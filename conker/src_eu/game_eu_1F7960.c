@@ -750,7 +750,7 @@ s32 aim_hud_lens_reticle_spawn(u8 *arg0, u8 arg1) {
     if (var_v0 != 0) {
         var_v0 = memcpy(var_v0 + 0x70, &sp.u4C, 0x58U);
     }
-    if (D_800BE616 == 0) {
+    if (g_mp_mode_active == 0) {
         sp.u30 = arg0;
         temp_t5 = ((*(u8 *)((u8 *)arg0 + 0x23D)) * 0x180) + g_player_cams;
         sp.u34 = temp_t5;
@@ -1131,7 +1131,7 @@ s32 aim_hud_gauge_scale_update(u8 *arg0) {
 }
 /*
  * obj_height_in_range: P190. A height clamped to [obj +0x88, obj +0x8C]: with flag 4 of obj[0x7C] the point
- * D_800C3958[(s8)obj[0xC4]] +0x28 percent of the way from +0x88 to +0x8C, else the middle of +0x19C / +0x1A0 of
+ * g_cutscene_track_recs[(s8)obj[0xC4]] +0x28 percent of the way from +0x88 to +0x8C, else the middle of +0x19C / +0x1A0 of
  * the object at obj +0x70.
  */
 /* was func_151CC784 */
@@ -1141,7 +1141,7 @@ f32 aim_hud_gauge_value(u8 *arg0) {
 
     if (arg0[0x7C] & 4) {
         lo = *(f32 *)(arg0 + 0x88);
-        h = lo + (*(f32 *)(arg0 + 0x8C) - lo) * (*(f32 *)((u8 *)D_800C3958 + (s8)arg0[0xC4] * 0x44 + 0x28) * 0.01f);
+        h = lo + (*(f32 *)(arg0 + 0x8C) - lo) * (*(f32 *)((u8 *)g_cutscene_track_recs + (s8)arg0[0xC4] * 0x44 + 0x28) * 0.01f);
     } else {
         o = *(u8 **)(arg0 + 0x70);
         lo = *(f32 *)(arg0 + 0x88);
@@ -1533,7 +1533,7 @@ void aim_hud_tint_spawn(u8 *arg0) {
     s32 temp_v0;
     u8 *sp28;
 
-    if (D_800BE616 != 0) {
+    if (g_mp_mode_active != 0) {
         sp28 = arg0;
         temp_v0 = screen_tint_create(0, 0, 0, 0xFF, 0, (s32) (*(u8 *)((u8 *)arg0 + 0x23D)), 1, 4);
         if (temp_v0 != 0) {

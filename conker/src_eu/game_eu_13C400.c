@@ -3,12 +3,12 @@
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
 void collision_select_area(s32 arg0);
-extern u8 *D_800DC278;
+extern u8 *g_zone_tree; /* was D_800DC278 */
 s32 zone_tree_leaf_index(u8 *arg0);
 
 
 void vec3f_cross(u8 *, u8 *, u8 *);
-extern s32 D_800D3720;
+extern s32 g_floor_hits; /* was D_800D3720 */
 
 /* was func_1510EBF0 */
 s32 collision_candidate_is_floor(s32 arg0) {
@@ -31,7 +31,7 @@ s32 collision_candidate_is_floor(s32 arg0) {
     u8 *temp_v0_2;
     u8 *temp_v1;
 
-    temp_v0 = ((s32 *)((u8 *)&D_800D3720 + (arg0 * 0x10)));
+    temp_v0 = ((s32 *)((u8 *)&g_floor_hits + (arg0 * 0x10)));
     temp_t0 = (*(u8 **)((u8 *)temp_v0 + 4));
     temp_t1 = (*(s32 *)((u8 *)temp_v0 + 8));
     var_v0 = 0;
@@ -74,9 +74,9 @@ void collision_find_floor_no_fallback(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s3
 }
 
 /*
- * P53: floor / ceiling lookup under (x, z) = (arg7, arg9) over the 4 collision areas (D_800894C0[area] == 1):
+ * P53: floor / ceiling lookup under (x, z) = (arg7, arg9) over the 4 collision areas (g_coll_area_enabled[area] == 1):
  * 0 / 1 level tree (floor_collect_level_tris), 2 world objects (world_objects_in_box + world_objects_transform_mesh + floor_collect_world_obj_tris), 3 records
- * (floor_collect_record_tris). Each area leaves its candidate floors in D_800D3720 (16 bytes: +0 height in 24.8, +4 triangle
+ * (floor_collect_record_tris). Each area leaves its candidate floors in g_floor_hits (16 bytes: +0 height in 24.8, +4 triangle
  * (3 vertex offsets), +8 vertex base (0 = level), +0xC object / record index); collision_candidate_is_floor(i) says whether
  * candidate i is not a floor (a ceiling).
  * Outputs: arg0 = floor triangle, arg1 / arg2 = s16[9] vertices of the floor / object ceiling, arg3 = floor y,
@@ -90,18 +90,18 @@ s32 floor_collect_record_tris(s32, s32);
 s32 world_objects_in_box(s32, s32, s32 *, s32, s32, s32, s32, s32);
 s32 world_objects_transform_mesh(s32 count, s32 *idList, s32 force);
 s32 collision_candidate_is_floor(s32 arg0);
-extern s32 D_800D3720;
-extern s32 D_800D3C00;
-extern s32 D_800D3C50;
-extern s32 D_800DC26C;
+extern s32 g_floor_hits; /* was D_800D3720 */
+extern s32 g_world_obj_box_ids; /* was D_800D3C00 */
+extern s32 g_floor_world_obj_ids; /* was D_800D3C50 */
+extern s32 g_level_tri_table; /* was D_800DC26C */
 extern f32 g_coll_floor_best_h; /* was D_800DC284 */
 extern f32 g_coll_ceiling_h; /* was D_800DC288 */
 extern u16 g_coll_floor_world_obj; /* was D_800DC290 */
-extern f32 D_800DC298;
-extern f32 D_800DC29C;
+extern f32 g_coll_probe_x; /* was D_800DC298 */
+extern f32 g_coll_probe_y; /* was D_800DC29C */
 extern s32 g_world_obj_rider_masks; /* was D_800DC3C4 */
-extern u8 D_800894C0[];
-#define EED0_E(i) ((u8 *)&D_800D3720 + (i) * 0x10)
+extern u8 g_coll_area_enabled[]; /* was D_800894C0 */
+#define EED0_E(i) ((u8 *)&g_floor_hits + (i) * 0x10)
 #define EED0_H(i) ((f32)*(s32 *)EED0_E(i) * (1.0f / 256.0f))
 #define EED0_OBJ(i) ((u8 *)g_world_objs + (i) * 0xA0)
 
@@ -147,11 +147,11 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
     if (arg0 != 0) {
         *(s32 *)arg0 = 0;
     }
-    step = (argC != 0) ? D_800DBE64 : 50.0f;
-    D_800DC298 = arg7;
-    D_800DC29C = arg8;
+    step = (argC != 0) ? g_collision_floor_step : 50.0f;
+    g_coll_probe_x = arg7;
+    g_coll_probe_y = arg8;
     fbFound = 0;
-    *(f32 *)&D_800DC2A0 = arg9;
+    *(f32 *)&g_coll_probe_z = arg9;
     *(f32 *)arg3 = -10000.0f;
     if (arg5 == 0) {
         flagsBuf = 0;
@@ -176,7 +176,7 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
     fbIdx = 0;
     base = 0;
     for (area = 0; area != 4; area++) {
-        if (D_800894C0[area] != 1) continue;
+        if (g_coll_area_enabled[area] != 1) continue;
         if (area == 3 && argC != 0 && (*(s32 *)(argC + 0xF8) & 0x200)) continue;
         x = (s32)arg7;
         z = (s32)arg9;
@@ -185,11 +185,11 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
         collision_select_area(area);
         if (area == 2) {
             objs = world_objects_in_box((s16)x, (s16)z, &objList, argB, x, z, (s32)argD, (s32)argE);
-            world_objects_transform_mesh(objs, &D_800D3C00, 0);
+            world_objects_transform_mesh(objs, &g_world_obj_box_ids, 0);
             if (arg4 != 0) {
                 t0 = 0;
-                world_objects_transform_mesh(objList, &D_800D3C50, 0);
-                cnt = floor_collect_world_obj_tris(x, z, objList, &D_800D3C50);
+                world_objects_transform_mesh(objList, &g_floor_world_obj_ids, 0);
+                cnt = floor_collect_world_obj_tris(x, z, objList, &g_floor_world_obj_ids);
                 if (cnt != 0) {
                     cmax = -10000.0f;
                     for (k = 0; k < cnt; k++) {
@@ -213,7 +213,7 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
                     }
                 }
             }
-            n = floor_collect_world_obj_tris(x, z, objs, &D_800D3C00);
+            n = floor_collect_world_obj_tris(x, z, objs, &g_world_obj_box_ids);
         } else if (area == 3) {
             n = floor_collect_record_tris(x, z);
         } else {
@@ -276,10 +276,10 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
                 tri = *(s32 *)(e + 4);
                 if (area != 3) {
                     if (argC != 0 && *(s32 *)(e + 8) == 0) {
-                        *(s16 *)(argC + 0x19E) = (tri - D_800DC26C) / 12;
+                        *(s16 *)(argC + 0x19E) = (tri - g_level_tri_table) / 12;
                     }
                 } else if (argC != 0) {
-                    *(s16 *)(argC + 0x19E) = (tri - D_800C6070[*((u8 *)&g_objects[*(s32 *)(e + 0xC)] + 4)]) / 12;
+                    *(s16 *)(argC + 0x19E) = (tri - g_model_coll_tris[*((u8 *)&g_objects[*(s32 *)(e + 0xC)] + 4)]) / 12;
                 }
                 if (*(s32 *)(e + 8) == 0 && arg0 != 0) {
                     *(s32 *)arg0 = *(s32 *)(e + 4);
@@ -289,13 +289,13 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
                 *(f32 *)arg3 = -10000.0f;
                 base = 0;
                 if (arg0 != 0) {
-                    *(s32 *)arg0 = D_800DC26C;
+                    *(s32 *)arg0 = g_level_tri_table;
                 }
-                tri = D_800DC26C;
+                tri = g_level_tri_table;
             }
-            ti = (tri - D_800DC26C) / 12;
+            ti = (tri - g_level_tri_table) / 12;
             if (area == 0 && arg5 != 0) {
-                *(s32 *)arg5 = (D_800DBE5C != 0) ? ((s32 *)D_800DBE5C)[ti] : 0;
+                *(s32 *)arg5 = (g_coll_tri_flags != 0) ? ((s32 *)g_coll_tri_flags)[ti] : 0;
             } else if (area == 2 && arg5 != 0) {
                 g_coll_floor_world_obj = *(s32 *)(EED0_E(best) + 0xC) + 1;
                 *(s32 *)arg5 = EED0_OBJFLAGS(EED0_OBJ(g_coll_floor_world_obj) - 0xA0, ti);
@@ -312,9 +312,9 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
                 h = EED0_H(i);
                 if (lo < h && h < ceil && collision_candidate_is_floor(i) == 0) {
                     ceil = h;
-                    ti = (*(s32 *)(EED0_E(i) + 4) - D_800DC26C) / 12;
+                    ti = (*(s32 *)(EED0_E(i) + 4) - g_level_tri_table) / 12;
                     if (area == 0) {
-                        ceilFlags = (D_800DBE5C != 0) ? ((s32 *)D_800DBE5C)[ti] : 0;
+                        ceilFlags = (g_coll_tri_flags != 0) ? ((s32 *)g_coll_tri_flags)[ti] : 0;
                     } else {
                         ceilFlags = 0;
                         if (area == 2) {
@@ -374,8 +374,8 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
 s32 floor_collect_world_obj_tris(s32, s32, s32, s32 *);
 s32 world_objects_transform_mesh(s32, s32 *, s32);
 s32 func_150A69A8(s32, s32, s32 *, s32);
-extern s32 D_800D3720;
-extern s32 D_800D3C50;
+extern s32 g_floor_hits; /* was D_800D3720 */
+extern s32 g_floor_world_obj_ids; /* was D_800D3C50 */
 
 /* was func_1510FBC8 */
 f32 collision_object_floor_height(f32 arg0, f32 arg1, f32 arg2) {
@@ -394,9 +394,9 @@ f32 collision_object_floor_height(f32 arg0, f32 arg1, f32 arg2) {
     sp20 = temp_f6;
     sp1C = temp_f10;
     func_150A69A8((s16) temp_f6, (s16) temp_f10, &sp.u28, (s32) arg1);
-    world_objects_transform_mesh(sp.u28, &D_800D3C50, 0);
-    if (floor_collect_world_obj_tris(sp20, sp1C, sp.u28, &D_800D3C50) != 0) {
-        var_f2 = (f32) D_800D3720 * 0.00390625f;
+    world_objects_transform_mesh(sp.u28, &g_floor_world_obj_ids, 0);
+    if (floor_collect_world_obj_tris(sp20, sp1C, sp.u28, &g_floor_world_obj_ids) != 0) {
+        var_f2 = (f32) g_floor_hits * 0.00390625f;
     } else {
         var_f2 = -10000.0f;
     }
@@ -416,7 +416,7 @@ s32 zone_tree_collect_near(s32 arg0, s32 arg1, s32 arg2, u8 **arg3) {
     u8 *var_v0;
 
     var_s2 = arg3;
-    var_v0 = D_800DC278;
+    var_v0 = g_zone_tree;
     var_v1 = 0;
     if (var_v0 != NULL) {
         do {
@@ -490,7 +490,7 @@ s32 floor_flags_surface_type(s32 arg0) {
 }
 
 s32 floor_collect_level_tris(s32, s32);
-extern s32 D_800D3720;
+extern s32 g_floor_hits; /* was D_800D3720 */
 
 /* was func_1510FE58 */
 s32 collision_level_nearest_height(s32 arg0, s32 arg1, s32 arg2, s32 *arg3) {
@@ -516,11 +516,11 @@ s32 collision_level_nearest_height(s32 arg0, s32 arg1, s32 arg2, s32 *arg3) {
     temp_t8 = (temp_v0 - 1) & 3;
     temp_f14 = (f32) arg1;
     var_v1 = 1;
-    var_f2 = temp_f14 - ((f32) D_800D3720 * 0.00390625f);
+    var_f2 = temp_f14 - ((f32) g_floor_hits * 0.00390625f);
     if (temp_v0 >= 2) {
         if (temp_t8 != 0) {
             do {
-                if (((var_f2 >= 0.0f) && (var_f0 = temp_f14 - ((f32) *(s32 *)((u8 *)&D_800D3720 + (var_v1 * 0x10)) * 0.00390625f), (var_f0 < var_f2)) && (var_f0 >= 0.0f)) || ((var_f2 < 0.0f) && (var_f0 = temp_f14 - ((f32) *(s32 *)((u8 *)&D_800D3720 + (var_v1 * 0x10)) * 0.00390625f), (var_f2 < var_f0)))) {
+                if (((var_f2 >= 0.0f) && (var_f0 = temp_f14 - ((f32) *(s32 *)((u8 *)&g_floor_hits + (var_v1 * 0x10)) * 0.00390625f), (var_f0 < var_f2)) && (var_f0 >= 0.0f)) || ((var_f2 < 0.0f) && (var_f0 = temp_f14 - ((f32) *(s32 *)((u8 *)&g_floor_hits + (var_v1 * 0x10)) * 0.00390625f), (var_f2 < var_f0)))) {
                     var_f2 = var_f0;
                     var_a0 = var_v1;
                 }
@@ -531,7 +531,7 @@ s32 collision_level_nearest_height(s32 arg0, s32 arg1, s32 arg2, s32 *arg3) {
             }
         } else {
 block_13:
-            var_v0 = ((s32 *)((u8 *)&D_800D3720 + (var_v1 * 0x10)));
+            var_v0 = ((s32 *)((u8 *)&g_floor_hits + (var_v1 * 0x10)));
             do {
                 if (((var_f2 >= 0.0f) && (var_f0_2 = temp_f14 - ((f32) (*(s32 *)((u8 *)var_v0 + 0)) * 0.00390625f), (var_f0_2 < var_f2)) && (var_f0_2 >= 0.0f)) || ((var_f2 < 0.0f) && (var_f0_2 = temp_f14 - ((f32) (*(s32 *)((u8 *)var_v0 + 0)) * 0.00390625f), (var_f2 < var_f0_2)))) {
                     var_f2 = var_f0_2;
@@ -558,9 +558,9 @@ block_13:
         }
     }
     if (arg3 != NULL) {
-        *arg3 = (*(s32 *)((u8 *)((((s32 *)((u8 *)&D_800D3720 + (var_a0 * 0x10))))) + 4));
+        *arg3 = (*(s32 *)((u8 *)((((s32 *)((u8 *)&g_floor_hits + (var_a0 * 0x10))))) + 4));
     }
-    return (s32) ((f32) *(s32 *)((u8 *)&D_800D3720 + (var_a0 * 0x10)) * 0.00390625f);
+    return (s32) ((f32) *(s32 *)((u8 *)&g_floor_hits + (var_a0 * 0x10)) * 0.00390625f);
 }
 void pvs_row_apply(s32);
 void camera_zone_flag_update(s32);
@@ -569,7 +569,7 @@ extern s32 g_zone_leaf_index; /* was D_800DC1F4 */
 extern s32 g_zone_leaf; /* was D_800DC1F8 */
 extern f32 g_zone_player_x; /* was D_800DC1FC */
 extern f32 g_zone_player_z; /* was D_800DC200 */
-extern s32 D_800DC260;
+extern s32 g_pvs_row; /* was D_800DC260 */
 
 /* was func_151101B4 */
 void player_zone_update(s32 arg0) {
@@ -590,7 +590,7 @@ void player_zone_update(s32 arg0) {
     g_zone_leaf = temp_v0_2;
     temp_v0_3 = zone_tree_leaf_index((u8 *) temp_v0_2);
     g_zone_leaf_index = temp_v0_3;
-    temp_v1 = ((s32 *)((u8 *)&D_800DC260 + (arg0 * 2)));
+    temp_v1 = ((s32 *)((u8 *)&g_pvs_row + (arg0 * 2)));
     if (temp_v0_3 != *temp_v1) {
         *temp_v1 = (s16) temp_v0_3;
         pvs_row_apply(arg0);
@@ -616,7 +616,7 @@ s32 zone_tree_find_leaf(s32 arg0, s32 arg1) {
     u16 temp_a1_4;
     u8 *var_v1;
 
-    var_v1 = D_800DC278;
+    var_v1 = g_zone_tree;
     if (var_v1 != NULL) {
 loop_1:
         temp_v0 = (*(s16 *)((u8 *)var_v1 + 0xC));
@@ -684,11 +684,11 @@ block_22:
     }
     return 0;
 }
-extern u8 *D_800DC278;
+extern u8 *g_zone_tree; /* was D_800DC278 */
 /* was func_151103B0 */
 s32 zone_tree_leaf_index(u8 *arg0) {
     s32 count = 0;
-    u8 *p = D_800DC278;
+    u8 *p = g_zone_tree;
 
     while (p != NULL) {
         if (p == arg0) {

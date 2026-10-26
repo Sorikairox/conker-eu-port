@@ -26,6 +26,6 @@ s#    sizes = \&g_flare_ring_sizes\[row \* 7\];#    sizes = \&g_flare_ring_sizes
 s#    for (i = 0, j = 2; i < count; i++, j += 2) {#    for (i = 0, j = 1; i < count; i++, j += 2) {# % centre
 s#        size = sizes\[i\] << 12;#        size = sizes[i] << 11;# % centre
 s#        g_sprite_keep_prim_colour = 0;#        g_sprite_keep_prim_colour = 1;# % centre
-s#        spr\.scaleY = size \* D_80038404 \/ 255\.0f;#        spr.scaleY = size * D_80038400 \/ 255.0f;# % centre
+s#        spr\.scaleY = size \* g_text_scale_y \/ 255\.0f;#        spr.scaleY = size * g_text_scale_x \/ 255.0f;# % centre
 s#                            \*(f32 \*) (node + 0x10) - dy \* f \/ 5\.0f + sizes\[i\] \* 0\.015625f);#                            *(f32 *) (node + 0x10) - dy * f \/ 5.0f + sizes[i] * 0.03125f);# % centre
 s#        gDPPipeSync(gdl++);#        gDPNoOp(gdl++);# % centre

@@ -1,0 +1,282 @@
+old	new	confidence	description
+D_80088AA0	g_trail_splash_colours	high	s16[3] splash colours used by trail_hit_splash
+D_8009FCF0	g_pipe_explode_spots	high	PipeSpot[3]: position and facing angle of each of the three bursting pipes (pipe_explode_effects)
+D_8009FD38	g_str_pipe_explode_life	high	String "life": debug tweak label in pipe_explode_spawn_debris
+D_8009FD40	g_str_pipe_explode_c_path	high	String "../Effects/PipeExplode/pipeexplode.c": debug tweak source file (copy 1)
+D_8009FD68	g_str_pipe_explode_min_grav	high	String "min grav": debug tweak label in pipe_explode_spawn_debris
+D_8009FD74	g_str_pipe_explode_c_path_2	high	pipeexplode.c source path string, copy 2 (debug tweak "min grav")
+D_8009FD9C	g_str_pipe_explode_grav_range	high	String "grav range": debug tweak label in pipe_explode_spawn_debris
+D_8009FDA8	g_str_pipe_explode_c_path_3	high	pipeexplode.c source path string, copy 3 (debug tweak "grav range")
+D_8009FDD0	g_str_pipe_explode_min_speed	high	String "min speed": debug tweak label in pipe_explode_spawn_debris
+D_8009FDDC	g_str_pipe_explode_c_path_4	high	pipeexplode.c source path string, copy 4 (debug tweak "min speed")
+D_8009FE04	g_str_pipe_explode_speed_range	high	String "speeed range" (sic): debug tweak label in pipe_explode_spawn_debris
+D_8009FE14	g_str_pipe_explode_c_path_5	high	pipeexplode.c source path string, copy 5 (debug tweak "speeed range")
+D_8009FE3C	g_str_pipe_explode_min_scale	high	String "min scale": debug tweak label in pipe_explode_spawn_debris
+D_8009FE48	g_str_pipe_explode_c_path_6	high	pipeexplode.c source path string, copy 6 (debug tweak "min scale")
+D_8009FE70	g_str_pipe_explode_scale_range	high	String "scale  range": debug tweak label in pipe_explode_spawn_debris
+D_8009FE80	g_str_pipe_explode_c_path_7	high	pipeexplode.c source path string, copy 7 (debug tweak "scale  range")
+D_8009FEA8	g_str_pipe_explode_xz_angle	high	String "xz angle": debug tweak label in pipe_explode_spawn_debris
+D_8009FEB4	g_str_pipe_explode_c_path_8	high	pipeexplode.c source path string, copy 8 (debug tweak "xz angle")
+D_8009FEDC	g_str_pipe_explode_yz_angle	high	String "yz angle": debug tweak label in pipe_explode_spawn_debris
+D_8009FEE8	g_str_pipe_explode_c_path_9	high	pipeexplode.c source path string, copy 9 (debug tweak "yz angle")
+D_8009FF90	g_joint_blast_offset	med	Joint-local point (vec3) transformed by the joint matrix to place obj_joint_blast_fx
+D_800915E8	g_tex_ribbon	med	Texture descriptor of the trail / water-jet ribbons (trail_draw_ribbon, water_jet_ribbon_draw)
+D_8009FFC0	g_water_jet_spray_params	med	0x24-byte spray parameter records (base / random ranges) per water jet kind (+0x38), read by water_jet_spray_spawn
+D_8009FFF0	g_electrify_k_fff0	low	Electrify fx rodata f32: base of the +8 drift step (plus random * g_electrify_k_fff4)
+D_8009FFF4	g_electrify_k_fff4	low	Electrify fx rodata f32: random range of the +8 drift step
+D_8009FFF8	g_electrify_k_fff8	low	Electrify fx rodata f32: base of the +0xC drift step (plus random * g_electrify_k_fffc)
+D_8009FFFC	g_electrify_k_fffc	low	Electrify fx rodata f32: random range of the +0xC drift step
+D_800CC76A	g_objects_facing_angle	med	u16 facing angle (+0x7A) of object 0; read per object at [n * 0x32C] (= g_objects + 0x7A)
+D_80088AB0	g_carry_anim_id	med	Animation / event id picked from the pressed buttons in player_carry_state_update (999 = none)
+D_80091C8C	g_cs_overlay_img_box	low	Image descriptor of the cutscene overlay boxes 0 and 3 (cs_overlay_open_box0 / _box3)
+D_80091C98	g_cs_overlay_img_counter	low	Image descriptor of the cutscene overlay counter boxes, boxes 4..8 and the bar-set type-0 effect
+D_80091CA4	g_cs_overlay_img_a4	low	Image descriptor (first image) used by cs_overlay_open_boxes_4_8
+D_80091CB0	g_cs_overlay_img_b0	low	Image descriptor (second image, template +4) used by cs_overlay_open_boxes_4_8
+D_80091CBC	g_cs_overlay_img_bar	low	Image descriptor of the three type-5 bars made by cs_overlay_create_bars
+D_80091CC8	g_cs_overlay_img_pulse	low	Image descriptor switched in by overlay_fx_pulse_update (effect +0x10)
+D_80091CD4	g_cs_overlay_img_cross	low	Image descriptor of the four type-7 effects of cs_overlay_spawn_cross
+D_800D9CB0	g_cs_overlay_cmd	high	Cutscene overlay command run by cs_overlay_update (1 reset, 2 close, 4 destroy, 5..10 open parts; 3 = idle)
+D_800D9CB4	g_cs_overlay_tint	high	Screen tint node of the cutscene overlay (screen_tint_create in cs_overlay_reset)
+D_800D9CB8	g_cs_overlay_fx	high	The 10 effect records (boxes, counters, bars) of the cutscene overlay
+D_800D9CC4	g_cs_overlay_fx_3	med	= &g_cs_overlay_fx[3]: loop end of cs_overlay_mark_boxes_closing (which walks entries 5..7)
+D_800D9CE0	g_cs_overlay_fx_end	high	End of g_cs_overlay_fx (= [10]), loop sentinel of cs_overlay_destroy_all
+D_80088720	g_holder_target_obj	med	Object (setup id 1) whose position + 50 up is g_holder_target_pos for thrown objects
+D_80088730	g_holder_obj	med	Current holder object (setup id 1) thrown objects land on / are knocked away from
+D_80088AD4	g_projectile_break_sfx	high	s32[2] break sound ids, one picked at random by projectile_bounce_update / projectile_wall_hit
+D_80088ADC	g_projectile_bounce_sfx	high	Bounce sound id (projectile_bounce_update, projectile_wall_hit)
+D_80088AE0	g_thrown_land_sfx	high	Landing sound id played by thrown_object_land_check
+D_800A4AA0	g_effect3d_default_params	med	Default parameter block passed to effect3d_spawn_full by effect3d_spawn_default and many effects
+D_800A01FC	g_fx_spin_gravity	med	Gravity f32 added to the y velocity (+0x114) per frame step by fx_gravity_spin_update
+D_800A0230	g_ground_point_k_0230	low	f32 threshold: obj_get_ground_point uses obj +0x180 as the height when it is above this
+D_80088750	g_foot_splash_queue	high	Timed queue (timed_queue_create(4, 300, 0)) of the foot splash effects
+D_800A0240	g_foot_splash_deg_to_angle	high	f32 256 / 360: degrees to angle units for the camera heading in foot_splash_effect
+D_800A0244	g_puff_k_0244	low	puff_particle_spawn_dir rodata f32 (stored in the spawn record +0x58)
+D_800A0248	g_puff_k_0248	low	puff_particle_spawn_dir rodata f32: the puff scale
+D_800A0310	g_skel_line_pts_a	low	vec3[4] joint-local points (first set) transformed by obj_skel_line_emit_pair for its line emitters
+D_800A0340	g_skel_line_pts_b	low	vec3[4] joint-local points (second set) transformed by obj_skel_line_emit_pair
+D_800A0370	g_skel_line_pts_c	low	vec3[4] joint-local points (third set) transformed by obj_skel_line_emit_pair
+D_800A03A0	g_trail_cb_k_03a0	low	trail_spawn_callback rodata f32: scale of the random speed (85..212) along the direction
+D_800A03A4	g_trail_cb_k_03a4	low	trail_spawn_callback rodata f32: random range of the record +0 value
+D_800A03A8	g_trail_cb_k_03a8	low	trail_spawn_callback rodata f32: base of the record +0 value
+D_800A03AC	g_trail_cb_k_03ac	low	trail_spawn_callback rodata f32: scale of the record +0 value
+D_800A03B0	g_trail_cb_k_03b0	low	trail_spawn_callback rodata f32: base of the record +0x10 value (plus random * 356)
+D_800A03B4	g_trail_cb_k_03b4	low	trail_spawn_callback rodata f32: scale of the record +0x10 value
+D_800A03E0	g_debris_dust_ids	med	Debris model ids (10) passed to emit_debris_burst by obj_debris_dust_burst
+D_800A0408	g_debris_dust_scales	med	Debris scales passed to emit_debris_burst by obj_debris_dust_burst
+D_800A0430	g_debris_dust_tex_params_a	low	First parameter block of the emit_textured_burst call in obj_debris_dust_burst
+D_800A0434	g_debris_dust_tex_params_b	low	Second parameter block of the emit_textured_burst call in obj_debris_dust_burst
+D_800A0480	g_seat_cam_speed_348	low	f32 stored in the camera speeds +0x348 and +0x34C by player_seat_camera_update
+D_800A0484	g_seat_cam_speed_374	low	f32 stored in camera +0x374 by player_seat_camera_update
+D_800A0490	g_impact_a_k_0490	low	impact_effect_a rodata f32: strength level scale of the 0xB impact particle
+D_800A0494	g_impact_a_k_0494	low	impact_effect_a rodata f32: second strength scale of the 0xB impact particle
+D_800A0498	g_impact_a_k_0498	low	impact_effect_a rodata f32: size factor (obj +0x40 times this, as a byte)
+D_800A049C	g_impact_a_k_049c	low	impact_effect_a rodata f32: last argument of fx_spawn_impact_burst
+D_800A04A0	g_impact_b_k_04a0	low	impact_effect_b rodata f32: strength level scale (times 2) of the 0xB impact particle
+D_800A04A4	g_impact_b_k_04a4	low	impact_effect_b rodata f32: size factor (obj +0x40 times this, as a byte)
+D_800A04A8	g_impact_b_k_04a8	low	impact_effect_b rodata f32: last argument of fx_spawn_impact_burst
+D_800A04D0	g_land_shatter_init_byte	low	Byte initialiser copied into the spawn record (+0xA4) by particle_land_shatter
+D_800A04D4	g_land_shatter_init_word	low	Word initialiser copied into the spawn record (+0xA0) by particle_land_shatter
+D_800A04D8	g_spark_burst_init_word	low	Word initialiser copied into the spawn record (+0x24) by spark_burst_at
+D_800A04DC	g_land_maybe_shatter_init_word	low	Word initialiser copied into the spawn record (+0xA0) by particle_land_maybe_shatter
+D_800BEE0B	g_view_count_minus1_lo	med	Low byte of g_view_count_minus1 (its s32 at +3), passed as the view / player to cam_wobble_start_preset
+D_800A0710	g_damage_smoke_colours	high	u32[4] smoke colours, one picked at random by damage_smoke_spawn
+D_800A0720	g_damage_smoke_offs_third	high	f32[3][3] smoke offsets by health third (damage_smoke_update)
+D_800A0744	g_damage_smoke_bone_third	high	u8[3] bone index by health third (damage_smoke_update)
+D_800A0748	g_damage_smoke_offs_quarter	high	f32[4][3] smoke offsets by health quarter (damage_smoke_update)
+D_800A0778	g_damage_smoke_point_quarter	high	u8[4] model attachment point by health quarter (damage_smoke_update)
+D_8008B148	g_cutscene_gated_fn	low	Function pointer called by cutscene_gated_b148_call when not in cutscene scenes b..d
+D_80088B00	g_beam_motion_fns	high	Beam motion handlers indexed by obj +0x30 (beam_follow_obj_pos, beam_follow_obj_point); 0 = remove
+D_80088B58	g_beam_retire_fns	med	void (*[2])(void): retire handlers by beam kind (beam_retire_by_kind)
+D_80088B60	g_beam_free_fns	med	void (*[2])(void): free handlers by beam kind (beam_free_by_kind)
+D_80088B68	g_beam_message_fns	med	Message handlers by beam kind (+0x38), called by beam_on_message_by_kind
+D_80091198	g_tex_rope	high	Rope texture descriptor (cord_draw, cord_plank_draw, beam_quad_draw)
+D_80088B70	g_ground_glow_a_offset	med	vec3 joint-local offset transformed by the joint matrix in ground_glow_a_spawn
+D_80088B80	g_ground_glow_b_offset	med	vec3 joint-local offset transformed by the joint matrix in ground_glow_b_spawn
+D_800A0880	g_light_flicker_k_0880	low	light_flicker_update rodata f32: upper bound of the timer range of the third flicker phase
+D_800A0884	g_light_flicker_k_0884	low	light_flicker_update rodata f32: blend factor towards full intensity
+D_800A0890	g_fx_parent_alpha_k_0890	low	fx_alpha_from_parent_rec rodata f32: scale of the parent byte +0x2F into alpha +0x70
+D_80088B94	g_zone_ambience_active	med	Flag toggled by zone_ambience_update when the zone ambience starts / stops
+D_80088BA0	g_flight_cam_mode_set	low	Flag in player_flight_mode_update: 1 once the flight camera mode was taken, cleared on exit
+D_800CC335	g_objects_parent_slot	high	Byte +0x65 of object 0: slot + 1 of the object it is attached to; camera_set_followed_obj(.., this - 1)
+D_80088BC0	g_ring_profile	high	RingProfile: cross-section points (radial offset, height) of the ring surface drawn by ring_effect_draw
+D_80088BF8	g_ring_spawn_fns	high	Ring spawn handlers by node +0x3C (ring_spawn_particle, ring_spawn_debris)
+D_80088C00	g_ring_node_fns	high	Ring node update handlers by node +0x1D (0 = free the node; [1] shockwave_hit_objects)
+D_80088C04	g_ring_node_fns_1	high	= &g_ring_node_fns[1], indexed by node +0x3D in ring_effect_update
+D_80091234	g_ring_tex_id_ptr	high	Pointer to the ring texture's id (texture_cache_lookup in ring_effect_draw)
+D_800A08C0	g_part_at_mtx_k_08c0	low	obj_spawn_part_at_mtx rodata f32: first of three values passed to obj_spawn_child_at_joint
+D_800A08C4	g_part_at_mtx_k_08c4	low	obj_spawn_part_at_mtx rodata f32: second value passed to obj_spawn_child_at_joint
+D_800A08C8	g_part_at_mtx_k_08c8	low	obj_spawn_part_at_mtx rodata f32: third value passed to obj_spawn_child_at_joint
+D_800A08CC	g_part_at_mtx_k_08cc	low	obj_spawn_part_at_mtx rodata f32: scale of (spawned +0x40 - 90)
+D_800A08FC	g_ring_two_pi	high	f32 2 pi: ring_effect_update spin rate scale
+D_800A0900	g_ring_spawn_max_dist_sq	high	f32 max squared horizontal distance from the origin of a ring spawn point
+D_800A0904	g_ring_deg_to_angle	high	f32 256 / 360: degrees to angle byte (camera heading in ring_effect_update)
+D_800A0950	g_ring_debris_k_0950	low	ring_spawn_debris rodata f32 stored in the spawn record +0x38
+D_800A0954	g_ring_debris_k_0954	low	ring_spawn_debris rodata f32: scale of the random launch speed
+D_800A0958	g_ring_debris_k_0958	low	ring_spawn_debris rodata f32: scale of the random +-130 spins
+D_800A0960	g_ring_debris_k_0960	low	ring_spawn_debris rodata f32: random range of the record +0x80 value
+D_800A0964	g_ring_debris_k_0964	low	ring_spawn_debris rodata f32: base of the record +0x80 value
+D_800A0968	g_ring_debris_k_0968	low	ring_spawn_debris rodata f32: scale of the record +0x80 value
+D_800A09B0	g_water_entry_point_a	med	vec3 joint-local point for obj_fx_point_water_entry (mode other than 1, joint +0xBC0)
+D_800A09BC	g_water_entry_point_b	med	vec3 joint-local point for obj_fx_point_water_entry mode 1 (joint +0xA00)
+D_800D9D00	g_level_timed_queue_alias	high	= g_level_timed_queue (same EU address 800D9D00): timed queue of the water entry splashes
+D_800A0AD0	g_ground_colour_k_0ad0	low	ground_colour_by_depth rodata f32: depth bound between the two colour ramps
+D_800A0AD4	g_ground_colour_k_0ad4	low	ground_colour_by_depth rodata f32: depth scale of the shallow ramp
+D_800A0AD8	g_ground_colour_k_0ad8	low	ground_colour_by_depth rodata f32: depth offset of the deep ramp
+D_800A0ADC	g_ground_colour_k_0adc	low	ground_colour_by_depth rodata f32: depth scale of the deep ramp
+D_80088C10	g_shooting_star_obj	med	Shooting-star sky effect object (set by level_tex_scroll_fx_setup; its rate set by shooting_star_set_rate)
+D_80088C14	g_shooting_star_lanes	high	f32[5] base angles (radians) of the five shooting-star lanes
+D_800A0B24	g_shooting_star_k_0b24	low	shooting_star_sky_update rodata f32: accumulator growth per frame step
+D_800A0B28	g_shooting_star_k_0b28	low	shooting_star_sky_update rodata f32 stored in the sprite +0x24
+D_800A0B2C	g_shooting_star_k_0b2c	low	shooting_star_sky_update rodata f32 stored in the sprite +0x48
+D_800A0B30	g_shooting_star_k_0b30	low	shooting_star_sky_update rodata f64: base distance of a streak
+D_800A0B38	g_shooting_star_k_0b38	low	shooting_star_sky_update rodata f64: random range of the streak distance
+D_800A0B40	g_shooting_star_k_0b40	low	shooting_star_sky_update rodata f32: random spread added to the lane angle
+D_800A0B44	g_shooting_star_deg_to_rad	med	shooting_star_sky_update rodata f32: degrees to radians for the camera heading
+D_800A0B48	g_shooting_star_k_0b48	low	shooting_star_sky_update rodata f32: max angle between a streak and the camera heading
+D_800A0B4C	g_shooting_star_k_0b4c	low	shooting_star_sky_update rodata f32: random range of the streak height
+D_800A0B50	g_shooting_star_k_0b50	low	shooting_star_sky_update rodata f32: base height of a streak (above 500)
+D_800A0B54	g_shooting_star_k_0b54	low	shooting_star_sky_update rodata f32 stored in the sprite +0x40 / +0x44
+D_800A0B58	g_shooting_star_k_0b58	low	shooting_star_sky_update rodata f32 added to the angle for the sprite rotation
+D_800A0B5C	g_shooting_star_k_0b5c	low	shooting_star_sky_update rodata f32 subtracted from the angle for the sprite rotation
+D_800A0B60	g_shooting_star_k_0b60	low	shooting_star_sky_update rodata f32: angle to rotation units scale
+D_800A0B64	g_shooting_star_k_0b64	low	shooting_star_sky_update rodata f32 stored in the sprite +0x1C
+D_800A0B68	g_shooting_star_k_0b68	low	shooting_star_sky_update rodata f32 stored in the sprite +0x20
+D_800A0B6C	g_shooting_star_k_0b6c	low	shooting_star_sky_update rodata f32 stored in the sprite +0x28
+D_800A0B70	g_shooting_star_k_0b70	low	shooting_star_sky_update rodata f32 stored in the sprite +0x2C
+D_800A0B74	g_shooting_star_rate_scale	med	f32 scale from the 0..255 rate argument of shooting_star_set_rate to the object rate +0x2C
+D_800A0BC0	g_fb_zoom_offset	low	Joint-local point (vec3) transformed by the joint matrix (+0xD00) in fb_zoom_fx_update
+D_800A0BD0	g_fb_zoom_k_0bd0	low	fb_zoom_fx_update rodata f32: right screen bound for the zoom point
+D_800BEA68	g_view_widths_3	med	= g_view_widths[3] (EU 800BEA68); rider_ai_control reads it as u16 buttons indexed by the rider index
+D_800A0C08	g_angle_offset_k_0c08	low	math_angle_offset_scaled rodata f32: scale of the atan2 result (radians to the caller's units)
+D_80088C30	g_tile_scroll_s0	med	Tile 0 s scroll counter (>> 7 into gDPSetTileSize), stepped per frame
+D_80088C34	g_tile_scroll_t0	med	Tile 0 t scroll counter (>> 7 into gDPSetTileSize), stepped per frame
+D_80088C38	g_tile_scroll_s1	med	Tile 1 s scroll counter (>> 7 into gDPSetTileSize), stepped per frame
+D_80088C3C	g_tile_scroll_t1	med	Tile 1 t scroll counter (>> 7 into gDPSetTileSize), stepped per frame
+D_80088C40	g_text_pager_rec_fns	med	Record update handlers by record +0x4C run by text_pager_update (entry 3 money_popup_draw); 0 ends the record
+D_80088C50	g_text_pager_event_fns	med	Event handlers by record +0x4D called by text_pager_handle_event
+D_800D9D10	g_ambient_cue_timer	med	Cooldown byte (frame-delta steps) of the random ambient sound cues (level_ambient_cue_update)
+D_80088C60	g_player_tint_r	high	Current tint red, eased towards g_player_tint_target_r by player_tint_update
+D_80088C64	g_player_tint_g	high	Current tint green, eased towards g_player_tint_target_g by player_tint_update
+D_80088C68	g_player_tint_b	high	Current tint blue, eased towards g_player_tint_target_b by player_tint_update
+D_80088C6C	g_player_tint_target_r	high	Tint target red (64 or 255) set by player_tint_update
+D_80088C70	g_player_tint_target_g	high	Tint target green (64 or 255) set by player_tint_update
+D_80088C74	g_player_tint_target_b	high	Tint target blue (64 or 255) set by player_tint_update
+D_80088C78	g_player_tint_vel_r	high	Spring velocity of the red tint (math_spring_approach)
+D_80088C7C	g_player_tint_vel_g	high	Spring velocity of the green tint (math_spring_approach)
+D_80088C80	g_player_tint_vel_b	high	Spring velocity of the blue tint (math_spring_approach)
+D_800A0C64	g_bone_spark_k_0c64	low	bone_spark_emitter_init rodata f32: scale of the random 350..500 value at +0x74
+D_800A0C68	g_bone_spark_k_0c68	low	bone_spark_emitter_emit rodata f32 passed to impact_tinted_particle_spawn
+D_800A0C6C	g_bone_spark_k_0c6c	low	bone_spark_emitter_emit rodata f32 passed to impact_tinted_particle_spawn
+D_800A0C70	g_bone_spark_k_0c70	low	bone_spark_emitter_emit rodata f32: random range of a particle parameter
+D_800A0C74	g_bone_spark_k_0c74	low	bone_spark_emitter_emit rodata f32: base of a particle parameter
+D_800A0C80	g_spin_decay_k_0c80	low	obj_spin_decay_update rodata f32: decay factor of the spin rate +0xBC
+D_800A0C84	g_spin_decay_k_0c84	low	obj_spin_decay_update rodata f32: damping factor of +0x3C
+D_800A0C88	g_spin_decay_k_0c88	low	obj_spin_decay_update rodata f32: decay factor of the spin rate +0x148
+D_800A0C90	g_red_flicker_dim_k_0c90	low	ambient_red_flicker_dim_update rodata f32 passed to fx_random_flicker_update
+D_800DC2E0	g_sky_backdrop_mtx	high	Mtx block: two per player (one per frame buffer) for the sky backdrop / sky box (level_setup_sky_backdrop)
+D_800A0CB0	g_red_flicker_bright_k_0cb0	low	ambient_red_flicker_bright_update rodata f32 passed to fx_random_flicker_update
+D_800A0CC0	g_beam_ray_ends	high	f32[6][3] end points (beam space) of the six rays of beam_rays_update
+D_800D9D20	g_sky_flash_count	high	Number of live sky flashes (sky_flash_spawn / sky_flash_uncount); nonzero sets draw flag 8
+D_151FA920	g_game_code_end	med	End of the game segment code (= game_TEXT_END); sizes the page table read at boot
+D_8000030C	g_os_reset_type	high	osResetType (0 cold boot, 1 reset) in low memory
+D_8002D4B0	g_boot_idle_stack_alias	high	= g_boot_idle_stack (EU 8002D810): start of the init bss cleared by boot_entry_main
+D_800318B0	g_boot_idle_thread	high	OSThread of the boot idle thread (thread 1, boot_idle_thread_main)
+D_80031AE0	g_game_thread	high	OSThread of the game thread (thread 3, boot_game_thread_main); stopped on reset / by the debugger
+D_80032E90	g_boot_page_table_raw	med	Raw buffer; aligned to 16 it becomes g_boot_page_offsets
+D_80033690	g_boot_aligned_buf_raw	low	Raw buffer whose 16-aligned address boot_game_thread_main stores in g_boot_aligned_buf
+D_80035858	g_boot_aligned_buf	low	16-aligned pointer into g_boot_aligned_buf_raw (set at boot, otherwise unused in C)
+D_8003585C	g_boot_page_offsets	high	Per-4 KB-page ROM offsets of the compressed game code (read and unscrambled at boot)
+D_8003B578	g_sched_event_queue	med	Scheduler event queue (VI retrace, SP/DP done, timer, controller); same EU variable as D_8003B218 (chunk g14)
+D_8003BC10	g_sched_event_msgs	med	OSMesg[8] buffer of g_sched_event_queue
+D_80043B40	g_frame_counter_block_alias	high	= g_frame_counter_block (EU 80043ED0): end of the init bss
+D_80043ED0	g_frame_counter_block	med	0xFE0-byte block of 0x20-byte records whose 4 counters world_update bumps per frame (anti-tamper target)
+D_80082EB0	g_level_tex_preload_lists	med	Per-level texture preload lists (game_data start); at boot it first holds the rzip header word
+D_8002BD60	g_audio_mixer_default_vol	med	f32[2] default voice volumes of audio_mixer_update_frame
+D_8002BD68	g_audio_mixer_default_freq	med	f32[2] default voice frequencies of audio_mixer_update_frame
+D_80042770	g_audio_mixer_req_mode	high	Requested music mixer mode for this frame (audio_mixer_request_mode), cleared after use
+D_80042774	g_audio_mixer_override_mode	high	Override music mixer mode (audio_mixer_set_override_mode), takes precedence
+D_80042778	g_audio_mixer_base_mode	high	Base music mixer mode (audio_mixer_set_base_mode), used when no other is set
+D_8004277C	g_audio_mixer_fade_mode	low	Mixer mode kept across frames: 4 while the mode 4 voice frequency fades back
+D_80042B20	g_audio_mixer_voice_freq	high	f32[2] current frequency per voice
+D_80042B28	g_audio_mixer_voice_vol	high	f32[2] current volume per voice
+D_80042B30	g_audio_mixer_master	high	Current master volume of the music mixer
+D_80042B34	g_audio_mixer_master_scale	low	f32 compared with 1.0 and reset to 1.0 when the master volume is sent
+D_80042B38	g_audio_mixer_time	high	Time accumulator (frame steps) driving the mixer frequency waves
+D_800427A0	g_mp3_text_queue	high	Ring buffer of text records (MP3 ID3 text), filled by mp3_id3_text_enqueue, read by text_queue_read
+D_800427B0	g_mp3_text_queue_buf	high	Storage (64 bytes) of g_mp3_text_queue
+D_800BE9F8	g_level_loaded_id	med	Level id stored by level_load (copy of g_level_id); read by music / event code
+D_1002AAD0	g_icache_flush_base	low	Address (EU 1002AE00) from which tlb_reset_and_flush_icache invalidates the icache up to 0x80400000
+D_8002C270	g_printf_pow10	high	f64 powers of ten 1e1, 1e2, 1e4, ..., 1e256 used by init_printf_ldtob
+D_8002C2B8	g_printf_str_nan	high	String "NaN" (init_printf_ldtob)
+D_8002C2BC	g_printf_str_inf	high	String "Inf" (init_printf_ldtob)
+D_8002C2C0	g_printf_str_zero	high	String "0" (init_printf_genld)
+D_8002C2C8	g_printf_k_1e8	high	f64 1e8 (init_printf_ldtob)
+D_8003BE74	g_tlb_area_phys	high	Physical address of the TLB mapped area (tlb_area_init), freed by tlb_remap_game_segment
+D_8002AE30	g_printf_spaces	high	Space padding string of init_printf_xprintf
+D_8002AE54	g_printf_zeros	high	Zero padding string of init_printf_xprintf
+D_80035500	g_debug_printf_len	low	s16 (EU 80035860) cleared by init_debug_printf_stub before formatting
+D_8003A8D3	g_pi_dma_busy	high	Nonzero while the PI manager has a read in flight (rom_read_direct waits)
+D_8003A8D5	g_pi_restart_thread	high	Set: restart the stopped thread after the direct read (pi_dev_mgr_main)
+D_800383D0	g_debug_port_addr	low	Last address written by debug_port_write_4040 (0xBC000C02)
+D_800383D4	g_debug_port_value	low	Last value written by debug_port_write_4040 (0x4040)
+D_800380A0	g_text_scale_x_alias	high	= g_text_scale_x (EU 80038400): screen width / 292, set by video_init_screen
+D_800380A4	g_text_scale_y_alias	high	= g_text_scale_y (EU 80038404): screen height / 216, set by video_init_screen
+D_800BE9C4	g_zbuffer_alias	high	= g_zbuffer (EU 800BEDE4): depth buffer allocated by video_init_screen
+D_800380B4	g_heap_head	high	First block of the game heap (heap_init)
+D_8002AC30	g_heap_largest_free	high	Size of the largest free heap block (heap_update_largest_free)
+D_8002AF74	g_heap_align_add	high	s16[5] alignment addends by alignment class (heap_alloc_tagged)
+D_8002AF80	g_heap_align_mask	high	s16[5] alignment masks by alignment class (heap_alloc_tagged)
+D_800380B0	g_heap_largest_block	high	The largest free heap block (heap_update_largest_free)
+D_800380B8	g_heap_free_head	high	Head of the heap free list
+D_8003841C	g_heap_free_tail	high	Tail of the heap free list
+D_80038420	g_heap_last_req_size	high	Size of the last heap_alloc_tagged request (debug)
+D_80038424	g_heap_last_req_tag	high	Tag of the last heap_alloc_tagged request (debug)
+D_80038428	g_heap_last_req_align	high	Alignment class of the last heap_alloc_tagged request (debug)
+D_8003842C	g_heap_last_req_from_top	high	Placement (0 bottom / 1 top) of the last heap_alloc_tagged request (debug)
+D_80038430	g_heap_last_req_may_fail	high	May-fail flag of the last heap_alloc_tagged request (debug)
+D_800380E0	g_pi_mgr_msgs	high	OSMesg buffer of the PI manager queue (osCreatePiManager)
+D_800388B0	g_pi_mgr_queue	high	PI manager command queue (osCreatePiManager)
+D_80038950	g_pi_io_msgs	high	OSIoMesg ring (300) used by rom_dma_read
+D_8003A570	g_pi_io_msg_index	high	Next OSIoMesg of g_pi_io_msgs to use (wraps at 299)
+D_8003A571	g_pi_io_pending	high	Number of queued PI reads waited for by rom_dma_wait_queued
+D_8003A8D2	g_pi_direct_read_active	high	1 while a direct cartridge read is in progress (rom_read_direct)
+D_8002AC50	g_sched_gfx_task	high	Current gfx OSScTask (taken from the gfx queue by sched_try_start_gfx_task)
+D_8002AC54	g_sched_audio_task	high	Current audio OSScTask (taken from the audio queue on retrace)
+D_8002AC58	g_sched_last_gfx_task	med	Last gfx task started (sched_start_gfx_task)
+D_8002AC6C	g_sched_audio_timer_armed	med	1 while the audio task timeout timer is armed
+D_8002AF20	g_vi_mode	high	The active OSViMode (osViSetMode; window / PAL tweaks)
+D_8003A580	g_sched_gfx_resumed	low	Set when the yielded gfx task is restarted after the audio task, cleared by sched_start_gfx_task
+D_8003A581	g_sched_audio_running	high	1 while the audio task runs on the RSP
+D_8003A582	g_sched_gfx_state	high	Gfx task state (0 idle, 1 running, 2 waiting for a frame buffer, 3 yielding, 4 yielded, 6 waiting to swap)
+D_8003A583	g_sched_gfx_running	med	1 from the gfx task start until its SP done
+D_8003A584	g_sched_dp_done	med	Set by the DP done message, cleared when a gfx task starts
+D_8003A8E8	g_sched_audio_timer	high	OSTimer of the audio task timeout (message 3)
+D_8003B238	g_sched_retrace_count	high	Retraces since the last gfx task start (saturates at 255), copied to g_frame_ticks
+D_8003B239	g_sched_frame_retraces	med	Retrace count of the last frame, minimum before the next gfx task while g_sched_retrace_hold runs
+D_8003B23A	g_sched_retrace_hold	med	Countdown (per retrace) during which gfx tasks wait for g_sched_frame_retraces retraces
+D_8003B240	g_sched_retrace_msg	high	Retrace message (u16 1) the scheduler sends to its clients
+D_8002AE14	g_rumble_paks_probed	high	Set by controller_init_all once the rumble paks were probed (stopped at PRE-NMI)
+D_8002AE24	g_sched_fb_swapped	med	Set after the first osViSwapBuffer (= D_eu_8002AE24); the PRE-NMI thread then resets the RDP
+D_8002C068	g_os_shutdown_alias	med	= __osShutdown (same address): set means do not wait for the PRE-NMI message
+D_8003B230	g_sched_client_queue	med	Queue that gets the retrace message at each gfx task start (set by sched_init)
+D_8003B234	g_sched_clients	high	Linked list of scheduler clients (sched_add_client) sent retrace messages
+D_8003B260	g_sched_init_pattern	low	u64 set to 0xFEFEFEFE by sched_init
+D_8003B660	g_sched_gfx_msgs	high	OSMesg[3] of the gfx task queue; also the stack top of the scheduler thread
+D_8003B670	g_sched_audio_msgs	high	OSMesg[1] of the audio task queue
+D_8003B6A0	g_sched_thread	high	OSThread of the scheduler (sched_thread_main)
+D_8003B9D0	g_prenmi_queue	high	PRE-NMI event queue (osSetEventMesg(OS_EVENT_PRENMI))
+D_8003B9E8	g_prenmi_msgs	high	OSMesg[2] of g_prenmi_queue
+D_8003B9F0	g_prenmi_thread	high	OSThread of the PRE-NMI thread (prenmi_thread_main)
+D_8003BD70	g_prenmi_queue_alias	high	= g_prenmi_queue (EU 8003BD70), read by prenmi_thread_main
+D_8003BFC0	g_prenmi_time	high	osGetTime() of the PRE-NMI, base of the reset delays
+D_800BED64	g_rumble_pak_present	high	u8[4] rumble pak present per controller
+D_800BEDB0	g_si_recv_mesg	med	Message slot for the blocking osRecvMesg on g_si_mesg_queue
+D_8003C900	g_music_players	high	N_ALCSPlayer *[3]: the music sequence players
+D_8003CA58	g_music_seqs	high	ALCSeq per music player
+D_8003CCB0	g_music_seq_sizes	high	u16 byte size (rounded up to even) of each sequence of the sequence file
+D_8003CD48	g_music_seq_markers	med	Loop markers per music player (n_cseq_find_markers / music_seq_jump_marker)
+D_8003CDDC	g_music_seq_ids	high	u16 sequence id loaded in each music player (0xFFFF = none)
+D_8003CDE8	g_music_seq_data	high	Sequence data loaded for each music player (allocate_memory)
+D_8003D0E0	g_music_seq_file	high	The sequence file table (ALSeqFile) read from ROM
+D_8003E710	g_audio_heap	high	The audio heap (ALHeap)
+D_80044B20	g_audio_heap_arena	high	0x3E000-byte arena of g_audio_heap (EU 80044EB0)

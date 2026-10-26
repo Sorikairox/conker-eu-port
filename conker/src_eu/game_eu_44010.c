@@ -13,14 +13,14 @@ extern u8 D_1A3750[];
 extern u8 D_1A3840[];
 extern u8 D_1A3B40[];
 extern s32 g_obj_update_counter; /* was D_800D1968 */
-extern u8 D_800D2521;
+extern u8 g_setup_level_first; /* was D_800D2521 */
 extern u8 *g_setup_entry_flags; /* was D_800D252C */
 
 
-extern u8 D_800BE9B0;
-extern u16 D_800BE9B8;
-extern s32 D_800BE9C8;
-extern u8 D_800D2520;
+extern u8 g_setup_type_count; /* was D_800BE9B0 */
+extern u16 g_setup_type_ids; /* was D_800BE9B8 */
+extern s32 g_setup_type_sound_tables; /* was D_800BE9C8 */
+extern u8 g_setup_entry_count; /* was D_800D2520 */
 
 /* was func_15016800 */
 void setup_load_type_assets(void) {
@@ -35,24 +35,24 @@ void setup_load_type_assets(void) {
     u8 temp_a2;
     u8 temp_s0;
 
-    D_800BE9B0 = 0;
-    temp_a2 = D_800D2520;
+    g_setup_type_count = 0;
+    temp_a2 = g_setup_entry_count;
     sp.u50 = 0;
     var_s1 = 0;
     if ((s32) temp_a2 > 0) {
         do {
             var_a1 = 0;
-            temp_s0 = D_800D20FC->pad4[var_s1];
+            temp_s0 = g_setup_entries->pad4[var_s1];
             var_v0 = 0;
-            if ((s32) D_800BE9B0 > 0) {
-                var_v1_2 = &D_800BE9B8;
+            if ((s32) g_setup_type_count > 0) {
+                var_v1_2 = &g_setup_type_ids;
 loop_4:
                 var_v0 += 1;
                 if (temp_s0 == *var_v1_2) {
                     var_a1 = 1;
                 } else {
                     var_v1_2 += 2;
-                    if (var_v0 < (s32) D_800BE9B0) {
+                    if (var_v0 < (s32) g_setup_type_count) {
                         goto loop_4;
                     }
                 }
@@ -65,9 +65,9 @@ loop_4:
                 }
                 var_v1 = temp_a2 * 0x30;
                 if (sp.u50 != 0) {
-                    *(s32 *)((u8 *)&D_800BE9C8 + (D_800BE9B0 * 4)) = sp.u50;
-                    (&D_800BE9B8)[D_800BE9B0] = (u16) temp_s0;
-                    D_800BE9B0 += 1;
+                    *(s32 *)((u8 *)&g_setup_type_sound_tables + (g_setup_type_count * 4)) = sp.u50;
+                    (&g_setup_type_ids)[g_setup_type_count] = (u16) temp_s0;
+                    g_setup_type_count += 1;
                 }
             }
             var_s1 += 0x30;
@@ -76,10 +76,10 @@ loop_4:
 }
 /* P36: level setup load (level arg0). DMAs the fixed player-slot setup table (ROM D_1A3840..D_1A3B40 for the
  * multiplayer-style levels 0x1A / 0x24 / 0x2B / 0x2D / 0x30 / 0x33 / 0x34 / 0x3F, else D_1A3750..D_1A3840) into
- * D_800D20FC (allocated with room for the level's setup asset (2, 0xE, level) from asset_get_size), D_800D2521 =
- * D_800D2520 = its entry count (0x30 bytes each), then appends the level's entries (asset_load_into) and counts them in
- * D_800D2520; level_entry_data_load(level); allocates + clears g_setup_entry_flags (spawned flags, 1 byte each) and D_800D2530 (respawn
- * timers, u16); g_obj_update_counter = 0. Each player slot i < g_player_count enabled in the mask D_800D2340 gets e[2] = 0, a type
+ * g_setup_entries (allocated with room for the level's setup asset (2, 0xE, level) from asset_get_size), g_setup_level_first =
+ * g_setup_entry_count = its entry count (0x30 bytes each), then appends the level's entries (asset_load_into) and counts them in
+ * g_setup_entry_count; level_entry_data_load(level); allocates + clears g_setup_entry_flags (spawned flags, 1 byte each) and g_setup_respawn_timers (respawn
+ * timers, u16); g_obj_update_counter = 0. Each player slot i < g_player_count enabled in the mask g_player_active_mask gets e[2] = 0, a type
  * byte e[4] (and extra fields) from its character player_stat_get(i, 1), flag 0x4000000 in levels 0x32 / 0x33, and the
  * position / angle of object g_objects[i]; disabled slots get e[2] = 1. setup_load_type_assets(); entries with e[0x28] == 0
  * get setup_next_free_id(count, i). Finally the player slots are spawned (setup_entries_spawn_range(level, 1, 1)), warp_request_cancel(0),
@@ -116,26 +116,26 @@ void level_setup_load(s32 arg0) {
             break;
     }
     size = tblEnd - tbl;
-    D_800D20FC = allocate_memory(asset_get_size(2, 0xE, arg0) + size, 1, 2, 0);
-    rom_dma_read((s32) tbl, (void *) D_800D20FC, size, 1);
+    g_setup_entries = allocate_memory(asset_get_size(2, 0xE, arg0) + size, 1, 2, 0);
+    rom_dma_read((s32) tbl, (void *) g_setup_entries, size, 1);
     n = size / 0x30;
-    D_800D2520 = n;
-    D_800D2521 = n & 0xFF;
-    D_800D2520 += asset_load_into((u8 *) D_800D20FC + (n & 0xFF) * 0x30, 0, 2, 0xE, arg0) / 0x30;
+    g_setup_entry_count = n;
+    g_setup_level_first = n & 0xFF;
+    g_setup_entry_count += asset_load_into((u8 *) g_setup_entries + (n & 0xFF) * 0x30, 0, 2, 0xE, arg0) / 0x30;
     level_entry_data_load(arg0);
-    cnt = D_800D2520;
+    cnt = g_setup_entry_count;
     g_setup_entry_flags = allocate_memory(cnt, 1, 0, 0);
-    D_800D2530 = allocate_memory(cnt * 2, 1, 0, 0);
+    g_setup_respawn_timers = allocate_memory(cnt * 2, 1, 0, 0);
     bzero(g_setup_entry_flags, cnt);
-    bzero(D_800D2530, cnt * 2);
+    bzero(g_setup_respawn_timers, cnt * 2);
     g_obj_update_counter = 0;
     for (i = 0, off = 0; i < g_player_count; i++, off += 0x30) {
-        if (((1 << i) & (u16) D_800D2340) == 0) {
-            ((u8 *) D_800D20FC)[off + 2] = 1;
+        if (((1 << i) & (u16) g_player_active_mask) == 0) {
+            ((u8 *) g_setup_entries)[off + 2] = 1;
             continue;
         }
         ch = player_stat_get((s16) i, 1);
-        e = (u8 *) D_800D20FC + off;
+        e = (u8 *) g_setup_entries + off;
         e[2] = 0;
         if ((u32) ch < 41) {
             switch (ch) {
@@ -251,48 +251,48 @@ void level_setup_load(s32 arg0) {
         e[0xC] = *(u16 *) (obj + 0x76) >> 8;
     }
     setup_load_type_assets();
-    for (i = 0, off = 0; i < D_800D2520; i++, off += 0x30) {
-        if (((u8 *) D_800D20FC)[off + 0x28] == 0) {
-            ((u8 *) D_800D20FC)[off + 0x28] = setup_next_free_id(D_800D2520, i);
+    for (i = 0, off = 0; i < g_setup_entry_count; i++, off += 0x30) {
+        if (((u8 *) g_setup_entries)[off + 0x28] == 0) {
+            ((u8 *) g_setup_entries)[off + 0x28] = setup_next_free_id(g_setup_entry_count, i);
         }
     }
     setup_entries_spawn_range(arg0, 1, 1);
     warp_request_cancel(0);
     setup_entries_spawn_range(arg0, 1, 0);
 }
-/* D_800D2520: setup entry count, D_800D2521: first entry of the level's own part; g_path_points (EU 0x800D2524, s32 *
- * in variables.h): per entry its data block; D_800D2528: per entry the block's kind byte; g_player_count (EU
+/* g_setup_entry_count: setup entry count, g_setup_level_first: first entry of the level's own part; g_path_points (EU 0x800D2524, s32 *
+ * in variables.h): per entry its data block; g_path_point_counts: per entry the block's kind byte; g_player_count (EU
  * 0x8009012C): player slot count. */
 
-// level_entry_data_load: allocates and clears the per-entry block pointers g_path_points and kind bytes D_800D2528 for
-// the D_800D2520 setup entries; each player slot (i < g_player_count) gets a zeroed 16-byte block of kind 2. Then the
-// level's asset (2, 0x10, level) gives 8-byte records {offset, kind} for the entries from D_800D2521 on: a record
+// level_entry_data_load: allocates and clears the per-entry block pointers g_path_points and kind bytes g_path_point_counts for
+// the g_setup_entry_count setup entries; each player slot (i < g_player_count) gets a zeroed 16-byte block of kind 2. Then the
+// level's asset (2, 0x10, level) gives 8-byte records {offset, kind} for the entries from g_setup_level_first on: a record
 // with a non-zero offset sets the entry's kind (low byte) and its block = asset + offset.
 /* was func_150170C4 */
 void level_entry_data_load(s32 level) {
     u8 *asset = NULL;
     u32 *rec;
-    s32 n = D_800D2520;
+    s32 n = g_setup_entry_count;
     s32 i;
     u8 **blocks;
 
     g_path_points = allocate_memory(n * 4, 1, 0, 0);
-    D_800D2528 = allocate_memory(n, 1, 0, 0);
+    g_path_point_counts = allocate_memory(n, 1, 0, 0);
     bzero(g_path_points, n * 4);
-    bzero(D_800D2528, n);
+    bzero(g_path_point_counts, n);
     for (i = 0; i < g_player_count; i++) {
         blocks = (u8 **) g_path_points;
         blocks[i] = allocate_memory(0x10, 1, 2, 0);
         bzero(((u8 **) g_path_points)[i], 0x10);
-        D_800D2528[i] = 2;
+        g_path_point_counts[i] = 2;
     }
     if (asset_load_ptr((s32 *) &asset, 2, 0x10, level) == 0) {
         return;
     }
-    for (i = D_800D2521; i < D_800D2520; i++) {
-        rec = (u32 *) (asset + (i - D_800D2521) * 8);
+    for (i = g_setup_level_first; i < g_setup_entry_count; i++) {
+        rec = (u32 *) (asset + (i - g_setup_level_first) * 8);
         if (rec[0] != 0) {
-            D_800D2528[i] = rec[1];
+            g_path_point_counts[i] = rec[1];
             ((u8 **) g_path_points)[i] = asset + rec[0];
         }
     }

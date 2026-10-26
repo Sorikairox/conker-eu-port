@@ -7,7 +7,7 @@ Gfx *render_set_color_image(Gfx *);
 Gfx *gfx_load_texture_tile(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 void matrix_rotate_ypr(f32 (*)[4], f32, f32, f32);
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
-extern s32 D_800DC2E0;
+extern s32 g_sky_backdrop_mtx; /* was D_800DC2E0 */
 extern Vtx *g_sky_backdrop_vtx[][2]; /* was D_800DC2B8 */
 
 /* P64: texture descriptor passed to gfx_load_texture_tile (the texture load) */
@@ -23,7 +23,7 @@ typedef struct {
 /* P64: draws a scrolling textured quad over the view of player g_cur_view_player (word 0 = player index, half +2 = a
  * parameter of render_set_scissor): texture, pipe sync, other modes and combiner, render_set_scissor / render_set_color_image,
  * the texture load (gfx_load_texture_tile), then the player's view matrix (g_player_cams[p] +0xBC, 0x180-byte records)
- * multiplied by a Z rotation `angle` (matrix_rotate_ypr) into the frame's Mtx D_800DC2E0[p * 2 + g_dl_buf_index],
+ * multiplied by a Z rotation `angle` (matrix_rotate_ypr) into the frame's Mtx g_sky_backdrop_mtx[p * 2 + g_dl_buf_index],
  * g_identity_mtx as the projection, perspective normalisation g_player_cams[p] +0xB8 and the 4 vertices
  * g_sky_backdrop_vtx[p][g_dl_buf_index] whose t coordinates are scrolled by `scroll` * 81 (top / bottom rows depend on the
  * level g_level_id: 0x32 / 0x33 / 0x3F use -0x62 / 0x27, else -0x13 / 0x65), drawn as two triangles. */
@@ -68,10 +68,10 @@ Gfx *view_scroll_overlay_draw(Gfx *gdl, f32 x, f32 y, f32 z, f32 scroll, f32 pit
     p = g_cur_view_player;
     player = (u8 *)g_player_cams + p * 0x180;
     mtxf_mul(rot, (f32 (*)[4])(player + 0xBC), view);
-    mtx = (Mtx *)D_800DC2E0 + (g_cur_view_player * 2 + g_dl_buf_index);
+    mtx = (Mtx *)g_sky_backdrop_mtx + (g_cur_view_player * 2 + g_dl_buf_index);
     guMtxF2L(view, mtx);
 
-    gdl->words.w0 = 0xDA380007; gdl->words.w1 = (u32)((Mtx *)D_800DC2E0 + (g_cur_view_player * 2 + g_dl_buf_index)); gdl++;
+    gdl->words.w0 = 0xDA380007; gdl->words.w1 = (u32)((Mtx *)g_sky_backdrop_mtx + (g_cur_view_player * 2 + g_dl_buf_index)); gdl++;
     gdl->words.w0 = 0xDA380003; gdl->words.w1 = (u32)g_identity_mtx; gdl++;                 /* gSPMatrix (projection) */
     gdl->words.w0 = 0xDB0E0000;                                                         /* gSPPerspNormalize */
     gdl->words.w1 = *(u16 *)((u8 *)g_player_cams + g_cur_view_player * 0x180 + 0xB8);

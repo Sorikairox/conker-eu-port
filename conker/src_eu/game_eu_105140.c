@@ -193,7 +193,7 @@ void sound_play_for_actor(s32, s32, s32, s32, s32, u8 *);
 void actor_sound_set_volume(u8 *arg0, s32 arg1);
 s32 obj_check_death(struct127 *arg0);
 
-// carried_object_update: interaction state 0x20 handler (entry 32 of D_800863B4, called as `(obj)` by
+// carried_object_update: interaction state 0x20 handler (entry 32 of g_obj_interaction_state_fns, called as `(obj)` by
 // objects_run_state_handlers) of a liftable object (id 0x48 rides on a partner object of kind 0x7A; id 0x7F is held). While a
 // player holds it (unk13C, player g_objects[unk124] with unk31C +0x4E set) it copies the player's position block,
 // turn and speed; otherwise it falls / spins (obj_approach_speed / obj_physics_step), lets a player land on it
@@ -384,7 +384,7 @@ void liftable_object_update(struct127 *self) {
         } else {
             self->unkC8 = 44.0f;
         }
-        if (speed > 0.2f && self->unk28 < 10.0f && self->health != 0 && D_800C35EA != 1) {
+        if (speed > 0.2f && self->unk28 < 10.0f && self->health != 0 && g_cutscene_slot_state != 1) {
             vol = 1000.0f * speed;
             if (vol > 0x4650) {
                 vol = 0x4650;

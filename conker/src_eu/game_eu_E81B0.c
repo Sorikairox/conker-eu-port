@@ -102,14 +102,14 @@ void crumble_emitter_on_message(u8 *arg0, s32 arg1, u8 arg2) {
 
 s32 hitinfo_from_obj_floor(s32, u8 *);
 s32 collision_floor_probe(f32 *, s32, f32, s32);
-extern f32 D_800A0230;
+extern f32 g_ground_point_k_0230; /* was D_800A0230 */
 
 /* was func_150BAE10 */
 s32 obj_get_ground_point(f32 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
     f32 sp24[3];
 
     arg0[0] = *(f32 *)(arg1 + 0x14);
-    if (D_800A0230 < *(f32 *)(arg1 + 0x180)) {
+    if (g_ground_point_k_0230 < *(f32 *)(arg1 + 0x180)) {
         arg0[1] = *(f32 *)(arg1 + 0x180);
     } else {
         arg0[1] = *(f32 *)(arg1 + 0x18);

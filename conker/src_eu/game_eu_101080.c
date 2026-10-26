@@ -309,7 +309,7 @@ typedef struct {
 // step from here, copies the position and object_get_beam_ends's direction to both links (+0x34 / +0x40) and sets their flag
 // 2, clears 4; 2: first contact as 1, links lose flag 2), records position + step length + 100 in the +0x94 ring
 // (write index +0x2E, count +0x2C, read index +0x2D, size +0x25), then picks the speed class from the target's
-// +0x31C (record byte 0x84: target speed +0x44 > 6 / > 3; else the player slot's lean (*D_800BE728)[i] byte 3 > 20 /
+// +0x31C (record byte 0x84: target speed +0x44 > 6 / > 3; else the player slot's lean (*g_cont_frame)[i] byte 3 > 20 /
 // < -20) and sets the goal +0x18 (50 / 10 / 20) and link +0x10's +0x174 (2.1 / 0.2 / 1); class 0 newly reached
 // spawns smoke_puff_burst dust (surface from motion_track_get_delta or g_vec3_zero). Always eases +0x14 by 0.35.
 /* was func_150D3F78 */
@@ -431,7 +431,7 @@ s32 track_follow_record(u8 *obj) {
                 if (slot >= 4) {
                     st[5] = 1;
                 } else {
-                    lean = *(s8 *) (((u8 **) D_800BE728[0])[slot] + 3);
+                    lean = *(s8 *) (((u8 **) g_cont_frame[0])[slot] + 3);
                     if (lean > 20) {
                         st[5] = 0;
                     } else if (lean < -20) {
@@ -503,7 +503,7 @@ s32 track_trail_update(u8 *arg0) {
     temp_t6 = (*(s32 **)((u8 *)arg0 + 0x98));
     sp.u8C = temp_t6;
     var_t0 = (*(s32 *)((u8 *)arg0 + 0x94));
-    if (D_800C35EA != 1) {
+    if (g_cutscene_slot_state != 1) {
         sp.u88 = var_t0;
         var_t0 = sp.u88;
         if (motion_track_get_delta(*temp_t6, &sp.u7C, arg0) != 0) {
@@ -1078,7 +1078,7 @@ void smoke_puff_burst(f32 *pos, f32 *vel, f32 scale, u8 room, s32 owner) {
 // 0 -> 16000 at once with pitch 400; 1 (or g_player_count >= 5) -> 12000; else 0 with pitch 400. Volume (+0xC) and pitch
 // (*pitch) move towards their targets by g_frame_ticks * 256 a frame (pitch down by * 8). Below 500 the volume is 0;
 // otherwise a voice without a sound restarts its id (+0 and *sound). Follows data->obj's position (+2/+4/+6), halves
-// the volume (and *vol) in mode D_800C35EA == 1, stores the pitch (+0x20). When *vol is 0 it stops the playing sound
+// the volume (and *vol) in mode g_cutscene_slot_state == 1, stores the pitch (+0x20). When *vol is 0 it stops the playing sound
 // (+0x24) and clears *sound. Returns 0.
 /* was func_150D5634 */
 s32 rocket_sound_update(u8 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *slot, u16 *sound) {
@@ -1172,7 +1172,7 @@ s32 rocket_sound_update(u8 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *sl
     *(s16 *) (e + 2) = (s32) *(f32 *) ((u8 *) data->obj + 0x14);
     *(s16 *) (e + 4) = (s32) *(f32 *) ((u8 *) data->obj + 0x18);
     *(s16 *) (e + 6) = (s32) *(f32 *) ((u8 *) data->obj + 0x1C);
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         *(s32 *) (e + 0xC) = cur >> 1;
         *vol >>= 1;
     } else {

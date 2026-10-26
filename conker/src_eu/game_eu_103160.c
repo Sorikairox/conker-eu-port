@@ -788,7 +788,7 @@ void vec_damp_xyz_per_tick(f32 *, f32);
 /* P67: update of a debris piece that follows its owner (obj +0xA8 = owner record, +0xAC = the owner's unique_id when
  * spawned). Returns 0 when the owner is gone or reused; else follows it (obj_get_center_point into obj +0x40), adds gravity
  * (obj +0x64) to the velocity (obj +0x58), lets vec_damp_xyz_per_tick adjust it and moves obj +0x4C by the average of the
- * old and new velocity over the frame (g_frame_step_f; D_800BEDC8 scales the change). Returns 1. */
+ * old and new velocity over the frame (g_frame_step_f; g_frame_step_inv scales the change). Returns 1. */
 /* was func_150D71D4 */
 s32 debris_follow_owner_update(u8 *arg0, s32 arg1) {
     struct127 *owner = *(struct127 **)(arg0 + 0xA8);
@@ -805,9 +805,9 @@ s32 debris_follow_owner_update(u8 *arg0, s32 arg1) {
     old[2] = vel[2];
     vel[1] += *(f32 *)(arg0 + 0x64) * g_frame_step_f;
     vec_damp_xyz_per_tick(vel, *(f32 *)(arg0 + 0xB0));
-    pos[0] += old[0] * g_frame_step_f + (vel[0] - old[0]) * D_800BEDC8 * g_frame_step_f * g_frame_step_f * 0.5f;
-    pos[1] += old[1] * g_frame_step_f + (vel[1] - old[1]) * D_800BEDC8 * g_frame_step_f * g_frame_step_f * 0.5f;
-    pos[2] += old[2] * g_frame_step_f + (vel[2] - old[2]) * D_800BEDC8 * g_frame_step_f * g_frame_step_f * 0.5f;
+    pos[0] += old[0] * g_frame_step_f + (vel[0] - old[0]) * g_frame_step_inv * g_frame_step_f * g_frame_step_f * 0.5f;
+    pos[1] += old[1] * g_frame_step_f + (vel[1] - old[1]) * g_frame_step_inv * g_frame_step_f * g_frame_step_f * 0.5f;
+    pos[2] += old[2] * g_frame_step_f + (vel[2] - old[2]) * g_frame_step_inv * g_frame_step_f * g_frame_step_f * 0.5f;
     return 1;
 }
 /* was func_150D7370 */

@@ -243,7 +243,7 @@ extern s32 (*g_char_effect_end_fns[])(u8 *); /* was D_8008D9C8 */
  * (+0x74 & 0xF != 0xF) the row whose id list holds owner +0x84 (else the default row), mode 4; without, the hidden
  * row (mode 2) at the owner position + yoff. A row / mode change restarts the effect (accumulator = max).
  * Live particles follow their model point (mtx_transform_point_or_origin) or the effect position + their offset; when their hold
- * time is over they are let go: velocity from the last move * D_800BEDC8 (x / z clamped to +-10), effect3d_set_handlers
+ * time is over they are let go: velocity from the last move * g_frame_step_inv (x / z clamped to +-10), effect3d_set_handlers
  * with the template's end arguments, a life time. The accumulator gains rate per frame; for every whole unit a free
  * slot is picked at random and a particle record is spawned (g_char_effect_spawn_init_fns[tpl->init] fills the spawn block,
  * effect3d_spawn_default, the 0x58-byte motion block to +0x110) at a model point or at the effect position + a random
@@ -359,13 +359,13 @@ void character_effect_update(u8 *arg0) {
                     if (slot->timer < 0) {
                         obj = slot->obj;
                         m = (CharFxMotion *) (obj + 0x110);
-                        m->vel[0] = (*(f32 *) (obj + 0x34) - *(f32 *) (obj + 0x40)) * D_800BEDC8;
+                        m->vel[0] = (*(f32 *) (obj + 0x34) - *(f32 *) (obj + 0x40)) * g_frame_step_inv;
                         if (10.0f < m->vel[0]) {
                             m->vel[0] = 10.0f;
                         } else if (m->vel[0] < -10.0f) {
                             m->vel[0] = -10.0f;
                         }
-                        m->vel[2] = (*(f32 *) (obj + 0x3C) - *(f32 *) (obj + 0x48)) * D_800BEDC8;
+                        m->vel[2] = (*(f32 *) (obj + 0x3C) - *(f32 *) (obj + 0x48)) * g_frame_step_inv;
                         if (10.0f < m->vel[2]) {
                             m->vel[2] = 10.0f;
                         } else if (m->vel[2] < -10.0f) {
@@ -678,7 +678,7 @@ extern f32 g_view_yaw_cos[]; /* per view: cos of the camera yaw; was D_800DD618 
 // vertices of the particle `p` for view `view` (a quad stretched along its screen-space motion, e.g. the
 // character-effect flames). vtx_slot_buffer_get gives the view's vertex block (p +0x100[view], 0x40 bytes); when it is
 // new, both of its halves get the template vertices p +0xC0. Lean: the motion since the last frame (+0x40 - +0x34,
-// +0x48 - +0x3C) across the view (cos / sin of the view, g_view_yaw_cos / g_view_yaw_sin) times D_800BEDC8, then
+// +0x48 - +0x3C) across the view (cos / sin of the view, g_view_yaw_cos / g_view_yaw_sin) times g_frame_step_inv, then
 // sqrt(|t|) * p +0x160, at most pi / 2, negative for a forward motion; byte angle = lean * 256 / (2 pi) (Rare's
 // unsigned conversion makes every negative angle 0xFF). Half width p +0x2C, half height p +0x30 rotated by the
 // angle (math_sin_u8 sin, math_cos_u8 cos) around the position p +0x34; the s16 corners go to +0x00, +0x10,
@@ -704,7 +704,7 @@ u8 *particle_quad_velocity_build(u8 *p, s16 view) {
     s = g_view_yaw_sin[view];
     c = g_view_yaw_cos[view];
     t = ((*(f32 *) (p + 0x40) - *(f32 *) (p + 0x34)) * c - s * (*(f32 *) (p + 0x48) - *(f32 *) (p + 0x3C))) *
-        D_800BEDC8;
+        g_frame_step_inv;
     neg = TRUE;
     if (t < 0.0f) {
         t = -t;

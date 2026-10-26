@@ -1,4 +1,4 @@
-// rail_wall_hit: where the move from (x, z) by (dx, dz) first crosses a wall: the type-1 nodes of D_800D2778 in the
+// rail_wall_hit: where the move from (x, z) by (dx, dz) first crosses a wall: the type-1 nodes of g_rail_nodes in the
 // height band of `y` (node +6 = rail_band_for_height(y)) and their links (+9..+0xD) to higher-numbered type-1 nodes form
 // segments; a segment counts when the move's start and end lie on different sides of its line and the crossing
 // point lies within the segment. Returns -1 when none is hit, else the move length times the crossing fraction of
@@ -24,8 +24,8 @@ f32 rail_wall_hit(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
     band = rail_band_for_height(y);
     best = 100.0f;
     s = 0.0f; // only read after a crossing set it
-    for (i = 0; i < D_80087630; i++) {
-        a = &D_800D2778[i];
+    for (i = 0; i < g_rail_node_count; i++) {
+        a = &g_rail_nodes[i];
         if (((u8 *) a)[0xE] != 1 || ((u8 *) a)[6] != band) {
             continue;
         }
@@ -34,7 +34,7 @@ f32 rail_wall_hit(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
             if (link == 0xFF || link <= i) {
                 continue;
             }
-            b = &D_800D2778[link];
+            b = &g_rail_nodes[link];
             if (((u8 *) b)[0xE] != 1) {
                 continue;
             }

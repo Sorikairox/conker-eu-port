@@ -216,7 +216,7 @@ s32 obj_glow_effect_spawn(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, 
     f.mainSpawn.u44[1] = 0xFF;
     f.mainSpawn.u44[2] = 0;
     f.mainSpawn.u44[3] = 6;
-    rec = (u8 *) effect3d_spawn((s32) &f.mainSpawn, (s32) &D_800A4AA0, 0x15, 0x1F, 0, 0x12, 0, 0x94, argD, argE);
+    rec = (u8 *) effect3d_spawn((s32) &f.mainSpawn, (s32) &g_effect3d_default_params, 0x15, 0x1F, 0, 0x12, 0, 0x94, argD, argE);
     if (rec == NULL) {
         return 0;
     }
@@ -253,7 +253,7 @@ s32 obj_glow_effect_spawn(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, 
     f.rec2Spawn.u44[2] = 0;
     f.rec2Spawn.u44[3] = 6;
     *(u8 **) (state + 0x28) =
-        (u8 *) effect3d_spawn((s32) &f.rec2Spawn, (s32) &D_800A4AA0, 0, 0, 0, 0x13, 0, 0x18, argD, argE);
+        (u8 *) effect3d_spawn((s32) &f.rec2Spawn, (s32) &g_effect3d_default_params, 0, 0, 0, 0x13, 0, 0x18, argD, argE);
     if (*(u8 **) (state + 0x28) != NULL) {
         memcpy((s32) (*(u8 **) (state + 0x28) + 0x110), (s32) &f.rec2Pay, 0x18);
     }
@@ -561,7 +561,7 @@ s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, 
 f32 vec3_length(f32 *);
 // laser_sight_update: update handler (g_effect3d_update_fns slot 21) of an aim beam carried by an object (+0x110, valid while
 // its +0 is set and its id +0x3B equals +0x114). The beam starts at a bone point (+0x118 in bone +0x130 space) of
-// the object's skeleton (+0x1D4; skipped in mode D_800C35EA 1 when the object's +0x74 low nibble is 0xF). With flag
+// the object's skeleton (+0x1D4; skipped in mode g_cutscene_slot_state 1 when the object's +0x74 low nibble is 0xF). With flag
 // 2 (+0x133) the end comes from the object's aim block (+0x31C): its locked target (+0x109 = hit kind, position
 // +0xB8, distance +0xB4, surface +0xF4) or, unlocked, 2000 units along the aim direction (+0xE8). Otherwise the end
 // point (+0x124, bone space) is ray cast (collision_ray_cast); a hit stores the end at +0x40 and the length at +0x154.
@@ -591,7 +591,7 @@ s32 laser_sight_update(u8 *fx) {
     visible = 1;
     hit = 0;
     bones = *(u8 **)(obj + 0x1D4);
-    if (bones != NULL && (D_800C35EA != 1 || (obj[0x74] & 0xF) != 0xF)) {
+    if (bones != NULL && (g_cutscene_slot_state != 1 || (obj[0x74] & 0xF) != 0xF)) {
         mtx = bones + (st[0x20] << 6);
         mtx_transform_point_or_origin(st + 0x8, fx + 0x34, mtx);
         if (st[0x23] & 2) {

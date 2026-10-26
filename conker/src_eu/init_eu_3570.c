@@ -23,17 +23,17 @@ typedef struct {
     /* 0x14 */ OSMesg msg;
 } OSViContext_s86;
 
-extern OSDevMgr_s86 D_8002AEB0;  /* __osViDevMgr */
-extern OSThread D_80036F00;      /* viThread */
-extern char D_80037130[];        /* viThreadStack */
-extern OSMesgQueue D_80038130;   /* viEventQueue (= viThreadStack end) */
-extern OSMesg D_80038148[5];     /* viEventBuf */
-extern OSIoMesg D_80038160;      /* viRetraceMsg */
-extern OSIoMesg D_80038178;      /* viCounterMsg */
-extern u16 D_80038190;           /* viMgrMain: static retrace */
-extern u64 D_80042D40;           /* __osCurrentTime */
-extern u32 D_80042D48;           /* __osBaseCounter */
-extern u32 D_80042D4C;           /* __osViIntrCount */
+extern OSDevMgr_s86 g_os_vi_dev_mgr;  /* __osViDevMgr; was D_8002AEB0 */
+extern OSThread g_os_vi_thread;      /* viThread; was D_80036F00 */
+extern char g_os_vi_thread_stack[];        /* viThreadStack; was D_80037130 */
+extern OSMesgQueue g_os_vi_event_queue;   /* viEventQueue (= viThreadStack end); was D_80038130 */
+extern OSMesg g_os_vi_event_buf[5];     /* viEventBuf; was D_80038148 */
+extern OSIoMesg g_os_vi_retrace_msg;      /* viRetraceMsg; was D_80038160 */
+extern OSIoMesg g_os_vi_counter_msg;      /* viCounterMsg; was D_80038178 */
+extern u16 g_os_vi_retrace_count;           /* viMgrMain: static retrace; was D_80038190 */
+extern u64 g_os_current_time;           /* __osCurrentTime; was D_80042D40 */
+extern u32 g_os_base_counter;           /* __osBaseCounter; was D_80042D48 */
+extern u32 g_os_vi_intr_count;           /* __osViIntrCount; was D_80042D4C */
 void __osTimerServicesInit(void);
 void os_vi_init(void);        /* __osViInit */
 OSViContext_s86 *__osGetActiveQueue(void); /* __osViGetCurrentContext */
@@ -49,19 +49,19 @@ void os_create_vi_manager(OSPri pri) {
     OSPri oldPri;
     OSPri myPri;
 
-    if (D_8002AEB0.active) {
+    if (g_os_vi_dev_mgr.active) {
         return;
     }
     __osTimerServicesInit();
-    osCreateMesgQueue(&D_80038130, D_80038148, 5);
-    D_80038160.hdr.type = OS_MESG_TYPE_VRETRACE;
-    D_80038160.hdr.pri = OS_MESG_PRI_NORMAL;
-    D_80038160.hdr.retQueue = NULL;
-    D_80038178.hdr.type = OS_MESG_TYPE_COUNTER;
-    D_80038178.hdr.pri = OS_MESG_PRI_NORMAL;
-    D_80038178.hdr.retQueue = NULL;
-    osSetEventMesg(OS_EVENT_VI, &D_80038130, &D_80038160);
-    osSetEventMesg(OS_EVENT_COUNTER, &D_80038130, &D_80038178);
+    osCreateMesgQueue(&g_os_vi_event_queue, g_os_vi_event_buf, 5);
+    g_os_vi_retrace_msg.hdr.type = OS_MESG_TYPE_VRETRACE;
+    g_os_vi_retrace_msg.hdr.pri = OS_MESG_PRI_NORMAL;
+    g_os_vi_retrace_msg.hdr.retQueue = NULL;
+    g_os_vi_counter_msg.hdr.type = OS_MESG_TYPE_COUNTER;
+    g_os_vi_counter_msg.hdr.pri = OS_MESG_PRI_NORMAL;
+    g_os_vi_counter_msg.hdr.retQueue = NULL;
+    osSetEventMesg(OS_EVENT_VI, &g_os_vi_event_queue, &g_os_vi_retrace_msg);
+    osSetEventMesg(OS_EVENT_COUNTER, &g_os_vi_event_queue, &g_os_vi_counter_msg);
     oldPri = -1;
     myPri = osGetThreadPri(NULL);
     if (myPri < pri) {
@@ -69,16 +69,16 @@ void os_create_vi_manager(OSPri pri) {
         osSetThreadPri(NULL, pri);
     }
     savedMask = __osDisableInt();
-    D_8002AEB0.active = TRUE;
-    D_8002AEB0.thread = &D_80036F00;
-    D_8002AEB0.cmdQueue = &D_80038130;
-    D_8002AEB0.evtQueue = &D_80038130;
-    D_8002AEB0.acsQueue = NULL;
-    D_8002AEB0.dma = NULL;
-    D_8002AEB0.edma = NULL;
-    osCreateThread(&D_80036F00, 0, os_vi_manager_main, &D_8002AEB0, &D_80037130[0x1000], pri);
+    g_os_vi_dev_mgr.active = TRUE;
+    g_os_vi_dev_mgr.thread = &g_os_vi_thread;
+    g_os_vi_dev_mgr.cmdQueue = &g_os_vi_event_queue;
+    g_os_vi_dev_mgr.evtQueue = &g_os_vi_event_queue;
+    g_os_vi_dev_mgr.acsQueue = NULL;
+    g_os_vi_dev_mgr.dma = NULL;
+    g_os_vi_dev_mgr.edma = NULL;
+    osCreateThread(&g_os_vi_thread, 0, os_vi_manager_main, &g_os_vi_dev_mgr, &g_os_vi_thread_stack[0x1000], pri);
     os_vi_init();
-    osStartThread(&D_80036F00);
+    osStartThread(&g_os_vi_thread);
     __osRestoreInt(savedMask);
     if (oldPri != -1) {
         osSetThreadPri(NULL, oldPri);
@@ -98,27 +98,27 @@ void os_vi_manager_main(void *arg) {
     u32 count;
 
     vc = __osGetActiveQueue();
-    D_80038190 = vc->retraceCount;
-    if (D_80038190 == 0) {
-        D_80038190 = 1;
+    g_os_vi_retrace_count = vc->retraceCount;
+    if (g_os_vi_retrace_count == 0) {
+        g_os_vi_retrace_count = 1;
     }
     while (TRUE) {
         osRecvMesg(dm->evtQueue, &mesg, OS_MESG_BLOCK);
         switch (((OSIoMesg *) mesg)->hdr.type) {
             case OS_MESG_TYPE_VRETRACE:
                 __osViSwapContext();
-                D_80038190--;
-                if (D_80038190 == 0) {
+                g_os_vi_retrace_count--;
+                if (g_os_vi_retrace_count == 0) {
                     vc = __osGetActiveQueue();
                     if (vc->msgq != NULL) {
                         osSendMesg(vc->msgq, vc->msg, OS_MESG_NOBLOCK);
                     }
-                    D_80038190 = vc->retraceCount;
+                    g_os_vi_retrace_count = vc->retraceCount;
                 }
-                D_80042D4C++;
+                g_os_vi_intr_count++;
                 count = osGetCount();
-                D_80042D40 += count - D_80042D48;
-                D_80042D48 = count;
+                g_os_current_time += count - g_os_base_counter;
+                g_os_base_counter = count;
                 break;
             case OS_MESG_TYPE_COUNTER:
                 __osTimerInterrupt();

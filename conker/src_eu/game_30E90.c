@@ -14,7 +14,7 @@ void world_object_calc_radius(u8 *arg0, s32 arg1);
 extern u16 g_world_obj_radius_small_cnt; /* was D_800BE6C0 */
 extern u16 g_world_obj_radius_set_cnt; /* was D_800BE6C2 */
 extern u16 g_world_obj_radius_ok_cnt; /* was D_800BE6C4 */
-extern s32 D_80089030[][3];        /* per object type: callback +0x38, +0x78, byte +0x92 */
+extern s32 g_world_obj_type_cbs[][3];        /* per object type: callback +0x38, +0x78, byte +0x92; was D_80089030 */
 extern u8 g_world_obj_model_records[];            /* per model id: 12-byte display records (multiplayer objects); was D_800A2A90 */
 extern u8 **g_level_model_entries;            /* level model segments, 8-byte entries: word 0 = segment; was D_800B1260 */
 extern void *g_world_obj_view_words[4]; /* was D_800DC300 */
@@ -35,7 +35,7 @@ extern s32 g_world_obj_mp_count; /* was D_800DC3C8 */
 /* world_objects_load: builds the level's world objects (0xA0-byte records at g_world_objs, count g_world_obj_count) from
  * the level's two 0x44-byte placement lists (asset 2/0xB/level: g_world_obj_level_count level objects, asset 3/0xC/level/2:
  * g_world_obj_mp_count multiplayer objects). Per object: position (s16 +0x10..), origin floats, scale, the type's callback
- * table D_80089030 (types < 0xFFFF; 0x28 / 0x42 set the +0x70 bit 2 and keep it for the next multiplayer ones, type
+ * table g_world_obj_type_cbs (types < 0xFFFF; 0x28 / 0x42 set the +0x70 bit 2 and keep it for the next multiplayer ones, type
  * 0x16 = "has a callback"), its model: an earlier object with the same key (+0xC / +0x10) shares its vertices /
  * display list, else the model is loaded (asset_load_with_subfiles 3/id, kind 0 in +0x1C) or taken from the level segments
  * g_level_model_entries (kind 1 / 2). Then the vertex buffers (+0x20 / +0x24 copies for moving objects, bit 0 of +0x70),
@@ -115,9 +115,9 @@ void world_objects_load(s32 arg0, s32 arg1) {
                 W8(obj, 0x70) |= 4;
                 keepBit2 = 1;
             }
-            W32(obj, 0x38) = D_80089030[W32(src, 0x14)][0];
-            W32(obj, 0x78) = D_80089030[W32(src, 0x14)][1];
-            W8(obj, 0x92) = D_80089030[W32(src, 0x14)][2];
+            W32(obj, 0x38) = g_world_obj_type_cbs[W32(src, 0x14)][0];
+            W32(obj, 0x78) = g_world_obj_type_cbs[W32(src, 0x14)][1];
+            W8(obj, 0x92) = g_world_obj_type_cbs[W32(src, 0x14)][2];
             if (W32(src, 0x14) == 0x16) {
                 hasCb = 1;
             }
@@ -352,10 +352,10 @@ void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
 void scenery_handler_noop();
 void scenery_uv_scroll_update();
 void scenery_start_pending_anim();
-extern f32 D_800DC338[4][4];
+extern f32 g_world_obj_fallback_mtx[4][4]; /* was D_800DC338 */
 extern f32 g_world_obj_identity_mtx[4][4]; /* was D_800DC378 */
 extern Mtx **g_world_obj_mtx_bufs[2];       /* per DL buffer: -> the world-object matrix array (0x40 each); was D_800895F0 */
-extern u16 D_800D3C00;
+extern u16 g_world_obj_box_ids; /* was D_800D3C00 */
 
 /* Level start for the g_world_obj_count world objects (0xA0-byte records at g_world_objs): reset, identity camera matrices,
  * then per object: kind 3 for no/known callbacks, its matrix (world_record_build_matrix) into both DL buffers' g_world_obj_mtx_bufs
@@ -377,7 +377,7 @@ void world_objects_level_start(s32 arg0) {
     void *cb;
 
     world_objects_clear_arrays();
-    guMtxIdentF(D_800DC338);
+    guMtxIdentF(g_world_obj_fallback_mtx);
     guMtxIdentF(g_world_obj_identity_mtx);
     for (i = 0; i < g_world_obj_count; i++) {
         r = (u8 *)g_world_objs + i * 0xA0;
@@ -410,8 +410,8 @@ void world_objects_level_start(s32 arg0) {
         }
         collision_select_area(2);
         if ((r[0x6F] & 0x80) == 0x80 && (r[0x4F] & 0x60) != 0x20) {
-            D_800D3C00 = i;
-            world_objects_transform_mesh(1, (s32 *)&D_800D3C00, 1);
+            g_world_obj_box_ids = i;
+            world_objects_transform_mesh(1, (s32 *)&g_world_obj_box_ids, 1);
         }
     }
     for (i = 0; i < g_world_obj_count; i++) {

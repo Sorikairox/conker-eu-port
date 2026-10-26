@@ -27,11 +27,11 @@ void level_slots10_init(void) {
 
 /* was func_1500FF4C */
 void level_tex_scroll_create(void) {
-    tex_scroll_create(D_80091B68, 0, 0xAD, 0x75);
+    tex_scroll_create(g_level_vtx_scroll_tex_key, 0, 0xAD, 0x75);
 }
 
 s32 memcpy(u8 *, f32 *, s32);
-extern s32 D_8009068C;
+extern s32 g_level_scroll_tex_id; /* was D_8009068C */
 extern s32 g_level_dl_tinted_extra; /* was D_800B1214 */
 
 /* was func_1500FF7C */
@@ -45,8 +45,8 @@ void level_tex_scroll_fx_setup(void) {
     struct260 *temp_v0;
     u8 *temp_v0_2;
 
-    level_dl_add_texture_scroll(*g_level_part_dls, D_8009068C, 1, -1, 0, 0, 0, -4);
-    level_dl_add_texture_scroll(g_level_dl_tinted_extra, D_8009068C, 1, -1, 0, 1, 0, -4);
+    level_dl_add_texture_scroll(*g_level_part_dls, g_level_scroll_tex_id, 1, -1, 0, 0, 0, -4);
+    level_dl_add_texture_scroll(g_level_dl_tinted_extra, g_level_scroll_tex_id, 1, -1, 0, 1, 0, -4);
     level_slots10_init();
     level_tex_scroll_create();
     sp.u44 = 0.0f;
@@ -57,7 +57,7 @@ void level_tex_scroll_fx_setup(void) {
     sp.u38 = 0.0f;
     sp.u3C = 0.0f;
     temp_v0_2 = effect_node_create(0x12C, -1, 0x17, -1, 0U, 0x14U, (struct37 *)8, 0xFFU, 1);
-    D_80088C10 = temp_v0_2;
+    g_shooting_star_obj = temp_v0_2;
     if (temp_v0_2 != NULL) {
         memcpy(temp_v0_2 + 0x28, &sp.u38, 8);
     }

@@ -72,10 +72,10 @@ u8 *path_record_create(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
 u8 *tether_smoke_emitter_spawn(u8 *obj, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
 struct225 *tether_light_spawn(u8 arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6);
 extern u8 g_vec3_zero[]; /* was D_800A5860 */
-extern s32 D_800A4AA0;
+extern s32 g_effect3d_default_params; /* was D_800A4AA0 */
 
 // fire_effect_start: P181: starts the burning effect on object `arg0` (side `arg1` < 2, else nothing): an effect
-// record (effect3d_spawn_full, handlers D_800A4AA0, 0x44 extra bytes at +0x110 holding obj, its index obj +0x3B, the
+// record (effect3d_spawn_full, handlers g_effect3d_default_params, 0x44 extra bytes at +0x110 holding obj, its index obj +0x3B, the
 // effect object obj_find_by_setup_id(18), kind 18, `arg1`, two random angles 0..2pi), two flame sprites
 // (path_record_create with the 0x50-byte flame definition; their +0x60 blocks get obj / index / effect / sprite number)
 // stored at +0x12C / +0x130, a light (effect_node_create, its +0x28 gets effect / 0.0) at +0x134, a smoke emitter
@@ -199,7 +199,7 @@ u8 *tether_effect_start(struct127 *arg0, u8 arg1, s32 arg2, s32 arg3) {
     def.u50 = 0;
     def.u54 = 1;
     def.u56 = 0xFF;
-    e = effect3d_spawn_full(&def, (s32)&D_800A4AA0, 29, 0, 0, 28, 0, 0, 0, 0x44, arg2, arg3);
+    e = effect3d_spawn_full(&def, (s32)&g_effect3d_default_params, 29, 0, 0, 28, 0, 0, 0, 0x44, arg2, arg3);
     if (e == NULL) {
         return e;
     }
@@ -1379,9 +1379,9 @@ void obj_trail_emitter_update(u8 *arg0) {
             sp.uD8 = (temp_f24 * temp_f0) + sp.u124;
             sp.uDC = (temp_f26 * temp_f0) + sp.u128;
             sp.uE0 = (temp_f28 * temp_f0) + sp.u12C;
-            sp.uF0 = temp_f24 * D_800BEDC8 * 0.333f;
-            sp.uF4 = temp_f26 * D_800BEDC8 * 0.333f;
-            sp.uF8 = temp_f28 * D_800BEDC8 * 0.333f;
+            sp.uF0 = temp_f24 * g_frame_step_inv * 0.333f;
+            sp.uF4 = temp_f26 * g_frame_step_inv * 0.333f;
+            sp.uF8 = temp_f28 * g_frame_step_inv * 0.333f;
             sp.u98 = random_int();
             sp.u99 = random_int();
             sp.u9A = (random_int() % 5U) + 4;

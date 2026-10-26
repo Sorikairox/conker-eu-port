@@ -5,12 +5,12 @@
 
 s32 event_dispatch(s32, s32, ...);
 void camera_set_followed_obj(struct108 *, s32);
-extern s32 D_80088AB0;
+extern s32 g_carry_anim_id; /* was D_80088AB0 */
 
 // player_carry_state_update: player state handler. Without input flag 0x503C/0x1A it (once camera_push_mode allows)
 // switches to mode 3 (+0x1B4, flag 0x20000 set / 4 cleared, camera_apply_zoom_level, +0x23C = 1) and sets the speeds
 // (+0x374 = 650, +0x348 / +0x34C = 450). Otherwise it clears 0x4000, leaves for mode 2 on track 1 (camera_pop_mode),
-// maps the pressed buttons 0x4024..0x4027 to an animation id in D_80088AB0 (0x9003 / 0x9009 / 0x900A / 0x900B; 999
+// maps the pressed buttons 0x4024..0x4027 to an animation id in g_carry_anim_id (0x9003 / 0x9009 / 0x900A / 0x900B; 999
 // = none) and plays it, sets 0x2000 / 0x3B for 0x400C..0x400E or 0x4014, and sets 0x9000 / 0x10 to 0x55 while
 // 0x4000 is held. Finally flag 0x100 of +0x5F0 follows "0x200A / 0xB7 and 0xBC set and 0xBB not -1": while it holds
 // the player (camera_push_mode kind 3) is seated on the object's last slot (camera_set_followed_obj) with speeds as above and
@@ -39,16 +39,16 @@ void player_carry_state_update(u8 *p) {
             camera_apply_zoom_level((struct108 *) p);
         }
         if (event_dispatch(1, 0x4024, 6, 0x2000) != 0) {
-            D_80088AB0 = 0x9003;
+            g_carry_anim_id = 0x9003;
         } else if (event_dispatch(1, 0x4025, 6, 0x2000) != 0) {
-            D_80088AB0 = 0x9009;
+            g_carry_anim_id = 0x9009;
         } else if (event_dispatch(1, 0x4026, 6, 0x2000) != 0) {
-            D_80088AB0 = 0x900A;
+            g_carry_anim_id = 0x900A;
         } else if (event_dispatch(1, 0x4027, 6, 0x2000) != 0) {
-            D_80088AB0 = 0x900B;
+            g_carry_anim_id = 0x900B;
         }
-        if (D_80088AB0 != 999) {
-            event_dispatch_alt(5, 0x4000, 4, 2, 0, D_80088AB0 & 0xFFF, 0, 0);
+        if (g_carry_anim_id != 999) {
+            event_dispatch_alt(5, 0x4000, 4, 2, 0, g_carry_anim_id & 0xFFF, 0, 0);
         }
         for (i = 0; i < 3; i++) {
             if (event_dispatch(1, 0x400C + i, 6, 0x2000) != 0 || event_dispatch(1, 0x4014, 6, 0x2000) != 0) {

@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 typedef struct { s32 x; s32 y; s32 z; s32 ex; s32 ey; s32 ez; f32 f; } SfxListener; // size 0x1C
-extern SfxListener D_80042308[];
+extern SfxListener g_sound_listeners[]; /* was D_80042308 */
 typedef struct {
     u16 unk0;
     s16 unk2;
@@ -25,10 +25,10 @@ typedef struct {
     u16 pad2A;
     f32 unk2C;
 } SfxEnt; // size 0x30
-extern u8 D_800BEA35;
+extern u8 g_game_frame_state; /* was D_800BEA35 */
 s32 sound_path_calc_pan_volume(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 *argA, u32 *argB, u32 *argC);
 
-extern s32 D_80042B00;
+extern s32 g_sfx_emitter_count; /* was D_80042B00 */
 void sound_stop_queue_process(void);
 void sfx_emitters_update(struct15 *arg0, s32 *arg1, s32 arg2, s32 arg3);
 typedef struct { s32 unk0; u8 pad4[0x10]; f32 unk14; f32 unk18; f32 unk1C; u8 pad20[0x64]; u16 unk84; u8 pad86[0xFE]; u32 unk184; } SfxObj;
@@ -40,7 +40,7 @@ s32 sfx_cb_ambient_random_chirp(struct04 *arg0, s32 arg1, s32 *arg2, s32 *arg3, 
         arg0->unk24 = 0;
     }
     *arg3 = 64;
-    if (D_800CC37D || (*arg2 == 0)) {
+    if (g_objects_in_water || (*arg2 == 0)) {
         *arg2 = 0;
         *arg8 = 0;
         return 0;
@@ -238,16 +238,16 @@ s32 sfx_cb_follow_object_anim(struct_eu_sfx *arg0, s32 arg1, s32 *arg2, struct11
 void sound_voices_reset(void) {
     s32 i;
 
-    D_80042760 = 0;
-    D_80041FD9 = 1;
-    D_80041FD8 = 0;
-    bzero(D_800425E0, 0x180);
+    g_sfx_emitter_count_alias = 0;
+    g_sound_default_fx_mode = 1;
+    g_sound_fx_mix_boost = 0;
+    bzero(g_sound_voices, 0x180);
     for (i = 0; i < 16; i++) {
-        D_800425E0[i].unk2 = i + 16;
+        g_sound_voices[i].unk2 = i + 16;
     }
-    D_80041F50 = 0;
+    g_sound_stop_queue_count = 0;
     n_sndp_stop_all_looping();
-    D_80041F60 = D_80041F61 = 0;
+    g_sound_pause_mute_state = g_sound_pause_mute_request = 0;
 }
 
 void n_sndp_set_group_volume(u8 arg0, u16 arg1);
@@ -258,41 +258,41 @@ void sound_level_init(s32 arg0) {
 
     sound_voices_reset();
     if (arg0 == 4) {
-        D_80041F54 = 0;
-        D_80041F58 = 0.01f; // 0.009999999776482582
+        g_sound_bus_volume = 0;
+        g_sound_bus_volume_rate = 0.01f; // 0.009999999776482582
     } else {
-        D_80041F54 = 23000;
-        D_80041F58 = 0.1f; // 0.10000000149011612
+        g_sound_bus_volume = 23000;
+        g_sound_bus_volume_rate = 0.1f; // 0.10000000149011612
     }
 
     if (arg0 == 0x35) {
-        D_80041FD9 = 0;
+        g_sound_default_fx_mode = 0;
     } else if (arg0 == 0x36) {
-        D_80041FD9 = 0;
+        g_sound_default_fx_mode = 0;
     } else if (arg0 == 0x3C) {
-        D_80041FD9 = 0;
-        D_80041FD8 = 0x3C;
+        g_sound_default_fx_mode = 0;
+        g_sound_fx_mix_boost = 0x3C;
     } else if (arg0 == 0x27) {
-        D_80041FD9 = 0;
-        D_80041FD8 = 0x28;
+        g_sound_default_fx_mode = 0;
+        g_sound_fx_mix_boost = 0x28;
     } else if ((arg0 == 0x3A) || (arg0 == 0x40)) {
-        D_80041FD9 = 0;
-        D_80041FD8 = 0x3C;
+        g_sound_default_fx_mode = 0;
+        g_sound_fx_mix_boost = 0x3C;
     }
 
-    D_80041F5C = allocate_memory(1762, 1, 0, 0);
+    g_sound_variant_played = allocate_memory(1762, 1, 0, 0);
 
-    bzero(D_80041F5C, 1762);
+    bzero(g_sound_variant_played, 1762);
 
     if (arg0 == 0x31) {
-        D_80041FDC = 14000;
+        g_sound_bus_volume_target = 14000;
     } else {
-        D_80041FDC = 23000;
+        g_sound_bus_volume_target = 23000;
     }
     sound_level_hook_nop(arg0);
-    D_80041F60 = D_80041F61 = 0;
-    n_sndp_set_group_volume(0, D_80041F56);
-    n_sndp_set_group_volume(1, D_80041F56);
+    g_sound_pause_mute_state = g_sound_pause_mute_request = 0;
+    n_sndp_set_group_volume(0, g_sound_bus_volume_lo);
+    n_sndp_set_group_volume(1, g_sound_bus_volume_lo);
     n_sndp_set_group_volume(2, 23000);
     // fakematch
     if (arg0) {}
@@ -302,7 +302,7 @@ void sound_level_init(s32 arg0) {
 s32 sound_voice_is_playing(u16 arg0) {
     struct120 *temp_v1;
 
-    temp_v1 = &D_800425E0[arg0 & 0xF];
+    temp_v1 = &g_sound_voices[arg0 & 0xF];
     if (temp_v1->unk8 != 0) {
         if ((temp_v1->unk0 == arg0) || (arg0 == (arg0 & 0xF))) {
             if (n_sndp_get_handle_state(&temp_v1->unk8) != 0) {
@@ -320,7 +320,7 @@ s32 sound_voice_is_looping(u16 arg0) {
     struct31 *temp_a2;
 
     mask = __osDisableInt();
-    temp_a1 = &D_800425E0[arg0 & 0xF];
+    temp_a1 = &g_sound_voices[arg0 & 0xF];
     temp_a2 = temp_a1->unk8;
     if ((temp_a2 != 0) && (temp_a1->unk0 == arg0) && ((temp_a2->unk53 & 2) != 0)) {
         __osRestoreInt(mask);
@@ -336,15 +336,15 @@ s32 sound_id_is_playing(u16 arg0) {
 
     arg0 &= 0x7FFF;
     for (i = 0; i < 16; i++) {
-        if (D_800425E0[i].unk8 != NULL && arg0 == (D_800425E0[i].unk4 & 0x7FFF) &&
-            n_sndp_get_handle_state(&D_800425E0[i].unk8)) {
+        if (g_sound_voices[i].unk8 != NULL && arg0 == (g_sound_voices[i].unk4 & 0x7FFF) &&
+            n_sndp_get_handle_state(&g_sound_voices[i].unk8)) {
             return 1;
         }
     }
     return 0;
 }
 // sound_pick_variant: picks one of n variants of sound `base` at random and returns base + pick. For n < 8 the byte
-// D_80041F5C[base] remembers the variants already played (bit 7 = valid) so every variant plays once before one
+// g_sound_variant_played[base] remembers the variants already played (bit 7 = valid) so every variant plays once before one
 // repeats, and the last one played is never picked first in the next round; for n >= 8 it only stores pick + 1.
 // base >= 0x6E2 returns 1, n < 2 returns base.
 s32 random_int(void);
@@ -363,10 +363,10 @@ u16 sound_pick_variant(s32 base, u16 n) {
     if (n < 2) {
         return base;
     }
-    if (D_80041F5C == NULL) {
+    if (g_sound_variant_played == NULL) {
         return base + pick;
     }
-    played = (u8 *)D_80041F5C + base;
+    played = (u8 *)g_sound_variant_played + base;
     if (n < 8) {
         bits = *played;
         mask = (1 << n) - 1;
@@ -379,7 +379,7 @@ u16 sound_pick_variant(s32 base, u16 n) {
         *played = bits ^ (1 << pick);
         if (((bits ^ (1 << pick)) & 0xFF & mask) == 0) {
             /* round over: all but this pick are available again */
-            ((u8 *)D_80041F5C)[base] = bits ^ mask;
+            ((u8 *)g_sound_variant_played)[base] = bits ^ mask;
         }
     } else {
         *played = pick + 1;
@@ -401,13 +401,13 @@ s32 sound_listener_volume_pan(s32 arg0, s16 x, s16 y, s16 z, s32 arg4, s16 arg5,
     if (g_last_player_index != 0) {
         min = -1;
         for (i = 0; i <= g_last_player_index; i++) {
-            tx = x - D_80042308[i].ex;
-            ty = y - D_80042308[i].ey;
-            tz = z - D_80042308[i].ez;
+            tx = x - g_sound_listeners[i].ex;
+            ty = y - g_sound_listeners[i].ey;
+            tz = z - g_sound_listeners[i].ez;
             d = tx * tx + ty * ty + tz * tz;
             if (d < min) {
                 min = d;
-                best = &D_80042308[i];
+                best = &g_sound_listeners[i];
                 dx = tx;
                 dy = ty;
                 dz = tz;
@@ -416,7 +416,7 @@ s32 sound_listener_volume_pan(s32 arg0, s16 x, s16 y, s16 z, s32 arg4, s16 arg5,
         goto block_end; // fakematch: empty goto moves the best->x reload into the b delay slot (permuter)
     block_end:;
     } else {
-        best = D_80042308;
+        best = g_sound_listeners;
         dx = x - best->ex;
         dy = y - best->ey;
         dz = z - best->ez;
@@ -429,7 +429,7 @@ typedef struct {
     s32 unk4;
     s32 unk8;
 } EU42988;
-extern EU42988 D_80042988[];
+extern EU42988 g_sound_voices_handle[]; /* was D_80042988 */
 /* was func_1000F85C */
 void sound_voice_set_param(u16 arg0, s16 arg1, s32 arg2) {
     if (arg0 >= 0x10) {
@@ -441,7 +441,7 @@ void sound_voice_set_param(u16 arg0, s16 arg1, s32 arg2) {
             } else if (arg1 == 0x11) {
                 arg1 = 0x10;
             }
-            n_sndp_post_event(D_80042988[arg0 & 0xF].unk0, arg1, arg2);
+            n_sndp_post_event(g_sound_voices_handle[arg0 & 0xF].unk0, arg1, arg2);
         }
     }
 }
@@ -499,7 +499,7 @@ void sound_voice_update_pan(u16 arg0, s16 arg1, s16 arg2, s16 arg3) {
     sound_voice_set_param(arg0, 256, tmp & 0x80);
 }
 
-// sfx_start_positional: claims the next of the 32 positional sound slots (D_80041FE0[D_80042B00++]) for sound id
+// sfx_start_positional: claims the next of the 32 positional sound slots (g_sfx_emitters[g_sfx_emitter_count++]) for sound id
 // arg0 at (arg1, arg2, arg3) with volume arg4, ranges arg5 / arg6, update callback arg7 (+ its data arg8, arg9) and
 // flags argA (with a callback: flags | 0x12, else (flags & 0x108) | 2; flag 0x40: arg2 is a joint index resolved by
 // setup_entry_find_by_id((u8) arg1), -1 = fail), pitch argB cents. sfx_emitters_update starts it; returns the voice handle (+0x24)
@@ -511,13 +511,13 @@ u16 sfx_emitter_start(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, u16 arg5
     s32 idx;
     s32 count;
 
-    idx = D_80042B00;
+    idx = g_sfx_emitter_count;
     if (idx < 32) {
-        D_80042B00 = idx + 1;
+        g_sfx_emitter_count = idx + 1;
     } else {
         return 0;
     }
-    e = &((SfxEnt *) D_80041FE0)[idx];
+    e = &((SfxEnt *) g_sfx_emitters)[idx];
     if (arg7 != 0) {
         e->unk10 = argA | 0x12;
     } else {
@@ -546,9 +546,9 @@ u16 sfx_emitter_start(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, u16 arg5
     e->unk26 = 0;
     e->unk28 = 0;
     e->unk20 = argB;
-    count = D_80042B00;
-    sfx_emitters_update(D_80041FE0, &D_80042B00, idx, idx + 1);
-    if (count != D_80042B00) {
+    count = g_sfx_emitter_count;
+    sfx_emitters_update(g_sfx_emitters, &g_sfx_emitter_count, idx, idx + 1);
+    if (count != g_sfx_emitter_count) {
         return 0;
     }
     e->unk10 |= 0x1000;
@@ -558,12 +558,12 @@ u16 sfx_emitter_start(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, u16 arg5
 void sfx_emitter_stop_at(u16 arg0, s16 arg1, s16 arg2, s16 arg3, u16 arg4) {
     s32 i;
 
-    for (i = 0; i < D_80042B00; i++) {
-        if (arg0 == ((SfxEnt *)D_80041FE0)[i].unk0 && arg1 == ((SfxEnt *)D_80041FE0)[i].unk2 && arg2 == ((SfxEnt *)D_80041FE0)[i].unk4 && arg3 == ((SfxEnt *)D_80041FE0)[i].unk6 && arg4 == (((SfxEnt *)D_80041FE0)[i].unk8 & 0x7FFF)) {
-            if (((SfxEnt *)D_80041FE0)[i].unk24 != 0) {
-                sound_voice_stop(((SfxEnt *)D_80041FE0)[i].unk24);
+    for (i = 0; i < g_sfx_emitter_count; i++) {
+        if (arg0 == ((SfxEnt *)g_sfx_emitters)[i].unk0 && arg1 == ((SfxEnt *)g_sfx_emitters)[i].unk2 && arg2 == ((SfxEnt *)g_sfx_emitters)[i].unk4 && arg3 == ((SfxEnt *)g_sfx_emitters)[i].unk6 && arg4 == (((SfxEnt *)g_sfx_emitters)[i].unk8 & 0x7FFF)) {
+            if (((SfxEnt *)g_sfx_emitters)[i].unk24 != 0) {
+                sound_voice_stop(((SfxEnt *)g_sfx_emitters)[i].unk24);
             }
-            ((SfxEnt *)D_80041FE0)[i].unk10 |= 0x80;
+            ((SfxEnt *)g_sfx_emitters)[i].unk10 |= 0x80;
         }
     }
 }
@@ -571,12 +571,12 @@ void sfx_emitter_stop_at(u16 arg0, s16 arg1, s16 arg2, s16 arg3, u16 arg4) {
 void sfx_emitter_stop_by_callback(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
 
-    for (i = 0; i < D_80042760; i++) {
-        if (arg0 == D_80041FE0[i].unk14 && arg1 == D_80041FE0[i].unk18 && arg2 == D_80041FE0[i].unk1C) {
-            if (D_80041FE0[i].unk24) {
-                sound_voice_stop(D_80041FE0[i].unk24);
+    for (i = 0; i < g_sfx_emitter_count_alias; i++) {
+        if (arg0 == g_sfx_emitters[i].unk14 && arg1 == g_sfx_emitters[i].unk18 && arg2 == g_sfx_emitters[i].unk1C) {
+            if (g_sfx_emitters[i].unk24) {
+                sound_voice_stop(g_sfx_emitters[i].unk24);
             }
-            D_80041FE0[i].unk10 = D_80041FE0[i].unk10 | 0x80;
+            g_sfx_emitters[i].unk10 = g_sfx_emitters[i].unk10 | 0x80;
         }
     }
 }
@@ -584,12 +584,12 @@ void sfx_emitter_stop_by_callback(s32 arg0, s32 arg1, s32 arg2) {
 void sfx_emitter_stop_by_voice(u16 arg0) {
     s32 i;
 
-    for (i = 0; i < D_80042760; i++) {
-        if (arg0 == D_80041FE0[i].unk24) {
-            if (D_80041FE0[i].unk24) {
-                sound_voice_stop(D_80041FE0[i].unk24);
+    for (i = 0; i < g_sfx_emitter_count_alias; i++) {
+        if (arg0 == g_sfx_emitters[i].unk24) {
+            if (g_sfx_emitters[i].unk24) {
+                sound_voice_stop(g_sfx_emitters[i].unk24);
             }
-            D_80041FE0[i].unk10 = D_80041FE0[i].unk10 | 0x80;
+            g_sfx_emitters[i].unk10 = g_sfx_emitters[i].unk10 | 0x80;
         }
     }
 }
@@ -616,15 +616,15 @@ s32 sfx_emitter_find_by_voice(s32 arg0, s32 arg1, s32 arg2) {
         goto block_10;
     }
     var_v1 = 0;
-    if (D_80042B00 > 0) {
-        var_a2 = D_80041FE0;
+    if (g_sfx_emitter_count > 0) {
+        var_a2 = g_sfx_emitters;
 loop_4:
         if ((temp_t6 == var_a2->unk24) && (arg1 == var_a2->unk18) && (arg2 == var_a2->unk1C) && !(var_a2->unk10 & 0x80)) {
             return var_v1;
         }
         var_v1 += 1;
         var_a2 = (struct15 *)((u8 *)var_a2 + (0x30));
-        if (var_v1 >= D_80042B00) {
+        if (var_v1 >= g_sfx_emitter_count) {
             goto block_10;
         }
         goto loop_4;
@@ -640,8 +640,8 @@ block_10:
 //     if (arg0 == 0) {
 //         // nothing
 //     } else {
-//         for (i = 0; i < D_80042760; i++) {
-//             tmp = &D_80041FE0[i];
+//         for (i = 0; i < g_sfx_emitter_count_alias; i++) {
+//             tmp = &g_sfx_emitters[i];
 //             if ((arg0 == tmp->unk24) &&
 //                 (arg1 == tmp->unk18) &&
 //                 (arg2 == tmp->unk1C) &&
@@ -653,18 +653,18 @@ block_10:
 //     return -1;
 // }
 
-extern s32 D_80042B00;
+extern s32 g_sfx_emitter_count; /* was D_80042B00 */
 /* was func_1000FF90 */
 s32 sfx_emitter_find_by_callback(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
     u32 new_var; // fakematch: -1 kept in its own register
 
-    for (i = 0; i < D_80042B00; i++) {
+    for (i = 0; i < g_sfx_emitter_count; i++) {
         new_var = -1;
-        if ((arg0 == D_80041FE0[i].unk14) &&
-            ((arg1 == D_80041FE0[i].unk18) || (arg1 == new_var)) &&
-            ((arg2 == D_80041FE0[i].unk1C) || (arg2 == -1)) &&
-            ((D_80041FE0[i].unk10 & 0x80) == 0)) {
+        if ((arg0 == g_sfx_emitters[i].unk14) &&
+            ((arg1 == g_sfx_emitters[i].unk18) || (arg1 == new_var)) &&
+            ((arg2 == g_sfx_emitters[i].unk1C) || (arg2 == -1)) &&
+            ((g_sfx_emitters[i].unk10 & 0x80) == 0)) {
             return i;
         }
     }
@@ -674,10 +674,10 @@ s32 sfx_emitter_find_by_callback(s32 arg0, s32 arg1, s32 arg2) {
 void sfx_emitter_set_volume_pitch(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 i;
 
-    for (i = 0; i < D_80042760; i++) {
-        if (arg0 == D_80041FE0[i].unk14 && arg1 == D_80041FE0[i].unk18 && arg2 == D_80041FE0[i].unk1C) {
-            *(f32 *)&D_80041FE0[i].unk2C = alCents2Ratio(arg4);
-            D_80041FE0[i].unkC = arg3;
+    for (i = 0; i < g_sfx_emitter_count_alias; i++) {
+        if (arg0 == g_sfx_emitters[i].unk14 && arg1 == g_sfx_emitters[i].unk18 && arg2 == g_sfx_emitters[i].unk1C) {
+            *(f32 *)&g_sfx_emitters[i].unk2C = alCents2Ratio(arg4);
+            g_sfx_emitters[i].unkC = arg3;
         }
     }
 }
@@ -685,11 +685,11 @@ void sfx_emitter_set_volume_pitch(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 ar
 void sfx_emitter_replace_callback(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     s32 i;
 
-    for (i = 0; i < D_80042760; i++) {
-        if (arg0 == D_80041FE0[i].unk14 && arg1 == D_80041FE0[i].unk18 && arg2 == D_80041FE0[i].unk1C) {
-            D_80041FE0[i].unk14 = arg3;
-            D_80041FE0[i].unk18 = arg4;
-            D_80041FE0[i].unk1C = arg5;
+    for (i = 0; i < g_sfx_emitter_count_alias; i++) {
+        if (arg0 == g_sfx_emitters[i].unk14 && arg1 == g_sfx_emitters[i].unk18 && arg2 == g_sfx_emitters[i].unk1C) {
+            g_sfx_emitters[i].unk14 = arg3;
+            g_sfx_emitters[i].unk18 = arg4;
+            g_sfx_emitters[i].unk1C = arg5;
         }
     }
 }
@@ -708,7 +708,7 @@ u16 actor_sound_play(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4) {
     }
     if (*(s32 *)(o + 0x318) != 0) {
         handle = sound_voice_play(*(u16 *)(o + 0x8E), sfx, vol, 0x40, 0, ((*(u32 *)(o + 0x184) >> 3) & 0x30) << 1,
-                               D_80041FD9);
+                               g_sound_default_fx_mode);
         *(u16 *)(o + 0x8E) = handle;
         return handle;
     }
@@ -752,7 +752,7 @@ u16 actor_sound_play2(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4) {
     }
     if (*(s32 *)(o + 0x318) != 0) {
         ctx = *(u8 **)(o + 0x31C);
-        mono = D_80041FD9;
+        mono = g_sound_default_fx_mode;
         if (ctx != NULL && ctx[0x94] == 1) {
             mono = 1;
             vol = 0x7FFF;
@@ -853,7 +853,7 @@ s32 actor_sound2_is_playing(struct127 *arg0) {
     return 0;
 }
 
-extern s32 D_8004238C;
+extern s32 g_sfx_emitters_volume; /* was D_8004238C */
 
 /* was func_1001091C */
 void actor_sound_set_volume(u8 *arg0, s32 arg1) {
@@ -868,7 +868,7 @@ void actor_sound_set_volume(u8 *arg0, s32 arg1) {
     } else {
         temp_v0 = sfx_emitter_find_by_callback((s32) sfx_cb_follow_object, (s32) arg0, (*(u8 *)((u8 *)arg0 + 0x3B)) | 0x10000);
         if (temp_v0 != -1) {
-            *(s32 *)((u8 *)&D_8004238C + (temp_v0 * 0x30)) = arg1;
+            *(s32 *)((u8 *)&g_sfx_emitters_volume + (temp_v0 * 0x30)) = arg1;
             return;
         }
         (*(u16 *)((u8 *)arg0 + 0x8E)) = 0U;
@@ -936,7 +936,7 @@ void actor_sounds_stop_loops(struct127 *arg0) {
             if (sound_voice_is_looping(arg0->unk8C)) {
                 sound_voice_stop(arg0->unk8C);
             }
-            tmp = &D_80041FE0[sp24];
+            tmp = &g_sfx_emitters[sp24];
             tmp->unk10 |= 0x80;
         }
         sp24 = sfx_emitter_find_by_voice(arg0->unk8E, arg0, arg0->unique_id);
@@ -944,7 +944,7 @@ void actor_sounds_stop_loops(struct127 *arg0) {
             if (sound_voice_is_looping(arg0->unk8E)) {
                 sound_voice_stop(arg0->unk8E);
             }
-            tmp = &D_80041FE0[sp24];
+            tmp = &g_sfx_emitters[sp24];
             tmp->unk10 |= 0x80;
         }
     }
@@ -953,8 +953,8 @@ void actor_sounds_stop_loops(struct127 *arg0) {
 }
 
 s32 n_sndp_play_sound(s32, s16, u16, u8, f32, s32, s32, struct31 **);
-extern s32 D_8003E708;
-extern u16 D_80042984;
+extern s32 g_sound_bank0; /* was D_8003E708 */
+extern u16 g_sound_voices_id; /* was D_80042984 */
 
 /* was func_10010BE8 */
 u16 sound_voice_play(u16 arg0, s32 arg1, u16 arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6) {
@@ -978,17 +978,17 @@ u16 sound_voice_play(u16 arg0, s32 arg1, u16 arg2, u8 arg3, s16 arg4, u8 arg5, u
 
     temp_t6 = arg0 & 0xFFFF;
     var_s1 = temp_t6 & 0xF;
-    temp_s0 = &D_800425E0[var_s1];
+    temp_s0 = &g_sound_voices[var_s1];
     if ((temp_t6 == temp_s0->unk0) && (temp_t6 != 0)) {
         if ((temp_s0->unk8 != NULL) && (n_sndp_get_handle_state(&temp_s0->unk8) != 0)) {
             n_sndp_stop_sound(temp_s0->unk8);
             temp_s0->unk8 = NULL;
         }
-    } else if ((((temp_s0->unk8 != NULL) && (n_sndp_get_handle_state(&temp_s0->unk8) != 0)) || (temp_s0->unk4 & 0x8000)) && (((var_s1 = 0, (D_80042988->unk0 != 0)) && (n_sndp_get_handle_state((struct31 **) D_80042988) != 0)) || (D_80042984 & 0x8000))) {
+    } else if ((((temp_s0->unk8 != NULL) && (n_sndp_get_handle_state(&temp_s0->unk8) != 0)) || (temp_s0->unk4 & 0x8000)) && (((var_s1 = 0, (g_sound_voices_handle->unk0 != 0)) && (n_sndp_get_handle_state((struct31 **) g_sound_voices_handle) != 0)) || (g_sound_voices_id & 0x8000))) {
 loop_11:
         var_s1 += 1;
         if (var_s1 < 0x10U) {
-            temp_s0_2 = &D_800425E0[var_s1];
+            temp_s0_2 = &g_sound_voices[var_s1];
             if (((temp_s0_2->unk8 != NULL) && (n_sndp_get_handle_state(&temp_s0_2->unk8) != 0)) || (temp_s0_2->unk4 & 0x8000)) {
                 goto loop_11;
             }
@@ -1008,7 +1008,7 @@ loop_11:
     if (temp_t3 >= 0x6E3) {
         return 0U;
     }
-    temp_s0_3 = &D_800425E0[var_s1];
+    temp_s0_3 = &g_sound_voices[var_s1];
     temp_t0 = temp_s0_3->unk2;
     temp_t2 = &temp_s0_3->unk8;
     temp_v0 = temp_t0 + 0x10;
@@ -1024,15 +1024,15 @@ loop_11:
     if (temp_v0_2 != NULL) {
         temp_v0_2->unk54 = 5;
     }
-    if (((arg5 & 0x7F) + (u8) D_80041FD8) < 0x80) {
-        var_s0 = (arg5 + (u8) D_80041FD8) & 0xFF;
+    if (((arg5 & 0x7F) + (u8) g_sound_fx_mix_boost) < 0x80) {
+        var_s0 = (arg5 + (u8) g_sound_fx_mix_boost) & 0xFF;
     } else {
         var_s0 = (arg5 | 0x7F) & 0xFF;
     }
     sp4E = temp_t0;
     sp34 = temp_t3;
     sp38 = temp_t2;
-    n_sndp_play_sound(D_8003E708, (s16) temp_t3, arg2, arg3, alCents2Ratio((s32) arg4), var_s0, (s32) arg6, temp_t2);
+    n_sndp_play_sound(g_sound_bank0, (s16) temp_t3, arg2, arg3, alCents2Ratio((s32) arg4), var_s0, (s32) arg6, temp_t2);
     var_t0 = temp_t0;
 block_31:
     return var_t0;
@@ -1046,14 +1046,14 @@ u16 sound_voice_play_at(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg
   temp_t1 = (((u32) arg2) * temp_t1) >> 0xF;
   if (temp_t1 != 0)
   {
-    return sound_voice_play(arg0, arg1, temp_t1, sp2C & 0x7F, (s16) ((s32) arg3), (sp2C & 0x80) | arg4, (u8) ((s32) D_80041FD9));
+    return sound_voice_play(arg0, arg1, temp_t1, sp2C & 0x7F, (s16) ((s32) arg3), (sp2C & 0x80) | arg4, (u8) ((s32) g_sound_default_fx_mode));
   }
   return 0;
 }
 
 /* was func_10010F30 */
 u16 sound_play_2d(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4) {
-    sound_voice_play(0, arg0, arg1, arg2, arg3, arg4, D_80041FD9);
+    sound_voice_play(0, arg0, arg1, arg2, arg3, arg4, g_sound_default_fx_mode);
 }
 
 // sound_play_at: plays a sound with no owner (sound_voice_play_at with arg0 0). The asm passes sound_voice_play_at's v0
@@ -1073,7 +1073,7 @@ u16 sound_play_for_actor(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, u8 *ar
   }
   if (*(s32 *) (arg5 + 0x318) != 0)
   {
-    arg0 = sound_voice_play(arg0, arg1, arg2, 0x40, arg3, arg4, D_80041FD9);
+    arg0 = sound_voice_play(arg0, arg1, arg2, 0x40, arg3, arg4, g_sound_default_fx_mode);
   }
   else
   {
@@ -1081,7 +1081,7 @@ u16 sound_play_for_actor(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, u8 *ar
     idx = arg5[4];
     if (idx != 0xFF)
     {
-      f = *(f32 *) (arg5 + 0x14C) * (u32) (u16) D_800D1C90[idx]->unkE;
+      f = *(f32 *) (arg5 + 0x14C) * (u32) (u16) g_type_descs[idx]->unkE;
     }
     else
     {
@@ -1106,7 +1106,7 @@ u16 sound_play_for_actor(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, u8 *ar
 
 /* was func_100111C8 */
 void sound_voice_stop(u16 arg0) {
-    struct120 *tmp = &D_800425E0[arg0 & 0xF];
+    struct120 *tmp = &g_sound_voices[arg0 & 0xF];
 
     if ((tmp->unk8 != 0) && (tmp->unk0 == arg0)) {
         tmp->unk0 = 0;
@@ -1118,7 +1118,7 @@ void sound_voice_stop(u16 arg0) {
 
 /* was func_1001123C */
 void sound_voice_stop_deferred(u16 arg0) {
-    struct120 *tmp = &D_800425E0[arg0 & 0xF];
+    struct120 *tmp = &g_sound_voices[arg0 & 0xF];
 
     if ((tmp->unk8 != 0) && (tmp->unk0 == arg0)) {
         if (sound_stop_queue_push(arg0, 1) == 0) {
@@ -1131,14 +1131,14 @@ void sound_voice_stop_deferred(u16 arg0) {
 /* was func_100112BC */
 s32 sound_stop_queue_push(s32 arg0, s32 arg1) {
     struct49 *temp_a0;
-    s32 temp_v1 = D_80041F50;
+    s32 temp_v1 = g_sound_stop_queue_count;
 
     if (temp_v1 < 16) {
-        temp_a0 = &D_80041F10[temp_v1];
+        temp_a0 = &g_sound_stop_queue[temp_v1];
         temp_a0->unk0 = arg0;
         temp_a0->unk2 = arg1;
         temp_a0->unk3 = arg0 & 0xF;
-        D_80041F50 = temp_v1 + 1;
+        g_sound_stop_queue_count = temp_v1 + 1;
         return 1;
     } else {
         return 0;
@@ -1146,7 +1146,7 @@ s32 sound_stop_queue_push(s32 arg0, s32 arg1) {
 }
 
 typedef struct { u16 id; u8 timer; u8 slot; } SfxPend;
-#define PEND ((SfxPend *)D_80041F10)
+#define PEND ((SfxPend *)g_sound_stop_queue)
 
 /* was func_10011310 */
 void sound_stop_queue_process(void)
@@ -1160,34 +1160,34 @@ void sound_stop_queue_process(void)
   struct120 *e;
   removed = 0;
   j = 0;
-  n = D_80041F50;
-  for (i = 0; i < ((s32) D_80041F50); i++)
+  n = g_sound_stop_queue_count;
+  for (i = 0; i < ((s32) g_sound_stop_queue_count); i++)
   {
-    pend = (SfxPend *) D_80041F10; // fakematch: pointer local only for the timer test, slot read and copy (permuter)
+    pend = (SfxPend *) g_sound_stop_queue; // fakematch: pointer local only for the timer test, slot read and copy (permuter)
     if (pend[i].timer > 0)
     {
-      ((SfxPend *) D_80041F10)[i].timer--;
+      ((SfxPend *) g_sound_stop_queue)[i].timer--;
     }
     else
     {
       removed = 1;
       slot = pend[i].slot;
-      if (D_800425E0[slot].unk0 == ((SfxPend *) D_80041F10)[i].id)
+      if (g_sound_voices[slot].unk0 == ((SfxPend *) g_sound_stop_queue)[i].id)
       {
-        D_800425E0[slot].unk0 = 0;
-        D_800425E0[slot].unk4 = 0;
-        if (D_800425E0[slot].unk8 != 0)
+        g_sound_voices[slot].unk0 = 0;
+        g_sound_voices[slot].unk4 = 0;
+        if (g_sound_voices[slot].unk8 != 0)
         {
-          n_sndp_stop_sound(D_800425E0[slot].unk8);
+          n_sndp_stop_sound(g_sound_voices[slot].unk8);
         }
-        D_800425E0[slot].unk8 = 0;
+        g_sound_voices[slot].unk8 = 0;
       }
       n--;
       ; // fakematch: empty statement after n-- (permuter)
     }
     if (j != i)
     {
-      ((SfxPend *) D_80041F10)[j] = pend[i];
+      ((SfxPend *) g_sound_stop_queue)[j] = pend[i];
     }
     if (removed)
     {
@@ -1199,7 +1199,7 @@ void sound_stop_queue_process(void)
     }
   }
 
-  D_80041F50 = n;
+  g_sound_stop_queue_count = n;
 }
 
 /* was func_1001147C */
@@ -1207,7 +1207,7 @@ s32 sound_voice_get_id(u16 arg0) {
     struct120 *tmp;
 
     if (arg0 != 0) {
-        tmp = &D_800425E0[arg0 & 0xF];
+        tmp = &g_sound_voices[arg0 & 0xF];
         if (tmp->unk0 == arg0) {
             return tmp->unk4 & 0x7FFF;
         }
@@ -1222,7 +1222,7 @@ s32 sound_voice_get_id(u16 arg0) {
 // Returns the distance.
 /* was func_100114D0 */
 s32 sound_source_mix(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *outPan, s32 *outVol, s32 *outDist) {
-    SfxListener *best = D_80042308;
+    SfxListener *best = g_sound_listeners;
     SfxListener *l;
     u32 min;
     u32 d;
@@ -1233,7 +1233,7 @@ s32 sound_source_mix(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *o
 
     if (g_last_player_index != 0) {
         min = -1;
-        for (i = 0, l = D_80042308; i <= g_last_player_index; i++, l++) {
+        for (i = 0, l = g_sound_listeners; i <= g_last_player_index; i++, l++) {
             dx = x - l->ex;
             dy = y - l->ey;
             dz = z - l->ez;
@@ -1255,11 +1255,11 @@ s32 sound_source_mix(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *o
 #define SFX_SMOOTH      0x0004 /* pitch ratio follows the distance change (Doppler-like), smoothed */
 #define SFX_KEEP        0x0008 /* keep the entry when the voice ends / goes silent */
 #define SFX_CALLBACK    0x0010 /* unk14 may adjust the parameters (non-zero: the entry is freed) */
-#define SFX_LISTENER    0x0040 /* position relative to listener D_80042308[0] (sound_path_calc_pan_volume) */
+#define SFX_LISTENER    0x0040 /* position relative to listener g_sound_listeners[0] (sound_path_calc_pan_volume) */
 #define SFX_FREE        0x0080
 #define SFX_FIXED_PAN   0x0100 /* pan 0x40, not computed */
 #define SFX_MIRROR      0x0200 /* mirrored pan, flips the 0x80 bit */
-#define SFX_FX_MASK     0x0C00 /* voice effect mode: 0 = D_80041FD9, 0x400 = 0, else 1 */
+#define SFX_FX_MASK     0x0C00 /* voice effect mode: 0 = g_sound_default_fx_mode, 0x400 = 0, else 1 */
 #define SFX_SKIP_ONCE   0x1000
 
 /* Updates the sound entries [first, min(*count, end)): drops ended voices, computes volume / pan / pitch from the
@@ -1324,7 +1324,7 @@ void sfx_emitters_update(struct15 *arg0, s32 *count, s32 first, s32 end) {
             panOut = &pan;
         }
         if (flags & SFX_LISTENER) {
-            lis = &D_80042308[0];
+            lis = &g_sound_listeners[0];
             pos = sound_path_calc_pan_volume(e->unk4, lis->ex, lis->ey, lis->ez, lis->f, lis->x, lis->y, lis->z, e->unk8, e->unkA,
                                 &pan, &vol, &dist);
             vol = (e->unkC * vol) >> 15;
@@ -1332,7 +1332,7 @@ void sfx_emitters_update(struct15 *arg0, s32 *count, s32 first, s32 end) {
             pos = sound_source_mix(e->unk2, e->unk4, e->unk6, e->unkC, e->unk8, e->unkA, panOut, (s32 *) &vol,
                                 (s32 *) &dist);
         }
-        if (D_800BEA35 != 0) {
+        if (g_game_frame_state != 0) {
             vol = 0;
         }
         pitch = e->unk20;
@@ -1379,7 +1379,7 @@ void sfx_emitters_update(struct15 *arg0, s32 *count, s32 first, s32 end) {
         if (voice == 0) {
             switch (flags & SFX_FX_MASK) {
                 case 0:
-                    fx = D_80041FD9;
+                    fx = g_sound_default_fx_mode;
                     break;
                 case 0x400:
                     fx = 0;
@@ -1437,49 +1437,49 @@ void sound_update_frame(void) {
     s32 j;
     s32 step;
 
-    if (D_80041F60 == 0 && D_80041F61 == 0) {
+    if (g_sound_pause_mute_state == 0 && g_sound_pause_mute_request == 0) {
         for (i = 0; i <= g_last_player_index; i++) {
             u8 *obj = (u8 *)&g_player_views[i];
 
             if (g_last_player_index != 0 || (*(s32 *)(obj + 0x2C) & 0x80000)) {
-                D_80042308[i].x = *(f32 *)(obj + 0x2F8);
-                D_80042308[i].y = *(f32 *)(obj + 0x2FC);
-                D_80042308[i].z = *(f32 *)(obj + 0x300);
+                g_sound_listeners[i].x = *(f32 *)(obj + 0x2F8);
+                g_sound_listeners[i].y = *(f32 *)(obj + 0x2FC);
+                g_sound_listeners[i].z = *(f32 *)(obj + 0x300);
             } else {
-                D_80042308[i].x = *(f32 *)(obj + 0x2A4);
-                D_80042308[i].y = *(f32 *)(obj + 0x2A8);
-                D_80042308[i].z = *(f32 *)(obj + 0x2AC);
+                g_sound_listeners[i].x = *(f32 *)(obj + 0x2A4);
+                g_sound_listeners[i].y = *(f32 *)(obj + 0x2A8);
+                g_sound_listeners[i].z = *(f32 *)(obj + 0x2AC);
             }
-            D_80042308[i].ex = *(f32 *)(obj + 0x2F8);
-            D_80042308[i].ey = *(f32 *)(obj + 0x2FC);
-            D_80042308[i].ez = *(f32 *)(obj + 0x300);
-            D_80042308[i].f = *(f32 *)(obj + 0x380);
+            g_sound_listeners[i].ex = *(f32 *)(obj + 0x2F8);
+            g_sound_listeners[i].ey = *(f32 *)(obj + 0x2FC);
+            g_sound_listeners[i].ez = *(f32 *)(obj + 0x300);
+            g_sound_listeners[i].f = *(f32 *)(obj + 0x380);
         }
         sound_stop_queue_process();
-        sfx_emitters_update(D_80041FE0, &D_80042B00, 0, D_80042B00);
-        for (i = 0, j = 0; i < D_80042B00; i++) {
-            D_80041FE0[j] = D_80041FE0[i];
-            if (!(D_80041FE0[j].unk10 & 0x80)) {
+        sfx_emitters_update(g_sfx_emitters, &g_sfx_emitter_count, 0, g_sfx_emitter_count);
+        for (i = 0, j = 0; i < g_sfx_emitter_count; i++) {
+            g_sfx_emitters[j] = g_sfx_emitters[i];
+            if (!(g_sfx_emitters[j].unk10 & 0x80)) {
                 j++;
             }
         }
-        D_80042B00 = j;
+        g_sfx_emitter_count = j;
     }
-    if (D_80041F54 != D_80041FDC || D_80041F60 != D_80041F61) {
-        if (D_80041F61 == 1) {
+    if (g_sound_bus_volume != g_sound_bus_volume_target || g_sound_pause_mute_state != g_sound_pause_mute_request) {
+        if (g_sound_pause_mute_request == 1) {
             n_sndp_set_group_volume(0, 0);
             n_sndp_set_group_volume(1, 0);
         } else {
-            n_sndp_set_group_volume(0, D_80041F54);
-            n_sndp_set_group_volume(1, D_80041F54);
-            step = (D_80041FDC - D_80041F54) * D_80041F58;
+            n_sndp_set_group_volume(0, g_sound_bus_volume);
+            n_sndp_set_group_volume(1, g_sound_bus_volume);
+            step = (g_sound_bus_volume_target - g_sound_bus_volume) * g_sound_bus_volume_rate;
             if (step != 0) {
-                D_80041F54 += step;
+                g_sound_bus_volume += step;
             } else {
-                D_80041F54 = D_80041FDC;
+                g_sound_bus_volume = g_sound_bus_volume_target;
             }
         }
-        D_80041F60 = D_80041F61;
+        g_sound_pause_mute_state = g_sound_pause_mute_request;
     }
 }
 
@@ -1490,9 +1490,9 @@ void sound_level_hook_nop(s32 arg0) {
 /* was func_10011E94 */
 void sound_set_pause_mute(s32 arg0) {
     if (arg0) {
-        D_80041F61 = 1;
+        g_sound_pause_mute_request = 1;
     } else {
-        D_80041F61 = 0;
+        g_sound_pause_mute_request = 0;
     }
 }
 
@@ -1500,7 +1500,7 @@ s32 floor_flags_surface_type(s32);
 u16 sound_pick_variant(s32, u16); /* P157: two parameters (the asm reads a0 / a1 only, as every other caller declares) */
 typedef struct { u16 a; u16 b; } SndPair;
 // rodata_inject: cdefined 0x2C5A0 0x2C758
-const SndPair D_8002C5A0[22][5] = {
+const SndPair g_sound_footstep_table[22][5] = { /* was D_8002C5A0 */
     { { 0x0000, 0 }, { 0x0000, 0 }, { 0x0000, 0 }, { 0x0000, 0 }, { 0x0000, 0 } },
     { { 0x025A, 4 }, { 0x0254, 4 }, { 0x0258, 2 }, { 0x0253, 1 }, { 0x02AB, 4 } },
     { { 0x0248, 4 }, { 0x024C, 4 }, { 0x0250, 2 }, { 0x0252, 1 }, { 0x02AB, 4 } },
@@ -1542,13 +1542,13 @@ u16 sound_surface_footstep(s32 arg0, s16 *arg1, s32 arg2)
       *arg1 = 0x7FFF;
     }
   }
-  v = D_8002C5A0[arg0][arg2].a;
-  if (D_8002C5A0[arg0][arg2].b >= 2)
+  v = g_sound_footstep_table[arg0][arg2].a;
+  if (g_sound_footstep_table[arg0][arg2].b >= 2)
   {
     new_var = &arg2; // fakematch: permuter, base table reg t0 and arg2 reloads
-    if (!D_8002C5A0 && !D_8002C5A0 && !D_8002C5A0) { // fakematch: permuter, always false
+    if (!g_sound_footstep_table && !g_sound_footstep_table && !g_sound_footstep_table) { // fakematch: permuter, always false
     }
-    v = sound_pick_variant(v, D_8002C5A0[arg0][*new_var].b);
+    v = sound_pick_variant(v, g_sound_footstep_table[arg0][*new_var].b);
   }
   return v;
 }

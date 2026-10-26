@@ -2,7 +2,7 @@
 # `while (1) {}`; RET osGetTime (100252D0) = 0, RETV1 (low words) 0;22ADD6;22ADD7;7270E0;7270DF;7270E0 (a
 # higher first bound ends the first wait on 7270E0, then waits again). Setups b1lo / b2lo (9th field = RETV1, P281) probe
 # the lower side of each bound: the busy waits only show through the number of osGetTime calls.
-# POKE words: D_8002C068 wait flag, D_8002AE14 / AE18 / AE24 bytes (high byte of the word), D_800BED64[4], D_800BED68[4]
+# POKE words: g_os_shutdown_alias wait flag, g_rumble_paks_probed / AE18 / AE24 bytes (high byte of the word), g_rumble_pak_present[4], g_rumble_motor_on[4]
 wait ! ! 8002C068=0,8002AE14=0,8002AE24=0 ! ! ! ! ! !
 nowait ! ! 8002C068=1,8002AE14=0,8002AE24=01000000 ! ! ! ! ! !
 rumble2 ! ! 8002C068=1,8002AE14=01000000,8002AE18=0,800BED64=00010001,800BED68=01010101,8002AE24=0 ! ! ! ! ! !

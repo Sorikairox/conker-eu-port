@@ -21,14 +21,14 @@ s32 osPiRawReadIo(u32, u32 *);
 extern u8 *g_trigger_zones; /* was D_800D34BC */
 extern u64 g_zone_always_mask[3]; /* was D_800D34C0 */
 extern u64 g_zone_overlap_mask[3]; /* was D_800D34D8 */
-extern u16 D_800D34F0[16];
+extern u16 g_trigger_player_zone[16]; /* was D_800D34F0 */
 extern u8 **g_camera_zone_list; /* was D_800D3690 */
 extern s32 g_camera_zone_count; /* was D_800D3694 */
-extern s32 D_800D3698;
+extern s32 g_trigger_unk_3698; /* was D_800D3698 */
 extern u8 g_shadow_skip_players; /* was D_800DF510 */
 extern u8 g_shadow_flat_players; /* was D_800DF511 */
-typedef struct { s16 x; s16 y; s16 z; s16 unk6; u8 pad8[8]; f32 unk10; u8 unk14; u8 unk15; u8 unk16; u8 unk17; s32 unk18; s32 unk1C; s32 unk20; f32 unk24; f32 unk28; f32 unk2C; f32 unk30; } Unk34B8; // 0x34 bytes, D_800D34B8[]
-extern u64 D_800D3510[][3];
+typedef struct { s16 x; s16 y; s16 z; s16 unk6; u8 pad8[8]; f32 unk10; u8 unk14; u8 unk15; u8 unk16; u8 unk17; s32 unk18; s32 unk1C; s32 unk20; f32 unk24; f32 unk28; f32 unk2C; f32 unk30; } Unk34B8; /* was D_800D34B8 */ // 0x34 bytes, g_level_zones[]
+extern u64 g_trigger_touch_bits[][3]; /* was D_800D3510 */
 
 
 void sfx_emitter_stop_at(u16, s16, s16, s16, u16);
@@ -52,12 +52,12 @@ void triggers_update(s32 arg0) {
     u8 temp_a0;
     u8 *temp_v0_3;
 
-    var_a1 = D_800D3094;
+    var_a1 = g_level_zone_count;
     var_s6 = 0;
     var_s0 = 0;
     if (var_a1 != 0) {
         do {
-            var_v0 = &D_800D34B8[var_s0];
+            var_v0 = &g_level_zones[var_s0];
             temp_a0 = (*(u8 *)((u8 *)var_v0 + 0x15));
             temp_v1 = (s32) temp_a0 >> 2;
             switch (temp_v1) {                      /* irregular */
@@ -67,13 +67,13 @@ void triggers_update(s32 arg0) {
                     (*(s32 *)((u8 *)var_v0 + 0x20)) = (s32) (temp_v1_2 ^ 3);
                 } else if (temp_v1_2 == 2) {
                     sfx_emitter_stop_at(((u32) (*(u32 *)((u8 *)var_v0 + 0x1C)) >> 0x10) & 0xFFFF, (*(s16 *)((u8 *)var_v0 + 0)), (*(s16 *)((u8 *)var_v0 + 2)), (*(s16 *)((u8 *)var_v0 + 4)), (*(s32 *)((u8 *)var_v0 + 0x18)));
-                    (*(s32 *)((u8 *)(&D_800D34B8[var_s0]) + 0x20)) = 0;
+                    (*(s32 *)((u8 *)(&g_level_zones[var_s0]) + 0x20)) = 0;
                 }
-                if ((D_800C35EA == 1) && (trigger_test_object(g_objects, &D_800D34B8[var_s0], 0) == 0)) {
-                    trigger_sound_start(&D_800D34B8[var_s0]);
+                if ((g_cutscene_slot_state == 1) && (trigger_test_object(g_objects, &g_level_zones[var_s0], 0) == 0)) {
+                    trigger_sound_start(&g_level_zones[var_s0]);
                 }
 block_36:
-                var_a1 = D_800D3094;
+                var_a1 = g_level_zone_count;
                 break;
             case 7:
                 if ((temp_a0 & 3) == 3) {
@@ -83,9 +83,9 @@ block_36:
                     if (temp_v1_3 == 1) {
                         (*(s32 *)((u8 *)var_v0 + 0x20)) = 2;
                     } else if ((temp_v1_3 == 2) && (music_song_set_chans_level((s32) (*(u8 *)((u8 *)var_v0 + 0x17)), 0, (*(s32 *)((u8 *)var_v0 + 0x18)), 0) != 0)) {
-                        temp_v0 = &D_800D34B8[var_s0];
+                        temp_v0 = &g_level_zones[var_s0];
                         if (music_song_set_chans_level((s32) (*(u8 *)((u8 *)temp_v0 + 0x17)), 0x64, (*(s32 *)((u8 *)temp_v0 + 0x1C)), 0) != 0) {
-                            (*(s32 *)((u8 *)(&D_800D34B8[var_s0]) + 0x20)) = 0;
+                            (*(s32 *)((u8 *)(&g_level_zones[var_s0]) + 0x20)) = 0;
                         }
                     }
                 }
@@ -102,13 +102,13 @@ block_36:
                         }
                         (*(u32 *)((u8 *)var_v0 + 0x1C)) = (u32) ((temp_a0_2 & ~0xFF) | var_v1);
                         if (var_v1 == 0) {
-                            temp_v0_2 = &D_800D34B8[var_s0];
+                            temp_v0_2 = &g_level_zones[var_s0];
                             g_weather_slot_busy[((u32) (*(u32 *)((u8 *)temp_v0_2 + 0x1C)) >> 8) & 0xFF] = 0;
                             (*(u32 *)((u8 *)temp_v0_2 + 0x1C)) = (u32) ((*(u32 *)((u8 *)temp_v0_2 + 0x1C)) & 0xFFFF0000);
                         }
                     }
                 }
-                var_v0 = &D_800D34B8[var_s0];
+                var_v0 = &g_level_zones[var_s0];
                 /* fallthrough */
             case 0:
                 if (((*(u8 *)((u8 *)var_v0 + 0x17)) == 0xC) && ((*(u8 *)((u8 *)var_v0 + 0x14)) == 0)) {
@@ -117,12 +117,12 @@ block_36:
                     if (g_last_player_index >= 0) {
                         do {
                             temp_v0_3 = var_a0 + g_player_views;
-                            (*(f32 *)((u8 *)temp_v0_3 + 0x93C)) = (f32) D_800D34B8[var_s0];
-                            (*(f32 *)((u8 *)temp_v0_3 + 0x940)) = (f32) (*(s16 *)((u8 *)(&D_800D34B8[var_s0]) + 2));
-                            (*(f32 *)((u8 *)temp_v0_3 + 0x944)) = (f32) (*(s16 *)((u8 *)(&D_800D34B8[var_s0]) + 4));
-                            (*(f32 *)((u8 *)temp_v0_3 + 0x938)) = (f32) (*(s16 *)((u8 *)(&D_800D34B8[var_s0]) + 6));
+                            (*(f32 *)((u8 *)temp_v0_3 + 0x93C)) = (f32) g_level_zones[var_s0];
+                            (*(f32 *)((u8 *)temp_v0_3 + 0x940)) = (f32) (*(s16 *)((u8 *)(&g_level_zones[var_s0]) + 2));
+                            (*(f32 *)((u8 *)temp_v0_3 + 0x944)) = (f32) (*(s16 *)((u8 *)(&g_level_zones[var_s0]) + 4));
+                            (*(f32 *)((u8 *)temp_v0_3 + 0x938)) = (f32) (*(s16 *)((u8 *)(&g_level_zones[var_s0]) + 6));
                             (*(s8 *)((u8 *)temp_v0_3 + 0x948)) = 1;
-                            (*(s8 *)((u8 *)temp_v0_3 + 0x949)) = (s8) (*(s32 *)((u8 *)(&D_800D34B8[var_s0]) + 0x18));
+                            (*(s8 *)((u8 *)temp_v0_3 + 0x949)) = (s8) (*(s32 *)((u8 *)(&g_level_zones[var_s0]) + 0x18));
                             var_v1_2 += 1;
                             var_a0 += 0x9A0;
                         } while (g_last_player_index >= var_v1_2);
@@ -135,21 +135,21 @@ block_36:
         } while (var_s6 < (u32) var_a1);
     }
 }
-extern f32 D_8009F970;
-extern f32 D_8009F974;
+extern f32 g_trigger_k_f970; /* was D_8009F970 */
+extern f32 g_trigger_k_f974; /* was D_8009F974 */
 /* was func_150A11F4 */
 void trigger_cache_angles(u8 *arg0)
 {
   f32 temp_f20;
-  temp_f20 = (*((f32 *) (((u8 *) arg0) + 0xC))) * D_8009F970;
+  temp_f20 = (*((f32 *) (((u8 *) arg0) + 0xC))) * g_trigger_k_f970;
   *((f32 *) (((u8 *) arg0) + 0x24)) = fast_sinf(temp_f20);
   *((f32 *) (((u8 *) arg0) + 0x28)) = fast_cosf(temp_f20);
-  temp_f20 = (*((f32 *) (((u8 *) arg0) + 0x10))) * D_8009F974;
+  temp_f20 = (*((f32 *) (((u8 *) arg0) + 0x10))) * g_trigger_k_f974;
   *((f32 *) (((u8 *) arg0) + 0x2C)) = fast_sinf(temp_f20);
   *((f32 *) (((u8 *) arg0) + 0x30)) = fast_cosf(temp_f20);
 }
 
-extern f32 D_8009F978;
+extern f32 g_trigger_k_f978; /* was D_8009F978 */
 void reflect_queue_object(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 /* was func_150A126C */
@@ -168,22 +168,22 @@ void trigger_reflect_queue_objects(void) {
 
     var_s7 = 0;
     var_s4 = 0;
-    if (D_800D3094 != 0) {
+    if (g_level_zone_count != 0) {
         do {
-            temp_s0 = &D_800D34B8[var_s4];
+            temp_s0 = &g_level_zones[var_s4];
             if ((*(u8 *)((u8 *)temp_s0 + 0x14)) == 0) {
                 var_s1 = g_objects;
                 var_s2 = 0;
                 if (((s32) (*(u8 *)((u8 *)temp_s0 + 0x15)) >> 2) == 6) {
                     do {
-                        if ((var_s1->interaction_state != 0) && ((temp_v0 = var_s1->unk5, (temp_v0 == 0)) || (temp_v0 == 1)) && (trigger_test_object(var_s1, &D_800D34B8[var_s4], 1) == 0)) {
-                            temp_s0_2 = &D_800D34B8[var_s4];
+                        if ((var_s1->interaction_state != 0) && ((temp_v0 = var_s1->unk5, (temp_v0 == 0)) || (temp_v0 == 1)) && (trigger_test_object(var_s1, &g_level_zones[var_s4], 1) == 0)) {
+                            temp_s0_2 = &g_level_zones[var_s4];
                             if ((*(u8 *)((u8 *)temp_s0_2 + 0x17)) == 0) {
-                                temp_s0_3 = &D_800D34B8[var_s4];
+                                temp_s0_3 = &g_level_zones[var_s4];
                                 temp_v1 = (*(s16 *)((u8 *)temp_s0_3 + 6));
                                 if (approx_dist3_int((s16) (s32) (var_s1->x_position - (f32) (*(s16 *)((u8 *)temp_s0_2 + 0))), (s16) (s32) (var_s1->y_position - (f32) (*(s16 *)((u8 *)temp_s0_2 + 2))), (s16) (s32) (var_s1->z_position - (f32) (*(s16 *)((u8 *)temp_s0_2 + 4)))) < temp_v1) {
                                     temp_f2 = (f32) temp_v1;
-                                    var_f0 = temp_f2 * D_8009F978;
+                                    var_f0 = temp_f2 * g_trigger_k_f978;
                                     if (var_f0 > 100.0f) {
                                         var_f0 = 100.0f;
                                     }
@@ -200,7 +200,7 @@ void trigger_reflect_queue_objects(void) {
             }
             var_s7 += 1;
             var_s4 += 0x34;
-        } while (var_s7 < (u32) D_800D3094);
+        } while (var_s7 < (u32) g_level_zone_count);
     }
 }
 /* was func_150A1520 */
@@ -209,7 +209,7 @@ u8 *ptr_offset_0x400(u8 *arg0) {
 }
 
 s32 trigger_test_object(struct127 *, u8 *, s32);
-extern f32 D_8009F97C;
+extern f32 g_trigger_k_f97c; /* was D_8009F97C */
 
 /* was func_150A152C */
 void trigger_camera_zones_apply(struct108 *arg0, u8 **arg1, s32 arg2) {
@@ -222,7 +222,7 @@ void trigger_camera_zones_apply(struct108 *arg0, u8 **arg1, s32 arg2) {
     sp.old_x_position = arg0->unk304;
     sp.old_y_position = arg0->unk308;
     sp.old_z_position = arg0->unk30C;
-    arg0->unk364 = D_8009F97C;
+    arg0->unk364 = g_trigger_k_f97c;
     arg0->unk84 &= ~0x40000;
     for (; arg2 != 0; arg2--, arg1++) {
         if (*arg1 == NULL) {
@@ -252,11 +252,11 @@ void trigger_camera_zones_apply(struct108 *arg0, u8 **arg1, s32 arg2) {
 
 // P45: trigger zones of a record, per frame, before its state handler (objects_run_state_handlers).
 // Zones: g_trigger_zones, 0x28 bytes each: u64 mask[3] (which triggers the zone allows), u8 +0x18 priority, s16 box
-// +0x1A..+0x24 (x min/max, y min/max, z min/max, exclusive). w = the record's cached zone (D_800D34F0[player] - 1)
+// +0x1A..+0x24 (x min/max, y min/max, z min/max, exclusive). w = the record's cached zone (g_trigger_player_zone[player] - 1)
 // if it still contains the position, else g_zone_overlap_mask; then every zone set in w that contains the position ANDs its
 // mask in (the lowest priority one is cached for players), a zone that does not is cleared. w |= g_zone_always_mask (always
-// on). Then each trigger set in w (D_800D34B8, 0x34 bytes) that trigger_test_object says the record touches fires by
-// kind (+0x15 >> 2) and is recorded in D_800D3510[player] (the bits of the previous frame are `prev`).
+// on). Then each trigger set in w (g_level_zones, 0x34 bytes) that trigger_test_object says the record touches fires by
+// kind (+0x15 >> 2) and is recorded in g_trigger_touch_bits[player] (the bits of the previous frame are `prev`).
 /* was func_150A16A4 */
 void trigger_zones_update_object(struct127 *arg0) {
     u32 spCC;
@@ -299,12 +299,12 @@ void trigger_zones_update_object(struct127 *arg0) {
     }
     obj_set_spawn_flags(arg0);
     *(s16 *)((u8 *)arg0 + 0x120) = -10000;
-    D_800D3698 = 0;
+    g_trigger_unk_3698 = 0;
     player = arg0 - g_objects;
     found = 0;
     if (player < 16) {
-        if (D_800D34F0[player] > 0) {
-            zone = g_trigger_zones + D_800D34F0[player] * 0x28 - 0x28;
+        if (g_trigger_player_zone[player] > 0) {
+            zone = g_trigger_zones + g_trigger_player_zone[player] * 0x28 - 0x28;
             if (*(s16 *)(zone + 0x1A) < x && x < *(s16 *)(zone + 0x1C) && *(s16 *)(zone + 0x1E) < y &&
                 y < *(s16 *)(zone + 0x20) && *(s16 *)(zone + 0x22) < z && z < *(s16 *)(zone + 0x24)) {
                 for (k = 0; k < 3; k++) {
@@ -313,7 +313,7 @@ void trigger_zones_update_object(struct127 *arg0) {
                 found = 1;
             }
         }
-        D_800D34F0[player] = 0;
+        g_trigger_player_zone[player] = 0;
     }
     ws = w;
     if (found == 0) {
@@ -324,12 +324,12 @@ void trigger_zones_update_object(struct127 *arg0) {
     i = 0;
     base = 0;
     mask = w[0];
-    if (D_800D3094 != 0) {
+    if (g_level_zone_count != 0) {
         do {
             if (mask == 0) {
                 base += 64;
                 i = base;
-                if (!(base < (u32)D_800D3094)) {
+                if (!(base < (u32)g_level_zone_count)) {
                     next = i + 1;
                     goto next1;
                 }
@@ -344,7 +344,7 @@ void trigger_zones_update_object(struct127 *arg0) {
                         w[k] &= ((u64 *)zone)[k];
                     }
                     if (player < 16 && zone[0x18] < spCC) {
-                        D_800D34F0[player] = i + 1;
+                        g_trigger_player_zone[player] = i + 1;
                         spCC = zone[0x18];
                     }
                 } else {
@@ -355,7 +355,7 @@ void trigger_zones_update_object(struct127 *arg0) {
             mask >>= 1;
         next1:
             i = next;
-        } while (next < (u32)D_800D3094);
+        } while (next < (u32)g_level_zone_count);
         ws = w;
         base = 0;
     }
@@ -363,7 +363,7 @@ void trigger_zones_update_object(struct127 *arg0) {
         w[k] |= g_zone_always_mask[k];
     }
     if (player < 16) {
-        ps = D_800D3510[player];
+        ps = g_trigger_touch_bits[player];
         prev = *ps;
         *ps = 0;
     } else {
@@ -372,12 +372,12 @@ void trigger_zones_update_object(struct127 *arg0) {
     }
     i = 0;
     mask = w[0];
-    if (D_800D3094 != 0) {
+    if (g_level_zone_count != 0) {
         do {
             if (mask == 0) {
                 base += 64;
                 i = base;
-                if (!(base < (u32)D_800D3094)) {
+                if (!(base < (u32)g_level_zone_count)) {
                     next = i + 1;
                     goto next2;
                 }
@@ -389,14 +389,14 @@ void trigger_zones_update_object(struct127 *arg0) {
                     *ps = 0;
                 }
             }
-            if (((u32)mask & 1) && (off = i * 0x34, trigger_test_object(arg0, D_800D34B8 + off, 0) == 0)) {
-                e = D_800D34B8 + off;
+            if (((u32)mask & 1) && (off = i * 0x34, trigger_test_object(arg0, g_level_zones + off, 0) == 0)) {
+                e = g_level_zones + off;
                 v = e[0x15] >> 2;
                 if (v < 26) {
                     switch (v) {
                     case 0:
                         if (spB8 != NULL && e[0x17] != 0xC) {
-                            camera_queue_event(spB8, 1, D_800D34B8 + off);
+                            camera_queue_event(spB8, 1, g_level_zones + off);
                             *(u16 *)((u8 *)spB8 + 0x700) = i;
                         }
                         break;
@@ -435,7 +435,7 @@ void trigger_zones_update_object(struct127 *arg0) {
                                         ((u8 *)arg0->unk31C)[0x96] = 0;
                                         *((u8 *)arg0 + 0x8A) = 0x12;
                                         ((u8 *)arg0->unk31C)[0x95] = i + 1;
-                                        if (*(s32 *)(D_800D34B8 + off + 0x18) != 0) {
+                                        if (*(s32 *)(g_level_zones + off + 0x18) != 0) {
                                             o = (u8 *)arg0->unk31C;
                                             o[0x95] |= 0x80;
                                         }
@@ -462,22 +462,22 @@ void trigger_zones_update_object(struct127 *arg0) {
                         }
                         break;
                     case 2:
-                        trigger_sound_start(D_800D34B8 + off);
+                        trigger_sound_start(g_level_zones + off);
                         break;
                     case 3:
                         if (e[0x17] == 5) {
-                            rope_try_grab(arg0, D_800D34B8 + off);
+                            rope_try_grab(arg0, g_level_zones + off);
                         }
                         break;
                     case 4:
-                        trigger_ambfx_start(D_800D34B8 + off, spC8);
+                        trigger_ambfx_start(g_level_zones + off, spC8);
                         break;
                     case 7:
                         if (*(s32 *)(e + 0x20) == 0) {
                             if (music_song_set_chans_level(e[0x17], 100, *(s32 *)(e + 0x18), 0) != 0) {
-                                e = D_800D34B8 + off;
+                                e = g_level_zones + off;
                                 if (music_song_set_chans_level(e[0x17], 0, *(s32 *)(e + 0x1C), 0) != 0) {
-                                    *(s32 *)(D_800D34B8 + off + 0x20) = 1;
+                                    *(s32 *)(g_level_zones + off + 0x20) = 1;
                                 }
                             }
                         } else {
@@ -488,38 +488,38 @@ void trigger_zones_update_object(struct127 *arg0) {
                         os_pi_get_access();
                         osPiRawReadIo((u32)ptr_offset_0x400((u8 *)0xB0000054), &sp68);
                         os_pi_rel_access();
-                        if (ptr_offset_0x400((u8 *)sp68) == (u8 *)0x01090C2B && D_800C35EA == 0 &&
+                        if (ptr_offset_0x400((u8 *)sp68) == (u8 *)0x01090C2B && g_cutscene_slot_state == 0 &&
                             *((u8 *)arg0 + 0x1CA) != 0) {
-                            e = D_800D34B8 + off;
+                            e = g_level_zones + off;
                             warp_request_start(arg0, e[0x17], *(s32 *)(e + 0x18));
-                            if (g_level_id != (D_800D34B8 + off)[0x17]) {
+                            if (g_level_id != (g_level_zones + off)[0x17]) {
                                 *((u8 *)arg0 + 0x125) = 0xFF;
                                 *(f32 *)((u8 *)arg0 + 0x1CC) = arg0->y_position;
                             }
                         }
                         break;
                     case 11:
-                        context_action_set(arg0, D_800D34B8 + off, 1, e[0x17], *(s32 *)(e + 0x18));
+                        context_action_set(arg0, g_level_zones + off, 1, e[0x17], *(s32 *)(e + 0x18));
                         break;
                     case 12:
-                        trigger_zone_event_fire(D_800D34B8 + off, arg0, spC8, prev);
+                        trigger_zone_event_fire(g_level_zones + off, arg0, spC8, prev);
                         break;
                     case 13:
                         if (spC8 != 0xFF && !((u32)prev & 1) && g_game_mode == 0 && *((u8 *)arg0 + 0x1CA) != 0 &&
-                            D_800C35EA == 0) {
+                            g_cutscene_slot_state == 0) {
                             if (e[0x17] == 0) {
                                 e[0x14] = 1;
-                                e = D_800D34B8 + off;
+                                e = g_level_zones + off;
                             }
                             cutscene_scene_load(g_level_id, *(s32 *)(e + 0x18), 0, 0, 0);
-                            e = D_800D34B8 + off;
+                            e = g_level_zones + off;
                             *(s32 *)(e + 0x1C) += 1;
                         }
                         break;
                     case 14:
                         if (spC8 != 0xFF && !((u32)prev & 1)) {
                             music_play_song(e[0x17], *(s32 *)(e + 0x18), *(s32 *)(e + 0x1C) & 0xFF);
-                            e = D_800D34B8 + off;
+                            e = g_level_zones + off;
                             if (e[0x17] != 0) {
                                 music_song_set_chans_level(e[0x17], 0, *(s32 *)(e + 0x20) & 0xFFFF, 0);
                             }
@@ -527,7 +527,7 @@ void trigger_zones_update_object(struct127 *arg0) {
                         break;
                     case 25:
                         if (e[0x17] == 0) {
-                            D_80041FD8 = *(s32 *)(e + 0x18);
+                            g_sound_fx_mix_boost = *(s32 *)(e + 0x18);
                         }
                         break;
                     }
@@ -541,7 +541,7 @@ void trigger_zones_update_object(struct127 *arg0) {
             prev >>= 1;
         next2:
             i = next;
-        } while (next < (u32)D_800D3094);
+        } while (next < (u32)g_level_zone_count);
     }
 }
 s32 approx_dist3_int(s32, s32, s32);
@@ -785,7 +785,7 @@ void trigger_ambfx_start(Unk34B8 *arg0, s32 arg1) {
 
 void arc_spark_spawn(struct127 *, s32, u8 *, u8);
 void spout_check_obj_hit(struct127 *, u8 *);
-extern u8 D_800D34B0;
+extern u8 g_trigger_ambfx_timer; /* was D_800D34B0 */
 extern s32 g_tint_request_level; /* was D_800DA2D8 */
 
 /* was func_150A2AB4 */
@@ -821,11 +821,11 @@ void trigger_zone_event_fire(u8 *arg0, struct127 *arg1, s32 arg2, u64 arg4) { //
         break;
     case 6:
         if (!(arg4 & 1)) {
-            D_800D34B0 = 0x19;
+            g_trigger_ambfx_timer = 0x19;
             actor_sound_play2(0x66FU, arg1, 0x5DC0, 0x190, 0x1F4U);
         }
-        temp_t1 = (D_800D34B0 + g_frame_ticks) & 0xFF;
-        D_800D34B0 = temp_t1;
+        temp_t1 = (g_trigger_ambfx_timer + g_frame_ticks) & 0xFF;
+        g_trigger_ambfx_timer = temp_t1;
         if ((s32) temp_t1 >= 0x1A) {
             temp_v0_2 = arg1->unkB2;
             if ((s32) temp_v0_2 >= 0x5A1) {
@@ -835,7 +835,7 @@ void trigger_zone_event_fire(u8 *arg0, struct127 *arg1, s32 arg2, u64 arg4) { //
             } else {
                 arg1->unkB2 = temp_v0_2 - 0xF0;
             }
-            D_800D34B0 = 0;
+            g_trigger_ambfx_timer = 0;
             return;
         }
         break;
@@ -864,20 +864,20 @@ void trigger_warp_check(u8 *arg0)
   {
     var_s1 = 0;
     var_s0 = 0;
-    if (D_800D3094 != 0)
+    if (g_level_zone_count != 0)
     {
       do
       {
         new_var = var_s0 ^ 0;
-        if (((((s32) (*((u8 *) (((u8 *) (&D_800D34B8[new_var])) + 0x15)))) >> 2) == 8) && (trigger_test_object(arg0, &D_800D34B8[var_s0 & 0xFFFFFFFF], 0) == 0))
+        if (((((s32) (*((u8 *) (((u8 *) (&g_level_zones[new_var])) + 0x15)))) >> 2) == 8) && (trigger_test_object(arg0, &g_level_zones[var_s0 & 0xFFFFFFFF], 0) == 0))
         {
-          temp_v0 = &D_800D34B8[var_s0];
+          temp_v0 = &g_level_zones[var_s0];
           warp_request_start(arg0, *((u8 *) (((u8 *) temp_v0) + 0x17)), *((s32 *) (((u8 *) temp_v0) + 0x18)));
         }
         var_s1 += 1;
         var_s0 += 0x34;
       }
-      while (var_s1 < ((u32) D_800D3094));
+      while (var_s1 < ((u32) g_level_zone_count));
     }
   }
 }
@@ -887,12 +887,12 @@ void trigger_set_disabled(s32 arg0, s32 arg1) {
     s32 i;
 
     arg0 &= 0xFFF;
-    if ((u32)arg0 < (u32)D_800D3094) {
-        ((Unk34B8 *)D_800D34B8)[arg0].unk14 = arg1;
+    if ((u32)arg0 < (u32)g_level_zone_count) {
+        ((Unk34B8 *)g_level_zones)[arg0].unk14 = arg1;
     }
     if (arg1 == 1) {
         for (i = 0; i < 16; i++) {
-            D_800D3510[i][(u32)arg0 >> 6] &= ~(1ULL << ((u32)arg0 & 0x3F));
+            g_trigger_touch_bits[i][(u32)arg0 >> 6] &= ~(1ULL << ((u32)arg0 & 0x3F));
         }
     }
 }
@@ -905,37 +905,37 @@ void trigger_set_kind_args(s32 arg0, s32 arg1, int arg2)
   int new_var2;
   new_var = 1;
   arg0 = arg0 & 0xFFF;
-  if (arg0 < ((u32) D_800D3094))
+  if (arg0 < ((u32) g_level_zone_count))
   {
     new_var2 = -new_var;
     if (arg1 != (-new_var))
     {
-      *((s32 *) (((u8 *) (D_800D34B8 + ((13 * arg0) * 4))) + 0x18)) = arg1;
+      *((s32 *) (((u8 *) (g_level_zones + ((13 * arg0) * 4))) + 0x18)) = arg1;
     }
     temp_v0 = arg0 * 0x34;
     if (arg2 != new_var2)
     {
-      *((s8 *) (((u8 *) (D_800D34B8 + temp_v0)) + 0x17)) = arg2;
+      *((s8 *) (((u8 *) (g_level_zones + temp_v0)) + 0x17)) = arg2;
     }
-    *((s32 *) (((u8 *) (D_800D34B8 + temp_v0)) + 0x1C)) = 0;
+    *((s32 *) (((u8 *) (g_level_zones + temp_v0)) + 0x1C)) = 0;
   }
 }
 
-extern u64 D_800D3510[][3];
+extern u64 g_trigger_touch_bits[][3]; /* was D_800D3510 */
 
 /* was func_150A29C8 */
 s32 trigger_test_player(s32 arg0, s32 arg1) {
     arg1 &= 0xFFF;
-    if ((u32)D_800D3094 < (u32)arg1) {
+    if ((u32)g_level_zone_count < (u32)arg1) {
         return 1;
     }
-    if ((u32)arg0 < 16 && ((u16)D_800D2340 & (1 << arg0))) {
-        if ((D_800D3510[(u32)arg0][(u32)arg1 >> 6] >> ((u32)arg1 & 0x3F)) & 1) {
+    if ((u32)arg0 < 16 && ((u16)g_player_active_mask & (1 << arg0))) {
+        if ((g_trigger_touch_bits[(u32)arg0][(u32)arg1 >> 6] >> ((u32)arg1 & 0x3F)) & 1) {
             return 0;
         }
         return 1;
     }
-    return trigger_test_object(&g_objects[arg0], D_800D34B8 + arg1 * 0x34, 1);
+    return trigger_test_object(&g_objects[arg0], g_level_zones + arg1 * 0x34, 1);
 }
 
 /* was func_150A2FCC */
@@ -943,11 +943,11 @@ s32 trigger_first_touched(u32 arg0, s32 arg1, s32 *arg2) {
     s32 i;
     u32 v;
 
-    if (arg0 < 16 && ((u16)D_800D2340 & (1 << arg0))) {
+    if (arg0 < 16 && ((u16)g_player_active_mask & (1 << arg0))) {
         for (i = 0; i < arg1; i++) {
             v = arg2[i] & 0xFFF;
-            if (v < (u32)D_800D3094) {
-                if ((D_800D3510[arg0][v >> 6] >> (v & 0x3F)) & 1) {
+            if (v < (u32)g_level_zone_count) {
+                if ((g_trigger_touch_bits[arg0][v >> 6] >> (v & 0x3F)) & 1) {
                     return v;
                 }
             }
@@ -955,8 +955,8 @@ s32 trigger_first_touched(u32 arg0, s32 arg1, s32 *arg2) {
     } else {
     for (i = 0; i < arg1; i++) {
         v = arg2[i] & 0xFFF;
-        if (v < (u32)D_800D3094) {
-            if (trigger_test_object(&g_objects[arg0], D_800D34B8 + v * 0x34, 1) == 0) {
+        if (v < (u32)g_level_zone_count) {
+            if (trigger_test_object(&g_objects[arg0], g_level_zones + v * 0x34, 1) == 0) {
                 return v;
             }
         }
@@ -970,12 +970,12 @@ s32 trigger_find_touching_player(s32 arg0) {
     s32 i;
 
     arg0 &= 0xFFF;
-    if ((u32)D_800D3094 < arg0) {
+    if ((u32)g_level_zone_count < arg0) {
         return -1;
     }
     for (i = 0; i < 16; i++) {
         if (*(u16 *)((u8 *)&g_session_game_mode + 0x208) & (1 << i)) {
-            if ((D_800D3510[i][(u32)arg0 >> 6] >> ((u32)arg0 & 0x3F)) & 1) {
+            if ((g_trigger_touch_bits[i][(u32)arg0 >> 6] >> ((u32)arg0 & 0x3F)) & 1) {
                 return i;
             }
         }
@@ -992,7 +992,7 @@ s32 trigger_test_camera(s32 arg0, u32 arg1) {
 
     e = &g_player_views[arg0];
     arg1 &= 0xFFF;
-    if ((u32)D_800D3094 < arg1) {
+    if ((u32)g_level_zone_count < arg1) {
         return 1;
     }
     sp.x_position = e->unk2F8;
@@ -1002,7 +1002,7 @@ s32 trigger_test_camera(s32 arg0, u32 arg1) {
     sp.old_x_position = e->unk304;
     sp.old_y_position = e->unk308;
     sp.old_z_position = e->unk30C;
-    return trigger_test_object(&sp, D_800D34B8 + arg1 * 0x34, 0);
+    return trigger_test_object(&sp, g_level_zones + arg1 * 0x34, 0);
 }
 
 /* was func_150A332C */
@@ -1020,11 +1020,11 @@ s32 trigger_plane_side(Unk34B8 *, f32, f32, f32);
 /* was func_150A33C4 */
 s32 trigger_plane_side_object(s32 arg0, s32 arg1) {
     arg1 &= 0xFFF;
-    if ((u32) D_800D3094 < arg1) {
+    if ((u32) g_level_zone_count < arg1) {
         return 1;
     }
-    if ((((Unk34B8 *) D_800D34B8)[arg1].unk15 & 3) == 3) {
-        return trigger_plane_side(arg1 + (Unk34B8 *) D_800D34B8, g_objects[arg0].x_position, g_objects[arg0].y_position, g_objects[arg0].z_position);
+    if ((((Unk34B8 *) g_level_zones)[arg1].unk15 & 3) == 3) {
+        return trigger_plane_side(arg1 + (Unk34B8 *) g_level_zones, g_objects[arg0].x_position, g_objects[arg0].y_position, g_objects[arg0].z_position);
     }
     return 0;
 }
@@ -1035,11 +1035,11 @@ s32 trigger_plane_side_camera(s32 arg0, s32 arg1) {
     struct108 *v = &g_player_views[arg0];
 
     arg1 &= 0xFFF;
-    if ((u32) D_800D3094 < arg1) {
+    if ((u32) g_level_zone_count < arg1) {
         return 1;
     }
-    if ((((Unk34B8 *) D_800D34B8)[arg1].unk15 & 3) == 3) {
-        return trigger_plane_side(arg1 + (Unk34B8 *) D_800D34B8, v->unk2F8, v->unk2FC, v->unk300);
+    if ((((Unk34B8 *) g_level_zones)[arg1].unk15 & 3) == 3) {
+        return trigger_plane_side(arg1 + (Unk34B8 *) g_level_zones, v->unk2F8, v->unk2FC, v->unk300);
     }
     return 0;
 }
@@ -1054,8 +1054,8 @@ s32 trigger_point_in_kind3(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
     sp.y_position = sp.old_y_position = (f32)arg2;
     sp.z_position = sp.old_z_position = (f32)arg3;
     sp.unk180 = sp.y_position;
-    for (i = 0; i < (u32)D_800D3094; i++) {
-        if (((Unk34B8 *)D_800D34B8)[i].unk14 == 0 && (((Unk34B8 *)D_800D34B8)[i].unk15 >> 2) == 3 && ((Unk34B8 *)D_800D34B8)[i].unk17 == arg0 && trigger_test_object(&sp, D_800D34B8 + i * 0x34, 0) == 0) {
+    for (i = 0; i < (u32)g_level_zone_count; i++) {
+        if (((Unk34B8 *)g_level_zones)[i].unk14 == 0 && (((Unk34B8 *)g_level_zones)[i].unk15 >> 2) == 3 && ((Unk34B8 *)g_level_zones)[i].unk17 == arg0 && trigger_test_object(&sp, g_level_zones + i * 0x34, 0) == 0) {
             return 1;
         }
     }
@@ -1073,9 +1073,9 @@ u8 *trigger_find_at_point(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     sp.y_position = sp.old_y_position = (f32)arg3;
     sp.z_position = sp.old_z_position = (f32)arg4;
     sp.unk180 = sp.y_position;
-    for (i = 0; i < (u32)D_800D3094; i++) {
-        if (((Unk34B8 *)D_800D34B8)[i].unk14 == 0 && (((Unk34B8 *)D_800D34B8)[i].unk15 >> 2) == arg0 && ((Unk34B8 *)D_800D34B8)[i].unk17 == arg1 && trigger_test_object(&sp, D_800D34B8 + i * 0x34, 0) == 0) {
-            return D_800D34B8 + i * 0x34;
+    for (i = 0; i < (u32)g_level_zone_count; i++) {
+        if (((Unk34B8 *)g_level_zones)[i].unk14 == 0 && (((Unk34B8 *)g_level_zones)[i].unk15 >> 2) == arg0 && ((Unk34B8 *)g_level_zones)[i].unk17 == arg1 && trigger_test_object(&sp, g_level_zones + i * 0x34, 0) == 0) {
+            return g_level_zones + i * 0x34;
         }
     }
     return NULL;
@@ -1102,25 +1102,25 @@ void trigger_get_fields(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4) {
     s32 temp_v0;
 
     temp_v0 = arg0 * 0x34;
-    *arg1 = (s32) (*(u8 *)((u8 *)((D_800D34B8 + temp_v0)) + 0x17));
-    *arg2 = (*(s32 *)((u8 *)((D_800D34B8 + temp_v0)) + 0x18));
-    *arg3 = (*(s32 *)((u8 *)((D_800D34B8 + temp_v0)) + 0x1C));
-    *arg4 = (*(s32 *)((u8 *)((D_800D34B8 + temp_v0)) + 0x20));
+    *arg1 = (s32) (*(u8 *)((u8 *)((g_level_zones + temp_v0)) + 0x17));
+    *arg2 = (*(s32 *)((u8 *)((g_level_zones + temp_v0)) + 0x18));
+    *arg3 = (*(s32 *)((u8 *)((g_level_zones + temp_v0)) + 0x1C));
+    *arg4 = (*(s32 *)((u8 *)((g_level_zones + temp_v0)) + 0x20));
 }
 
 /* was func_150A3878 */
 void trigger_set_fields_masked(s32 arg0, u16 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     if (arg1 & 1) {
-        *(s8 *)((u8 *)(D_800D34B8 + (arg0 * 0x34)) + 0x17) = arg2;
+        *(s8 *)((u8 *)(g_level_zones + (arg0 * 0x34)) + 0x17) = arg2;
     }
     if (arg1 & 2) {
-        *(s32 *)((u8 *)(D_800D34B8 + (arg0 * 0x34)) + 0x18) = arg3;
+        *(s32 *)((u8 *)(g_level_zones + (arg0 * 0x34)) + 0x18) = arg3;
     }
     if (arg1 & 4) {
-        *(s32 *)((u8 *)(D_800D34B8 + (arg0 * 0x34)) + 0x1C) = arg4;
+        *(s32 *)((u8 *)(g_level_zones + (arg0 * 0x34)) + 0x1C) = arg4;
     }
     if (arg1 & 8) {
-        *(s32 *)((u8 *)(D_800D34B8 + (arg0 * 0x34)) + 0x20) = arg5;
+        *(s32 *)((u8 *)(g_level_zones + (arg0 * 0x34)) + 0x20) = arg5;
     }
 }
 
@@ -1129,9 +1129,9 @@ void trigger_set_position(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
     s32 temp_v0;
 
     temp_v0 = arg0 * 0x34;
-    *(s16 *)(D_800D34B8 + temp_v0) = arg1;
-    (*(s16 *)((u8 *)((D_800D34B8 + temp_v0)) + 2)) = arg2;
-    (*(s16 *)((u8 *)((D_800D34B8 + temp_v0)) + 4)) = arg3;
+    *(s16 *)(g_level_zones + temp_v0) = arg1;
+    (*(s16 *)((u8 *)((g_level_zones + temp_v0)) + 2)) = arg2;
+    (*(s16 *)((u8 *)((g_level_zones + temp_v0)) + 4)) = arg3;
 }
 
 s32 trigger_cylinder_segment_hit(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
@@ -1147,7 +1147,7 @@ s32 trigger_segment_hit(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     return 0;
 }
 
-/* collision cylinder (0x34-byte entries of D_800D34B8, see trigger_set_position / trigger_cache_angles) */
+/* collision cylinder (0x34-byte entries of g_level_zones, see trigger_set_position / trigger_cache_angles) */
 typedef struct {
     s16 x, y, z;    /* base centre */
     s16 radius;

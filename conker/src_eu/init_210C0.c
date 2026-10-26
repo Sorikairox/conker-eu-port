@@ -30,7 +30,7 @@ typedef struct {
     S210C0_AuxBus *auxBus;
 } S210C0_Synth;
 
-extern S210C0_Synth *D_8002BA44;
+extern S210C0_Synth *g_audio_synth; /* was D_8002BA44 */
 Acmd *func_10020000(S210C0_PVoice *, s32, Acmd *);
 f32 sqrtf(f32);
 
@@ -47,7 +47,7 @@ Acmd *n_aux_bus_pull(s32 arg0, Acmd *arg1, s32 arg2, s32 *arg3) {
     Acmd *sp1C;
 
     sp3C = arg1;
-    sp38 = &D_8002BA44->auxBus[arg2];
+    sp38 = &g_audio_synth->auxBus[arg2];
     sp30 = 0;
     sp2C = 1;
     *arg3 = 0;

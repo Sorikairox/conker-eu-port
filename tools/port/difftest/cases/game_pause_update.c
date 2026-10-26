@@ -20,10 +20,10 @@ extern s8 g_pause_last_stick_x;           /* last stick x; was D_800902A0 */
 extern s8 g_pause_last_stick_y;           /* last stick y; was D_800E0EB5 */
 extern s8 g_pause_quit_yes;           /* quit confirmation: 1 = yes; was D_80090138 */
 extern u8 g_menu_prompt_alpha_lo; /* was D_8009016D */
-extern u8 D_800BEEE3;
+extern u8 g_rumble_stop_request; /* was D_800BEEE3 */
 extern u8 g_pause_pad;           /* controller that paused; was D_800E0EC8 */
 extern s8 g_play_time_frames;           /* frame counter for the seconds of play time; was D_800E0EC9 */
-extern s32 D_800D3268;
+extern s32 g_event_cur_id; /* was D_800D3268 */
 extern OSIoMesg g_pause_pi_io_mesg; /* was D_80038C40 */
 extern u8 g_str_pause_time_fmt[];         /* "%d:%02d"; was D_800ABBB8 */
 extern u8 g_str_pause_simple_item[];         /* "#": text id (the next argument), likewise the following; was D_800ABBC0 */
@@ -42,9 +42,9 @@ void text_set_color(u8 arg0, u8 arg1, u8 arg2, u8 arg3);
 void menu_game_start(void);
 void os_writeback_dcache(void *, s32); /* osWritebackDCache (hand-written cache loop) */
 
-// game_pause_update: P127: menu handler of mode 0 (story game, D_8009018C[0]): counts the play time (g_save_play_time
+// game_pause_update: P127: menu handler of mode 0 (story game, g_game_mode_fns[0]): counts the play time (g_save_play_time
 // seconds), shows the time limit (multiplayer, settings byte 3 >= 3), and runs the pause menu: START (0x1000) on a
-// controller that is not disabled (D_800D18A0) opens it (g_pause_open) unless blocked (screen_fade_all_active, scene states);
+// controller that is not disabled (g_player_view_hidden_mask) opens it (g_pause_open) unless blocked (screen_fade_all_active, scene states);
 // the stick moves the cursor g_menu_cursor over the 2 (story) / 3 (multiplayer) items with sfx 0x62D; past the last item
 // is the quit confirmation (g_pause_quit_yes no / yes). A on "yes" quits to the menu (g_menu_fade_callback = pause_quit_to_menu, in
 // multiplayer menu_game_start to restart when the cursor was on "restart"); A on "no" goes back after Rare's cartridge
@@ -73,12 +73,12 @@ void game_pause_update(void) {
     if (g_level_id == 0x22) {
         simple = 1;
     }
-    if (D_800C35EA != 1 || g_level_id != 0x18 || D_800C3A08 != 1) {
+    if (g_cutscene_slot_state != 1 || g_level_id != 0x18 || g_cutscene_scene != 1) {
         if (screen_fade_all_active() != 0) {
             blocked = 1;
         }
     }
-    if (D_800C35EA == 1 && D_800C3683 != 0) {
+    if (g_cutscene_slot_state == 1 && g_cutscene_no_pause != 0) {
         blocked = 1;
     }
     if (g_pause_input_delay > 0) {
@@ -89,9 +89,9 @@ void game_pause_update(void) {
     if (g_game_paused == 0 && g_pause_open == 0 && !blocked && g_pause_input_delay == 0) {
         nPads = g_last_player_index;
         for (i = 0; i <= nPads && g_pause_open == 0; i++) {
-            if (((&g_cont_pressed)[i] & 0x1000) && !(D_800D18A0 & (1 << i))) {
+            if (((&g_cont_pressed)[i] & 0x1000) && !(g_player_view_hidden_mask & (1 << i))) {
                 g_pause_open = 1;
-                D_800BEEE3 = 1;
+                g_rumble_stop_request = 1;
                 g_pause_pad = i;
                 g_menu_cursor = 0;
                 g_pause_last_stick_x = g_cont_pads[i].stickY;
@@ -101,7 +101,7 @@ void game_pause_update(void) {
     }
 
     /* play time */
-    if (g_game_paused == 0 && D_800D3268 != 0xC7) {
+    if (g_game_paused == 0 && g_event_cur_id != 0xC7) {
         g_play_time_frames += g_frame_ticks;
         if (g_play_time_frames >= 50) {
             g_play_time_frames -= 50;
@@ -110,7 +110,7 @@ void game_pause_update(void) {
     }
 
     /* time limit */
-    if (D_800BE616 != 0 && g_pause_open == 0 && g_settings_time_limit >= 3) {
+    if (g_mp_mode_active != 0 && g_pause_open == 0 && g_settings_time_limit >= 3) {
         y = 198;
         if (g_last_player_index > 0) {
             y = 100;
@@ -137,7 +137,7 @@ void game_pause_update(void) {
     }
 
     /* pause menu */
-    if (D_800BE616 != 0) {
+    if (g_mp_mode_active != 0) {
         yOff = -0x24;
         count = 3;
     } else {
@@ -230,7 +230,7 @@ void game_pause_update(void) {
                 g_game_mode = 7;
                 g_menu_fade_callback = (s32 *) pause_quit_to_menu;
                 g_menu_fade_speed = 8;
-                if (D_800BE616 != 0) {
+                if (g_mp_mode_active != 0) {
                     g_menu_state[0x3F] = 4; /* MenuState mainPage */
                     if (count == (s8) g_menu_cursor) {
                         g_pause_drop_queue = 1;

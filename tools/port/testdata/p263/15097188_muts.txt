@@ -13,22 +13,22 @@ s/if (\*((u8 \*) cam->unk3D4 + 0x120) == 0) {/if (*((u8 *) cam->unk3D4 + 0x121) 
 s/cam->unk348 = (f32) a\[3\];/cam->unk348 = (f32) a[2];/ % op8z
 s/cam->unk134 = a\[2\];/cam->unk134 = a[3];/ % op9
 s/g_camera_timers\[id\] = 3;/g_camera_timers[id] = 2;/ % op10
-s/D_800C3A20\[6\] = (f32) \*(s16 \*) (mk + 2);/D_800C3A20[6] = (f32) *(u16 *) (mk + 2);/ % op10
-s/D_800C3A20\[9\] = \*(f32 \*) (mk + 0xC);/D_800C3A20[9] = *(f32 *) (mk + 0x10);/ % op10
+s/g_camera_event_params\[6\] = (f32) \*(s16 \*) (mk + 2);/g_camera_event_params[6] = (f32) *(u16 *) (mk + 2);/ % op10
+s/g_camera_event_params\[9\] = \*(f32 \*) (mk + 0xC);/g_camera_event_params[9] = *(f32 *) (mk + 0x10);/ % op10
 s/camera_queue_event(cam, 5, NULL);/camera_queue_event(cam, 6, NULL);/ % op10
-s/camera_queue_event(cam, 7, D_800C3A20);/camera_queue_event(cam, 7, NULL);/ % op10
+s/camera_queue_event(cam, 7, g_camera_event_params);/camera_queue_event(cam, 7, NULL);/ % op10
 s/\&= ~0x200;/\&= ~0x201;/ % op11
-1,/D_800D2DB4 = 0;/s/D_800D2DB4 = 0;/D_800D2DB4 = 1;/ % op11
+1,/g_camera_timed_active = 0;/s/g_camera_timed_active = 0;/g_camera_timed_active = 1;/ % op11
 s/rec\[1\] = id;/rec[1] = id + 1;/ % op12m7
-s/if (D_800D3C60 >= 6) {/if (D_800D3C60 > 6) {/ % op12m6
-s/if (D_800D3C60 >= 7) {/if (D_800D3C60 > 7) {/ % op12m7
+s/if (g_event_arg_count >= 6) {/if (g_event_arg_count > 6) {/ % op12m6
+s/if (g_event_arg_count >= 7) {/if (g_event_arg_count > 7) {/ % op12m7
 s/\*(f32 \*) (rec + 0x10) = 1.0f;/*(f32 *) (rec + 0x10) = 0.5f;/ % op12m5
 s/if (camera_timed_records_any_active(a\[2\]) == 0) {/if (camera_timed_records_any_active(a[2]) != 0) {/ % op12m7 op12busy
 /case 14:/,/case 15:/s/cam->unk2C4 = (f32) a\[4\];/cam->unk2C4 = (f32) a[3];/ % op14
 /case 14:/,/case 15:/s/cam->unk300 = (f32) a\[7\];/cam->unk300 = (f32) a[6];/ % op14
 s/            cam->unk194 = (f32) a\[3\];/            cam->unk194 = (f32) a[2];/ % op15m4
 s/        cam->unk190 = (f32) a\[2\];/        cam->unk190 = (f32) a[3];/ % op16m4
-s/if ((D_800D3C60 == 5 \&\& a\[4\] != 0) || /if ((D_800D3C60 == 5) || / % op17d op17e
+s/if ((g_event_arg_count == 5 \&\& a\[4\] != 0) || /if ((g_event_arg_count == 5) || / % op17d op17e
 s/id \* 0x68) == 5) {/id * 0x68) == 4) {/ % op17b op17c
 s/camera_set_followed_obj(cam, obj_slot_by_spawn(a\[2\] \& 0xFFF));/camera_set_followed_obj(cam, obj_slot_by_spawn(a[2] \& 0x1FFF));/ % op18
 s/camera_set_second_target(cam, obj_slot_by_spawn(a\[2\] \& 0xFFF));/camera_set_second_target(cam, obj_slot_by_spawn(a[2]));/ % op19

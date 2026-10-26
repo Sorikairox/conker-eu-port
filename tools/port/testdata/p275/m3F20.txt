@@ -14,10 +14,10 @@
 \#^    grp = &g_level_model_colour_groups\[mesh\]\[first\];$#s/\[first\]/[0]/ % g1
 \#^        for (j = 0; j < grp->count; j++, to += 3) {$#s/to += 3/to += 4/ % m0all
 \#^            if (((u8 \*) g_level_header)\[0x21\] & 4) {$#s/0x21/0x20/ % b4m0
-\#^                from = (\*(u8 \*\*\*\*) D_800BE940)\[mesh\]\[g\] + j \* 3;$#s/\[g\]/[0]/ % b4m1
-\#^                from = (\*(u8 \*\*\*\*) D_800BE940)\[mesh\]\[g\] + j \* 3;$#s/j \* 3/j/ % b4m0
+\#^                from = (\*(u8 \*\*\*\*) g_vtx_colour_group_backup)\[mesh\]\[g\] + j \* 3;$#s/\[g\]/[0]/ % b4m1
+\#^                from = (\*(u8 \*\*\*\*) g_vtx_colour_group_backup)\[mesh\]\[g\] + j \* 3;$#s/j \* 3/j/ % b4m0
 \#^            } else if (mode == 0) {$#s/== 0/!= 0/ % m0all
-\#^                from = D_800BE930 + (\*(u16 \*\*) D_800BE944)\[slot\] \* 3 + n \* 3;$#s/\[slot\] \* 3/[slot]/ % m1all
+\#^                from = g_vtx_colour_backup + (\*(u16 \*\*) g_vtx_colour_room_base)\[slot\] \* 3 + n \* 3;$#s/\[slot\] \* 3/[slot]/ % m1all
 \#^            v = vtxBuf + n \* 16;$#s/16/12/ % m0all
 \#^            v\[0xC\] = (((to\[0\] - from\[0\]) \* t) >> 8) + from\[0\];$#s/>> 8/>> 7/ % m0all
 \#^            v\[0xD\] = (((to\[1\] - from\[1\]) \* t) >> 8) + from\[1\];$#s/+ from\[1\]/+ from[0]/ % m0all

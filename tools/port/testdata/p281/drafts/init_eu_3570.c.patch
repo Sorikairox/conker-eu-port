@@ -19,27 +19,27 @@ index 2bfdbdf0..750afa98 100644
 +    u32 count;
 +
 +    vc = __osGetActiveQueue();
-+    D_80038190 = vc->retraceCount;
-+    if (D_80038190 == 0) {
-+        D_80038190 = 1;
++    g_os_vi_retrace_count = vc->retraceCount;
++    if (g_os_vi_retrace_count == 0) {
++        g_os_vi_retrace_count = 1;
 +    }
 +    while (TRUE) {
 +        osRecvMesg(dm->evtQueue, &mesg, OS_MESG_BLOCK);
 +        switch (((OSIoMesg *) mesg)->hdr.type) {
 +            case OS_MESG_TYPE_VRETRACE:
 +                __osViSwapContext();
-+                D_80038190--;
-+                if (D_80038190 == 0) {
++                g_os_vi_retrace_count--;
++                if (g_os_vi_retrace_count == 0) {
 +                    vc = __osGetActiveQueue();
 +                    if (vc->msgq != NULL) {
 +                        osSendMesg(vc->msgq, vc->msg, OS_MESG_NOBLOCK);
 +                    }
-+                    D_80038190 = vc->retraceCount;
++                    g_os_vi_retrace_count = vc->retraceCount;
 +                }
-+                D_80042D4C++;
++                g_os_vi_intr_count++;
 +                count = osGetCount();
-+                D_80042D40 += count - D_80042D48;
-+                D_80042D48 = count;
++                g_os_current_time += count - g_os_base_counter;
++                g_os_base_counter = count;
 +                break;
 +            case OS_MESG_TYPE_COUNTER:
 +                __osTimerInterrupt();

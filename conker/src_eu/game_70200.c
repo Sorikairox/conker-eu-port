@@ -209,16 +209,16 @@ void text_set_color(u8 arg0, u8 arg1, u8 arg2, u8 arg3) {
  * with sprite_project_point), 0x04 f32 scale, 0x08/0x0A s16 x/y, 0x0C flags (0x40: x/y already in screen units,
  * 0x80: drop shadow, == 1: centred), 0x0D icon (0 = text), 0x0E..0x11 RGBA, 0x15 measure, 0x1C the string.
  * Icons come from the 8-byte table g_text_icon_table (w, h, scale/128, flags, texture) and go through the sprite
- * descriptor D_80090410 and hud_image_draw; g_text_icon_animated's texture animates with the frame counter g_text_icon_anim_frame. */
+ * descriptor g_hud_sprite_desc and hud_image_draw; g_text_icon_animated's texture animates with the frame counter g_text_icon_anim_frame. */
 extern s32 g_text_icon_anim_frame; /* was D_80086070 */
 extern u8 g_text_render_dl[]; /* was D_80085D30 */
 extern u8 g_text_icon_table[]; /* was D_80085D70 */
 extern u8 g_text_icon_animated[]; /* was D_80085E38 */
-extern u8 D_80090410[];
-extern f32 D_800901BC;
-extern f32 D_800901C0;
+extern u8 g_hud_sprite_desc[]; /* was D_80090410 */
+extern f32 g_hud_scale_x; /* was D_800901BC */
+extern f32 g_hud_scale_y; /* was D_800901C0 */
 extern f32 g_text_anchor_proj_param; /* was D_80099014 */
-extern s32 D_800BEDCC;
+extern s32 g_frame_count; /* was D_800BEDCC */
 extern u8 g_text_bg_r; /* was D_800CC18C */
 extern u8 g_text_bg_g; /* was D_800CC18D */
 extern u8 g_text_bg_b; /* was D_800CC18E */
@@ -260,8 +260,8 @@ Gfx *text_queue_draw(Gfx *arg0) {
                 if (item[0xC] & 0x40) {
                     item[0xC] &= 0xBF;
                 } else {
-                    *(s16 *)(item + 0x8) = (s32)((f32) * (s16 *)(item + 0x8) * D_800901BC);
-                    *(s16 *)(item + 0xA) = (s32)((f32) * (s16 *)(item + 0xA) * D_800901C0);
+                    *(s16 *)(item + 0x8) = (s32)((f32) * (s16 *)(item + 0x8) * g_hud_scale_x);
+                    *(s16 *)(item + 0xA) = (s32)((f32) * (s16 *)(item + 0xA) * g_hud_scale_y);
                 }
                 if (item[0xC] & 0x80) {
                     shadow = 1;
@@ -307,8 +307,8 @@ Gfx *text_queue_draw(Gfx *arg0) {
                 gdl++;
                 scale = (f32)(u32)icon[2] * 0.0078125f;
                 if (icon[3] & 2) {
-                    *(s16 *)(D_80090410 + 6) = 0x10;
-                    *(s16 *)(D_80090410 + 8) = 0x10;
+                    *(s16 *)(g_hud_sprite_desc + 6) = 0x10;
+                    *(s16 *)(g_hud_sprite_desc + 8) = 0x10;
                 }
                 if (icon[3] & 1) {
                     gdl->words.w0 = 0xE7000000;
@@ -317,10 +317,10 @@ Gfx *text_queue_draw(Gfx *arg0) {
                     gdl->words.w0 = 0xFB000000;
                     gdl->words.w1 = (item[0xE] << 24) | (item[0xF] << 16) | (item[0x10] << 8) | item[0x11];
                     gdl++;
-                    *(s32 *)D_80090410 = *(s32 *)(icon - 4);
-                    gdl = hud_image_draw(gdl, D_80090410, *(s16 *)(item + 0x8), *(s16 *)(item + 0xA), icon[-8],
+                    *(s32 *)g_hud_sprite_desc = *(s32 *)(icon - 4);
+                    gdl = hud_image_draw(gdl, g_hud_sprite_desc, *(s16 *)(item + 0x8), *(s16 *)(item + 0xA), icon[-8],
                                         icon[-7], scale, 0);
-                    v = (D_800BEDCC * 2) & 0x7F;
+                    v = (g_frame_count * 2) & 0x7F;
                     if (v >= 0x40) {
                         v = 0x7F - v;
                     }
@@ -336,15 +336,15 @@ Gfx *text_queue_draw(Gfx *arg0) {
                 gdl->words.w0 = 0xFB000000;
                 gdl->words.w1 = (item[0xE] << 24) | (item[0xF] << 16) | (item[0x10] << 8) | item[0x11];
                 gdl++;
-                *(s32 *)D_80090410 = *(s32 *)(icon + 4);
+                *(s32 *)g_hud_sprite_desc = *(s32 *)(icon + 4);
                 if (icon == g_text_icon_animated) {
                     v = (g_text_icon_anim_frame >> 1) % 10;
                     if (v >= 6) {
                         v = 10 - v;
                     }
-                    *(s32 *)D_80090410 = *(s32 *)(icon + 4) + v;
+                    *(s32 *)g_hud_sprite_desc = *(s32 *)(icon + 4) + v;
                 }
-                gdl = hud_image_draw(gdl, D_80090410, *(s16 *)(item + 0x8), *(s16 *)(item + 0xA), icon[0], icon[1],
+                gdl = hud_image_draw(gdl, g_hud_sprite_desc, *(s16 *)(item + 0x8), *(s16 *)(item + 0xA), icon[0], icon[1],
                                     scale, 0);
                 gdl->words.w0 = 0xDE000000;
                 gdl->words.w1 = (u32)g_text_render_dl;
@@ -353,8 +353,8 @@ Gfx *text_queue_draw(Gfx *arg0) {
                 gdl->words.w1 = 0x504240;
                 gdl++;
                 if (icon[3] & 2) {
-                    *(s16 *)(D_80090410 + 6) = 0x20;
-                    *(s16 *)(D_80090410 + 8) = 0x20;
+                    *(s16 *)(g_hud_sprite_desc + 6) = 0x20;
+                    *(s16 *)(g_hud_sprite_desc + 8) = 0x20;
                 }
                 next = *(u8 **)(item + 0x18);
             }
@@ -452,7 +452,7 @@ s32 ring_buffer_advance(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     }
     return arg2;
 }
-// text_queue_put: appends a record (u32 length padded to 4, then the bytes) to the ring buffer q (D_800427A0:
+// text_queue_put: appends a record (u32 length padded to 4, then the bytes) to the ring buffer q (g_mp3_text_queue:
 // +0 buffer, +4 size, +8 read, +C write); returns 1 when it does not fit, else 0 (also for no data). The padded
 // length is copied from src too (up to 3 bytes past len, as on N64).
 /* was func_15043BB8 */

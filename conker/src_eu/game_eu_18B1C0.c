@@ -43,7 +43,7 @@ void light_set_level_colour(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
         (*(s8 *)((u8 *)(&g_level_light_colour) + 0)) = (s8) arg0;
         (*(s8 *)((u8 *)(&g_level_light_colour) + 1)) = (s8) arg1;
         (*(s8 *)((u8 *)(&g_level_light_colour) + 2)) = (s8) arg2;
-        D_800DCD7C = 1;
+        g_light_vertex_lighting = 1;
         g_level_colour_priority = (u8) temp_t6;
     }
 }
@@ -413,11 +413,11 @@ void light_get_tint_zone(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *a
         arg4[0] = ((u8 *)g_level_light_dir)[0];
         arg4[1] = ((u8 *)g_level_light_dir)[1];
         arg4[2] = ((u8 *)g_level_light_dir)[2];
-        arg5[0] = D_800DCD28[0];
-        arg5[1] = D_800DCD28[1];
-        arg5[2] = D_800DCD28[2];
-        *arg6 = D_800DCD3C;
-        *arg7 = D_800DCD3D;
+        arg5[0] = g_level_tint_colour[0];
+        arg5[1] = g_level_tint_colour[1];
+        arg5[2] = g_level_tint_colour[2];
+        *arg6 = g_level_tint_strength_b;
+        *arg7 = g_level_tint_strength_a;
     }
 }
 
@@ -525,7 +525,7 @@ block_8:
 }
 void light_get_zone_colour(s32, s32, s32, s32, u8 *, s32, s32);
 extern u8 g_light_count; /* was D_800DA241 */
-extern u8 *D_800DA248;
+extern u8 *g_point_light_ptrs; /* was D_800DA248 */
 
 /* was func_1515EDF8 */
 void light_compute_point_colour(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, s32 arg6, s32 arg7) {
@@ -584,7 +584,7 @@ void light_compute_point_colour(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4
     var_v1 = 0;
     temp_a1 = (g_light_count & 0x7F) - 1;
     if (temp_a1 > 0) {
-        var_a0 = &D_800DA248;
+        var_a0 = &g_point_light_ptrs;
         do {
             temp_v0 = *var_a0;
             var_v1 += 1;

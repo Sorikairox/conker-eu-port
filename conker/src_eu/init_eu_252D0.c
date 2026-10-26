@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u32 D_80042D48; // __osBaseCounter
-extern OSTime D_80042D40; // __osCurrentTime
+extern u32 g_os_base_counter; /* was D_80042D48 */ // __osBaseCounter
+extern OSTime g_os_current_time; /* was D_80042D40 */ // __osCurrentTime
 
 OSTime osGetTime(void) {
     u32 tmptime;
@@ -13,8 +13,8 @@ OSTime osGetTime(void) {
 
     saveMask = __osDisableInt();
     tmptime = osGetCount();
-    elapseCount = tmptime - D_80042D48;
-    currentCount = D_80042D40;
+    elapseCount = tmptime - g_os_base_counter;
+    currentCount = g_os_current_time;
     __osRestoreInt(saveMask);
     return currentCount + elapseCount;
 }

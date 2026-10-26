@@ -1,7 +1,7 @@
 # P255 collision_ceiling_static (ceiling_probe) mutants: sed % setup names
 s/if (maxY < pos\[1\]) {/if (maxY <= pos[1]) {/ % eqmax
 1,/out->unk1C \&= ~2;/s/out->unk1C \&= ~2;/out->unk1C \&= ~4;/ % above
-s/out->unk0 = D_800990F0;/out->unk0 = 1000.0f;/ % eqmax n0
+s/out->unk0 = g_coll_k_90f0;/out->unk0 = 1000.0f;/ % eqmax n0
 s/collision_select_area(0);/collision_select_area(1);/ % base
 s/n = floor_collect_level_tris((s32) pos\[0\], (s32) pos\[2\]);/n = floor_collect_level_tris((s32) pos[2], (s32) pos[0]);/ % base
 s/\* 0.00390625f;/* 0.0078125f;/ % base
@@ -9,9 +9,9 @@ s/if (pos\[1\] <= d \&\&/if (pos[1] < d \&\&/ % eqd
 s/\&\& d < out->unk0) {/\&\& d <= out->unk0) {/ % tie
 s/            best = i;/            best = 0;/ % order
 s/if (best == -1) {/if (best == -2) {/ % n0 eqmax
-s/off = D_800D3720\[best\].unk8 \* 16;/off = D_800D3720[best].unk8 * 12;/ % base
+s/off = g_floor_hits\[best\].unk8 \* 16;/off = g_floor_hits[best].unk8 * 12;/ % base
 s/out->unk4\[j\]\[1\] = p\[1\];/out->unk4[j][1] = p[2];/ % base
-s/- D_800DC26C) \/ 12\];/- D_800DC26C) \/ 16];/ % second
+s/- g_level_tri_table) \/ 12\];/- g_level_tri_table) \/ 16];/ % second
 s/out->unk1D = 1;/out->unk1D = 2;/ % base
 s/out->unk1C |= 5;/out->unk1C |= 7;/ % toohigh
 s/out->unk20 = 0;/out->unk20 = 1;/ % base

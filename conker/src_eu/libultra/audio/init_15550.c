@@ -21,11 +21,11 @@ typedef struct {
     f32 unk34;  // used
 } struct154;
 
-extern N_ALUnknownStruct1 *D_8002BA20;
-extern N_ALUnknownStruct1 *D_8002BA24;
-extern N_ALUnknownStruct1 *D_8002BA28;
-extern N_ALSndPlayer *D_8002BA2C;
-extern s16 D_8002BA30;
+extern N_ALUnknownStruct1 *g_sndp_active_head; /* was D_8002BA20 */
+extern N_ALUnknownStruct1 *g_sndp_active_tail; /* was D_8002BA24 */
+extern N_ALUnknownStruct1 *g_sndp_free_list; /* was D_8002BA28 */
+extern N_ALSndPlayer *g_sndp_player; /* was D_8002BA2C */
+extern s16 g_sndp_active_count; /* was D_8002BA30 */
 
 void n_sndp_release_state(N_ALUnknownStruct1 *arg0);
 
@@ -40,7 +40,7 @@ void n_csp_set_bank(N_ALCSPlayer *csp, s32 arg1) {
 }
 
 // s127: DK64 n_sndplayer.c func_global_asm_80735AA0 (sound player init) with Conker's 0x58-byte sound
-// states, the D_8002BA44 driver, an extra config word at sndp 0x54 and the 4-arg n_alEvtqPostEvent
+// states, the g_audio_synth driver, an extra config word at sndp 0x54 and the 4-arg n_alEvtqPostEvent
 // s127: DK64 n_sndplayer.c func_global_asm_80735DBC (_n_handleEvent) with Conker's changes: sounds are
 // loaded on demand (event 0x4000 -> n_synth_load_instrument, retried while unk40 > 0), no-sound events are
 // re-posted, fx bus (0x2000) and 0x8000 events, the dead "freed too early" prints in the stop case
@@ -86,7 +86,7 @@ typedef struct {
 } SndEvt155;
 
 #define SND_VOL155(state, sound, keymap) \
-    ((((s16 *)D_80042C58)[(keymap)->keyMin & 0x1f] * ((state)->envvol * (state)->vol * (sound)->sampleVolume / 0x3f01)) / 0x7fff)
+    ((((s16 *)g_sndp_group_volumes)[(keymap)->keyMin & 0x1f] * ((state)->envvol * (state)->vol * (sound)->sampleVolume / 0x3f01)) / 0x7fff)
 #define SND_MIN155(a, b) ((a) < (b) ? (a) : (b))
 #define SND_MAX155(a, b) ((a) > (b) ? (a) : (b))
 
@@ -116,8 +116,8 @@ typedef struct {
     /* 0x54 */ s32 unk54;
 } SndPlayer155;
 
-extern N_ALSynth *D_8002BA44;
-extern u16 *D_80042C58;
+extern N_ALSynth *g_audio_synth; /* was D_8002BA44 */
+extern u16 *g_sndp_group_volumes; /* was D_80042C58 */
 s32 n_sndp_voice_handler(N_ALSndPlayer *sp);
 
 /* was func_100155A0 */
@@ -127,21 +127,21 @@ s32 n_sndp_init(SndpConfig155 *c) {
     N_ALEvent evt;
     SndState155 *sndState;
 
-    D_8002BA2C->maxSounds = c->maxSounds;
-    D_8002BA2C->target = 0;
-    D_8002BA2C->drvr = D_8002BA44;
-    D_8002BA2C->frameTime = 16000;
+    g_sndp_player->maxSounds = c->maxSounds;
+    g_sndp_player->target = 0;
+    g_sndp_player->drvr = g_audio_synth;
+    g_sndp_player->frameTime = 16000;
     items = alHeapAlloc(c->heap, c->maxStates, sizeof(SndState155));
-    D_8002BA2C->sndState = items;
-    ((SndPlayer155 *)D_8002BA2C)->unk54 = c->unk10;
+    g_sndp_player->sndState = items;
+    ((SndPlayer155 *)g_sndp_player)->unk54 = c->unk10;
     items = alHeapAlloc(c->heap, c->maxEvents, sizeof(N_ALEventListItem));
-    n_alEvtqNew(&D_8002BA2C->evtq, items, c->maxEvents);
-    D_8002BA28 = D_8002BA2C->sndState;
+    n_alEvtqNew(&g_sndp_player->evtq, items, c->maxEvents);
+    g_sndp_free_list = g_sndp_player->sndState;
     for (i = 1; i < c->maxStates; i++) {
         ALLink *ln;
         ALLink *to;
 
-        sndState = D_8002BA2C->sndState;
+        sndState = g_sndp_player->sndState;
         ln = (ALLink *)(i + sndState);
         to = (ALLink *)(i + sndState - 1);
         ln->next = to->next;
@@ -152,18 +152,18 @@ s32 n_sndp_init(SndpConfig155 *c) {
         to->next = ln;
     }
 
-    D_80042C58 = alHeapAlloc(c->heap, 2, c->unk14);
+    g_sndp_group_volumes = alHeapAlloc(c->heap, 2, c->unk14);
     for (i = 0; i < c->unk14; i++) {
-        D_80042C58[i] = 0x7FFF;
+        g_sndp_group_volumes[i] = 0x7FFF;
     }
 
-    D_8002BA2C->node.next = NULL;
-    D_8002BA2C->node.handler = n_sndp_voice_handler;
-    D_8002BA2C->node.clientData = D_8002BA2C;
-    n_alSynAddPlayer(D_8002BA2C);
+    g_sndp_player->node.next = NULL;
+    g_sndp_player->node.handler = n_sndp_voice_handler;
+    g_sndp_player->node.clientData = g_sndp_player;
+    n_alSynAddPlayer(g_sndp_player);
     evt.type = 0x20;
-    n_alEvtqPostEvent(&D_8002BA2C->evtq, &evt, D_8002BA2C->frameTime, 3);
-    D_8002BA2C->nextDelta = n_alEvtqNextEvent(&D_8002BA2C->evtq, &D_8002BA2C->nextEvent);
+    n_alEvtqPostEvent(&g_sndp_player->evtq, &evt, g_sndp_player->frameTime, 3);
+    g_sndp_player->nextDelta = n_alEvtqNextEvent(&g_sndp_player->evtq, &g_sndp_player->nextEvent);
 }
 
 /* was func_10015878 */
@@ -230,7 +230,7 @@ void _n_handleEvent(SndEvt155 *event)
                         && event->type != 0x800 && event->type != 0x2000) {
                     state->unk40--;
                 }
-                n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)event, 33333, 2);
+                n_alEvtqPostEvent(&g_sndp_player->evtq, (N_ALEvent *)event, 33333, 2);
             } else {
                 n_sndp_free_state(state);
             }
@@ -238,19 +238,19 @@ void _n_handleEvent(SndEvt155 *event)
             switch (event->type) {
             case 0x4000:
                 if (sound == NULL) {
-                    sound = n_synth_load_instrument(D_8002BA2C->drvr, &state->unk3C->unkC, state->unk4C);
+                    sound = n_synth_load_instrument(g_sndp_player->drvr, &state->unk3C->unkC, state->unk4C);
                     state->sound = sound;
                     if (sound == NULL) {
                         event->type = 0x4000;
                         state->state = 5;
                         state->unk40--;
-                        n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)event, 33333, 2);
+                        n_alEvtqPostEvent(&g_sndp_player->evtq, (N_ALEvent *)event, 33333, 2);
                         break;
                     }
                 }
                 if (sound != NULL) {
                     if ((u32)sound->envelope < 0x1000000) {
-                        n_bnkf_patch_sound(sound, sound, ((SndPlayer155 *)D_8002BA2C)->unk54);
+                        n_bnkf_patch_sound(sound, sound, ((SndPlayer155 *)g_sndp_player)->unk54);
                     }
                     if (((u32)sound->envelope & 0xFF000003) != 0x80000000) {
                         break;
@@ -280,7 +280,7 @@ void _n_handleEvent(SndEvt155 *event)
                 config.priority = state->priority;
                 config.unityPitch = 0;
                 config.unk8 = state->unk3C->unkC->unk10[state->unk4C];
-                sp70 = D_8002BA30 >= D_8002BA2C->maxSounds;
+                sp70 = g_sndp_active_count >= g_sndp_player->maxSounds;
                 if (!sp70 || (state->flags & 0x10)) {
                     hasvoice = n_alSynAllocVoice(&state->voice, &config);
                 }
@@ -288,7 +288,7 @@ void _n_handleEvent(SndEvt155 *event)
                     if ((state->flags & 0x12) || state->unk40 > 0) {
                         state->state = 4;
                         state->unk40--;
-                        n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)event, 33333, 2);
+                        n_alEvtqPostEvent(&g_sndp_player->evtq, (N_ALEvent *)event, 33333, 2);
                     } else {
                         n_sndp_free_state(state);
                     }
@@ -298,27 +298,27 @@ void _n_handleEvent(SndEvt155 *event)
                 state->envvol = sound->envelope->attackVolume;
                 state->fxbus = config.fxBus;
                 delta = sound->envelope->attackTime / state->pitch / state->basepitch;
-                state->endtime = D_8002BA2C->curTime + delta;
+                state->endtime = g_sndp_player->curTime + delta;
                 vol = SND_MAX155(0, SND_VOL155(state, sound, keymap) - 1);
                 tmppan = state->pan + sound->samplePan - AL_PAN_CENTER;
                 pan = SND_MIN155(SND_MAX155(tmppan, 0), 127);
                 fxmix = (state->fxmix & 0x7f) + (keymap->keyMax & 0xf) * 8;
                 fxmix = SND_MIN155(127, SND_MAX155(0, fxmix));
                 fxmix |= state->fxmix & 0x80;
-                n_synth_release_instrument(D_8002BA2C->drvr, state->unk3C->unkC, state->unk4C);
+                n_synth_release_instrument(g_sndp_player->drvr, state->unk3C->unkC, state->unk4C);
                 n_alSynStartVoiceParams(&state->voice, sound->wavetable, state->pitch * state->basepitch, vol, pan, fxmix, 0, 0.0f, 0, delta);
                 state->state = AL_PLAYING;
-                D_8002BA30++;
+                g_sndp_active_count++;
                 if ((state->flags & 2) == 0) {
                     if (delta == 0) {
                         state->envvol = sound->envelope->decayVolume;
                         vol = SND_MAX155(0, SND_VOL155(state, sound, keymap) - 1);
                         delta = sound->envelope->decayTime / state->basepitch / state->pitch;
-                        state->endtime = D_8002BA2C->curTime + delta;
+                        state->endtime = g_sndp_player->curTime + delta;
                         n_alSynSetVol(&state->voice, vol, delta);
                         sp94.type = 2;
                         sp94.state = state;
-                        n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)&sp94, delta, 2);
+                        n_alEvtqPostEvent(&g_sndp_player->evtq, (N_ALEvent *)&sp94, delta, 2);
                         if (state->flags & 0x20) {
                             n_sndp_post_pitch_update(state);
                         }
@@ -326,7 +326,7 @@ void _n_handleEvent(SndEvt155 *event)
                         sp94.type = 0x40;
                         sp94.state = state;
                         delta = sound->envelope->attackTime / state->pitch / state->basepitch;
-                        n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)&sp94, delta, 2);
+                        n_alEvtqPostEvent(&g_sndp_player->evtq, (N_ALEvent *)&sp94, delta, 2);
                     }
                 }
                 break;
@@ -337,7 +337,7 @@ void _n_handleEvent(SndEvt155 *event)
                 if (event->type != 0x1000 || (state->flags & 2)) {
                     switch (state->state) {
                     case AL_PLAYING:
-                        _n_removeEvents(&D_8002BA2C->evtq, (s32)state, 0x40);
+                        _n_removeEvents(&g_sndp_player->evtq, (s32)state, 0x40);
                         if (1) { // fakematch: dead debug prints
                         } else {
                             init_debug_printf_stub("snd %d has been freed too early - %d\n\n\n\n\n", state->state, state->state);
@@ -348,7 +348,7 @@ void _n_handleEvent(SndEvt155 *event)
                         if (delta) {
                             sp94.type = 0x80;
                             sp94.state = state;
-                            n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)&sp94, delta, 2);
+                            n_alEvtqPostEvent(&g_sndp_player->evtq, (N_ALEvent *)&sp94, delta, 2);
                             state->state = AL_STOPPING;
                         } else {
                             n_sndp_free_state(state);
@@ -399,7 +399,7 @@ void _n_handleEvent(SndEvt155 *event)
 
             case 0x2000:
                 state->fxbus = event->unk08;
-                if (state->fxbus >= D_8002BA44->maxAuxBusses) {
+                if (state->fxbus >= g_audio_synth->maxAuxBusses) {
                     state->fxbus = 0;
                 }
                 if (state->state == AL_PLAYING) {
@@ -412,7 +412,7 @@ void _n_handleEvent(SndEvt155 *event)
                 state->vol = event->unk08;
                 if (state->state == AL_PLAYING) {
                     vol = SND_MAX155(0, SND_VOL155(state, sound, keymap) - 1);
-                    n_alSynSetVol(&state->voice, vol, SND_MAX155(1000, state->endtime - D_8002BA2C->curTime));
+                    n_alSynSetVol(&state->voice, vol, SND_MAX155(1000, state->endtime - g_sndp_player->curTime));
                 }
                 break;
 
@@ -431,11 +431,11 @@ void _n_handleEvent(SndEvt155 *event)
                     state->envvol = sound->envelope->decayVolume;
                     vol = SND_MAX155(0, SND_VOL155(state, sound, keymap) - 1);
                     delta = sound->envelope->decayTime / state->basepitch / state->pitch;
-                    state->endtime = D_8002BA2C->curTime + delta;
+                    state->endtime = g_sndp_player->curTime + delta;
                     n_alSynSetVol(&state->voice, vol, delta);
                     sp94.type = 2;
                     sp94.state = state;
-                    n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)&sp94, delta, 2);
+                    n_alEvtqPostEvent(&g_sndp_player->evtq, (N_ALEvent *)&sp94, delta, 2);
                     if (state->flags & 0x20) {
                         n_sndp_post_pitch_update(state);
                     }
@@ -479,7 +479,7 @@ void n_sndp_free_state(N_ALUnknownStruct1 *arg0) {
         n_alSynFreeVoice(&arg0->unk10);
     }
     n_sndp_release_state(arg0);
-    _n_removeEvents(&D_8002BA2C->evtq, (s32) arg0, 0xFFFF);
+    _n_removeEvents(&g_sndp_player->evtq, (s32) arg0, 0xFFFF);
 }
 
 /* was func_10016F00 */
@@ -494,7 +494,7 @@ void n_sndp_post_pitch_update(struct154 *arg0) {
     event.msg.vol.voice = arg0;
     event.msg.vol.delta = *(s32*)&res;
 
-    n_alEvtqPostEvent(&D_8002BA2C->evtq, &event, 33333, 2);
+    n_alEvtqPostEvent(&g_sndp_player->evtq, &event, 33333, 2);
 }
 
 /* was func_10016F80 */
@@ -597,9 +597,9 @@ N_ALUnknownStruct1 *n_sndp_alloc_state(s32 arg0, s16 arg1) {
     N_ALUnknownStruct1 *sp1C;
 
     mask = osSetIntMask(1);
-    sp24 = D_8002BA28;
+    sp24 = g_sndp_free_list;
     if (sp24 != 0) {
-        D_8002BA28 = sp24->node.next;
+        g_sndp_free_list = sp24->node.next;
         sp1C = sp24;
         if (sp1C->node.next) {
             sp1C->node.next->prev = sp1C->node.prev;
@@ -607,16 +607,16 @@ N_ALUnknownStruct1 *n_sndp_alloc_state(s32 arg0, s16 arg1) {
         if (sp1C->node.prev) {
             sp1C->node.prev->next = sp1C->node.next;
         }
-        if (D_8002BA20) {
-            sp24->node.next = D_8002BA20;
+        if (g_sndp_active_head) {
+            sp24->node.next = g_sndp_active_head;
             sp24->node.prev = NULL;
-            D_8002BA20->node.prev = sp24;
-            D_8002BA20 = sp24;
+            g_sndp_active_head->node.prev = sp24;
+            g_sndp_active_head = sp24;
         } else {
             sp24->node.prev = 0;
             sp24->node.next = sp24->node.prev;
-            D_8002BA20 = sp24;
-            D_8002BA24 = sp24;
+            g_sndp_active_head = sp24;
+            g_sndp_active_tail = sp24;
         }
         osSetIntMask(mask);
         sp24->unkC = 0;
@@ -638,11 +638,11 @@ N_ALUnknownStruct1 *n_sndp_alloc_state(s32 arg0, s16 arg1) {
 void n_sndp_release_state(N_ALUnknownStruct1 *arg0) {
     N_ALUnknownStruct1 *sp4;
 
-    if (D_8002BA20 == arg0) {
-        D_8002BA20 = arg0->node.next;
+    if (g_sndp_active_head == arg0) {
+        g_sndp_active_head = arg0->node.next;
     }
-    if (D_8002BA24 == arg0) {
-        D_8002BA24 = arg0->node.prev;
+    if (g_sndp_active_tail == arg0) {
+        g_sndp_active_tail = arg0->node.prev;
     }
 
     sp4 = arg0;
@@ -654,18 +654,18 @@ void n_sndp_release_state(N_ALUnknownStruct1 *arg0) {
         sp4->node.prev->next = sp4->node.next;
     }
 
-    if (D_8002BA28) {
-        arg0->node.next = D_8002BA28;
+    if (g_sndp_free_list) {
+        arg0->node.next = g_sndp_free_list;
         arg0->node.prev = NULL;
-        D_8002BA28->node.prev = arg0;
-        D_8002BA28 = arg0;
+        g_sndp_free_list->node.prev = arg0;
+        g_sndp_free_list = arg0;
     } else {
         arg0->node.prev = NULL;
         arg0->node.next = arg0->node.prev;
-        D_8002BA28 = arg0;
+        g_sndp_free_list = arg0;
     }
     if (arg0->unk53 & 4) {
-        D_8002BA30 -= 1;
+        g_sndp_active_count -= 1;
     }
     arg0->unk54 = 0;
     if (arg0->unk38) {
@@ -710,7 +710,7 @@ N_ALUnknownStruct1 *n_sndp_play_sound(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32
         do {
             sp34 = n_sndp_alloc_state(arg0, arg1 - 1);
             if (sp34 != NULL) {
-                D_8002BA2C->target = (s32) sp34;
+                g_sndp_player->target = (s32) sp34;
                 ev.type = 0x4000;
                 ev.voice = sp34;
                 sp34->pad4F[0] = arg3;
@@ -719,7 +719,7 @@ N_ALUnknownStruct1 *n_sndp_play_sound(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32
                 sp34->pad4F[1] = arg5;
                 sp34->pad4F[2] = arg6;
                 sp28 = 0;
-                n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *) &ev, sp28 + 1, 2);
+                n_alEvtqPostEvent(&g_sndp_player->evtq, (N_ALEvent *) &ev, sp28 + 1, 2);
                 sp30 = sp34;
             }
             arg1 = 0;
@@ -759,7 +759,7 @@ N_ALUnknownStruct1 *n_sndp_play_sound(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32
 //             sp34->unk50 = arg5;
 //             sp34->unk51 = arg6;
 //             sp28 = 0;
-//             n_alEvtqPostEvent(D_8002BA2C + 20, &sp18, sp28 + 1, 2);
+//             n_alEvtqPostEvent(g_sndp_player + 20, &sp18, sp28 + 1, 2);
 //             sp30 = sp34;
 //         }
 //         arg1 = (u16)0;
@@ -786,7 +786,7 @@ void n_sndp_stop_sound(N_ALUnknownStruct1 *arg0) {
         event.type = 1024;
         event.msg.unknown1.unk0 = arg0;
         event.msg.unknown1.unk0->unk53 &= -0x11;
-        n_alEvtqPostEvent(&D_8002BA2C->evtq, &event, 0, 2);
+        n_alEvtqPostEvent(&g_sndp_player->evtq, &event, 0, 2);
     }
 }
 
@@ -801,14 +801,14 @@ void n_sndp_stop_with_flags(u8 arg0) {
     N_ALUnknownStruct1 *p;
 
     mask = osSetIntMask(1);
-    p = D_8002BA20;
+    p = g_sndp_active_head;
     if (p != NULL) {
         do {
             ev.type = 0x400;
             ev.cur = p;
             if ((p->unk53 & arg0) == arg0) {
                 ev.cur->unk53 &= ~0x10;
-                n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *) &ev, 0, 2);
+                n_alEvtqPostEvent(&g_sndp_player->evtq, (N_ALEvent *) &ev, 0, 2);
             }
             p = p->node.next;
         } while (p != NULL);
@@ -824,7 +824,7 @@ void n_sndp_stop_with_flags(u8 arg0) {
 //     struct31 *sp18;
 //
 //     mask = osSetIntMask(1);
-//     sp18 = D_8002BA20;
+//     sp18 = g_sndp_active_head;
 //     if (sp18 != 0) {
 //         do
 //         {
@@ -832,7 +832,7 @@ void n_sndp_stop_with_flags(u8 arg0) {
 //             sp20 = sp18;
 //             if ((sp18->unk53 & arg0) == arg0) {
 //                 sp20->unk53 = sp20->unk53 & -0x11;
-//                 n_alEvtqPostEvent(D_8002BA2C + 20, &sp1C, 0, 2);
+//                 n_alEvtqPostEvent(g_sndp_player + 20, &sp1C, 0, 2);
 //             }
 //             sp18 = sp18->unk0;
 //         }
@@ -859,11 +859,11 @@ void n_sndp_post_event(s32 arg0, s16 type, s32 arg2) {
         event.type = type;
         event.msg.vol.voice = arg0;
         event.msg.vol.delta = arg2;
-        n_alEvtqPostEvent(&D_8002BA2C->evtq, &event, 0, 2);
+        n_alEvtqPostEvent(&g_sndp_player->evtq, &event, 0, 2);
     }
 }
 
-extern u16 *D_80042C58;
+extern u16 *g_sndp_group_volumes; /* was D_80042C58 */
 /* was func_10017780 */
 void n_sndp_set_group_volume(u8 arg0, u16 arg1) {
     s32 mask;
@@ -876,14 +876,14 @@ void n_sndp_set_group_volume(u8 arg0, u16 arg1) {
     } ev;
 
     mask = osSetIntMask(1);
-    p = D_8002BA20;
-    D_80042C58[arg0] = arg1;
+    p = g_sndp_active_head;
+    g_sndp_group_volumes[arg0] = arg1;
     if ((count = 0, p != NULL)) { // fakematch: count init ordered after the p load
         do {
             if ((p->unkC != 0) && ((*(u8 *)(*(s32 *)(p->unkC + 4) + 2) & 0x1F) == arg0)) {
                 ev.type = 0x800;
                 ev.cur = p;
-                n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *) &ev, 0, 2);
+                n_alEvtqPostEvent(&g_sndp_player->evtq, (N_ALEvent *) &ev, 0, 2);
             }
         } while ((count++, p = p->node.next) != NULL); // fakematch: count++ in the condition
     }
@@ -900,7 +900,7 @@ void n_sndp_set_group_volume(u8 arg0, u16 arg1) {
 //     struct31 *temp_t4_2;
 //
 //     sp34 = osSetIntMask(1);
-//     sp30 = D_8002BA20;
+//     sp30 = g_sndp_active_head;
 //     D_800428B8[arg0] = arg1;
 //     sp2C = 0;
 //     if (sp30 != 0) {
@@ -910,7 +910,7 @@ void n_sndp_set_group_volume(u8 arg0, u16 arg1) {
 //             // if ((temp_t4 != 0) && ((temp_t4->unk4->unk2 & 0x1F) == arg0)) {
 //             //     sp1C = 1024;
 //             //     sp20 = sp30;
-//             //     n_alEvtqPostEvent(D_8002BA2C + 20, &sp1C, 0, 2);
+//             //     n_alEvtqPostEvent(g_sndp_player + 20, &sp1C, 0, 2);
 //             // }
 //             sp2C = sp2C + 1;
 //             temp_t4_2 = sp30->unk0;

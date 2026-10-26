@@ -1,8 +1,8 @@
 extern u8 g_mp_last_hitter[];    /* per-racer input byte (bit 7 = trigger), consumed here; was D_800E0FE8 */
-extern s8 D_80087670[];    /* by difficulty D_800E1000: AI timer limit */
-extern s8 D_80087680[];    /* by difficulty: AI timer restart value (negated) */
-extern s16 D_80087664[];   /* by difficulty: boost time that forces a re-plan (-1 = never) */
-extern s8 D_80087688[];    /* by difficulty: chance (percent) to keep the old steering offsets */
+extern s8 g_race_ai_timer_max_by_diff[];    /* by difficulty g_race_difficulty: AI timer limit; was D_80087670; was D_800E1000 */
+extern s8 g_race_ai_timer_reset_by_diff[];    /* by difficulty: AI timer restart value (negated); was D_80087680 */
+extern s16 g_race_boost_replan_by_diff[];   /* by difficulty: boost time that forces a re-plan (-1 = never); was D_80087664 */
+extern s8 g_race_keep_steer_by_diff[];    /* by difficulty: chance (percent) to keep the old steering offsets; was D_80087688 */
 s32 rail_band_for_height(f32);
 s32 rail_racer_steer(s32, s32, s32, s32, s32, s32);
 void rail_events_assign_nodes(void);
@@ -10,7 +10,7 @@ s32 rail_pickup_slot_release(s32, s32);
 void rail_racer_send_event_14(s32, s32);
 void rail_racer_send_event_61(s32, s32);
 // rail_racers_update: script command 6 (event_action_rail; its result is read by the scripts). For every racer i of the rail
-// state D_800D27D0 (count +0x10): racers in the mask +0x14 (or newly seen ones, which are added to the mask +0x18) run
+// state g_race_state (count +0x10): racers in the mask +0x14 (or newly seen ones, which are added to the mask +0x18) run
 // their timers by the frame time g_frame_ticks, take their input byte g_mp_last_hitter[i] (bit 7 cleared), refresh their rail
 // node (+0x9C) and activity (+0x39C); a racer that is not started (+0x35C) and becomes active (or is new, or its object
 // has unk2FD set) is started: its team count moves, rail_pickup_slot_release(i, 1) resets its route, and bit i goes into the
@@ -20,7 +20,7 @@ void rail_racer_send_event_61(s32, s32);
 // +0x16B4 is set and, in race mode 0xB9, each player's +0x1574 counter is drawn (/50) on its viewport.
 // Returns the bit mask of the racers started this call.
 s32 rail_racers_update(void) {
-    u8 *rail = (u8 *) D_800D27D0;
+    u8 *rail = (u8 *) g_race_state;
     s32 mask = *(s32 *) (rail + 0x14);
     s32 seen = *(s32 *) (rail + 0x18);
     s32 n = *(s32 *) (rail + 0x10);
@@ -73,7 +73,7 @@ s32 rail_racers_update(void) {
         }
         obj = (u8 *) &g_objects[i];
         myTeam = team[i];
-        if (myTeam != 0 && *(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB9) {
+        if (myTeam != 0 && *(s16 *) ((u8 *) g_race_state + 0x16BC) == 0xB9) {
             obj[0x1E4] = 1;
         }
         prevAi = aiTimer[i];
@@ -96,7 +96,7 @@ s32 rail_racers_update(void) {
         }
         input[i] = g_mp_last_hitter[i];
         g_mp_last_hitter[i] &= 0x7F;
-        ((s32 *) ((u8 *) D_800D27D0 + 0x4DC))[i] = (*(u8 **) (obj + 0x31C))[0x19A];
+        ((s32 *) ((u8 *) g_race_state + 0x4DC))[i] = (*(u8 **) (obj + 0x31C))[0x19A];
         active[i] = player_stat_get(i, 4);
         node[i] = rail_band_for_height(*(f32 *) (obj + 0x18));
 
@@ -105,22 +105,22 @@ s32 rail_racers_update(void) {
         } else if (started[i] == 0) {
             /* the racer starts */
             if (obj[0x20F] != 0xFF) {
-                ((s32 *) ((u8 *) D_800D27D0 + 0x59C))[i] = obj[0x20F];
+                ((s32 *) ((u8 *) g_race_state + 0x59C))[i] = obj[0x20F];
             } else {
-                ((s32 *) ((u8 *) D_800D27D0 + 0x59C))[i] = -1;
+                ((s32 *) ((u8 *) g_race_state + 0x59C))[i] = -1;
             }
             started[i] = 1;
             cooldown[i] = 0;
             state[i] = 0;
-            ((s32 *) ((u8 *) D_800D27D0 + 0x5C))[i] = 1;
-            ((s32 *) ((u8 *) D_800D27D0 + 0x11C))[i] = -1;
+            ((s32 *) ((u8 *) g_race_state + 0x5C))[i] = 1;
+            ((s32 *) ((u8 *) g_race_state + 0x11C))[i] = -1;
             teamCount[myTeam]--;
             k = input[i] & 0x7F;
             if (k < n && myTeam != team[k]) {
                 teamCount[team[k]]++;
             }
-            if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) != 0xB9) {
-                ((s32 *) ((u8 *) D_800D27D0 + 0xFF0))[i] = 0;
+            if (*(s16 *) ((u8 *) g_race_state + 0x16BC) != 0xB9) {
+                ((s32 *) ((u8 *) g_race_state + 0xFF0))[i] = 0;
                 rail_pickup_slot_release(i, 1);
             }
             result |= bit;
@@ -128,7 +128,7 @@ s32 rail_racers_update(void) {
 
         /* steering towards the target (racer index + 2) */
         wrapped = TRUE;
-        if (target[i] != 0 && *(s16 *) ((u8 *) D_800D27D0 + 0x16BC) != 0xB8) {
+        if (target[i] != 0 && *(s16 *) ((u8 *) g_race_state + 0x16BC) != 0xB8) {
             replan = FALSE;
             if (state[i] != 1 && boost[i] < 0x1E) {
                 st = obj[0x232];
@@ -142,23 +142,23 @@ s32 rail_racers_update(void) {
                 if (st == 5) {
                     /* boost point: random spot within 50 of the racer, 40 above it, pulled halfway to the target */
                     boost[i] = 0x1E;
-                    ((f32 *) ((u8 *) D_800D27D0 + 0x1868))[i] = ((f32 *) &D_80087698)[D_800E1000];
-                    ((f32 *) ((u8 *) D_800D27D0 + 0x17A8))[i] = random_float() * 50.0f + *(f32 *) (obj + 0x14);
-                    ((f32 *) ((u8 *) D_800D27D0 + 0x17E8))[i] = *(f32 *) (obj + 0x18) + 40.0f;
-                    ((f32 *) ((u8 *) D_800D27D0 + 0x1828))[i] = random_float() * 50.0f + *(f32 *) (obj + 0x1C);
+                    ((f32 *) ((u8 *) g_race_state + 0x1868))[i] = ((f32 *) &g_race_speed_by_diff)[g_race_difficulty];
+                    ((f32 *) ((u8 *) g_race_state + 0x17A8))[i] = random_float() * 50.0f + *(f32 *) (obj + 0x14);
+                    ((f32 *) ((u8 *) g_race_state + 0x17E8))[i] = *(f32 *) (obj + 0x18) + 40.0f;
+                    ((f32 *) ((u8 *) g_race_state + 0x1828))[i] = random_float() * 50.0f + *(f32 *) (obj + 0x1C);
                     if (target[i] - 2 >= 2) {
                         other = (u8 *) &g_objects[target[i] - 2];
-                        ((f32 *) ((u8 *) D_800D27D0 + 0x17A8))[i] +=
+                        ((f32 *) ((u8 *) g_race_state + 0x17A8))[i] +=
                             (*(f32 *) (other + 0x14) - *(f32 *) (obj + 0x14)) * 0.5f;
-                        ((f32 *) ((u8 *) D_800D27D0 + 0x1828))[i] +=
+                        ((f32 *) ((u8 *) g_race_state + 0x1828))[i] +=
                             (*(f32 *) (other + 0x1C) - *(f32 *) (obj + 0x1C)) * 0.5f;
                     }
                 }
             }
             wrapped = FALSE;
-            lvl = D_800E1000;
+            lvl = g_race_difficulty;
             limit = 0;
-            if (D_80087670[lvl] < aiTimer[i]) {
+            if (g_race_ai_timer_max_by_diff[lvl] < aiTimer[i]) {
                 aiTimer[i] = 0;
                 prevAi = -1;
             }
@@ -166,38 +166,38 @@ s32 rail_racers_update(void) {
             if (aiTimer[i] >= 0 && prevAi < 0) {
                 limit = 1;
             }
-            if (D_80087664[D_800E1000] != -1 && boost[i] >= D_80087664[D_800E1000]) {
+            if (g_race_boost_replan_by_diff[g_race_difficulty] != -1 && boost[i] >= g_race_boost_replan_by_diff[g_race_difficulty]) {
                 replan = TRUE;
             }
-            rail = (u8 *) D_800D27D0;
+            rail = (u8 *) g_race_state;
             rail[0x1725 + i] += (s8) (((s8) rail[0x1705 + i] - (s8) rail[0x1725 + i]) >> 2);
-            rail = (u8 *) D_800D27D0;
+            rail = (u8 *) g_race_state;
             rail[0x1735 + i] += (s8) (((s8) rail[0x1715 + i] - (s8) rail[0x1735 + i]) >> 2);
-            rail = (u8 *) D_800D27D0;
+            rail = (u8 *) g_race_state;
             if (rail_racer_steer(i, target[i] - 2, limit, replan, (s8) rail[0x1725 + i], (s8) rail[0x1735 + i]) != 0
                 && state[i] != 1) {
                 boost[i] = 0;
             }
             if (aiTimer[i] == 0) {
                 /* new random steering offsets */
-                ((s8 *) D_800D27D0)[0x1705 + i] = 0;
-                ((s8 *) D_800D27D0)[0x1715 + i] = 0;
-                if (D_80087688[D_800E1000] < (s32) (random_float() * 100.0f)) {
+                ((s8 *) g_race_state)[0x1705 + i] = 0;
+                ((s8 *) g_race_state)[0x1715 + i] = 0;
+                if (g_race_keep_steer_by_diff[g_race_difficulty] < (s32) (random_float() * 100.0f)) {
                     if (0.5f < random_float()) {
-                        ((s8 *) D_800D27D0)[0x1705 + i] = -50;
+                        ((s8 *) g_race_state)[0x1705 + i] = -50;
                     } else {
-                        ((s8 *) D_800D27D0)[0x1705 + i] = 50;
+                        ((s8 *) g_race_state)[0x1705 + i] = 50;
                     }
                     if (0.5f < random_float()) {
-                        ((s8 *) D_800D27D0)[0x1715 + i] = 50;
+                        ((s8 *) g_race_state)[0x1715 + i] = 50;
                     } else {
-                        ((s8 *) D_800D27D0)[0x1715 + i] = 0;
+                        ((s8 *) g_race_state)[0x1715 + i] = 0;
                     }
                 }
             }
         }
-        if (wrapped && *(s16 *) ((u8 *) D_800D27D0 + 0x16BC) != 0xB8) {
-            aiTimer[i] = -D_80087680[D_800E1000];
+        if (wrapped && *(s16 *) ((u8 *) g_race_state + 0x16BC) != 0xB8) {
+            aiTimer[i] = -g_race_ai_timer_reset_by_diff[g_race_difficulty];
         }
         flags = *(u16 *) (obj + 0x22C);
         *(u16 *) (obj + 0x22C) = flags & ~0x200;
@@ -209,15 +209,15 @@ s32 rail_racers_update(void) {
             cooldown[i] = 20;
         }
     }
-    rail = (u8 *) D_800D27D0;
+    rail = (u8 *) g_race_state;
     *(s32 *) (rail + 0x18) = seen;
     if (g_frame_ticks != 0) {
-        *(f32 *) ((u8 *) D_800D27D0 + 0x16B4) = g_frame_ticks;
+        *(f32 *) ((u8 *) g_race_state + 0x16B4) = g_frame_ticks;
     } else {
-        *(f32 *) ((u8 *) D_800D27D0 + 0x16B4) = 1.0f;
+        *(f32 *) ((u8 *) g_race_state + 0x16B4) = 1.0f;
     }
     rail_events_assign_nodes();
-    if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB9) {
+    if (*(s16 *) ((u8 *) g_race_state + 0x16BC) == 0xB9) {
         /* each player's counter, centred on its viewport */
         view = *(u8 **) &g_player_cams;
         half = (s32) (*(f32 *) (view + 0x30) - *(f32 *) (view + 0x2C)) >> 1;

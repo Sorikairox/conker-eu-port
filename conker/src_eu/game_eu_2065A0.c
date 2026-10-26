@@ -4,7 +4,7 @@
 void rumble_strength_by_distance(u8 *arg0, f32 *arg1);
 
 
-extern u8 D_800BED64[];
+extern u8 g_rumble_pak_present[]; /* was D_800BED64 */
 /* was func_151D8D90 */
 s32 rumble_mask_has_pak(u8 arg0) {
     u8 i;
@@ -15,7 +15,7 @@ s32 rumble_mask_has_pak(u8 arg0) {
             if (t >= 4) {
                 return 0;
             }
-            if (D_800BED64[t] != 0) {
+            if (g_rumble_pak_present[t] != 0) {
                 return 1;
             }
         }
@@ -28,7 +28,7 @@ s32 screen_fade_alpha(s32);
 s32 hud_lens_is_off(s32);
 s32 memcpy(u8 *, structEU_151D8E18 *, s32);
 extern u8 g_unpause_settle_frames; /* was D_800BEEE2 */
-extern u8 D_800BEEE3;
+extern u8 g_rumble_stop_request; /* was D_800BEEE3 */
 
 /* was func_151D8E18 */
 s32 rumble_request(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3) {
@@ -44,7 +44,7 @@ s32 rumble_request(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3) {
     if (rumble_mask_has_pak(arg0->unk5) == 0) {
         return 0;
     }
-    if ((g_game_paused != 0) || (g_pause_open != 0) || (g_unpause_settle_frames != 0) || (D_800BEEE3 != 0)) {
+    if ((g_game_paused != 0) || (g_pause_open != 0) || (g_unpause_settle_frames != 0) || (g_rumble_stop_request != 0)) {
         return 0;
     }
     var_s1 = 0;

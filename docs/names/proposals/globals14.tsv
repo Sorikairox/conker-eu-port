@@ -1,0 +1,299 @@
+old	new	confidence	description
+D_10029400	g_rspboot_text	high	rspboot microcode text (ROM segment start); ucode_boot of the audio and gfx RSP tasks
+D_100294D0	g_rspboot_text_end	high	End of rspboot text (= aspMain text start); ucode_boot_size = end - start
+D_8002AE40	g_audio_thread_started	high	u8 set to 1 by audio_mgr_init once the audio thread runs; audio_thread_stop stops it only when set
+D_8002B194	g_audio_frame_count	high	Audio frame counter: picks the audio info buffer (% 3), stamps DMA buffer lastFrame, ages them in audio_clear_dma
+D_8002B198	g_audio_dma_count	high	Number of audio sample DMAs issued this frame (max 32); waited for and reset by audio_clear_dma
+D_8002B19C	g_audio_cmdlist_index	high	Which of the two audio command lists (g_audio_mgr ACMDList) is built this frame; toggled by audio_do_frame
+D_8002B1A0	g_snd_cache_dma_pending	high	Sound bank cache DMAs in flight (max 40), polled and decremented by snd_cache_update_dmas
+D_8002CCC0	g_audio_ucode_data	high	Audio microcode data block (0x800 bytes, holds the resample table); ucode_data of the audio task
+D_8003B560	g_sched_audio_queue	high	Scheduler audio task queue: audio_do_frame sends its OSScTask here; same EU variable as D_8003B200
+D_8003E3A0	g_audio_thread	high	OSThread of the audio manager (audio_thread_main), created by audio_mgr_init
+D_8003E720	g_audio_al_globals_ptr	med	Pointer to the audio library globals (set to &g_audio_al_globals by audio_mgr_init)
+D_8003E724	g_snd_cache_flush_request	high	Set by level_load; snd_cache_update_dmas then flushes the unused sound cache entries and clears it
+D_8003E728	g_audio_mgr	high	Audio manager (AmMgr): ACMDList[2] command list buffers, then audioInfo[3]
+D_8003E730	g_audio_mgr_audio_info	high	audioInfo[3] field of g_audio_mgr (+8): the three output frame buffers used round-robin
+D_8003E970	g_audio_frame_queue	high	Audio manager frame message queue (scheduler retrace client): audio_thread_main waits on it
+D_8003E988	g_audio_frame_msgs	high	Message buffer (8) of g_audio_frame_queue
+D_8003E9A8	g_audio_reply_queue	high	Audio task done queue (task msgQ): audio_thread_main waits on it after audio_do_frame
+D_8003E9C0	g_audio_reply_msgs	high	Message buffer (8) of g_audio_reply_queue
+D_8003E9E0	g_audio_al_globals	high	N_ALGlobals of the audio manager (n_alInit / n_alClose)
+D_800406A0	g_snd_cache	med	Sound bank cache state (struct147: +4 used list head, +8 DMA free list, +0x10 entry free list); its address is the audio thread stack top
+D_800406B8	g_audio_dma_buffers	high	Audio sample DMA buffers (AMDMABuffer array, 52 x 0x800 bytes), linked in audio_mgr_init
+D_80040A44	g_snd_cache_used_head	med	g_snd_cache +4 (EU name): head of the used sound cache entry list, unlinked in snd_cache_entry_free
+D_80040A50	g_snd_cache_free_list	med	g_snd_cache +0x10 (EU name): free list of sound cache entries, pushed in snd_cache_entry_free
+D_80040AC8	g_snd_cache_dma_bufs	med	Sound cache DMA records (50 x 24 bytes, 1200 bytes) linked by audio_mgr_init, handed out by snd_cache_dma_new
+D_80040F78	g_audio_dma_state	high	Audio DMA state (AMDMAState: initialized, firstUsed, firstFree) of audio_dma_new / audio_dma_callback
+D_80041324	g_audio_short_frame_hold	high	Frames left before audio_do_frame may use the short frame size again (2 after a short frame)
+D_80041328	g_audio_frame_samples_short	high	Short audio frame size (normal size - 184), used when the AI buffer is running full
+D_8004132C	g_audio_frame_samples	high	Normal audio frame size in samples (25 fps, rounded up to a multiple of 184 plus 184)
+D_80041330	g_audio_frame_buf_samples	high	Samples allocated per audio output buffer (normal frame size + 84)
+D_80041334	g_audio_cmdlist_len	med	Length in Acmds of each audio command list (config +8), stored by audio_mgr_init
+D_80041338	g_audio_dma_io_msgs	high	OSIoMesg array (32) of the audio sample DMAs started by audio_dma_callback
+D_80041638	g_audio_dma_queue	high	Completion queue of the audio sample DMAs (drained by audio_clear_dma)
+D_80041650	g_audio_dma_msgs	high	Message buffer (32) of g_audio_dma_queue
+D_800416D0	g_snd_cache_io_msgs	high	OSIoMesg array (40) of the sound bank cache DMAs (snd_cache_load_on_demand)
+D_80041A90	g_snd_cache_dma_queue	high	Completion queue of the sound bank cache DMAs, polled by snd_cache_update_dmas
+D_80041AA8	g_snd_cache_dma_msgs	high	Message buffer (40) of g_snd_cache_dma_queue
+D_8002C574	g_sound_pan_min_dist	med	f32 distance above which sound_calc_pan_from_xz normalises x before the asin
+D_8002C578	g_sound_pan_asin_scale	med	f64 scale from math_asin_scaled to the pan angle in sound_calc_pan_from_xz
+D_8002B070	g_music_open_level	low	Music mode value (arg / 2) set by music_set_b070_mode (level 2: from a door's open angle); defaults to 1 in the level31 callback
+D_8002B074	g_music_song_table	high	Song table, 16 bytes per song: +0 tempo, +4 type / flags, +8 per-frame callback, +0xC initial marker byte
+D_8002B078	g_music_song_table_type	high	+4 word of g_music_song_table (type in the low bits, 0x20 / 0x40 flags) viewed as its own array
+D_8002B9D4	g_music_slot_default_types	low	Default table given to new song slots (+8, read as per-channel group types by music_player_process_messages)
+D_8002B9F4	g_music_slot_default_masks	low	Default table given to new song slots (+0xC, read as per-marker channel masks by music_player_process_messages)
+D_8002C580	g_music_amb19_listener_y	high	f32 reference y of the level 0x13 ambience callback (distance from (x - 24, y - this))
+D_8002C584	g_music_amb19_far_dist_sq	high	f32 squared distance beyond which the level 0x13 ambience uses the minimum volume
+D_8002C588	g_music_amb19_full_dist	high	f32 full-volume distance of the level 0x13 ambience callback
+D_8002C58C	g_music_amb19_vol_per_dist	high	f32 volume per unit of distance of the level 0x13 ambience callback
+D_8002C590	g_music_amb19_height_limit	high	f32 height threshold of the level 0x13 ambience's second parameter
+D_8002C594	g_music_amb19_height_scale	high	f32 scale of the level 0x13 ambience's second parameter
+D_800417B0	g_music_player_songs	high	Per music sequence player (3): the song record it plays (NULL when idle)
+D_800418AC	g_music_player_marker_bits	high	Per music player: channel-group bits hit by markers this frame (bit 7 = player stopped)
+D_800419A8	g_music_song_slots	high	The 12 song slot records (100 bytes each); unk4 = -1 when free (music_song_slot_alloc)
+D_80041B60	g_music_pulse_decay	high	[3][16] per player and channel: pulse decay per frame tick, set from the marker interval
+D_80041C20	g_music_marker_time	high	Per music player: time of the last beat marker (cleared when a new song starts)
+D_80041C30	g_music_beat_time	high	Per music player: time of the last beat marker, used to measure the beat period
+D_80041C40	g_music_beat_period	high	Per music player: time between the last two beat markers
+D_80041C50	g_music_pulse_level	high	[3][16] per player and channel: beat pulse level (0x8000 at a marker, decays); objects dance to [player][0]
+D_80041D10	g_music_pulse_toggle	high	[3][16] per player and channel: pulse toggle bit flipped by the markers
+D_80041D40	g_music_pulse_player	high	Index of the music player that sent the last marker (row of g_music_pulse_level read by objects)
+D_80041E58	g_music_player_queues	high	The 3 message queues the music sequence players post their markers to
+D_80041F04	g_music_event_flags	med	Music event flags (bit 0 mute layers, bit 4 effect request, ...) posted by music_post_event_request
+D_80041F08	g_music_event_value	med	Music event request word: meter accumulator (level 4) or mode (level 0x1D / channel effect)
+D_80041F0C	g_music_event_param	med	Music event request parameters (count for the level 4 meter, effect params A = bits 0-7, B = bits 8..)
+D_800422A0	g_music_all_paused	high	s8 flag recorded by music_set_all_paused; music_update_all skips its work while set
+D_800427F4	g_mp3_voice_last_id	high	s16 id of the last MP3 voice asset started by mp3_voice_play (music ducking by music_update_all)
+D_8002C5A0	g_sound_footstep_table	high	Footstep sounds [22 surfaces][5 steps]: {sound base, variant count} (sound_surface_footstep)
+D_8003E708	g_sound_bank0	high	First instrument bank of the bank file, used by sound_voice_play (audio_system_init)
+D_80041F10	g_sound_stop_queue	high	Pending stop queue (16 entries {id, timer, slot}) processed by sound_stop_queue_process
+D_80041F50	g_sound_stop_queue_count	high	Number of entries in g_sound_stop_queue
+D_80041F54	g_sound_bus_volume	high	Current volume of sound groups 0 and 1, ramped toward g_sound_bus_volume_target by sound_update_frame
+D_80041F56	g_sound_bus_volume_lo	med	u16 low half of g_sound_bus_volume, passed to n_sndp_set_group_volume by sound_level_init
+D_80041F58	g_sound_bus_volume_rate	high	f32 ramp rate of g_sound_bus_volume toward its target (0.01 or 0.1 per frame)
+D_80041F5C	g_sound_variant_played	high	Per sound base: bitmask of the variants already played (bit 7 valid), allocated by sound_level_init
+D_80041F60	g_sound_pause_mute_state	high	Pause mute state applied by sound_update_frame (follows g_sound_pause_mute_request)
+D_80041F61	g_sound_pause_mute_request	high	Pause mute request set by sound_set_pause_mute: silences sound groups 0 and 1
+D_80041FD8	g_sound_fx_mix_boost	med	s8 added to each voice's effect (reverb) send in sound_voice_play; set per level, by the storm and trigger zones
+D_80041FD9	g_sound_default_fx_mode	med	Default voice effect mode (0 / 1) used by emitters without an explicit SFX_FX_MASK mode
+D_80041FDC	g_sound_bus_volume_target	high	Target volume of sound groups 0 and 1 (set per level and by scene events)
+D_80041FE0	g_sfx_emitters	high	The 32 positional sound emitter entries (0x30 bytes each), count g_sfx_emitter_count
+D_80042308	g_sound_listeners	high	Sound listeners (one per player, 0x1C bytes: position, ear position, yaw)
+D_8004238C	g_sfx_emitters_volume	med	+0xC field (volume) of g_sfx_emitters[0], indexed by entry * 0x30 in actor_sound_set_volume
+D_800425E0	g_sound_voices	high	The 16 sound voice slots (0x18 bytes each)
+D_80042760	g_sfx_emitter_count_alias	high	Same EU variable as g_sfx_emitter_count (D_80042B00): number of used positional emitter entries
+D_80042984	g_sound_voices_id	med	+4 field (sound id, 0x8000 flag) of g_sound_voices[0]
+D_80042988	g_sound_voices_handle	med	+8 field (sound state handle) of g_sound_voices[], indexed by voice in sound_voice_set_param
+D_80042B00	g_sfx_emitter_count	high	Number of used positional sound emitter entries in g_sfx_emitters (max 32)
+D_800CC37D	g_objects_in_water	high	in_water byte (+0xAD) of object 0 (indexed by player * 0x32C in head_icon_show_timed)
+D_8002C140	g_os_thread_tail	high	libultra __osThreadTail: empty thread queue sentinel used by osCreateMesgQueue
+D_8002C148	g_os_run_queue	high	libultra __osRunQueue: queue of runnable threads
+D_8002C080	g_os_litob_ldigs	high	libultra _Litob lower-case hex digit string
+D_8002C094	g_os_litob_udigs	high	libultra _Litob upper-case hex digit string
+D_8002C0B0	g_os_pi_access_queue_enabled	high	libultra __osPiAccessQueueEnabled
+D_80042C80	g_os_pi_access_buf	high	libultra piAccessBuf: message buffer (1) of g_os_pi_access_queue
+D_80042C88	g_os_pi_access_queue	high	libultra __osPiAccessQueue (its address is also the PI manager thread stack end)
+D_80042CA0	g_os_event_state_tab	high	libultra __osEventStateTab: message queue and message per OS event
+D_8002C0C0	g_os_timer_list	high	libultra __osTimerList: head of the OS timer list
+D_8002C0D0	g_os_vi_contexts	high	libultra vi: the two __OSViContext records
+D_8002C138	g_os_vi_clock	high	libultra osViClock (PAL / MPAL / NTSC VI clock)
+D_80042D50	g_os_timer_counter	high	libultra __osTimerCounter
+D_8002C130	g_os_vi_curr	high	libultra __osViCurr: current VI context
+D_8002C170	g_os_si_access_queue_enabled	high	libultra __osSiAccessQueueEnabled
+D_80042E30	g_os_si_access_buf_boot	high	libultra siAccessBuf of the boot-segment copy of __osSiCreateAccessQueue
+D_80042E38	g_os_si_access_queue	high	libultra __osSiAccessQueue
+D_8002AFC0	g_os_hw_int_table	high	libultra __osHwIntTable: hardware interrupt handlers set by __osSetHWIntrRoutine
+D_8002C06C	g_os_global_int_mask	high	libultra __OSGlobalIntMask
+D_8002AEAC	g_os_pi_table	high	libultra __osPiTable: list of PI handles
+D_80043E50	g_os_leo_disk_handle	high	libultra LeoDiskHandle (64DD PI handle) set up by os_leo_disk_init
+D_80043EC4	g_os_disk_handle	high	libultra __osDiskHandle
+D_8002AEB0	g_os_vi_dev_mgr	high	libultra __osViDevMgr
+D_80036F00	g_os_vi_thread	high	libultra viThread (VI manager thread)
+D_80037130	g_os_vi_thread_stack	high	libultra viThreadStack (0x1000 bytes)
+D_80038130	g_os_vi_event_queue	high	libultra viEventQueue (VI manager command / event queue)
+D_80038148	g_os_vi_event_buf	high	libultra viEventBuf: message buffer (5) of g_os_vi_event_queue
+D_80038160	g_os_vi_retrace_msg	high	libultra viRetraceMsg (OS_EVENT_VI message)
+D_80038178	g_os_vi_counter_msg	high	libultra viCounterMsg (OS_EVENT_COUNTER message)
+D_80038190	g_os_vi_retrace_count	high	libultra viMgrMain static retrace counter (frames until the next retrace message)
+D_80042D40	g_os_current_time	high	libultra __osCurrentTime
+D_80042D48	g_os_base_counter	high	libultra __osBaseCounter
+D_80042D4C	g_os_vi_intr_count	high	libultra __osViIntrCount
+D_80042D60	g_os_pfs_pif_ram	high	libultra __osPfsPifRam: PIF RAM buffer of the pak / rumble commands
+D_80042DE0	g_os_cont_last_cmd	high	libultra __osContLastCmd (_osLastSentSiCmd): last SI command sent
+D_8003BFD0	g_os_motor_stop_data	high	libultra __MotorDataBuf: per channel (0x40) PIF block that stops the rumble motor
+D_8003C0D0	g_os_motor_start_data	high	Per channel (0x40) PIF block that starts the rumble motor (os_motor_start)
+D_8003C1D0	g_os_motor_stop_bytes	high	32 zero bytes written to the rumble pak to stop the motor (os_motor_init)
+D_8003C1F0	g_os_motor_start_bytes	high	32 one bytes written to the rumble pak to start the motor (os_motor_init)
+D_8002C420	g_rzip_mask_bits	high	Inflate mask_bits[17] table (rzip)
+D_8002C442	g_rzip_cplens	high	Inflate cplens: length base values (rzip)
+D_8002C480	g_rzip_cpdist	high	Inflate cpdist: distance base values (rzip)
+D_8002C4BC	g_rzip_border	high	Inflate border[19]: order of the code length codes (rzip)
+D_8002C4CF	g_rzip_cplext	high	Inflate cplext: extra bits of the length codes (rzip)
+D_8002C4EE	g_rzip_cpdext	high	Inflate cpdext: extra bits of the distance codes (rzip)
+D_8003BE70	g_tlb_page_bitmap	high	Page bitmap of the TLB code area (one bit per 4 KB page), allocated by tlb_area_init
+D_8003C218	g_tlb_area_pages	high	s16 size of the code / TLB area in 4 KB pages
+D_8003C21C	g_tlb_page_bitmap_last	high	Pointer to the last byte of g_tlb_page_bitmap
+D_8003C220	g_tlb_state_c220	low	s16 set to 0x1FC by tlb_area_init, read by the TLB code
+D_8003C222	g_tlb_state_c222	low	s16 set to 0x3FF by tlb_area_init, read by the TLB code
+D_8003C230	g_rzip_fixed_tables	high	Fixed Huffman inflate tables built once at boot (literal at [1], distance at [0x272])
+D_8002BF60	g_audio_eqpower	high	Equal-power pan gain table (128 s16): left = [pan], right = [127 - pan]
+D_8002C05E	g_audio_unused_c05e	low	Declared in the MP3 stream code but never used
+D_800E0D80	g_mp3_stream	high	MP3 stream state (0xA0 bytes): +0 ROM address of the stream data, envelope mixer, low-pass filter, play state
+D_800E0DB0	g_mp3_stream_lp_cutoff	med	g_mp3_stream +0x30: low-pass filter cutoff (mp3_stream_set_fx arg1)
+D_800E0DB2	g_mp3_stream_lp_gain	med	g_mp3_stream +0x32: low-pass filter gain; the filter runs when > 0 (mp3_stream_set_fx arg0)
+D_800E0DD8	g_mp3_stream_lp_update	med	g_mp3_stream +0x58: low-pass coefficient update request (2 = new parameters)
+D_800E0DE0	g_mp3_stream_rom_size	high	g_mp3_stream +0x60: size of the stream data in ROM
+D_800E0DE4	g_mp3_stream_rom_pos	high	g_mp3_stream +0x64: read offset in the stream data (mp3_stream_rom_read)
+D_800E0DFC	g_mp3_stream_read_cb	high	g_mp3_stream +0x7C: data read callback (mp3_stream_set_read_cb); streaming needs it set
+D_800E0E00	g_mp3_log_callback_alias	high	Same EU variable as g_mp3_log_callback (g_mp3_stream +0x80): text callback set by mp3_stream_set_text_cb
+D_800E0E04	g_mp3_stream_state	high	g_mp3_stream +0x84: play state (1 playing, 2/6 paused, 3 stopping, 4/5 starting, 7 resuming)
+D_800E0E10	g_mp3_stream_ramp_time	high	g_mp3_stream +0x90: volume ramp time (mp3_stream_set_volume arg1)
+D_800E0E14	g_mp3_stream_target_pan	high	g_mp3_stream +0x94: target pan, moved by 2 per frame toward the requested pan
+D_800E0E16	g_mp3_stream_requested_pan	high	g_mp3_stream +0x96: pan requested by mp3_stream_set_pan (0..127)
+D_800E0E18	g_mp3_stream_wait_frames	high	g_mp3_stream +0x98: frames of prefetch left before decoding starts / resumes (5)
+D_800E0E20	g_mp3_huff_trees	high	MP3 Huffman trees per table (asset 0x17/4), node offsets relocated by g_mp3_huff_node_data
+D_800E0E24	g_mp3_huff_fast_table	high	MP3 Huffman fast lookup table by the next 8 bits (asset 0x17/5): +0 = y << 4 | x, +0x2200 = code length
+D_800E0E28	g_mp3_huff_node_data	med	MP3 Huffman tree node data (asset 0x17/6), base added to the tree offsets by mp3dec_init
+D_800E0E2C	g_mp3_tables_loaded	high	Set once the MP3 decoder tables are loaded (mp3_stream_start); cleared when they are freed
+D_800E0E30	g_mp3_pow43_buf	high	0x8000-byte buffer allocated for the MP3 decoder's pow43 table (g_mp3_pow43_table)
+D_800E11B4	g_mp3_stream_decoder	high	g_mp3_stream +4: MP3 decoder handle from mp3main_init
+D_800E11B8	g_mp3_stream_env_state	high	g_mp3_stream +8: envelope mixer state buffer
+D_800E11BC	g_mp3_stream_pan	high	g_mp3_stream +0xC: current pan
+D_800E11BE	g_mp3_stream_volume	high	g_mp3_stream +0xE: current volume
+D_800E11C0	g_mp3_stream_cvol_l	high	g_mp3_stream +0x10: current left volume (cvolL)
+D_800E11C2	g_mp3_stream_cvol_r	high	g_mp3_stream +0x12: current right volume (cvolR)
+D_800E11C8	g_mp3_stream_lratl	high	g_mp3_stream +0x18: left volume ramp rate, low part
+D_800E11CA	g_mp3_stream_lratm	high	g_mp3_stream +0x1A: left volume ramp rate, high part
+D_800E11CC	g_mp3_stream_ltgt	high	g_mp3_stream +0x1C: left target volume
+D_800E11CE	g_mp3_stream_rratl	high	g_mp3_stream +0x1E: right volume ramp rate, low part
+D_800E11D0	g_mp3_stream_rratm	high	g_mp3_stream +0x20: right volume ramp rate, high part
+D_800E11D2	g_mp3_stream_rtgt	high	g_mp3_stream +0x22: right target volume
+D_800E11D4	g_mp3_stream_env_first	high	g_mp3_stream +0x24: set when volume / pan changed: the next frame computes new envelope targets
+D_800E11D5	g_mp3_stream_skip_mix	med	g_mp3_stream +0x25: set when decoding starts; the first frame skips the envelope mix
+D_800E11D8	g_mp3_stream_env_delta	high	g_mp3_stream +0x28: samples into the current envelope segment
+D_800E11DC	g_mp3_stream_env_seg_end	high	g_mp3_stream +0x2C: length of the envelope segment in samples
+D_800E1218	g_mp3_stream_pcm_buf	high	g_mp3_stream +0x68: decoded PCM frame buffer
+D_800E121C	g_mp3_stream_pcm_len	high	g_mp3_stream +0x6C: samples in the decoded frame buffer (0x240)
+D_800E1220	g_mp3_stream_pcm_pos	high	g_mp3_stream +0x70: samples already consumed from the decoded frame
+D_800E1228	g_mp3_stream_synth_ofs	low	g_mp3_stream +0x78: rotating offset passed in the MP3 synthesis command (steps by -0x24 & 0x1E)
+D_800E1238	g_mp3_stream_target_volume	high	g_mp3_stream +0x88: target volume (mp3_stream_set_volume, 0..0x7FFF)
+D_800E1249	g_mp3_stream_stereo	high	g_mp3_stream +0x99: the decoded frame has two channels
+D_80042800	g_audio_osc_free_list	high	Free list of sequence player oscillator states
+D_80042804	g_audio_osc_pool	high	Oscillator state pool (0x2C bytes each) allocated by audio_osc_pool_create
+D_8002BA20	g_sndp_active_head	high	Head of the sound player's active sound state list
+D_8002BA24	g_sndp_active_tail	high	Tail of the sound player's active sound state list
+D_8002BA28	g_sndp_free_list	high	Free list of sound player sound states
+D_8002BA2C	g_sndp_player	high	The sound player (N_ALSndPlayer) set up by n_sndp_init
+D_8002BA30	g_sndp_active_count	high	Number of active sounds (limited to maxSounds)
+D_80042C58	g_sndp_group_volumes	high	Per sound group volume (u16, 0x7FFF default) set by n_sndp_set_group_volume
+D_800428C0	g_audio_surround	med	Output mode 4 flag (surround): enables the bus side / invert mixes
+D_800428C1	g_audio_mono	med	Output mode 1 flag (mono): MP3 pan centred, no one-side bus mixes
+D_800428C2	g_audio_headphones	med	Output mode 3 flag: MP3 pan narrowed to 0x20..0x5F
+D_800428C4	g_audio_bus_one_side	med	Per bus: mix the bus into one output side only (n_main_bus_pull)
+D_800428C6	g_audio_bus_invert	med	Per bus: mix the bus with inverted phase (gain 0x8000) (n_main_bus_pull)
+D_800428C8	g_audio_bus_mix_type	high	Per bus: mix type remembered by audio_set_bus_mix_type (0 = keep)
+D_8002BF30	g_audio_fx_default_params	med	Default effect parameter table used by n_alFxNew for fx types other than 6
+D_8002C770	g_audio_fx_pi	high	f32 pi used by n_fx_calc_biquad_lowpass
+D_8002C774	g_audio_fx_sqrt2	high	f32 sqrt(2) used by n_fx_calc_biquad_lowpass
+D_8002C778	g_audio_semitone_up	high	f32 ratio of one semitone up (2^(1/12)), audio_semitones_to_ratio
+D_8002C77C	g_audio_semitone_down	high	f32 ratio of one semitone down (2^(-1/12)), audio_semitones_to_ratio
+D_8002C780	g_audio_lp_coef_scale_0	med	f32 scale of low-pass coefficient 0 in n_fx_lowpass_update_coefs
+D_8002C784	g_audio_lp_coef_scale_1	med	f32 scale of low-pass coefficient 1 in n_fx_lowpass_update_coefs
+D_8002C788	g_audio_fx_delay_scale_alias	med	US name of g_audio_fx_delay_scale (EU 0x8002CAE8); only declared, unused
+D_8002C78C	g_audio_fx_k_caec	low	US name of the f32 0.0 constant after the fx delay scale; only declared, unused
+D_8002CAE8	g_audio_fx_delay_scale	med	f32 divisor of the fx delay modulation depth in n_alFxNew
+D_8002BDA0	g_cseq_midi_ctrl_fns	med	Handler table of the compact sequence player's controller / extended MIDI events (low bytes)
+D_8002C310	g_cseq_meta_fns	med	Handlers of the 0xFC-0xFF compact sequence events (indexed by -byte)
+D_80042BB0	g_cseq_chan_event_time	med	Per sequence channel: delta time of the last marker event, posted to the marker queue
+D_8002BA44	g_audio_synth	high	The audio synthesizer driver (n_syn)
+D_8002C750	g_audio_k_usec_per_sec	high	f32 1000000.0 used by _n_timeToSamplesNoRound
+D_8002CC80	g_libm_qnan_f	high	libm __libm_qnan_f (quiet NaN) returned by cosf
+D_80086240	g_cosf_inv_pi	high	f32 1/pi of cosf
+D_80086244	g_cosf_pi_hi	high	f32 pi, high part, of cosf
+D_80086248	g_cosf_pi_lo	high	f32 pi, low part, of cosf
+D_8008624C	g_cosf_zero	high	f32 0.0 returned by cosf
+D_80099120	g_cosf_poly	high	cosf polynomial coefficients P[0..4]
+D_8002AE90	g_os_pi_dev_mgr	high	libultra __osPiDevMgr
+D_80035C70	g_os_pi_thread	high	libultra piThread (PI manager thread, pi_dev_mgr_main)
+D_80036EA0	g_os_pi_event_queue	high	libultra piEventQueue (its address is also the PI thread stack top)
+D_80036EB8	g_os_pi_event_buf	high	libultra piEventBuf: message buffer (1) of g_os_pi_event_queue
+D_80036EC0	g_os_sp_tmp_task	high	libultra tmp_task of _VirtualToPhysicalTask
+D_8000031C	g_os_app_nmi_buffer	high	libultra osAppNMIBuffer (64 bytes at 0x8000031C), cleared by __osInitialize_common
+D_8002C070	g_os_disk_exist	high	libultra osDiskExist (64DD present)
+D_80042C70	g_os_final_rom	high	libultra __osFinalrom
+D_8009FAB0	g_nm_tri_bbox_slack	high	f32 slack of the point-in-triangle bounding box test
+D_8009FAC0	g_nmw_k_deg_to_rad	med	f32 scale from the record heading to radians in nmw_engine (+4 = minimum floor normal y of ledges)
+D_8009FAC8	g_nmw_ledge_vertical_slope	med	f32 slope used for an edge with dx == 0 in nmw_ledge_triangle
+D_8009FACC	g_nmw_ledge_grab_radius_sq	high	f32 squared radius of the ledge grab circle in nmw_ledge_triangle
+D_8009FAD0	g_nmw_k_rad_to_deg	med	f32 scale from radians to degrees for the ledge angle in nmw_ledge_triangle
+D_8009FAE0	g_fast_sinf_half_pi	high	f32 pi/2 (fast_cosf = fast_sinf(x + pi/2))
+D_8009FAE4	g_fast_sinf_small_k3	high	fast_sinf small-range polynomial coefficient (x^6 term)
+D_8009FAE8	g_fast_sinf_small_k2	high	fast_sinf small-range polynomial coefficient (x^4 term)
+D_8009FAEC	g_fast_sinf_small_k1	high	fast_sinf small-range polynomial coefficient (x^2 term)
+D_8009FAF0	g_fast_sinf_small_k0	high	fast_sinf small-range polynomial constant term
+D_8009FAF4	g_fast_sinf_inv_pi	high	f32 1/pi of fast_sinf
+D_8009FAF8	g_fast_sinf_pi_hi	high	f32 pi, high part, of fast_sinf
+D_8009FAFC	g_fast_sinf_pi_lo	high	f32 pi, low part, of fast_sinf
+D_8009FB00	g_fast_sinf_red_k4	high	fast_sinf reduced-range polynomial coefficient (x^8 term)
+D_8009FB04	g_fast_sinf_red_k3	high	fast_sinf reduced-range polynomial coefficient (x^6 term)
+D_8009FB08	g_fast_sinf_red_k2	high	fast_sinf reduced-range polynomial coefficient (x^4 term)
+D_8009FB0C	g_fast_sinf_red_k1	high	fast_sinf reduced-range polynomial coefficient (x^2 term)
+D_800CC1B0	g_wall_ledge_grab_z	high	f32 world z of the ledge grab point found by nmw_ledge_triangle (read by obj_state_walk)
+D_800CC1B4	g_wall_ledge_angle_neg	high	f32 edge angle of the ledge found on the negative side (with g_wall_ledge_h_neg)
+D_800CC1B8	g_wall_ledge_angle_pos	high	f32 edge angle of the ledge found on the positive side (with g_wall_ledge_h_pos)
+D_800CC1C0	g_obj_attached_world_obj	med	Per object u16: world object index + 1 it is attached to / follows (set to 1 by a ledge hit)
+D_800CC21C	g_wall_ledge_grab_x	high	f32 world x of the ledge grab point found by nmw_ledge_triangle (read by obj_state_walk)
+D_800CC630	g_tri_plane_nx	high	Plane normal x of the last tri_compute_plane triangle
+D_800CC634	g_tri_plane_ny	high	Plane normal y of the last tri_compute_plane triangle
+D_800CC638	g_tri_plane_nz	high	Plane normal z of the last tri_compute_plane triangle
+D_800CC63C	g_tri_plane_d	high	Plane distance of the last tri_compute_plane triangle (n . p = d)
+D_800CC64C	g_quadtree_box_half_x	high	Half x extent of the collision test box (quadtree_set_test_box)
+D_800CC650	g_quadtree_box_half_y	high	Half y extent of the collision test box (quadtree_set_test_box)
+D_800CC654	g_quadtree_box_half_z	high	Half z extent of the collision test box (quadtree_set_test_box)
+D_800CC658	g_quadtree_box_ratio_yx	high	y / x ratio of the collision test box, for its diagonals
+D_800CC65C	g_quadtree_box_ratio_zx	high	z / x ratio of the collision test box, for its diagonals
+D_800D3C00	g_world_obj_box_ids	med	List of world object ids (from world_objects_in_box) passed to world_objects_transform_mesh and the shadow code
+D_800DC270	g_coll_tri_xz_bounds	high	Current collision area: triangle x / z bounds (4 s16 per triangle: x min, z min, x max, z max)
+D_800DC274	g_coll_tri_y_bounds	high	Current collision area: triangle y bounds (2 s16 per triangle)
+D_150AA11C	g_anim_sine_table	high	Sine table, 513 floats over a quarter turn (animation joint rotations)
+D_800888E0	g_anim_joint_mtx_arena	high	Joint matrix arena of the model being evaluated (first matrix)
+D_800888E4	g_anim_arena_ptr_slot	high	Where the arena pointer lives; advanced by n matrices after an evaluation
+D_800888E8	g_anim_skeleton	high	Skeleton being evaluated: 16-byte entries {parent slot, matrix slot, channel, -, f32 x, y, z}
+D_800888EC	g_anim_last_trans_offsets	high	Translation offsets of the last decoded animation (NULL: none)
+D_800888F0	g_anim_decode_mode	high	Animation decoder mode: 0 = animation 1, 4 = animation 2
+D_800888F4	g_anim_root_motion	high	Root motion (z channel with descriptor flag 0x40), 1/1024 units
+D_800888F8	g_anim_root_motion_total	high	Root motion total (descriptor +0xA)
+D_800888FC	g_anim_root_motion_a	high	Root motion of animation 1 while blending with the next key frames
+D_80088900	g_anim_root_motion_end	high	Root motion end value (set past the last key frame)
+D_80088904	g_anim_blend_next_keys	high	Blend the current and the next key-frame pair (state +0x47 & 0x10, no animation 2)
+D_80088908	g_anim_trans_free	high	Next free translation offset table
+D_8008890C	g_anim_decode_scales	high	Scale table of the current decode
+D_80088910	g_anim_euler_table	high	Euler angle table (3 s16 per channel), animation 1 then animation 2
+D_80088914	g_anim_scale_table	high	Scale table (3 u16 per channel, 0x4000 = 1.0)
+D_80088918	g_anim_trans_table	high	Translation offset table (3 s16 per channel, 1/16 units)
+D_8008891C	g_anim_channel0_angle	med	Output angle 1 of channel 0 (descriptor flag 0x20, object +0x7C); also the base of the per-joint callback table
+D_80088920	g_anim_key_fraction	high	Key-frame fraction (0..1024) of a decode with descriptor flag 0x10
+D_8009FAA0	g_mtx_deg_to_rad	high	f32 pi / 180 of mtx_rotate_scale_3x3
+D_8002B1A4	g_audio_fx_params	high	Effect parameter tables of the two fx buses (2 x 0x108 bytes), copied by audio_mgr_init
+D_800E11C4	g_mp3_stream_dry_amt	high	g_mp3_stream +0x14: dry amount of the envelope mixer
+D_800E11C6	g_mp3_stream_wet_amt	high	g_mp3_stream +0x16: wet (effect) amount of the envelope mixer
+D_800E120C	g_mp3_stream_lp_state	high	g_mp3_stream +0x5C: low-pass filter state buffer
+D_800E1224	g_mp3_stream_dec_bufs	med	g_mp3_stream +0x74: MP3 decoder state buffers (per channel, 0x440 bytes), passed to the MP3 microcode
+D_800B8BB8	g_texture_expanded_sizes	high	Expanded (inflated) size of each compressed texture, read from the ROM headers
+D_800BEA35	g_game_frame_state	high	Game thread frame state: 1-5 run the frame steps (2 / 3 = level change requested), 0 / 4 idle
+D_800BEE20	g_level_start_player_mask	med	Player mask passed to level_start_game / level_lights_init (set by game_request_transition)
+D_800BEE24	g_level_start_session_mode	med	Session game mode passed to level_start_game / level_lights_init (set by game_request_transition)
+D_800BEE30	g_game_main_queue	high	Main game message queue (scheduler client: retrace / task done messages)
+D_800BEE48	g_game_main_msgs	high	Message buffer (16) of g_game_main_queue
+D_800BEE88	g_gfx_done_msgs	high	Gfx task done messages, 0x20 bytes per DL buffer
+D_800BEECA	g_render_level_world	med	Set to 1 at boot: player_view_dl_build draws the level geometry when set
+D_800D3048	g_segment_table	high	Segment base address table (16 entries), cleared at boot
+D_80000308	g_os_rom_base	high	libultra osRomBase (cartridge base address)
+D_80000310	g_os_cic_id	high	libultra osCicId (6105)
+D_80000318	g_os_mem_size	high	libultra osMemSize (RDRAM size)
+D_8002D8B0	g_boot_thread_stack_4000_alias	high	Same EU variable as g_boot_thread_stack_4000: stack top of the boot idle thread (0x4000 bytes)
+D_80038090	g_mem_rdp_fifo_start	high	Start of the RDP FIFO output buffer (gfx task output_buff), set by mem_init_region_bounds
+D_80038094	g_mem_rdp_fifo_end	high	End of the RDP FIFO output buffer (gfx task output_buff_size)
+D_80038098	g_mem_heap_end	high	End of the main heap (heap_init: one free block from g_heap_start)
+D_8003809C	g_mem_scratch_area	med	High-memory scratch area: inflate work buffer and the level triangle visibility bytes
+D_8003B218	g_sched_event_queue_alias	high	Same EU variable as g_sched_event_queue (D_8003B578): scheduler SP / DP / timer event queue

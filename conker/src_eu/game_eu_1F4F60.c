@@ -260,7 +260,7 @@ u8 *laser_create(f32 *hitA, u8 *triA, f32 *hitB, u8 *triB, u8 *owner, u8 *arg5, 
     spawn.u44[1] = 0xFF;
     spawn.u44[2] = 0;
     spawn.u44[3] = 6;
-    rec = (u8 *) effect3d_spawn((s32) &spawn, (s32) &D_800A4AA0, 0x1A, 0, 0, 0x18, 0, 0xA0, arg22, arg23);
+    rec = (u8 *) effect3d_spawn((s32) &spawn, (s32) &g_effect3d_default_params, 0x1A, 0, 0, 0x18, 0, 0xA0, arg22, arg23);
     if (rec == NULL) {
         return NULL;
     }
@@ -577,7 +577,7 @@ s32 obj_collision_cylinder(u8 *, s16 *, s16 *, s16 *);
 s32 segment_sphere_hit(f32 *, f32 *, f32 *, f32, f32, s32, s32, f32 *, f32 *);
 
 // beam_hits_object: whether the beam segment of `rec` (end points +0x34 / +0x40) crosses `obj`'s collision body.
-/* The body is an ellipsoid of radius (model kind obj +4 < 0xBB, not 0xFF: D_800D1C90[kind] +0x1A x obj +0x14C, else
+/* The body is an ellipsoid of radius (model kind obj +4 < 0xBB, not 0xFF: g_type_descs[kind] +0x1A x obj +0x14C, else
  * 50) around obj's position raised by half its height (obj_collision_cylinder); the segment's y is scaled by radius /
  * half-height about that centre to make it a sphere, then segment_sphere_hit tests the ray (start, unit direction) against
  * the sphere within the segment length. 0 when the height is 0 or the segment has no length. */
@@ -603,7 +603,7 @@ s32 laser_hits_object(u8 *obj, u8 *rec) {
 
     kind = obj[4];
     if (kind < 0xBB && kind != 0xFF) {
-        radius = *(s16 *)((u8 *)D_800D1C90[kind] + 0x1A) * *(f32 *)(obj + 0x14C);
+        radius = *(s16 *)((u8 *)g_type_descs[kind] + 0x1A) * *(f32 *)(obj + 0x14C);
     } else {
         radius = 50.0f;
     }

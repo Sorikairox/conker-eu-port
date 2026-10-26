@@ -3,15 +3,15 @@
 #include "variables.h"
 
 
-extern s32 D_800CC76A;
+extern s32 g_objects_facing_angle; /* was D_800CC76A */
 
 /* was func_150B5DD0 */
 u8 *obj_adjust_entries_type4b(u8 *arg0, s32 arg1) {
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         return arg0;
     }
     (*(s16 *)arg0) = 0x1A;
-    (*(u16 *)((u8 *)arg0 + 2)) = *(u16 *)((u8 *)&D_800CC76A + (arg1 * 0x32C));
+    (*(u16 *)((u8 *)arg0 + 2)) = *(u16 *)((u8 *)&g_objects_facing_angle + (arg1 * 0x32C));
     return arg0 + 4;
 }
 void zap_burst_spawn_small(f32 *, u8, s32);

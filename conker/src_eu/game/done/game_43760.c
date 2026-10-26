@@ -18,8 +18,8 @@ void records_table_reset(void) {
     } else {
         g_records_game_mode = 0;
     }
-    D_800CC2B0 = 0;
+    g_obj_pending_actions = 0;
     bzero(&g_obj_anim_shared, 24);
     g_records_flag_2a2 = 1;
-    D_800D18D0 = 0;
+    g_lipsync_obj_idx = 0;
 }

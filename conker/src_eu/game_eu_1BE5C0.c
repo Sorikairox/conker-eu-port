@@ -108,7 +108,7 @@ extern DripCfg g_model_drip_cfgs[]; /* was D_8008FE10 */
  * another id (e[0x14] vs owner[0x3B]), or the owner has no matrices (+0x1D4; then it first starts the ending
  * effect effect_node_create_nodraw with e +0x10..+0x1B copied to its +0x28). Hanging drops follow their point on the owner
  * (mtx_transform_point_or_origin with the owner matrix), and once their timer is over they fall (velocity from the last move *
- * D_800BEDC8, effect3d_set_handlers, life from g_drip_drop_ranges). The accumulator gains rate * dt; for every whole unit a free slot
+ * g_frame_step_inv, effect3d_set_handlers, life from g_drip_drop_ranges). The accumulator gains rate * dt; for every whole unit a free slot
  * is picked at random and, when the point is below the owner's +0x118 height limit, a drop object is created
  * (effect3d_spawn_default with a 0x60-byte motion block at +0x110) and given a hang time. */
 /* was func_15190E08 */
@@ -193,8 +193,8 @@ void model_drip_update(u8 *e) {
                     if (slot->timer < 0) {
                         obj = slot->obj;
                         *(f32 *) (obj + 0x114) = 0.0f;
-                        *(f32 *) (obj + 0x110) = (*(f32 *) (obj + 0x34) - *(f32 *) (obj + 0x40)) * D_800BEDC8;
-                        *(f32 *) (obj + 0x118) = (*(f32 *) (obj + 0x3C) - *(f32 *) (obj + 0x48)) * D_800BEDC8;
+                        *(f32 *) (obj + 0x110) = (*(f32 *) (obj + 0x34) - *(f32 *) (obj + 0x40)) * g_frame_step_inv;
+                        *(f32 *) (obj + 0x118) = (*(f32 *) (obj + 0x3C) - *(f32 *) (obj + 0x48)) * g_frame_step_inv;
                         r = &g_drip_drop_ranges[obj[0x130]];
                         effect3d_set_handlers(obj, 13, 18, 0, 13);
                         *(s16 *) (obj + 0x1C) = (u32) random_int() % (u32) (r->range + 1) + r->base;
@@ -368,7 +368,7 @@ u8 *drop_quad_velocity_build(u8 *arg0, s16 arg1) {
         temp_v1 = temp_t0 + &g_view_yaw_cos;
         temp_a0 = temp_t0 + &g_view_yaw_sin;
         var_f14 = -1.0f;
-        var_f2 = ((*temp_v1 * ((*(f32 *)((u8 *)arg0 + 0x40)) - (*(f32 *)((u8 *)arg0 + 0x34)))) - (*temp_a0 * ((*(f32 *)((u8 *)arg0 + 0x48)) - (*(f32 *)((u8 *)arg0 + 0x3C))))) * D_800BEDC8;
+        var_f2 = ((*temp_v1 * ((*(f32 *)((u8 *)arg0 + 0x40)) - (*(f32 *)((u8 *)arg0 + 0x34)))) - (*temp_a0 * ((*(f32 *)((u8 *)arg0 + 0x48)) - (*(f32 *)((u8 *)arg0 + 0x3C))))) * g_frame_step_inv;
         if (var_f2 < 0.0f) {
             var_f14 = 1.0f;
             var_f2 = -var_f2;

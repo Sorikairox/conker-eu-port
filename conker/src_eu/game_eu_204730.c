@@ -247,7 +247,7 @@ s32 money_popup_mtx_update(u8 *arg0) {
 #undef MTX_7410
 
 /* P241: readable C for money_popup_draw (game_eu_204730, 51 insns). */
-// money_popup_draw: entry 3 of the record table D_80088C40 (dispatcher text_pager_update ends the record, timer +0xE = -1,
+// money_popup_draw: entry 3 of the record table g_text_pager_rec_fns (dispatcher text_pager_update ends the record, timer +0xE = -1,
 // when the result is 0). Returns 0 once the owner object (data +0) is gone or its id byte +0x3B no longer matches
 // data +4; otherwise prints "$ %d" (g_str_money_popup, the amount at data +8) above the owner in colour (0x32, 0x7D, 0x1C)
 // with alpha fading in over the first data +0xC frames (timer * step data +0xE, clamped at 0; 0xFF after) and keeps

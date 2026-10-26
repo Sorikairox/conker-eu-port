@@ -309,7 +309,7 @@ void port_gfx_demo_test(const char *spec) {
 
 /* P58 ?p58pose=1: preview of the game's posed skeleton. p58_model.c passes record 0's joint matrices (model space)
  * after each evaluation; after each game gfx task the matching ROM model (the viewer asset whose bone table equals the
- * skeleton D_800C5000[id] entry for entry) is drawn in a box on the right with them. Framing from the bind-pose joints. */
+ * skeleton g_model_skeletons[id] entry for entry) is drawn in a box on the right with them. Framing from the bind-pose joints. */
 static Asset PA;
 static int pa_state; /* 0 not tried, 1 ready, -1 none */
 static float pa_ang, pa_err;

@@ -1,4 +1,4 @@
-# P281 boot_game_thread_main (boot_thread_main). D_8000030C = osResetType (0 cold, 1 NMI). RET allocate_memory (10003E90).
-# OUTW rom_dma_read (10004764) a1: 1st call = header word (D_80082EB0), 3rd = the first offset table words.
+# P281 boot_game_thread_main (boot_thread_main). g_os_reset_type = osResetType (0 cold, 1 NMI). RET allocate_memory (10003E90).
+# OUTW rom_dma_read (10004764) a1: 1st call = header word (g_level_tex_preload_lists), 3rd = the first offset table words.
 cold ! 0=0 ! 8000030C=0 ! 10003E90=80480000,10003EBC=80400000;80420000 ! ! ! 10004764=1:00001234;0;8039CCCB ! !
 nmi ! 0=0 ! 8000030C=1 ! 10003E90=80480000,10003EBC=80400000;80420000 ! ! ! 10004764=1:00005678;0;0 ! !

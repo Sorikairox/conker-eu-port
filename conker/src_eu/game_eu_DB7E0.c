@@ -7,7 +7,7 @@
  * P106: the level event script VM, hand C.
  *
  * Rare wrote event_vm_run in assembly (the .s is marked "Handwritten function": it saves gp / fp, keeps its own sp in
- * D_800D3858 for the abort entry event_vm_abort, uses `add` / `sub` / `neg`, and dispatches through five jump tables).
+ * g_event_vm_abort for the abort entry event_vm_abort, uses `add` / `sub` / `neg`, and dispatches through five jump tables).
  * This is a readable interpreter of the same machine, not a register-level translation.
  *
  * Event block (loaded by event_load, relocated by event_block_relocate), u16 header:
@@ -16,21 +16,21 @@
  * Instruction: one u16 opcode word, then up to three operands of one u16 each:
  *   bits 0-5 opcode, bit 6 "the first immediate operand is 32 bits (two u16, high first)",
  *   bits 13-15 / 10-12 / 7-9 addressing mode of operand 1 / 2 / 3.
- *   D_800876F8[opcode] = number of operands + 1.
+ *   g_event_vm_op_nargs[opcode] = number of operands + 1.
  * Modes: 0 frame slot (frame + s16), 1 variable (vars + s16), 2 data address (data + s16; the value is the offset),
- *   3 / 4 / 6 immediate (4 = code offset, 6 = native function index), 5 the result register D_800D3C68.
- * Operand stack: D_800D3C80, growing down from +0x17FC. A script call pushes the return pc; `enter n` pushes the
+ *   3 / 4 / 6 immediate (4 = code offset, 6 = native function index), 5 the result register g_event_vm_result.
+ * Operand stack: g_event_vm_stack, growing down from +0x17FC. A script call pushes the return pc; `enter n` pushes the
  * frame pointer and reserves n bytes; `return` pops both and ends the run when the stack is empty again.
- * Native calls (call with a mode-6 operand) run D_80088A44[index](stack pointer); the pushed arguments are not
+ * Native calls (call with a mode-6 operand) run g_event_vm_native_fns[index](stack pointer); the pushed arguments are not
  * popped (as in the asm: the stack is reset by the next `return`).
  *
  * Abort: event_vm_abort (called only by the game-state handler event_action_game_state, as `event_vm_abort(); return 0;`) makes
- * the asm reload D_800D3858 into sp, clear it, and leave through the VM's epilogue. Here it is a flag: event_vm_abort
- * stores EV_ABORTED in D_800D3858 (nothing but event_vm_abort reads that word; the TU cannot have its own .bss in the
+ * the asm reload g_event_vm_abort into sp, clear it, and leave through the VM's epilogue. Here it is a flag: event_vm_abort
+ * stores EV_ABORTED in g_event_vm_abort (nothing but event_vm_abort reads that word; the TU cannot have its own .bss in the
  * NM link), and the VM checks it right after every native call returns, clears it to 0 as the asm does, and leaves
  * before storing the result. A flag is enough because the only caller aborts in tail position (nothing it does after
  * the call is observable); setjmp/longjmp is not available in the N64 NM build. Divergence only where the N64 itself
- * breaks: an abort after a nested VM run has returned (D_800D3858 then points into the dead inner frame on N64).
+ * breaks: an abort after a nested VM run has returned (g_event_vm_abort then points into the dead inner frame on N64).
  *
  * Quirks of the asm that are kept: operand 1 in mode 5 has no value load (it reads as 6, the shift count left in
  * t2); operand 3 in mode 2 has no offset load (it reads as 5, the shift count left in t4);
@@ -46,22 +46,22 @@ typedef s32 (*EvNative)(s32 *args, s32 mode, s32 *operand);
 typedef s32 (*EvHandlerA)(s32 id, s32 *args, s32 *operand);
 typedef s32 (*EvHandlerB)(s32 id, s32 arg, s32 *args);
 
-extern u8 D_800876F8[];         /* operand count + 1 per opcode */
-extern EvNative D_80088A44[];   /* native functions */
-extern EvHandlerA D_800887C0[];
-extern EvHandlerA D_800887FC[];
-extern EvHandlerB D_80088838[];
-extern EvHandlerB D_80088874[];
-extern s32 D_800D3C60;          /* argument count of the native call in progress */
-extern s32 D_800D3C64;          /* arguments pushed since the last call */
-extern s32 D_800D3C68;          /* result register */
-extern s32 *D_800D3C6C;         /* -> D_800D3C68 once a result was used */
-extern s32 D_800D3C80[];        /* operand stack */
-extern u8 D_800BE9A0;           /* frames since the last update */
+extern u8 g_event_vm_op_nargs[];         /* operand count + 1 per opcode; was D_800876F8 */
+extern EvNative g_event_vm_native_fns[];   /* native functions; was D_80088A44 */
+extern EvHandlerA g_event_native_start_fns[]; /* was D_800887C0 */
+extern EvHandlerA g_event_native_stop_fns[]; /* was D_800887FC */
+extern EvHandlerB g_event_query_fns[]; /* was D_80088838 */
+extern EvHandlerB g_event_action_fns[]; /* was D_80088874 */
+extern s32 g_event_arg_count;          /* argument count of the native call in progress; was D_800D3C60 */
+extern s32 g_event_vm_pushed;          /* arguments pushed since the last call; was D_800D3C64 */
+extern s32 g_event_vm_result;          /* result register; was D_800D3C68 */
+extern s32 *g_event_vm_result_ptr;         /* -> g_event_vm_result once a result was used; was D_800D3C68; was D_800D3C6C */
+extern s32 g_event_vm_stack[];        /* operand stack; was D_800D3C80 */
+extern u8 g_frame_delta;           /* frames since the last update; was D_800BE9A0 */
 
 enum { EV_FRAME, EV_VAR, EV_DATA, EV_IMM, EV_LABEL, EV_RESULT, EV_NATIVE };
 
-#define EV_ABORTED -1   /* D_800D3858 after event_vm_abort */
+#define EV_ABORTED -1   /* g_event_vm_abort after event_vm_abort */
 
 /* event_vm_run: run the event block `blk` from entry `entry` (0: +0x20, 1..4: header +0x0E..+0x14) until its outermost return.
  * The asm leaves v0 as it is (the last native result or return value, else the caller's v0); no caller reads it, so
@@ -72,7 +72,7 @@ void event_vm_run(struct249 *blk, s32 entry) {
     u8 *base = (u8 *) blk;      /* code offsets are relative to the block */
     u8 *vars = base + hdr[5];
     u8 *data = base + hdr[4];
-    s32 *top = (s32 *) ((u8 *) D_800D3C80 + 0x17FC);
+    s32 *top = (s32 *) ((u8 *) g_event_vm_stack + 0x17FC);
     s32 *frame = top;
     s32 *sp = top;
     u16 *pc;
@@ -86,9 +86,9 @@ void event_vm_run(struct249 *blk, s32 entry) {
     s16 off;
     u16 op;
 
-    D_800D3858 = (s32) &frame;
-    D_800D3C60 = 0;
-    D_800D3C64 = 0;
+    g_event_vm_abort = (s32) &frame;
+    g_event_arg_count = 0;
+    g_event_vm_pushed = 0;
     if (entry == 0) {
         pc = (u16 *) (base + 0x20);
     } else if (entry <= 4) {
@@ -99,8 +99,8 @@ void event_vm_run(struct249 *blk, s32 entry) {
 
     for (;;) {
         op = *pc++;
-        /* D_800876F8 holds operands + 1; the asm decodes three operands for any other count */
-        nops = D_800876F8[op & 0x3F] - 1;
+        /* g_event_vm_op_nargs holds operands + 1; the asm decodes three operands for any other count */
+        nops = g_event_vm_op_nargs[op & 0x3F] - 1;
         if (nops < 0 || nops > 3) {
             nops = 3;
         }
@@ -123,10 +123,10 @@ void event_vm_run(struct249 *blk, s32 entry) {
                     break;
                 case EV_RESULT:
                     pc++;
-                    D_800D3C6C = &D_800D3C68;
-                    addr[n] = &D_800D3C68;
+                    g_event_vm_result_ptr = &g_event_vm_result;
+                    addr[n] = &g_event_vm_result;
                     /* operand 1 has no load in the asm: the register still holds 6 (a shift count) */
-                    val[n] = (n == 0) ? 6 : D_800D3C68;
+                    val[n] = (n == 0) ? 6 : g_event_vm_result;
                     break;
                 case EV_FRAME:
                     off = pc[0];
@@ -200,24 +200,24 @@ void event_vm_run(struct249 *blk, s32 entry) {
             case 0x17: *addr[0] = (val[1] != val[2]); break;
             case 0x18: /* push (a data operand pushes its address) */
                 sp--;
-                D_800D3C64++;
+                g_event_vm_pushed++;
                 *sp = ((op >> 13) == EV_DATA) ? (s32) addr[0] : val[0];
                 break;
             case 0x19: /* call: native function or script subroutine */
-                D_800D3C60 = D_800D3C64;
+                g_event_arg_count = g_event_vm_pushed;
                 if ((op >> 13) == EV_NATIVE) {
-                    D_800D3C64 = 0;
-                    result = D_80088A44[val[0]](sp, EV_NATIVE, addr[0]);
-                    if (D_800D3858 == EV_ABORTED) {
-                        D_800D3858 = 0;
+                    g_event_vm_pushed = 0;
+                    result = g_event_vm_native_fns[val[0]](sp, EV_NATIVE, addr[0]);
+                    if (g_event_vm_abort == EV_ABORTED) {
+                        g_event_vm_abort = 0;
                         return;
                     }
-                    D_800D3C68 = result;
-                    D_800D3C6C = &D_800D3C68;
+                    g_event_vm_result = result;
+                    g_event_vm_result_ptr = &g_event_vm_result;
                 } else {
                     sp--;
                     *sp = (s32) pc;
-                    D_800D3C64 = 0;
+                    g_event_vm_pushed = 0;
                     pc = (u16 *) (base + val[0]);
                 }
                 break;
@@ -228,15 +228,15 @@ void event_vm_run(struct249 *blk, s32 entry) {
                 sp = (s32 *) ((u8 *) sp - val[0]);
                 break;
             case 0x1A: /* return a value */
-                D_800D3C68 = val[0];
-                D_800D3C6C = &D_800D3C68;
+                g_event_vm_result = val[0];
+                g_event_vm_result_ptr = &g_event_vm_result;
                 /* fallthrough */
             case 0x1C: /* return */
                 sp = frame;
                 frame = (s32 *) *sp++;
                 pc = (u16 *) *sp++;
-                D_800D3C60 = 0;
-                D_800D3C64 = 0;
+                g_event_arg_count = 0;
+                g_event_vm_pushed = 0;
                 if (sp >= top) {
                     return;
                 }
@@ -249,10 +249,10 @@ void event_vm_run(struct249 *blk, s32 entry) {
     }
 }
 
-/* Native functions 3..12 of D_80088A44 (code inside the asm VM; separate functions here). args = the VM stack
+/* Native functions 3..12 of g_event_vm_native_fns (code inside the asm VM; separate functions here). args = the VM stack
  * pointer: args[0] is the last value pushed. 3..6 call handler (args[0] >> 12 & 0xF) - 1 of their table with the
  * id word minus that nibble; the asm passes on the VM's a2 (the call operand's address) to the first two kinds. */
-/* event_native_call_tab_7C0: handler of D_800887C0 by the id word's nibble */
+/* event_native_call_tab_7C0: handler of g_event_native_start_fns by the id word's nibble */
 /* was func_150AE5D8 */
 s32 event_native_start_cmd(s32 *args, s32 mode, s32 *operand) {
     s32 id = args[0];
@@ -261,10 +261,10 @@ s32 event_native_start_cmd(s32 *args, s32 mode, s32 *operand) {
     if (n == 0) {
         return 0;
     }
-    return D_800887C0[n - 1](id & 0xFFFF0FFF, args, operand);
+    return g_event_native_start_fns[n - 1](id & 0xFFFF0FFF, args, operand);
 }
 
-/* event_native_call_tab_7FC: handler of D_800887FC */
+/* event_native_call_tab_7FC: handler of g_event_native_stop_fns */
 /* was func_150AE5E8 */
 s32 event_native_stop_cmd(s32 *args, s32 mode, s32 *operand) {
     s32 id = args[0];
@@ -273,10 +273,10 @@ s32 event_native_stop_cmd(s32 *args, s32 mode, s32 *operand) {
     if (n == 0) {
         return 0;
     }
-    return D_800887FC[n - 1](id & 0xFFFF0FFF, args, operand);
+    return g_event_native_stop_fns[n - 1](id & 0xFFFF0FFF, args, operand);
 }
 
-/* event_native_call_tab_838: handler of D_80088838 (id, args[1], args) */
+/* event_native_call_tab_838: handler of g_event_query_fns (id, args[1], args) */
 /* was func_150AE5F8 */
 s32 event_native_query(s32 *args) {
     s32 id = args[0];
@@ -285,10 +285,10 @@ s32 event_native_query(s32 *args) {
     if (n == 0) {
         return 0;
     }
-    return D_80088838[n - 1](id & 0xFFFF0FFF, args[1], args);
+    return g_event_query_fns[n - 1](id & 0xFFFF0FFF, args[1], args);
 }
 
-/* event_native_game_state: handler of D_80088874 (game-state actions; id, args[1], args) */
+/* event_native_game_state: handler of g_event_action_fns (game-state actions; id, args[1], args) */
 /* was func_150AE60C */
 s32 event_native_action(s32 *args) {
     s32 id = args[0];
@@ -297,7 +297,7 @@ s32 event_native_action(s32 *args) {
     if (n == 0) {
         return 0;
     }
-    return D_80088874[n - 1](id & 0xFFFF0FFF, args[1], args);
+    return g_event_action_fns[n - 1](id & 0xFFFF0FFF, args[1], args);
 }
 
 /* event_native_random: random number below args[0] (unsigned; VR4300 x % 0 = x) */
@@ -312,7 +312,7 @@ s32 event_native_random(s32 *args) {
 /* event_native_frame_time: frames since the last update */
 /* was func_150AE690 */
 s32 event_native_frame_time(s32 *args) {
-    return D_800BE9A0;
+    return g_frame_delta;
 }
 
 /* event_native_fixed_mul: 16.16 fixed-point product (64-bit intermediate) */
@@ -336,7 +336,7 @@ s32 event_native_fixed_div(s32 *args) {
 /* was func_150AE6D4 */
 s32 event_native_timer_up(s32 *args) {
     s32 t = args[0];
-    s32 next = (u32) t + D_800BE9A0;
+    s32 next = (u32) t + g_frame_delta;
 
     if (t < 0 && next >= 0) {
         return 0;
@@ -351,7 +351,7 @@ s32 event_native_timer_up(s32 *args) {
 /* was func_150AE714 */
 s32 event_native_timer_down(s32 *args) {
     s32 t = args[0];
-    s32 next = (u32) t - D_800BE9A0;
+    s32 next = (u32) t - g_frame_delta;
 
     if (t >= 2 && next < 2) {
         return 1;
@@ -365,7 +365,7 @@ s32 event_native_timer_down(s32 *args) {
 /* event_vm_abort: abort the running event script (see the VM comment). */
 /* was func_150AE760 */
 void event_vm_abort(void) {
-    D_800D3858 = EV_ABORTED;
+    g_event_vm_abort = EV_ABORTED;
 }
 
 /* object_sway_update: the rest of event_vm_abort's asm (from 0x150AE780) is an ordinary function, an entry of the table at 0x80089C70:

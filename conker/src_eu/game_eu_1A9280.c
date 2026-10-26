@@ -101,14 +101,14 @@ s32 ambient_placer_hop(s16 *arg0, s16 *arg1, s32 *arg2, s32 arg3) {
 typedef struct {
     s16 pos[3];     /* +0 x, y, z */
     u8 mode;        /* +6 mode << 5 | slot (low nibble: the slot / voice 0..14) */
-    u8 phase;       /* +7 index into D_800DE0C0 (animation phase) */
+    u8 phase;       /* +7 index into g_ambient_phases (animation phase) */
     u16 sound;      /* +8 */
-    u8 kind;        /* +A placer kind (column of D_8008D2A0) */
+    u8 kind;        /* +A placer kind (column of g_ambient_placement_rows) */
     u8 flare;       /* +B 0x21 / 0x22: flare-up state (0x22 counts down to 0x21) */
     s8 halfWidth;   /* +C quad half width */
     s8 height;      /* +D quad height / 4 */
 } AmbientEmitterRec;  /* 14 bytes (ambient_emitter_add layout) */
-extern AmbientEmitterRec *D_800DE148;
+extern AmbientEmitterRec *g_ambient_emitters; /* was D_800DE148 */
 extern s32 g_ambient_sort_by_z;   /* sort key: 0 = x, else z; was D_8008D254 */
 
 /* per-frame updater of a placer type: may move the quad base / phase / alpha; non-zero = drop the emitter */
@@ -120,20 +120,20 @@ typedef struct {
     u8 heard;       /* +C an emitter of this voice was in range this frame (cleared by ambient_slots_refresh) */
     u8 padD[3];
 } AmbientVoice;     /* g_ambient_voices[15] */
-extern struct { void *place; AmbientUpdater update; s32 unk8; } D_8008D258[];  /* placers by type (.game_data) */
-extern s16 D_8008D2A0[][8][2];  /* per placement row and kind: { placer type, placer param } (.game_data) */
-extern u8 D_80096090[];         /* per sound id, 10 bytes: +1 u8 frame count, +2 u16 frame size (.game_data) */
-extern u8 D_800DE0B0[15];       /* per slot: placement row */
-extern s16 D_800DE0C0[];        /* 15 slots x 4 animation phases (<< 8) */
+extern struct { void *place; AmbientUpdater update; s32 unk8; } g_ambient_placer_fns[];  /* placers by type (.game_data); was D_8008D258 */
+extern s16 g_ambient_placement_rows[][8][2];  /* per placement row and kind: { placer type, placer param } (.game_data); was D_8008D2A0 */
+extern u8 g_ambient_sound_info[];         /* per sound id, 10 bytes: +1 u8 frame count, +2 u16 frame size (.game_data); was D_80096090 */
+extern u8 g_ambient_placement_row[15];       /* per slot: placement row; was D_800DE0B0 */
+extern s16 g_ambient_phases[];        /* 15 slots x 4 animation phases (<< 8); was D_800DE0C0 */
 extern u32 g_ambient_slot_nearest[15];      /* nearest emitter distance per slot (0x7FFF = none); was D_800DE070 */
 extern u8 g_ambient_slot_sound_ids[15];       /* per slot: sound id; was D_800DDFF0 */
-extern u8 D_800DE000[15];       /* per slot: phase period >> 8 */
-extern u8 D_800DE010[15];       /* per slot: flare-up frame */
-extern u8 D_800DE020[15];
+extern u8 g_ambient_phase_period[15];       /* per slot: phase period >> 8; was D_800DE000 */
+extern u8 g_ambient_flare_frame[15];       /* per slot: flare-up frame; was D_800DE010 */
+extern u8 g_ambient_quad_flag[15]; /* was D_800DE020 */
 extern s16 g_ambient_slot_tc[15][2];   /* per slot: texture size s, t; was D_800DDFB0 */
-extern u8 D_800DE040[15];       /* per slot: ping-pong direction bits of the 4 phases */
+extern u8 g_ambient_phase_dir_bits[15];       /* per slot: ping-pong direction bits of the 4 phases; was D_800DE040 */
 extern s32 g_ambient_quad_count;          /* quads built this frame; was D_800DE188 */
-extern f32 D_800A7620;          /* 315.0 */
+extern f32 g_player_morph_descs_end;          /* 315.0; was D_800A7620 */
 extern f32 g_ambient_deg_to_rad_7624;          /* degrees -> radians; was D_800A7624 */
 f32 sinf(f32);
 f32 cosf(f32);
@@ -144,7 +144,7 @@ void heap_free(s32);
 void ambient_emitters_sort(s32 lo, s32 hi);
 s32 game_gu_random(void);
 
-// ambient_emitters_sort: quicksort of the emitter records D_800DE148[lo..hi] (14 bytes) by x, or by z when
+// ambient_emitters_sort: quicksort of the emitter records g_ambient_emitters[lo..hi] (14 bytes) by x, or by z when
 // g_ambient_sort_by_z is set; pivot = the last record (Rare's partition loop, literal).
 /* was func_1517BE0C */
 void ambient_emitters_sort(s32 lo, s32 hi) {
@@ -159,25 +159,25 @@ void ambient_emitters_sort(s32 lo, s32 hi) {
     }
     for (;;) {
         k = (g_ambient_sort_by_z != 0) ? 2 : 0;
-        pivot = D_800DE148[hi].pos[k];
-        while (D_800DE148[i].pos[k] < pivot && i < hi) {
+        pivot = g_ambient_emitters[hi].pos[k];
+        while (g_ambient_emitters[i].pos[k] < pivot && i < hi) {
             i++;
         }
-        while (pivot < D_800DE148[j].pos[k] && lo < j) {
+        while (pivot < g_ambient_emitters[j].pos[k] && lo < j) {
             j--;
         }
         if (!(i < j)) {
             break;
         }
-        tmp = D_800DE148[i];
-        D_800DE148[i] = D_800DE148[j];
-        D_800DE148[j] = tmp;
+        tmp = g_ambient_emitters[i];
+        g_ambient_emitters[i] = g_ambient_emitters[j];
+        g_ambient_emitters[j] = tmp;
         i++;
         j--;
     }
-    tmp = D_800DE148[i];
-    D_800DE148[i] = D_800DE148[hi];
-    D_800DE148[hi] = tmp;
+    tmp = g_ambient_emitters[i];
+    g_ambient_emitters[i] = g_ambient_emitters[hi];
+    g_ambient_emitters[hi] = tmp;
     ambient_emitters_sort(lo, i - 1);
     ambient_emitters_sort(i + 1, hi);
 }
@@ -226,7 +226,7 @@ void ambient_emitters_update(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px,
     hi = g_ambient_emitter_count - 1;
     lo = 0;
     mid = 0;
-    if ((angle > 45.0f && angle < 135.0f) || (angle > 225.0f && angle < D_800A7620)) {
+    if ((angle > 45.0f && angle < 135.0f) || (angle > 225.0f && angle < g_player_morph_descs_end)) {
         byZ = FALSE;
         if (angle > 180.0f) {
             dir = -1;
@@ -249,13 +249,13 @@ void ambient_emitters_update(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px,
 
 /* emitter i is on the sorted list and short of the far edge of the range in the walking direction */
 #define AMBIENT_IN_RANGE(i) \
-    ((dir == 1) ? ((i) < g_ambient_emitter_count && D_800DE148[i].pos[axis] < limit) \
-                : (dir == -1 && (i) >= 0 && limit < D_800DE148[i].pos[axis]))
+    ((dir == 1) ? ((i) < g_ambient_emitter_count && g_ambient_emitters[i].pos[axis] < limit) \
+                : (dir == -1 && (i) >= 0 && limit < g_ambient_emitters[i].pos[axis]))
 
     // Binary search for the near edge of the range.
     while (lo <= hi) {
         mid = (lo + hi) / 2;
-        key = D_800DE148[mid].pos[axis];
+        key = g_ambient_emitters[mid].pos[axis];
         if (target < key) {
             hi = mid - 1;
         } else if (key < target) {
@@ -283,7 +283,7 @@ void ambient_emitters_update(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px,
     idx = mid;
     if (g_ambient_quad_max != 0 && AMBIENT_IN_RANGE(idx)) {
         do {
-            e = &D_800DE148[idx];
+            e = &g_ambient_emitters[idx];
             dist = approx_dist3_int(e->pos[0] - x, e->pos[1] - y, e->pos[2] - z);
             if (dist >= radius) {
                 goto next;
@@ -305,7 +305,7 @@ void ambient_emitters_update(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px,
             v = &((AmbientVoice *) &g_ambient_voices)[voice];
             if (slot[0] == 0) {
                 if (v->romAddr != 0) {
-                    info = &D_80096090[g_ambient_slot_sound_ids[voice] * 10];
+                    info = &g_ambient_sound_info[g_ambient_slot_sound_ids[voice] * 10];
                     n = info[1] * *(u16 *) (info + 2);
                     v->handle = heap_alloc_tagged(v->size, 1, 2, 1, 0);
                     if (v->handle != 0) {
@@ -313,7 +313,7 @@ void ambient_emitters_update(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px,
                         if (slot[0] != 0) {
                             rom_dma_read(v->romAddr, (void *) v->handle, v->size, 1);
                             v->heard = 1;
-                            step = *(u16 *) &D_80096090[g_ambient_slot_sound_ids[voice] * 10 + 2];
+                            step = *(u16 *) &g_ambient_sound_info[g_ambient_slot_sound_ids[voice] * 10 + 2];
                             for (k = 1; k < 26; k++) {
                                 slot[k] = slot[k - 1] + step;
                             }
@@ -328,7 +328,7 @@ void ambient_emitters_update(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px,
             }
 
             quad = (Vtx *) (g_ambient_quad_bufs[g_dl_buf_index] + count * 64);
-            phase = D_800DE0C0[e->phase];
+            phase = g_ambient_phases[e->phase];
             if (phase < 0) {
                 phase = 0;
             }
@@ -355,7 +355,7 @@ void ambient_emitters_update(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px,
             }
             quad[0].v.cn[3] = a;
 
-            update = D_8008D258[D_8008D2A0[D_800DE0B0[voice]][e->kind][0]].update;
+            update = g_ambient_placer_fns[g_ambient_placement_rows[g_ambient_placement_row[voice]][e->kind][0]].update;
             if (update != NULL) {
                 if ((*update)(e, quad, &phase, &quad[0].v.cn[3]) != 0) {
                     goto next;
@@ -369,13 +369,13 @@ void ambient_emitters_update(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px,
                 quad[k].v.cn[0] = quad[k].v.cn[1] = quad[k].v.cn[2] = e->mode | 0x9F;
             }
             quad[1].v.cn[3] = quad[2].v.cn[3] = quad[3].v.cn[3] = quad[0].v.cn[3];
-            // flag of vertex 0 = frame number in the slot's 26 frames (D_800DE010: the flare-up frame)
+            // flag of vertex 0 = frame number in the slot's 26 frames (g_ambient_flare_frame: the flare-up frame)
             if (e->flare >= 0x21) {
-                quad[0].v.flag = D_800DE010[voice] + voice * 26;
+                quad[0].v.flag = g_ambient_flare_frame[voice] + voice * 26;
             } else {
                 quad[0].v.flag = voice * 26 + (phase >> 8);
             }
-            quad[1].v.flag = D_800DE020[voice];
+            quad[1].v.flag = g_ambient_quad_flag[voice];
             quad[1].v.tc[0] = quad[2].v.tc[0] = g_ambient_slot_tc[voice][0];
             quad[2].v.tc[1] = quad[3].v.tc[1] = g_ambient_slot_tc[voice][1];
             count++;
@@ -389,19 +389,19 @@ void ambient_emitters_update(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px,
 #undef AMBIENT_IN_RANGE
     g_ambient_quad_count = count;
 
-    // Phase animation per slot: ping-pong (D_800DDC04 bit; D_800DDC08 bit: slower, with random direction flips)
+    // Phase animation per slot: ping-pong (g_ambient_pingpong_slots bit; g_ambient_slow_random_slots bit: slower, with random direction flips)
     // or wrap-around.
     if (g_game_paused == 0) {
         for (i = 0; i < 15; i++) {
-            period = (D_800DE000[i] << 8) - 1;
+            period = (g_ambient_phase_period[i] << 8) - 1;
             if (period < 0x101) {
                 continue;
             }
-            ph = &D_800DE0C0[i * 4];
+            ph = &g_ambient_phases[i * 4];
             bit = 1 << i;
-            if (bit & D_800DDC04) {
-                flags = &D_800DE040[i];
-                if (bit & D_800DDC08) {
+            if (bit & g_ambient_pingpong_slots) {
+                flags = &g_ambient_phase_dir_bits[i];
+                if (bit & g_ambient_slow_random_slots) {
                     r = game_gu_random() % 10;
                     if (r == 0) {
                         *flags |= game_gu_random() % 16;
@@ -492,7 +492,7 @@ void ambient_slots_free_all(void)
   s32 temp_a0;
   s32 temp_a1;
   s32 var_s1;
- do { var_s0 = &g_ambient_voices; var_s1 = 0; do { temp_a0 = *((s32 *) (((u8 *) var_s0) + 8)); if (temp_a0 != 0) { temp_a1 = (&g_ambient_slots)[var_s1 * 0x1A]; if (temp_a1 != 0) { rzip_inflate(temp_a0, temp_a1, D_8003809C); heap_free(*((s32 *) (((u8 *) var_s0) + 8))); } *((s32 *) (((u8 *) var_s0) + 8)) = 0; } var_s1 += 1; var_s0 += 4; } while (var_s1 != 0xF); } while (0);
+ do { var_s0 = &g_ambient_voices; var_s1 = 0; do { temp_a0 = *((s32 *) (((u8 *) var_s0) + 8)); if (temp_a0 != 0) { temp_a1 = (&g_ambient_slots)[var_s1 * 0x1A]; if (temp_a1 != 0) { rzip_inflate(temp_a0, temp_a1, g_mem_scratch_area); heap_free(*((s32 *) (((u8 *) var_s0) + 8))); } *((s32 *) (((u8 *) var_s0) + 8)) = 0; } var_s1 += 1; var_s0 += 4; } while (var_s1 != 0xF); } while (0);
 }
 
 extern s32 g_ambient_quad_setup_dl; /* was D_8008D340 */

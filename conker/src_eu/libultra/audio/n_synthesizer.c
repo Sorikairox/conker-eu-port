@@ -5,7 +5,7 @@
 #undef n_alSynNew
 
 
-extern f32 D_8002C750;
+extern f32 g_audio_k_usec_per_sec; /* was D_8002C750 */
 
 // s125: DK64 n_synthesizer.c n_alSynNew with Conker's layout: 6 extra config words copied to the synth,
 // per-bus voice lists (0x14/0x18) instead of DK64's source arrays, alLink inlined, aux bus stride 0x44.
@@ -84,7 +84,7 @@ typedef struct {
     u8 fxTypes[4];
 } SynNewConfig;
 
-extern SynNewSynth *D_8002BA44;
+extern SynNewSynth *g_audio_synth; /* was D_8002BA44 */
 void *n_synth_aux_fx_new(s32, SynNewConfig *, ALHeap *);
 void alN_PVoiceNew(SynNewPVoice *, void *, ALHeap *);
 Acmd *func_1001E530();
@@ -98,54 +98,54 @@ void n_alSynNew(SynNewConfig *c) {
     SynNewParam *params;
     SynNewParam *paramPtr;
 
-    D_8002BA44->head          = NULL;
-    D_8002BA44->numPVoices    = c->maxPVoices;
-    D_8002BA44->curSamples    = 0;
-    D_8002BA44->paramSamples  = 0;
-    D_8002BA44->outputRate    = c->outputRate;
-    D_8002BA44->maxOutSamples = FIXED_SAMPLE;
-    D_8002BA44->dma           = c->dmaproc;
-    D_8002BA44->unk28         = c->unk14;
-    D_8002BA44->unk2C         = c->unk18;
-    D_8002BA44->unk30         = c->unk1C;
-    D_8002BA44->unk34         = c->unk20;
-    D_8002BA44->unk38         = c->unk24;
+    g_audio_synth->head          = NULL;
+    g_audio_synth->numPVoices    = c->maxPVoices;
+    g_audio_synth->curSamples    = 0;
+    g_audio_synth->paramSamples  = 0;
+    g_audio_synth->outputRate    = c->outputRate;
+    g_audio_synth->maxOutSamples = FIXED_SAMPLE;
+    g_audio_synth->dma           = c->dmaproc;
+    g_audio_synth->unk28         = c->unk14;
+    g_audio_synth->unk2C         = c->unk18;
+    g_audio_synth->unk30         = c->unk1C;
+    g_audio_synth->unk34         = c->unk20;
+    g_audio_synth->unk38         = c->unk24;
 
     if (c->maxFXbusses > 2) {
-        D_8002BA44->maxAuxBusses = 2;
+        g_audio_synth->maxAuxBusses = 2;
     } else if (c->maxFXbusses < 1) {
-        D_8002BA44->maxAuxBusses = 1;
+        g_audio_synth->maxAuxBusses = 1;
     } else {
-        D_8002BA44->maxAuxBusses = c->maxFXbusses;
+        g_audio_synth->maxAuxBusses = c->maxFXbusses;
     }
 
-    D_8002BA44->auxBus = alHeapAlloc(hp, D_8002BA44->maxAuxBusses, sizeof(SynNewAuxBus));
+    g_audio_synth->auxBus = alHeapAlloc(hp, g_audio_synth->maxAuxBusses, sizeof(SynNewAuxBus));
 
-    for (i = 0; i < D_8002BA44->maxAuxBusses; i++) {
-        D_8002BA44->auxBus[i].unk14 = 0;
-        D_8002BA44->auxBus[i].unk18 = 0;
+    for (i = 0; i < g_audio_synth->maxAuxBusses; i++) {
+        g_audio_synth->auxBus[i].unk14 = 0;
+        g_audio_synth->auxBus[i].unk18 = 0;
 
         if (c->fxTypes[i]) {
-            D_8002BA44->auxBus[i].fx = n_synth_aux_fx_new(i, c, hp);
+            g_audio_synth->auxBus[i].fx = n_synth_aux_fx_new(i, c, hp);
         } else {
-            D_8002BA44->auxBus[i].fx = NULL;
+            g_audio_synth->auxBus[i].fx = NULL;
         }
 
-        D_8002BA44->auxBus[i].unk40 = alHeapAlloc(hp, 1, sizeof(SynNewBusFx));
-        D_8002BA44->auxBus[i].unk40->unk2 = 0;
-        D_8002BA44->auxBus[i].unk40->unk2C = alHeapAlloc(hp, 1, 8);
-        D_8002BA44->auxBus[i].unk40->unk30 = alHeapAlloc(hp, 1, 8);
+        g_audio_synth->auxBus[i].unk40 = alHeapAlloc(hp, 1, sizeof(SynNewBusFx));
+        g_audio_synth->auxBus[i].unk40->unk2 = 0;
+        g_audio_synth->auxBus[i].unk40->unk2C = alHeapAlloc(hp, 1, 8);
+        g_audio_synth->auxBus[i].unk40->unk30 = alHeapAlloc(hp, 1, 8);
     }
 
-    D_8002BA44->mainBus = alHeapAlloc(hp, 1, sizeof(SynNewMainBus));
-    D_8002BA44->mainBus->handler = func_1001E530;
+    g_audio_synth->mainBus = alHeapAlloc(hp, 1, sizeof(SynNewMainBus));
+    g_audio_synth->mainBus->handler = func_1001E530;
 
-    D_8002BA44->pFreeList.next = 0;
-    D_8002BA44->pFreeList.prev = 0;
-    D_8002BA44->pLameList.next = 0;
-    D_8002BA44->pLameList.prev = 0;
-    D_8002BA44->pAllocList.next = 0;
-    D_8002BA44->pAllocList.prev = 0;
+    g_audio_synth->pFreeList.next = 0;
+    g_audio_synth->pFreeList.prev = 0;
+    g_audio_synth->pLameList.next = 0;
+    g_audio_synth->pLameList.prev = 0;
+    g_audio_synth->pAllocList.next = 0;
+    g_audio_synth->pAllocList.prev = 0;
 
     pvoices = alHeapAlloc(hp, c->maxPVoices, sizeof(SynNewPVoice));
 
@@ -153,7 +153,7 @@ void n_alSynNew(SynNewConfig *c) {
         pv = &pvoices[i];
         {
             ALLink *ln = (ALLink *) pv;
-            ALLink *to = &D_8002BA44->pFreeList;
+            ALLink *to = &g_audio_synth->pFreeList;
 
             ln->next = to->next;
             ln->prev = to;
@@ -163,25 +163,25 @@ void n_alSynNew(SynNewConfig *c) {
             to->next = ln;
         }
         pv->vvoice = 0;
-        alN_PVoiceNew(pv, D_8002BA44->dma, hp);
+        alN_PVoiceNew(pv, g_audio_synth->dma, hp);
     }
 
-    for (j = 0; j < D_8002BA44->maxAuxBusses; j++) {
-        D_8002BA44->auxBus[j].unk14 = 0;
-        D_8002BA44->auxBus[j].unk18 = 0;
+    for (j = 0; j < g_audio_synth->maxAuxBusses; j++) {
+        g_audio_synth->auxBus[j].unk14 = 0;
+        g_audio_synth->auxBus[j].unk18 = 0;
     }
 
     params = alHeapAlloc(hp, c->maxUpdates, sizeof(SynNewParam));
-    D_8002BA44->paramList = 0;
+    g_audio_synth->paramList = 0;
 
     for (i = 0; i < c->maxUpdates; i++) {
         paramPtr = &params[i];
-        paramPtr->next = D_8002BA44->paramList;
+        paramPtr->next = g_audio_synth->paramList;
 
-        D_8002BA44->paramList = paramPtr;
+        g_audio_synth->paramList = paramPtr;
     }
 
-    D_8002BA44->heap = hp;
+    g_audio_synth->heap = hp;
 }
 
 static s32 __n_nextSampleTime(ALPlayer **client);
@@ -268,7 +268,7 @@ void _n_freePVoice(N_PVoice *pvoice) {
 }
 
 s32 _n_timeToSamplesNoRound(s32 micros) {
-    f32 tmp = (((f32) micros * (f32) n_syn->outputRate) / D_8002C750) + 0.5f; // 1000000.0f
+    f32 tmp = (((f32) micros * (f32) n_syn->outputRate) / g_audio_k_usec_per_sec) + 0.5f; // 1000000.0f
     return (s32) tmp;
 }
 

@@ -15,7 +15,7 @@ void trail_get_aim(s32 arg0, s32 arg1) {
     f32 sp34[3];
     f32 sp28[3];
 
-    obj_get_aim_vectors(arg0, (s32)sp34, (s32)sp28, arg1, D_800BE616 ? g_trail_aim_scale_mp : g_trail_aim_scale_sp);
+    obj_get_aim_vectors(arg0, (s32)sp34, (s32)sp28, arg1, g_mp_mode_active ? g_trail_aim_scale_mp : g_trail_aim_scale_sp);
 }
 
 extern f32 g_effect50_u3c; /* was D_800A0F18 */
@@ -578,7 +578,7 @@ Gfx *gfx_load_texture_cached(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, u
 Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
 Gfx *gfx_set_combine_mode(Gfx *, u8, u8 *);
 Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
-extern u8 D_800915E8[];
+extern u8 g_tex_ribbon[]; /* was D_800915E8 */
 extern s32 g_render_mode_pairs[]; /* was D_800A4EA8 */
 extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
@@ -615,7 +615,7 @@ Gfx *trail_draw_ribbon(u8 *obj, Gfx *gfx, s16 id) {
     }
     cam = camera_get_pos(id);
     flag = 1;
-    gfx = gfx_load_texture_cached(gfx, D_800915E8, 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
+    gfx = gfx_load_texture_cached(gfx, g_tex_ribbon, 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
     gfx = gfx_geometry_mode_cached(gfx, 0x220005, 0x1D0600);
     gfx = gfx_set_combine_mode(gfx, 0x4E, &flag);
     gfx = gfx_other_mode_cached(gfx, g_gfx_tlut_mode | 0x80000 | 0x2CA0, g_render_mode_pairs[7] | g_render_mode_pairs[6], &flag);

@@ -61,7 +61,7 @@ Gfx *view_background_draw(Gfx *gdl, s32 arg1) {
     if (g_view_clear_black != 0) {
         gdl = gfx_fill_rect_colour(gdl, 0, 0, g_framebuffer_width, g_framebuffer_height, 0, 0, 0);
     }
-    if ((D_800C35EA == 1) && (D_800C3681 != 0)) {
+    if ((g_cutscene_slot_state == 1) && (g_cutscene_hide_background != 0)) {
         return gdl;
     }
 
@@ -93,7 +93,7 @@ Gfx *view_background_draw(Gfx *gdl, s32 arg1) {
     y = player->unk2FC;
     z = player->unk300;
 
-    if (D_800C3682 != 0) {
+    if (g_cutscene_flat_background != 0) {
         u8 *cam = (u8 *)g_player_cams + g_cur_view_player * 0x180;
         return gfx_fill_rect_colour(gdl, (s32)*(f32 *)(cam + 0x2C), (s32)*(f32 *)(cam + 0x24),
                              (s32)(*(f32 *)(cam + 0x30) - 1.0f), (s32)*(f32 *)(cam + 0x28), 0x16, 0x1C, 0x1B);
@@ -314,7 +314,7 @@ block_46:
         }
         break;
     case 0x13:
-        if ((D_800C35EA == 1) && ((D_800C3A08 == 2) || (D_800C3A08 == 1))) {
+        if ((g_cutscene_slot_state == 1) && ((g_cutscene_scene == 2) || (g_cutscene_scene == 1))) {
             goto block_46;
         }
         if (arg1 < 1900.0f) {
@@ -355,7 +355,7 @@ typedef struct {
 } SkyLoad;
 extern SkyFace g_sky_box_faces[]; /* was D_800A3170 */
 extern s32 g_sky_backdrop_vtx[]; /* was D_800DC2B8 */
-extern s32 D_800DC2E0;
+extern s32 g_sky_backdrop_mtx; /* was D_800DC2E0 */
 /* (one line: tools/port/protocheck.py reads single-line prototypes) */
 Gfx *sky_box_face_build(Gfx *gdl, s32 *vtx, s32 tex, s32 arg3, s32 arg4, u32 w, u32 h, u32 step_s, u32 step_t, f32 x, f32 y, f32 z, s32 axis, f32 (*view)[4], s32 dist, s32 *count, s32 *first, SkyLoad *loads, s32 *last_fmt, u8 *arg19, u8 *arg20, s16 *tlut_offset, u8 *tlut_count, u8 *tile, s32 face);
 /* P203 */
@@ -363,7 +363,7 @@ s32 view_sphere_depth(f32 *m, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far);
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 extern f32 g_sky_tile_far; /* sky tile view-test far distance; was D_800A32F0 */
 extern u8 g_sky_load_all_tiles;  /* 1 on level 0x3C: load every visible tile's texture, even beyond the distance limit; was D_800DC2DB */
-extern u8 D_800DC2DC;  /* bit 0 of g_save_progress_bits->unk14: sky 1 face 2 shows the replacement tiles 0x1675..; was D_800D2E4C */
+extern u8 g_sky_alt_tiles;  /* bit 0 of g_save_progress_bits->unk14: sky 1 face 2 shows the replacement tiles 0x1675..; was D_800D2E4C; was D_800DC2DC */
 extern s32 g_sky_asset; /* sky asset: one format byte per tile (0 = CI8, 1 = CI4); was D_800DC2B0 */
 
 // sky_box_face_build: P203: builds one face of the sky box (sky_box_draw) as a grid of textured quads in the
@@ -372,7 +372,7 @@ extern s32 g_sky_asset; /* sky asset: one format byte per tile (0 = CI8, 1 = CI4
 // run down from the corner's second coordinate, columns along its first. Per tile: the view test view_sphere_depth
 // (centre of the quad, half sizes step * 8, far g_sky_tile_far) drops tiles outside the view; for the side faces
 // (face < 4) only the first `dist` rows are kept with dist scaled from 0..320 to 0..rows (rounded up); the texture
-// (tex + col * rows + row, or on sky 1 face 2 with D_800DC2DC the replacement 0x1675 + col * 3 + row - 10 for
+// (tex + col * rows + row, or on sky 1 face 2 with g_sky_alt_tiles the replacement 0x1675 + col * 3 + row - 10 for
 // rows 4..6 / columns 2..3) is fetched with texture_cache_lookup(id, NULL, 3, 0) and queued in loads[] with the tile's
 // format byte from the sky asset g_sky_asset. On the 'y' faces the first and last columns grow by 3 units on each
 // side (hides the seams). Every 16 vertices (4 quads) it emits one G_VTX and per quad the block / palette loads,
@@ -466,7 +466,7 @@ Gfx *sky_box_face_build(Gfx *gdl, s32 *vtx, s32 tex, s32 arg3, s32 arg4, u32 w, 
             }
             rows = h / step_t;
             id = tex + col * rows + row;
-            if (D_800DC2DC != 0 && ((u8 *) g_level_header)[9] == 1 && face == 2 && row >= 4 && row < 7 && col >= 2 &&
+            if (g_sky_alt_tiles != 0 && ((u8 *) g_level_header)[9] == 1 && face == 2 && row >= 4 && row < 7 && col >= 2 &&
                 col < 4) {
                 id = 0x1675 + (col * 3 + row - 10);
             }
@@ -556,12 +556,12 @@ void heap_free(s32);
 void texture_unref_age3(s32);
 void star_field_generate(void);
 s32 asset_load_ptr(s32 *, s32, ...);
-extern s32 *D_8008955C[];
+extern s32 *g_sky_tex_sets[]; /* was D_8008955C */
 
 /*
  * overlay_mode_set: switches the camera overlay (g_level_header: +8 state, +9 overlay id). mode 1: state 1, frees the
  * overlay asset g_sky_asset (when loaded) and calls star_field_generate. Other modes, only when the id changes and the
- * state is 4: releases the 0x168 textures of the current overlay (D_8008955C[id], when D_80038080 is set), frees
+ * state is 4: releases the 0x168 textures of the current overlay (g_sky_tex_sets[id], when g_mem_expansion_pak is set), frees
  * g_sky_asset, stores the new id and loads its asset (type 0xD) into g_sky_asset with asset_load_ptr.
  */
 /* was func_15111CAC */
@@ -579,9 +579,9 @@ void overlay_mode_set(s32 mode) {
     if (mode == g_level_header->unk9 || g_level_header->unk8 != 4) {
         return;
     }
-    if (D_80038080 != 0) {
+    if (g_mem_expansion_pak != 0) {
         for (i = 0; i < 0x168; i++) {
-            texture_unref_age3(*D_8008955C[g_level_header->unk9] + i);
+            texture_unref_age3(*g_sky_tex_sets[g_level_header->unk9] + i);
         }
     }
     heap_free(g_sky_asset);
@@ -646,19 +646,19 @@ void star_field_generate(void) {
 /*
  * sky_box_draw: camera callback (g_view_bg_fns[], same signature as view_clear_level_colour) that draws the textured sky box of
  * the current player g_cur_view_player. The position arguments are unused. Steps:
- *  - texture on, render_set_scissor (g_render_scissor_mode) / render_set_color_image; on level 60 (and on level 19 in mode D_800C35EA == 1
- *    with D_800C3A08 == 1 or 2) the viewport is first cleared to black through gfx_fill_rect_colour (the camera record
+ *  - texture on, render_set_scissor (g_render_scissor_mode) / render_set_color_image; on level 60 (and on level 19 in mode g_cutscene_slot_state == 1
+ *    with g_cutscene_scene == 1 or 2) the viewport is first cleared to black through gfx_fill_rect_colour (the camera record
  *    g_player_cams[p] +0x24..0x30, as view_clear_level_colour);
  *  - on level 65 the pitch is turned by -119 degrees (wrapped into [0, 360));
  *  - pipe sync, combiner: plain texture when the sky colour (g_level_header +5..7) is white, else texture * env colour;
  *    other modes, the 4-bit / 8-bit tile descriptors;
  *  - view matrix: matrix_rotate_ypr(yaw, pitch, roll) times the camera matrix (+0xBC) into the frame's Mtx
- *    D_800DC2E0[p * 2 + g_dl_buf_index], g_identity_mtx as the projection, perspective normalisation (+0xB8);
+ *    g_sky_backdrop_mtx[p * 2 + g_dl_buf_index], g_identity_mtx as the projection, perspective normalisation (+0xB8);
  *  - faces `first`..`last - 1` (0..4; 4..4 on level 25; 0..5 on level 12): faces 0..3 (the sides, every 90 degrees
  *    of pitch) only when the pitch is within the field of view (95 degrees in mode g_last_player_index == 1, else 80) of the
  *    face, faces 4 / 5 (down / up) by the yaw, face 5 only from distance `dist` >= 300. sky_box_face_build builds each
  *    face's quads into the frame's vertex buffer g_sky_backdrop_vtx[p * 2 + g_dl_buf_index] and queues the texture loads (the
- *    face's textures D_8008955C[sky +9][face, 0 for face 5]);
+ *    face's textures g_sky_tex_sets[sky +9][face, 0 for face 5]);
  *  - one G_VTX for all `count` vertices, then per quad (4 vertices): load its texture block and palette (tile
  *    changes only when the format does) and two triangles.
  */
@@ -711,7 +711,7 @@ Gfx *sky_box_draw(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s
             pitch += 360.0f;
         }
     } else if (g_level_id == 60 ||
-               (g_level_id == 19 && D_800C35EA == 1 && (D_800C3A08 == 2 || D_800C3A08 == 1))) {
+               (g_level_id == 19 && g_cutscene_slot_state == 1 && (g_cutscene_scene == 2 || g_cutscene_scene == 1))) {
         cam = (u8 *) g_player_cams + g_cur_view_player * 0x180;
         gdl = gfx_fill_rect_colour(gdl, (s32) *(f32 *) (cam + 0x2C), (s32) *(f32 *) (cam + 0x24),
                             (s32) (*(f32 *) (cam + 0x30) - 1.0f), (s32) *(f32 *) (cam + 0x28), 0, 0, 0);
@@ -758,9 +758,9 @@ Gfx *sky_box_draw(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s
     gdl++;
     matrix_rotate_ypr(view, yaw, pitch, roll);
     mtxf_mul(view, (f32 (*)[4]) ((u8 *) g_player_cams + g_cur_view_player * 0x180 + 0xBC), m);
-    guMtxF2L(m, (Mtx *) D_800DC2E0 + (g_cur_view_player * 2 + g_dl_buf_index));
+    guMtxF2L(m, (Mtx *) g_sky_backdrop_mtx + (g_cur_view_player * 2 + g_dl_buf_index));
     gdl->words.w0 = 0xDA380007;
-    gdl->words.w1 = (u32) ((Mtx *) D_800DC2E0 + (g_cur_view_player * 2 + g_dl_buf_index));
+    gdl->words.w1 = (u32) ((Mtx *) g_sky_backdrop_mtx + (g_cur_view_player * 2 + g_dl_buf_index));
     gdl++;
     gdl->words.w0 = 0xDA380003;
     gdl->words.w1 = (u32) g_identity_mtx;
@@ -768,7 +768,7 @@ Gfx *sky_box_draw(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s
     gdl->words.w0 = 0xDB0E0000;
     gdl->words.w1 = *(u16 *) ((u8 *) g_player_cams + g_cur_view_player * 0x180 + 0xB8);
     gdl++;
-    texs = D_8008955C[sky[9]];
+    texs = g_sky_tex_sets[sky[9]];
     count = 0;
     first_vtx = 0;
     last_fmt = -1;
@@ -1058,7 +1058,7 @@ s32 camera_view_test_sphere(s32 cam, s32 *mtx, f32 x, f32 y, f32 z, f32 r, f32 r
  * (player_stat_get(player, 0)) rebuilds the list of visible world-object records (0xA0 bytes, g_world_objs[0 ..
  * g_world_obj_count - 1]). Records come in groups: a record's +0x70 >> 4 is the number of records following it in the group.
  * For each record the player's bit in +0x6F is cleared; a record takes part unless it is kind 1 (+0x6E), hidden
- * (+0x70 & 8), disabled (!(+0x4F & 1)) or has no model (+0x8A == 0). In mode D_800C35EA[view] == 1, cutscene_room_has_actor
+ * (+0x70 & 8), disabled (!(+0x4F & 1)) or has no model (+0x8A == 0). In mode g_cutscene_slot_state[view] == 1, cutscene_room_has_actor
  * decides (without g_cutscene_show_all[view] a refusal skips the record; an acceptance skips the occlusion test below), else
  * records with +0x6C & 0x100 are skipped when zone_point_allowed(+0x98, x, z, player, 0) says they are hidden.
  * camera_view_test_sphere then gives the (absolute) view depth against the far distance (+0x90: 0 = g_cam_far_plane, 1 = 40000,
@@ -1102,7 +1102,7 @@ void world_records_build_visible(s32 view) {
                 if (rec[0x6E] == 1 || (rec[0x70] & 8) || !(rec[0x4F] & 1) || rec[0x8A] == 0) {
                     continue;
                 }
-                mode = &D_800C35EA + view;
+                mode = &g_cutscene_slot_state + view;
                 if ((&g_cutscene_show_all)[view] == 0 && *mode == 1 && cutscene_room_has_actor(i, view) == 0) {
                     continue;
                 }
@@ -1193,7 +1193,7 @@ void world_record_build_matrix(f32 (*arg0)[4], u8 *arg1);
 extern s32 g_world_vis_lists[];     /* per group: pointer to the group's entry list pointer (entries: u16 record id, u16); was D_800895E0 */
 extern s32 g_world_obj_mtx_bufs[];     /* per DL buffer: pointer to the matrix array pointer (one Mtx per record id); was D_800895F0 */
 extern u16 g_world_vis_counts[];     /* per group: entry count; was D_800DC318 */
-extern f32 D_800DC338[][4][4]; /* per DL buffer: fallback matrix */
+extern f32 g_world_obj_fallback_mtx[][4][4]; /* per DL buffer: fallback matrix; was D_800DC338 */
 
 /* world_records_update_matrices: per-frame matrix pass over the world-object records (called by world_update, the
  * world update). For each group 0..g_last_player_index that player_stat_get(group, 0) accepts, every listed record id gets its
@@ -1203,7 +1203,7 @@ extern f32 D_800DC338[][4][4]; /* per DL buffer: fallback matrix */
  *  - kind 0x65..0x7C (follows object g_objects[kind - 100]): rotation from the record angles +0x2C / +0x30 /
  *    +0x34 (mtxf_scale) at the object's position +0x14; with an attachment +0x1D4, at its +0x30 position,
  *    raised by the object's +0x90 (mtxf_translate_local), and that point is written back to the record (+0x10 / 12 / 14);
- *  - any other kind: the buffer's fallback matrix D_800DC338[g_dl_buf_index]. */
+ *  - any other kind: the buffer's fallback matrix g_world_obj_fallback_mtx[g_dl_buf_index]. */
 /* was func_15113798 */
 void world_records_update_matrices(void) {
     f32 mf[4][4];
@@ -1251,7 +1251,7 @@ void world_records_update_matrices(void) {
                     *(s16 *)(rec + 0x14) = (s32)mf[3][2];
                 }
             } else {
-                guMtxF2L(D_800DC338[g_dl_buf_index], (Mtx *)(*(u8 **)g_world_obj_mtx_bufs[g_dl_buf_index] + id * 0x40));
+                guMtxF2L(g_world_obj_fallback_mtx[g_dl_buf_index], (Mtx *)(*(u8 **)g_world_obj_mtx_bufs[g_dl_buf_index] + id * 0x40));
                 continue;
             }
             id = *(u16 *)(*(u8 **)g_world_vis_lists[group] + j * 4);
@@ -1422,7 +1422,7 @@ s32 world_mesh_draw(s32 arg0, u8 *obj, s32 mtx, s16 player, s32 unused, s32 pass
     gdl->words.w0 = 0xE7000000;
     gdl->words.w1 = 0;
     gdl++;
-    if (g_dl_capacity < (((u8 *) gdl - (u8 *) D_800BEDE8[g_dl_buf_index]) >> 3)) {
+    if (g_dl_capacity < (((u8 *) gdl - (u8 *) g_gfx_dl_buffers[g_dl_buf_index]) >> 3)) {
         return (s32) start;
     }
     return (s32) gdl;
@@ -1452,7 +1452,7 @@ void world_records_update_shadows(void) {
             }
         }
         if ((e->pad70[0] & 8) || ((u8 *)e)[0x4C] == 0 || (((u8 *)e)[0x4F] & 0x10) == 0x10 || found ||
-            (g_cutscene_show_all == 0 && D_800C35EA == 1 && !cutscene_room_has_actor(i, 0)) || !(((u8 *)e)[0x4F] & 1)) {
+            (g_cutscene_show_all == 0 && g_cutscene_slot_state == 1 && !cutscene_room_has_actor(i, 0)) || !(((u8 *)e)[0x4F] & 1)) {
             ok = 0;
         } else {
             ok = 1;
@@ -1482,7 +1482,7 @@ typedef struct {
     u8  pad84[0xA0 - 0x84];
 } Rec151143D4;
 
-/* a D_800D23C0 group (0x18 bytes): ids[] are (type << 12 | record index); type 2 = g_world_objs record */
+/* a g_link_groups group (0x18 bytes): ids[] are (type << 12 | record index); type 2 = g_world_objs record */
 typedef struct {
     u8  pad0[2];
     u16 count;                /* 0x2 */
@@ -1513,13 +1513,13 @@ void world_records_run_callbacks(s32 arg0) {
             rec->update(rec);
         }
     }
-    for (i = 0; i < (s32) D_80087380; i++) {
-        grp = (Group151143D4 *) D_800D23C0 + i;
+    for (i = 0; i < (s32) g_link_group_count; i++) {
+        grp = (Group151143D4 *) g_link_groups + i;
         if ((grp->ids[0] >> 12) != 2) {
             continue;
         }
         for (j = 0; j < grp->count; j++) {
-            id = ((Group151143D4 *) D_800D23C0)[i].ids[j];
+            id = ((Group151143D4 *) g_link_groups)[i].ids[j];
             if ((id >> 12) != 2) {
                 continue;
             }
@@ -1532,7 +1532,7 @@ void world_records_run_callbacks(s32 arg0) {
                     rec->extra = extra;
                 }
                 rec->update(rec);
-                grp = (Group151143D4 *) D_800D23C0 + i;   /* the callback may move the groups */
+                grp = (Group151143D4 *) g_link_groups + i;   /* the callback may move the groups */
             }
             if (j == 0) {
                 x = rec->pos[0];
@@ -1690,13 +1690,13 @@ void world_object_rotate_point(s32 idx, f32 *px, f32 *py, f32 *pz) {
 /* P133 */
 void world_object_rotate_point(s32, f32 *, f32 *, f32 *);
 extern f32 g_world_obj_timer_scale;   /* world-object timer scale; was D_800A3330 */
-extern u16 D_800CC1C0[]; /* per object: world-object index + 1 it follows */
+extern u16 g_obj_attached_world_obj[]; /* per object: world-object index + 1 it follows; was D_800CC1C0 */
 
 /*
  * world_object_timer_update: for a visible world-object record idx (< g_world_obj_count) and its object, refreshes the
  * object's +0x14 / +0x18 / +0x1C (world_object_rotate_point) and advances its u16 timer +0x76 by the record's +0x64 speed
  * times g_world_obj_timer_scale (float -> unsigned as IDO, stored as u16); when the object's +0x137 flag is set and its
- * D_800CC1C0 entry (index from the 0x32C-byte array g_objects) is idx + 1, +0x7A gets the same value.
+ * g_obj_attached_world_obj entry (index from the 0x32C-byte array g_objects) is idx + 1, +0x7A gets the same value.
  */
 /* was func_15114CBC */
 void world_object_timer_update(struct127 *arg0, s32 idx) {
@@ -1711,7 +1711,7 @@ void world_object_timer_update(struct127 *arg0, s32 idx) {
     rec = (u8 *) g_world_objs + idx * 0xA0;
     t = (f32) *(u16 *) (obj + 0x76) + *(f32 *) (rec + 0x64) * g_world_obj_timer_scale;
     *(u16 *) (obj + 0x76) = t;
-    if (obj[0x137] != 0 && D_800CC1C0[(obj - (u8 *) g_objects) / 0x32C] == idx + 1) {
+    if (obj[0x137] != 0 && g_obj_attached_world_obj[(obj - (u8 *) g_objects) / 0x32C] == idx + 1) {
         *(u16 *) (obj + 0x7A) = t;
     }
 }
@@ -1902,8 +1902,8 @@ void level_tri_tables_check(s32 arg0, s32 arg1, s32 arg2)
     s32 j;
     if (g_level_id == 0x12 || g_level_id == 0x36 || g_level_id == 0x13) {
         for (i = 0; i < 2; i++) {
-            u32 *base = (u32 *)D_800DC208[i];
-            for (j = 0; j < D_800DBE18[i]; j++) {
+            u32 *base = (u32 *)g_coll_area_tri_tables[i];
+            for (j = 0; j < g_coll_area_tri_counts[i]; j++) {
                 if ((base[j * 3 + 0] & 0xF0000000) != 0x80000000 || (base[j * 3 + 1] & 0xF0000000) != 0x80000000 || (base[j * 3 + 2] & 0xF0000000) != 0x80000000 || (base[j * 3 + 0] & 3) || (base[j * 3 + 1] & 3) || (base[j * 3 + 2] & 3)) {
                     g_dbg_crash_marker = 0x0C00005A;
                     func_150ADC50();

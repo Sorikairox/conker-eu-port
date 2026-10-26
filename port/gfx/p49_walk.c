@@ -1,7 +1,7 @@
 /* P49: ?p49walk=N runtime check of P47's walk handler obj_state_walk (state 1), link-time wrap.
  * Logs the player record before / after each call (first N calls, then every `p49every` calls, default 32):
- * position, velocities, yaw (+0x76 / +0x7A), target speed (+0x44), the pad (D_800CC6A4), the handler's flag
- * word D_800CC6DC, and which asm stubs the handler reached (port_stub_trace_hook), with call counts. */
+ * position, velocities, yaw (+0x76 / +0x7A), target speed (+0x44), the pad (g_cur_pad), the handler's flag
+ * word g_walk_flags, and which asm stubs the handler reached (port_stub_trace_hook), with call counts. */
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
@@ -12,9 +12,9 @@ int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
 extern void (*port_stub_trace_hook)(const char *name);
-extern unsigned D_800CC6A4, D_800CC6DC, D_800CC288, D_800CC6A0;
-extern unsigned short D_800CC69E; /* u16 in game memory: read with vbe_ld16 */
-extern unsigned char D_800BE616;
+extern unsigned g_cur_pad, g_walk_flags, g_cur_buttons_pressed, g_cur_cam_yaw; /* was D_800CC288; was D_800CC6A0; was D_800CC6A4; was D_800CC6DC */
+extern unsigned short g_walk_rel_heading; /* u16 in game memory: read with vbe_ld16; was D_800CC69E */
+extern unsigned char g_mp_mode_active; /* was D_800BE616 */
 
 #define NSTUB 48
 static const char *st_name[NSTUB];
@@ -31,14 +31,14 @@ static void p49_hook(const char *name) {
 #define U16(o) vbe_ld16(r + (o))
 static void p49_line(const char *tag, const unsigned char *r) {
     const unsigned char *u = (const unsigned char *)(uintptr_t)*(const unsigned *)(r + 0x31C);
-    const unsigned char *pad = (const unsigned char *)(uintptr_t)D_800CC6A4;
+    const unsigned char *pad = (const unsigned char *)(uintptr_t)g_cur_pad;
     port_log("[p49] %s frame %u: state %d pos %g %g %g yv %g grav %g xz %g +28 %g +44 %g +54 %g yaw76 %04X 7A %04X 78 %04X "
              "floor118 %g dis_run %02X stun %02X water %02X 81 %02X 83 %02X AA %02X 110 %02X F8 %08X | pad %04X %d,%d "
              "CC288 %04X CC6DC %03X CC69E %04X CC6A0 %04X hp %02X BE616 %02X | 31C %08X 78 %02X 84 %02X 4E %02X 52 %02X 197 %02X 198 %02X 11A %02X 12 %d\n",
              tag, port_frame_count, *(const int *)r, F(0x14), F(0x18), F(0x1C), F(0x20), F(0x24), F(0x3C), F(0x28), F(0x44),
              F(0x54), U16(0x76), U16(0x7A), U16(0x78), F(0x118), U8(0x89), U8(0x104), U8(0xAD), U8(0x81), U8(0x83), U8(0xAA),
              U8(0x110), *(const unsigned *)(r + 0xF8), pad ? vbe_ld16(pad) : 0, pad ? (signed char)vbe_ld8(pad + 2) : 0,
-             pad ? (signed char)vbe_ld8(pad + 3) : 0, D_800CC288 & 0xFFFF, D_800CC6DC, vbe_ld16(&D_800CC69E), D_800CC6A0 & 0xFFFF, U8(0x1CA), vbe_ld8(&D_800BE616),
+             pad ? (signed char)vbe_ld8(pad + 3) : 0, g_cur_buttons_pressed & 0xFFFF, g_walk_flags, vbe_ld16(&g_walk_rel_heading), g_cur_cam_yaw & 0xFFFF, U8(0x1CA), vbe_ld8(&g_mp_mode_active),
              (unsigned)(uintptr_t)u, u ? vbe_ld8(u + 0x78) : 0, u ? vbe_ld8(u + 0x84) : 0, u ? vbe_ld8(u + 0x4E) : 0,
              u ? vbe_ld8(u + 0x52) : 0, u ? vbe_ld8(u + 0x197) : 0, u ? vbe_ld8(u + 0x198) : 0, u ? vbe_ld8(u + 0x11A) : 0, u ? (short)vbe_ld16(u + 0x12) : 0);
 }
@@ -90,10 +90,10 @@ void __wrap_obj_state_walk(void *arg0) {
  *  - wrap obj_apply_gravity (P50 C gravity; the call from the walk handler): y / y_velocity / +0x28 before and after,
  *    gravity +0x24 and the frame time g_obj_time_step[0] (an f32 array, P50), first p49walk calls then every p49every;
  *  - wrap objects_update_all (P48 C object update loop, called from game_45B80.c): record 0's model fields after it
- *    (+0x1D4 model instance, +0x2D0 animation state, id +4, D_800D19A0[id] loaded model, D_800C52F0[id]). */
+ *    (+0x1D4 model instance, +0x2D0 animation state, id +4, g_model_bases[id] loaded model, g_model_joint_counts[id]). */
 extern float g_obj_time_step[]; /* was D_800D1550 */
-extern unsigned D_800D19A0[];
-extern unsigned short D_800C52F0[];
+extern unsigned g_model_bases[]; /* was D_800D19A0 */
+extern unsigned short g_model_joint_counts[]; /* was D_800C52F0 */
 extern unsigned char g_objects[]; /* was D_800CC2D0 */
 void __real_obj_apply_gravity(void *rec);
 void __wrap_obj_apply_gravity(void *rec) {
@@ -150,22 +150,22 @@ void __wrap_objects_update_all(void) {
         unsigned id = U8(4);
         port_log("[p52] objects_update_all call %u frame %u: rec0 state %d id %02X +65 %02X +1D4 %08X +2D0 %08X "
                  "D_800D19A0[id] %08X D_800C52F0[id] %u +74 %02X\n", calls, port_frame_count, *(const int *)r, id,
-                 U8(0x65), *(const unsigned *)(r + 0x1D4), *(const unsigned *)(r + 0x2D0), D_800D19A0[id],
-                 vbe_ld16(&D_800C52F0[id]), U8(0x74));
+                 U8(0x65), *(const unsigned *)(r + 0x1D4), *(const unsigned *)(r + 0x2D0), g_model_bases[id],
+                 vbe_ld16(&g_model_joint_counts[id]), U8(0x74));
     }
 }
 
 /* P52 diagnostic ?p52void=1 (P55: now off by default and only a diagnostic; the floor query is real C since P53/P54):
  * forces "no floor" (-10000) into arg 3 (spC4) and arg 4 (+0x118) after the real query.
  * P55 ?p49walk: for record 0 (argB == g_objects) logs the query's inputs / outputs and an independent float floor
- * height: every level triangle (D_800DC26C, D_800DBE4C of them, vertices s16 at the offsets) whose x/z projection
+ * height: every level triangle (g_level_tri_table, g_coll_tri_count of them, vertices s16 at the offsets) whose x/z projection
  * holds (x, z), with the plane y there; the highest such y that is <= y + 15 (step), and the count of hits. */
-extern unsigned D_800DC26C, D_800DBE4C;
-extern unsigned char D_800DBE62;
-extern int D_800D3720[];
+extern unsigned g_level_tri_table, g_coll_tri_count; /* was D_800DC26C; was D_800DBE4C */
+extern unsigned char g_coll_quadtrees_built; /* was D_800DBE62 */
+extern int g_floor_hits[]; /* was D_800D3720 */
 static int p55_ref(float x, float z, float ylim, float *best, float *top, int *ntri) {
-    const unsigned *vo = (const unsigned *)(uintptr_t)D_800DC26C;
-    unsigned i, n = D_800DBE4C;
+    const unsigned *vo = (const unsigned *)(uintptr_t)g_level_tri_table;
+    unsigned i, n = g_coll_tri_count;
     int hits = 0, bi = -1;
     *best = -10000.0f; *top = -10000.0f;
     if (!vo || n > 20000) { *ntri = 0; return -1; }
@@ -214,32 +214,32 @@ int __wrap_floor_collect_level_tris(int x, int z) {
         bi = p55_ref((float)x, (float)z, r_y + 15.0f, &b, &t, &nt);
         if (nt > 0) { r_n3f50 = n; r_bi = bi; r_best = b; r_top = t; r_ntri = nt; } /* keep the area with triangles */
         if (r_minx > r_maxx) { /* level extent, once */
-            const unsigned *vo = (const unsigned *)(uintptr_t)D_800DC26C;
+            const unsigned *vo = (const unsigned *)(uintptr_t)g_level_tri_table;
             unsigned i;
-            for (i = 0; vo && i < D_800DBE4C * 3; i++) {
+            for (i = 0; vo && i < g_coll_tri_count * 3; i++) {
                 const unsigned char *q = (const unsigned char *)(uintptr_t)vo[i];
                 float vx = (short)vbe_ld16(q), vy = (short)vbe_ld16(q + 2), vz = (short)vbe_ld16(q + 4);
                 if (vx < r_minx) r_minx = vx; if (vx > r_maxx) r_maxx = vx;
                 if (vz < r_minz) r_minz = vz; if (vz > r_maxz) r_maxz = vz;
                 if (vy < r_miny) r_miny = vy; if (vy > r_maxy) r_maxy = vy;
             }
-            port_log("[p55] level area tables: %u triangles, x %g..%g y %g..%g z %g..%g, D_800DBE62 %u\n", D_800DBE4C,
-                     r_minx, r_maxx, r_miny, r_maxy, r_minz, r_maxz, vbe_ld8(&D_800DBE62));
+            port_log("[p55] level area tables: %u triangles, x %g..%g y %g..%g z %g..%g, D_800DBE62 %u\n", g_coll_tri_count,
+                     r_minx, r_maxx, r_miny, r_maxy, r_minz, r_maxz, vbe_ld8(&g_coll_quadtrees_built));
         }
     }
     return n;
 }
 
 /* P55 ?p55synth=1: one-shot in-wasm check of the C floor query on sloped synthetic geometry (level 0x21 is flat, y 0).
- * At the first record-0 floor query: only area 0 enabled (D_800894C0), and after func_150A4ED4(0) the area-0 tables
- * D_800DC26C / D_800DC270 / D_800DBE4C / D_800DBE62 (0: all-triangles path) / D_800DBE5C point at PC buffers written
+ * At the first record-0 floor query: only area 0 enabled (g_coll_area_enabled), and after func_150A4ED4(0) the area-0 tables
+ * g_level_tri_table / g_coll_tri_xz_bounds / g_coll_tri_count / g_coll_quadtrees_built (0: all-triangles path) / g_coll_tri_flags point at PC buffers written
  * through vbe (s16 vertices and bounds), then collision_find_floor_no_fallback runs over an integer grid with y = prevY = 1000 (so the
  * highest floor below wins) and record 0 = NULL. Its height is compared with a float barycentric reference. All
  * globals are restored afterwards. */
-extern unsigned char D_800894C0[];
+extern unsigned char g_coll_area_enabled[]; /* was D_800894C0 */
 void __real_collision_find_floor_no_fallback(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
                           unsigned short aA, int aB, int aC, int aD, int aE);
-extern unsigned D_800DC270, D_800DBE5C;
+extern unsigned g_coll_tri_xz_bounds, g_coll_tri_flags; /* was D_800DC270; was D_800DBE5C */
 static int synth_on;
 static short syn_v[8][3] = {
     {-200, 0, -200}, {200, 80, -200}, {200, 120, 200}, {-200, 40, 200},   /* sloped quad: tris 0-1-2, 0-2-3 */
@@ -286,16 +286,16 @@ void __real_func_150A4ED4(int area);
 void __wrap_func_150A4ED4(int area) {
     __real_func_150A4ED4(area);
     if (synth_on && area == 0) {
-        D_800DC26C = (unsigned)(uintptr_t)syn_ofs; D_800DC270 = (unsigned)(uintptr_t)syn_bnd; D_800DBE4C = 3;
-        vbe_st8(&D_800DBE62, 0); D_800DBE5C = (unsigned)(uintptr_t)syn_flags;
+        g_level_tri_table = (unsigned)(uintptr_t)syn_ofs; g_coll_tri_xz_bounds = (unsigned)(uintptr_t)syn_bnd; g_coll_tri_count = 3;
+        vbe_st8(&g_coll_quadtrees_built, 0); g_coll_tri_flags = (unsigned)(uintptr_t)syn_flags;
     }
 }
 static void p55_synth(void) {
-    unsigned s26c = D_800DC26C, s270 = D_800DC270, s24c = D_800DBE4C, s25c = D_800DBE5C, s62 = vbe_ld8(&D_800DBE62);
+    unsigned s26c = g_level_tri_table, s270 = g_coll_tri_xz_bounds, s24c = g_coll_tri_count, s25c = g_coll_tri_flags, s62 = vbe_ld8(&g_coll_quadtrees_built);
     unsigned char en[4]; int i, x, z, n = 0, nin = 0, miss = 0, extra = 0, bad = 0, edge = 0; float maxd = 0, sumd = 0;
     char ex[400]; int exn = 0;
     unsigned tri, vtx[5], flags; short area[2]; float h, ceil;
-    for (i = 0; i < 4; i++) { en[i] = vbe_ld8(&D_800894C0[i]); vbe_st8(&D_800894C0[i], i == 0); }
+    for (i = 0; i < 4; i++) { en[i] = vbe_ld8(&g_coll_area_enabled[i]); vbe_st8(&g_coll_area_enabled[i], i == 0); }
     synth_tables();
     synth_on = 1;
     ex[0] = 0;
@@ -328,20 +328,20 @@ static void p55_synth(void) {
             if (d > 1.5f) { bad++; if (exn < 360) exn += snprintf(ex + exn, sizeof ex - exn, " (%d,%d ref %g got %g)", x, z, r, h); }
         }
     synth_on = 0;
-    for (i = 0; i < 4; i++) vbe_st8(&D_800894C0[i], en[i]);
-    D_800DC26C = s26c; D_800DC270 = s270; D_800DBE4C = s24c; D_800DBE5C = s25c; vbe_st8(&D_800DBE62, s62);
+    for (i = 0; i < 4; i++) vbe_st8(&g_coll_area_enabled[i], en[i]);
+    g_level_tri_table = s26c; g_coll_tri_xz_bounds = s270; g_coll_tri_count = s24c; g_coll_tri_flags = s25c; vbe_st8(&g_coll_quadtrees_built, s62);
     port_log("[p55] synth floor: %d grid points, %d inside a triangle; height |C - float| max %g mean %g; >1.5: %d; "
              "missed %d, extra %d, edge-ambiguous %d;%s %s\n", n, nin, maxd, nin ? sumd / nin : 0, bad, miss, extra, edge,
              ex, (bad || miss || extra) ? "FAIL" : "PASS");
 }
 /* P101 DIAGNOSTIC ?p101col=N: on the first N floor -> void changes of record 0's floor query: the 4 collision areas
- * (enable D_800894C0, triangle count D_800DBE18, x / y / z extent of the table D_800DC208), the level DLs
+ * (enable g_coll_area_enabled, triangle count g_coll_area_tri_counts, x / y / z extent of the table g_coll_area_tri_tables), the level DLs
  * g_level_part_dls[0..3], and the world objects (g_world_obj_count records of 0xA0 at g_world_objs: DL +0x1C, flags +0x4F, first tri
  * +0x58, count +0x56, +0x10..+0x14). */
-extern int D_800DC208[], D_800DBE18[], g_world_obj_count, g_level_part_dls[]; /* was D_800B0E00; was D_800DC320 */
+extern int g_coll_area_tri_tables[], g_coll_area_tri_counts[], g_world_obj_count, g_level_part_dls[]; /* was D_800B0E00; was D_800DC320; was D_800DBE18; was D_800DC208 */
 extern unsigned char *g_world_objs; /* was D_800DBEF4 */
 extern unsigned char g_game_mode; /* was D_800E0B94 */
-extern unsigned D_8009018C[];
+extern unsigned g_game_mode_fns[]; /* was D_8009018C */
 static void p101_col(float h, float x, float y, float z) {
     static int f = -1, n, last = 2;
     int isfloor = h != -10000.0f, a, i, was = last;
@@ -350,15 +350,15 @@ static void p101_col(float h, float x, float y, float z) {
     if (!f || isfloor || was != 1 || n >= f) return;
     n++;
     port_log("[p101] game mode D_800E0B94 %u, handlers D_8009018C[0..9] %08X %08X %08X %08X %08X %08X %08X %08X %08X %08X\n",
-             vbe_ld8(&g_game_mode), D_8009018C[0], D_8009018C[1], D_8009018C[2], D_8009018C[3], D_8009018C[4],
-             D_8009018C[5], D_8009018C[6], D_8009018C[7], D_8009018C[8], D_8009018C[9]);
+             vbe_ld8(&g_game_mode), g_game_mode_fns[0], g_game_mode_fns[1], g_game_mode_fns[2], g_game_mode_fns[3], g_game_mode_fns[4],
+             g_game_mode_fns[5], g_game_mode_fns[6], g_game_mode_fns[7], g_game_mode_fns[8], g_game_mode_fns[9]);
     port_log("[p101] void at frame %u: x %g y %g z %g; enable %u %u %u %u; level DLs %08X %08X %08X %08X; objects %d\n",
-             port_frame_count, x, y, z, vbe_ld8(&D_800894C0[0]), vbe_ld8(&D_800894C0[1]), vbe_ld8(&D_800894C0[2]),
-             vbe_ld8(&D_800894C0[3]), g_level_part_dls[0], g_level_part_dls[1], g_level_part_dls[2], g_level_part_dls[3], g_world_obj_count);
+             port_frame_count, x, y, z, vbe_ld8(&g_coll_area_enabled[0]), vbe_ld8(&g_coll_area_enabled[1]), vbe_ld8(&g_coll_area_enabled[2]),
+             vbe_ld8(&g_coll_area_enabled[3]), g_level_part_dls[0], g_level_part_dls[1], g_level_part_dls[2], g_level_part_dls[3], g_world_obj_count);
     for (a = 0; a < 4; a++) {
-        const unsigned *vo = (const unsigned *)(uintptr_t)D_800DC208[a];
+        const unsigned *vo = (const unsigned *)(uintptr_t)g_coll_area_tri_tables[a];
         float mn[3] = {1e9f, 1e9f, 1e9f}, mx[3] = {-1e9f, -1e9f, -1e9f};
-        int k, cnt = D_800DBE18[a];
+        int k, cnt = g_coll_area_tri_counts[a];
         for (i = 0; vo && cnt > 0 && cnt < 40000 && i < cnt * 3; i++)
             for (k = 0; k < 3; k++) {
                 float v = (short)vbe_ld16((const unsigned char *)(uintptr_t)vo[i] + 2 * k);
@@ -376,9 +376,9 @@ static void p101_col(float h, float x, float y, float z) {
     }
 }
 /* P245 DIAGNOSTIC ?p245col=F: once, on the first p205_obj_hook call (needs ?p205obj) at retrace >= F (the floor-query wrap is not reached for Conker on 0x29), dump every triangle of collision areas
- * 0 and 1 (D_800DC208 vertex-pointer table, 3 pointers to s16 x y z per triangle, count D_800DBE18) as
- * "[p245tri] area idx x0 y0 z0 x1 y1 z1 x2 y2 z2 flags" (flags = D_800DBE5C entry when the area is the current one,
- * D_800DC26C, else -1), plus the caller's position. For offline path planning (level 0x29 river). */
+ * 0 and 1 (g_coll_area_tri_tables vertex-pointer table, 3 pointers to s16 x y z per triangle, count g_coll_area_tri_counts) as
+ * "[p245tri] area idx x0 y0 z0 x1 y1 z1 x2 y2 z2 flags" (flags = g_coll_tri_flags entry when the area is the current one,
+ * g_level_tri_table, else -1), plus the caller's position. For offline path planning (level 0x29 river). */
 void p245_coldump(float x, float y, float z) {
     static int f = -2, done;
     int a, i, k, cnt;
@@ -386,15 +386,15 @@ void p245_coldump(float x, float y, float z) {
     if (f <= 0 || done || port_frame_count < (unsigned)f) return;
     done = 1;
     port_log("[p245col] frame %u pos %g %g %g; area counts %d %d %d %d, current table %08X\n", port_frame_count, x, y, z,
-             D_800DBE18[0], D_800DBE18[1], D_800DBE18[2], D_800DBE18[3], (unsigned)D_800DC26C);
+             g_coll_area_tri_counts[0], g_coll_area_tri_counts[1], g_coll_area_tri_counts[2], g_coll_area_tri_counts[3], (unsigned)g_level_tri_table);
     for (a = 0; a < 2; a++) {
-        const unsigned *vo = (const unsigned *)(uintptr_t)D_800DC208[a];
-        cnt = D_800DBE18[a];
+        const unsigned *vo = (const unsigned *)(uintptr_t)g_coll_area_tri_tables[a];
+        cnt = g_coll_area_tri_counts[a];
         if (!vo || cnt <= 0 || cnt > 40000) continue;
         for (i = 0; i < cnt; i++) {
             short v[9]; long fl = -1;
             for (k = 0; k < 9; k++) v[k] = (short)vbe_ld16((const unsigned char *)(uintptr_t)vo[i * 3 + k / 3] + 2 * (k % 3));
-            if ((uintptr_t)D_800DC26C == (uintptr_t)vo && D_800DBE5C) fl = (long)((const unsigned *)(uintptr_t)D_800DBE5C)[i];
+            if ((uintptr_t)g_level_tri_table == (uintptr_t)vo && g_coll_tri_flags) fl = (long)((const unsigned *)(uintptr_t)g_coll_tri_flags)[i];
             port_log("[p245tri] %d %d %d %d %d %d %d %d %d %d %d %lX\n", a, i, v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], fl);
         }
     }
@@ -418,7 +418,7 @@ void p248_mesh(void) {
     if (!done) {
         done = 1; n0 = n;
         port_log("[p248mesh] frame %u: %d world objects, gate fn %08X, area counts %d %d %d %d\n", port_frame_count, n,
-                 (unsigned)(uintptr_t)scenery_gate_swing_update, D_800DBE18[0], D_800DBE18[1], D_800DBE18[2], D_800DBE18[3]);
+                 (unsigned)(uintptr_t)scenery_gate_swing_update, g_coll_area_tri_counts[0], g_coll_area_tri_counts[1], g_coll_area_tri_counts[2], g_coll_area_tri_counts[3]);
         for (i = 0; i < n; i++) {
             const unsigned char *o = g_world_objs + i * 0xA0;
             port_log("[p248mesh] %d ang %.1f yaw %.1f pos %d %d %d scale %.2f %.2f %.2f upd %08X%s 4F %02X tri %u +%u pos5A %d %d %d busy %u fl %02X 73 %02X DL %08X\n",
@@ -432,8 +432,8 @@ void p248_mesh(void) {
             lastang[i] = (int)*(const float *)o; last73[i] = vbe_ld8(o + 0x73);
         }
         for (a = 2; a < 4; a++) {
-            const unsigned *vo = (const unsigned *)(uintptr_t)D_800DC208[a];
-            int cnt = D_800DBE18[a];
+            const unsigned *vo = (const unsigned *)(uintptr_t)g_coll_area_tri_tables[a];
+            int cnt = g_coll_area_tri_counts[a];
             if (!vo || cnt <= 0 || cnt > 40000) continue;
             for (i = 0; i < cnt; i++) {
                 short v[9];
@@ -442,10 +442,10 @@ void p248_mesh(void) {
             }
         }
         {   /* the level's event zones (as P212's [p212zone], which fires before the level loads in EEPROM boots) */
-            extern unsigned char *D_800D34B8; extern unsigned D_800D3094;
+            extern unsigned char *g_level_zones; extern unsigned g_level_zone_count;
             unsigned kz;
-            for (kz = 0; kz < D_800D3094 && kz < 256 && D_800D34B8; kz++) {
-                const unsigned char *z = D_800D34B8 + kz * 0x34;
+            for (kz = 0; kz < g_level_zone_count && kz < 256 && g_level_zones; kz++) {
+                const unsigned char *z = g_level_zones + kz * 0x34;
                 port_log("[p248zone] %02X pos %d %d %d u6 %d f10 %.1f b14 %02X %02X %02X %02X\n", kz, (short)vbe_ld16(z),
                          (short)vbe_ld16(z + 2), (short)vbe_ld16(z + 4), (short)vbe_ld16(z + 6), *(const float *)(z + 0x10),
                          vbe_ld8(z + 0x14), vbe_ld8(z + 0x15), vbe_ld8(z + 0x16), vbe_ld8(z + 0x17));
@@ -473,14 +473,14 @@ void p248_mesh(void) {
         static int lf = -2, zlev = -1;
         if (lf == -2) lf = port_flag("p261lever");
         {   /* P261: the event zones again whenever the level (g_level_id) changes, 60 retraces after */
-            extern unsigned char *D_800D34B8; extern unsigned D_800D3094; extern int g_level_id;
+            extern unsigned char *g_level_zones; extern unsigned g_level_zone_count; extern int g_level_id;
             static unsigned zf;
             if (lf > 0 && g_level_id != zlev) { zlev = g_level_id; zf = port_frame_count + 60; }
             if (lf > 0 && zf && port_frame_count >= zf) {
                 unsigned kz;
                 zf = 0;
-                for (kz = 0; kz < D_800D3094 && kz < 256 && D_800D34B8; kz++) {
-                    const unsigned char *z = D_800D34B8 + kz * 0x34;
+                for (kz = 0; kz < g_level_zone_count && kz < 256 && g_level_zones; kz++) {
+                    const unsigned char *z = g_level_zones + kz * 0x34;
                     port_log("[p261zone] level %02X %02X pos %d %d %d u6 %d f10 %.1f b14 %02X %02X %02X %02X\n", zlev, kz,
                              (short)vbe_ld16(z), (short)vbe_ld16(z + 2), (short)vbe_ld16(z + 4), (short)vbe_ld16(z + 6),
                              *(const float *)(z + 0x10), vbe_ld8(z + 0x14), vbe_ld8(z + 0x15), vbe_ld8(z + 0x16), vbe_ld8(z + 0x17));
@@ -540,7 +540,7 @@ void __wrap_collision_find_floor_no_fallback(int a0, int a1, int a2, int a3, int
                      "flags %08X area %d | n 3F50 %d (x%d) 48C0 %d 5480 %d | ref best %g (tri %d) top %g, %d tris, all-tri path %d | ref-out %g%s\n",
                      calls, port_frame_count, a6, a7, a8, a9, h, f118, a0 ? *(unsigned *)(uintptr_t)a0 : 0,
                      a4 ? *(unsigned *)(uintptr_t)a4 : 0, a5 ? (short)vbe_ld16((void *)(uintptr_t)a5) : -1, r_n3f50, r_calls, r_n48c0, r_n5480, best, bi, top, ntri,
-                     vbe_ld8(&D_800DBE62) == 0, best - h, isfloor != lastfloor ? " (floor/void change)" : "");
+                     vbe_ld8(&g_coll_quadtrees_built) == 0, best - h, isfloor != lastfloor ? " (floor/void change)" : "");
         lastfloor = isfloor;
     }
     if (aB == (int)(uintptr_t)g_objects) p101_col(a2 ? *(float *)(uintptr_t)a2 : 0, a6, a7, a8);
@@ -565,9 +565,9 @@ void __wrap_obj_ctrl_floor_contact(void *rec, float a1) {
 
 /* P101 DIAGNOSTIC ?p101mus=1: at each call of the level-start music function level_start_music (game_2D4B0.c, still an
  * asm stub = does nothing; its m2c draft starts the level songs from the level header g_level_header +0x2C..+0x39 through
- * music_play_song): the level g_level_id, the header bytes +0x2C..+0x39, and the level model count D_800B1248. */
+ * music_play_song): the level g_level_id, the header bytes +0x2C..+0x39, and the level model count g_level_model_colour_group_count. */
 extern unsigned char *g_level_header; /* was D_800B0DF0 */
-extern int g_level_id, D_800B1248; /* was D_800BE9F0 */
+extern int g_level_id, g_level_model_colour_group_count; /* was D_800BE9F0; was D_800B1248 */
 int port_p110_inmus;
 void __real_level_start_music(void);
 void __wrap_level_start_music(void) {
@@ -578,7 +578,7 @@ void __wrap_level_start_music(void) {
         char b[64]; int i, o = 0;
         for (i = 0x2C; h && i < 0x3A; i++) o += snprintf(b + o, sizeof b - o, "%02X%s", vbe_ld8(h + i), (i & 3) == 3 ? " " : "");
         port_log("[p101] level_start_music (level music start, asm stub) frame %u: level %X header %08X +2C: %s| models %d\n",
-                 port_frame_count, g_level_id, (unsigned)(uintptr_t)h, h ? b : "-", D_800B1248);
+                 port_frame_count, g_level_id, (unsigned)(uintptr_t)h, h ? b : "-", g_level_model_colour_group_count);
     }
     port_p110_inmus = 1; /* P110: music_play_song / DE1C calls from inside are logged by p61_checks.c */
     __real_level_start_music();
@@ -586,9 +586,9 @@ void __wrap_level_start_music(void) {
 }
 /* P261 DIAGNOSTIC (always on, logs only on a bad key): --wrap of anim_events_run (game_981E0, anim event keys). Before
  * the real call, walks the keys the real code would dispatch (time <= arg1, < 900) and logs any key byte (+7) whose
- * D_8008679C handler word is not a small table index, with the record and the key list. The real function runs. */
+ * g_anim_event_fns handler word is not a small table index, with the record and the key list. The real function runs. */
 extern float __real_anim_events_run(unsigned char *a0, float a1, int a2);
-extern unsigned char D_8008679C[];
+extern unsigned char g_anim_event_fns[]; /* was D_8008679C */
 float __wrap_anim_events_run(unsigned char *a0, float a1, int a2) {
     static int nlog;
     const unsigned char *keys = (const unsigned char *)(uintptr_t)*(const unsigned *)(a0 + 0x1C4);
@@ -601,7 +601,7 @@ float __wrap_anim_events_run(unsigned char *a0, float a1, int a2) {
             unsigned key = vbe_ld8(e + 7), fn;
             if (!(t <= a1)) break;
             if (t >= 900.f) continue;
-            fn = *(const unsigned *)(D_8008679C + key * 4);
+            fn = *(const unsigned *)(g_anim_event_fns + key * 4);
             if (key && (fn == 0 || fn > 0x10000)) {
                 nlog++;
                 port_log("[p261key] frame %u rec %p id %02X key %u (#%u t %.1f now %.1f) handler word %08X | keys %p idx %u b4 %.1f 2D0 %08X\n",
@@ -613,7 +613,7 @@ float __wrap_anim_events_run(unsigned char *a0, float a1, int a2) {
     return __real_anim_events_run(a0, a1, a2);
 }
 /* P261 (port-side, not a diagnostic): EU 0x1506D8AC is a separate 2-instruction function (jr ra; nop) that the split
- * glued to the end of objev_throw_object's asm (game_981E0). It is entry 16 of the anim-key handler table D_8008679C
+ * glued to the end of objev_throw_object's asm (game_981E0). It is entry 16 of the anim-key handler table g_anim_event_fns
  * (dispatched by anim_events_run). Without a definition the table word stayed the N64 address and call_indirect trapped
  * ("table index is out of bounds") when the level-0x2E mushroom played its hit animation. port/tools/n64mem.py lists it
  * in VM_NATIVES so the relocation maps the word here. Proper fix: split it in game_981E0 (port). */

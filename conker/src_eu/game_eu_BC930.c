@@ -16,13 +16,13 @@ s32 link_group_find_partner(s32 arg0, s32 arg1, s32 arg2) {
     u8 *var_t3;
 
     var_v0 = 0;
-    if (D_80087380 != 0) {
-        var_t0 = D_800D23C0;
+    if (g_link_group_count != 0) {
+        var_t0 = g_link_groups;
 loop_2:
         temp_t1 = (*(u16 *)((u8 *)var_t0 + 2));
         var_a2 = 0;
         if (temp_t1 != 0) {
-            temp_t2 = D_800D23C0 + (var_v0 * 0x18);
+            temp_t2 = g_link_groups + (var_v0 * 0x18);
             var_t3 = temp_t2;
 loop_4:
             if (((((arg0 & 0xFFFF) << 0xC) + (arg1 & 0xFFFF)) & 0xFFFF) == (*(u16 *)((u8 *)var_t3 + 8))) {
@@ -54,7 +54,7 @@ block_11:
 block_13:
         var_v0 += 1;
         var_t0 += 0x18;
-        if (var_v0 >= (u32) D_80087380) {
+        if (var_v0 >= (u32) g_link_group_count) {
             goto block_14;
         }
         goto loop_2;
@@ -64,10 +64,10 @@ block_14:
 }
 /* was func_1508F21C */
 void link_group_clear(u32 arg0) {
-    if (arg0 < D_80087380) {
-        *(s16 *)(D_800D23C0 + arg0 * 0x18 + 2) = 0;
-        *(s32 *)(D_800D23C0 + arg0 * 0x18 + 4) = 0;
-        *(s16 *)(D_800D23C0 + arg0 * 0x18) = 0;
+    if (arg0 < g_link_group_count) {
+        *(s16 *)(g_link_groups + arg0 * 0x18 + 2) = 0;
+        *(s32 *)(g_link_groups + arg0 * 0x18 + 4) = 0;
+        *(s16 *)(g_link_groups + arg0 * 0x18) = 0;
     }
 }
 
@@ -90,8 +90,8 @@ void link_group_remove_members(s32 arg0, s32 arg1) {
     u8 *var_v0;
 
     var_s2 = 0;
-    if (D_80087380 != 0) {
-        temp_a2 = D_800D23C0;
+    if (g_link_group_count != 0) {
+        temp_a2 = g_link_groups;
         var_s3 = 0;
         var_a1 = temp_a2;
 loop_2:
@@ -112,11 +112,11 @@ loop_4:
                         switch (temp_v1) {          /* irregular */
                         case 2:
                             world_record_remove(temp_a1);
-                            var_a0 = (*(u16 *)((u8 *)((D_800D23C0 + var_s3)) + 2));
+                            var_a0 = (*(u16 *)((u8 *)((g_link_groups + var_s3)) + 2));
                             break;
                         case 3:
                             look_point_remove(temp_a1);
-                            var_a0 = (*(u16 *)((u8 *)((D_800D23C0 + var_s3)) + 2));
+                            var_a0 = (*(u16 *)((u8 *)((g_link_groups + var_s3)) + 2));
                             break;
                         }
                         var_s0_2 += 1;
@@ -136,7 +136,7 @@ block_15:
         var_s2 += 1;
         var_s3 += 0x18;
         var_a1 += 0x18;
-        if (var_s2 >= (u32) D_80087380) {
+        if (var_s2 >= (u32) g_link_group_count) {
 
         } else {
             goto loop_2;

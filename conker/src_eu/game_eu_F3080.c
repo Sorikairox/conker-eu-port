@@ -40,7 +40,7 @@ void beam_free(struct102 *arg0) {
     node_unlink_free(arg0);
 }
 
-extern void (*D_80088B58[2])(void);
+extern void (*g_beam_retire_fns[2])(void); /* was D_80088B58 */
 /* was func_150C5970 */
 void beam_retire_by_kind(u8 *arg0) {
     s32 idx = *(u8 *)(arg0 + 0x38);
@@ -50,10 +50,10 @@ void beam_retire_by_kind(u8 *arg0) {
     } else if (idx >= 2) {
         idx = 0;
     }
-    D_80088B58[idx]();
+    g_beam_retire_fns[idx]();
 }
 
-extern void (*D_80088B60[2])(void);
+extern void (*g_beam_free_fns[2])(void); /* was D_80088B60 */
 /* was func_150C59C0 */
 void beam_free_by_kind(u8 *arg0) {
     s32 idx = *(u8 *)(arg0 + 0x38);
@@ -63,7 +63,7 @@ void beam_free_by_kind(u8 *arg0) {
     } else if (idx >= 2) {
         idx = 0;
     }
-    D_80088B60[idx]();
+    g_beam_free_fns[idx]();
 }
 
 /* was func_150C5A10 */
@@ -78,9 +78,9 @@ void beam_detach_free(struct102 *arg0) {
     beam_free(arg0);
 }
 
-extern s32 (*D_80088B00[])(u8 *); /* motion handlers (beam_follow_obj_pos, beam_follow_obj_point) (index obj +0x30, -1 = none); 0 = remove the object */
+extern s32 (*g_beam_motion_fns[])(u8 *); /* motion handlers (beam_follow_obj_pos, beam_follow_obj_point) (index obj +0x30, -1 = none); 0 = remove the object; was D_80088B00 */
 
-/* object_motion_step: for an active object (flag word +0x10 bit 0), runs its motion handler D_80088B00[+0x30] (if
+/* object_motion_step: for an active object (flag word +0x10 bit 0), runs its motion handler g_beam_motion_fns[+0x30] (if
  * any); when the handler returns 0 the object is removed (node_destroy). Otherwise, if the offset position +0x18 -
  * +0x24 (f32[3] each) changed across the handler, its length (vec3_length) is stored in +0xC0. Table record word
  * 0x8008C680 (update slot), like its neighbours `void (struct102 *)`. */
@@ -98,7 +98,7 @@ void beam_motion_tick(struct102 *obj) {
     dy = *(f32 *) (o + 0x1C) - *(f32 *) (o + 0x28);
     dz = *(f32 *) (o + 0x20) - *(f32 *) (o + 0x2C);
     if (*(s8 *) (o + 0x30) != -1) {
-        if (D_80088B00[*(s8 *) (o + 0x30)](o) == 0) {
+        if (g_beam_motion_fns[*(s8 *) (o + 0x30)](o) == 0) {
             remove = 1;
         }
     }
@@ -121,7 +121,7 @@ s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *
 s32 gfx_geometry_mode_cached(s32, s32, s32);
 s32 gfx_set_combine_mode(s32, s32, s8 *);
 u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
-extern s32 D_80091198[];
+extern s32 g_tex_rope[]; /* was D_80091198 */
 float sqrtf(float);
 extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
@@ -129,7 +129,7 @@ extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 // beam_quad_draw: draws a camera-facing beam quad from +0x18 (start) to +0x24 (end) for player view `view` when
 // flag 1 of +0x10 is set. The quad's half-width vector is (end - start) x (end - camera) normalised to 8.4
 // (camera = view record +0x2F8 of g_player_views, 0x9A0 bytes per view); the texture runs 0..0x3C0 across and
-// 0..+0xC0 * +0x34 * 64 along. Render state: texture D_80091198 (gfx_load_texture_cached); with flag 1 of the view's
+// 0..+0xC0 * +0x34 * 64 along. Render state: texture g_tex_rope (gfx_load_texture_cached); with flag 1 of the view's
 // +0x5F0 the view's colours g_tint_env_rgb / g_tint_prim_rgb (3 bytes per view) and mode 0x1E, else black and mode 0x13.
 // The 4 vertices go to the obj's buffer for g_dl_buf_index (+0x40, 0x40 bytes each) and two triangles are added.
 /* was func_150C5BA4 */
@@ -158,7 +158,7 @@ u8 *beam_quad_draw(u8 *gdl, u8 *obj, s16 view) {
     v = (s16 *) (obj + g_dl_buf_index * 0x40 + 0x40);
     flag = 1;
     gdl = (u8 *) gfx_geometry_mode_cached((s32) gdl, 1, 0x600);
-    gdl = (u8 *) gfx_load_texture_cached(gdl, D_80091198, 0, 0, 0, 0, 0x36, 0, 0, (s8 *) &flag, 3);
+    gdl = (u8 *) gfx_load_texture_cached(gdl, g_tex_rope, 0, 0, 0, 0, 0x36, 0, 0, (s8 *) &flag, 3);
     if (*(s32 *) ((u8 *) g_player_views + view * 0x9A0 + 0x5F0) & 1) {
         gdl = (u8 *) gfx_env_color_cached((Gfx *) gdl, g_tint_env_rgb[view * 3], g_tint_env_rgb[view * 3 + 1],
                                    g_tint_env_rgb[view * 3 + 2], 0xFF, &flag);
@@ -279,7 +279,7 @@ void char_fx_event15_stop(s32 arg0) {
 
 /* was func_150C61C4 */
 void beam_on_message_by_kind(u8 *arg0, s32 arg1, u8 arg2) {
-    void (*temp_v0)(u8 *, s32, u8) = D_80088B68[arg0[0x38]];
+    void (*temp_v0)(u8 *, s32, u8) = g_beam_message_fns[arg0[0x38]];
 
     if (temp_v0 != NULL) {
         temp_v0(arg0, arg1, arg2);

@@ -88,7 +88,7 @@ void obj_interaction_update(struct127 *arg0, s32 arg1) {
     struct_eu_link *temp_a0;
     struct_eu_link *temp_t8;
 
-    if (D_800BE616 == 0) {
+    if (g_mp_mode_active == 0) {
         temp_v0 = obj_interaction_category(arg0);
         if (g_interaction_hook_fns[temp_v0] != 0) {
             temp_v0_2 = ((s32 (*)(s32, struct127 *)) g_interaction_hook_fns[temp_v0])(interaction_mode_for_level(floor_flags_surface_type(arg0->unk184)), arg0);
@@ -204,7 +204,7 @@ s32 interaction_mode_for_level(u32 arg0) {
 void obj_interaction_start_timed(void *arg0, s32 arg1, s32 arg2) {
     if ((arg1 < 12) && (arg1 >= 0) &&
         (arg2 < 20) && (arg2 >= 0) &&
-        (D_800BE616 == 0) &&
+        (g_mp_mode_active == 0) &&
         (g_interaction_hook_fns[arg1] != 0) && (arg2 != -1)) {
         if ((g_interaction_handlers[arg2].unk0 != 0) && (g_interaction_handlers[arg2].unk4 > 0)) {
             obj_interaction_attach_timed(arg0, arg2);
@@ -425,7 +425,7 @@ s32 debug_tweak_value(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 
 /* was func_15142314 */
 void mtx_get_translation(Mtx *arg0, s32 arg1, struct17 *arg2) {
-    if (D_800C42B0 != 0) {
+    if (g_mtx_fixed_point != 0) {
         s16 *m = ((s16 (*)[32])arg0)[arg1];
 
         arg2->unk0 = ((f32)(m[0xC] << 16) + (f32)m[0x1C]) * 0.0000152587890625f;
@@ -439,7 +439,7 @@ void mtx_get_translation(Mtx *arg0, s32 arg1, struct17 *arg2) {
         arg2->unk8 = mf[14];
     }
 }
-extern f32 D_8009A5E0[];
+extern f32 g_cos_u8_table[]; /* was D_8009A5E0 */
 
 /* was func_151423D8 */
 f32 angle_byte_cos(u8 arg0) {
@@ -453,9 +453,9 @@ f32 angle_byte_cos(u8 arg0) {
     }
     q = arg0 & 0xC0;
     if ((q == 0) || (q == 0xC0)) {
-        return D_8009A5E0[idx];
+        return g_cos_u8_table[idx];
     }
-    return -D_8009A5E0[idx];
+    return -g_cos_u8_table[idx];
 }
 /* was func_15142444 */
 struct127 *obj_resolve_with_model(u8 arg0, struct127 *arg1) {

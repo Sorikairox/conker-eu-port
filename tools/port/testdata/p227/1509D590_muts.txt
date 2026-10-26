@@ -1,7 +1,7 @@
 s/obj_electrify_fx_spawn((u8 \*) obj_find_by_spawn(args\[1\] \& 0xFFF), (s16) args\[2\], 0xFF, 1);/obj_electrify_fx_spawn((u8 *) obj_find_by_spawn(args[1] \& 0xFFF), (s16) args[3], 0xFF, 1);/ % c00
 s/        return 1;/        return 2;/ % c01
 s/twin_particle_emitters_spawn(args\[1\]);/twin_particle_emitters_spawn(args[2]);/ % c01
-s/D_800D9D40 = 1;/D_800D9D40 = 2;/ % c02
+s/g_event_effect_flag = 1;/g_event_effect_flag = 2;/ % c02
 s/rain_request(args\[1\]);/rain_request(args[0]);/ % c03
 s/args\[6\], args\[7\], args\[8\]);/args[6], args[7], args[7]);/ % c04
 1,/ret = (ret << 6) | 0xE004;/s/ret = (ret << 6) | 0xE004;/ret = (ret << 5) | 0xE004;/ % c04
@@ -24,7 +24,7 @@ s/scroll_banner_spawn((s16) args\[1\]);/scroll_banner_spawn((s8) args[1]);/ % c1
 s/fx_model_emitter_spawn((u8) args\[1\], 0xFF, 1);/fx_model_emitter_spawn((u8) args[2], 0xFF, 1);/ % c14
 s/light_ctrl_broadcast(0x24, 0x27, 0);/light_ctrl_broadcast(0x24, 0x28, 0);/ % c16
 s/light_create_obj_pulse((u8) args\[1\], 0xFF, 1);/light_create_obj_pulse((u8) args[1], 0x7F, 1);/ % c17
-s/tbl\[0\] = D_8009F4A0;/tbl[0] = D_8009F4A0 + 1;/ % c18
+s/tbl\[0\] = g_event_effect_tbl;/tbl[0] = g_event_effect_tbl + 1;/ % c18
 s/obj_find_by_setup_id((u8) args\[1\]), tbl\[args\[2\]\], (s16) args\[3\], -1, -1, -1,/obj_find_by_setup_id((u8) args[1]), tbl[args[2]], (s16) args[3], -1, 0, -1,/ % c18
 s/(s16) args\[3\], -1, -1, -1, 0, 0, 0xFF, 1)/(s16) args[2], -1, -1, -1, 0, 0, 0xFF, 1)/ % c18
 s/    case 0x1B:/    case 0x1C:/ % c1B

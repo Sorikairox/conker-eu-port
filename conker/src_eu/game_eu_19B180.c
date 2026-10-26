@@ -10,7 +10,7 @@ void particle_cooldowns_tick(void) {
 
     for (i = 0; i < 4; i++) {
         if ((&g_particle_cooldown)[i] < 0xFF) {
-            v = (&g_particle_cooldown)[i] + D_800BE9A0;
+            v = (&g_particle_cooldown)[i] + g_frame_delta;
             if (v >= 0x100) {
                 v = 0xFF;
             }
@@ -1003,10 +1003,10 @@ void particle_quad_edge_sparks(f32 *quad, f32 x, f32 z, s32 kind, f32 size, s32 
     }
 }
 
-extern u16 D_800CC76A;
+extern u16 g_objects_facing_angle; /* was D_800CC76A */
 s32 game_gu_random(void);
 f32 math_cos_u8(s32 angle); // defined (u8); the file's unprototyped declaration rules out u8 here
-// spark_particle_spawn: one spark at (x, y, z) thrown in direction `angle` (the camera angle D_800CC76A when `flare`
+// spark_particle_spawn: one spark at (x, y, z) thrown in direction `angle` (the camera angle g_objects_facing_angle when `flare`
 // is 0) with a random pitch (rand % 50, both signs), horizontal speed from sin / cos of the angle, fixed fall -0x32;
 // flare != 0: long-lived flare particle (particle_sprite_spawn), else short spark (particle_emitter_node_spawn). alpha and arg6 pass through.
 // Called by ambient_emitters_update (ambient_emitters_update) for torch / fire sparks and flare-ups.
@@ -1024,7 +1024,7 @@ void particle_spark_spawn(s32 x, s32 y, s32 z, s32 angle, s32 flare, s32 alpha, 
     s32 vy;
 
     if (flare == 0) {
-        angle = D_800CC76A;
+        angle = g_objects_facing_angle;
     }
     pitch = game_gu_random() % 50;
     dirX = math_cos_u8(angle & 0xFF);

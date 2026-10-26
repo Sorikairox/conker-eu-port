@@ -10,7 +10,7 @@ s32 rail_node_position(s32, f32 *, f32 *, f32 *);
 s32 rail_node_find_by_tag(s32);
 s32 impact_effect_at_world_object(s32);
 void vtx_colour_record_blend(s32, s32, s32);
-extern s32 D_80089030;
+extern s32 g_world_obj_type_cbs; /* was D_80089030 */
 
 /* was func_1509EDE0 */
 s32 event_action_world_object(s32 arg0, u32 arg1, u8 *arg2) {
@@ -136,9 +136,9 @@ s32 event_action_world_object(s32 arg0, u32 arg1, u8 *arg2) {
 block_62:
         return 0;
     case 10:
-        (*(s32 *)((u8 *)temp_v0 + 0x38)) = (*(s32 *)((u8 *) &D_80089030 + (*(s32 *)((u8 *)arg2 + 8)) * 0xC));
-        (*(s32 *)((u8 *)temp_v0 + 0x78)) = (s32) (*(s32 *)((u8 *) &D_80089030 + (*(s32 *)((u8 *)arg2 + 8)) * 0xC + 4));
-        (*(s8 *)((u8 *)temp_v0 + 0x92)) = (s8) (*(s32 *)((u8 *) &D_80089030 + (*(s32 *)((u8 *)arg2 + 8)) * 0xC + 8));
+        (*(s32 *)((u8 *)temp_v0 + 0x38)) = (*(s32 *)((u8 *) &g_world_obj_type_cbs + (*(s32 *)((u8 *)arg2 + 8)) * 0xC));
+        (*(s32 *)((u8 *)temp_v0 + 0x78)) = (s32) (*(s32 *)((u8 *) &g_world_obj_type_cbs + (*(s32 *)((u8 *)arg2 + 8)) * 0xC + 4));
+        (*(s8 *)((u8 *)temp_v0 + 0x92)) = (s8) (*(s32 *)((u8 *) &g_world_obj_type_cbs + (*(s32 *)((u8 *)arg2 + 8)) * 0xC + 8));
         goto block_62;
     case 11:
         vtx_colour_record_blend((*(s32 *)((u8 *)arg2 + 8)), (*(s32 *)((u8 *)arg2 + 0xC)), (*(u8 *)((u8 *)temp_v0 + 0x72)));
@@ -299,9 +299,9 @@ u16 sound_play_random(s32, s32, s32);
 void sound_play_on_object(u16, s32, s32, s16, s32, s32);
 u16 sound_play_at_object(s32, s32, u16, s32, s32);
 void object_sound_play_cooldown(s32, s32, u32, s32, s32);
-extern s32 D_800D3C60;           /* sound mode */
-/* event_sound_command: handler 7 of the event VM's native table D_800887C0 (id = the command word without its
- * table nibble, args = the VM stack). In sound mode 1 (D_800D3C60) every command just plays sound id (volume
+extern s32 g_event_arg_count;           /* sound mode; was D_800D3C60 */
+/* event_sound_command: handler 7 of the event VM's native table g_event_native_start_fns (id = the command word without its
+ * table nibble, args = the VM stack). In sound mode 1 (g_event_arg_count) every command just plays sound id (volume
  * 0x7FFF, sound_play_plain). Otherwise by args[1]: 0 = random / positional sound by the kind nibble of args[5]
  * (0x2000 random pick from the range id..args[2] on object args[4], returns the remaining mask; 0x3000 / 0x4000
  * positional variants sound_play_random_world_object / sound_play_random_at_trigger, the latter returns its handle unpacked; other kinds
@@ -316,7 +316,7 @@ s32 event_sound_command(s32 id, s32 *args, s32 *operand) {
     s32 pan;
     s32 force;
 
-    if (D_800D3C60 == 1) {
+    if (g_event_arg_count == 1) {
         h = sound_play_plain(id, 0x7FFF, 0, 0x40);
     } else {
         switch ((u32) args[1]) {
@@ -337,11 +337,11 @@ s32 event_sound_command(s32 id, s32 *args, s32 *operand) {
                 break;
             case 1:
                 pan = 0x40;
-                if (D_800D3C60 < 4) {
+                if (g_event_arg_count < 4) {
                     vol = 0;
                 } else {
                     vol = args[3];
-                    if (D_800D3C60 == 5) {
+                    if (g_event_arg_count == 5) {
                         pan = args[4];
                     }
                 }
@@ -349,7 +349,7 @@ s32 event_sound_command(s32 id, s32 *args, s32 *operand) {
                 break;
             case 2:
                 force = 0;
-                if (D_800D3C60 >= 7 && args[6] != 0) {
+                if (g_event_arg_count >= 7 && args[6] != 0) {
                     force = 1;
                 }
                 sound_play_on_object(id & 0xFFF, args[2], args[3] & 0xFFF, args[4], args[5], force);
@@ -448,7 +448,7 @@ u16 sound_play_random_at_trigger(s32 arg0, s32 arg1, u16 arg2, s32 arg3, u32 arg
     s32 temp_t0;
     u8 *sp34;
 
-    temp_v1 = (arg3 * 0x34) + D_800D34B8;
+    temp_v1 = (arg3 * 0x34) + g_level_zones;
     temp_t0 = (*(s16 *)((u8 *)temp_v1 + 6));
     if (arg4 >= (u32) temp_t0) {
         arg4 = temp_t0 - 1;

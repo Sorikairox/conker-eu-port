@@ -18,13 +18,13 @@ typedef struct {
     __OSViScale x;
     __OSViScale y;
 } __OSViContext;
-extern __OSViContext *D_8002C134; // __osViNext
+extern __OSViContext *g_os_vi_next; /* was D_8002C134 */ // __osViNext
 
 void osViSetMode(OSViMode *modep) {
     register u32 saveMask = __osDisableInt();
 
-    D_8002C134->modep = modep;
-    D_8002C134->state = 1;
-    D_8002C134->control = D_8002C134->modep->comRegs.ctrl;
+    g_os_vi_next->modep = modep;
+    g_os_vi_next->state = 1;
+    g_os_vi_next->control = g_os_vi_next->modep->comRegs.ctrl;
     __osRestoreInt(saveMask);
 }

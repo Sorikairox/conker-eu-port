@@ -11,7 +11,7 @@ void level_lights_reset(void) {
     int tmp0 = 127;
 
     g_light_list_head = 0;
-    D_800DCD7C = 1;
+    g_light_vertex_lighting = 1;
     g_light_colour_zones = 0;
     g_light_tint_zones = 0;
 
@@ -21,9 +21,9 @@ void level_lights_reset(void) {
     g_level_light_dir[1] = 0;
     g_level_light_dir[2] = 0;
 
-    D_800DCD28[0] = 255;
-    D_800DCD28[1] = 255;
-    D_800DCD28[2] = 255;
+    g_level_tint_colour[0] = 255;
+    g_level_tint_colour[1] = 255;
+    g_level_tint_colour[2] = 255;
 
     if (0) {};
 
@@ -42,15 +42,15 @@ void level_lights_reset(void) {
     g_level_light_dirs_3x = tmp0;
     g_level_light_dirs_3y = 0;
     g_level_light_dirs_3z = 0;
-    D_800DCD3C = 0;
-    D_800DCD3D = 0;
+    g_level_tint_strength_b = 0;
+    g_level_tint_strength_a = 0;
     bzero(&g_light_cmd_data, 56);
 }
 
 /* was func_150092DC */
 void level_hotspots_setup_all(void) {
     u32 i;
-    for (i = 0; i < D_800D3094; i++) {
+    for (i = 0; i < g_level_zone_count; i++) {
         level_hotspot_setup(i);
     }
 }
@@ -79,7 +79,7 @@ void level_hotspot_setup(s32 arg0) {
     u8 *temp_v0_6;
 
     temp_t4 = arg0 * 0x34;
-    temp_v0 = D_800D34B8 + temp_t4;
+    temp_v0 = g_level_zones + temp_t4;
     temp_t7 = (s32) (*(u8 *)((u8 *)temp_v0 + 0x15)) >> 2;
     switch (temp_t7) {
     case 9:
@@ -94,7 +94,7 @@ void level_hotspot_setup(s32 arg0) {
         case 10:                                    /* switch 1 */
             sp34 = temp_t4;
             light_set_level_colour(sp70, sp6C, sp68, 0U);
-            temp_t0 = (*(s32 *)((u8 *)((D_800D34B8 + temp_t4)) + 0x20));
+            temp_t0 = (*(s32 *)((u8 *)((g_level_zones + temp_t4)) + 0x20));
             if (temp_t0 != 0) {
                 ambient_fx_dispatch(temp_t0);
                 return;
@@ -102,7 +102,7 @@ void level_hotspot_setup(s32 arg0) {
         default:
             return;
         case 9:                                     /* switch 1 */
-            temp_v0_2 = D_800D34B8 + temp_t4;
+            temp_v0_2 = g_level_zones + temp_t4;
             temp_v1_2 = (*(u32 *)((u8 *)temp_v0_2 + 0x18));
             temp_t0_2 = (*(u32 *)((u8 *)temp_v0_2 + 0x20));
             sp44 = temp_t0_2 & 0xFFFF;
@@ -116,26 +116,26 @@ void level_hotspot_setup(s32 arg0) {
             (*(s8 *)((u8 *)g_level_light_dir + 0)) = (s8) sp70;
             g_level_light_dir[1] = (s8) sp6C;
             g_level_light_dir[2] = (s8) sp68;
-            temp_v0_4 = D_800D34B8 + temp_t4;
-            (*(u8 *)((u8 *)D_800DCD28 + 0)) = (u8) (*(u32 *)((u8 *)temp_v0_4 + 0x1C));
-            D_800DCD28[1] = (u8) ((u32) (*(u32 *)((u8 *)temp_v0_4 + 0x1C)) >> 8);
-            D_800DCD28[2] = (u8) ((u32) (*(u32 *)((u8 *)temp_v0_4 + 0x1C)) >> 0x10);
-            D_800DCD3C = (u8) ((u32) (*(u32 *)((u8 *)temp_v0_4 + 0x1C)) >> 0x18);
-            D_800DCD3D = (u8) ((u32) (*(u32 *)((u8 *)temp_v0_4 + 0x18)) >> 0x18);
+            temp_v0_4 = g_level_zones + temp_t4;
+            (*(u8 *)((u8 *)g_level_tint_colour + 0)) = (u8) (*(u32 *)((u8 *)temp_v0_4 + 0x1C));
+            g_level_tint_colour[1] = (u8) ((u32) (*(u32 *)((u8 *)temp_v0_4 + 0x1C)) >> 8);
+            g_level_tint_colour[2] = (u8) ((u32) (*(u32 *)((u8 *)temp_v0_4 + 0x1C)) >> 0x10);
+            g_level_tint_strength_b = (u8) ((u32) (*(u32 *)((u8 *)temp_v0_4 + 0x1C)) >> 0x18);
+            g_level_tint_strength_a = (u8) ((u32) (*(u32 *)((u8 *)temp_v0_4 + 0x18)) >> 0x18);
             return;
         }
         break;
     case 15:
         sp34 = temp_t4;
         temp_v0_5 = allocate_memory(8, 1, 0, 0);
-        (*(u8 **)((u8 *)temp_v0_5 + 4)) = (u8 *) (temp_t4 + D_800D34B8);
+        (*(u8 **)((u8 *)temp_v0_5 + 4)) = (u8 *) (temp_t4 + g_level_zones);
         (*(s32 *)((u8 *)temp_v0_5 + 0)) = (s32) g_light_colour_zones;
         g_light_colour_zones = (s32) temp_v0_5;
         return;
     case 24:
         sp34 = temp_t4;
         temp_v0_6 = allocate_memory(8, 1, 0, 0);
-        (*(u8 **)((u8 *)temp_v0_6 + 4)) = (u8 *) (temp_t4 + D_800D34B8);
+        (*(u8 **)((u8 *)temp_v0_6 + 4)) = (u8 *) (temp_t4 + g_level_zones);
         (*(s32 *)((u8 *)temp_v0_6 + 0)) = (s32) g_light_tint_zones;
         g_light_tint_zones = (s32) temp_v0_6;
         break;

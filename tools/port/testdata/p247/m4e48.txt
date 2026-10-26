@@ -17,7 +17,7 @@
 \#^                e->count += e->rate \* g_frame_step_f;$#s/e->rate/e->rateScale/
 \#^                if (e->count > 1\.0f) {$#s/> 1\.0f/>= 1.0f/
 \#^                    inv = 1\.0f / e->count;$#s/1\.0f \//2.0f \//
-\#^                    phase = e->phase + g_frame_step_f;$#s/+ g_frame_step_f/+ D_800BEDC8/
+\#^                    phase = e->phase + g_frame_step_f;$#s/+ g_frame_step_f/+ g_frame_step_inv/
 \#^                    phaseStep = phase \* inv;$#s/phase \*/e->phase */
 \#^                    curA\[1\] = e->posA\[1\];$#s/posA\[1\]/posA[0]/
 \#^                    curB\[2\] = e->posB\[2\];$#s/posB\[2\]/posA[2]/
@@ -25,8 +25,8 @@
 \#^                    dA\[1\] = newA\[1\] - e->posA\[1\];$#s/newA\[1\]/newB[1]/
 \#^                    dB\[0\] = newB\[0\] - e->posB\[0\];$#s/e->posB\[0\]/e->posA[0]/
 \#^                    dB\[2\] = newB\[2\] - e->posB\[2\];$#s/- e->posB\[2\]/+ e->posB[2]/
-\#^                    velA\[2\] = dA\[2\] \* D_800BEDC8;$#s/D_800BEDC8/g_frame_step_f/
-\#^                    velB\[1\] = dB\[1\] \* D_800BEDC8;$#s/dB\[1\]/dA[1]/
+\#^                    velA\[2\] = dA\[2\] \* g_frame_step_inv;$#s/g_frame_step_inv/g_frame_step_f/
+\#^                    velB\[1\] = dB\[1\] \* g_frame_step_inv;$#s/dB\[1\]/dA[1]/
 \#^                    stepA\[0\] = dA\[0\] \* inv;$#s/inv/phaseStep/
 \#^                    stepB\[2\] = dB\[2\] \* inv;$#s/dB\[2\]/dB[1]/
 \#^                            g_bone_emitter_emit_fns\[e->emitFn\](curA, curB, velA, velB, phase, e);$#s/velA, velB/velB, velA/

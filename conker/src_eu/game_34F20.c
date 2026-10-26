@@ -21,7 +21,7 @@ void level_start_game(s16 arg0, s16 arg1, s16 arg2) {
     level_state_init();
     rail_state_clear();
     level_music_stop_all();
-    D_800BE938 = 1;
+    g_rumble_probe_request = 1;
     g_mp_respawning = 0;
     g_level_load_white_fill = 0;
 }
@@ -31,7 +31,7 @@ void level_start_game(s16 arg0, s16 arg1, s16 arg2) {
 // level (tlb_remap_game_segment), resets the per-level systems, allocates the two DL buffers (gfx_alloc_dl_buffers), arms the
 // controller-read timer (cont_arm_read_timer), initialises every player (camera_raise_timer), every live object
 // (trigger_zones_update_object) and commits the level id (g_level_load_id = g_level_id).
-extern s32 D_8003E724;
+extern s32 g_snd_cache_flush_request; /* was D_8003E724 */
 extern u8 g_frame_dt_history_idx; /* was D_800BEA39 */
 extern u8 g_frame_dt_history_count; /* was D_800BEA3A */
 extern u8 g_slowmo_divisor; /* was D_800BEE2C */
@@ -170,13 +170,13 @@ void level_load(void) {
     g_particle_emitter_count = 0;
     g_buddy_marker = 0;
     zap_bolt_table_clear();
-    D_8003E724 = 1;
+    g_snd_cache_flush_request = 1;
     sp30 = g_warp_entry_ids;
     sp2C = checkpoint_get_restart_index((s32)&sp30);
     if (g_game_mode == 2) {
         sp30 = g_level_start_point_override;
     }
-    D_800BE9F8 = g_level_id;
+    g_level_loaded_id = g_level_id;
     g_level_id = (s32)g_level_load_id;
     level_lights_reset();
     light_fx_clear_all();
@@ -190,7 +190,7 @@ void level_load(void) {
     } else {
         framebuffer_fill_color(0, 0, 0);
     }
-    if (D_800BE616 == 0 && !(((u8 *)g_save_progress_bits)[0x18] & 1)) {
+    if (g_mp_mode_active == 0 && !(((u8 *)g_save_progress_bits)[0x18] & 1)) {
         g_hud_health_max_pieces = 3;
         g_hud_health_shown_pieces = 3;
         player_stat_modify(0, 5, 3);
@@ -257,18 +257,18 @@ void level_load(void) {
     g_frame_ticks = 2;
     glyph_count_reset();
     joint_chain_reset_mask_init();
-    level_lights_stub(D_800D2340);
+    level_lights_stub(g_player_active_mask);
     anim_mesh_slots_reset();
     breakable_slots_clear();
     vertex_anchor_alloc_players();
     cutscene_start_pending();
-    if (D_800BE616 == 0) {
+    if (g_mp_mode_active == 0) {
         player_stat_modify(0, 9, g_save_stat9);
     }
     if (level_is_game_over_level() != 0) {
         g_save_restart_entry = sp30;
     }
-    D_800D2E43 = 1;
+    g_game_over_pending = 1;
     event_list_run_phase(4);
     event_list_run_phase(1);
     hotspots_start_all();
@@ -277,7 +277,7 @@ void level_load(void) {
     }
     menu_clear_flag_ebc();
     if (g_level_zoom_in_request != 0 || g_level_entry_zoom_mode == 2) {
-        if (D_800C35EA != 1 && g_level_entry_zoom_mode != 1) {
+        if (g_cutscene_slot_state != 1 && g_level_entry_zoom_mode != 1) {
             n = mp_human_player_count();
             for (i = 0; i < n; i++) {
                 hud_lens_start_zoom_in(i);
@@ -306,8 +306,8 @@ void level_load(void) {
 void level_reset_globals(void) {
     s32 i;
 
-    D_800D3668 = 0;
-    D_800CBE00 = 0;
+    g_level_tri_vis_flags = 0;
+    g_timedfx_list = 0;
     g_flare_nodes = 0;
 
     for (i = 0; i < 2; i++)
@@ -323,29 +323,29 @@ void level_reset_globals(void) {
 /* was func_15008230 */
 void cutscene_clear_pending(void) {
     g_cutscene_pending = (u8)0;
-    D_800C3C88 = (u8)0;
+    g_cutscene_skip_state = (u8)0;
 }
 
 /* was func_15008248 */
 void cutscene_reset_state(s32 arg0) {
     s32 i;
 
-    D_800C3638 = 0;
-    D_800C3671 = 0;
-    D_800C3670 = 0;
+    g_cutscene_in_progress = 0;
+    g_cutscene_restart_transition = 0;
+    g_cutscene_treat_as_seen = 0;
     cutscene_slot_reset(0);
     cutscene_slot_reset(1);
-    D_800C3663 = 0;
+    g_cutscene_focus_set = 0;
 
     for (i = 0; i < 3; i++)
     {
-        D_800C3CA0[i].unk0 = 0;
-        D_800C3CA0[i].unkC = 0;
+        g_subtitle_slots[i].unk0 = 0;
+        g_subtitle_slots[i].unkC = 0;
     }
 
-    D_800C3681 = 0;
-    D_800C3682 = 0;
-    D_800C3683 = 0;
+    g_cutscene_hide_background = 0;
+    g_cutscene_flat_background = 0;
+    g_cutscene_no_pause = 0;
 }
 
 /* was func_150082CC */
@@ -353,10 +353,10 @@ void cutscene_start_pending(void) {
     s32 tmp = g_cutscene_pending - 1;
 
     if (g_cutscene_pending != 0) {
-        if (D_800C35C5 == 0) {
-            D_800C35EA = 2;
+        if (g_cutscene_pending_was_idle == 0) {
+            g_cutscene_slot_state = 2;
         }
         g_cutscene_pending = 0;
-        cutscene_scene_load(g_level_id, tmp, 0, D_800C3C90, D_800C3C94);
+        cutscene_scene_load(g_level_id, tmp, 0, g_cutscene_load_callback, g_cutscene_load_callback_arg);
     }
 }

@@ -59,7 +59,7 @@ void music_play_song(s32, s32, s32);
 void music_stop_song(s32, s32);
 f32 math_cos_u8(s32);
 void puff_drift_spawn(s32, s16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
-extern s32 D_80088B94;
+extern s32 g_zone_ambience_active; /* was D_80088B94 */
 
 /* was func_150C7EBC */
 void zone_ambience_update(s32 arg0) {
@@ -81,16 +81,16 @@ void zone_ambience_update(s32 arg0) {
     temp_s0 = (s32) temp_v0->unk2F8 + 0x972;
     temp_s1 = (s32) temp_v0->unk300 - 0x6EF;
     if (((var_a1 - 0x9C4) >= -0xC7) && (((temp_s0 * temp_s0) + (temp_s1 * temp_s1)) < 0x15F900)) {
-        if (D_80088B94 == 0) {
+        if (g_zone_ambience_active == 0) {
             music_play_song(0x5F, 0xF, 6);
             music_stop_song(0x10, 4);
-            D_80088B94 = 1;
+            g_zone_ambience_active = 1;
             var_a1 = (s32) (*(f32 *)((u8 *)((g_player_views + sp44)) + 0x2FC));
         }
-    } else if (D_80088B94 != 0) {
+    } else if (g_zone_ambience_active != 0) {
         music_play_song(0xF, 0x5F, 4);
         music_play_song(0x10, 0, 3);
-        D_80088B94 = 0;
+        g_zone_ambience_active = 0;
         var_a1 = (s32) (*(f32 *)((u8 *)((g_player_views + sp44)) + 0x2FC));
     }
     if (((var_a1 - 0x62F) < 0) && (((temp_s0 * temp_s0) + (temp_s1 * temp_s1)) < 0xC5C10) && ((u32) (random_int() & 0xFFFF) < 0x2000U)) {

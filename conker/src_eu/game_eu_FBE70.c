@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A0BC0[];
+extern u8 g_fb_zoom_offset[]; /* was D_800A0BC0 */
 
 
 s32 memcpy(s32, u8 **, s32);
@@ -48,7 +48,7 @@ s32 fb_zoom_fx_spawn(u8 *arg0, s16 arg1, s32 arg2, s32 arg3) {
     }
     return var_v0;
 }
-extern f32 D_800A0BD0;
+extern f32 g_fb_zoom_k_0bd0; /* was D_800A0BD0 */
 s32 world_to_screen(s32 *, u8 *, s32 *, s32 *, f32 *, s32);
 
 /* was func_150CE710 */
@@ -87,7 +87,7 @@ s32 fb_zoom_fx_update(u8 *arg0) {
         (*(u8 *)((u8 *)temp_v1 + 0x14)) = (u8) ((*(u8 *)((u8 *)temp_v1 + 0x14)) & 0xFFFE);
     } else {
         sp28 = temp_v1;
-        mtx_transform_point_or_origin(((u8 *)&D_800A0BC0), &sp.u40, temp_a3 + 0xD00);
+        mtx_transform_point_or_origin(((u8 *)&g_fb_zoom_offset), &sp.u40, temp_a3 + 0xD00);
         if (world_to_screen(&sp.u40, sp28 + 0x28, &sp.u3C, &sp.u38, &sp.u34, g_cur_view_player) != 0) {
             temp_f12 = (*(f32 *)((u8 *)sp28 + 0x28));
             temp_f0 = (*(f32 *)((u8 *)sp28 + 8)) * sp.u34;
@@ -101,7 +101,7 @@ s32 fb_zoom_fx_update(u8 *arg0) {
             (*(s32 *)((u8 *)sp28 + 0x20)) = temp_f10;
             temp_f4 = (s32) (temp_f14 + temp_f2);
             (*(s32 *)((u8 *)sp28 + 0x24)) = temp_f4;
-            if (((f32) temp_f18 > D_800A0BD0) || ((f32) temp_f10 < 0.0f) || (var_f0 = (f32) temp_f8, (var_f0 > 215.0f)) || ((f32) temp_f4 < 0.0f)) {
+            if (((f32) temp_f18 > g_fb_zoom_k_0bd0) || ((f32) temp_f10 < 0.0f) || (var_f0 = (f32) temp_f8, (var_f0 > 215.0f)) || ((f32) temp_f4 < 0.0f)) {
                 var_t5 = (*(u8 *)((u8 *)sp28 + 0x14)) & 0xFFFE;
                 goto block_22;
             }
@@ -112,7 +112,7 @@ s32 fb_zoom_fx_update(u8 *arg0) {
             if (var_f0 < 0.0f) {
                 (*(s32 *)((u8 *)sp28 + 0x1C)) = 0;
             }
-            if ((f32) (*(s32 *)((u8 *)sp28 + 0x20)) > D_800A0BD0) {
+            if ((f32) (*(s32 *)((u8 *)sp28 + 0x20)) > g_fb_zoom_k_0bd0) {
                 (*(s32 *)((u8 *)sp28 + 0x20)) = 0x123;
             }
             if ((f32) (*(s32 *)((u8 *)sp28 + 0x24)) > 215.0f) {

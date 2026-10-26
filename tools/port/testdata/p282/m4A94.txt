@@ -30,8 +30,8 @@
 /^        ok = TRUE;/s/TRUE/FALSE/
 /^        ok = ctl->unk197;/s/unk197/unk11A/
 /if (ctl->unk84 == 0) {/s/== 0/!= 0/
-/if (n < 4 && !(\*(u16 \*) ((s32 \*) D_800BE728\[0\])\[n\] & 0x10)) {/s/n < 4/n < 5/
-/if (n < 4 && !(\*(u16 \*) ((s32 \*) D_800BE728\[0\])\[n\] & 0x10)) {/s/0x10)/0x20)/
+/if (n < 4 && !(\*(u16 \*) ((s32 \*) g_cont_frame\[0\])\[n\] & 0x10)) {/s/n < 4/n < 5/
+/if (n < 4 && !(\*(u16 \*) ((s32 \*) g_cont_frame\[0\])\[n\] & 0x10)) {/s/0x10)/0x20)/
 /if (partner->unk84.uh == 0x10A && \*(s16 \*) ((u8 \*) panim + 0x3C) <= 0 && ok && (ctl->unk8A & 0x2000)) {/s/<= 0/< 0/
 /if (partner->unk84.uh == 0x10A && \*(s16 \*) ((u8 \*) panim + 0x3C) <= 0 && ok && (ctl->unk8A & 0x2000)) {/s/ \&\& ok//
 /if (partner->unk84.uh == 0x10A && \*(s16 \*) ((u8 \*) panim + 0x3C) <= 0 && ok && (ctl->unk8A & 0x2000)) {/s/0x2000/0x1000/

@@ -11,7 +11,7 @@
  *
  * Float operations are written in the asm's order (no reassociation): each line rounds like one mul.s / add.s.
  * The asm keeps its work tables below the stack pointer; here they are one stack array laid out the same way
- * (D_80088918 = D_80088908 at the bottom, then D_80088914, then D_80088910, each 12 * count bytes), so the
+ * (g_anim_trans_table = g_anim_trans_free at the bottom, then g_anim_scale_table, then g_anim_euler_table, each 12 * count bytes), so the
  * globals that point at them are comparable across the tables but not with the asm's stack addresses.
  */
 #include <ultra64.h>
@@ -19,25 +19,25 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 *D_800888E0;  /* joint matrix arena (first matrix of this model) */
-extern s32 **D_800888E4; /* where the arena pointer lives (arg0); advanced by n matrices */
-extern u8 *D_800888E8;  /* skeleton: 16-byte entries {parent slot, matrix slot, channel, -, f32 x, y, z} */
-extern s16 *D_800888EC; /* translation offsets of the last decoded animation (NULL: none) */
-extern s32 D_800888F0;  /* decoder mode: 0 = animation 1 (state +0x8 / +0x18), 4 = animation 2 (+0xC / +0x1C) */
-extern s32 D_800888F4;  /* root motion (z channel with descriptor flag 0x40), 1/1024 units */
-extern s32 D_800888F8;  /* root motion total (descriptor +0xA) */
-extern s32 D_800888FC;  /* root motion of animation 1 while blending (D_80088904) */
-extern s32 D_80088900;  /* root motion end value (set past the last key frame) */
-extern s32 D_80088904;  /* blend the current and the next key-frame pair (state +0x47 & 0x10, no animation 2) */
-extern s16 *D_80088908; /* next free translation-offset table */
-extern s16 *D_8008890C; /* scale table of the current decode */
-extern s16 *D_80088910; /* Euler angle table (3 x s16 per channel), animation 1 then animation 2 */
-extern s16 *D_80088914; /* scale table (3 x u16 per channel, 0 = 1.0, 0x4000 = 1.0) */
-extern s16 *D_80088918; /* translation offset table (3 x s16 per channel, 1/16 units) */
-extern s32 D_8008891C;  /* output: descriptor flag 0x20: angle 1 of channel 0 (object +0x7C); also the base of
+extern u8 *g_anim_joint_mtx_arena;  /* joint matrix arena (first matrix of this model); was D_800888E0 */
+extern s32 **g_anim_arena_ptr_slot; /* where the arena pointer lives (arg0); advanced by n matrices; was D_800888E4 */
+extern u8 *g_anim_skeleton;  /* skeleton: 16-byte entries {parent slot, matrix slot, channel, -, f32 x, y, z}; was D_800888E8 */
+extern s16 *g_anim_last_trans_offsets; /* translation offsets of the last decoded animation (NULL: none); was D_800888EC */
+extern s32 g_anim_decode_mode;  /* decoder mode: 0 = animation 1 (state +0x8 / +0x18), 4 = animation 2 (+0xC / +0x1C); was D_800888F0 */
+extern s32 g_anim_root_motion;  /* root motion (z channel with descriptor flag 0x40), 1/1024 units; was D_800888F4 */
+extern s32 g_anim_root_motion_total;  /* root motion total (descriptor +0xA); was D_800888F8 */
+extern s32 g_anim_root_motion_a;  /* root motion of animation 1 while blending (g_anim_blend_next_keys); was D_800888FC; was D_80088904 */
+extern s32 g_anim_root_motion_end;  /* root motion end value (set past the last key frame); was D_80088900 */
+extern s32 g_anim_blend_next_keys;  /* blend the current and the next key-frame pair (state +0x47 & 0x10, no animation 2); was D_80088904 */
+extern s16 *g_anim_trans_free; /* next free translation-offset table; was D_80088908 */
+extern s16 *g_anim_decode_scales; /* scale table of the current decode; was D_8008890C */
+extern s16 *g_anim_euler_table; /* Euler angle table (3 x s16 per channel), animation 1 then animation 2; was D_80088910 */
+extern s16 *g_anim_scale_table; /* scale table (3 x u16 per channel, 0 = 1.0, 0x4000 = 1.0); was D_80088914 */
+extern s16 *g_anim_trans_table; /* translation offset table (3 x s16 per channel, 1/16 units); was D_80088918 */
+extern s32 g_anim_channel0_angle; /* was D_8008891C */ /* output: descriptor flag 0x20: angle 1 of channel 0 (object +0x7C); also the base of
                          * the per-joint callback table {void (*)(void), flag} indexed by remap[slot] * 8 */
-extern s32 D_80088920;  /* key-frame fraction (0..1024) of a decode with descriptor flag 0x10 */
-extern f32 D_150AA11C[]; /* sine table: 513 entries over a quarter turn */
+extern s32 g_anim_key_fraction;  /* key-frame fraction (0..1024) of a decode with descriptor flag 0x10; was D_80088920 */
+extern f32 g_anim_sine_table[]; /* sine table: 513 entries over a quarter turn; was D_150AA11C */
 
 /* The animation state (object +0x2D0) */
 #define ANIM_F32(a, o) (*(f32 *)((u8 *)(a) + (o)))
@@ -85,7 +85,7 @@ static s32 nmAnimBits(u8 *p, s32 pos, s32 n) {
 
 /*
  * func_150A8EF8: decode one animation at a frame time into the angle table *rotp and the scale table *sclp (both
- * advanced), the translation offsets (descriptor flag 0x80, D_80088908) and the root position out[0..2]
+ * advanced), the translation offsets (descriptor flag 0x80, g_anim_trans_free) and the root position out[0..2]
  * (1/1024 units, y raised by height). Key frames: data and data + next (the next key frame), mixed by the frame
  * fraction w / 1024. Then the per-object adjustments of buf (func_150A939C) on what this call wrote.
  */
@@ -105,10 +105,10 @@ static void nmAnimDecode(s32 mode, u8 *anim, u8 *desc, u8 *data, s32 next, f32 t
     u32 fl;
     f32 last, len, base;
 
-    D_800888F0 = mode;
-    D_8008890C = scl;
+    g_anim_decode_mode = mode;
+    g_anim_decode_scales = scl;
     if (data == NULL) {
-        data = (u8 *)D_80088910;
+        data = (u8 *)g_anim_euler_table;
     }
     rd = desc + 0xA;
     cnt = desc[1];
@@ -116,7 +116,7 @@ static void nmAnimDecode(s32 mode, u8 *anim, u8 *desc, u8 *data, s32 next, f32 t
     p1 = data + next;
 
     /* frame fraction */
-    last = ANIM_F32(anim, D_800888F0 + 0x18) - 1.0f;
+    last = ANIM_F32(anim, g_anim_decode_mode + 0x18) - 1.0f;
     if (!(last <= time)) {
         len = (f32)(desc[8] + 1);
         base = last / len;
@@ -132,7 +132,7 @@ static void nmAnimDecode(s32 mode, u8 *anim, u8 *desc, u8 *data, s32 next, f32 t
     len = time - len;
     w = nmAnimRound(len * 1024.0f);
     if (desc[7] & 0x10) {
-        D_80088920 = w;
+        g_anim_key_fraction = w;
         p1 = p0;
         w = 0;
     }
@@ -143,7 +143,7 @@ static void nmAnimDecode(s32 mode, u8 *anim, u8 *desc, u8 *data, s32 next, f32 t
     tr = NULL;
     if (fl & 0x80) {
         /* translation offsets: one bit per channel joint (first 64), 3 x s16 per set bit from the stream */
-        t = D_80088908;
+        t = g_anim_trans_free;
         tr = t;
         end = t + (cnt - 1) * 3;
         mask = rd;
@@ -168,11 +168,11 @@ static void nmAnimDecode(s32 mode, u8 *anim, u8 *desc, u8 *data, s32 next, f32 t
             t += 3;
             bit++;
         } while (t != end);
-        if (D_800888F0 == 0) {
-            D_80088908 = t;
+        if (g_anim_decode_mode == 0) {
+            g_anim_trans_free = t;
         }
     }
-    D_800888EC = tr;
+    g_anim_last_trans_offsets = tr;
 
     /* root position: bases desc[0] / [2] / [4] << 12 plus fields of desc[6] >> 4, desc[6] & 0xF, desc[7] & 0xF bits */
     pos = 0;
@@ -205,15 +205,15 @@ static void nmAnimDecode(s32 mode, u8 *anim, u8 *desc, u8 *data, s32 next, f32 t
         if (!(desc[7] & 0x40)) {
             v += ((a << 10) + d * w) >> 5;
         } else {
-            /* root motion: the z channel goes to D_800888F4 instead (animation 1 only) */
+            /* root motion: the z channel goes to g_anim_root_motion instead (animation 1 only) */
             v = 0;
-            if (D_800888F0 == 0) {
-                D_800888F8 = DESC_S16(desc + 0xA);
-                if (ANIM_F32(anim, D_800888F0 + 0x18) - 1.0f < ANIM_F32(anim, D_800888F0 + 8)) {
-                    D_80088900 = DESC_S16(desc + 0xA);
-                    d = D_80088900 - a;
+            if (g_anim_decode_mode == 0) {
+                g_anim_root_motion_total = DESC_S16(desc + 0xA);
+                if (ANIM_F32(anim, g_anim_decode_mode + 0x18) - 1.0f < ANIM_F32(anim, g_anim_decode_mode + 8)) {
+                    g_anim_root_motion_end = DESC_S16(desc + 0xA);
+                    d = g_anim_root_motion_end - a;
                 }
-                D_800888F4 = (a << 10) + d * w;
+                g_anim_root_motion = (a << 10) + d * w;
             }
         }
     }
@@ -264,7 +264,7 @@ static void nmAnimDecode(s32 mode, u8 *anim, u8 *desc, u8 *data, s32 next, f32 t
             t = (s16 *)((u8 *)rot0 + n);
             *t += (s16)buf[1];
         } else {
-            t = (s16 *)((u8 *)D_8008890C + (n & 0x7FF));
+            t = (s16 *)((u8 *)g_anim_decode_scales + (n & 0x7FF));
             v = *t;
             if (v == 0) {
                 v = 0x4000;
@@ -283,11 +283,11 @@ static void nmAnimHalfSinCos(s16 h, f32 *s, f32 *c) {
     f32 t;
 
     if (h >= 0) {
-        *s = D_150AA11C[i];
-        *c = D_150AA11C[0x200 - i];
+        *s = g_anim_sine_table[i];
+        *c = g_anim_sine_table[0x200 - i];
     } else {
-        t = D_150AA11C[i];
-        *s = D_150AA11C[0x200 - i];
+        t = g_anim_sine_table[i];
+        *s = g_anim_sine_table[0x200 - i];
         *c = 0.0f - t;
     }
 }
@@ -316,21 +316,21 @@ static void nmAnimSinCos(u16 h, f32 *s, f32 *c) {
     f32 t;
 
     if (q == 0x600) {
-        *c = D_150AA11C[i];
-        t = D_150AA11C[0x200 - i];
+        *c = g_anim_sine_table[i];
+        t = g_anim_sine_table[0x200 - i];
         *s = 0.0f - t;
     } else if (q == 0x400) {
-        t = D_150AA11C[i];
+        t = g_anim_sine_table[i];
         *s = 0.0f - t;
-        t = D_150AA11C[0x200 - i];
+        t = g_anim_sine_table[0x200 - i];
         *c = 0.0f - t;
     } else if (q == 0x200) {
-        t = D_150AA11C[i];
+        t = g_anim_sine_table[i];
         *c = 0.0f - t;
-        *s = D_150AA11C[0x200 - i];
+        *s = g_anim_sine_table[0x200 - i];
     } else {
-        *s = D_150AA11C[i];
-        *c = D_150AA11C[0x200 - i];
+        *s = g_anim_sine_table[i];
+        *c = g_anim_sine_table[0x200 - i];
     }
 }
 
@@ -402,11 +402,11 @@ static void nmAnimTrans(f32 *mt, u8 *e, s16 *tt) {
 
 /*
  * anim_eval_joint_matrices: the joint matrices of a model instance.
- * arena: &D_800C42A8 (advanced by n matrices); m: root matrix; anim: animation state (object +0x2D0; 0: copy m
- * into one matrix, func_150A8680); skel: skeleton entries (D_800C5000[id]); n: joints; buf: per-object angle /
+ * arena: &g_obj_mtx_next (advanced by n matrices); m: root matrix; anim: animation state (object +0x2D0; 0: copy m
+ * into one matrix, func_150A8680); skel: skeleton entries (g_model_skeletons[id]); n: joints; buf: per-object angle /
  * scale adjustments (obj_adjust_list_build); remap: per-slot callback index (model header +0x29) or NULL; height: added
  * to the root y.
- * Animation 1 alone, or blended (quaternion slerp-free nlerp) with the next key-frame pair (D_80088904) or with
+ * Animation 1 alone, or blended (quaternion slerp-free nlerp) with the next key-frame pair (g_anim_blend_next_keys) or with
  * animation 2 (+0x3C weight / 1024). Each joint matrix is (scale x rotation, bone offset) times its parent's;
  * column 3 of the matrices is not written.
  */
@@ -442,36 +442,36 @@ void anim_eval_joint_matrices(s32 *arena, f32 (*m)[4], s32 anim, s32 skel, s32 n
     u8 *idx;
     s16 work[3 * 6 * NM_ANIM_MAXCNT + 0x80];
 
-    D_800888E4 = (s32 **)arena;
-    D_800888E0 = (u8 *)*arena;
-    D_800888F8 = 0;
-    D_80088904 = 0;
-    D_80088900 = 0;
+    g_anim_arena_ptr_slot = (s32 **)arena;
+    g_anim_joint_mtx_arena = (u8 *)*arena;
+    g_anim_root_motion_total = 0;
+    g_anim_blend_next_keys = 0;
+    g_anim_root_motion_end = 0;
     if (a == NULL) {
         /* func_150A8680 */
         for (i = 0; i < 16; i++) {
-            ((s32 *)D_800888E0)[i] = ((s32 *)m)[i];
+            ((s32 *)g_anim_joint_mtx_arena)[i] = ((s32 *)m)[i];
         }
-        *D_800888E4 = (s32 *)(D_800888E0 + 0x40);
+        *g_anim_arena_ptr_slot = (s32 *)(g_anim_joint_mtx_arena + 0x40);
         return;
     }
     if (ANIM_S16(a, 0x3C) <= 0) {
-        D_80088904 = a[0x47] & 0x10;
+        g_anim_blend_next_keys = a[0x47] & 0x10;
     }
     cnt = a[0x41];
-    D_80088918 = work;
-    D_80088908 = work;
-    D_80088914 = work + 6 * cnt;
-    D_80088910 = work + 12 * cnt;
-    D_800888E8 = (u8 *)skel;
+    g_anim_trans_table = work;
+    g_anim_trans_free = work;
+    g_anim_scale_table = work + 6 * cnt;
+    g_anim_euler_table = work + 12 * cnt;
+    g_anim_skeleton = (u8 *)skel;
 
-    rot = D_80088910;
-    scl = D_80088914;
+    rot = g_anim_euler_table;
+    scl = g_anim_scale_table;
     nmAnimDecode(0, a, a + 0x40, ANIM_PTR(a, 0x30), a[0x38], ANIM_F32(a, 8), &rot, &scl, root, height, buf);
 
-    if (D_80088904 != 0) {
-        /* the next key-frame pair, weight D_80088920 */
-        D_800888FC = D_800888F4;
+    if (g_anim_blend_next_keys != 0) {
+        /* the next key-frame pair, weight g_anim_key_fraction */
+        g_anim_root_motion_a = g_anim_root_motion;
         rootA[0] = root[0];
         rootA[1] = root[1];
         rootA[2] = root[2];
@@ -479,13 +479,13 @@ void anim_eval_joint_matrices(s32 *arena, f32 (*m)[4], s32 anim, s32 skel, s32 n
         sclB = scl;
         desc = a + 0x40;
         nmAnimDecode(0, a, desc, ANIM_PTR(a, 0x30) + a[0x38], 0, ANIM_F32(a, 8), &rot, &scl, root, height, buf);
-        w = D_80088920;
-        if (D_800888F8 != 0) {
-            v = D_800888FC;
-            if (D_80088900 == 0) {
-                v = (((D_800888F4 - D_800888FC) * w) >> 10) + D_800888FC;
+        w = g_anim_key_fraction;
+        if (g_anim_root_motion_total != 0) {
+            v = g_anim_root_motion_a;
+            if (g_anim_root_motion_end == 0) {
+                v = (((g_anim_root_motion - g_anim_root_motion_a) * w) >> 10) + g_anim_root_motion_a;
             }
-            D_800888F4 = v;
+            g_anim_root_motion = v;
         }
     } else if (ANIM_S16(a, 0x3C) > 0) {
         /* animation 2, weight +0x3C */
@@ -499,18 +499,18 @@ void anim_eval_joint_matrices(s32 *arena, f32 (*m)[4], s32 anim, s32 skel, s32 n
         w = ANIM_S16(a, 0x3C);
     } else {
         /* func_150A94E0: one animation */
-        e = D_800888E8;
-        rot = D_80088910;
+        e = g_anim_skeleton;
+        rot = g_anim_euler_table;
         v = a[0x47] & 0x20;
         if (v != 0) {
             v = rot[1];
         }
-        D_8008891C = v;
-        tr = D_800888EC;
-        sA = D_80088914;
+        g_anim_channel0_angle = v;
+        tr = g_anim_last_trans_offsets;
+        sA = g_anim_scale_table;
         i = n;
         do {
-            mt = (f32 *)(D_800888E0 + (e[1] << 6));
+            mt = (f32 *)(g_anim_joint_mtx_arena + (e[1] << 6));
             ch = e[2] * 3;
             nmAnimTrans(mt, e, tr != NULL ? tr + ch : NULL);
             nmAnimSinCos(rot[ch], &sx, &cx);
@@ -557,18 +557,18 @@ void anim_eval_joint_matrices(s32 *arena, f32 (*m)[4], s32 anim, s32 skel, s32 n
             mt[9] = m9;
             mt[10] = m10;
             e += 0x10;
-        } while (e != D_800888E8 + (n << 4));
+        } while (e != g_anim_skeleton + (n << 4));
         goto compose;
     }
 
-    /* func_150A88F4: blend animation 1 (tables at D_80088910 / D_80088914, root rootA) with B (rotB / sclB, root) */
-    sA = D_80088914;
-    e = D_800888E8;
+    /* func_150A88F4: blend animation 1 (tables at g_anim_euler_table / g_anim_scale_table, root rootA) with B (rotB / sclB, root) */
+    sA = g_anim_scale_table;
+    e = g_anim_skeleton;
     v = desc[7] & 0x20;
     if (v != 0) {
         v = rotB[1];
     }
-    D_8008891C = v;
+    g_anim_channel0_angle = v;
     wf = (f32)w / 1024.0f;
     iw = 1.0f - wf;
     dx = rootA[0] - root[0];
@@ -596,12 +596,12 @@ void anim_eval_joint_matrices(s32 *arena, f32 (*m)[4], s32 anim, s32 skel, s32 n
     } while (t != sEnd);
 
     /* translation offsets */
-    tA = D_80088918;
+    tA = g_anim_trans_table;
     t = tA;
     tEnd = tA + 3 * n;
-    tB = D_800888EC;
-    tr = D_80088918;
-    if (tA == D_80088908) {
+    tB = g_anim_last_trans_offsets;
+    tr = g_anim_trans_table;
+    if (tA == g_anim_trans_free) {
         if (tB == NULL) {
             tr = NULL;
         } else {
@@ -628,8 +628,8 @@ void anim_eval_joint_matrices(s32 *arena, f32 (*m)[4], s32 anim, s32 skel, s32 n
     root[1] = dy + root[1];
     root[2] = dz + root[2];
 
-    sA = D_80088914;
-    rot = D_80088910;
+    sA = g_anim_scale_table;
+    rot = g_anim_euler_table;
     i = n;
     do {
         ch = e[2] * 3;
@@ -664,7 +664,7 @@ void anim_eval_joint_matrices(s32 *arena, f32 (*m)[4], s32 anim, s32 skel, s32 n
         xz = r1 * f;
         yz = r2 * f;
         zz = r3 * f;
-        mt = (f32 *)(D_800888E0 + (e[1] << 6));
+        mt = (f32 *)(g_anim_joint_mtx_arena + (e[1] << 6));
         m0 = 1.0f - (yy + zz);
         m1 = xy + wz;
         m2 = xz - wy;
@@ -715,16 +715,16 @@ compose:
     p[9] = p[9] + ((root[0] * p[0] + root[1] * p[3]) + root[2] * p[6]);
     p[10] = p[10] + ((root[0] * p[1] + root[1] * p[4]) + root[2] * p[7]);
     p[11] = p[11] + ((root[0] * p[2] + root[1] * p[5]) + root[2] * p[8]);
-    *D_800888E4 = (s32 *)(D_800888E0 + (n << 6));
-    e = D_800888E8;
+    *g_anim_arena_ptr_slot = (s32 *)(g_anim_joint_mtx_arena + (n << 6));
+    e = g_anim_skeleton;
     idx = remap;
     j = n;
     for (;;) {
-        nmAnimMtxMul((f32 *)(D_800888E0 + (e[1] << 6)), p);
+        nmAnimMtxMul((f32 *)(g_anim_joint_mtx_arena + (e[1] << 6)), p);
         j--;
         if (remap != NULL && *idx != 0) {
             /* the asm tail-jumps (never returns) for a 0 flag; every entry of the ROM table has flag 1 */
-            cb = (u32 *)&D_8008891C + *idx * 2;
+            cb = (u32 *)&g_anim_channel0_angle + *idx * 2;
             ((void (*)(void))cb[0])();
         }
         if (j == 0) {
@@ -732,6 +732,6 @@ compose:
         }
         e += 0x10;
         idx = remap + e[1];
-        nmAnimLoad12(p, (f32 *)(D_800888E0 + (e[0] << 6)));
+        nmAnimLoad12(p, (f32 *)(g_anim_joint_mtx_arena + (e[0] << 6)));
     }
 }

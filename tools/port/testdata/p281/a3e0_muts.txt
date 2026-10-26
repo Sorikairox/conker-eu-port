@@ -4,27 +4,27 @@ s/        x\[5\] += x\[3\];/        x[5] += x[2];/
 s/        x\[3\] += x\[1\];/        x[3] += x[0];/
 s/even = x\[0\] + x\[4\] \* 0.5f;/even = x[0] + x[4] * 0.25f;/
 s/t\[1\] = x\[0\] - x\[4\];/t[1] = x[0] - x[2];/
-s/t\[0\] = even + x\[2\] \* D_800B116C;/t[0] = even + x[2] * D_800B1170;/
-s/t\[2\] = even - x\[2\] \* D_800B116C;/t[2] = even + x[2] * D_800B116C;/
+s/t\[0\] = even + x\[2\] \* g_mp3_imdct12_cos3_a;/t[0] = even + x[2] * g_mp3_imdct12_cos3_b;/
+s/t\[2\] = even - x\[2\] \* g_mp3_imdct12_cos3_a;/t[2] = even + x[2] * g_mp3_imdct12_cos3_a;/
 s/odd = x\[1\] + x\[5\] \* 0.5f;/odd = x[1] - x[5] * 0.5f;/
 s/t\[4\] = x\[1\] - x\[5\];/t[4] = x[1] - x[3];/
-s/t\[3\] = odd - x\[3\] \* D_800B1170;/t[3] = odd - x[3] * D_800B116C;/
-s/t\[4\] \*= D_800B1178;/t[4] *= D_800B1174;/
-s/t\[5\] \*= D_800B117C;/t[5] *= D_800B1178;/
+s/t\[3\] = odd - x\[3\] \* g_mp3_imdct12_cos3_b;/t[3] = odd - x[3] * g_mp3_imdct12_cos3_a;/
+s/t\[4\] \*= g_mp3_imdct12_twiddle_1;/t[4] *= g_mp3_imdct12_twiddle_0;/
+s/t\[5\] \*= g_mp3_imdct12_twiddle_2;/t[5] *= g_mp3_imdct12_twiddle_1;/
 s/t\[5\] = even - t\[5\];/t[5] = t[5] - even;/
 s/t\[4\] = even - t\[4\];/t[4] = even + t[4];/
 s/t\[3\] = even - t\[3\];/t[3] = even;/
-s/t\[2\] \*= D_800B1188;/t[2] *= D_800B118C;/
-s/t\[5\] \*= D_800B1194;/t[5] *= D_800B1190;/
-s/t\[9\] = t\[0\] \* D_800B119C;/t[9] = t[1] * D_800B119C;/
-s/t\[7\] = t\[1\] \* D_800B11A0;/t[7] = t[1] * D_800B11A4;/
-s/t\[11\] = t\[2\] \* D_800B11AC;/t[11] = t[2] * D_800B11A8;/
+s/t\[2\] \*= g_mp3_imdct12_scale_2;/t[2] *= g_mp3_imdct12_scale_3;/
+s/t\[5\] \*= g_mp3_imdct12_scale_5;/t[5] *= g_mp3_imdct12_scale_4;/
+s/t\[9\] = t\[0\] \* g_mp3_imdct12_win_1;/t[9] = t[1] * g_mp3_imdct12_win_1;/
+s/t\[7\] = t\[1\] \* g_mp3_imdct12_win_2;/t[7] = t[1] * g_mp3_imdct12_win_3;/
+s/t\[11\] = t\[2\] \* g_mp3_imdct12_win_5;/t[11] = t[2] * g_mp3_imdct12_win_4;/
 s/t\[0\] = t\[3\] \* 1.0f;/t[0] = t[3] * 2.0f;/
-s/t\[1\] = t\[4\] \* D_800B11B0;/t[1] = t[4] * D_800B11B4;/
-s/t\[3\] = t\[5\] \* D_800B11B8;/t[3] = t[4] * D_800B11B8;/
-s/t\[5\] = t\[0\] \* D_800B11C0;/t[5] = t[3] * D_800B11C0;/
-s/t\[4\] = t\[4\] \* D_800B11BC;/t[4] = t[5] * D_800B11BC;/
-s/t\[0\] = t\[0\] \* D_800B11C4;/t[0] = t[0] * D_800B11C0;/
+s/t\[1\] = t\[4\] \* g_mp3_imdct12_win_6;/t[1] = t[4] * g_mp3_imdct12_win_7;/
+s/t\[3\] = t\[5\] \* g_mp3_imdct12_win_8;/t[3] = t[4] * g_mp3_imdct12_win_8;/
+s/t\[5\] = t\[0\] \* g_mp3_imdct12_win_10;/t[5] = t[3] * g_mp3_imdct12_win_10;/
+s/t\[4\] = t\[4\] \* g_mp3_imdct12_win_9;/t[4] = t[5] * g_mp3_imdct12_win_9;/
+s/t\[0\] = t\[0\] \* g_mp3_imdct12_win_11;/t[0] = t[0] * g_mp3_imdct12_win_10;/
 s/            a\[6 + i\] += t\[i\];/            a[5 + i] += t[i];/
 s/for (i = 0; i < 12; i++) {/for (i = 0; i < 11; i++) {/
 s/        x += 6;/        x += 5;/

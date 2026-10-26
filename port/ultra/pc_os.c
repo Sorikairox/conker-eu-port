@@ -153,13 +153,13 @@ EMSCRIPTEN_KEEPALIVE void port_dump_stubs(int max) {
 void port_stub_mark_dl(void) { if (stub_last < STUB_SLOTS) stub_tab[stub_last].dl++; }
 
 /* P23: return value of an int stub with an int first argument (gen_stubs.py): a0 when it points into the
- * frame DL buffers D_800BEDE8[0..1] (each D_800BEDE8[1] - D_800BEDE8[0] bytes; the stub is a DL builder
+ * frame DL buffers g_gfx_dl_buffers[0..1] (each g_gfx_dl_buffers[1] - g_gfx_dl_buffers[0] bytes; the stub is a DL builder
  * whose output is simply missing), else 0 as before. */
-extern unsigned D_800BEDE8[2];
+extern unsigned g_gfx_dl_buffers[2]; /* was D_800BEDE8 */
 static unsigned dlret_hits;
 void port_stub_mark_dl(void);
 int port_stub_dlret(int a0) {
-    unsigned a = (unsigned)a0, b0 = D_800BEDE8[0], b1 = D_800BEDE8[1];
+    unsigned a = (unsigned)a0, b0 = g_gfx_dl_buffers[0], b1 = g_gfx_dl_buffers[1];
     if (b0 && b1 > b0 && a >= b0 && a < b1 + (b1 - b0)) { dlret_hits++; port_stub_mark_dl(); return a0; }
     return 0;
 }
@@ -167,9 +167,9 @@ unsigned port_stub_dlret_hits(void) { return dlret_hits; }
 /* source-detected pass-through stubs (gen_stubs.py): always a0; marked as DL builders when a0 is in range */
 int port_stub_pt(int a0) { port_stub_dlret(a0); return a0; }
 
-/* P23: ?gdltrack=N: during VI frame N, log every stub hit with the frame DL write pointer D_800BE9D0
+/* P23: ?gdltrack=N: during VI frame N, log every stub hit with the frame DL write pointer g_gfx_dl_ptr
  * (game_45B80.c GDL) and the DL buffers, to find where the frame DL leaves its buffer. */
-extern unsigned D_800BE9D0;
+extern unsigned g_gfx_dl_ptr; /* was D_800BE9D0 */
 void port_camwatch(const char *where); /* P39: pc_overrides.c, ?camwatch=N */
 void (*port_stub_trace_hook)(const char *name); /* P49: ?p49walk records the stubs hit inside the walk handler */
 void port_stub_hit(const char *name, const char *what) {
@@ -179,14 +179,14 @@ void port_stub_hit(const char *name, const char *what) {
     { static int gt = -1; if (gt < 0) gt = port_flag("gdltrack");
       if (gt && port_frame_count >= (unsigned)gt && port_frame_count < (unsigned)gt + 8) {
           OSThread *t = port_current_thread();
-          port_log("[gdl] %s thread=%d GDL %08X (buf %08X %08X)\n", name, t ? (int)t->id : -1, D_800BE9D0, D_800BEDE8[0], D_800BEDE8[1]);
+          port_log("[gdl] %s thread=%d GDL %08X (buf %08X %08X)\n", name, t ? (int)t->id : -1, g_gfx_dl_ptr, g_gfx_dl_buffers[0], g_gfx_dl_buffers[1]);
       } }
     { /* P55: ?gdlzero=N: find where a "G_DL 0" (DE000000 00000000) enters the frame DL: at each stub hit scan the
        * commands written since the previous hit; log the first N finds with the previous / current stub and JS stack */
       static int gz = -1, found; static unsigned last; static const char *prev = "";
       if (gz < 0) gz = port_flag("gdlzero");
       if (gz) {
-          unsigned cur = D_800BE9D0, a;
+          unsigned cur = g_gfx_dl_ptr, a;
           if (cur < last || cur - last > 0x10000) last = cur > 0x800 ? cur - 0x800 : cur;
           for (a = (last + 7) & ~7u; a + 8 <= cur; a += 8)
               if (*(unsigned *)(uintptr_t)a == 0xDE000000u && *(unsigned *)(uintptr_t)(a + 4) == 0 && found < gz) {
@@ -427,7 +427,7 @@ void osViSwapBuffer(void *fb) { vi_next_fb = fb; }
 void *osViGetCurrentFramebuffer(void) { return vi_cur_fb; }
 void *osViGetNextFramebuffer(void) { return vi_next_fb; }
 
-/* P147 DIAGNOSTIC ?p147vi=1 (node PORT_P147VI=1): log the game's active VI mode D_8002AF20 (EU 0x8002AF20; OSViMode,
+/* P147 DIAGNOSTIC ?p147vi=1 (node PORT_P147VI=1): log the game's active VI mode g_vi_mode (EU 0x8002AF20; OSViMode,
  * u32 fields are native words in the vbe memory) whenever it changes: width, hStart, xScale, field 0 origin / yScale /
  * vStart, and what the VI would show from it (N64 pixels = screen span * scale / 1024; PAL screen lines per field
  * = (vEnd - vStart) / 2). */
@@ -446,7 +446,7 @@ static void p147_vi_log(void) {
              m[10], ys, vs, m[4], m[5], hspan, vspan, hspan * (xs & 0xFFF) / 1024.0, vspan * (ys & 0xFFF) / 1024.0);
 }
 
-/* P147: the part of the framebuffer the VI shows, from the active mode (the game's PAL mode D_8002AF20: width 292,
+/* P147: the part of the framebuffer the VI shows, from the active mode (the game's PAL mode g_vi_mode: width 292,
  * origin 0x248 = one 16-bit row, yScale 0x350 over vStart 0x3F..0x244 = 258 lines -> rows 1 .. 214.7 of the 216-row
  * framebuffer; xScale 0x200 over hStart 0x8C..0x2D5 = 585 dots -> 292.5 columns, the whole width). The renderer maps
  * these rows onto the canvas (gfx_f3dex2.c), so row 0 and rows 215 / 216 are not shown, as on the N64.

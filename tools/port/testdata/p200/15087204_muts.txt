@@ -1,5 +1,5 @@
 s/    best = 100.0f;/    best = 1.0f;/
-s/    for (i = 0; i < D_80087630; i++) {/    for (i = 0; i < D_80087630 - 1; i++) {/
+s/    for (i = 0; i < g_rail_node_count; i++) {/    for (i = 0; i < g_rail_node_count - 1; i++) {/
 s/        if (((u8 \*) a)\[0xE\] != 1 || ((u8 \*) a)\[6\] != band) {/        if (((u8 *) a)[0xE] != 1) {/
 s/        if (((u8 \*) a)\[0xE\] != 1 || ((u8 \*) a)\[6\] != band) {/        if (((u8 *) a)[6] != band) {/
 s/        for (k = 0; k < 5; k++) {/        for (k = 0; k < 4; k++) {/

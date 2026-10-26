@@ -1,20 +1,20 @@
-s/    D_800D3048 = 0;/    D_800D3048 = 1;/
-s/osCreateMesgQueue(&D_800BEE30, D_800BEE48, 16);/osCreateMesgQueue(\&D_800BEE30, D_800BEE48, 15);/
-s/    D_800BEE88\[0x10\] = 2;/    D_800BEE88[0x8] = 2;/
-s/    D_800BEA37 = 0;/    D_800BEA37 = 1;/
-s/    D_800BEECB = 0;/    D_800BEECB = 2;/
+s/    g_segment_table = 0;/    g_segment_table = 1;/
+s/osCreateMesgQueue(&g_game_main_queue, g_game_main_msgs, 16);/osCreateMesgQueue(\&g_game_main_queue, g_game_main_msgs, 15);/
+s/    g_gfx_done_msgs\[0x10\] = 2;/    g_gfx_done_msgs[0x8] = 2;/
+s/    g_gfx_vi_mode_pending = 0;/    g_gfx_vi_mode_pending = 1;/
+s/    g_text_bank_lang = 0;/    g_text_bank_lang = 2;/
 s/    g_gfx_tasks_pending = 0;/    g_gfx_tasks_pending = 3;/
 s/    glyph_set_load_rom(0);/    glyph_set_load_rom(1);/
-s/    D_800BEA35 = 5;/    D_800BEA35 = 2;/
-s/    D_800BEE20 = 1;/    D_800BEE20 = 0;/
-s/    D_800BEECA = 1;/    D_800BEECA = 0;/
+s/    g_game_frame_state = 5;/    g_game_frame_state = 2;/
+s/    g_level_start_player_mask = 1;/    g_level_start_player_mask = 0;/
+s/    g_render_level_world = 1;/    g_render_level_world = 0;/
 s/            case 5:/            case 6:/
 s/            case 1:/            case 4:/
 s/                \/\* fallthrough \*\/$/                break;/
 s/if (g_game_mode == 2) {/if (g_game_mode != 3) {/
 s/random_seed(0x81280783);/random_seed(0x81280782);/
-s/level_start_game((s16) D_800BEE24, (s16) D_800BEE20/level_start_game((s16) D_800BEE20, (s16) D_800BEE24/
+s/level_start_game((s16) g_level_start_session_mode, (s16) g_level_start_player_mask/level_start_game((s16) g_level_start_player_mask, (s16) g_level_start_session_mode/
 s/((s16 \*) \&g_level_load_id)\[1\]/((s16 *) \&g_level_load_id)[0]/
-s/                D_800BEA35 = 0;/                D_800BEA35 = 1;/
+s/                g_game_frame_state = 0;/                g_game_frame_state = 1;/
 s/        g_view_count_minus1 = 0;/        g_view_count_minus1 = 1;/
 s/        sched_send_retrace_msg();//

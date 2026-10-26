@@ -7,7 +7,7 @@
 /* was func_10004470 */
 void pi_init_dma_queues(void) {
     int i;
-    osCreatePiManager(150, &D_800388B0, &D_800380E0, 0xC8);
+    osCreatePiManager(150, &g_pi_mgr_queue, &g_pi_mgr_msgs, 0xC8);
 
     for (i = 0; i < 3; i++)
     {
@@ -15,8 +15,8 @@ void pi_init_dma_queues(void) {
     }
 
     osCreateMesgQueue(&gMessageQueue0, &gMessage0, 300);
-    D_8003A570 = 0;
-    D_8003A571 = 0;
+    g_pi_io_msg_index = 0;
+    g_pi_io_pending = 0;
 }
 
 /* was func_10004514 */
@@ -35,15 +35,15 @@ s32 rom_dma_read(s32 devAddr, void *dramAddr, u32 size, s32 arg3) {
         sp3c = 0;
     }
     if (arg3 == 0) {
-        if (D_8003A571 != 300) { // messages waiting?
-            ioMsg = &D_80038950[D_8003A570];
+        if (g_pi_io_pending != 300) { // messages waiting?
+            ioMsg = &g_pi_io_msgs[g_pi_io_msg_index];
             msgQueue = &gMessageQueue0;
-            if (D_8003A570 == 299) { // number of message queues used?
-                D_8003A570 = 0;
+            if (g_pi_io_msg_index == 299) { // number of message queues used?
+                g_pi_io_msg_index = 0;
             } else {
-                D_8003A570 += 1U;
+                g_pi_io_msg_index += 1U;
             }
-            D_8003A571 += 1U;
+            g_pi_io_pending += 1U;
         } else {
             return;
         }
@@ -62,12 +62,12 @@ s32 rom_dma_read(s32 devAddr, void *dramAddr, u32 size, s32 arg3) {
 /* was func_10004674 */
 void rom_dma_wait_queued(void) {
     int i;
-    for (i = 0; i < D_8003A571; i++)
+    for (i = 0; i < g_pi_io_pending; i++)
     {
         osRecvMesg(&gMessageQueue0, 0, OS_MESG_BLOCK);
     }
 
-    D_8003A571 = 0;
+    g_pi_io_pending = 0;
 }
 
 /* was func_100046E4 */
@@ -101,15 +101,15 @@ void rom_dma_read_chunked(u32 devAddr, u8 *dramAddr, u32 size) {
 }
 /* P62: hand-written from the asm. UNVERIFIED by difftest (busy-waits on the PI and reads the cartridge through
  * KSEG1, which neither harness maps); checked by reading against the asm, see docs/port/sessions/P62.md. */
-extern vu8 D_8003A8D2;       /* 1 while a direct cartridge read is in progress */
-extern vu8 D_8003A8D3;       /* nonzero while a PI DMA owner holds the bus: wait */
-extern vu8 D_8003A8D5;       /* restart thread D_80035C70 after the read */
-extern OSThread D_80035C70;
+extern vu8 g_pi_direct_read_active;       /* 1 while a direct cartridge read is in progress; was D_8003A8D2 */
+extern vu8 g_pi_dma_busy;       /* nonzero while a PI DMA owner holds the bus: wait; was D_8003A8D3 */
+extern vu8 g_pi_restart_thread;       /* restart thread g_os_pi_thread after the read; was D_8003A8D5; was D_80035C70 */
+extern OSThread g_os_pi_thread; /* was D_80035C70 */
 
 #define CART_WORD(addr) (*(vu32 *)((u32)(addr) | 0xA0000000))
 
 /*
- * Blocking read of `size` bytes (rounded up to even) from cartridge address devAddr (| the ROM base D_80000308)
+ * Blocking read of `size` bytes (rounded up to even) from cartridge address devAddr (| the ROM base g_os_rom_base)
  * into dramAddr, with uncached 32-bit loads from the PI's KSEG1 window. The cartridge is word-addressed, so a
  * halfword-aligned devAddr is read from the word before it: its low half is the first halfword, then each
  * word is split into the high half (for the halfword at +2) and the low half (for the next one).
@@ -121,13 +121,13 @@ void rom_read_direct(s32 devAddr, void *dramAddr, u32 size) {
     u32 i;
     u32 end;
 
-    D_8003A8D2 = 1;
+    g_pi_direct_read_active = 1;
     size = (size + 1) & ~1;
-    while (D_8003A8D3 != 0) {
+    while (g_pi_dma_busy != 0) {
     }
     while (IO_READ(PI_STATUS_REG) & (PI_STATUS_DMA_BUSY | PI_STATUS_IO_BUSY)) {
     }
-    devAddr |= D_80000308;
+    devAddr |= g_os_rom_base;
 
     if (devAddr & 2) {
         /* first halfword: low half of the word that holds it */
@@ -164,8 +164,8 @@ void rom_read_direct(s32 devAddr, void *dramAddr, u32 size) {
         }
     }
 
-    D_8003A8D2 = 0;
-    if (D_8003A8D5 != 0) {
-        osStartThread(&D_80035C70);
+    g_pi_direct_read_active = 0;
+    if (g_pi_restart_thread != 0) {
+        osStartThread(&g_os_pi_thread);
     }
 }

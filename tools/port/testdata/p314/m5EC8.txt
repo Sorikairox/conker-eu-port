@@ -15,10 +15,10 @@
 118s/(f->type == 8 || f->type == 9)/(f->type == 8 || f->type == 10)/ % ev9go ev7
 118s/(f->type == 8 || f->type == 9)/(f->type == 7 || f->type == 9)/ % ev8go ev7 ev8wait
 118s/g_level_id == 6/g_level_id >= 5/ % ev8lvl5
-118s/D_800C35EA != 0 \&\& D_800C3A08 == 0xF) {/D_800C35EA != 0 \&\& D_800C3A08 >= 0xE) {/ % ev8evE
-118s/D_800C35EA != 0 \&\& D_800C3A08 == 0xF) {/D_800C3A08 == 0xF) {/ % ev8ev35
+118s/g_cutscene_slot_state != 0 \&\& g_cutscene_scene == 0xF) {/g_cutscene_slot_state != 0 \&\& g_cutscene_scene >= 0xE) {/ % ev8evE
+118s/g_cutscene_slot_state != 0 \&\& g_cutscene_scene == 0xF) {/g_cutscene_scene == 0xF) {/ % ev8ev35
 119s/f->flags \&= 0xFFF7;/f->flags \&= 0xFFFF;/ % ev8wait
-124s/if (D_800C39D0 >= 60 \&\&/if (D_800C39D0 >= 61 \&\&/ % ev9go
+124s/if (g_cutscene_frame >= 60 \&\&/if (g_cutscene_frame >= 61 \&\&/ % ev9go
 124s/!(f->flags \& 0x200)) {/!(f->flags \& 0x400)) {/ % ev8circ
 125s/(f->flags \& 0xFFB3) | 0x200;/(f->flags \& 0xFFB7) | 0x200;/ % ev9go ev8go
 126s/dx = f->x - sFlyerCircleX\[0\];/dx = f->z - sFlyerCircleX[0];/ % ev8go
@@ -80,7 +80,7 @@
 226s/f->turnVel = -t->turnMax;/f->turnVel = t->turnMax;/ % tmaxn
 231s/if (f->flags \& 0x80) {/if (f->flags \& 0x800) {/ % floor0 floor1
 232s/f->floorY = (f32)collision_level_nearest_height((s32)f->x, (s32)f->y, (s32)f->z, \&tri);/f->floorY = (f32)collision_level_nearest_height((s32)f->x, (s32)f->z, (s32)f->y, \&tri);/ % floor0
-235s/v = ((s32 \*)D_800DBE5C)\[(tri - D_800DC26C) \/ 12\];/v = ((s32 *)D_800DBE5C)[(tri - D_800DC26C) \/ 9];/ % floor1
+235s/v = ((s32 \*)g_coll_tri_flags)\[(tri - g_level_tri_table) \/ 12\];/v = ((s32 *)g_coll_tri_flags)[(tri - g_level_tri_table) \/ 9];/ % floor1
 234s/if (tri != 0) {/if (tri == 0) {/ % floor0 floor1
 237s/f->surface = v;/f->surface = v + 1;/ % floor0 floor1
 241s/if (f->climbTimer >= 0) {/if (f->climbTimer > 0) {/ % bobexp bobup
@@ -149,8 +149,8 @@
 333s/f->x = f->rollVel \* c + sFlyerCircleX\[0\];/f->x = f->rollVel * s + sFlyerCircleX[0];/ % ev8circ
 334s/f->z = f->rollVel \* s + sFlyerCircleZ\[0\];/f->z = f->rollVel * c + sFlyerCircleZ[0];/ % ev8circ
 335s/f->y -= 100\.0f \/ ((f->rollVel - 60\.0f) + 4\.0f);/f->y -= 100.0f \/ ((f->rollVel - 60.0f) + 2.0f);/ % ev8circ
-336s/f->y < sFlyerCircleFloor\[0\] || D_800C35EA == 0/f->y < sFlyerCircleFloor[0] \&\& D_800C35EA == 0/ % ev8sink circ35
-336s/|| D_800C3A08 != 0xF) {/|| D_800C3A08 != 0xE) {/ % circend
+336s/f->y < sFlyerCircleFloor\[0\] || g_cutscene_slot_state == 0/f->y < sFlyerCircleFloor[0] \&\& g_cutscene_slot_state == 0/ % ev8sink circ35
+336s/|| g_cutscene_scene != 0xF) {/|| g_cutscene_scene != 0xE) {/ % circend
 341s/a = f->pitch \* sFlyerDegToRad\[0\];/a = f->roll * sFlyerDegToRad[0];/ % base
 342s/h = f->heading \* sFlyerDegToRad\[0\];/h = f->pitch * sFlyerDegToRad[0];/ % base
 344s/sh = fast_sinf(h);/sh = fast_sinf(a);/ % base
@@ -168,8 +168,8 @@
 358s/g_weather_slot_timers\[f->slot\] = (random_int() \& 0x3F) + 30;/g_weather_slot_timers[f->slot] = (random_int() \& 0x7F) + 30;/ % chirp
 358s/g_weather_slot_timers\[f->slot\] = (random_int() \& 0x3F) + 30;/g_weather_slot_timers[f->slot] = (random_int() \& 0x3F) + 31;/ % chirp
 360s/if ((f->flags \& 2)/if ((f->flags \& 1)/ % cull1
-361s/view_point_cull_test(g_view_mtxf, f->x, f->y, f->z, g_cam_near_plane, g_cam_far_plane, D_800D3A00, g_cam_zoom_factors_1, 0, 0) != 0/view_point_cull_test(g_view_mtxf, f->x, f->y, f->z, g_cam_near_plane, g_cam_far_plane, D_800D3A00, D_800D3A00, 0, 0) != 0/ % cull1
-361s/view_point_cull_test(g_view_mtxf, f->x, f->y, f->z, g_cam_near_plane, g_cam_far_plane, D_800D3A00, g_cam_zoom_factors_1, 0, 0) != 0/view_point_cull_test(g_view_mtxf, f->x, f->y, f->z, g_cam_far_plane, g_cam_near_plane, D_800D3A00, g_cam_zoom_factors_1, 0, 0) != 0/ % cull1
-361s/view_point_cull_test(g_view_mtxf, f->x, f->y, f->z, g_cam_near_plane, g_cam_far_plane, D_800D3A00, g_cam_zoom_factors_1, 0, 0) != 0/view_point_cull_test(g_view_mtxf, f->x, f->y, f->z, g_cam_near_plane, g_cam_far_plane, D_800D3A00, g_cam_zoom_factors_1, 0, 0) == 0/ % cull0 cull1
+361s/view_point_cull_test(g_view_mtxf, f->x, f->y, f->z, g_cam_near_plane, g_cam_far_plane, g_cam_zoom_factors, g_cam_zoom_factors_1, 0, 0) != 0/view_point_cull_test(g_view_mtxf, f->x, f->y, f->z, g_cam_near_plane, g_cam_far_plane, g_cam_zoom_factors, g_cam_zoom_factors, 0, 0) != 0/ % cull1
+361s/view_point_cull_test(g_view_mtxf, f->x, f->y, f->z, g_cam_near_plane, g_cam_far_plane, g_cam_zoom_factors, g_cam_zoom_factors_1, 0, 0) != 0/view_point_cull_test(g_view_mtxf, f->x, f->y, f->z, g_cam_far_plane, g_cam_near_plane, g_cam_zoom_factors, g_cam_zoom_factors_1, 0, 0) != 0/ % cull1
+361s/view_point_cull_test(g_view_mtxf, f->x, f->y, f->z, g_cam_near_plane, g_cam_far_plane, g_cam_zoom_factors, g_cam_zoom_factors_1, 0, 0) != 0/view_point_cull_test(g_view_mtxf, f->x, f->y, f->z, g_cam_near_plane, g_cam_far_plane, g_cam_zoom_factors, g_cam_zoom_factors_1, 0, 0) == 0/ % cull0 cull1
 362s/(g_session_game_mode != 1/(g_session_game_mode != 2/ % cull2a cull2c
 363s/|| view_point_cull_test(g_view_mtxf_p1, f->x, f->y, f->z/|| view_point_cull_test(g_view_mtxf, f->x, f->y, f->z/ % cull2b

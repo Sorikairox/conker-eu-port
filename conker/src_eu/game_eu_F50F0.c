@@ -3,8 +3,8 @@
 #include "variables.h"
 
 
-extern f32 D_800A0880;
-extern f32 D_800A0884;
+extern f32 g_light_flicker_k_0880; /* was D_800A0880 */
+extern f32 g_light_flicker_k_0884; /* was D_800A0884 */
 void light_ctrl_broadcast(u8, u8, s32);
 
 /* was func_150C78E0 */
@@ -33,14 +33,14 @@ s32 light_flicker_update(u8 *arg0, u8 *arg1) {
             var_f0 = var_f16 * (((f32) (*(s32 *)((u8 *)arg0 + 0x38)) / 50.0f) * 0.25f);
         } else if (temp_v1 < 0xFA) {
             var_f0 = (((f32) (temp_v1 - 0x32) / 200.0f) * 0.75f) + 0.25f;
-        } else if ((f32) temp_v1 < D_800A0880) {
+        } else if ((f32) temp_v1 < g_light_flicker_k_0880) {
             if ((1.0f - 0.25f) < temp_f0) {
                 var_f0 = 0.25f;
             } else {
                 var_f0 = temp_f0 + 0.25f;
             }
         } else {
-            var_f0 = temp_f0 + ((1.0f - temp_f0) * D_800A0884);
+            var_f0 = temp_f0 + ((1.0f - temp_f0) * g_light_flicker_k_0884);
         }
         if (g_frame_ticks >= (*(s32 *)((u8 *)arg0 + 0x38))) {
             (*(s32 *)((u8 *)arg0 + 0x38)) = 0;

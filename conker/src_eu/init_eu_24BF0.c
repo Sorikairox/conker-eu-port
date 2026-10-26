@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern OSDevMgr D_8002AE90; // __osPiDevMgr
+extern OSDevMgr g_os_pi_dev_mgr; /* was D_8002AE90 */ // __osPiDevMgr
 OSMesgQueue *osPiGetCmdQueue(void);
 
 
@@ -27,7 +27,7 @@ s32 osPiStartDma(OSIoMesg *mb, s32 priority, s32 direction, u32 devAddr, void *d
                  OSMesgQueue *mq) {
     register s32 ret;
 
-    if (!D_8002AE90.active) {
+    if (!g_os_pi_dev_mgr.active) {
         return -1;
     }
     if (direction == OS_READ) {

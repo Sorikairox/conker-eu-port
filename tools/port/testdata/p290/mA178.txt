@@ -1,5 +1,5 @@
 s/DustEmitter \*e = (DustEmitter \*) (obj + 0x28);/DustEmitter *e = (DustEmitter *) (obj + 0x24);/
-s/D_800BEE0B, 3000.0f,/D_800BEE0B, 2000.0f,/
+s/g_view_count_minus1_lo, 3000.0f,/g_view_count_minus1_lo, 2000.0f,/
 s/(struct17 \*) e) == 0)/(struct17 *) e) != 0)/
 s/e->acc += (e->rate + random_float() \* e->rateRand)/e->acc += (e->rate + random_float() * e->rate)/
 s/\* e->rateRand) \* g_frame_step_f;/* e->rateRand);/

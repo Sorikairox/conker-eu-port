@@ -4,23 +4,23 @@
 
 #if 0
 f32 PI = 3.1415927410125732;
-f32 D_8002C774 = 1.4142136573791504;
-f32 D_8002C778 = 1.0594631433486938;
-f32 D_8002C77C = 0.9438742995262146;
-f32 D_8002C780 = 26768.0;
-f32 D_8002C784 = 26768.0;
-f32 D_8002C788 = 173123.40625;
-f32 D_8002C78C = 0.0;
+f32 g_audio_fx_sqrt2 = 1.4142136573791504; /* was D_8002C774 */
+f32 g_audio_semitone_up = 1.0594631433486938; /* was D_8002C778 */
+f32 g_audio_semitone_down = 0.9438742995262146; /* was D_8002C77C */
+f32 g_audio_lp_coef_scale_0 = 26768.0; /* was D_8002C780 */
+f32 g_audio_lp_coef_scale_1 = 26768.0; /* was D_8002C784 */
+f32 g_audio_fx_delay_scale_alias = 173123.40625; /* was D_8002C788 */
+f32 g_audio_fx_k_caec = 0.0; /* was D_8002C78C */
 #endif
 
-extern f32 D_8002C770;
-extern f32 D_8002C774;
-extern f32 D_8002C778;
-extern f32 D_8002C77C;
-extern f32 D_8002C780;
-extern f32 D_8002C784;
-extern f32 D_8002C788;
-extern f32 D_8002C78C;
+extern f32 g_audio_fx_pi; /* was D_8002C770 */
+extern f32 g_audio_fx_sqrt2; /* was D_8002C774 */
+extern f32 g_audio_semitone_up; /* was D_8002C778 */
+extern f32 g_audio_semitone_down; /* was D_8002C77C */
+extern f32 g_audio_lp_coef_scale_0; /* was D_8002C780 */
+extern f32 g_audio_lp_coef_scale_1; /* was D_8002C784 */
+extern f32 g_audio_fx_delay_scale_alias; /* was D_8002C788 */
+extern f32 g_audio_fx_k_caec; /* was D_8002C78C */
 
 f32 math_atan2f(f32, f32);
 
@@ -35,9 +35,9 @@ void n_fx_calc_biquad_lowpass(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg
         arg1 = arg0 - 200.0f;
     }
 
-    sp24 = math_atan2f(arg1 * D_8002C770, arg0);
+    sp24 = math_atan2f(arg1 * g_audio_fx_pi, arg0);
     sp20 = sp24 * sp24;
-    sp1C = (sp24 * D_8002C774) / arg2;
+    sp1C = (sp24 * g_audio_fx_sqrt2) / arg2;
     arg3[0] = sp20 / (1.0f + sp20 + sp1C);
     arg3[1] = arg3[0] * 2.0f;
     arg3[2] = arg3[0];
@@ -80,9 +80,9 @@ f32 audio_semitones_to_ratio(s32 arg0) {
     f32 sp0 = 1.0f;
 
     if (arg0 >= 0) {
-        sp4 = D_8002C778;
+        sp4 = g_audio_semitone_up;
     } else {
-        sp4 = D_8002C77C;
+        sp4 = g_audio_semitone_down;
         arg0 = -arg0;
     }
 
@@ -114,8 +114,8 @@ void n_fx_lowpass_update_coefs(ALLowPass *arg0, f32 arg1) {
     for(i = 3; i < 8; i++) {
         arg0->fcvec.fccoef[i] = 0;
     }
-    arg0->fcvec.fccoef[0] = sp30[0] * (D_8002C780 - (arg0->fgain * 128.0f));
-    arg0->fcvec.fccoef[1] = sp30[1] * (D_8002C784 - (arg0->fgain * 128.0f));
+    arg0->fcvec.fccoef[0] = sp30[0] * (g_audio_lp_coef_scale_0 - (arg0->fgain * 128.0f));
+    arg0->fcvec.fccoef[1] = sp30[1] * (g_audio_lp_coef_scale_1 - (arg0->fgain * 128.0f));
     arg0->fcvec.fccoef[2] = 0;
 
     arg0->fcvec.fccoef[8] = sp24[1] * -16384.0f;
@@ -127,10 +127,10 @@ void n_fx_lowpass_update_coefs(ALLowPass *arg0, f32 arg1) {
 }
 
 // s123: DK64 src/global_asm/audio/n_drvrNew.c n_alFxNew (built -g)
-#define D_global_asm_80756458 D_8002BF30
+#define D_global_asm_80756458 g_audio_fx_default_params
 #define _init_lpfilter(x) init_lpfilter((ALLowPass *) (x))
-extern s32 D_8002BF30;
-extern f32 D_8002CAE8; /* 173123.4f */
+extern s32 g_audio_fx_default_params; /* was D_8002BF30 */
+extern f32 g_audio_fx_delay_scale; /* 173123.4f; was D_8002CAE8 */
 typedef struct {
     u8 pad0[0x2C]; /* Conker layout (DK64 has outputRate at 0x18) */
     s32 outputRate;
@@ -230,7 +230,7 @@ void n_alFxNew(ALFx **arg0, ALSynConfig *arg1, s16 arg2, s32 arg3) {
         sp28->unkC = sp2C[j++];
         if (sp2C[j]) {
             sp28->unk10 = ((sp2C[j++] / 1000.0f) * 2.0f) / ((ALSynConfig*) arg1)->outputRate;
-            sp28->unk1C = (sp2C[j++] / D_8002CAE8) /* rodata of another object */ * (u32)(sp28->unk4 - sp28->unk0);
+            sp28->unk1C = (sp2C[j++] / g_audio_fx_delay_scale) /* rodata of another object */ * (u32)(sp28->unk4 - sp28->unk0);
             sp28->unk14 = 1.0f;
             sp28->unk18 = 0;
             sp28->unk24 = alHeapAlloc(arg3, 1U, 0x38);

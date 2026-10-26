@@ -4,10 +4,10 @@
 #include "osint.h"
 
 /* libultra os/sethwintrroutine.c (-O1) */
-extern void *D_8002AFC0[];
+extern void *g_os_hw_int_table[]; /* was D_8002AFC0 */
 void __osSetHWIntrRoutine(OSHWIntr interrupt, s32 (*handler)(void)) {
     register u32 saveMask = __osDisableInt();
-    D_8002AFC0[interrupt] = handler;
+    g_os_hw_int_table[interrupt] = handler;
     __osRestoreInt(saveMask);
 }
 
@@ -22,11 +22,11 @@ void __osSetHWIntrRoutine(OSHWIntr interrupt, s32 (*handler)(void)) {
 #define LEO_ERROR_17 17
 #define LEO_ERROR_29 29
 #define LEO_ERROR_75 75
-#define osDiskExist D_8002C070
-#define __osDiskHandle D_80043EC4
-#define __OSGlobalIntMask D_8002C06C
-#define __osEventStateTab D_80042CA0
-#define __osRunQueue D_8002C148
+#define osDiskExist g_os_disk_exist
+#define __osDiskHandle g_os_disk_handle
+#define __OSGlobalIntMask g_os_global_int_mask
+#define __osEventStateTab g_os_event_state_tab
+#define __osRunQueue g_os_run_queue
 #define __osEnqueueThread os_enqueue_thread
 #define __osPopThread os_pop_thread
 #define __osEPiRawStartDma os_epi_raw_start_dma

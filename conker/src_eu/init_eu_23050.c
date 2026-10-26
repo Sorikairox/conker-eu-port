@@ -18,15 +18,15 @@ typedef struct {
     __OSViScale x;
     __OSViScale y;
 } __OSViContext;
-extern __OSViContext *D_8002C134; // __osViNext
+extern __OSViContext *g_os_vi_next; /* was D_8002C134 */ // __osViNext
 
 void osViBlack(u8 active) {
     register u32 saveMask = __osDisableInt();
 
     if (active) {
-        D_8002C134->state |= 0x20;
+        g_os_vi_next->state |= 0x20;
     } else {
-        D_8002C134->state &= ~0x20;
+        g_os_vi_next->state &= ~0x20;
     }
     __osRestoreInt(saveMask);
 }
@@ -34,8 +34,8 @@ void osViBlack(u8 active) {
 void osViSetEvent(OSMesgQueue *mq, OSMesg m, u32 retraceCount) {
     register u32 saveMask = __osDisableInt();
 
-    D_8002C134->msgq = mq;
-    D_8002C134->msg = m;
-    D_8002C134->retraceCount = retraceCount;
+    g_os_vi_next->msgq = mq;
+    g_os_vi_next->msg = m;
+    g_os_vi_next->retraceCount = retraceCount;
     __osRestoreInt(saveMask);
 }

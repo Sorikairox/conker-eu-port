@@ -135,8 +135,8 @@ void decal_tick(struct102 *arg0) {
 }
 
 extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
-extern u32 D_800DD5E4;
-extern s32 D_800DD5E8;
+extern u32 g_sprite_last_tex; /* was D_800DD5E4 */
+extern s32 g_sprite_last_frame; /* was D_800DD5E8 */
 extern s16 g_sprite_last_other_mode; /* was D_800DD5EC */
 
 /* was func_15172634 */
@@ -190,13 +190,13 @@ u8 *decal_draw(u8 *arg0, u8 *arg1, s32 arg2) {
             var_t0 = *(s32 *)(temp_v0 + (var_v1 * 4));
             var_v1 = 0;
         }
-        if ((var_t0 != D_800DD5E4) || (var_v1 != D_800DD5E8)) {
+        if ((var_t0 != g_sprite_last_tex) || (var_v1 != g_sprite_last_frame)) {
             sp.u90 = var_v1;
             sp.u94 = var_t0;
             temp_v0_2 = sprite_load_texture(var_s0, sp88, temp_a2, &sp.u98, 0, 0, 0, 2, 3);
-            D_800DD5E4 = sp.u94;
+            g_sprite_last_tex = sp.u94;
             var_s0 = temp_v0_2;
-            D_800DD5E8 = sp.u90;
+            g_sprite_last_frame = sp.u90;
         }
         var_t0_2 = g_sprite_last_other_mode & 0xF;
         if (!((*(u8 *)((u8 *)arg1 + 0x59)) & 1)) {

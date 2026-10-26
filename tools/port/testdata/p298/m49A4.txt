@@ -8,14 +8,14 @@ s#        u8 \*pt = attachment_find_by_slot(obj, rec->point, 0);#        u8 *pt 
 s#        t = (\*(s32 \*) (obj + 0x2EC) != 0) ? \*(f32 \*) (obj + 0x2DC) \* \*(f32 \*) (obj + 0x2D8) : 0\.0f;#        t = (*(s32 *) (obj + 0x2EC) != 0) ? *(f32 *) (obj + 0x2DC) * *(f32 *) (obj + 0x2DC) : 0.0f;# % m1q2
 s#        if (i >= 4) {#        if (i > 4) {# % m1q4
 s#        f = (t - (f32) i \* 0\.25f) \* 4\.0f;#        f = (t - (f32) i * 0.25f) * 3.0f;# % m1q2 m1q1
-s#        off\[1\] = D_800A0748\[i\]\[1\] \* f;#        off[1] = D_800A0748[i][2] * f;# % m1q2
-s#        if (model_node_points_to_world(obj, pt, D_800A0778\[i\], \&offp, \&posp, 1) == 0) {#        if (model_node_points_to_world(obj, pt, D_800A0778[i + 1], \&offp, \&posp, 1) == 0) {# % m1q2 m1fb
+s#        off\[1\] = g_damage_smoke_offs_quarter\[i\]\[1\] \* f;#        off[1] = g_damage_smoke_offs_quarter[i][2] * f;# % m1q2
+s#        if (model_node_points_to_world(obj, pt, g_damage_smoke_point_quarter\[i\], \&offp, \&posp, 1) == 0) {#        if (model_node_points_to_world(obj, pt, g_damage_smoke_point_quarter[i + 1], \&offp, \&posp, 1) == 0) {# % m1q2 m1fb
 s#            pos\[1\] = \*(f32 \*) (obj + 0x18) + 800\.0f;#            pos[1] = *(f32 *) (obj + 0x18) + 80.0f;# % m1fb
 s#        t = (\*(s32 \*) (obj + 0x2E8) != 0) ? (f32) \*(s32 \*) (obj + 0x2E4) \/ (f32) \*(s32 \*) (obj + 0x2E8) : 1\.0f;#        t = (*(s32 *) (obj + 0x2E8) != 0) ? (f32) *(s32 *) (obj + 0x2E4) \/ (f32) *(s32 *) (obj + 0x2E8) : 0.5f;# % m0z
 s#        if (i >= 3) {#        if (i > 3) {# % m0full
 s#        f = (t - (f32) i \* D_800A0788_c\[0\]) \* 3\.0f;#        f = (t - (f32) i * D_800A0788_c[0]) * 4.0f;# % m0t1 m0t2
-s#        off\[2\] = D_800A0720\[i\]\[2\] \* f;#        off[2] = D_800A0720[i][1] * f;# % m0t1 m0t2 m0t0
-s#        mtx_transform_point_or_origin(off, pos, \*(u8 \*\*) (obj + 0x1D4) + (D_800A0744\[i\] << 6));#        mtx_transform_point_or_origin(off, pos, *(u8 **) (obj + 0x1D4) + (D_800A0744[i] << 5));# % m0t1 m0t2
+s#        off\[2\] = g_damage_smoke_offs_third\[i\]\[2\] \* f;#        off[2] = g_damage_smoke_offs_third[i][1] * f;# % m0t1 m0t2 m0t0
+s#        mtx_transform_point_or_origin(off, pos, \*(u8 \*\*) (obj + 0x1D4) + (g_damage_smoke_bone_third\[i\] << 6));#        mtx_transform_point_or_origin(off, pos, *(u8 **) (obj + 0x1D4) + (g_damage_smoke_bone_third[i] << 5));# % m0t1 m0t2
 s#        glow\[0x74\] = 0xFF;#        glow[0x74] = 0xFE;# % m0t1
 s#        \*(Vec49A4 \*) (rec->glow + 0x40) = \*(Vec49A4 \*) pos;#        *(Vec49A4 *) (rec->glow + 0x44) = *(Vec49A4 *) pos;# % m0t1
 s#    if (g_level_id == 2 \&\& trigger_test_player(((u8 \*) obj - (u8 \*) g_objects) \/ 0x32C, 0x4065) == 0) {#    if (g_level_id == 2 \&\& trigger_test_player(((u8 *) obj - (u8 *) g_objects) \/ 0x32C, 0x4066) == 0) {# % gm2no gm2yes

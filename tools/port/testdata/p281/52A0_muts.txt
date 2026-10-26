@@ -1,22 +1,22 @@
-s/if (D_8002C068 == 0) {/if (D_8002C068 != 0) {/
+s/if (g_os_shutdown_alias == 0) {/if (g_os_shutdown_alias != 0) {/
 s/g_eeprom_writes_disabled = 1;/g_eeprom_writes_disabled = 2;/
-s/osStopThread(&D_80035C70);/osStopThread(\&D_80031AE0);/
+s/osStopThread(&g_os_pi_thread);/osStopThread(\&g_game_thread);/
 s/osSetThreadPri(NULL, 11);/osSetThreadPri(NULL, 12);/
-s/if (D_8002AE14 != 0) {/if (D_8002AE14 == 0) {/
+s/if (g_rumble_paks_probed != 0) {/if (g_rumble_paks_probed == 0) {/
 s/any = 1;/any = 2;/
-s/if (any == 1 \&\& D_8002AE18 == 0) {/if (any == 1 || D_8002AE18 == 0) {/
-s/osRecvMesg(&g_si_mesg_queue, &D_800BEDB0, OS_MESG_BLOCK);/osRecvMesg(\&g_si_mesg_queue, \&D_800BEDB0, OS_MESG_NOBLOCK);/
-s/os_motor_init(&g_si_mesg_queue, &D_800BEB80\[i\], i);/os_motor_init(\&g_si_mesg_queue, \&D_800BEB80[i], 0);/
-s/os_motor_stop(&D_800BEB80\[i\]);/os_motor_stop(\&D_800BEB80[0]);/
-s/D_800BED68\[i\] = 0;/D_800BED64[i] = 0;/
-s/D_8003BFC0 + 0x22ADD7/D_8003BFC0 + 0x22ADD8/
-s/D_8003BFC0 + 0x7270E0/D_8003BFC0 + 0x2272E0/
+s/if (any == 1 \&\& g_cont_read_done == 0) {/if (any == 1 || g_cont_read_done == 0) {/
+s/osRecvMesg(&g_si_mesg_queue, &g_si_recv_mesg, OS_MESG_BLOCK);/osRecvMesg(\&g_si_mesg_queue, \&g_si_recv_mesg, OS_MESG_NOBLOCK);/
+s/os_motor_init(&g_si_mesg_queue, &g_rumble_pfs\[i\], i);/os_motor_init(\&g_si_mesg_queue, \&g_rumble_pfs[i], 0);/
+s/os_motor_stop(&g_rumble_pfs\[i\]);/os_motor_stop(\&g_rumble_pfs[0]);/
+s/g_rumble_motor_on\[i\] = 0;/g_rumble_pak_present[i] = 0;/
+s/g_prenmi_time + 0x22ADD7/g_prenmi_time + 0x22ADD8/
+s/g_prenmi_time + 0x7270E0/g_prenmi_time + 0x2272E0/
 s/__osSpSetStatus(0xAAAA82);/__osSpSetStatus(0xAAAA83);/
-s/if (D_8002AE24 != 0) {/if (D_8002AE24 == 0) {/
+s/if (g_sched_fb_swapped != 0) {/if (g_sched_fb_swapped == 0) {/
 s/osDpSetStatus(0x1D6);/osDpSetStatus(0x1D7);/
 s/__osSpSetPc(0);/__osSpSetPc(4);/
 s/for (i = 0; i < 4; i++) {$/for (i = 0; i < 3; i++) {/
-s/D_8003BFC0 + 0x7270E0/D_8003BFC0 + 0x7270DF/
-s/D_8003BFC0 + 0x22ADD7/D_8003BFC0 + 0x22ADD6/
-s/osGetTime() < D_8003BFC0 + 0x22ADD7/osGetTime() <= D_8003BFC0 + 0x22ADD7/
-s/osGetTime() < D_8003BFC0 + 0x7270E0/osGetTime() <= D_8003BFC0 + 0x7270E0/
+s/g_prenmi_time + 0x7270E0/g_prenmi_time + 0x7270DF/
+s/g_prenmi_time + 0x22ADD7/g_prenmi_time + 0x22ADD6/
+s/osGetTime() < g_prenmi_time + 0x22ADD7/osGetTime() <= g_prenmi_time + 0x22ADD7/
+s/osGetTime() < g_prenmi_time + 0x7270E0/osGetTime() <= g_prenmi_time + 0x7270E0/

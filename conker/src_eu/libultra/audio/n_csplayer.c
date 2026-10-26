@@ -463,11 +463,11 @@ static void __n_CSPHandleNextSeqEvent(N_ALCSPlayer *seqp)
 // jump table
 // s127: DK64 n_csplayer.c func_global_asm_80733D8C (__CSPHandleMIDIMsg) with Conker's changes: channels
 // with unk36 set re-queue every non-program-change message, controller handlers come from a
-// table (D_8002BDA0), program change goes through n_cseqp_set_inst_chan_state and may re-queue itself
+// table (g_cseq_midi_ctrl_fns), program change goes through n_cseqp_set_inst_chan_state and may re-queue itself
 typedef ALMicroTime (*CSPOscInit)(void **oscState, f32 *initVal, u8 oscType, u8 rate, u8 depth, u8 delay, u8 arg6);
-extern ALMicroTime D_80042BB0[];
-extern void (*D_8002BDA0[])(N_ALCSPlayer *, N_ALEvent *, u8, u8);
-extern void (*D_8002C310[])(N_ALCSPlayer *, N_ALEvent *, u8, u8);
+extern ALMicroTime g_cseq_chan_event_time[]; /* was D_80042BB0 */
+extern void (*g_cseq_midi_ctrl_fns[])(N_ALCSPlayer *, N_ALEvent *, u8, u8); /* was D_8002BDA0 */
+extern void (*g_cseq_meta_fns[])(N_ALCSPlayer *, N_ALEvent *, u8, u8); /* was D_8002C310 */
 ALSound *n_seqp_lookup_sound_quick(N_ALCSPlayer *seqp, u8 key, u8 vel, u8 chan);
 N_ALVoiceState *n_seqp_lookup_voice(N_ALCSPlayer *seqp, u8 key, u8 chan);
 s32 n_cseqp_set_inst_chan_state(N_ALCSPlayer *seqp, s32 id, u8 chan);
@@ -524,7 +524,7 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                     evt.msg.midi.byte1 = key;
                     evt.msg.midi.byte2 = 0;
                     deltaTime = seqp->uspt * midi->duration;
-                    D_80042BB0[chan] = deltaTime;
+                    g_cseq_chan_event_time[chan] = deltaTime;
                     n_alEvtqPostEvent(&seqp->evtq, &evt, deltaTime, 0);
                 }
                 break;
@@ -684,12 +684,12 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                 evt.msg.midi.byte1  = key;
                 evt.msg.midi.byte2  = 0;
                 deltaTime = seqp->uspt * midi->duration;
-                D_80042BB0[chan] = deltaTime;
+                g_cseq_chan_event_time[chan] = deltaTime;
                 n_alEvtqPostEvent(&seqp->evtq, &evt, deltaTime, 0);
             }
 
             if ((chanstate->unk17 & 1) && seqp->unk84) {
-                osSendMesg((OSMesgQueue *)seqp->unk84, (OSMesg)((D_80042BB0[chan] & 0xffffff00) | (chanstate->unk17 >> 2)), OS_MESG_NOBLOCK);
+                osSendMesg((OSMesgQueue *)seqp->unk84, (OSMesg)((g_cseq_chan_event_time[chan] & 0xffffff00) | (chanstate->unk17 >> 2)), OS_MESG_NOBLOCK);
             }
 
             break;
@@ -745,9 +745,9 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
             void (*handler)(N_ALCSPlayer *, N_ALEvent *, u8, u8);
 
             if (byte1 < 0x5D) {
-                handler = D_8002BDA0[byte1];
+                handler = g_cseq_midi_ctrl_fns[byte1];
             } else if (byte1 >= 0xFC) {
-                handler = D_8002C310[-byte1]; // the four 0xFC-0xFF handlers follow the 0x5D low ones
+                handler = g_cseq_meta_fns[-byte1]; // the four 0xFC-0xFF handlers follow the 0x5D low ones
             } else {
                 handler = NULL;
             }

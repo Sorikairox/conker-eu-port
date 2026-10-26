@@ -41,7 +41,7 @@ void camera_calc_point_ahead(void) {
 s32 impact_effect_spawn(f32, f32, f32, s32, s32, s32, s32);
 s32 floor_flags_surface_type(s32);
 s32 collision_level_nearest_height(s32, s32, s32, s32 *);
-extern s32 D_800DC26C;
+extern s32 g_level_tri_table; /* was D_800DC26C */
 
 /* was func_150E4878 */
 void impact_scatter_random(s32 arg0) {
@@ -69,9 +69,9 @@ void impact_scatter_random(s32 arg0) {
             temp_a2 = (random_int() % 500) + sp.u68;
             temp_v0 = collision_level_nearest_height(temp_s0, 0x2710, temp_a2, &sp.u58);
             if (((f32) temp_v0 != -10000.0f) && (sp.u58 != 0)) {
-                temp_lo = (s32) (sp.u58 - D_800DC26C) / 12;
-                if ((temp_lo >= 0) && (temp_lo < D_800DBE4C)) {
-                    temp_v0_2 = floor_flags_surface_type(*(s32 *)(D_800DBE5C + (temp_lo * 4)));
+                temp_lo = (s32) (sp.u58 - g_level_tri_table) / 12;
+                if ((temp_lo >= 0) && (temp_lo < g_coll_tri_count)) {
+                    temp_v0_2 = floor_flags_surface_type(*(s32 *)(g_coll_tri_flags + (temp_lo * 4)));
                     if (temp_v0_2 != 0) {
                         impact_effect_spawn((f32) temp_s0, (f32) temp_v0, (f32) temp_a2, 0, temp_v0_2, sp.u58, 0xFF);
                     }

@@ -422,7 +422,7 @@ s32 gfx_prim_color_cached(s32, s32, s32, s32, s32, s32, s32, s8 *);
 s32 gfx_load_texture_cached(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
 u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
-extern s32 D_80091198;
+extern s32 g_tex_rope; /* was D_80091198 */
 extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 /* was func_151B2F24 */
@@ -491,7 +491,7 @@ u8 *cord_plank_draw(u8 *arg0, u8 *arg1, s16 arg2) {
         sp.uB2 = 1;
         sp.uA8 = &g_player_views[arg2].unk2F8;
         temp_v1 = ((u8 *)&g_render_mode_pairs);
-        temp_v0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_prim_color_cached(gfx_env_color_cached(gfx_load_texture_cached(gfx_geometry_mode_cached(var_s0, 0x200005, 0x60600), &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &sp.uB2, 3), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0x2B, &sp.uB2), g_gfx_tlut_mode | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x2C)) | (*(s32 *)((u8 *)temp_v1 + 0x28)), &sp.uB2);
+        temp_v0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_prim_color_cached(gfx_env_color_cached(gfx_load_texture_cached(gfx_geometry_mode_cached(var_s0, 0x200005, 0x60600), &g_tex_rope, 0, 0, 0, 0, 0x36, 0, 0, &sp.uB2, 3), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0x2B, &sp.uB2), g_gfx_tlut_mode | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x2C)) | (*(s32 *)((u8 *)temp_v1 + 0x28)), &sp.uB2);
         temp_f0 = sp.u74 - sp.u80;
         temp_f14 = ((temp_f0 * 0.5f) + sp.u80) - (*(f32 *)((u8 *)sp.uA8 + 0));
         temp_f2 = sp.u78 - sp.u84;

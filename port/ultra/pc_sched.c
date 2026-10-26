@@ -123,7 +123,7 @@ static void fiber_entry(void *arg) {
  * osSetIntMask (the allocator brackets its work with it); report the first broken walk with the
  * thread that ran last and the last place the walk was still clean. */
 __attribute__((weak)) int port_heap_check(void); __attribute__((weak)) extern int port_heap_quiet;
-__attribute__((weak)) extern void *D_800380B4; /* game heap head (absent in the scheduler demo) */
+__attribute__((weak)) extern void *g_heap_head; /* game heap head (absent in the scheduler demo); was D_800380B4 */
 void (*p113_watch_hook)(unsigned addr); /* P113: set by p103_boot.c (scans the camera records) */
 static int hw_mode = -1, hw_done;
 static char hw_good_where[48]; static int hw_good_tid; static unsigned hw_good_frame, hw_checks;
@@ -150,7 +150,7 @@ void port_heapwatch(const char *where) {
     p113_watch(where);
     if (hw_mode < 0) hw_mode = port_flag("heapwatch");
     if (!hw_mode || hw_done) return;
-    if (!port_heap_check || !&D_800380B4 || !D_800380B4) return; /* heap not set up yet */
+    if (!port_heap_check || !&g_heap_head || !g_heap_head) return; /* heap not set up yet */
     hw_checks++;
     port_heap_quiet = 1;
     int bad = port_heap_check();

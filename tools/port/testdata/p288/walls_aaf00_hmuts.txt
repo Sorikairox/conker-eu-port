@@ -1,10 +1,10 @@
 /^static s32 nmw_box_diagonal_misses/,/^}/s/        denom = 0.0001f;/        denom = 0.001f;/
-/^static s32 nmw_box_diagonal_misses/,/^}/s/    q.y = sy \* (t \* D_800CC658);/    q.y = sy * (t * D_800CC65C);/
-/^static s32 nmw_box_diagonal_misses/,/^}/s/    q.z = sz \* (t \* D_800CC65C);/    q.z = (t * D_800CC65C);/
+/^static s32 nmw_box_diagonal_misses/,/^}/s/    q.y = sy \* (t \* g_quadtree_box_ratio_yx);/    q.y = sy * (t * g_quadtree_box_ratio_zx);/
+/^static s32 nmw_box_diagonal_misses/,/^}/s/    q.z = sz \* (t \* g_quadtree_box_ratio_zx);/    q.z = (t * g_quadtree_box_ratio_zx);/
 /^static s32 nmw_box_diagonal_misses/,/^}/s/    f32 denom = n\[0\] + sy \* ny + sz \* nz;/    f32 denom = n[0] + sz * ny + sy * nz;/
 /^static s32 nmw_box_diagonal_misses/,/^}/s/    return nmD5E90_pointInTri(&q, v);/    return !nmD5E90_pointInTri(\&q, v);/
 /^static s32 nmw_box_diagonal_misses/,/^}/s/    if (NM_FABS(t) > hx) {/    if (NM_FABS(t) >= hx) {/
-/^static s32 nmw_box_diagonal_misses/,/^}/s/    f32 ny = n\[1\] \* D_800CC658;/    f32 ny = n[1] * D_800CC65C;/
+/^static s32 nmw_box_diagonal_misses/,/^}/s/    f32 ny = n\[1\] \* g_quadtree_box_ratio_yx;/    f32 ny = n[1] * g_quadtree_box_ratio_zx;/
 /^static s32 nmw_tri_misses_box/,/^hit:/s/    if (!(n\[2\] >= 0.0f)) {/    if (!(n[2] > 0.0f)) {/
 /^static s32 nmw_tri_misses_box/,/^hit:/s/        n\[1\] = -n\[1\];/        n[1] = n[1];/
 /^static s32 nmw_tri_misses_box/,/^hit:/s/        n\[3\] = -n\[3\];/        n[3] = n[3];/

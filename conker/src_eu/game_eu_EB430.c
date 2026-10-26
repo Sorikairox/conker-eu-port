@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A0370[];
-extern u8 D_800A0340[];
+extern u8 g_skel_line_pts_c[]; /* was D_800A0370 */
+extern u8 g_skel_line_pts_b[]; /* was D_800A0340 */
 
 /* was func_150BDC20 */
 void obj_skel_line_emit_pair(u8 *arg0, u8 arg1, s32 arg2) {
@@ -50,11 +50,11 @@ void obj_skel_line_emit_pair(u8 *arg0, u8 arg1, s32 arg2) {
     f32 *var_s2;
 
     if (arg0 != NULL) {
-        var_s1 = &D_800A0310;
+        var_s1 = &g_skel_line_pts_a;
         var_s2 = &sp.u108;
         if ((*(u8 **)((u8 *)arg0 + 0x1D4)) != NULL) {
-            var_s5 = ((u8 *)&D_800A0370);
-            var_s3 = ((u8 *)&D_800A0340);
+            var_s5 = ((u8 *)&g_skel_line_pts_c);
+            var_s3 = ((u8 *)&g_skel_line_pts_b);
             var_s4 = &sp.uD8;
             var_s0 = &sp.uA8;
             do {
@@ -82,12 +82,12 @@ void obj_skel_line_emit_pair(u8 *arg0, u8 arg1, s32 arg2) {
 s32 random_int(void);
 f32 random_float(void);
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
-extern f32 D_800A03A0;
-extern f32 D_800A03A4;
-extern f32 D_800A03A8;
-extern f32 D_800A03AC;
-extern f32 D_800A03B0;
-extern f32 D_800A03B4;
+extern f32 g_trail_cb_k_03a0; /* was D_800A03A0 */
+extern f32 g_trail_cb_k_03a4; /* was D_800A03A4 */
+extern f32 g_trail_cb_k_03a8; /* was D_800A03A8 */
+extern f32 g_trail_cb_k_03ac; /* was D_800A03AC */
+extern f32 g_trail_cb_k_03b0; /* was D_800A03B0 */
+extern f32 g_trail_cb_k_03b4; /* was D_800A03B4 */
 /* was func_150BDE34 */
 s32 trail_spawn_callback(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, f32 *argD, u8 argE)
 {
@@ -113,15 +113,15 @@ s32 trail_spawn_callback(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 a
   b.u1A = 0xFF;
   b.u18 = 8;
   c.u8 = arg4;
-  t = ((random_float() * 127.0f) + 85.0f) * D_800A03A0;
+  t = ((random_float() * 127.0f) + 85.0f) * g_trail_cb_k_03a0;
   b.u4 = argD[0] * t;
   b.u8 = argD[1] * t;
   b.uC = argD[2] * t;
   b.u1B = (random_int() % 86U) + 0xB4;
   c.u15 = (random_int() & 3) + 3;
   c.uC = (random_int() % 31U) + 0x27;
-  b.u0 = ((random_float() * D_800A03A4) + D_800A03A8) * D_800A03AC;
-  b.u10 = ((random_float() * 356.0f) + D_800A03B0) * D_800A03B4;
+  b.u0 = ((random_float() * g_trail_cb_k_03a4) + g_trail_cb_k_03a8) * g_trail_cb_k_03ac;
+  b.u10 = ((random_float() * 356.0f) + g_trail_cb_k_03b0) * g_trail_cb_k_03b4;
   trail_spawn(&c, &b, 0, 1, 0xB, 0, 0, 0, 0, 0, 0, &a, 0, argE, 1);
   return 1;
 }

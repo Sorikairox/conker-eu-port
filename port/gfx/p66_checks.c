@@ -4,7 +4,7 @@
  *              speed (+0xC0) before -> after. Logged for the first N calls, every 64th, and for every call where the
  *              buttons, the anim id or the sign of y_velocity change or the record is airborne (+0x28 > 0.5) for the
  *              first 400 such calls; plus the idle-chooser state (ctl +0x58..+0x65, P64 IdleState) when it changes.
- *  ?p66lowg=1  DIAGNOSTIC: D_800CC69C = 1 during calls with A pressed on the floor (reaches P64's low-gravity jump
+ *  ?p66lowg=1  DIAGNOSTIC: g_cur_floor_kind = 1 during calls with A pressed on the floor (reaches P64's low-gravity jump
  *              branches: Z long jump +0x81 = 0x81, y_velocity * 1.4); logged as "[p66] lowg".
  *  ?p66hud=N   player_stat_modify (per-player HUD / status records, game_eu_B2980.c; called by func_150447B0 users,
  *              player_lose_life's restart path, ...): arguments of the first N calls (proves it is the C body). */
@@ -21,7 +21,7 @@ static float F(const unsigned char *r, int o) { return *(const float *)(r + o); 
 static int recno(const void *r) { return (int)(((const unsigned char *)r - g_objects) / REC); } /* was D_800CC2D0 */
 
 static int fj = -1, fh = -1, flg = -1;
-extern unsigned char D_800CC69C_[] __asm__("D_800CC69C");
+extern unsigned char D_800CC69C_[] __asm__("g_cur_floor_kind"); /* was D_800CC69C */
 
 static void idle_state(const unsigned char *ctl, unsigned char *out) {
     int i;
@@ -43,7 +43,7 @@ void __wrap_obj_jump_swim_glide_update(void *rec, void *pad) {
     b = pad ? vbe_ld16(pad) : 0;
     id0 = vbe_ld16(r + 0x84); y0 = F(r, 0x18); vy0 = F(r, 0x20); h0 = F(r, 0x28);
     if (flg < 0) flg = port_flag("p66lowg");
-    if (flg && (b & 0x8000) && h0 < 0.5f) {   /* DIAGNOSTIC: D_800CC69C = 1 (P64's "low gravity" test) for this call */
+    if (flg && (b & 0x8000) && h0 < 0.5f) {   /* DIAGNOSTIC: g_cur_floor_kind = 1 (P64's "low gravity" test) for this call */
         unsigned char old = vbe_ld8(D_800CC69C_);
         vbe_st8(D_800CC69C_, 1);
         __real_obj_jump_swim_glide_update(rec, pad);

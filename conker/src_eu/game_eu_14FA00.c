@@ -8,7 +8,7 @@ void math_spring_approach_angle(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 ar
 void camera_update_eye_base(struct108 *arg0);
 void camera_update_eye_orbit(struct108 *arg0);
 void camera_update_eye_height(u8 *arg0);
-extern u8 D_800BE616;
+extern u8 g_mp_mode_active; /* was D_800BE616 */
 extern u8 g_slowmo_divisor; /* was D_800BEE2C */
 extern f32 g_camera_follow_yaw_k_a; /* was D_800A3810 */
 extern f32 g_camera_follow_tilt_scale; /* was D_800A3814 */
@@ -43,8 +43,8 @@ void camera_follow_yaw_update(struct108 *arg0, f32 arg1) {
     if (flag) {
         flag = (**(u16 **) (cam + 0x36C) & 0x10) != 0;
     }
-    if (!flag && (D_800BE616 != 0 || cam[0x23E] == 9 || cam[0x23E] == 0x3B) && (*(u8 **) (cam + 0x3D4))[0x1B3] != 0) {
-        if (D_800BE616 != 0) {
+    if (!flag && (g_mp_mode_active != 0 || cam[0x23E] == 9 || cam[0x23E] == 0x3B) && (*(u8 **) (cam + 0x3D4))[0x1B3] != 0) {
+        if (g_mp_mode_active != 0) {
             CAM_F32(0x97C) = 5.0f;
             CAM_F32(0x980) = 8.0f;
             math_spring_approach((f32 *) (cam + 0x96C), 5.0f, (f32 *) (cam + 0x98C), 1.0f, 2.0f, CAM_F32(0x7B4));
@@ -87,7 +87,7 @@ void camera_follow_yaw_update(struct108 *arg0, f32 arg1) {
             if (flag || cam[0x600] != 0) {
                 gain = 4.0f;
                 rate = 6.0f;
-            } else if ((mode == 9 && D_800BE616 != 0) || mode == 0x38 || mode == 0x39 || mode == 0x37 || mode == 0x3B
+            } else if ((mode == 9 && g_mp_mode_active != 0) || mode == 0x38 || mode == 0x39 || mode == 0x37 || mode == 0x3B
                        || mode == 0x12) {
                 gain = 2.0f;
                 rate = 6.0f;

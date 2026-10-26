@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_8009FC40;
+extern f32 g_wake_k_fc40; /* was D_8009FC40 */
 /* was func_150B0F40 */
 void wake_spray_point_pick(u8 *arg0, u8 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, s16 *arg5) {
     f32 r;
@@ -10,7 +10,7 @@ void wake_spray_point_pick(u8 *arg0, u8 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, 
     f32 s;
     f32 m;
 
-    *arg5 = *(f32 *)(arg0 + 0x40) * D_8009FC40 - 128.0f;
+    *arg5 = *(f32 *)(arg0 + 0x40) * g_wake_k_fc40 - 128.0f;
     r = random_float() * 248.0f;
     s = random_float() + -0.5f;
     if (r < 122.0f) {

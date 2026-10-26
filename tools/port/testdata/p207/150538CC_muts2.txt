@@ -7,7 +7,7 @@ s/flags |= 8;/flags |= 4;/ % d_k13_flag8
 s/if (n < 25) {/if (n <= 25) {/ % d_k5_far
 s/(g_obj_contact_mask >> 1) != 0/(g_obj_contact_mask >> 2) != 0/ % m_k15_two
 s/impact_burst_effect(p + 0x14, 0xFF, 1)/impact_burst_effect(p + 0x14, 0xFF, 0)/ % d_k13_flag8
-s/vec\[2\] = D_800CC674\[2\] - P38_F32(0x34)/vec[2] = D_800CC674[2] - P38_F32(0x1C)/ % ht_k13 d_k13_vec0
+s/vec\[2\] = g_obj_effect_vec\[2\] - P38_F32(0x34)/vec[2] = g_obj_effect_vec[2] - P38_F32(0x1C)/ % ht_k13 d_k13_vec0
 s/game_gu_random() \(.\) 2/(u32) game_gu_random() \1 2/ % k2_spin_neg
 s/\(random_int() . 3 + 0x2E\)E/\1F/ % k9_a8
 s/(u32) \(random_int() . 3 + 0x2EE\)/(s32) \1/ % k13_a8

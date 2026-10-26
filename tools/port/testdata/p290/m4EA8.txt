@@ -16,14 +16,14 @@ s/found = floor_collect_world_obj_tris(x, z, 1,/found = floor_collect_world_obj_
 s/found = floor_collect_world_obj_tris(x, z,/found = floor_collect_world_obj_tris(z, x,/
 s/best = -0x800000;/best = 0;/
 s/for (i = found - 1; i >= 0; i--)/for (i = found - 1; i >= 1; i--)/
-s/if (best < D_800D3720\[i\].height)/if (best <= D_800D3720[i].height)/
-s/tri = D_800D3720\[i\].tri;/tri = D_800D3720[0].tri;/
+s/if (best < g_floor_hits\[i\].height)/if (best <= g_floor_hits[i].height)/
+s/tri = g_floor_hits\[i\].tri;/tri = g_floor_hits[0].tri;/
 s/height = best \* 0.00390625f;/height = best * 0.0078125f;/
 s/tries = 0;/tries = 1;/
 s/            tries--;/            tries -= 2;/
 s/if (!found) {/if (found) {/
-s/D_800DC26C) \/ 12 - \*(u16 \*) (obj + 0x58)\]/D_800DC26C) \/ 12 + *(u16 *) (obj + 0x58)]/
-s/D_800DC26C) \/ 12/D_800DC26C) \/ 16/
+s/g_level_tri_table) \/ 12 - \*(u16 \*) (obj + 0x58)\]/g_level_tri_table) \/ 12 + *(u16 *) (obj + 0x58)]/
+s/g_level_tri_table) \/ 12/g_level_tri_table) \/ 16/
 s/material = \*(s32 \*) (obj + 0x40);/material = *(s32 *) (obj + 0x44);/
 s/if (\*(s32 \*\*) (obj + 0x44) != NULL)/if (*(s32 **) (obj + 0x40) != NULL)/
 s/world_record_build_matrix(mtx, obj);/world_record_build_matrix(mtx, obj + 4);/

@@ -124,10 +124,10 @@ s32 floor_collect_world_obj_tris(s32, s32, s32, s32 *);
 s32 floor_flags_surface_type(s32);
 extern struct {
     s32 height;  /* floor height * 256 */
-    s32 *tri;    /* collision triangle (12-byte records at D_800DC26C) */
+    s32 *tri;    /* collision triangle (12-byte records at g_level_tri_table) */
     u8 pad8[8];
-} D_800D3720[]; /* hits of the last floor_collect_world_obj_tris probe */
-extern s32 D_800DC26C;
+} g_floor_hits[]; /* hits of the last floor_collect_world_obj_tris probe */
+extern s32 g_level_tri_table; /* was D_800DC26C */
 
 // object_impact_effect: impact effect for the world object `obj` (0xA0-byte records at g_world_objs, count
 // g_world_obj_count). Probes the object's floor (floor_collect_world_obj_tris, only this object's id in the list) at its x / z (+0x10 /
@@ -171,9 +171,9 @@ s32 impact_effect_at_world_object(u8 *obj) {
         if (found != 0) {
             best = -0x800000;
             for (i = found - 1; i >= 0; i--) {
-                if (best < D_800D3720[i].height) {
-                    best = D_800D3720[i].height;
-                    tri = D_800D3720[i].tri;
+                if (best < g_floor_hits[i].height) {
+                    best = g_floor_hits[i].height;
+                    tri = g_floor_hits[i].tri;
                     height = best * 0.00390625f;
                 }
             }
@@ -187,7 +187,7 @@ s32 impact_effect_at_world_object(u8 *obj) {
         return 0;
     }
     if (*(s32 **) (obj + 0x44) != NULL) {
-        material = (*(s32 **) (obj + 0x44))[((s32) tri - D_800DC26C) / 12 - *(u16 *) (obj + 0x58)];
+        material = (*(s32 **) (obj + 0x44))[((s32) tri - g_level_tri_table) / 12 - *(u16 *) (obj + 0x58)];
     } else {
         material = *(s32 *) (obj + 0x40);
     }
@@ -265,7 +265,7 @@ typedef struct {
     u8 pad36[2];
 } ImpactDust;
 void tri_compute_plane(s32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
-extern f32 D_800CC630, D_800CC634, D_800CC638; /* plane of the last tri_compute_plane triangle */
+extern f32 g_tri_plane_nx, g_tri_plane_ny, g_tri_plane_nz; /* plane of the last tri_compute_plane triangle; was D_800CC630; was D_800CC634; was D_800CC638 */
 void mtxf_look_at(f32 mtx[4][4], f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy,
                    f32 upz);
 f32 math_cos_u8(u8);
@@ -313,9 +313,9 @@ void impact_dust_spawn(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 sl
             v[i][2] = ((s16 **) tri)[i][2];
         }
         tri_compute_plane(*(s32 *) &v[0][0], v[0][1], v[0][2], v[1][0], v[1][1], v[1][2], v[2][0], v[2][1], v[2][2]);
-        nx = -D_800CC630;
-        ny = -D_800CC634;
-        nz = -D_800CC638;
+        nx = -g_tri_plane_nx;
+        ny = -g_tri_plane_ny;
+        nz = -g_tri_plane_nz;
         len = sqrtf(nx * nx + ny * ny + nz * nz);
         if (len < 0.0001f) {
             return;
@@ -521,13 +521,13 @@ void impact_dust_smoke_puff(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f3
 
 void tri_compute_plane(s32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
 f32 vec3f_dot(f32 *a, f32 *b);
-extern f32 D_800CC630, D_800CC634, D_800CC638; /* plane of the last tri_compute_plane triangle */
+extern f32 g_tri_plane_nx, g_tri_plane_ny, g_tri_plane_nz; /* plane of the last tri_compute_plane triangle; was D_800CC630; was D_800CC634; was D_800CC638 */
 
 // debris_ground_bounce: ground handler 4 of g_mdl_particle_land_fns (`s32 (u8 *, f32, f32, f32, f32, u8 *)`, mdl_particle_spawn_ex's
 // dispatcher; x / y / z unused). Puts the object on the ground (+0x3C = +0x10 * 1.1 + ground). Slower than 2 downwards
 // it stops: velocities +0x44..+0x4C cleared, flags 0x6F of +0x60 dropped. Otherwise it bounces: with the ground
 // triangle `tri` (nine s16) the velocity is reflected about the triangle's normal (v - 2 (v.n) n, from the
-// tri_compute_plane plane D_800CC630; skipped when the normal is shorter than 1e-5) and scaled by +0x14 (x / z also
+// tri_compute_plane plane g_tri_plane_nx; skipped when the normal is shorter than 1e-5) and scaled by +0x14 (x / z also
 // by 0.8); without a triangle only the y velocity is flipped. The spin +0x50..+0x58 is scaled by +0x14 too.
 // Returns 1 (keep the object).
 /* was func_150E5D90 */
@@ -556,9 +556,9 @@ s32 debris_ground_bounce(u8 *p, f32 x, f32 y, f32 z, f32 ground, s16 *tri) {
             v[i][2] = tri[i * 3 + 2];
         }
         tri_compute_plane(*(s32 *) &v[0][0], v[0][1], v[0][2], v[1][0], v[1][1], v[1][2], v[2][0], v[2][1], v[2][2]);
-        n[0] = -D_800CC630;
-        n[1] = -D_800CC634;
-        n[2] = -D_800CC638;
+        n[0] = -g_tri_plane_nx;
+        n[1] = -g_tri_plane_ny;
+        n[2] = -g_tri_plane_nz;
         len = vec3f_magnitude(n);
         if (1e-05f < len) {
             vec3_scale((struct17 *) n, 1.0f / len, (struct17 *) unit);

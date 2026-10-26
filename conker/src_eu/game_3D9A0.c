@@ -35,7 +35,7 @@ dummy_label_927029:
     }
 }
 
-extern u8 D_800D9D40;
+extern u8 g_event_effect_flag; /* was D_800D9D40 */
 extern u8 g_level_flag_9d41; /* was D_800D9D41 */
 extern u8 g_level_flag_9d48; /* was D_800D9D48 */
 extern u8 g_level_flag_9d49; /* was D_800D9D49 */
@@ -48,7 +48,7 @@ void level_clear_d9d40_flags(void)
 {
   s32 i;
   g_level_flag_9d41 = 0;
-  D_800D9D40 = 0;
+  g_event_effect_flag = 0;
   g_level_flag_9d48 = 0;
   g_level_flag_9d58 = 0;
   g_level_flag_9d49 = 0;

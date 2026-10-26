@@ -788,7 +788,7 @@ void emit_effect3d_from_surface(u8 *arg0, s32 arg1, s32 arg2) {
                 temp_f20_3 = (*(f32 *)((u8 *)arg0 + 0x70));
                 sp.uAC = (random_float() * (2.0f * temp_f20_3)) - temp_f20_3;
                 temp_s1_2 = random_int();
-                temp_v0 = effect3d_spawn_full(&sp.uB0, (s32) ((u8 *)&D_800A4AA0), 0x19U, 0U, 0U, 0x17U, (u8) ((random_int() & 1) + ((temp_s1_2 & 1) * 2)), (*(s32 *)((u8 *)arg0 + 0x60)), (*(s32 *)((u8 *)arg0 + 0x64)), 0x20, (u8) (arg1 & 0xFF), arg2);
+                temp_v0 = effect3d_spawn_full(&sp.uB0, (s32) ((u8 *)&g_effect3d_default_params), 0x19U, 0U, 0U, 0x17U, (u8) ((random_int() & 1) + ((temp_s1_2 & 1) * 2)), (*(s32 *)((u8 *)arg0 + 0x60)), (*(s32 *)((u8 *)arg0 + 0x64)), 0x20, (u8) (arg1 & 0xFF), arg2);
                 if (temp_v0 != NULL) {
     s32 pad;
                     memcpy(temp_v0 + 0x110, &sp.u90, 0x20);

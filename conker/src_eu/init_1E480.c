@@ -5,5 +5,5 @@
 
 
 void n_alSynDelete(void) {
-    D_8002BA44->unk0 = 0;
+    g_audio_synth->unk0 = 0;
 }

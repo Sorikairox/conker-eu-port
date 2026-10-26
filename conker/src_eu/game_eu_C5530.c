@@ -21,8 +21,8 @@ s32 script_entity_object_id(s32 entity, s32 unused) {
         if (obj != NULL) {
             idx = ((u8 *)obj)[0x13F];
         } else {
-            ((u8 *)D_800D20FC + idx * 0x30)[2] = 0;
-            if (setup_entry_spawn((u8 *)D_800D20FC + idx * 0x30, idx, 0, 0, 0) == 0) {
+            ((u8 *)g_setup_entries + idx * 0x30)[2] = 0;
+            if (setup_entry_spawn((u8 *)g_setup_entries + idx * 0x30, idx, 0, 0, 0) == 0) {
                 return -1;
             }
             idx = setup_entry_find_by_id(entity);
@@ -36,10 +36,10 @@ s32 script_entity_object_id(s32 entity, s32 unused) {
 
 s32 obj_death_resolve(struct127 *);
 void obj_remove(struct127 *arg0, s32 arg1);
-extern u8 D_800D2520;
-extern s32 D_800D3C60;
+extern u8 g_setup_entry_count; /* was D_800D2520 */
+extern s32 g_event_arg_count; /* was D_800D3C60 */
 
-/* Removes object `id`: sets flag +2 of its entity record (when id < D_800D2520) and kills it with
+/* Removes object `id`: sets flag +2 of its entity record (when id < g_setup_entry_count) and kills it with
  * obj_remove(obj, 0), or with obj_death_resolve when called with two words and args[1] != 0. Returns 999999,
  * 0 for a missing object. */
 /* was func_15097DDC */
@@ -50,10 +50,10 @@ s32 script_object_remove(s32 id, s32 *args) {
     if (obj == NULL) {
         return 0;
     }
-    if (id < D_800D2520) {
-        ((u8 *)D_800D20FC + id * 0x30)[2] = 1;
+    if (id < g_setup_entry_count) {
+        ((u8 *)g_setup_entries + id * 0x30)[2] = 1;
     }
-    if (D_800D3C60 == 2 && args[1] != 0) {
+    if (g_event_arg_count == 2 && args[1] != 0) {
         obj_death_resolve(obj);
     } else {
         obj_remove(obj, 0);
@@ -109,10 +109,10 @@ s32 player_hit_reaction(struct127 *, s32);
 void screen_fade_start(s32, s32, s32, s32, s8, s32);
 void obj_remove(struct127 *, s32);
 void *aiscript_find_by_kind(s32, s32);
-extern s32 D_800D3C60;
+extern s32 g_event_arg_count; /* was D_800D3C60 */
 extern s32 g_save_stat9; /* was D_800BE804 */
-extern u16 D_800BEB30[];
-extern s16 D_800C4414[];
+extern u16 g_pad_pressed[]; /* was D_800BEB30 */
+extern s16 g_look_fixed_target[]; /* was D_800C4414 */
 extern u16 g_mp_game_flags; /* was D_8009015C */
 
 #define E9C_U8(p, o) (*(u8 *)((u8 *)(p) + (o)))
@@ -132,7 +132,7 @@ extern u16 g_mp_game_flags; /* was D_8009015C */
 
 // object_run_command: performs one scripted object command (move, turn, animate, spawn, ...) on the object `id`.
 /* Object command handler: entry 0 of event_dispatch's handler table (event ids 0x2xxx), called as
- * handler(id, cmd, args) with args = {id, cmd, x1, x2, ...} (args[2] is the first extra argument, D_800D3C60 the
+ * handler(id, cmd, args) with args = {id, cmd, x1, x2, ...} (args[2] is the first extra argument, g_event_arg_count the
  * number of words; 16.16 fixed point for speeds / scales, degrees for angles). `id` names an object
  * (obj_find_by_spawn); returns 0 when it does not exist or for an unknown command, else 1. */
 /* was func_15097E9C */
@@ -306,7 +306,7 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         return 1;
     case 0x20:
         E9C_U8(o, 0x1CA) = args[2];
-        if (D_800D3C60 == 4) {
+        if (g_event_arg_count == 4) {
             g_hud_health_max_pieces = args[2];
             g_hud_health_shown_pieces = g_hud_health_max_pieces;
         }
@@ -315,14 +315,14 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         player_stat_modify(id, args[2], args[3]);
         return 1;
     case 0x22: /* +0x2D8[i] = fixed args[2 + i] (0x78000000 keeps one) */
-        for (i = 0; i < D_800D3C60 - 2; i++) {
+        for (i = 0; i < g_event_arg_count - 2; i++) {
             if (args[2 + i] != 0x78000000) {
                 E9C_F32(o, 0x2D8 + i * 4) = E9C_FIX(args[2 + i]);
             }
         }
         return 1;
     case 0x23: /* +0x2E4[i] = args[2 + i] (0x7FFFFFFF keeps one) */
-        for (i = 0; i < D_800D3C60 - 2; i++) {
+        for (i = 0; i < g_event_arg_count - 2; i++) {
             if (args[2 + i] != 0x7FFFFFFF) {
                 E9C_S32(o, 0x2E4 + i * 4) = args[2 + i];
             }
@@ -352,7 +352,7 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         return 1;
     case 0x27:
         context_action_lock(id, 1, args[2], 0);
-        if (D_800D3C60 == 3 && args[2] == 0) {
+        if (g_event_arg_count == 3 && args[2] == 0) {
             E9C_U8(E9C_REC(o), 0x78) = 0;
         }
         return 1;
@@ -374,9 +374,9 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
     case 0x2D:
         E9C_U8(o, 0x21E) = args[2];
         return 1;
-    case 0x2E: /* button word args[2] = args[3] (D_800BEB30 and the pointer table D_800BE728) */
-        D_800BEB30[args[2]] = args[3];
-        *((u16 **)D_800BE728[0])[args[2]] = args[3];
+    case 0x2E: /* button word args[2] = args[3] (g_pad_pressed and the pointer table g_cont_frame) */
+        g_pad_pressed[args[2]] = args[3];
+        *((u16 **)g_cont_frame[0])[args[2]] = args[3];
         return 1;
     case 0x2F: /* attached object args[2] (obj_find_child_nth): 0 scale, 1 move, 2 script */
         p = (u8 *)obj_find_child_nth(obj, args[2]);
@@ -402,7 +402,7 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         E9C_U8(o, 0x10A) = args[2];
         return 1;
     case 0x33:
-        D_800D1898[args[2]] = E9C_FIX(args[3]);
+        g_aiscript_values[args[2]] = E9C_FIX(args[3]);
         return 1;
     case 0x34: /* place 1800 in front of the camera g_player_views (+-400 random), mirrored into the box
                 * args[2..5] (x lo / hi, z lo / hi), on the floor + args[6] */
@@ -458,7 +458,7 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         return 1;
     case 0x3B:
         E9C_U16(E9C_REC(o), 0x32) |= args[2];
-        if (D_800D3C60 == 4) {
+        if (g_event_arg_count == 4) {
             E9C_U16(E9C_REC(o), 0x34) = args[3];
         }
         return 1;
@@ -568,7 +568,7 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         E9C_U8(o, 0x89) = args[2];
         return 1;
     case 0x54: /* fade: 3 words = mode 1 to args[2], else mode 2 args[2] / args[3] */
-        if (D_800D3C60 == 3) {
+        if (g_event_arg_count == 3) {
             obj_fade_command(obj, 1, args[2], 0, 0);
         } else {
             obj_fade_command(obj, 2, args[2], args[3], 0);
@@ -577,8 +577,8 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
     case 0x55: /* players 0..3: button bit 0x4000 */
         n = E9C_INDEX(o);
         if (n < 4) {
-            *((u16 **)D_800BE728[0])[n] |= 0x4000;
-            D_800BEB30[n] |= 0x4000;
+            *((u16 **)g_cont_frame[0])[n] |= 0x4000;
+            g_pad_pressed[n] |= 0x4000;
         }
         return 1;
     case 0x56:
@@ -652,7 +652,7 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         return 1;
     case 0x64:
         i = args[2];
-        if (D_800BE616 == 0 && (g_cheat_flags & 0x200)) {
+        if (g_mp_mode_active == 0 && (g_cheat_flags & 0x200)) {
             i = 0x33;
         }
         n = E9C_INDEX(o);
@@ -680,7 +680,7 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         E9C_U16(o, 0x10) = args[2];
         return 1;
     case 0x69:
-        D_800D18C0 |= args[2];
+        g_idle_request_flags |= args[2];
         return 1;
     case 0x6A:
         if (args[2] != 0) {
@@ -761,9 +761,9 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         }
         return 1;
     case 0x77:
-        D_800C4414[0] = args[2];
-        D_800C4414[1] = args[3];
-        D_800C4414[2] = args[4];
+        g_look_fixed_target[0] = args[2];
+        g_look_fixed_target[1] = args[3];
+        g_look_fixed_target[2] = args[4];
         return 1;
     case 0x78:
         switch ((u32)args[2]) {
@@ -887,9 +887,9 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
     }
     return 0;
 }
-/* Object query handler: entry 1 of event_dispatch's handler table D_80088838 (event ids 0x2xxx), called as
+/* Object query handler: entry 1 of event_dispatch's handler table g_event_query_fns (event ids 0x2xxx), called as
  * handler(id & 0xFFF, cmd, args) with args = g_event_dispatch_args = {id, cmd, x1, x2, ...} (args[2] is the first extra
- * argument; D_800D3C60 = the number of words). `id` names an object (obj_find_by_spawn). 0xB7 asks setup_entry_find_by_id,
+ * argument; g_event_arg_count = the number of words). `id` names an object (obj_find_by_spawn). 0xB7 asks setup_entry_find_by_id,
  * 0xB0 / 0xB1 test whether the object is missing (0xB1: or of kind 8 / 0x27); every other query returns 0 for a
  * missing object and otherwise a field or a derived value (positions packed as x << 16 | z, distances, angles in
  * degrees, ...). Object ids passed as arguments drop bits 12..15 (& 0xFFFF0FFF). */
@@ -908,14 +908,14 @@ f32 wrap_angle_deg(f32 angle);
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 s32 mp_is_free_for_all(void);
 s32 mp_match_check_over(void);
-extern s32 D_800D3C60;
+extern s32 g_event_arg_count; /* was D_800D3C60 */
 extern u8 g_mp_last_hitter[]; /* was D_800E0FE8 */
 extern s8 g_mp_placings[]; /* was D_800E0EF0 */
-extern u8 D_80087638;
-extern u8 D_8008763C;
+extern u8 g_rail_route_target; /* was D_80087638 */
+extern u8 g_rail_last_node; /* was D_8008763C */
 extern u8 g_player_hit_reaction_mode; /* was D_800D1CC9 */
-extern u16 D_800BEB30[];
-extern f32 D_8009E80C;
+extern u16 g_pad_pressed[]; /* was D_800BEB30 */
+extern f32 g_event_obj_k_e80c; /* was D_8009E80C */
 
 #define A024_U8(p, o) (*(u8 *)((u8 *)(p) + (o)))
 #define A024_S8(p, o) (*(s8 *)((u8 *)(p) + (o)))
@@ -926,7 +926,7 @@ extern f32 D_8009E80C;
 #define A024_REC(p) (*(u8 **)((u8 *)(p) + 0x31C))
 #define A024_OBJ(arg) obj_find_by_spawn((arg) & 0xFFFF0FFF)
 #define A024_INDEX(p) (((u8 *)(p) - (u8 *)g_objects) / 0x32C)   /* index in g_objects (0x32C each) */
-#define A024_POINT(i) (((u8 *)D_800D2778 + (i) * 0x10)[7])
+#define A024_POINT(i) (((u8 *)g_rail_nodes + (i) * 0x10)[7])
 #define A024_DEG (360.0f / 65536.0f)
 
 /* was func_1509A024 */
@@ -1050,7 +1050,7 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
     case 0xAB:
         return A024_U8(A024_REC(obj), 0x79);
     case 0xAC:
-        r = trigger_first_touched(A024_INDEX(obj), D_800D3C60 - 2, &args[2]);
+        r = trigger_first_touched(A024_INDEX(obj), g_event_arg_count - 2, &args[2]);
         if (r != -1) {
             return r | 0x4000;
         }
@@ -1158,7 +1158,7 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
         if (A024_U8(obj, 0x20F) != 0xFF) {
             return A024_POINT(A024_U8(obj, 0x20F));
         }
-        D_8008763C = A024_U8(obj, 0x213);
+        g_rail_last_node = A024_U8(obj, 0x213);
         r = rail_point_pick(obj->x_position, obj->y_position, obj->z_position, 0, 0, &none, &none);
         A024_U8(obj, 0x213) = r;
         if (r != 0xFF) {
@@ -1185,12 +1185,12 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
             return dist;
         }
         return 0;
-    case 0xCC: /* index of the D_800D34B8 record (0x34 bytes) at the object's position */
+    case 0xCC: /* index of the g_level_zones record (0x34 bytes) at the object's position */
         p = (u8 *)trigger_find_at_point(3, 0xB, obj->x_position, obj->y_position, obj->z_position);
         if (p == NULL) {
             return -1;
         }
-        return (p - D_800D34B8) / 0x34;
+        return (p - g_level_zones) / 0x34;
     case 0xCD: /* angle between the heading +0x40 and the direction to object args[2] (args[3] == 1: absolute) */
         other = A024_OBJ(args[2]);
         r = math_atan2_u16(other->x_position - obj->x_position, other->z_position - obj->z_position, 0);
@@ -1230,12 +1230,12 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
         best = -1;
         if (count != 0) {
             r = rail_point_pick(obj->x_position, obj->y_position, obj->z_position, count, sel, found, &sel);
-            D_80087638 = 0xFF;
+            g_rail_route_target = 0xFF;
             if ((u8)r != 0xFF) {
                 rail_route_next((u8)r, count, sel, found, &sel);
             }
-            if (D_80087638 != 0xFF) {
-                best = A024_POINT(D_80087638);
+            if (g_rail_route_target != 0xFF) {
+                best = A024_POINT(g_rail_route_target);
             }
         }
         return best;
@@ -1291,7 +1291,7 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
     case 0xD6:
         return mp_match_check_over();
     case 0xD7:
-        return (600.0f < A024_F32(obj, 0x1CC) - obj->y_position && D_8009E80C == A024_F32(obj, 0x118)) ? 1 : 0;
+        return (600.0f < A024_F32(obj, 0x1CC) - obj->y_position && g_event_obj_k_e80c == A024_F32(obj, 0x118)) ? 1 : 0;
     case 0xD8:
         return obj->in_water;
     case 0xD9:
@@ -1348,7 +1348,7 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
     case 0xE7: /* nearest point of path +0x13F to object args[2], squared xz distance in (args[3]^2, args[4]^2) */
         n = A024_U8(obj, 0x13F);
         list = (s16 *)g_path_points[n];
-        i = D_800D2528[n];
+        i = g_path_point_counts[n];
         best = -1;
         if (list == NULL || i == 0) {
             return -1;
@@ -1358,9 +1358,9 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
         oz = other->z_position;
         maxD = 100000000;
         minD = -1;
-        if (D_800D3C60 >= 4) {
+        if (g_event_arg_count >= 4) {
             minD = args[3] * args[3];
-            if (D_800D3C60 >= 5) {
+            if (g_event_arg_count >= 5) {
                 maxD = args[4] * args[4];
             }
         }
@@ -1397,7 +1397,7 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
     case 0xEC:
         return A024_U8(A024_REC(obj), 0x95);
     case 0xED:
-        return D_800BEB30[id];
+        return g_pad_pressed[id];
     case 0xEE: /* the point args[2] ahead of the object (heading +0x7A turned 180 degrees): x << 16 | z */
         vec_from_yaw_pitch(A024_U16(obj, 0x7A) + 0x8000, (f32)args[2], 0.0f, &hit[2], &hit[0], &hit[1]);
         return ((s32)((f32)(s16)(s32)obj->x_position + hit[2]) << 16)

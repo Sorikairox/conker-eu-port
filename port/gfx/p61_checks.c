@@ -4,7 +4,7 @@
  *  - player_lose_life (life lost: respawn / checkpoint restart / game over), its callee game_request_transition (arguments);
  *  - obj_contact_pass (record-vs-record contact pass): calls, and whether it moved the record (x / z before / after);
  *  - obj_surface_effects_update (floor-material effects, only called inside game_eu_AC770.c): seen through its sound calls
- *    music_play_song / music_stop_song (ambient loop ids 0x15..0x17, D_800D1CE4) and music_post_event_request / music_clear_event_flag1;
+ *    music_play_song / music_stop_song (ambient loop ids 0x15..0x17, g_surface_ambient_song) and music_post_event_request / music_clear_event_flag1;
  *  - anim_advance_frame (animation frame advance; called from game_eu_6CFB0.c): frame before / after, the end callback
  *    (anim +0), loops / holds. */
 #include <stdint.h>
@@ -14,7 +14,7 @@ int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
 extern unsigned char g_objects[]; /* was D_800CC2D0 */
-extern int D_800D1CE4;
+extern int g_surface_ambient_song; /* was D_800D1CE4 */
 
 #define REC 0x32C
 static int fl = -1;
@@ -72,7 +72,7 @@ void __wrap_music_play_song(int a0, int a1, int a2) {
     n++;
     if (want(n) || port_p110_inmus || (a0 >= 0x15 && a0 <= 0x17 && on()))
         port_log("[p61] music_play_song (sound start) call %u frame %u: id %d (0x%X) %d %d | D_800D1CE4 %d\n", n,
-                 port_frame_count, a0, a0, a1, a2, D_800D1CE4);
+                 port_frame_count, a0, a0, a1, a2, g_surface_ambient_song);
     __real_music_play_song(a0, a1, a2);
 }
 void __real_music_stop_song(int a0, int a1);
@@ -81,7 +81,7 @@ void __wrap_music_stop_song(int a0, int a1) {
     n++;
     if (want(n) || port_p110_inmus || (a0 >= 0x15 && a0 <= 0x17 && on()))
         port_log("[p61] music_stop_song (sound stop) call %u frame %u: id %d (0x%X) %d | D_800D1CE4 %d\n", n,
-                 port_frame_count, a0, a0, a1, D_800D1CE4);
+                 port_frame_count, a0, a0, a1, g_surface_ambient_song);
     __real_music_stop_song(a0, a1);
 }
 void __real_music_post_event_request(unsigned a0, int a1);
@@ -105,7 +105,7 @@ void __wrap_music_clear_event_flag1(int a0) {
  * callback window end-1 was crossed with a callback set) and NEW (id or stream changed inside the call = the callback
  * started another animation). N calls logged, then every 64th and every change of id. */
 static int fl63 = -1;
-extern unsigned char D_800CC69C_[] __asm__("D_800CC69C");
+extern unsigned char D_800CC69C_[] __asm__("g_cur_floor_kind"); /* was D_800CC69C */
 static void p63_anim_log(const unsigned char *a, float step, int rec, unsigned id0, unsigned s28, float f0, float last0,
                          unsigned cb) {
     static unsigned n, lastid = 0xFFFFFFFF, cbs, loops;

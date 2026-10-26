@@ -2,7 +2,7 @@
 
 
 // s127: main bus pull (n_alMainBusPull-like): Conker's per-bus loop starting at the last active aux bus,
-// per-bus mix gains from D_800428C4/D_800428C6 and the bus fx pole filter (load ADPCM + two pole filters)
+// per-bus mix gains from g_audio_bus_one_side/g_audio_bus_invert and the bus fx pole filter (load ADPCM + two pole filters)
 #include "n_abi.h"
 
 typedef struct {
@@ -25,10 +25,10 @@ typedef struct {
     /* 0x04 */ Acmd *(*handler)(s32 sampleOffset, Acmd *p, s32 bus);
 } FB40MainBus;
 
-extern N_ALSynth *D_8002BA44;
-extern s32 D_800E0E04;
-extern u8 D_800428C4[];
-extern u8 D_800428C6[];
+extern N_ALSynth *g_audio_synth; /* was D_8002BA44 */
+extern s32 g_mp3_stream_state; /* was D_800E0E04 */
+extern u8 g_audio_bus_one_side[]; /* was D_800428C4 */
+extern u8 g_audio_bus_invert[]; /* was D_800428C6 */
 s32 mp3_stream_synth_pull(s32 arg0, Acmd **arg1);
 void n_fx_lowpass_update_coefs(FB40Fx *fx, f32 rate);
 
@@ -38,45 +38,45 @@ Acmd *n_main_bus_pull(s32 sampleOffset, Acmd *cmdList) {
     s32 i;
     s32 j;
 
-    if (D_800E0E04 == 0 || mp3_stream_synth_pull(0xB8, &ptr) == 0) {
+    if (g_mp3_stream_state == 0 || mp3_stream_synth_pull(0xB8, &ptr) == 0) {
         aClearBuffer(ptr++, 0x4E0, 0x2E0);
         aClearBuffer(ptr++, 0x7C0, 0x2E0);
     }
 
     j = 0;
-    for (i = 1; i < D_8002BA44->maxAuxBusses; i++) {
-        if (((FB40AuxBus *)D_8002BA44->auxBus)[i].fx->unk2 > 0) {
+    for (i = 1; i < g_audio_synth->maxAuxBusses; i++) {
+        if (((FB40AuxBus *)g_audio_synth->auxBus)[i].fx->unk2 > 0) {
             j = i;
         }
     }
 
-    for (i = 0; i < D_8002BA44->maxAuxBusses; i++, j++) {
-        if (j >= D_8002BA44->maxAuxBusses) {
+    for (i = 0; i < g_audio_synth->maxAuxBusses; i++, j++) {
+        if (j >= g_audio_synth->maxAuxBusses) {
             j = 0;
         }
         if (i != 0) {
             aClearBuffer(ptr++, 0x7C0, 0x2E0);
         }
-        ptr = ((FB40MainBus *)D_8002BA44->mainBus)->handler(sampleOffset, ptr, j);
-        if (D_800428C4[j]) {
-            if (D_800428C6[j]) {
+        ptr = ((FB40MainBus *)g_audio_synth->mainBus)->handler(sampleOffset, ptr, j);
+        if (g_audio_bus_one_side[j]) {
+            if (g_audio_bus_invert[j]) {
                 aMix(ptr++, 0, 0x8000, 0x7C0, 0x4E0);
             } else {
                 aMix(ptr++, 0, 0x7FFF, 0x7C0, 0x650);
             }
         } else {
-            if (D_800428C6[j]) {
+            if (g_audio_bus_invert[j]) {
                 aMix(ptr++, 0, 0x8000, 0x7C0, 0x650);
             } else {
                 aMix(ptr++, 0, 0x7FFF, 0x7C0, 0x650);
             }
             aMix(ptr++, 0, 0x7FFF, 0x7C0, 0x4E0);
         }
-        if (((FB40AuxBus *)D_8002BA44->auxBus)[j].fx->unk2 > 0) {
-            FB40Fx *fx = ((FB40AuxBus *)D_8002BA44->auxBus)[j].fx;
+        if (((FB40AuxBus *)g_audio_synth->auxBus)[j].fx->unk2 > 0) {
+            FB40Fx *fx = ((FB40AuxBus *)g_audio_synth->auxBus)[j].fx;
 
             if (fx->unk28) {
-                n_fx_lowpass_update_coefs(fx, D_8002BA44->outputRate);
+                n_fx_lowpass_update_coefs(fx, g_audio_synth->outputRate);
             }
             n_aLoadADPCM(ptr++, 0x20, osVirtualToPhysical(fx->unk8));
             n_aPoleFilter(ptr++, 0, 0x4E0, 0, osVirtualToPhysical(fx->unk2C) & 0xFFFFFF);

@@ -5,7 +5,7 @@ s/pitch = 0x124 \/ g_mp_team_count;/pitch = 0x120 \/ g_mp_team_count;/ % nt3
 s/if (p->unk13C != 0 ||/if (p->unk13C == 0 ||/ % act_team1
 s/+ 0x128) \& 0x20))/+ 0x128) \& 0x40))/ % ctlflag
 s/sel = p->unk128;/sel = p->unk128 + 1;/ % f1sel f1only
-s/if (sel != -1 \&\& (D_80090160 \& 0x8000))/if (sel != -1 \&\& (D_80090160 \& 0x4000))/ % arrow_t0
+s/if (sel != -1 \&\& (g_mp_hud_flags \& 0x8000))/if (sel != -1 \&\& (g_mp_hud_flags \& 0x4000))/ % arrow_t0
 s/flags |= 2;/flags |= 1;/ % arrow_t0
 s/^            sel = -1;$/            sel = sel;/ % arrow_t1
 s/if (p->unk128 == 1 \&\& p->unk2E4/if (p->unk128 == 0 \&\& p->unk2E4/ % bonus
@@ -16,24 +16,24 @@ s/rail_node_find_by_tag(0x49)/rail_node_find_by_tag(0x48)/ % near
 s/ddz = pz - p->z_position;/ddz = py - p->z_position;/ % near
 s/< 6250000.0f/< 6000000.0f/ % near_edge
 s/                g_mp_game_flags |= 0x10;/                g_mp_game_flags |= 0x18;/ % near
-1,/D_800E0FFC |= 1 << i;/s/D_800E0FFC |= 1 << i;/D_800E0FFC |= 2 << i;/ % act_team1
-/0x25) {/,/D_800E0FFC/s/D_800E0FFC |= 1 << i;/D_800E0FFC |= 1;/ % near
-s/(D_800BEDCC \& 0x1F) < 11/(D_800BEDCC \& 0x1F) < 10/ % blink
+1,/g_mp_hud_marked_players |= 1 << i;/s/g_mp_hud_marked_players |= 1 << i;/g_mp_hud_marked_players |= 2 << i;/ % act_team1
+/0x25) {/,/g_mp_hud_marked_players/s/g_mp_hud_marked_players |= 1 << i;/g_mp_hud_marked_players |= 1;/ % near
+s/(g_frame_count \& 0x1F) < 11/(g_frame_count \& 0x1F) < 10/ % blink
 s/^        flags = 0;$/        flags = flags;/ % blink
-s/if (D_80090160 \& 9) {/if (D_80090160 \& 1) {/ % f8only
+s/if (g_mp_hud_flags \& 9) {/if (g_mp_hud_flags \& 1) {/ % f8only
 s/tex = texture_cache_lookup(0xD16, 0, 3, 0);/tex = texture_cache_lookup(0xD17, 0, 3, 0);/ % base
 s/HUD_W(gdl, 0xF5181000, 0x00094250);/HUD_W(gdl, 0xF5181000, 0x00094251);/ % base
 s/gDPSetOtherMode(gdl++, 0x002C3F, 0x504244);/gDPSetOtherMode(gdl++, 0x002C3F, 0x504245);/ % base
 s/^            tex = 0;$/            tex = 1;/ % notex
-s/if ((D_80090160 \& 8) \&\& tex != 0)/if ((D_80090160 \& 8) || tex != 0)/ % f1only
+s/if ((g_mp_hud_flags \& 8) \&\& tex != 0)/if ((g_mp_hud_flags \& 8) || tex != 0)/ % f1only
 s/x = pitch >> 1;/x = pitch >> 2;/ % base
 s/score = player_stat_get((s16) team, 6);/score = player_stat_get((s16) team, 5);/ % base
-s/D_800ABEA0\[team\]\[1\]/D_800ABEA0[team][2]/ % base
+s/g_mp_team_colours\[team\]\[1\]/g_mp_team_colours[team][2]/ % base
 1,/alpha \& 0xFF)/s/alpha \& 0xFF)/alpha \& 0x7F)/ % base
 s/(x + 3) \* 4, y, dx, y + 0x1C, 0, 0x1C0/(x + 3) * 4, y, dx, y + 0x1D, 0, 0x1C0/ % base
 s/if (q != 0 || started || div == 1)/if (q != 0 || div == 1)/ % nt3
-s/D_8009041C\[q \& 3\] << 5/D_8009041C[q \& 3] << 4/ % base
-s/D_80090420\[q >> 2\] << 5/D_80090420[q >> 1] << 5/ % nt4big
+s/g_mp_digit_sheet_col\[q \& 3\] << 5/g_mp_digit_sheet_col[q \& 3] << 4/ % base
+s/g_mp_digit_sheet_row\[q >> 2\] << 5/g_mp_digit_sheet_row[q >> 1] << 5/ % nt4big
 s/dx += 0x18;/dx += 0x14;/ % nt3
 s/score -= q \* div;/score -= div;/ % nt4big
 s/div = 10000;/div = 1000;/ % nt4big
@@ -58,12 +58,12 @@ s/gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0xFF);/gDPSetEnvColor(gdl++, 0xFF, 0xF
 s/0xA0, y - 0x10, 0xE0, y + 0x30/0xA0, y - 0x10, 0xE0, y + 0x20/ % arrow_t1
 s/0x3B0, y - 0x10, 0x3F0/0x3B0, y - 0x8, 0x3F0/ % arrow_t0
 s/0x250, 0xC, 0x280, 0x48, 0, 0, 0x200/0x250, 0xC, 0x280, 0x48, 0, 0, 0x240/ % bonus
-s/if (D_80090160 \& 0x6340)/if (D_80090160 \& 0x6300)/ % timer
+s/if (g_mp_hud_flags \& 0x6340)/if (g_mp_hud_flags \& 0x6300)/ % timer
 s/mp_team_score_draw((u8 \*) gdl, y, 1)/mp_team_score_draw((u8 *) gdl, y, 0)/ % timer
 1,/if (flags \& 4) {/s/if (flags \& 4) {/if (flags \& 2) {/ % bonus
 s/if (sel != -1) {$/if (sel == -1) {/ % near_sel
 s/if (near) {$/if (!near) {/ % near
-1,/if (D_80090160 \& 1) {/s/if (D_80090160 \& 1) {/if (D_80090160 \& 2) {/ % f1only
+1,/if (g_mp_hud_flags \& 1) {/s/if (g_mp_hud_flags \& 1) {/if (g_mp_hud_flags \& 2) {/ % f1only
 s/p = \&g_objects\[i\];/p = \&g_objects[i + 1];/ % act_team1
 s/for (i = 0; i < g_player_count; i++)/for (i = 1; i < g_player_count; i++)/ % arrow_t0
 s/for (team = 0; team < g_mp_team_count; team++)/for (team = 1; team < g_mp_team_count; team++)/ % base

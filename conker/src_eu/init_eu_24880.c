@@ -19,8 +19,8 @@ typedef struct {
     __OSViScale x;
     __OSViScale y;
 } __OSViContext;
-extern __OSViContext *D_8002C130; // __osViCurr
-extern __OSViContext *D_8002C134; // __osViNext
+extern __OSViContext *g_os_vi_curr; /* was D_8002C130 */ // __osViCurr
+extern __OSViContext *g_os_vi_next; /* was D_8002C134 */ // __osViNext
 
 void __osViSwapContext(void) {
     register OSViMode *vm;
@@ -31,7 +31,7 @@ void __osViSwapContext(void) {
     u32 field;
 
     field = 0;
-    vc = D_8002C134;
+    vc = g_os_vi_next;
     vm = vc->modep;
     field = IO_READ(VI_V_CURRENT_LINE_REG) & 1;
     origin = osVirtualToPhysical(vc->framep) + vm->fldRegs[field].origin;
@@ -72,7 +72,7 @@ void __osViSwapContext(void) {
     IO_WRITE(VI_X_SCALE_REG, vc->x.scale);
     IO_WRITE(VI_Y_SCALE_REG, vc->y.scale);
     IO_WRITE(VI_CONTROL_REG, vc->control);
-    D_8002C134 = D_8002C130;
-    D_8002C130 = vc;
-    *D_8002C134 = *D_8002C130;
+    g_os_vi_next = g_os_vi_curr;
+    g_os_vi_curr = vc;
+    *g_os_vi_next = *g_os_vi_curr;
 }

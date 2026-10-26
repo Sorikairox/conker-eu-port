@@ -126,7 +126,7 @@ void obj_set_scale(struct127 *arg0, f32 arg1, f32 arg2) {
     arg0->xz_scale = arg1;
     arg0->y_scale = arg2;
     if (arg0->id != 255) {
-        temp_v0 = D_800D1C90[arg0->id];
+        temp_v0 = g_type_descs[arg0->id];
         arg0->unkD2 = (s32) (temp_v0->unk20 * arg0->xz_scale);
         arg0->unkD4 = (s32) (temp_v0->unk22 * arg0->y_scale);
         arg0->unkD6 = (s32) (temp_v0->unk24 * arg0->y_scale);
@@ -138,7 +138,7 @@ void obj_set_scale(struct127 *arg0, f32 arg1, f32 arg2) {
     }
 }
 
-extern s32 D_800C48A8;
+extern s32 g_model_dl_tables; /* was D_800C48A8 */
 
 /* was func_15062D10 */
 void gfx_tile_scroll_coords(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
@@ -152,8 +152,8 @@ void gfx_tile_scroll_coords(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s3
     s32 var_v1;
     u8 *temp_a3;
 
-    if ((&D_800D19A0)[arg0] != 0) {
-        temp_a3 = *(s32 *)(*(s32 *)((u8 *)&D_800C48A8 + (arg0 * 4)) + (arg4 * 4)) + (arg1 * 8);
+    if ((&g_model_bases)[arg0] != 0) {
+        temp_a3 = *(s32 *)(*(s32 *)((u8 *)&g_model_dl_tables + (arg0 * 4)) + (arg4 * 4)) + (arg1 * 8);
         temp_a2 = (*(s32 *)((u8 *)temp_a3 + 4));
         temp_v1 = ((temp_a2 >> 0xC) & 0xFFF) + 2;
         temp_a0 = (temp_a2 & 0xFFF) + 2;
@@ -183,13 +183,13 @@ void gfx_tile_scroll_coords(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s3
         (*(s32 *)((u8 *)temp_a3 + 0)) = (s32) ((temp_a2_2 & 0xFF000000) | (var_v1 & 0xFFF) | ((var_v0 & 0xFFF) << 0xC));
     }
 }
-extern u8 *D_800C5758[]; /* per object type: 12-byte texture entries, u16 size at +8 / +0xA */
+extern u8 *g_model_tex_entries[]; /* per object type: 12-byte texture entries, u16 size at +8 / +0xA; was D_800C5758 */
 void uv_rotate(u8 *, s32 *, s32, f32, s32, s32);
 
 // type_texture_scroll_apply: for every live object (+0x0) of `type` (+0x4) with +0x2FA set and a display list
 // for the current screen (+0x28C[g_dl_buf_index]), calls uv_rotate on entry `dl` (16-byte steps) of it with the
-// type's texture-command table D_800C6360[type] at `cmd`, `arg2`, the amount `amount`, and the size of texture
-// `tex` of D_800C5758[type] (doubled when `twice`).
+// type's texture-command table g_model_vtx_ptr_tables[type] at `cmd`, `arg2`, the amount `amount`, and the size of texture
+// `tex` of g_model_tex_entries[type] (doubled when `twice`).
 /* was func_15062E24 */
 void obj_type_tex_scroll_apply(s32 type, s32 dl, s32 arg2, s32 cmd, s32 amount, s32 tex, s32 twice) {
     s32 *table;
@@ -200,14 +200,14 @@ void obj_type_tex_scroll_apply(s32 type, s32 dl, s32 arg2, s32 cmd, s32 amount, 
     s32 h;
     s32 i;
 
-    if (D_800C6360[type] == 0) {
+    if (g_model_vtx_ptr_tables[type] == 0) {
         return;
     }
     for (i = 0, o = g_objects; i < 25; i++, o++) {
         if (*(s32 *) o == 0 || type != *((u8 *) o + 4) || o->unk2FA == 0) {
             continue;
         }
-        entry = D_800C5758[type] + tex * 12;
+        entry = g_model_tex_entries[type] + tex * 12;
         w = *(u16 *) (entry + 8);
         h = *(u16 *) (entry + 0xA);
         if (twice) {
@@ -216,12 +216,12 @@ void obj_type_tex_scroll_apply(s32 type, s32 dl, s32 arg2, s32 cmd, s32 amount, 
         }
         list = ((u8 **) &g_objects[i].unk28C)[g_dl_buf_index];
         if (list != NULL) {
-            table = (s32 *) D_800C6360[type];
+            table = (s32 *) g_model_vtx_ptr_tables[type];
             uv_rotate(list + dl * 16, &table[cmd], arg2, (f32) amount, h, w);
         }
     }
 }
-extern s32 D_800C4440;
+extern s32 g_model_part_tables; /* was D_800C4440 */
 
 /* was func_15062FC0 */
 void obj_vtx_scroll_uv(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
@@ -249,7 +249,7 @@ void obj_vtx_scroll_uv(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg
     var_v1 = (*(s32 *)((u8 *)((temp_a2 + ((g_dl_buf_index == 0) * 4))) + 0x28C));
     if (var_v0 != NULL) {
         if (arg1 != -1) {
-            temp_t7 = *(s32 *)(*(s32 *)(((s32 *)((u8 *)&D_800C4440 + ((*(u8 *)((u8 *)arg0 + 4)) * 4)))) + (arg1 * 4)) * 0x10;
+            temp_t7 = *(s32 *)(*(s32 *)(((s32 *)((u8 *)&g_model_part_tables + ((*(u8 *)((u8 *)arg0 + 4)) * 4)))) + (arg1 * 4)) * 0x10;
             var_v0 += temp_t7;
             var_v1 += temp_t7;
         }

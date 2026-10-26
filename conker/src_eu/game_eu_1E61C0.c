@@ -136,9 +136,9 @@ void bullet_debris_spray_emit(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, 
     sp6C[1] = 0.0f;
     temp_f2 = temp_f2 * 0.001f;
     sp6C[2] = 0.0f;
-    sp6C[3] += -arg3 * D_800BEDC8 * temp_f2;
-    sp6C[4] += -arg4 * D_800BEDC8 * temp_f2;
-    sp6C[5] += -arg5 * D_800BEDC8 * temp_f2;
+    sp6C[3] += -arg3 * g_frame_step_inv * temp_f2;
+    sp6C[4] += -arg4 * g_frame_step_inv * temp_f2;
+    sp6C[5] += -arg5 * g_frame_step_inv * temp_f2;
     particle_puff_spawn(&sp6C[6], sp6C, &sp6C[3], 1.0f, ((random_float() * 157.0f) + -151.0f) * 0.001f, (random_float() * 55.0f) + 75.0f, (random_int() % 26U) + 0x19, (random_int() % 101U) + 0x64, 0xA, 0x19, 0, -1, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
 }
 

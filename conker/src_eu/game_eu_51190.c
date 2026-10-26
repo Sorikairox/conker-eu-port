@@ -3,23 +3,23 @@
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
 void scene_event_queue_insert(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-/* one 8-byte entry of a player's D_800C3A10 table: what track arg1 refers to (scene chunk table, cutscene_scene_load) */
+/* one 8-byte entry of a player's g_cutscene_actor_entries table: what track arg1 refers to (scene chunk table, cutscene_scene_load) */
 typedef struct {
     u16 kind;   /* 1: camera track, 2: object obj_find_by_setup_id(id), 3: world record world_record_find(id), else none */
     u8  id;
     u8  pad3[5];
 } struct_1502AB94_ref;
 
-extern struct_1502AB94_ref *D_800C3A10[];   /* per player */
+extern struct_1502AB94_ref *g_cutscene_actor_entries[];   /* per player; was D_800C3A10 */
 
 
 /* was func_15023980 */
 void scene_stub_noop(void) {
 }
 
-extern s32 D_800C39D0;
+extern s32 g_cutscene_frame; /* was D_800C39D0 */
 extern s32 D_eu_800C3A60;
-extern u8 D_800C40A9;
+extern u8 g_cutscene_volume; /* was D_800C40A9 */
 
 /* the 0x10-byte record a scene positional sound (handler C types 6 / 0xA) passes to sfx_emitter_start */
 typedef struct {
@@ -32,14 +32,14 @@ typedef struct {
     u16 fadeIn;   /* fade-in length (frames) */
     u16 fadeOut;  /* fade-out length: the last fadeOut frames */
     u16 volume;
-    u8 epoch;     /* D_800C3A08[player] when started */
+    u8 epoch;     /* g_cutscene_scene[player] when started */
     u8 padF;
 } SceneSfx;
 
-// scene_sfx_update: positional sound callback (SfxEnt +0x14, game init_EB00): follows the track's position (D_800C3958 record:
+// scene_sfx_update: positional sound callback (SfxEnt +0x14, game init_EB00): follows the track's position (g_cutscene_track_recs record:
 // x, y + 0x38, z) while the player's scene epoch is unchanged, counts the frames left down, sets *vol from the
-// record's volume with the fade-in / fade-out ramps and the cutscene volume D_800C40A9 / 25 while skipping
-// (D_800C3C88). Stops (vol 0, *stop = 0, record freed, returns 1) at the end, on a stop request (flag 0x80) or when
+// record's volume with the fade-in / fade-out ramps and the cutscene volume g_cutscene_volume / 25 while skipping
+// (g_cutscene_skip_state). Stops (vol 0, *stop = 0, record freed, returns 1) at the end, on a stop request (flag 0x80) or when
 // the scene ended; else returns 0.
 /* was func_15023988 */
 s32 scene_sfx_update(u8 *e, s32 *a1, u32 *vol, s32 *a3, s32 *a4, s32 *a5, u16 *stop) {
@@ -48,14 +48,14 @@ s32 scene_sfx_update(u8 *e, s32 *a1, u32 *vol, s32 *a3, s32 *a4, s32 *a5, u16 *s
     u16 left;
 
     r = *(SceneSfx **) (e + 0x18);
-    if ((r->untilEnd != 0 && (&D_800C39D0)[r->player] >= (&D_eu_800C3A60)[r->player]) || (*(s32 *) (e + 0x10) & 0x80)) {
+    if ((r->untilEnd != 0 && (&g_cutscene_frame)[r->player] >= (&D_eu_800C3A60)[r->player]) || (*(s32 *) (e + 0x10) & 0x80)) {
         goto stop;
     }
-    if (r->epoch == (&D_800C3A08)[r->player] && (&D_800C3958)[r->player] != NULL) {
-        *(s16 *) (e + 2) = *(f32 *) ((u8 *) (&D_800C3958)[r->player] + r->track * 0x44 + 0);
-        base = (u8 *) (&D_800C3958)[r->player] + r->track * 0x44;
+    if (r->epoch == (&g_cutscene_scene)[r->player] && (&g_cutscene_track_recs)[r->player] != NULL) {
+        *(s16 *) (e + 2) = *(f32 *) ((u8 *) (&g_cutscene_track_recs)[r->player] + r->track * 0x44 + 0);
+        base = (u8 *) (&g_cutscene_track_recs)[r->player] + r->track * 0x44;
         *(s16 *) (e + 4) = *(f32 *) (base + 0x38) + *(f32 *) (base + 4);
-        *(s16 *) (e + 6) = *(f32 *) ((u8 *) (&D_800C3958)[r->player] + r->track * 0x44 + 8);
+        *(s16 *) (e + 6) = *(f32 *) ((u8 *) (&g_cutscene_track_recs)[r->player] + r->track * 0x44 + 8);
     }
     left = r->left;
     if (left != 0xFFFF) {
@@ -73,11 +73,11 @@ s32 scene_sfx_update(u8 *e, s32 *a1, u32 *vol, s32 *a3, s32 *a4, s32 *a5, u16 *s
     } else if (r->fadeIn != 0 && r->total - r->fadeIn < r->left) {
         *vol = (u32) (*vol * (r->total - r->left)) / r->fadeIn;
     }
-    if (r->left == 0xFFFF || D_800C3C88 == 0) {
+    if (r->left == 0xFFFF || g_cutscene_skip_state == 0) {
         return 0;
     }
-    *vol = (u32) (*vol * D_800C40A9) / 25;
-    if (g_frame_ticks < D_800C40A9) {
+    *vol = (u32) (*vol * g_cutscene_volume) / 25;
+    if (g_frame_ticks < g_cutscene_volume) {
         return 0;
     }
 stop:
@@ -87,7 +87,7 @@ stop:
     return 1;
 }
 
-extern s32 D_800C3AA8;
+extern s32 g_cutscene_event_tracks; /* was D_800C3AA8 */
 extern s32 D_eu_800C3A60;
 
 /* was func_15023C60 */
@@ -99,10 +99,10 @@ s32 scene_event_find_next(u32 arg0, s32 arg1, s32 arg2, u8 **arg3, s32 arg4, s32
     u8 *temp_v0;
     u8 *var_a0;
 
-    temp_v0 = *(((s32 *)((u8 *)&D_800C3AA8 + ((argA * 0x78) + (arg2 * 4)))));
+    temp_v0 = *(((s32 *)((u8 *)&g_cutscene_event_tracks + ((argA * 0x78) + (arg2 * 4)))));
     if (temp_v0 != NULL) {
         var_a0 = temp_v0 + 0x20;
-        temp_t0 = D_800C39F8[argA][arg2];
+        temp_t0 = g_cutscene_event_counts[argA][arg2];
         var_a1 = var_a0 - temp_v0;
         var_v1 = (*(s16 *)((u8 *)temp_v0 + 2));
         if ((u32) (var_a1 >> 3) < temp_t0) {
@@ -153,21 +153,21 @@ block_38:
     *arg3 = NULL;
     return *(s32 *)((u8 *)&D_eu_800C3A60 + (argA * 4));
 }
-extern s32 D_800C3AA8;
+extern s32 g_cutscene_event_tracks; /* was D_800C3AA8 */
 extern s32 D_eu_800C3A60;
-extern s32 D_800C39D0;
-extern s32 D_800C3A68;
+extern s32 g_cutscene_frame; /* was D_800C39D0 */
+extern s32 g_cutscene_length_60hz; /* was D_800C3A68 */
 
 /* an 8-byte scene event: s8 type, u8 delta time (0: same time as the previous event), s16 id (type 0 with delta 0:
  * absolute time), s8 b4, s8 b5, s16 w6 */
 #define EV_MATCH(ev) ((s8) (ev)[0] == type && (useId == 0 || (useId == 1 && id == *(s16 *) ((ev) + 2))) && \
                       (useB4 == 0 || (useB4 == 1 && b4 == (s8) (ev)[4])))
 
-// scene_event_find_around: on the player's track list (D_800C3AA8[player][track], D_800C39F8 entries after the
+// scene_event_find_around: on the player's track list (g_cutscene_event_tracks[player][track], g_cutscene_event_counts entries after the
 // 0x20-byte header) finds the last matching event at or before `now` (*prev, *prevTime) and the first one after it
 // (*next, *nextTime, default the scene end D_eu_800C3A60[player]); type / optional id / optional b4 must match. Times
 // are track ticks (60 per second) converted to and from frames (50). Inside a run of same-time events the split
-// point is the scene limit (D_800C39D0[player] while the scene runs, else D_800C3A68), as in the asm.
+// point is the scene limit (g_cutscene_frame[player] while the scene runs, else g_cutscene_length_60hz), as in the asm.
 /* was func_15023EC4 */
 void scene_event_find_around(u8 **prev, u8 **next, s32 *prevTime, s32 *nextTime, s32 track, s32 type, s32 useId, s32 id,
                    s32 useB4, s32 b4, s32 now, s32 player) {
@@ -188,16 +188,16 @@ void scene_event_find_around(u8 **prev, u8 **next, s32 *prevTime, s32 *nextTime,
     }
     t = now * 60 / 50;
     *nextTime = (&D_eu_800C3A60)[player];
-    if ((&D_800C39D0)[player] < (&D_eu_800C3A60)[player]) {
-        limit = (&D_800C39D0)[player] * 60 / 50;
+    if ((&g_cutscene_frame)[player] < (&D_eu_800C3A60)[player]) {
+        limit = (&g_cutscene_frame)[player] * 60 / 50;
     } else {
-        limit = D_800C3A68;
+        limit = g_cutscene_length_60hz;
     }
-    list = ((u8 **) &D_800C3AA8)[player * 30 + track];
+    list = ((u8 **) &g_cutscene_event_tracks)[player * 30 + track];
     if (list == NULL) {
         return;
     }
-    n = D_800C39F8[player][track];
+    n = g_cutscene_event_counts[player][track];
     time = *(s16 *) (list + 2);
     for (ev = list + 0x20; (u32) ((ev - list) >> 3) < n; ev += 8) {
         d = ev[1];
@@ -259,7 +259,7 @@ typedef struct {
     u16 unkA;
 } struct_150243AC; // size 0xC
 
-extern struct_150243AC *D_800C4170;
+extern struct_150243AC *g_scene_event_queue; /* was D_800C4170 */
 
 /* was func_150243AC */
 void scene_event_queue_run(s32 arg0, s32 arg1) {
@@ -267,12 +267,12 @@ void scene_event_queue_run(s32 arg0, s32 arg1) {
     struct_150243AC *temp_v0;
 
     for (i = 0; i < arg0; i++) {
-        temp_v0 = (struct_150243AC *)((u8 *)D_800C4170 + i * 0xC);
+        temp_v0 = (struct_150243AC *)((u8 *)g_scene_event_queue + i * 0xC);
         scene_event_run(temp_v0->unk0, temp_v0->unk8, temp_v0->unkA, temp_v0->unk4 >> 8, arg1);
     }
 }
 
-extern u16 D_800C40BA;
+extern u16 g_scene_event_queue_size; /* was D_800C40BA */
 
 /* was func_15024438 */
 void scene_event_queue_insert(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
@@ -288,7 +288,7 @@ void scene_event_queue_insert(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4,
 
     temp_s0 = *arg1;
     var_a2 = temp_s0;
-    if (temp_s0 >= (s32) D_800C40BA) {
+    if (temp_s0 >= (s32) g_scene_event_queue_size) {
         scene_event_queue_run(temp_s0, arg6);
         *arg1 = 0;
         return;
@@ -328,13 +328,13 @@ loop_4:
     *arg1 += 1;
 }
 void scene_event_queue_insert(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-extern s32 D_800C39D0;
-extern s32 D_800C39D8;
-extern s32 D_800C39E0;
-extern s32 D_800C3A68;
-extern s32 D_800C3AA8;
-extern u8 D_800C40AC;
-extern u16 D_800C40BA;
+extern s32 g_cutscene_frame; /* was D_800C39D0 */
+extern s32 g_cutscene_prev_frame; /* was D_800C39D8 */
+extern s32 g_cutscene_events_ran; /* was D_800C39E0 */
+extern s32 g_cutscene_length_60hz; /* was D_800C3A68 */
+extern s32 g_cutscene_event_tracks; /* was D_800C3AA8 */
+extern u8 g_cutscene_finish_state; /* was D_800C40AC */
+extern u16 g_scene_event_queue_size; /* was D_800C40BA */
 extern s32 D_eu_800C3A60;
 
 /* was func_1502457C */
@@ -361,27 +361,27 @@ void scene_event_track_pass(s32 arg0, s32 arg1) {
     u8 *temp_a1;
     u8 *var_s0;
 
-    if ((D_800C40AC != 2) && ((&D_800C35EA)[arg1] == 1) && (D_800C40BA != 0)) {
-        D_800C3638 = 0;
+    if ((g_cutscene_finish_state != 2) && ((&g_cutscene_slot_state)[arg1] == 1) && (g_scene_event_queue_size != 0)) {
+        g_cutscene_in_progress = 0;
         sp.u80 = 0;
-        temp_t2 = &D_800C3A5A[arg1];
+        temp_t2 = &g_cutscene_actor_count[arg1];
         sp74 = temp_t2;
         var_a3 = *temp_t2;
         var_s7 = 0;
         if ((s32) var_a3 > 0) {
-            var_s6 = (u8 **) ((u8 *) &D_800C3AA8 + arg1 * 0x78); /* P117: byte offset (was x4 on an s32 *) */
+            var_s6 = (u8 **) ((u8 *) &g_cutscene_event_tracks + arg1 * 0x78); /* P117: byte offset (was x4 on an s32 *) */
             do {
                 temp_a1 = *var_s6;
                 if (temp_a1 != NULL) {
-                    temp_a0 = (&D_800C39D8)[arg1]; /* P117: was + arg1 * 4 words */
-                    temp_v1 = (&D_800C39D0)[arg1];
+                    temp_a0 = (&g_cutscene_prev_frame)[arg1]; /* P117: was + arg1 * 4 words */
+                    temp_v1 = (&g_cutscene_frame)[arg1];
                     var_s0 = temp_a1 + 0x20;
                     if (temp_a0 != temp_v1) {
-                        temp_s4 = &D_800C39F8[arg1];
+                        temp_s4 = &g_cutscene_event_counts[arg1];
                         var_s1 = (*(s16 *)((u8 *)temp_a1 + 2));
                         sp78 = (s32) (temp_a0 * 0x3C) / 50;
                         if (temp_v1 >= (&D_eu_800C3A60)[arg1]) {
-                            sp7C = D_800C3A68;
+                            sp7C = g_cutscene_length_60hz;
                         } else {
                             sp7C = (s32) (temp_v1 * 0x3C) / 50;
                         }
@@ -397,7 +397,7 @@ loop_11:
                             if ((sp7C >= var_s1) && (sp78 < var_s1) && ((u32) var_v0 < var_a0)) {
 loop_17:
                                 if (((arg0 == 0) && ((*(s8 *)((u8 *)var_s0 + 0)) != 0x11)) || ((arg0 == 1) && ((*(s8 *)((u8 *)var_s0 + 0)) == 0x11))) {
-                                    scene_event_queue_insert(D_800C4170, &sp.u80, var_s0, var_s7, var_v0, (s32) ((var_s1 << 8) * 0x32) / 60, arg1);
+                                    scene_event_queue_insert(g_scene_event_queue, &sp.u80, var_s0, var_s7, var_v0, (s32) ((var_s1 << 8) * 0x32) / 60, arg1);
                                 }
                                 temp_v0 = (*(u8 *)((u8 *)var_s0 + 1));
                                 if ((temp_v0 == 0) && ((temp_v0 != 0) || ((*(s8 *)((u8 *)var_s0 + 0)) != 0))) {
@@ -450,9 +450,9 @@ block_35:
             } while (var_s7 < (s32) var_a3);
         }
         scene_event_queue_run(sp.u80, arg1);
-        D_800C3638 = 1;
+        g_cutscene_in_progress = 1;
         if (arg0 == 0) {
-            ((u8 *) &D_800C39E0)[arg1] = 1; /* P117: sb (was a word at 4 * arg1) */
+            ((u8 *) &g_cutscene_events_ran)[arg1] = 1; /* P117: sb (was a word at 4 * arg1) */
         }
     }
 }
@@ -516,27 +516,27 @@ void obj_attach_to_carrier(struct127 *arg0, s32 arg1);
 void objev_set_timer_3c_2000(void);
 void hud_clock_set_enabled(s32 arg0);
 
-extern s8 D_800E1024;              /* cutscene colour-light events (7 / 0xE / 0xF / 0x10 / 0x12) enabled */
-extern u8 D_800BEECB;              /* which of them is active: 0 / 4 / 2 / 3 / 1 */
-extern u8 D_800844A8[3][3];        /* light colours (.data) */
-extern u8 D_800844B4[2][3];        /* sub 0x41 colours (.data) */
-extern s16 D_800844BC[4][2];       /* sub 0x05 kinds (.data; [i][1] is used) */
-extern u8 D_800844CC[3][3];        /* sub 0x37 colours (.data) */
-extern s32 *D_800C3A00[4];
-extern u8 D_800C3A18;
-extern s32 D_800905C4[];
-extern u8 D_800C3A78[], D_800C3A7A[], g_cutscene_show_all[], D_800C3A7E[], D_800C3A80[], D_800C3A82[], D_800C3A84[]; /* was D_800C3A7C */
-extern u8 D_800C3A86;
-extern f32 D_800C3A70, D_800C3A74, D_800C3A94, D_800C3A98;
-extern s32 D_800C3A9C;
+extern s8 g_scene_light_events_on;              /* cutscene colour-light events (7 / 0xE / 0xF / 0x10 / 0x12) enabled; was D_800E1024 */
+extern u8 g_text_bank_lang;              /* which of them is active: 0 / 4 / 2 / 3 / 1; was D_800BEECB */
+extern u8 g_scene_light_colours[3][3];        /* light colours (.data); was D_800844A8 */
+extern u8 g_scene_ev41_colours[2][3];        /* sub 0x41 colours (.data); was D_800844B4 */
+extern s16 g_scene_ev05_fx_kinds[4][2];       /* sub 0x05 kinds (.data; [i][1] is used); was D_800844BC */
+extern u8 g_scene_ev37_colours[3][3];        /* sub 0x37 colours (.data); was D_800844CC */
+extern s32 *g_cutscene_words[4]; /* was D_800C3A00 */
+extern u8 g_cutscene_camera_actor; /* was D_800C3A18 */
+extern s32 g_scene_att_tex_ids[]; /* was D_800905C4 */
+extern u8 g_cutscene_run_all_objs[], g_cutscene_show_all_objs[], g_cutscene_show_all[], g_cutscene_keep_listed_objs[], g_cutscene_ev13_value[], g_cutscene_anim_events_on[], g_cutscene_obj_vis_mode[]; /* was D_800C3A7C; was D_800C3A78; was D_800C3A7A; was D_800C3A7E; was D_800C3A84; was D_800C3A82; was D_800C3A80 */
+extern u8 g_cutscene_hide_world; /* was D_800C3A86 */
+extern f32 g_camera_viewport_w, g_camera_viewport_h, g_cutscene_end_cam_value, g_cutscene_end_cam_blend_arg; /* was D_800C3A70; was D_800C3A74; was D_800C3A94; was D_800C3A98 */
+extern s32 g_cutscene_end_cam_blend_time; /* was D_800C3A9C */
 extern f32 g_cam_far_plane, g_cam_near_plane; /* was D_800D9F3C; was D_800D9F40 */
 extern s32 g_view_count_minus1; /* was D_800BEE08 */
-extern u8 D_800C40AB, D_800C40AD, D_800C3AA0, D_800DC2DC, D_800C40BD, g_slowmo_divisor; /* was D_800BEE2C */
-extern u8 D_800C39E2, D_800C39E3, D_800C3682, D_800C3683;
-extern s16 D_800C40BE;
+extern u8 g_cutscene_fade_out_at_end, g_cutscene_event_no_fade, g_cutscene_skip_end_cam_event, g_sky_alt_tiles, g_cutscene_tail_lift_pct, g_slowmo_divisor; /* was D_800BEE2C; was D_800C3AA0; was D_800C40AB; was D_800C40AD; was D_800DC2DC; was D_800C40BD */
+extern u8 g_cutscene_next_scene, g_cutscene_return_level, g_cutscene_flat_background, g_cutscene_no_pause; /* was D_800C39E2; was D_800C3682; was D_800C3683; was D_800C39E3 */
+extern s16 g_cutscene_cash_offset; /* was D_800C40BE */
 extern s32 g_hud_clock_frames; /* was D_800D2870 */
-extern u8 *D_800DE274, *D_800DE278, *D_800DE27C;
-extern char D_80096DE0[];          /* "Cutscene 1" */
+extern u8 *g_hud_scope_zoom_ptr, *g_hud_scope_aim_x_ptr, *g_hud_scope_aim_y_ptr; /* was D_800DE274; was D_800DE278; was D_800DE27C */
+extern char g_str_cutscene_1[];          /* "Cutscene 1"; was D_80096DE0 */
 
 typedef struct { u8 b[9]; } SceneBytes9;
 typedef struct { u8 b[6]; } SceneBytes6;
@@ -551,7 +551,7 @@ typedef struct {
     s16 w6;
 } SceneEventA;
 
-#define SA_REC(p, t) ((u8 *) (&D_800C3958)[p] + (t) * 0x44)   /* the track's struct233 record (0x44 bytes) */
+#define SA_REC(p, t) ((u8 *) (&g_cutscene_track_recs)[p] + (t) * 0x44)   /* the track's struct233 record (0x44 bytes) */
 #define SA_U8(p, o) (*(u8 *) ((u8 *) (p) + (o)))
 #define SA_S8(p, o) (*(s8 *) ((u8 *) (p) + (o)))
 #define SA_S16(p, o) (*(s16 *) ((u8 *) (p) + (o)))
@@ -562,8 +562,8 @@ typedef struct {
 
 // scene_event_run_a: first handler of a scene event (scene_event_run tries this one, then scene_event_run_b, then
 // scene_event_run_c). ev is the 8-byte event, track / player its track, now the track time, obj / wrec the track's object
-// or world record (ref kind 2 / 3), flag the player's D_800C3A08 byte. Handles the cutscene light types (7, 0xE, 0xF,
-// 0x10, 0x12 while D_800E1024), object types 0xC (animation), 0xD (setup lists), 4, 9, 1, track switch 3, and the
+// or world record (ref kind 2 / 3), flag the player's g_cutscene_scene byte. Handles the cutscene light types (7, 0xE, 0xF,
+// 0x10, 0x12 while g_scene_light_events_on), object types 0xC (animation), 0xD (setup lists), 4, 9, 1, track switch 3, and the
 // type 5 sub-types below (0x67: leave the logo scene for the title menu via menu_reset_and_enter). Returns 1 when handled.
 /* was func_15024910 */
 s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 *obj, u8 *wrec, u8 *data, s32 flag) {
@@ -574,15 +574,15 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
     s32 span;
     s32 type = ev->type;
 
-    if (D_800E1024 != 0 && (type == 7 || type == 0xE || type == 0xF || type == 0x10 || type == 0x12)) {
+    if (g_scene_light_events_on != 0 && (type == 7 || type == 0xE || type == 0xF || type == 0x10 || type == 0x12)) {
         u8 colours[3][3];
         s16 *light;
         u8 *text;
         s32 k;
 
-        *(SceneBytes9 *) colours = *(SceneBytes9 *) D_800844A8;
-        if ((type == 7 && D_800BEECB != 0) || (type == 0xE && D_800BEECB != 4) || (type == 0xF && D_800BEECB != 2) ||
-            (type == 0x10 && D_800BEECB != 3) || (type == 0x12 && D_800BEECB != 1)) {
+        *(SceneBytes9 *) colours = *(SceneBytes9 *) g_scene_light_colours;
+        if ((type == 7 && g_text_bank_lang != 0) || (type == 0xE && g_text_bank_lang != 4) || (type == 0xF && g_text_bank_lang != 2) ||
+            (type == 0x10 && g_text_bank_lang != 3) || (type == 0x12 && g_text_bank_lang != 1)) {
             return 1;
         }
         light = subtitle_slot_get(track, ev->b4 == 0);
@@ -593,7 +593,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             if (SA_U8(light, 0xC) != 0) {
                 text_box_close_now(SA_PTR(light, 0x34));
             }
-            text = (u8 *) D_800C3A00[player][ev->id];
+            text = (u8 *) g_cutscene_words[player][ev->id];
             if (*text == 0xBE) {
                 SA_S32(light, 4) = 0x8013;
                 text++;
@@ -668,9 +668,9 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
 
                 if (att != NULL) {
                     if (ev->b4 == 2) {
-                        SA_S16(att, 0x18) = D_800905C4[ev->b5];
+                        SA_S16(att, 0x18) = g_scene_att_tex_ids[ev->b5];
                     } else if (ev->b4 == 3) {
-                        SA_S16(att, 0x1A) = D_800905C4[ev->b5];
+                        SA_S16(att, 0x1A) = g_scene_att_tex_ids[ev->b5];
                     }
                 }
             }
@@ -691,8 +691,8 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         }
         return 1;
     case 3: /* switch the camera track: only to a track of ref kind 1 */
-        if (ev->id < D_800C3A5A[player] && D_800C3A10[player][ev->id].kind == 1 && ev->id != D_800C3A18) {
-            D_800C3A18 = ev->id;
+        if (ev->id < g_cutscene_actor_count[player] && g_cutscene_actor_entries[player][ev->id].kind == 1 && ev->id != g_cutscene_camera_actor) {
+            g_cutscene_camera_actor = ev->id;
             g_camera_timers[0] = 4;
             SA_S32(g_player_views, 0x5F0) |= 4;
         }
@@ -718,22 +718,22 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         g_letterbox_track = ev->b4 == 0 ? (s32) (SA_REC(player, track) + 0x28) : 0;
         break;
     case 0x08:
-        D_800C3A7A[player] = ev->b4 == 0;
+        g_cutscene_show_all_objs[player] = ev->b4 == 0;
         break;
     case 0x09:
         g_cutscene_show_all[player] = ev->b4 == 0;
         break;
     case 0x0D:
-        D_800C3A78[player] = ev->b4 == 0;
+        g_cutscene_run_all_objs[player] = ev->b4 == 0;
         break;
     case 0x12:
-        D_800C3A7E[player] = ev->b4 == 0;
+        g_cutscene_keep_listed_objs[player] = ev->b4 == 0;
         break;
     case 0x13:
-        D_800C3A80[player] = ev->b4;
+        g_cutscene_ev13_value[player] = ev->b4;
         break;
     case 0x15:
-        D_800C3A82[player] = ev->b4 == 0;
+        g_cutscene_anim_events_on[player] = ev->b4 == 0;
         break;
     case 0x14:
         if (obj != NULL) {
@@ -747,7 +747,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
     case 0x41: {
         u8 colours[2][3];
 
-        *(SceneBytes6 *) colours = *(SceneBytes6 *) D_800844B4;
+        *(SceneBytes6 *) colours = *(SceneBytes6 *) g_scene_ev41_colours;
         if (obj != NULL) {
             if (ev->b4 == 0) {
                 SA_U8(o, 0xA5) = colours[ev->b5][0];
@@ -796,13 +796,13 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
     case 0x6B:
         break;
     case 0x1D:
-        if (D_800C3A10[player][track].kind == 3 && wrec != NULL) {
+        if (g_cutscene_actor_entries[player][track].kind == 3 && wrec != NULL) {
             SA_U8(wrec, 0x6E) = ev->b4 == 0 ? 1 : 0;
         }
         break;
     case 0x1E:
-        D_800C39E2 = ev->b4 + 1;
-        D_800C39E3 = g_level_id;
+        g_cutscene_next_scene = ev->b4 + 1;
+        g_cutscene_return_level = g_level_id;
         break;
     case 0x03: {
         u8 *r = world_record_find(ev->w6);
@@ -871,7 +871,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             u8 i;
 
             for (i = 0; i < 4; i++) {
-                laser_switch_broadcast(2, (s32) (D_800D34B8 + sLights[i] * 0x34));
+                laser_switch_broadcast(2, (s32) (g_level_zones + sLights[i] * 0x34));
             }
             break;
         }
@@ -944,7 +944,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         s32 k;
         s32 f;
 
-        *(SceneHalves8 *) kinds = *(SceneHalves8 *) D_800844BC;
+        *(SceneHalves8 *) kinds = *(SceneHalves8 *) g_scene_ev05_fx_kinds;
         if (ev->b4 == 0) {
             k = ev->b5 >= 4 ? 3 : ev->b5;
             span = scene_event_find_next(arg0, ev->type, track, &next, 1, ev->id, 0, 0, 1, ev->b5, player) - now;
@@ -954,7 +954,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             } else {
                 f = (u8) flag;
             }
-            character_effect_attach(o, kinds[k][1], span, 0, f, 0, D_80096DE0);
+            character_effect_attach(o, kinds[k][1], span, 0, f, 0, g_str_cutscene_1);
         }
         break;
     }
@@ -998,12 +998,12 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         }
         break;
     case 0x25:
-        D_800C3A70 = ev->b4 != 0 ? (f32) ev->b4 : g_cam_near_plane;
-        camera_projection_set_viewport(0, D_800C3A70, D_800C3A74);
+        g_camera_viewport_w = ev->b4 != 0 ? (f32) ev->b4 : g_cam_near_plane;
+        camera_projection_set_viewport(0, g_camera_viewport_w, g_camera_viewport_h);
         break;
     case 0x58:
-        D_800C3A74 = ev->w6 != 0 ? (f32) (ev->w6 * 10) : g_cam_far_plane;
-        camera_projection_set_viewport(0, D_800C3A70, D_800C3A74);
+        g_camera_viewport_h = ev->w6 != 0 ? (f32) (ev->w6 * 10) : g_cam_far_plane;
+        camera_projection_set_viewport(0, g_camera_viewport_w, g_camera_viewport_h);
         break;
     case 0x3C:
         if (obj != NULL) {
@@ -1036,31 +1036,31 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
     case 0x42:
         switch (ev->b4) {
         case 0:
-            D_800D9CB0 = 1;
+            g_cs_overlay_cmd = 1;
             break;
         case 1:
-            D_800D9CB0 = 4;
+            g_cs_overlay_cmd = 4;
             break;
         case 3:
-            D_800D9CB0 = 2;
+            g_cs_overlay_cmd = 2;
             break;
         case 4:
-            D_800D9CB0 = 5;
+            g_cs_overlay_cmd = 5;
             break;
         case 5:
-            D_800D9CB0 = 6;
+            g_cs_overlay_cmd = 6;
             break;
         case 6:
-            D_800D9CB0 = 7;
+            g_cs_overlay_cmd = 7;
             break;
         case 7:
-            D_800D9CB0 = 8;
+            g_cs_overlay_cmd = 8;
             break;
         case 8:
-            D_800D9CB0 = 9;
+            g_cs_overlay_cmd = 9;
             break;
         case 9:
-            D_800D9CB0 = 10;
+            g_cs_overlay_cmd = 10;
             break;
         }
         break;
@@ -1091,13 +1091,13 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         audio_mixer_set_override_mode(ev->b4 == 0 ? ev->b5 : 0);
         break;
     case 0x54:
-        D_800C3A84[player] = ~ev->b4;
+        g_cutscene_obj_vis_mode[player] = ~ev->b4;
         break;
     case 0x55:
         wobblers_set_intensity(ev->b4);
         break;
     case 0x59:
-        D_800C40AB = 1;
+        g_cutscene_fade_out_at_end = 1;
         break;
     case 0x5A:
         g_cur_obj_index = SA_OBJ_INDEX(obj);
@@ -1130,7 +1130,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         u8 colours[3][3];
         s32 v;
 
-        *(SceneBytes9 *) colours = *(SceneBytes9 *) D_800844CC;
+        *(SceneBytes9 *) colours = *(SceneBytes9 *) g_scene_ev37_colours;
         span = scene_event_find_next(arg0, ev->type, track, &next, 1, ev->id, 0, 0, 0, 0, player) - now;
         if (ev->b4 == 0) {
             v = ev->w6 != 0 ? ev->w6 : 0x7F;
@@ -1172,26 +1172,26 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         SA_U8(g_level_header, 8) = 0;
         break;
     case 0x7C:
-        D_800C3681 = ev->b4 == 0;
+        g_cutscene_hide_background = ev->b4 == 0;
         break;
     case 0x84:
-        D_800C3682 = ev->b4 == 0;
+        g_cutscene_flat_background = ev->b4 == 0;
         break;
     case 0x85:
-        D_800C3683 = ev->b4 == 0;
+        g_cutscene_no_pause = ev->b4 == 0;
         break;
     case 0x63:
-        D_80041FDC = ev->w6;
+        g_sound_bus_volume_target = ev->w6;
         break;
     case 0x64:
         if (ev->b4 == 0) {
-            D_800DDE40 = 1;
+            g_hud_scope_scripted = 1;
             rec = SA_REC(player, track);
-            D_800DE274 = rec + 0x28;
-            D_800DE278 = rec + 0x24;
-            D_800DE27C = rec + 0x2C;
+            g_hud_scope_zoom_ptr = rec + 0x28;
+            g_hud_scope_aim_x_ptr = rec + 0x24;
+            g_hud_scope_aim_y_ptr = rec + 0x2C;
         } else {
-            D_800DDE40 = 0;
+            g_hud_scope_scripted = 0;
         }
         break;
     case 0x67: /* end of the logo scene: go to the title menu */
@@ -1239,14 +1239,14 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         }
         break;
     case 0x6A:
-        D_800C3A94 = ev->w6;
+        g_cutscene_end_cam_value = ev->w6;
         break;
     case 0x7A:
-        D_800C3A9C = ev->b5 * 50;
-        D_800C3A98 = ev->w6;
+        g_cutscene_end_cam_blend_time = ev->b5 * 50;
+        g_cutscene_end_cam_blend_arg = ev->w6;
         break;
     case 0x6D:
-        D_800C3A86 = ev->b4 == 0;
+        g_cutscene_hide_world = ev->b4 == 0;
         break;
     case 0x74:
         g_slowmo_divisor = ev->b5;
@@ -1257,15 +1257,15 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         }
         break;
     case 0x70:
-        D_800C40AC = 1;
+        g_cutscene_finish_state = 1;
         break;
     case 0x72:
         if (obj != NULL) {
-            SA_F32(o, 0xC8) = SA_S16(D_800D1C90[SA_U8(o, 4)], 6);
+            SA_F32(o, 0xC8) = SA_S16(g_type_descs[SA_U8(o, 4)], 6);
         }
         break;
     case 0x78:
-        D_800C40AD = 1;
+        g_cutscene_event_no_fade = 1;
         break;
     case 0x79:
         if (wrec != NULL) {
@@ -1276,7 +1276,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         break;
     case 0x7B:
         if (g_level_id == 0x1D) {
-            D_800C3AA0 = 1;
+            g_cutscene_skip_end_cam_event = 1;
         }
         break;
     case 0x7D:
@@ -1286,11 +1286,11 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         break;
     case 0x7E:
         if (obj != NULL) {
-            D_800D18D0 = SA_OBJ_INDEX(obj);
+            g_lipsync_obj_idx = SA_OBJ_INDEX(obj);
         }
         break;
     case 0x7F:
-        D_800DC2DC = 1;
+        g_sky_alt_tiles = 1;
         break;
     case 0x80:
         g_level_load_white_fill = ev->b4;
@@ -1300,10 +1300,10 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         g_hud_clock_frames = ev->w6 * 25;
         break;
     case 0x82:
-        D_800C40BD = (u8) ev->b4 >= 101 ? 100 : ev->b4;
+        g_cutscene_tail_lift_pct = (u8) ev->b4 >= 101 ? 100 : ev->b4;
         break;
     case 0x83:
-        D_800C40BE = ev->w6;
+        g_cutscene_cash_offset = ev->w6;
         break;
     default:
         return 0;
@@ -1475,16 +1475,16 @@ typedef struct {
     s16 unk56, unk58;
 } ScriptSpray;
 
-extern u8  *D_800C3D80[4][30];      /* per player and track: byte table written by type 0x11 */
+extern u8  *g_cutscene_actor_blocks[4][30];      /* per player and track: byte table written by type 0x11; was D_800C3D80 */
 extern s16 *D_eu_800C3C88[4][30];   /* per player and track: s16 x, y, z */
-extern s32 *D_800C3A00[4];          /* per player: word table indexed by w6 */
-extern s32 D_8008CDF0;
+extern s32 *g_cutscene_words[4];          /* per player: word table indexed by w6; was D_800C3A00 */
+extern s32 g_scene_ev0c_quad_word; /* was D_8008CDF0 */
 extern u8 *g_char_fx_states[]; /* was D_8008AF88 */
 /* gun_muzzle_smoke_spawn's .s rodata (game_eu_1F3040) is dropped in the NM link: local copy of its first muzzle point */
 static const f32 g_gun_smoke_start_pt[3] = { -113.828796f, -14.0823936f, 14.5422001f }; /* was D_800AAE70 */
-extern char D_80096DEC[];          /* "Cutscene 2" */
+extern char g_str_cutscene_2[];          /* "Cutscene 2"; was D_80096DEC */
 
-extern u8 D_800844D8[3][6];         /* sub 0x11 colour sets (.data) */
+extern u8 g_scene_ev11_colour_sets[3][6];         /* sub 0x11 colour sets (.data); was D_800844D8 */
 /* bone offset tables of sub 0x5F (copied to the stack before use, as the N64 code does: their address is passed on) */
 typedef struct { f32 v[3][3]; } ScriptOffsets3;
 typedef struct { f32 v[4][3]; } ScriptOffsets4;
@@ -1511,12 +1511,12 @@ static const u8 sBones5F19[8] = { 7, 8, 9, 10, 13, 14, 15, 16 };                
 
 /* frames until the next event of this type and id on the track: the effect's duration */
 #define SPAN(ev, out) (scene_event_find_next((u32) (ev), (ev)->type, track, (out), 1, (ev)->id, 0, 0, 0, 0, player) - now)
-#define REC(player, track) ((u8 *) &(&D_800C3958)[player][track])
+#define REC(player, track) ((u8 *) &(&g_cutscene_track_recs)[player][track])
 #define OBJ_INDEX(obj) ((s32) ((u8 *) (obj) - (u8 *) g_objects) / 812)
 
 /* Script event interpreter (middle handler of scene_event_run). `arg0` is one 8-byte ScriptEvent of track `track` of
  * player `player`; `now` = the current frame, `value` = the byte type 0x11 stores, `obj` / `rec` = the object or the
- * player's D_800C3958 record the track drives, `data` = its position (f32 x, y, z), `flag` = passed on to the effects.
+ * player's g_cutscene_track_recs record the track drives, `data` = its position (f32 x, y, z), `flag` = passed on to the effects.
  * Type 0x0B plays / fades / stops a sound, type 0x11 sets a per-track byte, type 0x05 starts effect `id` (most only
  * when b4 == 0; "span" = frames until the next event with the same type and id). Returns 1 when handled, else 0. */
 /* was func_150268BC */
@@ -1546,7 +1546,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         return 1;
     }
     if (ev->type == 0x11) {
-        D_800C3D80[player][track][ev->id] = ev->b4 != 0 ? (u8) value : 0xFF;
+        g_cutscene_actor_blocks[player][track][ev->id] = ev->b4 != 0 ? (u8) value : 0xFF;
         return 1;
     }
     if (ev->type != 5) {
@@ -1572,7 +1572,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             size = 200;
         }
         k = ev->b5 < 3 ? ev->b5 : 0;
-        c = D_800844D8[k];   /* N64: from a stack copy of the table taken before the span call */
+        c = g_scene_ev11_colour_sets[k];   /* N64: from a stack copy of the table taken before the span call */
         grow = (size * 40) / 4096;
         /* a0 / a1: the two halves of the `data` pointer, as the N64 code passes them */
         particle_emitter_node_spawn((s16) ((s32) data >> 16), (s16) (s32) data, 0, 0x1B, 0, c[0], c[1], c[2], c[3], c[4], c[5], 0, 1,
@@ -1602,7 +1602,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         } s;
         s.unk4 = 0;
         s.unk6 = 0x100;
-        s.unk0 = D_8008CDF0;
+        s.unk0 = g_scene_ev0c_quad_word;
         s.x = pos[0];
         s.y = pos[1] + ev->b4;
         s.unkE = 1500;
@@ -1813,10 +1813,10 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             }
             break;
         case 17:
-            text_pager_spawn_caption(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
+            text_pager_spawn_caption(ev->w6 & 0xFF, g_cutscene_words[player][ev->w6], span, (u8) flag, 1);
             break;
         case 18:
-            text_pager_spawn_console(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
+            text_pager_spawn_console(ev->w6 & 0xFF, g_cutscene_words[player][ev->w6], span, (u8) flag, 1);
             break;
         case 19:
             screen_bar_spawn(span, (u8) flag, 1);
@@ -1825,7 +1825,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             obj_dust_effect((u8 *) obj, span, (u8) flag, 1);
             break;
         case 21:
-            text_pager_spawn_title(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
+            text_pager_spawn_title(ev->w6 & 0xFF, g_cutscene_words[player][ev->w6], span, (u8) flag, 1);
             break;
         case 22:
             seqfx_track_sprite_spawn(REC(player, track), (u16) ev->w6 < 0xCF ? (u16) ev->w6 : 0, span, (u8) flag, 1);
@@ -1922,7 +1922,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
                     bone_sparks_attach_preset((s32) obj, list[ev->w6], span, -1, -1, -1, 0, 0, flag, 1);
                 }
             } else {
-                character_effect_attach((u8 *) obj, ev->b5, span, 0, flag, 1, D_80096DEC);
+                character_effect_attach((u8 *) obj, ev->b5, span, 0, flag, 1, g_str_cutscene_2);
             }
         }
         break;
@@ -2140,7 +2140,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         case 11: {
             u8 k = 0;
             do {
-                laser_switch_broadcast(1, (s32) (D_800D34B8 + sLights5F11[k] * 0x34));
+                laser_switch_broadcast(1, (s32) (g_level_zones + sLights5F11[k] * 0x34));
                 k++;
             } while (k < 4);
             break;
@@ -2452,10 +2452,10 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
     return 1;
 }
 
-extern s32 D_800C39D0;
-extern u8 D_800844A0[];  /* screen fade colours, 3 bytes (r, g, b) per entry */
-extern s8 D_800C40AA;
-extern u16 D_800C40AE;
+extern s32 g_cutscene_frame; /* was D_800C39D0 */
+extern u8 g_scene_fade_colours[];  /* screen fade colours, 3 bytes (r, g, b) per entry; was D_800844A0 */
+extern s8 g_cutscene_last_fade_in; /* was D_800C40AA */
+extern u16 g_cutscene_start_frame; /* was D_800C40AE */
 s32 scene_event_find_next(u32 arg0, s32 arg1, s32 arg2, u8 **arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA);
 void scene_event_find_around(u8 **, u8 **, s32 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 scene_sfx_update(u8 *, s32 *, u32 *, s32 *, s32 *, s32 *, u16 *);
@@ -2486,7 +2486,7 @@ void *allocate_memory(s32, s32, s32, s32);
 //            0xA stops at its b4 1 event and fades in / out to its b4 2 / 3 events, 6 plays to the end (flags
 //            0x400, 0x800 for b4 2). 8: music id (b4 0 start, 1 / 4 volume, 2 / 6 fade, 8 / 9 other controls).
 //   2: object animation id with blend w6 - 1 frames, speed so that it lasts to the next type-2 event.
-//   5 / 1: screen fade to colour D_800844A0[b5] over the span to the b4 1 event (w6 0 = fade in); in replay the
+//   5 / 1: screen fade to colour g_scene_fade_colours[b5] over the span to the b4 1 event (w6 0 = fade in); in replay the
 //          b4 != 0 event re-applies the last one. 5 / 4, 0x5C, 0x56, 0x76, 0x2D, 0x57: see the cases.
 /* was func_15029EA8 */
 s32 scene_event_run_c(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 *obj, u8 *wrec, u8 *data, s32 flag,
@@ -2542,7 +2542,7 @@ s32 scene_event_run_c(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         r = allocate_memory(0x10, 1, 0, 0);
         if (r != NULL) {
             r[0] = player;
-            r[0xE] = (&D_800C3A08)[player];
+            r[0xE] = (&g_cutscene_scene)[player];
             *(u16 *) (r + 4) = span;
             *(u16 *) (r + 6) = span;
             r[1] = track;
@@ -2622,7 +2622,7 @@ s32 scene_event_run_c(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             blend = *(s16 *) (ev + 6) - 1;
         }
         mode = 1;
-        if (D_800C40AE >= now) {
+        if (g_cutscene_start_frame >= now) {
             blend = 0.0f;
         }
         if (replay != 0) {
@@ -2660,15 +2660,15 @@ s32 scene_event_run_c(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
                 if (replay != 0) {
                     t = 0;
                 }
-                c = &D_800844A0[(s8) ev[5] * 3];
+                c = &g_scene_fade_colours[(s8) ev[5] * 3];
                 screen_fade_start(c[0], c[1], c[2], t, *(s16 *) (ev + 6) == 0, 0);
-                D_800C40AA = *(s16 *) (ev + 6) == 0;
+                g_cutscene_last_fade_in = *(s16 *) (ev + 6) == 0;
             } else if (replay != 0) {
-                scene_event_find_around(&prev, &next, NULL, &prevTime, track, type, 1, 1, 1, 0, (&D_800C39D0)[player], player);
+                scene_event_find_around(&prev, &next, NULL, &prevTime, track, type, 1, 1, 1, 0, (&g_cutscene_frame)[player], player);
                 if (prev != NULL) {
-                    c = &D_800844A0[(s8) prev[5] * 3];
+                    c = &g_scene_fade_colours[(s8) prev[5] * 3];
                     screen_fade_start(c[0], c[1], c[2], 0, *(s16 *) (prev + 6) == 0, 0);
-                    D_800C40AA = *(s16 *) (prev + 6) == 0;
+                    g_cutscene_last_fade_in = *(s16 *) (prev + 6) == 0;
                 }
             }
             return 1;
@@ -2762,8 +2762,8 @@ s32 scene_event_run_b(s32, u8, u16, s32, s32, struct127 *, u8 *, u8 *, s32);
 s32 scene_event_run_c(s32, u8, u16, s32, s32, struct127 *, u8 *, u8 *, s32, s32);
 
 /* Runs entry arg1 of player `player` through the three handlers in turn; the first non-zero result is returned.
- * The entry may refer to an object (kind 2: its data at +0x14 replaces the player's D_800C3958 record) or to a
- * world_record_find record (kind 3); a missing reference returns 0. When D_800C3C88 == 2 the middle handler is skipped
+ * The entry may refer to an object (kind 2: its data at +0x14 replaces the player's g_cutscene_track_recs record) or to a
+ * world_record_find record (kind 3); a missing reference returns 0. When g_cutscene_skip_state == 2 the middle handler is skipped
  * and the last one gets 1 instead of 0. */
 /* was func_1502AB94 */
 s32 scene_event_run(s32 arg0, u8 arg1, u16 arg2, s32 arg3, s32 player) {
@@ -2777,8 +2777,8 @@ s32 scene_event_run(s32 arg0, u8 arg1, u16 arg2, s32 arg3, s32 player) {
     obj = NULL;
     rec = NULL;
     data = NULL;
-    flag = (&D_800C3A08)[player];
-    ref = &D_800C3A10[player][arg1];
+    flag = (&g_cutscene_scene)[player];
+    ref = &g_cutscene_actor_entries[player][arg1];
     if (ref->kind == 2) {
         obj = obj_find_by_setup_id(ref->id);
         if (obj == NULL) {
@@ -2792,9 +2792,9 @@ s32 scene_event_run(s32 arg0, u8 arg1, u16 arg2, s32 arg3, s32 player) {
         }
     }
     if (data == NULL) {
-        data = (u8 *) ((&D_800C3958)[player] + arg1);
+        data = (u8 *) ((&g_cutscene_track_recs)[player] + arg1);
     }
-    if (D_800C3C88 != 2) {
+    if (g_cutscene_skip_state != 2) {
         ret = scene_event_run_a(arg0, arg1, arg2, arg3, player, obj, rec, data, flag);
         if (ret != 0) {
             return ret;

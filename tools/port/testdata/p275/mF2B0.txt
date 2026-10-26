@@ -5,8 +5,8 @@
 \#^        aimed = 1;$#s/1;/2;/
 \#^    beam_aim_compute(&aimed, (s32) hit, (u8 \*) start14C, (s32) pos110, (s32) dir104#s/(s32) pos110, (s32) dir104/(s32) dir104, (s32) pos110/
 \#^                  (s32) axis11C, (s32) axisF8, (s32) axisEC#s/(s32) axisF8, (s32) axisEC/(s32) axisEC, (s32) axisF8/
-\#^    kind = D_800BE616 ? 0x35 : 0x1A;$#s/0x35/0x36/
-\#^    kind = D_800BE616 ? 0x35 : 0x1A;$#s/0x1A/0x1B/
+\#^    kind = g_mp_mode_active ? 0x35 : 0x1A;$#s/0x35/0x36/
+\#^    kind = g_mp_mode_active ? 0x35 : 0x1A;$#s/0x1A/0x1B/
 \#^    dir = (((u8 \*) obj)\[4\] == 0x98) ? 1 : -1;$#s/0x98/0x97/
 \#^    tracer_spawn(end140, pos134, target, surface, 1, 0, 300\.0f#s/target, surface/surface, target/
 \#^    tracer_spawn(end140, pos134, target, surface, 1, 0, 300\.0f#s/0\.0033333334f/0.0033333f/

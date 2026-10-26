@@ -18,18 +18,18 @@ void controller_init_si_queue(void) {
 s32 os_motor_stop(u8 *);
 s32 os_motor_init(void *, void *, int);
 s32 os_pfs_init(void *, void *, int);
-extern s8 D_8002AE14;
+extern s8 g_rumble_paks_probed; /* was D_8002AE14 */
 extern OSContStatus g_cont_status; /* was D_800BE6E0 */
 extern s32 g_cont_count; /* was D_800BEB4C */
-extern u8 D_800BEB60;
-extern s32 D_800BEB80;
-extern s8 D_800BED60;
-extern s8 D_800BED64;
-extern s8 D_800BED68;
-extern f32 D_800BED70;
-extern f32 D_800BED80;
-extern f32 D_800BED90;
-extern f32 D_800BEDA0;
+extern u8 g_cont_connected_mask; /* was D_800BEB60 */
+extern s32 g_rumble_pfs; /* was D_800BEB80 */
+extern s8 g_rumble_prev_active; /* was D_800BED60 */
+extern s8 g_rumble_pak_present; /* was D_800BED64 */
+extern s8 g_rumble_motor_on; /* was D_800BED68 */
+extern f32 g_rumble_phase; /* was D_800BED70 */
+extern f32 g_rumble_on_time; /* was D_800BED80 */
+extern f32 g_rumble_off_time; /* was D_800BED90 */
+extern f32 g_rumble_period; /* was D_800BEDA0 */
 
 /* was func_15006234 */
 void controller_init_all(void) {
@@ -62,15 +62,15 @@ void controller_init_all(void) {
         } while (osContInit(&g_si_mesg_queue, &sp.u8F, &g_cont_status) != 0);
     }
     g_cont_count = 0;
-    var_t1 = D_800BE720;
-    var_t0 = &D_800BEDA0;
-    var_a3 = &D_800BED90;
-    var_fp = &D_800BED80;
-    var_s7 = &D_800BED70;
-    var_s5 = &D_800BED68;
-    var_s4 = &D_800BED60;
-    var_s3 = D_800BED5C;
-    var_s2 = &D_800BED64;
+    var_t1 = g_cont_forced_buttons;
+    var_t0 = &g_rumble_period;
+    var_a3 = &g_rumble_off_time;
+    var_fp = &g_rumble_on_time;
+    var_s7 = &g_rumble_phase;
+    var_s5 = &g_rumble_motor_on;
+    var_s4 = &g_rumble_prev_active;
+    var_s3 = g_rumble_active;
+    var_s2 = &g_rumble_pak_present;
     var_s0 = 0;
     var_s6 = 0;
     do {
@@ -87,9 +87,9 @@ void controller_init_all(void) {
         if (sp.u8F & temp_v1) {
             temp_v0 = ((OSContStatus *)((u8 *)&g_cont_status + var_s6));
             if (!((*(u8 *)((u8 *)temp_v0 + 3)) & 8)) {
-                D_800BEB60 |= temp_v1;
+                g_cont_connected_mask |= temp_v1;
                 g_cont_count += 1;
-                if (((*(u16 *)((u8 *)temp_v0 + 0)) & 4) && ((*(u8 *)((u8 *)temp_v0 + 2)) & 1) && ((temp_s1 = ((s32 *)((u8 *)&D_800BEB80 + (var_s0 * 0x68))), sp6C = var_a3, sp68 = var_t0, sp60 = var_t1, temp_v0_2 = os_pfs_init(&g_si_mesg_queue, temp_s1, var_s0), (temp_v0_2 == 0xA)) || (temp_v0_2 == 0xB))) {
+                if (((*(u16 *)((u8 *)temp_v0 + 0)) & 4) && ((*(u8 *)((u8 *)temp_v0 + 2)) & 1) && ((temp_s1 = ((s32 *)((u8 *)&g_rumble_pfs + (var_s0 * 0x68))), sp6C = var_a3, sp68 = var_t0, sp60 = var_t1, temp_v0_2 = os_pfs_init(&g_si_mesg_queue, temp_s1, var_s0), (temp_v0_2 == 0xA)) || (temp_v0_2 == 0xB))) {
                     sp6C = var_a3;
                     sp68 = var_t0;
                     sp60 = var_t1;
@@ -116,5 +116,5 @@ void controller_init_all(void) {
         var_t0 = (f32 *)((u8 *)var_t0 + (4));
         var_t1 = (u16 *)((u8 *)var_t1 + (2));
     } while (var_s0 != 4);
-    D_8002AE14 = 1;
+    g_rumble_paks_probed = 1;
 }

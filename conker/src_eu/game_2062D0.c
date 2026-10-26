@@ -1004,7 +1004,7 @@ void impact_splash_ring_spawn(u8 type, f32 size, u8 alpha, f32 *pos, u8 lit, u8 
     req.u50 = 0;
     req.fadeStart = 0x20;
     req.fadeRate = 7;
-    fx = effect3d_spawn_full(&req, (s32)&D_800A4AA0, 0, 0x14, 0, 0xE, (random_int() & 1) | 2, lit ? 3 : 0,
+    fx = effect3d_spawn_full(&req, (s32)&g_effect3d_default_params, 0, 0x14, 0, 0xE, (random_int() & 1) | 2, lit ? 3 : 0,
                        lit ? 0xFF : 0, 0xC, room, owner);
     if (fx != NULL) {
         memcpy(fx + 0x110, &extra, 0xC);

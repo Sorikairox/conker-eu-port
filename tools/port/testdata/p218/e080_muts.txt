@@ -17,7 +17,7 @@ s/obj_tint_set_pulse(obj, 0, 0, 0xFF, 0xBF, 4);/obj_tint_set_pulse(obj, 0, 0, 0x
 s/context_action_lock(i, 1, cur, 0);/context_action_lock(i, 1, have, 0);/
 s/if (cur == 0 \&\& have != 3) {/if (cur == 0) {/
 s/rail_racer_send_event(i, 0x45, 4);/rail_racer_send_event(i, 0x45, 3);/
-s/if (D_800876E0 != i ||/if (D_800876E0 != 0 ||/
+s/if (g_race_item_check_racer != i ||/if (g_race_item_check_racer != 0 ||/
 s/if (n == 0 \&\& ((u8 \*) obj->unk31C)\[0x11A\] == 2/if (n == 0 \&\& ((u8 *) obj->unk31C)[0x11A] != 0/
 s/item != 0x55 \&\& item != 0x2E) {/item != 0x55) {/
 s/if (n != 0 \&\& cur != 0x20) {/if (n != 0) {/
@@ -32,8 +32,8 @@ s/if (item != 0x55 \&\& \*(s32/if (*(s32/
 s/== i + 1 \&\& \*((u8 \*) p + 4) == 0x6E/== i \&\& *((u8 *) p + 4) == 0x6E/
 s/                    break;/                    ;/
 s/if (\*(s32 \*) p != 0 \&\& /if (/
-s/    D_800876E0++;/    ;/
-s/if (D_800876E0 >= \*(s32/if (D_800876E0 > *(s32/
+s/    g_race_item_check_racer++;/    ;/
+s/if (g_race_item_check_racer >= \*(s32/if (g_race_item_check_racer > *(s32/
 s/pick = world_record_find((u8) slotObj\[i\]);/pick = world_record_find(slotObj[i]);/
 s/respawn\[i\] = 4;/respawn[i] = 3;/
 s/if (hide\[i\] <= 0) {/if (hide[i] < 0) {/
@@ -63,4 +63,4 @@ s/slotOf\[r\] = i;/slotOf[i] = r;/
 s/0x5C))\[r\] = 1;/0x5C))[i] = 1;/
 s/+ 0x12C) = 600;/+ 0x12C) = 601;/
 s/if (weapon\[i\] == ext\[0x128\]) {/if (1) {/
-s/    return (s32) D_800D27D0;/    return 0;/
+s/    return (s32) g_race_state;/    return 0;/

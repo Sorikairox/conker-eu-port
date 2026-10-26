@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-// D_80000308: osRomBase (variables.h)
+// g_os_rom_base: osRomBase (variables.h)
 
 s32 osPiRawReadIo(u32 devAddr, u32 *data) {
     register u32 stat;
@@ -11,6 +11,6 @@ s32 osPiRawReadIo(u32 devAddr, u32 *data) {
     while (stat & (PI_STATUS_IO_BUSY | PI_STATUS_DMA_BUSY)) {
         stat = IO_READ(PI_STATUS_REG);
     }
-    *data = IO_READ((u32)D_80000308 | devAddr);
+    *data = IO_READ((u32)g_os_rom_base | devAddr);
     return 0;
 }

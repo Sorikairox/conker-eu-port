@@ -89,27 +89,27 @@ void ground_fx_spawn_above_player(s32 arg0) {
     ground_fx_spawn_random(g_objects, g_objects->y_position + 300.0f, -10000.0f); /* P95: float literal (asm passes the bits 0xC61C4000) */
 }
 
-extern s32 D_80088C30;
-extern s32 D_80088C34;
-extern s32 D_80088C38;
+extern s32 g_tile_scroll_s0; /* was D_80088C30 */
+extern s32 g_tile_scroll_t0; /* was D_80088C34 */
+extern s32 g_tile_scroll_s1; /* was D_80088C38 */
 /* was func_150CFA88 */
 void tex_scroll_step_offsets(s32 arg0) {
     s32 temp_v1;
-    D_80088C30 += g_frame_ticks * 0x1A;
+    g_tile_scroll_s0 += g_frame_ticks * 0x1A;
     temp_v1 = g_frame_ticks * 0x1C;
-    D_80088C34 -= temp_v1;
-    D_80088C38 -= temp_v1;
+    g_tile_scroll_t0 -= temp_v1;
+    g_tile_scroll_s1 -= temp_v1;
 }
 
-extern s32 D_80088C30;
-extern s32 D_80088C34;
-extern s32 D_80088C38;
-extern s32 D_80088C3C;
+extern s32 g_tile_scroll_s0; /* was D_80088C30 */
+extern s32 g_tile_scroll_t0; /* was D_80088C34 */
+extern s32 g_tile_scroll_s1; /* was D_80088C38 */
+extern s32 g_tile_scroll_t1; /* was D_80088C3C */
 
 /* was func_150CFAF8 */
 Gfx *tex_scroll_set_tile_sizes(Gfx *gdl) {
-    gDPSetTileSize(gdl++, 0, D_80088C30 >> 7, D_80088C34 >> 7, 0x47E, 0x47E);
-    gDPSetTileSize(gdl++, 1, D_80088C38 >> 7, D_80088C3C >> 7, 0x47E, 0x47E);
+    gDPSetTileSize(gdl++, 0, g_tile_scroll_s0 >> 7, g_tile_scroll_t0 >> 7, 0x47E, 0x47E);
+    gDPSetTileSize(gdl++, 1, g_tile_scroll_s1 >> 7, g_tile_scroll_t1 >> 7, 0x47E, 0x47E);
     return gdl;
 }
 
@@ -485,13 +485,13 @@ u8 *text_pager_spawn(u8 arg0, s32 arg1, s16 arg2, s32 arg3, s32 arg4, s32 arg5, 
     }
     return sp3C;
 }
-extern s32 D_80088C40[];
+extern s32 g_text_pager_rec_fns[]; /* was D_80088C40 */
 
 /* was func_150D0544 */
 s32 text_pager_update(s32 arg0, u8 *arg1, s32 arg2) {
     u8 *v = arg1 + 0x28;
 
-    if ((*(s8 *)(arg1 + 0x4C) != -1) && (((s32 (**)(u8 *))D_80088C40)[*(volatile s8 *)(arg1 + 0x4C)](arg1) == 0)) { // fakematch: volatile forces the second lb of the index, v defined first so addiu is rematerialised
+    if ((*(s8 *)(arg1 + 0x4C) != -1) && (((s32 (**)(u8 *))g_text_pager_rec_fns)[*(volatile s8 *)(arg1 + 0x4C)](arg1) == 0)) { // fakematch: volatile forces the second lb of the index, v defined first so addiu is rematerialised
         *(s16 *)(arg1 + 0xE) = -1;
         return arg0;
     }
@@ -499,7 +499,7 @@ s32 text_pager_update(s32 arg0, u8 *arg1, s32 arg2) {
     return arg0;
 }
 
-extern void (*D_80088C50[])(u8 *, u8 *, u8);
+extern void (*g_text_pager_event_fns[])(u8 *, u8 *, u8); /* was D_80088C50 */
 void text_pager_next_line(u8 *);
 /* was func_150D05D0 */
 void text_pager_handle_event(u8 *arg0, u8 *arg1, u8 arg2) {
@@ -509,7 +509,7 @@ void text_pager_handle_event(u8 *arg0, u8 *arg1, u8 arg2) {
             text_pager_next_line(arg0);
         }
     } else {
-        f = D_80088C50[arg0[0x4D]];
+        f = g_text_pager_event_fns[arg0[0x4D]];
         if (f != NULL) {
             f(arg0, arg1, arg2);
         }

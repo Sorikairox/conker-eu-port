@@ -1,9 +1,9 @@
 s/g_player_out_fade\[i\] < 0x33/g_player_out_fade[i] < 0x34/
 s/g_player_out_fade\[i\] < 0x33/g_player_out_fade[j] < 0x33/
 s/if (g_player_out_mask \& mask) {/if (g_player_out_mask \& jbit) {/
-s/    D_800D18A0 \&= ~mask;/    ;/
+s/    g_player_view_hidden_mask \&= ~mask;/    ;/
 s/    g_player_out_mask |= mask;/    g_player_out_mask |= jbit;/
-s/    D_800D18A0 |= jbit;/    D_800D18A0 |= mask;/
+s/    g_player_view_hidden_mask |= jbit;/    g_player_view_hidden_mask |= mask;/
 s/player_stat_modify(i, 2, player_stat_get(j, 3));/player_stat_modify(i, 2, player_stat_get(i, 3));/
 s/player_stat_get(j, 3)/player_stat_get(j, 2)/
 s/player_stat_modify(j, 2, 0);/player_stat_modify(j, 2, 1);/

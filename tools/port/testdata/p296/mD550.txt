@@ -1,5 +1,5 @@
-\#^    cyl\[0\] = D_800D34B8 + sBlastCyl\[0\] \* 0x34;#s/sBlastCyl\[0\]/sBlastCyl[1]/
-\#^    cyl\[1\] = D_800D34B8 + sBlastCyl\[1\] \* 0x34;#s/0x34/0x30/
+\#^    cyl\[0\] = g_level_zones + sBlastCyl\[0\] \* 0x34;#s/sBlastCyl\[0\]/sBlastCyl[1]/
+\#^    cyl\[1\] = g_level_zones + sBlastCyl\[1\] \* 0x34;#s/0x34/0x30/
 \#^    n = random_int() . 9U + 13;#s/+ 13/+ 12/
 \#^    debris.u50 = 0x12DE8;#s/0x12DE8/0x12DE9/
 \#^    debris.u56 = 1;#s/1;/2;/

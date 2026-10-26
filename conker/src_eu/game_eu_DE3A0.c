@@ -2,14 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_8009FBE0[];
-extern u8 D_8009FBE8[];
+extern u8 g_hit_fx_burst_desc_a[]; /* was D_8009FBE0 */
+extern u8 g_hit_fx_burst_desc_b[]; /* was D_8009FBE8 */
 
 
 void hitinfo_from_obj_floor(void *, u8 *);
 s32 obj_get_local_yaw_byte(struct127 *);
-extern s32 D_8009FBE4;
-extern s32 D_8009FBEC;
+extern s32 g_hit_fx_burst_params_a; /* was D_8009FBE4 */
+extern s32 g_hit_fx_burst_params_b; /* was D_8009FBEC */
 
 /* was func_150B0B90 */
 void obj_hit_impact_fx_spawn(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3) {
@@ -114,7 +114,7 @@ void obj_hit_impact_fx_spawn(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg
         sp.uF4 = 0.707f;
         sp.uF8 = 0.507f;
         sp.uFC = 26.411001f;
-        emit_textured_burst(&sp.uC4, ((u8 *)&D_8009FBE0), &D_8009FBE4, 1, 0.0f, 0U, (u8) temp_s1, arg3);
+        emit_textured_burst(&sp.uC4, ((u8 *)&g_hit_fx_burst_desc_a), &g_hit_fx_burst_params_a, 1, 0.0f, 0U, (u8) temp_s1, arg3);
         return;
     }
     sp.u88 = 0xA;
@@ -135,7 +135,7 @@ void obj_hit_impact_fx_spawn(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg
     sp.uB8 = 0.049000002f;
     sp.uBC = 0.102000006f;
     sp.uC0 = 26.411001f;
-    emit_textured_burst(&sp.u88, ((u8 *)&D_8009FBE8), &D_8009FBEC, 1, 0.0f, 0U, (u8) temp_s1, arg3);
+    emit_textured_burst(&sp.u88, ((u8 *)&g_hit_fx_burst_desc_b), &g_hit_fx_burst_params_b, 1, 0.0f, 0U, (u8) temp_s1, arg3);
     sp.u44.unk0 = (*(f32 *)((u8 *)(&sp.u134) + 0));
     sp.u44.unk4 = (*(f32 *)((u8 *)(&sp.u134) + 4));
     sp.u44.unk8 = (*(f32 *)((u8 *)(&sp.u134) + 8));

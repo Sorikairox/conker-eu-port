@@ -2,14 +2,14 @@
  *
  * ?p103boot=1 : one line per change of the game mode g_game_mode or the level g_level_id (called from the
  *               game_mode_frame_step wrap in p84_checks.c): mode, previous mode g_game_mode_prev, mode timer g_game_mode_timer,
- *               osTvType D_80000300, world objects g_world_obj_count, level events D_800D2F3C, scene slot 0 D_800C35EA.
- *               Also logs every event_start_level_events call (level-start event pass: the event ids D_800D2F40[0..n-1], their
- *               D_800877D0 record, and what the asm event_prereqs_met would answer, computed here from its asm), every
+ *               osTvType g_os_tv_type, world objects g_world_obj_count, level events g_level_event_count, scene slot 0 g_cutscene_slot_state.
+ *               Also logs every event_start_level_events call (level-start event pass: the event ids g_level_event_ids[0..n-1], their
+ *               g_event_table record, and what the asm event_prereqs_met would answer, computed here from its asm), every
  *               event_start call (start one event) and every cutscene_scene_load call (scene load).
  * ?p103ev=1   : TEST ONLY. event_prereqs_met (game_eu_CA630.c, still an asm stub = always 0) answers with the C below, so
  *               event_start_level_events goes on to event_start (also an asm stub). Shows which events the stub suppresses.
  *
- * event_prereqs_met(id) from the asm: the u16 list D_800877D0[id] + 0xC (0xFFFF-terminated) holds prerequisite event ids;
+ * event_prereqs_met(id) from the asm: the u16 list g_event_table[id] + 0xC (0xFFFF-terminated) holds prerequisite event ids;
  * for each one p, recurse on p, then require save flag bit p (g_save_progress_bits byte p >> 3, bit p & 7) and the recursion's
  * result; an empty list answers 1. */
 #include <stdint.h>
@@ -21,11 +21,11 @@ int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
 
-extern unsigned char g_game_mode, g_game_mode_prev, D_800D2F3C, D_800C35EA; /* was D_800E0B94; was D_800E0FC5 */
-extern int g_level_id, g_game_mode_timer, D_80000300, g_world_obj_count; /* was D_800DC320; was D_800BE9F0; was D_800E0EC0 */
-extern unsigned char *D_800D2F40;  /* u16 ids */
+extern unsigned char g_game_mode, g_game_mode_prev, g_level_event_count, g_cutscene_slot_state; /* was D_800E0B94; was D_800E0FC5; was D_800C35EA; was D_800D2F3C */
+extern int g_level_id, g_game_mode_timer, g_os_tv_type, g_world_obj_count; /* was D_800DC320; was D_800BE9F0; was D_800E0EC0; was D_80000300 */
+extern unsigned char *g_level_event_ids;  /* u16 ids; was D_800D2F40 */
 extern unsigned char *g_save_progress_bits;  /* save flags (pointer); was D_800D2E4C */
-extern unsigned char D_800877D0[]; /* 0x14-byte records */
+extern unsigned char g_event_table[]; /* 0x14-byte records; was D_800877D0 */
 
 static int fboot = -1, fev = -1;
 static int flag(int *f, const char *n) { if (*f < 0) *f = port_flag(n); return *f; }
@@ -41,7 +41,7 @@ static int memok(const void *p) {
 }
 
 static int p103_prereq(int id, int depth) {
-    const unsigned char *rec = D_800877D0 + id * 0x14;
+    const unsigned char *rec = g_event_table + id * 0x14;
     const unsigned char *p = (const unsigned char *)(uintptr_t)*(const unsigned *)(rec + 0xC);
     const unsigned char *save = g_save_progress_bits;
     unsigned e;
@@ -91,8 +91,8 @@ void p103_frame(void) {
     }
     if (!flag(&fboot, "p103boot") || (m == lmode && l == llevel)) return;
     port_log("[p103] frame %u: mode %d (prev %d) level %X timer %d tv %d | objects %d events %u scene0 %u\n",
-             port_frame_count, m, vbe_ld8(&g_game_mode_prev), l, g_game_mode_timer, D_80000300, g_world_obj_count, vbe_ld8(&D_800D2F3C),
-             vbe_ld8(&D_800C35EA));
+             port_frame_count, m, vbe_ld8(&g_game_mode_prev), l, g_game_mode_timer, g_os_tv_type, g_world_obj_count, vbe_ld8(&g_level_event_count),
+             vbe_ld8(&g_cutscene_slot_state));
     lmode = m; llevel = l;
 }
 
@@ -108,12 +108,12 @@ int __wrap_event_prereqs_met(int id) {
 void __real_event_start_level_events(int a0, int a1);
 void __wrap_event_start_level_events(int a0, int a1) {
     if (flag(&fboot, "p103boot")) {
-        int n = vbe_ld8(&D_800D2F3C), i;
+        int n = vbe_ld8(&g_level_event_count), i;
         port_log("[p103] event_start_level_events(%d, %d) frame %u level %X mode %d: %d level events, save flags %08X\n", a0, a1,
                  port_frame_count, g_level_id, vbe_ld8(&g_game_mode), n, (unsigned)(uintptr_t)g_save_progress_bits);
-        for (i = 0; i < n && i < 32 && memok(D_800D2F40); i++) {
-            int id = (short)vbe_ld16(D_800D2F40 + 2 * i);
-            const unsigned *r = (const unsigned *)(D_800877D0 + id * 0x14);
+        for (i = 0; i < n && i < 32 && memok(g_level_event_ids); i++) {
+            int id = (short)vbe_ld16(g_level_event_ids + 2 * i);
+            const unsigned *r = (const unsigned *)(g_event_table + id * 0x14);
             const unsigned char *pl = (const unsigned char *)(uintptr_t)r[3];
             char pre[64]; int k, o = 0;
             for (k = 0; k < 6 && memok(pl); k++) {
@@ -175,12 +175,12 @@ static void p113_cam_scan(unsigned a) {
 /* P113 OPT-IN emulation ?p113g84=1 (remove when obj_model_refs_release is game C): obj_model_refs_release (game_eu_AF2A0, asm stub) is the
  * part-reference release under the object removal chain obj_remove -> obj_release_models (C since port P112) ->
  * obj_model_refs_release_all (C). The stub left the object's part words +0x28C + j*8 set, the shared-block reference counts
- * D_800D1F80[slot] up and the private copies allocated, and the heap was corrupt right after the LogoScreen scene
+ * g_model_slot_users[slot] up and the private copies allocated, and the heap was corrupt right after the LogoScreen scene
  * end (frame 2133-2137). This wrap does what the asm does (EU asm read by hand, 0x60 bytes): for both words of
- * part j: word == D_800D19A0[slot] -> D_800D1F80[slot]--, else heap_set_block_tag(word, 3); then the word = 0.
+ * part j: word == g_model_bases[slot] -> g_model_slot_users[slot]--, else heap_set_block_tag(word, 3); then the word = 0.
  * Result: it is NOT the cause of the heap corruption (same corruption with it), so it is opt-in; default = the stub. */
-extern unsigned D_800D19A0[];
-extern unsigned char D_800D1F80[];
+extern unsigned g_model_bases[]; /* was D_800D19A0 */
+extern unsigned char g_model_slot_users[]; /* was D_800D1F80 */
 void heap_set_block_tag(int *p, unsigned tag);
 void __real_obj_model_refs_release(unsigned char *obj, int j);
 void __wrap_obj_model_refs_release(unsigned char *obj, int j) {
@@ -197,7 +197,7 @@ void __wrap_obj_model_refs_release(unsigned char *obj, int j) {
     slot = (*(unsigned char **)(obj + 0x2C4))[j];
     for (k = 0; k < 2; k++) {
         if (w[k] == 0) continue;
-        if (w[k] == D_800D19A0[slot]) D_800D1F80[slot]--;
+        if (w[k] == g_model_bases[slot]) g_model_slot_users[slot]--;
         else heap_set_block_tag((int *)(uintptr_t)w[k], 3);
         w[k] = 0;
     }
@@ -215,11 +215,11 @@ P113W1(collision_select_area)
 P113W0(world_records_flag_active)
 P113W0(timedfx_update_all)
 /* P116: scene_event_track_pass also logs, when slot 0's +0x65 (parent) changed during the call, the scene events it queued in
- * D_800C4170 ({event ptr, time << 8, s8 track, s16 index}, 0xC bytes) this frame (first 8 entries). */
+ * g_scene_event_queue ({event ptr, time << 8, s8 track, s16 index}, 0xC bytes) this frame (first 8 entries). */
 void __real_scene_event_track_pass(int, int);
 void __wrap_scene_event_track_pass(int a, int b) {
     extern unsigned char g_objects[];
-    extern unsigned char *D_800C4170;
+    extern unsigned char *g_scene_event_queue;
     static unsigned nlog;
     unsigned before = vbe_ld8(g_objects + 0x65), after;
     p113_watch("scene_event_track_pass in");
@@ -229,9 +229,9 @@ void __wrap_scene_event_track_pass(int a, int b) {
        * type-3 / 5-0x67 event, first 24 hits */
         static int fb = -1; static unsigned n121; static const unsigned char *lastev;
         int i;
-        if (flag(&fb, "p103boot") && D_800C4170)
+        if (flag(&fb, "p103boot") && g_scene_event_queue)
             for (i = 0; i < 16 && n121 < 24; i++) {
-                const unsigned char *e = D_800C4170 + i * 0xC;
+                const unsigned char *e = g_scene_event_queue + i * 0xC;
                 const unsigned char *ev;
                 if (!memok(e)) break; /* P154 */
                 ev = (const unsigned char *)(uintptr_t)*(const unsigned *)e;
@@ -252,19 +252,19 @@ void __wrap_scene_event_track_pass(int a, int b) {
         port_log("[p116] slot 0 +0x65 %02X -> %02X in scene_event_track_pass(%d, %d) frame %u; queue:\n", before, after, a, b,
                  port_frame_count);
         if (nlog == 1) { /* the slot-0 scene tables: event track i -> events pointer / count, and its ref entry */
-            extern int D_800C3AA8[][30]; extern unsigned short *D_800C39F8[]; extern unsigned char *D_800C3A10[];
-            extern unsigned char D_800C3A5A[];
-            int n = vbe_ld8(D_800C3A5A);
+            extern int g_cutscene_event_tracks[][30]; extern unsigned short *g_cutscene_event_counts[]; extern unsigned char *g_cutscene_actor_entries[];
+            extern unsigned char g_cutscene_actor_count[];
+            int n = vbe_ld8(g_cutscene_actor_count);
             for (i = 0; i < n && i < 30; i++) {
-                const unsigned char *rf = D_800C3A10[0] + i * 8;
+                const unsigned char *rf = g_cutscene_actor_entries[0] + i * 8;
                 /* P199: bounds-safe (frame 17820, level 6 scene 20: a stale table pointer read out of bounds) */
-                int nev = memok(D_800C39F8[0] + i) ? vbe_ld16(&D_800C39F8[0][i]) : -1;
-                port_log("[p116]   track %d: events %08X n %d | ref kind %d id %d\n", i, (unsigned)D_800C3AA8[0][i],
+                int nev = memok(g_cutscene_event_counts[0] + i) ? vbe_ld16(&g_cutscene_event_counts[0][i]) : -1;
+                port_log("[p116]   track %d: events %08X n %d | ref kind %d id %d\n", i, (unsigned)g_cutscene_event_tracks[0][i],
                          nev, memok(rf) ? vbe_ld16(rf) : -1, memok(rf) ? vbe_ld8(rf + 2) : -1);
             }
         }
-        for (i = 0; i < 8 && D_800C4170; i++) {
-            const unsigned char *e = D_800C4170 + i * 0xC;
+        for (i = 0; i < 8 && g_scene_event_queue; i++) {
+            const unsigned char *e = g_scene_event_queue + i * 0xC;
             const unsigned char *ev;
             if (!memok(e)) break; /* P199 */
             ev = (const unsigned char *)(uintptr_t)*(const unsigned *)e;
@@ -372,7 +372,7 @@ void __wrap_menu_sprites_load(void) {
 
 /* P123 DIAGNOSTIC ?p123fade=1: every screen-colour/fade request screen_fade_start(r, g, b, frames, dir, player) with the
  * frame and the JS stack, and (from p103_frame, mode 3 and every 120 frames) the world-render gates of
- * render_player_frame_setup / render_player_scene: g_game_paused, g_scene_render_suspend, screen_fade_is_opaque(0) (fade level 0xFF = skip), D_800D18A0. */
+ * render_player_frame_setup / render_player_scene: g_game_paused, g_scene_render_suspend, screen_fade_is_opaque(0) (fade level 0xFF = skip), g_player_view_hidden_mask. */
 void p123_requests_stack(void);
 void __real_screen_fade_start(int r, int g, int b, int n, int dir, int pl);
 void __wrap_screen_fade_start(int r, int g, int b, int n, int dir, int pl) {
@@ -387,12 +387,12 @@ void __wrap_screen_fade_start(int r, int g, int b, int n, int dir, int pl) {
 }
 void p123_gates(void) {
     static int ff = -1; static unsigned next;
-    extern unsigned char g_game_paused, g_screen_fade_dir, g_screen_fade_alpha_override[]; extern int g_scene_render_suspend; extern unsigned short D_800D18A0;
+    extern unsigned char g_game_paused, g_screen_fade_dir, g_screen_fade_alpha_override[]; extern int g_scene_render_suspend; extern unsigned short g_player_view_hidden_mask;
     extern int g_screen_fade_timer, g_screen_fade_duration; int screen_fade_alpha(int);
     if (!flag(&ff, "p123fade") || port_frame_count < next) return;
     next = port_frame_count + 120;
     port_log("[p123] gates frame %u mode %d level %X: D_800BEAC0 %u D_80084810 %d D_800D18A0 %X | fade level %d (dir %d timer %d/%d forced %u)\n",
-             port_frame_count, vbe_ld8(&g_game_mode), g_level_id, vbe_ld8(&g_game_paused), g_scene_render_suspend, vbe_ld16(&D_800D18A0),
+             port_frame_count, vbe_ld8(&g_game_mode), g_level_id, vbe_ld8(&g_game_paused), g_scene_render_suspend, vbe_ld16(&g_player_view_hidden_mask),
              screen_fade_alpha(0), (signed char)vbe_ld8(&g_screen_fade_dir), g_screen_fade_timer, g_screen_fade_duration, vbe_ld8(&g_screen_fade_alpha_override[0]));
 }
 
@@ -458,25 +458,25 @@ int __wrap_asset_load_with_subfiles(int *a0, int a1, int *a2, int a3, ...) {
     return r;
 }
 
-/* P131 (?p131mdl, DIAGNOSTIC): level-setup entry spawns (setup_entry_spawn, 0x30-byte entries of D_800D20FC): idx and the
+/* P131 (?p131mdl, DIAGNOSTIC): level-setup entry spawns (setup_entry_spawn, 0x30-byte entries of g_setup_entries): idx and the
  * whole entry (+0x28 setup id, +0x29 setup command list), from the same start frame. */
 int __real_setup_entry_spawn(unsigned char *e, int idx, int a2, int a3, int reuse);
 int __wrap_setup_entry_spawn(unsigned char *e, int idx, int a2, int a3, int reuse) {
     static int f = -1; static unsigned n;
-    extern unsigned char D_800D20FC[];
+    extern unsigned char g_setup_entries[];
     if (f < 0) f = port_flag("p131mdl");
     if (f > 0 && port_frame_count >= (f > 1 ? (unsigned)f : 4400u) && n < 60) {
         char hex[0x30 * 2 + 1]; int k;
         n++;
         for (k = 0; k < 0x30; k++) snprintf(hex + 2 * k, 3, "%02X", vbe_ld8(e + k));
         port_log("[p131] setup_entry_spawn e %08X (entry %ld) idx %d a3 %d frame %u: %s\n", (unsigned)(uintptr_t)e,
-                 (long)(e - D_800D20FC) / 0x30, idx, a3, port_frame_count, hex);
+                 (long)(e - g_setup_entries) / 0x30, idx, a3, port_frame_count, hex);
     }
     return __real_setup_entry_spawn(e, idx, a2, a3, reuse);
 }
 
 /* P131 (?p131mdl, DIAGNOSTIC): the level-setup asset load (asset_load_into(dst, 0, 2, 0xE, level), game_eu_44010.c):
- * size and the first entry it wrote (entry 5 of D_800D20FC on level 0x18), logged at load time (any frame). */
+ * size and the first entry it wrote (entry 5 of g_setup_entries on level 0x18), logged at load time (any frame). */
 int __real_asset_load_into(int a0, int a1, int a2, ...);
 int __wrap_asset_load_into(int a0, int a1, int a2, ...) {
     static int f = -1;

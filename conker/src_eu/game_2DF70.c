@@ -13,10 +13,10 @@ void texture_scroll_clear(void) {
 // jump table
 extern u8 g_level_bg_colour[];       /* camera / sky settings copied from the level header +5..+7; was D_800DC2D8 */
 extern u8 g_sky_load_all_tiles;         /* 1 on level 0x3C (mode 4); was D_800DC2DB */
-extern u8 D_800DC2DC;         /* bit 0 of g_save_progress_bits->unk14; was D_800D2E4C */
-extern s32 D_800DC2E0;        /* per player: two Mtx (one per frame buffer) */
+extern u8 g_sky_alt_tiles;         /* bit 0 of g_save_progress_bits->unk14; was D_800D2E4C; was D_800DC2DC */
+extern s32 g_sky_backdrop_mtx;        /* per player: two Mtx (one per frame buffer); was D_800DC2E0 */
 extern Vtx *g_sky_backdrop_vtx[][2];  /* per player: two vertex buffers (one per frame buffer); was D_800DC2B8 */
-extern s32 *D_8008955C[];
+extern s32 *g_sky_tex_sets[]; /* was D_8008955C */
 void *allocate_memory(s32, s32, s32, s32);
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 void star_field_generate(void);
@@ -46,15 +46,15 @@ static const SkyGradient sSkyGradients[] = {
 
 /*
  * P74: per-level setup of the sky / backdrop buffers (called by level_load with g_level_id; the argument is
- * unused). g_level_bg_colour[0..2] = level header +5..+7. Backdrop mode = header +8 (4 becomes 2 when D_800BE616 is set):
+ * unused). g_level_bg_colour[0..2] = level header +5..+7. Backdrop mode = header +8 (4 becomes 2 when g_mp_mode_active is set):
  *  - 4: per player (0..g_last_player_index) a vertex buffer of 2 x n vertices (n = 0x1C0 with g_last_player_index == 1, else 0x130),
- *       g_sky_asset loaded as asset (0xD, header +9) by asset_load_ptr, 0x168 entries of D_8008955C[+9] requested
- *       when D_80038080 is set, two Mtx per player in D_800DC2E0, g_sky_load_all_tiles = (level == 0x3C).
+ *       g_sky_asset loaded as asset (0xD, header +9) by asset_load_ptr, 0x168 entries of g_sky_tex_sets[+9] requested
+ *       when g_mem_expansion_pak is set, two Mtx per player in g_sky_backdrop_mtx, g_sky_load_all_tiles = (level == 0x3C).
  *  - 2: g_sky_asset = 256-row sky gradient texture (4 RGBA32 texels per row, sSkyGradients), two Mtx per player in
- *       D_800DC2E0, and per player two 4-vertex quads (+-0x6D6, z -1000, s 0x2000) in g_sky_backdrop_vtx (read by
+ *       g_sky_backdrop_mtx, and per player two 4-vertex quads (+-0x6D6, z -1000, s 0x2000) in g_sky_backdrop_vtx (read by
  *       func_1510FD50 / game_eu_FF530.c).
  *  - 1: star_field_generate.
- * Always: D_800DC2DC = bit 0 of g_save_progress_bits->unk14.
+ * Always: g_sky_alt_tiles = bit 0 of g_save_progress_bits->unk14.
  */
 /* was func_15000AD0 */
 void level_setup_sky_backdrop(s32 level) {
@@ -76,7 +76,7 @@ void level_setup_sky_backdrop(s32 level) {
     g_level_bg_colour[0] = g_level_header->unk5;
     g_level_bg_colour[1] = g_level_header->unk6;
     g_level_bg_colour[2] = g_level_header->unk7;
-    if (D_800BE616 != 0 && g_level_header->unk8 == 4) {
+    if (g_mp_mode_active != 0 && g_level_header->unk8 == 4) {
         g_level_header->unk8 = 2;
     }
 
@@ -88,12 +88,12 @@ void level_setup_sky_backdrop(s32 level) {
             g_sky_backdrop_vtx[p][1] = buf + n;
         }
         asset_load_ptr(&g_sky_asset, 2, 0xD, g_level_header->unk9);
-        if (D_80038080 != 0) {
+        if (g_mem_expansion_pak != 0) {
             for (i = 0; i < 0x168; i++) {
-                texture_cache_lookup(*D_8008955C[g_level_header->unk9] + i, NULL, 0x3F, 0);
+                texture_cache_lookup(*g_sky_tex_sets[g_level_header->unk9] + i, NULL, 0x3F, 0);
             }
         }
-        D_800DC2E0 = (s32) allocate_memory((g_last_player_index + 1) * 2 * sizeof(Mtx), 1, 2, 0);
+        g_sky_backdrop_mtx = (s32) allocate_memory((g_last_player_index + 1) * 2 * sizeof(Mtx), 1, 2, 0);
         g_sky_load_all_tiles = (g_level_id == 0x3C) ? 1 : 0;
     } else if (g_level_header->unk8 == 2) {
         tex = allocate_memory(0x100 * 4 * sizeof(u32), 1, 1, 0);
@@ -145,7 +145,7 @@ void level_setup_sky_backdrop(s32 level) {
             tex[i * 4 + 3] = rgba;
         }
 
-        D_800DC2E0 = (s32) allocate_memory((g_last_player_index + 1) * 2 * sizeof(Mtx), 1, 1, 0);
+        g_sky_backdrop_mtx = (s32) allocate_memory((g_last_player_index + 1) * 2 * sizeof(Mtx), 1, 1, 0);
         for (p = 0; p <= g_last_player_index; p++) {
             buf = allocate_memory(2 * 4 * sizeof(Vtx), 1, 1, 0);
             g_sky_backdrop_vtx[p][0] = buf;
@@ -165,20 +165,20 @@ void level_setup_sky_backdrop(s32 level) {
         star_field_generate();
     }
 
-    D_800DC2DC = (g_save_progress_bits->unk14 & 1) ? 1 : 0;
+    g_sky_alt_tiles = (g_save_progress_bits->unk14 & 1) ? 1 : 0;
 }
 // loops!
-extern s32 D_800DC26C;    /* triangle table: 3 vertex pointers per triangle (12 bytes) */
-extern s32 D_800DC270;    /* per triangle: s16 x min, z min, x max, z max */
-extern s32 D_800DC274;    /* per triangle: s16 y min, y max */
-extern s32 D_800D3048[];  /* segment table */
+extern s32 g_level_tri_table;    /* triangle table: 3 vertex pointers per triangle (12 bytes); was D_800DC26C */
+extern s32 g_coll_tri_xz_bounds;    /* per triangle: s16 x min, z min, x max, z max; was D_800DC270 */
+extern s32 g_coll_tri_y_bounds;    /* per triangle: s16 y min, y max; was D_800DC274 */
+extern s32 g_segment_table[];  /* segment table; was D_800D3048 */
 extern u8 g_collision_scan_objects;     /* 1 while object DLs are scanned: segment addresses lose 0x01000000; was D_800D3088 */
 
 /* Collision triangle scan of a level DL (ends at G_ENDDL 0xDF): G_VTX (0x01) loads vertex pointers into a 32-entry
  * cache (the loop runs from the first vertex v0 = end - n to n - 1, as the asm does), G_TRI1 (0x05, index bytes
  * 1-3 / 2), G_TRI2 (0x06, 5-bit fields at bits 17 / 9 / 1 of both words) and Rare's 0x1x (four triangles, 5-bit
- * fields) append triangles at D_800DBE38: the 3 vertex pointers and the bounds (x / z in D_800DC270, y in D_800DC274;
- * full range when D_800DBE63 is set). The bounds are recomputed only when cache entry 0 holds a pointer above
+ * fields) append triangles at g_collision_area_tri_count: the 3 vertex pointers and the bounds (x / z in g_coll_tri_xz_bounds, y in g_coll_tri_y_bounds;
+ * full range when g_collision_full_bounds is set). The bounds are recomputed only when cache entry 0 holds a pointer above
  * 0x100000; otherwise the previous triangle's bounds are written again. */
 /* was func_15001460 */
 void collision_scan_level_dl(s32 arg0) {
@@ -209,7 +209,7 @@ void collision_scan_level_dl(s32 arg0) {
     vmin[0] = vmin[1] = vmin[2] = 0;
     vmax[0] = vmax[1] = vmax[2] = 0;
     i = 0;
-    count = D_800DBE38;
+    count = g_collision_area_tri_count;
     while ((op = ((s8 *) arg0)[i * 8]) != -0x21) {
         cmd = (u32 *) (arg0 + i * 8);
         ntri = 0;
@@ -242,7 +242,7 @@ void collision_scan_level_dl(s32 arg0) {
         } else if (op == 1) {
             addr = cmd[1];
             if ((addr >> 24) & 0xF) {
-                addr = D_800D3048[(addr >> 24) & 0xF] + addr - (g_collision_scan_objects << 24);
+                addr = g_segment_table[(addr >> 24) & 0xF] + addr - (g_collision_scan_objects << 24);
             }
             n = (s16) ((cmd[0] >> 12) & 0xFF);
             start = (s16) (((cmd[0] >> 1) & 0x7F) - n);
@@ -260,7 +260,7 @@ void collision_scan_level_dl(s32 arg0) {
             tri = &idx[t * 3];
             if ((u32) verts[0] >= 0x100001) {
                 for (c = 0; c < 3; c++) {
-                    if (D_800DBE63 != 0) {
+                    if (g_collision_full_bounds != 0) {
                         vmin[c] = -0x8000;
                         vmax[c] = 0x7FFF;
                     } else {
@@ -279,19 +279,19 @@ void collision_scan_level_dl(s32 arg0) {
                 }
             }
             for (k = 0; k < 3; k++) {
-                ((s32 *) D_800DC26C)[count * 3 + k] = verts[tri[k]];
+                ((s32 *) g_level_tri_table)[count * 3 + k] = verts[tri[k]];
             }
-            b = (s16 *) (D_800DC270 + count * 8);
+            b = (s16 *) (g_coll_tri_xz_bounds + count * 8);
             b[0] = vmin[0];
             b[2] = vmax[0];
             b[1] = vmin[2];
             b[3] = vmax[2];
-            b = (s16 *) (D_800DC274 + count * 4);
+            b = (s16 *) (g_coll_tri_y_bounds + count * 4);
             b[0] = vmin[1];
             b[1] = vmax[1];
             count++;
         }
         i++;
     }
-    D_800DBE38 = count;
+    g_collision_area_tri_count = count;
 }

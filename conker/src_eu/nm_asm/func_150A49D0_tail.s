@@ -14,15 +14,15 @@ glabel func_150A49D0_tail
     /* D27AC 150A4F9C 449F7800 */  mtc1       $ra, $f15
     /* D27B0 150A4FA0 3C1F150A */  lui        $ra, %hi(D_150A4FD4)
     /* D27B4 150A4FA4 27FF4FD4 */  addiu      $ra, $ra, %lo(D_150A4FD4)
-    /* D27B8 150A4FA8 3C0A800D */  lui        $t2, %hi(D_800D3720)
-    /* D27BC 150A4FAC 254A3720 */  addiu      $t2, $t2, %lo(D_800D3720)
+    /* D27B8 150A4FA8 3C0A800D */  lui        $t2, %hi(g_floor_hits)
+    /* D27BC 150A4FAC 254A3720 */  addiu      $t2, $t2, %lo(g_floor_hits)
     /* D27C0 150A4FB0 00001025 */  or         $v0, $zero, $zero
-    /* D27C4 150A4FB4 3C0C800E */  lui        $t4, %hi(D_800DC270)
-    /* D27C8 150A4FB8 8D8CC270 */  lw         $t4, %lo(D_800DC270)($t4)
-    /* D27CC 150A4FBC 3C0B800E */  lui        $t3, %hi(D_800DC26C)
-    /* D27D0 150A4FC0 8D6BC26C */  lw         $t3, %lo(D_800DC26C)($t3)
-    /* D27D4 150A4FC4 3C09800E */  lui        $t1, %hi(D_800DBE4C)
-    /* D27D8 150A4FC8 8D29C27C */  lw         $t1, %lo(D_800DBE4C)($t1)
+    /* D27C4 150A4FB4 3C0C800E */  lui        $t4, %hi(g_coll_tri_xz_bounds)
+    /* D27C8 150A4FB8 8D8CC270 */  lw         $t4, %lo(g_coll_tri_xz_bounds)($t4)
+    /* D27CC 150A4FBC 3C0B800E */  lui        $t3, %hi(g_level_tri_table)
+    /* D27D0 150A4FC0 8D6BC26C */  lw         $t3, %lo(g_level_tri_table)($t3)
+    /* D27D4 150A4FC4 3C09800E */  lui        $t1, %hi(g_coll_tri_count)
+    /* D27D8 150A4FC8 8D29C27C */  lw         $t1, %lo(g_coll_tri_count)($t1)
     /* D27DC 150A4FCC 0000C025 */  or         $t8, $zero, $zero
     /* D27E0 150A4FD0 00004025 */  or         $t0, $zero, $zero
   glabel D_150A4FD4

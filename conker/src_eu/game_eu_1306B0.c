@@ -132,7 +132,7 @@ typedef struct {
     s32 unk48;         /* 0x48 (not set) */
     u8 unk4C;          /* 0x4C */
 } EmitterSpawn;
-// attached_particle_spawn: P259: spawns particle emitter 0x29 of D_800A4AA0 (effect3d_spawn_full, render layer 1 or 3
+// attached_particle_spawn: P259: spawns particle emitter 0x29 of g_effect3d_default_params (effect3d_spawn_full, render layer 1 or 3
 // at random) attached to `owner`'s matrix `matrix` (joint `joint`, -1 = none): kind 0x5F / 5, flags 0x2203,
 // `count` particles at `pos` toward `dir`, range from `range`, alpha `alpha`; copies the attachment block (owner,
 // its unique id, matrix offset, joint, zero points g_vec3_zero) to the emitter's +0x110, then starts the matching
@@ -188,7 +188,7 @@ void *attached_particle_spawn(u8 *owner, u8 matrix, f32 *pos, f32 *dir, f32 *ran
     spawn.vel[2] = 0.0f;
     spawn.alpha = alpha;
     spawn.unk4C = arg9;
-    emitter = effect3d_spawn_full(&spawn, (s32) &D_800A4AA0, 0x29, 0, 0, 0x16, ((random_int() & 1) ? 2 : 0) + 1, 0, 0,
+    emitter = effect3d_spawn_full(&spawn, (s32) &g_effect3d_default_params, 0x29, 0, 0, 0x16, ((random_int() & 1) ? 2 : 0) + 1, 0, 0,
                             argA + 0x30, argC, argD);
     if (emitter != NULL) {
         memcpy((s32) emitter + 0x110, (u8 *) &att, sizeof(att));

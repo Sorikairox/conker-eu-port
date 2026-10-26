@@ -27,7 +27,7 @@ void level_light2_orbit(s32 arg0) {
 f32 math_angle_offset_scaled(s32 arg0, s32 arg1) {
     arg0++;
     arg1 -= 0x2C;
-    return math_atan2f(arg0, arg1) * D_800A0C08;
+    return math_atan2f(arg0, arg1) * g_angle_offset_k_0c08;
 }
 
 /* was func_150CF590 */

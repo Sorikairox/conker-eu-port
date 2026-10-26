@@ -4,17 +4,17 @@
 #include "variables.h"
 
 
-extern struct54 *D_8003841C;
+extern struct54 *g_heap_free_tail; /* was D_8003841C */
 
-// heap init: one free block spanning D_800EA140 .. D_80038098
+// heap init: one free block spanning g_heap_start .. g_mem_heap_end
 /* was func_10003BD0 */
 void heap_init(void) {
-    D_800380B4 = &D_800EA140;
-    D_800380B4->unk0 = NULL;
-    D_800380B4->unk4 = NULL;
-    D_800380B4->unk8 = D_80038098 - (u32)&D_800EA140 - 0x14;
-    D_800380B4->unkC = 0;
-    D_800380B4->unk10 = 0;
-    D_800380B8 = D_8003841C = D_800380B4;
-    D_800380B0 = D_800380B4;
+    g_heap_head = &g_heap_start;
+    g_heap_head->unk0 = NULL;
+    g_heap_head->unk4 = NULL;
+    g_heap_head->unk8 = g_mem_heap_end - (u32)&g_heap_start - 0x14;
+    g_heap_head->unkC = 0;
+    g_heap_head->unk10 = 0;
+    g_heap_free_head = g_heap_free_tail = g_heap_head;
+    g_heap_largest_block = g_heap_head;
 }

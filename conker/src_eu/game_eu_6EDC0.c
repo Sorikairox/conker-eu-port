@@ -7,7 +7,7 @@ s32 dbgfont_char_index(u8 arg0);
 s32 text_char_to_glyph(s32 arg0);
 
 
-extern s32 D_80084CC0;
+extern s32 g_dbgfont_texture; /* was D_80084CC0 */
 
 /* was func_150415B0 */
 u8 *dbgfont_setup_dl(u8 *arg0) {
@@ -36,10 +36,10 @@ u8 *dbgfont_setup_dl(u8 *arg0) {
     (*(s32 *)((u8 *)temp_a0_4 + 4)) = 0x55204C;
     temp_a0_5 = temp_a0_4 + 8;
     (*(s32 *)((u8 *)temp_a0_5 + 0)) = 0xFD90003F;
-    (*(s32 **)((u8 *)temp_a0_5 + 4)) = &D_80084CC0;
+    (*(s32 **)((u8 *)temp_a0_5 + 4)) = &g_dbgfont_texture;
     temp_a0_6 = temp_a0_5 + 8;
     (*(s32 *)((u8 *)temp_a0_6 + 0)) = 0xFD900000;
-    (*(s32 **)((u8 *)temp_a0_6 + 4)) = &D_80084CC0;
+    (*(s32 **)((u8 *)temp_a0_6 + 4)) = &g_dbgfont_texture;
     temp_a0_7 = temp_a0_6 + 8;
     (*(s32 *)((u8 *)temp_a0_7 + 4)) = 0x07000000;
     (*(s32 *)((u8 *)temp_a0_7 + 0)) = 0xF5900000;
@@ -85,12 +85,12 @@ Gfx *dbgfont_draw_string(Gfx *arg0, s32 arg1, s32 arg2, u8 *arg3) {
     }
     return var_s2;
 }
-extern u8 D_80084C60[];
+extern u8 g_dbgfont_chars[]; /* was D_80084C60 */
 /* was func_15041770 */
 s32 dbgfont_char_index(u8 arg0) {
     s32 i;
     for (i = 0; i < 0x50; i++) {
-        if (arg0 == D_80084C60[i]) {
+        if (arg0 == g_dbgfont_chars[i]) {
             return i;
         }
     }
@@ -178,26 +178,26 @@ void text_icon_metrics(s32 arg0, s32 *arg1, s32 *arg2, f32 *arg3, s32 *arg4, f32
     }
 }
 
-extern f32 D_80038400;         /* text scale x (screen units per glyph pixel) */
-extern f32 D_80038404;         /* text scale y */
-extern u8 *D_80085D20[];       /* [0] font texture (0xE0 bytes per glyph, I8) */
-extern u8 *D_80085D24[];       /* [0] glyph metrics: width, height, x offset, y offset (4 bytes per glyph) */
+extern f32 g_text_scale_x;         /* text scale x (screen units per glyph pixel); was D_80038400 */
+extern f32 g_text_scale_y;         /* text scale y; was D_80038404 */
+extern u8 *g_font_textures[];       /* [0] font texture (0xE0 bytes per glyph, I8); was D_80085D20 */
+extern u8 *g_font_metrics[];       /* [0] glyph metrics: width, height, x offset, y offset (4 bytes per glyph); was D_80085D24 */
 extern Gfx g_text_render_dl[]; /* was D_80085D30 */
-extern Gfx D_80087770[];
-extern Gfx D_800877A8[];
+extern Gfx g_sprite_setup_dl[]; /* was D_80087770 */
+extern Gfx g_sprite_setup_dl_alt[]; /* was D_800877A8 */
 extern u8 g_render_mode_pairs[];        /* render mode pairs (8 bytes each); was D_800A4EA8 */
 extern s32 g_dl_capacity;         /* display list capacity (commands); was D_800BEFC4 */
-extern u16 D_800CC16E;         /* controller layout bits: picks the icon of the B1 / B2-B5 / BB codes */
-extern u8 D_800CC170;          /* current control code (0xFF: none) */
-extern u8 D_800CC177;          /* primitive colour last sent: r */
-extern u8 D_800CC178[4];       /* g, b, a, flashing flag */
-extern u8 D_800CC17C;          /* flashing phase */
-extern u8 D_800CC17D;          /* wave flag */
-extern u8 D_800CC17E;          /* wave phase */
-extern s32 D_800D30C0;
-extern s32 D_8009198C[], D_8009199C[], D_800919AC[], D_800919BC[], D_800919CC[], D_800919DC[], D_800919EC[],
-    D_800919FC[], D_80091A0C[], D_80091A40[], D_80091A5C[], D_80091A78[], D_80091A94[], D_80091AB0[], D_80091AC0[],
-    D_80091AD0[], D_80091AE0[], D_80091AF0[], D_80091B00[], D_80091B14[];
+extern u16 g_text_icon_clock;         /* controller layout bits: picks the icon of the B1 / B2-B5 / BB codes; was D_800CC16E */
+extern u8 g_text_ctrl_code;          /* current control code (0xFF: none); was D_800CC170 */
+extern u8 g_text_prim_r_sent;          /* primitive colour last sent: r; was D_800CC177 */
+extern u8 g_text_prim_gba_sent[4];       /* g, b, a, flashing flag; was D_800CC178 */
+extern u8 g_text_flash_phase;          /* flashing phase; was D_800CC17C */
+extern u8 g_text_wave_on;          /* wave flag; was D_800CC17D */
+extern u8 g_text_wave_phase;          /* wave phase; was D_800CC17E */
+extern s32 g_gfx_cur_tex_addr; /* was D_800D30C0 */
+extern s32 g_text_icon_a8[], g_text_icon_a9[], g_text_icon_ae[], g_text_icon_af[], g_text_icon_b0[], g_text_icon_aa[], g_text_icon_ab[], /* was D_8009198C; was D_8009199C; was D_800919AC; was D_800919BC; was D_800919CC; was D_800919DC; was D_800919EC */
+    g_text_icon_ac[], g_text_icon_ad[], g_text_icon_b1[], g_text_icon_b2[], g_text_icon_b4[], g_text_icon_b3[], g_text_icon_b5[], g_text_icon_b6[],
+    g_text_icon_b7[], g_text_icon_b8[], g_text_icon_b9[], g_text_icon_ba[], g_text_icon_bb[];
 s32 text_char_to_glyph(s32 arg0);
 void text_icon_metrics(s32 arg0, s32 *arg1, s32 *arg2, f32 *arg3, s32 *arg4, f32 *arg5);
 Gfx *sprite_load_texture(Gfx *, s32 *, s32, void *, s32, s32, s32, s32, s32);
@@ -209,10 +209,10 @@ Gfx *sprite_draw_at_screen(Gfx *, void *, f32, f32);
 
 /*
  * P85: draw len characters of str at (x, y) in colour r, g, b, a with scales scaleX / scaleY (4096 = 1).
- * Characters go through text_char_to_glyph (glyph index). Glyphs are I8 texture rectangles from font 0 (D_80085D20 /
- * D_80085D24), clipped against the view; 0x60 is a space. Codes 0xA1..0xA7 change the colour (A1 reset, A2 red,
- * A3 green, A4 blue, A5 yellow), A6 starts flashing (alpha pulses with D_800CC17C), A7 starts the wave (glyphs
- * bob with D_800CC17E). Codes 0xA8..0xBB pick a button icon (sprite D_8009198C..., frame from D_800CC16E for some)
+ * Characters go through text_char_to_glyph (glyph index). Glyphs are I8 texture rectangles from font 0 (g_font_textures /
+ * g_font_metrics), clipped against the view; 0x60 is a space. Codes 0xA1..0xA7 change the colour (A1 reset, A2 red,
+ * A3 green, A4 blue, A5 yellow), A6 starts flashing (alpha pulses with g_text_flash_phase), A7 starts the wave (glyphs
+ * bob with g_text_wave_phase). Codes 0xA8..0xBB pick a button icon (sprite g_text_icon_a8..., frame from g_text_icon_clock for some)
  * and the next code >= 0xA8 draws it (text_icon_metrics size, sprite_load_texture / sprite_draw_at_screen). Byte 0xBC is skipped
  * (the previous glyph is handled again, as in the original). When the display list is full, a pipe sync is
  * written and the commands of the current character are dropped.
@@ -269,8 +269,8 @@ Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f
         return gdl;
     }
     view = TEXT_VIEW();
-    scaleX = scaleX * VIEW_F(view, 0x14) * D_80038400;
-    scaleY = scaleY * VIEW_F(view, 0x18) * D_80038404;
+    scaleX = scaleX * VIEW_F(view, 0x14) * g_text_scale_x;
+    scaleY = scaleY * VIEW_F(view, 0x18) * g_text_scale_y;
     prevH = -1;
     prevW = -1;
     w = 0;
@@ -280,13 +280,13 @@ Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f
     iconSprite = NULL;
     gDPPipeSync(gdl++);
     gDPSetPrimColor(gdl++, 1, 0, r, g, b, a);
-    D_800CC177 = r;
-    D_800CC178[0] = g;
-    D_800CC178[1] = b;
-    D_800CC178[2] = a;
-    D_800CC178[3] = 0;
-    D_800CC17D = 0;
-    D_800CC17E += g_frame_ticks * 6;
+    g_text_prim_r_sent = r;
+    g_text_prim_gba_sent[0] = g;
+    g_text_prim_gba_sent[1] = b;
+    g_text_prim_gba_sent[2] = a;
+    g_text_prim_gba_sent[3] = 0;
+    g_text_wave_on = 0;
+    g_text_wave_phase += g_frame_ticks * 6;
     curR = r;
     curG = g;
     curB = b;
@@ -298,39 +298,39 @@ Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f
     str_p = str;
     for (i = 0; i < len; i++, str_p++) {
         start = gdl;
-        if (D_800CC177 != curR || D_800CC178[0] != curG || D_800CC178[1] != curB || D_800CC178[2] != a) {
-            D_800CC177 = curR;
-            D_800CC178[0] = curG;
-            D_800CC178[1] = curB;
-            D_800CC178[2] = a;
+        if (g_text_prim_r_sent != curR || g_text_prim_gba_sent[0] != curG || g_text_prim_gba_sent[1] != curB || g_text_prim_gba_sent[2] != a) {
+            g_text_prim_r_sent = curR;
+            g_text_prim_gba_sent[0] = curG;
+            g_text_prim_gba_sent[1] = curB;
+            g_text_prim_gba_sent[2] = a;
             primA = a;
-            gDPSetPrimColor(gdl++, 1, 0, D_800CC177, D_800CC178[0], D_800CC178[1], D_800CC178[2]);
+            gDPSetPrimColor(gdl++, 1, 0, g_text_prim_r_sent, g_text_prim_gba_sent[0], g_text_prim_gba_sent[1], g_text_prim_gba_sent[2]);
         }
-        if (D_800CC178[3] != 0) {
-            primA = (u32) ((f32) (D_800CC178[2] - 127) * flash + 127.0f);
-            if (D_800CC178[2] < primA) {
-                primA = D_800CC178[2];
+        if (g_text_prim_gba_sent[3] != 0) {
+            primA = (u32) ((f32) (g_text_prim_gba_sent[2] - 127) * flash + 127.0f);
+            if (g_text_prim_gba_sent[2] < primA) {
+                primA = g_text_prim_gba_sent[2];
             }
-            gDPSetPrimColor(gdl++, 1, 0, D_800CC177, D_800CC178[0], D_800CC178[1], primA);
+            gDPSetPrimColor(gdl++, 1, 0, g_text_prim_r_sent, g_text_prim_gba_sent[0], g_text_prim_gba_sent[1], primA);
         }
-        if (D_800CC17D != 0) {
-            wave = (cosf((u8) (D_800CC17E + waveStep) * (3.1415927f / 128.0f)) + 1.0f) * 1.5f;
+        if (g_text_wave_on != 0) {
+            wave = (cosf((u8) (g_text_wave_phase + waveStep) * (3.1415927f / 128.0f)) + 1.0f) * 1.5f;
             waveStep += 0x4E;
         }
         if (*str_p == 0xBC) {
-            D_800CC170 = 0xFF;
+            g_text_ctrl_code = 0xFF;
         } else {
             font = 0;
             glyph = text_char_to_glyph(*str_p);
-            D_800CC170 = (glyph >= 0xA1) ? glyph : 0xFF;
+            g_text_ctrl_code = (glyph >= 0xA1) ? glyph : 0xFF;
         }
-        switch (D_800CC170) {
+        switch (g_text_ctrl_code) {
             case 0xA1: /* back to the caller's colour, no effects */
-                D_800CC178[3] = 0;
+                g_text_prim_gba_sent[3] = 0;
                 curR = r;
                 curG = g;
                 curB = b;
-                D_800CC17D = 0;
+                g_text_wave_on = 0;
                 break;
             case 0xA2:
                 curR = 0xFF;
@@ -353,33 +353,33 @@ Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f
                 curB = 0;
                 break;
             case 0xA6: /* flashing */
-                D_800CC178[3] = 1;
-                D_800CC17C += g_frame_ticks * 8;
-                flash = (cosf(D_800CC17C * (3.1415927f / 128.0f)) + 1.0f) * 0.5f;
+                g_text_prim_gba_sent[3] = 1;
+                g_text_flash_phase += g_frame_ticks * 8;
+                flash = (cosf(g_text_flash_phase * (3.1415927f / 128.0f)) + 1.0f) * 0.5f;
                 break;
             case 0xA7: /* wave */
-                D_800CC17D = 1;
+                g_text_wave_on = 1;
                 break;
-            case 0xA8: iconSprite = D_8009198C; iconFrame = 0; break;
-            case 0xA9: iconSprite = D_8009199C; iconFrame = 0; break;
-            case 0xAA: iconSprite = D_800919DC; iconFrame = 0; break;
-            case 0xAB: iconSprite = D_800919EC; iconFrame = 0; break;
-            case 0xAC: iconSprite = D_800919FC; iconFrame = 0; break;
-            case 0xAD: iconSprite = D_80091A0C; iconFrame = 0; break;
-            case 0xAE: iconSprite = D_800919AC; iconFrame = 0; break;
-            case 0xAF: iconSprite = D_800919BC; iconFrame = 0; break;
-            case 0xB0: iconSprite = D_800919CC; iconFrame = 0; break;
-            case 0xB1: iconSprite = D_80091A40; iconFrame = (D_800CC16E >> 8) % 10; break;
-            case 0xB2: iconSprite = D_80091A5C; iconFrame = (D_800CC16E >> 8) & 3; break;
-            case 0xB3: iconSprite = D_80091A94; iconFrame = (D_800CC16E >> 8) & 3; break;
-            case 0xB4: iconSprite = D_80091A78; iconFrame = (D_800CC16E >> 8) & 3; break;
-            case 0xB5: iconSprite = D_80091AB0; iconFrame = (D_800CC16E >> 8) & 3; break;
-            case 0xB6: iconSprite = D_80091AC0; iconFrame = 0; break;
-            case 0xB7: iconSprite = D_80091AD0; iconFrame = 0; break;
-            case 0xB8: iconSprite = D_80091AE0; iconFrame = 0; break;
-            case 0xB9: iconSprite = D_80091AF0; iconFrame = 0; break;
-            case 0xBA: iconSprite = D_80091B00; iconFrame = 0; break;
-            case 0xBB: iconSprite = D_80091B14; iconFrame = (D_800CC16E >> 10) & 1; break;
+            case 0xA8: iconSprite = g_text_icon_a8; iconFrame = 0; break;
+            case 0xA9: iconSprite = g_text_icon_a9; iconFrame = 0; break;
+            case 0xAA: iconSprite = g_text_icon_aa; iconFrame = 0; break;
+            case 0xAB: iconSprite = g_text_icon_ab; iconFrame = 0; break;
+            case 0xAC: iconSprite = g_text_icon_ac; iconFrame = 0; break;
+            case 0xAD: iconSprite = g_text_icon_ad; iconFrame = 0; break;
+            case 0xAE: iconSprite = g_text_icon_ae; iconFrame = 0; break;
+            case 0xAF: iconSprite = g_text_icon_af; iconFrame = 0; break;
+            case 0xB0: iconSprite = g_text_icon_b0; iconFrame = 0; break;
+            case 0xB1: iconSprite = g_text_icon_b1; iconFrame = (g_text_icon_clock >> 8) % 10; break;
+            case 0xB2: iconSprite = g_text_icon_b2; iconFrame = (g_text_icon_clock >> 8) & 3; break;
+            case 0xB3: iconSprite = g_text_icon_b3; iconFrame = (g_text_icon_clock >> 8) & 3; break;
+            case 0xB4: iconSprite = g_text_icon_b4; iconFrame = (g_text_icon_clock >> 8) & 3; break;
+            case 0xB5: iconSprite = g_text_icon_b5; iconFrame = (g_text_icon_clock >> 8) & 3; break;
+            case 0xB6: iconSprite = g_text_icon_b6; iconFrame = 0; break;
+            case 0xB7: iconSprite = g_text_icon_b7; iconFrame = 0; break;
+            case 0xB8: iconSprite = g_text_icon_b8; iconFrame = 0; break;
+            case 0xB9: iconSprite = g_text_icon_b9; iconFrame = 0; break;
+            case 0xBA: iconSprite = g_text_icon_ba; iconFrame = 0; break;
+            case 0xBB: iconSprite = g_text_icon_bb; iconFrame = (g_text_icon_clock >> 10) & 1; break;
         }
         gDPPipeSync(gdl++);
 
@@ -387,7 +387,7 @@ Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f
         if (font != 1) {
             draw = 0;
             if (glyph == 0x60) {
-                x += 4.0f * D_80038400; /* space */
+                x += 4.0f * g_text_scale_x; /* space */
             } else if (glyph >= 0xA1 && glyph < 0xA8) {
                 /* colour / effect code: nothing drawn */
             } else if (glyph < 0xA8) {
@@ -395,30 +395,30 @@ Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f
             } else {
                 /* button icon, centred on the pen position */
                 text_icon_metrics(glyph, &w, &h, &iconDy, &iconFlip, &iconScale);
-                if (D_800CC17D != 0) {
+                if (g_text_wave_on != 0) {
                     iconDy += wave;
                 }
                 view = TEXT_VIEW();
-                halfW = VIEW_F(view, 0x14) * ((f32) (w >> 1) * iconScale) * D_80038400;
+                halfW = VIEW_F(view, 0x14) * ((f32) (w >> 1) * iconScale) * g_text_scale_x;
                 x += halfW;
-                halfH = VIEW_F(view, 0x18) * ((f32) (h >> 1) * iconScale) * D_80038404;
+                halfH = VIEW_F(view, 0x18) * ((f32) (h >> 1) * iconScale) * g_text_scale_y;
                 y += halfH;
                 iconFrame <<= 8;
                 icon.w = scaleX * iconScale;
                 icon.h = scaleY * iconScale;
                 icon.flags = 0;
                 icon.alpha = primA;
-                gSPDisplayList(gdl++, D_80087770);
+                gSPDisplayList(gdl++, g_sprite_setup_dl);
                 g_sprite_keep_prim_colour = 1;
                 gDPSetOtherMode(gdl++, 0x2C3F, ((u32 *) g_render_mode_pairs)[0x32] | ((u32 *) g_render_mode_pairs)[0x33] | 4);
                 if (iconFlip == 0) {
                     gDPSetCombine(gdl++, 0xFFB3FF, 0xFF65FEFF);
                 }
                 gdl = sprite_load_texture(gdl, iconSprite, iconFrame, &icon, 0, 0, 0, 2, 3);
-                if (D_800D30C0 != (s32) 0x80000000) {
+                if (g_gfx_cur_tex_addr != (s32) 0x80000000) {
                     gdl = sprite_draw_at_screen(gdl, &icon, x, y - iconDy);
                 }
-                gSPDisplayList(gdl++, D_800877A8);
+                gSPDisplayList(gdl++, g_sprite_setup_dl_alt);
                 gSPDisplayList(gdl++, g_text_render_dl);
                 g_sprite_keep_prim_colour = 0;
                 y -= halfH;
@@ -429,19 +429,19 @@ Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f
         if (draw) {
             sx = scaleX * (1.0f / 4096.0f);
             sy = scaleY * (1.0f / 4096.0f);
-            metrics = D_80085D24[font] + glyph * 4;
+            metrics = g_font_metrics[font] + glyph * 4;
             w = metrics[0];
             h = metrics[1];
             rise = 0.0f;
-            if (D_800CC17D != 0) {
+            if (g_text_wave_on != 0) {
                 rise += wave;
             }
-            x += (f32) metrics[2] * D_80038400 * sx;
-            dy = ((f32) metrics[3] - rise) * D_80038404;
+            x += (f32) metrics[2] * g_text_scale_x * sx;
+            dy = ((f32) metrics[3] - rise) * g_text_scale_y;
             y += dy * sy;
             view = TEXT_VIEW();
-            if (VIEW_F(view, 0x2C) <= x + (f32) w * D_80038400 && x < VIEW_F(view, 0x30) &&
-                VIEW_F(view, 0x24) <= y + (f32) h * D_80038404 && y < VIEW_F(view, 0x28)) {
+            if (VIEW_F(view, 0x2C) <= x + (f32) w * g_text_scale_x && x < VIEW_F(view, 0x30) &&
+                VIEW_F(view, 0x24) <= y + (f32) h * g_text_scale_y && y < VIEW_F(view, 0x28)) {
                 isx = scaleX;
                 isy = scaleY;
                 dsdx = 0x400000 / isx;
@@ -451,22 +451,22 @@ Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f
                                0, 0);
                     gDPSetTileSize(gdl++, 3, 0, 0, (((w + 7) & 0xFFF8) - 1) << 2, h << 2);
                 }
-                gDPSetTextureImage(gdl++, G_IM_FMT_I, G_IM_SIZ_16b, 1, D_80085D20[font] + glyph * 0xE0);
+                gDPSetTextureImage(gdl++, G_IM_FMT_I, G_IM_SIZ_16b, 1, g_font_textures[font] + glyph * 0xE0);
                 gDPLoadBlock(gdl++, 1, 0, 0, ((((w + 7) & 0xFFF8) * (h + 1) + 1) >> 1) - 1, 0);
                 iy = y;
                 gSPScisTextureRectangle(gdl++, x * 4.0f, iy << 2, x * 4.0f + (f32) ((w * isx) / 4096) * 4.0f,
                                         ((s32) (f32) ((h * isy) / 4096) + iy) << 2, 3, 0,
                                         ((-(s32) ((y - (f32) iy) * 32.0f) << 12) + 0x20000) / isy, dsdx, dtdy);
-                metrics = D_80085D24[font] + glyph * 4;
-                dy = ((f32) metrics[3] - rise) * D_80038404;
+                metrics = g_font_metrics[font] + glyph * 4;
+                dy = ((f32) metrics[3] - rise) * g_text_scale_y;
             }
             y -= dy * sx; /* (sic) x scale for y, y scale for x */
-            x += (f32) (metrics[0] - 1) * D_80038400 * sy;
+            x += (f32) (metrics[0] - 1) * g_text_scale_x * sy;
         }
 
         prevW = w;
         prevH = h;
-        if (gdl != NULL && gdl - D_800BEDE8[g_dl_buf_index] > g_dl_capacity) {
+        if (gdl != NULL && gdl - g_gfx_dl_buffers[g_dl_buf_index] > g_dl_capacity) {
             gDPPipeSync(gdl);
             return start;
         }
@@ -474,9 +474,9 @@ Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f
     return gdl;
 }
 
-extern f32 D_80038400;
-extern f32 D_80038404;
-extern u8 *D_80085D24[]; /* [0] glyph metrics (4 bytes per glyph) */
+extern f32 g_text_scale_x; /* was D_80038400 */
+extern f32 g_text_scale_y; /* was D_80038404 */
+extern u8 *g_font_metrics[]; /* [0] glyph metrics (4 bytes per glyph); was D_80085D24 */
 
 /* was func_15042BC4 */
 void text_measure_string(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
@@ -563,9 +563,9 @@ void text_measure_string(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
                     var_s2 += 1;
                     if (var_t0 != 0) {
                         temp_v1_2 = temp_s3 * 4;
-                        temp_v0_4 = D_80085D24[0] + temp_v1_2;
+                        temp_v0_4 = g_font_metrics[0] + temp_v1_2;
                         *arg1 = (*arg1 + (*(u8 *)((u8 *)temp_v0_4 + 0)) + (*(u8 *)((u8 *)temp_v0_4 + 2))) - 1;
-                        temp_v0_5 = D_80085D24[0] + temp_v1_2;
+                        temp_v0_5 = g_font_metrics[0] + temp_v1_2;
                         temp_a0 = (*(u8 *)((u8 *)temp_v0_5 + 3)) + (*(u8 *)((u8 *)temp_v0_5 + 1));
                         if (temp_a0 >= var_s0) {
                             var_s0 = temp_a0;
@@ -580,15 +580,15 @@ void text_measure_string(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
             *arg1 = var_s5;
         }
         *arg2 += var_s0;
-        *arg1 = (s32) ((f32) *arg1 * D_80038400);
-        *arg2 = (s32) ((f32) *arg2 * D_80038404);
-        *arg3 = (s32) ((f32) *arg3 * D_80038400);
+        *arg1 = (s32) ((f32) *arg1 * g_text_scale_x);
+        *arg2 = (s32) ((f32) *arg2 * g_text_scale_y);
+        *arg3 = (s32) ((f32) *arg3 * g_text_scale_x);
     }
 }
-extern u8 D_80085CC0;
-extern u8 D_80085CC1;
-extern u8 D_80085CC2;
-extern s32 D_80085CC3;
+extern u8 g_text_glyph_chars; /* was D_80085CC0 */
+extern u8 g_text_glyph_chars_1; /* was D_80085CC1 */
+extern u8 g_text_glyph_chars_2; /* was D_80085CC2 */
+extern s32 g_text_glyph_chars_3; /* was D_80085CC3 */
 
 /* was func_15042F30 */
 s32 text_char_to_glyph(s32 arg0) {
@@ -606,15 +606,15 @@ s32 text_char_to_glyph(s32 arg0) {
     if (temp_t6 == 0x20) {
         return 0x60;
     }
-    if (var_v0 == D_80085CC0) {
+    if (var_v0 == g_text_glyph_chars) {
         return 0;
     }
-    if (var_v0 == D_80085CC1) {
+    if (var_v0 == g_text_glyph_chars_1) {
         return 1;
     }
-    var_v0_2 = &D_80085CC3;
+    var_v0_2 = &g_text_glyph_chars_3;
     var_a0 = 3;
-    if (var_v0 == D_80085CC2) {
+    if (var_v0 == g_text_glyph_chars_2) {
         return 2;
     }
 loop_13:

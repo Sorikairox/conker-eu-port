@@ -276,7 +276,7 @@ void seqfx_track_sprite_spawn(u8 *arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
     blk.u50 = 0;
     blk.u54 = 1;
     blk.u56 = 0xFF;
-    temp_v0 = effect3d_spawn_full(&blk, (s32)&D_800A4AA0, 0x27, 0, 0, 0x17, 0, 3, 0xFF, 4, arg3, arg4);
+    temp_v0 = effect3d_spawn_full(&blk, (s32)&g_effect3d_default_params, 0x27, 0, 0, 0x17, 0, 3, 0xFF, 4, arg3, arg4);
     if (temp_v0 != NULL) {
         memcpy(temp_v0 + 0x110, &tmp, 4);
     }

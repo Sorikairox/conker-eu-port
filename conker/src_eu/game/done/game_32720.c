@@ -6,6 +6,6 @@
 
 /* was func_15005270 */
 void obj_flagged_select_reset(void) {
-    D_800C67F1 = (u8)0;
-    D_800C67F0 = (u8)0;
+    g_obj_flagged_select_idx = (u8)0;
+    g_obj_flagged_pending = (u8)0;
 }

@@ -2,7 +2,7 @@ s/    s32 half = n >> 1;/    s32 half = n >> 2;/ % n8 n9
 s/    if (half < 2) {/    if (half < 1) {/ % n2 n3
 s/        half = 2;/        half = 3;/ % n2 n3
 s/    step0 = 0xAA \/ half;/    step0 = 0xAB \/ half;/ % n6 n7
-s/    u8 \*row = (u8 \*) D_800D27D0 + 0x15B4;/    u8 *row = (u8 *) D_800D27D0 + 0x15B5;/ % n2
+s/    u8 \*row = (u8 \*) g_race_state + 0x15B4;/    u8 *row = (u8 *) g_race_state + 0x15B5;/ % n2
 s/    if (n <= 0) {/    if (n <= 1) {/ % n1
 s/    for (i = 0; i < n; i++, row += 0x10) {/    for (i = 0; i < n; i++, row += 0x11) {/ % n2
 s/        v = 0x55;/        v = 0x56;/ % n2

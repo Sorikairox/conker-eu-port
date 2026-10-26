@@ -699,7 +699,7 @@ void drip_fx_update(u8 *arg0) {
             if (collision_ceiling_static_probe(&sp.uC0, sp.uA0, temp_s0 + 0x10) != 0) {
                 sp.uC4 = (*(f32 *)((u8 *)temp_s0 + 0x10));
                 sp.uE8 = (random_int() % 101U) + 0x9B;
-                effect3d_spawn_full(&sp.uA4, (s32) ((u8 *)&D_800A4AA0), 0x1CU, 0U, 0U, 0x22U, 0U, 0, 0, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                effect3d_spawn_full(&sp.uA4, (s32) ((u8 *)&g_effect3d_default_params), 0x1CU, 0U, 0U, 0x22U, 0U, 0, 0, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             }
             (*(f32 *)((u8 *)temp_s0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 8)) - 1.0f);
         } while ((*(f32 *)((u8 *)temp_s0 + 8)) > 1.0f);

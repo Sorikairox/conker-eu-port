@@ -13,12 +13,12 @@
 #include "functions.h"
 #include "variables.h"
 
-/* box half extents (D_800CC64C/50/54) and the y/x, z/x ratios used for the box diagonals (D_800CC658/5C) */
-extern f32 D_800CC630; /* plane of the last tested triangle: normal x, y, z, then d */
-extern f32 D_800CC634;
-extern f32 D_800CC638;
-extern f32 D_800CC63C;
-extern f32 D_8009FAB0; /* slack of the point-in-triangle bounding-box test */
+/* box half extents (g_quadtree_box_half_x/50/54) and the y/x, z/x ratios used for the box diagonals (g_quadtree_box_ratio_yx/5C) */
+extern f32 g_tri_plane_nx; /* plane of the last tested triangle: normal x, y, z, then d; was D_800CC630 */
+extern f32 g_tri_plane_ny; /* was D_800CC634 */
+extern f32 g_tri_plane_nz; /* was D_800CC638 */
+extern f32 g_tri_plane_d; /* was D_800CC63C */
+extern f32 g_nm_tri_bbox_slack; /* slack of the point-in-triangle bounding-box test; was D_8009FAB0 */
 
 #define NM_FABS(x) ((x) < 0.0f ? -(x) : (x))
 
@@ -33,12 +33,12 @@ typedef struct {
 static s32 nmD5E90_outcode(TriPt *p) {
     s32 r = 0;
 
-    if (!(p->x <= D_800CC64C)) r |= 1;
-    if (p->x < -D_800CC64C) r |= 2;
-    if (!(p->y <= D_800CC650)) r |= 4;
-    if (p->y < -D_800CC650) r |= 8;
-    if (!(p->z <= D_800CC654)) r |= 0x10;
-    if (p->z < -D_800CC654) r |= 0x20;
+    if (!(p->x <= g_quadtree_box_half_x)) r |= 1;
+    if (p->x < -g_quadtree_box_half_x) r |= 2;
+    if (!(p->y <= g_quadtree_box_half_y)) r |= 4;
+    if (p->y < -g_quadtree_box_half_y) r |= 8;
+    if (!(p->z <= g_quadtree_box_half_z)) r |= 0x10;
+    if (p->z < -g_quadtree_box_half_z) r |= 0x20;
     return r;
 }
 
@@ -47,17 +47,17 @@ static s32 nmD5E90_bevel2d(TriPt *p) {
     s32 r = 0;
     f32 s;
 
-    s = D_800CC64C + D_800CC650;
+    s = g_quadtree_box_half_x + g_quadtree_box_half_y;
     if (!(p->x + p->y <= s)) r |= 1;
     if (!(p->x - p->y <= s)) r |= 2;
     if (!(-(p->x + p->y) <= s)) r |= 8;
     if (!(-(p->x - p->y) <= s)) r |= 4;
-    s = D_800CC64C + D_800CC654;
+    s = g_quadtree_box_half_x + g_quadtree_box_half_z;
     if (!(p->x + p->z <= s)) r |= 0x10;
     if (!(p->x - p->z <= s)) r |= 0x20;
     if (!(-(p->x + p->z) <= s)) r |= 0x80;
     if (!(-(p->x - p->z) <= s)) r |= 0x40;
-    s = D_800CC650 + D_800CC654;
+    s = g_quadtree_box_half_y + g_quadtree_box_half_z;
     if (!(p->y + p->z <= s)) r |= 0x100;
     if (!(p->y - p->z <= s)) r |= 0x200;
     if (!(-(p->y + p->z) <= s)) r |= 0x800;
@@ -68,7 +68,7 @@ static s32 nmD5E90_bevel2d(TriPt *p) {
 /* bevel_3d: the 8 corner planes */
 static s32 nmD5E90_bevel3d(TriPt *p) {
     s32 r = 0;
-    f32 s = D_800CC64C + D_800CC650 + D_800CC654;
+    f32 s = g_quadtree_box_half_x + g_quadtree_box_half_y + g_quadtree_box_half_z;
     f32 a = p->x + p->y;
     f32 b = p->x - p->y;
     f32 ppp = a + p->z;
@@ -103,18 +103,18 @@ static s32 nmD5E90_checkLine(TriPt *a, TriPt *b, s32 diff) {
 
     if (diff & 3) {
         inv = 1.0f / (a->x - b->x);
-        if ((diff & 1) && nmD5E90_checkPoint(a, b, (D_800CC64C - b->x) * inv, 0x3E) == 0) return 0;
-        if ((diff & 2) && nmD5E90_checkPoint(a, b, -(D_800CC64C + b->x) * inv, 0x3D) == 0) return 0;
+        if ((diff & 1) && nmD5E90_checkPoint(a, b, (g_quadtree_box_half_x - b->x) * inv, 0x3E) == 0) return 0;
+        if ((diff & 2) && nmD5E90_checkPoint(a, b, -(g_quadtree_box_half_x + b->x) * inv, 0x3D) == 0) return 0;
     }
     if (diff & 0xC) {
         inv = 1.0f / (a->y - b->y);
-        if ((diff & 4) && nmD5E90_checkPoint(a, b, (D_800CC650 - b->y) * inv, 0x3B) == 0) return 0;
-        if ((diff & 8) && nmD5E90_checkPoint(a, b, -(D_800CC650 + b->y) * inv, 0x37) == 0) return 0;
+        if ((diff & 4) && nmD5E90_checkPoint(a, b, (g_quadtree_box_half_y - b->y) * inv, 0x3B) == 0) return 0;
+        if ((diff & 8) && nmD5E90_checkPoint(a, b, -(g_quadtree_box_half_y + b->y) * inv, 0x37) == 0) return 0;
     }
     if (diff & 0x30) {
         inv = 1.0f / (a->z - b->z);
-        if ((diff & 0x10) && nmD5E90_checkPoint(a, b, (D_800CC654 - b->z) * inv, 0x2F) == 0) return 0;
-        if ((diff & 0x20) && nmD5E90_checkPoint(a, b, -(D_800CC654 + b->z) * inv, 0x1F) == 0) return 0;
+        if ((diff & 0x10) && nmD5E90_checkPoint(a, b, (g_quadtree_box_half_z - b->z) * inv, 0x2F) == 0) return 0;
+        if ((diff & 0x20) && nmD5E90_checkPoint(a, b, -(g_quadtree_box_half_z + b->z) * inv, 0x1F) == 0) return 0;
     }
     return 1;
 }
@@ -139,7 +139,7 @@ static s32 nmD5E90_sign3(TriPt *p, TriPt *a, TriPt *b, s32 *mask) {
 
 /* point_triangle_intersection: 0 if p (on the triangle's plane) is inside the triangle, else 1 */
 static s32 nmD5E90_pointInTri(TriPt *p, TriPt *v) {
-    f32 eps = D_8009FAB0;
+    f32 eps = g_nm_tri_bbox_slack;
     f32 lo, hi;
     s32 k, mask, s1, s2, s3;
 
@@ -172,7 +172,7 @@ static s32 nmD5E90_pointInTri(TriPt *p, TriPt *v) {
     return 0;
 }
 
-/* plane of the triangle, also stored in D_800CC630..3C */
+/* plane of the triangle, also stored in g_tri_plane_nx..3C */
 static void nmD5E90_plane(TriPt *v, f32 *n) {
     f32 dy12 = v[0].y - v[1].y, dz13 = v[0].z - v[2].z, dy13 = v[0].y - v[2].y;
     f32 dz12 = v[0].z - v[1].z, dx12 = v[0].x - v[1].x, dx13 = v[0].x - v[2].x;
@@ -181,16 +181,16 @@ static void nmD5E90_plane(TriPt *v, f32 *n) {
     n[1] = dz12 * dx13 - dx12 * dz13;
     n[2] = dx12 * dy13 - dy12 * dx13;
     n[3] = n[0] * v[0].x + n[1] * v[0].y + n[2] * v[0].z;
-    D_800CC630 = n[0];
-    D_800CC634 = n[1];
-    D_800CC638 = n[2];
-    D_800CC63C = n[3];
+    g_tri_plane_nx = n[0];
+    g_tri_plane_ny = n[1];
+    g_tri_plane_nz = n[2];
+    g_tri_plane_d = n[3];
 }
 
 /* one of the 4 box diagonals (1, sy * ky, sz * kz) against the triangle's plane: 0 if it hits the triangle */
 static s32 nmD5E90_diagonal(TriPt *v, f32 *n, f32 sy, f32 sz) {
-    f32 ny = n[1] * D_800CC658;
-    f32 nz = n[2] * D_800CC65C;
+    f32 ny = n[1] * g_quadtree_box_ratio_yx;
+    f32 nz = n[2] * g_quadtree_box_ratio_zx;
     f32 denom = n[0] + sy * ny + sz * nz;
     f32 t;
     TriPt q;
@@ -199,10 +199,10 @@ static s32 nmD5E90_diagonal(TriPt *v, f32 *n, f32 sy, f32 sz) {
         denom = 0.0001f;
     }
     t = n[3] / denom;
-    if (NM_FABS(t) <= D_800CC64C) {
+    if (NM_FABS(t) <= g_quadtree_box_half_x) {
         q.x = t;
-        q.y = sy * (t * D_800CC658);
-        q.z = sz * (t * D_800CC65C);
+        q.y = sy * (t * g_quadtree_box_ratio_yx);
+        q.z = sz * (t * g_quadtree_box_ratio_zx);
         if (nmD5E90_pointInTri(&q, v) == 0) {
             return 0;
         }
@@ -210,9 +210,9 @@ static s32 nmD5E90_diagonal(TriPt *v, f32 *n, f32 sy, f32 sz) {
     return 1;
 }
 
-/* Triangle (9 floats, the 3 vertices relative to the box centre) vs the box D_800CC64C/50/54.
+/* Triangle (9 floats, the 3 vertices relative to the box centre) vs the box g_quadtree_box_half_x/50/54.
  * Returns 0 if they intersect, 1 if the triangle is outside. When the test gets past the vertex-in-box
- * check, the triangle's plane is left in D_800CC630..3C. Used by quadtree_tri_box_test (quadtree culling). */
+ * check, the triangle's plane is left in g_tri_plane_nx..3C. Used by quadtree_tri_box_test (quadtree culling). */
 /* was func_150AB278 */
 s32 collision_tri_box_test(struct_eu_bytes24 arg0) {
     TriPt *v = (TriPt *) arg0.unk0;
@@ -256,13 +256,13 @@ inside:
 }
 /* ---- fast_cosf / fast_sinf: cosf / sinf (P24) ----
  * sin: |x| < 2^-12 -> x; |x| < 1.5 -> odd polynomial; |x| < 2^28 -> reduce by n = round(x / pi) with a two-part
- * pi (D_8009FAF8 + D_8009FAFC), polynomial, negate for odd n; else (and inf/NaN) 0. cos(x) = sin(x + pi/2).
+ * pi (g_fast_sinf_pi_hi + g_fast_sinf_pi_lo), polynomial, negate for odd n; else (and inf/NaN) 0. cos(x) = sin(x + pi/2).
  * The asm tests the float bits: (bits >> 22) & 0x1FF is the exponent plus the top mantissa bit. */
-extern f32 D_8009FAE0; /* pi/2 */
-extern f32 D_8009FAE4, D_8009FAE8, D_8009FAEC, D_8009FAF0; /* small-range coefficients */
-extern f32 D_8009FAF4; /* 1/pi */
-extern f32 D_8009FAF8, D_8009FAFC; /* pi high / low part */
-extern f32 D_8009FB00, D_8009FB04, D_8009FB08, D_8009FB0C; /* reduced-range coefficients */
+extern f32 g_fast_sinf_half_pi; /* pi/2; was D_8009FAE0 */
+extern f32 g_fast_sinf_small_k3, g_fast_sinf_small_k2, g_fast_sinf_small_k1, g_fast_sinf_small_k0; /* small-range coefficients; was D_8009FAE4; was D_8009FAE8; was D_8009FAEC; was D_8009FAF0 */
+extern f32 g_fast_sinf_inv_pi; /* 1/pi; was D_8009FAF4 */
+extern f32 g_fast_sinf_pi_hi, g_fast_sinf_pi_lo; /* pi high / low part; was D_8009FAF8; was D_8009FAFC */
+extern f32 g_fast_sinf_red_k4, g_fast_sinf_red_k3, g_fast_sinf_red_k2, g_fast_sinf_red_k1; /* reduced-range coefficients; was D_8009FB00; was D_8009FB04; was D_8009FB08; was D_8009FB0C */
 
 /* cvt.w.s with the default FCSR mode: round to nearest, ties to even */
 static s32 nmD5E90_rint(f32 f) {
@@ -294,18 +294,18 @@ f32 fast_sinf(f32 x) {
             return x;
         }
         x2 = x * x;
-        r = ((D_8009FAE4 * x2 + D_8009FAE8) * x2 + D_8009FAEC) * x2 + D_8009FAF0;
+        r = ((g_fast_sinf_small_k3 * x2 + g_fast_sinf_small_k2) * x2 + g_fast_sinf_small_k1) * x2 + g_fast_sinf_small_k0;
         return r * (x2 * x) + x;
     }
     if (e >= 0x136) {
         return 0.0f;
     }
-    n = nmD5E90_rint(D_8009FAF4 * x);
+    n = nmD5E90_rint(g_fast_sinf_inv_pi * x);
     nf = (f32)n;
-    x = x - D_8009FAF8 * nf;
-    x = x - D_8009FAFC * nf;
+    x = x - g_fast_sinf_pi_hi * nf;
+    x = x - g_fast_sinf_pi_lo * nf;
     x2 = x * x;
-    r = (((D_8009FB00 * x2 + D_8009FB04) * x2 + D_8009FB08) * x2 + D_8009FB0C) * x2;
+    r = (((g_fast_sinf_red_k4 * x2 + g_fast_sinf_red_k3) * x2 + g_fast_sinf_red_k2) * x2 + g_fast_sinf_red_k1) * x2;
     r = r * x + x;
     if (n & 1) {
         r = -r;
@@ -315,7 +315,7 @@ f32 fast_sinf(f32 x) {
 
 /* was func_150AD780 */
 f32 fast_cosf(f32 x) {
-    return fast_sinf(x + D_8009FAE0);
+    return fast_sinf(x + g_fast_sinf_half_pi);
 }
 
 /* ---- P56: wall engine collision_walls_slide / collision_ledge_probe (-> func_150AB708) and ray cast collision_ray_cast ----
@@ -326,15 +326,15 @@ f32 fast_cosf(f32 x) {
  * (helpers P281-P288, ray cast P291, engine P294) and the .inc files are gone. */
 #include <libc/math.h>
 
-extern u8 D_8009FAC0[], D_8009FAC8[], D_8009FACC[], D_8009FAD0[], D_800C5D38[], D_800CC1B0[], D_800CC1B4[];
-extern u8 D_800CC1B8[], D_800CC1C0[], g_wall_coll_no_floor_skip[], g_wall_coll_soft_edges[], g_wall_coll_no_clamp[], D_800CC1F8[], D_800CC1FC[]; /* was D_800CC1F2; was D_800CC1F3; was D_800CC1F4 */
-extern u8 D_800D3C00[], D_800DC26C[], D_800DC270[], D_800DC274[], D_800DC278[], g_world_obj_rider_masks[]; /* was D_800DC3C4 */
+extern u8 g_nmw_k_deg_to_rad[], g_nmw_ledge_vertical_slope[], g_nmw_ledge_grab_radius_sq[], g_nmw_k_rad_to_deg[], g_model_tri_counts[], g_wall_ledge_grab_z[], g_wall_ledge_angle_neg[]; /* was D_800C5D38; was D_8009FAC0; was D_8009FAC8; was D_8009FACC; was D_8009FAD0; was D_800CC1B0; was D_800CC1B4 */
+extern u8 g_wall_ledge_angle_pos[], g_obj_attached_world_obj[], g_wall_coll_no_floor_skip[], g_wall_coll_soft_edges[], g_wall_coll_no_clamp[], g_wall_coll_height[], g_wall_coll_lift[]; /* was D_800CC1F2; was D_800CC1F3; was D_800CC1F4; was D_800CC1F8; was D_800CC1FC; was D_800CC1B8; was D_800CC1C0 */
+extern u8 g_world_obj_box_ids[], g_level_tri_table[], g_coll_tri_xz_bounds[], g_coll_tri_y_bounds[], g_zone_tree[], g_world_obj_rider_masks[]; /* was D_800DC3C4; was D_800DC26C; was D_800D3C00; was D_800DC270; was D_800DC274; was D_800DC278 */
 s32 obj_collision_cylinder(struct127 *, s16 *, s16 *, s16 *);
 s32 func_150A69A8(s32, s32, s32 *, s32);
 s32 world_objects_transform_mesh(s32, s32 *, s32);
 void collision_select_area(s32);
 
-/* BSP node of the level collision tree (D_800DBE08): a square of half size `half` around (cx, cz); `next` = byte
+/* BSP node of the level collision tree (g_quadtree_roots): a square of half size `half` around (cx, cz); `next` = byte
  * offset to the next sibling (0: last), `child` = byte offset to the first child (0: leaf, the triangle list follows). */
 typedef struct {
     /* 0x00 */ u32 unk0;
@@ -487,12 +487,12 @@ static void nmw_tri_to_local(u32 *tri, u32 base, f32 cx, f32 cy, f32 cz, f32 si,
     }
 }
 
-/* box_diagonal_misses (part of func_150AAF00): the box diagonal (1, sy * ky, sz * kz) with ky / kz = D_800CC658 /
- * D_800CC65C meets the plane n (n[0..2] . p = n[3]) at x = t; 0 if |t| is not beyond hx (NaN passes too) and that
+/* box_diagonal_misses (part of func_150AAF00): the box diagonal (1, sy * ky, sz * kz) with ky / kz = g_quadtree_box_ratio_yx /
+ * g_quadtree_box_ratio_zx meets the plane n (n[0..2] . p = n[3]) at x = t; 0 if |t| is not beyond hx (NaN passes too) and that
  * point lies in the triangle v, else 1. A zero denominator is replaced by 0.0001. */
 static s32 nmw_box_diagonal_misses(TriPt *v, f32 *n, f32 sy, f32 sz, f32 hx) {
-    f32 ny = n[1] * D_800CC658;
-    f32 nz = n[2] * D_800CC65C;
+    f32 ny = n[1] * g_quadtree_box_ratio_yx;
+    f32 nz = n[2] * g_quadtree_box_ratio_zx;
     f32 denom = n[0] + sy * ny + sz * nz;
     f32 t;
     TriPt q;
@@ -505,16 +505,16 @@ static s32 nmw_box_diagonal_misses(TriPt *v, f32 *n, f32 sy, f32 sz, f32 hx) {
         return 1;
     }
     q.x = t;
-    q.y = sy * (t * D_800CC658);
-    q.z = sz * (t * D_800CC65C);
+    q.y = sy * (t * g_quadtree_box_ratio_yx);
+    q.z = sz * (t * g_quadtree_box_ratio_zx);
     return nmD5E90_pointInTri(&q, v);
 }
 
 /* triangle_misses_box (func_150AAF00): the wall engine's copy of collision_tri_box_test with the box half extents in
- * registers (hx, hy, hz) instead of D_800CC64C..54: 0 if the triangle v (vertices relative to the box centre) meets
+ * registers (hx, hy, hz) instead of g_quadtree_box_half_x..54: 0 if the triangle v (vertices relative to the box centre) meets
  * the box, 1 if not. Same steps: a vertex inside -> hit; all vertices beyond one face / edge bevel / corner bevel ->
  * miss; an edge crossing the box -> hit; else the 4 box diagonals against the triangle's plane (made to face +z).
- * The plane is left in D_800CC630..3C whenever it is computed (the hit paths reload it from there). */
+ * The plane is left in g_tri_plane_nx..3C whenever it is computed (the hit paths reload it from there). */
 static s32 nmw_tri_misses_box(TriPt *v, f32 hx, f32 hy, f32 hz) {
     s32 o1, o2, o3;
     f32 n[4];
@@ -563,17 +563,17 @@ hit:
  * `ledge` flag:
  *   collision_walls_slide (walls):  box = move + radius, triangles pushed out of (face or nearest edge), result written back;
  *   collision_ledge_probe (ledges): box around the record turned by its heading, triangles only looked at (ledge grab
- *                           data in D_800CC214..21C / D_800CC1B0..B8, D_800CC1C0[record] = 1), nothing written back. */
+ *                           data in g_wall_ledge_h_neg..21C / g_wall_ledge_grab_z..B8, g_obj_attached_world_obj[record] = 1), nothing written back. */
 #define NMW_F32(sym) (*(f32 *) (sym))
 #define NMW_REC_SIZE 812 /* struct127 */
 
 typedef struct {
     u8 *rec;             /* 0x140 the moving record */
-    s32 nObjs;           /* s1: area kind 2: objects func_150A69A8 listed in D_800D3C00 (else 0) */
+    s32 nObjs;           /* s1: area kind 2: objects func_150A69A8 listed in g_world_obj_box_ids (else 0) */
     s32 cur;             /* 0x148 kind 2: current object index; kind 3: current record (pointer); else 0 */
     s32 curFirst;        /* 0x14C kind 2: the object's first triangle; kind 3: end of the records */
     u32 vbase;           /* 0x150 base of the triangles' vertex offsets (0: absolute) */
-    s32 listPos;         /* 0x154 kind 2: position in D_800D3C00 */
+    s32 listPos;         /* 0x154 kind 2: position in g_world_obj_box_ids */
     s32 count;           /* 0x154 kind 3: triangles of the current record's model */
     s32 recNo;           /* 0x144 kind 3: 1 + index of the current record */
     s32 margin;          /* 0x158 widening of the xz box (s16 from obj_collision_cylinder) */
@@ -589,8 +589,8 @@ typedef struct {
     f32 tgt[3];          /* 0x40 the target */
     u32 keepFall;        /* 0x4C rec+0x20 copy; walls clear rec+0x20 when this was zeroed */
     NmwReg dy;           /* 0x50 rec+0x20 (bits), after the first push pos y - target y */
-    f32 yoff;            /* 0x54 D_800CC1FC: box centre above the record */
-    f32 half[3];         /* 0x58 box half extents (D_800CC64C..54, set by quadtree_set_test_box) */
+    f32 yoff;            /* 0x54 g_wall_coll_lift: box centre above the record */
+    f32 half[3];         /* 0x58 box half extents (g_quadtree_box_half_x..54, set by quadtree_set_test_box) */
     s32 prev;            /* 0x64 previous triangle of the leaf list (relative entries) */
     s32 nVisited;        /* 0x68 / gp */
     u16 visited[100];    /* 0x6C level triangles already tested (a triangle can be in several leaves) */
@@ -642,8 +642,8 @@ static void nmw_set_box(NmwState *w, f32 px, f32 py, f32 pz) {
 }
 
 /* next_record (part of func_150ABBD0): area kind 3, the next record after w->cur that is not the mover, exists,
- * has flag 0x4000 at +0xF8 and a vertex base at +0x264; selects its model's triangles (D_800DC26C = D_800C6070[kind],
- * count D_800C5D38[kind]). 0 when the records run out. */
+ * has flag 0x4000 at +0xF8 and a vertex base at +0x264; selects its model's triangles (g_level_tri_table = g_model_coll_tris[kind],
+ * count g_model_tri_counts[kind]). 0 when the records run out. */
 static s32 nmw_next_record(NmwState *w) {
     u8 *r = (u8 *) w->cur;
     s32 no = w->recNo;
@@ -666,8 +666,8 @@ static s32 nmw_next_record(NmwState *w) {
     w->cur = (s32) r;
     w->recNo = no;
     w->vbase = base;
-    *(s32 *) D_800DC26C = D_800C6070[r[4]];
-    w->count = ((u16 *) D_800C5D38)[r[4]];
+    *(s32 *) g_level_tri_table = g_model_coll_tris[r[4]];
+    w->count = ((u16 *) g_model_tri_counts)[r[4]];
     w->tri = 0;
     return 1;
 }
@@ -706,7 +706,7 @@ static s32 nmw_walk_tree(NmwState *w) {
  * 200 of rint(pos y)) and whose flags hold the mask; level triangles are tested once (visited list, 100 entries).
  * Kind 3 runs over the records' own models instead of the tree. Kind 2: list entries past the current object's
  * triangles move to the next listed object (whose flags +0x40 apply to that first triangle; the others use the
- * level's D_800DBE5C). 0 when there is none left. */
+ * level's g_coll_tri_flags). 0 when there is none left. */
 static s32 nmw_next_triangle(NmwState *w) {
     s16 *xz;
     s16 *yr;
@@ -748,7 +748,7 @@ static s32 nmw_next_triangle(NmwState *w) {
                     if (++w->listPos == w->nObjs) {
                         return 0;
                     }
-                    w->cur = ((u16 *) D_800D3C00)[w->listPos];
+                    w->cur = ((u16 *) g_world_obj_box_ids)[w->listPos];
                     obj = (u8 *) g_world_objs + w->cur * NMR_OBJ_SIZE;
                     t = w->curFirst = NMR_OBJ_U16(obj, NMR_OBJ_TRI0);
                     w->vbase = g_world_obj_blocks[w->cur];
@@ -757,15 +757,15 @@ static s32 nmw_next_triangle(NmwState *w) {
                     goto test_flags;
                 }
             }
-            flags = D_800DBE5C != 0 ? ((u32 *) D_800DBE5C)[t] : 0;
+            flags = g_coll_tri_flags != 0 ? ((u32 *) g_coll_tri_flags)[t] : 0;
         test_flags:
             w->prev = t;
             if ((flags & w->mask) != w->mask) {
                 continue;
             }
             w->noSlope = flags & 0x1000000;
-            xz = *(s16 **) D_800DC270 + t * 4;
-            yr = *(s16 **) D_800DC274;
+            xz = *(s16 **) g_coll_tri_xz_bounds + t * 4;
+            yr = *(s16 **) g_coll_tri_y_bounds;
         }
         w->tri = t;
         if (!(xz[0] < w->xmax) || !(w->xmin < xz[2]) || !(xz[1] < w->zmax) || !(w->zmin < xz[3])) {
@@ -891,7 +891,7 @@ static s32 nmw_edge_push(NmwState *w, f32 *p) {
  * target or the position projects inside the triangle, or g_wall_coll_soft_edges and the second edge's sign component <= 0.8)
  * or away from the nearest edge. 1 if the position moved. */
 static s32 nmw_wall_triangle(NmwState *w) {
-    u32 *tri = (u32 *) (*(u32 *) D_800DC26C + w->tri * 12);
+    u32 *tri = (u32 *) (*(u32 *) g_level_tri_table + w->tri * 12);
     u8 *obj;
     f32 n[4];
     f32 p[3];
@@ -912,10 +912,10 @@ static s32 nmw_wall_triangle(NmwState *w) {
     } else if (w->cur != 0) {
         w->rec[0x275] = w->recNo;
     }
-    n[0] = D_800CC630;
-    n[1] = D_800CC634;
-    n[2] = D_800CC638;
-    n[3] = D_800CC63C;
+    n[0] = g_tri_plane_nx;
+    n[1] = g_tri_plane_ny;
+    n[2] = g_tri_plane_nz;
+    n[3] = g_tri_plane_d;
     len2 = n[0] * n[0] + n[1] * n[1] + n[2] * n[2];
     if (len2 == 0.0f) {
         len2 = 1.0f;
@@ -990,10 +990,10 @@ static s32 nmw_wall_triangle(NmwState *w) {
  * around the half move: its xz edges (x along the heading) are lines z = slope x + icept; the one passing nearest to
  * the record (foot of the perpendicular, clamped to the edge) is the ledge candidate. When it beats the best so far,
  * has an end on each side of the record (x > 0 and x < 0) and |slope| < 4: the grab point is where the line meets
- * the circle of radius^2 D_8009FACC (the root on the record's side), stored with the ledge height and the edge's
- * angle in D_800CC214 / D_800CC1B4 (icept negative) or D_800CC218 / D_800CC1B8, and D_800CC1C0[record] = 1. */
+ * the circle of radius^2 g_nmw_ledge_grab_radius_sq (the root on the record's side), stored with the ledge height and the edge's
+ * angle in g_wall_ledge_h_neg / g_wall_ledge_angle_neg (icept negative) or g_wall_ledge_h_pos / g_wall_ledge_angle_pos, and g_obj_attached_world_obj[record] = 1. */
 static void nmw_ledge_triangle(NmwState *w) {
-    u32 *tri = (u32 *) (*(u32 *) D_800DC26C + w->tri * 12);
+    u32 *tri = (u32 *) (*(u32 *) g_level_tri_table + w->tri * 12);
     f32 *v = &w->tv[0].x;
     f32 nx, ny, nz, d, len, top, hm, x0, z0, x1, z1, dx, m, ic, fx, fz, footx, footz, d2, best, tmp;
     f32 bestFoot[2], bestSlope, bestX0, bestX1;
@@ -1006,12 +1006,12 @@ static void nmw_ledge_triangle(NmwState *w) {
     if (nmw_tri_misses_box(w->tv, w->half[0], w->half[1], w->half[2])) {
         return;
     }
-    nx = D_800CC630;
-    ny = D_800CC634;
-    nz = D_800CC638;
-    d = D_800CC63C;
+    nx = g_tri_plane_nx;
+    ny = g_tri_plane_ny;
+    nz = g_tri_plane_nz;
+    d = g_tri_plane_d;
     len = sqrtf(nx * nx + ny * ny + nz * nz);
-    if (len == 0.0f || ny / len <= NMW_F32(D_8009FAC0 + 4)) {
+    if (len == 0.0f || ny / len <= NMW_F32(g_nmw_k_deg_to_rad + 4)) {
         return;
     }
     top = d / ny + w->yoff;
@@ -1033,7 +1033,7 @@ static void nmw_ledge_triangle(NmwState *w) {
             continue; /* a short edge, unless it is the last chance */
         }
         if (dx == 0.0f) {
-            m = NMW_F32(D_8009FAC8);
+            m = NMW_F32(g_nmw_ledge_vertical_slope);
             ic = x1;
             fx = x1;
             fz = 0.0f;
@@ -1105,7 +1105,7 @@ static void nmw_ledge_triangle(NmwState *w) {
     m = bestSlope;
     a = 1.0f + m * m;
     bq = 2.0f * (m * bestFoot[0] - bestFoot[1]);
-    cq = bestFoot[0] * bestFoot[0] - NMW_F32(D_8009FACC) + bestFoot[1] * bestFoot[1];
+    cq = bestFoot[0] * bestFoot[0] - NMW_F32(g_nmw_ledge_grab_radius_sq) + bestFoot[1] * bestFoot[1];
     disc = bq * bq - 4.0f * a * cq;
     if (!(disc > 0.0f)) {
         disc = 0.0f;
@@ -1118,20 +1118,20 @@ static void nmw_ledge_triangle(NmwState *w) {
     lx = -m * t;
     wx = lx * w->co - t * w->si;
     wz = lx * w->si + t * w->co;
-    D_800CC21C = wx + *(f32 *) (w->rec + 0x14);
-    NMW_F32(D_800CC1B0) = wz + *(f32 *) (w->rec + 0x1C);
-    ang = math_atan2f(1.0f, m) * NMW_F32(D_8009FAD0) - 90.0f;
+    g_wall_ledge_grab_x = wx + *(f32 *) (w->rec + 0x14);
+    NMW_F32(g_wall_ledge_grab_z) = wz + *(f32 *) (w->rec + 0x1C);
+    ang = math_atan2f(1.0f, m) * NMW_F32(g_nmw_k_rad_to_deg) - 90.0f;
     if (bestIcept.i < 0) {
-        D_800CC214 = height;
-        NMW_F32(D_800CC1B4) = ang;
+        g_wall_ledge_h_neg = height;
+        NMW_F32(g_wall_ledge_angle_neg) = ang;
     } else {
-        D_800CC218 = height;
-        NMW_F32(D_800CC1B8) = ang;
+        g_wall_ledge_h_pos = height;
+        NMW_F32(g_wall_ledge_angle_pos) = ang;
     }
-    ((s16 *) D_800CC1C0)[(s32) (w->rec - (u8 *) g_objects) / NMW_REC_SIZE] = 1;
+    ((s16 *) g_obj_attached_world_obj)[(s32) (w->rec - (u8 *) g_objects) / NMW_REC_SIZE] = 1;
 }
 
-/* wall_engine (func_150AB708): see the block comment above. Area kind D_800DC280: 2 = the objects func_150A69A8
+/* wall_engine (func_150AB708): see the block comment above. Area kind g_collision_cur_area: 2 = the objects func_150A69A8
  * lists near the target (sorted by world_objects_transform_mesh; nothing listed or no vertex base -> 0), 3 = the other records'
  * models, else the level. Returns 1 if a wall moved the record (walls; ledges return 0). */
 static s32 nmw_engine(u8 *rec, f32 x, f32 y, u32 zbits, s32 mark, s32 ledge) {
@@ -1156,20 +1156,20 @@ static s32 nmw_engine(u8 *rec, f32 x, f32 y, u32 zbits, s32 mark, s32 ledge) {
     w.tgt[2] = z.f;
     obj_collision_cylinder((struct127 *) rec, &yo.h[0], &mg, &rd);
     w.nObjs = 0;
-    if (D_800DC280 == 2) {
+    if (g_collision_cur_area == 2) {
         w.nObjs = func_150A69A8(nmD5E90_rint(x), nmD5E90_rint(z.f), &yo.w, nmD5E90_rint(y) + yo.h[0]);
         if (w.nObjs == 0) {
             return 0;
         }
-        world_objects_transform_mesh(w.nObjs, (s32 *) D_800D3C00, 0);
-        w.cur = *(u16 *) D_800D3C00;
+        world_objects_transform_mesh(w.nObjs, (s32 *) g_world_obj_box_ids, 0);
+        w.cur = *(u16 *) g_world_obj_box_ids;
         w.curFirst = NMR_OBJ_U16((u8 *) g_world_objs + w.cur * NMR_OBJ_SIZE, NMR_OBJ_TRI0);
         w.vbase = g_world_obj_blocks[w.cur];
         if (w.vbase == 0) {
             return 0;
         }
         w.listPos = 0;
-    } else if (D_800DC280 == 3) {
+    } else if (g_collision_cur_area == 3) {
         w.curFirst = (s32) ((u8 *) g_objects + 25 * NMW_REC_SIZE);
         w.cur = (s32) ((u8 *) g_objects - NMW_REC_SIZE);
         w.tri = -1;
@@ -1183,19 +1183,19 @@ static s32 nmw_engine(u8 *rec, f32 x, f32 y, u32 zbits, s32 mark, s32 ledge) {
         w.ledgeLo = 64.0f;
         w.ledgeHi = 65.0f;
         w.ledgeBest = 65536.0f; /* collision_ledge_probe sets it before joining the engine */
-        w.yoff = NMW_F32(D_800CC1FC);
+        w.yoff = NMW_F32(g_wall_coll_lift);
         { /* P317: volatile zero: IDO folds `0.0f + x` (the asm adds $f3, taken as 0.0; P310) */
             volatile f32 p317z = 0.0f;
-            quadtree_set_test_box((f32) w.margin * 2.0f, NMW_F32(D_800CC1F8) + p317z, (f32) w.radius * 2.0f);
+            quadtree_set_test_box((f32) w.margin * 2.0f, NMW_F32(g_wall_coll_height) + p317z, (f32) w.radius * 2.0f);
         }
     } else {
         w.radiusF = rd;
         w.radius = rd;
         w.margin = mg;
-        w.yoff = NMW_F32(D_800CC1FC);
+        w.yoff = NMW_F32(g_wall_coll_lift);
         dx = x - *(f32 *) (rec + 0x14);
         dz = z.f - *(f32 *) (rec + 0x1C);
-        quadtree_set_test_box((f32) w.margin * 2.0f, NMW_F32(D_800CC1F8), (f32) w.radius * 2.0f + sqrtf(dx * dx + dz * dz));
+        quadtree_set_test_box((f32) w.margin * 2.0f, NMW_F32(g_wall_coll_height), (f32) w.radius * 2.0f + sqrtf(dx * dx + dz * dz));
     }
     w.nVisited = 0;
     w.si = 0.0f;
@@ -1205,13 +1205,13 @@ static s32 nmw_engine(u8 *rec, f32 x, f32 y, u32 zbits, s32 mark, s32 ledge) {
     w.pos[2] = *(f32 *) (rec + 0x1C);
     nmw_set_box(&w, w.pos[0], w.pos[1], w.pos[2]);
     w.keepFall = w.dy.u = *(u32 *) (rec + 0x20);
-    w.half[0] = D_800CC64C;
-    w.half[1] = D_800CC650;
-    w.half[2] = D_800CC654;
-    w.node = *(NmrNode **) D_800DC278;
+    w.half[0] = g_quadtree_box_half_x;
+    w.half[1] = g_quadtree_box_half_y;
+    w.half[2] = g_quadtree_box_half_z;
+    w.node = *(NmrNode **) g_zone_tree;
     w.cursor = NULL;
     if (ledge) {
-        ang = *(f32 *) (rec + 0x40) * NMW_F32(D_8009FAC0);
+        ang = *(f32 *) (rec + 0x40) * NMW_F32(g_nmw_k_deg_to_rad);
         w.si = sinf(ang);
         w.co = -cosf(ang);
     }
@@ -1240,13 +1240,13 @@ s32 collision_walls_slide(f32 x, f32 y, s32 zbits, u8 *rec, s32 mark) {
 }
 
 /* ledges: returns at once (v0 = 0 here, the caller's v0 in the asm) if rec+0x20 > 0 (rising), else clears
- * D_800CC1C0[record] and runs the engine in ledge mode */
+ * g_obj_attached_world_obj[record] and runs the engine in ledge mode */
 /* was func_150AC8C4 */
 s32 collision_ledge_probe(f32 x, f32 y, s32 zbits, u8 *rec, s32 mark) {
     if (*(s32 *) (rec + 0x20) > 0) {
         return 0;
     }
-    ((s16 *) D_800CC1C0)[(s32) (rec - (u8 *) g_objects) / NMW_REC_SIZE] = 0;
+    ((s16 *) g_obj_attached_world_obj)[(s32) (rec - (u8 *) g_objects) / NMW_REC_SIZE] = 0;
     return nmw_engine(rec, x, y, zbits, mark, 1);
 }
 
@@ -1294,14 +1294,14 @@ s32 nmw_unit(u32 entry, u32 *io) {
 }
 
 /* ray_hits_triangle (func_150AD844, the ray cast's private helper): the ray org + t * dir (t >= 0) against triangle
- * `tri` of the current collision set (D_800DC26C: 3 vertex offsets from vbase per triangle, vertices s16 x, y, z;
- * D_800DC270: s16 min x, min z, max x, max z per triangle; D_800DC274: s16 min y, max y). Misses (0) when the ray
+ * `tri` of the current collision set (g_level_tri_table: 3 vertex offsets from vbase per triangle, vertices s16 x, y, z;
+ * g_coll_tri_xz_bounds: s16 min x, min z, max x, max z per triangle; g_coll_tri_y_bounds: s16 min y, max y). Misses (0) when the ray
  * is parallel to the plane, the plane is behind the origin, the hit point is outside the triangle's bounds widened
  * by 1, it is not nearer than best[0], or it lies outside the triangle (edge cross products, see below). On a hit (1): best[0] = distance, best[1..3] = hit point. */
 static s32 nmr_ray_hits_triangle(u32 tri, u32 vbase, f32 *org, f32 *dir, f32 *best) {
-    u32 *offs = (u32 *) (*(u32 *) D_800DC26C + tri * 12);
-    s16 *box = (s16 *) (*(u32 *) D_800DC270 + tri * 8);
-    s16 *ybox = (s16 *) (*(u32 *) D_800DC274 + tri * 4);
+    u32 *offs = (u32 *) (*(u32 *) g_level_tri_table + tri * 12);
+    s16 *box = (s16 *) (*(u32 *) g_coll_tri_xz_bounds + tri * 8);
+    s16 *ybox = (s16 *) (*(u32 *) g_coll_tri_y_bounds + tri * 4);
     f32 v[3][3];
     f32 e1x, e1y, e1z, e2x, e2y, e2z;
     f32 nx, ny, nz, d, denom, t;
@@ -1392,14 +1392,14 @@ typedef struct {
     f32 dir[3];
     f32 best[4];
     s32 kind;    /* 0 none, 1 level triangle, 2 object triangle */
-    u32 hitRec;  /* D_800DC26C record (3 vertex offsets) of the hit triangle */
+    u32 hitRec;  /* g_level_tri_table record (3 vertex offsets) of the hit triangle */
     u32 hitTri;  /* its index */
     u32 lastRec; /* the asm's gp: the record of the last tested triangle (read by the flags output, see below) */
 } NmrRay;
 
 /* test triangle `tri` (vertices at vbase + its offsets) against the ray; on a hit the ray's best and hit change */
 static s32 nmr_test_triangle(NmrRay *ray, u32 tri, u32 vbase) {
-    ray->lastRec = *(u32 *) D_800DC26C + tri * 12;
+    ray->lastRec = *(u32 *) g_level_tri_table + tri * 12;
     if (!nmr_ray_hits_triangle(tri, vbase, ray->org, ray->dir, ray->best)) {
         return 0;
     }
@@ -1410,7 +1410,7 @@ static s32 nmr_test_triangle(NmrRay *ray, u32 tri, u32 vbase) {
 }
 
 /* does the xz line (dep = slope * ind + icept) separate the corners of a triangle's xz bounds? ind / dep point at
- * the min of the independent / dependent coordinate in its D_800DC270 entry (s16 min x, min z, max x, max z) */
+ * the min of the independent / dependent coordinate in its g_coll_tri_xz_bounds entry (s16 min x, min z, max x, max z) */
 static s32 nmr_line_splits_box(s16 *ind, s16 *dep, f32 slope, f32 icept) {
     f32 k1 = slope * (f32) ind[0];
     f32 k2 = slope * (f32) ind[2];
@@ -1433,7 +1433,7 @@ static s32 nmr_line_splits_box(s16 *ind, s16 *dep, f32 slope, f32 icept) {
 
 /* the BSP leaf (from the root, skipping `skip`) whose square holds (x, z); NULL if none */
 static NmrNode *nmr_find_leaf(f32 x, f32 z, NmrNode *skip) {
-    NmrNode *node = *(NmrNode **) D_800DBE08;
+    NmrNode *node = *(NmrNode **) g_quadtree_roots;
     f32 cx, cz, h;
 
     for (;;) {
@@ -1461,10 +1461,10 @@ static NmrNode *nmr_find_leaf(f32 x, f32 z, NmrNode *skip) {
  * point 10 units past the exit side of the current square, until a hit, no leaf, or the exit point is maxDist or
  * more away in xz); in each leaf the triangles whose xz bounds the ray's xz line crosses are tested
  * (func_150AD844). Objects: those whose bounding sphere the ray's line meets (in front of the origin) are listed in
- * D_800D3C00, sorted by world_objects_transform_mesh, and all their triangles tested the same way.
- * Outputs (each optional): *outRec = the hit triangle's D_800DC26C record, *outX / Y / Z = the point, outVerts = its
+ * g_world_obj_box_ids, sorted by world_objects_transform_mesh, and all their triangles tested the same way.
+ * Outputs (each optional): *outRec = the hit triangle's g_level_tri_table record, *outX / Y / Z = the point, outVerts = its
  * 3 vertices (s16 x, y, z each), *outDist, *outObj = the object index (-1: level), *outFlags = the triangle's flags
- * (level: D_800DBE5C[tri]; object: its table +0x44 [tri - first], or +0x40 for all). Returns 1 on a hit, else 0.
+ * (level: g_coll_tri_flags[tri]; object: its table +0x44 [tri - first], or +0x40 for all). Returns 1 on a hit, else 0.
  * collision_select_area(0 / 2) marks the level / object phases (profiler).
  */
 /* was func_150ACEA0 */
@@ -1532,8 +1532,8 @@ s32 collision_ray_cast(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRe
     prev = 0; /* the asm's t3: the first entry of a leaf is relative to the caller's t3 (0) or the last exit side */
     leaf = nmr_find_leaf(x0, z0, NULL);
     while (leaf != NULL) {
-        ind = (s16 *) *(u32 *) D_800DC270 + (xMajor ? 0 : 1);
-        dep = (s16 *) *(u32 *) D_800DC270 + (xMajor ? 1 : 0);
+        ind = (s16 *) *(u32 *) g_coll_tri_xz_bounds + (xMajor ? 0 : 1);
+        dep = (s16 *) *(u32 *) g_coll_tri_xz_bounds + (xMajor ? 1 : 0);
         list = leaf->list;
         while ((tri = *list++) != 0) {
             if (tri & 0x80) {
@@ -1591,7 +1591,7 @@ s32 collision_ray_cast(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRe
         tz = 2.0f * ray.dir[2];
         n = 0;
         i = 0;
-        idx = (u16 *) D_800D3C00;
+        idx = (u16 *) g_world_obj_box_ids;
         do {
             if (obj[NMR_OBJ_OFF] == 0 && (obj[NMR_OBJ_MODE] & 0x60) != 0x20) {
                 /* |o + t d - c|^2 = r^2 with the doubled direction: b = 2 d.(o - c), c = |o - c|^2 - r^2 */
@@ -1620,10 +1620,10 @@ s32 collision_ray_cast(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRe
         } while (obj != objEnd);
 
         if (n != 0) {
-            world_objects_transform_mesh(n, (s32 *) D_800D3C00, 0);
-            ind = (s16 *) *(u32 *) D_800DC270 + (xMajor ? 0 : 1);
-            dep = (s16 *) *(u32 *) D_800DC270 + (xMajor ? 1 : 0);
-            idx = (u16 *) D_800D3C00;
+            world_objects_transform_mesh(n, (s32 *) g_world_obj_box_ids, 0);
+            ind = (s16 *) *(u32 *) g_coll_tri_xz_bounds + (xMajor ? 0 : 1);
+            dep = (s16 *) *(u32 *) g_coll_tri_xz_bounds + (xMajor ? 1 : 0);
+            idx = (u16 *) g_world_obj_box_ids;
             idxEnd = idx + n;
             do {
                 vbase = g_world_obj_blocks[*idx];
@@ -1680,10 +1680,10 @@ s32 collision_ray_cast(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRe
     }
     if (outFlags != 0) {
         if (ray.kind == 1) {
-            flags = ((u32 *) D_800DBE5C)[ray.hitTri];
+            flags = ((u32 *) g_coll_tri_flags)[ray.hitTri];
         } else {
             /* Rare's asm reads the object from gp, which holds the object only when the vertex output ran; without
-             * it gp is still the last tested triangle's D_800DC26C record (kept: ray.lastRec) */
+             * it gp is still the last tested triangle's g_level_tri_table record (kept: ray.lastRec) */
             obj = (u8 *) ray.lastRec;
             triFlags = *(u32 **) (obj + NMR_OBJ_TRIFLAGS);
             if (triFlags != NULL) {

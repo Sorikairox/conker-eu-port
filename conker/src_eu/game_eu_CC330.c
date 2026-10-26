@@ -5,7 +5,7 @@
 
 void mp3_stream_stop(void);
 void mp3_stream_set_volume(s32, s32);
-extern s32 D_800D3C60;
+extern s32 g_event_arg_count; /* was D_800D3C60 */
 
 /* was func_1509EB20 */
 s32 event_action_stream(s32 arg0, s32 arg1, u8 *arg2) {
@@ -14,13 +14,13 @@ s32 event_action_stream(s32 arg0, s32 arg1, u8 *arg2) {
     switch (arg1) {                                 /* irregular */
     case 0:
         var_a1 = 0x7FFF;
-        if (D_800D3C60 >= 3) {
+        if (g_event_arg_count >= 3) {
             var_a1 = (*(s32 *)((u8 *)arg2 + 8));
         }
         mp3_voice_play(arg0, var_a1, 0x40);
         return 1;
     case 1:
-        if (D_800D3C60 == 4) {
+        if (g_event_arg_count == 4) {
     s32 pad;
             mp3_stream_set_volume((*(s32 *)((u8 *)arg2 + 8)), (*(s32 *)((u8 *)arg2 + 0xC)));
             return 1;
@@ -46,7 +46,7 @@ s32 event_query_stream(s32 arg0, s32 arg1, s32 arg2) {
 
 void music_play_song(s32, s32, s32);
 void music_stop_song(s32, s32);
-extern s32 D_800D3C60;
+extern s32 g_event_arg_count; /* was D_800D3C60 */
 
 /* was func_1509EC10 */
 s32 event_action_music(s32 arg0, u32 arg1, u8 *arg2) {
@@ -67,19 +67,19 @@ s32 event_action_music(s32 arg0, u32 arg1, u8 *arg2) {
         music_stop_song(arg0 & 0xFFF, (*(s32 *)((u8 *)arg2 + 8)));
         return 1;
     case 3:
-        if (D_800D3C60 == 5) {
+        if (g_event_arg_count == 5) {
             return music_song_set_chans_level(arg0 & 0xFFF, (*(s32 *)((u8 *)arg2 + 8)), (*(s32 *)((u8 *)arg2 + 0xC)), (*(s32 *)((u8 *)arg2 + 0x10)));
         }
         return music_song_set_chans_level(arg0 & 0xFFF, (*(s32 *)((u8 *)arg2 + 8)), (*(s32 *)((u8 *)arg2 + 0xC)), 0x3C);
     case 4:
         temp_a0 = arg0 & 0xFFF;
-        if (D_800D3C60 == 5) {
+        if (g_event_arg_count == 5) {
             return music_song_set_marker(arg0 & 0xFFF, (*(s32 *)((u8 *)arg2 + 8)), (*(s32 *)((u8 *)arg2 + 0xC)), (*(s32 *)((u8 *)arg2 + 0x10)) & 0xFFF);
         }
         return music_song_set_marker(temp_a0, (*(s32 *)((u8 *)arg2 + 8)), (*(s32 *)((u8 *)arg2 + 0xC)), temp_a0);
     case 6:
         var_a1 = 1;
-        if (D_800D3C60 == 3) {
+        if (g_event_arg_count == 3) {
             var_a1 = (*(s32 *)((u8 *)arg2 + 8));
         }
         music_song_set_paused(arg0 & 0xFFF, var_a1);

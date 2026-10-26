@@ -13,10 +13,10 @@ s/        mode = 1;$/        mode = 2;/ % k9_neg k9_0 k9_big
 s/        replan = 0;$/        replan = 1;/ % k3 k3_nov k3_near rec1F
 s/        lead = 80.0f;/        lead = 40.0f;/ % rec1F
 s/    lead = 40.0f;/    lead = 41.0f;/ % plain
-s/    if (\*(s16 \*) ((u8 \*) D_800D27D0 + 0x16BC) == 0xB9 || D_800E1000 >= 3) {/    if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB9 || D_800E1000 >= 4) {/ % special_41_dif3
+s/    if (\*(s16 \*) ((u8 \*) g_race_state + 0x16BC) == 0xB9 || g_race_difficulty >= 3) {/    if (*(s16 *) ((u8 *) g_race_state + 0x16BC) == 0xB9 || g_race_difficulty >= 4) {/ % special_41_dif3
 s/                k = 0.024767801f;/                k = 0.016f;/ % k14_race k3F_dif3
 s/                k = 0.032f;/                k = 0.016f;/ % k16_race
-s/            k = sqrtf(dx \* dx + dy \* dy + dz \* dz) \* k \/ CF34_F(D_800D27D0, 0x16B4);/            k = sqrtf(dx * dx + dz * dz) * k \/ CF34_F(D_800D27D0, 0x16B4);/ % k14_race k16_race special_18_race
+s/            k = sqrtf(dx \* dx + dy \* dy + dz \* dz) \* k \/ CF34_F(g_race_state, 0x16B4);/            k = sqrtf(dx * dx + dz * dz) * k \/ CF34_F(g_race_state, 0x16B4);/ % k14_race k16_race special_18_race
 s/            dx = (CF34_F(rec, 0x14) - CF34_F(rec, 0x2C)) \* k;/            dx = (CF34_F(rec, 0x14) - CF34_F(rec, 0x30)) * k;/ % k14_race k16_race special_18_race
 s/            dz = (CF34_F(rec, 0x1C) - CF34_F(rec, 0x34)) \* k;/            dz = (CF34_F(rec, 0x18) - CF34_F(rec, 0x34)) * k;/ % k14_race k16_race special_18_race
 s/        dx = (f32) \*(s16 \*) (rec + 0x1A4) + dx - CF34_RAILF(0x17A8, i);/        dx = (f32) *(s16 *) (rec + 0x1A6) + dx - CF34_RAILF(0x17A8, i);/ % replan replan_veh
@@ -67,8 +67,8 @@ s/            if (height < -50.0f \&\& (CF34_RAILW(0x16C0, i) \& (0x10001 << nod
 s/                \*(u16 \*) (CF34_ST(obj) + 0x8A) |= 0x2000;/                *(u16 *) (CF34_ST(obj) + 0x8A) = 0x2000;/ % k1B_bit_small
 s/            t = (dist - 136.0f) \/ 664.0f;/            t = (dist - 136.0f) \/ 600.0f;/ % k3 k3_nov
 s/                t = 0.0f;/                t = 0.1f;/ % k3_near
-s/            t = sinf((f32) (D_800BEDCC \& 0x3F) \* 0.09815625f) \* 0.175f + t;/            t = sinf((f32) (D_800BEDCC \& 0x1F) * 0.09815625f) * 0.175f + t;/ % k3
-s/            t = sinf((f32) (D_800BEDCC \& 0x3F) \* 0.09815625f) \* 0.175f + t;/            t = sinf((f32) (D_800BEDCC \& 0x3F) * 0.09815625f) * 0.2f + t;/ % k3
+s/            t = sinf((f32) (g_frame_count \& 0x3F) \* 0.09815625f) \* 0.175f + t;/            t = sinf((f32) (g_frame_count \& 0x1F) * 0.09815625f) * 0.175f + t;/ % k3
+s/            t = sinf((f32) (g_frame_count \& 0x3F) \* 0.09815625f) \* 0.175f + t;/            t = sinf((f32) (g_frame_count \& 0x3F) * 0.09815625f) * 0.2f + t;/ % k3
 s/                t = 1.0f;$/                t = 0.9f;/ % k3_far
 s/            t = t \* 0.025690002f + 0.017241f;/            t = t * 0.025690002f + 0.02f;/ % k3
 s/            CF34_ST(obj)\[0x86\] = 0;/            CF34_ST(obj)[0x87] = 0;/ % k3
@@ -79,7 +79,7 @@ s/            trail_send_aim_msg(obj, t);/            trail_send_aim_msg(obj, di
 s/        } else if (CF34_RAILW(0x29C, i) >= 0) {/        } else if (CF34_RAILW(0x29C, i) > 0) {/ % k9_0
 s/        } else if (CF34_RAILW(0x29C, i) >= 0) {/        } else if (CF34_RAILW(0x29C, i) >= -1) {/ % k9_neg
 s/            \*(u16 \*) (CF34_ST(obj) + 0x8A) = 0x2000;/            *(u16 *) (CF34_ST(obj) + 0x8A) |= 0x2000;/ % k9_0 k38_limit k15
-s/                if (D_80087678\[D_800E1000\] < CF34_RAILW(0x29C, i)) {/                if (D_80087678[D_800E1000] <= CF34_RAILW(0x29C, i)) {/ % k9_eq
+s/                if (g_race_boost_stop_by_diff\[g_race_difficulty\] < CF34_RAILW(0x29C, i)) {/                if (g_race_boost_stop_by_diff[g_race_difficulty] <= CF34_RAILW(0x29C, i)) {/ % k9_eq
 s/                    CF34_ST(obj)\[0x8E\] = 0;/                    CF34_ST(obj)[0x8F] = 0;/ % k9_big
 s/            \*(s16 \*) (CF34_ST(obj) + 0x8C) = 0;/            *(s16 *) (CF34_ST(obj) + 0x8C) = 1;/ % special_limit
 s/            \*(s16 \*) (CF34_ST(obj) + 0x8C) = 0x2000;/            *(s16 *) (CF34_ST(obj) + 0x8C) = 0x2001;/ % plain_limit

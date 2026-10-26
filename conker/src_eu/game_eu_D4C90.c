@@ -3,13 +3,13 @@
 #include "variables.h"
 
 /* P122: vertex wave animators (hand asm in the ROM), readable C; called by vtx_anims_update. */
-extern f32 D_8009A5E0[]; /* cos(i * 2pi / 256) for i = 0..64 (a quarter wave) */
+extern f32 g_cos_u8_table[]; /* cos(i * 2pi / 256) for i = 0..64 (a quarter wave); was D_8009A5E0 */
 
 /* vtx_wave_cos: cos(b * 2pi / 256) of the byte angle b (0..255) from the quarter-wave table (the hand-asm lookup,
  * also vtx_wave_cos_lookup). Macros, not functions: the hand asm makes no calls. */
 #define VTX_WAVE_COS(b)                                                                                    \
-    ((b) <= 0x40 ? D_8009A5E0[b] : (b) <= 0x80 ? -D_8009A5E0[0x80 - (b)]                                   \
-     : (b) <= 0xC0 ? -D_8009A5E0[(b) - 0x80] : D_8009A5E0[0x100 - (b)])
+    ((b) <= 0x40 ? g_cos_u8_table[b] : (b) <= 0x80 ? -g_cos_u8_table[0x80 - (b)]                                   \
+     : (b) <= 0xC0 ? -g_cos_u8_table[(b) - 0x80] : g_cos_u8_table[0x100 - (b)])
 
 /* vtx_wave_rint: cvt.w.s in the default FCSR mode (round to nearest, ties to even), for |f| < 2^31 */
 #define VTX_WAVE_RINT(f)                                                                                   \

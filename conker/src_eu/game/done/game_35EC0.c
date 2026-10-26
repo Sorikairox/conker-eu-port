@@ -6,11 +6,11 @@
 
 /* was func_15008A10 */
 void obj_holder_refs_init(void) {
-    D_80088720 = obj_find_by_setup_id(1);
+    g_holder_target_obj = obj_find_by_setup_id(1);
     g_holder_target_pos.x = 0.0f;
     g_holder_target_pos.y = 0.0f;
     g_holder_target_pos.z = 0.0f;
-    D_80088730 = obj_find_by_setup_id(1);
+    g_holder_obj = obj_find_by_setup_id(1);
 }
 
 /* was func_15008A60 */
@@ -20,7 +20,7 @@ void view_zoom_state_reset(void) {
     g_screen_pulse_timer = 0;
 
     // unrolled loop?
-    D_800DDE40 = 0;
+    g_hud_scope_scripted = 0;
     g_screen_fade_dir = 0;
     g_screen_fade_duration = 0;
     g_screen_fade_timer = 0;

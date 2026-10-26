@@ -1,4 +1,4 @@
-s#special = (D_800D1940 == 0x42) \&\& (mode == 0x1A);#special = (mode == 0x1A);# % m2m1A
+s#special = (g_hint_action == 0x42) \&\& (mode == 0x1A);#special = (mode == 0x1A);# % m2m1A
 s#(s32) (arg0 + 0x360), 0, 0#(s32) (arg0 + 0x364), 0, 0# % m2base
 s#PF32(0x300), PF32(0x2FC), 0,#PF32(0x300), PF32(0x2F8), 0,# % m2base
 s#0, -10000.0f, PF32(0x2FC));#0, -1000.0f, PF32(0x2FC));# % m2base
@@ -79,7 +79,7 @@ s#lim = 30.0f;#lim = 31.0f;# % m2aim
 s#lim = -45.0f;#lim = -44.0f;# % m2lo
 s#lim = 80.0f;#lim = 81.0f;# % m2hi
 s#cam->pitchTarget = lim;#cam->pitchTarget = lim + 0.0f * cam->pitch;# % m2base
-s#if (D_800BE616 == 0 \&\& CAM_MODE_RIDE(mode)) {#if (CAM_MODE_RIDE(mode)) {# % m2ride616
+s#if (g_mp_mode_active == 0 \&\& CAM_MODE_RIDE(mode)) {#if (CAM_MODE_RIDE(mode)) {# % m2ride616
 s#cam->pitchTarget = -20.0f;#cam->pitchTarget = -21.0f;# % m2ride
 s#cam->pitch = cam->pitchTarget;#cam->pitch = cam->yawTarget;# % m2snap
 s#} else if (mode != 0 || special) {#} else if (mode != 0) {# % m2base

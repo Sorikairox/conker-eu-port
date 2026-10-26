@@ -4,15 +4,15 @@
 
 
 /* P279: the libultra cosf below (the commented copy) with the ROM's own constants: rpi / pihi / pilo / zero are
- * D_80086240..4C (.data), the polynomial P[0..4] is D_80099120 (.rodata), __libm_qnan_f is D_8002CC80. */
+ * g_cosf_inv_pi..4C (.data), the polynomial P[0..4] is g_cosf_poly (.rodata), __libm_qnan_f is g_libm_qnan_f. */
 // cosf: cos(x) by range reduction to [-pi/2, pi/2] around the nearest (n + 1/2) pi and an odd degree-9 polynomial
 // (sign from n's parity); |x| >= 2^28 (exponent field >= 0x136 after >> 22) gives 0, NaN gives the quiet NaN.
-extern f32 D_80086240; /* 1/pi */
-extern f32 D_80086244; /* pi, high part */
-extern f32 D_80086248; /* pi, low part */
-extern f32 D_8008624C; /* 0.0f */
-extern f32 D_80099120[5];
-extern f32 D_8002CC80; /* __libm_qnan_f */
+extern f32 g_cosf_inv_pi; /* 1/pi; was D_80086240 */
+extern f32 g_cosf_pi_hi; /* pi, high part; was D_80086244 */
+extern f32 g_cosf_pi_lo; /* pi, low part; was D_80086248 */
+extern f32 g_cosf_zero; /* 0.0f; was D_8008624C */
+extern f32 g_cosf_poly[5]; /* was D_80099120 */
+extern f32 g_libm_qnan_f; /* __libm_qnan_f; was D_8002CC80 */
 
 f32 cosf(f32 x) {
     f32 absx, dn, dx, xsq, poly;
@@ -21,21 +21,21 @@ f32 cosf(f32 x) {
 
     if (xpt < 0x136) {
         absx = (x > 0.0f) ? x : -x;
-        dn = absx * D_80086240 + 0.5f;
+        dn = absx * g_cosf_inv_pi + 0.5f;
         n = (dn >= 0.0f) ? (s32) (dn + 0.5f) : (s32) (dn - 0.5f);
         dn = n;
         dn = dn - 0.5f;
-        dx = absx - dn * D_80086244;
-        dx = dx - dn * D_80086248;
+        dx = absx - dn * g_cosf_pi_hi;
+        dx = dx - dn * g_cosf_pi_lo;
         xsq = dx * dx;
-        poly = ((D_80099120[4] * xsq + D_80099120[3]) * xsq + D_80099120[2]) * xsq + D_80099120[1];
+        poly = ((g_cosf_poly[4] * xsq + g_cosf_poly[3]) * xsq + g_cosf_poly[2]) * xsq + g_cosf_poly[1];
         dx = dx + (dx * xsq) * poly;
         return (n & 1) ? -dx : dx;
     }
     if (x != x) {
-        return D_8002CC80;
+        return g_libm_qnan_f;
     }
-    return D_8008624C;
+    return g_cosf_zero;
 }
 // NON-MATCHING: only dn/dx swap registers (f12/f2). To use it, split .data 0x22B4C0-0x22B4D0
 // and .rodata 0x23E3A0-0x23E3C0 out of the game_data blobs (tools/eu_port/rodata_split.py).

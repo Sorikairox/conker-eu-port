@@ -2,27 +2,27 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A6440[];
+extern u8 g_anim_model_fx_node_types[]; /* was D_800A6440 */
 
 
 /* was func_1509CE20 */
 s32 event_table_get_block(s32 arg0) {
-    return D_800877D0[arg0].unk0;
+    return g_event_table[arg0].unk0;
 }
 
 /* was func_1509CE40 */
 u16 event_table_get_u16_8(s32 arg0) {
-    return D_800877D0[arg0].unk8;
+    return g_event_table[arg0].unk8;
 }
 
 /* was func_1509CE60 */
 s32 event_table_get_id_field(s32 arg0) {
-    return *(u16 *)((u8 *)&D_800877D0[arg0] + 0xA) & 0xFFF;
+    return *(u16 *)((u8 *)&g_event_table[arg0] + 0xA) & 0xFFF;
 }
 
 /* was func_1509CE88 */
 s32 event_table_get_word4(s32 arg0) {
-    return D_800877D0[arg0].unk4;
+    return g_event_table[arg0].unk4;
 }
 
 /* was func_1509CEA8 */
@@ -31,7 +31,7 @@ s32 event_table_find_by_word4(s32 arg0)
   s32 var_v1;
   struct_eu_800877D0 *var_v0;
   var_v1 = 0;
- var_v0 = D_800877D0; loop_1: if ((var_v0->unk0 != 0) && (arg0 == ((var_v0->unk4 & 0x1FFFFFFF) + 1))) { return var_v1;
+ var_v0 = g_event_table; loop_1: if ((var_v0->unk0 != 0) && (arg0 == ((var_v0->unk4 & 0x1FFFFFFF) + 1))) { return var_v1;
   }
 
   if (((*((s32 *) (((u8 *) var_v0) + 0x14))) != 0) && (arg0 == (((*((s32 *) (((u8 *) var_v0) + 0x18))) & 0x1FFFFFFF) + 1)))
@@ -60,18 +60,18 @@ s32 event_table_count(void) {
     s32 n = 0;
     s32 i;
     for (i = 0; i < 204; i++) {
-        if (D_800877D0[i].unk0 != 0) {
+        if (g_event_table[i].unk0 != 0) {
             n++;
         }
     }
     return n;
 }
 
-/* event_prereqs_met: D_800877D0[id] +0xC is a 0xFFFF-terminated list of event ids. The event may start when every
+/* event_prereqs_met: g_event_table[id] +0xC is a 0xFFFF-terminated list of event ids. The event may start when every
  * prerequisite has its save bit set (bit field at g_save_progress_bits) and its own prerequisites hold. Empty list: 1. */
 /* was func_1509CBD4 */
 s32 event_prereqs_met(s32 id) {
-    u16 *p = *(u16 **) ((u8 *) D_800877D0 + id * 0x14 + 0xC);
+    u16 *p = *(u16 **) ((u8 *) g_event_table + id * 0x14 + 0xC);
     u16 e;
     s32 ok;
 
@@ -96,14 +96,14 @@ void event_unlock_chain(s32 arg0) {
 }
 
 void event_list_unlock(s32 listp, void (*cb)(s32), s32 arg2);
-extern s32 D_800877DC;
+extern s32 g_event_table_prereqs; /* was D_800877DC */
 
 /* was func_1509D0C4 */
 void event_unlock_chain_rec(s32 arg0) {
-    event_list_unlock(*(s32 *)((u8 *)&D_800877DC + (arg0 * 0x14)), event_unlock_chain_rec, arg0);
+    event_list_unlock(*(s32 *)((u8 *)&g_event_table_prereqs + (arg0 * 0x14)), event_unlock_chain_rec, arg0);
 }
 
-extern u16 *D_800877E0[][5];
+extern u16 *g_event_table_unlocks[][5]; /* was D_800877E0 */
 
 /* was func_1509D104 */
 s32 save_unlocks_apply(s32 arg0) {
@@ -113,7 +113,7 @@ s32 save_unlocks_apply(s32 arg0) {
     u16 *new_var; // fakematch: permuter temp
     u8 *q; // fakematch: permuter temp (dead)
 
-    p = D_800877E0[arg0][0];
+    p = g_event_table_unlocks[arg0][0];
     cnt = 0;
     if (*p != 0xFFFF) {
         do {
@@ -172,7 +172,7 @@ typedef struct SaveRouteRec {
 } SaveRouteRec;
 s32 asset_load_with_subfiles(s32 *, s32, s32 *, s32, ...);
 
-// save_route_table_load: loads the save-route table into D_800D33D0 (arg0 selects it), stores the number of routes
+// save_route_table_load: loads the save-route table into g_save_route_table (arg0 selects it), stores the number of routes
 // (records - 1) in record 0 and *count, and relocates each route block: every pair's first word gets the block
 // address added (up to the pair flagged 0x80000000; the flags are cleared), and the block's word 3 becomes
 // (word 3 & 0x0FFFFFFF) >> 1. Returns 0 (and *count = 0) when nothing was loaded, else 1.
@@ -185,8 +185,8 @@ s32 save_route_table_load(s32 arg0, s32 *count) {
     SaveRouteRec *tbl;
 
     n = 0;
-    D_800D33D0 = asset_load_with_subfiles(NULL, 0, (s32 *) &n, 3, 8, 0, arg0);
-    tbl = (SaveRouteRec *) D_800D33D0;
+    g_save_route_table = asset_load_with_subfiles(NULL, 0, (s32 *) &n, 3, 8, 0, arg0);
+    tbl = (SaveRouteRec *) g_save_route_table;
     if (tbl == NULL) {
         *count = 0;
         return 0;
@@ -215,14 +215,14 @@ void heap_free(s32);
 /* was func_1509D464 */
 void save_route_table_free(void) {
     s32 r;
-    if (D_800D33D0 != 0) {
-        r = D_800D33D0;
+    if (g_save_route_table != 0) {
+        r = g_save_route_table;
         heap_free(r);
-        D_800D33D0 = 0;
+        g_save_route_table = 0;
     }
 }
 
-// save_route_check: route arg1 of the table D_800D33D0 (record arg1 + 1, relocated by save_route_table_load): writes the
+// save_route_check: route arg1 of the table g_save_route_table (record arg1 + 1, relocated by save_route_table_load): writes the
 // first id of its requirement list through outA and the id its word 0 points at through outB (0xBF / 0 when there
 // is no table or no route; NULL out-pointers are skipped) and returns 1 when every id of the list (word 2, count
 // word 3, s16 each) has its bit set in g_save_progress_bits, else 0. arg0 is unused.
@@ -235,8 +235,8 @@ s32 save_route_check(s8 arg0, u8 arg1, s32 *outA, s32 *outB) {
     u32 n;
     s32 id;
 
-    rec = &((SaveRouteRec *) D_800D33D0)[arg1];
-    if (D_800D33D0 == 0 || rec[1].data == NULL) {
+    rec = &((SaveRouteRec *) g_save_route_table)[arg1];
+    if (g_save_route_table == 0 || rec[1].data == NULL) {
         if (outA != NULL) {
             *outA = 0xBF;
         }
@@ -266,8 +266,8 @@ s32 save_route_check(s8 arg0, u8 arg1, s32 *outA, s32 *outB) {
     return 1;
 }
 
-extern u8 D_8009F4A0;            /* the one-entry effect table of command 0x18 */
-extern s8 D_800D9D40;
+extern u8 g_event_effect_tbl;            /* the one-entry effect table of command 0x18; was D_8009F4A0 */
+extern s8 g_event_effect_flag; /* was D_800D9D40 */
 void light_ctrl_broadcast(u8, u8, s32);
 void music_post_event_request(u32, s32);
 s32 collision_floor_probe(void *, u16, f32, void *);
@@ -300,9 +300,9 @@ void impact_effects_spawn(u8 *, f32 *, f32 *, u8, u8, s32);
 void explosion_ground_effects(u8 *, s32, u8, s32, s32);
 void spout_broadcast_start(s32);
 void scroll_banner_spawn(s16);
-/* event_effect_command: handler 14 of the event VM's native table D_800887C0 (id = the command word without its
+/* event_effect_command: handler 14 of the event VM's native table g_event_native_start_fns (id = the command word without its
  * nibble, args = the operands, args[1] mostly an object id resolved with obj_find_by_spawn & 0xFFF). Starts effects /
- * spawns: 0 obj_electrify_fx_spawn, 1 twin_particle_emitters_spawn (returns 1), 2 sets D_800D9D40, 3 rain_request, 4 / 5 / 6 spawn through
+ * spawns: 0 obj_electrify_fx_spawn, 1 twin_particle_emitters_spawn (returns 1), 2 sets g_event_effect_flag, 3 rain_request, 4 / 5 / 6 spawn through
  * zap_bolt_spawn_between / zap_bolt_spawn_follow (at an object) / zap_bolt_spawn_with_sound (at the player) and return the handle as
  * (h << 6) | 0xE004, 7 big_explosion_spawn at a point (args[1] == 999) or fx_scripted_blast, 0x10 / 0x16 light_ctrl_broadcast
  * pairs, 0x18 bone_sparks_attach_preset on character args[1], 0x21 explosion_ground_effects 50 above an object, 0x22 impact_effects_spawn at the
@@ -332,7 +332,7 @@ s32 event_effect_command(s32 id, s32 *args, s32 *operand) {
         twin_particle_emitters_spawn(args[1]);
         return 1;
     case 0x02:
-        D_800D9D40 = 1;
+        g_event_effect_flag = 1;
         break;
     case 0x03:
         rain_request(args[1]);
@@ -393,7 +393,7 @@ s32 event_effect_command(s32 id, s32 *args, s32 *operand) {
         light_create_obj_pulse((u8) args[1], 0xFF, 1);
         break;
     case 0x18:
-        tbl[0] = D_8009F4A0;
+        tbl[0] = g_event_effect_tbl;
         bone_sparks_attach_preset((s32) obj_find_by_setup_id((u8) args[1]), tbl[args[2]], (s16) args[3], -1, -1, -1, 0, 0, 0xFF, 1);
         break;
     case 0x1B:
@@ -487,7 +487,7 @@ void fire_post_finish_events(u8);
 void light_ctrl_broadcast(u8, u8, s32);
 void spout_broadcast_stop(s32);
 void scroll_banner_stop(s16);
-extern s8 D_800D9D40;
+extern s8 g_event_effect_flag; /* was D_800D9D40 */
 
 /* was func_1509DB90 */
 void event_effect_stop(s32 arg0, u8 *arg1) {
@@ -519,7 +519,7 @@ void event_effect_stop(s32 arg0, u8 *arg1) {
         spout_broadcast_stop((*(s32 *)((u8 *)arg1 + 4)));
         return;
     case 2:
-        D_800D9D40 = 0;
+        g_event_effect_flag = 0;
         return;
     case 4:
     case 5:
@@ -551,9 +551,9 @@ void event_effect_stop(s32 arg0, u8 *arg1) {
         break;
     }
 }
-extern s32 D_800A0D30;
+extern s32 g_effect_node_params; /* was D_800A0D30 */
 
-// P176: s32 like the D_80088874 handler table. The asm sets v0 only on the case 0x1C / 5 out-of-range path (1);
+// P176: s32 like the g_event_action_fns handler table. The asm sets v0 only on the case 0x1C / 5 out-of-range path (1);
 // elsewhere v0 is a callee's result (undefined): 0 here.
 /* was func_1509DD0C */
 s32 event_action_effect(s32 arg0, s32 arg1, u8 *arg2) {
@@ -635,7 +635,7 @@ s32 event_action_effect(s32 arg0, s32 arg1, u8 *arg2) {
             if ((temp_v0 < 0) || (temp_v0 >= 3)) {
                 return 1;
             }
-            effect_nodes_broadcast((s32) ((u8 *) &D_800A0D30 + temp_v0 * 0x10), 0x32U);
+            effect_nodes_broadcast((s32) ((u8 *) &g_effect_node_params + temp_v0 * 0x10), 0x32U);
             return 0;
         }
         break;
@@ -700,7 +700,7 @@ s32 event_query_effect(s32 arg0, s32 arg1, s32 arg2) {
 loop_6:
                 var_a1 = 0;
 loop_7:
-                var_v0_2 = g_node_lists[var_t0][*(s32 *)((u8 *)&D_800A6440 + var_a1 * 4)];
+                var_v0_2 = g_node_lists[var_t0][*(s32 *)((u8 *)&g_anim_model_fx_node_types + var_a1 * 4)];
                 var_a1 += 1;
                 /* P176 (browser P174): test +0x48 of every node, then move to next (the m2c body advanced first:
                  * it skipped each list's first node and read NULL + 0x48 at the end) */

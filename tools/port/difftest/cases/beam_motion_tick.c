@@ -1,6 +1,6 @@
-extern s32 (*D_80088B00[])(u8 *); /* motion handlers (beam_follow_obj_pos, beam_follow_obj_point) (index obj +0x30, -1 = none); 0 = remove the object */
+extern s32 (*g_beam_motion_fns[])(u8 *); /* motion handlers (beam_follow_obj_pos, beam_follow_obj_point) (index obj +0x30, -1 = none); 0 = remove the object; was D_80088B00 */
 
-/* object_motion_step: for an active object (flag word +0x10 bit 0), runs its motion handler D_80088B00[+0x30] (if
+/* object_motion_step: for an active object (flag word +0x10 bit 0), runs its motion handler g_beam_motion_fns[+0x30] (if
  * any); when the handler returns 0 the object is removed (node_destroy). Otherwise, if the offset position +0x18 -
  * +0x24 (f32[3] each) changed across the handler, its length (vec3_length) is stored in +0xC0. Table record word
  * 0x8008C680 (update slot), like its neighbours `void (struct102 *)`. */
@@ -17,7 +17,7 @@ void beam_motion_tick(struct102 *obj) {
     dy = *(f32 *) (o + 0x1C) - *(f32 *) (o + 0x28);
     dz = *(f32 *) (o + 0x20) - *(f32 *) (o + 0x2C);
     if (*(s8 *) (o + 0x30) != -1) {
-        if (D_80088B00[*(s8 *) (o + 0x30)](o) == 0) {
+        if (g_beam_motion_fns[*(s8 *) (o + 0x30)](o) == 0) {
             remove = 1;
         }
     }

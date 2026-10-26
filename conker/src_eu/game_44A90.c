@@ -6,7 +6,7 @@
 
 /* was func_150175E0 */
 void render_set_detail_level(void) {
-    if ((D_800BE616 == 0) && ((g_save_progress_bits->unk18 & 1) == 0)) {
+    if ((g_mp_mode_active == 0) && ((g_save_progress_bits->unk18 & 1) == 0)) {
         g_hud_health_shown_pieces = g_hud_health_max_pieces = 3;
     } else {
         g_hud_health_shown_pieces = g_hud_health_max_pieces = 6;

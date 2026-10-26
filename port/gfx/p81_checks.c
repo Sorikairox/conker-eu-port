@@ -1,11 +1,11 @@
 /* P81 runtime checks of port P76 C (look target, attachment draw).
- *  ?p81look=N   after each look_frame_cb_current (Conker's per-frame look callback, via p69's wrap): slot D_800C441A, target
- *               D_800C4408, aim point D_800C43F0, record +0x2CA, LookTrack (+0x324) yaw / pitch / hold / fade of
+ *  ?p81look=N   after each look_frame_cb_current (Conker's per-frame look callback, via p69's wrap): slot g_look_cb_calls, target
+ *               g_look_target_point, aim point g_look_aim_point, record +0x2CA, LookTrack (+0x324) yaw / pitch / hold / fade of
  *               the slots, and the joint 7 / 12 matrices (+0x1D4): row lengths and translation (the slerp blend must
  *               keep them). First N calls, then every 64th and every call where a blend (fade) runs (first 300).
  *  ?p81att=N    attachment_draw_all_for_player / attachment_draw_for_object (attachment passes of game_eu_5D910.c, called from game_eu_595D0.c):
  *               commands written, G_DL part lists and the segment 3 matrix found in them, plus the attachment list
- *               D_800C3EE0 (+0 model, +2 joint, +7 callback, +0x1C timer, +0x1E sub model, +3 alpha, +5 visible, +0x13 / +0x14 mask / parts, +0x24 part DLs). First N
+ *               g_attachment_list (+0 model, +2 joint, +7 callback, +0x1C timer, +0x1E sub model, +3 alpha, +5 visible, +0x13 / +0x14 mask / parts, +0x24 part DLs). First N
  *               calls, then every 256th.
  *  DIAGNOSTIC ?p81noatt=1  the two attachment passes return the display list unchanged (nothing drawn). */
 #include <stdint.h>
@@ -17,14 +17,14 @@ int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
 extern unsigned char g_objects[]; /* was D_800CC2D0 */
-extern unsigned char D_800C441A_[] __asm__("D_800C441A");
-extern unsigned char D_800C4408_[] __asm__("D_800C4408");
-extern unsigned char D_800C43F0_[] __asm__("D_800C43F0");
+extern unsigned char D_800C441A_[] __asm__("g_look_cb_calls"); /* was D_800C441A */
+extern unsigned char D_800C4408_[] __asm__("g_look_target_point"); /* was D_800C4408 */
+extern unsigned char D_800C43F0_[] __asm__("g_look_aim_point"); /* was D_800C43F0 */
 extern unsigned char D_800C3E78_[] __asm__("g_cur_obj_index"); /* was D_800C3E78 */
-extern unsigned char D_800C3EE0_[] __asm__("D_800C3EE0");
+extern unsigned char D_800C3EE0_[] __asm__("g_attachment_list"); /* was D_800C3EE0 */
 extern unsigned char D_800C6A70_[] __asm__("g_look_points"); /* was D_800C6A70 */
-extern unsigned char D_800C6A74_[] __asm__("D_800C6A74");
-extern unsigned char D_800C35EA_[] __asm__("D_800C35EA");
+extern unsigned char D_800C6A74_[] __asm__("g_look_points_count"); /* was D_800C6A74 */
+extern unsigned char D_800C35EA_[] __asm__("g_cutscene_slot_state"); /* was D_800C35EA */
 
 #define REC 0x32C
 static unsigned W(const unsigned char *r, int o) { return *(const unsigned *)(r + o); }

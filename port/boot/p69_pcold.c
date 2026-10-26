@@ -47,7 +47,7 @@ static s32 pc_150A69E0(s32 a0, s32 a1, s32 a2, s32 a3) {
  *   *outB = (e2.x * e1.y - e1.x * e2.y) / (e2.x * e1.z - e1.x * e2.z),  *outA = (e2.y - *outB * e2.z) / e2.x
  * (e1 = P0 - P1, e2 = P2 - P1), result 1; all degenerate (or the 6th try reached), or both inputs NULL: 0 / 0, result
  * 0. As a gen_stubs stub it wrote nothing, so floor_slope_direction's dx / dz were stack leftovers: on the flat start floor
- * of level 0x21 walk_ground_slide_push saw a "strong push" (dx^2 + dz^2 > 1) every frame, started a slide (D_800CC69C = 1,
+ * of level 0x21 walk_ground_slide_push saw a "strong push" (dx^2 + dz^2 > 1) every frame, started a slide (g_cur_floor_kind = 1,
  * +0x110 = 3, animation 0x28E) and pushed the player off the level (P63). Read from the asm instruction by instruction
  * (the 6th try forces "fail" even when it is not degenerate, as the asm does). */
 static s32 pc_1510E908(s32 tris, s32 verts, f32 *outA, f32 *outB) {
@@ -117,9 +117,9 @@ s32 __wrap_floor_triangle_slope(s32 a, s32 b, f32 *c, f32 *d) { return m(4) ? pc
  *                                          a wasm address 0x10xxxxxx, so the OR gives 0x9xxxxxxx and the byte store
  *                                          traps (memory access out of bounds, frame 2139, P121).
  * The game C fix (drop the OR, or use a port-neutral K0 macro) belongs to a conversion slot. */
-extern u8 *D_800904E8;
-extern u8 *D_800E10AC;
-extern s8 D_800E10B0, D_800E10B1, D_800E10B2, D_800E10B3, D_800E10B4;
+extern u8 *g_menu_sprite_entries; /* was D_800904E8 */
+extern u8 *g_menu_sprite_block; /* was D_800E10AC */
+extern s8 g_cheat_cursor_col, g_cheat_cursor_row, g_cheat_letter_tilt, g_cheat_text_len, g_cheat_key_repeat; /* was D_800E10B0; was D_800E10B1; was D_800E10B2; was D_800E10B3; was D_800E10B4 */
 u8 *allocate_memory(s32, s32, s32, s32);
 s32 asset_load_with_subfiles(s32 *, s32, s32 *, s32, ...);
 s32 texture_resolve_dl_ids(s32, s32, s32, s32, s32 *);
@@ -131,17 +131,17 @@ void p121_sprites_fixed(void) {
     s32 id, off;
     u32 cmd;
 
-    D_800904E8 = NULL;
+    g_menu_sprite_entries = NULL;
     block = allocate_memory(0x1A8, 1, 0, 0);
-    D_800E10AC = block;
+    g_menu_sprite_block = block;
     if (block == NULL) return;
-    D_800904E8 = block + 0x40;
+    g_menu_sprite_entries = block + 0x40;
     for (id = 0x1C5, off = 0; id != 0x1E3; id++, off += 0xC) {
         asset = (s32 *) asset_load_with_subfiles(NULL, 1, NULL, 2, 9, id);
-        *(s32 **) (D_800904E8 + off + 4) = asset;
-        *(s32 *) (D_800904E8 + off) = *asset;
-        texture_resolve_dl_ids(*(s32 *) (D_800904E8 + off), 0, 1, 0x3E, (s32 *) (D_800904E8 + off + 8));
-        dl = *(u32 **) (D_800904E8 + off);
+        *(s32 **) (g_menu_sprite_entries + off + 4) = asset;
+        *(s32 *) (g_menu_sprite_entries + off) = *asset;
+        texture_resolve_dl_ids(*(s32 *) (g_menu_sprite_entries + off), 0, 1, 0x3E, (s32 *) (g_menu_sprite_entries + off + 8));
+        dl = *(u32 **) (g_menu_sprite_entries + off);
         do {
             cmd = (dl[0] >> 24) & 0xFF;
             if (cmd == 1) {
@@ -156,7 +156,7 @@ void p121_sprites_fixed(void) {
             dl += 2;
         } while (cmd != 0xDF);
     }
-    D_800E10B0 = 0; D_800E10B1 = 0; D_800E10B2 = 0; D_800E10B3 = 0;
-    D_800E10AC[0] = 0; D_800E10AC[0x20] = 0;
-    D_800E10B4 = 0;
+    g_cheat_cursor_col = 0; g_cheat_cursor_row = 0; g_cheat_letter_tilt = 0; g_cheat_text_len = 0;
+    g_menu_sprite_block[0] = 0; g_menu_sprite_block[0x20] = 0;
+    g_cheat_key_repeat = 0;
 }

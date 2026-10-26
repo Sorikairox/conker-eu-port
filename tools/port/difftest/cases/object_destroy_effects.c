@@ -1,6 +1,6 @@
-extern u8 D_800BE616;
+extern u8 g_mp_mode_active; /* was D_800BE616 */
 extern s32 g_level_id; /* was D_800BE9F0 */
-extern u8 D_800C35EA;
+extern u8 g_cutscene_slot_state; /* was D_800C35EA */
 void obj_impact_burst_spawn(u8 *arg0, u8 arg1, s32 arg2);
 void object_land_puff(u8 *obj);
 void explosion_ground_effect(struct127 *arg0);
@@ -67,7 +67,7 @@ s32 object_destroy_effects(struct127 *arg0) {
             rec = NULL;
             object_model_shatter(obj, 0xFF, 1);
             obj_set_destroyed(arg0);
-            if (D_800BE616 != 0) {
+            if (g_mp_mode_active != 0) {
                 player_hit_reaction(arg0, 6);
                 rec = world_record_find(obj[0x127] + 0xB);
             } else {
@@ -75,7 +75,7 @@ s32 object_destroy_effects(struct127 *arg0) {
                     rec = world_record_find(1);
                 }
                 item = player_find_owned_object(arg0);
-                if (item != NULL && D_800C35EA != 1) {
+                if (item != NULL && g_cutscene_slot_state != 1) {
                     object_hit_effects((u8 *) item, 1, 1, 1, 1, 0, 0xFF, 1);
                 }
             }
@@ -92,7 +92,7 @@ s32 object_destroy_effects(struct127 *arg0) {
                 *(s32 *) (rec + 0x80) = 0;
                 *(s32 *) (rec + 0x84) = 0;
             }
-            return (D_800BE616 != 0) ? 2 : 0;
+            return (g_mp_mode_active != 0) ? 2 : 0;
         case 0x34:
             object_explode(obj, 0xFF, 1);
             break;
@@ -114,7 +114,7 @@ s32 object_destroy_effects(struct127 *arg0) {
             object_explosion_effects(obj, 0xFF, 1);
             break;
         case 0x53:
-            if (D_800BE616 != 0) {
+            if (g_mp_mode_active != 0) {
                 player_hit_reaction(arg0, 10);
                 return 2;
             }
@@ -126,7 +126,7 @@ s32 object_destroy_effects(struct127 *arg0) {
             obj_impact_burst_spawn(obj, 0xFF, 1);
             break;
         case 0x90:
-            if (D_800BE616 != 0 && g_level_id == 0x33) {
+            if (g_mp_mode_active != 0 && g_level_id == 0x33) {
                 player_hit_reaction(arg0, 8);
                 return 2;
             }

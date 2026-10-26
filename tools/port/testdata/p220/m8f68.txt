@@ -8,10 +8,10 @@
 35s/t < /t <= / % fadein live
 36s/0x34/0x2C/ % fadein
 39s/0x38/0x3C/ % spawn0 spawn1
-39s/D_800A08FC \*/1.0f */ % spawn0 spawn1
+39s/g_ring_two_pi \*/1.0f */ % spawn0 spawn1
 40s/1.0f </0.5f </ % spawn0 spawn1 nospawn
 41s/0x380/0x384/ % spawn0 spawn1
-41s/D_800A0904/1.0f/ % spawn0 spawn1
+41s/g_ring_deg_to_angle/1.0f/ % spawn0 spawn1
 42s/% 81/% 80/ % spawn1
 42s/- 0x28/- 0x29/ % spawn0 spawn1
 43s/a - 0x40/a + 0x40/ % spawn0 spawn1

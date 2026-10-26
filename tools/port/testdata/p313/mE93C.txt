@@ -1,23 +1,23 @@
-49s/if (D_800904E8 == NULL) {/if (D_800904E8 != NULL) {/ % idle nobuf
+49s/if (g_menu_sprite_entries == NULL) {/if (g_menu_sprite_entries != NULL) {/ % idle nobuf
 55s/if (\*(u16 \*) (g_menu_state + 0x20) \& 1) {/if (*(u16 *) (g_menu_state + 0x20) \& 0x20) {/ % up0 up1
-56s/D_800E10B1--;/D_800E10B1++;/ % up0 up1
+56s/g_cheat_cursor_row--;/g_cheat_cursor_row++;/ % up0 up1
 57s/moved = TRUE;/moved = FALSE;/ % up1
 59s/if (\*(u16 \*) (g_menu_state + 0x20) \& 2) {/if (*(u16 *) (g_menu_state + 0x20) \& 1) {/ % down34 down5
-60s/D_800E10B1++;/D_800E10B1 += 2;/ % down34 down5
+60s/g_cheat_cursor_row++;/g_cheat_cursor_row += 2;/ % down34 down5
 61s/moved = TRUE;/moved = FALSE;/ % down34b
-62s/if (D_800E10B1 == 4 \&\& D_800E10B0 >= 5) {/if (D_800E10B1 == 4 \&\& D_800E10B0 >= 6) {/ % down34
-62s/if (D_800E10B1 == 4 \&\& D_800E10B0 >= 5) {/if (D_800E10B1 == 3 \&\& D_800E10B0 >= 5) {/ % down34 ud
-63s/D_800E10B0 = 4;/D_800E10B0 = 3;/ % down34
+62s/if (g_cheat_cursor_row == 4 \&\& g_cheat_cursor_col >= 5) {/if (g_cheat_cursor_row == 4 \&\& g_cheat_cursor_col >= 6) {/ % down34
+62s/if (g_cheat_cursor_row == 4 \&\& g_cheat_cursor_col >= 5) {/if (g_cheat_cursor_row == 3 \&\& g_cheat_cursor_col >= 5) {/ % down34 ud
+63s/g_cheat_cursor_col = 4;/g_cheat_cursor_col = 3;/ % down34
 68s/if (row < 0) {/if (row <= 0) {/ % up0 selA
-69s/D_800E10B1 = 5;/D_800E10B1 = 4;/ % up0
+69s/g_cheat_cursor_row = 5;/g_cheat_cursor_row = 4;/ % up0
 72s/if (row >= 6) {/if (row > 6) {/ % down5
-73s/D_800E10B1 = 0;/D_800E10B1 = 1;/ % down5
+73s/g_cheat_cursor_row = 0;/g_cheat_cursor_row = 1;/ % down5
 76s/if (\*(u16 \*) (g_menu_state + 0x20) \& 8) {/if (*(u16 *) (g_menu_state + 0x20) \& 4) {/ % right left
-77s/D_800E10B0 = col + 1;/D_800E10B0 = col + 2;/ % right4 lr
+77s/g_cheat_cursor_col = col + 1;/g_cheat_cursor_col = col + 2;/ % right4 lr
 79s/moved = TRUE;/moved = FALSE;/ % right4
-82s/D_800E10B0 = col - 1;/D_800E10B0 = col - 2;/ % lr
-78s/col = D_800E10B0;/col = col;/ % lr
-83s/col = D_800E10B0;/col = col;/ % left4 lr
+82s/g_cheat_cursor_col = col - 1;/g_cheat_cursor_col = col - 2;/ % lr
+78s/col = g_cheat_cursor_col;/col = col;/ % lr
+83s/col = g_cheat_cursor_col;/col = col;/ % left4 lr
 84s/moved = TRUE;/moved = FALSE;/ % left4
 86s/if (row == 4) {/if (row == 3) {/ % right4 left4 down34
 87s/cols = 5;/cols = 4;/ % right4 left4
@@ -25,52 +25,52 @@
 89s/cols = 1;/cols = 2;/ % row5c1
 91s/cols = 6;/cols = 5;/ % right left up1
 93s/if (col < 0) {/if (col < -1) {/ % left left5
-94s/D_800E10B0 = cols - 1;/D_800E10B0 = cols;/ % left left4
-95s/col = D_800E10B0;/col = cols;/ % left left5
+94s/g_cheat_cursor_col = cols - 1;/g_cheat_cursor_col = cols;/ % left left4
+95s/col = g_cheat_cursor_col;/col = cols;/ % left left5
 97s/if (col >= cols) {/if (col > cols) {/ % right up0
-98s/D_800E10B0 = 0;/D_800E10B0 = 1;/ % right up0
+98s/g_cheat_cursor_col = 0;/g_cheat_cursor_col = 1;/ % right up0
 100s/if (moved) {/if (!moved) {/ % idle up1 right
 101s/sound_play_2d(0x62D, 0x4650, 0x40, 0, 0);/sound_play_2d(0x62D, 0x4650, 0x40, 0, 1);/ % up1
 101s/sound_play_2d(0x62D, 0x4650, 0x40, 0, 0);/sound_play_2d(0x62C, 0x4650, 0x40, 0, 0);/ % up1
-103s/sel = D_800E10B1 \* 6 + D_800E10B0;/sel = D_800E10B1 * 5 + D_800E10B0;/ % idle selP
-103s/sel = D_800E10B1 \* 6 + D_800E10B0;/sel = D_800E10B1 * 6 + col;/ % right up0
-104s/if (D_800E10B1 == 5) {/if (D_800E10B1 == 4) {/ % row5 Y row4
+103s/sel = g_cheat_cursor_row \* 6 + g_cheat_cursor_col;/sel = g_cheat_cursor_row * 5 + g_cheat_cursor_col;/ % idle selP
+103s/sel = g_cheat_cursor_row \* 6 + g_cheat_cursor_col;/sel = g_cheat_cursor_row * 6 + col;/ % right up0
+104s/if (g_cheat_cursor_row == 5) {/if (g_cheat_cursor_row == 4) {/ % row5 Y row4
 105s/sel--;/sel++;/ % row5
 108s/mtx = (Mtx \*) allocate_memory(0x80, 4, 2, 0);/mtx = (Mtx *) allocate_memory(0x40, 4, 2, 0);/ % idle
 108s/mtx = (Mtx \*) allocate_memory(0x80, 4, 2, 0);/mtx = (Mtx *) allocate_memory(0x80, 4, 1, 0);/ % idle
 109s/if (g_pad_states\[0\] \& 0x8000) {/if (g_pad_states[0] \& 0x4000) {/ % idle blink
-110s/D_800E10B2 += 8;/D_800E10B2 += 4;/ % idle
-112s/D_800E10B2 -= 8;/D_800E10B2 -= 2;/ % blink
-114s/if (D_800E10B2 < 0) {/if (D_800E10B2 < -1) {/ % tiltm1
-115s/D_800E10B2 = 0;/D_800E10B2 = 1;/ % blink tilt0
-117s/if (D_800E10B2 >= 13) {/if (D_800E10B2 >= 14) {/ % tilt13
-118s/D_800E10B2 = 12;/D_800E10B2 = 13;/ % tiltmax
+110s/g_cheat_letter_tilt += 8;/g_cheat_letter_tilt += 4;/ % idle
+112s/g_cheat_letter_tilt -= 8;/g_cheat_letter_tilt -= 2;/ % blink
+114s/if (g_cheat_letter_tilt < 0) {/if (g_cheat_letter_tilt < -1) {/ % tiltm1
+115s/g_cheat_letter_tilt = 0;/g_cheat_letter_tilt = 1;/ % blink tilt0
+117s/if (g_cheat_letter_tilt >= 13) {/if (g_cheat_letter_tilt >= 14) {/ % tilt13
+118s/g_cheat_letter_tilt = 12;/g_cheat_letter_tilt = 13;/ % tiltmax
 121s/if (\*(u16 \*) (g_menu_state + 0x20) \& 0x10) {/if (*(u16 *) (g_menu_state + 0x20) \& 0x8) {/ % selP right
 122s/sound_play_2d(0x500, 0x7D00, 0x40, 0, 0);/sound_play_2d(0x500, 0x7D01, 0x40, 0, 0);/ % selP
 123s/ch = sel + 'A';/ch = sel + 'B';/ % selP selA
-124s/if (D_800E10B1 == 5) {/if (D_800E10B1 == 3) {/ % space selX
+124s/if (g_cheat_cursor_row == 5) {/if (g_cheat_cursor_row == 3) {/ % space selX
 125s/ch = ' ';/ch = '_';/ % space
-126s/} else if (D_800E10B1 == 4) {/} else if (D_800E10B1 == 2) {/ % selP dot
-127s/if (D_800E10B0 == 0) {/if (D_800E10B0 == 2) {/ % del Y
-129s/if (D_800E10B3 > 0) {/if (D_800E10B3 >= 0) {/ % del0
-130s/D_800E10B3--;/D_800E10B3 -= 2;/ % del
-132s/D_800E10AC\[D_800E10B3\] = '\\0';/D_800E10AC[D_800E10B3 + 1] = '\\0';/ % del
+126s/} else if (g_cheat_cursor_row == 4) {/} else if (g_cheat_cursor_row == 2) {/ % selP dot
+127s/if (g_cheat_cursor_col == 0) {/if (g_cheat_cursor_col == 2) {/ % del Y
+129s/if (g_cheat_text_len > 0) {/if (g_cheat_text_len >= 0) {/ % del0
+130s/g_cheat_text_len--;/g_cheat_text_len -= 2;/ % del
+132s/g_menu_sprite_block\[g_cheat_text_len\] = '\\0';/g_menu_sprite_block[g_cheat_text_len + 1] = '\\0';/ % del
 133s/ch = 0;/ch = 1;/ % del
-134s/} else if (D_800E10B0 == 1) {/} else if (D_800E10B0 == 3) {/ % dot Z
+134s/} else if (g_cheat_cursor_col == 1) {/} else if (g_cheat_cursor_col == 3) {/ % dot Z
 135s/ch = '\.';/ch = ',';/ % dot
-136s/} else if (D_800E10B0 != 4) {/} else if (D_800E10B0 != 3) {/ % Z ch10
+136s/} else if (g_cheat_cursor_col != 4) {/} else if (g_cheat_cursor_col != 3) {/ % Z ch10
 137s/ch = sel + 'A' - 2;/ch = sel + 'A' - 1;/ % Y Z
 140s/match = 0xFFC3FFFE;/match = 0xFFC7FFFE;/ % chmask
 140s/match = 0xFFC3FFFE;/match = 0xFFC3FFFF;/ % chmask
 140s/match = 0xFFC3FFFE;/match = 0xFFE3FFFE;/ % chmask
 140s/match = 0xFFC3FFFE;/match = 0xFF83FFFE;/ % chmask22
 140s/match = 0xFFC3FFFE;/match = 0x7FC3FFFE;/ % ch31
-141s/len = D_800E10B3;/len = D_800E10B3 - 1;/ % ch10 chpre
+141s/len = g_cheat_text_len;/len = g_cheat_text_len - 1;/ % ch10 chpre
 142s/for (i = 0x90; i < 0xA3; i++) {/for (i = 0x90; i < 0xA2; i++) {/ % ch19 ch10
 142s/for (i = 0x90; i < 0xA3; i++) {/for (i = 0x91; i < 0xA3; i++) {/ % ch10
 143s/str = ((u8 \*\*) g_text_strings)\[i\];/str = ((u8 **) g_text_strings)[i + 1];/ % ch10
 144s/if (i - 0x90 < len) {/if (i - 0x90 <= len) {/ % ch10 chpre
-145s/c = D_800E10AC\[i - 0x90\];/c = D_800E10AC[i - 0x8F];/ % ch10
+145s/c = g_menu_sprite_block\[i - 0x90\];/c = g_menu_sprite_block[i - 0x8F];/ % ch10
 147s/c = ' ';/c = 0;/ % ch10
 149s/for (n = 0; n < 32; n++) {/for (n = 0; n < 31; n++) {/ % ch10
 149s/for (n = 0; n < 32; n++) {/for (n = 0; n < 32; n += 2) {/ % ch3
@@ -111,18 +111,18 @@
 192s/while (\*in != '\\0' \&\& \*in != ' ') {/while (*in != '\\0') {/ % phlast phend
 204s/if (sfx == 0) {/if (sfx != 0) {/ % phend rep0
 205s/sfx = (random_int() \& 1) + 0xC5;/sfx = (random_int() \& 1) + 0xC6;/ % repdiff rep1
-206s/text = D_800E10AC;/text = D_800E10AC + 1;/ % repoff
+206s/text = g_menu_sprite_block;/text = g_menu_sprite_block + 1;/ % repoff
 208s/while (text\[n + 0x20\] != '\\0' \&\& text\[n\] != '\\0' \&\& text\[n + 0x20\] == text\[n\]) {/while (text[n + 0x20] != '\\0' \&\& text[n] != '\\0' \&\& text[n + 0x20] == text[n + 1]) {/ % rep0
 208s/while (text\[n + 0x20\] != '\\0' \&\& text\[n\] != '\\0' \&\& text\[n + 0x20\] == text\[n\]) {/while (text[n + 0x1F] != '\\0' \&\& text[n] != '\\0' \&\& text[n + 0x20] == text[n]) {/ % rep0 reppre
 211s/if (text\[n + 0x20\] == '\\0' \&\& text\[n\] == '\\0') {/if (text[n + 0x20] == '\\0') {/ % reppre
 211s/if (text\[n + 0x20\] == '\\0' \&\& text\[n\] == '\\0') {/if (text[n] == '\\0') {/ % reppre2
-212s/D_800E10B4++;/D_800E10B4 += 2;/ % rep0 rep1
-213s/if (D_800E10B4 == 1) {/if (D_800E10B4 == 2) {/ % rep0 rep1
+212s/g_cheat_key_repeat++;/g_cheat_key_repeat += 2;/ % rep0 rep1
+213s/if (g_cheat_key_repeat == 1) {/if (g_cheat_key_repeat == 2) {/ % rep0 rep1
 214s/sfx = 0xC7;/sfx = 0xC6;/ % rep0 repnone
-217s/D_800E10B4 = 0;/D_800E10B4 = 1;/ % repdiff reppre
-220s/D_800E10B4 = 0;/D_800E10B4 = 1;/ % phend phsp
-225s/D_800E10AC\[n + 0x20\] = D_800E10AC\[n\];/D_800E10AC[n + 0x21] = D_800E10AC[n];/ % ch10 repdiff
-227s/D_800E10AC\[n + 0x20\] = '\\0';/D_800E10AC[n + 0x1F] = '\\0';/ % reppre2 ch10
+217s/g_cheat_key_repeat = 0;/g_cheat_key_repeat = 1;/ % repdiff reppre
+220s/g_cheat_key_repeat = 0;/g_cheat_key_repeat = 1;/ % phend phsp
+225s/g_menu_sprite_block\[n + 0x20\] = g_menu_sprite_block\[n\];/g_menu_sprite_block[n + 0x21] = g_menu_sprite_block[n];/ % ch10 repdiff
+227s/g_menu_sprite_block\[n + 0x20\] = '\\0';/g_menu_sprite_block[n + 0x1F] = '\\0';/ % reppre2 ch10
 228s/if (sfx != 0) {/if (sfx == 0) {/ % ch10 rep0
 229s/mp3_voice_play(sfx, 0x7D00, 0x40);/mp3_voice_play(sfx, 0x7D00, 0x41);/ % ch10
 231s/obj = obj_find_by_setup_id(9);/obj = obj_find_by_setup_id(8);/ % ch10
@@ -136,32 +136,32 @@
 236s/obj->unk218 = (struct216 \*) aiscript_find_by_kind(0, obj->unk232);/obj->unk218 = (struct216 *) aiscript_find_by_kind(0, 0x10);/ % rep0
 236s/obj->unk218 = (struct216 \*) aiscript_find_by_kind(0, obj->unk232);/aiscript_find_by_kind(0, obj->unk232);/ % ch10
 237s/obj->unk21C = 0;/obj->unk21C = 1;/ % ch10
-239s/D_800E10B3 = 0;/D_800E10B3 = 1;/ % ch10
-240s/D_800E10AC\[D_800E10B3\] = '\\0';/D_800E10AC[1] = '\\0';/ % ch10
+239s/g_cheat_text_len = 0;/g_cheat_text_len = 1;/ % ch10
+240s/g_menu_sprite_block\[g_cheat_text_len\] = '\\0';/g_menu_sprite_block[1] = '\\0';/ % ch10
 241s/ch = 0;/ch = 1;/ % ch10
 244s/if (ch > 0) {/if (ch >= 0) {/ % del ch10
 244s/if (ch > 0) {/if (ch > 0x41) {/ % selA space
-245s/D_800E10AC\[D_800E10B3\] = ch;/D_800E10AC[D_800E10B3 + 1] = ch;/ % selP
-246s/if (D_800E10B3 < 19) {/if (D_800E10B3 < 20) {/ % sel19
-247s/D_800E10B3++;/D_800E10B3 += 2;/ % selP
-249s/D_800E10AC\[D_800E10B3\] = '\\0';/D_800E10AC[D_800E10B3] = 'A';/ % selP
+245s/g_menu_sprite_block\[g_cheat_text_len\] = ch;/g_menu_sprite_block[g_cheat_text_len + 1] = ch;/ % selP
+246s/if (g_cheat_text_len < 19) {/if (g_cheat_text_len < 20) {/ % sel19
+247s/g_cheat_text_len++;/g_cheat_text_len += 2;/ % selP
+249s/g_menu_sprite_block\[g_cheat_text_len\] = '\\0';/g_menu_sprite_block[g_cheat_text_len] = 'A';/ % selP
 254s/mtx_build_rot_trans(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/mtx_build_rot_trans(mtx, -30.0f, -10.0f, 0.0f, -115.0f, 10.0f, -530.00006f);/ % idle
 254s/mtx_build_rot_trans(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/mtx_build_rot_trans(mtx, -30.000002f, -10.0f, 0.0f, -115.0f, 10.0f, -530.0f);/ % idle
 254s/mtx_build_rot_trans(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/mtx_build_rot_trans(mtx, -30.0f, -10.000001f, 0.0f, -115.0f, 10.0f, -530.0f);/ % idle
 254s/mtx_build_rot_trans(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/mtx_build_rot_trans(mtx, -30.0f, -10.0f, 0.0f, -115.00001f, 10.0f, -530.0f);/ % idle
 254s/mtx_build_rot_trans(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/mtx_build_rot_trans(mtx, -30.0f, -10.0f, 0.0f, -115.0f, 10.000001f, -530.0f);/ % idle
 254s/mtx_build_rot_trans(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/mtx_build_rot_trans(mtx, -30.0f, -10.0f, 1.0f, -115.0f, 10.0f, -530.0f);/ % idle
-255s/mtx_translate_fixed(mtx + 1, 0\.0f, 0\.0f, -(f32) D_800E10B2);/mtx_translate_fixed(mtx, 0.0f, 0.0f, -(f32) D_800E10B2);/ % idle
-255s/mtx_translate_fixed(mtx + 1, 0\.0f, 0\.0f, -(f32) D_800E10B2);/mtx_translate_fixed(mtx + 1, 0.0f, 0.0f, (f32) D_800E10B2);/ % idle
-255s/mtx_translate_fixed(mtx + 1, 0\.0f, 0\.0f, -(f32) D_800E10B2);/mtx_translate_fixed(mtx + 1, 0.0f, 1.0f, -(f32) D_800E10B2);/ % idle
-255s/mtx_translate_fixed(mtx + 1, 0\.0f, 0\.0f, -(f32) D_800E10B2);/mtx_translate_fixed(mtx + 1, 1.0f, 0.0f, -(f32) D_800E10B2);/ % idle
-256s/guPerspective((Mtx \*) \&D_800E1068, \&persp, 50\.0f, 60\.6f, 53\.0f, 20000\.0f, 1\.0f);/guPerspective((Mtx *) \&D_800E1068, \&persp, 50.0f, 60.600002f, 53.0f, 20000.0f, 1.0f);/ % idle
-256s/guPerspective((Mtx \*) \&D_800E1068, \&persp, 50\.0f, 60\.6f, 53\.0f, 20000\.0f, 1\.0f);/guPerspective((Mtx *) \&D_800E1068, \&persp, 50.000004f, 60.6f, 53.0f, 20000.0f, 1.0f);/ % idle
-256s/guPerspective((Mtx \*) \&D_800E1068, \&persp, 50\.0f, 60\.6f, 53\.0f, 20000\.0f, 1\.0f);/guPerspective((Mtx *) \&D_800E1068, \&persp, 50.0f, 60.6f, 53.000004f, 20000.0f, 1.0f);/ % idle
-256s/guPerspective((Mtx \*) \&D_800E1068, \&persp, 50\.0f, 60\.6f, 53\.0f, 20000\.0f, 1\.0f);/guPerspective((Mtx *) \&D_800E1068, \&persp, 50.0f, 60.6f, 53.0f, 20000.002f, 1.0f);/ % idle
-256s/guPerspective((Mtx \*) \&D_800E1068, \&persp, 50\.0f, 60\.6f, 53\.0f, 20000\.0f, 1\.0f);/guPerspective((Mtx *) \&D_800E1068, \&persp, 50.0f, 60.6f, 53.0f, 20000.0f, 1.0000001f);/ % idle
+255s/mtx_translate_fixed(mtx + 1, 0\.0f, 0\.0f, -(f32) g_cheat_letter_tilt);/mtx_translate_fixed(mtx, 0.0f, 0.0f, -(f32) g_cheat_letter_tilt);/ % idle
+255s/mtx_translate_fixed(mtx + 1, 0\.0f, 0\.0f, -(f32) g_cheat_letter_tilt);/mtx_translate_fixed(mtx + 1, 0.0f, 0.0f, (f32) g_cheat_letter_tilt);/ % idle
+255s/mtx_translate_fixed(mtx + 1, 0\.0f, 0\.0f, -(f32) g_cheat_letter_tilt);/mtx_translate_fixed(mtx + 1, 0.0f, 1.0f, -(f32) g_cheat_letter_tilt);/ % idle
+255s/mtx_translate_fixed(mtx + 1, 0\.0f, 0\.0f, -(f32) g_cheat_letter_tilt);/mtx_translate_fixed(mtx + 1, 1.0f, 0.0f, -(f32) g_cheat_letter_tilt);/ % idle
+256s/guPerspective((Mtx \*) \&g_hud_model_proj_mtx, \&persp, 50\.0f, 60\.6f, 53\.0f, 20000\.0f, 1\.0f);/guPerspective((Mtx *) \&g_hud_model_proj_mtx, \&persp, 50.0f, 60.600002f, 53.0f, 20000.0f, 1.0f);/ % idle
+256s/guPerspective((Mtx \*) \&g_hud_model_proj_mtx, \&persp, 50\.0f, 60\.6f, 53\.0f, 20000\.0f, 1\.0f);/guPerspective((Mtx *) \&g_hud_model_proj_mtx, \&persp, 50.000004f, 60.6f, 53.0f, 20000.0f, 1.0f);/ % idle
+256s/guPerspective((Mtx \*) \&g_hud_model_proj_mtx, \&persp, 50\.0f, 60\.6f, 53\.0f, 20000\.0f, 1\.0f);/guPerspective((Mtx *) \&g_hud_model_proj_mtx, \&persp, 50.0f, 60.6f, 53.000004f, 20000.0f, 1.0f);/ % idle
+256s/guPerspective((Mtx \*) \&g_hud_model_proj_mtx, \&persp, 50\.0f, 60\.6f, 53\.0f, 20000\.0f, 1\.0f);/guPerspective((Mtx *) \&g_hud_model_proj_mtx, \&persp, 50.0f, 60.6f, 53.0f, 20000.002f, 1.0f);/ % idle
+256s/guPerspective((Mtx \*) \&g_hud_model_proj_mtx, \&persp, 50\.0f, 60\.6f, 53\.0f, 20000\.0f, 1\.0f);/guPerspective((Mtx *) \&g_hud_model_proj_mtx, \&persp, 50.0f, 60.6f, 53.0f, 20000.0f, 1.0000001f);/ % idle
 257s/gSPPerspNormalize(gdl++, persp);/gSPPerspNormalize(gdl++, 0);/ % idle
-258s/gSPMatrix(gdl++, \&D_800E1068, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);/gSPMatrix(gdl++, \&D_800E1068, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);/ % idle
+258s/gSPMatrix(gdl++, \&g_hud_model_proj_mtx, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);/gSPMatrix(gdl++, \&g_hud_model_proj_mtx, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);/ % idle
 259s/gSPClearGeometryMode(gdl++, 0xFFFFFFFF);/gSPClearGeometryMode(gdl++, 0xFFFFFFFE);/ % idle
 260s/gSPSetGeometryMode(gdl++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);/gSPSetGeometryMode(gdl++, G_SHADE | G_SHADING_SMOOTH);/ % idle
 261s/gSPMatrix(gdl++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);/gSPMatrix(gdl++, mtx + 1, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);/ % idle
@@ -172,19 +172,19 @@
 265s/gDPSetEnvColor(gdl++, 0xFF, 0x00, 0xFF, g_menu_page_alpha);/gDPSetEnvColor(gdl++, 0xFF, 0x00, 0xFE, g_menu_page_alpha);/ % idle
 266s/gSPMatrix(gdl++, mtx + 1, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);/gSPMatrix(gdl++, mtx + 1, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);/ % idle
 268s/gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, g_menu_page_alpha);/gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0xFF);/ % idle
-270s/gSPDisplayList(gdl++, \*(Gfx \*\*) (D_800904E8 + off));/gSPDisplayList(gdl++, *(Gfx **) (D_800904E8 + off + 4));/ % idle
+270s/gSPDisplayList(gdl++, \*(Gfx \*\*) (g_menu_sprite_entries + off));/gSPDisplayList(gdl++, *(Gfx **) (g_menu_sprite_entries + off + 4));/ % idle
 271s/if (off == sel \* 12) {/if (off != sel * 12) {/ % idle
 272s/gSPMatrix(gdl++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);/gSPMatrix(gdl++, mtx, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);/ % idle
 277s/text_set_color(0xFF, 0xB1, 0x1E, g_menu_page_alpha);/text_set_color(0xFF, 0xB1, 0x1F, g_menu_page_alpha);/ % idle
-278s/text_measure_string(D_800E10AC, \&w, \&h, \&d);/text_measure_string(D_800E10AC, \&h, \&w, \&d);/ % idle
+278s/text_measure_string(g_menu_sprite_block, \&w, \&h, \&d);/text_measure_string(g_menu_sprite_block, \&h, \&w, \&d);/ % idle
 279s/x = 75 - (w >> 1);/x = 76 - (w >> 1);/ % idle
 279s/x = 75 - (w >> 1);/x = 75 - (w >> 2);/ % idle
 280s/if (x < 10) {/if (x < 9) {/ % w132
 281s/x = 10;/x = 11;/ % wide
-283s/text_printf_at(x, 180, 0x80, D_800E10AC);/text_printf_at(x, 181, 0x80, D_800E10AC);/ % idle
-284s/if ((D_800BEDCC \& 0x1F) >= 10) {/if ((D_800BEDCC \& 0x1F) >= 11) {/ % idle
-284s/if ((D_800BEDCC \& 0x1F) >= 10) {/if ((D_800BEDCC \& 0x1F) >= 9) {/ % blink
-284s/if ((D_800BEDCC \& 0x1F) >= 10) {/if ((D_800BEDCC \& 0x3F) >= 10) {/ % wide
+283s/text_printf_at(x, 180, 0x80, g_menu_sprite_block);/text_printf_at(x, 181, 0x80, g_menu_sprite_block);/ % idle
+284s/if ((g_frame_count \& 0x1F) >= 10) {/if ((g_frame_count \& 0x1F) >= 11) {/ % idle
+284s/if ((g_frame_count \& 0x1F) >= 10) {/if ((g_frame_count \& 0x1F) >= 9) {/ % blink
+284s/if ((g_frame_count \& 0x1F) >= 10) {/if ((g_frame_count \& 0x3F) >= 10) {/ % wide
 285s/w = x + w + 2;/w = x + w + 3;/ % idle
 286s/text_set_color(0xFF, 0xFF, 0xFF, 0xFF);/text_set_color(0xFF, 0xFF, 0xFF, 0xFE);/ % idle
-287s/text_printf_at(w, 180, 0x80, D_800ABEE4);/text_printf_at(w, 180, 0x80, D_800E10AC);/ % idle
+287s/text_printf_at(w, 180, 0x80, g_str_cheat_cursor);/text_printf_at(w, 180, 0x80, g_menu_sprite_block);/ % idle

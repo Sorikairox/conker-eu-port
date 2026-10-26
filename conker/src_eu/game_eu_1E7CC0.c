@@ -101,8 +101,8 @@ extern u8 *g_obj0_camera; /* was D_800CCA08 */
 // sky_dome_project_uv) of a 20-vertex record rec attached to an object (rec + +0x50 + 0xF8 = {obj, obj id}) for
 // player view `slot`: releases the record (node_destroy) when the object is gone or replaced; returns 0 (not
 // drawn) when the object has no matrix, is hidden ((+0x74 & 0xF) == 0xF) or is the object this view looks from
-// (+0x318 / +0x31C rider check when D_800BE616, else g_obj0_camera / g_obj0_state). Otherwise copies the object's
-// matrix (+0x1D4 + 0x40, fixed point when D_800C42B0), with its fourth column set to (0, 0, 0, 1), into this frame's Mtx (rec +0x78 +
+// (+0x318 / +0x31C rider check when g_mp_mode_active, else g_obj0_camera / g_obj0_state). Otherwise copies the object's
+// matrix (+0x1D4 + 0x40, fixed point when g_mtx_fixed_point), with its fourth column set to (0, 0, 0, 1), into this frame's Mtx (rec +0x78 +
 // g_dl_buf_index * 0x40), and maps each vertex of the slot's copy to texture coordinates: its screen position (object
 // matrix, then view matrix g_cam_view_proj_mtx[slot]) times 2.002, relative to the screen position of the object point
 // (0, 67, 159) truncated to a multiple of 1024. Returns 1.
@@ -135,7 +135,7 @@ s32 object_screen_uv_project(u8 *rec, s32 slot) {
     if ((obj[0x74] & 0xF) == 0xF) {
         return 0;
     }
-    if (D_800BE616) {
+    if (g_mp_mode_active) {
         rider = *(u8 **) (obj + 0x318);
         if (rider != NULL && *(u8 **) (obj + 0x31C) != NULL && (*(u8 **) (obj + 0x31C))[0x197] != 0
             && rider[0x23D] == slot) {
@@ -144,7 +144,7 @@ s32 object_screen_uv_project(u8 *rec, s32 slot) {
     } else if (g_obj0_camera != NULL && g_obj0_state != NULL && g_obj0_state[0x197] != 0 && g_obj0_camera[0x23D] == slot) {
         return 0;
     }
-    if (D_800C42B0) {
+    if (g_mtx_fixed_point) {
         guMtxL2F(m, (Mtx *) (mtx + 0x40));
     } else {
         memcpy(m, mtx + 0x40, 0x40);
@@ -632,7 +632,7 @@ static const f32 sImpactFlashScales[9] = { 1.0f, 1.0f, 0.15f, 0.15f, 1.0f, 1.0f,
 // ray cast (collision_ray_cast) along target - pos. On a hit: shot_scorch_decal_spawn when the hit object passes prop_is_flagged,
 // impact_debris_emitter_spawn when the surface's third axis points down (tri_calc_normal), a spark spray off the surface
 // (emit_spray_from_surface, 3 / 4 particles, range 494) and an animated impact flash (emit_impact_flash_spray, 9 keyframes).
-// Called by obj_effect_shot_impact (effect handler 2 of obj_effect_run_handler) with D_800D1980 / D_eu_800D1990.
+// Called by obj_effect_shot_impact (effect handler 2 of obj_effect_run_handler) with g_obj_effect_pos / D_eu_800D1990.
 /* was func_151BBBCC */
 void shot_impact_effects(s32 obj, f32 *pos, f32 *target, u8 arg3, s32 arg4) {
     struct {
@@ -1104,9 +1104,9 @@ void debris_spray_emit_b(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 a
     sp6C[1] = 0.0f;
     temp_f2 = temp_f2 * 0.001f;
     sp6C[2] = 0.0f;
-    sp6C[3] += -arg3 * D_800BEDC8 * temp_f2;
-    sp6C[4] += -arg4 * D_800BEDC8 * temp_f2;
-    sp6C[5] += -arg5 * D_800BEDC8 * temp_f2;
+    sp6C[3] += -arg3 * g_frame_step_inv * temp_f2;
+    sp6C[4] += -arg4 * g_frame_step_inv * temp_f2;
+    sp6C[5] += -arg5 * g_frame_step_inv * temp_f2;
     particle_puff_spawn(&sp6C[6], sp6C, &sp6C[3], 1.0f, ((random_float() * 1049.0f) + -1022.0f) * 0.001f, (random_float() * 124.0f) + 202.0f, (random_int() & 0xF) + 0x14, (random_int() % 201U) + 0x37, 0xF, 0xF, 0, -1, 0xCB, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
 }
 
@@ -1861,11 +1861,11 @@ struct260 *effect_node_create(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 a
 void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
 s32 random_int(void);
-extern s32 D_800A4AA0;
+extern s32 g_effect3d_default_params; /* was D_800A4AA0 */
 
 // object_aura_burst_spawn: the aura_group_spawn (object_aura_spawn) effect without its rumble_request / light_create_obj_joint calls: creates
 // a group object (effect_node_create kind 300, flag 0, 0x18-byte block {obj, obj+0x3B}) and, when it exists, two particles
-// (effect3d_spawn_full texture 0x5F, D_800A4AA0 list, random blend 1 / 3; +0x110 gets index, object, room, group, mid height
+// (effect3d_spawn_full texture 0x5F, g_effect3d_default_params list, random blend 1 / 3; +0x110 gets index, object, room, group, mid height
 // (obj +0x14C + +0x150) / 2 and this function's constants) and two emitters (particle_emitter_spawn texture 0x60, 0x2A; +0x170
 // gets index, object, room, group); the group records them at +0x30 / +0x38. `alpha` / `owner` go to every spawner.
 /* was func_151BDDD8 */
@@ -1943,7 +1943,7 @@ s32 aura_burst_group_spawn(u8 *obj, u8 alpha, s32 owner) {
         fr.spec.u47 = 7;
         fr.spec.u48 = 0;
         for (fr.extra.index = 0; fr.extra.index < 2; fr.extra.index++) {
-            g->part[fr.extra.index] = effect3d_spawn_full(&fr.spec, (s32)&D_800A4AA0, 0, 0x25, 0, 0x1D,
+            g->part[fr.extra.index] = effect3d_spawn_full(&fr.spec, (s32)&g_effect3d_default_params, 0, 0x25, 0, 0x1D,
                                               ((random_int() & 1) ? 2 : 0) + 1, 0, 0, 0x5C,
                                               alpha, owner);
             if (g->part[fr.extra.index] != NULL) {
@@ -2035,7 +2035,7 @@ extern f32 g_aura_burst_dir_pt1[3]; /* was D_800AAB7C */
 // by the first matrix (mtx_transform_points) and gives each of the two emitter pairs (+0x30 / +0x38 and +0x34 / +0x3C) its
 // position and direction: the first kind gets the flag 1 at +0x168, the second the flag 2 (and loses 4) at +0x58;
 // otherwise both flags are cleared. For the four players (owner index in g_objects below 4) the sizes follow the
-// player's state word (D_800BE728[0][player], bit 0x8000): first kind +0x158 / +0x15C = 6 / 21, else 3 / 8; second
+// player's state word (g_cont_frame[0][player], bit 0x8000): first kind +0x158 / +0x15C = 6 / 21, else 3 / 8; second
 // kind +0x174 = 1.5, else 1.
 /* was func_151BE33C */
 void aura_burst_follow_owner(u8 *arg0) {
@@ -2102,7 +2102,7 @@ void aura_burst_follow_owner(u8 *arg0) {
         for (i = 0; i < 2; i++) {
             p = a[i];
             if (p != NULL) {
-                if (*((u16 **) D_800BE728[0])[(u8) player] & 0x8000) {
+                if (*((u16 **) g_cont_frame[0])[(u8) player] & 0x8000) {
                     *(f32 *) (p + 0x158) = 6.0f;
                     *(f32 *) (p + 0x15C) = 21.0f;
                 } else {
@@ -2112,7 +2112,7 @@ void aura_burst_follow_owner(u8 *arg0) {
             }
             p = b[i];
             if (p != NULL) {
-                if (*((u16 **) D_800BE728[0])[(u8) player] & 0x8000) {
+                if (*((u16 **) g_cont_frame[0])[(u8) player] & 0x8000) {
                     *(f32 *) (p + 0x174) = 1.5f;
                 } else {
                     *(f32 *) (p + 0x174) = 1.0f;

@@ -19,8 +19,8 @@ void *bone_effect_spawn(void *, void *, void *, s32, s32, s32, s32);
 
 
 // character_handler_indices: picks the handler-table indices for a character (P151). By the character type
-// (+0x4) it sets *outType (index into D_800A62B8, flag 4); by the game mode g_level_id it sets *outMode (index
-// into D_800A62A0, flag 2) and, when the character's sub-type (+0x3B) matches the mode, *outSub (column of
+// (+0x4) it sets *outType (index into g_char_fx_type_table, flag 4); by the game mode g_level_id it sets *outMode (index
+// into g_char_fx_mode_table, flag 2) and, when the character's sub-type (+0x3B) matches the mode, *outSub (column of
 // g_char_fx_mode_tables[*outMode], flag 1). Returns the flags; outputs whose flag is clear are left unwritten.
 /* was func_1514CFF0 */
 s32 char_fx_handler_indices(struct127 *arg0, s32 *outSub, s32 *outMode, s32 *outType) {
@@ -123,8 +123,8 @@ struct102 *head_icon_find(s32);
 extern void (*g_char_fx_init_fns[])(struct127 *); /* was D_8008AE10 */
 extern void (*g_char_fx_common_init_fn)(struct127 *); /* was D_8008AE6C */
 extern u8 *g_char_fx_mode_tables[]; /* was D_8008AF30 */
-extern u8 D_800A62A0[];
-extern u8 D_800A62B8[];
+extern u8 g_char_fx_mode_table[]; /* was D_800A62A0 */
+extern u8 g_char_fx_type_table[]; /* was D_800A62B8 */
 
 /* was func_1514D6CC */
 s32 char_fx_init(struct127 *arg0) {
@@ -147,7 +147,7 @@ s32 char_fx_init(struct127 *arg0) {
             node_destroy(e);
         }
     } while (e != NULL);
-    if (idx == 0 && D_800BE616 == 0) {
+    if (idx == 0 && g_mp_mode_active == 0) {
         head_icon_create(idx, 0xFF);
     }
     g_char_fx_common_init_fn(arg0);
@@ -157,13 +157,13 @@ s32 char_fx_init(struct127 *arg0) {
         return 0;
     }
     if (r & 4) {
-        v = D_800A62B8[sp3C];
+        v = g_char_fx_type_table[sp3C];
         if (v != 0) {
             g_char_fx_init_fns[v](arg0);
         }
     }
     if (r & 2) {
-        v = D_800A62A0[sp40];
+        v = g_char_fx_mode_table[sp40];
         if (v != 0) {
             g_char_fx_init_fns[v](arg0);
         }
@@ -1493,7 +1493,7 @@ int char_fx_bundle_attach(struct127 *arg0) { // int: callers use the implicit de
     obj_point_trail_spawn(arg0, 1, 0xFF, 1);
     obj_point_trail_spawn(arg0, 2, 0xFF, 1);
     tank_engine_sound_start(arg0);
-    if (D_800BE616 == 0) {
+    if (g_mp_mode_active == 0) {
         obj_beam_light_attach(arg0);
     }
     obj_twin_bone_emitters_spawn(arg0, 0xFF, 1);

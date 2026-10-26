@@ -13,10 +13,10 @@
 \#^        obj->old_x_position = g_objects\[0\].x_position;$#s/x_position;/y_position;/
 \#^        obj->old_z_position = g_objects\[0\].z_position;$#s/old_z/old_y/
 \#^        obj_carried_update(obj);$#s/obj_carried_update(obj);//
-\#^        if ((D_800B8AC4\[obj->unk13D \* 0x32C\] == 0 || (D_800CC670 & 4)) && obj->unk21C >= 9) {$#s/0x32C/0x328/
-\#^        if ((D_800B8AC4\[obj->unk13D \* 0x32C\] == 0 || (D_800CC670 & 4)) && obj->unk21C >= 9) {$#s/& 4/\& 2/
-\#^        if ((D_800B8AC4\[obj->unk13D \* 0x32C\] == 0 || (D_800CC670 & 4)) && obj->unk21C >= 9) {$#s/>= 9/>= 10/
-\#^        if ((D_800B8AC4\[obj->unk13D \* 0x32C\] == 0 || (D_800CC670 & 4)) && obj->unk21C >= 9) {$#s/ || (D_800CC670 & 4)//
+\#^        if ((g_objects_ref_stunned\[obj->unk13D \* 0x32C\] == 0 || (g_obj_anim_clock & 4)) && obj->unk21C >= 9) {$#s/0x32C/0x328/
+\#^        if ((g_objects_ref_stunned\[obj->unk13D \* 0x32C\] == 0 || (g_obj_anim_clock & 4)) && obj->unk21C >= 9) {$#s/& 4/\& 2/
+\#^        if ((g_objects_ref_stunned\[obj->unk13D \* 0x32C\] == 0 || (g_obj_anim_clock & 4)) && obj->unk21C >= 9) {$#s/>= 9/>= 10/
+\#^        if ((g_objects_ref_stunned\[obj->unk13D \* 0x32C\] == 0 || (g_obj_anim_clock & 4)) && obj->unk21C >= 9) {$#s/ || (g_obj_anim_clock & 4)//
 \#^            target = -20.0f;$#s/-20/-21/
 \#^    obj->unkB8 = obj->unkB8 + (target - obj->unkB8) \* 0.2f;$#s/0.2f/0.25f/
 \#^    obj->unk40 = (f32) (s16) (obj->unk7A + 0x4000) \* 0.0054931640625f;$#s/(s16) //

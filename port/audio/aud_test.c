@@ -25,9 +25,9 @@ s32 n_alSynAllocVoice(void *voice, void *vc);
 void n_alSynStartVoiceParams(void *v, void *w, f32 pitch, s16 vol, u8 pan, u8 fxmix, u8 arg6, f32 arg7, u8 arg8, s32 t);
 void n_alSynSetVol(void *v, s16 vol, s32 t);
 u64 *n_alAudioFrame(u64 *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen);
-extern u8 D_8003E9E0[]; /* N_ALGlobals of the audio manager */
+extern u8 g_audio_al_globals[]; /* N_ALGlobals of the audio manager; was D_8003E9E0 */
 extern void *n_alGlobals;
-extern u8 D_8002B1A4[];
+extern u8 g_audio_fx_params[]; /* was D_8002B1A4 */
 
 void aud_run_alist(const u32 *cmds, u32 nbytes);
 extern int aud_trace;
@@ -98,9 +98,9 @@ int port_audio_test(u32 rec_off, int frames) {
     c.unk14 = c.unk18 = c.unk1C = c.unk20 = (void *)cb_none;
     c.unk24 = (s32)tbl; c.heap = heap; c.outputRate = OUT_RATE;
     c.fxTypes[0] = c.fxTypes[1] = 6; c.fxTypes[2] = c.fxTypes[3] = 0;
-    /* fx parameter tables: audio_mgr_init copies D_8002B1A4 (2 x 0x108 bytes) to its stack */
-    c.params0 = D_8002B1A4; c.params1 = D_8002B1A4 + 0x108;
-    n_alInit(D_8003E9E0, &c);
+    /* fx parameter tables: audio_mgr_init copies g_audio_fx_params (2 x 0x108 bytes) to its stack */
+    c.params0 = g_audio_fx_params; c.params1 = g_audio_fx_params + 0x108;
+    n_alInit(g_audio_al_globals, &c);
 
     /* the record: ALSound / envelope / keymap / wavetable / book, relocated like n_bnkf_patch_sound */
     osPiRawStartDma(OS_READ, rec, record, sizeof record);
@@ -153,18 +153,18 @@ s32 mp3dec_init(void);
 void mp3_stream_set_volume(s32 vol, s32 t);
 void mp3_stream_set_pan(s32 pan, s32 now);
 void mp3_stream_set_fx(s32 a, s32 b);
-extern u8 **D_800E0E20;
-extern u8 *D_800E0E24;
-extern s32 D_800E0E28;
-extern u8 D_800E0E2C;
-extern f32 *D_800E0E30;
-extern s32 D_800E0DFC;
-extern s32 D_800E0E04;
-extern void *D_800E1224;
-extern void *D_800E11B8;
-extern void *D_800E120C;
-extern s16 D_800E11C4, D_800E11C6;
-extern void **D_8002BA44;
+extern u8 **g_mp3_huff_trees; /* was D_800E0E20 */
+extern u8 *g_mp3_huff_fast_table; /* was D_800E0E24 */
+extern s32 g_mp3_huff_node_data; /* was D_800E0E28 */
+extern u8 g_mp3_tables_loaded; /* was D_800E0E2C */
+extern f32 *g_mp3_pow43_buf; /* was D_800E0E30 */
+extern s32 g_mp3_stream_read_cb; /* was D_800E0DFC */
+extern s32 g_mp3_stream_state; /* was D_800E0E04 */
+extern void *g_mp3_stream_dec_bufs; /* was D_800E1224 */
+extern void *g_mp3_stream_env_state; /* was D_800E11B8 */
+extern void *g_mp3_stream_lp_state; /* was D_800E120C */
+extern s16 g_mp3_stream_dry_amt, g_mp3_stream_wet_amt; /* was D_800E11C4; was D_800E11C6 */
+extern void **g_audio_synth; /* was D_8002BA44 */
 
 static u8 mp3_tree_idx[0x100] __attribute__((aligned(16)));
 static u8 mp3_fast[0x4400] __attribute__((aligned(16)));
@@ -203,7 +203,7 @@ static s32 voice_dma(s32 ctx, u8 *dst, s32 len, s32 off) {
 int port_voice_test(u32 id, int calls) {
     u32 info, a4, a5, a6, clips;
     s32 i, played = 0;
-    void **saved_tbl = D_8002BA44;
+    void **saved_tbl = g_audio_synth;
 
     clips = asset(0x16, id, &info);
     voice_rom = clips; voice_size = info & 0xFFFFFF; voice_pos = 0;
@@ -213,30 +213,30 @@ int port_voice_test(u32 id, int calls) {
     port_log("[voicetest] clip 0x%X: ROM 0x%X size 0x%X; tables 0x%X 0x%X 0x%X (trees 0x%X bytes)\n",
              id, voice_rom, voice_size, a4, a5, a6, info & 0xFFFFFF);
 
-    D_800E0E20 = (u8 **)mp3_tree_idx;
-    D_800E0E24 = mp3_fast;
-    D_800E0E28 = (s32)mp3_trees;
-    D_800E0E30 = mp3_pow;
+    g_mp3_huff_trees = (u8 **)mp3_tree_idx;
+    g_mp3_huff_fast_table = mp3_fast;
+    g_mp3_huff_node_data = (s32)mp3_trees;
+    g_mp3_pow43_buf = mp3_pow;
     if (!mp3dec_init()) { port_log("[voicetest] mp3dec init failed\n"); return 1; }
-    D_800E0E2C = 1; /* tables loaded: mp3_stream_start skips its loader */
+    g_mp3_tables_loaded = 1; /* tables loaded: mp3_stream_start skips its loader */
 
-    D_800E1224 = mp3_state;
-    D_800E11B8 = env_state;
-    D_800E120C = flt_state;
+    g_mp3_stream_dec_bufs = mp3_state;
+    g_mp3_stream_env_state = env_state;
+    g_mp3_stream_lp_state = flt_state;
     fake_audio_tbl[9] = (void *)pc_dma_new; /* mp3_stream_prefetch's prefetch DMA */
-    D_8002BA44 = fake_audio_tbl;
-    D_800E0DFC = (s32)voice_dma;
+    g_audio_synth = fake_audio_tbl;
+    g_mp3_stream_read_cb = (s32)voice_dma;
     mp3_stream_set_volume(0x7FFF, 0);   /* volume */
     mp3_stream_set_pan(64, 1);       /* centre pan */
     mp3_stream_set_fx(0, 0);        /* no filter */
-    D_800E11C4 = 0x7FFF;        /* dry */
-    D_800E11C6 = 0;             /* wet */
+    g_mp3_stream_dry_amt = 0x7FFF;        /* dry */
+    g_mp3_stream_wet_amt = 0;             /* wet */
     mp3_stream_start((s32)voice_rom, (s32)voice_size);
 
     for (i = 0; i < calls; i++) {
         u64 *p = cmds;
         s32 r;
-        if (D_800E0E04 == 3 || D_800E0E04 == 0) break; /* end of stream (state 3 frees the tables) */
+        if (g_mp3_stream_state == 3 || g_mp3_stream_state == 0) break; /* end of stream (state 3 frees the tables) */
         r = mp3_stream_synth_pull(0xB8, &p);
         if (!r) continue;
         ((u32 *)p)[0] = 0x0D000000; ((u32 *)p)[1] = 0; p++;
@@ -246,8 +246,8 @@ int port_voice_test(u32 id, int calls) {
         aud_wav_append(vout, 184);
         played++;
     }
-    D_8002BA44 = saved_tbl;
-    port_log("[voicetest] %d calls, %d played (%d samples), state %d\n", i, played, played * 184, D_800E0E04);
+    g_audio_synth = saved_tbl;
+    port_log("[voicetest] %d calls, %d played (%d samples), state %d\n", i, played, played * 184, g_mp3_stream_state);
     aud_wav_finish(22050);
     return 0;
 }

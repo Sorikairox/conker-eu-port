@@ -19,13 +19,13 @@ typedef struct {
     u8 angle;
     u8 pad[3];
 } PipeSpot;
-static const PipeSpot D_8009FCF0[3] = {
+static const PipeSpot g_pipe_explode_spots[3] = { /* was D_8009FCF0 */
     { { 975.0f, 351.0f, 1723.0f }, 0x94 },
     { { 1005.0f, 351.0f, -1706.0f }, 0xEA },
     { { -1980.0f, 351.0f, -17.0f }, 0x3F },
 };
 
-// pipe_explode_effects: P197 (difftest as a void variant, d_2c20.c): the effects of pipe `pipe` (0..2, D_8009FCF0: position and facing angle) bursting in
+// pipe_explode_effects: P197 (difftest as a void variant, d_2c20.c): the effects of pipe `pipe` (0..2, g_pipe_explode_spots: position and facing angle) bursting in
 // view `view` ("../Effects/PipeExploded/pipeexploded.c"): camera_shake_start on the current player's state (7, 1), a spray
 // of 3..4 pieces (debris_spray_spawn), 1..2 debris bursts (spawn_arc_emit, radius 31..104, 4..6 pieces), a smoke cloud
 // (emit_line_sparks_by_angles), two spark bursts (emit_sparks_by_angles_b), clears the pipe's two earlier effects of type 0x17
@@ -102,7 +102,7 @@ s32 pipe_explode_effects(s32 pipe, s32 view) {
 
     /* spray of pieces */
     spray.count = (random_int() & 1) + 3;
-    p = &D_8009FCF0[(u8) pipe];
+    p = &g_pipe_explode_spots[(u8) pipe];
     spray.pos[0] = p->pos[0];
     spray.pos[1] = p->pos[1];
     spray.pos[2] = p->pos[2];
@@ -363,24 +363,24 @@ s32 pipe_explode_spawn_chunk(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 cx
 }
 
 /* P139 */
-extern char D_8009FD38[];   /* "life" */
-extern char D_8009FD40[];   /* "../Effects/PipeExplode/pipeexplode.c" (one copy per tunable) */
-extern char D_8009FD68[];   /* "min grav" */
-extern char D_8009FD74[];
-extern char D_8009FD9C[];   /* "grav range" */
-extern char D_8009FDA8[];
-extern char D_8009FDD0[];   /* "min speed" */
-extern char D_8009FDDC[];
-extern char D_8009FE04[];   /* "speeed range" */
-extern char D_8009FE14[];
-extern char D_8009FE3C[];   /* "min scale" */
-extern char D_8009FE48[];
-extern char D_8009FE70[];   /* "scale  range" */
-extern char D_8009FE80[];
-extern char D_8009FEA8[];   /* "xz angle" */
-extern char D_8009FEB4[];
-extern char D_8009FEDC[];   /* "yz angle" */
-extern char D_8009FEE8[];
+extern char g_str_pipe_explode_life[];   /* "life"; was D_8009FD38 */
+extern char g_str_pipe_explode_c_path[];   /* "../Effects/PipeExplode/pipeexplode.c" (one copy per tunable); was D_8009FD40 */
+extern char g_str_pipe_explode_min_grav[];   /* "min grav"; was D_8009FD68 */
+extern char g_str_pipe_explode_c_path_2[]; /* was D_8009FD74 */
+extern char g_str_pipe_explode_grav_range[];   /* "grav range"; was D_8009FD9C */
+extern char g_str_pipe_explode_c_path_3[]; /* was D_8009FDA8 */
+extern char g_str_pipe_explode_min_speed[];   /* "min speed"; was D_8009FDD0 */
+extern char g_str_pipe_explode_c_path_4[]; /* was D_8009FDDC */
+extern char g_str_pipe_explode_speed_range[];   /* "speeed range"; was D_8009FE04 */
+extern char g_str_pipe_explode_c_path_5[]; /* was D_8009FE14 */
+extern char g_str_pipe_explode_min_scale[];   /* "min scale"; was D_8009FE3C */
+extern char g_str_pipe_explode_c_path_6[]; /* was D_8009FE48 */
+extern char g_str_pipe_explode_scale_range[];   /* "scale  range"; was D_8009FE70 */
+extern char g_str_pipe_explode_c_path_7[]; /* was D_8009FE80 */
+extern char g_str_pipe_explode_xz_angle[];   /* "xz angle"; was D_8009FEA8 */
+extern char g_str_pipe_explode_c_path_8[]; /* was D_8009FEB4 */
+extern char g_str_pipe_explode_yz_angle[];   /* "yz angle"; was D_8009FEDC */
+extern char g_str_pipe_explode_c_path_9[]; /* was D_8009FEE8 */
 s32 debug_tweak_int(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
 /*
@@ -422,15 +422,15 @@ s32 pipe_explode_spawn_debris(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 c
 
     cosA = angle_byte_cos((a - 0x40) & 0xFF);
     sinA = angle_byte_cos(a & 0xFF);
-    life = debug_tweak_int(6, (s32) D_8009FD38, 1, 500, 300, (s32) D_8009FD40, 1858);
-    minGrav = debug_tweak_int(7, (s32) D_8009FD68, -5000, 0, 0, (s32) D_8009FD74, 1872) * 0.001f;
-    gravRange = debug_tweak_int(8, (s32) D_8009FD9C, -5000, 0, 0, (s32) D_8009FDA8, 1874) * 0.001f;
-    minSpeed = debug_tweak_int(9, (s32) D_8009FDD0, 0, 500, 0, (s32) D_8009FDDC, 1882);
-    speedRange = debug_tweak_int(10, (s32) D_8009FE04, 0, 500, 0, (s32) D_8009FE14, 1884);
-    minScale = debug_tweak_int(11, (s32) D_8009FE3C, 0, 5000, 1000, (s32) D_8009FE48, 1889) * 0.1f;
-    scaleRange = debug_tweak_int(12, (s32) D_8009FE70, 0, 5000, 0, (s32) D_8009FE80, 1891) * 0.1f;
-    xzAngle = debug_tweak_int(13, (s32) D_8009FEA8, -255, 255, 0, (s32) D_8009FEB4, 1897);
-    yzAngle = debug_tweak_int(14, (s32) D_8009FEDC, -255, 255, 0, (s32) D_8009FEE8, 1903);
+    life = debug_tweak_int(6, (s32) g_str_pipe_explode_life, 1, 500, 300, (s32) g_str_pipe_explode_c_path, 1858);
+    minGrav = debug_tweak_int(7, (s32) g_str_pipe_explode_min_grav, -5000, 0, 0, (s32) g_str_pipe_explode_c_path_2, 1872) * 0.001f;
+    gravRange = debug_tweak_int(8, (s32) g_str_pipe_explode_grav_range, -5000, 0, 0, (s32) g_str_pipe_explode_c_path_3, 1874) * 0.001f;
+    minSpeed = debug_tweak_int(9, (s32) g_str_pipe_explode_min_speed, 0, 500, 0, (s32) g_str_pipe_explode_c_path_4, 1882);
+    speedRange = debug_tweak_int(10, (s32) g_str_pipe_explode_speed_range, 0, 500, 0, (s32) g_str_pipe_explode_c_path_5, 1884);
+    minScale = debug_tweak_int(11, (s32) g_str_pipe_explode_min_scale, 0, 5000, 1000, (s32) g_str_pipe_explode_c_path_6, 1889) * 0.1f;
+    scaleRange = debug_tweak_int(12, (s32) g_str_pipe_explode_scale_range, 0, 5000, 0, (s32) g_str_pipe_explode_c_path_7, 1891) * 0.1f;
+    xzAngle = debug_tweak_int(13, (s32) g_str_pipe_explode_xz_angle, -255, 255, 0, (s32) g_str_pipe_explode_c_path_8, 1897);
+    yzAngle = debug_tweak_int(14, (s32) g_str_pipe_explode_yz_angle, -255, 255, 0, (s32) g_str_pipe_explode_c_path_9, 1903);
     req.flags = 0x29E9;
     req.one[0] = 1.0f;
     req.one[1] = 1.0f;
@@ -540,11 +540,11 @@ s32 trail_alpha_fade(u8 *arg0) {
 
 struct210 *sprite_fx_spawn_cam(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, u8 argC, s32 argD);
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
-extern s16 D_80088AA0[3];   /* splash colours (15, 16, 17) */
+extern s16 g_trail_splash_colours[3];   /* splash colours (15, 16, 17); was D_80088AA0 */
 
 /* trail_hit_splash: trail hit handler (g_trail_hit_fns [5]) of particle `obj` hitting the ground at height `y`: the trail
  * record (obj +0x98) goes to state 4 (shrink); a splash sprite (sprite_fx_spawn_cam kind 0x11, life 150, a random colour
- * of D_80088AA0, size 50..100, the record's alpha bytes +0x1A / +0x1B) at the trail's current point (obj +0x94,
+ * of g_trail_splash_colours, size 50..100, the record's alpha bytes +0x1A / +0x1B) at the trail's current point (obj +0x94,
  * 20-byte points, index +0x2D) and a falling child trail (trail_spawn: 3/4 of the record's +0 width, +4, random
  * length 15..30, +0xC / +0x10, colour bytes +0x19..+0x1B, life 60, the obj's +0x25) are spawned. Returns 1. */
 /* was func_150B3CA8 */
@@ -596,9 +596,9 @@ s32 trail_hit_splash(u8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
         u8 b15;
     } at;
 
-    colours[0] = D_80088AA0[0];
-    colours[1] = D_80088AA0[1];
-    colours[2] = D_80088AA0[2];
+    colours[0] = g_trail_splash_colours[0];
+    colours[1] = g_trail_splash_colours[1];
+    colours[2] = g_trail_splash_colours[2];
     rec[0x20] = 4;
     size = random_float() * 50.0f + 50.0f;
     splash.colour = colours[(u32)random_int() % 3];

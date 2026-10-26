@@ -117,7 +117,7 @@ s32 text_box_open(s32 id, s32 player, s32 arg2, void (*callback)(s32, s32, s32),
 
 s32 mp3_stream_get_state(void);
 void text_box_place(u8 *box);
-extern u16 D_800BEB30[]; /* buttons pressed this frame, per player (0x8000 A, 0x4000 B) */
+extern u16 g_pad_pressed[]; /* buttons pressed this frame, per player (0x8000 A, 0x4000 B); was D_800BEB30 */
 extern f32 g_text_box_open_speed;   /* 1 / 3: open speed; was D_800A7138 */
 
 #define TB_T(box) (*(TextAD20 **)((box) + 0x10))
@@ -125,7 +125,7 @@ extern f32 g_text_box_open_speed;   /* 1 / 3: open speed; was D_800A7138 */
 #define TB_F32(box, o) (*(f32 *)((box) + (o)))
 
 // text_box_update: per-frame update of a text box (g_node_type_table kind 0x51, record of text_box_open). Closes the box at
-// once when the descriptor's +0x2B is set and D_800C35EA is not 1. +0x15 is the state: 1 open (style 2: the 3-dot
+// once when the descriptor's +0x2B is set and g_cutscene_slot_state is not 1. +0x15 is the state: 1 open (style 2: the 3-dot
 // "more" variant, starts at 8), 2 grow (+0x28 scale up by +0x2C per frame, line fades in after 0.75), 4 wait
 // (45 per frame from 180), 8 the dots fade in one by one, 0x10 line fade-in, 0x20 shown (waits for A / B, the
 // "no B" / "last line" / timed flags of the descriptor, or a +0x100 request), 0x40 line fade-out then the next line
@@ -146,7 +146,7 @@ void text_box_update(u8 *box) {
     t = TB_T(box);
     pl = (u8 *) g_player_views;
     skip = t->flags & 0x400;
-    if (((u8 *) t)[0x2B] != 0 && D_800C35EA != 1) {
+    if (((u8 *) t)[0x2B] != 0 && g_cutscene_slot_state != 1) {
         ((u8 *) t)[8] = 0;
         node_destroy((struct102 *) box);
         return;
@@ -189,7 +189,7 @@ void text_box_update(u8 *box) {
             TB_S16(box, 0x18) = 10;
         }
         if (TB_S16(box, 0x18) != 0) {
-            TB_S16(box, 0x18) -= D_800BE9A0;
+            TB_S16(box, 0x18) -= g_frame_delta;
             if (TB_S16(box, 0x18) < 0) {
                 TB_S16(box, 0x18) = 0;
             }
@@ -206,11 +206,11 @@ void text_box_update(u8 *box) {
         if (skip) {
             TB_S16(box, 0x16) = 0;
         }
-        TB_S16(box, 0x16) -= D_800BE9A0 * 45;
+        TB_S16(box, 0x16) -= g_frame_delta * 45;
         if (TB_S16(box, 0x16) < 0) {
             TB_S16(box, 0x16) = 0;
         }
-        TB_S16(box, 0x18) -= D_800BE9A0;
+        TB_S16(box, 0x18) -= g_frame_delta;
         if (TB_S16(box, 0x18) < 0) {
             TB_S16(box, 0x18) = 0;
         }
@@ -220,7 +220,7 @@ void text_box_update(u8 *box) {
         }
         break;
     case 8:
-        TB_S16(box, 0x16) -= D_800BE9A0;
+        TB_S16(box, 0x16) -= g_frame_delta;
         if (TB_S16(box, 0x16) < 0) {
             TB_S16(box, 0x16) = 0;
         }
@@ -236,7 +236,7 @@ void text_box_update(u8 *box) {
         }
         break;
     case 0x40:
-        TB_S16(box, 0x16) -= D_800BE9A0;
+        TB_S16(box, 0x16) -= g_frame_delta;
         if (TB_S16(box, 0x16) < 0) {
             TB_S16(box, 0x16) = 0;
         }
@@ -270,7 +270,7 @@ void text_box_update(u8 *box) {
         text_measure_string(*(u8 **) (box + 0x24), &w, &h, &unused);
         TB_F32(box, 0x30) = w >> 1;
         TB_F32(box, 0x34) = h >> 1;
-        TB_S16(box, 0x18) -= D_800BE9A0;
+        TB_S16(box, 0x18) -= g_frame_delta;
         if (TB_S16(box, 0x18) < 0) {
             TB_S16(box, 0x18) = 0;
         }
@@ -295,7 +295,7 @@ void text_box_update(u8 *box) {
             }
             TB_T(box)->flags &= ~0x4000;
         }
-        TB_S16(box, 0x16) -= D_800BE9A0;
+        TB_S16(box, 0x16) -= g_frame_delta;
         if (TB_S16(box, 0x16) < 0) {
             TB_S16(box, 0x16) = 0;
         }
@@ -308,16 +308,16 @@ void text_box_update(u8 *box) {
                 flags = TB_T(box)->flags;
             }
             if ((flags & 0x80) && TB_T(box)->lines == ((s8 *) box)[0x20] + 1) {
-                pad = D_800BEB30[0];
+                pad = g_pad_pressed[0];
                 if (pad & 0x4000) {
                     box[0x20] = -1;
                     skip = 1;
-                    D_800D1994 = 0;
+                    g_hint_voice_pos = 0;
                 } else if (pad & 0x8000) {
                     skip = 1;
                 }
             } else {
-                pad = D_800BEB30[0];
+                pad = g_pad_pressed[0];
                 if (pad & 0x8000) {
                     skip = 1;
                 } else if (!(flags & 0x40) && (pad & 0x4000)) {
@@ -340,7 +340,7 @@ void text_box_update(u8 *box) {
         break;
     case 0x80:
         if (TB_T(box)->flags & 2) {
-            TB_S16(box, 0x18) -= D_800BE9A0;
+            TB_S16(box, 0x18) -= g_frame_delta;
             if (TB_S16(box, 0x18) < 0) {
                 TB_S16(box, 0x18) = 0;
             }
@@ -396,7 +396,7 @@ typedef struct {
 
 #define TB_F(off) (*(f32 *) (box + (off)))
 #define TB_FLAGS (**(s32 **) (box + 0x10))
-#define TB_DL_FULL(g) ((g) - D_800BEDE8[g_dl_buf_index] > g_dl_capacity)
+#define TB_DL_FULL(g) ((g) - g_gfx_dl_buffers[g_dl_buf_index] > g_dl_capacity)
 
 // text_box_draw: draws a text box (record of text_box_open; +0x28 scale, +0x38 / +0x3C size, +0x40 / +0x44 pointer
 // tip, +0x58 pointer angle from text_box_place). First the shadow pass in black at a quarter alpha: the box sprite
@@ -654,7 +654,7 @@ Gfx *text_box_draw_text(Gfx *gfx, u8 *box, u8 r, u8 g, u8 b, u8 a) {
         } while ((*(u8 **) (box + 0x24))[i] == '\n');
     }
     do {
-        if (gfx - D_800BEDE8[g_dl_buf_index] > g_dl_capacity) {
+        if (gfx - g_gfx_dl_buffers[g_dl_buf_index] > g_dl_capacity) {
             return start;
         }
         c = (*(u8 **) (box + 0x24))[i];

@@ -34,8 +34,8 @@
 /if (heading == \*(s16 \*) aimrec && \*(s8 \*) (target + 0x1D1) == \*(s8 \*) (aimrec + 2)) {/s/\*(s16 \*) aimrec/*(u16 *) aimrec/ % aim_negh
 /if (heading == \*(s16 \*) aimrec && \*(s8 \*) (target + 0x1D1) == \*(s8 \*) (aimrec + 2)) {/s/(aimrec + 2)/(aimrec + 3)/ % base aimmis_t
 /\*(f32 \*) (obj + 0xB4) = \*(f32 \*) (aimrec + 8);/s/+ 8)/+ 4)/ % base
-/if (D_800BE616 == 0 && game_gu_random() .* 100 < aimrec\[3\]) {/s/D_800BE616 == 0/D_800BE616 != 0/ % aim_on aim_pass
-/if (D_800BE616 == 0 && game_gu_random() .* 100 < aimrec\[3\]) {/s/< aimrec/<= aimrec/ % aim_fail aim_eq2
+/if (g_mp_mode_active == 0 && game_gu_random() .* 100 < aimrec\[3\]) {/s/g_mp_mode_active == 0/g_mp_mode_active != 0/ % aim_on aim_pass
+/if (g_mp_mode_active == 0 && game_gu_random() .* 100 < aimrec\[3\]) {/s/< aimrec/<= aimrec/ % aim_fail aim_eq2
 /vec\[1\] = \*(f32 \*) (obj + 0xB4) - \*(f32 \*) (obj + 0x98);/s/0x98/0x94/ % aim_pass aim_big
 /dir = (f32 \*) (aimrec + 0x10);/s/0x10/0x14/ % aim_pass
 /vec3_scale((struct17 \*) dir, d + d, (struct17 \*) out);/s/d + d/d * d/ % aim_pass aim_big
@@ -61,11 +61,11 @@
 /hit\[1\] \* step, hit\[2\] \* step, &rayhit, NULL, &hit\[0\], &hit\[1\], &hit\[2\], NULL, 0, 0,/s/&hit\[0\], &hit\[1\]/\&hit[1], \&hit[0]/ % ff_ray
 /                        \*(f32 \*) (obj + 0xB4) = hit\[1\];/s/hit\[1\]/hit[2]/ % ff_ray
 /                        alpha = 1.0f;/d % ff_ray
-/idx = (u32) (rayhit - D_800DC26C) \/ 12;/s/(u32) //  % ff_idxneg
-/idx = (u32) (rayhit - D_800DC26C) \/ 12;/s/12;/8;/ % ff_ray ff_idx4
-/if (idx >= 0 && idx < D_800DBE4C && D_800DBE5C != 0) {/s/idx < D_800DBE4C/idx <= D_800DBE4C/ % ff_idx5
-/if (idx >= 0 && idx < D_800DBE4C && D_800DBE5C != 0) {/s/ \&\& D_800DBE5C != 0// % ff_notab
-/hitobj = floor_flags_surface_type(((s32 \*) D_800DBE5C)\[idx\]);/s/\[idx\]/[idx + 1]/ % ff_ray ff_idx0
+/idx = (u32) (rayhit - g_level_tri_table) \/ 12;/s/(u32) //  % ff_idxneg
+/idx = (u32) (rayhit - g_level_tri_table) \/ 12;/s/12;/8;/ % ff_ray ff_idx4
+/if (idx >= 0 && idx < g_coll_tri_count && g_coll_tri_flags != 0) {/s/idx < g_coll_tri_count/idx <= g_coll_tri_count/ % ff_idx5
+/if (idx >= 0 && idx < g_coll_tri_count && g_coll_tri_flags != 0) {/s/ \&\& g_coll_tri_flags != 0// % ff_notab
+/hitobj = floor_flags_surface_type(((s32 \*) g_coll_tri_flags)\[idx\]);/s/\[idx\]/[idx + 1]/ % ff_ray ff_idx0
 /                tex = 0x43;/s/0x43/0x42/ % ff ff_ray
 /\*(f32 \*) (obj + 0xA4) = math_atan2f(-(\*(f32 \*) (obj + 0xB0) - \*(f32 \*) (obj + 0x94)),/s/-(\*(f32/(*(f32/ % base
 /-(\*(f32 \*) (obj + 0xB8) - \*(f32 \*) (obj + 0x9C)));/s/0x9C/0x98/ % base

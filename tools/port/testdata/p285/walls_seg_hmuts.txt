@@ -20,4 +20,4 @@ s/    s2 = nmD5E90_sign3(p, \&v\[1\], \&v\[2\], \&mask);/    s2 = nmD5E90_sign3(
 s/    if ((s1 \& mask) != (s2 \& mask) || (s2 \& mask) != (s3 \& mask)) {/    if ((s1 \& mask) != (s2 \& mask)) {/
 s/    n\[1\] = dz12 \* dx13 - dx12 \* dz13;/    n[1] = dz12 * dx13 - dx12 * dz12;/
 s/    n\[3\] = n\[0\] \* v\[0\].x + n\[1\] \* v\[0\].y + n\[2\] \* v\[0\].z;/    n[3] = n[0] * v[0].x + n[1] * v[0].y + n[2] * v[1].z;/
-s/    D_800CC638 = n\[2\];/    D_800CC638 = n[1];/
+s/    g_tri_plane_nz = n\[2\];/    g_tri_plane_nz = n[1];/

@@ -453,8 +453,8 @@ void afterimage_world_free_history(u8 *arg0) {
 u8 obj_current_part_model_idx(struct127 *, s32 *);
 s32 model_make_ready(struct127 *, u8, s32, s32);
 u8 *obj_draw_part(u8 *, s32, s16, s32, s32);
-extern u8 *D_800DFBF0; /* matrix list obj_draw_part draws the object with */
-extern u8 D_800DFBF4;  /* alpha obj_draw_part draws the object with */
+extern u8 *g_afterimage_mtx; /* matrix list obj_draw_part draws the object with; was D_800DFBF0 */
+extern u8 g_afterimage_alpha;  /* alpha obj_draw_part draws the object with; was D_800DFBF4 */
 // trail_draw: P253. Draw handler (u8 *(u8 *gfx, u8 *rec, s16 arg2), same table as afterimage_history_push) of an object's
 // motion trail: with filled steps (rec[2] != 0) it prepares the object +0x10 (obj_current_part_model_idx / model_make_ready), swaps
 // the object's +0x94 for the record's +0x14 and draws the object (obj_draw_part, g_objects slot index, mode 4) once
@@ -487,8 +487,8 @@ u8 *afterimage_draw(u8 *gfx, u8 *rec, s16 arg2) {
     *(s32 *) ((u8 *) obj + 0x94) = *(s32 *) (rec + 0x14);
     a = alpha0 * 3 * 32;
     for (i = 0; i < count; i++) {
-        D_800DFBF0 = *(u8 **) (rec + 8) + m * 64;
-        D_800DFBF4 = a >> 8;
+        g_afterimage_mtx = *(u8 **) (rec + 8) + m * 64;
+        g_afterimage_alpha = a >> 8;
         gfx = obj_draw_part(gfx, slot, arg2, 4, 1);
         a += alpha0 * 32;
         m += per;

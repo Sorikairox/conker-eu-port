@@ -37,7 +37,7 @@ void head_icon_show_timed(s32 arg0, s32 arg1, f32 arg2) {
     }
     if (var_v0 != NULL) {
         (*(f32 *)((u8 *)var_v0 + 0x98)) = arg2;
-        if (*(&D_800CC37D + (arg0 * 0x32C)) != 0) {
+        if (*(&g_objects_in_water + (arg0 * 0x32C)) != 0) {
             (*(s16 *)((u8 *)var_v0 + 0xE)) = 0;
             (*(s8 *)((u8 *)var_v0 + 0x11)) = 0;
             return;
@@ -77,7 +77,7 @@ void head_icon_update(u8 *arg0) {
         if (temp_v1_2 != NULL) {
             var_v0 = temp_v1_2->unk75;
         }
-        if (!(var_v0 & 0x80) && (var_v0 != 0x2A) && (var_v0 != 0x2B) && ((var_v0 != 0x42) || !(D_800D2E68 & 4)) && (var_v0 != 0x2C) && (temp_v1_2->unk197 == 0) && (var_v0 != 0) && (var_v0 != 0x1F) && (temp_t0->in_water == 0)) {
+        if (!(var_v0 & 0x80) && (var_v0 != 0x2A) && (var_v0 != 0x2B) && ((var_v0 != 0x42) || !(g_hints_seen_b8 & 4)) && (var_v0 != 0x2C) && (temp_v1_2->unk197 == 0) && (var_v0 != 0) && (var_v0 != 0x1F) && (temp_t0->in_water == 0)) {
             (*(u8 *)((u8 *)arg0 + 0x11)) = 1U;
             (*(s16 *)((u8 *)arg0 + 0xE)) = 0x78;
             sound_play_2d(0x1EB, 0x7FFFU, 0x40U, 0, 0U);

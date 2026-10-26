@@ -5,13 +5,13 @@
 
 s32 screen_fade_alpha(s32);
 s32 hud_lens_is_off(s32);
-extern u8 D_800C35EA;
+extern u8 g_cutscene_slot_state; /* was D_800C35EA */
 extern void (*g_fb_fx_apply_fns[])(u8 *, u16 *); /* was D_8008B478 */
 
 /*
  * framebuffer_effects_apply: runs the framebuffer handlers (g_fb_fx_apply_fns, index effect+0x10, -1 = none) of the
  * type-0x34 effects of both list groups on the frame about to be swapped (called by sched_swap_framebuffer).
- * Flag bits at effect+0xE: 4 = skip this frame once (cleared here), 2 = not while D_800C35EA == 1,
+ * Flag bits at effect+0xE: 4 = skip this frame once (cleared here), 2 = not while g_cutscene_slot_state == 1,
  * 8 = only while hud_lens_is_off(0) is set and screen_fade_alpha(0) is 0. Walks with the g_node_iter_next safe-next
  * stack so a handler may free its effect.
  */
@@ -32,7 +32,7 @@ void fb_fx_apply_all(u16 *fb) {
                 node[0xE] = flags & ~4;
             } else if (*(s8 *)(node + 0x10) != -1) {
                 run = TRUE;
-                if ((flags & 2) && D_800C35EA == 1) {
+                if ((flags & 2) && g_cutscene_slot_state == 1) {
                     run = FALSE;
                 }
                 if (flags & 8) {

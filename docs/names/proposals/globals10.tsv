@@ -1,0 +1,213 @@
+old	new	confidence	description
+D_80087608	g_mp_team_mark_count	med	s8 number of score marks each team draws on the multiplayer HUD (set from D_800E1010[4] by menu_game_start)
+D_8008955C	g_sky_tex_sets	med	Per sky id (level header +9) pointer to its texture set (+8 = first of 0x168 texture ids), released by hud_ingame_draw
+D_8009011C	g_mp_p0_start_state	low	s8 player 0 state (D_80087270[0]) saved by menu_game_start; 9 shows the out mark on the scoreboard
+D_80090160	g_mp_hud_flags	high	u16 multiplayer HUD element bits (1 / 8 team scores, 0x4000 / 0x8000 carried item, 0x6340 timer), from the settings set
+D_8009016C	g_hud_fade_alpha	high	s16 fade-in alpha (0..0xFF) of the pause HUD / level start title screens
+D_800901BC	g_hud_scale_x	med	f32 horizontal HUD scale (hi-res factor) applied to HUD and text positions
+D_800901C0	g_hud_scale_y	med	f32 vertical HUD scale (hi-res factor) applied to HUD and text positions
+D_80090370	g_hud_screen_fns	high	Table of full-screen overlay draw functions (in-game HUD, intro credits, centred text ...) by hud_overlay_draw_screen
+D_800903A4	g_hud_post_fns	high	Table of post-overlay draw functions indexed by D_800E0B94 (hud_overlay_draw_post)
+D_800903D8	g_hud_sprite_setup_dl	med	Display list that sets up the render state for HUD sprites / text images
+D_80090408	g_hud_cash_model	med	HudModel (asset 0xA4, the blinking head) drawn beside the cash counter on the pause HUD; 0 when not loaded
+D_8009040C	g_hud_pause_model_a2	low	HudModel (asset 0xA2) drawn at (70, 80) on the pause HUD when the progress flag allows
+D_80090410	g_hud_sprite_desc	high	Shared sprite descriptor (texture id, size, format) filled before each hud_image_draw call
+D_8009041C	g_mp_digit_sheet_col	med	u8[4] digit -> column on the multiplayer marker sheet texture
+D_80090420	g_mp_digit_sheet_row	med	u8[] digit -> row on the multiplayer marker sheet texture
+D_80090424	g_hud_digit_tex_ids	med	Texture ids of the counter digits 0..9 (hud_counter_digits_draw)
+D_8009044C	g_hud_digit_divisors	med	Powers of ten (7 words) copied by hud_counter_digits_draw to split the counter into digits
+D_80090468	g_pause_hud_delay	med	s8 frames since the pause HUD opened (0..5); the fade-in starts after 5, cleared on unpause
+D_8009046C	g_menu_page_title_tex	med	Per frontend menu page (+0x2C): texture id of the page title sprite (frontend_menu_draw)
+D_80090484	g_menu_fade_alpha	med	u8 frontend menu fade-in alpha (+4 per tick, max 0xFF), reset during cutscenes
+D_80090488	g_menu_page_banner_tex	med	Per barrel menu page: texture id of the banner sprite (0 = none)
+D_800904A8	g_menu_banner_page	med	s8 barrel menu page whose banner is shown (4 = item ring page)
+D_800904AC	g_menu_barrel_tex	med	Texture id per item barrel (5) of the barrel menu ring
+D_800904C0	g_hud_model_setup_dl	med	Display list loaded before a HUD model: HUD matrices and render state (hud_anim_model_draw)
+D_800904D8	g_hud_model_end_dl	med	Display list called after a HUD model's own lists (hud_anim_model_draw)
+D_800904E8	g_menu_sprite_entries	high	Menu sprite entries (30 x 12 bytes: display list, asset, texture) inside the menu sprite block; NULL if not allocated
+D_800904EC	g_save_caption_str	med	Cached caption string of the selected save / load screen entry (0 = no caption)
+D_80091B9C	g_screen_sprite_1b9c	low	Sprite descriptor drawn by the intro credits screen; also the template of effect_spawn_sum_counter
+D_80091BA8	g_screen_sprite_1ba8	low	Sprite descriptor of the intro credits / sprite fade screens (also screen_overlay_show_timed)
+D_80091BB4	g_screen_sprite_1bb4	low	Sprite descriptor drawn at (0x92, 0xCB) by screen_sprite_fade_draw (first variant)
+D_80091BC0	g_screen_sprite_1bc0	low	Sprite descriptor drawn at (0x92, 0xCB) by screen_sprite_fade_draw (second variant)
+D_80091BCC	g_screen_logo_sprite	med	Sprite descriptor of the logo drawn by screen_logo_glow_draw
+D_80091BD8	g_screen_logo_glow_sprite	med	Sprite descriptor of the orange glow over the logo (screen_logo_glow_draw)
+D_8009E280	g_tex_siz_load_incr	high	Per texel size: LoadBlock texel count increment (G_IM_SIZ_*_INCR) for hud_image_tile_setup
+D_8009E284	g_tex_siz_load_shift	high	Per texel size: LoadBlock texel count shift (G_IM_SIZ_*_SHIFT)
+D_8009E288	g_tex_siz_line_bytes	high	Per texel size: bytes per texel for the tile line size (G_IM_SIZ_*_LINE_BYTES)
+D_8009E28C	g_tex_siz_load_block	high	Per texel size: size used for the SetTImg of LoadBlock (G_IM_SIZ_*_LOAD_BLOCK)
+D_800ABEA0	g_mp_team_colours	high	Team colours (r, g, b, pad) of the multiplayer HUD and scoreboard
+D_800ABEB0	g_str_mp_fmt_team1_score	med	Format string of team 1's score on the multiplayer HUD (mp_team_score_draw)
+D_800ABEB4	g_str_mp_fmt_team0_score	med	Format string of team 0's score on the multiplayer HUD (mp_team_score_draw)
+D_800ABEB8	g_str_mp_fmt_placing	med	Scoreboard format string of the placing name
+D_800ABEBC	g_str_mp_fmt_team_score	med	Scoreboard format string of the team score
+D_800ABEC0	g_str_mp_fmt_hit_pct	med	Scoreboard format string of the hit percentage
+D_800ABEC8	g_str_mp_fmt_score	med	Scoreboard format string of the player score (+0x46)
+D_800ABECC	g_str_mp_out_mark	med	Scoreboard string shown instead of the lives for players out of the game (state 9)
+D_800ABED0	g_str_mp_fmt_lives	med	Scoreboard format string of the lives (+0x6A)
+D_800ABED4	g_str_mp_fmt_hits	med	Scoreboard format string of the hit count (D_800E0F00)
+D_800ABED8	g_str_menu_fmt_slot	med	Barrel menu format string of the player slot number ("#")
+D_800ABEDC	g_str_menu_fmt_char	med	Barrel menu format string printing character 0x38 ("#")
+D_800ABEE0	g_str_menu_fmt_number	med	Barrel menu format string "%d" of a setting value
+D_800ABEE4	g_str_cheat_cursor	high	"-": the blinking text cursor of the cheat entry screen
+D_800ABEF8	g_screen_k_bef8	med	f32 text scale constant of the intro credits screen
+D_800BEDCC	g_frame_count	high	s32 game frame counter (advanced by game_update_frame_timing; blink / wobble phases)
+D_800C40BE	g_cutscene_cash_offset	low	s16 set by cutscene event 0x83: subtracted from the pause HUD cash (0 hides, 0x7D00 = 1000000, -1 = off)
+D_800E0ED0	g_mp_team_scores	high	s16[2] team scores of the multiplayer HUD, cleared by menu_game_start
+D_800E0FFC	g_mp_hud_marked_players	med	u16 bit per player marked by the multiplayer HUD; those players are left off the radar
+D_800E1003	g_text_bank_loaded	high	s8 text bank currently loaded (0 = none; 1 / 2 select scoreboard strings), set by text_bank_load
+D_800E1060	g_hud_model_env_alpha	high	s16 environment alpha of the HUD models (copied from the HUD fade alpha)
+D_800E1068	g_hud_model_proj_mtx	med	Projection matrix of the HUD models / cheat entry letters (ortho or perspective)
+D_800E10A8	g_mp_hud_unk_10a8	low	s16 cleared by hud_overlay_draw_screen and hud_ingame_draw outside multiplayer; never read in C
+D_800E10AC	g_menu_sprite_block	high	Menu sprite block (0x1A8 bytes: 0x40 header with the cheat text at +0x20, then the sprite entries)
+D_800E10B0	g_cheat_cursor_col	high	s8 cheat entry letter grid column of the cursor
+D_800E10B1	g_cheat_cursor_row	high	s8 cheat entry letter grid row of the cursor (0..5, wrapping)
+D_800E10B2	g_cheat_letter_tilt	med	s8 tilt of the selected cheat entry letter (+8 / -8 a frame)
+D_800E10B3	g_cheat_text_len	high	s8 length of the text typed on the cheat entry screen
+D_800E10B4	g_cheat_key_repeat	med	s8 counts frames the same direction is held on the cheat entry screen (auto repeat)
+D_800E10B5	g_save_caption_entry	med	u8 save / load screen entry + 1 whose caption is cached in D_800904EC
+D_800E10B8	g_menu_slot_fill	med	u8[4] barrel menu player slot fill levels (0..255)
+D_8002C060	g_os_clock_rate	high	u64 libultra osClockRate (CPU counter ticks per second) used for timers
+D_8002C160	g_os_cont_initialized	high	libultra __osContinitialized flag (game_os_cont_init)
+D_8002C134	g_os_vi_next	high	libultra __osViNext: the VI context to apply at the next retrace
+D_80042DA0	g_os_cont_pif_ram	high	libultra __osContPifRam: PIF RAM command block for controller reads
+D_80042DDC	g_os_cont_pif_status	med	pifstatus word (+0x3C) of the controller PIF RAM block
+D_80042DE1	g_os_max_controllers	high	libultra __osMaxControllers (4)
+D_800E1150	g_os_si_access_buf	high	Message buffer of the SI access queue (game_os_si_create_access_queue)
+D_800B116C	g_mp3_imdct12_cos3_a	med	f32 MP3 short-block IMDCT 3-point stage cosine (x[2])
+D_800B1170	g_mp3_imdct12_cos3_b	med	f32 MP3 short-block IMDCT 3-point stage cosine (x[3])
+D_800B1174	g_mp3_imdct12_twiddle_0	med	f32 MP3 short-block IMDCT odd-part twiddle (t[3])
+D_800B1178	g_mp3_imdct12_twiddle_1	med	f32 MP3 short-block IMDCT odd-part twiddle (t[4])
+D_800B117C	g_mp3_imdct12_twiddle_2	med	f32 MP3 short-block IMDCT odd-part twiddle (t[5])
+D_800B1180	g_mp3_imdct12_scale_0	med	f32 MP3 short-block IMDCT 6-point output scale (t[0])
+D_800B1184	g_mp3_imdct12_scale_1	med	f32 MP3 short-block IMDCT 6-point output scale (t[1])
+D_800B1188	g_mp3_imdct12_scale_2	med	f32 MP3 short-block IMDCT 6-point output scale (t[2])
+D_800B118C	g_mp3_imdct12_scale_3	med	f32 MP3 short-block IMDCT 6-point output scale (t[3])
+D_800B1190	g_mp3_imdct12_scale_4	med	f32 MP3 short-block IMDCT 6-point output scale (t[4])
+D_800B1194	g_mp3_imdct12_scale_5	med	f32 MP3 short-block IMDCT 6-point output scale (t[5])
+D_800B1198	g_mp3_imdct12_win_0	med	f32 MP3 short-block window coefficient 0 (first half)
+D_800B119C	g_mp3_imdct12_win_1	med	f32 MP3 short-block window coefficient 1 (first half)
+D_800B11A0	g_mp3_imdct12_win_2	med	f32 MP3 short-block window coefficient 2 (first half)
+D_800B11A4	g_mp3_imdct12_win_3	med	f32 MP3 short-block window coefficient 3 (first half)
+D_800B11A8	g_mp3_imdct12_win_4	med	f32 MP3 short-block window coefficient 4 (first half)
+D_800B11AC	g_mp3_imdct12_win_5	med	f32 MP3 short-block window coefficient 5 (first half)
+D_800B11B0	g_mp3_imdct12_win_6	med	f32 MP3 short-block window coefficient 6 (second half)
+D_800B11B4	g_mp3_imdct12_win_7	med	f32 MP3 short-block window coefficient 7 (second half)
+D_800B11B8	g_mp3_imdct12_win_8	med	f32 MP3 short-block window coefficient 8 (second half)
+D_800B11BC	g_mp3_imdct12_win_9	med	f32 MP3 short-block window coefficient 9 (second half)
+D_800B11C0	g_mp3_imdct12_win_10	med	f32 MP3 short-block window coefficient 10 (second half)
+D_800B11C4	g_mp3_imdct12_win_11	med	f32 MP3 short-block window coefficient 11 (second half)
+D_8008FD90	g_human_player_count_us	med	US-named alias of D_80090130 (g_human_player_count, EU 0x80090130): human player count; 2+ turns level mode 4 into 2
+D_80091C04	g_level_collision_buf_sizes	med	Per level id: size of the collision scratch buffer allocated by collision_build_reset (US name, EU 0x80091FB4)
+D_80091EA0	g_level_quadtree_pool_sizes	high	Per level id: quadtree node pool size (doubled unless the cart check word matches)
+D_800B0DC0	g_collision_buf_cursor	high	Allocation cursor in the collision scratch buffer (per-area triangle / bound / grid arrays)
+D_800B0DC4	g_collision_buf_start	high	Start of the collision scratch buffer (collision_build_reset)
+D_800B0DC8	g_collision_buf_end	high	End of the collision scratch buffer (start + per-level size)
+D_800B0DCC	g_quadtree_node_count	high	Number of quadtree nodes allocated from the node pool
+D_800B0DD0	g_quadtree_leaf_count	high	Number of quadtree leaf nodes built
+D_800B0DD4	g_quadtree_min_half_size	med	Quadtree build: nodes with a half size below this (512) become leaves
+D_800B0DD8	g_quadtree_leaf_max_tris	med	Quadtree build: nodes with fewer triangles than this (10) become leaves
+D_800B0DE0	g_quadtree_pool_cursor	high	Write cursor in the quadtree node pool (14-byte nodes and leaf lists)
+D_800B0DE4	g_collision_total_tris	high	Total triangle count of all collision areas
+D_800B11EC	g_quadtree_pool_base	high	Base of the quadtree node pool (quadtree_alloc_node_pool)
+D_800C5C08	g_model_vtx_ranges	high	Per model kind (187): vertex ranges (G_VTX runs with their G_MTX group) for collision building
+D_800C6070	g_model_coll_tris	high	Per model kind (187): collision triangle array (12 bytes per triangle)
+D_800C6318	g_model_vtx_range_count	high	u16 per model kind: number of vertex ranges in g_model_vtx_ranges
+D_800DBE08	g_quadtree_roots	high	Per collision area: root node of its quadtree
+D_800DBE1C	g_collision_area_tris_1	med	Triangle count of collision area 1 (D_800DBE18 + 1; areas 0..3)
+D_800DBE20	g_collision_area_tris_2	med	Triangle count of collision area 2 (D_800DBE18 + 2)
+D_800DBE24	g_collision_area_tris_3	med	Triangle count of collision area 3 (D_800DBE18 + 3)
+D_800DBE28	g_pvs_row_bytes	med	s16 bytes per PVS row: (area 0 node count + 7) / 8 rounded up to 16 (collision_load_level_grid)
+D_800DBE2A	g_quadtree0_node_count	med	s16 node count of the area 0 quadtree (collision_build_quadtrees)
+D_800DBE2C	g_quadtree0_leaf_count	med	s16 leaf count of the area 0 quadtree (collision_build_quadtrees)
+D_800DBE38	g_collision_area_tri_count	high	Triangle count of the collision area being built (also the append index of collision_scan_level_dl)
+D_800DBE63	g_collision_full_bounds	med	u8 flag: collision triangles get the full s16 bounds instead of their own (collision_scan_level_dl)
+D_800DBE64	g_collision_floor_step	med	f32 floor / ceiling search step height (150 / 85 / 50) set by collision_set_step_size
+D_800DC262	g_quadtree_stat_1	low	s16 cleared with D_800DC260 by quadtree_alloc_node_pool; not otherwise used in C
+D_800DC264	g_quadtree_stat_2	low	s16 cleared with D_800DC260 by quadtree_alloc_node_pool; not otherwise used in C
+D_800DC266	g_quadtree_stat_3	low	s16 cleared with D_800DC260 by quadtree_alloc_node_pool; not otherwise used in C
+D_800DC280	g_collision_cur_area	high	Index of the collision area whose arrays are being allocated / selected
+D_80083110	g_ambient_shape_points	high	Per shape: point list for the shape placer (pair count, then x / z offsets)
+D_8008D258	g_ambient_placer_fns	high	Ambient effect placers by type: { place function, update function, word }
+D_8008D2A0	g_ambient_placement_rows	high	s16 [row][8 kinds][2]: per placement row and kind {placer type, placer parameter}
+D_80096014	g_ambient_tri_uv_points	high	f32 (u, v) triangle coordinates used by the point placer
+D_80096074	g_ambient_slot_defaults	low	u8 per ambient slot: value copied into both D_800DE050 bytes of the slot
+D_80096090	g_ambient_sound_info	med	10-byte info per ambient sound id (frame count, frame size / length, flags, parameters)
+D_800BE4A0	g_ambient_slot_ids	med	15 ambient slots, 4-byte stride: sound id (0xFF = empty) and flags, loaded from the level asset
+D_800BE850	g_ambient_shape_phase_bits	med	u16 per ambient slot alternating phase bit flipped by the shape placer
+D_800BE858	g_ambient_slot_params	med	s16 x 2 per ambient slot: the two slot parameters (sound info +4 / +6)
+D_800BE898	g_ambient_slot_emitter_count	med	u16 per ambient slot: emitter count; nonzero loads the slot's sample
+D_800DDC00	g_ambient_alt_phase_slots	med	Bit per ambient slot (placement flag 0x80): emitters alternate between two phases
+D_800DDC04	g_ambient_pingpong_slots	med	Bit per ambient slot (info flag 1): ping-pong phase animation
+D_800DDC08	g_ambient_slow_random_slots	med	Bit per ambient slot (info flag 8): slower phase animation with random direction flips
+D_800DE000	g_ambient_phase_period	med	u8 per ambient slot: phase period >> 8 (sound info +1)
+D_800DE010	g_ambient_flare_frame	med	u8 per ambient slot: flare-up frame
+D_800DE020	g_ambient_quad_flag	low	u8 per ambient slot: vertex 1 flag of its quads (2 when info flag 0x80, else 1)
+D_800DE040	g_ambient_phase_dir_bits	med	u8 per ambient slot: ping-pong direction bits of its 4 phases (random at build)
+D_800DE050	g_ambient_slot_bytes	low	u8 x 2 per ambient slot, both set from g_ambient_slot_defaults
+D_800DE0B0	g_ambient_placement_row	high	u8 per ambient slot: its placement row (flags & 0x7F)
+D_800DE0C0	g_ambient_phases	high	s16 15 slots x 4 animation phases (<< 8)
+D_800DE148	g_ambient_emitters	high	Ambient emitter records (14 bytes each), sorted by x or z
+D_800D9CF0	g_mist_puff_handles	med	Node handles of the 4 mist puffs spawned by the level setup (destroyed by fx_slots_9cf0_clear)
+D_800966D0	g_level_rope1_ends	med	Rope 1 template (two end points, 0x18 bytes) copied by level_ropes_setup
+D_800966E8	g_level_rope2_ends	med	Rope 2 template (two end points, 0x18 bytes) copied by level_ropes_setup
+D_80096700	g_level_rope3_ends	med	Rope 3 template (two end points, 0x18 bytes) copied by level_ropes_setup
+D_80096718	g_level_rope4_ends	low	Rope 4 template (0x18 bytes); copied but overwritten before use by level_ropes_setup
+D_80096730	g_level_rope5_ends	med	Rope 5 template (two end points, 0x18 bytes) copied by level_ropes_setup
+D_800DCD28	g_level_tint_colour	med	u8 RGB default tint colour B (outside tint zones), set by the level hotspot setup, reset to white
+D_800DCD3C	g_level_tint_strength_b	low	u8 default tint strength B (top byte of the hotspot word with g_level_tint_colour)
+D_800DCD3D	g_level_tint_strength_a	low	u8 default tint strength A (top byte of the hotspot's other colour word)
+D_800DD1D4	g_rope_light_r	low	f32 red of the level light colour, copied by level_ropes_setup
+D_800DD1D8	g_rope_light_g	low	f32 green of the level light colour, copied by level_ropes_setup
+D_800DD1DC	g_rope_light_b	low	f32 blue of the level light colour, copied by level_ropes_setup
+D_800DD1E0	g_rope_tint_r	low	f32 red of g_level_tint_colour, copied by level_ropes_setup
+D_800DD1E4	g_rope_tint_g	low	f32 green of g_level_tint_colour, copied by level_ropes_setup
+D_800DD1E8	g_rope_tint_b	low	f32 blue of g_level_tint_colour, copied by level_ropes_setup
+D_800DD1EC	g_rope_tint_strength_b	low	f32 copy of g_level_tint_strength_b (level_ropes_setup)
+D_800DD1F0	g_rope_tint_strength_a	low	f32 copy of g_level_tint_strength_a (level_ropes_setup)
+D_8009068C	g_level_scroll_tex_id	med	Texture id whose uses in the level display lists get a texture scroll (level_tex_scroll_fx_setup)
+D_80091B68	g_level_vtx_scroll_tex_key	med	Texture key whose vertices in the level DL get a vertex texture scroll (level_tex_scroll_create)
+D_800B1248	g_level_model_colour_group_count	high	u8 number of level model colour groups (level_load_models)
+D_800B1250	g_level_part_vtx_count	high	s32[4] vertex count of each level geometry part (level_load_models)
+D_800BE930	g_vtx_colour_backup	high	u8 *[4] per level geometry part: its slice of the vertex colour store (3 bytes per vertex)
+D_800BE940	g_vtx_colour_group_backup	med	Per colour group: per entry, the backed-up RGB of its listed vertices
+D_800BE944	g_vtx_colour_room_base	med	u16 per room record: first colour index in the vertex colour store (0xFFFF = none)
+D_800BE948	g_vtx_colour_stored	med	u16 number of colours stored so far in the vertex colour store
+D_800BE950	g_level_env_colours_rgb	med	RGB (3 bytes each) of the G_SETENVCOLOR commands of the level display list
+D_800BE970	g_level_env_colour_cmds	med	u16 command index of each G_SETENVCOLOR of the level display list
+D_800BE984	g_level_env_colour_count	med	u8 number of G_SETENVCOLOR commands listed (dl_env_colours_list)
+D_80083310	g_glyph_set_rom_ranges	high	ROM {start, end} of each glyph set loaded by glyph_set_load_rom
+D_800CC16C	g_glyph_count	low	u8 cleared by glyph_count_reset
+D_800D1CD0	g_level_blockers	med	Level blocker table (asset 3 / 0xC, 8-byte records, relocated) used by obj_push_out_of_blockers
+D_800BE9B0	g_setup_type_count	high	u8 number of object types with a loaded sound word table (setup_load_type_assets)
+D_800BE9B8	g_setup_type_ids	high	u16 object type of each loaded sound word table (level_list_index_of)
+D_800BE9C8	g_setup_type_sound_tables	high	Per loaded object type: sound word table (asset 2 / 0x12) for sound ids >= 2000
+D_800D20FC	g_setup_entries	high	Level setup entry table (0x30 bytes per entry: player slots, then the level's entries)
+D_800D2520	g_setup_entry_count	high	u8 number of level setup entries
+D_800D2521	g_setup_level_first	high	u8 index of the first setup entry of the level's own part (after the player slots)
+D_800D2530	g_setup_respawn_timers	high	s16 per setup entry: respawn timer (allocated by level_setup_load)
+D_800BEAE0	g_camera_smooth_pitch	high	f32 per player: smoothed camera pitch (camera_update_dir_vector)
+D_800BEAF0	g_camera_smooth_heading	high	f32 per player: smoothed camera heading (camera_update_dir_vector)
+D_800843D0	g_obj_colour_key_sets	med	Per colour group 1..5: RGB key colours (3 bytes each) blended by obj_vertex_colours_blend
+D_80096CD0	g_obj_colour_key_counts	med	u8 per colour group 1..5: number of key colours
+D_8002AE18	g_cont_read_done	med	u8 set when a controller read finished (SI free); arms the next read timer, checked at PRE-NMI
+D_800843F4	g_save_eeprom_state	med	u8 EEPROM probe result / save request state (save_process_request)
+D_80096D10	g_rumble_k_6d10	med	f32 constant scaling the rumble strength levels 1..7 (rumble_start_strength)
+D_800BE720	g_cont_forced_buttons	med	u16 per pad: button bits OR-ed into the next read, then cleared (set by events / init)
+D_800BE938	g_rumble_probe_request	med	u8 set at level start: rumble_update re-probes the rumble paks, then clears it
+D_800BEB00	g_cont_read_timer	high	OSTimer that triggers the next controller read (cont_arm_read_timer)
+D_800BEB20	g_cont_prev_buttons	high	u16 per player: buttons of the previous read (pressed edges in D_800BEB30)
+D_800BEB28	g_cont_prev_buttons_b	med	u16 per player: previous buttons for the second pressed-edge mask D_800BED50
+D_800BEB38	g_cont_last_buttons	med	u16 per player: buttons before this frame's read (cont_read_frame)
+D_800BEB60	g_cont_connected_mask	high	u8 bit per controller port with a controller connected
+D_800BEB80	g_rumble_pfs	high	OSPfs[4] (0x68 bytes each) motor handles of the rumble paks
+D_800BED5C	g_rumble_active	high	u8 per channel: rumble requested (1 = pulsing), set by rumble_start, cleared by rumble_stop
+D_800BED60	g_rumble_prev_active	med	u8 per channel: g_rumble_active of the previous update
+D_800BED68	g_rumble_motor_on	high	u8 per channel: the rumble motor is running
+D_800BED70	g_rumble_phase	med	f32 per channel: time within the current on / off cycle
+D_800BED80	g_rumble_on_time	med	f32 per channel: motor on time of a cycle
+D_800BED90	g_rumble_off_time	med	f32 per channel: motor off time of a cycle
+D_800BEDA0	g_rumble_period	med	f32 per channel: cycle length (on + off time)
+D_800BEEE3	g_rumble_stop_request	med	u8 one-frame request (pause) to stop all rumble motors (rumble_update)
+D_800CC7A2	g_objects_air_time	low	u16 +0xB2 of object 0 (EU 0x800CC7A2), cleared when out of water; carried over a level transition
+D_800D2132	g_transition_air_time	low	u16 player +0xB2 kept over a level transition (from g_objects_air_time), restored at spawn

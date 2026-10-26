@@ -30,11 +30,11 @@ s32 osJamMesg(OSMesgQueue *mq, OSMesg msg, s32 flag) {
     return 0;
 }
 
-extern OSDevMgr D_8002AE90; // __osPiDevMgr
+extern OSDevMgr g_os_pi_dev_mgr; /* was D_8002AE90 */ // __osPiDevMgr
 
 OSMesgQueue *osPiGetCmdQueue(void) {
-    if (!D_8002AE90.active) {
+    if (!g_os_pi_dev_mgr.active) {
         return NULL;
     }
-    return D_8002AE90.cmdQueue;
+    return g_os_pi_dev_mgr.cmdQueue;
 }

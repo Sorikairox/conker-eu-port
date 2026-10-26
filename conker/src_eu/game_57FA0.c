@@ -181,7 +181,7 @@ s32 asset_dma_into(u8 *arg0, s32 arg1, s32 arg2, s32 arg3)
     }
     rom_dma_read((s32) arg0, temp_v0, (var_s1 + 0xF) & (~0xF), 1);
     sp24 = (*temp_v0) & 0x7FFFFFFF;
-    var_s1 = rzip_inflate(temp_v0, arg1, D_8003809C);
+    var_s1 = rzip_inflate(temp_v0, arg1, g_mem_scratch_area);
     if (sp24 != ((0, var_s1))) // fakematch: comma expression flips beq operand order
     {
       g_dbg_crash_marker = 0x0C000036;
@@ -222,7 +222,7 @@ s32 asset_load_alloc(u8 *rom, s32 info, s32 *size_out) {
     if (n != 0 && n < 1000000) {
         out = allocate_memory(n, 1, 2, 2);
         if (out != NULL) {
-            got = rzip_inflate(buf, (s32) out, D_8003809C);
+            got = rzip_inflate(buf, (s32) out, g_mem_scratch_area);
         }
     }
     heap_free(buf);

@@ -14,9 +14,9 @@ s32 sprite_load_texture(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 f32 math_sin_u8(u8);
 f32 math_cos_u8(u8);
 extern u8 *g_sprite_tex_descs[]; /* was D_8008CDEC */
-extern f32 D_800DD600[2]; /* camera yaw: [0] sin, [1] cos (node_billboard_draw's caller in game_1944C0.c) */
-extern s32 D_800DD5E4;    /* last sprite texture: the hand asm keeps it in the upper half (lh / sh) */
-extern s32 D_800DD5E8;    /* last sprite frame: upper half, as D_800DD5E4 */
+extern f32 g_billboard_yaw_sincos[2]; /* camera yaw: [0] sin, [1] cos (node_billboard_draw's caller in game_1944C0.c); was D_800DD600 */
+extern s32 g_sprite_last_tex;    /* last sprite texture: the hand asm keeps it in the upper half (lh / sh); was D_800DD5E4 */
+extern s32 g_sprite_last_frame;    /* last sprite frame: upper half, as g_sprite_last_tex; was D_800DD5E4; was D_800DD5E8 */
 extern s16 g_sprite_last_other_mode;    /* last sprite other-mode (1 / 2 / 3); was D_800DD5EC */
 extern s32 g_gfx_tlut_mode;    /* TLUT bit of the last loaded texture (gfx_load_texture_tile); was D_800D30BC */
 
@@ -36,8 +36,8 @@ extern s32 g_gfx_tlut_mode;    /* TLUT bit of the last loaded texture (gfx_load_
  * from the address of g_player_views, not from the pointer it holds), 0x200 / 0x4000 quad above / below the origin,
  * 0x8 / 0x10 / 0x400 / 0x1000 / 0x2000 combine modes, 0x800 prim alpha, 0x20 / 0x2000 other modes.
  * Loads the texture (sprite_load_texture) when the texture or frame changed; the combine / other mode / alpha commands
- * only when they differ from the last sprite's (D_800DD5EE, g_sprite_last_other_mode, g_gfx_prim_a_cached); a pipe sync precedes the
- * first mode change when no texture load did. Then the 4 vertices (camera yaw D_800DD600, optional roll and
+ * only when they differ from the last sprite's (g_sprite_last_combine, g_sprite_last_other_mode, g_gfx_prim_a_cached); a pipe sync precedes the
+ * first mode change when no texture load did. Then the 4 vertices (camera yaw g_billboard_yaw_sincos, optional roll and
  * pitch rotations, rounded, plus the position) and the triangles (0, 2, 1), (0, 3, 2).
  */
 /* was func_150A6D40 */
@@ -68,12 +68,12 @@ Gfx *sprite_billboard_draw(Gfx *gfx, u8 *rec, s32 idx) {
         tex = ((s32 *) tex)[frame];
         frame = 0;
     }
-    if (tex == (s16) (D_800DD5E4 >> 16) && frame == (s16) (D_800DD5E8 >> 16)) {
+    if (tex == (s16) (g_sprite_last_tex >> 16) && frame == (s16) (g_sprite_last_frame >> 16)) {
         noLoad = TRUE;
     } else {
-        D_800DD5E4 = (D_800DD5E4 & 0xFFFF) | (tex << 16);
+        g_sprite_last_tex = (g_sprite_last_tex & 0xFFFF) | (tex << 16);
         noLoad = FALSE;
-        D_800DD5E8 = (D_800DD5E8 & 0xFFFF) | (frame << 16);
+        g_sprite_last_frame = (g_sprite_last_frame & 0xFFFF) | (frame << 16);
         /* the asm leaves its caller's s0 (a KSEG0 pointer, so a negative age) as the 9th argument */
         gfx = (Gfx *) sprite_load_texture((s32) gfx, (s32) desc, *(s16 *) (spr + 0x88), 0, 0, 0, 0, 2, (s32) 0x80000000);
     }
@@ -91,8 +91,8 @@ Gfx *sprite_billboard_draw(Gfx *gfx, u8 *rec, s32 idx) {
 
     /* the quad in camera yaw: (a, -b) and (-a, b) horizontally, lo..hi vertically */
     w = *(s16 *) (spr + 0x92);
-    a = w * D_800DD600[1];
-    b = w * D_800DD600[0];
+    a = w * g_billboard_yaw_sincos[1];
+    b = w * g_billboard_yaw_sincos[0];
     h = *(s16 *) (spr + 0x94);
     if (flags & 0x200) {
         lo = 0.0f;
@@ -150,8 +150,8 @@ Gfx *sprite_billboard_draw(Gfx *gfx, u8 *rec, s32 idx) {
         mode = 0;
     }
     /* with no mode flag the asm compares a leftover 64-bit register, (u16) vtx[3].y << 32: equal only when 0 */
-    if (D_800DD5EE != mode || (mode == 0 && vtx[3 * 8 + 1] != 0)) {
-        D_800DD5EE = mode;
+    if (g_sprite_last_combine != mode || (mode == 0 && vtx[3 * 8 + 1] != 0)) {
+        g_sprite_last_combine = mode;
         if (noLoad) {
             SPRITE_GFX(gfx, 0xE7000000, 0); /* gDPPipeSync */
         }

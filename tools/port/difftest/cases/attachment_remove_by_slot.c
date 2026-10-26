@@ -1,9 +1,9 @@
 /* P241 selftest: a candidate longer than the reference (8 words, matched C, no .s) that calls the function right
- * after it (attachment_remove_by_slot_n). The extra test reads D_800C3EE0 only; both paths make the same call. */
+ * after it (attachment_remove_by_slot_n). The extra test reads g_attachment_list only; both paths make the same call. */
 s32 attachment_remove_by_slot_n(u8 *arg0, s32 arg1, s32 arg2);
-extern s32 D_800C3EE0;
+extern s32 g_attachment_list; /* was D_800C3EE0 */
 void attachment_remove_by_slot(s32 arg0, s32 arg1) {
-    if (D_800C3EE0 == 0x5A5A1234) {
+    if (g_attachment_list == 0x5A5A1234) {
         attachment_remove_by_slot_n((u8 *) arg0, arg1, 0xFF);
         return;
     }

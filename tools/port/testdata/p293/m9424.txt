@@ -3,7 +3,7 @@ s#        \*(f32 \*) (obj + 0x4C) = 0\.0f;#        *(f32 *) (obj + 0x4C) = 1.0f;
 s#        if (0\.0f < vy) {#        if (0.0f > vy) {# % slow slowpos
 s#        \*(f32 \*) (obj + 0x3C) = \*(f32 \*) (hit + 0x18);#        *(f32 *) (obj + 0x3C) = *(f32 *) (hit + 0x14);# % slow
 s#        \*(f32 \*) (obj + 0x54) \*= k;#        *(f32 *) (obj + 0x54) *= vy;# % slow
-s#        sound_play_at(D_80088ADC, 0xFA00, 0, 0, 0, \*(f32 \*) (hit + 0x14), \*(f32 \*) (hit + 0x18), \*(f32 \*) (hit + 0x1C),#        sound_play_at(D_80088ADC, 0x7D00, 0, 0, 0, *(f32 *) (hit + 0x14), *(f32 *) (hit + 0x18), *(f32 *) (hit + 0x1C),# % slow
+s#        sound_play_at(g_projectile_bounce_sfx, 0xFA00, 0, 0, 0, \*(f32 \*) (hit + 0x14), \*(f32 \*) (hit + 0x18), \*(f32 \*) (hit + 0x1C),#        sound_play_at(g_projectile_bounce_sfx, 0x7D00, 0, 0, 0, *(f32 *) (hit + 0x14), *(f32 *) (hit + 0x18), *(f32 *) (hit + 0x1C),# % slow
 s#        return 1;#        return 0;# % slow
 s#    if (trigger_point_in_kind3(1, \*(f32 \*) (hit + 0x14), \*(f32 \*) (hit + 0x18), \*(f32 \*) (hit + 0x1C)) == 0) {#    if (trigger_point_in_kind3(2, *(f32 *) (hit + 0x14), *(f32 *) (hit + 0x18), *(f32 *) (hit + 0x1C)) == 0) {# % hit
 s#        d\[1\] = \*(f32 \*) (obj + 0x3C) - y;#        d[1] = *(f32 *) (obj + 0x3C) - x;# % miss
@@ -30,5 +30,5 @@ s#            b\.u94 = 0x20;#            b.u94 = 0x21;# % hit
 s#            b\.u9E = 0x19;#            b.u9E = 0x1A;# % hit
 s#            b\.uA0 = \*(s32 \*) (obj + 0x128);#            b.uA0 = *(s32 *) (obj + 0x14C);# % hit
 s#            emit_sparks_from_surface((u8 \*) \&b, obj\[0xC\], obj\[1\]);#            emit_sparks_from_surface((u8 *) \&b, obj[1], obj[0xC]);# % hit
-s#    sound_play_at(D_80088AD4\[random_int() \& 1\], 0x7D00, 0, 0, 0, \*(f32 \*) (obj + 0x38), \*(f32 \*) (obj + 0x3C),#    sound_play_at(D_80088AD4[random_int() \& 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x40),# % rej
+s#    sound_play_at(g_projectile_break_sfx\[random_int() \& 1\], 0x7D00, 0, 0, 0, \*(f32 \*) (obj + 0x38), \*(f32 \*) (obj + 0x3C),#    sound_play_at(g_projectile_break_sfx[random_int() \& 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x40),# % rej
 s#    return 0;#    return 1;# % rej

@@ -100,7 +100,7 @@ s32 gfx_load_texture_cached(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s3
         if (*arg9 == 1) {
             *arg9 = 0;
         }
-        if ((g_level_id == 0x18) || (g_level_id == 0x13) || (g_level_id == 6) || (g_level_id == 0x3B) || (g_level_id == 2) || (D_800BE616 != 0)) {
+        if ((g_level_id == 0x18) || (g_level_id == 0x13) || (g_level_id == 6) || (g_level_id == 0x3B) || (g_level_id == 2) || (g_mp_mode_active != 0)) {
             argA = 3;
         }
         temp_v0_2 = sprite_load_texture_at(arg0, arg1, arg2 >> 8, arg8, 0, 0, 0, arg3, arg4, arg5, argA);
@@ -174,7 +174,7 @@ void mtx_transform_point_or_origin(void *arg0, void *arg1, void *arg2) {
         g_mtx_xform_dbg_x = ((struct17 *)arg0)->unk0;
         g_mtx_xform_dbg_y = ((struct17 *)arg0)->unk4;
         g_mtx_xform_dbg_z = ((struct17 *)arg0)->unk8;
-        if (D_800C42B0 != 0) {
+        if (g_mtx_fixed_point != 0) {
             f32 mf[4][4];
 
             g_mtx_xform_dbg_step = 3;
@@ -396,7 +396,7 @@ u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
         return NULL;
     }
     sp58 = NULL;
-    clamp_range_to_bounds(&arg0, &arg1, 0, D_800D3094);
+    clamp_range_to_bounds(&arg0, &arg1, 0, g_level_zone_count);
     var_a1 = arg0;
     var_t0 = NULL;
     if (var_a1 < arg1) {
@@ -410,7 +410,7 @@ u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
             var_v0 = 0;
             var_a0 = 0;
             if (arg2 & 1) {
-                temp_v1 = D_800D34B8 + (var_a1 * 0x34);
+                temp_v1 = g_level_zones + (var_a1 * 0x34);
                 if (((*(s16 *)((u8 *)arg3 + 0)) == (*(s16 *)((u8 *)temp_v1 + 0))) && ((*(s16 *)((u8 *)arg3 + 2)) == (*(s16 *)((u8 *)temp_v1 + 2))) && ((*(s16 *)((u8 *)arg3 + 4)) == (*(s16 *)((u8 *)temp_v1 + 4)))) {
                     var_v0 = 1;
                     var_a0 = 1;
@@ -419,7 +419,7 @@ u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
                 var_v0 = 1;
             }
             if (arg2 & 2) {
-                temp_v1_2 = D_800D34B8 + (var_a1 * 0x34);
+                temp_v1_2 = g_level_zones + (var_a1 * 0x34);
                 if (((*(s16 *)((u8 *)arg3 + 6)) == (*(s16 *)((u8 *)temp_v1_2 + 6))) && ((*(s16 *)((u8 *)arg3 + 8)) == (*(s16 *)((u8 *)temp_v1_2 + 8))) && ((*(s16 *)((u8 *)arg3 + 0xA)) == (*(s16 *)((u8 *)temp_v1_2 + 0xA)))) {
                     var_v0 = (var_v0 | 2) & 0xFFFF;
                     var_a0 = (var_a0 | 2) & 0xFFFF;
@@ -428,7 +428,7 @@ u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
                 var_v0 = (var_v0 | 2) & 0xFFFF;
             }
             if (arg2 & 4) {
-                if ((*(f32 *)((u8 *)arg3 + 0xC)) == (*(f32 *)((u8 *)((D_800D34B8 + (var_a1 * 0x34))) + 0xC))) {
+                if ((*(f32 *)((u8 *)arg3 + 0xC)) == (*(f32 *)((u8 *)((g_level_zones + (var_a1 * 0x34))) + 0xC))) {
                     var_v0 = (var_v0 | 4) & 0xFFFF;
                     var_a0 = (var_a0 | 4) & 0xFFFF;
                 }
@@ -436,7 +436,7 @@ u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
                 var_v0 = (var_v0 | 4) & 0xFFFF;
             }
             if (arg2 & 8) {
-                if ((*(f32 *)((u8 *)arg3 + 0x10)) == (*(f32 *)((u8 *)((D_800D34B8 + (var_a1 * 0x34))) + 0x10))) {
+                if ((*(f32 *)((u8 *)arg3 + 0x10)) == (*(f32 *)((u8 *)((g_level_zones + (var_a1 * 0x34))) + 0x10))) {
                     var_v0 = (var_v0 | 8) & 0xFFFF;
                     var_a0 = (var_a0 | 8) & 0xFFFF;
                 }
@@ -444,7 +444,7 @@ u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
                 var_v0 = (var_v0 | 8) & 0xFFFF;
             }
             if (arg2 & 0x10) {
-                if ((*(u8 *)((u8 *)arg3 + 0x14)) == (*(u8 *)((u8 *)((D_800D34B8 + (var_a1 * 0x34))) + 0x14))) {
+                if ((*(u8 *)((u8 *)arg3 + 0x14)) == (*(u8 *)((u8 *)((g_level_zones + (var_a1 * 0x34))) + 0x14))) {
                     var_v0 = (var_v0 | 0x10) & 0xFFFF;
                     var_a0 = (var_a0 | 0x10) & 0xFFFF;
                 }
@@ -452,7 +452,7 @@ u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
                 var_v0 = (var_v0 | 0x10) & 0xFFFF;
             }
             if (arg2 & 0x20) {
-                if ((*(u8 *)((u8 *)arg3 + 0x15)) == ((s32) (*(u8 *)((u8 *)((D_800D34B8 + (var_a1 * 0x34))) + 0x15)) >> 2)) {
+                if ((*(u8 *)((u8 *)arg3 + 0x15)) == ((s32) (*(u8 *)((u8 *)((g_level_zones + (var_a1 * 0x34))) + 0x15)) >> 2)) {
                     var_v0 = (var_v0 | 0x20) & 0xFFFF;
                     var_a0 = (var_a0 | 0x20) & 0xFFFF;
                 }
@@ -460,7 +460,7 @@ u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
                 var_v0 = (var_v0 | 0x20) & 0xFFFF;
             }
             if (sp34 != 0) {
-                if ((*(u8 *)((u8 *)arg3 + 0x16)) == (*(u8 *)((u8 *)((D_800D34B8 + (var_a1 * 0x34))) + 0x16))) {
+                if ((*(u8 *)((u8 *)arg3 + 0x16)) == (*(u8 *)((u8 *)((g_level_zones + (var_a1 * 0x34))) + 0x16))) {
                     var_v0 = (var_v0 | 0x40) & 0xFFFF;
                     var_a0 = (var_a0 | 0x40) & 0xFFFF;
                 }
@@ -468,7 +468,7 @@ u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
                 var_v0 = (var_v0 | 0x40) & 0xFFFF;
             }
             if (sp30 != 0) {
-                if ((*(u8 *)((u8 *)arg3 + 0x17)) == (*(u8 *)((u8 *)((D_800D34B8 + (var_a1 * 0x34))) + 0x17))) {
+                if ((*(u8 *)((u8 *)arg3 + 0x17)) == (*(u8 *)((u8 *)((g_level_zones + (var_a1 * 0x34))) + 0x17))) {
                     var_v0 = (var_v0 | 0x80) & 0xFFFF;
                     var_a0 = (var_a0 | 0x80) & 0xFFFF;
                 }
@@ -476,7 +476,7 @@ u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
                 var_v0 = (var_v0 | 0x80) & 0xFFFF;
             }
             if (sp2C != 0) {
-                if ((*(s32 *)((u8 *)arg3 + 0x18)) == (*(s32 *)((u8 *)((D_800D34B8 + (var_a1 * 0x34))) + 0x18))) {
+                if ((*(s32 *)((u8 *)arg3 + 0x18)) == (*(s32 *)((u8 *)((g_level_zones + (var_a1 * 0x34))) + 0x18))) {
                     var_v0 = (var_v0 | 0x100) & 0xFFFF;
                     var_a0 = (var_a0 | 0x100) & 0xFFFF;
                 }
@@ -484,7 +484,7 @@ u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
                 var_v0 = (var_v0 | 0x100) & 0xFFFF;
             }
             if (sp28 != 0) {
-                if ((*(s32 *)((u8 *)arg3 + 0x1C)) == (*(s32 *)((u8 *)((D_800D34B8 + (var_a1 * 0x34))) + 0x1C))) {
+                if ((*(s32 *)((u8 *)arg3 + 0x1C)) == (*(s32 *)((u8 *)((g_level_zones + (var_a1 * 0x34))) + 0x1C))) {
                     var_v0 = (var_v0 | 0x200) & 0xFFFF;
                     var_a0 = (var_a0 | 0x200) & 0xFFFF;
                 }
@@ -492,7 +492,7 @@ u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
                 var_v0 = (var_v0 | 0x200) & 0xFFFF;
             }
             if (sp24 != 0) {
-                if ((*(s32 *)((u8 *)arg3 + 0x20)) == (*(s32 *)((u8 *)((D_800D34B8 + (var_a1 * 0x34))) + 0x20))) {
+                if ((*(s32 *)((u8 *)arg3 + 0x20)) == (*(s32 *)((u8 *)((g_level_zones + (var_a1 * 0x34))) + 0x20))) {
                     var_v0 = (var_v0 | 0x400) & 0xFFFF;
                     var_a0 = (var_a0 | 0x400) & 0xFFFF;
                 }
@@ -501,10 +501,10 @@ u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
             }
             if (sp20 != 0) {
                 if (var_v0 == 0x7FF) {
-                    var_t0 = (var_a1 * 0x34) + D_800D34B8;
+                    var_t0 = (var_a1 * 0x34) + g_level_zones;
                 }
             } else if (var_a0 != 0) {
-                var_t0 = (var_a1 * 0x34) + D_800D34B8;
+                var_t0 = (var_a1 * 0x34) + g_level_zones;
             }
             var_a1 += 1;
         } while (var_a1 != arg1);
@@ -1484,7 +1484,7 @@ f32 curve_table_lookup(f32 arg0, f32 arg1, f32 arg2) {
 void obj_set_destroyed(struct127 *arg0) {
     arg0->unk5 = 3;
     if (g_level_id != 51) {
-        if ((D_800BE616 != 0) || (arg0->interaction_state == 5) || (arg0->interaction_state == 1) || (arg0->interaction_state == 21)) {
+        if ((g_mp_mode_active != 0) || (arg0->interaction_state == 5) || (arg0->interaction_state == 1) || (arg0->interaction_state == 21)) {
             arg0->interaction_state = 5;
             if (arg0->unk31C != NULL) {
                 arg0->unk31C->unk78 = 0;
@@ -1608,7 +1608,7 @@ void mtx_transform_points(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3) {
     f32 *v;
     f32 *o;
 
-    if (D_800C42B0 != 0) {
+    if (g_mtx_fixed_point != 0) {
         guMtxL2F(mtx, arg2);
         if (arg3 > 0) {
             p = arg0;

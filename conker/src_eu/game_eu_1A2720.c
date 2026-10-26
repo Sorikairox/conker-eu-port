@@ -19,7 +19,7 @@ void level_anim_frame_counter_tick(s32 arg0, s32 arg1) {
 }
 
 extern void (*g_level_update_fns[])(s32); /* was D_8008D0A4 */
-extern u16 D_800CC16E;
+extern u16 g_text_icon_clock; /* was D_800CC16E */
 s32 texscroll_update(s32, s32);
 s32 tex_scroll_update();
 void ambient_slots_refresh(void);
@@ -33,11 +33,11 @@ void level_update_frame(s32 arg0, s32 arg1) {
     if (g_level_header->padB[0] != 0) {
         g_level_update_fns[g_level_header->padB[0]](arg1);
     }
-    if (D_800BE616 == 0) {
+    if (g_mp_mode_active == 0) {
         ambient_slots_refresh();
         light_fx_update();
     }
-    D_800CC16E += g_frame_ticks << 6;
+    g_text_icon_clock += g_frame_ticks << 6;
 }
 
 extern Gfx *(*g_level_pre_layer_fns[])(Gfx *, s32); /* was D_8008D114 */

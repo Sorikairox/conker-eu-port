@@ -11,7 +11,7 @@ extern Tri3 g_level_part_triggers; /* was D_80088D24 */
 s32 level_part_is_active(s32 arg0) {
     Tri3 t = g_level_part_triggers;
 
-    if (((S34 *)D_800D34B8)[t.a[arg0]].u14 != 0) {
+    if (((S34 *)g_level_zones)[t.a[arg0]].u14 != 0) {
         return 1;
     }
     return 0;
@@ -359,9 +359,9 @@ void fx_debris_spray_vel(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 a
     sp6C[0] = 0.0f;
     sp6C[1] = 0.0f;
     sp6C[2] = 0.0f;
-    sp6C[3] += -arg3 * D_800BEDC8 * temp_f2;
-    sp6C[4] += -arg4 * D_800BEDC8 * temp_f2;
-    sp6C[5] += -arg5 * D_800BEDC8 * temp_f2;
+    sp6C[3] += -arg3 * g_frame_step_inv * temp_f2;
+    sp6C[4] += -arg4 * g_frame_step_inv * temp_f2;
+    sp6C[5] += -arg5 * g_frame_step_inv * temp_f2;
     particle_puff_spawn(&sp6C[6], sp6C, &sp6C[3], 0.986891f, (random_float() * 0.23f) + -0.337f, (random_float() * 200.0f) + 150.0f, ((u32) random_int() % 26U) + 0x28, (random_int() % 201U) + 0x37, 0x1E, 0x14, 0, -1, 0x34, 0x35, 0x34, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F7CA4E3) */
 }
 

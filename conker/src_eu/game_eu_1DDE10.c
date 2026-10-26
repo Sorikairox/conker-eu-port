@@ -399,7 +399,7 @@ typedef struct {
 
 // character_sparks_update: keeps up to 11 sparks attached to bone points (g_char_spark_bone_pts, g_char36_spark_bone_pts for character kind
 // 0x36) of the target character. Each frame every attached spark is moved to its point (old position kept at
-// +0x40) and its timer counts down by g_frame_ticks; at < 0 it is let go (velocity (pos - old) * D_800BEDC8 in x / z,
+// +0x40) and its timer counts down by g_frame_ticks; at < 0 it is let go (velocity (pos - old) * g_frame_step_inv in x / z,
 // effect3d_set_handlers(rec, 0x10, 0x1B, 0, 0x10), flag 1 at +0x58). New sparks (sprite g_spark_kind_sprites[kind], life 52..102,
 // timer 20..50) are spawned with effect3d_spawn_default at random free points while accum (+ random 0..0.307 *
 // g_frame_step_f per frame) is above 1. Without a skeleton (+0x1D4) or with (+0x74 & 0xF) == 0xF all sparks are
@@ -449,8 +449,8 @@ void character_sparks_update(u8 *obj) {
                     if (slot->timer < 0) {
                         rec = slot->rec;
                         *(f32 *) (rec + 0x114) = 0.0f;
-                        *(f32 *) (rec + 0x110) = (*(f32 *) (rec + 0x34) - *(f32 *) (rec + 0x40)) * D_800BEDC8;
-                        *(f32 *) (rec + 0x118) = (*(f32 *) (rec + 0x3C) - *(f32 *) (rec + 0x48)) * D_800BEDC8;
+                        *(f32 *) (rec + 0x110) = (*(f32 *) (rec + 0x34) - *(f32 *) (rec + 0x40)) * g_frame_step_inv;
+                        *(f32 *) (rec + 0x118) = (*(f32 *) (rec + 0x3C) - *(f32 *) (rec + 0x48)) * g_frame_step_inv;
                         effect3d_set_handlers(slot->rec, 0x10, 0x1B, 0, 0x10);
                         *(s32 *) (slot->rec + 0x58) |= 1;
                         slot->rec = NULL;
@@ -669,7 +669,7 @@ u8 *debris_fall_draw(u8 *arg0, s16 arg1) {
         temp_v1 = temp_t0 + &g_view_yaw_cos;
         temp_a0 = temp_t0 + &g_view_yaw_sin;
         var_f16 = -1.0f;
-        var_f14 = ((*temp_v1 * ((*(f32 *)((u8 *)arg0 + 0x40)) - (*(f32 *)((u8 *)arg0 + 0x34)))) - (*temp_a0 * ((*(f32 *)((u8 *)arg0 + 0x48)) - (*(f32 *)((u8 *)arg0 + 0x3C))))) * D_800BEDC8;
+        var_f14 = ((*temp_v1 * ((*(f32 *)((u8 *)arg0 + 0x40)) - (*(f32 *)((u8 *)arg0 + 0x34)))) - (*temp_a0 * ((*(f32 *)((u8 *)arg0 + 0x48)) - (*(f32 *)((u8 *)arg0 + 0x3C))))) * g_frame_step_inv;
         if (var_f14 < 0.0f) {
             var_f16 = 1.0f;
             var_f14 = -var_f14;

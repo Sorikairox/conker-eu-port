@@ -3,8 +3,8 @@
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
 extern s8 g_settings_time_limit; /* was D_800E1013 */
-extern f32 D_8009DD30;
-extern f32 D_8009DD34;
+extern f32 g_startpt_k_dd30; /* was D_8009DD30 */
+extern f32 g_startpt_k_dd34; /* was D_8009DD34 */
 f32 sinf(f32);
 f32 cosf(f32);
 void camera_set_initial_eye(u8 *arg0, u8 *arg1, f32 *arg2);
@@ -24,8 +24,8 @@ typedef struct {
 } struct_eu_B2980;
 
 
-extern s32 D_800875E0;
-extern u8 D_8009DD24;
+extern s32 g_type_model_group_lists; /* was D_800875E0 */
+extern u8 g_type_model_group_counts; /* was D_8009DD24 */
 
 /* was func_15085170 */
 u8 obj_type_model_group(u8 *arg0) {
@@ -38,13 +38,13 @@ u8 obj_type_model_group(u8 *arg0) {
     u8 temp_v1;
 
     temp_v1 = (*(u8 *)((u8 *)arg0 + 4));
-    var_a1 = &D_8009DD24;
+    var_a1 = &g_type_model_group_counts;
     var_v0 = 0;
 loop_1:
     temp_a2 = *var_a1;
     var_a0 = 0;
     if ((s32) temp_a2 > 0) {
-        temp_a3 = *(s32 *)((u8 *)&D_800875E0 + (var_v0 * 4));
+        temp_a3 = *(s32 *)((u8 *)&g_type_model_group_lists + (var_v0 * 4));
         var_t0 = temp_a3;
 loop_3:
         var_a0 += 1;
@@ -67,7 +67,7 @@ block_6:
 }
 /* Level start point lookup. Entries of g_start_points are 0x18 bytes: s16 x/y/z +0, u8 +6 / +7 (angle), f32 x3 +8,
  * u8 +0x14, s8 +0x15, s8 +0x16 (alias index). arg0 = player (0xFF: none), arg1 = start index (-1: the player's
- * saved one at rec+0x31C->+0x11B). Multiplayer (D_800BE616 && g_mp_respawning) picks the start farthest from the
+ * saved one at rec+0x31C->+0x11B). Multiplayer (g_mp_mode_active && g_mp_respawning) picks the start farthest from the
  * others. Returns 1 when there is no start table, else 0. arg9 is unused. */
 /* was func_150851E0 */
 s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8 *arg5, u8 *arg6, s32 *arg7, s32 *arg8,
@@ -83,7 +83,7 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
         save = 0;
         g_mp_respawning = 0;
     }
-    if (D_800BE616 != 0 && *(s8 *)(g_menu_state + 0x42) == 0 && g_settings_time_limit != 0) {
+    if (g_mp_mode_active != 0 && *(s8 *)(g_menu_state + 0x42) == 0 && g_settings_time_limit != 0) {
         save = 0;
     }
     if (arg0 != 0xFF) {
@@ -95,18 +95,18 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
         }
     }
     idx = arg1 & 0xFFF;
-    if (!(idx < D_800D2128) || idx < 0) {
+    if (!(idx < g_start_point_count) || idx < 0) {
         idx = 0;
     }
     tab = (u8 *)g_start_points;
     if (tab == NULL) {
         return 1;
     }
-    if (D_800BE616 != 0 && g_mp_respawning != 0) {
+    if (g_mp_mode_active != 0 && g_mp_respawning != 0) {
         u8 *rec = (u8 *)g_objects + arg0 * 0x32C;
         u8 team = rec[0x128];
         u8 *ctl = *(u8 **)(rec + 0x31C);
-        s32 mask = team ? D_800D2124 : D_800D2120;
+        s32 mask = team ? g_start_point_team_mask : g_start_point_mask;
         u8 list[0x20];
         s32 n = 0;
         s32 i;
@@ -114,7 +114,7 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
         f32 bestd = 0.0f;
         s8 cur;
 
-        for (i = 0; i < D_800D2128; i++) {
+        for (i = 0; i < g_start_point_count; i++) {
             if (mask & (1 << i)) {
                 list[n++] = i;
             }
@@ -130,7 +130,7 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
             if (cur == s) {
                 continue;
             }
-            d = D_8009DD30;
+            d = g_startpt_k_dd30;
             end = (u8 *)g_objects + g_player_count * 0x32C;
             for (o = (u8 *)g_objects; o < end; o += 0x32C) {
                 f32 dx, dz, q;
@@ -162,7 +162,7 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
     }
     v1 = idx;
     if (arg2 != 0 && (c = *(s8 *)(tab + idx * 0x18 + 0x16)) != 0) {
-        if (c == -1 || !(c < D_800D2128)) {
+        if (c == -1 || !(c < g_start_point_count)) {
             v1 = idx;
         } else {
             v1 = c;
@@ -191,8 +191,8 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
     *arg6 = e[7];
     *arg7 = e[0x14];
     *arg8 = *(s8 *)(e + 0x15);
-    if (D_800BE616 != 0 && g_mp_respawning == 0) {
-        f32 ang = ((f32)*arg6 * D_8009DD34) * 0.0078125f;
+    if (g_mp_mode_active != 0 && g_mp_respawning == 0) {
+        f32 ang = ((f32)*arg6 * g_startpt_k_dd34) * 0.0078125f;
         f32 r = random_float() * 80.0f - 40.0f;
         arg3[0] = (s16)(s32)((f32)arg3[0] + sinf(ang) * r);
         arg3[2] = (s16)(s32)((f32)arg3[2] + cosf(ang) * r);
@@ -276,7 +276,7 @@ void obj_place_at_start(void *arg0, s32 arg1, s32 arg2) {
         rec[0x83] = 0;
     } else {
         (*(u8 **)(rec + 0x31C))[0x23] = o64;
-        if (D_800BE616 != 0 && g_mp_respawning != 0) {
+        if (g_mp_mode_active != 0 && g_mp_respawning != 0) {
             obj_contact_pass(rec, idx);
         }
         ctl = *(u8 **)(rec + 0x31C);
@@ -292,12 +292,12 @@ void obj_place_at_start(void *arg0, s32 arg1, s32 arg2) {
     node_broadcast_all((s32)&msg, 4);
 }
 extern u16 g_mp_game_flags; /* was D_8009015C */
-extern s32 D_800D255C;
-extern s32 D_800D2560;
-extern s32 D_800D2564;
-extern s32 D_800D2565;
-extern s32 D_800D2566;
-extern s32 D_800D2568;
+extern s32 g_player_stats; /* was D_800D255C */
+extern s32 g_player_stats_w4; /* was D_800D2560 */
+extern s32 g_player_stats_health; /* was D_800D2564 */
+extern s32 g_player_stats_lives; /* was D_800D2565 */
+extern s32 g_player_stats_b0a; /* was D_800D2566 */
+extern s32 g_player_stats_cash; /* was D_800D2568 */
 extern s8 g_mp_match_over; /* was D_800E1050 */
 
 /* was func_15085710 */
@@ -313,13 +313,13 @@ void player_stat_modify(s16 arg0, s16 arg1, s32 arg2) {
     o = arg0 * 0x1C;
     e = (u8 *)&g_session_game_mode + o + 4;
     switch (arg1) {
-        case 0: *(s32 *)((u8 *)&D_800D255C + o) = arg2; return;
-        case 1: *(s32 *)((u8 *)&D_800D2560 + o) = arg2; return;
+        case 0: *(s32 *)((u8 *)&g_player_stats + o) = arg2; return;
+        case 1: *(s32 *)((u8 *)&g_player_stats_w4 + o) = arg2; return;
         case 2:
             if (g_mp_game_flags & 1) {
                 arg2 = 6;
             }
-            *((u8 *)&D_800D2564 + o) = arg2;
+            *((u8 *)&g_player_stats_health + o) = arg2;
             return;
         case 3:
             *(s8 *)(e + 8) = *(s8 *)(e + 8) + arg2;
@@ -331,7 +331,7 @@ void player_stat_modify(s16 arg0, s16 arg1, s32 arg2) {
                 *(s8 *)(e + 8) = *(s8 *)(e + 8) - arg2;
             }
             return;
-        case 5: *((u8 *)&D_800D2565 + o) = arg2; return;
+        case 5: *((u8 *)&g_player_stats_lives + o) = arg2; return;
         case 6:
             *(s8 *)(e + 9) = *(s8 *)(e + 9) + arg2;
             b = *(s8 *)(e + 9);
@@ -342,10 +342,10 @@ void player_stat_modify(s16 arg0, s16 arg1, s32 arg2) {
             b = *(s8 *)(e + 9);
             *(s8 *)(e + 9) = (b < 0) ? 0 : b;
             return;
-        case 8: *((u8 *)&D_800D2566 + o) = arg2; return;
-        case 9: *(s32 *)((u8 *)&D_800D2568 + o) = arg2; return;
+        case 8: *((u8 *)&g_player_stats_b0a + o) = arg2; return;
+        case 9: *(s32 *)((u8 *)&g_player_stats_cash + o) = arg2; return;
         case 10:
-            if (D_800BE616 != 0 && g_mp_match_over != 0) {
+            if (g_mp_mode_active != 0 && g_mp_match_over != 0) {
                 return;
             }
             *(s32 *)(e + 0xC) += arg2;
@@ -357,14 +357,14 @@ void player_stat_modify(s16 arg0, s16 arg1, s32 arg2) {
             return;
     }
 }
-extern s32 D_800D255C;          /* per-player records, 0x1C bytes each (fields at +0, +4, +8, +9, +0xA, +0xC) */
-extern s32 D_800D2560;
-extern s32 D_800D2564;
-extern s32 D_800D2565;
-extern s32 D_800D2566;
-extern s32 D_800D2568;
+extern s32 g_player_stats;          /* per-player records, 0x1C bytes each (fields at +0, +4, +8, +9, +0xA, +0xC); was D_800D255C */
+extern s32 g_player_stats_w4; /* was D_800D2560 */
+extern s32 g_player_stats_health; /* was D_800D2564 */
+extern s32 g_player_stats_lives; /* was D_800D2565 */
+extern s32 g_player_stats_b0a; /* was D_800D2566 */
+extern s32 g_player_stats_cash; /* was D_800D2568 */
 
-/* Query field `field` of player `player`'s record (0: the bit in D_800D2340). Players >= 0xFF give 0. */
+/* Query field `field` of player `player`'s record (0: the bit in g_player_active_mask). Players >= 0xFF give 0. */
 /* was func_150859AC */
 s32 player_stat_get(s16 player, s32 field) {
     s32 off = player * 0x1C;
@@ -374,19 +374,19 @@ s32 player_stat_get(s16 player, s32 field) {
     }
     switch ((s16)field) {
     case 0:
-        return (u16)D_800D2340 & (1 << player);
+        return (u16)g_player_active_mask & (1 << player);
     case 1:
-        return *(s32 *)((u8 *)&D_800D255C + off);
+        return *(s32 *)((u8 *)&g_player_stats + off);
     case 2:
-        return *(s32 *)((u8 *)&D_800D2560 + off);
+        return *(s32 *)((u8 *)&g_player_stats_w4 + off);
     case 3:
-        return *(s8 *)((u8 *)&D_800D2564 + off);
+        return *(s8 *)((u8 *)&g_player_stats_health + off);
     case 4:
-        return *(s8 *)((u8 *)&D_800D2565 + off);
+        return *(s8 *)((u8 *)&g_player_stats_lives + off);
     case 5:
-        return *(u8 *)((u8 *)&D_800D2566 + off);
+        return *(u8 *)((u8 *)&g_player_stats_b0a + off);
     case 6:
-        return *(s32 *)((u8 *)&D_800D2568 + off);
+        return *(s32 *)((u8 *)&g_player_stats_cash + off);
     }
     return 0; /* the asm returns whatever v0 held */
 }

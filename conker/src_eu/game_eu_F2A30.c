@@ -182,22 +182,22 @@ void scenery_vtx_scroll_update(u8 *arg0) {
     }
     segment_override_add(arg0, temp_v0_3, var_a2, 4, 5);
 }
-extern struct102 *D_800D9CF0[];
+extern struct102 *g_mist_puff_handles[]; /* was D_800D9CF0 */
 /* was func_150C572C */
 void fx_slots_9cf0_clear(void) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        if (D_800D9CF0[i] != 0) {
-            node_destroy(D_800D9CF0[i]);
+        if (g_mist_puff_handles[i] != 0) {
+            node_destroy(g_mist_puff_handles[i]);
         }
-        D_800D9CF0[i] = 0;
+        g_mist_puff_handles[i] = 0;
     }
 }
 
 /* was func_150C5780 */
 s32 cutscene_is_scene_b_to_d(void) {
-    if ((D_800C35EA == 1) && ((D_800C3A08 == 0xB) || (D_800C3A08 == 0xC) || (D_800C3A08 == 0xD))) {
+    if ((g_cutscene_slot_state == 1) && ((g_cutscene_scene == 0xB) || (g_cutscene_scene == 0xC) || (g_cutscene_scene == 0xD))) {
         return 1;
     }
     return 0;
@@ -210,7 +210,7 @@ s32 cutscene_gated_b148_call(s32 arg0) {
     if (cutscene_is_scene_b_to_d() != 0) {
         return 0;
     }
-    return D_8008B148(arg0);
+    return g_cutscene_gated_fn(arg0);
 }
 
 s32 cutscene_is_scene_b_to_d();

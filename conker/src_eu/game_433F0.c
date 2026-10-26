@@ -17,11 +17,11 @@ void mp_set_mode_for_level(s16 arg0, s32 arg1) {
     case 0x33:
     case 0x34:
     case 0x3F:
-        D_800BE616 = 1;
+        g_mp_mode_active = 1;
         g_view_count_minus1 = mp_human_player_count(arg0) - 1;
         return;
     default:
-        D_800BE616 = 0;
+        g_mp_mode_active = 0;
         g_view_count_minus1 = arg0 - 1;
         return;
     }

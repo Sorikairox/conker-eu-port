@@ -4,11 +4,11 @@
 #include "controller.h"
 
 
-extern s32 D_8002C160;          /* __osContinitialized */
-extern u64 D_8002C060;          /* osClockRate */
-extern u8 D_80042DE0;           /* __osContLastCmd */
-extern u8 D_80042DE1;           /* __osMaxControllers */
-extern OSPifRam D_80042DA0;     /* __osContPifRam */
+extern s32 g_os_cont_initialized;          /* __osContinitialized; was D_8002C160 */
+extern u64 g_os_clock_rate;          /* osClockRate; was D_8002C060 */
+extern u8 g_os_cont_last_cmd;           /* __osContLastCmd; was D_80042DE0 */
+extern u8 g_os_max_controllers;           /* __osMaxControllers; was D_80042DE1 */
+extern OSPifRam g_os_cont_pif_ram;     /* __osContPifRam; was D_80042DA0 */
 extern OSMesgQueue g_eep_timer_queue;  /* __osEepromTimerQ; was D_80042E08 */
 extern OSMesg g_eep_timer_msg;       /* __osEepromTimerMsg; was D_80042E20 */
 s32 os_si_raw_start_dma(s32, void *); /* __osSiRawStartDma */
@@ -24,31 +24,31 @@ s32 game_os_cont_init(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *data) {
     OSTimer mytimer;
     OSMesgQueue timerMesgQueue;
 
-    if (D_8002C160) {
+    if (g_os_cont_initialized) {
         return 0;
     }
-    D_8002C160 = TRUE;
+    g_os_cont_initialized = TRUE;
     t = osGetTime();
-    if (t < (500000ULL * D_8002C060) / 1000000ULL) {
+    if (t < (500000ULL * g_os_clock_rate) / 1000000ULL) {
         osCreateMesgQueue(&timerMesgQueue, &dummy, 1);
-        osSetTimer(&mytimer, (500000ULL * D_8002C060) / 1000000ULL - t, 0, &timerMesgQueue, &dummy);
+        osSetTimer(&mytimer, (500000ULL * g_os_clock_rate) / 1000000ULL - t, 0, &timerMesgQueue, &dummy);
         osRecvMesg(&timerMesgQueue, &dummy, OS_MESG_BLOCK);
     }
-    D_80042DE1 = 4;
+    g_os_max_controllers = 4;
     __osPackRequestData(0);
-    ret = os_si_raw_start_dma(OS_WRITE, &D_80042DA0);
+    ret = os_si_raw_start_dma(OS_WRITE, &g_os_cont_pif_ram);
     osRecvMesg(mq, &dummy, OS_MESG_BLOCK);
-    ret = os_si_raw_start_dma(OS_READ, &D_80042DA0);
+    ret = os_si_raw_start_dma(OS_READ, &g_os_cont_pif_ram);
     osRecvMesg(mq, &dummy, OS_MESG_BLOCK);
     __osContGetInitData(bitpattern, data);
-    D_80042DE0 = 0;
+    g_os_cont_last_cmd = 0;
     __osSiCreateAccessQueue();
     osCreateMesgQueue(&g_eep_timer_queue, &g_eep_timer_msg, 1);
     return ret;
 }
 
-extern u8 D_80042DE1;
-extern OSPifRam D_80042DA0;
+extern u8 g_os_max_controllers; /* was D_80042DE1 */
+extern OSPifRam g_os_cont_pif_ram; /* was D_80042DA0 */
 /* was func_151EFA48 */
 void game_os_cont_get_init_data(u8 *pattern, OSContStatus *data) {
     u8 *ptr;
@@ -57,8 +57,8 @@ void game_os_cont_get_init_data(u8 *pattern, OSContStatus *data) {
     u8 bits;
 
     bits = 0;
-    ptr = (u8 *)D_80042DA0.ramarray;
-    for (i = 0; i < D_80042DE1; i++, ptr += sizeof(requestformat), data++) {
+    ptr = (u8 *)g_os_cont_pif_ram.ramarray;
+    for (i = 0; i < g_os_max_controllers; i++, ptr += sizeof(requestformat), data++) {
         requestformat = *(__OSContRequesFormat *)ptr;
         data->errno = CHNL_ERR(requestformat);
         if (data->errno == 0) {

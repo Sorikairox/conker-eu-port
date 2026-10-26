@@ -1,4 +1,4 @@
-# P249 ambient_far_sound_update (ambient_far_sound_update): slot 1 = g_objects + 0x32C (EU 800CCA1C); D_800D9D10 (800D9D10) cooldown u8, g_frame_ticks = 800BEE04; random_int = jal 150ADF00, sound_source_mix = 100117C0 (OUTW pan), sound_play_2d = 10011220
+# P249 ambient_far_sound_update (ambient_far_sound_update): slot 1 = g_objects + 0x32C (EU 800CCA1C); g_ambient_cue_timer (800D9D10) cooldown u8, g_frame_ticks = 800BEE04; random_int = jal 150ADF00, sound_source_mix = 100117C0 (OUTW pan), sound_play_2d = 10011220
 far ! 0=1 ! 800BEE04=00000002,800CCA30=42700000,800CCA34=C29B0000,800CCA38=41200000,800D9D10=00000000 ! 150ADF00=12345;7 ! ! ! 100117C0=6:1234 !
 near ! 0=1 ! 800BEE04=00000002,800CCA30=42480000,800CCA34=C29B0000,800CCA38=41200000,800D9D10=00000000 ! 150ADF00=12345;7 ! ! ! 100117C0=6:1234 !
 cool ! 0=1 ! 800BEE04=00000002,800CCA30=42700000,800CCA38=41200000,800D9D10=09000000 ! ! ! ! !

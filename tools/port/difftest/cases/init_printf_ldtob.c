@@ -1,10 +1,10 @@
 /* P281: readable C for init_printf_ldtob (compiled C, 296 insns): libc _Ldtob. */
 #include "libc/stdlib.h"
 void *memcpy(void *, const void *, size_t);
-extern const f64 D_8002C270[];   /* powers of ten 1e1, 1e2, 1e4, 1e8, ..., 1e256 */
-extern const f64 D_8002C2C8;     /* 1e8 */
-extern const char D_8002C2B8[];  /* "NaN" */
-extern const char D_8002C2BC[];  /* "Inf" */
+extern const f64 g_printf_pow10[];   /* powers of ten 1e1, 1e2, 1e4, 1e8, ..., 1e256; was D_8002C270 */
+extern const f64 g_printf_k_1e8;     /* 1e8; was D_8002C2C8 */
+extern const char g_printf_str_nan[];  /* "NaN"; was D_8002C2B8 */
+extern const char g_printf_str_inf[];  /* "Inf"; was D_8002C2BC */
 s16 init_printf_ldunscale(s16 *arg0, struct05 *arg1);
 void init_printf_genld(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
 // format_double_digits (libc _Ldtob): converts the double in px->v for printf conversion `code` (e f g E G): default
@@ -39,7 +39,7 @@ void init_printf_ldtob(void *arg0, u8 code) {
     err = init_printf_ldunscale(&xexp, (struct05 *) px);
     if (err > 0) {
         px->n1 = 3;
-        memcpy(px->s, (err == 2) ? D_8002C2B8 : D_8002C2BC, 3);
+        memcpy(px->s, (err == 2) ? g_printf_str_nan : g_printf_str_inf, 3);
         return;
     }
     if (err == 0) {
@@ -55,7 +55,7 @@ void init_printf_ldtob(void *arg0, u8 code) {
             xexp = -n;
             for (i = 0; n > 0; n >>= 1, i++) {
                 if (n & 1) {
-                    val *= D_8002C270[i];
+                    val *= g_printf_pow10[i];
                 }
             }
         } else if (xexp > 0) {
@@ -63,7 +63,7 @@ void init_printf_ldtob(void *arg0, u8 code) {
             xexp &= ~3;
             for (n = xexp, i = 0; n > 0; n >>= 1, i++) {
                 if (n & 1) {
-                    factor *= D_8002C270[i];
+                    factor *= g_printf_pow10[i];
                 }
             }
             val /= factor;
@@ -76,7 +76,7 @@ void init_printf_ldtob(void *arg0, u8 code) {
         while (gen > 0 && 0.0 < val) {
             lo = val;
             if ((gen -= 8) > 0) {
-                val = (val - lo) * D_8002C2C8;
+                val = (val - lo) * g_printf_k_1e8;
             }
             p += 8;
             for (j = 8; lo > 0 && --j >= 0;) {

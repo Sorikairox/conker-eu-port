@@ -4,14 +4,14 @@
 // hoisted declarations of the NON_MATCHING bodies
 s32 breakable_slot_has_piece_flag(s32 arg0, s32 arg1);
 void breakable_release(s32 arg0);
-extern u8 D_80098CC4[];
+extern u8 g_breakable_piece_counts[]; /* was D_80098CC4 */
 
 
 void breakable_request_flags(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-extern s32 *D_800847FC[];
+extern s32 *g_breakable_flag_sets[]; /* was D_800847FC */
 
 /*
- * P71 (EU 0x1503E160): sets the flags of entry `entry` of flag set D_800847FC[set] on object obj's record
+ * P71 (EU 0x1503E160): sets the flags of entry `entry` of flag set g_breakable_flag_sets[set] on object obj's record
  * (breakable_request_flags with its slot index); entry -1 sets all bits.
  */
 /* was func_1503DE70 */
@@ -19,7 +19,7 @@ void breakable_request_flag_entry(struct127 *obj, s32 set, s32 entry) {
     s32 *e;
 
     if (entry != -1) {
-        e = &D_800847FC[set][entry * 2];
+        e = &g_breakable_flag_sets[set][entry * 2];
         breakable_request_flags(obj - g_objects, set, e[0], e[1]);
     } else {
         breakable_request_flags(obj - g_objects, set, -1, -1);
@@ -29,18 +29,18 @@ void breakable_request_flag_entry(struct127 *obj, s32 set, s32 entry) {
 /* was func_1503E1FC */
 void breakable_request_flags(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     struct106 *temp_v0;
-    temp_v0 = &D_800C6660[arg0];
+    temp_v0 = &g_breakable_slots[arg0];
     temp_v0->unk4 |= arg2;
     temp_v0->unk8 |= arg3;
     temp_v0->pad[2] = arg1;
     temp_v0->unkF = 2;
 }
 
-extern s8 *D_800847E4[];
-extern u8 D_80098CC4[];
-extern void (*D_800847C0[])(s32, s32);  /* per kind: piece init (pc, slot) */
-extern void (*D_800847CC[])(s32);       /* per kind: start (slot) */
-extern void (*D_800847D8[])(s32);       /* per kind: update (slot) */
+extern s8 *g_breakable_piece_parents[]; /* was D_800847E4 */
+extern u8 g_breakable_piece_counts[]; /* was D_80098CC4 */
+extern void (*g_breakable_init_fns[])(s32, s32);  /* per kind: piece init (pc, slot); was D_800847C0 */
+extern void (*g_breakable_start_fns[])(s32);       /* per kind: start (slot); was D_800847CC */
+extern void (*g_breakable_update_fns[])(s32);       /* per kind: update (slot); was D_800847D8 */
 s32 allocate_memory(s32, s32, s32, s32);
 s32 breakable_slot_has_piece_flag(s32 arg0, s32 arg1);
 void breakable_init_piece(s32 i, s32 piece, s32 jointOffset, u8 *pc, s32 detached);
@@ -48,17 +48,17 @@ void breakable_move_free_pieces(s32 i);
 void breakable_write_matrices(s32 i);
 
 /*
- * P74: per-frame breakable update of slot i (record D_800C6660[i], kind = byte 0xE, state = byte 0xF).
+ * P74: per-frame breakable update of slot i (record g_breakable_slots[i], kind = byte 0xE, state = byte 0xF).
  * State 2 (requested): object flag 0x80 at +0x74, and once the object has joint matrices (unk1D4) go on as state 3.
- * State 3 (break): allocate the D_80098CC4[kind] pieces (0x68 bytes, inactive) if needed (return if that fails),
+ * State 3 (break): allocate the g_breakable_piece_counts[kind] pieces (0x68 bytes, inactive) if needed (return if that fails),
  * initialise every piece that is not excluded (-2), whose flag bit is set on the slot (breakable_slot_has_piece_flag) and that is not
- * yet active, from its joint (breakable_init_piece, kind callback D_800847C0) and mark it active; then D_800847CC[kind] and
- * state 1. State 1 (running): D_800847D8[kind], then while the state stays non-zero move the pieces (breakable_move_free_pieces)
+ * yet active, from its joint (breakable_init_piece, kind callback g_breakable_init_fns) and mark it active; then g_breakable_start_fns[kind] and
+ * state 1. State 1 (running): g_breakable_update_fns[kind], then while the state stays non-zero move the pieces (breakable_move_free_pieces)
  * and rebuild their matrices (breakable_write_matrices).
  */
 /* was func_1503E238 */
 void breakable_update_slot(s32 i) {
-    struct106 *rec = &D_800C6660[i];
+    struct106 *rec = &g_breakable_slots[i];
     struct127 *obj;
     s32 state = rec->unkF;
     s32 n;
@@ -76,7 +76,7 @@ void breakable_update_slot(s32 i) {
         state = 3;
     }
     if (state == 3) {
-        n = D_80098CC4[(u8) rec->pad[2]];
+        n = g_breakable_piece_counts[(u8) rec->pad[2]];
         if (rec->unk0 == 0) {
             buf = (u8 *) allocate_memory(n * 0x68, 1, 0, 0);
             if (buf == NULL) {
@@ -87,7 +87,7 @@ void breakable_update_slot(s32 i) {
                 buf[k * 0x68 + 0x64] = 0;
             }
         }
-        att = D_800847E4[(u8) rec->pad[2]];
+        att = g_breakable_piece_parents[(u8) rec->pad[2]];
         for (k = 0; k < n; k++) {
             if (att[k] == -2) {
                 continue;
@@ -97,15 +97,15 @@ void breakable_update_slot(s32 i) {
                 continue;
             }
             breakable_init_piece(i, k, 0, pc, 0);
-            D_800847C0[(u8) rec->pad[2]]((s32) pc, i);
+            g_breakable_init_fns[(u8) rec->pad[2]]((s32) pc, i);
             pc[0x64] = 1;
         }
-        D_800847CC[(u8) rec->pad[2]](i);
+        g_breakable_start_fns[(u8) rec->pad[2]](i);
         rec->unkF = 1;
         state = 1;
     }
     if (state == 1) {
-        D_800847D8[(u8) rec->pad[2]](i);
+        g_breakable_update_fns[(u8) rec->pad[2]](i);
         if (rec->unkF != 0) {
             breakable_move_free_pieces(i);
             breakable_write_matrices(i);
@@ -113,17 +113,17 @@ void breakable_update_slot(s32 i) {
     }
 }
 
-extern s32 D_800C6A84;
-extern s32 D_800C6A88;
+extern s32 g_breakable_slots_flags_a; /* was D_800C6A84 */
+extern s32 g_breakable_slots_flags_b; /* was D_800C6A88 */
 /* was func_1503E4E4 */
 s32 breakable_slot_has_piece_flag(s32 arg0, s32 arg1)
 {
   if (arg0 < 0x20) {
-    if ((*(s32 *)((u8 *)&D_800C6A84 + arg1 * 0x10)) & (1 << arg0)) {
+    if ((*(s32 *)((u8 *)&g_breakable_slots_flags_a + arg1 * 0x10)) & (1 << arg0)) {
       return 1;
     }
   } else {
-    if ((*(s32 *)((u8 *)&D_800C6A88 + arg1 * 0x10)) & (1 << arg0)) {
+    if ((*(s32 *)((u8 *)&g_breakable_slots_flags_b + arg1 * 0x10)) & (1 << arg0)) {
       return 1;
     }
   }
@@ -131,7 +131,7 @@ s32 breakable_slot_has_piece_flag(s32 arg0, s32 arg1)
 }
 
 void heap_free(s32);
-extern s32 D_800847F0;
+extern s32 g_breakable_release_tables; /* was D_800847F0 */
 
 /* was func_1503E550 */
 void breakable_release(s32 arg0) {
@@ -146,12 +146,12 @@ void breakable_release(s32 arg0) {
     u8 temp_s6;
     u8 temp_v1;
 
-    temp_s7 = &D_800C6660[arg0];
+    temp_s7 = &g_breakable_slots[arg0];
     if (temp_s7->unkF != 0) {
         temp_v1 = (u8) temp_s7->pad[2];
-        temp_v0 = *(s32 *)((u8 *)&D_800847F0 + (temp_v1 * 4));
+        temp_v0 = *(s32 *)((u8 *)&g_breakable_release_tables + (temp_v1 * 4));
         if (temp_v0 != NULL) {
-            temp_s6 = D_80098CC4[temp_v1];
+            temp_s6 = g_breakable_piece_counts[temp_v1];
             var_s0 = 0;
             var_s1 = temp_v0;
             if ((s32) temp_s6 > 0) {
@@ -176,7 +176,7 @@ void breakable_release(s32 arg0) {
         temp_v0_3->unk74 &= 0xFF7F;
     }
 }
-extern s8 *D_800847E4[];
+extern s8 *g_breakable_piece_parents[]; /* was D_800847E4 */
 void math_mtx_affine_inverse(f32 arg0[4][4], f32 arg1[4][4]);
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 void mtxf_decompose(f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
@@ -184,7 +184,7 @@ void mtxf_decompose(f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 
 /*
  * P74: initialises breakable piece pc (0x68 bytes; piece number `piece`) of slot i from object i's joint matrix
  * unk1D4[piece + jointOffset]: made relative to its parent piece's matrix (inverse, math_mtx_affine_inverse) unless `detached`
- * is set or the piece has no parent (D_800847E4[kind][piece] == -1); decomposed (mtxf_decompose) into
+ * is set or the piece has no parent (g_breakable_piece_parents[kind][piece] == -1); decomposed (mtxf_decompose) into
  * position +0x00, angles +0x0C, scale +0x18, copied to the rest pose +0x24..+0x44; +0x48 = unit vector from the
  * object's position (30 units up) to the piece (a zero distance counts as 1).
  */
@@ -204,7 +204,7 @@ void breakable_init_piece(s32 i, s32 piece, s32 jointOffset, u8 *pc, s32 detache
     if (detached != 0) {
         parent = -1;
     } else {
-        parent = D_800847E4[(u8) D_800C6660[i].pad[2]][piece];
+        parent = g_breakable_piece_parents[(u8) g_breakable_slots[i].pad[2]][piece];
     }
     if (parent != -1) {
         math_mtx_affine_inverse((f32 (*)[4]) ((u8 *) obj->unk1D4 + parent * 0x40), inv);
@@ -299,14 +299,14 @@ void mtxf_decompose(f32 *m, f32 *x, f32 *y, f32 *z, f32 *rx, f32 *ry, f32 *rz, f
     *rz = az * 57.295776f;
 }
 
-extern s8 *D_800847E4[];
-extern u8 D_80098CC4[];
+extern s8 *g_breakable_piece_parents[]; /* was D_800847E4 */
+extern u8 g_breakable_piece_counts[]; /* was D_80098CC4 */
 void mtxf_translate(u8 *, s32, s32, s32);
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 
 /*
  * P74: matrices of slot i's breakable pieces into object i's joint matrices (unk1D4, one f32 4x4 per piece).
- * Pieces marked -2 in D_800847E4[kind] and inactive pieces (+0x64 == 0) are skipped. A free piece (-1) gets
+ * Pieces marked -2 in g_breakable_piece_parents[kind] and inactive pieces (+0x64 == 0) are skipped. A free piece (-1) gets
  * rotation (+0x30..+0x38) then scale (+0x3C..+0x44) and translation (+0x24..+0x2C) by mtxf_scale_set_trans. A piece attached
  * to piece `parent` gets translate(+0x24..) * parent's matrix, then its rotation, times that, then scale
  * (mtxf_scale) times the result. The translate / scale helpers take the floats as bit patterns.
@@ -326,9 +326,9 @@ void breakable_write_matrices(s32 i) {
     if (obj->unk1D4 == NULL) {
         return;
     }
-    rec = &D_800C6660[i];
-    att = D_800847E4[(u8) rec->pad[2]];
-    n = D_80098CC4[(u8) rec->pad[2]];
+    rec = &g_breakable_slots[i];
+    att = g_breakable_piece_parents[(u8) rec->pad[2]];
+    n = g_breakable_piece_counts[(u8) rec->pad[2]];
     for (k = 0; k < n; k++) {
         if (att[k] == -2) {
             continue;
@@ -337,7 +337,7 @@ void breakable_write_matrices(s32 i) {
         if (pc[0x64] == 0) {
             continue;
         }
-        parent = D_800847E4[(u8) rec->pad[2]][k];
+        parent = g_breakable_piece_parents[(u8) rec->pad[2]][k];
         m = (f32 (*)[4]) ((u8 *) obj->unk1D4 + k * 0x40);
         if (parent != -1) {
             mtxf_translate((u8 *) tmp, *(s32 *) (pc + 0x24), *(s32 *) (pc + 0x28), *(s32 *) (pc + 0x2C));
@@ -357,26 +357,26 @@ void breakable_write_matrices(s32 i) {
     }
 }
 
-extern s8 *D_800847E4[];
-extern u8 D_80098CC4[];
+extern s8 *g_breakable_piece_parents[]; /* was D_800847E4 */
+extern u8 g_breakable_piece_counts[]; /* was D_80098CC4 */
 
 /*
- * P74: advances the free pieces of slot i's breakable (D_800C6660[i].unk0: D_80098CC4[kind] pieces of 0x68 bytes,
+ * P74: advances the free pieces of slot i's breakable (g_breakable_slots[i].unk0: g_breakable_piece_counts[kind] pieces of 0x68 bytes,
  * kind = record byte 0xE) by one frame of g_frame_ticks ticks: a piece that is active (+0x64) and not attached
- * (D_800847E4[kind][piece] == -1) moves its 6 floats +0x24..+0x38 by the rates +0x48..+0x5C; the rate +0x4C
+ * (g_breakable_piece_parents[kind][piece] == -1) moves its 6 floats +0x24..+0x38 by the rates +0x48..+0x5C; the rate +0x4C
  * itself changes by +0x60 (gravity) after it is used.
  */
 /* was func_1503ED44 */
 void breakable_move_free_pieces(s32 i) {
-    struct106 *rec = &D_800C6660[i];
+    struct106 *rec = &g_breakable_slots[i];
     f32 dt = g_frame_ticks;
-    s32 n = D_80098CC4[(u8) rec->pad[2]];
+    s32 n = g_breakable_piece_counts[(u8) rec->pad[2]];
     s32 k;
     u8 *pc;
 
     for (k = 0; k < n; k++) {
         pc = (u8 *) rec->unk0 + k * 0x68;
-        if (pc[0x64] == 0 || D_800847E4[(u8) rec->pad[2]][k] != -1) {
+        if (pc[0x64] == 0 || g_breakable_piece_parents[(u8) rec->pad[2]][k] != -1) {
             continue;
         }
         *(f32 *) (pc + 0x24) += *(f32 *) (pc + 0x48) * dt;
@@ -389,7 +389,7 @@ void breakable_move_free_pieces(s32 i) {
     }
 }
 
-extern f32 D_80098CD4;
+extern f32 g_breakable_k_8cd4; /* was D_80098CD4 */
 /* was func_1503EE68 */
 void breakable_scatter_pieces(s32 arg0, f32 arg1, f32 arg2, s32 arg3) {
     struct {
@@ -435,10 +435,10 @@ void breakable_scatter_pieces(s32 arg0, f32 arg1, f32 arg2, s32 arg3) {
         var_s0_2 += 4;
         (*(f32 *)((u8 *)var_s0_2 + 0x50)) = (f32) ((f32) (s32) ((random_int() & 0xFF) - 0x80) * 0.03125f);
     } while (var_s2 != 3);
-    *(f32 *)((u8 *)arg0 + 0x60) = D_80098CD4;
+    *(f32 *)((u8 *)arg0 + 0x60) = g_breakable_k_8cd4;
 }
-extern s8 *D_800847E4[];
-extern u8 D_80098CC4[];
+extern s8 *g_breakable_piece_parents[]; /* was D_800847E4 */
+extern u8 g_breakable_piece_counts[]; /* was D_80098CC4 */
 void collision_select_area(s32);
 s32 collision_level_nearest_height(s32, s32, s32, s32 *);
 
@@ -457,11 +457,11 @@ void breakable_pieces_ground_collide(s32 i) {
     f32 floor;
 
     collision_select_area(0);
-    rec = &D_800C6660[i];
-    n = D_80098CC4[(u8) rec->pad[2]];
+    rec = &g_breakable_slots[i];
+    n = g_breakable_piece_counts[(u8) rec->pad[2]];
     for (k = 0; k < n; k++) {
         pc = (u8 *) rec->unk0 + k * 0x68;
-        if (pc[0x64] == 0 || D_800847E4[(u8) rec->pad[2]][k] != -1) {
+        if (pc[0x64] == 0 || g_breakable_piece_parents[(u8) rec->pad[2]][k] != -1) {
             continue;
         }
         if (*(f32 *) (pc + 0x60) == 0.0f) {
@@ -502,7 +502,7 @@ void breakable_cb_fall_then_remove(s32 arg0) {
     struct106 *temp_v1;
 
     breakable_pieces_ground_collide(arg0);
-    temp_v1 = &D_800C6660[arg0];
+    temp_v1 = &g_breakable_slots[arg0];
     temp_v0 = *(s16 *)((u8 *)temp_v1 + 0xC);
     temp_v0 = temp_v0 - g_frame_ticks; // fakematch: split load/subtract (permuter) gives the ref register order
     (*(s16 *)((u8 *)temp_v1 + 0xC)) = temp_v0;
@@ -511,27 +511,27 @@ void breakable_cb_fall_then_remove(s32 arg0) {
     }
 }
 
-extern s32 *D_800847FC[];
+extern s32 *g_breakable_flag_sets[]; /* was D_800847FC */
 
 /*
- * P71: entry (flagsA, flagsB) of flag set D_800847FC[set] is satisfied by object slot i when every non-zero word
- * shares a bit with the slot's flags D_800C6A84 / D_800C6A88 (the +4 / +8 words of its 16-byte record, as in
+ * P71: entry (flagsA, flagsB) of flag set g_breakable_flag_sets[set] is satisfied by object slot i when every non-zero word
+ * shares a bit with the slot's flags g_breakable_slots_flags_a / g_breakable_slots_flags_b (the +4 / +8 words of its 16-byte record, as in
  * breakable_slot_has_piece_flag). Returns 1 / 0.
  */
 /* was func_1503F23C */
 s32 breakable_flag_entry_matches(s32 set, s32 entry, s32 i) {
-    s32 *e = &D_800847FC[set][entry * 2];
+    s32 *e = &g_breakable_flag_sets[set][entry * 2];
 
-    if (e[0] != 0 && !(e[0] & *(s32 *) ((u8 *) &D_800C6A84 + i * 0x10))) {
+    if (e[0] != 0 && !(e[0] & *(s32 *) ((u8 *) &g_breakable_slots_flags_a + i * 0x10))) {
         return 0;
     }
-    if (e[1] != 0 && !(e[1] & *(s32 *) ((u8 *) &D_800C6A88 + i * 0x10))) {
+    if (e[1] != 0 && !(e[1] & *(s32 *) ((u8 *) &g_breakable_slots_flags_b + i * 0x10))) {
         return 0;
     }
     return 1;
 }
 
-extern u8 D_80098CC4[];
+extern u8 g_breakable_piece_counts[]; /* was D_80098CC4 */
 
 /* was func_1503F2B4 */
 void breakable_cb_init_random_spin(s32 arg0) {
@@ -539,9 +539,9 @@ void breakable_cb_init_random_spin(s32 arg0) {
     s32 n;
     s32 i;
 
-    p = &D_800C6660[arg0];
+    p = &g_breakable_slots[arg0];
     *(s16 *)&p->pad[0] = 0x78;
-    n = D_80098CC4[(u8)p->pad[2]];
+    n = g_breakable_piece_counts[(u8)p->pad[2]];
     for (i = 0; i < n; i++) {
         *(f32 *)(p->unk0 + i * 0x68 + 0x4C) = (s32)(random_int() % 20U) - 5;
     }
@@ -562,15 +562,15 @@ void breakable_cb_scatter_c(s32 arg0, s32 arg1) {
     breakable_scatter_pieces(arg0, 2.06f, 3.0f, 1);
 }
 
-extern s32 D_800CC784;
+extern s32 g_objects_unk94; /* was D_800CC784 */
 
 /* was func_1503F3F8 */
 void breakable_cb_init_timer140(s32 arg0) {
     struct106 *temp_v0;
 
-    temp_v0 = &D_800C6660[arg0];
+    temp_v0 = &g_breakable_slots[arg0];
     (*(s16 *)((u8 *)temp_v0 + 0xC)) = 0x8C;
-    *(s32 *)((u8 *)&D_800CC784 + (arg0 * 0x32C)) = 6;
+    *(s32 *)((u8 *)&g_objects_unk94 + (arg0 * 0x32C)) = 6;
     (*(f32 *)((u8 *)(temp_v0->unk0) + 0x1EC)) = 10.0f;
 }
 
@@ -583,7 +583,7 @@ s32 breakable_flag_entry_matches(s32, s32, s32);
  */
 /* was func_1503F45C */
 void breakable_cb_init_flags(s32 i) {
-    *(s16 *) ((u8 *) &D_800C6660[i] + 0xC) = 300;
+    *(s16 *) ((u8 *) &g_breakable_slots[i] + 0xC) = 300;
     if (breakable_flag_entry_matches(2, 0, i) != 0) {
         g_objects[i].unk94 |= 0x40;
         g_objects[i].unk94 &= ~0x200;
@@ -608,7 +608,7 @@ void breakable_cb_settle(s32 arg0) {
     struct127 *temp_v0_4;
 
     breakable_pieces_ground_collide(arg0);
-    temp_v0 = &D_800C6660[arg0];
+    temp_v0 = &g_breakable_slots[arg0];
     (*(s16 *)((u8 *)temp_v0 + 0xC)) = (s16) ((*(s16 *)((u8 *)temp_v0 + 0xC)) - g_frame_ticks);
     if ((*(s16 *)((u8 *)temp_v0 + 0xC)) <= 0) {
         breakable_release(arg0);
@@ -632,7 +632,7 @@ void mtxf_decompose(f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 
 /* was func_1503F6F4 */
 void mtx_decompose(Mtx *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 *arg7, f32 *arg8, f32 *arg9) {
     f32 sp30[16];
-    if (D_800C42B0 != 0) {
+    if (g_mtx_fixed_point != 0) {
         guMtxL2F((f32 (*)[4]) sp30, arg0);
     } else {
         memcpy(sp30, arg0, 0x40);

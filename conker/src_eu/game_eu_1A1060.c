@@ -47,7 +47,7 @@ s32 fog_identity_stub(s32 arg0, s32 arg1)
 
 s8 fog_level_preset_get(s32 arg0);
 extern s32 g_fog_state;          /* current fog/colour state: c[4] at +0, then halfwords at +4..+0x10; was D_800DD714 */
-extern s16 D_800DD718, g_fog_state_v3, D_800DD71C, g_fog_state_v1, g_fog_blend_t; /* was D_800DD71A; was D_800DD71E; was D_800DD720 */
+extern s16 g_fog_near, g_fog_state_v3, g_fog_far, g_fog_state_v1, g_fog_blend_t; /* was D_800DD71A; was D_800DD71E; was D_800DD720; was D_800DD718; was D_800DD71C */
 extern u16 g_fog_state_width, g_fog_state_height; /* was D_800DD722; was D_800DD724 */
 
 /* Blend fog/colour preset `from` toward `to` by t/4096 into slot `dest` of g_fog_presets (or, for -1, the current
@@ -72,9 +72,9 @@ s32 fog_blend_presets(s32 from, s32 to, s32 arg2, s32 t, s32 dest) {
     g_fog_blend_t = t;
     if (dest == -1) {
         out = (u8 *)&g_fog_state;
-        v0 = &D_800DD71C;
+        v0 = &g_fog_far;
         v1 = &g_fog_state_v1;
-        v2 = &D_800DD718;
+        v2 = &g_fog_near;
         v3 = &g_fog_state_v3;
         pa = (s16 *)&g_fog_state_width;
         pb = (s16 *)&g_fog_state_height;

@@ -11,8 +11,8 @@ void collision_noop(s32 arg0) {
 
 /* was func_150039BC */
 void collision_set_tri_flags_table(s32 arg0) {
-    D_800DBE5C = arg0;
-    if (D_800DBE5C) {
-        D_800DBE5C += 8;
+    g_coll_tri_flags = arg0;
+    if (g_coll_tri_flags) {
+        g_coll_tri_flags += 8;
     }
 }

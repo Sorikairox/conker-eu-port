@@ -3,8 +3,8 @@
 #include "variables.h"
 
 
-extern f32 D_800A0480;
-extern f32 D_800A0484;
+extern f32 g_seat_cam_speed_348; /* was D_800A0480 */
+extern f32 g_seat_cam_speed_374; /* was D_800A0484 */
 s32 event_dispatch(s32, s32, ...);
 
 /* was func_150BED50 */
@@ -21,16 +21,16 @@ void player_seat_camera_update(struct108 *arg0) {
             camera_init_controller(arg0);
         }
         if (camera_push_mode(arg0, 8, 0, arg0->unk134, 3) != 0) {
-            camera_set_followed_obj(arg0, D_800CC335 - 1);
+            camera_set_followed_obj(arg0, g_objects_parent_slot - 1);
             temp_t0 = arg0->unk84 | 0x01000200;
             arg0->unk84 = temp_t0;
             arg0->unk73C = 0;
             arg0->unk84 = temp_t0 & ~4;
             arg0->unk674 = 0.0f;
         }
-        arg0->unk348 = D_800A0480;
-        arg0->unk34C = D_800A0480;
-        arg0->unk374 = D_800A0484;
+        arg0->unk348 = g_seat_cam_speed_348;
+        arg0->unk34C = g_seat_cam_speed_348;
+        arg0->unk374 = g_seat_cam_speed_374;
         arg0->unk190 = 0.0f;
         camera_calc_relative_yaw(arg0);
         return;

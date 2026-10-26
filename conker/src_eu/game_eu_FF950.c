@@ -6,10 +6,10 @@ extern u8 g_vec3_zero[]; /* was D_800A5860 */
 
 
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-extern f32 D_800A0CC0[6][3];  /* beam end points (beam space) */
+extern f32 g_beam_ray_ends[6][3];  /* beam end points (beam space); was D_800A0CC0 */
 
 // beam_rays_update: obj + 0x28 is the source point, +0x34 the beam position (moved by its velocity +0x40 x
-// g_frame_step_f), +0x4C six ray parts. While obj + 0x6C bit 0 is set, each ray's end D_800A0CC0[i] is moved to the
+// g_frame_step_f), +0x4C six ray parts. While obj + 0x6C bit 0 is set, each ray's end g_beam_ray_ends[i] is moved to the
 // beam's position (mtxf_rotate_xyz_deg / mtxf_transform_point) and traced from the source (collision_ray_cast): on a hit the part's
 // sprite (+0x14) is shown at the hit point with alpha +0x64 x hit fraction, otherwise it is hidden. Without the bit
 // every ray sprite is hidden.
@@ -33,7 +33,7 @@ void beam_rays_update(u8 *obj) {
             if (part == NULL) {
                 continue;
             }
-            mtxf_transform_point(mtx, D_800A0CC0[i][0], D_800A0CC0[i][1], D_800A0CC0[i][2], &end[0], &end[1], &end[2]);
+            mtxf_transform_point(mtx, g_beam_ray_ends[i][0], g_beam_ray_ends[i][1], g_beam_ray_ends[i][2], &end[0], &end[1], &end[2]);
             if (collision_ray_cast(*(f32 *) (obj + 0x28), *(f32 *) (obj + 0x2C), *(f32 *) (obj + 0x30), end[0], end[1],
                               end[2], 0, NULL, &hit[0], &hit[1], &hit[2], &frac, 0, 0, 0.0f) != 0) {
                 (*(u8 **) (part + 0x14))[9] = 0;

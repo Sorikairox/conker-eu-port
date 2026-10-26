@@ -8,8 +8,8 @@ s/    want = ((u8 \*) rec)\[0x2F\];/    want = ((u8 *) rec)[0x2E];/
 s/    self = ((u8 \*) obj)\[0x124\] - 1;/    self = ((u8 *) obj)[0x124];/
 s/    best = 10000.0f;/    best = 1000.0f;/
 s/    c = -(nx/    c = (nx/
-s/    for (i = 0; i < D_800D27B8; i++) {/    for (i = 1; i < D_800D27B8; i++) {/
-s/    for (i = 0; i < D_800D27B8; i++) {/    for (i = 0; i <= D_800D27B8; i++) {/
+s/    for (i = 0; i < g_rail_human_count; i++) {/    for (i = 1; i < g_rail_human_count; i++) {/
+s/    for (i = 0; i < g_rail_human_count; i++) {/    for (i = 0; i <= g_rail_human_count; i++) {/
 s/        if (self == id) {/        if (0) {/
 s/        if (want != 0 \&\& want != (s8) ((u8 \*) other)\[0x2F\]) {/        if (want != (s8) ((u8 *) other)[0x2F]) {/
 s/        if (want != 0 \&\& want != (s8) ((u8 \*) other)\[0x2F\]) {/        if (want != 0 \&\& want == (s8) ((u8 *) other)[0x2F]) {/

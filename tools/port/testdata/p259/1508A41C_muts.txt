@@ -10,7 +10,7 @@ s/slots\[i\] == 3 ||/slots[i] == 2 ||/ % slot3 slot2
 s/slots\[i\] == 3 || // % slot3
 s/!(mask \& bit)/0/ % maskoff
 s/(bit << 16)/(bit << 15)/ % pmaskoff pmasklow
-s/D_800D27D0 + player \* 4 + 0x16C0/D_800D27D0 + 0x16C0/ % p1
+s/g_race_state + player \* 4 + 0x16C0/g_race_state + 0x16C0/ % p1
 s/scale = 6.2831855f/scale = 6.28318f/ % p1 mid
 s/g_objects\[player\].x_position - obj->x_position/g_objects[player].x_position + obj->x_position/ % midoff
 s/dz = g_objects\[player\].z_position/dz = g_objects[0].z_position/ % midoff

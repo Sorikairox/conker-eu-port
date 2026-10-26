@@ -1,10 +1,10 @@
 /* P69 runtime checks of port P65 / port-b P67 C (link-time wraps; only cross-TU calls are seen).
- *  ?p69attach=N  attachment_update_all (attachment list D_800C3EE0, game_eu_5D910.c): on the first call the callback table
- *                D_80084550[1..24] as loaded (wasm table index, registered signature, port_n64_to_wasm of the ROM
+ *  ?p69attach=N  attachment_update_all (attachment list g_attachment_list, game_eu_5D910.c): on the first call the callback table
+ *                g_attachment_cb_fns[1..24] as loaded (wasm table index, registered signature, port_n64_to_wasm of the ROM
  *                word: they must be equal), then the list (model, callback, sub-model, timer, mtx, target) whenever
  *                its shape changes, for the first N changes.
  *  ?p69look=N    look_aim_head_eyes (head / eye aim, called by obj_update_one): record, id, mode +0x276, timer +0x282,
- *                angles +0x27A..+0x280 before -> after, look target D_800C4408 and the call counter D_800C441A
+ *                angles +0x27A..+0x280 before -> after, look target g_look_target_point and the call counter g_look_cb_calls
  *                (written by look_frame_cb_current): first N calls, then every 128th and every angle change of record 0
  *                (first 200).
  *  ?p69tri=N     model_build_collision_tables (per-model triangle tables, called by model_load / model_make_ready): id -> result.
@@ -21,10 +21,10 @@ void port_log(const char *fmt, ...);
 const char *port_fsig_of(void *fp);
 extern unsigned port_frame_count;
 extern unsigned char g_objects[]; /* was D_800CC2D0 */
-extern unsigned char D_80084550_[] __asm__("D_80084550");
-extern unsigned char D_800C3EE0_[] __asm__("D_800C3EE0");
-extern unsigned char D_800C4408_[] __asm__("D_800C4408");
-extern unsigned char D_800C441A_[] __asm__("D_800C441A");
+extern unsigned char D_80084550_[] __asm__("g_attachment_cb_fns"); /* was D_80084550 */
+extern unsigned char D_800C3EE0_[] __asm__("g_attachment_list"); /* was D_800C3EE0 */
+extern unsigned char D_800C4408_[] __asm__("g_look_target_point"); /* was D_800C4408 */
+extern unsigned char D_800C441A_[] __asm__("g_look_cb_calls"); /* was D_800C441A */
 extern unsigned char D_800DD280_[] __asm__("g_node_lists"); /* was D_800DD280 */
 static unsigned w_n;
 /* ?p69stub=MASK DIAGNOSTIC (bisecting the respawn hang): skip the game C like the old asm stubs did: 1 face_anim_start,

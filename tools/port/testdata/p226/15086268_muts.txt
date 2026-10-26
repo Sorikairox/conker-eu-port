@@ -2,13 +2,13 @@ s/    f32 best = 1e8f;/    f32 best = 1e7f;/ % far
 s/    if (kind == 0) {/    if (kind == 1) {/ % kind0_walls kind1
 s/    kind = (s8) kind;/    ;/ % kind_hi
 s/    band = (s8) band;/    band = (u8) band;/ % band_s8
-s/    if (D_8008763C != 0xFF) {/    if (D_8008763C != 0xFE) {/ % cached_fe
+s/    if (g_rail_last_node != 0xFF) {/    if (g_rail_last_node != 0xFE) {/ % cached_fe
 1,/dx = p->unk0 - x;/s/        dx = p->unk0 - x;/        dx = p->unk2 - x;/ % cached_far
 s/        if (!walls || rail_wall_hit(x, y, z, dx, dz) < 0.0f) {/        if (rail_wall_hit(x, y, z, dx, dz) < 0.0f) {/ % cached
 s/        if (!walls || rail_wall_hit(x, y, z, dx, dz) < 0.0f) {/        if (!walls || rail_wall_hit(x, y, z, dx, dy) < 0.0f) {/ % cached_free
 s/            best = dx \* dx + dy \* dy + dz \* dz + 10.0f;/            best = dx * dx + dy * dy + dz * dz + 1.0f;/ % cached_bar
-s/        D_8008763C = 0xFF;/        ;/ % cached
-s/    for (i = 0; i < D_80087630; i++) {/    for (i = 1; i < D_80087630; i++) {/ % first
+s/        g_rail_last_node = 0xFF;/        ;/ % cached
+s/    for (i = 0; i < g_rail_node_count; i++) {/    for (i = 1; i < g_rail_node_count; i++) {/ % first
 s/        if (band != p->pad6 \&\& band != -1) {/        if (band != p->pad6) {/ % any
 s/        if (band != p->pad6 \&\& band != -1) {/        if (band == p->pad6 \&\& band != -1) {/ % band1
 s/        if (kind != p->pad8\[6\] \&\& kind != -1) {/        if (kind != p->pad8[7] \&\& kind != -1) {/ % kind2
@@ -21,5 +21,5 @@ s/        if (d < best \&\& (!walls || rail_wall_hit(x, y, z, dx, dz) < 0.0f)) {
 s/        if (d < best \&\& (!walls || rail_wall_hit(x, y, z, dx, dz) < 0.0f)) {/        if (d < best \&\& (!walls || rail_wall_hit(x, y, z, dz, dx) < 0.0f)) {/ % kind0_free
 s/            best = d;/            ;/ % any
 s/            res = i;/            res = i + 1;/ % any
-s/    D_800D277C = sqrtf(best);/    D_800D277C = best;/ % band1
+s/    g_rail_route_dist = sqrtf(best);/    g_rail_route_dist = best;/ % band1
 s/    return res;/    return res \& 3;/ % far

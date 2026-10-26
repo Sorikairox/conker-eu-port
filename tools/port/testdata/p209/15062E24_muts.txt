@@ -1,4 +1,4 @@
-s/if (D_800C6360\[type\] == 0) {/if (D_800C6360[type] != 0) {/ %
+s/if (g_model_vtx_ptr_tables\[type\] == 0) {/if (g_model_vtx_ptr_tables[type] != 0) {/ %
 s/i < 25; i++/i < 4; i++/ %
 s/\*(s32 \*) o == 0 || //  %
 s/type != \*((u8 \*) o + 4) || //  %

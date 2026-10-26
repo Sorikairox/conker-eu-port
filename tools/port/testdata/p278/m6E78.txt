@@ -1,35 +1,35 @@
 \#^    if (rec\[0\] == 1) {$#s/1/3/
 \#^    if (rec\[0\] == 2) {$#s/2/3/
 \#^    u8 \*rec = #s/0x24/0x20/
-\#^        D_800D31D8 = cam#s/unk2C0/unk2BC/
-\#^        D_800D2DB4 = 1;#s/1/2/
+\#^        g_camera_timed_saved_2c0 = cam#s/unk2C0/unk2BC/
+\#^        g_camera_timed_active = 1;#s/1/2/
 \#^        g_camera_timers\[rec\[1\]\] = 3;#s/3/2/
 \#^        mk = #s/rec\[2\]/rec[1]/
-\#^        ((s32 \*) D_800C3A20)\[1\] = 0;#s/0;/1;/
-\#^        D_800C3A20\[6\] = #s/mk + 2/mk + 4/
-\#^        D_800C3A20\[7\] = #s/(f32) \*(s16 \*)/(f32) *(u16 *)/ % s1neg
-\#^        D_800C3A20\[8\] = #s/0x14/0x10/
-\#^        D_800C3A20\[2\] = 0\.0f;#s/0\.0f/1.0f/
+\#^        ((s32 \*) g_camera_event_params)\[1\] = 0;#s/0;/1;/
+\#^        g_camera_event_params\[6\] = #s/mk + 2/mk + 4/
+\#^        g_camera_event_params\[7\] = #s/(f32) \*(s16 \*)/(f32) *(u16 *)/ % s1neg
+\#^        g_camera_event_params\[8\] = #s/0x14/0x10/
+\#^        g_camera_event_params\[2\] = 0\.0f;#s/0\.0f/1.0f/
 \#^        camera_queue_event(cam, 5, NULL);#s/5/4/
-\#^        camera_queue_event(cam, 7, #s/D_800C3A20/NULL/
+\#^        camera_queue_event(cam, 7, #s/g_camera_event_params/NULL/
 \#^        if (!(\*(s32 \*) (rec + 0xC) & 1)) {#s/& 1/\& 2/
 \#^            \*((u8 \*) cam->unk3D0 + 7) = 0;#s/= 0/= 1/
 \#^            \*(s32 \*) ((u8 \*) cam->unk3D0 + 0x25C) |= 0x200;#s/0x200/0x400/
-\#^        D_800D3250\[idx\] = #s/(s32)/(u32)/
+\#^        g_camera_timed_push\[idx\] = #s/(s32)/(u32)/
 \#^        rec\[0\] = 2;#s/2/3/
 \#^        return 1;$#s/1/0/
-\#^        \*(s16 \*) (rec + 4) -= D_800BE9A0;#s/-=/+=/
+\#^        \*(s16 \*) (rec + 4) -= g_frame_delta;#s/-=/+=/
 \#^        if (\*((u8 \*) cam->unk3D0 + 0x1CA) == 0) {#s/==/!=/
 \#^        if (\*(s16 \*) (rec + 4) > 0) {#s/> 0/>= 0/
 \#^        if (\*(s16 \*) (rec + 4) > 0) {#s/s16/u16/
 \#^        \*(f32 \*) ((u8 \*) cam + 0x3A4) = #s/0x20/0x10/
 \#^        if (!(\*(s32 \*) (rec + 0xC) & 2)) {#s/& 2/\& 1/
 \#^            camera_queue_event(cam, 6, NULL);#s/6/5/
-\#^        D_800D2DB4 = 0;#s/0;/1;/
+\#^        g_camera_timed_active = 0;#s/0;/1;/
 \#^            \*(s32 \*) ((u8 \*) cam->unk3D0 + 0x25C) &= ~0x200;#s/~0x200/~0x400/
 \#^            \*((u8 \*) cam->unk3D0 + 7) = 0xFF;#s/0xFF/0xFE/
 \#^        \*(s16 \*) (rec + 4) = 0;$#s/0;/1;/
 \#^        rec\[0\] = 0;#s/0;/1;/
-\#^        cam->unk2C0 = D_800D31D8;#s/unk2C0/unk2BC/
+\#^        cam->unk2C0 = g_camera_timed_saved_2c0;#s/unk2C0/unk2BC/
 \#^        return 0;$#s/0/1/
 \#^    return 1;$#s/1/0/

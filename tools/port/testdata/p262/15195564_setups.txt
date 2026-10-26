@@ -1,4 +1,4 @@
-# P262 character_hit_react (character_hit_react): obj 80410000 (id +4 in word +4 top byte, +0x124 byte), target 80420000 (id +4, +0x31C 80440000); D_800BE616 EU 800BEA36 (word 800BEA34 bits 8-15), g_objects EU 800CC6F0; EU jal bone_sparks_detach_owner 15190A88, bone_sparks_attach_preset 1518FA8C, memcpy 10023360 (ARGMEM 1:12 knob)
+# P262 character_hit_react (character_hit_react): obj 80410000 (id +4 in word +4 top byte, +0x124 byte), target 80420000 (id +4, +0x31C 80440000); g_mp_mode_active EU 800BEA36 (word 800BEA34 bits 8-15), g_objects EU 800CC6F0; EU jal bone_sparks_detach_owner 15190A88, bone_sparks_attach_preset 1518FA8C, memcpy 10023360 (ARGMEM 1:12 knob)
 plain ! 0=80410000,1=80420000,2=1 ! 80420004=58000000,800BEA34=00000000,8042031C=80440000 ! 1518FA8C=80430000 ! ! ! !
 attach ! 0=80410000,1=80420000,2=1 ! 80410004=10000000,80420004=00000000,800BEA34=00000100,8042031C=80440000 ! 1518FA8C=80430000 ! ! ! !
 player ! 0=80410000,1=80420000,2=1 ! 80410004=FF000000,80410124=03000000,80420004=9D000000,800BEA34=00000100,8042031C=80440000 ! 1518FA8C=80430000 ! ! ! !

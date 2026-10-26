@@ -79,12 +79,12 @@ void camera_update_eye_base(struct108 *arg0) {
     camera_update_state_flags(arg0);
     if (!(*(s32 *)(p + 0x84) & 0x10)) {
         t = *(u8 **)(p + 0x3D0);
-        if (t[0x102] == 0 && D_800C3671 == 0 && p[0x92C] == 0 && *(f32 *)(t + 0x17C) < A390_F(0x35C)) {
+        if (t[0x102] == 0 && g_cutscene_restart_transition == 0 && p[0x92C] == 0 && *(f32 *)(t + 0x17C) < A390_F(0x35C)) {
             camera_snap_to_object(arg0, (struct127 *)t);
         }
     }
     if (A390_F(0x35C) == -10000.0f) {
-        if (D_800BE616 != 0) {
+        if (g_mp_mode_active != 0) {
             A390_F(0x35C) = *(f32 *)(*(u8 **)(p + 0x3D0) + 0x180);
         } else {
             A390_F(0x35C) = 10000.0f;
@@ -105,7 +105,7 @@ void camera_update_eye_base(struct108 *arg0) {
         A390_F(0x354) = f;
         A390_F(0x35C) = f;
     }
-    if (D_800C3671 != 0 || *(u16 *)(p + 0x7F4) != 0) {
+    if (g_cutscene_restart_transition != 0 || *(u16 *)(p + 0x7F4) != 0) {
         f = *(f32 *)(t + 0x180);
         A390_F(0x354) = f;
         A390_F(0x35C) = f;
@@ -129,7 +129,7 @@ void camera_update_eye_base(struct108 *arg0) {
                 A390_F(0x354) = g;
             }
         }
-    } else if (D_800C3671 == 0) {
+    } else if (g_cutscene_restart_transition == 0) {
         flags = *(s32 *)(p + 0x84);
         if (!(flags & 0x20000000)) {
             if (flags & 0x10000000) {
@@ -364,7 +364,7 @@ void freecam_auto_update(u8 *arg0) {
     s32 temp_v0_3;
 
     temp_v0 = (*(s32 *)((u8 *)arg0 + 0x2C));
-    if ((temp_v0 & ~0x100) && (g_game_paused == 0) && (D_800C3671 == 0)) {
+    if ((temp_v0 & ~0x100) && (g_game_paused == 0) && (g_cutscene_restart_transition == 0)) {
         if (temp_v0 != 0x40) {
             temp_v0_2 = (*(s32 *)((u8 *)arg0 + 0x84));
             if ((temp_v0_2 & 8) && !(temp_v0_2 & 0x200) && ((*(u8 *)((u8 *)arg0 + 0x23C)) == 0)) {
@@ -595,12 +595,12 @@ s32 freecam_turn(u8 *cam, f32 *turn, f32 *unused) {
  * (+0x94C width, +0x950 height) is picked from the situation and eased into +0x95C / +0x960 (math_spring_approach,
  * speeds +0x954 / +0x958; set at once while +0x23C is set). A probe object (struct127, type 0x2D, camera
  * = this one) at the eye (+0x2F8; y raised by +0x18C with flag 0x800 of +0x5F0) is moved by collision_obj_walls
- * from the previous eye (+0x304) with the collision globals g_wall_coll_no_floor_skip..F4 and D_800894C0[1..2] set for the
+ * from the previous eye (+0x304) with the collision globals g_wall_coll_no_floor_skip..F4 and g_coll_area_enabled[1..2] set for the
  * call and restored after it. The probe's final position is the new eye (y not in mode 0x100);
  * +0x3E8 = no collision, +0x26C eases to 1.0 (0.1 per frame) or drops to 0.005 on a hit. After a hit the
  * eye is kept 40 above the floor below it (collision_find_floor_no_fallback), except in level 0x1B and mode 0x100.
  * Always ends with camera_update_state_flags (state flags). The asm leaves v0 undefined: void under NM. */
-extern u8 D_800894C0[];
+extern u8 g_coll_area_enabled[]; /* was D_800894C0 */
 extern u8 g_wall_coll_no_floor_skip; /* was D_800CC1F2 */
 extern u8 g_wall_coll_soft_edges; /* was D_800CC1F3 */
 extern u8 g_wall_coll_no_clamp; /* was D_800CC1F4 */
@@ -615,8 +615,8 @@ void camera_eye_collision(struct108 *arg0) {
     u8 *target = *(u8 **)(p + 0x3D4);
     u8 *followed;
     s32 small = FALSE;    /* t3: the size used is the small "close" one */
-    s32 savedSlide;       /* D_800894C0[2] */
-    s32 savedStep;        /* D_800894C0[1] */
+    s32 savedSlide;       /* g_coll_area_enabled[2] */
+    s32 savedStep;        /* g_coll_area_enabled[1] */
     s32 saved1F3;
     s32 saved1F4;
     s32 hit;
@@ -628,8 +628,8 @@ void camera_eye_collision(struct108 *arg0) {
         camera_update_state_flags(arg0);
         return;
     }
-    savedSlide = D_800894C0[2];
-    savedStep = D_800894C0[1];
+    savedSlide = g_coll_area_enabled[2];
+    savedStep = g_coll_area_enabled[1];
 
     /* collision size */
     if (C080_W(0x5F0) & 0x800) {
@@ -692,10 +692,10 @@ void camera_eye_collision(struct108 *arg0) {
     probe.unk40 = C080_F(0x37C);
 
     if ((C080_W(0x84) & 0x80000000) || g_level_id == 0x37) {
-        D_800894C0[2] = 0;
+        g_coll_area_enabled[2] = 0;
     }
     if (C080_W(0x84) & 0x10000) {
-        D_800894C0[1] = 0;
+        g_coll_area_enabled[1] = 0;
     }
     g_wall_coll_no_floor_skip = 1;
     saved1F3 = g_wall_coll_soft_edges;
@@ -706,8 +706,8 @@ void camera_eye_collision(struct108 *arg0) {
     g_wall_coll_no_clamp = saved1F4;
     g_wall_coll_no_floor_skip = 0;
     g_wall_coll_soft_edges = saved1F3;
-    D_800894C0[2] = savedSlide;
-    D_800894C0[1] = savedStep;
+    g_coll_area_enabled[2] = savedSlide;
+    g_coll_area_enabled[1] = savedStep;
 
     if (hit != 0) {
         p[0x3E8] = 0;

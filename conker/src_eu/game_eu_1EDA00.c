@@ -383,7 +383,7 @@ s32 projectile_fire(struct127 *obj, struct127 *target, s32 *arg2, u8 arg3, u8 ar
     s32 trace;
     u8 *particle;
 
-    if (D_800BE616 != 0) {
+    if (g_mp_mode_active != 0) {
         if (W(obj, 0x1D4) != 0) {
             gun_muzzle_point_get((u8 *)obj, (u8 *)pos);
         } else {
@@ -839,7 +839,7 @@ void muzzle_flash_light_spawn(u8 *arg0, u8 arg1, s32 arg2) {
 s32 obj_not_listed_check();
 
 /* P159 */
-// object_filter_not_listed: target filter 3 of D_80087030 (objects_hit_by_segment, ray_cast_world): returns obj_not_listed_check's
+// object_filter_not_listed: target filter 3 of g_ray_filter_fns (objects_hit_by_segment, ray_cast_world): returns obj_not_listed_check's
 // result (the N64 code leaves it in v0; the matching C is void, which breaks a call through the s32 table on wasm).
 /* was func_151C1EF0 */
 s32 object_filter_not_listed(s32 arg0, s32 arg1, s32 *arg2) {

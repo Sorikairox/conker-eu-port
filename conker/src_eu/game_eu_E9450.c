@@ -783,7 +783,7 @@ void cam_shake_all_players(struct17 *, f32, f32, f32, s16, s32, s32);
 void *memcpy(void *, const void *, s32);
 
 /* rodata of blast_debris_and_smoke (bit-exact copies: the NM link drops this file's .rodata / .late_rodata) */
-static const u8 sBlastCyl[2] = { 0x4C, 0x4D };             /* D_800A0260: the two D_800D34B8 cylinders */
+static const u8 sBlastCyl[2] = { 0x4C, 0x4D };             /* D_800A0260: the two g_level_zones cylinders; was D_800D34B8 */
 static const f32 sBlastSpinBase[1] = { -22.733002f };     /* D_800A02CC 0xC1B5DD30 */
 static const f32 sBlastSpinRange[1] = { 45.466003f };     /* D_800A02D0 0x4235DD30 */
 static const f32 sBlastSizeRange[1] = { 0.24700001f };    /* D_800A02D4 0x3E7CED92 */
@@ -864,8 +864,8 @@ void blast_debris_and_smoke(u8 arg0, s32 owner) {
     s32 i;
     u8 *p;
 
-    cyl[0] = D_800D34B8 + sBlastCyl[0] * 0x34;
-    cyl[1] = D_800D34B8 + sBlastCyl[1] * 0x34;
+    cyl[0] = g_level_zones + sBlastCyl[0] * 0x34;
+    cyl[1] = g_level_zones + sBlastCyl[1] * 0x34;
 
     /* debris */
     n = random_int() % 9U + 13;

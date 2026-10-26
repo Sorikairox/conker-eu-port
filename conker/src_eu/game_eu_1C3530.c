@@ -2899,7 +2899,7 @@ s32 emitter2_trail_update(u8 *obj) {
                 spec.p1[1] = spec.p0[1] + seg.unk4;
                 spec.p1[2] = spec.p0[2] + seg.unk8;
                 spec.frame = (u32)random_int() % (u32)(st[0x89] + 1) + st[0x88];
-                spark = effect3d_spawn_full(&spec, (s32)&D_800A4AA0, 0x1F, 0x22, 0, 0x1A, (random_int() & 1) | 2, 0, 0,
+                spark = effect3d_spawn_full(&spec, (s32)&g_effect3d_default_params, 0x1F, 0x22, 0, 0x1A, (random_int() & 1) | 2, 0, 0,
                                       0x2C, obj[0xC], obj[1]);
                 if (spark != NULL) {
                     memcpy(spark + 0x110, &mot, 0x2C);
@@ -2990,7 +2990,7 @@ static const f32 sEmit2CullFar[1] = { 20000.0f }; /* D_800A8ED4 */
 // emitter2_flame_draw: entry 12 of g_fxrec_draw_fns (`s32 (u8 *, s32 gfx, s16 slot)`) for the emitter2 e updated by
 // emitter2_flame_update (ring of 0x28-byte Emitter2Point at e +0x94, e[0x25] entries, tail +0x2D, head +0x2E, count +0x2C;
 // record rec = e +0x98). Returns gfx unchanged with fewer than 2 points, when hidden (rec flags 0x20 and 0x10 while
-// D_800BE616 is 0), when rec flag 1 is set and the box around the newest and oldest points (centre = midpoint,
+// g_mp_mode_active is 0), when rec flag 1 is set and the box around the newest and oldest points (centre = midpoint,
 // radius = their horizontal distance, half height |dy| + 2 * rec +0x2C) is outside view `slot` (camera_view_test_sphere with
 // g_player_cams + slot * 0x180, g_view_mtxf + slot * 0x40, far 20000), or without a vertex buffer (vtx_slot_buffer_get, 0x20
 // bytes per point + 0xA0). Sets texture g_emitter2_flame_tex (0x6B), geometry 0x200005 / 0x1F0600, combine 0x4C and render
@@ -3030,7 +3030,7 @@ s32 emitter2_flame_draw(u8 *e, s32 gfxArg, s16 slot) {
     }
     rec = *(Emitter2Record **) (e + 0x98);
     pts = *(Emitter2Point **) (e + 0x94);
-    if ((rec->flags & 0x20) && D_800BE616 == 0 && (rec->flags & 0x10)) {
+    if ((rec->flags & 0x20) && g_mp_mode_active == 0 && (rec->flags & 0x10)) {
         return (s32) gfx;
     }
     if (rec->flags & 1) {
@@ -3328,13 +3328,13 @@ s32 line_particle_move_drag(u8 *arg0) {
             (*(f32 *)((u8 *)temp_v0 + 0x14)) = (f32) ((*(f32 *)((u8 *)temp_v0 + 0x14)) * temp_f12_2);
         } while (var_v1 > 0);
     }
-    temp_f8 = ((*(f32 *)((u8 *)temp_v0 + 0x10)) - sp.u40) * D_800BEDC8;
+    temp_f8 = ((*(f32 *)((u8 *)temp_v0 + 0x10)) - sp.u40) * g_frame_step_inv;
     sp28 = temp_f8;
-    sp2C = ((*(f32 *)((u8 *)temp_v0 + 0x14)) - sp.u44) * D_800BEDC8;
-    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((sp.u48 * g_frame_step_f) + (0.5f * (((*(f32 *)((u8 *)temp_v0 + 0)) - sp.u48) * D_800BEDC8) * temp_f0)));
-    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((sp.u4C * g_frame_step_f) + (0.5f * (((*(f32 *)((u8 *)temp_v0 + 4)) - sp.u4C) * D_800BEDC8) * temp_f0)));
-    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((sp.u50 * g_frame_step_f) + (0.5f * (((*(f32 *)((u8 *)temp_v0 + 8)) - sp.u50) * D_800BEDC8) * temp_f0)));
-    (*(f32 *)((u8 *)arg0 + 0x40)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x40)) + ((sp.u3C * g_frame_step_f) + (0.5f * (((*(f32 *)((u8 *)temp_v0 + 0xC)) - sp.u3C) * D_800BEDC8) * temp_f0)));
+    sp2C = ((*(f32 *)((u8 *)temp_v0 + 0x14)) - sp.u44) * g_frame_step_inv;
+    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((sp.u48 * g_frame_step_f) + (0.5f * (((*(f32 *)((u8 *)temp_v0 + 0)) - sp.u48) * g_frame_step_inv) * temp_f0)));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((sp.u4C * g_frame_step_f) + (0.5f * (((*(f32 *)((u8 *)temp_v0 + 4)) - sp.u4C) * g_frame_step_inv) * temp_f0)));
+    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((sp.u50 * g_frame_step_f) + (0.5f * (((*(f32 *)((u8 *)temp_v0 + 8)) - sp.u50) * g_frame_step_inv) * temp_f0)));
+    (*(f32 *)((u8 *)arg0 + 0x40)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x40)) + ((sp.u3C * g_frame_step_f) + (0.5f * (((*(f32 *)((u8 *)temp_v0 + 0xC)) - sp.u3C) * g_frame_step_inv) * temp_f0)));
     (*(f32 *)((u8 *)arg0 + 0x44)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x44)) + ((sp.u40 * g_frame_step_f) + (0.5f * temp_f8 * temp_f0)));
     (*(f32 *)((u8 *)arg0 + 0x48)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x48)) + ((sp.u44 * g_frame_step_f) + (0.5f * sp2C * temp_f0)));
     return 1;

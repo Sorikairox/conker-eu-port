@@ -25,7 +25,7 @@
 /impact_spark_spawn((struct17 \*) &a, v, 0.0f/s/1.9f/2.0f/
 /(u32) y . 3 + 4, 0, 1.0f, 1.0f, 1, type, 0, 0x10, 0xF, 0, kind, owner/s/0x10, 0xF/0xF, 0x10/
 /(u32) y . 3 + 4, 0, 1.0f, 1.0f, 1, type, 0, 0x10, 0xF, 0, kind, owner/s/1.0f, 1.0f, 1/1.0f, 2.0f, 1/
-/if (!splash || !D_800BE616) {/s/!D_800BE616/D_800BE616/
+/if (!splash || !g_mp_mode_active) {/s/!g_mp_mode_active/g_mp_mode_active/
 /for (n = (random_int() & 3) + 3; n != 0; n--) {/s/+ 3/+ 2/
 /vec2_from_angle_byte(x & 0xFF, random_float() \* 140.0f/s/140.0f/141.0f/
 /if (collision_ray_cast(b.x, b.y, b.z, dir.x/s/b.y, b.z/b.z, b.y/

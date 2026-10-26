@@ -16,7 +16,7 @@ void camera_push_preset(struct108 *, s32);
 f32 sinf(f32);
 f32 cosf(f32);
 f32 sqrtf(f32);
-extern u8 *D_800DC450;   /* camera position records, 0x18 bytes each (s16 x, y, z first) */
+extern u8 *g_camera_fixed_pos_records;   /* camera position records, 0x18 bytes each (s16 x, y, z first); was D_800DC450 */
 extern u8 *g_camera_fixed_pos_cur;   /* the record of the current fixed position; was D_800DC454 */
 
 #define EF(o) (*(f32 *)(p + (o)))
@@ -48,10 +48,10 @@ extern u8 *g_camera_fixed_pos_cur;   /* the record of the current fixed position
  * 0x100 or 0x40000 or +0x73C. A new id restarts it (state +6 = 0, flag +0x92C = 0, channels C/D/2/7 cleared);
  * when +0x6CC is set and nothing is pending or easing, the mode is applied:
  *  4: hold (+0x272 = -1, +0x6C8 = 1, copy +0x1B4 / +0x1E0);
- *  7: follow the camera node graph (D_800D2778, 16-byte nodes, links at +9..+13): the eye (+0x2F8/2FC/300) is
+ *  7: follow the camera node graph (g_rail_nodes, 16-byte nodes, links at +9..+13): the eye (+0x2F8/2FC/300) is
  *     moved toward the closest point of the node's links (eased with math_spring_approach at rates +0x908 / +0x90C unless
  *     +0x23C snaps); flags from the argument (+0x920): 0x10 keeps x/z, 8 keeps the height (cam +0x2FC);
- *  5: fixed position record D_800DC450[A] (argument 5 / 0x11: jump there once, camera_snap_to_object);
+ *  5: fixed position record g_camera_fixed_pos_records[A] (argument 5 / 0x11: jump there once, camera_snap_to_object);
  *  0xB: store A / B / argument as floats in state +0x24..+0x2C;
  *  0xA / 0xE: look at object obj_find_by_spawn(setup_entry_find_by_id(A low byte)) (target +0x618, 0xE via camera_set_followed_obj);
  *  0xF: camera_orbit_point_init; 3: look at the request point; 2 / 1 / 0: keep distance A from the target, pushing the eye
@@ -127,7 +127,7 @@ void camera_apply_request(struct108 *arg0) {
             return;
         }
         if (mode == 7) {
-            node = (u8 *)D_800D2778 + rail_node_nearest(EF(0x2F8), EF(0x2FC), EF(0x300), 7, 0) * 16;
+            node = (u8 *)g_rail_nodes + rail_node_nearest(EF(0x2F8), EF(0x2FC), EF(0x300), 7, 0) * 16;
             bestD = 1e14f;
             if (ES32(0x2C) & 0x100) {
                 return;
@@ -139,7 +139,7 @@ void camera_apply_request(struct108 *arg0) {
             for (i = 0; i != 5; i++) {
                 l = node[9 + i];
                 if (l != 0xFF) {
-                    link = (u8 *)D_800D2778 + l * 16;
+                    link = (u8 *)g_rail_nodes + l * 16;
                     linkPos[0] = *(s16 *)(link + 0);
                     linkPos[1] = *(s16 *)(link + 2);
                     linkPos[2] = *(s16 *)(link + 4);
@@ -241,7 +241,7 @@ void camera_apply_request(struct108 *arg0) {
             if (RQ_ARG == 5 || RQ_ARG == 0x11) {
                 if ((s32)RQ_A != ES16(0x272)) {
                     ES16(0x272) = RQ_A;
-                    g_camera_fixed_pos_cur = D_800DC450 + ES16(0x272) * 0x18;
+                    g_camera_fixed_pos_cur = g_camera_fixed_pos_records + ES16(0x272) * 0x18;
                     EF(0x278) = RQ_B;
                     EF(0x288) = *(s16 *)(g_camera_fixed_pos_cur + 0);
                     EF(0x28C) = *(s16 *)(g_camera_fixed_pos_cur + 2);
@@ -255,7 +255,7 @@ void camera_apply_request(struct108 *arg0) {
                 }
             } else {
                 ES16(0x272) = RQ_A;
-                g_camera_fixed_pos_cur = D_800DC450 + ES16(0x272) * 0x18;
+                g_camera_fixed_pos_cur = g_camera_fixed_pos_records + ES16(0x272) * 0x18;
                 EF(0x288) = *(s16 *)(g_camera_fixed_pos_cur + 0);
                 EF(0x28C) = *(s16 *)(g_camera_fixed_pos_cur + 2);
                 EF(0x290) = *(s16 *)(g_camera_fixed_pos_cur + 4);

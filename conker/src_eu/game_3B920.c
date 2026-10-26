@@ -74,7 +74,7 @@ void level_objects_init(s32 arg0) {
 //     D_800E0934 = 0;
 //     g_world_obj_hit_cb = 0;
 //     D_8008CD00 = 0;
-//     D_80088B60 = 0;
+//     g_beam_free_fns = 0;
 //     D_800BE4E0 = 0;
 //     // is this handwritten?
 //     g_level_proj_mode = level_get_proj_mode();

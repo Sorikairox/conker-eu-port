@@ -12,11 +12,11 @@ void face_anim_start(struct127 *obj, u8 anim, u8 prio, u16 time, s32 arg4);
 
 
 /* P48: eye blink of object obj (+0x6A / +0x6B eyelid states, +0x6E countdown in frames of g_frame_ticks). Id 0x2B
- * and D_800C35EA == 1: nothing. A player-controlled object whose controller +0x120 is set keeps both eyes at 1.
+ * and g_cutscene_slot_state == 1: nothing. A player-controlled object whose controller +0x120 is set keeps both eyes at 1.
  * When the countdown runs out (and +0x6C != 1) both states toggle; reopened eyes wait 10 + random % 140. */
 /* was func_1507E690 */
 void face_eye_blink_update(u8 *obj) {
-    if (obj[4] == 0x2B || D_800C35EA == 1) {
+    if (obj[4] == 0x2B || g_cutscene_slot_state == 1) {
         return;
     }
     if (obj[0x127] != 0xFF && (*(u8 **)(obj + 0x31C))[0x120] != 0) {
@@ -117,7 +117,7 @@ void face_anim_play_body(s32, s32, s32);
 /* Apply the current animation (+0x6F) of `obj`: its entry (face_anim_entry_get) gives a model / frame pair for
  * face_anim_play_body (entry +4 / +6), the animation set (+0x134, with +0x135 = `variant`, or the entry's default +3 when
  * `variant` is 0, only when the set changes), two bytes +0x6C / +0x6D = entry +0 / +1 plus 10, and +0x68 / +0x69
- * from entry +8 / +9, or the object type's defaults (D_800D1C90[id] +0x3B / +0x3C) when those are 0. */
+ * from entry +8 / +9, or the object type's defaults (g_type_descs[id] +0x3B / +0x3C) when those are 0. */
 /* was func_1507E9A8 */
 void face_anim_apply(struct127 *obj, s32 variant) {
     u8 *entry = (u8 *) face_anim_entry_get((s32) obj, obj->unk6F);
@@ -140,12 +140,12 @@ void face_anim_apply(struct127 *obj, s32 variant) {
     if (entry[8] != 0) {
         obj->unk68 = entry[8];
     } else {
-        obj->unk68 = ((u8 *) D_800D1C90[obj->id])[0x3B];
+        obj->unk68 = ((u8 *) g_type_descs[obj->id])[0x3B];
     }
     if (entry[9] != 0) {
         obj->unk69 = entry[9];
     } else {
-        obj->unk69 = ((u8 *) D_800D1C90[obj->id])[0x3C];
+        obj->unk69 = ((u8 *) g_type_descs[obj->id])[0x3C];
     }
 }
 
@@ -258,7 +258,7 @@ void face_anim_start(struct127 *obj, u8 anim, u8 prio, u16 time, s32 arg4) {
 s32 face_anim_entry_get(s32 arg0, s32 arg1) {
     s32 *p;
     s32 v;
-    p = (s32 *)D_800D1C90[obj_current_part_model(arg0)];
+    p = (s32 *)g_type_descs[obj_current_part_model(arg0)];
     if (p != NULL) {
         p -= 2;
         v = *p;
@@ -289,7 +289,7 @@ u32 face_anim_count(s32 arg0)
   {
     return 0;
   }
-  p = (s32 *) D_800D1C90[arg0];
+  p = (s32 *) g_type_descs[arg0];
   r = 0;
   if (p != 0)
   {
@@ -308,7 +308,7 @@ s32 *face_anim_body_table(s32 arg0, s32 *arg1) {
         if (arg1 != NULL) {
             *arg1 = 5;
         }
-        return &D_8009DCE0;
+        return &g_face_anim_default_body;
     }
     if (arg1 != NULL) {
         *arg1 = 0;
@@ -316,14 +316,14 @@ s32 *face_anim_body_table(s32 arg0, s32 *arg1) {
     return NULL;
 }
 
-extern f32 D_8009BC70;
+extern f32 g_face_anim_k_bc70; /* was D_8009BC70 */
 /* was func_1507EE24 */
 void face_anim_play_body(s32 arg0, s32 arg1, s32 arg2) {
     s32 temp_v0;
     if (arg1 != 0) {
         temp_v0 = face_anim_body_table(arg0, 0);
         if (temp_v0 != 0) {
-            obj_setup_run((struct127 *) arg0, (s32) (*(u8 *)(arg1 + temp_v0 - 1)), (f32) arg2 * D_8009BC70, 0);
+            obj_setup_run((struct127 *) arg0, (s32) (*(u8 *)(arg1 + temp_v0 - 1)), (f32) arg2 * g_face_anim_k_bc70, 0);
         }
     }
 }

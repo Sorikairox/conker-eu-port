@@ -51,7 +51,7 @@ s32 cs_overlay_create_bars(void);
 
 /* was func_150B70A0 */
 void cs_overlay_update(s32 arg0) {
-    switch (D_800D9CB0) {
+    switch (g_cs_overlay_cmd) {
     case 1:
         cs_overlay_reset();
         return;
@@ -87,56 +87,56 @@ void cs_overlay_update(s32 arg0) {
 extern s32 g_view_count_minus1; /* was D_800BEE08 */
 void *screen_tint_create(s32, s32, s32, s32, s32, s32, u8, s32);
 
-// hud_box_reset: removes the old box object D_800D9CB4 (node_destroy), creates a new one (screen_tint_create(0, 0, 0xFF,
-// 0, 0, g_view_count_minus1, 0, 0)), sets state D_800D9CB0 = 3 and clears the 10 words D_800D9CB8.
+// hud_box_reset: removes the old box object g_cs_overlay_tint (node_destroy), creates a new one (screen_tint_create(0, 0, 0xFF,
+// 0, 0, g_view_count_minus1, 0, 0)), sets state g_cs_overlay_cmd = 3 and clears the 10 words g_cs_overlay_fx.
 /* was func_150B7170 */
 void cs_overlay_reset(void) {
     s32 i;
 
-    if (D_800D9CB4 != 0) {
-        node_destroy((struct102 *) D_800D9CB4);
+    if (g_cs_overlay_tint != 0) {
+        node_destroy((struct102 *) g_cs_overlay_tint);
     }
-    D_800D9CB4 = (s32) screen_tint_create(0, 0, 0xFF, 0, 0, g_view_count_minus1, 0, 0);
-    D_800D9CB0 = 3;
+    g_cs_overlay_tint = (s32) screen_tint_create(0, 0, 0xFF, 0, 0, g_view_count_minus1, 0, 0);
+    g_cs_overlay_cmd = 3;
     for (i = 0; i < 10; i++) {
-        D_800D9CB8[i] = 0;
+        g_cs_overlay_fx[i] = 0;
     }
 }
 
-extern s32 D_800D9CC4;
+extern s32 g_cs_overlay_fx_3; /* was D_800D9CC4 */
 
 /* was func_150B7214 */
 s32 cs_overlay_mark_boxes_closing(void) {
     s32 *var_v1;
     s32 temp_v0;
 
-    var_v1 = D_800D9CB8;
+    var_v1 = g_cs_overlay_fx;
     do {
         temp_v0 = var_v1[5];
         var_v1 = (s32 *)((u8 *)var_v1 + (4));
         if (temp_v0 != 0) {
             (*(s32 *)((u8 *)temp_v0 + 0x20)) = 1;
         }
-    } while (var_v1 != &D_800D9CC4);
-    D_800D9CB0 = 3;
+    } while (var_v1 != &g_cs_overlay_fx_3);
+    g_cs_overlay_cmd = 3;
     return temp_v0;
 }
 /* was func_150B7258 */
 s32 cs_overlay_destroy_all(void) {
     struct102 **p;
 
-    if (*(struct102 **)&D_800D9CB4 != NULL) {
-        node_destroy(*(struct102 **)&D_800D9CB4);
-        *(struct102 **)&D_800D9CB4 = NULL;
+    if (*(struct102 **)&g_cs_overlay_tint != NULL) {
+        node_destroy(*(struct102 **)&g_cs_overlay_tint);
+        *(struct102 **)&g_cs_overlay_tint = NULL;
     }
-    p = (struct102 **)D_800D9CB8; do { // fakematch: same-line `do` sets the s0/s1 addiu order
+    p = (struct102 **)g_cs_overlay_fx; do { // fakematch: same-line `do` sets the s0/s1 addiu order
         if (*p != NULL) {
             node_destroy(*p);
             *p = NULL;
         }
         p++;
-    } while (p != (struct102 **)D_800D9CE0);
-    D_800D9CB0 = 3;
+    } while (p != (struct102 **)g_cs_overlay_fx_end);
+    g_cs_overlay_cmd = 3;
 }
 
 /* was func_150B72DC */
@@ -147,7 +147,7 @@ void overlay_fx_scroll_update(u8 *arg0) {
     }
 }
 
-extern s32 D_80091CC8;
+extern s32 g_cs_overlay_img_pulse; /* was D_80091CC8 */
 
 /* was func_150B731C */
 void overlay_fx_pulse_update(u8 *arg0) {
@@ -183,7 +183,7 @@ void overlay_fx_pulse_update(u8 *arg0) {
                 temp_t6 = (*(s32 *)((u8 *)arg0 + 0x20)) + 1;
                 (*(s32 *)((u8 *)arg0 + 0x20)) = temp_t6;
                 if (temp_t6 == 3) {
-                    (*(s32 **)((u8 *)arg0 + 0x10)) = &D_80091CC8;
+                    (*(s32 **)((u8 *)arg0 + 0x10)) = &g_cs_overlay_img_pulse;
                     (*(s8 *)((u8 *)arg0 + 0x40)) = 8;
                     (*(u8 *)((u8 *)arg0 + 0x45)) = 0xFFU;
                     (*(s16 *)((u8 *)arg0 + 0x3C)) = 0x80;
@@ -267,10 +267,10 @@ void overlay_fx_scale_grow_update(u8 *arg0) {
 }
 
 u8 *image_fx_spawn(void *, s32);
-extern s32 D_80091CD4;
+extern s32 g_cs_overlay_img_cross; /* was D_80091CD4 */
 extern s32 g_screen_width; /* was D_800BEA58 */
 
-// effect_spawn_cross: spawns four type-7 effects (template D_80091CD4, priority arg3) around (arg0, arg1): above and
+// effect_spawn_cross: spawns four type-7 effects (template g_cs_overlay_img_cross, priority arg3) around (arg0, arg1): above and
 // below (arg1 -/+ d, flag byte 0 / 8) and left and right (arg0 -/+ d, flag 4 / 0, u16 0x100), where d is the
 // distance of arg0 to the nearer screen edge (g_screen_width = screen width). arg2 goes to words 0xC and +0x14.
 /* was func_150B7700 */
@@ -280,7 +280,7 @@ void cs_overlay_spawn_cross(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     s32 v;
 
     t.u2A = 0x1000;
-    t.u0 = &D_80091CD4;
+    t.u0 = &g_cs_overlay_img_cross;
     t.u8 = (arg0 << 16) | (arg1 & 0xFFFF);
     t.u28 = 0x1000;
     t.uC = arg2;
@@ -340,7 +340,7 @@ void overlay_fx_lerp_pos_update(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x2C)) = (f32) (((s32) (((*(s16 *)((u8 *)arg0 + 0x20)) - temp_v0) * temp_lo) >> 0x10) + temp_v0);
     (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) (((s32) (((*(s16 *)((u8 *)arg0 + 0x22)) - temp_v1) * temp_lo) >> 0x10) + temp_v1);
 }
-extern s32 D_80091C8C;
+extern s32 g_cs_overlay_img_box; /* was D_80091C8C */
 
 /* was func_150B7964 */
 void cs_overlay_open_box0(void) {
@@ -380,7 +380,7 @@ void cs_overlay_open_box0(void) {
     sp.unk18 = 0;
     sp.unk2E = 0x58;
     sp.unk30 = 6;
-    sp.unk0 = &D_80091C8C;
+    sp.unk0 = &g_cs_overlay_img_box;
     sp.unk32 = 0xFF;
     sp.unk33 = 0;
     sp.unk34 = 0;
@@ -393,14 +393,14 @@ void cs_overlay_open_box0(void) {
     sp.unk38 = 1;
     sp.unk28 = 0x51;
     sp.unk2A = 0x51;
-    if (*(struct102 **)D_800D9CB8 != NULL) {
-        node_destroy(*(struct102 **)D_800D9CB8);
+    if (*(struct102 **)g_cs_overlay_fx != NULL) {
+        node_destroy(*(struct102 **)g_cs_overlay_fx);
     }
-    *D_800D9CB8 = (s32)image_fx_spawn_template(&sp);
-    D_800D9CB0 = 3;
+    *g_cs_overlay_fx = (s32)image_fx_spawn_template(&sp);
+    g_cs_overlay_cmd = 3;
 }
 
-extern s32 D_80091C8C;
+extern s32 g_cs_overlay_img_box; /* was D_80091C8C */
 
 /* was func_150B7A40 */
 void cs_overlay_open_box3(void) {
@@ -431,9 +431,9 @@ void cs_overlay_open_box3(void) {
         s8 unk39;
     } sp;
 
-    if (*(struct102 **)D_800D9CB8 != NULL) {
-        node_destroy(*(struct102 **)D_800D9CB8);
-        *D_800D9CB8 = 0;
+    if (*(struct102 **)g_cs_overlay_fx != NULL) {
+        node_destroy(*(struct102 **)g_cs_overlay_fx);
+        *g_cs_overlay_fx = 0;
     }
     sp.unk18 = 0x4D;
     sp.unk31 = 0xF;
@@ -442,7 +442,7 @@ void cs_overlay_open_box3(void) {
     sp.unk2C = 0x58;
     sp.unk2E = 0x58;
     sp.unk30 = 0;
-    sp.unk0 = &D_80091C8C;
+    sp.unk0 = &g_cs_overlay_img_box;
     sp.unk24 = 0;
     sp.unk26 = 0;
     sp.unk32 = 0xFF;
@@ -457,29 +457,29 @@ void cs_overlay_open_box3(void) {
     sp.unk2A = 0x1000;
     sp.unk1C = 60.0f;
     sp.unk20 = 60.0f;
-    if (((struct102 **)D_800D9CB8)[3] != NULL) {
-        node_destroy(((struct102 **)D_800D9CB8)[3]);
+    if (((struct102 **)g_cs_overlay_fx)[3] != NULL) {
+        node_destroy(((struct102 **)g_cs_overlay_fx)[3]);
     }
-    D_800D9CB8[3] = (s32)image_fx_spawn_template(&sp);
-    D_800D9CB0 = 3;
+    g_cs_overlay_fx[3] = (s32)image_fx_spawn_template(&sp);
+    g_cs_overlay_cmd = 3;
 }
 
 /* was func_150B7B3C */
 void cs_overlay_open_counter_left(void) {
     cs_overlay_counter_box_open(0x3C, 1);
-    D_800D9CB0 = 3;
+    g_cs_overlay_cmd = 3;
 }
 
 /* was func_150B7B6C */
 void cs_overlay_open_counter_right(void) {
     cs_overlay_counter_box_open(0xE6, 2);
-    D_800D9CB0 = 3;
+    g_cs_overlay_cmd = 3;
 }
 
-extern s32 D_80091C98;
+extern s32 g_cs_overlay_img_counter; /* was D_80091C98 */
 
-// hud_counter_box_open: replaces HUD box slot `slot` of D_800D9CB8 (the old one is removed with node_destroy) by a
-// new type-6 box effect (image_fx_spawn_template) using the D_80091C98 graphics, `width` wide and 170 high (0x51 / 0x51
+// hud_counter_box_open: replaces HUD box slot `slot` of g_cs_overlay_fx (the old one is removed with node_destroy) by a
+// new type-6 box effect (image_fx_spawn_template) using the g_cs_overlay_img_counter graphics, `width` wide and 170 high (0x51 / 0x51
 // offsets, 0x58 / 0x40 size, colour 0xFF / 0 / 0 / 0xFF, flags 7 / 0x15 / 1).
 /* was func_150B7B9C */
 void cs_overlay_counter_box_open(s32 width, s32 slot) {
@@ -488,14 +488,14 @@ void cs_overlay_counter_box_open(s32 width, s32 slot) {
 
     sp.u30 = 6;
     sp.u2E = 0x40;
-    box = &D_800D9CB8[slot];
+    box = &g_cs_overlay_fx[slot];
     sp.u31 = 1;
     sp.u2C = 0x58;
     sp.u1C = width;
     sp.u14 = 0;
     sp.u16 = 0;
     sp.u18 = 0;
-    sp.u0 = &D_80091C98;
+    sp.u0 = &g_cs_overlay_img_counter;
     sp.u32 = 0xFF;
     sp.u33 = 0;
     sp.u34 = 0;
@@ -515,9 +515,9 @@ void cs_overlay_counter_box_open(s32 width, s32 slot) {
     *box = (s32)image_fx_spawn_template(&sp);
 }
 
-extern s32 D_80091C98;
-extern s32 D_80091CA4;
-extern s32 D_80091CB0;
+extern s32 g_cs_overlay_img_counter; /* was D_80091C98 */
+extern s32 g_cs_overlay_img_a4; /* was D_80091CA4 */
+extern s32 g_cs_overlay_img_b0; /* was D_80091CB0 */
 
 /* was func_150B7C88 */
 void cs_overlay_open_boxes_4_8(void) {
@@ -549,17 +549,17 @@ void cs_overlay_open_boxes_4_8(void) {
         s8 unk39;
     } sp;
 
-    if (((struct102 **)D_800D9CB8)[1] != NULL) {
-        node_destroy(((struct102 **)D_800D9CB8)[1]);
-        D_800D9CB8[1] = 0;
+    if (((struct102 **)g_cs_overlay_fx)[1] != NULL) {
+        node_destroy(((struct102 **)g_cs_overlay_fx)[1]);
+        g_cs_overlay_fx[1] = 0;
     }
     sp.unk1C = 60.0f;
     sp.unk20 = 170.0f;
     sp.unk2C = 0x40;
     sp.unk2E = 0x40;
     sp.unk30 = 4;
-    sp.unk0 = &D_80091CA4;
-    sp.unk4 = &D_80091CB0;
+    sp.unk0 = &g_cs_overlay_img_a4;
+    sp.unk4 = &g_cs_overlay_img_b0;
     sp.unk14 = 0;
     sp.unk16 = 0;
     sp.unk18 = 0;
@@ -576,10 +576,10 @@ void cs_overlay_open_boxes_4_8(void) {
     sp.unk39 = 3;
     sp.unk28 = 0x1000;
     sp.unk2A = 0x1000;
-    if (((struct102 **)D_800D9CB8)[4] != NULL) {
-        node_destroy(((struct102 **)D_800D9CB8)[4]);
+    if (((struct102 **)g_cs_overlay_fx)[4] != NULL) {
+        node_destroy(((struct102 **)g_cs_overlay_fx)[4]);
     }
-    D_800D9CB8[4] = (s32)image_fx_spawn_template(&sp);
+    g_cs_overlay_fx[4] = (s32)image_fx_spawn_template(&sp);
     sp.unk24 = 0;
     sp.unk26 = 0;
     sp.unk2C = 0x58;
@@ -587,30 +587,30 @@ void cs_overlay_open_boxes_4_8(void) {
     sp.unk30 = 0;
     sp.unk36 = 7;
     sp.unk37 = 0x11;
-    sp.unk0 = &D_80091C98;
+    sp.unk0 = &g_cs_overlay_img_counter;
     sp.unk38 = 1;
-    if (((struct102 **)D_800D9CB8)[8] != NULL) {
-        node_destroy(((struct102 **)D_800D9CB8)[8]);
+    if (((struct102 **)g_cs_overlay_fx)[8] != NULL) {
+        node_destroy(((struct102 **)g_cs_overlay_fx)[8]);
     }
-    D_800D9CB8[8] = (s32)image_fx_spawn_template(&sp);
-    D_800D9CB0 = 3;
+    g_cs_overlay_fx[8] = (s32)image_fx_spawn_template(&sp);
+    g_cs_overlay_cmd = 3;
 }
 
 u8 *image_fx_spawn_template(void *);
-extern s32 D_80091CBC;
-extern s32 D_80091C98;
+extern s32 g_cs_overlay_img_bar; /* was D_80091CBC */
+extern s32 g_cs_overlay_img_counter; /* was D_80091C98 */
 
-// hud_bars_create: (re)creates the effect records D_800D9CB8[5..7] (three type-5 bars from template D_80091CBC at
-// y 150 / 170 / 190, alpha 0x80 / 0xFF / 0x80) and [9] (a type-0 effect from D_80091C98 at 230, 170); frees [2]
-// first. Returns the last record; sets D_800D9CB0 = 3. The free before [6] / [7] passes D_800D9CB8[5] (as the asm:
+// hud_bars_create: (re)creates the effect records g_cs_overlay_fx[5..7] (three type-5 bars from template g_cs_overlay_img_bar at
+// y 150 / 170 / 190, alpha 0x80 / 0xFF / 0x80) and [9] (a type-0 effect from g_cs_overlay_img_counter at 230, 170); frees [2]
+// first. Returns the last record; sets g_cs_overlay_cmd = 3. The free before [6] / [7] passes g_cs_overlay_fx[5] (as the asm:
 // the original source frees the wrong slot there).
 /* was func_150B7DFC */
 s32 cs_overlay_create_bars(void) {
     EffectTemplateE48B0 t;
 
-    if (D_800D9CB8[2] != 0) {
-        node_destroy((struct102 *) D_800D9CB8[2]);
-        D_800D9CB8[2] = 0;
+    if (g_cs_overlay_fx[2] != 0) {
+        node_destroy((struct102 *) g_cs_overlay_fx[2]);
+        g_cs_overlay_fx[2] = 0;
     }
     t.u31 = 3;
     t.u2C = 0x40;
@@ -621,7 +621,7 @@ s32 cs_overlay_create_bars(void) {
     t.u14 = 0;
     t.u16 = 0;
     t.u18 = 0;
-    t.u0 = &D_80091CBC;
+    t.u0 = &g_cs_overlay_img_bar;
     t.u4 = 0;
     t.u8 = 0;
     t.u10 = 0;
@@ -638,28 +638,28 @@ s32 cs_overlay_create_bars(void) {
     t.u20 = 150.0f;
     t.u1C = 230.0f;
     t.uC = (s32) t.u20;
-    if (D_800D9CB8[5] != 0) {
-        node_destroy((struct102 *) D_800D9CB8[5]);
+    if (g_cs_overlay_fx[5] != 0) {
+        node_destroy((struct102 *) g_cs_overlay_fx[5]);
     }
-    D_800D9CB8[5] = (s32) image_fx_spawn_template(&t);
+    g_cs_overlay_fx[5] = (s32) image_fx_spawn_template(&t);
     t.u16 = 0x100;
     t.u8 = 0x100;
     t.u35 = 0xFF;
     t.u20 = 170.0f;
     t.uC = (s32) t.u20;
-    if (D_800D9CB8[6] != 0) {
-        node_destroy((struct102 *) D_800D9CB8[5]);
+    if (g_cs_overlay_fx[6] != 0) {
+        node_destroy((struct102 *) g_cs_overlay_fx[5]);
     }
-    D_800D9CB8[6] = (s32) image_fx_spawn_template(&t);
+    g_cs_overlay_fx[6] = (s32) image_fx_spawn_template(&t);
     t.u16 = 0x200;
     t.u8 = 0x200;
     t.u35 = 0x80;
     t.u20 = 190.0f;
     t.uC = (s32) t.u20;
-    if (D_800D9CB8[7] != 0) {
-        node_destroy((struct102 *) D_800D9CB8[5]);
+    if (g_cs_overlay_fx[7] != 0) {
+        node_destroy((struct102 *) g_cs_overlay_fx[5]);
     }
-    D_800D9CB8[7] = (s32) image_fx_spawn_template(&t);
+    g_cs_overlay_fx[7] = (s32) image_fx_spawn_template(&t);
     t.u14 = 0;
     t.u16 = 0;
     t.u18 = 0;
@@ -668,13 +668,13 @@ s32 cs_overlay_create_bars(void) {
     t.u2E = 0x40;
     t.u35 = 0xFF;
     t.u30 = 0;
-    t.u0 = &D_80091C98;
+    t.u0 = &g_cs_overlay_img_counter;
     t.u1C = 230.0f;
     t.u20 = 170.0f;
-    if (D_800D9CB8[9] != 0) {
-        node_destroy((struct102 *) D_800D9CB8[9]);
+    if (g_cs_overlay_fx[9] != 0) {
+        node_destroy((struct102 *) g_cs_overlay_fx[9]);
     }
-    D_800D9CB8[9] = (s32) image_fx_spawn_template(&t);
-    D_800D9CB0 = 3;
-    return D_800D9CB8[9];
+    g_cs_overlay_fx[9] = (s32) image_fx_spawn_template(&t);
+    g_cs_overlay_cmd = 3;
+    return g_cs_overlay_fx[9];
 }

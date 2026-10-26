@@ -55,7 +55,7 @@ void arc_spark_spawn(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
     struct260 *temp_v0;
     u8 *var_v0;
 
-    if ((arg0 != 0) && ((D_800C35EA != 1) || (D_800C3A08 != 9))) {
+    if ((arg0 != 0) && ((g_cutscene_slot_state != 1) || (g_cutscene_scene != 9))) {
         var_v0 = ((s32 *)((u8 *)&g_arc_spark_presets + (arg3 * 0x10)));
         if ((random_float() < (*(f32 *)((u8 *)var_v0 + 0))) && ((*(s8 *)((u8 *)var_v0 + 4)) != -1)) {
             temp_v1 = (*(s8 *)((u8 *)var_v0 + 5));
@@ -940,7 +940,7 @@ void storm_controller_update(u8 *arg0) {
 typedef struct { s32 a, b; } E8EB0_V;
 typedef struct { u8 a; u8 p1; s16 b; u8 c; u8 d; s8 e; } E8EB0_S;
 extern E8EB0_V g_storm_strike_node_types; /* was D_80088E20 */
-extern u8 D_800BEE0B;
+extern u8 g_view_count_minus1_lo; /* was D_800BEE0B */
 /* was func_150E8EB0 */
 void storm_lightning_strike() {
     E8EB0_V v;
@@ -948,7 +948,7 @@ void storm_lightning_strike() {
 
     v = g_storm_strike_node_types;
     node_broadcast_types(&v, 2, 0, 0x1B);
-    cam_wobble_start_preset(0, D_800BEE0B, 0, 0xFF, 1);
+    cam_wobble_start_preset(0, g_view_count_minus1_lo, 0, 0xFF, 1);
     s.a = 1;
     s.b = random_int() % 21U + 20;
     s.d = 1;

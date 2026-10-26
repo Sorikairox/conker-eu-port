@@ -11,19 +11,19 @@ s/        r\[0x2B\] = r\[0x2C\];//
 s/        r\[0x2D\] = r\[0x2E\];//
 s/rail_link_pick(r\[0x2C\], r\[0x2D\], (s8) r\[0x2F\])/rail_link_pick(r[0x2D], r[0x2C], (s8) r[0x2F])/
 s/        dir = 1;/        dir = 2;/
-s/        if (D_800D27C8 == 0) {/        if (D_800D27C8 != 0) {/
+s/        if (g_rail_mirrored == 0) {/        if (g_rail_mirrored != 0) {/
 s/            if (node\[0xF\] == 5) {/            if (node[0xF] == 4) {/
-s/                D_800D27B0 = 2;/                D_800D27B0 = 1;/
+s/                g_rail_cam_mode = 2;/                g_rail_cam_mode = 1;/
 s/            if (node\[0xF\] == 9) {/            if (node[0xF] == 8) {/
-s/                D_800D27B0 = 3;/                D_800D27B0 = 2;/
+s/                g_rail_cam_mode = 3;/                g_rail_cam_mode = 2;/
 s/            if (node\[0xF\] == 7) {/            if (node[0xF] == 6) {/
-s/D_800D2778\[r\[0x2C\]\]/D_800D2778[r[0x2D]]/
+s/g_rail_nodes\[r\[0x2C\]\]/g_rail_nodes[r[0x2D]]/
 s/    laps = g_settings\[7\];/    laps = g_settings[6];/
 s/    rec->unk24 += dir;/    rec->unk24 += 1;/
 s/    rec->unk27 = rec->unk24 \/ (s8) r\[0x26\];/    rec->unk27 = rec->unk24 \/ r[0x26];/
 s/    player = (s8) r\[0x31\];/    player = r[0x31];/
-s/    if (D_800BE616 != 0 \&\& laps < rec->unk27) {/    if (laps < rec->unk27) {/
-s/    if (D_800BE616 != 0 \&\& laps < rec->unk27) {/    if (D_800BE616 != 0 \&\& laps <= rec->unk27) {/
+s/    if (g_mp_mode_active != 0 \&\& laps < rec->unk27) {/    if (laps < rec->unk27) {/
+s/    if (g_mp_mode_active != 0 \&\& laps < rec->unk27) {/    if (g_mp_mode_active != 0 \&\& laps <= rec->unk27) {/
 s/        rec->unk27 = laps + 1;/        rec->unk27 = laps;/
 s/    if (rec->unk27 <= (s8) r\[0x28\]) {/    if (rec->unk27 < (s8) r[0x28]) {/
 s/    if (rec->unk27 <= (s8) r\[0x28\]) {/    if (rec->unk27 <= r[0x28]) {/

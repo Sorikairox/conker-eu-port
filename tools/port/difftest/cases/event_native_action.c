@@ -5,5 +5,5 @@ s32 event_native_action(s32 *args) {
     if (n == 0) {
         return 0;
     }
-    return D_80088874[n - 1](id & 0xFFFF0FFF, args[1], args);
+    return g_event_action_fns[n - 1](id & 0xFFFF0FFF, args[1], args);
 }

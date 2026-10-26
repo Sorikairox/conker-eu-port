@@ -1,21 +1,21 @@
 s/        px->prec = 6;/        px->prec = 5;/
 s/(code == 'g' || code == 'G')/(code == 'g' || code == 'E')/
 s/        px->prec = 1;/        px->prec = 2;/
-s/(err == 2) ? D_8002C2B8 : D_8002C2BC/(err == 1) ? D_8002C2B8 : D_8002C2BC/
+s/(err == 2) ? g_printf_str_nan : g_printf_str_inf/(err == 1) ? g_printf_str_nan : g_printf_str_inf/
 s/        px->n1 = 3;/        px->n1 = 4;/
 s/    if (err == 0) {/    if (err == 1) {/
 s/            val = -val;/            val = val;/
 s/xexp \* 30103 \/ 100000 - 4/xexp * 30103 \/ 100000 - 3/
 s/n = (3 - xexp) \& ~3;/n = (4 - xexp) \& ~3;/
-s/val \*= D_8002C270\[i\];/val *= D_8002C270[i + 1];/
+s/val \*= g_printf_pow10\[i\];/val *= g_printf_pow10[i + 1];/
 s/factor = 1.0f;/factor = 2.0f;/
 s/            xexp \&= ~3;/            xexp \&= ~1;/
-s/factor \*= D_8002C270\[i\];/factor *= D_8002C270[0];/
+s/factor \*= g_printf_pow10\[i\];/factor *= g_printf_pow10[0];/
 s/xexp + 10 : 6/xexp + 11 : 6/
 s/if (gen > 19) {/if (gen > 18) {/
 s/while (gen > 0 \&\& 0.0 < val) {/while (gen > 0 \&\& 0.0 <= val) {/
 s/(gen -= 8) > 0/(gen -= 7) > 0/
-s/val = (val - lo) \* D_8002C2C8;/val = (val - lo) * D_8002C270[3];/
+s/val = (val - lo) \* g_printf_k_1e8;/val = (val - lo) * g_printf_pow10[3];/
 s/qr = ldiv(lo, 10);/qr = ldiv(lo, 16);/
 s/\*--p = qr.rem + '0';/*--p = qr.quot + '0';/
 s/lo = qr.quot;/lo = qr.rem;/

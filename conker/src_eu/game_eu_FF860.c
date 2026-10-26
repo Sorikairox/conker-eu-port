@@ -3,12 +3,12 @@
 #include "variables.h"
 
 
-extern f32 D_800A0CB0;
+extern f32 g_red_flicker_bright_k_0cb0; /* was D_800A0CB0 */
 /* was func_150D2050 */
 void ambient_red_flicker_bright_update(s32 arg0) {
     f32 *sp28;
     sp28 = (f32 *)((arg0 ^ 0) + 0x28); sp28 = sp28;
-    fx_random_flicker_update(arg0 + 0x30, 10.0f, arg0 + 0x2C, 86.0f, 170.0f, 255.0f, D_800A0CB0, sp28);
+    fx_random_flicker_update(arg0 + 0x30, 10.0f, arg0 + 0x2C, 86.0f, 170.0f, 255.0f, g_red_flicker_bright_k_0cb0, sp28);
     light_set_level_colour(*sp28, ((u8 *)&g_level_light_colour)[1], ((u8 *)&g_level_light_colour)[2], 0);
 }
 

@@ -1,4 +1,4 @@
-# P204 music_song_cb_level1d_voices: g_level_id = EU 800BEE10, D_800C35EA = EU 800C3A0A (byte), D_80041F08 = EU 800422A8, g_frame_ticks = EU 800BEE04;
+# P204 music_song_cb_level1d_voices: g_level_id = EU 800BEE10, g_cutscene_slot_state = EU 800C3A0A (byte), g_music_event_value = EU 800422A8, g_frame_ticks = EU 800BEE04;
 # OUTW sound_source_mix (key 100117C0) pan (arg 6) / vol (arg 7) per call
 first_off ! 0=0,1=5,2=1234,3=5678 ! 800BEE10=00000004,800C3A08=00000000,800422A8=00000000,800BEE04=00000002 ! ! ! ! 100117C0=6:40;41;42/7:8000;9000;1000 ! 
 first_off_ea ! 0=3,1=5,2=1234,3=5678 ! 800BEE10=00000004,800C3A08=00000100,800422A8=00000000,800BEE04=00000002 ! ! ! ! 100117C0=6:40;41;42/7:8000;9000;1000 ! 

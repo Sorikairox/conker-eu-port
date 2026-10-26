@@ -1,5 +1,5 @@
 s/    f32 ease = 0.05f;/    f32 ease = 0.04f;/
-s/    } else if (D_800C3A08 != 1) {/    } else if (D_800C3A08 != 2) {/
+s/    } else if (g_cutscene_scene != 1) {/    } else if (g_cutscene_scene != 2) {/
 s/    if (g_level_first_frame != 0) {/    if (g_level_first_frame == 0) {/
 s/^        \*(f32 \*) (p + 0x7C) = height;$/        ;/
 s/        height = 0.0f;/        height = 1.0f;/

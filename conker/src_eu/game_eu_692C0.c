@@ -13,15 +13,15 @@ void tail_record_alloc(u8 *arg0) {
     (*(s16 *)((u8 *)((*(u8 **)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x11C))) + 0x4C)) = (s16) (random_int() % 30U);
 }
 
-extern u16 D_80098BE0[3];
-extern u16 D_80098B2C;
-extern u16 D_80098B2E;
-extern u16 D_80098B30[88];
+extern u16 g_tail_off_anims[3]; /* was D_80098BE0 */
+extern u16 g_tail_hold_anim_a; /* was D_80098B2C */
+extern u16 g_tail_hold_anim_b; /* was D_80098B2E */
+extern u16 g_tail_hold_anims[88]; /* was D_80098B30 */
 
 /*
  * P70: object kind flags (called from obj_model_reset after it clears +0x2FB). Only for the active state 1:
- * an animation / model id +0x84 listed in D_80098BE0 (3 ids) sets bit 1 (2), one of D_80098B2C, D_80098B2E or the
- * 88 ids of D_80098B30 sets bit 0 (1). The first table wins.
+ * an animation / model id +0x84 listed in g_tail_off_anims (3 ids) sets bit 1 (2), one of g_tail_hold_anim_a, g_tail_hold_anim_b or the
+ * 88 ids of g_tail_hold_anims sets bit 0 (1). The first table wins.
  */
 /* was func_1503B840 */
 void obj_set_kind_look_flags(struct127 *obj) {
@@ -33,32 +33,32 @@ void obj_set_kind_look_flags(struct127 *obj) {
     }
     kind = obj->unk84.uh;
     for (i = 0; i < 3; i++) {
-        if (kind == D_80098BE0[i]) {
+        if (kind == g_tail_off_anims[i]) {
             obj->unk2FB |= 2;
             return;
         }
     }
-    if (kind == D_80098B2C) {
+    if (kind == g_tail_hold_anim_a) {
         obj->unk2FB |= 1;
         return;
     }
-    if (kind == D_80098B2E) {
+    if (kind == g_tail_hold_anim_b) {
         obj->unk2FB |= 1;
         return;
     }
     for (i = 0; i < 88; i++) {
-        if (kind == D_80098B30[i]) {
+        if (kind == g_tail_hold_anims[i]) {
             obj->unk2FB |= 1;
             return;
         }
     }
 }
 
-extern u8 D_800CC9EB;
+extern u8 g_objects_tail_flags; /* was D_800CC9EB */
 /* was func_1503BC4C */
 s32 tail_get_mode(s32 arg0, u8 *arg1) {
     s32 temp_v0;
-    temp_v0 = *((u8 *)&D_800CC9EB + (arg0 * 0x32C));
+    temp_v0 = *((u8 *)&g_objects_tail_flags + (arg0 * 0x32C));
     if (temp_v0 & 2) {
         arg1[0x4E] = 0;
         return 0;
@@ -75,26 +75,26 @@ f32 math_angle_diff_deg(f32, f32);
 f32 math_atan2f(f32, f32);
 f32 math_acosf_lut(f32);
 extern u8 g_slowmo_divisor; /* was D_800BEE2C */
-extern u8 D_800C40BD;
-extern f32 D_800C4428[3];
-extern f32 D_80098AA0[4];
-extern f32 D_80098AB0[4];
-extern f32 D_80098AC0[4];
-extern f32 D_80098AD0[4];
-extern f32 D_80098AE0[4];
-extern f32 D_80098AF0[5];
-extern f32 D_80098B04[5];
-extern f32 D_80098B18[5];
-extern f32 D_80098BE8;
-extern f32 D_80098BEC;
-extern f32 D_80098BF0;
-extern f32 D_80098BF4;
-extern f32 D_80098BF8;
-extern f32 D_80098BFC;
-extern f32 D_80098C00;
-extern f32 D_80098C04;
-extern f32 D_80098C08;
-extern f32 D_80098C0C;
+extern u8 g_cutscene_tail_lift_pct; /* was D_800C40BD */
+extern f32 g_tail_anchor[3]; /* was D_800C4428 */
+extern f32 g_tail_seg_lengths[4]; /* was D_80098AA0 */
+extern f32 g_tail_seg_lengths_alt[4]; /* was D_80098AB0 */
+extern f32 g_tail_ease_a[4]; /* was D_80098AC0 */
+extern f32 g_tail_ease_b[4]; /* was D_80098AD0 */
+extern f32 g_tail_max_bend[4]; /* was D_80098AE0 */
+extern f32 g_tail_lift_a[5]; /* was D_80098AF0 */
+extern f32 g_tail_lift_b[5]; /* was D_80098B04 */
+extern f32 g_tail_lift_c[5]; /* was D_80098B18 */
+extern f32 g_tail_k_8be8; /* was D_80098BE8 */
+extern f32 g_tail_k_8bec; /* was D_80098BEC */
+extern f32 g_tail_k_8bf0; /* was D_80098BF0 */
+extern f32 g_tail_k_8bf4; /* was D_80098BF4 */
+extern f32 g_tail_k_8bf8; /* was D_80098BF8 */
+extern f32 g_tail_k_8bfc; /* was D_80098BFC */
+extern f32 g_tail_k_8c00; /* was D_80098C00 */
+extern f32 g_tail_k_8c04; /* was D_80098C04 */
+extern f32 g_tail_k_8c08; /* was D_80098C08 */
+extern f32 g_tail_k_8c0c; /* was D_80098C0C */
 void tail_record_alloc(u8 *);
 s32 tail_get_mode(s32, u8 *);
 void tail_build_joint_matrices(s32, s32, f32, u8 *);
@@ -125,12 +125,12 @@ typedef struct {
  * P70: Conker's tail (chain of 4 segments hanging from joint 24, called from obj_update_tail_for_conker).
  * The record is created on first use. tail_get_mode gives the mode: 0 = hidden / not simulated (the chain just
  * follows the joints 24..27), 1 = simulated, 2 = simulated and fading in (+0x4E frames left, given to tail_build_joint_matrices
- * as a 0..1 factor). Without joint matrices the object is only marked in D_800C4000 to reset the chain next time.
+ * as a 0..1 factor). Without joint matrices the object is only marked in g_tail_reset_mask to reset the chain next time.
  * Simulation: per-segment offsets off[] (walk wave from the xz speed, lift by animation, idle sway or a turn towards
- * the close camera) are added to each point's target; each point eases towards it (D_80098AC0 / D_80098AD0 weights,
- * none on a reset), is pulled back when the bend exceeds 45 degrees (D_80098AE0), and is put at the segment length
- * (D_80098AA0, or D_80098AB0 for ids 0x80 / 0xB0) from the previous point, scaled by the object scale.
- * D_800C4428 is the anchor before the first point (joint 0). The pause flags g_game_paused / g_slowmo_divisor freeze the
+ * the close camera) are added to each point's target; each point eases towards it (g_tail_ease_a / g_tail_ease_b weights,
+ * none on a reset), is pulled back when the bend exceeds 45 degrees (g_tail_max_bend), and is put at the segment length
+ * (g_tail_seg_lengths, or g_tail_seg_lengths_alt for ids 0x80 / 0xB0) from the previous point, scaled by the object scale.
+ * g_tail_anchor is the anchor before the first point (joint 0). The pause flags g_game_paused / g_slowmo_divisor freeze the
  * state but still rebuild the chain.
  */
 /* was func_1503BCAC */
@@ -160,14 +160,14 @@ void tail_update_conker(s32 arg0) {
     mode = tail_get_mode(arg0, (u8 *) rec);
 
     if (obj->unk1D4 == NULL) {
-        D_800C4000 |= 1 << arg0;
+        g_tail_reset_mask |= 1 << arg0;
         return;
     }
 
     /* reset: requested while the joints were missing, or by g_camera_timers / +0x2FD */
     reset = 0;
-    if (D_800C4000 & (1 << arg0)) {
-        D_800C4000 &= ~(1 << arg0);
+    if (g_tail_reset_mask & (1 << arg0)) {
+        g_tail_reset_mask &= ~(1 << arg0);
         reset = 1;
     }
     if (*(s32 *) g_camera_timers != 0 || OBJ_U8(obj, 0x2FD) != 0) {
@@ -193,9 +193,9 @@ void tail_update_conker(s32 arg0) {
         }
     }
 
-    D_800C4428[0] = JOINT_POS(obj, 0)[0];
-    D_800C4428[1] = JOINT_POS(obj, 0)[1];
-    D_800C4428[2] = JOINT_POS(obj, 0)[2];
+    g_tail_anchor[0] = JOINT_POS(obj, 0)[0];
+    g_tail_anchor[1] = JOINT_POS(obj, 0)[1];
+    g_tail_anchor[2] = JOINT_POS(obj, 0)[2];
 
     if (mode == 0) {
         for (i = 0; i < 4; i++) {
@@ -210,9 +210,9 @@ void tail_update_conker(s32 arg0) {
     rec->p[0][1] = JOINT_POS(obj, 24)[1];
     rec->p[0][2] = JOINT_POS(obj, 24)[2];
     if (obj->id == 0x80 || obj->id == 0xB0) {
-        len = D_80098AB0;
+        len = g_tail_seg_lengths_alt;
     } else {
-        len = D_80098AA0;
+        len = g_tail_seg_lengths;
     }
     for (k = 0; k < 5; k++) {
         off[k][0] = 0.0f;
@@ -230,7 +230,7 @@ void tail_update_conker(s32 arg0) {
     if (obj->unk28 > 3.0f) {
         speed *= 0.5f;
     }
-    wave = sinf(rec->phase * D_80098BE8) * speed;
+    wave = sinf(rec->phase * g_tail_k_8be8) * speed;
     if (g_game_paused == 0 && g_slowmo_divisor == 0) {
         rec->phase += speed;
         if (rec->phase >= 360.0f) {
@@ -238,7 +238,7 @@ void tail_update_conker(s32 arg0) {
         }
     }
     off[0][1] += wave;
-    off[4][1] += sinf((rec->phase + 180.0f) * D_80098BEC) * speed;
+    off[4][1] += sinf((rec->phase + 180.0f) * g_tail_k_8bec) * speed;
 
     /* close camera: swing the tail out of the view (angle between the facing +0x76 and the camera) */
     cam = obj->camera;
@@ -246,7 +246,7 @@ void tail_update_conker(s32 arg0) {
         s32 pushed = 0;
 
         a = math_atan2f((CAM_F32(cam, 0x2F8) + CAM_F32(cam, 0x74C)) - obj->x_position,
-                          (CAM_F32(cam, 0x300) + CAM_F32(cam, 0x754)) - obj->z_position) * D_80098BF0 + 90.0f;
+                          (CAM_F32(cam, 0x300) + CAM_F32(cam, 0x754)) - obj->z_position) * g_tail_k_8bf0 + 90.0f;
         if (a >= 360.0f) {
             a -= 360.0f;
         }
@@ -270,7 +270,7 @@ void tail_update_conker(s32 arg0) {
                 pushed = 1;
             }
             if (pushed) {
-                b = rec->sway + (b - rec->sway) * D_80098BF4;
+                b = rec->sway + (b - rec->sway) * g_tail_k_8bf4;
             }
             rec->sway = b;
             rec->timer = 60;
@@ -281,9 +281,9 @@ void tail_update_conker(s32 arg0) {
 
     /* facing */
     anim = obj->unk84.uh;
-    a = obj->unk40 * D_80098BF8;
+    a = obj->unk40 * g_tail_k_8bf8;
     if (anim == 0x122 || anim == 0x128 || anim == 0x129 || anim == 0x12A) {
-        a -= D_80098BFC;
+        a -= g_tail_k_8bfc;
     }
     s = sinf(a);
     c = cosf(a);
@@ -291,10 +291,10 @@ void tail_update_conker(s32 arg0) {
     anim = obj->unk84.uh;
     if (anim == 0x24 || anim == 0x22 || anim == 0xD1) {
         /* these animations: anchor at the root height, moved one unit forward while +0xB8 > 0 */
-        D_800C4428[1] = rec->p[0][1];
+        g_tail_anchor[1] = rec->p[0][1];
         if (OBJ_F32(obj, 0xB8) > 0.0f) {
-            D_800C4428[0] = rec->p[0][0] + s;
-            D_800C4428[2] = rec->p[0][2] + c;
+            g_tail_anchor[0] = rec->p[0][0] + s;
+            g_tail_anchor[2] = rec->p[0][2] + c;
         }
         off[0][1] -= wave;
         off[1][1] += wave;
@@ -307,19 +307,19 @@ void tail_update_conker(s32 arg0) {
             speed = 30.0f;
         }
         lift = 60.0f - (speed + speed);
-        if (D_800C35EA == 1 && D_800C40BD < 100) {
-            lift = lift * (f32) D_800C40BD * D_80098C00;
+        if (g_cutscene_slot_state == 1 && g_cutscene_tail_lift_pct < 100) {
+            lift = lift * (f32) g_cutscene_tail_lift_pct * g_tail_k_8c00;
         }
         if (obj->id == 0x80 || obj->id == 0xB0) {
-            lift_tbl = D_80098B18;
+            lift_tbl = g_tail_lift_c;
         } else if (anim == 0x1B || anim == 0x18B) {
             for (k = 0; k < 5; k++) {
                 off[k][1] = 0.0f;
             }
-            lift_tbl = D_80098B04;
+            lift_tbl = g_tail_lift_b;
             lift = 60.0f;
         } else {
-            lift_tbl = D_80098AF0;
+            lift_tbl = g_tail_lift_a;
         }
         if (*((u8 *) obj->unk31C + 0x78) == 0x3B && CAMERA_CLOSE(cam)) {
             lift = 0.0f;
@@ -345,8 +345,8 @@ void tail_update_conker(s32 arg0) {
                 }
             } else {
                 /* sway sideways (root and tip), across the facing */
-                a = sinf(rec->sway * D_80098C04) * rec->swayAmp;
-                b = sinf((rec->sway + 30.0f) * D_80098C08) * rec->swayAmp * 5.0f;
+                a = sinf(rec->sway * g_tail_k_8c04) * rec->swayAmp;
+                b = sinf((rec->sway + 30.0f) * g_tail_k_8c08) * rec->swayAmp * 5.0f;
                 off[4][0] += c * b;
                 off[0][0] += c * a;
                 off[4][2] += -s * b;
@@ -390,9 +390,9 @@ void tail_update_conker(s32 arg0) {
         d[1] = off[i][1] * obj->y_scale + p0[1];
         d[2] = off[i][2] * obj->xz_scale + p0[2];
         if (i == 0) {
-            d[0] -= D_800C4428[0];
-            d[1] -= D_800C4428[1];
-            d[2] -= D_800C4428[2];
+            d[0] -= g_tail_anchor[0];
+            d[1] -= g_tail_anchor[1];
+            d[2] -= g_tail_anchor[2];
         } else {
             d[0] -= rec->p[i - 1][0];
             d[1] -= rec->p[i - 1][1];
@@ -410,17 +410,17 @@ void tail_update_conker(s32 arg0) {
         if (g_game_paused == 0 && g_slowmo_divisor == 0) {
             f = goal[0] - p1[0];
             if (!reset) {
-                f *= D_80098AC0[i];
+                f *= g_tail_ease_a[i];
             }
             p1[0] += f;
             f = goal[1] - p1[1];
             if (!reset) {
-                f *= D_80098AD0[i];
+                f *= g_tail_ease_b[i];
             }
             p1[1] += f;
             f = goal[2] - p1[2];
             if (!reset) {
-                f *= D_80098AC0[i];
+                f *= g_tail_ease_a[i];
             }
             p1[2] += f;
         }
@@ -433,9 +433,9 @@ void tail_update_conker(s32 arg0) {
         dir[0] *= mag;
         dir[1] *= mag;
         dir[2] *= mag;
-        ang = fabsf(math_acosf_lut(dir[2] * d[2] + (d[0] * dir[0] + d[1] * dir[1])) * D_80098C0C);
-        if (g_game_paused == 0 && g_slowmo_divisor == 0 && D_80098AE0[i] < ang) {
-            f = 1.0f - D_80098AE0[i] / ang;
+        ang = fabsf(math_acosf_lut(dir[2] * d[2] + (d[0] * dir[0] + d[1] * dir[1])) * g_tail_k_8c0c);
+        if (g_game_paused == 0 && g_slowmo_divisor == 0 && g_tail_max_bend[i] < ang) {
+            f = 1.0f - g_tail_max_bend[i] / ang;
             if (reset) {
                 f = 1.0f;
             }

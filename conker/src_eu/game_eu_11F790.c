@@ -236,7 +236,7 @@ void fx_big_explosion_at_obj(u8 *arg0, s32 arg1, s32 arg2) {
     }
 }
 /* P249: readable C for ambient_far_sound_update (game_eu_11F790, 80 insns). */
-// ambient_far_sound_update: random ambient sound while object `slot` is far out. A cooldown D_800D9D10 (u8) counts
+// ambient_far_sound_update: random ambient sound while object `slot` is far out. A cooldown g_ambient_cue_timer (u8) counts
 // down by g_frame_ticks per frame (to 0); when it is 0 and x^4 + z^4 of g_objects[slot] exceeds 6760000, plays sound
 // 0x6C..0x6E (random_int() % 3) at volume 0x5DC0 with the pan of sound_source_mix(0, y, 0, 0x7FFF, 20000, 19000)
 // (+0x80, low byte) and restarts the cooldown at 0x80..0xFF frames.
@@ -245,7 +245,7 @@ s32 random_int(void);
 /* was func_150F2670 */
 void ambient_far_sound_update(s32 slot) {
     struct127 *obj = &g_objects[slot];
-    u8 *timer = (u8 *) D_800D9D10;
+    u8 *timer = (u8 *) g_ambient_cue_timer;
     f32 x2, z2;
     s32 pan, vol, dist;
 

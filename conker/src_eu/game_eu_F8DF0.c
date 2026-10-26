@@ -5,8 +5,8 @@
 
 s32 hitinfo_from_obj_floor(s32, u8 *);
 s32 collision_floor_probe(f32 *, s32, f32, s32);
-extern f32 D_800A09B0[3];
-extern f32 D_800A09BC[3];
+extern f32 g_water_entry_point_a[3]; /* was D_800A09B0 */
+extern f32 g_water_entry_point_b[3]; /* was D_800A09BC */
 
 /* was func_150CB5E0 */
 s32 obj_fx_point_water_entry(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
@@ -15,7 +15,7 @@ s32 obj_fx_point_water_entry(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
     if ((arg3 != 1) && (arg3 != 2)) {
         return 0;
     }
-    mtx_transform_point_or_origin((arg3 == 1) ? D_800A09BC : D_800A09B0, arg0, (arg3 == 1) ? *(u8 **)(arg1 + 0x1D4) + 0xA00 : *(u8 **)(arg1 + 0x1D4) + 0xBC0);
+    mtx_transform_point_or_origin((arg3 == 1) ? g_water_entry_point_b : g_water_entry_point_a, arg0, (arg3 == 1) ? *(u8 **)(arg1 + 0x1D4) + 0xA00 : *(u8 **)(arg1 + 0x1D4) + 0xBC0);
     if (arg2 == 0) {
         return 1;
     }
@@ -33,7 +33,7 @@ s32 water_entry_effect_id(s32 arg0, s32 arg1) {
 
 /* P296 */
 extern s32 g_view_count_minus1; /* was D_800BEE08 */
-extern u8 *D_800D9D00;
+extern u8 *g_level_timed_queue_alias; /* was D_800D9D00 */
 void ground_colour_by_depth(f32, f32 *, f32 *, f32 *);
 void spawn_circle_random_emit(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9, s32 argA, u8 argB);
 s32 timed_queue_push(u8 *arg0, s32 arg1, u8 arg2);
@@ -139,7 +139,7 @@ void object_water_entry_splash(u8 *obj, s32 arg1, s32 arg2) {
                              0xFF, 0);
     if (p != NULL) {
         memcpy(p + 0x128, &tail, 8);
-        if (timed_queue_push(D_800D9D00, (s32) p, 2) == 0) {
+        if (timed_queue_push(g_level_timed_queue_alias, (s32) p, 2) == 0) {
             node_destroy((struct102 *) p);
         }
     }

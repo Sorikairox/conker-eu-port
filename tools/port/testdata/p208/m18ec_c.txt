@@ -24,15 +24,15 @@ s/                wi = 8, hi = 9, s = 0x240, t = 0x60;/                wi = 8, h
 s/            for (i = 0; i < ((u8 \*)obj->unk31C)\[0x19A\]; i++) {/            for (i = 0; i <= ((u8 *)obj->unk31C)[0x19A]; i++) {/
 s/                                        0x400, scale);/                                        scale, scale);/
 s/                ix -= 11 \* 4;/                ix -= 10 * 4;/
-s/    if ((D_80090160 & 0x80) && D_80087640 != NULL) {/    if (D_80090160 \& 0x80) {/
+s/    if ((g_mp_hud_flags & 0x80) && g_race_records != NULL) {/    if (g_mp_hud_flags \& 0x80) {/
 s/            iy = (s32)view->unk24 + 5;/            iy = (s32)view->unk24 + 6;/
 s/            if (\*(s32 \*)((u8 \*)race + 0x20) > 0) {/            if (*(s32 *)((u8 *)race + 0x20) >= 0) {/
 s/                hud_time_draw((s32)view->unk2C + 0x17, iy + 0x19,/                hud_time_draw((s32)view->unk2C + 0x17, iy + 0x18,/
 s/            lap = race->unk27 + 1;/            lap = race->unk27;/
 s/            if (lap <= laps) {/            if (lap < laps) {/
 s/(s32)view->unk2C + 0x1D, iy + 0xE, 0xC1, (s32)g_str_mp_hud_lap, lap, laps);/(s32)view->unk2C + 0x1D, iy + 0xE, 0xC1, (s32)g_str_mp_hud_lap, lap, lap);/
-s/(s32)view->unk28 - 0xC, \*(s32 \*)((u8 \*)\&D_80087640\[p\] + 0x1C), 0xC0);/(s32)view->unk28 - 0xC, *(s32 *)((u8 *)\&D_80087640[p] + 0x20), 0xC0);/
-s/    if (g_pause_open == 0 && (D_80090160 & 0x1000)) {/    if (D_80090160 \& 0x1000) {/
+s/(s32)view->unk28 - 0xC, \*(s32 \*)((u8 \*)\&g_race_records\[p\] + 0x1C), 0xC0);/(s32)view->unk28 - 0xC, *(s32 *)((u8 *)\&g_race_records[p] + 0x20), 0xC0);/
+s/    if (g_pause_open == 0 && (g_mp_hud_flags & 0x1000)) {/    if (g_mp_hud_flags \& 0x1000) {/
 s/        mx = ((s32)((struct_eu_BE628 \*)g_player_cams)->unk30 - table\[32\]) \* 4;/        mx = ((s32)((struct_eu_BE628 *)g_player_cams)->unk30 - table[31]) * 4;/
 s/            zoom = g_mp_map_scale \* g_mp_map_hires_factor;/            zoom = g_mp_map_scale;/
 s/            size = 0x63;/            size = 0x64;/
@@ -50,5 +50,5 @@ s/                } else if (i < g_player_count) {/                } else if (i 
 s/                cx = fx + (f32)(s32)(obj->x_position \* zoom);/                cx = fx + (obj->x_position * zoom);/
 s/                cy = fy + (f32)(s32)(obj->z_position \* zoom);/                cy = fy + (f32)(s32)(obj->y_position * zoom);/
 s/            for (i = 0; i < 25; i++) {/            for (i = 0; i < 24; i++) {/
-s/    if (g_pause_open == 0 && (D_80090160 & 0x20)) {/    if (D_80090160 \& 0x20) {/
+s/    if (g_pause_open == 0 && (g_mp_hud_flags & 0x20)) {/    if (g_mp_hud_flags \& 0x20) {/
 s/        gdl = radar_draw(gdl, scale, table, 0x2C30, 0);/        gdl = radar_draw(gdl, scale, table, 0x2C30, 1);/

@@ -4,13 +4,13 @@ s/g_settings\[3\] >= 3 \&\& g_mp_time_left <= 0/g_settings[3] >= 3 \&\& g_mp_tim
 s/g_settings\[3\] >= 3 \&\& g_mp_time_left <= 0/g_settings[3] >= 3 || g_mp_time_left <= 0/ % ffa_time_left ffa_time_neg
 s/\*(s16 \*) (g_menu_state + 0x46 + i \* 2) >= g_settings_score_limit/*(s16 *) (g_menu_state + 0x46 + i * 2) > g_settings_score_limit/ % ffa_limit_eq
 s/                lim = g_settings_score_limit;/                lim = 5000;/ % ffa_limit
-s/if ((D_800D18A0 \& (1 << i)) \&\& g_mp_fixed_placings\[i\] == -1) {/if ((D_800D18A0 \& (2 << i)) \&\& g_mp_fixed_placings[i] == -1) {/ % ffa_elim
+s/if ((g_player_view_hidden_mask \& (1 << i)) \&\& g_mp_fixed_placings\[i\] == -1) {/if ((g_player_view_hidden_mask \& (2 << i)) \&\& g_mp_fixed_placings[i] == -1) {/ % ffa_elim
 s/                g_mp_fixed_placings\[i\] = g_mp_next_placing--;/                g_mp_fixed_placings[i] = --g_mp_next_placing;/ % ffa_elim
 s/g_players_alive - g_menu_queue_drop_count < 2 ||/g_players_alive - g_menu_queue_drop_count < 1 ||/ % ffa_queue
 s/|| g_humans_alive - g_menu_queue_drop_count <= 0)/|| g_humans_alive - g_menu_queue_drop_count < 0)/ % ffa_queue2
-s/if (D_80090160 \& 0x80) {/if (D_80090160 \& 0x81) {/ % ffa_f01
-s/        } else if ((s8) D_80087640\[i\].pad28\[2\] != 0x7F) {/        } else if ((s8) D_80087640[i].pad28[2] != 0x7E) {/ % ffa_f80
-s/                    g_mp_placings\[i\] = D_80087640\[i\].pad28\[1\];/                    g_mp_placings[i] = D_80087640[i].pad28[0];/ % ffa_f80
+s/if (g_mp_hud_flags \& 0x80) {/if (g_mp_hud_flags \& 0x81) {/ % ffa_f01
+s/        } else if ((s8) g_race_records\[i\].pad28\[2\] != 0x7F) {/        } else if ((s8) g_race_records[i].pad28[2] != 0x7E) {/ % ffa_f80
+s/                    g_mp_placings\[i\] = g_race_records\[i\].pad28\[1\];/                    g_mp_placings[i] = g_race_records[i].pad28[0];/ % ffa_f80
 s/                if (g_player_start_state\[i\] == 10) {/                if (g_player_start_state[i] == 11) {/ % ffa_spect
 s/                    \*out = g_mp_fixed_placings\[i\];/                    *out = 0;/ % ffa_elim_fixed
 s/                \*out = 1;/                *out = 0;/ % ffa_rank
@@ -41,8 +41,8 @@ s/            if (j == i || g_mp_fixed_placings\[j\] != -1) {/            if (j 
 s/            if (tm\[col + i\] < tm\[col + j\]) {/            if (tm[col + i] <= tm[col + j]) {/ % team_m9a team_4
 s/                if (tm\[i\] < tm\[j\]) {/                if (tm[i] > tm[j]) {/ % team_tie4
 s/                } else if (tm\[i\] == tm\[j\] \&\& tm\[12 + j\] < tm\[12 + i\]) {/                } else if (tm[i] == tm[j] \&\& tm[12 + j] > tm[12 + i]) {/ % team_tie team_tie2 team_tie3
-s/        if (g_player_start_state\[i\] != 10 \&\& !(D_800D18A0 \& (1 << i))) {/        if (!(D_800D18A0 \& (1 << i))) {/ % team_spect
-s/        if (g_player_start_state\[i\] != 10 \&\& !(D_800D18A0 \& (1 << i))) {/        if (g_player_start_state[i] != 10) {/ % team_elim team_elim2
+s/        if (g_player_start_state\[i\] != 10 \&\& !(g_player_view_hidden_mask \& (1 << i))) {/        if (!(g_player_view_hidden_mask \& (1 << i))) {/ % team_spect
+s/        if (g_player_start_state\[i\] != 10 \&\& !(g_player_view_hidden_mask \& (1 << i))) {/        if (g_player_start_state[i] != 10) {/ % team_elim team_elim2
 s/            if (g_mp_human_teams \& (1 << i)) {/            if (g_mp_human_teams \& (2 << i)) {/ % team_cpu1 team_cpu
 s/    if (humans == 0 || live < 2) {/    if (humans == 0 || live < 1) {/ % team_elim
 s/    if (humans == 0 || live < 2) {/    if (live < 2) {/ % team_cpu

@@ -12,13 +12,13 @@ s/            obj->unk81 = 0;/            ;/
 s/            obj->unk83 = 0;/            ;/
 s/            b\[0xAD\] = 0;/            ;/
 s/            obj->unkB8 = 0.0f;/            ;/
-s/if (D_800BE616 == 0 || obj->interaction_state != 1) {/if (D_800BE616 == 0 \&\& obj->interaction_state != 1) {/
+s/if (g_mp_mode_active == 0 || obj->interaction_state != 1) {/if (g_mp_mode_active == 0 \&\& obj->interaction_state != 1) {/
 s/        obj->unk21C = 0;/        ;/
 s/    if (stun == 0xFF) {/    if (stun == 0xFE) {/
 s/if (stun != 0xFE \&\& (obj->health != 0 || obj->interaction_state != 1)) {/if (stun != 0xFE \&\& (obj->health != 0)) {/
 s/if (stun != 0xFE \&\& /if (/
 s/obj->stunned = stun - 1;/obj->stunned = stun - 2;/
-s/obj->unk10C -= D_800CC264;/obj->unk10C -= 1;/
+s/obj->unk10C -= g_obj_time_step_pct;/obj->unk10C -= 1;/
 s/if (obj->unk28 < 0.2f \&\& (obj->unkF4 \& 0x100)) {/if (obj->unk28 < 0.2f) {/
 s/if (obj->unk28 < 0.2f \&\& /if (obj->unk28 < 0.25f \&\& /
 s/    if (obj->unk10C <= 0) {/    if (obj->unk10C < 0) {/

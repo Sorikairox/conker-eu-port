@@ -164,7 +164,7 @@ u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 s32 puff_texture_set(s32 arg0, s32 arg1);
 extern f32 g_cam_near_plane;     /* screen width; was D_800D9F40 */
 extern f32 g_cam_far_plane;     /* screen height; was D_800D9F3C */
-extern f32 D_800D3A00[2];  /* frustum side slopes */
+extern f32 g_cam_zoom_factors[2];  /* frustum side slopes; was D_800D3A00 */
 extern f32 g_view_mtxf[][4][4]; /* was D_800DA030 */
 extern Gfx g_puff_sprite_dl[]; /* was D_8008D190 */
 extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
@@ -184,7 +184,7 @@ s32 puff_sprite_draw(s32 gfxArg, u8 *obj, s16 player) {
 
     if (obj[0] != 0xC && obj[0] != 0x59) {
         if (view_point_cull_test((u8 *) g_view_mtxf[player], *(s16 *) (obj + 0x90), *(s16 *) (obj + 0x92),
-                          *(s16 *) (obj + 0x94), g_cam_near_plane, g_cam_far_plane, D_800D3A00[0], D_800D3A00[1], NULL,
+                          *(s16 *) (obj + 0x94), g_cam_near_plane, g_cam_far_plane, g_cam_zoom_factors[0], g_cam_zoom_factors[1], NULL,
                           NULL) != 0) {
             if (obj[0] == 8 && (obj[0xB2] & (1 << player))) {
                 obj[0xB2] |= 0x10 << player;

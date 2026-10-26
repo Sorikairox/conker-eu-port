@@ -72,12 +72,12 @@ void obj_effect_emitter_trail(s32 arg0, s32 arg1) {
 
 /* was func_1506AAE4 */
 void obj_effect_shot_impact(s32 arg0, s32 arg1) {
-    shot_impact_effects(arg0, D_800D1980, D_eu_800D1990, 0xFF, 1);
+    shot_impact_effects(arg0, g_obj_effect_pos, D_eu_800D1990, 0xFF, 1);
 }
 
 /* was func_1506AB20 */
 void obj_effect_explosion(s32 arg0, s32 arg1) {
-    explosion_effects_at(arg0, D_800D1980, D_eu_800D1990, 0xFF, 1);
+    explosion_effects_at(arg0, g_obj_effect_pos, D_eu_800D1990, 0xFF, 1);
 }
 
 s32 bullet_impact_effects(f32 *, f32 *, s32, s32, s32, s32);
@@ -90,9 +90,9 @@ void obj_effect_directed_burst(u8 *arg0, s32 arg1) {
     sp2C[0] = *(f32 *)(arg0 + 0x14);
     sp2C[1] = *(f32 *)(arg0 + 0x18);
     sp2C[2] = *(f32 *)(arg0 + 0x1C);
-    sp20[0] = ((f32 *)D_eu_800D1990)[0] - ((f32 *)D_800D1980)[0];
-    sp20[1] = ((f32 *)D_eu_800D1990)[1] - ((f32 *)D_800D1980)[1];
-    sp20[2] = ((f32 *)D_eu_800D1990)[2] - ((f32 *)D_800D1980)[2];
+    sp20[0] = ((f32 *)D_eu_800D1990)[0] - ((f32 *)g_obj_effect_pos)[0];
+    sp20[1] = ((f32 *)D_eu_800D1990)[1] - ((f32 *)g_obj_effect_pos)[1];
+    sp20[2] = ((f32 *)D_eu_800D1990)[2] - ((f32 *)g_obj_effect_pos)[2];
     bullet_impact_effects(sp2C, sp20, 0, 0, 0xFF, 1);
 }
 
@@ -101,7 +101,7 @@ void obj_effect_trail_smoke_light(s32 arg0, s32 arg1) {
     obj_trail_smoke_light_spawn(arg0, 0xFF, 1);
 }
 
-extern f32 D_80099DE8;
+extern f32 g_obj_effect_k_9de8; /* was D_80099DE8 */
 
 /* was func_1506AC24 */
 void obj_effect_flash_light(struct127 *arg0, s32 arg1) {
@@ -125,7 +125,7 @@ void obj_effect_flash_light(struct127 *arg0, s32 arg1) {
     header.unk2 = 0x12C;
     header.unk4 = 5;
     data.unk4 = 80.0f;
-    data.unkC = D_80099DE8;
+    data.unkC = g_obj_effect_k_9de8;
     temp_v0 = light_create_with_ctrl(&header, &header2, 0, 0xFF, 0xFF, 0x5A, 0xFF, 0, sizeof(data), 0xFF, 1);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &data, sizeof(data));
@@ -142,9 +142,9 @@ void obj_effect_directed_burst_alt(u8 *arg0, s32 arg1) {
     sp2C[0] = *(f32 *)(arg0 + 0x14);
     sp2C[1] = *(f32 *)(arg0 + 0x18);
     sp2C[2] = *(f32 *)(arg0 + 0x1C);
-    sp20[0] = ((f32 *)D_eu_800D1990)[0] - ((f32 *)D_800D1980)[0];
-    sp20[1] = ((f32 *)D_eu_800D1990)[1] - ((f32 *)D_800D1980)[1];
-    sp20[2] = ((f32 *)D_eu_800D1990)[2] - ((f32 *)D_800D1980)[2];
+    sp20[0] = ((f32 *)D_eu_800D1990)[0] - ((f32 *)g_obj_effect_pos)[0];
+    sp20[1] = ((f32 *)D_eu_800D1990)[1] - ((f32 *)g_obj_effect_pos)[1];
+    sp20[2] = ((f32 *)D_eu_800D1990)[2] - ((f32 *)g_obj_effect_pos)[2];
     bullet_impact_effects(sp2C, sp20, 0, 1, 0xFF, 1);
 }
 
@@ -174,20 +174,20 @@ void obj_effect_task_spawn(u8 *arg0, u8 *arg1) {
     }
 }
 
-extern s32 D_800CC680;   /* bit mask of the players to affect */
+extern s32 g_obj_effect_player_mask;   /* bit mask of the players to affect; was D_800CC680 */
 void object_impact_effects(u8 *, f32 *, f32 *, f32 *, s32, s32);
 
-// players_effect_at_point: for every player whose bit is set in D_800CC680, object_impact_effects(player, D_800D1980,
+// players_effect_at_point: for every player whose bit is set in g_obj_effect_player_mask, object_impact_effects(player, g_obj_effect_pos,
 // D_eu_800D1990, NULL, 0xFF, 1) (the point / vector obj_effect_run_handler fills in).
-// P184: handler 10 of obj_effect_run_handler's D_800864B0 table, so it takes the dispatch arguments (unused).
+// P184: handler 10 of obj_effect_run_handler's g_obj_effect_fns table, so it takes the dispatch arguments (unused).
 /* was func_1506AEA0 */
 void obj_effect_players_impact(u8 *obj, void *arg) {
-    s32 mask = D_800CC680;
+    s32 mask = g_obj_effect_player_mask;
     u8 *player = (u8 *) g_objects;
 
     while (mask != 0) {
         if (mask & 1) {
-            object_impact_effects(player, (f32 *) D_800D1980, (f32 *) D_eu_800D1990, NULL, 0xFF, 1);
+            object_impact_effects(player, (f32 *) g_obj_effect_pos, (f32 *) D_eu_800D1990, NULL, 0xFF, 1);
         }
         mask >>= 1;
         player += 0x32C;
@@ -221,14 +221,14 @@ void obj_effect_misc_spawn(s32 arg0, s32 arg1) {
     obj_ribbon_spawn(arg0, 0, 1, 0xFF, 1);
 }
 
-extern f32 D_800CC674[3];   /* vector copied to D_eu_800D1990 for the effect handlers */
+extern f32 g_obj_effect_vec[3];   /* vector copied to D_eu_800D1990 for the effect handlers; was D_800CC674 */
 typedef void (*ObjEffectHandler)(u8 *obj, void *arg);
-extern ObjEffectHandler D_800864B0[15];   /* .data: obj_effect_debris_spray .. obj_effect_ground_blast_alt */
-// obj_effect_dispatch: effect `type` (0..14) on obj: publishes obj's vector at +0x2C as the effect point D_800D1980 and
-// D_800CC674 as the effect vector D_eu_800D1990, then runs the type's handler D_800864B0[type](obj, arg) (NULL = none).
+extern ObjEffectHandler g_obj_effect_fns[15];   /* .data: obj_effect_debris_spray .. obj_effect_ground_blast_alt; was D_800864B0 */
+// obj_effect_dispatch: effect `type` (0..14) on obj: publishes obj's vector at +0x2C as the effect point g_obj_effect_pos and
+// g_obj_effect_vec as the effect vector D_eu_800D1990, then runs the type's handler g_obj_effect_fns[type](obj, arg) (NULL = none).
 /* was func_1506B04C */
 void obj_effect_run_handler(u8 *obj, s32 type, void *arg) {
-    f32 *point = (f32 *) D_800D1980;
+    f32 *point = (f32 *) g_obj_effect_pos;
     f32 *vec = (f32 *) D_eu_800D1990;
     void (*handler)(u8 *obj, void *arg);
 
@@ -238,10 +238,10 @@ void obj_effect_run_handler(u8 *obj, s32 type, void *arg) {
     point[0] = *(f32 *) (obj + 0x2C);
     point[1] = *(f32 *) (obj + 0x30);
     point[2] = *(f32 *) (obj + 0x34);
-    vec[0] = D_800CC674[0];
-    vec[1] = D_800CC674[1];
-    vec[2] = D_800CC674[2];
-    handler = D_800864B0[type];
+    vec[0] = g_obj_effect_vec[0];
+    vec[1] = g_obj_effect_vec[1];
+    vec[2] = g_obj_effect_vec[2];
+    handler = g_obj_effect_fns[type];
     if (handler != NULL) {
         handler(obj, arg);
     }

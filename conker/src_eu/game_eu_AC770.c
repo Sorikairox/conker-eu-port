@@ -13,15 +13,15 @@ void idle_list_add(u8 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
-extern u8 *D_80086FC4[];
-extern u8 D_8009BFC0[];
+extern u8 *g_idle_groups[]; /* was D_80086FC4 */
+extern u8 g_idle_group_lengths[]; /* was D_8009BFC0 */
 /* was func_1507EF98 */
 void idle_list_add_group(s32 arg0, s32 *arg1, s32 arg2) {
     u8 *src;
     s32 len;
     s32 v;
-    src = D_80086FC4[arg2];
-    len = D_8009BFC0[arg2];
+    src = g_idle_groups[arg2];
+    len = g_idle_group_lengths[arg2];
     v = *arg1;
     if (v + len < 0x28) {
         bcopy(src, v + arg0, len);
@@ -233,14 +233,14 @@ s32 idle_delay_random(s32);
 s32 obj_near_reachable_node(struct127 *);
 u8 move_watch_state_matches(u8 *, s16, s16, s16, s16, s16);
 u8 *attachment_find_by_slot(u8 *, s32, s32);
-extern u8 *D_80086F40[];
+extern u8 *g_idle_sets[]; /* was D_80086F40 */
 
 /* P64: the idle-chooser state of a player controller, ctl +0x58 (idle_mode_update / F640 / F834 / F3B0). */
 typedef struct {
     /* 0x0 */ u8  active;     /* ctl +0x58 */
     /* 0x1 */ u8  delay;      /* ctl +0x59 */
     /* 0x2 */ u16 timer;      /* ctl +0x5A: frames idle */
-    /* 0x4 */ u8  set;        /* ctl +0x5C: idle set (D_80086F40 index, 0 = none) */
+    /* 0x4 */ u8  set;        /* ctl +0x5C: idle set (g_idle_sets index, 0 = none) */
     /* 0x5 */ u8  entry;      /* ctl +0x5D: position inside the set */
     /* 0x6 */ u8  pad6;
     /* 0x7 */ u8  recent[5];  /* ctl +0x5F: last chosen sets, newest first */
@@ -249,11 +249,11 @@ typedef struct {
 } IdleState;
 
 /* P64: picks the next idle set. Collects candidate set ids into list[40] (idle_list_add adds one id,
- * idle_list_add_group appends the D_80086FC4 group n): a forced set (rec +0x13A / +0x139), the D_800D18C0 & 2
+ * idle_list_add_group appends the g_idle_groups group n): a forced set (rec +0x13A / +0x139), the g_idle_request_flags & 2
  * request (3), the "bored" set 0xB / 0xC (ctl +0x66 with no character idle, 0xC after 100 frames, which also
  * resets the mode and calls obj_broadcast_bored), 0 when hurt (health < 2), held (move_watch_state_matches) or the timer is
  * still below idle_delay_random(mode). Otherwise idle_mode_update updates the mode and a group is chosen: by state /
- * character / level (g_level_id) / D_800D18C0 & 1, else by the mode (0, 1, plus 3 in mode 2 after 4 sets
+ * character / level (g_level_id) / g_idle_request_flags & 1, else by the mode (0, 1, plus 3 in mode 2 after 4 sets
  * when obj_near_reachable_node). idle_list_filter_recent filters the list against the recent sets; a random survivor becomes
  * ctl +0x5C (entry 0) and is pushed onto recent[] (idle_recent_push; idle_recent_remove first drops it when
  * idle_list_filter_recent says it was already there). */
@@ -276,9 +276,9 @@ void idle_choose_next_set(void) {
         }
         goto choose;
     }
-    if (D_800D18C0 & 2) {
+    if (g_idle_request_flags & 2) {
         idle_list_add(list, &n, 3);
-        D_800D18C0 = 0;
+        g_idle_request_flags = 0;
         goto choose;
     }
     ctl = rec->unk31C;
@@ -315,7 +315,7 @@ void idle_choose_next_set(void) {
     } else if (attachment_find_by_slot((u8 *)rec, 0x17, 0) != NULL) {
         group = 6;
     } else if (g_level_id == 0x31) {
-        group = (D_800D18C0 & 4) ? 8 : 7;
+        group = (g_idle_request_flags & 4) ? 8 : 7;
     } else if (g_cur_obj->id == 0x96) {
         group = 2;
     } else {
@@ -325,11 +325,11 @@ void idle_choose_next_set(void) {
                 group = 2;
                 break;
             default:
-                if (D_800D18C0 != 0) {
-                    if (D_800D18C0 & 1) {
+                if (g_idle_request_flags != 0) {
+                    if (g_idle_request_flags & 1) {
                         group = 4;
                     }
-                    D_800D18C0 = 0;
+                    g_idle_request_flags = 0;
                 }
                 break;
         }
@@ -374,7 +374,7 @@ s32 idle_set_advance(void) {
         return 1;
     }
     st->entry++;
-    if (D_80086F40[st->set][st->entry] == 0) {
+    if (g_idle_sets[st->set][st->entry] == 0) {
         st->set = 0;
         st->entry = 0;
         return 1;
@@ -407,14 +407,14 @@ block_7:
     return (random_int() % var_a0) + var_v1;
 }
 
-extern u8 D_800B89C4[];
+extern u8 g_objects_ref_id[]; /* was D_800B89C4 */
 
 /* was func_1507F92C */
 void player_play_idle_base_anim(struct127 *arg0) {
     s32 v;
 
     if (arg0->unk13C >= 0x64) {
-        switch (D_800B89C4[arg0->unk13C * 0x32C]) {
+        switch (g_objects_ref_id[arg0->unk13C * 0x32C]) {
         case 0x57:
             v = 0x115;
             break;
@@ -442,15 +442,15 @@ void player_play_idle_base_anim(struct127 *arg0) {
 s32 player_hit_reaction(struct127 *, s32);
 void idle_choose_next_set(void);
 s32 idle_set_advance(void);
-extern u8 *D_80086F40[];
-extern u8 D_8009BC80[][8];
+extern u8 *g_idle_sets[]; /* was D_80086F40 */
+extern u8 g_idle_anim_entries[][8]; /* was D_8009BC80 */
 
 /* P60: idle animation of the current player record g_cur_obj (g_cur_obj_index = its index, players only; not when
- * D_800C35EA == 1 or the record's +5 is 4). Marks the controller's idle state (ctl +0x58 = 1); while the idle
+ * g_cutscene_slot_state == 1 or the record's +5 is 4). Marks the controller's idle state (ctl +0x58 = 1); while the idle
  * delay ctl +0x59 runs it counts down. Out of health: player_hit_reaction(rec, 0). Else the run / jump locks and the
  * turn are reset and an idle animation is chosen: ctl +0x17 (random 0x4F / 0x4D), a per-character idle
  * (ctl +0x78, below), carried items / states (ctl +0x1B2, +0x4E, +0x8, +0x1A, +0x32), held by another record
- * (player_play_idle_base_anim), the cutscene idle 0xF (D_800BE616), else the idle sets D_80086F40 / D_8009BC80 (u16 anim,
+ * (player_play_idle_base_anim), the cutscene idle 0xF (g_mp_mode_active), else the idle sets g_idle_sets / g_idle_anim_entries (u16 anim,
  * speed / 100, blend / 10, delay) chosen by ctl +0x5C / +0x5D after idle_set_advance / idle_choose_next_set. */
 /* was func_1507F640 */
 void player_idle_animation(void) {
@@ -462,7 +462,7 @@ void player_idle_animation(void) {
     f32 speed = 1.0f;
     f32 blend = 4.0f;
 
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         return;
     }
     rec = g_cur_obj;
@@ -555,7 +555,7 @@ void player_idle_animation(void) {
         player_play_idle_base_anim(rec);
         return;
     }
-    if (D_800BE616 != 0 && ch != 0x23 && ch != 0x16 && ch != 9) {
+    if (g_mp_mode_active != 0 && ch != 0x23 && ch != 0x16 && ch != 9) {
         obj_start_anim(rec, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
         return;
     }
@@ -578,8 +578,8 @@ void player_idle_animation(void) {
         idle_choose_next_set();
     }
 
-    e = D_8009BC80[D_80086F40[ctl->unk5C][ctl->unk5D]];
-    if (D_80086F40[ctl->unk5C][ctl->unk5D] == 0) {
+    e = g_idle_anim_entries[g_idle_sets[ctl->unk5C][ctl->unk5D]];
+    if (g_idle_sets[ctl->unk5C][ctl->unk5D] == 0) {
         rec = g_cur_obj;
         switch (rec->unk31C->unk78) {
             case 0x09: anim = 0x3A; break;
@@ -594,7 +594,7 @@ void player_idle_animation(void) {
                 break;
         }
         if (anim != -1) {
-            e = D_8009BC80[anim];
+            e = g_idle_anim_entries[anim];
         }
     }
     obj_start_anim(g_cur_obj, *(u16 *) e, e[2] * 0.01f, e[3] * 0.1f, 0.0f, 0.0f, 0);
@@ -607,16 +607,16 @@ void music_stop_song(s32, s32);
 void music_post_event_request(u32, s32);
 void music_clear_event_flag1(s32);
 void actor_sound_stop(struct127 *arg0);
-extern u8 *D_80086F40[];
-extern u8 D_8009BC80[][8];
-extern s32 D_80041C50[];
-extern u8 D_80041D40;
-extern s32 D_800D1CE4;
+extern u8 *g_idle_sets[]; /* was D_80086F40 */
+extern u8 g_idle_anim_entries[][8]; /* was D_8009BC80 */
+extern s32 g_music_pulse_level[]; /* was D_80041C50 */
+extern u8 g_music_pulse_player; /* was D_80041D40 */
+extern s32 g_surface_ambient_song; /* was D_800D1CE4 */
 
 /* Per-frame surface effects of the record's current floor material (ctl = rec->unk31C + 0x58: +4 material set,
- * +5 index, +6 the flags applied last frame). Flags (D_8009BC80[mat][6]): 0x10 scales the model's +0x08 by the
- * D_80041C50 level, and on change 1 = record flag unk2F8 bit 0, 2 = music_post_event_request / music_clear_event_flag1, 4 = ambient
- * loop 0x15 / 0x16 (D_800D1CE4) start / stop, 8 cleared = actor_sound_stop. */
+ * +5 index, +6 the flags applied last frame). Flags (g_idle_anim_entries[mat][6]): 0x10 scales the model's +0x08 by the
+ * g_music_pulse_level level, and on change 1 = record flag unk2F8 bit 0, 2 = music_post_event_request / music_clear_event_flag1, 4 = ambient
+ * loop 0x15 / 0x16 (g_surface_ambient_song) start / stop, 8 cleared = actor_sound_stop. */
 /* was func_1508000C */
 void obj_surface_effects_update(struct127 *rec) {
     u8 *ctl = (u8 *)rec->unk31C + 0x58;
@@ -627,10 +627,10 @@ void obj_surface_effects_update(struct127 *rec) {
     f32 k;
 
     if (set != 0) {
-        flags = D_8009BC80[D_80086F40[set][ctl[5]]][6];
+        flags = g_idle_anim_entries[g_idle_sets[set][ctl[5]]][6];
     }
     if (flags & 0x10) {
-        k = ((f32)D_80041C50[D_80041D40 * 16] - 5462.0f) * 1.2f;
+        k = ((f32)g_music_pulse_level[g_music_pulse_player * 16] - 5462.0f) * 1.2f;
         if (k < 0.0f) {
             k = 0.0f;
         }
@@ -654,14 +654,14 @@ void obj_surface_effects_update(struct127 *rec) {
         music_clear_event_flag1(1);
     }
     if (gained & 4) {
-        if (D_800D1CE4 == 0) {
-            D_800D1CE4 = 0x15;
-        } else if (D_800D1CE4++ == 0x17) { /* 0x15 -> 0x16 -> 0x17 -> 0x15 */
-            D_800D1CE4 = 0x15;
+        if (g_surface_ambient_song == 0) {
+            g_surface_ambient_song = 0x15;
+        } else if (g_surface_ambient_song++ == 0x17) { /* 0x15 -> 0x16 -> 0x17 -> 0x15 */
+            g_surface_ambient_song = 0x15;
         }
-        music_play_song(D_800D1CE4, 0, 0);
+        music_play_song(g_surface_ambient_song, 0, 0);
     } else if (lost & 4) {
-        music_stop_song(D_800D1CE4, 0);
+        music_stop_song(g_surface_ambient_song, 0);
     }
     if (lost & 8) {
         actor_sound_stop(rec);
@@ -686,7 +686,7 @@ void player_idle_state_update(struct127 *arg0) {
         if (temp_v1 != 0) {
             arg0->unk13A = temp_v1 - 1;
         }
-        if (((*(u8 *)((u8 *)temp_v0 + 0)) == 1) && (D_800C35EA != 1)) {
+        if (((*(u8 *)((u8 *)temp_v0 + 0)) == 1) && (g_cutscene_slot_state != 1)) {
             temp_a1_2 = (*(u16 *)((u8 *)temp_v0 + 2));
             if ((s32) temp_a1_2 < (0xFFFF - g_frame_ticks)) {
                 (*(u16 *)((u8 *)temp_v0 + 2)) = (u16) (temp_a1_2 + g_frame_ticks);
@@ -731,16 +731,16 @@ void obj_broadcast_bored(u8 *arg0)
 // obj_near_reachable_node: P256: 1 when `obj` stands in a zone of kind 5 or 0xB (trigger_find_at_point(4, kind, truncated
 // x, y, z)) and one of the nodes of the lists g_node_lists[0][0x15 / 0x16 / 0x17] (position at node +0x98) lies within
 // 1000 units (squared distance < D_8009C0DC = 1e6) and passes look_point_in_joint_range(obj index, joints 0 / 0, node position,
-// out, 90.0f, 0, 0); else 0. The list ids come from D_80086FF0 {0x15, 0x16, 0x17} (struct copy to the stack).
+// out, 90.0f, 0, 0); else 0. The list ids come from g_bored_list_ids {0x15, 0x16, 0x17} (struct copy to the stack).
 s32 trigger_find_at_point(s32, s32, s32 x, s32 y, s32 z);
 s32 look_point_in_joint_range(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
 typedef struct {
     s32 id[3];
 } ListIds3;
-extern ListIds3 D_80086FF0;
+extern ListIds3 g_bored_list_ids; /* was D_80086FF0 */
 /* was func_150803E0 */
 s32 obj_near_reachable_node(struct127 *obj) {
-    ListIds3 lists = D_80086FF0;
+    ListIds3 lists = g_bored_list_ids;
     f32 out[7];
     struct_eu_node *node;
     f32 *pos;

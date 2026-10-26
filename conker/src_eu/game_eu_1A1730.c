@@ -12,12 +12,12 @@ typedef struct {
 extern u8 *g_level_model_colour_counts;               /* group count per mesh; was D_800B1244 */
 extern VtxColourGroup **g_level_model_colour_groups; /* was D_800B1240 */
 extern u8 *g_level_part_vtx;               /* mesh vertex buffer (16-byte vertices); was D_800B1220 */
-extern u8 *D_800BE930;               /* base vertex colours, 3 bytes per vertex */
+extern u8 *g_vtx_colour_backup;               /* base vertex colours, 3 bytes per vertex; was D_800BE930 */
 
 // vertex_colours_blend: blends the vertex colours of mesh's colour groups (all with group 0xFF, else only that one)
 // from their base colour towards the group's target colour by t / 256, writing the vertex rgb (+0xC..+0xE). Base
-// colour: per group / vertex table D_800BE940[mesh][g] when g_level_header +0x21 bit 2 is set, else D_800BE930 by
-// vertex index (offset by D_800BE944[slot] vertices for mode != 0). Mode 0 writes the g_level_part_vtx vertices, other
+// colour: per group / vertex table g_vtx_colour_group_backup[mesh][g] when g_level_header +0x21 bit 2 is set, else g_vtx_colour_backup by
+// vertex index (offset by g_vtx_colour_room_base[slot] vertices for mode != 0). Mode 0 writes the g_level_part_vtx vertices, other
 // modes the vertex buffer of g_world_objs[slot] (+0x20 + g_dl_buf_index * 4). Without bit 2, mode 0 needs bit 0 and mode 1
 // bit 1 of +0x21.
 /* was func_15173F20 */
@@ -70,11 +70,11 @@ void vtx_colour_groups_blend(s32 mesh, s32 mode, s32 t, s32 group, s32 slot) {
         for (j = 0; j < grp->count; j++, to += 3) {
             n = grp->vtx[j];
             if (((u8 *) g_level_header)[0x21] & 4) {
-                from = (*(u8 ****) D_800BE940)[mesh][g] + j * 3;
+                from = (*(u8 ****) g_vtx_colour_group_backup)[mesh][g] + j * 3;
             } else if (mode == 0) {
-                from = D_800BE930 + n * 3;
+                from = g_vtx_colour_backup + n * 3;
             } else {
-                from = D_800BE930 + (*(u16 **) D_800BE944)[slot] * 3 + n * 3;
+                from = g_vtx_colour_backup + (*(u16 **) g_vtx_colour_room_base)[slot] * 3 + n * 3;
             }
             v = vtxBuf + n * 16;
             v[0xC] = (((to[0] - from[0]) * t) >> 8) + from[0];

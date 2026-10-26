@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A03E0[];
-extern u8 D_800A0430[];
+extern u8 g_debris_dust_ids[]; /* was D_800A03E0 */
+extern u8 g_debris_dust_tex_params_a[]; /* was D_800A0430 */
 
 void scenery_platform_drift_update(u8 *, s32, s32, f32); /* P95: f32 parameter */
 
@@ -80,8 +80,8 @@ s16 *obj_adjust_entries_type21(s16 *arg0, s32 arg1) {
 void hitinfo_from_obj_floor(void *, u8 *);
 s32 emit_debris_burst(s32 *, s32 *, s32 *, s32, s32, s32, s32, s32, s32, s32 *, f32, s32, s32, s32, s32);
 void obj_get_fx_point_b(u8 *, f32 *, f32 *, f32 *);
-extern s32 D_800A0408;
-extern s32 D_800A0434;
+extern s32 g_debris_dust_scales; /* was D_800A0408 */
+extern s32 g_debris_dust_tex_params_b; /* was D_800A0434 */
 
 /* was func_150BE994 */
 void obj_debris_dust_burst(u8 *arg0, s32 arg1, s32 arg2) {
@@ -182,7 +182,7 @@ void obj_debris_dust_burst(u8 *arg0, s32 arg1, s32 arg2) {
         sp.u118 = 14.098001f;
         sp.u11C = 1.0f;
         sp.u110 = sp.u148;
-        emit_debris_burst(&sp.uE0, ((u8 *)&D_800A03E0), &D_800A0408, 0xA, 0, 0, 0, 1, -1, &sp.u124, 55.0f, 0, 0, temp_s1, arg2);
+        emit_debris_burst(&sp.uE0, ((u8 *)&g_debris_dust_ids), &g_debris_dust_scales, 0xA, 0, 0, 0, 1, -1, &sp.u124, 55.0f, 0, 0, temp_s1, arg2);
         sp.uA4 = 0x11;
         sp.uA8 = 9;
         (*(f32 *)((u8 *)(&sp.uAC) + 0)) = (f32) (*(f32 *)((u8 *)(&sp.u154) + 0));
@@ -201,7 +201,7 @@ void obj_debris_dust_burst(u8 *arg0, s32 arg1, s32 arg2) {
         sp.uD4 = 0.15100001f;
         sp.uD8 = 0.15900001f;
         sp.uDC = 29.787f;
-        emit_textured_burst(&sp.uA4, ((u8 *)&D_800A0430), &D_800A0434, 1, 10.0f, 0U, (u8) temp_s1, arg2);
+        emit_textured_burst(&sp.uA4, ((u8 *)&g_debris_dust_tex_params_a), &g_debris_dust_tex_params_b, 1, 10.0f, 0U, (u8) temp_s1, arg2);
         sp.u60.unk0 = (*(f32 *)((u8 *)(&sp.u154) + 0));
         sp.u60.unk4 = (*(f32 *)((u8 *)(&sp.u154) + 4));
         sp.u60.unk8 = (*(f32 *)((u8 *)(&sp.u154) + 8));

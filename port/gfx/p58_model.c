@@ -1,7 +1,7 @@
 /* P58: runtime checks of P51's model path (link-time wraps), and a posed-skeleton preview.
  *
  * ?p58model=N  log the first N calls (then every 256th) of
- *   - model_load (P51 C model load): arguments, result, D_800D19A0[id] / D_800C5000[id] after;
+ *   - model_load (P51 C model load): arguments, result, g_model_bases[id] / g_model_skeletons[id] after;
  *   - anim_eval_joint_matrices (P51 C skeleton evaluator, nm_asm/D5E90_anim.c): object, animation state, joint count, remap
  *     slots and the callback table entries they select, the adjustment buffer (how far the 0x1000 scan runs), the
  *     asm stubs reached inside (the callbacks), and a sanity check of the n joint matrices written: finite, the
@@ -10,7 +10,7 @@
  * ?p58dump=K   at evaluator call K (of record 0), dump the root matrix and every joint matrix in full.
  * (P61: ?p58noterm is gone with the terminator; see below.)
  * ?p58pose=1   preview: after every game gfx task, draw Conker's ROM model (the P6/P14 viewer asset whose bone table
- *              equals D_800C5000[id]) in a box on the right with the joint matrices of record 0's last evaluation
+ *              equals g_model_skeletons[id]) in a box on the right with the joint matrices of record 0's last evaluation
  *              (gfx_demo.c gfx_pose_overlay). Diagnostic only (P61: the game draws its own model through obj_draw_model_dl now).
  *
  * P61: the P58 TEMPORARY 0x1000 terminator written before obj_adjust_list_build is removed: obj_adjust_list_build and
@@ -26,10 +26,10 @@ int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
 extern void (*port_stub_trace_hook)(const char *name);
-extern unsigned D_800D19A0[], D_800C5000[], D_800D1C90[];
+extern unsigned g_model_bases[], g_model_skeletons[], g_type_descs[]; /* was D_800D19A0; was D_800D1C90; was D_800C5000 */
 extern unsigned char g_objects[]; /* was D_800CC2D0 */
-extern unsigned D_800C42A8;
-extern int D_8008891C;
+extern unsigned g_obj_mtx_next; /* was D_800C42A8 */
+extern int g_anim_channel0_angle; /* was D_8008891C */
 void look_frame_cb_current(void);
 int look_head_body_by_kind(void);
 void obj_cb_pin_joint1_position(void);
@@ -57,7 +57,7 @@ int __wrap_model_load(int id, int a1, int a2, int a3, int a4) {
         unsigned id8 = (unsigned)id & 0xFF;
         port_log("[p58] model_load call %u frame %u: id %d a1 %d a2 %08X a3 %d a4 %d -> %d | D_800D19A0[id] %08X "
                  "D_800C5000[id] %08X D_800D1C90[id] %08X\n", calls, port_frame_count, id, a1, a2, a3, a4, r,
-                 D_800D19A0[id8], D_800C5000[id8], D_800D1C90[id8]);
+                 g_model_bases[id8], g_model_skeletons[id8], g_type_descs[id8]);
     }
     return r;
 }
@@ -106,13 +106,13 @@ static void p58_mul4(const float *a, const float *b, float *r) {
  * (+0x2D0) never gets a header and the evaluator always decodes an empty animation (bind pose). With p58anim, before
  * each evaluation of record 0 the state is filled the way anim_start_entry fills a fresh state for animation K - 1 of
  * the object's bank (from tools/port/difftest/anim_inputs.py, P51): A+0x40 <- the header record dir[key] read raw
- * from the ROM ((size + 15) & ~15 bytes, dir = obj +0x58, key = D_800D1588[id][anim].key), A+0x28 <- the ROM address
+ * from the ROM ((size + 15) & ~15 bytes, dir = obj +0x58, key = g_model_anim_banks[id][anim].key), A+0x28 <- the ROM address
  * of the key-frame stream dir[key + 1] (1 when A[0x45] = 0), A+8 = the frame time (advanced by p58speed / 10 per
  * evaluation, default 0.5, wrapping at A[0x43]), A+0x10 = 1, A+0x18 = (f32)A[0x43], A+0x3C = 0. Then the game's C
  * anim_copy_keyframes(A, 0, buf) copies the two key frames by DMA, as obj_build_model_instance does just before the evaluator. */
 extern unsigned char *port_rom;
 extern unsigned port_rom_size;
-extern unsigned D_800D1588[];
+extern unsigned g_model_anim_banks[]; /* was D_800D1588 */
 void anim_copy_keyframes(void *a, int arg1, int arg2);
 static unsigned char p58_dbuf[0x340] __attribute__((aligned(16)));
 static float p58_t;
@@ -120,7 +120,7 @@ static unsigned rom32(unsigned o) { return o + 4 <= port_rom_size ? (unsigned)po
 static int p58_anim_setup(unsigned char *A, const unsigned char *obj) {
     static int logged;
     unsigned id = vbe_ld8(obj + 4), k = (unsigned)fl_anim - 1;
-    const unsigned char *tb = (const unsigned char *)(uintptr_t)D_800D1588[id];
+    const unsigned char *tb = (const unsigned char *)(uintptr_t)g_model_anim_banks[id];
     unsigned dir = *(const unsigned *)(obj + 0x58), key, sfx, hoff, hinfo, soff, hsz, i;
     if (!tb || !dir || !port_rom) return -1;
     key = vbe_ld16(tb + 8 * k); sfx = vbe_ld16(tb + 8 * k + 2);
@@ -312,7 +312,7 @@ void p58_check_cbtable(void) {
         {(void *)look_frame_cb_current, "look_frame_cb_current"}, {(void *)look_head_body_by_kind, "look_head_body_by_kind"},
         {(void *)obj_cb_pin_joint1_position, "obj_cb_pin_joint1_position"}, {(void *)obj22_cb_scale_joint, "obj22_cb_scale_joint"},
         {(void *)look_joint_cb_combined, "look_joint_cb_combined"}};
-    const unsigned *t = (const unsigned *)&D_8008891C;
+    const unsigned *t = (const unsigned *)&g_anim_channel0_angle;
     for (int k = 1; k <= 5; k++) {
         const char *nm = "?";
         for (unsigned i = 0; i < 5; i++) if ((unsigned)(uintptr_t)fn[i].f == t[2 * k]) nm = fn[i].n;

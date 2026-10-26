@@ -9,12 +9,12 @@
 \#^        event_dispatch_alt(0, 0x4000, 0);$#s/0x4000/0x4001/ % b1
 \#^        if (\*(s32 \*) (p + 0x2C) == 1 && #s/== 1/== 2/ % b1
 \#^            \*(s16 \*) (p + 0x1B4) = 2;$#s/2/3/ % b1
-\#^            D_80088AB0 = 0x9003;$#s/9003/9004/ % b1
-\#^            D_80088AB0 = 0x900A;$#s/900A/900B/ % b3
-\#^            D_80088AB0 = 0x900B;$#s/900B/900C/ % b4
+\#^            g_carry_anim_id = 0x9003;$#s/9003/9004/ % b1
+\#^            g_carry_anim_id = 0x900A;$#s/900A/900B/ % b3
+\#^            g_carry_anim_id = 0x900B;$#s/900B/900C/ % b4
 \#^        } else if (event_dispatch(1, 0x4027, 6, 0x2000) != 0) {$#s/0x4027/0x4028/ % b4
-\#^        if (D_80088AB0 != 999) {$#s/999/998/ % b2
-\#^            event_dispatch_alt(5, 0x4000, 4, 2, 0, D_80088AB0 & 0xFFF, 0, 0);$#s/0xFFF/0xFF/ % b1
+\#^        if (g_carry_anim_id != 999) {$#s/999/998/ % b2
+\#^            event_dispatch_alt(5, 0x4000, 4, 2, 0, g_carry_anim_id & 0xFFF, 0, 0);$#s/0xFFF/0xFF/ % b1
 \#^        for (i = 0; i < 3; i++) {$#s/< 3/< 2/ % b1 b2
 \#^            if (event_dispatch(1, 0x400C + i#s/0x4014/0x4015/ % b1
 \#^            if (event_dispatch(1, 0x400C + i#s/ || / \&\& / % b1

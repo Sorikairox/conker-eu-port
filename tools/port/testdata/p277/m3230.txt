@@ -16,7 +16,7 @@
 \#^        obj_sync_anim_frame(obj, &g_objects\[obj->unk65 - 1\]);$#s/ - 1//
 \#^        if (carrier->interaction_state == 5) {$#s/5/4/
 \#^            obj->unk65 = 0;$#d
-\#^    if (D_800BE616 == 0 && D_800C35EA == 0 && obj->unk65 == 0) {$#s/ && D_800C35EA == 0//
+\#^    if (g_mp_mode_active == 0 && g_cutscene_slot_state == 0 && obj->unk65 == 0) {$#s/ && g_cutscene_slot_state == 0//
 \#^    if (g_frame_ticks < obj->unk2E4) {$#s/</<=/
 \#^        obj->unk2E4 -= g_frame_ticks;$#s/-=/+=/
 \#^            rail_event_add(obj->x_position, obj->y_position, obj->z_position, 900.0f);$#s/900.0f/800.0f/
@@ -27,5 +27,5 @@
 \#^        carrier->immune = 0;$#s/0;/1;/
 \#^        if (carrier->health != 0) {$#s/!=/==/
 \#^            carrier->health = 1;$#s/1;/0;/
-\#^    obj_effect_run_handler(obj, D_800BE616 ? 0xB : 0xE, &msg);$#s/0xB : 0xE/0xE : 0xB/
+\#^    obj_effect_run_handler(obj, g_mp_mode_active ? 0xB : 0xE, &msg);$#s/0xB : 0xE/0xE : 0xB/
 \#^    obj_remove(obj, 1);$#s/1)/2)/

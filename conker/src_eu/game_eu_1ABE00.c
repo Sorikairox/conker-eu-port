@@ -162,8 +162,8 @@ extern u8 g_sprite_prim_g; /* was D_800D31C9 */
 extern u8 g_sprite_prim_b; /* was D_800D31CA */
 extern u8 g_flare_sprite[]; /* flare sprite; was D_8009075C */
 extern u8 g_flare_ring_sizes[]; /* flare ring sizes, 7 per row; was D_800A7630 */
-extern f32 D_80038400;
-extern f32 D_80038404;
+extern f32 g_text_scale_x; /* was D_80038400 */
+extern f32 g_text_scale_y; /* was D_80038404 */
 extern u8 g_flare_sprite_mode_set; /* flare sprite mode set this frame; was D_800DE190 */
 
 /* sprite_draw_at_screen sprite request */
@@ -269,8 +269,8 @@ Gfx *flare_lens_draw(Gfx *gdl, u8 *node, s32 row, s32 count, s32 falloff, s32 br
         spr.alpha = alpha;
         size = sizes[i] << 12;
         g_sprite_keep_prim_colour = 0;
-        spr.scaleX = size * D_80038400 / 255.0f;
-        spr.scaleY = size * D_80038404 / 255.0f;
+        spr.scaleX = size * g_text_scale_x / 255.0f;
+        spr.scaleY = size * g_text_scale_y / 255.0f;
         gdl = sprite_draw_at_screen(gdl, &spr, *(f32 *) (node + 0xC) - dx * f / 5.0f,
                             *(f32 *) (node + 0x10) - dy * f / 5.0f + sizes[i] * 0.015625f);
         gDPPipeSync(gdl++);

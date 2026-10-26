@@ -447,7 +447,7 @@ void bubble_emitter_spawn(u8 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg
     blk.u47 = 0;
     blk.u48 = arg1;
     blk.u4C = 0xFF;
-    temp_v0 = effect3d_spawn_full(&blk, (s32)&D_800A4AA0, 0, 0x28, 0, 0x20, 0, 0, 0, 0x1C, arg4, arg5);
+    temp_v0 = effect3d_spawn_full(&blk, (s32)&g_effect3d_default_params, 0, 0x28, 0, 0x20, 0, 0, 0, 0x1C, arg4, arg5);
     if (temp_v0 != NULL) {
         dst = temp_v0 + 0x110;
         memcpy(dst, &tmp, 0x1C);

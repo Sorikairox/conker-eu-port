@@ -6,7 +6,7 @@
 
 f32 math_cos_u8(); // fakematch: K&R decl so math_sin_u8 re-masks the u8 arg (ref calls an undeclared function)
 extern f32 g_cos_tbl_base_neg80[]; /* was D_8009A3E0 */
-extern f32 D_8009A5E0[];
+extern f32 g_cos_u8_table[]; /* was D_8009A5E0 */
 extern u8 g_cos_tbl_mirror_80[]; /* was D_8009A7E0 */
 extern u8 g_cos_tbl_mirror_100[]; /* was D_8009A9E0 */
 /* was func_150489B0 */
@@ -27,7 +27,7 @@ u8 arg0;
             r = -*(f32 *)(g_cos_tbl_mirror_80 + -(arg0 * 4));
         }
     } else {
-        r = D_8009A5E0[arg0];
+        r = g_cos_u8_table[arg0];
     }
     return r;
 }

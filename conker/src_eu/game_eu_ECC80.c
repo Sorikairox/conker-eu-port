@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A04D0[];
+extern u8 g_land_shatter_init_byte[]; /* was D_800A04D0 */
 
 
 /* was func_150BF470 */
@@ -76,8 +76,8 @@ void mtxf_translate(u8 *mtx, s32 x, s32 y, s32 z);
 void mtxf_build_basis_trans(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 
-// lift_platform_update: world-object callback (D_80089030[9][0], obj +0x38) of a lift that moves its model up to the
-// target height +0x3C (s32). The current height is +0x7C, the speed +0x84; while D_800C35EA is set and D_800C3A08 is
+// lift_platform_update: world-object callback (g_world_obj_type_cbs[9][0], obj +0x38) of a lift that moves its model up to the
+// target height +0x3C (s32). The current height is +0x7C, the speed +0x84; while g_cutscene_slot_state is set and g_cutscene_scene is
 // not 1 nothing moves (height 0 in the matrix, the bob is left alone). g_level_first_frame snaps the height to the target.
 // At the target: the bob phase +0x80 advances by 0.05, the bob amplitude is (height / 1500 + 1) * g_frame_step_f (not
 // below 0) and the move sound stops (world_object_sound_play -1). Moving: the phase is reset, the speed accelerates by -5
@@ -104,9 +104,9 @@ void lift_platform_update(u8 *p) {
     s32 i;
     s32 frozen;
 
-    if (D_800C35EA == 0) {
+    if (g_cutscene_slot_state == 0) {
         frozen = 0;
-    } else if (D_800C3A08 != 1) {
+    } else if (g_cutscene_scene != 1) {
         frozen = 1;
     } else {
         frozen = 0;
@@ -193,8 +193,8 @@ void scenery_door_swing_angle_update(u8 *);
 s32 texture_anim_start_for(u8 *, s32, s32, s32, s32, s32, s32);
 s32 setup_entry_try_spawn(s32, s32);
 
-// door_lift_update: per-frame update of the object driven by object 0x14's animation (skipped while D_800C35EA is 1
-// and D_800C3A08 is not). Runs scenery_door_swing_angle_update, starts its looping sound g_tex_scroll_id_02b8 once (handle at +0x124), and takes
+// door_lift_update: per-frame update of the object driven by object 0x14's animation (skipped while g_cutscene_slot_state is 1
+// and g_cutscene_scene is not). Runs scenery_door_swing_angle_update, starts its looping sound g_tex_scroll_id_02b8 once (handle at +0x124), and takes
 // the animation progress `ratio` = frame (+8) / (length (+0x18) - 2) of object 0x14's +0x2D0 (0 without the object).
 // +0xA8 (a sway offset) is cleared, then by mode (+0x73 & 3): 2: sway -10 sin(ratio * pi * 4/3) up to ratio 0.75,
 // spawning object 0x14 when missing, and its state +0x232 set to 2 (+0x218 = 0); 3: obj_remove(obj, 0) once the
@@ -209,7 +209,7 @@ void door_lift_update(u8 *p) {
     s32 mode;
     s32 idx;
 
-    if (D_800C35EA == 1 && D_800C3A08 != 1) {
+    if (g_cutscene_slot_state == 1 && g_cutscene_scene != 1) {
         return;
     }
     scenery_door_swing_angle_update(p);
@@ -229,7 +229,7 @@ void door_lift_update(u8 *p) {
         }
         if (obj == NULL) {
             idx = setup_entry_find_by_id(0x14);
-            ((u8 *) D_800D20FC + idx * 48)[2] = 0;
+            ((u8 *) g_setup_entries + idx * 48)[2] = 0;
             setup_entry_try_spawn(idx, 0);
             obj = (u8 *) obj_find_by_setup_id(0x14);
         }
@@ -254,7 +254,7 @@ void door_lift_update(u8 *p) {
         }
         if (obj == NULL) {
             idx = setup_entry_find_by_id(0x14);
-            ((u8 *) D_800D20FC + idx * 48)[2] = 0;
+            ((u8 *) g_setup_entries + idx * 48)[2] = 0;
             setup_entry_try_spawn(idx, 0);
             obj = (u8 *) obj_find_by_setup_id(0x14);
         }
@@ -270,9 +270,9 @@ u8 *cam_wobble_start_preset(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4);
 void object_ring_burst_particles(u8 *obj, s32 arg1, s32 arg2);
 void link_group_remove_members(s32 arg0, s32 arg1);
 s32 game_gu_random(void);
-extern u8 D_800BEE0B;
+extern u8 g_view_count_minus1_lo; /* was D_800BEE0B */
 
-// sinking_platform_update: world-object callback (D_80089030[1] / [2], obj +0x38) of a platform that drops when stood
+// sinking_platform_update: world-object callback (g_world_obj_type_cbs[1] / [2], obj +0x38) of a platform that drops when stood
 // on. kind = +0x3C >> 16: 0 drops 0x82 below its rest height at a speed falling from 16 near the bottom, with a
 // start sound; 1 just follows the rest height + the offset +0x80; 2 drops 0x622 at 48 and, landed, marks itself and
 // the next 0xA0-byte placement (+0x6E / +0x10E = 1, link_group_remove_members(2, index)); 4 plays a sound when landed. The rest
@@ -317,7 +317,7 @@ void sinking_platform_update(u8 *p) {
         rubble_burst_with_dust(*(f32 *) ((u8 *) g_objects + 0x14), *(f32 *) ((u8 *) g_objects + 0x18),
                       *(f32 *) ((u8 *) g_objects + 0x1C), 0xFF, 0);
         if (mode == 0) {
-            cam_wobble_start_preset(3, D_800BEE0B, NULL, 0xFF, 0);
+            cam_wobble_start_preset(3, g_view_count_minus1_lo, NULL, 0xFF, 0);
             rumble.unk0 = 1;
             rumble.unk2 = 0x3C;
             rumble.unk5 = 1;
@@ -499,7 +499,7 @@ void object_land_puff(u8 *obj) {
 }
 
 void emit_particle_burst_req(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
-extern s32 D_800A04D4;
+extern s32 g_land_shatter_init_word; /* was D_800A04D4 */
 
 /* P317: NM signature = g_mdl_particle_land_fns's dispatcher type (wasm call_indirect); args 1..3 / 5 unused */
 /* was func_150C06DC */
@@ -577,8 +577,8 @@ s32 particle_land_shatter(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *
     sp.uE4 = (*(s32 *)((u8 *)arg0 + 0x38));
     sp.uE8 = arg4 + 20.0f;
     sp.uEC = (*(f32 *)((u8 *)arg0 + 0x40));
-    sp.uA4 = *((u8 *)&D_800A04D0);
-    sp.uA0 = D_800A04D4;
+    sp.uA4 = *((u8 *)&g_land_shatter_init_byte);
+    sp.uA0 = g_land_shatter_init_word;
     sp.uA8 = 5;
     sp.uAC = 4;
     (*(s32 *)((u8 *)(&sp.uB0) + 0)) = (s32) (*(s32 *)((u8 *)(&sp.uE4) + 0));
@@ -646,7 +646,7 @@ s32 particle_land_shatter(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *
     return 0;
 }
 s32 emit_spark_burst(s32 *, s16 *, u8, s32);
-extern s32 D_800A04D8;
+extern s32 g_spark_burst_init_word; /* was D_800A04D8 */
 
 /* was func_150C04C0 */
 void spark_burst_at(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
@@ -688,7 +688,7 @@ void spark_burst_at(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
     } sp;
     s8 var_v0;
 
-    sp.u24 = D_800A04D8;
+    sp.u24 = g_spark_burst_init_word;
     sp.u28 = arg2;
     sp.u34 = 9;
     sp.u38 = 4;
@@ -731,7 +731,7 @@ void spark_burst_at(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
 }
 s32 mdl_particle_land_bounce_settle(u8 *, f32, f32, f32, f32, s32); /* P95: f32 (float bits were passed as an int) */
 void emit_particle_burst_req(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
-extern s32 D_800A04DC;
+extern s32 g_land_maybe_shatter_init_word; /* was D_800A04DC */
 
 /* P317: args 1..3 f32 = g_mdl_particle_land_fns's dispatcher type (wasm call_indirect) */
 /* was func_150C0B48 */
@@ -823,7 +823,7 @@ s32 particle_land_maybe_shatter(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4
     s8 var_v0;
 
     if (random_float() < (*(f32 *)((u8 *)arg0 + 0x170))) {
-        sp.uA0 = D_800A04DC;
+        sp.uA0 = g_land_maybe_shatter_init_word;
         sp.uB0 = 2;
         sp.uB4 = 0;
         temp_f2 = arg4 + 20.0f;

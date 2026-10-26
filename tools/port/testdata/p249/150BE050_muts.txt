@@ -20,7 +20,7 @@ s/100.0f, kind, 4, 0, state3/100.0f, kind, 4, 1, state3/ % ride23 ridelo
 s/if (o\[0x232\] == state2)/if (o[0x232] == state3)/ % ride23 ridelo
 s/o\[0x232\] != state1 ||/o[0x232] == state1 ||/ % pick3 pick4
 s/(struct127 \*) o, 0) != NULL/(struct127 *) o, 0) == NULL/ % found pick3
-s/mask = ~D_800D18A0 \& g_obj_contact_mask;/mask = g_obj_contact_mask;/ % pick3
+s/mask = ~g_player_view_hidden_mask \& g_obj_contact_mask;/mask = g_obj_contact_mask;/ % pick3
 s/i < 0x19; i++/i < 0x3; i++/ % pick3 pick4
 s/slot\[0x127\] != 0xFF \&\& //  % pick4b
 s/slot\[0x65\] == 0 \&\& // % pick4

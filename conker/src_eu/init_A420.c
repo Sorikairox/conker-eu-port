@@ -156,7 +156,7 @@ f32 vec3f_magnitude(f32 *);
 void vec3_scale(struct17 *v, f32 len, struct17 *out);
 typedef struct { s16 x, y, z, pad; } PathSoundPoint; /* g_path_points[path] points; was D_800D2104 */
 // path_sound_pan_volume: sound_calc_pan_volume (pan / volume / distance) for a sound that runs along path `path`
-// (g_path_points points, D_800D2528 counts) instead of sitting at one spot: the sound position is the path point
+// (g_path_points points, g_path_point_counts counts) instead of sitting at one spot: the sound position is the path point
 // nearest to (x, y, z); when that is 168 units or more away (squared >= 0x6D61) and the path has two or more points,
 // the position slides along the neighbouring segment (the one towards the nearer neighbour, stepping once to the
 // other side when the projection falls outside it) to the foot of the perpendicular. (ex, ey, ez) is the listener,
@@ -183,7 +183,7 @@ s32 sound_path_calc_pan_volume(s32 path, s32 ex, s32 ey, s32 ez, f32 yaw, s32 x,
     f32 len2;
     s16 px, py, pz;
 
-    count = D_800D2528[path];
+    count = g_path_point_counts[path];
     if (count == 0) {
         return 0;
     }
@@ -262,8 +262,8 @@ s32 sound_path_calc_pan_volume(s32 path, s32 ex, s32 ey, s32 ez, f32 yaw, s32 x,
     return sound_calc_pan_volume(px - ex, py - ey, pz - ez, yaw, px - x, py - y, pz - z, near, far, outPan, (s32 *) outVol,
                          (s32 *) outDist);
 }
-extern f32 D_8002C574;
-extern f64 D_8002C578;
+extern f32 g_sound_pan_min_dist; /* was D_8002C574 */
+extern f64 g_sound_pan_asin_scale; /* was D_8002C578 */
 
 /* was func_1000B060 */
 s32 sound_calc_pan_from_xz(f32 arg0, f32 arg1, s32 arg2) {
@@ -273,11 +273,11 @@ s32 sound_calc_pan_from_xz(f32 arg0, f32 arg1, s32 arg2) {
     s32 t;
 
     d = sqrtf(arg0 * arg0 + arg1 * arg1);
-    if (d > D_8002C574) {
+    if (d > g_sound_pan_min_dist) {
         d = arg0 / d;
     }
     flag = 0x80;
-    t = math_asin_scaled(d) * D_8002C578;
+    t = math_asin_scaled(d) * g_sound_pan_asin_scale;
     a = t;
     if (arg1 > 0.0f) {
         if ((s16)t < 0) {

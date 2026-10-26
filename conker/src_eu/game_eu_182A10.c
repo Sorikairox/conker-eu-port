@@ -82,7 +82,7 @@ typedef struct {
 #define SPRITE2D_FLIP_S      0x0002
 #define SPRITE2D_FLIP_T      0x0004
 #define SPRITE2D_ONE_PLAYER  0x0010 /* only drawn in the view of sprite->player */
-#define SPRITE2D_HIDE_C35EA  0x0040 /* hidden while D_800C35EA == 1 */
+#define SPRITE2D_HIDE_C35EA  0x0040 /* hidden while g_cutscene_slot_state == 1 */
 #define SPRITE2D_SCALE_ST    0x0080
 #define SPRITE2D_OFFSET_ST   0x0100
 #define SPRITE2D_TEX_MODE0   0x0200 /* texture load mode 0 instead of 2 */
@@ -125,7 +125,7 @@ Gfx *sprite2d_draw(Gfx *gdl, Sprite2D *spr, s16 view) {
     if ((spr->flags & SPRITE2D_ONE_PLAYER) && spr->player != view) {
         return gdl;
     }
-    if ((spr->flags & SPRITE2D_HIDE_C35EA) && D_800C35EA == 1) {
+    if ((spr->flags & SPRITE2D_HIDE_C35EA) && g_cutscene_slot_state == 1) {
         return gdl;
     }
     if (spr->flags & (1 << (view + 11))) {

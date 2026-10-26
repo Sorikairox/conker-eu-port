@@ -19,8 +19,8 @@ s/g_cur_obj->unk23D + (s8)g_aiscript_arg0;/g_cur_obj->unk23D + g_aiscript_arg0;/
 s/g_cur_obj->unk22A = g_aiscript_arg0;/g_cur_obj->unk22A = g_aiscript_arg3;/
 s/            \*var = g_aiscript_arg0;/            *var = g_aiscript_arg1;/
 s/            \*var -= 1;/            *var -= 2;/
-s/            \*var += g_frame_ticks;/            *var += D_800CC264;/
+s/            \*var += g_frame_ticks;/            *var += g_obj_time_step_pct;/
 s/            \*var += 1;/            ;/
 s/            \*var -= g_frame_ticks;/            *var += g_frame_ticks;/
-s/            \*var -= D_800CC264;/            *var += D_800CC264;/
+s/            \*var -= g_obj_time_step_pct;/            *var += g_obj_time_step_pct;/
 s/        case 4:$/        case 44:/

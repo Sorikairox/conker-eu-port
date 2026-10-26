@@ -17,7 +17,7 @@ void init_debug_printf_stub(const char *fmt, ...) {
     va_list args;
 
     va_start(args, fmt);
-    D_80035500 = 0;
+    g_debug_printf_len = 0;
     init_printf_xprintf(init_printf_null_out, 0, fmt, args);
 }
 
@@ -56,7 +56,7 @@ int strlen(const char *);
 		if (dst < 999) \
 			dst = dst * 10 + *src - '0'; \
 	}
-#define MAX_PAD (sizeof(D_8002AE30) - 1)
+#define MAX_PAD (sizeof(g_printf_spaces) - 1)
 #define PAD(s, n) \
 	if (0 < (n)) { \
 		int i, j = (n); \
@@ -72,7 +72,7 @@ int strlen(const char *);
 		else \
 			return x.nchar; \
 	}
-extern char D_8002AE30[33]; // spaces
+extern char g_printf_spaces[33]; /* was D_8002AE30 */ // spaces
 void init_printf_put_arg(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac);
 char *strchr(const char *, s32);
 
@@ -145,18 +145,18 @@ s32 init_printf_xprintf(void *prout, char *arg, const char *fmt, va_list args)
 		x.width -= x.n0 + x.nz0 + x.n1 + x.nz1 + x.n2 + x.nz2;
 
 		if (!(x.flags & FLAGS_MINUS)) {
-			PAD(D_8002AE30, x.width);
+			PAD(g_printf_spaces, x.width);
 		}
 
 		PUT(ac, x.n0);
-		PAD((char *)&D_8002AE54, x.nz0);
+		PAD((char *)&g_printf_zeros, x.nz0);
 		PUT(x.s, x.n1);
-		PAD((char *)&D_8002AE54, x.nz1);
+		PAD((char *)&g_printf_zeros, x.nz1);
 		PUT(x.s + x.n1, x.n2);
-		PAD((char *)&D_8002AE54, x.nz2);
+		PAD((char *)&g_printf_zeros, x.nz2);
 
 		if (x.flags & FLAGS_MINUS) {
-			PAD(D_8002AE30, x.width);
+			PAD(g_printf_spaces, x.width);
 		}
 
 		fmt = s + 1;

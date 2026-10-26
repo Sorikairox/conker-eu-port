@@ -154,7 +154,7 @@ s32 move_watch_is_near_ground(u8 *arg0, u8 arg1) {
     s32 r;
 
     if (arg1 == 2 || arg1 == 3) {
-        if (D_800C35EA != 1) {
+        if (g_cutscene_slot_state != 1) {
             r = 0;
         } else if (*(f32 *)(arg0 + 0x118) - 75.0f < *(f32 *)(arg0 + 0x18)) {
             r = 1;
@@ -226,7 +226,7 @@ loop_2:
 s32 move_watch_pick_kind(struct127 *arg0, u8 *arg1) {
     s32 ret = 0;
 
-    if (D_800BE616 != 0) {
+    if (g_mp_mode_active != 0) {
         *arg1 = 0;
         ret = 1;
     }
@@ -532,7 +532,7 @@ void smoke_wobble_spawn_at(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32
     smoke_wobble_spawn(sp24, sp18, *(u8 *)(arg6 + 0xC), *(u8 *)(arg6 + 1));
 }
 
-extern u8 D_800BEE0B;
+extern u8 g_view_count_minus1_lo; /* was D_800BEE0B */
 s32 camera_within_dist(u8 arg0, f32 arg1, struct17 *arg2);
 void mtxf_rotate_xyz_deg(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
 f32 sinf(f32);
@@ -602,7 +602,7 @@ void dust_disc_emitter_update(u8 *obj) {
     s16 fadeI;
     u8 *p;
 
-    if (camera_within_dist(D_800BEE0B, 3000.0f, (struct17 *) e) == 0) {
+    if (camera_within_dist(g_view_count_minus1_lo, 3000.0f, (struct17 *) e) == 0) {
         return;
     }
     e->acc += (e->rate + random_float() * e->rateRand) * g_frame_step_f;

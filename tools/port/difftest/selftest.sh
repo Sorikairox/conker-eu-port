@@ -106,7 +106,7 @@ DF0C="DIFFTEST_EXACT=* DIFFTEST_ARG=0=80480000,1=2,2=99,3=10,4=1,5=804A0000,6=80
 chkce EQUIV  scene_event_run_b "$DF0C"
 chkce DIFFER scene_event_run_b "$DF0C" 's/0, 0, player, 0, 0, flag, 0);/0, 0, track, 0, 0, flag, 0);/'
 chkce EQUIV  scene_event_run_b "$DF0C DIFFTEST_STKW_OLD=1" 's/0, 0, player, 0, 0, flag, 0);/0, 0, track, 0, 0, flag, 0);/'
-# P93: knob notes. P90 poked D_800C3958 at its US address 0x800C395C (EU 0x800C3D78): the 0x33 record pokes never reached
+# P93: knob notes. P90 poked g_cutscene_track_recs at its US address 0x800C395C (EU 0x800C3D78): the 0x33 record pokes never reached
 # the code and the rec + 0x18 -> 0x1C mutant survived. difftest now appends [POKE unread: ...] for poke words the
 # reference never reads (trials 0-1) and [knob callee never called: ...] for RET/RETF/OUT*/ARGMEM keys never called.
 S33="DIFFTEST_EXACT=* DIFFTEST_ARG=0=80480000,1=2,2=99,3=10,4=1,5=804A0000,6=804C0000,7=804B0000,8=37 DIFFTEST_POKE=800C395C=80490000,800C3A04=804D2000,800C3D08=804D1000,800C3E00=804D0000,80480000=05070033,80480004=00030150,80490088=40B00000,8049008C=40D00000,80490090=C0F00000,80490094=41000000,80490098=41100000,804900A0=41300000,804900A4=41400000,804900A8=41500000,804900C0=41600000,804A0004=58123456,804A0014=42C90000,804A0018=43488000,804A001C=C3964000,804B0000=41280000,804B0004=41A20000,804B0008=C1F60000,804D1000=00050006,804D1004=00070000 DIFFTEST_RET=15023C60=40,150ADF00=12345,151905AC=0 DIFFTEST_RETF=150ADF48=3EC00000,15048D30=3F000000,15048CA0=BF400000"
@@ -144,7 +144,7 @@ chk DIFFER effect_pulse_sine_update src_eu/game_16DC80.c 's/sinf(temp->unk8)/sin
 AE60C="DIFFTEST_ROMDATA=1 DIFFTEST_EXACT=* DIFFTEST_REFLEN=104 DIFFTEST_SIGNORE=7 DIFFTEST_ARG=0=80490000,1=6,2=80491000 DIFFTEST_POKE=80490000=1001,80490004=1234"
 chkce EQUIV  event_native_action "$AE60C"
 chkce DIFFER event_native_action "$AE60C" 's/args\[1\], args)/args[0], args)/'
-# P132: game_pause_update time limit (game_pause_update). DE: g_last_player_index (.game_data 80083330) = 1, D_800BE616 = 1,
+# P132: game_pause_update time limit (game_pause_update). DE: g_last_player_index (.game_data 80083330) = 1, g_mp_mode_active = 1,
 # g_settings_time_limit = 3, g_mp_time_left = 3000, g_frame_ticks_raw = 0x20, g_game_paused / AC1 = 0, g_pause_unpause_timer = 0.
 DE="DIFFTEST_EXACT=* DIFFTEST_POKE=80083330=1,800BEA34=100,800E1010=3,800BEEE0=0,80090118=BB8,8009029C=0,800BEE28=20"
 chkce EQUIV  game_pause_update "$DE"
@@ -156,7 +156,7 @@ chkce EQUIV  game_pause_update "$DE DIFFTEST_TRAPSCAN_OLD=1" 's/secs = g_mp_time
 # y = 100 needs g_last_player_index > 0, so the mutant dies only if the poke holds. DIFFTEST_POKE_OLD=1 = pre-P132 order.
 chkce DIFFER game_pause_update "$DE DIFFTEST_ROMDATA=1" 's/y = 100;/y = 101;/'
 chkce EQUIV  game_pause_update "$DE DIFFTEST_ROMDATA=1 DIFFTEST_POKE_OLD=1" 's/y = 100;/y = 101;/'
-# [POKE unread] comes from decoded loads since P132 (Unicorn's read hook missed `lbu D_800BE616` at 800BEA36)
+# [POKE unread] comes from decoded loads since P132 (Unicorn's read hook missed `lbu g_mp_mode_active` at 800BEA36)
 out=$(set -f; env $DE $R/tools/port/difftest.sh game_pause_update $C/game_pause_update.c --trials 4)
 case "$out" in *POKE\ unread*) fail=$((fail+1)); echo "FAIL [want no POKE unread] $out";; EQUIV*) pass=$((pass+1)); echo "ok   [no POKE unread] $out";; *) fail=$((fail+1)); echo "FAIL $out";; esac
 # P134: a callee declared only in a header (cosf in gu.h) takes its arity / float slots from there: a0 (written at the
@@ -217,7 +217,7 @@ TRIALS=4 chkce DIFFER aiscript_find_visible_target "$S68DC DIFFTEST_NOPROTO=math
 TRIALS=4 chkce EQUIV  aiscript_find_visible_target "$S68DC DIFFTEST_NOPROTO=math_atan2_u16 DIFFTEST_JALARG_OLD=1" "$M68DC"
 # P215: (1) P214 lost the `cnt = max(cnt, ...indw...)` line of the P211 jalr compare (indw computed, never used): the
 # object_state_dispatch_a `arg0 = 0` case above gave EQUIV (82 / 83 at the end of P214). (2) at a jalr the target register is not
-# an argument: obj_effect_run_handler does `lw a2, D_800864B0(a2); jalr a2` (a2 = the handler address in the reference, `arg`
+# an argument: obj_effect_run_handler does `lw a2, g_obj_effect_fns(a2); jalr a2` (a2 = the handler address in the reference, `arg`
 # in the candidate) and keeps a scratch copy of `arg` in a3 (`or a3, a2, zero`; it passes it in a1). The target
 # register is skipped (DIFFTEST_JALRTGT_OLD=1 = old); DIFFTEST_JALRSKIP=3 drops the scratch a3 (all 15 handlers take 2 args).
 SB04C="DIFFTEST_ROMDATA=1 DIFFTEST_ARG=0=80450000,1=A,2=80460010 DIFFTEST_POKE=8045002C=3F800000"
@@ -274,7 +274,7 @@ TRIALS=8 chkce EQUIV  sfx_cooldown_tick "DIFFTEST_ARG=0=7"
 # P243: a matched-C reference is its own ELF symbol size, not len(candidate): a longer candidate that jals the next
 # function (attachment_remove_by_slot -> attachment_remove_by_slot_n) used to make the reference span the callee, leave `jal attachment_remove_by_slot_n`
 # unstubbed and run into the real callee (hang until DIFFTEST_TIMEOUT). Now the candidate moves to CAND_ALT and the
-# callee is a stub on both sides. DIFFTEST_REFSZ_OLD=1 = old (hangs; not a case here). D_800C3EE0 is EU 800C4300.
+# callee is a stub on both sides. DIFFTEST_REFSZ_OLD=1 = old (hangs; not a case here). g_attachment_list is EU 800C4300.
 TRIALS=8 chkce EQUIV  attachment_remove_by_slot "DIFFTEST_TIMEOUT=120"
 TRIALS=8 chkce DIFFER attachment_remove_by_slot "DIFFTEST_TIMEOUT=120 DIFFTEST_POKE=800C4300=5A5A1234" '1,/0xFF/s/0xFF/0xFE/'
 TRIALS=8 chkce EQUIV  attachment_remove_by_slot "DIFFTEST_TIMEOUT=120" '1,/0xFF/s/0xFF/0xFE/'
@@ -294,7 +294,7 @@ TRIALS=8 chkce DIFFER attachment_set_alpha_by_slot "DIFFTEST_INCHDR_OLD=1 DIFFTE
 S5A68="DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=0=80410000 DIFFTEST_POKE=80410010=00000001,80410018=41200000,8041001C=40A00000,80410020=C1200000,80410024=3F800000,80410028=40000000,8041002C=40400000,80410030=00000000,804100C0=12345678 DIFFTEST_RET=150C6088=1 DIFFTEST_RETF=151443D4=42C80000"
 chkce EQUIV  beam_motion_tick "$S5A68"
 chkce DIFFER beam_motion_tick "$S5A68 DIFFTEST_JALRFPR_OLD=1"
-chkce DIFFER beam_motion_tick "$S5A68" 's/D_80088B00\[\*(s8 \*) (o + 0x30)\](o) == 0/D_80088B00[*(s8 *) (o + 0x30)](o + 4) == 0/'
+chkce DIFFER beam_motion_tick "$S5A68" 's/g_beam_motion_fns\[\*(s8 \*) (o + 0x30)\](o) == 0/g_beam_motion_fns[*(s8 *) (o + 0x30)](o + 4) == 0/'
 TRIALS=1 chkce KNOBERROR beam_motion_tick "$S5A68 DIFFTEST_OUTW=150C6088=0:1,150C6088=1:2"
 # P256: DIFFTEST_ARGMEM "N*OFF:LEN" compares LEN bytes at the pointer stored at aN + OFF (prop_owner_effects_clear's key holds a
 # stack copy of a 9-byte part list; the pointer itself differs between the builds, so only the deref sees a swapped list).
@@ -326,8 +326,8 @@ chkce EQUIV  prenmi_thread_main "$S52A0"
 chkce DIFFER prenmi_thread_main "$S52A0" 's/__osSpSetPc(0);/__osSpSetPc(4);/'
 chkce DIFFER prenmi_thread_main "$S52A0" 's/    osWritebackDCacheAll();//'
 chkce EQUIV  prenmi_thread_main "$S52A0 $V52A0"
-chkce DIFFER prenmi_thread_main "$S52A0 $V52A0" 's/D_8003BFC0 + 0x22ADD7/D_8003BFC0 + 0x22ADD6/'
-chkce EQUIV  prenmi_thread_main "$S52A0" 's/D_8003BFC0 + 0x22ADD7/D_8003BFC0 + 0x22ADD6/'
+chkce DIFFER prenmi_thread_main "$S52A0 $V52A0" 's/g_prenmi_time + 0x22ADD7/g_prenmi_time + 0x22ADD6/'
+chkce EQUIV  prenmi_thread_main "$S52A0" 's/g_prenmi_time + 0x22ADD7/g_prenmi_time + 0x22ADD6/'
 # P281: a struct returned by value (ldiv_t ldiv(long, long)) takes a hidden a0, so its divisor is a2: the arity now
 # counts it (DIFFTEST_SRET_OLD=1 = old: the divisor was never compared), and ldiv's stub computes the real quotient /
 # remainder (DIFFTEST_LDIV_OLD=1 = old random). init_printf_ldtob = libc _Ldtob on 1234.5678 with %e.
@@ -336,12 +336,12 @@ chkce EQUIV  init_printf_ldtob "$S1550"
 chkce DIFFER init_printf_ldtob "$S1550" 's/qr = ldiv(lo, 10);/qr = ldiv(lo, 16);/'
 chkce EQUIV  init_printf_ldtob "$S1550 DIFFTEST_SRET_OLD=1 DIFFTEST_LDIV_OLD=1" 's/qr = ldiv(lo, 10);/qr = ldiv(lo, 16);/'
 # P288: a stub's OUTW / OUTA into a page the function never touched (boot_game_thread_main's rom_dma_read reads into
-# D_80082EB0) faulted in stub_write (mem_write without ensure()) -> UNSURE; stub_write now maps the pages first
+# g_level_tex_preload_lists) faulted in stub_write (mem_write without ensure()) -> UNSURE; stub_write now maps the pages first
 # (DIFFTEST_STUBMAP_OLD=1 = old). The xor-key mutant is only seen through the OUTW-read offset table.
 S1194="DIFFTEST_ROMDATA=1 DIFFTEST_ARG=0=0 DIFFTEST_POKE=8000030C=0 DIFFTEST_RET=10003E90=80480000,10003EBC=80400000;80420000 DIFFTEST_OUTW=10004764=1:00001234;0;8039CCCB"
 chkce EQUIV  boot_game_thread_main "$S1194"
 chkce UNSURE boot_game_thread_main "$S1194 DIFFTEST_STUBMAP_OLD=1"
-chkce DIFFER boot_game_thread_main "$S1194" 's/(D_8003585C\[i\] ^ 0x8039CCCA)/(D_8003585C[i] ^ 0x8039CCCB)/'
+chkce DIFFER boot_game_thread_main "$S1194" 's/(g_boot_page_offsets\[i\] ^ 0x8039CCCA)/(g_boot_page_offsets[i] ^ 0x8039CCCB)/'
 # P292: a stub output (DIFFTEST_OUTW / OUTA) into a heap page the function had not touched yet faulted with
 # UC_ERR_WRITE_UNMAPPED at the stub, so every trial was inconclusive (object_ring_burst_particles: the ring / world buffers that
 # DIFFTEST_RET hands out are filled by stubs first). same fix as P288 above (one ensure() loop, one

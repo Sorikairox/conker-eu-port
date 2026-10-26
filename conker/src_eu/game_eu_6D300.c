@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-extern u8 *D_800DC278;
+extern u8 *g_zone_tree; /* was D_800DC278 */
 
 /* was func_1503FAF0 */
 s32 zone_point_allowed(u8 *arg0, s16 arg1, s16 arg2, s32 arg3, s32 arg4) {
@@ -21,7 +21,7 @@ s32 zone_point_allowed(u8 *arg0, s16 arg1, s16 arg2, s32 arg3, s32 arg4) {
     arg1 = temp_a1;
     arg2 = temp_a2;
     collision_select_area(0, temp_a1, temp_a2);
-    var_v1 = D_800DC278;
+    var_v1 = g_zone_tree;
     if (var_v1 != NULL) {
 loop_1:
         temp_a0 = (*(s16 *)((u8 *)var_v1 + 8));
@@ -69,9 +69,9 @@ void obj_select_next_flagged(void)
   int new_var; // fakematch: permuter temp for start + 1
   s32 i;
   s32 start;
-  if (0 != D_800C67F0)
+  if (0 != g_obj_flagged_pending)
   {
-    start = D_800C67F1;
+    start = g_obj_flagged_select_idx;
     new_var = start + 1;
     i = new_var;
     if (i >= 0x19)
@@ -82,7 +82,7 @@ void obj_select_next_flagged(void)
     {
       if (g_objects[i].unkF8 & 0x800000)
       {
-        D_800C67F1 = i;
+        g_obj_flagged_select_idx = i;
         return;
       }
       i++;

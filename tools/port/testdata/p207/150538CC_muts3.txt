@@ -1,2 +1,2 @@
-s/vec\[2\] = D_800CC674\[2\] - P38_F32(0x34)/vec[2] = D_800CC674[2] - P38_F32(0x1C)/ % ht_k13 d_k13_vec0
+s/vec\[2\] = g_obj_effect_vec\[2\] - P38_F32(0x34)/vec[2] = g_obj_effect_vec[2] - P38_F32(0x1C)/ % ht_k13 d_k13_vec0
 s/\(random_int() . \)9/\18/ % b_f4_r8

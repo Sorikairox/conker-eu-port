@@ -19,9 +19,9 @@ void aura_group_spawn(u8 *, u8, s32);        /* P238: port-b hand C (void); call
 void obj_point_burst_spawn(u8 *, u8, u8, s32);    /* P238: port-b hand C (void); called by objfx_fa520_0 / objfx_fa520_1 / objfx_fa520_2 */
 
 
-extern s32 D_8008679C;
+extern s32 g_anim_event_fns; /* was D_8008679C */
 extern u8 g_anim_event_kinds; /* was D_80099DF0 */
-extern u8 D_800C3A82;
+extern u8 g_cutscene_anim_events_on; /* was D_800C3A82 */
 
 /* was func_1506AD30 */
 f32 anim_events_run(struct127 *arg0, f32 arg1, s32 arg2) {
@@ -59,7 +59,7 @@ loop_8:
                 temp_a1 = arg0->unk2D0;
                 var_a2 = (*(s32 *)((u8 *)temp_a1 + 0x28));
                 temp_s2 = var_a2;
-                if ((D_800C35EA == 0) || (D_800C3A82 != 0)) {
+                if ((g_cutscene_slot_state == 0) || (g_cutscene_anim_events_on != 0)) {
                     var_a0 = (*(u8 *)((u8 *)((arg0->unk1C4 + (arg0->unk138 * 0xC))) + 7));
                     if ((temp_s0 != 0) && (temp_s0 != 0)) {
                         var_v0 = &g_anim_event_kinds;
@@ -76,7 +76,7 @@ loop_14:
                         }
                     }
                     if (var_a0 != 0) {
-                        (*(s32 (**)())((u8 *)&D_8008679C + (var_a0 * 4)))(var_a0, temp_a1, var_a2, &g_anim_event_continue);
+                        (*(s32 (**)())((u8 *)&g_anim_event_fns + (var_a0 * 4)))(var_a0, temp_a1, var_a2, &g_anim_event_continue);
                         var_a2 = (*(s32 *)((u8 *)(arg0->unk2D0) + 0x28));
                     }
                 }
@@ -472,11 +472,11 @@ void objev_clear_244(void) {
 void objev_finish_and_idle(void) {
     struct126 *temp_a0;
 
-    D_800BE720[g_cur_obj_index] |= 0x4000;
+    g_cont_forced_buttons[g_cur_obj_index] |= 0x4000;
     temp_a0 = g_cur_obj->unk31C;
     if (temp_a0 != 0) {
         temp_a0->unk78 = 0;
-        D_800D2E60[D_800D1940 >> 3] |=  (1 << (D_800D1940 & 7));
+        g_hints_seen[g_hint_action >> 3] |=  (1 << (g_hint_action & 7));
     }
     player_idle_animation(); /* takes no arguments (a0 is left over) */
 }
@@ -616,8 +616,8 @@ void objev_sound_if_above_water(void) {
 
 /* Script command: play a sound for the current object g_cur_obj. Command word g_cur_obj_cmd:
  *   bits 0..10 sound id, 11..13 how to play it, 14..15 actor condition, 16 "defer", 24..31 actor type.
- * Condition 0x4000: only when the object's actor type (its id, or the alias D_8008704C[...] when
- * D_800D1C90[id]->unk4 is set) equals bits 24..31; 0x8000: only when it differs. With bit 16 the command
+ * Condition 0x4000: only when the object's actor type (its id, or the alias g_type_part_model_lists[...] when
+ * g_type_descs[id]->unk4 is set) equals bits 24..31; 0x8000: only when it differs. With bit 16 the command
  * word + 1 is stored in g_objev_sound_pending (which is cleared otherwise) and nothing plays.
  * Modes (volume 0x7D00, 500 / 2500 = the distance / time arguments of the sound calls):
  *   0x0000 actor_sound_play, 0x1000 actor_sound_play2, 0x3000 actor_sound_play_untracked,
@@ -628,7 +628,7 @@ void objev_sound_if_above_water(void) {
  *          fall speed (obj->unk31C's first float, else y_velocity), 0.5 .. 1.0 over 0 .. 10 (water) or 30.
  *          Surface 8 plays with actor_sound_play_untracked, the others with actor_sound_play. */
 extern s32 g_objev_sound_pending; /* was D_800D1C9C */
-extern u8 *D_8008704C[];
+extern u8 *g_type_part_model_lists[]; /* was D_8008704C */
 s32 sound_pick_variant(s32, s32);
 s32 sound_surface_footstep(s32 surface, u16 *volume, s32 sound);
 
@@ -646,8 +646,8 @@ void objev_play_sound(void) {
     f32 limit;
     f32 scale;
 
-    if (D_800D1C90[type]->unk4 != 0) {
-        type = *D_8008704C[D_800D1C90[type]->unk5];
+    if (g_type_descs[type]->unk4 != 0) {
+        type = *g_type_part_model_lists[g_type_descs[type]->unk5];
     }
     g_objev_sound_pending = 0;
     if ((cmd & 0xC000) == 0x4000) {
@@ -791,7 +791,7 @@ u8 *move_watch_spawn(u8 *arg0, u8 arg1, s32 arg2);
 void obj_effect_run_handler(u8 *, s32, void *);
 extern f32 g_obj0_x; /* was D_800CC704 */
 extern f32 g_obj0_z; /* was D_800CC70C */
-extern u8 D_80099E84[];
+extern u8 g_weapon_hit_effects[]; /* was D_80099E84 */
 extern s16 D_eu_80099E98[][4];
 // P310: copies of the asm's injected rodata (D_8009A050 / D_8009A054); 1-element arrays so IDO keeps them in .rodata (P283)
 static const f32 sCamDegToAngle[1] = { 182.04445f };
@@ -800,7 +800,7 @@ static const f32 sCamRadToAngle[1] = { 10430.378f };
 // camera_object_spawn: P310: takes a camera object slot from the g_objects pool (25 records of 0x32C; a recycled
 // type-4 slot via obj_find_by_state when 5 or more cameras are live or the free slot is out of range), places it at
 // `target`, above the player (+50), or at the player's mode attach point (D_eu_80099E98[mode] = x, y, z, matrix index
-// in the player's +0x1D4 matrices; fixed-point when D_800C42B0), lifts it to at least player y + floor_off, starts
+// in the player's +0x1D4 matrices; fixed-point when g_mtx_fixed_point), lifts it to at least player y + floor_off, starts
 // its mode sound (not modes 0 / 1), then sets yaw (degrees -> binary angle - 90 deg), distance / rise / height with the
 // flag bits (1 = no aim search, 2 = face the first object, 4 = aim height at it, 8 = random yaw jitter, 0x10 = orbit
 // the object the player follows), the style fields and per-mode setup. `snap` (11th arg) allocates a 0x1C0 history
@@ -867,7 +867,7 @@ s32 camera_object_spawn(f32 yaw, f32 dist, f32 rise, f32 height, u8 alpha, s32 m
             *(f32 *) (obj + 0x1C) = *(f32 *) ((u8 *) g_cur_obj + 0x1C);
         } else {
             attach = D_eu_80099E98[mode];
-            if (D_800C42B0 != 0) {
+            if (g_mtx_fixed_point != 0) {
                 guMtxL2F(mf, (Mtx *) (mtx + attach[3] * 0x40));
                 m = mf;
             } else {
@@ -936,7 +936,7 @@ s32 camera_object_spawn(f32 yaw, f32 dist, f32 rise, f32 height, u8 alpha, s32 m
     }
 
     angle = (s32) (yaw * sCamDegToAngle[0]) - 0x4000;
-    if (D_800BE616 != 0 && !(flags & 1) && mode != 5 && mode != 9 && mode != 10 && mode != 4) {
+    if (g_mp_mode_active != 0 && !(flags & 1) && mode != 5 && mode != 9 && mode != 10 && mode != 4) {
         aim = math_atan2_u16(dist, rise, 0);
         hit = obj_find_visible_target(obj, &aim, (aim >> 8) & 0xFF, 0xFF, 0x14);
         if (hit != 0xFF) {
@@ -987,7 +987,7 @@ s32 camera_object_spawn(f32 yaw, f32 dist, f32 rise, f32 height, u8 alpha, s32 m
     }
     obj[0x82] = 0x26;
     if (snap == 0) {
-        obj[0xD0] = D_80099E84[mode] + 1;
+        obj[0xD0] = g_weapon_hit_effects[mode] + 1;
     }
     *(f32 *) (obj + 0x28) = 100.0f;
     *(f32 *) (obj + 0x114) = 255.0f;
@@ -1221,7 +1221,7 @@ void objev_throw_object(void) {
     }
 }
 
-// mode_handler_noop: empty handler, entry 16 of the D_8008679C mode table (EU 0x1506D8AC; US 0x1506D4EC). It was
+// mode_handler_noop: empty handler, entry 16 of the g_anim_event_fns mode table (EU 0x1506D8AC; US 0x1506D4EC). It was
 // glued to the end of objev_throw_object (split in P263), so the port had no function at that table address.
 /* was func_1506D4EC */
 void objev_nop_1506d4ec(void) {
@@ -1277,7 +1277,7 @@ void objev_anim_slow(void) {
 
 /* was func_1506D538 */
 void objev_lose_life_cur_player(void) {
-    if (D_800C35EA != 1) {
+    if (g_cutscene_slot_state != 1) {
         player_lose_life(g_cur_obj_index);
     }
 }
@@ -1668,10 +1668,10 @@ s32 actor_sound2_is_playing(struct127 *arg0);
 s32 mp3_stream_get_state(void);
 s32 sound_pick_variant(s32, s32);
 s32 random_int(void);
-extern s32 *D_800BE9C8[];
+extern s32 *g_setup_type_sound_tables[]; /* was D_800BE9C8 */
 
 /* Resolves a sound / event word *slot for a record. Bit 21: conditional on mode (0 / 1: record tests, 2: a global
- * test). Ids >= 2000 come from the per-level table D_800BE9C8[rec->unk288] (high bits kept if set). Bits 24-31 are
+ * test). Ids >= 2000 come from the per-level table g_setup_type_sound_tables[rec->unk288] (high bits kept if set). Bits 24-31 are
  * a random-chance byte, bits 16-20 a variant count. Returns 1 and writes *slot, or 0 when it should not play. */
 /* was func_1506E46C */
 s32 sound_word_resolve(struct127 *rec, s32 *slot, s32 mode) {
@@ -1696,7 +1696,7 @@ s32 sound_word_resolve(struct127 *rec, s32 *slot, s32 mode) {
         }
     }
     if (id >= 2000) {
-        v = D_800BE9C8[*((u8 *)rec + 0x288)][id - 2000];
+        v = g_setup_type_sound_tables[*((u8 *)rec + 0x288)][id - 2000];
         if (v == 0) {
             return 0;
         }
@@ -2672,7 +2672,7 @@ block_10:
             sp.uA7 = var_a3_2;
             obj_rider_cam_shake(sp.uA0);
         }
-        if (D_800BE616 != 0) {
+        if (g_mp_mode_active != 0) {
             if (g_cur_obj->unk31C->unk128 & 0x10) {
                 g_cur_obj_cmd = 0xA;
                 temp_v0_3 = g_cur_obj->unk31C;
@@ -3340,7 +3340,7 @@ void objev_7c8e0(void) {
 
 /* was func_15071F80 */
 void objev_skip_if_cutscene(void) {
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         g_cur_obj->unk138++;
     }
 }
@@ -3495,7 +3495,7 @@ void objev_remove_kind_owned(void) {
 // 16..23 = state (+0x232 gets the low 7 bits; bit 7 keeps the record's current object, otherwise that object is
 // released first: obj_remove(obj, 0) + obj_reset). Clears the record's flag bytes (g_setup_entry_flags[rec], record
 // +2), spawns it again (setup_entry_spawn, 1-based object number) and places the object on the current object
-// g_cur_obj, owned by it (+0x65 = its index + 1, +0x124 = g_cur_obj_index + 1). With D_800BE616 set and the current
+// g_cur_obj, owned by it (+0x65 = its index + 1, +0x124 = g_cur_obj_index + 1). With g_mp_mode_active set and the current
 // object of kind 0x53 that one remembers the new index (+0x222); kind 0x16 objects on level 0x3F get +0x94 bit 2.
 extern u8 *g_setup_entry_flags; /* was D_800D252C */
 s32 setup_entry_spawn(u8 *, s32, s32, s32, s32);
@@ -3523,8 +3523,8 @@ void objev_respawn_record_object(void) {
             obj_reset(old);
         }
     }
-    ((u8 *) D_800D20FC + rec * 0x30)[2] = 0;
-    n = setup_entry_spawn((u8 *) D_800D20FC + rec * 0x30, rec, 0, 0, 0);
+    ((u8 *) g_setup_entries + rec * 0x30)[2] = 0;
+    n = setup_entry_spawn((u8 *) g_setup_entries + rec * 0x30, rec, 0, 0, 0);
     if (n == 0) {
         return;
     }
@@ -3540,7 +3540,7 @@ void objev_respawn_record_object(void) {
     obj->x_position = g_cur_obj->x_position;
     obj->y_position = g_cur_obj->y_position;
     obj->z_position = g_cur_obj->z_position;
-    if (D_800BE616 != 0 && g_cur_obj->id == 0x53) {
+    if (g_mp_mode_active != 0 && g_cur_obj->id == 0x53) {
         g_cur_obj->unk222 = obj - g_objects;
     }
     if (g_level_id == 0x3F && obj->id == 0x16) {
@@ -3553,7 +3553,7 @@ void objev_adopt_remembered_obj(void)
   u8 new_var;
   s32 temp_a2;
   struct127 *temp_a1;
-  if ((D_800BE616 != 0) || (g_cur_obj->unk222 != 0))
+  if ((g_mp_mode_active != 0) || (g_cur_obj->unk222 != 0))
   {
     new_var = (u8) g_cur_obj_cmd;
     temp_a2 = ((s32) g_cur_obj_cmd) >> 0x10;
@@ -3881,7 +3881,7 @@ u8 *obj_spawn_child_at_joint(struct127 *parent, s32 joint, s32 kind, f32 x, f32 
     O_U8(o, 0x83) = b83;
     if (parent->unk1D4 != NULL && joint != -1) {
         m = (f32 (*)[4]) ((u8 *) parent->unk1D4 + joint * 64);
-        if (D_800C42B0 != 0) {
+        if (g_mtx_fixed_point != 0) {
             guMtxL2F(mf, (Mtx *) m);   /* fixed-point joint matrices */
             m = mf;
         }
@@ -4032,7 +4032,7 @@ void objev_set_wait_timer(void) {
 
 /* was func_150739C0 */
 void objev_wait_timer(void) {
-    g_cur_obj->unk64 -= D_800BE9A0;
+    g_cur_obj->unk64 -= g_frame_delta;
 
     if (g_cur_obj->unk64 >= 0) {
         g_anim_event_continue = 0;
@@ -4192,7 +4192,7 @@ s32 attachment_sound_cb();
 
 // event_spawn_helper_object: event-script command: spawns the helper object of record (arg & 0xFF) next to the
 // current object g_cur_obj (on its marker point 0x13 / 4 / arg byte 2 or 100 units above it), gives it the owner's
-// heading, a throw speed (from the owner's charge +0x19C when D_800BE616 is set, with a launch sound), then applies
+// heading, a throw speed (from the owner's charge +0x19C when g_mp_mode_active is set, with a launch sound), then applies
 // the per-kind setup (0x4A, 0x7B, 0x9A), marks it active (+0x1CA bit 0x80) and stores its state in +0x232.
 /* was func_15073FA0 */
 void objev_spawn_helper_object(void) {
@@ -4217,7 +4217,7 @@ void objev_spawn_helper_object(void) {
     }
     state = 1;
     g_setup_entry_flags[rec] = 0;
-    n = setup_entry_spawn((u8 *) D_800D20FC + rec * 0x30, rec, 0, 0, 0);
+    n = setup_entry_spawn((u8 *) g_setup_entries + rec * 0x30, rec, 0, 0, 0);
     if (n == 0) {
         return;
     }
@@ -4258,7 +4258,7 @@ void objev_spawn_helper_object(void) {
         obj->y_position = me->y_position + 100.0f;
         obj->z_position = me->z_position;
     }
-    if (D_800BE616 != 0) {
+    if (g_mp_mode_active != 0) {
         state = 5;
         obj->unk2E4 = CTL_U16(me->unk31C, 0x19C);
         me->unk31C->unk19B = 0;
@@ -4365,7 +4365,7 @@ void objev_set_music_mode(void) {
 void objev_damage(void) {
     struct127 *var_a0 = NULL;
 
-    if (D_800BE616 != 0) {
+    if (g_mp_mode_active != 0) {
         var_a0 = g_cur_obj;
     } else if (g_cur_obj->unk13C != 0) {
         var_a0 = g_objects;

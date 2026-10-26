@@ -10,7 +10,7 @@ extern s32 g_dl_capacity; /* was D_800BEFC4 */
 /* was func_15015E30 */
 void gfx_alloc_dl_buffers(void) {
     u16 *count = (u16 *)((u8 *)g_level_header + 0x1C);
-    Gfx **bufs = (Gfx **)&D_800BEDE8;
+    Gfx **bufs = (Gfx **)&g_gfx_dl_buffers;
     Gfx *b;
 
     if (*count == 0) {

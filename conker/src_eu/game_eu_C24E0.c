@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-extern f32 (*D_800D3040)[4];
+extern f32 (*g_skin_point_mtx)[4]; /* was D_800D3040 */
 s32 skin_point_table_build(s32, u8 **);
 /* was func_15094CD0 */
 void skin_transform_points(s32 arg0, u8 *arg1) {
@@ -16,7 +16,7 @@ void skin_transform_points(s32 arg0, u8 *arg1) {
         p = sp50[i];
         if (p != NULL) {
             v = arg1 + i * 0xC;
-            mtxf_transform_point(D_800D3040, (f32) *(s16 *)(p + 0), (f32) *(s16 *)(p + 2), (f32) *(s16 *)(p + 4), (f32 *)v, (f32 *)(v + 4), (f32 *)(v + 8));
+            mtxf_transform_point(g_skin_point_mtx, (f32) *(s16 *)(p + 0), (f32) *(s16 *)(p + 2), (f32) *(s16 *)(p + 4), (f32 *)v, (f32 *)(v + 4), (f32 *)(v + 8));
         }
     }
 }
@@ -129,8 +129,8 @@ void uv_rotate(u8 *vtx, s32 *uv, s32 count, f32 angle, s32 w, s32 h) {
     }
 }
 
-extern Mtx *D_800DC6D0[];
-extern f32 D_800D30C8[][4][4];
+extern Mtx *g_view_mtx_bufs[]; /* was D_800DC6D0 */
+extern f32 g_view_proj_mtx[][4][4]; /* was D_800D30C8 */
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 
 /* was func_150952B0 */
@@ -138,7 +138,7 @@ void camera_build_view_proj(s32 arg0) {
     f32 a[4][4];
     f32 b[4][4];
 
-    guMtxL2F(a, &D_800DC6D0[g_dl_buf_index][arg0]);
+    guMtxL2F(a, &g_view_mtx_bufs[g_dl_buf_index][arg0]);
     guMtxL2F(b, &((Mtx *)((u8 *)&((struct_eu_BE628 *)g_player_cams)[arg0] + 0x100))[g_dl_buf_index]);
-    mtxf_mul(a, b, D_800D30C8[arg0]);
+    mtxf_mul(a, b, g_view_proj_mtx[arg0]);
 }

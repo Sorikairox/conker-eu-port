@@ -19,9 +19,9 @@ void event_start_level_events(s32 arg0, s32 arg1) {
     save_block_realloc_random();
     camera_timed_records_clear();
 
-    for (i = 0; i < D_800D2F3C; i++) {
-        if (event_prereqs_met(D_800D2F40[i])) {
-            event_start(D_800D2F40[i], arg1);
+    for (i = 0; i < g_level_event_count; i++) {
+        if (event_prereqs_met(g_level_event_ids[i])) {
+            event_start(g_level_event_ids[i], arg1);
         }
     }
 
@@ -279,8 +279,8 @@ void event_list_unload(s32 arg0) {
 s32 event_dispatch(s32, s32, ...);
 void event_vm_run(struct249 *, s32);
 extern s16 g_level_start_mode; /* was D_800BEE12 */
-extern s32 D_800D3268;
-extern s32 D_800D3378;
+extern s32 g_event_cur_id; /* was D_800D3268 */
+extern s32 g_save_bits_changed; /* was D_800D3378 */
 
 /* was func_1509BBA0 */
 void event_list_run_phase(s32 arg0) {
@@ -294,14 +294,14 @@ void event_list_run_phase(s32 arg0) {
 
     var_s0 = g_event_list.unk4;
     camera_timed_records_update();
-    if ((D_800BE616 != 0) || (g_level_id == 0x32) || (event_dispatch(0, 0x2000, 0x93) != 0) || (arg0 != 2)) {
+    if ((g_mp_mode_active != 0) || (g_level_id == 0x32) || (event_dispatch(0, 0x2000, 0x93) != 0) || (arg0 != 2)) {
         event_send_cmd36();
         temp_a2 = g_event_list.length;
         var_s5 = 0;
         if ((s32) temp_a2 > 0) {
             do {
                 temp_v0 = var_s0->unk0 & 0x3FF;
-                D_800D3268 = temp_v0;
+                g_event_cur_id = temp_v0;
                 var_v1 = var_s0->unk0;
                 var_a1 = var_v1 & 0x8000;
                 if (var_a1 != 0) {
@@ -353,22 +353,22 @@ block_26:
                 var_s5 += 1;
             } while (var_s5 < (s32) temp_a2);
         }
-        if (D_800D3378 != 0) {
+        if (g_save_bits_changed != 0) {
     s32 pad;
-            D_800D3378 = 0;
+            g_save_bits_changed = 0;
             event_start_level_events((s32) g_level_start_mode, 0);
         }
-        D_800D3858 = 0;
+        g_event_vm_abort = 0;
     }
 }
 //
 #include <stdarg.h>
 extern s32 g_event_dispatch_args[]; /* was D_800D3380 */
-extern s32 D_800D3C60;
-extern s32 (*D_80088838[])(s32, s32, s32 *);
+extern s32 g_event_arg_count; /* was D_800D3C60 */
+extern s32 (*g_event_query_fns[])(s32, s32, s32 *); /* was D_80088838 */
 
 /* P43: variadic event dispatch. event_dispatch(n, id, arg, x1 .. xn): g_event_dispatch_args = {id & 0xFFF, arg, x1 .. xn},
- * D_800D3C60 = n + 2 during the call (restored after), returns D_80088838[(id >> 12 & 0xF) - 1](id & 0xFFF, arg,
+ * g_event_arg_count = n + 2 during the call (restored after), returns g_event_query_fns[(id >> 12 & 0xF) - 1](id & 0xFFF, arg,
  * g_event_dispatch_args). Callers pass 3 to 8 words; every caller's NON_MATCHING prototype is now `(s32, s32, ...)`. */
 /* was func_1509BE40 */
 s32 event_dispatch(s32 n, s32 id, ...) {
@@ -379,7 +379,7 @@ s32 event_dispatch(s32 n, s32 id, ...) {
     s32 r;
 
     va_start(ap, id);
-    saved = D_800D3C60;
+    saved = g_event_arg_count;
     arg = va_arg(ap, s32);
     g_event_dispatch_args[0] = id & 0xFFF;
     g_event_dispatch_args[1] = arg;
@@ -387,17 +387,17 @@ s32 event_dispatch(s32 n, s32 id, ...) {
         g_event_dispatch_args[i + 2] = va_arg(ap, s32);
     }
     va_end(ap);
-    D_800D3C60 = n + 2;
-    r = D_80088838[((id & 0xF000) >> 12) - 1](id & 0xFFF, arg, g_event_dispatch_args);
-    D_800D3C60 = saved;
+    g_event_arg_count = n + 2;
+    r = g_event_query_fns[((id & 0xF000) >> 12) - 1](id & 0xFFF, arg, g_event_dispatch_args);
+    g_event_arg_count = saved;
     return r;
 }
 
-extern void (*D_80088874[])(s32, s32, s32 *);
+extern void (*g_event_action_fns[])(s32, s32, s32 *); /* was D_80088874 */
 
 /* Variadic event dispatch like event_dispatch, on the second handler table: event_dispatch_alt(n, id, arg, x1 .. xn) sets
- * g_event_dispatch_args = {id & 0xFFF, arg, x1 .. xn} and D_800D3C60 = n + 2 for the call (restored after), then calls
- * D_80088874[(id >> 12 & 0xF) - 1](id & 0xFFF, arg, g_event_dispatch_args). */
+ * g_event_dispatch_args = {id & 0xFFF, arg, x1 .. xn} and g_event_arg_count = n + 2 for the call (restored after), then calls
+ * g_event_action_fns[(id >> 12 & 0xF) - 1](id & 0xFFF, arg, g_event_dispatch_args). */
 /* was func_1509BFB0 */
 void event_dispatch_alt(s32 n, s32 id, s32 arg, ...) {
     va_list ap;
@@ -405,16 +405,16 @@ void event_dispatch_alt(s32 n, s32 id, s32 arg, ...) {
     s32 i;
 
     va_start(ap, arg);
-    saved = D_800D3C60;
+    saved = g_event_arg_count;
     g_event_dispatch_args[0] = id & 0xFFF;
     g_event_dispatch_args[1] = arg;
     for (i = 0; i < n; i++) {
         g_event_dispatch_args[i + 2] = va_arg(ap, s32);
     }
     va_end(ap);
-    D_800D3C60 = n + 2;
-    D_80088874[((id & 0xF000) >> 12) - 1](id & 0xFFF, arg, g_event_dispatch_args);
-    D_800D3C60 = saved;
+    g_event_arg_count = n + 2;
+    g_event_action_fns[((id & 0xF000) >> 12) - 1](id & 0xFFF, arg, g_event_dispatch_args);
+    g_event_arg_count = saved;
 }
 
 // need a bigger brain
@@ -445,7 +445,7 @@ void save_block_realloc_random(void) {
 
 /* was func_1509C228 */
 void event_send_cmd36(void) {
-    if ((D_800D2E68 & 8) || (g_save_progress_bits->unkF & 1)) {
+    if ((g_hints_seen_b8 & 8) || (g_save_progress_bits->unkF & 1)) {
         event_dispatch_alt(2, 0x2000, 0x36, 0, 1);
         return;
     }
@@ -490,12 +490,12 @@ s32 level_is_game_over_level(void) {
 
 /* was func_1509C3A0 */
 void game_over_apply_pending(void) {
-    if ((D_800D2E43 != 0) && (g_game_over_disabled == 0) && (level_is_game_over_level() != 0)) {
+    if ((g_game_over_pending != 0) && (g_game_over_disabled == 0) && (level_is_game_over_level() != 0)) {
         g_save_resume_level = (s8) g_level_load_id;
         if (g_cutscene_pending == 0) {
             save_request_slot_write(g_save_cur_slot);
         }
-        D_800D2E43 = 0;
+        g_game_over_pending = 0;
     }
 }
 

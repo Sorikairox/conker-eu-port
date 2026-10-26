@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern s32 D_8008704C;
+extern s32 g_type_part_model_lists; /* was D_8008704C */
 void look_record_alloc(u8 *arg0);
 struct197 *allocate_memory(s32, s32, s32, s32);
 void obj_reset(struct127 *);
@@ -20,17 +20,17 @@ void obj_randomize_anim_frame(u8 *);
 extern s8 g_player_count; /* was D_8008FD8C */
 extern u8 *g_setup_entry_flags; /* was D_800D252C */
 extern s8 g_menu_player_queue[]; /* was D_800901E4 */
-extern s8 D_800D2550;
-extern u16 D_800D2132;
-extern u8 D_800C67F0;
-extern u8 D_80038080;
+extern s8 g_spawn_ctl_19a_init; /* was D_800D2550 */
+extern u16 g_transition_air_time; /* was D_800D2132 */
+extern u8 g_obj_flagged_pending; /* was D_800C67F0 */
+extern u8 g_mem_expansion_pak; /* was D_80038080 */
 extern u8 g_player_morph_descs[]; /* was D_800A7610 */
-extern u8 D_800A7620[];
+extern u8 g_player_morph_descs_end[]; /* was D_800A7620 */
 u8 obj_type_model_group(u8 *arg0);
 u8 *asset_lookup_rom(s32 *arg0, s32 arg1, ...);
 s32 obj_spawn_attached(struct127 *, u8, u8, s32, s32, s32, s32, s32, f32);
 struct127 *attachment_create(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 *arg9, s32 argA, s32 argB, s32 argC);
-extern s32 D_80087064;
+extern s32 g_setup_cmd_lists; /* was D_80087064 */
 
 typedef struct {
     /* 0x000 */ u8 pad0[0x1C9];
@@ -42,7 +42,7 @@ typedef struct {
 
 
 /* P146 */
-extern s32 (*D_80087030[])(u8 *, s32, s32);
+extern s32 (*g_ray_filter_fns[])(u8 *, s32, s32); /* was D_80087030 */
 s32 obj_ray_hit_model(u8 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32 *, s32 *, s16 *);
 s32 ray_hit_object_bounds(f32 *, f32 *, u8 *, f32 *, f32 *, f32 *, f32 *);
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *, f32 *, s32 *, u8 *, f32);
@@ -52,7 +52,7 @@ s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, 
 // +0x38 direction, +0x44 level surface, +0x56 / +0x58 / +0x5A model hit data, +0x59 kind (0 none, 1 level,
 // 2 object bounds, 3 object model), +0x5C level material (g_world_objs entry), +0x60 level hit extra. Objects are
 // skipped when in skipMask, the caster's own slot (+0x124 - 1) or the caster itself, inactive, of type 3
-// (+0x5), not hittable (+0xF8 bit 0x40), or rejected by filter D_80087030[filter](obj, caster, filterArg)
+// (+0x5), not hittable (+0xF8 bit 0x40), or rejected by filter g_ray_filter_fns[filter](obj, caster, filterArg)
 // (-1 = none). Without boundsOnly the object model is tested (obj_ray_hit_model) and its bounds only when that
 // returns -1; an object linked (+0x65) to the previous model hit is not taken again. The original returns
 // nothing (callers ignore the value); 0 here.
@@ -149,7 +149,7 @@ s32 ray_cast_world(struct127 *caster, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 d
         if (*(s32 *)obj == 0 || obj[0x5] == 3 || obj == (u8 *)caster || !(*(s32 *)(obj + 0xF8) & 0x40)) {
             continue;
         }
-        if ((s8)filter != -1 && D_80087030[(s8)filter](obj, (s32)caster, filterArg) == 0) {
+        if ((s8)filter != -1 && g_ray_filter_fns[(s8)filter](obj, (s32)caster, filterArg) == 0) {
             continue;
         }
         if (boundsOnly == 0) {
@@ -248,7 +248,7 @@ s32 ray_hit_object_bounds(f32 *start, f32 *dir, u8 *obj, f32 *hitIn, f32 *hitOut
 void obj_set_hit_flags_by_kind(u8 *, s32, u8);
 /* was func_1508220C */
 void obj_apply_hit_flags(u8 *arg0, u16 v, u8 arg2) {
-    if (D_800BE616 == 0) {
+    if (g_mp_mode_active == 0) {
         if (arg0[0x1CA] != 0) {
             arg0[0x1CA] = 7;
         }
@@ -264,8 +264,8 @@ void stub_hit_point_noop(f32 arg0, f32 arg1, s32 arg2, s32 arg3);
 void zap_burst_spawn(u8 *arg0, u8 arg1, s32 arg2);
 void screen_flash_zap(u8 arg0, s32 arg1);
 void impact_burst_effect(u8 *arg0, u8 arg1, s32 arg2);
-extern u8 D_80099E84[];   /* per weapon kind: the hit-effect id passed to obj_send_hit */
-extern f32 D_8009CFF8;    /* 65536 / 360 */
+extern u8 g_weapon_hit_effects[];   /* per weapon kind: the hit-effect id passed to obj_send_hit; was D_80099E84 */
+extern f32 g_shot_k_cff8;    /* 65536 / 360; was D_8009CFF8 */
 /* the hit record a ray cast fills (ray_cast_world); only the fields used here */
 typedef struct {
     u8 *target;          /* 0x00: the object hit */
@@ -308,7 +308,7 @@ typedef struct {
 // invulnerable (+0x125 / +0x104) and already reacting (+0x1CA) is skipped (return 2). Type 2: target type 0x94 gets
 // zap_burst_spawn / screen_flash_zap and no blood (object_impact_effects). Type 3: with sub 10 (head shot) and no earlier head shot
 // (controller +0x1AD) the target dies (obj_set_dying_flags, its sounds 0x2E3.. / object_hit_effect / sound 0xAA, effect 0x20 /
-// 0x3D) or, for kinds 2 / 11 / 12 / 18, only plays sound 0x107; targets 0x9F / 0xA0 (unless D_800BE616) farther than
+// 0x3D) or, for kinds 2 / 11 / 12 / 18, only plays sound 0x107; targets 0x9F / 0xA0 (unless g_mp_mode_active) farther than
 // 1000 call obj_apply_hit_flags instead. Kinds 2 / 18 / 12 / 11 start the reaction attachment_spawn_at_joint (0x2A / 0x22 / 0x6B / 0x6D)
 // while +0x1CA < 2. Then the blood / sparks object_impact_effects, kind 13 impact_burst_effect, and when the target was already
 // reacting, obj_send_hit(target, effect | 0x80000, (direction - 90) as a u16 angle, shooter player index). Returns 2.
@@ -382,7 +382,7 @@ s32 shot_hit_apply(u8 *obj, u8 *hit, s32 kind) {
     if ((target[0x125] != 0 || target[0x104] != 0) && !fresh) {
         return 2;
     }
-    effect = D_80099E84[kind];
+    effect = g_weapon_hit_effects[kind];
     if (kind == 7 && g_level_id == 0x2B) {
         effect = 0x27;
     }
@@ -395,7 +395,7 @@ s32 shot_hit_apply(u8 *obj, u8 *hit, s32 kind) {
         }
     } else if (h->type == 3) {
         far = FALSE;
-        if (D_800BE616 == 0 && (target[4] == 0x9F || target[4] == 0xA0) && 1000.0f < h->dist) {
+        if (g_mp_mode_active == 0 && (target[4] == 0x9F || target[4] == 0xA0) && 1000.0f < h->dist) {
             far = TRUE;
         }
         ctrl = *(u8 **) (target + 0x31C);
@@ -453,7 +453,7 @@ s32 shot_hit_apply(u8 *obj, u8 *hit, s32 kind) {
     }
     if (!fresh) {
         /* (u32) of the angle the IDO way: truncation, values >= 2^31 through the -2^31 retry, negatives -> -1 */
-        f = (yaw - 90.0f) * D_8009CFF8;
+        f = (yaw - 90.0f) * g_shot_k_cff8;
         if (f >= 2147483648.0f) {
             f -= 2147483648.0f;
             angle = (f >= 2147483648.0f) ? 0xFFFFFFFF : ((u32) (s32) f | 0x80000000);
@@ -472,9 +472,9 @@ s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
 s32 camera_view_test_sphere(s32, s32 *, f32, f32, f32, f32, f32, f32);
 extern s32 g_view_mtxf[]; /* was D_800DA030 */
 
-/* P36: level-setup entry idx (0x30 bytes at D_800D20FC): spawn it with setup_entry_spawn(e, idx, 0, 0, 0) and return
+/* P36: level-setup entry idx (0x30 bytes at g_setup_entries): spawn it with setup_entry_spawn(e, idx, 0, 0, 0) and return
  * that, or return 0 when: already spawned (g_setup_entry_flags[idx] != 0); a placeholder (e[2] == 1); no position
- * (x == 0x7FFF); its respawn timer D_800D2530[idx] is running (lowered by D_800BE9A0 this frame); idx >= 5 with a
+ * (x == 0x7FFF); its respawn timer g_setup_respawn_timers[idx] is running (lowered by g_frame_delta this frame); idx >= 5 with a
  * range class e[1] & 6 (2: 650, 4: 1300, else 2750 units) and no player object g_objects[0 .. g_player_count)
  * (+0 != 0, +0x127 != 0xFF and enabled in the u16 mask at g_session_game_mode + 0x208) within that XZ distance; or
  * e[1] & 8 and the spot (x, y + 150, z), radius 150, is in view of one of the cameras 0 .. g_last_player_index
@@ -492,7 +492,7 @@ s32 setup_entry_try_spawn(s32 idx, s32 arg1) {
     if (g_setup_entry_flags[idx] != 0) {
         return 0;
     }
-    e = (u8 *) D_800D20FC + idx * 0x30;
+    e = (u8 *) g_setup_entries + idx * 0x30;
     if (e[2] == 1) {
         return 0;
     }
@@ -500,10 +500,10 @@ s32 setup_entry_try_spawn(s32 idx, s32 arg1) {
     if (x == 0x7FFF) {
         return 0;
     }
-    timer = (u16 *) D_800D2530 + idx;
+    timer = (u16 *) g_setup_respawn_timers + idx;
     if (*timer != 0) {
-        if (D_800BE9A0 < *timer) {
-            *timer = *timer - D_800BE9A0;
+        if (g_frame_delta < *timer) {
+            *timer = *timer - g_frame_delta;
         } else {
             *timer = 0;
         }
@@ -545,7 +545,7 @@ s32 setup_entry_try_spawn(s32 idx, s32 arg1) {
     if (flags & 8) {
         ok = 1;
         for (i = 0; i <= g_last_player_index; i++) {
-            e = (u8 *) D_800D20FC + idx * 0x30;
+            e = (u8 *) g_setup_entries + idx * 0x30;
             if (camera_view_test_sphere(g_player_cams + i * 0x180, g_view_mtxf + i * 0x10, (f32) *(s16 *) (e + 6),
                               (f32) (*(s16 *) (e + 8) + 150), (f32) *(s16 *) (e + 0xA), 150.0f, 150.0f, 20000.0f) != 0) {
                 ok = 0;
@@ -555,12 +555,12 @@ s32 setup_entry_try_spawn(s32 idx, s32 arg1) {
             return 0;
         }
     }
-    return setup_entry_spawn((u8 *) D_800D20FC + idx * 0x30, idx, 0, 0, 0);
+    return setup_entry_spawn((u8 *) g_setup_entries + idx * 0x30, idx, 0, 0, 0);
 }
 
 s32 setup_entry_try_spawn(s32, s32);
-extern u8 D_800D2520;
-extern u8 D_800D2521;
+extern u8 g_setup_entry_count; /* was D_800D2520 */
+extern u8 g_setup_level_first; /* was D_800D2521 */
 /* was func_15082D5C */
 void setup_entries_spawn_range(s32 arg0, s32 arg1, s32 arg2) {
     s32 lo;
@@ -568,10 +568,10 @@ void setup_entries_spawn_range(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
     if (arg2 != 0) {
         lo = 0;
-        hi = D_800D2521;
+        hi = g_setup_level_first;
     } else {
-        lo = D_800D2521;
-        hi = D_800D2520;
+        lo = g_setup_level_first;
+        hi = g_setup_entry_count;
     }
     i = lo;
     if (lo < hi) {
@@ -612,7 +612,7 @@ void obj_set_spawn_flags(u8 *arg0) {
     }
 }
 
-/* Spawns the level-setup object e (0x30-byte entry of D_800D20FC) into an object slot of g_objects (0x32C each):
+/* Spawns the level-setup object e (0x30-byte entry of g_setup_entries) into an object slot of g_objects (0x32C each):
  * slot = reuse+reset (obj_reset) of slot reuse - 1 when reuse != 0, of slot idx when idx < g_player_count (the
  * player / character slots), else a new one (obj_alloc_slot). Returns slot + 1, or 0 when g_setup_entry_flags[idx] & 0x7F
  * (already spawned) or no slot is free (25). Fills position (+0x14.., from e+6/8/A), angle (e+0xC << 8), the setup
@@ -704,7 +704,7 @@ s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
     }
     if (O8(0x127) != 0xFF) {
         O8(0x128) = mp_player_team(O8(0x127));
-        REC(0x19A) = D_800D2550;
+        REC(0x19A) = g_spawn_ctl_19a_init;
         REC(0x1AF) = 0x40;
         REC(0x1B0) = 0xFF;
     }
@@ -730,7 +730,7 @@ s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
         O16(0x38) = (s32)(OF(0x18) - 500.0f);
     }
     if (flags & 0x800000) {
-        D_800C67F0 = 1;
+        g_obj_flagged_pending = 1;
     }
     O8(0x1E4) = e[0x11];
     O8(0x1DD) = 0x78;
@@ -762,7 +762,7 @@ s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
     }
     if (O8(0x127) != 0xFF) {
         O8(0x1CA) = player_stat_get((s16)O8(0x127), 4);
-        O16(0xB2) = (s16)D_800D2132;
+        O16(0xB2) = (s16)g_transition_air_time;
         obj_set_spawn_flags(obj);
         obj_apply_setup_variant((struct127 *)obj, player_stat_get((s16)slot, 1));
     }
@@ -772,7 +772,7 @@ s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
         O32(0x314) = 0;
     }
     O8(0x288) = level_list_index_of(type);
-    if (D_800BE616 != 0) {
+    if (g_mp_mode_active != 0) {
         v = mp_player_team(O8(0x127));
         if (v >= 4) {
             v = 3;
@@ -783,13 +783,13 @@ s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
             O8(0x68) = v + 0x10;
         }
     }
-    if (D_80038080 == 0 && g_level_id != 0x1D && e[0x2E] == 0xFF) {
+    if (g_mem_expansion_pak == 0 && g_level_id != 0x1D && e[0x2E] == 0xFF) {
         n = O8(0x2C9);
         if (n == 0) {
             n = 1;
         }
         for (i = 0; i < n; i++) {
-            ((u8 *)D_800D2040)[(*(u8 **)(obj + 0x2C4))[i]] = 0xFF;
+            ((u8 *)g_model_slot_timers)[(*(u8 **)(obj + 0x2C4))[i]] = 0xFF;
         }
     }
     if (g_level_id == 0x1D) {
@@ -798,7 +798,7 @@ s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
     char_fx_init((struct127 *)obj);
     v = obj_current_part_model((struct_eu_AF2A0 *)obj);
     found = 0;
-    for (t = g_player_morph_descs; t != D_800A7620; t += 8) {
+    for (t = g_player_morph_descs; t != g_player_morph_descs_end; t += 8) {
         if (v == t[0]) {
             found = 1;
             break;
@@ -944,7 +944,7 @@ void obj_apply_setup_variant(struct127 *arg0, s32 arg1) {
         obj_setup_run(arg0, sp1C, 0.0f, 0);
     }
 }
-/* P36: run the setup command list D_80087064[arg1 - 1] ({list, count} of 0x10-byte commands) on obj: type 0 ->
+/* P36: run the setup command list g_setup_cmd_lists[arg1 - 1] ({list, count} of 0x10-byte commands) on obj: type 0 ->
  * obj_spawn_attached, else attachment_create (attachment spawn; arg10 = cmd[6] for type 2, else -1). Returns the last result. */
 
 /* was func_15083568 */
@@ -959,7 +959,7 @@ s32 obj_setup_run(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3) {
     u8 *var_s0;
 
     temp_s4 = arg1 - 1;
-    temp_s5 = ((s32 *)((u8 *)&D_80087064 + (temp_s4 * 8)));
+    temp_s5 = ((s32 *)((u8 *)&g_setup_cmd_lists + (temp_s4 * 8)));
     var_v1 = 0;
     var_s1 = 0;
     if ((s32) (*(u8 *)((u8 *)temp_s5 + 4)) > 0) {
@@ -983,19 +983,19 @@ s32 obj_setup_run(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3) {
     }
     return var_v1;
 }
-extern s32 D_80087064;
+extern s32 g_setup_cmd_lists; /* was D_80087064 */
 void attachment_remove_by_slot(s32 arg0, s32 arg1);
 struct127 *obj_find_by_id(s32 arg0);
 void obj_release_partner_remove(struct127 *arg0, struct127 *arg1);
 void obj_remove(struct127 *arg0, s32 arg1);
 
-// object_setup_undo: undoes setup command list D_80087064[n - 1] on obj (the list obj_setup_run runs): first
+// object_setup_undo: undoes setup command list g_setup_cmd_lists[n - 1] on obj (the list obj_setup_run runs): first
 // attachment_remove_by_slot(obj, n), then for every type-0 command (+3 == 0) the object it spawned (obj_find_by_id(cmd[0])) is
 // removed if it is still attached to obj (+0x65 == obj's index + 1): kinds 0x1D / 0x6E / 0x2F are detached with
 // obj_release_partner_remove(o, owner), other kinds removed with obj_remove(o, 0). No return value (callers ignore v0).
 /* was func_150836CC */
 s32 obj_setup_undo(struct127 *obj, s32 n) {
-    u8 *list = (u8 *) &D_80087064 + (n - 1) * 8;
+    u8 *list = (u8 *) &g_setup_cmd_lists + (n - 1) * 8;
     u8 *cmd;
     u8 *o;
     s32 i;
@@ -1019,8 +1019,8 @@ s32 obj_setup_undo(struct127 *obj, s32 n) {
     return 0;
 }
 /* P36: set object slot's type (+4). 0xFF (no type): clears +0xE4/E6/E8, +0xD2 = +0xD4 = 0x46, +0xD6, +0x160, +0xC8 = 0.
- * Else +0xC8 = type record D_800D1C90[type]->+6 (s16), obj_set_scale(obj, +0x14C, +0x150), +5 = record +0x12.
- * Then +6 = obj_type_model_group(obj) (model id); +0x58 = asset_lookup_rom(0, 2, 2, id) when D_800C5A90[id] != 0. arg2 unused. */
+ * Else +0xC8 = type record g_type_descs[type]->+6 (s16), obj_set_scale(obj, +0x14C, +0x150), +5 = record +0x12.
+ * Then +6 = obj_type_model_group(obj) (model id); +0x58 = asset_lookup_rom(0, 2, 2, id) when g_model_anim_counts[id] != 0. arg2 unused. */
 /* was func_15083C3C */
 void obj_set_type(s32 slot, s32 type, s32 arg2) {
     u8 *obj = (u8 *) g_objects + slot * 0x32C;
@@ -1038,14 +1038,14 @@ void obj_set_type(s32 slot, s32 type, s32 arg2) {
         *(s16 *) (obj + 0x160) = 0;
         *(f32 *) (obj + 0xC8) = 0.0f;
     } else {
-        rec = (u8 *) D_800D1C90[type];
+        rec = (u8 *) g_type_descs[type];
         *(f32 *) (obj + 0xC8) = (f32) *(s16 *) (rec + 6);
         obj_set_scale((struct127 *) obj, *(f32 *) (obj + 0x14C), *(f32 *) (obj + 0x150));
-        obj[5] = ((u8 *) D_800D1C90[type])[0x12];
+        obj[5] = ((u8 *) g_type_descs[type])[0x12];
     }
     id = obj_type_model_group(obj);
     obj[6] = id;
-    if ((u16) D_800C5A90[id] != 0) {
+    if ((u16) g_model_anim_counts[id] != 0) {
         *(u8 **) (obj + 0x58) = asset_lookup_rom(0, 2, 2, id);
     }
 }
@@ -1057,10 +1057,10 @@ s32 obj_anim_state_alloc(struct127 *arg0, u16 arg1, s32 arg2, f32 arg3) {
     u8 temp_v0;
 
     temp_v0 = arg0->id;
-    if (D_800D1588[temp_v0] == 0) {
+    if (g_model_anim_banks[temp_v0] == 0) {
         goto block_7;
     }
-    if ((u16) D_800C5A90[temp_v0] == 0) {
+    if ((u16) g_model_anim_counts[temp_v0] == 0) {
         goto block_7;
     }
     temp_v0_2 = allocate_memory(0x3E0, 1, 2, 0);
@@ -1073,7 +1073,7 @@ s32 obj_anim_state_alloc(struct127 *arg0, u16 arg1, s32 arg2, f32 arg3) {
 block_7:
     return 0;
 }
-/* Copy an object's per-type parameters from its type record D_800D1C90[type] (P15, hand C). */
+/* Copy an object's per-type parameters from its type record g_type_descs[type] (P15, hand C). */
 /* was func_15083E20 */
 void obj_copy_type_params(u8 *arg0, u16 type, u8 *arg2) {
     u8 *t;
@@ -1081,7 +1081,7 @@ void obj_copy_type_params(u8 *arg0, u16 type, u8 *arg2) {
     if (type == 0xFF) {
         return;
     }
-    t = (u8 *)D_800D1C90[type];
+    t = (u8 *)g_type_descs[type];
     if (arg2 != NULL) {
         u16 v = *(u16 *)(arg2 + 0x2C);
 
@@ -1106,7 +1106,7 @@ void obj_copy_type_params(u8 *arg0, u16 type, u8 *arg2) {
     arg0[0x69] = t[0x3C];
     *(s16 *)(arg0 + 0x160) = *(s16 *)(t + 2);
     if (t[4] != 0) {
-        *(s32 *)(arg0 + 0x2C4) = (&D_8008704C)[t[5]];
+        *(s32 *)(arg0 + 0x2C4) = (&g_type_part_model_lists)[t[5]];
         arg0[0x2C8] = t[4];
     }
     arg0[0x2C9] = arg0[0x2C8] + t[0x38];
@@ -1129,7 +1129,7 @@ s32 obj_anim_state_alloc(struct127 *, u16, s32, f32);
 // +0x5C = mode, +0xAB = arg3, +0 = arg4, +0xAC = flags (bit 0: +0xF8 |= 0x4000 and +0x270 = kind record +0xE * scale;
 // bit 1: passed to obj_anim_state_alloc), +0x101 = keepScale (0: scales 1.0, else the owner's), copies of the owner's
 // +0x66 (without bit 4) and +0x1DD..+0x1E2 (+0x1DF takes the owner's +0x1DE, as the asm does), per-camera slots
-// +0x304.. from light_alloc_light_buf(1). While D_800C35EA == 1 the D_800C3638 byte is 0 during the kind setup. Returns it.
+// +0x304.. from light_alloc_light_buf(1). While g_cutscene_slot_state == 1 the g_cutscene_in_progress byte is 0 during the kind setup. Returns it.
 /* was func_15083F30 */
 s32 obj_spawn_attached(struct127 *owner, u8 mode, u8 kind, s32 arg3, s32 arg4, s32 flags, s32 keepScale, s32 arg7,
                          f32 arg8) {
@@ -1177,7 +1177,7 @@ s32 obj_spawn_attached(struct127 *owner, u8 mode, u8 kind, s32 arg3, s32 arg4, s
     model_header_load(kind, 0);
     if (flags & 1) {
         *(s32 *) (o + 0xF8) |= 0x4000;
-        *(f32 *) (o + 0x270) = (f32) *(u16 *) ((u8 *) D_800D1C90[kind] + 0xE) * *(f32 *) (o + 0x14C);
+        *(f32 *) (o + 0x270) = (f32) *(u16 *) ((u8 *) g_type_descs[kind] + 0xE) * *(f32 *) (o + 0x14C);
     }
     flag2 = (flags & 2) ? 1 : 0;
     slot = (s32 *) (o + 0x304);
@@ -1188,15 +1188,15 @@ s32 obj_spawn_attached(struct127 *owner, u8 mode, u8 kind, s32 arg3, s32 arg4, s
         o[0x301] = 1;
     }
     *(s32 *) (o + 0x314) = light_alloc_lookat_buf();
-    single = D_800C35EA == 1;
+    single = g_cutscene_slot_state == 1;
     if (single) {
-        D_800C3638 = 0;
+        g_cutscene_in_progress = 0;
     }
     obj_copy_type_params(o, kind, NULL);
     obj_set_type((o - (u8 *) g_objects) / 0x32C, kind, 1);
     obj_anim_state_alloc((struct127 *) o, arg7, flag2, arg8);
     if (single) {
-        D_800C3638 = 1;
+        g_cutscene_in_progress = 1;
     }
     return (s32) o;
 }
@@ -1206,14 +1206,14 @@ s32 setup_next_free_id(void) {
     s32 i;
     id = 1;
     i = 0;
-    if (D_800D2520 > 0) {
+    if (g_setup_entry_count > 0) {
         do {
-            if (id == *((u8 *)D_800D20FC + i * 0x30 + 0x28)) {
+            if (id == *((u8 *)g_setup_entries + i * 0x30 + 0x28)) {
                 id++;
                 i = 0;
             }
             i++;
-        } while (i < D_800D2520);
+        } while (i < g_setup_entry_count);
     }
     if (id >= 0x100) {
         id = 0xFF;
@@ -1221,7 +1221,7 @@ s32 setup_next_free_id(void) {
     return id;
 }
 
-/* P95: index of the level-setup entry (0x30 bytes at D_800D20FC, D_800D2520 of them) whose byte +0x28 is `id`;
+/* P95: index of the level-setup entry (0x30 bytes at g_setup_entries, g_setup_entry_count of them) whose byte +0x28 is `id`;
  * -1 when id is 0 or not found. */
 /* was func_15083E0C */
 s32 setup_entry_find_by_id(u8 id) {
@@ -1230,8 +1230,8 @@ s32 setup_entry_find_by_id(u8 id) {
     if (id == 0) {
         return -1;
     }
-    for (i = 0; i < D_800D2520; i++) {
-        if (((u8 *) D_800D20FC + i * 0x30)[0x28] == id) {
+    for (i = 0; i < g_setup_entry_count; i++) {
+        if (((u8 *) g_setup_entries + i * 0x30)[0x28] == id) {
             return i;
         }
     }
@@ -1277,13 +1277,13 @@ s32 obj_slot_by_spawn(s32 arg0) {
     return -1;
 }
 
-extern u16 D_800C5BC0[]; /* vertex block size of each model slot, in 16-byte vertices */
+extern u16 g_model_vtx_counts[]; /* vertex block size of each model slot, in 16-byte vertices; was D_800C5BC0 */
 void heap_free(void *);
 
 /*
  * P62: vertex blocks of object o for variant var: the two frame words o +0x28C + var * 8 (+0 / +4) that
- * obj_draw_model_dl draws from. The model slot is ((u8 *)o +0x2C4)[var]; its shared block is D_800D19A0[slot] with the
- * user count D_800D1F80[slot]. The sharing mode is (rec +0x10) & 3, rec being the record +0x144 of the parent object
+ * obj_draw_model_dl draws from. The model slot is ((u8 *)o +0x2C4)[var]; its shared block is g_model_bases[slot] with the
+ * user count g_model_slot_users[slot]. The sharing mode is (rec +0x10) & 3, rec being the record +0x144 of the parent object
  * o[0x65] - 1 (or o's own when o[0x65] is 0); no record: mode 0; slot 0: mode 2.
  *   both words set, or no shared block: nothing (0);
  *   mode 0: both words share the block (count += 2);
@@ -1321,7 +1321,7 @@ s32 obj_model_vertex_blocks_get(struct127 *o, s32 var) {
     if (slot == 0) {
         mode = 2;
     }
-    shared = (u32 *)&D_800D19A0 + slot;
+    shared = (u32 *)&g_model_bases + slot;
     if (words[0] != 0 && words[1] != 0) {
         return 0;
     }
@@ -1329,7 +1329,7 @@ s32 obj_model_vertex_blocks_get(struct127 *o, s32 var) {
         return 0;
     }
     failed = 0;
-    count = (u8 *)D_800D1F80 + slot;
+    count = (u8 *)g_model_slot_users + slot;
 
     if (mode == 0) {
         words[1] = *shared;
@@ -1338,7 +1338,7 @@ s32 obj_model_vertex_blocks_get(struct127 *o, s32 var) {
     } else if (mode == 1) {
         if (words[0] == 0 || words[0] == *shared) {
             if (*count != 0) {
-                size = D_800C5BC0[slot] * 16;
+                size = g_model_vtx_counts[slot] * 16;
                 words[0] = (u32)allocate_memory(size, 1, 2, 2);
                 if (words[0] == 0) {
                     failed = 1;
@@ -1360,7 +1360,7 @@ s32 obj_model_vertex_blocks_get(struct127 *o, s32 var) {
                 continue;
             }
             if (*count != 0) {
-                size = D_800C5BC0[slot] * 16;
+                size = g_model_vtx_counts[slot] * 16;
                 words[w] = (u32)allocate_memory(size, 1, 2, 2);
                 if (words[w] == 0) {
                     failed = 1;
@@ -1410,8 +1410,8 @@ void obj_model_refs_release_all(u8 *arg0) {
 
 /* P150 */
 // object_model_refs_release: drops entry slot's two model block references (struct127 words +0x28C + slot * 8).
-// A reference to the slot's shared block D_800D19A0[model] (model = ((u8 *)+0x2C4)[slot]) only lowers its user
-// count D_800D1F80[model] (bytes); any other block is freed with heap_set_block_tag(block, 3).
+// A reference to the slot's shared block g_model_bases[model] (model = ((u8 *)+0x2C4)[slot]) only lowers its user
+// count g_model_slot_users[model] (bytes); any other block is freed with heap_set_block_tag(block, 3).
 /* was func_15084814 */
 void obj_model_refs_release(struct127 *obj, s32 slot) {
     s32 **ref;
@@ -1427,8 +1427,8 @@ void obj_model_refs_release(struct127 *obj, s32 slot) {
         if (ref[i] == NULL) {
             continue;
         }
-        if (ref[i] == ((s32 **)&D_800D19A0)[model]) {
-            ((u8 *)D_800D1F80)[model]--;
+        if (ref[i] == ((s32 **)&g_model_bases)[model]) {
+            ((u8 *)g_model_slot_users)[model]--;
         } else {
             heap_set_block_tag(ref[i], 3);
         }
@@ -1438,7 +1438,7 @@ void obj_model_refs_release(struct127 *obj, s32 slot) {
 
 s32 anim_bank_load(s32, s32);
 s32 model_header_load(s32, s32);
-extern s32 D_8008704C;
+extern s32 g_type_part_model_lists; /* was D_8008704C */
 
 /* was func_150848F0 */
 void obj_load_part_models(u8 *arg0, s32 arg1, s32 arg2) {
@@ -1452,13 +1452,13 @@ void obj_load_part_models(u8 *arg0, s32 arg1, s32 arg2) {
     temp_s0 = arg0[4];
     if (temp_s0 != 0xFF) {
         model_header_load(temp_s0, arg2);
-        temp_v0 = D_800D1C90[temp_s0];
+        temp_v0 = g_type_descs[temp_s0];
         var_v1 = arg0 + 4;
         var_s2 = temp_v0->unk4;
         if (var_s2 == 0) {
             var_s2 = 1;
         } else {
-            var_v1 = *(u8 **)(&D_8008704C + (u8) temp_v0->unk5);
+            var_v1 = *(u8 **)(&g_type_part_model_lists + (u8) temp_v0->unk5);
         }
         var_s1 = 0;
         var_s0 = var_v1;
@@ -1480,9 +1480,9 @@ void heap_free(void *);
 
 // object_release_models: release the shared model resources of an object that goes away (called by the object
 // removal obj_remove for kinds other than 2 / 3). For each part id of the object (+0x2C4 list, +0x2C9 count):
-// the D_800D1588 and D_800D1C90 blocks of the part are freed unless another live object (of the first 25, kind byte
-// +4 != 0xFF, +5 != 2) has a part that uses the same block; then every D_800D1588 slot holding that block is
-// cleared. When no other object has the same part id, the per-kind buffers D_800C5C08 / D_800C6070 / D_800C6360
+// the g_model_anim_banks and g_type_descs blocks of the part are freed unless another live object (of the first 25, kind byte
+// +4 != 0xFF, +5 != 2) has a part that uses the same block; then every g_model_anim_banks slot holding that block is
+// cleared. When no other object has the same part id, the per-kind buffers g_model_vtx_ranges / g_model_coll_tris / g_model_vtx_ptr_tables
 // (indexed by the object's kind +4, as the asm does) are freed.
 /* was func_150849C0 */
 void obj_release_models(struct127 *obj) {
@@ -1503,7 +1503,7 @@ void obj_release_models(struct127 *obj) {
     s32 model;
     struct124 *record;
 
-    if (kind == 0xFF || (&D_800D19A0)[kind] == 0) {
+    if (kind == 0xFF || (&g_model_bases)[kind] == 0) {
         return;
     }
     nparts = o[0x2C9];
@@ -1524,42 +1524,42 @@ void obj_release_models(struct127 *obj) {
             }
             list = *(u8 **) (other + 0x2C4);
             id = parts[j];
-            model = D_800D1588[id];
-            record = D_800D1C90[id];
+            model = g_model_anim_banks[id];
+            record = g_type_descs[id];
             for (q = 0; q < other[0x2C9]; q++) {
                 if (list[q] == id) {
                     lastUser = 0;
                 }
-                if (D_800D1588[list[q]] == model && model != 0) {
+                if (g_model_anim_banks[list[q]] == model && model != 0) {
                     freeModel = 0;
                 }
-                if (D_800D1C90[list[q]] == record && record != NULL) {
+                if (g_type_descs[list[q]] == record && record != NULL) {
                     freeRecord = 0;
                 }
             }
         }
-        if (freeModel && (model = D_800D1588[parts[j]]) != 0) {
+        if (freeModel && (model = g_model_anim_banks[parts[j]]) != 0) {
             heap_set_block_tag((s32 *) (model - 0x10), 3);
             for (k = 0; k < 187; k++) {
-                if (D_800D1588[k] == model) {
-                    D_800D1588[k] = 0;
+                if (g_model_anim_banks[k] == model) {
+                    g_model_anim_banks[k] = 0;
                 }
             }
         }
-        if (freeRecord && D_800D1C90[parts[j]] != NULL) {
-            heap_set_block_tag((s32 *) ((u8 *) D_800D1C90[parts[j]] - 0x10), 3);
-            D_800D1C90[parts[j]] = NULL;
+        if (freeRecord && g_type_descs[parts[j]] != NULL) {
+            heap_set_block_tag((s32 *) ((u8 *) g_type_descs[parts[j]] - 0x10), 3);
+            g_type_descs[parts[j]] = NULL;
         }
-        if (lastUser && (&D_800D19A0)[parts[j]] != 0) {
-            if (D_800C5C08[kind] != 0) {
-                heap_free((void *) D_800C5C08[kind]);
-                D_800C5C08[kind] = 0;
-                heap_free((void *) D_800C6070[kind]);
-                D_800C6070[kind] = 0;
+        if (lastUser && (&g_model_bases)[parts[j]] != 0) {
+            if (g_model_vtx_ranges[kind] != 0) {
+                heap_free((void *) g_model_vtx_ranges[kind]);
+                g_model_vtx_ranges[kind] = 0;
+                heap_free((void *) g_model_coll_tris[kind]);
+                g_model_coll_tris[kind] = 0;
             }
-            if (D_800C6360[kind] != 0) {
-                heap_free((void *) D_800C6360[kind]);
-                D_800C6360[kind] = 0;
+            if (g_model_vtx_ptr_tables[kind] != 0) {
+                heap_free((void *) g_model_vtx_ptr_tables[kind]);
+                g_model_vtx_ptr_tables[kind] = 0;
             }
         }
         lastUser = 1;
@@ -1591,22 +1591,22 @@ u8 obj_current_part_model_idx(struct_eu_AF2A0 *arg0, s32 *arg1) {
     return arg0->unk2C4[temp_v1];
 }
 
-/* Per-frame countdown of the 187 resource slots (P15, hand C from the asm). D_800D2040 holds one
+/* Per-frame countdown of the 187 resource slots (P15, hand C from the asm). g_model_slot_timers holds one
  * byte timer per slot (0 = idle, 0xFF = pinned). When a timer reaches 1 and the slot owns a block
- * (D_800D19A0[i]) that is not locked (D_800C5C08[i] == 0), the block is released: object references to
+ * (g_model_bases[i]) that is not locked (g_model_vtx_ranges[i] == 0), the block is released: object references to
  * it (struct127 words 0x28C.., two per entry, unk2C9 entries) are cleared, objects whose entry list
  * (unk2C4) names slot i are notified through obj_model_refs_release, the slot's 12-byte records
- * (D_800C5758[i], D_800C5A48[i] of them) free their texture through texture_unref_age2, then the block
+ * (g_model_tex_entries[i], g_model_tex_counts[i] of them) free their texture through texture_unref_age2, then the block
  * (minus its 0x38-byte header) goes back to the allocator. */
 void texture_unref_age2(s32);
-extern u16 D_800C5A48[];         /* record count per slot */
-extern u8 *D_800C5758[];         /* 12-byte records per slot */
+extern u16 g_model_tex_counts[];         /* record count per slot; was D_800C5A48 */
+extern u8 *g_model_tex_entries[];         /* 12-byte records per slot; was D_800C5758 */
 /* was func_15084E80 */
 void model_slots_age_release(void) {
-    u8 *timers = (u8 *)D_800D2040;
-    s32 *blocks = &D_800D19A0;
-    u16 *counts = D_800C5A48;
-    u8 **records = D_800C5758;
+    u8 *timers = (u8 *)g_model_slot_timers;
+    s32 *blocks = &g_model_bases;
+    u16 *counts = g_model_tex_counts;
+    u8 **records = g_model_tex_entries;
     s32 i;
 
     for (i = 0; i != 187; i++) {
@@ -1615,7 +1615,7 @@ void model_slots_age_release(void) {
         if (t == 0xFF || t == 0) {
             continue;
         }
-        if (t == 1 && blocks[i] != 0 && D_800C5C08[i] == 0) {
+        if (t == 1 && blocks[i] != 0 && g_model_vtx_ranges[i] == 0) {
             struct127 *obj;
             u8 *rec;
             s32 j;
@@ -1645,7 +1645,7 @@ void model_slots_age_release(void) {
                 }
             }
             heap_free(blocks[i] - 0x38);
-            ((u8 *)D_800D1F80)[i] = 0;
+            ((u8 *)g_model_slot_users)[i] = 0;
             blocks[i] = 0;
             t = timers[i];
         }
@@ -1663,15 +1663,15 @@ void obj_randomize_anim_frame(u8 *arg0) {
     }
 }
 
-extern u8 D_800BE9B0;
-extern u16 D_800BE9B8[];
+extern u8 g_setup_type_count; /* was D_800BE9B0 */
+extern u16 g_setup_type_ids[]; /* was D_800BE9B8 */
 /* was func_15085118 */
 s32 level_list_index_of(s32 arg0) {
     s32 ret = 0;
     s32 i;
 
-    for (i = 0; i < D_800BE9B0; i++) {
-        if (arg0 == D_800BE9B8[i]) {
+    for (i = 0; i < g_setup_type_count; i++) {
+        if (arg0 == g_setup_type_ids[i]) {
             ret = i;
             break;
         }

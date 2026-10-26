@@ -2,26 +2,26 @@
 #include "functions.h"
 #include "variables.h"
 
-OSTime D_80042D40;                // __osCurrentTime (tentative definition: one lui for the u64 store)
-extern u32 D_80042D48;            // __osBaseCounter
-extern u32 D_80042D4C;            // __osViIntrCount
-extern u32 D_80042D50;            // __osTimerCounter
-extern OSTimer *D_8002C0C0;       // __osTimerList
+OSTime g_os_current_time; /* was D_80042D40 */ // __osCurrentTime (tentative definition: one lui for the u64 store)
+extern u32 g_os_base_counter; /* was D_80042D48 */ // __osBaseCounter
+extern u32 g_os_vi_intr_count; /* was D_80042D4C */ // __osViIntrCount
+extern u32 g_os_timer_counter; /* was D_80042D50 */ // __osTimerCounter
+extern OSTimer *g_os_timer_list; /* was D_8002C0C0 */ // __osTimerList
 void __osSetTimerIntr(OSTime tim);
 void __osSetCompare(u32);
 OSTime __osInsertTimer(OSTimer *t);
 
 
 void __osTimerServicesInit(void) {
-    D_80042D40 = 0;
-    D_80042D48 = 0;
-    D_80042D4C = 0;
-    D_8002C0C0->prev = D_8002C0C0;
-    D_8002C0C0->next = D_8002C0C0->prev;
-    D_8002C0C0->value = 0;
-    D_8002C0C0->interval = D_8002C0C0->value;
-    D_8002C0C0->mq = NULL;
-    D_8002C0C0->msg = 0;
+    g_os_current_time = 0;
+    g_os_base_counter = 0;
+    g_os_vi_intr_count = 0;
+    g_os_timer_list->prev = g_os_timer_list;
+    g_os_timer_list->next = g_os_timer_list->prev;
+    g_os_timer_list->value = 0;
+    g_os_timer_list->interval = g_os_timer_list->value;
+    g_os_timer_list->mq = NULL;
+    g_os_timer_list->msg = 0;
 }
 
 void __osTimerInterrupt(void) {
@@ -29,19 +29,19 @@ void __osTimerInterrupt(void) {
     u32 count;
     u32 elapsed_cycles;
 
-    if (D_8002C0C0->next == D_8002C0C0) {
+    if (g_os_timer_list->next == g_os_timer_list) {
         return;
     }
     while (1) {
-        t = D_8002C0C0->next;
-        if (t == D_8002C0C0) {
+        t = g_os_timer_list->next;
+        if (t == g_os_timer_list) {
             __osSetCompare(0);
-            D_80042D50 = 0;
+            g_os_timer_counter = 0;
             break;
         }
         count = osGetCount();
-        elapsed_cycles = count - D_80042D50;
-        D_80042D50 = count;
+        elapsed_cycles = count - g_os_timer_counter;
+        g_os_timer_counter = count;
         if (elapsed_cycles < t->value) {
             t->value -= elapsed_cycles;
             __osSetTimerIntr(t->value);
@@ -67,8 +67,8 @@ void __osSetTimerIntr(OSTime tim) {
     u32 savedMask;
 
     savedMask = __osDisableInt();
-    D_80042D50 = osGetCount();
-    NewTime = D_80042D50 + tim;
+    g_os_timer_counter = osGetCount();
+    NewTime = g_os_timer_counter + tim;
     __osSetCompare(NewTime);
     __osRestoreInt(savedMask);
 }
@@ -79,12 +79,12 @@ OSTime __osInsertTimer(OSTimer *t) {
     u32 savedMask;
 
     savedMask = __osDisableInt();
-    for (timep = D_8002C0C0->next, tim = t->value; timep != D_8002C0C0 && tim > timep->value;
+    for (timep = g_os_timer_list->next, tim = t->value; timep != g_os_timer_list && tim > timep->value;
          tim -= timep->value, timep = timep->next) {
         ;
     }
     t->value = tim;
-    if (timep != D_8002C0C0) {
+    if (timep != g_os_timer_list) {
         timep->value -= tim;
     }
     t->next = timep;
@@ -111,32 +111,32 @@ typedef struct {
     __OSViScale x;
     __OSViScale y;
 } __OSViContext;
-extern __OSViContext D_8002C0D0[2]; // vi
-extern __OSViContext *D_8002C130;   // __osViCurr
-extern __OSViContext *D_8002C134;   // __osViNext
-extern u32 D_8002C138;              // osViClock
+extern __OSViContext g_os_vi_contexts[2]; /* was D_8002C0D0 */ // vi
+extern __OSViContext *g_os_vi_curr; /* was D_8002C130 */ // __osViCurr
+extern __OSViContext *g_os_vi_next; /* was D_8002C134 */ // __osViNext
+extern u32 g_os_vi_clock; /* was D_8002C138 */ // osViClock
 void __osViSwapContext(void);
 
 // __osViInit
 /* was func_10024720 */
 void os_vi_init(void) {
-    bzero(D_8002C0D0, sizeof(D_8002C0D0));
-    D_8002C130 = &D_8002C0D0[0];
-    D_8002C134 = &D_8002C0D0[1];
-    D_8002C134->retraceCount = 1;
-    D_8002C130->retraceCount = 1;
+    bzero(g_os_vi_contexts, sizeof(g_os_vi_contexts));
+    g_os_vi_curr = &g_os_vi_contexts[0];
+    g_os_vi_next = &g_os_vi_contexts[1];
+    g_os_vi_next->retraceCount = 1;
+    g_os_vi_curr->retraceCount = 1;
     if (osTvType == OS_TV_PAL) {
-        D_8002C134->modep = &osViModePalLan1;
-        D_8002C138 = VI_PAL_CLOCK;
+        g_os_vi_next->modep = &osViModePalLan1;
+        g_os_vi_clock = VI_PAL_CLOCK;
     } else if (osTvType == OS_TV_MPAL) {
-        D_8002C134->modep = &osViModeMpalLan1;
-        D_8002C138 = VI_MPAL_CLOCK;
+        g_os_vi_next->modep = &osViModeMpalLan1;
+        g_os_vi_clock = VI_MPAL_CLOCK;
     } else {
-        D_8002C134->modep = &osViModeNtscLan1;
-        D_8002C138 = VI_NTSC_CLOCK;
+        g_os_vi_next->modep = &osViModeNtscLan1;
+        g_os_vi_clock = VI_NTSC_CLOCK;
     }
-    D_8002C134->state = 0x20 /* VI_STATE_BLACK */;
-    D_8002C134->control = D_8002C134->modep->comRegs.ctrl;
+    g_os_vi_next->state = 0x20 /* VI_STATE_BLACK */;
+    g_os_vi_next->control = g_os_vi_next->modep->comRegs.ctrl;
     while (IO_READ(VI_CURRENT_REG) > 10) {
     }
     IO_WRITE(VI_CONTROL_REG, 0);

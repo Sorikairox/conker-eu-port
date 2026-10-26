@@ -316,7 +316,7 @@ s32 rocket_update(u8 *obj) {
             rec.pos[1] = *(f32 *) (d + 0x9C);
             rec.pos[2] = *(f32 *) (d + 0xA0);
             rec.u44[0] = (u32) (extra.u18 * D_800A1FA0_c[0]);
-            puff = effect3d_spawn_full(&rec, (s32) &D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj[0xC], obj[1]);
+            puff = effect3d_spawn_full(&rec, (s32) &g_effect3d_default_params, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj[0xC], obj[1]);
             if (puff != NULL) {
                 memcpy((s32) (puff + 0x110), (s32 *) &extra, 0x2C);
             }
@@ -580,7 +580,7 @@ s32 trail_follower_update(u8 *arg0) {
                 (*(s32 *)((u8 *)(&sp.uE0) + 4)) = (s32) (*(s32 *)((u8 *)temp_s5 + 4));
                 (*(s32 *)((u8 *)(&sp.uE0) + 8)) = (s32) (*(s32 *)((u8 *)temp_s5 + 8));
                 sp.u108 = (s8) (u32) (sp.uB0 * 6.4814816f);
-                temp_v0_2 = effect3d_spawn_full(&sp.uC4, (s32) ((u8 *)&D_800A4AA0), 0x24U, 0U, 0U, 0x21U, 0U, 0, 0, 0x2C, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                temp_v0_2 = effect3d_spawn_full(&sp.uC4, (s32) ((u8 *)&g_effect3d_default_params), 0x24U, 0U, 0U, 0x21U, 0U, 0, 0, 0x2C, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 if (temp_v0_2 != NULL) {
                     memcpy(temp_v0_2 + 0x110, &sp.u98, 0x2C);
                 }

@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern OSTimer *D_8002C0C0; // __osTimerList
+extern OSTimer *g_os_timer_list; /* was D_8002C0C0 */ // __osTimerList
 void __osSetTimerIntr(OSTime tim);
 OSTime __osInsertTimer(OSTimer *t);
 
@@ -20,7 +20,7 @@ int osSetTimer(OSTimer *t, OSTime value, OSTime interval, OSMesgQueue *mq, OSMes
     t->mq = mq;
     t->msg = msg;
     tim = __osInsertTimer(t);
-    if (D_8002C0C0->next == t) {
+    if (g_os_timer_list->next == t) {
         __osSetTimerIntr(tim);
     }
     return 0;

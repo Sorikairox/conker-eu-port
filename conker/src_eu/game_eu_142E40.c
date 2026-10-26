@@ -1723,7 +1723,7 @@ void scenery_mover_swing_step(s32 arg0, s32 arg1) {
     if (g_level_first_frame == 0 && yaw == *(f32 *) (rec + 4)) {
         return;
     }
-    if (D_800C35EA == 1 && cutscene_room_has_actor((rec - (u8 *) g_world_objs) / 0xA0, 0) != 0) {
+    if (g_cutscene_slot_state == 1 && cutscene_room_has_actor((rec - (u8 *) g_world_objs) / 0xA0, 0) != 0) {
         yaw = *(f32 *) (rec + 4);
     } else {
         *(f32 *) (rec + 4) = yaw;
@@ -2388,7 +2388,7 @@ void scenery_bob_update(u8 *);
 
 /* was func_1511ACC0 */
 void scenery_bob_and_tex_update(u8 *arg0) {
-    if ((D_800C35EA == 1) && (cutscene_room_has_actor((arg0 - (u8 *)g_world_objs) / 160, 0) != 0)) {
+    if ((g_cutscene_slot_state == 1) && (cutscene_room_has_actor((arg0 - (u8 *)g_world_objs) / 160, 0) != 0)) {
         *(s32 *)(arg0 + 0x7C) = 0;
         *(f32 *)(arg0 + 0x18) = 0.0f;
     }
@@ -2628,7 +2628,7 @@ void scenery_jitter_tilt_update(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x7C)) + (*(f32 *)((u8 *)arg0 + 0x80)));
 }
 // sliding_door_update: per-frame update of a sliding door / gate (type +0x3C & 0x3FF, 0..7). On a networked game
-// (D_800C35EA == 1) nothing happens when cutscene_room_has_actor (object index) says so. The closed position (x +0x10,
+// (g_cutscene_slot_state == 1) nothing happens when cutscene_room_has_actor (object index) says so. The closed position (x +0x10,
 // z +0x14) is saved at +0x7C (bit 31 = saved) / +0x80 on first use. Mode +0x73 & 3: 0 = closed, 1 = closing,
 // 2 = opening, 3 = open. While opening / open each type has its open position (x first, or z first for types 4 /
 // 7; types 0 / 1 / 7 move x without waiting for z) and speed (7, 15 for types 4 / 7); closing goes back to the saved
@@ -2651,7 +2651,7 @@ void scenery_sliding_door_update(u8 *obj) {
     f32 vel;
     f32 d;
 
-    if (D_800C35EA == 1 && cutscene_room_has_actor((s32) (obj - (u8 *) g_world_objs) / 0xA0, 0) != 0) {
+    if (g_cutscene_slot_state == 1 && cutscene_room_has_actor((s32) (obj - (u8 *) g_world_objs) / 0xA0, 0) != 0) {
         return;
     }
     if (*(s32 *) (obj + 0x7C) == 0) {
@@ -4007,7 +4007,7 @@ typedef struct {
 #define PK_F32(p, o) (*(f32 *) ((u8 *) (p) + (o)))
 #define PK_S16(p, o) (*(s16 *) ((u8 *) (p) + (o)))
 #define PK_ANG (6.2831855f / 65536.0f)
-/* pickup_update: world-object callback of type 0x28 (D_80089030[0x28][0], obj +0x38): a floating pickup. On the
+/* pickup_update: world-object callback of type 0x28 (g_world_obj_type_cbs[0x28][0], obj +0x38): a floating pickup. On the
  * first call it allocates its 0x10-byte state into obj +0x7C (the full scale from +0x2C; the scales +0x2C..+0x34
  * start at 0). Unless the object kind (+0x54) is 0x59 / 0x5A it spins (+4 += 1.52 per tick) and bobs (+0 / +0x18 from
  * two cosine phases). Kind 0x54 uses item 0x17 for attachment_find_by_slot and is disabled on level 0x2D while object 0xBA's

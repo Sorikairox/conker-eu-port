@@ -13,7 +13,7 @@ typedef struct {
     /* 0x14 */ OSMesg msg;
 } OSViContext_s86;
 
-extern OSViContext_s86 *D_8002C134; /* __osViNext */
+extern OSViContext_s86 *g_os_vi_next; /* __osViNext; was D_8002C134 */
 u32 __osDisableInt(void);
 void __osRestoreInt(u32);
 
@@ -23,31 +23,31 @@ void game_os_pi_set_control(u32 func) {
 
     saveMask = __osDisableInt();
     if ((func & 0x1) != 0) {
-        D_8002C134->control |= 0x8;
+        g_os_vi_next->control |= 0x8;
     }
     if ((func & 0x2) != 0) {
-        D_8002C134->control &= ~0x8;
+        g_os_vi_next->control &= ~0x8;
     }
     if ((func & 0x4) != 0) {
-        D_8002C134->control |= 0x4;
+        g_os_vi_next->control |= 0x4;
     }
     if ((func & 0x8) != 0) {
-        D_8002C134->control &= ~0x4;
+        g_os_vi_next->control &= ~0x4;
     }
     if ((func & 0x10) != 0) {
-        D_8002C134->control |= 0x10;
+        g_os_vi_next->control |= 0x10;
     }
     if ((func & 0x20) != 0) {
-        D_8002C134->control &= ~0x10;
+        g_os_vi_next->control &= ~0x10;
     }
     if ((func & 0x40) != 0) {
-        D_8002C134->control |= 0x10000;
-        D_8002C134->control &= ~0x300;
+        g_os_vi_next->control |= 0x10000;
+        g_os_vi_next->control &= ~0x300;
     }
     if ((func & 0x80) != 0) {
-        D_8002C134->control &= ~0x10000;
-        D_8002C134->control |= D_8002C134->modep->comRegs.ctrl & 0x300;
+        g_os_vi_next->control &= ~0x10000;
+        g_os_vi_next->control |= g_os_vi_next->modep->comRegs.ctrl & 0x300;
     }
-    D_8002C134->state |= 0x8;
+    g_os_vi_next->state |= 0x8;
     __osRestoreInt(saveMask);
 }

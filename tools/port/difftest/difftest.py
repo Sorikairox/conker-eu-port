@@ -851,7 +851,7 @@ for _p in filter(None, os.environ.get('DIFFTEST_POKE', '').split(',')):
         POKES[(int(_a, 16) + 4 * _k) & 0x1FFFFFFF] = int(_v, 16) & 0xFFFFFFFF
 
 # P106 (opt-in): DIFFTEST_MEMSTK="ADDR,..." (hex): memory words that hold a stack address (a function that saves
-# its sp in a global, e.g. event_vm_run -> D_800D3858) compare by class ('STK' in the used stack window), not bytes.
+# its sp in a global, e.g. event_vm_run -> g_event_vm_abort) compare by class ('STK' in the used stack window), not bytes.
 POKE_OLD = os.environ.get('DIFFTEST_POKE_OLD') == '1'   # P132: pre-P132 precedence (the ROM image overwrites pokes)
 
 MEMSTK = [int(_a, 16) & 0x1FFFFFFF for _a in filter(None, os.environ.get('DIFFTEST_MEMSTK', '').split(','))]
@@ -1166,7 +1166,7 @@ class Run:
             if os.environ.get('DIFFTEST_PREAD_OLD') == '1':
                 mu.hook_add(UC_HOOK_MEM_READ, self.on_pread)
             else:
-                # P132: Unicorn 2.0.1 also skips some reads in the global hook (game_pause_update: `lbu D_800BE616`
+                # P132: Unicorn 2.0.1 also skips some reads in the global hook (game_pause_update: `lbu g_mp_mode_active`
                 # at 151DE340 and `lb g_settings_time_limit` were never reported, so [POKE unread] listed words the reference
                 # had read). Decode the function's own loads in a code hook instead (stubs read nothing).
                 mu.hook_add(UC_HOOK_CODE, self.on_pload, begin=vram, end=self.end - 1)
@@ -1654,7 +1654,7 @@ def compare(R, C, rk, arity):
         if a.get('ind') and not JALRTGT_OLD:
             tgt = {c['jrs'] - 4 for c in (a, b) if c.get('jrs') is not None and 4 <= c['jrs'] <= 7}
             # DIFFTEST_JALRSKIP=N,...: arg GPRs aN the caller only uses as scratch before a jalr (obj_effect_run_handler copies
-            # `arg` to a3 and passes it in a1; all 15 D_800864B0 handlers take 2 args). Check every table entry first.
+            # `arg` to a3 and passes it in a1; all 15 g_obj_effect_fns handlers take 2 args). Check every table entry first.
             tgt |= JALRSKIP
             tgt = {k for k in tgt if na is None or na == 99 or k >= na}
         for k in sorted(set(range(min(cnt, 4))) | jw):
@@ -2011,7 +2011,7 @@ def knob_notes(called, ntrials):
 
 def poke_notes(pread, nwatched):
     """P93: DIFFTEST_POKE words the reference never read in trials 0-1 (a wrong address, e.g. the US address of a
-    symbol: P90 poked D_800C3958 at 0x800C395C, its EU address is 0x800C3D78, and the knob silently did nothing), and
+    symbol: P90 poked g_cutscene_track_recs at 0x800C395C, its EU address is 0x800C3D78, and the knob silently did nothing), and
     pokes inside the ROM image (odd trials load the ROM .data / .rodata over them, so they only hold in even trials)."""
     out = ''
     if POKES and nwatched:

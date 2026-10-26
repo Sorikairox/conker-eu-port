@@ -36,7 +36,7 @@ void camera_look_enter(u8 *arg0) {
         temp_v0_2 = (*(u8 *)((u8 *)arg0 + 0x23E));
         if ((temp_v0_2 == 9) || (temp_v0_2 == 0x38) || (temp_v0_2 == 0x39) || (temp_v0_2 == 0x37) || (temp_v0_2 == 0x3B) || (temp_v0_2 == 0x15) || (temp_v0_2 == 0x26) || (temp_v0_2 == 0x3A)) {
             (*(f32 *)((u8 *)var_v1 + 0x34)) = (f32) ((f32) (((*(u16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x3D0))) + 0x7A)) - (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x3D4))) + 0x12))) + 0xC000) * 0.005493164f);
-        } else if ((D_800D1940 == 0x42) && (temp_v0 == 0x1A)) {
+        } else if ((g_hint_action == 0x42) && (temp_v0 == 0x1A)) {
             (*(f32 *)((u8 *)var_v1 + 0x34)) = (f32) (*(f32 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x3D0))) + 0x40));
         } else {
             (*(f32 *)((u8 *)var_v1 + 0x34)) = (f32) ((*(f32 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x3D0))) + 0x40)) - 180.0f);
@@ -206,7 +206,7 @@ void camera_look_update(u8 *arg0) {
     u8 *view;
 
     mode = PU8(0x23E);
-    special = (D_800D1940 == 0x42) && (mode == 0x1A);
+    special = (g_hint_action == 0x42) && (mode == 0x1A);
     collision_find_floor(0, 0, (s32) &floorY, (s32) (arg0 + 0x360), 0, 0, PF32(0x2F8), PF32(0x2FC), PF32(0x300), PF32(0x2FC), 0,
                   0, -10000.0f, PF32(0x2FC));
     *(s8 *) (PPTR(0x3D4) + 0x198) = PS16(0x73C);
@@ -417,7 +417,7 @@ void camera_look_update(u8 *arg0) {
                 }
             }
             cam->pitchTarget = lim;
-            if (D_800BE616 == 0 && CAM_MODE_RIDE(mode)) {
+            if (g_mp_mode_active == 0 && CAM_MODE_RIDE(mode)) {
                 if (cam->pitchTarget < -20.0f) {
                     cam->pitchTarget = -20.0f;
                 }

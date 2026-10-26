@@ -5,19 +5,19 @@
 
 /* was func_150158C0 */
 void glyph_count_reset(void) {
-    D_800CC16C = 0;
+    g_glyph_count = 0;
 }
 
 void heap_free(s32);
 void glyph_rle_to_texture(u8 *, s32, s32);
-extern u32 D_80083310[][2];
+extern u32 g_glyph_set_rom_ranges[][2]; /* was D_80083310 */
 
-/* load ROM range #idx (D_80083310[idx] = {start, end}) into a temporary buffer and hand each record
+/* load ROM range #idx (g_glyph_set_rom_ranges[idx] = {start, end}) into a temporary buffer and hand each record
    (big-endian size at +4, at least 16 bytes) to glyph_rle_to_texture */
 /* was func_150158D0 */
 void glyph_set_load_rom(s16 idx) {
     u8 *buf = (u8 *)heap_alloc_tagged(0x2800, 1, 2, 1, 0);
-    u32 *range = D_80083310[idx];
+    u32 *range = g_glyph_set_rom_ranges[idx];
     u8 *rec;
     s32 i;
 
@@ -31,16 +31,16 @@ void glyph_set_load_rom(s16 idx) {
     }
     heap_free((s32)buf);
 }
-extern u8 *D_80085D20[];
-extern u8 *D_80085D24[];
+extern u8 *g_font_textures[]; /* was D_80085D20 */
+extern u8 *g_font_metrics[]; /* was D_80085D24 */
 
 /* Expand one RLE glyph record (font/sprite set `set`, glyph `idx`) into its 8-bit texture.
- * D_80085D24[set][idx*4..+3] = {width + 1, height + 1, src[2], src[3]}; the texture is
- * D_80085D20[set] + idx * 224, rows of (width + 7) & ~7 bytes. A blank row and a blank column frame
+ * g_font_metrics[set][idx*4..+3] = {width + 1, height + 1, src[2], src[3]}; the texture is
+ * g_font_textures[set] + idx * 224, rows of (width + 7) & ~7 bytes. A blank row and a blank column frame
  * the glyph. Each RLE byte at src[8...] is (value & 0xF0) | (run - 1). Odd rows are stored with the
  * TMEM 8-byte word swap (x ^ 4). The tables are re-read for every access, as the original does. */
-#define GLYPH(k) (D_80085D24[set][idx * 4 + (k)])
-#define TEX(o) (D_80085D20[set][idx * 224 + (o)])
+#define GLYPH(k) (g_font_metrics[set][idx * 4 + (k)])
+#define TEX(o) (g_font_textures[set][idx * 224 + (o)])
 /* was func_150159E8 */
 void glyph_rle_to_texture(u8 *src, s32 idx, s32 set) {
     s32 stride;

@@ -24,15 +24,15 @@ s32 event_action_trigger(s32 arg0, u32 arg1, u8 *arg2) {
         trigger_set_fields_masked(arg0, (u16) (*(s16 *)(arg2 + 0xA)), (*(s32 *)(arg2 + 0xC)), (*(s32 *)(arg2 + 0x10)), (*(s32 *)(arg2 + 0x14)), (*(s32 *)(arg2 + 0x18)));
         return 0;
     case 5:
-        laser_switch_broadcast(*(s32 *)(arg2 + 8) == 0x3E7 ? 2 : (*(s32 *)(arg2 + 8) != 0 ? 0 : 1), (arg0 * 0x34) + D_800D34B8);
+        laser_switch_broadcast(*(s32 *)(arg2 + 8) == 0x3E7 ? 2 : (*(s32 *)(arg2 + 8) != 0 ? 0 : 1), (arg0 * 0x34) + g_level_zones);
         break;
     }
     return 0;
 }
 
-/* Sequence-slot query handler: entry 3 of event_dispatch's handler table D_80088838, called as
- * handler(slot, cmd, args) like event_query_object (args[2] = first extra argument, D_800D3C60 = number of words).
- * `slot` indexes the 0x34-byte records at D_800D34B8 (the per-slot words +0x17 / +0x18 / +0x1C / +0x20 that
+/* Sequence-slot query handler: entry 3 of event_dispatch's handler table g_event_query_fns, called as
+ * handler(slot, cmd, args) like event_query_object (args[2] = first extra argument, g_event_arg_count = number of words).
+ * `slot` indexes the 0x34-byte records at g_level_zones (the per-slot words +0x17 / +0x18 / +0x1C / +0x20 that
  * trigger_get_fields / trigger_set_fields_masked read and write). Object ids passed as arguments drop bits 12..15; their kind is
  * bits 12..15: 0x2000 = an object (obj_find_by_spawn, index in g_objects), 0x9000 = a player / character id. */
 s32 trigger_find_touching_player(s32);
@@ -40,9 +40,9 @@ s32 trigger_test_camera(s32, u32);
 s32 trigger_plane_side_object(s32, s32);
 s32 trigger_plane_side_camera(s32, s32);
 void trigger_get_fields(s32, s32 *, s32 *, s32 *, s32 *);
-extern s32 D_800D3C60;
+extern s32 g_event_arg_count; /* was D_800D3C60 */
 
-#define B9B8_SLOT(i) (D_800D34B8 + (i) * 0x34)
+#define B9B8_SLOT(i) (g_level_zones + (i) * 0x34)
 #define B9B8_OBJ(i) ((u8 *)g_objects + (i) * 0x32C)   /* object i of g_objects (0x32C each) */
 #define B9B8_INDEX(p) (((u8 *)(p) - (u8 *)g_objects) / 0x32C)
 
@@ -81,9 +81,9 @@ s32 event_query_trigger(s32 slot, s32 cmd, s32 *args) {
             return 0;
         }
         if (cmd == 8) {
-            return D_800C35EA == 0;
+            return g_cutscene_slot_state == 0;
         }
-        return D_800C35EA == 1;
+        return g_cutscene_slot_state == 1;
     case 0xA: /* packed x << 16 | z */
         slotp = B9B8_SLOT(slot);
         return (*(s16 *)(slotp + 0) << 16) | (u16)*(s16 *)(slotp + 4);
@@ -126,7 +126,7 @@ s32 event_query_trigger(s32 slot, s32 cmd, s32 *args) {
             }
             /* character i is attached: with a second argument it must not be in state 3 and not attached to
              * the object args[2] */
-            if (D_800D3C60 == 2 || args[3] == 0) {
+            if (g_event_arg_count == 2 || args[3] == 0) {
                 return 1;
             }
             if ((*(u8 **)(B9B8_OBJ(i) + 0x31C))[0x78] != 3 && trigger_test_camera(i, args[2] & 0xFFFF0FFF) == 0) {

@@ -40,7 +40,7 @@ s/|| obj->health == 0 ||/||/
 s/|| (base->flags \& 2)$/|| (base->flags \& 4)/
 s/30.0f < obj->y_velocity/40.0f < obj->y_velocity/
 s/110.0f < obj->xz_velocity/120.0f < obj->xz_velocity/
-s/(D_800BE616 != 0 \&\& (/(D_800BE616 == 0 \&\& (/
+s/(g_mp_mode_active != 0 \&\& (/(g_mp_mode_active == 0 \&\& (/
 s/s32 state = (id == 0x8A) ? 1 : 0;/s32 state = (id == 0x8A) ? 2 : 0;/
 s/                    state = 10;/                    state = 11;/
 s/                    state = 15;/                    state = 14;/
@@ -62,7 +62,7 @@ s/g_cur_obj_cmd = base->sound;/g_cur_obj_cmd = cur->sound;/
 s/actor_sound_play_untracked(g_cur_obj_cmd_sound, obj, 0x6D60, 0x12C, 0x708);/actor_sound_play_untracked(g_cur_obj_cmd_sound, obj, 0x6D60, 0x12C, 0x700);/
 s/    } else if (cur->sound != 0) {/    } else if (base->sound != 0) {/
 s/self->unk107 = 0x3C;/self->unk107 = 0x3D;/
-s/if (D_800BE616 == 0 || obj->interaction_state != 1) {/if (D_800BE616 == 0 \&\& obj->interaction_state != 1) {/
+s/if (g_mp_mode_active == 0 || obj->interaction_state != 1) {/if (g_mp_mode_active == 0 \&\& obj->interaction_state != 1) {/
 s/obj->unk21C = 0;/;/
 s/if (base->flags \& 0x100) {/if (cur->flags \& 0x100) {/
 s/            obj->unk218 = NULL;/            ;/
@@ -83,9 +83,9 @@ s/obj->unk10B |= 0x20;/obj->unk10B |= 0x10;/
 s/if (0.0f < obj->y_velocity) {/if (0.0f <= obj->y_velocity) {/
 s/obj->unk28 += 0.1f;/obj->unk28 += 0.2f;/
 s/if (base->flags \& 8) {/if (base->flags \& 4) {/
-s/D_800CC690 = self->x_position;/D_800CC690 = obj->x_position;/
-s/D_800CC694 = self->z_position;/D_800CC694 = self->y_position;/
-s/D_800CC698 = self->y_position;/D_800CC698 = self->z_position;/
+s/g_contact_src_x = self->x_position;/g_contact_src_x = obj->x_position;/
+s/g_contact_src_z = self->z_position;/g_contact_src_z = self->y_position;/
+s/g_contact_src_y = self->y_position;/g_contact_src_y = self->z_position;/
 s/obj->unk10B |= 0x80;/obj->unk10B |= 0x8;/
 s/(base->flags \& 0x400) || (cur->flags \& 0x400)/(base->flags \& 0x400)/
 s/if (base->immune \& 0x80) {/if (base->immune \& 0x40) {/

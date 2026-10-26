@@ -6,7 +6,7 @@
 void obj_follow_path(struct127 *obj, s32 path);
 void tri_compute_plane(s32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
 s32 cutscene_obj_takes_part(struct127 *);
-extern u8 D_800C3A78;
+extern u8 g_cutscene_run_all_objs; /* was D_800C3A78 */
 s32 anim_start_entry(struct127 *, s32, u8 *, s32, s32, s32, s32, f32, f32, f32, f32, s32);
 void obj_update_ground_tilt(struct127 *);
 void obj_apply_gravity(struct127 *);
@@ -35,7 +35,7 @@ void obj_vertex_colours_blend(struct127 *, f32 *, s32);
 void obj7b_set_anim_ids(u8 *arg0);
 extern s32 g_tex_anim_5b_frames[]; /* was D_800997EC */
 extern s32 g_tex_anim_phase_steps; /* was D_80086490 */
-extern s32 D_800C4440;
+extern s32 g_model_part_tables; /* was D_800C4440 */
 extern s32 g_obj_anim_shared; /* was D_800CC298 */
 extern s32 g_obj_scratch_rec; /* was D_800D121C */
 extern s32 g_level_id; /* was D_800BE9F0 */
@@ -50,7 +50,7 @@ f32  obj_approach_speed(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
 u8  obj_apply_hit(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 arg6);
 s32 obj_receive_hit(struct127 *arg0, struct127 *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
-extern u8 *D_800D1CD0;
+extern u8 *g_level_blockers; /* was D_800D1CD0 */
 
 /* was func_15055E50 */
 void obj_push_out_of_blockers(struct127 *arg0, s32 arg1) {
@@ -96,11 +96,11 @@ void obj_push_out_of_blockers(struct127 *arg0, s32 arg1) {
             arg0->z_position = -1200.0f;
         }
     }
-    if ((arg1 != 0) && (D_800D1CD0 != NULL) && ((s32) arg0->unk13D < 0x64)) {
+    if ((arg1 != 0) && (g_level_blockers != NULL) && ((s32) arg0->unk13D < 0x64)) {
         var_f30 = 1e9f;
         var_a3 = 0;
-        if (arg1 != (*(u16 *)((u8 *)D_800D1CD0 + 6))) {
-            var_t0 = D_800D1CD0;
+        if (arg1 != (*(u16 *)((u8 *)g_level_blockers + 6))) {
+            var_t0 = g_level_blockers;
 loop_14:
             if ((*(s32 *)((u8 *)var_t0 + 0)) != 0) {
                 temp_t2 = (*(u16 *)((u8 *)var_t0 + 0xE));
@@ -113,7 +113,7 @@ loop_14:
             }
         } else {
 block_16:
-            temp_t0 = D_800D1CD0 + (var_a3 * 8);
+            temp_t0 = g_level_blockers + (var_a3 * 8);
             temp_t1 = (*(u16 *)((u8 *)temp_t0 + 4));
             var_a3_2 = 0;
             var_a2 = (*(u8 **)((u8 *)temp_t0 + 0));
@@ -222,7 +222,7 @@ void obj_follow_water_level(struct127 *arg0) {
 
 // object_carried_update: P213: per-frame update of object `obj` while it is held by the object in slot unk13D - 100
 /* (port P209: void, one argument). Sets 30 frames of immunity, copies the carrier's unk180, keeps the height in
- * unk1CC, gravity 4.5, no fall speed; the hold timer unk21C counts up by D_800BE9A0 to 30. Per type (0x57, 0x8C
+ * unk1CC, gravity 4.5, no fall speed; the hold timer unk21C counts up by g_frame_delta to 30. Per type (0x57, 0x8C
  * after 10 frames - else nothing more; 0xA8 / 0xA9; 0x5E with offset 16) the carrier's animation unk84 picks the
  * column (0..2) of the reaction row and the carrier's grab is synced (obj_slot_sync_anim_frame); other types use row 13
  * column 0. The reaction row comes from obj_find_reaction_row (0x24 for 0x57 with carrier anim 0x114, else 13); a
@@ -263,7 +263,7 @@ void obj_carried_update(struct127 *obj) {
     obj->gravity = 4.5f;
     obj->y_velocity = 0.0f;
     if (obj->unk21C < 30) {
-        obj->unk21C += D_800BE9A0;
+        obj->unk21C += g_frame_delta;
     }
     col = 0;
     row = 13;
@@ -322,7 +322,7 @@ void obj_carried_update(struct127 *obj) {
         }
     }
     row = obj_find_reaction_row(row, obj);
-    rows = *(u8 **)((u8 *)D_800D1588[obj->id] - 8);
+    rows = *(u8 **)((u8 *)g_model_anim_banks[obj->id] - 8);
     if (holder->interaction_state == 1 && holder->in_water != 0) {
         obj->unk5C = 4;
         typed = 1;
@@ -436,7 +436,7 @@ void obj_carried_update(struct127 *obj) {
 //     arg0->gravity = 4.5f;
 //     arg0->y_velocity = 0.0f;
 //     if ((s32) arg0->unk21C < 0x1E) {
-//         arg0->unk21C += D_800BE9A0;
+//         arg0->unk21C += g_frame_delta;
 //     }
 //     temp_v0 = arg0->id;
 //     if (temp_v0 == 0x57) {
@@ -512,7 +512,7 @@ void obj_carried_update(struct127 *obj) {
 //         temp_t0_2 = &g_objects[sp63];
 //         phi_t1_4 = phi_t1_3;
 //         temp_t2 = temp_v0_6;
-//         temp_a3 = D_800D1588[arg0->id] - 8;
+//         temp_a3 = g_model_anim_banks[arg0->id] - 8;
 //         if (temp_t0_2->interaction_state == 1) {
 //             if (temp_t0_2->in_water != 0) {
 //                 temp_t9 = temp_v0_6 * 3;
@@ -813,7 +813,7 @@ void obj_walk_update(struct127 *arg0) {
         arg0->unk21C = 0;
         arg0->unk23A = 0;
     }
-    if ((D_800C3638 == 0) || (cutscene_obj_takes_part(arg0) == 0)) {
+    if ((g_cutscene_in_progress == 0) || (cutscene_obj_takes_part(arg0) == 0)) {
         if ((arg0->unkF4 & 0x1000) && (arg0->unk28 < 0.2f)) {
             arg0->unk21C = 0;
         }
@@ -828,16 +828,16 @@ void obj_walk_update(struct127 *arg0) {
             var_v1 = 0;
         }
         if (arg0->stunned == 0) {
-            sp14A = (u16) ((s32) (((arg0->unk1E5 << 8) + arg0->unk1E7) * D_800CC264) / 100);
+            sp14A = (u16) ((s32) (((arg0->unk1E5 << 8) + arg0->unk1E7) * g_obj_time_step_pct) / 100);
             sp149 = arg0->unk1E6;
             temp_v0_2 = arg0->unk13F;
-            if (D_800D2528[temp_v0_2] == 0) {
+            if (g_path_point_counts[temp_v0_2] == 0) {
                 arg0->xz_velocity = 0.0f;
                 obj_update_move_anim(arg0, 0.0f);
                 return;
             }
             var_t0_2 = var_v1;
-            sp134 = D_800D1C90[arg0->id];
+            sp134 = g_type_descs[arg0->id];
             temp_a0 = arg0->unk23D;
             if (temp_a0 == 0xFF) {
                 sp164 = 1e9f;
@@ -999,10 +999,10 @@ void obj_walk_update(struct127 *arg0) {
                     sp10C = 1;
                 }
                 if (temp_v1_3 != 0) {
-                    if ((s32) D_800BE9A0 >= (s32) temp_v1_3) {
+                    if ((s32) g_frame_delta >= (s32) temp_v1_3) {
                         arg0->unk22E = 0;
                     } else {
-                        arg0->unk22E = temp_v1_3 - D_800BE9A0;
+                        arg0->unk22E = temp_v1_3 - g_frame_delta;
                     }
                 }
                 if (arg0->unk241 != 0) {
@@ -1259,7 +1259,7 @@ block_182:
                 if (((sp4C == 0) || (sp4C == 0xA)) && (sp144 < sp13C)) {
                     temp_v0_17 = arg0->unk13F;
                     temp_v1_6 = arg0->unk21F;
-                    var_a2_2 = (D_800D2528[temp_v0_17] - 1) & 0xFF;
+                    var_a2_2 = (g_path_point_counts[temp_v0_17] - 1) & 0xFF;
                     if (temp_v1_6 != 0) {
                         var_a2_2 = temp_v1_6 & 0xFF;
                     }
@@ -1378,8 +1378,8 @@ extern f32 g_move_anim_speed_base; /* was D_8009982C */
 extern f32 g_move_anim_speed_bonus; /* was D_80099830 */
 extern f32 g_move_anim_input_bias; /* was D_80099838 */
 extern f32 g_move_anim_input_scale; /* was D_8009983C */
-extern s32 D_80041C50;
-extern u8 D_80041D40;
+extern s32 g_music_pulse_level; /* was D_80041C50 */
+extern u8 g_music_pulse_player; /* was D_80041D40 */
 
 /* was func_1505841C */
 void obj_update_move_anim(struct127 *arg0, f32 arg1) {
@@ -1410,7 +1410,7 @@ void obj_update_move_anim(struct127 *arg0, f32 arg1) {
     }
     obj_start_anim(arg0, (u16) arg0->unk244, var_f0, (f32) arg0->unk1D0, 0.0f, 0.0f, 0);
     if (arg0->unk246 == 0xFF) {
-        var_f0_2 = ((f32) *(&D_80041C50 + (D_80041D40 << 6)) - g_move_anim_input_bias) * g_move_anim_input_scale;
+        var_f0_2 = ((f32) *(&g_music_pulse_level + (g_music_pulse_player << 6)) - g_move_anim_input_bias) * g_move_anim_input_scale;
         if (var_f0_2 < 0.0f) {
             var_f0_2 = 0.0f;
         }
@@ -1436,7 +1436,7 @@ void obj_update_move_anim(struct127 *arg0, f32 arg1) {
 //             temp_f0 += D_8009946C;
 //
 //             if ((arg0->unk246 & 0x20) == 0) {
-//                 temp_f0 += D_80099470;
+//                 temp_f0 += g_walk_slide_push_k;
 //             }
 //         }
 //     }
@@ -1463,7 +1463,7 @@ void obj_update_move_anim(struct127 *arg0, f32 arg1) {
 /* Hover physics obj_approach_speed (speed unk109 / 10); remembers the height in unk1CC while it is unset (>= 100000);
  * while lifted (+0xAD 1..9) no gravity, the upward speed fades (x0.9 below 60) and above unk118 - 20 the lift
  * ends (gravity 4). unk21C is cleared unless a player in multiplayer. Unless stunned 0xFF: the stun counter
- * counts down (0xFE stays; a dead player keeps it), the hit timer unk10C by D_800CC264 (cleared when unk28 < 0.2
+ * counts down (0xFE stays; a dead player keeps it), the hit timer unk10C by g_obj_time_step_pct (cleared when unk28 < 0.2
  * with flag 0x100; at 0 the controller's byte 0x7D is cleared and obj_hit_reaction_advance runs). Stun over: speeds and
  * turning stop (players: objev_anim_d1_by_depth when lifted, else gravity 4 and flag 0x8000 cleared), unk23A = unk238 when
  * set. Still stunned: the hit reaction obj_turn_towards(obj, 12, heading (turned round with unk10B bit 4)) unless
@@ -1494,7 +1494,7 @@ void obj_stun_update(struct127 *obj) {
             obj->gravity = 4.0f;
         }
     }
-    if (D_800BE616 == 0 || obj->interaction_state != 1) {
+    if (g_mp_mode_active == 0 || obj->interaction_state != 1) {
         obj->unk21C = 0;
     }
     stun = obj->stunned;
@@ -1504,7 +1504,7 @@ void obj_stun_update(struct127 *obj) {
     if (stun != 0xFE && (obj->health != 0 || obj->interaction_state != 1)) {
         obj->stunned = stun - 1;
     }
-    obj->unk10C -= D_800CC264;
+    obj->unk10C -= g_obj_time_step_pct;
     if (obj->unk28 < 0.2f && (obj->unkF4 & 0x100)) {
         obj->unk10C = 0;
     }
@@ -1566,7 +1566,7 @@ void obj_stun_update(struct127 *obj) {
 //             arg0->gravity = 4.0f;
 //         }
 //     }
-//     if ((D_800BE616 == 0) || (arg0->interaction_state != 1)) {
+//     if ((g_mp_mode_active == 0) || (arg0->interaction_state != 1)) {
 //         arg0->unk21C = (u16)0;
 //     }
 //     if (arg0->stunned != 0xFF) {
@@ -1575,7 +1575,7 @@ void obj_stun_update(struct127 *obj) {
 //                 arg0->stunned -= 1;
 //             }
 //         }
-//         arg0->unk10C -= D_800CC264;
+//         arg0->unk10C -= g_obj_time_step_pct;
 //         if ((arg0->unk28 < D_80099484) && ((arg0->unkF4 & 0x100) != 0)) {
 //             arg0->unk10C = (u16)0;
 //         }
@@ -1934,20 +1934,20 @@ void obj_physics_step(struct127 *arg0) {
         attack_hit_test(arg0, g_cur_obj_index);
     }
     if (arg0->unk13D == 0) {
-        if (D_800BE9A0 >= arg0->unk10F) {
+        if (g_frame_delta >= arg0->unk10F) {
             arg0->unk10F = 0U;
         } else {
-            arg0->unk10F -= D_800BE9A0;
+            arg0->unk10F -= g_frame_delta;
         }
     }
     if (arg0->unk107 != 0) {
         arg0->unk107 -= 1;
     }
     if (arg0->immune != 0xFF) {
-        if (D_800BE9A0 >= arg0->immune) {
+        if (g_frame_delta >= arg0->immune) {
             arg0->immune = 0U;
         } else {
-            arg0->immune -= D_800BE9A0;
+            arg0->immune -= g_frame_delta;
         }
     }
 }
@@ -2048,7 +2048,7 @@ void obj_attach_to_carrier(struct127 *arg0, s32 arg1) {
     arg0->unk106 = obj_find_reaction_row(g_carry_reaction_rows[phi_v1], arg0);
     arg0->unk84.uh = 0xFFFF;
     obj_hit_reaction_advance(g_cur_obj_index, arg0);
-    temp_v1 = (s32*)D_800D1588[arg0->id];
+    temp_v1 = (s32*)g_model_anim_banks[arg0->id];
     if (temp_v1 != 0) {
         temp_v0 = (struct252 *)*(temp_v1 - 2);
         if ((temp_v0 != 0) && ((temp_v0[arg0->unk106].unk15 & 2) != 0)) {
@@ -2128,10 +2128,10 @@ u8 obj_turn_towards(struct127 *arg0, u8 arg1, u16 arg2) {
     temp_t0 = arg0->unk7A;
     temp_t1 = arg0->unk1EA;
     var_a3 = (arg2 & 0xFFFF) - temp_t0;
-    var_v0 = (s32) ((((arg1 & 0xFF) << 8) + arg0->unk1E8) * D_800CC264) / 100;
+    var_v0 = (s32) ((((arg1 & 0xFF) << 8) + arg0->unk1E8) * g_obj_time_step_pct) / 100;
     if (temp_t1 != 0) {
         temp_t2 = arg0->unk1EC;
-        temp_lo = (s32) (temp_t1 * D_800CC264) / 100;
+        temp_lo = (s32) (temp_t1 * g_obj_time_step_pct) / 100;
         temp_a2 = temp_t2 + temp_lo;
         temp_t3 = temp_t2 - temp_lo;
         if (temp_a2 < var_a3) {
@@ -2180,7 +2180,7 @@ s32 obj_turn_to_target_yaw(struct127 *arg0, u16 arg1) {
     temp_a1 = arg0->unk1EA;
     if (temp_a1 != 0) {
         temp_t1 = arg0->unk1EC;
-        temp_lo = (s32) (temp_a1 * D_800CC264) / 100;
+        temp_lo = (s32) (temp_a1 * g_obj_time_step_pct) / 100;
         temp_t0 = temp_t1 + temp_lo;
         temp_t2 = temp_t1 - temp_lo;
         if (temp_t0 < var_v0) {
@@ -2222,7 +2222,7 @@ s32 obj_turn_to_target_yaw(struct127 *arg0, u16 arg1) {
 //         phi_a2 = phi_a2 ^ 0xFFFF;
 //     }
 //     if (arg0->unk1EA != 0) {
-//         temp_lo = (s32) (arg0->unk1EA * D_800CC264) / 0x64;
+//         temp_lo = (s32) (arg0->unk1EA * g_obj_time_step_pct) / 0x64;
 //         temp_t8_2 = arg0->unk1EC + temp_lo;
 //         temp_t2 = arg0->unk1EC - temp_lo;
 //         if (temp_t8_2 < temp_t8) {
@@ -2251,9 +2251,9 @@ s32 obj_turn_to_target_yaw(struct127 *arg0, u16 arg1) {
 //     return phi_a2 >> 8;
 // }
 
-extern f32 D_800CC630;
-extern f32 D_800CC634;
-extern f32 D_800CC638;
+extern f32 g_tri_plane_nx; /* was D_800CC630 */
+extern f32 g_tri_plane_ny; /* was D_800CC634 */
+extern f32 g_tri_plane_nz; /* was D_800CC638 */
 extern s32 g_obj_update_counter; /* was D_800D1968 */
 
 /* was func_15059C84 */
@@ -2349,7 +2349,7 @@ block_17:
                 /* P77: the nine floats as arguments (the asm passes them in a0..a3 and the stack; the old call
                  * passed one 36-byte struct, a single argument in the port) */
                 tri_compute_plane(*(s32 *)&tri[0], tri[1], tri[2], tri[3], tri[4], tri[5], tri[6], tri[7], tri[8]);
-                if ((D_800CC634 != 0.0f) && ((temp_f12 = ((-D_800CC630 * sp84) - (D_800CC638 * sp80)) / D_800CC634, (temp_f12 > 4.0f)) || ((*(s32 *)((u8 *)arg0 + 0)) != 1) || ((*(u8 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x4E)) != 2))) {
+                if ((g_tri_plane_ny != 0.0f) && ((temp_f12 = ((-g_tri_plane_nx * sp84) - (g_tri_plane_nz * sp80)) / g_tri_plane_ny, (temp_f12 > 4.0f)) || ((*(s32 *)((u8 *)arg0 + 0)) != 1) || ((*(u8 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x4E)) != 2))) {
                     temp_f14 = (sp84 * sp84) + (sp80 * sp80);
                     temp_f2 = sqrtf(temp_f14 + (temp_f12 * temp_f12));
                     if (temp_f2 != 0.0f) {
@@ -2453,7 +2453,7 @@ extern f32 g_speed_flag40_value; /* was D_8009988C */
 extern f32 g_speed_flags_factor; /* was D_80099890 */
 extern f32 g_speed_ae_factor; /* was D_80099894 */
 extern f32 g_speed_near_max_factor; /* was D_80099898 */
-extern u8 D_800CC69C;
+extern u8 g_cur_floor_kind; /* was D_800CC69C */
 
 /* was func_1505A3A8 */
 f32 obj_approach_speed(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4) {
@@ -2465,7 +2465,7 @@ f32 obj_approach_speed(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4) {
     var_f12 = arg0;
     var_f20 = arg2 * *g_obj_time_step;
     var_f14 = arg3 * *g_obj_time_step;
-    if ((D_800CC69C != 0) && (arg1->unk28 < 5.0f) && (arg1->interaction_state != 0x1E)) {
+    if ((g_cur_floor_kind != 0) && (arg1->unk28 < 5.0f) && (arg1->interaction_state != 0x1E)) {
         var_f20 = 0.0f;
     }
     if (arg1->interaction_state == 1) {
@@ -2607,7 +2607,7 @@ void obj_apply_gravity(struct127 *rec) {
 void player_start_shrink_death(struct127 *);
 s32 player_hit_reaction(struct127 *, s32);
 void object_break_effects_floor(struct127 *, s32, s32);
-extern u8 D_800CC69C;
+extern u8 g_cur_floor_kind; /* was D_800CC69C */
 
 /* was func_1505A9AC */
 void obj_ctrl_floor_contact(struct127 *arg0, f32 arg1) {
@@ -2929,7 +2929,7 @@ block_64:
                     }
                 }
                 if ((arg0->unk28 > 0.0f) && !(arg0->unk100 & 8)) {
-                    if (D_800CC69C != 0) {
+                    if (g_cur_floor_kind != 0) {
                         if (arg0->xz_velocity > 20.0f) {
                             arg0->xz_velocity = 20.0f;
                         }
@@ -3150,9 +3150,9 @@ void rope_release(u8 *);
 s32 sound_word_resolve(struct127 *, s32 *, s32);
 f32 anim_events_run(struct127 *, f32, s32);
 extern void (*g_hit_handlers[])(struct127 *, struct127 *, u8 *); /* hit handlers (void/3, tablesig); was D_80086A34 */
-extern f32 D_800CC690;
-extern f32 D_800CC694;
-extern f32 D_800CC698;
+extern f32 g_contact_src_x; /* was D_800CC690 */
+extern f32 g_contact_src_z; /* was D_800CC694 */
+extern f32 g_contact_src_y; /* was D_800CC698 */
 
 /* P210: one hit descriptor (0x28 bytes): the attack tables of obj_get_hit_rules (indexed by the attack number) and
  * g_hit_desc_table. Fields 0x09..0x0E are the attack's hit volume (attack_hit_test's AttackBox). */
@@ -3259,7 +3259,7 @@ u8 obj_apply_hit(struct127 *self, struct127 *obj, s32 base_tbl, s32 cur_tbl, u8 
             u8 id = carrier->id;
 
             if ((id != 0x8A && id != 0x23) || obj->health == 0 || (base->flags & 2)
-                || (D_800BE616 != 0 && (30.0f < obj->y_velocity || 110.0f < obj->xz_velocity))) {
+                || (g_mp_mode_active != 0 && (30.0f < obj->y_velocity || 110.0f < obj->xz_velocity))) {
                 s32 state = (id == 0x8A) ? 1 : 0;
 
                 if (id == 0x23) {
@@ -3287,7 +3287,7 @@ u8 obj_apply_hit(struct127 *self, struct127 *obj, s32 base_tbl, s32 cur_tbl, u8 
     if (kind != 0x27) {
         g_hit_handlers[handler](self, obj, &kind);
     }
-    if (D_800BE616 != 0) {
+    if (g_mp_mode_active != 0) {
         mp_report_hit((self->unk124 != 0) ? &g_objects[self->unk124 - 1] : self, obj, kind);
     }
     ev.obj = self;
@@ -3310,7 +3310,7 @@ u8 obj_apply_hit(struct127 *self, struct127 *obj, s32 base_tbl, s32 cur_tbl, u8 
     }
 
     self->unk107 = 0x3C;
-    if (D_800BE616 == 0 || obj->interaction_state != 1) {
+    if (g_mp_mode_active == 0 || obj->interaction_state != 1) {
         obj->unk21C = 0;
         if (base->flags & 0x100) {
             obj->unk218 = NULL;
@@ -3345,9 +3345,9 @@ u8 obj_apply_hit(struct127 *self, struct127 *obj, s32 base_tbl, s32 cur_tbl, u8 
             }
             if (base->flags & 8) {
                 obj->unk10B |= 0x40;
-                D_800CC690 = self->x_position;
-                D_800CC694 = self->z_position;
-                D_800CC698 = self->y_position;
+                g_contact_src_x = self->x_position;
+                g_contact_src_z = self->z_position;
+                g_contact_src_y = self->y_position;
             }
         }
         if (base->flags & 2) {
@@ -3379,8 +3379,8 @@ struct252 *obj_get_hit_rules(struct127 *arg0) {
     s32 *temp_v1;
     struct252 *ret;
 
-    if ((arg0->id != 0xFF) && (D_800D1588[arg0->id] != 0)) {
-        temp_v1 = (s32*)D_800D1588[arg0->id] - 3;
+    if ((arg0->id != 0xFF) && (g_model_anim_banks[arg0->id] != 0)) {
+        temp_v1 = (s32*)g_model_anim_banks[arg0->id] - 3;
         ret = *temp_v1;
     } else {
         ret = &g_hit_sender_default;
@@ -3618,7 +3618,7 @@ s32 attack_hit_test(struct127 *self, s32 skip) {
         self->unkD0 = 0;
         return 0;
     }
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         return 0;
     }
     skip = (skip & 0x7F) + 1;
@@ -3757,7 +3757,7 @@ u8 obj_apply_hit(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3, u8 arg4, 
 extern s16 g_obj_scratch_7a; /* the asm's name for this halfword (D_800D1296 in the US list); was D_800D16B6 */
 
 // object_send_hit: sends a hit / message of kind `flags & 0xFF` to the object `obj` from the current object.
-/* Nothing (returns 0) while D_800C35EA is 1, or when the object is immune (flag 0x20000), stunned (0x40000) or has
+/* Nothing (returns 0) while g_cutscene_slot_state is 1, or when the object is immune (flag 0x20000), stunned (0x40000) or has
  * no health (unless flag 0x100000). Sets the parameter g_obj_scratch_owner (arg3 + 1, 0 for -1) and the value `val` in
  * g_obj_scratch_yaw / g_obj_scratch_7a. The sender record is g_hit_sender_default, or obj_get_hit_rules(g_cur_obj) with flag 0x10000.
  * Flag 0x80000 uses obj_receive_hit and returns its result; else obj_apply_hit and returns the object's bit
@@ -3768,7 +3768,7 @@ s32 obj_send_hit(struct127 *obj, s32 flags, u16 val, s32 arg3) {
     s32 idx;
     s32 bit;
 
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         return 0;
     }
     if ((flags & 0x20000) && obj->immune != 0) {
@@ -3806,7 +3806,7 @@ s32 obj_send_hit(struct127 *obj, s32 flags, u16 val, s32 arg3) {
 //     struct252 *sp30;
 //
 //     sp30 = &g_hit_sender_default;
-//     if (D_800C35EA == 1) {
+//     if (g_cutscene_slot_state == 1) {
 //         return 0;
 //     }
 //     if ((arg1 & 0x20000) && (arg0->immune != 0)) {
@@ -3898,7 +3898,7 @@ f32 math_rotate_offset_deg(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4) {
     return (arg1 * sp24) + arg2 * temp_f0;
 }
 
-extern s8 D_800CC68C;
+extern s8 g_contact_obj_idx; /* was D_800CC68C */
 extern s8 g_contact_grab_obj_id; /* was D_800CC68D */
 
 /* was func_1505D408 */
@@ -3927,7 +3927,7 @@ void obj_contact_resolve(struct127 *arg0, struct127 *arg1, f32 arg2, f32 arg3, f
         var_f14 = 1.0f;
     }
     g_obj_contact_mask |= 1 << arg7;
-    if (!(arg1->unkF8 & 0x10) || (D_800CC68C = (s8) arg7, var_f2 = 0.8f, (arg1->id != 0x61)) || (arg0->interaction_state != 1)) {
+    if (!(arg1->unkF8 & 0x10) || (g_contact_obj_idx = (s8) arg7, var_f2 = 0.8f, (arg1->id != 0x61)) || (arg0->interaction_state != 1)) {
         temp_t0 = arg0->unkF8;
         temp_a2 = arg1->unkF8;
         if (temp_t0 & 1) {
@@ -3990,11 +3990,11 @@ void obj_box_contact_test(struct127 *rec, struct127 *o, f32 x, f32 y, f32 z, f32
 }
 void obj_contact_resolve(struct127 *, struct127 *, f32, f32, f32, f32, f32, s32);
 void obj_box_contact_test(struct127 *, struct127 *, f32, f32, f32, f32, f32, s32, f32, f32, f32, f32, f32);
-extern s8 D_800CC68C;
+extern s8 g_contact_obj_idx; /* was D_800CC68C */
 extern s8 g_contact_grab_obj_id; /* was D_800CC68D */
 
 /* Record-vs-record push / contact pass for record idx (rec = &g_objects[idx]): clears the contact mask
- * g_obj_contact_mask and the D_800CC68C / 68D flags, then tests rec's cylinder (radius unkE4, height offset unkE8, vertical
+ * g_obj_contact_mask and the g_contact_obj_idx / 68D flags, then tests rec's cylinder (radius unkE4, height offset unkE8, vertical
  * scale unkEC) against the other 25 records (only record 0 when rec->unkF8 has 0x02000000). Overlaps go to
  * obj_contact_resolve; record id 0x34 gets the special box test obj_box_contact_test. In multiplayer, a player close to
  * another team's player who holds the flag (+0x78 in the controller) sets its own chase timer (+0x4A = 20). */
@@ -4009,7 +4009,7 @@ void obj_contact_pass(struct127 *rec, s32 idx) {
     s16 oradius;
 
     g_obj_contact_mask = 0;
-    D_800CC68C = 0;
+    g_contact_obj_idx = 0;
     g_contact_grab_obj_id = 0;
     count = 25;
     if (rec->interaction_state == 1) {
@@ -4049,7 +4049,7 @@ void obj_contact_pass(struct127 *rec, s32 idx) {
         dx = x - o->x_position;
         dz = z - o->z_position;
         dy = (y - (o->y_position + (s16)o->unkE8)) * ((scale + o->unkEC) * 0.5f);
-        if (D_800BE616 != 0 && dx * dx + dy * dy + dz * dz < 30000.0f && rec->interaction_state == 1 &&
+        if (g_mp_mode_active != 0 && dx * dx + dy * dy + dz * dz < 30000.0f && rec->interaction_state == 1 &&
             o->interaction_state == 1 && o->unk128 != rec->unk128) {
             ctl = (u8 *)rec->unk31C;
             if (ctl[0x78] == 0 && ((u8 *)o->unk31C)[0x78] != 0) {
@@ -4187,8 +4187,8 @@ void obj_anim_reset(struct127 *arg0) {
         id = arg0->id;
         anim->unk28 = 0;
         bzero(anim->unk40, 0x3A0);
-        anim->unk40[1] = D_800C52F0[id] + 1;
-        anim->unk210[1] = D_800C52F0[id] + 1;
+        anim->unk40[1] = g_model_joint_counts[id] + 1;
+        anim->unk210[1] = g_model_joint_counts[id] + 1;
         anim->unk30 = 0;
         anim->unk34 = 0;
     }
@@ -4214,7 +4214,7 @@ extern u16 g_anim_last_frame_92[]; /* was D_800997B8 */
  * s32 value for obj +0x1C4), NULL = file id 2 * id.
  * The animation restarts when `restart` is set (no blend then), the id differs from anim +4 (low 15 bits) or, with
  * an object, from obj +0x84 (or that is 0xFFFF, or obj +0x103 is set). Else only the speed and the hold flag change
- * (and the frame, when D_800C35EA == 1 and the animation holds).
+ * (and the frame, when g_cutscene_slot_state == 1 and the animation holds).
  * Restart: the previous animation is kept for blending (anim +6..+0x2C and the 0x1D0 block copied to +0x210) unless
  * the blend countdown +0x3C is >= 600; the countdown restarts at 0x3FF (blend >= 1: step +0x3A = 500 / blend; a
  * blend into the same animation reverses the countdown); the animation header (file `entry[0]`, 2 words: data
@@ -4257,7 +4257,7 @@ s32 anim_start_entry(struct127 *obj, s32 entry_addr, u8 *anim_addr, s32 unused, 
         } else {
             anim->unk4 &= 0x7FFF;
         }
-        if (D_800C35EA == 1 && (anim->unk4 & 0x8000)) {
+        if (g_cutscene_slot_state == 1 && (anim->unk4 & 0x8000)) {
             anim->unk8 = frame;
         }
     } else {
@@ -4369,9 +4369,9 @@ s32 anim_start_entry(struct127 *obj, s32 entry_addr, u8 *anim_addr, s32 unused, 
     }
     return 0;
 }
-/* P38: start animation `anim` of an object (+4 = type): skipped when the cutscene flag D_800C3638 is set and
- * D_800C3A78 is clear or cutscene_obj_takes_part(obj) says so, for type 0xFF, a type without animations (D_800C5A90[type] == 0),
- * no model (+0x2D0) or anim out of range. No table D_800D1588[type] or an entry id >= 30000: obj_anim_reset(obj).
+/* P38: start animation `anim` of an object (+4 = type): skipped when the cutscene flag g_cutscene_in_progress is set and
+ * g_cutscene_run_all_objs is clear or cutscene_obj_takes_part(obj) says so, for type 0xFF, a type without animations (g_model_anim_counts[type] == 0),
+ * no model (+0x2D0) or anim out of range. No table g_model_anim_banks[type] or an entry id >= 30000: obj_anim_reset(obj).
  * Entry id 999 (or table[0] == 999): nothing. Else anim_start_entry(obj, &table[anim], model, 0, 0, anim, 0, speed,
  * arg3 (0 unless +0x2FF), arg4, arg5, arg6). */
 /* was func_1505E650 */
@@ -4384,8 +4384,8 @@ void obj_start_anim(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32
     u16 *tbl;
     u16 *e;
 
-    if (D_800C3638 != 0) {
-        if (D_800C3A78 == 0) {
+    if (g_cutscene_in_progress != 0) {
+        if (g_cutscene_run_all_objs == 0) {
             return;
         }
         if (cutscene_obj_takes_part(arg0) != 0) {
@@ -4395,7 +4395,7 @@ void obj_start_anim(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32
     if (obj[4] == 0xFF) {
         return;
     }
-    n = (u16) D_800C5A90[obj[4]];
+    n = (u16) g_model_anim_counts[obj[4]];
     if (n == 0) {
         return;
     }
@@ -4406,12 +4406,12 @@ void obj_start_anim(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32
     if (anim >= n) {
         return;
     }
-    tbl = (u16 *) D_800D1588[type];
+    tbl = (u16 *) g_model_anim_banks[type];
     if (tbl == NULL) {
         obj_anim_reset(arg0);
         return;
     }
-    if (anim >= (u16) D_800C5A90[type]) {
+    if (anim >= (u16) g_model_anim_counts[type]) {
         return;
     }
     if (tbl[0] == 999) {
@@ -4444,7 +4444,7 @@ u32 obj_find_reaction_row(s32 arg0, struct127 *arg1)
   {
     return 0U;
   }
-  temp_v1 = D_800D1588[temp_v0];
+  temp_v1 = g_model_anim_banks[temp_v0];
   if (temp_v1 == 0)
   {
     return 0U;
@@ -4479,7 +4479,7 @@ u32 obj_find_reaction_row(s32 arg0, struct127 *arg1)
   return 0U;
 }
 // hit_reaction_advance: P213: plays the next phase of object `obj`'s current hit reaction (port P209: void; the
-/* first argument is not read). Reaction row unk106 of the type's row table (D_800D1588[id] - 8, 0x18-byte rows:
+/* first argument is not read). Reaction row unk106 of the type's row table (g_model_anim_banks[id] - 8, 0x18-byte rows:
  * +0 kind, +4 sound, +8 unk10F value, +0xA three phases {u16 anim, u8 speed %, u8 flags}). Phase 0 (unk105)
  * first: unk10F from the row, jump flag and the controller's byte 0x26 cleared, the row's sound (0x33 through
  * obj_sfx_play_vol, others obj_sfx_play) when sound_word_resolve allows it; type 0x5E held by a carrier blends with 0.
@@ -4514,7 +4514,7 @@ void obj_hit_reaction_advance(u8 arg0, struct127 *obj) {
         return;
     }
     row = obj->unk106;
-    rows = *(u8 **)((u8 *)D_800D1588[obj->id] - 8);
+    rows = *(u8 **)((u8 *)g_model_anim_banks[obj->id] - 8);
     if (rows == NULL) {
         return;
     }
@@ -4820,14 +4820,14 @@ void obj_fade_command(struct127 *, u8, u8, u8, u8);
 void objev_anim_38(void);
 void actor_sound_stop(struct127 *);
 extern s32 g_obj_id_by_slot1; /* was D_800CC3C8 */
-extern u8 D_800CC69C;
+extern u8 g_cur_floor_kind; /* was D_800CC69C */
 extern char g_glide_sfx_cb_data[]; /* was D_800997E8 */
 s32 sfx_cb_follow_object_anim(struct_eu_sfx *, s32, s32 *, struct11 *, s32, s32 *, u16 *);
 
 
 /* P64: the jump / swim / glide handler of a walking record, once per walk-handler call (obj_ctrl_floor_contact family).
  * `pad` = the controller: +0 buttons (0x8000 = A / jump, 0x4000 = B, 0x2000 = Z, 0x10), +3 stick y (s8).
- * D_800CC288 = the buttons pressed this frame. ctl = rec->unk31C. Sections:
+ * g_cur_buttons_pressed = the buttons pressed this frame. ctl = rec->unk31C. Sections:
  *   1. guards: stunned / dead stop the record (target speed 0); nothing while ctl +0x46 > 0, ctl +0x36 >= 100 or
  *      ctl +0x6B. `height` = rec +0x28 (ground clearance), -150 with ctl +0x4E == 2 (carried state), 0 with
  *      ctl +0x4F == 2, +50 while rising.
@@ -4837,7 +4837,7 @@ s32 sfx_cb_follow_object_anim(struct_eu_sfx *, s32, s32 *, struct11 *, s32, s32 
  *      returns when an animation was started.
  *   4. jump start: riding a record of id 0x28 (not level 0x23) / 0x8A / 0x23 (rec +0x65), or on the ground / ctl
  *      +0x55: A starts a jump (0x32, the run jump 0x37 / 0x19E, the high jump 0x279 with ctl +0x17, the item jump
- *      0x43 with ctl +8, the super jump with ctl +0x1A, the Z long jump 0xEB) with floor-kind and D_800CC69C
+ *      0x43 with ctl +8, the super jump with ctl +0x1A, the Z long jump 0xEB) with floor-kind and g_cur_floor_kind
  *      (low gravity) adjustments; a ride is left (obj_reset_link_state) with a push-off speed.
  *   5. obj_ctrl_action_update (air move), then the double jump (ctl +0x98 / +0x95: 0x37 again), the high-fall 0x3B, and
  *      the helicopter glide (ctl +0x31: start 0xE9 with the sound 0x61E, then the spin-down counter); the
@@ -4887,7 +4887,7 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
         if (rec->in_water == 1) {
             blend = 2.0f;
             anim = 0;
-            if ((D_800CC288 & 0x8000) && (g_level_id != 0x29 || (s16)ctl->unk8 <= 0)
+            if ((g_cur_buttons_pressed & 0x8000) && (g_level_id != 0x29 || (s16)ctl->unk8 <= 0)
                 && rec->unk118 - 60.0f - 30.0f < rec->y_position) {
                 /* jump out of the water */
                 swim_exit_water(rec);
@@ -4914,7 +4914,7 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
                 rec->gravity = 3.3f;
             }
             rec->target_speed = 0.0f;
-            if ((D_800CC288 & 0x4000) && !(*(u16 *)pad & 0x10)) {
+            if ((g_cur_buttons_pressed & 0x4000) && !(*(u16 *)pad & 0x10)) {
                 ctl = rec->unk31C;
                 if ((s8)ctl->pad17[0xB] < 0x69) {
                     ctl->pad17[0xB] = 0xF;
@@ -4987,7 +4987,7 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
                 rec->gravity = 3.5f;
             }
         }
-        if ((D_800CC288 & 0x8000) || rec->unk31C->unk84 != 0) {
+        if ((g_cur_buttons_pressed & 0x8000) || rec->unk31C->unk84 != 0) {
             rec->unk137 = 2;
             anim = 0x40;
             speed = 3.0f;
@@ -5013,7 +5013,7 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
         rec->unk137 = 0;
         jumped = 0;
         jump_v = 0.0f;
-        if ((D_800CC288 & 0x8000) && rec->unk31C->unk11A != 1 && rec->unk31C->unk11A != 3
+        if ((g_cur_buttons_pressed & 0x8000) && rec->unk31C->unk11A != 1 && rec->unk31C->unk11A != 3
             && (ride != 0 || (rec->unk13C < 100 && rec->disable_jump == 0 && rec->disable_run != 0xFF))) {
             jumped = 1;
             jump_v = 15.0f;
@@ -5088,14 +5088,14 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
                         anim = 0x32;
                         rec->y_velocity *= 0.55f;
                     }
-                    if (D_800CC69C != 0) {
+                    if (g_cur_floor_kind != 0) {
                         rec->unk81 = 0x82;
                     } else {
                         rec->unk81 = 2;
                     }
                 } else {
                     /* Z long jump */
-                    if (D_800CC69C == 0) {
+                    if (g_cur_floor_kind == 0) {
                         rec->unk81 = 1;
                     } else {
                         rec->unk81 = 0x81;
@@ -5105,7 +5105,7 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
                     rec->disable_run = 0x17;
                     rec->unk83 = 0x64;
                     anim = 0xEB;
-                    if (D_800CC69C != 0) {
+                    if (g_cur_floor_kind != 0) {
                         rec->xz_velocity = rec->xz_velocity;
                         rec->y_velocity *= 1.4f;
                         rec->gravity = 3.8f;
@@ -5126,7 +5126,7 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
                 } else if (ride == 0x8B) {
                     obj_reset_link_state(rec->unk65 - 1, 5);
                     rec->xz_velocity = 30.0f;
-                    if (D_800BE616 != 0) {
+                    if (g_mp_mode_active != 0) {
                         rec->unk7A = 0x3000;
                         if (rec->z_position > 0.0f) {
                             rec->unk7A = 0xB000;
@@ -5164,11 +5164,11 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
     }
 
     /* 5. in the air */
-    obj_ctrl_action_update(rec, buttons, D_800CC288, height, 0);
+    obj_ctrl_action_update(rec, buttons, g_cur_buttons_pressed, height, 0);
     anim = 0;
     ctl = rec->unk31C;
     blend = 2.0f;
-    if ((ctl->pad98[0] != 0 || ctl->unk95 != 0) && rec->disable_jump == 0 && (D_800CC288 & 0x8000)) {
+    if ((ctl->pad98[0] != 0 || ctl->unk95 != 0) && rec->disable_jump == 0 && (g_cur_buttons_pressed & 0x8000)) {
         /* double jump */
         a = ctl->unk4C;
         rec->unk7A = a;
@@ -5197,7 +5197,7 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
             blend = 2.0f;
         }
         rec->unk31C->unk54 = 0;
-    } else if ((D_800CC288 & 0x8000) && ctl->unk4E == 0) {
+    } else if ((g_cur_buttons_pressed & 0x8000) && ctl->unk4E == 0) {
         /* high fall */
         if (rec->unk84.uh != 0x3B && rec->unk84.uh != 0x3C && rec->unk137 == 0 && rec->unk13C == 0
             && ctl->unk95 == 0 && ctl->unk31 == 0 && height > 55.0f) {
@@ -5211,12 +5211,12 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
             }
         }
     }
-    if (D_800BE616 == 0 && glide != 0 && rec->in_water == 0 && rec->unk13C <= 100 && rec->id != 0x96) {
+    if (g_mp_mode_active == 0 && glide != 0 && rec->in_water == 0 && rec->unk13C <= 100 && rec->id != 0x96) {
         ctl = rec->unk31C;
         if (ctl->unk31 != 0 && ctl->unk4E == 0) {
             if (ctl->unk31 < 3) {
                 /* helicopter glide start */
-                if ((D_800CC288 & 0x8000) && rec->unk28 > 1.0f) {
+                if ((g_cur_buttons_pressed & 0x8000) && rec->unk28 > 1.0f) {
                     blend = 6.0f;
                     anim = 0xE9;
                     rec->xz_velocity *= 0.3f;
@@ -5244,7 +5244,7 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
 #else
 #define GLIDE_HOLD_MAX 0x3E
 #endif
-                ctl->unk31 += D_800BE9A0;
+                ctl->unk31 += g_frame_delta;
                 if (rec->unk31C->unk31 < 0xD) {
                     rec->y_velocity = 8.0f;
                 }
@@ -5291,7 +5291,7 @@ void player_context_action(struct127 *, s32, f32, s32, s32); /* P157: no return 
 s32 player_item_action(struct127 *, s32, s32, f32, s32, s32, s32, s32, s32); /* P102: arg3 = height */
 s32 hint_action_has_hint(u8);
 extern s32 g_obj_id_by_slot1; /* was D_800CC3C8 */
-extern u16 *D_800CC6A4;
+extern u16 *g_cur_pad; /* was D_800CC6A4 */
 
 /* was func_1506045C */
 void obj_ctrl_action_update(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4) {
@@ -5314,7 +5314,7 @@ void obj_ctrl_action_update(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 a
     u8 var_s0;
 
     var_t4 = 0;
-    if (D_800C35EA != 1) {
+    if (g_cutscene_slot_state != 1) {
         sp40 = 0;
         temp_v1 = arg0->unk31C;
         var_t1 = 0;
@@ -5334,7 +5334,7 @@ void obj_ctrl_action_update(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 a
         if ((temp_v0_2 != 0) && (temp_t8 == 0)) {
             var_s0 = temp_v0_2;
         }
-        if ((g_level_id != 0x29) && (g_level_id != 0x2E) && (arg0->unk31C->unk78 == 0) && (*D_800CC6A4 & 0x20)) {
+        if ((g_level_id != 0x29) && (g_level_id != 0x2E) && (arg0->unk31C->unk78 == 0) && (*g_cur_pad & 0x20)) {
             sp4C = 0;
             sp44 = var_t2;
             sp3C = 0;
@@ -5538,8 +5538,8 @@ void obj_calc_bone_offset(u8 *arg0) {
     var_v0 = 0;
     if (temp_v1 != 0xFF) {
         temp_a1 = (*(s32 *)((u8 *)arg0 + 0x1D4));
-        if ((temp_a1 != 0) && (D_800C42B0 == 0)) {
-            temp_v0 = D_800D1C90[temp_v1];
+        if ((temp_a1 != 0) && (g_mtx_fixed_point == 0)) {
+            temp_v0 = g_type_descs[temp_v1];
             temp_a2 = temp_a1 + ((*(u8 *)((u8 *)temp_v0 + 0x27)) << 6);
             temp_f2 = (f32) (*(s16 *)((u8 *)temp_v0 + 0x14)) * (*(f32 *)((u8 *)arg0 + 0x150));
             if (temp_f2 != 0.0f) {
@@ -5673,7 +5673,7 @@ void obj_remove(struct127 *obj, s32 mode) {
     }
     obj_reset(obj);
 }
-// path_face_nearest_segment: turns obj toward its path `path` (g_path_points[path], D_800D2528[path] points of s16
+// path_face_nearest_segment: turns obj toward its path `path` (g_path_points[path], g_path_point_counts[path] points of s16
 // {x, y, z, speed}; at least 3): finds the point nearest to obj's x / z (squared distance, first minimum wins);
 // unless that is the first or the last point, steps back one point when obj is 0x6D61 or more away from it and the
 // previous point is nearer than the next one; then faces along the segment to the next point
@@ -5697,7 +5697,7 @@ void obj_follow_path(struct127 *obj, s32 path) {
     f32 turn;
     u16 angle;
 
-    count = D_800D2528[path];
+    count = g_path_point_counts[path];
     if (count < 3) {
         return;
     }
@@ -6040,7 +6040,7 @@ void objects_animate_textures(void) {
                         OBJ_ANIM.jitter = (u32)random_int() % 5 - 2;
                     }
                     gfx_tile_scroll_coords(type, 4, -4, OBJ_ANIM.jitter, 0, 0);
-                    tex = &((s32 **)&D_800C4440)[type];
+                    tex = &((s32 **)&g_model_part_tables)[type];
                     if (*tex != NULL) {
                         obj_type_tex_scroll_apply(type, (*tex)[0], 0x37, 0, (s32)OBJ_ANIM.scrollV, 2, 1);
                         obj_type_tex_scroll_apply(type, (*tex)[1], 0x27, 0x37, (s32)OBJ_ANIM.scrollU, 1, 0);
@@ -6219,7 +6219,7 @@ s32 obj_check_visible(struct127 *arg0) {
     if (arg0->unk127 != 0xFF) {
         return 1;
     }
-    if ((D_800C3638 != 0) && (cutscene_obj_takes_part(arg0) != 0)) {
+    if ((g_cutscene_in_progress != 0) && (cutscene_obj_takes_part(arg0) != 0)) {
         return 1;
     }
     if (arg0->interaction_state == 0x27) {
@@ -6241,7 +6241,7 @@ s32 obj_check_visible(struct127 *arg0) {
         return 1;
     }
     temp_a2 = arg0->unk13F;
-    if (D_800D2528[temp_a2] != 0) {
+    if (g_path_point_counts[temp_a2] != 0) {
         var_t0 = 1;
         var_v1 = 0;
         if (g_player_count > 0) {
@@ -6272,7 +6272,7 @@ block_27:
     var_s1 = &g_view_mtxf;
     var_v1_2 = 0;
     var_s0 = 0;
-    temp_f20 = (f32) (*(s16 *)((u8 *)(D_800D1C90[arg0->id]) + 0x10)) * arg0->y_scale;
+    temp_f20 = (f32) (*(s16 *)((u8 *)(g_type_descs[arg0->id]) + 0x10)) * arg0->y_scale;
     if (g_last_player_index >= 0) {
         sp4C = 1;
 loop_29:

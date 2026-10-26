@@ -156,7 +156,7 @@ s32 screen_tint_draw(s32 arg0, s32 arg1) {
 
 extern u8 g_screen_pulse_colours[][6]; /* was D_8008D3B0 */
 
-/* Pulsing overlay: alpha g_screen_pulse_alpha (scaled by a 0..1 wave from math_sin_u8 when D_800DE1BC is set),
+/* Pulsing overlay: alpha g_screen_pulse_alpha (scaled by a 0..1 wave from math_sin_u8 when g_screen_pulse_wave is set),
  * colour g_screen_pulse_colours[g_screen_pulse_colour] (first of its two RGB triples). */
 /* was func_1517FAD4 */
 Gfx *screen_pulse_overlay_draw(Gfx *gdl) {
@@ -171,10 +171,10 @@ Gfx *screen_pulse_overlay_draw(Gfx *gdl) {
     if (a == 0) {
         return gdl;
     }
-    /* the asm leaves t uninitialised (a stale stack word) when D_800DE1BC == 0 and sets 0 on the wave path:
+    /* the asm leaves t uninitialised (a stale stack word) when g_screen_pulse_wave == 0 and sets 0 on the wave path:
      * use 0 on both paths (UNVERIFIED for the non-wave path) */
     t = 0.0f;
-    if (D_800DE1BC != 0) {
+    if (g_screen_pulse_wave != 0) {
         a = (f32)g_screen_pulse_alpha * ((math_sin_u8(g_screen_pulse_phase) + 1.0f) * 0.5f);
     }
     c = g_screen_pulse_colours[g_screen_pulse_colour];
@@ -188,7 +188,7 @@ void screen_pulse_start(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     g_screen_pulse_phase = 0;
     g_screen_pulse_colour = arg0;
     g_screen_pulse_alpha = arg3;
-    D_800DE1BC = arg4;
+    g_screen_pulse_wave = arg4;
 }
 
 /* P95: per-frame countdown of the g_screen_tint_timer[0..g_last_player_index] timers by the frame time g_frame_ticks (clamped at 0). */
@@ -359,9 +359,9 @@ extern s32 g_tile_anim_tex_ids[];       /* scope textures: [1] lens I16, [2] rim
 extern f32 g_hud_scope_zoom_scale;         /* zoom scale; was D_800A766C */
 extern f32 g_hud_scope_radius_scale;         /* lens radius per zoom; was D_800A7670 */
 extern u8 g_hud_scope_range_frame[];        /* per view: range finder frame (0..2); was D_800DE1A8 */
-extern f32 *D_800DE274;        /* zoom */
-extern f32 *D_800DE278;        /* aim offset x */
-extern f32 *D_800DE27C;        /* aim offset y */
+extern f32 *g_hud_scope_zoom_ptr;        /* zoom; was D_800DE274 */
+extern f32 *g_hud_scope_aim_x_ptr;        /* aim offset x; was D_800DE278 */
+extern f32 *g_hud_scope_aim_y_ptr;        /* aim offset y; was D_800DE27C */
 s32 texture_cache_lookup(s32, s32, s32, s32);
 u8 *hud_view_fill_rect(u8 *, s32, s32, s32, s32, s32); /* P85: the callee compares full words (callers pass s16 values) */
 Gfx *hud_scope_lens_draw(Gfx *, s32, s32, f32, f32, s32);
@@ -374,8 +374,8 @@ Gfx *hud_scope_lens_draw(Gfx *, s32, s32, f32, f32, s32);
 #define SCOPE_RECT(x0, y0, x1, y1) gdl = (Gfx *) hud_view_fill_rect((u8 *) gdl, x0, y0, x1, y1, view)
 
 /*
- * P85: sniper scope overlay of view `view`. The lens size follows the zoom (D_800DE274 when D_800DDE40 is set and
- * D_800C35EA == 1, which also moves the lens centre g_hud_lens_centre[view] with the aim offsets D_800DE278 / D_800DE27C
+ * P85: sniper scope overlay of view `view`. The lens size follows the zoom (g_hud_scope_zoom_ptr when g_hud_scope_scripted is set and
+ * g_cutscene_slot_state == 1, which also moves the lens centre g_hud_lens_centre[view] with the aim offsets g_hud_scope_aim_x_ptr / g_hud_scope_aim_y_ptr
  * in view 0's scale; 1.0 when D_800DE40 is set otherwise; else g_hud_lens_zoom[view]). Zoom 0: nothing. Zoom < 1: the
  * view outside the lens square is filled black, an optional cross hair (g_hud_lens_mode[view] != 0: black then white
  * pass, 1 pixel wider each) with corner brackets around the lens (mode 1), then the lens texture (g_tile_anim_tex_ids[1]),
@@ -401,17 +401,17 @@ Gfx *hud_sniper_scope_draw(Gfx *gdl, s32 view) {
     s32 right;
     s32 bottom;
 
-    if (D_800DDE40 != 0) {
-        if (D_800C35EA == 1) {
+    if (g_hud_scope_scripted != 0) {
+        if (g_cutscene_slot_state == 1) {
             k = g_hud_scope_zoom_scale;
-            zoom = *D_800DE274 * k;
+            zoom = *g_hud_scope_zoom_ptr * k;
             if (zoom > 1.0f) {
                 zoom = 1.0f;
             } else if (zoom < 0.0f) {
                 zoom = 0.0f;
             }
-            g_hud_lens_centre[view][0] = *(f32 *) ((u8 *) g_player_cams + 4) * (*D_800DE278 * k);
-            g_hud_lens_centre[view][1] = *(f32 *) ((u8 *) g_player_cams + 8) * -(*D_800DE27C * k);
+            g_hud_lens_centre[view][0] = *(f32 *) ((u8 *) g_player_cams + 4) * (*g_hud_scope_aim_x_ptr * k);
+            g_hud_lens_centre[view][1] = *(f32 *) ((u8 *) g_player_cams + 8) * -(*g_hud_scope_aim_y_ptr * k);
         } else {
             zoom = 1.0f;
         }
@@ -750,7 +750,7 @@ extern f32 g_hud_lens_zoom_in_rate; /* was D_800A7694 */
 /* was func_15182388 */
 void hud_lens_start_zoom_in(s32 arg0) {
     f32 *p;
-    if (D_800BE616 != 0) {
+    if (g_mp_mode_active != 0) {
         g_screen_fade_rgb[arg0][0] = 0;
         g_screen_fade_rgb[arg0][1] = 0;
         g_screen_fade_rgb[arg0][2] = 0;

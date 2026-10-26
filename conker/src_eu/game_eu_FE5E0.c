@@ -5,71 +5,71 @@
 
 s32 event_dispatch(s32, s32, ...);
 void math_spring_approach(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
-extern f32 D_80088C60; // tint red, green, blue (current)
-extern f32 D_80088C64;
-extern f32 D_80088C68;
-extern f32 D_80088C6C; // tint target
-extern f32 D_80088C70;
-extern f32 D_80088C74;
-extern f32 D_80088C78; // tint speed
-extern f32 D_80088C7C;
-extern f32 D_80088C80;
+extern f32 g_player_tint_r; /* was D_80088C60 */ // tint red, green, blue (current)
+extern f32 g_player_tint_g; /* was D_80088C64 */
+extern f32 g_player_tint_b; /* was D_80088C68 */
+extern f32 g_player_tint_target_r; /* was D_80088C6C */ // tint target
+extern f32 g_player_tint_target_g; /* was D_80088C70 */
+extern f32 g_player_tint_target_b; /* was D_80088C74 */
+extern f32 g_player_tint_vel_r; /* was D_80088C78 */ // tint speed
+extern f32 g_player_tint_vel_g; /* was D_80088C7C */
+extern f32 g_player_tint_vel_b; /* was D_80088C80 */
 
 // player_tint_update: player state handler (g_level_player_state_fns table). While event flag 0x9000/6/0x403D is set the player
 // gets +0x84 bits 0x80021000 and the screen tint target becomes red-less (0x4043: 64, 255, 255), green-less (0x4044:
 // 255, 64, 255), blue-less (0x4045: 255, 255, 64) or white; otherwise the target is white and +0x84 loses
-// 0x80021000 and gains 8. The tint D_80088C60..68 eases toward the target (math_spring_approach, rate 4, max 6, the
+// 0x80021000 and gains 8. The tint g_player_tint_r..68 eases toward the target (math_spring_approach, rate 4, max 6, the
 // player's +0x7B4 step) and is published as bytes in event flags 0x12/0x30F5..0x30F3 and 0x30FA..0x30F8.
 /* was func_150D0DD0 */
 void player_tint_update(u8 *obj) {
     if (event_dispatch(1, 0x403D, 6, 0x9000) != 0) {
         *(s32 *) (obj + 0x84) |= 0x80021000;
         if (event_dispatch(1, 0x4043, 6, 0x9000) != 0) {
-            D_80088C6C = 64.0f;
-            D_80088C70 = 255.0f;
-            D_80088C74 = 255.0f;
+            g_player_tint_target_r = 64.0f;
+            g_player_tint_target_g = 255.0f;
+            g_player_tint_target_b = 255.0f;
         } else if (event_dispatch(1, 0x4044, 6, 0x9000) != 0) {
-            D_80088C6C = 255.0f;
-            D_80088C70 = 64.0f;
-            D_80088C74 = 255.0f;
+            g_player_tint_target_r = 255.0f;
+            g_player_tint_target_g = 64.0f;
+            g_player_tint_target_b = 255.0f;
         } else if (event_dispatch(1, 0x4045, 6, 0x9000) != 0) {
-            D_80088C6C = 255.0f;
-            D_80088C70 = 255.0f;
-            D_80088C74 = 64.0f;
+            g_player_tint_target_r = 255.0f;
+            g_player_tint_target_g = 255.0f;
+            g_player_tint_target_b = 64.0f;
         } else {
-            D_80088C6C = 255.0f;
-            D_80088C70 = 255.0f;
-            D_80088C74 = 255.0f;
+            g_player_tint_target_r = 255.0f;
+            g_player_tint_target_g = 255.0f;
+            g_player_tint_target_b = 255.0f;
         }
     } else {
-        D_80088C6C = 255.0f;
-        D_80088C70 = 255.0f;
-        D_80088C74 = 255.0f;
+        g_player_tint_target_r = 255.0f;
+        g_player_tint_target_g = 255.0f;
+        g_player_tint_target_b = 255.0f;
         *(s32 *) (obj + 0x84) &= ~0x80021000;
         *(s32 *) (obj + 0x84) |= 8;
     }
-    math_spring_approach(&D_80088C60, D_80088C6C, &D_80088C78, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
-    math_spring_approach(&D_80088C64, D_80088C70, &D_80088C7C, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
-    math_spring_approach(&D_80088C68, D_80088C74, &D_80088C80, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
-    event_dispatch_alt(1, 0x30F5, 0x12, (u32) D_80088C60 & 0xFF);
-    event_dispatch_alt(1, 0x30F4, 0x12, (u32) D_80088C64 & 0xFF);
-    event_dispatch_alt(1, 0x30F3, 0x12, (u32) D_80088C68 & 0xFF);
-    event_dispatch_alt(1, 0x30FA, 0x12, (u32) D_80088C60 & 0xFF);
-    event_dispatch_alt(1, 0x30F9, 0x12, (u32) D_80088C64 & 0xFF);
-    event_dispatch_alt(1, 0x30F8, 0x12, (u32) D_80088C68 & 0xFF);
+    math_spring_approach(&g_player_tint_r, g_player_tint_target_r, &g_player_tint_vel_r, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    math_spring_approach(&g_player_tint_g, g_player_tint_target_g, &g_player_tint_vel_g, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    math_spring_approach(&g_player_tint_b, g_player_tint_target_b, &g_player_tint_vel_b, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    event_dispatch_alt(1, 0x30F5, 0x12, (u32) g_player_tint_r & 0xFF);
+    event_dispatch_alt(1, 0x30F4, 0x12, (u32) g_player_tint_g & 0xFF);
+    event_dispatch_alt(1, 0x30F3, 0x12, (u32) g_player_tint_b & 0xFF);
+    event_dispatch_alt(1, 0x30FA, 0x12, (u32) g_player_tint_r & 0xFF);
+    event_dispatch_alt(1, 0x30F9, 0x12, (u32) g_player_tint_g & 0xFF);
+    event_dispatch_alt(1, 0x30F8, 0x12, (u32) g_player_tint_b & 0xFF);
 }
 
-extern s32 D_80088C30;
-extern s32 D_80088C34;
-extern s32 D_80088C38;
-extern s32 D_80088C3C;
+extern s32 g_tile_scroll_s0; /* was D_80088C30 */
+extern s32 g_tile_scroll_t0; /* was D_80088C34 */
+extern s32 g_tile_scroll_s1; /* was D_80088C38 */
+extern s32 g_tile_scroll_t1; /* was D_80088C3C */
 extern s32 *g_world_obj_rider_masks; /* was D_800DC3C4 */
 s32 world_record_find(u8);
 void obj_hit_split_halves(struct127 *);
 s32 object_hit_effects(void *, s32, s32, s32, s32, s32, s32, s32);
 s32 player_hit_reaction(struct127 *, s32);
 
-// level_item_flags_update: advances the four scroll counters D_80088C30..3C by the frame step (x40, x-66, x-8, x92);
+// level_item_flags_update: advances the four scroll counters g_tile_scroll_s0..3C by the frame step (x40, x-66, x-8, x92);
 // unless the player's held object (object 0 +0x31C, byte 0x120) is busy: for items 0xFA..0xF8 with flag bit 0
 // (world_record_find entry index = (item - g_world_objs) / 160 into g_world_obj_rider_masks) calls obj_hit_split_halves on the player and plays
 // sound 0x627; for item 0xFB plays it and resets the player (object_hit_effects, obj_set_destroyed, mode 6 via player_hit_reaction).
@@ -79,10 +79,10 @@ void level_item_flags_update(s32 arg0) {
     s32 i;
     s32 item;
 
-    D_80088C30 += step * 40;
-    D_80088C34 += -step * 66;
-    D_80088C38 += -step * 8;
-    D_80088C3C += step * 92;
+    g_tile_scroll_s0 += step * 40;
+    g_tile_scroll_t0 += -step * 66;
+    g_tile_scroll_s1 += -step * 8;
+    g_tile_scroll_t1 += step * 92;
     if ((*(u8 **) ((u8 *) g_objects + 0x31C))[0x120] != 0) {
         return;
     }
@@ -159,17 +159,17 @@ void bone_spark_emitter_spawn(u8 *arg0, s32 arg1) {
     sp.u50 = 0.35085f;
     bone_emitter_spawn(&sp.u1C, 0);
 }
-extern f32 D_800A0C64;
+extern f32 g_bone_spark_k_0c64; /* was D_800A0C64 */
 
 /* was func_150D16C4 */
 s32 bone_spark_emitter_init(u8 *arg0) {
-    (*(f32 *)((u8 *)arg0 + 0x74)) = (f32) (((random_float() * 150.0f) + 350.0f) * D_800A0C64);
+    (*(f32 *)((u8 *)arg0 + 0x74)) = (f32) (((random_float() * 150.0f) + 350.0f) * g_bone_spark_k_0c64);
     return 1;
 }
 
 s32 impact_tinted_particle_spawn(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s16 arg7, u8 arg8, s16 arg9, s16 argA, u8 argB, u8 argC, s32 argD);
 
-extern f32 D_800A0C68, D_800A0C6C, D_800A0C70, D_800A0C74;
+extern f32 g_bone_spark_k_0c68, g_bone_spark_k_0c6c, g_bone_spark_k_0c70, g_bone_spark_k_0c74; /* was D_800A0C68; was D_800A0C6C; was D_800A0C70; was D_800A0C74 */
 /* was func_150D1714 */
 void bone_spark_emitter_emit(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, f32 arg4, u8 *arg5) {
     f32 a[3];
@@ -195,5 +195,5 @@ void bone_spark_emitter_emit(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, f32 arg4, u
     r2 = random_float();
     r3 = random_int();
     r4 = random_int();
-    impact_tinted_particle_spawn(0, a, d, r1 * 61.0f + 60.0f, D_800A0C68, D_800A0C6C, r2 * D_800A0C70 + D_800A0C74, (r3 & 0xF) + 0x23, r4 % 156U + 0x64, 0x1E, 8, 0, arg5[0xC], arg5[1]);
+    impact_tinted_particle_spawn(0, a, d, r1 * 61.0f + 60.0f, g_bone_spark_k_0c68, g_bone_spark_k_0c6c, r2 * g_bone_spark_k_0c70 + g_bone_spark_k_0c74, (r3 & 0xF) + 0x23, r4 % 156U + 0x64, 0x1E, 8, 0, arg5[0xC], arg5[1]);
 }

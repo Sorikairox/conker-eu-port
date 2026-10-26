@@ -3,26 +3,26 @@
 #include "variables.h"
 
 
-extern u8 D_8002AE18;
-extern u64 D_8002C060;
-extern OSMesgQueue D_8003B578;
-extern OSTimer D_800BEB00;
+extern u8 g_cont_read_done; /* was D_8002AE18 */
+extern u64 g_os_clock_rate; /* was D_8002C060 */
+extern OSMesgQueue g_sched_event_queue; /* was D_8003B578 */
+extern OSTimer g_cont_read_timer; /* was D_800BEB00 */
 /* was func_1501BB20 */
 void cont_arm_read_timer(void) {
-    if (D_8002AE18 != 0) {
-        osSetTimer(&D_800BEB00, (25ULL * D_8002C060) / 1000000ULL, 0, &D_8003B578, (void *)6);
-        D_8002AE18 = 0;
+    if (g_cont_read_done != 0) {
+        osSetTimer(&g_cont_read_timer, (25ULL * g_os_clock_rate) / 1000000ULL, 0, &g_sched_event_queue, (void *)6);
+        g_cont_read_done = 0;
     }
 }
 
-extern u8 D_8002AE18;
-extern OSMesg D_800BEDB0;
-extern u8 D_800BEB60;
+extern u8 g_cont_read_done; /* was D_8002AE18 */
+extern OSMesg g_si_recv_mesg; /* was D_800BEDB0 */
+extern u8 g_cont_connected_mask; /* was D_800BEB60 */
 extern u8 g_game_mode_prev; /* was D_800E0FC5 */
-extern u16 D_800BEB20[4];
-extern u16 D_800BEB28[4];
-extern u16 D_800BEB30[4];
-extern u16 D_800BEB38[4];
+extern u16 g_cont_prev_buttons[4]; /* was D_800BEB20 */
+extern u16 g_cont_prev_buttons_b[4]; /* was D_800BEB28 */
+extern u16 g_pad_pressed[4]; /* was D_800BEB30 */
+extern u16 g_cont_last_buttons[4]; /* was D_800BEB38 */
 extern OSContPad g_cont_pads[4]; /* was D_800BED38 */
 extern u16 g_cont_pressed[4]; /* was D_800BED50 */
 void demo_input_play_next(void);
@@ -43,20 +43,20 @@ struct14 *cont_read_frame(void) {
     u8 idx;
 
     for (i = 0; i < 4; i++) {
-        D_800BEB38[i] = player[i].button;
+        g_cont_last_buttons[i] = player[i].button;
     }
-    osRecvMesg(&g_si_mesg_queue, &D_800BEDB0, OS_MESG_BLOCK);
+    osRecvMesg(&g_si_mesg_queue, &g_si_recv_mesg, OS_MESG_BLOCK);
     osContGetReadData(pads);
     save_process_request();
-    D_8002AE18 = 1;
-    D_800BEB60 = 0;
+    g_cont_read_done = 1;
+    g_cont_connected_mask = 0;
     for (i = 0; i < 4; i++) {
         if (pads[i].errno != 0) {
             pads[i].button = 0;
             pads[i].stick_x = 0;
             pads[i].stick_y = 0;
         } else {
-            D_800BEB60 |= 1 << i;
+            g_cont_connected_mask |= 1 << i;
         }
     }
 
@@ -69,8 +69,8 @@ struct14 *cont_read_frame(void) {
         if (idx < 4 && i < nplayers) {
             player[i].stick_x = pads[idx].stick_x;
             player[i].stick_y = pads[idx].stick_y;
-            player[i].button = pads[idx].button | D_800BE720[idx];
-            D_800BE720[idx] = 0;
+            player[i].button = pads[idx].button | g_cont_forced_buttons[idx];
+            g_cont_forced_buttons[idx] = 0;
         } else {
             player[i].button = 0;
             player[i].stick_x = 0;
@@ -79,9 +79,9 @@ struct14 *cont_read_frame(void) {
     }
 
     for (i = 0; i < 4; i++) {
-        g_cont_pressed[i] = ~D_800BEB28[i] & player[i].button;
+        g_cont_pressed[i] = ~g_cont_prev_buttons_b[i] & player[i].button;
         g_cont_pads[i].button = player[i].button;
-        D_800BEB28[i] = player[i].button;
+        g_cont_prev_buttons_b[i] = player[i].button;
         g_cont_pads[i].stick_x = DEADZONE(player[i].stick_x);
         g_cont_pads[i].stick_y = DEADZONE(player[i].stick_y);
     }
@@ -94,8 +94,8 @@ struct14 *cont_read_frame(void) {
     }
 
     for (i = 0; i < 4; i++) {
-        D_800BEB30[i] = ~D_800BEB20[i] & player[i].button;
-        D_800BEB20[i] = player[i].button;
+        g_pad_pressed[i] = ~g_cont_prev_buttons[i] & player[i].button;
+        g_cont_prev_buttons[i] = player[i].button;
         if (replay == 0) {
             player[i].stick_x = DEADZONE(player[i].stick_x);
             player[i].stick_y = DEADZONE(player[i].stick_y);
@@ -104,7 +104,7 @@ struct14 *cont_read_frame(void) {
     return &g_cont_pad_ptrs;
 }
 #undef DEADZONE
-extern f32 D_80096D10;
+extern f32 g_rumble_k_6d10; /* was D_80096D10 */
 void rumble_start(u8, f32, f32);
 /* was func_1501BFF0 */
 void rumble_start_strength(u8 arg0, u8 arg1)
@@ -122,28 +122,28 @@ void rumble_start_strength(u8 arg0, u8 arg1)
     a = 0.0f;
     b = 99.0f;
   } else {
-    t = ((f32)(u32)arg1 - 1) * D_80096D10 * 5.0f;
+    t = ((f32)(u32)arg1 - 1) * g_rumble_k_6d10 * 5.0f;
     a = t + 2.0f;
     b = 7.0f - t;
   }
   rumble_start(arg0, a, b);
 }
 
-extern u8 D_800BED64[];
-extern f32 D_800BED70[];
-extern f32 D_800BED80[];
-extern f32 D_800BED90[];
-extern f32 D_800BEDA0[];
+extern u8 g_rumble_pak_present[]; /* was D_800BED64 */
+extern f32 g_rumble_phase[]; /* was D_800BED70 */
+extern f32 g_rumble_on_time[]; /* was D_800BED80 */
+extern f32 g_rumble_off_time[]; /* was D_800BED90 */
+extern f32 g_rumble_period[]; /* was D_800BEDA0 */
 /* was func_1501C0D0 */
 void rumble_start(u8 arg0, f32 arg1, f32 arg2) {
     s32 idx;
     idx = g_player_pad_map[arg0];
-    if (idx < 4 && D_800BED64[idx] != 0) {
-        D_800BED5C[idx] = 1;
-        D_800BED70[idx] = 0.0f;
-        D_800BED80[idx] = arg1;
-        D_800BED90[idx] = arg2;
-        D_800BEDA0[idx] = arg1 + arg2;
+    if (idx < 4 && g_rumble_pak_present[idx] != 0) {
+        g_rumble_active[idx] = 1;
+        g_rumble_phase[idx] = 0.0f;
+        g_rumble_on_time[idx] = arg1;
+        g_rumble_off_time[idx] = arg2;
+        g_rumble_period[idx] = arg1 + arg2;
     }
 }
 
@@ -152,15 +152,15 @@ void rumble_stop(u8 arg0) {
     s32 temp_v0 = g_player_pad_map[arg0];
 
     if (temp_v0 < 4) {
-        D_800BED5C[temp_v0] = 0;
+        g_rumble_active[temp_v0] = 0;
     }
 }
 
-extern s32 D_800BEB80;
-extern s32 D_800BED60;
-extern s32 D_800BED68;
+extern s32 g_rumble_pfs; /* was D_800BEB80 */
+extern s32 g_rumble_prev_active; /* was D_800BED60 */
+extern s32 g_rumble_motor_on; /* was D_800BED68 */
 extern u8 g_unpause_settle_frames; /* was D_800BEEE2 */
-extern u8 D_800BEEE3;
+extern u8 g_rumble_stop_request; /* was D_800BEEE3 */
 extern u8 D_eu_800E0E30;
 
 /* was func_1501C1B0 */
@@ -178,69 +178,69 @@ void rumble_update(void) {
     u8 *temp_s0_2;
     u8 *temp_s0_3;
 
-    var_s3 = D_800BED64;
+    var_s3 = g_rumble_pak_present;
     var_s1 = 0;
     do {
-        if (D_800BE938 != 0) {
-            temp_s0 = ((u8 *)&D_800BEB80 + (var_s1 * 0x68));
+        if (g_rumble_probe_request != 0) {
+            temp_s0 = ((u8 *)&g_rumble_pfs + (var_s1 * 0x68));
             if (os_motor_init(&g_si_mesg_queue, temp_s0, var_s1) == 0) {
                 if (*var_s3 == 0) {
                     *var_s3 = 1;
-                    D_800BED5C[var_s1] = 0;
-                    ((u8 *)&D_800BED60)[var_s1] = 0;
-                    ((u8 *)&D_800BED68)[var_s1] = 0;
-                    D_800BED70[var_s1] = 0.0f;
-                    D_800BED80[var_s1] = 1.0f;
-                    D_800BED90[var_s1] = 1.0f;
-                    D_800BEDA0[var_s1] = 2.0f;
+                    g_rumble_active[var_s1] = 0;
+                    ((u8 *)&g_rumble_prev_active)[var_s1] = 0;
+                    ((u8 *)&g_rumble_motor_on)[var_s1] = 0;
+                    g_rumble_phase[var_s1] = 0.0f;
+                    g_rumble_on_time[var_s1] = 1.0f;
+                    g_rumble_off_time[var_s1] = 1.0f;
+                    g_rumble_period[var_s1] = 2.0f;
                     os_motor_stop(temp_s0);
                 }
             } else {
                 *var_s3 = 0;
             }
         }
-        temp_s4 = &D_800BED5C[var_s1];
+        temp_s4 = &g_rumble_active[var_s1];
         if (*var_s3 != 0) {
-            temp_s7 = ((u8 *)&D_800BED60 + var_s1);
-            if ((D_800BEEE3 != 0) || (D_eu_800E0E30 != 0)) {
-                temp_s0_2 = ((u8 *)&D_800BEB80 + (var_s1 * 0x68));
+            temp_s7 = ((u8 *)&g_rumble_prev_active + var_s1);
+            if ((g_rumble_stop_request != 0) || (D_eu_800E0E30 != 0)) {
+                temp_s0_2 = ((u8 *)&g_rumble_pfs + (var_s1 * 0x68));
                 os_motor_init(&g_si_mesg_queue, temp_s0_2, var_s1);
                 os_motor_stop(temp_s0_2);
-                ((u8 *)&D_800BED68)[var_s1] = 0;
+                ((u8 *)&g_rumble_motor_on)[var_s1] = 0;
                 *temp_s4 = 0;
             }
-            if ((g_pause_open == 0) && (g_game_paused == 0) && (g_unpause_settle_frames == 0) && (D_800BEEE3 == 0) && (D_eu_800E0E30 == 0)) {
+            if ((g_pause_open == 0) && (g_game_paused == 0) && (g_unpause_settle_frames == 0) && (g_rumble_stop_request == 0) && (D_eu_800E0E30 == 0)) {
                 temp_v0 = *temp_s4;
                 switch (temp_v0) {                  /* irregular */
                 case 0:
                     if (*temp_s7 == 1) {
-                        temp_s0_3 = ((u8 *)&D_800BEB80 + (var_s1 * 0x68));
+                        temp_s0_3 = ((u8 *)&g_rumble_pfs + (var_s1 * 0x68));
                         os_motor_init(&g_si_mesg_queue, temp_s0_3, var_s1);
                         os_motor_stop(temp_s0_3);
-                        ((u8 *)&D_800BED68)[var_s1] = 0;
+                        ((u8 *)&g_rumble_motor_on)[var_s1] = 0;
                     }
                     break;
                 case 1:
-                    temp_v0_2 = &D_800BED70[var_s1];
+                    temp_v0_2 = &g_rumble_phase[var_s1];
                     *temp_v0_2 += g_frame_step_f;
-                    temp_f2 = D_800BEDA0[var_s1];
-                    temp_s2 = ((u8 *)&D_800BED68 + var_s1);
+                    temp_f2 = g_rumble_period[var_s1];
+                    temp_s2 = ((u8 *)&g_rumble_motor_on + var_s1);
                     var_s0 = 1;
                     if (temp_f2 < *temp_v0_2) {
                         do {
                             *temp_v0_2 -= temp_f2;
                         } while (temp_f2 < *temp_v0_2);
                     }
-                    if (D_800BED80[var_s1] <= *temp_v0_2) {
+                    if (g_rumble_on_time[var_s1] <= *temp_v0_2) {
                         var_s0 = 0;
                     }
                     if (var_s0 != 0) {
                         if (*temp_s2 == 0) {
-                            os_motor_start(((u8 *)&D_800BEB80 + (var_s1 * 0x68)));
+                            os_motor_start(((u8 *)&g_rumble_pfs + (var_s1 * 0x68)));
                         }
                     } else if (*temp_s2 == 1) {
     s32 pad;
-                        os_motor_stop(((u8 *)&D_800BEB80 + (var_s1 * 0x68)));
+                        os_motor_stop(((u8 *)&g_rumble_pfs + (var_s1 * 0x68)));
                     }
                     *temp_s2 = var_s0;
                     break;
@@ -251,8 +251,8 @@ void rumble_update(void) {
         var_s1 += 1;
         var_s3 += 1;
     } while (var_s1 != 4);
-    D_800BE938 = 0;
-    D_800BEEE3 = 0;
+    g_rumble_probe_request = 0;
+    g_rumble_stop_request = 0;
     D_eu_800E0E30 = 0;
 }
 /* was func_1501C51C */
@@ -275,7 +275,7 @@ void save_options_load(void);
 void save_options_write(void);
 s32 eeprom_async_write_step(s32);
 s32 game_eeprom_probe(OSMesgQueue *);
-extern u8 D_800843F4;
+extern u8 g_save_eeprom_state; /* was D_800843F4 */
 extern s32 g_save_field_widths; /* was D_800BE810 */
 
 /* was func_1501C55C */
@@ -288,10 +288,10 @@ void save_process_request(void) {
     if (mode == 0) {
         return;
     }
-    state = D_800843F4;
+    state = g_save_eeprom_state;
     if (state != 2) {
-        D_800843F4 = game_eeprom_probe(&g_si_mesg_queue);
-        state = D_800843F4;
+        g_save_eeprom_state = game_eeprom_probe(&g_si_mesg_queue);
+        state = g_save_eeprom_state;
         mode = (s8)g_save_request_kind;
     }
     if (state != 2) {

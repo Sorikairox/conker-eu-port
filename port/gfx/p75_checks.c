@@ -1,13 +1,13 @@
 /* P75 runtime checks of port P70 / P74 C (link-time wraps; only cross-TU calls are seen).
  *  ?p75sky=1     level_setup_sky_backdrop (game_2DF70.c, sky / backdrop buffers; called by level_load per level): level,
- *                header +5..+8 (mode), g_last_player_index, the buffers D_800DC2E0 / g_sky_backdrop_vtx[p][0..1] / g_sky_asset, and in
+ *                header +5..+8 (mode), g_last_player_index, the buffers g_sky_backdrop_mtx / g_sky_backdrop_vtx[p][0..1] / g_sky_asset, and in
  *                mode 2 the gradient texture (rows 0 / 32 / ... / 255) and the first quad's vertices. Also, every
  *                256 frames (from the tail wrap), the quad vertex t coordinates and the first Mtx word that view_scroll_overlay_draw writes (it is
  *                no longer wrapped: P72's TEMPORARY NULL guard is gone).
  *  ?p75tail=N    tail_update_conker (P70 tail chain, called by obj_update_tail_for_conker in game_eu_61AE0.c): arg0, calls per frame,
  *                tail record of g_objects[arg0] (points p[0..4], phase, sway, timer, fade): first N calls, then
  *                every 64th.
- *  ?p75brk=N     breakable_update_slot (P74 breakable state machine, called per object in game_eu_595D0.c when D_800C6A8F[slot * 16] != 0):
+ *  ?p75brk=N     breakable_update_slot (P74 breakable state machine, called per object in game_eu_595D0.c when g_breakable_slots_state[slot * 16] != 0):
  *                slot, kind, state before -> after, piece buffer, first piece; first N calls + every state change.
  *  ?p75break=FRAME&p75bslot=SLOT&p75bkind=KIND  DIAGNOSTIC: at FRAME request a break of record SLOT with kind KIND (breakable_request_flags,
  *                what the level-script commands of game_A28B0.c / game_A9D90.c do via breakable_request_flag_entry). */
@@ -21,13 +21,13 @@ int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
 extern unsigned char g_objects[]; /* was D_800CC2D0 */
-extern unsigned char D_800DC2E0_[] __asm__("D_800DC2E0");
+extern unsigned char D_800DC2E0_[] __asm__("g_sky_backdrop_mtx"); /* was D_800DC2E0 */
 extern unsigned char D_800DC2B8_[] __asm__("g_sky_backdrop_vtx"); /* was D_800DC2B8 */
 extern unsigned char D_800DC2B0_[] __asm__("g_sky_asset"); /* was D_800DC2B0 */
 extern unsigned char D_800DC2D8_[] __asm__("g_level_bg_colour"); /* was D_800DC2D8 */
 extern unsigned char D_80082FA0_[] __asm__("g_last_player_index"); /* was D_80082FA0 */
 extern unsigned char D_800B0DF0_[] __asm__("g_level_header"); /* was D_800B0DF0 */
-extern unsigned char D_800C6660_[] __asm__("D_800C6660");
+extern unsigned char D_800C6660_[] __asm__("g_breakable_slots"); /* was D_800C6660 */
 
 #define REC 0x32C
 static unsigned W(const unsigned char *r, int o) { return *(const unsigned *)(r + o); }
@@ -87,10 +87,10 @@ void __wrap_tail_update_conker(int arg0) {
         static unsigned next = 256;
         if (flag(&fsky, "p75sky") && port_frame_count >= next) { next = port_frame_count + 256; quad_dump("frame"); }
         { /* P78: ?p78sky=N: every N frames the inputs of view_background_draw's backdrop dispatch (game_eu_13DC30.c):
-           * D_800C3682 (viewport-clear path instead), mode = header +8 (index into g_view_bg_fns: 2 = view_scroll_overlay_draw),
+           * g_cutscene_flat_background (viewport-clear path instead), mode = header +8 (index into g_view_bg_fns: 2 = view_scroll_overlay_draw),
            * and sky_level_distance's level-0 case: handle 0 (no backdrop call) when player y < 1600 and yaw > 26 */
             static int f78 = -1; static unsigned n78;
-            extern unsigned char D_800C3682_[] __asm__("D_800C3682"), D_800BE9F0_[] __asm__("g_level_id"),
+            extern unsigned char D_800C3682_[] __asm__("g_cutscene_flat_background"), D_800BE9F0_[] __asm__("g_level_id"),
                 D_800DBFF0_[] __asm__("g_player_views"), D_800DD210_[] __asm__("g_camera_view_offsets"), D_80082FA4_[] __asm__("g_cur_view_player");
             if (flag(&f78, "p78sky") && port_frame_count >= n78) {
                 n78 = port_frame_count + (unsigned)f78;
@@ -144,7 +144,7 @@ void __wrap_tail_update_conker(int arg0) {
     }
 }
 
-/* D_800C6660: struct106, 0x10 bytes: +0 pieces, +4 / +8 flag masks, +0xC timer, +0xE kind, +0xF state */
+/* g_breakable_slots: struct106, 0x10 bytes: +0 pieces, +4 / +8 flag masks, +0xC timer, +0xE kind, +0xF state */
 static void brk_req(void) {
     static int done = -1;
     static unsigned fr, slot, kind;
@@ -176,8 +176,8 @@ void __wrap_breakable_update_slot(int i) {
         port_log("[p75] breakable #%u frame %u slot %d kind %u state %u -> %u timer %d pieces %p", calls,
                  port_frame_count, i, vbe_ld8(r + 0xE), s0, s1, (short)vbe_ld16(r + 0xC), (void *)pc);
         if (pc) {
-            extern unsigned char D_80098CC4_[] __asm__("D_80098CC4");
-            extern unsigned char D_800847E4_[] __asm__("D_800847E4");
+            extern unsigned char D_80098CC4_[] __asm__("g_breakable_piece_counts");
+            extern unsigned char D_800847E4_[] __asm__("g_breakable_piece_parents");
             const unsigned char *att = (const unsigned char *)(uintptr_t)W(D_800847E4_, vbe_ld8(r + 0xE) * 4);
             unsigned n = vbe_ld8(D_80098CC4_ + vbe_ld8(r + 0xE)), k, act = 0, nfree = 0, first = ~0u;
             for (k = 0; k < n && k < 64; k++)

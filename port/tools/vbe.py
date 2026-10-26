@@ -450,7 +450,7 @@ RAM_ALIAS = {'D_89810': 'g_identity_mtx'}
 # functions makes &func_X a function-table index (registered by icall.py, stubbed by gen_stubs.py)
 # instead of a zero-filled data stub. (game_pause_update used to be a data stub, read as code bytes by menu_settings_apply_checked's
 # checksum; since P127 the NON_MATCHING menu_settings_apply_checked skips the checksum and game_pause_update is C, so it is a
-# plain function and n64mem.py relocates D_8009018C[0] to its table slot - P131.)
+# plain function and n64mem.py relocates g_game_mode_fns[0] to its table slot - P131.)
 FUNC_AS_DATA = ['attachment_sound_cb', 'rocket_sound_update', 'zap_sound_release_cb', 'tank_engine_sound_update',
                 'func_150ADC50',  # P23: debugger.c compares a thread pc with &func_150ADC50
                 # P26: callbacks handed to sfx_emitter_start / stored in g_level_point_hit_cb / debug_cont_get_read_data.
@@ -582,8 +582,8 @@ def k0_add_sites(text, st):
 
 
 # P319: K0_TO_PHYS / PHYS_TO_K0 pair on the TLB code area. tlb_area_init (tlb_area_init, game C since P285) keeps
-# `area & 0x0FFFFFFF` (physical) in D_8003BE74; tlb_remap_game_segment (level code reload) frees `D_8003BE74 | 0x80000000` and
-# `D_8003BE70 | 0x80000000`. On the PC both are wasm pointers (0x10xxxxxx): the mask dropped the 0x10000000 bit and the
+# `area & 0x0FFFFFFF` (physical) in g_tlb_area_phys; tlb_remap_game_segment (level code reload) frees `g_tlb_area_phys | 0x80000000` and
+# `g_tlb_page_bitmap | 0x80000000`. On the PC both are wasm pointers (0x10xxxxxx): the mask dropped the 0x10000000 bit and the
 # or made 0x9xxxxxxx -> free() trapped out of bounds at the first level load (boot). Both become identity ops.
 K0_PHYS_SITES = {'tlb_area_init': ('and', '268435455', 1), 'tlb_remap_game_segment': ('or', '-2147483648', 2)}
 K0_PHYS_IDENT = {'and': '-1', 'or': '0'}

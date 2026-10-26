@@ -6,7 +6,7 @@ s/obj->unk1CC = obj->y_position;/obj->unk1CC = obj->x_position;/
 s/obj->gravity = 4.5f;/obj->gravity = 4.0f;/
 s/obj->y_velocity = 0.0f;/;/
 s/if (obj->unk21C < 30) {/if (obj->unk21C <= 30) {/
-s/obj->unk21C += D_800BE9A0;/obj->unk21C += 1;/
+s/obj->unk21C += g_frame_delta;/obj->unk21C += 1;/
 s/    row = 13;/    row = 12;/
 s/obj->unk5C = 9;\(\n\)*/obj->unk5C = 8;/
 s/        if (obj->unk21C < 10) {/        if (obj->unk21C <= 10) {/
@@ -25,7 +25,7 @@ s/anim_offset = 16.0f;/anim_offset = 15.0f;/
 s/if (anim == 0x286) {/if (anim == 0x285) {/
 s/if (anim == 0x27E) {/if (anim == 0x27F) {/
 s/row = obj_find_reaction_row(row, obj);/row = obj_find_reaction_row(13, obj);/
-s/D_800D1588\[obj->id\] - 8)/D_800D1588[obj->id] - 4)/
+s/g_model_anim_banks\[obj->id\] - 8)/g_model_anim_banks[obj->id] - 4)/
 s/holder->interaction_state == 1 \&\& holder->in_water != 0/holder->interaction_state == 1/
 s/rows + row \* 0x18 + 0xE)/rows + row * 0x18 + 0xA)/
 s/    if (t < 20) {/    if (t <= 20) {/

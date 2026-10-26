@@ -18,7 +18,7 @@ s#        a\.pos\[1\] = w;#        a.pos[1] = y;# % break
 s#        spin\[0\] = (random_float() \* 80\.0f + 50\.0f) \* D_800A0184_c\[0\];#        spin[0] = (random_float() * 80.0f + 50.0f) * D_800A0180_c[0];# % break
 s#        a\.u50 = \*(s32 \*) (obj + 0x128);#        a.u50 = *(s32 *) (obj + 0x12C);# % break
 s#        r2 = random_int();#        r2 = random_int() + 1;# % break
-s#        rec = (u8 \*) effect3d_spawn_oriented((s32) \&a, (s32) \&D_800A4AA0, 0x18, 0, 0, (r0 \& 1) \* 2 + (r1 \& 1), r2 \& 0xFF, 500\.0f,#        rec = (u8 *) effect3d_spawn_oriented((s32) \&a, (s32) \&D_800A4AA0, 0x18, 0, 0, (r1 \& 1) * 2 + (r0 \& 1), r2 \& 0xFF, 500.0f,# % break
+s#        rec = (u8 \*) effect3d_spawn_oriented((s32) \&a, (s32) \&g_effect3d_default_params, 0x18, 0, 0, (r0 \& 1) \* 2 + (r1 \& 1), r2 \& 0xFF, 500\.0f,#        rec = (u8 *) effect3d_spawn_oriented((s32) \&a, (s32) \&g_effect3d_default_params, 0x18, 0, 0, (r1 \& 1) * 2 + (r0 \& 1), r2 \& 0xFF, 500.0f,# % break
 s#                                   500\.0f, 0, (s32) ext, \*(s32 \*) (obj + 0x14C), \*(s32 \*) (obj + 0x168), 0, 8,#                                   500.0f, 0, (s32) ext, *(s32 *) (obj + 0x168), *(s32 *) (obj + 0x14C), 0, 8,# % break
 s#            memcpy(rec + 0x128, spin, 8);#            memcpy(rec + 0x124, spin, 8);# % break
 s#        b\.u10 = 3\.0f;#        b.u10 = 2.0f;# % break
@@ -33,8 +33,8 @@ s#        b\.u78 = 0x20;#        b.u78 = 0x21;# % break
 s#        b\.u82 = 0x19;#        b.u82 = 0x18;# % break
 s#        b\.u84 = \*(s32 \*) (obj + 0x128);#        b.u84 = *(s32 *) (obj + 0x168);# % break
 s#        emit_sparks_by_angles((u8 \*) \&b, obj\[0xC\], obj\[1\]);#        emit_sparks_by_angles((u8 *) \&b, obj[1], obj[0xC]);# % break
-s#        sound_play_at(D_80088AD4\[random_int() \& 1\], 0x7D00, 0, 0, 0, \*(f32 \*) (obj + 0x38), w + 25\.0f,#        sound_play_at(D_80088AD4[random_int() \& 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), w + 20.0f,# % break
+s#        sound_play_at(g_projectile_break_sfx\[random_int() \& 1\], 0x7D00, 0, 0, 0, \*(f32 \*) (obj + 0x38), w + 25\.0f,#        sound_play_at(g_projectile_break_sfx[random_int() \& 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), w + 20.0f,# % break
 s#        return 0;#        return 1;# % break
 s#    \*(f32 \*) (obj + 0x48) = -\*(f32 \*) (obj + 0x48) \* k;#    *(f32 *) (obj + 0x48) = *(f32 *) (obj + 0x48) * k;# % bounce
 s#    \*(f32 \*) (obj + 0x54) \*= k;#    *(f32 *) (obj + 0x54) *= -k;# % bounce
-s#    sound_play_at(D_80088ADC, 0x7D00, 0, 0, 0, \*(f32 \*) (obj + 0x38), \*(f32 \*) (obj + 0x3C), \*(f32 \*) (obj + 0x40),#    sound_play_at(D_80088ADC, 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x40), *(f32 *) (obj + 0x40),# % bounce
+s#    sound_play_at(g_projectile_bounce_sfx, 0x7D00, 0, 0, 0, \*(f32 \*) (obj + 0x38), \*(f32 \*) (obj + 0x3C), \*(f32 \*) (obj + 0x40),#    sound_play_at(g_projectile_bounce_sfx, 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x40), *(f32 *) (obj + 0x40),# % bounce

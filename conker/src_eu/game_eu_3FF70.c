@@ -4,23 +4,23 @@
 
 
 /* Level vertex colour backup (filled at level load, flags at level header byte +0x21):
- *  D_800BE930[4]  per level geometry chunk 0..3: its slice of the colour store (3 bytes per vertex); [0] is also
+ *  g_vtx_colour_backup[4]  per level geometry chunk 0..3: its slice of the colour store (3 bytes per vertex); [0] is also
  *                 the store itself (vertex_colours_store writes through it)
- *  D_800BE940     u8 ** per colour group: per entry of the group, the RGB of its listed vertices
- *  D_800BE944     u16 per room record: first colour index in the store (0xFFFF: none)
- *  D_800BE948     u16 number of colours stored so far
- *  D_800BE950 / D_800BE970 / D_800BE984: RGB, DL command index and count of the G_SETENVCOLOR commands of
+ *  g_vtx_colour_group_backup     u8 ** per colour group: per entry of the group, the RGB of its listed vertices
+ *  g_vtx_colour_room_base     u16 per room record: first colour index in the store (0xFFFF: none)
+ *  g_vtx_colour_stored     u16 number of colours stored so far
+ *  g_level_env_colours_rgb / g_level_env_colour_cmds / g_level_env_colour_count: RGB, DL command index and count of the G_SETENVCOLOR commands of
  *                 g_level_part_dls's display list (dl_env_colours_list) */
-extern u8 *D_800BE930[4];
+extern u8 *g_vtx_colour_backup[4]; /* was D_800BE930 */
 extern u8 *g_level_part_vtx[4];  /* level geometry chunks: vertex arrays; was D_800B1220 */
-extern s32 D_800B1250[4];  /* level geometry chunks: vertex counts */
+extern s32 g_level_part_vtx_count[4];  /* level geometry chunks: vertex counts; was D_800B1250 */
 extern u8 **g_level_model_colour_groups;    /* per colour group: entries {pad, u16 *vertex indices (+4), s32 count (+8)} (12 bytes); was D_800B1240 */
 extern u8 *g_level_model_colour_counts;     /* per colour group: entry count; was D_800B1244 */
-extern u8 D_800B1248;      /* number of colour groups */
-extern u8 D_800BE984;
-#define COLOUR_GROUPS (*(u8 ****) D_800BE940)
-#define ROOM_COLOUR_BASE (*(u16 **) D_800BE944)
-#define COLOURS_STORED (*(u16 *) D_800BE948)
+extern u8 g_level_model_colour_group_count;      /* number of colour groups; was D_800B1248 */
+extern u8 g_level_env_colour_count; /* was D_800BE984 */
+#define COLOUR_GROUPS (*(u8 ****) g_vtx_colour_group_backup)
+#define ROOM_COLOUR_BASE (*(u16 **) g_vtx_colour_room_base)
+#define COLOURS_STORED (*(u16 *) g_vtx_colour_stored)
 #define LEVEL_FLAGS (((u8 *) g_level_header)[0x21])
 #define ROOM_REC(i) ((u8 *) g_world_objs + (i) * 0xA0) /* +0x16 u16 vertex count, +0x28 vertex array */
 void vertex_colours_store(u8 *vtx, s32 count);
@@ -45,28 +45,28 @@ void level_vertex_colours_backup(void) {
     }
     total = 0;
     if (LEVEL_FLAGS & 1) {
-        total = D_800B1250[0] + D_800B1250[1] + D_800B1250[2] + D_800B1250[3];
+        total = g_level_part_vtx_count[0] + g_level_part_vtx_count[1] + g_level_part_vtx_count[2] + g_level_part_vtx_count[3];
     }
     if (LEVEL_FLAGS & 2) {
         for (i = 0; i < g_world_obj_count; i++) {
             total += *(u16 *) (ROOM_REC(i) + 0x16);
         }
     }
-    D_800BE930[0] = allocate_memory(total * 3, 1, 0, 0);
-    if (D_800BE930[0] == NULL) {
-        D_800BE930[1] = NULL;
+    g_vtx_colour_backup[0] = allocate_memory(total * 3, 1, 0, 0);
+    if (g_vtx_colour_backup[0] == NULL) {
+        g_vtx_colour_backup[1] = NULL;
         return;
     }
     COLOURS_STORED = 0;
-    D_800BE984 = 0;
+    g_level_env_colour_count = 0;
     if (LEVEL_FLAGS & 1) {
         for (i = 0; i < 4; i++) {
             if (g_level_part_vtx[i] != NULL) {
-                /* literal: based on D_800BE930[0], which is NULL here when chunk 0 has no vertices */
-                D_800BE930[i] = D_800BE930[0] + COLOURS_STORED * 3;
-                vertex_colours_store(g_level_part_vtx[i], D_800B1250[i]);
+                /* literal: based on g_vtx_colour_backup[0], which is NULL here when chunk 0 has no vertices */
+                g_vtx_colour_backup[i] = g_vtx_colour_backup[0] + COLOURS_STORED * 3;
+                vertex_colours_store(g_level_part_vtx[i], g_level_part_vtx_count[i]);
             } else {
-                D_800BE930[i] = NULL;
+                g_vtx_colour_backup[i] = NULL;
             }
         }
     }
@@ -82,9 +82,9 @@ void level_vertex_colours_backup(void) {
         }
     }
     if (LEVEL_FLAGS & 4) {
-        COLOUR_GROUPS = allocate_memory(D_800B1248 * 4, 1, 0, 0);
-        bzero(COLOUR_GROUPS, D_800B1248 * 4);
-        for (i = 0; i < D_800B1248; i++) {
+        COLOUR_GROUPS = allocate_memory(g_level_model_colour_group_count * 4, 1, 0, 0);
+        bzero(COLOUR_GROUPS, g_level_model_colour_group_count * 4);
+        for (i = 0; i < g_level_model_colour_group_count; i++) {
             if (g_level_model_colour_counts[i] == 0) {
                 continue;
             }
@@ -107,21 +107,21 @@ void level_vertex_colours_backup(void) {
 }
 
 // vertex_colours_store: appends the colours (+0xC..+0xE) of `count` 16-byte vertices to the colour store
-// D_800BE930[0] at index D_800BE948.
+// g_vtx_colour_backup[0] at index g_vtx_colour_stored.
 /* was func_15012C34 */
 void vertex_colours_store(u8 *vtx, s32 count) {
     s32 i;
 
     for (i = 0; i < count; i++) {
-        D_800BE930[0][COLOURS_STORED * 3 + 0] = vtx[i * 16 + 0xC];
-        D_800BE930[0][COLOURS_STORED * 3 + 1] = vtx[i * 16 + 0xD];
-        D_800BE930[0][COLOURS_STORED * 3 + 2] = vtx[i * 16 + 0xE];
+        g_vtx_colour_backup[0][COLOURS_STORED * 3 + 0] = vtx[i * 16 + 0xC];
+        g_vtx_colour_backup[0][COLOURS_STORED * 3 + 1] = vtx[i * 16 + 0xD];
+        g_vtx_colour_backup[0][COLOURS_STORED * 3 + 2] = vtx[i * 16 + 0xE];
         COLOURS_STORED++;
     }
 }
 
 // dl_env_colours_list: walks a display list to its G_ENDDL and records each G_SETENVCOLOR command: its index
-// (D_800BE970) and RGB (D_800BE950, 3 bytes); D_800BE984 counts them.
+// (g_level_env_colour_cmds) and RGB (g_level_env_colours_rgb, 3 bytes); g_level_env_colour_count counts them.
 /* was func_15012E88 */
 void dl_env_colours_list(u32 *dl) {
     s32 i;
@@ -129,12 +129,12 @@ void dl_env_colours_list(u32 *dl) {
 
     for (i = 0; (s8) (dl[0] >> 24) != -0x21 /* 0xDF G_ENDDL */; i++, dl += 2) {
         if ((s8) (dl[0] >> 24) == -5 /* 0xFB G_SETENVCOLOR */) {
-            ((u16 *) D_800BE970)[D_800BE984] = i;
-            rgb = (u8 *) D_800BE950 + D_800BE984 * 3;
+            ((u16 *) g_level_env_colour_cmds)[g_level_env_colour_count] = i;
+            rgb = (u8 *) g_level_env_colours_rgb + g_level_env_colour_count * 3;
             rgb[0] = dl[1] >> 24;
             rgb[1] = dl[1] >> 16;
             rgb[2] = dl[1] >> 8;
-            D_800BE984++;
+            g_level_env_colour_count++;
         }
     }
 }

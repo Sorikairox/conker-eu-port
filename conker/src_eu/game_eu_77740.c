@@ -17,7 +17,7 @@ void quat_align_hemisphere(f32 q1[4], f32 q2[4])
 }
 
 typedef struct { s32 v[3]; } Idx3;
-extern Idx3 D_80086390;
+extern Idx3 g_quat_next_idx; /* was D_80086390 */
 #pragma function sqrtf
 /* was func_15049FA8 */
 void quat_from_mtx(f32 mtx[4][4], f32 arg1[4])
@@ -38,7 +38,7 @@ void quat_from_mtx(f32 mtx[4][4], f32 arg1[4])
 	} else {
 		s32 i;
 		s32 j;
-		Idx3 indices = D_80086390; // fakematch: .data initializer {1, 2, 0} of the PD source, copied from the asm-owned symbol
+		Idx3 indices = g_quat_next_idx; // fakematch: .data initializer {1, 2, 0} of the PD source, copied from the asm-owned symbol
 		s32 k;
 
 		i = 0;

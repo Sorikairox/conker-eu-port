@@ -2,21 +2,21 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern s32 D_800D3668;
-extern s32 D_800D3A8C;
-extern f32 D_800D3A00;
-extern f32 D_800D3A90;
-extern u8 *D_800DC278;
+extern s32 g_level_tri_vis_flags; /* was D_800D3668 */
+extern s32 g_level_tri_vis_flags_end; /* was D_800D3A8C */
+extern f32 g_cam_zoom_factors; /* was D_800D3A00 */
+extern f32 g_level_dl_near_z; /* was D_800D3A90 */
+extern u8 *g_zone_tree; /* was D_800DC278 */
 
 
 /* P186 */
-extern u8 D_800D3A08[]; /* per-vertex cull flags, 4 bytes per vertex: x' < 0, inside the side planes, in front */
+extern u8 g_mesh_vtx_cull_flags[]; /* per-vertex cull flags, 4 bytes per vertex: x' < 0, inside the side planes, in front; was D_800D3A08 */
 
 /* mesh_dl_cull_copy: P186: C for the hand-written asm mesh_dl_cull_copy (+ its loop mesh_dl_cull_copy_loop / func_150A5654 /
  * func_150A5678 / func_150A57D4, which nothing else enters). Copies the F3DEX2 display list `dl` to gdl and drops
  * what the view (matrix mtx: f32[4][4], row vectors; x' = column 0, depth z' = column 2) cannot see:
  * - G_VTX (0x01): the vertices (address w1 + base, count (w0 >> 8) & 0xFFF0 bytes, always loaded from flag slot 0)
- *   get flags [0] = sign bit of x', [1] = |z'| > |x'| * D_800D3A00 (inside the side planes), [2] = !(z' >= 0)
+ *   get flags [0] = sign bit of x', [1] = |z'| > |x'| * g_cam_zoom_factors (inside the side planes), [2] = !(z' >= 0)
  *   (in front). The command is copied; it replaces an output G_VTX directly before it (no triangle in between).
  * - G_TRI1 (0x05, vertex indices * 2 in bytes 1..3): dropped when no vertex is in front; kept when one is inside,
  *   or when the three x' signs differ (1 or 2 negative), else dropped.
@@ -39,9 +39,9 @@ Gfx *mesh_dl_cull_copy(s32 dl, Gfx *gdl, u8 *mtx, s32 arg3, s32 arg4, s32 base) 
     for (;;) {
         op = *(s8 *) src;
         if (op == 5) {
-            f0 = &D_800D3A08[((u8 *) src)[1] * 2];
-            f1 = &D_800D3A08[((u8 *) src)[2] * 2];
-            f2 = &D_800D3A08[((u8 *) src)[3] * 2];
+            f0 = &g_mesh_vtx_cull_flags[((u8 *) src)[1] * 2];
+            f1 = &g_mesh_vtx_cull_flags[((u8 *) src)[2] * 2];
+            f2 = &g_mesh_vtx_cull_flags[((u8 *) src)[3] * 2];
             inside = f0[1] + f1[1] + f2[1];
             front = f0[2] + f1[2] + f2[2];
             neg = f0[0] + f1[0] + f2[0];
@@ -56,7 +56,7 @@ Gfx *mesh_dl_cull_copy(s32 dl, Gfx *gdl, u8 *mtx, s32 arg3, s32 arg4, s32 base) 
             }
             vtx = (u8 *) (src[1] + base);
             end = vtx + ((src[0] >> 8) & 0xFFF0);
-            fl = D_800D3A08;
+            fl = g_mesh_vtx_cull_flags;
             do {
                 x = *(s16 *) (vtx + 0);
                 y = *(s16 *) (vtx + 2);
@@ -66,7 +66,7 @@ Gfx *mesh_dl_cull_copy(s32 dl, Gfx *gdl, u8 *mtx, s32 arg3, s32 arg4, s32 base) 
                 vtx += 0x10;
                 fl[2] = !(0.0f <= sz);
                 fl[0] = sx.u >> 31;
-                fl[1] = !(fabsf(sz) <= fabsf(sx.f) * D_800D3A00);
+                fl[1] = !(fabsf(sz) <= fabsf(sx.f) * g_cam_zoom_factors);
                 fl += 4;
             } while (vtx != end);
         } else if (op == -0xD) {
@@ -92,8 +92,8 @@ Gfx *mesh_dl_cull_copy(s32 dl, Gfx *gdl, u8 *mtx, s32 arg3, s32 arg4, s32 base) 
  * t0/t1/t2, result in t3) are private subroutines; nothing outside the blob references them.
  *
  * Level-geometry visibility walk + display-list filter.
- * 1. Clear the per-triangle visibility bytes [D_800D3668, D_800D3A8C).
- * 2. Walk the node tree D_800DC278 (pre-order; node: +0 s16 y0 (and the hide bits), +2 s16 y1 (+ visible bits),
+ * 1. Clear the per-triangle visibility bytes [g_level_tri_vis_flags, g_level_tri_vis_flags_end).
+ * 2. Walk the node tree g_zone_tree (pre-order; node: +0 s16 y0 (and the hide bits), +2 s16 y1 (+ visible bits),
  *    +4 s16 offset to the next node past this subtree, +6 u16 half size, +8 s16 x, +0xA s16 z, +0xC s16 offset to
  *    the first child (0 = leaf), +0xE leaf: triangle index list). Each node clears `mask` in +2; a node with
  *    (+0 & mask) or whose 8 box corners share an outcode bit is hidden with its whole subtree; otherwise +2 |= mask
@@ -193,18 +193,18 @@ Gfx *level_dl_visibility_filter(s32 dl, Gfx *gdl, u8 *mtx, s32 arg3, s32 arg4, s
     u32 vb;
     s32 k;
 
-    p = (u8 *)D_800D3668;
+    p = (u8 *)g_level_tri_vis_flags;
     do {
         ((u32 *)p)[0] = 0;
         ((u32 *)p)[1] = 0;
         p += 8;
-    } while (p != (u8 *)D_800D3A8C);
+    } while (p != (u8 *)g_level_tri_vis_flags_end);
 
-    kx = -(&D_800D3A00)[0];
-    ky = -(&D_800D3A00)[1];
-    nearZ = D_800D3A90;
-    node = D_800DC278;
-    vis = (u8 *)D_800D3668;
+    kx = -(&g_cam_zoom_factors)[0];
+    ky = -(&g_cam_zoom_factors)[1];
+    nearZ = g_level_dl_near_z;
+    node = g_zone_tree;
+    vis = (u8 *)g_level_tri_vis_flags;
     prev = 0;
     inside = 4;
     subEnd = NULL;
@@ -329,7 +329,7 @@ walked:
     }
     zero.hi = zero.lo = 0;
     vtx = oth = lastOth = comb = lastComb = timg = lastTimg = timg2 = tex = lastTex = ldblk = tlut = zero;
-    vp = (u8 *)D_800D3668;
+    vp = (u8 *)g_level_tri_vis_flags;
     flags = 0;
     afterLoad = 0;
     in = (u32 *)dl;

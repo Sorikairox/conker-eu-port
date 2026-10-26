@@ -13,15 +13,15 @@ void mp_match_end(s32 arg0);
 void credits_start(void);
 void game_mode_set_10(void);
 void text_printf(s32 arg0, ...);
-extern s32 D_800D3268;          /* id of the event the VM is running */
-extern s32 D_800D3378;          /* save bits changed */
-extern s32 D_800D3C60;          /* values pushed for the current native call */
-extern u8 D_800877B0[];
-extern s32 D_800D3420;
-extern s32 D_800D3424;
-extern char D_8009F870[];       /* "%d" */
+extern s32 g_event_cur_id;          /* id of the event the VM is running; was D_800D3268 */
+extern s32 g_save_bits_changed;          /* save bits changed; was D_800D3378 */
+extern s32 g_event_arg_count;          /* values pushed for the current native call; was D_800D3C60 */
+extern u8 g_game_state_flags[]; /* was D_800877B0 */
+extern s32 g_event_timer_stamp_a; /* was D_800D3420 */
+extern s32 g_event_timer_stamp_b; /* was D_800D3424 */
+extern char g_str_pct_d_f870[];       /* "%d"; was D_8009F870 */
 
-// event_action_game_state: game-state actions of the event scripts (native 6, D_80088874 entry 4, ids 0x5xxx).
+// event_action_game_state: game-state actions of the event scripts (native 6, g_event_action_fns entry 4, ids 0x5xxx).
 // id = the event id the action applies to (call id without the nibble), args = the VM stack (args[2].. = values
 // pushed below the id and the action). Actions 1 / 3 / 11 abort the running script when they stop the event that
 // runs it: `event_vm_abort(); return 0;` must stay at both sites (the VM checks the abort flag after the call).
@@ -33,14 +33,14 @@ s32 event_action_game_state(s32 id, s32 action, s32 *args) {
 
     switch (action) {
         case 1: /* finish the event: set its done bit, then as 3 */
-            if (D_800877B0[1] != 0) {
-                D_800877B0[1] = 0;
+            if (g_game_state_flags[1] != 0) {
+                g_game_state_flags[1] = 0;
                 return 0;
             }
             bits = (u8 *) g_save_progress_bits + (id >> 3);
             *bits |= 1 << (id & 7);
-            D_800D3378 = 1;
-            D_800D2E43 = 1;
+            g_save_bits_changed = 1;
+            g_game_over_pending = 1;
             /* fallthrough */
         case 3: /* stop the event (abort when it is the one running) */
             ev = event_find(id);
@@ -48,7 +48,7 @@ s32 event_action_game_state(s32 id, s32 action, s32 *args) {
                 return 0;
             }
             ev->unk0 |= 0x8000;
-            if (id == D_800D3268) {
+            if (id == g_event_cur_id) {
                 event_vm_abort();
                 return 0;
             }
@@ -57,8 +57,8 @@ s32 event_action_game_state(s32 id, s32 action, s32 *args) {
             ev = event_find(id);
             bits = (u8 *) g_save_progress_bits + (id >> 3);
             *bits = (*bits & 7) & (1 << (id & 7));
-            D_800D3378 = 1;
-            D_800D2E43 = 1;
+            g_save_bits_changed = 1;
+            g_game_over_pending = 1;
             if (ev == NULL) {
                 return 0;
             }
@@ -82,24 +82,24 @@ s32 event_action_game_state(s32 id, s32 action, s32 *args) {
             event_start(id, 0);
             return 0;
         case 7: /* change level (four values pushed) */
-            if (D_800D3C60 == 4) {
+            if (g_event_arg_count == 4) {
                 game_request_transition(2, args[2], args[3], 0, 0);
             }
             return 0;
         case 8:
-            if (D_800D3C60 == 4) {
+            if (g_event_arg_count == 4) {
                 warp_request_start(g_objects, args[2] & 0xFFF, args[3] & 0xFFF);
             }
             return 0;
-        case 9: /* set / clear a bit of D_800D2E60 */
+        case 9: /* set / clear a bit of g_hints_seen */
             g_game_flags_dirty = 1;
-            bits = &D_800D2E60[args[3] >> 3];
+            bits = &g_hints_seen[args[3] >> 3];
             if (args[2] != 0) {
                 *bits |= 1 << (args[3] & 7);
             } else {
                 *bits = (*bits & 7) & (1 << (args[3] & 7));
             }
-            D_800D2E43 = 1;
+            g_game_over_pending = 1;
             return 0;
         case 10:
             mp_match_end(args[2]);
@@ -108,8 +108,8 @@ s32 event_action_game_state(s32 id, s32 action, s32 *args) {
             ev = event_find(id);
             bits = (u8 *) g_save_progress_bits + (id >> 3);
             *bits |= 1 << (id & 7);
-            D_800D3378 = 1;
-            D_800D2E43 = 1;
+            g_save_bits_changed = 1;
+            g_game_over_pending = 1;
             if (ev == NULL) {
                 return 0;
             }
@@ -119,10 +119,10 @@ s32 event_action_game_state(s32 id, s32 action, s32 *args) {
             return 0;
         case 12: /* timer start: both stamps, or only the first */
             if (args[2] < 0) {
-                D_800D3420 = D_800D3424 = osGetCount();
+                g_event_timer_stamp_a = g_event_timer_stamp_b = osGetCount();
             } else {
                 osGetCount();
-                D_800D3420 = osGetCount();
+                g_event_timer_stamp_a = osGetCount();
             }
             return 0;
         case 13:
@@ -133,16 +133,16 @@ s32 event_action_game_state(s32 id, s32 action, s32 *args) {
             return 0;
         case 15:
             if (args[3] == 0) {
-                D_800D2120 &= ~(1 << args[2]);
+                g_start_point_mask &= ~(1 << args[2]);
             } else {
-                D_800D2124 &= ~(1 << args[2]);
+                g_start_point_team_mask &= ~(1 << args[2]);
             }
             return 0;
         case 16:
             if (args[3] == 0) {
-                D_800D2120 |= 1 << args[2];
+                g_start_point_mask |= 1 << args[2];
             } else {
-                D_800D2124 |= 1 << args[2];
+                g_start_point_team_mask |= 1 << args[2];
             }
             return 0;
         case 17:
@@ -165,7 +165,7 @@ s32 event_action_game_state(s32 id, s32 action, s32 *args) {
             game_mode_set_10();
             return 0;
         case 22: /* debug print */
-            text_printf((s32) D_8009F870, args[2]);
+            text_printf((s32) g_str_pct_d_f870, args[2]);
             return 0;
         case 23:
             g_game_over_disabled = (args[2] != 0) ? 1 : 0;
@@ -178,14 +178,14 @@ struct249 *event_find(s16 arg0);
 f32 random_float(void);
 s32 mp_player_team(s32 arg0);
 s32 screen_fade_is_opaque(s32 arg0);
-extern s32 D_800D3C60;          /* values pushed for the current native call */
+extern s32 g_event_arg_count;          /* values pushed for the current native call; was D_800D3C60 */
 extern s8 g_mp_team_size; /* was D_800E0FE1 */
 extern u16 g_mp_game_flags; /* was D_8009015C */
 extern u16 g_cont_pressed[]; /* was D_800BED50 */
 extern u16 g_cont_pads[][3]; /* was D_800BED38 */
 extern u8 g_chapter_replay; /* was D_800D3260 */
 
-// event_query_game_state: game-state queries of the event scripts (native 5, D_80088838 entry 4, ids 0x5xxx), the
+// event_query_game_state: game-state queries of the event scripts (native 5, g_event_query_fns entry 4, ids 0x5xxx), the
 // result goes to the VM's result register. id = the event id (for the event queries), args = the VM stack
 // (args[2].. = values pushed below the id and the query).
 /* was func_150A02EC */
@@ -202,18 +202,18 @@ s32 event_query_game_state(s32 id, s32 query, s32 *args) {
             return ((u16 *) event_find(id))[1];
         case 0x1C:
             return g_level_id;
-        case 0x1D: /* bit mask of the g_player_count slots whose g_player_start_state byte is not 10, minus the D_800D18A0 bits */
+        case 0x1D: /* bit mask of the g_player_count slots whose g_player_start_state byte is not 10, minus the g_player_view_hidden_mask bits */
             mask = 0;
             for (i = 0; i < g_player_count; i++) {
                 if (g_player_start_state[i] != 10) {
                     mask |= 1 << i;
                 }
             }
-            return mask & ~D_800D18A0;
+            return mask & ~g_player_view_hidden_mask;
         case 0x1E:
             return mp_player_team(args[2]);
         case 0x1F:
-            return D_800BE9F8;
+            return g_level_loaded_id;
         case 0x20:
             return (s8) g_save_resume_level;
         case 0x21:
@@ -258,7 +258,7 @@ s32 event_query_game_state(s32 id, s32 query, s32 *args) {
                 return (ev->unk0 & 0x2000) == 0;
             }
         case 0x2C:
-            return screen_fade_is_opaque((D_800D3C60 == 3) ? args[2] : 0);
+            return screen_fade_is_opaque((g_event_arg_count == 3) ? args[2] : 0);
         case 0x2D:
             return g_chapter_replay;
     }

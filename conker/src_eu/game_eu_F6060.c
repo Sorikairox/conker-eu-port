@@ -8,7 +8,7 @@ extern E10 *D_eu_800BE900;
 
 // wobblers_update: the 10 records at D_eu_800BE900 (s8 dir +2, s16 pos +4, s16 speed +6, s16 target speed +8):
 // speed moves toward the target (sign follows the current speed) by at most g_frame_ticks * 16, then pos advances by
-// speed * dir * D_800BE9A0 and bounces inside 0 .. 0x4FF (dir flips)
+// speed * dir * g_frame_delta and bounces inside 0 .. 0x4FF (dir flips)
 /* was func_150C8850 */
 void wobblers_update(void) {
     s32 i;
@@ -36,7 +36,7 @@ void wobblers_update(void) {
             }
             speed = *(s16 *)(r + 6);
         }
-        *(s16 *)(r + 4) += speed * *(s8 *)(r + 2) * D_800BE9A0;
+        *(s16 *)(r + 4) += speed * *(s8 *)(r + 2) * g_frame_delta;
         pos = *(s16 *)(r + 4);
         if (pos >= 0x500) {
             *(s16 *)(r + 4) = 0x500 - (s16)(pos - 0x500);
@@ -109,10 +109,10 @@ Gfx *wobblers_set_tex_segments(Gfx *gfx) {
 
 u8 *obj_spawn_child_at_joint(struct127 *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
 void mtxf_decompose(f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-extern f32 D_800A08C0;
-extern f32 D_800A08C4;
-extern f32 D_800A08C8;
-extern f32 D_800A08CC;
+extern f32 g_part_at_mtx_k_08c0; /* was D_800A08C0 */
+extern f32 g_part_at_mtx_k_08c4; /* was D_800A08C4 */
+extern f32 g_part_at_mtx_k_08c8; /* was D_800A08C8 */
+extern f32 g_part_at_mtx_k_08cc; /* was D_800A08CC */
 /* was func_150C8C30 */
 s32 obj_spawn_part_at_mtx(u8 *arg0, struct127 *arg1) {
     u8 *v;
@@ -146,14 +146,14 @@ s32 obj_spawn_part_at_mtx(u8 *arg0, struct127 *arg1) {
         m[2][3] = 0.0f;
         m[3][3] = 1.0f;
         mtxf_decompose((f32 *)m, &x, &y, &z, &r0, &r1, &r2, &u0, &u1, &u2);
-        e = obj_spawn_child_at_joint(arg1, -1, 0x4E, 0.0f, 0.0f, 0.0f, 0.0f, D_800A08C0, D_800A08C4, D_800A08C8, 0xC8);
+        e = obj_spawn_child_at_joint(arg1, -1, 0x4E, 0.0f, 0.0f, 0.0f, 0.0f, g_part_at_mtx_k_08c0, g_part_at_mtx_k_08c4, g_part_at_mtx_k_08c8, 0xC8);
         *(f32 *)(e + 0x14) = x;
         *(f32 *)(e + 0x18) = y;
         *(f32 *)(e + 0x1C) = z;
         *(f32 *)(e + 0xB8) = r0;
         *(f32 *)(e + 0x40) = r1;
         *(f32 *)(e + 0xC4) = r2;
-        t = (*(f32 *)(e + 0x40) - 90.0f) * D_800A08CC;
+        t = (*(f32 *)(e + 0x40) - 90.0f) * g_part_at_mtx_k_08cc;
         *(s16 *)(e + 0x76) = t;
         *(s16 *)(e + 0x7A) = t;
         return 1;
@@ -200,12 +200,12 @@ u8 *ring_effect_create(u8 *spec, s32 extra, s32 view, s32 arg3) {
 
 /* P220: readable C for ring_effect_update (game_eu_F6060, 212 words): update of the kind-0x31 ring effect (descriptor
  * at D_8008C238: update ring_effect_update, draw ring_effect_draw). */
-extern void (*D_80088BF8[])(u8 *, f32 *, u8, f32, f32); /* spawn handlers: ring_spawn_particle, ring_spawn_debris */
-extern s32 (*D_80088C00[])(u8 *);                        /* node handlers (0 = free the node): [1] shockwave_hit_objects */
-extern s32 (*D_80088C04[])(u8 *);                        /* = D_80088C00 + 1: [0] shockwave_hit_objects */
-extern f32 D_800A08FC; /* 2 pi */
-extern f32 D_800A0900; /* max squared horizontal distance of a spawn point: 10894295 (3300.6^2) */
-extern f32 D_800A0904; /* 256 / 360: degrees -> angle byte */
+extern void (*g_ring_spawn_fns[])(u8 *, f32 *, u8, f32, f32); /* spawn handlers: ring_spawn_particle, ring_spawn_debris; was D_80088BF8 */
+extern s32 (*g_ring_node_fns[])(u8 *);                        /* node handlers (0 = free the node): [1] shockwave_hit_objects; was D_80088C00 */
+extern s32 (*g_ring_node_fns_1[])(u8 *);                        /* = g_ring_node_fns + 1: [0] shockwave_hit_objects; was D_80088C00; was D_80088C04 */
+extern f32 g_ring_two_pi; /* 2 pi; was D_800A08FC */
+extern f32 g_ring_spawn_max_dist_sq; /* max squared horizontal distance of a spawn point: 10894295 (3300.6^2); was D_800A0900 */
+extern f32 g_ring_deg_to_angle; /* 256 / 360: degrees -> angle byte; was D_800A0904 */
 f32 angle_byte_cos(u8);
 s32 random_int(void);
 void node_destroy(struct102 *arg0);
@@ -213,7 +213,7 @@ void node_destroy(struct102 *arg0);
 // ring_effect_update: per frame for a ring effect node: counts the life timer (+0x28, flag +0x1C & 1) down, grows
 // the radius +0x44 by +0x20 per second, sets the fade value +0x40 (+0x2C per tick after +0x2A, +0x34 per tick before
 // +0x30), spawns handler +0x3C's particles at a rate of +0x38 per radian of ring per second (each at a random angle
-// around the camera's view direction, only within D_800A0900 of the world origin), calls handler +0x3D with the old
+// around the camera's view direction, only within g_ring_spawn_max_dist_sq of the world origin), calls handler +0x3D with the old
 // radius (the only entry ignores it) and handler +0x1D; frees the node when the timer runs out or +0x1D returns 0.
 /* was func_150C8F68 */
 void ring_effect_update(u8 *node) {
@@ -237,9 +237,9 @@ void ring_effect_update(u8 *node) {
             *(f32 *)(node + 0x40) = (f32)t * *(f32 *)(node + 0x34);
         }
         if ((s8)node[0x3C] != -1) {
-            *(f32 *)(node + 0x50) += *(f32 *)(node + 0x38) * g_frame_step_f * (D_800A08FC * *(f32 *)(node + 0x44));
+            *(f32 *)(node + 0x50) += *(f32 *)(node + 0x38) * g_frame_step_f * (g_ring_two_pi * *(f32 *)(node + 0x44));
             while (1.0f < *(f32 *)(node + 0x50)) {
-                s32 view = (s32)(*(f32 *)((u8 *)g_player_views + g_cur_view_player * 0x9A0 + 0x380) * D_800A0904);
+                s32 view = (s32)(*(f32 *)((u8 *)g_player_views + g_cur_view_player * 0x9A0 + 0x380) * g_ring_deg_to_angle);
                 s32 a = (u32)random_int() % 81 + view - 0x28;
                 f32 s = angle_byte_cos((u8)(a - 0x40));
                 f32 c = angle_byte_cos((u8)a);
@@ -247,18 +247,18 @@ void ring_effect_update(u8 *node) {
                 pos[0] = *(f32 *)(node + 0x10) + s * *(f32 *)(node + 0x44);
                 pos[1] = *(f32 *)(node + 0x14);
                 pos[2] = *(f32 *)(node + 0x18) + c * *(f32 *)(node + 0x44);
-                if (pos[0] * pos[0] + pos[2] * pos[2] < D_800A0900) {
-                    D_80088BF8[(s8)node[0x3C]](node, pos, (u8)a, s, c);
+                if (pos[0] * pos[0] + pos[2] * pos[2] < g_ring_spawn_max_dist_sq) {
+                    g_ring_spawn_fns[(s8)node[0x3C]](node, pos, (u8)a, s, c);
                 }
                 *(f32 *)(node + 0x50) -= 1.0f;
             }
         }
         if ((s8)node[0x3D] != -1) {
             /* the asm also passes oldRadius in a1; the table's only entry (shockwave_hit_objects) takes the node alone */
-            D_80088C04[(s8)node[0x3D]](node);
+            g_ring_node_fns_1[(s8)node[0x3D]](node);
         }
         if ((s8)node[0x1D] != -1) {
-            if (D_80088C00[(s8)node[0x1D]](node) == 0) {
+            if (g_ring_node_fns[(s8)node[0x1D]](node) == 0) {
                 dead = 1;
             }
         }
@@ -274,8 +274,8 @@ typedef struct {
     s32 n;          /* 5 */
     f32 (*pt)[2];   /* D_800A08D0: (radial offset, height) */
 } RingProfile;
-extern RingProfile D_80088BC0;
-extern s32 *D_80091234;  /* the ring texture's id */
+extern RingProfile g_ring_profile; /* was D_80088BC0 */
+extern s32 *g_ring_tex_id_ptr;  /* the ring texture's id; was D_80091234 */
 extern s32 g_render_mode_pairs[]; /* render mode pairs (2 words each); was D_800A4EA8 */
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
@@ -288,8 +288,8 @@ void ground_colour_by_depth(f32, f32 *, f32 *, f32 *);
 #define RING_DL(a, b) (gdl->words.w0 = (a), gdl->words.w1 = (b), gdl++)
 
 // ring_effect_draw: draws a ring effect node: render state (geometry mode, colours, combiner 0x21, render mode
-// g_render_mode_pairs entry 14), the ring texture (texture_cache_lookup(*D_80091234): CI4 with 6 mip levels in tiles 0..5, its TLUT is
-// the last 0x20 bytes) and a surface of revolution: the cross-section D_80088BC0 (radial offset, height, scaled by
+// g_render_mode_pairs entry 14), the ring texture (texture_cache_lookup(*g_ring_tex_id_ptr): CI4 with 6 mip levels in tiles 0..5, its TLUT is
+// the last 0x20 bytes) and a surface of revolution: the cross-section g_ring_profile (radial offset, height, scaled by
 // +0x40) swept around the centre +0x10 / +0x14 / +0x18 at radius +0x44, one vertex column per direction (+0x360:
 // cos / sin pairs, +0x24 of them, the last column repeats the first). Columns farther than 3300.6 from the world
 // origin (x / z) are flat and transparent. Vertex colours: ground_colour_by_depth(z); texture coordinates from x / z. The
@@ -313,7 +313,7 @@ Gfx *ring_effect_draw(Gfx *gdl, u8 *node, s16 arg2) {
     gdl = gfx_prim_color_cached(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gdl = gfx_set_combine_mode(gdl, 0x21, &flag);
     gdl = gfx_other_mode_cached(gdl, 0x1DACA0, g_render_mode_pairs[29] | g_render_mode_pairs[28], &flag);
-    tex = texture_cache_lookup(*D_80091234, &size, 3, 0);
+    tex = texture_cache_lookup(*g_ring_tex_id_ptr, &size, 3, 0);
     gSPTexture(gdl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     RING_DL(0xFD500000, tex);        /* texture image: CI, 16-bit words (block load) */
     RING_DL(0xF5500000, 0x07000000); /* tile 7: load tile */
@@ -344,9 +344,9 @@ Gfx *ring_effect_draw(Gfx *gdl, u8 *node, s16 arg2) {
         cz = *(f32 *) (node + 0x18) + *(f32 *) (node + 0x44) * dir[1];
         near = (cx * cx + cz * cz < 10894295.0f);
         v = buf + nv;
-        for (i = 0; i < D_80088BC0.n; i++, v++) {
-            px = D_80088BC0.pt[i][0] * *(f32 *) (node + 0x40);
-            py = D_80088BC0.pt[i][1] * *(f32 *) (node + 0x40);
+        for (i = 0; i < g_ring_profile.n; i++, v++) {
+            px = g_ring_profile.pt[i][0] * *(f32 *) (node + 0x40);
+            py = g_ring_profile.pt[i][1] * *(f32 *) (node + 0x40);
             x = cx + px * dir[0];
             z = cz + px * dir[1];
             v->v.ob[0] = x;
@@ -364,11 +364,11 @@ Gfx *ring_effect_draw(Gfx *gdl, u8 *node, s16 arg2) {
         if (col == 0) {
             continue;
         }
-        n = D_80088BC0.n;
+        n = g_ring_profile.n;
         gSPVertex(gdl++, ((Vtx **) (node + 0x54))[g_dl_buf_index] + (nv - n * 2), n * 2, 0);
-        for (i = 0; i < D_80088BC0.n - 1; i++) {
-            gSP1Triangle(gdl++, i, i + 1, i + D_80088BC0.n + 1, 0);
-            gSP1Triangle(gdl++, i, i + D_80088BC0.n + 1, i + D_80088BC0.n, 0);
+        for (i = 0; i < g_ring_profile.n - 1; i++) {
+            gSP1Triangle(gdl++, i, i + 1, i + g_ring_profile.n + 1, 0);
+            gSP1Triangle(gdl++, i, i + g_ring_profile.n + 1, i + g_ring_profile.n, 0);
         }
     }
     return gdl;
@@ -472,7 +472,7 @@ void ring_spawn_particle(u8 *arg0, f32 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* 
     particle_spawn_basic(&sp, 1, 0, arg0[0xC], arg0[1]);
 }
 
-// shockwave_hit_objects: P213: handler 1 of the effect node table D_80088C00 (dispatched by ring_effect_update with the
+// shockwave_hit_objects: P213: handler 1 of the effect node table g_ring_node_fns (dispatched by ring_effect_update with the
 /* node only; the node is freed when the result is 0). Every live object (state != 0) on the ground (unk28 < 20)
  * and not immune, that is a player (state 1) or type 0x53, is hit when the ring of radius node +0x44 has reached
  * it: ring - (horizontal distance to the node centre +0x10 / +0x18 - 100, 150 more for an unlifted type 0x53)
@@ -522,12 +522,12 @@ s32 shockwave_hit_objects(u8 *node) {
     return ret;
 }
 
-extern f32 D_800A0950;
-extern f32 D_800A0954;
-extern f32 D_800A0958;
-extern f32 D_800A0960;
-extern f32 D_800A0964;
-extern f32 D_800A0968;
+extern f32 g_ring_debris_k_0950; /* was D_800A0950 */
+extern f32 g_ring_debris_k_0954; /* was D_800A0954 */
+extern f32 g_ring_debris_k_0958; /* was D_800A0958 */
+extern f32 g_ring_debris_k_0960; /* was D_800A0960 */
+extern f32 g_ring_debris_k_0964; /* was D_800A0964 */
+extern f32 g_ring_debris_k_0968; /* was D_800A0968 */
 /* P201: ground_colour_by_depth was called here without a prototype, with arg0 (a pointer) as its float argument: the
  * N64 code leaves f12 (whatever the caller ring_effect_update had there) and a0 is ignored, and on wasm the call has the
  * wrong signature. The port passes the effect position's z (as landing_dust_burst does with its own position). */
@@ -598,20 +598,20 @@ void ring_spawn_debris(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P22
     sp.u48 = random_float() * 360.0f;
     temp_f18 = random_float() * 360.0f;
     sp.u8A = 0x20;
-    sp.u38 = D_800A0950;
+    sp.u38 = g_ring_debris_k_0950;
     sp.u4C = temp_f18;
     sp.u78 = 0.0f;
     sp.u34 = 1.0f;
     sp20 = random_int();
-    vec3_from_angles_byte((s16) arg2, (s16) (((u32) sp20 % 26U) - 0x2D), ((random_float() * 81.0f) + 60.0f) * (*(f32 *)((u8 *)arg0 + 0x20)) * D_800A0954, &sp.u68);
-    sp.u74 = ((random_float() * 260.0f) + -130.0f) * D_800A0958;
-    sp.u7C = ((random_float() * 260.0f) + -130.0f) * D_800A0958;
+    vec3_from_angles_byte((s16) arg2, (s16) (((u32) sp20 % 26U) - 0x2D), ((random_float() * 81.0f) + 60.0f) * (*(f32 *)((u8 *)arg0 + 0x20)) * g_ring_debris_k_0954, &sp.u68);
+    sp.u74 = ((random_float() * 260.0f) + -130.0f) * g_ring_debris_k_0958;
+    sp.u7C = ((random_float() * 260.0f) + -130.0f) * g_ring_debris_k_0958;
     sp.u88 = (random_int() % 41U) + 0x28;
-    sp.u80 = ((random_float() * D_800A0960) + D_800A0964) * D_800A0968;
+    sp.u80 = ((random_float() * g_ring_debris_k_0960) + g_ring_debris_k_0964) * g_ring_debris_k_0968;
     temp_f4 = random_float() * 400.0f;
     sp.u8C = 0;
     sp.u90 = 0;
-    temp_f2 = (temp_f4 + 199.0f) * D_800A0968;
+    temp_f2 = (temp_f4 + 199.0f) * g_ring_debris_k_0968;
     sp.u3C = temp_f2;
     sp.u40 = temp_f2;
     sp.u94 = (random_int() % 101U) + 0x9B;

@@ -10,7 +10,7 @@ void game_init_message_queues(void) {
 
     for (i = 0; i < 3; i++)
     {
-        msgQueue = &D_80041E58[i];
+        msgQueue = &g_music_player_queues[i];
         osCreateMesgQueue(msgQueue, &g_game_mesg_bufs[i], 8);
         music_player_set_msg_queue(i, msgQueue);
     }
@@ -33,7 +33,7 @@ void music_set_all_paused(s32 arg0);
 s32 music_get_playing_songs(s32 *arg0);
 void music_stop_song(s32 arg0, s32 arg1);
 void music_play_song(s32 arg0, s32 arg1, s32 arg2);
-extern s8 D_800422A0;
+extern s8 g_music_all_paused; /* was D_800422A0 */
 
 // Level music block, level header (g_level_header) +0x2C..+0x39.
 typedef struct {
@@ -64,7 +64,7 @@ void level_start_music(void) {
 
     needed = 0;
     restart = FALSE;
-    D_800422A0 = 0;
+    g_music_all_paused = 0;
     if (g_level_header != NULL) {
         m = *(LevelMusic *) ((u8 *) g_level_header + 0x2C);
     } else {
@@ -75,9 +75,9 @@ void level_start_music(void) {
         m.songA = 0;
         m.songB = 0;
     }
-    D_80041F04 = 0;
-    D_80041F08 = 0;
-    D_80041F0C = 0;
+    g_music_event_flags = 0;
+    g_music_event_value = 0;
+    g_music_event_param = 0;
 
     if (m.songA == 1 && (g_save_progress_bits->unk4 & 0x80)) {
         m.fadeA = 0x10;
@@ -99,7 +99,7 @@ void level_start_music(void) {
     case 1:
         if (g_level_first_frame == 2) {
             music_release_stopped_slots();
-        } else if (D_800BE9F8 != 0x22) {
+        } else if (g_level_loaded_id != 0x22) {
             restart = FALSE;
             m.songA = -1;
             m.songB = -1;
@@ -239,7 +239,7 @@ void level_start_music(void) {
 
 extern f32 g_cam_far_plane;            /* screen height (g_level_header->unk0); was D_800D9F3C; was D_800B0DF0 */
 extern f32 g_cam_near_plane;            /* screen width (g_level_header->unk2); was D_800D9F40; was D_800B0DF0 */
-extern f32 D_800D3A90;
+extern f32 g_level_dl_near_z; /* was D_800D3A90 */
 extern u8 g_screen_tint_extra_a[3]; /* was D_800D9FA4 */
 extern u8 g_screen_tint_extra_b[3]; /* was D_800D9FA8 */
 extern u8 g_screen_tint_extra_ab; /* was D_800D9FAB */
@@ -264,7 +264,7 @@ s32 level_setup_screen_projection(s32 arg0) {
 
     g_cam_near_plane = (f32)g_level_header->unk2;
     g_cam_far_plane = (f32)g_level_header->unk0;
-    D_800D3A90 = 100.0f - g_cam_far_plane;
+    g_level_dl_near_z = 100.0f - g_cam_far_plane;
     level_init_color_tables(arg0);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {

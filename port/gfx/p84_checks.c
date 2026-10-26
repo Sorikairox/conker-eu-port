@@ -1,6 +1,6 @@
 /* P84 runtime checks after merging port-b P68 / P73 / P77 / P82.
  *  ?p84text=N      game_mode_frame_step (per game mode text bank choice, game_eu_20B730.c, called from game_45B80.c) ->
- *                  text_bank_load (text bank loader, P68 C): language g_settings_language / D_800BEECB, loaded bank D_800E1003,
+ *                  text_bank_load (text bank loader, P68 C): language g_settings_language / g_text_bank_lang, loaded bank g_text_bank_loaded,
  *                  bank g_text_bank_data, string table g_text_strings, bank-1 extras g_text_bank1_extra / g_text_scene_names when they change
  *                  (first N changes).
  *  DIAGNOSTIC ?p84notext=1  game_mode_frame_step does nothing (the pre-merge asm stub behaviour): bisects the text bank load. */
@@ -11,17 +11,17 @@ int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
 extern unsigned char D_800E101A_[] __asm__("g_settings_language"); /* was D_800E101A */
-extern unsigned char D_800BEECB_[] __asm__("D_800BEECB");
-extern unsigned char D_800E1003_[] __asm__("D_800E1003");
+extern unsigned char D_800BEECB_[] __asm__("g_text_bank_lang"); /* was D_800BEECB */
+extern unsigned char D_800E1003_[] __asm__("g_text_bank_loaded"); /* was D_800E1003 */
 extern unsigned char D_800E1004_[] __asm__("g_text_bank_data"); /* was D_800E1004 */
 extern unsigned char D_800E1008_[] __asm__("g_text_strings"); /* was D_800E1008 */
 extern unsigned char D_80090178_[] __asm__("g_text_bank1_extra"); /* was D_80090178 */
 extern unsigned char D_800E0FB8_[] __asm__("g_text_scene_names"); /* was D_800E0FB8 */
 
-extern unsigned char p88_D_800C35EA[] __asm__("D_800C35EA");
-extern unsigned char p88_D_800C39D0[] __asm__("D_800C39D0");
+extern unsigned char p88_D_800C35EA[] __asm__("g_cutscene_slot_state"); /* was D_800C35EA */
+extern unsigned char p88_D_800C39D0[] __asm__("g_cutscene_frame"); /* was D_800C39D0 */
 extern unsigned char p88_D_eu_800C3A60[] __asm__("D_eu_800C3A60");
-extern unsigned char p91_D_800C3638[] __asm__("D_800C3638"); /* P91: cutscene flag (objects frozen while set), logged too */
+extern unsigned char p91_D_800C3638[] __asm__("g_cutscene_in_progress"); /* P91: cutscene flag (objects frozen while set), logged too; was D_800C3638 */
 static int flag(int *f, const char *n) { if (*f < 0) *f = port_flag(n); return *f; }
 static unsigned B(const unsigned char *p) { return *(const unsigned char *)((uintptr_t)p ^ 3); } /* virtual BE byte */
 static unsigned W(const unsigned char *p) { return *(const unsigned *)p; }
@@ -78,10 +78,10 @@ static void lang_watch(const char *where) {
     l_val = v;
 }
 static void lang_hook(const char *name) { lang_watch("stub"); l_last = name; }
-/* P88 ?p88scene=N: scene slots 0 / 1 (state D_800C35EA[slot], counter D_800C39D0[slot], length D_eu_800C3A60[slot],
+/* P88 ?p88scene=N: scene slots 0 / 1 (state g_cutscene_slot_state[slot], counter g_cutscene_frame[slot], length D_eu_800C3A60[slot],
  * cutscene_compute_length C since the P83 merge) and the language byte, logged when the state or length changes (first N). */
-extern unsigned char p88_D_800C35EA[] __asm__("D_800C35EA");
-extern unsigned char p88_D_800C39D0[] __asm__("D_800C39D0");
+extern unsigned char p88_D_800C35EA[] __asm__("g_cutscene_slot_state"); /* was D_800C35EA */
+extern unsigned char p88_D_800C39D0[] __asm__("g_cutscene_frame"); /* was D_800C39D0 */
 extern unsigned char p88_D_eu_800C3A60[] __asm__("D_eu_800C3A60");
 /* P88 ?p88pos=N: every N frames from frame 940 to 1300, player record 0 (g_objects, 0x32C bytes) state / position and
  * the slot 0 scene state / counter. */
@@ -141,7 +141,7 @@ void p84_hang_init(void) {
 /* P88: the TEMPORARY __wrap_cutscene_check_finished guard (P84, scene length 0) was removed: the port-b branch converted the
  * scene length cutscene_compute_length in P83 (game_eu_4A070.c, NON_MATCHING). */
 
-/* P91: the P88 TEMPORARY guard __wrap_cutscene_check_finished (scene end: state + cutscene flag D_800C3638) was removed: the
+/* P91: the P88 TEMPORARY guard __wrap_cutscene_check_finished (scene end: state + cutscene flag g_cutscene_in_progress) was removed: the
  * port-b branch converted cutscene_end in P87 (game_eu_4A070.c, NON_MATCHING). */
 
 /* P88 ?p88watch=N: from frame 960 watch player record 0 position (+0x14 / +0x18 / +0x1C) at every asm-stub hit
@@ -170,7 +170,7 @@ void p88_watch_init(void) {
 }
 
 /* P91: the P88 TEMPORARY guard __wrap_cutscene_scene_load (restore of object records moved from uninitialised
- * D_800C3958 blocks) was removed: the port-b branch converted the producer cutscene_camera_track_pass (and cutscene_apply_cameras) in P87. */
+ * g_cutscene_track_recs blocks) was removed: the port-b branch converted the producer cutscene_camera_track_pass (and cutscene_apply_cameras) in P87. */
 
 /* P105: the P97 TEMPORARY guard (__wrap_cutscene_actor_place_at / __wrap_cutscene_actor_heading_at skipped the P92 path C while its
  * producer cutscene_path_prepare_segment was an asm stub) was removed: port-b P96 converted cutscene_path_prepare_segment (segment cubic). */

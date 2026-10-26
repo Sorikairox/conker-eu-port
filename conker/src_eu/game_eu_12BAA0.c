@@ -8,7 +8,7 @@ void sfx_tick_poke_kind28_objs(s32 arg0) {
     struct127 *p;
 
     sfx_cooldown_tick();
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         p = g_objects;
         do {
             if (p->id == 0x28) {

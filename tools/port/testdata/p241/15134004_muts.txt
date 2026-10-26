@@ -7,7 +7,7 @@ s/    bones = \*(u8 \*\*) (target + 0x1D4);/    bones = *(u8 **) (target + 0x1D0
 s/    if (bones == NULL) {/    if (bones != NULL) {/ % fixed
 s/    if ((target\[0x74\] \& 0xF) == 0xF) {/    if ((target[0x74] \& 0x7) == 0x7) {/ % nib7
 s/    if ((target\[0x74\] \& 0xF) == 0xF) {/    if ((target[0x74] \& 0xF) != 0xF) {/ % fixed
-s/    if (D_800C42B0 != 0) {/    if (D_800C42B0 == 0) {/ % fixed
+s/    if (g_mtx_fixed_point != 0) {/    if (g_mtx_fixed_point == 0) {/ % fixed
 s/        memcpy(mtx, bones + obj\[0x170\] \* 0x40, 0x40);/        memcpy(mtx, bones + obj[0x170] * 0x20, 0x40);/ % fixed
 s/        return 1;/        return 0;/ % fixed
 s/    memcpy(mf, bones + obj\[0x170\] \* 0x40, 0x40);/    memcpy(mf, bones + obj[0x171] * 0x40, 0x40);/ % float

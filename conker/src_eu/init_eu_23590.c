@@ -27,8 +27,8 @@ typedef struct {
 #define FLAGS_MINUS 4
 #define FLAGS_ZERO 16
 
-extern unsigned char D_8002C080[]; // ldigs "0123456789abcdef"
-extern unsigned char D_8002C094[]; // udigs "0123456789ABCDEF"
+extern unsigned char g_os_litob_ldigs[]; /* was D_8002C080 */ // ldigs "0123456789abcdef"
+extern unsigned char g_os_litob_udigs[]; /* was D_8002C094 */ // udigs "0123456789ABCDEF"
 
 void _Litob(_Pft *args, unsigned char type) {
     unsigned char buff[BUFF_LEN];
@@ -37,7 +37,7 @@ void _Litob(_Pft *args, unsigned char type) {
     s32 i;
     unsigned long long ull;
 
-    digs = (type == 'X') ? D_8002C094 : D_8002C080;
+    digs = (type == 'X') ? g_os_litob_udigs : g_os_litob_ldigs;
     base = (type == 'o') ? 8 : ((type != 'x' && type != 'X') ? 10 : 16);
     i = BUFF_LEN;
     ull = args->v.ll;

@@ -7,10 +7,10 @@
 s32 __osContRamRead(OSMesgQueue *mq, int channel, u16 address, u8 *buffer);
 s32 __osContRamWrite(OSMesgQueue *mq, int channel, u16 address, u8 *buffer, int force);
 void os_make_motor_data(int channel, u16 address, u8 *buffer, OSPifRam *mdata);
-extern u8 D_8003C1D0[0x20];
-extern u8 D_8003C1F0[0x20];
-extern u8 D_8003C0D0[];
-extern u8 D_8003BFD0[];
+extern u8 g_os_motor_stop_bytes[0x20]; /* was D_8003C1D0 */
+extern u8 g_os_motor_start_bytes[0x20]; /* was D_8003C1F0 */
+extern u8 g_os_motor_start_data[]; /* was D_8003C0D0 */
+extern u8 g_os_motor_stop_data[]; /* was D_8003BFD0 */
 
 /* was func_10005AD0 */
 s32 os_motor_init(OSMesgQueue *mq, OSPfs *pfs, int channel) {
@@ -40,11 +40,11 @@ s32 os_motor_init(OSMesgQueue *mq, OSPfs *pfs, int channel) {
         return 11;
     }
     for (i = 0; i < 0x20; i++) {
-        D_8003C1F0[i] = 1;
-        D_8003C1D0[i] = 0;
+        g_os_motor_start_bytes[i] = 1;
+        g_os_motor_stop_bytes[i] = 0;
     }
-    os_make_motor_data(channel, 0x600, D_8003C1F0, (OSPifRam *)(D_8003C0D0 + (channel << 6)));
-    os_make_motor_data(channel, 0x600, D_8003C1D0, (OSPifRam *)(D_8003BFD0 + (channel << 6)));
+    os_make_motor_data(channel, 0x600, g_os_motor_start_bytes, (OSPifRam *)(g_os_motor_start_data + (channel << 6)));
+    os_make_motor_data(channel, 0x600, g_os_motor_stop_bytes, (OSPifRam *)(g_os_motor_stop_data + (channel << 6)));
     return 0;
 }
 

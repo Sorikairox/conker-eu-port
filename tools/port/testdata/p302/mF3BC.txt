@@ -2,7 +2,7 @@ s#    level_fx_spawn_box_a(0x1612, -0x553, -0x2DC, -0x69F);#    level_fx_spawn_b
 s#    level_fx_spawn_box_a(0x1633, -0x553, -0x3C2, -0x69F);#    level_fx_spawn_box_a(0x1633, -0x553, -0x3C3, -0x69F);# % base
 s#D_80096600_c\[0\], 0\.0f);#D_80096600_c[0], 1.0f);# % base
 s#D_80096600_c\[0\], -78\.0f);#D_80096600_c[0], -77.0f);# % base
-s#    D_800D9CF0\[3\] =#    D_800D9CF0[2] =# % base
+s#    g_mist_puff_handles\[3\] =#    g_mist_puff_handles[2] =# % base
 s#    spec\.w48 = 3;#    spec.w48 = 4;# % base
 s#    spec\.h04 = -0x15;#    spec.h04 = -0x14;# % base
 s#    spec\.h46 = 0x29;#    spec.h46 = 0x28;# % base

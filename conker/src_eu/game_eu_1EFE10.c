@@ -29,7 +29,7 @@ void hit_spark_sound_play(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3, f32 arg4) {
     u8 *temp_v1;
 
     if (arg0 != NULL) {
-        if ((D_800BE616 != 0) || (temp_v1 = (*(u8 **)((u8 *)arg0 + 0x318)), (temp_v1 == NULL))) {
+        if ((g_mp_mode_active != 0) || (temp_v1 = (*(u8 **)((u8 *)arg0 + 0x318)), (temp_v1 == NULL))) {
             temp_v0 = (*(s16 *)((u8 *)g_level_header + 0x2C));
             if ((temp_v0 == 0x24) || (temp_v0 == 0x13) || (temp_v0 == 0x4D) || (temp_v0 == 0x85) || (temp_v0 == 0x93)) {
                 sound_source_mix((s32) (*(f32 *)((u8 *)arg1 + 0)), (s32) (*(f32 *)((u8 *)arg1 + 4)), (s32) (*(f32 *)((u8 *)arg1 + 8)), 0x7FFF, 0x3E8, 0x64, &sp.u4C, &sp.u48, NULL);
@@ -273,7 +273,7 @@ block_27:
     sp.u18A = 0;
     sp.u18B = 0;
     sp.u190 = arg16;
-    temp_v0 = effect3d_spawn_full(&sp.u144, (s32) ((u8 *)&D_800A4AA0), 0x16U, 0U, 0U, 0x14U, 0U, 0, 0, arg18 + 0xB0, (u8) (s32) arg19, arg1A);
+    temp_v0 = effect3d_spawn_full(&sp.u144, (s32) ((u8 *)&g_effect3d_default_params), 0x16U, 0U, 0U, 0x14U, 0U, 0, 0, arg18 + 0xB0, (u8) (s32) arg19, arg1A);
     sp.u19C = temp_v0;
     if (temp_v0 != NULL) {
         temp_a0 = temp_v0 + 0x110;
@@ -1281,7 +1281,7 @@ void surface_impact_effects(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debr
         s = random_float() * 15.0f + 15.0f;
         spark.texture = g_surface_spark_tex[type];
         spark.u07 = 0;
-        spark.flags = (D_800BE616 ? 0x20000 : 0) | 0xBF01;
+        spark.flags = (g_mp_mode_active ? 0x20000 : 0) | 0xBF01;
         spark.life = random_int() % 61U + 60;
         spark.u08 = 0;
         spark.u0C = 0;
@@ -1323,7 +1323,7 @@ void surface_impact_effects(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debr
         smoke.u34 = g_surface_smoke_k_34;
         smoke.u38 = 1.0f;
         smoke.u3C = g_surface_smoke_k_3c;
-        smoke.flags = (D_800BE616 ? 0x40000000 : 0) | 0x08DC0009;
+        smoke.flags = (g_mp_mode_active ? 0x40000000 : 0) | 0x08DC0009;
         smoke.alpha = random_int() % 76U + 180;
         smoke.u45 = 0xFF;
         smoke.u46 = 0;
@@ -1332,7 +1332,7 @@ void surface_impact_effects(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debr
         smoke.u54 = 8;
         smoke.u56 = 0x1F;
         smoke.tag = smokeTag;
-        effect3d_spawn_full(&smoke, (s32) &D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, obj[0xC], obj[1]);
+        effect3d_spawn_full(&smoke, (s32) &g_effect3d_default_params, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, obj[0xC], obj[1]);
     }
 
     if (random_float() < debrisChance) {
@@ -1373,7 +1373,7 @@ void surface_impact_effects(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debr
         debris.u50 = 17.0f;
         debris.u54 = g_surface_debris_k_54;
         debris.u58 = g_surface_debris_k_58;
-        debris.flags = (D_800BE616 ? 0x800000 : 0) | 0x40E07;
+        debris.flags = (g_mp_mode_active ? 0x800000 : 0) | 0x40E07;
         debris.u60 = 0x10;
         debris.u61 = -1;
         debris.u62 = 8;

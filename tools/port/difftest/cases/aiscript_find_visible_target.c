@@ -5,7 +5,7 @@ int aiscript_find_by_kind(s32, s32);
 // find_visible_target: P210: script command: looks for the nearest object the current one can see: live (state,
 // health), targetable (unkF8 bit 0x20), not itself, of another id unless g_aiscript_arg1 is set, within 50 in height,
 // closer than g_aiscript_arg0 * 8 (obj_dist_3d), and inside its view cone (width byte 0x17 of its type record
-// D_800D1C90[id], in 1/256 turns around heading unk76 >> 8 + unk2CA). The nearest one is stored as unkA8 =
+// g_type_descs[id], in 1/256 turns around heading unk76 >> 8 + unk2CA). The nearest one is stored as unkA8 =
 // 0x80 + its number; then the object's script jumps to g_aiscript_arg3 and, when g_aiscript_arg2 is set, the target's
 // script to g_aiscript_arg2 with unk222 = the current object's number.
 void aiscript_find_visible_target(void) {
@@ -35,7 +35,7 @@ void aiscript_find_visible_target(void) {
             continue;
         }
         dx = o->x_position - g_cur_obj->x_position;
-        fov = D_800D1C90[g_cur_obj->id]->unk17;
+        fov = g_type_descs[g_cur_obj->id]->unk17;
         if (fov < 0) {
             fov = 0;
         }

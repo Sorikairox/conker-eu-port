@@ -1,6 +1,6 @@
 s/    rail\[0x1704\]++;/    ;/
 s/== me) {/!= me) {/
-s/D_800D27D0\[0x1704\] = 0;/D_800D27D0[0x1704] = 1;/
+s/g_race_state\[0x1704\] = 0;/g_race_state[0x1704] = 1;/
 s/row = me \* 16;/row = me * 15;/
 s/if (!(mask \& (1 << me))) {/if (!(mask \& (2 << me))) {/
 s/if (active\[k\] <= 0 || team\[k\] == myTeam) {/if (active[k] < 0 || team[k] == myTeam) {/

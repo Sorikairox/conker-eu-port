@@ -131,14 +131,14 @@ typedef struct CustomPVoice {
 #define _pullSubFrame func_10020ABC
 #define func_global_asm_807407A8 n_adpcm_load_param
 #define __n_freeParam _n_freeParam
-#define D_global_asm_807FF0F0 D_800428C0
-#define D_global_asm_807FF0F1 D_800428C1
-#define D_global_asm_807FF0F2 D_800428C2
-#define n_eqpower D_8002BF60
-extern u8 D_800428C0;
-extern u8 D_800428C1;
-extern u8 D_800428C2;
-extern s16 D_8002BF60[];
+#define D_global_asm_807FF0F0 g_audio_surround
+#define D_global_asm_807FF0F1 g_audio_mono
+#define D_global_asm_807FF0F2 g_audio_headphones
+#define n_eqpower g_audio_eqpower
+extern u8 g_audio_surround; /* was D_800428C0 */
+extern u8 g_audio_mono; /* was D_800428C1 */
+extern u8 g_audio_headphones; /* was D_800428C2 */
+extern s16 g_audio_eqpower[]; /* was D_8002BF60 */
 #define N_EQPOWER_LENGTH 128
 Acmd *_pullSubFrame(N_PVoice *filter, s16 *inp, s16 *outp, s32 outCount, Acmd *p);
 void __n_freeParam(ALParam *);

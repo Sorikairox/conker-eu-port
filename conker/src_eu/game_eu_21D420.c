@@ -26,7 +26,7 @@ s32 game_os_pfs_init_pak(OSMesgQueue *queue, OSPfs *pfs, int channel) {
     return ret;
 }
 
-extern OSPifRam D_80042D60;
+extern OSPifRam g_os_pfs_pif_ram; /* was D_80042D60 */
 /* was func_151EFCC4 */
 s32 game_os_pfs_get_status(OSMesgQueue *queue, int channel) {
     s32 ret = 0;
@@ -35,9 +35,9 @@ s32 game_os_pfs_get_status(OSMesgQueue *queue, int channel) {
     OSContStatus data[4];
 
     __osPfsRequestData(CONT_CMD_REQUEST_STATUS);
-    ret = os_si_raw_start_dma(OS_WRITE, &D_80042D60);
+    ret = os_si_raw_start_dma(OS_WRITE, &g_os_pfs_pif_ram);
     osRecvMesg(queue, &dummy, OS_MESG_BLOCK);
-    ret = os_si_raw_start_dma(OS_READ, &D_80042D60);
+    ret = os_si_raw_start_dma(OS_READ, &g_os_pfs_pif_ram);
     osRecvMesg(queue, &dummy, OS_MESG_BLOCK);
     game_os_pfs_get_init_data(&pattern, data);
     if (((data[channel].status & CONT_CARD_ON) != 0) && ((data[channel].status & CONT_CARD_PULL) != 0)) {

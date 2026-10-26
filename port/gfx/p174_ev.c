@@ -1,6 +1,6 @@
 /* P174 DIAGNOSTIC ?p174ev=1 / PORT_P174EV=1: event-script queries / actions of the first room (level 0x22, event 0xCA
- * "First Death"). Wraps the VM natives event_native_query (native 5 = D_80088838 queries) and event_native_action (native 6 =
- * D_80088874 actions), reached through D_80088A44 (n64mem_tab refs -> --wrap applies). Logs every change of
+ * "First Death"). Wraps the VM natives event_native_query (native 5 = g_event_query_fns queries) and event_native_action (native 6 =
+ * g_event_action_fns actions), reached through g_event_vm_native_fns (n64mem_tab refs -> --wrap applies). Logs every change of
  * (id, arg, result) per id, and every native-6 action. For table entry 0 (event_query_scene, scene queries) and entry 13 /
  * id 0x19 (event_query_effect, "no object in lists D_800A6440[0..2] has +0x48 == 2") it also computes what the asm answers.
  *
@@ -14,20 +14,20 @@ typedef int32_t s32; typedef uint8_t u8; typedef uint16_t u16;
 int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
-extern u8 g_cutscene_pending, D_800C35EA, D_800C40B8, D_800C3A08, D_800C3A92; /* was D_800C35C4 */
+extern u8 g_cutscene_pending, g_cutscene_slot_state, g_cutscene_scene_id, g_cutscene_scene, g_cutscene_skipped; /* was D_800C35C4; was D_800C35EA; was D_800C3A08; was D_800C3A92; was D_800C40B8 */
 extern u8 *g_node_lists[][104]; /* was D_800DD280 */
-extern u8 D_800A6440[];
+extern u8 g_anim_model_fx_node_types[]; /* was D_800A6440 */
 extern s32 g_level_id; /* was D_800BE9F0 */
 static int on(void) { static int f = -1; if (f < 0) f = port_flag("p174ev"); return f; }
 
 static s32 asm_CBD8(s32 a0, s32 a1) {
-    unsigned c4 = vbe_ld8(&g_cutscene_pending), ea = vbe_ld8(&D_800C35EA), sc = vbe_ld8(&D_800C40B8), s2 = vbe_ld8(&D_800C3A08);
+    unsigned c4 = vbe_ld8(&g_cutscene_pending), ea = vbe_ld8(&g_cutscene_slot_state), sc = vbe_ld8(&g_cutscene_scene_id), s2 = vbe_ld8(&g_cutscene_scene);
     switch (a1) {
     case 1: if (c4) return 0; if (!ea) return 1; return (unsigned)a0 == sc ? 0 : 1;
     case 2: return ea == 1 && (unsigned)a0 == sc;
     case 3: return ea == 1 && (unsigned)a0 == s2;
     case 4: return ea != 1;
-    case 5: return vbe_ld8(&D_800C3A92);
+    case 5: return vbe_ld8(&g_cutscene_skipped);
     case 6: return ea == 1 && (unsigned)a0 == s2;
     }
     return 0;
@@ -39,7 +39,7 @@ static s32 asm_DFCC19(void) {
     buf[0] = 0;
     for (int g = 0; g < 2; g++)
         for (int i = 0; i < 3; i++) {
-            unsigned li = *(unsigned *)(D_800A6440 + 4 * i);
+            unsigned li = *(unsigned *)(g_anim_model_fx_node_types + 4 * i);
             u8 *n = g_node_lists[g][li];
             int cnt = 0;
             while (n && cnt < 32) {
@@ -80,7 +80,7 @@ void __wrap_event_vm_run(void *blk, s32 entry) {
     __real_event_vm_run(blk, entry);
     cur_ev = sv;
 }
-/* native 5: D_80088838[n - 1](id & 0xFFFF0FFF, args[1], args) */
+/* native 5: g_event_query_fns[n - 1](id & 0xFFFF0FFF, args[1], args) */
 s32 __real_event_native_query(s32 *args);
 s32 __wrap_event_native_query(s32 *args) {
     if (!on()) return __real_event_native_query(args);
@@ -96,20 +96,20 @@ s32 __wrap_event_native_query(s32 *args) {
         if (j == nk && nk < 64) { kid[nk] = kk; karg[nk] = arg; kr[nk] = 0x7FFFFFFF; kra[nk] = 0x7FFFFFFF; nk++; }
         if (j < 64 && (kr[j] != r || kra[j] != ra) && nlog++ < 600) {
             port_log("[p174ev] frame %u ev %X q5 id %04X arg %d -> C %d asm %d%s (EA %u C4 %u scene 40B8 %u 3A08 %u 3A92 %u)\n",
-                     port_frame_count, cur_ev, id & 0xFFFF, arg, r, ra, fixed ? " FIXED" : "", vbe_ld8(&D_800C35EA),
-                     vbe_ld8(&g_cutscene_pending), vbe_ld8(&D_800C40B8), vbe_ld8(&D_800C3A08), vbe_ld8(&D_800C3A92));
+                     port_frame_count, cur_ev, id & 0xFFFF, arg, r, ra, fixed ? " FIXED" : "", vbe_ld8(&g_cutscene_slot_state),
+                     vbe_ld8(&g_cutscene_pending), vbe_ld8(&g_cutscene_scene_id), vbe_ld8(&g_cutscene_scene), vbe_ld8(&g_cutscene_skipped));
             kr[j] = r; kra[j] = ra;
         }
     }
     return r;
 }
-/* native 6: game-state actions D_80088874[n - 1](id & 0xFFFF0FFF, args[1], args) */
+/* native 6: game-state actions g_event_action_fns[n - 1](id & 0xFFFF0FFF, args[1], args) */
 s32 __real_event_native_action(s32 *args);
-extern u8 D_800877B0[]; extern s32 D_800D3268; extern u8 *g_save_progress_bits; void *event_find(s32); /* was D_800D2E4C */
+extern u8 g_game_state_flags[]; extern s32 g_event_cur_id; extern u8 *g_save_progress_bits; void *event_find(s32); /* was D_800D2E4C; was D_800D3268; was D_800877B0 */
 static void p178fin(const char *w, s32 id) {   /* P178: state around action 1 (finish event) */
     u8 *e = (u8 *)event_find(id);
     port_log("[p178bf] frame %u %s 5%03X(1): 877B0[1] %u running %X save[%X] %02x bit %u ev %08x flags %04x\n", port_frame_count, w,
-             (unsigned)id, vbe_ld8(D_800877B0 + 1), (unsigned)D_800D3268, (unsigned)(id >> 3),
+             (unsigned)id, vbe_ld8(g_game_state_flags + 1), (unsigned)g_event_cur_id, (unsigned)(id >> 3),
              g_save_progress_bits ? vbe_ld8(g_save_progress_bits + (id >> 3)) : 0xFFu, (unsigned)(id & 7), (unsigned)(uintptr_t)e, e ? vbe_ld16(e) : 0);
 }
 s32 __wrap_event_native_action(s32 *args) {
@@ -132,13 +132,13 @@ s32 __wrap_event_native_action(s32 *args) {
 }
 
 /* P174 ?p174ev: pointer probe before objects_update_visibility (game_83300.c; it calls obj_check_visible per active object): the
- * pointers obj_check_visible dereferences (obj +0x144, g_path_points[obj +0x13F] if D_800D2528[obj +0x13F], D_800D1C90[id]),
+ * pointers obj_check_visible dereferences (obj +0x144, g_path_points[obj +0x13F] if g_path_point_counts[obj +0x13F], g_type_descs[id]),
  * logged when outside the wasm memory (raw N64 addresses / garbage) - the trap at 10732 with ?p174fix (scene 3 of
  * level 0x18). Up to 40 lines. */
 extern u8 g_objects[]; /* was D_800CC2D0 */
 extern s32 *g_path_points; /* was D_800D2104 */
-extern u8 *D_800D2528;
-extern u8 *D_800D1C90[];
+extern u8 *g_path_point_counts; /* was D_800D2528 */
+extern u8 *g_type_descs[]; /* was D_800D1C90 */
 extern s32 g_last_player_index; /* was D_80082FA0 */
 static int badp(unsigned p) { return p != 0 && (p < 0x1000 || p >= 0x16000000u); }
 void __real_objects_update_visibility(void);
@@ -147,20 +147,20 @@ void __wrap_objects_update_visibility(void) {
         static unsigned nlog, nfr;
         if (port_frame_count >= 10731 && nfr < 16) {
             char b[1600]; int k = 0;
-            for (int i = 0; i < 0x19; i++) { u8 *o = g_objects + 0x32C * i; if (*(s32 *)o) k += snprintf(b + k, sizeof b - k, " %d:id%u/74=%x/13F=%u/on%u/p%08x", i, vbe_ld8(o + 4), vbe_ld8(o + 0x74), vbe_ld8(o + 0x13F), D_800D2528 ? vbe_ld8(D_800D2528 + vbe_ld8(o + 0x13F)) : 99, g_path_points ? (unsigned)g_path_points[vbe_ld8(o + 0x13F)] : 0); }
-            k += snprintf(b + k, sizeof b - k, " | D2528 %08x D2104 %08x", (unsigned)(uintptr_t)D_800D2528, (unsigned)(uintptr_t)g_path_points);
+            for (int i = 0; i < 0x19; i++) { u8 *o = g_objects + 0x32C * i; if (*(s32 *)o) k += snprintf(b + k, sizeof b - k, " %d:id%u/74=%x/13F=%u/on%u/p%08x", i, vbe_ld8(o + 4), vbe_ld8(o + 0x74), vbe_ld8(o + 0x13F), g_path_point_counts ? vbe_ld8(g_path_point_counts + vbe_ld8(o + 0x13F)) : 99, g_path_points ? (unsigned)g_path_points[vbe_ld8(o + 0x13F)] : 0); }
+            k += snprintf(b + k, sizeof b - k, " | D2528 %08x D2104 %08x", (unsigned)(uintptr_t)g_path_point_counts, (unsigned)(uintptr_t)g_path_points);
             nfr++; port_log("[p174ptr] frame %u D_80082FA0 %d objs%s\n", port_frame_count, g_last_player_index, b);
         }
         for (int i = 0; i < 0x19 && nlog < 40; i++) {
             u8 *o = g_objects + 0x32C * i;
             if (*(s32 *)o == 0) continue;
             unsigned id = vbe_ld8(o + 4), k = vbe_ld8(o + 0x13F), p144 = *(unsigned *)(o + 0x144);
-            unsigned on2528 = D_800D2528 ? vbe_ld8(D_800D2528 + k) : 0xFFFF, p2104 = g_path_points ? (unsigned)g_path_points[k] : 0;
-            unsigned p1c90 = (unsigned)(uintptr_t)D_800D1C90[id];
-            if (badp(p144) || badp(p1c90) || badp((unsigned)(uintptr_t)D_800D2528) || badp((unsigned)(uintptr_t)g_path_points) ||
+            unsigned on2528 = g_path_point_counts ? vbe_ld8(g_path_point_counts + k) : 0xFFFF, p2104 = g_path_points ? (unsigned)g_path_points[k] : 0;
+            unsigned p1c90 = (unsigned)(uintptr_t)g_type_descs[id];
+            if (badp(p144) || badp(p1c90) || badp((unsigned)(uintptr_t)g_path_point_counts) || badp((unsigned)(uintptr_t)g_path_points) ||
                 (on2528 && on2528 != 0xFFFF && badp(p2104)))
                 nlog++, port_log("[p174ptr] frame %u obj %d state %d id %u +144 %08x 13F %u D2528 %08x [%u] D2104 %08x [%08x] D1C90[id] %08x\n",
-                                 port_frame_count, i, *(s32 *)o, id, p144, k, (unsigned)(uintptr_t)D_800D2528, on2528,
+                                 port_frame_count, i, *(s32 *)o, id, p144, k, (unsigned)(uintptr_t)g_path_point_counts, on2528,
                                  (unsigned)(uintptr_t)g_path_points, p2104, p1c90);
         }
     }

@@ -4,14 +4,14 @@
 
 
 /* P179 */
-extern u8 *D_80087000[];
-extern u8 D_8009CF9C[];
+extern u8 *g_hit_sphere_lists[]; /* was D_80087000 */
+extern u8 g_hit_sphere_counts[]; /* was D_8009CF9C */
 
 // object_reach_hit: P179: whether attacker `arg0`'s reach point hits `target`'s hit spheres; the sphere's bone + 1
 /* or 0. The point is `reach` (x attacker scale +0x14C) ahead of the attacker, turned by its angles +0xB8 and +0x40
- * (degrees), from its position +0x14. A bounding sphere around the target (radius D_800D1C90[target +4] +0xE x
+ * (degrees), from its position +0x14. A bounding sphere around the target (radius g_type_descs[target +4] +0xE x
  * target +0x14C, centre raised by +0x10 x +0x150) is tested first; then the target's sphere list for model kind
- * `kind` (D_80087000[kind], D_8009CF9C[kind] entries of 10 bytes, same layout as obj_ray_hit_model: +0 bone, +2 radius,
+ * `kind` (g_hit_sphere_lists[kind], g_hit_sphere_counts[kind] entries of 10 bytes, same layout as obj_ray_hit_model: +0 bone, +2 radius,
  * +4 centre in bone space, bone matrices at +0x1D4) with each radius x +0x14C plus `grow` (x attacker scale). The
  * first sphere containing the point wins; unless the target's +0x125 is set the hit is reported to it with
  * attack_spawn_at_point(target position, `arg5`, the attacker's index in g_objects, 0, 0, 0). */
@@ -56,7 +56,7 @@ s32 obj_reach_hit(s32 arg0, u8 *target, s32 kind, f32 reach, f32 grow, s32 arg5)
     v[1] += *(f32 *)(att + 0x18);
     v[2] += *(f32 *)(att + 0x1C);
 
-    type = (u8 *) D_800D1C90[target[4]];
+    type = (u8 *) g_type_descs[target[4]];
     radius = (f32) (u32) *(u16 *)(type + 0xE) * *(f32 *)(target + 0x14C);
     height = *(s16 *)(type + 0x10) * *(f32 *)(target + 0x150);
     dx = v[0] - *(f32 *)(target + 0x14);
@@ -65,8 +65,8 @@ s32 obj_reach_hit(s32 arg0, u8 *target, s32 kind, f32 reach, f32 grow, s32 arg5)
     if (radius * radius < dx * dx + dy * dy + dz * dz) {
         return 0;
     }
-    count = D_8009CF9C[kind];
-    rec = D_80087000[kind];
+    count = g_hit_sphere_counts[kind];
+    rec = g_hit_sphere_lists[kind];
     bones = *(u8 **)(target + 0x1D4);
     for (i = 0; i < count; i++, rec += 10) {
         local[0] = *(s16 *)(rec + 4);
@@ -88,25 +88,25 @@ s32 obj_reach_hit(s32 arg0, u8 *target, s32 kind, f32 reach, f32 grow, s32 arg5)
     return 0;
 }
 
-extern u16 D_8009C100;
-extern u16 D_8009C104;
-extern u16 D_8009C108;
-extern u16 D_8009C10C[][2];
+extern u16 g_hit_model_kinds; /* was D_8009C100 */
+extern u16 g_hit_model_kinds_1; /* was D_8009C104 */
+extern u16 g_hit_model_kinds_2; /* was D_8009C108 */
+extern u16 g_hit_model_kinds_3[][2]; /* was D_8009C10C */
 /* was func_1508148C */
 s32 obj_hit_model_kind(u8 *arg0) {
     unsigned long i;
     s32 id;
-    if ((id = arg0[4]) == D_8009C100) {
+    if ((id = arg0[4]) == g_hit_model_kinds) {
         return 0;
     }
-    if (id == D_8009C104) {
+    if (id == g_hit_model_kinds_1) {
         return 1;
     }
-    if (id == D_8009C108) {
+    if (id == g_hit_model_kinds_2) {
         return 2;
     }
     for (i = 3; i < 0x17; i++) {
-        if (id == D_8009C10C[i - 3][0]) {
+        if (id == g_hit_model_kinds_3[i - 3][0]) {
             return i;
         }
     }
@@ -114,13 +114,13 @@ s32 obj_hit_model_kind(u8 *arg0) {
 }
 
 /* P150 */
-extern u8 *D_80087000[];
-extern u8 D_8009CF9C[];
+extern u8 *g_hit_sphere_lists[]; /* was D_80087000 */
+extern u8 g_hit_sphere_counts[]; /* was D_8009CF9C */
 // object_ray_hit_model: intersects the ray start + t * dir with an object's hit spheres. The object's model kind
-// (obj_hit_model_kind, -1 = none) selects a sphere list D_80087000[k] of D_8009CF9C[k] entries of 10 bytes: +0 bone,
+// (obj_hit_model_kind, -1 = none) selects a sphere list g_hit_sphere_lists[k] of g_hit_sphere_counts[k] entries of 10 bytes: +0 bone,
 // +1 priority, +2 radius (u16, times the object scale +0x14C), +4 / +6 / +8 centre (s16, bone space; the bone
 // matrices are at +0x1D4, 64 bytes each). A bounding sphere around the object (height and radius from its
-// D_800D1C90 type, times +0x150) is tested first. Spheres whose bone bit is set in +0x9C are skipped; the nearest
+// g_type_descs type, times +0x150) is tested first. Spheres whose bone bit is set in +0x9C are skipped; the nearest
 // hit wins, but a later sphere of lower priority than the current best never replaces it. Returns -1 when the
 // object has no bones or no sphere list, 0 on a miss, 1 on a hit: point / exitPoint = entry / exit point, normal
 // (optional) = the sphere centre, *dist = the last tested sphere's entry distance (as the original), *index /
@@ -153,16 +153,16 @@ s32 obj_ray_hit_model(u8 *obj, f32 *start, f32 *dir, f32 *point, f32 *exitPoint,
     if (kind == -1) {
         return -1;
     }
-    kind = ((u8 *)&D_8009C100)[kind * 4 + 2];
-    list = D_80087000[kind];
-    count = D_8009CF9C[kind];
+    kind = ((u8 *)&g_hit_model_kinds)[kind * 4 + 2];
+    list = g_hit_sphere_lists[kind];
+    count = g_hit_sphere_counts[kind];
     *dist = -1.0f;
 
-    type = (u8 *)D_800D1C90[obj[4]];
+    type = (u8 *)g_type_descs[obj[4]];
     sphere[0] = *(f32 *)(obj + 0x14);
     sphere[1] = *(s16 *)(type + 0x10) * *(f32 *)(obj + 0x150) + *(f32 *)(obj + 0x18);
     sphere[2] = *(f32 *)(obj + 0x1C);
-    type = (u8 *)D_800D1C90[obj[4]];
+    type = (u8 *)g_type_descs[obj[4]];
     if (ray_sphere_intersect((struct17 *)start, (struct17 *)dir, (struct17 *)sphere,
                       *(u16 *)(type + 0xE) * *(f32 *)(obj + 0x150), (s32)hitIn, (s32)hitOut, &tIn, &tOut) == 0) {
         return 0;
@@ -239,7 +239,7 @@ loop_1:
     if ((var_s0->interaction_state != 0) && (var_s0->unk1D4 != NULL) && (arg5 == var_s0->id)) {
         temp_v0_2 = obj_hit_model_kind((u8 *) var_s0);
         if (temp_v0_2 != -1) {
-            temp_v0 = obj_reach_hit(arg0, (u8 *) var_s0, (*(u8 *)((u8 *)((((u8 *)&D_8009C100) + (temp_v0_2 * 4))) + 2)), arg1, arg2, arg4);
+            temp_v0 = obj_reach_hit(arg0, (u8 *) var_s0, (*(u8 *)((u8 *)((((u8 *)&g_hit_model_kinds) + (temp_v0_2 * 4))) + 2)), arg1, arg2, arg4);
             if (temp_v0 != 0) {
                 *arg3 = var_s0;
                 return temp_v0;

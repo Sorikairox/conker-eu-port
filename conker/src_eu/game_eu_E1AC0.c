@@ -263,7 +263,7 @@ s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *
 u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 u8 *gfx_env_color_cached(u8 *, s32, s32, s32, s32, s8 *);
-extern s32 D_800915E8;
+extern s32 g_tex_ribbon; /* was D_800915E8 */
 extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 typedef struct {
@@ -283,7 +283,7 @@ typedef struct {
 // fade ramps from the oldest (start 0, step +0x33, +0x32 points) / the newest (step +0x35, +0x34 points). When s
 // grows between two points the last pair is repeated with s - 0x4000 (texture wrap). With +0x1E bit 1 the ribbon
 // starts at the trail's own position (+0x10). Vertices from vtx_slot_buffer_get (+0x84 buffer, (count << 5) + 0xA0 bytes;
-// none -> gfx unchanged); render state: texture D_800915E8, combine 0x4D, grey +0x24, geometry 1 / 0x160600,
+// none -> gfx unchanged); render state: texture g_tex_ribbon, combine 0x4D, grey +0x24, geometry 1 / 0x160600,
 // othermode g_gfx_tlut_mode | 0x82CA0 / 0x5049D8.
 /* was func_150B4BF0 */
 u8 *water_jet_ribbon_draw(u8 *trail, u8 *gfx, s16 arg2) {
@@ -355,7 +355,7 @@ u8 *water_jet_ribbon_draw(u8 *trail, u8 *gfx, s16 arg2) {
         } while (n != 0 && i != *(s8 *) (trail + 0x2E));
     }
 
-    gfx = (u8 *) gfx_load_texture_cached(gfx, &D_800915E8, 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
+    gfx = (u8 *) gfx_load_texture_cached(gfx, &g_tex_ribbon, 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
     gfx = (u8 *) gfx_geometry_mode_cached((s32) gfx, 1, 0x160600);
     gfx = (u8 *) gfx_set_combine_mode((s32) gfx, 0x4D, &flag);
     gfx = gfx_env_color_cached(gfx, style[0x24], style[0x24], style[0x24], 0xFF, &flag);
@@ -524,7 +524,7 @@ void water_jet_stop(u8 *arg0) {
 }
 
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
-extern s32 D_8009FFC0;
+extern s32 g_water_jet_spray_params; /* was D_8009FFC0 */
 
 /* was func_150B5568 */
 void water_jet_spray_spawn(u8 *arg0) {
@@ -573,7 +573,7 @@ void water_jet_spray_spawn(u8 *arg0) {
     u8 *temp_s3;
 
     temp_s3 = (*(u8 **)((u8 *)arg0 + 0x98));
-    temp_s0 = ((s32 *)((u8 *)&D_8009FFC0 + ((*(u8 *)((u8 *)temp_s3 + 0x38)) * 0x24)));
+    temp_s0 = ((s32 *)((u8 *)&g_water_jet_spray_params + ((*(u8 *)((u8 *)temp_s3 + 0x38)) * 0x24)));
     sp.u100 = 0;
     sp.u104 = 1;
     sp.u108 = 0x160600;

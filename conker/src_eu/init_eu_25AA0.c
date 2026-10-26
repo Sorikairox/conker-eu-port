@@ -3,28 +3,28 @@
 #include "variables.h"
 
 // libultra siacs.c (+ sirawdma.c)
-extern u32 D_8002C170;          // __osSiAccessQueueEnabled
-extern OSMesg D_80042E30[1];     // siAccessBuf
+extern u32 g_os_si_access_queue_enabled; /* was D_8002C170 */ // __osSiAccessQueueEnabled
+extern OSMesg g_os_si_access_buf_boot[1]; /* was D_80042E30 */ // siAccessBuf
 void __osSiCreateAccessQueue(void);
 
 
 void __osSiCreateAccessQueue(void) {
-    D_8002C170 = 1;
-    osCreateMesgQueue(&D_80042E38, D_80042E30, 1);
-    osSendMesg(&D_80042E38, NULL, OS_MESG_NOBLOCK);
+    g_os_si_access_queue_enabled = 1;
+    osCreateMesgQueue(&g_os_si_access_queue, g_os_si_access_buf_boot, 1);
+    osSendMesg(&g_os_si_access_queue, NULL, OS_MESG_NOBLOCK);
 }
 
 void __osSiGetAccess(void) {
     OSMesg dummyMesg;
 
-    if (!D_8002C170) {
+    if (!g_os_si_access_queue_enabled) {
         __osSiCreateAccessQueue();
     }
-    osRecvMesg(&D_80042E38, &dummyMesg, OS_MESG_BLOCK);
+    osRecvMesg(&g_os_si_access_queue, &dummyMesg, OS_MESG_BLOCK);
 }
 
 void __osSiRelAccess(void) {
-    osSendMesg(&D_80042E38, NULL, OS_MESG_NOBLOCK);
+    osSendMesg(&g_os_si_access_queue, NULL, OS_MESG_NOBLOCK);
 }
 
 void os_writeback_dcache(void *, s32); // osWritebackDCache

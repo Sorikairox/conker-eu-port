@@ -215,7 +215,7 @@ u8 *mdl_particle_spawn_ex(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extra
         ref->prev = NULL;
         ref->modelId = *(u16 *)(req + 0x56);
         if ((*(s32 *)(req + 0x50) & 0x100000) && g_level_id != 0x3B && g_level_id != 6 && g_level_id != 0x13 &&
-            D_800BE616 == 0 && g_level_id != 2) {
+            g_mp_mode_active == 0 && g_level_id != 2) {
             ref->keep = 1;
         } else {
             ref->keep = 0;
@@ -764,7 +764,7 @@ s32 mdl_particle_land_stop(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 
 // attached_bone_matrix: entry 5 of g_mdl_particle_mtx_fns (dispatcher mdl_particle_update_matrix: -1 ends the object, 0 hides it, 1 shows
 // it): copies bone obj[0x170] of the target object (+0x7C) into mtx. -1 when the target is gone (NULL, word +0 is 0,
 // byte +4 is 0xFF or its id +0x3B no longer matches obj +0x80); 0 when the target has no bone matrices (+0x1D4) or
-// its +0x74 low nibble is 0xF. The bone list holds Mtx (D_800C42B0 set: copied as is) or float matrices (made affine:
+// its +0x74 low nibble is 0xF. The bone list holds Mtx (g_mtx_fixed_point set: copied as is) or float matrices (made affine:
 // column 3 = 0, 0, 0, 1, then guMtxF2L).
 /* was func_15134004 */
 s32 mdl_particle_mtx_attach_bone(Mtx *mtx, u8 *obj) {
@@ -782,7 +782,7 @@ s32 mdl_particle_mtx_attach_bone(Mtx *mtx, u8 *obj) {
     if ((target[0x74] & 0xF) == 0xF) {
         return 0;
     }
-    if (D_800C42B0 != 0) {
+    if (g_mtx_fixed_point != 0) {
         memcpy(mtx, bones + obj[0x170] * 0x40, 0x40);
         return 1;
     }

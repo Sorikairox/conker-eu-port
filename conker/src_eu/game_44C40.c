@@ -9,7 +9,7 @@ void level_state_clear(void) {
     save_block_realloc_random();
     bzero(g_save_progress_bits, 0x1B);
     bzero(&g_level_state_blk_2e50, 0x10);
-    bzero(&D_800D2E60, 9);
+    bzero(&g_hints_seen, 9);
     bzero(&g_event_states, 0xCC);
     g_game_over_disabled = (u8)0;
 }
@@ -22,7 +22,7 @@ void level_state_init(void) {
     g_camera_event_heading = g_level_init_heading_f;
     g_level_state_u8_2e41 = 0xA;
     g_level_state_u8_2e42 = 6;
-    D_800D3858 = 0;
+    g_event_vm_abort = 0;
     g_game_over_disabled = 0;
 }
 
@@ -31,8 +31,8 @@ void level_apply_flag_entries(void) {
     u16 *temp_v0;
     s32 i;
 
-    for (i = 0; i < D_800D2F3C; i++) {
-        temp_v0 = event_find((s16)D_800D2F40[i]);
+    for (i = 0; i < g_level_event_count; i++) {
+        temp_v0 = event_find((s16)g_level_event_ids[i]);
         if ((temp_v0 != 0) && ((temp_v0[0] & 0x1000) != 0)) {
             temp_v0[1] = g_level_id;
         }
@@ -44,8 +44,8 @@ void level_apply_flag_entries(void) {
 
 u8 **allocate_memory(s32, s32, s32, s32);
 void zones_build_overlap_masks(u8 *, u32);
-extern s32 D_800D34F0;
-extern s32 D_800D3510;
+extern s32 g_trigger_player_zone; /* was D_800D34F0 */
+extern s32 g_trigger_touch_bits; /* was D_800D3510 */
 extern u8 **g_camera_zone_list; /* was D_800D3690 */
 extern s32 g_camera_zone_count; /* was D_800D3694 */
 
@@ -66,19 +66,19 @@ void zones_load(s32 arg0) {
     u8 temp_v0_2;
     u8 temp_v0_4;
 
-    temp_v0 = asset_load_ptr((s32 *) &D_800D34B8, 3, 0xC, arg0, 5);
+    temp_v0 = asset_load_ptr((s32 *) &g_level_zones, 3, 0xC, arg0, 5);
     temp_lo = temp_v0 / 52U;
-    D_800D3094 = (s32) temp_v0;
-    D_800D3094 = (s32) temp_lo;
-    zones_build_overlap_masks(D_800D34B8, temp_lo);
+    g_level_zone_count = (s32) temp_v0;
+    g_level_zone_count = (s32) temp_lo;
+    zones_build_overlap_masks(g_level_zones, temp_lo);
     g_camera_zone_count = 0;
     g_camera_zone_list = NULL;
     var_a3 = 0;
-    if (D_800D3094 != 0) {
+    if (g_level_zone_count != 0) {
         var_a1 = 0;
         do {
             var_a3 += 1;
-            temp_v1 = &D_800D34B8[var_a1];
+            temp_v1 = &g_level_zones[var_a1];
             temp_t9 = (s32) (*(u8 *)((u8 *)temp_v1 + 0x15)) >> 2;
             var_a0 = temp_t9;
             if (temp_t9 == 1) {
@@ -106,7 +106,7 @@ block_9:
                 (*(s32 *)((u8 *)temp_v1 + 0x20)) = 0;
             }
             var_a1 += 0x34;
-        } while (var_a3 < (u32) D_800D3094);
+        } while (var_a3 < (u32) g_level_zone_count);
     }
     if (g_camera_zone_count != 0) {
         temp_v0_3 = allocate_memory(g_camera_zone_count * 4, 1, 0, 0);
@@ -115,10 +115,10 @@ block_9:
             var_a0_2 = temp_v0_3;
             var_a3_2 = 0;
             var_a1_2 = 0;
-            if (D_800D3094 != 0) {
+            if (g_level_zone_count != 0) {
                 do {
                     var_a3_2 += 1;
-                    temp_v1_2 = &D_800D34B8[var_a1_2];
+                    temp_v1_2 = &g_level_zones[var_a1_2];
                     if (((s32) (*(u8 *)((u8 *)temp_v1_2 + 0x15)) >> 2) == 1) {
                         temp_v0_4 = (*(u8 *)((u8 *)temp_v1_2 + 0x17));
                         if (temp_v0_4 != 2) {
@@ -131,17 +131,17 @@ block_9:
                             }
                         } else {
 block_18:
-                            *var_a0_2 = &D_800D34B8[var_a1_2];
+                            *var_a0_2 = &g_level_zones[var_a1_2];
                             var_a0_2 = (u8 * *)((u8 *)var_a0_2 + (4));
                         }
                     }
                     var_a1_2 += 0x34;
-                } while (var_a3_2 < (u32) D_800D3094);
+                } while (var_a3_2 < (u32) g_level_zone_count);
             }
         }
     }
-    bzero(&D_800D3510, 0x180);
-    bzero(&D_800D34F0, 0x20);
+    bzero(&g_trigger_touch_bits, 0x180);
+    bzero(&g_trigger_player_zone, 0x20);
 }
 void trigger_cache_angles(u8 *);
 void zone_compute_bbox(u8 *, u8 *);

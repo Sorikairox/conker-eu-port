@@ -13,7 +13,7 @@ s/if (o\[0x251\] == 1) {/if (o[0x251] == 0) {/
 s/settle = 0;/settle = 1;/
 s/OBJ_F32(o, 0x20), 0) \* -0.0054931640625f;/OBJ_F32(o, 0x20), 0) * 0.0054931640625f;/
 s/if (PLAYER(o\[0x124\])\[-0x205\] == 0xFF) {/if (PLAYER(o[0x124])[-0x204] == 0xFF) {/
-s/OBJ_F32(o, 0xB8) \* D_80099708;/OBJ_F32(o, 0xB8) * D_8009970C;/
+s/OBJ_F32(o, 0xB8) \* g_float_k_9708;/OBJ_F32(o, 0xB8) * g_float_k_970c;/
 s/if (kind == 8) {/if (kind == 9) {/
 s/if (floor < OBJ_F32(o, 0x18) \&\& OBJ_F32(o, 0x20) > 0.0f) {/if (floor < OBJ_F32(o, 0x18)) {/
 s/if (o\[0x223\] != 3) {/if (o[0x223] == 3) {/
@@ -21,7 +21,7 @@ s/if (floor < target) {/if (floor > target) {/
 s/band = radius \* g_frame_step_f;/band = radius;/
 s/if (d < band \&\& -band < d) {/if (d < band) {/
 s/OBJ_F32(o, 0x24) = 0.0f;/OBJ_F32(o, 0x28) = 0.0f;/
-s/y + d \* D_80099710;/y + d * D_80099714;/
+s/y + d \* g_float_k_9710;/y + d * g_float_k_9714;/
 s/if (bob == 0xFF) {/if (bob == 0xFE) {/
 s/if (g_frame_ticks < timer) {/if (g_frame_ticks <= timer) {/
 s/= timer - g_frame_ticks;/= timer - 1;/
@@ -29,9 +29,9 @@ s/OBJ_F32(o, 0x3C) = 254.0f;/OBJ_F32(o, 0x3C) = 255.0f;/
 s/(ctl + 0x8C) \& 0x2000)/(ctl + 0x8C) \& 0x4000)/
 s/obj_fire_weapon_kind(arg0, ctl\[0x75\] \& 0x7F);/obj_fire_weapon_kind(arg0, ctl[0x75]);/
 s/if (30.0f < v) {/if (31.0f < v) {/
-s/(v - OBJ_F32(o, 0xB8)) \* D_80099714;/(v - OBJ_F32(o, 0xB8)) * D_8009971C;/
+s/(v - OBJ_F32(o, 0xB8)) \* g_float_k_9714;/(v - OBJ_F32(o, 0xB8)) * g_float_k_971c;/
 s/if (snap != 2 \&\& bob != 0) {/if (bob != 0) {/
-s/amp = (f32) bob \* D_80099718;/amp = (f32) bob * D_80099714;/
+s/amp = (f32) bob \* g_float_k_9718;/amp = (f32) bob * g_float_k_9714;/
 s/obj_set_gravity_band(arg0, target, amp, target, -amp, radius, -radius);/obj_set_gravity_band(arg0, target, amp, target, amp, radius, -radius);/
 s/o\[4\] != 0x49 \&\&/o[4] != 0x48 \&\&/
 s/(o + 0x22C) \& 8)) {/(o + 0x22C) \& 4)) {/

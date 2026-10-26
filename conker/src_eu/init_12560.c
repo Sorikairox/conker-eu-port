@@ -7,20 +7,20 @@
 /* P98: g_mp3_log_callback callback (mp3main_decode_next_frame calls it with (0, line, length)); a1 / a2 reach ring_buffer_put_record untouched */
 /* was func_10012560 */
 void mp3_id3_text_enqueue(s32 arg0, u8 *arg1, s32 arg2) {
-    ring_buffer_put_record(&D_800427A0, arg1, arg2);
+    ring_buffer_put_record(&g_mp3_text_queue, arg1, arg2);
 }
 
 /* was func_10012588 */
 void mp3_voice_init(s32 arg0) {
     audio_fx_mixer_init(arg0);
-    ring_buffer_init(&D_800427A0, &D_800427B0, 64);
+    ring_buffer_init(&g_mp3_text_queue, &g_mp3_text_queue_buf, 64);
     mp3_stream_set_text_cb(mp3_id3_text_enqueue);
 }
 
 /* was func_100125CC */
 void mp3_voice_stop(s32 arg0) {
     s32 res = mp3_stream_get_state();
-    if ((arg0 != 30) || (D_800BE9F8 != 27)) {
+    if ((arg0 != 30) || (g_level_loaded_id != 27)) {
         if (res == 1) {
             mp3_stream_set_volume(0, 11010);
             return;
@@ -38,7 +38,7 @@ void mp3_voice_play(s32 arg0, s32 arg1, s32 arg2) {
 
     sp18 = 0;
     temp_v0 = asset_lookup_rom(&sp18, 2, 22, arg0);
-    D_800427F4 = (s16) arg0;
+    g_mp3_voice_last_id = (s16) arg0;
     if ((temp_v0 != 0) && (sp18 != 0)) {
         mp3_stream_set_volume(arg1, 0);
         mp3_stream_set_pan(arg2, 1);
@@ -51,11 +51,11 @@ void mp3_voice_play(s32 arg0, s32 arg1, s32 arg2) {
     }
 }
 
-// text_queue_read: takes the next record of the text queue D_800427A0 into the buffer arg0 (at most arg1 bytes,
+// text_queue_read: takes the next record of the text queue g_mp3_text_queue into the buffer arg0 (at most arg1 bytes,
 // ring_buffer_get_record) and returns its length (P182: the asm caller lipsync_poll_text_queue loops while it is non-zero; it was void).
 /* was func_100126E8 */
 s32 text_queue_read(s32 arg0, s32 arg1) {
-    return ring_buffer_get_record(&D_800427A0, arg0, arg1);
+    return ring_buffer_get_record(&g_mp3_text_queue, arg0, arg1);
 }
 
 /* was func_10012718 */

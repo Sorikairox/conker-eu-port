@@ -4,8 +4,8 @@ s/count\[i\] = 0;/count[i] = 1;/ %
 s/prev\[i\] = -1;/;/ %
 s/one\[i\] = 1;/one[i] = 0;/ %
 s/extra\[i\] = 0;/extra[i] = -1;/ %
-s/i < \*(s32 \*) ((u8 \*) D_800D27D0 + 0x10)/i <= *(s32 *) ((u8 *) D_800D27D0 + 0x10)/ %
-s/i < \*(s32 \*) ((u8 \*) D_800D27D0 + 0xEA4)/i < *(s32 *) ((u8 *) D_800D27D0 + 0x10)/ %
+s/i < \*(s32 \*) ((u8 \*) g_race_state + 0x10)/i <= *(s32 *) ((u8 *) g_race_state + 0x10)/ %
+s/i < \*(s32 \*) ((u8 \*) g_race_state + 0xEA4)/i < *(s32 *) ((u8 *) g_race_state + 0x10)/ %
 s/return (s32) \&link\[i\];/return (s32) \&link[i - 1];/ %
 s/return (s32) slots;/return 0;/ %
 s/if (i > 0) {/if (i >= 0) {/ %

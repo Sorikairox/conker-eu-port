@@ -256,8 +256,8 @@ s32 anim_model_fx_beh_move(u8 *arg0) {
         } else {
             g = 0.0f;
         }
-        dx = (*(f32 *)(p + 0x10) - old.x) * D_800BEDC8;
-        dz = (*(f32 *)(p + 0x18) - old.z) * D_800BEDC8;
+        dx = (*(f32 *)(p + 0x10) - old.x) * g_frame_step_inv;
+        dz = (*(f32 *)(p + 0x18) - old.z) * g_frame_step_inv;
         *(f32 *)(arg0 + 0x54) += (old.x + 0.5f * dx * g_frame_step_f) * g_frame_step_f;
         *(f32 *)(arg0 + 0x58) += (old.y + 0.5f * g * g_frame_step_f) * g_frame_step_f;
         *(f32 *)(arg0 + 0x5C) += (old.z + 0.5f * dz * g_frame_step_f) * g_frame_step_f;
@@ -308,16 +308,16 @@ Gfx *anim_model_fx_load_screen_mtx(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, u8 *a
     return gdl;
 }
 
-extern Mtx *D_800DC6D0[];
+extern Mtx *g_view_mtx_bufs[]; /* was D_800DC6D0 */
 
 /* was func_15158558 */
 Gfx *anim_model_fx_load_view_proj(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
     gSPMatrix(gdl++, (u8 *)g_player_cams + arg2 * 0x180 + (g_dl_buf_index << 6) + 0x100, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gSPMatrix(gdl++, (u8 *)D_800DC6D0[g_dl_buf_index] + (arg2 << 6), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
+    gSPMatrix(gdl++, (u8 *)g_view_mtx_bufs[g_dl_buf_index] + (arg2 << 6), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
     return gdl;
 }
 
 /* was func_151585E8 */
 void anim_model_fx_broadcast(s32 arg0, u8 arg1) {
-    node_broadcast_types(D_800A6440, 3, arg0, arg1);
+    node_broadcast_types(g_anim_model_fx_node_types, 3, arg0, arg1);
 }

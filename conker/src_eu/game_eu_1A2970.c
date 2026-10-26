@@ -11,7 +11,7 @@ s32 approx_dist2_int(s32, s32, s32, s32);
 
 
 s32 collision_level_nearest_height(s32 x, s32 y, s32 z, s32 *tri);
-extern s32 D_800DC26C; /* triangle table: 12 bytes per triangle */
+extern s32 g_level_tri_table; /* triangle table: 12 bytes per triangle; was D_800DC26C */
 
 // leaf_burst_spawn: spawns up to `count` falling leaves (node_alloc list 0xA, type 3) around (x, y, z) facing away
 // from player `player`'s camera position (+0x2F8): position jittered by -63..64 in x / z, life 10..24, yaw = the
@@ -82,7 +82,7 @@ void flyer_leaf_burst_spawn(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 player
             *(f32 *)(p + 0xC8) = (f32)collision_level_nearest_height(px, y, pz, &tri);
             v = 0;
             if (tri != 0) {
-                v = ((s32 *)D_800DBE5C)[(tri - D_800DC26C) / 12];
+                v = ((s32 *)g_coll_tri_flags)[(tri - g_level_tri_table) / 12];
             }
             *(s32 *)(p + 0xE8) = v;
             p[0xEC] = g_flyer_surface_tints[((u32)v >> 5) & 3];
@@ -96,7 +96,7 @@ void flyer_leaf_burst_spawn(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 player
 
 void collision_select_area(s32 arg0);
 s32 floor_collect_level_tris(s32 x, s32 z);
-extern s32 D_800D3720; /* floor candidates (16 bytes: +0 height in 24.8) left by floor_collect_level_tris */
+extern s32 g_floor_hits; /* floor candidates (16 bytes: +0 height in 24.8) left by floor_collect_level_tris; was D_800D3720 */
 
 // leaf_drop_spawn: spawns up to `count` leaves of model row 7 (node_alloc list 0x13) in a `width` square around
 // (x, z) at height y: life 4..6, spin / tilt jitter, size `base` + rand * `scale`. Each leaf takes the lowest floor
@@ -146,9 +146,9 @@ void flyer_leaf_drop_spawn(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 width, 
             node_delete((struct102 *)p);
             continue;
         }
-        floorY = (&D_800D3720)[0];
+        floorY = (&g_floor_hits)[0];
         for (k = 1; k < n; k++) {
-            h = (&D_800D3720)[k * 4];
+            h = (&g_floor_hits)[k * 4];
             if (h < floorY) {
                 floorY = h;
             }
@@ -180,7 +180,7 @@ void flyer_leaf_drop_spawn(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 width, 
 
 s32 collision_level_nearest_height(s32 x, s32 y, s32 z, s32 *tri);
 s32 random_int(void);
-extern s32 D_800DC26C; /* triangle table: 12 bytes per triangle */
+extern s32 g_level_tri_table; /* triangle table: 12 bytes per triangle; was D_800DC26C */
 
 // leaf_field_spawn: spawns up to `count` leaf / debris particles (node_alloc list `list` + rand % `listRand`)
 // in a ring around (x, z): each axis offset is rand % (rMax - rMin) pushed out by rMin (away from 0), so |offset| is
@@ -306,7 +306,7 @@ void flyer_field_spawn(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 rMax, s32 p
             *(s16 *)(p + 0x92) |= 0x80;
             v = 0;
             if (tri != 0) {
-                v = ((s32 *)D_800DBE5C)[(tri - D_800DC26C) / 12];
+                v = ((s32 *)g_coll_tri_flags)[(tri - g_level_tri_table) / 12];
             }
             *(s32 *)(p + 0xE8) = v;
             p[0xEC] = g_flyer_surface_tints[((u32)v >> 5) & 3];
@@ -377,8 +377,8 @@ typedef struct {
 } FlyerModels;
 
 extern s32 g_anim_mesh_params; /* was D_8008D450 */
-extern s32 D_800C39D0;
-extern f32 D_800D3A00;
+extern s32 g_cutscene_frame; /* was D_800C39D0 */
+extern f32 g_cam_zoom_factors; /* was D_800D3A00 */
 extern f32 g_cam_zoom_factors_1; /* was D_800D3A04 */
 extern f32 g_cam_far_plane; /* was D_800D9F3C */
 extern f32 g_cam_near_plane; /* was D_800D9F40 */
@@ -401,7 +401,7 @@ static const f32 sFlyerDegToRad[1] = { 0.0174532924f }; /* D_800A7588 */
 
 // ambient_flyer_update: per-frame update of an ambient flyer (bird / bat; render-layer field 0 of layers 10 / 20 /
 // 68 / 69, also called by flyer_perched_update / flyer_resting_update). Removed (node_destroy) when its type row is off. Types 8
-// and 9 on level 6 during D_800C3A08 == 0xF scatter after 60 frames of D_800C39D0: they start circling (flag 0x200)
+// and 9 on level 6 during g_cutscene_scene == 0xF scatter after 60 frames of g_cutscene_frame: they start circling (flag 0x200)
 // round (-3478, 3858), the radius shrinking to 60 while they sink, and vanish below -3100 or when the event ends.
 // Otherwise: fade in / fade out (alpha +0xF0, `fading` once the slot is gone and flag 8 is set), keep the looping
 // sound at the flyer (+0xEE), flag 4 = tether to home (turn back past rangeMax, or away inside rangeMin with flag
@@ -435,13 +435,13 @@ void flyer_update(u8 *arg0) {
         return;
     }
     alpha = f->alpha;
-    if ((f->type == 8 || f->type == 9) && g_level_id == 6 && D_800C35EA != 0 && D_800C3A08 == 0xF) {
+    if ((f->type == 8 || f->type == 9) && g_level_id == 6 && g_cutscene_slot_state != 0 && g_cutscene_scene == 0xF) {
         f->flags &= 0xFFF7;
-        if (D_800C35EA == 0 || D_800C3A08 != 0xF) {
+        if (g_cutscene_slot_state == 0 || g_cutscene_scene != 0xF) {
             node_destroy((struct102 *)f);
             return;
         }
-        if (D_800C39D0 >= 60 && !(f->flags & 0x200)) {
+        if (g_cutscene_frame >= 60 && !(f->flags & 0x200)) {
             f->flags = (f->flags & 0xFFB3) | 0x200;
             dx = f->x - sFlyerCircleX[0];
             dz = f->z - sFlyerCircleZ[0];
@@ -552,7 +552,7 @@ void flyer_update(u8 *arg0) {
         f->floorY = (f32)collision_level_nearest_height((s32)f->x, (s32)f->y, (s32)f->z, &tri);
         v = 0;
         if (tri != 0) {
-            v = ((s32 *)D_800DBE5C)[(tri - D_800DC26C) / 12];
+            v = ((s32 *)g_coll_tri_flags)[(tri - g_level_tri_table) / 12];
         }
         f->surface = v;
     }
@@ -653,7 +653,7 @@ void flyer_update(u8 *arg0) {
         f->x = f->rollVel * c + sFlyerCircleX[0];
         f->z = f->rollVel * s + sFlyerCircleZ[0];
         f->y -= 100.0f / ((f->rollVel - 60.0f) + 4.0f);
-        if (f->y < sFlyerCircleFloor[0] || D_800C35EA == 0 || D_800C3A08 != 0xF) {
+        if (f->y < sFlyerCircleFloor[0] || g_cutscene_slot_state == 0 || g_cutscene_scene != 0xF) {
             node_destroy((struct102 *)f);
             return;
         }
@@ -678,9 +678,9 @@ void flyer_update(u8 *arg0) {
         g_weather_slot_timers[f->slot] = (random_int() & 0x3F) + 30;
     }
     if ((f->flags & 2)
-        && view_point_cull_test(g_view_mtxf, f->x, f->y, f->z, g_cam_near_plane, g_cam_far_plane, D_800D3A00, g_cam_zoom_factors_1, 0, 0) != 0
+        && view_point_cull_test(g_view_mtxf, f->x, f->y, f->z, g_cam_near_plane, g_cam_far_plane, g_cam_zoom_factors, g_cam_zoom_factors_1, 0, 0) != 0
         && (g_session_game_mode != 1
-            || view_point_cull_test(g_view_mtxf_p1, f->x, f->y, f->z, g_cam_near_plane, g_cam_far_plane, D_800D3A00, g_cam_zoom_factors_1, 0, 0)
+            || view_point_cull_test(g_view_mtxf_p1, f->x, f->y, f->z, g_cam_near_plane, g_cam_far_plane, g_cam_zoom_factors, g_cam_zoom_factors_1, 0, 0)
                    != 0)) {
         node_destroy((struct102 *)f);
     }
@@ -884,7 +884,7 @@ Gfx *flyer_model_draw(Gfx *gdl, u8 *obj, s16 arg2) {
 
 s32 view_point_cull_test(u8 *, f32, f32, f32, f32, f32, f32, f32, s32, s32);
 Gfx *flyer_model_draw(Gfx *, u8 *, s16);
-extern f32 D_800D3A00;
+extern f32 g_cam_zoom_factors; /* was D_800D3A00 */
 extern f32 g_cam_zoom_factors_1; /* was D_800D3A04 */
 extern f32 g_cam_near_plane; /* was D_800D9F40 */
 extern u8 g_view_mtxf[]; /* was D_800DA030 */
@@ -894,7 +894,7 @@ Gfx *flyer_draw(Gfx *gdl, u8 *arg1, s16 arg2) {
     f32 mf[4][4];
     s32 pad[2];
 
-    if (view_point_cull_test(&g_view_mtxf[arg2 << 6], *(f32 *)(arg1 + 0x98), *(f32 *)(arg1 + 0x9C), *(f32 *)(arg1 + 0xA0), g_cam_near_plane, 4000.0f, D_800D3A00, g_cam_zoom_factors_1, 0, 0) == 0) {
+    if (view_point_cull_test(&g_view_mtxf[arg2 << 6], *(f32 *)(arg1 + 0x98), *(f32 *)(arg1 + 0x9C), *(f32 *)(arg1 + 0xA0), g_cam_near_plane, 4000.0f, g_cam_zoom_factors, g_cam_zoom_factors_1, 0, 0) == 0) {
         switch (arg1[0x91]) {
         case 0:
             mtxf_rotate_xyz_deg(mf, *(f32 *)(arg1 + 0xA8), *(f32 *)(arg1 + 0xAC), *(f32 *)(arg1 + 0xB0));

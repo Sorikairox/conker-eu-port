@@ -63,7 +63,7 @@ void sound_voice_set_param(u16 arg0, s16 arg1, s32 arg2);
 s32 allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 random_int(void);
 
-/* rain_update: per-frame rain state machine (view index arg0; D_800C35EA[arg0] != 0 pauses the timers).
+/* rain_update: per-frame rain state machine (view index arg0; g_cutscene_slot_state[arg0] != 0 pauses the timers).
  * g_rain_gust_timer / g_rain_gust_strength: random gust timer and strength (after a strong gust (>= 40) a weak one of 20..50 frames,
  * else a strong one of 60..122). g_rain_state is the state, g_rain_level the requested mode (rain_request),
  * D_800DD874 (US name g_rain_state_timer, s16) the state timer, g_rain_drop_count the number of drops in the table g_rain_drops
@@ -112,7 +112,7 @@ void rain_update(s32 arg0) {
                     g_rain_state_timer = 0;
                     g_rain_voice = sound_play_2d(0x6F, 200, 0x40, 0, 0x80);
                 }
-            } else if ((&D_800C35EA)[arg0] == 0) {
+            } else if ((&g_cutscene_slot_state)[arg0] == 0) {
                 g_rain_state_timer = t + g_frame_ticks;
             }
             break;
@@ -140,7 +140,7 @@ void rain_update(s32 arg0) {
             } else if (g_rain_level == 0 || (s16) g_rain_state_timer >= 120) {
                 g_rain_state = 3;
                 g_rain_state_timer = g_rain_drop_count;
-            } else if (g_rain_level == 3 && (&D_800C35EA)[arg0] == 0) {
+            } else if (g_rain_level == 3 && (&g_cutscene_slot_state)[arg0] == 0) {
                 g_rain_state_timer = (s16) g_rain_state_timer + g_frame_ticks;
             }
             break;

@@ -87,7 +87,7 @@ void node_lists_run_update2(void) {
         }
     }
 }
-extern f32 D_800DD600[2];
+extern f32 g_billboard_yaw_sincos[2]; /* was D_800DD600 */
 extern f32 g_view_yaw_sin[4]; /* was D_800DD608 */
 extern f32 g_view_yaw_cos[4]; /* was D_800DD618 */
 /* was func_15167310 */
@@ -104,8 +104,8 @@ void node_lists_run_view_update(void) {
         g_view_yaw_cos[k] = cosf(a);
     }
     a = g_player_views->unk3A0;
-    D_800DD600[0] = sinf(a);
-    D_800DD600[1] = cosf(a);
+    g_billboard_yaw_sincos[0] = sinf(a);
+    g_billboard_yaw_sincos[1] = cosf(a);
 dummy: ; // fakematch: label splits the block (permuter)
     for (j = 0; j < 0x68; j++) {
         for (i = 0; i < 2; i++) {
@@ -141,10 +141,10 @@ extern s8 g_node_iter_depth; /* was D_800DD5C0 */
 extern struct_eu_node *g_node_lists[][104]; /* was D_800DD280 */
 extern u8 g_sprite_keep_prim_colour; /* was D_800D31CB */
 extern s32 g_tex_cache_last_addr; /* was D_800DD5E0 */
-extern s32 D_800DD5E4;
-extern s32 D_800DD5E8;
+extern s32 g_sprite_last_tex; /* was D_800DD5E4 */
+extern s32 g_sprite_last_frame; /* was D_800DD5E8 */
 extern s16 g_sprite_last_other_mode; /* was D_800DD5EC */
-extern s16 D_800DD5EE;
+extern s16 g_sprite_last_combine; /* was D_800DD5EE */
 extern s16 g_gfx_prim_r_cached; /* was D_800DD5F0 */
 extern s16 g_gfx_prim_g_cached; /* was D_800DD5F2 */
 extern s16 g_gfx_prim_b_cached; /* was D_800DD5F4 */
@@ -167,11 +167,11 @@ extern s32 g_gfx_othermode_lo_cached; /* was D_800DD64C */
 extern s32 g_layer_tex_scroll; /* was D_800DD650 */
 extern s32 g_layer_tex_mode; /* was D_800DD654 */
 extern s32 g_layer_tex; /* was D_800DD658 */
-extern Gfx *D_800BEDE8[];
+extern Gfx *g_gfx_dl_buffers[]; /* was D_800BEDE8 */
 extern s32 g_dl_capacity; /* was D_800BEFC4 */
 extern u8 g_identity_mtx[]; /* was D_80089810 */
 
-#define DL_FULL(g) (g_dl_capacity < (g) - D_800BEDE8[g_dl_buf_index])
+#define DL_FULL(g) (g_dl_capacity < (g) - g_gfx_dl_buffers[g_dl_buf_index])
 
 /* Draw the render layers of `group` (render_group_layer_range gives the index range) from node list `list`:
  * per layer the pre DL / callback, every node's draw callback, then the post DL / callback.
@@ -217,10 +217,10 @@ void *node_render_layers_draw(void *arg0, s32 group, s16 arg2, s32 list) {
         g_layer_tex_scroll = 0;
         g_layer_tex_mode = 2;
         g_tex_cache_last_addr = -1;
-        D_800DD5E4 = -1;
-        D_800DD5E8 = -1;
+        g_sprite_last_tex = -1;
+        g_sprite_last_frame = -1;
         g_sprite_last_other_mode = 0;
-        D_800DD5EE = 0;
+        g_sprite_last_combine = 0;
         g_gfx_prim_a_cached = -1;
         g_gfx_prim_b_cached = g_gfx_prim_a_cached;
         g_gfx_prim_g_cached = g_gfx_prim_b_cached;

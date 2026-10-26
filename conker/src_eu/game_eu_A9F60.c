@@ -25,8 +25,8 @@ void obj_collision_sizes_update(void) {
     }
 }
 
-extern u8 D_800B89C4[];
-extern f32 D_8009BA58;
+extern u8 g_objects_ref_id[]; /* was D_800B89C4 */
+extern f32 g_coll_cyl_k_ba58; /* was D_8009BA58 */
 
 /* Collision cylinder of a record: *height (h), *width (w) and *radius (r), each optional, as s16. By state
  * (+0): 0 = 60 / 180, 0x2D (camera-driven) the camera's +0x95C / +0x960, 4 = 3 x unkE4 / 6 x unkE6, 0x2C = 80 / 160;
@@ -104,7 +104,7 @@ s32 obj_collision_cylinder(struct127 *rec, u16 *height, u16 *width, u16 *radius)
         r = w = 90.0f;
         break;
     case 0x36:
-        h = D_8009BA58; /* 257 */
+        h = g_coll_cyl_k_ba58; /* 257 */
         r = w = 90.0f;
         break;
     case 0x9A:
@@ -123,7 +123,7 @@ s32 obj_collision_cylinder(struct127 *rec, u16 *height, u16 *width, u16 *radius)
         scaled = 0;
         break;
     case 0x53:
-        if (D_800BE616 != 0) {
+        if (g_mp_mode_active != 0) {
             r = w = 150.0f;
             h = 300.0f;
         } else {
@@ -138,8 +138,8 @@ s32 obj_collision_cylinder(struct127 *rec, u16 *height, u16 *width, u16 *radius)
         break;
     }
     holder = rec->unk13C;
-    /* D_800B89C4[n * 0x32C] is g_objects[n - 100].id */
-    if (holder > 100 && D_800B89C4[holder * 0x32C] == 0x13) {
+    /* g_objects_ref_id[n * 0x32C] is g_objects[n - 100].id */
+    if (holder > 100 && g_objects_ref_id[holder * 0x32C] == 0x13) {
         r += 120.0f * *(f32 *)((u8 *)rec + 0x14C);
         h += 100.0f * *(f32 *)((u8 *)rec + 0x150);
     }

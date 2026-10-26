@@ -3,7 +3,7 @@ s/    g_pause_open = 0;/    g_pause_open = 1;/ % r2_none
 s/    g_menu_setup_step = 0;/    g_menu_setup_step = 1;/ % r2_none
 s/    g_game_mode_timer = 0;/    g_game_mode_timer = 1;/ % r2_none
 s/    next = mode\[7\];/    next = mode[6];/ % r2_none r11_none r11_quit
-s/    D_80090160 \&= 0xF369;/    D_80090160 \&= 0xF36B;/ % r2_none
+s/    g_mp_hud_flags \&= 0xF369;/    g_mp_hud_flags \&= 0xF36B;/ % r2_none
 s/    if (g_menu_modes\[(s8) g_menu_state\[0x42\]\]\[5\] >= 0) {/    if (g_menu_modes[(s8) g_menu_state[0x42]][5] > 0) {/ % r0_two
 s/    if (g_menu_modes\[(s8) g_menu_state\[0x42\]\]\[5\] >= 0) {/    if (g_menu_modes[(s8) g_menu_state[0x42]][4] >= 0) {/ % r1_two
 s/        if (g_mp_placings\[0\] == 1) {/        if (g_mp_placings[0] != 1) {/ % r2_two
@@ -20,7 +20,7 @@ s/        g_menu_scene_start_state = 1;/        g_menu_scene_start_state = 3;/ %
 s/    } else if (next == -2 \&\& (s8) g_mp_match_quit == 0) {/    } else if (next == -1 \&\& (s8) g_mp_match_quit == 0) {/ % r11_none r3_none
 s/    } else if (next == -2 \&\& (s8) g_mp_match_quit == 0) {/    } else if (next == -2) {/ % r11_quit
 s/        g_menu_scene_start_state = 2;/        g_menu_scene_start_state = 5;/ % r11_none
-s/        D_80090160 = 0;/        D_80090160 = 1;/ % r11_none
+s/        g_mp_hud_flags = 0;/        g_mp_hud_flags = 1;/ % r11_none
 s/        return;/        ;/ % r11_none
 s/        level = 0x1D;/        level = 0x1C;/ % r3_none
 s/        g_game_mode = 3;/        g_game_mode = 4;/ % r3_none

@@ -13,4 +13,4 @@ s|< 0x64|<= 0x64|
 s#|= 0xE00#|= 0x600#
 s#|= 0x70#|= 0x60#
 s|case 0x85:|case 0x86:|
-s|D_800905D8;|D_800905DC;|
+s|g_att_8d_tex_low;|g_att_8d_tex_high;|

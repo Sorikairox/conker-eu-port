@@ -52,7 +52,7 @@ void level_fx_spawn_box_a(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     }
 }
 
-extern s32 D_800D9CF0[];
+extern s32 g_mist_puff_handles[]; /* was D_800D9CF0 */
 void area_drift_emitter_create(void *arg0, u8 arg1);
 
 /* emitter spec copied by area_drift_emitter_create (0x50 bytes) */
@@ -88,7 +88,7 @@ static const f32 D_80096614_c[9][6] = {
 };
 
 // level_mist_setup: level-object init (g_level_obj_init_fns[8]): two level_fx_spawn_box_a spawns, four mist_puff_spawn objects whose
-// handles go to D_800D9CF0[0..3] (x 4054 / 3890 / 4380 / 4218, y -1692, z 0 / -78 / -664 / -740), then nine
+// handles go to g_mist_puff_handles[0..3] (x 4054 / 3890 / 4380 / 4218, y -1692, z 0 / -78 / -664 / -740), then nine
 // drifting emitters (area_drift_emitter_create, flag 1) along a chain of path segments; each spec gets its start, the vector to
 // the segment end and the heading atan2(dx, dz) as a byte angle - 0x40.
 /* was func_1500F3BC */
@@ -99,10 +99,10 @@ void level_mist_setup(void) {
 
     level_fx_spawn_box_a(0x1612, -0x553, -0x2DC, -0x69F);
     level_fx_spawn_box_a(0x1633, -0x553, -0x3C2, -0x69F);
-    D_800D9CF0[0] = mist_puff_spawn(D_80096600_c[1], D_80096600_c[0], 0.0f);
-    D_800D9CF0[1] = mist_puff_spawn(D_80096600_c[2], D_80096600_c[0], -78.0f);
-    D_800D9CF0[2] = mist_puff_spawn(D_80096600_c[3], D_80096600_c[0], -664.0f);
-    D_800D9CF0[3] = mist_puff_spawn(D_80096600_c[4], D_80096600_c[0], -740.0f);
+    g_mist_puff_handles[0] = mist_puff_spawn(D_80096600_c[1], D_80096600_c[0], 0.0f);
+    g_mist_puff_handles[1] = mist_puff_spawn(D_80096600_c[2], D_80096600_c[0], -78.0f);
+    g_mist_puff_handles[2] = mist_puff_spawn(D_80096600_c[3], D_80096600_c[0], -664.0f);
+    g_mist_puff_handles[3] = mist_puff_spawn(D_80096600_c[4], D_80096600_c[0], -740.0f);
 
     spec.w48 = 3;
     spec.w4C = 2;

@@ -60,7 +60,7 @@ void aiscript_move_setup(void) {
         if (g_cur_obj->unk44 == 1.0f) {
             g_cur_obj->unk44 = 0.5f;
         }
-        if (D_800BE616 != 0) {
+        if (g_mp_mode_active != 0) {
             if ((g_cur_obj->id == 40) && ((g_cur_obj->unk31C->unk128 & 1) != 0)) {
                 g_cur_obj->unk44 *= g_aiscript_speed_boost;
             }
@@ -86,7 +86,7 @@ void aiscript_move_setup_path_point(void) {
 
     var_v1 = g_cur_obj;
     temp_v0 = var_v1->unk21F;
-    var_a0 = (D_800D2528[var_v1->unk13F] - 1) & 0xFF;
+    var_a0 = (g_path_point_counts[var_v1->unk13F] - 1) & 0xFF;
     if (temp_v0 != 0) {
         var_a0 = temp_v0 & 0xFF;
     }
@@ -235,10 +235,10 @@ void aiscript_if_path_offset(void) {
     var_a2 = 0;
     var_a0 = g_cur_obj->unk21E - g_cur_obj->unk221;
     if (var_a0 < 0) {
-        var_v0 = D_800D2528[g_cur_obj->unk13F];
+        var_v0 = g_path_point_counts[g_cur_obj->unk13F];
         var_a0 = (var_a0 + var_v0) - 1;
     } else {
-        var_v0 = D_800D2528[g_cur_obj->unk13F];
+        var_v0 = g_path_point_counts[g_cur_obj->unk13F];
         if (var_a0 >= (var_v0 - 1)) {
             var_a0 = (var_a0 - var_v0) + 1;
         }
@@ -714,7 +714,7 @@ int aiscript_find_by_kind(s32, s32);
 // find_visible_target: P210: script command: looks for the nearest object the current one can see: live (state,
 // health), targetable (unkF8 bit 0x20), not itself, of another id unless g_aiscript_arg1 is set, within 50 in height,
 // closer than g_aiscript_arg0 * 8 (obj_dist_3d), and inside its view cone (width byte 0x17 of its type record
-// D_800D1C90[id], in 1/256 turns around heading unk76 >> 8 + unk2CA). The nearest one is stored as unkA8 =
+// g_type_descs[id], in 1/256 turns around heading unk76 >> 8 + unk2CA). The nearest one is stored as unkA8 =
 // 0x80 + its number; then the object's script jumps to g_aiscript_arg3 and, when g_aiscript_arg2 is set, the target's
 // script to g_aiscript_arg2 with unk222 = the current object's number.
 /* was func_150768DC */
@@ -743,7 +743,7 @@ void aiscript_find_visible_target(void) {
         if (!(d < best)) {
             continue;
         }
-        fov = D_800D1C90[g_cur_obj->id]->unk17;
+        fov = g_type_descs[g_cur_obj->id]->unk17;
         ang = math_atan2_u16(o->x_position - g_cur_obj->x_position, g_cur_obj->z_position - o->z_position, 0);
         if (((((g_cur_obj->unk76 >> 8) + g_cur_obj->unk2CA) - (ang >> 8) + fov / 2) & 0xFF) < fov) {
             g_cur_obj->unkA8 = i + 0x80;
@@ -786,7 +786,7 @@ void aiscript_find_visible_target(void) {
 //                 if (!(fabsf(g_cur_obj->y_position - current->y_position) > 50.0f)) {
 //                     temp_f20 = obj_dist_3d(g_cur_obj, current);
 //                     if (temp_f20 < phi_f22) {
-//                         foo = D_800D1C90[g_cur_obj->id];
+//                         foo = g_type_descs[g_cur_obj->id];
 //                         temp_s2 = foo->unk17;
 //                         tmp1 = math_atan2_u16(current->x_position - g_cur_obj->x_position, g_cur_obj->z_position - current->z_position, 0) >> 8;
 //                         if ((((((g_cur_obj->unk76 >> 8) + g_cur_obj->unk2CA) - tmp1) + (temp_s2 / 2)) & 0xFF) < temp_s2) {
@@ -1057,7 +1057,7 @@ void aiscript_if_nav_arrived(void) {
 s32 rail_point_pick(f32, f32, f32, s8, s8, u8 *, u8 *); /* P98: from the asm (f12, f14, a2 = z bits, a3, 3 stack words) */
 s32 rail_route_next(u8, s8, s8, u8 *, u8 *);
 s32 rail_node_position(s32, f32 *, f32 *, f32 *);
-extern s32 D_800D277C;
+extern s32 g_rail_route_dist; /* was D_800D277C */
 
 /* was func_15077508 */
 void aiscript_nav_next_node(void) {
@@ -1111,7 +1111,7 @@ void aiscript_nav_next_node(void) {
     }
 block_5:
     g_cur_obj->unk25C &= ~0x800;
-    if ((D_800D2528[g_cur_obj->unk13F] - 1) > 0) {
+    if ((g_path_point_counts[g_cur_obj->unk13F] - 1) > 0) {
         sp76 = 0;
         var_a1 = 0;
         if (g_cur_obj->unk211 != 0xFF) {
@@ -1139,7 +1139,7 @@ block_5:
                 }
                 var_f2 = 10.0f;
                 var_a0 = 0;
-                var_v1 = &D_800D2778[temp_v1_2];
+                var_v1 = &g_rail_nodes[temp_v1_2];
                 do {
                     temp_v0 = var_v1->pad8[1];
                     if ((temp_v0 != 0xFF) && (g_cur_obj->unk210 != temp_v0)) {
@@ -1171,10 +1171,10 @@ block_28:
         if (sp.u84 != 0xFF) {
             g_cur_obj->unk21E = 0;
             if (rail_node_position(sp.u84, &sp.u80, &sp.u7C, &sp.u78) != 0) {
-                (*(s16 *)((u8 *)g_cur_obj + 0x216)) = (s16) D_800D277C;
+                (*(s16 *)((u8 *)g_cur_obj + 0x216)) = (s16) g_rail_route_dist;
                 g_cur_obj->unk210 = g_cur_obj->unk20F;
                 g_cur_obj->unk20F = (u8) sp.u84;
-                temp_t2 = D_800D2778[sp.u84].pad8[0];
+                temp_t2 = g_rail_nodes[sp.u84].pad8[0];
                 var_f2_2 = (f32) temp_t2;
                 if ((s32) temp_t2 < 0) {
                     var_f2_2 += 4294967296.0f;
@@ -1202,7 +1202,7 @@ block_28:
 }
 /* was func_150778F0 */
 void aiscript_path_advance(void) {
-    u8 var_v0 = D_800D2528[g_cur_obj->unk13F] - 1;
+    u8 var_v0 = g_path_point_counts[g_cur_obj->unk13F] - 1;
 
     if (g_cur_obj->unk21F != 0) {
         var_v0 = g_cur_obj->unk21F;
@@ -1629,7 +1629,7 @@ void aiscript_copy_target_2d0_pos(void) {
 // requires jump table
 /* P183 */
 f32 math_atan2f(f32, f32);
-extern u8 D_800CC9D4[];
+extern u8 g_objects_unk2e4[]; /* was D_800CC9D4 */
 extern u8 g_obj2_unkb0[]; /* was D_800CC9D8 */
 extern u8 g_obj2_unkb4[]; /* was D_800CC9DC */
 extern u8 g_obj1_unk138[]; /* was D_800CC734 */
@@ -1661,7 +1661,7 @@ s32 aiscript_test_object_value(s32 idx) {
             v = *(f32 *) ((u8 *) g_obj_tab_xz_velocity + off);
             break;
         case 1:
-            v = *(s32 *) (D_800CC9D4 + off);
+            v = *(s32 *) (g_objects_unk2e4 + off);
             break;
         case 2:
             v = *(s32 *) (g_obj2_unkb0 + off);
@@ -1798,7 +1798,7 @@ void aiscript_set_field1c9(void) {
 // ???
 /* was func_15079228 */
 void aiscript_send_dir_message(void) {
-    s16 *temp_v0 = ((s16 (*)[26])D_800D34B8)[g_cur_obj->unk251];
+    s16 *temp_v0 = ((s16 (*)[26])g_level_zones)[g_cur_obj->unk251];
     f32 px = temp_v0[0];
     f32 pz = temp_v0[2];
     s32 temp_v0_2 = math_atan2_u16(g_cur_obj->x_position - px, pz - g_cur_obj->z_position, 0);
@@ -1992,7 +1992,7 @@ void aiscript_set_field252(void) {
 
 /* was func_15079A58 */
 void aiscript_set_path_param(void) {
-    D_800D2530[g_cur_obj->unk13F] = (g_aiscript_arg0 << 8) + g_aiscript_arg1;
+    g_setup_respawn_timers[g_cur_obj->unk13F] = (g_aiscript_arg0 << 8) + g_aiscript_arg1;
 }
 
 // path_point_angle: angle (u16, math_atan2_u16) from object arg0 (g_objects) to the current path point of the
@@ -2013,8 +2013,8 @@ u16 aiscript_path_point_angle(s32 arg0);
 
 // object_var_cmd: P210: script command on object `idx` (g_aiscript_arg1 0 / 1: the current one g_cur_obj_index, else
 // obj_slot_by_setup_id(g_aiscript_arg1 - 2); -1 = none). g_aiscript_arg2 selects: 1..3 counter unk2E4 / unk2E8 / unk2EC, updated by
-// g_aiscript_arg3 (0 = g_aiscript_arg0, 1 -1, 2 + frame time g_frame_ticks, 3 +1, 4 - frame time, 5 - D_800CC264,
-// 6 + D_800CC264); 4 / 5 start script g_aiscript_arg0 on the object (when it is not running it already); 6 unkC8 =
+// g_aiscript_arg3 (0 = g_aiscript_arg0, 1 -1, 2 + frame time g_frame_ticks, 3 +1, 4 - frame time, 5 - g_obj_time_step_pct,
+// 6 + g_obj_time_step_pct); 4 / 5 start script g_aiscript_arg0 on the object (when it is not running it already); 6 unkC8 =
 // g_aiscript_arg0; 7 unkB8 = 0; for the current object: 8 unk221 = g_aiscript_arg0 when the path point angle
 // (aiscript_path_point_angle) from object g_cur_obj_index minus the one from object unk222 has bit 15 set, 9 unk244 = g_aiscript_arg3 << 8 | g_aiscript_arg0, 10 unk236 = unk23D + (s8)g_aiscript_arg0, 11 unk22A = g_aiscript_arg0.
 // Other g_aiscript_arg2 values: the asm then updates a counter through an unset stack pointer; here nothing happens.
@@ -2099,17 +2099,17 @@ void aiscript_object_var_cmd(void) {
             *var -= g_frame_ticks;
             break;
         case 5:
-            *var -= D_800CC264;
+            *var -= g_obj_time_step_pct;
             break;
         case 6:
-            *var += D_800CC264;
+            *var += g_obj_time_step_pct;
             break;
     }
 }
 
 /* was func_15079F24 */
 void aiscript_set_field48(void) {
-    g_cur_obj->unk48 = D_800D1898[g_aiscript_arg0];
+    g_cur_obj->unk48 = g_aiscript_values[g_aiscript_arg0];
 }
 
 /* was func_15079F50 */
@@ -2296,7 +2296,7 @@ void aiscript_set_path_step(void) {
         if (g_aiscript_arg2 != 0) {
             count = g_aiscript_arg2;
         } else {
-            count = D_800D2528[g_cur_obj->unk13F] - 1;
+            count = g_path_point_counts[g_cur_obj->unk13F] - 1;
         }
         g_cur_obj->unk221 = -g_cur_obj->unk221;
         pos = g_cur_obj->unk21E + g_cur_obj->unk221;
@@ -2385,7 +2385,7 @@ void aiscript_call_15b470(void) {
 
 /* was func_1507A8A8 */
 void aiscript_if_mp_or_cc335(void) {
-    if ((D_800CC335 != 0) || (D_800BE616 != 0)) {
+    if ((g_objects_parent_slot != 0) || (g_mp_mode_active != 0)) {
         aiscript_branch(g_aiscript_arg0);
     }
 }
@@ -2781,7 +2781,7 @@ u8 aiscript_call_hook(void) {
 /* was func_1507B8F4 */
 void aiscript_if_mp_flag(void) {
 
-    if (D_800BE616 != 0) {
+    if (g_mp_mode_active != 0) {
         if ((g_aiscript_arg1 != 0) || ((g_cur_obj->unk31C != 0) && (g_cur_obj->unk31C->unk84 != 0))) {
             aiscript_branch(g_aiscript_arg0);
         }
@@ -2839,7 +2839,7 @@ extern u8 g_aiscript_default_list[];          /* default script list, 8-byte ent
 
 // object_find_script: returns the current object's script of a given kind (type list, then the default list).
 /* (int: game_A28B0.c calls it before any prototype, i.e. as implicit int.) The script of kind `kind` for the current object g_cur_obj: its type's list (pointer 0x10 bytes before the
- * type's D_800D1588 entry) is searched first; a list without that kind (a NULL script ends it) falls back to the
+ * type's g_model_anim_banks entry) is searched first; a list without that kind (a NULL script ends it) falls back to the
  * default list g_aiscript_default_list, which must contain it (the asm spins forever otherwise). No type entry / list: the
  * empty script g_aiscript_empty. */
 /* was func_1507BB28 */
@@ -2848,7 +2848,7 @@ int aiscript_find_by_kind(s32 unused, s32 kind) {
     u8 *list;
     s32 i;
 
-    type = ((u8 **)D_800D1588)[*((u8 *)g_cur_obj + 4)];
+    type = ((u8 **)g_model_anim_banks)[*((u8 *)g_cur_obj + 4)];
     if (type == NULL) {
         return (s32)g_aiscript_empty;
     }
@@ -2875,7 +2875,7 @@ void aiscript_run(struct127 *arg0) {
     if (arg0->unk21C != 0) {
         if (arg0->unk218 != 0) {
             if (arg0->unk21C != 25500) {
-                arg0->unk21C = arg0->unk21C - D_800CC264;
+                arg0->unk21C = arg0->unk21C - g_obj_time_step_pct;
             }
             if ((arg0->unk21C >= 50000) || (arg0->unk21C == 0)) {
                 arg0->unk21C = 0;

@@ -12,7 +12,7 @@
 /\*(f32 \*) (obj + 0x18) = ((f32 \*) target)\[1\];/s/\[1\]/[2]/ % target
 /\*(f32 \*) (obj + 0x14) = \*(f32 \*) (player + 0x14);/s/0x14);/0x1C);/ % mode4
 /\*(f32 \*) (obj + 0x18) = \*(f32 \*) ((u8 \*) g_cur_obj + 0x18) + 50.0f;/s/50.0f/40.0f/ % mode4
-/if (D_800C42B0 != 0) {/s/!= 0/== 0/ % mtx mtxfix
+/if (g_mtx_fixed_point != 0) {/s/!= 0/== 0/ % mtx mtxfix
 /guMtxL2F(mf, (Mtx \*) (mtx + attach\[3\] \* 0x40));/s/attach\[3\]/attach[2]/ % mtxfix mtx9fix
 /m = (f32 (\*)\[4\]) (mtx + attach\[3\] \* 0x40);/s/0x40/0x20/ % mtx mtx5 mtx13
 /mtxf_transform_point(m, (f32) attach\[0\], (f32) attach\[1\], (f32) attach\[2\], &pos\[0\], &pos\[1\], &pos\[2\]);/s/(f32) attach\[1\]/(f32) attach[0]/ % mtx mtx5 mtx13 mtxfix
@@ -36,9 +36,9 @@
 /            sound = 0x50;/s/0x50/0x51/ % mode4 mode7 mode19
 /        obj_setup_run((struct127 \*) obj, sound, 1.0f, 0);/s/1.0f/0.5f/ % mode4
 /angle = (s32) (yaw \* sCamDegToAngle\[0\]) - 0x4000;/s/- 0x4000/+ 0x4000/ % mode4 yawneg
-/if (D_800BE616 != 0 && !(flags & 1) && mode != 5 && mode != 9 && mode != 10 && mode != 4) {/s/mode != 10 \&\& // % aimskip10
-/if (D_800BE616 != 0 && !(flags & 1) && mode != 5 && mode != 9 && mode != 10 && mode != 4) {/s/!(flags & 1)/!(flags \& 2)/ % aimf1 fl2 fl6
-/if (D_800BE616 != 0 && !(flags & 1) && mode != 5 && mode != 9 && mode != 10 && mode != 4) {/s/mode != 4)/mode != 3)/ % aim3 aimskip4
+/if (g_mp_mode_active != 0 && !(flags & 1) && mode != 5 && mode != 9 && mode != 10 && mode != 4) {/s/mode != 10 \&\& // % aimskip10
+/if (g_mp_mode_active != 0 && !(flags & 1) && mode != 5 && mode != 9 && mode != 10 && mode != 4) {/s/!(flags & 1)/!(flags \& 2)/ % aimf1 fl2 fl6
+/if (g_mp_mode_active != 0 && !(flags & 1) && mode != 5 && mode != 9 && mode != 10 && mode != 4) {/s/mode != 4)/mode != 3)/ % aim3 aimskip4
 /hit = obj_find_visible_target(obj, &aim, (aim >> 8) & 0xFF, 0xFF, 0x14);/s/(aim >> 8) & 0xFF/aim \& 0xFF/ % aim3 aimhi
 /hit = obj_find_visible_target(obj, &aim, (aim >> 8) & 0xFF, 0xFF, 0x14);/s/0x14)/0x15)/ % aim3
 /if (hit != 0xFF) {/s/!= 0xFF/!= 0xFE/ % aimmiss3 aimmiss12
@@ -72,7 +72,7 @@
 /obj\[0x83\] = alpha;/s/alpha/0x64/ % alpha yawbig
 /obj\[0x80\] = obj\[0x126\] = \*((u8 \*) g_cur_obj + 0x222);/s/obj\[0x126\] = // % fl20 fl20b
 /if (snap == 0) {/s/== 0/!= 0/ % mode4 snap
-/obj\[0xD0\] = D_80099E84\[mode\] + 1;/s/+ 1/+ 2/ % mode3 mode4
+/obj\[0xD0\] = g_weapon_hit_effects\[mode\] + 1;/s/+ 1/+ 2/ % mode3 mode4
 /\*(f32 \*) (obj + 0x114) = 255.0f;/s/255.0f/256.0f/ % mode4
 /\*(s16 \*) (obj + 0xE6) = 5;/s/5/6/ % mode4
 /\*(f32 \*) (obj + 0xDC) = 1.0f;/d % mode4

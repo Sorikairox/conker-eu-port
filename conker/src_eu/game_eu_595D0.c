@@ -16,7 +16,7 @@ void obj_follow_parent(s32 arg0);
 void obj_tint_update(struct127 *arg0);
 void obj_floor_mesh_update(struct127 *arg0);
 s32 player_morph_blend(s32 arg0, s32 arg1, s32 arg2); /* P148: returns 0 / -1 (result unused) */
-extern u8 D_800C6A8F[];
+extern u8 g_breakable_slots_state[]; /* was D_800C6A8F */
 
 typedef struct {
     /* 0x00 */ u8 pad0[0xA0];
@@ -31,8 +31,8 @@ typedef struct {
 u8 * obj_draw_ground_shadow(u8 *, s32, s16);
 u8 * obj_draw_part(u8 *, s32, s16, s32, s32);
 u8 * player_draw_slot8_strip(u8 *, s32, s16);
-extern s32 D_800844F0;
-extern s32 D_80084520;
+extern s32 g_obj_draw_begin_dl; /* was D_800844F0 */
+extern s32 g_obj_draw_end_dl; /* was D_80084520 */
 
 /* was func_1502BDC0 */
 Gfx *objects_draw_pass(Gfx *gdl, s32 arg1, s16 arg2) {
@@ -46,7 +46,7 @@ Gfx *objects_draw_pass(Gfx *gdl, s32 arg1, s16 arg2) {
     u8 *var_v0_2;
 
     (*(s32 *)((u8 *)arg0 + 0)) = 0xDE000000;
-    (*(s32 **)((u8 *)arg0 + 4)) = &D_800844F0;
+    (*(s32 **)((u8 *)arg0 + 4)) = &g_obj_draw_begin_dl;
     var_s2 = arg0 + 8;
     var_s0 = g_objects;
     var_s1 = 0;
@@ -119,14 +119,14 @@ block_39:
         var_s2 = var_v0_2;
     }
     (*(s32 *)((u8 *)var_s2 + 0)) = 0xDE000000;
-    (*(s32 **)((u8 *)var_s2 + 4)) = &D_80084520;
+    (*(s32 **)((u8 *)var_s2 + 4)) = &g_obj_draw_end_dl;
     g_dbg_crash_marker = 0;
     return (Gfx *) (var_s2 + 8);
 }
 /* P41: per-object update of object arg1 (record arg0): clears +0x1D4 (the shadow / model pointer), type +5 == 5 →
  * obj_build_model_matrix(arg1, 1) only; type +4 == 0xFF or +5 == 3: nothing; +5 == 2: obj_shadow_anim_step. Otherwise the model setup
  * (obj_update_visibility, obj_build_model_matrix(arg1, 0) which sets +0x1D4, obj_bounds_from_skeleton), +0x1FC = 2 without a model, and the
- * per-frame callees (D_800C6A8F[arg1 * 16], +0x0, +0xA4, +0xF8 & 0x4000, +0x260). */
+ * per-frame callees (g_breakable_slots_state[arg1 * 16], +0x0, +0xA4, +0xF8 & 0x4000, +0x260). */
 /* was func_1502C074 */
 void obj_update_one(struct127 *arg0, s32 arg1) {
     u8 *obj = (u8 *)arg0;
@@ -156,7 +156,7 @@ void obj_update_one(struct127 *arg0, s32 arg1) {
         obj_postprocess_joints(arg1);
         look_aim_head_eyes(arg0);
     }
-    if (D_800C6A8F[arg1 * 16] != 0) {
+    if (g_breakable_slots_state[arg1 * 16] != 0) {
         breakable_update_slot(arg1);
     }
     if (*(s32 *)obj == 0) {
@@ -180,9 +180,9 @@ void objects_update_carried(void);
 void obj_save_prev_joint_mtx(u8 *arg0);
 void attachment_update_all(void);
 void obj_anims_advance_all(s32 arg0);
-extern s32 D_800C4294;
-extern u8 D_800C4290;
-/* P48: per-frame object update loop. D_800C4294 = mask of the +0x274 values (bit v - 1) of the 25 records.
+extern s32 g_obj_274_mask; /* was D_800C4294 */
+extern u8 g_objects_update_flag; /* was D_800C4290 */
+/* P48: per-frame object update loop. g_obj_274_mask = mask of the +0x274 values (bit v - 1) of the 25 records.
  * Records with no parent (+0x65 == 0) are updated (obj_update_one) in index order; the others afterwards, sorted
  * by the depth of their +0x65 parent chain (1-based record index), so a parent is updated before its children. */
 /* was func_1502C1D4 */
@@ -193,13 +193,13 @@ void objects_update_all(void) {
     s32 i, j, d, n, maxd;
 
     obj_select_next_flagged();
-    D_800C42B0 = 0;
-    D_800C4294 = 0;
+    g_mtx_fixed_point = 0;
+    g_obj_274_mask = 0;
     maxd = 0;
     for (i = 0; i < 25; i++) {
         u8 v = ((u8 *)&g_objects[i])[0x274];
         if (v != 0) {
-            D_800C4294 |= 1 << ((v + 0x1F) & 0x1F);
+            g_obj_274_mask |= 1 << ((v + 0x1F) & 0x1F);
         }
     }
     bzero(depth, 25);
@@ -244,13 +244,13 @@ void objects_update_all(void) {
     if (g_game_paused == 0) {
         obj_anims_advance_all(0);
     }
-    D_800C4290 = 0;
+    g_objects_update_flag = 0;
 }
 
 s32 cutscene_obj_takes_part(struct127 *);
 s32 obj_get_player_alpha(struct127 *, s32);
 struct102 *blob_shadow_create(s32, struct127 *, s32, s32, s32);
-extern u8 D_800C3A7A;
+extern u8 g_cutscene_show_all_objs; /* was D_800C3A7A */
 
 /* was func_1502C494 */
 void objects_update_blob_shadows(void) {
@@ -265,7 +265,7 @@ void objects_update_blob_shadows(void) {
     do {
         if (var_s1->interaction_state != 0) {
             var_s2 = 0;
-            if ((var_s1->unk5 != 3) && (var_s1->id != 0xFF) && (var_s1->unk123 == 0) && ((var_s1->unk66 & 0x10) != 0x10) && (var_s1->unk160 != 0) && (var_s1->unk65 == 0) && ((D_800C3638 == 0) || (D_800C3A7A != 0) || (cutscene_obj_takes_part(var_s1) != 0)) && ((var_s1->unk88 == 0) || (var_s1->unkCC >= -0x96))) {
+            if ((var_s1->unk5 != 3) && (var_s1->id != 0xFF) && (var_s1->unk123 == 0) && ((var_s1->unk66 & 0x10) != 0x10) && (var_s1->unk160 != 0) && (var_s1->unk65 == 0) && ((g_cutscene_in_progress == 0) || (g_cutscene_show_all_objs != 0) || (cutscene_obj_takes_part(var_s1) != 0)) && ((var_s1->unk88 == 0) || (var_s1->unkCC >= -0x96))) {
                 var_s0 = 0;
                 if (g_last_player_index >= 0) {
                     do {
@@ -299,13 +299,13 @@ void objects_update_blob_shadows(void) {
 }
 /* was func_1502C380 */
 void obj_mtx_buffer_reset(void) {
-    D_800C42AC = D_800C42A8 = (&D_800C3E80)[g_dl_buf_index];
-    D_800C429A = 0;
+    g_obj_mtx_arena_start = g_obj_mtx_next = (&g_matrix_arena_a)[g_dl_buf_index];
+    g_obj_mtx_count = 0;
 }
 
 /* was func_1502C6AC */
 s32 obj_shadow_kind(s32 arg0) {
-    s32 temp_v1 = (&D_800CC826)[arg0 * 0x32C];
+    s32 temp_v1 = (&g_objects_shadow_kind)[arg0 * 0x32C];
 
     if (temp_v1 >= 0x46) {
         temp_v1 = 0xB;
@@ -321,7 +321,7 @@ extern u8 *g_sprite_tex_descs[]; /* was D_8008CDEC */
  * P71: ground shadow of object idx (none while g_game_paused is set or when the alpha +7 is 0). Shadow quad: position
  * (x, y + half the size +0x122, z), extent 19 * size (15 * size for state +0 == 3), alpha +7; texture
  * g_sprite_tex_descs[obj_shadow_kind(idx)] with +0x60 (sprite_load_texture, which also fills the quad), drawn by sprite_draw_at_world_depth
- * between the D_80087770 / D_800877A8 display lists.
+ * between the g_sprite_setup_dl / g_sprite_setup_dl_alt display lists.
  */
 /* was func_1502C6F8 */
 u8 *obj_draw_ground_shadow(u8 *gdl, s32 idx, s16 unused) {
@@ -351,7 +351,7 @@ u8 *obj_draw_ground_shadow(u8 *gdl, s32 idx, s16 unused) {
     }
     tex = obj_shadow_kind(idx);
     ((s32 *) gdl)[0] = 0xDE000000;
-    ((s32 *) gdl)[1] = (s32) D_80087770;
+    ((s32 *) gdl)[1] = (s32) g_sprite_setup_dl;
     ((s32 *) gdl)[2] = 0xE7000000;
     ((s32 *) gdl)[3] = 0;
     gdl = sprite_load_texture(gdl + 16, g_sprite_tex_descs[tex], *(s16 *) (obj + 0x60), &quad, 0, 0, 0, 2, 3);
@@ -364,7 +364,7 @@ u8 *obj_draw_ground_shadow(u8 *gdl, s32 idx, s16 unused) {
     quad.y = *(f32 *) (obj + 0x18) + (f32) (size / 2);
     gdl = sprite_draw_at_world_depth(gdl, (u8 *) &quad);
     ((s32 *) gdl)[0] = 0xDE000000;
-    ((s32 *) gdl)[1] = (s32) D_800877A8;
+    ((s32 *) gdl)[1] = (s32) g_sprite_setup_dl_alt;
     return gdl + 8;
 }
 
@@ -399,7 +399,7 @@ u8 obj_current_part_model(struct127 *);
  * P62: model level of detail. For object i (not hidden by +0x1C9, not state 7) with +0x2C8 levels: pick a level from
  * the squared distance to the camera record g_player_views[cam] (a pointer; +0x2F8 / +0x2FC / +0x300): < 500 -> 0, < 730 -> 1,
  * < 1500 -> 2, < 2000 -> 3, else 4; one level finer when slow (xz_velocity < 3). Overrides: obj_current_part_model's
- * code 0x5A at level 0, or no code while D_800BE616 is set, -> 1; D_800C35EA == 1 -> 0. Clamped to the last level.
+ * code 0x5A at level 0, or no code while g_mp_mode_active is set, -> 1; g_cutscene_slot_state == 1 -> 0. Clamped to the last level.
  * A new level loads model ((u8 *)+0x2C4)[level] through obj_set_type and is stored in +0x1C8.
  */
 /* was func_1502C9D8 */
@@ -445,10 +445,10 @@ void obj_select_lod(s32 i, s16 cam, s32 unused) {
         if (code == 0x5A && level == 0) {
             level = 1;
         }
-    } else if (D_800BE616 != 0) {
+    } else if (g_mp_mode_active != 0) {
         level = 1;
     }
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         level = 0;
     }
     if (last < level) {
@@ -466,18 +466,18 @@ void obj_fog_alpha(u8 *, s32 *, s32);
 u8 obj_current_part_model_idx(struct127 *, s32 *);
 Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *color, s32 arg6, s32 arg7);
 void obj_ambient_colour(s32 arg0, u8 *arg1);
-extern u8 D_800C3A7A;
+extern u8 g_cutscene_show_all_objs; /* was D_800C3A7A */
 extern s32 g_dl_capacity; /* was D_800BEFC4 */
-extern s32 D_800DFBF0;
-extern u8 D_800DFBF4;
+extern s32 g_afterimage_mtx; /* was D_800DFBF0 */
+extern u8 g_afterimage_alpha; /* was D_800DFBF4 */
 
 /* P43: one object of the frame DL (object arg1, part arg2, mode arg3). Skipped (returns gdl) when the object is
  * culled, part bit arg2 of +0x74 is set, obj_get_player_alpha(obj, part) == 0 or +0x1D4 == NULL. Colour block col[6]
  * (sp40): obj_ambient_colour fills it, obj_fog_alpha adjusts it when g_level_header->+0x3E != 0 (else col[3] = 0xFF);
  * col[5] = +0x1C8 (obj_select_lod path) or from obj_current_part_model_idx (modes 3 / 4 / 5). Alpha = obj_get_player_alpha, 0xFF when the
- * object's camera record is in mode 0x100 and the part is not +0x127; mode 4 scales it by D_800DFBF4 and draws
- * D_800DFBF0 instead of +0x1D4. The DL from obj_draw_model_dl is dropped (gdl returned) when it overflows
- * g_dl_capacity commands of the frame buffer D_800BEDE8[g_dl_buf_index]. */
+ * object's camera record is in mode 0x100 and the part is not +0x127; mode 4 scales it by g_afterimage_alpha and draws
+ * g_afterimage_mtx instead of +0x1D4. The DL from obj_draw_model_dl is dropped (gdl returned) when it overflows
+ * g_dl_capacity commands of the frame buffer g_gfx_dl_buffers[g_dl_buf_index]. */
 /* was func_1502CC64 */
 u8 *obj_draw_part(u8 *gdl, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
     s32 col[6];   /* sp40 */
@@ -487,7 +487,7 @@ u8 *obj_draw_part(u8 *gdl, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
     s32 alpha;
     u8 *r;
 
-    if (D_800C3638 != 0 && D_800C3A7A == 0 && cutscene_obj_takes_part(&g_objects[arg1]) == 0) {
+    if (g_cutscene_in_progress != 0 && g_cutscene_show_all_objs == 0 && cutscene_obj_takes_part(&g_objects[arg1]) == 0) {
         return gdl;
     }
     rec = (u8 *)&g_objects[arg1];
@@ -520,13 +520,13 @@ u8 *obj_draw_part(u8 *gdl, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
         }
     }
     if (arg3 == 4) {
-        model = D_800DFBF0;
-        alpha = (s32)(D_800DFBF4 * (u32)alpha) >> 8;
+        model = g_afterimage_mtx;
+        alpha = (s32)(g_afterimage_alpha * (u32)alpha) >> 8;
     } else {
         model = *(s32 *)(rec + 0x1D4);
     }
     r = (u8 *)obj_draw_model_dl((Gfx *)gdl, arg1, arg2, model, alpha, col, arg3, arg4);
-    if (g_dl_capacity < (s32)((u32)r - (u32)D_800BEDE8[g_dl_buf_index]) >> 3) {
+    if (g_dl_capacity < (s32)((u32)r - (u32)g_gfx_dl_buffers[g_dl_buf_index]) >> 3) {
         return gdl;
     }
     return r;
@@ -566,26 +566,26 @@ u8 obj_current_part_model_idx(struct127 *, s32 *);
 Gfx *light_apply_object_lights(Gfx *, s32, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, u8 *, s32, u8 *);
 s32 attachment_draw_for_object(s32 arg0, u8 *arg1, s32 arg2, s32 arg3);
 void game_gu_mtx_ident(Mtx *arg0);
-extern u8 D_80083350[];
-extern u8 D_800834D0[];
-extern u8 D_80083650[];
-extern s32 D_800844F0;
-extern s32 D_80084520;
-extern Mtx D_800C42B8;
-extern u16 D_800C4B98[];
-extern u8 **D_800C48A8[];
-extern u8 **D_800C4D10[];
-extern u8 D_800DA248[];
+extern u8 g_model_mat_blend_set[]; /* was D_80083350 */
+extern u8 g_model_mat_opaque_set[]; /* was D_800834D0 */
+extern u8 g_model_mat_special_set[]; /* was D_80083650 */
+extern s32 g_obj_draw_begin_dl; /* was D_800844F0 */
+extern s32 g_obj_draw_end_dl; /* was D_80084520 */
+extern Mtx g_model_draw_ident_mtx; /* was D_800C42B8 */
+extern u16 g_model_dl_counts[]; /* was D_800C4B98 */
+extern u8 **g_model_dl_tables[]; /* was D_800C48A8 */
+extern u8 **g_model_dl2_tables[]; /* was D_800C4D10 */
+extern u8 g_point_light_ptrs[]; /* was D_800DA248 */
 extern u8 g_fog_state[]; /* was D_800DD714 */
 
 /* obj_draw_model_dl (P57): the model display list of object arg1, part arg2. arg3 = model (segment 6 base, from
- * +0x1D4 or D_800DFBF0), arg4 = alpha, color = colour block (obj_unpack_light_colours unpacks it), arg6 = mode (0 normal,
- * 3 / 4 / 5 special; 3 draws the D_800C4D10 DLs without matrix), arg7: wrap in D_800844F0 / D_80084520.
+ * +0x1D4 or g_afterimage_mtx), arg4 = alpha, color = colour block (obj_unpack_light_colours unpacks it), arg6 = mode (0 normal,
+ * 3 / 4 / 5 special; 3 draws the g_model_dl2_tables DLs without matrix), arg7: wrap in g_obj_draw_begin_dl / g_obj_draw_end_dl.
  * model = obj+4 (or obj_current_part_model_idx in modes 3-5), variant +0x1C8; returns gdl unchanged when model_make_ready fails or
  * the variant has no vertex block (+0x28C + variant * 8 + frame * 4). Emits: segment 6 = arg3, segment 1 =
  * that block - 0x38, the combiner DL (segment 8), geometry mode, lights (light_apply_object_lights) when lit, then per DL k
- * of D_800C4B98[model] not hidden by +0x94 bit k: prim / env / blend colours (+0x98 bit k: fixed white ones),
- * G_MTX D_800C42B8 (physical address) + G_DL D_800C48A8[model][k]. Then model_keep_resident, +0x2FE = 1, attachment_draw_for_object. */
+ * of g_model_dl_counts[model] not hidden by +0x94 bit k: prim / env / blend colours (+0x98 bit k: fixed white ones),
+ * G_MTX g_model_draw_ident_mtx (physical address) + G_DL g_model_dl_tables[model][k]. Then model_keep_resident, +0x2FE = 1, attachment_draw_for_object. */
 /* was func_1502CFEC */
 Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *color, s32 arg6, s32 arg7) {
     u32 *g = (u32 *)gdl;
@@ -610,7 +610,7 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
         return (Gfx *)g;
     }
     if (arg7 != 0) {
-        g[1] = (u32)&D_800844F0;
+        g[1] = (u32)&g_obj_draw_begin_dl;
         g[0] = 0xDE000000;
     } else {
         g[0] = 0xE7000000;
@@ -625,10 +625,10 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
     g += 4;
     obj_unpack_light_colours(o, arg2, arg4, (u8 *)color, &c0, &c1, &c2, &c3, &c4, &c5, &c6, &c7, &c8, &c9);
     g[0] = 0xDB060020;
-    if (arg6 == 5) g[1] = (u32)D_80083650;
-    else if (arg6 == 3) g[1] = (u32)D_80083650;
-    else if (arg4 < 0xFF) g[1] = (u32)D_80083350;
-    else g[1] = (u32)D_800834D0;
+    if (arg6 == 5) g[1] = (u32)g_model_mat_special_set;
+    else if (arg6 == 3) g[1] = (u32)g_model_mat_special_set;
+    else if (arg4 < 0xFF) g[1] = (u32)g_model_mat_blend_set;
+    else g[1] = (u32)g_model_mat_opaque_set;
     g += 2;
     g[0] = 0xD9FFF9FF;
     g[1] = 0;
@@ -645,7 +645,7 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
         g[2] = 0xD9BFFFFF;
         g[3] = 0;
         g += 4;
-    } else if (fl == 8 && D_800DCD7C != 0) {
+    } else if (fl == 8 && g_light_vertex_lighting != 0) {
         g[1] = 0x420000;
         g[0] = 0xD9FFFFFF;
         g += 2;
@@ -664,13 +664,13 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
     if (lit) {
         s32 v = 2;
         if (o[0x2FE] == 0) v = 0xA;
-        if (D_800D9D20 != 0) v |= 8;
+        if (g_sky_flash_count != 0) v |= 8;
         g = (u32 *)light_apply_object_lights((Gfx *)g, arg2, (s32)*(f32 *)(o + 0x14), (s32)*(f32 *)(o + 0x18),
                                  (s32)*(f32 *)(o + 0x1C), *(s32 *)(o + 0x184), *(s32 *)(o + arg2 * 4 + 0x304),
                                  o[0x301], *(u8 **)(o + 0x314) + g_dl_buf_index * 8, o + 0x302, 2, o + 0x1DD, v,
-                                 D_800DA248);
+                                 g_point_light_ptrs);
     }
-    cnt = &D_800C4B98[model];
+    cnt = &g_model_dl_counts[model];
     n = *cnt;
     mode = -1;
     for (k = 0; k < n; k++) {
@@ -709,17 +709,17 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
             mode = 1;
         }
         if (arg6 == 3) {
-            if (D_800C4D10[model] != NULL) {
+            if (g_model_dl2_tables[model] != NULL) {
                 g[0] = 0xDE000000;
-                g[1] = (u32)D_800C4D10[model][k];
+                g[1] = (u32)g_model_dl2_tables[model][k];
                 g += 2;
             }
         } else {
-            game_gu_mtx_ident(&D_800C42B8);
+            game_gu_mtx_ident(&g_model_draw_ident_mtx);
             g[0] = 0xDA380003;
-            g[1] = (u32)&D_800C42B8 & 0x1FFFFFFF; /* the asm stores D_C42B8 (physical) */
+            g[1] = (u32)&g_model_draw_ident_mtx & 0x1FFFFFFF; /* the asm stores D_C42B8 (physical) */
             g[2] = 0xDE000000;
-            g[3] = (u32)D_800C48A8[model][k];
+            g[3] = (u32)g_model_dl_tables[model][k];
             g += 4;
         }
         n = *cnt;
@@ -731,7 +731,7 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
     }
     if (arg7 != 0) {
         g[0] = 0xDE000000;
-        g[1] = (u32)&D_80084520;
+        g[1] = (u32)&g_obj_draw_end_dl;
         g += 2;
     }
     if (arg6 == 0) {
@@ -765,14 +765,14 @@ void obj_ambient_colour(s32 arg0, u8 *arg1) {
 void mtxf_transform_point_w(f32 *mtx, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz, f32 *ow);
 extern f32 g_cam_far_plane; /* was D_800D9F3C */
 extern f32 g_cam_near_plane; /* was D_800D9F40 */
-extern u16 D_800DD718;
-extern u16 D_800DD71C;
-extern f32 D_800D30C8[][4][4];
+extern u16 g_fog_near; /* was D_800DD718 */
+extern u16 g_fog_far; /* was D_800DD71C */
+extern f32 g_view_proj_mtx[][4][4]; /* was D_800D30C8 */
 
 /*
- * P71: fog alpha col[3] of object rec for view matrix view (D_800D30C8[view]). In 1 / depth units (0.001 instead
- * of 1 / 0): a = 1 / g_cam_far_plane, b = 1 / g_cam_near_plane, the fog range from b + (a - b) * 0.001 * D_800DD718 (full
- * fog colour) to b + (a - b) * 0.001 * D_800DD71C (none). The object position (+0x14) is transformed
+ * P71: fog alpha col[3] of object rec for view matrix view (g_view_proj_mtx[view]). In 1 / depth units (0.001 instead
+ * of 1 / 0): a = 1 / g_cam_far_plane, b = 1 / g_cam_near_plane, the fog range from b + (a - b) * 0.001 * g_fog_near (full
+ * fog colour) to b + (a - b) * 0.001 * g_fog_far (none). The object position (+0x14) is transformed
  * (mtxf_transform_point_w, w); 1 / w in that range interpolates, outside it the alpha is 0xFF (behind / closer) or 0.
  */
 /* was func_1502D920 */
@@ -788,9 +788,9 @@ void obj_fog_alpha(u8 *rec, s32 *col, s32 view) {
     near = (g_cam_far_plane == 0.0f) ? 0.001f : 1.0f / g_cam_far_plane;
     far = (g_cam_near_plane == 0.0f) ? 0.001f : 1.0f / g_cam_near_plane;
     step = (near - far) * 0.001f;
-    fogMin = D_800DD718 * step + far;
-    fogMax = D_800DD71C * step + far;
-    mtxf_transform_point_w((f32 *) D_800D30C8[view], *(f32 *) (rec + 0x14), *(f32 *) (rec + 0x18), *(f32 *) (rec + 0x1C),
+    fogMin = g_fog_near * step + far;
+    fogMax = g_fog_far * step + far;
+    mtxf_transform_point_w((f32 *) g_view_proj_mtx[view], *(f32 *) (rec + 0x14), *(f32 *) (rec + 0x18), *(f32 *) (rec + 0x1C),
                   &sx, &sy, &sz, &w);
     w = (w == 0.0f) ? 0.001f : 1.0f / w;
     if (w < 0.0f) {
@@ -904,7 +904,7 @@ void anim_copy_keyframes(u8 *arg0, s32 arg1, s32 arg2) {
     }
 }
 
-/* P48: joint-matrix count of model id: D_800C52F0[id], minus 4 for the ids of the asm's jump table
+/* P48: joint-matrix count of model id: g_model_joint_counts[id], minus 4 for the ids of the asm's jump table
  * (jtbl_800971A8: 0x3B and 0x75 .. 0xB4 entries pointing at the "- 4" case). */
 /* was func_1502DE10 */
 s32 model_joint_mtx_count(s32 id) {
@@ -912,9 +912,9 @@ s32 model_joint_mtx_count(s32 id) {
         case 0x3B:
         case 0x75: case 0x82: case 0x88: case 0x90: case 0x96: case 0x98: case 0x9C:
         case 0x9D: case 0x9F: case 0xA0: case 0xB1: case 0xB2: case 0xB4:
-            return D_800C52F0[id] - 4;
+            return g_model_joint_counts[id] - 4;
         default:
-            return D_800C52F0[id];
+            return g_model_joint_counts[id];
     }
 }
 
@@ -925,19 +925,19 @@ void model_keep_resident(u8 *arg0);
 void obj_adjust_list_build(u8 *arg0, s32 arg1);
 void anim_copy_keyframes(u8 *, s32, s32);
 void anim_eval_joint_matrices(s32 *arena, f32 (*mtx)[4], s32 anim, s32 skel, s32 n, u8 *arg5, u8 *remap, s32 h);
-extern u8 D_800C441A;
-extern u8 *D_800845BC[];
-extern s32 D_800C5000[];
-extern s32 D_800888F8;
-extern s32 D_800888F4;
-extern s32 D_8008891C;
+extern u8 g_look_cb_calls; /* was D_800C441A */
+extern u8 *g_model_joint_map_lists[]; /* was D_800845BC */
+extern s32 g_model_skeletons[]; /* was D_800C5000 */
+extern s32 g_anim_root_motion_total; /* was D_800888F8 */
+extern s32 g_anim_root_motion; /* was D_800888F4 */
+extern s32 g_anim_channel0_angle; /* was D_8008891C */
 /* P48: model instance of object arg1 (record +0x1D4) from its root matrix m. Loads the model of id +4 when
- * D_800D19A0[id] is empty (model_load), makes sure the object has an animation state +0x2D0 (obj_anim_state_alloc),
- * then reserves model_joint_mtx_count(id) joint matrices (0x40 bytes each) in the D_800C42A8 arena (none written and
+ * g_model_bases[id] is empty (model_load), makes sure the object has an animation state +0x2D0 (obj_anim_state_alloc),
+ * then reserves model_joint_mtx_count(id) joint matrices (0x40 bytes each) in the g_obj_mtx_next arena (none written and
  * +0x1D4 = 0 when the g_matrix_arena_count-matrix arena would overflow), sets +0x1D4 to the first one and fills them with the
  * hand-asm skeleton evaluator anim_eval_joint_matrices (D5E90.s). +0x29 of the model header selects a joint remap table
- * (D_800845BC, pairs ending in 0xFF). The evaluator's outputs D_800888F4 / D_800888F8 give the animation
- * position +0x1F8 / +0x1F4 (and +0x2D0 +0x10 with +0x246 & 0x40); +0x7C = D_8008891C. */
+ * (g_model_joint_map_lists, pairs ending in 0xFF). The evaluator's outputs g_anim_root_motion / g_anim_root_motion_total give the animation
+ * position +0x1F8 / +0x1F4 (and +0x2D0 +0x10 with +0x246 & 0x40); +0x7C = g_anim_channel0_angle. */
 /* was func_1502DE74 */
 void obj_build_model_instance(f32 (*m)[4], s32 arg1) {
     u8 remap[0x44];
@@ -945,7 +945,7 @@ void obj_build_model_instance(f32 (*m)[4], s32 arg1) {
     u8 sbuf[0x54];
     u8 *obj = (u8 *)&g_objects[arg1];
     s32 id = obj[4];
-    s32 *slot = &((s32 *)&D_800D19A0)[id];
+    s32 *slot = &((s32 *)&g_model_bases)[id];
     u8 *map = NULL;
     u16 *cnt;
     s32 n, f1, f2, h;
@@ -968,21 +968,21 @@ void obj_build_model_instance(f32 (*m)[4], s32 arg1) {
             return;
         }
     }
-    cnt = &D_800C52F0[id];
+    cnt = &g_model_joint_counts[id];
     if (*cnt >= 2 && *(s32 *)(obj + 0x2D0) == 0) {
         return;
     }
     n = model_joint_mtx_count(id);
-    if ((u32)(g_matrix_arena_count << 6) < (u32)(D_800C42A8 + (n << 6) - D_800C42AC)) {
+    if ((u32)(g_matrix_arena_count << 6) < (u32)(g_obj_mtx_next + (n << 6) - g_obj_mtx_arena_start)) {
         *(s32 *)(obj + 0x1D4) = 0;
         return;
     }
     model_keep_resident(obj);
-    *(s32 *)(obj + 0x1D4) = D_800C42A8;
-    if (((u8 *)D_800D1C90[id])[0x29] != 0) {
-        D_800C441A = 0;
+    *(s32 *)(obj + 0x1D4) = g_obj_mtx_next;
+    if (((u8 *)g_type_descs[id])[0x29] != 0) {
+        g_look_cb_calls = 0;
         bzero(remap, *cnt);
-        p = D_800845BC[((u8 *)D_800D1C90[id])[0x29]];
+        p = g_model_joint_map_lists[((u8 *)g_type_descs[id])[0x29]];
         while (p[0] != 0xFF) {
             remap[p[0]] = p[1];
             p += 2;
@@ -991,16 +991,16 @@ void obj_build_model_instance(f32 (*m)[4], s32 arg1) {
     }
     obj_adjust_list_build(sbuf, arg1);
     anim_copy_keyframes(NULL, (s32)obj, (s32)dbuf);
-    if (D_800C35EA != 1) {
+    if (g_cutscene_slot_state != 1) {
         h = (s16)(s32)(*(f32 *)(obj + 0x150) * (f32)*(s16 *)(obj + 0xCC));
     } else {
         h = 0;
     }
-    anim_eval_joint_matrices(&D_800C42A8, m, *(s32 *)(obj + 0x2D0), D_800C5000[id], n, sbuf, map, h);
-    *(s16 *)(obj + 0x7C) = D_8008891C;
-    f1 = D_800888F8;
+    anim_eval_joint_matrices(&g_obj_mtx_next, m, *(s32 *)(obj + 0x2D0), g_model_skeletons[id], n, sbuf, map, h);
+    *(s16 *)(obj + 0x7C) = g_anim_channel0_angle;
+    f1 = g_anim_root_motion_total;
     if (f1 != 0) {
-        t = (f32)D_800888F4 / 32768.0f;
+        t = (f32)g_anim_root_motion / 32768.0f;
         fl = obj[0x1FC];
         if (fl & 4) {
             *(f32 *)(obj + 0x1F8) -= (f32)f1 * 0.03125f;
@@ -1020,19 +1020,19 @@ void obj_build_model_instance(f32 (*m)[4], s32 arg1) {
             *(f32 *)(an + 0x10) = (*(f32 *)(obj + 0x3C) / ((*(f32 *)(obj + 0x14C) * ((f32)f1 * 0.03125f)) / *(f32 *)(an + 0x18))) * 0.5f;
         }
     }
-    D_800C429A += n;
+    g_obj_mtx_count += n;
 }
 
 void obj_build_model_instance(f32 (*mtx)[4], s32 arg1);
-extern s32 D_800C4294;
+extern s32 g_obj_274_mask; /* was D_800C4294 */
 /* P48: object arg0's model matrix. Skipped (nothing written) when the object is hidden for every player (+0x74 low
  * nibble 0xF, or every obj_get_player_alpha alpha 0), unless it is forced (+0x66 & 0x20, a player-controlled object
- * (+0x31C +0x197), bit arg0 of D_800C4294, or id 0x8A whose obj_find_child_nth target is player-controlled).
+ * (+0x31C +0x197), bit arg0 of g_obj_274_mask, or id 0x8A whose obj_find_child_nth target is player-controlled).
  * A child (+0x65 = parent index + 1, without +0x101 & 0x10) takes the parent's joint +0x5C matrix (+0x1D4 + 0x40 *
  * joint) with rows 0 / 2 scaled by +0x14C and row 1 by +0x150 (+0x101 & 4: rows normalised first); otherwise
  * mtx_rotate_scale_3x3 builds it from the angles (+0xB8, +0x40, +0xC4) and scales, at the position (with +0x101 & 0x10:
  * the parent's joint position), raised by +0xCC when +0x2D0 +0x28 is 0.
- * arg1 != 0: the matrix is copied to the D_800C42A8 arena and +0x1D4 points at it; else obj_build_model_instance(m, arg0). */
+ * arg1 != 0: the matrix is copied to the g_obj_mtx_next arena and +0x1D4 points at it; else obj_build_model_instance(m, arg0). */
 /* was func_1502E228 */
 void obj_build_model_matrix(s32 arg0, s32 arg1) {
     f32 m[4][4];
@@ -1057,7 +1057,7 @@ void obj_build_model_matrix(s32 arg0, s32 arg1) {
     if (*(u8 **)(obj + 0x31C) != NULL && (*(u8 **)(obj + 0x31C))[0x197] != 0) {
         force = 0;
     }
-    if ((1 << (arg0 & 0x1F)) & D_800C4294) {
+    if ((1 << (arg0 & 0x1F)) & g_obj_274_mask) {
         force = 0;
     }
     if (obj[4] == 0x8A) {
@@ -1129,10 +1129,10 @@ void obj_build_model_matrix(s32 arg0, s32 arg1) {
         }
     }
     if (arg1 != 0) {
-        *(s32 *)(obj + 0x1D4) = D_800C42A8;
-        bcopy(m, (void *)D_800C42A8, 0x40);
-        D_800C42A8 += 0x40;
-        D_800C429A++;
+        *(s32 *)(obj + 0x1D4) = g_obj_mtx_next;
+        bcopy(m, (void *)g_obj_mtx_next, 0x40);
+        g_obj_mtx_next += 0x40;
+        g_obj_mtx_count++;
         return;
     }
     obj_build_model_instance(m, arg0);
@@ -1140,10 +1140,10 @@ void obj_build_model_matrix(s32 arg0, s32 arg1) {
 
 /* was func_1502E764 */
 void obj_mtx_buffer_flush(void) {
-    if ((u16)D_800C429A != 0) {
-        mtx_f_to_l_batch((&D_800C3E80)[g_dl_buf_index], (u16)D_800C429A);
+    if ((u16)g_obj_mtx_count != 0) {
+        mtx_f_to_l_batch((&g_matrix_arena_a)[g_dl_buf_index], (u16)g_obj_mtx_count);
     }
-    D_800C42B0 = 1;
+    g_mtx_fixed_point = 1;
 }
 
 void obj_visibility_stub(s32 arg0, s32 arg1);
@@ -1151,14 +1151,14 @@ s32 cutscene_obj_takes_part(struct127 *);
 s32 obj_zone_point_allowed(struct127 *, s32, s32);
 s32 obj_get_player_alpha(struct127 *, s32);
 s32 camera_view_test_sphere(s32, s32 *, f32, f32, f32, f32, f32, f32);
-extern u8 D_800C3A7A;
-extern u8 D_800C3A84;
+extern u8 g_cutscene_show_all_objs; /* was D_800C3A7A */
+extern u8 g_cutscene_obj_vis_mode; /* was D_800C3A84 */
 extern s32 g_view_mtxf; /* was D_800DA030 */
 
 /* P48: visibility mask +0x74 of object arg0 (bit i set = hidden for player i). Type 7: low nibble cleared. Otherwise
- * all four bits are set, and when the object is not culled and in an active view group (+0x127 bit of D_800D2340):
+ * all four bits are set, and when the object is not culled and in an active view group (+0x127 bit of g_player_active_mask):
  * a child (+0x65 = parent index + 1) copies its parent's mask; else each player's view test camera_view_test_sphere
- * (radius from the model header D_800D1C90[id] +0xE / +0x10 and the scales) and the fade distance (+0x10, or
+ * (radius from the model header g_type_descs[id] +0xE / +0x10 and the scales) and the fade distance (+0x10, or
  * 100000 for player-controlled cameras) choose obj_fade_command events 8 / 9 / 10 and clear the player's bit.
  * The m2c draft stepped g_view_mtxf by 0x100 and g_player_views by sizeof(struct108) * 0x9A0: both are byte offsets. */
 /* was func_1502E7B4 */
@@ -1205,13 +1205,13 @@ void obj_update_visibility(s32 arg0) {
     temp_v0 = temp_s1->unk74;
     temp_s1->unk74 = temp_v0 | 0xF;
     sp54 = (s32) temp_v0;
-    if (((D_800C3638 == 0) || (D_800C3A7A != 0) || (cutscene_obj_takes_part(temp_s1) != 0)) && ((temp_v0_2 = temp_s1->unk127, (temp_v0_2 == 0xFF)) || ((u16) D_800D2340 & (1 << (temp_v0_2 & 0x1F)))) && ((temp_s1->unk101 & 1) != 1) && (temp_s1->unk7 != 0)) {
+    if (((g_cutscene_in_progress == 0) || (g_cutscene_show_all_objs != 0) || (cutscene_obj_takes_part(temp_s1) != 0)) && ((temp_v0_2 = temp_s1->unk127, (temp_v0_2 == 0xFF)) || ((u16) g_player_active_mask & (1 << (temp_v0_2 & 0x1F)))) && ((temp_s1->unk101 & 1) != 1) && (temp_s1->unk7 != 0)) {
         temp_v0_3 = temp_s1->unk65;
         if (temp_v0_3 != 0) {
             temp_s1->unk74 = ((u8 *)&g_objects[temp_v0_3 - 1])[0x74] /* the parent's mask */;
             return;
         }
-        temp_v1 = &D_800D1C90[temp_s0];
+        temp_v1 = &g_type_descs[temp_s0];
         temp_v0_4 = *temp_v1;
         temp_f0 = (f32) (u16) temp_v0_4->unkE;
         temp_f12 = temp_s1->xz_scale;
@@ -1221,7 +1221,7 @@ void obj_update_visibility(s32 arg0) {
         sp74 = (f32) ((*(s16 *)((u8 *)temp_v0_4 + 0x10)) + temp_s1->unkCC) * temp_f2;
         temp_s1->unk270 = temp_f14;
         sp5C = (s32) (*(u16 *)((u8 *)temp_s1 + 0x10));
-        if ((D_800C35EA == 1) && (D_800C3A84 == 0)) {
+        if ((g_cutscene_slot_state == 1) && (g_cutscene_obj_vis_mode == 0)) {
             sp5C = 0;
         }
         var_fp = 0;
@@ -1261,7 +1261,7 @@ void obj_update_visibility(s32 arg0) {
                 if (var_fp < var_v1) {
                     var_fp = var_v1;
                 }
-                if (((temp_s1->unk66 & 0x80) != 0x80) && ((f32) var_v1 <= sp70) && (D_800C35EA != 1)) {
+                if (((temp_s1->unk66 & 0x80) != 0x80) && ((f32) var_v1 <= sp70) && (g_cutscene_slot_state != 1)) {
 block_37:
                     var_s3 = 1;
                 }
@@ -1278,7 +1278,7 @@ block_37:
                         var_s0_2 = -1;
                         obj_fade_command(temp_s1, 9U, 0U, 0U, (u8) var_s2);
                     }
-                    if ((temp_s1->unkF8 & 0x800000) && (var_s0_2 != 8) && (D_800C35EA != 1) && (obj_zone_point_allowed(temp_s1, var_s2, sp54) != 0)) {
+                    if ((temp_s1->unkF8 & 0x800000) && (var_s0_2 != 8) && (g_cutscene_slot_state != 1) && (obj_zone_point_allowed(temp_s1, var_s2, sp54) != 0)) {
                         var_s3 = 1;
                     }
                 } else {
@@ -1305,7 +1305,7 @@ block_37:
         if ((temp_v0_7 != NULL) && ((temp_v0_7->unk2C == 0x10000) || (temp_s1->unk31C->unk197 != 0))) {
             temp_s1->unk74 |= 1 << arg0;
         }
-        if (D_800C35EA != 1) {
+        if (g_cutscene_slot_state != 1) {
             temp_v0_8 = temp_s1->unk2FC;
             if (temp_v0_8 != 0) {
                 temp_s1->unk74 |= temp_v0_8;
@@ -1529,10 +1529,10 @@ void obj_face_selectors_step(s32 arg0) {
     face_update_hide_mask(&g_objects[arg0]);
 }
 u8 *face_anim_entry_get(u8 *, s32);
-extern s32 D_800C5758;
+extern s32 g_model_tex_entries; /* was D_800C5758 */
 /* obj_set_vertex_segments (P57): segments 6 +0x18 / +0x1C / +0x28 / +0x2C of object arg1's model: vertex blocks
- * D_800C5758[type][k * 12] for k = the two selector bytes +0x6C / +0x6D (>= 10: k = byte - 10; else the model
- * header table (D_800D1C90[type])[i * 3 + byte + 8], overridden by face_anim_entry_get(obj, +0x6F)'s
+ * g_model_tex_entries[type][k * 12] for k = the two selector bytes +0x6C / +0x6D (>= 10: k = byte - 10; else the model
+ * header table (g_type_descs[type])[i * 3 + byte + 8], overridden by face_anim_entry_get(obj, +0x6F)'s
  * pair when that matches the table's +0xA entry or the byte is 0) and the bytes +0x68 / +0x69. */
 /* was func_1502F30C */
 u8 *obj_set_vertex_segments(u8 *gdl, s32 arg1) {
@@ -1551,7 +1551,7 @@ u8 *obj_set_vertex_segments(u8 *gdl, s32 arg1) {
             sel[i] = v - 10;
             continue;
         }
-        sel[i] = ((u8 *)D_800D1C90[type])[i * 3 + v + 8];
+        sel[i] = ((u8 *)g_type_descs[type])[i * 3 + v + 8];
         if (o[0x6F] != 0 && ov == NULL) {
             ov = face_anim_entry_get(o, o[0x6F]);
         }
@@ -1559,11 +1559,11 @@ u8 *obj_set_vertex_segments(u8 *gdl, s32 arg1) {
         pr[0] = ov[0];
         pr[1] = ov[1];
         v = pr[i];
-        if (v == ((u8 *)D_800D1C90[type])[i * 3 + 0xA] || o[0x6C + i] == 0) {
+        if (v == ((u8 *)g_type_descs[type])[i * 3 + 0xA] || o[0x6C + i] == 0) {
             sel[i] = v;
         }
     }
-    p = ((u8 **)&D_800C5758)[o[4]];
+    p = ((u8 **)&g_model_tex_entries)[o[4]];
     if (p != NULL) {
         u32 *g = (u32 *)gdl;
         g[0] = 0xDB060018;
@@ -1649,11 +1649,11 @@ void objects_update_carried(void) {
     }
 }
 
-extern u16 D_800C6318[];    /* per model: number of D_800C5C08 vertex ranges */
+extern u16 g_model_vtx_range_count[];    /* per model: number of g_model_vtx_ranges vertex ranges; was D_800C5C08; was D_800C6318 */
 
 /*
- * P76: carry a point (*x, *y, *z) along with triangle tri of the model of carrier obj (kind +4). D_800C6070[kind] =
- * triangles (three vertex offsets into D_800D19A0[kind]), D_800C5C08[kind] = vertex ranges (start, count of 16-byte
+ * P76: carry a point (*x, *y, *z) along with triangle tri of the model of carrier obj (kind +4). g_model_coll_tris[kind] =
+ * triangles (three vertex offsets into g_model_bases[kind]), g_model_vtx_ranges[kind] = vertex ranges (start, count of 16-byte
  * vertices, joint). The joint of each corner is looked up in the ranges (no range: nothing happens), the corners
  * are transformed by their joint matrices of the previous (+0x1D8) and the current (+0x1D4) frame. The point's
  * (u, v) on the old triangle (solved in x / z) must lie in [0, 1]; the point is then moved by the same (u, v)
@@ -1678,24 +1678,24 @@ void obj_carry_point(struct127 *obj, f32 *x, f32 *y, f32 *z, s32 tri) {
     f32 u, v;
     s16 *s;
 
-    tris = (u32 *) D_800C6070[kind];
+    tris = (u32 *) g_model_coll_tris[kind];
     if (tris == NULL) {
         return;
     }
     for (k = 0; k < 3; k++) {
-        vtx[k] = (u8 *) ((s32 *) &D_800D19A0)[kind] + tris[tri * 3 + k];
+        vtx[k] = (u8 *) ((s32 *) &g_model_bases)[kind] + tris[tri * 3 + k];
     }
     found = 0;
     i = 0;
     do {
-        if (i == D_800C6318[kind]) {
+        if (i == g_model_vtx_range_count[kind]) {
             return;
         }
         for (k = 0; k < 3; k++) {
             if (found & (1 << k)) {
                 continue;
             }
-            range = (u32 *) (D_800C5C08[kind] + i * 12);
+            range = (u32 *) (g_model_vtx_ranges[kind] + i * 12);
             if ((u32) vtx[k] >= range[0] && (u32) vtx[k] < range[0] + range[1] * 16) {
                 joint[k] = range[2];
                 found |= 1 << k;
@@ -1761,18 +1761,18 @@ void obj_save_prev_joint_mtx(u8 *arg0) {
     if ((*(s32 *)(arg0 + 0xF8) & 0x4000) && *(s32 *)(arg0 + 0x264) != 0 && *(s32 *)(arg0 + 0x1D4) != 0) {
         temp_v1 = arg0[4];
         if (*(s32 *)(arg0 + 0x1D8) == 0) {
-            temp_v0 = allocate_memory(D_800C52F0[temp_v1] << 6, 1, 1, 2);
+            temp_v0 = allocate_memory(g_model_joint_counts[temp_v1] << 6, 1, 1, 2);
             *(u8 **)(arg0 + 0x1D8) = temp_v0;
             if (temp_v0 == NULL) {
                 return;
             }
         }
-        bcopy(*(u8 **)(arg0 + 0x1D4), *(u8 **)(arg0 + 0x1D8), D_800C52F0[temp_v1] << 6);
+        bcopy(*(u8 **)(arg0 + 0x1D4), *(u8 **)(arg0 + 0x1D8), g_model_joint_counts[temp_v1] << 6);
     }
 }
 
 void * obj_timer_scroll_tex_dl(void *, void *);
-extern s32 D_800C5758;
+extern s32 g_model_tex_entries; /* was D_800C5758 */
 
 /* was func_1502FCEC */
 u8 *obj_model_special_dl(u8 *arg0, s32 arg1) {
@@ -1806,7 +1806,7 @@ u8 *obj_model_special_dl(u8 *arg0, s32 arg1) {
             }
         }
     }
-    temp_t4 = ((s32 *)((u8 *)&D_800C5758 + (temp_v0 * 4)));
+    temp_t4 = ((s32 *)((u8 *)&g_model_tex_entries + (temp_v0 * 4)));
     var_a0 = 0;
     if (*temp_t4 != 0) {
         var_a1 = &g_objects[arg1];
@@ -1829,8 +1829,8 @@ void face_anim_reset_default(struct127 *);
  * P70: pending model switch of an object. +0x1C9 holds the requested entry + 1 of the object's model list
  * +0x2C4 (+0x2C9 entries; 0xFF = entry 0 again). When it differs from the current entry +0x1C8, model
  * list[entry] is set up by obj_set_type; if that model has another animation set than the object's id
- * (D_800D1588), the animation is restarted (obj_start_anim: from +0x84 when it exists in the new set, i.e. below
- * D_800C5A90[model], else from 0) with +0x84 = 0xFFFF. D_800C3638 is cleared around it in mode D_800C35EA == 1.
+ * (g_model_anim_banks), the animation is restarted (obj_start_anim: from +0x84 when it exists in the new set, i.e. below
+ * g_model_anim_counts[model], else from 0) with +0x84 = 0xFFFF. g_cutscene_in_progress is cleared around it in mode g_cutscene_slot_state == 1.
  * The request +0x1C9 stays set (except 0xFF, which is consumed).
  */
 /* was func_1502FED8 */
@@ -1844,7 +1844,7 @@ void obj_apply_model_switch(struct127 *obj) {
     if (req == 0) {
         return;
     }
-    anims = D_800D1588[obj->id];
+    anims = g_model_anim_banks[obj->id];
     if (req == 0xFF) {
         OBJ_U8(obj, 0x1C9) = 0;
         entry = 0;
@@ -1860,12 +1860,12 @@ void obj_apply_model_switch(struct127 *obj) {
     model = (*(u8 **) ((u8 *) obj + 0x2C4))[entry];
     obj_set_type(((u8 *) obj - (u8 *) g_objects) / 0x32C, model, 0);
     OBJ_U8(obj, 0x1C8) = entry;
-    if (D_800C35EA == 1) {
-        D_800C3638 = 0;
+    if (g_cutscene_slot_state == 1) {
+        g_cutscene_in_progress = 0;
     }
-    if (anims != D_800D1588[model]) {
+    if (anims != g_model_anim_banks[model]) {
         anim = obj->unk84.uh;
-        if (anim < (u16) D_800C5A90[model]) {
+        if (anim < (u16) g_model_anim_counts[model]) {
             obj->unk84.uh = 0xFFFF;
             obj_start_anim(obj, anim, 1.0f, 0.0f, 0.0f, 0.0f, 0);
         } else {
@@ -1873,8 +1873,8 @@ void obj_apply_model_switch(struct127 *obj) {
             obj_start_anim(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
         }
     }
-    if (D_800C35EA == 1) {
-        D_800C3638 = 1;
+    if (g_cutscene_slot_state == 1) {
+        g_cutscene_in_progress = 1;
     }
     face_anim_reset_default(obj);
 }
@@ -1887,12 +1887,12 @@ void model_keep_resident(u8 *arg0)
   u8 *s;
   u8 a2;
   s32 v;
-  if ((D_80038080 == 0) && (g_level_id == 0x1D))
+  if ((g_mem_expansion_pak == 0) && (g_level_id == 0x1D))
   {
-    ((u8 *) D_800D2040)[idx] = 2;
+    ((u8 *) g_model_slot_timers)[idx] = 2;
     return;
   }
-  p = &((u8 *) D_800D2040)[idx];
+  p = &((u8 *) g_model_slot_timers)[idx];
   if ((*p) != 0xFF)
   {
     s = *((u8 **) (arg0 + 0x144));

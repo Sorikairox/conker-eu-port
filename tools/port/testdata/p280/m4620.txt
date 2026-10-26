@@ -18,7 +18,7 @@
 \#^    tail.u3 = #s/\(.\) 6/\1 5/ % k34
 \#^    tail.u8 = #s/0.25f/0.5f/ % k34
 \#^    tail.uC = #s/0.2f)/0.3f)/ % k34
-\#^    g.colour = D_800A0710\[random_int() & 3\];$#s/& 3/\& 1/ % k34
+\#^    g.colour = g_damage_smoke_colours\[random_int() & 3\];$#s/& 3/\& 1/ % k34
 \#^    g.u8 = 0x2203;$#s/3;/4;/ % k34
 \#^    g.u0 = 0x200005;$#s/5;/4;/ % k34
 \#^    g.rgba\[3\] = 0xFF;$#s/0xFF/0/ % k34

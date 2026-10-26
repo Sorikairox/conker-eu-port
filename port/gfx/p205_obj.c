@@ -35,13 +35,13 @@ void p205_obj_hook(void) {
     if (f <= 0 || port_frame_count < (unsigned)f) return;
     if (last != ~0u && port_frame_count - last < 250) return;
     if (last == ~0u) {
-        /* P212: once, the event zones D_800D34B8[D_800D3094] (0x34 bytes; event query 0x4nnn cmd 6 = "object not in
+        /* P212: once, the event zones g_level_zones[g_level_zone_count] (0x34 bytes; event query 0x4nnn cmd 6 = "object not in
          * zone nnn"): s16 x y z +6, f32 +0x10, bytes +0x14..+0x17, words +0x18..+0x20, f32 +0x24..+0x30 */
-        extern unsigned char *D_800D34B8; extern unsigned D_800D3094;
-        unsigned k, nz = D_800D3094;
+        extern unsigned char *g_level_zones; extern unsigned g_level_zone_count;
+        unsigned k, nz = g_level_zone_count;
         port_log("[p212zone] frame %u %u zones\n", port_frame_count, nz);
-        for (k = 0; k < nz && k < 256 && D_800D34B8; k++) {
-            const unsigned char *z = D_800D34B8 + k * 0x34;
+        for (k = 0; k < nz && k < 256 && g_level_zones; k++) {
+            const unsigned char *z = g_level_zones + k * 0x34;
             port_log("[p212zone] %02X pos %d %d %d u6 %d f10 %.1f b14 %02X %02X %02X %02X w18 %X %X %X f24 %.1f %.1f %.1f %.1f\n",
                      k, (short)vbe_ld16(z), (short)vbe_ld16(z + 2), (short)vbe_ld16(z + 4), (short)vbe_ld16(z + 6),
                      F(z, 0x10), vbe_ld8(z + 0x14), vbe_ld8(z + 0x15), vbe_ld8(z + 0x16), vbe_ld8(z + 0x17),
@@ -60,37 +60,37 @@ void p205_obj_hook(void) {
         port_log("[p205obj]   rec %2d st %08X id %02X uid %02X pos %.1f %.1f %.1f water %d\n", i, st, id, uid, x, y, z,
                  vbe_ld8(r + 0xAD));
     }
-    {   /* P236 DIAGNOSTIC ?p236race=1 (with ?p205obj): the race / rail records D_80087640[humans + cpus] (0x84 bytes,
+    {   /* P236 DIAGNOSTIC ?p236race=1 (with ?p205obj): the race / rail records g_race_records[humans + cpus] (0x84 bytes,
          * rail_param_step rail_param_step): f32 param +8, s32 lap start +0x18 / time +0x1C / lap time +0x20, s16 node
          * counter +0x24, s8 lap length +0x26, lap +0x27, highest lap +0x28, nodes +0x2B..+0x2E, on rail +0x30, player
-         * +0x31; laps D_800E1017, D_800BE616, humans g_human_player_count. */
+         * +0x31; laps g_race_lap_count, g_mp_mode_active, humans g_human_player_count. */
         static int fr = -1;
-        extern unsigned char *D_80087640; extern signed char D_800D27B8, D_800D27B9, D_800E1017, g_human_player_count;
-        extern unsigned char D_800BE616;
+        extern unsigned char *g_race_records; extern signed char g_rail_human_count, g_rail_cpu_count, g_race_lap_count, g_human_player_count;
+        extern unsigned char g_mp_mode_active;
         int k, n;
         if (fr < 0) fr = port_flag("p236race");
-        if (fr > 0 && D_80087640) {
+        if (fr > 0 && g_race_records) {
             extern unsigned p236_rail_calls[8], p236_rail_mode[8];
             port_log("[p236race] rail_track_update calls per record: %u %u %u %u %u %u (mode of last: %u %u)\n",
                      p236_rail_calls[0], p236_rail_calls[1], p236_rail_calls[2], p236_rail_calls[3], p236_rail_calls[4],
                      p236_rail_calls[5], p236_rail_mode[0], p236_rail_mode[1]);
-            {   /* once: the rail nodes D_800D2778 (0x10 bytes: s16 x y z, links +9..+0xD, type +0xE, camera +0xF) */
-                static int nd; extern unsigned char *D_800D2778; int j;
-                if (!nd && D_800D2778) {
+            {   /* once: the rail nodes g_rail_nodes (0x10 bytes: s16 x y z, links +9..+0xD, type +0xE, camera +0xF) */
+                static int nd; extern unsigned char *g_rail_nodes; int j;
+                if (!nd && g_rail_nodes) {
                     nd = 1;
                     for (j = 0; j < 100; j++) {
-                        const unsigned char *q = D_800D2778 + j * 0x10;
+                        const unsigned char *q = g_rail_nodes + j * 0x10;
                         port_log("[p236node] %d %d %d %d links %d %d %d %d %d type %d cam %d\n", j, (short)vbe_ld16(q),
                                  (short)vbe_ld16(q + 2), (short)vbe_ld16(q + 4), vbe_ld8(q + 9), vbe_ld8(q + 10),
                                  vbe_ld8(q + 11), vbe_ld8(q + 12), vbe_ld8(q + 13), vbe_ld8(q + 14), vbe_ld8(q + 15));
                     }
                 }
             }
-            n = vbe_ld8(&D_800D27B8) + vbe_ld8(&D_800D27B9);
+            n = vbe_ld8(&g_rail_human_count) + vbe_ld8(&g_rail_cpu_count);
             port_log("[p236race] frame %u: %d records, laps %d, BE616 %d, humans %d\n", port_frame_count, n,
-                     (signed char)vbe_ld8(&D_800E1017), vbe_ld8(&D_800BE616), (signed char)vbe_ld8(&g_human_player_count));
+                     (signed char)vbe_ld8(&g_race_lap_count), vbe_ld8(&g_mp_mode_active), (signed char)vbe_ld8(&g_human_player_count));
             for (k = 0; k < n && k < 8; k++) {
-                const unsigned char *q = D_80087640 + k * 0x84;
+                const unsigned char *q = g_race_records + k * 0x84;
                 port_log("[p236race]   %d: t %.3f start %d time %d lapt %d cnt %d len %d lap %d max %d nodes %d %d %d %d rail %d pl %d\n",
                          k, F(q, 8), *(const int *)(q + 0x18), *(const int *)(q + 0x1C), *(const int *)(q + 0x20),
                          (short)vbe_ld16(q + 0x24), (signed char)vbe_ld8(q + 0x26), (signed char)vbe_ld8(q + 0x27),
@@ -119,7 +119,7 @@ EM_JS(int, __port_p205_goto_char, (int i), {
     return v === null || i >= v.length ? 0 : v.charCodeAt(i);
 });
 #define GO_MAX 100   /* P236: 32 -> 100 (3 race laps) */
-extern float D_800DD600[2];   /* camera yaw of view 0: sin, cos (node_lists_run_view_update) */
+extern float g_billboard_yaw_sincos[2];   /* camera yaw of view 0: sin, cos (node_lists_run_view_update); was D_800DD600 */
 static int go_n = -1, go_i, go_btn;
 static unsigned go_f, go_arrive, go_stuck_f;
 static float go_r, go_x[GO_MAX], go_z[GO_MAX];
@@ -162,18 +162,18 @@ static void go_parse(void) {
     port_log("[p205go] %d waypoints from retrace %u, radius %.0f, taps %X\n", go_n, go_f, go_r, go_btn);
 }
 /* stick angle th (from up towards right) -> world heading atan2(dx, dz) = cam + base + sgn * th, cam from
- * D_800DD600. Fitted on the P205 goB log: sgn = -1, base ~ pi (start value); base is refined slowly from the motion
+ * g_billboard_yaw_sincos. Fitted on the P205 goB log: sgn = -1, base ~ pi (start value); base is refined slowly from the motion
  * (the game polls the pad only on some retraces, so no frame-exact calibration). Stuck (< 8 units in 100 retraces):
  * jump (A) and turn the stick +90 degrees for 50 retraces. */
 /* P240 TEST ?p240steer=F[:LOOK[:PCT]] (node: PORT_P240STEER): hoverboard steering controller for Race A. From retrace F on
  * the stick of pad 0 steers player record p205_player (?p205rec) towards a rail node ahead in the player's rail
- * record (D_80087640 entry whose +0x31 is 0): node list +0x2B..+0x2E, from slot LOOK (1 default .. 3), skipping nodes
+ * record (g_race_records entry whose +0x31 is 0): node list +0x2B..+0x2E, from slot LOOK (1 default .. 3), skipping nodes
  * already reached (within 900 units) or passed (the board is within the node's distance + 400 of the next slot's
  * node; nodes reached / passed are remembered, last 6); target = node + PCT% (default 50) of the way to its
- * type-4 edge node (link +0xB), from D_800D2778. Stick angle th = wrap(cam + pi - bearing)
+ * type-4 edge node (link +0xB), from g_rail_nodes. Stick angle th = wrap(cam + pi - bearing)
  * (the P205 camera mapping, sgn -1, base pi; the board camera sits behind the board), limited to +-100 degrees,
  * magnitude 80. Stuck (< 30 units in 120 retraces): stick at +90 degrees with A for 40 retraces. Once the record's
- * highest lap (+0x28) reaches the lap count D_800E1017 the stick is released (P245: A taps every 60 retraces only from 1500 retraces later).
+ * highest lap (+0x28) reaches the lap count g_race_lap_count the stick is released (P245: A taps every 60 retraces only from 1500 retraces later).
  * Logs [p240steer] every 40 retraces and on each node / lap change. Wins over ?p205goto. */
 EM_JS(int, __port_p240_steer, (void), {
     var v = null;
@@ -194,28 +194,28 @@ EM_JS(int, __port_p240_start, (void), {
 static int p240_start;
 static float p240_frac = 0.5f;   /* ?p240steer=F:LOOK:PCT: target = node + PCT% of the way to its edge node */
 static void node_centre(int ni, float *tx, float *tz) {   /* P240: rail node + its type-4 edge node (link +0xB), halved */
-    extern unsigned char *D_800D2778;
-    const unsigned char *nd = D_800D2778 + ni * 0x10, *ed;
+    extern unsigned char *g_rail_nodes;
+    const unsigned char *nd = g_rail_nodes + ni * 0x10, *ed;
     int e = vbe_ld8(nd + 0xB);
     *tx = (short)vbe_ld16(nd); *tz = (short)vbe_ld16(nd + 4);
-    if (e < 100) { ed = D_800D2778 + e * 0x10; if (vbe_ld8(ed + 0xE) == 4) { *tx += ((short)vbe_ld16(ed) - *tx) * p240_frac; *tz += ((short)vbe_ld16(ed + 4) - *tz) * p240_frac; } }
+    if (e < 100) { ed = g_rail_nodes + e * 0x10; if (vbe_ld8(ed + 0xE) == 4) { *tx += ((short)vbe_ld16(ed) - *tx) * p240_frac; *tz += ((short)vbe_ld16(ed + 4) - *tz) * p240_frac; } }
 }
 static int p240_steer(int *btn, int *sx, int *sy) {
     static int cfg = -2, look, last_node = -1, last_lap = -1, unstick, done;
     static unsigned f0, st_f, done_f, log_f; static float st_x, st_z; static int reached[6], nreached;
-    extern unsigned char *D_80087640, *D_800D2778; extern signed char D_800D27B8, D_800D27B9, D_800E1017;
+    extern unsigned char *g_race_records, *g_rail_nodes; extern signed char g_rail_human_count, g_rail_cpu_count, g_race_lap_count;
     const unsigned char *r, *q = 0;
     float x, z, tx, tz, cam, b, th; int k, n, ni, lap, laps, passed, allseen;
     if (cfg == -2) { cfg = __port_p240_steer(); if (cfg >= 0) { p240_frac = (cfg & 127) / 100.f; cfg >>= 7; f0 = (unsigned)cfg >> 2; look = cfg & 3; if (look < 1) look = 1;
         p240_start = __port_p240_start();
         port_log("[p240steer] from retrace %u, look slot %d, edge fraction %.2f, start phase %d\n", f0, look, p240_frac, p240_start); } }
-    if (cfg < 0 || port_frame_count < f0 || !D_80087640 || !D_800D2778) return cfg >= 0 && port_frame_count >= f0;
-    n = vbe_ld8(&D_800D27B8) + vbe_ld8(&D_800D27B9);
-    for (k = 0; k < n && k < 8; k++) if ((signed char)vbe_ld8(D_80087640 + k * 0x84 + 0x31) == 0) { q = D_80087640 + k * 0x84; break; }
+    if (cfg < 0 || port_frame_count < f0 || !g_race_records || !g_rail_nodes) return cfg >= 0 && port_frame_count >= f0;
+    n = vbe_ld8(&g_rail_human_count) + vbe_ld8(&g_rail_cpu_count);
+    for (k = 0; k < n && k < 8; k++) if ((signed char)vbe_ld8(g_race_records + k * 0x84 + 0x31) == 0) { q = g_race_records + k * 0x84; break; }
     if (!q) return 1;
     r = g_objects + (p205_player < 26 ? p205_player : 0) * REC;
     x = F(r, 0x14); z = F(r, 0x1C);
-    lap = (signed char)vbe_ld8(q + 0x28); laps = (signed char)vbe_ld8(&D_800E1017);
+    lap = (signed char)vbe_ld8(q + 0x28); laps = (signed char)vbe_ld8(&g_race_lap_count);
     if (lap != last_lap) { port_log("[p240steer] retrace %u: lap %d (max) of %d, cnt %d, pos %.0f %.0f\n", port_frame_count, lap, laps,
                                     (short)vbe_ld16(q + 0x24), x, z); last_lap = lap; }
     if (laps > 0 && lap >= laps) {   /* finished: release, tap A */
@@ -258,7 +258,7 @@ static int p240_steer(int *btn, int *sx, int *sy) {
         break;
     }
     node_centre(ni, &tx, &tz);
-    cam = atan2f(D_800DD600[0], D_800DD600[1]);
+    cam = atan2f(g_billboard_yaw_sincos[0], g_billboard_yaw_sincos[1]);
     b = atan2f(tx - x, tz - z);
     th = allseen ? 0.f : wrapa(cam + 3.14159265f - b);   /* every slot reached (record lags): straight on */
     if (th > 1.745f) th = 1.745f; else if (th < -1.745f) th = -1.745f;
@@ -287,7 +287,7 @@ void p205_goto_apply(int *btn, int *sx, int *sy) {
     if (go_n <= 0 || port_frame_count < go_f) return;
     r = g_objects + (p205_player < 26 ? p205_player : 0) * REC;
     x = F(r, 0x14); z = F(r, 0x1C);
-    cam = atan2f(D_800DD600[0], D_800DD600[1]);
+    cam = atan2f(g_billboard_yaw_sincos[0], g_billboard_yaw_sincos[1]);
     if (!go_have_init) { go_have_init = 1; go_sgn = -1; go_base = 3.14159265f; go_px = x; go_pz = z; go_sx0 = x; go_sz0 = z; go_stuck_f = port_frame_count; }
     if (go_i >= go_n) {   /* arrived: release the stick, tap the buttons */
         t = port_frame_count - go_arrive;
@@ -389,8 +389,8 @@ unsigned p236_rail_calls[8], p236_rail_mode[8];
 void __real_rail_track_update(int player, int mode, float speed);
 void __wrap_rail_track_update(int player, int mode, float speed) {
     static int rw = -1;
-    extern unsigned char *D_80087640;
-    const unsigned char *q = D_80087640 ? D_80087640 + (player & 7) * 0x84 : 0;
+    extern unsigned char *g_race_records;
+    const unsigned char *q = g_race_records ? g_race_records + (player & 7) * 0x84 : 0;
     int lg;
     float t0 = 0.f; int c0 = 0, n0 = 0;
     if ((unsigned)player < 8) { p236_rail_calls[player]++; p236_rail_mode[player] = (unsigned)mode; }

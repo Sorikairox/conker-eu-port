@@ -2,8 +2,8 @@ s/    s32 arg = g_cur_obj_cmd \& 0xFFFF;/    s32 arg = g_cur_obj_cmd \& 0xFFF;/ 
 s/    if (rec == -1) {/    if (rec == -2) {/ % rec_none
 s/    state = 1;/    state = 2;/ % nobe nobe_noctl
 s/    g_setup_entry_flags\[rec\] = 0;/    g_setup_entry_flags[rec] = 1;/ % k75_tbl
-s/    n = setup_entry_spawn((u8 \*) D_800D20FC + rec \* 0x30, rec, 0, 0, 0);/    n = setup_entry_spawn((u8 *) D_800D20FC + rec * 0x2C, rec, 0, 0, 0);/ % k75_tbl
-s/    n = setup_entry_spawn((u8 \*) D_800D20FC + rec \* 0x30, rec, 0, 0, 0);/    n = setup_entry_spawn((u8 *) D_800D20FC + rec * 0x30, 0, 0, 0, 0);/ % k75_tbl
+s/    n = setup_entry_spawn((u8 \*) g_setup_entries + rec \* 0x30, rec, 0, 0, 0);/    n = setup_entry_spawn((u8 *) g_setup_entries + rec * 0x2C, rec, 0, 0, 0);/ % k75_tbl
+s/    n = setup_entry_spawn((u8 \*) g_setup_entries + rec \* 0x30, rec, 0, 0, 0);/    n = setup_entry_spawn((u8 *) g_setup_entries + rec * 0x30, 0, 0, 0, 0);/ % k75_tbl
 s/    if (n == 0) {/    if (n == 1) {/ % obj_none k7B_10_n1
 s/    obj = \&g_objects\[n - 1\];/    obj = \&g_objects[n];/ % k75_tbl
 s/    obj->unk124 = g_cur_obj_index + 1;/    obj->unk124 = g_cur_obj_index;/ % k75_tbl
@@ -18,7 +18,7 @@ s/                usePos = TRUE;/                usePos = FALSE;/ % k7B_A k7B_ot
 s/            mtx_transform_point_or_origin(NULL, \&obj->x_position, (u8 \*) me->unk1D4 + sel \* 64);/            mtx_transform_point_or_origin(NULL, \&obj->y_position, (u8 *) me->unk1D4 + sel * 64);/ % k75_tbl
 s/        obj->y_position = me->y_position + 100.0f;/        obj->y_position = me->y_position + 10.0f;/ % notbl other_kind
 s/        obj->z_position = me->z_position;/        obj->z_position = me->x_position;/ % notbl other_kind
-s/    if (D_800BE616 != 0) {/    if (D_800BE616 == 0) {/ % k75_tbl nobe
+s/    if (g_mp_mode_active != 0) {/    if (g_mp_mode_active == 0) {/ % k75_tbl nobe
 s/        state = 5;/        state = 6;/ % k75_tbl
 s/        obj->unk2E4 = CTL_U16(me->unk31C, 0x19C);/        obj->unk2E4 = CTL_U16(me->unk31C, 0x19E);/ % k75_tbl
 s/        me->unk31C->unk19B = 0;/        me->unk31C->unk19B = 1;/ % k75_tbl

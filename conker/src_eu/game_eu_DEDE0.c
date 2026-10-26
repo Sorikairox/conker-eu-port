@@ -44,8 +44,8 @@ void obj_whirlpool_pull_update(struct127 *arg0) {
     obj_start_anim(arg0, 0U, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-extern f32 D_8009FC8C;
-extern f32 D_8009FC90;
+extern f32 g_path_bank_k_fc8c; /* was D_8009FC8C */
+extern f32 g_path_bank_k_fc90; /* was D_8009FC90 */
 void cutscene_actor_apply_track(struct127 *, s32, s32);
 void obj_walk_update(struct127 *);
 s32 obj_check_death(struct127 *);
@@ -62,7 +62,7 @@ void obj_path_bank_update(struct127 *arg0) {
     arg0->unk80 = 0xA;
     sp34 = arg0->unk76;
     temp_f0 = (f32) (*(s16 *)((u8 *)(g_path_points[arg0->unk13F]) + 2));
-    obj_set_gravity_band(arg0, temp_f0, 1.0f, temp_f0, D_8009FC8C, 12.0f, -16.0f);
+    obj_set_gravity_band(arg0, temp_f0, 1.0f, temp_f0, g_path_bank_k_fc8c, 12.0f, -16.0f);
     obj_walk_update(arg0);
     var_f2 = 6.0f;
     temp_f12 = arg0->unkC4;
@@ -76,7 +76,7 @@ block_3:
         var_f0 = var_f2;
     }
     temp_f2 = arg0->unk148;
-    arg0->unk148 = temp_f2 + ((var_f0 - temp_f2) * D_8009FC90);
+    arg0->unk148 = temp_f2 + ((var_f0 - temp_f2) * g_path_bank_k_fc90);
     arg0->unkC4 = temp_f12 + arg0->unk148;
     arg0->unk40 = (f32) (s16) (arg0->unk7A + 0x4000) * 0.005493164f;
     obj_physics_step(arg0);
@@ -89,7 +89,7 @@ void obj_stun_update(struct127 *);
 void obj_lean_into_turn(struct127 *, s16);
 
 // held_object_update: update of an object that may be held, thrown or resting: unk80 = 10; stunned objects only run
-// obj_stun_update. Otherwise its resting height is 210 above the floor entry D_800D20FC[unk13F] (+8), the vertical
+// obj_stun_update. Otherwise its resting height is 210 above the floor entry g_setup_entries[unk13F] (+8), the vertical
 // bounce speed unkB8 is -vy / 2 (0 in mode 3) unless unk22C bit 3; in mode 14 (unk223) it is pulled towards object
 // unk222 (no gravity, vy = (its height + unk224 - y) / (distance obj_dist_xz / speed)); otherwise (mode 1: 210 above
 // the player) the height comes from unk224 (10000: the g_path_points path point unk21E, else 8 x unk224, + unk180 for
@@ -110,7 +110,7 @@ void held_object_update(struct127 *obj) {
     heading = obj->unk76;
     obj->unk80 = 10;
     if (obj->stunned == 0) {
-        height = *(s16 *) ((u8 *) D_800D20FC + obj->unk13F * 0x30 + 8) + 210.0f;
+        height = *(s16 *) ((u8 *) g_setup_entries + obj->unk13F * 0x30 + 8) + 210.0f;
         if (!(obj->unk22C & 8)) {
             if (obj->unk223 == 3) {
                 obj->unkB8 = 0.0f;
@@ -205,8 +205,8 @@ void obj_carrier_update(struct127 *arg0) {
         vec_from_yaw_pitch((*(u16 *)((u8 *)temp_s0 + 0x7A)), (*(f32 *)((u8 *)temp_s0 + 0xB8)) * -7.0f, 0.0f, &sp.u34, &sp.u30, &sp.u2C);
         (*(f32 *)((u8 *)temp_s0 + 0x14)) = (f32) (arg0->x_position + sp.u34);
         (*(f32 *)((u8 *)temp_s0 + 0x1C)) = (f32) (arg0->z_position + sp.u30);
-        (*(u16 *)((u8 *)temp_s0 + 0x7A)) = (u16) ((*(u16 *)((u8 *)temp_s0 + 0x7A)) + (D_800BE9A0 << 8));
-        arg0->unk7E += D_800BE9A0;
+        (*(u16 *)((u8 *)temp_s0 + 0x7A)) = (u16) ((*(u16 *)((u8 *)temp_s0 + 0x7A)) + (g_frame_delta << 8));
+        arg0->unk7E += g_frame_delta;
         (*(s8 *)((u8 *)temp_s0 + 0xAD)) = 0;
         (*(f32 *)((u8 *)temp_s0 + 0x3C)) = 0.0f;
         (*(f32 *)((u8 *)temp_s0 + 0x16C)) = 0.0f;
@@ -216,9 +216,9 @@ void obj_carrier_update(struct127 *arg0) {
     arg0->unk7A = temp_v0;
     arg0->unk40 = (f32) (s16) (temp_v0 + 0x4000) * 0.005493164f;
 }
-extern u8 D_800B8AC4[];
-extern s32 D_800CC670;
-extern s32 D_8008CE80;
+extern u8 g_objects_ref_stunned[]; /* was D_800B8AC4 */
+extern s32 g_obj_anim_clock; /* was D_800CC670 */
+extern s32 g_sinking_rec_init; /* was D_8008CE80 */
 void obj_carried_update(struct127 *);
 void obj_find_carrier(struct127 *);
 f32 math_cos_u8(u8);
@@ -229,7 +229,7 @@ void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 // sinking_object_update: per-frame update of an object sinking / floating in water: flags (0x80, 0x4 while moving
 // faster than 1), unkB0 25, stunned 10, unk239 3, unkFC 0xA7, unk80 1; a pending reset (unk25C bit 6) puts its old
 // position on the player's. In a water region (unk13D) it calls obj_carried_update and sinks (unkB8 eases towards -20 with
-// factor 0.2, else towards 0) once unk21C reaches 9, unless the region's D_800B8AC4 entry is set and D_800CC670 bit 2
+// factor 0.2, else towards 0) once unk21C reaches 9, unless the region's g_objects_ref_stunned entry is set and g_obj_anim_clock bit 2
 // is clear. Facing / animation / obj_find_carrier / obj_start_anim / release as usual. In water, 40 in 256 frames spawn
 // a ripple record (node_spawn_sprite) at a random point up to 40 x xz_scale around it, drifting with the player's speed.
 /* was func_150B1EC0 */
@@ -287,7 +287,7 @@ void sinking_object_update(struct127 *obj) {
     target = 0.0f;
     if (obj->unk13D != 0) {
         obj_carried_update(obj);
-        if ((D_800B8AC4[obj->unk13D * 0x32C] == 0 || (D_800CC670 & 4)) && obj->unk21C >= 9) {
+        if ((g_objects_ref_stunned[obj->unk13D * 0x32C] == 0 || (g_obj_anim_clock & 4)) && obj->unk21C >= 9) {
             target = -20.0f;
         }
     }
@@ -304,7 +304,7 @@ void sinking_object_update(struct127 *obj) {
     a = random_int();
     s = math_cos_u8(a);
     c = math_sin_u8(a);
-    rec.u00 = D_8008CE80;
+    rec.u00 = g_sinking_rec_init;
     rec.u0C = 0;
     rec.u0E = 0;
     rec.pos[0] = (s32) (obj->x_position + s * dist);

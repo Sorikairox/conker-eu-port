@@ -23,8 +23,8 @@
 #include <ultra64.h>
 #include <math.h>
 
-extern u8 **D_800E0E20; /* Huffman trees, per table (asset 0x17,4 relocated onto asset 0x17,6) */
-extern u8 *D_800E0E24;  /* fast table: [tbl << 8 | next 8 bits] = y << 4 | x, +0x2200 = code length */
+extern u8 **g_mp3_huff_trees; /* Huffman trees, per table (asset 0x17,4 relocated onto asset 0x17,6); was D_800E0E20 */
+extern u8 *g_mp3_huff_fast_table;  /* fast table: [tbl << 8 | next 8 bits] = y << 4 | x, +0x2200 = code length; was D_800E0E24 */
 
 /* ---- bit reader: buf is the stream buffer, pos an absolute bit position ---- */
 static u32 peek32(u8 *buf, s32 pos) {
@@ -50,19 +50,19 @@ static s32 huff(u8 *buf, s32 *pos, s32 tbl, s32 *second) {
     s32 sh = *pos & 7;
     u32 byte8 = (((u32)p[0] << 8 | p[1]) >> (8 - sh)) & 0xFF;
     u32 idx = ((u32)tbl << 8) + byte8;
-    u32 len = D_800E0E24[0x2200 + idx];
+    u32 len = g_mp3_huff_fast_table[0x2200 + idx];
     u8 *node;
     u32 cur, mask;
 
     if (len != 0) {
-        u32 v = D_800E0E24[idx];
+        u32 v = g_mp3_huff_fast_table[idx];
         *pos += len;
         *second = v >> 4;
         return v & 0xF;
     }
     /* tree walk, one bit per step: node[0] / node[1] = child offset in 4-byte units for bit 0 / 1,
      * node[2] = first value (-1: internal node), node[3] = second value */
-    node = D_800E0E20[tbl];
+    node = g_mp3_huff_trees[tbl];
     cur = p[0];
     mask = 0x80u >> sh;
     for (;;) {

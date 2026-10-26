@@ -110,6 +110,6 @@ def fix(path, rel, stderr):
     return out
 
 
-# P61's STATIC fix (the literal 0x800A0000 / -1360 in nm_asm/D5E90_walls.inc, D_8009FAB0) was removed in P66: P62
-# fixed tools/port/asm2c_hand.py, the regenerated include reads HI / LO((u32) &D_8009FAB0), so the pattern no longer
+# P61's STATIC fix (the literal 0x800A0000 / -1360 in nm_asm/D5E90_walls.inc, g_nm_tri_bbox_slack) was removed in P66: P62
+# fixed tools/port/asm2c_hand.py, the regenerated include reads HI / LO((u32) &g_nm_tri_bbox_slack), so the pattern no longer
 # matched and the copy only duplicated the TU.

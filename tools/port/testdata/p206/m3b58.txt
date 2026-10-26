@@ -5,10 +5,10 @@ s/    if (g_human_player_count == 1) {/    if (g_human_player_count == 2) {/
 s/        range = 7744.0f;/        range = 7745.0f;/
 s/        size = (size \* 2) \/ 3;/        size = (size * 2) >> 1;/
 s/        half = table\[24\];/        half = table[23];/
-s/    range \*= D_800901BC;/    range *= 1.0f;/
-s/    scale \*= D_800901BC;/    scale *= 1.0f;/
+s/    range \*= g_hud_scale_x;/    range *= 1.0f;/
+s/    scale \*= g_hud_scale_x;/    scale *= 1.0f;/
 s/        dot = 4;/        dot = 5;/
-s/    if (D_800901BC == 1.0f) {/    if (D_800901BC >= 1.0f) {/
+s/    if (g_hud_scale_x == 1.0f) {/    if (g_hud_scale_x >= 1.0f) {/
 s/    tex = texture_cache_lookup(0xCF5, NULL, 3, 0);/    tex = texture_cache_lookup(0xCF4, NULL, 3, 0);/
 s/    if (tex == 0x80000000) {/    if (tex == 0) {/
 s/    gdl->words.w1 = 0x07094250;/    gdl->words.w1 = 0x07094251;/
@@ -42,9 +42,9 @@ s/            if (obj->interaction_state == 0 || obj->unk328 == 0) {/           
 s/            if (obj->interaction_state == 0 || obj->unk328 == 0) {/            if (obj->interaction_state == 0) {/
 s/            team = obj->unk328 - 1;/            team = obj->unk328;/
 s/            if (i < g_player_count) {/            if (i <= g_player_count) {/
-s/                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 4) <= 0 || (D_800E0FFC \& (1 << i)) ||/                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 3) <= 0 || (D_800E0FFC \& (1 << i)) ||/
-s/                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 4) <= 0 || (D_800E0FFC \& (1 << i)) ||/                if (player_stat_get((s16)i, 3) < 0 || player_stat_get((s16)i, 4) <= 0 || (D_800E0FFC \& (1 << i)) ||/
-s/                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 4) <= 0 || (D_800E0FFC \& (1 << i)) ||/                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 4) <= 0 || (D_800E0FFC \& (2 << i)) ||/
+s/                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 4) <= 0 || (g_mp_hud_marked_players \& (1 << i)) ||/                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 3) <= 0 || (g_mp_hud_marked_players \& (1 << i)) ||/
+s/                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 4) <= 0 || (g_mp_hud_marked_players \& (1 << i)) ||/                if (player_stat_get((s16)i, 3) < 0 || player_stat_get((s16)i, 4) <= 0 || (g_mp_hud_marked_players \& (1 << i)) ||/
+s/                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 4) <= 0 || (g_mp_hud_marked_players \& (1 << i)) ||/                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 4) <= 0 || (g_mp_hud_marked_players \& (2 << i)) ||/
 s/                    obj->health == 0 || (((u8 \*)obj->unk31C)\[0x75\] \& 0x7F) == 0x21) {/                    obj->health == 1 || (((u8 *)obj->unk31C)[0x75] \& 0x7F) == 0x21) {/
 s/                    obj->health == 0 || (((u8 \*)obj->unk31C)\[0x75\] \& 0x7F) == 0x21) {/                    obj->health == 0 || ((u8 *)obj->unk31C)[0x75] == 0x21) {/
 s/            dx = (obj->x_position - rx) \* scale;/            dx = (obj->x_position - rx) * zoom;/

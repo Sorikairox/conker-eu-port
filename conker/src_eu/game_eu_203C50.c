@@ -277,7 +277,7 @@ u8 *fb_ghost_image_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
 }
 /* was func_151D6CA0 */
 void fb_ghost_set_mode(s32 arg0, s32 arg1) {
-    if (g_level_id == 6 && D_80038080 == 0) {
+    if (g_level_id == 6 && g_mem_expansion_pak == 0) {
         return;
     }
     if (arg1 == 0) {

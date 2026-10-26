@@ -26,4 +26,4 @@
 \#^                  0, 1, 0, 0x1A#s/0x1A/0x1B/
 \#^                  0, 1, 0, 0x1A#s/? -1 : 2/? -1 : 1/
 \#^                  0, 1, 0, 0x1A#s/flag, arg2)/flag, 0)/
-\#^                  0, 1, 0, 0x1A#s/0xFF, D_800BE616/0xFE, D_800BE616/
+\#^                  0, 1, 0, 0x1A#s/0xFF, g_mp_mode_active/0xFE, g_mp_mode_active/

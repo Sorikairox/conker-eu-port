@@ -6,7 +6,7 @@
 void spawn_arc_emit(f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, f32, s32, s32);
 void explosion_light_spawn(f32 *, u8, s32);
 extern s32 g_view_count_minus1; /* was D_800BEE08 */
-extern u8 D_8009FF90[];
+extern u8 g_joint_blast_offset[]; /* was D_8009FF90 */
 /* was func_150B3AB0 */
 void obj_joint_blast_fx(struct127 *arg0, u8 arg1) {
     s16 angle;
@@ -16,7 +16,7 @@ void obj_joint_blast_fx(struct127 *arg0, u8 arg1) {
     if (arg0 != NULL && arg0->unk1D4 != NULL) {
         camera_shake_start(&g_player_views[g_view_count_minus1], 6, 1);
         angle = (*(u16 *)((u8 *)arg0 + 0x7A) >> 8) + 0x40;
-        mtx_transform_point_or_origin(D_8009FF90, &pos, (u8 *)arg0->unk1D4 + 0x640);
+        mtx_transform_point_or_origin(g_joint_blast_offset, &pos, (u8 *)arg0->unk1D4 + 0x640);
         spawn_arc_emit(pos.unk0, pos.unk4, pos.unk8, 10.0f, angle, 0, 0xFF, (u32)random_int() % 31 + 0x28, 8, 0, 0.0f, 0, arg1);
         blk.unk0 = 1;
         blk.unk2 = (random_int() & 0xF) + 0xC;

@@ -25,7 +25,7 @@ s32 storm_thunder_flag_take(void) {
 void storm_thunder_sfx_update(s32 arg0) {
     if (((g_player1_floor_flags & 0X1F) == 3) || ((g_player1_floor_flags & 0x1F) == 4)) {
         if (g_frame_ticks < g_storm_thunder_sfx_timer){
-            if(D_800C35EA != 1) {
+            if(g_cutscene_slot_state != 1) {
                 g_storm_thunder_sfx_timer = (g_storm_thunder_sfx_timer - g_frame_ticks);
             }
         } else {

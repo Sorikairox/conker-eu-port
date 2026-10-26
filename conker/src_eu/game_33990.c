@@ -27,11 +27,11 @@ extern s32 g_save_stat9; /* was D_800BE804 */
  * checksum (0xCC + sum of bytes 2..0x7F shifted left by index & 3, 16 bits) against the first u16. Bad block:
  * save_game_defaults (defaults) and, if a slot is loaded (g_save_best_slot_score >= 0) while g_save_slot_refresh is set, the 27-byte state
  * at g_save_progress_bits is put back. Good block: byte 2 = slot kind (sp+0x7F), bytes 3..6 = a time stamp (big-endian),
- * 27 bytes of g_save_progress_bits, 9 bytes of D_800D2E60, g_save_resume_level, g_save_restart_entry, g_save_stat9 (u16, also passed to
+ * 27 bytes of g_save_progress_bits, 9 bytes of g_hints_seen, g_save_resume_level, g_save_restart_entry, g_save_stat9 (u16, also passed to
  * player_stat_modify(0, 9, .)), g_save_play_time, then the 69 bit fields of g_save_level_bits (u64 each, widths g_save_field_widths, MSB
  * first). While g_save_slot_refresh is set and the kind is < 3, the slot record g_save_slot_summaries[kind] is refreshed when the stamp
  * is newer (count of set bits in g_save_progress_bits, g_save_play_time, g_save_resume_level, stamp, slot, g_save_stat9); g_save_best_slot_score keeps the
- * best count (g_save_final_scene_unlock = 1 when D_800D2E68 bit 5 is set), otherwise the old g_save_progress_bits state is put back.
+ * best count (g_save_final_scene_unlock = 1 when g_hints_seen_b8 bit 5 is set), otherwise the old g_save_progress_bits state is put back.
  * Block 0x34 (slot 3) clears g_save_slot_refresh at the end. */
 /* was func_15006590 */
 void save_slot_load(s8 arg0) {
@@ -84,7 +84,7 @@ void save_slot_load(s8 arg0) {
         ((u8 *) g_save_progress_bits)[i] = *p++;
     }
     for (i = 0; i < 9; i++) {
-        D_800D2E60[i] = *p++;
+        g_hints_seen[i] = *p++;
     }
     g_save_resume_level = p[0];
     g_save_restart_entry = p[1];
@@ -135,7 +135,7 @@ void save_slot_load(s8 arg0) {
             *(s32 *) (rec + 4) = g_save_stat9;
             if ((u8) bits >= g_save_best_slot_score) {
                 g_save_best_slot_score = (u8) bits;
-                if (D_800D2E68 & 0x20) {
+                if (g_hints_seen_b8 & 0x20) {
                     g_save_final_scene_unlock = 1;
                 }
             } else {
@@ -159,7 +159,7 @@ s32 player_stat_get(s16, s32);
  * and moves it to the highest EEPROM slot area (0..3) that no live record (+8 >= 0) uses (+0xE). Unless the EEPROM
  * is disabled (g_eeprom_writes_disabled), the area's last block (area * 16 + 0x13) is first overwritten with 0xFE bytes. The
  * 0x80-byte block g_save_slot_buf is the inverse of save_slot_load's layout: u16 checksum, slot, stamp (big-endian), 27
- * bytes of *g_save_progress_bits, 9 bytes of D_800D2E60, g_save_resume_level, g_save_restart_entry, g_save_stat9 = player_stat_get(0, 6) (u16),
+ * bytes of *g_save_progress_bits, 9 bytes of g_hints_seen, g_save_resume_level, g_save_restart_entry, g_save_stat9 = player_stat_get(0, 6) (u16),
  * g_save_play_time (u32), then the 69 values of g_save_level_bits packed MSB first with the widths g_save_field_widths (a last partial
  * byte is not stored; the 0x45 bytes after g_save_play_time are cleared first). Checksum = 0xCC + bytes 2..0x7F shifted
  * left by index & 3 (16 bits). Written with eeprom_async_write_start (osEepromLongWrite) to block area * 16 + 4. */
@@ -214,7 +214,7 @@ void save_slot_write(s32 slot) { /* the asm uses the whole a0 (callers pass an s
         *p++ = ((u8 *) g_save_progress_bits)[i];
     }
     for (i = 0; i < 9; i++) {   /* the asm copies up to g_game_flags_dirty (EU), 9 bytes */
-        *p++ = D_800D2E60[i];
+        *p++ = g_hints_seen[i];
     }
     p[0] = g_save_resume_level;
     p[1] = g_save_restart_entry;
@@ -492,7 +492,7 @@ void save_request_slot_load(s32 arg0) {
     if (arg0 < 0) {
         save_game_defaults();
     }
-    if ((arg0 >= 0) && (arg0 < 4) && (D_800BE616 == 0)) {
+    if ((arg0 >= 0) && (arg0 < 4) && (g_mp_mode_active == 0)) {
         g_save_request_kind = (u8)1;
         g_save_request_slot = arg0;
     }
@@ -500,7 +500,7 @@ void save_request_slot_load(s32 arg0) {
 
 /* was func_15007718 */
 void save_request_slot_write(s32 arg0) {
-    if ((arg0 >= 0) && (arg0 < 3) && (D_800BE616 == 0)) {
+    if ((arg0 >= 0) && (arg0 < 3) && (g_mp_mode_active == 0)) {
         g_save_request_kind = (u8)2;
         g_save_request_slot = arg0;
     }
@@ -516,7 +516,7 @@ void save_request_slot_erase(s32 arg0) {
 
 // save_slots_reset: marks the three save-slot summaries g_save_slot_summaries empty (+8 = -1, +0xE = -1), clears the current slot
 // g_save_best_slot_score / g_save_final_scene_unlock, sets g_save_slot_refresh, clears the 27 bytes at g_save_progress_bits (pointer) and the 9 save bits
-// D_800D2E60, and sets the four bytes g_save_slot_kinds[0..3] to -1. Mode 3 (menu) calls it on its first frame.
+// g_hints_seen, and sets the four bytes g_save_slot_kinds[0..3] to -1. Mode 3 (menu) calls it on its first frame.
 /* was func_15007778 */
 void save_slots_reset(void) {
     s32 i;
@@ -534,7 +534,7 @@ void save_slots_reset(void) {
         ((u8 *) g_save_progress_bits)[i] = 0;
     }
     for (i = 0; i < 9; i++) {
-        D_800D2E60[i] = 0;
+        g_hints_seen[i] = 0;
     }
     g_save_slot_kinds[3] = -1;
     g_save_slot_kinds[2] = -1;
@@ -561,7 +561,7 @@ void save_slots_reset(void) {
 //     } while (phi_v0 < 27);
 //
 //     for (phi_v0 = 0; phi_v0 < 9; phi_v0++) {
-//         D_800D2E60[phi_v0] = 0;
+//         g_hints_seen[phi_v0] = 0;
 //     }
 //
 //     D_800BE3DB = -1;

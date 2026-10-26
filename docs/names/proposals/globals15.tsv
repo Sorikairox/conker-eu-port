@@ -1,0 +1,34 @@
+old	new	confidence	description
+D_800BE9D8	g_gfx_dl_frame_starts	high	Per DL buffer: start of the frame's display list (g_gfx_dl_ptr is reset to it each frame)
+D_800D2340	g_player_active_mask	high	s16 bit mask of the active players (level_lights_init); player_stat_get field 0
+D_800DC6D0	g_view_mtx_bufs	high	Per DL buffer: the per-player view matrices (0x40 bytes each)
+D_800DE1BC	g_screen_pulse_wave	high	Non-zero: the screen pulse overlay alpha is modulated by a sine wave (screen_pulse_start arg4)
+D_8003A928	g_sched_thread_state	low	u16 set to 4 when the scheduler thread starts
+D_8003B1E8	g_sched_gfx_queue_alias	high	Same EU variable as g_sched_gfx_queue (D_8003B548): scheduler gfx task queue
+D_8003B200	g_sched_audio_queue_alias	high	Same EU variable as g_sched_audio_queue (D_8003B560): scheduler audio task queue
+D_800EA140	g_heap_start	high	Start of the main heap (heap_init: one free block up to g_mem_heap_end)
+D_800A62A0	g_char_fx_mode_table	med	u8 per game mode: character effect column used by char_fx_init (flag 2)
+D_800A62B8	g_char_fx_type_table	med	u8 per character type: character effect index used by char_fx_init (flag 4)
+D_800C42B8	g_model_draw_ident_mtx	high	Mtx set to identity and loaded (G_MTX) by obj_draw_model_dl before a model's display lists
+D_800D3668	g_level_tri_vis_flags	high	Start of the per level triangle visibility / flag bytes (in the scratch area)
+D_800D3A8C	g_level_tri_vis_flags_end	high	End of the per level triangle visibility / flag bytes
+D_800DC278	g_zone_tree	high	Zone (BSP) tree of the current collision area (zone_tree_find_leaf, floor_collect_level_tris)
+D_800DE3E0	g_shadow_light_pos	high	Per shadow slot: smoothed light position (3 floats)
+D_80000300	g_os_tv_type	high	libultra osTvType (0 = PAL, 1 = NTSC)
+D_800D2F3C	g_level_event_count	high	Number of level-start events in g_level_event_ids (from the level header)
+D_800D2F40	g_level_event_ids	high	u16 ids of the events started at level start (from the level header)
+D_800A6440	g_anim_model_fx_node_types	med	The three node list types of the animated model effects (anim_model_fx_broadcast)
+D_800C3A92	g_cutscene_skipped	med	Set by cutscene_end_skip, cleared by cutscene_slot_reset; read by camera events and event_query_scene 5
+D_800C40B8	g_cutscene_scene_id	high	Id of the scene loaded by cutscene_scene_load (event_query_scene)
+D_800D2528	g_path_point_counts	high	Per path: number of points (g_path_points)
+D_800DD600	g_billboard_yaw_sincos	high	Camera yaw of view 0: [0] sin, [1] cos, used by sprite_billboard_draw
+D_800E1017	g_race_lap_count	high	s8 number of laps of the race (mp_hud_draw_views)
+D_8008679C	g_anim_event_fns	high	Animation event command handler table (anim_events_run)
+D_8009018C	g_game_mode_fns	high	Per game mode: frame handler called by game_mode_frame_step
+D_800DBE18	g_coll_area_tri_counts	high	Per collision area: triangle count (collision_end_area)
+D_800DBE4C	g_coll_tri_count	high	Triangle count of the current collision area
+D_800DBE5C	g_coll_tri_flags	high	Per-triangle flags table read by the collision queries (collision_set_tri_flags_table)
+D_800DBE62	g_coll_quadtrees_built	high	Set when the collision quadtrees are built; else every triangle is tested
+D_800DC208	g_coll_area_tri_tables	high	Per collision area: triangle table (3 vertex pointers per triangle)
+D_800C5000	g_model_skeletons	high	Per model id: skeleton pointer (model +0x10), set by model_load
+D_800894C0	g_coll_area_enabled	high	Per collision area: enable byte (1 = tested by the floor / wall queries; camera_eye_collision toggles [1..2])

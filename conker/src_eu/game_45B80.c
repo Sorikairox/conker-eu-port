@@ -23,7 +23,7 @@ void game_main_loop(void) {
     func_151E6BFC();
 
     *(s16 *)&g_game_loop_flag_5e0 = 1; // s16 in EU, u8 in US
-    D_800D18A0 = 0;
+    g_player_view_hidden_mask = 0;
     g_player_mask_18a2 = 0;
     g_player_state_18a4 = 0;
     g_game_state_u8_23a9 = 0;
@@ -32,24 +32,24 @@ void game_main_loop(void) {
 
     g_loop_exit_flag_ac60 = 1;
     g_loop_exit_value_ac64 = 3500;
-    *D_800BE728 = cont_read_frame();
+    *g_cont_frame = cont_read_frame();
 
     while (func_151DCFD8(1) != 0) {};
 }
 
 // something big and interesting
-extern OSMesgQueue D_800BEE30;
+extern OSMesgQueue g_game_main_queue; /* was D_800BEE30 */
 extern u8 g_frame_flag_afa0; /* was D_8002AFA0 */
 extern s16 g_frame_value_afa4; /* was D_8002AFA4 */
 extern u8 g_dl_buffers_reinit_req; /* was D_800BEA34 */
-extern u8 D_800BEA35;
+extern u8 g_game_frame_state; /* was D_800BEA35 */
 extern s16 g_gfx_tasks_pending; /* was D_800BEEC8 */
 extern u8 g_view_player_order[]; /* was D_800BEA50 */
 extern u8 g_gfx_alt_ucode_active; /* was D_800BEFC0 */
 extern u8 g_cam_viewport_pending; /* was D_800D9F38 */
 extern u8 g_cam_fov_pending; /* was D_800D9F10 */
-extern void *D_800BEFBC;
-extern u8 D_800C1480[];
+extern void *g_gfx_ucode_data; /* was D_800BEFBC */
+extern u8 g_gfx_ucode_text[]; /* was D_800C1480 */
 extern u8 g_identity_mtx[]; /* was D_80089810 */
 extern s32 g_dl_capacity; /* was D_800BEFC4 */
 extern u8 g_unpause_settle_frames; /* was D_800BEEE2 */
@@ -75,15 +75,15 @@ void mp3_stream_resume(void);
 
 /* Per-frame main step: wait for the frame message, then build and submit the frame's display list
  * (message 1), release the DL buffers when the game is torn down (message 2) or halt (message 4).
- * Returns 0 once the buffers were released, 1 otherwise. D_800BE9D0 is the DL write pointer. */
-#define GDL (*(Gfx **)&D_800BE9D0)
+ * Returns 0 once the buffers were released, 1 otherwise. g_gfx_dl_ptr is the DL write pointer. */
+#define GDL (*(Gfx **)&g_gfx_dl_ptr)
 /* was func_1501878C */
 s32 game_frame_step(void) {
     OSMesg msg = NULL;
     s16 i;
     Gfx *saved;
 
-    osRecvMesg(&D_800BEE30, &msg, OS_MESG_BLOCK);
+    osRecvMesg(&g_game_main_queue, &msg, OS_MESG_BLOCK);
     g_frame_flag_afa0 = 0;
     g_frame_value_afa4 = 800;
     switch (*(s16 *)msg) {
@@ -95,12 +95,12 @@ s32 game_frame_step(void) {
                 effect_sample_zbuffer_cells();
             }
             g_gfx_tasks_pending--;
-            if (D_800BEA35 == 0 || g_gfx_tasks_pending != 0) {
+            if (g_game_frame_state == 0 || g_gfx_tasks_pending != 0) {
                 return 1;
             }
-            heap_free((s32)D_800BEDE8[0]);
-            heap_free((s32)D_800BEDE8[1]);
-            D_800BEDE8[0] = NULL;
+            heap_free((s32)g_gfx_dl_buffers[0]);
+            heap_free((s32)g_gfx_dl_buffers[1]);
+            g_gfx_dl_buffers[0] = NULL;
             return 0;
         case 4:
             while (eeprom_async_write_step(1) != 0) {
@@ -111,11 +111,11 @@ s32 game_frame_step(void) {
             return 1;
     }
 
-    if (D_800BEA35 != 0) {
+    if (g_game_frame_state != 0) {
         return 1;
     }
     game_mode_frame_step();
-    if (D_800BEA35 != 0) {
+    if (g_game_frame_state != 0) {
         return 1;
     }
     if (g_dl_buffers_reinit_req != 0) {
@@ -143,8 +143,8 @@ s32 game_frame_step(void) {
     }
 
     if (g_gfx_alt_ucode_active == 0) {
-        /* Back to the main microcode (text D_800C1480, data D_800BEFBC), then the base render state. */
-        gSPLoadUcodeEx(GDL++, D_800C1480, D_800BEFBC, 0x800);
+        /* Back to the main microcode (text g_gfx_ucode_text, data g_gfx_ucode_data), then the base render state. */
+        gSPLoadUcodeEx(GDL++, g_gfx_ucode_text, g_gfx_ucode_data, 0x800);
         gSPGeometryMode(GDL++, 0x3D0605, 0);
         gSPSetGeometryMode(GDL++, 0x220005);
         gSPMatrix(GDL++, g_identity_mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
@@ -158,7 +158,7 @@ s32 game_frame_step(void) {
         GDL = light_setup_view(GDL, g_cur_view_player);
         GDL = render_player_scene(GDL, g_cur_view_player);
         /* Out of DL space: drop this player's view. */
-        if (g_dl_capacity < GDL - D_800BEDE8[g_dl_buf_index]) {
+        if (g_dl_capacity < GDL - g_gfx_dl_buffers[g_dl_buf_index]) {
             GDL = saved;
         }
     }
@@ -227,12 +227,12 @@ void world_update_objects(void) {
     objects_update_visibility();
     frame_hook_nop_1501c870();
     if (g_game_paused == 0) {
-        if (D_800C35EA == 1) {
+        if (g_cutscene_slot_state == 1) {
             cutscene_update_objects();
         } else {
             objects_run_state_handlers();
         }
-        player_stats_store_health(D_800D2340);
+        player_stats_store_health(g_player_active_mask);
     }
     obj_collision_sizes_update();
     player_update_life_states();
@@ -242,7 +242,7 @@ void world_update_objects(void) {
  * render_player_scene uses it as the new GDL. */
 /* was func_15018E88 */
 void *render_scene_layers_pre(void *arg0, s16 arg1) {
-    if (D_800BE616 == 0) {
+    if (g_mp_mode_active == 0) {
         ambient_flames_draw(&arg0, 1);
     }
     arg0 = node_render_layers_draw(arg0, 0, arg1, 0);
@@ -276,8 +276,8 @@ void camera_player_update(s16 arg0) {
 
 /* was func_1501905C */
 void game_frame_begin(void) {
-    D_800BE9D0 = D_800BE9D8[g_dl_buf_index];
-    *D_800BE728 = cont_read_frame();
+    g_gfx_dl_ptr = g_gfx_dl_frame_starts[g_dl_buf_index];
+    *g_cont_frame = cont_read_frame();
     game_update_frame_timing();
     if ((g_pause_open != 0) && (g_game_paused == 0)) {
         node_broadcast_all(0, 0x47);
@@ -296,10 +296,10 @@ void game_frame_begin(void) {
 
 // few loops
 // Per-frame world update (P13 from the P12 convert.py EQUIV, prototypes cleaned): camera/objects/players/effects
-// steps, then ages the 0x20-byte records D_80043ED0..D_80044B20 (four counters each). Returns 1 (game_frame_step
+// steps, then ages the 0x20-byte records g_frame_counter_block..g_audio_heap_arena (four counters each). Returns 1 (game_frame_step
 // builds the frame only when this is nonzero).
-extern s32 D_80043ED0;
-extern s8 D_800D27C9;
+extern s32 g_frame_counter_block; /* was D_80043ED0 */
+extern s8 g_rail_cams_active; /* was D_800D27C9 */
 void heap_age_tagged_blocks(void);
 void world_update_objects(void);
 void frame_hook_nop_1501c860(void);
@@ -374,7 +374,7 @@ s32 world_update(void) {
     scene_event_track_pass(0, 0);
     cutscene_apply_cameras(0);
     cutscene_check_finished(0);
-    if (D_800D27C9 != 0) {
+    if (g_rail_cams_active != 0) {
         rail_cameras_update();
     }
     camera_update_all();
@@ -397,7 +397,7 @@ s32 world_update(void) {
         node_lists_run_update2();
     }
     objects_update_all();
-    if (D_800BE616 == 0) {
+    if (g_mp_mode_active == 0) {
         trigger_reflect_queue_objects();
     }
     world_records_update_matrices();
@@ -405,7 +405,7 @@ s32 world_update(void) {
     fog_apply_level_default(g_level_id);
     objects_update_blob_shadows();
     world_records_update_shadows();
-    if (D_800CC2B0 != 0) {
+    if (g_obj_pending_actions != 0) {
         obj_run_pending_actions();
     }
     if (g_game_paused == 0) {
@@ -420,14 +420,14 @@ s32 world_update(void) {
     screen_pulse_tick();
     reflect_queue_objects_over_water();
     light_stub();
-    p = &D_80043ED0;
+    p = &g_frame_counter_block;
     do {
         p[1]++;
         p[3]++;
         p[5]++;
         p[7]++;
         p += 8;
-    } while (p != &D_80044B20);
+    } while (p != &g_audio_heap_arena);
     return 1;
 }
 /* was func_15019414 */
@@ -436,7 +436,7 @@ void game_frame_end_update(void) {
         node_types_run_frame_hooks();
     }
     player_morph_cache_age();
-    if (D_800BE616 == 0) {
+    if (g_mp_mode_active == 0) {
         hud_health_air_update();
     }
 }
@@ -461,7 +461,7 @@ Gfx *render_player_frame_setup(Gfx *gdl, s16 player) {
         return gdl;
     }
     gdl = view_background_draw(gdl, g_level_id);
-    if (screen_fade_is_opaque(player) != 0 || (D_800D18A0 & (1 << player))) {
+    if (screen_fade_is_opaque(player) != 0 || (g_player_view_hidden_mask & (1 << player))) {
         return gdl;
     }
     gdl = light_setup_view(gdl, player);
@@ -482,7 +482,7 @@ Gfx *render_player_frame_setup(Gfx *gdl, s16 player) {
 //     }
 //
 //     temp_s0 = func_1510FEA0(temp_s0, g_level_id);
-//     if ((func_1517EFAC(arg1) != 0) || ((D_800D18A0 & (1 << arg1)) != 0)){
+//     if ((func_1517EFAC(arg1) != 0) || ((g_player_view_hidden_mask & (1 << arg1)) != 0)){
 //         return temp_s0;
 //     }
 //
@@ -493,7 +493,7 @@ Gfx *render_player_frame_setup(Gfx *gdl, s16 player) {
 // }
 
 /* Per-player scene pass (P13, hand C). Skipped (returns gdl) while paused (g_game_paused), during g_scene_render_suspend, when
- * screen_fade_is_opaque(player) says so or the player's bit in D_800D18A0 is set. In split screen it first sets the
+ * screen_fade_is_opaque(player) says so or the player's bit in g_player_view_hidden_mask is set. In split screen it first sets the
  * player's viewport/projection; then the layers in order: sky (world_meshes_draw_player 1), the g_fb_ghost_pass == 2 pass,
  * model group 6, shadow_draw_all, the projection again, objects_draw_pass 1, reflect_draw_queue, the fixed matrix, the
  * world (render_scene_layers_pre / world_meshes_draw_player 0 / render_scene_layers_post, order by player flag 0x5F0 bit 0), afterimage_list_draw 0/1,
@@ -519,7 +519,7 @@ Gfx *render_player_scene(Gfx *arg0, s16 arg1) {
     if (g_scene_render_suspend != 0) {
         return gdl;
     }
-    if (screen_fade_is_opaque(player) != 0 || (D_800D18A0 & (1 << player))) {
+    if (screen_fade_is_opaque(player) != 0 || (g_player_view_hidden_mask & (1 << player))) {
         return gdl;
     }
     if (g_last_player_index > 0) {
@@ -630,7 +630,7 @@ Gfx *render_player_hud(Gfx *gdl, s32 arg1) {
     gdl = screen_tint_draw(gdl, arg1);
     gdl = screen_fade_draw(gdl, arg1);
     gdl = hud_sniper_scope_draw(gdl, arg1);
-    if ((D_800D18A0 & (1 << arg1)) || (g_player_out_mask & (1 << arg1))) {
+    if ((g_player_view_hidden_mask & (1 << arg1)) || (g_player_out_mask & (1 << arg1))) {
         gdl = player_draw_out_overlay(gdl, arg1);
     }
     gdl = node_render_layers_draw(gdl, 4, (s16)arg1, 0);
@@ -651,7 +651,7 @@ Gfx *render_player_hud(Gfx *gdl, s32 arg1) {
 //     temp_v0 = func_1517F3A0(temp_v0, arg1);
 //     temp_v0 = func_15180580(temp_v0, arg1);
 //     // temp_v1 = 1 << arg1;
-//     if (((D_800D18A0 & (1 << arg1)) != 0) || ( ((g_player_mask_18a2 & (1 << arg1)) != 0))) {
+//     if (((g_player_view_hidden_mask & (1 << arg1)) != 0) || ( ((g_player_mask_18a2 & (1 << arg1)) != 0))) {
 //         temp_v0 = player_draw_out_overlay(temp_v0, arg1);
 //     }
 //     temp_v0 = node_render_layers_draw(temp_v0, 4, sp2A, 0);
@@ -661,8 +661,8 @@ Gfx *render_player_hud(Gfx *gdl, s32 arg1) {
 /* Per-player 3D setup (P13, hand C): viewport and projection of camera record g_player_cams + player * 0x180
  * (double-buffered by the DL buffer index g_dl_buf_index), the fixed matrix g_identity_mtx, level 0x1D's extra pass
  * (objects_draw_pass), the two model layers of group 5, then the view matrix and the player's model matrix from
- * D_800DC6D0[idx] (0x40 per player). */
-extern s32 D_800DC6D0[];
+ * g_view_mtx_bufs[idx] (0x40 per player). */
+extern s32 g_view_mtx_bufs[]; /* was D_800DC6D0 */
 Gfx *objects_draw_pass(Gfx *arg0, s32 arg1, s16 arg2);
 
 /* was func_15019CC8 */
@@ -686,7 +686,7 @@ Gfx *render_player_3d_setup(Gfx *arg0, s32 arg1) {
     gdl[0].words.w0 = 0xDA380007;
     gdl[0].words.w1 = g_player_cams + arg1 * 0x180 + g_dl_buf_index * 64 + 0x100;
     gdl[1].words.w0 = 0xDA380005;
-    gdl[1].words.w1 = D_800DC6D0[g_dl_buf_index] + arg1 * 64;
+    gdl[1].words.w1 = g_view_mtx_bufs[g_dl_buf_index] + arg1 * 64;
     return gdl + 2;
 }
 /* was func_15019E60 */
@@ -704,7 +704,7 @@ void event_timers_update(void);
 extern u32 g_slowmo_tick_remainder; /* was D_800BEA30 */
 extern u8 g_frame_dt_history_idx; /* was D_800BEA39 */
 extern u8 g_frame_dt_history_count; /* was D_800BEA3A */
-extern s32 D_800BEDCC;
+extern s32 g_frame_count; /* was D_800BEDCC */
 extern s32 g_tick_count_mod30; /* was D_800BEDD0 */
 extern f32 g_frame_dt_avg; /* was D_800BEDD8 */
 extern f32 g_frame_dt_avg_inv; /* was D_800BEDDC */
@@ -762,15 +762,15 @@ void game_update_frame_timing(void) {
     temp_t5 = temp_t3 + (var_v1 * 0x266);
     *(u16 *)g_frame_phase_accum = temp_t3;
     *(u16 *)g_frame_phase_accum = temp_t5;
-    D_800BE9A0 = (u8) ((s32) (temp_t5 & 0xFFFF) >> 0xA);
+    g_frame_delta = (u8) ((s32) (temp_t5 & 0xFFFF) >> 0xA);
     if (g_frame_step_f != 0.0f) {
-        D_800BEDC8 = (1.0f / g_frame_step_f) / 1.2f;
+        g_frame_step_inv = (1.0f / g_frame_step_f) / 1.2f;
     } else {
         g_frame_step_f = 0.0f;
-        D_800BEDC8 = 0.0f;
+        g_frame_step_inv = 0.0f;
     }
-    temp_t9 = D_800BEDCC + var_v1;
-    D_800BEDCC = temp_t9;
+    temp_t9 = g_frame_count + var_v1;
+    g_frame_count = temp_t9;
     g_tick_count_mod30 = temp_t9 % 30;
     (&D_eu_800BEA08)[g_frame_dt_history_idx] = g_frame_step_f;
     temp_t4 = g_frame_dt_history_idx + 1;
@@ -781,7 +781,7 @@ void game_update_frame_timing(void) {
     if ((s32) g_frame_dt_history_count < 0xA) {
         g_frame_dt_history_count += 1;
         g_frame_dt_avg = g_frame_step_f;
-        g_frame_dt_avg_inv = D_800BEDC8;
+        g_frame_dt_avg_inv = g_frame_step_inv;
     } else {
         {
             f32 *fp = (f32 *)&g_frame_dt_history_2;

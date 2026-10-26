@@ -24,7 +24,7 @@ s/spawn.unk47 = 7;/spawn.unk47 = 6;/ % base
 s/spawn.vel\[1\] = 0.0f;/spawn.vel[1] = 1.0f;/ % base
 s/spawn.alpha = alpha;/spawn.alpha = arg9;/ % base
 s/spawn.unk4C = arg9;/spawn.unk4C = argC;/ % base
-s/(s32) \&D_800A4AA0, 0x29, 0, 0, 0x16,/(s32) \&D_800A4AA0, 0x28, 0, 0, 0x16,/ % base
+s/(s32) \&g_effect3d_default_params, 0x29, 0, 0, 0x16,/(s32) \&g_effect3d_default_params, 0x28, 0, 0, 0x16,/ % base
 s/0x29, 0, 0, 0x16,/0x29, 0, 0, 0x15,/ % base
 s/? 2 : 0) + 1, 0, 0,/? 2 : 0) + 0, 0, 0,/ % base
 s/(random_int() \& 1) ? 2 : 0/(random_int() \& 2) ? 2 : 0/ % odd mtx0

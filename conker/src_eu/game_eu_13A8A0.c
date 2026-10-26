@@ -166,7 +166,7 @@ s32 texture_resolve_dl_ids(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 *
 #undef TEXCACHE_MISSING
 #undef TEXID_COUNT
 extern u16 g_texture_rom_sizes[]; /* was D_800920D0 */
-extern u16 D_800B8BB8[];
+extern u16 g_texture_expanded_sizes[]; /* was D_800B8BB8 */
 extern s32 g_texture_cache_data[]; /* was D_800B1268 */
 extern u8 g_texture_load_cooldown; /* was D_800DC1DC */
 s32 heap_alloc_tagged(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -178,7 +178,7 @@ s32 rzip_inflate(s32, s32 *, u32);
 
 /* Texture cache lookup. Returns the expanded data of texture `id` (g_texture_cache_data[id]), loading it on a miss:
  * DMA the compressed block (ROM offset texture_rom_offset(id), g_texture_rom_sizes[id] bytes) into a temporary buffer,
- * expand it into a D_800B8BB8[id]-byte buffer. Returns 0x80000000 for a bad id or when out of memory.
+ * expand it into a g_texture_expanded_sizes[id]-byte buffer. Returns 0x80000000 for a bad id or when out of memory.
  * `*outSize` gets the expanded size; the slot's age is raised to `age`; `addRef` bumps its use count. */
 /* was func_1510D66C */
 s32 texture_cache_lookup(s32 id, s32 *outSize, s32 age, s32 addRef) {
@@ -227,18 +227,18 @@ s32 texture_cache_lookup(s32 id, s32 *outSize, s32 age, s32 addRef) {
             return TEXCACHE_MISSING;
         }
         rom_dma_read(rom, (void *)tmp, size, 1);
-        dst = heap_alloc_tagged(D_800B8BB8[id], 1, 1, 0, 2);
+        dst = heap_alloc_tagged(g_texture_expanded_sizes[id], 1, 1, 0, 2);
         if (dst == 0) {
             heap_free((s16 *)tmp);
             return TEXCACHE_MISSING;
         }
-        rzip_inflate(tmp + skew, (s32 *)dst, D_8003809C);
+        rzip_inflate(tmp + skew, (s32 *)dst, g_mem_scratch_area);
         heap_free((s16 *)tmp);
         *slot = dst;
         g_texture_cache_refs[id] = 0;
     }
     if (outSize != NULL) {
-        *outSize = D_800B8BB8[id];
+        *outSize = g_texture_expanded_sizes[id];
     }
     data = *slot;
     if (g_texture_cache_ages[id] < age) {
@@ -317,7 +317,7 @@ void texture_cache_age_tick(void) {
         } else if (age & 0x40) {
             slot = (s32 *)g_texture_cache_data[i];
             buf = slot[0];
-            rzip_inflate(buf + slot[1], slot, D_8003809C);
+            rzip_inflate(buf + slot[1], slot, g_mem_scratch_area);
             heap_free((s16 *)buf);
             g_texture_cache_ages[i] &= ~0x40;
         } else {

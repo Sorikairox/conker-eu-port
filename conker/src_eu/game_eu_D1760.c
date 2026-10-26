@@ -8,27 +8,27 @@
  * walks a set of triangles and runs the per-triangle floor test func_150A408C (a label inside floor_collect_level_tris.s,
  * here floor_tri) on the integer point (x, z). A triangle passes when (x, z) is inside its x / z bounds (+-2) and
  * between the two edges at z; its floor height (24.8, clamped to the triangle's y range) goes to the next 16-byte
- * entry of D_800D3720: +0 height, +4 pointer to the 3 vertex offsets, +8 vertex base, +0xC tag. The count stops at
+ * entry of g_floor_hits: +0 height, +4 pointer to the 3 vertex offsets, +8 vertex base, +0xC tag. The count stops at
  * 0x27 (later hits overwrite entry 0x27). Returns the count.
- * - floor_collect_level_tris: area 0 / 1 (level). D_800DBE62 == 0: every triangle 0 .. D_800DBE4C - 1 (the asm leaves the tag
- *   = the caller's $gp; 0 here). Else D_800D39A4 = 0 and the BSP tree D_800DC278 (+4 sibling offset, +6 radius,
+ * - floor_collect_level_tris: area 0 / 1 (level). g_coll_quadtrees_built == 0: every triangle 0 .. g_coll_tri_count - 1 (the asm leaves the tag
+ *   = the caller's $gp; 0 here). Else g_floor_level_tri_tag = 0 and the BSP tree g_zone_tree (+4 sibling offset, +6 radius,
  *   +8 / +0xA centre x / z, +0xC child offset, leaf byte list at +0xE: b < 0x80 = previous index + b, else 15-bit
  *   index ((b & 0x7F) << 8 | next byte), 0 = end): only the first leaf reached is tested, tag 0. The first delta
  *   adds to the caller's $v1 (0 here; level data starts each leaf with an absolute index).
  * - floor_collect_world_obj_tris: area 2, the world objects in the u16 list ids[0 .. count - 1] (g_world_objs + id * 0xA0: +0x56
  *   triangle count, +0x58 first triangle; vertex base g_world_obj_blocks[id], skipped when 0), tag = id.
- * - floor_collect_record_tris: area 3, the 25 records g_objects except D_800D39FC - 1, with +0 != 0, +0xF8 & 0x4000,
- *   +0x264 (vertex base) and +0x268 (bounds) set; byte +4 = model: D_800C5D38[m] triangles, offsets D_800C6070[m].
+ * - floor_collect_record_tris: area 3, the 25 records g_objects except g_obj_updating_slot - 1, with +0 != 0, +0xF8 & 0x4000,
+ *   +0x264 (vertex base) and +0x268 (bounds) set; byte +4 = model: g_model_tri_counts[m] triangles, offsets g_model_coll_tris[m].
  */
-extern u8 D_800DBE62;
-extern s32 D_800DBE4C;          /* level triangle count */
-extern s32 D_800D39A4;
-extern s32 D_800D3720;          /* candidate floors, 16 bytes each */
-extern s32 D_800DC26C;          /* triangle vertex offsets (3 words per triangle) */
-extern s32 D_800DC270;          /* triangle x/z bounds (4 halfwords per triangle) */
-extern s32 D_800DC278;          /* BSP tree */
-extern u8 D_800D39FC;
-extern u16 D_800C5D38[];
+extern u8 g_coll_quadtrees_built; /* was D_800DBE62 */
+extern s32 g_coll_tri_count;          /* level triangle count; was D_800DBE4C */
+extern s32 g_floor_level_tri_tag; /* was D_800D39A4 */
+extern s32 g_floor_hits;          /* candidate floors, 16 bytes each; was D_800D3720 */
+extern s32 g_level_tri_table;          /* triangle vertex offsets (3 words per triangle); was D_800DC26C */
+extern s32 g_coll_tri_xz_bounds;          /* triangle x/z bounds (4 halfwords per triangle); was D_800DC270 */
+extern s32 g_zone_tree;          /* BSP tree; was D_800DC278 */
+extern u8 g_obj_updating_slot; /* was D_800D39FC */
+extern u16 g_model_tri_counts[]; /* was D_800C5D38 */
 
 static s32 floor_div(s32 a, s32 b) {
     if (b == 0) return (a < 0) ? 1 : -1; /* VR4300 lo for a zero divisor */
@@ -90,7 +90,7 @@ static s32 floor_tri(s32 x, s32 z, s32 i, u8 *vofs, u8 *bnd, s32 base, s32 tag, 
     d2 += t;
     if ((d2 ^ d1) >= 0) return n;
 
-    e = (u8 *)&D_800D3720 + n * 16;
+    e = (u8 *)&g_floor_hits + n * 16;
     *(s32 *)(e + 4) = (s32)vo;
     ymax = ay;
     if (ymax < by) ymax = by;
@@ -121,21 +121,21 @@ static s32 floor_tri(s32 x, s32 z, s32 i, u8 *vofs, u8 *bnd, s32 base, s32 tag, 
 
 /* was func_150A3F50 */
 s32 floor_collect_level_tris(s32 x, s32 z) {
-    u8 *vofs = (u8 *)D_800DC26C;
-    u8 *bnd = (u8 *)D_800DC270;
+    u8 *vofs = (u8 *)g_level_tri_table;
+    u8 *bnd = (u8 *)g_coll_tri_xz_bounds;
     u8 *node;
     s32 n = 0;
     s32 i, d, off;
     u32 c;
 
-    if (D_800DBE62 == 0) {
-        for (i = 0; i != D_800DBE4C; i++) {
+    if (g_coll_quadtrees_built == 0) {
+        for (i = 0; i != g_coll_tri_count; i++) {
             n = floor_tri(x, z, i, vofs, bnd, 0, 0, n);
         }
         return n;
     }
-    D_800D39A4 = 0;
-    node = (u8 *)D_800DC278;
+    g_floor_level_tri_tag = 0;
+    node = (u8 *)g_zone_tree;
     for (;;) {
         d = (s32)((u32)x - (u32)*(s16 *)(node + 8));
         if (d <= 0) d = (s32)(0u - (u32)d);
@@ -182,8 +182,8 @@ s32 floor_collect_world_obj_tris(s32 x, s32 z, s32 count, s32 *idList) {
     while (ids != end) {
         id = *ids++;
         obj = (u8 *)g_world_objs + id * 0xA0;
-        bnd = (u8 *)D_800DC270 + *(u16 *)(obj + 0x58) * 8;
-        vofs = (u8 *)D_800DC26C + *(u16 *)(obj + 0x58) * 12;
+        bnd = (u8 *)g_coll_tri_xz_bounds + *(u16 *)(obj + 0x58) * 8;
+        vofs = (u8 *)g_level_tri_table + *(u16 *)(obj + 0x58) * 12;
         base = g_world_obj_blocks[id];
         if (base == 0) continue;
         cnt = *(u16 *)(obj + 0x56);
@@ -198,7 +198,7 @@ s32 floor_collect_world_obj_tris(s32 x, s32 z, s32 count, s32 *idList) {
 s32 floor_collect_record_tris(s32 x, s32 z) {
     u8 *rec = (u8 *)g_objects;
     u8 *end = rec + 0x4F4C;
-    s32 skip = D_800D39FC - 1;
+    s32 skip = g_obj_updating_slot - 1;
     s32 n = 0;
     s32 idx = -1;
     s32 base, cnt, m, i;
@@ -215,8 +215,8 @@ s32 floor_collect_record_tris(s32 x, s32 z) {
         bnd = *(u8 **)(rec - 0x32C + 0x268);
         if (base == 0) continue;
         m = *(rec - 0x32C + 4);
-        cnt = D_800C5D38[m];
-        vofs = (u8 *)D_800C6070[m];
+        cnt = g_model_tri_counts[m];
+        vofs = (u8 *)g_model_coll_tris[m];
         if (bnd == NULL) continue;
         for (i = 0; i != cnt; i++) {
             n = floor_tri(x, z, i, vofs, bnd, base, idx, n);
@@ -364,7 +364,7 @@ typedef struct {
     /* 0x28 */ s16 *verts;          /* model-space vertices, 16 bytes each */
     /* 0x2C */ f32 scale[3];
     /* 0x38 */ u8 pad38[0x16];
-    /* 0x4E */ u8 kind;             /* 0xFF: use the camera-relative matrix D_800DC338 */
+    /* 0x4E */ u8 kind;             /* 0xFF: use the camera-relative matrix g_world_obj_fallback_mtx */
     /* 0x4F */ u8 pad4F[7];
     /* 0x56 */ u16 numTris;
     /* 0x58 */ u16 firstTri;
@@ -376,12 +376,12 @@ typedef struct {
 
 s32 allocate_memory(s32, s32, s32, s32);
 void heap_free(s32);
-extern s32 D_800DC26C;          /* triangle vertex offsets (3 words per triangle) */
-extern s32 D_800DC270;          /* triangle x/z bounds (4 halfwords per triangle) */
-extern s32 D_800DC274;          /* triangle y bounds (2 halfwords per triangle) */
-extern s32 D_800DC278;
-extern f32 D_800DC338[2][4][4];
-extern f32 D_8009FA50;          /* degrees to radians */
+extern s32 g_level_tri_table;          /* triangle vertex offsets (3 words per triangle); was D_800DC26C */
+extern s32 g_coll_tri_xz_bounds;          /* triangle x/z bounds (4 halfwords per triangle); was D_800DC270 */
+extern s32 g_coll_tri_y_bounds;          /* triangle y bounds (2 halfwords per triangle); was D_800DC274 */
+extern s32 g_zone_tree; /* was D_800DC278 */
+extern f32 g_world_obj_fallback_mtx[2][4][4]; /* was D_800DC338 */
+extern f32 g_floor_k_fa50;          /* degrees to radians; was D_8009FA50 */
 
 /* cvt.w.s with the default FCSR mode: round to nearest, ties to even */
 #define BLOB49D0_RINT(f)                                                                             \
@@ -444,7 +444,7 @@ s32 world_objects_transform_mesh(s32 count, s32 *idList, s32 force) {
         }
 
         if (obj->kind == 0xFF) {
-            f32 (*m)[4] = D_800DC338[buf != 0];
+            f32 (*m)[4] = g_world_obj_fallback_mtx[buf != 0];
             m00 = m[0][0];
             m01 = m[0][1];
             m02 = m[0][2];
@@ -458,13 +458,13 @@ s32 world_objects_transform_mesh(s32 count, s32 *idList, s32 force) {
             ty = m[3][1];
             tz = m[3][2];
         } else {
-            r = obj->rot[0] * D_8009FA50;
+            r = obj->rot[0] * g_floor_k_fa50;
             cA = fast_cosf(r);
             sA = fast_sinf(r);
-            r = obj->rot[1] * D_8009FA50;
+            r = obj->rot[1] * g_floor_k_fa50;
             cB = fast_cosf(r);
             sB = fast_sinf(r);
-            r = obj->rot[2] * D_8009FA50;
+            r = obj->rot[2] * g_floor_k_fa50;
             cC = fast_cosf(r);
             sC = fast_sinf(r);
             m00 = (cC * cB) * obj->scale[0];
@@ -504,9 +504,9 @@ s32 world_objects_transform_mesh(s32 count, s32 *idList, s32 force) {
             goto next;
         }
         /* bounding box of each triangle (do-while: numTris != 0) */
-        xz = (s16 *)D_800DC270 + obj->firstTri * 4;
-        ylim = (s16 *)D_800DC274 + obj->firstTri * 2;
-        tri = (s32 *)D_800DC26C + obj->firstTri * 3;
+        xz = (s16 *)g_coll_tri_xz_bounds + obj->firstTri * 4;
+        ylim = (s16 *)g_coll_tri_y_bounds + obj->firstTri * 2;
+        tri = (s32 *)g_level_tri_table + obj->firstTri * 3;
         xzEnd = xz + obj->numTris * 4;
         do {
             v = (s16 *)((u8 *)out + tri[0]);
@@ -555,12 +555,12 @@ s32 world_objects_transform_mesh(s32 count, s32 *idList, s32 force) {
 
 /* Select area `area`'s collision tables. */
 void func_150A4ED4(s32 area) {
-    D_800DC26C = D_800DC208[area];
-    D_800DC270 = D_800DC218[area];
-    D_800DC274 = D_800DC228[area];
-    D_800DC278 = (s32)D_800DBE08[area];
-    D_800DBE4C = D_800DBE18[area];
-    D_800DC280 = area;
+    g_level_tri_table = g_coll_area_tri_tables[area];
+    g_coll_tri_xz_bounds = g_coll_area_xz_bounds[area];
+    g_coll_tri_y_bounds = g_coll_area_y_bounds[area];
+    g_zone_tree = (s32)g_quadtree_roots[area];
+    g_coll_tri_count = g_coll_area_tri_counts[area];
+    g_collision_cur_area = area;
 }
 
 /* P54: func_150A49D0_tail.s no longer needed (floor_collect_level_tris / floor_collect_world_obj_tris are C) */
@@ -570,18 +570,18 @@ void func_150A4ED4(s32 area) {
  * values in odd FPRs; inner labels func_150A53D4 / func_150A543C are its exit and release paths). Builds the
  * world-space floor mesh of an object record (g_objects, 0x32C bytes each) that floor_collect_record_tris tests (area 3):
  * - only while the record is live (+0, +0x1D4 matrices, +0xF8 & 0x4000), its model m = byte +4 has a group list
- *   D_800C5C08[m] and another live record is within the radius +0x270 on x / z; otherwise the three buffers
+ *   g_model_vtx_ranges[m] and another live record is within the radius +0x270 on x / z; otherwise the three buffers
  *   +0x264 / +0x268 / +0x26C are freed and cleared.
- * - +0x264: D_800C5BC0[m] vertices (s16 x / y / z, 0x10 bytes each). The D_800C6318[m] groups (12 bytes: +0 source
+ * - +0x264: g_model_vtx_counts[m] vertices (s16 x / y / z, 0x10 bytes each). The g_model_vtx_range_count[m] groups (12 bytes: +0 source
  *   s16 vertices, stride 0x10, +4 count, +8 matrix index) are transformed by the 4x4 f32 matrices at +0x1D4
  *   (0x40 bytes each), rounded with cvt.w.s.
- * - +0x268: per triangle (D_800C5D38[m] triangles, vertex byte offsets D_800C6070[m], 3 words each) the x / z
+ * - +0x268: per triangle (g_model_tri_counts[m] triangles, vertex byte offsets g_model_coll_tris[m], 3 words each) the x / z
  *   bounds (min x, min z, max x, max z); +0x26C: the y bounds (min y, max y).
  * Buffers are allocated (allocate_memory(size, 1, 1, 2)) when missing; a failed allocation releases all three.
  * Counts of 0 (groups or triangles) loop "forever" in the asm (do-while); the C keeps that shape.
  */
-extern u16 D_800C5BC0[];        /* model vertex counts */
-extern u16 D_800C6318[];        /* model transform group counts */
+extern u16 g_model_vtx_counts[];        /* model vertex counts; was D_800C5BC0 */
+extern u16 g_model_vtx_range_count[];        /* model transform group counts; was D_800C6318 */
 
 #define OBJMESH_F(p, off) (*(f32 *)((u8 *)(p) + (off)))
 #define OBJMESH_W(p, off) (*(s32 *)((u8 *)(p) + (off)))
@@ -617,7 +617,7 @@ void obj_floor_mesh_update(struct127 *arg0) {
         goto release;
     }
     m = obj[4];
-    group = (s32 *)D_800C5C08[m];
+    group = (s32 *)g_model_vtx_ranges[m];
     if (group == NULL) {
         goto release;
     }
@@ -637,10 +637,10 @@ void obj_floor_mesh_update(struct127 *arg0) {
         goto release;
     }
 
-    groups = D_800C6318[m] - 1;
+    groups = g_model_vtx_range_count[m] - 1;
     verts = (s16 *)OBJMESH_W(obj, 0x264);
     if (verts == NULL) {
-        verts = (s16 *)allocate_memory(D_800C5BC0[m] << 4, 1, 1, 2);
+        verts = (s16 *)allocate_memory(g_model_vtx_counts[m] << 4, 1, 1, 2);
         if (verts == NULL) {
             goto release;
         }
@@ -648,7 +648,7 @@ void obj_floor_mesh_update(struct127 *arg0) {
     }
     bounds = (s16 *)OBJMESH_W(obj, 0x268);
     if (bounds == NULL) {
-        bounds = (s16 *)allocate_memory(D_800C5D38[m] << 3, 1, 1, 2);
+        bounds = (s16 *)allocate_memory(g_model_tri_counts[m] << 3, 1, 1, 2);
         if (bounds == NULL) {
             goto release;
         }
@@ -656,7 +656,7 @@ void obj_floor_mesh_update(struct127 *arg0) {
     }
     yRange = (s16 *)OBJMESH_W(obj, 0x26C);
     if (yRange == NULL) {
-        yRange = (s16 *)allocate_memory(D_800C5D38[m] << 2, 1, 1, 2);
+        yRange = (s16 *)allocate_memory(g_model_tri_counts[m] << 2, 1, 1, 2);
         if (yRange == NULL) {
             goto release;
         }
@@ -683,8 +683,8 @@ void obj_floor_mesh_update(struct127 *arg0) {
     } while (groups-- != 0);
 
     /* per-triangle bounds */
-    tri = (s32 *)D_800C6070[m];
-    triEnd = tri + D_800C5D38[m] * 3;
+    tri = (s32 *)g_model_coll_tris[m];
+    triEnd = tri + g_model_tri_counts[m] * 3;
     do {
         a = (s16 *)((u8 *)verts + tri[0]);
         b = (s16 *)((u8 *)verts + tri[1]);

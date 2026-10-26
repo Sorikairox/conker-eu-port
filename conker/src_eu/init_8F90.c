@@ -5,7 +5,7 @@
 // hoisted declarations of the NON_MATCHING bodies
 void snd_cache_flush_unused(void);
 void heap_free(s32);
-extern s32 D_8003E724;
+extern s32 g_snd_cache_flush_request; /* was D_8003E724 */
 
 typedef struct AMDMABuffer_s {
     ALLink node;
@@ -18,17 +18,17 @@ typedef struct {
     AMDMABuffer *firstUsed;
     AMDMABuffer *firstFree;
 } AMDMAState;
-#define dmaState (*(AMDMAState *)&D_80040F78)
-extern u32 D_8002B194;
-extern u32 D_8002B198;
-extern OSMesgQueue D_80041638;
-extern OSIoMesg D_80041338[];
+#define dmaState (*(AMDMAState *)&g_audio_dma_state)
+extern u32 g_audio_frame_count; /* was D_8002B194 */
+extern u32 g_audio_dma_count; /* was D_8002B198 */
+extern OSMesgQueue g_audio_dma_queue; /* was D_80041638 */
+extern OSIoMesg g_audio_dma_io_msgs[]; /* was D_80041338 */
 typedef struct { s16 type; s16 pad; void *data; } AmMsg;
-extern OSMesgQueue D_8003E970;
-extern OSMesgQueue D_8003E9A8;
-extern s32 D_8003E9E0;
-extern void *D_8003E730[];
-extern u32 D_8002B194;
+extern OSMesgQueue g_audio_frame_queue; /* was D_8003E970 */
+extern OSMesgQueue g_audio_reply_queue; /* was D_8003E9A8 */
+extern s32 g_audio_al_globals; /* was D_8003E9E0 */
+extern void *g_audio_mgr_audio_info[]; /* was D_8003E730 */
+extern u32 g_audio_frame_count; /* was D_8002B194 */
 s32 audio_do_frame();
 struct AudTask {
         void *next;
@@ -50,15 +50,15 @@ typedef struct {
     struct AudTask task;
     s32 unk70;
 } AudioInfo;
-extern u8 D_80041324;
-extern s32 D_80041328;
-extern s32 D_8004132C;
-extern u32 D_8002B19C;
-extern Acmd *D_8003E728[];
-extern OSMesgQueue D_8003B560;
-extern u8 D_10029400[];
-extern u8 D_100294D0[];
-extern u8 D_8002CCC0[];
+extern u8 g_audio_short_frame_hold; /* was D_80041324 */
+extern s32 g_audio_frame_samples_short; /* was D_80041328 */
+extern s32 g_audio_frame_samples; /* was D_8004132C */
+extern u32 g_audio_cmdlist_index; /* was D_8002B19C */
+extern Acmd *g_audio_mgr[]; /* was D_8003E728 */
+extern OSMesgQueue g_sched_audio_queue; /* was D_8003B560 */
+extern u8 g_rspboot_text[]; /* was D_10029400 */
+extern u8 g_rspboot_text_end[]; /* was D_100294D0 */
+extern u8 g_audio_ucode_data[]; /* was D_8002CCC0 */
 void audio_clear_dma(void);
 void snd_cache_update_dmas(void);
 Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen);
@@ -103,30 +103,30 @@ typedef struct {
     void *info;
     u8 pad78[0x90 - 0x78];
 } AmAudioInfo;
-extern AmFxParams D_8002B1A4;
-extern u8 D_8003E710[];
-extern void *D_8003E720;
-#define dmaBuffs ((AMDMABuffer *) &D_800406B8)
-#define amUnk18Buffs ((AmUnk18 *) &D_80040AC8)
-extern u32 D_80041330;
-extern u32 D_80041334;
+extern AmFxParams g_audio_fx_params; /* was D_8002B1A4 */
+extern u8 g_audio_heap[]; /* was D_8003E710 */
+extern void *g_audio_al_globals_ptr; /* was D_8003E720 */
+#define dmaBuffs ((AMDMABuffer *) &g_audio_dma_buffers)
+#define amUnk18Buffs ((AmUnk18 *) &g_snd_cache_dma_bufs)
+extern u32 g_audio_frame_buf_samples; /* was D_80041330 */
+extern u32 g_audio_cmdlist_len; /* was D_80041334 */
 typedef struct {
     Acmd *ACMDList[2];
     AmAudioInfo *audioInfo[3];
 } AmMgr;
-#define __am (*(AmMgr *) D_8003E728)
+#define __am (*(AmMgr *) g_audio_mgr)
 #define AM_LINK(ln, to) \
     (ln)->next = (to)->next; \
     (ln)->prev = (to); \
     if ((to)->next) (to)->next->prev = (ln); \
     (to)->next = (ln);
-extern OSMesg D_8003E9C0[];
-extern OSMesg D_8003E988[];
-extern OSMesg D_80041650[];
-extern OSMesgQueue D_80041A90;
-extern OSMesg D_80041AA8[];
-extern OSThread D_8003E3A0;
-extern u8 D_8002AE40;
+extern OSMesg g_audio_reply_msgs[]; /* was D_8003E9C0 */
+extern OSMesg g_audio_frame_msgs[]; /* was D_8003E988 */
+extern OSMesg g_audio_dma_msgs[]; /* was D_80041650 */
+extern OSMesgQueue g_snd_cache_dma_queue; /* was D_80041A90 */
+extern OSMesg g_snd_cache_dma_msgs[]; /* was D_80041AA8 */
+extern OSThread g_audio_thread; /* was D_8003E3A0 */
+extern u8 g_audio_thread_started; /* was D_8002AE40 */
 s32 snd_cache_dma_new(void);
 
 /* was func_10008F90 */
@@ -136,7 +136,7 @@ void audio_mgr_init(AmSynConfig *c, OSPri pri, AmConfig *arg2) {
     f32 fsize;
     AmFxParams params;
 
-    mp3_voice_init((s32) D_8003E710);
+    mp3_voice_init((s32) g_audio_heap);
     c->dmaproc = audio_dma_new;
     c->outputRate = osAiSetFrequency(arg2->frequency);
     c->unk14 = snd_cache_dma_new;
@@ -147,22 +147,22 @@ void audio_mgr_init(AmSynConfig *c, OSPri pri, AmConfig *arg2) {
     /* Samples per frame (25 fps), rounded up to a multiple of 184 plus one more block. */
     fsize = arg2->unk4 * (f32) c->outputRate / 25.0f;
     n = (s32) fsize;
-    D_8004132C = n;
+    g_audio_frame_samples = n;
     if ((f32) n < fsize) {
         n++;
-        D_8004132C = n;
+        g_audio_frame_samples = n;
     }
     n = (n / 184) * 184 + 184;
-    D_8004132C = n;
-    D_80041328 = n - 184;
-    D_80041330 = n + 84;
-    D_80041324 = 0;
+    g_audio_frame_samples = n;
+    g_audio_frame_samples_short = n - 184;
+    g_audio_frame_buf_samples = n + 84;
+    g_audio_short_frame_hold = 0;
 
-    params = D_8002B1A4;
+    params = g_audio_fx_params;
     c->params[0] = params.bus0;
     c->params[1] = params.bus1;
-    n_alInit((void *) &D_8003E9E0, (s32) c);
-    D_8003E720 = &D_8003E9E0;
+    n_alInit((void *) &g_audio_al_globals, (s32) c);
+    g_audio_al_globals_ptr = &g_audio_al_globals;
 
     dmaBuffs[0].node.prev = 0;
     dmaBuffs[0].node.next = 0;
@@ -189,22 +189,22 @@ void audio_mgr_init(AmSynConfig *c, OSPri pri, AmConfig *arg2) {
     for (i = 0; i < 2; i++) {
         __am.ACMDList[i] = alHeapAlloc(c->heap, 1, arg2->unk8 * 8);
     }
-    D_80041334 = arg2->unk8;
+    g_audio_cmdlist_len = arg2->unk8;
 
     for (i = 0; i < 3; i++) {
         __am.audioInfo[i] = alHeapAlloc(c->heap, 1, sizeof(AmAudioInfo));
         __am.audioInfo[i]->type = 2;
         __am.audioInfo[i]->info = __am.audioInfo[i];
-        __am.audioInfo[i]->data = alHeapAlloc(c->heap, 1, 4 * D_80041330);
+        __am.audioInfo[i]->data = alHeapAlloc(c->heap, 1, 4 * g_audio_frame_buf_samples);
     }
 
-    osCreateMesgQueue(&D_8003E9A8, D_8003E9C0, 8);
-    osCreateMesgQueue(&D_8003E970, D_8003E988, 8);
-    osCreateMesgQueue(&D_80041638, D_80041650, 0x20);
-    osCreateMesgQueue(&D_80041A90, D_80041AA8, 0x28);
-    osCreateThread(&D_8003E3A0, 4, (void (*)(void *)) audio_thread_main, 0, (void *) &D_800406A0, pri);
-    D_8002AE40 = 1;
-    osStartThread(&D_8003E3A0);
+    osCreateMesgQueue(&g_audio_reply_queue, g_audio_reply_msgs, 8);
+    osCreateMesgQueue(&g_audio_frame_queue, g_audio_frame_msgs, 8);
+    osCreateMesgQueue(&g_audio_dma_queue, g_audio_dma_msgs, 0x20);
+    osCreateMesgQueue(&g_snd_cache_dma_queue, g_snd_cache_dma_msgs, 0x28);
+    osCreateThread(&g_audio_thread, 4, (void (*)(void *)) audio_thread_main, 0, (void *) &g_snd_cache, pri);
+    g_audio_thread_started = 1;
+    osStartThread(&g_audio_thread);
 }
 // NON-MATCHING: so much to do
 // void audio_mgr_init(struct15 *arg0, OSPri arg1, struct52 *arg2) {
@@ -260,7 +260,7 @@ void audio_mgr_init(AmSynConfig *c, OSPri pri, AmConfig *arg2) {
 //     D_80040F88 = temp_t7 - 184;
 //     D_80040F90 = temp_t7 + 84;
 //     D_80040F84 = (u8)0;
-//     phi_t0 = D_8002AE54;
+//     phi_t0 = g_printf_zeros;
 //     phi_t4 = &sp58;
 // // loop_3:
 // //     temp_t0 = phi_t0 + 0xC;
@@ -277,9 +277,9 @@ void audio_mgr_init(AmSynConfig *c, OSPri pri, AmConfig *arg2) {
 // //     arg0->unk38 = &sp160;
 // //     n_alInit(0x8003E640, arg0, (void *)0x80040F8C, &sp58);
 // //     *(void *)0x8003E380 = 0x8003E640;
-// //     D_800406B8.unk4 = 0;
-// //     D_800406B8.unk0 = 0;
-// //     phi_s0 = &D_800406B8;
+// //     g_audio_dma_buffers.unk4 = 0;
+// //     g_audio_dma_buffers.unk0 = 0;
+// //     phi_s0 = &g_audio_dma_buffers;
 // //     phi_s1 = (void *)0x800406CC;
 // // loop_5:
 // //     temp_v0_2 = phi_s0->unk0;
@@ -294,14 +294,14 @@ void audio_mgr_init(AmSynConfig *c, OSPri pri, AmConfig *arg2) {
 // //     temp_s0->unk-4 = alHeapDBAlloc(0, 0, arg0->unk28, 1, 2048);
 // //     phi_s0 = temp_s0;
 // //     phi_s1 = temp_s1;
-// //     if ((u32) temp_s1 < (u32) &D_80040AC8) {
+// //     if ((u32) temp_s1 < (u32) &g_snd_cache_dma_bufs) {
 // //         goto loop_5;
 // //     }
 // //     temp_s0->unk10 = alHeapDBAlloc(0, 0, arg0->unk28, 1, 2048);
-// //     bzero(&D_80040AC8, 1200);
-// //     D_80040AC8.unk4 = 0;
-// //     D_80040AC8.unk0 = 0;
-// //     phi_v0 = &D_80040AC8;
+// //     bzero(&g_snd_cache_dma_bufs, 1200);
+// //     g_snd_cache_dma_bufs.unk4 = 0;
+// //     g_snd_cache_dma_bufs.unk0 = 0;
+// //     phi_v0 = &g_snd_cache_dma_bufs;
 // //     phi_v1_2 = 0x80040AE0;
 // //     phi_a1 = 0U;
 // // loop_9:
@@ -349,15 +349,15 @@ void audio_mgr_init(AmSynConfig *c, OSPri pri, AmConfig *arg2) {
 //     osCreateMesgQueue(&D_8003E5D0, &D_8003E5E8, 8);
 //     osCreateMesgQueue(&D_80041298, &D_800412B0, 32);
 //     osCreateMesgQueue(&D_800416F0, &D_80041708, 40);
-//     osCreateThread(&D_8003E3A0, 4, (void *) audio_thread_main, 0, &D_800406A0, arg1);
-//     D_8002AE40 = (u8)1;
-//     osStartThread(&D_8003E3A0);
+//     osCreateThread(&g_audio_thread, 4, (void *) audio_thread_main, 0, &g_snd_cache, arg1);
+//     g_audio_thread_started = (u8)1;
+//     osStartThread(&g_audio_thread);
 // }
 
 /* was func_100093CC */
 void audio_thread_stop(void) {
-    if (D_8002AE40 != 0) {
-        osStopThread(&D_8003E3A0);
+    if (g_audio_thread_started != 0) {
+        osStopThread(&g_audio_thread);
     }
 }
 
@@ -373,9 +373,9 @@ void audio_thread_main(s32 arg0) {
     s32 first = 1;
 
     client.x = 0;
-    sched_add_client((OSPfs *) &client, &D_8003E970);
+    sched_add_client((OSPfs *) &client, &g_audio_frame_queue);
     while (!done) {
-        osRecvMesg(&D_8003E970, (OSMesg *) &msg, OS_MESG_BLOCK);
+        osRecvMesg(&g_audio_frame_queue, (OSMesg *) &msg, OS_MESG_BLOCK);
         if (g_eeprom_writes_disabled) {
             msg->type = 4;
         }
@@ -384,9 +384,9 @@ void audio_thread_main(s32 arg0) {
                 if (count >= 2) {
                     count = 0;
                 }
-                if (count == 0 && audio_do_frame(D_8003E730[D_8002B194 % 3], lastInfo)) {
+                if (count == 0 && audio_do_frame(g_audio_mgr_audio_info[g_audio_frame_count % 3], lastInfo)) {
                     if (!first) {
-                        osRecvMesg(&D_8003E9A8, (OSMesg *) &msg, OS_MESG_BLOCK);
+                        osRecvMesg(&g_audio_reply_queue, (OSMesg *) &msg, OS_MESG_BLOCK);
                         lastInfo = msg->data;
                     }
                     first = 0;
@@ -401,9 +401,9 @@ void audio_thread_main(s32 arg0) {
                 break;
         }
     }
-    n_alClose((s32) &D_8003E9E0);
+    n_alClose((s32) &g_audio_al_globals);
     for (;;) {
-        osRecvMesg(&D_8003E970, (OSMesg *) &msg, OS_MESG_BLOCK);
+        osRecvMesg(&g_audio_frame_queue, (OSMesg *) &msg, OS_MESG_BLOCK);
     }
 }
 
@@ -476,13 +476,13 @@ s32 audio_do_frame(AudioInfo *info, AudioInfo *lastInfo) {
     if (lastInfo) {
         osAiSetNextBuffer(lastInfo->unk4, lastInfo->frameSamples << 2);
     }
-    if (samplesLeft >= 0xF9 && D_80041324 == 0) {
-        info->frameSamples = D_80041328;
-        D_80041324 = 2;
+    if (samplesLeft >= 0xF9 && g_audio_short_frame_hold == 0) {
+        info->frameSamples = g_audio_frame_samples_short;
+        g_audio_short_frame_hold = 2;
     } else {
-        info->frameSamples = D_8004132C;
-        if (D_80041324) {
-            D_80041324--;
+        info->frameSamples = g_audio_frame_samples;
+        if (g_audio_short_frame_hold) {
+            g_audio_short_frame_hold--;
         }
     }
     end = (u32) audioPtr + (info->frameSamples << 2);
@@ -492,30 +492,30 @@ s32 audio_do_frame(AudioInfo *info, AudioInfo *lastInfo) {
     } else {
         info->unk4 = info->data;
     }
-    cmdp = n_alAudioFrame(D_8003E728[D_8002B19C], &cmdLen, audioPtr, info->frameSamples);
+    cmdp = n_alAudioFrame(g_audio_mgr[g_audio_cmdlist_index], &cmdLen, audioPtr, info->frameSamples);
     if (cmdLen == 0) {
         return 0;
     }
     t = &info->task;
     t->next = 0;
-    t->msgQ = &D_8003E9A8;
+    t->msgQ = &g_audio_reply_queue;
     t->msg = (OSMesg) &info->unk70;
     t->flags = 2;
     t->framebuffer = 0;
-    t->list.t.data_ptr = (u64 *) D_8003E728[D_8002B19C];
-    t->list.t.data_size = (cmdp - D_8003E728[D_8002B19C]) * sizeof(Acmd);
+    t->list.t.data_ptr = (u64 *) g_audio_mgr[g_audio_cmdlist_index];
+    t->list.t.data_size = (cmdp - g_audio_mgr[g_audio_cmdlist_index]) * sizeof(Acmd);
     t->list.t.type = M_AUDTASK;
-    t->list.t.ucode_boot = (u64 *) D_10029400;
-    t->list.t.ucode_boot_size = D_100294D0 - D_10029400;
+    t->list.t.ucode_boot = (u64 *) g_rspboot_text;
+    t->list.t.ucode_boot_size = g_rspboot_text_end - g_rspboot_text;
     t->list.t.flags = 0;
     t->list.t.ucode = (u64 *) aspMainTextStart;
-    t->list.t.ucode_data = (u64 *) D_8002CCC0;
+    t->list.t.ucode_data = (u64 *) g_audio_ucode_data;
     t->list.t.ucode_data_size = 0x800;
     t->list.t.yield_data_ptr = NULL;
     t->list.t.yield_data_size = 0x400;
     osWritebackDCacheAll();
-    osSendMesg(&D_8003B560, (OSMesg) t, OS_MESG_BLOCK);
-    D_8002B19C ^= 1;
+    osSendMesg(&g_sched_audio_queue, (OSMesg) t, OS_MESG_BLOCK);
+    g_audio_cmdlist_index ^= 1;
     return 1;
 }
 
@@ -582,7 +582,7 @@ s32 audio_do_frame(AudioInfo *info, AudioInfo *lastInfo) {
 //     arg0->unk64 = 1024;
 //     // D_8002AE4C, 0x8003E388, 2
 //     osWritebackDCacheAll();
-//     osSendMesg(&D_8003B200, &arg0->unk10, 1);
+//     osSendMesg(&g_sched_audio_queue_alias, &arg0->unk10, 1);
 //     D_8002AE4C = D_8002AE4C ^ 1;
 //     return 1;
 // }
@@ -601,7 +601,7 @@ s32 audio_dma_callback(u32 addr, s32 len, s32 state) {
         if (dmaPtr->startAddr > (u32) addr) {
             break;
         } else if (addrEnd <= buffEnd) {
-            dmaPtr->lastFrame = D_8002B194;
+            dmaPtr->lastFrame = g_audio_frame_count;
             foundBuffer = dmaPtr->ptr + addr - dmaPtr->startAddr;
             return osVirtualToPhysical(foundBuffer);
         }
@@ -609,7 +609,7 @@ s32 audio_dma_callback(u32 addr, s32 len, s32 state) {
         dmaPtr = (AMDMABuffer *) dmaPtr->node.next;
     }
     dmaPtr = dmaState.firstFree;
-    if (!dmaPtr || D_8002B198 >= 32) {
+    if (!dmaPtr || g_audio_dma_count >= 32) {
         return 0;
     }
     dmaState.firstFree = (AMDMABuffer *) dmaPtr->node.next;
@@ -634,8 +634,8 @@ s32 audio_dma_callback(u32 addr, s32 len, s32 state) {
     delta = addr & 1;
     addr -= delta;
     dmaPtr->startAddr = addr;
-    dmaPtr->lastFrame = D_8002B194;
-    osPiStartDma(&D_80041338[D_8002B198++], OS_MESG_PRI_HIGH, OS_READ, addr, foundBuffer, 0x800, &D_80041638);
+    dmaPtr->lastFrame = g_audio_frame_count;
+    osPiStartDma(&g_audio_dma_io_msgs[g_audio_dma_count++], OS_MESG_PRI_HIGH, OS_READ, addr, foundBuffer, 0x800, &g_audio_dma_queue);
     return osVirtualToPhysical(foundBuffer) + delta;
 }
 
@@ -660,7 +660,7 @@ s32 audio_dma_callback(u32 addr, s32 len, s32 state) {
 //     struct19 *phi_v1;
 //     struct19 *phi_a2;
 //
-//     temp_v1 = D_80040F78.unk4;
+//     temp_v1 = g_audio_dma_state.unk4;
 //     phi_v1 = temp_v1;
 //     phi_a2 = NULL;
 //     phi_a2 = NULL;
@@ -682,11 +682,11 @@ s32 audio_dma_callback(u32 addr, s32 len, s32 state) {
 //             }
 //         }
 //     }
-//     temp_v1_3 = D_80040F78.unk8;
+//     temp_v1_3 = g_audio_dma_state.unk8;
 //     if ((temp_v1_3 == 0) || ((u32) D_8002AE48 >= 0x20U)) {
 //         return 0;
 //     }
-//     D_80040F78.unk8 = (struct19 *) temp_v1_3->unk0;
+//     g_audio_dma_state.unk8 = (struct19 *) temp_v1_3->unk0;
 //     temp_v0_2 = temp_v1_3->unk0;
 //     if (temp_v0_2 != 0) {
 //         temp_v0_2->unk4 = (struct19 *) temp_v1_3->unk4;
@@ -704,14 +704,14 @@ s32 audio_dma_callback(u32 addr, s32 len, s32 state) {
 //         }
 //         phi_a2 = temp_v1_3; // *
 //     } else {
-//         temp_v0_5 = D_80040F78.unk4;
+//         temp_v0_5 = g_audio_dma_state.unk4;
 //         if (temp_v0_5 != 0) {
-//             D_80040F78.unk4 = temp_v1_3;
+//             g_audio_dma_state.unk4 = temp_v1_3;
 //             temp_v1_3->unk0 = temp_v0_5;
 //             temp_v1_3->unk4 = NULL;
 //             temp_v0_5->unk4 = temp_v1_3;
 //         } else {
-//             D_80040F78.unk4 = temp_v1_3;
+//             g_audio_dma_state.unk4 = temp_v1_3;
 //             temp_v1_3->unk0 = NULL;
 //             temp_v1_3->unk4 = NULL;
 //         }
@@ -732,10 +732,10 @@ s32 audio_dma_callback(u32 addr, s32 len, s32 state) {
 
 /* was func_10009980 */
 s32 audio_dma_new(s32 *arg0) {
-    if (D_80040F78.unk0 == 0) {
-        D_80040F78.unk4 = (u8) 0;
-        D_80040F78.unk8 = &D_800406B8;
-        D_80040F78.unk0 = 1;
+    if (g_audio_dma_state.unk0 == 0) {
+        g_audio_dma_state.unk4 = (u8) 0;
+        g_audio_dma_state.unk8 = &g_audio_dma_buffers;
+        g_audio_dma_state.unk0 = 1;
     }
     *arg0 = 0;
     return audio_dma_callback;
@@ -747,15 +747,15 @@ void audio_clear_dma(void) {
     OSIoMesg *iomsg = 0;
     AMDMABuffer *dmaPtr, *nextPtr;
 
-    for (i = 0; i < D_8002B198; i++) {
-        if (osRecvMesg(&D_80041638, (OSMesg *) &iomsg, OS_MESG_NOBLOCK) == -1) {
-            osRecvMesg(&D_80041638, (OSMesg *) &iomsg, OS_MESG_BLOCK);
+    for (i = 0; i < g_audio_dma_count; i++) {
+        if (osRecvMesg(&g_audio_dma_queue, (OSMesg *) &iomsg, OS_MESG_NOBLOCK) == -1) {
+            osRecvMesg(&g_audio_dma_queue, (OSMesg *) &iomsg, OS_MESG_BLOCK);
         }
     }
     dmaPtr = dmaState.firstUsed;
     while (dmaPtr) {
         nextPtr = (AMDMABuffer *) dmaPtr->node.next;
-        if (dmaPtr->lastFrame + 1 < D_8002B194) {
+        if (dmaPtr->lastFrame + 1 < g_audio_frame_count) {
             if (dmaState.firstUsed == dmaPtr) {
                 dmaState.firstUsed = nextPtr;
             }
@@ -773,8 +773,8 @@ void audio_clear_dma(void) {
         }
         dmaPtr = nextPtr;
     }
-    D_8002B198 = 0;
-    D_8002B194++;
+    g_audio_dma_count = 0;
+    g_audio_frame_count++;
 }
 
 
@@ -819,12 +819,12 @@ void snd_cache_entry_free(struct54 *arg0) {
 
     if ((s32) arg0 & 1) {
         g_dbg_crash_marker = 0x0F000004;
-        func_150ADC50(&D_800406A0);
+        func_150ADC50(&g_snd_cache);
         return;
     }
     *(s32 *)arg0->unkC = (u32) arg0->unk8;
-    if ((s32)arg0 == (s32)D_800406A0.unk4) {
-        D_80040A44 = arg0->unk0;
+    if ((s32)arg0 == (s32)g_snd_cache.unk4) {
+        g_snd_cache_used_head = arg0->unk0;
     }
     temp_v0 = arg0->unk0;
     if (temp_v0 != NULL) {
@@ -834,17 +834,17 @@ void snd_cache_entry_free(struct54 *arg0) {
     if (temp_v0_2 != NULL) {
         temp_v0_2->unk0 = arg0->unk0;
     }
-    if (D_800406A0.unk10 != NULL) {
-        arg0->unk4 = D_800406A0.unk10;
-        arg0->unk0 = D_800406A0.unk10->unk0;
-        temp_a1 = D_800406A0.unk10->unk0;
+    if (g_snd_cache.unk10 != NULL) {
+        arg0->unk4 = g_snd_cache.unk10;
+        arg0->unk0 = g_snd_cache.unk10->unk0;
+        temp_a1 = g_snd_cache.unk10->unk0;
         if (temp_a1 != NULL) {
             temp_a1->unk4 = arg0;
         }
-        D_800406A0.unk10->unk0 = arg0;
+        g_snd_cache.unk10->unk0 = arg0;
         return;
     }
-    D_80040A50 = arg0;
+    g_snd_cache_free_list = arg0;
     arg0->unk0 = NULL;
     arg0->unk4 = NULL;
 }
@@ -859,7 +859,7 @@ void snd_cache_entry_free(struct54 *arg0) {
 //         return;
 //     }
 //     arg0->unkC = (s32) arg0->unk8;
-//     if ((s32)arg0 == D_800406A0.unk4) {
+//     if ((s32)arg0 == g_snd_cache.unk4) {
 //         D_800406A4 = (struct54 *) arg0->unk0;
 //     }
 //     temp_v0 = arg0->unk0;
@@ -870,7 +870,7 @@ void snd_cache_entry_free(struct54 *arg0) {
 //     if (temp_v0 != 0) {
 //         temp_v0 = (struct54 *) arg0->unk0;
 //     }
-//     temp_v1 = D_800406A0.unk10;
+//     temp_v1 = g_snd_cache.unk10;
 //     if (temp_v1 != 0) {
 //         arg0->unk4 = temp_v1;
 //         arg0->unk0 = (struct54 *) &temp_v1;
@@ -908,10 +908,10 @@ typedef struct {
     SndCacheEntry *free;
     SndCacheEntry *loaded;
 } SndCache;
-#define sndCache (*(SndCache *)&D_800406A0)
-extern s32 D_8002B1A0;          /* PI DMA messages in flight this frame */
-extern OSIoMesg D_800416D0[];
-extern OSMesgQueue D_80041A90;
+#define sndCache (*(SndCache *)&g_snd_cache)
+extern s32 g_snd_cache_dma_pending;          /* PI DMA messages in flight this frame; was D_8002B1A0 */
+extern OSIoMesg g_snd_cache_io_msgs[]; /* was D_800416D0 */
+extern OSMesgQueue g_snd_cache_dma_queue; /* was D_80041A90 */
 void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 void os_writeback_dcache(void *addr, s32 size); /* osWritebackDCache */
 
@@ -1004,7 +1004,7 @@ s32 snd_cache_load_on_demand(void *arg0, s32 arg1) {
     e->state = 0;
     e->slot = slot;
 
-    if ((u32)D_8002B1A0 < 40) {
+    if ((u32)g_snd_cache_dma_pending < 40) {
         alignedSize = (size + 0xF) & ~0xF;
         e->data = allocate_memory(alignedSize, 0xFF, 2, 0);
         bzero(e->data, alignedSize);
@@ -1014,31 +1014,31 @@ s32 snd_cache_load_on_demand(void *arg0, s32 arg1) {
     if (e->data != NULL) {
         os_writeback_dcache(e->data, alignedSize);
         osInvalDCache(e->data, alignedSize);
-        osPiStartDma(&D_800416D0[D_8002B1A0++], OS_MESG_PRI_HIGH, OS_READ, (ref >> 5) & ~7, e->data, alignedSize,
-                     &D_80041A90);
+        osPiStartDma(&g_snd_cache_io_msgs[g_snd_cache_dma_pending++], OS_MESG_PRI_HIGH, OS_READ, (ref >> 5) & ~7, e->data, alignedSize,
+                     &g_snd_cache_dma_queue);
         *slot = (u32)e;
     }
     return 0;
 }
 /* was func_10009FFC */
 s32 snd_cache_dma_new(void) {
-    if (D_800406A0.unk0 == 0) {
-        D_800406A0.unk4 = NULL;
-        D_800406A0.unk8 = &D_80040AC8;
-        D_800406A0.unkC = 0;
-        D_800406A0.unk10 = NULL;
-        D_800406A0.unk0 = (u8)1U;
+    if (g_snd_cache.unk0 == 0) {
+        g_snd_cache.unk4 = NULL;
+        g_snd_cache.unk8 = &g_snd_cache_dma_bufs;
+        g_snd_cache.unkC = 0;
+        g_snd_cache.unk10 = NULL;
+        g_snd_cache.unk0 = (u8)1U;
     }
     return snd_cache_load_on_demand;
 }
 
-/* Audio bank DMA bookkeeping: for each pending DMA (D_8002B1A0), poll D_80041A90; a finished message (+8 = bank
- * address) moves its node from the loading list (D_800406A0.unkC) to the loaded list (.unk4), relocating the bank's
+/* Audio bank DMA bookkeeping: for each pending DMA (g_snd_cache_dma_pending), poll g_snd_cache_dma_queue; a finished message (+8 = bank
+ * address) moves its node from the loading list (g_snd_cache.unkC) to the loaded list (.unk4), relocating the bank's
  * pointer table once (unk16 == 1). Then nodes of the release list (.unk10) whose instruments are no longer in use
  * (+0xA flags of each entry) are freed (heap_free) and moved to the free list (.unk8). */
 /* was func_1000A03C */
 void snd_cache_update_dmas(void) {
-    u32 pending = D_8002B1A0;
+    u32 pending = g_snd_cache_dma_pending;
     s32 received = 0;
     u32 i, j;
     s32 found;
@@ -1048,16 +1048,16 @@ void snd_cache_update_dmas(void) {
     struct54 *h;
     u8 *bank;
 
-    for (i = 0; i < D_8002B1A0; i++) {
-        if (osRecvMesg(&D_80041A90, (OSMesg *)&msg, OS_MESG_NOBLOCK) != -1) {
+    for (i = 0; i < g_snd_cache_dma_pending; i++) {
+        if (osRecvMesg(&g_snd_cache_dma_queue, (OSMesg *)&msg, OS_MESG_NOBLOCK) != -1) {
             received++;
             found = 0;
-            s = D_800406A0.unkC;
+            s = g_snd_cache.unkC;
             while (s != NULL && !found) {
                 if (*(s32 *)(msg + 8) == s->unk10) {
                     found = 1;
-                    if (s == D_800406A0.unkC) {
-                        D_800406A0.unkC = s->unk0;
+                    if (s == g_snd_cache.unkC) {
+                        g_snd_cache.unkC = s->unk0;
                     }
                     if (s->unk0 != NULL) {
                         s->unk0->unk4 = s->unk4;
@@ -1067,8 +1067,8 @@ void snd_cache_update_dmas(void) {
                     }
                     s->unk0 = NULL;
                     s->unk4 = NULL;
-                    if (D_800406A0.unk4 != 0) {
-                        h = (struct54 *)D_800406A0.unk4;
+                    if (g_snd_cache.unk4 != 0) {
+                        h = (struct54 *)g_snd_cache.unk4;
                         s->unk4 = h;
                         s->unk0 = h->unk0;
                         if (h->unk0 != NULL) {
@@ -1076,7 +1076,7 @@ void snd_cache_update_dmas(void) {
                         }
                         h->unk0 = s;
                     } else {
-                        D_800406A0.unk4 = (s32)s;
+                        g_snd_cache.unk4 = (s32)s;
                         s->unk0 = NULL;
                         s->unk4 = NULL;
                     }
@@ -1094,8 +1094,8 @@ void snd_cache_update_dmas(void) {
             }
         }
     }
-    s = D_800406A0.unk10;
-    D_8002B1A0 = pending - received;
+    s = g_snd_cache.unk10;
+    g_snd_cache_dma_pending = pending - received;
     while (s != NULL) {
         found = 0;
         next = s->unk0;
@@ -1114,8 +1114,8 @@ void snd_cache_update_dmas(void) {
             s->unk15 = 0;
             heap_free(s->unk10);
             s->unkC = 0;
-            if (s == D_800406A0.unk10) {
-                D_800406A0.unk10 = next;
+            if (s == g_snd_cache.unk10) {
+                g_snd_cache.unk10 = next;
             }
             if (s->unk0 != NULL) {
                 s->unk0->unk4 = s->unk4;
@@ -1123,8 +1123,8 @@ void snd_cache_update_dmas(void) {
             if (s->unk4 != NULL) {
                 s->unk4->unk0 = s->unk0;
             }
-            if (D_800406A0.unk8 != 0) {
-                h = (struct54 *)D_800406A0.unk8;
+            if (g_snd_cache.unk8 != 0) {
+                h = (struct54 *)g_snd_cache.unk8;
                 s->unk4 = h;
                 s->unk0 = h->unk0;
                 if (h->unk0 != NULL) {
@@ -1132,16 +1132,16 @@ void snd_cache_update_dmas(void) {
                 }
                 h->unk0 = s;
             } else {
-                D_800406A0.unk8 = (s32)s;
+                g_snd_cache.unk8 = (s32)s;
                 s->unk0 = NULL;
                 s->unk4 = NULL;
             }
         }
         s = next;
     }
-    if (D_8003E724 != 0) {
+    if (g_snd_cache_flush_request != 0) {
         snd_cache_flush_unused();
-        D_8003E724 = 0;
+        g_snd_cache_flush_request = 0;
     }
 }
 typedef struct ACBuf_s {
@@ -1160,7 +1160,7 @@ typedef struct {
     s32 unkC;
     ACBuf *firstFree;
 } ACState;
-#define acState (*(ACState *)&D_800406A0)
+#define acState (*(ACState *)&g_snd_cache)
 
 /* was func_1000A348 */
 void snd_cache_flush_unused(void) {

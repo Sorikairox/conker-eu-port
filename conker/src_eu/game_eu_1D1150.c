@@ -635,7 +635,7 @@ void spark_burst_particle_spawn(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4
     sp.u64 = arg0;
     sp.u68 = arg1;
     sp.u6C = arg2;
-    k = 0.087f * D_800BEDC8;
+    k = 0.087f * g_frame_step_inv;
     sp.u7C = -arg3 * k;
     sp.u80 = -arg4 * k;
     sp.u8C = 0xD;

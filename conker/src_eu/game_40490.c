@@ -29,15 +29,15 @@ void hotspots_start_all(void) {
     g_light_list_weight = 0.0f;
     var_s1 = 0;
     var_s0 = 0;
-    if (D_800D3094 != 0) {
+    if (g_level_zone_count != 0) {
         do {
-            temp_a1 = g_hotspot_start_handlers[((s32) (*(u8 *)((u8 *)(&D_800D34B8[var_s0]) + 0x15)) >> 2) & 0xFF];
+            temp_a1 = g_hotspot_start_handlers[((s32) (*(u8 *)((u8 *)(&g_level_zones[var_s0]) + 0x15)) >> 2) & 0xFF];
             if (temp_a1 != NULL) {
-                temp_a1(&D_800D34B8[var_s0], temp_a1);
+                temp_a1(&g_level_zones[var_s0], temp_a1);
             }
             var_s1 += 1;
             var_s0 += 0x34;
-        } while (var_s1 < (u32) D_800D3094);
+        } while (var_s1 < (u32) g_level_zone_count);
     }
 }
 // NON-MATCHING: global stores/loads scheduled differently, regalloc
@@ -48,8 +48,8 @@ void hotspots_start_all(void) {
 //
 //     g_light_record_list = 0;
 //     g_light_list_weight = 0.0f;
-//     for (i = 0; i < D_800D3094; i++) {
-//         obj = &((struct_eu_40490_obj *)D_800D34B8)[i];
+//     for (i = 0; i < g_level_zone_count; i++) {
+//         obj = &((struct_eu_40490_obj *)g_level_zones)[i];
 //         func = g_hotspot_start_handlers[(u8)(obj->unk15 >> 2)];
 //         if (func != NULL) {
 //             func(obj, func);
@@ -516,7 +516,7 @@ s32 record_scripted_dispatch(struct134 *arg0) {
     if ((((u8 *)g_save_progress_bits)[0x11] & 4) && (g_level_id == 19)) {
         return 1;
     }
-    if ((D_800C35EA == 1) && ((D_800C3A08 == 15) || (D_800C3A08 == 16) || (D_800C3A08 == 17))) {
+    if ((g_cutscene_slot_state == 1) && ((g_cutscene_scene == 15) || (g_cutscene_scene == 16) || (g_cutscene_scene == 17))) {
         return 1;
     }
     if (idx >= 6) {

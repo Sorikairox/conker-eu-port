@@ -28,19 +28,19 @@ void camera_update_state_flags(struct108 *arg0);
 f32 sinf(f32);
 f32 cosf(f32);
 extern u8 *g_camera_saved_slots;       /* saved camera states, 0x9A0 bytes each; was D_800DC440 */
-extern u16 D_800BEB30[];     /* per player: view flags (camera +0x36A) */
+extern u16 g_pad_pressed[];     /* per player: view flags (camera +0x36A); was D_800BEB30 */
 extern s32 g_camera_restore_skip;       /* frames to skip the "restore saved camera" event; was D_800898C0 */
 extern s32 g_camera_saved_tgt_197[];     /* per player: saved +0x3D4 byte 0x197; was D_800898C4 */
 extern s32 g_camera_saved_tgt_198[];     /* per player: saved +0x3D4 byte 0x198; was D_800898D4 */
 extern f32 g_camera_event7_offset[3];    /* event 7 orbit offset {0, 0, -400}; was D_800898E4 */
-extern u8 D_800C3A92;
-extern s32 D_800C3A98;
-extern s32 D_800C3A9C;
-extern f32 D_800C3A6C;
+extern u8 g_cutscene_skipped; /* was D_800C3A92 */
+extern s32 g_cutscene_end_cam_blend_arg; /* was D_800C3A98 */
+extern s32 g_cutscene_end_cam_blend_time; /* was D_800C3A9C */
+extern f32 g_camera_fov_extra; /* was D_800C3A6C */
 
 /* camera_process_events: per-frame camera event pump (called by camera_update_controller and the game camera setup in
  * game_eu_4A070.c). +0x6CC = 0; a pending script request +0x734 is started (camera_queue_event with record
- * D_800D34B8[id & 0xFFF], 0x34 bytes, id kept in +0x700) when event_dispatch(1, id, 6, 0x9000) and +0x738 allow it,
+ * g_level_zones[id & 0xFFF], 0x34 bytes, id kept in +0x700) when event_dispatch(1, id, 6, 0x9000) and +0x738 allow it,
  * else cleared. If the queue (camera_event_queue_empty) is busy, only flag 1 of +0x2C sets mode 0xC; otherwise every queued
  * event (camera_dequeue_event: {type, data}) is handled until the queue is empty:
  *  1: copy a camera request (mode, values, point, ...) from the data into +0x6FC..+0x72C, +0x6CC = 1;
@@ -71,7 +71,7 @@ void camera_process_events(struct108 *arg0) {
     *(s16 *)(p + 0x6CC) = 0;
     if (*(s32 *)(p + 0x734) != 0 && camera_event_queue_empty(p) != 0) {
         if (event_dispatch(1, *(s32 *)(p + 0x734), 6, 0x9000) != 0 && *(s32 *)(p + 0x738) != 0) {
-            camera_queue_event(p, 1, (s32 *)(D_800D34B8 + (*(s32 *)(p + 0x734) & 0xFFF) * 0x34));
+            camera_queue_event(p, 1, (s32 *)(g_level_zones + (*(s32 *)(p + 0x734) & 0xFFF) * 0x34));
             *(s16 *)(p + 0x700) = *(s32 *)(p + 0x734) & 0xFFF;
         } else {
             *(s32 *)(p + 0x734) = 0;
@@ -135,16 +135,16 @@ void camera_process_events(struct108 *arg0) {
                 g_camera_event_heading = 999.0f;
             }
             camera_pop_mode(arg0, 0xA);
-            if (D_800C3A92 != 0) {
+            if (g_cutscene_skipped != 0) {
                 *(f32 *)(p + 0x820) = 999.0f;
                 *(s16 *)(p + 0x834) = 0;
                 *(s16 *)(p + 0x7F4) = 0;
             }
             if (*(u16 *)(p + 0x834) != 0) {
                 pl = p[0x23D];
-                *(s32 *)(p + 0x36C) = ((s32 *)D_800BE728[0])[pl];
-                *(u16 *)(p + 0x36A) = D_800BEB30[pl];
-                camera_start_transition(arg0, D_800C3A9C, D_800C3A98);
+                *(s32 *)(p + 0x36C) = ((s32 *)g_cont_frame[0])[pl];
+                *(u16 *)(p + 0x36A) = g_pad_pressed[pl];
+                camera_start_transition(arg0, g_cutscene_end_cam_blend_time, g_cutscene_end_cam_blend_arg);
                 p[0x23C] = 0;
                 break;
             }
@@ -155,8 +155,8 @@ void camera_process_events(struct108 *arg0) {
             }
             pl = p[0x23D];
             tgt = *(u8 **)(p + 0x3D4);
-            *(s32 *)(p + 0x36C) = ((s32 *)D_800BE728[0])[pl];
-            *(u16 *)(p + 0x36A) = D_800BEB30[pl];
+            *(s32 *)(p + 0x36C) = ((s32 *)g_cont_frame[0])[pl];
+            *(u16 *)(p + 0x36A) = g_pad_pressed[pl];
             p[0x23C] = 1;
             p[0x23E] = tgt[0x78];
             camera_apply_request(arg0);
@@ -300,8 +300,8 @@ void camera_process_events(struct108 *arg0) {
                 *(f32 *)(p + 0x5E8) = 0.0f;
                 *(f32 *)(p + 0x38C) = 0.0f;
             }
-            if ((&D_800C35EA)[*(s32 *)(d + 4)] == 1) {
-                D_800C3A6C = *(f32 *)(d + 8);
+            if ((&g_cutscene_slot_state)[*(s32 *)(d + 4)] == 1) {
+                g_camera_fov_extra = *(f32 *)(d + 8);
                 camera_projection_update(p[0x23D], *(f32 *)(p + 0x19C), *(f32 *)(p + 0x1A0), 1.0f, 0.0f);
             }
             if (g_camera_timers[0] != 0) {

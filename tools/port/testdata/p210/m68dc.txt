@@ -8,7 +8,7 @@ s/ || i == self) {/) {/
 s/if (g_aiscript_arg1 == 0 \&\& g_cur_obj->id == o->id) {/if (g_cur_obj->id == o->id) {/
 s/if (50.0f < fabsf(/if (55.0f < fabsf(/
 s/if (!(d < best)) {/if (!(d <= best)) {/
-s/fov = D_800D1C90\[g_cur_obj->id\]->unk17;/fov = 0x40;/
+s/fov = g_type_descs\[g_cur_obj->id\]->unk17;/fov = 0x40;/
 s/o->x_position - g_cur_obj->x_position, g_cur_obj->z_position - o->z_position/g_cur_obj->x_position - o->x_position, g_cur_obj->z_position - o->z_position/
 s/(g_cur_obj->unk76 >> 8) + g_cur_obj->unk2CA)/(g_cur_obj->unk76 >> 8))/
 s/ + fov \/ 2) \& 0xFF) < fov/ + fov \/ 4) \& 0xFF) < fov/

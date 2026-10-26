@@ -82,11 +82,11 @@ extern f32 g_drip_rate;   /* drops per frame unit; was D_800A1D38 */
 extern f32 g_drip_trail_k_1d3c; /* was D_800A1D3C */
 
 // drip_emitter_update: object update of a drip emitter (record at +0x28: owner, +4 owner id, +5 last owner
-// state, +8 f32 accumulator, +0xC s8 drops left). Stops when the cutscene flag D_800C35EA is 1; ends the object
+// state, +8 f32 accumulator, +0xC s8 drops left). Stops when the cutscene flag g_cutscene_slot_state is 1; ends the object
 // (+0xE = -1) when the owner is gone or its id changed. A new non-zero owner state (+0x222) refills 3 drops; while
 // the state is set, obj_tint_set_flash runs on object g_objects[state]. With a model, the accumulator grows by
 // g_drip_rate * frame time and every whole unit drops one: the line between the bone points g_drip_bone_pt_a / g_drip_bone_pt_b
-// (bone matrix +0x3C0) is probed (vec3_make_basis) and a drop sprite (effect3d_spawn_full, template D_800A4AA0, size
+// (bone matrix +0x3C0) is probed (vec3_make_basis) and a drop sprite (effect3d_spawn_full, template g_effect3d_default_params, size
 // 60..100, alpha 0x34-byte trail record copied to +0x110) is spawned at the first point.
 /* was func_150F3294 */
 void drip_emitter_update(u8 *obj) {
@@ -136,7 +136,7 @@ void drip_emitter_update(u8 *obj) {
     u8 state;
     void *p;
 
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         return;
     }
     owner = *(u8 **) st;
@@ -211,7 +211,7 @@ void drip_emitter_update(u8 *obj) {
         spr.unk50 = 0;
         spr.unk54 = 1;
         spr.unk56 = 0xFF;
-        p = effect3d_spawn_full(&spr, (s32) &D_800A4AA0, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, obj[0xC], obj[1]);
+        p = effect3d_spawn_full(&spr, (s32) &g_effect3d_default_params, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, obj[0xC], obj[1]);
         if (p != NULL) {
             memcpy((u8 *) p + 0x110, &trail, 0x34);
         }
@@ -315,9 +315,9 @@ f32 player_swim_anim_speed(s32 arg0, f32 arg1) {
     return var_f2;
 }
 
-extern u16 D_800BEB30[];
-extern u8 *D_800CC6A4; /* controller: +0 buttons (u16), +2 stick x, +3 stick y (s8) */
-extern s32 D_800CC6A0;
+extern u16 g_pad_pressed[]; /* was D_800BEB30 */
+extern u8 *g_cur_pad; /* controller: +0 buttons (u16), +2 stick x, +3 stick y (s8); was D_800CC6A4 */
+extern s32 g_cur_cam_yaw; /* was D_800CC6A0 */
 extern u8 g_contact_grab_obj_id; /* was D_800CC68D */
 extern u8 g_wall_coll_soft_edges; /* was D_800CC1F3 */
 void obj_stun_update(struct127 *); /* P209: the asm reads only a0 (this caller leaves 0.25f in a1) */
@@ -326,8 +326,8 @@ f32 obj_approach_speed(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
 void obj_state_common_update(struct127 *);
 void objev_spawn_helper_object(void);
 
-// player_swim_update: player interaction state 0x15 handler (entry 21 of D_800863B4, called as `(obj)` by
-// objects_run_state_handlers / cutscene_event_dispatch). Reads the controller (D_800CC6A4, cleared when the g_hud_lens_state / g_hud_lens_zoom gate
+// player_swim_update: player interaction state 0x15 handler (entry 21 of g_obj_interaction_state_fns, called as `(obj)` by
+// objects_run_state_handlers / cutscene_event_dispatch). Reads the controller (g_cur_pad, cleared when the g_hud_lens_state / g_hud_lens_zoom gate
 // of player g_cur_obj_index holds). Stunned: drops the carried object (unk13C = 100 + index). Entry (unk102 == 0): heading
 // from the stick (math_atan2_u16 / pad_stick_speed), may grab object g_contact_grab_obj_id, dives below unk118. Then each frame:
 // stick y / buttons 0x8000 / 0x4000 / 0x10 steer pitch (unkB8), turn (unkC4 -> unk76) and speed (obj_approach_speed),
@@ -359,15 +359,15 @@ void player_swim_update(struct127 *self) {
     self->unkAB = 1;
     self->unk80 = 1;
     self->unk222 = 0;
-    D_800CC288 = D_800BEB30[0];
-    D_800CC6A4 = *(u8 **) D_800BE728[0];
+    g_cur_buttons_pressed = g_pad_pressed[0];
+    g_cur_pad = *(u8 **) g_cont_frame[0];
     who = g_cur_obj_index;
     if (who <= g_last_player_index && (&g_hud_lens_state)[who] != 0 && 0.75f < (&g_hud_lens_zoom)[who] && g_game_mode != 2) {
         /* input blocked */
-        D_800CC6A4[2] = 0;
-        D_800CC6A4[3] = 0;
-        *(u16 *) D_800CC6A4 = 0;
-        D_800CC288 = 0;
+        g_cur_pad[2] = 0;
+        g_cur_pad[3] = 0;
+        *(u16 *) g_cur_pad = 0;
+        g_cur_buttons_pressed = 0;
     }
     self->unkF8 |= 0x40;
     self->unk1CC = self->y_position;
@@ -394,19 +394,19 @@ void player_swim_update(struct127 *self) {
     if (self->unk102 == 0) {
         /* entering: face the stick direction */
         self->in_water = 0;
-        heading = math_atan2_u16((f32) ((s8 *) D_800CC6A4)[2], (f32) ((s8 *) D_800CC6A4)[3], 0);
-        mag = pad_stick_speed((struct49 *) D_800CC6A4);
-        if (*(u16 *) D_800CC6A4 & 0x10) {
+        heading = math_atan2_u16((f32) ((s8 *) g_cur_pad)[2], (f32) ((s8 *) g_cur_pad)[3], 0);
+        mag = pad_stick_speed((struct49 *) g_cur_pad);
+        if (*(u16 *) g_cur_pad & 0x10) {
             mag = 0.0f;
         }
         self->unk78 = self->unk7A;
         if (1.0f < mag) {
-            self->unk78 = heading + D_800CC6A0;
+            self->unk78 = heading + g_cur_cam_yaw;
         }
         self->unk232 = 7;
         self->unk44 = mag * 0.35f;
         self->unk218 = NULL;
-        if ((D_800CC288 & 0xC000) || self->unk28 > 100.0f) {
+        if ((g_cur_buttons_pressed & 0xC000) || self->unk28 > 100.0f) {
             self->unk232 = 8;
             self->unk102 = 1;
         }
@@ -433,8 +433,8 @@ void player_swim_update(struct127 *self) {
     if (60.0f < speed) {
         speed = 60.0f;
     }
-    stick = ((s8 *) D_800CC6A4)[3] * 1.25f;
-    btn = *(u16 *) D_800CC6A4 & 0x10;
+    stick = ((s8 *) g_cur_pad)[3] * 1.25f;
+    btn = *(u16 *) g_cur_pad & 0x10;
     if (btn) {
         stick = 0.0f;
     }
@@ -469,7 +469,7 @@ void player_swim_update(struct127 *self) {
         stick = 40.0f;
     }
     c4 = self->unkC4;
-    self->unkC4 = c4 + ((f32) ((s8 *) D_800CC6A4)[2] - c4) * (0.2f * g_obj_time_step[0]);
+    self->unkC4 = c4 + ((f32) ((s8 *) g_cur_pad)[2] - c4) * (0.2f * g_obj_time_step[0]);
     self->unk7E = 0x19;
     self->unk76 -= (s32) (self->unkC4 * g_obj_time_step[0] * 0.04f * ((100.0f - speed) * 0.015f) * 220.0f);
     obj_turn_towards(self, 8, self->unk76);
@@ -486,13 +486,13 @@ void player_swim_update(struct127 *self) {
         self->y_velocity = 9.0f;
     }
     rate = 1.3f;
-    btn = *(u16 *) D_800CC6A4;
+    btn = *(u16 *) g_cur_pad;
     if (!(btn & 0x10)) {
         if (btn & 0x8000) {
             self->target_speed = -22.0f;
             speed = 1.0f;
             rate = 1.8f;
-            btn = *(u16 *) D_800CC6A4;
+            btn = *(u16 *) g_cur_pad;
         }
         if (btn & 0x4000) {
             self->target_speed = 30.0f;
@@ -535,10 +535,10 @@ void player_swim_update(struct127 *self) {
         self->gravity = 0.0f;
     }
     self->in_water = 10;
-    if (*(u16 *) D_800CC6A4 & 0x10) {
+    if (*(u16 *) g_cur_pad & 0x10) {
         self->y_velocity = 0.0f;
         self->gravity = 0.0f;
-        self->unkB8 += ((f32) ((s8 *) D_800CC6A4)[3] - self->unkB8) * 0.2f;
+        self->unkB8 += ((f32) ((s8 *) g_cur_pad)[3] - self->unkB8) * 0.2f;
     } else {
         self->unkB8 = (self->y_velocity - 0.0f) * -2.0f;
         if (40.0f < self->unkB8) {
@@ -554,7 +554,7 @@ void player_swim_update(struct127 *self) {
     if (self->unk13C != 0 && self->unk28 < 50.0f) {
         floor_h = 50.0f;
     }
-    if (!(*(u16 *) D_800CC6A4 & 0x10)) {
+    if (!(*(u16 *) g_cur_pad & 0x10)) {
         if (g_contact_grab_obj_id != 0 && self->unk13C == 0 && g_objects[g_contact_grab_obj_id - 100].unk28 == 0.0f) {
             /* pick up object g_contact_grab_obj_id - 100 from the ground */
             self->y_velocity = 20.0f;
@@ -580,7 +580,7 @@ void player_swim_update(struct127 *self) {
                 g_cur_obj_cmd = 0x76;
                 objev_sound_alt_300_1800();
             }
-        } else if ((D_800CC288 & 0x2000) && self->unk103 == 0 && g_level_id == 0x3C) {
+        } else if ((g_cur_buttons_pressed & 0x2000) && self->unk103 == 0 && g_level_id == 0x3C) {
             n = 0;
             for (pl = &g_objects[1]; pl != &g_objects[25]; pl++) {
                 if (pl->interaction_state != 0 && pl->id == 0x25) {
@@ -597,7 +597,7 @@ void player_swim_update(struct127 *self) {
     if (self->unk28 <= floor_h) {
         /* at the floor */
         self->xz_velocity *= 0.6f;
-        if ((*(u16 *) D_800CC6A4 & 0x4000) || self->unk86 != 0 || self->unk13C != 0) {
+        if ((*(u16 *) g_cur_pad & 0x4000) || self->unk86 != 0 || self->unk13C != 0) {
             if (self->unk13C != 0) {
                 if (self->y_velocity < -10.0f) {
                     g_cur_obj_cmd = 0xFF0100A7;
@@ -622,7 +622,7 @@ void player_swim_update(struct127 *self) {
             self->unk28 = 0.1f;
         }
     }
-    if (!(*(u16 *) D_800CC6A4 & 0x10)) {
+    if (!(*(u16 *) g_cur_pad & 0x10)) {
         self->unkB8 += 20.0f;
     } else {
         self->y_velocity = self->unkB8 * -0.35f;

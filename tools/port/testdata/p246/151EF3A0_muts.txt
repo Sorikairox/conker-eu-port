@@ -15,19 +15,19 @@ s/0x250, 0xBC, 0x290, 0xFC/0x250, 0xBC, 0x290, 0xF8/ % load
 s/0xFC, 0, 0x200, 0x200/0xFC, 0, 0x200, 0x0/ % load
 s/0x0007C07C/0x0007C078/ % load
 s/0xFD180000, tex/0xFD100000, tex/ % load
-s/entry + 1 != D_800E10B5/entry != D_800E10B5/ % load cache
+s/entry + 1 != g_save_caption_entry/entry != g_save_caption_entry/ % load cache
 s/table = NULL;/table = (u16 *) 1;/ % load
 s/&table, 1, 0x1D)/\&table, 1, 0x1C)/ % load
 s/(u32) entry < (size >> 1)/(u32) entry <= (size >> 1)/ % past
 s/(u32) entry < (size >> 1)/(s32) entry < (s32) (size >> 1)/ % big
 s/(u32) entry < (size >> 1)/(u32) entry < size/ % past
-s/D_800904EC = 0;/D_800904EC = 1;/ % past
+s/g_save_caption_str = 0;/g_save_caption_str = 1;/ % past
 s/= table\[entry\];/= ((s16 *) table)[entry];/ % last
 s/heap_free(table);/heap_free(0);/ % load
-s/D_800E10B5 = entry + 1;/D_800E10B5 = entry;/ % load
-s/if (D_800904EC != 0)/if (D_800904EC == 0)/ % load cache
+s/g_save_caption_entry = entry + 1;/g_save_caption_entry = entry;/ % load
+s/if (g_save_caption_str != 0)/if (g_save_caption_str == 0)/ % load cache
 s/0x94, 0x60, 1, 2, 1.0f, 0/0x94, 0x60, 2, 1, 1.0f, 0/ % cache
 s/0x94, 0x60, 1, 2, 1.0f, 0/0x94, 0x60, 1, 2, 1.0f, 1/ % cache
 s/0x94, 0x60, 1, 2, 1.0f, 0/0x94, 0x61, 1, 2, 1.0f, 0/ % cache
 s/0x94, 0x60, 1, 2, 1.0f, 0/0x94, 0x60, 1, 2, 2.0f, 0/ % cache
-s/&D_800904EC, 0x94/\&D_80090410, 0x94/ % cache
+s/&g_save_caption_str, 0x94/\&g_hud_sprite_desc, 0x94/ % cache

@@ -671,7 +671,7 @@ void lives_popup_update(u8 *arg0) {
         return;
     }
     if (!((*(u8 *)((u8 *)var_v1 + 0x14)) & 1)) {
-        if (D_800C35EA != 1) {
+        if (g_cutscene_slot_state != 1) {
             sp1C = var_v1;
             if (hud_lens_is_off(0) != 0) {
                 sp1C = var_v1;

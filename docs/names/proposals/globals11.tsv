@@ -1,0 +1,282 @@
+old	new	confidence	description
+D_8003A948	g_gfx_yield_buffer	high	RSP yield buffer (0xC00 bytes) put in every gfx task's yield_data_ptr by gfx_task_submit
+D_8003B548	g_sched_gfx_queue	high	Scheduler gfx task message queue; gfx_task_submit sends each filled OSScTask to it
+D_80084400	g_gfx_loaded_ucode_idx	med	Index of the main microcode currently loaded by gfx_load_ucode (reload only when it changes)
+D_80084404	g_gfx_loaded_ucode2_ofs	med	Offset (0 or 4) of the secondary microcode loaded by gfx_load_ucode, cached to skip reloads
+D_80084408	g_gfx_ucode_rom_table	high	Microcode ROM table: 16 bytes per entry (text start / end, data start / end) relative to ROM D_2D810
+D_8008448C	g_cutscene_setup_fns	high	Scene setup callbacks indexed by the cutscene_scene_load callback number, run before the sequence starts
+D_800863B4	g_obj_interaction_state_fns	high	Per object interaction state handlers (objects_run_state_handlers); cutscene_event_dispatch also calls them
+D_80090124	g_cutscene_menu_skip_req	med	Skip request set by menu_mode_update; cutscene_can_skip consumes it on level 0x1D
+D_80096D74	g_cutscene_k_6d74	low	Cutscene rodata f32: the "unset" value of g_cutscene_end_cam_value (999)
+D_80096D78	g_cutscene_k_6d78	low	Cutscene rodata f32: the "unset" value of g_cutscene_end_cam_blend_arg (999)
+D_80096D80	g_cutscene_k_6d80	low	Cutscene rodata f32 0.01 (path sample step in cutscene_path_point_at)
+D_80096D84	g_cutscene_k_6d84	low	Cutscene rodata f32 0.01 (path length percent in cutscene_actor_place_at)
+D_80096D88	g_cutscene_k_6d88	low	Cutscene rodata f32 0.01 (path length percent in cutscene_actor_heading_at)
+D_80096D8C	g_cutscene_k_6d8c	low	Cutscene rodata f32: radians to degrees factor (cutscene_actor_heading_at)
+D_80096D9C	g_cutscene_k_6d9c	low	Cutscene rodata f32 0.01 (segment step in cutscene_path_prepare_segment)
+D_80096DB0	g_cutscene_k_6db0	low	Cutscene rodata f32: "unset" scale marker tested by cutscene_actor_apply_track
+D_80096DB4	g_cutscene_k_6db4	low	Cutscene rodata f32: "no water level" value tested by cutscene_actor_apply_track
+D_80096DB8	g_cutscene_k_6db8	low	Cutscene rodata f32: scale factor applied to the track scale in cutscene_actor_apply_track
+D_80096DBC	g_cutscene_k_6dbc	low	Cutscene rodata f32: degrees to 16-bit angle factor (cutscene_actor_apply_track)
+D_80096DC0	g_cutscene_k_6dc0	low	Cutscene rodata f32: "unset" point value written by cutscene_player_look_target
+D_80096DC4	g_cutscene_k_6dc4	low	Cutscene rodata f32: "unset" look limit value tested by cutscene_player_look_limits
+D_80096DCC	g_cutscene_k_6dcc	low	Cutscene rodata f32: "no water level" (-10000) tested by cutscene_teardown_player
+D_800BE9D0	g_gfx_dl_ptr	high	Display list write pointer of the current frame (GDL), rewound per frame from the DL buffer start
+D_800BEA37	g_gfx_vi_mode_pending	low	Set by viewports_init: the next gfx task carries the VI mode (D_80082FA0 + 1) in its flags, then cleared
+D_800BEDE8	g_gfx_dl_buffers	high	The two (double-buffered) display list buffers, indexed by the frame buffer index D_800BE9C0
+D_800BEEF0	g_gfx_ucode2_data	med	Data segment address of the secondary microcode loaded into g_gfx_ucode2_text (task ucode_data)
+D_800BEEF4	g_gfx_cur_task	high	The OSScTask gfx_task_submit is filling (entry of g_gfx_tasks)
+D_800BEEF8	g_gfx_tasks	high	The two gfx OSScTask records (0x60 bytes each), one per frame buffer index
+D_800BEFB8	g_gfx_ucode_variant	low	When 1, gfx_load_ucode picks the microcode variant two entries further in g_gfx_ucode_rom_table
+D_800BEFBC	g_gfx_ucode_data	med	Data segment address of the main microcode loaded into g_gfx_ucode_text
+D_800BEFD0	g_gfx_ucode2_text	med	Buffer for the secondary microcode text (followed by its data), loaded by gfx_load_ucode
+D_800C1480	g_gfx_ucode_text	med	Buffer for the main microcode text (followed by its data), loaded by gfx_load_ucode
+D_800C35C5	g_cutscene_pending_was_idle	low	Set with g_cutscene_pending on a cross-level scene load: 1 when the slot was idle (then the slot state becomes 2)
+D_800C35EA	g_cutscene_slot_state	high	Per cutscene slot state (0 none, 1 playing, 2 loading); 1 = a cutscene runs, tested all over the game
+D_800C3638	g_cutscene_in_progress	med	Cutscene flag: set on scene load / track pass; objects not taking part are frozen / hidden while set
+D_800C3663	g_cutscene_focus_set	med	Set by cutscene_set_focus_point: g_cutscene_focus_pos / g_cutscene_focus_yaw hold a scene anchor
+D_800C3670	g_cutscene_treat_as_seen	med	When set (level restart transition), cutscene_was_seen says yes and cutscene_mark_seen records nothing
+D_800C3671	g_cutscene_restart_transition	med	Set while the restart transition scene of level 0x25 runs (level_restart_at_start_point); camera keeps its state
+D_800C3930	g_cutscene_obj_list_count	high	Per cutscene slot: number of object ids in g_cutscene_obj_lists
+D_800C3938	g_cutscene_obj_lists	high	Per cutscene slot: list of up to 25 object ids released at the end (cutscene_release_listed_objs)
+D_800C3958	g_cutscene_track_recs	med	Per cutscene slot: struct233 track records (0x44 bytes per actor; lights, positions, gauges read them)
+D_800C396A	g_cutscene_rec_list_count	high	Per cutscene slot: number of world record ids in g_cutscene_rec_lists
+D_800C3970	g_cutscene_rec_lists	high	Per cutscene slot: list of up to 30 world record ids restored at the end (cutscene_restore_records)
+D_800C39AC	g_cutscene_focus_pos	med	Scene anchor point (s16 x, y, z) set by cutscene_set_focus_point; cutscene_place_scene moves the scene onto it
+D_800C39B4	g_cutscene_focus_yaw	med	Scene anchor angle set by cutscene_set_focus_point; cutscene_place_scene rotates the scene by it
+D_800C39B8	g_cutscene_focus2_pos	med	Second scene anchor point (s16 x, y, z) from cutscene_set_focus_point2, copied to g_cutscene_focus_pos at the end
+D_800C39C0	g_cutscene_focus2_yaw	med	Second scene anchor angle from cutscene_set_focus_point2, copied to g_cutscene_focus_yaw at the end
+D_800C39C4	g_cutscene_scene_rot	med	Rotation cutscene_place_scene applied to the scene; used as the camera record angle (cam[4])
+D_800C39C8	g_cutscene_level	med	Level id of the scene loaded by cutscene_scene_load
+D_800C39C9	g_cutscene_script_no_fade	med	The scene script has event 0x44: no fade to black when the cutscene is skipped
+D_800C39CA	g_cutscene_keep_player	med	The scene script has event 0x68: cutscene_teardown_player does not reset the player object
+D_800C39D0	g_cutscene_frame	high	Per cutscene slot: script position (frame) of the running cutscene
+D_800C39D8	g_cutscene_prev_frame	med	Per cutscene slot: script position of the previous step (-100 when reset)
+D_800C39E0	g_cutscene_events_ran	low	Per cutscene slot byte: set once scene_event_track_pass has run the slot's events
+D_800C39E2	g_cutscene_next_scene	high	Queued follow-up scene + 1 (0 = none), loaded by cutscene_end
+D_800C39E8	g_cutscene_actor_key_counts	med	Per cutscene slot: u16 table of path key counts of each actor
+D_800C39F0	g_cutscene_cam_key_counts	med	Per cutscene slot: u16 table of camera track key counts of each actor
+D_800C39F8	g_cutscene_event_counts	med	Per cutscene slot: u16 table of event track counts of each actor
+D_800C3A00	g_cutscene_words	med	Per cutscene slot: table of plain words of the scene (text pointers etc. indexed by event w6)
+D_800C3A08	g_cutscene_scene	high	Per cutscene slot: scene number currently loaded (level scripts test specific scenes)
+D_800C3A10	g_cutscene_actor_entries	med	Per cutscene slot: actor entry table (8 bytes per actor, u16 type at +0)
+D_800C3A18	g_cutscene_camera_actor	high	Index of the cutscene camera actor (0xFF = pick again with cutscene_find_camera_actor)
+D_800C3A40	g_camera_event_target_x	med	Camera event block D_800C3A20 +0x20: look target x (set by cutscene_apply_cameras)
+D_800C3A44	g_camera_event_target_y	med	Camera event block D_800C3A20 +0x24: look target y (set by cutscene_apply_cameras, -180 in side view)
+D_800C3A48	g_camera_event_target_z	med	Camera event block D_800C3A20 +0x28: look target z (set by cutscene_apply_cameras)
+D_800C3A5A	g_cutscene_actor_count	high	Per cutscene slot: number of actors of the loaded scene
+D_800C3A68	g_cutscene_length_60hz	med	Length of the cutscene in 60 Hz frames (cutscene_compute_length)
+D_800C3A6C	g_camera_fov_extra	med	Extra angle added to both fields of view by camera_projection_update (cutscene camera event)
+D_800C3A70	g_camera_viewport_w	med	Viewport width override (0 = default), set by scene event 0x25
+D_800C3A74	g_camera_viewport_h	med	Viewport height override (0 = the screen height), set by scene event 0x25
+D_800C3A78	g_cutscene_run_all_objs	med	Per slot, scene event 0x0D: objects not in the cutscene keep updating / animating
+D_800C3A7A	g_cutscene_show_all_objs	med	Per slot, scene event 0x08: objects not in the cutscene stay visible
+D_800C3A7E	g_cutscene_keep_listed_objs	med	Per slot, scene event 0x12: cutscene_end does not release the listed objects
+D_800C3A84	g_cutscene_obj_vis_mode	low	Per slot, scene event 0x54 (~b4): obj_update_visibility test during cutscenes
+D_800C3A86	g_cutscene_hide_world	med	Scene event 0x6D: player_view_dl_build skips the world while a cutscene runs
+D_800C3A88	g_cutscene_scene_assets	high	Per cutscene slot: loaded scene asset (cutscene_load_scene_asset), first word = header
+D_800C3A94	g_cutscene_end_cam_value	low	Value of camera event 8 queued at the cutscene end (999 = unset); set by scene event 0x6A
+D_800C3A98	g_cutscene_end_cam_blend_arg	low	Camera transition argument queued at the cutscene end (999 = unset); scene event 0x7A
+D_800C3A9C	g_cutscene_end_cam_blend_time	low	Camera transition duration queued at the cutscene end (b5 * 50); scene event 0x7A
+D_800C3AA0	g_cutscene_skip_end_cam_event	low	Scene event 0x7B (level 0x1D): skip camera event 6 at the cutscene end once
+D_800C3AA8	g_cutscene_event_tracks	med	Per cutscene slot, per actor: sound / event track record pointers (events at +0x18)
+D_800C3B98	g_cutscene_cam_tracks	med	Per cutscene slot, per actor: camera track key arrays (8-byte keys)
+D_800C3C88	g_cutscene_skip_state	med	Cutscene skip progress (0 idle, 1 skipping, 2 done), see cutscene_update_skip
+D_800C3C90	g_cutscene_load_callback	high	Setup callback number passed to cutscene_scene_load, kept for the follow-up scene
+D_800C3C94	g_cutscene_load_callback_arg	high	Setup callback argument passed to cutscene_scene_load, kept for the follow-up scene
+D_800C3CA0	g_subtitle_slots	high	The three cutscene subtitle text box slots (struct163, 0x38 bytes each)
+D_800C3D80	g_cutscene_actor_blocks	med	Per cutscene slot, per actor: 16-byte look-step block (0xFF = none)
+D_800C3E70	g_cutscene_actors	high	Per cutscene slot: SceneActor array (0x40 bytes per actor: path keys, state)
+D_800C40A9	g_cutscene_volume	med	Cutscene sound volume 0..25 (fades out while skipping)
+D_800C40AB	g_cutscene_fade_out_at_end	med	Scene event 0x59: cutscene_end fades the screen to black
+D_800C40AC	g_cutscene_finish_state	med	Cutscene finish state; cutscene_check_finished sets 2 when the scene is over
+D_800C40AD	g_cutscene_event_no_fade	med	Scene event 0x78: no fade to black when the cutscene is skipped
+D_800C40AE	g_cutscene_start_frame	high	Start position of the cutscene script (frame of event 0x77)
+D_800C40B9	g_cutscene_chain_skip	low	The script has event 0x1E (or a queued follow-up): always skippable, skipping restarts the next part
+D_800C40BC	g_cutscene_no_skip	high	The scene script has the "no skip" event 0xE
+D_800C4168	g_subtitle_slots_end	med	End of g_subtitle_slots (3 * 0x38 bytes), compared by subtitle_slot_get
+D_800C4170	g_scene_event_queue	high	Queued scene events (12 bytes each) of the loaded scene, run by scene_event_queue_run
+D_800CC230	g_gfx_dram_stack	high	RSP DRAM stack (0x400 bytes) given to every gfx task
+D_800CC3FF	g_obj_unique_id_by_slot1	med	Byte base so that [n * 0x32C] is the unique id (+0x3B) of object n - 1 (1-based owner lookups)
+D_800844A0	g_scene_fade_colours	high	Screen fade colours of scene events, 3 bytes (r, g, b) per entry
+D_800844A8	g_scene_light_colours	med	Scene event light colours, 3 RGB rows (copied by scene_event_run_a)
+D_800844B4	g_scene_ev41_colours	med	Two RGB colours of scene event sub-type 0x41
+D_800844BC	g_scene_ev05_fx_kinds	med	Effect kinds of scene event sub-type 0x05 ([i][1] used, character_effect_attach)
+D_800844CC	g_scene_ev37_colours	med	Three RGB colours of scene event sub-type 0x37
+D_800844D8	g_scene_ev11_colour_sets	med	Three colour sets (6 bytes) of scene event 0x11 in scene_event_run_b
+D_8008CDF0	g_scene_ev0c_quad_word	low	First word of the sprite quad spawned by scene event 0x0C (node_spawn_sprite_quad)
+D_800905C4	g_scene_att_tex_ids	low	Texture ids put in an attachment's +0x18 / +0x1A by a scene event (index b5)
+D_80096DE0	g_str_cutscene_1	high	String "Cutscene 1" (effect name of a scene event character effect)
+D_80096DEC	g_str_cutscene_2	high	String "Cutscene 2" (effect name of a scene event character effect)
+D_800BEECB	g_text_bank_lang	high	Language of the loaded text banks (reloaded when the language D_800E101A changes)
+D_800C3681	g_cutscene_hide_background	med	Scene event 0x7C: view_background_draw draws nothing while a cutscene runs
+D_800C3682	g_cutscene_flat_background	med	Scene event 0x84: view_background_draw only clears the viewport to a fixed colour
+D_800C3683	g_cutscene_no_pause	med	Scene event 0x85: pausing is blocked while a cutscene runs
+D_800DC2DC	g_sky_alt_tiles	med	Sky 1 face 2 shows the replacement tiles 0x1675..; from the level header bit or scene event 0x7F
+D_800DDE40	g_hud_scope_scripted	med	Scene event 0x64: the sniper scope follows the cutscene track values (g_hud_scope_zoom_ptr ...)
+D_800DE274	g_hud_scope_zoom_ptr	med	Pointer to the f32 scope zoom of a cutscene track record (+0x28), scene event 0x64
+D_800DE278	g_hud_scope_aim_x_ptr	med	Pointer to the f32 scope aim offset x of a cutscene track record (+0x24)
+D_800DE27C	g_hud_scope_aim_y_ptr	med	Pointer to the f32 scope aim offset y of a cutscene track record (+0x2C)
+D_800E1024	g_scene_light_events_on	med	Enables the cutscene colour light events (types 7 / 0xE / 0xF / 0x10 / 0x12)
+D_80083650	g_model_mat_special_set	low	Segment 8 material set for model draw modes 3 / 5 (obj_draw_model_dl)
+D_800844F0	g_obj_draw_begin_dl	med	Display list called before object drawing (objects_draw_pass, obj_draw_model_dl arg7, air meter)
+D_80084520	g_obj_draw_end_dl	med	Display list called after object drawing (objects_draw_pass, obj_draw_model_dl arg7, air meter)
+D_800845BC	g_model_joint_map_lists	low	Per model kind: joint pair lists ending in 0xFF used by obj_build_model_instance
+D_800C3E80	g_matrix_arena_a	high	First level matrix arena (count * 64 bytes), double-buffered with g_matrix_arena_b
+D_800C4290	g_objects_update_flag	low	Byte cleared at the end of objects_update_all
+D_800C4294	g_obj_274_mask	med	Mask of the +0x274 values (bit v - 1) of the 25 objects, rebuilt each frame by objects_update_all
+D_800C429A	g_obj_mtx_count	high	Number of object matrices reserved this frame (converted by obj_mtx_buffer_flush)
+D_800C42A8	g_obj_mtx_next	high	Next free address in this frame's object matrix arena
+D_800C42AC	g_obj_mtx_arena_start	high	Start of this frame's object matrix arena (for the overflow check)
+D_800C42B0	g_mtx_fixed_point	high	Bone matrices are fixed-point Mtx when set, else f32 matrices
+D_800C52F0	g_model_joint_counts	high	Per model id: joint matrix count
+D_800C6A8F	g_breakable_slots_state	med	Byte view of g_breakable_slots[0] +0xF (state), indexed [slot * 16]
+D_800CC826	g_objects_shadow_kind	med	g_objects[0] +0x136: ground shadow sprite kind, indexed [obj * 0x32C]
+D_800DD718	g_fog_near	med	Fog start (per mille of the range between the far / near planes)
+D_800DD71C	g_fog_far	med	Fog end (per mille of the range between the far / near planes)
+D_800DFBF0	g_afterimage_mtx	med	Matrix list obj_draw_part draws the object with (afterimage_draw)
+D_800DFBF4	g_afterimage_alpha	med	Alpha obj_draw_part draws the object with (afterimage_draw)
+D_80084550	g_attachment_cb_fns	high	Attachment per-frame callbacks (index +7 of the record, 0 = none)
+D_800905D8	g_att_8d_tex_low	low	Attachment kind 0x8D texture id when player stat 6 is below 100
+D_800905DC	g_att_8d_tex_high	low	Attachment kind 0x8D texture id when player stat 6 is 100 or more
+D_8009066C	g_att_pingpong_tex_ids	med	Texture ids cycled back and forth by attachment_cb_texture_pingpong
+D_80090680	g_att_sync_tex_idle	low	Texture id of attachment kinds 0x5A / 0x74 / 0x7A while obj +0x2E8 == 0
+D_80090684	g_att_sync_tex_active	low	Texture id of attachment kinds 0x5A / 0x74 / 0x7A while obj +0x2E8 != 0
+D_800906AC	g_att_blink_tex_ids	med	The two texture ids toggled by attachment_cb_blink_texture
+D_8009748C	g_attachment_k_748c	low	Attachment rodata f32 1 / 60 (attachment_cb_tile_by_height)
+D_800C3EE0	g_attachment_list	high	Head of the doubly linked attachment record list (+0x54 next, +0x58 prev)
+D_800DA248	g_point_light_ptrs	low	Level point light pointers, iterated by light_compute_point_colour and passed to the DL builders
+D_800980CC	g_obj_adjust_k_80cc	low	Rodata f32 used by obj_adjust_entries_type28
+D_800CC9D4	g_objects_unk2e4	low	g_objects[0] +0x2E4 (s32 angle of object type 0x8A, script test value), indexed [obj * 0x32C]
+D_80083350	g_model_mat_blend_set	med	Segment 8 material set for blended (alpha < 0xFF) models
+D_800834D0	g_model_mat_opaque_set	med	Segment 8 material set for opaque models
+D_80098120	g_reflect_k_8120	low	Rodata f32 passed to the cull test of reflect_is_culled
+D_800C4310	g_face_lower_amount	low	Face value set by obj_adjust_entries_face, lowers joints in obj_lower_joints_by_face
+D_800C4320	g_reflect_queue_count	high	Number of entries in the mirrored-draw queue g_reflect_queue (max 15)
+D_800C4328	g_reflect_queue	high	Mirrored-draw queue, 15 entries of 12 bytes
+D_800846E0	g_player_strip_dl	low	Setup display list of the player slot-8 strip (player_draw_slot8_strip)
+D_8009076C	g_player_strip_sprite	low	Sprite / texture of the player slot-8 strip (sprite_load_texture)
+D_80098130	g_player_strip_k_8130	low	Rodata f32 0.7: strip vertex follow rate (player_strip_update_vertices)
+D_800C43E4	g_player_strip_points	med	Strip vertex positions (s16 x, y, z) eased by player_strip_update_vertices
+D_800DCD7C	g_light_vertex_lighting	low	Set by level_lights_reset / light_set_level_colour; switches the draw code to lit geometry mode
+D_80084710	g_look_id_lists	med	Look: u16 lists of +0x84 values per list number (look_record_setup)
+D_80084770	g_look_node_list_ids	high	The 8 node list indices searched in g_node_lists for look targets
+D_80084790	g_look_point_rr	high	Round-robin start into g_look_points (the last chosen point)
+D_80084794	g_obj22_scale_joints	med	Joints scaled by obj22_cb_scale_joint, indexed by the call count
+D_8009822C	g_look_list_by_obj_id	med	Per object id: look list number + 1 (0 = none)
+D_80098400	g_look_list_lengths	med	Lengths of the g_look_id_lists lists
+D_80098418	g_look_limits	med	Look limit sets (0x18 bytes each), returned by look_get_limits
+D_80098550	g_look_follow_rates	high	Per limit set: yaw / pitch follow factors and yaw / pitch max steps
+D_800989F8	g_look_k_89f8	low	Rodata f32 scaling both angles in look_angles_to_point
+D_800C43F0	g_look_aim_point	high	f32 x, y, z: current aim point (-99999 = none), set by look_turn_joint
+D_800C43FC	g_look_fixed_once	high	One-shot: use g_look_fixed_yaw / g_look_fixed_pitch as the look angles
+D_800C4400	g_look_fixed_yaw	med	Look yaw saved by look_turn_joint for the one-shot fixed angles
+D_800C4404	g_look_fixed_pitch	med	Look pitch saved by look_turn_joint for the one-shot fixed angles
+D_800C4408	g_look_target_point	med	f32 x, y, z look target point (-99999 = unset) filled by look_find_target
+D_800C4414	g_look_fixed_target	med	s16 x, y, z fixed look target set by event_action_object, read by look_get_fixed_target
+D_800C441A	g_look_cb_calls	med	Number of look joint callback calls of the current object this frame
+D_80098AA0	g_tail_seg_lengths	med	Tail segment lengths (4) from the previous point
+D_80098AB0	g_tail_seg_lengths_alt	med	Tail segment lengths (4) for object ids 0x80 / 0xB0
+D_80098AC0	g_tail_ease_a	low	Tail per-point easing weights (first set)
+D_80098AD0	g_tail_ease_b	low	Tail per-point easing weights (second set)
+D_80098AE0	g_tail_max_bend	med	Tail per-point maximum bend angles (45 degrees)
+D_80098AF0	g_tail_lift_a	low	Tail lift table (5 floats), first variant
+D_80098B04	g_tail_lift_b	low	Tail lift table (5 floats), second variant
+D_80098B18	g_tail_lift_c	low	Tail lift table (5 floats), third variant
+D_80098B2C	g_tail_hold_anim_a	low	Animation id that sets bit 0 of object +0x2FB (obj_set_kind_look_flags)
+D_80098B2E	g_tail_hold_anim_b	low	Second animation id that sets bit 0 of object +0x2FB
+D_80098B30	g_tail_hold_anims	low	88 animation ids that set bit 0 of object +0x2FB
+D_80098BE0	g_tail_off_anims	low	3 animation ids that set bit 1 of object +0x2FB (tail off)
+D_80098BE8	g_tail_k_8be8	low	Tail rodata f32: wave phase to radians
+D_80098BEC	g_tail_k_8bec	low	Tail rodata f32: second wave phase to radians
+D_80098BF0	g_tail_k_8bf0	low	Tail rodata f32 scaling the camera z offset
+D_80098BF4	g_tail_k_8bf4	low	Tail rodata f32: sway easing factor
+D_80098BF8	g_tail_k_8bf8	low	Tail rodata f32 scaling obj +0x40
+D_80098BFC	g_tail_k_8bfc	low	Tail rodata f32 subtracted from the scaled +0x40 angle
+D_80098C00	g_tail_k_8c00	low	Tail rodata f32: percent factor for the cutscene tail lift
+D_80098C04	g_tail_k_8c04	low	Tail rodata f32: sway phase to radians
+D_80098C08	g_tail_k_8c08	low	Tail rodata f32: second sway phase to radians
+D_80098C0C	g_tail_k_8c0c	low	Tail rodata f32: acos result to degrees
+D_800C4000	g_tail_reset_mask	med	Bit per object (0..3): reset its tail joint chain next time
+D_800C40BD	g_cutscene_tail_lift_pct	med	Tail lift percent during cutscenes (100 = normal), set by scene event 0x82
+D_800C4428	g_tail_anchor	med	f32 x, y, z: tail anchor before the first point (joint 0)
+D_800CC9EB	g_objects_tail_flags	med	g_objects[0] +0x2FB: tail flags (bit 0 hold, bit 1 off), indexed [obj * 0x32C]
+D_800847A0	g_anim_bank_group_lists	med	Model id lists of the animation bank sharing groups
+D_80098C38	g_anim_bank_group_sizes	med	Sizes of the animation bank sharing groups (0 terminated)
+D_800C4440	g_model_part_tables	low	Per model id: header +0 table (per-part vertex index lists)
+D_800C48A8	g_model_dl_tables	high	Per model id: display list table
+D_800C4B98	g_model_dl_counts	high	Per model id: number of display lists (header +0xC / 4)
+D_800C4D10	g_model_dl2_tables	low	Per model id: second display list table (header +0x28), drawn without matrix in mode 3
+D_800C5468	g_model_hdr20_tables	low	Per model id: header +0x20 table
+D_800C5758	g_model_tex_entries	high	Per model id: texture entries (12 bytes each, u16 size at +8 / +0xA)
+D_800C5A48	g_model_tex_counts	high	Per model id: u16 number of texture entries
+D_800C5A90	g_model_anim_counts	high	Per model id: number of animations in its animation bank
+D_800C6360	g_model_vtx_ptr_tables	med	Per model id: per-part vertex pointer table
+D_800D1588	g_model_anim_banks	high	Per model id: animation bank
+D_800D19A0	g_model_bases	high	Per model id: loaded model base (asset + 0x38), 0 when not loaded
+D_800C6A74	g_look_points_count	high	Number of entries in g_look_points
+D_800847C0	g_breakable_init_fns	high	Per breakable kind: piece init (pc, slot)
+D_800847CC	g_breakable_start_fns	high	Per breakable kind: start (slot)
+D_800847D8	g_breakable_update_fns	high	Per breakable kind: update (slot)
+D_800847E4	g_breakable_piece_parents	med	Per breakable kind: parent piece of every piece (-1 free, -2 skipped)
+D_800847F0	g_breakable_release_tables	low	Per breakable kind: table used by breakable_release
+D_800847FC	g_breakable_flag_sets	high	Breakable flag sets: entries of (flagsA, flagsB) words
+D_80098CC4	g_breakable_piece_counts	high	Per breakable kind: number of pieces (0x68 bytes each)
+D_80098CD4	g_breakable_k_8cd4	low	Breakable rodata f32 stored at piece +0x60 by breakable_scatter_pieces
+D_800C6660	g_breakable_slots	high	The 25 breakable slot records (16 bytes: pieces, flags A / B, kind +0xE, state +0xF)
+D_800C6A84	g_breakable_slots_flags_a	med	Word view of g_breakable_slots[0] +4 (flags A), indexed [slot * 16]
+D_800C6A88	g_breakable_slots_flags_b	med	Word view of g_breakable_slots[0] +8 (flags B), indexed [slot * 16]
+D_800CC784	g_objects_unk94	low	g_objects[0] +0x94, indexed [obj * 0x32C]; set to 6 by breakable_cb_init_timer140
+D_800C67F1	g_obj_flagged_select_idx	med	Index of the currently selected flagged object (obj_select_next_flagged)
+D_80084814	g_select_menu_stick_delay	med	Select menu stick repeat delay counter
+D_80084818	g_select_menu_scroll_dir	med	Select menu scroll direction (-1 / 0 / 1)
+D_8008481C	g_select_menu_reset_timer	med	Select menu lockout timer after the L + R reset (60 ticks)
+D_80084820	g_select_menu_blink_timer	med	Select menu blink timer of the selected entry (30 ticks)
+D_80084824	g_select_menu_blink_on	med	Select menu blink phase of the selected entry
+D_80084828	g_select_menu_sel	high	Select menu selected entry
+D_8008482C	g_str_select_empty	med	Select menu: empty text
+D_80098CE0	g_str_select_locked	med	Select menu: text shown on every row while the menu is locked
+D_80098CF4	g_str_select_marker	med	Select menu: marker line drawn above some entries
+D_80098CF8	g_str_select_blink	med	Select menu: blink text of the selected entry
+D_800C6C70	g_select_menu_scroll	med	Select menu scroll offset (-11 .. 11)
+D_80038400	g_text_scale_x	high	Text scale x (screen units per glyph pixel)
+D_80038404	g_text_scale_y	high	Text scale y (screen units per glyph pixel)
+D_80084C60	g_dbgfont_chars	high	Debug font character table (dbgfont_char_index)
+D_80084CC0	g_dbgfont_texture	med	Debug font texture image (dbgfont_setup_dl)
+D_80085CC0	g_text_glyph_chars	med	Character table of text_char_to_glyph: entry k maps to glyph k (this is entry 0)
+D_80085CC1	g_text_glyph_chars_1	med	Entry 1 of g_text_glyph_chars
+D_80085CC2	g_text_glyph_chars_2	med	Entry 2 of g_text_glyph_chars
+D_80085CC3	g_text_glyph_chars_3	med	Entries 3.. of g_text_glyph_chars, searched in a loop
+D_80085D20	g_font_textures	high	Per font: glyph texture (I8, 0xE0 bytes per glyph)
+D_80085D24	g_font_metrics	high	Per font: glyph metrics (width, height, x offset, y offset; 4 bytes per glyph)
+D_80087770	g_sprite_setup_dl	high	Sprite setup display list (sprite_gfx_begin, text_draw_string, ground shadows)
+D_800877A8	g_sprite_setup_dl_alt	med	Alternate sprite setup display list (sprite_gfx_begin_alt, text_draw_string, ground shadows)
+D_8009198C	g_text_icon_a8	med	Button icon sprite of text control code 0xA8
+D_8009199C	g_text_icon_a9	med	Button icon sprite of text control code 0xA9
+D_800919AC	g_text_icon_ae	med	Button icon sprite of text control code 0xAE
+D_800919BC	g_text_icon_af	med	Button icon sprite of text control code 0xAF
+D_800919CC	g_text_icon_b0	med	Button icon sprite of text control code 0xB0
+D_800919DC	g_text_icon_aa	med	Button icon sprite of text control code 0xAA
+D_800919EC	g_text_icon_ab	med	Button icon sprite of text control code 0xAB
+D_800919FC	g_text_icon_ac	med	Button icon sprite of text control code 0xAC
+D_80091A0C	g_text_icon_ad	med	Button icon sprite of text control code 0xAD
+D_80091A40	g_text_icon_b1	med	Button icon sprite of text control code 0xB1 (10 animated frames)
+D_80091A5C	g_text_icon_b2	med	Button icon sprite of text control code 0xB2 (4 animated frames)
+D_80091A78	g_text_icon_b4	med	Button icon sprite of text control code 0xB4 (4 animated frames)
+D_80091A94	g_text_icon_b3	med	Button icon sprite of text control code 0xB3 (4 animated frames)
+D_80091AB0	g_text_icon_b5	med	Button icon sprite of text control code 0xB5 (4 animated frames)
+D_80091AC0	g_text_icon_b6	med	Button icon sprite of text control code 0xB6
+D_80091AD0	g_text_icon_b7	med	Button icon sprite of text control code 0xB7
+D_80091AE0	g_text_icon_b8	med	Button icon sprite of text control code 0xB8
+D_80091AF0	g_text_icon_b9	med	Button icon sprite of text control code 0xB9
+D_80091B00	g_text_icon_ba	med	Button icon sprite of text control code 0xBA
+D_80091B14	g_text_icon_bb	med	Button icon sprite of text control code 0xBB (2 animated frames)
+D_800CC16E	g_text_icon_clock	med	Clock advanced every frame by level_update_frame; picks the animated icon frames
+D_800CC170	g_text_ctrl_code	high	Current text control code (0xFF: none)
+D_800CC177	g_text_prim_r_sent	high	Text primitive colour last sent: r
+D_800CC178	g_text_prim_gba_sent	high	Text primitive colour last sent: g, b, a, plus the flashing flag
+D_800CC17C	g_text_flash_phase	high	Text flashing phase (code 0xA6)
+D_800CC17D	g_text_wave_on	high	Text wave flag (code 0xA7)
+D_800CC17E	g_text_wave_phase	high	Text wave phase
+D_800C40AA	g_cutscene_last_fade_in	low	Set by the scene fade event (1 = fade in, w6 == 0), 0xFF when reset; 1 suppresses the fade to black on skip
+D_800C40BA	g_scene_event_queue_size	med	Capacity of g_scene_event_queue (number of 12-byte entries) set by cutscene_scene_load

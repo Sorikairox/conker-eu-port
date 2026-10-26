@@ -27,8 +27,8 @@ void level_obj_init_d34b8_effect(void) {
     vtx_anim_light_create(0x10U, 0xE9U, -0x1B5, 0x463, -0xCBF, 90.0f, 0x3A98U, 36.0f, 0x4D, 0xF, 0x7FU, 0x7FU, 0x7FU, 0x7FU, 0x7FU, 0x7FU);
     g_level_point_hit_cb = (s32 *) trigger_zones_check;
     sp.u54 = 0;
-    sp.u58 = D_800D34B8 + 0xEA0;
-    sp.u5C = D_800D34B8 + 0xED4;
+    sp.u58 = g_level_zones + 0xEA0;
+    sp.u5C = g_level_zones + 0xED4;
     temp_v0 = effect_node_create(0x12C, -1, 0x5E, -1, 0U, 0U, (struct37 *)0xC, 0xFFU, 1);
     if (temp_v0 != NULL) {
         memcpy(((struct260 *)((u8 *)temp_v0 + 0x28)), &sp.u54, 0xC);
@@ -46,8 +46,8 @@ void level_obj_init_d34b8_effect(void) {
 //     D_800E0934 = func_150DE32C;
     
 //     tmp.unk0 = 0;
-//     tmp.unk4 = *((s32*) &D_800D3098) + 0xEA0;
-//     tmp.unk8 = *((s32*) &D_800D3098) + 0xED4;
+//     tmp.unk4 = *((s32*) &g_sprite_rect_left) + 0xEA0;
+//     tmp.unk8 = *((s32*) &g_sprite_rect_left) + 0xED4;
 
 //     temp_v0 = effect_node_create(300, -1, 94, -1, 0, 0, 12, 255, 1);
 //     if (temp_v0 != NULL) {

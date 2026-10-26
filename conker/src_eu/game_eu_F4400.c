@@ -322,7 +322,7 @@ s32 ground_trail_b_free(u8 *arg0) {
 
 s32 collision_floor_dynamic_b_full(f32 *, s32, f32, u8 *);
 u8 impact_current_kind(void);
-extern s32 D_80088B80;
+extern s32 g_ground_glow_b_offset; /* was D_80088B80 */
 extern s32 g_impact_kind_colours; /* was D_800AB7F4 */
 
 /* was func_150C7290 */
@@ -377,9 +377,9 @@ s32 ground_glow_b_spawn(u8 *arg0) {
     sp.uD4 = NULL;
     temp_v0 = (*(u8 **)((u8 *)arg0 + 0x18));
     if ((*(u8 **)((u8 *)temp_v0 + 0x1D4)) != NULL) {
-        (*(s32 *)((u8 *)(&sp.uB8) + 0)) = (s32) (*(s32 *)((u8 *)(&D_80088B80) + 0));
-        (*(s32 *)((u8 *)(&sp.uB8) + 4)) = (s32) (*(s32 *)((u8 *)(&D_80088B80) + 4));
-        (*(s32 *)((u8 *)(&sp.uB8) + 8)) = (s32) (*(s32 *)((u8 *)(&D_80088B80) + 8));
+        (*(s32 *)((u8 *)(&sp.uB8) + 0)) = (s32) (*(s32 *)((u8 *)(&g_ground_glow_b_offset) + 0));
+        (*(s32 *)((u8 *)(&sp.uB8) + 4)) = (s32) (*(s32 *)((u8 *)(&g_ground_glow_b_offset) + 4));
+        (*(s32 *)((u8 *)(&sp.uB8) + 8)) = (s32) (*(s32 *)((u8 *)(&g_ground_glow_b_offset) + 8));
         mtx_transform_point_or_origin(&sp.uB8, &sp.uC8, (*(u8 **)((u8 *)temp_v0 + 0x1D4)));
     } else {
         sp.uC8 = (*(f32 *)((u8 *)temp_v0 + 0x14));

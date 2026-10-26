@@ -1,4 +1,4 @@
-\#^    cam_wobble_start_preset(2, D_800BEE0B#s/(2,/(1,/ % a
+\#^    cam_wobble_start_preset(2, g_view_count_minus1_lo#s/(2,/(1,/ % a
 \#^    fx_debris_emitter_spawn(g_fireworks_flash_pos#s/\(.\) 62 + 120/\1 61 + 120/ % a
 \#^    fx_debris_emitter_spawn(g_fireworks_flash_pos#s/(u32) func/(s32) func/ % a
 \#^    smoke_cloud_spawn(g_fireworks_burst_pos#s/0xFF/0xFE/ % a

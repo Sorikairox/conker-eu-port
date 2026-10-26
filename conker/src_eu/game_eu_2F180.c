@@ -8,32 +8,32 @@
 s32 quadtree_filter_box_tris(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in, u16 **out);
 s32 quadtree_tri_box_test(struct_eu_bytes24 arg0);
 void quadtree_write_leaf_list(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list);
-extern s32 D_800DC26C;   /* triangle table: 3 vertex pointers (s16 x, y, z) per entry */
-extern s32 D_800DC274;   /* grid table: s16 x, z per entry */
+extern s32 g_level_tri_table;   /* triangle table: 3 vertex pointers (s16 x, y, z) per entry; was D_800DC26C */
+extern s32 g_coll_tri_y_bounds;   /* grid table: s16 x, z per entry; was D_800DC274 */
 
 /* was func_15001970 */
 void collision_build_reset(void) {
     s32 pad;
     s32 tmp;
 
-    D_800B0DE4 = 0;
-    D_800DBE63 = 0;
-    *D_800DBE18 = 0;
-    *D_800DBE1C = 0;
-    D_800DBE20 = 0;
-    tmp = D_80091C04[g_level_id];
-    D_800DBE24 = 0;
-    D_800B0DC0 = allocate_memory(tmp, 1, 0, 0);
-    D_800B0DC8 = tmp + D_800B0DC0;
-    D_800B0DC4 = D_800B0DC0;
+    g_collision_total_tris = 0;
+    g_collision_full_bounds = 0;
+    *g_coll_area_tri_counts = 0;
+    *g_collision_area_tris_1 = 0;
+    g_collision_area_tris_2 = 0;
+    tmp = g_level_collision_buf_sizes[g_level_id];
+    g_collision_area_tris_3 = 0;
+    g_collision_buf_cursor = allocate_memory(tmp, 1, 0, 0);
+    g_collision_buf_end = tmp + g_collision_buf_cursor;
+    g_collision_buf_start = g_collision_buf_cursor;
 }
 
-extern s32 D_80091EA0[];   /* node pool size per level (rodata) */
-extern s32 D_800B11EC;     /* node pool base */
-extern s16 D_800DC260;
-extern s16 D_800DC262;
-extern s16 D_800DC264;
-extern s16 D_800DC266;
+extern s32 g_level_quadtree_pool_sizes[];   /* node pool size per level (rodata); was D_80091EA0 */
+extern s32 g_quadtree_pool_base;     /* node pool base; was D_800B11EC */
+extern s16 g_pvs_row; /* was D_800DC260 */
+extern s16 g_quadtree_stat_1; /* was D_800DC262 */
+extern s16 g_quadtree_stat_2; /* was D_800DC264 */
+extern s16 g_quadtree_stat_3; /* was D_800DC266 */
 void os_pi_get_access(void);  /* __osPiGetAccess */
 void os_pi_rel_access(void);  /* __osPiRelAccess */
 
@@ -44,23 +44,23 @@ void quadtree_alloc_node_pool(void) {
     s32 size;
     s32 word;
 
-    size = D_80091EA0[g_level_id];
+    size = g_level_quadtree_pool_sizes[g_level_id];
     os_pi_get_access();
     while (IO_READ(PI_STATUS_REG) & 3) {
     }
-    word = IO_READ(D_80000308 | 0xB0000D24);
+    word = IO_READ(g_os_rom_base | 0xB0000D24);
     os_pi_rel_access();
     if (word != 0x98CCE31A) {
         size <<= 1;
     }
-    D_800B11EC = allocate_memory(size, 1, 0, 0);   /* implicit int declaration (collision_build_reset) */
-    D_800B0DE0 = (u8 *) D_800B11EC;
-    D_800B0DCC = 0;
-    D_800B0DD0 = 0;
-    D_800DC260 = 0;
-    D_800DC262 = 0;
-    D_800DC264 = 0;
-    D_800DC266 = 0;
+    g_quadtree_pool_base = allocate_memory(size, 1, 0, 0);   /* implicit int declaration (collision_build_reset) */
+    g_quadtree_pool_cursor = (u8 *) g_quadtree_pool_base;
+    g_quadtree_node_count = 0;
+    g_quadtree_leaf_count = 0;
+    g_pvs_row = 0;
+    g_quadtree_stat_1 = 0;
+    g_quadtree_stat_2 = 0;
+    g_quadtree_stat_3 = 0;
 }
 // NON-MATCHING: JUSTREG (US draft)
 // void quadtree_alloc_node_pool(void) {
@@ -69,13 +69,13 @@ void quadtree_alloc_node_pool(void) {
 //     s32 sp1C;
 //
 //     tmp = g_level_id;
-//     sp24 = D_80091AF0[tmp];
+//     sp24 = g_text_icon_b9[tmp];
 //
 //     __osPiGetAccess();
 //
 //     while ((IO_READ(PI_STATUS_REG) & 3)) {};
 //
-//     tmp = D_80000308 | 0xB0000D24 | 0xA0000000;
+//     tmp = g_os_rom_base | 0xB0000D24 | 0xA0000000;
 //     sp1C = *(s32*)tmp;
 //
 //     __osPiRelAccess();
@@ -85,9 +85,9 @@ void quadtree_alloc_node_pool(void) {
 //     }
 //
 //     D_800B0DDC = allocate_memory(sp24, 1, 0, 0);
-//     D_800B0DE0 = D_800B0DDC;
-//     D_800B0DCC = 0;
-//     D_800B0DD0 = 0;
+//     g_quadtree_pool_cursor = D_800B0DDC;
+//     g_quadtree_node_count = 0;
+//     g_quadtree_leaf_count = 0;
 //     D_800DBE30 = 0;
 //     D_800DBE32 = 0;
 //     D_800DBE34 = 0;
@@ -98,27 +98,27 @@ void quadtree_alloc_node_pool(void) {
 u16* quadtree_alloc_node(void) {
     u16 *temp_v0;
 
-    D_800B0DE0 = ALIGN4(D_800B0DE0);
-    D_800B0DCC += 1;
+    g_quadtree_pool_cursor = ALIGN4(g_quadtree_pool_cursor);
+    g_quadtree_node_count += 1;
 
-    temp_v0 = (u16*)D_800B0DE0;
+    temp_v0 = (u16*)g_quadtree_pool_cursor;
     temp_v0[6] = 0;
     temp_v0[2] = 0;
 
-    D_800B0DE0 += 14;
+    g_quadtree_pool_cursor += 14;
     return temp_v0;
 }
 
 /* was func_15001B5C */
 void quadtree_pool_put_byte(u8 arg0) {
-    *D_800B0DE0++ = arg0;
+    *g_quadtree_pool_cursor++ = arg0;
 }
 
 /* was func_15001B8C */
 void quadtree_pool_put_u16_be(u16 arg0) {
-   D_800B0DE0[0] = (arg0 >> 8);
-   D_800B0DE0[1] = arg0 & 0xFF;
-   D_800B0DE0 += 2;
+   g_quadtree_pool_cursor[0] = (arg0 >> 8);
+   g_quadtree_pool_cursor[1] = arg0 & 0xFF;
+   g_quadtree_pool_cursor += 2;
 }
 
 /* was func_15001BC8 */
@@ -128,17 +128,17 @@ void quadtree_build_area(s32 arg0, s16 *arg1, s16 *arg2) {
     s32 i;
 
     collision_select_area(arg0);
-    D_800B0DD8 = 10;
-    D_800B0DD4 = 512;
-    sp20 = allocate_memory((D_800DBE4C + 1) << 1, 1, 0, 0);
+    g_quadtree_leaf_max_tris = 10;
+    g_quadtree_min_half_size = 512;
+    sp20 = allocate_memory((g_coll_tri_count + 1) << 1, 1, 0, 0);
 
-    *sp20 = D_800DBE4C;
-    for (i = 0; i < D_800DBE4C; i++) {
+    *sp20 = g_coll_tri_count;
+    for (i = 0; i < g_coll_tri_count; i++) {
         sp20[i + 1] = i;
     }
 
     tmp = quadtree_build_node(0, 0, 32768, 32768, 0, sp20);
-    D_800DBE08[arg0] = tmp;
+    g_quadtree_roots[arg0] = tmp;
     quadtree_link_siblings(tmp, 0);
     heap_free(sp20);
 
@@ -146,10 +146,10 @@ void quadtree_build_area(s32 arg0, s16 *arg1, s16 *arg2) {
     if (1) { }
 
     if (arg1 != 0) {
-        *arg1 = D_800B0DCC;
+        *arg1 = g_quadtree_node_count;
     }
     if (arg2 != 0) {
-        *arg2 = D_800B0DD0;
+        *arg2 = g_quadtree_leaf_count;
     }
 }
 
@@ -162,7 +162,7 @@ void quadtree_build_area_flat(s32 arg0) {
     collision_select_area(arg0);
     temp_v0 = quadtree_alloc_node();
 
-    D_800DBE08[arg0] = temp_v0;
+    g_quadtree_roots[arg0] = temp_v0;
 
     *((s16*)temp_v0 + 0) = 32768;
     temp_v0[1] = 32767;
@@ -172,10 +172,10 @@ void quadtree_build_area_flat(s32 arg0) {
     temp_v0[5] = 0;
     temp_v0[6] = 0;
 
-    sp20 = allocate_memory((D_800DBE4C + 1) << 1, 1, 0, 0);
+    sp20 = allocate_memory((g_coll_tri_count + 1) << 1, 1, 0, 0);
 
-    *sp20 = D_800DBE4C;
-    for (i = 0; i < D_800DBE4C; i++) {
+    *sp20 = g_coll_tri_count;
+    for (i = 0; i < g_coll_tri_count; i++) {
         sp20[i + 1] = i;
     }
 
@@ -203,8 +203,8 @@ u16 *quadtree_build_node(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
     s32 sp54;
     s32 sp58;
 
-    tmp0 = D_800B0DD8;
-    tmp1 = D_800B0DD4;
+    tmp0 = g_quadtree_leaf_max_tris;
+    tmp1 = g_quadtree_min_half_size;
 
     sp54 = arg0 - arg2;
     sp50 = arg0 + arg2;
@@ -213,7 +213,7 @@ u16 *quadtree_build_node(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
 
     if ((quadtree_filter_box_tris(sp54, sp50, sp4C, sp48, &sp7C, &sp78, arg5, &sp58) < tmp0) || (arg2 < tmp1)) {
         temp_v0 = quadtree_alloc_node();
-        D_800B0DD0 = (D_800B0DD0 + 1);
+        g_quadtree_leaf_count = (g_quadtree_leaf_count + 1);
         temp_v0[0] = sp7C;
         temp_v0[1] = sp78;
         temp_v0[3] = arg2;
@@ -270,7 +270,7 @@ void quadtree_write_leaf_list(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list) {
         end = &list[n + 1];
         do {
             u16 idx = *src;
-            u32 *verts = (u32 *) (D_800DC26C + idx * 12);
+            u32 *verts = (u32 *) (g_level_tri_table + idx * 12);
 
             for (k = 0; k < 3; k++) {
                 s16 *p = (s16 *) verts[k];
@@ -335,7 +335,7 @@ s32 quadtree_filter_box_tris(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zma
     src = &in[1];
     for (i = 1; i < n; i++, src++) {
         u16 idx = *src;
-        u32 *verts = (u32 *) (D_800DC26C + idx * 12);
+        u32 *verts = (u32 *) (g_level_tri_table + idx * 12);
         s16 *g;
         s32 a;
         s32 b;
@@ -356,7 +356,7 @@ s32 quadtree_filter_box_tris(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zma
             continue;
         }
         list[++cnt] = idx;
-        g = (s16 *) (D_800DC274 + idx * 4);
+        g = (s16 *) (g_coll_tri_y_bounds + idx * 4);
         a = (g[0] - lo) & mask;
         b = ((g[1] + lo) & mask) + lo;
         if (!found) {
@@ -413,49 +413,49 @@ void collision_load_level_grid(void) {
     s32 tmp2;
     s32 tmp3;
 
-    tmp0 = D_800DBE2A;
-    tmp1 = D_800DBE2C;
+    tmp0 = g_quadtree0_node_count;
+    tmp1 = g_quadtree0_leaf_count;
 
-    D_800DBE28 = (((tmp0 + 7) / 8) + 0xF) & 0xFFF0;
+    g_pvs_row_bytes = (((tmp0 + 7) / 8) + 0xF) & 0xFFF0;
     tmp2 = asset_load(0, 2, 5, g_level_id << 1);
     tmp3 = asset_load(0, 2, 5, (g_level_id << 1) + 1);
     if (tmp2 == 0) {
-        D_800BE5D0 = 0;
+        g_pvs_stream = 0;
     } else {
-        pvs_setup(D_800DBE28, tmp1, tmp2, tmp3);
+        pvs_setup(g_pvs_row_bytes, tmp1, tmp2, tmp3);
         heap_free(tmp3);
     }
 }
 
 /* was func_150026C4 */
 void collision_begin_area(s32 arg0) {
-    D_800DBE38 = 0;
+    g_collision_area_tri_count = 0;
     collision_select_area(arg0);
 }
 
 /* was func_150026E8 */
 void collision_end_area(s32 arg0) {
-    D_800DBE18[arg0] = D_800DBE38;
-    D_800DBE4C = D_800DBE38;
-    D_800B0DE4 += D_800DBE38;
+    g_coll_area_tri_counts[arg0] = g_collision_area_tri_count;
+    g_coll_tri_count = g_collision_area_tri_count;
+    g_collision_total_tris += g_collision_area_tri_count;
 }
 
 /* was func_15002724 */
 void collision_count_dl_tris(s32 arg0) {
-    D_800DBE38 += dl_count_triangles(arg0);
+    g_collision_area_tri_count += dl_count_triangles(arg0);
 }
 
 /* was func_15002754 */
 void collision_alloc_area_arrays(void) {
-    D_800B0DC0 = (D_800B0DC0 + 3) & ~3;
-    D_800DC208[D_800DC280] = D_800B0DC0;
-    D_800B0DC0 += D_800DBE38 * 12;
-    D_800DC218[D_800DC280] = D_800B0DC0;
-    D_800B0DC0 += D_800DBE38 * 8;
-    D_800DC228[D_800DC280] = D_800B0DC0;
-    D_800B0DC0 += D_800DBE38 * 4;
-    collision_select_area(D_800DC280);
-    D_800DBE38 = 0;
+    g_collision_buf_cursor = (g_collision_buf_cursor + 3) & ~3;
+    g_coll_area_tri_tables[g_collision_cur_area] = g_collision_buf_cursor;
+    g_collision_buf_cursor += g_collision_area_tri_count * 12;
+    g_coll_area_xz_bounds[g_collision_cur_area] = g_collision_buf_cursor;
+    g_collision_buf_cursor += g_collision_area_tri_count * 8;
+    g_coll_area_y_bounds[g_collision_cur_area] = g_collision_buf_cursor;
+    g_collision_buf_cursor += g_collision_area_tri_count * 4;
+    collision_select_area(g_collision_cur_area);
+    g_collision_area_tri_count = 0;
 }
 
 
@@ -489,10 +489,10 @@ s32 collision_max_area_tris(void) {
     s32 tmp;
     s32 highest;
 
-    highest = *D_800DBE18;
+    highest = *g_coll_area_tri_counts;
 
     for (i = 0; i < 3; i++) {
-        tmp = D_800DBE1C[i];
+        tmp = g_collision_area_tris_1[i];
         if (highest < tmp) {
             highest = tmp;
         }
@@ -501,13 +501,13 @@ s32 collision_max_area_tris(void) {
     return highest;
 }
 
-extern s32 D_800C48A8[];    /* per model: its display-list table (one list used here) */
-extern u16 D_800C5D38[];    /* per model: triangle count */
-extern u16 D_800C6318[];    /* per model: vertex-range count */
+extern s32 g_model_dl_tables[];    /* per model: its display-list table (one list used here); was D_800C48A8 */
+extern u16 g_model_tri_counts[];    /* per model: triangle count; was D_800C5D38 */
+extern u16 g_model_vtx_range_count[];    /* per model: vertex-range count; was D_800C6318 */
 
-/* D_800C5C08[model] entries: a run of vertices loaded by G_VTX and the matrix group (G_MTX) they belong to */
+/* g_model_vtx_ranges[model] entries: a run of vertices loaded by G_VTX and the matrix group (G_MTX) they belong to */
 typedef struct ModelVtxRange {
-    u32 start;  /* model base D_800D19A0[model] + vertex offset */
+    u32 start;  /* model base g_model_bases[model] + vertex offset */
     s32 count;
     s32 group;  /* (G_MTX address & 0xFFFFFF) >> 6 */
 } ModelVtxRange;
@@ -515,10 +515,10 @@ typedef struct ModelVtxRange {
 #define DL_OP(dl, k) (((u8 *) (dl))[(k) * 8])
 
 /*
- * P65: per-model collision / skinning tables from the model's display list (D_800C48A8[id][0], Gfx words):
- * D_800C5C08[id] = the vertex ranges (one per G_VTX, merged with the previous range when contiguous and in the
- * same G_MTX group), sorted by start address, D_800C6318[id] = their count; D_800C6070[id] = the triangles
- * (D_800C5D38[id] of them) as 3 vertex byte offsets (into the model's vertex block, from base + 0x38) each, from
+ * P65: per-model collision / skinning tables from the model's display list (g_model_dl_tables[id][0], Gfx words):
+ * g_model_vtx_ranges[id] = the vertex ranges (one per G_VTX, merged with the previous range when contiguous and in the
+ * same G_MTX group), sorted by start address, g_model_vtx_range_count[id] = their count; g_model_coll_tris[id] = the triangles
+ * (g_model_tri_counts[id] of them) as 3 vertex byte offsets (into the model's vertex block, from base + 0x38) each, from
  * G_TRI1 (0x05), G_TRI2 (0x06) and the packed 4-triangle commands 0x10..0x1F (5-bit indices). Already built: 0.
  * Allocation failure: 1. Vertex buffer indices are assumed < 32, as in the game's lists (the asm's buffer is 32 words).
  */
@@ -541,35 +541,35 @@ s32 model_build_collision_tables(s32 id) {
     s32 group = 0;
     u8 op;
 
-    if (D_800C5C08[id] != 0) {
+    if (g_model_vtx_ranges[id] != 0) {
         return 0;
     }
 
     /* count the G_VTX commands: at most one range each */
     for (j = 0; j < 1; j++) {
-        dl = ((u32 **) D_800C48A8[id])[j];
+        dl = ((u32 **) g_model_dl_tables[id])[j];
         for (k = 0; DL_OP(dl, k) != 0xDF; k++) {
             if (DL_OP(dl, k) == 0x01) {
                 nVtxCmds++;
             }
         }
     }
-    D_800C5C08[id] = allocate_memory(nVtxCmds * sizeof(ModelVtxRange), 1, 0, 2);
-    if (D_800C5C08[id] == 0) {
+    g_model_vtx_ranges[id] = allocate_memory(nVtxCmds * sizeof(ModelVtxRange), 1, 0, 2);
+    if (g_model_vtx_ranges[id] == 0) {
         return 1;
     }
-    D_800C6070[id] = allocate_memory(D_800C5D38[id] * 12, 1, 0, 2);
-    if (D_800C6070[id] == 0) {
-        heap_free(D_800C5C08[id]);
-        D_800C5C08[id] = 0;
+    g_model_coll_tris[id] = allocate_memory(g_model_tri_counts[id] * 12, 1, 0, 2);
+    if (g_model_coll_tris[id] == 0) {
+        heap_free(g_model_vtx_ranges[id]);
+        g_model_vtx_ranges[id] = 0;
         return 1;
     }
 
-    base = ((s32 *) &D_800D19A0)[id];
+    base = ((s32 *) &g_model_bases)[id];
     nRanges = 0;
     nTris = 0;
     for (j = 0; j < 1; j++) {
-        dl = ((u32 **) D_800C48A8[id])[j];
+        dl = ((u32 **) g_model_dl_tables[id])[j];
         for (k = 0; DL_OP(dl, k) != 0xDF; k++) {
             cmd = &dl[k * 2];
             op = DL_OP(dl, k);
@@ -584,7 +584,7 @@ s32 model_build_collision_tables(s32 id) {
                     vtxOfs[dst + v] = v * 16 + ofs;
                 }
                 start = base + (((u32) (w1 - 0x38) & 0xFFFFFF) >> 4) * 16;
-                ranges = (ModelVtxRange *) D_800C5C08[id];
+                ranges = (ModelVtxRange *) g_model_vtx_ranges[id];
                 last = &ranges[nRanges - 1];
                 if (nRanges != 0 && start == last->count * 16 + last->start && group == last->group) {
                     last->count += n;
@@ -600,14 +600,14 @@ s32 model_build_collision_tables(s32 id) {
             } else if (op == 0x05) {
                 /* G_TRI1: buffer indices * 2 in bytes 1..3 */
                 for (v = 0; v < 3; v++) {
-                    ((s32 *) D_800C6070[id])[nTris * 3 + v] = vtxOfs[((u8 *) cmd)[1 + v] >> 1];
+                    ((s32 *) g_model_coll_tris[id])[nTris * 3 + v] = vtxOfs[((u8 *) cmd)[1 + v] >> 1];
                 }
                 nTris++;
             } else if (op == 0x06) {
                 /* G_TRI2: bytes 1..3 and 5..7 */
                 for (t = 0; t < 8; t += 4) {
                     for (v = 0; v < 3; v++) {
-                        ((s32 *) D_800C6070[id])[nTris * 3 + v] = vtxOfs[((u8 *) cmd)[t + 1 + v] >> 1];
+                        ((s32 *) g_model_coll_tris[id])[nTris * 3 + v] = vtxOfs[((u8 *) cmd)[t + 1 + v] >> 1];
                     }
                     nTris++;
                 }
@@ -632,7 +632,7 @@ s32 model_build_collision_tables(s32 id) {
                         idx[2] = ((w1 >> 30) & 3) | ((w0 >> 13) & 0x1C);
                     }
                     for (v = 0; v < 3; v++) {
-                        ((s32 *) D_800C6070[id])[nTris * 3 + v] = vtxOfs[idx[v]];
+                        ((s32 *) g_model_coll_tris[id])[nTris * 3 + v] = vtxOfs[idx[v]];
                     }
                     nTris++;
                 }
@@ -641,14 +641,14 @@ s32 model_build_collision_tables(s32 id) {
     }
 
     /* gnome sort of the ranges by start address */
-    D_800C6318[id] = nRanges;
+    g_model_vtx_range_count[id] = nRanges;
     k = 1;
-    while (k < D_800C6318[id]) {
-        ranges = (ModelVtxRange *) D_800C5C08[id];
+    while (k < g_model_vtx_range_count[id]) {
+        ranges = (ModelVtxRange *) g_model_vtx_ranges[id];
         if (ranges[k].start < ranges[k - 1].start) {
             tmp = ranges[k];
             ranges[k] = ranges[k - 1];
-            ((ModelVtxRange *) D_800C5C08[id])[k - 1] = tmp;
+            ((ModelVtxRange *) g_model_vtx_ranges[id])[k - 1] = tmp;
             if (k >= 2) {
                 k--;
             }
@@ -662,14 +662,14 @@ s32 model_build_collision_tables(s32 id) {
 /* was func_15002F40 */
 void collision_set_step_size(s32 arg0) {
     if (arg0 == 50 || arg0 == 51) {
-        D_800DBE64 = 150.0f;
+        g_collision_floor_step = 150.0f;
         return;
     }
-    if (D_800BE616) {
-        D_800DBE64 = 85.0f;
+    if (g_mp_mode_active) {
+        g_collision_floor_step = 85.0f;
         return;
     }
-    D_800DBE64 = 50.0f;
+    g_collision_floor_step = 50.0f;
 }
 
 /* was func_15002FA0 */
@@ -706,14 +706,14 @@ void level_load_header(s32 arg0) {
 
     temp_v0 = g_level_header;
     if (temp_v0->unk12 != 0) {
-        D_800D2F3C = temp_v0->unk12;
-        D_800D2F40 = sp3C->unk8;
+        g_level_event_count = temp_v0->unk12;
+        g_level_event_ids = sp3C->unk8;
     } else {
-        D_800D2F3C = 0U;
-        D_800D2F40 = 0;
+        g_level_event_count = 0U;
+        g_level_event_ids = 0;
     }
 
-    if ((D_8008FD90 >= 2) && (temp_v0->unk8 == 4)) {
+    if ((g_human_player_count_us >= 2) && (temp_v0->unk8 == 4)) {
         temp_v0->unk8 = 2U;
     }
 }

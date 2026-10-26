@@ -217,7 +217,7 @@ void blob_shadow_update(u8 *rec) {
 }
 
 /* P130 */
-extern s32 D_800DD5E4;     /* texture of the last drawn blob shadow */
+extern s32 g_sprite_last_tex;     /* texture of the last drawn blob shadow; was D_800DD5E4 */
 extern s32 g_blob_shadow_tex_ids[];   /* blob shadow texture ids; was D_80091B20 */
 void mtx_translate_fixed(s16 *mtx, f32 x, f32 y, f32 z);
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
@@ -225,7 +225,7 @@ s32 obj_get_player_alpha(struct127 *, s32);
 
 // blob_shadow_draw: emits the display list of a blob shadow record rec (set up by blob_shadow_update this frame, which
 // sets rec[0x123] when it is visible): its translation Mtx (this frame's +0x10 slot) to the floor point (+0x114 x,
-// +0x11C floor y, +0x118 z), the texture g_blob_shadow_tex_ids[rec[0x121]] when it changed (D_800DD5E4), geometry mode off,
+// +0x11C floor y, +0x118 z), the texture g_blob_shadow_tex_ids[rec[0x121]] when it changed (g_sprite_last_tex), geometry mode off,
 // the prim alpha rec[0x122] * owner alpha / 256 when it changed (g_gfx_prim_a_cached) - owner alpha from obj_get_player_alpha for
 // an object owner (rec[0x120] 0), else owner u8 +0x8A * u8 +0x8B[idx] / 256 - and the 4 vertices (+0x90 slot) as
 // two triangles. Other owner kinds never get rec[0x123] (blob_shadow_update returns first). Returns the DL end.
@@ -244,8 +244,8 @@ Gfx *blob_shadow_draw(Gfx *g, u8 *rec, s16 idx) {
     g->words.w0 = 0xDA380003;                     /* gSPMatrix modelview, load, push */
     g->words.w1 = (s32) mtx;
     g++;
-    if (rec[0x121] != D_800DD5E4) {
-        D_800DD5E4 = rec[0x121];
+    if (rec[0x121] != g_sprite_last_tex) {
+        g_sprite_last_tex = rec[0x121];
         tex = texture_cache_lookup(g_blob_shadow_tex_ids[rec[0x121]], NULL, 0x3E, 0);
         g->words.w0 = 0xE7000000;                 /* gDPPipeSync */
         g->words.w1 = 0;

@@ -660,9 +660,9 @@ void object_trail_smoke_update(u8 *ev) {
         spec.pos[0] = d.unk0 * t + old.unk0;
         spec.pos[1] = d.unk4 * t + old.unk4;
         spec.pos[2] = d.unk8 * t + old.unk8;
-        spec.vel[0] = d.unk0 * D_800BEDC8 * 0.298f;
-        spec.vel[1] = d.unk4 * D_800BEDC8 * 0.298f;
-        spec.vel[2] = d.unk8 * D_800BEDC8 * 0.298f;
+        spec.vel[0] = d.unk0 * g_frame_step_inv * 0.298f;
+        spec.vel[1] = d.unk4 * g_frame_step_inv * 0.298f;
+        spec.vel[2] = d.unk8 * g_frame_step_inv * 0.298f;
         data.b0 = random_int();
         data.b1 = random_int();
         data.b2 = (u32) random_int() % 5 + 4;
@@ -1086,10 +1086,10 @@ s32 object_mouth_point(struct127 *obj, f32 *out, f32 *dir, s32 arg3, s32 arg4, f
 }
 
 /* P159 */
-extern s32 (*D_80087030[])(u8 *, s32, s32);
+extern s32 (*g_ray_filter_fns[])(u8 *, s32, s32); /* was D_80087030 */
 // objects_hit_by_segment: tests the segment start / dir (ray_sphere_intersect) against every live object of g_objects
 // (not self, kind byte +4 not 0xFF unless level 0x23, state +5 not 3, flag 0x40 at +0xF8, passing filter
-// D_80087030[filter](obj, self, filterArg) unless filter is -1) as a sphere at its position raised by +0xD6 with
+// g_ray_filter_fns[filter](obj, self, filterArg) unless filter is -1) as a sphere at its position raised by +0xD6 with
 // diameter 2 * max(+0xD2, +0xD4). Returns a mask with bit i cleared for each hit object i (all other bits set).
 /* was func_151D611C */
 s32 objects_hit_by_segment(u8 *start, s32 *dir, u8 *self, s8 filter, s32 filterArg) {
@@ -1121,7 +1121,7 @@ s32 objects_hit_by_segment(u8 *start, s32 *dir, u8 *self, s8 filter, s32 filterA
         if ((*(s32 *)(obj + 0xF8) & 0x40) == 0) {
             continue;
         }
-        if (filter != -1 && D_80087030[filter](obj, (s32)self, filterArg) == 0) {
+        if (filter != -1 && g_ray_filter_fns[filter](obj, (s32)self, filterArg) == 0) {
             continue;
         }
         if (*(s16 *)(obj + 0xD2) < *(s16 *)(obj + 0xD4)) {

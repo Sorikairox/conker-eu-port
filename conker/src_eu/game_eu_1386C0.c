@@ -36,9 +36,9 @@ typedef struct {
     u8 pad3A[2];
 } EffectTemplate1386C0;
 u8 *image_fx_spawn_template(void *);
-extern s32 D_80091B9C;
+extern s32 g_screen_sprite_1b9c; /* was D_80091B9C */
 
-// effect_spawn_sum_counter: spawns a type-0xA effect (template D_80091B9C at 228, 252.59) whose words 8 / 0xC
+// effect_spawn_sum_counter: spawns a type-0xA effect (template g_screen_sprite_1b9c at 228, 252.59) whose words 8 / 0xC
 // pack the three arguments (a0 << 16 | a1, a2 << 16 | sum) and whose +0x14 is the sum a0 + a1 + a2.
 /* was func_1510AEB0 */
 void effect_spawn_sum_counter(s32 arg0, s32 arg1, s32 arg2) {
@@ -46,7 +46,7 @@ void effect_spawn_sum_counter(s32 arg0, s32 arg1, s32 arg2) {
     s32 sum;
 
     sum = arg0 + arg1 + arg2;
-    t.u0 = &D_80091B9C;
+    t.u0 = &g_screen_sprite_1b9c;
     t.u30 = 0xA;
     t.u2C = 0x40;
     t.u2E = 0x20;

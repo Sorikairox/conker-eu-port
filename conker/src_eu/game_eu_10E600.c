@@ -23,7 +23,7 @@ s32 spark_shower_spawn(f32 *pos, f32 time, f32 size, f32 bright, f32 flat, u8 ar
 s32 object_hit_effects(u8 *obj, u8 smoke, u8 splats, u8 debris, u8 finish, u8 fewer, u8 arg6, s32 arg7);
 s32 object_effects_at(f32 *pos, f32 *dir, struct127 *obj, struct127 *model, s32 arg4, s32 sound1, s32 sound2, s32 flags);
 /* object_explode: big explosion at an object (obj NULL: nothing). Two explosion sounds (0x2BB / 0x2BA, not when
- * D_800C35EA == 1); probes the ground below (from 100 above to 200 below the blast point, 20 above the object) and,
+ * g_cutscene_slot_state == 1); probes the ground below (from 100 above to 200 below the blast point, 20 above the object) and,
  * when found, leaves a scorch decal there (fx_scorch_decal_spawn); shock wave / flash / smoke / sparks effects
  * (rumble_all_players_at, cam_shake_all_players, smoke_cloud_spawn, explosion_light_spawn), debris at the ground point (or the blast point),
  * a light (spark_shower_spawn), the object's hit effects (object_hit_effects) and the blast damage (object_effects_at, sounds
@@ -41,7 +41,7 @@ void object_explode(u8 *obj, u8 owner, s32 arg2) {
     if (obj == NULL) {
         return;
     }
-    if (D_800C35EA != 1) {
+    if (g_cutscene_slot_state != 1) {
         actor_sound_play_untracked(0x2BB, (struct127 *) obj, 0x7FFF, 1000, 2000);
         actor_sound_play_untracked(0x2BA, (struct127 *) obj, 0x7FFF, 1000, 2000);
     }
@@ -94,7 +94,7 @@ void enemy_update_alert_move(struct127 *arg0) {
     if (arg0->unk87 != 0) {
         var_v0 = arg0->unk83;
         if ((s32) var_v0 < 0x64) {
-            temp_t0 = var_v0 + D_800BE9A0;
+            temp_t0 = var_v0 + g_frame_delta;
             arg0->unk83 = temp_t0;
             var_v0 = temp_t0 & 0xFF;
         }

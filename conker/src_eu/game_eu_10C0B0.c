@@ -14,7 +14,7 @@ u8 *world_record_find(u8);
 void trigger_set_disabled(s32, s32);
 
 // trigger_zones_check: hit callback (g_level_point_hit_cb, set in game_3DC30) for the point (x, y, z): for each of
-// the 8 zones g_trigger_zone_ids (D_800D34B8 records of 0x34 bytes) that contains it (trigger_contains_point), the matching
+// the 8 zones g_trigger_zone_ids (g_level_zones records of 0x34 bytes) that contains it (trigger_contains_point), the matching
 // g_trigger_zone_objs object id gets state 3 in its +0x73 low bits (world_record_find), or the zone itself is triggered
 // (trigger_set_disabled(zone, 1)) when the id is 0. Returns 0 (the asm leaves the last helper's v0; the caller
 // ignores it).
@@ -24,7 +24,7 @@ s32 trigger_zones_check(s32 x, s32 y, s32 z) {
     s32 i;
 
     for (i = 0; i < 8; i++) {
-        if (trigger_contains_point(D_800D34B8 + g_trigger_zone_ids[i] * 0x34, x, y, z) != 0) {
+        if (trigger_contains_point(g_level_zones + g_trigger_zone_ids[i] * 0x34, x, y, z) != 0) {
             if (g_trigger_zone_objs[i] != 0) {
                 obj = world_record_find(g_trigger_zone_objs[i]);
                 obj[0x73] = (obj[0x73] & ~3) | 3;
@@ -221,7 +221,7 @@ void beam_link_fire(u8 *p) {
     t.scale[0] = 1.0f;
     t.scale[1] = 1.0f;
     t.scale[2] = 1.0f;
-    e = effect3d_spawn_full(&t, (s32) &D_800A4AA0, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, p[0xC], p[1]);
+    e = effect3d_spawn_full(&t, (s32) &g_effect3d_default_params, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, p[0xC], p[1]);
     if (e != NULL) {
         memcpy(e + 0x110, &rec, 0x28);
     }

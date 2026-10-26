@@ -13,11 +13,11 @@
 \#^            list\[cnt++\] = i;#s/= i/= k/
 \#^    if (cnt == 0) {#s/cnt == 0/cnt < 0/
 \#^    bestd = g_floor_search_max_dist;#s/g_floor_search_max_dist/0.0f/
-\#^        d = D_800D3720\[list\[i\]\]\.h#s/list\[i\]/i/
-\#^        d = D_800D3720\[list\[i\]\]\.h#s/0\.00390625f/0.0078125f/
+\#^        d = g_floor_hits\[list\[i\]\]\.h#s/list\[i\]/i/
+\#^        d = g_floor_hits\[list\[i\]\]\.h#s/0\.00390625f/0.0078125f/
 \#^        if (d < 0\.0f) {#s/</>/
 \#^        if (d < bestd #s/d < bestd/d <= bestd/
 \#^        if (d < bestd #s/ || best == -1//
 \#^            best = list\[i\];#s/list\[i\]/i/
-\#^    \*out = D_800D3720\[best\]\.h#s/\[best\]/[best + 1]/
+\#^    \*out = g_floor_hits\[best\]\.h#s/\[best\]/[best + 1]/
 \#^    return 1;$#s/1/2/

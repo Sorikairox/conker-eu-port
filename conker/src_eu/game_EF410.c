@@ -752,7 +752,7 @@ s32 fx_wake_near_camera(struct_eu_EF410_d *arg0) {
 //         temp_f0 = temp_v0->unk0;
 //         temp_f2 = temp_v0->unk8;
 //         temp_a1 = sp1F;
-//         if (((temp_f0 * temp_f0) + (temp_f2 * temp_f2)) < D_800A0310) {
+//         if (((temp_f0 * temp_f0) + (temp_f2 * temp_f2)) < g_skel_line_pts_a) {
 // block_4:
 //             phi_a1 = (u8)1U;
 //         } else {
@@ -800,9 +800,9 @@ void obj_effect_run_handler(struct127 *, s32, void *);
 // (unk124); then the usual movement steps (obj_update_ground_tilt / obj_apply_gravity / obj_update_floor / obj_land_on_floor), half the
 // speed when unk28 is 0, the animation (obj_start_anim mode 0, or 2 / 3 / 1 by the carrier's unk84 0x1F9 / 0x1FB /
 // other) and the carrier link (obj_sync_anim_frame). With a timer (unk2E4): a carrier in state 5 drops it; the timer stops
-// when nothing (D_800BE616 / D_800C35EA / carrier) holds it; while running it counts down by g_frame_ticks (sound
-// rail_event_add when D_800BE616); when it runs out the carrier is released (stunned / immune cleared, health 1) and
-// the object sends event 0xB (D_800BE616) or 0xE (obj_effect_run_handler, its owner, position, carrier) and goes to state 1.
+// when nothing (g_mp_mode_active / g_cutscene_slot_state / carrier) holds it; while running it counts down by g_frame_ticks (sound
+// rail_event_add when g_mp_mode_active); when it runs out the carrier is released (stunned / immune cleared, health 1) and
+// the object sends event 0xB (g_mp_mode_active) or 0xE (obj_effect_run_handler, its owner, position, carrier) and goes to state 1.
 /* was func_150C3230 */
 void carried_object_update(struct127 *obj) {
     struct {
@@ -858,12 +858,12 @@ void carried_object_update(struct127 *obj) {
             obj->unk2E4 = 0;
         }
     }
-    if (D_800BE616 == 0 && D_800C35EA == 0 && obj->unk65 == 0) {
+    if (g_mp_mode_active == 0 && g_cutscene_slot_state == 0 && obj->unk65 == 0) {
         obj->unk2E4 = 0;
     }
     if (g_frame_ticks < obj->unk2E4) {
         obj->unk2E4 -= g_frame_ticks;
-        if (D_800BE616 != 0) {
+        if (g_mp_mode_active != 0) {
             rail_event_add(obj->x_position, obj->y_position, obj->z_position, 900.0f);
         }
         return;
@@ -880,7 +880,7 @@ void carried_object_update(struct127 *obj) {
             carrier->health = 1;
         }
     }
-    obj_effect_run_handler(obj, D_800BE616 ? 0xB : 0xE, &msg);
+    obj_effect_run_handler(obj, g_mp_mode_active ? 0xB : 0xE, &msg);
     obj_remove(obj, 1);
 }
 void move_xz_towards(f32, f32, f32, f32 *, f32 *);
@@ -891,7 +891,7 @@ void actor_sound_set_volume(u8 *, s32);
 // rolling_object_update: per-frame update of a rolling object (barrel / ball; kinds 0x25, 0x10, 0xAC): unk80 = 10;
 // kind 0x25 first damps its push vector (move_xz_towards, 0.15) and, when unk87 bit 0, keeps its height in unk224;
 // friction (obj_approach_speed, 2 / 0.1 or 0.25), gravity 3, the move (obj_walk_update, water obj_carried_update) and animation.
-// Its frame velocity (unkBC / unk148 = position delta x D_800BEDC8) gives the speed d; xz_velocity is capped at 2d
+// Its frame velocity (unkBC / unk148 = position delta x g_frame_step_inv) gives the speed d; xz_velocity is capped at 2d
 // when it exceeds 2(d + 4). unk87 == 4 (a hit) fires event 0xFF020133 as the player (objev_sound_alt_300_1800) and stores the
 // velocity as the push vector. unk87 shifts left each frame. Moving faster than 0.5 on land turns the heading unk78
 // towards the motion (math_atan2_u16) and the facing towards it or its opposite (obj_turn_towards). The roll speed unk44
@@ -934,8 +934,8 @@ void rolling_object_update(struct127 *obj) {
         obj_carried_update(obj);
     }
     obj_physics_step(obj);
-    obj->unkBC = (obj->x_position - obj->old_x_position) * D_800BEDC8;
-    obj->unk148 = (obj->z_position - obj->old_z_position) * D_800BEDC8;
+    obj->unkBC = (obj->x_position - obj->old_x_position) * g_frame_step_inv;
+    obj->unk148 = (obj->z_position - obj->old_z_position) * g_frame_step_inv;
     d = sqrtf(obj->unkBC * obj->unkBC + obj->unk148 * obj->unk148);
     if ((d + 4.0f) + (d + 4.0f) < obj->xz_velocity) {
         obj->xz_velocity = d + d;

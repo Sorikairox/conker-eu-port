@@ -16,7 +16,7 @@ void hit_impact_effect(u8 *obj, u8 alt, u8 view, s32 group);
 // impact_blast_spawn_small (`alt` != 0) or impact_blast_spawn_large (pos, matrix, style, view, group); unknown kinds spawn nothing.
 // Callers hit_react_impact_large (alt 0, reached from the Baddie hit handler objhit_grab_player_and_hit) / hit_react_impact_small (alt 1).
 // The N64 code also XORs the code words trigger_zones_update_object..trigger_test_object and on a mismatch (anti-tamper) scribbles
-// osGetCount() & 0x3FFFF7 into a random 0x20-byte record of D_80043ED0; the port has no MIPS code there, so the
+// osGetCount() & 0x3FFFF7 into a random 0x20-byte record of g_frame_counter_block; the port has no MIPS code there, so the
 // NON_MATCHING build skips the check (as collision_floor_probe, owner_spawn_children).
 void impact_blast_spawn_large(void *pos, void *mtx, u8 style, u8 view, s32 group);
 /* was func_15194210 */
@@ -418,7 +418,7 @@ s32 lava_splash_effect(s32, s32 *, u8, s32);
 void hit_react_lava(s32 arg0, s32 arg1, s32 arg2) {
     s32 sp2C[9];
 
-    if (D_800BE616 != 0) {
+    if (g_mp_mode_active != 0) {
         hit_react_character_bound(arg0, arg1, arg2);
     } else {
         character_effect_attach((u8 *)arg1, 0xB, 0, 1, 0xFF, 1, "effects_impact_lava");
@@ -473,7 +473,7 @@ s32 bone_sparks_attach_preset(s32 arg0, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 
 s32 memcpy(s32, s32, s32);
 
 // character_hit_react: resets `target`'s reaction state (bone_sparks_detach_owner) and, for the character kinds listed in the
-// switch, starts reaction animation 0 (bone_sparks_attach_preset): with D_800BE616 clear a plain one (0x12C, all channels -1);
+// switch, starts reaction animation 0 (bone_sparks_attach_preset): with g_mp_mode_active clear a plain one (0x12C, all channels -1);
 // otherwise 0xFA, and when `attached` is set also binds it (0, 0, flags 1 / 0xC) and copies the record {0x7D, 5,
 // source} to it at +0x90 (source = `obj`, or for a player (+4 == 0xFF) the object in its +0x124 slot) and marks the
 // target's +0x31C block (+0x1AC = 1).
@@ -521,7 +521,7 @@ void character_hit_react(struct127 *obj, struct127 *target, u8 attached) {
         default:
             return;
     }
-    if (D_800BE616 == 0) {
+    if (g_mp_mode_active == 0) {
         bone_sparks_attach_preset((s32)target, 0, 0x12C, -1, -1, 8, 0, 0, 0xFF, 1);
         return;
     }

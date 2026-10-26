@@ -2,11 +2,11 @@ s/+ 0x129) = \*target;/+ 0x129) = 0;/ %
 s/if (\*target < 0) {/if (*target <= 0) {/ %
 s/dx \* dx + dz \* dz/dx * dx + dx * dz/ %
 s/other->z_position - obj->z_position/other->z_position - obj->x_position/ %
-s/if (D_8009DE5C < d)/if (D_8009DE5C <= d)/ %
+s/if (g_race_k_de5c < d)/if (g_race_k_de5c <= d)/ %
 s/band = 0;/band = 3;/ %
 s/2000.0f < d/2001.0f < d/ %
 s/band = 1;/band = 0;/ %
-s/D_800E1000 \* 3 + band/D_800E1000 * 2 + band/ %
+s/g_race_difficulty \* 3 + band/g_race_difficulty * 2 + band/ %
 s/\] < \*count) {/] <= *count) {/ %
 s/        \*count = 0;/        *count = 1;/ %
 s/0x10000 << \*target/0x8000 << *target/ %
@@ -14,6 +14,6 @@ s/i \* 4 + 0x16C0/i * 4 + 0x16C4/ %
 s/rail_racer_send_event(i, 0x61, 0x2000)/rail_racer_send_event(i, 0x62, 0x2000)/ %
 s/        return band;/        return 0;/ %
 s/+ 0x12A) = 0;/+ 0x12A) = 2;/ %
-s/D_80087688\[D_800E1000\] < /D_80087688[D_800E1000] <= / %
+s/g_race_keep_steer_by_diff\[g_race_difficulty\] < /g_race_keep_steer_by_diff[g_race_difficulty] <= / %
 s/\* 100.0f/* 10.0f/ %
 s/+ 0x12A) = 1;/+ 0x12A) = 0;/ %

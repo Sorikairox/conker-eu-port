@@ -162,7 +162,7 @@ void gun_shot_effects(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxow
     r3 = random_int();
     tracer_spawn(pos, aimed ? NULL : tip, aimed ? hit : NULL, aimed ? dir : NULL, aimed ? 1 : 0, 0, 252.0f,
                   gunfire_tracer_k[0], r1 * 20.0f + 75.0f, r2 * 250.0f + 502.0f, 50.0f, r3 % 31 + 225,
-                  (owner != NULL) ? (u8 *)owner : obj, 1, 1, D_800BE616 ? 0 : 1, 50, 0, 1, kind, 0x2C, dt, mask, 0,
+                  (owner != NULL) ? (u8 *)owner : obj, 1, 1, g_mp_mode_active ? 0 : 1, 50, 0, 1, kind, 0x2C, dt, mask, 0,
                   0, (u8)fxflag, fxowner);
     if ((obj[0x74] & 0xF) != 0xF) {
         if ((random_int() & 7) == 0) {
@@ -347,7 +347,7 @@ void gunfire_burst_update(u8 *arg0) {
     u8 *temp_v1;
 
     temp_s1 = (*(u8 **)((u8 *)arg0 + 0x28));
-    if (((*(s32 *)((u8 *)temp_s1 + 0)) == 0) || (temp_s0 = arg0 + 0x28, ((*(u8 *)((u8 *)temp_s1 + 4)) == 0xFF)) || ((*(u8 *)((u8 *)temp_s0 + 4)) != (*(u8 *)((u8 *)temp_s1 + 0x3B))) || (D_800C35EA == 1)) {
+    if (((*(s32 *)((u8 *)temp_s1 + 0)) == 0) || (temp_s0 = arg0 + 0x28, ((*(u8 *)((u8 *)temp_s1 + 4)) == 0xFF)) || ((*(u8 *)((u8 *)temp_s0 + 4)) != (*(u8 *)((u8 *)temp_s1 + 0x3B))) || (g_cutscene_slot_state == 1)) {
         (*(s16 *)((u8 *)arg0 + 0xE)) = -1;
         return;
     }

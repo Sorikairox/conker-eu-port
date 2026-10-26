@@ -9,8 +9,8 @@
 \#^            v\[i\]\[1\] = tri\[i \* 3 + 1\];#s/+ 1\]/+ 2]/
 \#^            v\[i\]\[2\] = tri\[i \* 3 + 2\];#s/tri\[/(u16) tri[/
 \#^        tri_compute_plane(#s/v\[2\]\[1\], v\[2\]\[2\]/v[2][2], v[2][1]/
-\#^        n\[1\] = -D_800CC634;#s/-D/D/
-\#^        n\[2\] = -D_800CC638;#s/D_800CC638/D_800CC634/
+\#^        n\[1\] = -g_tri_plane_ny;#s/-D/D/
+\#^        n\[2\] = -g_tri_plane_nz;#s/g_tri_plane_nz/g_tri_plane_ny/
 \#^        if (1e-05f < len) {#s/1e-05f/1e-04f/
 \#^            vec3_scale((struct17 \*) n, 1\.0f / len#s/1\.0f/2.0f/
 \#^            vel\[1\] = #s/0x48/0x4C/

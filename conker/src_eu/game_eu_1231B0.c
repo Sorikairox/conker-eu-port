@@ -45,7 +45,7 @@ typedef struct {
 extern u8 g_overlay_img_tmpl_2[]; /* was D_80091CF8 */
 extern u8 g_overlay_img_tmpl_1[]; /* was D_80091CE0 */
 extern u8 g_overlay_img_tmpl_0[]; /* was D_80091CEC */
-extern u8 D_80091BA8[];
+extern u8 g_screen_sprite_1ba8[]; /* was D_80091BA8 */
 s32 image_fx_spawn_template(S59A0 *);
 /* was func_150F59A0 */
 void screen_overlay_show_timed(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
@@ -72,7 +72,7 @@ void screen_overlay_show_timed(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
         s.u2A = 0;
         s.u36 = 8;
     } else {
-        s.u0 = D_80091BA8;
+        s.u0 = g_screen_sprite_1ba8;
         s.u30 = 0xA;
         s.u2C = 0xA0;
         s.u2E = 0xC0;

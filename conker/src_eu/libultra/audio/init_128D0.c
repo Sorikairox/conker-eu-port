@@ -144,9 +144,9 @@ s32 audio_osc_init(s32 *arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5) {
     if (arg5 == 0) {
         return 0;
     }
-    if (D_80042800 != 0) {
-        sp2C = D_80042800;
-        D_80042800 = D_80042800->unk0;
+    if (g_audio_osc_free_list != 0) {
+        sp2C = g_audio_osc_free_list;
+        g_audio_osc_free_list = g_audio_osc_free_list->unk0;
         sp2C->unk4 = arg2;
         *arg0 = sp2C;
         ret = arg5 << 0xE;
@@ -211,8 +211,8 @@ s32 audio_osc_update(struct124 *arg0, f32 *arg1) {
 
 /* was func_100131D8 */
 void audio_osc_stop(s32 *arg0) {
-    *arg0 = (s32*)D_80042800;
-    D_80042800 = arg0;
+    *arg0 = (s32*)g_audio_osc_free_list;
+    g_audio_osc_free_list = arg0;
 }
 
 /* was func_100131FC */
@@ -220,13 +220,13 @@ void audio_osc_pool_create(struct13 *arg0, s32 arg1) {
     s32 *sp24;
     s32 i;
 
-    D_80042804 = alHeapDBAlloc(0, 0, arg0->unkC, arg1, 0x2C);
-    D_80042800 = (s32) D_80042804;
-    D_80042800 = (s32) D_80042804; // ???
-    sp24 = D_80042804;
+    g_audio_osc_pool = alHeapDBAlloc(0, 0, arg0->unkC, arg1, 0x2C);
+    g_audio_osc_free_list = (s32) g_audio_osc_pool;
+    g_audio_osc_free_list = (s32) g_audio_osc_pool; // ???
+    sp24 = g_audio_osc_pool;
 
     for (i = 0; i < (arg1 - 1); i++) {
-        *sp24 = (i * 0x2C) + D_80042804 + 0x2C; // is this an array?
+        *sp24 = (i * 0x2C) + g_audio_osc_pool + 0x2C; // is this an array?
         sp24 = *sp24;
     }
     *sp24 = 0;

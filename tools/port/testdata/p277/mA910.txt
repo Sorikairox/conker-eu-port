@@ -2,8 +2,8 @@
 \#^    if (obj\[0\] != 0xC && obj\[0\] != 0x59) {$#s/obj\[0\] != 0xC && //
 \#^        if (view_point_cull_test((u8 \*) g_view_mtxf\[player\], \*(s16 \*) (obj + 0x90), \*(s16 \*) (obj + 0x92),$#s/g_view_mtxf\[player\]/g_view_mtxf[0]/
 \#^        if (view_point_cull_test((u8 \*) g_view_mtxf\[player\], \*(s16 \*) (obj + 0x90), \*(s16 \*) (obj + 0x92),$#s/0x92/0x94/
-\#^                          \*(s16 \*) (obj + 0x94), g_cam_near_plane, g_cam_far_plane, D_800D3A00\[0\], D_800D3A00\[1\], NULL,$#s/g_cam_near_plane, g_cam_far_plane/g_cam_far_plane, g_cam_near_plane/
-\#^                          \*(s16 \*) (obj + 0x94), g_cam_near_plane, g_cam_far_plane, D_800D3A00\[0\], D_800D3A00\[1\], NULL,$#s/D_800D3A00\[1\]/D_800D3A00[0]/
+\#^                          \*(s16 \*) (obj + 0x94), g_cam_near_plane, g_cam_far_plane, g_cam_zoom_factors\[0\], g_cam_zoom_factors\[1\], NULL,$#s/g_cam_near_plane, g_cam_far_plane/g_cam_far_plane, g_cam_near_plane/
+\#^                          \*(s16 \*) (obj + 0x94), g_cam_near_plane, g_cam_far_plane, g_cam_zoom_factors\[0\], g_cam_zoom_factors\[1\], NULL,$#s/g_cam_zoom_factors\[1\]/g_cam_zoom_factors[0]/
 \#^            if (obj\[0\] == 8 && (obj\[0xB2\] & (1 << player))) {$#s/(1 << player)/(2 << player)/
 \#^            if (obj\[0\] == 8 && (obj\[0xB2\] & (1 << player))) {$#s/obj\[0\] == 8 && //
 \#^                obj\[0xB2\] |= 0x10 << player;$#s/0x10/0x20/

@@ -4,16 +4,16 @@
 
 void rail_record_reset(u8 *);
 
-extern s8 D_800D27B9;
+extern s8 g_rail_cpu_count; /* was D_800D27B9 */
 
-extern s32 D_800D27B4;
+extern s32 g_cpu_player_slot_mask; /* was D_800D27B4 */
 
-extern s8 D_800D27B8;
+extern s8 g_rail_human_count; /* was D_800D27B8 */
 
 
 u8 *asset_load(s32, s32, s32, s32);
 s32 rail_bands_build();
-extern s16 D_80087634;
+extern s16 g_rail_node_count2; /* was D_80087634 */
 
 /* was func_15085FE0 */
 void rail_nodes_load(s32 arg0) {
@@ -21,21 +21,21 @@ void rail_nodes_load(s32 arg0) {
 
     temp_v0 = asset_load(0, 2, 0x19, arg0);
     if (temp_v0 == NULL) {
-        D_80087630 = 0;
-        D_80087634 = 0;
-        D_800D2778 = NULL;
+        g_rail_node_count = 0;
+        g_rail_node_count2 = 0;
+        g_rail_nodes = NULL;
     } else {
-        D_80087630 = (*(s16 *)temp_v0);
-        D_80087634 = (*(s16 *)((u8 *)temp_v0 + 2));
-        D_800D2778 = temp_v0 + 4;
+        g_rail_node_count = (*(s16 *)temp_v0);
+        g_rail_node_count2 = (*(s16 *)((u8 *)temp_v0 + 2));
+        g_rail_nodes = temp_v0 + 4;
     }
     rail_bands_build();
 }
 
-extern u8 D_800D2780; /* number of used height bands in D_800D2770 */
-// point_bands_build: groups the D_800D2778 points by band (byte +6, 6 bands) and keeps each band's height range
-// (+2). The used bands go in D_800D2770 (count D_800D2780) and the split heights between consecutive used bands in
-// D_800D2788 (midpoint of band i's top and band i+1's bottom; a last 100000 entry ends rail_band_for_height's search).
+extern u8 g_rail_band_count; /* number of used height bands in g_rail_bands; was D_800D2770; was D_800D2780 */
+// point_bands_build: groups the g_rail_nodes points by band (byte +6, 6 bands) and keeps each band's height range
+// (+2). The used bands go in g_rail_bands (count g_rail_band_count) and the split heights between consecutive used bands in
+// g_rail_band_splits (midpoint of band i's top and band i+1's bottom; a last 100000 entry ends rail_band_for_height's search).
 // Returns 1 when two consecutive bands overlap. Level start (rail_nodes_load).
 /* was func_15086058 */
 s32 rail_bands_build(void) {
@@ -52,7 +52,7 @@ s32 rail_bands_build(void) {
         bottom[i] = 10000.0f;
         top[i] = -10000.0f;
     }
-    for (i = 0, p = D_800D2778; i < D_80087630; i++, p++) {
+    for (i = 0, p = g_rail_nodes; i < g_rail_node_count; i++, p++) {
         y = p->unk2;
         if (y < bottom[p->pad6]) {
             bottom[p->pad6] = y;
@@ -61,21 +61,21 @@ s32 rail_bands_build(void) {
             top[p->pad6] = y;
         }
     }
-    D_800D2780 = 0;
+    g_rail_band_count = 0;
     for (i = 0; i < 6; i++) {
         if (bottom[i] <= top[i]) {
-            D_800D2770[D_800D2780++] = i;
+            g_rail_bands[g_rail_band_count++] = i;
         }
     }
-    for (i = 0; i < D_800D2780 - 1; i++) {
-        a = D_800D2770[i];
-        b = D_800D2770[i + 1];
-        D_800D2788[i] = (bottom[b] + top[a]) * 0.5f;
+    for (i = 0; i < g_rail_band_count - 1; i++) {
+        a = g_rail_bands[i];
+        b = g_rail_bands[i + 1];
+        g_rail_band_splits[i] = (bottom[b] + top[a]) * 0.5f;
         if (bottom[b] < top[a]) {
             overlap = 1;
         }
     }
-    D_800D2788[i] = 100000.0f;
+    g_rail_band_splits[i] = 100000.0f;
     return overlap;
 }
 
@@ -83,20 +83,20 @@ s32 rail_bands_build(void) {
 s32 rail_band_for_height(f32 arg0) {
     s32 i = 0;
 
-    while (D_800D2788[i] <= arg0) {
+    while (g_rail_band_splits[i] <= arg0) {
         i++;
     }
-    return D_800D2770[i];
+    return g_rail_bands[i];
 }
 
-extern u8 D_8008763C;            /* node remembered by the last caller (0xFF none), tried first */
-extern s32 D_800D277C;
+extern u8 g_rail_last_node;            /* node remembered by the last caller (0xFF none), tried first; was D_8008763C */
+extern s32 g_rail_route_dist; /* was D_800D277C */
 f32 rail_wall_hit(f32 x, f32 y, f32 z, f32 dx, f32 dz);
-/* rail_node_nearest: the track node of D_800D2778 nearest to (x, y, z) among those of band `band` (+6) and kind
+/* rail_node_nearest: the track node of g_rail_nodes nearest to (x, y, z) among those of band `band` (+6) and kind
  * `kind` (+0xE; -1 = any). With kind 0 a node counts only when the straight move to it is free of walls
- * (rail_wall_hit < 0). The remembered node D_8008763C is tried first (its distance + 10 sets the bar) and then
+ * (rail_wall_hit < 0). The remembered node g_rail_last_node is tried first (its distance + 10 sets the bar) and then
  * cleared. Returns the node (0xFF none, also when nothing is nearer than 10000) and leaves its distance in
- * D_800D277C. */
+ * g_rail_route_dist. */
 /* was func_15086268 */
 s32 rail_node_nearest(f32 x, f32 y, f32 z, s32 kind, s32 band) {
     struct_eu_800D2778 *p;
@@ -111,18 +111,18 @@ s32 rail_node_nearest(f32 x, f32 y, f32 z, s32 kind, s32 band) {
     if (kind == 0) {
         walls = 1;
     }
-    if (D_8008763C != 0xFF) {
-        p = &D_800D2778[D_8008763C];
+    if (g_rail_last_node != 0xFF) {
+        p = &g_rail_nodes[g_rail_last_node];
         dx = p->unk0 - x;
         dy = p->unk2 - y;
         dz = p->unk4 - z;
         if (!walls || rail_wall_hit(x, y, z, dx, dz) < 0.0f) {
             best = dx * dx + dy * dy + dz * dz + 10.0f;
         }
-        D_8008763C = 0xFF;
+        g_rail_last_node = 0xFF;
     }
-    for (i = 0; i < D_80087630; i++) {
-        p = &D_800D2778[i];
+    for (i = 0; i < g_rail_node_count; i++) {
+        p = &g_rail_nodes[i];
         if (band != p->pad6 && band != -1) {
             continue;
         }
@@ -138,7 +138,7 @@ s32 rail_node_nearest(f32 x, f32 y, f32 z, s32 kind, s32 band) {
             res = i;
         }
     }
-    D_800D277C = sqrtf(best);
+    g_rail_route_dist = sqrtf(best);
     return res;
 }
 
@@ -184,7 +184,7 @@ s32 rail_point_pick(f32 x, f32 y, f32 z, s32 count, s32 first, u8 *list, void *s
         if (zone != NULL && trigger_contains_point(zone, (s32) x, (s32) y, (s32) z) != 0) {
             res = rail_route_next(near, (s8) count, (s8) first, list, sel);
         } else {
-            node = &D_800D2778[near];
+            node = &g_rail_nodes[near];
             radius = ((u8 *) node)[8];
             r2 = (f32) radius + (f32) radius;
             if (1e8f < r2 * r2) {
@@ -197,7 +197,7 @@ s32 rail_point_pick(f32 x, f32 y, f32 z, s32 count, s32 first, u8 *list, void *s
                     if (link == 0xFF) {
                         continue;
                     }
-                    to = &D_800D2778[link];
+                    to = &g_rail_nodes[link];
                     ex = to->unk0 - node->unk0;
                     ez = to->unk4 - node->unk4;
                     inv = 1.0f / sqrtf(ex * ex + ez * ez);
@@ -232,12 +232,12 @@ s32 rail_point_pick(f32 x, f32 y, f32 z, s32 count, s32 first, u8 *list, void *s
 }
 
 f32 rail_node_distance(s32, s32);
-extern u8 D_80087638;
-extern s32 D_800D277C;
+extern u8 g_rail_route_target; /* was D_80087638 */
+extern s32 g_rail_route_dist; /* was D_800D277C */
 
-// rail_route_next: shortest route (Dijkstra over the D_800D2778 track nodes, links +9..+0xD, straight-line
+// rail_route_next: shortest route (Dijkstra over the g_rail_nodes track nodes, links +9..+0xD, straight-line
 // lengths; +5000 for a link into a node of `avoid`) from node `start` to the nearest node of `targets`
-// (`nTargets` > 0). D_80087638 = the target reached (0xFF none), D_800D277C = the route length summed with
+// (`nTargets` > 0). g_rail_route_target = the target reached (0xFF none), g_rail_route_dist = the route length summed with
 // rail_node_distance over the zone runs (rail_node_in_zone). Returns the next node to head for: the first step after start,
 // or, when that step starts a zone run, the node where the run ends; `start` itself when it is a target, 0xFF when
 // there is no route. The work arrays keep the asm frame layout (a long route or node ids >= 200 spill into the next
@@ -277,12 +277,12 @@ s32 rail_route_next(s32 start, s32 nTargets, s32 nAvoid, u8 *targets, void *avoi
 
     nTargets = (s8) nTargets;
     nAvoid = (s8) nAvoid;
-    D_80087638 = 0xFF;
-    D_800D277C = 0;
+    g_rail_route_target = 0xFF;
+    g_rail_route_dist = 0;
     if (nTargets <= 0) {
         return 0xFF;
     }
-    if (start < 0 || start >= D_80087630) {
+    if (start < 0 || start >= g_rail_node_count) {
         return 0xFF;
     }
     found = TRUE;
@@ -292,15 +292,15 @@ s32 rail_route_next(s32 start, s32 nTargets, s32 nAvoid, u8 *targets, void *avoi
         }
     }
     if (!found) {
-        D_80087638 = start;
+        g_rail_route_target = start;
         return start;
     }
 
     nOpen = 0;
-    for (i = 0; i < D_80087630; i++) {
+    for (i = 0; i < g_rail_node_count; i++) {
         w.dist[i] = 1000000;
     }
-    nodes = D_800D2778;
+    nodes = g_rail_nodes;
     node = (u8 *) &nodes[start];
     for (k = 0; k < 5; k++) {
         link = node[9 + k];
@@ -349,7 +349,7 @@ s32 rail_route_next(s32 start, s32 nTargets, s32 nAvoid, u8 *targets, void *avoi
             }
         }
         if (found) {
-            D_80087638 = cur;
+            g_rail_route_target = cur;
             link = cur;
             if (cur != start) {
                 w.path[n] = link;
@@ -447,11 +447,11 @@ s32 rail_route_next(s32 start, s32 nTargets, s32 nAvoid, u8 *targets, void *avoi
             n = j;
         } while (j > 0);
     }
-    D_800D277C = total;
+    g_rail_route_dist = total;
     return next;
 }
 
-// rail_node_distance: straight-line distance between track nodes `a` and `b` of D_800D2778 (0 when either is
+// rail_node_distance: straight-line distance between track nodes `a` and `b` of g_rail_nodes (0 when either is
 // 0xFF, no node).
 /* was func_15087040 */
 f32 rail_node_distance(s32 a, s32 b) {
@@ -464,8 +464,8 @@ f32 rail_node_distance(s32 a, s32 b) {
     if (a == 0xFF || b == 0xFF) {
         return 0.0f;
     }
-    pa = (s16 *) &D_800D2778[a];
-    pb = (s16 *) &D_800D2778[b];
+    pa = (s16 *) &g_rail_nodes[a];
+    pb = (s16 *) &g_rail_nodes[b];
     dx = pa[0] - pb[0];
     dy = pa[1] - pb[1];
     dz = pa[2] - pb[2];
@@ -474,19 +474,19 @@ f32 rail_node_distance(s32 a, s32 b) {
 
 /* was func_150870E0 */
 s32 rail_node_in_zone(s32 arg0) {
-    s32 temp_v1 = D_800D2778[arg0].unk4;
+    s32 temp_v1 = g_rail_nodes[arg0].unk4;
 
-    return trigger_find_at_point(3, 0xB, D_800D2778[arg0].unk0, D_800D2778[arg0].unk2, temp_v1);
+    return trigger_find_at_point(3, 0xB, g_rail_nodes[arg0].unk0, g_rail_nodes[arg0].unk2, temp_v1);
 }
 
 /* was func_1508712C */
 s32 rail_node_position(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
-    if ((arg0 < 0) || (arg0 >= D_80087630)) {
+    if ((arg0 < 0) || (arg0 >= g_rail_node_count)) {
         return 0;
     }
-    *arg1 = (f32) D_800D2778[arg0].unk0;
-    *arg2 = (f32) D_800D2778[arg0].unk2;
-    *arg3 = (f32) D_800D2778[arg0].unk4;
+    *arg1 = (f32) g_rail_nodes[arg0].unk0;
+    *arg2 = (f32) g_rail_nodes[arg0].unk2;
+    *arg3 = (f32) g_rail_nodes[arg0].unk4;
     return 1;
 }
 
@@ -494,15 +494,15 @@ s32 rail_node_position(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
 s32 rail_node_find_by_tag(s32 arg0) {
     s32 i;
 
-    for (i = 0; i < D_80087630; i++) {
-        if (arg0 == D_800D2778[i].unk7) {
+    for (i = 0; i < g_rail_node_count; i++) {
+        if (arg0 == g_rail_nodes[i].unk7) {
             return i;
         }
     }
     return 0xFF;
 }
 
-// rail_wall_hit: where the move from (x, z) by (dx, dz) first crosses a wall: the type-1 nodes of D_800D2778 in the
+// rail_wall_hit: where the move from (x, z) by (dx, dz) first crosses a wall: the type-1 nodes of g_rail_nodes in the
 // height band of `y` (node +6 = rail_band_for_height(y)) and their links (+9..+0xD) to higher-numbered type-1 nodes form
 // segments; a segment counts when the move's start and end lie on different sides of its line and the crossing
 // point lies within the segment. Returns -1 when none is hit, else the move length times the crossing fraction of
@@ -529,8 +529,8 @@ f32 rail_wall_hit(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
     band = rail_band_for_height(y);
     best = 100.0f;
     s = 0.0f; // only read after a crossing set it
-    for (i = 0; i < D_80087630; i++) {
-        a = &D_800D2778[i];
+    for (i = 0; i < g_rail_node_count; i++) {
+        a = &g_rail_nodes[i];
         if (((u8 *) a)[0xE] != 1 || ((u8 *) a)[6] != band) {
             continue;
         }
@@ -539,7 +539,7 @@ f32 rail_wall_hit(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
             if (link == 0xFF || link <= i) {
                 continue;
             }
-            b = &D_800D2778[link];
+            b = &g_rail_nodes[link];
             if (((u8 *) b)[0xE] != 1) {
                 continue;
             }
@@ -579,19 +579,19 @@ f32 rail_wall_hit(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
     return -1.0f;
 }
 
-extern s8 D_800D27C8;
-extern s8 D_800D27B9;
-extern s8 D_800D27BA;
+extern s8 g_rail_mirrored; /* was D_800D27C8 */
+extern s8 g_rail_cpu_count; /* was D_800D27B9 */
+extern s8 g_rail_next_place; /* was D_800D27BA */
 void *allocate_memory(s32, s32, s32, s32);
 s32 rail_node_find_by_tag(s32);
 s32 rail_link_pick(u8, u8, s32);
 
 // rail_records_init: sets up the rail (track) records. From the node tagged `tag` (rail_node_find_by_tag) it takes the type-0
-// link with the highest band (the lowest when D_800D27C8 mirrors the track), the nodes after it and before the start
-// (rail_link_pick), and counts the nodes of one lap. Then D_800D27B8 = `humans`, D_800D27B9 = `cpus`, D_800D27B4 = 0,
-// and D_80087640 gets humans + cpus records (0x84 bytes, rail_record_reset) with nodes +0x2B..+0x2E = back, start, next,
-// after next, +0x26 = lap length, +0x31 = player index (human records), +0x30 = 1 from g_human_player_count on; D_800D27BA = 1.
-// Nothing (D_80087640 stays NULL) when the start node or one of its neighbours is missing.
+// link with the highest band (the lowest when g_rail_mirrored mirrors the track), the nodes after it and before the start
+// (rail_link_pick), and counts the nodes of one lap. Then g_rail_human_count = `humans`, g_rail_cpu_count = `cpus`, g_cpu_player_slot_mask = 0,
+// and g_race_records gets humans + cpus records (0x84 bytes, rail_record_reset) with nodes +0x2B..+0x2E = back, start, next,
+// after next, +0x26 = lap length, +0x31 = player index (human records), +0x30 = 1 from g_human_player_count on; g_rail_next_place = 1.
+// Nothing (g_race_records stays NULL) when the start node or one of its neighbours is missing.
 /* was func_15087540 */
 void rail_records_init(s32 tag, s32 humans, s32 cpus) {
     struct_eu_80087640 *rec;
@@ -610,24 +610,24 @@ void rail_records_init(s32 tag, s32 humans, s32 cpus) {
     s32 total;
     s32 i;
 
-    D_80087640 = NULL;
+    g_race_records = NULL;
     start = rail_node_find_by_tag(tag);
     if (start == 0xFF) {
         return;
     }
-    best = D_800D27C8 * 0xFF;
+    best = g_rail_mirrored * 0xFF;
     next = 0xFF;
-    p = (u8 *) &D_800D2778[start];
+    p = (u8 *) &g_rail_nodes[start];
     for (i = 0; i < 5; i++) {
         link = p[9 + i];
         if (link == 0xFF) {
             continue;
         }
-        q = (u8 *) &D_800D2778[link];
+        q = (u8 *) &g_rail_nodes[link];
         if (q[0xE] != 0) {
             continue;
         }
-        if (D_800D27C8 == 0) {
+        if (g_rail_mirrored == 0) {
             if (q[0xF] >= best) {
                 best = q[0xF];
                 next = link;
@@ -657,32 +657,32 @@ void rail_records_init(s32 tag, s32 humans, s32 cpus) {
         prev = cur;
         cur = nx;
     }
-    D_800D27B9 = cpus;
-    D_800D27B8 = humans;
+    g_rail_cpu_count = cpus;
+    g_rail_human_count = humans;
     total = humans + cpus;
-    D_800D27B4 = 0;
-    D_80087640 = allocate_memory(total * 0x84, 1, 0, 0);
+    g_cpu_player_slot_mask = 0;
+    g_race_records = allocate_memory(total * 0x84, 1, 0, 0);
     for (i = 0; i < total; i++) {
-        rec = &D_80087640[i];
+        rec = &g_race_records[i];
         rail_record_reset((u8 *) rec);
         rec->pad28[3] = back;
         rec->pad28[5] = next;
         rec->pad28[6] = after;
         rec->pad28[4] = start;
-        if (i < D_800D27B8) {
+        if (i < g_rail_human_count) {
             rec->unk31 = i;
         }
         ((u8 *) rec)[0x26] = laps;
         ((u8 *) rec)[0x30] = !(i < g_human_player_count);
     }
-    D_800D27BA = 1;
+    g_rail_next_place = 1;
 }
 
-extern s8 D_800D27B0;
-extern f32 D_800D27BC;
-extern f32 D_800D27C0;
-extern f32 D_800D27C4;
-extern s8 D_800D27C9;
+extern s8 g_rail_cam_mode; /* was D_800D27B0 */
+extern f32 g_rail_cam_x; /* was D_800D27BC */
+extern f32 g_rail_cam_y; /* was D_800D27C0 */
+extern f32 g_rail_cam_z; /* was D_800D27C4 */
+extern s8 g_rail_cams_active; /* was D_800D27C9 */
 f32 catmull_rom_eval(s32 *, s32, f32);
 f32 catmull_rom_eval_deriv(s32 *, s32, f32, s32 *);
 s32 rail_param_step(struct_eu_80087640 *, f32);
@@ -690,16 +690,16 @@ s32 rail_spline_points(struct_eu_80087640 *, s32 *, s32 *, s32 *);
 s32 rail_record_start_script(struct_eu_80087640 *, struct127 *, s32);
 void text_set_flags(u8);
 
-// rail_track_update: moves `player`'s rail record (D_80087640 + player * 0x84) along its spline to the point nearest
+// rail_track_update: moves `player`'s rail record (g_race_records + player * 0x84) along its spline to the point nearest
 // the player object (g_objects + rec[0x31]): the step +0 (start 0.5 when +0x30 is 0, else eased toward +4 by 1/8,
 // clamped to +-0.06) is used, then up to 11 times the player's distance from the plane through the spline point
 // (normal = the tangent, stored at +0xC / +0x10) is turned into a parameter step for rail_param_step (halved when it
 // grows). +0x14 gets the speed along the track ((previous - current distance) * 4 / frames). With +0x30 set it
-// computes the camera point D_800D27BC / C0 / C4 on a copy moved 2 * `speed` ahead (human players: or 300 units
+// computes the camera point g_rail_cam_x / C0 / C4 on a copy moved 2 * `speed` ahead (human players: or 300 units
 // behind player 0's yaw when `mode` is 0, written to the player's camera g_path_points[obj[0x13F]] +8 / +A / +C, mode
-// to obj +0x44, fov +0x20 by D_800D27B0); otherwise +0 becomes the step to the next point. Sets D_800D27C9 (rail
+// to obj +0x44, fov +0x20 by g_rail_cam_mode); otherwise +0 becomes the step to the next point. Sets g_rail_cams_active (rail
 // cameras on), counts frames off-track in +0x1C, records state 2+ via rail_record_start_script (0xD) and, for player 0, ranks
-// all D_800D27B8 records (score = t + segment, + 30000 - 1000 * place while +0x2A != 0x7F, - 10000 for the D_800D18A0
+// all g_rail_human_count records (score = t + segment, + 30000 - 1000 * place while +0x2A != 0x7F, - 10000 for the g_player_view_hidden_mask
 // players) and stores each record's place in +0x29.
 /* was func_150877C0 */
 void rail_track_update(s32 player, s32 mode, f32 speed) {
@@ -737,15 +737,15 @@ void rail_track_update(s32 player, s32 mode, f32 speed) {
     s8 tb;
 
     tries = 0;
-    if (D_80087640 == NULL) {
+    if (g_race_records == NULL) {
         return;
     }
-    rec = &D_80087640[player];
+    rec = &g_race_records[player];
     r = (u8 *) rec;
     obj = (u8 *) &g_objects[(s8) r[0x31]];
     px = *(f32 *) (obj + 0x14);
     pz = *(f32 *) (obj + 0x1C);
-    D_800D27B0 = 0;
+    g_rail_cam_mode = 0;
     if ((s8) r[0x30] == 0) {
         rec->unk0 = 0.5f;
     } else {
@@ -811,27 +811,27 @@ void rail_track_update(s32 player, s32 mode, f32 speed) {
         bcopy(rec, copy, 0x84);
         rail_param_step((struct_eu_80087640 *) copy, speed + speed);
         rail_spline_points((struct_eu_80087640 *) copy, (s32 *) xs, (s32 *) ys, (s32 *) zs);
-        D_800D27BC = catmull_rom_eval((s32 *) xs, 0, ((struct_eu_80087640 *) copy)->unk8);
-        D_800D27C0 = catmull_rom_eval((s32 *) ys, 0, ((struct_eu_80087640 *) copy)->unk8);
-        D_800D27C4 = catmull_rom_eval((s32 *) zs, 0, ((struct_eu_80087640 *) copy)->unk8);
-        if (player < D_800D27B8) {
+        g_rail_cam_x = catmull_rom_eval((s32 *) xs, 0, ((struct_eu_80087640 *) copy)->unk8);
+        g_rail_cam_y = catmull_rom_eval((s32 *) ys, 0, ((struct_eu_80087640 *) copy)->unk8);
+        g_rail_cam_z = catmull_rom_eval((s32 *) zs, 0, ((struct_eu_80087640 *) copy)->unk8);
+        if (player < g_rail_human_count) {
             if (mode == 0) {
                 // player 0's yaw (g_objects[0] +0x40) in degrees (Rare's 0.01745 for pi / 180)
                 f32 ang = *(f32 *) ((u8 *) g_objects + 0x40) * 0.01745;
 
-                D_800D27BC = sinf(ang) * 300.0f + *(f32 *) (obj + 0x14);
-                D_800D27C0 = *(f32 *) (obj + 0x18);
-                D_800D27C4 = cosf(ang) * 300.0f + *(f32 *) (obj + 0x1C);
+                g_rail_cam_x = sinf(ang) * 300.0f + *(f32 *) (obj + 0x14);
+                g_rail_cam_y = *(f32 *) (obj + 0x18);
+                g_rail_cam_z = cosf(ang) * 300.0f + *(f32 *) (obj + 0x1C);
             }
-            *(s16 *) ((u8 *) g_path_points[obj[0x13F]] + 8) = D_800D27BC;
-            *(s16 *) ((u8 *) g_path_points[obj[0x13F]] + 0xA) = D_800D27C0;
-            *(s16 *) ((u8 *) g_path_points[obj[0x13F]] + 0xC) = D_800D27C4;
+            *(s16 *) ((u8 *) g_path_points[obj[0x13F]] + 8) = g_rail_cam_x;
+            *(s16 *) ((u8 *) g_path_points[obj[0x13F]] + 0xA) = g_rail_cam_y;
+            *(s16 *) ((u8 *) g_path_points[obj[0x13F]] + 0xC) = g_rail_cam_z;
             *(f32 *) (obj + 0x44) = mode;
-            if (D_800D27B0 == 1) {
+            if (g_rail_cam_mode == 1) {
                 *(f32 *) (obj + 0x20) = 75.0f;
-            } else if (D_800D27B0 == 2) {
+            } else if (g_rail_cam_mode == 2) {
                 *(f32 *) (obj + 0x20) = 55.0f;
-            } else if (D_800D27B0 == 3) {
+            } else if (g_rail_cam_mode == 3) {
                 *(f32 *) (obj + 0x20) = 65.0f;
             }
             obj[0x21E] = 0;
@@ -856,8 +856,8 @@ void rail_track_update(s32 player, s32 mode, f32 speed) {
         }
     }
     r[0x48] = mode;
-    D_800D27C9 = 1;
-    if ((s8) r[0x30] == 0 && r[0x48] != 0 && !(D_800D18A0 & (1 << (s8) r[0x31]))) {
+    g_rail_cams_active = 1;
+    if ((s8) r[0x30] == 0 && r[0x48] != 0 && !(g_player_view_hidden_mask & (1 << (s8) r[0x31]))) {
         *(s32 *) (r + 0x1C) += g_frame_ticks;
     }
     if ((s8) r[0x30] >= 2 && (*(u8 **) (obj + 0x31C))[0x84] == 0) {
@@ -867,14 +867,14 @@ void rail_track_update(s32 player, s32 mode, f32 speed) {
         return;
     }
 
-    n = D_800D27B8;
+    n = g_rail_human_count;
     for (i = 0; i < n; i++) {
         order[i] = i;
-        score[i] = D_80087640[i].unk8 + D_80087640[i].unk24;
-        if ((s8) D_80087640[i].pad28[2] != 0x7F) {
-            score[i] += 30000.0f - (s8) D_80087640[i].pad28[2] * 1000.0f;
+        score[i] = g_race_records[i].unk8 + g_race_records[i].unk24;
+        if ((s8) g_race_records[i].pad28[2] != 0x7F) {
+            score[i] += 30000.0f - (s8) g_race_records[i].pad28[2] * 1000.0f;
         }
-        if (D_800D18A0 & (1 << (s8) D_80087640[i].unk31)) {
+        if (g_player_view_hidden_mask & (1 << (s8) g_race_records[i].unk31)) {
             score[i] -= 10000.0f;
         }
     }
@@ -893,18 +893,18 @@ void rail_track_update(s32 player, s32 mode, f32 speed) {
         }
     } while (!sorted);
     if (n > 0) {
-        for (i = 0; i < D_800D27B8; i++) {
-            D_80087640[order[i]].pad28[1] = i + 1;
+        for (i = 0; i < g_rail_human_count; i++) {
+            g_race_records[order[i]].pad28[1] = i + 1;
         }
     }
 }
 
-extern s8 D_800D27C9;
+extern s8 g_rail_cams_active; /* was D_800D27C9 */
 void rail_camera_follow(u8 *rec, u8 *player);
 void rail_camera_spline(u8 *rec, u8 *player, s32 release);
 
-// rail_cameras_update: clears D_800D27C9 and runs the rail camera of each of the D_800D27B8 player records
-// (D_80087640, 0x84 bytes) whose player (g_objects + rec[0x31]) has a camera (+0x318): records in state 2 or more
+// rail_cameras_update: clears g_rail_cams_active and runs the rail camera of each of the g_rail_human_count player records
+// (g_race_records, 0x84 bytes) whose player (g_objects + rec[0x31]) has a camera (+0x318): records in state 2 or more
 // (rec[0x30]) follow the rail (rail_camera_follow), the others with rec[0x48] == 0 run the spline camera
 // (rail_camera_spline), and the rest release the spline camera once while rec[0x49] is set.
 /* was func_15088130 */
@@ -913,12 +913,12 @@ void rail_cameras_update(void) {
     u8 *player;
     s32 i;
 
-    D_800D27C9 = 0;
-    if (D_80087640 == NULL) {
+    g_rail_cams_active = 0;
+    if (g_race_records == NULL) {
         return;
     }
-    for (i = 0; i < D_800D27B8; i++) {
-        rec = (u8 *) D_80087640 + i * 0x84;
+    for (i = 0; i < g_rail_human_count; i++) {
+        rec = (u8 *) g_race_records + i * 0x84;
         player = (u8 *) &g_objects[(s8) rec[0x31]];
         if (*(s32 *) (player + 0x318) == 0) {
             continue;
@@ -938,8 +938,8 @@ s32 rail_link_pick(u8, u8, s32);
 void rail_record_set_alt(s32 arg0, s32 arg1) {
     struct_eu_80087640 *temp_v1;
     s32 temp_v0;
-    if (D_80087640 != NULL) {
-        temp_v1 = &D_80087640[arg0];
+    if (g_race_records != NULL) {
+        temp_v1 = &g_race_records[arg0];
         if (arg1 != (s8) temp_v1->pad28[7]) {
             if (arg1 != 0) {
                 temp_v0 = rail_link_pick(temp_v1->pad28[3], temp_v1->pad28[4], 1);
@@ -952,7 +952,7 @@ void rail_record_set_alt(s32 arg0, s32 arg1) {
 }
 
 // obj_yaw_clamp_to_track: keeps the object's yaw (+0x76) within 0x2400 of a quarter turn (+0x4000) past player
-// `player`'s track direction (record D_80087640 + player * 0x84, vector +0x10 / +0xC, math_atan2_u16). Nothing without
+// `player`'s track direction (record g_race_records + player * 0x84, vector +0x10 / +0xC, math_atan2_u16). Nothing without
 // player records. Returns math_atan2_u16's raw result (the asm leaves v0 unset without records; the one caller
 // ignores it).
 /* was func_150882C4 */
@@ -962,10 +962,10 @@ s32 obj_yaw_clamp_to_track(u8 player, struct127 *obj) {
     u16 dir;
     u16 diff;
 
-    if (D_80087640 == NULL) {
+    if (g_race_records == NULL) {
         return 0;
     }
-    rec = &D_80087640[player];
+    rec = &g_race_records[player];
     r = math_atan2_u16(*(f32 *) ((u8 *) rec + 0x10), *(f32 *) ((u8 *) rec + 0xC), 0);
     dir = r + 0x4000;
     diff = dir - *(u16 *) ((u8 *) obj + 0x76);
@@ -979,22 +979,22 @@ s32 obj_yaw_clamp_to_track(u8 player, struct127 *obj) {
     return r;
 }
 
-extern s8 D_800D27C8;
+extern s8 g_rail_mirrored; /* was D_800D27C8 */
 
 // player_face_track_side: turns the object (+0x76 yaw) a quarter turn (+0x3600 / +0x4A00) from the direction of
 // player `player`'s track vector (+0x10 / +0xC, math_atan2_u16), the side picked by the track position +0 against 0.5
-// (mirrored when D_800D27C8 is set). Returns that direction (0 without player records); the one caller ignores it.
+// (mirrored when g_rail_mirrored is set). Returns that direction (0 without player records); the one caller ignores it.
 /* was func_15088360 */
 s32 player_face_track_side(s32 player, struct127 *obj) {
     struct_eu_80087640 *rec;
     u16 dir;
 
-    if (D_80087640 == NULL) {
+    if (g_race_records == NULL) {
         return 0;
     }
-    rec = &D_80087640[player];
+    rec = &g_race_records[player];
     dir = math_atan2_u16(*(f32 *)((u8 *)rec + 0x10), *(f32 *)((u8 *)rec + 0xC), 0);
-    if (D_800D27C8 == 0) {
+    if (g_rail_mirrored == 0) {
         if (rec->unk0 < 0.5f) {
             *(u16 *)((u8 *)obj + 0x76) = dir + 0x4A00;
         } else {
@@ -1014,8 +1014,8 @@ s32 player_face_track_side(s32 player, struct127 *obj) {
 void rail_record_set_player(s32 arg0, s32 arg1) {
     struct_eu_80087640 *temp_v1;
 
-    if (D_80087640 != NULL) {
-        temp_v1 = &D_80087640[arg0];
+    if (g_race_records != NULL) {
+        temp_v1 = &g_race_records[arg0];
         temp_v1->unk31 = arg1;
     }
 }
@@ -1024,8 +1024,8 @@ void rail_record_set_player(s32 arg0, s32 arg1) {
 void rail_record_set_target_pos(s32 arg0, s32 arg1) {
     struct_eu_80087640 *temp_v1;
 
-    if (D_80087640 != NULL) {
-        temp_v1 = &D_80087640[arg0];
+    if (g_race_records != NULL) {
+        temp_v1 = &g_race_records[arg0];
         temp_v1->unk4 = arg1 * (1.0f / 256);
     }
 }
@@ -1040,7 +1040,7 @@ s32 rail_record_start_script(struct_eu_80087640 *arg0, struct127 *arg1, s32 arg2
     if (temp_v0->unk120 != 0) {
         return 1;
     }
-    if (D_800D18A0 & (1 << (arg1 - g_objects))) {
+    if (g_player_view_hidden_mask & (1 << (arg1 - g_objects))) {
         return 1;
     }
     temp_v0->unk84 = 1;
@@ -1056,7 +1056,7 @@ s32 rail_record_start_script(struct_eu_80087640 *arg0, struct127 *arg1, s32 arg2
 }
 
 s32 rail_record_start_script(struct_eu_80087640 *, struct127 *, s32); // 3 params: the asm never reads a3 (s87)
-extern s8 D_800D27BA;
+extern s8 g_rail_next_place; /* was D_800D27BA */
 
 /* was func_15088568 */
 s32 rail_record_start(s32 arg0, s32 arg1) {
@@ -1067,10 +1067,10 @@ s32 rail_record_start(s32 arg0, s32 arg1) {
     struct_eu_80087640 *sp1C;
 
     var_a2 = 0;
-    if (D_80087640 == NULL) {
+    if (g_race_records == NULL) {
         return 0;
     }
-    temp_a0 = &D_80087640[arg0];
+    temp_a0 = &g_race_records[arg0];
     temp_v1 = (s8) temp_a0->pad28[8];
     temp_a1 = &g_objects[(s8) temp_a0->unk31];
     if (temp_v1 == 0) {
@@ -1080,8 +1080,8 @@ s32 rail_record_start(s32 arg0, s32 arg1) {
         temp_a0->pad28[8] = 2;
         temp_a1->immune = 0xFF;
     }
-    temp_a0->pad28[2] = (u8) D_800D27BA;
-    D_800D27BA += 1;
+    temp_a0->pad28[2] = (u8) g_rail_next_place;
+    g_rail_next_place += 1;
     return var_a2;
 }
 
@@ -1089,10 +1089,10 @@ s32 rail_record_start(s32 arg0, s32 arg1) {
 s32 rail_record_get_pos(s32 arg0) {
     struct_eu_80087640 *temp_a0;
 
-    if (D_80087640 == NULL) {
+    if (g_race_records == NULL) {
         return 0;
     }
-    temp_a0 = &D_80087640[arg0];
+    temp_a0 = &g_race_records[arg0];
     return temp_a0->unk0 * 256.0f;
 }
 
@@ -1101,10 +1101,10 @@ s32 rail_record_get_progress(s32 arg0) {
     struct_eu_80087640 *temp_a0;
     s16 temp_a2;
 
-    if (D_80087640 == NULL) {
+    if (g_race_records == NULL) {
         return 0;
     }
-    temp_a0 = &D_80087640[arg0];
+    temp_a0 = &g_race_records[arg0];
     temp_a2 = temp_a0->unk24;
     return (temp_a2 * 16) + (s32)(temp_a0->unk8 * 16.0f);
 }
@@ -1113,10 +1113,10 @@ s32 rail_record_get_progress(s32 arg0) {
 s32 rail_record_get_speed(s32 arg0) {
     struct_eu_80087640 *temp_a0;
 
-    if (D_80087640 == NULL) {
+    if (g_race_records == NULL) {
         return 0;
     }
-    temp_a0 = &D_80087640[arg0];
+    temp_a0 = &g_race_records[arg0];
     return temp_a0->unk14 * 0.8f;
 }
 
@@ -1124,10 +1124,10 @@ s32 rail_record_get_speed(s32 arg0) {
 s32 rail_record_get_lap(s32 arg0) {
     struct_eu_80087640 *temp_a0;
 
-    if (D_80087640 == NULL) {
+    if (g_race_records == NULL) {
         return 0;
     }
-    temp_a0 = &D_80087640[arg0];
+    temp_a0 = &g_race_records[arg0];
     return temp_a0->unk27;
 }
 
@@ -1141,12 +1141,12 @@ s32 player_place_gap(s32 player, s32 delta) {
     s32 gap;
     s32 i;
 
-    if (D_80087640 == NULL) {
+    if (g_race_records == NULL) {
         return 16;
     }
-    me = &D_80087640[player];
+    me = &g_race_records[player];
     place = *(s8 *)((u8 *)me + 0x29) + delta;
-    for (i = 0, other = D_80087640; i < D_800D27B8; i++, other++) {
+    for (i = 0, other = g_race_records; i < g_rail_human_count; i++, other++) {
         if (place == *(s8 *)((u8 *)other + 0x29) && i != player) {
             gap = me->unk24 * 16 + (s32)(me->unk8 * 16.0f) - other->unk24 * 16 - (s32)(other->unk8 * 16.0f);
             if (gap < 0) {
@@ -1159,7 +1159,7 @@ s32 player_place_gap(s32 player, s32 delta) {
 }
 
 // rail_find_ahead: the nearest other racer in front of player `player`'s object along its rail record's track
-// direction (+0xC / +0x10, reversed when `dir` >= 0): among the D_800D27B8 records whose player (+0x31) is not the
+// direction (+0xC / +0x10, reversed when `dir` >= 0): among the g_rail_human_count records whose player (+0x31) is not the
 // object's own (obj[0x124] - 1) and, when the record's alt +0x2F is set, with the same alt, the one with the smallest
 // positive distance (< 10000) from the plane through the player's position. Stores that record's +0 in `*t` and its
 // alt in `*alt` and returns its object (g_objects + +0x31); NULL when there is none or no records.
@@ -1180,10 +1180,10 @@ struct127 *rail_find_ahead(s32 player, s32 dir, f32 *t, s32 *alt) {
     s8 id;
     s32 i;
 
-    if (D_80087640 == NULL) {
+    if (g_race_records == NULL) {
         return NULL;
     }
-    rec = &D_80087640[player];
+    rec = &g_race_records[player];
     if (dir >= 0) {
         sign = -1.0f;
     } else {
@@ -1197,8 +1197,8 @@ struct127 *rail_find_ahead(s32 player, s32 dir, f32 *t, s32 *alt) {
     found = NULL;
     best = 10000.0f;
     c = -(nx * *(f32 *) ((u8 *) obj + 0x14) + nz * *(f32 *) ((u8 *) obj + 0x1C));
-    for (i = 0; i < D_800D27B8; i++) {
-        other = &D_80087640[i];
+    for (i = 0; i < g_rail_human_count; i++) {
+        other = &g_race_records[i];
         id = other->unk31;
         if (self == id) {
             continue;
@@ -1229,15 +1229,15 @@ s32 rail_record_index_of(arg0)
     struct_eu_80087640 *p;
 
     idx = arg0 - g_objects;
-    if (D_80087640 == NULL) {
+    if (g_race_records == NULL) {
         return -1;
     }
     if (idx == 0) {
         return 0;
     }
     i = 1;
-    n = D_800D27B8 + D_800D27B9;
-    p = D_80087640 + 1;
+    n = g_rail_human_count + g_rail_cpu_count;
+    p = g_race_records + 1;
     if (n >= 2) {
         for (;;) {
             if (idx == (s8)p->unk31) {
@@ -1259,35 +1259,35 @@ void rail_record_copy(s32 arg0, s32 arg1)
 {
   s32 a;
   s32 b;
-  if (D_80087640 != 0) {
-    a = (s8)D_80087640[arg1].unk31;
-    b = (s8)D_80087640[arg1].pad28[8];
-    bcopy(&D_80087640[arg0], &D_80087640[arg1], 0x84);
-    D_80087640[arg1].unk31 = a;
-    D_80087640[arg1].pad28[8] = b;
+  if (g_race_records != 0) {
+    a = (s8)g_race_records[arg1].unk31;
+    b = (s8)g_race_records[arg1].pad28[8];
+    bcopy(&g_race_records[arg0], &g_race_records[arg1], 0x84);
+    g_race_records[arg1].unk31 = a;
+    g_race_records[arg1].pad28[8] = b;
   }
 }
 
-// cpu_player_slot_claim: takes the first free computer-player slot (bit i of D_800D27B4, i < D_800D27B9), resets
-// its record D_80087640[D_800D27B8 + i] (rail_record_reset), marks it used (+0x30 = 1) for the object record objp
+// cpu_player_slot_claim: takes the first free computer-player slot (bit i of g_cpu_player_slot_mask, i < g_rail_cpu_count), resets
+// its record g_race_records[g_rail_human_count + i] (rail_record_reset), marks it used (+0x30 = 1) for the object record objp
 // (+0x31 = its g_objects index) and returns the record index; -1 when none is free or there are no records.
 // arg1 is unused (the caller passes the object twice).
 /* was func_15088B08 */
 s32 cpu_player_slot_claim(s32 objp, s32 arg1) {
     s32 bit = 1;
-    s32 n = D_800D27B9;
+    s32 n = g_rail_cpu_count;
     s32 i;
 
-    if (D_80087640 == NULL) {
+    if (g_race_records == NULL) {
         return -1;
     }
     for (i = 0; i < n; i++, bit <<= 1) {
-        if (!(D_800D27B4 & bit)) {
-            D_800D27B4 |= bit;
-            i += D_800D27B8;
-            rail_record_reset((u8 *)&D_80087640[i]);
-            *((u8 *)&D_80087640[i] + 0x30) = 1;
-            D_80087640[i].unk31 = ((u8 *)objp - (u8 *)g_objects) / 0x32C;
+        if (!(g_cpu_player_slot_mask & bit)) {
+            g_cpu_player_slot_mask |= bit;
+            i += g_rail_human_count;
+            rail_record_reset((u8 *)&g_race_records[i]);
+            *((u8 *)&g_race_records[i] + 0x30) = 1;
+            g_race_records[i].unk31 = ((u8 *)objp - (u8 *)g_objects) / 0x32C;
             return i;
         }
     }
@@ -1302,19 +1302,19 @@ s32 rail_record_index_of();
 void cpu_player_slot_release(struct127 *arg0) {
     s32 temp_v0;
 
-    if (D_80087640 != NULL) {
+    if (g_race_records != NULL) {
         temp_v0 = rail_record_index_of(arg0);
-        D_80087640[temp_v0].unk31 = 0;
-        D_800D27B4 &= ~(1 << (temp_v0 - D_800D27B8));
+        g_race_records[temp_v0].unk31 = 0;
+        g_cpu_player_slot_mask &= ~(1 << (temp_v0 - g_rail_human_count));
     }
 }
 
 /* was func_15088C74 */
 s32 rail_first_record_idle(void) {
-    if (D_80087640 == NULL) {
+    if (g_race_records == NULL) {
         return 0;
     }
-    return D_80087640->unk46 == 0xFF;
+    return g_race_records->unk46 == 0xFF;
 }
 
 /* was func_15088CA0 */
@@ -1345,11 +1345,11 @@ void rail_record_reset(u8 *arg0) {
 }
 
 // rail_link_pick: the next track node after `node` coming from `prev`, among its type-0 links (+9..+0xD of the
-// D_800D2778 node, 0xFF / `prev` skipped): the last link whose band (+0xF) is not the wanted one (1 when `alt` is set,
+// g_rail_nodes node, 0xFF / `prev` skipped): the last link whose band (+0xF) is not the wanted one (1 when `alt` is set,
 // else 2; a band-0 link only when none was found yet), otherwise the last link in the wanted band; 0xFF when none.
 /* was func_15088D24 */
 s32 rail_link_pick(u8 prev, u8 node, s32 alt) {
-    u8 *p = (u8 *) &D_800D2778[node];
+    u8 *p = (u8 *) &g_rail_nodes[node];
     u8 *q;
     u8 want;
     u8 match = 0xFF;
@@ -1367,7 +1367,7 @@ s32 rail_link_pick(u8 prev, u8 node, s32 alt) {
         if (link == 0xFF || link == prev) {
             continue;
         }
-        q = (u8 *) &D_800D2778[link];
+        q = (u8 *) &g_rail_nodes[link];
         if (q[0xE] != 0) {
             continue;
         }
@@ -1383,16 +1383,16 @@ s32 rail_link_pick(u8 prev, u8 node, s32 alt) {
     return other;
 }
 
-extern s8 D_800D27B0;
-extern s8 D_800D27C8;
+extern s8 g_rail_cam_mode; /* was D_800D27B0 */
+extern s8 g_rail_mirrored; /* was D_800D27C8 */
 s32 rail_link_pick(u8, u8, s32);
 
 // rail_param_step: moves rail record `rec`'s spline parameter +8 by `dt`. Below 0 it wraps (+1) and the four control
 // nodes +0x2B..+0x2E shift one node back (new first node from rail_link_pick, alt = +0x2F); from 1 on it wraps (-1) and
-// they shift forward (new last node), and the new second node's camera type (+0xF) picks the camera mode D_800D27B0
-// (5 -> 1, 6 -> 2; on the mirrored track D_800D27C8: 7 -> 1, 8 -> 2, 9 -> 3). On a shift the node counter +0x24 moves
+// they shift forward (new last node), and the new second node's camera type (+0xF) picks the camera mode g_rail_cam_mode
+// (5 -> 1, 6 -> 2; on the mirrored track g_rail_mirrored: 7 -> 1, 8 -> 2, 9 -> 3). On a shift the node counter +0x24 moves
 // by the direction and gives the lap +0x27 (/ lap length +0x26; capped at the lap count g_settings[7] + 1 when
-// D_800BE616 is set). A new highest lap +0x28 of a human player's (+0x31 < g_human_player_count) record that is not on the rail
+// g_mp_mode_active is set). A new highest lap +0x28 of a human player's (+0x31 < g_human_player_count) record that is not on the rail
 // (+0x30 = 0) with time +0x1C > 0 records the lap time (+0x1C - lap start +0x18, max 0x7D00) in +0x20 and as the
 // player's best lap (s16 at g_settings + 0x30) when better, and on the last lap the total time (max 0x57E40) at
 // g_settings + 0x38; the lap start becomes the time (-time after the last lap). Returns the direction (-1, 0, 1).
@@ -1421,27 +1421,27 @@ s32 rail_param_step(struct_eu_80087640 *rec, f32 dt) {
         r[0x2D] = r[0x2E];
         r[0x2E] = rail_link_pick(r[0x2C], r[0x2D], (s8) r[0x2F]);
         dir = 1;
-        if (D_800D27C8 == 0) {
-            node = (u8 *) &D_800D2778[r[0x2C]];
+        if (g_rail_mirrored == 0) {
+            node = (u8 *) &g_rail_nodes[r[0x2C]];
             if (node[0xF] == 5) {
-                D_800D27B0 = 1;
+                g_rail_cam_mode = 1;
             }
-            node = (u8 *) &D_800D2778[r[0x2C]];
+            node = (u8 *) &g_rail_nodes[r[0x2C]];
             if (node[0xF] == 6) {
-                D_800D27B0 = 2;
+                g_rail_cam_mode = 2;
             }
         } else {
-            node = (u8 *) &D_800D2778[r[0x2C]];
+            node = (u8 *) &g_rail_nodes[r[0x2C]];
             if (node[0xF] == 7) {
-                D_800D27B0 = 1;
+                g_rail_cam_mode = 1;
             }
-            node = (u8 *) &D_800D2778[r[0x2C]];
+            node = (u8 *) &g_rail_nodes[r[0x2C]];
             if (node[0xF] == 8) {
-                D_800D27B0 = 2;
+                g_rail_cam_mode = 2;
             }
-            node = (u8 *) &D_800D2778[r[0x2C]];
+            node = (u8 *) &g_rail_nodes[r[0x2C]];
             if (node[0xF] == 9) {
-                D_800D27B0 = 3;
+                g_rail_cam_mode = 3;
             }
         }
     }
@@ -1453,7 +1453,7 @@ s32 rail_param_step(struct_eu_80087640 *rec, f32 dt) {
     rec->unk24 += dir;
     rec->unk27 = rec->unk24 / (s8) r[0x26];
     player = (s8) r[0x31];
-    if (D_800BE616 != 0 && laps < rec->unk27) {
+    if (g_mp_mode_active != 0 && laps < rec->unk27) {
         rec->unk27 = laps + 1;
     }
     if (rec->unk27 <= (s8) r[0x28]) {
@@ -1515,7 +1515,7 @@ void rail_record_resync(u8 *arg0)
   temp_v0 = rail_record_index_of(arg0);
   if (temp_v0 >= 0)
   {
-    temp_s4 = &D_80087640[temp_v0];
+    temp_s4 = &g_race_records[temp_v0];
     temp_s4->unk0 = 0.5f;
     temp_s4->unk4 = 0.5f;
     temp_s4->unk8 = 0.5f;
@@ -1523,14 +1523,14 @@ void rail_record_resync(u8 *arg0)
     {
       var_s0 = 0;
       var_v0 = 0;
-      var_v1 = (u8 *) &D_800D2778[temp_s4->pad28[4]];
+      var_v1 = (u8 *) &g_rail_nodes[temp_s4->pad28[4]];
       do
       {
         temp_a0 = var_v1[9];
         var_v0 += 1;
         if (temp_a0 != 0xFF)
         {
-          temp_a1 = &D_800D2778[temp_a0];
+          temp_a1 = &g_rail_nodes[temp_a0];
           if (temp_a1->pad8[6] == 4)
           {
             var_s0 = temp_a1->pad8[7];
@@ -1562,7 +1562,7 @@ void rail_record_resync(u8 *arg0)
   }
 }
 
-// rail_spline_points: the four spline control points of a rail record (nodes rec[0x2B..0x2E] of D_800D2778) as
+// rail_spline_points: the four spline control points of a rail record (nodes rec[0x2B..0x2E] of g_rail_nodes) as
 // separate x / y / z float arrays: each node's position moved by rec->unk0 toward its first type-4 link (x and z only;
 // the node itself when it has none); a missing node (0xFF) gives (i * 64, 0, 0). Returns 4 (the point count; the
 // callers ignore it).
@@ -1584,13 +1584,13 @@ s32 rail_spline_points(struct_eu_80087640 *rec, s32 *xs, s32 *ys, s32 *zs) {
             ((f32 *) zs)[i] = 0.0f;
             continue;
         }
-        node = &D_800D2778[id];
+        node = &g_rail_nodes[id];
         to = node;
         p = (u8 *) node;
         for (k = 0; k < 5; k++) {
             link = p[9 + k];
-            if (link != 0xFF && ((u8 *) &D_800D2778[link])[0xE] == 4) {
-                to = &D_800D2778[link];
+            if (link != 0xFF && ((u8 *) &g_rail_nodes[link])[0xE] == 4) {
+                to = &g_rail_nodes[link];
                 break;
             }
         }
@@ -1601,7 +1601,7 @@ s32 rail_spline_points(struct_eu_80087640 *rec, s32 *xs, s32 *ys, s32 *zs) {
     return i;
 }
 
-// rail_node_next: the rail node after `node` coming from `prev` (D_800D2778, D_80087630 nodes of 16 bytes: s16 x / y / z,
+// rail_node_next: the rail node after `node` coming from `prev` (g_rail_nodes, g_rail_node_count nodes of 16 bytes: s16 x / y / z,
 // links +9..+0xD (0xFF = none), type +0xE, band +0xF). Takes the links in order, skipping 0xFF and `prev`; a link of
 // type `type` (any type when `type` is 0xFF) and band `band` is returned at once, otherwise the last link of the right
 // type. 0xFF when `node` is out of range or no link fits.
@@ -1613,16 +1613,16 @@ u8 rail_node_next(u8 node, u8 type, u8 prev, u8 band) {
     u8 link;
     s32 k;
 
-    if (node >= D_80087630) {
+    if (node >= g_rail_node_count) {
         return 0xFF;
     }
-    p = (u8 *) &D_800D2778[node];
+    p = (u8 *) &g_rail_nodes[node];
     for (k = 0; k < 5; k++) {
         link = p[9 + k];
         if (link == 0xFF || link == prev) {
             continue;
         }
-        q = (u8 *) &D_800D2778[link];
+        q = (u8 *) &g_rail_nodes[link];
         if (q[0xE] == type || type == 0xFF) {
             last = link;
             if (q[0xF] == band) {
@@ -1637,10 +1637,10 @@ extern u16 g_mp_game_flags; /* was D_8009015C */
 void camera_queue_event(u8 *, s32, void *);
 u8 rail_node_next(u8 node, u8 type, u8 prev, u8 band);
 
-// rail_camera_follow: rail camera of one player record (D_80087640 + i * 0x84, player = g_objects + rec[0x31],
-// camera = player + 0x318) on the rail nodes of D_800D2778 (band 1 when g_mp_game_flags bit 6 is set, else 0). State 2
+// rail_camera_follow: rail camera of one player record (g_race_records + i * 0x84, player = g_objects + rec[0x31],
+// camera = player + 0x318) on the rail nodes of g_rail_nodes (band 1 when g_mp_game_flags bit 6 is set, else 0). State 2
 // (rec[0x30]) sets it up: the first type-5 band-2 node starts the segment rec[0x4A] -> rec[0x4B] (rec[0x4B] = its
-// band-3 link, or its non-band-3 link when D_800D27C8 is set), then the whole rail loop is walked from there and the
+// band-3 link, or its non-band-3 link when g_rail_mirrored is set), then the whole rail loop is walked from there and the
 // segment whose end node is nearest the player (x / z) is kept; camera mode 5, state 3. Every call: the segment moves
 // on when the player is nearer its end node than its start; the camera (mode 7, parameters at rec + 0x4C) looks at the
 // player from that node's direction, at most 1000 units back. Camera +0x19C..+0x1A8 = 30.
@@ -1671,8 +1671,8 @@ void rail_camera_follow(u8 *rec, u8 *player) {
     }
     band = (g_mp_game_flags & 0x40) ? 1 : 0;
     if ((s8) rec[0x30] == 2) {
-        for (i = 0; i < D_80087630; i++) {
-            node = (u8 *) &D_800D2778[i];
+        for (i = 0; i < g_rail_node_count; i++) {
+            node = (u8 *) &g_rail_nodes[i];
             if (node[0xE] != 5 || node[0xF] != 2) {
                 continue;
             }
@@ -1683,11 +1683,11 @@ void rail_camera_follow(u8 *rec, u8 *player) {
                 if (link == 0xFF) {
                     continue;
                 }
-                if (D_800D27C8 == 0) {
-                    if (((u8 *) &D_800D2778[link])[0xF] == 3) {
+                if (g_rail_mirrored == 0) {
+                    if (((u8 *) &g_rail_nodes[link])[0xF] == 3) {
                         rec[0x4B] = link;
                     }
-                } else if (((u8 *) &D_800D2778[link])[0xF] != 3) {
+                } else if (((u8 *) &g_rail_nodes[link])[0xF] != 3) {
                     rec[0x4B] = link;
                 }
             }
@@ -1698,7 +1698,7 @@ void rail_camera_follow(u8 *rec, u8 *player) {
         prev = rec[0x4A];
         best = 1.0e9f;
         do {
-            node = (u8 *) &D_800D2778[cur];
+            node = (u8 *) &g_rail_nodes[cur];
             next = rail_node_next(cur, 0xFF, prev, band);
             dx = *(f32 *) (player + 0x14) - *(s16 *) node;
             dz = *(f32 *) (player + 0x1C) - *(s16 *) (node + 4);
@@ -1715,11 +1715,11 @@ void rail_camera_follow(u8 *rec, u8 *player) {
         rec[0x30] = 3;
     }
 
-    b = (u8 *) &D_800D2778[rec[0x4B]];
+    b = (u8 *) &g_rail_nodes[rec[0x4B]];
     dx = *(f32 *) (player + 0x14) - *(s16 *) b;
     dz = *(f32 *) (player + 0x1C) - *(s16 *) (b + 4);
     dB = dx * dx + dz * dz;
-    a = (u8 *) &D_800D2778[rec[0x4A]];
+    a = (u8 *) &g_rail_nodes[rec[0x4A]];
     node = a;
     dx = *(f32 *) (player + 0x14) - *(s16 *) a;
     dz = *(f32 *) (player + 0x1C) - *(s16 *) (a + 4);
@@ -1762,9 +1762,9 @@ void rail_camera_follow(u8 *rec, u8 *player) {
 void camera_queue_event(u8 *, s32, void *);
 u8 rail_node_next(u8 node, u8 type, u8 prev, u8 band);
 
-// rail_camera_spline: spline camera of one player record (D_80087640 + i * 0x84, camera = player + 0x318).
+// rail_camera_spline: spline camera of one player record (g_race_records + i * 0x84, camera = player + 0x318).
 // `release` != 0: camera mode 10 (rec + 0x4C params: +0x58 = 999, +0x5C = 120), then mode 6 with the camera's +0x23D,
-// rec[0x49] = 0. Else, on the first call (rec[0x49] == 0): the first type-6 node of band D_800D27C8 + 1 and the next
+// rec[0x49] = 0. Else, on the first call (rec[0x49] == 0): the first type-6 node of band g_rail_mirrored + 1 and the next
 // three type-6 nodes after it fill rec[0x44..0x47], the player position is kept at rec + 0x38, t (rec + 0x34) = 0,
 // camera mode 5, rec[0x49] = 1. Each call t += 0.017 * g_frame_ticks; past 1 the four nodes shift on by one (t stays at
 // 1 at the rail end). The eye points are the nodes rec[0x44 + k] (from rec + 0x38 behind the player's yaw +0x40 for
@@ -1796,9 +1796,9 @@ void rail_camera_spline(u8 *rec, u8 *player, s32 release) {
         return;
     }
     if ((s8) rec[0x49] == 0) {
-        want = D_800D27C8 + 1;
-        for (i = 0; i < D_80087630; i++) {
-            if (((u8 *) &D_800D2778[i])[0xE] == 6 && ((u8 *) &D_800D2778[i])[0xF] == want) {
+        want = g_rail_mirrored + 1;
+        for (i = 0; i < g_rail_node_count; i++) {
+            if (((u8 *) &g_rail_nodes[i])[0xE] == 6 && ((u8 *) &g_rail_nodes[i])[0xF] == want) {
                 rec[0x44] = i;
                 break;
             }

@@ -154,15 +154,15 @@ typedef struct {
     s16 unk56, unk58;
 } ScriptSpray;
 
-extern u8  *D_800C3D80[4][30];      /* per player and track: byte table written by type 0x11 */
+extern u8  *g_cutscene_actor_blocks[4][30];      /* per player and track: byte table written by type 0x11; was D_800C3D80 */
 extern s16 *D_eu_800C3C88[4][30];   /* per player and track: s16 x, y, z */
-extern s32 *D_800C3A00[4];          /* per player: word table indexed by w6 */
-extern s32 D_8008CDF0;
+extern s32 *g_cutscene_words[4];          /* per player: word table indexed by w6; was D_800C3A00 */
+extern s32 g_scene_ev0c_quad_word; /* was D_8008CDF0 */
 extern u8 *g_char_fx_states[]; /* was D_8008AF88 */
 extern f32 g_gun_smoke_start_pt[]; /* was D_800AAE70 */
-extern char D_80096DEC[];          /* "Cutscene 2" */
+extern char g_str_cutscene_2[];          /* "Cutscene 2"; was D_80096DEC */
 
-extern u8 D_800844D8[3][6];         /* sub 0x11 colour sets (.data) */
+extern u8 g_scene_ev11_colour_sets[3][6];         /* sub 0x11 colour sets (.data); was D_800844D8 */
 /* bone offset tables of sub 0x5F (copied to the stack before use, as the N64 code does: their address is passed on) */
 typedef struct { f32 v[3][3]; } ScriptOffsets3;
 typedef struct { f32 v[4][3]; } ScriptOffsets4;
@@ -189,12 +189,12 @@ static const u8 sBones5F19[8] = { 7, 8, 9, 10, 13, 14, 15, 16 };                
 
 /* frames until the next event of this type and id on the track: the effect's duration */
 #define SPAN(ev, out) (scene_event_find_next((u32) (ev), (ev)->type, track, (out), 1, (ev)->id, 0, 0, 0, 0, player) - now)
-#define REC(player, track) ((u8 *) &(&D_800C3958)[player][track])
+#define REC(player, track) ((u8 *) &(&g_cutscene_track_recs)[player][track])
 #define OBJ_INDEX(obj) ((s32) ((u8 *) (obj) - (u8 *) g_objects) / 812)
 
 /* Script event interpreter (middle handler of scene_event_run). `arg0` is one 8-byte ScriptEvent of track `track` of
  * player `player`; `now` = the current frame, `value` = the byte type 0x11 stores, `obj` / `rec` = the object or the
- * player's D_800C3958 record the track drives, `data` = its position (f32 x, y, z), `flag` = passed on to the effects.
+ * player's g_cutscene_track_recs record the track drives, `data` = its position (f32 x, y, z), `flag` = passed on to the effects.
  * Type 0x0B plays / fades / stops a sound, type 0x11 sets a per-track byte, type 0x05 starts effect `id` (most only
  * when b4 == 0; "span" = frames until the next event with the same type and id). Returns 1 when handled, else 0. */
 s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 *obj, u8 *rec, u8 *data, s32 flag) {
@@ -223,7 +223,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         return 1;
     }
     if (ev->type == 0x11) {
-        D_800C3D80[player][track][ev->id] = ev->b4 != 0 ? (u8) value : 0xFF;
+        g_cutscene_actor_blocks[player][track][ev->id] = ev->b4 != 0 ? (u8) value : 0xFF;
         return 1;
     }
     if (ev->type != 5) {
@@ -249,7 +249,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             size = 200;
         }
         k = ev->b5 < 3 ? ev->b5 : 0;
-        c = D_800844D8[k];   /* N64: from a stack copy of the table taken before the span call */
+        c = g_scene_ev11_colour_sets[k];   /* N64: from a stack copy of the table taken before the span call */
         grow = (size * 40) / 4096;
         /* a0 / a1: the two halves of the `data` pointer, as the N64 code passes them */
         particle_emitter_node_spawn((s16) ((s32) data >> 16), (s16) (s32) data, 0, 0x1B, 0, c[0], c[1], c[2], c[3], c[4], c[5], 0, 1,
@@ -279,7 +279,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         } s;
         s.unk4 = 0;
         s.unk6 = 0x100;
-        s.unk0 = D_8008CDF0;
+        s.unk0 = g_scene_ev0c_quad_word;
         s.x = pos[0];
         s.y = pos[1] + ev->b4;
         s.unkE = 1500;
@@ -490,10 +490,10 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             }
             break;
         case 17:
-            text_pager_spawn_caption(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
+            text_pager_spawn_caption(ev->w6 & 0xFF, g_cutscene_words[player][ev->w6], span, (u8) flag, 1);
             break;
         case 18:
-            text_pager_spawn_console(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
+            text_pager_spawn_console(ev->w6 & 0xFF, g_cutscene_words[player][ev->w6], span, (u8) flag, 1);
             break;
         case 19:
             screen_bar_spawn(span, (u8) flag, 1);
@@ -502,7 +502,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             obj_dust_effect((u8 *) obj, span, (u8) flag, 1);
             break;
         case 21:
-            text_pager_spawn_title(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
+            text_pager_spawn_title(ev->w6 & 0xFF, g_cutscene_words[player][ev->w6], span, (u8) flag, 1);
             break;
         case 22:
             seqfx_track_sprite_spawn(REC(player, track), (u16) ev->w6 < 0xCF ? (u16) ev->w6 : 0, span, (u8) flag, 1);
@@ -599,7 +599,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
                     bone_sparks_attach_preset((s32) obj, list[ev->w6], span, -1, -1, -1, 0, 0, flag, 1);
                 }
             } else {
-                character_effect_attach((u8 *) obj, ev->b5, span, 0, flag, 1, D_80096DEC);
+                character_effect_attach((u8 *) obj, ev->b5, span, 0, flag, 1, g_str_cutscene_2);
             }
         }
         break;
@@ -817,7 +817,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         case 11: {
             u8 k = 0;
             do {
-                laser_switch_broadcast(1, (s32) (D_800D34B8 + sLights5F11[k] * 0x34));
+                laser_switch_broadcast(1, (s32) (g_level_zones + sLights5F11[k] * 0x34));
                 k++;
             } while (k < 4);
             break;

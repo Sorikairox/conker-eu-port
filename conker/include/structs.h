@@ -3313,7 +3313,7 @@ typedef struct {
     u8  unk8;
     u8  unk9;
 } struct_eu_151419D0_msg;
-// generic view of a sound handle entry (struct15, D_80041FE0[]) as seen by the
+// generic view of a sound handle entry (struct15, g_sfx_emitters[]) as seen by the
 // per-sound update callbacks in init_EB00; unk14/unk18/unk1C are the owner keys
 typedef struct {
     s16 unk0;

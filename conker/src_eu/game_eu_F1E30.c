@@ -37,7 +37,7 @@ typedef struct {
     u8 rgba[4];     /* 0x14 */
     u8 rgba2[4];    /* 0x18 */
     u8 u1C;         /* 0x1C */
-    u8 colour;      /* 0x1D D_800A0710[rand & 3] */
+    u8 colour;      /* 0x1D g_damage_smoke_colours[rand & 3] */
     s16 u1E;        /* 0x1E */
     s16 u20;        /* 0x20 */
     s16 u22;        /* 0x22 */
@@ -67,13 +67,13 @@ typedef struct {
     f32 v[3];
 } Vec4620;
 
-extern u32 D_800A0710[4];
+extern u32 g_damage_smoke_colours[4]; /* was D_800A0710 */
 s32 memcpy(void *, void *, s32);
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 // object_glow_spawn: spawns a type `kind` object (0x12C when kind is -1; effect_node_create) linked to obj (record at +0x28:
 // obj, room, the glow at +0xC; field +0x14 = 0x54 / +0x16 = 1 for a type 0x34 owner, else -1 / 0), then a glow
-// (particle_spawn_ex type 1, radius 700, a random colour of D_800A0710, random flag bits 0x40 / 0x80) whose +0xA8 tail
+// (particle_spawn_ex type 1, radius 700, a random colour of g_damage_smoke_colours, random flag bits 0x40 / 0x80) whose +0xA8 tail
 // gets two random bytes, two counts 5..10 and two scales (0.2 + [0, 0.25)) * 700.
 /* was func_150C4620 */
 void damage_smoke_spawn(u8 *obj, s16 kind, u8 flag, s32 arg3) {
@@ -113,7 +113,7 @@ void damage_smoke_spawn(u8 *obj, s16 kind, u8 flag, s32 arg3) {
     tail.u3 = (u32) random_int() % 6 + 5;
     tail.u8 = (random_float() * 0.25f + 0.2f) * tail.radius;   /* D_800A077C */
     tail.uC = (random_float() * 0.25f + 0.2f) * tail.radius;   /* D_800A0780 */
-    g.colour = D_800A0710[random_int() & 3];
+    g.colour = g_damage_smoke_colours[random_int() & 3];
     g.u8 = 0x2203;
     g.u0 = 0x200005;
     g.u4 = 0;
@@ -164,10 +164,10 @@ void fire_embers_spawn_b(u8 *arg0, u8 arg1, s32 arg2);
 s32 motion_track_get_delta(u8 *, f32 **);
 void vec3_from_angles_byte(s16, s16, f32, f32 *);
 
-extern f32 D_800A0720[3][3];    /* offsets by health third */
-extern u8 D_800A0744[3];        /* bone index by health third */
-extern f32 D_800A0748[4][3];    /* offsets by quarter */
-extern u8 D_800A0778[4];        /* attachment point by quarter */
+extern f32 g_damage_smoke_offs_third[3][3];    /* offsets by health third; was D_800A0720 */
+extern u8 g_damage_smoke_bone_third[3];        /* bone index by health third; was D_800A0744 */
+extern f32 g_damage_smoke_offs_quarter[4][3];    /* offsets by quarter; was D_800A0748 */
+extern u8 g_damage_smoke_point_quarter[4];        /* attachment point by quarter; was D_800A0778 */
 
 /* rodata copies (NM link drops the asm rodata) */
 static const f32 D_800A0788_c[1] = { 0.33333334f };  /* 0x3EAAAAAB */
@@ -204,7 +204,7 @@ typedef struct {
 // or changed room; with the owner switched off (+0x1D4 == 0 or mode bit 1) it only sets the glow's +0x74 to 3.
 // Otherwise starts the 0x96 loop sound once, places the emitter on the owner (mode bit 0: attachment point
 // attachment_find_by_slot / model_node_points_to_world by the +0x2DC * +0x2D8 quarter, fallback owner + (0, 800, 0); else bone
-// D_800A0744[third] of +0x1D4 by the +0x2E4 / +0x2E8 third), moves the glow there, then emits smoke puffs
+// g_damage_smoke_bone_third[third] of +0x1D4 by the +0x2E4 / +0x2E8 third), moves the glow there, then emits smoke puffs
 // (fire_embers_spawn_b, (0.129 + 0.117 * random) * g_frame_step_f per frame, skipped in mode 2 when trigger_test_player says no) and
 // sparks (impact_dust_cloud_spawn, (0.13 + 0.2 * random) * g_frame_step_f per frame, blown against the owner's motion_track_get_delta vector).
 /* was func_150C49A4 */
@@ -257,12 +257,12 @@ void damage_smoke_update(u8 *self) {
             i = 3;
         }
         f = (t - (f32) i * 0.25f) * 4.0f;
-        off[0] = D_800A0748[i][0] * f;
-        off[1] = D_800A0748[i][1] * f;
-        off[2] = D_800A0748[i][2] * f;
+        off[0] = g_damage_smoke_offs_quarter[i][0] * f;
+        off[1] = g_damage_smoke_offs_quarter[i][1] * f;
+        off[2] = g_damage_smoke_offs_quarter[i][2] * f;
         offp = off;
         posp = pos;
-        if (model_node_points_to_world(obj, pt, D_800A0778[i], &offp, &posp, 1) == 0) {
+        if (model_node_points_to_world(obj, pt, g_damage_smoke_point_quarter[i], &offp, &posp, 1) == 0) {
             pos[0] = *(f32 *) (obj + 0x14);
             pos[1] = *(f32 *) (obj + 0x18) + 800.0f;
             pos[2] = *(f32 *) (obj + 0x1C);
@@ -274,10 +274,10 @@ void damage_smoke_update(u8 *self) {
             i = 2;
         }
         f = (t - (f32) i * D_800A0788_c[0]) * 3.0f;
-        off[0] = D_800A0720[i][0] * f;
-        off[1] = D_800A0720[i][1] * f;
-        off[2] = D_800A0720[i][2] * f;
-        mtx_transform_point_or_origin(off, pos, *(u8 **) (obj + 0x1D4) + (D_800A0744[i] << 6));
+        off[0] = g_damage_smoke_offs_third[i][0] * f;
+        off[1] = g_damage_smoke_offs_third[i][1] * f;
+        off[2] = g_damage_smoke_offs_third[i][2] * f;
+        mtx_transform_point_or_origin(off, pos, *(u8 **) (obj + 0x1D4) + (g_damage_smoke_bone_third[i] << 6));
     }
     glow = rec->glow;
     if (glow != NULL) {

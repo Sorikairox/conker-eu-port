@@ -122,7 +122,7 @@ struct210 *sprite_fx_spawn(struct210 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4,
     s32 i;
 
     if (arg1 == 0) {
-        arg1 = (s32)&D_800A4AA0;
+        arg1 = (s32)&g_effect3d_default_params;
     }
     if (arg0->unk0 & 0x40000) {
         phi_v0 = 0x4A;
@@ -641,12 +641,12 @@ struct210 *effect3d_spawn(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5
     return effect3d_spawn_full(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0, 0, arg7, arg8, arg9);
 }
 
-// record_spawn_default: effect3d_spawn_full with the default parameter block D_800A4AA0 and no extra words; returns the
+// record_spawn_default: effect3d_spawn_full with the default parameter block g_effect3d_default_params and no extra words; returns the
 // new record (the asm leaves effect3d_spawn_full's v0 in v0; spark_spawn_from_desc copies into it). P128.
 // functions.h declares it with this return type under NON_MATCHING (P131 merge).
 /* was func_1513D524 */
 struct210 *effect3d_spawn_default(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
-    return effect3d_spawn_full(arg0, &D_800A4AA0, arg1, arg2, arg3, arg4, arg5, 0, 0, arg6, arg7, arg8);
+    return effect3d_spawn_full(arg0, &g_effect3d_default_params, arg1, arg2, arg3, arg4, arg5, 0, 0, arg6, arg7, arg8);
 }
 
 /* was func_1513D594 */
@@ -654,7 +654,7 @@ s32 effect3d_spawn_oriented(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 ar
     struct210 *temp_v0;
 
     if (arg1 == 0) {
-        arg1 = &D_800A4AA0;
+        arg1 = &g_effect3d_default_params;
     }
     temp_v0 = effect3d_spawn_full(arg0, arg1, arg2, arg3, arg4, 0xC, arg5, argB, argC, argE + 0x18, argF, arg10);
     if ((temp_v0 != 0) && (effect3d_build_axes(&temp_v0->unk110, arg6, arg7, arg8, arg9, argA, argD) == 0)) {
@@ -1653,7 +1653,7 @@ u8 *sprite_quad_build_screen_rot(u8 *arg0, s16 arg1) {
         temp_f16 = -((*(f32 *)((u8 *)arg0 + 0x50)) * temp_f0);
         sp.u78 = temp_f0 + temp_f16;
         var_f14 = -1.0f;
-        var_f2 = ((((*(f32 *)((u8 *)arg0 + 0x40)) - (*(f32 *)((u8 *)arg0 + 0x34))) * temp_f20) - (temp_f18 * ((*(f32 *)((u8 *)arg0 + 0x48)) - (*(f32 *)((u8 *)arg0 + 0x3C))))) * D_800BEDC8;
+        var_f2 = ((((*(f32 *)((u8 *)arg0 + 0x40)) - (*(f32 *)((u8 *)arg0 + 0x34))) * temp_f20) - (temp_f18 * ((*(f32 *)((u8 *)arg0 + 0x48)) - (*(f32 *)((u8 *)arg0 + 0x3C))))) * g_frame_step_inv;
         if (var_f2 < 0.0f) {
             var_f14 = 1.0f;
             var_f2 = -var_f2;
@@ -1715,7 +1715,7 @@ u8 * sprite_quad_build_axes_entry(struct210 *arg0, s16 arg1) {
 Gfx *gfx_set_combine_mode(Gfx *arg0, u8 arg1, u8 *arg2) {
     s32 mode = fx_layer_to_prim_depth(arg1, 0);
 
-    if (mode != D_800DD5EE) {
+    if (mode != g_sprite_last_combine) {
         if (*arg2 == 1) {
             gDPPipeSync(arg0++);
             *arg2 = 0;
@@ -1724,7 +1724,7 @@ Gfx *gfx_set_combine_mode(Gfx *arg0, u8 arg1, u8 *arg2) {
         // fakematch: w0 and w1 on one line (statement scheduling)
         { Gfx *_g = (Gfx *)(arg0++); _g->words.w0 = _SHIFTL(G_SETCOMBINE, 24, 8) | _SHIFTL(GCCc0w0(CC(0), CC(2), CC(4), CC(6)) | GCCc1w0(CC(8), CC(10)), 0, 24); _g->words.w1 = (unsigned int)(GCCc0w1(CC(1), CC(3), CC(5), CC(7)) | GCCc1w1(CC(9), CC(12), CC(14), CC(11), CC(13), CC(15))); }
 #undef CC
-        D_800DD5EE = mode;
+        g_sprite_last_combine = mode;
     }
     return arg0;
 }
@@ -1834,9 +1834,9 @@ block_5:
         }
     }
     (*(f32 *)((u8 *)temp_v1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 4)) + ((*(f32 *)((u8 *)temp_v1 + 0xC)) * g_frame_step_f));
-    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((sp.u20 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 0)) - sp.u20) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
-    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((sp.u24 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 4)) - sp.u24) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
-    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((sp.u28 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 8)) - sp.u28) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((sp.u20 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 0)) - sp.u20) * g_frame_step_inv) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((sp.u24 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 4)) - sp.u24) * g_frame_step_inv) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((sp.u28 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 8)) - sp.u28) * g_frame_step_inv) * g_frame_step_f)) * g_frame_step_f));
     (*(f32 *)((u8 *)arg0 + 0x40)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x40)) + ((*(f32 *)((u8 *)temp_v1 + 0x14)) * g_frame_step_f));
     (*(f32 *)((u8 *)arg0 + 0x44)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x44)) + ((*(f32 *)((u8 *)temp_v1 + 0x18)) * g_frame_step_f));
     (*(f32 *)((u8 *)arg0 + 0x48)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x48)) + ((*(f32 *)((u8 *)temp_v1 + 0x1C)) * g_frame_step_f));

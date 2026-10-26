@@ -6,24 +6,24 @@
 
 /* was func_15016500 */
 void level_globals_reset(void) {
-    D_800D1940 = (u8)0;
-    D_800D1941 = (u8)0;
-    D_800D1944 = 0;
-    D_800D1948 = 0;
-    D_800D194C = 0;
-    D_800D1950 = 0;
-    bzero(D_800D1958, 48); // bzero
-    D_800D1988 = 0.0f;
-    D_800D198C = 0.0f;
-    D_800D1990 = 0.0f;
-    D_800D1994 = (u8)0;
-    D_800D1995 = (u8)0;
-    D_800D1998 = 0;
+    g_hint_action = (u8)0;
+    g_hint_box_open = (u8)0;
+    g_hint_text_asset = 0;
+    g_hint_intro_asset = 0;
+    g_hint_text_buf = 0;
+    g_hint_text_box = 0;
+    bzero(g_hint_box_params, 48); // bzero
+    g_hint_box_x = 0.0f;
+    g_hint_box_y = 0.0f;
+    g_hint_box_scale = 0.0f;
+    g_hint_voice_pos = (u8)0;
+    g_hint_voice_count = (u8)0;
+    g_hint_voice_queue = 0;
 }
 
 // grim looking loop
 s32 asset_lookup_rom(s32 *, s32, s32, u8, s32);
-extern u8 D_800BEECB;
+extern u8 g_text_bank_lang; /* was D_800BEECB */
 /* was func_15016588 */
 void level_build_flag_bitmask(void) {
     s32 idx;
@@ -39,7 +39,7 @@ void level_build_flag_bitmask(void) {
         } else {
             bit *= 2;
         }
-        asset_lookup_rom(&sp40, 3, 0x1A, D_800BEECB, i);
+        asset_lookup_rom(&sp40, 3, 0x1A, g_text_bank_lang, i);
         if (sp40 != 0) {
             D_eu_800BE9A0[idx] |= bit;
         }

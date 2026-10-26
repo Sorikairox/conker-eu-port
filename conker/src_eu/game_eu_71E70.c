@@ -7,14 +7,14 @@ void collision_select_area(s32);
 
 /* was func_15044660 */
 void collision_reset_counter(void) {
-    D_800CC1BC = 0;
+    g_coll_counter_1bc = 0;
 }
 
 void collision_set_obj_body_heights(u8 *, f32, f32, s32);
 s32 collision_walls_slide(f32, f32, s32, u8 *, s32);
 s32 collision_ledge_probe(f32, f32, s32, u8 *, s32);
-extern u8 D_800894C0;
-extern u8 D_800894C3;
+extern u8 g_coll_area_enabled; /* was D_800894C0 */
+extern u8 g_coll_area_enabled_3; /* was D_800894C3 */
 extern u8 g_wall_coll_soft_edges; /* was D_800CC1F3 */
 
 /* was func_15044670 */
@@ -26,31 +26,31 @@ s32 collision_obj_walls(f32 arg0, f32 arg1, s32 arg2, u8 *arg3, s32 arg4, s32 ar
     u8 *var_s1;
     u8 *var_s1_2;
 
-    D_800CC214 = -32768.0f;
-    D_800CC218 = -32768.0f;
+    g_wall_ledge_h_neg = -32768.0f;
+    g_wall_ledge_h_pos = -32768.0f;
     var_s6 = 0;
     (*(s8 *)((u8 *)arg3 + 0x275)) = 0;
     collision_set_obj_body_heights(arg3, arg0, arg1, arg2);
-    var_s1 = &D_800894C3;
+    var_s1 = &g_coll_area_enabled_3;
     var_s0 = 3;
     sp5C = (s32) g_wall_coll_soft_edges;
     do {
         if ((*var_s1 == 1) && ((var_s0 != 3) || !((*(s32 *)((u8 *)arg3 + 0xF8)) & 0x200))) {
             collision_select_area(var_s0);
-            if (D_800DBE62 != 0) {
+            if (g_coll_quadtrees_built != 0) {
                 var_s6 += collision_walls_slide(arg0, arg1, arg2, arg3, arg4);
             }
         }
         var_s0 -= 1;
         var_s1 -= 1;
     } while (var_s0 >= 0);
-    var_s1_2 = &D_800894C0;
+    var_s1_2 = &g_coll_area_enabled;
     var_s0_2 = 0;
     if (arg5 != 0) {
         do {
             if (*var_s1_2 == 1) {
                 collision_select_area(var_s0_2);
-                if (D_800DBE62 != 0) {
+                if (g_coll_quadtrees_built != 0) {
                     collision_ledge_probe(arg0, arg1, arg2, arg3, 0);
                 }
             }
@@ -109,14 +109,14 @@ void collision_nop(void) {
 }
 
 /*
- * P53: collision cylinder of a record for the wall tests: D_800CC1F8 = height, D_800CC1FC = lift above the feet,
+ * P53: collision cylinder of a record for the wall tests: g_wall_coll_height = height, g_wall_coll_lift = lift above the feet,
  * from obj_collision_cylinder's height (sp2E) and the record kind / state. arg2 is the y the record moves to.
  * For kinds 0x2C-0x2E the asm reads an uninitialised stack word (sp+0x20) as the record index; it only matters
  * for kinds other than 5 / 0x53 / 0x28 / 0x25 with no in-water flag, where the C uses -1 (index check fails).
  */
 s32 obj_collision_cylinder(u8 *, s16 *, s16 *, s16 *);
-extern f32 D_800CC1F8;
-extern f32 D_800CC1FC;
+extern f32 g_wall_coll_height; /* was D_800CC1F8 */
+extern f32 g_wall_coll_lift; /* was D_800CC1FC */
 extern s8 g_player_count; /* was D_8008FD8C */
 
 /* was func_15044950 */
@@ -132,45 +132,45 @@ void collision_set_obj_body_heights(u8 *arg0, f32 arg1, f32 arg2, s32 arg3) {
     kind = *(s32 *)arg0;
     if (kind == 0x2D || kind == 0x2E || kind == 0x2C) {
         idx = -1;
-        D_800CC1FC = 0.0f;
-        D_800CC1F8 = (f32)h;
+        g_wall_coll_lift = 0.0f;
+        g_wall_coll_height = (f32)h;
     } else {
         idx = (struct127 *)arg0 - g_objects;
         h = (s32)((f32)h + fabsf(arg2 - *(f32 *)(arg0 + 0x18)));
     }
     if (arg0[5] == 5) {
-        D_800CC1FC = 0.0f;
-        D_800CC1F8 = (f32)h;
+        g_wall_coll_lift = 0.0f;
+        g_wall_coll_height = (f32)h;
         return;
     }
     if (arg0[0xAD] != 0) {
-        D_800CC1F8 = (f32)h;
-        D_800CC1FC = (f32)(h >> 1);
+        g_wall_coll_height = (f32)h;
+        g_wall_coll_lift = (f32)(h >> 1);
         return;
     }
     if (arg0[4] == 0x53) {
-        D_800CC1F8 = (f32)h;
-        D_800CC1FC = (f32)(h >> 1);
+        g_wall_coll_height = (f32)h;
+        g_wall_coll_lift = (f32)(h >> 1);
         return;
     }
     if (arg0[4] == 0x28) {
-        D_800CC1F8 = (f32)(h - 20);
-        D_800CC1FC = 20.0f + D_800CC1F8 * 0.5f;
+        g_wall_coll_height = (f32)(h - 20);
+        g_wall_coll_lift = 20.0f + g_wall_coll_height * 0.5f;
         return;
     }
     if (idx >= 0 && idx < g_player_count && *(f32 *)(arg0 + 0x28) != 0.0f) {
-        D_800CC1F8 = (f32)h;
-        D_800CC1FC = (f32)(h >> 1);
+        g_wall_coll_height = (f32)h;
+        g_wall_coll_lift = (f32)(h >> 1);
         return;
     }
     if (arg0[4] == 0x25) {
         half = h / 2;
-        D_800CC1F8 = (f32)(h - half);
-        D_800CC1FC = (f32)half + D_800CC1F8 * 0.5f;
+        g_wall_coll_height = (f32)(h - half);
+        g_wall_coll_lift = (f32)half + g_wall_coll_height * 0.5f;
         return;
     }
-    D_800CC1F8 = (f32)h;
-    D_800CC1FC = (f32)(h >> 1);
+    g_wall_coll_height = (f32)h;
+    g_wall_coll_lift = (f32)(h >> 1);
 }
 
 u8 *timedfx_alloc(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -210,11 +210,11 @@ u8 *timedfx_alloc(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
     (*(s16 *)((u8 *)temp_v0 + 6)) = (s16) arg5;
     (*(s16 *)((u8 *)temp_v0 + 8)) = (s16) arg6;
     (*(s16 *)((u8 *)temp_v0 + 0xA)) = (s16) arg7;
-    if (D_800CBE00 == 0) {
-        D_800CBE00 = (s32) temp_v0;
+    if (g_timedfx_list == 0) {
+        g_timedfx_list = (s32) temp_v0;
     } else {
-        var_v1 = *(s32 *)D_800CBE00;
-        var_a0 = D_800CBE00;
+        var_v1 = *(s32 *)g_timedfx_list;
+        var_a0 = g_timedfx_list;
         if (var_v1 != 0) {
             do {
                 var_a0 = var_v1;
@@ -226,8 +226,8 @@ u8 *timedfx_alloc(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
     return temp_v0;
 }
 
-/* Timed effect list (entries made by timedfx_alloc, head D_800CBE00): per frame each entry with no start delay
- * (+0xE) runs its update hook D_80086220[+0xC](entry) and, when that returns non-zero, the hook D_8008622C[+0xD]
+/* Timed effect list (entries made by timedfx_alloc, head g_timedfx_list): per frame each entry with no start delay
+ * (+0xE) runs its update hook g_timedfx_update_fns[+0xC](entry) and, when that returns non-zero, the hook g_timedfx_done_fns[+0xD]
  * (called with no argument set: a0 is whatever the first hook left). The delay counts down by g_frame_ticks
  * (clamped at 0). The lifetime (+4, -1 = forever) counts down too; at <= 0 the entry is unlinked and freed
  * (heap_set_block_tag(entry, 2)). The next pointer is read before the hooks run. */
@@ -239,12 +239,12 @@ typedef struct TimedFx {
     u8 done;
     u8 delay;
 } TimedFx;
-extern s32 (*D_80086220[])(TimedFx *);
-extern void (*D_8008622C[])(void);
+extern s32 (*g_timedfx_update_fns[])(TimedFx *); /* was D_80086220 */
+extern void (*g_timedfx_done_fns[])(void); /* was D_8008622C */
 
 /* was func_15044D18 */
 void timedfx_update_all(void) {
-    TimedFx *e = (TimedFx *) D_800CBE00;
+    TimedFx *e = (TimedFx *) g_timedfx_list;
     TimedFx *prev = NULL;
     TimedFx *next;
     s32 t;
@@ -252,8 +252,8 @@ void timedfx_update_all(void) {
     while (e != NULL) {
         next = e->next;
         if (e->delay == 0) {
-            if (D_80086220[e->update](e) != 0) {
-                D_8008622C[e->done]();
+            if (g_timedfx_update_fns[e->update](e) != 0) {
+                g_timedfx_done_fns[e->done]();
             }
         } else {
             t = e->delay - g_frame_ticks;
@@ -271,7 +271,7 @@ void timedfx_update_all(void) {
                 prev = e;
             } else {
                 if (prev == NULL) {
-                    D_800CBE00 = (s32) e->next;
+                    g_timedfx_list = (s32) e->next;
                 } else {
                     prev->next = e->next;
                 }
@@ -338,9 +338,9 @@ s32 floor_tri_height(f32, f32, s32, u8 *, f32 *);
 s32 collision_override_ceiling(u8 *, f32, u8 *);
 typedef struct { s32 unk0; s32 *unk4; s32 unk8; s32 unkC; } Unk3720;
 typedef struct { f32 unk0; s16 unk4[3][3]; s32 unk18; u8 unk1C; u8 unk1D; s32 unk20; } Unk45674;
-extern Unk3720 D_800D3720[];
-extern f32 D_800990F8; // 99999.9f
-extern f32 D_800990FC;
+extern Unk3720 g_floor_hits[]; /* was D_800D3720 */
+extern f32 g_coll_k_90f8; /* was D_800990F8 */ // 99999.9f
+extern f32 g_coll_k_90fc; /* was D_800990FC */
 void collision_select_area(s32);
 s32 collision_ceiling_static(f32 *, f32, Unk45674 *);
 s32 collision_floor_all(u8 *, u16, f32, u8 *);
@@ -366,7 +366,7 @@ void timedfx_hit_player_5(void) {
 void timedfx_hit_player_4(void) {
     if (g_objects->stunned == 0) {
         if (g_objects->immune == 0) {
-            if (D_800C35EA != 1) {
+            if (g_cutscene_slot_state != 1) {
                 obj_send_hit(g_objects, 4, g_objects->unk7A, -1);
             }
         }
@@ -391,13 +391,13 @@ void timedfx_hit_player_1(void) {
     }
 }
 
-extern f32 D_800990F0; // 99999.9f
-extern s32 D_800DC26C;
+extern f32 g_coll_k_90f0; /* was D_800990F0 */ // 99999.9f
+extern s32 g_level_tri_table; /* was D_800DC26C */
 s32 floor_collect_level_tris(s32, s32);
 
 // ceiling_probe: mirror of collision_floor_static (floor probe). Of the collision triangles floor_collect_level_tris lists under pos
-// (x, z), takes the lowest one at or above pos[1] (heights in D_800D3720 are 24.8 fixed point), copies its vertices
-// and surface type (D_800DBE5C, no NULL check here) into out and sets flags 1 | 4. Returns 1 (and sets out flag 2)
+// (x, z), takes the lowest one at or above pos[1] (heights in g_floor_hits are 24.8 fixed point), copies its vertices
+// and surface type (g_coll_tri_flags, no NULL check here) into out and sets flags 1 | 4. Returns 1 (and sets out flag 2)
 // when that ceiling is at or below maxY; returns 0 with flag 2 cleared when pos is above maxY or nothing is found.
 /* was func_150451C0 */
 s32 collision_ceiling_static(f32 *pos, f32 maxY, Unk45674 *out) {
@@ -413,12 +413,12 @@ s32 collision_ceiling_static(f32 *pos, f32 maxY, Unk45674 *out) {
         out->unk1C &= ~2;
         return 0;
     }
-    out->unk0 = D_800990F0;
+    out->unk0 = g_coll_k_90f0;
     best = -1;
     collision_select_area(0);
     n = floor_collect_level_tris((s32) pos[0], (s32) pos[2]);
     for (i = 0; i < n; i++) {
-        d = D_800D3720[i].unk0 * 0.00390625f;
+        d = g_floor_hits[i].unk0 * 0.00390625f;
         if (pos[1] <= d && d < out->unk0) {
             best = i;
             out->unk0 = d;
@@ -428,8 +428,8 @@ s32 collision_ceiling_static(f32 *pos, f32 maxY, Unk45674 *out) {
         out->unk1C &= ~2;
         return 0;
     }
-    q = D_800D3720[best].unk4;
-    off = D_800D3720[best].unk8 * 16;
+    q = g_floor_hits[best].unk4;
+    off = g_floor_hits[best].unk8 * 16;
     for (j = 0; j < 3; j++) {
         s16 *p = (s16 *) (q[j] + off);
 
@@ -437,7 +437,7 @@ s32 collision_ceiling_static(f32 *pos, f32 maxY, Unk45674 *out) {
         out->unk4[j][1] = p[1];
         out->unk4[j][2] = p[2];
     }
-    out->unk18 = ((s32 *) D_800DBE5C)[((s32) D_800D3720[best].unk4 - D_800DC26C) / 12];
+    out->unk18 = ((s32 *) g_coll_tri_flags)[((s32) g_floor_hits[best].unk4 - g_level_tri_table) / 12];
     out->unk1D = 1;
     out->unk1C |= 5;
     out->unk20 = 0;
@@ -448,16 +448,16 @@ s32 collision_ceiling_static(f32 *pos, f32 maxY, Unk45674 *out) {
     return 0;
 }
 
-extern f32 D_800990F4;
-extern f32 D_800DC298;
-extern f32 D_800DC29C;
-extern f32 D_800DC2A4;
-extern s32 D_800DC26C;
+extern f32 g_coll_k_90f4; /* was D_800990F4 */
+extern f32 g_coll_probe_x; /* was D_800DC298 */
+extern f32 g_coll_probe_y; /* was D_800DC29C */
+extern f32 g_coll_probe_max_y; /* was D_800DC2A4 */
+extern s32 g_level_tri_table; /* was D_800DC26C */
 s32 floor_collect_level_tris(s32, s32);
 
 /* P67: floor probe (sibling of collision_ceiling_alt). Of the collision triangles floor_collect_level_tris lists under pos (x, z), takes
- * the highest one at or below pos[1] (heights in D_800D3720 are 24.8 fixed point) and copies its vertices into out.
- * The probe point is also stored in D_800DC298..D_800DC2A4 (D_800DC2A0 is declared as a pointer in variables.h).
+ * the highest one at or below pos[1] (heights in g_floor_hits are 24.8 fixed point) and copies its vertices into out.
+ * The probe point is also stored in g_coll_probe_x..g_coll_probe_max_y (g_coll_probe_z is declared as a pointer in variables.h).
  * Returns 1 when the floor is at or above maxY (out flag 2 set). */
 /* was func_150453BC */
 s32 collision_floor_static(u8 *arg0, f32 maxY, u8 *arg2) {
@@ -475,16 +475,16 @@ s32 collision_floor_static(u8 *arg0, f32 maxY, u8 *arg2) {
         out->unk1C &= ~2;
         return 0;
     }
-    out->unk0 = D_800990F4;
+    out->unk0 = g_coll_k_90f4;
     best = -1;
     collision_select_area(0);
-    D_800DC298 = pos[0];
-    D_800DC29C = pos[1];
-    *(f32 *)&D_800DC2A0 = pos[2];
-    D_800DC2A4 = maxY;
+    g_coll_probe_x = pos[0];
+    g_coll_probe_y = pos[1];
+    *(f32 *)&g_coll_probe_z = pos[2];
+    g_coll_probe_max_y = maxY;
     n = floor_collect_level_tris((s32)pos[0], (s32)pos[2]);
     for (i = 0; i < n; i++) {
-        d = D_800D3720[i].unk0 * 0.00390625f;
+        d = g_floor_hits[i].unk0 * 0.00390625f;
         if (d <= pos[1] && out->unk0 < d) {
             best = i;
             out->unk0 = d;
@@ -494,8 +494,8 @@ s32 collision_floor_static(u8 *arg0, f32 maxY, u8 *arg2) {
         out->unk1C &= ~2;
         return 0;
     }
-    q = D_800D3720[best].unk4;
-    off = D_800D3720[best].unk8 * 16;
+    q = g_floor_hits[best].unk4;
+    off = g_floor_hits[best].unk8 * 16;
     for (j = 0; j < 3; j++) {
         s16 *p = (s16 *)(q[j] + off);
 
@@ -503,9 +503,9 @@ s32 collision_floor_static(u8 *arg0, f32 maxY, u8 *arg2) {
         out->unk4[j][1] = p[1];
         out->unk4[j][2] = p[2];
     }
-    if (D_800DBE5C != 0) {
-        /* surface type of the triangle (index of its vertex list in D_800DC26C, 12 bytes each) */
-        out->unk18 = ((s32 *)D_800DBE5C)[((s32)D_800D3720[best].unk4 - D_800DC26C) / 12];
+    if (g_coll_tri_flags != 0) {
+        /* surface type of the triangle (index of its vertex list in g_level_tri_table, 12 bytes each) */
+        out->unk18 = ((s32 *)g_coll_tri_flags)[((s32)g_floor_hits[best].unk4 - g_level_tri_table) / 12];
     } else {
         out->unk18 = 0;
     }
@@ -547,21 +547,21 @@ s32 collision_ceiling_alt(f32 *arg0, f32 arg1, Unk45674 *arg2) {
         arg2->unk1C &= ~2;
         return 0;
     }
-    arg2->unk0 = D_800990F8;
+    arg2->unk0 = g_coll_k_90f8;
     best = -1;
     collision_select_area(3);
     n = floor_collect_record_tris((s32) arg0[0], (s32) arg0[2]);
     for (i = 0; i < n; i++) {
-        d = D_800D3720[i].unk0 * 0.00390625f;
+        d = g_floor_hits[i].unk0 * 0.00390625f;
         if ((arg0[1] <= d) && (d < arg2->unk0)) {
             best = i;
             arg2->unk0 = d;
         }
     }
     if (best != -1) {
-        q = D_800D3720[best].unk4;
+        q = g_floor_hits[best].unk4;
         out = arg2;
-        off = D_800D3720[best].unk8;
+        off = g_floor_hits[best].unk8;
         for (j = 0; j < 3; j++) {
             s16 *p;
 
@@ -599,21 +599,21 @@ s32 collision_floor_alt(f32 *arg0, f32 arg1, Unk45674 *arg2) {
         arg2->unk1C &= ~2;
         return 0;
     }
-    arg2->unk0 = D_800990FC;
+    arg2->unk0 = g_coll_k_90fc;
     best = -1;
     collision_select_area(3);
     n = floor_collect_record_tris((s32) arg0[0], (s32) arg0[2]);
     for (i = 0; i < n; i++) {
-        d = D_800D3720[i].unk0 * 0.00390625f;
+        d = g_floor_hits[i].unk0 * 0.00390625f;
         if ((d <= arg0[1]) && (arg2->unk0 < d)) {
             best = i;
             arg2->unk0 = d;
         }
     }
     if (best != -1) {
-        q = D_800D3720[best].unk4;
+        q = g_floor_hits[best].unk4;
         out = arg2;
-        off = D_800D3720[best].unk8;
+        off = g_floor_hits[best].unk8;
         for (j = 0; j < 3; j++) {
             s16 *p;
 
@@ -683,11 +683,11 @@ typedef struct {
     s32 unk20;
 } HitInfo;
 
-extern f32 D_80099100;
+extern f32 g_coll_k_9100; /* was D_80099100 */
 s32 floor_collect_world_obj_tris(s32, s32, s32, s32 *);
 s32 world_objects_transform_mesh(s32, s32 *, s32);
-extern s32 D_800D3C00;
-extern s32 D_800DC26C;
+extern s32 g_world_obj_box_ids; /* was D_800D3C00 */
+extern s32 g_level_tri_table; /* was D_800DC26C */
 
 /* was func_15045B70 */
 u8 collision_ceiling_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
@@ -707,14 +707,14 @@ u8 collision_ceiling_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
     struct131 *temp_t5;
     u8 *temp_v0_2;
 
-    arg3->t = D_80099100;
+    arg3->t = g_coll_k_9100;
     sp20 = -1;
-    world_objects_transform_mesh(*arg2, &D_800D3C00, 0);
-    temp_v0 = floor_collect_world_obj_tris((s32) (*(f32 *)((u8 *)arg0 + 0)), (s32) (*(f32 *)((u8 *)arg0 + 8)), *arg2, &D_800D3C00);
+    world_objects_transform_mesh(*arg2, &g_world_obj_box_ids, 0);
+    temp_v0 = floor_collect_world_obj_tris((s32) (*(f32 *)((u8 *)arg0 + 0)), (s32) (*(f32 *)((u8 *)arg0 + 8)), *arg2, &g_world_obj_box_ids);
     var_t0 = -1;
     var_v1 = 0;
     if (temp_v0 > 0) {
-        var_v0 = D_800D3720;
+        var_v0 = g_floor_hits;
         do {
             temp_f0 = (f32) var_v0->unk0 * 0.00390625f;
             if (((*(f32 *)((u8 *)arg0 + 4)) <= temp_f0) && (temp_f0 < arg3->t)) {
@@ -726,7 +726,7 @@ u8 collision_ceiling_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
         } while (var_v1 < temp_v0);
     }
     if (var_t0 != -1) {
-        temp_t1 = &D_800D3720[var_t0];
+        temp_t1 = &g_floor_hits[var_t0];
         temp_t2 = temp_t1->unk4;
         var_a0 = 0;
         var_v1_2 = arg3;
@@ -745,7 +745,7 @@ u8 collision_ceiling_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
         arg3->unk20 = (s32) temp_t5;
         temp_a0 = (*(s32 *)((u8 *)temp_t5 + 0x44));
         if (temp_a0 != 0) {
-            arg3->unk18 = *(s32 *)(temp_a0 + ((((s32) (((s32 *)((u8 *)temp_t2 - D_800DC26C))) / 12) - (u16) temp_t5->unk58) * 4));
+            arg3->unk18 = *(s32 *)(temp_a0 + ((((s32) (((s32 *)((u8 *)temp_t2 - g_level_tri_table))) / 12) - (u16) temp_t5->unk58) * 4));
         } else {
             arg3->unk18 = (*(s32 *)((u8 *)temp_t5 + 0x40));
         }
@@ -763,11 +763,11 @@ u8 collision_ceiling_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
     arg3->flags &= 0xFFFD;
     return 0U;
 }
-extern f32 D_80099104;
+extern f32 g_coll_k_9104; /* was D_80099104 */
 s32 floor_collect_world_obj_tris(s32, s32, s32, s32 *);
 s32 world_objects_transform_mesh(s32, s32 *, s32);
-extern s32 D_800D3C00;
-extern s32 D_800DC26C;
+extern s32 g_world_obj_box_ids; /* was D_800D3C00 */
+extern s32 g_level_tri_table; /* was D_800DC26C */
 
 /* was func_15045DD4 */
 u8 collision_floor_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
@@ -787,14 +787,14 @@ u8 collision_floor_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
     struct131 *temp_t5;
     u8 *temp_v0_2;
 
-    arg3->t = D_80099104;
+    arg3->t = g_coll_k_9104;
     sp20 = -1;
-    world_objects_transform_mesh(*arg2, &D_800D3C00, 0);
-    temp_v0 = floor_collect_world_obj_tris((s32) (*(f32 *)((u8 *)arg0 + 0)), (s32) (*(f32 *)((u8 *)arg0 + 8)), *arg2, &D_800D3C00);
+    world_objects_transform_mesh(*arg2, &g_world_obj_box_ids, 0);
+    temp_v0 = floor_collect_world_obj_tris((s32) (*(f32 *)((u8 *)arg0 + 0)), (s32) (*(f32 *)((u8 *)arg0 + 8)), *arg2, &g_world_obj_box_ids);
     var_t0 = -1;
     var_v1 = 0;
     if (temp_v0 > 0) {
-        var_v0 = D_800D3720;
+        var_v0 = g_floor_hits;
         do {
             temp_f0 = (f32) var_v0->unk0 * 0.00390625f;
             if ((temp_f0 <= (*(f32 *)((u8 *)arg0 + 4))) && (arg3->t < temp_f0)) {
@@ -806,7 +806,7 @@ u8 collision_floor_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
         } while (var_v1 < temp_v0);
     }
     if (var_t0 != -1) {
-        temp_t1 = &D_800D3720[var_t0];
+        temp_t1 = &g_floor_hits[var_t0];
         temp_t2 = temp_t1->unk4;
         var_a0 = 0;
         var_v1_2 = arg3;
@@ -825,7 +825,7 @@ u8 collision_floor_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
         arg3->unk20 = (s32) temp_t5;
         temp_a0 = (*(s32 *)((u8 *)temp_t5 + 0x44));
         if (temp_a0 != 0) {
-            arg3->unk18 = *(s32 *)(temp_a0 + ((((s32) (((s32 *)((u8 *)temp_t2 - D_800DC26C))) / 12) - (u16) temp_t5->unk58) * 4));
+            arg3->unk18 = *(s32 *)(temp_a0 + ((((s32) (((s32 *)((u8 *)temp_t2 - g_level_tri_table))) / 12) - (u16) temp_t5->unk58) * 4));
         } else {
             arg3->unk18 = (*(s32 *)((u8 *)temp_t5 + 0x40));
         }
@@ -843,11 +843,11 @@ u8 collision_floor_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
     arg3->flags &= 0xFFFD;
     return 0U;
 }
-extern f32 D_80099108;
+extern f32 g_coll_k_9108; /* was D_80099108 */
 s32 floor_collect_world_obj_tris(s32, s32, s32, s32 *);
 s32 world_objects_transform_mesh(s32, s32 *, s32);
-extern s32 D_800D3C50;
-extern s32 D_800DC26C;
+extern s32 g_floor_world_obj_ids; /* was D_800D3C50 */
+extern s32 g_level_tri_table; /* was D_800DC26C */
 
 /* was func_15046038 */
 u8 collision_ceiling_dynamic_b(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
@@ -868,14 +868,14 @@ u8 collision_ceiling_dynamic_b(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
     u8 temp_t8;
     u8 *temp_v0_2;
 
-    arg3->t = D_80099108;
+    arg3->t = g_coll_k_9108;
     sp20 = -1;
-    world_objects_transform_mesh(*arg2, &D_800D3C50, 0);
-    temp_v0 = floor_collect_world_obj_tris((s32) (*(f32 *)((u8 *)arg0 + 0)), (s32) (*(f32 *)((u8 *)arg0 + 8)), *arg2, &D_800D3C50);
+    world_objects_transform_mesh(*arg2, &g_floor_world_obj_ids, 0);
+    temp_v0 = floor_collect_world_obj_tris((s32) (*(f32 *)((u8 *)arg0 + 0)), (s32) (*(f32 *)((u8 *)arg0 + 8)), *arg2, &g_floor_world_obj_ids);
     var_t0 = -1;
     var_v1 = 0;
     if (temp_v0 > 0) {
-        var_v0 = D_800D3720;
+        var_v0 = g_floor_hits;
         do {
             temp_f0 = (f32) var_v0->unk0 * 0.00390625f;
             if (((*(f32 *)((u8 *)arg0 + 4)) <= temp_f0) && (temp_f0 < arg3->t)) {
@@ -887,7 +887,7 @@ u8 collision_ceiling_dynamic_b(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
         } while (var_v1 < temp_v0);
     }
     if (var_t0 != -1) {
-        temp_t1 = &D_800D3720[var_t0];
+        temp_t1 = &g_floor_hits[var_t0];
         temp_t2 = temp_t1->unk4;
         var_a0 = 0;
         var_v1_2 = arg3;
@@ -906,7 +906,7 @@ u8 collision_ceiling_dynamic_b(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
         arg3->unk20 = (s32) temp_v0_3;
         temp_a0 = (*(s32 *)((u8 *)temp_v0_3 + 0x44));
         if (temp_a0 != 0) {
-            arg3->unk18 = *(s32 *)(temp_a0 + ((((s32) (((s32 *)((u8 *)temp_t2 - D_800DC26C))) / 12) - (u16) temp_v0_3->unk58) * 4));
+            arg3->unk18 = *(s32 *)(temp_a0 + ((((s32) (((s32 *)((u8 *)temp_t2 - g_level_tri_table))) / 12) - (u16) temp_v0_3->unk58) * 4));
         } else {
             arg3->unk18 = (*(s32 *)((u8 *)temp_v0_3 + 0x40));
         }
@@ -927,8 +927,8 @@ u8 collision_ceiling_dynamic_b(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
 }
 s32 floor_collect_world_obj_tris(s32, s32, s32, s32 *);
 s32 world_objects_transform_mesh(s32, s32 *, s32);
-extern s32 D_800D3C50;
-extern s32 D_800DC26C;
+extern s32 g_floor_world_obj_ids; /* was D_800D3C50 */
+extern s32 g_level_tri_table; /* was D_800DC26C */
 
 /* was func_1504627C */
 s32 collision_floor_dynamic_b(u8 *arg0, f32 arg1, s32 *arg2, u8 *arg3) {
@@ -951,12 +951,12 @@ s32 collision_floor_dynamic_b(u8 *arg0, f32 arg1, s32 *arg2, u8 *arg3) {
 
     (*(f32 *)((u8 *)arg3 + 0)) = -10000.0f;
     sp20 = -1;
-    world_objects_transform_mesh(*arg2, &D_800D3C50, 0);
-    temp_v0 = floor_collect_world_obj_tris((s32) (*(f32 *)((u8 *)arg0 + 0)), (s32) (*(f32 *)((u8 *)arg0 + 8)), *arg2, &D_800D3C50);
+    world_objects_transform_mesh(*arg2, &g_floor_world_obj_ids, 0);
+    temp_v0 = floor_collect_world_obj_tris((s32) (*(f32 *)((u8 *)arg0 + 0)), (s32) (*(f32 *)((u8 *)arg0 + 8)), *arg2, &g_floor_world_obj_ids);
     var_t0 = -1;
     var_v1 = 0;
     if (temp_v0 > 0) {
-        var_v0 = D_800D3720;
+        var_v0 = g_floor_hits;
         do {
             temp_f0 = (f32) var_v0->unk0 * 0.00390625f;
             if ((temp_f0 <= (*(f32 *)((u8 *)arg0 + 4))) && ((*(f32 *)((u8 *)arg3 + 0)) < temp_f0)) {
@@ -968,7 +968,7 @@ s32 collision_floor_dynamic_b(u8 *arg0, f32 arg1, s32 *arg2, u8 *arg3) {
         } while (var_v1 < temp_v0);
     }
     if (var_t0 != -1) {
-        temp_t1 = &D_800D3720[var_t0];
+        temp_t1 = &g_floor_hits[var_t0];
         temp_t2 = temp_t1->unk4;
         var_a0 = 0;
         var_v1_2 = arg3;
@@ -987,7 +987,7 @@ s32 collision_floor_dynamic_b(u8 *arg0, f32 arg1, s32 *arg2, u8 *arg3) {
         (*(struct131 **)((u8 *)arg3 + 0x20)) = temp_v0_3;
         temp_a0 = (*(s32 *)((u8 *)temp_v0_3 + 0x44));
         if (temp_a0 != 0) {
-            (*(s32 *)((u8 *)arg3 + 0x18)) = (s32) *(s32 *)(temp_a0 + ((((s32) (((s32 *)((u8 *)temp_t2 - D_800DC26C))) / 12) - (u16) temp_v0_3->unk58) * 4));
+            (*(s32 *)((u8 *)arg3 + 0x18)) = (s32) *(s32 *)(temp_a0 + ((((s32) (((s32 *)((u8 *)temp_t2 - g_level_tri_table))) / 12) - (u16) temp_v0_3->unk58) * 4));
         } else {
             (*(s32 *)((u8 *)arg3 + 0x18)) = (s32) (*(s32 *)((u8 *)temp_v0_3 + 0x40));
         }
@@ -1342,9 +1342,9 @@ void hitinfo_from_record(HitInfo *out, u8 *in) {
 }
 
 #pragma function sqrtf
-extern f32 D_80099110;
-extern f32 D_80099114;
-extern f32 D_80099118;
+extern f32 g_mtx_k_9110; /* was D_80099110 */
+extern f32 g_mtx_k_9114; /* was D_80099114 */
+extern f32 g_mtx_k_9118; /* was D_80099118 */
 /* was func_15047680 */
 void mtxf_look_at_f(f32 mf[4][4], f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
     f32 len, inv, xLook, yLook, zLook, xRight, yRight, zRight;
@@ -1357,7 +1357,7 @@ void mtxf_look_at_f(f32 mf[4][4], f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt
 
     len = sqrtf(xLook * xLook + yLook * yLook + zLook * zLook);
     if (len == 0.0f) {
-        len = D_80099110;
+        len = g_mtx_k_9110;
     }
     inv = -1.0f / len;
     xLook *= inv;
@@ -1369,7 +1369,7 @@ void mtxf_look_at_f(f32 mf[4][4], f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt
     zRight = xUp * yLook - yUp * xLook;
     len = sqrtf(xRight * xRight + yRight * yRight + zRight * zRight);
     if (len == 0.0f) {
-        len = D_80099114;
+        len = g_mtx_k_9114;
     }
     inv = 1.0f / len;
     xRight *= inv;
@@ -1381,7 +1381,7 @@ void mtxf_look_at_f(f32 mf[4][4], f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt
     zUp = xLook * yRight - yLook * xRight;
     len = sqrtf(xUp * xUp + yUp * yUp + zUp * zUp);
     if (len == 0.0f) {
-        len = D_80099118;
+        len = g_mtx_k_9118;
     }
     inv = 1.0f / len;
     xUp *= inv;

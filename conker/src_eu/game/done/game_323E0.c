@@ -6,13 +6,13 @@
 
 /* was func_15004F30 */
 void model_kind_tables_clear(void) {
-    bzero(&D_800D19A0, 748); // bzero
-    bzero(&D_800D1C90, 748);
-    bzero(&D_800D1F80, 187);
-    bzero(&D_800D2040, 187);
-    bzero(&D_800D1588, 748);
-    bzero(&D_800C5A90, 374);
-    bzero(&D_800C5C08, 748);
-    bzero(&D_800C6070, 748);
-    bzero(&D_800C6360, 748);
+    bzero(&g_model_bases, 748); // bzero
+    bzero(&g_type_descs, 748);
+    bzero(&g_model_slot_users, 187);
+    bzero(&g_model_slot_timers, 187);
+    bzero(&g_model_anim_banks, 748);
+    bzero(&g_model_anim_counts, 374);
+    bzero(&g_model_vtx_ranges, 748);
+    bzero(&g_model_coll_tris, 748);
+    bzero(&g_model_vtx_ptr_tables, 748);
 }

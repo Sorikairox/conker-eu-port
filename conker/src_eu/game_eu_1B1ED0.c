@@ -23,7 +23,7 @@ struct124 *shadow_obj_box_extents(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     *arg3 = 0.0f;
     *arg2 = 0.0f;
     *arg1 = 0.0f;
-    if ((temp_t0->unk1D4 == NULL) || (D_800C42B0 != 0)) {
+    if ((temp_t0->unk1D4 == NULL) || (g_mtx_fixed_point != 0)) {
         return NULL;
     }
     sp1C = temp_t0;
@@ -58,10 +58,10 @@ struct124 *shadow_obj_box_extents(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
         } while (var_a0 < temp_t2);
     }
     if ((*arg1 == 0.0f) || (*arg2 == 0.0f) || (*arg3 == 0.0f)) {
-        temp_f2 = temp_t0->xz_scale * (f32) D_800D1C90[temp_t0->id]->unk1A;
+        temp_f2 = temp_t0->xz_scale * (f32) g_type_descs[temp_t0->id]->unk1A;
         *arg3 = temp_f2;
         *arg1 = temp_f2;
-        var_v0 = (s32) D_800D1C90[temp_t0->id];
+        var_v0 = (s32) g_type_descs[temp_t0->id];
         *arg2 = temp_t0->y_scale * (f32) ((*(s16 *)((u8 *)var_v0 + 0x1E)) + (*(s16 *)((u8 *)var_v0 + 0x1C)));
     }
     return (struct124 *) var_v0;
@@ -83,7 +83,7 @@ extern s32 g_shadow_no_point_lights;        /* != 0: no point lights (only the d
 extern f32 g_shadow_light_dir[3];     /* default light direction (reset to (100, 600, -200) when its y <= 0); was D_800DE440 */
 extern f32 g_shadow_world_scale;        /* world scale of the shadow distances; was D_800DE46C */
 extern s32 g_shadow_detail;        /* shadow detail level: >= 2 snaps the light positions; was D_800DE468 */
-extern f32 D_800DE3E0[][3];   /* per shadow slot: smoothed light position */
+extern f32 g_shadow_light_pos[][3];   /* per shadow slot: smoothed light position; was D_800DE3E0 */
 extern f32 g_shadow_light_dist;        /* distance object -> light of the last projection; was D_800DFB28 */
 extern s8 g_shadow_light_height_mode;         /* != 0: the minimum light height grows with the horizontal distance; was D_800DE470 */
 extern f32 g_shadow_far_base;        /* far clip depth (before the scale); was D_800DE458 */
@@ -109,7 +109,7 @@ f32 math_atan2f(f32, f32);
  * Light: unless g_shadow_no_point_lights, the nearest enabled light of the list g_light_list_head whose integer distance
  * (approx_dist3_int) is above prev_dist and below 5000; with none, 0 is returned when prev_dist != 0, else the default
  * direction g_shadow_light_dir (scaled by g_shadow_world_scale) from the object is used with distance 1. The slot's light position
- * D_800DE3E0[slot] snaps to it (detail >= 2 or *g_camera_timers) or moves 0.3 of the way. The light is pushed out to at
+ * g_shadow_light_pos[slot] snaps to it (detail >= 2 or *g_camera_timers) or moves 0.3 of the way. The light is pushed out to at
  * least 200 units and to a minimum height (10, or 0.57735 * the horizontal distance when g_shadow_light_height_mode); beyond
  * 5000 * scale nothing is cast. A look-at matrix from the light to the object (g_shadow_light_mtxf[slot]) projects the 8 box
  * corners; their largest |x / z|, |y / z| (>= 0.01, else nothing) give the projection scale g_shadow_proj_scale and the
@@ -187,7 +187,7 @@ f32 shadow_light_projection(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_
         target[2] = g_shadow_light_dir[2] * g_shadow_world_scale + pos[2];
     }
 
-    lit = D_800DE3E0[slot];
+    lit = g_shadow_light_pos[slot];
     if (*(s32 *) g_camera_timers != 0 || g_shadow_detail >= 2) {
         lit[0] = target[0];
         lit[1] = target[1];
@@ -728,10 +728,10 @@ s32 shadow_clip_triangle(s32 inAddr, s32 n, s32 unused, s32 outAddr, s32 *counts
 }
 
 /* P130 */
-extern s8 g_shadow_flagged_tris_only;   /* != 0: only level triangles whose D_800D3668 flag is 1 cast shadows; was D_800DE471 */
+extern s8 g_shadow_flagged_tris_only;   /* != 0: only level triangles whose g_level_tri_vis_flags flag is 1 cast shadows; was D_800DE471; was D_800D3668 */
 extern s32 g_shadow_tri_table;  /* triangle table for shadow_level_triangles / shadow_object_triangles; was D_800D3AB0 */
-extern s32 D_800D3AB4;  /* end of the triangle bit mask */
-extern s32 D_800DC26C;  /* level triangle table: 3 vertex pointers per triangle */
+extern s32 g_shadow_tri_mask_end;  /* end of the triangle bit mask; was D_800D3AB4 */
+extern s32 g_level_tri_table;  /* level triangle table: 3 vertex pointers per triangle; was D_800DC26C */
 extern s32 g_shadow_box_x_min;  /* shadow box x min, x max, z min, z max; was D_800DF518 */
 extern s32 g_shadow_box_x_max; /* was D_800DF51C */
 extern s32 g_shadow_box_z_min; /* was D_800DF520 */
@@ -743,7 +743,7 @@ s32 shadow_level_triangles(u32 *, s32, f32 *, s32);
 // shadow_level_vertices: collects the level triangles under a shadow (box x / z +- r) and projects them.
 // zone_tree_collect_near returns up to 16 level cells around (x, z); each cell holds at +0xE a 0-terminated triangle list
 // (byte < 0x80: index += byte; else ((byte << 8) | next byte) & 0x7FFF is the index). The triangles (< 0x1760,
-// and with flag 1 in D_800D3668 when g_shadow_flagged_tris_only) become bits of a stack mask; shadow_level_triangles projects them with the
+// and with flag 1 in g_level_tri_vis_flags when g_shadow_flagged_tris_only) become bits of a stack mask; shadow_level_triangles projects them with the
 // light matrix (4x4 f32) into the 20-byte shadow vertices at buf (up to end). Returns the number of vertices written.
 /* was func_15186A9C */
 s32 shadow_level_vertices(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end) {
@@ -776,7 +776,7 @@ s32 shadow_level_vertices(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end) {
             if (tri >= 0x1760) {
                 continue;
             }
-            if (g_shadow_flagged_tris_only != 0 && ((u8 *) D_800D3668)[tri] != 1) {
+            if (g_shadow_flagged_tris_only != 0 && ((u8 *) g_level_tri_vis_flags)[tri] != 1) {
                 continue;
             }
             mask[tri >> 5] |= 1 << (tri & 0x1F);
@@ -785,8 +785,8 @@ s32 shadow_level_vertices(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end) {
             }
         }
     }
-    g_shadow_tri_table = D_800DC26C;
-    D_800D3AB4 = (s32) &mask[(last >> 5) + 1];
+    g_shadow_tri_table = g_level_tri_table;
+    g_shadow_tri_mask_end = (s32) &mask[(last >> 5) + 1];
     g_shadow_box_x_min = x - r;
     g_shadow_box_x_max = x + r;
     g_shadow_box_z_min = z - r;
@@ -810,7 +810,7 @@ s32 memcpy(u8 *, s32, s32);
 extern s32 g_shadow_tri_budget; /* was D_8008D780 */
 extern s32 g_shadow_draw_setup_dl; /* was D_8008D7B0 */
 extern s32 g_dl_capacity; /* was D_800BEFC4 */
-extern s32 D_800C4D10;
+extern s32 g_model_dl2_tables; /* was D_800C4D10 */
 extern s32 g_shadow_tri_budget_max; /* was D_800DE44C */
 extern s32 g_shadow_tri_budget_grow; /* was D_800DE450 */
 extern s32 g_shadow_tri_budget_min; /* was D_800DE454 */
@@ -959,7 +959,7 @@ u8 *shadow_draw_all(u8 *arg0, s32 arg1) {
                 spE0 = 0;
             }
             var_v0_2 = spF8 + 1;
-            if (*(s32 *)((u8 *)&D_800C4D10 + (var_s1 * 4)) == 0) {
+            if (*(s32 *)((u8 *)&g_model_dl2_tables + (var_s1 * 4)) == 0) {
 
             } else {
                 var_v0_2 = spF8 + 1;
@@ -1132,7 +1132,7 @@ loop_54:
     g_shadow_skip_players = 0;
     g_shadow_flat_players = 0;
     heap_free(sp134);
-    if (g_dl_capacity < (((s32) var_s0 - (s32) D_800BEDE8[g_dl_buf_index]) >> 3)) {
+    if (g_dl_capacity < (((s32) var_s0 - (s32) g_gfx_dl_buffers[g_dl_buf_index]) >> 3)) {
         var_v0_3 = 1;
     } else {
         var_v0_3 = 0;
@@ -1193,13 +1193,13 @@ void shadow_settings_for_level(s32 arg0) {
 }
 /* P130 */
 extern s32 g_shadow_tri_table; /* was D_800D3AB0 */
-extern s32 D_800DC26C;
-extern s32 D_800DF514;  /* number of world object ids for shadow_object_triangles */
+extern s32 g_level_tri_table; /* was D_800DC26C */
+extern s32 g_shadow_obj_count;  /* number of world object ids for shadow_object_triangles; was D_800DF514 */
 extern s32 g_shadow_box_x_min; /* was D_800DF518 */
 extern s32 g_shadow_box_x_max; /* was D_800DF51C */
 extern s32 g_shadow_box_z_min; /* was D_800DF520 */
 extern s32 g_shadow_box_z_max; /* was D_800DF524 */
-extern s16 D_800D3C00[]; /* visible world object ids */
+extern s16 g_world_obj_box_ids[]; /* visible world object ids; was D_800D3C00 */
 void collision_select_area(s32);
 s32 world_objects_transform_mesh(s32 count, s32 *idList, s32 force);
 s32 shadow_object_triangles(u16 *, s32, f32 *, s32);
@@ -1238,13 +1238,13 @@ u32 shadow_object_vertices(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end, s32
             g_shadow_box_z_max < *(s16 *) (obj + 0x14) - size || *(s16 *) (obj + 0x14) + size < g_shadow_box_z_min) {
             continue;
         }
-        D_800D3C00[n++] = i;
+        g_world_obj_box_ids[n++] = i;
     }
     if (n != 0) {
-        world_objects_transform_mesh(n, (s32 *) D_800D3C00, 0);
-        g_shadow_tri_table = D_800DC26C;
-        D_800DF514 = n;
-        count += (shadow_object_triangles((u16 *) D_800D3C00, buf, (f32 *) light, end) - buf) / 20;
+        world_objects_transform_mesh(n, (s32 *) g_world_obj_box_ids, 0);
+        g_shadow_tri_table = g_level_tri_table;
+        g_shadow_obj_count = n;
+        count += (shadow_object_triangles((u16 *) g_world_obj_box_ids, buf, (f32 *) light, end) - buf) / 20;
     }
     return count;
 }

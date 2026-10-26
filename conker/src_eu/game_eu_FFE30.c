@@ -16,7 +16,7 @@ void sky_flash_spawn(s16 arg0, f32 arg1, f32 arg2, u8 arg3, u8 arg4, u8 arg5, s3
     } tmp;
     struct260 *temp_v0;
 
-    D_800D9D20++;
+    g_sky_flash_count++;
     tmp.unk8 = arg1;
     tmp.unkC = arg2;
     tmp.unk10 = arg1 + arg2;
@@ -68,7 +68,7 @@ void sky_flash_delete(struct260 *arg0) {
 
 /* was func_150D27E4 */
 void sky_flash_uncount(s32 arg0) {
-    D_800D9D20--;
+    g_sky_flash_count--;
 }
 
 Gfx *screen_view_fill_colour(Gfx *, s32, s32, s32, s32, s32);

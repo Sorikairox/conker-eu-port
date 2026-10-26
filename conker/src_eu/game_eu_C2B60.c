@@ -6,59 +6,59 @@ void sprite_screen_rect(s32, f32, f32, f32, s32, s32 *);
 
 /* was func_15095350 */
 Gfx *sprite_gfx_begin(Gfx *arg0) {
-    gSPDisplayList(arg0++, D_80087770);
-    D_800D30C0 = 0;
+    gSPDisplayList(arg0++, g_sprite_setup_dl);
+    g_gfx_cur_tex_addr = 0;
     return arg0;
 }
 
 void sprite_tex_desc_set(s32, s32, s32);
 s32 gfx_load_texture_tile(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 D_800D30B0;
+extern s32 g_sprite_tex_desc; /* was D_800D30B0 */
 
 /* NON_MATCHING: the matching void wrappers return the callee's v0 (the new display-list pointer), which callers use. */
 /* was func_15095380 */
 s32 sprite_load_texture(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
     sprite_tex_desc_set(arg1, arg2, arg3);
-    return gfx_load_texture_tile(arg0, &D_800D30B0, arg4, arg5, 0, arg6, arg7, 0x100, 0x100, arg8);
+    return gfx_load_texture_tile(arg0, &g_sprite_tex_desc, arg4, arg5, 0, arg6, arg7, 0x100, 0x100, arg8);
 }
 
 void sprite_tex_desc_set(s32, s32, s32);
 s32 gfx_load_texture_tile(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 D_800D30B0;
+extern s32 g_sprite_tex_desc; /* was D_800D30B0 */
 
 /* NON_MATCHING: the matching void wrappers return the callee's v0 (the new display-list pointer), which callers use. */
 /* was func_150953F8 */
 s32 sprite_load_texture_at(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
     sprite_tex_desc_set(arg1, arg2, arg3);
-    return gfx_load_texture_tile(arg0, &D_800D30B0, arg4, arg5, 0, arg6, arg7, arg8, arg9, argA);
+    return gfx_load_texture_tile(arg0, &g_sprite_tex_desc, arg4, arg5, 0, arg6, arg7, arg8, arg9, argA);
 }
 
 /* was func_15095470 */
 void sprite_tex_desc_set(s32 arg0, s32 arg1, s32 arg2) {
     u32 temp_v0;
     if (arg2 != 0) {
-        (*(s32 **)((u8 *)arg2 + 0x10)) = &D_800D30B0;
+        (*(s32 **)((u8 *)arg2 + 0x10)) = &g_sprite_tex_desc;
     }
     temp_v0 = (*(u32 *)((u8 *)arg0 + 0));
     if (temp_v0 < 0x10000000U) {
-        (*(s32 *)((u8 *)(&D_800D30B0) + 0)) = (s32) temp_v0;
+        (*(s32 *)((u8 *)(&g_sprite_tex_desc) + 0)) = (s32) temp_v0;
     } else {
-        (*(s32 *)((u8 *)(&D_800D30B0) + 0)) = *(s32 *)((u8 *)((s32)temp_v0 + ((arg1 >> 8) * 4)));
+        (*(s32 *)((u8 *)(&g_sprite_tex_desc) + 0)) = *(s32 *)((u8 *)((s32)temp_v0 + ((arg1 >> 8) * 4)));
     }
-    (*(u16 *)((u8 *)(&D_800D30B0) + 4)) = (u16) (*(u16 *)((u8 *)arg0 + 6));
-    (*(u16 *)((u8 *)(&D_800D30B0) + 6)) = (u16) (*(u16 *)((u8 *)arg0 + 8));
-    (*(u8 *)((u8 *)(&D_800D30B0) + 8)) = (u8) (*(u8 *)((u8 *)arg0 + 0xA));
-    (*(u8 *)((u8 *)(&D_800D30B0) + 9)) = (u8) (*(u8 *)((u8 *)arg0 + 0xB));
-    (*(u8 *)((u8 *)(&D_800D30B0) + 0xA)) = (u8) (*(u8 *)((u8 *)arg0 + 4));
+    (*(u16 *)((u8 *)(&g_sprite_tex_desc) + 4)) = (u16) (*(u16 *)((u8 *)arg0 + 6));
+    (*(u16 *)((u8 *)(&g_sprite_tex_desc) + 6)) = (u16) (*(u16 *)((u8 *)arg0 + 8));
+    (*(u8 *)((u8 *)(&g_sprite_tex_desc) + 8)) = (u8) (*(u8 *)((u8 *)arg0 + 0xA));
+    (*(u8 *)((u8 *)(&g_sprite_tex_desc) + 9)) = (u8) (*(u8 *)((u8 *)arg0 + 0xB));
+    (*(u8 *)((u8 *)(&g_sprite_tex_desc) + 0xA)) = (u8) (*(u8 *)((u8 *)arg0 + 4));
 }
 
 /* Texture loader behind sprite_load_texture / sprite_load_texture_at (the sky quad, sprites, ...): appends the display-list
  * commands that load the texture `tex` into TMEM at `tmem` and set up render tile `tile`, and returns the new
- * display-list end. `tex` is the descriptor sprite_tex_desc_set fills (D_800D30B0): +0 address, or an asset id below
+ * display-list end. `tex` is the descriptor sprite_tex_desc_set fills (g_sprite_tex_desc): +0 address, or an asset id below
  * 0x10000000 that the texture cache resolves (texture_cache_lookup with `age`), +4 width, +6 height, +8 format (G_IM_FMT_*;
  * 5 = RGBA texels followed by an I4 plane that goes to tile + 1), +9 texel size (G_IM_SIZ_*), +0xA animated flag
  * (`frame` selects one of several equal textures stored after each other; 0 when not animated). The address used
- * is kept in D_800D30C0. Clamp / mirror `cm` applies to s and t; the tile rectangle starts at (uls, ult) with the
+ * is kept in g_gfx_cur_tex_addr. Clamp / mirror `cm` applies to s and t; the tile rectangle starts at (uls, ult) with the
  * s fraction `sfrac` (10.2). For CI textures the palette after the texels is loaded too (g_gfx_tlut_mode = 0x8000,
  * the CI flag for the caller's render mode; 0 otherwise). Note the I4 tile's ult is not shifted by 2 (as the
  * original). */
@@ -67,7 +67,7 @@ extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 static const u8 s954E4_incr[4] = { G_IM_SIZ_4b_INCR, G_IM_SIZ_8b_INCR, G_IM_SIZ_16b_INCR, G_IM_SIZ_32b_INCR };
 static const u8 s954E4_shift[4] = { G_IM_SIZ_4b_SHIFT, G_IM_SIZ_8b_SHIFT, G_IM_SIZ_16b_SHIFT, G_IM_SIZ_32b_SHIFT };
-static const u8 s954E4_lineBytes[4] = { 1, 1, 2, 2 };   /* D_8009E288: line = (bytes * lineW + 7) / 8 */
+static const u8 s954E4_lineBytes[4] = { 1, 1, 2, 2 };   /* g_tex_siz_line_bytes: line = (bytes * lineW + 7) / 8; was D_8009E288 */
 static const u8 s954E4_loadSiz[4] = { G_IM_SIZ_4b_LOAD_BLOCK, G_IM_SIZ_8b_LOAD_BLOCK, G_IM_SIZ_16b_LOAD_BLOCK,
                                       G_IM_SIZ_32b_LOAD_BLOCK };
 
@@ -95,13 +95,13 @@ s32 gfx_load_texture_tile(s32 gfxAddr, s32 *tex, s32 tmem, s32 tile, s32 frame, 
     words >>= s954E4_shift[siz];
 
     addr = *(s32 *)t;
-    D_800D30C0 = addr;
+    g_gfx_cur_tex_addr = addr;
     if ((u32)addr < 0x10000000) {
-        D_800D30C0 = texture_cache_lookup(addr, NULL, age, 0);
-        addr = D_800D30C0;
+        g_gfx_cur_tex_addr = texture_cache_lookup(addr, NULL, age, 0);
+        addr = g_gfx_cur_tex_addr;
     }
     if (addr != (s32)0x80000000) {
-        D_800D30C0 = addr + words * 2 * frame;
+        g_gfx_cur_tex_addr = addr + words * 2 * frame;
     }
 
     lineW = (siz == G_IM_SIZ_4b) ? width >> 1 : width;
@@ -115,7 +115,7 @@ s32 gfx_load_texture_tile(s32 gfxAddr, s32 *tex, s32 tmem, s32 tile, s32 frame, 
     imgFmt = (fmt == 5) ? G_IM_FMT_RGBA : fmt;
 
     gDPPipeSync(gfx++);
-    gDPSetTextureImage(gfx++, imgFmt, s954E4_loadSiz[t[9]], 1, D_800D30C0);
+    gDPSetTextureImage(gfx++, imgFmt, s954E4_loadSiz[t[9]], 1, g_gfx_cur_tex_addr);
     gDPSetTile(gfx++, imgFmt, s954E4_loadSiz[t[9]], 0, tmem, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
     gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, words - 1, 0);
     siz = t[9];
@@ -142,7 +142,7 @@ s32 gfx_load_texture_tile(s32 gfxAddr, s32 *tex, s32 tmem, s32 tile, s32 frame, 
             palCount = 255;
         }
         gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
-                           D_800D30C0 + *(u16 *)(t + 4) * *(u16 *)(t + 6) * palBits / 8);
+                           g_gfx_cur_tex_addr + *(u16 *)(t + 4) * *(u16 *)(t + 6) * palBits / 8);
         gDPLoadSync(gfx++);
         gDPLoadTLUTCmd(gfx++, 6, palCount);
         g_gfx_tlut_mode = 0x8000;
@@ -153,9 +153,9 @@ s32 gfx_load_texture_tile(s32 gfxAddr, s32 *tex, s32 tmem, s32 tile, s32 frame, 
 }
 
 void mtxf_transform_point_w(u8 *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
-extern u8 D_800D30C8[][0x40];   /* view matrices per player */
+extern u8 g_view_proj_mtx[][0x40];   /* view matrices per player; was D_800D30C8 */
 extern f32 g_cam_near_plane; /* was D_800D9F40 */
-/* Projects the world point (x, y, z) with the current player's view matrix D_800D30C8[g_cur_view_player]
+/* Projects the world point (x, y, z) with the current player's view matrix g_view_proj_mtx[g_cur_view_player]
  * (mtxf_transform_point_w -> *sx, *sy, *sz, *w). Behind / too far (w >= far) or too near (w <= g_cam_near_plane): returns 0.
  * Else *sx / *sy become screen coordinates of that player's viewport (g_player_cams + player * 0x180: half
  * sizes +0x0C / +0x10 (+ 5), centre +0x34 / +0x38; y points down) and it returns 1. */
@@ -166,7 +166,7 @@ s32 sprite_project_point(f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz, f32 *w,
     f32 px;
     f32 py;
 
-    mtxf_transform_point_w(D_800D30C8[g_cur_view_player], x, y, z, sx, sy, sz, w);
+    mtxf_transform_point_w(g_view_proj_mtx[g_cur_view_player], x, y, z, sx, sy, sz, w);
     if (far <= *w || *w <= g_cam_near_plane) {
         return 0;
     }
@@ -252,21 +252,21 @@ s32 sprite_draw_if_visible(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32
 }
 
 /* P139 */
-extern f32 D_80038400;     /* sprite size units -> screen x */
-extern f32 D_80038404;     /* sprite size units -> screen y */
-extern f32 D_800D3090;     /* last sprite rect: x scale */
+extern f32 g_text_scale_x;     /* sprite size units -> screen x; was D_80038400 */
+extern f32 g_text_scale_y;     /* sprite size units -> screen y; was D_80038404 */
+extern f32 g_sprite_rect_xscale;     /* last sprite rect: x scale; was D_800D3090 */
 extern f32 D_eu_800D3094;  /* y scale */
-extern f32 D_800D309C;     /* top (D_800D3098 = left, declared as a struct array in variables.h) */
-extern f32 D_800D30A0;     /* depth */
-extern f32 D_800D30A4;     /* width */
-extern f32 D_800D30A8;     /* height */
+extern f32 g_sprite_rect_top;     /* top (g_sprite_rect_left = left, declared as a struct array in variables.h); was D_800D3098; was D_800D309C */
+extern f32 g_sprite_rect_depth;     /* depth; was D_800D30A0 */
+extern f32 g_sprite_rect_width;     /* width; was D_800D30A4 */
+extern f32 g_sprite_rect_height;     /* height; was D_800D30A8 */
 
 /*
  * sprite_screen_rect: screen rectangle of the sprite `spr` (s16 scale +6 / +8, texture +0x10 with u16 size +4 / +6)
  * centred on the screen point (sx, sy) at depth w, in the current player's viewport (g_player_cams + g_cur_view_player *
- * 0x180; scales +0x14 / +0x18, or +0x1C / +0x20 when alt): width = tex w * (scale x * D_80038400 * vp scale) / w,
+ * 0x180; scales +0x14 / +0x18, or +0x1C / +0x20 when alt): width = tex w * (scale x * g_text_scale_x * vp scale) / w,
  * height likewise. *visible = 1 when the rectangle overlaps the viewport's clip box (x: +0x2C..+0x30, y:
- * +0x24..+0x28), else 0. The scales, corner, depth and size are left in D_800D3090..D_800D30A8 for the sprite
+ * +0x24..+0x28), else 0. The scales, corner, depth and size are left in g_sprite_rect_xscale..g_sprite_rect_height for the sprite
  * drawer. Nothing but *visible = 0 happens when a scale is 0. (void: the file prototypes said s32, no caller used it).
  */
 /* was func_15095F18 */
@@ -286,8 +286,8 @@ void sprite_screen_rect(s32 sprArg, f32 sx, f32 sy, f32 w, s32 alt, s32 *visible
     if (*(s16 *) (spr + 6) == 0 || *(s16 *) (spr + 8) == 0) {
         return;
     }
-    scaleX = (f32) *(s16 *) (spr + 6) * D_80038400;
-    scaleY = (f32) *(s16 *) (spr + 8) * D_80038404;
+    scaleX = (f32) *(s16 *) (spr + 6) * g_text_scale_x;
+    scaleY = (f32) *(s16 *) (spr + 8) * g_text_scale_y;
     if (alt != 0) {
         vp = (u8 *) g_player_cams + g_cur_view_player * 0x180;
         scaleX *= *(f32 *) (vp + 0x1C);
@@ -307,13 +307,13 @@ void sprite_screen_rect(s32 sprArg, f32 sx, f32 sy, f32 w, s32 alt, s32 *visible
         top < *(f32 *) (vp + 0x28)) {
         *visible = 1;
     }
-    D_800D3090 = scaleX;
+    g_sprite_rect_xscale = scaleX;
     D_eu_800D3094 = scaleY;
-    *(f32 *) D_800D3098 = left;
-    D_800D309C = top;
-    D_800D30A0 = w;
-    D_800D30A4 = width;
-    D_800D30A8 = height;
+    *(f32 *) g_sprite_rect_left = left;
+    g_sprite_rect_top = top;
+    g_sprite_rect_depth = w;
+    g_sprite_rect_width = width;
+    g_sprite_rect_height = height;
     return;
 }
 
@@ -329,11 +329,11 @@ extern u8 g_sprite_prim_g; /* was D_800D31C9 */
 extern u8 g_sprite_prim_b; /* was D_800D31CA */
 /* sprite_draw_rect: draws the sprite spr (+0xA alpha, +0xB animation speed, +0xC animation frame, +0xD flip x / y
  * bits 1 / 2, +0x10 texture descriptor: u16 width +4 / height +6, u8 frame count +0xA, bit 7 = ping-pong) as one
- * textured rectangle at the screen rectangle sprite_screen_rect left in D_800D3090..D_800D30A8 (x / y scale, left,
+ * textured rectangle at the screen rectangle sprite_screen_rect left in g_sprite_rect_xscale..g_sprite_rect_height (x / y scale, left,
  * top, depth, width, height). sOff / tOff shift the texture start; tOff != 0 also shrinks the rectangle by one
  * texel on each side (the width / height globals keep the shrunk size). xAdd widens the right edge. Off-screen
  * left / top edges are clipped with the matching s / t correction. Unless g_sprite_keep_prim_colour, sets the primitive colour
- * first. Then advances the animation frame (8 steps per frame, D_800BE9A0 ticks). Returns the new display-list
+ * first. Then advances the animation frame (8 steps per frame, g_frame_delta ticks). Returns the new display-list
  * end. */
 /* was func_15096144 */
 s32 sprite_draw_rect(s32 gfxAddr, s32 sprAddr, s32 sOff, s32 tOff, s32 xAdd) {
@@ -368,21 +368,21 @@ s32 sprite_draw_rect(s32 gfxAddr, s32 sprAddr, s32 sOff, s32 tOff, s32 xAdd) {
     u8 step;
     u8 frame;
 
-    xs = D_800D3090;
+    xs = g_sprite_rect_xscale;
     ys = D_eu_800D3094;
-    left = *(f32 *) D_800D3098;
+    left = *(f32 *) g_sprite_rect_left;
     xsi = (s32) xs;
-    top = D_800D309C;
+    top = g_sprite_rect_top;
     ysi = (s32) ys;
-    depth = D_800D30A0;
+    depth = g_sprite_rect_depth;
     if (tOff != 0) {
-        D_800D30A4 -= (xs + xs) / depth;
-        D_800D30A8 -= (ys + ys) / depth;
+        g_sprite_rect_width -= (xs + xs) / depth;
+        g_sprite_rect_height -= (ys + ys) / depth;
         left += xs / depth;
         top += ys / depth;
     }
-    width = D_800D30A4;
-    height = D_800D30A8;
+    width = g_sprite_rect_width;
+    height = g_sprite_rect_height;
     if (width < 2.0f) {
         width = 2.0f;
     }
@@ -446,7 +446,7 @@ s32 sprite_draw_rect(s32 gfxAddr, s32 sprAddr, s32 sOff, s32 tOff, s32 xAdd) {
     tex = *(u8 **) (spr + 0x10);
     frames = tex[0xA];
     if (frames != 0) {
-        step = spr[0xB] * D_800BE9A0;
+        step = spr[0xB] * g_frame_delta;
         if (frames & 0x80) {
             frame = spr[0xC];
             if (frame & 0x80) {
@@ -643,7 +643,7 @@ u32 *image_draw_tiled(u32 *gfx, ImageTileDesc *img, f32 scaleX, f32 scaleY, f32 
 
 /* was func_15096D44 */
 Gfx *sprite_gfx_begin_alt(Gfx *arg0) {
-    gSPDisplayList(arg0++, D_800877A8);
+    gSPDisplayList(arg0++, g_sprite_setup_dl_alt);
     g_sprite_keep_prim_colour = 0;
     return arg0;
 }

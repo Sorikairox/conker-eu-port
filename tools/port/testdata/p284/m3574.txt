@@ -14,8 +14,8 @@
 \#^        scale = 1.5f;$#s/1.5f/1.25f/
 \#^    scale \*= 0.75f;$#s/0.75f/0.5f/
 \#^        obj_carried_update(obj);$#s/obj_carried_update(obj);//
-\#^    obj->unkBC = (obj->x_position - obj->old_x_position) \* D_800BEDC8;$#s/ \* D_800BEDC8//
-\#^    obj->unk148 = (obj->z_position - obj->old_z_position) \* D_800BEDC8;$#s/old_z_position/old_x_position/
+\#^    obj->unkBC = (obj->x_position - obj->old_x_position) \* g_frame_step_inv;$#s/ \* g_frame_step_inv//
+\#^    obj->unk148 = (obj->z_position - obj->old_z_position) \* g_frame_step_inv;$#s/old_z_position/old_x_position/
 \#^    d = sqrtf(obj->unkBC \* obj->unkBC + obj->unk148 \* obj->unk148);$#s/+ obj->unk148 \* obj->unk148//
 \#^    if ((d + 4.0f) + (d + 4.0f) < obj->xz_velocity) {$#s/4.0f) + (d + 4.0f)/4.0f) + (d + 5.0f)/
 \#^        obj->xz_velocity = d + d;$#s/d + d/d/

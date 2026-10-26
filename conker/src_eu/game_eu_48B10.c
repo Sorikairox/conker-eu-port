@@ -5,11 +5,11 @@
 
 /* Smoothed view direction of camera `player` (g_player_views cameras, 0x9A0 bytes each), skipped while
  * g_game_paused is set. The pitch (+0x388, folded into -180..180) and the heading (+0x380) are followed by
- * D_800BEAE0[player] / D_800BEAF0[player] at rate 0.1 (camera +0x698 set), 1.0 (g_camera_timers set) or 0.03;
+ * g_camera_smooth_pitch[player] / g_camera_smooth_heading[player] at rate 0.1 (camera +0x698 set), 1.0 (g_camera_timers set) or 0.03;
  * the smoothed heading stays within 90 degrees of the real one. The direction vector, scaled to 127, is
  * stored as three s8 in g_level_light_dirs[player * 3]. */
-extern f32 D_800BEAE0[];
-extern f32 D_800BEAF0[];
+extern f32 g_camera_smooth_pitch[]; /* was D_800BEAE0 */
+extern f32 g_camera_smooth_heading[]; /* was D_800BEAF0 */
 #define DEG_TO_RAD 0.017453292f
 
 /* was func_1501B300 */
@@ -50,8 +50,8 @@ void camera_update_dir_vector(s32 player) {
         pitch -= 360.0f;
     }
 
-    smoothPitch = &D_800BEAE0[player];
-    smoothHeading = &D_800BEAF0[player];
+    smoothPitch = &g_camera_smooth_pitch[player];
+    smoothHeading = &g_camera_smooth_heading[player];
     *smoothPitch = *smoothPitch + (pitch - *smoothPitch) * rate;
     *smoothHeading = *smoothHeading + rate * math_angle_diff_deg(*smoothHeading, heading);
     if (*smoothHeading < 0.0f) {

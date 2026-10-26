@@ -35,22 +35,22 @@ s32 target_volume_hit_check(u8 *arg0, f32 *arg1, s32 arg2) {
         for (var_s1 = 0; var_s1 < 4; var_s1++) {
             temp_s2 = g_target_hit_trigger_ids[var_s1];
             temp_lo = temp_s2 * 0x34;
-            if (trigger_segment_hit(temp_lo + D_800D34B8, arg0, arg1, arg2) != 0) {
+            if (trigger_segment_hit(temp_lo + g_level_zones, arg0, arg1, arg2) != 0) {
                 trigger_set_disabled(temp_s2, 1);
                 sp44->unk2E8 = var_s1 + 1;
-                target_volume_explode(temp_lo + D_800D34B8, 0xFF, 1);
+                target_volume_explode(temp_lo + g_level_zones, 0xFF, 1);
                 return 1;
             }
         }
         for (var_s1 = 0; var_s1 < 8; var_s1++) {
-            if (trigger_segment_hit((g_target_block_trigger_ids[var_s1] * 0x34) + D_800D34B8, arg0, arg1, arg2) != 0) {
+            if (trigger_segment_hit((g_target_block_trigger_ids[var_s1] * 0x34) + g_level_zones, arg0, arg1, arg2) != 0) {
                 return 1;
             }
         }
         return 0;
     }
-    if (trigger_segment_hit(D_800D34B8 + 0xF70, arg0, arg1, arg2) != 0) {
-        (*(s32 *)((u8 *)D_800D34B8 + 0xF88)) = 1;
+    if (trigger_segment_hit(g_level_zones + 0xF70, arg0, arg1, arg2) != 0) {
+        (*(s32 *)((u8 *)g_level_zones + 0xF88)) = 1;
     }
     return 0;
 }
@@ -174,7 +174,7 @@ typedef struct {
     f32 v[3];
 } VecBE44;
 
-extern u8 D_800BEE0B;
+extern u8 g_view_count_minus1_lo; /* was D_800BEE0B */
 extern f32 g_fireworks_burst_pos[]; /* was D_800A1860 */
 extern f32 g_fireworks_flash_pos[]; /* was D_800A186C */
 extern VecBE44 g_fireworks_spark_dirs[]; /* was D_800A1878 */
@@ -202,7 +202,7 @@ s32 fx_fireworks_burst(s32 arg0) {
     u32 b;
     s32 ret;
 
-    cam_wobble_start_preset(2, D_800BEE0B, 0, 0xFF, 1);
+    cam_wobble_start_preset(2, g_view_count_minus1_lo, 0, 0xFF, 1);
     fx_debris_emitter_spawn(g_fireworks_flash_pos, (u32) random_int() % 62 + 120, 0xFF, 1);
     smoke_cloud_spawn(g_fireworks_burst_pos, 0xFF, 1);
     explosion_light_spawn((u8 *) g_fireworks_burst_pos, 0xFF, 1);

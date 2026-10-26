@@ -44,7 +44,7 @@ extern u8 g_str_money_popup[]; /* "$ %d", the format of the cash pop-up (money_p
 /* hud_cash_always_draw: P325 option "Always show cash" (off by default). The original shows the cash total only
  * in a short green "$ N" pop-up above Conker when a script hands him cash (money_collect_popup_spawn) and on the
  * pause screen (hud_ingame_draw). With the option on this queues the same "$ N" text, same colour, every frame
- * in the top right corner of the screen: not during cutscenes (D_800C35EA), pauses, the title level 0x1D or the
+ * in the top right corner of the screen: not during cutscenes (g_cutscene_slot_state), pauses, the title level 0x1D or the
  * HUD-less frames (g_pause_open), the cases where hud_draw hides the health HUD. The amount is computed as on the
  * pause screen: stat 6, 0x7D00 means 1000000, and while event 0x5082 runs without 0x5083 it is scaled by
  * event 0x83's count (+0x64) / 3. The text state is saved and restored so that other text in the same frame
@@ -58,7 +58,7 @@ static void hud_cash_always_draw(void) {
     u8 flags;
     u32 anchor;
 
-    if (!port_option(PORT_OPT_CASH_ALWAYS) || D_800C35EA == 1 || g_game_paused != 0 || g_pause_open != 0 ||
+    if (!port_option(PORT_OPT_CASH_ALWAYS) || g_cutscene_slot_state == 1 || g_game_paused != 0 || g_pause_open != 0 ||
         g_level_id == 0x1D) {
         return;
     }
@@ -465,7 +465,7 @@ Gfx *radar_draw(Gfx *, s32, s16 *, s32, s32);
 extern u16 g_hud_persp_norm; /* was D_800D2874 */
 extern u8 g_hud_persp_mtx[]; /* was D_800D27F0 */
 extern s32 g_dl_capacity;          /* display list capacity, in Gfx commands; was D_800BEFC4 */
-extern f32 D_800901BC;          /* fog/table scale */
+extern f32 g_hud_scale_x;          /* fog/table scale; was D_800901BC */
 extern s16 g_hud_health_pos_hidden; /* was D_8009E084 */
 extern f32 g_hud_health_pos; /* was D_800D2848 */
 extern s32 g_hud_health_piece_dl; /* was D_800D29A8 */
@@ -490,9 +490,9 @@ u8 *hud_draw(u8 *arg0) {
     gdl->words.w1 = (u32)g_hud_persp_mtx;
     gdl++;
 
-    if (D_800BE616 != 0) {
+    if (g_mp_mode_active != 0) {
         gdl = mp_hud_draw_views(gdl);
-        if (g_dl_capacity < gdl - D_800BEDE8[g_dl_buf_index]) {
+        if (g_dl_capacity < gdl - g_gfx_dl_buffers[g_dl_buf_index]) {
             return (u8 *)start;
         }
         return (u8 *)gdl;
@@ -500,11 +500,11 @@ u8 *hud_draw(u8 *arg0) {
     if (g_hud_clock_enabled != 0) {
         gdl = (Gfx *)hud_clock_draw((s32 *)gdl);
     }
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         return (u8 *)gdl;
     }
     if (g_aim_hud_active != 0) {
-        f = D_800901BC;
+        f = g_hud_scale_x;
         scale = 0x400;
         if (f == 1.0f) {
             table[0] = 0;
@@ -529,7 +529,7 @@ u8 *hud_draw(u8 *arg0) {
     gdl = sprite_gfx_begin(gdl);
     gdl = hud_bubbles_draw(gdl);
     gdl = sprite_gfx_begin_alt(gdl);
-    if (g_dl_capacity < gdl - D_800BEDE8[g_dl_buf_index]) {
+    if (g_dl_capacity < gdl - g_gfx_dl_buffers[g_dl_buf_index]) {
         return (u8 *)start;
     }
     return (u8 *)gdl;
@@ -597,7 +597,7 @@ Gfx *hud_health_draw(Gfx *gdlArg, s32 arg1) {
         temp_s1_11 = temp_s1_10 + 8;
         (*(s32 *)((u8 *)temp_s1_11 + 0)) = 0xFB000000;
         var_s1 = temp_s1_11 + 8;
-        (*(s32 *)((u8 *)temp_s1_11 + 4)) = (s32) ((D_8009016C & 0xFF) | ~0xFF);
+        (*(s32 *)((u8 *)temp_s1_11 + 4)) = (s32) ((g_hud_fade_alpha & 0xFF) | ~0xFF);
     }
     count = g_hud_health_max_pieces;
     dl = (u8 *)g_hud_health_piece_dl;
@@ -952,8 +952,8 @@ void underwater_air_meter_update(void) {
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 extern s32 g_air_meter_seg6_dl_xlu; /* was D_800837D0 */
 extern s32 g_air_meter_seg6_dl_opa; /* was D_80083950 */
-extern s32 D_800844F0;
-extern s32 D_80084520;
+extern s32 g_obj_draw_begin_dl; /* was D_800844F0 */
+extern s32 g_obj_draw_end_dl; /* was D_80084520 */
 extern s32 g_hud_air_meter_block; /* was D_800D28E8 */
 
 /* was func_150911F4 */
@@ -982,7 +982,7 @@ Gfx *hud_air_meter_draw(Gfx *gdlArg) {
     if ((*(u8 *)((u8 *)(&g_hud_air_meter_block) + 0xBA)) == 0) {
 
     } else {
-        (*(s32 **)((u8 *)var_s0 + 4)) = &D_800844F0;
+        (*(s32 **)((u8 *)var_s0 + 4)) = &g_obj_draw_begin_dl;
         temp_s0 = var_s0 + 8;
         (*(s32 *)((u8 *)var_s0 + 0)) = 0xDE000000;
         (*(s32 *)((u8 *)temp_s0 + 4)) = 0x400;
@@ -1049,7 +1049,7 @@ Gfx *hud_air_meter_draw(Gfx *gdlArg) {
         (*(s32 *)((u8 *)var_s0_3 + 0)) = 0xDE000000;
         temp_s0_10 = var_s0_3 + 8;
         (*(s32 *)((u8 *)var_s0_3 + 4)) = (s32) (*(s32 *)((u8 *)(&g_hud_air_meter_block) + 0x80));
-        (*(s32 **)((u8 *)temp_s0_10 + 4)) = &D_80084520;
+        (*(s32 **)((u8 *)temp_s0_10 + 4)) = &g_obj_draw_end_dl;
         var_s0 = temp_s0_10 + 8;
         (*(s32 *)((u8 *)temp_s0_10 + 0)) = 0xDE000000;
     }
@@ -1191,10 +1191,10 @@ extern u8 g_mp_hud_icon_row_t[];    /* icon sheet: t of each icon row, in 32nds;
 extern u8 g_mp_hud_icon_row_h_idx[];    /* icon sheet: layout table index of each icon row's height; was D_8008775C */
 extern u8 g_mp_hud_place_digit_s[];    /* placing digits: s column (k & 3), in 32nds; was D_80087764 */
 extern u8 g_mp_hud_place_digit_t[];    /* placing digits: t row (k >> 2), in 32nds; was D_80087768 */
-extern u16 D_80090160;     /* multiplayer HUD element bits */
+extern u16 g_mp_hud_flags;     /* multiplayer HUD element bits; was D_80090160 */
 extern u16 g_mp_game_flags; /* was D_8009015C */
 extern s8 g_mp_placings[];    /* team of each view; was D_800E0EF0 */
-extern s8 D_800E1017;      /* number of laps */
+extern s8 g_race_lap_count;      /* number of laps; was D_800E1017 */
 extern char g_str_mp_hud_score[];  /* "%d"; was D_8009E0B8 */
 extern char g_str_mp_hud_paren_name[];  /* "(%s)"; was D_8009E0BC */
 extern char g_str_mp_hud_name[];  /* "%s"; was D_8009E0C4 */
@@ -1204,9 +1204,9 @@ extern f32 g_mp_map_hires_factor;     /* map scale factor in hi-res (1.56); was 
 extern f32 g_mp_map_center_dy;     /* map centre y offset (3.4); was D_8009E244 */
 extern f32 g_mp_map_center_dx;     /* map centre x offset (3.6); was D_8009E248 */
 
-// mp_hud_draw: P208: the multiplayer HUD overlay (hud_draw when D_800BE616 is set). The layout table
-// (33 entries, scaled by the hi-res factor D_800901BC, texture step `scale`) is the same as hud_draw's.
-// D_80090160 selects the parts, each drawn per view (g_last_player_index + 1 views, skipped when g_player_start_state[p] == 10;
+// mp_hud_draw: P208: the multiplayer HUD overlay (hud_draw when g_mp_mode_active is set). The layout table
+// (33 entries, scaled by the hi-res factor g_hud_scale_x, texture step `scale`) is the same as hud_draw's.
+// g_mp_hud_flags selects the parts, each drawn per view (g_last_player_index + 1 views, skipped when g_player_start_state[p] == 10;
 // view rectangle g_player_cams: y top 0x24, y bottom 0x28, x left 0x2C, x right 0x30):
 //   0x002: placing digit (sheet 0xD16, cell from player_stat_get(p, 3)) at the top left;
 //   0x400 / 0x800: score (g_menu_state s16 table at 0x46) / "(team name)" text at the top centre;
@@ -1214,7 +1214,7 @@ extern f32 g_mp_map_center_dx;     /* map centre x offset (3.6); was D_8009E248 
 //   0x004: status icons at the top right: icon by the player's state (sheet 0xD18 via hud_icon_sheet_load), and in
 //          interaction state 0x1E the vehicle / weapon icons (sheet 0xD19) with a red ammo / fuel bar;
 //   the "on fire" counter (sheet 0xD15) for players in state 0x26 / 0x3A, one icon per unit of 0x19A;
-//   0x080 (race, D_80087640 records): best / current lap times and "lap n/m";
+//   0x080 (race, g_race_records records): best / current lap times and "lap n/m";
 //   0x1000: the overview map (texture 0xCF3 / 0xCF4) with a dot per player (green = self, red = players,
 //          white = other objects with a team);
 //   0x020: the radar (radar_draw, not big).
@@ -1242,7 +1242,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
     gSPDisplayList(gdl++, g_mp_hud_setup_dl);
     text_set_color(0xFF, 0xFF, 0xFF, 0xFF);
 
-    f = D_800901BC;
+    f = g_hud_scale_x;
     scale = 0x400;
     if (f == 1.0f) {
         table[0] = 0;
@@ -1257,7 +1257,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
     }
 
     /* placing digit, score and team name */
-    if (D_80090160 & 0xC02) {
+    if (g_mp_hud_flags & 0xC02) {
         loaded = 0;
         ready = 0;
         for (p = 0; p <= g_last_player_index; p++) {
@@ -1267,7 +1267,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
             view = (struct_eu_BE628 *)g_player_cams + p;
             y = (f32)table[6] + view->unk24;
             x = view->unk2C;
-            if (D_80090160 & 2) {
+            if (g_mp_hud_flags & 2) {
                 if (!loaded) {
                     loaded = 1;
                     tex = texture_cache_lookup(0xD16, NULL, 3, 0);
@@ -1306,16 +1306,16 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
                                             G_TX_RENDERTILE, s, t, scale, scale);
                 }
             }
-            if (D_80090160 & 0x400) {
+            if (g_mp_hud_flags & 0x400) {
                 ix = (width >> 1) + x - 8;
-                if (D_800901BC != 1.0f) {
+                if (g_hud_scale_x != 1.0f) {
                     ix -= 8;
                 }
                 text_printf_at(ix, y, 0x41, (s32)g_str_mp_hud_score, *(s16 *)(g_menu_state + 0x46 + p * 2));
             }
-            if (D_80090160 & 0x800) {
+            if (g_mp_hud_flags & 0x800) {
                 ix = (width >> 1) + x + 16;
-                if (D_800901BC != 1.0f) {
+                if (g_hud_scale_x != 1.0f) {
                     ix += 16;
                 }
                 text_printf_at(ix, y, 0x41, (s32)g_str_mp_hud_paren_name, ((u8 **)g_text_strings)[8 + g_mp_placings[p]]);
@@ -1324,7 +1324,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
     }
 
     /* state icons and lives bars */
-    if (D_80090160 & 0x14) {
+    if (g_mp_hud_flags & 0x14) {
         loaded = 0;
         ready = 0;
         for (p = 0; p <= g_last_player_index; p++) {
@@ -1336,7 +1336,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
             x = f + view->unk2C;
             right = view->unk30 - f;
             y = f + view->unk24;
-            if (D_80090160 & 4) {
+            if (g_mp_hud_flags & 4) {
                 obj = &g_objects[p];
                 st = (u8 *)obj->unk31C;
                 count = 1;
@@ -1403,7 +1403,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
                     } while (--count > 0);
                 }
             }
-            if (D_80090160 & 0x10) {
+            if (g_mp_hud_flags & 0x10) {
                 if (!loaded) {
                     gdl = hud_icon_sheet_load(gdl, 0, &ready);
                 }
@@ -1424,7 +1424,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
     }
 
     /* vehicle / weapon icons (state 0x1E) and the second-sheet state icons */
-    if (D_80090160 & 4) {
+    if (g_mp_hud_flags & 4) {
         loaded = 0;
         ready = 0;
         for (p = 0; p <= g_last_player_index; p++) {
@@ -1569,32 +1569,32 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
     }
 
     /* race: lap times and lap counter */
-    if ((D_80090160 & 0x80) && D_80087640 != NULL) {
-        laps = D_800E1017;
+    if ((g_mp_hud_flags & 0x80) && g_race_records != NULL) {
+        laps = g_race_lap_count;
         for (p = 0; p <= g_last_player_index; p++) {
             view = (struct_eu_BE628 *)g_player_cams + p;
             iy = (s32)view->unk24 + 5;
             text_set_color(0xFF, 0xFF, 0xFF, 0xFF);
-            race = &D_80087640[p];
+            race = &g_race_records[p];
             if (*(s32 *)((u8 *)race + 0x20) > 0) { /* best lap */
                 hud_time_draw((s32)view->unk2C + 0x17, iy + 0x19, *(s32 *)((u8 *)race + 0x20), 0xC0);
-                race = &D_80087640[p];
+                race = &g_race_records[p];
             }
             lap = race->unk27 + 1;
             ix = (s32)view->unk2C + (width >> 1);
             if (lap <= laps) {
                 text_printf_at(ix, iy, 0xC1, (s32)g_str_mp_hud_name, ((u8 **)g_text_strings)[8 + g_mp_placings[p]]);
                 text_printf_at((s32)view->unk2C + 0x1D, iy + 0xE, 0xC1, (s32)g_str_mp_hud_lap, lap, laps);
-                hud_time_draw(ix, (s32)view->unk28 - 0xC, *(s32 *)((u8 *)&D_80087640[p] + 0x1C), 0xC0);
+                hud_time_draw(ix, (s32)view->unk28 - 0xC, *(s32 *)((u8 *)&g_race_records[p] + 0x1C), 0xC0);
             }
         }
     }
 
     /* overview map */
-    if (g_pause_open == 0 && (D_80090160 & 0x1000)) {
+    if (g_pause_open == 0 && (g_mp_hud_flags & 0x1000)) {
         zoom = g_mp_map_scale;
         mx = ((s32)((struct_eu_BE628 *)g_player_cams)->unk30 - table[32]) * 4;
-        if (D_800901BC != 1.0f) {
+        if (g_hud_scale_x != 1.0f) {
             zoom = g_mp_map_scale * g_mp_map_hires_factor;
             size = 0x63;
             dot = 6;
@@ -1664,7 +1664,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
         }
     }
 
-    if (g_pause_open == 0 && (D_80090160 & 0x20)) {
+    if (g_pause_open == 0 && (g_mp_hud_flags & 0x20)) {
         gdl = radar_draw(gdl, scale, table, 0x2C30, 0);
     }
     return gdl;
@@ -1739,7 +1739,7 @@ extern f32 g_radar_big_disc_factor; /* big radar disc size factor (0.858); was D
 extern f32 g_radar_big_tex_step; /* big radar texture step factor (1.1655); was D_8009E25C */
 extern f32 g_radar_deg_to_rad; /* degrees -> radians; was D_8009E260 */
 extern u8 g_mp_team_colors[]; /* radar dot colours: r, g, b per team (unk328 - 1); was D_800ABA0C */
-extern u16 D_800E0FFC;  /* bit per player object: hidden from the radar */
+extern u16 g_mp_hud_marked_players;  /* bit per player object: hidden from the radar; was D_800E0FFC */
 
 // radar_draw: P206: draws the multiplayer radar of every active view (hud_draw / mp_hud_draw_views). The radar
 // disc (texture 0xCF5, IA16 32x32) sits at the view's corner from the view rectangle (g_player_cams) and the layout
@@ -1747,7 +1747,7 @@ extern u16 D_800E0FFC;  /* bit per player object: hidden from the radar */
 // texture step is size * 2 / 3); `big` moves it by (-0x1C6, -0x46) quarter pixels and scales it. Every other
 // object slot 0..24 with a team (unk328) inside the range is drawn as a coloured dot, rotated by the view's yaw
 // (g_player_views[p].unk37C, degrees); for the player slots below g_player_count the dot is hidden when the player is
-// out of the game (player_stat_get modes 3 / 4), flagged in D_800E0FFC, dead, or in state 0x21. A black mark above
+// out of the game (player_stat_get modes 3 / 4), flagged in g_mp_hud_marked_players, dead, or in state 0x21. A black mark above
 // or below the dot shows a different height level (rail_band_for_height). When the view's object is in state 0x25 the
 // radar centres on player 0 (or 1 when its camera mode is 3), which is skipped as well. Returns the advanced DL,
 // or `gdl` unchanged when the texture is not loaded.
@@ -1774,10 +1774,10 @@ Gfx *radar_draw(Gfx *gdl, s32 size, s16 *table, s32 mode, s32 big) {
         size = (size * 2) / 3;
         half = table[24];
     }
-    scale *= D_800901BC;
-    range *= D_800901BC;
+    scale *= g_hud_scale_x;
+    range *= g_hud_scale_x;
     dot = 6;
-    if (D_800901BC == 1.0f) {
+    if (g_hud_scale_x == 1.0f) {
         dot = 4;
     }
     tex = texture_cache_lookup(0xCF5, NULL, 3, 0);
@@ -1876,7 +1876,7 @@ Gfx *radar_draw(Gfx *gdl, s32 size, s16 *table, s32 mode, s32 big) {
             }
             team = obj->unk328 - 1;
             if (i < g_player_count) {
-                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 4) <= 0 || (D_800E0FFC & (1 << i)) ||
+                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 4) <= 0 || (g_mp_hud_marked_players & (1 << i)) ||
                     obj->health == 0 || (((u8 *)obj->unk31C)[0x75] & 0x7F) == 0x21) {
                     team = -1;
                 }

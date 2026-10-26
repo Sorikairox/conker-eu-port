@@ -8226,3 +8226,1393 @@ D_800E1040	g_mp_result_time_b	(low) s16 [2]: second time per player shown by the
 D_800E1048	g_mp_result_time_a	(low) s32 [2]: first time per player shown by the level start prompt (reset to -1 at game start)
 D_800E1050	g_mp_match_over	Multiplayer match-over flag (1 = over)
 D_800E9D00	g_cheat_flags	Cheat / unlock flags (cheat codes, event actions)
+D_80087608	g_mp_team_mark_count	(med) s8 number of score marks each team draws on the multiplayer HUD (set from D_800E1010[4] by menu_game_start)
+D_8008955C	g_sky_tex_sets	(med) Per sky id (level header +9) pointer to its texture set (+8 = first of 0x168 texture ids), released by hud_ingame_draw
+D_8009011C	g_mp_p0_start_state	(low) s8 player 0 state (D_80087270[0]) saved by menu_game_start; 9 shows the out mark on the scoreboard
+D_80090160	g_mp_hud_flags	u16 multiplayer HUD element bits (1 / 8 team scores, 0x4000 / 0x8000 carried item, 0x6340 timer), from the settings set
+D_8009016C	g_hud_fade_alpha	s16 fade-in alpha (0..0xFF) of the pause HUD / level start title screens
+D_800901BC	g_hud_scale_x	(med) f32 horizontal HUD scale (hi-res factor) applied to HUD and text positions
+D_800901C0	g_hud_scale_y	(med) f32 vertical HUD scale (hi-res factor) applied to HUD and text positions
+D_80090370	g_hud_screen_fns	Table of full-screen overlay draw functions (in-game HUD, intro credits, centred text ...) by hud_overlay_draw_screen
+D_800903A4	g_hud_post_fns	Table of post-overlay draw functions indexed by D_800E0B94 (hud_overlay_draw_post)
+D_800903D8	g_hud_sprite_setup_dl	(med) Display list that sets up the render state for HUD sprites / text images
+D_80090408	g_hud_cash_model	(med) HudModel (asset 0xA4, the blinking head) drawn beside the cash counter on the pause HUD; 0 when not loaded
+D_8009040C	g_hud_pause_model_a2	(low) HudModel (asset 0xA2) drawn at (70, 80) on the pause HUD when the progress flag allows
+D_80090410	g_hud_sprite_desc	Shared sprite descriptor (texture id, size, format) filled before each hud_image_draw call
+D_8009041C	g_mp_digit_sheet_col	(med) u8[4] digit -> column on the multiplayer marker sheet texture
+D_80090420	g_mp_digit_sheet_row	(med) u8[] digit -> row on the multiplayer marker sheet texture
+D_80090424	g_hud_digit_tex_ids	(med) Texture ids of the counter digits 0..9 (hud_counter_digits_draw)
+D_8009044C	g_hud_digit_divisors	(med) Powers of ten (7 words) copied by hud_counter_digits_draw to split the counter into digits
+D_80090468	g_pause_hud_delay	(med) s8 frames since the pause HUD opened (0..5); the fade-in starts after 5, cleared on unpause
+D_8009046C	g_menu_page_title_tex	(med) Per frontend menu page (+0x2C): texture id of the page title sprite (frontend_menu_draw)
+D_80090484	g_menu_fade_alpha	(med) u8 frontend menu fade-in alpha (+4 per tick, max 0xFF), reset during cutscenes
+D_80090488	g_menu_page_banner_tex	(med) Per barrel menu page: texture id of the banner sprite (0 = none)
+D_800904A8	g_menu_banner_page	(med) s8 barrel menu page whose banner is shown (4 = item ring page)
+D_800904AC	g_menu_barrel_tex	(med) Texture id per item barrel (5) of the barrel menu ring
+D_800904C0	g_hud_model_setup_dl	(med) Display list loaded before a HUD model: HUD matrices and render state (hud_anim_model_draw)
+D_800904D8	g_hud_model_end_dl	(med) Display list called after a HUD model's own lists (hud_anim_model_draw)
+D_800904E8	g_menu_sprite_entries	Menu sprite entries (30 x 12 bytes: display list, asset, texture) inside the menu sprite block; NULL if not allocated
+D_800904EC	g_save_caption_str	(med) Cached caption string of the selected save / load screen entry (0 = no caption)
+D_80091B9C	g_screen_sprite_1b9c	(low) Sprite descriptor drawn by the intro credits screen; also the template of effect_spawn_sum_counter
+D_80091BA8	g_screen_sprite_1ba8	(low) Sprite descriptor of the intro credits / sprite fade screens (also screen_overlay_show_timed)
+D_80091BB4	g_screen_sprite_1bb4	(low) Sprite descriptor drawn at (0x92, 0xCB) by screen_sprite_fade_draw (first variant)
+D_80091BC0	g_screen_sprite_1bc0	(low) Sprite descriptor drawn at (0x92, 0xCB) by screen_sprite_fade_draw (second variant)
+D_80091BCC	g_screen_logo_sprite	(med) Sprite descriptor of the logo drawn by screen_logo_glow_draw
+D_80091BD8	g_screen_logo_glow_sprite	(med) Sprite descriptor of the orange glow over the logo (screen_logo_glow_draw)
+D_8009E280	g_tex_siz_load_incr	Per texel size: LoadBlock texel count increment (G_IM_SIZ_*_INCR) for hud_image_tile_setup
+D_8009E284	g_tex_siz_load_shift	Per texel size: LoadBlock texel count shift (G_IM_SIZ_*_SHIFT)
+D_8009E288	g_tex_siz_line_bytes	Per texel size: bytes per texel for the tile line size (G_IM_SIZ_*_LINE_BYTES)
+D_8009E28C	g_tex_siz_load_block	Per texel size: size used for the SetTImg of LoadBlock (G_IM_SIZ_*_LOAD_BLOCK)
+D_800ABEA0	g_mp_team_colours	Team colours (r, g, b, pad) of the multiplayer HUD and scoreboard
+D_800ABEB0	g_str_mp_fmt_team1_score	(med) Format string of team 1's score on the multiplayer HUD (mp_team_score_draw)
+D_800ABEB4	g_str_mp_fmt_team0_score	(med) Format string of team 0's score on the multiplayer HUD (mp_team_score_draw)
+D_800ABEB8	g_str_mp_fmt_placing	(med) Scoreboard format string of the placing name
+D_800ABEBC	g_str_mp_fmt_team_score	(med) Scoreboard format string of the team score
+D_800ABEC0	g_str_mp_fmt_hit_pct	(med) Scoreboard format string of the hit percentage
+D_800ABEC8	g_str_mp_fmt_score	(med) Scoreboard format string of the player score (+0x46)
+D_800ABECC	g_str_mp_out_mark	(med) Scoreboard string shown instead of the lives for players out of the game (state 9)
+D_800ABED0	g_str_mp_fmt_lives	(med) Scoreboard format string of the lives (+0x6A)
+D_800ABED4	g_str_mp_fmt_hits	(med) Scoreboard format string of the hit count (D_800E0F00)
+D_800ABED8	g_str_menu_fmt_slot	(med) Barrel menu format string of the player slot number ("#")
+D_800ABEDC	g_str_menu_fmt_char	(med) Barrel menu format string printing character 0x38 ("#")
+D_800ABEE0	g_str_menu_fmt_number	(med) Barrel menu format string "%d" of a setting value
+D_800ABEE4	g_str_cheat_cursor	"-": the blinking text cursor of the cheat entry screen
+D_800ABEF8	g_screen_k_bef8	(med) f32 text scale constant of the intro credits screen
+D_800BEDCC	g_frame_count	s32 game frame counter (advanced by game_update_frame_timing; blink / wobble phases)
+D_800C40BE	g_cutscene_cash_offset	(low) s16 set by cutscene event 0x83: subtracted from the pause HUD cash (0 hides, 0x7D00 = 1000000, -1 = off)
+D_800E0ED0	g_mp_team_scores	s16[2] team scores of the multiplayer HUD, cleared by menu_game_start
+D_800E0FFC	g_mp_hud_marked_players	(med) u16 bit per player marked by the multiplayer HUD; those players are left off the radar
+D_800E1003	g_text_bank_loaded	s8 text bank currently loaded (0 = none; 1 / 2 select scoreboard strings), set by text_bank_load
+D_800E1060	g_hud_model_env_alpha	s16 environment alpha of the HUD models (copied from the HUD fade alpha)
+D_800E1068	g_hud_model_proj_mtx	(med) Projection matrix of the HUD models / cheat entry letters (ortho or perspective)
+D_800E10A8	g_mp_hud_unk_10a8	(low) s16 cleared by hud_overlay_draw_screen and hud_ingame_draw outside multiplayer; never read in C
+D_800E10AC	g_menu_sprite_block	Menu sprite block (0x1A8 bytes: 0x40 header with the cheat text at +0x20, then the sprite entries)
+D_800E10B0	g_cheat_cursor_col	s8 cheat entry letter grid column of the cursor
+D_800E10B1	g_cheat_cursor_row	s8 cheat entry letter grid row of the cursor (0..5, wrapping)
+D_800E10B2	g_cheat_letter_tilt	(med) s8 tilt of the selected cheat entry letter (+8 / -8 a frame)
+D_800E10B3	g_cheat_text_len	s8 length of the text typed on the cheat entry screen
+D_800E10B4	g_cheat_key_repeat	(med) s8 counts frames the same direction is held on the cheat entry screen (auto repeat)
+D_800E10B5	g_save_caption_entry	(med) u8 save / load screen entry + 1 whose caption is cached in D_800904EC
+D_800E10B8	g_menu_slot_fill	(med) u8[4] barrel menu player slot fill levels (0..255)
+D_8002C060	g_os_clock_rate	u64 libultra osClockRate (CPU counter ticks per second) used for timers
+D_8002C160	g_os_cont_initialized	libultra __osContinitialized flag (game_os_cont_init)
+D_8002C134	g_os_vi_next	libultra __osViNext: the VI context to apply at the next retrace
+D_80042DA0	g_os_cont_pif_ram	libultra __osContPifRam: PIF RAM command block for controller reads
+D_80042DDC	g_os_cont_pif_status	(med) pifstatus word (+0x3C) of the controller PIF RAM block
+D_80042DE1	g_os_max_controllers	libultra __osMaxControllers (4)
+D_800E1150	g_os_si_access_buf	Message buffer of the SI access queue (game_os_si_create_access_queue)
+D_800B116C	g_mp3_imdct12_cos3_a	(med) f32 MP3 short-block IMDCT 3-point stage cosine (x[2])
+D_800B1170	g_mp3_imdct12_cos3_b	(med) f32 MP3 short-block IMDCT 3-point stage cosine (x[3])
+D_800B1174	g_mp3_imdct12_twiddle_0	(med) f32 MP3 short-block IMDCT odd-part twiddle (t[3])
+D_800B1178	g_mp3_imdct12_twiddle_1	(med) f32 MP3 short-block IMDCT odd-part twiddle (t[4])
+D_800B117C	g_mp3_imdct12_twiddle_2	(med) f32 MP3 short-block IMDCT odd-part twiddle (t[5])
+D_800B1180	g_mp3_imdct12_scale_0	(med) f32 MP3 short-block IMDCT 6-point output scale (t[0])
+D_800B1184	g_mp3_imdct12_scale_1	(med) f32 MP3 short-block IMDCT 6-point output scale (t[1])
+D_800B1188	g_mp3_imdct12_scale_2	(med) f32 MP3 short-block IMDCT 6-point output scale (t[2])
+D_800B118C	g_mp3_imdct12_scale_3	(med) f32 MP3 short-block IMDCT 6-point output scale (t[3])
+D_800B1190	g_mp3_imdct12_scale_4	(med) f32 MP3 short-block IMDCT 6-point output scale (t[4])
+D_800B1194	g_mp3_imdct12_scale_5	(med) f32 MP3 short-block IMDCT 6-point output scale (t[5])
+D_800B1198	g_mp3_imdct12_win_0	(med) f32 MP3 short-block window coefficient 0 (first half)
+D_800B119C	g_mp3_imdct12_win_1	(med) f32 MP3 short-block window coefficient 1 (first half)
+D_800B11A0	g_mp3_imdct12_win_2	(med) f32 MP3 short-block window coefficient 2 (first half)
+D_800B11A4	g_mp3_imdct12_win_3	(med) f32 MP3 short-block window coefficient 3 (first half)
+D_800B11A8	g_mp3_imdct12_win_4	(med) f32 MP3 short-block window coefficient 4 (first half)
+D_800B11AC	g_mp3_imdct12_win_5	(med) f32 MP3 short-block window coefficient 5 (first half)
+D_800B11B0	g_mp3_imdct12_win_6	(med) f32 MP3 short-block window coefficient 6 (second half)
+D_800B11B4	g_mp3_imdct12_win_7	(med) f32 MP3 short-block window coefficient 7 (second half)
+D_800B11B8	g_mp3_imdct12_win_8	(med) f32 MP3 short-block window coefficient 8 (second half)
+D_800B11BC	g_mp3_imdct12_win_9	(med) f32 MP3 short-block window coefficient 9 (second half)
+D_800B11C0	g_mp3_imdct12_win_10	(med) f32 MP3 short-block window coefficient 10 (second half)
+D_800B11C4	g_mp3_imdct12_win_11	(med) f32 MP3 short-block window coefficient 11 (second half)
+D_8008FD90	g_human_player_count_us	(med) US-named alias of D_80090130 (g_human_player_count, EU 0x80090130): human player count; 2+ turns level mode 4 into 2
+D_80091C04	g_level_collision_buf_sizes	(med) Per level id: size of the collision scratch buffer allocated by collision_build_reset (US name, EU 0x80091FB4)
+D_80091EA0	g_level_quadtree_pool_sizes	Per level id: quadtree node pool size (doubled unless the cart check word matches)
+D_800B0DC0	g_collision_buf_cursor	Allocation cursor in the collision scratch buffer (per-area triangle / bound / grid arrays)
+D_800B0DC4	g_collision_buf_start	Start of the collision scratch buffer (collision_build_reset)
+D_800B0DC8	g_collision_buf_end	End of the collision scratch buffer (start + per-level size)
+D_800B0DCC	g_quadtree_node_count	Number of quadtree nodes allocated from the node pool
+D_800B0DD0	g_quadtree_leaf_count	Number of quadtree leaf nodes built
+D_800B0DD4	g_quadtree_min_half_size	(med) Quadtree build: nodes with a half size below this (512) become leaves
+D_800B0DD8	g_quadtree_leaf_max_tris	(med) Quadtree build: nodes with fewer triangles than this (10) become leaves
+D_800B0DE0	g_quadtree_pool_cursor	Write cursor in the quadtree node pool (14-byte nodes and leaf lists)
+D_800B0DE4	g_collision_total_tris	Total triangle count of all collision areas
+D_800B11EC	g_quadtree_pool_base	Base of the quadtree node pool (quadtree_alloc_node_pool)
+D_800C5C08	g_model_vtx_ranges	Per model kind (187): vertex ranges (G_VTX runs with their G_MTX group) for collision building
+D_800C6070	g_model_coll_tris	Per model kind (187): collision triangle array (12 bytes per triangle)
+D_800C6318	g_model_vtx_range_count	u16 per model kind: number of vertex ranges in g_model_vtx_ranges
+D_800DBE08	g_quadtree_roots	Per collision area: root node of its quadtree
+D_800DBE1C	g_collision_area_tris_1	(med) Triangle count of collision area 1 (D_800DBE18 + 1; areas 0..3)
+D_800DBE20	g_collision_area_tris_2	(med) Triangle count of collision area 2 (D_800DBE18 + 2)
+D_800DBE24	g_collision_area_tris_3	(med) Triangle count of collision area 3 (D_800DBE18 + 3)
+D_800DBE28	g_pvs_row_bytes	(med) s16 bytes per PVS row: (area 0 node count + 7) / 8 rounded up to 16 (collision_load_level_grid)
+D_800DBE2A	g_quadtree0_node_count	(med) s16 node count of the area 0 quadtree (collision_build_quadtrees)
+D_800DBE2C	g_quadtree0_leaf_count	(med) s16 leaf count of the area 0 quadtree (collision_build_quadtrees)
+D_800DBE38	g_collision_area_tri_count	Triangle count of the collision area being built (also the append index of collision_scan_level_dl)
+D_800DBE63	g_collision_full_bounds	(med) u8 flag: collision triangles get the full s16 bounds instead of their own (collision_scan_level_dl)
+D_800DBE64	g_collision_floor_step	(med) f32 floor / ceiling search step height (150 / 85 / 50) set by collision_set_step_size
+D_800DC262	g_quadtree_stat_1	(low) s16 cleared with D_800DC260 by quadtree_alloc_node_pool; not otherwise used in C
+D_800DC264	g_quadtree_stat_2	(low) s16 cleared with D_800DC260 by quadtree_alloc_node_pool; not otherwise used in C
+D_800DC266	g_quadtree_stat_3	(low) s16 cleared with D_800DC260 by quadtree_alloc_node_pool; not otherwise used in C
+D_800DC280	g_collision_cur_area	Index of the collision area whose arrays are being allocated / selected
+D_80083110	g_ambient_shape_points	Per shape: point list for the shape placer (pair count, then x / z offsets)
+D_8008D258	g_ambient_placer_fns	Ambient effect placers by type: { place function, update function, word }
+D_8008D2A0	g_ambient_placement_rows	s16 [row][8 kinds][2]: per placement row and kind {placer type, placer parameter}
+D_80096014	g_ambient_tri_uv_points	f32 (u, v) triangle coordinates used by the point placer
+D_80096074	g_ambient_slot_defaults	(low) u8 per ambient slot: value copied into both D_800DE050 bytes of the slot
+D_80096090	g_ambient_sound_info	(med) 10-byte info per ambient sound id (frame count, frame size / length, flags, parameters)
+D_800BE4A0	g_ambient_slot_ids	(med) 15 ambient slots, 4-byte stride: sound id (0xFF = empty) and flags, loaded from the level asset
+D_800BE850	g_ambient_shape_phase_bits	(med) u16 per ambient slot alternating phase bit flipped by the shape placer
+D_800BE858	g_ambient_slot_params	(med) s16 x 2 per ambient slot: the two slot parameters (sound info +4 / +6)
+D_800BE898	g_ambient_slot_emitter_count	(med) u16 per ambient slot: emitter count; nonzero loads the slot's sample
+D_800DDC00	g_ambient_alt_phase_slots	(med) Bit per ambient slot (placement flag 0x80): emitters alternate between two phases
+D_800DDC04	g_ambient_pingpong_slots	(med) Bit per ambient slot (info flag 1): ping-pong phase animation
+D_800DDC08	g_ambient_slow_random_slots	(med) Bit per ambient slot (info flag 8): slower phase animation with random direction flips
+D_800DE000	g_ambient_phase_period	(med) u8 per ambient slot: phase period >> 8 (sound info +1)
+D_800DE010	g_ambient_flare_frame	(med) u8 per ambient slot: flare-up frame
+D_800DE020	g_ambient_quad_flag	(low) u8 per ambient slot: vertex 1 flag of its quads (2 when info flag 0x80, else 1)
+D_800DE040	g_ambient_phase_dir_bits	(med) u8 per ambient slot: ping-pong direction bits of its 4 phases (random at build)
+D_800DE050	g_ambient_slot_bytes	(low) u8 x 2 per ambient slot, both set from g_ambient_slot_defaults
+D_800DE0B0	g_ambient_placement_row	u8 per ambient slot: its placement row (flags & 0x7F)
+D_800DE0C0	g_ambient_phases	s16 15 slots x 4 animation phases (<< 8)
+D_800DE148	g_ambient_emitters	Ambient emitter records (14 bytes each), sorted by x or z
+D_800D9CF0	g_mist_puff_handles	(med) Node handles of the 4 mist puffs spawned by the level setup (destroyed by fx_slots_9cf0_clear)
+D_800966D0	g_level_rope1_ends	(med) Rope 1 template (two end points, 0x18 bytes) copied by level_ropes_setup
+D_800966E8	g_level_rope2_ends	(med) Rope 2 template (two end points, 0x18 bytes) copied by level_ropes_setup
+D_80096700	g_level_rope3_ends	(med) Rope 3 template (two end points, 0x18 bytes) copied by level_ropes_setup
+D_80096718	g_level_rope4_ends	(low) Rope 4 template (0x18 bytes); copied but overwritten before use by level_ropes_setup
+D_80096730	g_level_rope5_ends	(med) Rope 5 template (two end points, 0x18 bytes) copied by level_ropes_setup
+D_800DCD28	g_level_tint_colour	(med) u8 RGB default tint colour B (outside tint zones), set by the level hotspot setup, reset to white
+D_800DCD3C	g_level_tint_strength_b	(low) u8 default tint strength B (top byte of the hotspot word with g_level_tint_colour)
+D_800DCD3D	g_level_tint_strength_a	(low) u8 default tint strength A (top byte of the hotspot's other colour word)
+D_800DD1D4	g_rope_light_r	(low) f32 red of the level light colour, copied by level_ropes_setup
+D_800DD1D8	g_rope_light_g	(low) f32 green of the level light colour, copied by level_ropes_setup
+D_800DD1DC	g_rope_light_b	(low) f32 blue of the level light colour, copied by level_ropes_setup
+D_800DD1E0	g_rope_tint_r	(low) f32 red of g_level_tint_colour, copied by level_ropes_setup
+D_800DD1E4	g_rope_tint_g	(low) f32 green of g_level_tint_colour, copied by level_ropes_setup
+D_800DD1E8	g_rope_tint_b	(low) f32 blue of g_level_tint_colour, copied by level_ropes_setup
+D_800DD1EC	g_rope_tint_strength_b	(low) f32 copy of g_level_tint_strength_b (level_ropes_setup)
+D_800DD1F0	g_rope_tint_strength_a	(low) f32 copy of g_level_tint_strength_a (level_ropes_setup)
+D_8009068C	g_level_scroll_tex_id	(med) Texture id whose uses in the level display lists get a texture scroll (level_tex_scroll_fx_setup)
+D_80091B68	g_level_vtx_scroll_tex_key	(med) Texture key whose vertices in the level DL get a vertex texture scroll (level_tex_scroll_create)
+D_800B1248	g_level_model_colour_group_count	u8 number of level model colour groups (level_load_models)
+D_800B1250	g_level_part_vtx_count	s32[4] vertex count of each level geometry part (level_load_models)
+D_800BE930	g_vtx_colour_backup	u8 *[4] per level geometry part: its slice of the vertex colour store (3 bytes per vertex)
+D_800BE940	g_vtx_colour_group_backup	(med) Per colour group: per entry, the backed-up RGB of its listed vertices
+D_800BE944	g_vtx_colour_room_base	(med) u16 per room record: first colour index in the vertex colour store (0xFFFF = none)
+D_800BE948	g_vtx_colour_stored	(med) u16 number of colours stored so far in the vertex colour store
+D_800BE950	g_level_env_colours_rgb	(med) RGB (3 bytes each) of the G_SETENVCOLOR commands of the level display list
+D_800BE970	g_level_env_colour_cmds	(med) u16 command index of each G_SETENVCOLOR of the level display list
+D_800BE984	g_level_env_colour_count	(med) u8 number of G_SETENVCOLOR commands listed (dl_env_colours_list)
+D_80083310	g_glyph_set_rom_ranges	ROM {start, end} of each glyph set loaded by glyph_set_load_rom
+D_800CC16C	g_glyph_count	(low) u8 cleared by glyph_count_reset
+D_800D1CD0	g_level_blockers	(med) Level blocker table (asset 3 / 0xC, 8-byte records, relocated) used by obj_push_out_of_blockers
+D_800BE9B0	g_setup_type_count	u8 number of object types with a loaded sound word table (setup_load_type_assets)
+D_800BE9B8	g_setup_type_ids	u16 object type of each loaded sound word table (level_list_index_of)
+D_800BE9C8	g_setup_type_sound_tables	Per loaded object type: sound word table (asset 2 / 0x12) for sound ids >= 2000
+D_800D20FC	g_setup_entries	Level setup entry table (0x30 bytes per entry: player slots, then the level's entries)
+D_800D2520	g_setup_entry_count	u8 number of level setup entries
+D_800D2521	g_setup_level_first	u8 index of the first setup entry of the level's own part (after the player slots)
+D_800D2530	g_setup_respawn_timers	s16 per setup entry: respawn timer (allocated by level_setup_load)
+D_800BEAE0	g_camera_smooth_pitch	f32 per player: smoothed camera pitch (camera_update_dir_vector)
+D_800BEAF0	g_camera_smooth_heading	f32 per player: smoothed camera heading (camera_update_dir_vector)
+D_800843D0	g_obj_colour_key_sets	(med) Per colour group 1..5: RGB key colours (3 bytes each) blended by obj_vertex_colours_blend
+D_80096CD0	g_obj_colour_key_counts	(med) u8 per colour group 1..5: number of key colours
+D_8002AE18	g_cont_read_done	(med) u8 set when a controller read finished (SI free); arms the next read timer, checked at PRE-NMI
+D_800843F4	g_save_eeprom_state	(med) u8 EEPROM probe result / save request state (save_process_request)
+D_80096D10	g_rumble_k_6d10	(med) f32 constant scaling the rumble strength levels 1..7 (rumble_start_strength)
+D_800BE720	g_cont_forced_buttons	(med) u16 per pad: button bits OR-ed into the next read, then cleared (set by events / init)
+D_800BE938	g_rumble_probe_request	(med) u8 set at level start: rumble_update re-probes the rumble paks, then clears it
+D_800BEB00	g_cont_read_timer	OSTimer that triggers the next controller read (cont_arm_read_timer)
+D_800BEB20	g_cont_prev_buttons	u16 per player: buttons of the previous read (pressed edges in D_800BEB30)
+D_800BEB28	g_cont_prev_buttons_b	(med) u16 per player: previous buttons for the second pressed-edge mask D_800BED50
+D_800BEB38	g_cont_last_buttons	(med) u16 per player: buttons before this frame's read (cont_read_frame)
+D_800BEB60	g_cont_connected_mask	u8 bit per controller port with a controller connected
+D_800BEB80	g_rumble_pfs	OSPfs[4] (0x68 bytes each) motor handles of the rumble paks
+D_800BED5C	g_rumble_active	u8 per channel: rumble requested (1 = pulsing), set by rumble_start, cleared by rumble_stop
+D_800BED60	g_rumble_prev_active	(med) u8 per channel: g_rumble_active of the previous update
+D_800BED68	g_rumble_motor_on	u8 per channel: the rumble motor is running
+D_800BED70	g_rumble_phase	(med) f32 per channel: time within the current on / off cycle
+D_800BED80	g_rumble_on_time	(med) f32 per channel: motor on time of a cycle
+D_800BED90	g_rumble_off_time	(med) f32 per channel: motor off time of a cycle
+D_800BEDA0	g_rumble_period	(med) f32 per channel: cycle length (on + off time)
+D_800BEEE3	g_rumble_stop_request	(med) u8 one-frame request (pause) to stop all rumble motors (rumble_update)
+D_800CC7A2	g_objects_air_time	(low) u16 +0xB2 of object 0 (EU 0x800CC7A2), cleared when out of water; carried over a level transition
+D_800D2132	g_transition_air_time	(low) u16 player +0xB2 kept over a level transition (from g_objects_air_time), restored at spawn
+D_8003A948	g_gfx_yield_buffer	RSP yield buffer (0xC00 bytes) put in every gfx task's yield_data_ptr by gfx_task_submit
+D_8003B548	g_sched_gfx_queue	Scheduler gfx task message queue; gfx_task_submit sends each filled OSScTask to it
+D_80084400	g_gfx_loaded_ucode_idx	(med) Index of the main microcode currently loaded by gfx_load_ucode (reload only when it changes)
+D_80084404	g_gfx_loaded_ucode2_ofs	(med) Offset (0 or 4) of the secondary microcode loaded by gfx_load_ucode, cached to skip reloads
+D_80084408	g_gfx_ucode_rom_table	Microcode ROM table: 16 bytes per entry (text start / end, data start / end) relative to ROM D_2D810
+D_8008448C	g_cutscene_setup_fns	Scene setup callbacks indexed by the cutscene_scene_load callback number, run before the sequence starts
+D_800863B4	g_obj_interaction_state_fns	Per object interaction state handlers (objects_run_state_handlers); cutscene_event_dispatch also calls them
+D_80090124	g_cutscene_menu_skip_req	(med) Skip request set by menu_mode_update; cutscene_can_skip consumes it on level 0x1D
+D_80096D74	g_cutscene_k_6d74	(low) Cutscene rodata f32: the "unset" value of g_cutscene_end_cam_value (999)
+D_80096D78	g_cutscene_k_6d78	(low) Cutscene rodata f32: the "unset" value of g_cutscene_end_cam_blend_arg (999)
+D_80096D80	g_cutscene_k_6d80	(low) Cutscene rodata f32 0.01 (path sample step in cutscene_path_point_at)
+D_80096D84	g_cutscene_k_6d84	(low) Cutscene rodata f32 0.01 (path length percent in cutscene_actor_place_at)
+D_80096D88	g_cutscene_k_6d88	(low) Cutscene rodata f32 0.01 (path length percent in cutscene_actor_heading_at)
+D_80096D8C	g_cutscene_k_6d8c	(low) Cutscene rodata f32: radians to degrees factor (cutscene_actor_heading_at)
+D_80096D9C	g_cutscene_k_6d9c	(low) Cutscene rodata f32 0.01 (segment step in cutscene_path_prepare_segment)
+D_80096DB0	g_cutscene_k_6db0	(low) Cutscene rodata f32: "unset" scale marker tested by cutscene_actor_apply_track
+D_80096DB4	g_cutscene_k_6db4	(low) Cutscene rodata f32: "no water level" value tested by cutscene_actor_apply_track
+D_80096DB8	g_cutscene_k_6db8	(low) Cutscene rodata f32: scale factor applied to the track scale in cutscene_actor_apply_track
+D_80096DBC	g_cutscene_k_6dbc	(low) Cutscene rodata f32: degrees to 16-bit angle factor (cutscene_actor_apply_track)
+D_80096DC0	g_cutscene_k_6dc0	(low) Cutscene rodata f32: "unset" point value written by cutscene_player_look_target
+D_80096DC4	g_cutscene_k_6dc4	(low) Cutscene rodata f32: "unset" look limit value tested by cutscene_player_look_limits
+D_80096DCC	g_cutscene_k_6dcc	(low) Cutscene rodata f32: "no water level" (-10000) tested by cutscene_teardown_player
+D_800BE9D0	g_gfx_dl_ptr	Display list write pointer of the current frame (GDL), rewound per frame from the DL buffer start
+D_800BEA37	g_gfx_vi_mode_pending	(low) Set by viewports_init: the next gfx task carries the VI mode (D_80082FA0 + 1) in its flags, then cleared
+D_800BEDE8	g_gfx_dl_buffers	The two (double-buffered) display list buffers, indexed by the frame buffer index D_800BE9C0
+D_800BEEF0	g_gfx_ucode2_data	(med) Data segment address of the secondary microcode loaded into g_gfx_ucode2_text (task ucode_data)
+D_800BEEF4	g_gfx_cur_task	The OSScTask gfx_task_submit is filling (entry of g_gfx_tasks)
+D_800BEEF8	g_gfx_tasks	The two gfx OSScTask records (0x60 bytes each), one per frame buffer index
+D_800BEFB8	g_gfx_ucode_variant	(low) When 1, gfx_load_ucode picks the microcode variant two entries further in g_gfx_ucode_rom_table
+D_800BEFBC	g_gfx_ucode_data	(med) Data segment address of the main microcode loaded into g_gfx_ucode_text
+D_800BEFD0	g_gfx_ucode2_text	(med) Buffer for the secondary microcode text (followed by its data), loaded by gfx_load_ucode
+D_800C1480	g_gfx_ucode_text	(med) Buffer for the main microcode text (followed by its data), loaded by gfx_load_ucode
+D_800C35C5	g_cutscene_pending_was_idle	(low) Set with g_cutscene_pending on a cross-level scene load: 1 when the slot was idle (then the slot state becomes 2)
+D_800C35EA	g_cutscene_slot_state	Per cutscene slot state (0 none, 1 playing, 2 loading); 1 = a cutscene runs, tested all over the game
+D_800C3638	g_cutscene_in_progress	(med) Cutscene flag: set on scene load / track pass; objects not taking part are frozen / hidden while set
+D_800C3663	g_cutscene_focus_set	(med) Set by cutscene_set_focus_point: g_cutscene_focus_pos / g_cutscene_focus_yaw hold a scene anchor
+D_800C3670	g_cutscene_treat_as_seen	(med) When set (level restart transition), cutscene_was_seen says yes and cutscene_mark_seen records nothing
+D_800C3671	g_cutscene_restart_transition	(med) Set while the restart transition scene of level 0x25 runs (level_restart_at_start_point); camera keeps its state
+D_800C3930	g_cutscene_obj_list_count	Per cutscene slot: number of object ids in g_cutscene_obj_lists
+D_800C3938	g_cutscene_obj_lists	Per cutscene slot: list of up to 25 object ids released at the end (cutscene_release_listed_objs)
+D_800C3958	g_cutscene_track_recs	(med) Per cutscene slot: struct233 track records (0x44 bytes per actor; lights, positions, gauges read them)
+D_800C396A	g_cutscene_rec_list_count	Per cutscene slot: number of world record ids in g_cutscene_rec_lists
+D_800C3970	g_cutscene_rec_lists	Per cutscene slot: list of up to 30 world record ids restored at the end (cutscene_restore_records)
+D_800C39AC	g_cutscene_focus_pos	(med) Scene anchor point (s16 x, y, z) set by cutscene_set_focus_point; cutscene_place_scene moves the scene onto it
+D_800C39B4	g_cutscene_focus_yaw	(med) Scene anchor angle set by cutscene_set_focus_point; cutscene_place_scene rotates the scene by it
+D_800C39B8	g_cutscene_focus2_pos	(med) Second scene anchor point (s16 x, y, z) from cutscene_set_focus_point2, copied to g_cutscene_focus_pos at the end
+D_800C39C0	g_cutscene_focus2_yaw	(med) Second scene anchor angle from cutscene_set_focus_point2, copied to g_cutscene_focus_yaw at the end
+D_800C39C4	g_cutscene_scene_rot	(med) Rotation cutscene_place_scene applied to the scene; used as the camera record angle (cam[4])
+D_800C39C8	g_cutscene_level	(med) Level id of the scene loaded by cutscene_scene_load
+D_800C39C9	g_cutscene_script_no_fade	(med) The scene script has event 0x44: no fade to black when the cutscene is skipped
+D_800C39CA	g_cutscene_keep_player	(med) The scene script has event 0x68: cutscene_teardown_player does not reset the player object
+D_800C39D0	g_cutscene_frame	Per cutscene slot: script position (frame) of the running cutscene
+D_800C39D8	g_cutscene_prev_frame	(med) Per cutscene slot: script position of the previous step (-100 when reset)
+D_800C39E0	g_cutscene_events_ran	(low) Per cutscene slot byte: set once scene_event_track_pass has run the slot's events
+D_800C39E2	g_cutscene_next_scene	Queued follow-up scene + 1 (0 = none), loaded by cutscene_end
+D_800C39E8	g_cutscene_actor_key_counts	(med) Per cutscene slot: u16 table of path key counts of each actor
+D_800C39F0	g_cutscene_cam_key_counts	(med) Per cutscene slot: u16 table of camera track key counts of each actor
+D_800C39F8	g_cutscene_event_counts	(med) Per cutscene slot: u16 table of event track counts of each actor
+D_800C3A00	g_cutscene_words	(med) Per cutscene slot: table of plain words of the scene (text pointers etc. indexed by event w6)
+D_800C3A08	g_cutscene_scene	Per cutscene slot: scene number currently loaded (level scripts test specific scenes)
+D_800C3A10	g_cutscene_actor_entries	(med) Per cutscene slot: actor entry table (8 bytes per actor, u16 type at +0)
+D_800C3A18	g_cutscene_camera_actor	Index of the cutscene camera actor (0xFF = pick again with cutscene_find_camera_actor)
+D_800C3A40	g_camera_event_target_x	(med) Camera event block D_800C3A20 +0x20: look target x (set by cutscene_apply_cameras)
+D_800C3A44	g_camera_event_target_y	(med) Camera event block D_800C3A20 +0x24: look target y (set by cutscene_apply_cameras, -180 in side view)
+D_800C3A48	g_camera_event_target_z	(med) Camera event block D_800C3A20 +0x28: look target z (set by cutscene_apply_cameras)
+D_800C3A5A	g_cutscene_actor_count	Per cutscene slot: number of actors of the loaded scene
+D_800C3A68	g_cutscene_length_60hz	(med) Length of the cutscene in 60 Hz frames (cutscene_compute_length)
+D_800C3A6C	g_camera_fov_extra	(med) Extra angle added to both fields of view by camera_projection_update (cutscene camera event)
+D_800C3A70	g_camera_viewport_w	(med) Viewport width override (0 = default), set by scene event 0x25
+D_800C3A74	g_camera_viewport_h	(med) Viewport height override (0 = the screen height), set by scene event 0x25
+D_800C3A78	g_cutscene_run_all_objs	(med) Per slot, scene event 0x0D: objects not in the cutscene keep updating / animating
+D_800C3A7A	g_cutscene_show_all_objs	(med) Per slot, scene event 0x08: objects not in the cutscene stay visible
+D_800C3A7E	g_cutscene_keep_listed_objs	(med) Per slot, scene event 0x12: cutscene_end does not release the listed objects
+D_800C3A84	g_cutscene_obj_vis_mode	(low) Per slot, scene event 0x54 (~b4): obj_update_visibility test during cutscenes
+D_800C3A86	g_cutscene_hide_world	(med) Scene event 0x6D: player_view_dl_build skips the world while a cutscene runs
+D_800C3A88	g_cutscene_scene_assets	Per cutscene slot: loaded scene asset (cutscene_load_scene_asset), first word = header
+D_800C3A94	g_cutscene_end_cam_value	(low) Value of camera event 8 queued at the cutscene end (999 = unset); set by scene event 0x6A
+D_800C3A98	g_cutscene_end_cam_blend_arg	(low) Camera transition argument queued at the cutscene end (999 = unset); scene event 0x7A
+D_800C3A9C	g_cutscene_end_cam_blend_time	(low) Camera transition duration queued at the cutscene end (b5 * 50); scene event 0x7A
+D_800C3AA0	g_cutscene_skip_end_cam_event	(low) Scene event 0x7B (level 0x1D): skip camera event 6 at the cutscene end once
+D_800C3AA8	g_cutscene_event_tracks	(med) Per cutscene slot, per actor: sound / event track record pointers (events at +0x18)
+D_800C3B98	g_cutscene_cam_tracks	(med) Per cutscene slot, per actor: camera track key arrays (8-byte keys)
+D_800C3C88	g_cutscene_skip_state	(med) Cutscene skip progress (0 idle, 1 skipping, 2 done), see cutscene_update_skip
+D_800C3C90	g_cutscene_load_callback	Setup callback number passed to cutscene_scene_load, kept for the follow-up scene
+D_800C3C94	g_cutscene_load_callback_arg	Setup callback argument passed to cutscene_scene_load, kept for the follow-up scene
+D_800C3CA0	g_subtitle_slots	The three cutscene subtitle text box slots (struct163, 0x38 bytes each)
+D_800C3D80	g_cutscene_actor_blocks	(med) Per cutscene slot, per actor: 16-byte look-step block (0xFF = none)
+D_800C3E70	g_cutscene_actors	Per cutscene slot: SceneActor array (0x40 bytes per actor: path keys, state)
+D_800C40A9	g_cutscene_volume	(med) Cutscene sound volume 0..25 (fades out while skipping)
+D_800C40AB	g_cutscene_fade_out_at_end	(med) Scene event 0x59: cutscene_end fades the screen to black
+D_800C40AC	g_cutscene_finish_state	(med) Cutscene finish state; cutscene_check_finished sets 2 when the scene is over
+D_800C40AD	g_cutscene_event_no_fade	(med) Scene event 0x78: no fade to black when the cutscene is skipped
+D_800C40AE	g_cutscene_start_frame	Start position of the cutscene script (frame of event 0x77)
+D_800C40B9	g_cutscene_chain_skip	(low) The script has event 0x1E (or a queued follow-up): always skippable, skipping restarts the next part
+D_800C40BC	g_cutscene_no_skip	The scene script has the "no skip" event 0xE
+D_800C4168	g_subtitle_slots_end	(med) End of g_subtitle_slots (3 * 0x38 bytes), compared by subtitle_slot_get
+D_800C4170	g_scene_event_queue	Queued scene events (12 bytes each) of the loaded scene, run by scene_event_queue_run
+D_800CC230	g_gfx_dram_stack	RSP DRAM stack (0x400 bytes) given to every gfx task
+D_800CC3FF	g_obj_unique_id_by_slot1	(med) Byte base so that [n * 0x32C] is the unique id (+0x3B) of object n - 1 (1-based owner lookups)
+D_800844A0	g_scene_fade_colours	Screen fade colours of scene events, 3 bytes (r, g, b) per entry
+D_800844A8	g_scene_light_colours	(med) Scene event light colours, 3 RGB rows (copied by scene_event_run_a)
+D_800844B4	g_scene_ev41_colours	(med) Two RGB colours of scene event sub-type 0x41
+D_800844BC	g_scene_ev05_fx_kinds	(med) Effect kinds of scene event sub-type 0x05 ([i][1] used, character_effect_attach)
+D_800844CC	g_scene_ev37_colours	(med) Three RGB colours of scene event sub-type 0x37
+D_800844D8	g_scene_ev11_colour_sets	(med) Three colour sets (6 bytes) of scene event 0x11 in scene_event_run_b
+D_8008CDF0	g_scene_ev0c_quad_word	(low) First word of the sprite quad spawned by scene event 0x0C (node_spawn_sprite_quad)
+D_800905C4	g_scene_att_tex_ids	(low) Texture ids put in an attachment's +0x18 / +0x1A by a scene event (index b5)
+D_80096DE0	g_str_cutscene_1	String "Cutscene 1" (effect name of a scene event character effect)
+D_80096DEC	g_str_cutscene_2	String "Cutscene 2" (effect name of a scene event character effect)
+D_800BEECB	g_text_bank_lang	Language of the loaded text banks (reloaded when the language D_800E101A changes)
+D_800C3681	g_cutscene_hide_background	(med) Scene event 0x7C: view_background_draw draws nothing while a cutscene runs
+D_800C3682	g_cutscene_flat_background	(med) Scene event 0x84: view_background_draw only clears the viewport to a fixed colour
+D_800C3683	g_cutscene_no_pause	(med) Scene event 0x85: pausing is blocked while a cutscene runs
+D_800DC2DC	g_sky_alt_tiles	(med) Sky 1 face 2 shows the replacement tiles 0x1675..; from the level header bit or scene event 0x7F
+D_800DDE40	g_hud_scope_scripted	(med) Scene event 0x64: the sniper scope follows the cutscene track values (g_hud_scope_zoom_ptr ...)
+D_800DE274	g_hud_scope_zoom_ptr	(med) Pointer to the f32 scope zoom of a cutscene track record (+0x28), scene event 0x64
+D_800DE278	g_hud_scope_aim_x_ptr	(med) Pointer to the f32 scope aim offset x of a cutscene track record (+0x24)
+D_800DE27C	g_hud_scope_aim_y_ptr	(med) Pointer to the f32 scope aim offset y of a cutscene track record (+0x2C)
+D_800E1024	g_scene_light_events_on	(med) Enables the cutscene colour light events (types 7 / 0xE / 0xF / 0x10 / 0x12)
+D_80083650	g_model_mat_special_set	(low) Segment 8 material set for model draw modes 3 / 5 (obj_draw_model_dl)
+D_800844F0	g_obj_draw_begin_dl	(med) Display list called before object drawing (objects_draw_pass, obj_draw_model_dl arg7, air meter)
+D_80084520	g_obj_draw_end_dl	(med) Display list called after object drawing (objects_draw_pass, obj_draw_model_dl arg7, air meter)
+D_800845BC	g_model_joint_map_lists	(low) Per model kind: joint pair lists ending in 0xFF used by obj_build_model_instance
+D_800C3E80	g_matrix_arena_a	First level matrix arena (count * 64 bytes), double-buffered with g_matrix_arena_b
+D_800C4290	g_objects_update_flag	(low) Byte cleared at the end of objects_update_all
+D_800C4294	g_obj_274_mask	(med) Mask of the +0x274 values (bit v - 1) of the 25 objects, rebuilt each frame by objects_update_all
+D_800C429A	g_obj_mtx_count	Number of object matrices reserved this frame (converted by obj_mtx_buffer_flush)
+D_800C42A8	g_obj_mtx_next	Next free address in this frame's object matrix arena
+D_800C42AC	g_obj_mtx_arena_start	Start of this frame's object matrix arena (for the overflow check)
+D_800C42B0	g_mtx_fixed_point	Bone matrices are fixed-point Mtx when set, else f32 matrices
+D_800C52F0	g_model_joint_counts	Per model id: joint matrix count
+D_800C6A8F	g_breakable_slots_state	(med) Byte view of g_breakable_slots[0] +0xF (state), indexed [slot * 16]
+D_800CC826	g_objects_shadow_kind	(med) g_objects[0] +0x136: ground shadow sprite kind, indexed [obj * 0x32C]
+D_800DD718	g_fog_near	(med) Fog start (per mille of the range between the far / near planes)
+D_800DD71C	g_fog_far	(med) Fog end (per mille of the range between the far / near planes)
+D_800DFBF0	g_afterimage_mtx	(med) Matrix list obj_draw_part draws the object with (afterimage_draw)
+D_800DFBF4	g_afterimage_alpha	(med) Alpha obj_draw_part draws the object with (afterimage_draw)
+D_80084550	g_attachment_cb_fns	Attachment per-frame callbacks (index +7 of the record, 0 = none)
+D_800905D8	g_att_8d_tex_low	(low) Attachment kind 0x8D texture id when player stat 6 is below 100
+D_800905DC	g_att_8d_tex_high	(low) Attachment kind 0x8D texture id when player stat 6 is 100 or more
+D_8009066C	g_att_pingpong_tex_ids	(med) Texture ids cycled back and forth by attachment_cb_texture_pingpong
+D_80090680	g_att_sync_tex_idle	(low) Texture id of attachment kinds 0x5A / 0x74 / 0x7A while obj +0x2E8 == 0
+D_80090684	g_att_sync_tex_active	(low) Texture id of attachment kinds 0x5A / 0x74 / 0x7A while obj +0x2E8 != 0
+D_800906AC	g_att_blink_tex_ids	(med) The two texture ids toggled by attachment_cb_blink_texture
+D_8009748C	g_attachment_k_748c	(low) Attachment rodata f32 1 / 60 (attachment_cb_tile_by_height)
+D_800C3EE0	g_attachment_list	Head of the doubly linked attachment record list (+0x54 next, +0x58 prev)
+D_800DA248	g_point_light_ptrs	(low) Level point light pointers, iterated by light_compute_point_colour and passed to the DL builders
+D_800980CC	g_obj_adjust_k_80cc	(low) Rodata f32 used by obj_adjust_entries_type28
+D_800CC9D4	g_objects_unk2e4	(low) g_objects[0] +0x2E4 (s32 angle of object type 0x8A, script test value), indexed [obj * 0x32C]
+D_80083350	g_model_mat_blend_set	(med) Segment 8 material set for blended (alpha < 0xFF) models
+D_800834D0	g_model_mat_opaque_set	(med) Segment 8 material set for opaque models
+D_80098120	g_reflect_k_8120	(low) Rodata f32 passed to the cull test of reflect_is_culled
+D_800C4310	g_face_lower_amount	(low) Face value set by obj_adjust_entries_face, lowers joints in obj_lower_joints_by_face
+D_800C4320	g_reflect_queue_count	Number of entries in the mirrored-draw queue g_reflect_queue (max 15)
+D_800C4328	g_reflect_queue	Mirrored-draw queue, 15 entries of 12 bytes
+D_800846E0	g_player_strip_dl	(low) Setup display list of the player slot-8 strip (player_draw_slot8_strip)
+D_8009076C	g_player_strip_sprite	(low) Sprite / texture of the player slot-8 strip (sprite_load_texture)
+D_80098130	g_player_strip_k_8130	(low) Rodata f32 0.7: strip vertex follow rate (player_strip_update_vertices)
+D_800C43E4	g_player_strip_points	(med) Strip vertex positions (s16 x, y, z) eased by player_strip_update_vertices
+D_800DCD7C	g_light_vertex_lighting	(low) Set by level_lights_reset / light_set_level_colour; switches the draw code to lit geometry mode
+D_80084710	g_look_id_lists	(med) Look: u16 lists of +0x84 values per list number (look_record_setup)
+D_80084770	g_look_node_list_ids	The 8 node list indices searched in g_node_lists for look targets
+D_80084790	g_look_point_rr	Round-robin start into g_look_points (the last chosen point)
+D_80084794	g_obj22_scale_joints	(med) Joints scaled by obj22_cb_scale_joint, indexed by the call count
+D_8009822C	g_look_list_by_obj_id	(med) Per object id: look list number + 1 (0 = none)
+D_80098400	g_look_list_lengths	(med) Lengths of the g_look_id_lists lists
+D_80098418	g_look_limits	(med) Look limit sets (0x18 bytes each), returned by look_get_limits
+D_80098550	g_look_follow_rates	Per limit set: yaw / pitch follow factors and yaw / pitch max steps
+D_800989F8	g_look_k_89f8	(low) Rodata f32 scaling both angles in look_angles_to_point
+D_800C43F0	g_look_aim_point	f32 x, y, z: current aim point (-99999 = none), set by look_turn_joint
+D_800C43FC	g_look_fixed_once	One-shot: use g_look_fixed_yaw / g_look_fixed_pitch as the look angles
+D_800C4400	g_look_fixed_yaw	(med) Look yaw saved by look_turn_joint for the one-shot fixed angles
+D_800C4404	g_look_fixed_pitch	(med) Look pitch saved by look_turn_joint for the one-shot fixed angles
+D_800C4408	g_look_target_point	(med) f32 x, y, z look target point (-99999 = unset) filled by look_find_target
+D_800C4414	g_look_fixed_target	(med) s16 x, y, z fixed look target set by event_action_object, read by look_get_fixed_target
+D_800C441A	g_look_cb_calls	(med) Number of look joint callback calls of the current object this frame
+D_80098AA0	g_tail_seg_lengths	(med) Tail segment lengths (4) from the previous point
+D_80098AB0	g_tail_seg_lengths_alt	(med) Tail segment lengths (4) for object ids 0x80 / 0xB0
+D_80098AC0	g_tail_ease_a	(low) Tail per-point easing weights (first set)
+D_80098AD0	g_tail_ease_b	(low) Tail per-point easing weights (second set)
+D_80098AE0	g_tail_max_bend	(med) Tail per-point maximum bend angles (45 degrees)
+D_80098AF0	g_tail_lift_a	(low) Tail lift table (5 floats), first variant
+D_80098B04	g_tail_lift_b	(low) Tail lift table (5 floats), second variant
+D_80098B18	g_tail_lift_c	(low) Tail lift table (5 floats), third variant
+D_80098B2C	g_tail_hold_anim_a	(low) Animation id that sets bit 0 of object +0x2FB (obj_set_kind_look_flags)
+D_80098B2E	g_tail_hold_anim_b	(low) Second animation id that sets bit 0 of object +0x2FB
+D_80098B30	g_tail_hold_anims	(low) 88 animation ids that set bit 0 of object +0x2FB
+D_80098BE0	g_tail_off_anims	(low) 3 animation ids that set bit 1 of object +0x2FB (tail off)
+D_80098BE8	g_tail_k_8be8	(low) Tail rodata f32: wave phase to radians
+D_80098BEC	g_tail_k_8bec	(low) Tail rodata f32: second wave phase to radians
+D_80098BF0	g_tail_k_8bf0	(low) Tail rodata f32 scaling the camera z offset
+D_80098BF4	g_tail_k_8bf4	(low) Tail rodata f32: sway easing factor
+D_80098BF8	g_tail_k_8bf8	(low) Tail rodata f32 scaling obj +0x40
+D_80098BFC	g_tail_k_8bfc	(low) Tail rodata f32 subtracted from the scaled +0x40 angle
+D_80098C00	g_tail_k_8c00	(low) Tail rodata f32: percent factor for the cutscene tail lift
+D_80098C04	g_tail_k_8c04	(low) Tail rodata f32: sway phase to radians
+D_80098C08	g_tail_k_8c08	(low) Tail rodata f32: second sway phase to radians
+D_80098C0C	g_tail_k_8c0c	(low) Tail rodata f32: acos result to degrees
+D_800C4000	g_tail_reset_mask	(med) Bit per object (0..3): reset its tail joint chain next time
+D_800C40BD	g_cutscene_tail_lift_pct	(med) Tail lift percent during cutscenes (100 = normal), set by scene event 0x82
+D_800C4428	g_tail_anchor	(med) f32 x, y, z: tail anchor before the first point (joint 0)
+D_800CC9EB	g_objects_tail_flags	(med) g_objects[0] +0x2FB: tail flags (bit 0 hold, bit 1 off), indexed [obj * 0x32C]
+D_800847A0	g_anim_bank_group_lists	(med) Model id lists of the animation bank sharing groups
+D_80098C38	g_anim_bank_group_sizes	(med) Sizes of the animation bank sharing groups (0 terminated)
+D_800C4440	g_model_part_tables	(low) Per model id: header +0 table (per-part vertex index lists)
+D_800C48A8	g_model_dl_tables	Per model id: display list table
+D_800C4B98	g_model_dl_counts	Per model id: number of display lists (header +0xC / 4)
+D_800C4D10	g_model_dl2_tables	(low) Per model id: second display list table (header +0x28), drawn without matrix in mode 3
+D_800C5468	g_model_hdr20_tables	(low) Per model id: header +0x20 table
+D_800C5758	g_model_tex_entries	Per model id: texture entries (12 bytes each, u16 size at +8 / +0xA)
+D_800C5A48	g_model_tex_counts	Per model id: u16 number of texture entries
+D_800C5A90	g_model_anim_counts	Per model id: number of animations in its animation bank
+D_800C6360	g_model_vtx_ptr_tables	(med) Per model id: per-part vertex pointer table
+D_800D1588	g_model_anim_banks	Per model id: animation bank
+D_800D19A0	g_model_bases	Per model id: loaded model base (asset + 0x38), 0 when not loaded
+D_800C6A74	g_look_points_count	Number of entries in g_look_points
+D_800847C0	g_breakable_init_fns	Per breakable kind: piece init (pc, slot)
+D_800847CC	g_breakable_start_fns	Per breakable kind: start (slot)
+D_800847D8	g_breakable_update_fns	Per breakable kind: update (slot)
+D_800847E4	g_breakable_piece_parents	(med) Per breakable kind: parent piece of every piece (-1 free, -2 skipped)
+D_800847F0	g_breakable_release_tables	(low) Per breakable kind: table used by breakable_release
+D_800847FC	g_breakable_flag_sets	Breakable flag sets: entries of (flagsA, flagsB) words
+D_80098CC4	g_breakable_piece_counts	Per breakable kind: number of pieces (0x68 bytes each)
+D_80098CD4	g_breakable_k_8cd4	(low) Breakable rodata f32 stored at piece +0x60 by breakable_scatter_pieces
+D_800C6660	g_breakable_slots	The 25 breakable slot records (16 bytes: pieces, flags A / B, kind +0xE, state +0xF)
+D_800C6A84	g_breakable_slots_flags_a	(med) Word view of g_breakable_slots[0] +4 (flags A), indexed [slot * 16]
+D_800C6A88	g_breakable_slots_flags_b	(med) Word view of g_breakable_slots[0] +8 (flags B), indexed [slot * 16]
+D_800CC784	g_objects_unk94	(low) g_objects[0] +0x94, indexed [obj * 0x32C]; set to 6 by breakable_cb_init_timer140
+D_800C67F1	g_obj_flagged_select_idx	(med) Index of the currently selected flagged object (obj_select_next_flagged)
+D_80084814	g_select_menu_stick_delay	(med) Select menu stick repeat delay counter
+D_80084818	g_select_menu_scroll_dir	(med) Select menu scroll direction (-1 / 0 / 1)
+D_8008481C	g_select_menu_reset_timer	(med) Select menu lockout timer after the L + R reset (60 ticks)
+D_80084820	g_select_menu_blink_timer	(med) Select menu blink timer of the selected entry (30 ticks)
+D_80084824	g_select_menu_blink_on	(med) Select menu blink phase of the selected entry
+D_80084828	g_select_menu_sel	Select menu selected entry
+D_8008482C	g_str_select_empty	(med) Select menu: empty text
+D_80098CE0	g_str_select_locked	(med) Select menu: text shown on every row while the menu is locked
+D_80098CF4	g_str_select_marker	(med) Select menu: marker line drawn above some entries
+D_80098CF8	g_str_select_blink	(med) Select menu: blink text of the selected entry
+D_800C6C70	g_select_menu_scroll	(med) Select menu scroll offset (-11 .. 11)
+D_80038400	g_text_scale_x	Text scale x (screen units per glyph pixel)
+D_80038404	g_text_scale_y	Text scale y (screen units per glyph pixel)
+D_80084C60	g_dbgfont_chars	Debug font character table (dbgfont_char_index)
+D_80084CC0	g_dbgfont_texture	(med) Debug font texture image (dbgfont_setup_dl)
+D_80085CC0	g_text_glyph_chars	(med) Character table of text_char_to_glyph: entry k maps to glyph k (this is entry 0)
+D_80085CC1	g_text_glyph_chars_1	(med) Entry 1 of g_text_glyph_chars
+D_80085CC2	g_text_glyph_chars_2	(med) Entry 2 of g_text_glyph_chars
+D_80085CC3	g_text_glyph_chars_3	(med) Entries 3.. of g_text_glyph_chars, searched in a loop
+D_80085D20	g_font_textures	Per font: glyph texture (I8, 0xE0 bytes per glyph)
+D_80085D24	g_font_metrics	Per font: glyph metrics (width, height, x offset, y offset; 4 bytes per glyph)
+D_80087770	g_sprite_setup_dl	Sprite setup display list (sprite_gfx_begin, text_draw_string, ground shadows)
+D_800877A8	g_sprite_setup_dl_alt	(med) Alternate sprite setup display list (sprite_gfx_begin_alt, text_draw_string, ground shadows)
+D_8009198C	g_text_icon_a8	(med) Button icon sprite of text control code 0xA8
+D_8009199C	g_text_icon_a9	(med) Button icon sprite of text control code 0xA9
+D_800919AC	g_text_icon_ae	(med) Button icon sprite of text control code 0xAE
+D_800919BC	g_text_icon_af	(med) Button icon sprite of text control code 0xAF
+D_800919CC	g_text_icon_b0	(med) Button icon sprite of text control code 0xB0
+D_800919DC	g_text_icon_aa	(med) Button icon sprite of text control code 0xAA
+D_800919EC	g_text_icon_ab	(med) Button icon sprite of text control code 0xAB
+D_800919FC	g_text_icon_ac	(med) Button icon sprite of text control code 0xAC
+D_80091A0C	g_text_icon_ad	(med) Button icon sprite of text control code 0xAD
+D_80091A40	g_text_icon_b1	(med) Button icon sprite of text control code 0xB1 (10 animated frames)
+D_80091A5C	g_text_icon_b2	(med) Button icon sprite of text control code 0xB2 (4 animated frames)
+D_80091A78	g_text_icon_b4	(med) Button icon sprite of text control code 0xB4 (4 animated frames)
+D_80091A94	g_text_icon_b3	(med) Button icon sprite of text control code 0xB3 (4 animated frames)
+D_80091AB0	g_text_icon_b5	(med) Button icon sprite of text control code 0xB5 (4 animated frames)
+D_80091AC0	g_text_icon_b6	(med) Button icon sprite of text control code 0xB6
+D_80091AD0	g_text_icon_b7	(med) Button icon sprite of text control code 0xB7
+D_80091AE0	g_text_icon_b8	(med) Button icon sprite of text control code 0xB8
+D_80091AF0	g_text_icon_b9	(med) Button icon sprite of text control code 0xB9
+D_80091B00	g_text_icon_ba	(med) Button icon sprite of text control code 0xBA
+D_80091B14	g_text_icon_bb	(med) Button icon sprite of text control code 0xBB (2 animated frames)
+D_800CC16E	g_text_icon_clock	(med) Clock advanced every frame by level_update_frame; picks the animated icon frames
+D_800CC170	g_text_ctrl_code	Current text control code (0xFF: none)
+D_800CC177	g_text_prim_r_sent	Text primitive colour last sent: r
+D_800CC178	g_text_prim_gba_sent	Text primitive colour last sent: g, b, a, plus the flashing flag
+D_800CC17C	g_text_flash_phase	Text flashing phase (code 0xA6)
+D_800CC17D	g_text_wave_on	Text wave flag (code 0xA7)
+D_800CC17E	g_text_wave_phase	Text wave phase
+D_800C40AA	g_cutscene_last_fade_in	(low) Set by the scene fade event (1 = fade in, w6 == 0), 0xFF when reset; 1 suppresses the fade to black on skip
+D_800C40BA	g_scene_event_queue_size	(med) Capacity of g_scene_event_queue (number of 12-byte entries) set by cutscene_scene_load
+D_80086220	g_timedfx_update_fns	Timed effect update hooks, indexed by entry +0xC; non-zero return ends the entry (timedfx_update_all)
+D_8008622C	g_timedfx_done_fns	Timed effect completion hooks, indexed by entry +0xD, run when the update hook returns non-zero
+D_800894C3	g_coll_area_enabled_3	(med) Element [3] of the per-collision-area enable bytes D_800894C0; collision_obj_walls walks areas 3..0 backwards from here
+D_800990F0	g_coll_k_90f0	(med) f32 constant (99999.9) stored as the initial result of collision_ceiling_static
+D_800990F4	g_coll_k_90f4	(med) f32 constant: initial floor result of collision_floor_static
+D_800990F8	g_coll_k_90f8	(med) f32 constant (99999.9): initial result of collision_ceiling_alt
+D_800990FC	g_coll_k_90fc	(med) f32 constant: initial result of collision_floor_alt
+D_80099100	g_coll_k_9100	(med) f32 constant: initial hit distance of collision_ceiling_dynamic_a
+D_80099104	g_coll_k_9104	(med) f32 constant: initial hit distance of collision_floor_dynamic_a
+D_80099108	g_coll_k_9108	(med) f32 constant: initial hit distance of collision_ceiling_dynamic_b
+D_80099110	g_mtx_k_9110	(med) f32 constant used as a fallback vector length in mtxf_look_at_f
+D_80099114	g_mtx_k_9114	(med) f32 constant used as a fallback vector length in mtxf_look_at_f
+D_80099118	g_mtx_k_9118	(med) f32 constant used as a fallback vector length in mtxf_look_at_f
+D_800CBE00	g_timedfx_list	Head of the timed effect entry list (timedfx_alloc / timedfx_update_all); cleared by level_reset_globals
+D_800CC1BC	g_coll_counter_1bc	(low) s32 collision counter that collision_reset_counter clears; no C reader
+D_800CC1F8	g_wall_coll_height	f32 height of the collision cylinder of the record for the wall tests (collision_set_obj_body_heights, nmw_engine)
+D_800CC1FC	g_wall_coll_lift	f32 lift of the wall test box centre above the record's feet (collision_set_obj_body_heights, nmw_engine)
+D_800D3720	g_floor_hits	Candidate floor hits, 16 bytes each (+0 height, +4 triangle, +8 vertex base, +0xC tag), max 0x28 (floor_collect_*)
+D_800D3C50	g_floor_world_obj_ids	(med) u16 list of world object ids passed to world_objects_transform_mesh / floor_collect_world_obj_tris
+D_800DC26C	g_level_tri_table	Level collision triangle table: 3 vertex pointers per triangle (12 bytes); triangle index = (tri - base) / 12
+D_800DC298	g_coll_probe_x	x of the last floor / ceiling probe point (collision_floor_static, collision_find_floor_ceiling)
+D_800DC29C	g_coll_probe_y	y of the last floor / ceiling probe point
+D_800DC2A0	g_coll_probe_z	z of the last floor / ceiling probe point (declared as a pointer in variables.h)
+D_800DC2A4	g_coll_probe_max_y	(med) Maximum y of the last static floor probe (collision_floor_static)
+D_80086390	g_quat_next_idx	Idx3 {1, 2, 0}: next axis index table copied by quat_from_mtx
+D_800863A4	g_level_obj_pre_fns	(med) Level hook table run per object before its state update, index = level header +0x49 (objects_run_state_handlers)
+D_800863AC	g_level_obj_post_fns	(med) Level hook table run per object after its state update, index = level header +0x4A (objects_run_state_handlers)
+D_8009919C	g_explosion_sfx_ids	Six explosion sound ids, one picked at random by explosion_sfx_play
+D_80099470	g_walk_slide_push_k	(low) f32 table before D_80099490; element [1] is the push used by walk_ground_slide_push when sliding on a wall
+D_80099490	g_walk_floor_push	(med) f32 slide push per floor kind (D_800CC69C), used by walk_ground_slide_push
+D_800994F0	g_surface_lean_params	(low) 3-byte entries per surface type (unk184 & 0x1F) read by obj_calc_surface_lean; byte 2 goes to unkAA
+D_8009952C	g_walk_dir_anims	(low) u16 animation ids by stick direction bits (0xFFFF none), picked in obj_state_walk
+D_80099700	g_lean_k_9700	(low) f32 lean rate constant of obj_lean_into_turn (default case)
+D_80099704	g_lean_k_9704	(low) f32 lean rate constant of obj_lean_into_turn (second case)
+D_80099708	g_float_k_9708	(med) f32 0.2: y velocity damping of obj_state_float_on_water
+D_8009970C	g_float_k_970c	(med) f32 0.8: velocity +0x20 damping of obj_state_float_on_water
+D_80099710	g_float_k_9710	(med) f32 0.15: y approach factor of obj_state_float_on_water
+D_80099714	g_float_k_9714	(med) f32 0.4: velocity ease factor of obj_state_float_on_water
+D_80099718	g_float_k_9718	(med) f32 0.1: bob amplitude scale of obj_state_float_on_water
+D_8009971C	g_float_k_971c	(med) f32 0.18: velocity ease factor of obj_state_float_on_water
+D_800BE616	g_mp_mode_active	1 on multiplayer levels (mp_set_mode_for_level); many systems switch to multiplayer behaviour on it
+D_800BE728	g_cont_frame	(med) Controller frame pointer from cont_read_frame; its first word points at the per-player pad records
+D_800BE9A0	g_frame_delta	u8 whole frames elapsed since the last update (game_update_frame_timing); timers count by it
+D_800BEDC8	g_frame_step_inv	f32 1 / frame step (0 when paused), turns per-frame steps into velocities
+D_800CC214	g_wall_ledge_h_neg	(med) f32 ledge height found on the negative side by nmw_ledge_triangle (-32768 = none), read by obj_state_walk
+D_800CC218	g_wall_ledge_h_pos	(med) f32 ledge height found on the positive side by nmw_ledge_triangle (-32768 = none), read by obj_state_walk
+D_800CC264	g_obj_time_step_pct	s16 current object time step * 100: timers and turn speeds are scaled by it / 100 (objects_run_state_handlers)
+D_800CC288	g_cur_buttons_pressed	Buttons pressed this frame for the object being updated (pad or ctl +0x8C); 0x8000 A, 0x4000 B
+D_800CC670	g_obj_anim_clock	(med) s32 counter advanced by the frame delta each object pass; drives walk bob and sinking blink
+D_800CC674	g_obj_effect_vec	(med) f32[3] vector set by obj_state_rail_follow, copied to D_eu_800D1990 for the object effect handlers
+D_800CC68C	g_contact_obj_idx	(med) Index of the object found by obj_contact_resolve that the walking object rides / is pushed by (0 = none)
+D_800CC690	g_contact_src_x	(low) x position of the hit source saved by obj_apply_hit; offsets ctl +0x28 in obj_state_walk
+D_800CC694	g_contact_src_z	(low) z position of the hit source saved by obj_apply_hit; offsets ctl +0x2C in obj_state_walk
+D_800CC698	g_contact_src_y	(low) y position of the hit source saved by obj_apply_hit; compared with the walker's y
+D_800CC69C	g_cur_floor_kind	u8 floor kind of the object being updated ((unk184 >> 28) & 7), 0 = normal
+D_800CC69E	g_walk_rel_heading	(low) u16 move heading relative to the camera yaw, kept by obj_state_walk
+D_800CC6A0	g_cur_cam_yaw	(med) s32 camera yaw (u16 units) of the object being updated; stick input is turned by it
+D_800CC6A4	g_cur_pad	Pointer to the pad record of the object being updated: +0 buttons (u16), +2 stick x, +3 stick y
+D_800CC6D1	g_walk_no_run	(low) u8 flag cleared by obj_state_walk; when set, the walk / run animation choice is blocked
+D_800CC6D4	g_aim_turn_div	(med) f32 divisor of the eased aim turn (4, 10, 12 or 16) used by walk_select_move_anim
+D_800CC6D8	g_obj_half_rate_parity	Toggled each object pass: objects whose unk127 bit 0 matches update this frame (obj_half_rate_tick)
+D_800CC6DA	g_obj_half_rate_saved_ticks	(med) u16 frame ticks saved by obj_half_rate_tick before it adds the object's extra ticks
+D_800CC6DC	g_walk_flags	(med) Walk state bits of the object being updated (1, 2 input blocked, 4, 8, 0x80), cleared per object pass
+D_800D39FC	g_obj_updating_slot	Slot + 1 of the object being updated (0 = none); floor_collect_record_tris skips it
+D_800864A0	g_item_shout_sfx	(low) Two sound ids copied to the stack by player_item_action (shout lines)
+D_80099A60	g_item_weapon_anims	Per weapon row: {start, idle, fire, stop} animation ids (player_item_action)
+D_80099A80	g_item_sfx_params_a	(low) u16 parameter list passed to sfx_emitter_start by player_item_action (voice line)
+D_80099A88	g_item_sfx_params_b	(low) u16 parameter list passed to sfx_emitter_start by player_item_action (voice line)
+D_80099A90	g_item_sfx_params_c	(low) u16 parameter list passed to sfx_emitter_start by player_item_action
+D_80099B50	g_shot_k_9b50	(low) f32 scale of ctl +0x16C in obj_spawn_hit_shot
+D_80099B54	g_shot_k_9b54	(med) f32 radians to degrees style scale applied to atan2 results in obj_spawn_hit_shot
+D_80099B5C	g_shot_k_9b5c	(med) f32 angle to u16 scale for the shot yaw in obj_spawn_hit_shot
+D_800CC2B0	g_obj_pending_actions	Set when an object queued an action; world_update then runs obj_run_pending_actions, which clears it
+D_800CC6AC	g_walk_buttons_pressed	Pad buttons pressed this frame for the walking object (D_800BEB30[cur]); handlers clear used bits
+D_800CC6B0	g_walk_buttons_held	Pad buttons held for the walking object (pad +0), read by player_item_action
+D_800CC6D2	g_aim_yaw_delta	(med) s16 yaw difference to aim at (player_aim_yaw_delta / walk_idle_variation), eased in walk_select_move_anim
+D_800D2E68	g_hints_seen_b8	(med) Byte 8 of the seen-hint bits D_800D2E60 (hints 0x40..0x47: 4 = 0x42, 8 = 0x43, 0x10 = 0x44, 0x20 = 0x45)
+D_800864B0	g_obj_effect_fns	Object effect handler table (15 entries) run by obj_effect_run_handler by type
+D_80099DE8	g_obj_effect_k_9de8	(low) f32 constant stored in the light data of obj_effect_flash_light
+D_800CC680	g_obj_effect_player_mask	Bit mask of the players hit by obj_effect_players_impact (set by obj_state_rail_follow)
+D_800D1980	g_obj_effect_pos	f32[3] origin of the current object effect (with D_eu_800D1990 the target / direction point)
+D_8009B860	g_anim_k_b860	(med) f32 1.2: animation step factor of anim_advance_frame
+D_800C3A82	g_cutscene_anim_events_on	(med) Per view: run animation events during a cutscene (scene event 0x15); anim_advance_frame / anim_events_run
+D_8009BA58	g_coll_cyl_k_ba58	(med) f32 257: collision cylinder height used by obj_collision_cylinder
+D_8009BC70	g_face_anim_k_bc70	(low) f32 scale of the body animation speed in face_anim_play_body
+D_8009DCE0	g_face_anim_default_body	(med) Default face animation body table returned by face_anim_body_table when the object has no part model
+D_80086F40	g_idle_sets	Idle animation sets: per set a 0-terminated list of D_8009BC80 entry indices (player_idle_animation)
+D_80086FC4	g_idle_groups	Idle set groups: per group a list of idle set ids appended by idle_list_add_group
+D_80086FF0	g_bored_list_ids	(med) ListIds3 {0x15, 0x16, 0x17} copied by obj_near_reachable_node
+D_8009BC80	g_idle_anim_entries	8-byte idle animation entries (u16 anim, ..., +6 flags) used by player_idle_animation
+D_8009BFC0	g_idle_group_lengths	Length of each idle group of D_80086FC4 (idle_list_add_group)
+D_800B89C4	g_objects_ref_id	(med) g_objects id (+4) seen from a 100-based object ref: [ref * 0x32C] = g_objects[ref - 100].id
+D_800D18C0	g_idle_request_flags	(med) Idle requests from event scripts (1, 2 force, 4 group 8), consumed by idle_choose_next_set
+D_800D1CE4	g_surface_ambient_song	(med) Ambient loop song id (0x15..0x17 cycling, 0 = none) played by obj_surface_effects_update
+D_80042B90	g_lipsync_voice_level	(low) s32 voice level compared with 1000 by lipsync_update_mouth, then reset to 0
+D_8009C0E0	g_lipsync_mouth_shapes	(med) Five s32 mouth shapes cycled by lipsync_update_mouth into object +0x134
+D_800D18D0	g_lipsync_obj_idx	g_objects index of the speaking object that gets lipsync events (scene_event_run_a)
+D_800D1D48	g_lipsync_mode	(med) Lipsync mode set by lipsync_apply_event (0 off, 1 open/close, 2 cycling shapes)
+D_800D1D4C	g_lipsync_shape_idx	(med) Current index into the mouth shape table D_8009C0E0 (lipsync_update_mouth)
+D_800D1D50	g_lipsync_unk_1d50	(low) Lipsync word only cleared by lipsync_reset
+D_800D1940	g_hint_action	Context action whose hint box is pending / open; bit index into the seen-hint bits D_800D2E60
+D_800D1941	g_hint_box_open	1 while the hint text box is open (hint_box_open / hint_box_close)
+D_800D1944	g_hint_text_asset	Loaded hint text asset (+0 string, +8 voice list, +0xC size) for D_800D1940
+D_800D1948	g_hint_intro_asset	Loaded intro hint text (asset 0x43) prepended to the hint, or 0
+D_800D194C	g_hint_text_buf	Allocated buffer holding intro + hint text when both are shown
+D_800D1950	g_hint_text_box	Text box opened for the hint (text_box_open), closed by hint_box_close
+D_800D1958	g_hint_box_params	48-byte text box parameter block of the hint box (flags, text, position pointers)
+D_800D1988	g_hint_box_x	(med) f32 hint box x (78), pointed to by the parameter block
+D_800D198C	g_hint_box_y	(med) f32 hint box y (48), pointed to by the parameter block
+D_800D1990	g_hint_box_scale	(low) f32 third hint box value (9), pointed to by the parameter block
+D_800D1994	g_hint_voice_pos	Next entry of the hint voice queue D_800D1998 (hint_play_next_voice)
+D_800D1995	g_hint_voice_count	Number of entries in the hint voice queue
+D_800D1998	g_hint_voice_queue	u16 voice line queue of the hint box (asset data or allocated copy)
+D_800D1DBC	g_hint_hotspot	(med) Hotspot remembered by context_action_set for actions 0x2B / 0x2C; hint_box_update flags it (+0x14)
+D_800D2E60	g_hints_seen	9 saved bytes of seen-hint bits, bit n = hint / context action n (save_slot_load / write)
+D_80087000	g_hit_sphere_lists	Per hit model kind: list of 10-byte hit spheres (+0 bone, +2 radius ...) for obj_ray_hit_model / obj_reach_hit
+D_8009C100	g_hit_model_kinds	(med) 4-byte entries {u16 object id, u8 hit model kind}; entry 0 (obj_hit_model_kind, obj_ray_hit_model)
+D_8009C104	g_hit_model_kinds_1	(med) Object id of entry 1 of the hit model kind table D_8009C100
+D_8009C108	g_hit_model_kinds_2	(med) Object id of entry 2 of the hit model kind table D_8009C100
+D_8009C10C	g_hit_model_kinds_3	(med) Entries 3.. of the hit model kind table D_8009C100 (obj_hit_model_kind)
+D_8009CF9C	g_hit_sphere_counts	Per hit model kind: number of spheres in D_80087000[kind]
+D_80038080	g_mem_expansion_pak	8 MB memory (Expansion Pak) flag: enables extra sky textures, ambience and level features
+D_80087030	g_ray_filter_fns	Target filter functions of ray_cast_world / objects_hit_by_segment (obj, caster, arg) -> 0 rejects
+D_8008704C	g_type_part_model_lists	(med) Per object type part model lists (t[5] index), stored at object +0x2C4 (obj_copy_type_params, obj_load_part_models)
+D_80087064	g_setup_cmd_lists	Setup command lists {list, count} of 0x10-byte commands run by obj_setup_run / undone by obj_setup_undo
+D_80099E84	g_weapon_hit_effects	Per weapon kind: hit effect id passed to obj_send_hit (shot_hit_apply)
+D_8009CFF8	g_shot_k_cff8	f32 65536 / 360: degrees to u16 angle in shot_hit_apply
+D_800A7620	g_player_morph_descs_end	(low) End of the 2-entry g_player_morph_descs table (setup_entry_spawn); also read as f32 315 in ambient_emitters_update
+D_800C5BC0	g_model_vtx_counts	u16 per model slot: vertex block size in 16-byte vertices (model_load)
+D_800C67F0	g_obj_flagged_pending	(med) Set by setup_entry_spawn, cleared by obj_flagged_select_reset; obj_select_next_flagged runs while set
+D_800D1C90	g_type_descs	Per object type descriptor pointers (187 entries, cleared by model_kind_tables_clear)
+D_800D1F80	g_model_slot_users	u8 user count per model resource slot (187), released by obj_model_refs_release
+D_800D2040	g_model_slot_timers	u8 per-frame release countdown per model resource slot (187; 0xFF / 2 keep resident)
+D_800D2550	g_spawn_ctl_19a_init	(low) s8 initial ctl +0x19A count of spawned players (3 at game start; shown as HUD icons)
+D_800875E0	g_type_model_group_lists	(med) Per model group: list of object types (obj_type_model_group)
+D_8009DD24	g_type_model_group_counts	(med) Number of types in each list of D_800875E0
+D_8009DD30	g_startpt_k_dd30	(med) f32 initial best distance of the start point search in level_start_point_get
+D_8009DD34	g_startpt_k_dd34	(med) f32 angle scale of the start point heading in level_start_point_get
+D_800D2128	g_start_point_count	Number of level start points (start_points_load)
+D_800D255C	g_player_stats	Per-player stat records (0x1C bytes); field +0 (player_stat_get 1)
+D_800D2560	g_player_stats_w4	(med) Field +4 of the player stat records (player_stat_get 2)
+D_800D2564	g_player_stats_health	(med) s8 field +8 of the player stat records: health, clamped to 100 (player_stat_get 3)
+D_800D2565	g_player_stats_lives	(med) s8 field +9 of the player stat records: lives, clamped to 99 (player_stat_get 4)
+D_800D2566	g_player_stats_b0a	(low) u8 field +0xA of the player stat records (player_stat_get 5)
+D_800D2568	g_player_stats_cash	(med) s32 field +0xC of the player stat records: cash, never below 0 (player_stat_get 6)
+D_80087630	g_rail_node_count	Number of rail / point graph nodes in D_800D2778 (rail_nodes_load)
+D_80087634	g_rail_node_count2	(low) Second s16 of the rail node asset header (rail_nodes_load)
+D_8008763C	g_rail_last_node	Node remembered by the last caller of rail_node_nearest (0xFF none), tried first
+D_80087640	g_race_records	Race / rail player records (lap times, placings +0x2A, ...), one per racer
+D_800D2770	g_rail_bands	Used height band ids of the rail nodes (count D_800D2780), rail_bands_build
+D_800D2778	g_rail_nodes	Rail / point graph nodes, 16 bytes each with links at +9..+13 (rail_nodes_load)
+D_800D277C	g_rail_route_dist	(med) Distance to the nearest node / summed route length left by rail_node_nearest / rail_route_next
+D_800D2780	g_rail_band_count	Number of used height bands in D_800D2770
+D_800D2788	g_rail_band_splits	f32 split heights between consecutive used bands (last 100000), rail_band_for_height
+D_800D27B0	g_rail_cam_mode	(med) Rail camera mode (0..3) picked from the node camera type (rail_link_pick / rail_track_update)
+D_800D27B4	g_cpu_player_slot_mask	Bit mask of the claimed computer-player slots (cpu_player_slot_claim / release)
+D_800D27B8	g_rail_human_count	Number of human racer records (rail_records_init)
+D_800D27B9	g_rail_cpu_count	Number of computer racer records (rail_records_init)
+D_800D27BA	g_rail_next_place	Next finishing place given by rail_record_start (starts at 1)
+D_800D27BC	g_rail_cam_x	x of the rail camera point (rail_track_update)
+D_800D27C0	g_rail_cam_y	y of the rail camera point
+D_800D27C4	g_rail_cam_z	z of the rail camera point
+D_800D27C8	g_rail_mirrored	(med) Track mirrored flag (settings 0x13), set by menu_game_start, read by the rail code
+D_800D27C9	g_rail_cams_active	(med) Set by rail_track_update when a rail camera ran; world_update checks it, rail_cameras_update clears it
+D_80087650	g_race_score_scale_by_diff	(med) Per difficulty: s32 score scale of the human racers (rail state +0x16B8)
+D_80087664	g_race_boost_replan_by_diff	s16 per difficulty: boost time that forces a re-plan (-1 = never)
+D_80087670	g_race_ai_timer_max_by_diff	s8 per difficulty: AI timer limit (rail_racers_update)
+D_80087678	g_race_boost_stop_by_diff	s8 per difficulty: rail time (+0x29C) after which mode 1 stops boosting
+D_80087680	g_race_ai_timer_reset_by_diff	s8 per difficulty: AI timer restart value (negated)
+D_80087688	g_race_keep_steer_by_diff	s8 per difficulty: chance (percent) to keep the old steering offsets
+D_80087690	g_race_state_c_by_diff	(low) s8 per difficulty copied to rail state +0xC by rail_state_init
+D_80087698	g_race_speed_by_diff	(low) Per difficulty value stored as f32 in each racer's rail state +0x1868 slot
+D_800876C0	g_race_step_limits	(med) s16 [difficulty][distance band] step limits of rail_rival_pace
+D_800876E0	g_race_item_check_racer	Racer whose carried items are checked this frame, cycling (rail_weapons_update)
+D_8009DE2C	g_race_k_de2c	(med) f32 initial best distance of rail_events_assign_nodes
+D_8009DE30	g_race_k_de30	(med) f32 cost factor for the racer already chasing (rail_pick_chase_target)
+D_8009DE34	g_race_k_de34	(med) f32 bias weight factor (rail_pick_chase_target)
+D_8009DE38	g_race_k_de38	(med) f32 initial best value in rail_pair_rivals
+D_8009DE5C	g_race_k_de5c	(med) f32 far distance band limit of rail_rival_pace
+D_800CC82F	g_objects_event_id	(med) Byte +0x13F (event / script id) of g_objects records, read per player [i * 0x32C] to send events
+D_800D18A0	g_player_view_hidden_mask	(med) u16 bit per player: skip that player's scene / HUD rendering (cleared by game_main_loop)
+D_800D27D0	g_race_state	Allocated race AI state block (racers, pickup slots, per-racer tables at +0x1868 ...), rail_state_init
+D_800D3268	g_event_cur_id	Id (& 0x3FF) of the event being run by event_list_run_phase
+D_800E1000	g_race_difficulty	s8 race difficulty (settings 0x10), index of the per-difficulty race tables
+D_80087380	g_link_group_count	Number of 0x18-byte link groups in D_800D23C0 (level_table_load)
+D_800D23C0	g_link_groups	Loaded level link groups, 0x18 bytes each (ids = type << 12 | record index), level_table_load
+D_800D3040	g_skin_point_mtx	(med) Pointer to the f32[4][4] matrix applied by skin_transform_points
+D_800D3090	g_sprite_rect_xscale	x scale of the last screen rect computed by sprite_screen_rect
+D_800D3098	g_sprite_rect_left	Left of the last sprite screen rect (declared as a struct array in variables.h)
+D_800D309C	g_sprite_rect_top	Top of the last sprite screen rect
+D_800D30A0	g_sprite_rect_depth	Depth of the last sprite screen rect
+D_800D30A4	g_sprite_rect_width	Width of the last sprite screen rect
+D_800D30A8	g_sprite_rect_height	Height of the last sprite screen rect
+D_800D30B0	g_sprite_tex_desc	Texture tile descriptor filled by sprite_tex_desc_set and passed to gfx_load_texture_tile
+D_800D30C0	g_gfx_cur_tex_addr	Address of the texture last loaded by gfx_load_texture_tile (0 at sprite_gfx_begin)
+D_800D30C8	g_view_proj_mtx	Per player f32[4][4] view-projection matrices (camera_build_view_proj, sprite_project_point)
+D_800C3A20	g_camera_event_params	Camera event parameter block passed to camera_queue_event (path / look records)
+D_800C3A80	g_cutscene_ev13_value	(low) Per view byte set by scene event 0x13, cleared by camera code
+D_800D2DB4	g_camera_timed_active	Set while a timed camera record runs (camera_timed_record_update); keeps cameras updating while paused
+D_800D31D8	g_camera_timed_saved_2c0	(med) Camera +0x2C0 value saved / restored by camera_timed_record_update
+D_800D31E0	g_camera_timed_records	Timed camera records, 0x24 bytes each (3), filled by camera script op 12
+D_800D3250	g_camera_timed_push	(med) Per id: push-back factor of the timed camera records (camera_timed_push_back)
+D_800DC450	g_camera_fixed_pos_records	Loaded camera position records, 0x18 bytes each (s16 x, y, z first), camera_level_init
+D_800DC740	g_camera_shake_states_50	(low) Field +0x50 of the per-player 0x68-byte camera shake states D_800DC6F0 (5 tested by event_action_camera)
+D_80087638	g_rail_route_target	Target node reached by rail_route_next (0xFF none)
+D_8009E80C	g_event_obj_k_e80c	(low) f32 constant compared with object +0x118 in event_query_object
+D_800BEB30	g_pad_pressed	u16 per player: buttons pressed this frame (0x8000 A, 0x4000 B)
+D_800D1898	g_aiscript_values	(med) Values set by event scripts (event_action_object), read by aiscript_set_field48 at g_aiscript_arg0
+D_800D3C60	g_event_arg_count	Number of arguments of the current event dispatch (n + 2), saved / restored by event_dispatch
+D_800C39E3	g_cutscene_return_level	Level to return to after the cutscene (0x25 = temporary load), cutscene_end
+D_800877D0	g_event_table	Event table, 0x14-byte records (+0 block, +4 word, +8 u16, +0xC prereq list)
+D_800877DC	g_event_table_prereqs	(med) Field +0xC of the event table records (prerequisite / unlock list)
+D_800877E0	g_event_table_unlocks	(med) Field +0x10 of the event table records: save unlock list (save_unlocks_apply)
+D_8009F4A0	g_event_effect_tbl	(med) One-entry effect table of event effect command 0x18
+D_800A0D30	g_effect_node_params	(low) 0x10-byte records broadcast by event_action_effect (effect_nodes_broadcast)
+D_800D33D0	g_save_route_table	Loaded save-route table (save_route_table_load / free)
+D_800D9D40	g_event_effect_flag	(low) Flag set by event effect command 2, cleared by event_effect_stop and level resets
+D_8009F6D0	g_str_pct_d_f6d0	String "%d" (event_action_rail countdown)
+D_800CCA1C	g_obj1_interaction_state	(med) g_objects + 0x32C: object 1 base / interaction_state, scanned by event_query_rail
+D_800D33E0	g_rail_script_ease_vel	(med) f32 spring velocities of the event script ease values (event_action_rail)
+D_800D33F8	g_rail_script_ease_val	(med) f32 event script ease values driven by math_spring_approach (event_action_rail)
+D_800D340C	g_rail_script_ease_set	(med) u8 per ease value: set by rail_script_set_ease
+D_80089030	g_world_obj_type_cbs	Per world object type: {callback +0x38, callback +0x78, byte +0x92} (world_objects_load)
+D_800877B0	g_game_state_flags	(low) Game state bytes; [1] tested and cleared by event_action_game_state
+D_8009F870	g_str_pct_d_f870	String "%d" (event_action_game_state)
+D_800D2120	g_start_point_mask	Bit mask of enabled start points (event_action_game_state, level_start_point_get)
+D_800D2124	g_start_point_team_mask	Bit mask of enabled team start points
+D_800D2E43	g_game_over_pending	Set on life loss / credits; game_over_apply_pending applies it
+D_800D3378	g_save_bits_changed	Set when the save bits changed (event_action_game_state); event_list_run_phase clears it
+D_800D3420	g_event_timer_stamp_a	(med) osGetCount stamp set by event game-state timer start
+D_800D3424	g_event_timer_stamp_b	(med) Second osGetCount stamp of event game-state timer start
+D_800888B0	g_event_timer_periods	u16 timer period per event timer kind
+D_800888BC	g_event_timer_mods	u16 count modulus per event timer kind (0 none)
+D_800D3430	g_event_timers	10 event timer slots (12 bytes: flags, count, timer)
+D_800D3434	g_event_timers_count	&g_event_timers[0].count, read by event_query_timer
+D_8009F970	g_trigger_k_f970	(med) f32 angle scale of trigger_cache_angles (+0xC)
+D_8009F974	g_trigger_k_f974	(med) f32 angle scale of trigger_cache_angles (+0x10)
+D_8009F978	g_trigger_k_f978	(low) f32 constant of trigger_reflect_queue_objects
+D_8009F97C	g_trigger_k_f97c	(low) f32 value stored to +0x364 by trigger_camera_zones_apply
+D_800D3094	g_level_zone_count	Number of 52-byte level zones in D_800D34B8 (zones_load)
+D_800D34B0	g_trigger_ambfx_timer	(med) u8 timer of trigger_ambfx_start
+D_800D34B8	g_level_zones	Loaded level zones / hotspots, 52 bytes each (zones_load, level_hotspot_setup)
+D_800D34F0	g_trigger_player_zone	u16 per player: cached trigger zone index + 1 (trigger_zones_update_object)
+D_800D3510	g_trigger_touch_bits	u64[3] per player: bit per trigger zone touched this frame
+D_800D3698	g_trigger_unk_3698	(low) Word cleared by trigger_zones_update_object
+D_8009FA50	g_floor_k_fa50	f32 degrees to radians (world_objects_transform_mesh)
+D_800C5D38	g_model_tri_counts	u16 per model: collision triangle count (model_count_triangles)
+D_800D39A4	g_floor_level_tri_tag	(low) Tag word cleared by floor_collect_level_tris before the BSP walk
+D_800DC218	g_coll_area_xz_bounds	Per collision area: triangle x / z bounds array (4 halfwords per triangle)
+D_800DC228	g_coll_area_y_bounds	Per collision area: triangle y bounds array (2 halfwords per triangle)
+D_800DC338	g_world_obj_fallback_mtx	Per DL buffer f32[4][4] fallback (camera-relative) matrix for world objects
+D_800D3A08	g_mesh_vtx_cull_flags	Per-vertex cull flags, 4 bytes each (x' < 0, inside the side planes, in front), mesh_dl_cull_copy
+D_800D3A90	g_level_dl_near_z	Near z of the level DL visibility filter (100 - far plane)
+D_800BE5D0	g_pvs_stream	Huffman PVS bit stream (pvs_setup), decoded by pvs_row_apply
+D_800D3A00	g_cam_zoom_factors	(med) f32[2] camera zoom factors (current / base fov ratio), passed to view_point_cull_test
+D_800D3AB4	g_shadow_tri_mask_end	End of the level triangle bit mask of the shadow pass (u32 *)
+D_800DC260	g_pvs_row	s16 per view: current PVS row (player_zone_update)
+D_800DF514	g_shadow_obj_count	Number of world object ids for shadow_object_triangles
+D_800DD5E4	g_sprite_last_tex	Texture of the last drawn sprite / blob shadow / decal (-1 none), skips reloads
+D_800DD5E8	g_sprite_last_frame	Frame of the last drawn sprite (upper half), as D_800DD5E4
+D_800DD5EE	g_sprite_last_combine	s16 last combine mode set by gfx_set_combine_mode / sprite_billboard_draw
+D_8009A5E0	g_cos_u8_table	f32 cos(i * 2pi / 256) for i = 0..64 (quarter wave)
+D_800876F8	g_event_vm_op_nargs	Per opcode: number of operands + 1 (event_vm_run)
+D_800887C0	g_event_native_start_fns	Event VM native start handlers, by the id word's nibble
+D_800887FC	g_event_native_stop_fns	Event VM native stop handlers
+D_80088838	g_event_query_fns	Event query handlers by (id >> 12) - 1 (event_dispatch, event_native_query)
+D_80088874	g_event_action_fns	Event action handlers by (id >> 12) - 1 (event_dispatch_alt, event_native_action)
+D_80088A44	g_event_vm_native_fns	Event VM native functions called with a mode-6 operand
+D_800D3858	g_event_vm_abort	Event VM abort flag / saved stack (EV_ABORTED after event_vm_abort)
+D_800D3C64	g_event_vm_pushed	Arguments pushed since the last event VM call
+D_800D3C68	g_event_vm_result	Event VM result register
+D_800D3C6C	g_event_vm_result_ptr	Points at D_800D3C68 once a result was used
+D_800D3C80	g_event_vm_stack	Event VM operand stack (grows down from +0x17FC)
+D_8009FB60	g_impact_burst_desc	(low) Textured burst descriptor of obj_impact_burst_spawn
+D_8009FB74	g_impact_burst_params	(low) Parameters passed with D_8009FB60 to emit_textured_burst
+D_800DD2C4	g_node_list_head	(med) Head of the node list scanned by nodes_destroy_for_player
+D_8009FBE0	g_hit_fx_burst_desc_a	(low) First textured burst descriptor of obj_hit_impact_fx_spawn
+D_8009FBE4	g_hit_fx_burst_params_a	(low) Parameters passed with D_8009FBE0 to emit_textured_burst
+D_8009FBE8	g_hit_fx_burst_desc_b	(low) Second textured burst descriptor of obj_hit_impact_fx_spawn
+D_8009FBEC	g_hit_fx_burst_params_b	(low) Parameters passed with D_8009FBE8 to emit_textured_burst
+D_8009FC40	g_wake_k_fc40	(low) f32 scale of +0x40 in wake_spray_point_pick
+D_8008CE80	g_sinking_rec_init	(low) Word copied to the ripple record by sinking_object_update
+D_8009FC8C	g_path_bank_k_fc8c	(low) f32 gravity band value of obj_path_bank_update
+D_8009FC90	g_path_bank_k_fc90	(low) f32 ease factor of obj_path_bank_update
+D_800B8AC4	g_objects_ref_stunned	(low) g_objects stunned (+0x104) seen from a 100-based ref: [ref * 0x32C] = g_objects[ref - 100]
+D_80088AA0	g_trail_splash_colours	s16[3] splash colours used by trail_hit_splash
+D_8009FCF0	g_pipe_explode_spots	PipeSpot[3]: position and facing angle of each of the three bursting pipes (pipe_explode_effects)
+D_8009FD38	g_str_pipe_explode_life	String "life": debug tweak label in pipe_explode_spawn_debris
+D_8009FD40	g_str_pipe_explode_c_path	String "../Effects/PipeExplode/pipeexplode.c": debug tweak source file (copy 1)
+D_8009FD68	g_str_pipe_explode_min_grav	String "min grav": debug tweak label in pipe_explode_spawn_debris
+D_8009FD74	g_str_pipe_explode_c_path_2	pipeexplode.c source path string, copy 2 (debug tweak "min grav")
+D_8009FD9C	g_str_pipe_explode_grav_range	String "grav range": debug tweak label in pipe_explode_spawn_debris
+D_8009FDA8	g_str_pipe_explode_c_path_3	pipeexplode.c source path string, copy 3 (debug tweak "grav range")
+D_8009FDD0	g_str_pipe_explode_min_speed	String "min speed": debug tweak label in pipe_explode_spawn_debris
+D_8009FDDC	g_str_pipe_explode_c_path_4	pipeexplode.c source path string, copy 4 (debug tweak "min speed")
+D_8009FE04	g_str_pipe_explode_speed_range	String "speeed range" (sic): debug tweak label in pipe_explode_spawn_debris
+D_8009FE14	g_str_pipe_explode_c_path_5	pipeexplode.c source path string, copy 5 (debug tweak "speeed range")
+D_8009FE3C	g_str_pipe_explode_min_scale	String "min scale": debug tweak label in pipe_explode_spawn_debris
+D_8009FE48	g_str_pipe_explode_c_path_6	pipeexplode.c source path string, copy 6 (debug tweak "min scale")
+D_8009FE70	g_str_pipe_explode_scale_range	String "scale  range": debug tweak label in pipe_explode_spawn_debris
+D_8009FE80	g_str_pipe_explode_c_path_7	pipeexplode.c source path string, copy 7 (debug tweak "scale  range")
+D_8009FEA8	g_str_pipe_explode_xz_angle	String "xz angle": debug tweak label in pipe_explode_spawn_debris
+D_8009FEB4	g_str_pipe_explode_c_path_8	pipeexplode.c source path string, copy 8 (debug tweak "xz angle")
+D_8009FEDC	g_str_pipe_explode_yz_angle	String "yz angle": debug tweak label in pipe_explode_spawn_debris
+D_8009FEE8	g_str_pipe_explode_c_path_9	pipeexplode.c source path string, copy 9 (debug tweak "yz angle")
+D_8009FF90	g_joint_blast_offset	(med) Joint-local point (vec3) transformed by the joint matrix to place obj_joint_blast_fx
+D_800915E8	g_tex_ribbon	(med) Texture descriptor of the trail / water-jet ribbons (trail_draw_ribbon, water_jet_ribbon_draw)
+D_8009FFC0	g_water_jet_spray_params	(med) 0x24-byte spray parameter records (base / random ranges) per water jet kind (+0x38), read by water_jet_spray_spawn
+D_8009FFF0	g_electrify_k_fff0	(low) Electrify fx rodata f32: base of the +8 drift step (plus random * g_electrify_k_fff4)
+D_8009FFF4	g_electrify_k_fff4	(low) Electrify fx rodata f32: random range of the +8 drift step
+D_8009FFF8	g_electrify_k_fff8	(low) Electrify fx rodata f32: base of the +0xC drift step (plus random * g_electrify_k_fffc)
+D_8009FFFC	g_electrify_k_fffc	(low) Electrify fx rodata f32: random range of the +0xC drift step
+D_800CC76A	g_objects_facing_angle	(med) u16 facing angle (+0x7A) of object 0; read per object at [n * 0x32C] (= g_objects + 0x7A)
+D_80088AB0	g_carry_anim_id	(med) Animation / event id picked from the pressed buttons in player_carry_state_update (999 = none)
+D_80091C8C	g_cs_overlay_img_box	(low) Image descriptor of the cutscene overlay boxes 0 and 3 (cs_overlay_open_box0 / _box3)
+D_80091C98	g_cs_overlay_img_counter	(low) Image descriptor of the cutscene overlay counter boxes, boxes 4..8 and the bar-set type-0 effect
+D_80091CA4	g_cs_overlay_img_a4	(low) Image descriptor (first image) used by cs_overlay_open_boxes_4_8
+D_80091CB0	g_cs_overlay_img_b0	(low) Image descriptor (second image, template +4) used by cs_overlay_open_boxes_4_8
+D_80091CBC	g_cs_overlay_img_bar	(low) Image descriptor of the three type-5 bars made by cs_overlay_create_bars
+D_80091CC8	g_cs_overlay_img_pulse	(low) Image descriptor switched in by overlay_fx_pulse_update (effect +0x10)
+D_80091CD4	g_cs_overlay_img_cross	(low) Image descriptor of the four type-7 effects of cs_overlay_spawn_cross
+D_800D9CB0	g_cs_overlay_cmd	Cutscene overlay command run by cs_overlay_update (1 reset, 2 close, 4 destroy, 5..10 open parts; 3 = idle)
+D_800D9CB4	g_cs_overlay_tint	Screen tint node of the cutscene overlay (screen_tint_create in cs_overlay_reset)
+D_800D9CB8	g_cs_overlay_fx	The 10 effect records (boxes, counters, bars) of the cutscene overlay
+D_800D9CC4	g_cs_overlay_fx_3	(med) = &g_cs_overlay_fx[3]: loop end of cs_overlay_mark_boxes_closing (which walks entries 5..7)
+D_800D9CE0	g_cs_overlay_fx_end	End of g_cs_overlay_fx (= [10]), loop sentinel of cs_overlay_destroy_all
+D_80088720	g_holder_target_obj	(med) Object (setup id 1) whose position + 50 up is g_holder_target_pos for thrown objects
+D_80088730	g_holder_obj	(med) Current holder object (setup id 1) thrown objects land on / are knocked away from
+D_80088AD4	g_projectile_break_sfx	s32[2] break sound ids, one picked at random by projectile_bounce_update / projectile_wall_hit
+D_80088ADC	g_projectile_bounce_sfx	Bounce sound id (projectile_bounce_update, projectile_wall_hit)
+D_80088AE0	g_thrown_land_sfx	Landing sound id played by thrown_object_land_check
+D_800A4AA0	g_effect3d_default_params	(med) Default parameter block passed to effect3d_spawn_full by effect3d_spawn_default and many effects
+D_800A01FC	g_fx_spin_gravity	(med) Gravity f32 added to the y velocity (+0x114) per frame step by fx_gravity_spin_update
+D_800A0230	g_ground_point_k_0230	(low) f32 threshold: obj_get_ground_point uses obj +0x180 as the height when it is above this
+D_80088750	g_foot_splash_queue	Timed queue (timed_queue_create(4, 300, 0)) of the foot splash effects
+D_800A0240	g_foot_splash_deg_to_angle	f32 256 / 360: degrees to angle units for the camera heading in foot_splash_effect
+D_800A0244	g_puff_k_0244	(low) puff_particle_spawn_dir rodata f32 (stored in the spawn record +0x58)
+D_800A0248	g_puff_k_0248	(low) puff_particle_spawn_dir rodata f32: the puff scale
+D_800A0310	g_skel_line_pts_a	(low) vec3[4] joint-local points (first set) transformed by obj_skel_line_emit_pair for its line emitters
+D_800A0340	g_skel_line_pts_b	(low) vec3[4] joint-local points (second set) transformed by obj_skel_line_emit_pair
+D_800A0370	g_skel_line_pts_c	(low) vec3[4] joint-local points (third set) transformed by obj_skel_line_emit_pair
+D_800A03A0	g_trail_cb_k_03a0	(low) trail_spawn_callback rodata f32: scale of the random speed (85..212) along the direction
+D_800A03A4	g_trail_cb_k_03a4	(low) trail_spawn_callback rodata f32: random range of the record +0 value
+D_800A03A8	g_trail_cb_k_03a8	(low) trail_spawn_callback rodata f32: base of the record +0 value
+D_800A03AC	g_trail_cb_k_03ac	(low) trail_spawn_callback rodata f32: scale of the record +0 value
+D_800A03B0	g_trail_cb_k_03b0	(low) trail_spawn_callback rodata f32: base of the record +0x10 value (plus random * 356)
+D_800A03B4	g_trail_cb_k_03b4	(low) trail_spawn_callback rodata f32: scale of the record +0x10 value
+D_800A03E0	g_debris_dust_ids	(med) Debris model ids (10) passed to emit_debris_burst by obj_debris_dust_burst
+D_800A0408	g_debris_dust_scales	(med) Debris scales passed to emit_debris_burst by obj_debris_dust_burst
+D_800A0430	g_debris_dust_tex_params_a	(low) First parameter block of the emit_textured_burst call in obj_debris_dust_burst
+D_800A0434	g_debris_dust_tex_params_b	(low) Second parameter block of the emit_textured_burst call in obj_debris_dust_burst
+D_800A0480	g_seat_cam_speed_348	(low) f32 stored in the camera speeds +0x348 and +0x34C by player_seat_camera_update
+D_800A0484	g_seat_cam_speed_374	(low) f32 stored in camera +0x374 by player_seat_camera_update
+D_800A0490	g_impact_a_k_0490	(low) impact_effect_a rodata f32: strength level scale of the 0xB impact particle
+D_800A0494	g_impact_a_k_0494	(low) impact_effect_a rodata f32: second strength scale of the 0xB impact particle
+D_800A0498	g_impact_a_k_0498	(low) impact_effect_a rodata f32: size factor (obj +0x40 times this, as a byte)
+D_800A049C	g_impact_a_k_049c	(low) impact_effect_a rodata f32: last argument of fx_spawn_impact_burst
+D_800A04A0	g_impact_b_k_04a0	(low) impact_effect_b rodata f32: strength level scale (times 2) of the 0xB impact particle
+D_800A04A4	g_impact_b_k_04a4	(low) impact_effect_b rodata f32: size factor (obj +0x40 times this, as a byte)
+D_800A04A8	g_impact_b_k_04a8	(low) impact_effect_b rodata f32: last argument of fx_spawn_impact_burst
+D_800A04D0	g_land_shatter_init_byte	(low) Byte initialiser copied into the spawn record (+0xA4) by particle_land_shatter
+D_800A04D4	g_land_shatter_init_word	(low) Word initialiser copied into the spawn record (+0xA0) by particle_land_shatter
+D_800A04D8	g_spark_burst_init_word	(low) Word initialiser copied into the spawn record (+0x24) by spark_burst_at
+D_800A04DC	g_land_maybe_shatter_init_word	(low) Word initialiser copied into the spawn record (+0xA0) by particle_land_maybe_shatter
+D_800BEE0B	g_view_count_minus1_lo	(med) Low byte of g_view_count_minus1 (its s32 at +3), passed as the view / player to cam_wobble_start_preset
+D_800A0710	g_damage_smoke_colours	u32[4] smoke colours, one picked at random by damage_smoke_spawn
+D_800A0720	g_damage_smoke_offs_third	f32[3][3] smoke offsets by health third (damage_smoke_update)
+D_800A0744	g_damage_smoke_bone_third	u8[3] bone index by health third (damage_smoke_update)
+D_800A0748	g_damage_smoke_offs_quarter	f32[4][3] smoke offsets by health quarter (damage_smoke_update)
+D_800A0778	g_damage_smoke_point_quarter	u8[4] model attachment point by health quarter (damage_smoke_update)
+D_8008B148	g_cutscene_gated_fn	(low) Function pointer called by cutscene_gated_b148_call when not in cutscene scenes b..d
+D_80088B00	g_beam_motion_fns	Beam motion handlers indexed by obj +0x30 (beam_follow_obj_pos, beam_follow_obj_point); 0 = remove
+D_80088B58	g_beam_retire_fns	(med) void (*[2])(void): retire handlers by beam kind (beam_retire_by_kind)
+D_80088B60	g_beam_free_fns	(med) void (*[2])(void): free handlers by beam kind (beam_free_by_kind)
+D_80088B68	g_beam_message_fns	(med) Message handlers by beam kind (+0x38), called by beam_on_message_by_kind
+D_80091198	g_tex_rope	Rope texture descriptor (cord_draw, cord_plank_draw, beam_quad_draw)
+D_80088B70	g_ground_glow_a_offset	(med) vec3 joint-local offset transformed by the joint matrix in ground_glow_a_spawn
+D_80088B80	g_ground_glow_b_offset	(med) vec3 joint-local offset transformed by the joint matrix in ground_glow_b_spawn
+D_800A0880	g_light_flicker_k_0880	(low) light_flicker_update rodata f32: upper bound of the timer range of the third flicker phase
+D_800A0884	g_light_flicker_k_0884	(low) light_flicker_update rodata f32: blend factor towards full intensity
+D_800A0890	g_fx_parent_alpha_k_0890	(low) fx_alpha_from_parent_rec rodata f32: scale of the parent byte +0x2F into alpha +0x70
+D_80088B94	g_zone_ambience_active	(med) Flag toggled by zone_ambience_update when the zone ambience starts / stops
+D_80088BA0	g_flight_cam_mode_set	(low) Flag in player_flight_mode_update: 1 once the flight camera mode was taken, cleared on exit
+D_800CC335	g_objects_parent_slot	Byte +0x65 of object 0: slot + 1 of the object it is attached to; camera_set_followed_obj(.., this - 1)
+D_80088BC0	g_ring_profile	RingProfile: cross-section points (radial offset, height) of the ring surface drawn by ring_effect_draw
+D_80088BF8	g_ring_spawn_fns	Ring spawn handlers by node +0x3C (ring_spawn_particle, ring_spawn_debris)
+D_80088C00	g_ring_node_fns	Ring node update handlers by node +0x1D (0 = free the node; [1] shockwave_hit_objects)
+D_80088C04	g_ring_node_fns_1	= &g_ring_node_fns[1], indexed by node +0x3D in ring_effect_update
+D_80091234	g_ring_tex_id_ptr	Pointer to the ring texture's id (texture_cache_lookup in ring_effect_draw)
+D_800A08C0	g_part_at_mtx_k_08c0	(low) obj_spawn_part_at_mtx rodata f32: first of three values passed to obj_spawn_child_at_joint
+D_800A08C4	g_part_at_mtx_k_08c4	(low) obj_spawn_part_at_mtx rodata f32: second value passed to obj_spawn_child_at_joint
+D_800A08C8	g_part_at_mtx_k_08c8	(low) obj_spawn_part_at_mtx rodata f32: third value passed to obj_spawn_child_at_joint
+D_800A08CC	g_part_at_mtx_k_08cc	(low) obj_spawn_part_at_mtx rodata f32: scale of (spawned +0x40 - 90)
+D_800A08FC	g_ring_two_pi	f32 2 pi: ring_effect_update spin rate scale
+D_800A0900	g_ring_spawn_max_dist_sq	f32 max squared horizontal distance from the origin of a ring spawn point
+D_800A0904	g_ring_deg_to_angle	f32 256 / 360: degrees to angle byte (camera heading in ring_effect_update)
+D_800A0950	g_ring_debris_k_0950	(low) ring_spawn_debris rodata f32 stored in the spawn record +0x38
+D_800A0954	g_ring_debris_k_0954	(low) ring_spawn_debris rodata f32: scale of the random launch speed
+D_800A0958	g_ring_debris_k_0958	(low) ring_spawn_debris rodata f32: scale of the random +-130 spins
+D_800A0960	g_ring_debris_k_0960	(low) ring_spawn_debris rodata f32: random range of the record +0x80 value
+D_800A0964	g_ring_debris_k_0964	(low) ring_spawn_debris rodata f32: base of the record +0x80 value
+D_800A0968	g_ring_debris_k_0968	(low) ring_spawn_debris rodata f32: scale of the record +0x80 value
+D_800A09B0	g_water_entry_point_a	(med) vec3 joint-local point for obj_fx_point_water_entry (mode other than 1, joint +0xBC0)
+D_800A09BC	g_water_entry_point_b	(med) vec3 joint-local point for obj_fx_point_water_entry mode 1 (joint +0xA00)
+D_800D9D00	g_level_timed_queue_alias	= g_level_timed_queue (same EU address 800D9D00): timed queue of the water entry splashes
+D_800A0AD0	g_ground_colour_k_0ad0	(low) ground_colour_by_depth rodata f32: depth bound between the two colour ramps
+D_800A0AD4	g_ground_colour_k_0ad4	(low) ground_colour_by_depth rodata f32: depth scale of the shallow ramp
+D_800A0AD8	g_ground_colour_k_0ad8	(low) ground_colour_by_depth rodata f32: depth offset of the deep ramp
+D_800A0ADC	g_ground_colour_k_0adc	(low) ground_colour_by_depth rodata f32: depth scale of the deep ramp
+D_80088C10	g_shooting_star_obj	(med) Shooting-star sky effect object (set by level_tex_scroll_fx_setup; its rate set by shooting_star_set_rate)
+D_80088C14	g_shooting_star_lanes	f32[5] base angles (radians) of the five shooting-star lanes
+D_800A0B24	g_shooting_star_k_0b24	(low) shooting_star_sky_update rodata f32: accumulator growth per frame step
+D_800A0B28	g_shooting_star_k_0b28	(low) shooting_star_sky_update rodata f32 stored in the sprite +0x24
+D_800A0B2C	g_shooting_star_k_0b2c	(low) shooting_star_sky_update rodata f32 stored in the sprite +0x48
+D_800A0B30	g_shooting_star_k_0b30	(low) shooting_star_sky_update rodata f64: base distance of a streak
+D_800A0B38	g_shooting_star_k_0b38	(low) shooting_star_sky_update rodata f64: random range of the streak distance
+D_800A0B40	g_shooting_star_k_0b40	(low) shooting_star_sky_update rodata f32: random spread added to the lane angle
+D_800A0B44	g_shooting_star_deg_to_rad	(med) shooting_star_sky_update rodata f32: degrees to radians for the camera heading
+D_800A0B48	g_shooting_star_k_0b48	(low) shooting_star_sky_update rodata f32: max angle between a streak and the camera heading
+D_800A0B4C	g_shooting_star_k_0b4c	(low) shooting_star_sky_update rodata f32: random range of the streak height
+D_800A0B50	g_shooting_star_k_0b50	(low) shooting_star_sky_update rodata f32: base height of a streak (above 500)
+D_800A0B54	g_shooting_star_k_0b54	(low) shooting_star_sky_update rodata f32 stored in the sprite +0x40 / +0x44
+D_800A0B58	g_shooting_star_k_0b58	(low) shooting_star_sky_update rodata f32 added to the angle for the sprite rotation
+D_800A0B5C	g_shooting_star_k_0b5c	(low) shooting_star_sky_update rodata f32 subtracted from the angle for the sprite rotation
+D_800A0B60	g_shooting_star_k_0b60	(low) shooting_star_sky_update rodata f32: angle to rotation units scale
+D_800A0B64	g_shooting_star_k_0b64	(low) shooting_star_sky_update rodata f32 stored in the sprite +0x1C
+D_800A0B68	g_shooting_star_k_0b68	(low) shooting_star_sky_update rodata f32 stored in the sprite +0x20
+D_800A0B6C	g_shooting_star_k_0b6c	(low) shooting_star_sky_update rodata f32 stored in the sprite +0x28
+D_800A0B70	g_shooting_star_k_0b70	(low) shooting_star_sky_update rodata f32 stored in the sprite +0x2C
+D_800A0B74	g_shooting_star_rate_scale	(med) f32 scale from the 0..255 rate argument of shooting_star_set_rate to the object rate +0x2C
+D_800A0BC0	g_fb_zoom_offset	(low) Joint-local point (vec3) transformed by the joint matrix (+0xD00) in fb_zoom_fx_update
+D_800A0BD0	g_fb_zoom_k_0bd0	(low) fb_zoom_fx_update rodata f32: right screen bound for the zoom point
+D_800BEA68	g_view_widths_3	(med) = g_view_widths[3] (EU 800BEA68); rider_ai_control reads it as u16 buttons indexed by the rider index
+D_800A0C08	g_angle_offset_k_0c08	(low) math_angle_offset_scaled rodata f32: scale of the atan2 result (radians to the caller's units)
+D_80088C30	g_tile_scroll_s0	(med) Tile 0 s scroll counter (>> 7 into gDPSetTileSize), stepped per frame
+D_80088C34	g_tile_scroll_t0	(med) Tile 0 t scroll counter (>> 7 into gDPSetTileSize), stepped per frame
+D_80088C38	g_tile_scroll_s1	(med) Tile 1 s scroll counter (>> 7 into gDPSetTileSize), stepped per frame
+D_80088C3C	g_tile_scroll_t1	(med) Tile 1 t scroll counter (>> 7 into gDPSetTileSize), stepped per frame
+D_80088C40	g_text_pager_rec_fns	(med) Record update handlers by record +0x4C run by text_pager_update (entry 3 money_popup_draw); 0 ends the record
+D_80088C50	g_text_pager_event_fns	(med) Event handlers by record +0x4D called by text_pager_handle_event
+D_800D9D10	g_ambient_cue_timer	(med) Cooldown byte (frame-delta steps) of the random ambient sound cues (level_ambient_cue_update)
+D_80088C60	g_player_tint_r	Current tint red, eased towards g_player_tint_target_r by player_tint_update
+D_80088C64	g_player_tint_g	Current tint green, eased towards g_player_tint_target_g by player_tint_update
+D_80088C68	g_player_tint_b	Current tint blue, eased towards g_player_tint_target_b by player_tint_update
+D_80088C6C	g_player_tint_target_r	Tint target red (64 or 255) set by player_tint_update
+D_80088C70	g_player_tint_target_g	Tint target green (64 or 255) set by player_tint_update
+D_80088C74	g_player_tint_target_b	Tint target blue (64 or 255) set by player_tint_update
+D_80088C78	g_player_tint_vel_r	Spring velocity of the red tint (math_spring_approach)
+D_80088C7C	g_player_tint_vel_g	Spring velocity of the green tint (math_spring_approach)
+D_80088C80	g_player_tint_vel_b	Spring velocity of the blue tint (math_spring_approach)
+D_800A0C64	g_bone_spark_k_0c64	(low) bone_spark_emitter_init rodata f32: scale of the random 350..500 value at +0x74
+D_800A0C68	g_bone_spark_k_0c68	(low) bone_spark_emitter_emit rodata f32 passed to impact_tinted_particle_spawn
+D_800A0C6C	g_bone_spark_k_0c6c	(low) bone_spark_emitter_emit rodata f32 passed to impact_tinted_particle_spawn
+D_800A0C70	g_bone_spark_k_0c70	(low) bone_spark_emitter_emit rodata f32: random range of a particle parameter
+D_800A0C74	g_bone_spark_k_0c74	(low) bone_spark_emitter_emit rodata f32: base of a particle parameter
+D_800A0C80	g_spin_decay_k_0c80	(low) obj_spin_decay_update rodata f32: decay factor of the spin rate +0xBC
+D_800A0C84	g_spin_decay_k_0c84	(low) obj_spin_decay_update rodata f32: damping factor of +0x3C
+D_800A0C88	g_spin_decay_k_0c88	(low) obj_spin_decay_update rodata f32: decay factor of the spin rate +0x148
+D_800A0C90	g_red_flicker_dim_k_0c90	(low) ambient_red_flicker_dim_update rodata f32 passed to fx_random_flicker_update
+D_800DC2E0	g_sky_backdrop_mtx	Mtx block: two per player (one per frame buffer) for the sky backdrop / sky box (level_setup_sky_backdrop)
+D_800A0CB0	g_red_flicker_bright_k_0cb0	(low) ambient_red_flicker_bright_update rodata f32 passed to fx_random_flicker_update
+D_800A0CC0	g_beam_ray_ends	f32[6][3] end points (beam space) of the six rays of beam_rays_update
+D_800D9D20	g_sky_flash_count	Number of live sky flashes (sky_flash_spawn / sky_flash_uncount); nonzero sets draw flag 8
+D_151FA920	g_game_code_end	(med) End of the game segment code (= game_TEXT_END); sizes the page table read at boot
+D_8000030C	g_os_reset_type	osResetType (0 cold boot, 1 reset) in low memory
+D_8002D4B0	g_boot_idle_stack_alias	= g_boot_idle_stack (EU 8002D810): start of the init bss cleared by boot_entry_main
+D_800318B0	g_boot_idle_thread	OSThread of the boot idle thread (thread 1, boot_idle_thread_main)
+D_80031AE0	g_game_thread	OSThread of the game thread (thread 3, boot_game_thread_main); stopped on reset / by the debugger
+D_80032E90	g_boot_page_table_raw	(med) Raw buffer; aligned to 16 it becomes g_boot_page_offsets
+D_80033690	g_boot_aligned_buf_raw	(low) Raw buffer whose 16-aligned address boot_game_thread_main stores in g_boot_aligned_buf
+D_80035858	g_boot_aligned_buf	(low) 16-aligned pointer into g_boot_aligned_buf_raw (set at boot, otherwise unused in C)
+D_8003585C	g_boot_page_offsets	Per-4 KB-page ROM offsets of the compressed game code (read and unscrambled at boot)
+D_8003B578	g_sched_event_queue	(med) Scheduler event queue (VI retrace, SP/DP done, timer, controller); same EU variable as D_8003B218 (chunk g14)
+D_8003BC10	g_sched_event_msgs	(med) OSMesg[8] buffer of g_sched_event_queue
+D_80043B40	g_frame_counter_block_alias	= g_frame_counter_block (EU 80043ED0): end of the init bss
+D_80043ED0	g_frame_counter_block	(med) 0xFE0-byte block of 0x20-byte records whose 4 counters world_update bumps per frame (anti-tamper target)
+D_80082EB0	g_level_tex_preload_lists	(med) Per-level texture preload lists (game_data start); at boot it first holds the rzip header word
+D_8002BD60	g_audio_mixer_default_vol	(med) f32[2] default voice volumes of audio_mixer_update_frame
+D_8002BD68	g_audio_mixer_default_freq	(med) f32[2] default voice frequencies of audio_mixer_update_frame
+D_80042770	g_audio_mixer_req_mode	Requested music mixer mode for this frame (audio_mixer_request_mode), cleared after use
+D_80042774	g_audio_mixer_override_mode	Override music mixer mode (audio_mixer_set_override_mode), takes precedence
+D_80042778	g_audio_mixer_base_mode	Base music mixer mode (audio_mixer_set_base_mode), used when no other is set
+D_8004277C	g_audio_mixer_fade_mode	(low) Mixer mode kept across frames: 4 while the mode 4 voice frequency fades back
+D_80042B20	g_audio_mixer_voice_freq	f32[2] current frequency per voice
+D_80042B28	g_audio_mixer_voice_vol	f32[2] current volume per voice
+D_80042B30	g_audio_mixer_master	Current master volume of the music mixer
+D_80042B34	g_audio_mixer_master_scale	(low) f32 compared with 1.0 and reset to 1.0 when the master volume is sent
+D_80042B38	g_audio_mixer_time	Time accumulator (frame steps) driving the mixer frequency waves
+D_800427A0	g_mp3_text_queue	Ring buffer of text records (MP3 ID3 text), filled by mp3_id3_text_enqueue, read by text_queue_read
+D_800427B0	g_mp3_text_queue_buf	Storage (64 bytes) of g_mp3_text_queue
+D_800BE9F8	g_level_loaded_id	(med) Level id stored by level_load (copy of g_level_id); read by music / event code
+D_1002AAD0	g_icache_flush_base	(low) Address (EU 1002AE00) from which tlb_reset_and_flush_icache invalidates the icache up to 0x80400000
+D_8002C270	g_printf_pow10	f64 powers of ten 1e1, 1e2, 1e4, ..., 1e256 used by init_printf_ldtob
+D_8002C2B8	g_printf_str_nan	String "NaN" (init_printf_ldtob)
+D_8002C2BC	g_printf_str_inf	String "Inf" (init_printf_ldtob)
+D_8002C2C0	g_printf_str_zero	String "0" (init_printf_genld)
+D_8002C2C8	g_printf_k_1e8	f64 1e8 (init_printf_ldtob)
+D_8003BE74	g_tlb_area_phys	Physical address of the TLB mapped area (tlb_area_init), freed by tlb_remap_game_segment
+D_8002AE30	g_printf_spaces	Space padding string of init_printf_xprintf
+D_8002AE54	g_printf_zeros	Zero padding string of init_printf_xprintf
+D_80035500	g_debug_printf_len	(low) s16 (EU 80035860) cleared by init_debug_printf_stub before formatting
+D_8003A8D3	g_pi_dma_busy	Nonzero while the PI manager has a read in flight (rom_read_direct waits)
+D_8003A8D5	g_pi_restart_thread	Set: restart the stopped thread after the direct read (pi_dev_mgr_main)
+D_800383D0	g_debug_port_addr	(low) Last address written by debug_port_write_4040 (0xBC000C02)
+D_800383D4	g_debug_port_value	(low) Last value written by debug_port_write_4040 (0x4040)
+D_800380A0	g_text_scale_x_alias	= g_text_scale_x (EU 80038400): screen width / 292, set by video_init_screen
+D_800380A4	g_text_scale_y_alias	= g_text_scale_y (EU 80038404): screen height / 216, set by video_init_screen
+D_800BE9C4	g_zbuffer_alias	= g_zbuffer (EU 800BEDE4): depth buffer allocated by video_init_screen
+D_800380B4	g_heap_head	First block of the game heap (heap_init)
+D_8002AC30	g_heap_largest_free	Size of the largest free heap block (heap_update_largest_free)
+D_8002AF74	g_heap_align_add	s16[5] alignment addends by alignment class (heap_alloc_tagged)
+D_8002AF80	g_heap_align_mask	s16[5] alignment masks by alignment class (heap_alloc_tagged)
+D_800380B0	g_heap_largest_block	The largest free heap block (heap_update_largest_free)
+D_800380B8	g_heap_free_head	Head of the heap free list
+D_8003841C	g_heap_free_tail	Tail of the heap free list
+D_80038420	g_heap_last_req_size	Size of the last heap_alloc_tagged request (debug)
+D_80038424	g_heap_last_req_tag	Tag of the last heap_alloc_tagged request (debug)
+D_80038428	g_heap_last_req_align	Alignment class of the last heap_alloc_tagged request (debug)
+D_8003842C	g_heap_last_req_from_top	Placement (0 bottom / 1 top) of the last heap_alloc_tagged request (debug)
+D_80038430	g_heap_last_req_may_fail	May-fail flag of the last heap_alloc_tagged request (debug)
+D_800380E0	g_pi_mgr_msgs	OSMesg buffer of the PI manager queue (osCreatePiManager)
+D_800388B0	g_pi_mgr_queue	PI manager command queue (osCreatePiManager)
+D_80038950	g_pi_io_msgs	OSIoMesg ring (300) used by rom_dma_read
+D_8003A570	g_pi_io_msg_index	Next OSIoMesg of g_pi_io_msgs to use (wraps at 299)
+D_8003A571	g_pi_io_pending	Number of queued PI reads waited for by rom_dma_wait_queued
+D_8003A8D2	g_pi_direct_read_active	1 while a direct cartridge read is in progress (rom_read_direct)
+D_8002AC50	g_sched_gfx_task	Current gfx OSScTask (taken from the gfx queue by sched_try_start_gfx_task)
+D_8002AC54	g_sched_audio_task	Current audio OSScTask (taken from the audio queue on retrace)
+D_8002AC58	g_sched_last_gfx_task	(med) Last gfx task started (sched_start_gfx_task)
+D_8002AC6C	g_sched_audio_timer_armed	(med) 1 while the audio task timeout timer is armed
+D_8002AF20	g_vi_mode	The active OSViMode (osViSetMode; window / PAL tweaks)
+D_8003A580	g_sched_gfx_resumed	(low) Set when the yielded gfx task is restarted after the audio task, cleared by sched_start_gfx_task
+D_8003A581	g_sched_audio_running	1 while the audio task runs on the RSP
+D_8003A582	g_sched_gfx_state	Gfx task state (0 idle, 1 running, 2 waiting for a frame buffer, 3 yielding, 4 yielded, 6 waiting to swap)
+D_8003A583	g_sched_gfx_running	(med) 1 from the gfx task start until its SP done
+D_8003A584	g_sched_dp_done	(med) Set by the DP done message, cleared when a gfx task starts
+D_8003A8E8	g_sched_audio_timer	OSTimer of the audio task timeout (message 3)
+D_8003B238	g_sched_retrace_count	Retraces since the last gfx task start (saturates at 255), copied to g_frame_ticks
+D_8003B239	g_sched_frame_retraces	(med) Retrace count of the last frame, minimum before the next gfx task while g_sched_retrace_hold runs
+D_8003B23A	g_sched_retrace_hold	(med) Countdown (per retrace) during which gfx tasks wait for g_sched_frame_retraces retraces
+D_8003B240	g_sched_retrace_msg	Retrace message (u16 1) the scheduler sends to its clients
+D_8002AE14	g_rumble_paks_probed	Set by controller_init_all once the rumble paks were probed (stopped at PRE-NMI)
+D_8002AE24	g_sched_fb_swapped	(med) Set after the first osViSwapBuffer (= D_eu_8002AE24); the PRE-NMI thread then resets the RDP
+D_8002C068	g_os_shutdown_alias	(med) = __osShutdown (same address): set means do not wait for the PRE-NMI message
+D_8003B230	g_sched_client_queue	(med) Queue that gets the retrace message at each gfx task start (set by sched_init)
+D_8003B234	g_sched_clients	Linked list of scheduler clients (sched_add_client) sent retrace messages
+D_8003B260	g_sched_init_pattern	(low) u64 set to 0xFEFEFEFE by sched_init
+D_8003B660	g_sched_gfx_msgs	OSMesg[3] of the gfx task queue; also the stack top of the scheduler thread
+D_8003B670	g_sched_audio_msgs	OSMesg[1] of the audio task queue
+D_8003B6A0	g_sched_thread	OSThread of the scheduler (sched_thread_main)
+D_8003B9D0	g_prenmi_queue	PRE-NMI event queue (osSetEventMesg(OS_EVENT_PRENMI))
+D_8003B9E8	g_prenmi_msgs	OSMesg[2] of g_prenmi_queue
+D_8003B9F0	g_prenmi_thread	OSThread of the PRE-NMI thread (prenmi_thread_main)
+D_8003BD70	g_prenmi_queue_alias	= g_prenmi_queue (EU 8003BD70), read by prenmi_thread_main
+D_8003BFC0	g_prenmi_time	osGetTime() of the PRE-NMI, base of the reset delays
+D_800BED64	g_rumble_pak_present	u8[4] rumble pak present per controller
+D_800BEDB0	g_si_recv_mesg	(med) Message slot for the blocking osRecvMesg on g_si_mesg_queue
+D_8003C900	g_music_players	N_ALCSPlayer *[3]: the music sequence players
+D_8003CA58	g_music_seqs	ALCSeq per music player
+D_8003CCB0	g_music_seq_sizes	u16 byte size (rounded up to even) of each sequence of the sequence file
+D_8003CD48	g_music_seq_markers	(med) Loop markers per music player (n_cseq_find_markers / music_seq_jump_marker)
+D_8003CDDC	g_music_seq_ids	u16 sequence id loaded in each music player (0xFFFF = none)
+D_8003CDE8	g_music_seq_data	Sequence data loaded for each music player (allocate_memory)
+D_8003D0E0	g_music_seq_file	The sequence file table (ALSeqFile) read from ROM
+D_8003E710	g_audio_heap	The audio heap (ALHeap)
+D_80044B20	g_audio_heap_arena	0x3E000-byte arena of g_audio_heap (EU 80044EB0)
+D_10029400	g_rspboot_text	rspboot microcode text (ROM segment start); ucode_boot of the audio and gfx RSP tasks
+D_100294D0	g_rspboot_text_end	End of rspboot text (= aspMain text start); ucode_boot_size = end - start
+D_8002AE40	g_audio_thread_started	u8 set to 1 by audio_mgr_init once the audio thread runs; audio_thread_stop stops it only when set
+D_8002B194	g_audio_frame_count	Audio frame counter: picks the audio info buffer (% 3), stamps DMA buffer lastFrame, ages them in audio_clear_dma
+D_8002B198	g_audio_dma_count	Number of audio sample DMAs issued this frame (max 32); waited for and reset by audio_clear_dma
+D_8002B19C	g_audio_cmdlist_index	Which of the two audio command lists (g_audio_mgr ACMDList) is built this frame; toggled by audio_do_frame
+D_8002B1A0	g_snd_cache_dma_pending	Sound bank cache DMAs in flight (max 40), polled and decremented by snd_cache_update_dmas
+D_8002CCC0	g_audio_ucode_data	Audio microcode data block (0x800 bytes, holds the resample table); ucode_data of the audio task
+D_8003B560	g_sched_audio_queue	Scheduler audio task queue: audio_do_frame sends its OSScTask here; same EU variable as D_8003B200
+D_8003E3A0	g_audio_thread	OSThread of the audio manager (audio_thread_main), created by audio_mgr_init
+D_8003E720	g_audio_al_globals_ptr	(med) Pointer to the audio library globals (set to &g_audio_al_globals by audio_mgr_init)
+D_8003E724	g_snd_cache_flush_request	Set by level_load; snd_cache_update_dmas then flushes the unused sound cache entries and clears it
+D_8003E728	g_audio_mgr	Audio manager (AmMgr): ACMDList[2] command list buffers, then audioInfo[3]
+D_8003E730	g_audio_mgr_audio_info	audioInfo[3] field of g_audio_mgr (+8): the three output frame buffers used round-robin
+D_8003E970	g_audio_frame_queue	Audio manager frame message queue (scheduler retrace client): audio_thread_main waits on it
+D_8003E988	g_audio_frame_msgs	Message buffer (8) of g_audio_frame_queue
+D_8003E9A8	g_audio_reply_queue	Audio task done queue (task msgQ): audio_thread_main waits on it after audio_do_frame
+D_8003E9C0	g_audio_reply_msgs	Message buffer (8) of g_audio_reply_queue
+D_8003E9E0	g_audio_al_globals	N_ALGlobals of the audio manager (n_alInit / n_alClose)
+D_800406A0	g_snd_cache	(med) Sound bank cache state (struct147: +4 used list head, +8 DMA free list, +0x10 entry free list); its address is the audio thread stack top
+D_800406B8	g_audio_dma_buffers	Audio sample DMA buffers (AMDMABuffer array, 52 x 0x800 bytes), linked in audio_mgr_init
+D_80040A44	g_snd_cache_used_head	(med) g_snd_cache +4 (EU name): head of the used sound cache entry list, unlinked in snd_cache_entry_free
+D_80040A50	g_snd_cache_free_list	(med) g_snd_cache +0x10 (EU name): free list of sound cache entries, pushed in snd_cache_entry_free
+D_80040AC8	g_snd_cache_dma_bufs	(med) Sound cache DMA records (50 x 24 bytes, 1200 bytes) linked by audio_mgr_init, handed out by snd_cache_dma_new
+D_80040F78	g_audio_dma_state	Audio DMA state (AMDMAState: initialized, firstUsed, firstFree) of audio_dma_new / audio_dma_callback
+D_80041324	g_audio_short_frame_hold	Frames left before audio_do_frame may use the short frame size again (2 after a short frame)
+D_80041328	g_audio_frame_samples_short	Short audio frame size (normal size - 184), used when the AI buffer is running full
+D_8004132C	g_audio_frame_samples	Normal audio frame size in samples (25 fps, rounded up to a multiple of 184 plus 184)
+D_80041330	g_audio_frame_buf_samples	Samples allocated per audio output buffer (normal frame size + 84)
+D_80041334	g_audio_cmdlist_len	(med) Length in Acmds of each audio command list (config +8), stored by audio_mgr_init
+D_80041338	g_audio_dma_io_msgs	OSIoMesg array (32) of the audio sample DMAs started by audio_dma_callback
+D_80041638	g_audio_dma_queue	Completion queue of the audio sample DMAs (drained by audio_clear_dma)
+D_80041650	g_audio_dma_msgs	Message buffer (32) of g_audio_dma_queue
+D_800416D0	g_snd_cache_io_msgs	OSIoMesg array (40) of the sound bank cache DMAs (snd_cache_load_on_demand)
+D_80041A90	g_snd_cache_dma_queue	Completion queue of the sound bank cache DMAs, polled by snd_cache_update_dmas
+D_80041AA8	g_snd_cache_dma_msgs	Message buffer (40) of g_snd_cache_dma_queue
+D_8002C574	g_sound_pan_min_dist	(med) f32 distance above which sound_calc_pan_from_xz normalises x before the asin
+D_8002C578	g_sound_pan_asin_scale	(med) f64 scale from math_asin_scaled to the pan angle in sound_calc_pan_from_xz
+D_8002B070	g_music_open_level	(low) Music mode value (arg / 2) set by music_set_b070_mode (level 2: from a door's open angle); defaults to 1 in the level31 callback
+D_8002B074	g_music_song_table	Song table, 16 bytes per song: +0 tempo, +4 type / flags, +8 per-frame callback, +0xC initial marker byte
+D_8002B078	g_music_song_table_type	+4 word of g_music_song_table (type in the low bits, 0x20 / 0x40 flags) viewed as its own array
+D_8002B9D4	g_music_slot_default_types	(low) Default table given to new song slots (+8, read as per-channel group types by music_player_process_messages)
+D_8002B9F4	g_music_slot_default_masks	(low) Default table given to new song slots (+0xC, read as per-marker channel masks by music_player_process_messages)
+D_8002C580	g_music_amb19_listener_y	f32 reference y of the level 0x13 ambience callback (distance from (x - 24, y - this))
+D_8002C584	g_music_amb19_far_dist_sq	f32 squared distance beyond which the level 0x13 ambience uses the minimum volume
+D_8002C588	g_music_amb19_full_dist	f32 full-volume distance of the level 0x13 ambience callback
+D_8002C58C	g_music_amb19_vol_per_dist	f32 volume per unit of distance of the level 0x13 ambience callback
+D_8002C590	g_music_amb19_height_limit	f32 height threshold of the level 0x13 ambience's second parameter
+D_8002C594	g_music_amb19_height_scale	f32 scale of the level 0x13 ambience's second parameter
+D_800417B0	g_music_player_songs	Per music sequence player (3): the song record it plays (NULL when idle)
+D_800418AC	g_music_player_marker_bits	Per music player: channel-group bits hit by markers this frame (bit 7 = player stopped)
+D_800419A8	g_music_song_slots	The 12 song slot records (100 bytes each); unk4 = -1 when free (music_song_slot_alloc)
+D_80041B60	g_music_pulse_decay	[3][16] per player and channel: pulse decay per frame tick, set from the marker interval
+D_80041C20	g_music_marker_time	Per music player: time of the last beat marker (cleared when a new song starts)
+D_80041C30	g_music_beat_time	Per music player: time of the last beat marker, used to measure the beat period
+D_80041C40	g_music_beat_period	Per music player: time between the last two beat markers
+D_80041C50	g_music_pulse_level	[3][16] per player and channel: beat pulse level (0x8000 at a marker, decays); objects dance to [player][0]
+D_80041D10	g_music_pulse_toggle	[3][16] per player and channel: pulse toggle bit flipped by the markers
+D_80041D40	g_music_pulse_player	Index of the music player that sent the last marker (row of g_music_pulse_level read by objects)
+D_80041E58	g_music_player_queues	The 3 message queues the music sequence players post their markers to
+D_80041F04	g_music_event_flags	(med) Music event flags (bit 0 mute layers, bit 4 effect request, ...) posted by music_post_event_request
+D_80041F08	g_music_event_value	(med) Music event request word: meter accumulator (level 4) or mode (level 0x1D / channel effect)
+D_80041F0C	g_music_event_param	(med) Music event request parameters (count for the level 4 meter, effect params A = bits 0-7, B = bits 8..)
+D_800422A0	g_music_all_paused	s8 flag recorded by music_set_all_paused; music_update_all skips its work while set
+D_800427F4	g_mp3_voice_last_id	s16 id of the last MP3 voice asset started by mp3_voice_play (music ducking by music_update_all)
+D_8002C5A0	g_sound_footstep_table	Footstep sounds [22 surfaces][5 steps]: {sound base, variant count} (sound_surface_footstep)
+D_8003E708	g_sound_bank0	First instrument bank of the bank file, used by sound_voice_play (audio_system_init)
+D_80041F10	g_sound_stop_queue	Pending stop queue (16 entries {id, timer, slot}) processed by sound_stop_queue_process
+D_80041F50	g_sound_stop_queue_count	Number of entries in g_sound_stop_queue
+D_80041F54	g_sound_bus_volume	Current volume of sound groups 0 and 1, ramped toward g_sound_bus_volume_target by sound_update_frame
+D_80041F56	g_sound_bus_volume_lo	(med) u16 low half of g_sound_bus_volume, passed to n_sndp_set_group_volume by sound_level_init
+D_80041F58	g_sound_bus_volume_rate	f32 ramp rate of g_sound_bus_volume toward its target (0.01 or 0.1 per frame)
+D_80041F5C	g_sound_variant_played	Per sound base: bitmask of the variants already played (bit 7 valid), allocated by sound_level_init
+D_80041F60	g_sound_pause_mute_state	Pause mute state applied by sound_update_frame (follows g_sound_pause_mute_request)
+D_80041F61	g_sound_pause_mute_request	Pause mute request set by sound_set_pause_mute: silences sound groups 0 and 1
+D_80041FD8	g_sound_fx_mix_boost	(med) s8 added to each voice's effect (reverb) send in sound_voice_play; set per level, by the storm and trigger zones
+D_80041FD9	g_sound_default_fx_mode	(med) Default voice effect mode (0 / 1) used by emitters without an explicit SFX_FX_MASK mode
+D_80041FDC	g_sound_bus_volume_target	Target volume of sound groups 0 and 1 (set per level and by scene events)
+D_80041FE0	g_sfx_emitters	The 32 positional sound emitter entries (0x30 bytes each), count g_sfx_emitter_count
+D_80042308	g_sound_listeners	Sound listeners (one per player, 0x1C bytes: position, ear position, yaw)
+D_8004238C	g_sfx_emitters_volume	(med) +0xC field (volume) of g_sfx_emitters[0], indexed by entry * 0x30 in actor_sound_set_volume
+D_800425E0	g_sound_voices	The 16 sound voice slots (0x18 bytes each)
+D_80042760	g_sfx_emitter_count_alias	Same EU variable as g_sfx_emitter_count (D_80042B00): number of used positional emitter entries
+D_80042984	g_sound_voices_id	(med) +4 field (sound id, 0x8000 flag) of g_sound_voices[0]
+D_80042988	g_sound_voices_handle	(med) +8 field (sound state handle) of g_sound_voices[], indexed by voice in sound_voice_set_param
+D_80042B00	g_sfx_emitter_count	Number of used positional sound emitter entries in g_sfx_emitters (max 32)
+D_800CC37D	g_objects_in_water	in_water byte (+0xAD) of object 0 (indexed by player * 0x32C in head_icon_show_timed)
+D_8002C140	g_os_thread_tail	libultra __osThreadTail: empty thread queue sentinel used by osCreateMesgQueue
+D_8002C148	g_os_run_queue	libultra __osRunQueue: queue of runnable threads
+D_8002C080	g_os_litob_ldigs	libultra _Litob lower-case hex digit string
+D_8002C094	g_os_litob_udigs	libultra _Litob upper-case hex digit string
+D_8002C0B0	g_os_pi_access_queue_enabled	libultra __osPiAccessQueueEnabled
+D_80042C80	g_os_pi_access_buf	libultra piAccessBuf: message buffer (1) of g_os_pi_access_queue
+D_80042C88	g_os_pi_access_queue	libultra __osPiAccessQueue (its address is also the PI manager thread stack end)
+D_80042CA0	g_os_event_state_tab	libultra __osEventStateTab: message queue and message per OS event
+D_8002C0C0	g_os_timer_list	libultra __osTimerList: head of the OS timer list
+D_8002C0D0	g_os_vi_contexts	libultra vi: the two __OSViContext records
+D_8002C138	g_os_vi_clock	libultra osViClock (PAL / MPAL / NTSC VI clock)
+D_80042D50	g_os_timer_counter	libultra __osTimerCounter
+D_8002C130	g_os_vi_curr	libultra __osViCurr: current VI context
+D_8002C170	g_os_si_access_queue_enabled	libultra __osSiAccessQueueEnabled
+D_80042E30	g_os_si_access_buf_boot	libultra siAccessBuf of the boot-segment copy of __osSiCreateAccessQueue
+D_80042E38	g_os_si_access_queue	libultra __osSiAccessQueue
+D_8002AFC0	g_os_hw_int_table	libultra __osHwIntTable: hardware interrupt handlers set by __osSetHWIntrRoutine
+D_8002C06C	g_os_global_int_mask	libultra __OSGlobalIntMask
+D_8002AEAC	g_os_pi_table	libultra __osPiTable: list of PI handles
+D_80043E50	g_os_leo_disk_handle	libultra LeoDiskHandle (64DD PI handle) set up by os_leo_disk_init
+D_80043EC4	g_os_disk_handle	libultra __osDiskHandle
+D_8002AEB0	g_os_vi_dev_mgr	libultra __osViDevMgr
+D_80036F00	g_os_vi_thread	libultra viThread (VI manager thread)
+D_80037130	g_os_vi_thread_stack	libultra viThreadStack (0x1000 bytes)
+D_80038130	g_os_vi_event_queue	libultra viEventQueue (VI manager command / event queue)
+D_80038148	g_os_vi_event_buf	libultra viEventBuf: message buffer (5) of g_os_vi_event_queue
+D_80038160	g_os_vi_retrace_msg	libultra viRetraceMsg (OS_EVENT_VI message)
+D_80038178	g_os_vi_counter_msg	libultra viCounterMsg (OS_EVENT_COUNTER message)
+D_80038190	g_os_vi_retrace_count	libultra viMgrMain static retrace counter (frames until the next retrace message)
+D_80042D40	g_os_current_time	libultra __osCurrentTime
+D_80042D48	g_os_base_counter	libultra __osBaseCounter
+D_80042D4C	g_os_vi_intr_count	libultra __osViIntrCount
+D_80042D60	g_os_pfs_pif_ram	libultra __osPfsPifRam: PIF RAM buffer of the pak / rumble commands
+D_80042DE0	g_os_cont_last_cmd	libultra __osContLastCmd (_osLastSentSiCmd): last SI command sent
+D_8003BFD0	g_os_motor_stop_data	libultra __MotorDataBuf: per channel (0x40) PIF block that stops the rumble motor
+D_8003C0D0	g_os_motor_start_data	Per channel (0x40) PIF block that starts the rumble motor (os_motor_start)
+D_8003C1D0	g_os_motor_stop_bytes	32 zero bytes written to the rumble pak to stop the motor (os_motor_init)
+D_8003C1F0	g_os_motor_start_bytes	32 one bytes written to the rumble pak to start the motor (os_motor_init)
+D_8002C420	g_rzip_mask_bits	Inflate mask_bits[17] table (rzip)
+D_8002C442	g_rzip_cplens	Inflate cplens: length base values (rzip)
+D_8002C480	g_rzip_cpdist	Inflate cpdist: distance base values (rzip)
+D_8002C4BC	g_rzip_border	Inflate border[19]: order of the code length codes (rzip)
+D_8002C4CF	g_rzip_cplext	Inflate cplext: extra bits of the length codes (rzip)
+D_8002C4EE	g_rzip_cpdext	Inflate cpdext: extra bits of the distance codes (rzip)
+D_8003BE70	g_tlb_page_bitmap	Page bitmap of the TLB code area (one bit per 4 KB page), allocated by tlb_area_init
+D_8003C218	g_tlb_area_pages	s16 size of the code / TLB area in 4 KB pages
+D_8003C21C	g_tlb_page_bitmap_last	Pointer to the last byte of g_tlb_page_bitmap
+D_8003C220	g_tlb_state_c220	(low) s16 set to 0x1FC by tlb_area_init, read by the TLB code
+D_8003C222	g_tlb_state_c222	(low) s16 set to 0x3FF by tlb_area_init, read by the TLB code
+D_8003C230	g_rzip_fixed_tables	Fixed Huffman inflate tables built once at boot (literal at [1], distance at [0x272])
+D_8002BF60	g_audio_eqpower	Equal-power pan gain table (128 s16): left = [pan], right = [127 - pan]
+D_8002C05E	g_audio_unused_c05e	(low) Declared in the MP3 stream code but never used
+D_800E0D80	g_mp3_stream	MP3 stream state (0xA0 bytes): +0 ROM address of the stream data, envelope mixer, low-pass filter, play state
+D_800E0DB0	g_mp3_stream_lp_cutoff	(med) g_mp3_stream +0x30: low-pass filter cutoff (mp3_stream_set_fx arg1)
+D_800E0DB2	g_mp3_stream_lp_gain	(med) g_mp3_stream +0x32: low-pass filter gain; the filter runs when > 0 (mp3_stream_set_fx arg0)
+D_800E0DD8	g_mp3_stream_lp_update	(med) g_mp3_stream +0x58: low-pass coefficient update request (2 = new parameters)
+D_800E0DE0	g_mp3_stream_rom_size	g_mp3_stream +0x60: size of the stream data in ROM
+D_800E0DE4	g_mp3_stream_rom_pos	g_mp3_stream +0x64: read offset in the stream data (mp3_stream_rom_read)
+D_800E0DFC	g_mp3_stream_read_cb	g_mp3_stream +0x7C: data read callback (mp3_stream_set_read_cb); streaming needs it set
+D_800E0E00	g_mp3_log_callback_alias	Same EU variable as g_mp3_log_callback (g_mp3_stream +0x80): text callback set by mp3_stream_set_text_cb
+D_800E0E04	g_mp3_stream_state	g_mp3_stream +0x84: play state (1 playing, 2/6 paused, 3 stopping, 4/5 starting, 7 resuming)
+D_800E0E10	g_mp3_stream_ramp_time	g_mp3_stream +0x90: volume ramp time (mp3_stream_set_volume arg1)
+D_800E0E14	g_mp3_stream_target_pan	g_mp3_stream +0x94: target pan, moved by 2 per frame toward the requested pan
+D_800E0E16	g_mp3_stream_requested_pan	g_mp3_stream +0x96: pan requested by mp3_stream_set_pan (0..127)
+D_800E0E18	g_mp3_stream_wait_frames	g_mp3_stream +0x98: frames of prefetch left before decoding starts / resumes (5)
+D_800E0E20	g_mp3_huff_trees	MP3 Huffman trees per table (asset 0x17/4), node offsets relocated by g_mp3_huff_node_data
+D_800E0E24	g_mp3_huff_fast_table	MP3 Huffman fast lookup table by the next 8 bits (asset 0x17/5): +0 = y << 4 | x, +0x2200 = code length
+D_800E0E28	g_mp3_huff_node_data	(med) MP3 Huffman tree node data (asset 0x17/6), base added to the tree offsets by mp3dec_init
+D_800E0E2C	g_mp3_tables_loaded	Set once the MP3 decoder tables are loaded (mp3_stream_start); cleared when they are freed
+D_800E0E30	g_mp3_pow43_buf	0x8000-byte buffer allocated for the MP3 decoder's pow43 table (g_mp3_pow43_table)
+D_800E11B4	g_mp3_stream_decoder	g_mp3_stream +4: MP3 decoder handle from mp3main_init
+D_800E11B8	g_mp3_stream_env_state	g_mp3_stream +8: envelope mixer state buffer
+D_800E11BC	g_mp3_stream_pan	g_mp3_stream +0xC: current pan
+D_800E11BE	g_mp3_stream_volume	g_mp3_stream +0xE: current volume
+D_800E11C0	g_mp3_stream_cvol_l	g_mp3_stream +0x10: current left volume (cvolL)
+D_800E11C2	g_mp3_stream_cvol_r	g_mp3_stream +0x12: current right volume (cvolR)
+D_800E11C8	g_mp3_stream_lratl	g_mp3_stream +0x18: left volume ramp rate, low part
+D_800E11CA	g_mp3_stream_lratm	g_mp3_stream +0x1A: left volume ramp rate, high part
+D_800E11CC	g_mp3_stream_ltgt	g_mp3_stream +0x1C: left target volume
+D_800E11CE	g_mp3_stream_rratl	g_mp3_stream +0x1E: right volume ramp rate, low part
+D_800E11D0	g_mp3_stream_rratm	g_mp3_stream +0x20: right volume ramp rate, high part
+D_800E11D2	g_mp3_stream_rtgt	g_mp3_stream +0x22: right target volume
+D_800E11D4	g_mp3_stream_env_first	g_mp3_stream +0x24: set when volume / pan changed: the next frame computes new envelope targets
+D_800E11D5	g_mp3_stream_skip_mix	(med) g_mp3_stream +0x25: set when decoding starts; the first frame skips the envelope mix
+D_800E11D8	g_mp3_stream_env_delta	g_mp3_stream +0x28: samples into the current envelope segment
+D_800E11DC	g_mp3_stream_env_seg_end	g_mp3_stream +0x2C: length of the envelope segment in samples
+D_800E1218	g_mp3_stream_pcm_buf	g_mp3_stream +0x68: decoded PCM frame buffer
+D_800E121C	g_mp3_stream_pcm_len	g_mp3_stream +0x6C: samples in the decoded frame buffer (0x240)
+D_800E1220	g_mp3_stream_pcm_pos	g_mp3_stream +0x70: samples already consumed from the decoded frame
+D_800E1228	g_mp3_stream_synth_ofs	(low) g_mp3_stream +0x78: rotating offset passed in the MP3 synthesis command (steps by -0x24 & 0x1E)
+D_800E1238	g_mp3_stream_target_volume	g_mp3_stream +0x88: target volume (mp3_stream_set_volume, 0..0x7FFF)
+D_800E1249	g_mp3_stream_stereo	g_mp3_stream +0x99: the decoded frame has two channels
+D_80042800	g_audio_osc_free_list	Free list of sequence player oscillator states
+D_80042804	g_audio_osc_pool	Oscillator state pool (0x2C bytes each) allocated by audio_osc_pool_create
+D_8002BA20	g_sndp_active_head	Head of the sound player's active sound state list
+D_8002BA24	g_sndp_active_tail	Tail of the sound player's active sound state list
+D_8002BA28	g_sndp_free_list	Free list of sound player sound states
+D_8002BA2C	g_sndp_player	The sound player (N_ALSndPlayer) set up by n_sndp_init
+D_8002BA30	g_sndp_active_count	Number of active sounds (limited to maxSounds)
+D_80042C58	g_sndp_group_volumes	Per sound group volume (u16, 0x7FFF default) set by n_sndp_set_group_volume
+D_800428C0	g_audio_surround	(med) Output mode 4 flag (surround): enables the bus side / invert mixes
+D_800428C1	g_audio_mono	(med) Output mode 1 flag (mono): MP3 pan centred, no one-side bus mixes
+D_800428C2	g_audio_headphones	(med) Output mode 3 flag: MP3 pan narrowed to 0x20..0x5F
+D_800428C4	g_audio_bus_one_side	(med) Per bus: mix the bus into one output side only (n_main_bus_pull)
+D_800428C6	g_audio_bus_invert	(med) Per bus: mix the bus with inverted phase (gain 0x8000) (n_main_bus_pull)
+D_800428C8	g_audio_bus_mix_type	Per bus: mix type remembered by audio_set_bus_mix_type (0 = keep)
+D_8002BF30	g_audio_fx_default_params	(med) Default effect parameter table used by n_alFxNew for fx types other than 6
+D_8002C770	g_audio_fx_pi	f32 pi used by n_fx_calc_biquad_lowpass
+D_8002C774	g_audio_fx_sqrt2	f32 sqrt(2) used by n_fx_calc_biquad_lowpass
+D_8002C778	g_audio_semitone_up	f32 ratio of one semitone up (2^(1/12)), audio_semitones_to_ratio
+D_8002C77C	g_audio_semitone_down	f32 ratio of one semitone down (2^(-1/12)), audio_semitones_to_ratio
+D_8002C780	g_audio_lp_coef_scale_0	(med) f32 scale of low-pass coefficient 0 in n_fx_lowpass_update_coefs
+D_8002C784	g_audio_lp_coef_scale_1	(med) f32 scale of low-pass coefficient 1 in n_fx_lowpass_update_coefs
+D_8002C788	g_audio_fx_delay_scale_alias	(med) US name of g_audio_fx_delay_scale (EU 0x8002CAE8); only declared, unused
+D_8002C78C	g_audio_fx_k_caec	(low) US name of the f32 0.0 constant after the fx delay scale; only declared, unused
+D_8002CAE8	g_audio_fx_delay_scale	(med) f32 divisor of the fx delay modulation depth in n_alFxNew
+D_8002BDA0	g_cseq_midi_ctrl_fns	(med) Handler table of the compact sequence player's controller / extended MIDI events (low bytes)
+D_8002C310	g_cseq_meta_fns	(med) Handlers of the 0xFC-0xFF compact sequence events (indexed by -byte)
+D_80042BB0	g_cseq_chan_event_time	(med) Per sequence channel: delta time of the last marker event, posted to the marker queue
+D_8002BA44	g_audio_synth	The audio synthesizer driver (n_syn)
+D_8002C750	g_audio_k_usec_per_sec	f32 1000000.0 used by _n_timeToSamplesNoRound
+D_8002CC80	g_libm_qnan_f	libm __libm_qnan_f (quiet NaN) returned by cosf
+D_80086240	g_cosf_inv_pi	f32 1/pi of cosf
+D_80086244	g_cosf_pi_hi	f32 pi, high part, of cosf
+D_80086248	g_cosf_pi_lo	f32 pi, low part, of cosf
+D_8008624C	g_cosf_zero	f32 0.0 returned by cosf
+D_80099120	g_cosf_poly	cosf polynomial coefficients P[0..4]
+D_8002AE90	g_os_pi_dev_mgr	libultra __osPiDevMgr
+D_80035C70	g_os_pi_thread	libultra piThread (PI manager thread, pi_dev_mgr_main)
+D_80036EA0	g_os_pi_event_queue	libultra piEventQueue (its address is also the PI thread stack top)
+D_80036EB8	g_os_pi_event_buf	libultra piEventBuf: message buffer (1) of g_os_pi_event_queue
+D_80036EC0	g_os_sp_tmp_task	libultra tmp_task of _VirtualToPhysicalTask
+D_8000031C	g_os_app_nmi_buffer	libultra osAppNMIBuffer (64 bytes at 0x8000031C), cleared by __osInitialize_common
+D_8002C070	g_os_disk_exist	libultra osDiskExist (64DD present)
+D_80042C70	g_os_final_rom	libultra __osFinalrom
+D_8009FAB0	g_nm_tri_bbox_slack	f32 slack of the point-in-triangle bounding box test
+D_8009FAC0	g_nmw_k_deg_to_rad	(med) f32 scale from the record heading to radians in nmw_engine (+4 = minimum floor normal y of ledges)
+D_8009FAC8	g_nmw_ledge_vertical_slope	(med) f32 slope used for an edge with dx == 0 in nmw_ledge_triangle
+D_8009FACC	g_nmw_ledge_grab_radius_sq	f32 squared radius of the ledge grab circle in nmw_ledge_triangle
+D_8009FAD0	g_nmw_k_rad_to_deg	(med) f32 scale from radians to degrees for the ledge angle in nmw_ledge_triangle
+D_8009FAE0	g_fast_sinf_half_pi	f32 pi/2 (fast_cosf = fast_sinf(x + pi/2))
+D_8009FAE4	g_fast_sinf_small_k3	fast_sinf small-range polynomial coefficient (x^6 term)
+D_8009FAE8	g_fast_sinf_small_k2	fast_sinf small-range polynomial coefficient (x^4 term)
+D_8009FAEC	g_fast_sinf_small_k1	fast_sinf small-range polynomial coefficient (x^2 term)
+D_8009FAF0	g_fast_sinf_small_k0	fast_sinf small-range polynomial constant term
+D_8009FAF4	g_fast_sinf_inv_pi	f32 1/pi of fast_sinf
+D_8009FAF8	g_fast_sinf_pi_hi	f32 pi, high part, of fast_sinf
+D_8009FAFC	g_fast_sinf_pi_lo	f32 pi, low part, of fast_sinf
+D_8009FB00	g_fast_sinf_red_k4	fast_sinf reduced-range polynomial coefficient (x^8 term)
+D_8009FB04	g_fast_sinf_red_k3	fast_sinf reduced-range polynomial coefficient (x^6 term)
+D_8009FB08	g_fast_sinf_red_k2	fast_sinf reduced-range polynomial coefficient (x^4 term)
+D_8009FB0C	g_fast_sinf_red_k1	fast_sinf reduced-range polynomial coefficient (x^2 term)
+D_800CC1B0	g_wall_ledge_grab_z	f32 world z of the ledge grab point found by nmw_ledge_triangle (read by obj_state_walk)
+D_800CC1B4	g_wall_ledge_angle_neg	f32 edge angle of the ledge found on the negative side (with g_wall_ledge_h_neg)
+D_800CC1B8	g_wall_ledge_angle_pos	f32 edge angle of the ledge found on the positive side (with g_wall_ledge_h_pos)
+D_800CC1C0	g_obj_attached_world_obj	(med) Per object u16: world object index + 1 it is attached to / follows (set to 1 by a ledge hit)
+D_800CC21C	g_wall_ledge_grab_x	f32 world x of the ledge grab point found by nmw_ledge_triangle (read by obj_state_walk)
+D_800CC630	g_tri_plane_nx	Plane normal x of the last tri_compute_plane triangle
+D_800CC634	g_tri_plane_ny	Plane normal y of the last tri_compute_plane triangle
+D_800CC638	g_tri_plane_nz	Plane normal z of the last tri_compute_plane triangle
+D_800CC63C	g_tri_plane_d	Plane distance of the last tri_compute_plane triangle (n . p = d)
+D_800CC64C	g_quadtree_box_half_x	Half x extent of the collision test box (quadtree_set_test_box)
+D_800CC650	g_quadtree_box_half_y	Half y extent of the collision test box (quadtree_set_test_box)
+D_800CC654	g_quadtree_box_half_z	Half z extent of the collision test box (quadtree_set_test_box)
+D_800CC658	g_quadtree_box_ratio_yx	y / x ratio of the collision test box, for its diagonals
+D_800CC65C	g_quadtree_box_ratio_zx	z / x ratio of the collision test box, for its diagonals
+D_800D3C00	g_world_obj_box_ids	(med) List of world object ids (from world_objects_in_box) passed to world_objects_transform_mesh and the shadow code
+D_800DC270	g_coll_tri_xz_bounds	Current collision area: triangle x / z bounds (4 s16 per triangle: x min, z min, x max, z max)
+D_800DC274	g_coll_tri_y_bounds	Current collision area: triangle y bounds (2 s16 per triangle)
+D_150AA11C	g_anim_sine_table	Sine table, 513 floats over a quarter turn (animation joint rotations)
+D_800888E0	g_anim_joint_mtx_arena	Joint matrix arena of the model being evaluated (first matrix)
+D_800888E4	g_anim_arena_ptr_slot	Where the arena pointer lives; advanced by n matrices after an evaluation
+D_800888E8	g_anim_skeleton	Skeleton being evaluated: 16-byte entries {parent slot, matrix slot, channel, -, f32 x, y, z}
+D_800888EC	g_anim_last_trans_offsets	Translation offsets of the last decoded animation (NULL: none)
+D_800888F0	g_anim_decode_mode	Animation decoder mode: 0 = animation 1, 4 = animation 2
+D_800888F4	g_anim_root_motion	Root motion (z channel with descriptor flag 0x40), 1/1024 units
+D_800888F8	g_anim_root_motion_total	Root motion total (descriptor +0xA)
+D_800888FC	g_anim_root_motion_a	Root motion of animation 1 while blending with the next key frames
+D_80088900	g_anim_root_motion_end	Root motion end value (set past the last key frame)
+D_80088904	g_anim_blend_next_keys	Blend the current and the next key-frame pair (state +0x47 & 0x10, no animation 2)
+D_80088908	g_anim_trans_free	Next free translation offset table
+D_8008890C	g_anim_decode_scales	Scale table of the current decode
+D_80088910	g_anim_euler_table	Euler angle table (3 s16 per channel), animation 1 then animation 2
+D_80088914	g_anim_scale_table	Scale table (3 u16 per channel, 0x4000 = 1.0)
+D_80088918	g_anim_trans_table	Translation offset table (3 s16 per channel, 1/16 units)
+D_8008891C	g_anim_channel0_angle	(med) Output angle 1 of channel 0 (descriptor flag 0x20, object +0x7C); also the base of the per-joint callback table
+D_80088920	g_anim_key_fraction	Key-frame fraction (0..1024) of a decode with descriptor flag 0x10
+D_8009FAA0	g_mtx_deg_to_rad	f32 pi / 180 of mtx_rotate_scale_3x3
+D_8002B1A4	g_audio_fx_params	Effect parameter tables of the two fx buses (2 x 0x108 bytes), copied by audio_mgr_init
+D_800E11C4	g_mp3_stream_dry_amt	g_mp3_stream +0x14: dry amount of the envelope mixer
+D_800E11C6	g_mp3_stream_wet_amt	g_mp3_stream +0x16: wet (effect) amount of the envelope mixer
+D_800E120C	g_mp3_stream_lp_state	g_mp3_stream +0x5C: low-pass filter state buffer
+D_800E1224	g_mp3_stream_dec_bufs	(med) g_mp3_stream +0x74: MP3 decoder state buffers (per channel, 0x440 bytes), passed to the MP3 microcode
+D_800B8BB8	g_texture_expanded_sizes	Expanded (inflated) size of each compressed texture, read from the ROM headers
+D_800BEA35	g_game_frame_state	Game thread frame state: 1-5 run the frame steps (2 / 3 = level change requested), 0 / 4 idle
+D_800BEE20	g_level_start_player_mask	(med) Player mask passed to level_start_game / level_lights_init (set by game_request_transition)
+D_800BEE24	g_level_start_session_mode	(med) Session game mode passed to level_start_game / level_lights_init (set by game_request_transition)
+D_800BEE30	g_game_main_queue	Main game message queue (scheduler client: retrace / task done messages)
+D_800BEE48	g_game_main_msgs	Message buffer (16) of g_game_main_queue
+D_800BEE88	g_gfx_done_msgs	Gfx task done messages, 0x20 bytes per DL buffer
+D_800BEECA	g_render_level_world	(med) Set to 1 at boot: player_view_dl_build draws the level geometry when set
+D_800D3048	g_segment_table	Segment base address table (16 entries), cleared at boot
+D_80000308	g_os_rom_base	libultra osRomBase (cartridge base address)
+D_80000310	g_os_cic_id	libultra osCicId (6105)
+D_80000318	g_os_mem_size	libultra osMemSize (RDRAM size)
+D_8002D8B0	g_boot_thread_stack_4000_alias	Same EU variable as g_boot_thread_stack_4000: stack top of the boot idle thread (0x4000 bytes)
+D_80038090	g_mem_rdp_fifo_start	Start of the RDP FIFO output buffer (gfx task output_buff), set by mem_init_region_bounds
+D_80038094	g_mem_rdp_fifo_end	End of the RDP FIFO output buffer (gfx task output_buff_size)
+D_80038098	g_mem_heap_end	End of the main heap (heap_init: one free block from g_heap_start)
+D_8003809C	g_mem_scratch_area	(med) High-memory scratch area: inflate work buffer and the level triangle visibility bytes
+D_8003B218	g_sched_event_queue_alias	Same EU variable as g_sched_event_queue (D_8003B578): scheduler SP / DP / timer event queue
+D_800BE9D8	g_gfx_dl_frame_starts	Per DL buffer: start of the frame's display list (g_gfx_dl_ptr is reset to it each frame)
+D_800D2340	g_player_active_mask	s16 bit mask of the active players (level_lights_init); player_stat_get field 0
+D_800DC6D0	g_view_mtx_bufs	Per DL buffer: the per-player view matrices (0x40 bytes each)
+D_800DE1BC	g_screen_pulse_wave	Non-zero: the screen pulse overlay alpha is modulated by a sine wave (screen_pulse_start arg4)
+D_8003A928	g_sched_thread_state	(low) u16 set to 4 when the scheduler thread starts
+D_8003B1E8	g_sched_gfx_queue_alias	Same EU variable as g_sched_gfx_queue (D_8003B548): scheduler gfx task queue
+D_8003B200	g_sched_audio_queue_alias	Same EU variable as g_sched_audio_queue (D_8003B560): scheduler audio task queue
+D_800EA140	g_heap_start	Start of the main heap (heap_init: one free block up to g_mem_heap_end)
+D_800A62A0	g_char_fx_mode_table	(med) u8 per game mode: character effect column used by char_fx_init (flag 2)
+D_800A62B8	g_char_fx_type_table	(med) u8 per character type: character effect index used by char_fx_init (flag 4)
+D_800C42B8	g_model_draw_ident_mtx	Mtx set to identity and loaded (G_MTX) by obj_draw_model_dl before a model's display lists
+D_800D3668	g_level_tri_vis_flags	Start of the per level triangle visibility / flag bytes (in the scratch area)
+D_800D3A8C	g_level_tri_vis_flags_end	End of the per level triangle visibility / flag bytes
+D_800DC278	g_zone_tree	Zone (BSP) tree of the current collision area (zone_tree_find_leaf, floor_collect_level_tris)
+D_800DE3E0	g_shadow_light_pos	Per shadow slot: smoothed light position (3 floats)
+D_80000300	g_os_tv_type	libultra osTvType (0 = PAL, 1 = NTSC)
+D_800D2F3C	g_level_event_count	Number of level-start events in g_level_event_ids (from the level header)
+D_800D2F40	g_level_event_ids	u16 ids of the events started at level start (from the level header)
+D_800A6440	g_anim_model_fx_node_types	(med) The three node list types of the animated model effects (anim_model_fx_broadcast)
+D_800C3A92	g_cutscene_skipped	(med) Set by cutscene_end_skip, cleared by cutscene_slot_reset; read by camera events and event_query_scene 5
+D_800C40B8	g_cutscene_scene_id	Id of the scene loaded by cutscene_scene_load (event_query_scene)
+D_800D2528	g_path_point_counts	Per path: number of points (g_path_points)
+D_800DD600	g_billboard_yaw_sincos	Camera yaw of view 0: [0] sin, [1] cos, used by sprite_billboard_draw
+D_800E1017	g_race_lap_count	s8 number of laps of the race (mp_hud_draw_views)
+D_8008679C	g_anim_event_fns	Animation event command handler table (anim_events_run)
+D_8009018C	g_game_mode_fns	Per game mode: frame handler called by game_mode_frame_step
+D_800DBE18	g_coll_area_tri_counts	Per collision area: triangle count (collision_end_area)
+D_800DBE4C	g_coll_tri_count	Triangle count of the current collision area
+D_800DBE5C	g_coll_tri_flags	Per-triangle flags table read by the collision queries (collision_set_tri_flags_table)
+D_800DBE62	g_coll_quadtrees_built	Set when the collision quadtrees are built; else every triangle is tested
+D_800DC208	g_coll_area_tri_tables	Per collision area: triangle table (3 vertex pointers per triangle)
+D_800C5000	g_model_skeletons	Per model id: skeleton pointer (model +0x10), set by model_load
+D_800894C0	g_coll_area_enabled	Per collision area: enable byte (1 = tested by the floor / wall queries; camera_eye_collision toggles [1..2])

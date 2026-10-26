@@ -8,16 +8,16 @@
 /^\/\/ huff_decode_pair/,/^#else/{/s32 k = (table << 8)/s#8 -#7 -#;}
 /^\/\/ huff_decode_pair/,/^#else/{/s32 k = (table << 8)/s#& 0xFF#\& 0x7F#;}
 /^\/\/ huff_decode_pair/,/^#else/{/s32 k = (table << 8)/s#table << 8#table << 7#;}
-/^\/\/ huff_decode_pair/,/^#else/{/s32 len = D_800E0E24/s#0x2200#0x2100#;}
+/^\/\/ huff_decode_pair/,/^#else/{/s32 len = g_mp3_huff_fast_table/s#0x2200#0x2100#;}
 /^\/\/ huff_decode_pair/,/^#else/{/if (len != 0) {/s#len != 0#len > 1#;}
 /^\/\/ huff_decode_pair/,/^#else/{/r->pos += len;/s#+= len#+= len - 1#;}
-/^\/\/ huff_decode_pair/,/^#else/{/\*x = D_800E0E24\[k\] & 0xF;/s#0xF#0x7#;}
-/^\/\/ huff_decode_pair/,/^#else/{/\*y = D_800E0E24\[k\] >> 4;/s#>> 4#>> 3#;}
+/^\/\/ huff_decode_pair/,/^#else/{/\*x = g_mp3_huff_fast_table\[k\] & 0xF;/s#0xF#0x7#;}
+/^\/\/ huff_decode_pair/,/^#else/{/\*y = g_mp3_huff_fast_table\[k\] >> 4;/s#>> 4#>> 3#;}
 /^\/\/ huff_decode_pair/,/^#else/{/node\[1\] : node\[0\]/s#node\[1\] : node\[0\]#node[0] : node[1]#;}
 /^\/\/ huff_decode_pair/,/^#else/{/node\[1\] : node\[0\]/s#\* 4#* 2#;}
 /^\/\/ huff_decode_pair/,/^#else/{/} while ((s8) node\[2\] == -1);/s#== -1#< -1#;}
 /^\/\/ huff_decode_pair/,/^#else/{/\*x = (s8) node\[2\];/s#node\[2\]#node[3]#;}
-/^\/\/ huff_decode_pair/,/^#else/{/node = D_800E0E20\[table\];/s#\[table\]#[table + 1]#;}
+/^\/\/ huff_decode_pair/,/^#else/{/node = g_mp3_huff_trees\[table\];/s#\[table\]#[table + 1]#;}
 /^\/\/ huff_decode_big_values/,/^#else/{/while (end - i > 0) {/s#> 0#>= 0#;}
 /^\/\/ huff_decode_big_values/,/^#else/{/if (linbits != 0 && x == 15) {/s#x == 15#x == 14#;}
 /^\/\/ huff_decode_big_values/,/^#else/{/x = huff_get_bits(&r, linbits) + 15;/s#+ 15#+ 14#;}

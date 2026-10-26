@@ -1,6 +1,6 @@
 s/flag = (\*(s32 \*) (cam + 0x5F0) \& 0x10) != 0;/flag = (*(s32 *) (cam + 0x5F0) \& 0x20) != 0;/
 s/flag = (\*\*(u16 \*\*) (cam + 0x36C) \& 0x10) != 0;/flag = (**(u16 **) (cam + 0x36C) \& 0x20) != 0;/
-s/if (!flag \&\& (D_800BE616 != 0 || cam\[0x23E\] == 9/if ((D_800BE616 != 0 || cam[0x23E] == 9/
+s/if (!flag \&\& (g_mp_mode_active != 0 || cam\[0x23E\] == 9/if ((g_mp_mode_active != 0 || cam[0x23E] == 9/
 s/|| cam\[0x23E\] == 0x3B) \&\& (\*(u8/|| cam[0x23E] == 0x3A) \&\& (*(u8/
 s/(cam + 0x3D4))\[0x1B3\] != 0) {/(cam + 0x3D4))[0x1B2] != 0) {/
 s/CAM_F32(0x97C) = 5.0f;/CAM_F32(0x97C) = 4.0f;/
@@ -24,7 +24,7 @@ s/+ 0x18C) = g_camera_follow_no_snap_yaw;/+ 0x18C) = 0.0f;/
 s/CAM_F32(0x7C8) = 0.0f;/CAM_F32(0x7C8) = 1.0f;/
 s/if (flag || cam\[0x600\] != 0) {/if (cam[0x600] != 0) {/
 s/gain = 4.0f;/gain = 3.0f;/
-s/} else if ((mode == 9 \&\& D_800BE616 != 0) || mode == 0x38/} else if (mode == 9 || mode == 0x38/
+s/} else if ((mode == 9 \&\& g_mp_mode_active != 0) || mode == 0x38/} else if (mode == 9 || mode == 0x38/
 s/|| mode == 0x39 || mode == 0x37 || mode == 0x3B$/|| mode == 0x39 || mode == 0x37 || mode == 0x3A/
 s/                       || mode == 0x12) {/                       || mode == 0x13) {/
 s/gain = 2.0f;/gain = 2.5f;/

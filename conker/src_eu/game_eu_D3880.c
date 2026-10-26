@@ -9,9 +9,9 @@ extern f32 g_shadow_proj_scale;  /* [2] f32: shadow u / v scale; was D_800D3AA0 
 extern f32 g_shadow_far_depth;  /* shadow far clip depth: w <= this -> outcode 0x10; was D_800D3AA8 */
 extern f32 g_shadow_near_depth;  /* shadow near clip depth: w >= this -> outcode 0x20; was D_800D3AAC */
 extern s32 g_shadow_tri_table;  /* triangle table: 3 vertex pointers (offsets for world objects) per triangle; was D_800D3AB0 */
-extern s32 D_800D3AB4;  /* end of the level triangle bit mask (u32 *) */
-extern s32 D_800DC270;  /* per triangle: s16 x min, z min, x max, z max */
-extern s32 D_800DF514;  /* number of world object ids */
+extern s32 g_shadow_tri_mask_end;  /* end of the level triangle bit mask (u32 *); was D_800D3AB4 */
+extern s32 g_coll_tri_xz_bounds;  /* per triangle: s16 x min, z min, x max, z max; was D_800DC270 */
+extern s32 g_shadow_obj_count;  /* number of world object ids; was D_800DF514 */
 extern s32 g_shadow_box_x_min;  /* shadow box: x min; was D_800DF518 */
 extern s32 g_shadow_box_x_max;  /* x max; was D_800DF51C */
 extern s32 g_shadow_box_z_min;  /* z min; was D_800DF520 */
@@ -71,7 +71,7 @@ static s32 shadow_project_vertex(ShadowProj *p, s16 *v, ShadowVtx *o) {
 // three outcodes share no bit and it faces the light ((v0 - v2)(u0 - u1) > (u0 - u2)(v0 - v1), NaN counts as facing).
 // Returns 1 when written.
 static s32 shadow_emit_triangle(ShadowProj *p, s32 tri, s32 base, ShadowVtx *out) {
-    s16 *box = (s16 *) (D_800DC270 + tri * 8);
+    s16 *box = (s16 *) (g_coll_tri_xz_bounds + tri * 8);
     s32 *vtx = (s32 *) (g_shadow_tri_table + tri * 12);
     ShadowVtx t[3];
     s32 all;
@@ -103,13 +103,13 @@ static void shadow_proj_init(ShadowProj *p, f32 *m) {
 }
 
 // shadow_level_triangles: (hand asm) projects the level triangles whose bit is set in mask (bit i of word i / 32,
-// words up to D_800D3AB4) with the light matrix m into shadow vertices at out. A triangle that reaches end is
+// words up to g_shadow_tri_mask_end) with the light matrix m into shadow vertices at out. A triangle that reaches end is
 // written but not counted and ends the walk. Returns the end of the counted vertices.
 /* was func_150A6070 */
 s32 shadow_level_triangles(u32 *mask, s32 out, f32 *m, s32 end) {
     ShadowProj p;
     ShadowVtx *o = (ShadowVtx *) out;
-    u32 *stop = (u32 *) D_800D3AB4;
+    u32 *stop = (u32 *) g_shadow_tri_mask_end;
     u32 bits;
     s32 tri = 0;
 
@@ -133,14 +133,14 @@ s32 shadow_level_triangles(u32 *mask, s32 out, f32 *m, s32 end) {
     return (s32) o;
 }
 
-// shadow_object_triangles: (hand asm) as shadow_level_triangles for D_800DF514 (>= 1) world objects: ids[i] selects the
+// shadow_object_triangles: (hand asm) as shadow_level_triangles for g_shadow_obj_count (>= 1) world objects: ids[i] selects the
 // 0xA0-byte record g_world_objs + id * 0xA0 (u16 triangle count +0x56, first triangle +0x58, >= 1 triangle) whose
 // vertex offsets are relative to g_world_obj_blocks[id].
 /* was func_150A6324 */
 s32 shadow_object_triangles(u16 *ids, s32 out, f32 *m, s32 end) {
     ShadowProj p;
     ShadowVtx *o = (ShadowVtx *) out;
-    u16 *last = ids + D_800DF514;
+    u16 *last = ids + g_shadow_obj_count;
     u8 *obj;
     s32 base;
     s32 tri, stop;
@@ -167,7 +167,7 @@ s32 shadow_object_triangles(u16 *ids, s32 out, f32 *m, s32 end) {
 
 /* P197 */
 extern f32 g_cam_near_plane; /* screen width (also the near-depth bound here); was D_800D9F40 */
-extern f32 D_800D3A00[2];
+extern f32 g_cam_zoom_factors[2]; /* was D_800D3A00 */
 
 /* cvt.w.s with the default FCSR mode: round to nearest, ties to even */
 #define VIEW66F0_RINT(f)                                                                             \
@@ -179,7 +179,7 @@ extern f32 D_800D3A00[2];
  * view_sphere_depth: P197: view test of a box around (x, y, z) (hand asm, FR=1 odd FPRs as singles, epilogue
  * view_test_epilogue), the frustum variant of camera_view_test_sphere without a camera record: m (4x4 floats) maps the point to
  * (u, v, w); outside when w - r > -g_cam_near_plane (in front of the near bound) or w + r < -far, or when u / v scaled by
- * D_800D3A00[0] / [1] leave +-(depth + half size) with the half sizes r / ry scaled by 0.70710677 (sqrt(1/2)),
+ * g_cam_zoom_factors[0] / [1] leave +-(depth + half size) with the half sizes r / ry scaled by 0.70710677 (sqrt(1/2)),
  * depth = -w (the asm's c.ule / c.olt: a NaN passes every test). Returns 0 when outside, else round(-w) (0 stays 0).
  */
 /* was func_150A66F0 */
@@ -197,18 +197,18 @@ s32 view_sphere_depth(f32 *m, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far) {
     u = (m[0] * x + m[4] * y) + (m[8] * z + m[12]);
     rs = r * 0.70710677f;
     lim = depth + rs;
-    if ((u - rs) * D_800D3A00[0] > lim) {
+    if ((u - rs) * g_cam_zoom_factors[0] > lim) {
         return 0;
     }
-    if ((u + rs) * D_800D3A00[0] < -lim) {
+    if ((u + rs) * g_cam_zoom_factors[0] < -lim) {
         return 0;
     }
     v = (m[1] * x + m[5] * y) + (m[9] * z + m[13]);
     rys = ry * 0.70710677f;
-    if ((v - rys) * D_800D3A00[1] > lim) {
+    if ((v - rys) * g_cam_zoom_factors[1] > lim) {
         return 0;
     }
-    if ((v + rys) * D_800D3A00[1] < -lim) {
+    if ((v + rys) * g_cam_zoom_factors[1] < -lim) {
         return 0;
     }
     return VIEW66F0_RINT(depth);
@@ -290,16 +290,16 @@ s32 world_objects_at_point(s32 x, s32 z, s32 *outCount, s32 n) {
  * P54: world_objects_in_box (hand asm): the world objects (g_world_objs, g_world_obj_count of them, 0xA0 bytes) whose box
  * (+0x10 / +0x12 / +0x14 centre, +0x50 x/z half size, +0x52 y half size) overlaps (x .. x2, z .. z2) and, unless
  * +0x4F & 0x40, (y .. y2), all bounds strict; skipped: +0x6E != 0, +0x4F & 0x60 == 0x20, index n - 1.
- * Indices with +0x4F & 0x60 == 0 go to the u16 list D_800D3C00 (the count is returned), the others (0x40 / 0x60)
- * to D_800D3C50 (count in *outCount).
+ * Indices with +0x4F & 0x60 == 0 go to the u16 list g_world_obj_box_ids (the count is returned), the others (0x40 / 0x60)
+ * to g_floor_world_obj_ids (count in *outCount).
  */
-extern s32 D_800D3C00;
-extern s32 D_800D3C50;
+extern s32 g_world_obj_box_ids; /* was D_800D3C00 */
+extern s32 g_floor_world_obj_ids; /* was D_800D3C50 */
 
 /* was func_150A6A48 */
 s32 world_objects_in_box(s32 x, s32 z, s32 *outCount, s32 n, s32 x2, s32 z2, s32 y, s32 y2) {
-    u16 *l0 = (u16 *)&D_800D3C00;
-    u16 *l1 = (u16 *)&D_800D3C50;
+    u16 *l0 = (u16 *)&g_world_obj_box_ids;
+    u16 *l1 = (u16 *)&g_floor_world_obj_ids;
     u8 *obj, *end;
     s32 n0 = 0, n1 = 0, i = 0;
     s32 k, r, c;
@@ -341,11 +341,11 @@ s32 world_objects_in_box(s32 x, s32 z, s32 *outCount, s32 n, s32 x2, s32 z2, s32
 /* P128 */
 extern s32 D_eu_800BE9F4; /* PVS row index: per row {u16 byte index, s16 bit} (pvs_setup) */
 extern s32 D_eu_800BE9F8; /* Huffman tree: 6-byte nodes {s16 symbol (< 0: inner), s16 child 0, s16 child 1} */
-extern s16 D_800DC260[]; /* current PVS row per view (player_zone_update) */
-extern s32 D_800DC278; /* record list head (func_150A4ED4) */
+extern s16 g_pvs_row[]; /* current PVS row per view (player_zone_update); was D_800DC260 */
+extern s32 g_zone_tree; /* record list head (func_150A4ED4); was D_800DC278 */
 
-// pvs_row_apply: (hand asm) decodes PVS row D_800DC260[view] from the Huffman bit stream D_800BE5D0 and writes
-// bit `view` of the s16 visibility word (+0) of every record in the D_800DC278 list (next record at +0xC, else +4,
+// pvs_row_apply: (hand asm) decodes PVS row g_pvs_row[view] from the Huffman bit stream g_pvs_stream and writes
+// bit `view` of the s16 visibility word (+0) of every record in the g_zone_tree list (next record at +0xC, else +4,
 // byte offsets; 0 ends the list). One decoded symbol gives 8 records, LSB first. Bits are read MSB first; the row
 // start {byte, bit} comes from D_eu_800BE9F4 (byte 0xFFFF = none loaded yet: read as u16, as in the asm).
 // Shift counts use the low 5 bits (srlv).
@@ -361,15 +361,15 @@ void pvs_row_apply(s32 view) {
     s32 sym;
     s32 keep;
 
-    if (D_800BE5D0 == 0) {
+    if (g_pvs_stream == 0) {
         return;
     }
     keep = ~(1 << view);
-    rec = (u8 *) D_800DC278;
+    rec = (u8 *) g_zone_tree;
     k = 0;
-    row = (s16 *) (D_eu_800BE9F4 + D_800DC260[view] * 4);
+    row = (s16 *) (D_eu_800BE9F4 + g_pvs_row[view] * 4);
     bit = row[1];
-    p = (u8 *) D_800BE5D0 + *(u16 *) row;
+    p = (u8 *) g_pvs_stream + *(u16 *) row;
     cur = *p;
     if (rec == NULL) {
         return;

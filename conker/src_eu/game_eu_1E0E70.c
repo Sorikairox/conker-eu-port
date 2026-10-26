@@ -75,7 +75,7 @@ s32 gfx_other_mode_cached(s32, s32, s32, s8 *);
    render-mode pair index; 0 = draw nothing */
 extern s32 (*g_cord_style_fns[])(u8 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, u8 *, /* was D_8008FEB0 */
                            u8 *);
-extern s32 D_80091198;   /* rope texture descriptor */
+extern s32 g_tex_rope;   /* rope texture descriptor; was D_80091198 */
 extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 extern s32 g_render_mode_pairs[]; /* render mode pairs (2 words each); was D_800A4EA8 */
 
@@ -121,7 +121,7 @@ extern s32 g_render_mode_pairs[]; /* render mode pairs (2 words each); was D_800
 // (camera at g_player_views + id * 0x9A0 + 0x2F8). Nothing when obj +0x10 has flag 4, 8 or 2, when vtx_slot_buffer_get gives
 // no vertices (0x190 bytes from the cache at obj +0x140) or when the style getter g_cord_style_fns[obj +0x2E] returns 0.
 // The getter's values set the geometry mode, prim / env colours, combine, render mode (| 0x80000 | 0x2CA0 |
-// g_gfx_tlut_mode with the g_render_mode_pairs pair) and the texture D_80091198. Each point gets two vertices offset by +-n
+// g_gfx_tlut_mode with the g_render_mode_pairs pair) and the texture g_tex_rope. Each point gets two vertices offset by +-n
 // (ROPE_NORMAL), s = 0 / 0x3C0 across, t growing by obj +0x13C per point; each segment loads 4 vertices and draws
 // two triangles. Returns the display list end.
 /* was func_151B3878 */
@@ -165,7 +165,7 @@ s32 cord_draw(s32 gfx, u8 *obj, s16 id) {
     gfx = gfx_env_color_cached(gfx, primR, primG, primB, primA, &flag);
     gfx = gfx_prim_color_cached(gfx, 0, 0, envR, envG, envB, envA, &flag);
     gfx = gfx_set_combine_mode(gfx, tex, &flag);
-    gfx = gfx_load_texture_cached(gfx, &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &flag, 3);
+    gfx = gfx_load_texture_cached(gfx, &g_tex_rope, 0, 0, 0, 0, 0x36, 0, 0, &flag, 3);
     gfx = gfx_other_mode_cached(gfx, rmode | 0x80000 | g_gfx_tlut_mode | 0x2CA0,
                         g_render_mode_pairs[rmodePair * 2 + 1] | g_render_mode_pairs[rmodePair * 2], &flag);
 

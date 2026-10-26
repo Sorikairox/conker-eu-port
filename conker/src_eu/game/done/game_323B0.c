@@ -6,10 +6,10 @@
 
 /* was func_15004F00 */
 void attachment_list_reset(void) {
-    D_800C3EE0 = 0;
+    g_attachment_list = 0;
 }
 
 /* was func_15004F10 */
 void joint_chain_reset_mask_init(void) {
-    D_800C4000 = 0xF;
+    g_tail_reset_mask = 0xF;
 }

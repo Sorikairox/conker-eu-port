@@ -3,29 +3,29 @@
 #include "variables.h"
 
 
-extern s32 D_8002C170;
-extern u8 *D_800E1150;
+extern s32 g_os_si_access_queue_enabled; /* was D_8002C170 */
+extern u8 *g_os_si_access_buf; /* was D_800E1150 */
 
 /* was func_151F0B10 */
 void game_os_si_create_access_queue(void) {
-    D_8002C170 = 1;
-    osCreateMesgQueue(&D_80042E38, &D_800E1150, 1);
-    osSendMesg(&D_80042E38, NULL, 0);
+    g_os_si_access_queue_enabled = 1;
+    osCreateMesgQueue(&g_os_si_access_queue, &g_os_si_access_buf, 1);
+    osSendMesg(&g_os_si_access_queue, NULL, 0);
 }
 
 /* was func_151F0B60 */
 void game_os_si_get_access(void) {
     OSMesg dummyMesg;
 
-    if (!D_8002C170) {
+    if (!g_os_si_access_queue_enabled) {
         __osSiCreateAccessQueue();
     }
-    osRecvMesg(&D_80042E38, &dummyMesg, OS_MESG_BLOCK);
+    osRecvMesg(&g_os_si_access_queue, &dummyMesg, OS_MESG_BLOCK);
 }
 
 /* was func_151F0BA4 */
 void game_os_si_rel_access(void) {
-    osSendMesg(&D_80042E38, NULL, OS_MESG_NOBLOCK);
+    osSendMesg(&g_os_si_access_queue, NULL, OS_MESG_NOBLOCK);
 }
 
 void os_writeback_dcache(void *, s32); // osWritebackDCache

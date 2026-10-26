@@ -13,8 +13,8 @@
 #define _doModFunc(a, b) n_reverb_do_mod_func((void *) (a), b)
 #define func_global_asm_8073F8A0 n_aux_bus_pull
 #define _init_lpfilter init_lpfilter
-#define D_global_asm_807FF0F4 D_800428C4
-#define D_global_asm_807FF0F6 D_800428C6
+#define D_global_asm_807FF0F4 g_audio_bus_one_side
+#define D_global_asm_807FF0F6 g_audio_bus_invert
 
 #define RANGE 2.0f
 
@@ -35,7 +35,7 @@ typedef struct {
     s32 maxAuxBusses;
     s32 outputRate;
 } RareSynth;
-#define n_syn ((RareSynth *) D_8002BA44)
+#define n_syn ((RareSynth *) g_audio_synth)
 
 Acmd *_n_loadOutputBuffer(ALFx *r, ALDelay *d, s32 arg2, s32 buff, Acmd *p);
 Acmd *_n_loadBuffer(ALFx *r, s32 arg1, s16 *curr_ptr, s32 buff,s32 count, Acmd *p);

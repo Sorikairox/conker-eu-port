@@ -14,7 +14,7 @@ void animmodel_free(s32);
 void shared_dl_release(s32);
 extern s32 g_shared_dl_tex_lists[]; /* was D_800DFDE8 */
 extern s32 *g_shared_dl_headers[]; /* was D_800E0578 */
-/* P71: a word of an attachment record (the list D_800C3EE0, see attachment_update_all) */
+/* P71: a word of an attachment record (the list g_attachment_list, see attachment_update_all) */
 #define ATT_W(rec, off) (*(s32 *) ((rec) + (off)))
 s32 attachment_sound_cb();   /* P71: C under NON_MATCHING (else an extern s32 below, as the matching code uses it) */
 s32 sfx_emitter_stop_by_callback(s32 *, u8 *, u8 *);
@@ -123,11 +123,11 @@ s32 attachment_load_model(struct127 *arg0, u8 *obj) {
 }
 
 /*
- * P70: frees an attachment record of the list D_800C3EE0 (see attachment_update_all). now != 0 frees its buffers at
+ * P70: frees an attachment record of the list g_attachment_list (see attachment_update_all). now != 0 frees its buffers at
  * once (heap_free), else they are released deferred (heap_set_block_tag(buf, 4)) after attachment_undo_kind_effects.
  * Loaded records (+9) drop the two vertex copies +0x28 / +0x2C when they were made (+8), the +0x48 handle
  * (animmodel_free) and their asset (shared_dl_release(+1)). Then +0x34, +0x44 (always at once), +0x4C, +0x50, the
- * unlink from the doubly linked list (+0x54 next, +0x58 prev; the head D_800C3EE0) and the record itself.
+ * unlink from the doubly linked list (+0x54 next, +0x58 prev; the head g_attachment_list) and the record itself.
  */
 /* was func_15030448 */
 void attachment_free(struct127 *arg0, s32 now) {
@@ -177,8 +177,8 @@ void attachment_free(struct127 *arg0, s32 now) {
             heap_set_block_tag((s32 *) ATT_W(rec, 0x50), 4);
         }
     }
-    if ((u8 *) D_800C3EE0 == rec) {
-        D_800C3EE0 = ATT_W(rec, 0x54);
+    if ((u8 *) g_attachment_list == rec) {
+        g_attachment_list = ATT_W(rec, 0x54);
     }
     prev = (u8 *) ATT_W(rec, 0x58);
     if (prev != NULL) {
@@ -207,7 +207,7 @@ s32 attachment_remove_by_slot_n(u8 *arg0, s32 arg1, s32 arg2) {
     if ((*(u8 *)((u8 *)arg0 + 0x3B)) == 0) {
         return 0;
     }
-    var_a0 = D_800C3EE0;
+    var_a0 = g_attachment_list;
     var_s5 = 0;
     if (var_a0 != 0) {
 loop_3:
@@ -243,7 +243,7 @@ s32 attachment_remove_all_of_owner(u8 *arg0) {
     if ((*(u8 *)((u8 *)arg0 + 0x3B)) == 0) {
         return 0;
     }
-    var_a0 = D_800C3EE0;
+    var_a0 = g_attachment_list;
     var_s1 = 0;
     if (var_a0 != 0) {
         do {
@@ -258,7 +258,7 @@ s32 attachment_remove_all_of_owner(u8 *arg0) {
     return var_s1;
 }
 
-/* P65: the attachment records of the D_800C3EE0 list (offsets read from attachment_update_all's asm). */
+/* P65: the attachment records of the g_attachment_list list (offsets read from attachment_update_all's asm). */
 typedef struct Attach {
     /* 0x00 */ u8 model;            /* model id for obj_find_by_setup_id */
     /* 0x01 */ u8 pad1;
@@ -266,7 +266,7 @@ typedef struct Attach {
     /* 0x03 */ u8 pad3[2];
     /* 0x05 */ u8 seen;
     /* 0x06 */ u8 pad6;
-    /* 0x07 */ u8 callback;         /* index into D_80084550, 0 = none */
+    /* 0x07 */ u8 callback;         /* index into g_attachment_cb_fns, 0 = none */
     /* 0x08 */ u8 pad8[2];
     /* 0x0A */ u16 ownerIds[3];     /* kept only while the model's +0x84 matches one of them (0 = unused) */
     /* 0x10 */ u8 pad10[6];
@@ -286,16 +286,16 @@ typedef struct Attach {
     /* 0x54 */ struct Attach *next;
 } Attach;
 
-extern s32 (*D_80084550[])(Attach *, u8 *);
+extern s32 (*g_attachment_cb_fns[])(Attach *, u8 *); /* was D_80084550 */
 s32 attachment_get_matrices(u8 *, u8 *, s32 *, s32 *);
 u8 *attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
 void animmodel_update_matrices(u8 *);
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 
 /*
- * P65: per-frame update of the attachments (D_800C3EE0 list). Pass 0 handles the records without +0x1E (and notes
+ * P65: per-frame update of the attachments (g_attachment_list list). Pass 0 handles the records without +0x1E (and notes
  * whether any has one), pass 1, only when needed, those attached to a sub-model. For each: its model (obj_find_by_setup_id)
- * must exist and the optional callback D_80084550[+7] must return 0, else the record is freed (attachment_free).
+ * must exist and the optional callback g_attachment_cb_fns[+7] must return 0, else the record is freed (attachment_free).
  * With a matrix buffer (+0x34) or a target (+0x48), the joint matrix (the model's joint +2, or the sub-model matrix
  * from attachment_get_matrices as f32) gives the record's matrix for this DL buffer: transformed by +0x44 (rotation, scale +0x40,
  * translation) / scaled to +0x40 (mode 4) / as is, then rotated by +0x22. The target gets the pointer. Records whose
@@ -330,7 +330,7 @@ void attachment_update_all(void) {
         if (pass == 1 && !deferred) {
             return;
         }
-        for (rec = (Attach *) D_800C3EE0; rec != NULL; rec = next) {
+        for (rec = (Attach *) g_attachment_list; rec != NULL; rec = next) {
             next = rec->next;
             if (pass == 0) {
                 if (rec->subModel != 0) {
@@ -347,7 +347,7 @@ void attachment_update_all(void) {
                 attachment_free((struct127 *) rec, 0);
                 continue;
             }
-            if (rec->callback != 0 && D_80084550[rec->callback](rec, model) != 0) {
+            if (rec->callback != 0 && g_attachment_cb_fns[rec->callback](rec, model) != 0) {
                 attachment_free((struct127 *) rec, 0);
                 continue;
             }
@@ -475,7 +475,7 @@ struct127 *attachment_create(u8 *arg0, s8 arg1, s32 arg2, s32 arg3, s32 arg4, s3
         return NULL;
     }
     if (!(arg3 & 8)) {
-        var_s0 = D_800C3EE0;
+        var_s0 = g_attachment_list;
         if (var_s0 != 0) {
 loop_4:
             temp_v0_2 = (*(s32 *)((u8 *)var_s0 + 0x54));
@@ -495,12 +495,12 @@ block_9:
         return NULL;
     }
     var_t1 = 0;
-    if (D_800C3EE0 != 0) {
-        (*(struct127 **)((u8 *)D_800C3EE0 + 0x58)) = temp_v0;
+    if (g_attachment_list != 0) {
+        (*(struct127 **)((u8 *)g_attachment_list + 0x58)) = temp_v0;
     }
-    temp_v0->unk54 = (*(f32 *)&(D_800C3EE0));
+    temp_v0->unk54 = (*(f32 *)&(g_attachment_list));
     temp_v0->unk58 = 0;
-    D_800C3EE0 = (s32) temp_v0;
+    g_attachment_list = (s32) temp_v0;
     (*(s8 *)((u8 *)temp_v0 + 1)) = arg1;
     (*(u8 *)((u8 *)temp_v0 + 0)) = (u8) (*(u8 *)((u8 *)arg0 + 0x3B));
     temp_v0->gravity = 0.0f;
@@ -593,7 +593,7 @@ s32 attachment_draw_all_for_player(s32 arg0, s32 arg1, s32 arg2) {
     struct127 *temp_v0;
 
     var_s6 = arg0;
-    var_s0 = D_800C3EE0;
+    var_s0 = g_attachment_list;
     if (var_s0 != 0) {
         do {
             temp_s2 = (*(s32 *)((u8 *)var_s0 + 0x54));
@@ -641,7 +641,7 @@ s32 attachment_draw_for_object(s32 arg0, u8 *arg1, s32 arg2, s32 arg3) {
     if ((arg1 == NULL) || ((*(s32 *)((u8 *)arg1 + 0x1D4)) == 0) || ((*(u8 *)((u8 *)arg1 + 0x3B)) == 0)) {
 
     } else {
-        var_s0 = D_800C3EE0;
+        var_s0 = g_attachment_list;
         if (var_s0 != 0) {
             do {
                 temp_s1 = (*(s32 *)((u8 *)var_s0 + 0x54));
@@ -703,10 +703,10 @@ block_13:
 block_14:
     return 1;
 }
-extern u8 D_80083350[];     /* segment 8: blended (alpha < 0xFF) material set */
-extern u8 D_800834D0[];     /* segment 8: opaque material set */
+extern u8 g_model_mat_blend_set[];     /* segment 8: blended (alpha < 0xFF) material set; was D_80083350 */
+extern u8 g_model_mat_opaque_set[];     /* segment 8: opaque material set; was D_800834D0 */
 extern u8 g_fog_state[];     /* fog colour r, g, b when the level fogs (header +0x3E); was D_800DD714 */
-extern u8 D_800DA248[];
+extern u8 g_point_light_ptrs[]; /* was D_800DA248 */
 extern s32 g_dl_capacity;      /* display list capacity (commands); was D_800BEFC4 */
 s32 attachment_get_matrices(u8 *, u8 *, s32 *, s32 *);
 void obj_ambient_colour(s32 arg0, u8 *arg1);
@@ -734,7 +734,7 @@ u8 *reflect_emit_entries_dl(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4);
  * attachment_get_matrices (nothing drawn without one), fog / tint colours from obj_ambient_colour / obj_fog_alpha / obj_unpack_light_colours,
  * lighting by the object's +0x66 mode (lights +0x304[player] built by obj_alloc_light_bufs on demand, light_write_light_cmds /
  * light_apply_object_lights), then the parts (or reflect_emit_entries_dl when special != 0). When the display list would overflow
- * (g_dl_capacity commands from D_800BEDE8[g_dl_buf_index]) the commands are dropped (the start pointer is returned).
+ * (g_dl_capacity commands from g_gfx_dl_buffers[g_dl_buf_index]) the commands are dropped (the start pointer is returned).
  */
 /* was func_150314B4 */
 s32 attachment_draw(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special) {
@@ -764,9 +764,9 @@ s32 attachment_draw(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special)
         alpha = (v * alpha) >> 8;
     }
     if (alpha < 0xFF) {
-        ATT_DL(gfx, 0xDB060020, D_80083350);
+        ATT_DL(gfx, 0xDB060020, g_model_mat_blend_set);
     } else {
-        ATT_DL(gfx, 0xDB060020, D_800834D0);
+        ATT_DL(gfx, 0xDB060020, g_model_mat_opaque_set);
     }
     if (attachment_get_matrices(att, obj, &mtx, &unused110) == 0) {
         return (s32) gfx;
@@ -789,7 +789,7 @@ s32 attachment_draw(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special)
     } else if ((obj[0x66] & 0xC) != 8 && !(att[4] & 1)) {
         ATT_DL(gfx, 0xD9BDFFFF, 0);
         lit = FALSE;
-    } else if (D_800DCD7C != 0) {
+    } else if (g_light_vertex_lighting != 0) {
         ATT_DL(gfx, 0xD9FFFFFF, 0x420000);
     } else {
         ATT_DL(gfx, 0xD9BDFFFF, 0);
@@ -812,7 +812,7 @@ s32 attachment_draw(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special)
                 gfx = light_apply_object_lights(gfx, player, *(f32 *) (obj + 0x14), *(f32 *) (obj + 0x18), *(f32 *) (obj + 0x1C),
                                     *(s32 *) (obj + 0x184), lights, obj[0x301],
                                     (u8 *) (*(s32 *) (obj + 0x314) + g_dl_buf_index * 8), obj + 0x302, 2, obj + 0x1DD,
-                                    size, D_800DA248);
+                                    size, g_point_light_ptrs);
             }
         }
     }
@@ -845,7 +845,7 @@ s32 attachment_draw(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special)
         ATT_DL(gfx, 0xD9FFFFFF, 0x200);
         gfx = (Gfx *) reflect_emit_entries_dl((u8 *) gfx, att, envR, envG, envB);
     }
-    if (gfx - D_800BEDE8[g_dl_buf_index] > g_dl_capacity) {
+    if (gfx - g_gfx_dl_buffers[g_dl_buf_index] > g_dl_capacity) {
         return (s32) start;
     }
     return (s32) gfx;
@@ -859,7 +859,7 @@ void attachment_set_alpha_by_slot(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     }
 }
 
-// attachment_find_nth: returns the arg2-th (0 = first) entry of the D_800C3EE0 list whose owner id (+0) is obj+0x3B
+// attachment_find_nth: returns the arg2-th (0 = first) entry of the g_attachment_list list whose owner id (+0) is obj+0x3B
 // and whose sub id (+6) is arg1, or NULL.
 /* was func_15031C4C */
 u8 * attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2) {
@@ -872,7 +872,7 @@ u8 * attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2) {
     if (temp_v0 == 0) {
         return NULL;
     }
-    var_v1 = D_800C3EE0;
+    var_v1 = g_attachment_list;
     if (var_v1 != 0) {
 loop_3:
         if ((temp_v0 == (*(u8 *)((u8 *)var_v1 + 0))) && (arg1 == (*(u8 *)((u8 *)var_v1 + 6)))) {
@@ -898,7 +898,7 @@ u8 *attachment_find_by_slot_any(s32 arg0, u8 *arg1) {
     u8 *next;
 
     if (arg1 != NULL) {
-        n = (u8 *)D_800C3EE0;
+        n = (u8 *)g_attachment_list;
         if (n != NULL) {
             do {
                 next = *(u8 **)(n + 0x54);
@@ -909,7 +909,7 @@ u8 *attachment_find_by_slot_any(s32 arg0, u8 *arg1) {
             } while (n != NULL);
         }
     }
-    n = (u8 *)D_800C3EE0;
+    n = (u8 *)g_attachment_list;
     if (n != NULL) {
         do {
             next = *(u8 **)(n + 0x54);
@@ -928,8 +928,8 @@ void obj_timer_link_spawn(u8 *);
 s32 light_create_joint_pulse(u8 *, s32, s32);
 s32 aura_burst_group_spawn(u8 *, s32, s32);
 void char_glow_trail_spawn(u8 *, u8, s8, u8, s32);
-extern s32 D_800905D8;
-extern s32 D_800905DC;
+extern s32 g_att_8d_tex_low; /* was D_800905D8 */
+extern s32 g_att_8d_tex_high; /* was D_800905DC */
 
 // attachment_start_effect: runs the start effect of an attachment record by its kind (rec[1]): two jump tables
 // in the asm, kinds 0x82..0x90 (jtbl_800972F0) and 0x37..0x5E (jtbl_8009732C), plus kind 0x1D. P272 rewrite: the
@@ -949,9 +949,9 @@ void attachment_apply_kind_effects(u8 *arg0, u8 *arg1) {
             break;
         case 0x8D:
             if (player_stat_get(0, 6) < 0x64) {
-                *(s16 *)(arg0 + 0x18) = (s16) D_800905D8;
+                *(s16 *)(arg0 + 0x18) = (s16) g_att_8d_tex_low;
             } else {
-                *(s16 *)(arg0 + 0x18) = (s16) D_800905DC;
+                *(s16 *)(arg0 + 0x18) = (s16) g_att_8d_tex_high;
             }
             break;
         case 0x8F:
@@ -1086,7 +1086,7 @@ s32 attachment_cb_texture_pingpong(u8 *arg0, s32 arg1) {
     if (*(s32 *)(arg0 + 0x38) >= 3) {
         var_v0 = 5 - var_v0;
     }
-    *(s16 *)(arg0 + 0x18) = D_8009066C[var_v0];
+    *(s16 *)(arg0 + 0x18) = g_att_pingpong_tex_ids[var_v0];
     (*(s32 *)(arg0 + 0x38))++;
     if (*(s32 *)(arg0 + 0x38) >= 6) {
         *(s32 *)(arg0 + 0x38) = 0;
@@ -1094,7 +1094,7 @@ s32 attachment_cb_texture_pingpong(u8 *arg0, s32 arg1) {
     return 0;
 }
 
-extern f32 D_8009748C; /* 1 / 60 */
+extern f32 g_attachment_k_748c; /* 1 / 60; was D_8009748C */
 
 /*
  * P70: model callback: animates the tile size of a texture by the height +0x08 of the record +0x2D0 of obj.
@@ -1125,7 +1125,7 @@ s32 attachment_cb_tile_by_height(u8 *arg0, struct127 *obj) {
     } else {
         y = *(f32 *) (rec + 8);
         if (0.0f <= y && y <= 120.0f) {
-            t = 1.0f - y * D_8009748C;
+            t = 1.0f - y * g_attachment_k_748c;
         } else {
             t = 0.0f;
         }
@@ -1146,8 +1146,8 @@ s32 attachment_cb_tile_by_height(u8 *arg0, struct127 *obj) {
     return 0;
 }
 
-extern s32 D_80090680;      /* att+0x18 for kinds 0x5A / 0x74 / 0x7A when obj+0x2E8 == 0 */
-extern s32 D_80090684;      /* ... and when obj+0x2E8 != 0 */
+extern s32 g_att_sync_tex_idle;      /* att+0x18 for kinds 0x5A / 0x74 / 0x7A when obj+0x2E8 == 0; was D_80090680 */
+extern s32 g_att_sync_tex_active;      /* ... and when obj+0x2E8 != 0; was D_80090684 */
 void anim_state_snapshot(u8 *);
 
 /* Tables of attachment_cb_sync_animation: animation index by animation id, generated from the ROM's jump tables by
@@ -1246,7 +1246,7 @@ s32 attachment_cb_sync_animation(u8 *att, u8 *obj) {
         case 0x5A:
         case 0x74:
         case 0x7A:
-            *(s16 *) (att + 0x18) = (*(s32 *) (obj + 0x2E8) != 0) ? D_80090684 : D_80090680;
+            *(s16 *) (att + 0x18) = (*(s32 *) (obj + 0x2E8) != 0) ? g_att_sync_tex_active : g_att_sync_tex_idle;
             if (id < 0x2B) {
                 idx = sAnim_8009751C[id];
             } else if (id == 0x50) {
@@ -1522,7 +1522,7 @@ s32 attachment_cb_play_anim_once(u8 *arg0, s32 arg1) {
 s32 attachment_cb_expire_timer(u8 *arg0, u8 *arg1)
 {
   s32 temp_a1;
-  if (D_800C35EA == 1)
+  if (g_cutscene_slot_state == 1)
   {
     return 0;
   }
@@ -1546,7 +1546,7 @@ s32 attachment_cb_expire_on_flag(u8 *arg0, u8 *arg1) {
     f32 new_var;
     u8 *temp_v0;
     new_var = -10000.0f; // fakematch: constant in a variable swaps the c.eq.s operands
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         return 0;
     }
     if (arg1[0xAD] != 0) {
@@ -1722,7 +1722,7 @@ s32 attachment_cb_blink_texture(u8 *arg0, s32 arg1) {
         *(s32 *)(arg0 + 0x38) = 0;
         *(s32 *)(arg0 + 0x3C) ^= 1;
     }
-    *(s16 *)(arg0 + 0x18) = D_800906AC[*(s32 *)(arg0 + 0x3C)];
+    *(s16 *)(arg0 + 0x18) = g_att_blink_tex_ids[*(s32 *)(arg0 + 0x3C)];
     return 0;
 }
 
@@ -1775,7 +1775,7 @@ extern u8 g_slowmo_divisor; /* was D_800BEE2C */
 /* was func_15033CB8 */
 s32 attachment_cb_loop_sound(u8 *arg0, u8 *arg1) {
     attachment_tile_scroll_update(arg0, arg1);
-    if (D_800C35EA != 1) {
+    if (g_cutscene_slot_state != 1) {
         if (g_slowmo_divisor != 0) {
             if (*(s32 *)(arg0 + 0x3C) != 0) {
                 sfx_emitter_stop_by_callback(&attachment_sound_cb, arg0, arg1);
@@ -1793,7 +1793,7 @@ s32 attachment_cb_loop_sound(u8 *arg0, u8 *arg1) {
 s32 attachment_cb_delayed_sound(u8 *arg0, u8 *arg1) {
     s32 temp_v0;
 
-    if (D_800BE616 != 0) {
+    if (g_mp_mode_active != 0) {
         rail_event_add((*(f32 *)((u8 *)arg1 + 0x14)), (*(f32 *)((u8 *)arg1 + 0x18)), (*(f32 *)((u8 *)arg1 + 0x1C)), 900.0f);
     }
     if ((*(s32 *)((u8 *)arg0 + 0x38)) == 0) {
@@ -1879,10 +1879,10 @@ s32 attachment_list_for_owner(u8 *arg0, s32 *arg1) {
     u8 *p;
     u8 *next;
     n = 0;
-    if (D_800C3EE0 == 0) {
+    if (g_attachment_list == 0) {
         return 0;
     }
-    p = (u8 *)D_800C3EE0;
+    p = (u8 *)g_attachment_list;
     if (p != NULL) {
         do {
             next = *(u8 **)(p + 0x54);
@@ -1900,7 +1900,7 @@ s32 attachment_list_for_owner(u8 *arg0, s32 *arg1) {
 u8 *attachment_find_first_of_owner(u8 *arg0) {
     u8 *var_v1;
     u8 *next;
-    for (var_v1 = (u8 *)D_800C3EE0; var_v1 != NULL; var_v1 = next) {
+    for (var_v1 = (u8 *)g_attachment_list; var_v1 != NULL; var_v1 = next) {
         next = *(u8 **)(var_v1 + 0x54);
         if (arg0[0x3B] == var_v1[0]) {
             return var_v1;
@@ -1913,7 +1913,7 @@ u8 *attachment_find_first_of_owner(u8 *arg0) {
 void attachment_swap_owner_ids(s32 arg0, s32 arg1) {
     u8 *var_v0;
     u8 *next;
-    for (var_v0 = (u8 *)D_800C3EE0; var_v0 != NULL; var_v0 = next) {
+    for (var_v0 = (u8 *)g_attachment_list; var_v0 != NULL; var_v0 = next) {
         next = *(u8 **)(var_v0 + 0x54);
         if (arg0 == var_v0[0]) {
             var_v0[0] = arg1;
@@ -1927,7 +1927,7 @@ void attachment_swap_owner_ids(s32 arg0, s32 arg1) {
 s32 attachment_cb_release_link(s32 arg0, u8 *arg1) {
     u8 *temp_v1;
 
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         return 0;
     }
     temp_v1 = (*(u8 **)((u8 *)arg1 + 0x31C));
@@ -1943,7 +1943,7 @@ s32 attachment_cb_release_link2(s32 arg0, u8 *arg1) {
     u8 temp_v0;
     u8 *temp_v1;
 
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         return 0;
     }
     temp_v1 = (*(u8 **)((u8 *)arg1 + 0x31C));

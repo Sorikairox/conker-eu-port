@@ -22,7 +22,7 @@ void ground_dust_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     if (arg0 != NULL) {
         tmp.unk0 = *(f32 *)(arg0 + 0x14);
         tmp.unk8 = *(f32 *)(arg0 + 0x1C);
-        if (D_800C35EA != 1) {
+        if (g_cutscene_slot_state != 1) {
             tmp.unk4 = *(f32 *)(arg0 + 0x180);
             tmp.unk10 = 0.0f;
             switch (floor_flags_surface_type(*(s32 *)(arg0 + 0x184))) {
@@ -973,7 +973,7 @@ s32 particle_upd_damp_vel(u8 *, s32);
 // particle_timed_event_update: particle update handler 17 (particle_sprite_update). While the age (+0x1A) is below +0xB0
 // the alpha +0x2C ramps as age * +0xB2. While the age (+0x1A, counting down) is <= the trigger time +0xB4 (-1 = none) the event
 // g_particle_event_fns[+0xB6] (-1 = none) is called once with (particle, trigger time, age, -1) and the trigger cleared;
-// events are suppressed while D_800BE616 is set. Then the common update particle_upd_damp_vel(particle, arg) runs and its
+// events are suppressed while g_mp_mode_active is set. Then the common update particle_upd_damp_vel(particle, arg) runs and its
 // result is returned.
 /* was func_151A2F10 */
 s32 particle_timed_event_update(u8 *part, s32 arg) {
@@ -984,7 +984,7 @@ s32 particle_timed_event_update(u8 *part, s32 arg) {
     if (age < *(s16 *)(part + 0xB0)) {
         part[0x2C] = age * *(s16 *)(part + 0xB2);
     }
-    if (D_800BE616 == 0) {
+    if (g_mp_mode_active == 0) {
         when = *(s16 *)(part + 0xB4);
         event = *(s8 *)(part + 0xB6);
         if (when != -1 && event != -1 && when >= age) {

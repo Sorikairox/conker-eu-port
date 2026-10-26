@@ -61,30 +61,30 @@ s32 __osPfsGetStatus(OSMesgQueue *queue, int channel) {
     return ret;
 }
 
-extern OSPiHandle *D_8002AEAC; /* __osPiTable */
-OSPiHandle D_80043E50;  /* LeoDiskHandle (.bss; tentative definition, COMMON resolved by undefined_syms: gives the shared lui) */
-extern OSPiHandle *D_80043EC4; /* __osDiskHandle (.bss) */
+extern OSPiHandle *g_os_pi_table; /* __osPiTable; was D_8002AEAC */
+OSPiHandle g_os_leo_disk_handle;  /* LeoDiskHandle (.bss; tentative definition, COMMON resolved by undefined_syms: gives the shared lui); was D_80043E50 */
+extern OSPiHandle *g_os_disk_handle; /* __osDiskHandle (.bss); was D_80043EC4 */
 
 // osLeoDiskInit (Rare libultrare, GoldenEye src/libultrare/io/leodiskinit.c)
 /* was func_10027B50 */
 OSPiHandle *os_leo_disk_init(void) {
     s32 sp1c;
 
-    D_80043E50.type = 2;
-    D_80043E50.baseAddress = (0xa0000000 | 0x05000000);
-    D_80043E50.latency = 3;
-    D_80043E50.pulse = 6;
-    D_80043E50.pageSize = 6;
-    D_80043E50.relDuration = 2;
-    IO_WRITE(PI_BSD_DOM2_LAT_REG, D_80043E50.latency);
-    IO_WRITE(PI_BSD_DOM2_PWD_REG, D_80043E50.pulse);
-    IO_WRITE(PI_BSD_DOM2_PGS_REG, D_80043E50.pageSize);
-    IO_WRITE(PI_BSD_DOM2_RLS_REG, D_80043E50.relDuration);
-    bzero(&D_80043E50.transferInfo, sizeof(__OSTranxInfo));
+    g_os_leo_disk_handle.type = 2;
+    g_os_leo_disk_handle.baseAddress = (0xa0000000 | 0x05000000);
+    g_os_leo_disk_handle.latency = 3;
+    g_os_leo_disk_handle.pulse = 6;
+    g_os_leo_disk_handle.pageSize = 6;
+    g_os_leo_disk_handle.relDuration = 2;
+    IO_WRITE(PI_BSD_DOM2_LAT_REG, g_os_leo_disk_handle.latency);
+    IO_WRITE(PI_BSD_DOM2_PWD_REG, g_os_leo_disk_handle.pulse);
+    IO_WRITE(PI_BSD_DOM2_PGS_REG, g_os_leo_disk_handle.pageSize);
+    IO_WRITE(PI_BSD_DOM2_RLS_REG, g_os_leo_disk_handle.relDuration);
+    bzero(&g_os_leo_disk_handle.transferInfo, sizeof(__OSTranxInfo));
     sp1c = __osDisableInt();
-    D_80043E50.next = D_8002AEAC;
-    D_8002AEAC = &D_80043E50;
-    D_80043EC4 = &D_80043E50;
+    g_os_leo_disk_handle.next = g_os_pi_table;
+    g_os_pi_table = &g_os_leo_disk_handle;
+    g_os_disk_handle = &g_os_leo_disk_handle;
     __osRestoreInt(sp1c);
-    return &D_80043E50;
+    return &g_os_leo_disk_handle;
 }

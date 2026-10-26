@@ -25,7 +25,7 @@ u8 *tracer_spawn(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, u8 arg4, s32 arg5, f32 
 // attachment 0x46 (attachment_find_by_slot / model_node_points_to_world; bail out when either fails), then sparks (gun_muzzle_flash_light) and, on a
 // random odd value, a flash (gun_muzzle_sparks_spawn); without a model the start is the object position (+0x14) raised by 106
 // and pushed 120 along the direction, the end 82 back. Then the smoke stream tracer_spawn (alpha 0xFF with a model,
-// else 0x80; mode -1 when D_800BE616 is set, else 2). `flag` / `arg2` are passed on.
+// else 0x80; mode -1 when g_mp_mode_active is set, else 2). `flag` / `arg2` are passed on.
 /* was func_151C5280 */
 void gun_muzzle_smoke_spawn(u8 *obj, u8 flag, s32 arg2) {
     f32 *in[2];
@@ -77,7 +77,7 @@ void gun_muzzle_smoke_spawn(u8 *obj, u8 flag, s32 arg2) {
     r = random_int();
     tracer_spawn((u8 *) start, NULL, (u8 *) end, (u8 *) dir, 1, 0, 300.0f, g_gun_smoke_tracer_k[0], a * 10.0f + 25.0f,
                   b * 150.0f + 400.0f, 80.0f, r % 56 + 200, obj, 1, 1, 0, *(u8 **) (obj + 0x1D4) != NULL ? 0xFF : 0x80,
-                  0, 1, 0, 0x1A, 0.0f, 0xFF, D_800BE616 ? -1 : 2, 0, flag, arg2);
+                  0, 1, 0, 0x1A, 0.0f, 0xFF, g_mp_mode_active ? -1 : 2, 0, flag, arg2);
 }
 
 s32 attached_particle_spawn(s32, s32, f32 *, f32 *, f32 *, s32, s32, f32, s32, s32, s32, s32, s32, s32);

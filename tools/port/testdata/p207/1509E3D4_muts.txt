@@ -2,7 +2,7 @@ s/hud_lens_start_zoom_in(0)/hud_lens_start_zoom_in(1)/ % c0
 s/(a\[2\] + 59) \/ 60/(a[2] + 60) \/ 60/ % c1 c1_neg c1_exact
 s/g_mp_game_flags |= 0x80/g_mp_game_flags |= 0x40/ % c1
 s/0x96, 0x56/0x96, 0x57/ % c1
-s/(s32) D_8009F6D0/(s32) g_hud_clock_frames/ % c1
+s/(s32) g_str_pct_d_f6d0/(s32) g_hud_clock_frames/ % c1
 s/g_hud_clock_frames = a\[2\]/g_hud_clock_frames = a[3]/ % c2
 s/return rail_rank_rivals();/return rail_racers_update();/ % c5
 s/return rail_cmd_stub(a\[2\])/return rail_cmd_stub(a[3])/ % c8
@@ -22,7 +22,7 @@ s/args\[0xB\]/args[0xA]/ % c24_obj
 s/obj_remove(obj, 0)/obj_remove(obj, 1)/ % c24_obj
 s/obj != NULL/obj == NULL/ % c24_obj c24_none
 1,/case 26/s/a\[5\] \*/a[4] */ % c25 c25_i2
-1,/case 26/s/D_800D33F8\[a\[2\]\] \* 65536.0f/D_800D33E0[a[2]] * 65536.0f/ % c25 c25_i2
+1,/case 26/s/g_rail_script_ease_val\[a\[2\]\] \* 65536.0f/g_rail_script_ease_vel[a[2]] * 65536.0f/ % c25 c25_i2
 /case 26/,$s/0x7B4/0x7B0/ % c26 c26_i3
-/case 26/,$s/&D_800D33E0\[a\[2\]\]/\&D_800D33F8[a[2]]/ % c26 c26_i3
+/case 26/,$s/&g_rail_script_ease_vel\[a\[2\]\]/\&g_rail_script_ease_val[a[2]]/ % c26 c26_i3
 s/return 0;$/return 1;/ % c27 cbig c3

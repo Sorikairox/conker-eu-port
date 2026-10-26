@@ -2,7 +2,7 @@ s/s32 mode = state \& 3;/s32 mode = state \& 7;/
 s/u32 last = (u32) state >> 8;/u32 last = state >> 8;/
 s/if (!(state \& 0x80)) {/if (!(state \& 0x40)) {/
 s/music_song_set_volume(0x22, 0x5DC0);/music_song_set_volume(0x22, 0x5DC1);/
-s/if (D_800C35EA == 1) {/if (D_800C35EA != 0) {/
+s/if (g_cutscene_slot_state == 1) {/if (g_cutscene_slot_state != 0) {/
 s/music_song_set_fade(0x22, 0x14, 1);/music_song_set_fade(0x22, 0x14, 0);/
 s/        state = 0x80;/        state = 0x81;/
 s/started = TRUE;/started = 2;/
@@ -27,7 +27,7 @@ s/music_chan_set_cc41(ch, 0, 0);/music_chan_set_cc41(ch, 0, 1);/
 s/music_chans_set_volume(ch, 0x18, (vol >> 8) \& 0xFF);/music_chans_set_volume(ch, 0x18, vol \& 0xFF);/
 s/music_chan_set_pan(ch, 4, pan \& 0x7F);/music_chan_set_pan(ch, 3, pan \& 0x7F);/
 s/music_chan_set_cc41(ch, 4, (pan >> 7) \& 0xFF);/music_chan_set_cc41(ch, 4, pan \& 0xFF);/
-s/if (mode != D_80041F08) {/if (1) {/
+s/if (mode != g_music_event_value) {/if (1) {/
 s/if (state \& 0x7C) {/if (state \& 0x7E) {/
 s/(g_frame_ticks >> 1) \* 4/(g_frame_ticks >> 1) * 2/
 s/(g_frame_ticks >> 1) \* 4/g_frame_ticks * 2/

@@ -3,11 +3,11 @@
 #include "variables.h"
 
 // libultra io/devmgr.c, pre-2.0J __osDevMgrMain (no 64DD block), with a Rare addition:
-// DMAREAD stops the thread D_80035C70 while D_8003A8D2 is set and flags D_8003A8D3 while the read is in flight.
-extern OSThread D_80035C70;
-extern u8 D_8003A8D2;
-extern u8 D_8003A8D3;
-extern u8 D_8003A8D5;
+// DMAREAD stops the thread g_os_pi_thread while g_pi_direct_read_active is set and flags g_pi_dma_busy while the read is in flight.
+extern OSThread g_os_pi_thread; /* was D_80035C70 */
+extern u8 g_pi_direct_read_active; /* was D_8003A8D2 */
+extern u8 g_pi_dma_busy; /* was D_8003A8D3 */
+extern u8 g_pi_restart_thread; /* was D_8003A8D5 */
 
 /* was func_10002E50 */
 void pi_dev_mgr_main(void *args) {
@@ -24,12 +24,12 @@ void pi_dev_mgr_main(void *args) {
         osRecvMesg(dm->cmdQueue, (OSMesg)&mb, OS_MESG_BLOCK);
         switch (mb->hdr.type) {
             case OS_MESG_TYPE_DMAREAD:
-                if (D_8003A8D2) {
-                    D_8003A8D5 = 1;
-                    osStopThread(&D_80035C70);
-                    D_8003A8D5 = 0;
+                if (g_pi_direct_read_active) {
+                    g_pi_restart_thread = 1;
+                    osStopThread(&g_os_pi_thread);
+                    g_pi_restart_thread = 0;
                 }
-                D_8003A8D3 = 1;
+                g_pi_dma_busy = 1;
                 osRecvMesg(dm->acsQueue, &dummy, OS_MESG_BLOCK);
                 ret = dm->dma(OS_READ, mb->devAddr, mb->dramAddr, mb->size);
                 break;
@@ -58,7 +58,7 @@ void pi_dev_mgr_main(void *args) {
             osSendMesg(mb->hdr.retQueue, mb, OS_MESG_NOBLOCK);
             osSendMesg(dm->acsQueue, NULL, OS_MESG_NOBLOCK);
             if (mb->hdr.type == OS_MESG_TYPE_DMAREAD) {
-                D_8003A8D3 = 0;
+                g_pi_dma_busy = 0;
             }
         }
     }

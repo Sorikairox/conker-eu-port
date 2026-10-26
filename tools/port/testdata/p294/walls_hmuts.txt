@@ -35,7 +35,7 @@ s|    h = n\[3\] + w->radiusF \* len - |    h = n[3] + w->radiusF - |
 s|    if (!(n\[1\] / len >= -0.2f) \&\& !(w->dy.f <= 0.0f)) {|    if (!(n[1] / len >= -0.2f)) {|
 s|    h = h / len2;|    h = h / len;|
 s|    w->pos\[1\] = h \* n\[1\] + w->pos\[1\];|    w->pos[1] = w->pos[1];|
-s|        quadtree_set_test_box((f32) w.margin \* 2.0f, NMW_F32(D_800CC1F8), (f32) w.radius \* 2.0f + sqrtf|        quadtree_set_test_box((f32) w.margin * 2.0f, NMW_F32(D_800CC1F8), (f32) w.radius * 2.0f + 0.0f * sqrtf|
+s|        quadtree_set_test_box((f32) w.margin \* 2.0f, NMW_F32(g_wall_coll_height), (f32) w.radius \* 2.0f + sqrtf|        quadtree_set_test_box((f32) w.margin * 2.0f, NMW_F32(g_wall_coll_height), (f32) w.radius * 2.0f + 0.0f * sqrtf|
 s|    w.keepFall = w.dy.u = \*(u32 \*) (rec + 0x20);|    w.keepFall = w.dy.u = 0;|
 s|            w.moved = 1;|            w.moved = 0;|
 s|        if (w.keepFall == 0) {|        if (w.keepFall != 0) {|

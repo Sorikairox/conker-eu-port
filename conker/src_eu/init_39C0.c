@@ -10,9 +10,9 @@ void framebuffer_fill_color(s32 arg0, s32 arg1, s32 arg2);
 void video_init_screen(void) {
     g_framebuffer_width = 292; // screen width px
     g_framebuffer_height = 216; // screen height px
-    D_800380A0 = (f32) g_framebuffer_width / 292.0f;
-    D_800380A4 = (f32) g_framebuffer_height / 216.0f;
-    D_800BE9C4 = allocate_memory(g_framebuffer_width * g_framebuffer_height * 2, 255, 3, 0);
+    g_text_scale_x_alias = (f32) g_framebuffer_width / 292.0f;
+    g_text_scale_y_alias = (f32) g_framebuffer_height / 216.0f;
+    g_zbuffer_alias = allocate_memory(g_framebuffer_width * g_framebuffer_height * 2, 255, 3, 0);
     framebuffer_fill_color(0, 0, 0);
     screen_setup_viewports(g_framebuffer_width, g_framebuffer_height);
     // EU: the VI mode is no longer set here
@@ -69,7 +69,7 @@ block_10:
     }
 }
 // EU only
-extern s32 D_8002AF20;
+extern s32 g_vi_mode; /* was D_8002AF20 */
 
 /* was func_10003C10 */
 void vi_mode_set_window(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
@@ -93,13 +93,13 @@ void vi_mode_set_window(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
         if ((temp_v0 + temp_f8) >= 0x272) {
             var_v1 = 0x271 - temp_v0;
         }
-        (*(s32 *)((u8 *)(&D_8002AF20) + 0x1C)) = (s32) ((temp_a2 << 0x10) | (temp_a2 + var_t0));
+        (*(s32 *)((u8 *)(&g_vi_mode) + 0x1C)) = (s32) ((temp_a2 << 0x10) | (temp_a2 + var_t0));
         temp_t6 = (temp_v0 << 0x10) | (temp_v0 + var_v1);
-        (*(u32 *)((u8 *)(&D_8002AF20) + 0x20)) = (u32) (512.0f - (f32) (var_t0 - 0x249));
-        (*(s32 *)((u8 *)(&D_8002AF20) + 0x30)) = temp_t6;
-        (*(s32 *)((u8 *)(&D_8002AF20) + 0x44)) = temp_t6;
+        (*(u32 *)((u8 *)(&g_vi_mode) + 0x20)) = (u32) (512.0f - (f32) (var_t0 - 0x249));
+        (*(s32 *)((u8 *)(&g_vi_mode) + 0x30)) = temp_t6;
+        (*(s32 *)((u8 *)(&g_vi_mode) + 0x44)) = temp_t6;
         temp_t2 = (u32) (1024.0f - ((f32) (var_v1 - 0x1AB) * 1.95f));
-        (*(u32 *)((u8 *)(&D_8002AF20) + 0x2C)) = temp_t2;
-        (*(u32 *)((u8 *)(&D_8002AF20) + 0x40)) = temp_t2;
+        (*(u32 *)((u8 *)(&g_vi_mode) + 0x2C)) = temp_t2;
+        (*(u32 *)((u8 *)(&g_vi_mode) + 0x40)) = temp_t2;
     }
 }

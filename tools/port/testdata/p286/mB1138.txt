@@ -13,7 +13,7 @@
 /if (slot->timer < 0) {/s/< 0/<= 0/
 /\*(f32 \*) (rec + 0x114) = 0.0f;/s/0.0f/1.0f/
 /\*(f32 \*) (rec + 0x110) = /s/- \*(f32 \*) (rec + 0x40)/- *(f32 *) (rec + 0x44)/
-/\*(f32 \*) (rec + 0x118) = /s/D_800BEDC8/g_frame_step_f/
+/\*(f32 \*) (rec + 0x118) = /s/g_frame_step_inv/g_frame_step_f/
 /effect3d_set_handlers(slot->rec, 0x10, 0x1B, 0, 0x10);/s/0x1B/0x1C/
 /\*(s32 \*) (slot->rec + 0x58) |= 1;/s/|= 1/|= 2/
 /^                        s->count--;/s/--/++/

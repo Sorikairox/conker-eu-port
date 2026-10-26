@@ -158,7 +158,7 @@ void camera_update_all(void) {
         temp_s0 = &g_player_views[i]; // ???
         if (player_stat_get(i, 0) || (i == 0)) {
             temp_s0->unk7B4 = temp_f20;
-            if ((g_game_paused == 0) || (D_800C35EA != 0) || (D_800D2DB4 != 0)) {
+            if ((g_game_paused == 0) || (g_cutscene_slot_state != 0) || (g_camera_timed_active != 0)) {
                 camera_pop_mode(temp_s0, 5);
                 camera_update_controller(temp_s0);
             } else {
@@ -201,7 +201,7 @@ void camera_eye_collision(struct108 *); /* P68: void, v0 is undefined in the asm
 void camera_lean_from_heading(struct108 *, f32 *, f32 *);
 s32 camera_yaw_fade_in(struct108 *);
 void camera_finish_frame(struct108 *);
-extern u16 D_800BEB30[];
+extern u16 g_pad_pressed[]; /* was D_800BEB30 */
 
 #define CAM_W(o) (*(s32 *)(p + (o)))
 #define CAM_H(o) (*(s16 *)(p + (o)))
@@ -249,8 +249,8 @@ void camera_update_controller(struct108 *arg0) {
         ((s32 *)at)[2] = CAM_W(0x2F4);
     }
     pl = p[0x23D];
-    CAM_W(0x36C) = (*(s32 **)&D_800BE728)[pl];
-    CAM_H(0x36A) = D_800BEB30[pl];
+    CAM_W(0x36C) = (*(s32 **)&g_cont_frame)[pl];
+    CAM_H(0x36A) = g_pad_pressed[pl];
     CAM_W(0x304) = ((s32 *)at)[0];
     CAM_W(0x308) = ((s32 *)at)[1];
     CAM_F(0x358) = CAM_F(0x35C);
@@ -375,7 +375,7 @@ void camera_update_controller(struct108 *arg0) {
 //         temp_a1->unk8 = arg0->unk2F4;
 //     }
 //     // temp_v0_2 = arg0->unk23D;
-//     arg0->unk36C = D_800BE728[temp_v0_2];
+//     arg0->unk36C = g_cont_frame[temp_v0_2];
 //     arg0->unk36A = g_save_config[temp_v0_2];
 //     arg0->unk304 = temp_a1->unk0;
 //     arg0->unk308 = temp_a1->unk4;
@@ -760,7 +760,7 @@ void camera_update_eye_orbit(struct108 *arg0) {
     save = *(f32 *)(p + 0x374);
     p[0x600] = 0;
     *(f32 *)(p + 0x604) = save;
-    if (D_800C3671 != 0) {
+    if (g_cutscene_restart_transition != 0) {
         return;
     }
     d = *(f32 *)(p + 0x6F8);
@@ -936,7 +936,7 @@ void camera_update_eye_orbit(struct108 *arg0) {
         if (*(s32 *)(p + 0x7B8) != 0 || (v0 & 0x100) || ((v0 & 0x80) && (**(u16 **)(p + 0x36C) & 0x10))) {
             *(f32 *)(p + 0x3B4) = 6.0f;
             *(f32 *)(p + 0x3B8) = 10.0f;
-        } else if (D_800BE616 != 0 || (*(s32 *)(p + 0x84) & 0x200000)) {
+        } else if (g_mp_mode_active != 0 || (*(s32 *)(p + 0x84) & 0x200000)) {
             if (v0 & 0x40) {
                 *(f32 *)(p + 0x974) = 1.0f;
                 *(f32 *)(p + 0x978) = 2.0f;
@@ -960,7 +960,7 @@ void camera_update_eye_orbit(struct108 *arg0) {
         }
         if (g_slowmo_divisor == 0) {
             if (p[0x600] != 0) {
-                if (*(s16 *)(p + 0x73C) != 0 || D_800BE616 != 0) {
+                if (*(s16 *)(p + 0x73C) != 0 || g_mp_mode_active != 0) {
                     math_spring_approach((f32 *)(p + 0x370), *(f32 *)(p + 0x374), (f32 *)(p + 0x258), 8.0f, 10.0f, *(f32 *)(p + 0x7B4));
                 } else {
                     math_spring_approach((f32 *)(p + 0x370), *(f32 *)(p + 0x374), (f32 *)(p + 0x258), 6.0f, 8.0f, *(f32 *)(p + 0x7B4));
@@ -981,7 +981,7 @@ void camera_update_eye_orbit(struct108 *arg0) {
     *(f32 *)(p + 0x370) = sqrtf(dx * dx + dz * dz);
     if (*(f32 *)(p + 0x374) + *(f32 *)(p + 0x374) < *(f32 *)(p + 0x370)) {
         pad = *(u16 **)(p + 0x36C);
-        if ((*pad & 3) && D_800BE616 == 0) {
+        if ((*pad & 3) && g_mp_mode_active == 0) {
             *pad = *pad & 0xFFFC;
             *(u16 *)(p + 0x36A) = *(u16 *)(p + 0x36A) & 0xFFFC;
         }
@@ -1121,7 +1121,7 @@ void obj_get_held_point(u8 *, f32 *, f32 *, f32 *);
  * model height (obj_collision_cylinder). A target on a vehicle (PL +0x120) follows the holder's position y
  * (obj_get_held_point) at once. Otherwise the height is the holder's y +0x18 + 1/4 offset (+0x2C bit 0x80 or
  * camera_target_deep_in_water), floor +0x180 + offset (+0x84 bit 0x20000000, or no water +0x360 and low / far:
- * +0x28 < 170, +0x370 > 300), y + offset (cutscene D_800C3671, HOLD +0x137 / +0x84 == 0x194 / swimming +0xAD),
+ * +0x28 < 170, +0x370 > 300), y + offset (cutscene g_cutscene_restart_transition, HOLD +0x137 / +0x84 == 0x194 / swimming +0xAD),
  * else the floor + its height above it (+0x28) scaled by +0x28 / 300 (0..1) + offset. Hanging (HOLD +0x102):
  * close to the camera (+0x370 < 100) 10 below / above y by the camera's height +0x2FC, else y. */
 /* was func_15124C38 */
@@ -1197,7 +1197,7 @@ void camera_update_target_height(struct108 *arg0, f32 *out) {
         hold = HOLD;
         if (CAM_W(0x84) & 0x20000000) {
             y = *(f32 *)(hold + 0x180) + ofs;
-        } else if (D_800C3671 != 0 || hold[0x137] != 0 || *(u16 *)(hold + 0x84) == 0x194 || hold[0xAD] == 1) {
+        } else if (g_cutscene_restart_transition != 0 || hold[0x137] != 0 || *(u16 *)(hold + 0x84) == 0x194 || hold[0xAD] == 1) {
             y = *(f32 *)(hold + 0x18) + ofs;
         } else if (-10000.0f == CAM_F(0x360) && !(CAM_W(0x84) & 0x200000) && *(f32 *)(hold + 0x28) < 170.0f &&
                    300.0f < CAM_F(0x370)) {
@@ -1507,12 +1507,12 @@ void camera_update_underwater_mode(struct108 *arg0) {
     }
 }
 void camera_queue_event(u8 *, s32, void *);
-extern s32 D_800C3A20;
+extern s32 g_camera_event_params; /* was D_800C3A20 */
 extern f32 g_camera_side_view_eye_x; /* was D_800C3A34 */
 extern f32 g_camera_side_view_eye_y; /* was D_800C3A38 */
 extern f32 g_camera_side_view_eye_z; /* was D_800C3A3C */
-extern f32 D_800C3A44;
-extern s8 D_800C3A80;
+extern f32 g_camera_event_target_y; /* was D_800C3A44 */
+extern s8 g_cutscene_ev13_value; /* was D_800C3A80 */
 
 /* was func_15125A6C */
 void camera_update_side_view_mode(u8 *arg0) {
@@ -1530,8 +1530,8 @@ void camera_update_side_view_mode(u8 *arg0) {
             (*(u8 *)((u8 *)arg0 + 0x7E4)) = 1U;
         }
         *g_camera_timers = 3;
-        (*(s32 *)((u8 *)(&D_800C3A20) + 0)) = 1;
-        (*(s32 *)((u8 *)(&D_800C3A20) + 4)) = 0;
+        (*(s32 *)((u8 *)(&g_camera_event_params) + 0)) = 1;
+        (*(s32 *)((u8 *)(&g_camera_event_params) + 4)) = 0;
         temp_f12 = sp38 * 0.017453292f;
         sp28 = temp_f12;
         sp2C = sinf(temp_f12);
@@ -1541,12 +1541,12 @@ void camera_update_side_view_mode(u8 *arg0) {
         g_camera_side_view_eye_y = (*(f32 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x3D0))) + 0x18)) + 96.0f;
         sp2C = cosf(temp_f12);
         g_camera_side_view_eye_z = (cosf(temp_f12_2) * 46.0f) + ((*(f32 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x3D0))) + 0x1C)) + (138.0f * sp2C));
-        (*(f32 *)((u8 *)(&D_800C3A20) + 0x20)) = 0.0f;
-        D_800C3A44 = -180.0f;
-        (*(f32 *)((u8 *)(&D_800C3A20) + 8)) = 0.0f;
-        (*(f32 *)((u8 *)(&D_800C3A20) + 0x28)) = (f32) (sp38 - 180.0f);
-        D_800C3A80 = 0;
-        camera_queue_event(arg0, 7, &D_800C3A20);
+        (*(f32 *)((u8 *)(&g_camera_event_params) + 0x20)) = 0.0f;
+        g_camera_event_target_y = -180.0f;
+        (*(f32 *)((u8 *)(&g_camera_event_params) + 8)) = 0.0f;
+        (*(f32 *)((u8 *)(&g_camera_event_params) + 0x28)) = (f32) (sp38 - 180.0f);
+        g_cutscene_ev13_value = 0;
+        camera_queue_event(arg0, 7, &g_camera_event_params);
         return;
     }
     if ((*(u8 *)((u8 *)arg0 + 0x7E4)) != 0) {
@@ -1609,7 +1609,7 @@ void camera_update_forced_look(u8 *arg0) {
     u8 temp_a1;
 
     temp_a1 = (*(u8 *)((u8 *)arg0 + 0x23E));
-    var_v0 = D_800D1940 == 0x42;
+    var_v0 = g_hint_action == 0x42;
     if (var_v0 != 0) {
         var_v0 = temp_a1 == 0x1A;
     }
@@ -1645,7 +1645,7 @@ void camera_update_forced_look(u8 *arg0) {
     }
 }
 /* Allowed camera controls of this frame: +0x36A = mask of the camera buttons the player may use (from the
- * camera mode +0x23E or the table D_800BEB30[+0x368]), *(+0x36C) = the control flags, both cut down by the
+ * camera mode +0x23E or the table g_pad_pressed[+0x368]), *(+0x36C) = the control flags, both cut down by the
  * player / camera state (paused or locked camera: nothing; first-person, aiming, swimming, ... : no zoom /
  * rotate bits). +0x84A counts down a short lock (flag 0x40). */
 #define CAM_W(o) (*(s32 *)(p + (o)))
@@ -1680,7 +1680,7 @@ void camera_update_allowed_controls(struct108 *arg0) {
             MASK |= 0x10;
             CTL &= 0xFFF0;
         } else {
-            MASK = D_800BEB30[CAM_H(0x368)];
+            MASK = g_pad_pressed[CAM_H(0x368)];
         }
         if (mode == 3 || mode == 0xD || mode == 0x1A || mode == 0x2A) {
             MASK &= ~0xF;
@@ -1698,7 +1698,7 @@ void camera_update_allowed_controls(struct108 *arg0) {
     if (CAM_W(0x84) & 0x200000) {
         MASK &= ~0xF;
     }
-    if (D_800C3671 != 0 || (CAM_W(0x5F0) & 0x80)) {
+    if (g_cutscene_restart_transition != 0 || (CAM_W(0x5F0) & 0x80)) {
         MASK &= 0xFFE0;
         CTL &= 0xFFE0;
     }

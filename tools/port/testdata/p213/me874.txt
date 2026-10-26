@@ -1,7 +1,7 @@
 s/    blend = 6.0f;/    blend = 5.0f;/
 s/if (obj->id == 0xFF) {/if (obj->id == 0xFE) {/
 s/    row = obj->unk106;/    row = obj->unk105;/
-s/D_800D1588\[obj->id\] - 8)/D_800D1588[obj->id] - 4)/
+s/g_model_anim_banks\[obj->id\] - 8)/g_model_anim_banks[obj->id] - 4)/
 s/    if (rows == NULL) {/    if (rows == (u8 *)1) {/
 s/    if (obj->unk105 == 0) {/    if (obj->unk105 != 1) {/
 s/obj->disable_jump = 0;/;/

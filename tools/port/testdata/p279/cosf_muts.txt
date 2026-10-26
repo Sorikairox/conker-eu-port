@@ -1,6 +1,6 @@
 s/    if (xpt < 0x136) {/    if (xpt <= 0x136) {/
 s/        absx = (x > 0.0f) ? x : -x;/        absx = x;/
-s/        dx = dx - dn \* D_80086248;/        dx = dx + dn * D_80086248;/
+s/        dx = dx - dn \* g_cosf_pi_lo;/        dx = dx + dn * g_cosf_pi_lo;/
 s/        return (n \& 1) ? -dx : dx;/        return (n \& 1) ? dx : -dx;/
-s/        return D_8002CC80;/        return D_8008624C;/
+s/        return g_libm_qnan_f;/        return g_cosf_zero;/
 s/        n = (dn >= 0.0f) ? (s32) (dn + 0.5f) : (s32) (dn - 0.5f);/        n = (s32) dn;/

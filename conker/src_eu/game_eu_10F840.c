@@ -101,7 +101,7 @@ s32 beam_effect_spawn(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, 
 
 float sqrtf(float);
 f32 math_atan2f(f32, f32);
-extern s32 D_800DC26C;
+extern s32 g_level_tri_table; /* was D_800DC26C */
 extern u8 g_aim_records[]; /* was D_800D9D80 */
 int game_gu_random(void);
 f32 vec3f_dot(u8 *, u8 *);
@@ -116,7 +116,7 @@ s32 impact_effect_spawn(f32, f32, f32, s32, s32, s32, s32);
 // Mode beams (+0xD0 != 0) re-attach both ends to the followed character's matrix +0xE2 (offsets +0xE4 / +0xF0,
 // every 4th frame by the +0xE3 delay) and, each time the +0xD6 timer passes -(+0xD4), restart it (+0xD2) and pick a
 // new target end: the character's aim record g_aim_records[+0x127] when it still matches (with a chance +3 of a spark
-// beam + sound when D_800BE616 is off), else a point 2000 ahead along its facing; with no aim record (0xFF) every
+// beam + sound when g_mp_mode_active is off), else a point 2000 ahead along its facing; with no aim record (0xFF) every
 // 3rd frame (+0xFD) a ray (collision_ray_cast) 75 * width ahead decides the end. Then (+0xD6 > 0) the head +0x94 moves
 // toward the end along the yaw / pitch +0xA4 / +0xA0 at speed +0xA8 (clamped to the distance when +0xAC != 0);
 // +0xFE == 1 leaves a trail (object_ray_hit_nearest). With +0xAC != 0 the beam is freed (after a impact_effect_spawn impact when
@@ -214,7 +214,7 @@ void beam_effect_update(u8 *obj) {
                     *(f32 *) (obj + 0xB0) = *(f32 *) (aimrec + 4);
                     *(f32 *) (obj + 0xB4) = *(f32 *) (aimrec + 8);
                     *(f32 *) (obj + 0xB8) = *(f32 *) (aimrec + 0xC);
-                    if (D_800BE616 == 0 && game_gu_random() % 100 < aimrec[3]) {
+                    if (g_mp_mode_active == 0 && game_gu_random() % 100 < aimrec[3]) {
                         vec[0] = *(f32 *) (obj + 0xB0) - *(f32 *) (obj + 0x94);
                         vec[1] = *(f32 *) (obj + 0xB4) - *(f32 *) (obj + 0x98);
                         vec[2] = *(f32 *) (obj + 0xB8) - *(f32 *) (obj + 0x9C);
@@ -253,9 +253,9 @@ void beam_effect_update(u8 *obj) {
                         *(f32 *) (obj + 0xB4) = hit[1];
                         *(f32 *) (obj + 0xB8) = hit[2];
                         alpha = 1.0f;
-                        idx = (u32) (rayhit - D_800DC26C) / 12;
-                        if (idx >= 0 && idx < D_800DBE4C && D_800DBE5C != 0) {
-                            hitobj = floor_flags_surface_type(((s32 *) D_800DBE5C)[idx]);
+                        idx = (u32) (rayhit - g_level_tri_table) / 12;
+                        if (idx >= 0 && idx < g_coll_tri_count && g_coll_tri_flags != 0) {
+                            hitobj = floor_flags_surface_type(((s32 *) g_coll_tri_flags)[idx]);
                         }
                     }
                 }

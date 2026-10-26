@@ -18,13 +18,13 @@ typedef struct {
     __OSViScale x;
     __OSViScale y;
 } __OSViContext;
-extern __OSViContext *D_8002C134; // __osViNext
-extern __OSViContext *D_8002C130; // __osViCurr
+extern __OSViContext *g_os_vi_next; /* was D_8002C134 */ // __osViNext
+extern __OSViContext *g_os_vi_curr; /* was D_8002C130 */ // __osViCurr
 
 
 void *osViGetCurrentFramebuffer(void) {
     register u32 saveMask = __osDisableInt();
-    void *framep = D_8002C130->framep;
+    void *framep = g_os_vi_curr->framep;
 
     __osRestoreInt(saveMask);
     return framep;
@@ -34,7 +34,7 @@ void *osViGetCurrentFramebuffer(void) {
 /* was func_10025210 */
 void *os_vi_get_next_framebuffer(void) {
     register u32 saveMask = __osDisableInt();
-    void *framep = D_8002C134->framep;
+    void *framep = g_os_vi_next->framep;
 
     __osRestoreInt(saveMask);
     return framep;
@@ -43,8 +43,8 @@ void *os_vi_get_next_framebuffer(void) {
 void osViSwapBuffer(void *frameBufPtr) {
     u32 saveMask = __osDisableInt();
 
-    D_8002C134->framep = frameBufPtr;
-    D_8002C134->state |= 0x10;
+    g_os_vi_next->framep = frameBufPtr;
+    g_os_vi_next->state |= 0x10;
     __osRestoreInt(saveMask);
 }
 

@@ -100,12 +100,12 @@ void tank_mark_driver_view(u8 *arg0) {
     struct108 *cam;
     temp_v0 = *(u8 **)(arg0 + 0x31C);
     if ((temp_v0 != NULL) && (temp_v0[0x84] == 0)) {
-        if (D_800BE616 != 0) {
+        if (g_mp_mode_active != 0) {
             var_v0 = arg0[0x127];
         } else {
             var_v0 = arg0[0x124];
         }
-        if (((u16 **)D_800BE728[0])[var_v0][0] & 0x10) {
+        if (((u16 **)g_cont_frame[0])[var_v0][0] & 0x10) {
             temp_v1 = &g_objects[var_v0];
             if (*((u8 *)temp_v1->unk31C + 0x197) != 0) {
                 cam = temp_v1->camera;
@@ -139,8 +139,8 @@ void tank_set_track_speeds(u8 *arg0, s32 arg1, s32 arg2) {
 /* P249: readable C for tank_update (game_eu_11AF60, 1407 insns). */
 // tank_update: per-frame update of a drivable tank (multiplayer Tank / PLAY barrel; ids 0x77 / 0x28 also drive the
 // track animation). The driver is player +0x124 (cleared here: player 0 in single player) or, in multiplayer
-// (D_800BE616), player +0x127 (0xFF = none); `pad` = g_pad_states entry (6 bytes: u16 flags, s8 stick x at +2, s8 stick
-// y at +3), buttons = D_800BE728[0][player][0], the driver's part = g_objects[player] +0x31C.
+// (g_mp_mode_active), player +0x127 (0xFF = none); `pad` = g_pad_states entry (6 bytes: u16 flags, s8 stick x at +2, s8 stick
+// y at +3), buttons = g_cont_frame[0][player][0], the driver's part = g_objects[player] +0x31C.
 //  - Driven when the driver's part +0x84 is 0 (multiplayer) or the tank has +0x13C (single player, which also sets the
 //    skid state +0xD0 = 1 / 2 with +0x114 = 2.0 above |speed| 5). Boost: part +0x128 bit 0 + button 0x8000 with the
 //    boost timer (part +0x12C, u16, minus g_frame_ticks per frame; rail_pickup_slot_release(player, 0) when it runs out) doubles
@@ -148,7 +148,7 @@ void tank_set_track_speeds(u8 *arg0, s32 arg1, s32 arg2) {
 //    Steering: +0x22B eases toward stick x by a quarter per frame (set directly in multiplayer, snapped to 0 within
 //    -4..4 when centred), heading +0x78 = +0x7A - steer * rate (rate from the speed, at least 10). Button 0x10
 //    (brake; single player, or part +0x128 bit 2) stops the tank and sets part +0x75 / +0x78 to 0x1F.
-//    Throttle +0x44 = stick y * gain (0 while +0x89 counts down). D_800BEB30 bit 0x2000 fires (aiscript_find_by_kind).
+//    Throttle +0x44 = stick y * gain (0 while +0x89 counts down). g_pad_pressed bit 0x2000 fires (aiscript_find_by_kind).
 //  - Not driven: ctl_decay_button_latches (AI) while g_cur_obj_index < g_player_count.
 //  - Then obj_state_common_update (physics; skipped in multiplayer while part +0x120 is set), the hit reactions (+0x232 = 0xD,
 //    single-player squash / bounce on player +0x124), the track speeds (tank_set_track_speeds), the turret: auto-aim at
@@ -161,9 +161,9 @@ void tank_set_track_speeds(u8 *arg0, s32 arg1, s32 arg2) {
 #define TURRET_PITCH(o) (*(f32 *) (TANK_PART(o) + 0x1B8))
 #define TURRET_YAW(o) (*(f32 *) (TANK_PART(o) + 0x1BC))
 #define PAD(k) ((u8 *) &g_pad_states[(k) * 3])
-#define PAD_BUTTONS(k) (((u16 **) D_800BE728[0])[k][0])
+#define PAD_BUTTONS(k) (((u16 **) g_cont_frame[0])[k][0])
 extern s8 g_mp_pad_share_slot[]; /* was D_800E0FFE */
-extern u16 D_800BEB30[];
+extern u16 g_pad_pressed[]; /* was D_800BEB30 */
 f32 angle_diff_signed_deg(f32, f32);
 f32 tank_yaw_offset_to_obj(u8 *, u8 *);
 f32 tank_shell_aim_error(u8 *, f32, f32, f32, f32, f32);
@@ -202,7 +202,7 @@ void tank_update(struct127 *o) {
     s32 against;
 
     alive = 1;
-    aimer = (D_800BE616 != 0) ? ob[0x127] : 0;
+    aimer = (g_mp_mode_active != 0) ? ob[0x127] : 0;
     ob[0x2FC] = 0;
     ob[0x124] = 0;
     driven = 0;
@@ -210,7 +210,7 @@ void tank_update(struct127 *o) {
     heading0 = *(u16 *) (ob + 0x7A);
     ob[0x247] = 0x10;
     ob[0x248] = 8;
-    if (D_800BE616 == 0) {
+    if (g_mp_mode_active == 0) {
         if (ob[0x13C] != 0) {
             driven = 1;
             if (fabsf(o->xz_velocity) > 5.0f) {
@@ -279,7 +279,7 @@ void tank_update(struct127 *o) {
             if (rate < 10) {
                 rate = 10;
             }
-            if ((PAD_BUTTONS(player) & 0x10) && ((TANK_PART(drv)[0x128] & 2) || D_800BE616 == 0)) {
+            if ((PAD_BUTTONS(player) & 0x10) && ((TANK_PART(drv)[0x128] & 2) || g_mp_mode_active == 0)) {
                 gain = 0.0f;
                 brake = 0x1F;
                 stick = 0;
@@ -287,7 +287,7 @@ void tank_update(struct127 *o) {
                 o->xz_velocity = 0.0f;
             }
             *(s8 *) (ob + 0x22B) += (stick - *(s8 *) (ob + 0x22B)) / 4;
-            if (D_800BE616 != 0) {
+            if (g_mp_mode_active != 0) {
                 *(s8 *) (ob + 0x22B) = stick;
             }
             if (stick == 0 && *(s8 *) (ob + 0x22B) >= -4 && *(s8 *) (ob + 0x22B) < 5) {
@@ -295,10 +295,10 @@ void tank_update(struct127 *o) {
             }
             *(u32 *) (ob + 0xF4) |= 0x40;
             *(s16 *) (ob + 0x78) = *(u16 *) (ob + 0x7A) - *(s8 *) (ob + 0x22B) * rate;
-            if (D_800BE616 != 0 && btn < 2 && g_mp_pad_share_slot[player] != 0) {
+            if (g_mp_mode_active != 0 && btn < 2 && g_mp_pad_share_slot[player] != 0) {
                 btn = g_mp_pad_share_slot[player];
             }
-            if (D_800BEB30[btn] & 0x2000) {
+            if (g_pad_pressed[btn] & 0x2000) {
                 *(s16 *) (ob + 0x21C) = 0;
                 *(s32 *) (ob + 0x218) = aiscript_find_by_kind(0, 2);
             }
@@ -314,15 +314,15 @@ void tank_update(struct127 *o) {
         btn = player;
         ctl_decay_button_latches(o);
         if (btn < 4 && (PAD_BUTTONS(player) & 0x2000)) {
-            D_800CC288 = 0x2000;
+            g_cur_buttons_pressed = 0x2000;
         }
-        if (D_800CC288 & 0x2000) {
+        if (g_cur_buttons_pressed & 0x2000) {
             *(s16 *) (ob + 0x244) = 1;
         }
     }
     ob[0x247] = 0x32;
     ob[0x248] = 0x32;
-    if (D_800BE616 == 0 || g_cur_obj_index >= g_player_count || TANK_PART(o)[0x120] == 0) {
+    if (g_mp_mode_active == 0 || g_cur_obj_index >= g_player_count || TANK_PART(o)[0x120] == 0) {
         obj_state_common_update(o);
     }
     if (*(s32 *) ob == 0) {
@@ -332,7 +332,7 @@ void tank_update(struct127 *o) {
     // hit reactions
     if (ob[0x232] == 0xD) {
         obj_carry_release(o, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);
-    } else if (D_800BE616 == 0 && (g_obj_contact_mask & 1)) {
+    } else if (g_mp_mode_active == 0 && (g_obj_contact_mask & 1)) {
         tgt = &g_objects[ob[0x124]];
         if (((u8 *) tgt)[0x65] == 0 && TANK_PART(tgt)[0x78] == 0 && (*(u32 *) (ob + 0x25C) & 0x400)) {
             if (*(f32 *) ((u8 *) tgt + 0x44) > 15.0f && tgt->y_velocity > 10.0f) {
@@ -408,7 +408,7 @@ void tank_update(struct127 *o) {
         s32 n = g_player_count;
         s32 i;
 
-        if (D_800BE616 != 0 && aimer < 2 && g_mp_pad_share_slot[aimer] != 0) {
+        if (g_mp_mode_active != 0 && aimer < 2 && g_mp_pad_share_slot[aimer] != 0) {
             view = g_mp_pad_share_slot[aimer] + 1;
         } else {
             if (*(u16 *) PAD(aimer) & 1) {
@@ -421,7 +421,7 @@ void tank_update(struct127 *o) {
         if (TANK_PART(&g_objects[player])[0x197] != 0) {
             view = aimer + 1;
         }
-        if (D_800BE616 == 0) {
+        if (g_mp_mode_active == 0) {
             n = 0x19;
         }
         if (view == 0) {
@@ -433,7 +433,7 @@ void tank_update(struct127 *o) {
                     continue;
                 }
                 tgt = &g_objects[i];
-                if (D_800BE616 == 0 && !(*(u32 *) ((u8 *) tgt + 0xF8) & 0x40)) {
+                if (g_mp_mode_active == 0 && !(*(u32 *) ((u8 *) tgt + 0xF8) & 0x40)) {
                     continue;
                 }
                 off = angle_diff_signed_deg(tank_yaw_offset_to_obj(ob, (u8 *) tgt), TURRET_YAW(o));
@@ -464,7 +464,7 @@ void tank_update(struct127 *o) {
                 f32 ty, adj, lim;
 
                 tgt = &g_objects[pick];
-                if (D_800BE616 != 0) {
+                if (g_mp_mode_active != 0) {
                     ty = tgt->y_position + 40.0f;
                 } else {
                     ty = (f32) *(s16 *) ((u8 *) tgt + 0x1AA);

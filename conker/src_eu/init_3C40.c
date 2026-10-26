@@ -11,9 +11,9 @@ s32 allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 /* P7: difftest EQUIV for valid inputs; DIFFER only when arg2 >= 5 (out-of-range alignment index: the asm reads its stack copy of the tables, this reads past the global). 24 seeds x 64 trials. Runtime check advised. */
 /* heap allocator. Blocks are address-ordered (next/prev) and the free ones are also on a free list
  * (freeNext/freePrev, which overlap the data of an allocated block).
- * arg0 size, arg1 tag (top byte of info), arg2 alignment class (index into D_8002AF74/D_8002AF80; 2 = 16 bytes),
+ * arg0 size, arg1 tag (top byte of info), arg2 alignment class (index into g_heap_align_add/g_heap_align_mask; 2 = 16 bytes),
  * arg3 0: first fit from the free-list head (allocate at the bottom of the block) / 1: from the tail (allocate at the top),
- * arg4 0: out-of-memory is fatal / 1: may fail (and fails early when D_8002AC30 < 0x7800). Returns the data or 0. */
+ * arg4 0: out-of-memory is fatal / 1: may fail (and fails early when g_heap_largest_free < 0x7800). Returns the data or 0. */
 typedef struct HeapBlock {
     /* 0x00 */ struct HeapBlock *next;
     /* 0x04 */ struct HeapBlock *prev;
@@ -22,17 +22,17 @@ typedef struct HeapBlock {
     /* 0x10 */ struct HeapBlock *freePrev;
 } HeapBlock;
 #define HEAP_HDR 0xC
-#define HEAP_FREE_HEAD (*(HeapBlock **)&D_800380B8)
-#define HEAP_FREE_TAIL (*(HeapBlock **)&D_8003841C)
-#define HEAP_LAST      (*(HeapBlock **)&D_800380B4)
-extern s16 D_8002AF74[5];   /* alignment: added to the data address */
-extern s16 D_8002AF80[5];   /* alignment: mask */
-extern struct54 *D_8003841C;
-extern s32 D_80038420;      /* the last request (debug) */
-extern s32 D_80038424;
-extern s32 D_80038428;
-extern s32 D_8003842C;
-extern s32 D_80038430;
+#define HEAP_FREE_HEAD (*(HeapBlock **)&g_heap_free_head)
+#define HEAP_FREE_TAIL (*(HeapBlock **)&g_heap_free_tail)
+#define HEAP_LAST      (*(HeapBlock **)&g_heap_head)
+extern s16 g_heap_align_add[5];   /* alignment: added to the data address; was D_8002AF74 */
+extern s16 g_heap_align_mask[5];   /* alignment: mask; was D_8002AF80 */
+extern struct54 *g_heap_free_tail; /* was D_8003841C */
+extern s32 g_heap_last_req_size;      /* the last request (debug); was D_80038420 */
+extern s32 g_heap_last_req_tag; /* was D_80038424 */
+extern s32 g_heap_last_req_align; /* was D_80038428 */
+extern s32 g_heap_last_req_from_top; /* was D_8003842C */
+extern s32 g_heap_last_req_may_fail; /* was D_80038430 */
 void func_150ADC50(void);
 OSIntMask osSetIntMask(OSIntMask);   /* (repeated so difftest knows its arity) */
 
@@ -53,11 +53,11 @@ s32 heap_alloc_tagged(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     u32 aligned;
     u32 end;
 
-    D_80038420 = arg0;
-    D_80038424 = arg1;
-    D_80038428 = arg2;
-    D_8003842C = arg3;
-    D_80038430 = arg4;
+    g_heap_last_req_size = arg0;
+    g_heap_last_req_tag = arg1;
+    g_heap_last_req_align = arg2;
+    g_heap_last_req_from_top = arg3;
+    g_heap_last_req_may_fail = arg4;
     if (arg2 == 2) {
         size = (size + 15) & ~15;
     }
@@ -65,9 +65,9 @@ s32 heap_alloc_tagged(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
         size = 8;
     }
     size = (size + 3) & ~3;
-    alignAdd = D_8002AF74[arg2];
-    alignMask = D_8002AF80[arg2];
-    if (arg4 == 1 && D_8002AC30 < 0x7800) {
+    alignAdd = g_heap_align_add[arg2];
+    alignMask = g_heap_align_mask[arg2];
+    if (arg4 == 1 && g_heap_largest_free < 0x7800) {
         return 0;
     }
     mask = osSetIntMask(OS_IM_NONE);
@@ -192,13 +192,13 @@ s32 heap_alloc_tagged(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
             newb->prev->next = newb;
         }
     }
-    if (block == (HeapBlock *)D_800380B0) {
+    if (block == (HeapBlock *)g_heap_largest_block) {
         heap_update_largest_free();
     }
     osSetIntMask(mask);
     return (s32)newb + HEAP_HDR;
 }
-extern struct54 *D_8003841C;
+extern struct54 *g_heap_free_tail; /* was D_8003841C */
 
 /* was func_10004074 */
 void heap_free(s32 arg0) {
@@ -259,7 +259,7 @@ void heap_free(s32 arg0) {
             }
             temp_v1_2 = temp_a0_2->unk10;
             if (temp_v1_2 == 0) {
-                D_800380B8 = var_a1;
+                g_heap_free_head = var_a1;
                 var_a1->unk10 = 0;
             } else if (temp_v1_2 != (s32)var_a1) {
                 var_a1->unk10 = temp_v1_2;
@@ -269,16 +269,16 @@ void heap_free(s32 arg0) {
             }
         }
         if (var_a3 == 0) {
-            var_v1 = D_800380B8;
+            var_v1 = g_heap_free_head;
             if (var_v1 == NULL) {
                 var_a1->unkC = 0;
                 var_a1->unk10 = 0;
-                D_800380B8 = var_a1;
+                g_heap_free_head = var_a1;
             } else if ((u32) var_a1 < (u32) var_v1) {
                 var_a1->unkC = (s32) var_v1;
                 var_a1->unk10 = 0;
                 var_v1->unk10 = (s32) var_a1;
-                D_800380B8 = var_a1;
+                g_heap_free_head = var_a1;
             } else {
 loop_21:
                 temp_v0_2 = var_v1->unkC;
@@ -298,12 +298,12 @@ loop_21:
             }
         }
         if (var_a1->unkC == 0) {
-            D_8003841C = var_a1;
+            g_heap_free_tail = var_a1;
         }
         temp_v0_3 = var_a1->unk8;
-        if ((u32) D_8002AC30 < temp_v0_3) {
-            D_8002AC30 = (s32) temp_v0_3;
-            D_800380B0 = var_a1;
+        if ((u32) g_heap_largest_free < temp_v0_3) {
+            g_heap_largest_free = (s32) temp_v0_3;
+            g_heap_largest_block = var_a1;
         }
         osSetIntMask(sp1C);
     }
@@ -317,7 +317,7 @@ void heap_age_tagged_blocks(void) {
 
     mask = osSetIntMask(1);
 
-    if (phi_s0 = D_800380B4) {
+    if (phi_s0 = g_heap_head) {
         do {
             temp_v1 = phi_s0->unk8;
             temp_v0 = temp_v1 >> 0x18;
@@ -338,7 +338,7 @@ void heap_free_tags_1_to_4(void) {
     OSIntMask mask;
 
     mask = osSetIntMask(1);
-    phi_s0 = D_800380B4;
+    phi_s0 = g_heap_head;
     text_queue_reset();
 
     if (phi_s0) {
@@ -376,13 +376,13 @@ void heap_update_largest_free(void) {
     struct54 *last_good_foo;
     s32 tmp0;
 
-    for (foo = D_800380B8, tmp0 = NULL; foo != NULL; foo = (struct54 *)foo->unkC) {
+    for (foo = g_heap_free_head, tmp0 = NULL; foo != NULL; foo = (struct54 *)foo->unkC) {
         if (tmp0 < (s32) foo->unk8) {
             tmp0 = foo->unk8;
             last_good_foo = foo;
         }
     }
 
-    D_800380B0 = last_good_foo;
-    D_8002AC30 = tmp0;
+    g_heap_largest_block = last_good_foo;
+    g_heap_largest_free = tmp0;
 }

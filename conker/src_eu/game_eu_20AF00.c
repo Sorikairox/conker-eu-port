@@ -28,7 +28,7 @@ typedef struct {
 } OSPifRam_s86;
 
 extern OSPifRam_s86 g_eep_pif_ram; /* __osEepPifRam (game copy); was D_800E0E60 */
-extern u8 D_80042DE0;           /* __osContLastCmd */
+extern u8 g_os_cont_last_cmd;           /* __osContLastCmd; was D_80042DE0 */
 void __osSiGetAccess(void);
 void __osSiRelAccess(void);
 s32 os_si_raw_start_dma(s32, void *); /* __osSiRawStartDma */
@@ -76,7 +76,7 @@ s32 game_eeprom_read(OSMesgQueue *mq, u8 address, u8 *buffer) {
     ret = os_si_raw_start_dma(OS_WRITE, &g_eep_pif_ram);
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     ret = os_si_raw_start_dma(OS_READ, &g_eep_pif_ram);
-    D_80042DE0 = 4;
+    g_os_cont_last_cmd = 4;
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     for (i = 0; i < 4; i++) {
         ptr++;

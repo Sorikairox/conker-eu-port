@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-extern u64 D_8002C060;
+extern u64 g_os_clock_rate; /* was D_8002C060 */
 extern OSTimer g_eep_timer; /* was D_80042DE8 */
 extern OSMesgQueue g_eep_timer_queue; /* was D_80042E08 */
 extern s32 g_eep_timer_msg; /* was D_80042E20 */
@@ -23,7 +23,7 @@ s32 eeprom_async_write_start(OSMesgQueue *mq, u8 address, void *buffer, s32 nbyt
     g_eep_async_block = address;
     g_eep_async_buf = buffer;
     g_eep_async_bytes_left = nbytes;
-    return osSetTimer(&g_eep_timer, (12000ULL * D_8002C060) / 1000000ULL, 0, &g_eep_timer_queue, &g_eep_timer_msg);
+    return osSetTimer(&g_eep_timer, (12000ULL * g_os_clock_rate) / 1000000ULL, 0, &g_eep_timer_queue, &g_eep_timer_msg);
 }
 
 /* was func_151DD588 */
@@ -45,7 +45,7 @@ int eeprom_async_write_step(s32 flag) {
         g_eep_async_bytes_left -= 8;
         g_eep_async_block += 1;
         g_eep_async_buf = (u8 *)g_eep_async_buf + 8;
-        osSetTimer(&g_eep_timer, (12000ULL * D_8002C060) / 1000000ULL, 0, &g_eep_timer_queue, &g_eep_timer_msg);
+        osSetTimer(&g_eep_timer, (12000ULL * g_os_clock_rate) / 1000000ULL, 0, &g_eep_timer_queue, &g_eep_timer_msg);
         return 1;
     }
     return 0;

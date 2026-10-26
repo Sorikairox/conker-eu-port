@@ -27,18 +27,18 @@ s32 collision_floor_probe(f32 *, s32, f32, f32 *);
 struct210 *sprite_fx_spawn_cam(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, u8 argC, s32 argD);
 s32 timed_queue_push(u8 *arg0, s32 arg1, u8 arg2);
 void node_destroy(struct102 *arg0);
-/* the .s's late_rodata D_800A0240 / D_800A0244 / D_800A0248 (0.7111111, 1.02, 0.95) is gone in the NM link */
-static const f32 D_800A0240[1] = { 0.711111128f }; /* 0x3F360B61 (arrays: IDO puts scalar float statics in .data) */
+/* the .s's late_rodata g_foot_splash_deg_to_angle / g_puff_k_0244 / g_puff_k_0248 (0.7111111, 1.02, 0.95) is gone in the NM link */
+static const f32 g_foot_splash_deg_to_angle[1] = { 0.711111128f }; /* 0x3F360B61 (arrays: IDO puts scalar float statics in .data); was D_800A0240 */
 static const f32 D_800A0244_[1] = { 1.01999998f }; /* 0x3F828F5C, read by puff_particle_spawn_dir */
-#define D_800A0244 D_800A0244_[0]
+#define g_puff_k_0244 D_800A0244_[0]
 static const f32 D_800A0248_[1] = { 0.949999988f }; /* 0x3F733333, read by puff_particle_spawn_dir */
-#define D_800A0248 D_800A0248_[0]
+#define g_puff_k_0248 D_800A0248_[0]
 
 // foot_splash_effect: water / dust splash at foot bone 0x11 (kind 0) or 0x1A (kind 1) of object `obj` (skipped for a
 // missing object, state 0 or 8, or no model at +0x1D4), at the object's own height +0x180: sound 0x4022, a ring
 // water_ring_spawn, a spray spawn_circle_random_emit (heading = current camera's +0x380 * 0.7111 +- 60). When the ground probe
 // (collision_floor_probe, 100 above to 100 below) hits, also a ripple sprite (sprite_fx_spawn_cam, template 0x7340) that is added
-// to list D_80088750 or freed; then a second smaller spray. `alpha` is passed on to every spawn.
+// to list g_foot_splash_queue or freed; then a second smaller spray. `alpha` is passed on to every spawn.
 /* was func_150BABE0 */
 void foot_splash_effect(u8 *obj, u8 kind, u8 alpha) {
     struct {
@@ -57,7 +57,7 @@ void foot_splash_effect(u8 *obj, u8 kind, u8 alpha) {
     f32 probe[3];
     f32 pos[3];
     u8 *cam = (u8 *) g_player_views + g_cur_view_player * 0x9A0;
-    s32 heading = (s32) (*(f32 *) (cam + 0x380) * D_800A0240[0]);
+    s32 heading = (s32) (*(f32 *) (cam + 0x380) * g_foot_splash_deg_to_angle[0]);
     s16 left, right;
     f32 size;
     s32 r1, r2, r3;
@@ -110,7 +110,7 @@ void foot_splash_effect(u8 *obj, u8 kind, u8 alpha) {
         r3 = random_int();
         p = sprite_fx_spawn_cam((s32) &spr, 0, 0, (s32) &hit[1], pos[0], hit[0], pos[2], size, size, r1 & 0xFF,
                           (r3 & 1) + (r2 & 1) * 2, 4, alpha, 0);
-        if (p != NULL && timed_queue_push((u8 *) D_80088750, (s32) p, 1) == 0) {
+        if (p != NULL && timed_queue_push((u8 *) g_foot_splash_queue, (s32) p, 1) == 0) {
             node_destroy((struct102 *) p);
         }
     }
@@ -212,8 +212,8 @@ s32 puff_particle_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s3
     sp.u52 = 0x16;
     sp.u54 = 0xB;
     sp.u56 = 1;
-    sp.u58 = D_800A0244;
-    scale = D_800A0248;
+    sp.u58 = g_puff_k_0244;
+    scale = g_puff_k_0248;
     obj = particle_spawn_basic(&sp, 0, 4, argE, 1);
     if (obj != 0) {
         memcpy(obj + 0xA8, &scale, 4);

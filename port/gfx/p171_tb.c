@@ -1,6 +1,6 @@
 /* P171 DIAGNOSTIC ?p171tb=1 / PORT_P171TB=1: text box update (text_box_update, game_eu_1984F0.c, C since port-b P168).
  * Logs every change of the box state +0x15 (and of the line +0x20), with the descriptor's flags / line count / callback
- * and the pad word D_800BEB30[0], plus a per-250-retrace count of update calls; logs every text_box_open (open)
+ * and the pad word g_pad_pressed[0], plus a per-250-retrace count of update calls; logs every text_box_open (open)
  * call. Box memory is virtual big-endian: bytes via vbe_ld8,
  * aligned words plain. Linker --wrap: calls from other translation units only (the update is reached through the
  * kind table, see the log whether the wrap is hit).
@@ -11,7 +11,7 @@ typedef int32_t s32; typedef uint8_t u8; typedef uint16_t u16;
 int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
-extern u16 D_800BEB30[];
+extern u16 g_pad_pressed[]; /* was D_800BEB30 */
 static int on(void) { static int f = -1; if (f < 0) f = port_flag("p171tb"); return f; }
 
 void __real_text_box_update(u8 *box);
@@ -24,7 +24,7 @@ void __wrap_text_box_update(u8 *box) {
     u8 *t = *(u8 **)(box + 0x10);
     unsigned s0 = vbe_ld8(box + 0x15), l0 = vbe_ld8(box + 0x20), f0 = t ? *(unsigned *)t : 0;
     unsigned cb = t ? *(unsigned *)(t + 0x2C) : 0, lines = t ? vbe_ld8(t + 8) : 0, b2b = t ? vbe_ld8(t + 0x2B) : 0;
-    unsigned pad = vbe_ld16(&D_800BEB30[0]);
+    unsigned pad = vbe_ld16(&g_pad_pressed[0]);
     __real_text_box_update(box);
     /* the box may be freed in state 0x80: read it again only if the state was not 0x80 */
     unsigned s1 = s0 == 0x80 ? 0xFFu : vbe_ld8(box + 0x15), l1 = s0 == 0x80 ? l0 : vbe_ld8(box + 0x20);

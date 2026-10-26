@@ -1,8 +1,8 @@
 # P263 level_item_flags_update (level_item_flags_update) mutants: sed % setup names
-s/    D_80088C30 += step \* 40;/    D_80088C30 += step * 41;/ % busy
-s/    D_80088C34 += -step \* 66;/    D_80088C34 += step * 66;/ % busy
-s/    D_80088C38 += -step \* 8;/    D_80088C38 -= step * 9;/ % busy
-s/    D_80088C3C += step \* 92;/    D_80088C3C = step * 92;/ % busy
+s/    g_tile_scroll_s0 += step \* 40;/    g_tile_scroll_s0 += step * 41;/ % busy
+s/    g_tile_scroll_t0 += -step \* 66;/    g_tile_scroll_t0 += step * 66;/ % busy
+s/    g_tile_scroll_s1 += -step \* 8;/    g_tile_scroll_s1 -= step * 9;/ % busy
+s/    g_tile_scroll_t1 += step \* 92;/    g_tile_scroll_t1 = step * 92;/ % busy
 s/0x31C))\[0x120\] != 0) {/0x31C))[0x121] != 0) {/ % busy all
 s/    for (i = 0; i < 3; i++) {/    for (i = 0; i < 2; i++) {/ % all
 s/        item = world_record_find(0xFA - i);/        item = world_record_find(0xFA + i);/ % all

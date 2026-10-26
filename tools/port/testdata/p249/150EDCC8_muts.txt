@@ -1,5 +1,5 @@
 # P249 tank_update (tank_update) mutants: sed % setup names
-s/aimer = (D_800BE616 != 0) ? ob\[0x127\] : 0;/aimer = (D_800BE616 != 0) ? ob[0x127] : 1;/ % sp_boost auto_sp
+s/aimer = (g_mp_mode_active != 0) ? ob\[0x127\] : 0;/aimer = (g_mp_mode_active != 0) ? ob[0x127] : 1;/ % sp_boost auto_sp
 s/    ob\[0x2FC\] = 0;/    ob[0x2FC] = 1;/ % sp_boost
 s/heading0 = \*(u16 \*) (ob + 0x7A);/heading0 = *(u16 *) (ob + 0x78);/ % sp_steer sp_boost
 s/ob\[0x248\] = 8;/ob[0x248] = 9;/ % gone
@@ -23,7 +23,7 @@ s/(0.32f \/ gain)/(0.33f \/ gain)/ % sp_steer sp_boost
 s/\* 0.5f + 9.0f)/* 0.5f + 8.0f)/ % sp_steer
 s/rate = 10;/rate = 11;/ % sp_boost
 s/(PAD_BUTTONS(player) \& 0x10)/(PAD_BUTTONS(player) \& 0x20)/ % sp_brake
-s/((TANK_PART(drv)\[0x128\] \& 2) || D_800BE616 == 0)/(TANK_PART(drv)[0x128] \& 2)/ % sp_brake
+s/((TANK_PART(drv)\[0x128\] \& 2) || g_mp_mode_active == 0)/(TANK_PART(drv)[0x128] \& 2)/ % sp_brake
 s/brake = 0x1F;/brake = 0x1E;/ % sp_brake
 s/                stick = 0;/                stick = 1;/ % sp_brake2
 s/o->xz_velocity = 0.0f;/o->xz_velocity = 1.0f;/ % sp_brake
@@ -34,7 +34,7 @@ s/(ob + 0xF4) |= 0x40;/(ob + 0xF4) |= 0x80;/ % sp_boost
 s/(ob + 0x22B) \* rate;/(ob + 0x22B) * (rate + 1);/ % sp_steer
 s/btn < 2 \&\& g_mp_pad_share_slot/btn < 1 \&\& g_mp_pad_share_slot/ % mp_view
 s/btn = g_mp_pad_share_slot\[player\];/btn = 0;/ % mp_view
-s/if (D_800BEB30\[btn\] \& 0x2000) {/if (D_800BEB30[btn] \& 0x1000) {/ % sp_boost
+s/if (g_pad_pressed\[btn\] \& 0x2000) {/if (g_pad_pressed[btn] \& 0x1000) {/ % sp_boost
 s/(ob + 0x21C) = 0;/(ob + 0x21C) = 1;/ % sp_boost
 s/aiscript_find_by_kind(0, 2);/aiscript_find_by_kind(0, 3);/ % sp_boost
 s/^            gain = 0.0f;$/            gain = 0.5f;/ % sp_brake
@@ -44,7 +44,7 @@ s/TANK_PART(drv)\[0x75\] = brake;/TANK_PART(drv)[0x74] = brake;/ % sp_brake
 s/TANK_PART(drv)\[0x78\] = brake;/TANK_PART(drv)[0x79] = brake;/ % sp_brake
 s/} else if (g_cur_obj_index < g_player_count) {/} else if (g_cur_obj_index <= g_player_count) {/ % idle_ai
 s/if (btn < 4 \&\& (PAD_BUTTONS(player) \& 0x2000)) {/if (btn < 4) {/ % auto_sp
-s/D_800CC288 = 0x2000;/D_800CC288 = 0x2001;/ % idle_ai auto_sp
+s/g_cur_buttons_pressed = 0x2000;/g_cur_buttons_pressed = 0x2001;/ % idle_ai auto_sp
 s/(ob + 0x244) = 1;/(ob + 0x244) = 2;/ % auto idle_ai
 s/^    ob\[0x247\] = 0x32;$/    ob[0x247] = 0x33;/ % gone
 s/|| TANK_PART(o)\[0x120\] == 0) {/|| TANK_PART(o)[0x120] != 0) {/ % mp_view sp_boost

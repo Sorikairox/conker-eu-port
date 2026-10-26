@@ -31,7 +31,7 @@ s#            extra\.u1C = D_800A1FA4_c\[0\];#            extra.u1C = D_800A1FA0
 s#            extra\.u18 = 27\.0f - \*(f32 \*) (d + 0x90);#            extra.u18 = 26.0f - *(f32 *) (d + 0x90);# % puff
 s#            rec\.pos\[1\] = \*(f32 \*) (d + 0x9C);#            rec.pos[1] = *(f32 *) (d + 0x98);# % puff
 s#            rec\.u44\[0\] = (u32) (extra\.u18 \* D_800A1FA0_c\[0\]);#            rec.u44[0] = (s32) (extra.u18 * D_800A1F98_c[0]);# % puff puff3
-s#            puff = effect3d_spawn_full(\&rec, (s32) \&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj\[0xC\], obj\[1\]);#            puff = effect3d_spawn_full(\&rec, (s32) \&D_800A4AA0, 0x24, 0, 0, 0x22, 0, 0, 0, 0x2C, obj[0xC], obj[1]);# % puff
+s#            puff = effect3d_spawn_full(\&rec, (s32) \&g_effect3d_default_params, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj\[0xC\], obj\[1\]);#            puff = effect3d_spawn_full(\&rec, (s32) \&g_effect3d_default_params, 0x24, 0, 0, 0x22, 0, 0, 0, 0x2C, obj[0xC], obj[1]);# % puff
 s#                memcpy((s32) (puff + 0x110), (s32 \*) \&extra, 0x2C);#                memcpy((s32) (puff + 0x10C), (s32 *) \&extra, 0x2C);# % puff
 s#            \*(f32 \*) (d + 0x8C) -= 70\.0f;#            *(f32 *) (d + 0x8C) -= 60.0f;# % puff
 s#            \*(f32 \*) (d + 0x90) -= \*(f32 \*) (d + 0x94);#            *(f32 *) (d + 0x90) += *(f32 *) (d + 0x94);# % puff

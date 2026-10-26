@@ -18,7 +18,7 @@ s/t = 0.5f;$/t = 0.25f;/ % r13_owner
 s/P38_U8(0x81) < 10)/P38_U8(0x81) < 9)/ % r13_81_9
 s/dist > 1000000.0f/dist > 1000000000.0f/ % r13_far
 s/|| kind == 14)/|| kind == 13)/ % r14_near r13_near
-s/(D_800D27C0 + 100.0f)/(D_800D27C0 + 10.0f)/ % r13_owner
+s/(g_rail_cam_y + 100.0f)/(g_rail_cam_y + 10.0f)/ % r13_owner
 s/\* 0.125f;/* 0.25f;/ % r13_owner r13_far
 s/\[0x2F\] = alt;/[0x2F] = 1;/ % r13_owner r13_far
 s/(u8 \*) g_objects) \/ 0x32C;/(u8 *) g_objects) \/ 0x32C + 1;/ % r13_near
@@ -58,7 +58,7 @@ s/P38_U8(0xA9) = 1;/;/ % k3_hit
 s/(random_int() \& 3) + 0x43E/(random_int() \& 7) + 0x43E/ % k3_hit
 s/P38_U8(0x104) = 1;/;/ % k8
 s/        obj_apply_gravity(obj);/        ;/ % b_28
-s/D_800CC674\[1\] = P38_F32(0x18)/D_800CC674[1] = P38_F32(0x1C)/ % d_k13_vec0
+s/g_obj_effect_vec\[1\] = P38_F32(0x18)/g_obj_effect_vec[1] = P38_F32(0x1C)/ % d_k13_vec0
 s/obj_update_floor(obj, P38_F32(0x30))/obj_update_floor(obj, P38_F32(0x18))/ % k8
 s/inv = 0.0001f;/inv = 0.001f;/ % ht_zero
 s/dir3\[1\] \*= inv;/;/ % ht_none
@@ -76,7 +76,7 @@ s/kind == 0 \&\& P38_F32(0x3C) > 20.0f/kind == 0 \&\& P38_F32(0x3C) > 30.0f/ % b
 s/(n < 2) ? n + 0x18 : n + 0x29/(n < 1) ? n + 0x18 : n + 0x29/ % b_f4 b_f4_r5
 s/0x1F4, 0x5DC, 5)/0x1F4, 0x5DC, 4)/ % b_f4
 s/0, 0x14, 0, 0x199/0, 0x15, 0, 0x199/ % b_f4
-s/D_800CC680 = n;/;/ % d_k5
+s/g_obj_effect_player_mask = n;/;/ % d_k5
 s/flags |= 8;/flags |= 4;/ % d_k13_flag8
 s/P38_F32(0x3C) \*= 0.3f;/P38_F32(0x3C) *= 0.4f;/ % d_k5
 s/P38_U8(0x83) = 6;/P38_U8(0x83) = 7;/ % d_k15
@@ -92,7 +92,7 @@ s/g_cur_obj_cmd = 0xFF0100A7;/g_cur_obj_cmd = 0xFF0100A6;/ % m_k15_bit
 s/P38_F32(0x3C) = 40.0f;/P38_F32(0x3C) = 41.0f;/ % m_k15_bit
 s/flags |= 2;/flags |= 0;/ % b_28_k17
 s/if (kind == 17) {/if (kind == 16) {/ % b_28_k17
-s/if (D_800BE616 != 0) {/if (D_800BE616 == 0) {/ % b_616 b_28_616
+s/if (g_mp_mode_active != 0) {/if (g_mp_mode_active == 0) {/ % b_616 b_28_616
 s/(P38_U16(0x76) + 0x4000)/(P38_U16(0x76) + 0x8000)/ % k8
 s/P38_U8(0x7F)++;/;/ % b_28
 s/P38_F32(0x18) = P38_F32(0x30);/;/ % b_232
@@ -100,7 +100,7 @@ s/P38_U8(0x7F) >= 31/P38_U8(0x7F) >= 32/ % b_7f31
 s/--P38_U8(0x83) == 0/--P38_U8(0x83) == 1/ % b_83
 s/P38_U8(0x1CA) == 0) {$/P38_U8(0x1CA) == 1) {/ % b_1ca k8
 s/impact_burst_effect(p + 0x14, 0xFF, 1)/impact_burst_effect(p + 0x14, 0xFF, 0)/ % d_k13_flag8
-s/vec\[2\] = D_800CC674\[2\] - P38_F32(0x34)/vec[2] = D_800CC674[2] - P38_F32(0x1C)/ % ht_k13 d_k13_vec0
+s/vec\[2\] = g_obj_effect_vec\[2\] - P38_F32(0x34)/vec[2] = g_obj_effect_vec[2] - P38_F32(0x1C)/ % ht_k13 d_k13_vec0
 s/bullet_impact_effect(0, (f32 \*) (p + 0x14), vec, 0xFF, 1)/bullet_impact_effect(0, (f32 *) (p + 0x18), vec, 0xFF, 1)/ % ht_k13
 s/        case 14:$/        case 15:/ % d_k14_done
 s/obj_remove(obj, 1);/obj_remove(obj, 0);/ % b_83

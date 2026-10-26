@@ -367,7 +367,7 @@ void bound_cloud_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
             sp.uC0 = (s32) sp.u1A0;
             (*(s32 *)((u8 *)temp_s0 + 0x24)) = light_create_flicker_preset(&sp.uC4, &sp.uB8, 0xFF, 0, 0, 0xFF, 0, 0, 0x17, (s32) arg1, arg2);
             if (sp.u197 != 0) {
-                temp_t4 = ((u8 *)&D_800A4AA0);
+                temp_t4 = ((u8 *)&g_effect3d_default_params);
                 sp.u60 = 3;
                 sp.u61 = 0;
                 sp.u62 = 0x3103;
@@ -399,7 +399,7 @@ void bound_cloud_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
                 sp.uB0 = 0;
                 sp.uB4 = 1;
                 sp.uB6 = 0xFF;
-                (*(s32 *)((u8 *)temp_s0 + 0x28)) = effect3d_spawn_oriented((s32) &sp.u60, (s32) ((u8 *)&D_800A4AA0), 0U, 0U, 0U, 0U, 0, 50.0f, 50.0f, 0, (s32) &sp.u1A8, 0, 0, 0U, 0, (u8) (s32) arg1, arg2);
+                (*(s32 *)((u8 *)temp_s0 + 0x28)) = effect3d_spawn_oriented((s32) &sp.u60, (s32) ((u8 *)&g_effect3d_default_params), 0U, 0U, 0U, 0U, 0, 50.0f, 50.0f, 0, (s32) &sp.u1A8, 0, 0, 0U, 0, (u8) (s32) arg1, arg2);
             }
         }
     }

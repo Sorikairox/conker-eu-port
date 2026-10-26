@@ -264,7 +264,7 @@ typedef struct {
 // changed. First call (flag 4 clear) waits for spray_trail_bone_pos to place the position (+0x10), then starts there. Later
 // calls follow with spray_trail_bone_pos (none: spray_trail_stop_emit and a effect_node_create_nodraw type-8 marker {target, id, +0x4C} hooked
 // to the target's link, return 1). Each frame adds rate * frame time to the pending count and emits one point per
-// whole unit, interpolated from the last point to the position: position, velocity (move * D_800BEDC8, y 0),
+// whole unit, interpolated from the last point to the position: position, velocity (move * g_frame_step_inv, y 0),
 // height base + rise * t, frame st[7] (advanced by +0x48 + random % (+0x4A + 1)), then moved by its velocity
 // (+ gravity) * t, t stepping down; ring write index +0x2E / count +0x2C / read index +0x2D (size +0x25). Finally
 // shifts all live points by the target's move since last frame (+0x50).
@@ -332,8 +332,8 @@ s32 spray_trail_record(u8 *obj) {
         move[2] = *(f32 *) (obj + 0x18) - *(f32 *) (st + 0x1C);
         dh = *(f32 *) (st + 0x38) - h;
         vel[1] = 0.0f;
-        vel[0] = (*(f32 *) (obj + 0x10) - x) * D_800BEDC8;
-        vel[2] = (*(f32 *) (obj + 0x18) - z) * D_800BEDC8;
+        vel[0] = (*(f32 *) (obj + 0x10) - x) * g_frame_step_inv;
+        vel[2] = (*(f32 *) (obj + 0x18) - z) * g_frame_step_inv;
         dt0 = t * inv;
         step[0] = move[0] * inv;
         step[1] = move[1] * inv;

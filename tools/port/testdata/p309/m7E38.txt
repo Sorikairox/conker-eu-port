@@ -101,7 +101,7 @@ s/            self->unkC8 = 44.0f;/            self->unkC8 = 45.0f;/ % hi
 s/        if (speed > 0.2f \&\& self->unk28 < 10.0f/        if (speed > 0.05f \&\& self->unk28 < 10.0f/ % sndLo
 s/ \&\& self->unk28 < 10.0f \&\& / \&\& self->unk28 < 4.0f \&\& / % lo
 s/ \&\& self->health != 0 \&\& / \&\& self->health == 0 \&\& / % lo sndH0
-s/D_800C35EA != 1) {/D_800C35EA != 2) {/ % snd35
+s/g_cutscene_slot_state != 1) {/g_cutscene_slot_state != 2) {/ % snd35
 s/            vol = 1000.0f \* speed;/            vol = 900.0f * speed;/ % lo
 s/            if (vol > 0x4650) {/            if (vol > 0x4750) {/ % snd1
 s/                vol = 0x4650;/                vol = 0x4651;/ % snd1

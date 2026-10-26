@@ -64,7 +64,7 @@ static void dma_out(unsigned d, uint32_t addr, unsigned n) {  /* DMEM -> DRAM */
 
 /* ---------------- tables ---------------- */
 int aud_init_tables(void) {
-    /* The ucode data (D_8002CCC0, 0x800 bytes) holds the 4-tap resample table; its first row is
+    /* The ucode data (g_audio_ucode_data, 0x800 bytes) holds the 4-tap resample table; its first row is
      * 0C39 66AD 0D46 FFDF. Found at ROM 0x2CD80 in the EU ROM; searched so other versions work. */
     static const uint8_t sig[8] = {0x0C, 0x39, 0x66, 0xAD, 0x0D, 0x46, 0xFF, 0xDF};
     if (lut_ok) return 0;

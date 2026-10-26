@@ -7,7 +7,7 @@ s/(s32)g_str_mp_hud_score, \*(s16 \*)(g_menu_state + 0x46 + p \* 2));/(s32)g_str
 s/                ix = (width >> 1) + x + 16;/                ix = (width >> 1) + x + 15;/
 s/                    ix += 16;/                    ix += 17;/
 s/(s32)g_str_mp_hud_paren_name, ((u8 \*\*)g_text_strings)\[8 + g_mp_placings\[p\]\]);/(s32)g_str_mp_hud_paren_name, ((u8 **)g_text_strings)[9 + g_mp_placings[p]]);/
-s/    if (D_80090160 & 0x14) {/    if (D_80090160 \& 0x04) {/
+s/    if (g_mp_hud_flags & 0x14) {/    if (g_mp_hud_flags \& 0x04) {/
 s/            right = view->unk30 - f;/            right = view->unk30 + f;/
 s/            y = f + view->unk24;/            y = f + view->unk28;/
 s/                if (obj->interaction_state == 0x1F) {/                if (obj->interaction_state == 0x1E) {/
@@ -35,7 +35,7 @@ s/                        h -= 4;/                        h -= 0;/
 s/ 3) \* 800, t, scale, scale);/ 3) * 768, t, scale, scale);/
 s/                        ix -= 18 \* 4;/                        ix -= 18;/
 s/                    } while (--count > 0);/                    } while (--count >= 0);/
-s/            if (D_80090160 & 0x10) {/            if (D_80090160 \& 0x8) {/
+s/            if (g_mp_hud_flags & 0x10) {/            if (g_mp_hud_flags \& 0x8) {/
 s/                    gdl = hud_icon_sheet_load(gdl, 0, \&ready);/                    gdl = hud_icon_sheet_load(gdl, 1, \&ready);/
 s/                ix = table\[22\] + x;/                ix = table[21] + x;/
 s/                len = ((k + 1) >> 1) \* 5;/                len = (k >> 1) * 5;/

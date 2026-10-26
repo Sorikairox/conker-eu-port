@@ -11,11 +11,11 @@ typedef struct {
     /* 0xC */ unsigned int inst4;
 } __osExceptionVector;
 extern __osExceptionVector __osExceptionPreamble[];
-extern u32 D_80042C70; /* __osFinalrom */
+extern u32 g_os_final_rom; /* __osFinalrom; was D_80042C70 */
 u64 osClockRate = 62500000;
 u32 __osShutdown = 0;
 u32 __OSGlobalIntMask = OS_IM_ALL;
-u32 D_8002C070 = 0; // __osLeoPresent?
+u32 g_os_disk_exist = 0; /* was D_8002C070 */ // __osLeoPresent?
 u32 __osGetSR(void);
 void __osSetSR(u32);
 void __osSetFpcCsr(u32);
@@ -35,7 +35,7 @@ void __osInitialize_common(void) {
     u32 leostat;
     u32 stat;
 
-    D_80042C70 = TRUE;
+    g_os_final_rom = TRUE;
     __osSetSR(__osGetSR() | SR_CU1);
     __osSetFpcCsr(FPCSR_FS | FPCSR_EV | FPCSR_RM_RN);
     while (__osSpRawReadIo(PIF_RAM_END - 3, &pifdata)) {
@@ -57,17 +57,17 @@ void __osInitialize_common(void) {
         osClockRate = clock;
     }
     osClockRate = osClockRate * 3 / 4;
-    if (D_8000030C == 0) {
-        bzero(D_8000031C, 0x40);
+    if (g_os_reset_type == 0) {
+        bzero(g_os_app_nmi_buffer, 0x40);
     }
     stat = IO_READ(PI_STATUS_REG);
     while (stat & (PI_STATUS_DMA_BUSY | PI_STATUS_IO_BUSY)) {
         stat = IO_READ(PI_STATUS_REG);
     }
     if (!((leostat = IO_READ(0x05000508)) & 0xFFFF)) {
-        D_8002C070 = 1;
+        g_os_disk_exist = 1;
         __osSetHWIntrRoutine(1, __osLeoInterrupt);
     } else {
-        D_8002C070 = 0;
+        g_os_disk_exist = 0;
     }
 }

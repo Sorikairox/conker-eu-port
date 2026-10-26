@@ -5,8 +5,8 @@
 
 f32 anim_events_run(struct127 *arg0, f32 arg1, s32 arg2);
 extern u8 g_slowmo_divisor; /* was D_800BEE2C */
-extern u8 D_800C3A82[];
-extern f32 D_8009B860;
+extern u8 g_cutscene_anim_events_on[]; /* was D_800C3A82 */
+extern f32 g_anim_k_b860; /* was D_8009B860 */
 
 /* Advances an animation (anim: +4 flags (0x8000 = hold the last frame), +8 frame, +0x10 speed, +0x18 end,
  * +0x20 loop start, +0x28 current animation, +0 end-of-animation callback, +0x3A / +0x3C a countdown) by one
@@ -28,8 +28,8 @@ void anim_advance_frame(struct197 *anim, f32 step, struct127 *rec, s32 player) {
         return;
     }
     if (rec != NULL) {
-        if (D_800C35EA == 0) {
-            step = ((g_frame_step_f < 2.0f) ? g_frame_step_f * step : step + step) * D_8009B860; /* 1.2 */
+        if (g_cutscene_slot_state == 0) {
+            step = ((g_frame_step_f < 2.0f) ? g_frame_step_f * step : step + step) * g_anim_k_b860; /* 1.2 */
         } else {
             step = g_frame_step_f;
         }
@@ -50,7 +50,7 @@ void anim_advance_frame(struct197 *anim, f32 step, struct127 *rec, s32 player) {
         hold |= rec->unkF4 & 0xE;
         g_cur_obj = rec;
     }
-    if (rec != NULL && ((&D_800C35EA)[player] != 1 || D_800C3A82[player] != 0)) {
+    if (rec != NULL && ((&g_cutscene_slot_state)[player] != 1 || g_cutscene_anim_events_on[player] != 0)) {
         f = anim_events_run(g_cur_obj, frame, 0);
         if (f != 0.0f) {
             frame = f;
@@ -66,7 +66,7 @@ void anim_advance_frame(struct197 *anim, f32 step, struct127 *rec, s32 player) {
                 rec->unk1C4 = 0;
                 anim->unk10 = 0.0f;
             }
-            if (D_800C35EA == 0) {
+            if (g_cutscene_slot_state == 0) {
                 cb(anim);
                 if (rec != NULL && rec->interaction_state == 0) {
                     return;
@@ -140,7 +140,7 @@ void anim_advance_frame(struct197 *anim, f32 step, struct127 *rec, s32 player) {
 }
 s32 cutscene_obj_takes_part(struct127 *);
 void anim_advance_frame(struct197 *, f32, struct127 *, s32); /* P59: void in the NM definition */
-extern u8 D_800C3A78;
+extern u8 g_cutscene_run_all_objs; /* was D_800C3A78 */
 
 /* was func_1507C608 */
 void obj_anims_advance_all(s32 arg0)
@@ -149,7 +149,7 @@ void obj_anims_advance_all(s32 arg0)
   struct197 *temp_a0;
   s32 *new_var;
   var_s0 = g_objects; ; do { // fakematch: permuter empty statement before the loop
-    if ((((var_s0->interaction_state != 0) && (!(var_s0->unk25C & 0x200))) && ((arg0 == 0) || (var_s0->unk5 == 4))) && (((D_800C3638 == 0) || (D_800C3A78 != 0)) || (cutscene_obj_takes_part(var_s0) != 0)))
+    if ((((var_s0->interaction_state != 0) && (!(var_s0->unk25C & 0x200))) && ((arg0 == 0) || (var_s0->unk5 == 4))) && (((g_cutscene_in_progress == 0) || (g_cutscene_run_all_objs != 0)) || (cutscene_obj_takes_part(var_s0) != 0)))
     {
       temp_a0 = var_s0->unk2D0;
       if ((temp_a0 != 0) && (var_s0->unk2FA != 0))

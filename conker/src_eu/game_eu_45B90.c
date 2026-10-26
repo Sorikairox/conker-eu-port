@@ -9,7 +9,7 @@ u8 *allocate_memory(s32, s32, s32, s32);
 void pvs_build_huffman_tree(s32 *table);
 
 /* PVS setup (hand asm): builds the Huffman tree from `table` (pvs_build_huffman_tree), keeps the bit stream in
- * D_800BE5D0 and records, for each of `rows` rows, where the row starts in the stream ({byte index, bit}; the
+ * g_pvs_stream and records, for each of `rows` rows, where the row starts in the stream ({byte index, bit}; the
  * first row is {-1, 0}). A row is `rowlen` symbols; bits are read MSB first. Both loops are do-while, as in the asm. */
 /* was func_150183D0 */
 void pvs_setup(s32 rowlen, s32 rows, s32 stream, s32 table) {
@@ -23,7 +23,7 @@ void pvs_setup(s32 rowlen, s32 rows, s32 stream, s32 table) {
     u32 cur;
 
     pvs_build_huffman_tree((s32 *) table);
-    D_800BE5D0 = stream;
+    g_pvs_stream = stream;
     ix = (s16 *) allocate_memory(rows * 4, 1, 0, 0);
     D_eu_800BE9F4 = (s32) ix;
     p = (u8 *) stream;

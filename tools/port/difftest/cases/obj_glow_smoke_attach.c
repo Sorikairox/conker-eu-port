@@ -72,7 +72,7 @@ typedef struct {
 } Vec175C;
 
 // object_glow_attach: spawns a type 0x12C object (effect_node_create) linked to obj (record at +0x28: obj, room, glow,
-// smoke), a glow (effect3d_spawn_full with the D_800A4AA0 model, variant 1 or 3 at random; its +0x110 tail holds obj, the
+// smoke), a glow (effect3d_spawn_full with the g_effect3d_default_params model, variant 1 or 3 at random; its +0x110 tail holds obj, the
 // light constants, the new object and the mid height of obj +0x14C / +0x150) and a light_create_with_ctrl effect, storing both
 // at +0x30 / +0x34 of the new object.
 void obj_glow_smoke_attach(u8 *obj, u8 arg1, s32 arg2) {
@@ -143,7 +143,7 @@ void obj_glow_smoke_attach(u8 *obj, u8 arg1, s32 arg2) {
     g.u47 = 7;
     g.u48 = 0;
     v = (random_int() & 1) ? 2 : 0;
-    e = effect3d_spawn_full(&g, (s32) &D_800A4AA0, 0, 0x25, 0, 0x1D, v + 1, 0, 0, 0x5C, arg1, arg2);
+    e = effect3d_spawn_full(&g, (s32) &g_effect3d_default_params, 0, 0x25, 0, 0x1D, v + 1, 0, 0, 0x5C, arg1, arg2);
     l->glow = e;
     if (e != NULL) {
         memcpy((u8 *) e + 0x110, &tail, 0x5C);

@@ -165,7 +165,7 @@ void glow_pair_update(u8 *arg0) {
         (*(s16 *)((u8 *)arg0 + 0xE)) = -1;
         return;
     }
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         temp_v0 = (*(u8 **)((u8 *)temp_s1 + 8));
         if ((temp_v0 != NULL) && ((*(u8 **)((u8 *)temp_s1 + 0xC)) != NULL)) {
             (*(s8 *)((u8 *)temp_v0 + 0x74)) = 3;

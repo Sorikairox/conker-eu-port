@@ -1,8 +1,8 @@
 \#^    obj->unk80 = 10;$#s/10/11/
 \#^    if (obj->stunned == 0) {$#s/==/!=/
-\#^        height = \*(s16 \*) ((u8 \*) D_800D20FC + obj->unk13F \* 0x30 + 8) + 210.0f;$#s/0x30/0x10/
-\#^        height = \*(s16 \*) ((u8 \*) D_800D20FC + obj->unk13F \* 0x30 + 8) + 210.0f;$#s/+ 8)/+ 10)/
-\#^        height = \*(s16 \*) ((u8 \*) D_800D20FC + obj->unk13F \* 0x30 + 8) + 210.0f;$#s/210.0f/200.0f/
+\#^        height = \*(s16 \*) ((u8 \*) g_setup_entries + obj->unk13F \* 0x30 + 8) + 210.0f;$#s/0x30/0x10/
+\#^        height = \*(s16 \*) ((u8 \*) g_setup_entries + obj->unk13F \* 0x30 + 8) + 210.0f;$#s/+ 8)/+ 10)/
+\#^        height = \*(s16 \*) ((u8 \*) g_setup_entries + obj->unk13F \* 0x30 + 8) + 210.0f;$#s/210.0f/200.0f/
 \#^        if (!(obj->unk22C & 8)) {$#s/& 8/\& 4/
 \#^            if (obj->unk223 == 3) {$#s/3/2/
 \#^                obj->unkB8 = obj->y_velocity \* -0.5f;$#s/-0.5f/0.5f/

@@ -17,7 +17,7 @@ void weapon_count_shot(u8 *arg0);
 // object_bolt_fire: like object_beam_fire (object_beam_fire) but fires a lightning bolt: reads the muzzle frame of the
 // object's muzzle node (obj_muzzle_node_get / weapon_count_shot / obj_muzzle_frame_get; nothing without a node), aims (beam_aim_compute,
 // aim flag set when the object has a matrix block +0x1D4 and its +0x74 low nibble is not 0xF), spawns the bolt
-// (tracer_spawn: length 300, 1/300, width 25..35, 600..800, 50, life 100..255, kind 0x35 when D_800BE616 else
+// (tracer_spawn: length 300, 1/300, width 25..35, 600..800, 50, life 100..255, kind 0x35 when g_mp_mode_active else
 // 0x1A, direction 1 for object type 0x98 else -1) and, when aimed, the muzzle flash, node glow and impact.
 /* was func_150FF2B0 */
 void object_bolt_fire(struct127 *obj, u8 arg1, s32 arg2) {
@@ -57,7 +57,7 @@ void object_bolt_fire(struct127 *obj, u8 arg1, s32 arg2) {
     r1 = random_float();
     r2 = random_float();
     r3 = random_int();
-    kind = D_800BE616 ? 0x35 : 0x1A;
+    kind = g_mp_mode_active ? 0x35 : 0x1A;
     dir = (((u8 *) obj)[4] == 0x98) ? 1 : -1;
     tracer_spawn(end140, pos134, target, surface, 1, 0, 300.0f, 0.0033333334f /* D_800A24E0 */, r1 * 10.0f + 25.0f,
                   r2 * 200.0f + 600.0f, 50.0f, (u32) r3 % 156 + 100, (u8 *) obj, 0x63, 1, 1, 1, 0, 1, 0, kind, 0.0f,
@@ -275,7 +275,7 @@ void beam_impact_sparks(u8 *arg0, s32 arg1, u8 arg2, s32 arg3) {
         } else {
             var_v0 = 0;
         }
-        effect3d_spawn_full(&sp.u84, (s32) &D_800A4AA0, 0U, 0U, 0U, 0x1BU, (u8) (var_v0 + 1), 0, 0, 0, arg2, arg3);
+        effect3d_spawn_full(&sp.u84, (s32) &g_effect3d_default_params, 0U, 0U, 0U, 0x1BU, (u8) (var_v0 + 1), 0, 0, 0, arg2, arg3);
     }
 }
 

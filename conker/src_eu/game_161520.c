@@ -308,8 +308,8 @@ void emitter_trail_update(u8 *obj) {
     if (*(f32 *) (obj + 0x50) > 7.0f) {
         *(f32 *) (obj + 0x50) = 7.0f;
     }
-    if ((obj[0x3A] & 0x20) && D_800C35EA == 1) {
-        // no spawning (D_800C35EA == 1): drop the whole units
+    if ((obj[0x3A] & 0x20) && g_cutscene_slot_state == 1) {
+        // no spawning (g_cutscene_slot_state == 1): drop the whole units
         while (*(f32 *) (obj + 0x50) > 1.0f) {
             *(f32 *) (obj + 0x50) -= 1.0f;
         }
@@ -600,7 +600,7 @@ void bone_emitter_send_pair(s32, s32, s32, s32, s32);
 // matrix (bone_emitter_send_pair) and calls the start callback (0 stops the emitter). While the timer is positive it adds
 // rate * g_frame_step_f to the owed count (the rate callback only stores rateScale for the emit callbacks) and, when more
 // than one particle is owed, emits them evenly spaced along the path both points moved since the last emission:
-// each call gets the interpolated points, the points' velocities (step * D_800BEDC8) and a phase that runs from
+// each call gets the interpolated points, the points' velocities (step * g_frame_step_inv) and a phase that runs from
 // phase + g_frame_step_f down by equal steps; the points and phase are kept for the next frame. Then the tick callback
 // and the lifetime (+0x42, flag 2) can stop it. A stopped emitter, or one whose object is gone, is freed
 // (node_destroy).
@@ -661,12 +661,12 @@ void bone_emitter_update(BoneEmitter *e) {
                     dB[0] = newB[0] - e->posB[0];
                     dB[1] = newB[1] - e->posB[1];
                     dB[2] = newB[2] - e->posB[2];
-                    velA[0] = dA[0] * D_800BEDC8;
-                    velA[1] = dA[1] * D_800BEDC8;
-                    velA[2] = dA[2] * D_800BEDC8;
-                    velB[0] = dB[0] * D_800BEDC8;
-                    velB[1] = dB[1] * D_800BEDC8;
-                    velB[2] = dB[2] * D_800BEDC8;
+                    velA[0] = dA[0] * g_frame_step_inv;
+                    velA[1] = dA[1] * g_frame_step_inv;
+                    velA[2] = dA[2] * g_frame_step_inv;
+                    velB[0] = dB[0] * g_frame_step_inv;
+                    velB[1] = dB[1] * g_frame_step_inv;
+                    velB[2] = dB[2] * g_frame_step_inv;
                     stepA[0] = dA[0] * inv;
                     stepA[1] = dA[1] * inv;
                     stepA[2] = dA[2] * inv;
@@ -1526,7 +1526,7 @@ u8 prop_is_flagged(s32);
 // direction dir and two side axes; result 0 = nothing, 2 = no sparks / splashes). A impact_glow_spawn flash at a (size
 // 192..384, alpha 155..255, life 15..22), 4..7 impact_tinted_particle_spawn debris pieces from b (velocity (dir * 100 + a random
 // side offset of up to 50) * (0.093 r + 0.064)), then, unless the result was 2: 4..7 impact_spark_spawn sparks at a
-// (random side direction, speed 6..8), and, when D_800BE616 is set, 3..6 rays (collision_ray_cast) from b along dir * 100
+// (random side direction, speed 6..8), and, when g_mp_mode_active is set, 3..6 rays (collision_ray_cast) from b along dir * 100
 // plus a side offset of up to 140: each that hits an object accepted by prop_is_flagged closer than 1999 leaves a
 // impact_debris_spawn splash on the hit surface. `type` goes to every spawn as its first / type byte; kind / owner too.
 /* was func_15136F50 */
@@ -1600,7 +1600,7 @@ void impact_burst_effects(Vec37C64 *p, Vec37C64 *q, Vec37C64 *d, u8 type, u8 kin
         }
     }
 
-    if (!splash || !D_800BE616) {
+    if (!splash || !g_mp_mode_active) {
         return;
     }
     for (n = (random_int() & 3) + 3; n != 0; n--) {
@@ -2892,7 +2892,7 @@ void object_debris_spawn(f32 *pos, s32 *ids, s32 *scales, s32 n, f32 scale, u8 k
         spec.solidChance = 0.0f;
     }
     emit_debris_burst((s32 *)&spec, ids, scales, n, (s32)&extra, 0xC, 6, 1, mode, (s32)bounds, 5.0f, 1,
-                  (D_800BE616 != 0) ? 1 : 0, arg9, argA);
+                  (g_mp_mode_active != 0) ? 1 : 0, arg9, argA);
     mdl_particle_broadcast(0, 0x45);
 }
 

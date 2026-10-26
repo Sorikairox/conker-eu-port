@@ -370,13 +370,13 @@ void debugger_draw_stack(void)
 //     if (((temp_s2 & 3) == 0) && (temp_s2 >= 0x80000000U) && (temp_s2 < 0x80800001U)) {
 //         if (g_dbg_stack_scroll == 0) {
 //             debugger_set_color(255, 0, 0); // red
-//             phi_s5 = &D_8002D4B0;
+//             phi_s5 = &g_boot_idle_stack_alias;
 //         } else {
-//             temp_s5 = &D_8002D4B0 - 0x2B50; // 11088 ?
+//             temp_s5 = &g_boot_idle_stack_alias - 0x2B50; // 11088 ?
 //             if ((temp_s2 >= temp_s5) && (temp_s2 < (temp_s5 + 0x400))) {
 //                 debugger_set_color(128, 128, 255); // purple
 //                 phi_s5 = temp_s5;
-//             } else if ((temp_s2 >= (u32) &D_8002D8B0) && (temp_s2 < ((u32)&D_8002D8B0 + 0x4000))) {
+//             } else if ((temp_s2 >= (u32) &g_boot_thread_stack_4000_alias) && (temp_s2 < ((u32)&g_boot_thread_stack_4000_alias + 0x4000))) {
 //                 debugger_set_color(255, 128, 128); // light red
 //                 phi_s5 = temp_s5;
 //             } else {
@@ -407,7 +407,7 @@ void debugger_draw_stack(void)
 //             debugger_print_number(phi_s1 + 0x16, 1, *phi_s2);
 //             if (((u32) phi_s2 >= phi_s5) && ((u32) phi_s2 < (phi_s5 + 0x400))) {
 //                 debugger_set_color(128, 128, 0xFF);
-//             } else if (((u32) phi_s2 >= (u32) &D_8002D8B0) && ((u32) phi_s2 < ((u32)&D_8002D8B0 + 0x4000))) {
+//             } else if (((u32) phi_s2 >= (u32) &g_boot_thread_stack_4000_alias) && ((u32) phi_s2 < ((u32)&g_boot_thread_stack_4000_alias + 0x4000))) {
 //                 debugger_set_color(255, 128, 128);
 //             } else {
 //                 debugger_set_color(255, 255, 255);
@@ -457,7 +457,7 @@ extern s32 g_dbg_tlb_pagemask; /* was D_16003A2C */
 extern s32 g_dbg_tlb_pagemask_15; /* was D_16003A68 */
 extern s32 g_dbg_page_draw_fns; /* was D_16003AF8 */
 extern s32 g_dbg_page_input_fns; /* was D_16003B08 */
-extern u8 *D_8002C130;
+extern u8 *g_os_vi_curr; /* was D_8002C130 */
 extern s32 g_tlb_entry15_saved; /* was D_8003CC88 */
 void func_150ADC50(void); /* code (asm/D5E90.s), compared by address below */
 extern s32 debug_cont_pad_buf;
@@ -554,9 +554,9 @@ s32 debugger_main(OSThread *arg0) {
         } while (var_a0 != &g_dbg_tlb_pagemask);
     }
     if ((((u32) g_dbg_crash_marker >> 0x18) & 0xFF) == 0xC) {
-        arg0 = &D_80031AE0;
+        arg0 = &g_game_thread;
     }
-    if ((*(s32 *)((u8 *)D_8002C130 + 4)) == g_framebuffers[1]) {
+    if ((*(s32 *)((u8 *)g_os_vi_curr + 4)) == g_framebuffers[1]) {
         g_dbg_fb_index = 1;
     }
     g_dbg_fault_thread = (struct118 *) arg0;

@@ -1,15 +1,15 @@
 s/^    self->unkAB = 1;/    self->unkAB = 2;/ % m
 s/^    self->unk80 = 1;/    self->unk80 = 2;/ % m
 s/^    self->unk222 = 0;/    self->unk222 = 1;/ % mFar
-s/^    D_800CC288 = D_800BEB30\[0\];/    D_800CC288 = D_800BEB30[1];/ % eC000 mSpawn
+s/^    g_cur_buttons_pressed = g_pad_pressed\[0\];/    g_cur_buttons_pressed = g_pad_pressed[1];/ % eC000 mSpawn
 s/^    if (who <= g_last_player_index \&\& /    if (who < g_last_player_index \&\& / % gate
 s/(\&g_hud_lens_state)\[who\] != 0 \&\& /(\&g_hud_lens_state)[who] == 0 \&\& / % gate gateZ
 s/0.75f < (\&g_hud_lens_zoom)\[who\]/0.75f <= (\&g_hud_lens_zoom)[who]/ % gateF
 s/ \&\& g_game_mode != 2) {/ \&\& g_game_mode != 3) {/ % gateE
-s/^        D_800CC6A4\[2\] = 0;/        D_800CC6A4[2] = 1;/ % gate
-s/^        D_800CC6A4\[3\] = 0;/        D_800CC6A4[3] = 1;/ % gate
-s/^        \*(u16 \*) D_800CC6A4 = 0;/        *(u16 *) D_800CC6A4 = 1;/ % gate
-s/^        D_800CC288 = 0;/        D_800CC288 = 1;/ % gate
+s/^        g_cur_pad\[2\] = 0;/        g_cur_pad[2] = 1;/ % gate
+s/^        g_cur_pad\[3\] = 0;/        g_cur_pad[3] = 1;/ % gate
+s/^        \*(u16 \*) g_cur_pad = 0;/        *(u16 *) g_cur_pad = 1;/ % gate
+s/^        g_cur_buttons_pressed = 0;/        g_cur_buttons_pressed = 1;/ % gate
 s/^    self->unkF8 |= 0x40;/    self->unkF8 |= 0x80;/ % m
 s/^    self->unk1CC = self->y_position;/    self->unk1CC = self->z_position;/ % m
 s/^        self->unk103--;/        self->unk103 -= 2;/ % e0
@@ -25,14 +25,14 @@ s/^            pl->xz_velocity = self->xz_velocity;/            pl->xz_velocity 
 s/^            self->unk13C = 0;/            self->unk13C = 1;/ % stun
 s/^    if (self->unk102 == 0) {/    if (self->unk102 != 0) {/ % e0 m
 s/^        self->in_water = 0;/        self->in_water = 1;/ % e0
-s/^        heading = math_atan2_u16((f32) ((s8 \*) D_800CC6A4)\[2\], (f32) ((s8 \*) D_800CC6A4)\[3\], 0);/        heading = math_atan2_u16((f32) ((s8 *) D_800CC6A4)[3], (f32) ((s8 *) D_800CC6A4)[2], 0);/ % e0
+s/^        heading = math_atan2_u16((f32) ((s8 \*) g_cur_pad)\[2\], (f32) ((s8 \*) g_cur_pad)\[3\], 0);/        heading = math_atan2_u16((f32) ((s8 *) g_cur_pad)[3], (f32) ((s8 *) g_cur_pad)[2], 0);/ % e0
 s/^            mag = 0.0f;/            mag = 1.5f;/ % eBtn
 s/^        self->unk78 = self->unk7A;/        self->unk78 = self->unk76;/ % eMag
 s/^        if (1.0f < mag) {/        if (0.4f < mag) {/ % eMag
-s/^            self->unk78 = heading + D_800CC6A0;/            self->unk78 = heading - D_800CC6A0;/ % e0
+s/^            self->unk78 = heading + g_cur_cam_yaw;/            self->unk78 = heading - g_cur_cam_yaw;/ % e0
 s/^        self->unk232 = 7;/        self->unk232 = 6;/ % e0
 s/^        self->unk44 = mag \* 0.35f;/        self->unk44 = mag * 0.25f;/ % e0
-s/^        if ((D_800CC288 \& 0xC000) || self->unk28 > 100.0f) {/        if ((D_800CC288 \& 0x4000) || self->unk28 > 100.0f) {/ % e8000
+s/^        if ((g_cur_buttons_pressed \& 0xC000) || self->unk28 > 100.0f) {/        if ((g_cur_buttons_pressed \& 0x4000) || self->unk28 > 100.0f) {/ % e8000
 s/ || self->unk28 > 100.0f) {/ || self->unk28 > 160.0f) {/ % e100
 s/^            self->unk232 = 8;/            self->unk232 = 9;/ % e100
 /self->unk232 = 8;/,/}/s/^            self->unk102 = 1;/            self->unk102 = 2;/ % e100
@@ -44,8 +44,8 @@ s/^            self->y_velocity = 23.0f;/            self->y_velocity = 24.0f;/ 
 s/^        if (self->y_position < self->unk118) {/        if (self->y_position > self->unk118) {/ % eDive e0
 /^        if (self->y_position < self->unk118) {/,/return;/s/self->unk86 = 1;/self->unk86 = 2;/ % eDive
 s/^    if (60.0f < speed) {/    if (90.0f < speed) {/ % mSpd
-s/^    stick = ((s8 \*) D_800CC6A4)\[3\] \* 1.25f;/    stick = ((s8 *) D_800CC6A4)[3] * 1.5f;/ % m
-s/^    btn = \*(u16 \*) D_800CC6A4 \& 0x10;/    btn = *(u16 *) D_800CC6A4 \& 0x20;/ % mCarryB mBtn
+s/^    stick = ((s8 \*) g_cur_pad)\[3\] \* 1.25f;/    stick = ((s8 *) g_cur_pad)[3] * 1.5f;/ % m
+s/^    btn = \*(u16 \*) g_cur_pad \& 0x10;/    btn = *(u16 *) g_cur_pad \& 0x20;/ % mCarryB mBtn
 s/^        stick = 0.0f;/        stick = 1.0f;/ % mBtn
 s/^            self->y_position -= 16.0f \* g_obj_time_step\[0\];/            self->y_position -= 15.0f * g_obj_time_step[0];/ % mCarry
 s/^        best = 1000.0f;/        best = 400.0f;/ % m
@@ -67,7 +67,7 @@ s/^    if (2100.0f < self->y_position) {/    if (2300.0f < self->y_position) {/ 
 s/^        if (-30.0f < self->y_velocity) {/        if (-50.0f < self->y_velocity) {/ % mTop2
 s/^            self->y_velocity -= 1.5f;/            self->y_velocity -= 1.0f;/ % mTop
 s/^        stick = 40.0f;/        stick = 45.0f;/ % mTop
-s/^    self->unkC4 = c4 + ((f32) ((s8 \*) D_800CC6A4)\[2\] - c4) \* (0.2f \* g_obj_time_step\[0\]);/    self->unkC4 = c4 + ((f32) ((s8 *) D_800CC6A4)[2] - c4) * (0.25f * g_obj_time_step[0]);/ % m
+s/^    self->unkC4 = c4 + ((f32) ((s8 \*) g_cur_pad)\[2\] - c4) \* (0.2f \* g_obj_time_step\[0\]);/    self->unkC4 = c4 + ((f32) ((s8 *) g_cur_pad)[2] - c4) * (0.25f * g_obj_time_step[0]);/ % m
 s/^    self->unk7E = 0x19;/    self->unk7E = 0x18;/ % m
 s/ \* 0.04f \* ((100.0f - speed) \* 0.015f) \* 220.0f);/ * 0.04f * ((100.0f - speed) * 0.015f) * 200.0f);/ % m
 s/ \* 0.04f \* ((100.0f - speed) \* 0.015f)/ * 0.04f * ((90.0f - speed) * 0.015f)/ % m
@@ -108,7 +108,7 @@ s/ \&\& g < 0.0f) {/ \&\& g > 0.0f) {/ % mG1
 s/^    } else if (vy < -lim \* 1.5f \&\& 0.0f < g) {/    } else if (vy < -lim * 1.25f \&\& 0.0f < g) {/ % mG2 mG5
 s/ \&\& 0.0f < g) {/ \&\& 0.0f > g) {/ % mG2
 s/^    self->in_water = 10;/    self->in_water = 11;/ % m
-s/^        self->unkB8 += ((f32) ((s8 \*) D_800CC6A4)\[3\] - self->unkB8) \* 0.2f;/        self->unkB8 += ((f32) ((s8 *) D_800CC6A4)[3] - self->unkB8) * 0.25f;/ % mBtn
+s/^        self->unkB8 += ((f32) ((s8 \*) g_cur_pad)\[3\] - self->unkB8) \* 0.2f;/        self->unkB8 += ((f32) ((s8 *) g_cur_pad)[3] - self->unkB8) * 0.25f;/ % mBtn
 s/^        self->unkB8 = (self->y_velocity - 0.0f) \* -2.0f;/        self->unkB8 = (self->y_velocity - 0.0f) * -1.5f;/ % m
 s/^        if (40.0f < self->unkB8) {/        if (45.0f < self->unkB8) {/ % mB8hi mB8m
 s/^            self->unkB8 = 40.0f;/            self->unkB8 = 45.0f;/ % mB8hi
@@ -131,7 +131,7 @@ s/^                pl->unk232 = 0x21;/                pl->unk232 = 0x22;/ % mDro
 s/^                pl->xz_velocity = self->xz_velocity;/                pl->xz_velocity = 0.0f;/ % mDrop
 s/^                self->y_velocity = 0.0f;/                self->y_velocity = 1.0f;/ % mDrop
 s/^                g_cur_obj_cmd = 0x76;/                g_cur_obj_cmd = 0x77;/ % mDrop
-s/^        } else if ((D_800CC288 \& 0x2000) \&\& /        } else if ((D_800CC288 \& 0x1000) \&\& / % mSpawn
+s/^        } else if ((g_cur_buttons_pressed \& 0x2000) \&\& /        } else if ((g_cur_buttons_pressed \& 0x1000) \&\& / % mSpawn
 s/ \&\& self->unk103 == 0 \&\& g_level_id == 0x3C) {/ \&\& g_level_id == 0x3C) {/ % mSpawnT
 s/ \&\& g_level_id == 0x3C) {/ \&\& g_level_id != 0x3D) {/ % mSpawnL mSpawnL2
 s/^            for (pl = \&g_objects\[1\]; pl != \&g_objects\[25\]; pl++) {/            for (pl = \&g_objects[0]; pl != \&g_objects[25]; pl++) {/ % mSpawn5 mSpawn4
@@ -142,7 +142,7 @@ s/^                g_cur_obj_cmd = 6;/                g_cur_obj_cmd = 7;/ % mSpa
 s/^                self->unk103 = 4;/                self->unk103 = 5;/ % mSpawn
 s/^    if (self->unk28 <= floor_h) {/    if (self->unk28 < floor_h) {/ % fB fA
 s/^        self->xz_velocity \*= 0.6f;/        self->xz_velocity *= 0.5f;/ % fB
-s/^        if ((\*(u16 \*) D_800CC6A4 \& 0x4000) || /        if ((*(u16 *) D_800CC6A4 \& 0x400) || / % fA
+s/^        if ((\*(u16 \*) g_cur_pad \& 0x4000) || /        if ((*(u16 *) g_cur_pad \& 0x400) || / % fA
 s/ || self->unk86 != 0 || self->unk13C != 0) {/ || self->unk13C != 0) {/ % fS
 s/^                if (self->y_velocity < -10.0f) {/                if (self->y_velocity < -11.0f) {/ % fC2 fC fC3
 s/^                if (self->y_velocity < -10.0f) {/                if (self->y_velocity < -13.0f) {/ % fC

@@ -6,8 +6,8 @@
 \#^    gdl = gfx_set_combine_mode(gdl, 0x21, &flag);$#s/0x21/0x20/ %
 \#^    gdl = gfx_other_mode_cached(gdl, 0x1DACA0, g_render_mode_pairs\[29\] | g_render_mode_pairs\[28\], &flag);$#s/\[29\] | /[27] | / %
 \#^    gdl = gfx_other_mode_cached(gdl, 0x1DACA0, g_render_mode_pairs\[29\] | g_render_mode_pairs\[28\], &flag);$#s/0x1DACA0/0x1DACA1/ %
-\#^    tex = texture_cache_lookup(\*D_80091234, &size, 3, 0);$#s/, 3, 0)/, 2, 0)/ %
-\#^    tex = texture_cache_lookup(\*D_80091234, &size, 3, 0);$#s/, 3, 0)/, 3, 1)/ %
+\#^    tex = texture_cache_lookup(\*g_ring_tex_id_ptr, &size, 3, 0);$#s/, 3, 0)/, 2, 0)/ %
+\#^    tex = texture_cache_lookup(\*g_ring_tex_id_ptr, &size, 3, 0);$#s/, 3, 0)/, 3, 1)/ %
 \#^    RING_DL(0xFD500000, tex);        /\* texture image: CI, 16-bit words (block load) \*/$#s/tex)/tex + 1)/ %
 \#^    RING_DL(0xF3000000, 0x073EF000); /\* load block 0x3EF+1 texels \*/$#s/0x073EF000/0x073EE000/ %
 \#^    RING_DL(0xF56004BC, 0x00017C5F); /\* tile 0 (mip 0) \*/$#s/0x00017C5F/0x00017C5E/ %
@@ -29,8 +29,8 @@
 \#^        near = (cx \* cx + cz \* cz < 10894295\.0f);$#s/cx \* cx + cz \* cz/cx * cx/ %
 \#^        near = (cx \* cx + cz \* cz < 10894295\.0f);$#s/ < / <= / % eq
 \#^        near = (cx \* cx + cz \* cz < 10894295\.0f);$#s/10894295.0f/1089429.0f/ %
-\#^            px = D_80088BC0\.pt\[i\]\[0\] \* \*(f32 \*) (node + 0x40);$#s/\[0\]/[1]/ %
-\#^            py = D_80088BC0\.pt\[i\]\[1\] \* \*(f32 \*) (node + 0x40);$#s/0x40)/0x44)/ %
+\#^            px = g_ring_profile\.pt\[i\]\[0\] \* \*(f32 \*) (node + 0x40);$#s/\[0\]/[1]/ %
+\#^            py = g_ring_profile\.pt\[i\]\[1\] \* \*(f32 \*) (node + 0x40);$#s/0x40)/0x44)/ %
 \#^            x = cx + px \* dir\[0\];$#s/cx + /cz + / %
 \#^            z = cz + px \* dir\[1\];$#s/dir\[1\]/dir[0]/ %
 \#^            v->v\.ob\[0\] = x;$#s/= x;/= z;/ %
@@ -46,14 +46,14 @@
 \#^            v->v\.cn\[2\] = (u32) b;$#s/(u32) b/(u32) r/ %
 \#^            v->v\.cn\[3\] = near ? 0xFF : 0;$#s/0xFF : 0/0xFF : 1/ %
 \#^            v->v\.cn\[3\] = near ? 0xFF : 0;$#s/near ?/!near ?/ %
-\#^        n = D_80088BC0\.n;$#s/= D_80088BC0.n/= D_80088BC0.n - 1/ %
+\#^        n = g_ring_profile\.n;$#s/= g_ring_profile.n/= g_ring_profile.n - 1/ %
 \#^        gSPVertex(gdl++, ((Vtx \*\*) (node + 0x54))\[g_dl_buf_index\] + (nv - n \* 2), n \* 2, 0);$#s/(nv - n \* 2)/(nv - n)/ %
 \#^        gSPVertex(gdl++, ((Vtx \*\*) (node + 0x54))\[g_dl_buf_index\] + (nv - n \* 2), n \* 2, 0);$#s/n \* 2, 0)/n * 2, 1)/ %
-\#^        for (i = 0; i < D_80088BC0\.n - 1; i++) {$#s/n - 1;/n;/ %
-\#^        for (i = 0; i < D_80088BC0\.n - 1; i++) {$#s/i = 0;/i = 1;/ %
-\#^            gSP1Triangle(gdl++, i, i + 1, i + D_80088BC0\.n + 1, 0);$#s/i + 1, i/i + 2, i/ %
-\#^            gSP1Triangle(gdl++, i, i + 1, i + D_80088BC0\.n + 1, 0);$#s/n + 1, 0)/n, 0)/ %
-\#^            gSP1Triangle(gdl++, i, i + D_80088BC0\.n + 1, i + D_80088BC0\.n, 0);$#s/n + 1, i/n + 2, i/ %
-\#^            gSP1Triangle(gdl++, i, i + D_80088BC0\.n + 1, i + D_80088BC0\.n, 0);$#s/i + D_80088BC0.n, 0)/i + D_80088BC0.n + 1, 0)/ %
+\#^        for (i = 0; i < g_ring_profile\.n - 1; i++) {$#s/n - 1;/n;/ %
+\#^        for (i = 0; i < g_ring_profile\.n - 1; i++) {$#s/i = 0;/i = 1;/ %
+\#^            gSP1Triangle(gdl++, i, i + 1, i + g_ring_profile\.n + 1, 0);$#s/i + 1, i/i + 2, i/ %
+\#^            gSP1Triangle(gdl++, i, i + 1, i + g_ring_profile\.n + 1, 0);$#s/n + 1, 0)/n, 0)/ %
+\#^            gSP1Triangle(gdl++, i, i + g_ring_profile\.n + 1, i + g_ring_profile\.n, 0);$#s/n + 1, i/n + 2, i/ %
+\#^            gSP1Triangle(gdl++, i, i + g_ring_profile\.n + 1, i + g_ring_profile\.n, 0);$#s/i + g_ring_profile.n, 0)/i + g_ring_profile.n + 1, 0)/ %
 \#^    return gdl;$#s/return gdl;/return gdl - 1;/ %
 \#^            nv++;$#s/nv++;/nv += 2;/ %

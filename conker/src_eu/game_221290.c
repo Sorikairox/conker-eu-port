@@ -41,7 +41,7 @@ typedef struct struct_eu_221290 {
 } struct_eu_221290;
 
 extern struct_eu_221290 g_mp3_main_state; /* was D_800E1CB0 */
-extern s32 D_800E0E04;
+extern s32 g_mp3_stream_state; /* was D_800E0E04 */
 extern void (*g_mp3_log_callback)(s32, u8 *, s32); /* was D_800E1230 */
 
 /* Perfect Dark src/lib/mp3/mp3.h layout (same offsets) */
@@ -2198,9 +2198,9 @@ s32 mp3_get_bits(u8 *buffer, s32 *offset, s32 numbits); /* mp3util_get_bits */
 extern f32 g_mp3_win_normal[36]; /* was D_800E1268 */
 extern f32 g_mp3_win_start[36]; /* was D_800E12F8 */
 extern f32 g_mp3_win_stop[36]; /* was D_800E1418 */
-extern struct mp3decfourbytes **D_800E0E20;
-extern s32 D_800E0E28;
-extern f32 *D_800E0E30;
+extern struct mp3decfourbytes **g_mp3_huff_trees; /* was D_800E0E20 */
+extern s32 g_mp3_huff_node_data; /* was D_800E0E28 */
+extern f32 *g_mp3_pow43_buf; /* was D_800E0E30 */
 
 /* was func_151F3DE0 */
 s32 mp3dec_init(void) {
@@ -2241,9 +2241,9 @@ s32 mp3dec_init(void) {
         g_mp3_win_stop[i] = sinf((i + 0.5f) * 0.08726646f);
     }
     for (i = 1; i < 34; i++) {
-        ((u8 **)D_800E0E20)[i] += D_800E0E28;
+        ((u8 **)g_mp3_huff_trees)[i] += g_mp3_huff_node_data;
     }
-    g_mp3_pow43_table = D_800E0E30;
+    g_mp3_pow43_table = g_mp3_pow43_buf;
     if (g_mp3_pow43_table == NULL) {
         return 0;
     }
@@ -2660,7 +2660,7 @@ s32 mp3dec_unpack_scale_fac_lsf(struct asistream *stream, u32 gr, u32 ch)
 
 	return 1;
 }
-extern struct mp3decfourbytes **D_800E0E20;
+extern struct mp3decfourbytes **g_mp3_huff_trees; /* was D_800E0E20 */
 f32 math_powf(f32 arg0, f32 arg1);
 void func00046650(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3, void *arg4);
 void func00047550(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3);
@@ -2730,7 +2730,7 @@ s32 mp3dec_read_granule(struct asistream *stream, u32 gr, u32 ch)
 		sp34 = var700577d8[sp38];
 		sp30 = sp54[i];
 
-		if (D_800E0E20[sp38] == NULL) {
+		if (g_mp3_huff_trees[sp38] == NULL) {
 			sp2c = sp30 - sp48;
 
 			bzero(sp44, sp2c * 2);
@@ -3266,7 +3266,7 @@ s32 mp3main_decode_next_frame(struct_eu_221290 *arg0, u8 **arg1, s32 *arg2) {
         sp12C->unk3BA0 = 0;
     }
     if (mp3main_read_frame((struct asistream *)sp12C, sp12C->unk8474) == 0) {
-        D_800E0E04 = 3;
+        g_mp3_stream_state = 3;
         return 0;
     }
     sp12C->unk8474 = -1;

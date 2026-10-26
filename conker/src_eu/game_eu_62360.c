@@ -8,7 +8,7 @@
  * obj = &g_objects[i] (bytes): +4 type, +0x1FE blink amount, +0x1FF blink state, +0x200 blink timer,
  * +0x201 blink angle, +0x202 random blink offset, +0x203 blink speed; +0x204 mouth amount (s16), +0x206 mouth
  * state, +0x207 mouth timer, +0x208 mouth angle (s8), +0x209 mouth speed. a2 / a3: joint indices (0xFF = none). */
-extern s16 D_800C4310;
+extern s16 g_face_lower_amount; /* was D_800C4310 */
 /* was func_15034B50 */
 s16 *obj_adjust_entries_face(s16 *buf, u8 *obj, s32 a2, s32 a3) {
     s32 type = obj[4];
@@ -25,7 +25,7 @@ s16 *obj_adjust_entries_face(s16 *buf, u8 *obj, s32 a2, s32 a3) {
         else f = (f32)obj[0x201] * 182.04445f;
         v = (s16)(s32)(((f32)obj[0x1FE] * f) * 0.003921569f);
         if (!noeye) { buf[0] = a2 * 6 + off1; buf[1] = v; buf += 2; }
-        D_800C4310 = v;
+        g_face_lower_amount = v;
         r = ((s8)obj[0x202] * (s32)obj[0x1FE]) / 255;
         v = (s16)(s32)(((f32)r * 65535.0f) * 0.003921569f);
         if (!noeye) { buf[0] = a2 * 6 + off2; buf[1] = v; buf += 2; }
@@ -112,7 +112,7 @@ s16 *obj_adjust_entries_face(s16 *buf, u8 *obj, s32 a2, s32 a3) {
     return buf;
 }
 
-extern s16 D_800C4310;
+extern s16 g_face_lower_amount; /* was D_800C4310 */
 
 /* was func_150351A4 */
 void obj_lower_joints_by_face(u8 *arg0, s32 arg1, s32 arg2)
@@ -121,13 +121,13 @@ void obj_lower_joints_by_face(u8 *arg0, s32 arg1, s32 arg2)
   s32 temp_v1;
   u8 *temp_a2;
   s32 new_var;
-  if (D_800C4310 != 0)
+  if (g_face_lower_amount != 0)
   {
     u8 *temp_v0;
     temp_v1 = (new_var = /* fakematch: permuter chain */ *((s32 *) (((u8 *) arg0) + 0x1D4)));
     temp_a2 = (arg1 << 6) + temp_v1;
     temp_v0 = (arg2 << 6) + new_var;
-    temp_v1 = D_800C4310;
+    temp_v1 = g_face_lower_amount;
     temp_f0 = ((f32) temp_v1) * 0.00076296274f;
     temp_f0 *= *((f32 *) (((u8 *) arg0) + 0x14C));
     *((f32 *) (((u8 *) temp_a2) + 0x34)) = (f32) ((*((f32 *) (((u8 *) temp_a2) + 0x34))) - temp_f0);
@@ -140,7 +140,7 @@ void obj_lower_joints_by_face(u8 *arg0, s32 arg1, s32 arg2)
 
 /* was func_15035210 */
 void reflect_queue_reset(void) {
-    D_800C4320 = 0;
+    g_reflect_queue_count = 0;
 }
 
 void guMtxF2L2(float mf[4][4], Mtx *m);
@@ -258,21 +258,21 @@ void reflect_build_joint_matrices(struct127 *obj, struct_eu_size0C *e, s32 mode,
 
 /* was func_150359B8 */
 struct_eu_size0C *reflect_queue_alloc(void) {
-    if (D_800C4320 == 15) {
+    if (g_reflect_queue_count == 15) {
         return NULL;
     }
-    D_800C4320++;
-    return &D_800C4328[D_800C4320 - 1];
+    g_reflect_queue_count++;
+    return &g_reflect_queue[g_reflect_queue_count - 1];
 }
 
 s32 camera_view_test_sphere(s32, s32 *, f32, f32, f32, f32, f32, f32);
 extern s32 g_view_mtxf; /* was D_800DA030 */
-extern f32 D_80098120;
+extern f32 g_reflect_k_8120; /* was D_80098120 */
 
 /* was func_15035A04 */
 s32 reflect_is_culled(s32 arg0, u8 *arg1, u8 *arg2, f32 arg3) {
     s32 sp28 = g_player_cams;
-    struct124 *e = D_800D1C90[arg1[4]];
+    struct124 *e = g_type_descs[arg1[4]];
     f32 w = (f32)(u16)e->unkE;
     f32 h = (f32)*(s16 *)((u8 *)e + 0x10) * *(f32 *)(arg1 + 0x150);
     f32 y;
@@ -283,7 +283,7 @@ s32 reflect_is_culled(s32 arg0, u8 *arg1, u8 *arg2, f32 arg3) {
         y = *(f32 *)(arg1 + 0x18) + h;
     }
     return camera_view_test_sphere(sp28, &g_view_mtxf, *(f32 *)(arg2 + 0x30), y, *(f32 *)(arg2 + 0x38),
-                         w * *(f32 *)(arg1 + 0x14C), w * *(f32 *)(arg1 + 0x150), D_80098120) == 0;
+                         w * *(f32 *)(arg1 + 0x14C), w * *(f32 *)(arg1 + 0x150), g_reflect_k_8120) == 0;
 }
 void reflect_build_joint_matrices(struct127 *obj, struct_eu_size0C *e, s32 mode, s32 model, s32 mtx, s32 nmtx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 x, f32 y, f32 z, f32 g, f32 h, f32 alpha, s32 shadow, s32 sub);
 s32 model_joint_mtx_count(s32 id);
@@ -293,9 +293,9 @@ s32 attachment_get_matrices(u8 *att, u8 *obj, s32 *model, s32 *out);
 f32 *allocate_memory(s32, s32, s32, s32);
 
 /* P93: queue the draw (and shadow) of object `idx` for this frame. Fades out between max - 200 and max (max = 1400,
- * or 10000 when D_800C35EA == 1) of the camera distance, scaled by obj->unk7 (0xFF = opaque). Reserves the
- * object's joint matrices in the D_800C42A8 arena (model_joint_mtx_count(id) x 0x40 bytes) unless reflect_is_culled culls it,
- * then adds one entry per attachment of D_800C3EE0 that belongs to the object (attachment_get_matrices accepts it). */
+ * or 10000 when g_cutscene_slot_state == 1) of the camera distance, scaled by obj->unk7 (0xFF = opaque). Reserves the
+ * object's joint matrices in the g_obj_mtx_next arena (model_joint_mtx_count(id) x 0x40 bytes) unless reflect_is_culled culls it,
+ * then adds one entry per attachment of g_attachment_list that belongs to the object (attachment_get_matrices accepts it). */
 /* was func_15035AF8 */
 void reflect_queue_object(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 g, f32 h, f32 alpha) {
     struct127 *obj;
@@ -314,7 +314,7 @@ void reflect_queue_object(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, 
     s32 shadow;
     u8 opacity;
 
-    if (D_800C4320 == 15) {
+    if (g_reflect_queue_count == 15) {
         return;
     }
     max = 1400;
@@ -330,10 +330,10 @@ void reflect_queue_object(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, 
         return;
     }
     nmtx = model_joint_mtx_count(obj->id);
-    if ((u32) (g_matrix_arena_count << 6) < (u32) (D_800C42A8 + (nmtx << 6) - D_800C42AC)) {
+    if ((u32) (g_matrix_arena_count << 6) < (u32) (g_obj_mtx_next + (nmtx << 6) - g_obj_mtx_arena_start)) {
         return;   /* the matrix arena is full */
     }
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         max = 10000;
     }
     dist = approx_dist3_int((s32) (g_player_views->unk2F8 - obj->x_position), (s32) (g_player_views->unk2FC - obj->y_position),
@@ -353,7 +353,7 @@ void reflect_queue_object(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, 
     if (e == NULL) {
         return;
     }
-    *(s32 *) &e->unk0[0] = D_800C42A8;
+    *(s32 *) &e->unk0[0] = g_obj_mtx_next;
     obj_ambient_colour(idx, (u8 *) col);
     e->unk0[5] = col[0];
     e->unk0[6] = col[1];
@@ -366,13 +366,13 @@ void reflect_queue_object(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, 
                   obj->z_position, g, h, alpha, 0, 0);
     e->unk0[4] = (s32) ((u32) e->unk0[4] * fade) >> 8;
     if (reflect_is_culled(mode, (u8 *) obj, (u8 *) model, b) != 0) {
-        D_800C4320--;   /* culled: drop the entry again */
+        g_reflect_queue_count--;   /* culled: drop the entry again */
         return;
     }
-    D_800C42A8 += nmtx << 6;
-    D_800C429A += nmtx;
+    g_obj_mtx_next += nmtx << 6;
+    g_obj_mtx_count += nmtx;
 
-    for (att = (u8 *) D_800C3EE0; att != NULL; att = next) {
+    for (att = (u8 *) g_attachment_list; att != NULL; att = next) {
         next = *(u8 **) (att + 0x54);
         if (att[0] != obj->unique_id || att[3] == 0) {
             continue;
@@ -409,8 +409,8 @@ void reflect_queue_object(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, 
     }
 }
 
-extern s32 D_80083350;
-extern s32 D_800834D0;
+extern s32 g_model_mat_blend_set; /* was D_80083350 */
+extern s32 g_model_mat_opaque_set; /* was D_800834D0 */
 
 /* was func_1503605C */
 u8 *reflect_emit_entries_dl(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4) {
@@ -426,21 +426,21 @@ u8 *reflect_emit_entries_dl(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4) {
     u8 *var_a0;
 
     var_a0 = arg0;
-    if (D_800C4320 == 0) {
+    if (g_reflect_queue_count == 0) {
 
     } else {
         (*(s32 *)((u8 *)var_a0 + 4)) = 0x200;
         var_a0_2 = var_a0 + 8;
         (*(s32 *)((u8 *)var_a0 + 0)) = 0xD9FFFFFF;
-        var_a2 = D_800C4328;
-        if ((s32) D_800C4320 > 0) {
+        var_a2 = g_reflect_queue;
+        if ((s32) g_reflect_queue_count > 0) {
             do {
                 if (var_a2->unk0[0xB] != 1) {
-                    var_s3 = &D_800C4328[D_800C4320];
+                    var_s3 = &g_reflect_queue[g_reflect_queue_count];
                 } else if ((*(u8 *)((u8 *)arg1 + 0)) != var_a2->unk0[9]) {
-                    var_s3 = &D_800C4328[D_800C4320];
+                    var_s3 = &g_reflect_queue[g_reflect_queue_count];
                 } else if ((*(u8 *)((u8 *)arg1 + 6)) != var_a2->unk0[0xA]) {
-                    var_s3 = &D_800C4328[D_800C4320];
+                    var_s3 = &g_reflect_queue[g_reflect_queue_count];
                 } else {
                     temp_a0 = ((s32 *)((u8 *)var_a0_2 + 8));
                     temp_t6 = (s32) (var_a2->unk0[4] * (*(u8 *)((u8 *)arg1 + 3))) >> 8;
@@ -455,11 +455,11 @@ u8 *reflect_emit_entries_dl(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4) {
                     var_v0 = 0;
                     if (temp_t6 < 0xFF) {
                         (*(s32 *)((u8 *)temp_a0_3 + 0)) = 0xDB060020;
-                        (*(s32 **)((u8 *)temp_a0_3 + 4)) = &D_80083350;
+                        (*(s32 **)((u8 *)temp_a0_3 + 4)) = &g_model_mat_blend_set;
                         var_a0_2 = temp_a0_3 + 8;
                     } else {
                         (*(s32 *)((u8 *)temp_a0_3 + 0)) = 0xDB060020;
-                        (*(s32 **)((u8 *)temp_a0_3 + 4)) = &D_800834D0;
+                        (*(s32 **)((u8 *)temp_a0_3 + 4)) = &g_model_mat_opaque_set;
                         var_a0_2 = temp_a0_3 + 8;
                     }
                     if ((s32) (*(u8 *)((u8 *)arg1 + 0x14)) > 0) {
@@ -473,7 +473,7 @@ u8 *reflect_emit_entries_dl(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4) {
                             var_v0 += 1;
                         } while (var_v0 < (s32) (*(u8 *)((u8 *)arg1 + 0x14)));
                     }
-                    var_s3 = &D_800C4328[D_800C4320];
+                    var_s3 = &g_reflect_queue[g_reflect_queue_count];
                 }
                 var_a2 = (struct_eu_size0C *)((u8 *)var_a2 + (0xC));
             } while ((u32) var_a2 < (u32) var_s3);
@@ -486,14 +486,14 @@ u8 *reflect_emit_entries_dl(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4) {
 }
 Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *color, s32 arg6, s32 arg7);
 
-/* Draw the D_800C4320 entries of D_800C4328 that have no unkB flag through obj_draw_model_dl, after a
+/* Draw the g_reflect_queue_count entries of g_reflect_queue that have no unkB flag through obj_draw_model_dl, after a
  * geometry-mode / othermode setup. */
 /* was func_150362D8 */
 Gfx *reflect_draw_queue(Gfx *gdl, s32 arg1) {
     struct_eu_size0C *e;
     s32 color[4];
 
-    if (D_800C4320 == 0) {
+    if (g_reflect_queue_count == 0) {
         return gdl;
     }
     gdl->words.w0 = 0xD9FFFFFF;
@@ -505,7 +505,7 @@ Gfx *reflect_draw_queue(Gfx *gdl, s32 arg1) {
     gdl->words.w0 = 0xE2001E01;
     gdl->words.w1 = 0;
     gdl++;
-    for (e = D_800C4328; e < &D_800C4328[D_800C4320]; e++) {
+    for (e = g_reflect_queue; e < &g_reflect_queue[g_reflect_queue_count]; e++) {
         if (e->unk0[0xB] != 0) {
             continue;
         }

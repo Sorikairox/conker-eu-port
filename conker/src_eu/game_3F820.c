@@ -43,7 +43,7 @@ void camera_init_player_projections(void) {
 
 /* was func_15012470 */
 void fx_alloc_d88750(void) {
-    D_80088750 = timed_queue_create(4, 300, 0);
+    g_foot_splash_queue = timed_queue_create(4, 300, 0);
 }
 
 void *memcpy(void *, const void *, unsigned int);
@@ -55,7 +55,7 @@ typedef struct {
     f32 w;
 } PipeSprayPoint;
 extern PipeSprayPoint g_pipe_spray_points[3][10]; /* was D_800DCE60 */
-// the facing angles of the three pipes: the byte +0xC of each D_8009FCF0 row (a static const PipeSpot table in
+// the facing angles of the three pipes: the byte +0xC of each g_pipe_explode_spots row (a static const PipeSpot table in
 // game_eu_E0430.c in the NM build)
 static const u8 sPipeAngles[3] = { 0x94, 0xEA, 0x3F };
 // pipe_spray_points_init: P259: for each of the three pipes, casts 10 rays (collision_ray_cast) from (0, 300, 0) in

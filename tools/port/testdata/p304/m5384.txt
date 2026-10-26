@@ -1,6 +1,6 @@
 s/    if (kind \& 0x8000) {/    if (kind \& 0x4000) {/ % quiet tiltq flatq
 s/            v\[i\]\[1\] = ((s16 \*\*) tri)\[i\]\[1\];/            v[i][1] = ((s16 **) tri)[i][2];/ % tilt flat deg
-s/        ny = -D_800CC634;/        ny = D_800CC634;/ % tilt flat tilt2
+s/        ny = -g_tri_plane_ny;/        ny = g_tri_plane_ny;/ % tilt flat tilt2
 s/        if (len < 0.0001f) {/        if (len < 0.00001f) {/ % deg deg2
 s/        dz = nz \/ len;/        dz = nz \/ ny;/ % tilt flat
 s/        if (slot != 0xFF \&\& fabsf(dy) < 0.9f) {/        if (slot != 0xFF \&\& dy < 0.9f) {/ % flat tilt flatdn

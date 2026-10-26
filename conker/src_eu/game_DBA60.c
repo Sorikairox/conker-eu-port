@@ -11,7 +11,7 @@ void camera_update_event_modes(struct108 *arg0) {
         if (event_dispatch(0, 0x2000, 0xBB) != -1) {
             if (camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 8) != 0) {
                 arg0->unk84 |= 0x1000000;
-                camera_set_followed_obj(arg0, D_800CC335 - 1);
+                camera_set_followed_obj(arg0, g_objects_parent_slot - 1);
             }
         } else if (camera_pop_mode(arg0, 8) != 0) {
             camera_set_followed_obj(arg0, 0);

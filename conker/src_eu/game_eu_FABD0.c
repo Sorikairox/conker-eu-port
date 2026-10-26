@@ -320,17 +320,17 @@ s16 *spark_record_quad_build(u8 *arg0, s16 arg1) {
 
 void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
 void emit_coloured_points(u8 *arg0, u8 arg1, s32 arg2);
-extern f32 D_80088C14[5];   /* base angles (radians) of the five shooting-star lanes */
-extern f32 D_800A0B24, D_800A0B28, D_800A0B2C;
-extern f64 D_800A0B30, D_800A0B38;
-extern f32 D_800A0B40, D_800A0B44, D_800A0B48, D_800A0B4C, D_800A0B50, D_800A0B54, D_800A0B58, D_800A0B5C;
-extern f32 D_800A0B60, D_800A0B64, D_800A0B68, D_800A0B6C, D_800A0B70;
+extern f32 g_shooting_star_lanes[5];   /* base angles (radians) of the five shooting-star lanes; was D_80088C14 */
+extern f32 g_shooting_star_k_0b24, g_shooting_star_k_0b28, g_shooting_star_k_0b2c; /* was D_800A0B24; was D_800A0B28; was D_800A0B2C */
+extern f64 g_shooting_star_k_0b30, g_shooting_star_k_0b38; /* was D_800A0B30; was D_800A0B38 */
+extern f32 g_shooting_star_k_0b40, g_shooting_star_deg_to_rad, g_shooting_star_k_0b48, g_shooting_star_k_0b4c, g_shooting_star_k_0b50, g_shooting_star_k_0b54, g_shooting_star_k_0b58, g_shooting_star_k_0b5c; /* was D_800A0B40; was D_800A0B44; was D_800A0B48; was D_800A0B4C; was D_800A0B50; was D_800A0B54; was D_800A0B58; was D_800A0B5C */
+extern f32 g_shooting_star_k_0b60, g_shooting_star_k_0b64, g_shooting_star_k_0b68, g_shooting_star_k_0b6c, g_shooting_star_k_0b70; /* was D_800A0B60; was D_800A0B64; was D_800A0B68; was D_800A0B6C; was D_800A0B70 */
 
-// shooting_star_sky_update: sky effect object. Its accumulator (+0x28) grows by D_800A0B24 * frame time * rate
-// (+0x2C); every whole unit picks one of the five lane angles D_80088C14 (+ random * D_800A0B40) and, when that
-// direction is within D_800A0B48 of the current camera heading (camera +0x380 - 180, wrapped to 0..360, times
-// D_800A0B44 = degrees to radians), spawns a streak (emit_coloured_points) placed by vec2_from_angle_rad at a random distance
-// (D_800A0B30 + random * D_800A0B38) and height (500 + D_800A0B50 + random * D_800A0B4C).
+// shooting_star_sky_update: sky effect object. Its accumulator (+0x28) grows by g_shooting_star_k_0b24 * frame time * rate
+// (+0x2C); every whole unit picks one of the five lane angles g_shooting_star_lanes (+ random * g_shooting_star_k_0b40) and, when that
+// direction is within g_shooting_star_k_0b48 of the current camera heading (camera +0x380 - 180, wrapped to 0..360, times
+// g_shooting_star_deg_to_rad = degrees to radians), spawns a streak (emit_coloured_points) placed by vec2_from_angle_rad at a random distance
+// (g_shooting_star_k_0b30 + random * g_shooting_star_k_0b38) and height (500 + g_shooting_star_k_0b50 + random * g_shooting_star_k_0b4c).
 /* was func_150CDD08 */
 void shooting_star_sky_update(u8 *obj) {
     struct {
@@ -363,23 +363,23 @@ void shooting_star_sky_update(u8 *obj) {
     f32 ang, h, r;
     u8 k;
 
-    *(f32 *) (obj + 0x28) += D_800A0B24 * g_frame_step_f * *(f32 *) (obj + 0x2C);
+    *(f32 *) (obj + 0x28) += g_shooting_star_k_0b24 * g_frame_step_f * *(f32 *) (obj + 0x2C);
     if (!(1.0f < *(f32 *) (obj + 0x28))) {
         return;
     }
     spr.unk18 = -0x17;
     spr.unk1A = 6;
     spr.unk30 = 0;
-    spr.unk24 = D_800A0B28;
-    spr.unk48 = D_800A0B2C;
+    spr.unk24 = g_shooting_star_k_0b28;
+    spr.unk48 = g_shooting_star_k_0b2c;
     do {
-        lanes[0] = D_80088C14[0];
-        lanes[1] = D_80088C14[1];
-        lanes[2] = D_80088C14[2];
-        lanes[3] = D_80088C14[3];
-        lanes[4] = D_80088C14[4];
+        lanes[0] = g_shooting_star_lanes[0];
+        lanes[1] = g_shooting_star_lanes[1];
+        lanes[2] = g_shooting_star_lanes[2];
+        lanes[3] = g_shooting_star_lanes[3];
+        lanes[4] = g_shooting_star_lanes[4];
         k = (u32) random_int() % 5;
-        ang = random_float() * D_800A0B40 + lanes[k];
+        ang = random_float() * g_shooting_star_k_0b40 + lanes[k];
         h = *(f32 *) ((u8 *) g_player_views + g_cur_view_player * 0x9A0 + 0x380) - 180.0f;
         while (360.0f < h) {
             h -= 360.0f;
@@ -387,10 +387,10 @@ void shooting_star_sky_update(u8 *obj) {
         while (h < 0.0f) {
             h += 360.0f;
         }
-        if (fabsf(ang - h * D_800A0B44) < D_800A0B48) {
+        if (fabsf(ang - h * g_shooting_star_deg_to_rad) < g_shooting_star_k_0b48) {
             r = random_float();
-            spr.y = r * D_800A0B4C + D_800A0B50 + 500.0f;
-            vec2_from_angle_rad(ang, (f32) (r * D_800A0B38 + D_800A0B30), &spr.x, &spr.z);
+            spr.y = r * g_shooting_star_k_0b4c + g_shooting_star_k_0b50 + 500.0f;
+            vec2_from_angle_rad(ang, (f32) (r * g_shooting_star_k_0b38 + g_shooting_star_k_0b30), &spr.x, &spr.z);
             spr.type = 0xF;
             spr.life = 0x14;
             spr.unk16 = 0xC;
@@ -398,13 +398,13 @@ void shooting_star_sky_update(u8 *obj) {
             spr.unk34 = 0;
             spr.unk3C = 15.0f;
             spr.unk38 = 15.0f;
-            spr.unk44 = D_800A0B54;
-            spr.unk40 = D_800A0B54;
-            spr.unk1C = D_800A0B64;
-            spr.unk20 = D_800A0B68;
-            spr.unk28 = D_800A0B6C;
-            spr.unk2C = D_800A0B70;
-            spr.rot = (s32) (((ang + D_800A0B58) - D_800A0B5C) * D_800A0B60);
+            spr.unk44 = g_shooting_star_k_0b54;
+            spr.unk40 = g_shooting_star_k_0b54;
+            spr.unk1C = g_shooting_star_k_0b64;
+            spr.unk20 = g_shooting_star_k_0b68;
+            spr.unk28 = g_shooting_star_k_0b6c;
+            spr.unk2C = g_shooting_star_k_0b70;
+            spr.rot = (s32) (((ang + g_shooting_star_k_0b58) - g_shooting_star_k_0b5c) * g_shooting_star_k_0b60);
             emit_coloured_points((u8 *) &spr, obj[0xC], obj[1]);
         }
         *(f32 *) (obj + 0x28) -= 1.0f;
@@ -415,8 +415,8 @@ void shooting_star_sky_update(u8 *obj) {
 void shooting_star_set_rate(s32 arg0) {
     u8 *temp_v1;
 
-    if ((arg0 >= 0) && (arg0 < 0x100) && (D_80088C10 != NULL)) {
-        temp_v1 = D_80088C10 + 0x28;
-        *(f32 *)(temp_v1 + 4) = arg0 * D_800A0B74;
+    if ((arg0 >= 0) && (arg0 < 0x100) && (g_shooting_star_obj != NULL)) {
+        temp_v1 = g_shooting_star_obj + 0x28;
+        *(f32 *)(temp_v1 + 4) = arg0 * g_shooting_star_rate_scale;
     }
 }

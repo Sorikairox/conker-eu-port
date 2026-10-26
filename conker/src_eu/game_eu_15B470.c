@@ -178,8 +178,8 @@ void camera_shake_update(u8 *arg0) {
             } else {
                 camera_shake_reset(arg0);
             }
-            var_f10 = (f32) D_800BE9A0;
-            if ((s32) D_800BE9A0 < 0) {
+            var_f10 = (f32) g_frame_delta;
+            if ((s32) g_frame_delta < 0) {
                 var_f10 += 4294967296.0f;
             }
             (*(f32 *)((u8 *)temp_s0 + 0x28)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x28)) + var_f10);

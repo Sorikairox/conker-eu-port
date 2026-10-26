@@ -3,9 +3,9 @@
 #include "variables.h"
 
 
-extern f32 D_800A0C80;
-extern f32 D_800A0C84;
-extern f32 D_800A0C88;
+extern f32 g_spin_decay_k_0c80; /* was D_800A0C80 */
+extern f32 g_spin_decay_k_0c84; /* was D_800A0C84 */
+extern f32 g_spin_decay_k_0c88; /* was D_800A0C88 */
 void obj_update_ground_tilt(struct127 *);
 /* was func_150D18B0 */
 void obj_spin_decay_update(u8 *arg0) {
@@ -14,10 +14,10 @@ void obj_spin_decay_update(u8 *arg0) {
     temp_f0 = *(f32 *)(arg0 + 0xBC);
     temp_f2 = *(f32 *)(arg0 + 0x148);
     *(f32 *)(arg0 + 0xB8) += temp_f0;
-    *(f32 *)(arg0 + 0xBC) = temp_f0 * D_800A0C80;
-    *(f32 *)(arg0 + 0x3C) *= D_800A0C84;
+    *(f32 *)(arg0 + 0xBC) = temp_f0 * g_spin_decay_k_0c80;
+    *(f32 *)(arg0 + 0x3C) *= g_spin_decay_k_0c84;
     *(f32 *)(arg0 + 0xC4) += temp_f2;
-    *(f32 *)(arg0 + 0x148) = temp_f2 * D_800A0C88;
+    *(f32 *)(arg0 + 0x148) = temp_f2 * g_spin_decay_k_0c88;
     obj_update_ground_tilt(arg0);
 }
 
@@ -43,11 +43,11 @@ void world_rec_f9_set_flag(s32 arg0) {
     }
 }
 
-extern f32 D_800A0C90;
+extern f32 g_red_flicker_dim_k_0c90; /* was D_800A0C90 */
 /* was func_150D19AC */
 void ambient_red_flicker_dim_update(s32 arg0) {
     f32 *sp28;
     sp28 = (f32 *)((arg0 ^ 0) + 0x28); sp28 = sp28;
-    fx_random_flicker_update(arg0 + 0x30, 10.0f, arg0 + 0x2C, 50.0f, 100.0f, 123.0f, D_800A0C90, sp28);
+    fx_random_flicker_update(arg0 + 0x30, 10.0f, arg0 + 0x2C, 50.0f, 100.0f, 123.0f, g_red_flicker_dim_k_0c90, sp28);
     light_set_level_colour(*sp28, ((u8 *)&g_level_light_colour)[1], ((u8 *)&g_level_light_colour)[2], 0);
 }

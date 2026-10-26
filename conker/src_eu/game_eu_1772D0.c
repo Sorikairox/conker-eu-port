@@ -1324,7 +1324,7 @@ u8 *flame_spawn(u8 *arg0, u8 *arg1, s16 arg2, u8 arg3, u8 *arg4, f32 arg5, f32 a
     } else {
         var_v0_2 = 0;
     }
-    temp_v0 = effect3d_spawn_full(&sp.u9C, (s32) ((u8 *)&D_800A4AA0), arg8, arg9, (u8) (s32) argA, 0x1CU, (u8) (var_v0_2 | 2), 0, 0, argF + 0x50, (u8) (s32) arg10, arg11);
+    temp_v0 = effect3d_spawn_full(&sp.u9C, (s32) ((u8 *)&g_effect3d_default_params), arg8, arg9, (u8) (s32) argA, 0x1CU, (u8) (var_v0_2 | 2), 0, 0, argF + 0x50, (u8) (s32) arg10, arg11);
     var_v1 = temp_v0;
     if (temp_v0 != NULL) {
         sp.uF4 = temp_v0;
@@ -1504,9 +1504,9 @@ block_5:
     }
     temp_v0_3 = arg0 + 0x110;
     (*(f32 *)((u8 *)temp_v0_3 + 0x3C)) = (f32) ((*(f32 *)((u8 *)temp_v0_3 + 0x3C)) + ((*(f32 *)((u8 *)temp_v0_3 + 0x44)) * g_frame_step_f));
-    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((sp.u20 + (0.5f * (((*(f32 *)((u8 *)temp_v0_3 + 0x38)) - sp.u20) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
-    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((sp.u24 + (0.5f * (((*(f32 *)((u8 *)temp_v0_3 + 0x3C)) - sp.u24) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
-    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((sp.u28 + (0.5f * (((*(f32 *)((u8 *)temp_v0_3 + 0x40)) - sp.u28) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((sp.u20 + (0.5f * (((*(f32 *)((u8 *)temp_v0_3 + 0x38)) - sp.u20) * g_frame_step_inv) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((sp.u24 + (0.5f * (((*(f32 *)((u8 *)temp_v0_3 + 0x3C)) - sp.u24) * g_frame_step_inv) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((sp.u28 + (0.5f * (((*(f32 *)((u8 *)temp_v0_3 + 0x40)) - sp.u28) * g_frame_step_inv) * g_frame_step_f)) * g_frame_step_f));
 }
 /* was func_1514C7C8 */
 s32 flame_drift_look_follow(void *arg0) {

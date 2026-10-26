@@ -24,7 +24,7 @@ s32 level_setup_screen_projection(s32);
 s32 camera_record_setup(s32, s32, s32, s32);
 void camera_set_screen_ortho(s32);
 extern s8 g_dl_buffers_reinit_req; /* was D_800BEA34 */
-extern s8 D_800BEA37;
+extern s8 g_gfx_vi_mode_pending; /* was D_800BEA37 */
 extern s32 g_viewports; /* was D_800BEA4C */
 extern s8 g_view_clear_black; /* was D_800BEA55 */
 extern s32 g_view_widths; /* was D_800BEA5C */
@@ -63,7 +63,7 @@ void viewports_init(s32 arg0, s32 arg1) {
     if (temp_s1 != 0) {
         camera_record_setup(var_s0_2, 0, 0x3FF, 0);
     }
-    D_800BEA37 = 1;
+    g_gfx_vi_mode_pending = 1;
     g_dl_buffers_reinit_req = 1;
     g_view_clear_black = 0;
     camera_set_screen_ortho(arg1);
@@ -116,26 +116,26 @@ void render_dl_buffers_init(void) {
     Gfx *gfx;
 
     for (i = 0; i < 2; i++) {
-        gfx = D_800BEDE8[i];
+        gfx = g_gfx_dl_buffers[i];
         gSPSegment(gfx++, 0, 0);
         gSPSegment(gfx++, 0, 0);
         gSPDisplayList(gfx++, g_dl_frame_init);
         gDPSetDepthImage(gfx++, g_zbuffer);
         gSPViewport(gfx++, &((struct_eu_BE628 *)g_player_cams)->unk40[i]);
-        D_800BE9D8[i] = (s32)gfx;
+        g_gfx_dl_frame_starts[i] = (s32)gfx;
     }
 }
 // NON-MATCHING: something along these lines
-// extern Gfx* D_800BE9C8;
+// extern Gfx* g_setup_type_sound_tables;
 // extern s32 D_8002C930;
 // Gfx *render_dl_buffers_init(void) {
 //     s32 i;
-//     Gfx *tmp = D_800BE9C8;
+//     Gfx *tmp = g_setup_type_sound_tables;
 //     for (i = 0; i < 3; i++) {
 //         gSPSegment(tmp++, 0x00, 0x00000000);
 //         gSPSegment(tmp++, 0x00, 0x00000000);
 //         gSPDisplayList(tmp++, D_8002C930);
-//         gDPSetDepthImage(tmp++, D_800BE9C4);
+//         gDPSetDepthImage(tmp++, g_zbuffer_alias);
 //         gSPViewport(tmp++, g_player_cams + i + 0x40);
 //     }
 //     return tmp;
@@ -241,7 +241,7 @@ void camera_world_to_screen(s32 view, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32
 //     f32 sp28;
 //     struct140 *temp_v0_2;
 //
-//     func_150A7A00(arg1, arg2, &D_800D9D10 + (arg0 << 6), arg1, arg2, arg3, &sp34, &sp30, &sp2C, &sp28);
+//     func_150A7A00(arg1, arg2, &g_ambient_cue_timer + (arg0 << 6), arg1, arg2, arg3, &sp34, &sp30, &sp2C, &sp28);
 //     sp28 = 1.0f / sp28;
 //     // temp_v1 = arg0 * 0x180;
 //     temp_v0_2 = &g_player_cams[arg0];

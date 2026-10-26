@@ -723,9 +723,9 @@ struct225 *light_create_scripted(s32 arg0, s16 arg1, u8 arg2, s32 arg3) {
 
 /* was func_15161A68 */
 s32 light_beh_scripted(struct225 *arg0) {
-    struct233 **tmp = &D_800C3958; // fakematch?
+    struct233 **tmp = &g_cutscene_track_recs; // fakematch?
 
-    if (D_800C35EA == 1) {
+    if (g_cutscene_slot_state == 1) {
         f32 phi_f0;
         f32 phi_f2;
         struct233 *temp_v0 = *tmp + (s32) arg0->unk18;

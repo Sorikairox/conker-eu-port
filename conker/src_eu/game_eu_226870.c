@@ -12,9 +12,9 @@ typedef struct {
     u32 pos;    /* bit position */
 } HuffReader;
 
-extern u8 **D_800E0E20;     /* per table: Huffman tree (NULL for the unused tables), 4-byte nodes {u8 left, u8 right,
+extern u8 **g_mp3_huff_trees; /* was D_800E0E20 */ /* per table: Huffman tree (NULL for the unused tables), 4-byte nodes {u8 left, u8 right,
                                s8 x, s8 y}; child = node + 4 * offset; x == -1 marks an inner node */
-extern u8 *D_800E0E24;      /* [table][256] fast lookup by the next 8 bits: +0 = (y << 4) | x, +0x2200 = code
+extern u8 *g_mp3_huff_fast_table; /* was D_800E0E24 */ /* [table][256] fast lookup by the next 8 bits: +0 = (y << 4) | x, +0x2200 = code
                                length (0 = longer than 8 bits: walk the tree) */
 
 // huff_get_bits (mp3_huff_read_bits): the next n bits MSB first from the unaligned big-endian word at the read
@@ -41,16 +41,16 @@ static s32 huff_get_bit(HuffReader *r) {
 static void huff_decode_pair(HuffReader *r, s32 table, s32 *x, s32 *y) {
     u8 *p = r->buf + (r->pos >> 3);
     s32 k = (table << 8) + ((((p[0] << 8) | p[1]) >> (8 - (r->pos & 7))) & 0xFF);
-    s32 len = D_800E0E24[0x2200 + k];
+    s32 len = g_mp3_huff_fast_table[0x2200 + k];
     u8 *node;
 
     if (len != 0) {
         r->pos += len;
-        *x = D_800E0E24[k] & 0xF;
-        *y = D_800E0E24[k] >> 4;
+        *x = g_mp3_huff_fast_table[k] & 0xF;
+        *y = g_mp3_huff_fast_table[k] >> 4;
         return;
     }
-    node = D_800E0E20[table];
+    node = g_mp3_huff_trees[table];
     do {
         node += (huff_get_bit(r) ? node[1] : node[0]) * 4;
     } while ((s8) node[2] == -1);

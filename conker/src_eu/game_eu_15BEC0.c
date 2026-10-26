@@ -30,7 +30,7 @@ void camera_update_eye_height(u8 *arg0) {
     u8 *t2;
 
     ceiling = 0;
-    if (D_800C3671 != 0) {
+    if (g_cutscene_restart_transition != 0) {
         return;
     }
     if (!((*(s32 *)(arg0 + 0x2C) & 0x100) || arg0[0x92C] == 0 || (*(u16 *)(arg0 + 0x920) & 8))) {

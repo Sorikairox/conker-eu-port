@@ -1,4 +1,4 @@
-27s/D_800CC2B0 = 0;/D_800CC2B0 = 1;/ %
+27s/g_obj_pending_actions = 0;/g_obj_pending_actions = 1;/ %
 28s/i < 25/i < 24/ %
 30s/interaction_state == 0 ||/interaction_state != 0 ||/ %
 30s/ctl\[0x1B4\] == 0/ctl[0x1B4] == 1/ %

@@ -30,10 +30,10 @@ struct260 *obj_electrify_fx_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     return temp_v0;
 }
 
-extern f32 D_8009FFF0;
-extern f32 D_8009FFF4;
-extern f32 D_8009FFF8;
-extern f32 D_8009FFFC;
+extern f32 g_electrify_k_fff0; /* was D_8009FFF0 */
+extern f32 g_electrify_k_fff4; /* was D_8009FFF4 */
+extern f32 g_electrify_k_fff8; /* was D_8009FFF8 */
+extern f32 g_electrify_k_fffc; /* was D_8009FFFC */
 void obj_tint_set_flash(u8 *, s32, s32, s32, s32, s32, s32);
 s32 object_arc_to_surface_spawn(u8 *, s16, s16, s16, s32, f32, f32, s32, s32, s8 *, s32, s32);
 void obj_angle_point_effect(u8 *, s16, s16, u8, s32);
@@ -60,7 +60,7 @@ void obj_electrify_fx_update(u8 *arg0) {
         return;
     }
     obj_tint_set_flash(temp_s6, 0xFF, 0xFF, 0xFF, 0x1E, 0, 0xA);
-    (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((D_8009FFF0 + (random_float() * D_8009FFF4)) * g_frame_step_f));
+    (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((g_electrify_k_fff0 + (random_float() * g_electrify_k_fff4)) * g_frame_step_f));
     if ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f) {
         do {
             sp.u94 = 0xBA;
@@ -74,7 +74,7 @@ void obj_electrify_fx_update(u8 *arg0) {
             (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) - 1.0f);
         } while ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f);
     }
-    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((D_8009FFF8 + (random_float() * D_8009FFFC)) * g_frame_step_f));
+    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((g_electrify_k_fff8 + (random_float() * g_electrify_k_fffc)) * g_frame_step_f));
     if ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f) {
         do {
             temp_s0_2 = random_int();

@@ -112,7 +112,7 @@ void gun_shot_sparks(f32 *pos, f32 *dir, u8 flag, s32 arg3);
 // kind ctl +0x78 (bit 7 ignored): 0x14 / 0x3F / 0x18 / 0x41 hit reactions (obj_spawn_hit_shot 2 / 0x12 / 6, counter
 // ctl +0x1AA, pad rumble), 0x24 the hit record ctl +0xB0 as kind 7 (with a pain voice 0x53B..0x53D unless the
 // record says 2 or ctl +0xAF is clear), 0x3B kind 0x10 plus the muzzle sparks (weapon_c_muzzle_frame_get / gun_shot_sparks),
-// 0x23 kind 8 (rumble off). Then clears ctl +0x1B4. D_800CC2B0 is cleared first.
+// 0x23 kind 8 (rumble off). Then clears ctl +0x1B4. g_obj_pending_actions is cleared first.
 /* was func_15063AA0 */
 void obj_run_pending_actions(void) {
     struct127 *obj;
@@ -124,7 +124,7 @@ void obj_run_pending_actions(void) {
     f32 v44[3];
     s32 i;
 
-    D_800CC2B0 = 0;
+    g_obj_pending_actions = 0;
     for (i = 0, obj = g_objects; i < 25; i++, obj++) {
         if (obj->interaction_state == 0 || (ctl = *(u8 **) ((u8 *) obj + 0x31C)) == NULL || ctl[0x1B4] == 0) {
             continue;
@@ -191,22 +191,22 @@ void obj_run_pending_actions(void) {
     }
 }
 
-extern s16 D_800CC6D2;
+extern s16 g_aim_yaw_delta; /* was D_800CC6D2 */
 
 /* was func_15063D6C */
 s16 player_aim_yaw_delta(u8 *arg0) {
-    D_800CC6D2 = ((*(u16 *)((u8 *)arg0 + 0x7A)) - (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x12))) - obj_yaw_to_linked_obj(arg0);
-    if (D_800CC6D2 >= 0x3E81) {
-        D_800CC6D2 = 0x3E80;
+    g_aim_yaw_delta = ((*(u16 *)((u8 *)arg0 + 0x7A)) - (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x12))) - obj_yaw_to_linked_obj(arg0);
+    if (g_aim_yaw_delta >= 0x3E81) {
+        g_aim_yaw_delta = 0x3E80;
     }
-    if (D_800CC6D2 < -0x3E80) {
-        D_800CC6D2 = -0x3E80;
+    if (g_aim_yaw_delta < -0x3E80) {
+        g_aim_yaw_delta = -0x3E80;
     }
-    return D_800CC6D2;
+    return g_aim_yaw_delta;
 }
 
-extern u8 *D_800CC6A4;
-extern f32 D_800CC6D4;
+extern u8 *g_cur_pad; /* was D_800CC6A4 */
+extern f32 g_aim_turn_div; /* was D_800CC6D4 */
 
 /* was func_15063DE8 */
 s32 player_aim_turn_update(u8 *arg0, s32 arg1, s32 arg2) {
@@ -216,26 +216,26 @@ s32 player_aim_turn_update(u8 *arg0, s32 arg1, s32 arg2) {
 
     var_v0 = 0;
     if (arg1 & arg2) {
-        D_800CC6D2 = (*(s8 *)((u8 *)D_800CC6A4 + 2)) * 0xC8;
+        g_aim_yaw_delta = (*(s8 *)((u8 *)g_cur_pad + 2)) * 0xC8;
         if ((*(u8 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x84)) != 0) {
-            D_800CC6D2 = player_aim_yaw_delta(arg0);
+            g_aim_yaw_delta = player_aim_yaw_delta(arg0);
         }
-        D_800CC6D4 = 12.0f;
-        D_800CC6D2 = (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x12)) + ((s32) (D_800CC6D2 * D_800CC264) / 2000);
-        if (D_800CC6D2 < -0x2328) {
-            temp_t0 = ((*(u16 *)((u8 *)arg0 + 0x7A)) - D_800CC6D2) - 0x2328;
+        g_aim_turn_div = 12.0f;
+        g_aim_yaw_delta = (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x12)) + ((s32) (g_aim_yaw_delta * g_obj_time_step_pct) / 2000);
+        if (g_aim_yaw_delta < -0x2328) {
+            temp_t0 = ((*(u16 *)((u8 *)arg0 + 0x7A)) - g_aim_yaw_delta) - 0x2328;
             (*(u16 *)((u8 *)arg0 + 0x7A)) = temp_t0;
             (*(u16 *)((u8 *)arg0 + 0x76)) = temp_t0;
-            D_800CC6D2 = -0x2328;
+            g_aim_yaw_delta = -0x2328;
         }
-        if (D_800CC6D2 >= 0x2329) {
-            temp_t3 = ((*(u16 *)((u8 *)arg0 + 0x7A)) - D_800CC6D2) + 0x2328;
+        if (g_aim_yaw_delta >= 0x2329) {
+            temp_t3 = ((*(u16 *)((u8 *)arg0 + 0x7A)) - g_aim_yaw_delta) + 0x2328;
             (*(u16 *)((u8 *)arg0 + 0x7A)) = temp_t3;
             (*(u16 *)((u8 *)arg0 + 0x76)) = temp_t3;
-            D_800CC6D2 = 0x2328;
+            g_aim_yaw_delta = 0x2328;
         }
         var_v0 = 1;
-        (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x12)) = D_800CC6D2;
+        (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x12)) = g_aim_yaw_delta;
     }
     return var_v0;
 }
@@ -327,9 +327,9 @@ s32 player_try_begin_action(struct127 *arg0, s32 arg1, s32 arg2, s8 arg3, s32 ar
     }
     return 0x3E7;
 }
-extern f32 D_80099B50;
-extern f32 D_80099B54;
-extern f32 D_80099B5C;
+extern f32 g_shot_k_9b50; /* was D_80099B50 */
+extern f32 g_shot_k_9b54; /* was D_80099B54 */
+extern f32 g_shot_k_9b5c; /* was D_80099B5C */
 /* was func_1506435C */
 void obj_spawn_hit_shot(u8 *arg0, s32 arg1) {
     struct {
@@ -377,7 +377,7 @@ void obj_spawn_hit_shot(u8 *arg0, s32 arg1) {
     }
     sp5C = var_f14;
     sp60 = var_f2;
-    temp_f12 = (*(f32 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x16C)) * D_80099B50;
+    temp_f12 = (*(f32 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x16C)) * g_shot_k_9b50;
     sp.u78 = var_f0;
     sp58 = temp_f12;
     sp64 = sinf(temp_f12) * var_f14;
@@ -394,13 +394,13 @@ void obj_spawn_hit_shot(u8 *arg0, s32 arg1) {
         temp_f16 = (*(f32 *)((u8 *)temp_v0 + 0xC0)) - sp.u74;
         sp4C = temp_f2;
         sp44 = temp_f16;
-        temp_f2_2 = math_atan2f((*(f32 *)((u8 *)temp_v0 + 0xBC)) - sp.u70, sqrtf((temp_f2 * temp_f2) + (temp_f16 * temp_f16))) * D_80099B54;
+        temp_f2_2 = math_atan2f((*(f32 *)((u8 *)temp_v0 + 0xBC)) - sp.u70, sqrtf((temp_f2 * temp_f2) + (temp_f16 * temp_f16))) * g_shot_k_9b54;
         sp54 = temp_f2_2;
         var_f2_2 = temp_f2_2;
-        var_f12 = math_atan2f(sp4C, sp44) * D_80099B54;
+        var_f12 = math_atan2f(sp4C, sp44) * g_shot_k_9b54;
     }
     sp50 = var_f12;
-    vec_from_yaw_pitch((s32) (var_f2_2 * D_80099B5C) & 0xFFFF, sp.u78, 0.0f, &sp.u84, &sp.u80, &sp.u7C);
+    vec_from_yaw_pitch((s32) (var_f2_2 * g_shot_k_9b5c) & 0xFFFF, sp.u78, 0.0f, &sp.u84, &sp.u80, &sp.u7C);
     temp_f0 = -sp.u80;
     sp.u80 = temp_f0;
     camera_object_spawn(sp50, sp.u84, temp_f0, 0.0f, 0x64U, arg1, 0.0f, 0.5f, (s32) &sp.u6C, 1, 1);
@@ -434,7 +434,7 @@ u16 obj_pick_attack_anim(u8 *arg0, u16 arg1, u16 arg2, u16 arg3) {
     return r;
 }
 
-extern s32 D_800CC6AC;               /* pad buttons pressed this frame */
+extern s32 g_walk_buttons_pressed;               /* pad buttons pressed this frame; was D_800CC6AC */
 void objev_set_music_mode(void);
 void move_xz_towards(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
 void obj_sfx_play(s32 arg0, struct127 *arg1);
@@ -446,7 +446,7 @@ void obj_sfx_play(s32 arg0, struct127 *arg1);
 // player_context_action: B / context button of the player. First runs a pending context action (ctx+0x7B, set by
 // the level: sit down, pick up / put down, open, push, ...), then, when B was pressed with nothing pending and the
 // player is on the ground, starts the B animation (attack / slap, or a level variant). arg3 != 0 only updates the
-// state (no animation); noPad != 0 swallows the B press (buttons and D_800CC6AC lose 0x4000).
+// state (no animation); noPad != 0 swallows the B press (buttons and g_walk_buttons_pressed lose 0x4000).
 /* was func_15064668 */
 void player_context_action(struct127 *player, s32 buttons, f32 height, s32 arg3, s32 noPad) {
     u8 *ctx;
@@ -462,7 +462,7 @@ void player_context_action(struct127 *player, s32 buttons, f32 height, s32 arg3,
 
     if (noPad) {
         buttons &= ~0x4000;
-        D_800CC6AC &= ~0x4000;
+        g_walk_buttons_pressed &= ~0x4000;
     }
     ctx = CTX(player);
     if (ctx[0x7B] != 0) {
@@ -582,7 +582,7 @@ void player_context_action(struct127 *player, s32 buttons, f32 height, s32 arg3,
                 if (!(*(s32 *)((u8 *)player + 0x25C) & 0x20)) {
                     anim = 0xD6;
                     speed = 1.15f; /* D_80099B9C */
-                    if (D_800BE616) {
+                    if (g_mp_mode_active) {
                         anim = 0x118;
                         speed = 1.0f;
                     }
@@ -601,7 +601,7 @@ void player_context_action(struct127 *player, s32 buttons, f32 height, s32 arg3,
                     speed = 1.6f; /* D_80099BA0 */
                 } else {
                     P_U8(0x83) = 0xFF;
-                    if (D_800BE616 == 0) {
+                    if (g_mp_mode_active == 0) {
                         anim = 0x1DC;
                     } else if (g_cheat_flags & 0x400) {
                         anim = 0x355;
@@ -704,7 +704,7 @@ void obj_play_carried_anim(struct127 *arg0) {
     obj_start_anim(arg0, var_v1 & 0xFFFF, 1.0f, 6.0f, 0.0f, 0.0f, 0);
     obj_slot_sync_anim_frame(arg0->unk65 - 1, (s32) g_cur_obj_index);
 }
-extern u8 D_800B89C4[];              /* per-player record (stride 0x32C): character kind byte */
+extern u8 g_objects_ref_id[];              /* per-player record (stride 0x32C): character kind byte; was D_800B89C4 */
 
 #define P_U8(o) (((u8 *)player)[o])
 #define P_F32(o) (*(f32 *)((u8 *)player + (o)))
@@ -734,7 +734,7 @@ s32 player_move_animation(struct127 *player, f32 vel, f32 stickMag, s32 moveAnim
         if (v < 1.0f) {
             anim = walk_anim_cancel_special();
         } else {
-            switch (D_800B89C4[((u8 *)g_cur_obj)[0x13C] * 0x32C]) {
+            switch (g_objects_ref_id[((u8 *)g_cur_obj)[0x13C] * 0x32C]) {
             case 0x8C:
                 P_U8(0xAA) = 0x5A;
                 anim = 0x1A6;
@@ -804,11 +804,11 @@ s32 player_move_animation(struct127 *player, f32 vel, f32 stickMag, s32 moveAnim
             break;
         case 0x09:
             if (1.0f <= v) {
-                if (!D_800BE616) {
+                if (!g_mp_mode_active) {
                     P_U8(0xAA) = 0x37;
                 }
                 anim = 0x7E;
-                if (!D_800BE616) {
+                if (!g_mp_mode_active) {
                     speed = vel * 0.0625f + 0.6f;
                 } else if (20.0f <= P_F32(0x44)) {
                     anim = 0x22C;
@@ -967,7 +967,7 @@ s32 player_move_animation(struct127 *player, f32 vel, f32 stickMag, s32 moveAnim
                 }
             } else if (ctx[0x17] != 0) {
                 blend = 5.0f;
-                if (*(u16 *)D_800CC6A4 & 0x2000) {
+                if (*(u16 *)g_cur_pad & 0x2000) {
                     if (*(u16 *)((u8 *)player + 0x84) != 0x283) {
                         P_F32(0x3C) *= 0.2f;
                         g_cur_obj_cmd = 0xFF010604;
@@ -1030,27 +1030,27 @@ u8 *item_effect_spawn(u8 kind, s32 arg1); /* P222: as port's C (arg1 unused) */
 s32 aiscript_find_by_kind(s32, s32);
 void obj_point_fx_broadcast_kill(struct127 *);
 void object_bone_point_effects(struct127 *);
-extern u16 D_80099A60[][4];  /* per weapon row (kind 2 / 0x13 / 0xA / other): {start, idle, fire, stop} anims */
+extern u16 g_item_weapon_anims[][4];  /* per weapon row (kind 2 / 0x13 / 0xA / other): {start, idle, fire, stop} anims; was D_80099A60 */
 extern u8 D_eu_800C3E78;
-extern s16 D_800CC264;
-extern u8 D_800CC2B0;
-extern u8 D_800BE9A0;
+extern s16 g_obj_time_step_pct; /* was D_800CC264 */
+extern u8 g_obj_pending_actions; /* was D_800CC2B0 */
+extern u8 g_frame_delta; /* was D_800BE9A0 */
 extern s32 g_level_id;       /* level; was D_800BE9F0 */
-extern u8 D_800BE616;
+extern u8 g_mp_mode_active; /* was D_800BE616 */
 extern u8 *g_obj0_state; /* was D_800CCA0C */
-extern u8 D_800D2E68;
-extern u8 *D_800D34B8;
+extern u8 g_hints_seen_b8; /* was D_800D2E68 */
+extern u8 *g_level_zones; /* was D_800D34B8 */
 extern s32 g_cur_obj_cmd; /* was D_800D1580 */
 
-extern s32 D_800CC6A0;
-extern s32 D_800CC6B0;
-extern u16 D_800BEB30[];
+extern s32 g_cur_cam_yaw; /* was D_800CC6A0 */
+extern s32 g_walk_buttons_held; /* was D_800CC6B0 */
+extern u16 g_pad_pressed[]; /* was D_800BEB30 */
 void hint_box_open(s32);
 void hint_box_close(void);
 s32 hint_box_is_closed(void);
 s32 mp3_stream_get_state(void);
-extern s32 D_800864A0[2];
-extern u16 D_80099A90[];
+extern s32 g_item_shout_sfx[2]; /* was D_800864A0 */
+extern u16 g_item_sfx_params_c[]; /* was D_80099A90 */
 void face_anim_reset_default(struct127 *);
 void face_anim_start(struct127 *, u8, u8, u16, s32);
 void gunfire_burst_spawn(struct127 *arg0, struct127 *arg1, u8 arg2, u8 arg3); /* P222: as port's functions.h */
@@ -1060,8 +1060,8 @@ struct127 *obj_find_held(struct127 *, s32);
 void char_fx_glow_spawn(s32);
 extern s32 g_frame_ticks; /* was D_800BE9E4 */
 extern u8 g_level_first_frame; /* was D_800BE9B4 */
-extern u16 D_80099A80[];
-extern u16 D_80099A88[];
+extern u16 g_item_sfx_params_a[]; /* was D_80099A80 */
+extern u16 g_item_sfx_params_b[]; /* was D_80099A88 */
 struct127 *obj_find_by_setup_id(u8);
 s32 object_point_effect_spawn(struct127 *, s32, s32, s32, s32);
 u16 sfx_emitter_start(u16, s16, s16, s16, s32, u16, s16, s32, void *, s32, s32, s32);
@@ -1101,20 +1101,20 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
 
     if (B(CTL, 0x11A) == 3 || B(obj, 0x104) != 0 || recurse != 0) {
         held &= ~0x4000;
-        D_800CC6AC &= ~0x4000;
+        g_walk_buttons_pressed &= ~0x4000;
         if (recurse != 0) {
             if (B(obj, 0x104) == 0) {
                 W(obj, 0x1C4) = 0;
             }
             held &= ~0x2000;
-            D_800CC6AC &= ~0x2000;
+            g_walk_buttons_pressed &= ~0x2000;
         }
     }
     if (0.0f < F(obj, 0x20)) {
         height += 50.0f;
     }
     switch (kind) {
-    case 2: case 0xA: case 0x13: case 0x34: /* 15065F40: weapons, rows D_80099A60 */
+    case 2: case 0xA: case 0x13: case 0x34: /* 15065F40: weapons, rows g_item_weapon_anims */
         done = 1;
         row = (kind == 2) ? 0 : (kind == 0x13) ? 1 : (kind == 0xA) ? 2 : 3;
         if (stunned != 0) {
@@ -1145,7 +1145,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
                     B(obj, 0x89) = 0xFF;
                     B(obj, 0x8A) = 0xFF;
                     B(obj, 0x83) = 0xFF;
-                    anim = D_80099A60[row][3];
+                    anim = g_item_weapon_anims[row][3];
                     B(CTL, 0x11A) = 3;
                     H(CTL, 0x72) = 0x5A;
                     setFlag58 = 1;
@@ -1153,21 +1153,21 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             } else if (H(CTL, 0x72) == 0 && SH(W(obj, 0x318), 0x73C) != 1 && SH(W(obj, 0x318), 0x73C) != 3) {
                 B(CTL, 0x1B) = 0;
                 B(CTL, 0x11A) = 1;
-                anim = D_80099A60[row][0];
+                anim = g_item_weapon_anims[row][0];
                 B(obj, 0x83) = 0xFF;
                 B(obj, 0x89) = 0xFF;
                 H(CTL, 0x72) = 0x5A;
             }
             held &= ~0x4000;
         }
-        r = D_80099A60[row];
+        r = g_item_weapon_anims[row];
         if (B(CTL, 0x78) != 0 && (held & 0x2000) && anim == 0 && H(obj, 0x84) == r[1]) {
             anim = r[2];
             B(CTL, 0x1B)++;
         }
         if ((H(obj, 0x84) == r[1] || H(obj, 0x84) == r[0] || H(obj, 0x84) == r[2] || anim != 0) && anim != r[3]) {
             B(CTL, 0x78) = kind;
-            *(u16 *)D_800CC6A4 &= ~0x2000;
+            *(u16 *)g_cur_pad &= ~0x2000;
             setFlag58 = 1;
         } else {
             B(CTL, 0x78) = 0;
@@ -1253,7 +1253,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             if ((held & 0x2000) && H(CTL, 0x72) == 0) {
                 B(obj, 0x83) = 0xF;
                 B(CTL, 0x1B4) |= 3;
-                D_800CC2B0 = 1;
+                g_obj_pending_actions = 1;
                 f148 = 6.0f;
                 anim = animSwim;
                 H(CTL, 0x72) = 0x28;
@@ -1287,7 +1287,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             break;
         }
         if (SH(CTL, 0x8) != 0) {
-            SH(CTL, 0x8) -= D_800BE9A0;
+            SH(CTL, 0x8) -= g_frame_delta;
             if (SH(CTL, 0x8) < 100) {
                 SH(CTL, 0xE) = 0xAD;
                 B(CTL, 0x16) = 0xC8;
@@ -1322,22 +1322,22 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
         }
         B(CTL, 0x78) = 3;
         anim = 0x2C;
-        if (D_800BE616 != 0) {
+        if (g_mp_mode_active != 0) {
             B(obj, 0x8A) = 10;
         }
-        D_800CC6D2 = ((s8 *)D_800CC6A4)[2] * 150;
+        g_aim_yaw_delta = ((s8 *)g_cur_pad)[2] * 150;
         if (B(CTL, 0x84) != 0) {
             SH(CTL, 0x12) = 0;
-        } else if (D_800CC6D2 < -8000 && SH(CTL, 0x12) < -7000) {
-            H(obj, 0x7A) = H(obj, 0x76) = H(obj, 0x76) + D_800CC264 * 7;
+        } else if (g_aim_yaw_delta < -8000 && SH(CTL, 0x12) < -7000) {
+            H(obj, 0x7A) = H(obj, 0x76) = H(obj, 0x76) + g_obj_time_step_pct * 7;
             anim = 0xE0;
             speed = 3.0f;
-        } else if (D_800CC6D2 > 8000 && SH(CTL, 0x12) > 7000) {
-            H(obj, 0x7A) = H(obj, 0x76) = H(obj, 0x76) - D_800CC264 * 7;
+        } else if (g_aim_yaw_delta > 8000 && SH(CTL, 0x12) > 7000) {
+            H(obj, 0x7A) = H(obj, 0x76) = H(obj, 0x76) - g_obj_time_step_pct * 7;
             anim = 0xE0;
             speed = 3.0f;
         }
-        D_800CC6D4 = 10.0f;
+        g_aim_turn_div = 10.0f;
         blend = 8.0f;
         B(obj, 0x89) = 0x10;
         B(obj, 0x83) = 0x10;
@@ -1369,7 +1369,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
         return 0;
 
     case 0x42: /* 150669D8 */
-        if (!(D_800D2E68 & 4)) {
+        if (!(g_hints_seen_b8 & 4)) {
             if (held & 0x4000) {
                 B(CTL, 0x78) = kind;
                 return 0;
@@ -1389,12 +1389,12 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
         B(CTL, 0x30) = 0x12;
         anim = 0x2F;
         if (g_level_id == 0x31) {
-            F(CTL, 0x28) = SH(D_800D34B8, 0x270);
-            F(CTL, 0x2C) = SH(D_800D34B8, 0x274);
+            F(CTL, 0x28) = SH(g_level_zones, 0x270);
+            F(CTL, 0x2C) = SH(g_level_zones, 0x274);
             item_effect_spawn(5, 0);
         } else {
-            F(CTL, 0x28) = SH(D_800D34B8, 0x68);
-            F(CTL, 0x2C) = SH(D_800D34B8, 0x6C);
+            F(CTL, 0x28) = SH(g_level_zones, 0x68);
+            F(CTL, 0x2C) = SH(g_level_zones, 0x6C);
             item_effect_spawn(0, 0);
         }
         H(obj, 0x76) = 0xC000;
@@ -1485,11 +1485,11 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
         }
         {
             s16 d;
-            d = -((s8 *)D_800CC6A4)[2] * 100 - SH(CTL, 0x80);
+            d = -((s8 *)g_cur_pad)[2] * 100 - SH(CTL, 0x80);
             if (d > 600) d = 600;
             if (d < -600) d = -600;
             SH(CTL, 0x80) += d;
-            d = ((s8 *)D_800CC6A4)[3] * 32 - SH(CTL, 0x82) + 0x240;
+            d = ((s8 *)g_cur_pad)[3] * 32 - SH(CTL, 0x82) + 0x240;
             if (d > 300) d = 300;
             if (d < -300) d = -300;
             SH(CTL, 0x82) += d;
@@ -1514,7 +1514,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
         if (B(CTL, 0x7D) != 0) {
             if ((buttons & 0x2000) && F(obj, 0x48) < 0.6f /* D_80099D64 */) {
                 u16 old = H(CTL, 0x7E);
-                H(CTL, 0x7E) = old + D_800CC264 * 4 / 3;
+                H(CTL, 0x7E) = old + g_obj_time_step_pct * 4 / 3;
                 if ((old ^ H(CTL, 0x7E)) & 0x100) {
                     g_cur_obj_cmd = 0x13;
                     if (H(CTL, 0x7E) & 0x200) {
@@ -1563,19 +1563,19 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
                 } else {
                     B(CTL, 0x3C) = 0;
                 }
-                if (D_800BE616 == 0) {
+                if (g_mp_mode_active == 0) {
                     B(obj, 0xAA) = 0x37;
                 }
             }
             B(obj, 0x83) = 8;
             if (H(obj, 0x84) != 0x7C && H(obj, 0x84) != 0x20D && H(obj, 0x84) != 0x238) {
                 /* fire sounds (inlined in the asm): sound 0x2CF at the obj, then for obj kinds 0x3B / 0x80 one time in
-                 * four a voice line; D_80099A80 is passed through to sfx_emitter_start */
+                 * four a voice line; g_item_sfx_params_a is passed through to sfx_emitter_start */
                 obj_point_fx_broadcast_kill(obj);
-                sfx_emitter_start(0x2CF, POSARGS(obj), 0x7FFF, 1000, 0x1F4, (s32)sfx_cb_follow_object_anim, obj, (s32)D_80099A80, 0, 0);
+                sfx_emitter_start(0x2CF, POSARGS(obj), 0x7FFF, 1000, 0x1F4, (s32)sfx_cb_follow_object_anim, obj, (s32)g_item_sfx_params_a, 0, 0);
                 if ((B(obj, 4) == 0x3B || B(obj, 4) == 0x80) && (random_int() & 3) == 0) {
                     u16 v = (B(obj, 4) == 0x3B) ? sound_pick_variant(0x543, 4) : sound_pick_variant(0x57C, 6);
-                    sfx_emitter_start(v, POSARGS(obj), 0x7FFF, 1000, 0x1F4, (s32)sfx_cb_follow_object_anim, obj, (s32)D_80099A80, 0, 0);
+                    sfx_emitter_start(v, POSARGS(obj), 0x7FFF, 1000, 0x1F4, (s32)sfx_cb_follow_object_anim, obj, (s32)g_item_sfx_params_a, 0, 0);
                 }
             }
         } else if (W(obj, 0x2EC) != 0 && g_level_id == 0x36) {
@@ -1646,12 +1646,12 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             B(obj, 0x83) = 8;
             if (a0 != 0x1E0 && a0 != 0x253 && a0 != 0x254) {
                 /* fire sounds (inlined in the asm): sound 0x2CF at the obj, then for obj kinds 0x3B / 0x80 one time in
-                 * four a voice line; D_80099A88 is passed through to sfx_emitter_start */
+                 * four a voice line; g_item_sfx_params_b is passed through to sfx_emitter_start */
                 obj_point_fx_broadcast_kill(obj);
-                sfx_emitter_start(0x2CF, POSARGS(obj), 0x7FFF, 1000, 0x1F4, (s32)sfx_cb_follow_object_anim, obj, (s32)D_80099A88, 0, 0);
+                sfx_emitter_start(0x2CF, POSARGS(obj), 0x7FFF, 1000, 0x1F4, (s32)sfx_cb_follow_object_anim, obj, (s32)g_item_sfx_params_b, 0, 0);
                 if ((B(obj, 4) == 0x3B || B(obj, 4) == 0x80) && (random_int() & 3) == 0) {
                     u16 v = (B(obj, 4) == 0x3B) ? sound_pick_variant(0x543, 4) : sound_pick_variant(0x57C, 6);
-                    sfx_emitter_start(v, POSARGS(obj), 0x7FFF, 1000, 0x1F4, (s32)sfx_cb_follow_object_anim, obj, (s32)D_80099A88, 0, 0);
+                    sfx_emitter_start(v, POSARGS(obj), 0x7FFF, 1000, 0x1F4, (s32)sfx_cb_follow_object_anim, obj, (s32)g_item_sfx_params_b, 0, 0);
                 }
             }
             H(CTL, 0x1A4) += g_frame_ticks * 10;
@@ -1761,9 +1761,9 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
     case 0xB: /* 15067C14: anim 0x68 */
         if (H(obj, 0x84) == 0x68) {
             if (F(W(obj, 0x2D0), 8) < 68.0f && B(obj, 0x222) != 0) {
-                D_800CC6D2 = H(obj, 0x7A) - obj_yaw_to_linked_obj((u8 *)obj) - 0x2000;
+                g_aim_yaw_delta = H(obj, 0x7A) - obj_yaw_to_linked_obj((u8 *)obj) - 0x2000;
             }
-            D_800CC6D4 = 4.0f;
+            g_aim_turn_div = 4.0f;
             anim = 999;
             break;
         }
@@ -1821,7 +1821,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
                 } else if (kind == 0xC || g_level_id == 0x2B) {
                     anim = 0x207;
                 } else {
-                    anim = D_800BE616 ? 0x77 : 0x207;
+                    anim = g_mp_mode_active ? 0x77 : 0x207;
                 }
                 blend = 0.0f;
                 B(obj, 0x89) = 0xFF;
@@ -1889,13 +1889,13 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
         }
         break;
 
-    case 0x10: /* 150681BC: anims 0xBE / 0xC1 / 0xC0, stick x -> D_800CC6D2 */
+    case 0x10: /* 150681BC: anims 0xBE / 0xC1 / 0xC0, stick x -> g_aim_yaw_delta */
         speed = 1.4f; /* D_80099D98 */
         if (kind != B(CTL, 0x78)) {
             anim = player_try_begin_action(obj, 0xBE, 1, kind, held);
             break;
         }
-        D_800CC6D2 = ((s8 *)D_800CC6A4)[2] * 200;
+        g_aim_yaw_delta = ((s8 *)g_cur_pad)[2] * 200;
         B(obj, 0x8A) = 10;
         if ((buttons & 0x2000) && H(obj, 0x84) != 0xBE) {
             anim = 0xC1;
@@ -1962,16 +1962,16 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             B(obj, 0x8A) = 10;
             B(obj, 0x89) = 0;
             B(obj, 0x83) = 10;
-            if ((*(u16 *)D_800CC6A4 & 0x2000) || (H(CTL, 0x88) & 0x2000)) {
+            if ((*(u16 *)g_cur_pad & 0x2000) || (H(CTL, 0x88) & 0x2000)) {
                 B(CTL, 0x1B4) |= 1;
-                D_800CC2B0 = 1;
+                g_obj_pending_actions = 1;
             }
             if (a == H(obj, 0x84)) {
                 break;
             }
-            if (!(*(u16 *)D_800CC6A4 & 0x2000) && (H(CTL, 0x88) & 0x2000) && H(CTL, 0x19E) == 0) {
+            if (!(*(u16 *)g_cur_pad & 0x2000) && (H(CTL, 0x88) & 0x2000) && H(CTL, 0x19E) == 0) {
                 B(CTL, 0x1B4) |= 2;
-                D_800CC2B0 = 1;
+                g_obj_pending_actions = 1;
                 blend = 0.0f;
                 B(obj, 0x89) = 0xFF;
                 B(obj, 0x83) = 0xFF;
@@ -2017,7 +2017,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
         break;
 
     case 0x3C: { /* 1506867C: special pad (obj_ctrl_action_update: ctl +0x17 set), spin ctl +0x18 */
-        u16 diff = D_800CC6A0 - H(obj, 0x7A);
+        u16 diff = g_cur_cam_yaw - H(obj, 0x7A);
         anim = 999;
         B(obj, 0x239) = 0x2F;
         if (B(obj, 0x13C) != 0) {
@@ -2038,12 +2038,12 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
                 }
             }
             {
-                u16 yaw = H(obj, 0x7A) + SH(CTL, 0x18) * D_800CC264 / 100;
+                u16 yaw = H(obj, 0x7A) + SH(CTL, 0x18) * g_obj_time_step_pct / 100;
                 H(obj, 0x7A) = yaw;
                 H(obj, 0x76) = yaw;
             }
             if (SH(CTL, 0x18) > 0x200 || SH(CTL, 0x18) < -0x200) {
-                u16 now = D_800CC6A0 - H(obj, 0x7A);
+                u16 now = g_cur_cam_yaw - H(obj, 0x7A);
                 s16 s = SH(CTL, 0x18);
                 if (((diff < 0x1000 || diff > 0xF000) && now >= 0x1000 && now < 0x7000 && s < 0) ||
                     (diff > 0x7000 && now <= 0x7000 && s > 0)) {
@@ -2178,17 +2178,17 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             B(obj, 0x8A) = 10;
             B(obj, 0x89) = 0;
             B(obj, 0x83) = 10;
-            if (H(CTL, 0x19E) == 0 && ((*(u16 *)D_800CC6A4 & 0x2000) || (H(CTL, 0x88) & 0x2000))) {
+            if (H(CTL, 0x19E) == 0 && ((*(u16 *)g_cur_pad & 0x2000) || (H(CTL, 0x88) & 0x2000))) {
                 B(CTL, 0x1B4) |= 1;
-                D_800CC2B0 = 1;
+                g_obj_pending_actions = 1;
             }
             if (H(obj, 0x84) == 0x152) {
                 break;
             }
-            if (!(*(u16 *)D_800CC6A4 & 0x2000) && (H(CTL, 0x88) & 0x2000) && H(obj, 0x84) == 0x157 &&
+            if (!(*(u16 *)g_cur_pad & 0x2000) && (H(CTL, 0x88) & 0x2000) && H(obj, 0x84) == 0x157 &&
                 H(CTL, 0x19E) == 0) {
                 B(CTL, 0x1B4) |= 2;
-                D_800CC2B0 = 1;
+                g_obj_pending_actions = 1;
                 blend = 0.0f;
                 B(obj, 0x89) = 0xFF;
                 B(obj, 0x83) = 0xFF;
@@ -2263,23 +2263,23 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
         }
         B(obj, 0x8A) = 0x14;
         player_aim_turn_update((u8 *)obj, buttons, 0x2010);
-        if (H(CTL, 0x19E) == 0 && ((D_800CC6B0 & 0x2000) || (H(CTL, 0x88) & 0x2000))) {
+        if (H(CTL, 0x19E) == 0 && ((g_walk_buttons_held & 0x2000) || (H(CTL, 0x88) & 0x2000))) {
             if (B(CTL, 0x198) == 2) {
                 B(CTL, 0x1B4) |= 4;
             } else {
                 B(CTL, 0x1B4) |= 1;
             }
-            D_800CC2B0 = 1;
+            g_obj_pending_actions = 1;
         }
         /* (the asm re-tests recurse here: always 0 on this path) */
-        if ((((D_800CC6B0 & 0x10) && !(D_800CC6B0 & 0x2000) && (H(CTL, 0x88) & 0x2000)) ||
-             (!(D_800CC6B0 & 0x10) && (D_800CC6AC & 0x2000))) &&
+        if ((((g_walk_buttons_held & 0x10) && !(g_walk_buttons_held & 0x2000) && (H(CTL, 0x88) & 0x2000)) ||
+             (!(g_walk_buttons_held & 0x10) && (g_walk_buttons_pressed & 0x2000))) &&
             H(obj, 0x84) != 0x225 && H(obj, 0x84) != 0x222 && H(obj, 0x84) != 0x236 && H(obj, 0x84) != 0x227 &&
             H(obj, 0x84) != 0x237 && H(CTL, 0x19E) == 0) {
-            if (*(u16 *)D_800CC6A4 & 0x10) {
+            if (*(u16 *)g_cur_pad & 0x10) {
                 anim = (random_int() & 3) ? 0x227 : 0x237;
                 B(CTL, 0x1B4) |= 2;
-                D_800CC2B0 = 1;
+                g_obj_pending_actions = 1;
             } else {
                 anim = (random_int() & 3) ? 0x222 : 0x236;
             }
@@ -2289,7 +2289,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             H(CTL, 0x19E) = 0x32;
             break;
         }
-        if ((D_800CC6B0 & 0x10) && (D_800CC6B0 & 0x2000) && H(obj, 0x84) != 0x225) {
+        if ((g_walk_buttons_held & 0x10) && (g_walk_buttons_held & 0x2000) && H(obj, 0x84) != 0x225) {
             B(obj, 0x89) = 0;
             B(obj, 0x8A) = 8;
             B(obj, 0x83) = 8;
@@ -2331,13 +2331,13 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             break;
         }
         B(obj, 0x8A) = 0x14;
-        if ((*(u16 *)D_800CC6A4 & 0x2000) || (H(CTL, 0x88) & 0x2000)) {
+        if ((*(u16 *)g_cur_pad & 0x2000) || (H(CTL, 0x88) & 0x2000)) {
             if (B(CTL, 0x198) == 2) {
                 B(CTL, 0x1B4) |= 8;
             } else {
                 B(CTL, 0x1B4) |= 1;
             }
-            D_800CC2B0 = 1;
+            g_obj_pending_actions = 1;
         }
         if (recurse != 0) {
             B(obj, 0x89) = 0xFF;
@@ -2348,7 +2348,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             }
             break;
         }
-        if (!(*(u16 *)D_800CC6A4 & 0x2000) && (H(CTL, 0x88) & 0x2000) && H(obj, 0x84) != 0xC4 && H(CTL, 0x19E) == 0) {
+        if (!(*(u16 *)g_cur_pad & 0x2000) && (H(CTL, 0x88) & 0x2000) && H(obj, 0x84) != 0xC4 && H(CTL, 0x19E) == 0) {
             blend = 0.0f;
             anim = 0xC7;
             B(obj, 0x89) = 0xFF;
@@ -2356,7 +2356,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             H(CTL, 0x19E) = 0x32;
             break;
         }
-        if ((*(u16 *)D_800CC6A4 & 0x2000) && H(obj, 0x84) != 0xC4) {
+        if ((*(u16 *)g_cur_pad & 0x2000) && H(obj, 0x84) != 0xC4) {
             B(obj, 0x89) = 0;
             B(obj, 0x8A) = 8;
             B(obj, 0x83) = 8;
@@ -2386,9 +2386,9 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             B(obj, 0x8A) = 10;
             B(obj, 0x89) = 0;
             B(obj, 0x83) = 10;
-            if (H(CTL, 0x19E) == 0 && ((*(u16 *)D_800CC6A4 & 0x2000) || (H(CTL, 0x88) & 0x2000))) {
+            if (H(CTL, 0x19E) == 0 && ((*(u16 *)g_cur_pad & 0x2000) || (H(CTL, 0x88) & 0x2000))) {
                 B(CTL, 0x1B4) |= 1;
-                D_800CC2B0 = 1;
+                g_obj_pending_actions = 1;
             }
             if (H(obj, 0x84) == 0x163) {
                 break;
@@ -2403,10 +2403,10 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
                 }
                 break;
             }
-            if (!(*(u16 *)D_800CC6A4 & 0x2000) && (H(CTL, 0x88) & 0x2000) && H(obj, 0x84) == 0x165 &&
+            if (!(*(u16 *)g_cur_pad & 0x2000) && (H(CTL, 0x88) & 0x2000) && H(obj, 0x84) == 0x165 &&
                 H(CTL, 0x19E) == 0) {
                 B(CTL, 0x1B4) |= 2;
-                D_800CC2B0 = 1;
+                g_obj_pending_actions = 1;
                 blend = 0.0f;
                 B(obj, 0x89) = 0xFF;
                 B(obj, 0x83) = 0xFF;
@@ -2447,15 +2447,15 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
         }
         break;
 
-    case 0x17: { /* 15069924: anim 0x8E, turn to the level point D_800D34B8[ctl +0x7A] (0x34 bytes) */
+    case 0x17: { /* 15069924: anim 0x8E, turn to the level point g_level_zones[ctl +0x7A] (0x34 bytes) */
         s32 ok = 1;
         anim = 999;
         if (!(held & 0x4000) || !(height <= 0.0f)) {
             break;
         }
         if (B(CTL, 0x7A) != 0) {
-            f32 d = math_angle_diff_deg(F(D_800D34B8 + B(CTL, 0x7A) * 0x34, 0x10), F(obj, 0x40));
-            if (W(D_800D34B8 + B(CTL, 0x7A) * 0x34, 0x18) != 0 && (d < -90.0f || 90.0f < d)) {
+            f32 d = math_angle_diff_deg(F(g_level_zones + B(CTL, 0x7A) * 0x34, 0x10), F(obj, 0x40));
+            if (W(g_level_zones + B(CTL, 0x7A) * 0x34, 0x18) != 0 && (d < -90.0f || 90.0f < d)) {
                 ok = 0;
             }
         }
@@ -2468,7 +2468,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
         anim = 0x8E;
         {
             /* IDO f32 -> u32: values <= -1 give 0xFFFFFFFF (kept explicit: the plain cast traps on wasm) */
-            f32 a = F(D_800D34B8 + B(CTL, 0x7A) * 0x34, 0x10) * 182.04445f; /* D_80099DBC */
+            f32 a = F(g_level_zones + B(CTL, 0x7A) * 0x34, 0x10) * 182.04445f; /* D_80099DBC */
             u32 u = (a <= -1.0f) ? 0xFFFFFFFF : (u32)a;
             H(obj, 0x76) = u - 0x4000;
         }
@@ -2497,10 +2497,10 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             break;
         }
         if (hint_box_is_closed() != 0) {
-            if (D_800D1940 == 0x42) {
+            if (g_hint_action == 0x42) {
                 B(CTL, 0x78) = 0;
                 anim = 0x358;
-                D_800D2E60[D_800D1940 >> 3] |= 1 << (D_800D1940 & 7);
+                g_hints_seen[g_hint_action >> 3] |= 1 << (g_hint_action & 7);
             } else {
                 anim = 0x12E;
             }
@@ -2508,10 +2508,10 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             B(obj, 0x83) = 0xFF;
             break;
         }
-        if (H(obj, 0x84) == 0x12C || !(D_800BEB30[g_cur_obj_index] & 0x8000)) {
+        if (H(obj, 0x84) == 0x12C || !(g_pad_pressed[g_cur_obj_index] & 0x8000)) {
             break;
         }
-        if ((D_800D1958[0] & 0x20) && mp3_stream_get_state() != 0) {
+        if ((g_hint_box_params[0] & 0x20) && mp3_stream_get_state() != 0) {
             break;
         }
         anim = 0x142;
@@ -2550,9 +2550,9 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             break;
         }
         {
-            s32 shouts[2]; /* sp+0xB0: copy of D_800864A0 */
-            shouts[0] = D_800864A0[0];
-            shouts[1] = D_800864A0[1];
+            s32 shouts[2]; /* sp+0xB0: copy of g_item_shout_sfx */
+            shouts[0] = g_item_shout_sfx[0];
+            shouts[1] = g_item_shout_sfx[1];
             H(obj, 0x282) = 100;
             if (((s8 *)obj)[0x284] == 0) {
                 H(obj, 0x278) += g_frame_ticks;
@@ -2581,7 +2581,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
         s32 mode2;     /* a2 */
         B(CTL, 0x78) = 0x1B;
         B(obj, 0x8A) = 0x14;
-        if (D_800BE616 == 0 || B(obj, 0x65) != 0) {
+        if (g_mp_mode_active == 0 || B(obj, 0x65) != 0) {
             clearItem = 0;
         }
         anim = 999;
@@ -2593,7 +2593,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
         } else {
             hold = 0xB; mode = 4; grabAnim = 0xC; carryAnim = 1; mode2 = 0;
         }
-        if (*(u16 *)D_800CC6A4 & 0x2000) {
+        if (*(u16 *)g_cur_pad & 0x2000) {
             if (mode != B(other, 0x232)) {
                 actor_sound2_stop((struct127 *)other);
                 actor_sound_stop((struct127 *)other);
@@ -2607,7 +2607,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
                 if (B(obj, 4) == 0x80 && (random_int() & 3) == 0) {
                     u16 v = sound_pick_variant(0x57C, 6); /* voice id: the asm masks it to u16 */
                     sfx_emitter_start(v, POSARGS(obj), 0x7FFF, 1000, 0x1F4, (s32)sfx_cb_follow_object_anim, obj,
-                                  (s32)D_80099A90, 0, 0);
+                                  (s32)g_item_sfx_params_c, 0, 0);
                 }
             }
             if (g_frame_ticks < SH(CTL, 0x24)) {
@@ -2680,7 +2680,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             anim = animStart;
             SH(CTL, 0x1AA)++;
         } else if (B(CTL, 0x19B) == 2) {
-            if (!(D_800CC6B0 & 4) && !(H(obj, 0x2F8) & 0x10)) {
+            if (!(g_walk_buttons_held & 4) && !(H(obj, 0x2F8) & 0x10)) {
                 B(CTL, 0x19B) = 3;
             }
             if (g_frame_ticks < H(CTL, 0x19C)) {
@@ -2753,7 +2753,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             obj_start_anim((struct127 *)o, 2, 0.0f, 0.0f, 0.0f, 0.0f, 0);
             char_fx_glow_spawn((s32)o);
         } else if (B(CTL, 0x19B) == 6) {
-            if (!(D_800CC6B0 & 4)) {
+            if (!(g_walk_buttons_held & 4)) {
                 B(CTL, 0x19B) = 7;
             }
         } else if (B(CTL, 0x19B) == 7) {

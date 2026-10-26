@@ -208,8 +208,8 @@ s32 swing_lamp_height_update(u8 *arg0) {
         (*(f32 *)((u8 *)(&temp_v0_2[0xF8]) + 0x10)) = 226.0f;
         return (s32) temp_v0;
     }
-    if (D_800C35EA == 1) {
-        (*(f32 *)((u8 *)(&temp_v0_2[0xF8]) + 0x10)) = (f32) D_800C3958[temp_v1].unk4;
+    if (g_cutscene_slot_state == 1) {
+        (*(f32 *)((u8 *)(&temp_v0_2[0xF8]) + 0x10)) = (f32) g_cutscene_track_recs[temp_v1].unk4;
         return (s32) temp_v0;
     }
     (*(f32 *)((u8 *)(&temp_v0_2[0xF8]) + 0x10)) = 226.0f;

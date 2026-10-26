@@ -17,10 +17,10 @@
 \#^                B(CTL, 0x199)++;$#s/++/--/ % k23_inc
 1429s/B(CTL, 0x199) = 0;/;/ % k23_rst
 \#^                anim = 0x358;$#s/0x358/0x357/ % k1A_42
-\#^                D_800D2E60\[D_800D1940 >> 3\] |= 1 << (D_800D1940 & 7);$#s/D_800D1940 & 7/D_800D1940 \& 3/ % k1A_42
+\#^                g_hints_seen\[g_hint_action >> 3\] |= 1 << (g_hint_action & 7);$#s/g_hint_action & 7/g_hint_action \& 3/ % k1A_42
 \#^                anim = 0x12E;$#s/0x12E/0x12F/ % k1A_41
 \#^        anim = 0x142;$#s/0x142/0x141/ % k1A_142 k1A_142b
-\#^            shouts\[1\] = D_800864A0\[1\];$#s/D_800864A0\[1\]/D_800864A0[0]/ % k2A_sh
+\#^            shouts\[1\] = g_item_shout_sfx\[1\];$#s/g_item_shout_sfx\[1\]/g_item_shout_sfx[0]/ % k2A_sh
 \#^            anim = 0x26F;$#s/0x26F/0x270/ % k2A_go
 \#^                grab = grabAnim;$#s/grabAnim/hold/ % k1B_g k1B_g2
 1606s/B(CTL, 0x199) = 0;/;/ % k1B_r2

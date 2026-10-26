@@ -176,7 +176,7 @@ s32 fx_fade_in_byte28_update(u8 *arg0) {
 
 /* was func_150BA85C */
 s32 fx_gravity_spin_update(f32 *arg0) {
-    arg0[0x114 / 4] += D_800A01FC * g_frame_step_f;
+    arg0[0x114 / 4] += g_fx_spin_gravity * g_frame_step_f;
     arg0[0x34 / 4] += arg0[0x110 / 4] * g_frame_step_f;
     arg0[0x38 / 4] += arg0[0x114 / 4] * g_frame_step_f;
     arg0[0x3C / 4] += arg0[0x118 / 4] * g_frame_step_f;

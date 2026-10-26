@@ -48,14 +48,14 @@ s32 impact_a_effect_id(s32 arg0, s32 arg1) {
 
 void fx_spawn_impact_particle(u8, s32 *, f32, s32, f32 *, u8);
 void fx_spawn_impact_burst(u8, f32 *, s32, f32, f32);
-extern f32 D_800A0490;
-extern f32 D_800A0494;
-extern f32 D_800A0498;
-extern f32 D_800A049C;
+extern f32 g_impact_a_k_0490; /* was D_800A0490 */
+extern f32 g_impact_a_k_0494; /* was D_800A0494 */
+extern f32 g_impact_a_k_0498; /* was D_800A0498 */
+extern f32 g_impact_a_k_049c; /* was D_800A049C */
 // impact_effect_a: P250. Handler (u8 *obj, kind, level) of the effect table at ELF file offset 0x24A4DC (records
 // {handler, 0x55}; neighbours obj_fx_point_impact_d0 / impact_effect_b, `(u8 *, int, s32)` like obj_fx_point_impact_bc). When the
 // object has a model (+0x1D4) and obj_fx_bone_point_a finds the effect point for `kind` (pos + hit record), it spawns effect
-// 0xB there (fx_spawn_impact_particle: strength level * D_800A0490 * D_800A0494, size +0x40 * D_800A0498 as a byte) and, for
+// 0xB there (fx_spawn_impact_particle: strength level * g_impact_a_k_0490 * g_impact_a_k_0494, size +0x40 * g_impact_a_k_0498 as a byte) and, for
 // level >= 0x4C, also effect 2 (fx_spawn_impact_burst) with the hit record's word 6.
 /* was func_150BEFCC */
 void impact_effect_a(u8 *obj, s32 kind, s32 level) {
@@ -63,10 +63,10 @@ void impact_effect_a(u8 *obj, s32 kind, s32 level) {
     s32 hit[9]; /* filled by obj_fx_bone_point_a (a hit record: word 6 is passed on to fx_spawn_impact_burst) */
 
     if (*(s32 *) (obj + 0x1D4) != 0 && obj_fx_bone_point_a(pos, obj, (s32) hit, (u8) kind) != 0) {
-        fx_spawn_impact_particle(0xB, hit, (f32) level * D_800A0490 * D_800A0494, (u8) (u32) (*(f32 *) (obj + 0x40) * D_800A0498), pos,
+        fx_spawn_impact_particle(0xB, hit, (f32) level * g_impact_a_k_0490 * g_impact_a_k_0494, (u8) (u32) (*(f32 *) (obj + 0x40) * g_impact_a_k_0498), pos,
                       (u8) kind);
         if (level >= 0x4C) {
-            fx_spawn_impact_burst(2, pos, hit[6], 3.232f, D_800A049C);
+            fx_spawn_impact_burst(2, pos, hit[6], 3.232f, g_impact_a_k_049c);
         }
     }
 }
@@ -111,21 +111,21 @@ s32 impact_b_effect_id(s32 arg0, s32 arg1) {
     return -1;
 }
 
-extern f32 D_800A04A0;
-extern f32 D_800A04A4;
-extern f32 D_800A04A8;
+extern f32 g_impact_b_k_04a0; /* was D_800A04A0 */
+extern f32 g_impact_b_k_04a4; /* was D_800A04A4 */
+extern f32 g_impact_b_k_04a8; /* was D_800A04A8 */
 // impact_effect_b: P250. Same as impact_effect_a (impact_effect_a) with the obj_fx_bone_point_b effect points, strength
-// level * D_800A04A0 * 2, size +0x40 * D_800A04A4 and D_800A04A8 for the second effect.
+// level * g_impact_b_k_04a0 * 2, size +0x40 * g_impact_b_k_04a4 and g_impact_b_k_04a8 for the second effect.
 /* was func_150BF24C */
 void impact_effect_b(u8 *obj, s32 kind, s32 level) {
     f32 pos[3];
     s32 hit[9]; /* filled by obj_fx_bone_point_b (a hit record: word 6 is passed on to fx_spawn_impact_burst) */
 
     if (*(s32 *) (obj + 0x1D4) != 0 && obj_fx_bone_point_b(pos, obj, (s32) hit, (u8) kind) != 0) {
-        fx_spawn_impact_particle(0xB, hit, (f32) level * D_800A04A0 * 2.0f, (u8) (u32) (*(f32 *) (obj + 0x40) * D_800A04A4), pos,
+        fx_spawn_impact_particle(0xB, hit, (f32) level * g_impact_b_k_04a0 * 2.0f, (u8) (u32) (*(f32 *) (obj + 0x40) * g_impact_b_k_04a4), pos,
                       (u8) kind);
         if (level >= 0x4C) {
-            fx_spawn_impact_burst(2, pos, hit[6], 3.232f, D_800A04A8);
+            fx_spawn_impact_burst(2, pos, hit[6], 3.232f, g_impact_b_k_04a8);
         }
     }
 }

@@ -5,8 +5,8 @@
 
 
 void fx_alloc_d88750(void);
-extern s32 D_800D9CF0;
-extern s8 D_800D9D40;
+extern s32 g_mist_puff_handles; /* was D_800D9CF0 */
+extern s8 g_event_effect_flag; /* was D_800D9D40 */
 extern s8 g_level_flag_9d41; /* was D_800D9D41 */
 extern s8 g_level_flag_9d48; /* was D_800D9D48 */
 extern s8 g_level_flag_9d49; /* was D_800D9D49 */
@@ -36,7 +36,7 @@ void level_objects_reset_state(void) {
         (*(s8 *)((u8 *)var_v0 + -4)) = 0;
     } while ((s32)var_v0 != (s32)&g_level_reset_block_end);
     g_level_flag_9d41 = 0;
-    D_800D9D40 = 0;
+    g_event_effect_flag = 0;
     g_level_flag_9d48 = 0;
     g_level_flag_9d58 = 0;
     g_level_flag_9d49 = 0;
@@ -55,13 +55,13 @@ void level_objects_reset_state(void) {
         (*(s8 *)((u8 *)var_v1 + -4)) = 0;
         (*(s8 *)((u8 *)var_v0_2 + -4)) = 0;
     } while (var_v0_2 != &g_level_bytes_9d66_end);
-    D_800D9CB0 = 0;
-    D_800D9CB4 = 0;
-    (*(s32 *)((u8 *)(&D_800D9CF0) + 0)) = 0;
-    (*(s32 *)((u8 *)(&D_800D9CF0) + 4)) = 0;
-    (*(s32 *)((u8 *)(&D_800D9CF0) + 8)) = 0;
-    (*(s32 *)((u8 *)(&D_800D9CF0) + 0xC)) = 0;
-    D_80088C10 = NULL;
+    g_cs_overlay_cmd = 0;
+    g_cs_overlay_tint = 0;
+    (*(s32 *)((u8 *)(&g_mist_puff_handles) + 0)) = 0;
+    (*(s32 *)((u8 *)(&g_mist_puff_handles) + 4)) = 0;
+    (*(s32 *)((u8 *)(&g_mist_puff_handles) + 8)) = 0;
+    (*(s32 *)((u8 *)(&g_mist_puff_handles) + 0xC)) = 0;
+    g_shooting_star_obj = NULL;
     bzero(g_sky_segment_on, 5);
     (*(s8 *)((u8 *)(&g_level_part_fades) + 2)) = 0;
     (*(s8 *)((u8 *)(&g_level_part_fades) + 1)) = 0;

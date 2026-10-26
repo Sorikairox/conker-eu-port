@@ -3,16 +3,16 @@
 #include "variables.h"
 
 
-extern f32 D_800D33E0[];
-extern f32 D_800D33F8[];
-extern u8 D_800D340C[];
-extern s32 D_800D3C60;
+extern f32 g_rail_script_ease_vel[]; /* was D_800D33E0 */
+extern f32 g_rail_script_ease_val[]; /* was D_800D33F8 */
+extern u8 g_rail_script_ease_set[]; /* was D_800D340C */
+extern s32 g_event_arg_count; /* was D_800D3C60 */
 /* was func_1509E330 */
 void rail_script_set_ease(s32 arg0, u8 *arg1) {
-    if (*(s32 *)(arg1 + 4) == 1 && D_800D3C60 == 3) {
-        D_800D33E0[*(s32 *)(arg1 + 8)] = (f32)*(s32 *)(arg1 + 0xC) * 0.000015258789f;
-        D_800D33F8[*(s32 *)(arg1 + 8)] = (f32)*(s32 *)(arg1 + 0xC) * 0.000015258789f;
-        D_800D340C[*(s32 *)(arg1 + 8)] = 1;
+    if (*(s32 *)(arg1 + 4) == 1 && g_event_arg_count == 3) {
+        g_rail_script_ease_vel[*(s32 *)(arg1 + 8)] = (f32)*(s32 *)(arg1 + 0xC) * 0.000015258789f;
+        g_rail_script_ease_val[*(s32 *)(arg1 + 8)] = (f32)*(s32 *)(arg1 + 0xC) * 0.000015258789f;
+        g_rail_script_ease_set[*(s32 *)(arg1 + 8)] = 1;
     }
 }
 
@@ -45,7 +45,7 @@ void hud_lens_start_zoom_in(s32);
 void text_printf_at(s32, s32, u8, s32, ...);
 void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
 void math_spring_approach_angle(f32 *, f32, f32 *, f32, f32, f32);
-extern char D_8009F6D0[]; /* "%d" */
+extern char g_str_pct_d_f6d0[]; /* "%d"; was D_8009F6D0 */
 extern s32 g_hud_clock_frames; /* was D_800D2870 */
 extern u16 g_mp_game_flags; /* was D_8009015C */
 
@@ -67,7 +67,7 @@ s32 event_action_rail(s32 arg0, u32 cmd, u8 *args) {
         return 0;
     case 1:
         text_set_color(0xFF, 0xFF, 0xFF, 0xFF);
-        text_printf_at(0x96, 0x56, 1, (s32) D_8009F6D0, (a[2] + 59) / 60);
+        text_printf_at(0x96, 0x56, 1, (s32) g_str_pct_d_f6d0, (a[2] + 59) / 60);
         g_mp_game_flags |= 0x80;
         break;
     case 2:
@@ -135,13 +135,13 @@ s32 event_action_rail(s32 arg0, u32 cmd, u8 *args) {
         }
         break;
     case 25:
-        math_spring_approach(&D_800D33F8[a[2]], a[3] * (1.0f / 65536.0f), &D_800D33E0[a[2]], a[4] * (1.0f / 65536.0f),
+        math_spring_approach(&g_rail_script_ease_val[a[2]], a[3] * (1.0f / 65536.0f), &g_rail_script_ease_vel[a[2]], a[4] * (1.0f / 65536.0f),
                       a[5] * (1.0f / 65536.0f), *(f32 *) ((u8 *) g_player_views + 0x7B4));
-        return (s32) (D_800D33F8[a[2]] * 65536.0f);
+        return (s32) (g_rail_script_ease_val[a[2]] * 65536.0f);
     case 26:
-        math_spring_approach_angle(&D_800D33F8[a[2]], a[3] * (1.0f / 65536.0f), &D_800D33E0[a[2]], a[4] * (1.0f / 65536.0f),
+        math_spring_approach_angle(&g_rail_script_ease_val[a[2]], a[3] * (1.0f / 65536.0f), &g_rail_script_ease_vel[a[2]], a[4] * (1.0f / 65536.0f),
                       a[5] * (1.0f / 65536.0f), *(f32 *) ((u8 *) g_player_views + 0x7B4));
-        return (s32) (D_800D33F8[a[2]] * 65536.0f);
+        return (s32) (g_rail_script_ease_val[a[2]] * 65536.0f);
     }
     return 0;
 }
@@ -160,8 +160,8 @@ s32 rail_human_cursor_next(void);
 s32 rail_weapon_range(s32);
 f32 math_angle_offset_scaled(s32, s32);
 extern u16 g_mp_game_flags; /* was D_8009015C */
-extern s32 D_800CCA1C;
-extern s8 D_800E1000;
+extern s32 g_obj1_interaction_state; /* was D_800CCA1C */
+extern s8 g_race_difficulty; /* was D_800E1000 */
 
 /* was func_1509E7EC */
 s32 event_query_rail(s32 arg0, u32 arg1, u8 *arg2) {
@@ -186,7 +186,7 @@ s32 event_query_rail(s32 arg0, u32 arg1, u8 *arg2) {
     case 4:
         return rail_pair_rivals((*(s32 *)((u8 *)arg2 + 8)), (*(s32 *)((u8 *)arg2 + 0xC)));
     case 5:
-        return (s32) D_800E1000;
+        return (s32) g_race_difficulty;
     case 6:
         return mode_pick_mid_range_object((*(s32 *)((u8 *)arg2 + 8)));
     case 7:
@@ -214,7 +214,7 @@ block_45:
         return mp_human_counter_get((*(s32 *)((u8 *)arg2 + 8)));
     case 21:
     case 22:
-        return (s32) (D_800D33F8[(*(s32 *)((u8 *)arg2 + 8))] * 65536.0f);
+        return (s32) (g_rail_script_ease_val[(*(s32 *)((u8 *)arg2 + 8))] * 65536.0f);
     case 18:
         temp_v0 = obj_find_by_setup_id((*(u8 *)((u8 *)arg2 + 0xB)));
         if (temp_v0 != NULL) {
@@ -229,7 +229,7 @@ block_45:
         goto block_45;
     case 20:
         var_v1 = 0;
-        var_v0 = &D_800CCA1C;
+        var_v0 = &g_obj1_interaction_state;
         if ((g_objects->interaction_state != 0) && (*g_obj_tab_id == (*(s32 *)((u8 *)arg2 + 8)))) {
             var_v1 = 1;
         }

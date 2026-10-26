@@ -45,8 +45,8 @@ s/aimed ? 1 : 0, 0, 252.0f,/aimed ? 1 : 0, 0, 250.0f,/ % aim0
 s/static const f32 gunfire_tracer_k\[1\] = { 0.003968254f };/static const f32 gunfire_tracer_k[1] = { 0.00396825f };/ % aim0
 s/r1 \* 20.0f + 75.0f, r2/r2 * 20.0f + 75.0f, r2/ % aim0
 s/\(r3 .\) 31 + 225,/\1 32 + 225,/ % r2
-s/(owner != NULL) ? (u8 \*)owner : obj, 1, 1, D_800BE616 ? 0 : 1,/obj, 1, 1, D_800BE616 ? 0 : 1,/ % aim0
-s/D_800BE616 ? 0 : 1, 50, 0, 1, kind, 0x2C, dt, mask, 0,/D_800BE616 ? 1 : 1, 50, 0, 1, kind, 0x2C, dt, mask, 0,/ % f616
+s/(owner != NULL) ? (u8 \*)owner : obj, 1, 1, g_mp_mode_active ? 0 : 1,/obj, 1, 1, g_mp_mode_active ? 0 : 1,/ % aim0
+s/g_mp_mode_active ? 0 : 1, 50, 0, 1, kind, 0x2C, dt, mask, 0,/g_mp_mode_active ? 1 : 1, 50, 0, 1, kind, 0x2C, dt, mask, 0,/ % f616
 s/1, kind, 0x2C, dt, mask, 0,/1, kind, 0x2C, -dt, mask, 0,/ % aim0
 s/0, (u8)fxflag, fxowner);/0, fxflag, fxowner);/ % fl
 s/if ((obj\[0x74\] \& 0xF) != 0xF) {/if ((obj[0x74] \& 0x1F) != 0xF) {/ % nibF nibF2

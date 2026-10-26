@@ -165,9 +165,9 @@ void motion_track_update(u8 *arg0) {
         cur->x = ((V3C518 *)(*(u8 **)(arg0 + 0x18) + 0x14))->x;
         cur->y = ((V3C518 *)(*(u8 **)(arg0 + 0x18) + 0x14))->y;
         cur->z = ((V3C518 *)(*(u8 **)(arg0 + 0x18) + 0x14))->z;
-        d->x = (prev->x - cur->x) * D_800BEDC8;
-        d->y = (prev->y - cur->y) * D_800BEDC8;
-        d->z = (prev->z - cur->z) * D_800BEDC8;
+        d->x = (prev->x - cur->x) * g_frame_step_inv;
+        d->y = (prev->y - cur->y) * g_frame_step_inv;
+        d->z = (prev->z - cur->z) * g_frame_step_inv;
     }
     if (flag != 0) {
         node_destroy((struct102 *)arg0);

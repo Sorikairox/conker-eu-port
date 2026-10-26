@@ -14,7 +14,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_8009FAA0; /* pi / 180 */
+extern f32 g_mtx_deg_to_rad; /* pi / 180; was D_8009FAA0 */
 
 /*
  * m[0..2][0..2] = rotation(x, y, z) scaled per row by (sx, sy, sz); row 3 and column 3 are left alone.
@@ -30,13 +30,13 @@ void mtx_rotate_scale_3x3(f32 m[4][4], f32 x, f32 y, f32 z, f32 sx, f32 sy, f32 
     f32 cxsz, sxsz; /* cos(x) * -sin(z), -sin(x) * -sin(z) */
     f32 m00, m02, m10, m11, m12, m20, m21, m22;
 
-    x = x * D_8009FAA0;
+    x = x * g_mtx_deg_to_rad;
     cosX = fast_cosf(x);
     sinX = fast_sinf(x);
-    y = y * D_8009FAA0;
+    y = y * g_mtx_deg_to_rad;
     cosY = fast_cosf(y);
     sinY = fast_sinf(y);
-    z = z * D_8009FAA0;
+    z = z * g_mtx_deg_to_rad;
     cosZ = fast_cosf(z);
     sinZ = fast_sinf(z);
 

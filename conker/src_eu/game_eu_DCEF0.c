@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_8009FB60[];
+extern u8 g_impact_burst_desc[]; /* was D_8009FB60 */
 
 u8 *world_record_find(u8);
 
@@ -407,12 +407,12 @@ void particle_emitter_preset_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 ar
     particle_emitter_node_spawn(1, 0, 0, 0xD, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 1, 0, 0, 0, 0, 0xAA, 0xAA, 0xAA, 0xAA, arg2, arg3, 0, arg0, 0xF0, 0x50, 0x50, 1, 4, 0, 1, 0, 0, 0, arg1, 0, (s32) arg4, arg5);
 }
 
-extern struct_eu_node *D_800DD2C4;
+extern struct_eu_node *g_node_list_head; /* was D_800DD2C4 */
 /* was func_150B0290 */
 void nodes_destroy_for_player(void) {
     struct_eu_node *node;
 
-    node = D_800DD2C4;
+    node = g_node_list_head;
     g_node_iter_depth++;
     while (node != NULL) {
         g_node_iter_next[g_node_iter_depth] = node->next;
@@ -608,7 +608,7 @@ void beam_trail_die_free(u8 *arg0) {
 }
 
 void emit_particle_burst_req(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
-extern s32 D_8009FB74;
+extern s32 g_impact_burst_params; /* was D_8009FB74 */
 
 /* was func_150B0828 */
 void obj_impact_burst_spawn(u8 *arg0, u8 arg1, s32 arg2) {
@@ -746,7 +746,7 @@ void obj_impact_burst_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u5C = 0.30200002f;
     sp.u60 = 0.31800002f;
     sp.u64 = 9.687f;
-    emit_textured_burst(&sp.u2C, ((u8 *)&D_8009FB60), &D_8009FB74, 5, 65.0f, 0U, (u8) (s32) arg1, arg2);
+    emit_textured_burst(&sp.u2C, ((u8 *)&g_impact_burst_desc), &g_impact_burst_params, 5, 65.0f, 0U, (u8) (s32) arg1, arg2);
 }
 /* was func_150B0AEC */
 s32 world_record_anchor_init(u8 arg0, u8 *arg1) {

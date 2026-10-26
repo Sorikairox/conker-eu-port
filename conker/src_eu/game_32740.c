@@ -7,7 +7,7 @@ void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
 void camera_calc_relative_yaw(struct108 *arg0);
 void camera_queue_event(struct108 *arg0, s32 arg1, void *arg2);
 extern f32 g_camera_initial_eye_k; /* was D_80095DA0 */
-extern f32 D_800C3A20[];
+extern f32 g_camera_event_params[]; /* was D_800C3A20 */
 
 
 s32 allocate_memory(s32, s32, s32, s32);
@@ -15,14 +15,14 @@ s32 asset_load(s32 *arg0, s32 arg1, ...);
 void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3);
 void camera_viewport_tables_reset(void);
 void camera_shake_tracks_load(void);
-extern s32 D_800DC450;
+extern s32 g_camera_fixed_pos_records; /* was D_800DC450 */
 extern s16 g_camera_pivot_count; /* was D_800898F0 */
 extern s32 g_camera_event_queues; /* was D_800DC6E0 */
-extern Mtx *D_800DC6D0[];       /* per DL buffer: view matrices, 0x40 per player */
+extern Mtx *g_view_mtx_bufs[];       /* per DL buffer: view matrices, 0x40 per player; was D_800DC6D0 */
 extern s32 g_camera_grid_bufs[]; /* was D_800BE6D0 */
 extern s32 g_camera_saved_slots; /* was D_800DC440 */
 
-/* Level init: load the 0x18-byte records (D_800DC450), allocate the per-player camera controllers (g_player_views,
+/* Level init: load the 0x18-byte records (g_camera_fixed_pos_records), allocate the per-player camera controllers (g_player_views,
  * 0x9A0 each) and view matrices, initialise each controller, then the camera tables. */
 /* was func_15005290 */
 void camera_level_init(s32 arg0, s32 arg1) {
@@ -30,13 +30,13 @@ void camera_level_init(s32 arg0, s32 arg1) {
     s32 n;
     u32 i;
 
-    D_800DC450 = asset_load(&size, 3, 0xC, arg0, 8);
+    g_camera_fixed_pos_records = asset_load(&size, 3, 0xC, arg0, 8);
     g_camera_pivot_count = (u32)size / 0x18;
     n = g_last_player_index + 1;
     g_player_views = (struct108 *)allocate_memory(n * 0x9A0, 1, 1, 0);
     g_camera_event_queues = allocate_memory(n * 0xB0, 1, 0, 0);
-    D_800DC6D0[0] = (Mtx *)allocate_memory(n << 6, 1, 1, 0);
-    D_800DC6D0[1] = (Mtx *)allocate_memory(n << 6, 1, 1, 0);
+    g_view_mtx_bufs[0] = (Mtx *)allocate_memory(n << 6, 1, 1, 0);
+    g_view_mtx_bufs[1] = (Mtx *)allocate_memory(n << 6, 1, 1, 0);
     i = 0;
     do {
         g_camera_grid_bufs[i] = allocate_memory(g_framebuffer_width * 2, 1, 2, 0);
@@ -62,8 +62,8 @@ void camera_level_init(s32 arg0, s32 arg1) {
 //     temp_s0 = g_last_player_index + 1;
 //     g_player_views = allocate_memory(temp_s0 * 0x9A0, 1, 1, 0);
 //     g_sky_asset = allocate_memory(temp_s0 * 0xB0, 1, 0, 0);
-//     D_800DC2A0->unk0 = allocate_memory(temp_s0 << 6, 1, 1, 0);
-//     D_800DC2A0->unk4 = allocate_memory(temp_s0 << 6, 1, 1, 0);
+//     g_coll_probe_z->unk0 = allocate_memory(temp_s0 << 6, 1, 1, 0);
+//     g_coll_probe_z->unk4 = allocate_memory(temp_s0 << 6, 1, 1, 0);
 //
 //     i = 0;
 //     do {
@@ -174,7 +174,7 @@ void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
     CAM_F(0x86C) = 999.0f; /* D_80095D9C */
     CAM_W(0x8BC) = g_camera_grid_bufs[p[0x23D]];
     g_camera_restore_skip = 0;
-    D_800C3671 = 0;
+    g_cutscene_restart_transition = 0;
     g_camera_saved_tgt_197[p[0x23D]] = 0;
     g_camera_saved_tgt_198[p[0x23D]] = 0;
     CAM_H(0x5FE) = 0x32;
@@ -274,7 +274,7 @@ void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 //     arg0->unk86C = D_800959EC;
 //     arg0->unk8BC = D_800BE2B0[arg0->unk23D]; // * 4) + 0x800C0000)->unk-1D50;
 //     D_80089520 = 0;
-//     D_800C3671 = (u8)0;
+//     g_cutscene_restart_transition = (u8)0;
 //     D_80089524[arg0->unk23D] = 0;
 //     D_80089534[arg0->unk23D] = 0;
 //     arg0->unk5FE = (u16)0x3C;
@@ -284,7 +284,7 @@ void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 /* P41: initial camera eye. Controller arg0 (g_player_views[player]) gets eye = arg2 (0x2F8, copied to 0x27C and 0x304),
  * at = the record arg1's position (0x2A4, copied to 0x2BC / 0x2B0 / 0x2E0), the horizontal distance 0x374, the
  * eye height state (collision_find_floor → 0x354..0x360, 0x348 / 0x34C), then the camera setup callees. Outside level
- * 0x21 and unless D_800C35EA == 1, camera events 5 / 8 (with D_800C3A20[3] = yaw 0x37C) / 6. */
+ * 0x21 and unless g_cutscene_slot_state == 1, camera events 5 / 8 (with g_camera_event_params[3] = yaw 0x37C) / 6. */
 /* was func_15005818 */
 void camera_set_initial_eye(struct108 *arg0, u8 *arg1, f32 *arg2) {
     u8 *p = (u8 *)arg0;
@@ -332,10 +332,10 @@ void camera_set_initial_eye(struct108 *arg0, u8 *arg1, f32 *arg2) {
     camera_calc_pitch(arg0);
     camera_calc_relative_yaw(arg0);
     *(s32 *)(p + 0x5F0) |= 4;
-    if (g_level_id != 0x21 && D_800C35EA != 1) {
+    if (g_level_id != 0x21 && g_cutscene_slot_state != 1) {
         camera_queue_event(arg0, 5, NULL);
-        D_800C3A20[3] = *(f32 *)(p + 0x37C);
-        camera_queue_event(arg0, 8, D_800C3A20);
+        g_camera_event_params[3] = *(f32 *)(p + 0x37C);
+        camera_queue_event(arg0, 8, g_camera_event_params);
         camera_queue_event(arg0, 6, NULL);
     }
 }
@@ -395,7 +395,7 @@ void camera_set_initial_eye(struct108 *arg0, u8 *arg1, f32 *arg2) {
 //     camera_calc_pitch(arg0);
 //     camera_calc_relative_yaw(arg0);
 //     arg0->unk5F0 = (s32) (arg0->unk5F0 | 4);
-//     if ((g_level_id != 0x21) && (D_800C35EA != 1)) {
+//     if ((g_level_id != 0x21) && (g_cutscene_slot_state != 1)) {
 //         func_1512D560(arg0, 5, 0);
 //         D_800C3600->unkC = (f32) arg0->unk37C;
 //         func_1512D560(arg0, 8, D_800C3600);

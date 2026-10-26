@@ -1,14 +1,14 @@
-s/D_8003C220 = 0x1FC;/D_8003C220 = 0x1FD;/
-s/D_8003C222 = 0x3FF;/D_8003C222 = 0x3FE;/
+s/g_tlb_state_c220 = 0x1FC;/g_tlb_state_c220 = 0x1FD;/
+s/g_tlb_state_c222 = 0x3FF;/g_tlb_state_c222 = 0x3FE;/
 s/area = heap_alloc_tagged(pages << 12, 0xFF, 4, 1, 2);/area = heap_alloc_tagged(pages << 11, 0xFF, 4, 1, 2);/
 s/area = heap_alloc_tagged(pages << 12, 0xFF, 4, 1, 2);/area = heap_alloc_tagged(pages << 12, 0xFF, 3, 1, 2);/
 s/area = heap_alloc_tagged(pages << 12, 0xFF, 4, 1, 2);/area = heap_alloc_tagged(pages << 12, 0xFF, 4, 1, 0);/
 s/if (area != 0) {/if (area > 0) {/
 s/        pages = prev;/        pages = pages - 1;/
-s/        D_8003C218 = pages;/        D_8003C218 = prev;/
-s/D_8003BE74 = area \& 0x0FFFFFFF;/D_8003BE74 = area \& 0x1FFFFFFF;/
-s/D_8003BE70 = allocate_memory((D_8003C218 + 7) >> 3, 0xFF, 0, 0);/D_8003BE70 = allocate_memory((D_8003C218 + 8) >> 3, 0xFF, 0, 0);/
-s/D_8003BE70 = allocate_memory((D_8003C218 + 7) >> 3, 0xFF, 0, 0);/D_8003BE70 = allocate_memory((D_8003C218 + 7) >> 3, 0xFF, 1, 0);/
-s/((D_8003C218 + 7) >> 3) - 1;/((D_8003C218 + 7) >> 3);/
-s/((D_8003C218 + 7) >> 3) - 1;/((D_8003C218 + 7) >> 2) - 1;/
-s/    prev = D_8003C218;/    prev = pages;/
+s/        g_tlb_area_pages = pages;/        g_tlb_area_pages = prev;/
+s/g_tlb_area_phys = area \& 0x0FFFFFFF;/g_tlb_area_phys = area \& 0x1FFFFFFF;/
+s/g_tlb_page_bitmap = allocate_memory((g_tlb_area_pages + 7) >> 3, 0xFF, 0, 0);/g_tlb_page_bitmap = allocate_memory((g_tlb_area_pages + 8) >> 3, 0xFF, 0, 0);/
+s/g_tlb_page_bitmap = allocate_memory((g_tlb_area_pages + 7) >> 3, 0xFF, 0, 0);/g_tlb_page_bitmap = allocate_memory((g_tlb_area_pages + 7) >> 3, 0xFF, 1, 0);/
+s/((g_tlb_area_pages + 7) >> 3) - 1;/((g_tlb_area_pages + 7) >> 3);/
+s/((g_tlb_area_pages + 7) >> 3) - 1;/((g_tlb_area_pages + 7) >> 2) - 1;/
+s/    prev = g_tlb_area_pages;/    prev = pages;/

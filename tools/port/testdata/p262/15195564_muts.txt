@@ -6,7 +6,7 @@ s/        case 0x3B:/        case 0x3A:/ % pl1 mid
 s/        case 0xB4:/        case 0xB5:/ % player0 top
 s/        case 0x9D:/        case 0x9E:/ % player
 s/            return;$/            break;/ % other
-s/if (D_800BE616 == 0) {/if (D_800BE616 != 0) {/ % plain attach
+s/if (g_mp_mode_active == 0) {/if (g_mp_mode_active != 0) {/ % plain attach
 s/bone_sparks_attach_preset((s32)target, 0, 0x12C, -1, -1, 8, 0, 0, 0xFF, 1);/bone_sparks_attach_preset((s32)target, 0, 0x12C, -1, -1, 8, 0, 0, 0xFF, 0);/ % plain
 s/0x12C, -1, -1, 8, 0, 0,/0x12C, -1, 0, 8, 0, 0,/ % plain
 s/rec\[0\] = 0x7D;/rec[0] = 0x7C;/ % attach

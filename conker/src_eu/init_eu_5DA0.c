@@ -8,51 +8,51 @@
 /* P281: readable C for tlb_area_init (Rare hand asm, 55 insns, with the private entry func_10005E2C = the retry
    label). The two COP0 writes (Context = 0, Wired = 2: two wired TLB entries) have no C form; the port has no TLB
    and its platform layer does the boot setup (tools/port/platform_replaced.tsv). */
-extern s16 D_8003C218;           /* size of the code / TLB area in 4 KB pages */
-extern u8 *D_8003C21C;           /* last byte of the page bitmap */
-extern s16 D_8003C220;
-extern s16 D_8003C222;
+extern s16 g_tlb_area_pages;           /* size of the code / TLB area in 4 KB pages; was D_8003C218 */
+extern u8 *g_tlb_page_bitmap_last;           /* last byte of the page bitmap; was D_8003C21C */
+extern s16 g_tlb_state_c220; /* was D_8003C220 */
+extern s16 g_tlb_state_c222; /* was D_8003C222 */
 s32 allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 // tlb_area_init: reserves `pages` 4 KB pages (falling back to the previous page count, and retrying it for as long
-// as that fails), keeps the area's physical address in D_8003BE74 and allocates its page bitmap (one bit per page,
-// D_8003BE70 .. D_8003C21C).
+// as that fails), keeps the area's physical address in g_tlb_area_phys and allocates its page bitmap (one bit per page,
+// g_tlb_page_bitmap .. g_tlb_page_bitmap_last).
 /* was func_10005B04 */
 void tlb_area_init(s32 pages) {
     s16 prev;
     s32 area;
 
     /* COP0: Context = 0, Wired = 2 */
-    D_8003C220 = 0x1FC;
-    D_8003C222 = 0x3FF;
-    prev = D_8003C218;
+    g_tlb_state_c220 = 0x1FC;
+    g_tlb_state_c222 = 0x3FF;
+    prev = g_tlb_area_pages;
     while (TRUE) {
-        D_8003C218 = pages;
+        g_tlb_area_pages = pages;
         area = heap_alloc_tagged(pages << 12, 0xFF, 4, 1, 2);
         if (area != 0) {
             break;
         }
         pages = prev;
     }
-    D_8003BE74 = area & 0x0FFFFFFF;
-    D_8003BE70 = allocate_memory((D_8003C218 + 7) >> 3, 0xFF, 0, 0);
-    D_8003C21C = (u8 *) D_8003BE70 + ((D_8003C218 + 7) >> 3) - 1;
+    g_tlb_area_phys = area & 0x0FFFFFFF;
+    g_tlb_page_bitmap = allocate_memory((g_tlb_area_pages + 7) >> 3, 0xFF, 0, 0);
+    g_tlb_page_bitmap_last = (u8 *) g_tlb_page_bitmap + ((g_tlb_area_pages + 7) >> 3) - 1;
 }
 
-extern s16 D_8003C218;
-extern u8 *D_8003C21C;
+extern s16 g_tlb_area_pages; /* was D_8003C218 */
+extern u8 *g_tlb_page_bitmap_last; /* was D_8003C21C */
 
-/* fill the bitmap [D_8003BE70, D_8003C21C] with 0xFF, then mask the bits past the end in the last byte */
+/* fill the bitmap [g_tlb_page_bitmap, g_tlb_page_bitmap_last] with 0xFF, then mask the bits past the end in the last byte */
 /* was func_10005BE0 */
 void tlb_page_bitmap_reset(void) {
-    u8 *p = (u8 *)D_8003BE70;
+    u8 *p = (u8 *)g_tlb_page_bitmap;
     s32 n;
 
     do {
         *p = 0xFF;
-    } while (p++ != D_8003C21C);
-    n = D_8003C218 & 7;
+    } while (p++ != g_tlb_page_bitmap_last);
+    n = g_tlb_area_pages & 7;
     if (n != 0) {
-        *D_8003C21C = (2 << (n - 1)) - 1;
+        *g_tlb_page_bitmap_last = (2 << (n - 1)) - 1;
     }
 }
 /* was func_10005F1C */
@@ -69,7 +69,7 @@ s32 rzip_inflate(s32 arg0, s32 arg1, u32 arg2) {
 /* P36: Rare's inflater (init_eu_5DA0, hand-written asm 0x1000654C-0x100074B8), C for the whole set:
  * rzip_inflate_impl (entry), rzip_inflate_loop (block loop), rzip_inflate_block (block header), rzip_inflate_dynamic (dynamic block),
  * rzip_inflate_stored (stored block), rzip_inflate_fixed (fixed block), rzip_huft_build (huft_build), rzip_inflate_codes
- * (inflate_codes) and rzip_build_fixed_tables (builds the fixed tables at D_8003C230). It is Mark Adler's gzip inflate.c
+ * (inflate_codes) and rzip_build_fixed_tables (builds the fixed tables at g_rzip_fixed_tables). It is Mark Adler's gzip inflate.c
  * (huft tables, 4-byte entries {e, b, v}) with the state in registers: $s7 input pointer, $gp bit buffer, $fp bit
  * count, $f16 output base, $f17 output count, $f18 output limit, $f19 next free table entry, $s6 table base.
  * The inner glabels (func_100065E0, func_10006708, func_10006A40, func_10006B0C, func_10006F30, func_10006FA8,
@@ -77,7 +77,7 @@ s32 rzip_inflate(s32 arg0, s32 arg1, u32 arg2) {
  * Differences from gzip, kept here: no "n = x[g]" and no over-subscribed check in huft_build (y < 0), the first
  * huft_build of a dynamic block is not checked, a fixed block never fails (inflate_codes' error is dropped),
  * literals are not bounds-checked, and copies / stored blocks fail unless count + n < limit (strict).
- * Tables are built at the third argument (the work area, D_8003809C in the callers); the output limit is
+ * Tables are built at the third argument (the work area, g_mem_scratch_area in the callers); the output limit is
  * 0x70000000, src - dst when src is above dst, and work - dst when that is >= 0 and smaller.
  * Returns the output length, 0 on an error. Verified whole: tools/port/difftest/nmasm_inflate.py (P36). */
 typedef struct {
@@ -108,13 +108,13 @@ typedef struct {
     InfHuft *base; /* $s6 */
 } InfState;
 
-extern u16 D_8002C420[]; /* mask_bits[17] */
-extern u16 D_8002C442[]; /* cplens */
-extern u16 D_8002C480[]; /* cpdist */
-extern u8 D_8002C4BC[];  /* border[19] */
-extern u8 D_8002C4CF[];  /* cplext */
-extern u8 D_8002C4EE[];  /* cpdext */
-extern InfHuft D_8003C230[]; /* fixed tables: literal at [1], distance at [0x272] (D_8003CBF8) */
+extern u16 g_rzip_mask_bits[]; /* mask_bits[17]; was D_8002C420 */
+extern u16 g_rzip_cplens[]; /* cplens; was D_8002C442 */
+extern u16 g_rzip_cpdist[]; /* cpdist; was D_8002C480 */
+extern u8 g_rzip_border[];  /* border[19]; was D_8002C4BC */
+extern u8 g_rzip_cplext[];  /* cplext; was D_8002C4CF */
+extern u8 g_rzip_cpdext[];  /* cpdext; was D_8002C4EE */
+extern InfHuft g_rzip_fixed_tables[]; /* fixed tables: literal at [1], distance at [0x272] (D_8003CBF8); was D_8003C230 */
 
 #define INF_NEED(s, n) \
     while ((s)->bk < (s32)(n)) { (s)->bb |= (u32)*(s)->in++ << ((s)->bk & 31); (s)->bk += 8; }
@@ -286,8 +286,8 @@ static s32 inf_codes(InfState *s, InfHuft *tl, InfHuft *td, s32 bl, s32 bd) {
     u8 *out = s->out;
     s32 lim = s->limit;
     s32 w = s->outcnt;
-    u32 ml = D_8002C420[bl];
-    u32 md = D_8002C420[bd];
+    u32 ml = g_rzip_mask_bits[bl];
+    u32 md = g_rzip_mask_bits[bd];
     InfHuft *t;
     s32 e, n, d;
     u8 *src;
@@ -305,7 +305,7 @@ static s32 inf_codes(InfState *s, InfHuft *tl, InfHuft *td, s32 bl, s32 bd) {
             e -= 16;
             INF_DUMP(s, t->b);
             INF_NEED(s, e);
-            t = s->base + ((s->bb & D_8002C420[e]) + t->v);
+            t = s->base + ((s->bb & g_rzip_mask_bits[e]) + t->v);
             e = t->e;
         }
         INF_DUMP(s, t->b);
@@ -318,7 +318,7 @@ static s32 inf_codes(InfState *s, InfHuft *tl, InfHuft *td, s32 bl, s32 bd) {
             return 0;
         }
         INF_NEED(s, e);
-        n = (s->bb & D_8002C420[e]) + t->v;
+        n = (s->bb & g_rzip_mask_bits[e]) + t->v;
         INF_DUMP(s, e);
         INF_NEED(s, bd);
         t = td + (s->bb & md);
@@ -330,12 +330,12 @@ static s32 inf_codes(InfState *s, InfHuft *tl, InfHuft *td, s32 bl, s32 bd) {
             e -= 16;
             INF_DUMP(s, t->b);
             INF_NEED(s, e);
-            t = s->base + ((s->bb & D_8002C420[e]) + t->v);
+            t = s->base + ((s->bb & g_rzip_mask_bits[e]) + t->v);
             e = t->e;
         }
         INF_DUMP(s, t->b);
         INF_NEED(s, e);
-        d = w - (s32) (s->bb & D_8002C420[e]) - t->v;
+        d = w - (s32) (s->bb & g_rzip_mask_bits[e]) - t->v;
         INF_DUMP(s, e);
         if (!(w + n < lim)) {
             return 1;
@@ -384,8 +384,8 @@ static s32 inf_stored(InfState *s) {
 static s32 inf_fixed(InfState *s) {
     InfHuft *save = s->base;
 
-    s->base = D_8003C230;
-    inf_codes(s, D_8003C230 + 1, D_8003C230 + 0x272, 7, 5);
+    s->base = g_rzip_fixed_tables;
+    inf_codes(s, g_rzip_fixed_tables + 1, g_rzip_fixed_tables + 0x272, 7, 5);
     s->base = save;
     return 0;
 }
@@ -410,16 +410,16 @@ static s32 inf_dynamic(InfState *s) {
     j = 0;
     do {
         INF_NEED(s, 3);
-        ll[D_8002C4BC[j]] = s->bb & 7;
+        ll[g_rzip_border[j]] = s->bb & 7;
         INF_DUMP(s, 3);
         j++;
     } while (j < nb);
     for (; j < 19; j++) {
-        ll[D_8002C4BC[j]] = 0;
+        ll[g_rzip_border[j]] = 0;
     }
     bl = 7;
     inf_build(s, ll, 19, 19, NULL, NULL, &tl, &bl, s->bb); /* result not checked */
-    mask = D_8002C420[bl];
+    mask = g_rzip_mask_bits[bl];
     n = nl + nd;
     i = 0;
     l = 0;
@@ -468,11 +468,11 @@ static s32 inf_dynamic(InfState *s) {
     }
     td = idx;
     bl = 9;
-    if (inf_build(s, ll, nl, 257, D_8002C442, D_8002C4CF, &tl, &bl, s->bb) != 0) {
+    if (inf_build(s, ll, nl, 257, g_rzip_cplens, g_rzip_cplext, &tl, &bl, s->bb) != 0) {
         return 1;
     }
     bd = 6;
-    if (inf_build(s, ll + nl, nd, 0, D_8002C480, D_8002C4EE, &td, &bd, s->bb) != 0) {
+    if (inf_build(s, ll + nl, nd, 0, g_rzip_cpdist, g_rzip_cpdext, &td, &bd, s->bb) != 0) {
         return 1;
     }
     if (inf_codes(s, s->base + tl, s->base + td, bl, bd) != 0) {
@@ -538,7 +538,7 @@ s32 rzip_inflate_impl(s32 src, s32 dst, u32 work) {
     return st.outcnt;
 }
 
-/* rzip_build_fixed_tables: the fixed literal / distance tables at D_8003C230 (inflate_fixed's setup, run once at boot) */
+/* rzip_build_fixed_tables: the fixed literal / distance tables at g_rzip_fixed_tables (inflate_fixed's setup, run once at boot) */
 /* was func_1000738C */
 void rzip_build_fixed_tables(void) {
     InfFrame fr;
@@ -550,7 +550,7 @@ void rzip_build_fixed_tables(void) {
 
     st.fr = &fr;
     st.hufts = 0;
-    st.base = D_8003C230;
+    st.base = g_rzip_fixed_tables;
     for (i = 0; i < 144; i++) {
         l[i] = 8;
     }
@@ -564,12 +564,12 @@ void rzip_build_fixed_tables(void) {
         l[i] = 8;
     }
     m = 7;
-    inf_build(&st, l, 288, 257, D_8002C442, D_8002C4CF, &t, &m, 0);
+    inf_build(&st, l, 288, 257, g_rzip_cplens, g_rzip_cplext, &t, &m, 0);
     for (i = 0; i < 30; i++) {
         l[i] = 5;
     }
     m = 5;
-    inf_build(&st, l, 30, 0, D_8002C480, D_8002C4EE, &t, &m, 0);
+    inf_build(&st, l, 30, 0, g_rzip_cpdist, g_rzip_cpdext, &t, &m, 0);
 }
 
 /* C: see rzip_inflate_impl above (P36) */

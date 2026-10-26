@@ -16,7 +16,7 @@ void mtx_rotate_xyz_deg_fixed(Mtx *m, f32 rx, f32 ry, f32 rz);
 void camera_wobble_apply(u8 *arg0);
 void camera_track_noop(s32 arg0);
 void camera_track_update(u8 *arg0);
-extern Mtx *D_800DC6D0[];         /* per DL buffer: the per-player view matrices (0x40 each) */
+extern Mtx *g_view_mtx_bufs[];         /* per DL buffer: the per-player view matrices (0x40 each); was D_800DC6D0 */
 extern u8 g_dl_buf_index;             /* current DL buffer; was D_800BE9C0 */
 extern u8 g_cam_lookat_bufs[];           /* per DL buffer: LookAt (0x20); was D_800D9FB0 */
 extern s32 g_camera_track_data[];         /* camera shake tables (camera_shake_tracks_load): 6 floats (0x18) per step; was D_800DC6B0 */
@@ -28,11 +28,11 @@ extern s32 g_camera_track_data[];         /* camera shake tables (camera_shake_t
 #define CAM_F(o) (*(f32 *)(p + (o)))
 #define CAM_OBJ() (*(u8 **)(p + 0x3D4))
 #define CAM_REC() (*(u8 **)(p + 0x3D0))
-#define CAM_MTX() ((Mtx *)((u8 *)D_800DC6D0[g_dl_buf_index] + p[0x23D] * 0x40))
+#define CAM_MTX() ((Mtx *)((u8 *)g_view_mtx_bufs[g_dl_buf_index] + p[0x23D] * 0x40))
 
 /* Gameplay view matrix of one camera controller (camera_update_all's in-game branch): ease the orbit distances
  * (0x194 / 0x18C toward 0x198 / 0x190), pick eye (0x2F8) / target (0x2BC) (offset by the orbit around the
- * yaw 0x3A0 unless the object (0x3D4) has its own view, +0x197), look-at matrix into D_800DC6D0[buffer][player]
+ * yaw 0x3A0 unless the object (0x3D4) has its own view, +0x197), look-at matrix into g_view_mtx_bufs[buffer][player]
  * with the LookAt g_cam_lookat_bufs[buffer], then post-rotations: shake (0x854..0x868, decayed by 0.08 or driven by
  * g_camera_track_data), roll 0x5EC, per-player g_camera_view_offsets rotation / translation. */
 /* was func_1512C490 */
@@ -252,7 +252,7 @@ void camera_build_view_matrix(struct108 *arg0) {
 #undef CAM_REC
 #undef CAM_MTX
 void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
-extern Mtx *D_800DC6D0[];
+extern Mtx *g_view_mtx_bufs[]; /* was D_800DC6D0 */
 
 /* was func_1512D5E0 */
 void camera_wobble_apply(u8 *arg0) {
@@ -284,7 +284,7 @@ void camera_wobble_apply(u8 *arg0) {
     mf[0][0] = 2.0f * *(f32 *)(arg0 + 0x7DC) + 2.0f * (*(f32 *)(arg0 + 0x7DC) * fast_sinf(*(f32 *)(arg0 + 0x7B0))) + 1.0f;
     mf[1][1] = *(f32 *)(arg0 + 0x7DC) + *(f32 *)(arg0 + 0x7DC) * fast_cosf(*(f32 *)(arg0 + 0x7B0)) + 1.0f;
     guMtxF2L(mf, &m);
-    guMtxCatL(arg0[0x23D] + D_800DC6D0[g_dl_buf_index], &m, arg0[0x23D] + D_800DC6D0[g_dl_buf_index]);
+    guMtxCatL(arg0[0x23D] + g_view_mtx_bufs[g_dl_buf_index], &m, arg0[0x23D] + g_view_mtx_bufs[g_dl_buf_index]);
 }
 
 s32 asset_load(u32 *, s32, s32, s32);

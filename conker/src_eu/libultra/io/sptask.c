@@ -5,13 +5,13 @@
         ptr = (void *)osVirtualToPhysical(ptr);         \
     }
 
-extern OSTask D_80036EC0; // tmp_task
+extern OSTask g_os_sp_tmp_task; /* was D_80036EC0 */ // tmp_task
 
 OSTask *_VirtualToPhysicalTask(OSTask *intp) // static in libultra
 {
     OSTask *tp;
 
-    tp = &D_80036EC0;
+    tp = &g_os_sp_tmp_task;
     bcopy(intp, tp, sizeof(OSTask));
     _osVirtualToPhysical(tp->t.ucode);
     _osVirtualToPhysical(tp->t.ucode_data);

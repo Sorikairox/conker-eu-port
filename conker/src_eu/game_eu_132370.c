@@ -30,11 +30,11 @@ typedef struct {
     s32 off;    /* byte offset of the s16 x, y, z in each vertex */
     s32 pad;
 } FloorHit4BB4;
-extern FloorHit4BB4 D_800D3720[];
+extern FloorHit4BB4 g_floor_hits[]; /* was D_800D3720 */
 extern f32 g_floor_search_max_dist; /* 10000.0; was D_800A2740 */
 
 // floor_height_below: floor height at (x, z) closest to `y`. floor_collect_level_tris lists the floor triangles under the
-// point in D_800D3720; those whose third vertex lies on the positive side of the edge from vertex 0 to 1 (x / z
+// point in g_floor_hits; those whose third vertex lies on the positive side of the edge from vertex 0 to 1 (x / z
 // plane) are kept, and of these the one whose height (h / 256) is nearest to y is written to *out. Returns 0
 // when nothing is found, else 1.
 /* was func_15104BB4 */
@@ -56,7 +56,7 @@ s32 floor_height_below(f32 x, f32 z, f32 y, f32 *out) {
     cnt = 0;
     for (i = 0; i < n; i++) {
         for (k = 0; k < 3; k++) {
-            v = (s16 *) (D_800D3720[i].vtx[k] + D_800D3720[i].off);
+            v = (s16 *) (g_floor_hits[i].vtx[k] + g_floor_hits[i].off);
             vx[k] = v[0];
             vz[k] = v[2];
         }
@@ -74,7 +74,7 @@ s32 floor_height_below(f32 x, f32 z, f32 y, f32 *out) {
     best = -1;
     bestd = g_floor_search_max_dist;
     for (i = 0; i < cnt; i++) {
-        d = D_800D3720[list[i]].h * 0.00390625f - y;
+        d = g_floor_hits[list[i]].h * 0.00390625f - y;
         if (d < 0.0f) {
             d = -d;
         }
@@ -83,6 +83,6 @@ s32 floor_height_below(f32 x, f32 z, f32 y, f32 *out) {
             best = list[i];
         }
     }
-    *out = D_800D3720[best].h * 0.00390625f;
+    *out = g_floor_hits[best].h * 0.00390625f;
     return 1;
 }
