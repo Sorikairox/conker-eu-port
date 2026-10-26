@@ -1,0 +1,602 @@
+file	candidate_name	confidence	functions	described	evidence
+D5E90.c	triangle_floats	low	6	3	triangle=1, floats=1, vertices=1, relative=1, box=1
+D5E90_anim.c	joint_matrices	low	1	1	joint=1, matrices=1, model=1, instance=1
+D5E90_mtx.c	rotation_scaled	low	2	2	rotation=1, scaled=1, row=1, sx=1, sy=1
+code_17AA0.c	alseqpplay_alcspplay	low	1	1	alseqpplay=1, alcspplay=1
+code_17D80.c		none	1	0	
+code_18C60.c		none	1	0	
+code_18CB0.c		none	1	0	
+crc2.c	game_copy	low	2	1	game=1, copy=1, libultra=1, io=1, crc=1
+debugger.c	convert_framebuffer	low	22	3	framebuffer=2, convert=1, rgb=1, rgba=1, address=1
+debugger_256F80.c	reads_controllers	low	7	3	reads=1, controllers=1, another=1, ossidevicebusy=1, very=1
+debugger_257330.c		none	1	0	
+debugger_257350.c	whats_wrong	low	9	2	whats=1, wrong=1, bcopy=1, rodata=1, inject=1
+game_10B7C0.c		none	1	0	
+game_10C140.c		none	1	0	
+game_10ECB0.c		none	1	0	
+game_119960.c		none	1	0	
+game_122650.c		none	3	0	
+game_129EB0.c		none	1	0	
+game_12D7E0.c		none	1	0	
+game_130CB0.c		none	3	0	
+game_131F30.c		none	9	0	
+game_14D0D0.c		none	3	0	
+game_14FF90.c	frame_camera	low	42	12	camera=9, frame=2, controller=2, flags=2, target=2
+game_15A830.c		none	1	0	
+game_15B200.c		none	1	0	
+game_161520.c	requires_jump	low	46	1	requires=1, jump=1, table=1
+game_168A90.c		none	11	0	
+game_169510.c	sprite_quad	ok	54	6	sprite=2, quad=2, frame=1, update=1, effect=1
+game_16DC80.c	frame_grid	low	13	1	frame=1, grid=1, cell=1, lookup=1, scene=1
+game_16EE20.c	category_object	low	21	2	category=1, object=1, obj=1, interaction=1, tables=1
+game_1765E0.c		none	12	0	
+game_1897A0.c		none	6	0	
+game_18D770.c	another_struct	low	75	1	another=1, struct=1, definition=1
+game_193420.c		none	1	0	
+game_1944C0.c	frame_update	low	37	2	frame=1, update=1, hooks=1, draw=1, render=1
+game_1A6300.c		none	1	0	
+game_1BFC70.c		none	1	0	
+game_1CC420.c		none	1	0	
+game_1FFF60.c		none	19	0	
+game_2062D0.c	todo_we	low	58	2	todo=1, we=1, know=1, arg=1, spawn=1
+game_21FC90.c		none	14	0	
+game_221290.c	mp_dec	ok	13	6	mp=6, dec=5, unpack=1, scale=1, fac=1
+game_2D4B0.c	level_start	low	4	2	level=2, start=1, setup=1, screen=1, projection=1
+game_2DDF0.c		none	1	0	
+game_2DF70.c	level_setup	low	3	2	level=2, setup=1, sky=1, backdrop=1, buffers=1
+game_305D0.c	level_model	ok	7	3	level=2, model=2, relocates=1, ptr=1, loader=1
+game_30E60.c		none	2	0	
+game_30E90.c	fixme_matches	low	8	3	fixme=1, matches=1, something=1, isnt=1, right=1
+game_32200.c		none	1	0	
+game_322B0.c		none	2	0	
+game_323B0.c		none	2	0	
+game_323E0.c		none	1	0	
+game_32490.c	load_level	low	1	1	load=1, level=1, look=1, points=1
+game_32720.c		none	1	0	
+game_32740.c	level_camera	low	3	3	camera=2, level=1, init=1, initialise=1, player=1
+game_32F10.c		none	1	0	
+game_32F60.c		none	2	0	
+game_32FB0.c		none	1	0	
+game_32FC0.c		none	1	0	
+game_33000.c		none	1	0	
+game_33010.c		none	1	0	
+game_33020.c		none	1	0	
+game_33080.c		none	1	0	
+game_330E0.c		none	1	0	
+game_33130.c		none	2	0	
+game_331B0.c		none	1	0	
+game_33210.c		none	2	0	
+game_33260.c		none	1	0	
+game_332E0.c		none	1	0	
+game_33320.c		none	2	0	
+game_33390.c		none	1	0	
+game_333D0.c		none	1	0	
+game_33410.c		none	1	0	
+game_33450.c		none	1	0	
+game_33460.c		none	1	0	
+game_334C0.c		none	2	0	
+game_33620.c		none	1	0	
+game_33660.c		none	2	0	
+game_33990.c		none	13	0	
+game_34ED0.c		none	1	0	
+game_34F20.c	level_loader	low	6	1	level=1, loader=1
+game_35CF0.c		none	1	0	
+game_35D20.c	loops	low	2	1	loops=1
+game_35E80.c		none	1	0	
+game_35EC0.c		none	2	0	
+game_36040.c		none	3	0	
+game_360A0.c		none	1	0	
+game_36280.c		none	1	0	
+game_362B0.c		none	1	0	
+game_36600.c		none	1	0	
+game_36680.c	bfc_arg	low	69	1	bfc=1, arg=1
+game_39690.c		none	1	0	
+game_39750.c		none	5	0	
+game_3B920.c		none	1	0	
+game_3BA70.c		none	6	0	
+game_3BFD0.c		none	1	0	
+game_3BFE0.c		none	2	0	
+game_3C230.c		none	3	0	
+game_3C3D0.c		none	1	0	
+game_3C6C0.c		none	1	0	
+game_3D5C0.c		none	1	0	
+game_3D6F0.c		none	1	0	
+game_3D770.c		none	1	0	
+game_3D780.c		none	2	0	
+game_3D9A0.c		none	3	0	
+game_3DB30.c		none	1	0	
+game_3DB50.c		none	1	0	
+game_3DB60.c		none	1	0	
+game_3DB80.c		none	1	0	
+game_3DC30.c		none	3	0	
+game_3DF10.c		none	1	0	
+game_3E460.c		none	1	0	
+game_3E5A0.c		none	1	0	
+game_3E620.c		none	1	0	
+game_3E7E0.c		none	1	0	
+game_3E810.c		none	1	0	
+game_3E890.c		none	1	0	
+game_3EFB0.c		none	2	0	
+game_3F0F0.c		none	1	0	
+game_3F120.c		none	3	0	
+game_3F1F0.c		none	1	0	
+game_3F3D0.c		none	1	0	
+game_3F450.c		none	1	0	
+game_3F4D0.c		none	1	0	
+game_3F560.c		none	2	0	
+game_3F670.c		none	1	0	
+game_3F820.c		none	2	0	
+game_3FBD0.c		none	1	0	
+game_3FC20.c		none	1	0	
+game_3FC30.c		none	1	0	
+game_40490.c	effect_spawn	low	27	3	spawn=2, effect=1, record=1, ecc=1, idx=1
+game_433F0.c		none	2	0	
+game_43760.c		none	1	0	
+game_43820.c		none	1	0	
+game_439B0.c		none	2	0	
+game_43B20.c		none	3	0	
+game_447B0.c		none	5	0	
+game_44A90.c		none	2	0	
+game_44C40.c	level_load	low	6	1	level=1, load=1, bounding=1, box=1, byte=1
+game_45B80.c	player_setup	ok	16	7	player=3, setup=2, main=1, returns=1, dl=1
+game_476D0.c		none	10	0	
+game_49D10.c		none	1	0	
+game_49D20.c		none	1	0	
+game_57FA0.c	asset_cache	ok	15	4	asset=3, cache=1, insert=1, last=1, load=1
+game_6D800.c		none	63	0	
+game_6E240.c		none	3	0	
+game_70200.c	text_queue	low	14	3	text=1, queue=1, printf=1, partly=1, verified=1
+game_71240.c		none	6	0	
+game_71770.c		none	1	0	
+game_75810.c		none	2	0	
+game_75950.c		none	1	0	
+game_75A90.c		none	3	0	
+game_75BD0.c		none	2	0	
+game_75C90.c		none	3	0	
+game_75E60.c		none	3	0	
+game_75FC0.c		none	10	0	
+game_76710.c	asm_caller	low	3	1	asm=1, caller=1, tests=1
+game_768F0.c		none	1	0	
+game_77AD0.c	logf_perfect	low	1	1	logf=1, perfect=1, dark=1, src=1, lib=1
+game_83300.c	object_objects	ok	68	16	object=5, objects=3, record=3, animation=3, hit=2
+game_8FCB0.c		none	8	0	
+game_981E0.c	script_command	ok	319	12	command=8, script=7, object=2, triggered=1, entering=1
+game_A28B0.c	differ_trial	low	203	4	differ=1, trial=1, another=1, these=1, int=1
+game_A9D90.c	beb_flag	low	13	2	beb=1, flag=1, test=1, halfword=1, player=1
+game_BC430.c		none	1	0	
+game_BC510.c	overlay_world	low	12	4	world=2, overlay=1, pass=1, draws=1, display=1
+game_C8950.c	event_block	ok	17	8	event=5, block=2, variadic=2, dispatch=2, start=1
+game_CB1C0.c		none	8	0	
+game_D5160.c		none	1	0	
+game_D51B0.c	gutranslate_style	low	1	1	gutranslate=1, style=1, fixed=1, point=1, mtx=1
+game_D5250.c		none	1	0	
+game_D5500.c	rotation_matrix	low	1	1	rotation=1, matrix=1, three=1, angles=1, degrees=1
+game_DAE50.c	random_int	ok	4	3	random=2, int=1, float=1, mips=1, iii=1
+game_DBA60.c		none	7	0	
+game_EF410.c		none	13	0	
+game_F20A0.c		none	1	0	
+game_FC3C0.c		none	1	0	
+game_eu_100170.c		none	1	0	
+game_eu_100410.c		none	5	0	
+game_eu_101080.c		none	7	0	
+game_eu_103160.c	debris_burst	low	17	2	debris=2, burst=1, destroyed=1, object=1, update=1
+game_eu_104E40.c		none	1	0	
+game_eu_105140.c		none	5	0	
+game_eu_105FD0.c		none	8	0	
+game_eu_106830.c		none	11	0	
+game_eu_108C00.c		none	4	0	
+game_eu_109770.c		none	7	0	
+game_eu_10C0B0.c		none	7	0	
+game_eu_10CA50.c	void	low	1	1	void=1
+game_eu_10D5B0.c		none	1	0	
+game_eu_10D650.c		none	12	0	
+game_eu_10E600.c		none	1	0	
+game_eu_10EB20.c		none	1	0	
+game_eu_10EDF0.c		none	2	0	
+game_eu_10F840.c		none	5	0	
+game_eu_110DB0.c		none	11	0	
+game_eu_111F50.c		none	3	0	
+game_eu_1122E0.c		none	2	0	
+game_eu_113870.c	differ_fixed	low	1	1	differ=1, fixed=1, had=1, order=1, args=1
+game_eu_113D60.c		none	4	0	
+game_eu_114640.c	differ_trial	low	27	1	differ=1, trial=1
+game_eu_117620.c		none	2	0	
+game_eu_117D70.c		none	9	0	
+game_eu_1188A0.c		none	1	0	
+game_eu_118CE0.c	differ_arg	low	3	1	differ=1, arg=1
+game_eu_1191C0.c		none	3	0	
+game_eu_119C50.c		none	2	0	
+game_eu_11A2B0.c		none	6	0	
+game_eu_11AF60.c		none	5	0	
+game_eu_11CB90.c		none	31	0	
+game_eu_11F790.c	adjustment_entries	low	3	2	adjustment=1, entries=1, object=1, type=1, void=1
+game_eu_120060.c		none	9	0	
+game_eu_1207F0.c		none	9	0	
+game_eu_122300.c		none	4	0	
+game_eu_123040.c		none	2	0	
+game_eu_1231B0.c		none	22	0	
+game_eu_124B40.c		none	5	0	
+game_eu_125200.c		none	4	0	
+game_eu_126330.c		none	9	0	
+game_eu_1277B0.c		none	1	0	
+game_eu_127840.c		none	12	0	
+game_eu_129650.c		none	7	0	
+game_eu_12A7C0.c	differ_fixed	low	8	1	differ=1, fixed=1, xc=1, passed=1, bit=1
+game_eu_12BAA0.c		none	1	0	
+game_eu_12BB30.c		none	5	0	
+game_eu_12C0B0.c		none	5	0	
+game_eu_12C5F0.c		none	2	0	
+game_eu_12CAC0.c		none	6	0	
+game_eu_12D5D0.c		none	5	0	
+game_eu_12DF10.c		none	3	0	
+game_eu_12E390.c		none	18	0	
+game_eu_1306B0.c		none	5	0	
+game_eu_1311C0.c		none	1	0	
+game_eu_131420.c		none	3	0	
+game_eu_131F00.c		none	3	0	
+game_eu_1322B0.c		none	1	0	
+game_eu_132370.c		none	4	0	
+game_eu_133A70.c		none	28	0	
+game_eu_135D70.c		none	1	0	
+game_eu_135EB0.c		none	1	0	
+game_eu_136060.c		none	2	0	
+game_eu_1365E0.c		none	10	0	
+game_eu_1371A0.c		none	1	0	
+game_eu_1379B0.c		none	5	0	
+game_eu_1386C0.c		none	1	0	
+game_eu_1387B0.c		none	3	0	
+game_eu_138C70.c		none	1	0	
+game_eu_138E00.c	player_projection	ok	11	6	player=4, projection=2, screen=1, size=1, dd=1
+game_eu_13A8A0.c	texture_cache	ok	12	3	texture=3, cache=2, resolve=1, ids=1, model=1
+game_eu_13B700.c	floor_slope	low	3	1	floor=1, slope=1, triangle=1
+game_eu_13C400.c	batch_draft	low	14	1	batch=1, draft=1, hoist=1, extern=1, dc=1
+game_eu_13DC30.c	callback_runs	ok	23	6	callback=2, runs=2, every=2, hud=1, overlay=1
+game_eu_142E40.c		none	58	0	
+game_eu_14D9E0.c		none	4	0	
+game_eu_14F750.c		none	1	0	
+game_eu_14F980.c		none	2	0	
+game_eu_14FE50.c		none	1	0	
+game_eu_1501C0.c	camera_mode	low	1	1	camera=1, mode=1
+game_eu_156A30.c		none	1	0	
+game_eu_1579B0.c		none	1	0	
+game_eu_158110.c	camera_free	ok	13	7	camera=6, free=3, reset=2, tables=1, arg=1
+game_eu_15A210.c	gameplay_view	low	6	1	gameplay=1, view=1, matrix=1, camera=1, controller=1
+game_eu_15B110.c	player_sideways	low	1	1	player=1, sideways=1, tilt=1
+game_eu_15B2E0.c		none	3	0	
+game_eu_15B470.c		none	3	0	
+game_eu_15BEC0.c	camera_eye	low	1	1	camera=1, eye=1, height=1
+game_eu_15C230.c		none	1	0	
+game_eu_15C660.c		none	1	0	
+game_eu_15DFB0.c		none	1	0	
+game_eu_15E000.c		none	28	0	
+game_eu_15FF50.c	asm_passes	low	26	1	asm=1, passes=1, bbc=1, through=1
+game_eu_170760.c	texture_address	low	63	3	texture=1, address=1, material=1, non=1, matching=1
+game_eu_174610.c	interaction_hook	low	9	1	interaction=1, hook=1
+game_eu_1754C0.c		none	11	0	
+game_eu_175B20.c		none	5	0	
+game_eu_1772D0.c		none	30	0	
+game_eu_17A800.c		none	72	0	
+game_eu_17D3C0.c		none	25	0	
+game_eu_182A10.c	draws_sprite	low	5	1	draws=1, sprite=1, view=1
+game_eu_183500.c		none	9	0	
+game_eu_183F10.c		none	13	0	
+game_eu_185050.c		none	12	0	
+game_eu_185E30.c		none	14	0	
+game_eu_186A80.c		none	19	0	
+game_eu_188D10.c		none	10	0	
+game_eu_189860.c		none	11	0	
+game_eu_18B1C0.c	player_view	low	29	3	player=1, view=1, setup=1, object=1, lighting=1
+game_eu_18D5D0.c		none	5	0	
+game_eu_18DB20.c		none	4	0	
+game_eu_192500.c		none	7	0	
+game_eu_193D00.c		none	4	0	
+game_eu_194720.c		none	4	0	
+game_eu_197680.c		none	3	0	
+game_eu_1979F0.c		none	3	0	
+game_eu_1984F0.c		none	7	0	
+game_eu_19B180.c		none	20	0	
+game_eu_19E910.c		none	5	0	
+game_eu_19FA20.c		none	5	0	
+game_eu_1A09D0.c	reset_byte	low	5	1	reset=1, byte=1, tables=1
+game_eu_1A0CF0.c		none	1	0	
+game_eu_1A1060.c	blend_fog	low	5	1	blend=1, fog=1, colour=1, preset=1, toward=1
+game_eu_1A1730.c		none	2	0	
+game_eu_1A1A80.c	occlusion_probes	low	3	1	occlusion=1, probes=1
+game_eu_1A2410.c		none	2	0	
+game_eu_1A2720.c		none	4	0	
+game_eu_1A2970.c		none	4	0	
+game_eu_1A5D10.c		none	7	0	
+game_eu_1A6C30.c		none	7	0	
+game_eu_1A7B30.c		none	7	0	
+game_eu_1A8930.c		none	1	0	
+game_eu_1A9280.c	frame_refresh	low	11	1	frame=1, refresh=1, positional=1, sound=1, slots=1
+game_eu_1ABE00.c	node_list	low	5	1	node=1, list=1, ddd=1
+game_eu_1ACBC0.c	de_overlay	ok	22	5	de=2, overlay=2, takes=1, argument=1, id=1
+game_eu_1B0550.c		none	2	0	
+game_eu_1B1010.c	release_slot	low	6	1	release=1, slot=1, arg=1, dde=1, table=1
+game_eu_1B1ED0.c	aim_offset	low	26	2	aim=1, offset=1, player=1, object=1, obj=1
+game_eu_1B5C40.c		none	5	0	
+game_eu_1B6590.c		none	11	0	
+game_eu_1B7680.c		none	3	0	
+game_eu_1B7D70.c		none	5	0	
+game_eu_1B8140.c		none	3	0	
+game_eu_1B8790.c		none	4	0	
+game_eu_1B8AA0.c	void	low	5	1	void=1
+game_eu_1B9430.c		none	1	0	
+game_eu_1B9810.c		none	8	0	
+game_eu_1BA680.c	reference_counted	low	2	1	reference=1, counted=1, load=1, asset=1
+game_eu_1BA800.c		none	2	0	
+game_eu_1BAF40.c	rodata_inject	low	41	1	rodata=1, inject=1
+game_eu_1BE5C0.c		none	9	0	
+game_eu_1BF960.c		none	4	0	
+game_eu_1C0580.c		none	2	0	
+game_eu_1C06A0.c		none	6	0	
+game_eu_1C1110.c		none	2	0	
+game_eu_1C13E0.c		none	4	0	
+game_eu_1C1A20.c		none	25	0	
+game_eu_1C3530.c	texture_scrolling	low	49	1	texture=1, scrolling=1
+game_eu_1CACF0.c	fakematch_volatile	low	21	1	fakematch=1, volatile=1, arg=1, reloads=1, byte=1
+game_eu_1CC6F0.c		none	7	0	
+game_eu_1CCD10.c		none	12	0	
+game_eu_1CE7D0.c		none	20	0	
+game_eu_1D1150.c		none	14	0	
+game_eu_1D2F30.c		none	3	0	
+game_eu_1D3420.c		none	13	0	
+game_eu_1D4CC0.c		none	6	0	
+game_eu_1D5710.c		none	18	0	
+game_eu_1D7790.c		none	39	0	
+game_eu_1D9C00.c		none	15	0	
+game_eu_1DC470.c		none	1	0	
+game_eu_1DC570.c		none	5	0	
+game_eu_1DD290.c		none	1	0	
+game_eu_1DD380.c		none	5	0	
+game_eu_1DDE10.c		none	12	0	
+game_eu_1DFE20.c	void	low	17	1	void=1
+game_eu_1E0E70.c		none	14	0	
+game_eu_1E2A90.c		none	6	0	
+game_eu_1E3000.c		none	2	0	
+game_eu_1E3960.c		none	1	0	
+game_eu_1E39B0.c		none	2	0	
+game_eu_1E3DD0.c		none	2	0	
+game_eu_1E40E0.c		none	11	0	
+game_eu_1E61C0.c		none	5	0	
+game_eu_1E6900.c		none	4	0	
+game_eu_1E6B70.c	extern_aa	low	3	1	extern=1, aa=1
+game_eu_1E7450.c		none	2	0	
+game_eu_1E7CC0.c		none	37	0	
+game_eu_1EC610.c	lives_pop	low	10	1	lives=1, pop=1
+game_eu_1EDA00.c		none	22	0	
+game_eu_1EFE10.c		none	14	0	
+game_eu_1F3040.c		none	6	0	
+game_eu_1F4090.c		none	5	0	
+game_eu_1F4F60.c		none	12	0	
+game_eu_1F7960.c		none	21	0	
+game_eu_1FB080.c	near_sib	low	41	1	near=1, sib=1, li=1, beq=1
+game_eu_200070.c		none	1	0	
+game_eu_200480.c		none	4	0	
+game_eu_201240.c		none	16	0	
+game_eu_203C50.c		none	5	0	
+game_eu_204730.c		none	6	0	
+game_eu_204F70.c		none	19	0	
+game_eu_2065A0.c		none	10	0	
+game_eu_20A460.c		none	3	0	
+game_eu_20ABA0.c		none	1	0	
+game_eu_20ACB0.c		none	2	0	
+game_eu_20AF00.c		none	2	0	
+game_eu_20B160.c		none	1	0	
+game_eu_20B220.c		none	1	0	
+game_eu_20B2A0.c	void_ddc	low	4	1	void=1, ddc=1
+game_eu_20B730.c	clamp_settings	low	41	5	clamp=1, settings=1, bytes=1, lb=1, table=1
+game_eu_216470.c	draft_fixes	ok	16	7	draft=3, fixes=2, table=2, slot=2, convert=1
+game_eu_21CFC0.c		none	1	0	
+game_eu_21D010.c		none	1	0	
+game_eu_21D050.c	sqrtf_built	low	1	1	sqrtf=1, built=1, sqrt=1, fills=1, jr=1
+game_eu_21D060.c		none	3	0	
+game_eu_21D420.c		none	2	0	
+game_eu_21D5E0.c	gurandom_libultra	low	1	1	gurandom=1, libultra=1, gu=1, random=1, xseed=1
+game_eu_21D610.c		none	1	0	
+game_eu_21D7D0.c		none	2	0	
+game_eu_21D990.c		none	1	0	
+game_eu_21DA70.c		none	3	0	
+game_eu_21DCD0.c		none	2	0	
+game_eu_21DF40.c		none	2	0	
+game_eu_21E320.c		none	4	0	
+game_eu_21E490.c		none	1	0	
+game_eu_21E520.c		none	8	0	
+game_eu_220050.c		none	2	0	
+game_eu_220400.c		none	2	0	
+game_eu_2F180.c	node_quadtree	ok	23	4	node=2, quadtree=2, pool=1, level=1, quadtrees=1
+game_eu_38360.c		none	3	0	
+game_eu_3CA50.c		none	2	0	
+game_eu_3D190.c		none	2	0	
+game_eu_3D5F0.c		none	3	0	
+game_eu_3FF70.c		none	1	0	
+game_eu_430D0.c	load_rom	low	3	2	load=1, rom=1, range=1, idx=1, rle=1
+game_eu_43640.c	display_list	low	1	1	display=1, list=1, buffers=1, gfx=1
+game_eu_43B90.c		none	1	0	
+game_eu_44010.c	level_setup	low	2	1	level=1, setup=1, load=1
+game_eu_45B90.c	pvs_setup	low	2	2	pvs=1, setup=1, hand=1, asm=1, called=1
+game_eu_48B10.c	smoothed_camera	low	2	2	smoothed=1, camera=1, pitch=1, heading=1, asm=1
+game_eu_49310.c	frame_controller	low	8	3	frame=1, controller=1, read=1, bed=1, byte=1
+game_eu_49F20.c		none	1	0	
+game_eu_4A070.c	cutscene_slot	ok	56	28	slot=18, cutscene=17, actor=10, scene=4, sequence=4
+game_eu_51130.c		none	1	0	
+game_eu_51190.c	script_event	low	7	2	script=1, event=1, interpreter=1, runs=1, entry=1
+game_eu_595D0.c	object_arg	ok	38	19	object=13, arg=8, model=8, frame=3, update=2
+game_eu_5D910.c	attachment_record	ok	40	9	attachment=6, record=3, callback=3, model=2, rec=2
+game_eu_61AE0.c	build_object	low	10	1	build=1, object=1, adjustment=1, list=1
+game_eu_62360.c	draw_queue	ok	10	5	draw=3, queue=2, game=1, eu=1, builds=1
+game_eu_63E10.c	turns_joint	low	1	1	turns=1, joint=1, object=1, index=1, towards=1
+game_eu_64070.c		none	1	0	
+game_eu_64770.c	object_look	ok	19	11	object=8, look=6, joint=4, id=4, frame=2
+game_eu_692C0.c	object_tail	low	5	3	tail=2, object=1, kind=1, flags=1, conker=1
+game_eu_6AA20.c	model_id	ok	15	3	model=3, id=2, arg=2, load=1, triangle=1
+game_eu_6B8D0.c		none	1	0	
+game_eu_6B970.c	breakable_slot	ok	22	10	breakable=5, slot=5, pieces=3, entry=2, flag=2
+game_eu_6CFB0.c		none	4	0	
+game_eu_6D300.c	matched_void	low	3	1	matched=1, void=1, body=1, leaves=1, faf=1
+game_eu_6D4F0.c		none	2	0	
+game_eu_6EDC0.c	linear_search	low	8	2	linear=1, search=1, table=1, draw=1, len=1
+game_eu_71E70.c	timed_effect	low	42	3	timed=1, effect=1, list=1, cbe=1, floor=1
+game_eu_770B0.c		none	2	0	
+game_eu_772E0.c		none	2	0	
+game_eu_774A0.c		none	1	0	
+game_eu_77740.c		none	4	0	
+game_eu_77DB0.c		none	1	0	
+game_eu_77F00.c		none	1	0	
+game_eu_78230.c	frame_object	low	47	3	object=2, frame=1, pass=1, records=1, outside=1
+game_eu_90F50.c		none	12	0	
+game_eu_981C0.c		none	14	0	
+game_eu_A9980.c	advances_animation	low	3	1	advances=1, animation=1
+game_eu_A9F60.c	collision_cylinder	low	2	1	collision=1, cylinder=1, record=1
+game_eu_ABEA0.c	eye_animation	low	13	5	animation=3, eye=1, blink=1, object=1, obj=1
+game_eu_AC770.c	idle_record	ok	15	5	idle=3, record=2, picks=1, next=1, animation=1
+game_eu_ADE10.c		none	3	0	
+game_eu_AE110.c		none	10	0	
+game_eu_AE930.c		none	2	0	
+game_eu_AF2A0.c	level_object	low	24	7	object=3, level=2, setup=2, entry=2, slot=2
+game_eu_B2980.c	level_record	low	8	4	record=2, level=1, start=1, point=1, lookup=1
+game_eu_B37F0.c	asm_never	low	19	1	asm=1, never=1, sets=1, calling=1
+game_eu_B7840.c	permuter_changed	low	14	1	permuter=1, changed=1, decl=1
+game_eu_BC930.c		none	3	0	
+game_eu_C24E0.c		none	3	0	
+game_eu_C2B60.c	non_matching	ok	12	5	non=3, matching=3, sky=1, sprite=1, texture=1
+game_eu_C4590.c	pushes_player	low	5	1	pushes=1, player=1, id=1, back=1, along=1
+game_eu_C5530.c	object_id	ok	4	4	object=4, id=2, removes=1, command=1, query=1
+game_eu_CA060.c		none	3	0	
+game_eu_CA630.c	event_unk	low	14	4	unk=2, event=1, prerequisites=1, holds=1, pointer=1
+game_eu_CBB40.c		none	3	0	
+game_eu_CC330.c		none	4	0	
+game_eu_CC5F0.c		none	16	0	
+game_eu_CD540.c	game_query	low	1	1	game=1, query=1
+game_eu_CDDE0.c	frame_every	low	4	1	frame=1, every=1, active=1, running=1, slot=1
+game_eu_CE0A0.c	sequence_slot	low	2	1	sequence=1, slot=1, query=1
+game_eu_CE6C0.c	trigger_zones	low	26	2	trigger=1, zones=1, record=1, existing=1, body=1
+game_eu_D1760.c	select_area	low	6	1	select=1, area=1, collision=1, tables=1
+game_eu_D2DB0.c		none	1	0	
+game_eu_D3880.c	view_box	low	5	3	box=2, view=1, test=1, sphere=1, same=1
+game_eu_D5650.c	matrix_product	low	2	1	matrix=1, product=1
+game_eu_D5AE0.c	hand_asm	low	1	1	hand=1, asm=1, original=1
+game_eu_DB5A0.c		none	1	0	
+game_eu_DB5F0.c		none	2	0	
+game_eu_DB650.c	approximate_distance	low	1	1	approximate=1, distance=1, between=1
+game_eu_DB7E0.c	event_asm	low	15	8	event=2, asm=2, timer=2, counting=2, frame=2
+game_eu_DCBA0.c		none	2	0	
+game_eu_DCEF0.c		none	16	0	
+game_eu_DE3A0.c		none	1	0	
+game_eu_DE750.c		none	4	0	
+game_eu_DEDE0.c		none	3	0	
+game_eu_DFAA0.c		none	3	0	
+game_eu_E0170.c		none	2	0	
+game_eu_E0430.c		none	2	0	
+game_eu_E17A0.c		none	1	0	
+game_eu_E1AC0.c		none	9	0	
+game_eu_E30C0.c		none	6	0	
+game_eu_E35E0.c		none	10	0	
+game_eu_E48B0.c		none	15	0	
+game_eu_E5830.c		none	2	0	
+game_eu_E66D0.c		none	5	0	
+game_eu_E7BC0.c		none	2	0	
+game_eu_E81B0.c		none	6	0	
+game_eu_E88D0.c		none	5	0	
+game_eu_E93F0.c		none	1	0	
+game_eu_E9450.c		none	3	0	
+game_eu_EB430.c		none	3	0	
+game_eu_EBBA0.c		none	4	0	
+game_eu_EBF20.c		none	4	0	
+game_eu_EC560.c		none	1	0	
+game_eu_EC6C0.c		none	5	0	
+game_eu_ECC80.c		none	5	0	
+game_eu_EE6C0.c		none	5	0	
+game_eu_EEF70.c		none	1	0	
+game_eu_EF370.c		none	1	0	
+game_eu_EF6D0.c		none	3	0	
+game_eu_F1E30.c		none	3	0	
+game_eu_F2A30.c		none	6	0	
+game_eu_F3080.c		none	13	0	
+game_eu_F3AD0.c		none	10	0	
+game_eu_F4400.c		none	10	0	
+game_eu_F4D30.c		none	2	0	
+game_eu_F5060.c		none	1	0	
+game_eu_F50F0.c		none	1	0	
+game_eu_F5380.c		none	2	0	
+game_eu_F5480.c		none	1	0	
+game_eu_F5580.c		none	6	0	
+game_eu_F6060.c		none	13	0	
+game_eu_F8DF0.c		none	9	0	
+game_eu_F9CA0.c		none	5	0	
+game_eu_FAAB0.c		none	1	0	
+game_eu_FABD0.c		none	2	0	
+game_eu_FB8D0.c		none	3	0	
+game_eu_FBE70.c	arg_goes	low	4	2	arg=1, goes=1, nearest=1, neighbour=1, zoom=1
+game_eu_FCC80.c		none	2	0	
+game_eu_FCDC0.c		none	1	0	
+game_eu_FCE60.c	byte_stack	low	19	1	byte=1, stack=1, struct=1, memcpyd=1, behind=1
+game_eu_FDEC0.c		none	3	0	
+game_eu_FE370.c		none	1	0	
+game_eu_FE5E0.c		none	3	0	
+game_eu_FF0C0.c		none	4	0	
+game_eu_FF250.c		none	1	0	
+game_eu_FF530.c	draws_scrolling	low	1	1	draws=1, scrolling=1, textured=1, quad=1, view=1
+game_eu_FF860.c		none	2	0	
+game_eu_FF950.c		none	4	0	
+game_eu_FFE30.c		none	7	0	
+init_1050.c		none	2	0	
+init_11FA0.c		none	5	0	
+init_12560.c	callback_line	low	7	1	callback=1, line=1, length=1, reach=1, bb=1
+init_128D0.c	non_vanila	low	11	1	non=1, vanila=1, albnkfnew=1
+init_1420.c	clear_xfe	low	6	2	clear=1, xfe=1, byte=1, block=1, ed=1
+init_15550.c		none	16	0	
+init_17870.c		none	2	0	
+init_17AF0.c		none	4	0	
+init_17C00.c		none	4	0	
+init_17DF0.c		none	2	0	
+init_17F10.c		none	1	0	
+init_18D00.c		none	1	0	
+init_18D50.c		none	1	0	
+init_19B50.c		none	20	0	
+init_1AAE0.c	removes_pending	low	8	3	removes=1, pending=1, type=1, lookupvoice=1, fx=1
+init_1C060.c	alevtqflushtype_returns	low	1	1	alevtqflushtype=1, returns=1, time=1, first=1, flushed=1
+init_1CBF0.c		none	3	0	
+init_1D900.c	right	low	4	1	right=1
+init_1E2A0.c		none	1	0	
+init_1E350.c		none	1	0	
+init_1E400.c	non_vanilla	low	1	1	non=1, vanilla=1, alcspsendmidi=1, alseqpsendmidi=1
+init_1E4A0.c		none	1	0	
+init_1E530.c		none	2	0	
+init_1FB40.c		none	1	0	
+init_2070.c		none	4	0	
+init_210C0.c		none	1	0	
+init_214F0.c		none	3	0	
+init_2E50.c		none	1	0	
+init_38C0.c		none	1	0	
+init_38E0.c		none	2	0	
+init_3920.c		none	1	0	
+init_3930.c		none	1	0	
+init_39B0.c		none	1	0	
+init_39C0.c		none	3	0	
+init_3BD0.c	heap_init	low	1	1	heap=1, init=1
+init_3C40.c	heap_free	low	6	1	heap=1, free=1
+init_4470.c	blocking_read	low	5	1	blocking=1, read=1, size=1, bytes=1
+init_49E0.c	unverified_difftest	low	5	1	unverified=1, difftest=1
+init_50A0.c	problem_osmotorstop	low	6	1	problem=1, osmotorstop=1
+init_8180.c	audio_init	low	27	2	audio=1, init=1, alcspgetchlvol=1
+init_8F90.c	audio_dma	ok	15	4	audio=2, dma=2, unverified=1, past=1, alinit=1
+init_A420.c		none	1	0	
+init_B1B0.c	music_player	ok	47	4	music=2, player=2, slot=2, arg=2, pragma=1
+init_EB00.c	updates_sound	low	49	1	updates=1, sound=1, entries=1, first=1
+init_eu_23B70.c		none	3	0	
+init_eu_23CC0.c		none	1	0	
+init_eu_24320.c		none	1	0	
+init_eu_251D0.c		none	1	0	
+init_eu_25370.c		none	1	0	
+init_eu_25AA0.c		none	1	0	
+init_eu_25C10.c		none	1	0	
+init_eu_25FC0.c		none	1	0	
+init_eu_27990.c	osleodiskinit_rare	low	2	1	osleodiskinit=1, rare=1, libultrare=1, goldeneye=1, src=1
+init_eu_3570.c		none	1	0	
+init_eu_5860.c	libultra_motor	low	2	2	libultra=2, motor=2
+init_eu_5AD0.c	libultra_io	low	2	1	libultra=1, io=1, motor=1, makemotordata=1
+init_eu_5DA0.c	fill_bitmap	low	6	4	fill=1, bitmap=1, src=1, packed=1, record=1
+n_csq.c	rare_scan	low	2	1	rare=1, scan=1, compressed=1, sequence=1, marker=1
+n_synsetpitch2.c	pitch	low	1	1	pitch=1
