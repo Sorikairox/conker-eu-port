@@ -257,10 +257,13 @@ def plan(rows, only):
                     if (line[:1].isalpha() or line[:1] == '_') and line.rstrip()[-1:] != '\\' \
                             and word(new).search(line) and ('was ' + old) not in line:
                         s = line.rstrip()
-                        if s.endswith('*/') and '/*' in s and '*/' not in s[s.rindex('/*'):-2]:
+                        c = min([i for i in (s.find('/*'), s.find('//')) if i >= 0], default=-1)
+                        if c < 0:
+                            line = s + ' /* was %s */' % old
+                        elif s.endswith('*/') and s.startswith('/*', c) and '*/' not in s[c + 2:-2]:
                             line = s[:-2].rstrip() + '; was %s */' % old   # into the line's own trailing comment
-                        else:
-                            line += ' /* was %s */' % old
+                        else:   # a comment that goes on to the next line(s), or a // one: put it before it
+                            line = s[:c].rstrip() + ' /* was %s */ ' % old + s[c:]
                         n += 1
                     out.append(line)
                 if n:
