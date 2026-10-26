@@ -590,7 +590,7 @@ extern u8 *D_800CC6A4;
 #define SWIM_ANIM(p) SWIM_U16(p, 0x84)      /* current animation / move id */
 #define SWIM_ST(p) ((u8 *) (p)->unk31C)     /* player state block */
 
-// player_swim_update: P191: the player's per-frame water physics while p->in_water (called by player_update
+// swim_water_physics: P191: the player's per-frame water physics while p->in_water (called by player_update
 // obj_state_walk with the frame step dt). Depth below the surface (+0x118 minus 60) gives a float-up push for
 // shallow water (when the state block +0x20 bit 0 / +0x21 is set: at most 8 * D_800D1550 per frame up to 400), and
 // for a swimming player (in_water == 1) the swim pitch target (+0xB8 eases towards it at 2.7 deg per frame, clamped
@@ -711,6 +711,17 @@ f32 swim_water_physics(struct127 *p, f32 dt) {
                 SWIM_AIR(p) = 0;
             } else {
                 air = SWIM_AIR(p) + D_800BE9E4;
+#ifdef PORT
+                /* P326 option "Longer breath": before the warning point 0x5A1 the counter grows by half the frame
+                 * step (the odd tick is carried to the next frame), so the safe time under water doubles. The
+                 * warning, the drowning damage and the HUD (air meter = counter / 720, bubbles) keep the N64 rules. */
+                if (port_option(PORT_OPT_LONG_BREATH) && SWIM_AIR(p) < 0x5A1) {
+                    static s32 carry; /* 0 or 1 */
+                    s32 ticks = D_800BE9E4 + carry;
+                    carry = ticks & 1;
+                    air = SWIM_AIR(p) + (ticks >> 1);
+                }
+#endif
                 SWIM_AIR(p) = air;
                 if (air >= 0x605 || (p->health == 0 && SWIM_ST(p)[0x120] == 0)) {
                     /* out of air: lose one health per 0x605 - 0x32 ticks */

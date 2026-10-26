@@ -24,7 +24,7 @@ LINK_COMMON := -sUSE_SDL=2 -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536 -sMAX_WEBGL_VE
 ULTRA_SRC := ultra/pc_sched.c ultra/pc_os.c ultra/pc_pif.c ultra/pc_video.c ultra/pc_mem.c ultra/pc_icall.c ultra/pc_gu.c ultra/pc_libc.c ultra/pc_tables.c
 ULTRA_OBJ := $(patsubst ultra/%.c,$(B)/ultra/%.o,$(ULTRA_SRC))
 # F3DEX2 interpreter + WebGL2 backend + ROM asset viewer (docs/port/sessions/P6.md)
-GFX_SRC := gfx/gfx_f3dex2.c gfx/gfx_demo.c gfx/p49_walk.c gfx/p58_model.c gfx/p61_checks.c gfx/p66_checks.c gfx/p69_checks.c gfx/p75_checks.c gfx/p81_checks.c gfx/p84_checks.c gfx/p103_boot.c gfx/p144_hits.c gfx/p165_hits.c gfx/p171_tb.c gfx/p174_ev.c gfx/p202_fx.c gfx/p205_obj.c gfx/p223_hit.c gfx/p268_nodes.c
+GFX_SRC := gfx/gfx_f3dex2.c gfx/gfx_demo.c gfx/p49_walk.c gfx/p58_model.c gfx/p61_checks.c gfx/p66_checks.c gfx/p69_checks.c gfx/p75_checks.c gfx/p81_checks.c gfx/p84_checks.c gfx/p103_boot.c gfx/p144_hits.c gfx/p165_hits.c gfx/p171_tb.c gfx/p174_ev.c gfx/p202_fx.c gfx/p205_obj.c gfx/p326_probe.c gfx/p223_hit.c gfx/p268_nodes.c
 GFX_OBJ := $(patsubst gfx/%.c,$(B)/gfx/%.o,$(GFX_SRC))
 # audio HLE (n_audio ABI interpreter) + SDL output (docs/port/sessions/P9.md)
 AUD_SRC := audio/aud_abi.c audio/aud_out.c

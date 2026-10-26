@@ -62,6 +62,8 @@ const OPTIONS = [
     help: 'The chocolate (health) pieces stay on screen during play. Off: as on the N64, they slide in only when your health changes.' },
   { key: 'cashhud', label: 'Always show cash', def: false, game: 3,
     help: 'Your cash total ($) stays in the top right corner during play. Off: as on the N64, it only pops up above Conker when he gets cash (and on the pause screen).' },
+  { key: 'longbreath', label: 'Longer breath', def: false, game: 4,
+    help: 'Conker can stay under water about twice as long before he starts to drown (the air meter empties at half speed). Off: the N64 air time.' },
 ];
 const optOverride = {};
 for (const kv of (Q.get('opt') || '').split(',')) { const [k, v] = kv.split(':'); if (k) optOverride[k] = v === '1'; }
