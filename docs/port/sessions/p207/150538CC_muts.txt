@@ -24,7 +24,7 @@ s/\[0x2F\] = alt;/[0x2F] = 1;/ % r13_owner r13_far
 s/(u8 \*) D_800CC2D0) \/ 0x32C;/(u8 *) D_800CC2D0) \/ 0x32C + 1;/ % r13_near
 s/if (dist > 1.0f) {/if (dist > 0.0f) {/ % r13_same
 s/maxStep = dist;/maxStep = dist * 0.5f;/ % r13_near
-s/func_1505A630(-dx, dz, 0)/func_1505A630(dx, dz, 0)/ % r13_near r13_clamp
+s/math_atan2_u16(-dx, dz, 0)/math_atan2_u16(dx, dz, 0)/ % r13_near r13_clamp
 s/P38_F32(0x1C) += dz;/P38_F32(0x1C) -= dz;/ % r13_near
 s/P38_F32(0x18) + 50.0f, \&floorY) > 0/P38_F32(0x18) + 50.0f, \&floorY) >= 0/ % r13_floor_hi r13_floor_neg
 s/P38_F32(0x18) < floorY + 50.0f/P38_F32(0x18) > floorY + 50.0f/ % r13_floor_hi r13_floor_lo
@@ -38,13 +38,13 @@ s/P38_U8(0x82) = 40;/P38_U8(0x82) = 41;/ % h_in
 s/>> 8) + n) < n \* 2)/>> 8) + n) <= n * 2)/ % h_edge h_edge2
 s/(f32) \*(s16 \*) (p + 0x224)/(f32) *(u16 *) (p + 0x224)/ % h_in_mid
 s/- P38_F32(0x18)) \* 0.18f/- P38_F32(0x18)) * 0.2f/ % h_in_mid
-s/func_15059B54(obj, 0x300)/func_15059B54(obj, 0x200)/ % h_in
+s/obj_turn_to_target_yaw(obj, 0x300)/obj_turn_to_target_yaw(obj, 0x200)/ % h_in
 s/range < P38_F32(0x3C) \* 16.0f/range < P38_F32(0x3C) * 8.0f/ % h_far h_in
 s/pitch = 90.0f;/pitch = 80.0f;/ % h_in
 s/pitch = -90.0f;/pitch = -80.0f;/ % h_in_neg
 s/(pitch - P38_F32(0x20)) \* 0.18f/(pitch - P38_F32(0x20)) * 0.2f/ % h_in_mid
 s/P38_U8(0x82) >= 9/P38_U8(0x82) >= 8/ % h_82_8
-s/        func_15059C84(obj);/        ;/ % k2_spin
+s/        obj_update_ground_tilt(obj);/        ;/ % k2_spin
 s/15.0f \* (f32) D_800BE9E4/16.0f * (f32) D_800BE9E4/ % k2_spin
 s/func_151EFDD0() % 2 + 0x22F/(u32) func_151EFDD0() % 2 + 0x22F/ % k2_spin_neg
 s/    case 12:/    case 14:/ % k2_busy
@@ -52,14 +52,14 @@ s/        case 13:$/        case 14:/ % k13_a8
 s/\* 57.295776f/* 57.0f/ % k4_a8
 s/P38_U8(0xA8) < 25/P38_U8(0xA8) <= 25/ % k9_a8
 s/% 3 + 0x2EE/% 3 + 0x2EF/ % k9_a8
-s/func_150ADA20() % 3 + 0x2EE/(s32) func_150ADA20() % 3 + 0x2EE/ % k13_a8
+s/random_int() % 3 + 0x2EE/(s32) random_int() % 3 + 0x2EE/ % k13_a8
 s/0x200, 15.0f) != -1/0x200, 15.0f) != 0/ % k17_hit k3_hit
 s/P38_U8(0xA9) = 1;/;/ % k3_hit
-s/(func_150ADA20() \& 3) + 0x43E/(func_150ADA20() \& 7) + 0x43E/ % k3_hit
+s/(random_int() \& 3) + 0x43E/(random_int() \& 7) + 0x43E/ % k3_hit
 s/P38_U8(0x104) = 1;/;/ % k8
-s/        func_1505A770(obj);/        ;/ % b_28
+s/        obj_apply_gravity(obj);/        ;/ % b_28
 s/D_800CC674\[1\] = P38_F32(0x18)/D_800CC674[1] = P38_F32(0x1C)/ % d_k13_vec0
-s/func_15058898(obj, P38_F32(0x30))/func_15058898(obj, P38_F32(0x18))/ % k8
+s/obj_update_floor(obj, P38_F32(0x30))/obj_update_floor(obj, P38_F32(0x18))/ % k8
 s/inv = 0.0001f;/inv = 0.001f;/ % ht_zero
 s/dir3\[1\] \*= inv;/;/ % ht_none
 s/len, 0, 0, 0, -1, 0, 0)/len, 0, 0, 0, 0, 0, 0)/ % ht_none
@@ -86,7 +86,7 @@ s/\& 0x7F;/\& 0xFF;/ % d_k5
 s/if (n < 25) {/if (n <= 25) {/ % d_k5_far
 s/P38_F32(0x20) = 35.0f;/P38_F32(0x20) = 36.0f;/ % d_k5
 s/P38_F32(0x24) = 6.0f;/P38_F32(0x24) = 7.0f;/ % d_k5
-s/func_1505A3A8(0.0f, obj, 1.0f, 1.0f, 0)/func_1505A3A8(0.0f, obj, 1.0f, 0.5f, 0)/ % k15_pitch
+s/obj_approach_speed(0.0f, obj, 1.0f, 1.0f, 0)/obj_approach_speed(0.0f, obj, 1.0f, 0.5f, 0)/ % k15_pitch
 s/(D_800CC268 >> 1) != 0/(D_800CC268 >> 2) != 0/ % m_k15_nobit
 s/D_800D1580 = 0xFF0100A7;/D_800D1580 = 0xFF0100A6;/ % m_k15_bit
 s/P38_F32(0x3C) = 40.0f;/P38_F32(0x3C) = 41.0f;/ % m_k15_bit
@@ -99,9 +99,9 @@ s/P38_F32(0x18) = P38_F32(0x30);/;/ % b_232
 s/P38_U8(0x7F) >= 31/P38_U8(0x7F) >= 32/ % b_7f31
 s/--P38_U8(0x83) == 0/--P38_U8(0x83) == 1/ % b_83
 s/P38_U8(0x1CA) == 0) {$/P38_U8(0x1CA) == 1) {/ % b_1ca k8
-s/func_150D7630(p + 0x14, 0xFF, 1)/func_150D7630(p + 0x14, 0xFF, 0)/ % d_k13_flag8
+s/impact_burst_effect(p + 0x14, 0xFF, 1)/impact_burst_effect(p + 0x14, 0xFF, 0)/ % d_k13_flag8
 s/vec\[2\] = D_800CC674\[2\] - P38_F32(0x34)/vec[2] = D_800CC674[2] - P38_F32(0x1C)/ % ht_k13 d_k13_vec0
-s/func_150D779C(0, (f32 \*) (p + 0x14), vec, 0xFF, 1)/func_150D779C(0, (f32 *) (p + 0x18), vec, 0xFF, 1)/ % ht_k13
+s/bullet_impact_effect(0, (f32 \*) (p + 0x14), vec, 0xFF, 1)/bullet_impact_effect(0, (f32 *) (p + 0x18), vec, 0xFF, 1)/ % ht_k13
 s/        case 14:$/        case 15:/ % d_k14_done
-s/func_15060F28(obj, 1);/func_15060F28(obj, 0);/ % b_83
+s/obj_remove(obj, 1);/obj_remove(obj, 0);/ % b_83
 s/P38_U8(0x103) = 1;$/P38_U8(0x103) = 2;/ % k8

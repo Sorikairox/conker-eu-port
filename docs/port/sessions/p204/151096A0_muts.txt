@@ -1,5 +1,5 @@
 s/+ 0xF8);/+ 0xF4);/
-s/func_150A8050(mtx, p\[0\], 0.0f, p\[1\]);/func_150A8050(mtx, p[1], 0.0f, p[0]);/
+s/mtxf_rotate_xyz_deg(mtx, p\[0\], 0.0f, p\[1\]);/mtxf_rotate_xyz_deg(mtx, p[1], 0.0f, p[0]);/
 s/mtx\[3\]\[1\] = p\[4\];/mtx[3][1] = p[3];/
 s/mtx\[0\]\[1\] \*= 0.157f;/;/
 s/mtx\[1\]\[2\] \*= 0.157f;/;/

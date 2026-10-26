@@ -1,8 +1,8 @@
 # P256 func_151570C4 (spark_point_flash_update) mutants: sed % setup names
 s/(obj + 0x2C) >= 0)/(obj + 0x2C) > 0)/ % zero
 s/-= D_800BE9E4/-= 1/ % fire0 zero
-s/group = func_150ADA20() . 3U;/group = func_150ADA20() \& 1;/ % fire2
-s/\[func_150ADA20() . 10U\]/[func_150ADA20() \& 7]/ % fire0 fire2
+s/group = random_int() . 3U;/group = random_int() \& 1;/ % fire2
+s/\[random_int() . 10U\]/[random_int() \& 7]/ % fire0 fire2
 s/pt\[0\] != 0.0f \&\& //  % x0
 s/ \&\& pt\[1\] != 0.0f//  % y0
 s/ \&\& pt\[2\] != 0.0f//  % z0

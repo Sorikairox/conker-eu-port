@@ -54,7 +54,7 @@ s/                if (slot != 0 \&\& D_800E0FD0\[0\] != NULL) {/                
 s/                if (slot != 0 \&\& D_800E0FD0\[0\] != NULL) {/                if (slot != 0) {/ % m4_fd0null
 s/                        if (D_800E0FD0\[slot\] == NULL \&\& j != -1) {/                        if (D_800E0FD0[slot] == NULL) {/ % m4_4
 s/                            func_151E870C(slot, D_800E0FC0\[j\]);/                            func_151E870C(slot, D_800E0FC0[0]);/ % m4_4
-s/                        func_15060F28(D_800E0FD0\[slot\], 1);/                        func_15060F28(D_800E0FD0[slot], 0);/ % m4_4
+s/                        obj_remove(D_800E0FD0\[slot\], 1);/                        obj_remove(D_800E0FD0[slot], 0);/ % m4_4
 s/                        D_800E0FD0\[slot\] = NULL;/                        ;/ % m4_4
 s/                v = \*fill + dir \* (D_800BE9E4 \* 8);/                v = *fill + dir * (D_800BE9E4 * 4);/ % m4_4
 s/^                    v = 0xFF;/                    v = 0xFE;/ % m4_clamp
@@ -66,11 +66,11 @@ s/                if (v > 0) {/                if (v >= 0) {/ % m4_empty m4_clam
 s/                    gdl = func_151EDBE8(gdl, \&D_80090410, x, y, 1, 1, 1.0f, 1);/                    gdl = func_151EDBE8(gdl, \&D_80090410, x, y, 1, 1, 1.0f, 0);/ % m4_4
 s/                    if (step >= 0xFE) {/                    if (step > 0xFE) {/ % m4_full
 s/                    D_80090410 = (s32) D_87B;/                    D_80090410 = (s32) D_88C;/ % m4_4
-s/                func_1504332C(0xFF, 0xFF, 0xFF, D_800E0EC5);/                func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);/ % m4_4
-s/                func_15042D94(x, 0x41, 0x80, D_800ABED8, slot + 1);/                func_15042D94(x, 0x41, 0x80, D_800ABED8, slot);/ % m4_4
+s/                text_set_color(0xFF, 0xFF, 0xFF, D_800E0EC5);/                text_set_color(0xFF, 0xFF, 0xFF, 0xFF);/ % m4_4
+s/                text_printf_at(x, 0x41, 0x80, D_800ABED8, slot + 1);/                text_printf_at(x, 0x41, 0x80, D_800ABED8, slot);/ % m4_4
 s/                if (nscores != 0 \&\& j >= 0 \&\& D_800901E4\[j\] >= 0) {/                if (nscores != 0) {/ % m4_4
 s/                    nscores--;/                    ;/ % m4_1score
-s/                    func_15042D94(x, 0xA2, 0x81, D_800ABEE0, scores\[si\] + 1);/                    func_15042D94(x, 0xA2, 0x81, D_800ABEE0, scores[si]);/ % m4_4
+s/                    text_printf_at(x, 0xA2, 0x81, D_800ABEE0, scores\[si\] + 1);/                    text_printf_at(x, 0xA2, 0x81, D_800ABEE0, scores[si]);/ % m4_4
 s/                    si++;/                    ;/ % m4_4
 s/            gdl = (Gfx \*) func_151EA90C(gdl, 0x6A, 0xFF, 0);/            gdl = (Gfx *) func_151EA90C(gdl, 0x6A, 0xFF, 1);/ % m3
 s/            for (slot = 0; slot != nslots; slot++, fill++, x += 0x48) {/            for (slot = 0; slot != nslots; slot++, fill++, x += 0x40) {/ % m4_4

@@ -1,7 +1,7 @@
 s/DustEmitter \*e = (DustEmitter \*) (obj + 0x28);/DustEmitter *e = (DustEmitter *) (obj + 0x24);/
 s/D_800BEE0B, 3000.0f,/D_800BEE0B, 2000.0f,/
 s/(struct17 \*) e) == 0)/(struct17 *) e) != 0)/
-s/e->acc += (e->rate + func_150ADA68() \* e->rateRand)/e->acc += (e->rate + func_150ADA68() * e->rate)/
+s/e->acc += (e->rate + random_float() \* e->rateRand)/e->acc += (e->rate + random_float() * e->rate)/
 s/\* e->rateRand) \* D_800BE9A4;/* e->rateRand);/
 s/if (!(1.0f < e->acc)) {/if (!(2.0f < e->acc)) {/
 s/t.u1D = 0x2F;/t.u1D = 0x2E;/
@@ -21,13 +21,13 @@ s/t.pos\[1\] = e->pos\[1\];/t.pos[1] = e->pos[2];/
 s/t.u3C\[2\] = 0.0f;/t.u3C[2] = 1.0f;/
 s/ex.u05 = 0;/ex.u05 = 1;/
 s/t.u54 = 0.0f;/t.u54 = 1.0f;/
-s/ang = func_150ADA68() \* 6.2831855f;/ang = func_150ADA68() * 3.1415927f;/
+s/ang = random_float() \* 6.2831855f;/ang = random_float() * 3.1415927f;/
 s/r = rr \* e->radius;/r = rr * e->life;/
 s/x = sinf(ang) \* r;/x = sinf(ang) * rr;/
 s/z = cosf(ang) \* r;/z = cosf(ang) * rr;/
-s/func_150A8050(mtx, e->rotA, e->rotB, 0.0f);/func_150A8050(mtx, e->rotB, e->rotA, 0.0f);/
+s/mtxf_rotate_xyz_deg(mtx, e->rotA, e->rotB, 0.0f);/mtxf_rotate_xyz_deg(mtx, e->rotB, e->rotA, 0.0f);/
 s/func_150A7E40(mtx, x, 0.0f, z,/func_150A7E40(mtx, z, 0.0f, x,/
-s/ex.angle = func_150ADA68() \* 6.2831855f;/ex.angle = func_150ADA68();/
+s/ex.angle = random_float() \* 6.2831855f;/ex.angle = random_float();/
 s/\* 320.0f + -160.0f) \* 0.001f;/* 320.0f + -150.0f) * 0.001f;/
 s/\* 161.0f + 446.0f) \* 0.01f;/* 161.0f + 446.0f) * 0.02f;/
 s/inv = 1.0f \/ k;/inv = 2.0f \/ k;/
@@ -43,11 +43,11 @@ s/t.fadeStep = 0xFF \/ fadeI;/t.fadeStep = 0xFE \/ fadeI;/
 s/t.fade = fadeI;/t.fade = 0;/
 s/t.flags |= 0x40;/t.flags |= 0x80;/
 s/0x33 + 0x7C;/0x33 + 0x7D;/
-s/size = func_150ADA68() \* 100.0f + 240.0f;/size = func_150ADA68() * 100.0f + 250.0f;/
+s/size = random_float() \* 100.0f + 240.0f;/size = random_float() * 100.0f + 250.0f;/
 s/t.sizeB = size;/t.sizeB = 0.0f;/
-s/ex.spinB = (u32) func_150ADA20() /ex.spinB = 1 + (u32) func_150ADA20() /
-s/ex.growA = (func_150ADA68() \* 0.25f + 0.15f) \* ex.size;/ex.growA = (func_150ADA68() * 0.25f + 0.15f);/
-s/ex.growB = (func_150ADA68() \* 0.25f + 0.15f)/ex.growB = (func_150ADA68() * 0.5f + 0.15f)/
+s/ex.spinB = (u32) random_int() /ex.spinB = 1 + (u32) random_int() /
+s/ex.growA = (random_float() \* 0.25f + 0.15f) \* ex.size;/ex.growA = (random_float() * 0.25f + 0.15f);/
+s/ex.growB = (random_float() \* 0.25f + 0.15f)/ex.growB = (random_float() * 0.5f + 0.15f)/
 s/func_1513092C(&t, 2, 0x24);/func_1513092C(\&t, 1, 0x24);/
 s/if (p != NULL) {/if (p == NULL) {/
 s/memcpy((s32) (p + 0xA8), (f32 \*) &ex, 0x24);/memcpy((s32) (p + 0xA4), (f32 *) \&ex, 0x24);/

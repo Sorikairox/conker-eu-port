@@ -14,12 +14,12 @@ s/                total = trail_max_len\[0\];/                total = 0.0f;/
 s/                if (inv == trail_no_inv\[0\]) {/                if (inv != trail_no_inv[0]) {/
 s/unit\[2\], &hit, len, 0, 0, 1, -1, 0, 0);/unit[2], \&hit, len, 0, 0, 1, 1, 0, 0);/
 s/                if (hit.count != 0) {/                if (hit.count > 1) {/
-s/                    func_150DABFC(obj, &hit, unit);/                    func_150DABFC(obj, \&hit, dir);/
+s/                    trail_hit_effects(obj, &hit, unit);/                    trail_hit_effects(obj, \&hit, dir);/
 s/                    if (hit.count >= 2) {/                    if (hit.count >= 3) {/
 s/                        \*(s32 \*)(hobj + 0x2EC) = 1;/                        *(s32 *)(hobj + 0x2EC) = 2;/
 s/                            \*(u8 \*)(hobj + 0x232) = 10;/                            *(u8 *)(hobj + 0x232) = 11;/
 s/\*(u8 \*)(hobj + 4) == 0x10 && \*(u8 \*)(hobj + 0x251) == 1) {/*(u8 *)(hobj + 4) == 0x10 \&\& *(u8 *)(hobj + 0x251) != 0) {/
-s/                            func_1505A250(\*(f32 \*)(hobj + 0x14) - hit.pos\[0\]/                            func_1505A250(*(f32 *)(hobj + 0x14) - hit.pos[1]/
+s/                            move_xz_towards(\*(f32 \*)(hobj + 0x14) - hit.pos\[0\]/                            move_xz_towards(*(f32 *)(hobj + 0x14) - hit.pos[1]/
 s/(1.0f - (total - 50.0f) \* trail_push_k\[0\])/(1.0f - (total - 40.0f) * trail_push_k[0])/
 s/trail_push_a\[0\] + trail_push_b\[0\],/trail_push_a[0] - trail_push_b[0],/
 s/                            if (\*(u8 \*)(hobj + 0x232) == 0xF) {/                            if (*(u8 *)(hobj + 0x232) != 0xF) {/
@@ -27,7 +27,7 @@ s/                            dz = \*(f32 \*)(nxt + 8) - \*(f32 \*)(owner + 0x1C
 s/                            if (\*(u8 \*)(hobj + 0x232) == 0x10) {/                            if (*(u8 *)(hobj + 0x232) == 0x11) {/
 s/                                \*(f32 \*)(hobj + 0x3C) \*= trail_slow\[0\];/                                *(f32 *)(hobj + 0x3C) *= trail_dir_k[0];/
 s/                                s = 1.0f \/ (sqrtf(dx \* dx + dz \* dz) \* trail_dir_k\[0\]);/                                s = 1.0f \/ (sqrtf(dx * dx + dz * dx) * trail_dir_k[0]);/
-s/func_1505A250(dx \* s, dz \* s, 0.7f,/func_1505A250(dx * s, dz * s, 0.75f,/
+s/move_xz_towards(dx \* s, dz \* s, 0.7f,/move_xz_towards(dx * s, dz * s, 0.75f,/
 s/                            if (\*(u8 \*)(hobj + 0x125) == 0) {/                            if (*(u8 *)(hobj + 0x125) != 0) {/
 s/                            \*(u8 \*)(hobj + 0x232) = 3;/                            *(u8 *)(hobj + 0x232) = 4;/
 s/                            \*(u8 \*)(hobj + 0x232) = 0x2C;/                            *(u8 *)(hobj + 0x232) = 0x2D;/

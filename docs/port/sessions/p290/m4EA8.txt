@@ -3,7 +3,7 @@ s/s32 tries = 5;/s32 tries = 4;/
 s/f32 height = D_800A14F8\[0\];/f32 height = 0.0f;/
 s/if (idx >= D_800DC320 || idx < 0)/if (idx > D_800DC320 || idx < 0)/
 s/if (idx >= D_800DC320 || idx < 0)/if (idx >= D_800DC320 || idx < -1)/
-s/func_1510F800(2);/func_1510F800(1);/
+s/collision_select_area(2);/collision_select_area(1);/
 s/func_150A49D0(1, (s32 \*) &id, 0);/func_150A49D0(1, (s32 *) \&id, 1);/
 s/id = idx;/id = idx + 1;/
 s/x = \*(s16 \*) (obj + 0x10);/x = *(s16 *) (obj + 0x12);/
@@ -26,7 +26,7 @@ s/D_800DC26C) \/ 12 - \*(u16 \*) (obj + 0x58)\]/D_800DC26C) \/ 12 + *(u16 *) (ob
 s/D_800DC26C) \/ 12/D_800DC26C) \/ 16/
 s/material = \*(s32 \*) (obj + 0x40);/material = *(s32 *) (obj + 0x44);/
 s/if (\*(s32 \*\*) (obj + 0x44) != NULL)/if (*(s32 **) (obj + 0x40) != NULL)/
-s/func_15114E8C(mtx, obj);/func_15114E8C(mtx, obj + 4);/
+s/world_record_build_matrix(mtx, obj);/world_record_build_matrix(mtx, obj + 4);/
 s/if (tri != NULL) {/if (tri == NULL) {/
 s/world\[0\] = tri\[0\] + \*(s32 \*) (obj + 0x20 + D_800BE9C0 \* 4)/world[0] = tri[0] + *(s32 *) (obj + 0x20)/
 s/world\[1\] = tri\[1\]/world[1] = tri[2]/
@@ -36,7 +36,7 @@ s/verts\[i\]\[0\] = ox;/verts[i][0] = oy;/
 s/verts\[i\]\[2\] = oz;/verts[i][3] = oz;/
 s/world\[i\] = (s32) verts\[i\];/world[i] = (s32) verts[0];/
 s/        tri = world;/        tri = (s32 *) world[0];/
-s/func_150E4AD0(x, height, z, 1,/func_150E4AD0(z, height, x, 1,/
-s/func_150E4AD0(x, height, z, 1,/func_150E4AD0(x, height, z, 0,/
-s/func_1510FE4C(material), tri, 0)/func_1510FE4C(material), tri, 1)/
-s/func_1510FE4C(material)/func_1510FE4C(material + 1)/
+s/impact_effect_spawn(x, height, z, 1,/impact_effect_spawn(z, height, x, 1,/
+s/impact_effect_spawn(x, height, z, 1,/impact_effect_spawn(x, height, z, 0,/
+s/floor_flags_surface_type(material), tri, 0)/floor_flags_surface_type(material), tri, 1)/
+s/floor_flags_surface_type(material)/floor_flags_surface_type(material + 1)/

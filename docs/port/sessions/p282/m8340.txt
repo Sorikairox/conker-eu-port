@@ -6,12 +6,12 @@
 /^        \*bottom = zone->y - zone->height;/s/- zone->height/- zone->sizeA/
 /^        \*z = zone->z - r \* s;/s/- r/+ r/
 /^        \*x = zone->x + r \* c;/s/r \* c/r * s/
-/u = (f32) (u16) (func_150ADA20() \* t)/s/(u16)/(s16)/
+/u = (f32) (u16) (random_int() \* t)/s/(u16)/(s16)/
 /+ (f32) -zone->sizeA;/s/-zone->sizeA/zone->sizeA/
 /+ (f32) -zone->sizeB;/s/-zone->sizeB/-zone->sizeA/
 /^        \*x = zone->x + (u \* c + w \* s);/s/w \* s/w * c/
 /^        \*z = zone->z + (w \* c - u \* s);/s/w \* c - u/u * c - w/
-/^        r = (f32) (u16) (func_150ADA20() \* t) \* 1.5259022e-05f \* zone->sizeA;/s/sizeA/height/
+/^        r = (f32) (u16) (random_int() \* t) \* 1.5259022e-05f \* zone->sizeA;/s/sizeA/height/
 /^        \*x = zone->x;/s/zone->x/zone->z/
 /^        \*z = zone->z;/s/zone->z;/zone->y;/
-/^        r = (f32) (u16) (func_150ADA20() \* t) \* 1.5259022e-05f;/s/1.5259022e-05f/1.5258789e-05f/
+/^        r = (f32) (u16) (random_int() \* t) \* 1.5259022e-05f;/s/1.5259022e-05f/1.5258789e-05f/

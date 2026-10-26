@@ -1,10 +1,10 @@
-# P263 func_15117A98 (pendulum_angle_step) mutants: sed % setup names
+# P263 scenery_pendulum_angle_step (pendulum_angle_step) mutants: sed % setup names
 s/    if (angle == rest \&\& speed == 0.0f) {/    if (angle == rest) {/ % restmove
 s/    f32 rest = (f32) ((params << 22) >> 22);/    f32 rest = (f32) (params \& 0x3FF);/ % crosspos
 s/    kind = params >> 10;/    kind = params >> 11;/ % startsnd
 s/    if (speed == 0.0f \&\& kind != 0 \&\& D_80089600\[kind\].move_sfx != 0) {/    if (kind != 0 \&\& D_80089600[kind].move_sfx != 0) {/ % normpos
 s/D_80089600\[kind\].move_sfx, 0x5DC0, 0xC8, 0x9C4, 0);/D_80089600[kind].stop_sfx, 0x5DC0, 0xC8, 0x9C4, 0);/ % startsnd
-s/    before = func_15048A70(angle, rest);/    before = func_15048A70(rest, angle);/ % normpos
+s/    before = math_angle_diff_deg(angle, rest);/    before = math_angle_diff_deg(rest, angle);/ % normpos
 s/    angle += speed \* (f32) D_800BE9E4;/    angle += speed;/ % normpos
 s/    if ((diff <= 0.0f \&\& 0.0f < before) ||/    if ((diff < 0.0f \&\& 0.0f < before) ||/ % crosszero
 s/ || (0.0f <= diff \&\& before < 0.0f)) {/ || (0.0f < diff \&\& before < 0.0f)) {/ % crossneg normneg crosszn

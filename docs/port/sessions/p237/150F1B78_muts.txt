@@ -1,4 +1,4 @@
-# P237 func_150F1B78 (fx_hit_handler) mutants: sed % setup names
+# P237 fx_target_effect_on_message (fx_hit_handler) mutants: sed % setup names
 s/    if (event == 0x43) {/    if (event == 0x42) {/ % ev43_none
 s/        if (other\[0\] == \*(s32 \*) p || p\[4\] == ((u8 \*) other)\[4\]) {/        if (other[0] == *(s32 *) p) {/ % ev43_slot
 s/        if (other\[0\] == \*(s32 \*) p || p\[4\] == ((u8 \*) other)\[4\]) {/        if (p[4] == ((u8 *) other)[4]) {/ % ev43_id

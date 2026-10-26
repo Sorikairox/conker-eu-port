@@ -41,7 +41,7 @@ s/row >= 4 \&\& row < 7/row >= 4 \&\& row < 6/
 s/col >= 2 \&\&/col >= 1 \&\&/
 s/                col < 4) {/                col < 3) {/
 s/                id = 0x1675 + (col \* 3 + row - 10);/                id = 0x1675 + (col * 3 + row - 9);/
-s/addr = func_1510D66C(id, NULL, 3, 0);/addr = func_1510D66C(id, NULL, 2, 0);/
+s/addr = texture_cache_lookup(id, NULL, 3, 0);/addr = texture_cache_lookup(id, NULL, 2, 0);/
 s/t_hi = (s32) (((f32) step_t + 0.5f) \* 32.0f);/t_hi = (s32) (((f32) step_t + 0.5f) * 31.0f);/
 s/s_hi = (s32) (((f32) step_s + 0.5f) \* 32.0f);/s_hi = (s32) (((f32) step_t + 0.5f) * 32.0f);/
 s/vp = (s16 \*) (vbuf + (cur_first + n) \* 16);/vp = (s16 *) (vbuf + (cur_first + n) * 8);/

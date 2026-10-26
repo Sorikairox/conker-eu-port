@@ -15,8 +15,8 @@ s/cam->unk134 = a\[2\];/cam->unk134 = a[3];/ % op9
 s/D_800DBFF4\[id\] = 3;/D_800DBFF4[id] = 2;/ % op10
 s/D_800C3A20\[6\] = (f32) \*(s16 \*) (mk + 2);/D_800C3A20[6] = (f32) *(u16 *) (mk + 2);/ % op10
 s/D_800C3A20\[9\] = \*(f32 \*) (mk + 0xC);/D_800C3A20[9] = *(f32 *) (mk + 0x10);/ % op10
-s/func_1512DAD0(cam, 5, NULL);/func_1512DAD0(cam, 6, NULL);/ % op10
-s/func_1512DAD0(cam, 7, D_800C3A20);/func_1512DAD0(cam, 7, NULL);/ % op10
+s/camera_queue_event(cam, 5, NULL);/camera_queue_event(cam, 6, NULL);/ % op10
+s/camera_queue_event(cam, 7, D_800C3A20);/camera_queue_event(cam, 7, NULL);/ % op10
 s/\&= ~0x200;/\&= ~0x201;/ % op11
 1,/D_800D2DB4 = 0;/s/D_800D2DB4 = 0;/D_800D2DB4 = 1;/ % op11
 s/rec\[1\] = id;/rec[1] = id + 1;/ % op12m7

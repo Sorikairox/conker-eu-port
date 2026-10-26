@@ -10,10 +10,10 @@ s/((u8 \*)obj->unk31C)\[0x26\] = 0;/((u8 *)obj->unk31C)[0x27] = 0;/
 s/obj->id == 0x5E \&\& obj->unk13D != 0/obj->id == 0x5E/
 s/            blend = 0.0f;/            ;/
 s/sound = \*(s32 \*)(r + 4);/sound = *(s32 *)(r + 8);/
-s/func_1506E46C(obj, \&sound, 1)/func_1506E46C(obj, \&sound, 0)/
+s/sound_word_resolve(obj, \&sound, 1)/sound_word_resolve(obj, \&sound, 0)/
 s/if (sound == 0x33) {/if (sound == 0x32) {/
-s/func_15060B04(sound, obj, 0x5DC0);/func_15060B04(sound, obj, 0x5DC1);/
-s/func_15060A30(sound, obj);/func_15060A30(0x21, obj);/
+s/obj_sfx_play_vol(sound, obj, 0x5DC0);/obj_sfx_play_vol(sound, obj, 0x5DC1);/
+s/obj_sfx_play(sound, obj);/obj_sfx_play(0x21, obj);/
 s/obj->unkF4 \&= ~0x000C014E;/obj->unkF4 \&= ~0x000C004E;/
 s/    if (phase < 3) {/    if (phase < 2) {/
 s/flags = cell\[0xD\] \& 0xFE;/flags = cell[0xD];/
@@ -48,8 +48,8 @@ s/                                end = 16;/                                end 
 s/((u8 \*)obj->unk31C)\[0x1AC\] = 1;/((u8 *)obj->unk31C)[0x1AC] = 2;/
 s/D_800D1580 = (s32)0xFF010434;/D_800D1580 = (s32)0xFF010435;/
 s/D_800D1580 = (s32)0xFF070169;/;/
-s/                                func_1506E8D8();/                                ;/
-s/                                func_1506E5FC();/                                ;/
+s/                                objev_sound_alt_300_1800();/                                ;/
+s/                                objev_sound_300_1800();/                                ;/
 s/                            case 33:/                            case 34:/
 s/                            case 37:/                            case 36:/
 s/                            case 38:/                            case 39:/
@@ -66,7 +66,7 @@ s/                                end = 12;/                                end 
 s/                            case 67:/                            case 68:/
 s/                                end = 11;/                                end = 10;/
 s/                                end = 1;/                                end = 2;/
-s/func_1507CD64(obj, end);/func_1507CD64(obj, 1);/
+s/player_hit_reaction(obj, end);/player_hit_reaction(obj, 1);/
 s/obj->unk105 = 3;/obj->unk105 = 2;/
 s/if (flags == 200) {/if (flags == 202) {/
 s/obj->unkF4 |= 8;/obj->unkF4 |= 4;/
@@ -86,4 +86,4 @@ s/        obj->unk10F = 0;/        ;/
 s/if (obj->interaction_state == 1) {/if (obj->interaction_state == 2) {/
 s/((u8 \*)obj->unk31C)\[0x58\] = 0;/((u8 *)obj->unk31C)[0x59] = 0;/
 s/obj->unkF8 \&= ~0x01000200;/obj->unkF8 \&= ~0x01000000;/
-s/func_1505E650(obj, anim, speed, blend, 0.0f, 0.0f, 0);/func_1505E650(obj, anim, blend, speed, 0.0f, 0.0f, 0);/
+s/obj_start_anim(obj, anim, speed, blend, 0.0f, 0.0f, 0);/obj_start_anim(obj, anim, blend, speed, 0.0f, 0.0f, 0);/

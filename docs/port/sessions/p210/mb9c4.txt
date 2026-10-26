@@ -25,7 +25,7 @@ s/if (obj->interaction_state == 1) {/if (obj->interaction_state == 2) {/
 s/        D_800D154C = obj;/        ;/
 s/        D_800C3E78 = num;/        D_800C3E78 = num + 1;/
 s/if (ctl->unk4E != 2) {/if (ctl->unk4E == 2) {/
-s/func_1506AD30(obj, 800.0f, 1);/func_1506AD30(obj, 400.0f, 1);/
+s/anim_events_run(obj, 800.0f, 1);/anim_events_run(obj, 400.0f, 1);/
 s/        D_800D154C = saved;/        ;/
 s/        D_800C3E78 = savedNum;/        ;/
 s/obj->unkF8 \&= ~0x01008000;/obj->unkF8 \&= ~0x01000000;/
@@ -75,9 +75,9 @@ s/D_800CC2D0\[slot - 1\].unk31C + 0x46) = 8000;/D_800CC2D0[slot - 1].unk31C + 0x
 s/if (obj->unk23B != 0) {/if (obj->unk23B == 0) {/
 s/obj->stunned = 0xFE;/obj->stunned = 0xFF;/
 s/obj->unk105 = 0;/;/
-s/obj->unk106 = func_1505E7CC(kind, obj);/obj->unk106 = func_1505E7CC(kind + 1, obj);/
+s/obj->unk106 = obj_find_reaction_row(kind, obj);/obj->unk106 = obj_find_reaction_row(kind + 1, obj);/
 s/obj->unk84.uh = 0xFFFF;/obj->unk84.uh = 0xFFFE;/
-s/func_1505E874(slot - 1, obj);/func_1505E874(slot - 1, self);/
+s/obj_hit_reaction_advance(slot - 1, obj);/obj_hit_reaction_advance(slot - 1, self);/
 s/if (base->flags \& 0x200) {/if (base->flags \& 0x100) {/
 s/obj->unk10B |= 0x20;/obj->unk10B |= 0x10;/
 s/if (0.0f < obj->y_velocity) {/if (0.0f <= obj->y_velocity) {/

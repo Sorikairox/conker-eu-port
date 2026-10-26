@@ -6,7 +6,7 @@ s/((s8)D_800D1892 << 4) | (D_800D1893 \& 0xF)/((s8)D_800D1892 << 4) | (D_800D189
 s/mode = cmd >> 6;/mode = cmd >> 7;/
 s/y = o->y_position;/y = o->z_position;/
 s/u8 a = (o->unk7A >> 8) - 0x40;/u8 a = (o->unk7A >> 8);/
-s/s = func_15048A40(a);/s = func_150489B0(a);/
+s/s = math_sin_u8(a);/s = math_cos_u8(a);/
 s/        s = 0.0f;/        s = 1.0f;/
 s/        c = 1.0f;/        c = 0.0f;/
 s/} else if (mode == 1) {/} else if (mode == 2) {/

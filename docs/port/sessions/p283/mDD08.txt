@@ -5,8 +5,8 @@
 \#^    spr\.unk24 = D_800A0B28;#s/D_800A0B28/D_800A0B2C/
 \#^    spr\.unk48 = D_800A0B2C;#s/D_800A0B2C/D_800A0B28/
 \#^        lanes\[3\] = D_80088C14\[3\];#s/\[3\];/[2];/
-\#^        k = (u32) func_150ADA20() #s/(u32) //
-\#^        ang = func_150ADA68() \* D_800A0B40 + lanes\[k\];#s/D_800A0B40/D_800A0B44/
+\#^        k = (u32) random_int() #s/(u32) //
+\#^        ang = random_float() \* D_800A0B40 + lanes\[k\];#s/D_800A0B40/D_800A0B44/
 \#^        h = \*(f32 \*) ((u8 \*) D_800DBFF0 #s/0x9A0/0x9A4/
 \#^        h = \*(f32 \*) ((u8 \*) D_800DBFF0 #s/- 180\.0f/- 90.0f/
 \#^        while (360\.0f < h) {#s/360\.0f < h/360.0f <= h/

@@ -1,7 +1,7 @@
-# P262 func_150FF604 (object_beam_fire) mutants: sed % setup names
+# P262 object_beam_fire (object_beam_fire) mutants: sed % setup names
 s/if (node == NULL) {/if (node != NULL) {/ % aim nonode
 s/func_151D56F8((u8 \*)obj);/;/ % aim aimx
-s/func_150FF82C((s32)obj, (s32)pos10C, (s32)axis100, (s32)axisF4);/func_150FF82C((s32)obj, (s32)pos10C, (s32)axisF4, (s32)axis100);/ % aim aimx
+s/obj_muzzle_frame_get((s32)obj, (s32)pos10C, (s32)axis100, (s32)axisF4);/obj_muzzle_frame_get((s32)obj, (s32)pos10C, (s32)axisF4, (s32)axis100);/ % aim aimx
 s/if (obj->unk1D4 != NULL) {/if (obj->unk1D4 == NULL) {/ % nomtx
 s/        aimed = 0;/        aimed = 1;/ % nomtx
 s/(s32)\&target, (s32)\&surface,/(s32)\&surface, (s32)\&target,/ % aim aimx
@@ -18,12 +18,12 @@ s/(u8 \*)obj, 1, 1, 1, 0, 0x1A, 1,/(u8 *)obj, 1, 1, 1, 0, 0x1B, 1,/ % aim aimx
 s/ 5 + 0x327,/ 4 + 0x327,/ % aim aimx
 s/+ 0x327, 0, arg1, arg2);/+ 0x326, 0, arg1, arg2);/ % aim aimx
 s/+ 0x327, 0, arg1, arg2);/+ 0x327, 0, arg1, 0);/ % aim aimx
-s/(u32)func_150ADA20()/(s32)func_150ADA20()/ % nomtx
+s/(u32)random_int()/(s32)random_int()/ % nomtx
 s/if (aimed == 0) {/if (aimed != 0) {/ % aim noaim
 s/func_151D44C4((u8 \*)start124, arg1, arg2);/func_151D44C4((u8 *)end118, arg1, arg2);/ % aim aimx
 s/(u8 \*)obj->unk1D4 + node\[2\] \* 64/(u8 *)obj->unk1D4 + node[1] * 64/ % aim aimx
 s/(u8 \*)obj->unk1D4 + node\[2\] \* 64/(u8 *)obj->unk1D4 + node[2] * 16/ % aim aimx
 s/(u8 \*)obj, 1.0f, arg1, arg2);/(u8 *)obj, 0.5f, arg1, arg2);/ % aim aimx
 s/func_151D49B8((u8 \*)posE8, (u8 \*)dirDC,/func_151D49B8((u8 *)dirDC, (u8 *)posE8,/ % aim aimx
-s/func_150FF9F4((u8 \*)start124, (s32)hit, arg1, arg2);/func_150FF9F4((u8 *)start124, (s32)hit, arg1, 1);/ % aim aimx
-s/func_150FF9F4((u8 \*)start124, (s32)hit,/func_150FF9F4((u8 *)start124, (s32)axisC4,/ % aim aimx
+s/beam_impact_sparks((u8 \*)start124, (s32)hit, arg1, arg2);/beam_impact_sparks((u8 *)start124, (s32)hit, arg1, 1);/ % aim aimx
+s/beam_impact_sparks((u8 \*)start124, (s32)hit,/beam_impact_sparks((u8 *)start124, (s32)axisC4,/ % aim aimx

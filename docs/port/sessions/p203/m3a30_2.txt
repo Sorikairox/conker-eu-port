@@ -1,1 +1,1 @@
-s/trail.life = (func_150ADA20() \& 0xF) + 0x14;/trail.life = (func_150ADA20() \& 0x1F) + 0x14;/ % trail_rng
+s/trail.life = (random_int() \& 0xF) + 0x14;/trail.life = (random_int() \& 0x1F) + 0x14;/ % trail_rng

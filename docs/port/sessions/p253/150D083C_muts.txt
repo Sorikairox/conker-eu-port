@@ -11,7 +11,7 @@ s/memcpy((s32) buf, prompt, 4);/memcpy((s32) buf, prompt, 3);/ % run
 s/txt\[0x15\] \* 4), st->n)/txt[0x15] * 4 + 4), st->n)/ % run
 s/buf\[st->n + 5\] = 0xBB;/buf[st->n + 5] = 0xBC;/ % run
 s/buf\[st->n + 6\] = 0;/buf[st->n + 7] = 0;/ % run
-s/func_1504332C(0, 0xFF, 0, 0x96)/func_1504332C(0, 0xFF, 0, 0x95)/ % run
+s/text_set_color(0, 0xFF, 0, 0x96)/text_set_color(0, 0xFF, 0, 0x95)/ % run
 s/return 1;/return 0;/ % run
 s/st->n++;/st->n += 2;/ % run big
 s/char prompt\[\] = "C:> ";/char prompt[] = "C:>_";/ % run

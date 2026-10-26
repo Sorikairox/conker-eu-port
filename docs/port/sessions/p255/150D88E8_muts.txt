@@ -1,4 +1,4 @@
-# P255 func_150D88E8 (tile_slide_by_anim_update) mutants: sed % setup names
+# P255 tile_slide_by_anim_update (tile_slide_by_anim_update) mutants: sed % setup names
 s/\*level = 50;/*level = 51;/ % s0miss
 s/+ 0x6C);/+ 0x68);/ % s0miss
 s/+ 0x70);/+ 0x6C);/ % s0hit

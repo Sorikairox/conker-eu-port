@@ -1,3 +1,3 @@
-# func_150C1F60 setups: owner byte
+# smoke_columns_spawn setups: owner byte
 f5 ! 0=5 ! ! ! ! ! !
 fFF ! 0=FF ! ! ! ! ! !

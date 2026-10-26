@@ -36,7 +36,7 @@ s/            if (D_800E1010\[3\] < 3) {/            if (D_800E1010[3] < 4) {/ %
 s/    if (limit > 0) {/    if (limit >= 0) {/ % team_m0_zero
 s/            if (tm\[col + i\] >= limit) {/            if (tm[col + i] > limit) {/ % team_m0_hit team_m8
 s/                D_800E0EDA = i;/                D_800E0EDA = i + 1;/ % team_m0_hit team_m8
-s/    func_150432FC(20, 20);/    func_150432FC(20, 21);/ % team_m0
+s/    text_set_pos(20, 20);/    text_set_pos(20, 21);/ % team_m0
 s/            if (j == i || D_800E0EE0\[j\] != -1) {/            if (j == i) {/ % team_fixed2
 s/            if (tm\[col + i\] < tm\[col + j\]) {/            if (tm[col + i] <= tm[col + j]) {/ % team_m9a team_4
 s/                if (tm\[i\] < tm\[j\]) {/                if (tm[i] > tm[j]) {/ % team_tie4

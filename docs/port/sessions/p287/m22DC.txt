@@ -16,20 +16,20 @@ s#    rec\.u68 = 2;#    rec.u68 = 3;# % flip
 s#    rec\.u6C = 0;#    rec.u6C = 1;# % flip
 s#    rec\.u72 = 12;#    rec.u72 = 13;# % flip
 s#    rec\.u74 = 0x15;#    rec.u74 = 0x16;# % flip
-s#        speed = func_150ADA68() \* \*(f32 \*) (def + 0x3C) + \*(f32 \*) (def + 0x38);#        speed = func_150ADA68() * *(f32 *) (def + 0x38) + *(f32 *) (def + 0x3C);# % flip
-s#        r = func_150ADA68() \* \*(f32 \*) (def + 0x34);#        r = func_150ADA68() * *(f32 *) (def + 0x38);#
+s#        speed = random_float() \* \*(f32 \*) (def + 0x3C) + \*(f32 \*) (def + 0x38);#        speed = random_float() * *(f32 *) (def + 0x38) + *(f32 *) (def + 0x3C);# % flip
+s#        r = random_float() \* \*(f32 \*) (def + 0x34);#        r = random_float() * *(f32 *) (def + 0x38);#
 s#        func_15143874((s16) (ang \& 0xFF), r, \&c, \&s);#        func_15143874((s16) (ang \& 0x7F), r, \&c, \&s);# % flip
 s#        rec\.vel\[0\] = (ax0\[0\] \* c + ax1\[0\] \* s + ax2\[0\]) \* speed;#        rec.vel[0] = (ax0[0] * s + ax1[0] * c + ax2[0]) * speed;# % flip
 s#        rec\.vel\[2\] = (ax0\[2\] \* c + ax1\[2\] \* s + ax2\[2\]) \* speed;#        rec.vel[2] = (ax0[2] * c + ax1[2] * s + ax2[2]) * speed * 2.0f;# % flip
-s#        rec\.rot\[1\] = func_150ADA68() \* 360\.0f;#        rec.rot[1] = func_150ADA68() * 361.0f;# % flip
+s#        rec\.rot\[1\] = random_float() \* 360\.0f;#        rec.rot[1] = random_float() * 361.0f;# % flip
 s#        rec\.frame = frames\[v\];#        rec.frame = frames[v + 1];# % flip
-s#        rec\.scaleA = scales\[v\] \* (\*(f32 \*) (def + 0x4C) + func_150ADA68() \* \*(f32 \*) (def + 0x50));#        rec.scaleA = scales[v] * (*(f32 *) (def + 0x50) + func_150ADA68() * *(f32 *) (def + 0x4C));# % flip
+s#        rec\.scaleA = scales\[v\] \* (\*(f32 \*) (def + 0x4C) + random_float() \* \*(f32 \*) (def + 0x50));#        rec.scaleA = scales[v] * (*(f32 *) (def + 0x50) + random_float() * *(f32 *) (def + 0x4C));# % flip
 s#        rec\.scaleB = rec\.scaleA;#        rec.scaleB = 1.0f;# % flip
-s#        rec\.u40 = func_150ADA68() \* (w + w) - w;#        rec.u40 = func_150ADA68() * (w + w) + w;# % flip
-s#        rec\.u48 = func_150ADA68() \* (w + w) - w;#        rec.u48 = func_150ADA68() * w - w;# % flip
-s#        rec\.u4C = func_150ADA68() \* \*(f32 \*) (def + 0x44) + \*(f32 \*) (def + 0x40);#        rec.u4C = func_150ADA68() * *(f32 *) (def + 0x40) + *(f32 *) (def + 0x44);# % flip
+s#        rec\.u40 = random_float() \* (w + w) - w;#        rec.u40 = random_float() * (w + w) + w;# % flip
+s#        rec\.u48 = random_float() \* (w + w) - w;#        rec.u48 = random_float() * w - w;# % flip
+s#        rec\.u4C = random_float() \* \*(f32 \*) (def + 0x44) + \*(f32 \*) (def + 0x40);#        rec.u4C = random_float() * *(f32 *) (def + 0x40) + *(f32 *) (def + 0x44);# % flip
 s#        func_15132FBC(\&rec, 3, 0xFF, 0, kind, owner);#        func_15132FBC(\&rec, 3, 0xFF, 1, kind, owner);#
 s#        count--;#        count -= 2;#
-/count = (u32) func_150ADA20/s/+ 1) + \*(s32 \*) def;/+ 2) + *(s32 *) def;/
-/v = (u32) func_150ADA20/s/(u32) n;/(u32) (n - 1);/ % flip noflip
+/count = (u32) random_int/s/+ 1) + \*(s32 \*) def;/+ 2) + *(s32 *) def;/
+/v = (u32) random_int/s/(u32) n;/(u32) (n - 1);/ % flip noflip
 /rec.life = (u32)/s/(def + 0x48)/(def + 0x4A)/ % flip

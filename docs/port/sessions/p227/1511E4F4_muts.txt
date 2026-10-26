@@ -5,7 +5,7 @@ s/        PK_F32(obj, 0x30) = 0.0f;/        PK_F32(obj, 0x30) = 1.0f;/ % alloc
 s/    case 0x5A:/    case 0x5B:/ % k5A
 s/        item = 0x17;/        item = 0x16;/ % k54_has
 s/if (D_800BE9F0 == 0x2D) {/if (D_800BE9F0 == 0x2C) {/ % k54_l2d_off
-s/o = func_1509B570(0xBA);/o = func_1509B570(0xBB);/ % k54_l2d_off
+s/o = event_get_vars(0xBA);/o = event_get_vars(0xBB);/ % k54_l2d_off
 s/\*(s32 \*) (o + 0x1FE4) <= 0/*(s32 *) (o + 0x1FE4) < 0/ % k54_l2d_off
 s/PK_F32(obj, 4) += (f32) D_800BE9E4 \* 1.52f;/PK_F32(obj, 4) += (f32) D_800BE9E4 * 1.5f;/ % base
 s/PK_F32(obj, 0) = 8.0f \* cosf/PK_F32(obj, 0) = 9.0f * cosf/ % base
@@ -33,7 +33,7 @@ s/PK_F32(p, 0x18) < y + r \&\&/PK_F32(p, 0x18) < y + r - 1.0f \&\&/ % too_high
 s/y - r < PK_F32(p, 0x18) + (f32) h)/y - r < PK_F32(p, 0x18))/ % too_low low_h
 s/\*(s32 \*) (obj + 0x80) = PK_U8(p, 0x3B);/*(s32 *) (obj + 0x80) = PK_U8(p, 0x3A);/ % take
 s/            s->state = 3;$/            s->state = 2;/ % take
-s/func_1511E320(obj, p);/func_1511E320(obj, p + 1);/ % take
+s/pickup_collect_sound_play(obj, p);/pickup_collect_sound_play(obj, p + 1);/ % take
 s/func_151D6F20((s32) p, (s32) obj);/func_151D6F20((s32) obj, (s32) p);/ % take
 s/                    break;$/                    ;/ % take_p0
 s/PK_F32(obj, 0x34) += 0.26f \* s->scale;/PK_F32(obj, 0x34) += 0.25f * s->scale;/ % st0_grow

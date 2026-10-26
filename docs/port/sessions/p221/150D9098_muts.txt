@@ -5,7 +5,7 @@ s/data.u4D = 0;/data.u4D = 1;/
 s/data.id = obj\[0x3B\];/data.id = obj[0x3A];/
 s/data.pos0\[1\] = spec.pos\[1\];/data.pos0[1] = spec.pos[0];/
 s/data.pos1\[2\] = spec.pos\[2\];/data.pos1[2] = spec.pos[1];/
-s/func_150D904C((s32) obj, (s32) data.aim);/func_150D904C((s32) obj, (s32) data.pos1);/
+s/trail_get_aim((s32) obj, (s32) data.aim);/trail_get_aim((s32) obj, (s32) data.pos1);/
 s/data.u3C = D_800A0F18;/data.u3C = 0.0f;/
 s/if (D_800BE9F0 == 0x34) {/if (D_800BE9F0 != 0x34) {/
 s/func_151EFDD0() . 2, 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 1500)/(func_151EFDD0() \& 1), 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 1500)/

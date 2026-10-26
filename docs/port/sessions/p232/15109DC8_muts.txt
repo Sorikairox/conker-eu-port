@@ -1,15 +1,15 @@
-s/    scale = (func_150ADA68() \* D_800A2A04 + D_800A2A08) \* D_800A2A0C;/    scale = (func_150ADA68() * D_800A2A04 + D_800A2A08);/ % r00 r01
-s/    scale = (func_150ADA68() \* D_800A2A04 + D_800A2A08) \* D_800A2A0C;/    scale = (func_150ADA68() * D_800A2A08 + D_800A2A04) * D_800A2A0C;/ % r00 r01
+s/    scale = (random_float() \* D_800A2A04 + D_800A2A08) \* D_800A2A0C;/    scale = (random_float() * D_800A2A04 + D_800A2A08);/ % r00 r01
+s/    scale = (random_float() \* D_800A2A04 + D_800A2A08) \* D_800A2A0C;/    scale = (random_float() * D_800A2A08 + D_800A2A04) * D_800A2A0C;/ % r00 r01
 s/    t.kind = 0x2B;/    t.kind = 0x2A;/ % r00
 s/    t.flags = 0x4401;/    t.flags = 0x4400;/ % r00
 s/    t.u0 = 0x200005;/    t.u0 = 0x200004;/ % r00
 s/    t.u4 = 0x20000;/    t.u4 = 0x30000;/ % r00
-s/    t.life = (func_150ADA20() \& 0xF) + 10;/    t.life = (func_150ADA20() \& 0x7) + 10;/ % r10
-s/    t.life = (func_150ADA20() \& 0xF) + 10;/    t.life = (func_150ADA20() \& 0xF) + 11;/ % r00
+s/    t.life = (random_int() \& 0xF) + 10;/    t.life = (random_int() \& 0x7) + 10;/ % r10
+s/    t.life = (random_int() \& 0xF) + 10;/    t.life = (random_int() \& 0xF) + 11;/ % r00
 s/    t.uC = 0;/    t.uC = 1;/ % r00
 s/    t.u10 = 0;/    t.u10 = 1;/ % r00
 s/    for (i = 0; i < 9; i++) {/    for (i = 0; i < 8; i++) {/ % r00
-s/    size = func_150ADA68() \* 25.0f + 35.0f;/    size = func_150ADA68() * 25.0f + 30.0f;/ % r00
+s/    size = random_float() \* 25.0f + 35.0f;/    size = random_float() * 25.0f + 30.0f;/ % r00
 s/    t.size\[1\] = size;/    t.size[1] = 1.0f;/ % r00
 s/    t.pos\[0\] = pos\[0\];/    t.pos[0] = pos[1];/ % r00
 s/    t.pos\[2\] = pos\[2\];/    t.pos[2] = pos[1];/ % r00
@@ -22,8 +22,8 @@ s/    t.u20 = 0x33;/    t.u20 = 0x32;/ % r00
 s/    t.u22 = 1;/    t.u22 = 0;/ % r00
 s/    t.u54 = 0.0f;/    t.u54 = 1.0f;/ % r00
 s/    t.u24 = 1.0f;/    t.u24 = 2.0f;/ % r00
-s/    flipX = (func_150ADA20() \& 1) ? 0x40 : 0;/    flipX = (func_150ADA20() \& 2) ? 0x40 : 0;/ % r01 r_even
-s/    flipY = (func_150ADA20() \& 1) ? 0x80 : 0;/    flipY = (func_150ADA20() \& 1) ? 0x40 : 0;/ % r10
+s/    flipX = (random_int() \& 1) ? 0x40 : 0;/    flipX = (random_int() \& 2) ? 0x40 : 0;/ % r01 r_even
+s/    flipY = (random_int() \& 1) ? 0x80 : 0;/    flipY = (random_int() \& 1) ? 0x40 : 0;/ % r10
 s/    t.mode = flipY | 5 | flipX | 0xC200;/    t.mode = flipY | 5 | flipX | 0xC000;/ % r00
 s/    t.u60\[2\] = 0xFF;/    t.u60[2] = 0;/ % r00
 s/    t.u60\[5\] = 4;/    t.u60[5] = 5;/ % r00

@@ -2,7 +2,7 @@
 s/if (maxY < pos\[1\]) {/if (maxY <= pos[1]) {/ % eqmax
 1,/out->unk1C \&= ~2;/s/out->unk1C \&= ~2;/out->unk1C \&= ~4;/ % above
 s/out->unk0 = D_800990F0;/out->unk0 = 1000.0f;/ % eqmax n0
-s/func_1510F800(0);/func_1510F800(1);/ % base
+s/collision_select_area(0);/collision_select_area(1);/ % base
 s/n = func_150A3F50((s32) pos\[0\], (s32) pos\[2\]);/n = func_150A3F50((s32) pos[2], (s32) pos[0]);/ % base
 s/\* 0.00390625f;/* 0.0078125f;/ % base
 s/if (pos\[1\] <= d \&\&/if (pos[1] < d \&\&/ % eqd

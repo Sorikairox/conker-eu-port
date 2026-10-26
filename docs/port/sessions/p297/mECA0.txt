@@ -26,11 +26,11 @@ s/    fx.unk48 = 0;/    fx.unk48 = 1;/
 s/    fx.unk3C = 0;/    fx.unk3C = 1;/
 s/    fx.unk40 = 0.5f;/    fx.unk40 = 0.25f;/
 s/    func_15154488(\&fx, \&fx.unk8, (s32) floor, 0xFF, 1);/    func_15154488(\&fx, \&fx.unk8, (s32) floor, 0xFF, 0);/
-s/    n = (u32) func_150ADA20() .*/    n = 7;/
+s/    n = (u32) random_int() .*/    n = 7;/
 s/    probe\[1\] = \*(f32 \*) (obj + 0x18) + 100.0f;/    probe[1] = *(f32 *) (obj + 0x18) + 50.0f;/
-s/        func_15143874(r \& 0xFF, func_150ADA68() \* 59.0f + 90.0f/        func_15143874(r \& 0x7F, func_150ADA68() * 59.0f + 90.0f/
-s/        func_15143874(r \& 0xFF, func_150ADA68() \* 59.0f + 90.0f/        func_15143874(r \& 0xFF, func_150ADA68() * 60.0f + 90.0f/
-s/        func_15143874(r \& 0xFF, func_150ADA68() \* 59.0f + 90.0f/        func_15143874(r \& 0xFF, func_150ADA68() * 59.0f + 80.0f/
+s/        func_15143874(r \& 0xFF, random_float() \* 59.0f + 90.0f/        func_15143874(r \& 0x7F, random_float() * 59.0f + 90.0f/
+s/        func_15143874(r \& 0xFF, random_float() \* 59.0f + 90.0f/        func_15143874(r \& 0xFF, random_float() * 60.0f + 90.0f/
+s/        func_15143874(r \& 0xFF, random_float() \* 59.0f + 90.0f/        func_15143874(r \& 0xFF, random_float() * 59.0f + 80.0f/
 s/        piece\[0\] += \*(f32 \*) (obj + 0x14);/        piece[0] += *(f32 *) (obj + 0x1C);/
 s/        probe\[0\] = piece\[0\];/        probe[0] = piece[2];/
 s/        piece\[2\] += \*(f32 \*) (obj + 0x1C);/        piece[2] += *(f32 *) (obj + 0x18);/
@@ -38,7 +38,7 @@ s/        probe\[2\] = piece\[2\];/        probe[2] = piece[0];/
 s/        if (func_15046F70(probe, 0, \*(f32 \*) (obj + 0x18) - 500.0f, floor) == 0/        if (func_15046F70(probe, 0, *(f32 *) (obj + 0x18) - 400.0f, floor) == 0/
 s/ || ((u8 \*) floor)\[0x1D\] == 3) {/ || ((u8 *) floor)[0x1C] == 3) {/
 s/        piece\[1\] = floor\[0\] + 10.0f;/        piece[1] = floor[0] + 11.0f;/
-s/        if (func_150ADA20() \& 1) {/        if (func_150ADA20() \& 2) {/
+s/        if (random_int() \& 1) {/        if (random_int() \& 2) {/
 s/            impact_debris_spawn(0, size \* 4.5f + 15.0f/            impact_debris_spawn(0, size * 4.5f + 16.0f/
 s/            impact_debris_spawn(0, size \* 4.5f/            impact_debris_spawn(0, shade * 4.5f/
 s/            impact_debris_spawn(0, size \* 4.5f + 15.0f, (u32) (shade \* 100.0f + 155.0f)/            impact_debris_spawn(0, size * 4.5f + 15.0f, (u32) (shade * 100.0f + 154.0f)/
@@ -64,4 +64,4 @@ s/0x38 + 0x46,/0x39 + 0x46,/
 s/0x38 + 0x46,/0x38 + 0x45,/
 s/(struct17 \*) base, 0, 1, room, owner);/(struct17 *) base, 1, 1, room, owner);/
 s/(struct17 \*) base, 0, 1, room, owner);/(struct17 *) base, 0, 1, owner, owner);/
-s/    a = func_150ADA20();/    a = func_150ADA20() + 1;/
+s/    a = random_int();/    a = random_int() + 1;/

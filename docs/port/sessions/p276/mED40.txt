@@ -1,12 +1,12 @@
 \#^    if (\*(s16 \*) (p + 0x28) >= 0) {$#s/>= 0/> 0/
 \#^    kinds\[0\] = 0xBE;$#s/0xBE/0xBD/
 \#^    kinds\[1\] = 0xBF;$#s/0xBF/0xBD/
-\#^    t.kind = kinds\[func_150ADA20() & 1\];$#s/& 1/\& 0/
+\#^    t.kind = kinds\[random_int() & 1\];$#s/& 1/\& 0/
 \#^    func_1514470C(\*(u8 \*\*) (p + 0x2C), t.pos);$#s/0x2C/0x30/
 \#^    d\[0\] = to\[0\] - t.pos\[0\];$#s/- t/+ t/
 \#^    d\[2\] = to\[2\] - t.pos\[2\];$#s/to\[2\]/to[1]/
-\#^    speed = func_150ADA68() \* 30.0f + 25.0f;$#s/30.0f/31.0f/
-\#^    speed = func_150ADA68() \* 30.0f + 25.0f;$#s/25.0f/26.0f/
+\#^    speed = random_float() \* 30.0f + 25.0f;$#s/30.0f/31.0f/
+\#^    speed = random_float() \* 30.0f + 25.0f;$#s/25.0f/26.0f/
 \#^    if (t.kind == 0xBF) {$#s/0xBF/0xBE/
 \#^        spd = speed \* 0.18f;$#s/0.18f/0.2f/
 \#^    rec.vel\[1\] \*= spd;$#s/spd/speed/
@@ -30,5 +30,5 @@
 \#^    e = effect3d_spawn_full(&t, (s32) &D_800A4AA0, 0x28#s/0xFF, 0x28/0xFF, 0x27/
 \#^    e = effect3d_spawn_full(&t, (s32) &D_800A4AA0, 0x28#s/p\[1\]/p[2]/
 \#^        memcpy(e + 0x110, &rec, 0x28);$#s/0x110/0x114/
-\#^    \*timer = (u32) func_150ADA20()#s/ 201 + 200/ 201 + 201/
+\#^    \*timer = (u32) random_int()#s/ 201 + 200/ 201 + 201/
 \#^    t.u1 = 0;$#s/0/1/

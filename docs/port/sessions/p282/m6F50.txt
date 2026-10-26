@@ -5,9 +5,9 @@
 /impact_glow_spawn(&a.x/s/101 + 155/101 + 154/
 /impact_glow_spawn(&a.x/s/(y & 7) + 15/(y \& 3) + 15/
 /impact_glow_spawn(&a.x/s/type, kind/kind, type/
-/for (n = (func_150ADA20() & 3) + 4; n > 0; n--) {/s/+ 4/+ 3/
-/r = func_150ADA68() \* 0.0929f + 0.0643f;/s/0.0643f/0.0644f/
-/func_15143874(x & 0xFF, func_150ADA68() \* 50.0f/s/50.0f/49.0f/
+/for (n = (random_int() & 3) + 4; n > 0; n--) {/s/+ 4/+ 3/
+/r = random_float() \* 0.0929f + 0.0643f;/s/0.0643f/0.0644f/
+/func_15143874(x & 0xFF, random_float() \* 50.0f/s/50.0f/49.0f/
 /vel\[0\] = /s/side.x \* sc\[0\]/side.x * sc[1]/
 /vel\[1\] = /s/up.y/up.x/
 /vel\[2\] = /s/dir.z \* 100.0f/dir.z * 99.0f/
@@ -18,16 +18,16 @@
 /(u32) x . 31 + 30, (u32) y . 156 + 100, 0x2E, 5, 0, kind, owner/s/0x2E, 5/0x2E, 6/
 /(u32) x . 31 + 30, (u32) y . 156 + 100, 0x2E, 5, 0, kind, owner/s/+ 30,/+ 31,/
 /^    if (sparks) {/s/sparks/!sparks/
-/for (m = (func_150ADA20() & 3) + 4; m != 0; m--) {/s/+ 4/+ 5/
-/func_150ADA68() \* 2.0f + 6.0f, &sc2\[0\]/s/6.0f/7.0f/
+/for (m = (random_int() & 3) + 4; m != 0; m--) {/s/+ 4/+ 5/
+/random_float() \* 2.0f + 6.0f, &sc2\[0\]/s/6.0f/7.0f/
 /v\[1\] = side.y \* sc2\[0\] + up.y \* sc2\[1\];/s/up.y/up.z/
 /impact_spark_spawn((struct17 \*) &a, v, 0.0f/s/. 6 + 8/ \& 7 + 8/
 /impact_spark_spawn((struct17 \*) &a, v, 0.0f/s/1.9f/2.0f/
 /(u32) y . 3 + 4, 0, 1.0f, 1.0f, 1, type, 0, 0x10, 0xF, 0, kind, owner/s/0x10, 0xF/0xF, 0x10/
 /(u32) y . 3 + 4, 0, 1.0f, 1.0f, 1, type, 0, 0x10, 0xF, 0, kind, owner/s/1.0f, 1.0f, 1/1.0f, 2.0f, 1/
 /if (!splash || !D_800BE616) {/s/!D_800BE616/D_800BE616/
-/for (n = (func_150ADA20() & 3) + 3; n != 0; n--) {/s/+ 3/+ 2/
-/func_15143874(x & 0xFF, func_150ADA68() \* 140.0f/s/140.0f/141.0f/
+/for (n = (random_int() & 3) + 3; n != 0; n--) {/s/+ 3/+ 2/
+/func_15143874(x & 0xFF, random_float() \* 140.0f/s/140.0f/141.0f/
 /if (func_150ACEA0(b.x, b.y, b.z, dir.x/s/b.y, b.z/b.z, b.y/
 /dir.y \* 100.0f + side.y \* sc3\[0\] + up.y \* sc3\[1\],/s/side.y/side.x/
 /dir.z \* 100.0f + side.z \* sc3\[0\] + up.z \* sc3\[1\], 0, surf/s/, 0, surf/, 1, surf/

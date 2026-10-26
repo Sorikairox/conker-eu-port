@@ -24,8 +24,8 @@
 \#^        if (func_15144A74(d, r\.pos) < 0\.0f) {$#s/< 0\.0f/<= 0.0f/
 \#^        if (func_15144A74(d, r\.pos) < 0\.0f) {$#s/(d, r\.pos)/(r.pos, d)/
 \#^            r\.side = -1\.0f;$#s/-1/-2/
-\#^    bit2 = (func_150ADA20() & 1) ? 2 : 0;$#s/? 2/? 4/
-\#^    bit1 = (func_150ADA20() & 1) ? 1 : 0;$#s/: 0/: 2/
+\#^    bit2 = (random_int() & 1) ? 2 : 0;$#s/? 2/? 4/
+\#^    bit1 = (random_int() & 1) ? 1 : 0;$#s/: 0/: 2/
 \#^    o = effect3d_spawn_default((s32) &q, 0xF, 0x15, 0, 0xF, bit1 | bit2, 0x30, room, owner);$#s/0x15/0x16/
 \#^    o = effect3d_spawn_default#s/room, owner/room, 0/
 \#^    o = effect3d_spawn_default#s/0x30, room/0x20, room/

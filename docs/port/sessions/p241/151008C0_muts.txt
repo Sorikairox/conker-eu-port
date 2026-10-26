@@ -1,4 +1,4 @@
-# P241 func_151008C0 (sky_segments_flicker) mutants: sed % setup names
+# P241 sky_segments_flicker (sky_segments_flicker) mutants: sed % setup names
 s/    if (arg0 != 0) {/    if (arg0 == 0) {/ % edges
 s/    D_800DD835++;/    D_800DD835 += 2;/ % edges
 s/    for (i = 0; i < 5; i++) {/    for (i = 0; i < 4; i++) {/ % edges
@@ -12,5 +12,5 @@ s/                light_ctrl_broadcast(ids.id\[i\], 0x1C, 0);/                li
 s/                light_ctrl_broadcast(ids.id\[i\], 0x17, 0);/                light_ctrl_broadcast(ids.id[i], 0x16, 0);/ % edges
 s/                light_ctrl_broadcast(ids.id\[i\], 0x17, 0);/                light_ctrl_broadcast(i, 0x17, 0);/ % edges
 s/ 1000 < chance/ 1000 <= chance/ % edges
-s/(u32) func_150ADA20() \(.\) 1000 < chance/func_150ADA20() \1 1000 < (s32) chance/ % mod
+s/(u32) random_int() \(.\) 1000 < chance/random_int() \1 1000 < (s32) chance/ % mod
 s/ 1000 < chance/ 100 < chance/ % mod

@@ -29,7 +29,7 @@ s#        if (st->glow == 0) {#        if (st->glow != 0) {# % l4run l4glow
 s#            shade = (u32) (32\.5f \* (f + 1\.0f) + 190\.0f);#            shade = (u32) (32.5f * (f + 1.0f) + 191.0f);# % l4run l13run
 s#            ((u8 \*) dst)\[0xD\] = shade;#            ((u8 *) dst)[0xD] = shade + 1;# % l4run
 s#        half = (u16) (st->speed >> 1);#        half = (u16) (st->speed >> 2);# % l4run
-s#        c = func_150489B0(((st->time >> 8) + st->speedPhase) \& 0xFF);#        c = func_150489B0(((st->time >> 8) - st->speedPhase) \& 0xFF);# % l4run
+s#        c = math_cos_u8(((st->time >> 8) + st->speedPhase) \& 0xFF);#        c = math_cos_u8(((st->time >> 8) - st->speedPhase) \& 0xFF);# % l4run
 s#        speed = (u16) (u32) ((f32) half + (c + 1\.0f) \* 0\.5f \* (f32) half);#        speed = (u16) (u32) ((f32) half + (c + 1.0f) * 0.25f * (f32) half);# % l4run l4spd
 s#    st->time -= speed \* D_800BE9E4;#    st->time += speed * D_800BE9E4;# % l4run l13run
 s#        st->glowTimer += D_800BE9E4 \* 2;#        st->glowTimer += D_800BE9E4;# % l4glow

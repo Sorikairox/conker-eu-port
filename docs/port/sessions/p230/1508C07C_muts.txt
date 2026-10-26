@@ -8,7 +8,7 @@ s/    for (i = 0; i < n; i++, row += 0x10) {/    for (i = 0; i < n; i++, row += 
 s/        v = 0x55;/        v = 0x56;/ % n2
 s/        step = step0;/        step = step0 + 1;/ % n2
 s/            used\[k\] = 0;/            used[k] = (k == 15);/ % n16
-s/        j = (s32) (func_150ADA68() \* nf);/        j = (s32) (func_150ADA68() * (nf - 1));/ % n4 n5 n8
+s/        j = (s32) (random_float() \* nf);/        j = (s32) (random_float() * (nf - 1));/ % n4 n5 n8
 /for (k = 0; k < n/,$s/            if (j >= n) {/            if (j > n) {/ % n2 n3 n4 n5 n6 n7 n8
 /for (k = 0; k < n/,$s/                j = 0;/                j = 1;/ % n2 n3 n4 n5 n6 n7 n8
 s/        for (k = 0; k < n; k++) {/        for (k = 1; k < n; k++) {/ % n2

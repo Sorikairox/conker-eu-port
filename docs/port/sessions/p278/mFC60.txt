@@ -20,7 +20,7 @@
 \#^        if (0\.25f <= ratio) {#s/<=/</
 \#^            \*(f32 \*) (p + 0xA8) = sinf(ratio \* 4\.18878937f - 4\.18878937f) \* 10\.0f;#s/\* 10\.0f/* 9.0f/
 \#^        if (obj != NULL && 1\.0f <= ratio) {#s/<=/</
-\#^            func_15060F28((struct127 \*) obj, 0);#s/0)/1)/
+\#^            obj_remove((struct127 \*) obj, 0);#s/0)/1)/
 \#^    } else if (mode == 0) {#s/0/4/
 \#^    } else if (mode == 1) {#s/1/5/
 \#^        if (obj == NULL && obj\[0x232\] != 3) {#s/obj == NULL \&\& //

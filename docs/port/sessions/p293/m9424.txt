@@ -10,10 +10,10 @@ s#        d\[1\] = \*(f32 \*) (obj + 0x3C) - y;#        d[1] = *(f32 *) (obj + 0
 s#        if (func_150ACEA0(x, y, z, d\[0\], d\[1\], d\[2\], 0, \&surf, \&hp\[0\], \&hp\[1\], \&hp\[2\], 0, \&surfId, 0, 0\.0f) != 0) {#        if (func_150ACEA0(x, y, z, d[0], d[1], d[2], 0, \&surf, \&hp[0], \&hp[1], \&hp[2], 0, \&surfId, 0, 1.0f) != 0) {# % miss
 s#            if (func_15145C90(surfId) != 0) {#            if (func_15145C90(surfId) == 0) {# % hit hitnosurf
 s#                a\.u02 = 0x3B02;#                a.u02 = 0x3B01;# % hit
-s#                k = (func_150ADA68() \* 25\.0f + 25\.0f) \* D_800A018C_c\[0\];#                k = (func_150ADA68() * 25.0f + 25.0f) * D_800A0190_c[0];# % hit
+s#                k = (random_float() \* 25\.0f + 25\.0f) \* D_800A018C_c\[0\];#                k = (random_float() * 25.0f + 25.0f) * D_800A0190_c[0];# % hit
 s#                a\.pos\[1\] = hp\[1\];#                a.pos[1] = hp[2];# % hit
 s#                a\.u44\[3\] = 7;#                a.u44[3] = 6;# % hit
-s#                spin\[0\] = (func_150ADA68() \* 80\.0f + 50\.0f) \* D_800A0190_c\[0\];#                spin[0] = (func_150ADA68() * 80.0f + 50.0f) * D_800A018C_c[0];# % hit
+s#                spin\[0\] = (random_float() \* 80\.0f + 50\.0f) \* D_800A0190_c\[0\];#                spin[0] = (random_float() * 80.0f + 50.0f) * D_800A018C_c[0];# % hit
 s#                                           500\.0f, 500\.0f, 0, (s32) \&surf, \*(s32 \*) (obj + 0x14C),#                                           500.0f, 500.0f, 0, (s32) \&surfId, *(s32 *) (obj + 0x14C),# % hit
 s#                    memcpy(rec + 0x128, spin, 8);#                    memcpy(rec + 0x128, spin + 1, 8);# % hit
 s#            b\.dir\[1\] = -d\[1\];#            b.dir[1] = d[1];# % hit
@@ -30,5 +30,5 @@ s#            b\.u94 = 0x20;#            b.u94 = 0x21;# % hit
 s#            b\.u9E = 0x19;#            b.u9E = 0x1A;# % hit
 s#            b\.uA0 = \*(s32 \*) (obj + 0x128);#            b.uA0 = *(s32 *) (obj + 0x14C);# % hit
 s#            func_15151BE0((u8 \*) \&b, obj\[0xC\], obj\[1\]);#            func_15151BE0((u8 *) \&b, obj[1], obj[0xC]);# % hit
-s#    func_10010F88(D_80088AD4\[func_150ADA20() \& 1\], 0x7D00, 0, 0, 0, \*(f32 \*) (obj + 0x38), \*(f32 \*) (obj + 0x3C),#    func_10010F88(D_80088AD4[func_150ADA20() \& 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x40),# % rej
+s#    func_10010F88(D_80088AD4\[random_int() \& 1\], 0x7D00, 0, 0, 0, \*(f32 \*) (obj + 0x38), \*(f32 \*) (obj + 0x3C),#    func_10010F88(D_80088AD4[random_int() \& 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x40),# % rej
 s#    return 0;#    return 1;# % rej

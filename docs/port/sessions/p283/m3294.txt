@@ -13,9 +13,9 @@
 \#^    if (\*(s8 \*) (st + 0xC) <= 0) {#s/<= 0/< 0/
 \#^    \*(f32 \*) (st + 8) += #s/D_800A1D38 \* D_800BE9A4/D_800A1D38/
 \#^        trail\.id = owner\[0x3B\];#s/0x3B/0x3A/
-\#^        trail\.size = func_150ADA68() \* 6\.0f + 13\.0f;#s/13/12/
+\#^        trail\.size = random_float() \* 6\.0f + 13\.0f;#s/13/12/
 \#^        trail\.unk10 = D_800A1D3C;#s/D_800A1D3C/D_800A1D38/
-\#^        trail\.speed = func_150ADA68() \* 40\.0f + 60\.0f;#s/40/50/
+\#^        trail\.speed = random_float() \* 40\.0f + 60\.0f;#s/40/50/
 \#^        trail\.accel = #s/trail\.size \* trail\.size/trail.size/
 \#^        in\[1\] = (f32 \*) D_800A1D2C;#s/D_800A1D2C/D_800A1D20/
 \#^        func_15145EA4(in, out, #s/0x3C0/0x380/

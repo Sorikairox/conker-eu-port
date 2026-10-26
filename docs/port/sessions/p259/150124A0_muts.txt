@@ -1,14 +1,14 @@
-# P259 func_150124A0 (pipe_spray_points_init) mutants: sed % setup names
+# P259 pipe_spray_points_init (pipe_spray_points_init) mutants: sed % setup names
 s/for (pipe = 0; pipe < 3; pipe++) {/for (pipe = 0; pipe < 2; pipe++) {/ % mix
 s/for (i = 0; i < 10; i++, pt++) {/for (i = 0; i < 9; i++, pt++) {/ % mix
 s/for (i = 0; i < 10; i++, pt++) {/for (i = 0; i < 10; i++) {/ % mix
 s/static const u8 sPipeAngles\[3\] = { 0x94, 0xEA, 0x3F };/static const u8 sPipeAngles[3] = { 0x94, 0xEA, 0x3E };/ % mix
 s/static const u8 sPipeAngles\[3\] = { 0x94, 0xEA, 0x3F };/static const u8 sPipeAngles[3] = { 0x94, 0xEB, 0x3F };/ % mix
 s/13 + sPipeAngles/12 + sPipeAngles/ % mix
-s/yaw = (u32) func_150ADA20()/yaw = (s32) func_150ADA20()/ % mix2 mix3
+s/yaw = (u32) random_int()/yaw = (s32) random_int()/ % mix2 mix3
 s/sPipeAngles\[pipe\] - 0x86;/sPipeAngles[pipe] - 0x80;/ % mix
-s/(func_150ADA20() \& 0xF) - 10;/(func_150ADA20() \& 0x7) - 10;/ % mix
-s/(func_150ADA20() \& 0xF) - 10;/(func_150ADA20() \& 0xF) - 9;/ % mix
+s/(random_int() \& 0xF) - 10;/(random_int() \& 0x7) - 10;/ % mix
+s/(random_int() \& 0xF) - 10;/(random_int() \& 0xF) - 9;/ % mix
 s/yaw_c = angle_byte_cos(yaw - 0x40);/yaw_c = angle_byte_cos(yaw + 0x40);/ % mix
 s/yaw_s = angle_byte_cos(yaw);/yaw_s = angle_byte_cos(pitch);/ % mix
 s/pitch_c = angle_byte_cos(pitch - 0x40);/pitch_c = angle_byte_cos(pitch + 0x40);/ % mix

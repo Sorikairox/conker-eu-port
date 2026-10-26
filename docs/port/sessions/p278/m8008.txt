@@ -1,16 +1,16 @@
 \#^    if (\*(s16 \*) (obj + 0xA8) < 0) {#s/< 0/<= 0/
 \#^    if (\*(s16 \*) (obj + 0xA8) < 0) {#s/s16/u16/
-\#^    func_150A7DA0((u8 \*) mtx, \*(s32 \*) (obj + 0x90)#s/0x94), \*(s32 \*) (obj + 0x98)/0x98), *(s32 *) (obj + 0x94)/
+\#^    mtxf_translate((u8 \*) mtx, \*(s32 \*) (obj + 0x90)#s/0x94), \*(s32 \*) (obj + 0x98)/0x98), *(s32 *) (obj + 0x94)/
 \#^    guMtxF2L2(mtx, #s/0x10 +/0x50 +/
 \#^    for (i = 0; i < 12; i++) {#s/12/11/
 \#^        gfx->words\.w0 = 0xDA380003;#s/3;/2;/
 \#^        gfx->words\.w1 = (u32) (obj + 0x10 + D_800BE9C0 \* 64);#s/\* 64/* 32/
-\#^        func_150A7DA0((u8 \*) mtx, \*(s32 \*) (rec + 0x90), 0, 0);#s/0, 0)/0, 1)/
+\#^        mtxf_translate((u8 \*) mtx, \*(s32 \*) (rec + 0x90), 0, 0);#s/0, 0)/0, 1)/
 \#^        mtx\[0\]\[0\] \*= #s/0xA0/0x9C/
 \#^        mtx\[1\]\[1\] \*= #s/0x9C/0xA0/
 \#^        mtx\[2\]\[2\] \*= #s/mtx\[2\]\[2\]/mtx[2][1]/
 \#^        if (rec\[0x98\] == 0) {#s/0x98/0x99/
-\#^            func_150A8050(rot, #s/0x84), \*(f32 \*) (rec + 0x88)/0x88), *(f32 *) (rec + 0x84)/
+\#^            mtxf_rotate_xyz_deg(rot, #s/0x84), \*(f32 \*) (rec + 0x88)/0x88), *(f32 *) (rec + 0x84)/
 \#^            func_151882DC((u8 \*) rot, \*(f32 \*) (rec + 0x80)#s/0x80/0x84/
 \#^        func_150A7A48(mtx, rot, mtx);#s/mtx, rot, mtx/rot, mtx, mtx/
 \#^        guMtxF2L(mtx, #s/D_800BE9C0 \* 64/D_800BE9C0 * 32/

@@ -1,8 +1,8 @@
 \#^    if (\*(void \*\*) (obj + 0x1D4) == NULL) {#s/0x1D4/0x1D0/
 \#^    if (func_150CB5E0(pos, obj, (s32) ground, (u8) arg1) == 0) {#s/(u8) arg1/1/
 \#^    if (func_150CB5E0(pos, obj, (s32) ground, (u8) arg1) == 0) {#s/== 0/!= 0/
-\#^    func_1512D748((struct108 \*)#s/0x9A0/0x9A4/
-\#^    func_1512D748((struct108 \*)#s/7, 1)/7, 0)/
+\#^    camera_shake_start((struct108 \*)#s/0x9A0/0x9A4/
+\#^    camera_shake_start((struct108 \*)#s/7, 1)/7, 0)/
 \#^    if (!(\*(s32 \*) (obj + 0xF4) & 0x2000)) {#s/0x2000/0x4000/
 \#^        func_151D5404((struct17 \*) pos, 1502.0f#s/1502.0f/1500.0f/
 \#^        func_151D5404((struct17 \*) pos, 1502.0f#s/0xC, 0xF/0xF, 0xC/
@@ -20,8 +20,8 @@
 \#^    part.pos\[2\] = pos\[2\];#s/pos\[2\];/pos[1];/
 \#^    part.u34 = 1.0f;#s/1.0f/0.0f/
 \#^    part.flags = 0x401C0000;#s/0x401C0000/0x401C0001/
-\#^    part.u44\[0\] = func_150ADA20()#s/+ 0xA0;/+ 0xA1;/
-\#^    tail.life = (func_150ADA20() & 3) + 7;#s/& 3/\& 7/
+\#^    part.u44\[0\] = random_int()#s/+ 0xA0;/+ 0xA1;/
+\#^    tail.life = (random_int() & 3) + 7;#s/& 3/\& 7/
 \#^    tail.scale = #s/30.0f + 30.0f/30.0f + 31.0f/
 \#^    tail.scale = #s/ \* part.size\[0\]//
 \#^    part.u44\[3\] = 6;#s/6;/7;/
@@ -33,10 +33,10 @@
 \#^        memcpy(p + 0x128, &tail, 8);#s/0x128/0x124/
 \#^        if (func_1518B140(D_800D9D00, (s32) p, 2) == 0) {#s/p, 2)/p, 1)/
 \#^        if (func_1518B140(D_800D9D00, (s32) p, 2) == 0) {#s/== 0/!= 0/
-\#^    ringLife = (func_150ADA20() & 0xF) + 0xA;#s/0xA;/0xB;/
+\#^    ringLife = (random_int() & 0xF) + 0xA;#s/0xA;/0xB;/
 \#^    func_1514CBE8(pos\[0\], pos\[1\], pos\[2\], rnd \* 59.0f + 80.0f#s/80.0f/70.0f/
 \#^    func_1514CBE8(pos\[0\], pos\[1\], pos\[2\], rnd \* 59.0f + 80.0f#s/0xE, 0/0xF, 0/
-\#^    ringLife = (func_150ADA20() & 0xF) + 5;#s/+ 5/+ 6/
+\#^    ringLife = (random_int() & 0xF) + 5;#s/+ 5/+ 6/
 \#^    ringCol\[1\] = cg;#s/cg/cb/
 \#^    func_1514CBE8(pos\[0\], pos\[1\], pos\[2\], rnd \* 59.0f + 70.0f#s/(s32) ringCol/0/
 \#^    func_1514CBE8(pos\[0\], pos\[1\], pos\[2\], rnd \* 59.0f + 70.0f#s/pos\[1\], pos\[2\]/pos[2], pos[1]/

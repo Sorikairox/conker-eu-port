@@ -25,7 +25,7 @@ s/^            pl->xz_velocity = self->xz_velocity;/            pl->xz_velocity 
 s/^            self->unk13C = 0;/            self->unk13C = 1;/ % stun
 s/^    if (self->unk102 == 0) {/    if (self->unk102 != 0) {/ % e0 m
 s/^        self->in_water = 0;/        self->in_water = 1;/ % e0
-s/^        heading = func_1505A630((f32) ((s8 \*) D_800CC6A4)\[2\], (f32) ((s8 \*) D_800CC6A4)\[3\], 0);/        heading = func_1505A630((f32) ((s8 *) D_800CC6A4)[3], (f32) ((s8 *) D_800CC6A4)[2], 0);/ % e0
+s/^        heading = math_atan2_u16((f32) ((s8 \*) D_800CC6A4)\[2\], (f32) ((s8 \*) D_800CC6A4)\[3\], 0);/        heading = math_atan2_u16((f32) ((s8 *) D_800CC6A4)[3], (f32) ((s8 *) D_800CC6A4)[2], 0);/ % e0
 s/^            mag = 0.0f;/            mag = 1.5f;/ % eBtn
 s/^        self->unk78 = self->unk7A;/        self->unk78 = self->unk76;/ % eMag
 s/^        if (1.0f < mag) {/        if (0.4f < mag) {/ % eMag
@@ -38,7 +38,7 @@ s/^            self->unk232 = 8;/            self->unk232 = 9;/ % e100
 /self->unk232 = 8;/,/}/s/^            self->unk102 = 1;/            self->unk102 = 2;/ % e100
 s/^        func_15052590(self);/        ;/ % e0
 s/^            if (self->unk28 > 30.0f) {/            if (self->unk28 > 60.0f) {/ % eGrab
-s/^                func_1505959C(\&D_800CC2D0\[D_800CC68D - 100\], D_800C3E78);/                func_1505959C(\&D_800CC2D0[D_800CC68D - 100], 1);/ % eGrab
+s/^                obj_attach_to_carrier(\&D_800CC2D0\[D_800CC68D - 100\], D_800C3E78);/                obj_attach_to_carrier(\&D_800CC2D0[D_800CC68D - 100], 1);/ % eGrab
 s/^                self->unk13C = D_800CC68D;/                self->unk13C = 1;/ % eGrab
 s/^            self->y_velocity = 23.0f;/            self->y_velocity = 24.0f;/ % eGrab0
 s/^        if (self->y_position < self->unk118) {/        if (self->y_position > self->unk118) {/ % eDive e0
@@ -55,7 +55,7 @@ s/ \&\& pl->health != 0 \&\& pl->unk28 == 0.0f/ \&\& pl->unk28 == 0.0f/ % m
 s/ \&\& pl->unk28 == 0.0f \&\& pl->unk232 != 0x21/ \&\& pl->unk232 != 0x21/ % m
 s/ \&\& pl->unk232 != 0x21 \&\&/ \&\& pl->unk232 != 0x22 \&\&/ % m
 s/^                (pl->id == 0x9C || pl->id == 0x9D)) {/                (pl->id == 0x9C || pl->id == 0x9E)) {/ % m
-s/^                d = func_1505A6F8(D_800D154C, pl);/                d = func_1505A6F8(self, pl);/ % m mFar
+s/^                d = obj_dist_xz(D_800D154C, pl);/                d = obj_dist_xz(self, pl);/ % m mFar
 s/^                if (d < best) {/                if (d <= best) {/ % m mEq
 s/^                    self->unk222 = i;/                    self->unk222 = i + 1;/ % m
 s/^                    best = d;/                    ;/ % m mBest
@@ -71,7 +71,7 @@ s/^    self->unkC4 = c4 + ((f32) ((s8 \*) D_800CC6A4)\[2\] - c4) \* (0.2f \* D_8
 s/^    self->unk7E = 0x19;/    self->unk7E = 0x18;/ % m
 s/ \* 0.04f \* ((100.0f - speed) \* 0.015f) \* 220.0f);/ * 0.04f * ((100.0f - speed) * 0.015f) * 200.0f);/ % m
 s/ \* 0.04f \* ((100.0f - speed) \* 0.015f)/ * 0.04f * ((90.0f - speed) * 0.015f)/ % m
-s/^    func_150599C8(self, 8, self->unk76);/    func_150599C8(self, 9, self->unk76);/ % m
+s/^    obj_turn_towards(self, 8, self->unk76);/    obj_turn_towards(self, 9, self->unk76);/ % m
 s/^    self->target_speed = 0.0f;/    self->target_speed = 1.0f;/ % m
 s/^    speed = 0.0f;/    speed = 0.5f;/ % m
 s/^        if (self->unk86 == 0) {/        if (self->unk86 != 0) {/ % mDive mSub
@@ -89,7 +89,7 @@ s/^            if (self->y_velocity < 0.0f) {/            if (self->y_velocity >
 s/^                self->target_speed -= self->y_velocity \* 0.6f;/                self->target_speed += self->y_velocity * 0.6f;/ % mA
 s/^            speed = 1.5f;/            speed = 1.25f;/ % mA
 s/^            rate = 0.3f;/            rate = 0.25f;/ % mA
-s/^    func_1505A3A8(self->target_speed, self, speed, rate, 1);/    func_1505A3A8(self->target_speed, self, speed, rate, 2);/ % m
+s/^    obj_approach_speed(self->target_speed, self, speed, rate, 1);/    obj_approach_speed(self->target_speed, self, speed, rate, 2);/ % m
 s/^    self->gravity = stick \* 0.000125f \* (200.0f - self->xz_velocity);/    self->gravity = stick * 0.000125f * (180.0f - self->xz_velocity);/ % m
 s/^        if (26.0f < self->y_velocity) {/        if (27.0f < self->y_velocity) {/ % mB8lo mA2 mV26
 s/^            self->y_velocity = 26.0f;/            self->y_velocity = 25.0f;/ % mB8lo mV26
@@ -122,7 +122,7 @@ s/^        floor_h = 50.0f;/        floor_h = 25.0f;/ % fC
 s/^        if (D_800CC68D != 0 \&\& self->unk13C == 0 \&\& D_800CC2D0\[D_800CC68D - 100\].unk28 == 0.0f) {/        if (D_800CC68D != 0 \&\& self->unk13C == 0 \&\& D_800CC2D0[D_800CC68D - 100].unk28 == 5.0f) {/ % mPick mPick2
 s/^            self->y_velocity = 20.0f;/            self->y_velocity = 21.0f;/ % mPick
 s/^            self->y_position = D_800CC2D0\[D_800CC68D - 100\].y_position + 70.0f;/            self->y_position = D_800CC2D0[D_800CC68D - 100].y_position + 60.0f;/ % mPick
-s/^            func_1505959C(\&D_800CC2D0\[D_800CC68D - 100\], D_800C3E78);/            func_1505959C(\&D_800CC2D0[D_800CC68D - 101], D_800C3E78);/ % mPick
+s/^            obj_attach_to_carrier(\&D_800CC2D0\[D_800CC68D - 100\], D_800C3E78);/            obj_attach_to_carrier(\&D_800CC2D0[D_800CC68D - 101], D_800C3E78);/ % mPick
 s/^            self->unk13C = D_800CC68D;/            self->unk13C = 101;/ % mPickD
 s/^            D_800D1580 = 0xFF010074;/            D_800D1580 = 0xFF010075;/ % mPick
 s/^            if (self->unk25C \& 2) {/            if (self->unk25C \& 4) {/ % mDrop
@@ -165,7 +165,7 @@ s/^        if (8.0f < fabsf(stick) || 7.0f < self->target_speed) {/        if (8
 s/^        if (8.0f < fabsf(stick) || 7.0f < self->target_speed) {/        if (8.0f < (stick) || 7.0f < self->target_speed) {/ % mSub fS
 s/^            anim_speed = 1.0f;/            anim_speed = 1.5f;/ % mSub
 s/^            anim_speed = 0.5f;/            anim_speed = 0.25f;/ % aSub
-s/^        anim_speed = func_150F3A20((s32) self, stick);/        anim_speed = func_150F3A20((s32) self, -stick);/ % m
+s/^        anim_speed = player_swim_anim_speed((s32) self, stick);/        anim_speed = player_swim_anim_speed((s32) self, -stick);/ % m
 s/^    anim = 0xF;/    anim = 0xE;/ % m
 s/^    if (40.0f < self->unkB8 \&\& 20.0f < stick) {/    if (40.0f < self->unkB8 \&\& 60.0f < stick) {/ % a11
 s/^        anim = 0x11;/        anim = 0x12;/ % a11
@@ -175,4 +175,4 @@ s/^    if (self->xz_velocity < 0.0f) {/    if (self->xz_velocity < -5.0f) {/ % a
 s/^        anim = 0x1F;/        anim = 0x1E;/ % a1F
 s/^        anim = 0x17;/        anim = 0x16;/ % mCarry
 s/^        anim_speed += 0.2f;/        anim_speed += 0.25f;/ % mCarry
-s/^    func_1505E650(self, anim, anim_speed, 9.0f, 0.0f, 0.0f, 0);/    func_1505E650(self, anim, anim_speed, 8.0f, 0.0f, 0.0f, 0);/ % m
+s/^    obj_start_anim(self, anim, anim_speed, 9.0f, 0.0f, 0.0f, 0);/    obj_start_anim(self, anim, anim_speed, 8.0f, 0.0f, 0.0f, 0);/ % m

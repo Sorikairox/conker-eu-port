@@ -23,7 +23,7 @@ s/        self->unk21C = old + (s16) (angle - old) \/ 3;/        self->unk21C = 
 s/        self->unk7A = old;/        self->unk7A = angle;/ % hS1
 s/        self->unk76 = old;/        self->unk76 = angle;/ % hS1
 s/        self->xz_velocity = pl->xz_velocity;/        self->xz_velocity = pl->unk44;/ % hS1
-s/            func_1505C7D8(self, D_800C3E78);/            func_1505C7D8(self, 0);/ % hS1
+s/            attack_hit_test(self, D_800C3E78);/            attack_hit_test(self, 0);/ % hS1
 s/        if (self->unkD0 != 0) {/        if (self->unkD0 == 0) {/ % h48 h48k
 s/        self->unk21C = self->unk7A;/        self->unk21C = self->unk76;/ % rel
 s/            if (D_800CC2D0\[slot\].stunned != 0) {/            if (D_800CC2D0[slot].stunned == 0) {/ % rel rel0
@@ -33,9 +33,9 @@ s/            self->unk13C = 0;/            self->unk13C = 1;/ % rel
 s/        slot = D_800C3E78;/        slot = self->unk124;/ % rel0
 s/        self->unk65 = 0;/        self->unk65 = 1;/ % loopX
 s/        self->unkE4 = self->unk90;/        self->unkE4 = 0;/ % loopX
-s/        func_1505A3A8(0.0f, self, 0.0f, 0.5f, 1);/        func_1505A3A8(0.0f, self, 0.0f, 0.25f, 1);/ % loopX
+s/        obj_approach_speed(0.0f, self, 0.0f, 0.5f, 1);/        obj_approach_speed(0.0f, self, 0.0f, 0.25f, 1);/ % loopX
 s/        self->stunned = 0x1E;/        self->stunned = 0x1F;/ % loopX
-/        self->stunned = 0x1E;/d;s/        func_15059140(self);/        func_15059140(self); self->stunned = 0x1E;/ % loopX
+/        self->stunned = 0x1E;/d;s/        obj_physics_step(self);/        obj_physics_step(self); self->stunned = 0x1E;/ % loopX
 /        self->xz_velocity = vel;/d % loopX
 s/        turn = (self->unkC4 - self->unk44) \* 0.8f;/        turn = (self->unkC4 - self->unk44) * 0.7f;/ % loopX
 s/        if (self->unk232 == 4) {/        if (self->unk232 == 5) {/ % land loopX
@@ -64,7 +64,7 @@ s/top + 10.0f, 1.2f, top, -1.1f, 4.0f, -4.0f);/top + 10.0f, 1.2f, top, -1.2f, 4.
 s/                D_800CC2D0\[self->unk124\].unkCC = 0x1E;/                D_800CC2D0[self->unk124].unkCC = 0x1F;/ % h48
 s/            self->unkC4 = -self->y_velocity;/            self->unkC4 = self->y_velocity;/ % h48
 s/            self->unk40 = (f32) self->unk7A \* 0.0054931640625f;/            self->unk40 = (f32) self->unk7A * 0.0055f;/ % h48
-s/        func_1506B100(0, 2.0f, 4.0f);/        func_1506B100(0, 2.0f, 3.0f);/ % hi
+s/        objev_play_anim(0, 2.0f, 4.0f);/        objev_play_anim(0, 2.0f, 3.0f);/ % hi
 s/        if (self->unk28 > 75.0f) {/        if (self->unk28 > 85.0f) {/ % hi
 s/            if (self->unk102 < 30) {/            if (self->unk102 < 31) {/ % hi30
 s/                self->unk102++;/                self->unk102 += 2;/ % hi

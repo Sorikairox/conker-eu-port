@@ -27,7 +27,7 @@
 \#^    g.u45 = 0xFF;$#s/0xFF/0/ % all
 \#^    g.u47 = 7;$#s/7/6/ % all
 \#^    g.u48 = 0;$#d % all
-\#^    v = (func_150ADA20() & 1) ? 2 : 0;$#s/2 : 0/1 : 0/ % all
+\#^    v = (random_int() & 1) ? 2 : 0;$#s/2 : 0/1 : 0/ % all
 \#^    e = effect3d_spawn_full(&g#s/0x1D/0x1E/ % all
 \#^    e = effect3d_spawn_full(&g#s/0x5C, arg1/0x5C, 0/ % all
 \#^    l->glow = e;$#d % noglow

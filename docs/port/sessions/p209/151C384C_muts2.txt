@@ -1,3 +1,3 @@
 s/req.angle\[1\] = 0.0f;/req.angle[1] = 1.0f;/ %
-s/\(flash.unk2 = func_150ADA20() . 7U + \)6;/\15;/ %
-s/\(req.life = func_150ADA20() . 7U + \)6;/\17;/ %
+s/\(flash.unk2 = random_int() . 7U + \)6;/\15;/ %
+s/\(req.life = random_int() . 7U + \)6;/\17;/ %

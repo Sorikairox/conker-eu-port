@@ -89,8 +89,8 @@
 167s/} else if (bit == 0x800) {/} else if (bit == 0x1000) {/ % ch11
 168s/D_800E9D00 \&= ~0x400;/D_800E9D00 \&= ~0x600;/ % ch11
 170s/kind = 0x10;/kind = 0x11;/ % ch10
-171s/sfx = (func_150ADA20() \& 1) + 0xC3;/sfx = (func_150ADA20() \& 3) + 0xC3;/ % ch3
-171s/sfx = (func_150ADA20() \& 1) + 0xC3;/sfx = (func_150ADA20() \& 1) + 0xC4;/ % ch10
+171s/sfx = (random_int() \& 1) + 0xC3;/sfx = (random_int() \& 3) + 0xC3;/ % ch3
+171s/sfx = (random_int() \& 1) + 0xC3;/sfx = (random_int() \& 1) + 0xC4;/ % ch10
 174s/kind = 0x11;/kind = 0x10;/ % rep0
 175s/for (i = 0xA3; i < 0xC8 \&\& sfx == 0; i++) {/for (i = 0xA3; i < 0xC7 \&\& sfx == 0; i++) {/ % phlast phmulti
 175s/for (i = 0xA3; i < 0xC8 \&\& sfx == 0; i++) {/for (i = 0xA4; i < 0xC8 \&\& sfx == 0; i++) {/ % pha3
@@ -105,12 +105,12 @@
 186s/if (pat\[n\] == '\\0' \&\& (\*in == ' ' || \*in == '\\0')) {/if (*in == ' ' || *in == '\\0') {/ % rep0
 186s/if (pat\[n\] == '\\0' \&\& (\*in == ' ' || \*in == '\\0')) {/if (pat[n] == '\\0') {/ % phword phsp2
 187s/in = NULL;/in = in;/ % phtwice
-188s/sfx = (func_150ADA20() \& 1) + 0xC1;/sfx = (func_150ADA20() \& 1) + 0xC2;/ % phend phsp
-188s/sfx = (func_150ADA20() \& 1) + 0xC1;/sfx = 0xC1;/ % phsp
+188s/sfx = (random_int() \& 1) + 0xC1;/sfx = (random_int() \& 1) + 0xC2;/ % phend phsp
+188s/sfx = (random_int() \& 1) + 0xC1;/sfx = 0xC1;/ % phsp
 190s/in++;/in += 2;/ % phsp2 phlast
 192s/while (\*in != '\\0' \&\& \*in != ' ') {/while (*in != '\\0') {/ % phlast phend
 204s/if (sfx == 0) {/if (sfx != 0) {/ % phend rep0
-205s/sfx = (func_150ADA20() \& 1) + 0xC5;/sfx = (func_150ADA20() \& 1) + 0xC6;/ % repdiff rep1
+205s/sfx = (random_int() \& 1) + 0xC5;/sfx = (random_int() \& 1) + 0xC6;/ % repdiff rep1
 206s/text = D_800E10AC;/text = D_800E10AC + 1;/ % repoff
 208s/while (text\[n + 0x20\] != '\\0' \&\& text\[n\] != '\\0' \&\& text\[n + 0x20\] == text\[n\]) {/while (text[n + 0x20] != '\\0' \&\& text[n] != '\\0' \&\& text[n + 0x20] == text[n + 1]) {/ % rep0
 208s/while (text\[n + 0x20\] != '\\0' \&\& text\[n\] != '\\0' \&\& text\[n + 0x20\] == text\[n\]) {/while (text[n + 0x1F] != '\\0' \&\& text[n] != '\\0' \&\& text[n + 0x20] == text[n]) {/ % rep0 reppre
@@ -132,9 +132,9 @@
 235s/D_800C3E78 = ((u8 \*) obj - (u8 \*) D_800CC2D0) \/ 0x32C;/D_800C3E78 = ((u8 *) obj - (u8 *) D_800CC2D0) \/ 0x300;/ % ch10
 235s/D_800C3E78 = ((u8 \*) obj - (u8 \*) D_800CC2D0) \/ 0x32C;/D_800C3E78 = ((u8 *) obj - ((u8 *) D_800CC2D0 + 4)) \/ 0x32C;/ % ch10
 235s/D_800C3E78 = ((u8 \*) obj - (u8 \*) D_800CC2D0) \/ 0x32C;/D_800C3E78 = ((u8 *) obj - (u8 *) D_800CC2D0 + 0x32C) \/ 0x32C;/ % ch10 chobj
-236s/obj->unk218 = (struct216 \*) func_1507BB28(0, obj->unk232);/obj->unk218 = (struct216 *) func_1507BB28(1, obj->unk232);/ % ch10
-236s/obj->unk218 = (struct216 \*) func_1507BB28(0, obj->unk232);/obj->unk218 = (struct216 *) func_1507BB28(0, 0x10);/ % rep0
-236s/obj->unk218 = (struct216 \*) func_1507BB28(0, obj->unk232);/func_1507BB28(0, obj->unk232);/ % ch10
+236s/obj->unk218 = (struct216 \*) aiscript_find_by_kind(0, obj->unk232);/obj->unk218 = (struct216 *) aiscript_find_by_kind(1, obj->unk232);/ % ch10
+236s/obj->unk218 = (struct216 \*) aiscript_find_by_kind(0, obj->unk232);/obj->unk218 = (struct216 *) aiscript_find_by_kind(0, 0x10);/ % rep0
+236s/obj->unk218 = (struct216 \*) aiscript_find_by_kind(0, obj->unk232);/aiscript_find_by_kind(0, obj->unk232);/ % ch10
 237s/obj->unk21C = 0;/obj->unk21C = 1;/ % ch10
 239s/D_800E10B3 = 0;/D_800E10B3 = 1;/ % ch10
 240s/D_800E10AC\[D_800E10B3\] = '\\0';/D_800E10AC[1] = '\\0';/ % ch10
@@ -145,16 +145,16 @@
 246s/if (D_800E10B3 < 19) {/if (D_800E10B3 < 20) {/ % sel19
 247s/D_800E10B3++;/D_800E10B3 += 2;/ % selP
 249s/D_800E10AC\[D_800E10B3\] = '\\0';/D_800E10AC[D_800E10B3] = 'A';/ % selP
-254s/func_15043E68(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/func_15043E68(mtx, -30.0f, -10.0f, 0.0f, -115.0f, 10.0f, -530.00006f);/ % idle
-254s/func_15043E68(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/func_15043E68(mtx, -30.000002f, -10.0f, 0.0f, -115.0f, 10.0f, -530.0f);/ % idle
-254s/func_15043E68(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/func_15043E68(mtx, -30.0f, -10.000001f, 0.0f, -115.0f, 10.0f, -530.0f);/ % idle
-254s/func_15043E68(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/func_15043E68(mtx, -30.0f, -10.0f, 0.0f, -115.00001f, 10.0f, -530.0f);/ % idle
-254s/func_15043E68(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/func_15043E68(mtx, -30.0f, -10.0f, 0.0f, -115.0f, 10.000001f, -530.0f);/ % idle
-254s/func_15043E68(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/func_15043E68(mtx, -30.0f, -10.0f, 1.0f, -115.0f, 10.0f, -530.0f);/ % idle
-255s/func_150A7D00(mtx + 1, 0\.0f, 0\.0f, -(f32) D_800E10B2);/func_150A7D00(mtx, 0.0f, 0.0f, -(f32) D_800E10B2);/ % idle
-255s/func_150A7D00(mtx + 1, 0\.0f, 0\.0f, -(f32) D_800E10B2);/func_150A7D00(mtx + 1, 0.0f, 0.0f, (f32) D_800E10B2);/ % idle
-255s/func_150A7D00(mtx + 1, 0\.0f, 0\.0f, -(f32) D_800E10B2);/func_150A7D00(mtx + 1, 0.0f, 1.0f, -(f32) D_800E10B2);/ % idle
-255s/func_150A7D00(mtx + 1, 0\.0f, 0\.0f, -(f32) D_800E10B2);/func_150A7D00(mtx + 1, 1.0f, 0.0f, -(f32) D_800E10B2);/ % idle
+254s/mtx_build_rot_trans(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/mtx_build_rot_trans(mtx, -30.0f, -10.0f, 0.0f, -115.0f, 10.0f, -530.00006f);/ % idle
+254s/mtx_build_rot_trans(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/mtx_build_rot_trans(mtx, -30.000002f, -10.0f, 0.0f, -115.0f, 10.0f, -530.0f);/ % idle
+254s/mtx_build_rot_trans(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/mtx_build_rot_trans(mtx, -30.0f, -10.000001f, 0.0f, -115.0f, 10.0f, -530.0f);/ % idle
+254s/mtx_build_rot_trans(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/mtx_build_rot_trans(mtx, -30.0f, -10.0f, 0.0f, -115.00001f, 10.0f, -530.0f);/ % idle
+254s/mtx_build_rot_trans(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/mtx_build_rot_trans(mtx, -30.0f, -10.0f, 0.0f, -115.0f, 10.000001f, -530.0f);/ % idle
+254s/mtx_build_rot_trans(mtx, -30\.0f, -10\.0f, 0\.0f, -115\.0f, 10\.0f, -530\.0f);/mtx_build_rot_trans(mtx, -30.0f, -10.0f, 1.0f, -115.0f, 10.0f, -530.0f);/ % idle
+255s/mtx_translate_fixed(mtx + 1, 0\.0f, 0\.0f, -(f32) D_800E10B2);/mtx_translate_fixed(mtx, 0.0f, 0.0f, -(f32) D_800E10B2);/ % idle
+255s/mtx_translate_fixed(mtx + 1, 0\.0f, 0\.0f, -(f32) D_800E10B2);/mtx_translate_fixed(mtx + 1, 0.0f, 0.0f, (f32) D_800E10B2);/ % idle
+255s/mtx_translate_fixed(mtx + 1, 0\.0f, 0\.0f, -(f32) D_800E10B2);/mtx_translate_fixed(mtx + 1, 0.0f, 1.0f, -(f32) D_800E10B2);/ % idle
+255s/mtx_translate_fixed(mtx + 1, 0\.0f, 0\.0f, -(f32) D_800E10B2);/mtx_translate_fixed(mtx + 1, 1.0f, 0.0f, -(f32) D_800E10B2);/ % idle
 256s/guPerspective((Mtx \*) \&D_800E1068, \&persp, 50\.0f, 60\.6f, 53\.0f, 20000\.0f, 1\.0f);/guPerspective((Mtx *) \&D_800E1068, \&persp, 50.0f, 60.600002f, 53.0f, 20000.0f, 1.0f);/ % idle
 256s/guPerspective((Mtx \*) \&D_800E1068, \&persp, 50\.0f, 60\.6f, 53\.0f, 20000\.0f, 1\.0f);/guPerspective((Mtx *) \&D_800E1068, \&persp, 50.000004f, 60.6f, 53.0f, 20000.0f, 1.0f);/ % idle
 256s/guPerspective((Mtx \*) \&D_800E1068, \&persp, 50\.0f, 60\.6f, 53\.0f, 20000\.0f, 1\.0f);/guPerspective((Mtx *) \&D_800E1068, \&persp, 50.0f, 60.6f, 53.000004f, 20000.0f, 1.0f);/ % idle
@@ -175,16 +175,16 @@
 270s/gSPDisplayList(gdl++, \*(Gfx \*\*) (D_800904E8 + off));/gSPDisplayList(gdl++, *(Gfx **) (D_800904E8 + off + 4));/ % idle
 271s/if (off == sel \* 12) {/if (off != sel * 12) {/ % idle
 272s/gSPMatrix(gdl++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);/gSPMatrix(gdl++, mtx, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);/ % idle
-277s/func_1504332C(0xFF, 0xB1, 0x1E, D_800E0EC5);/func_1504332C(0xFF, 0xB1, 0x1F, D_800E0EC5);/ % idle
+277s/text_set_color(0xFF, 0xB1, 0x1E, D_800E0EC5);/text_set_color(0xFF, 0xB1, 0x1F, D_800E0EC5);/ % idle
 278s/func_15042BC4(D_800E10AC, \&w, \&h, \&d);/func_15042BC4(D_800E10AC, \&h, \&w, \&d);/ % idle
 279s/x = 75 - (w >> 1);/x = 76 - (w >> 1);/ % idle
 279s/x = 75 - (w >> 1);/x = 75 - (w >> 2);/ % idle
 280s/if (x < 10) {/if (x < 9) {/ % w132
 281s/x = 10;/x = 11;/ % wide
-283s/func_15042D94(x, 180, 0x80, D_800E10AC);/func_15042D94(x, 181, 0x80, D_800E10AC);/ % idle
+283s/text_printf_at(x, 180, 0x80, D_800E10AC);/text_printf_at(x, 181, 0x80, D_800E10AC);/ % idle
 284s/if ((D_800BEDCC \& 0x1F) >= 10) {/if ((D_800BEDCC \& 0x1F) >= 11) {/ % idle
 284s/if ((D_800BEDCC \& 0x1F) >= 10) {/if ((D_800BEDCC \& 0x1F) >= 9) {/ % blink
 284s/if ((D_800BEDCC \& 0x1F) >= 10) {/if ((D_800BEDCC \& 0x3F) >= 10) {/ % wide
 285s/w = x + w + 2;/w = x + w + 3;/ % idle
-286s/func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);/func_1504332C(0xFF, 0xFF, 0xFF, 0xFE);/ % idle
-287s/func_15042D94(w, 180, 0x80, D_800ABEE4);/func_15042D94(w, 180, 0x80, D_800E10AC);/ % idle
+286s/text_set_color(0xFF, 0xFF, 0xFF, 0xFF);/text_set_color(0xFF, 0xFF, 0xFF, 0xFE);/ % idle
+287s/text_printf_at(w, 180, 0x80, D_800ABEE4);/text_printf_at(w, 180, 0x80, D_800E10AC);/ % idle

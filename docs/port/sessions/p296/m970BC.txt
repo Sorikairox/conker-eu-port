@@ -28,8 +28,8 @@
 \#^        pt->u1C = rec->u53;#s/u53/u54/
 \#^        pt->alpha = 0xFF;#s/0xFF/0xFE/
 \#^        pt->seed = rec->u50;#s/u50/u51/
-\#^        rec->u50 = rec->u50 + func_150ADA20() . 6U + 3;#s/6U/7U/
-\#^        rec->u50 = rec->u50 + func_150ADA20() . 6U + 3;#s/+ 3;/+ 2;/
+\#^        rec->u50 = rec->u50 + random_int() . 6U + 3;#s/6U/7U/
+\#^        rec->u50 = rec->u50 + random_int() . 6U + 3;#s/+ 3;/+ 2;/
 \#^        pt->vel.y += rec->u40 \* time;#s/vel.y/vel.x/
 \#^        pt->pos.y += pt->vel.y \* time;#s/\* time/* timeStep/
 \#^        time -= timeStep;#s/-=/+=/

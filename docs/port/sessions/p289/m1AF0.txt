@@ -24,10 +24,10 @@
 \#^        if (best == -1 || score < bestScore#s/best == -1 || //
 \#^            bestScore = score;$#s/score;/i;/
 \#^    if (best != -1) {$#s/-1/0/
-\#^        ret = func_1505D1C4(obj->x_position#s/ + (f32)obj->unkD6//
-\#^        ret = func_1505D1C4(obj->x_position#s/kind, D_800C3E78, 0,/kind, best, 0,/
-\#^        ret = func_1505D1C4(obj->x_position#s/D_800C3E78, 0,/D_800C3E78, 1,/
-\#^        ret = func_1505D1C4(obj->x_position#s/ret = //
+\#^        ret = attack_spawn_at_point(obj->x_position#s/ + (f32)obj->unkD6//
+\#^        ret = attack_spawn_at_point(obj->x_position#s/kind, D_800C3E78, 0,/kind, best, 0,/
+\#^        ret = attack_spawn_at_point(obj->x_position#s/D_800C3E78, 0,/D_800C3E78, 1,/
+\#^        ret = attack_spawn_at_point(obj->x_position#s/ret = //
 \#^        obj->unk76 = self->unk76;$#s/self->unk76/obj->unk76 + 1/
 \#^        obj->unk76 = self->unk76;$#s/^.*$//
 \#^        obj = &D_800CC2D0\[best\];$#s/best/best + 1/

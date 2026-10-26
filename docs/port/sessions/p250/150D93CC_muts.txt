@@ -1,4 +1,4 @@
-# P250 func_150D93CC (path_points_catch_up) mutants: sed % setup names
+# P250 path_points_catch_up (path_points_catch_up) mutants: sed % setup names
 s/(p + 0x2C) < 2 \&\&/(p + 0x2C) < 3 \&\&/ % flag2
 s/(p + 0x1E) \& 8))/(p + 0x1E) \& 4))/ % skip
 s/^        return 0;$/        return 2;/ % skip

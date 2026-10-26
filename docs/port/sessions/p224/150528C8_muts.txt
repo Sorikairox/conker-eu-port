@@ -27,12 +27,12 @@ s/if (D_800BE9E4 < timer) {/if (D_800BE9E4 <= timer) {/
 s/= timer - D_800BE9E4;/= timer - 1;/
 s/OBJ_F32(o, 0x3C) = 254.0f;/OBJ_F32(o, 0x3C) = 255.0f;/
 s/(ctl + 0x8C) \& 0x2000)/(ctl + 0x8C) \& 0x4000)/
-s/func_150D7CA0(arg0, ctl\[0x75\] \& 0x7F);/func_150D7CA0(arg0, ctl[0x75]);/
+s/obj_fire_weapon_kind(arg0, ctl\[0x75\] \& 0x7F);/obj_fire_weapon_kind(arg0, ctl[0x75]);/
 s/if (30.0f < v) {/if (31.0f < v) {/
 s/(v - OBJ_F32(o, 0xB8)) \* D_80099714;/(v - OBJ_F32(o, 0xB8)) * D_8009971C;/
 s/if (snap != 2 \&\& bob != 0) {/if (bob != 0) {/
 s/amp = (f32) bob \* D_80099718;/amp = (f32) bob * D_80099714;/
-s/func_15058EA4(arg0, target, amp, target, -amp, radius, -radius);/func_15058EA4(arg0, target, amp, target, amp, radius, -radius);/
+s/obj_set_gravity_band(arg0, target, amp, target, -amp, radius, -radius);/obj_set_gravity_band(arg0, target, amp, target, amp, radius, -radius);/
 s/o\[4\] != 0x49 \&\&/o[4] != 0x48 \&\&/
 s/(o + 0x22C) \& 8)) {/(o + 0x22C) \& 4)) {/
 s/OBJ_F32(o, 0x20) \* -2.5f/OBJ_F32(o, 0x20) * -2.0f/

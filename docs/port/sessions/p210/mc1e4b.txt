@@ -8,15 +8,15 @@ s/                        self->unkD0 = 0;$/                        self->unkD0 
 s/D_80086A34\[handler\](self, obj, scratch);/D_80086A34[handler](obj, obj, scratch);/
 s/u8 handler = desc->handler;/u8 handler = desc->handler + 1;/
 s/if (obj->unkFC != 0) {/if (obj->unkFC == 0) {/
-s/if (func_1506E46C(self, \&effect, 1) != 0) {/if (func_1506E46C(self, \&effect, 0) != 0) {/
-s/func_15060B04(effect, obj, 0x5DC0);/func_15060B04(effect, self, 0x5DC0);/
+s/if (sound_word_resolve(self, \&effect, 1) != 0) {/if (sound_word_resolve(self, \&effect, 0) != 0) {/
+s/obj_sfx_play_vol(effect, obj, 0x5DC0);/obj_sfx_play_vol(effect, self, 0x5DC0);/
 s/D_800D1580 = desc->sound;/D_800D1580 = desc->sound + 1;/
 s/                    if (desc->sound != 0) {/                    if (desc->sound == 0) {/
 s/hits |= 1 << ((slot - 1) \& 0x1F);/hits |= 1 << (slot \& 0x1F);/
 s/                    continue; \/\* failed/                    break; \/* failed/
 s/        return hits;/        return 0;/
-s/func_1505B9C4(self, obj, (s32)descs, (s32)tbl, idx, slot, mask);/func_1505B9C4(self, obj, (s32)tbl, (s32)tbl, idx, slot, mask);/
-s/func_1505B9C4(self, obj, (s32)descs, (s32)tbl, idx, slot, mask);/func_1505B9C4(self, obj, (s32)descs, (s32)tbl, idx, slot, 7);/
+s/obj_apply_hit(self, obj, (s32)descs, (s32)tbl, idx, slot, mask);/obj_apply_hit(self, obj, (s32)tbl, (s32)tbl, idx, slot, mask);/
+s/obj_apply_hit(self, obj, (s32)descs, (s32)tbl, idx, slot, mask);/obj_apply_hit(self, obj, (s32)descs, (s32)tbl, idx, slot, 7);/
 s/return hits | (1 << ((slot - 1) \& 0x1F));/return hits | (1 << (slot \& 0x1F));/
 s/                case 9:/                case 99:/
 s/                case 2:/                case 22:/

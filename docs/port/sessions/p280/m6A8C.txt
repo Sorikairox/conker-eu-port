@@ -1,6 +1,6 @@
 \#^    if (!(obj\[0x4F\] & 4)) {$#s/& 4/\& 2/ % push
-\#^        push = func_15116E08(#s/>> 3/>> 2/ % push
-\#^        push = func_15116E08(#s/0x7C/0x78/ % push
+\#^        push = scenery_push_strength(#s/>> 3/>> 2/ % push
+\#^        push = scenery_push_strength(#s/0x7C/0x78/ % push
 \#^    if ((flags & 1) && push < 0) {$#s/push < 0/push <= 0/ % pushnf pushclamp push
 \#^    if ((flags & 1) && push < 0) {$#s/(flags \& 1) \&\& //  % pushnf
 \#^    if (push != 0) {$#s/!=/==/ % push

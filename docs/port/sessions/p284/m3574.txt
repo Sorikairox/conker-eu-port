@@ -1,19 +1,19 @@
 \#^    scale = 0.5f;$#s/0.5f/0.6f/
 \#^    obj->unk80 = 10;$#s/10/11/
 \#^    if (obj->id == 0x25) {$#s/0x25/0x26/
-\#^        func_1505A250(0.0f, 0.0f, 0.15f, &obj->unk164, &obj->unk168);$#s/0.15f/0.16f/
-\#^        func_1505A250(0.0f, 0.0f, 0.15f, &obj->unk164, &obj->unk168);$#s/&obj->unk164, &obj->unk168/\&obj->unk168, \&obj->unk164/
+\#^        move_xz_towards(0.0f, 0.0f, 0.15f, &obj->unk164, &obj->unk168);$#s/0.15f/0.16f/
+\#^        move_xz_towards(0.0f, 0.0f, 0.15f, &obj->unk164, &obj->unk168);$#s/&obj->unk164, &obj->unk168/\&obj->unk168, \&obj->unk164/
 \#^        friction = 0.1f;$#s/0.1f/0.25f/
 \#^        if (obj->unk87 & 1) {$#s/& 1/\& 2/
 \#^            obj->unk224 = (s32) obj->y_position;$#s/y_position/x_position/
 \#^        obj->unk160 = 0;$#s/0;/1;/
 \#^        friction = 0.25f;$#s/0.25f/0.1f/
-\#^    func_1505A3A8(0.0f, obj, 2.0f, friction, 0);$#s/2.0f/1.0f/
+\#^    obj_approach_speed(0.0f, obj, 2.0f, friction, 0);$#s/2.0f/1.0f/
 \#^    obj->gravity = 3.0f;$#s/3.0f/2.0f/
 \#^        scale = 0.375f;$#s/0.375f/0.5f/
 \#^        scale = 1.5f;$#s/1.5f/1.25f/
 \#^    scale \*= 0.75f;$#s/0.75f/0.5f/
-\#^        func_150562FC(obj);$#s/func_150562FC(obj);//
+\#^        obj_carried_update(obj);$#s/obj_carried_update(obj);//
 \#^    obj->unkBC = (obj->x_position - obj->old_x_position) \* D_800BEDC8;$#s/ \* D_800BEDC8//
 \#^    obj->unk148 = (obj->z_position - obj->old_z_position) \* D_800BEDC8;$#s/old_z_position/old_x_position/
 \#^    d = sqrtf(obj->unkBC \* obj->unkBC + obj->unk148 \* obj->unk148);$#s/+ obj->unk148 \* obj->unk148//
@@ -29,10 +29,10 @@
 \#^        flags = obj->unk87;$#s/flags = obj->unk87;//
 \#^    obj->unk87 = flags << 1;$#s/<< 1/<< 2/
 \#^    if (0.5f < d && obj->unk13D == 0) {$#s/0.5f/0.25f/
-\#^        obj->unk78 = func_1505A630(obj->x_position - obj->old_x_position, obj->old_z_position - obj->z_position, 0);$#s/obj->old_z_position - obj->z_position/obj->z_position - obj->old_z_position/
+\#^        obj->unk78 = math_atan2_u16(obj->x_position - obj->old_x_position, obj->old_z_position - obj->z_position, 0);$#s/obj->old_z_position - obj->z_position/obj->z_position - obj->old_z_position/
 \#^    if ((obj->unk7A - heading - 0x4000) & 0x8000) {$#s/- 0x4000/+ 0x4000/
-\#^        func_150599C8(obj, 2, heading ^ 0x8000);$#s/heading ^ 0x8000/heading/
-\#^        func_150599C8(obj, 2, heading);$#s/2,/3,/
+\#^        obj_turn_towards(obj, 2, heading ^ 0x8000);$#s/heading ^ 0x8000/heading/
+\#^        obj_turn_towards(obj, 2, heading);$#s/2,/3,/
 \#^    if (30.0f < obj->unk28) {$#s/30.0f/31.0f/
 \#^        obj->unk44 \*= 0.9f;$#s/0.9f/0.8f/
 \#^        obj->unk44 = d + d;$#s/d + d/d/

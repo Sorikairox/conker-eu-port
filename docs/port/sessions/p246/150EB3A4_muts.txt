@@ -1,4 +1,4 @@
-# P246 func_150EB3A4 (drifting_sprite_update) mutants: sed % setup names
+# P246 fx_drifting_sprite_update (drifting_sprite_update) mutants: sed % setup names
 s/(o + 0x20) \* D_800BE9A4/(o + 0x24) * D_800BE9A4/ % hit
 s/(o + 0x24) \* D_800BE9A4/(o + 0x20) * D_800BE9A4/ % hit
 s/pt\[1\] = \*(f32 \*) (o + 0x28)/pt[1] = *(f32 *) (o + 0x2C)/ % hit

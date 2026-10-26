@@ -17,7 +17,7 @@
 \#^    func_1514CBE8(pos\[0\], pos\[1\], pos\[2\], size \* 50#s/right, left/left, right/
 \#^    probe\[1\] = pos\[1\] + 100\.0f;#s/100/50/
 \#^    if (func_15046F70(probe, 0, #s/- 100/+ 100/
-\#^        size = func_150ADA68() \* 200#s/+ 200\.0f/+ 100.0f/
+\#^        size = random_float() \* 200#s/+ 200\.0f/+ 100.0f/
 \#^        spr\.type = 0x2A;#s/0x2A/0x2B/
 \#^        spr\.tex = 0x7340;#s/0x7340/0x7341/
 \#^        spr\.life = 300;#s/300/301/

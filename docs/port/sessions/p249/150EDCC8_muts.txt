@@ -1,4 +1,4 @@
-# P249 func_150EDCC8 (tank_update) mutants: sed % setup names
+# P249 tank_update (tank_update) mutants: sed % setup names
 s/aimer = (D_800BE616 != 0) ? ob\[0x127\] : 0;/aimer = (D_800BE616 != 0) ? ob[0x127] : 1;/ % sp_boost auto_sp
 s/    ob\[0x2FC\] = 0;/    ob[0x2FC] = 1;/ % sp_boost
 s/heading0 = \*(u16 \*) (ob + 0x7A);/heading0 = *(u16 *) (ob + 0x78);/ % sp_steer sp_boost
@@ -36,7 +36,7 @@ s/btn < 2 \&\& D_800E0FFE/btn < 1 \&\& D_800E0FFE/ % mp_view
 s/btn = D_800E0FFE\[player\];/btn = 0;/ % mp_view
 s/if (D_800BEB30\[btn\] \& 0x2000) {/if (D_800BEB30[btn] \& 0x1000) {/ % sp_boost
 s/(ob + 0x21C) = 0;/(ob + 0x21C) = 1;/ % sp_boost
-s/func_1507BB28(0, 2);/func_1507BB28(0, 3);/ % sp_boost
+s/aiscript_find_by_kind(0, 2);/aiscript_find_by_kind(0, 3);/ % sp_boost
 s/^            gain = 0.0f;$/            gain = 0.5f;/ % sp_brake
 s/o->disable_run--;/o->disable_run -= 2;/ % sp_brake
 s/PAD(player)\[3\] \* gain;/PAD(player)[2] * gain;/ % sp_boost sp_steer
@@ -57,7 +57,7 @@ s/(u8 \*) tgt + 0x44) > 15.0f/(u8 *) tgt + 0x44) > 25.0f/ % squash
 s/tgt->y_velocity > 10.0f/tgt->y_velocity > 13.0f/ % squash
 s/func_1505327C(o, 68.0f, 4.0f, 0xD, 5);/func_1505327C(o, 68.0f, 4.0f, 0xD, 6);/ % squash
 s/(u8 \*) tgt + 0x28) > 70.0f/(u8 *) tgt + 0x28) > 90.0f/ % bounce
-s/func_1505A6F8(tgt, o) < 100.0f/func_1505A6F8(tgt, o) < 300.0f/ % bounce_far
+s/obj_dist_xz(tgt, o) < 100.0f/obj_dist_xz(tgt, o) < 300.0f/ % bounce_far
 s/0x10, 0xFF, 0, 1, 0);/0x10, 0xFF, 0, 0, 0);/ % bounce
 s/turn = (s16) (\*(u16 \*) (ob + 0x7A) - heading0) \/ 70;/turn = (s16) (*(u16 *) (ob + 0x7A) - heading0) \/ 64;/ % sp_turn sp_steer
 s/if (fabsf(\*(f32 \*) (ob + 0x44)) > 4.0f) {/if (fabsf(*(f32 *) (ob + 0x44)) > 7.0f) {/ % sp_boost dead
@@ -76,7 +76,7 @@ s/s8 k = (s8) TANK_PART(o)\[0x129\];/s8 k = (s8) TANK_PART(o)[0x12A];/ % auto
 s/lead = tgt->xz_velocity \* (sqrtf(dx \* dx + dz \* dz) \/ 200.0f);/lead = tgt->xz_velocity * (sqrtf(dx * dx + dz * dz) \/ 100.0f);/ % auto
 s/rad = \*(f32 \*) ((u8 \*) tgt + 0x40) \* 0.017453292f;/rad = *(f32 *) ((u8 *) tgt + 0x3C) * 0.017453292f;/ % auto
 s/tgt->z_position += sz;/tgt->z_position += sx;/ % auto
-s/ang = func_150ED7B4(ob, (u8 \*) tgt) \* 0.017453292f;/ang = func_150ED7B4((u8 *) tgt, ob) * 0.017453292f;/ % auto
+s/ang = tank_yaw_offset_to_obj(ob, (u8 \*) tgt) \* 0.017453292f;/ang = tank_yaw_offset_to_obj((u8 *) tgt, ob) * 0.017453292f;/ % auto
 s/ry = cosf(\*(f32 \*) (ob + 0xC4)/ry = cosf(*(f32 *) (ob + 0xB8)/ % auto
 s/h = func_150484A0(ry \* 1000.0f,/h = func_150484A0(ry * 100.0f,/ % auto
 s/sy = lv \* 400.0f;/sy = lv * 40.0f;/ % auto

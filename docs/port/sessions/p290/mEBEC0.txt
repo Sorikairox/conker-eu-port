@@ -13,14 +13,14 @@ s/dir\[0\], dir\[1\], dir\[2\], 0, 0, &hitX/dir[0], dir[2], dir[1], 0, 0, \&hitX
 s/&hitX, &hitY, &hitZ, 0, 0, 0, 0.0f)/\&hitX, \&hitZ, \&hitY, 0, 0, 0, 0.0f)/
 s/&hitX, &hitY, &hitZ, 0, 0, 0, 0.0f)/\&hitX, \&hitY, \&hitZ, 0, 0, 1, 0.0f)/
 s/func_15143874(ri & 0xFF,/func_15143874(ri \& 0x7F,/
-s/func_150ADA68() \* 80.0f/func_150ADA68() * 40.0f/
+s/random_float() \* 80.0f/random_float() * 40.0f/
 s/hitX += offX;/hitX += offZ;/
 s/hitZ += offZ;/hitZ -= offZ;/
 s/aim\[1\] = hitY - muzzle\[1\];/aim[1] = hitY - muzzle[2];/
 s/aim\[2\] = hitZ - muzzle\[2\];/aim[2] = hitZ;/
 s/        tracerDir = aim;/        tracerDir = dir;/
-s/    r2 = func_150ADA68();/    r2 = r1;/
-s/    func_150ADA20();$/    ;/
+s/    r2 = random_float();/    r2 = r1;/
+s/    random_int();$/    ;/
 s/0, 0, 130.0f, D_800A191C, r1 \* 18.0f + 29.0f,/0, 0, 130.0f, D_800A191C, r2 * 18.0f + 29.0f,/
 s/0, 0, 130.0f, D_800A191C, r1 \* 18.0f + 29.0f,/0, 0, 120.0f, D_800A191C, r1 * 18.0f + 29.0f,/
 s/r2 \* 400.0f + 262.0f, 100.0f, 0xFF, obj,/r2 * 400.0f + 262.0f, 100.0f, 0xFF, NULL,/
@@ -36,11 +36,11 @@ s/flash.flags = 0;/flash.flags = 1;/
 s/flashPos\[1\] = muzzle\[1\];/flashPos[1] = muzzle[2];/
 s/13 + 0x5A, 0xFF,/13 + 0x5B, 0xFF,/
 s/                  0, room, owner);/                  0, owner, owner);/
-s/smoke\[1\] = (func_150ADA68() \* D_800A1920 + D_800A1924)/smoke[1] = (func_150ADA68() * D_800A1920 + D_800A1920)/
+s/smoke\[1\] = (random_float() \* D_800A1920 + D_800A1924)/smoke[1] = (random_float() * D_800A1920 + D_800A1920)/
 s/\* D_800A1928;/* D_800A1930;/
 s/+ 968.0f) \* D_800A1930;/+ 969.0f) * D_800A1930;/
 s/6 + 6, (u32) r34/6 + 7, (u32) r34/
 s/(u32) r34 /(u32) r6 /
-s/func_150ADA68() \* D_800A1934 + 4000.0f, muzzle, 0xFF, 0, -1, room, owner);/func_150ADA68() * D_800A1934 + 4000.0f, muzzle, 0xFF, 0, 0, room, owner);/
-s/func_151030B8(obj, D_800A1918\[side\], D_800A18E8\[side\], D_800A1900\[side\]/func_151030B8(obj, D_800A1918[side], D_800A18E8[side], D_800A18E8[side]/
+s/random_float() \* D_800A1934 + 4000.0f, muzzle, 0xFF, 0, -1, room, owner);/random_float() * D_800A1934 + 4000.0f, muzzle, 0xFF, 0, 0, room, owner);/
+s/attached_particle_spawn(obj, D_800A1918\[side\], D_800A18E8\[side\], D_800A1900\[side\]/attached_particle_spawn(obj, D_800A1918[side], D_800A18E8[side], D_800A18E8[side]/
 s/    return tracer;/    return NULL;/

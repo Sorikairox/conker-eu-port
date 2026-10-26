@@ -28,7 +28,7 @@ s/            if (step < -0.5f) {/            if (step < -0.25f) {/
 s/            if (0.5f < step) {/            if (0.25f < step) {/
 s/            ok = func_15088E84(rec, -step);/            ok = func_15088E84(rec, step);/
 s/        if (tries >= 11) {/        if (tries >= 10) {/
-s/    func_15042D78(0x80);/    func_15042D78(0x81);/
+s/    text_set_flags(0x80);/    text_set_flags(0x81);/
 s/    r\[0x32\] = r\[0x33\];/    ;/
 s/    r\[0x33\] = D_800BE9E4;/    r[0x33] = 1;/
 s/(obj + 0x2C) \* dx + \*(f32 \*) (obj + 0x34) \* dz + c) - d) \* 4.0f/(obj + 0x14) * dx + *(f32 *) (obj + 0x34) * dz + c) - d) * 4.0f/

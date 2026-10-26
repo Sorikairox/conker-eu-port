@@ -1,6 +1,6 @@
 s#    if (\*(s32 \*) tgt == 0 || st\[4\] != tgt\[0x3B\]) {#    if (*(s32 *) tgt == 0 \&\& st[4] != tgt[0x3B]) {# % gone idchg
 s#    if (D_800BE9E4 > 0) {#    if (D_800BE9E4 >= 0) {# % noframe
-s#        r = func_150D4FF0((u8 \*) pos, (u8 \*) dir, (struct127 \*) tgt, \*(s32 \*) (st + 8));#        r = func_150D4FF0((u8 *) pos, (u8 *) dir, (struct127 *) tgt, *(s32 *) (st + 4));# % r0
+s#        r = object_get_beam_ends((u8 \*) pos, (u8 \*) dir, (struct127 \*) tgt, \*(s32 \*) (st + 8));#        r = object_get_beam_ends((u8 *) pos, (u8 *) dir, (struct127 *) tgt, *(s32 *) (st + 4));# % r0
 s#            \*(u16 \*) (obj + 0x1E) \&= ~4;#            *(u16 *) (obj + 0x1E) \&= ~5;# % r0
 s#            return 1;#            return 0;# % r0
 s#                \*(f32 \*) (\*(u8 \*\*) (st + 0xC) + 0x38) = pos\[1\];#                *(f32 *) (*(u8 **) (st + 0xC) + 0x38) = pos[2];# % r1
@@ -28,7 +28,7 @@ s#                    glow\[1\] = D_800A0DD4_c\[0\];#                    glow[1]
 s#                \*(f32 \*) (st + 0x18) = 50\.0f;#                *(f32 *) (st + 0x18) = 40.0f;# % fast
 s#                if (st\[5\] != prev) {#                if (st[5] == prev) {# % fast fastsame
 s#                        surface = (f32 \*) D_800A5860;#                        surface = (f32 *) D_800A5860 + 1;# % fastnos
-s#                    func_150D5268(pos, surface, \*(f32 \*) (tgt + 0x40), obj\[0xC\], obj\[1\]);#                    func_150D5268(pos, surface, *(f32 *) (tgt + 0x44), obj[0xC], obj[1]);# % fast
+s#                    smoke_puff_burst(pos, surface, \*(f32 \*) (tgt + 0x40), obj\[0xC\], obj\[1\]);#                    smoke_puff_burst(pos, surface, *(f32 *) (tgt + 0x44), obj[0xC], obj[1]);# % fast
 s#                    glow\[1\] = D_800A0DD8_c\[0\];#                    glow[1] = D_800A0DDC_c[0];# % slow
 s#                \*(f32 \*) (st + 0x18) = 10\.0f;#                *(f32 *) (st + 0x18) = 20.0f;# % slow
 s#                    glow\[1\] = 1\.0f;#                    glow[1] = 0.5f;# % mid

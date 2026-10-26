@@ -11,8 +11,8 @@ s/                D_800D154C->unk21C = 0;/                ;/
 s/            D_800C3E78 = savedNum;/            ;/
 s/D_800CC2D0\[idx\].unkC8 = D_800D1890;/D_800CC2D0[idx].unkC8 = D_800D1891;/
 s/D_800CC2D0\[idx\].unkB8 = 0.0f;/D_800CC2D0[idx].unkB8 = 1.0f;/
-s/a = func_15079A98(D_800D154C->unk222);/a = func_15079A98(idx);/
-s/if ((func_15079A98(D_800C3E78) - a) \& 0x8000) {/if ((a - func_15079A98(D_800C3E78)) \& 0x8000) {/
+s/a = aiscript_path_point_angle(D_800D154C->unk222);/a = aiscript_path_point_angle(idx);/
+s/if ((aiscript_path_point_angle(D_800C3E78) - a) \& 0x8000) {/if ((a - aiscript_path_point_angle(D_800C3E78)) \& 0x8000) {/
 s/D_800D154C->unk221 = D_800D1890;/D_800D154C->unk221 = D_800D1891;/
 s/D_800D154C->unk244 = (D_800D1893 << 8) | D_800D1890;/D_800D154C->unk244 = (D_800D1890 << 8) | D_800D1893;/
 s/D_800D154C->unk23D + (s8)D_800D1890;/D_800D154C->unk23D + D_800D1890;/

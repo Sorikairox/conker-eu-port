@@ -11,14 +11,14 @@
 \#^    rec = (u8 \*) func_15149130(#s/0x40,/0x41,/ % k34
 \#^    rec = (u8 \*) func_15149130(#s/flag, arg3/flag, 0/ % k5
 \#^    memcpy(l, &link, 0x1C);$#s/0x1C/0x18/ % k34
-\#^    tail.u0 = func_150ADA20();$#s/func_150ADA20()/0/ % k34
+\#^    tail.u0 = random_int();$#s/random_int()/0/ % k34
 \#^    g.u2C = 700.0f;$#s/700/701/ % k34
 \#^    tail.radius = 700.0f;$#s/700/701/ % k34
 \#^    tail.u2 = #s/\(.\) 6 + 5/\1 6 + 4/ % k34
 \#^    tail.u3 = #s/\(.\) 6/\1 5/ % k34
 \#^    tail.u8 = #s/0.25f/0.5f/ % k34
 \#^    tail.uC = #s/0.2f)/0.3f)/ % k34
-\#^    g.colour = D_800A0710\[func_150ADA20() & 3\];$#s/& 3/\& 1/ % k34
+\#^    g.colour = D_800A0710\[random_int() & 3\];$#s/& 3/\& 1/ % k34
 \#^    g.u8 = 0x2203;$#s/3;/4;/ % k34
 \#^    g.u0 = 0x200005;$#s/5;/4;/ % k34
 \#^    g.rgba\[3\] = 0xFF;$#s/0xFF/0/ % k34
@@ -27,8 +27,8 @@
 \#^    \*(Vec4620 \*) g.pos3 = #d % k34
 \#^    g.u22 = 1;$#s/1/2/ % k34
 \#^    g.u54 = 0.0f;$#d % k34
-\#^    lo = (func_150ADA20() & 1) ? 0x40 : 0;$#s/0x40/0x20/ % k34
-\#^    hi = (func_150ADA20() & 1) ? 0x80 : 0;$#s/& 1/\& 2/ % k34 k5 k2
+\#^    lo = (random_int() & 1) ? 0x40 : 0;$#s/0x40/0x20/ % k34
+\#^    hi = (random_int() & 1) ? 0x80 : 0;$#s/& 1/\& 2/ % k34 k5 k2
 \#^    g.flags = hi | lo | 0xC000;$#s/0xC000/0x8000/ % k34
 \#^    g.uA = 0x12C;$#d % k34
 \#^    g.u6C = 10000.0f;#s/10000.0f/1000.0f/ % k34

@@ -6,12 +6,12 @@
 36s/ang = ctl\[0xAC\] + (\*(u16 \*) (obj + 0x76) >> 8);/ang = ctl[0xAC] + (*(u16 *) (obj + 0x76) >> 7);/ % obj5
 36s/ang = ctl\[0xAC\] + (\*(u16 \*) (obj + 0x76) >> 8);/ang = ctl[0xAC];/ % obj5
 37s/amp = \*(f32 \*) (ctl + 0xA8) \* 1\.9f;/amp = *(f32 *) (ctl + 0xA8) * 1.8f;/ % obj5
-39s/p\[3\] += amp \* func_150489B0(ang);/p[3] -= amp * func_150489B0(ang);/ % obj5
-41s/p\[5\] -= amp \* func_15048A40(ang);/p[4] -= amp * func_15048A40(ang);/ % obj5
+39s/p\[3\] += amp \* math_cos_u8(ang);/p[3] -= amp * math_cos_u8(ang);/ % obj5
+41s/p\[5\] -= amp \* math_sin_u8(ang);/p[4] -= amp * math_sin_u8(ang);/ % obj5
 43s/ang = \*(u16 \*) (obj + 0x76) >> 8;/ang = *(u16 *) (obj + 0x76);/ % obj5
 44s/amp = \*(f32 \*) (obj + 0x3C) \* 19\.0f;/amp = *(f32 *) (obj + 0x3C) * 18.0f;/ % obj5
-46s/p\[3\] += amp \* func_150489B0(ang);/p[3] += amp;/ % obj5
-48s/p\[5\] -= amp \* func_15048A40(ang);/p[5] += amp * func_15048A40(ang);/ % obj5
+46s/p\[3\] += amp \* math_cos_u8(ang);/p[3] += amp;/ % obj5
+48s/p\[5\] -= amp \* math_sin_u8(ang);/p[5] += amp * math_sin_u8(ang);/ % obj5
 50s/p\[4\] -= 1000\.0f;/p[4] -= 100.0f;/ % obj5
 52s/frames = ctl\[0xAD\] - 1;/frames = ctl[0xAD];/ % obj5 obj1
 53s/if (frames > 0) {/if (frames >= 0) {/ % obj1
@@ -19,8 +19,8 @@
 58s/ctl\[0xAD\] = 0;/ctl[0xAD] = 1;/ % obj0
 61s/if (\*(f32 \*) (e + 0x4C) != 0\.0f) {/if (*(f32 *) (e + 0x4C) > 0.0f) {/ % kickneg
 62s/p = \*(f32 \*\*) (e + 0x38) + e\[0x51\] \* 6;/p = *(f32 **) (e + 0x38) + e[0x50] * 6;/ % kick
-63s/p\[3\] -= \*(f32 \*) (e + 0x4C) \* func_150489B0(e\[0x50\]);/p[3] += *(f32 *) (e + 0x4C) * func_150489B0(e[0x50]);/ % kick
-65s/p\[5\] += \*(f32 \*) (e + 0x4C) \* func_15048A40(e\[0x50\]);/p[5] += *(f32 *) (e + 0x4C) * func_15048A40(e[0x51]);/ % kick
+63s/p\[3\] -= \*(f32 \*) (e + 0x4C) \* math_cos_u8(e\[0x50\]);/p[3] += *(f32 *) (e + 0x4C) * math_cos_u8(e[0x50]);/ % kick
+65s/p\[5\] += \*(f32 \*) (e + 0x4C) \* math_sin_u8(e\[0x50\]);/p[5] += *(f32 *) (e + 0x4C) * math_sin_u8(e[0x51]);/ % kick
 66s/\*(f32 \*) (e + 0x4C) \*= 0\.9f;/*(f32 *) (e + 0x4C) *= 0.8f;/ % kick
 68s/for (i = 0; i < last + 1; i++) {/for (i = 0; i < last; i++) {/ % n2 n20
 70s/pos\[i\]\[k\] = (\*(f32 \*\*) (e + 0x38))\[i \* 6 + k\];/pos[i][k] = (*(f32 **) (e + 0x38))[i * 6 + k + 3];/ % n2

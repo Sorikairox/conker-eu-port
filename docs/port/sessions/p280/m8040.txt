@@ -11,8 +11,8 @@
 \#^            func_151A88F0(obj, 0, #s/- 1/- 2/ % all
 \#^            func_151A88F0(obj, 0, #s/100/99/ % all
 \#^            func_151A88F0(obj, 0, #s/0x20/0x24/ % all
-\#^            \*(f32 \*) (obj + 0x68) = func_150ADA68() #s/0x18/0x14/ % all
-\#^            \*(f32 \*) (obj + 0x68) = func_150ADA68() #s/+ \*(f32 \*) (obj + 0x14)// % all
+\#^            \*(f32 \*) (obj + 0x68) = random_float() #s/0x18/0x14/ % all
+\#^            \*(f32 \*) (obj + 0x68) = random_float() #s/+ \*(f32 \*) (obj + 0x14)// % all
 \#^        if (obj\[0x1C\] & 2) {$#s/2/1/ % notimer
 \#^            fwd.unk0 = #s/0x30/0x34/ % notimer
 \#^            fwd.unk8 = #s/0x44/0x40/ % notimer

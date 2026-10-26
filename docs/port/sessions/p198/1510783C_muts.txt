@@ -32,10 +32,10 @@ s/(u32) (p\[0x2C\] + 1) + p\[0x2B\];/(u32) (p[0x2B] + 1) + p[0x2C];/
 s/    s.u50 = 1;/    s.u50 = 0;/
 s/(\*(s32 \*) (p + 0x24) + 1) + \*(s32 \*) (p + 0x20);/(*(s32 *) (p + 0x24) + 1);/
 s/(\*(s32 \*) (p + 0x24) + 1) + \*(s32 \*) (p + 0x20);/(*(s32 *) (p + 0x20) + 1) + *(s32 *) (p + 0x24);/
-s/func_15106260(&s.life, 4, rec\[0xC\], rec\[1\]);/func_15106260(\&s.life, 3, rec[0xC], rec[1]);/
-s/func_15106260(&s.life, 4, rec\[0xC\], rec\[1\]);/func_15106260(\&s.life, 4, rec[1], rec[0xC]);/
+s/bolt_arc_spawn(&s.life, 4, rec\[0xC\], rec\[1\]);/bolt_arc_spawn(\&s.life, 3, rec[0xC], rec[1]);/
+s/bolt_arc_spawn(&s.life, 4, rec\[0xC\], rec\[1\]);/bolt_arc_spawn(\&s.life, 4, rec[1], rec[0xC]);/
 s/    \*(u8 \*\*) (spec + 8) = arc;/    ;/
 s/memcpy(\*(u8 \*\*) (arc + 0x60), &s.rec, 4);/memcpy(arc + 0x60, \&s.rec, 4);/
 s/    if (arc != NULL) {/    if (1) {/
 s/    \*(s32 \*) (spec + 4) += 1;/    ;/
-s/(u32) func_150ADA20() .*0x1A);/(u32) func_150ADA20() + *(s16 *) (p + 0x1A);/
+s/(u32) random_int() .*0x1A);/(u32) random_int() + *(s16 *) (p + 0x1A);/

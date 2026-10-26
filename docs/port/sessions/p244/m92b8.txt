@@ -6,8 +6,8 @@
 \#^    gdl = gfx_set_combine_mode(gdl, 0x21, &flag);$#s/0x21/0x20/ %
 \#^    gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4EA8\[29\] | D_800A4EA8\[28\], &flag);$#s/\[29\] | /[27] | / %
 \#^    gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4EA8\[29\] | D_800A4EA8\[28\], &flag);$#s/0x1DACA0/0x1DACA1/ %
-\#^    tex = func_1510D66C(\*D_80091234, &size, 3, 0);$#s/, 3, 0)/, 2, 0)/ %
-\#^    tex = func_1510D66C(\*D_80091234, &size, 3, 0);$#s/, 3, 0)/, 3, 1)/ %
+\#^    tex = texture_cache_lookup(\*D_80091234, &size, 3, 0);$#s/, 3, 0)/, 2, 0)/ %
+\#^    tex = texture_cache_lookup(\*D_80091234, &size, 3, 0);$#s/, 3, 0)/, 3, 1)/ %
 \#^    RING_DL(0xFD500000, tex);        /\* texture image: CI, 16-bit words (block load) \*/$#s/tex)/tex + 1)/ %
 \#^    RING_DL(0xF3000000, 0x073EF000); /\* load block 0x3EF+1 texels \*/$#s/0x073EF000/0x073EE000/ %
 \#^    RING_DL(0xF56004BC, 0x00017C5F); /\* tile 0 (mip 0) \*/$#s/0x00017C5F/0x00017C5E/ %

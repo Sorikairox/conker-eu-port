@@ -16,7 +16,7 @@ s/RAIL_WORDS(0xEB0)\[i\] = RAIL_WORDS(0xEB0)\[j\];/;/
 s/if (k >= 0) {/if (k > 0) {/
 s/RAIL_WORDS(0xF70)\[k\] = i;/RAIL_WORDS(0xF70)[k] = j;/
 s/RAIL_WORDS(0x16C0)\[i\] = RAIL_WORDS(0x16C0)\[j\];/RAIL_WORDS(0x16C0)[i] = RAIL_WORDS(0x16C0)[i + 1];/
-s/func_15062800(\&D_800CC2D0\[j\], obj);/func_15062800(obj, \&D_800CC2D0[j]);/
+s/obj_slots_swap(\&D_800CC2D0\[j\], obj);/obj_slots_swap(obj, \&D_800CC2D0[j]);/
 s/D_800BE9F0 == 0x3F/D_800BE9F0 == 0x3E/
 s/obj->unk13C >= 100/obj->unk13C > 100/
 s/(u8) (obj->unk13C - 100)/(u8) (obj->unk13C - 99)/

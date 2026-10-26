@@ -14,7 +14,7 @@
 \#^    rec\[0x34\] = (u8) arg2;$#s/(u8) arg2/arg9/ % c3
 \#^    rec\[0x37\] = (u8) arg9;$#s/arg9/arg2/ % c3
 \#^    \*(s16 \*) (rec + 0x2E) = 0;$#s/0;/1;/ % c3
-\#^        s = func_150489B0(a);$#s/(a)/(a + 1)/ % c3
+\#^        s = math_cos_u8(a);$#s/(a)/(a + 1)/ % c3
 \#^        r = #s/50.0f/40.0f/ % c3
 \#^        r = #s/& 0xFFFF/\& 0x7FFF/ % c3
 \#^        px = #s/r \* c/r * s/ % c3

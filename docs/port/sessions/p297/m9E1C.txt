@@ -1,5 +1,5 @@
 s/    if ((s8) loadTex != 0) {/    if ((s8) refresh != 0) {/
-s/        tex = func_1510D66C(0xD16, 0, 3, 0);/        tex = func_1510D66C(0xD17, 0, 3, 0);/
+s/        tex = texture_cache_lookup(0xD16, 0, 3, 0);/        tex = texture_cache_lookup(0xD17, 0, 3, 0);/
 s/        TM_W(gdl, 0xFC12FE25, 0xFFFFF3F9);/        TM_W(gdl, 0xFC12FE25, 0xFFFFF3F8);/
 s/        TM_W(gdl, 0xFD180000, tex);  /        TM_W(gdl, 0xFD180000, tex + 1);  /
 s/        TM_W(gdl, 0xF5181000, 0x00094250);/        TM_W(gdl, 0xF5181000, 0x00094251);/
@@ -24,7 +24,7 @@ s/                TM_W(gdl, 0xFB000000, 0x40404040);/                TM_W(gdl, 0
 s/            gdl = (Gfx \*) func_151E8E94((u8 \*) gdl, mx \* 4, y, (mx + 7) \* 4, y + 0x1C, 0, 0x1C0/            gdl = (Gfx *) func_151E8E94((u8 *) gdl, mx * 4, y, (mx + 8) * 4, y + 0x1C, 0, 0x1C0/
 s/y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);/y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x200);/
 s/    if (out != 0) {/    if (out == 0xF) {/
-s/        tex = func_1510D66C(0xD19, 0, 3, 0);/        tex = func_1510D66C(0xD18, 0, 3, 0);/
+s/        tex = texture_cache_lookup(0xD19, 0, 3, 0);/        tex = texture_cache_lookup(0xD18, 0, 3, 0);/
 s/        TM_W(gdl, 0xFD100000, tex + 0x800);/        TM_W(gdl, 0xFD100000, tex + 0x400);/
 s/        TM_W(gdl, 0xF0000000, 0x0603C000);/        TM_W(gdl, 0xF0000000, 0x0603C001);/
 s/        gDPSetOtherMode(gdl++, 0x00AC3F, 0x504244);/        gDPSetOtherMode(gdl++, 0x00AC3F, 0x504245);/

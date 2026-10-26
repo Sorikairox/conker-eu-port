@@ -1,6 +1,6 @@
 s/                case 0x39: icon = 10; break;/                case 0x39: icon = 9; break;/ % veh1 veh2 sh2a sh2b sh2c sh2d sh2an sh2cn veh1n all
 s/                    bars\[p\] = \*(u16 \*)(st + 0x12C) >> 4;/                    bars[p] = *(u16 *)(st + 0x12C) >> 3;/ % veh1 veh2 sh2a sh2b sh2c sh2d sh2an sh2cn veh1n all
-s/                gdl = func_15091534(gdl, 1, \&ready);/                gdl = func_15091534(gdl, 0, \&ready);/ % veh1 veh2 sh2a sh2b sh2c sh2d sh2an sh2cn veh1n all
+s/                gdl = hud_icon_sheet_load(gdl, 1, \&ready);/                gdl = hud_icon_sheet_load(gdl, 0, \&ready);/ % veh1 veh2 sh2a sh2b sh2c sh2d sh2an sh2cn veh1n all
 s/            t = (D_80087754\[row\] + trow) << 5;/            t = (D_80087754[row] + trow) << 4;/ % veh1 veh2 sh2a sh2b sh2c sh2d sh2an sh2cn veh1n all
 s/                ix -= 18;/                ix -= 17;/ % veh1 veh2 sh2a sh2b sh2c sh2d sh2an sh2cn veh1n all
 s/        gdl->words.w1 = 0x0F0A4004;/        gdl->words.w1 = 0x0F0A4005;/ % veh1 veh2 sh2a sh2b sh2c sh2d sh2an sh2cn veh1n all
@@ -9,7 +9,7 @@ s/        x = (bar_mode == 2) ? 15 : 30;/        x = (bar_mode == 2) ? 16 : 30;/
 s/            ix = (s32)view->unk30 - x;/            ix = (s32)view->unk30 - x - 1;/ % veh1 veh2 sh2a sh2b sh2c sh2d sh2an sh2cn veh1n all
 s/            iy = (s32)view->unk24 + 10;/            iy = (s32)view->unk24 + 11;/ % veh1 veh2 sh2a sh2b sh2c sh2d sh2an sh2cn veh1n all
 s/            gDPFillRectangle(gdl++, ix - bars\[p\], iy, ix, iy + 4);/            gDPFillRectangle(gdl++, ix - bars[p], iy, ix, iy + 5);/ % veh1 veh2 sh2a sh2b sh2c sh2d sh2an sh2cn veh1n all
-s/        tex = func_1510D66C(0xD15, NULL, 3, 0);/        tex = func_1510D66C(0xD14, NULL, 3, 0);/ % fire1 fire1h fire2 fire2h fire3 fire3h fire4 fire4h fire_neg fire_skip all
+s/        tex = texture_cache_lookup(0xD15, NULL, 3, 0);/        tex = texture_cache_lookup(0xD14, NULL, 3, 0);/ % fire1 fire1h fire2 fire2h fire3 fire3h fire4 fire4h fire_neg fire_skip all
 s/            if (k != 0x26 && k != 0x3A) {/            if (k != 0x26) {/ % fire1 fire1h fire2 fire2h fire3 fire3h fire4 fire4h fire_neg fire_skip all
 s/            ix = ((s32)view->unk30 - 15) \* 4;/            ix = ((s32)view->unk30 - 14) * 4;/ % fire1 fire1h fire2 fire2h fire3 fire3h fire4 fire4h fire_neg fire_skip all
 s/            iy = ((s32)view->unk24 + 5) \* 4;/            iy = ((s32)view->unk24 + 4) * 4;/ % fire1 fire1h fire2 fire2h fire3 fire3h fire4 fire4h fire_neg fire_skip all
@@ -24,7 +24,7 @@ s/                ix -= 11 \* 4;/                ix -= 10 * 4;/ % fire1 fire1h f
 s/    if ((D_80090160 & 0x80) && D_80087640 != NULL) {/    if (D_80090160 \& 0x80) {/ % race1 race2 race_null all
 s/            iy = (s32)view->unk24 + 5;/            iy = (s32)view->unk24 + 6;/ % race1 race2 race_null all
 s/            if (\*(s32 \*)((u8 \*)race + 0x20) > 0) {/            if (*(s32 *)((u8 *)race + 0x20) >= 0) {/ % race1 race2 race_null all
-s/                func_150916B4((s32)view->unk2C + 0x17, iy + 0x19,/                func_150916B4((s32)view->unk2C + 0x17, iy + 0x18,/ % race1 race2 race_null all
+s/                hud_time_draw((s32)view->unk2C + 0x17, iy + 0x19,/                hud_time_draw((s32)view->unk2C + 0x17, iy + 0x18,/ % race1 race2 race_null all
 s/            lap = race->unk27 + 1;/            lap = race->unk27;/ % race1 race2 race_null all
 s/            if (lap <= laps) {/            if (lap < laps) {/ % race1 race2 race_null all
 s/(s32)view->unk2C + 0x1D, iy + 0xE, 0xC1, (s32)D_8009E0C8, lap, laps);/(s32)view->unk2C + 0x1D, iy + 0xE, 0xC1, (s32)D_8009E0C8, lap, lap);/ % race1 race2 race_null all
@@ -34,7 +34,7 @@ s/        mx = ((s32)((struct_eu_BE628 \*)D_800BE628)->unk30 - table\[32\]) \* 4
 s/            zoom = D_8009E23C \* D_8009E240;/            zoom = D_8009E23C;/ % map1 map2 map3 map4 map5 map_neg all
 s/            size = 0x63;/            size = 0x64;/ % map1 map2 map3 map4 map5 map_neg all
 s/            dot = 6;/            dot = 5;/ % map1 map2 map3 map4 map5 map_neg all
-s/        tex = func_1510D66C((D_8009015C & 0x40) ? 0xCF4 : 0xCF3, NULL, 3, 0);/        tex = func_1510D66C((D_8009015C \& 0x20) ? 0xCF4 : 0xCF3, NULL, 3, 0);/ % map1 map2 map3 map_neg all
+s/        tex = texture_cache_lookup((D_8009015C & 0x40) ? 0xCF4 : 0xCF3, NULL, 3, 0);/        tex = texture_cache_lookup((D_8009015C \& 0x20) ? 0xCF4 : 0xCF3, NULL, 3, 0);/ % map1 map2 map3 map_neg all
 s/        for (p = 0; p < D_80090130; p++) {/        for (p = 0; p <= D_80090130; p++) {/ % map1 map2 map3 map4 map5 map_neg all
 s/            my = (table\[24\] + (s32)view->unk24 + table\[21\]) \* 4;/            my = (table[24] + (s32)view->unk24 + table[20]) * 4;/ % map1 map2 map3 map4 map5 map_neg all
 s/            r = table\[32\] \* 4;/            r = table[31] * 4;/ % map1 map2 map3 map4 map5 map_neg all
@@ -48,4 +48,4 @@ s/                cx = fx + (f32)(s32)(obj->x_position \* zoom);/               
 s/                cy = fy + (f32)(s32)(obj->z_position \* zoom);/                cy = fy + (f32)(s32)(obj->y_position * zoom);/ % map1 map2 map3 map4 map5 map_neg all
 s/            for (i = 0; i < 25; i++) {/            for (i = 0; i < 24; i++) {/ % map1 map2 map3 map4 map5 map_neg all
 s/    if (D_800BEAC1 == 0 && (D_80090160 & 0x20)) {/    if (D_80090160 \& 0x20) {/ % radar all map4
-s/        gdl = func_15093B58(gdl, scale, table, 0x2C30, 0);/        gdl = func_15093B58(gdl, scale, table, 0x2C30, 1);/ % radar all map4
+s/        gdl = radar_draw(gdl, scale, table, 0x2C30, 0);/        gdl = radar_draw(gdl, scale, table, 0x2C30, 1);/ % radar all map4

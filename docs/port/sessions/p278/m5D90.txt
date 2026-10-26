@@ -8,15 +8,15 @@
 \#^    if (tri != NULL) {#s/!=/==/
 \#^            v\[i\]\[1\] = tri\[i \* 3 + 1\];#s/+ 1\]/+ 2]/
 \#^            v\[i\]\[2\] = tri\[i \* 3 + 2\];#s/tri\[/(u16) tri[/
-\#^        func_15049350(#s/v\[2\]\[1\], v\[2\]\[2\]/v[2][2], v[2][1]/
+\#^        tri_compute_plane(#s/v\[2\]\[1\], v\[2\]\[2\]/v[2][2], v[2][1]/
 \#^        n\[1\] = -D_800CC634;#s/-D/D/
 \#^        n\[2\] = -D_800CC638;#s/D_800CC638/D_800CC634/
 \#^        if (1e-05f < len) {#s/1e-05f/1e-04f/
-\#^            func_15049148((struct17 \*) n, 1\.0f / len#s/1\.0f/2.0f/
+\#^            vec3_scale((struct17 \*) n, 1\.0f / len#s/1\.0f/2.0f/
 \#^            vel\[1\] = #s/0x48/0x4C/
 \#^            len = func_150ADDE0(unit, vel);#s/unit, vel/vel, unit/
-\#^            func_15049148((struct17 \*) unit, len + len#s/len + len/len/
-\#^            func_15048F58(#s/(struct17 \*) vel, (struct17 \*) n/(struct17 *) n, (struct17 *) vel/
+\#^            vec3_scale((struct17 \*) unit, len + len#s/len + len/len/
+\#^            vec3_sub(#s/(struct17 \*) vel, (struct17 \*) n/(struct17 *) n, (struct17 *) vel/
 \#^            \*(f32 \*) (p + 0x44) = fac \* n\[0\] \* 0\.8f;#s/0\.8f/0.81f/
 \#^            \*(f32 \*) (p + 0x48) = fac \* n\[1\];#s/n\[1\]/n[1] * 0.8f/
 \#^            \*(f32 \*) (p + 0x4C) = fac \* n\[2\] \* 0\.8f;#s/n\[2\]/n[0]/

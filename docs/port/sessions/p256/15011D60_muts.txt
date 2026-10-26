@@ -1,4 +1,4 @@
-# P256 func_15011D60 (marker_effect_spawn) mutants: sed % setup names
+# P256 marker_effect_spawn (marker_effect_spawn) mutants: sed % setup names
 s/121U + 300/120U + 300/ % s0 s1rnd
 s/121U + 300/121 + 300/ % s5big
 s/(state.slot < 4) ? 0 : 1/(state.slot < 5) ? 0 : 1/ % s4

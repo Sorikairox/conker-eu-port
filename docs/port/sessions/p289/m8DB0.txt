@@ -12,8 +12,8 @@
 \#^    part.life = 300;$#s/300/30/
 \#^    part.kind = 0x22;$#s/0x22/0x21/
 \#^    part.spin\[0\] = #s/= 0.0f;/= 1.0f;/
-\#^    func_1510F800(0);$#s/0/1/
-\#^    water = func_1510FD20#s/part.pos\[2\]/part.pos[1]/
+\#^    collision_select_area(0);$#s/0/1/
+\#^    water = zone_tree_find_leaf#s/part.pos\[2\]/part.pos[1]/
 \#^    part.w5C = water;$#s/water/0/
 \#^    part.flags = (water#s/0x400 : 0/0x400 : 0x10/
 \#^    part.flags = (water#s/| 0x900/| 0x800/

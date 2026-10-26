@@ -15,7 +15,7 @@ s/ + fov \/ 2) \& 0xFF) < fov/ + fov \/ 4) \& 0xFF) < fov/
 s/\& 0xFF) < fov) {/\& 0xFF) <= fov) {/
 s/D_800D154C->unkA8 = i + 0x80;/D_800D154C->unkA8 = i + 0x81;/
 s/            best = d;/            ;/
-s/func_1507BB28(0, D_800D1893)/func_1507BB28(0, D_800D1892)/
+s/aiscript_find_by_kind(0, D_800D1893)/aiscript_find_by_kind(0, D_800D1892)/
 s/        D_800D154C->unk218--;/        ;/
 s/if (D_800D1892 != 0) {/if (D_800D1892 == 0) {/
 s/t = \&D_800CC2D0\[D_800D154C->unkA8 \& 0x7F\];/t = \&D_800CC2D0[D_800D154C->unkA8 \& 0x3F];/

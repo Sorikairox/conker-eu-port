@@ -60,7 +60,7 @@
 287s/0x74/0x70/
 288s/0x13 : 0x14/0x14 : 0x13/
 289s/+ 1)/+ 2)/
-290s/r1 = func_150ADA20();/r1 = func_150ADA20() + 1;/
+290s/r1 = random_int();/r1 = random_int() + 1;/
 291s/0x3F, width/0x40, width/
 293s/jit.unk4/jit.unk8/
 296s/seg.unk4/seg.unk0/

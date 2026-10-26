@@ -29,7 +29,7 @@ s/if (victim->id == 0x75) {/if (victim->id == 0x76) {/ % s75v75
 1,/MP_ROW(vi, 0x70) >= 4/s/MP_ROW(vi, 0x70) >= 4/MP_ROW(vi, 0x70) > 4/ % s75v75
 s/sound = 0x665;/sound = 0x666;/ % s75v75
 1,/n = 4;/s/n = 4;/n = 3;/ % s75v75
-1,/sound = 0x52A/s/(func_150ADA20() \& 3) == 3/(func_150ADA20() \& 3) == 2/ % s75k34 s75k34n
+1,/sound = 0x52A/s/(random_int() \& 3) == 3/(random_int() \& 3) == 2/ % s75k34 s75k34n
 s/sound = 0x4D1;/sound = 0x4D2;/ % s75
 1,/0x6D60, 0x320, 0xBB8, 0)/s/0x6D60, 0x320, 0xBB8, 0)/0x6D60, 0x320, 0xBB8, 1)/ % s75
 1,/sound = 0x4D1/s/} else if (kind == 0x34) {/} else if (kind == 0x33) {/ % s75k34
@@ -39,7 +39,7 @@ s/sound = 0x4D1;/sound = 0x4D2;/ % s75
 s/n = 8;/n = 7;/ % s80v80
 s/sound = 0x65A;/sound = 0x65B;/ % s80v80
 1,/sound = 0x571/s/} else if (mode == 2) {/} else if (mode == 3) {/ % s80m2d s80m3
-1,/sound = 0x571/s/(func_150ADA20() \& 7) == 0/(func_150ADA20() \& 7) == 1/ % s80m2a s80m2n
+1,/sound = 0x571/s/(random_int() \& 7) == 0/(random_int() \& 7) == 1/ % s80m2a s80m2n
 s/} else if (\*((u8 \*)victim->unk31C + 0x1AC) != 0) {/} else if (*((u8 *)victim->unk31C + 0x1AB) != 0) {/ % s80c1d
 s/if (kind != 0x21 \&\& (victim->health == 0/if (kind != 0x20 \&\& (victim->health == 0/ % s80c1k21
 s/sound = 0x582;/sound = 0x583;/ % s80c1d
@@ -47,7 +47,7 @@ s/sound = 0x582;/sound = 0x583;/ % s80c1d
 s/if (\*((u8 \*)src->unk31C + 0x78) == 0x23/if (*((u8 *)src->unk31C + 0x78) == 0x24/ % s80k2e23
 s/sound = 0x587;/sound = 0x588;/ % s80k2e23
 s/sound = 0x579;/sound = 0x57A;/ % hit
-s/if (func_150ADA20() \& 1) {/if (func_150ADA20() \& 2) {/ % hitk2f
+s/if (random_int() \& 1) {/if (random_int() \& 2) {/ % hitk2f
 s/sound = 0x56D;/sound = 0x56E;/ % s80k2c
 s/n = 7;/n = 6;/ % s80k2c
 /sound = 0x56D/,/arg5/s/arg5 = 50;/arg5 = 51;/ % s80k2c
@@ -55,7 +55,7 @@ s/} else if (kind == 0x21 || kind == 0x20 || kind == 0x31) {/} else if (kind == 
 1,/0x7D00, 0x258, 0x7D0, arg5)/s/0x7D00, 0x258, 0x7D0, arg5)/0x7D00, 0x258, 0x7D0, 0)/ % hit
 1,/0x7D00/s/(u16)sound, src, 0x7D00/(u16)sound, victim, 0x7D00/ % hit
 s/} else if (src->id == 0x3B) {/} else if (src->id == 0x3C) {/ % s3Bk2e
-s/(func_150ADA20() \& 7) == 7/(func_150ADA20() \& 7) == 6/ % s3Bm2a s3Bm2n
+s/(random_int() \& 7) == 7/(random_int() \& 7) == 6/ % s3Bm2a s3Bm2n
 s/sound = 0x52F;/sound = 0x530;/ % s3Bk2e
 s/} else if (kind == 0x2C || kind == 0x2F) {/} else if (kind == 0x2C) {/ % s3Bk2f
 s/n = 2;/n = 1;/ % s3Bk2c
@@ -65,7 +65,7 @@ s/if (victim->health >= 2) {/if (victim->health >= 3) {/ % s3Bk26o2
 s/sound = 0x55F - victim->health;/sound = 0x55F + victim->health;/ % s3Bk25o
 s/sound = 0x565 - victim->health;/sound = 0x564 - victim->health;/ % s3Bk25e
 s/sound = 0x52C;/sound = 0x52D;/ % s3Bk21
-s/r = func_150ADA20() \& 0xF;/r = func_150ADA20() \& 0x7;/ % s3Bk20rA
+s/r = random_int() \& 0xF;/r = random_int() \& 0x7;/ % s3Bk20rA
 s/if (r != 0) {/if (r != 1) {/ % s3Bk20r21
 s/if (r < 4) {/if (r < 3) {/ % s3Bk20r22
 s/sound = r + 0x52B;/sound = r + 0x52C;/ % s3Bk20r10

@@ -7,7 +7,7 @@ s/        ls = 0x200;/        ls = 0x100;/ % big_rows
 s/        lt = 0;/        lt = 0x200;/ % big_rows
 s/            tex = 0xD14;/            tex = 0xD13;/ % mode8
 s/        lt = 0x200;/        lt = 0x100;/ % small_4000
-s/    tex = func_1510D66C(tex, 0, 3, 0);/    tex = func_1510D66C(tex, 0, 2, 0);/ % big_rows
+s/    tex = texture_cache_lookup(tex, 0, 3, 0);/    tex = texture_cache_lookup(tex, 0, 2, 0);/ % big_rows
 # dropped (equivalent): `return buf` -> `return gdl` when the texture is missing (gdl == buf there); `lrs = 0x7FE`
 # (the clamp is dead for the 16 / 32 sizes)
 s/    if (tex == (s32) 0x80000000) {/    if (tex == 0) {/ % notex
@@ -28,6 +28,6 @@ s/        D_800E0ED0\[1\] = score1;/        D_800E0ED0[1] = score0;/ % big_rows
 s/        score0 = D_800E0ED0\[0\];/        score0 = D_800E0ED0[1];/ % stored
 s/    gdl = (Gfx \*) func_151E8E94((u8 \*) gdl, 0x108, top, 0x148, top + 0x40, 0, ls, row, 0x400, 0x400);/    gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x108, top, 0x148, top + 0x40, 0, ls, 0, 0x400, 0x400);/ % big_rows
 s/    gdl = (Gfx \*) func_151E8E94((u8 \*) gdl, 0x318, top, 0x358, top + 0x40, 0, 0, row + lt, 0x400, 0x400);/    gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x318, top, 0x358, top + 0x40, 0, 0, row, 0x400, 0x400);/ % small_4000
-s/    func_1504332C(0xC0, 0xC0, 0xC0, 0xFF);/    func_1504332C(0xC0, 0xC0, 0xC0, 0x80);/ % big_rows
-s/    func_15042D94(0x4F, (top >> 2) + 1, 0x80, D_800ABEB0, score1);/    func_15042D94(0x4F, (top >> 2), 0x80, D_800ABEB0, score1);/ % big_rows
-s/    func_15042D94(0xD3, (top >> 2) + 1, 0x80, D_800ABEB4, score0);/    func_15042D94(0xD3, (top >> 2) + 1, 0x80, D_800ABEB4, score1);/ % big_rows
+s/    text_set_color(0xC0, 0xC0, 0xC0, 0xFF);/    text_set_color(0xC0, 0xC0, 0xC0, 0x80);/ % big_rows
+s/    text_printf_at(0x4F, (top >> 2) + 1, 0x80, D_800ABEB0, score1);/    text_printf_at(0x4F, (top >> 2), 0x80, D_800ABEB0, score1);/ % big_rows
+s/    text_printf_at(0xD3, (top >> 2) + 1, 0x80, D_800ABEB4, score0);/    text_printf_at(0xD3, (top >> 2) + 1, 0x80, D_800ABEB4, score1);/ % big_rows

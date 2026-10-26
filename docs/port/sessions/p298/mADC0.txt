@@ -7,7 +7,7 @@ s#        inv = (radius == 0\.0f) ? 1\.0f : 1\.0f \/ radius;#        inv = (radi
 s#            lift\[i\] = (radius - d) \* inv;#            lift[i] = (radius + d) * inv;# % init
 s#            follow\[i\] = (radius - d \* D_800A3550_c\[0\]) \* inv;#            follow[i] = (radius - d * D_800A3554_c[0]) * inv;# % init
 s#            if (follow\[i\] < 0\.0f) {#            if (follow[i] < 1.0f) {# % init
-s#            phase\[i\] = func_150ADA20();#            phase[i] = func_150ADA20() + 1;# % init initnd
+s#            phase\[i\] = random_int();#            phase[i] = random_int() + 1;# % init initnd
 s#                if (v\[0\] == w\[0\] \&\& v\[1\] == w\[1\] \&\& v\[2\] == w\[2\]) {#                if (v[0] == w[0] \&\& v[1] == w[1]) {# % init initnd
 s#                    phase\[j\] = phase\[i\];#                    phase[j] = phase[i] + 1;# % init
 s#            wave\[i\] = 0\.0f;#            wave[i] = 1.0f;# % init
@@ -29,11 +29,11 @@ s#    ph\[1\] = \*(s32 \*) (obj + 0x84) >> 8;#    ph[1] = *(s32 *) (obj + 0x84) 
 s#        if (\*(u16 \*) \&dst\[3\] \& 0x4000) {#        if (*(u16 *) \&dst[3] \& 0x4100) {# % idle
 s#            a = ph\[phase\[i\] \& 3\] + phase\[i\];#            a = ph[phase[i] \& 1] + phase[i];# % idle
 s#            if (phase\[i\] \& 0x80) {#            if (phase[i] \& 0x40) {# % idle
-s#            cz = func_150489B0(a) \* amp;#            cz = func_15048A40(a) * amp;# % idle
+s#            cz = math_cos_u8(a) \* amp;#            cz = math_sin_u8(a) * amp;# % idle
 s#                up = (s32) (lift\[i\] \* wave\[i\]);#                up = (s32) (follow[i] * wave[i]);# % act
 s#            func_150A7E40(mtx, (f32) v\[0\] + sx, v\[1\] + up, (f32) v\[2\] + cz, \&ox, \&oy, \&oz);#            func_150A7E40(mtx, (f32) v[0] + sx, v[1] - up, (f32) v[2] + cz, \&ox, \&oy, \&oz);# % act
 s#            func_150A7E40(mtx, v\[0\], v\[1\], v\[2\], \&ox, \&oy, \&oz);#            func_150A7E40(mtx, v[0], v[2], v[1], \&ox, \&oy, \&oz);# % idle allfl
 s#        dst\[1\] = (s32) oy;#        dst[1] = (s32) oz;# % idle
 s#    ph\[3\] += 4;#    ph[3] += 3;# % idle
 s#    \*(s32 \*) (obj + 0x84) = (ph\[3\] << 24) | ph\[0\] | (ph\[1\] << 8) | (ph\[2\] << 16);#    *(s32 *) (obj + 0x84) = (ph[3] << 24) | ph[0] | (ph[1] << 8) | (ph[1] << 16);# % idle
-s#    func_1511AA1C(obj, \&st->slots, \&st->state);#    func_1511AA1C(obj, \&st->slots, \&st->slots);# % idle
+s#    scenery_texture_anim_step(obj, \&st->slots, \&st->state);#    scenery_texture_anim_step(obj, \&st->slots, \&st->slots);# % idle

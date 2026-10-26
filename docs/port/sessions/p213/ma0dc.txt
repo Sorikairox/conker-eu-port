@@ -20,7 +20,7 @@ s/o->unk218 = NULL;/;/
 s/o->unk232 = 0x13;/o->unk232 = 0x12;/
 s/D_800CC2D0\[o->unk124\].unk65 != 0/o->unk65 != 0/
 s/o->unk232 = 0x14;/o->unk232 = 0x15;/
-s/ret = func_1505D024(o, 0x6000E, o->unk7A, -1);/func_1505D024(o, 0x6000E, o->unk7A, -1);/
-s/func_1505D024(o, 0x6000E, o->unk7A, -1);/func_1505D024(o, 0x6000F, o->unk7A, -1);/
-s/func_1505D024(o, 0x6000E, o->unk7A, -1);/func_1505D024(o, 0x6000E, o->unk76, -1);/
-s/func_1505D024(o, 0x6000E, o->unk7A, -1);/func_1505D024(o, 0x6000E, o->unk7A, 0);/
+s/ret = obj_send_hit(o, 0x6000E, o->unk7A, -1);/obj_send_hit(o, 0x6000E, o->unk7A, -1);/
+s/obj_send_hit(o, 0x6000E, o->unk7A, -1);/obj_send_hit(o, 0x6000F, o->unk7A, -1);/
+s/obj_send_hit(o, 0x6000E, o->unk7A, -1);/obj_send_hit(o, 0x6000E, o->unk76, -1);/
+s/obj_send_hit(o, 0x6000E, o->unk7A, -1);/obj_send_hit(o, 0x6000E, o->unk7A, 0);/

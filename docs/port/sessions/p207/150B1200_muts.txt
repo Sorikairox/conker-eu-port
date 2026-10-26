@@ -18,7 +18,7 @@ s/fwd\[0\] = side\[1\];/fwd[0] = side[0];/ % one
 s/func_150B0F40(obj, owner,/func_150B0F40(owner, obj,/ % one
 s/n1 % 26 - 0x29/n1 % 26 - 0x28/ % one multi
 s/r + 4.06f/r + 4.0f/ % one
-s/func_150ADA68() \* 3.77f/func_150ADA68() * 3.7f/ % one
+s/random_float() \* 3.77f/random_float() * 3.7f/ % one
 s/((f32 \*) ground)\[0\] \* 0.9250001f/((f32 *) ground)[0] * 0.925f/ % one multi
 s/vel\[2\] -= ((f32 \*) ground)\[2\]/vel[2] -= ((f32 *) ground)[1]/ % one
 s/r \* 0.178f + -0.44200003f/r * 0.178f + -0.442f/ % one multi

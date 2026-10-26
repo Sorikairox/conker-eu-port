@@ -1,4 +1,4 @@
-# P255 func_15072B44 (player_anim_follow_up) mutants: sed % setup names
+# P255 objev_anim_follow_up (player_anim_follow_up) mutants: sed % setup names
 s/case 0x3F:/case 0x3E:/ % a3F
 s/next = 0x3A;/next = 0x3B;/ % a35
 s/case 0xFD:/case 0xFC:/ % aFD

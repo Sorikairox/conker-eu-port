@@ -1,4 +1,4 @@
-# P238 func_150FD49C (view_spot_distance_fade) mutants: sed % setup names
+# P238 view_spot_distance_fade (view_spot_distance_fade) mutants: sed % setup names
 s/        return 1\.0f;/        return 0.0f;/ % nospot
 s/    pos\[0\] = spot\[0\];/    pos[0] = spot[1];/ % spot
 s/    pos\[2\] = spot\[2\];/    pos[2] = spot[1];/ % spot

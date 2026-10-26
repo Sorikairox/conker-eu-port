@@ -1,3 +1,3 @@
-# P243 func_150C2558 (emit_point_smoke): x=10 y=5 z=-10 (a2 / a3 / stack word 4), argB byte at word 14; func_150ADA68 = jal 150ADF48 (RETF), func_15151FA8 = jal 15151FA8 (ARGMEM 132 bytes in the registry)
+# P243 emit_point_smoke (emit_point_smoke): x=10 y=5 z=-10 (a2 / a3 / stack word 4), argB byte at word 14; random_float = jal 150ADF48 (RETF), func_15151FA8 = jal 15151FA8 (ARGMEM 132 bytes in the registry)
 base ! 2=41200000,3=40A00000,4=C1200000,14=1234 ! ! ! 150ADF48=3F000000 ! ! !
 far ! 2=C2C80000,3=0,4=44FA0000,14=7F ! ! ! 150ADF48=3E800000 ! ! !

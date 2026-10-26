@@ -36,7 +36,7 @@ s/ 3) \* 800, t, scale, scale);/ 3) * 768, t, scale, scale);/
 s/                        ix -= 18 \* 4;/                        ix -= 18;/
 s/                    } while (--count > 0);/                    } while (--count >= 0);/
 s/            if (D_80090160 & 0x10) {/            if (D_80090160 \& 0x8) {/
-s/                    gdl = func_15091534(gdl, 0, \&ready);/                    gdl = func_15091534(gdl, 1, \&ready);/
+s/                    gdl = hud_icon_sheet_load(gdl, 0, \&ready);/                    gdl = hud_icon_sheet_load(gdl, 1, \&ready);/
 s/                ix = table\[22\] + x;/                ix = table[21] + x;/
 s/                len = ((k + 1) >> 1) \* 5;/                len = (k >> 1) * 5;/
 s/                len = (k >> 1) \* 5;/                len = ((k - 1) >> 1) * 5;/

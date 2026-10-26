@@ -3,7 +3,7 @@
 \#^    if (obj->unk1D4 != NULL && (((u8 \*) obj)\[0x74\] & 0xF) != 0xF) {$#s/& 0xF)/\& 0x7)/ % nib
 \#^    if (obj->unk1D4 != NULL &&#s/obj->unk1D4 != NULL/1/ % nomat
 \#^        aimed = 1;$#s/1;/2;/
-\#^    func_150FF854(&aimed, (s32) hit, (u8 \*) start14C, (s32) pos110, (s32) dir104#s/(s32) pos110, (s32) dir104/(s32) dir104, (s32) pos110/
+\#^    beam_aim_compute(&aimed, (s32) hit, (u8 \*) start14C, (s32) pos110, (s32) dir104#s/(s32) pos110, (s32) dir104/(s32) dir104, (s32) pos110/
 \#^                  (s32) axis11C, (s32) axisF8, (s32) axisEC#s/(s32) axisF8, (s32) axisEC/(s32) axisEC, (s32) axisF8/
 \#^    kind = D_800BE616 ? 0x35 : 0x1A;$#s/0x35/0x36/
 \#^    kind = D_800BE616 ? 0x35 : 0x1A;$#s/0x1A/0x1B/
@@ -20,4 +20,4 @@
 \#^    func_151D44C4((u8 \*) start14C, arg1, arg2);$#s/start14C/end140/ % aim
 \#^    func_151D49B8((u8 \*) pos110, (u8 \*) dir104, (s32) ((u8 \*) obj->unk1D4 + node\[2\] \* 64)#s/\* 64/* 48/ % aim
 \#^    func_151D49B8((u8 \*) pos110#s/1\.0f/2.0f/ % aim
-\#^    func_150FF9F4((u8 \*) start14C, (s32) hit, arg1, arg2);$#s/(s32) hit/(s32) end140/ % aim
+\#^    beam_impact_sparks((u8 \*) start14C, (s32) hit, arg1, arg2);$#s/(s32) hit/(s32) end140/ % aim

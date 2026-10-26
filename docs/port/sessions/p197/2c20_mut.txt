@@ -1,14 +1,14 @@
 # P197 mutants of func_150B2C20
 s/D_800BEE08 \* 0x9A0), 7, 1);/D_800BEE08 * 0x9A0), 7, 0);/
-s/spray.count = (func_150ADA20() \& 1) + 3;/spray.count = (func_150ADA20() \& 1) + 2;/
+s/spray.count = (random_int() \& 1) + 3;/spray.count = (random_int() \& 1) + 2;/
 s/spray.u10 = 300;/spray.u10 = 301;/
 s/spray.u18\[0\] = p->angle - 0x20;/spray.u18[0] = p->angle - 0x21;/
 s/spray.u20\[2\] = 19.300001f;/spray.u20[2] = 19.3f;/
 s/spray.u20\[10\] = -2.6000001f;/spray.u20[10] = -2.6f;/
 s/spray.u56 = 0x32;/spray.u56 = 0x31;/
 s/func_151A74B0(\&spray, 0, view, 1);/func_151A74B0(\&spray, 1, view, 1);/
-s/n = (func_150ADA20() \& 1) + 1;/n = (func_150ADA20() \& 1) + 2;/
-s/r = func_150ADA68() \* 73.0f + 31.0f;/r = func_150ADA68() * 73.0f + 30.0f;/
+s/n = (random_int() \& 1) + 1;/n = (random_int() \& 1) + 2;/
+s/r = random_float() \* 73.0f + 31.0f;/r = random_float() * 73.0f + 30.0f;/
 s/p->angle + 0x40, 0, 0xFF/p->angle + 0x40, 0, 0xFE/
 s/3 + 4,/3 + 3,/
 s/0.009615385f, 0, view);/0.009615385f, 1, view);/

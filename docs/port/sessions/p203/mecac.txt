@@ -14,7 +14,7 @@ s/        lean = 1.5707964f;/        lean = 1.5f;/
 s/    if (neg) {/    if (!neg) {/
 s/lean \* 40.7436638f/lean * 40.0f/
 s/ang = (n < 0) ? 0xFF : n;/ang = n;/
-s/    sn = func_15048A40(ang);/    sn = func_150489B0(ang);/
+s/    sn = math_sin_u8(ang);/    sn = math_cos_u8(ang);/
 s/    a = \*(f32 \*) (p + 0x2C) \* cs;/    a = *(f32 *) (p + 0x2C) * sn;/
 s/    hs = \*(f32 \*) (p + 0x30) \* sn;/    hs = *(f32 *) (p + 0x2C) * sn;/
 s/    hc = \*(f32 \*) (p + 0x30) \* cs;/    hc = *(f32 *) (p + 0x30) * sn;/

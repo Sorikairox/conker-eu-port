@@ -16,7 +16,7 @@ s#            if (st == 0x22 \&\& P(0x2E4, s32) == 0) {#            if (st == 0x
 s#                (\*(s16 \*) (\*(u8 \*\*) (obj + 0x31C) + 0x1AA))++;#                (*(s16 *) (*(u8 **) (obj + 0x31C) + 0x1AA))--;# % twnudge mptw mpnudge0
 s#        if (obj\[0x89\] == 0 \&\& !(D_800BE616 != 0 \&\& (\*(u8 \*\*) (obj + 0x31C))\[0x84\] != 0)) {#        if (obj[0x89] == 0) {# % mphuman2
 s#                D_800CC6A0 = (s32) (\*(f32 \*) ((u8 \*) D_800DBFF0 + D_800C3E78 \* 0x9A0 + 0x37C) \* D_800A0BF0_c\[0\]);#                D_800CC6A0 = (s32) (*(f32 *) ((u8 *) D_800DBFF0 + D_800C3E78 * 0x9A0 + 0x378) * D_800A0BF0_c[0]);# % mpbtn mpsteer
-s#                yaw = func_1505A630((s8) D_800CC6A4\[2\], (s8) D_800CC6A4\[3\], 0) + D_800CC6A0;#                yaw = func_1505A630((s8) D_800CC6A4[3], (s8) D_800CC6A4[2], 0) + D_800CC6A0;# % mp
+s#                yaw = math_atan2_u16((s8) D_800CC6A4\[2\], (s8) D_800CC6A4\[3\], 0) + D_800CC6A0;#                yaw = math_atan2_u16((s8) D_800CC6A4[3], (s8) D_800CC6A4[2], 0) + D_800CC6A0;# % mp
 s#                P(0x44, f32) = \*(f32 \*) (pl + 0x44) \* 1\.75f;#                P(0x44, f32) = *(f32 *) (pl + 0x44) * 1.5f;# % sp
 s#                yaw = \*(u16 \*) (\*(u8 \*\*) (pl + 0x31C) + 0x4C);#                yaw = *(u16 *) (*(u8 **) (pl + 0x31C) + 0x4E);# % sp
 s#            if (obj\[0x223\] == 0xD) {#            if (obj[0x223] == 0xC) {# % spd twd

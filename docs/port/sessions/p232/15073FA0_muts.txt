@@ -29,8 +29,8 @@ s/        speed = (f32) (200 - CTL_U16(ctl, 0x19C)) \* 60.0f \/ 200.0f + 40.0f;/
 s/        if ((D_800D1580 >> 16) \& 1) {/        if ((D_800D1580 >> 17) \& 1) {/ % bit16 k75_tbl
 s/            speed = 0.0f;/            speed = 1.0f;/ % bit16
 s/        if (ctl->unk198 != 0) {/        if (ctl->unk198 == 0) {/ % k75_tbl c198_0
-s/            func_1505A184((u16) (s32) ((45.0f - CTL_F32(ctl, 0x170)) \* 182.04445f), speed \* 4.0f, 0.0f, \&dx, \&dy, \&dz);/            func_1505A184((u16) (s32) ((45.0f - CTL_F32(ctl, 0x170)) * 182.04445f), speed * 2.0f, 0.0f, \&dx, \&dy, \&dz);/ % k75_tbl
-s/            func_1505A184((u16) (s32) ((45.0f - CTL_F32(ctl, 0x170)) \* 182.04445f), speed \* 4.0f, 0.0f, \&dx, \&dy, \&dz);/            func_1505A184((u16) (s32) ((40.0f - CTL_F32(ctl, 0x170)) * 182.04445f), speed * 4.0f, 0.0f, \&dx, \&dy, \&dz);/ % k75_tbl
+s/            vec_from_yaw_pitch((u16) (s32) ((45.0f - CTL_F32(ctl, 0x170)) \* 182.04445f), speed \* 4.0f, 0.0f, \&dx, \&dy, \&dz);/            vec_from_yaw_pitch((u16) (s32) ((45.0f - CTL_F32(ctl, 0x170)) * 182.04445f), speed * 2.0f, 0.0f, \&dx, \&dy, \&dz);/ % k75_tbl
+s/            vec_from_yaw_pitch((u16) (s32) ((45.0f - CTL_F32(ctl, 0x170)) \* 182.04445f), speed \* 4.0f, 0.0f, \&dx, \&dy, \&dz);/            vec_from_yaw_pitch((u16) (s32) ((40.0f - CTL_F32(ctl, 0x170)) * 182.04445f), speed * 4.0f, 0.0f, \&dx, \&dy, \&dz);/ % k75_tbl
 s/            obj->y_velocity = -dy;/            obj->y_velocity = -dx;/ % k75_tbl
 s/            obj->y_velocity = 50.0f;/            obj->y_velocity = 5.0f;/ % c198_0
 s/        snd = func_15031C4C((u8 \*) me, (me->id == 0x75) ? 0x64 : 0x2C, 0);/        snd = func_15031C4C((u8 *) me, (me->id == 0x75) ? 0x2C : 0x64, 0);/ % k75_tbl
@@ -51,16 +51,16 @@ s/            state = 7;/            state = 8;/ % k7B_10_tbl
 s/            OBJ_MODEL_S16(obj, 0xA) = 0x3D4;/            OBJ_MODEL_S16(obj, 0xA) = 0x3D5;/ % k7B_10_tbl
 s/            obj->unique_id = 0xFF - (n - 1);/            obj->unique_id = 0xFF - n;/ % k7B_10_tbl
 s/            func_1506B04C((u8 \*) obj, 0xC, NULL);/            func_1506B04C((u8 *) obj, 0xD, NULL);/ % k7B_10_tbl
-s/            func_150F1C5C((u8 \*) D_800D154C, r1 \& 1, r2 \& 3, 0xFF, 1);/            func_150F1C5C((u8 *) D_800D154C, r2 \& 1, r1 \& 3, 0xFF, 1);/ % k7B_10_tbl
-s/            func_150F1C5C((u8 \*) D_800D154C, r1 \& 1, r2 \& 3, 0xFF, 1);/            func_150F1C5C((u8 *) D_800D154C, r1 \& 1, r2 \& 3, 0xFF, 0);/ % k7B_10_tbl
+s/            obj_limb_muzzle_burst((u8 \*) D_800D154C, r1 \& 1, r2 \& 3, 0xFF, 1);/            obj_limb_muzzle_burst((u8 *) D_800D154C, r2 \& 1, r1 \& 3, 0xFF, 1);/ % k7B_10_tbl
+s/            obj_limb_muzzle_burst((u8 \*) D_800D154C, r1 \& 1, r2 \& 3, 0xFF, 1);/            obj_limb_muzzle_burst((u8 *) D_800D154C, r1 \& 1, r2 \& 3, 0xFF, 0);/ % k7B_10_tbl
 s/        } else if (arg == 0xA) {/        } else if (arg == 0xB) {/ % k7B_A
 s/            state = 0xE;/            state = 0xF;/ % k7B_A
 s/            obj->y_position = me->y_position;/            obj->y_position = me->z_position;/ % k7B_A
 s/            obj->unique_id = 0x12;/            obj->unique_id = 0x13;/ % k7B_other
 s/            obj->y_position = 1040.0f;/            obj->y_position = 1000.0f;/ % k7B_other
-s/        turn = (func_150ADA20() \& 0xFFF) - 0x800;/        turn = (func_150ADA20() \& 0x7FF) - 0x800;/ % k9A k9A_hi
-s/        func_1505A184((u16) (D_800D154C->unk76 + turn), 30.0f - (f32) r2 \* 0.01f, 0.0f, \&dx, \&dy, \&dz);/        func_1505A184((u16) (D_800D154C->unk7A + turn), 30.0f - (f32) r2 * 0.01f, 0.0f, \&dx, \&dy, \&dz);/ % k9A
-s/        func_1505A184((u16) (D_800D154C->unk76 + turn), 30.0f - (f32) r2 \* 0.01f, 0.0f, \&dx, \&dy, \&dz);/        func_1505A184((u16) (D_800D154C->unk76 + turn), 30.0f + (f32) r2 * 0.01f, 0.0f, \&dx, \&dy, \&dz);/ % k9A
+s/        turn = (random_int() \& 0xFFF) - 0x800;/        turn = (random_int() \& 0x7FF) - 0x800;/ % k9A k9A_hi
+s/        vec_from_yaw_pitch((u16) (D_800D154C->unk76 + turn), 30.0f - (f32) r2 \* 0.01f, 0.0f, \&dx, \&dy, \&dz);/        vec_from_yaw_pitch((u16) (D_800D154C->unk7A + turn), 30.0f - (f32) r2 * 0.01f, 0.0f, \&dx, \&dy, \&dz);/ % k9A
+s/        vec_from_yaw_pitch((u16) (D_800D154C->unk76 + turn), 30.0f - (f32) r2 \* 0.01f, 0.0f, \&dx, \&dy, \&dz);/        vec_from_yaw_pitch((u16) (D_800D154C->unk76 + turn), 30.0f + (f32) r2 * 0.01f, 0.0f, \&dx, \&dy, \&dz);/ % k9A
 s/        obj->x_position -= dx;/        obj->x_position += dx;/ % k9A
 s/        obj->z_position -= dy;/        obj->z_position -= dz;/ % k9A
 s/        obj->xz_velocity = me->xz_velocity \* 1.35f + 6.0f;/        obj->xz_velocity = me->xz_velocity * 1.35f + 5.0f;/ % k9A
@@ -70,5 +70,5 @@ s/        obj->y_position = me->y_position - 40.0f;/        obj->y_position = me
 s/        obj->unk222 = me->unk222;/        obj->unk222 = me->unk221;/ % k9A
 s/    obj->health |= 0x80;/    obj->health |= 0x40;/ % k75_tbl
 s/    obj->unk232 = state;/    obj->unk232 = state + 1;/ % k75_tbl
-s/(s16) ((u32) func_150ADA20()/(s16) ((s32) func_150ADA20()/ % k9A_hi
+s/(s16) ((u32) random_int()/(s16) ((s32) random_int()/ % k9A_hi
 s/ 800);/ 700);/ % k9A

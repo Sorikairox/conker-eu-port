@@ -43,7 +43,7 @@ s/rec->u128 = time;/rec->u128 = timeStep;/ % base
 s/} while (1.0f < rec->u12C);/} while (2.0f < rec->u12C);/ % base emit3
 s/rec->u138 += (spr->rate + r \* spr->rateRnd)/rec->u138 += (spr->rate + spr->rateRnd)/ % base
 s/if (1.0f < rec->u138) {/if (2.0f < rec->u138) {/ % base
-/first spray/,/r = func_150ADA68/s/\*(u8 \*\*) (obj + 0x1D4) != NULL/1/ % nomtx
+/first spray/,/r = random_float/s/\*(u8 \*\*) (obj + 0x1D4) != NULL/1/ % nomtx
 s/sparkDraw.u08 = 0x1F0600;/sparkDraw.u08 = 0x1F0601;/ % base
 s/sparkDraw.u1D = 7;/sparkDraw.u1D = 8;/ % base
 s/spark.u0E = 0x15;/spark.u0E = 0x16;/ % base
@@ -53,14 +53,14 @@ s/sparkMove.floorY = sEmit2SparkFloor\[0\];/sparkMove.floorY = 0.0f;/ % base
 s/sparkMove.u1E = spr->u1A;/sparkMove.u1E = spr->u18;/ % base
 s/(u32) (spr->shadeRnd + 1) + spr->shade;/(u32) (spr->shadeRnd) + spr->shade;/ % base rndmod
 s/(u32) (spr->lifeRnd + 1) + spr->life;/(u32) (spr->lifeRnd + 1) + spr->lifeRnd;/ % base
-s/sparkMove.size = func_150ADA68() \* spr->sizeRnd + spr->size;/sparkMove.size = func_150ADA68() * spr->sizeRnd;/ % base
+s/sparkMove.size = random_float() \* spr->sizeRnd + spr->size;/sparkMove.size = random_float() * spr->sizeRnd;/ % base
 s/off\[0\] = tgt\[0\] - spark.pos\[0\];/off[0] = tgt2[0] - spark.pos[0];/ % base
 s/if (func_15146078(off, u, v)) {/if (!func_15146078(off, u, v)) {/ % base nobasis
-s/speed = func_150ADA68() \* spr->speedRnd + spr->speed;/speed = func_150ADA68() * spr->speedRnd + spr->speed2;/ % base
+s/speed = random_float() \* spr->speedRnd + spr->speed;/speed = random_float() * spr->speedRnd + spr->speed2;/ % base
 1,/spr->spreadRnd/s/func_15143874(angle & 0xFF,/func_15143874(angle \& 0x7F,/ % base rndmod
 s/sparkMove.vel\[0\] = (u\[0\] \* cs + v\[0\] \* sn + off\[0\]) \* speed;/sparkMove.vel[0] = (u[0] * sn + v[0] * cs + off[0]) * speed;/ % base
 s/sparkMove.vel\[2\] = (u\[2\] \* cs + v\[2\] \* sn + off\[2\]) \* speed;/sparkMove.vel[2] = (u[2] * cs + v[2] * sn + off[1]) * speed;/ % base
-s/sparkMove.u10 = func_150ADA68() \* spr->u10Rnd + spr->u10;/sparkMove.u10 = func_150ADA68() * spr->u10 + spr->u10Rnd;/ % base
+s/sparkMove.u10 = random_float() \* spr->u10Rnd + spr->u10;/sparkMove.u10 = random_float() * spr->u10 + spr->u10Rnd;/ % base
 s/sparkMove.rgba\[3\] = EMIT2_F2U(r \* (f32) spr->alphaRnd + (f32) spr->alpha);/sparkMove.rgba[3] = (s32) (r * (f32) spr->alphaRnd + (f32) spr->alpha);/ % alphaneg alphabig
 s/sparkMove.rgba\[3\] = EMIT2_F2U(r \* (f32) spr->alphaRnd + (f32) spr->alpha);/sparkMove.rgba[3] = EMIT2_F2U(r * (f32) spr->alphaRnd);/ % base
 s/0, 0, 0, 0, 0, 0, 0, (u8 \*) &sparkDraw, 0,/0, 0, 0, 0, 0, 0, 1, (u8 *) \&sparkDraw, 0,/ % base
@@ -79,14 +79,14 @@ s/(u32) (spr->life2Rnd + 1) + spr->life2;/(u32) (spr->life2Rnd + 1) + spr->shade
 s/(u32) (spr->shade2Rnd + 1) + spr->shade2;/(u32) (spr->life2Rnd + 1) + spr->shade2;/ % base rndmod
 s/sprite.size2 = sprite.size = /sprite.size = / % base
 s/off\[1\] = tgt2\[1\] - sprite.pos\[1\];/off[1] = tgt2[1] - sprite.pos[0];/ % base
-s/speed = func_150ADA68() \* spr->speed2Rnd + spr->speed2;/speed = func_150ADA68() * spr->speedRnd + spr->speed2;/ % base
-s/func_150ADA68() \* spr->spread2Rnd, &cs, &sn);/func_150ADA68() * spr->spread2Rnd, \&sn, \&cs);/ % base
+s/speed = random_float() \* spr->speed2Rnd + spr->speed2;/speed = random_float() * spr->speedRnd + spr->speed2;/ % base
+s/random_float() \* spr->spread2Rnd, &cs, &sn);/random_float() * spr->spread2Rnd, \&sn, \&cs);/ % base
 s/sprite.vel\[1\] = (u\[1\] \* cs + v\[1\] \* sn + off\[1\]) \* speed;/sprite.vel[1] = (u[1] * cs + v[1] * sn + off[1]);/ % base
-s/sprite.u54 = func_150ADA68() \* spr->u54Rnd + spr->u54;/sprite.u54 = func_150ADA68() * spr->u54Rnd;/ % base
+s/sprite.u54 = random_float() \* spr->u54Rnd + spr->u54;/sprite.u54 = random_float() * spr->u54Rnd;/ % base
 s/func_151307F0((s32) &sprite, 1, 0, 0, e\[0xC\], e\[1\]);/func_151307F0((s32) \&sprite, 2, 0, 0, e[0xC], e[1]);/ % base
 s/func_151307F0((s32) &sprite, 1, 0, 0, e\[0xC\], e\[1\]);/func_151307F0((s32) \&sprite, 1, 0, 0, e[0xC], e[0]);/ % base
 s/rec->u13C -= 1.0f;/rec->u13C -= 2.0f;/ % spray3
-/second spray/,/r = func_150ADA68/s/(obj\[0x74\] & 0xF) != 0xF/(obj[0x74] \& 0xF) != 0xE/ % hidden
+/second spray/,/r = random_float/s/(obj\[0x74\] & 0xF) != 0xF/(obj[0x74] \& 0xF) != 0xE/ % hidden
 s/if (1.0f < rec->u13C) {/if (1.5f < rec->u13C) {/ % base spray2one
 s/rec->u151 += D_800BE9E4;/rec->u151 += D_800BE9E4 * 2;/ % base
 s/if (\*(s8 \*) &rec->u151 >= 0x33) {/if (*(s8 *) \&rec->u151 > 0x33) {/ % tick50

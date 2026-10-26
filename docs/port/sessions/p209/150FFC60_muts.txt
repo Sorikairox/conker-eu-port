@@ -1,4 +1,4 @@
-s/set = func_150ADA20() & 1;/set = func_150ADA20() \& 2;/ %
+s/set = random_int() & 1;/set = random_int() \& 2;/ %
 s/q.names\[1\] = D_800A2438;/q.names[1] = D_800A2444;/ %
 s/q.names\[3\] = D_800A242C;/q.names[3] = (char *) \&D_800A2420;/ %
 s/D_800A2450\[set\]\[i\];/D_800A2450[0][i];/ %

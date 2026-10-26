@@ -1,5 +1,5 @@
 s/    cam = (u8 \*) D_800DBFF0 + D_80082FA4 \* 0x9A0;/    cam = (u8 *) D_800DBFF0;/
-s/    func_151108E0(D_80082FA4, mtx,/    func_151108E0(0, mtx,/
+s/    camera_view_rotation_matrix(D_80082FA4, mtx,/    camera_view_rotation_matrix(0, mtx,/
 s/-\*(f32 \*) (cam + 0x388), -\*(f32 \*) (cam + 0x380)/-*(f32 *) (cam + 0x380), -*(f32 *) (cam + 0x388)/
 s/-\*(f32 \*) (cam + 0x388), -\*(f32 \*) (cam + 0x380)/*(f32 *) (cam + 0x388), -*(f32 *) (cam + 0x380)/
 s/, \*(f32 \*) (cam + 0x5EC));/, 0.0f);/

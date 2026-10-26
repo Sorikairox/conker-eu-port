@@ -12,7 +12,7 @@ s/if (life < (s32) mode) {/if (life <= (s32) mode) {/ % lifeeq
 1,/v + -sign \* r;/s/v + -sign \* r;/v - r;/ % dragneg
 s/(obj + 0xA4) = v + -sign \* r;/(obj + 0xA4) = v - sign;/ % drag
 1,/(obj + 0xAE);/s/(obj + 0xAE);/(obj + 0xAC);/ % drag
-1,/(u32) func_150ADA20()/s/(u32) func_150ADA20()/(s32) func_150ADA20()/ % dragbig
+1,/(u32) random_int()/s/(u32) random_int()/(s32) random_int()/ % dragbig
 s/        life = \*(u16 \*) (obj + 0xA6);/        life = 0;/ % drag
 s/v = life - D_800BE9E4;/v = life - 1;/ % fade
 s/if (v < 0) {/if (v <= 0) {/ % lifeedge

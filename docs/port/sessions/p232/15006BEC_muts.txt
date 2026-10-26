@@ -13,7 +13,7 @@ s/            D_800BE778\[i\] = 0xFE;/            D_800BE778[i] = 0xFF;/ % s0
 s/        for (i = 0; i < 8; i++) {/        for (i = 0; i < 7; i++) {/ % s0
 s/        func_151DDA90(\&D_800BE900, area \* 16 + 0x13, D_800BE778);/        func_151DDA90(\&D_800BE900, area * 16 + 0x12, D_800BE778);/ % s0
 s/    if (D_800BE810 == NULL) {/    if (D_800BE810 != NULL) {/ % s0 widths_alloc
-s/        D_800BE810 = (u8 \*) func_1502B5C8(NULL, 1, 7) + 8;/        D_800BE810 = (u8 *) func_1502B5C8(NULL, 1, 7);/ % widths_alloc
+s/        D_800BE810 = (u8 \*) asset_load(NULL, 1, 7) + 8;/        D_800BE810 = (u8 *) asset_load(NULL, 1, 7);/ % widths_alloc
 s/    p\[0\] = slot;/    p[0] = slot + 1;/ % s0
 s/    p\[1\] = stamp >> 24;/    p[1] = stamp >> 16;/ % s0 stamp_wrap stamp_big
 s/    p\[3\] = stamp >> 8;/    p[3] = stamp;/ % s0 stamp_neg

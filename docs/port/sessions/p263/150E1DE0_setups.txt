@@ -1,4 +1,4 @@
-# P263 func_150E1DE0 (door_lights_update): obj 80410000; EU jal func_1509BE40 1509C250 (5 calls: 4 lights + event 0x403D), func_150498A0 150498A0, func_1509BFB0 1509C3C0; light levels D_80088D30 poked (150 / 300 / -1 / 0.5)
+# P263 map_door_lights_update (door_lights_update): obj 80410000; EU jal event_dispatch 1509C250 (5 calls: 4 lights + event 0x403D), func_150498A0 150498A0, event_dispatch_alt 1509C3C0; light levels D_80088D30 poked (150 / 300 / -1 / 0.5)
 allon ! 0=80410000 ! 80410084=00000100,80088D30=43160000,80088D34=43960000,80088D38=BF800000,80088D3C=4F400000 ! 1509C250=1;1;1;1;1 ! ! ! ! 
 alloff ! 0=80410000 ! 80410084=FFFFFFFF,80088D30=43160000,80088D34=43960000,80088D38=BF800000,80088D3C=3F000000 ! 1509C250=0;0;0;0;0 ! ! ! ! 
 mix1 ! 0=80410000 ! 80410084=FFFFFFFF ! 1509C250=0;0;1;0;0 ! ! ! ! 

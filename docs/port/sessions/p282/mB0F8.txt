@@ -21,7 +21,7 @@
 /smoke.u56 = D_800A4710/s/\[i\]/[1 - i]/
 /func_15143134(D_800A4718\[i\]/s/0x300/0x304/
 /(u32) b . 35 - 84/s/84/83/
-/func_150ADA68() \* 6.12f + 3.0f/s/3.0f/3.5f/
+/random_float() \* 6.12f + 3.0f/s/3.0f/3.5f/
 /smoke.u40 = /s/-15.373001f/-15.0f/
 /smoke.u48 = /s/30.746002f/30.0f/
 /smoke.u4C = /s/0.208f/0.2f/
@@ -29,4 +29,4 @@
 /func_15132BBC(&smoke, 3, 0xFF, (s32) arg2, 0, kind, owner)/s/(s32) arg2, 0/(s32) arg2, 1/
 /func_15132BBC(&smoke, 3, 0xFF, (s32) arg2, 0, kind, owner)/s/(s32) arg2/(s32) pos/
 /^    kind &= 0xFF;/s/0xFF/0x1FF/
-/func_15103C34((s32) pos, kind, owner)/s/kind, owner/kind, 0/
+/pos_debris_burst_spawn((s32) pos, kind, owner)/s/kind, owner/kind, 0/

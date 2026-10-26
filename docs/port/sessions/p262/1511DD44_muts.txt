@@ -1,4 +1,4 @@
-# P262 func_1511DD44 (mesh_tex_wave_update) mutants: sed % setup names
+# P262 scenery_mesh_tex_wave_update (mesh_tex_wave_update) mutants: sed % setup names
 s/if (st == NULL) {/if (st != NULL) {/ % alloc cached
 s/st = (s32 \*)allocate_memory(0xC, 1, 0, 0);/st = (s32 *)allocate_memory(0x8, 1, 0, 0);/ % alloc
 s/\*(s32 \*\*)(obj + 0x7C) = st;/;/ % alloc
@@ -13,8 +13,8 @@ s/amp_s = packed \& 0xFFF;/amp_s = packed \& 0x7FF;/ % neg
 s/amp_t = (packed >> 12) \& 0xFFF;/amp_t = (packed >> 16) \& 0xFFF;/ % alloc
 s/speed = (packed >> 24) \& 0xFF;/speed = (packed >> 24) \& 0x7F;/ % neg
 s/phase = (\*(s32 \*)(obj + 0x80) >> 4) \& 0xFF;/phase = (*(s32 *)(obj + 0x80) >> 3) \& 0xFF;/ % alloc
-s/a = func_15048A40(phase);/a = func_15048A40(phase + 1);/ % alloc
-s/b = func_150489B0(phase);/b = func_150489B0(0);/ % alloc
+s/a = math_sin_u8(phase);/a = math_sin_u8(phase + 1);/ % alloc
+s/b = math_cos_u8(phase);/b = math_cos_u8(0);/ % alloc
 s/\*(s32 \*)(obj + 0x80) += speed \* D_800BE9E4;/*(s32 *)(obj + 0x80) += speed;/ % alloc
 s/\*(s32 \*)(obj + 0x80) += speed \* D_800BE9E4;/*(s32 *)(obj + 0x80) -= speed * D_800BE9E4;/ % alloc
 s/ds = (s32)((f32)amp_s \* b);/ds = (s32)((f32)amp_s * a);/ % alloc
@@ -24,4 +24,4 @@ s/if (\*(u16 \*)(obj + 0x16) > 0) {/if (*(u16 *)(obj + 0x16) > 1) {/ % neg
 s/+ off + 8) = uv\[i \* 2\] + ds;/+ off + 8) = uv[i * 2] - ds;/ % alloc
 s/+ off + 0xA) = uv\[i \* 2 + 1\] + dt;/+ off + 0xA) = uv[i * 2] + dt;/ % cached
 s/(obj + 0x20 + D_800BE9C0 \* 4) + off + 8)/(obj + 0x20) + off + 8)/ % alloc
-s/func_1511AA1C(obj, st + 1, st + 2);/func_1511AA1C(obj, st + 2, st + 1);/ % alloc
+s/scenery_texture_anim_step(obj, st + 1, st + 2);/scenery_texture_anim_step(obj, st + 2, st + 1);/ % alloc

@@ -1,7 +1,7 @@
 s/    rec->flags16 |= 4;/    rec->flags16 |= 8;/ % t1
 s/    snd = rec->opts >> 24;/    snd = rec->opts >> 16;/ % t1 t1_snd
 s/    b.spawn.pos0\[1\] = rec->y;/    b.spawn.pos0[1] = rec->z;/ % t1
-s/    func_150A8050(m, rec->angX, rec->angY, 0.0f);/    func_150A8050(m, rec->angY, rec->angX, 0.0f);/ % t1
+s/    mtxf_rotate_xyz_deg(m, rec->angX, rec->angY, 0.0f);/    mtxf_rotate_xyz_deg(m, rec->angY, rec->angX, 0.0f);/ % t1
 s/    func_150A7E40(m, 0.0f, 0.0f, -500.0f,/    func_150A7E40(m, 0.0f, 0.0f, 500.0f,/ % t1
 s/    b.spawn.pos1\[1\] += b.spawn.pos0\[1\];/    b.spawn.pos1[1] += b.spawn.pos0[2];/ % t1
 s/    b.emit.range\[1\] = rec->rangeX;/    b.emit.range[1] = rec->rangeY;/ % t1
@@ -23,8 +23,8 @@ s/    b.spawn.rgba\[3\] = 0xFF;/    b.spawn.rgba[3] = 0;/ % t1
 s/    b.spawn.size\[1\] = 0.0f;/    b.spawn.size[1] = 1.0f;/ % t1
 s/    b.spawn.scale\[2\] = 1.0f;/    b.spawn.scale[2] = 0.0f;/ % t1
 s/    b.spawn.u44\[3\] = 6;/    b.spawn.u44[3] = 5;/ % t1
-s/        func_1510F800(0);/        func_1510F800(1);/ % t1_snd
-s/        b.spawn.sound = func_1510FD20((s32) b.spawn.pos0\[0\], (s32) b.spawn.pos0\[2\]);/        b.spawn.sound = func_1510FD20((s32) b.spawn.pos0[0], (s32) b.spawn.pos0[1]);/ % t1_snd
+s/        collision_select_area(0);/        collision_select_area(1);/ % t1_snd
+s/        b.spawn.sound = zone_tree_find_leaf((s32) b.spawn.pos0\[0\], (s32) b.spawn.pos0\[2\]);/        b.spawn.sound = zone_tree_find_leaf((s32) b.spawn.pos0[0], (s32) b.spawn.pos0[1]);/ % t1_snd
 s/        b.spawn.sound = 0;/        b.spawn.sound = 1;/ % t1
 s/    flags = (snd != 0) ? 0x01002006 : 0x2006;/    flags = (snd != 0) ? 0x00002006 : 0x2006;/ % t1_snd
 s/        flags |= 0x10;/        flags |= 0x20;/ % t2_f16
@@ -37,7 +37,7 @@ s/            e = particle_emitter_spawn(\&b.emit, 0x70, \&b.spawn, 0, 0x29, 0, 
 s/                memcpy(e + 0x170, tail.t8, 0x10);/                memcpy(e + 0x160, tail.t8, 0x10);/ % t8
 /0x29, 0, 0/,/memcpy/s/            if (e != NULL) {/            if (e == NULL) {/ % t8 t8_null
 s/            b.emit.u54\[4\] = D_80096950\[type\];/            b.emit.u54[4] = D_80096950[type + 1];/ % t10
-s/            tail.t13.obj = func_151149AC(D_80083228\[type - 13\]);/            tail.t13.obj = func_151149AC(D_80083228[type - 12]);/ % t14
+s/            tail.t13.obj = world_record_find(D_80083228\[type - 13\]);/            tail.t13.obj = world_record_find(D_80083228[type - 12]);/ % t14
 s/            if (tail.t13.obj == NULL) {/            if (tail.t13.obj != NULL) {/ % t13 t15_noobj
 s/            tail.t13.a = -80.0f;/            tail.t13.a = 80.0f;/ % t13
 s/            tail.t13.b = 0.0125f;/            tail.t13.b = -0.0125f;/ % t13

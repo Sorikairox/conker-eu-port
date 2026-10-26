@@ -1,4 +1,4 @@
-# P259 func_15040A78 (dl_walk_call_handlers) mutants: sed % setup names
+# P259 dl_trace_segments (dl_walk_call_handlers) mutants: sed % setup names
 s/for (i = 0; i < 16; i++) {/for (i = 0; i < 15; i++) {/ % base
 s/D_800C6860\[0\] = 0;/D_800C6860[0] = 1;/ % base
 s/if (end < cmd) {/if (end <= cmd) {/ % endfirst

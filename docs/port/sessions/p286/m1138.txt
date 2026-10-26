@@ -25,16 +25,16 @@
 /t.u60\[2\] = 0xFF;/s/0xFF/0xFE/
 /while (1.0f < obj->accum && self->free != -1) {/s/ && self->free != -1//
 /cs = angle_byte_cos(r - 0x40);/s/r - 0x40/r + 0x40/
-/speed = func_150ADA68() \* 33.0f + 40.0f;/s/33.0f/32.0f/
+/speed = random_float() \* 33.0f + 40.0f;/s/33.0f/32.0f/
 /t.colour\[6\] = 0x97;/s/0x97/0x96/
-/t.colour\[7\] = (u32) func_150ADA20()/s/+ 80/+ 81/
+/t.colour\[7\] = (u32) random_int()/s/+ 80/+ 81/
 /t.size\[0\] = t.size\[1\] = /s/67.0f/66.0f/
 /t.pos\[1\] = pos\[1\];/s/pos\[1\]/pos[2]/
 /t.dir\[2\] = speed \* sn;/s/sn/cs/
 /t.dir\[1\] = 0.0f;/s/0.0f/1.0f/
 /t.mode &= ~0xC0;/s/0xC0/0x80/
-/flipX = (func_150ADA20() & 1) ? 0x80 : 0;/s/0x80/0x40/
-/t.life = t.u22 = (u32) func_150ADA20()/s/t.u22 = //
+/flipX = (random_int() & 1) ? 0x80 : 0;/s/0x80/0x40/
+/t.life = t.u22 = (u32) random_int()/s/t.u22 = //
 /t.u24 = 1.0352269f;/s/1.0352269f/1.035227f + 0.001f/
 /func_151307F0((s32) &t, 1, 0, 4, obj->room, obj->owner)/s/0, 4,/0, 0x1C,/
 /func_151307F0((s32) &t, 1, 0, 4, obj->room, obj->owner)/s/obj->room, obj->owner/obj->owner, obj->room/

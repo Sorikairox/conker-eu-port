@@ -1,4 +1,4 @@
-# P243 func_150C2334 (emit_point_puff): x=10 y=5 z=-10 x0=1 z0=3 arg9=100 (floats in a2/a3 and stack words); func_1518CFF0 = jal 1518CFF0 (ARGMEM 50 bytes in the registry), func_151429E0 = jal 15142F50 (OUTB), func_150ADA20 = jal 150ADF00 (RET); neg: arg9 = 10000
+# P243 func_150C2334 (emit_point_puff): x=10 y=5 z=-10 x0=1 z0=3 arg9=100 (floats in a2/a3 and stack words); func_1518CFF0 = jal 1518CFF0 (ARGMEM 50 bytes in the registry), func_151429E0 = jal 15142F50 (OUTB), random_int = jal 150ADF00 (RET); neg: arg9 = 10000
 base ! 2=41200000,3=40A00000,4=C1200000,5=3F800000,7=40400000,12=42C80000 ! ! 150ADF00=37 ! ! ! !
 col ! 2=41200000,3=40A00000,4=C1200000,5=3F800000,7=40400000,12=42C80000 ! ! 150ADF00=1F ! ! ! ! 15142F50=1:11/2:22/3:33
 neg ! 2=C2C80000,3=0,4=42480000,5=42C80000,7=C1A00000,12=461C4000 ! ! 150ADF00=FFFFFFF5 ! ! ! ! 15142F50=1:81/2:92/3:A3

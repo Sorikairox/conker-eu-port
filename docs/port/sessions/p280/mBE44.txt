@@ -1,6 +1,6 @@
 \#^    func_1516547C(2, D_800BEE0B#s/(2,/(1,/ % a
-\#^    func_150E892C(D_800A186C#s/\(.\) 62 + 120/\1 61 + 120/ % a
-\#^    func_150E892C(D_800A186C#s/(u32) func/(s32) func/ % a
+\#^    fx_debris_emitter_spawn(D_800A186C#s/\(.\) 62 + 120/\1 61 + 120/ % a
+\#^    fx_debris_emitter_spawn(D_800A186C#s/(u32) func/(s32) func/ % a
 \#^    func_151D5AC4(D_800A1860#s/0xFF/0xFE/ % a
 \#^    func_151D45A4(#s/D_800A1860/D_800A186C/ % a
 \#^    func_15154728(#s/f \* 4.0f/f * 3.0f/ % a

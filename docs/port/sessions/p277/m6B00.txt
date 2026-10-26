@@ -1,26 +1,26 @@
-\#^    if (func_1509BE40(1, 0x4003, 6, 0x2000) != 0 && arg0->unk3D0->health != 0) {$#s/6, 0x2000/6, 0x2001/
-\#^    if (func_1509BE40(1, 0x4003, 6, 0x2000) != 0 && arg0->unk3D0->health != 0) {$#s/health != 0/health == 0/
+\#^    if (event_dispatch(1, 0x4003, 6, 0x2000) != 0 && arg0->unk3D0->health != 0) {$#s/6, 0x2000/6, 0x2001/
+\#^    if (event_dispatch(1, 0x4003, 6, 0x2000) != 0 && arg0->unk3D0->health != 0) {$#s/health != 0/health == 0/
 \#^        arg0->unk84 |= 0xC0001000;$#s/0xC0001000/0xC0000000/
-\#^        func_15048F90(&D_800A1F50, (struct17 \*) &arg0->unk2A4, &toObj);$#s/unk2A4/unk2A8/
-\#^        func_15048F90(&D_800A1F50, (struct17 \*) &arg0->unk2A4, &toObj);$#s/&D_800A1F50/\&D_800A1F5C/
-\#^        func_15048F90(&D_800A1F50, &D_800A1F5C, &axis);$#s/&D_800A1F50, &D_800A1F5C/\&D_800A1F5C, \&D_800A1F50/
+\#^        vec3_diff(&D_800A1F50, (struct17 \*) &arg0->unk2A4, &toObj);$#s/unk2A4/unk2A8/
+\#^        vec3_diff(&D_800A1F50, (struct17 \*) &arg0->unk2A4, &toObj);$#s/&D_800A1F50/\&D_800A1F5C/
+\#^        vec3_diff(&D_800A1F50, &D_800A1F5C, &axis);$#s/&D_800A1F50, &D_800A1F5C/\&D_800A1F5C, \&D_800A1F50/
 \#^        invLen = 1.0f / func_150AD930((f32 \*) &axis);$#s/1.0f \//2.0f \//
-\#^        func_1504917C(&axis, &dir);$#s/&axis/\&toObj/
+\#^        vec3_normalize(&axis, &dir);$#s/&axis/\&toObj/
 \#^        t = func_150ADDE0(&dir, &toObj) \* invLen \* 0.75f;$#s/0.75f/0.7f/
 \#^        t = func_150ADDE0(&dir, &toObj) \* invLen \* 0.75f;$#s/&dir, &toObj/\&toObj, \&dir/
 \#^        if (t < 0.0f) {$#s/t < 0.0f/t <= 0.0f/
 \#^            t = 0.0f;$#s/0.0f/0.5f/
 \#^        } else if (1.0f < t) {$#s/1.0f < t/0.9f < t/
-\#^        if (func_1509BE40(4, 0x2000, 0xAC, 0x4040, 0x4041, 0x4042, 0x4043) != 0) {$#s/0x4042/0x4044/
+\#^        if (event_dispatch(4, 0x2000, 0xAC, 0x4040, 0x4041, 0x4042, 0x4043) != 0) {$#s/0x4042/0x4044/
 \#^            offset = 0.0f \* t + -900.0f;$#s/-900.0f/-800.0f/
-\#^        } else if (func_1509BE40(4, 0x2000, 0xAC, 0x4047, 0x4046, 0x4045, 0x4044) != 0) {$#s/0x4047, 0x4046/0x4046, 0x4047/
+\#^        } else if (event_dispatch(4, 0x2000, 0xAC, 0x4047, 0x4046, 0x4045, 0x4044) != 0) {$#s/0x4047, 0x4046/0x4046, 0x4047/
 \#^            offset = 0.0f \* t + 900.0f;$#s/900.0f/901.0f/
 \#^            arg0->unk374 = 294.0f;$#s/294.0f/220.0f/
-\#^        func_1509BFB0(3, 0x4003, 3, (s32) offset, (s32) -20.0f, (s32) (6728.0f \* t + -5530.0f));$#s/(s32) -20.0f/(s32) -21.0f/
-\#^        func_1509BFB0(3, 0x4003, 3, (s32) offset, (s32) -20.0f, (s32) (6728.0f \* t + -5530.0f));$#s/6728.0f/6720.0f/
-\#^        func_1509BFB0(3, 0x4003, 3, (s32) offset, (s32) -20.0f, (s32) (6728.0f \* t + -5530.0f));$#s/(s32) (6728.0f \* t + -5530.0f)/(s32) (6728.0f * t) + -5530/
-\#^        func_15049978(&arg0->unk37C, func_15048FC8(&D_800D9E70) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,$#s/180.0f/90.0f/
-\#^        func_15049978(&arg0->unk37C, func_15048FC8(&D_800D9E70) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,$#s/8.0f, 10.0f/10.0f, 8.0f/
+\#^        event_dispatch_alt(3, 0x4003, 3, (s32) offset, (s32) -20.0f, (s32) (6728.0f \* t + -5530.0f));$#s/(s32) -20.0f/(s32) -21.0f/
+\#^        event_dispatch_alt(3, 0x4003, 3, (s32) offset, (s32) -20.0f, (s32) (6728.0f \* t + -5530.0f));$#s/6728.0f/6720.0f/
+\#^        event_dispatch_alt(3, 0x4003, 3, (s32) offset, (s32) -20.0f, (s32) (6728.0f \* t + -5530.0f));$#s/(s32) (6728.0f \* t + -5530.0f)/(s32) (6728.0f * t) + -5530/
+\#^        func_15049978(&arg0->unk37C, vec3_heading_deg(&D_800D9E70) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,$#s/180.0f/90.0f/
+\#^        func_15049978(&arg0->unk37C, vec3_heading_deg(&D_800D9E70) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,$#s/8.0f, 10.0f/10.0f, 8.0f/
 \#^                      arg0->unk7B4);$#s/unk7B4/unk7B8/
 \#^        arg0->unk39C = arg0->unk37C \* 0.017453292f;$#s/0.017453292f/0.0174533f/
 \#^        arg0->unk84 &= 0x3FFFEFFF;$#s/0x3FFFEFFF/0x3FFFFFFF/

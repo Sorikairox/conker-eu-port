@@ -1,4 +1,4 @@
-# P255 func_150F6EDC (spark_burst_spawn) mutants: sed % setup names
+# P255 fx_bone_spark_dust_spawn (spark_burst_spawn) mutants: sed % setup names
 s/size \*= 1.0f + (r + r);/size *= 1.0f + r;/ % hitbounce
 s/size \*= 1.0f + (r + r);/size *= 2.0f + (r + r);/ % hitbounce
 s/< 0.6f) ? 1 : 0;/<= 0.6f) ? 1 : 0;/ % miss
@@ -9,7 +9,7 @@ s/floor.unk1C = 0;/floor.unk1C = 1;/ % miss
 s/floor.unk1D = 0;/floor.unk1D = 1;/ % miss
 s/floor.unk20 = 0;/floor.unk20 = 1;/ % miss
 s/floor.floor_y = -10000.0f;/floor.floor_y = -1000.0f;/ % miss
-s/if (func_150ADA68() < 0.5f) {/if (func_150ADA68() <= 0.5f) {/ % hitnob
+s/if (random_float() < 0.5f) {/if (random_float() <= 0.5f) {/ % hitnob
 s/            bounce = 1;/            bounce = 2;/ % hitbounce
 s/(pos, dir, 1, speed/(pos, unused, 1, speed/ % hitbounce
 s/(pos, dir, 1, speed/(pos, dir, 0, speed/ % hitbounce

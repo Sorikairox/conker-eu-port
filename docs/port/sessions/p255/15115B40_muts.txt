@@ -1,4 +1,4 @@
-# P255 func_15115B40 (lift_y_update) mutants: sed % setup names
+# P255 scenery_lift_y_update (lift_y_update) mutants: sed % setup names
 s/(params >> 16) \& 0xFF;/(params >> 16) \& 0x7F;/ % bytes
 s/((params >> 24) \& 0xFF) + 1;/((params >> 24) \& 0xFF) + 2;/ % downend upover
 s/((params >> 24) \& 0xFF) + 1;/(params >> 24) + 1;/ % bytes

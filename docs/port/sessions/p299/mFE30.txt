@@ -4,7 +4,7 @@
 \#^    y = 1;#s/1/0/
 \#if (D_8008481C == 0 && (buttons & 0x20) && (buttons & 0x10))#s/& 0x10)/\& 0x40)/
 \#^        D_8008481C = 60;#s/60/61/
-\#^        func_150177F8();#s/func_150177F8();//
+\#^        level_state_init();#s/level_state_init();//
 \#^        buttons = 0;#s/= 0/= buttons/
 \#^        D_8008481C -= D_800BE9E4;#s/D_800BE9E4/1/
 \#^        if (D_8008481C <= 0) {#s/<= 0/< 0/

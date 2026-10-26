@@ -1,5 +1,5 @@
-# P243 func_150C2558 (emit_point_smoke) mutants: sed % setup names
-s/(z + 15.0f) - func_150ADA68() \* 30.0f/(z + 15.0f) - func_150ADA68() * 20.0f/ % base far
+# P243 emit_point_smoke (emit_point_smoke) mutants: sed % setup names
+s/(z + 15.0f) - random_float() \* 30.0f/(z + 15.0f) - random_float() * 20.0f/ % base far
 s/(z + 15.0f)/(z + 16.0f)/ % base far
 s/sm.pos\[1\] = y;/sm.pos[1] = x;/ % base
 s/sm.sizeA = 22.0f;/sm.sizeA = 23.0f;/ % base

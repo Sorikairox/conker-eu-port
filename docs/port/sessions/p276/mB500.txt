@@ -1,9 +1,9 @@
-\#^    if (func_150ADA20() & 0xF) {$#s/0xF/0x7/
+\#^    if (random_int() & 0xF) {$#s/0xF/0x7/
 \#^    pos = (f32 \*) ((u8 \*) D_800DBFF0 + idx \* 0x9A0 + 0x2F8);$#s/0x2F8/0x2FC/
 \#^    yaw = \*(f32 \*)#s/0x380/0x384/
 \#^    yaw = \*(f32 \*)#s/0.7111111f/0.75f/
-\#^    dist = func_150ADA68() \* 1903.0f + 107.0f;$#s/1903/1904/
-\#^    dist = func_150ADA68() \* 1903.0f + 107.0f;$#s/107/108/
+\#^    dist = random_float() \* 1903.0f + 107.0f;$#s/1903/1904/
+\#^    dist = random_float() \* 1903.0f + 107.0f;$#s/107/108/
 \#^    s = angle_byte_cos((u8) (angle - 0x40));$#s/0x40/0x41/
 \#^    rec\[0\] = pos\[0\] - dist \* s;$#s/\* s/* c/
 \#^    rec\[2\] = pos\[2\] - dist \* c;$#s/- dist/+ dist/
@@ -26,7 +26,7 @@
 \#^    obj = func_151491F4#s/0xC, 1, 7/0xC, 1, 6/
 \#^        memcpy((s32) obj + 0x28, rec, 0x18);$#s/0x28/0x2C/
 \#^    if (!ok) {$#s/!ok/0/
-\#^    angle = (u32) func_150ADA20()#s/ 41 + yaw/ 40 + yaw/
-\#^    angle = (u32) func_150ADA20()#s/yaw - 20;/yaw - 21;/
-\#^    angle = (u32) func_150ADA20()#s/(u32) func/(s32) func/
+\#^    angle = (u32) random_int()#s/ 41 + yaw/ 40 + yaw/
+\#^    angle = (u32) random_int()#s/yaw - 20;/yaw - 21;/
+\#^    angle = (u32) random_int()#s/(u32) func/(s32) func/
 \#^    obj = func_151491F4#s/ 61 + 5)/ 61 + 6)/

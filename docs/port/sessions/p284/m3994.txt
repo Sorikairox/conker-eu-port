@@ -31,4 +31,4 @@
 \#^    if ((obj->unk28 == 0.0f && obj->unk83 >= 21 && obj->unkCC == 0) || obj->unk107 != 0 || obj->health == 0) {$#s/ || obj->health == 0//
 \#^    if ((obj->unk28 == 0.0f && obj->unk83 >= 21 && obj->unkCC == 0) || obj->unk107 != 0 || obj->health == 0) {$#s/ || obj->unk107 != 0//
 \#^        func_10010630(0x93, obj, 0x7D00, 200, 2500);$#s/0x93/0x92/
-\#^        func_15060F28(obj, 1);$#s/1)/0)/
+\#^        obj_remove(obj, 1);$#s/1)/0)/

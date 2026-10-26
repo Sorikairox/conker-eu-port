@@ -29,8 +29,8 @@ s/    if (dist < 1.0f) {/    if (dist < 0.5f) {/ % near07
 s/        if ((dist < 100.0f || kind == 3) \&\& oz != 0) {/        if ((dist < 10.0f || kind == 3) \&\& oz != 0) {/ % oz_close oz_ox
 s/            t \*= 1.25f;/            t *= 1.5f;/ % k9_ox racer2_k9
 s/        dz += h \* t;/        dz -= h * t;/ % ox_only oz_ox
-s/    ang = (f32) (u32) func_1505A630(dx, -dz, 0) \* 0.0054931640625f;/    ang = (f32) (u32) func_1505A630(dx, dz, 0) * 0.0054931640625f;/ % plain
-s/    ang = (f32) (u32) func_1505A630(dx, -dz, 0) \* 0.0054931640625f;/    ang = (f32) (s16) func_1505A630(dx, -dz, 0) * 0.0054931640625f;/ % ang_hi
+s/    ang = (f32) (u32) math_atan2_u16(dx, -dz, 0) \* 0.0054931640625f;/    ang = (f32) (u32) math_atan2_u16(dx, dz, 0) * 0.0054931640625f;/ % plain
+s/    ang = (f32) (u32) math_atan2_u16(dx, -dz, 0) \* 0.0054931640625f;/    ang = (f32) (s16) math_atan2_u16(dx, -dz, 0) * 0.0054931640625f;/ % ang_hi
 s/        cur = CF34_F(obj, 0x40) - 90.0f;/        cur = CF34_F(obj, 0x40) + 90.0f;/ % k3
 s/    diff = func_15144BC8(func_15144BC8(cur) - base);/    diff = func_15144BC8(func_15144BC8(cur) + base);/ % plain
 s/        diff = -360.0f + diff;/        diff = 360.0f - diff;/ % plain_yaw200
@@ -39,7 +39,7 @@ s/    if (45.0f < diff || diff < -45.0f) {/    if (45.0f < diff) {/ % plain_yawn
 s/        h = CF34_F(rec, 0x18) + lead - (f32) oz - CF34_RAILF(0x17E8, i);/        h = CF34_F(rec, 0x18) + lead + (f32) oz - CF34_RAILF(0x17E8, i);/ % oz_far
 s/        h = (f32) \*(s16 \*) (rec + 0x1A6) - (f32) oz - CF34_RAILF(0x17E8, i);/        h = (f32) *(s16 *) (rec + 0x1A4) - (f32) oz - CF34_RAILF(0x17E8, i);/ % replan
 s/    CF34_RAILF(0x17E8, i) += h \* rate;/    CF34_RAILF(0x17E8, i) += h;/ % plain
-s/    pitch = (f32) (u32) func_1505A630(dist, CF34_F(CF34_ST(obj), 0x140) - CF34_RAILF(0x17E8, i), 0) \* 0.0054931640625f;/    pitch = (f32) (u32) func_1505A630(dist, CF34_F(CF34_ST(obj), 0x144) - CF34_RAILF(0x17E8, i), 0) * 0.0054931640625f;/ % plain
+s/    pitch = (f32) (u32) math_atan2_u16(dist, CF34_F(CF34_ST(obj), 0x140) - CF34_RAILF(0x17E8, i), 0) \* 0.0054931640625f;/    pitch = (f32) (u32) math_atan2_u16(dist, CF34_F(CF34_ST(obj), 0x144) - CF34_RAILF(0x17E8, i), 0) * 0.0054931640625f;/ % plain
 s/    while (180.0f < curp) {/    if (180.0f < curp) {/ % plain_dp450
 s/    while (180.0f < dp) {/    if (180.0f < dp) {/ % k15_dp600
 s/    dp = func_15144BC8(curp - pitch);/    dp = func_15144BC8(pitch - curp);/ % plain
@@ -75,7 +75,7 @@ s/            CF34_ST(obj)\[0x86\] = 0;/            CF34_ST(obj)[0x87] = 0;/ % k
 s/            v = \*(u16 \*) (obj + 0x76) - (s32) (yaw \* 16.0f);/            v = *(u16 *) (obj + 0x76) + (s32) (yaw * 16.0f);/ % k3
 s/            \*(s16 \*) (obj + 0x7A) = v;/            *(s16 *) (obj + 0x78) = v;/ % k3
 s/            CF34_F(obj, 0x40) = (f32) (s16) (v + 0x4000) \* 0.0054931640625f;/            CF34_F(obj, 0x40) = (f32) (u16) (v + 0x4000) * 0.0054931640625f;/ % k3_neg
-s/            func_150DAB6C(obj, t);/            func_150DAB6C(obj, dist);/ % k3
+s/            trail_send_aim_msg(obj, t);/            trail_send_aim_msg(obj, dist);/ % k3
 s/        } else if (CF34_RAILW(0x29C, i) >= 0) {/        } else if (CF34_RAILW(0x29C, i) > 0) {/ % k9_0
 s/        } else if (CF34_RAILW(0x29C, i) >= 0) {/        } else if (CF34_RAILW(0x29C, i) >= -1) {/ % k9_neg
 s/            \*(u16 \*) (CF34_ST(obj) + 0x8A) = 0x2000;/            *(u16 *) (CF34_ST(obj) + 0x8A) |= 0x2000;/ % k9_0 k38_limit k15

@@ -1,4 +1,4 @@
-# P249 func_150ED818 (tank_shell_aim_error) mutants: sed % setup names
+# P249 tank_shell_aim_error (tank_shell_aim_error) mutants: sed % setup names
 s/skel = \*(u8 \*\*) (obj + 0x1D4);/skel = *(u8 **) (obj + 0x1D0);/ % skel low
 s/(skel + 0xC0)/(skel + 0xB0)/ % skel
 s/0.0f, 0.0f, 1.0f, \&ox/0.0f, 1.0f, 0.0f, \&ox/ % skel

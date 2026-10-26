@@ -1,6 +1,6 @@
 \#^    cyl\[0\] = D_800D34B8 + sBlastCyl\[0\] \* 0x34;#s/sBlastCyl\[0\]/sBlastCyl[1]/
 \#^    cyl\[1\] = D_800D34B8 + sBlastCyl\[1\] \* 0x34;#s/0x34/0x30/
-\#^    n = func_150ADA20() . 9U + 13;#s/+ 13/+ 12/
+\#^    n = random_int() . 9U + 13;#s/+ 13/+ 12/
 \#^    debris.u50 = 0x12DE8;#s/0x12DE8/0x12DE9/
 \#^    debris.u56 = 1;#s/1;/2;/
 \#^    debris.u60\[1\] = 8;#s/8;/9;/
@@ -9,29 +9,29 @@
 \#^    debris.u72 = 0xC;#s/0xC/0xD/
 \#^    debris.u74 = 0x15;#s/0x15/0x16/
 \#^    debris.u1C\[2\] = 1.0f;#s/1.0f/0.0f/
-\#^        debris.life = func_150ADA20() . 26U + 40;#s/26U/25U/
+\#^        debris.life = random_int() . 26U + 40;#s/26U/25U/
 \#^        debris.size\[0\] = debris.size\[1\] = #s/debris.size\[1\] = //
-\#^        debris.rot\[1\] = func_150ADA68() \* 360.0f;#s/360.0f/180.0f/
+\#^        debris.rot\[1\] = random_float() \* 360.0f;#s/360.0f/180.0f/
 \#^        debris.spinB = #s/sBlastSpinBase/sBlastSizeBase/
-\#^        func_1514470C(cyl\[func_150ADA20() & 1\], (u8 \*) debris.pos);#s/debris.pos/debris.vel/
+\#^        func_1514470C(cyl\[random_int() & 1\], (u8 \*) debris.pos);#s/debris.pos/debris.vel/
 \#^        func_15143794((u32) r1 . 31 - 0x54, (u32) r2 . 26 - 0x2D, rf#s/- 0x54/- 0x55/
 \#^        func_15143794((u32) r1 . 31 - 0x54, (u32) r2 . 26 - 0x2D, rf#s/(u32) r2/(u32) r1/
 \#^        debris.u4C = #s/sBlastU4CBase/sBlastU4CRange/
 \#^        func_15132BBC(&debris, 3, 0xFF, 0, 0, arg0, owner);#s/3, 0xFF/2, 0xFF/
-\#^    n = func_150ADA20() . 9U + 17;#s/+ 17/+ 16/
+\#^    n = random_int() . 9U + 17;#s/+ 17/+ 16/
 \#^    smoke.type = 0x5103;#s/0x5103/0x5102/
 \#^    smoke.u14\[0\] = 0xD4;#s/0xD4/0xD5/
 \#^    smoke.u14\[9\] = 0x6C;#s/0x6C/0x6D/
 \#^    smoke.u20 = 7;#s/7;/8;/
 \#^    smoke.u24 = sSmokeU24\[0\];#s/sSmokeU24/sSmokeTail/
 \#^    smoke.dir\[1\] = ((s32 \*) D_800A5860)\[1\];#s/\[1\];/[0];/
-\#^    bitA = (func_150ADA20() & 1) ? 0x40 : 0;#s/0x40 : 0/0 : 0x40/
+\#^    bitA = (random_int() & 1) ? 0x40 : 0;#s/0x40 : 0/0 : 0x40/
 \#^    smoke.flags = bitB | 7 | bitA | 0xCE00 | 0x20000 | 0x800000;#s/ | 0x800000//
 \#^    smoke.u60\[2\] = 0x10;#s/0x10/0x11/
 \#^    smoke.u6C = 0.0f;#s/0.0f/1.0f/
 \#^    tail = sSmokeTail\[0\];#s/sSmokeTail/sSmokeU24/
 \#^        smoke.life2 = smoke.life = #s/smoke.life2 = //
-\#^        smoke.u14\[7\] = func_150ADA20() . 101U + 0x9B;#s/101U/100U/
+\#^        smoke.u14\[7\] = random_int() . 101U + 0x9B;#s/101U/100U/
 \#^        smoke.size\[0\] = smoke.size\[1\] = #s/sSmokeSizeBase/sSmokeSizeRange/
 \#^        func_15143794((u32) r1 . 41 - 0x59, (u32) r2 . 51 - 0x40, rf#s/51 - 0x40/50 - 0x40/
 \#^        func_15143794((u32) r1 . 41 - 0x59, (u32) r2 . 51 - 0x40, rf#s/sSmokeSpeedBase/sSmokeSpeedRange/

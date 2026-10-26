@@ -10,18 +10,18 @@ s#                \*(f32 \*) (obj + 0x80) = 0\.0f;#                *(f32 *) (obj
 s#        \*(f32 \*) (obj + 0x80) += (0\.01953125f + 0\.00390625f \* (f32) i) \* D_800BE9A4;#        *(f32 *) (obj + 0x80) += (0.01953125f + 0.0078125f * (f32) i) * D_800BE9A4;# % flap
 s#        if (\*(s32 \*) (obj + 0x7C) < 0x14) {#        if (*(s32 *) (obj + 0x7C) <= 0x14) {# % wrap
 s#            \*(s32 \*) (obj + 0x7C) = 0xEC;#            *(s32 *) (obj + 0x7C) = 0xED;# % wrap
-s#            sc\[i\]\[1\] = func_150489B0((u32) \*(f32 \*) (obj + 0x80) \& 0xFF);#            sc[i][1] = func_15048A40((u32) *(f32 *) (obj + 0x80) \& 0xFF);# % s420 s410
+s#            sc\[i\]\[1\] = math_cos_u8((u32) \*(f32 \*) (obj + 0x80) \& 0xFF);#            sc[i][1] = math_sin_u8((u32) *(f32 *) (obj + 0x80) \& 0xFF);# % s420 s410
 s#            t = \*(f32 \*) (obj + 0x80) \* D_800A3538_c\[0\] - D_800A353C_c\[0\] \* (f32) i;#            t = *(f32 *) (obj + 0x80) * D_800A3538_c[0] - D_800A353C_c[0] * (f32) (i + 1);# % flap
 s#            if (t <= 0\.0f) {#            if (t < 0.0f) {# % zero
 s#                t = 5\.0f;#                t = 4.0f;# % neg zero
-s#                s = func_15048A40((state >> 1) \& 0xFF);#                s = func_15048A40((state >> 2) \& 0xFF);# % flap
+s#                s = math_sin_u8((state >> 1) \& 0xFF);#                s = math_sin_u8((state >> 2) \& 0xFF);# % flap
 s#                t = sinf(t) \* (s + s) + 5\.0f;#                t = sinf(t) * (s + s) + 6.0f;# % flap
-s#            sc\[i\]\[1\] = func_150489B0(a);#            sc[i][1] = func_150489B0(a + 1);# % flap
+s#            sc\[i\]\[1\] = math_cos_u8(a);#            sc[i][1] = math_cos_u8(a + 1);# % flap
 s#    if (\*(s32 \*) (obj + 0x7C) != 0x420) {#    if (*(s32 *) (obj + 0x7C) != 0x41F) {# % flap s420
 s#            dy = \*(f32 \*) (pl + 0x18) - oy;#            dy = *(f32 *) (pl + 0x18) + oy;# % flap
 s#            if (dx \* dx + dy \* dy + dz \* dz < 3072\.0f) {#            if (dx * dx + dy * dy + dz * dz < 30.0f) {# % flap
 s#                \*(s32 \*) (obj + 0x7C) = (\*(u8 \*) (\*(u8 \*\*) (pl + 0x31C) + 0x57) == 1) ? 0x420 : 0x41F;#                *(s32 *) (obj + 0x7C) = (*(u8 *) (*(u8 **) (pl + 0x31C) + 0x56) == 1) ? 0x420 : 0x41F;# % flap r57
-s#            s = func_15048A40((tag + heading) \& 0xFF);#            s = func_15048A40((tag - heading) \& 0xFF);# % flap neghead
+s#            s = math_sin_u8((tag + heading) \& 0xFF);#            s = math_sin_u8((tag - heading) \& 0xFF);# % flap neghead
 s#            ps = sc\[tag >> 8\]\[0\];#            ps = sc[tag >> 8][1];# % flap
 s#            pc = sc\[tag >> 8\]\[1\];#            pc = sc[(tag >> 8) \& 1][1];# % flap
 s#            z = by \* ps + bz \* pc;#            z = by * ps - bz * pc;# % flap

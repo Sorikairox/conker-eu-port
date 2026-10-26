@@ -11,4 +11,4 @@ s/        t = 12.0f;/        ;/
 s/D_800D154C->unk21C = t \* 100.0f;/D_800D154C->unk21C = t * 10.0f;/
 s/D_800D154C->gravity \* t \* 0.5f;/D_800D154C->gravity * t;/
 s/D_800D154C->unk223 = 4;/D_800D154C->unk223 = 5;/
-s/    func_15075548();/    ;/
+s/    aiscript_move_setup();/    ;/

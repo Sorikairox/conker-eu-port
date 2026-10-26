@@ -13,25 +13,25 @@ s/func_151530A8((s32 \*) &emit, room, owner);/func_151530A8((s32 *) \&emit, 0, o
 s/func_151530A8((s32 \*) &emit, room, owner);/func_151530A8((s32 *) \&emit, room, 1);/ %
 s/req.texture = 0x2B;/req.texture = 0x2A;/ %
 s/req.u04 = 0x20000;/req.u04 = 0;/ %
-s/req.life = func_150ADA20() . 7U + 6;/req.life = func_150ADA20() \& 7U + 6;/ %
-s/req.life = func_150ADA20() . 7U + 6;/req.life = func_150ADA20() \/ 7U + 6;/ %
-s/s = func_150ADA68() \* 196.0f + 106.0f;/s = func_150ADA68() * 196.0f;/ %
+s/req.life = random_int() . 7U + 6;/req.life = random_int() \& 7U + 6;/ %
+s/req.life = random_int() . 7U + 6;/req.life = random_int() \/ 7U + 6;/ %
+s/s = random_float() \* 196.0f + 106.0f;/s = random_float() * 196.0f;/ %
 s/req.halfH = s;/req.halfH = 1.0f;/ %
 s/req.pos\[2\] = pos\[2\];/req.pos[2] = pos[1];/ %
 s/req.fadeRate = 0x55;/req.fadeRate = 0x56;/ %
 s/req.u24 = 1.0f;/req.u24 = 0.0f;/ %
 s/req.angle\[1\] = 0.0f;/;/ %
-s/flipA = (func_150ADA20() & 1) ? 0x40 : 0;/flipA = (func_150ADA20() \& 1) ? 0 : 0x40;/ %
-s/flipB = (func_150ADA20() & 1) ? 0x80 : 0;/flipB = (func_150ADA20() \& 2) ? 0x80 : 0;/ %
+s/flipA = (random_int() & 1) ? 0x40 : 0;/flipA = (random_int() \& 1) ? 0 : 0x40;/ %
+s/flipB = (random_int() & 1) ? 0x80 : 0;/flipB = (random_int() \& 2) ? 0x80 : 0;/ %
 s/req.flags = (flipB | 1) | flipA | 0xC200;/req.flags = flipB | flipA | 0xC200;/ %
 s/req.update = 6;/req.update = 5;/ %
 s/req.u65 = 4;/req.u65 = 0;/ %
 s/func_151307F0((s32) &req, 1, 0, 0, room, owner);/func_151307F0((s32) \&req, 0, 0, 0, room, owner);/ %
 s/func_151307F0((s32) &req, 1, 0, 0, room, owner);/func_151307F0((s32) \&req, 1, 0, 0, owner, room);/ %
 s/flash.unk1 = -1;/flash.unk1 = 0;/ %
-s/flash.unk2 = func_150ADA20() . 7U + 6;/flash.unk2 = func_150ADA20() . 7U + 5;/ %
+s/flash.unk2 = random_int() . 7U + 6;/flash.unk2 = random_int() . 7U + 5;/ %
 s/flash.unk4 = 0;/flash.unk4 = 1;/ %
 s/at.unk8 = pos\[2\];/at.unk8 = pos[1];/ %
-s/(func_150ADA20() & 1) + 5, 0xFF/(func_150ADA20() \& 1) + 6, 0xFF/ %
+s/(random_int() & 1) + 5, 0xFF/(random_int() \& 1) + 6, 0xFF/ %
 s/0xFF, 0xFF, 0xFF, 0xFF, 0, 0, room, owner);/0xFF, 0xFF, 0xFF, 0xFF, 0, 4, room, owner);/ %
 s/0xFF, 0xFF, 0xFF, 0xFF, 0, 0, room, owner);/0xFF, 0xFF, 0xFF, 0xFF, 0, 0, room, 0);/ %

@@ -1,4 +1,4 @@
-# P256 func_15072420 (event_respawn_record_object) mutants: sed % setup names
+# P256 objev_respawn_record_object (event_respawn_record_object) mutants: sed % setup names
 s/(req >> 8) \& 0x7F/(req >> 8) \& 0xFF/ % flag
 s/(req >> 15) \& 1/(req >> 14) \& 1/ % flag base
 s/(req >> 16) \& 0xFF/(req >> 16) \& 0x7F/ % keep
@@ -6,10 +6,10 @@ s/func_15083E0C(req \& 0xFF)/func_15083E0C(req \& 0x7F)/ % rec5
 s/if (rec == -1)/if (rec == 0)/ % norec
 s/D_800D252C\[rec\] = 0;/D_800D252C[rec] = 1;/ % base
 s/if (!(state \& 0x80))/if (state \& 0x80)/ % keep base
-s/old = func_1505EEF4(rec);/old = func_1505EEF4(0);/ % base
+s/old = obj_find_by_spawn(rec);/old = obj_find_by_spawn(0);/ % base
 s/if (old != NULL)/if (old == NULL)/ % noold base
-s/func_15060F28(old, 0);/func_15060F28(old, 1);/ % base
-s/func_1505F188(old);/func_1505F188(obj);/ % base
+s/obj_remove(old, 0);/obj_remove(old, 1);/ % base
+s/obj_reset(old);/obj_reset(obj);/ % base
 s/rec \* 0x30)\[2\] = 0;/rec * 0x30)[3] = 0;/ % base
 s/rec \* 0x30, rec, 0, 0, 0)/rec * 0x30, rec, 1, 0, 0)/ % base
 s/if (n == 0)/if (n == 1)/ % nospawn rec5

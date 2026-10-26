@@ -1,4 +1,4 @@
-# P253 func_150DF8B4 (ground_burst_effect) mutants: sed % setup names
+# P253 ground_burst_effect (ground_burst_effect) mutants: sed % setup names
 s/(p + 0x2C) + 500.0f/(p + 0x2C) + 400.0f/ % hit miss
 s/probe\[1\] - 1000.0f/probe[1] - 500.0f/ % hit
 s/ground\[1\] = hit\[0\]/ground[1] = hit[1]/ % hit

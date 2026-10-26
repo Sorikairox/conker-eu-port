@@ -1,4 +1,4 @@
-# P241 func_150CF470 (level_light2_orbit): func_151149AC = jal 15114F2C (RET record 80450000, +8 f32 angle), func_150AD78C (sin) = jal 150ADC6C, func_150AD780 (cos) = jal 150ADC60, func_150A3924 / func_15174F10 jal their own names
+# P241 func_150CF470 (level_light2_orbit): world_record_find = jal 15114F2C (RET record 80450000, +8 f32 angle), func_150AD78C (sin) = jal 150ADC6C, func_150AD780 (cos) = jal 150ADC60, func_150A3924 / func_15174F10 jal their own names
 a30 ! 0=7 ! 80450008=41F00000 ! 15114F2C=80450000 ! 150ADC6C=3F000000,150ADC60=3F5DB3D7 ! ! ! !
 neg ! 0=7 ! 80450008=C2340000 ! 15114F2C=80450000 ! 150ADC6C=BF19999A,150ADC60=3F4CCCCD ! ! ! !
 zero ! 0=7 ! 80450008=00000000 ! 15114F2C=80450000 ! 150ADC6C=00000000,150ADC60=3F800000 ! ! ! !

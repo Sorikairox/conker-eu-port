@@ -1,5 +1,5 @@
 # P237 func_151B99B8 (searchlight_light_update) mutants: sed % setup names
-s/    func_150A8050(mf, 0.0f, 0.0f, \*(f32 \*) (obj + 0x170));/    func_150A8050(mf, 0.0f, 0.0f, *(f32 *) (obj + 0x174));/ % beam
+s/    mtxf_rotate_xyz_deg(mf, 0.0f, 0.0f, \*(f32 \*) (obj + 0x170));/    mtxf_rotate_xyz_deg(mf, 0.0f, 0.0f, *(f32 *) (obj + 0x174));/ % beam
 s/    mf\[3\]\[1\] = \*(f32 \*) (obj + 0x3C);/    mf[3][1] = *(f32 *) (obj + 0x38);/ % beam
 s/    mf\[0\]\[2\] \*= \*(f32 \*) (obj + 0x18);/    mf[0][2] *= *(f32 *) (obj + 0x1C);/ % beam
 s/    mf\[1\]\[1\] \*= \*(f32 \*) (obj + 0x1C);/    mf[1][1] *= *(f32 *) (obj + 0x18);/ % beam

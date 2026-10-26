@@ -19,7 +19,7 @@ s/func_15088434(a\[2\], a\[3\])/func_1508823C(a[2], a[3])/ % c21
 s/return func_15088568(a\[2\], a\[3\]);/func_15088568(a[2], a[3]); return 0;/ % c22
 s/func_1508B630(a\[2\])/func_1508B630(a[3])/ % c23
 s/args\[0xB\]/args[0xA]/ % c24_obj
-s/func_15060F28(obj, 0)/func_15060F28(obj, 1)/ % c24_obj
+s/obj_remove(obj, 0)/obj_remove(obj, 1)/ % c24_obj
 s/obj != NULL/obj == NULL/ % c24_obj c24_none
 1,/case 26/s/a\[5\] \*/a[4] */ % c25 c25_i2
 1,/case 26/s/D_800D33F8\[a\[2\]\] \* 65536.0f/D_800D33E0[a[2]] * 65536.0f/ % c25 c25_i2

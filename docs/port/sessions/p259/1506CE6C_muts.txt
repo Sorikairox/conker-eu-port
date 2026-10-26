@@ -1,4 +1,4 @@
-# P259 func_1506CE6C (player_camera_view_update) mutants: sed % setup names
+# P259 objev_player_camera_view (player_camera_view_update) mutants: sed % setup names
 s/    flags54 = 0;/    flags54 = 1;/ % m0
 s/    height = 0.0f;/    height = 1.0f;/ % m0
 s/    pitch = 45.0f;/    pitch = 44.0f;/ % m5nomat
@@ -53,7 +53,7 @@ s/        height = 5.0f;/        height = 4.0f;/ % m10
 s/(u16) (s32) (pitch \* 182.04445f)/(u16) (s32) (pitch * 182.0f)/ % m0
 s/(u16) (s32) (pitch \* 182.04445f), dist, 0.0f,/(u16) (s32) (pitch * 182.04445f), dist, 1.0f,/ % m0
 s/    off_y = -off_y;/    ;/ % m0
-s/func_1506C460(yaw, off_h, off_y, height, 100, mode,/func_1506C460(yaw, off_y, off_h, height, 100, mode,/ % m0
+s/camera_object_spawn(yaw, off_h, off_y, height, 100, mode,/camera_object_spawn(yaw, off_y, off_h, height, 100, mode,/ % m0
 s/height, 100, mode, 0.0f,/height, 99, mode, 0.0f,/ % m0
 s/(s32) target_ptr, flags54, snap);/(s32) target_ptr, flags54, 0);/ % m2
 s/mode, 0.0f, smooth,/mode, 1.0f, smooth,/ % m0

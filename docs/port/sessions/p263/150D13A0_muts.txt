@@ -5,13 +5,13 @@ s/    D_80088C38 += -step \* 8;/    D_80088C38 -= step * 9;/ % busy
 s/    D_80088C3C += step \* 92;/    D_80088C3C = step * 92;/ % busy
 s/0x31C))\[0x120\] != 0) {/0x31C))[0x121] != 0) {/ % busy all
 s/    for (i = 0; i < 3; i++) {/    for (i = 0; i < 2; i++) {/ % all
-s/        item = func_151149AC(0xFA - i);/        item = func_151149AC(0xFA + i);/ % all
+s/        item = world_record_find(0xFA - i);/        item = world_record_find(0xFA + i);/ % all
 1,/\/ 160\] \& 1) {/s/\/ 160\] \& 1) {/\/ 160] \& 2) {/ % mid
 s/            func_15195750(D_800CC2D0);/            ;/ % mid
 s/            func_10010154(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);/            func_10010154(0x627, D_800CC2D0, 0x7FFF, 0x2BC, 0xC8);/ % mid
-s/    item = func_151149AC(0xFB);/    item = func_151149AC(0xFC);/ % last
+s/    item = world_record_find(0xFB);/    item = world_record_find(0xFC);/ % last
 s/        object_hit_effects(D_800CC2D0, 1, 1, 1, 1, 0, 0xFF, 1);/        object_hit_effects(D_800CC2D0, 0, 0, 1, 1, 0, 0xFF, 1);/ % last
 s/        func_15145A50(D_800CC2D0);/        ;/ % last
-s/        func_1507CD64(D_800CC2D0, 6);/        func_1507CD64(D_800CC2D0, 5);/ % last
+s/        player_hit_reaction(D_800CC2D0, 6);/        player_hit_reaction(D_800CC2D0, 5);/ % last
 s/        func_10010154(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);/        func_10010154(0x628, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);/ % last
 s/(item - (s32) D_800DBEF4) \/ 160\] \& 1) {/((u32) item - (u32) D_800DBEF4) \/ 160] \& 1) {/ % neg

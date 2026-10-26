@@ -1,4 +1,4 @@
-# P262 func_1511DF6C (mesh_tex_scroll_update) mutants: sed % setup names
+# P262 scenery_mesh_tex_scroll_update (mesh_tex_scroll_update) mutants: sed % setup names
 s/if (uv == NULL) {/if (uv != NULL) {/ % alloc cached
 s/uv = allocate_memory(\*(u16 \*)(obj + 0x16) \* 4, 1, 0, 0);/uv = allocate_memory(*(u16 *)(obj + 0x16) * 2, 1, 0, 0);/ % alloc
 s/uv = allocate_memory(\*(u16 \*)(obj + 0x16) \* 4, 1, 0, 0);/uv = allocate_memory(*(u16 *)(obj + 0x16) * 4, 0, 0, 0);/ % alloc

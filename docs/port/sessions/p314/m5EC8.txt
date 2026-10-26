@@ -72,14 +72,14 @@
 210s/if (f->turnVel > 0\.0f) {/if (f->turnVel > 0.5f) {/ % st2negz
 215s/f->timer -= D_800BE9E4;/f->timer -= 1;/ % st2pos st2tmr
 216s/if (f->timer <= 0) {/if (f->timer < 0) {/ % st2tmr st2zero
-217s/(f32)((u32)func_150ADA20()/(f32)((s32)func_150ADA20()/ % st2tmr st2tmr1 st2tmrn
+217s/(f32)((u32)random_int()/(f32)((s32)random_int()/ % st2tmr st2tmr1 st2tmrn
 217s/360);/359);/ % st2tmr1 st2zero
 219s/f->timer = t->wanderTime;/f->timer = t->homeTime;/ % st2tmr st2zero st2tmr1
 222s/if (fabsf(f->turnVel) > t->turnMax) {/if (fabsf(f->turnVel) > t->turnMax + 1.0f) {/ % tmaxeq tmax35
 222s/if (fabsf(f->turnVel) > t->turnMax) {/if (f->turnVel > t->turnMax) {/ % tmaxn
 226s/f->turnVel = -t->turnMax;/f->turnVel = t->turnMax;/ % tmaxn
 231s/if (f->flags \& 0x80) {/if (f->flags \& 0x800) {/ % floor0 floor1
-232s/f->floorY = (f32)func_1510FE58((s32)f->x, (s32)f->y, (s32)f->z, \&tri);/f->floorY = (f32)func_1510FE58((s32)f->x, (s32)f->z, (s32)f->y, \&tri);/ % floor0
+232s/f->floorY = (f32)collision_level_nearest_height((s32)f->x, (s32)f->y, (s32)f->z, \&tri);/f->floorY = (f32)collision_level_nearest_height((s32)f->x, (s32)f->z, (s32)f->y, \&tri);/ % floor0
 235s/v = ((s32 \*)D_800DBE5C)\[(tri - D_800DC26C) \/ 12\];/v = ((s32 *)D_800DBE5C)[(tri - D_800DC26C) \/ 9];/ % floor1
 234s/if (tri != 0) {/if (tri == 0) {/ % floor0 floor1
 237s/f->surface = v;/f->surface = v + 1;/ % floor0 floor1
@@ -163,13 +163,13 @@
 353s/f->z += dir\.unk8 \* d;/f->z -= dir.unk8 * d;/ % base
 356s/f->kind == 0x13 \&\& D_800DDF60\[f->slot\] == 0/f->kind >= 0x13 \&\& D_800DDF60[f->slot] == 0/ % chirpk chirp
 356s/f->kind == 0x13 \&\& D_800DDF60\[f->slot\] == 0/f->kind == 0x13 \&\& D_800DDF60[f->slot] != 1/ % chirpno chirp chirpf2
-357s/func_10010F88(0x10, 0x7FFF, func_150ADA20() \& 0x7F, 0, 0/func_10010F88(0x10, 0x7FFF, func_150ADA20() \& 0xFF, 0, 0/ % chirp
+357s/func_10010F88(0x10, 0x7FFF, random_int() \& 0x7F, 0, 0/func_10010F88(0x10, 0x7FFF, random_int() \& 0xFF, 0, 0/ % chirp
 357s/(s32)f->z, 500, 4000);/(s32)f->z, 400, 4000);/ % chirp
-358s/D_800DDF60\[f->slot\] = (func_150ADA20() \& 0x3F) + 30;/D_800DDF60[f->slot] = (func_150ADA20() \& 0x7F) + 30;/ % chirp
-358s/D_800DDF60\[f->slot\] = (func_150ADA20() \& 0x3F) + 30;/D_800DDF60[f->slot] = (func_150ADA20() \& 0x3F) + 31;/ % chirp
+358s/D_800DDF60\[f->slot\] = (random_int() \& 0x3F) + 30;/D_800DDF60[f->slot] = (random_int() \& 0x7F) + 30;/ % chirp
+358s/D_800DDF60\[f->slot\] = (random_int() \& 0x3F) + 30;/D_800DDF60[f->slot] = (random_int() \& 0x3F) + 31;/ % chirp
 360s/if ((f->flags \& 2)/if ((f->flags \& 1)/ % cull1
-361s/func_1510B460(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0/func_1510B460(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A00, 0, 0) != 0/ % cull1
-361s/func_1510B460(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0/func_1510B460(D_800DA030, f->x, f->y, f->z, D_800D9F3C, D_800D9F40, D_800D3A00, D_800D3A04, 0, 0) != 0/ % cull1
-361s/func_1510B460(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0/func_1510B460(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) == 0/ % cull0 cull1
+361s/view_point_cull_test(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0/view_point_cull_test(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A00, 0, 0) != 0/ % cull1
+361s/view_point_cull_test(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0/view_point_cull_test(D_800DA030, f->x, f->y, f->z, D_800D9F3C, D_800D9F40, D_800D3A00, D_800D3A04, 0, 0) != 0/ % cull1
+361s/view_point_cull_test(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0/view_point_cull_test(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) == 0/ % cull0 cull1
 362s/(D_800D2138 != 1/(D_800D2138 != 2/ % cull2a cull2c
-363s/|| func_1510B460(D_800DA070, f->x, f->y, f->z/|| func_1510B460(D_800DA030, f->x, f->y, f->z/ % cull2b
+363s/|| view_point_cull_test(D_800DA070, f->x, f->y, f->z/|| view_point_cull_test(D_800DA030, f->x, f->y, f->z/ % cull2b

@@ -1,4 +1,4 @@
-# P301 mutants for func_150E3CB8 (zap_bolt_update)
+# P301 mutants for zap_bolt_update (zap_bolt_update)
 /if (\*(s16 \*) (obj + 0x7C) != -0x63) {/s/-0x63/-0x62/
 /\*(s16 \*) (obj + 0x7C) -= D_800BE9E4;/d
 /if (\*(s16 \*) (obj + 0x7C) < 0) {/s/< 0/<= 0/
@@ -26,8 +26,8 @@
 /vel\[1\] = k \* delta\[1\];/s/delta\[1\]/delta[0]/
 /newPos\[2\] = old\[2\] + vel\[2\];/s/old\[2\]/pos[2]/
 /^    pos\[0\] = newPos\[0\];/d
-/(D_800A1404 + func_150ADA68() \* D_800A1408) \* D_800A140C \* D_800BE9A4;/s/D_800A1404 +/D_800A1408 +/
-/(D_800A1404 + func_150ADA68() \* D_800A1408) \* D_800A140C \* D_800BE9A4;/s/ \* D_800BE9A4;/;/
+/(D_800A1404 + random_float() \* D_800A1408) \* D_800A140C \* D_800BE9A4;/s/D_800A1404 +/D_800A1408 +/
+/(D_800A1404 + random_float() \* D_800A1408) \* D_800A140C \* D_800BE9A4;/s/ \* D_800BE9A4;/;/
 /while (1.0f < \*(f32 \*) (obj + 0x4C)) {/s/1.0f </1.0f <=/
 /start\[2\] = anchor\[2\];/s/anchor\[2\]/anchor[1]/
 /func_15143874((u8) r, /s/(u8) r/(s8) r/
@@ -42,7 +42,7 @@
 /dir\[0\] = end\[0\] - start\[0\];/s/end\[0\]/tip[0]/
 /dir\[1\] = end\[1\] - start\[1\];/s/end\[1\]/tip[1]/
 /if (func_15145128(dir, dir, &len, &unused)) {/s/if (/if (!/
-/k = 190.0f \* (func_150ADA68() \* D_800BE9A4);/s/190.0f/180.0f/
+/k = 190.0f \* (random_float() \* D_800BE9A4);/s/190.0f/180.0f/
 /start\[1\] += dir\[1\] \* k;/s/dir\[1\]/dir[0]/
 /^            len -= k;/d
 /seg.u00 = 0;/s/0;/1;/
@@ -69,12 +69,12 @@
 /^            hit = 1;/d
 /\*(f32 \*) (obj + 0x4C) -= 1.0f;/s/1.0f/0.5f/
 /^    if (\*(s32 \*) (obj + 0x78) != 0) {/s/!= 0/== 0/
-/(56.0f + func_150ADA68() \* 235.0f)/s/56.0f/57.0f/
-/(56.0f + func_150ADA68() \* 235.0f)/s/D_800A1414/D_800A1418/
+/(56.0f + random_float() \* 235.0f)/s/56.0f/57.0f/
+/(56.0f + random_float() \* 235.0f)/s/D_800A1414/D_800A1418/
 /while (1.0f < \*(f32 \*) (obj + 0x50)) {/s/1.0f </2.0f </
-/func_151037D4((count & 3) + 6/s/+ 6/+ 7/
-/func_151037D4((count & 3) + 6/s/+ 100/+ 101/
-/func_151037D4((count & 3) + 6/s/D_800A141C + D_800A1418/D_800A1418 + D_800A141C/
-/func_151037D4((count & 3) + 6/s/anchor/pos/
+/flip_sprite_particle_spawn((count & 3) + 6/s/+ 6/+ 7/
+/flip_sprite_particle_spawn((count & 3) + 6/s/+ 100/+ 101/
+/flip_sprite_particle_spawn((count & 3) + 6/s/D_800A141C + D_800A1418/D_800A1418 + D_800A141C/
+/flip_sprite_particle_spawn((count & 3) + 6/s/anchor/pos/
 /\*(f32 \*) (obj + 0x50) -= 1.0f;/s/1.0f/0.5f/
 / 0, 0, 0, 0, 0, 0, 1, mode, /s/176U/177U/

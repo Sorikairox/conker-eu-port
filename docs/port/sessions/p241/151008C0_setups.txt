@@ -1,4 +1,4 @@
-# P241 func_151008C0 (sky_segments_flicker): EU D_800BE500 = 800BE920 (5 bytes), D_800DD835 = 800DD835 (word 800DD834 byte 1), D_80088F60 ids 9..13 (ROMDATA); func_150ADA20 = jal 150ADF00 (RET sequence), light_ctrl_broadcast = jal 15161C40
+# P241 sky_segments_flicker (sky_segments_flicker): EU D_800BE500 = 800BE920 (5 bytes), D_800DD835 = 800DD835 (word 800DD834 byte 1), D_80088F60 ids 9..13 (ROMDATA); random_int = jal 150ADF00 (RET sequence), light_ctrl_broadcast = jal 15161C40
 skip ! 0=1 ! 800BE920=00010001,800BE924=00000000,800DD834=00FE0000 ! 150ADF00=0;0;0;0;0 ! ! ! ! !
 edges ! 0=0 ! 800BE920=00010001,800BE924=00000000,800DD834=00FE0000 ! 150ADF00=0;45;23;46;22 ! ! ! ! !
 mod ! 0=0 ! 800BE920=01000100,800BE924=01000000,800DD834=00FF0000 ! 150ADF00=40A;FFFFFFFF;3ED;1F4;7D0 ! ! ! ! !

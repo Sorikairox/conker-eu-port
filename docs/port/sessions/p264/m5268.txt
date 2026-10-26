@@ -1,4 +1,4 @@
-\#^    n = (u32) func_150ADA20() . 11 + 10;$#s/+ 10/+ 9/
+\#^    n = (u32) random_int() . 11 + 10;$#s/+ 10/+ 9/
 \#^    t\.u0 = 0x200005;$#s/0x200005/0x200006/
 \#^    t\.u4 = 0;$#s/0/1/
 \#^    t\.flags = 0x2203;$#s/0x2203/0x2202/
@@ -22,28 +22,28 @@
 \#^    yaw = ((s16) (s32) (scale \* D_800A0DE8) >> 8) + 0x40;$#s/(s16) (s32)/(s32)/
 \#^    yaw = ((s16) (s32) (scale \* D_800A0DE8) >> 8) + 0x40;$#s/>> 8/>> 7/
 \#^    yaw = ((s16) (s32) (scale \* D_800A0DE8) >> 8) + 0x40;$#s/0x40/0x41/
-\#^        drag = func_150ADA68() \* D_800A0DF0 + D_800A0DEC;$#s/D_800A0DF0 + D_800A0DEC/D_800A0DEC + D_800A0DF0/
-\#^        t\.sprite = ((s32 \*) D_800A0D90)\[func_150ADA20() & 3\];$#s/& 3/\& 1/
-\#^        t\.life = (u32) func_150ADA20() . 18 + 27;$#s/+ 27/+ 28/
-\#^        t\.colour\[7\] = (u32) func_150ADA20() . 156 + 100;$#s/+ 100/+ 101/
-\#^        t\.size\[0\] = t\.size\[1\] = func_150ADA68() \* 233\.0f + 199\.0f;$#s/233\.0f/234.0f/
-\#^        t\.size\[0\] = t\.size\[1\] = func_150ADA68() \* 233\.0f + 199\.0f;$#s/199\.0f/198.0f/
-\#^        t\.size\[0\] = t\.size\[1\] = func_150ADA68() \* 233\.0f + 199\.0f;$#s/t\.size\[0\] = t\.size\[1\]/t.size[0] = t.u24/
-\#^        func_15143794(r1 . 130 + yaw, r2 . 81 - 0x40, func_150ADA68() \* 10\.0f + 5\.0f, t\.vel);$#s/- 0x40/- 0x3F/
-\#^        func_15143794(r1 . 130 + yaw, r2 . 81 - 0x40, func_150ADA68() \* 10\.0f + 5\.0f, t\.vel);$#s/10\.0f/11.0f/
-\#^        func_15143794(r1 . 130 + yaw, r2 . 81 - 0x40, func_150ADA68() \* 10\.0f + 5\.0f, t\.vel);$#s/5\.0f/6.0f/
+\#^        drag = random_float() \* D_800A0DF0 + D_800A0DEC;$#s/D_800A0DF0 + D_800A0DEC/D_800A0DEC + D_800A0DF0/
+\#^        t\.sprite = ((s32 \*) D_800A0D90)\[random_int() & 3\];$#s/& 3/\& 1/
+\#^        t\.life = (u32) random_int() . 18 + 27;$#s/+ 27/+ 28/
+\#^        t\.colour\[7\] = (u32) random_int() . 156 + 100;$#s/+ 100/+ 101/
+\#^        t\.size\[0\] = t\.size\[1\] = random_float() \* 233\.0f + 199\.0f;$#s/233\.0f/234.0f/
+\#^        t\.size\[0\] = t\.size\[1\] = random_float() \* 233\.0f + 199\.0f;$#s/199\.0f/198.0f/
+\#^        t\.size\[0\] = t\.size\[1\] = random_float() \* 233\.0f + 199\.0f;$#s/t\.size\[0\] = t\.size\[1\]/t.size[0] = t.u24/
+\#^        func_15143794(r1 . 130 + yaw, r2 . 81 - 0x40, random_float() \* 10\.0f + 5\.0f, t\.vel);$#s/- 0x40/- 0x3F/
+\#^        func_15143794(r1 . 130 + yaw, r2 . 81 - 0x40, random_float() \* 10\.0f + 5\.0f, t\.vel);$#s/10\.0f/11.0f/
+\#^        func_15143794(r1 . 130 + yaw, r2 . 81 - 0x40, random_float() \* 10\.0f + 5\.0f, t\.vel);$#s/5\.0f/6.0f/
 \#^        t\.vel\[0\] -= vel\[0\] \* drag;$#s/vel\[0\]/vel[1]/
 \#^        t\.vel\[2\] -= vel\[2\] \* drag;$#s/-=/+=/
-\#^        t\.u54 = func_150ADA68() \* D_800A0DF4 + D_800A0DF8;$#s/D_800A0DF4 + D_800A0DF8/D_800A0DF8 + D_800A0DF4/
+\#^        t\.u54 = random_float() \* D_800A0DF4 + D_800A0DF8;$#s/D_800A0DF4 + D_800A0DF8/D_800A0DF8 + D_800A0DF4/
 \#^        t\.mode &= ~0xC0;$#s/~0xC0/~0x80/
-\#^        bit80 = (func_150ADA20() & 1) ? 0x80 : 0;$#s/0x80/0x40/
-\#^        bit40 = (func_150ADA20() & 1) ? 0x40 : 0;$#s/& 1/\& 2/
+\#^        bit80 = (random_int() & 1) ? 0x80 : 0;$#s/0x80/0x40/
+\#^        bit40 = (random_int() & 1) ? 0x40 : 0;$#s/& 1/\& 2/
 \#^        func_151307F0((s32) &t, 1, 0, 0, room, owner);$#s/1, 0, 0/1, 0, 1/
 \#^        func_151307F0((s32) &t, 1, 0, 0, room, owner);$#s/room, owner/owner, room/
 \#^    } while (n > 0);$#s/n > 0/n > 1/
-\#^    n = (u32) func_150ADA20() . 11 + 10;$#s/11 +/12 +/
-\#^        t\.life = (u32) func_150ADA20() . 18 + 27;$#s/18 +/19 +/
-\#^        t\.colour\[7\] = (u32) func_150ADA20() . 156 + 100;$#s/156/157/
-\#^        func_15143794(r1 . 130 + yaw, r2 . 81 - 0x40, func_150ADA68() \* 10\.0f + 5\.0f, t\.vel);$#s/130 +/131 +/
-\#^        func_15143794(r1 . 130 + yaw, r2 . 81 - 0x40, func_150ADA68() \* 10\.0f + 5\.0f, t\.vel);$#s/81 -/80 -/
-\#^        func_15143794(r1 . 130 + yaw, r2 . 81 - 0x40, func_150ADA68() \* 10\.0f + 5\.0f, t\.vel);$#s/(r1/(r2/
+\#^    n = (u32) random_int() . 11 + 10;$#s/11 +/12 +/
+\#^        t\.life = (u32) random_int() . 18 + 27;$#s/18 +/19 +/
+\#^        t\.colour\[7\] = (u32) random_int() . 156 + 100;$#s/156/157/
+\#^        func_15143794(r1 . 130 + yaw, r2 . 81 - 0x40, random_float() \* 10\.0f + 5\.0f, t\.vel);$#s/130 +/131 +/
+\#^        func_15143794(r1 . 130 + yaw, r2 . 81 - 0x40, random_float() \* 10\.0f + 5\.0f, t\.vel);$#s/81 -/80 -/
+\#^        func_15143794(r1 . 130 + yaw, r2 . 81 - 0x40, random_float() \* 10\.0f + 5\.0f, t\.vel);$#s/(r1/(r2/

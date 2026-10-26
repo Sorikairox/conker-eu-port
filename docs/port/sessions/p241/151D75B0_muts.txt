@@ -12,9 +12,9 @@ s/        alpha = timer \* \*(s16 \*) (data + 0xE);/        alpha = timer + *(s1
 s/        if (alpha < 0) {/        if (alpha < -1) {/ % neg
 s/    s16 alpha;/    s32 alpha;/ % wrap
 s/    timer = \*(s16 \*) (rec + 0xE);/    timer = *(s16 *) (rec + 0xC);/ % fade
-s/    func_150432CC((s32) owner, 0x109);/    func_150432CC((s32) owner, 0x108);/ % fade
-s/    func_150432CC((s32) owner, 0x109);/    func_150432CC((s32) data, 0x109);/ % fade
-s/    func_1504332C(0x32, 0x7D, 0x1C, alpha);/    func_1504332C(0x32, 0x7C, 0x1C, alpha);/ % fade
-s/    func_15042D78(0x81);/    func_15042D78(0x80);/ % fade
-s/    func_15042E3C((s32) D_800AB634, \*(s32 \*) (data + 8));/    func_15042E3C((s32) D_800AB634, *(s16 *) (data + 0xA));/ % full
-s/    func_15042E3C((s32) D_800AB634, \*(s32 \*) (data + 8));/    func_15042E3C((s32) D_800AB634 + 1, *(s32 *) (data + 8));/ % fade
+s/    text_set_box((s32) owner, 0x109);/    text_set_box((s32) owner, 0x108);/ % fade
+s/    text_set_box((s32) owner, 0x109);/    text_set_box((s32) data, 0x109);/ % fade
+s/    text_set_color(0x32, 0x7D, 0x1C, alpha);/    text_set_color(0x32, 0x7C, 0x1C, alpha);/ % fade
+s/    text_set_flags(0x81);/    text_set_flags(0x80);/ % fade
+s/    text_printf((s32) D_800AB634, \*(s32 \*) (data + 8));/    text_printf((s32) D_800AB634, *(s16 *) (data + 0xA));/ % full
+s/    text_printf((s32) D_800AB634, \*(s32 \*) (data + 8));/    text_printf((s32) D_800AB634 + 1, *(s32 *) (data + 8));/ % fade

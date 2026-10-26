@@ -1,4 +1,4 @@
-# P259 func_151030B8 (attached_particle_spawn) mutants: sed % setup names
+# P259 attached_particle_spawn (attached_particle_spawn) mutants: sed % setup names
 s/if (owner == NULL) {/if (owner == (u8 *) 1) {/ % null
 s/    att.flags = 0;/    att.flags = 1;/ % base
 s/att.point0\[1\] = zero\[1\];/att.point0[1] = 1.0f;/ % base
@@ -27,13 +27,13 @@ s/spawn.unk4C = arg9;/spawn.unk4C = argC;/ % base
 s/(s32) \&D_800A4AA0, 0x29, 0, 0, 0x16,/(s32) \&D_800A4AA0, 0x28, 0, 0, 0x16,/ % base
 s/0x29, 0, 0, 0x16,/0x29, 0, 0, 0x15,/ % base
 s/? 2 : 0) + 1, 0, 0,/? 2 : 0) + 0, 0, 0,/ % base
-s/(func_150ADA20() \& 1) ? 2 : 0/(func_150ADA20() \& 2) ? 2 : 0/ % odd mtx0
+s/(random_int() \& 1) ? 2 : 0/(random_int() \& 2) ? 2 : 0/ % odd mtx0
 s/argA + 0x30, argC, argD);/argA + 0x20, argC, argD);/ % base
 s/argA + 0x30, argC, argD);/argA + 0x30, arg9, argD);/ % base
 s/if (emitter != NULL) {/if (1) {/ % noem
 s/memcpy((s32) emitter + 0x110,/memcpy((s32) emitter + 0x100,/ % base
-s/func_151037D4(count, alpha, speed, target, arg9, argC, argD);/func_151037D4(count, alpha, speed, target, argC, arg9, argD);/ % base
-s/func_151037D4(count, alpha, speed, target,/func_151037D4(count, alpha, 0.0f, target,/ % base
+s/flip_sprite_particle_spawn(count, alpha, speed, target, arg9, argC, argD);/flip_sprite_particle_spawn(count, alpha, speed, target, argC, arg9, argD);/ % base
+s/flip_sprite_particle_spawn(count, alpha, speed, target,/flip_sprite_particle_spawn(count, alpha, 0.0f, target,/ % base
 s/    return emitter;/    return NULL;/ % base
 s/s16 count, u8 alpha,/u8 count, u8 alpha,/ % mtx
 s/u8 \*target, u8 arg9,/u8 *target, s8 arg9,/ % mtx

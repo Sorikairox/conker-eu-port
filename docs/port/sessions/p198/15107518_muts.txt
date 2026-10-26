@@ -10,5 +10,5 @@ s/pts = (f32 \*) (rec + 0x28 + 0x48);/pts = (f32 *) (rec + 0x28 + 0x44);/
 s/        pts\[1\] = start\[1\];/        pts[1] = end[1];/
 s/+ (spec.count - 1) \* 3;/+ spec.count * 3;/
 s/        pts\[2\] = end\[2\];/        ;/
-s/func_15107678(rec, 0, spec.count - 1, jitter);/func_15107678(rec, 0, spec.count, jitter);/
+s/bolt_points_subdivide(rec, 0, spec.count - 1, jitter);/bolt_points_subdivide(rec, 0, spec.count, jitter);/
 s/    return (s32) rec;/    return 0;/

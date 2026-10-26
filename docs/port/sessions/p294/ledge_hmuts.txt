@@ -27,6 +27,6 @@ s|    if (bestIcept.i < 0) {|    if (bestIcept.f < 0.0f) {|
 s|        w.margin = mg + 10;|        w.margin = mg + 1;|
 s|        w.ledgeHi = 65.0f;|        w.ledgeHi = 66.0f;|
 s|        w.co = -cosf(ang);|        w.co = cosf(ang);|
-s|        func_150492CC((f32) w.margin \* 2.0f, NMW_F32(D_800CC1F8) + 0.0f, (f32) w.radius \* 2.0f);|        func_150492CC((f32) w.margin * 2.0f, NMW_F32(D_800CC1F8) + 0.0f, (f32) w.margin * 2.0f);|
+s|        quadtree_set_test_box((f32) w.margin \* 2.0f, NMW_F32(D_800CC1F8) + 0.0f, (f32) w.radius \* 2.0f);|        quadtree_set_test_box((f32) w.margin * 2.0f, NMW_F32(D_800CC1F8) + 0.0f, (f32) w.margin * 2.0f);|
 s|    ((s16 \*) D_800CC1C0)\[(s32) (w->rec - (u8 \*) D_800CC2D0) / NMW_REC_SIZE\] = 1;|    ((s16 *) D_800CC1C0)[(s32) (w->rec - (u8 *) D_800CC2D0) / NMW_REC_SIZE] = 2;|
 s|    if (\*(s32 \*) (rec + 0x20) > 0) {|    if (*(s32 *) (rec + 0x20) > 1) {|

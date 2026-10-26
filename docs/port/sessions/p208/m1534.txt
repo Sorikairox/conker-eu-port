@@ -10,5 +10,5 @@ s/tex + 0x800;/tex + 0x400;/
 s/0x0603C000;/0x0603C001;/
 s/0xEF00AC3F;/0xEF002C3F;/
 s/    \*ready = 1;/    *ready = 2;/
-s/func_1510D66C(0xD18 + sheet, NULL, 3, 0)/func_1510D66C(0xD18 + sheet, NULL, 2, 0)/
+s/texture_cache_lookup(0xD18 + sheet, NULL, 3, 0)/texture_cache_lookup(0xD18 + sheet, NULL, 2, 0)/
 s/    gdl->words.w1 = tex;/    gdl->words.w1 = tex + 1;/

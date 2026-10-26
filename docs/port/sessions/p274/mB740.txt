@@ -1,8 +1,8 @@
-\#^    a = func_1509BE40(0, 0x2006, 0xB7);$#s/0xB7/0xB8/
-\#^    b = func_1509BE40(0, a | 0x2000, 0xBC);$#s/a | 0x2000/0x2000/
-\#^    c = func_1509BE40(0, 0x2000, 0xBB);$#s/0xBB/0xBA/
+\#^    a = event_dispatch(0, 0x2006, 0xB7);$#s/0xB7/0xB8/
+\#^    b = event_dispatch(0, a | 0x2000, 0xBC);$#s/a | 0x2000/0x2000/
+\#^    c = event_dispatch(0, 0x2000, 0xBB);$#s/0xBB/0xBA/
 \#^    if (b != 0 && c != 0) {$#s/\&\&/||/
-\#^        func_1509BFB0(0, 0x405F, 1);$#s/1)/0)/
+\#^        event_dispatch_alt(0, 0x405F, 1);$#s/1)/0)/
 \#^        if (\*(s32 \*) (obj + 0x2C) == 0x100 ||#s/0x100/0x101/
 \#^        if (\*(s32 \*) (obj + 0x2C) == 0x100 ||#s/0x6C8) != 0/0x6C8) == 0/
 \#^        if (camera_push_mode((struct108 \*) obj, 8, 0, 0, 3) != 0) {$#s/, 3)/, 2)/
@@ -17,13 +17,13 @@
 \#^        \*(f32 \*) (obj + 0x374) = 550\.0f;#s/550/55/
 \#^        \*(f32 \*) (obj + 0x190) = 180\.0f;$#s/180/18/
 \#^        D_80088E30 = 1;$#s/1;/2;/
-\#^        func_1509BFB0(0, 0x405C, 0);$#s/0);/1);/
+\#^        event_dispatch_alt(0, 0x405C, 0);$#s/0);/1);/
 \#^    if (camera_pop_mode((struct108 \*) obj, 3) != 0) {$#s/!=/==/
 \#^        camera_set_followed_obj((struct108 \*) obj, obj\[0x23D\]);$#s/0x23D/0x23C/
 \#^        \*(s32 \*) (obj + 0x5F0) &= ~0x10;$#s/~0x10/~0x20/
 \#^        D_80088E30 = 0;$#s/0;/3;/
-\#^    func_1509BFB0(0, 0x405C, 1);$#s/1)/0)/
-\#^    func_1509BFB0(0, 0x4061, 0);$#s/0x4061/0x4062/
-\#^    if (func_1509BE40(1, 0x4040, 6, 0x9000) != 0) {$#s/0x9000/0x8000/
+\#^    event_dispatch_alt(0, 0x405C, 1);$#s/1)/0)/
+\#^    event_dispatch_alt(0, 0x4061, 0);$#s/0x4061/0x4062/
+\#^    if (event_dispatch(1, 0x4040, 6, 0x9000) != 0) {$#s/0x9000/0x8000/
 \#^        \*(s32 \*) (obj + 0x84) |= 0x80;$#s/0x80/0x40/
 \#^        \*(s32 \*) (obj + 0x84) &= ~0x80;$#s/~0x80/~0x40/

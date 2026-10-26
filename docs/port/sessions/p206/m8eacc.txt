@@ -1,2 +1,2 @@
-s/    st->flameAcc += (0.020000001f + func_150ADA68() \* 0.060000002f)/    st->flameAcc += (0.020000001f + func_150ADA68() * 0.06f)/ % acc_zero2 rand_long
+s/    st->flameAcc += (0.020000001f + random_float() \* 0.060000002f)/    st->flameAcc += (0.020000001f + random_float() * 0.06f)/ % acc_zero2 rand_long
 s/                smoke.flags \&= ~0xC0;/                smoke.flags \&= ~0x80;/ % acc_zero2 rand_long

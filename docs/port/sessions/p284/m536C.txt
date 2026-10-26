@@ -1,8 +1,8 @@
 \#^    if ((s8) obj\[0x30\] != -1) {$#s/-1/0/
 \#^        if (D_80088ED8\[(s8) obj\[0x30\]\](obj) == 0) {$#s/== 0/!= 0/
-\#^    em->acc += (0.0510000028f + func_150ADA68() \* 0.153000012f) \* D_800BE9A4;$#s/0.0510000028f/0.05f/
-\#^    em->acc += (0.0510000028f + func_150ADA68() \* 0.153000012f) \* D_800BE9A4;$#s/0.153000012f/0.15f/
-\#^    em->acc += (0.0510000028f + func_150ADA68() \* 0.153000012f) \* D_800BE9A4;$#s/ \* D_800BE9A4//
+\#^    em->acc += (0.0510000028f + random_float() \* 0.153000012f) \* D_800BE9A4;$#s/0.0510000028f/0.05f/
+\#^    em->acc += (0.0510000028f + random_float() \* 0.153000012f) \* D_800BE9A4;$#s/0.153000012f/0.15f/
+\#^    em->acc += (0.0510000028f + random_float() \* 0.153000012f) \* D_800BE9A4;$#s/ \* D_800BE9A4//
 \#^    if (!(1.0f < em->acc)) {$#s/1.0f/2.0f/
 \#^    cam = func_15144B34(em->owner\[0x23D\]);$#s/0x23D/0x23C/
 \#^    angle = (s32) ((\*(f32 \*) (em->owner + 0x380) + 180.0f) \* 0.7111111283f);$#s/0x380/0x384/
@@ -10,23 +10,23 @@
 \#^    angle = (s32) ((\*(f32 \*) (em->owner + 0x380) + 180.0f) \* 0.7111111283f);$#s/0.7111111283f/0.7f/
 \#^    left = angle - 21;$#s/21/20/
 \#^    right = angle + 21;$#s/21/22/
-\#^        func_15143874(right, func_150ADA68() \* 381.0f + 254.0f, &a.v\[0\], &a.v\[2\]);$#s/381.0f/380.0f/
-\#^        func_15143874(right, func_150ADA68() \* 381.0f + 254.0f, &a.v\[0\], &a.v\[2\]);$#s/right/left/
-\#^        func_15143874(right, func_150ADA68() \* 381.0f + 254.0f, &a.v\[0\], &a.v\[2\]);$#s/254.0f/250.0f/
-\#^        a.v\[1\] = func_150ADA68() \* 212.0f + -133.0f;$#s/-133.0f/-130.0f/
-\#^        a.v\[1\] = func_150ADA68() \* 212.0f + -133.0f;$#s/212.0f/210.0f/
+\#^        func_15143874(right, random_float() \* 381.0f + 254.0f, &a.v\[0\], &a.v\[2\]);$#s/381.0f/380.0f/
+\#^        func_15143874(right, random_float() \* 381.0f + 254.0f, &a.v\[0\], &a.v\[2\]);$#s/right/left/
+\#^        func_15143874(right, random_float() \* 381.0f + 254.0f, &a.v\[0\], &a.v\[2\]);$#s/254.0f/250.0f/
+\#^        a.v\[1\] = random_float() \* 212.0f + -133.0f;$#s/-133.0f/-130.0f/
+\#^        a.v\[1\] = random_float() \* 212.0f + -133.0f;$#s/212.0f/210.0f/
 \#^        a.v\[0\] += cam\[0\];$#s/cam\[0\]/cam[1]/
 \#^        a.v\[2\] += cam\[2\];$#s/+=/=/
 \#^        b.v\[1\] += cam\[1\];$#s/+=/-=/
-\#^        func_15143874(left, func_150ADA68() \* 381.0f + 254.0f, &b.v\[0\], &b.v\[2\]);$#s/&b.v\[0\], &b.v\[2\]/\&b.v[2], \&b.v[0]/
-\#^        b.v\[1\] = func_150ADA68() \* 212.0f + -133.0f;$#s/b.v\[1\] =/b.v[1] +=/
-\#^        if (func_150ADA20() & 1) {$#s/& 1/\& 2/
+\#^        func_15143874(left, random_float() \* 381.0f + 254.0f, &b.v\[0\], &b.v\[2\]);$#s/&b.v\[0\], &b.v\[2\]/\&b.v[2], \&b.v[0]/
+\#^        b.v\[1\] = random_float() \* 212.0f + -133.0f;$#s/b.v\[1\] =/b.v[1] +=/
+\#^        if (random_int() & 1) {$#s/& 1/\& 2/
 \#^            a = b;$#s/a = b;//
 \#^        set = &D_80088EC0\[em->set\];$#s/em->set/em->cond/
-\#^        k = (u32) func_150ADA20() . set->count;$#s/(u32) //
-\#^        width = func_150ADA68() \* 10.0f + 5.0f;$#s/5.0f;/6.0f;/
-\#^        func_150F4AF0((u8 \*) &a, (u8 \*) &b, set->pairs\[k \* 2 + 1\], width, 1.0f / width,$#s/k \* 2 + 1/k * 2/
-\#^        func_150F4AF0((u8 \*) &a, (u8 \*) &b, set->pairs\[k \* 2 + 1\], width, 1.0f / width,$#s/1.0f \/ width/width/
+\#^        k = (u32) random_int() . set->count;$#s/(u32) //
+\#^        width = random_float() \* 10.0f + 5.0f;$#s/5.0f;/6.0f;/
+\#^        lightning_bolt_spawn((u8 \*) &a, (u8 \*) &b, set->pairs\[k \* 2 + 1\], width, 1.0f / width,$#s/k \* 2 + 1/k * 2/
+\#^        lightning_bolt_spawn((u8 \*) &a, (u8 \*) &b, set->pairs\[k \* 2 + 1\], width, 1.0f / width,$#s/1.0f \/ width/width/
 \#^                      (r \* 0.075f + 0.075f) \* set->scales\[k\], 0, 0, obj\[0xC\], obj\[1\]);$#s/+ 0.075f/+ 0.07f/
 \#^                      (r \* 0.075f + 0.075f) \* set->scales\[k\], 0, 0, obj\[0xC\], obj\[1\]);$#s/scales\[k\]/scales[0]/
 \#^                      (r \* 0.075f + 0.075f) \* set->scales\[k\], 0, 0, obj\[0xC\], obj\[1\]);$#s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/

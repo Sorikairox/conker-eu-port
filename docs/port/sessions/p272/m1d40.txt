@@ -6,7 +6,7 @@ s|case 0x5D:|case 0x5C:|
 s|case 0x5E:|case 0x5F:|
 s|kind >= 0x5F|kind >= 0x5E|
 s|+= 0xAA;|+= 0xAB;|
-s|func_150D5950(arg1, 0xFF, 1);|func_150D5950(arg1, 0xFF, 0);|
+s|fire_smoke_trail_spawn(arg1, 0xFF, 1);|fire_smoke_trail_spawn(arg1, 0xFF, 0);|
 s|func_151D7A60(arg1, 0, 2, 0xFF, 1);|func_151D7A60(arg1, 0, 1, 0xFF, 1);|
 s|func_151D7A60(arg1, 6, -1, 0xFF, 1);|func_151D7A60(arg1, 6, 1, 0xFF, 1);|
 s|< 0x64|<= 0x64|

@@ -8,7 +8,7 @@ s/1.0f, 1.0f);/1.0f, 2.0f);/ % ring
 s/pos\[0\] = sp.pt\[0\];/pos[0] = sp.pt[1];/ % ring burst
 s/pos\[1\] = \*(f32 \*) \&sp.rec\[0\];/pos[1] = sp.pt[1];/ % ring burst
 s/pos\[2\] = sp.pt\[2\];/pos[2] = sp.pt[0];/ % ring burst
-s/func_150ADA20() \& 1)/func_150ADA20() \& 2)/ % ring burst
+s/random_int() \& 1)/random_int() \& 2)/ % ring burst
 s/r \* 10.0f + 10.0f/r * 10.0f + 11.0f/ % ring
 s/(s32) \&sp.rec\[1\]/(s32) \&sp.rec[2]/ % ring
 s/r \* 8.0f + 5.0f/r * 8.0f + 6.0f/ % burst

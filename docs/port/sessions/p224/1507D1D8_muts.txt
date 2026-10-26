@@ -4,12 +4,12 @@ s/if (D_800BE9F0 == 0x2B) {/if (D_800BE9F0 == 0x2C) {/
 s/n = func_150859AC((s16) idx, 1);/n = func_150859AC((s16) idx, 3);/
 s/if (n >= 0x11 \&\& n < 0x21) {/if (n >= 0x11 \&\& n < 0x20) {/
 s/if (n >= 0x11 \&\& n < 0x21) {/if (n > 0x11 \&\& n < 0x21) {/
-s/n = (func_150ADA20() \& 0xF) + 0x11;/n = (func_150ADA20() \& 0x7) + 0x11;/
+s/n = (random_int() \& 0xF) + 0x11;/n = (random_int() \& 0x7) + 0x11;/
 s/func_15085710((s16) idx, 0, n);/func_15085710((s16) idx, 1, n);/
 s/if (n < 0x1D) {/if (n < 0x1C) {/
 s/idx \* 0x30 + 4\] = 0x9C;/idx * 0x30 + 5] = 0x9C;/
 s/\] = 0x9D;/] = 0x9E;/
-s/func_15060F28(rec, 0);/func_15060F28(rec, 1);/
+s/obj_remove(rec, 0);/obj_remove(rec, 1);/
 s/D_800D18A8 = 1;/D_800D18A8 = 2;/
 s/func_15082E44((u8 \*) D_800D20FC + idx \* 0x30, idx, 0, 0, 0);/func_15082E44((u8 *) D_800D20FC + idx * 0x30, idx, 0, 0, 1);/
 s/\[0x1B0\] = keep1B0;/[0x1B0] = keep1AF;/
@@ -34,6 +34,6 @@ s/\[0x11B\] = team;/[0x11B] = 0;/
 s/obj\[0x125\] = 0x96;/obj[0x125] = 0x95;/
 s/\[0x1B1\] = 0x96;/[0x1B0] = 0x96;/
 s/if (D_800BE9F0 == 0x33) {/if (D_800BE9F0 == 0x34) {/
-s/func_1507D158(idx, 0x78, 0, 0, 0);/func_1507D158(idx, 0x77, 0, 0, 0);/
+s/player_send_event(idx, 0x78, 0, 0, 0);/player_send_event(idx, 0x77, 0, 0, 0);/
 s/func_150891D4(obj);/func_150891D4(0);/
 s/s8 keep1B0 = ctl\[0x1B0\];/s8 keep1B0 = ctl[0x1B1];/

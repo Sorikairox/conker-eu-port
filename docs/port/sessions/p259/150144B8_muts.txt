@@ -1,4 +1,4 @@
-# P259 func_150144B8 (screen_effect_start) mutants: sed % setup names
+# P259 screen_effect_start (screen_effect_start) mutants: sed % setup names
 s/rec\[0x16\] |= 4;/rec[0x16] |= 8;/ % base
 s/rec\[0x16\] |= 4;/;/ % mp
 s/if (D_80082FA0 >= 2) {/if (D_80082FA0 >= 3) {/ % mp

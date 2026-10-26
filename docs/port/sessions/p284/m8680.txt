@@ -28,13 +28,13 @@
 \#^        sa = angle_byte_cos(a - 0x40);$#s/0x40/0x80/
 \#^        cb = angle_byte_cos(b);$#s/(b)/(a)/
 \#^        r = \*(f32 \*) (next + 0x18) \* 0.8f;$#s/next/cur/
-\#^        hdr.life = (u32) func_150ADA20() . (u32) (kind->life_range + 1) + kind->life_min;$#s/(u32) func/(s32) func/
-\#^        hdr.life = (u32) func_150ADA20() . (u32) (kind->life_range + 1) + kind->life_min;$#s/+ 1)/)/
+\#^        hdr.life = (u32) random_int() . (u32) (kind->life_range + 1) + kind->life_min;$#s/(u32) func/(s32) func/
+\#^        hdr.life = (u32) random_int() . (u32) (kind->life_range + 1) + kind->life_min;$#s/+ 1)/)/
 \#^        dy = -r \* sb;$#s/-r/r/
 \#^        dz = h \* ca;$#s/ca/sa/
 \#^        hdr.p0\[1\] = \*(f32 \*) (next + 4) + dy;$#s/+ dy/- dy/
 \#^        hdr.p1\[0\] = \*(f32 \*) (cur + 0) + dx;$#s/cur/next/
-\#^        fx = (u8 \*) effect3d_spawn_default((s32) &hdr, 10, 11, 0, 9, (func_150ADA20() & 1 ? 1 : 0) | 2, 0x5C, 0xFF, 0);$#s/| 2/| 4/
-\#^        fx = (u8 \*) effect3d_spawn_default((s32) &hdr, 10, 11, 0, 9, (func_150ADA20() & 1 ? 1 : 0) | 2, 0x5C, 0xFF, 0);$#s/10, 11/10, 12/
+\#^        fx = (u8 \*) effect3d_spawn_default((s32) &hdr, 10, 11, 0, 9, (random_int() & 1 ? 1 : 0) | 2, 0x5C, 0xFF, 0);$#s/| 2/| 4/
+\#^        fx = (u8 \*) effect3d_spawn_default((s32) &hdr, 10, 11, 0, 9, (random_int() & 1 ? 1 : 0) | 2, 0x5C, 0xFF, 0);$#s/10, 11/10, 12/
 \#^            memcpy(fx + 0x110, &rec, 0x5C);$#s/0x110/0x100/
 \#^        \*(f32 \*) (owner + 0x70) -= 1.0f;$#s/1.0f/0.5f/

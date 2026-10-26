@@ -1,4 +1,4 @@
-# P232 func_15109DC8 (spark_burst_spawn): func_150ADA20 (jal 150ADF00) = life / flip bits, func_150ADA68 (150ADF48) = scale / size. Arguments random (learned pointers).
+# P232 point_spark_spawn (spark_burst_spawn): random_int (jal 150ADF00) = life / flip bits, random_float (150ADF48) = scale / size. Arguments random (learned pointers).
 r00 ! ! ! 150ADF00=0;0;0 ! 150ADF48=3F000000;3E800000 ! ! ! !
 r01 ! ! ! 150ADF00=5;1;0 ! 150ADF48=3F800000;00000000 ! ! ! !
 r10 ! ! ! 150ADF00=F;0;1 ! 150ADF48=00000000;3F800000 ! ! ! !

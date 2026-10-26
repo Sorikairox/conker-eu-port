@@ -2,8 +2,8 @@ s/    \*(f32 \*) (rec + 4) += \*(f32 \*) (rec + 8) \* D_800A28EC \* D_800BE9A4;/
 s/    \*(f32 \*) (rec + 4) += \*(f32 \*) (rec + 8) \* D_800A28EC \* D_800BE9A4;/    *(f32 *) (rec + 4) = *(f32 *) (rec + 8) * D_800A28EC * D_800BE9A4;/ % none
 s/    if ((s8) rec\[0xD\] != -1) {/    if ((s8) rec[0xD] > 0) {/ % one_h0
 s/        while (\*(f32 \*) (rec + 4) > 1.0f) {/        while (*(f32 *) (rec + 4) >= 1.0f) {/ % exact1
-s/            func_15114E8C(mtx, \*(u8 \*\*) rec);/            func_15114E8C(mtx, rec);/ % one_h0
-s/            sel = D_800A28D4\[6\] \* func_150ADA68();/            sel = D_800A28D4[5] * func_150ADA68();/ % pick2 pick5
+s/            world_record_build_matrix(mtx, \*(u8 \*\*) rec);/            world_record_build_matrix(mtx, rec);/ % one_h0
+s/            sel = D_800A28D4\[6\] \* random_float();/            sel = D_800A28D4[5] * random_float();/ % pick2 pick5
 s/            if (D_800A28D4\[0\] < sel) {/            if (D_800A28D4[0] <= sel) {/ % pick_eq
 s/                    sel -= wt;/                    sel += wt;/ % pick2
 s/                } while (wt < sel);/                } while (wt <= sel);/ % pick_tie pick2 pick5 pick1

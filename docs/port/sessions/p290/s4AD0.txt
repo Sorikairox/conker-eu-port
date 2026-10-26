@@ -1,4 +1,4 @@
-# func_150E4AD0 setups: x 100 y -10 z 200; kinds index ROM D_800A1440 (ROMDATA); func_151EFDD0 RET: count roll, smoke roll
+# impact_effect_spawn setups: x 100 y -10 z 200; kinds index ROM D_800A1440 (ROMDATA); func_151EFDD0 RET: count roll, smoke roll
 k1s1     ! 0=42C80000,1=C1200000,2=43480000,3=1,4=1,5=80470000,6=5 ! ! 151EFDD0=00000007;00000001 ! ! ! !
 k1s0     ! 0=42C80000,1=C1200000,2=43480000,3=0,4=1,5=80470000,6=5 ! ! 151EFDD0=00000007;00000001 ! ! ! !
 k1s2no   ! 0=42C80000,1=C1200000,2=43480000,3=2,4=1,5=0,6=5 ! ! 151EFDD0=00000007;00000001 ! ! ! !

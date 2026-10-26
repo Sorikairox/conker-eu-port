@@ -13,9 +13,9 @@
 /^        smokeChance = 0.0f;/d
 /^        debrisChance = 0.0f;/d
 /^        type = 0;/s/0/1/
-/if (func_150ADA68() < sparkChance) {/s/</<=/
-/s = func_150ADA68() \* 15.0f + 15.0f;/s/+ 15.0f/+ 16.0f/
-/s = func_150ADA68() \* 15.0f + 15.0f;/s/\* 15.0f/* 16.0f/
+/if (random_float() < sparkChance) {/s/</<=/
+/s = random_float() \* 15.0f + 15.0f;/s/+ 15.0f/+ 16.0f/
+/s = random_float() \* 15.0f + 15.0f;/s/\* 15.0f/* 16.0f/
 /spark.texture = D_800AADB0\[type\];/s/\[type\]/[type + 1]/
 /spark.flags = /s/0x20000/0x10000/
 /spark.flags = /s/0xBF01/0xBF00/
@@ -29,11 +29,11 @@
 /spark.blend = /s/6 : 7/6 : 8/
 /spark.u22 = 0x20;/s/0x20/0x21/
 /spark.tag = sparkTag;/s/sparkTag/debrisTag/
-/sprite_fx_spawn_cam_at((s32) &spark/s/func_150ADA20() & 0xFF,/func_150ADA20() \& 0x7F,/
+/sprite_fx_spawn_cam_at((s32) &spark/s/random_int() & 0xFF,/random_int() \& 0x7F,/
 /sprite_fx_spawn_cam_at((s32) &spark/s/obj + 0x17C/obj + 0x178/
 /sprite_fx_spawn_cam_at((s32) &spark/s/pos\[1\], pos\[2\], s, s/pos[1], pos[2], s, 1.0f/
 /0, 0, 0, 0, obj\[0xC\], obj\[1\]);/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
-/if (func_150ADA68() < smokeChance) {/s/</<=/
+/if (random_float() < smokeChance) {/s/</<=/
 /smoke.texture = D_800AADC8\[type\];/s/D_800AADC8/D_800AADB0/
 /smoke.texSet = 0x3B03;/s/0x3B03/0x3B02/
 /smoke.life = /s/+ 13;/+ 14;/
@@ -53,7 +53,7 @@
 /effect3d_spawn_full(&smoke/s/0x22, 0, 0, 0x1C, 2/0x22, 0, 0, 0x1D, 2/
 /effect3d_spawn_full(&smoke/s/0x22, 0, 0, 0x1C, 2/0x22, 0, 0, 0x1C, 3/
 /effect3d_spawn_full(&smoke/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
-/if (func_150ADA68() < debrisChance) {/s/</<=/
+/if (random_float() < debrisChance) {/s/</<=/
 /debris.colorA\[1\] = /s/\[type\]\[1\]/[type][2]/
 /debris.colorB\[0\] = /s/D_800AADF4/D_800AADE0/
 /debris.colorB\[3\] = 0xE6;/s/0xE6/0xE7/
@@ -72,11 +72,11 @@
 /debris.u61 = -1;/s/-1/1/
 /func_15153BA4((u8 \*) &debris/s/debrisTag/smokeTag/
 /func_15153BA4((u8 \*) &debris/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
-/if (func_150ADA68() < flashChance) {/s/flashChance/debrisChance/
+/if (random_float() < flashChance) {/s/flashChance/debrisChance/
 /flash.unk2 = /s/+ 3;/+ 4;/
 /flash.unk1 = -1;/s/-1/1/
 /at.unk4 = pos\[1\];/s/pos\[1\]/pos[0]/
-/i = func_150ADA20() & 1;/s/& 1/\& 0/
+/i = random_int() & 1;/s/& 1/\& 0/
 /light_create_with_ctrl(&flash/s/+ 10,/+ 11,/
 /light_create_with_ctrl(&flash/s/D_800AAE08\[i\]\[0\]/D_800AAE08[i][1]/
 /0xFF, 0, 0, obj\[0xC\], obj\[1\]);/s/0xFF, 0, 0/0xFE, 0, 0/

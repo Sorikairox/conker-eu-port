@@ -1,4 +1,4 @@
-# P241 func_150EF204 (rider_dismount_enter) mutants: sed % setup names
+# P241 tank_dismount_enter (rider_dismount_enter) mutants: sed % setup names
 s/    obj\[5\] = 3;/    obj[5] = 2;/ % norider
 s/    \*(s16 \*) (obj + 0xE4) = 0;/    *(s16 *) (obj + 0xE4) = 1;/ % norider
 s/    obj\[0x125\] = 0xFF;/    obj[0x125] = 0xFE;/ % norider

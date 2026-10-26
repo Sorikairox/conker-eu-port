@@ -29,7 +29,7 @@ s/(obj + 0x7A) >> 8)/(obj + 0x7A) >> 7)/
 s/angle_byte_cos((u8) (angle - 0x40))/angle_byte_cos((u8) (angle + 0x40))/
 s/\* 96.0f + 352.0f) \* 0.5f/* 96.0f + 352.0f) * 0.25f/
 s/puff.w0 = 0x701;/puff.w0 = 0x700;/
-s/    func_150ADA20();/    ;/
+s/    random_int();/    ;/
 s/puff.h4 = 0x408;/puff.h4 = 0x409;/
 s/puff.wC = 0;/puff.wC = 1;/
 s/% 41U + 0xB4;/% 40U + 0xB4;/

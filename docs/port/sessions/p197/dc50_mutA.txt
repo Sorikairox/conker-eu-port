@@ -26,7 +26,7 @@ s/D_8008D9C0\[tpl->init\]/D_8008D9C0[tpl->kind]/
 s/memcpy(rec + 0x110, (u8 \*\*) \&blk, 0x58);/memcpy(rec + 0x110, (u8 **) \&blk, 0x54);/
 s/                                    case 1: \/\* sphere \*\//                                    case 3:/
 s/head->off\[0\] = r \* sb \* ca;/head->off[0] = r * sb * sa;/
-s/head->off\[1\] = func_150ADA68() \* cfg->height;/head->off[1] = func_150ADA68() * cfg->radius;/
+s/head->off\[1\] = random_float() \* cfg->height;/head->off[1] = random_float() * cfg->radius;/
 s/e->pos\[2\] + head->off\[2\];/e->pos[2] + head->off[1];/
 s/                                obj = head->obj;/                                obj = rec + 4;/
 s/                                tail->next = head;/                                tail->next = tail;/

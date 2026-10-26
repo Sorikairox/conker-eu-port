@@ -14,19 +14,19 @@ s#    t\.u5C = 1;#    t.u5C = 2;#
 s#    t\.u5D = 1;#    t.u5D = 0;#
 s#    t\.life = life;#    t.life = u5B;#
 s#    for (i = 0; i < count; i++) {#    for (i = 0; i <= count; i++) {#
-s#        t\.pos\[0\] = (func_150ADA20() >> 16) \* spread + x;#        t.pos[0] = (func_150ADA20() >> 15) * spread + x;#
-s#        t\.pos\[1\] = (func_150ADA20() >> 16) \* spread + y;#        t.pos[1] = (func_150ADA20() >> 16) * spread + x;#
-s#        t\.pos\[2\] = (func_150ADA20() >> 16) \* spread + z;#        t.pos[2] = (func_150ADA20() >> 16) * spread - z;#
+s#        t\.pos\[0\] = (random_int() >> 16) \* spread + x;#        t.pos[0] = (random_int() >> 15) * spread + x;#
+s#        t\.pos\[1\] = (random_int() >> 16) \* spread + y;#        t.pos[1] = (random_int() >> 16) * spread + x;#
+s#        t\.pos\[2\] = (random_int() >> 16) \* spread + z;#        t.pos[2] = (random_int() >> 16) * spread - z;#
 s#        t\.model = func_1518C900(id);#        t.model = func_1518C900(id + 1);#
-s#        t\.spin\[0\] = (func_150ADA20() >> 16) \* 0\.00022888184f;#        t.spin[0] = (func_150ADA20() >> 16) * 0.00015258789f;#
-s#        t\.spin\[1\] = (u32) (func_150ADA20() \& 0xFFFF) \* spinYRange + spinYMin;#        t.spin[1] = (u32) (func_150ADA20() \& 0xFFFF) * spinYRange - spinYMin;#
-s#        t\.spin\[2\] = (func_150ADA20() >> 16) \* 0\.00022888184f;#        t.spin[2] = (func_150ADA20() \& 0xFFFF) * 0.00022888184f;#
-s#        t\.u24 = (func_150ADA20() >> 16) \* 0\.00015258789f;#        t.u24 = (func_150ADA20() >> 16) * 0.00022888184f;#
-s#        t\.u28 = (func_150ADA20() >> 16) \* 0\.00015258789f;#        t.u28 = (func_150ADA20() >> 17) * 0.00015258789f;#
-s#        t\.u2C = (func_150ADA20() >> 16) \* 0\.00015258789f;#        t.u2C = -(func_150ADA20() >> 16) * 0.00015258789f;#
-s#        t\.scale\[0\] = (u32) (func_150ADA20() \& 0xFFFF) \* 1\.5258789e-05f \* scaleRange + scaleMin;#        t.scale[0] = (u32) (func_150ADA20() \& 0xFFFF) * 1.5258789e-05f * scaleRange + scaleMax;#
-s#        t\.scale\[1\] = (u32) (func_150ADA20() \& 0xFFFF) \* 1\.5258789e-05f \* scaleRange + scaleMin;#        t.scale[1] = (u32) (func_150ADA20() \& 0x7FFF) * 1.5258789e-05f * scaleRange + scaleMin;#
-s#        scale2 = (u32) (func_150ADA20() \& 0xFFFF) \* 1\.5258789e-05f \* scaleRange + scaleMin;#        scale2 = (u32) (func_150ADA20() \& 0xFFFF) * 1.5258789e-05f + scaleMin;#
+s#        t\.spin\[0\] = (random_int() >> 16) \* 0\.00022888184f;#        t.spin[0] = (random_int() >> 16) * 0.00015258789f;#
+s#        t\.spin\[1\] = (u32) (random_int() \& 0xFFFF) \* spinYRange + spinYMin;#        t.spin[1] = (u32) (random_int() \& 0xFFFF) * spinYRange - spinYMin;#
+s#        t\.spin\[2\] = (random_int() >> 16) \* 0\.00022888184f;#        t.spin[2] = (random_int() \& 0xFFFF) * 0.00022888184f;#
+s#        t\.u24 = (random_int() >> 16) \* 0\.00015258789f;#        t.u24 = (random_int() >> 16) * 0.00022888184f;#
+s#        t\.u28 = (random_int() >> 16) \* 0\.00015258789f;#        t.u28 = (random_int() >> 17) * 0.00015258789f;#
+s#        t\.u2C = (random_int() >> 16) \* 0\.00015258789f;#        t.u2C = -(random_int() >> 16) * 0.00015258789f;#
+s#        t\.scale\[0\] = (u32) (random_int() \& 0xFFFF) \* 1\.5258789e-05f \* scaleRange + scaleMin;#        t.scale[0] = (u32) (random_int() \& 0xFFFF) * 1.5258789e-05f * scaleRange + scaleMax;#
+s#        t\.scale\[1\] = (u32) (random_int() \& 0xFFFF) \* 1\.5258789e-05f \* scaleRange + scaleMin;#        t.scale[1] = (u32) (random_int() \& 0x7FFF) * 1.5258789e-05f * scaleRange + scaleMin;#
+s#        scale2 = (u32) (random_int() \& 0xFFFF) \* 1\.5258789e-05f \* scaleRange + scaleMin;#        scale2 = (u32) (random_int() \& 0xFFFF) * 1.5258789e-05f + scaleMin;#
 s#        t\.u54\[5\] = (u32) ((t\.scale\[0\] + t\.scale\[1\] + scale2) \* D_800A739C_c\[0\] + 20\.0f);#        t.u54[5] = (u32) ((t.scale[0] + t.scale[1] + scale2) * D_800A739C_c[0] + 21.0f);#
 s#        t\.scale\[2\] = scale2;#        t.scale[2] = t.scale[1];#
 s#        node_spawn_model_fx((u8 \*) \&t, kind, owner);#        node_spawn_model_fx((u8 *) \&t, kind, id);#

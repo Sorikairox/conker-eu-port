@@ -1,4 +1,4 @@
-# func_150DA1FC setups: obj 80480000, gfx 80490000, points 80470000 (0x24 each), data 80478000, vertices 80450000
+# trail_draw_ribbon setups: obj 80480000, gfx 80490000, points 80470000 (0x24 each), data 80478000, vertices 80450000
 # (func_151D6310 OUTW a3), camera 80460000 (func_15144B34 RET). EU keys: 151D6310, 151450A4, 15143394 (func_15142E24),
 # 1513FA54 (gfx_set_combine_mode), 1514352C (func_15142FBC), 10023360 memcpy (ARGMEM src 32 bytes).
 # obj words: +1C (u16 +1E flags), +24 (u8 +25 count), +2C (n, tail, head).

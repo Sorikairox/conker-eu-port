@@ -16,9 +16,9 @@
 \#^            obj = \*(u8 \*\*) owner;$#s/owner;/(owner + 4);/
 \#^            t = (walked - mark) / len;$#s/\/ len/* len/
 \#^            t = (walked - mark) / len;$#s/walked - mark/mark - walked/
-\#^            func_1505D1C4(pt\[0\] + (prev\[0\] - pt\[0\]) \* t, pt\[1\] + (prev\[1\] - pt\[1\]) \* t, pt\[2\] + (prev\[2\] - pt\[2\]) \* t,$#s/(prev\[0\] - pt\[0\])/(prev[0] + pt[0])/
-\#^            func_1505D1C4(pt\[0\] + (prev\[0\] - pt\[0\]) \* t, pt\[1\] + (prev\[1\] - pt\[1\]) \* t, pt\[2\] + (prev\[2\] - pt\[2\]) \* t,$#s/pt\[1\] + (prev\[1\]/pt[1] - (prev[1]/
-\#^            func_1505D1C4(pt\[0\] + (prev\[0\] - pt\[0\]) \* t, pt\[1\] + (prev\[1\] - pt\[1\]) \* t, pt\[2\] + (prev\[2\] - pt\[2\]) \* t,$#s/(prev\[2\] - pt\[2\]) \* t/(prev[2] - pt[1]) * t/
+\#^            attack_spawn_at_point(pt\[0\] + (prev\[0\] - pt\[0\]) \* t, pt\[1\] + (prev\[1\] - pt\[1\]) \* t, pt\[2\] + (prev\[2\] - pt\[2\]) \* t,$#s/(prev\[0\] - pt\[0\])/(prev[0] + pt[0])/
+\#^            attack_spawn_at_point(pt\[0\] + (prev\[0\] - pt\[0\]) \* t, pt\[1\] + (prev\[1\] - pt\[1\]) \* t, pt\[2\] + (prev\[2\] - pt\[2\]) \* t,$#s/pt\[1\] + (prev\[1\]/pt[1] - (prev[1]/
+\#^            attack_spawn_at_point(pt\[0\] + (prev\[0\] - pt\[0\]) \* t, pt\[1\] + (prev\[1\] - pt\[1\]) \* t, pt\[2\] + (prev\[2\] - pt\[2\]) \* t,$#s/(prev\[2\] - pt\[2\]) \* t/(prev[2] - pt[1]) * t/
 \#^                          kind, (s32) (obj - (u8 \*) D_800CC2D0) / 0x32C, \*(u16 \*) (obj + 0x76), 0, 0);$#s/kind,/kind | 1,/
 \#^                          kind, (s32) (obj - (u8 \*) D_800CC2D0) / 0x32C, \*(u16 \*) (obj + 0x76), 0, 0);$#s/\/ 0x32C/\/ 0x330/
 \#^                          kind, (s32) (obj - (u8 \*) D_800CC2D0) / 0x32C, \*(u16 \*) (obj + 0x76), 0, 0);$#s/\*(u16 \*) (obj + 0x76)/*(u16 *) (obj + 0x74)/

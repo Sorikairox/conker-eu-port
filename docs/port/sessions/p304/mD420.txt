@@ -1,4 +1,4 @@
-s/    d->u0C += ((u32) func_150ADA20() .*/    d->u0C += (func_150ADA20() \& (d->u0E + 1)) * D_800BE9E4;/ % idle big
+s/    d->u0C += ((u32) random_int() .*/    d->u0C += (random_int() \& (d->u0E + 1)) * D_800BE9E4;/ % idle big
 s/    d->u04 += ((u32) /    d->u04 += ((s32) / % big
 s/    d->u20 += d->u1C \* D_800BE9A4;/    d->u20 += d->u1C;/ % one two
 s/    if (D_800A10C4 < d->u20) {/    if (1.0f < d->u20) {/ % edge
@@ -15,16 +15,16 @@ s/                    drop.u1F = d->u98;/                    drop.u1F = 0xFF;/ %
 s/                    drop.u0E = d->u94;/                    drop.u0E = d->u98;/ % one
 s/                    drop.y = (s32) \*(f32 \*) (obj + 0x14);/                    drop.y = (s32) *(f32 *) (obj + 0x18);/ % one
 s/                    drop.u28 = d->u7C;/                    drop.u28 = d->u7E;/ % one
-s/                        speed = func_150ADA68() \* d->u78 + d->u74;/                        speed = func_150ADA68() * d->u74 + d->u78;/ % one
+s/                        speed = random_float() \* d->u78 + d->u74;/                        speed = random_float() * d->u74 + d->u78;/ % one
 s/                        cosA = angle_byte_cos(a - 0x40);/                        cosA = angle_byte_cos(a + 0x40);/ % one
 s/(d->u72 + 1) + d->u70;/(d->u72 + 1) + d->u72;/ % one
 s/                        cosB = angle_byte_cos(b - 0x40);/                        cosB = angle_byte_cos(b);/ % one
 s/                        drop.x = (s32) (\*(f32 \*) (obj + 0x10) + d->u6C \* cosA);/                        drop.x = (s32) (*(f32 *) (obj + 0x10) + d->u6C * sinA);/ % one
 s/                        drop.vy = (s32) (-speed \* cosB);/                        drop.vy = (s32) (speed * cosB);/ % one
 s/                        drop.vz = (s32) (h \* sinA);/                        drop.vz = (s32) (h * cosA);/ % one
-s/                        drop.gravity = (s32) (func_150ADA68() \* d->u80 + d->u7E);/                        drop.gravity = (s32) (func_150ADA68() * d->u80 + d->u7C);/ % one
+s/                        drop.gravity = (s32) (random_float() \* d->u80 + d->u7E);/                        drop.gravity = (s32) (random_float() * d->u80 + d->u7C);/ % one
 s/(d->u86 + 1) + d->u84;/(d->u86 + 1) + d->u86;/ % one
-s/                        drop.size1 = drop.size0 = .*/                        drop.size1 = drop.size0 = (s32) (func_150ADA68() * d->u8C);/ % one
+s/                        drop.size1 = drop.size0 = .*/                        drop.size1 = drop.size0 = (s32) (random_float() * d->u8C);/ % one
 s/                        if (node_spawn_sprite(\&drop, 0, 0, -1, obj\[0xC\], obj\[1\]) == NULL) {/                        if (node_spawn_sprite(\&drop, 0, 0, -1, obj[1], obj[0xC]) == NULL) {/ % one
 s/                    } while (1.0f < d->u68 \&\& more);/                    } while (1.0f < d->u68);/ % full more
 s/                        d->u68 -= 1.0f;$/                        d->u68 -= 0.5f;/ % full

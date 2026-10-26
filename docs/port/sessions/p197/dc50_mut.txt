@@ -58,7 +58,7 @@ s/                                    case 1: \/\* sphere \*\//                 
 s/cb = angle_byte_cos((u8) (c - 0x40));/cb = angle_byte_cos((u8) (c + 0x40));/
 s/head->off\[0\] = r \* sb \* ca;/head->off[0] = r * sb * sa;/
 s/head->off\[1\] = -r \* cb;/head->off[1] = r * cb;/
-s/head->off\[1\] = func_150ADA68() \* cfg->height;/head->off[1] = func_150ADA68() * cfg->radius;/
+s/head->off\[1\] = random_float() \* cfg->height;/head->off[1] = random_float() * cfg->radius;/
 s/head->off\[2\] = -angle_byte_cos((u8) (a - 0x40)) \* r;/head->off[2] = angle_byte_cos((u8) (a - 0x40)) * r;/
 s/e->pos\[2\] + head->off\[2\];/e->pos[2] + head->off[1];/
 s/idx = head - e->slots;/idx = head - e->slots + 1;/

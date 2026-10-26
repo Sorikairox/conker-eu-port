@@ -1,4 +1,4 @@
-# P208: func_15091534 (hud_icon_sheet_load). jal key func_1510D66C 1510D66C
+# P208: hud_icon_sheet_load (hud_icon_sheet_load). jal key texture_cache_lookup 1510D66C
 ok0 ! 0=80410000,1=0,2=80420003 ! ! 1510D66C=80500000
 ok1 ! 0=80410000,1=1,2=80420001 ! ! 1510D66C=80512340
 fail ! 0=80410000,1=0,2=80420002 ! ! 1510D66C=80000000

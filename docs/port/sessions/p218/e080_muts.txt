@@ -34,14 +34,14 @@ s/                    break;/                    ;/
 s/if (\*(s32 \*) p != 0 \&\& /if (/
 s/    D_800876E0++;/    ;/
 s/if (D_800876E0 >= \*(s32/if (D_800876E0 > *(s32/
-s/pick = func_151149AC((u8) slotObj\[i\]);/pick = func_151149AC(slotObj[i]);/
+s/pick = world_record_find((u8) slotObj\[i\]);/pick = world_record_find(slotObj[i]);/
 s/respawn\[i\] = 4;/respawn[i] = 3;/
 s/if (hide\[i\] <= 0) {/if (hide[i] < 0) {/
 s/if (respawn\[i\] > 0) {\n            continue/X/
 s/            pick\[0x6E\] = 0;/            ;/
 s/\*(s16 \*) (pick + 0x12) = homeY\[i\];/*(s16 *) (pick + 0x12) = homeX[i];/
 s/if (flags\[i\] \& 4) {/if (flags[i] \& 8) {/
-s/pt = func_150ADA68() \* 0.99999f \* scale;/pt = func_150ADA68() * scale;/
+s/pt = random_float() \* 0.99999f \* scale;/pt = random_float() * scale;/
 s/                            k = 1000;/                            ;/
 s/pt = fixedPoint\[i\];/pt = point[i];/
 s/            point\[i\] = pt;/            ;/

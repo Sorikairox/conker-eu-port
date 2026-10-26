@@ -1,4 +1,4 @@
-# P246 func_150EFFCC (rider_anchor_update) mutants: sed % setup names
+# P246 tether_flame_anchor_update (rider_anchor_update) mutants: sed % setup names
 s/m\[0x128\] \& 1/m[0x128] \& 2/ % on1 off
 s/(sk + 0x1D4) != NULL/(sk + 0x1D0) != NULL/ % on1 noskel
 s/o\[0x1C\] \&= ~2;/o[0x1C] \&= ~3;/ % off noskel

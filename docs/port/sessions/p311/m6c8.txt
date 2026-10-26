@@ -17,7 +17,7 @@ s#cam->pitch = 0.0f;#cam->pitch = 1.0f;# % m2mode3n
 s#PF32(0x198) = 60.0f;#PF32(0x198) = 61.0f;# % m2special
 s#PF32(0x190) = 35.0f;#PF32(0x190) = 36.0f;# % m2m1A
 s#PF32(0x190) = 20.0f;#PF32(0x190) = 21.0f;# % m2base
-s#            func_15121C68(arg0);#            ;# % m2base
+s#            camera_look_mode_defaults(arg0);#            ;# % m2base
 s#PF32(0x35C) = PF32(0x2C0);#PF32(0x35C) = PF32(0x2BC);# % m2base
 s#2, 0xFF, 0x20, PU8(0x23D));#2, 0xFF, 0x20, PU8(0x23C));# % m2base
 s#dist = cam->dist;#dist = cam->distLimit;# % m2base
@@ -27,7 +27,7 @@ s#cam->yawTarget = PF32(0x37C);#cam->yawTarget = PF32(0x378);# % m1expire
 s#PS32(0x134) = 1;#PS32(0x134) = 2;# % m1run
 s#ci = (s32) (cosf(cam->pitch \* 0.017453292f) \* dist);#ci = (cosf(cam->pitch * 0.017453292f) * dist);# % m1run
 s#PF32(0x348) = (s32) (angle \* dist);#PF32(0x348) = (angle * dist);# % m1run
-s#func_15048A70(PF32(0x37C), cam->yawTarget);#func_15048A70(PF32(0x37C), cam->pitch);# % m1run
+s#math_angle_diff_deg(PF32(0x37C), cam->yawTarget);#math_angle_diff_deg(PF32(0x37C), cam->pitch);# % m1run
 s#if (cam->dir == -1) {#if (cam->dir == 1) {# % m1run m1far
 s#reach = PF32(0x370) < cam->distLimit;#reach = PF32(0x370) <= cam->dist;# % m1near
 s#if (reach || cam->force != 0) {#if (reach) {# % m1force
@@ -96,8 +96,8 @@ s#cam->eye\[0\] = sinf(PF32(0x37C) \* 0.017453292f + 3.1415927f) \* dist + PF32(
 s#cam->eye\[1\] = sinf(cam->pitch \* 0.017453292f + 3.1415927f) \* dist + PF32(0x2C0);#cam->eye[1] = sinf(cam->pitch * 0.017453292f + 3.1415927f) * dist + PF32(0x2C4);# % m2base
 s#3.1415927f) \* dist + PF32(0x2C4);#3.1415927f) * dist + PF32(0x2C0);# % m2base
 s#if (180.0f <= cam->pitch) {#if (180.0f < cam->pitch) {# % m2p180
-s#        func_15121E34(arg0);#        ;# % m2base
-s#angle = fabsf(func_15048A70(PF32(0x37C), cam->yawGoal));#angle = func_15048A70(PF32(0x37C), cam->yawGoal);# % m3far
+s#        camera_look_exit(arg0);#        ;# % m2base
+s#angle = fabsf(math_angle_diff_deg(PF32(0x37C), cam->yawGoal));#angle = math_angle_diff_deg(PF32(0x37C), cam->yawGoal);# % m3far
 s#PS32(0x134) = PS32(0x13C);#PS32(0x134) = PS32(0x138);# % m3
 s#if ((PS32(0x84) & 0x200000) || CAM_MODE_RIDE(PU8(0x23E))) {#if (CAM_MODE_RIDE(PU8(0x23E))) {# % m3flag
 s#if (cam->follow == 0 || angle < 45.0f) {#if (cam->follow == 0 || angle < 25.0f) {# % m3
@@ -118,7 +118,7 @@ s#func_150498A0(&cam->offX, 0.0f, &cam->offXVel, 4.0f, 9.0f#func_150498A0(\&cam-
 s#\*(f32 \*) (view + 0x150) = \*(f32 \*) (view + 0x150) + cam->offZ;#*(f32 *) (view + 0x150) = *(f32 *) (view + 0x150) + cam->offX;# % m0
 s#\*(f32 \*) (view + 0x13C) = \*(f32 \*) (view + 0x13C) + cam->offX;#*(f32 *) (view + 0x13C) = *(f32 *) (view + 0x13C) - cam->offX;# % m0
 s#(struct17 \*) (view + 0x130));#(struct17 *) (view + 0x134));# % m2base
-s#    func_1512E6B0(arg0);#    ;# % m2base
+s#    camera_update_eye_height(arg0);#    ;# % m2base
 
 # equivalent (kept for the record, they survive): ci is s32 so the (s32) cast is implicit; the snap after the
 # mode-1 easing is overwritten by the tail before any read; storing 0 over 0; lim + 0 * pitch; special implies mode 0x1A != 0

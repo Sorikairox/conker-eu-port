@@ -1,4 +1,4 @@
-# P259 func_15062800 (object_slots_swap) mutants: sed % setup names
+# P259 obj_slots_swap (object_slots_swap) mutants: sed % setup names
 s/func_15146508(a, b);/func_15146508(b, a);/ % base
 s/bcopy(b, \&tmp, sizeof(struct127));/bcopy(a, \&tmp, sizeof(struct127));/ % base
 s/bcopy(a, b, sizeof(struct127));/bcopy(b, a, sizeof(struct127));/ % base
@@ -20,7 +20,7 @@ s/        b->unk2D4 = NULL;/        ;/ % base
 s/if (b->unk2D4 != NULL) {/if (a->unk2D4 != NULL) {/ % base a2d4
 s/node_destroy((struct102 \*) a->unk2D4);/node_destroy((struct102 *) b->unk2D4);/ % both2d4 a2d4
 s/        a->unk2D4 = NULL;/        ;/ % both2d4
-s/func_150615DC(b);/func_150615DC(a);/ % base
+s/obj_fade_reset(b);/obj_fade_reset(a);/ % base
 s/for (i = 0; i < 25; i++) {/for (i = 0; i < 24; i++) {/ % base
 s/for (i = 0; i < 25; i++) {/for (i = 1; i < 25; i++) {/ % base ends
 s/if (i == ib || i == ia) {/if (i == ib) {/ % base
@@ -34,4 +34,4 @@ s/} else if (link == ia) {/} else if (link != ia) {/ % base
 s/if (b->unk13C >= 100) {/if (b->unk13C > 100) {/ % a2d4
 s/(u8) (b->unk13C - 100)\].unk13D = ib + 100;/(u8) (b->unk13C - 99)].unk13D = ib + 100;/ % base
 s/\].unk13D = ib + 100;/].unk13D = ia + 100;/ % base
-s/func_150627D4(b);/func_150627D4(a);/ % base
+s/obj_model_reset(b);/obj_model_reset(a);/ % base

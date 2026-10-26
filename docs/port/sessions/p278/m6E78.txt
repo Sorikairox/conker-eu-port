@@ -10,8 +10,8 @@
 \#^        D_800C3A20\[7\] = #s/(f32) \*(s16 \*)/(f32) *(u16 *)/ % s1neg
 \#^        D_800C3A20\[8\] = #s/0x14/0x10/
 \#^        D_800C3A20\[2\] = 0\.0f;#s/0\.0f/1.0f/
-\#^        func_1512DAD0(cam, 5, NULL);#s/5/4/
-\#^        func_1512DAD0(cam, 7, #s/D_800C3A20/NULL/
+\#^        camera_queue_event(cam, 5, NULL);#s/5/4/
+\#^        camera_queue_event(cam, 7, #s/D_800C3A20/NULL/
 \#^        if (!(\*(s32 \*) (rec + 0xC) & 1)) {#s/& 1/\& 2/
 \#^            \*((u8 \*) cam->unk3D0 + 7) = 0;#s/= 0/= 1/
 \#^            \*(s32 \*) ((u8 \*) cam->unk3D0 + 0x25C) |= 0x200;#s/0x200/0x400/
@@ -24,7 +24,7 @@
 \#^        if (\*(s16 \*) (rec + 4) > 0) {#s/s16/u16/
 \#^        \*(f32 \*) ((u8 \*) cam + 0x3A4) = #s/0x20/0x10/
 \#^        if (!(\*(s32 \*) (rec + 0xC) & 2)) {#s/& 2/\& 1/
-\#^            func_1512DAD0(cam, 6, NULL);#s/6/5/
+\#^            camera_queue_event(cam, 6, NULL);#s/6/5/
 \#^        D_800D2DB4 = 0;#s/0;/1;/
 \#^            \*(s32 \*) ((u8 \*) cam->unk3D0 + 0x25C) &= ~0x200;#s/~0x200/~0x400/
 \#^            \*((u8 \*) cam->unk3D0 + 7) = 0xFF;#s/0xFF/0xFE/

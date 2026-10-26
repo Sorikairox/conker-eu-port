@@ -14,7 +14,7 @@ s#            tx = -0x1004;#tx = -0x1005;# % k7m2 k7m2z
 s#            tz = 0x1A6;#tz = 0x1A7;# % k7m2 k7m2z
 s#            tz = -0x756;#tz = -0x757;# % k4m2z k4m2x k4m2xn
 s#    } else if (kind == 4) {#} else if (kind == 5) {# % k4m1 k4m1z
-s#        func_151152A4(obj, sound, 0x7D00, 100, 2500, 1);#func_151152A4(obj, sound, 0x7D00, 100, 2500, 0);#
+s#        world_object_sound_play(obj, sound, 0x7D00, 100, 2500, 1);#world_object_sound_play(obj, sound, 0x7D00, 100, 2500, 0);#
 s#    if (mode == 0 || mode == 3) {#if (mode == 0) {#
 s#        vel += (maxSpeed - vel) \* 0\.03f;#vel += (maxSpeed - vel) * 0.04f;#
 s#    if (vel < maxSpeed) {#if (vel <= maxSpeed + 1.0f) {# % k4ease

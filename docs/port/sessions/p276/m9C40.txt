@@ -32,5 +32,5 @@
 \#^    rec.u34 = 0;$#s/0/1/
 \#^    node_spawn_sprite(&rec, 0, 0, -1, room, owner);$#s/-1/0/
 \#^    node_spawn_sprite(&rec, 0, 0, -1, room, owner);$#s/owner)/room)/
-\#^    r = (u32) func_150ADA20()#s/speedSpread >> 1/speedSpread >> 2/
-\#^    angle += (f32) (s32)#{s/(u32) func_150ADA20()/(s32) func_150ADA20()/;s/(u32) angSpread/angSpread/;}
+\#^    r = (u32) random_int()#s/speedSpread >> 1/speedSpread >> 2/
+\#^    angle += (f32) (s32)#{s/(u32) random_int()/(s32) random_int()/;s/(u32) angSpread/angSpread/;}

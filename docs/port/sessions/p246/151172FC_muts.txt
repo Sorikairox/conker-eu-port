@@ -1,4 +1,4 @@
-# P246 func_151172FC (spin_angles_update) mutants: sed % setup names
+# P246 scenery_spin_angles_update (spin_angles_update) mutants: sed % setup names
 s/0.00390625f/0.0078125f/ % base
 s/if (rate\[i\] != target\[i\])/if (rate[i] == target[i])/ % base
 1,/rate\[i\] -= step;/s/if (target\[i\] < rate\[i\]) {/if (target[i] > rate[i]) {/ % base

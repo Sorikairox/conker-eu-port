@@ -1,2 +1,2 @@
-44s/(u32)func_150ADA20()/(u32)(func_150ADA20() + 1)/ %
+44s/(u32)random_int()/(u32)(random_int() + 1)/ %
 47s/a < 0/a <= 0/ %

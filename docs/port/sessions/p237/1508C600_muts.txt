@@ -1,6 +1,6 @@
 # P237 func_1508C600 (rail_pair_sight) mutants: sed % setup names
-s/    ra = (u8 \*) func_1505EEF4(a \& 0xFFFF0FFF);/    ra = (u8 *) func_1505EEF4(a);/ % ids_hi
-s/    rb = (u8 \*) func_1505EEF4(b \& 0xFFFF0FFF);/    rb = (u8 *) func_1505EEF4(a \& 0xFFFF0FFF);/ % ff_clear
+s/    ra = (u8 \*) obj_find_by_spawn(a \& 0xFFFF0FFF);/    ra = (u8 *) obj_find_by_spawn(a);/ % ids_hi
+s/    rb = (u8 \*) obj_find_by_spawn(b \& 0xFFFF0FFF);/    rb = (u8 *) obj_find_by_spawn(a \& 0xFFFF0FFF);/ % ff_clear
 s/    if (ra != NULL \&\& rb != NULL) {/    if (ra != NULL) {/ % nullB
 s/        flagB = sb\[0x84\];/        flagB = sa[0x84];/ % f0_pt 0f_pt
 s/            ya = \*(f32 \*) (ra + 0x18) + (f32) \*(s16 \*) (sa + 0x114) \* 0.75f;/            ya = *(f32 *) (ra + 0x18) + (f32) *(s16 *) (sa + 0x114) * 0.5f;/ % ff_clear

@@ -1,4 +1,4 @@
-# P246 func_151A11BC (emit_point_blob): x/y/z in a2/a3/arg4 (floats), a = arg 8, arg8 = arg 11 (colour index), argB = arg 14. EU jal targets: func_150ADA20 = 150ADF00 (RET), func_150ADA68 = 150ADF48 (RETF), angle_byte_cos = 15142948 (RETF), node_spawn_sprite = jal 151682F4 (ARGMEM in the registry, set fields only). D_8008FC70 from the ROM (ROMDATA).
+# P246 func_151A11BC (emit_point_blob): x/y/z in a2/a3/arg4 (floats), a = arg 8, arg8 = arg 11 (colour index), argB = arg 14. EU jal targets: random_int = 150ADF00 (RET), random_float = 150ADF48 (RETF), angle_byte_cos = 15142948 (RETF), node_spawn_sprite = jal 151682F4 (ARGMEM in the registry, set fields only). D_8008FC70 from the ROM (ROMDATA).
 c0 ! 2=41200000,3=40A00000,4=C1200000,8=20,11=0,14=1AB ! ! 150ADF00=7;5;4;3 ! 150ADF48=3F000000,15142948=3F000000;3F400000;3E800000;3F19999A ! ! !
 c1 ! 2=C2C80000,3=0,4=42480000,8=1C3,11=1,14=7F ! ! 150ADF00=FFFFFFF5;FFFFFFFE;FFFFFFC1;12345 ! 150ADF48=3F666666,15142948=BF000000;3E99999A;BF400000;3F6B851F ! ! !
 c2 ! 2=3F800000,3=40000000,4=40400000,8=FF,11=2,14=0 ! ! 150ADF00=2C;11;7F;1C2 ! 150ADF48=3F800000,15142948=3F800000;BF800000;3F000000;BF000000 ! ! !

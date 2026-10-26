@@ -1,9 +1,9 @@
-# P253 func_150D2C9C (flake_particle_spawn) mutants: sed % setup names
+# P253 flake_particle_spawn (flake_particle_spawn) mutants: sed % setup names
 s/\* 2.0f \* 3.1415927f/* 3.1415927f/ % odd
 s/\* 0.4f + 0.3f/* 0.4f + 0.2f/ % odd
 s/1.0f \/ f.scale/2.0f \/ f.scale/ % odd
 s/0.13000001f + 0.3f/0.13f + 0.3f/ % odd even
-s/if (func_150ADA20() & 1)/if (func_150ADA20() \& 2)/ % odd even
+s/if (random_int() & 1)/if (random_int() \& 2)/ % odd even
 s/f.unk18 = 0.0f;/f.unk18 = 1.0f;/ % odd
 s/(s32) mtx, 0x40)/(s32) mtx, 0x30)/ % odd
 s/f.colour\[1\] = colours\[c\]\[1\];/f.colour[1] = colours[c][0];/ % odd

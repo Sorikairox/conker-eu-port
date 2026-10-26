@@ -1,4 +1,4 @@
-# P253 func_150D779C (bullet_impact_effect) mutants: sed % setup names
+# P253 bullet_impact_effect (bullet_impact_effect) mutants: sed % setup names
 s/rec.normal\[1\] = -dir\[1\];/rec.normal[1] = dir[1];/ % tri notri
 s/if (tri != NULL)/if (tri == NULL)/ % tri notri
 s/rec.tri = \*tri;/rec.tri.v[0] = tri->v[0];/ % tri tri_odd

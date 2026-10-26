@@ -20,35 +20,35 @@
 /^                        isFree = 0;/s/0/1/
 /^                        last = slot;/s/slot/free/
 /^                    slot->next = free;/s/free/NULL/
-/s->accum = s->accum + func_150ADA68()/s/307.0f/308.0f/
-/s->accum = s->accum + func_150ADA68()/s/ \* D_800BE9A4//
+/s->accum = s->accum + random_float()/s/307.0f/308.0f/
+/s->accum = s->accum + random_float()/s/ \* D_800BE9A4//
 /^                if (1.0f < s->accum) {/s/1.0f/2.0f/
 /last->next = free; \/\* the free list/s/free;/NULL;/
 /t.sprite = D_800AB6F0\[s->kind\];/s/s->kind/s->kind + 1/
 /t.flags = 0x1001;/s/0x1001/0x1002/
-/t.life = (u32) func_150ADA20()/s/+ 52/+ 53/
+/t.life = (u32) random_int()/s/+ 52/+ 53/
 /t.colour\[3\] = 0xFF;/s/0xFF/0xFE/
 /t.scale\[1\] = 1.0f;/s/1.0f/2.0f/
 /m.u11 = 0;/s/0/1/
 /\*(f32 \*) &t.prev\[2\] = 0.0f;/s/0.0f/1.0f/
 /m.kind = s->kind;/s/s->kind/s->targetId/
-/m.u24 = func_150ADA20() & 1;/s/& 1/\& 2/
+/m.u24 = random_int() & 1;/s/& 1/\& 2/
 /m.u1C = 2.0f;/s/2.0f/3.0f/
 /t.u18 = 0.0f;/s/0.0f/1.0f/
 /m.u20 = 8.0f;/s/8.0f/7.0f/
 /^                            last = free;/d
-/for (k = (u32) func_150ADA20()/,/free = free->next;/s/free = free->next;/free = free;/
+/for (k = (u32) random_int()/,/free = free->next;/s/free = free->next;/free = free;/
 /pt = &D_800AA50C\[free - s->slots\];/s/D_800AA50C/D_800AA5BC/
-/t.u45 = (u32) func_150ADA20()/s/+ 100/+ 101/
-/t.u44 = (u32) func_150ADA20()/s/+ 155/+ 154/
-/m.u12 = (u32) func_150ADA20()/s/+ 4/+ 3/
-/m.spin = (func_150ADA68() \* 506.0f + -703.0f) \* 0.001f;/s/-703.0f/-702.0f/
+/t.u45 = (u32) random_int()/s/+ 100/+ 101/
+/t.u44 = (u32) random_int()/s/+ 155/+ 154/
+/m.u12 = (u32) random_int()/s/+ 4/+ 3/
+/m.spin = (random_float() \* 506.0f + -703.0f) \* 0.001f;/s/-703.0f/-702.0f/
 /func_15143134(pt->ofs, t.pos,/s/t.pos/t.scale/
 /t.prev\[1\] = \*(s32 \*) &t.pos\[1\];/s/pos\[1\]/pos[0]/
 /free->rec = (u8 \*) effect3d_spawn_default(/s/0x11, 0, 0, 0x10, 2, 0x28/0x11, 0, 0, 0x10, 2, 0x20/
 /free->rec = (u8 \*) effect3d_spawn_default(/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
 /memcpy(free->rec + 0x110, &m, 0x28);/s/0x110/0x10C/
-/free->timer = (u32) func_150ADA20()/s/+ 20/+ 21/
+/free->timer = (u32) random_int()/s/+ 20/+ 21/
 /^                            nfree--;/d
 /^                            last->next = free;/d
 /^                            s->count++;/d

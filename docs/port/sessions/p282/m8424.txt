@@ -16,7 +16,7 @@
 /req.u4C = /s/0.001f/0.002f/
 /req.at\[1\] = pos\[1\]/s/pos\[1\]/pos[2]/
 /(u32) b . 21 - 83/s/83/82/
-/func_150ADA68() \* 8.0f + 9.0f/s/9.0f/8.0f/
+/random_float() \* 8.0f + 9.0f/s/9.0f/8.0f/
 /req.pos\[2\] = trans\[2\]/s/trans\[2\]/trans[1]/
 /req.u40 = /s/-12248.0f/-12000.0f/
 /req.u48 = /s/24496.0f/24000.0f/

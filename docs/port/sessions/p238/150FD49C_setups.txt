@@ -1,4 +1,4 @@
-# P238 func_150FD49C (view_spot_distance_fade): obj 80440000; D_800D9AA0 = EU 800D9EC0 -> spot 80450000 (s16 x, y, z). func_15166120 = jal 15166120 (RETF: the result)
+# P238 view_spot_distance_fade (view_spot_distance_fade): obj 80440000; D_800D9AA0 = EU 800D9EC0 -> spot 80450000 (s16 x, y, z). func_15166120 = jal 15166120 (RETF: the result)
 nospot ! 0=80440000 ! 800D9EC0=00000000 ! ! 15166120=3F000000 ! ! ! !
 spot ! 0=80440000 ! 800D9EC0=80450000,80450000=0010FFF0,80450004=7FFF1234 ! ! 15166120=3F000000 ! ! ! !
 spotneg ! 0=80440000 ! 800D9EC0=80450000,80450000=0001FFFF,80450004=80000000 ! ! 15166120=3E800000 ! ! ! !

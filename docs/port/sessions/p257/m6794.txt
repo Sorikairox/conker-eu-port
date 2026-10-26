@@ -7,7 +7,7 @@
 \#^    for (i = 0; i < \*(s32 \*) (obj + 0x48); i++) {$#s/i </i <=/
 \#^    for (i = 0; i < \*(s32 \*) (obj + 0x48); i++) {$#s/i = 0/i = 1/
 \#^        rec\[0\] = t;$#s/= t/= step/
-\#^        b2 = func_15106A90(t);$#s/(t)/(step)/
+\#^        b2 = bezier_basis2(t);$#s/(t)/(step)/
 \#^            rec\[1 + k\] = p0\[k\] \* b0 + p1\[k\] \* b1 + p2\[k\] \* b2 + p3\[k\] \* b3;$#s/p1\[k\] \* b1/p1[k] * b2/
 \#^            rec\[1 + k\] = p0\[k\] \* b0 + p1\[k\] \* b1 + p2\[k\] \* b2 + p3\[k\] \* b3;$#s/+ p3\[k\] \* b3/- p3[k] * b3/
 \#^            rec\[1 + k\] = p0\[k\] \* b0 + p1\[k\] \* b1 + p2\[k\] \* b2 + p3\[k\] \* b3;$#s/p0\[k\] \* b0/p0[k] * b1/
@@ -23,4 +23,4 @@
 \#^        rec += 13;$#s/13/12/
 \#^        t += step;$#s/+= step/+= 0.25f/
 /for (k = 0; k < 3; k++) {/s/k < 3/k < 2/
-/b1 = func_15106A5C(t);/,/d1 = func_15106B04(t);/s/d1 = func_15106B04(t);/d1 = func_15106B3C(t);/
+/b1 = bezier_basis1(t);/,/d1 = bezier_basis1_deriv(t);/s/d1 = bezier_basis1_deriv(t);/d1 = bezier_basis2_deriv(t);/

@@ -1,4 +1,4 @@
-s/func_150ADA20() & 3\]/func_150ADA20() \& 2]/ % r0 r1 r3
+s/random_int() & 3\]/random_int() \& 2]/ % r0 r1 r3
 s/0x1303/0x1203/ %
 s/req.life = 300/req.life = 301/ %
 s/req.color\[1\] = 0xFF/req.color[1] = 0/ %

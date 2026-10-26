@@ -6,7 +6,7 @@ s/    if (count == 0) {/    if (count < 0) {/
 s/    if (st->stage < 7) {/    if (st->stage < 6) {/
 s/        st->timer -= D_800BE9E4 \* count;/        st->timer -= D_800BE9E4;/
 s/        if (st->timer < 0) {/        if (st->timer <= 0) {/
-s/            func_10010F88((func_150ADA20() \(.\) 3U) + 0x2B3, 0x5DC0/            func_10010F88((func_150ADA20() \1 3U) + 0x2B3, 0x5DC1/
+s/            func_10010F88((random_int() \(.\) 3U) + 0x2B3, 0x5DC0/            func_10010F88((random_int() \1 3U) + 0x2B3, 0x5DC1/
 s/            st->parts\[st->stage\]\[0x6E\] = 1;/            st->parts[st->stage][0x6E] = 2;/
 s/            st->stage++;/            st->stage += 2;/
 s/            st->parts\[st->stage\]\[0x6E\] = 0;/            st->parts[st->stage][0x6D] = 0;/
@@ -15,24 +15,24 @@ s/            burst.unk2 = 0x19;/            burst.unk2 = 0x18;/
 s/            burst.unk4 = 8;/            burst.unk4 = 9;/
 s/            burst.unk6 = -1;/            burst.unk6 = 0;/
 s/            func_151D8E18(\&burst, 0, arg0\[0xC\], arg0\[1\]);/            func_151D8E18(\&burst, 0, arg0[0xC], arg0[0]);/
-s/            st->timer = (func_150ADA20() \(.\) 31U) + 70;/            st->timer = (func_150ADA20() \1 31U) + 71;/
+s/            st->timer = (random_int() \(.\) 31U) + 70;/            st->timer = (random_int() \1 31U) + 71;/
 s/    st->crackle -= D_800BE9E4 \* count;/    st->crackle -= count;/
-s/        crackle.unk2 = (func_150ADA20() \(.\) 21U) + 10;/        crackle.unk2 = (func_150ADA20() \1 20U) + 10;/
-s/        crackle.unk4 = (func_150ADA20() \& 3) + 1;/        crackle.unk4 = (func_150ADA20() \& 7) + 1;/
+s/        crackle.unk2 = (random_int() \(.\) 21U) + 10;/        crackle.unk2 = (random_int() \1 20U) + 10;/
+s/        crackle.unk4 = (random_int() \& 3) + 1;/        crackle.unk4 = (random_int() \& 7) + 1;/
 s/        crackle.unk5 = 1;/        crackle.unk5 = 0;/
-s/        func_10010F88((func_150ADA20() \& 3) + 0x6D6/        func_10010F88((func_150ADA20() \& 1) + 0x6D6/
-s/        st->crackle = (func_150ADA20() \(.\) 151U) + 150;/        st->crackle = (func_150ADA20() \1 150U) + 150;/
+s/        func_10010F88((random_int() \& 3) + 0x6D6/        func_10010F88((random_int() \& 1) + 0x6D6/
+s/        st->crackle = (random_int() \(.\) 151U) + 150;/        st->crackle = (random_int() \1 150U) + 150;/
 s/    countf = count;/    countf = count + 1;/
-s/    st->emberAcc += (0.020000001f + func_150ADA68() \* 0.025f)/    st->emberAcc += (0.02f + func_150ADA68() * 0.025f)/
-s/    st->emberAcc += (0.020000001f + func_150ADA68() \* 0.025f) \* (D_800BE9A4 \* countf);/    st->emberAcc += (0.020000001f + func_150ADA68() * 0.025f) * D_800BE9A4;/
+s/    st->emberAcc += (0.020000001f + random_float() \* 0.025f)/    st->emberAcc += (0.02f + random_float() * 0.025f)/
+s/    st->emberAcc += (0.020000001f + random_float() \* 0.025f) \* (D_800BE9A4 \* countf);/    st->emberAcc += (0.020000001f + random_float() * 0.025f) * D_800BE9A4;/
 s/    if (1.0f < st->emberAcc) {/    if (1.0f <= st->emberAcc) {/
-s/            angle = ((s32)(func_150ADA20() \(.\) 126U) - 0xDC) \* dir;/            angle = ((s32)(func_150ADA20() \1 126U) - 0xDB) * dir;/
+s/            angle = ((s32)(random_int() \(.\) 126U) - 0xDC) \* dir;/            angle = ((s32)(random_int() \1 126U) - 0xDB) * dir;/
 s/            func_15143874(angle, st->radius, \&ember\[0\], \&ember\[2\]);/            func_15143874(angle, st->x, \&ember[0], \&ember[2]);/
-s/            ember\[1\] = func_150ADA68() \* 150.0f + 30.0f;/            ember[1] = func_150ADA68() * 150.0f + 31.0f;/
+s/            ember\[1\] = random_float() \* 150.0f + 30.0f;/            ember[1] = random_float() * 150.0f + 31.0f;/
 s/            ember\[0\] += st->x;/            ember[0] += st->z;/
 s/            func_151C384C(ember, arg0\[0xC\], arg0\[1\]);/            func_151C384C(ember, arg0[0xC], 1);/
 s/        } while (1.0f < st->emberAcc);/        } while (2.0f < st->emberAcc);/
-s/    st->flameAcc += (0.020000001f + func_150ADA68() \* 0.060000002f)/    st->flameAcc += (0.020000001f + func_150ADA68() * 0.06f)/
+s/    st->flameAcc += (0.020000001f + random_float() \* 0.060000002f)/    st->flameAcc += (0.020000001f + random_float() * 0.06f)/
 s/        flame.scale\[1\] = 1.0f;/        flame.scale[1] = 0.0f;/
 s/        flame.one\[2\] = 1.0f;/        flame.one[2] = 2.0f;/
 s/        flame.u50 = 0x39E8;/        flame.u50 = 0x39E9;/
@@ -41,20 +41,20 @@ s/        flame.u62\[6\] = 0;/        flame.u62[6] = 1;/
 s/        flame.u6A = 2;/        flame.u6A = 3;/
 s/        flame.u74 = 0x15;/        flame.u74 = 0x16;/
 s/        flame.u44 = 0.0f;/        flame.u44 = 1.0f;/
-s/            k = (func_150ADA20() \(.\) 7U) + 5;/            k = (func_150ADA20() \1 7U) + 4;/
+s/            k = (random_int() \(.\) 7U) + 5;/            k = (random_int() \1 7U) + 4;/
 s/            base = angle - 7;/            base = angle - 4;/
-s/                flame.life = (func_150ADA20() \& 0xF) + 0x23;/                flame.life = (func_150ADA20() \& 0x7) + 0x23;/
-s/                size = func_150ADA68() \* 0.012f + 0.005f;/                size = func_150ADA68() * 0.012f + 0.006f;/
+s/                flame.life = (random_int() \& 0xF) + 0x23;/                flame.life = (random_int() \& 0x7) + 0x23;/
+s/                size = random_float() \* 0.012f + 0.005f;/                size = random_float() * 0.012f + 0.006f;/
 s/                flame.size\[1\] = size;/                flame.size[1] = 0.0f;/
-s/                flame.rot\[2\] = func_150ADA68() \* 360.0f;/                flame.rot[2] = func_150ADA68() * 180.0f;/
+s/                flame.rot\[2\] = random_float() \* 360.0f;/                flame.rot[2] = random_float() * 180.0f;/
 s/                func_15143794((r1 \& 0xF) + base, ((u32)r2 \(.\) 37U) - 0x3F, speed/                func_15143794((r1 \& 0xF) + base, ((u32)r2 \1 36U) - 0x3F, speed/
-s/                speed = func_150ADA68() \* 8.0f + 10.0f;/                speed = func_150ADA68() * 8.0f + 6.0f;/
-s/                flame.u48 = func_150ADA68() \* 32.41f + -16.205f;/                flame.u48 = func_150ADA68() * 32.41f;/
-s/                flame.u4C = func_150ADA68() \* 0.337f + -1.177f;/                flame.u4C = func_150ADA68() * 0.337f + 1.177f;/
+s/                speed = random_float() \* 8.0f + 10.0f;/                speed = random_float() * 8.0f + 6.0f;/
+s/                flame.u48 = random_float() \* 32.41f + -16.205f;/                flame.u48 = random_float() * 32.41f;/
+s/                flame.u4C = random_float() \* 0.337f + -1.177f;/                flame.u4C = random_float() * 0.337f + 1.177f;/
 s/                func_15132BBC((u8 \*)\&flame, 3, 1, NULL, 0, 0xFF, 1);/                func_15132BBC((u8 *)\&flame, 2, 1, NULL, 0, 0xFF, 1);/
 s/                k--;/                k -= 2;/
 s/            st->flameAcc -= 1.0f;/            st->flameAcc -= 0.5f;/
-s/    st->smokeAcc += (0.055000003f + func_150ADA68() \* 0.05f)/    st->smokeAcc += (0.055000003f + func_150ADA68() * 0.06f)/
+s/    st->smokeAcc += (0.055000003f + random_float() \* 0.05f)/    st->smokeAcc += (0.055000003f + random_float() * 0.06f)/
 s/        smoke.u04 = 0x9F0600;/        smoke.u04 = 0x9F0601;/
 s/        smoke.texSet = 0x4404;/        smoke.texSet = 0x4403;/
 s/        smoke.color\[3\] = 0xFF;/        smoke.color[3] = 0xFE;/
@@ -67,21 +67,21 @@ s/        smoke.u64 = -1;/        smoke.u64 = 0;/
 s/        smoke.u66 = 0xFF;/        smoke.u66 = 0;/
 s/        smoke.range = 0.0f;/        smoke.range = 1.0f;/
 s/        smoke.u24 = 1.0f;/        smoke.u24 = 0.0f;/
-s/            n = (func_150ADA20() \(.\) 13U) + 7;/            n = (func_150ADA20() \1 13U) + 6;/
+s/            n = (random_int() \(.\) 13U) + 7;/            n = (random_int() \1 13U) + 6;/
 s/            base = angle - 4;/            base = angle - 5;/
-s/                smoke.life = (func_150ADA20() \(.\) 21U) + 0x1E;/                smoke.life = (func_150ADA20() \1 21U) + 0x1F;/
-s/                smoke.alpha = (func_150ADA20() \(.\) 156U) + 100;/                smoke.alpha = (func_150ADA20() \1 155U) + 100;/
-s/                size = func_150ADA68() \* 110.0f + 70.0f;/                size = func_150ADA68() * 110.0f + 71.0f;/
+s/                smoke.life = (random_int() \(.\) 21U) + 0x1E;/                smoke.life = (random_int() \1 21U) + 0x1F;/
+s/                smoke.alpha = (random_int() \(.\) 156U) + 100;/                smoke.alpha = (random_int() \1 155U) + 100;/
+s/                size = random_float() \* 110.0f + 70.0f;/                size = random_float() * 110.0f + 71.0f;/
 s/                smoke.flags \&= ~0xC0;/                smoke.flags \&= ~0x80;/
 s/                smoke.halfH = size;/                smoke.halfH = 0.0f;/
-s/                flipB = (func_150ADA20() \& 1) ? 0x80 : 0;/                flipB = (func_150ADA20() \& 1) ? 0x40 : 0;/
+s/                flipB = (random_int() \& 1) ? 0x80 : 0;/                flipB = (random_int() \& 1) ? 0x40 : 0;/
 s/                func_15143794(((u32)r1 \(.\) 9U) + base, (r2 \& 7) - 0x10, speed, (struct17 \*)smoke.vel);/                func_15143794(((u32)r1 \1 9U) + base, (r2 \& 3) - 0x10, speed, (struct17 *)smoke.vel);/
-s/                speed = func_150ADA68() \* 10.0f + 6.0f;/                speed = func_150ADA68() * 10.0f + 4.0f;/
-s/                smoke.value = func_150ADA68() \* 0.268f + -0.38700002f;/                smoke.value = func_150ADA68() * 0.268f;/
+s/                speed = random_float() \* 10.0f + 6.0f;/                speed = random_float() * 10.0f + 4.0f;/
+s/                smoke.value = random_float() \* 0.268f + -0.38700002f;/                smoke.value = random_float() * 0.268f;/
 s/                func_151307F0((s32)\&smoke, 1, 0, 0, 0xFF, 1);/                func_151307F0((s32)\&smoke, 1, 0, 0, 0xFF, 0);/
-s/    st->sparkAcc += (0.33600003f + func_150ADA68() \* 0.126f)/    st->sparkAcc += (0.336f + func_150ADA68() * 0.126f)/
+s/    st->sparkAcc += (0.33600003f + random_float() \* 0.126f)/    st->sparkAcc += (0.336f + random_float() * 0.126f)/
 s/            func_15143794(((u32)r1 \(.\) 9U) + angle - 4, (r2 \& 7) - 0x10/            func_15143794(((u32)r1 \1 9U) + angle - 3, (r2 \& 7) - 0x10/
-s/            speed = func_150ADA68() \* 6.0f + 4.0f;/            speed = func_150ADA68() * 6.0f + 6.0f;/
+s/            speed = random_float() \* 6.0f + 4.0f;/            speed = random_float() * 6.0f + 6.0f;/
 s/            impact_tinted_particle_spawn(8, (u8 \*)pos, (u8 \*)vel, size \* 200.0f + 200.0f, 1.025439f, 0.938816f,/            impact_tinted_particle_spawn(8, (u8 *)pos, (u8 *)vel, size * 200.0f + 200.0f, 0.938816f, 1.025439f,/
 s/                          spread \* 0.20700002f + -0.16900001f, ((u32)r1 \(.\) 21U) + 0x23, ((u32)r2 \(.\) 121U) + 100, 0x32,/                          spread * 0.20700002f + -0.16900001f, ((u32)r2 \1 21U) + 0x23, ((u32)r1 \2 121U) + 100, 0x32,/
 s/                          5, 0, 0xFF, 1);/                          5, 1, 0xFF, 1);/

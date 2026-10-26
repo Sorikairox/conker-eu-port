@@ -41,8 +41,8 @@
 \#^                level += 8;$#s/8/7/
 \#^                if (level >= 0x100) {$#s/>=/>/
 \#^                    level = 0xFF;$#s/0xFF/0x100/
-\#^                    timer = (func_150ADA20() & 0x200) + 0x12C;$#s/0x200/0x100/
-\#^                    timer = (func_150ADA20() & 0x200) + 0x12C;$#s/0x12C/0x12D/
+\#^                    timer = (random_int() & 0x200) + 0x12C;$#s/0x200/0x100/
+\#^                    timer = (random_int() & 0x200) + 0x12C;$#s/0x12C/0x12D/
 \#^                    fading = 0;$#s/0/1/
 \#^                level -= 8;$#s/8/9/
 \#^                if (level <= 0) {$#s/<= 0/< 0/
@@ -52,7 +52,7 @@
 \#^                if (\*id == 0x4A8) {$#s/0x4A8/0x4A9/
 \#^                                  (s32) \*(f32 \*) (tank + 0x1C), 0x2EE0, 0x320, 0xC8, (s32) &func_151BB690, tank,$#s/0x2EE0/0x2000/
 \#^                                  drive | 0x880, 8, 0);$#s/0x880/0x80/
-\#^                    timer = (func_150ADA20() & 0x200) + 0x384;$#s/0x384/0x12C/
+\#^                    timer = (random_int() & 0x200) + 0x384;$#s/0x384/0x12C/
 \#^        \*pitch = (s32) (fabsf(\*(f32 \*) (tank + 0x3C)) \* \*(f32 \*) (tank + 0xB8) \* 0\.5f);$#s/0\.5f/0.25f/
 \#^        \*pitch = (s32) (fabsf(\*(f32 \*) (tank + 0x3C)) \* \*(f32 \*) (tank + 0xB8) \* 0\.5f);$#s/0xB8/0xB4/
 \#^        \*pitch = (s32) (fabsf(\*(f32 \*) (tank + 0x3C)) \* \*(f32 \*) (tank + 0xB8) \* 0\.5f);$#s/fabsf(\*(f32 \*) (tank + 0x3C))/(*(f32 *) (tank + 0x3C))/

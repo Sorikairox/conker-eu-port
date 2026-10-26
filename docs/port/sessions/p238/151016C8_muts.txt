@@ -1,4 +1,4 @@
-# P238 func_151016C8 mutants: sed % setup names
+# P238 laser_sight_free mutants: sed % setup names
 s/node_delete(\*(struct102 \*\*) (obj + 0x138));/;/ % all
 s/(\*(struct102 \*\*) (obj + 0x138) != NULL)/(*(struct102 **) (obj + 0x13C) != NULL)/ % alt2
 s/(fx + 0x2C) != NULL/(fx + 0x28) != NULL/ % alt

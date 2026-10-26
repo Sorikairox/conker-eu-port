@@ -9,7 +9,7 @@ s/    range \*= D_800901BC;/    range *= 1.0f;/
 s/    scale \*= D_800901BC;/    scale *= 1.0f;/
 s/        dot = 4;/        dot = 5;/
 s/    if (D_800901BC == 1.0f) {/    if (D_800901BC >= 1.0f) {/
-s/    tex = func_1510D66C(0xCF5, NULL, 3, 0);/    tex = func_1510D66C(0xCF4, NULL, 3, 0);/
+s/    tex = texture_cache_lookup(0xCF5, NULL, 3, 0);/    tex = texture_cache_lookup(0xCF4, NULL, 3, 0);/
 s/    if (tex == 0x80000000) {/    if (tex == 0) {/
 s/    gdl->words.w1 = 0x07094250;/    gdl->words.w1 = 0x07094251;/
 s/    gdl->words.w0 = 0xEF000000 | ((mode | 0xF) \& 0xFFFFFF);/    gdl->words.w0 = 0xEF000000 | (mode \& 0xFFFFFF);/
