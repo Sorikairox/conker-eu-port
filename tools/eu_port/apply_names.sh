@@ -33,8 +33,9 @@ for c in sys.argv[1:]:
         f = line.rstrip('\n').split('\t')
         if len(f) < 4: sys.exit(f'chunk{c}: bad row {f}')
         o, n, conf, d = f[:4]
-        n = n.lower()   # names that embed an address use lowercase hex
-        if not re.fullmatch(r'func_(eu_)?[0-9A-F]{8}', o) or not re.fullmatch(r'[a-z][a-z0-9_]{2,47}', n): sys.exit(f'chunk{c}: bad name {o} {n}')
+        n = re.sub(r'_([0-9A-F]{8})$', lambda m: '_' + m.group(1).lower(), n)   # embedded address: lowercase hex
+        # (other case is kept: real SDK names such as n_alBnkfNew / _bnkfPatchBank)
+        if not re.fullmatch(r'func_(eu_)?[0-9A-F]{8}', o) or not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]{2,47}', n): sys.exit(f'chunk{c}: bad name {o} {n}')
         if o in have: print(f'skip {o}: already in names.tsv'); continue
         if o in inner: print(f'skip {o}: secondary entry point inside another function (asm glabel), keeps its name'); continue
         rows.append((o, n, conf, d.replace('\t', ' ')))
