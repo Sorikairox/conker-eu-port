@@ -887,6 +887,129 @@ u8 *hud_counter_digits_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     } while ((u32) var_s1 >= (u32) &sp.u7C);
     return var_s0;
 }
+#ifdef PORT
+s32 event_dispatch(s32, s32, ...);
+u8 *event_get_vars(s32);
+Gfx *hud_image_draw(Gfx *gdl, void *descArg, s32 x, s32 y, s32 cols, s32 rows, f32 scale, s32 idOffset);
+
+#define CASH_DOLLAR_TEX 0x7F6   /* the pause screen's "$" image (hud_ingame_draw) */
+#define CASH_DIGIT_W 0x40       /* quarter pixels: 16 px, half of the pause screen's 32 px digits */
+#define CASH_DIGIT_STEP 0x30    /* 12 px per digit (pause screen: 24 px) */
+#define CASH_MARGIN 16          /* px: gap between the counter and the right edge of the screen */
+#define CASH_TOP_Y 12           /* px: top of the digits */
+
+/* hud_cash_total: the cash amount as the pause screen shows it (hud_ingame_draw): player stat 6, where 0x7D00 means
+ * 1000000; while event 0x5082 runs without 0x5083 it is scaled by event 0x83's count (+0x64) / 3. */
+static s32 hud_cash_total(void) {
+    s32 cash;
+    s32 count;
+    u8 *vars;
+
+    cash = player_stat_get(0, 6);
+    if (cash == 0x7D00) {
+        cash = 1000000;
+    }
+    if (event_dispatch(0, 0x5082, 0x1A) != 0 && event_dispatch(0, 0x5083, 0x1A) == 0) {
+        vars = event_get_vars(0x83);
+        count = vars != NULL ? *(s32 *) (vars + 0x64) : 0;
+        if (count == 0) {
+            cash = 0;
+        } else if (count < 3) {
+            cash = cash * count / 3;
+        }
+    }
+    return cash;
+}
+
+/* hud_cash_digits_draw_half: hud_counter_digits_draw at half size: the same digit textures (g_hud_digit_tex_ids,
+ * 32x32) and the same load commands, drawn as 16x16 rectangles (texture step 0x800 = 2 texels per pixel) 12 px
+ * apart. x, y: top left in pixels. A digit whose texture is not loaded yet is skipped (as in the original). */
+static u8 *hud_cash_digits_draw_half(u8 *gdl, s32 x, s32 y, s32 value) {
+    s32 *divisors = &g_hud_digit_divisors;   /* 1, 10, ... 1000000 */
+    s32 started = 0;
+    s32 i, digit, tex;
+    s32 sx = x * 4;
+    s32 sy = y * 4;
+    s32 *g;
+
+    if (value > 9999999) {
+        value = 9999999;
+    }
+    if (value < 0) {
+        value = 0;
+    }
+    for (i = 6; i >= 0; i--) {
+        digit = value / divisors[i];
+        value = value % divisors[i];
+        if (digit == 0 && !started && i != 0) {
+            continue;
+        }
+        started = 1;
+        tex = texture_cache_lookup((&g_hud_digit_tex_ids)[digit], 0, 3, 0);
+        if (tex != (s32) 0x80000000) {
+            g = (s32 *) gdl;
+            g[0] = 0xFD180000; g[1] = tex;          /* SetTImg */
+            g[2] = 0xF5180000; g[3] = 0x07094250;   /* SetTile (load) */
+            g[4] = 0xE6000000; g[5] = 0;            /* LoadSync */
+            g[6] = 0xF3000000; g[7] = 0x073FF000;   /* LoadBlock */
+            g[8] = 0xE7000000; g[9] = 0;            /* PipeSync */
+            g[10] = 0xF5181000; g[11] = 0x94250;    /* SetTile (render) */
+            g[12] = 0xF2000000; g[13] = 0x7C07C;    /* SetTileSize 32x32 */
+            gdl = hud_tex_rect_scaled((u8 *) (g + 14), sx, sy, sx + CASH_DIGIT_W, sy + CASH_DIGIT_W, 0, 0, 0,
+                                      0x800, 0x800);
+        }
+        sx += CASH_DIGIT_STEP;
+    }
+    return gdl;
+}
+
+/* hud_cash_counter_draw: P330 option "Always show cash" (off by default; replaces P325's green "$ N" text). The
+ * original shows the cash total only on the pause screen (hud_ingame_draw: the "$" image 0x7F6 and the big digit
+ * textures) and in a short pop-up when a script hands Conker cash. With the option on, the same images are drawn
+ * every frame at half size in the top right corner. Not in multiplayer, during cutscenes, on the pause screen
+ * (which shows its own), on HUD-less frames (g_pause_open) or on the title level 0x1D: the cases where hud_draw
+ * hides the health HUD. The textures are requested every frame (texture_cache_lookup with an out pointer, as the
+ * pause screen does), so they appear once loaded. */
+static u8 *hud_cash_counter_draw(u8 *gdl) {
+    s32 cash, digits, limit, x, i, unused;
+    s32 saved_desc;
+    s32 *g;
+
+    if (!port_option(PORT_OPT_CASH_ALWAYS) || g_mp_mode_active != 0 || g_cutscene_slot_state == 1 ||
+        g_game_paused != 0 || g_pause_open != 0 || g_level_id == 0x1D) {
+        return gdl;
+    }
+    for (i = 0; i < 10; i++) {
+        texture_cache_lookup((&g_hud_digit_tex_ids)[i], (s32) &unused, 3, 0);
+    }
+    texture_cache_lookup(CASH_DOLLAR_TEX, (s32) &unused, 3, 0);
+    cash = hud_cash_total();
+    for (digits = 1, limit = 10; limit <= cash && digits < 7; limit *= 10) {
+        digits++;
+    }
+    /* HUD coordinates are multiplied by the hi-res factor g_hud_scale_x on the way to the screen */
+    x = (s32) ((f32) g_framebuffer_width / g_hud_scale_x) - CASH_MARGIN - digits * (CASH_DIGIT_STEP / 4) - 4;
+    g = (s32 *) gdl;
+    g[0] = 0xDE000000; g[1] = (s32) g_hud_sprite_setup_dl;   /* the pause screen's 2D setup */
+    g[2] = 0xFB000000; g[3] = -1;                               /* env colour: opaque white */
+    saved_desc = g_hud_sprite_desc;
+    g_hud_sprite_desc = CASH_DOLLAR_TEX;
+    gdl = (u8 *) hud_image_draw((Gfx *) (g + 4), &g_hud_sprite_desc, x - 5, CASH_TOP_Y + 8, 1, 1, 0.5f, 0);
+    g_hud_sprite_desc = saved_desc;
+    g = (s32 *) gdl;
+    g[0] = 0xDE000000; g[1] = (s32) g_hud_sprite_setup_dl;
+    g[2] = 0xEF002C3F; g[3] = 0x504244;                         /* other modes, as before the pause digits */
+    g[4] = 0xE7000000; g[5] = 0;
+    g[6] = 0xFB000000; g[7] = -1;
+    return hud_cash_digits_draw_half((u8 *) (g + 8), x, CASH_TOP_Y, cash);
+}
+#undef CASH_DOLLAR_TEX
+#undef CASH_DIGIT_W
+#undef CASH_DIGIT_STEP
+#undef CASH_MARGIN
+#undef CASH_TOP_Y
+#endif
+
 /* Table g_hud_screen_fns slot 0 (the in-game HUD pass): pause/fade overlay, and with g_game_paused set the
  * money/lives counter screen (texture ids 0x7D3.. loaded through texture_cache_lookup, counters drawn by
  * hud_counter_digits_draw). */
@@ -1124,6 +1247,9 @@ u8 *hud_ingame_draw(u8 *arg0) {
             }
         }
     }
+#ifdef PORT
+    var_s0 = hud_cash_counter_draw(var_s0);
+#endif
     return var_s0;
 }
 /* was func_151EC0E0 */
