@@ -20,6 +20,13 @@ for line in open('tools/eu_port/names.tsv'):
     if line.startswith('#') or line.startswith('old\t') or not line.strip(): continue
     o, n = line.split('\t')[:2]; have[o] = n
 used = set(have.values()); rows = []
+# secondary entry points (a glabel inside another function's .s) can't be renamed: listing them in the symbol list
+# makes splat split the parent function (P322 wave 3: game_eu_D1760 / D3880 changed size). Keep their func_ name.
+import glob, os
+inner = set()
+for f in glob.glob('conker/asm/nonmatchings/*/*.s'):
+    base = os.path.basename(f)[:-2]
+    inner |= {m for m in re.findall(r'^\s*glabel\s+(\S+)', open(f).read(), re.M) if m != base}
 for c in sys.argv[1:]:
     for line in open(f'docs/names/proposals/chunk{c}.tsv'):
         if line.startswith('#') or line.startswith('old\t') or not line.strip(): continue
@@ -29,6 +36,7 @@ for c in sys.argv[1:]:
         n = n.lower()   # names that embed an address use lowercase hex
         if not re.fullmatch(r'func_(eu_)?[0-9A-F]{8}', o) or not re.fullmatch(r'[a-z][a-z0-9_]{2,47}', n): sys.exit(f'chunk{c}: bad name {o} {n}')
         if o in have: print(f'skip {o}: already in names.tsv'); continue
+        if o in inner: print(f'skip {o}: secondary entry point inside another function (asm glabel), keeps its name'); continue
         rows.append((o, n, conf, d.replace('\t', ' ')))
 dn = [n for n, k in collections.Counter(r[1] for r in rows).items() if k > 1] + [r[1] for r in rows if r[1] in used]
 do = [o for o, k in collections.Counter(r[0] for r in rows).items() if k > 1]
