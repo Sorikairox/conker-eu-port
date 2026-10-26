@@ -120,7 +120,7 @@ void func_1518D290(u8 *obj, u8 owner, s32 ownerArg) {
     s16 count;
     s16 i;
 
-    count = func_150ADA20() % 11U + 25;
+    count = random_int() % 11U + 25;
     if (count <= 0) {
         return;
     }
@@ -131,7 +131,7 @@ void func_1518D290(u8 *obj, u8 owner, s32 ownerArg) {
     }
     for (i = 0; i < count; i++) {
         pt = ring + i * 3;
-        func_1514373C(func_150ADA68() * sRingPi[0] + sRingPi[0], 114.0f, &pt[0], &pt[2]);
+        func_1514373C(random_float() * sRingPi[0] + sRingPi[0], 114.0f, &pt[0], &pt[2]);
         pt[1] = -90.0f;
         pt[0] = pt[0] + 111.0f;
     }
@@ -171,14 +171,14 @@ void func_1518D290(u8 *obj, u8 owner, s32 ownerArg) {
     req.flags = 0x80CE07;
     centre = world + count * 3;
     for (i = 0; i < count; i++) {
-        flipB = (func_150ADA20() & 1) ? 0x80 : 0;
-        flipA = (func_150ADA20() & 1) ? 0x40 : 0;
+        flipB = (random_int() & 1) ? 0x80 : 0;
+        flipA = (random_int() & 1) ? 0x40 : 0;
         req.flags = (req.flags & ~0xC0) | (flipA | flipB);
-        speed = (func_150ADA68() * 202.0f + 250.0f) * sRingScale[0];
-        life = func_150ADA20() % 26U + 25;
+        speed = (random_float() * 202.0f + 250.0f) * sRingScale[0];
+        life = random_int() % 26U + 25;
         req.u22 = life;
         req.life = life;
-        req.halfH = req.halfW = func_150ADA68() * 105.0f + 150.0f;
+        req.halfH = req.halfW = random_float() * 105.0f + 150.0f;
         pt = world + i * 3;
         req.pos[0] = ((s32 *) pt)[0];
         req.pos[1] = ((s32 *) pt)[1];
@@ -186,8 +186,8 @@ void func_1518D290(u8 *obj, u8 owner, s32 ownerArg) {
         req.vel[0] = (pt[0] - centre[0]) * speed;
         req.vel[1] = (pt[1] - centre[1]) * speed;
         req.vel[2] = (pt[2] - centre[2]) * speed;
-        req.value = (func_150ADA68() * 880.0f + 13.0f) * sRingScale[0];
-        req.alpha = func_150ADA20() % 176U + 0x50;
+        req.value = (random_float() * 880.0f + 13.0f) * sRingScale[0];
+        req.alpha = random_int() % 176U + 0x50;
         p = (u8 *) func_151307F0((s32) &req, 1, 0, 4, owner, ownerArg);
         if (p != NULL) {
             memcpy(p + 0xA8, &extra, 4);

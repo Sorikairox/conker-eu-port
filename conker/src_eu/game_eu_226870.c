@@ -89,7 +89,7 @@ s32 func_151F9150(u8 *buffer, s32 *offset, s32 numbits) {
 // linbits is extended by `linbits` raw bits (+ 15); each non-zero value is followed by its sign bit (x's sign is
 // read before y's extension). Writes the values to *out (s16 pairs) and the sign flags to *signs (one byte per
 // value, 0 for a zero value), advances *bitpos, *out and *signs, returns the new line index. Caller:
-// func_151F63C4 (game_221290), once per region.
+// mp3dec_read_granule (game_221290), once per region.
 s32 func_151F9184(u8 *buf, s32 *bitpos, s32 table, s32 i, s32 linbits, s32 end, s16 **out, u8 **signs) {
     HuffReader r;
     s16 *o = *out;
@@ -128,7 +128,7 @@ s32 func_151F9184(u8 *buf, s32 *bitpos, s32 table, s32 i, s32 linbits, s32 end, 
 // v, w, x, y packed in the low nibble of table `table`'s result) from line i while i < 576 and the bit position
 // is before `endBit` (both tested before every quadruple). Reads 4 bits ahead for the signs, takes one per non-zero
 // value (MSB first) and gives the unused ones back. Writes 4 s16 values and 4 sign flags per quadruple, advances
-// *bitpos, *out and *signs, returns the new line index. Caller: func_151F63C4 (game_221290).
+// *bitpos, *out and *signs, returns the new line index. Caller: mp3dec_read_granule (game_221290).
 s32 func_151F933C(u8 *buf, s32 *bitpos, s32 table, s32 i, s32 endBit, s16 **out, u8 **signs) {
     HuffReader r;
     s16 *o = *out;
@@ -175,7 +175,7 @@ s32 func_151F933C(u8 *buf, s32 *bitpos, s32 table, s32 i, s32 endBit, s16 **out,
 // on the even and odd inputs). `in` holds the 18 dequantised spectral lines of subband `sb` and is used as scratch
 // (prefix sums). `out` gets the 18 output samples (window * IMDCT + the previous granule's overlap `prev`; the odd
 // samples of odd subbands are negated: frequency inversion), `prev` gets the new overlap. `win` is one of the
-// game's four sine_block[36] windows. Caller: func_151F78B4 (game_221290).
+// game's four sine_block[36] windows. Caller: mp3dec_decode_frame (game_221290).
 // The expressions keep the asm's evaluation order and its (signed) constants so the float results are bit-exact.
 void func_151F94E0(f32 *in, s32 sb, f32 *out, f32 *prev, f32 *win) {
     f32 t[18];      /* 0x00 9-point DCT results: even part t[0..8], odd part t[9..17] */

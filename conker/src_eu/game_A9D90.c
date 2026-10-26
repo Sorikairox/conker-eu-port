@@ -3,13 +3,14 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_1507E1D0(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
-void func_1507CD0C(struct127 *arg0);
-void func_1507D4F8(s32);
+void obj_get_held_point(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
+void player_enter_dead_state(struct127 *arg0);
+void player_lose_life(s32);
 #endif
 
 
-void func_1507C8E0(struct127 *arg0, s32 arg1) {
+/* was func_1507C8E0 */
+void player_set_respawn_wait(struct127 *arg0, s32 arg1) {
     arg0->unk31C->unk120 = (u8)2;
     arg0->unk31C->unk124 = arg1;
 }
@@ -21,7 +22,8 @@ extern u16 D_8009015C;
 extern s32 D_800BEB30;
 extern u16 D_800D1CC2;
 
-void func_1507C8FC(void) {
+/* was func_1507C8FC */
+void player_update_life_states(void) {
     struct {
         f32 u60;
         f32 u64;
@@ -64,7 +66,7 @@ void func_1507C8FC(void) {
                                 var_s1->unk31C->unk120 = 0xC;
                             } else if (var_v0 == 0xC) {
                                 if (func_1517F51C(var_s2, 0) != 0) {
-                                    func_1507D4F8(var_s2);
+                                    player_lose_life(var_s2);
                                 }
                             } else {
                                 if (var_v0 == 2) {
@@ -72,7 +74,7 @@ void func_1507C8FC(void) {
                                     if (temp_v0 > 0) {
                                         var_s1->unk31C->unk124 = temp_v0 - D_800BE9E4;
                                     } else {
-                                        func_1507CD0C(var_s1);
+                                        player_enter_dead_state(var_s1);
                                     }
                                 } else if (var_v0 == 7) {
                                     temp_v0_2 = var_s1->unk31C->unk124;
@@ -80,7 +82,7 @@ void func_1507C8FC(void) {
                                         var_s1->unk31C->unk124 = temp_v0_2 - D_800BE9E4;
                                     } else {
                                         var_s1->unk31C->unk120 = 8;
-                                        func_1506160C(var_s1, 2U, 0U, 0x3CU, 0U);
+                                        obj_fade_command(var_s1, 2U, 0U, 0x3CU, 0U);
                                     }
                                 }
                                 var_s1->unk31C->pad126 += D_800BE9E4;
@@ -90,18 +92,18 @@ void func_1507C8FC(void) {
                                 if (D_8009015C & 0x80) {
                                     var_s1->unk31C->unk122 = 0;
                                 }
-                                func_1507E1D0((u8 *) var_s1, &sp.u68, &sp.u64, &sp.u60);
+                                obj_get_held_point((u8 *) var_s1, &sp.u68, &sp.u64, &sp.u60);
                                 func_1517FD84(0, sp.u68, sp.u64, sp.u60, var_s2);
                                 temp_s0_3 = var_s1->unk31C;
                                 if ((temp_s0_3->unk122 != 0) && (temp_s0_3->unk120 == 5)) {
                                     temp_s0_3->unk120 = 6;
                                 }
                                 if (var_s1->unk31C->unk120 == 9) {
-                                    func_1507D4F8(var_s2);
+                                    player_lose_life(var_s2);
                                 }
                             }
                         } else if (var_v0 == 0xB) {
-                            func_1507D4F8(var_s2);
+                            player_lose_life(var_s2);
                         } else if (var_v0 == 2) {
                             temp_v0_3 = temp_s0->unk124;
                             if (temp_v0_3 > 0) {
@@ -112,12 +114,12 @@ void func_1507C8FC(void) {
                         } else {
                             temp_s0->pad126 = (s16) temp_s0->pad126 + D_800BE9E4;
                             if ((var_s1->unk7 == 0xFF) && ((s16) var_s1->unk31C->pad126 >= 0x86)) {
-                                func_1506160C(var_s1, 2U, 0U, 0x3CU, 0U);
+                                obj_fade_command(var_s1, 2U, 0U, 0x3CU, 0U);
                             }
                             temp_s0_4 = var_s1->unk31C;
                             if (((s16) temp_s0_4->pad126 >= 0x97) && (temp_s0_4->unk120 != 0xA)) {
     s32 pad;
-                                func_1507D4F8(var_s2);
+                                player_lose_life(var_s2);
                             }
                         }
 block_54:
@@ -132,9 +134,10 @@ block_54:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507C8FC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/player_update_life_states.s")
 #endif
-void func_1507CD0C(struct127 *arg0) {
+/* was func_1507CD0C */
+void player_enter_dead_state(struct127 *arg0) {
     s32 temp_lo = ((s32)arg0 - (s32)&D_800CC2D0) / (s32)sizeof(struct127);
 
     arg0->unk31C->unk120 = 3;
@@ -147,7 +150,7 @@ void func_1507CD0C(struct127 *arg0) {
 #ifdef NON_MATCHING
 void node_broadcast_all(s32 arg0, u8 arg1);
 void func_1504BAF0(struct127 *);
-u8 *func_150E7F14(s16 count, f32 scale, u8 arg2, s32 arg3);
+u8 *screen_lightning_curve_spawn(s16 count, f32 scale, u8 arg2, s32 arg3);
 extern u16 D_8009015C;
 extern s16 D_800E0F00[];
 extern u8 D_800D1CC9;
@@ -156,10 +159,11 @@ extern u8 D_800D1CC9;
 // `kind` (0..16; stored in its controller +0x121) unless it is already reacting (only kind 9 can override a
 // different running reaction). In multiplayer it counts the hit (D_800E0F00[idx]) and may play sound 10; it
 // sends message 3, picks the reaction animation (D_800D1CC9 = camera / blend mode), resets the object's motion
-// fields, and sets the controller state (+0x120: 1, 2 via func_1507C8E0, 11, or func_1507D4F8 for kind 15).
+// fields, and sets the controller state (+0x120: 1, 2 via player_set_respawn_wait, 11, or player_lose_life for kind 15).
 // Player 0 in mode 4 also spawns 4..6 random curve objects. Returns 0: every caller declares s32 but none
 // reads it (the asm leaves a scratch value in v0) (P156).
-s32 func_1507CD64(struct127 *obj, s32 kind) {
+/* was func_1507CD64 */
+s32 player_hit_reaction(struct127 *obj, s32 kind) {
     u8 *ctl = (u8 *)obj->unk31C;
     struct {
         struct127 *obj;
@@ -280,7 +284,7 @@ s32 func_1507CD64(struct127 *obj, s32 kind) {
             break;
     }
     if (anim != -1) {
-        func_1505E650(obj, anim, 1.0f, 3.0f, 0.0f, 0.0f, animFlag);
+        obj_start_anim(obj, anim, 1.0f, 3.0f, 0.0f, 0.0f, animFlag);
     }
 
     obj->unkF8 |= 0x200;
@@ -302,33 +306,34 @@ s32 func_1507CD64(struct127 *obj, s32 kind) {
     if (next == 0 || next == 3) {
         ((u8 *)obj->unk31C)[0x120] = 1;
     } else {
-        func_1507C8E0(obj, 0);
+        player_set_respawn_wait(obj, 0);
     }
     if (next == 2) {
         ((u8 *)obj->unk31C)[0x120] = 11;
     } else if (next == 3) {
-        func_1507D4F8(idx);
+        player_lose_life(idx);
     }
 
     if (idx == 0 && D_800BE9F0 == 4) {
-        r = func_150ADA20();
-        f = func_150ADA68();
-        func_150E7F14(r % 3 + 4, f * 0.1f + 0.3f, 0xFF, 0);
+        r = random_int();
+        f = random_float();
+        screen_lightning_curve_spawn(r % 3 + 4, f * 0.1f + 0.3f, 0xFF, 0);
     }
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507CD64.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/player_hit_reaction.s")
 #endif
-void func_1507D158(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* was func_1507D158 */
+void player_send_event(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 tmp = D_800CC82F[arg0 * 812];
-    func_1509BFB0(3, tmp | 0x2000, arg1, arg2, arg3, arg4);
+    event_dispatch_alt(3, tmp | 0x2000, arg1, arg2, arg3, arg4);
 }
 #ifdef NON_MATCHING
 void func_15085710(s16, s16, s32);
 s32 func_150859AC(s16 arg0, s32 arg1);
 s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
-void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3);
+void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3);
 void func_150858A0(void *arg0, s32 arg1, s32 arg2);
 void func_15182338(s32);
 void func_150891D4(u8 *arg0);
@@ -343,12 +348,13 @@ extern struct127 D_800CC2D0[];
 // Keeps the character record's (+0x31C) +0x1AA / +0x1AF / +0x1B0 and the object's +0x328 across the reset; the team /
 // colour byte is ctl +0x11B in multiplayer (D_800BE616), else -1. In level 0x2B a player whose stat 1 is 17..32 gets a
 // random 17..32 back (func_15085710(idx, 0, n)) and its D_800D20FC entry +4 becomes 0x9C (n < 29) or 0x9D. Then the
-// object is reset (func_15060F28), its D_800D20FC entry re-placed at a start point (func_15082E44, under the
-// D_800D18A8 flag), and human players (idx <= D_80082FA0) get their camera / HUD reset (func_150054C4, func_15182338,
+// object is reset (obj_remove), its D_800D20FC entry re-placed at a start point (func_15082E44, under the
+// D_800D18A8 flag), and human players (idx <= D_80082FA0) get their camera / HUD reset (camera_controller_init, func_15182338,
 // two func_1517F3B0 fades), others func_150858A0. Finally the control state is cleared, flags +0x22C |= 0x100,
 // health D_8008726C, and in multiplayer a 150-frame invulnerability (+0x125, ctl +0x1B1); in level 0x33 (race) also
-// a 120-frame event (func_1507D158) and a rail re-sync (func_150891D4). void: the callers ignore v0.
-void func_1507D1D8(struct127 *rec) {
+// a 120-frame event (player_send_event) and a rail re-sync (func_150891D4). void: the callers ignore v0.
+/* was func_1507D1D8 */
+void mp_player_respawn(struct127 *rec) {
     u8 *obj = (u8 *) rec;
     u8 *ctl = *(u8 **) (obj + 0x31C);
     s32 keep1AA = *(s16 *) (ctl + 0x1AA);
@@ -368,7 +374,7 @@ void func_1507D1D8(struct127 *rec) {
         idx = (s32) (obj - (u8 *) D_800CC2D0) / 0x32C;
         n = func_150859AC((s16) idx, 1);
         if (n >= 0x11 && n < 0x21) {
-            n = (func_150ADA20() & 0xF) + 0x11;
+            n = (random_int() & 0xF) + 0x11;
             func_15085710((s16) idx, 0, n);
             if (n < 0x1D) {
                 ((u8 *) D_800D20FC)[idx * 0x30 + 4] = 0x9C;
@@ -378,14 +384,14 @@ void func_1507D1D8(struct127 *rec) {
         }
     }
     idx = (s32) (obj - (u8 *) D_800CC2D0) / 0x32C;
-    func_15060F28(rec, 0);
+    obj_remove(rec, 0);
     D_800D18A8 = 1;
     func_15082E44((u8 *) D_800D20FC + idx * 0x30, idx, 0, 0, 0);
     (*(u8 **) (obj + 0x31C))[0x1B0] = keep1B0;
     (*(u8 **) (obj + 0x31C))[0x1AF] = keep1AF;
     obj[0x328] = keep328;
     if (idx <= D_80082FA0) {
-        func_150054C4((struct108 *) ((u8 *) D_800DBFF0 + idx * 0x9A0), idx, D_800BEE12, team);
+        camera_controller_init((struct108 *) ((u8 *) D_800DBFF0 + idx * 0x9A0), idx, D_800BEE12, team);
         func_15182338(idx);
         func_1517F3B0(0, 0, 0, 0, 1, idx);
         func_1517F3B0(0, 0, 0, 0x1E, 0, idx);
@@ -410,21 +416,21 @@ void func_1507D1D8(struct127 *rec) {
         obj[0x125] = 0x96;
         (*(u8 **) (obj + 0x31C))[0x1B1] = 0x96;
         if (D_800BE9F0 == 0x33) {
-            func_1507D158(idx, 0x78, 0, 0, 0);
+            player_send_event(idx, 0x78, 0, 0, 0);
             func_150891D4(obj);
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507D1D8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/mp_player_respawn.s")
 #endif
 
 #ifdef NON_MATCHING
 void func_15085710(s16, s16, s32);
 s32 func_150859AC(s16 arg0, s32 arg1);
-void func_1507D1D8(struct127 *);
+void mp_player_respawn(struct127 *);
 void func_1501C710(s32, s32, s32, s32, s32);
-void func_1509C3A0(void);
+void game_over_apply_pending(void);
 extern u16 D_8009015C;
 extern s8 D_8008726C;
 extern s8 D_80087260;
@@ -440,10 +446,11 @@ extern s8 D_800BEA38;
 extern struct127 D_800CC2D0[];
 
 /* A player record (index idx) has lost a life. With lives left (func_150859AC(idx, 3)) the life counter (5) is
- * reset and the record respawns: in multiplayer (D_800BE616) via func_1507D1D8 or a 10-frame timer, else a
+ * reset and the record respawns: in multiplayer (D_800BE616) via mp_player_respawn or a 10-frame timer, else a
  * checkpoint restart (func_1501C710). Out of lives: game over (single player) or the player is marked out in
  * D_800D18A0 (multiplayer); then the active-player counters drop. void: no caller uses a result. */
-void func_1507D4F8(s32 idx) {
+/* was func_1507D4F8 */
+void player_lose_life(s32 idx) {
     struct127 *rec;
     u8 *ctl;
 
@@ -456,7 +463,7 @@ void func_1507D4F8(s32 idx) {
         *(s16 *)((u8 *)rec + 0xB2) = 0;
         if (D_800BE616 != 0) {
             if (D_800E1050 == 0) {
-                func_1507D1D8(rec);
+                mp_player_respawn(rec);
                 return;
             }
             *((u8 *)rec->unk31C + 0x120) = 10;
@@ -472,7 +479,7 @@ void func_1507D4F8(s32 idx) {
     }
     if (D_800BE616 == 0) {
         D_800D2E43 = 1;
-        func_1509C3A0();
+        game_over_apply_pending();
         D_800D18A8 = 1;
         func_15085710(idx, 5, D_8008726C);
         func_15085710(idx, 2, D_80087260);
@@ -488,10 +495,10 @@ void func_1507D4F8(s32 idx) {
     D_800BEA38--;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507D4F8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/player_lose_life.s")
 #endif
 // NON-MATCHING: pretty far away!
-// void func_1507D4F8(s16 arg0) { // struct126 *
+// void player_lose_life(s16 arg0) { // struct126 *
 //     // ?32 sp24;
 //     struct127 *temp_a0;
 //
@@ -516,12 +523,12 @@ void func_1507D4F8(s32 idx) {
 //             temp_a0->unk31C->unk120 = (u8)0xA;
 //             return; // temp_ret;
 //         }
-//         func_1507D1D8(temp_a0);
+//         mp_player_respawn(temp_a0);
 //         return;
 //     }
 //     if (D_800BE616 == 0) {
 //         D_800D2E43 = (u8)1;
-//         func_1509C3A0();
+//         game_over_apply_pending();
 //         D_800D18A8 = (u8)1;
 //         func_15085710(arg0, 5, D_8008726C);
 //         func_15085710(arg0, 2, D_80087260);
@@ -544,32 +551,33 @@ extern s32 D_800BE9F0;
 extern u8 D_800C35EA;
 void func_150B0828(u8 *arg0, u8 arg1, s32 arg2);
 void func_150C04E0(u8 *obj);
-void func_150D8ABC(struct127 *arg0);
-void func_150F2290(u8 *arg0, s32 arg1, s32 arg2);
+void explosion_ground_effect(struct127 *arg0);
+void fx_big_explosion_at_obj(u8 *arg0, s32 arg1, s32 arg2);
 void func_151C9740(struct127 *obj, u8 arg1, s32 arg2);
 void func_151CFFFC(u8 *obj, u8 flag, s32 arg2);
 void func_150BE994(u8 *arg0, s32 arg1, s32 arg2);
-void func_1507DB44(s32 arg0, s32 arg1);
-void func_150AEB9C(u8 *owner);
-s32 func_1507CD64(struct127 *obj, s32 kind);
+void object_set_all_flags(s32 arg0, s32 arg1);
+void owner_spawn_children(u8 *owner);
+s32 player_hit_reaction(struct127 *obj, s32 kind);
 void func_151BAAC8(u8 *obj, u8 arg1, s32 arg2);
 void func_15145A50(struct127 *arg0);
-u8 *func_151149AC(u8 id);
-struct127 *func_1507515C(struct127 *owner, struct127 *unused1, s32 unused2);
+u8 *world_record_find(u8 id);
+struct127 *player_find_owned_object(struct127 *owner, struct127 *unused1, s32 unused2);
 s32 object_hit_effects(u8 *obj, u8 smoke, u8 splats, u8 debris, u8 finish, u8 fewer, u8 arg6, s32 arg7);
 void func_150B8020(u8 *obj, u8 owner, s32 arg2);
 void func_150BC968(u8 *obj);
 void func_150BC03C(u8 *obj);
 void func_151A7240(u8 *obj, u8 arg1, s32 arg2);
-void func_150E0DF0(u8 *obj, u8 owner, s32 arg2);
+void object_explode(u8 *obj, u8 owner, s32 arg2);
 void func_151D2860(struct127 *arg0, u8 arg1, s32 arg2);
 /* object_destroy_effects: the break / death effects of an object by its type (byte +4): one effect function per
  * type (owner 0xFF, flag 1), the type-0x20 crate picks the hard / soft debris by its y speed +0x20. Types 5 /
- * 0xAD..0xAF clear +0x328, release (func_1507DB44 / func_150AEB9C) and return 1. Types 0x28 / 0x77 shatter the
- * model, drop the held item and spawn a pickup record (func_151149AC: multiplayer id obj[0x127] + 11 after
- * func_1507CD64(obj, 6), else id 1 in level 0x23) placed at the object; multiplayer types 0x28 / 0x77 / 0x53 /
+ * 0xAD..0xAF clear +0x328, release (object_set_all_flags / owner_spawn_children) and return 1. Types 0x28 / 0x77 shatter the
+ * model, drop the held item and spawn a pickup record (world_record_find: multiplayer id obj[0x127] + 11 after
+ * player_hit_reaction(obj, 6), else id 1 in level 0x23) placed at the object; multiplayer types 0x28 / 0x77 / 0x53 /
  * 0x90 (level 0x33 only) return 2 (respawn), everything else 0. */
-s32 func_1507D754(struct127 *arg0) {
+/* was func_1507D754 */
+s32 object_destroy_effects(struct127 *arg0) {
     u8 *obj = (u8 *) arg0;
     u8 *rec;
     struct127 *item;
@@ -580,8 +588,8 @@ s32 func_1507D754(struct127 *arg0) {
         case 0xAE:
         case 0xAF:
             obj[0x328] = 0;
-            func_1507DB44((s32) obj, 0);
-            func_150AEB9C(obj);
+            object_set_all_flags((s32) obj, 0);
+            owner_spawn_children(obj);
             return 1;
         case 0x0D:
             func_150B8020(obj, 0xFF, 1);
@@ -609,13 +617,13 @@ s32 func_1507D754(struct127 *arg0) {
             func_151BAAC8(obj, 0xFF, 1);
             func_15145A50(arg0);
             if (D_800BE616 != 0) {
-                func_1507CD64(arg0, 6);
-                rec = func_151149AC(obj[0x127] + 0xB);
+                player_hit_reaction(arg0, 6);
+                rec = world_record_find(obj[0x127] + 0xB);
             } else {
                 if (D_800BE9F0 == 0x23) {
-                    rec = func_151149AC(1);
+                    rec = world_record_find(1);
                 }
-                item = func_1507515C(arg0, NULL, 0);
+                item = player_find_owned_object(arg0, NULL, 0);
                 if (item != NULL && D_800C35EA != 1) {
                     object_hit_effects((u8 *) item, 1, 1, 1, 1, 0, 0xFF, 1);
                 }
@@ -635,11 +643,11 @@ s32 func_1507D754(struct127 *arg0) {
             }
             return (D_800BE616 != 0) ? 2 : 0;
         case 0x34:
-            func_150E0DF0(obj, 0xFF, 1);
+            object_explode(obj, 0xFF, 1);
             break;
         case 0x3A:
         case 0x3D:
-            func_150D8ABC(arg0);
+            explosion_ground_effect(arg0);
             break;
         case 0x44:
             func_151D2860(arg0, 0xFF, 1);
@@ -648,7 +656,7 @@ s32 func_1507D754(struct127 *arg0) {
             func_151C9740((struct127 *) obj, 0xFF, 1);
             break;
         case 0x4A:
-            func_150F2290(obj, 0xFF, 1);
+            fx_big_explosion_at_obj(obj, 0xFF, 1);
             break;
         case 0x4F:
         case 0x83:
@@ -656,7 +664,7 @@ s32 func_1507D754(struct127 *arg0) {
             break;
         case 0x53:
             if (D_800BE616 != 0) {
-                func_1507CD64(arg0, 10);
+                player_hit_reaction(arg0, 10);
                 return 2;
             }
             break;
@@ -668,7 +676,7 @@ s32 func_1507D754(struct127 *arg0) {
             break;
         case 0x90:
             if (D_800BE616 != 0 && D_800BE9F0 == 0x33) {
-                func_1507CD64(arg0, 8);
+                player_hit_reaction(arg0, 8);
                 return 2;
             }
             break;
@@ -676,25 +684,28 @@ s32 func_1507D754(struct127 *arg0) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507D754.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/object_destroy_effects.s")
 #endif
 
-void func_1507DB44(s32 arg0, s32 arg1) {
+/* was func_1507DB44 */
+void object_set_all_flags(s32 arg0, s32 arg1) {
     func_1503DE70(arg0, arg1, -1);
 }
 
-void func_1507DB64(void) {
+/* was func_1507DB64 */
+void a9d90_stub(void) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1510D66C(s32 *, s32, s32, s32);
+s32 texture_cache_lookup(s32 *, s32, s32, s32);
 void func_15182338(s32);
 extern s32 D_80086F20;
 extern u16 D_800D1CC2;
 extern s32 D_800D1CC4;
 extern s32 D_D11;
 
-u8 *func_1507DB6C(u8 *arg0, s32 arg1) {
+/* was func_1507DB6C */
+u8 *player_draw_out_overlay(u8 *arg0, s32 arg1) {
     s32 temp_a2_2;
     s32 temp_a3;
     s32 temp_t0;
@@ -726,7 +737,7 @@ u8 *func_1507DB6C(u8 *arg0, s32 arg1) {
     (*(s32 *)((u8 *)arg0 + 0)) = 0xDE000000;
     (*(s32 **)((u8 *)arg0 + 4)) = &D_80086F20;
     temp_s0 = arg0 + 8;
-    temp_v0 = func_1510D66C(&D_D11, 0, 3, 0);
+    temp_v0 = texture_cache_lookup(&D_D11, 0, 3, 0);
     (*(s32 *)((u8 *)temp_s0 + 0)) = 0xFD180000;
     (*(s32 *)((u8 *)temp_s0 + 4)) = temp_v0;
     temp_s0_2 = temp_s0 + 8;
@@ -795,9 +806,10 @@ block_6:
     return var_s0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507DB6C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/player_draw_out_overlay.s")
 #endif
-void func_1507DE4C(struct127 *arg0) {
+/* was func_1507DE4C */
+void obj_set_dying_flags(struct127 *arg0) {
 
     if (arg0->interaction_state == 1) {
         func_150836CC(arg0, 0x44);
@@ -822,7 +834,8 @@ void func_1507DE4C(struct127 *arg0) {
 }
 
 
-void func_1507DF10(u8 *arg0, s32 arg1) {
+/* was func_1507DF10 */
+void obj_set_hit_flags_by_kind(u8 *arg0, s32 arg1) {
     switch (arg1) {
     case 9:
         *(s32 *)(arg0 + 0x94) |= 0x20;
@@ -855,7 +868,8 @@ void func_1501D348(s32, s32, s32, s32, s32);
 void func_15022238(s16, s16, s16, f32);
 s32 func_150851E0(s32, s32, s32, s16 *, s32 *, s32 *, u8 *, s32 *, s32 *, s32, s32 *);
 
-void func_1507DFE4(s32 arg0, s32 arg1) {
+/* was func_1507DFE4 */
+void level_restart_at_start_point(s32 arg0, s32 arg1) {
     struct {
         s32 u38;
         s32 u3C;
@@ -894,9 +908,10 @@ block_5:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507DFE4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/level_restart_at_start_point.s")
 #endif
-s32 func_1507E114(s32 arg0) {
+/* was func_1507E114 */
+s32 checkpoint_get_restart_index(s32 arg0) {
     s32 sp5C;
     s32 sp54[2];
     s32 sp48[3];
@@ -915,7 +930,8 @@ s32 func_1507E114(s32 arg0) {
     func_150851E0(0, D_800BE800, 1, sp54, sp48, &sp43, &sp42, &sp44, &sp3C, 1, &sp5C);
     return sp5C + 1;
 }
-void func_1507E1D0(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+/* was func_1507E1D0 */
+void obj_get_held_point(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     u8 *var_a2;
     f32 sp28[3];
     f32 sp1C[3];

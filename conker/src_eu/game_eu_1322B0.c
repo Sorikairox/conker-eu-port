@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_15104AA0(struct108 *arg0) {
+/* was func_15104AA0 */
+void camera_update_close_snap(struct108 *arg0) {
     f32 temp_f0;
     struct127 *temp_a1;
 

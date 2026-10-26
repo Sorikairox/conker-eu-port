@@ -100,18 +100,18 @@ extern u8 D_800DF728[];       /* [slot][frame] Mtx (0x40 bytes): fixed-point pro
 extern u8 D_800DE478[];       /* shadow texture buffer (D_800DF4B8 = its 64-byte aligned start) */
 extern s32 D_800DF4B8;
 extern f32 D_800DE45C;        /* shadow alpha */
-s32 func_150AD9A0(s32, s32, s32);
+s32 approx_dist3_int(s32, s32, s32);
 void func_15047680(f32 mf[4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
-void func_15048F90(struct17 *, struct17 *, struct17 *);
+void vec3_diff(struct17 *, struct17 *, struct17 *);
 f32 func_150AD930(f32 *);
 void func_150A7E40(f32 mf[4][4], f32, f32, f32, f32 *, f32 *, f32 *);
-void func_150A7CB0(f32 mtx[4][4], s32, s32, s32);
+void mtxf_scale(f32 mtx[4][4], s32, s32, s32);
 f32 func_150484A0(f32, f32);
 
 /* shadow_light_projection: sets up shadow slot `slot` of object record `obj` (box half sizes sx, sy, sz).
  * Light: unless D_800DE464, the nearest enabled light of the list D_800DCD78 whose integer distance
- * (func_150AD9A0) is above prev_dist and below 5000; with none, 0 is returned when prev_dist != 0, else the default
+ * (approx_dist3_int) is above prev_dist and below 5000; with none, 0 is returned when prev_dist != 0, else the default
  * direction D_800DE440 (scaled by D_800DE46C) from the object is used with distance 1. The slot's light position
  * D_800DE3E0[slot] snaps to it (detail >= 2 or *D_800DBFF4) or moves 0.3 of the way. The light is pushed out to at
  * least 200 units and to a minimum height (10, or 0.57735 * the horizontal distance when D_800DE470); beyond
@@ -165,7 +165,7 @@ f32 func_151848D8(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_dist) {
             lx = light->x;
             ly = light->y;
             lz = light->z;
-            d = func_150AD9A0((s32) (lx - pos[0]), (s32) (ly - pos[1]), (s32) (lz - pos[2]));
+            d = approx_dist3_int((s32) (lx - pos[0]), (s32) (ly - pos[1]), (s32) (lz - pos[2]));
             if (d < best && prev_dist < d) {
                 best = d;
                 found++;
@@ -201,7 +201,7 @@ f32 func_151848D8(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_dist) {
         lit[2] += (target[2] - lit[2]) * 0.3f;
     }
 
-    func_15048F90((struct17 *) pos, (struct17 *) lit, (struct17 *) dir);
+    vec3_diff((struct17 *) pos, (struct17 *) lit, (struct17 *) dir);
     D_800DFB28 = func_150AD930(dir);
     if (D_800DFB28 < 200.0f) {
         /* at least 200 units away along the same direction */
@@ -225,7 +225,7 @@ f32 func_151848D8(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_dist) {
         /* raise the light, then rescale the offset to the old distance */
         lit[1] += min_h - dir[1];
         dir[1] = min_h;
-        d = func_150AD9A0((s32) dir[0], (s32) dir[1], (s32) dir[2]);
+        d = approx_dist3_int((s32) dir[0], (s32) dir[1], (s32) dir[2]);
         k = D_800DFB28 / d;
         D_800DFB28 = d;
         for (i = 0; i < 3; i++) {
@@ -313,7 +313,7 @@ f32 func_151848D8(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_dist) {
             persp_scale *= 0.5f;
         }
     } while (done == 0);
-    func_150A7CB0(scale_mf, 0x3F000000, 0x3F000000, 0x3F800000); /* f32 bits: scale (0.5, 0.5, 1) */
+    mtxf_scale(scale_mf, 0x3F000000, 0x3F000000, 0x3F800000); /* f32 bits: scale (0.5, 0.5, 1) */
     func_150A7A48(mf, scale_mf, mf);
     guMtxF2L(mf, (Mtx *) (D_800DF728 + slot * 0x80 + D_800BE9C0 * 0x40));
     D_800DF4B8 = ((s32) D_800DE478 + 0x3F) & ~0x3F;
@@ -336,9 +336,9 @@ f32 func_151848D8(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_dist) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_150AD9A0(s32, s32, s32);
+s32 approx_dist3_int(s32, s32, s32);
 
-/* Aim offset from player `player` to object `obj`: d = distance (func_150AD9A0 of the truncated delta between the
+/* Aim offset from player `player` to object `obj`: d = distance (approx_dist3_int of the truncated delta between the
  * object position and the player's +0x2F8 vector). Beyond 2000 units, or when the offset func_151846C0 writes to
  * (*x, *y, *z) (scaled by 1.3, D_800A7758) has a zero component, the clip heights D_800D3AA8 / D_800D3AAC are
  * cleared and 0 is returned; else d. */
@@ -347,7 +347,7 @@ s32 func_15185360(s32 obj, s32 player, f32 *x, f32 *y, f32 *z) {
     struct108 *p = &D_800DBFF0[player];
     s32 d;
 
-    d = func_150AD9A0((s32) (o->x_position - p->unk2F8), (s32) (o->y_position - p->unk2FC),
+    d = approx_dist3_int((s32) (o->x_position - p->unk2F8), (s32) (o->y_position - p->unk2FC),
                       (s32) (o->z_position - p->unk300));
     if (d > 2000) {
         D_800D3AA8 = 0.0f;
@@ -379,11 +379,11 @@ extern u8 D_800BE9C0;      /* frame buffer index */
 extern s32 D_8008D7E8;     /* static DLs / viewport / Mtx of the shadow pass */
 extern s32 D_8008D788;
 extern s32 D_89810;
-Gfx *func_1501A680(Gfx *);
-s32 func_1501A490(s32, s16, s32, s32, s32, s32);
+Gfx *render_set_color_image(Gfx *);
+s32 render_set_scissor(s32, s16, s32, s32, s32, s32);
 Gfx *func_1502CFEC(Gfx *, s32, s32, s32, s32, s32 *, s32, s32);
-s32 func_1506196C(struct127 *, s32);
-u8 *func_1510BD34(u8 *, s32);
+s32 obj_get_player_alpha(struct127 *, s32);
+u8 *view_dl_begin(u8 *, s32);
 
 /* one GBI command: two words */
 #define SHADOW_GFX(g, hi, lo) ((g)->words.w0 = (hi), (g)->words.w1 = (lo), (g)++)
@@ -393,7 +393,7 @@ u8 *func_1510BD34(u8 *, s32);
 // perspNorm D_800DF500[slot], viewport D_8008D788, projection D_800DF728[slot][frame] and view D_89810, then the
 // object's model (func_1502CFEC with an all-zero colour and the object's shadow level). Shadow level 0 / 1
 // (unk1C8, + 1 when unk127 == 0xFF) blurs the texture twice / once with a 64x64 TEX rectangle over itself.
-// Ends with geometry mode on (D9FFFFFF / 0x200001), then func_1501A680 / func_1501A490 / func_1510BD34
+// Ends with geometry mode on (D9FFFFFF / 0x200001), then render_set_color_image / render_set_scissor / view_dl_begin
 // restore the frame state. Marks the object (unk123 = 1). Returns the display list end.
 u8 *func_15185514(u8 *dl, s32 obj, s32 slot, s32 arg3) {
     struct127 *o = &D_800CC2D0[obj];
@@ -418,7 +418,7 @@ u8 *func_15185514(u8 *dl, s32 obj, s32 slot, s32 arg3) {
     col[1] = 0;
     col[2] = 0;
     col[3] = level;
-    g = func_1502CFEC(g, obj, arg3, (s32) o->unk1D4, func_1506196C(o, arg3), col, 3, 1);
+    g = func_1502CFEC(g, obj, arg3, (s32) o->unk1D4, obj_get_player_alpha(o, arg3), col, 3, 1);
     SHADOW_GFX(g, 0xD7000002, 0xFFFFFFFF);                          /* gSPTexture on */
     SHADOW_GFX(g, 0xE7000000, 0);
     if (level < 2) {
@@ -445,7 +445,7 @@ u8 *func_15185514(u8 *dl, s32 obj, s32 slot, s32 arg3) {
         SHADOW_GFX(g, 0xE7000000, 0);
     }
     SHADOW_GFX(g, 0xD9FFFFFF, 0x00200001);                          /* geometry mode */
-    dl = func_1510BD34((u8 *) func_1501A490((s32) func_1501A680(g), D_80083336, 0, 0, 0, 0), arg3);
+    dl = view_dl_begin((u8 *) render_set_scissor((s32) render_set_color_image(g), D_80083336, 0, 0, 0, 0), arg3);
     o->unk123 = 1;
     return dl;
 }
@@ -733,12 +733,12 @@ extern s32 D_800DF518;  /* shadow box x min, x max, z min, z max */
 extern s32 D_800DF51C;
 extern s32 D_800DF520;
 extern s32 D_800DF524;
-void func_1510F800(s32);
-s32 func_1510FCA0(s32, s32, s32, u8 **);
+void collision_select_area(s32);
+s32 zone_tree_collect_near(s32, s32, s32, u8 **);
 s32 func_150A6070(u32 *, s32, f32 *, s32);
 
 // shadow_level_vertices: collects the level triangles under a shadow (box x / z +- r) and projects them.
-// func_1510FCA0 returns up to 16 level cells around (x, z); each cell holds at +0xE a 0-terminated triangle list
+// zone_tree_collect_near returns up to 16 level cells around (x, z); each cell holds at +0xE a 0-terminated triangle list
 // (byte < 0x80: index += byte; else ((byte << 8) | next byte) & 0x7FFF is the index). The triangles (< 0x1760,
 // and with flag 1 in D_800D3668 when D_800DE471) become bits of a stack mask; func_150A6070 projects them with the
 // light matrix (4x4 f32) into the 20-byte shadow vertices at buf (up to end). Returns the number of vertices written.
@@ -751,8 +751,8 @@ s32 func_15186A9C(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end) {
     u32 c;
 
     last = 0;
-    func_1510F800(0);
-    n = func_1510FCA0(x, z, r, cells);
+    collision_select_area(0);
+    n = zone_tree_collect_near(x, z, r, cells);
     if (n == 0) {
         return 0;
     }
@@ -799,7 +799,7 @@ s32 allocate_memory(s32, s32, s32, s32);
 void func_10004074();
 s32 func_1503DD8C(struct127 *, u8, s32, s32);
 u8 func_15084E34(struct127 *, s32 *);
-u8 *func_1510BD34(u8 *, s32);
+u8 *view_dl_begin(u8 *, s32);
 f32 func_151848D8(s32, s32, f32, f32, f32, f32);
 s32 func_15185360(s32, s32, f32 *, f32 *, f32 *);
 u8 *func_15185514(u8 *, s32, s32, s32);
@@ -1116,7 +1116,7 @@ loop_54:
         sp74 = &sp74[1];
     } while (var_v0_2 != 0x19);
     if (spF4 != 0) {
-        temp_v0_11 = func_1510BD34(var_s0, arg1);
+        temp_v0_11 = view_dl_begin(var_s0, arg1);
         (*(s32 *)((u8 *)temp_v0_11 + 0)) = 0xDC080008;
         (*(s32 *)((u8 *)temp_v0_11 + 4)) = (s32) (D_800BE628 + (D_80082FA4 * 0x180) + (D_800BE9C0 * 0x10) + 0x40);
         var_s0 = temp_v0_11 + 8;
@@ -1206,7 +1206,7 @@ extern s32 D_800DF51C;
 extern s32 D_800DF520;
 extern s32 D_800DF524;
 extern s16 D_800D3C00[]; /* visible world object ids */
-void func_1510F800(s32);
+void collision_select_area(s32);
 s32 func_150A49D0(s32 count, s32 *idList, s32 force);
 s32 func_150A6324(u16 *, s32, f32 *, s32);
 
@@ -1223,7 +1223,7 @@ u32 func_15187954(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end, s32 count) {
     if (D_800DC320 == 0) {
         return count;
     }
-    func_1510F800(2);
+    collision_select_area(2);
     buf += count * 20;
     D_800DF518 = x - r;
     D_800DF51C = x + r;
@@ -1302,14 +1302,14 @@ void func_15187B50(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f
         (*(f32 *)((u8 *)temp_v0 + 0xA0)) = arg7;
         do {
             if (var_s3 < 0x168) {
-                temp_t9 = 7 - (func_150ADA20() & 0xF);
+                temp_t9 = 7 - (random_int() & 0xF);
                 var_f18 = (f32) temp_t9;
                 if (temp_t9 < 0) {
                     var_f18 += 4294967296.0f;
                 }
                 (*(f32 *)((u8 *)(((*(s32 *)((u8 *)temp_v0 + 0xA4)) + var_s0)) + 0x80)) = var_f18;
                 (*(f32 *)((u8 *)(((*(s32 *)((u8 *)temp_v0 + 0xA4)) + var_s0)) + 0x84)) = 0.0f;
-                temp_t5 = (func_150ADA20() & 0x3F) + (var_s3 - 0x1E);
+                temp_t5 = (random_int() & 0x3F) + (var_s3 - 0x1E);
                 var_f8 = (f32) temp_t5;
                 if (temp_t5 < 0) {
                     var_f8 += 4294967296.0f;
@@ -1318,13 +1318,13 @@ void func_15187B50(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f
                 (*(s8 *)((u8 *)(((*(s32 *)((u8 *)temp_v0 + 0xA4)) + var_s0)) + 0x98)) = 0;
             } else if (var_s3 < 0x2D0) {
                 (*(f32 *)((u8 *)(((*(s32 *)((u8 *)temp_v0 + 0xA4)) + var_s0)) + 0x80)) = 0.0f;
-                temp_t3 = (func_150ADA20() & 0x3F) + (var_s3 - 0x23A);
+                temp_t3 = (random_int() & 0x3F) + (var_s3 - 0x23A);
                 var_f4 = (f32) temp_t3;
                 if (temp_t3 < 0) {
                     var_f4 += 4294967296.0f;
                 }
                 (*(f32 *)((u8 *)(((*(s32 *)((u8 *)temp_v0 + 0xA4)) + var_s0)) + 0x84)) = var_f4;
-                temp_t7 = 7 - (func_150ADA20() & 0xF);
+                temp_t7 = 7 - (random_int() & 0xF);
                 var_f10 = (f32) temp_t7;
                 if (temp_t7 < 0) {
                     var_f10 += 4294967296.0f;
@@ -1332,13 +1332,13 @@ void func_15187B50(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f
                 (*(f32 *)((u8 *)(((*(s32 *)((u8 *)temp_v0 + 0xA4)) + var_s0)) + 0x88)) = var_f10;
                 (*(s8 *)((u8 *)(((*(s32 *)((u8 *)temp_v0 + 0xA4)) + var_s0)) + 0x98)) = 0;
             } else {
-                temp_t3_2 = (func_150ADA20() & 0x3F) + (var_s3 - 0x1E);
+                temp_t3_2 = (random_int() & 0x3F) + (var_s3 - 0x1E);
                 var_f18_2 = (f32) temp_t3_2;
                 if (temp_t3_2 < 0) {
                     var_f18_2 += 4294967296.0f;
                 }
                 (*(f32 *)((u8 *)(((*(s32 *)((u8 *)temp_v0 + 0xA4)) + var_s0)) + 0x80)) = var_f18_2;
-                temp_t8 = 0x61 - (func_150ADA20() & 0xF);
+                temp_t8 = 0x61 - (random_int() & 0xF);
                 var_f8_2 = (f32) temp_t8;
                 if (temp_t8 < 0) {
                     var_f8_2 += 4294967296.0f;
@@ -1348,7 +1348,7 @@ void func_15187B50(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f
                 (*(s8 *)((u8 *)(((*(s32 *)((u8 *)temp_v0 + 0xA4)) + var_s0)) + 0x98)) = 1;
             }
             if (arg3 >= 4) {
-                temp_t6 = (func_150ADA20() % (u32) (arg3 >> 2)) + arg3;
+                temp_t6 = (random_int() % (u32) (arg3 >> 2)) + arg3;
                 var_f4_2 = (f32) temp_t6;
                 if (temp_t6 < 0) {
                     var_f4_2 += 4294967296.0f;
@@ -1357,7 +1357,7 @@ void func_15187B50(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f
             } else {
                 (*(f32 *)((u8 *)(((*(s32 *)((u8 *)temp_v0 + 0xA4)) + var_s0)) + 0x8C)) = (f32) arg3;
             }
-            temp_t2 = func_150ADA20() & 0xF;
+            temp_t2 = random_int() & 0xF;
             var_f16 = (f32) temp_t2;
             if (temp_t2 < 0) {
                 var_f16 += 4294967296.0f;
@@ -1367,7 +1367,7 @@ void func_15187B50(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f
             var_s3 += 0x5A;
             temp_t0 = (*(s32 *)((u8 *)temp_v0 + 0xA4)) + var_s0;
             var_s0 += 0xA0;
-            (*(s16 *)((u8 *)temp_t0 + 0x96)) = (s16) (arg4 - (func_150ADA20() & arg5));
+            (*(s16 *)((u8 *)temp_t0 + 0x96)) = (s16) (arg4 - (random_int() & arg5));
         } while (var_s3 != 0x438);
     }
 }
@@ -1425,9 +1425,9 @@ void func_15187EE8(struct102 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15187EE8.s")
 #endif
 #ifdef NON_MATCHING
-void func_150A7DA0(u8 *mtx, s32 x, s32 y, s32 z);
+void mtxf_translate(u8 *mtx, s32 x, s32 y, s32 z);
 void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
-void func_150A8050(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
+void mtxf_rotate_xyz_deg(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
 void func_151882DC(u8 *arg0, f32 arg1, f32 arg2, f32 arg3);
 void guMtxF2L2(float mf[4][4], Mtx *m);
 extern u8 D_8008D8D8[];         /* the 4-vertex quad */
@@ -1436,7 +1436,7 @@ extern u8 D_8008D8D8[];         /* the 4-vertex quad */
 // func_15187EE8; nothing (gfx returned unchanged) when obj + 0xA8 < 0. Loads the object matrix (translation obj
 // + 0x90, this frame's Mtx at obj + 0x10 + D_800BE9C0 * 64), then for each 0xA0-byte quad record (obj + 0xA4):
 // translation (rec + 0x90, 0, 0) scaled by obj + 0xA0 (x) / obj + 0x9C (y, z) times its rotation (rec + 0x80..0x88;
-// func_150A8050, or func_151882DC when rec + 0x98 is set) into its own frame Mtx (rec + D_800BE9C0 * 64), prim alpha
+// mtxf_rotate_xyz_deg, or func_151882DC when rec + 0x98 is set) into its own frame Mtx (rec + D_800BE9C0 * 64), prim alpha
 // (life - age) * 255 / life (rec + 0x96 / + 0x94), and the quad D_8008D8D8 as two triangles. arg2 is unused.
 Gfx *func_15188008(Gfx *gfx, u8 *obj, s32 arg2) {
     f32 mtx[4][4];
@@ -1447,7 +1447,7 @@ Gfx *func_15188008(Gfx *gfx, u8 *obj, s32 arg2) {
     if (*(s16 *) (obj + 0xA8) < 0) {
         return gfx;
     }
-    func_150A7DA0((u8 *) mtx, *(s32 *) (obj + 0x90), *(s32 *) (obj + 0x94), *(s32 *) (obj + 0x98));
+    mtxf_translate((u8 *) mtx, *(s32 *) (obj + 0x90), *(s32 *) (obj + 0x94), *(s32 *) (obj + 0x98));
     guMtxF2L2(mtx, (Mtx *) (obj + 0x10 + D_800BE9C0 * 64));
     for (i = 0; i < 12; i++) {
         /* gSPMatrix(load, modelview): the object matrix */
@@ -1455,13 +1455,13 @@ Gfx *func_15188008(Gfx *gfx, u8 *obj, s32 arg2) {
         gfx->words.w1 = (u32) (obj + 0x10 + D_800BE9C0 * 64);
         gfx++;
         rec = *(u8 **) (obj + 0xA4) + i * 0xA0;
-        func_150A7DA0((u8 *) mtx, *(s32 *) (rec + 0x90), 0, 0);
+        mtxf_translate((u8 *) mtx, *(s32 *) (rec + 0x90), 0, 0);
         mtx[0][0] *= *(f32 *) (obj + 0xA0);
         mtx[1][1] *= *(f32 *) (obj + 0x9C);
         mtx[2][2] *= *(f32 *) (obj + 0x9C);
         rec = *(u8 **) (obj + 0xA4) + i * 0xA0;
         if (rec[0x98] == 0) {
-            func_150A8050(rot, *(f32 *) (rec + 0x80), *(f32 *) (rec + 0x84), *(f32 *) (rec + 0x88));
+            mtxf_rotate_xyz_deg(rot, *(f32 *) (rec + 0x80), *(f32 *) (rec + 0x84), *(f32 *) (rec + 0x88));
         } else {
             func_151882DC((u8 *) rot, *(f32 *) (rec + 0x80), *(f32 *) (rec + 0x84), *(f32 *) (rec + 0x88));
         }

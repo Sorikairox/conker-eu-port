@@ -131,30 +131,30 @@ void func_150C1F40(u8 *arg0, s32 arg1, s32 arg2) {
         sp.u116 = 0x10;
         sp.u118 = 0xF;
         sp.u114 = (*(u8 *)((u8 *)arg0 + 0x3B));
-        temp_v1 = (func_150ADA20() & 7) + 5;
+        temp_v1 = (random_int() & 7) + 5;
         var_s1 = temp_v1 - 1;
         if (temp_v1 != 0) {
             do {
-                temp_s0 = func_150ADA20() & 0xFF;
-                temp_f20 = ((func_150ADA68() * 0.9f) + 0.1f) * 9.0f * sp.u120;
+                temp_s0 = random_int() & 0xFF;
+                temp_f20 = ((random_float() * 0.9f) + 0.1f) * 9.0f * sp.u120;
                 temp_f22 = angle_byte_cos((temp_s0 - 0x40) & 0xFF);
                 temp_f24 = angle_byte_cos(temp_s0 & 0xFF);
-                sp.uF8 = (func_150ADA20() & 0xF) + 0x1E;
+                sp.uF8 = (random_int() & 0xF) + 0x1E;
                 sp.uCC = (sp7C * temp_f22) + sp.u124;
                 sp.uD0 = (*(f32 *)((u8 *)arg0 + 0x180)) + 2.0f;
                 sp.uDC = 2.0f * temp_f20;
                 sp.uD8 = temp_f20 * temp_f22;
                 sp.uD4 = (sp7C * temp_f24) + sp.u12C;
                 sp.uE0 = temp_f20 * temp_f24;
-                temp_f2 = ((func_150ADA68() * 0.9f) + 0.1f) * sp.u120 * 1.5f;
+                temp_f2 = ((random_float() * 0.9f) + 0.1f) * sp.u120 * 1.5f;
                 sp.uAC = temp_f2;
                 sp.uB0 = temp_f2;
                 sp.uA4 = temp_f2;
-                sp.uB4 = func_150ADA68() * 360.0f;
-                sp.uB8 = func_150ADA68() * 360.0f;
-                sp.uBC = func_150ADA68() * 360.0f;
-                sp.uE4 = 25.0f - (func_150ADA68() * 50.0f);
-                sp.uE8 = 25.0f - (func_150ADA68() * 50.0f);
+                sp.uB4 = random_float() * 360.0f;
+                sp.uB8 = random_float() * 360.0f;
+                sp.uBC = random_float() * 360.0f;
+                sp.uE4 = 25.0f - (random_float() * 50.0f);
+                sp.uE8 = 25.0f - (random_float() * 50.0f);
                 temp_v0 = func_15132FBC(&sp.uA4, 3, 0xFF, 4, 0xFF, 0);
                 if (temp_v0 != NULL) {
                     (*(f32 *)((u8 *)temp_v0 + 0x170)) = (f32) (*(f32 *)((u8 *)arg0 + 0x180));
@@ -209,7 +209,7 @@ s32 func_150C2334(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
     func_151429E0(0, &s.c1[0], &s.c1[1], &s.c1[2]);
     s.b2E = 0xFF;
     s.b2F = 0xFF;
-    s.b30 = (func_150ADA20() & 0xF) + 12;
+    s.b30 = (random_int() & 0xF) + 12;
     s.b31 = 1;
     func_1518CFF0(&s, 1);
     return 1;

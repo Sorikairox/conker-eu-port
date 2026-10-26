@@ -54,19 +54,19 @@ chk DIFFER effect_pulse_sine_update src_eu/game_16DC80.c 's/return 1;/return 2;/
 chk DIFFER effect_orbit_update src_eu/game_16DC80.c 's/temp_v0\[0\], temp_v0\[2\]/temp_v0[2], temp_v0[0]/'
 chk DIFFER camera_push_mode src_eu/game_14FF90.c 's/STK->unk2C\[0\] = arg1;/STK->unk2C[0] = arg2;/'
 # P5: MIPS III sd/ld in the reference (emulated by a code hook)
-chkc EQUIV  func_150A7D00
-chkc DIFFER func_150A7D00 's/mtx\[15\] = 1;/mtx[15] = 2;/'
-chkc DIFFER func_150A7D00 's/i < 16;/i < 15;/'
+chkc EQUIV  mtx_translate_fixed
+chkc DIFFER mtx_translate_fixed 's/mtx\[15\] = 1;/mtx[15] = 2;/'
+chkc DIFFER mtx_translate_fixed 's/i < 16;/i < 15;/'
 # P5: branch right after a stubbed call whose delay slot is an FPU store (was UC_ERR_EXCEPTION at 0)
 chkc EQUIV  impact_splash_ring_verts
 chkc DIFFER impact_splash_ring_verts 's/arg1, 0x40, \&sp4C/arg1, 0x41, \&sp4C/'
 # P5: daddiu (64-bit add feeding an sd)
-chkc EQUIV  func_150ADACC
-chkc DIFFER func_150ADACC 's/(s64)arg0 + 1/(s64)arg0 + 2/'
+chkc EQUIV  random_seed
+chkc DIFFER random_seed 's/(s64)arg0 + 1/(s64)arg0 + 2/'
 # P18: FPRs move through memory (Unicorn 2.0.1 ignores FPR reg_read/reg_write): float args, f0 return
-chk EQUIV  func_15048A70 src_eu/game_75E60.c
-chk DIFFER func_15048A70 src_eu/game_75E60.c 's/return arg1 - arg0;/return arg0 - arg1;/'
-chk DIFFER func_15048A70 src_eu/game_75E60.c 's/arg0 -= 360.0f;/arg0 -= 361.0f;/'
+chk EQUIV  math_angle_diff_deg src_eu/game_75E60.c
+chk DIFFER math_angle_diff_deg src_eu/game_75E60.c 's/return arg1 - arg0;/return arg0 - arg1;/'
+chk DIFFER math_angle_diff_deg src_eu/game_75E60.c 's/arg0 -= 360.0f;/arg0 -= 361.0f;/'
 # P18: a candidate's own float literal (TU .rodata) after a null-pointer access (was read as 0: TU_BASE aliased page 0)
 chkc EQUIV  func_151B97C4
 chkc DIFFER func_151B97C4 's/0.0234f/0.0235f/g'
@@ -81,8 +81,8 @@ chkc EQUIV  func_15030448
 chkc DIFFER func_15030448 's/ATT_W(rec, 0x2C), 4);/ATT_W(rec, 0x2C), 5);/'
 # P80: a converted function whose #else holds a note line before the pragma (game_981E0.c "// TBD ..."): the candidate
 # used to be dropped (the old NM C was tested, every mutant survived); now spliced, and a dropped candidate is an ERROR
-chkc EQUIV  func_1506EF5C
-chkc DIFFER func_1506EF5C 's/= 0xFFFF;/= 0xFFFE;/'
+chkc EQUIV  objev_set_path_pair
+chkc DIFFER objev_set_path_pair 's/= 0xFFFF;/= 0xFFFE;/'
 # P89: a stub-returned pointer in the harness stack range (0x80660000, below every frame) is not a frame address: a
 # +0x14 -> +0x10 mutant on it must DIFFER (P86: same_val normalised every 0x806xxxxx value to 'STK', the mutant survived).
 # DIFFTEST_STK_OLD=1 restores the old rule; the case then shows the hole (EQUIV).
@@ -114,11 +114,11 @@ M33='s/O_F32(r, 0x18) \* 0.1f + 1.0f, scale/O_F32(r, 0x1C) * 0.1f + 1.0f, scale/
 chkce "EQUIV*POKE unread: 800C395C"  func_150268BC "$S33"   # (the mutant below survives P90's TR=4 with the US address)
 chkce DIFFER func_150268BC "${S33/800C395C=/800C3D7C=}" "$M33"
 # P93: a callee declared only in include/functions.h had an unknown arity: stack args 16+ (sp+0x40..) were never compared
-# (func_150FD554 -> effect3d_spawn_oriented, 17 args). Prototypes with > 16 args are now taken from functions.h.
+# (bound_cloud_spawn -> effect3d_spawn_oriented, 17 args). Prototypes with > 16 args are now taken from functions.h.
 FD554="DIFFTEST_EXACT=* DIFFTEST_ARG=0=80450000 DIFFTEST_POKE=80450004=000000FF DIFFTEST_RET=15046F70=1,1513D860=80460000"
-chkce EQUIV  func_150FD554 "$FD554"
-chkce DIFFER func_150FD554 "$FD554" 's/0U, 0, (u8) (s32) arg1, arg2);/0U, 0, (u8) (s32) arg1, arg2 + 1);/'
-chkce "EQUIV*knob callee never called: RET 1513D2F0" func_150FD554 "${FD554/1513D860=/1513D2F0=}"
+chkce EQUIV  bound_cloud_spawn "$FD554"
+chkce DIFFER bound_cloud_spawn "$FD554" 's/0U, 0, (u8) (s32) arg1, arg2);/0U, 0, (u8) (s32) arg1, arg2 + 1);/'
+chkce "EQUIV*knob callee never called: RET 1513D2F0" bound_cloud_spawn "${FD554/1513D860=/1513D2F0=}"
 # P95: stack argument words 12+ (arguments 16+) were never set: func_15035220 (19 args) read leftovers for alpha (16) /
 # fixed (17) / tofixed (18) and DIFFTEST_ARG 16..18 were ignored, so every alpha mutant survived. Now set when needed.
 S5220="DIFFTEST_EXACT=* DIFFTEST_ARG=0=80450000,1=804B0000,2=1,3=80460000,4=80470000,5=2,6=42C80000,7=42480000,8=43480000,9=40E00000,10=3F000000,11=42F00000,12=43160000,13=43520000,14=41A00000,15=43960000,16=43480000,17=0,18=0 DIFFTEST_POKE=8045009C=00000001,804501D4=80455550,80460000=3F800000,80460004=3E800000,80460008=00000000,8046000C=40400000,80460010=3F800000,80460014=3E800000,80460018=00000000,8046001C=40400000,80460020=3F800000,80460024=3E800000,80460028=00000000,8046002C=40400000,80460030=41200000,80460034=42700000,80460038=C1F00000,8046003C=40000000,80460040=3F800000,80460044=3E800000,80460048=00000000,8046004C=40400000,80460050=3F800000,80460054=3E800000,80460058=00000000,8046005C=40400000,80460060=3F800000,80460064=3E800000,80460068=00000000,8046006C=40400000,80460070=41300000,80460074=42700000,80460078=C1F00000,8046007C=40000000 DIFFTEST_RET=150ADE40=64"
@@ -161,25 +161,25 @@ out=$(set -f; env $DE $R/tools/port/difftest.sh func_151DE100 $C/func_151DE100.c
 case "$out" in *POKE\ unread*) fail=$((fail+1)); echo "FAIL [want no POKE unread] $out";; EQUIV*) pass=$((pass+1)); echo "ok   [no POKE unread] $out";; *) fail=$((fail+1)); echo "FAIL $out";; esac
 # P134: a callee declared only in a header (cosf in gu.h) takes its arity / float slots from there: a0 (written at the
 # call site, &D_800CC298) is not an argument of cosf(float). DIFFTEST_HDRSLOT_OLD=1 = pre-P134 (false DIFFER on a0).
-chkce EQUIV  func_150F1F80 "DIFFTEST_TRIALS_UNUSED=1"
+chkce EQUIV  obj7b_update_pulse_scale "DIFFTEST_TRIALS_UNUSED=1"
 # P234: the included-header prototypes (gu.h `cosf`) now come first, so HDRSLOT_OLD alone has no effect: the P134
 # false DIFFER needs DIFFTEST_INCHDR_OLD=1 too
-chkce DIFFER func_150F1F80 "DIFFTEST_HDRSLOT_OLD=1 DIFFTEST_INCHDR_OLD=1"
-chkce EQUIV  func_150F1F80 "DIFFTEST_HDRSLOT_OLD=1"
-chkce DIFFER func_150F1F80 "DIFFTEST_TRIALS_UNUSED=1" 's/0.35000002f/0.35f/'
+chkce DIFFER obj7b_update_pulse_scale "DIFFTEST_HDRSLOT_OLD=1 DIFFTEST_INCHDR_OLD=1"
+chkce EQUIV  obj7b_update_pulse_scale "DIFFTEST_HDRSLOT_OLD=1"
+chkce DIFFER obj7b_update_pulse_scale "DIFFTEST_TRIALS_UNUSED=1" 's/0.35000002f/0.35f/'
 # P176: a stub on the last word of a page (func_151CFFFC at 0x151CFFFC): its delay slot runs as a separate Unicorn
 # block that was taken for a second call (both sides faulted at 0 -> UNSURE). Type-0x25 object with +0x2EC set.
 D754="DIFFTEST_ARG=0=80480000 DIFFTEST_POKE=80480004=25000000,80480014=42C80000,80480018=C1200000,8048001C=43480000,804800B8=3F800000,80480040=40000000,804800C4=40400000,80480124=00000003,800BEA34=00000000,800BEE10=00000000,800C3A08=00000000,804802EC=00000001 DIFFTEST_RET=15114F2C=80484000,1507551C=80486000"
-chkce EQUIV  func_1507D754 "$D754"
-chkce DIFFER func_1507D754 "$D754" 's/func_151CFFFC(obj, 0xFF, 1);/func_151CFFFC(obj, 0xFE, 1);/'
-chkce UNSURE func_1507D754 "$D754 DIFFTEST_PAGESTUB_OLD=1"
-# P198: words a stub writes (DIFFTEST_OUTW '@ADDR') are part of the compared memory: func_15063254 saves +0xB8 / +0xC4
-# of its object, func_15060F28 (jal 150612D4) clobbers them, the function restores them. Before P198 the final compare
+chkce EQUIV  object_destroy_effects "$D754"
+chkce DIFFER object_destroy_effects "$D754" 's/func_151CFFFC(obj, 0xFF, 1);/func_151CFFFC(obj, 0xFE, 1);/'
+chkce UNSURE object_destroy_effects "$D754 DIFFTEST_PAGESTUB_OLD=1"
+# P198: words a stub writes (DIFFTEST_OUTW '@ADDR') are part of the compared memory: obj_model_swap_keep_pose saves +0xB8 / +0xC4
+# of its object, obj_remove (jal 150612D4) clobbers them, the function restores them. Before P198 the final compare
 # used the function's own store log only, so dropping a restore compared equal. DIFFTEST_STUBW_OLD=1 = old behaviour.
 S63254="DIFFTEST_EXACT=* DIFFTEST_ARG=0=800CC6F0,1=3,2=7,3=3FC00000 DIFFTEST_POKE=800CC704=41280000,800CC708=C1A20000,800CC70C=43960000,800CC7A8=3F400000,800CC730=3FA00000,800CC7B4=C0900000,800CC764=5555BEEF,800CC82C=11111102,800CC834=80410000,800CCA08=80420000,800CCA0C=CAFE0000 DIFFTEST_OUTW=150612D4=@800CC7A8:DEADBEEF/@800CC7B4:DEADBEEF/@800CCA08:DEADBEEF"
-chkce EQUIV  func_15063254 "$S63254"
-chkce DIFFER func_15063254 "$S63254" 's/    \*(f32 \*) (o + 0xC4) = fC4;/    ;/'
-chkce EQUIV  func_15063254 "$S63254 DIFFTEST_STUBW_OLD=1" 's/    \*(f32 \*) (o + 0xC4) = fC4;/    ;/'
+chkce EQUIV  obj_model_swap_keep_pose "$S63254"
+chkce DIFFER obj_model_swap_keep_pose "$S63254" 's/    \*(f32 \*) (o + 0xC4) = fC4;/    ;/'
+chkce EQUIV  obj_model_swap_keep_pose "$S63254 DIFFTEST_STUBW_OLD=1" 's/    \*(f32 \*) (o + 0xC4) = fC4;/    ;/'
 # P200: DIFFTEST_ARG on a leading float parameter (f12 / f14) set only a0 / a1, so f(f32 x, f32 y, ...) ran on random
 # x / y: func_15087204's wall setups never met the wall and dropping `ex = -ex` survived. DIFFTEST_ARGF_OLD=1 = old.
 # (old mode: 4 trials, the random x / y of trial 5 happen to cross the wall)
@@ -203,18 +203,18 @@ TRIALS=4 chkce EQUIV  func_151C384C "$S384C DIFFTEST_STKFILL=5A5A5A5A"
 TRIALS=4 chkce DIFFER func_151C384C "$S384C DIFFTEST_STKFILL=5A5A5A5A" 's/    req.angle\[1\] = 0.0f;//'
 TRIALS=4 chkce EQUIV  func_151C384C "$S384C" 's/    req.angle\[1\] = 0.0f;//'
 # P214: arguments of direct calls. (1) `return func_X(...)` was parsed as a declaration of func_X (type `return`):
-# game_A28B0's `return func_1505A630(temp_v0[0] - ...)` gave func_1505A630 an empty FP-argument set, so f12 / f14 were
-# never compared (port-b P210 func_150768DC x-swap survived); DIFFTEST_DECLKW_OLD=1 = old. (2) a callee of unknown
+# game_A28B0's `return math_atan2_u16(temp_v0[0] - ...)` gave math_atan2_u16 an empty FP-argument set, so f12 / f14 were
+# never compared (port-b P210 aiscript_find_visible_target x-swap survived); DIFFTEST_DECLKW_OLD=1 = old. (2) a callee of unknown
 # prototype (DIFFTEST_NOPROTO forces it): every f12-f15 / a0-a3 either side wrote since the previous call is
 # compared, not only FPRs both sides set right before the jal (the case writes f12 before a branch); JALARG_OLD=1 = old.
 S68DC="DIFFTEST_EXACT=* DIFFTEST_POKE=800CC6F0=00000000,800CCA1C=00000000,800CCD48=00000000,800CD074=00000001,800CD078=10000000,800CD088=00000000,800CD08C=40A00000,800CD090=00000000,800CD0E8=00000000,800CD11C=33000000,800CD33C=00000000,800CD3A0=00000000,800CD6CC=00000001,800CD6D0=11000000,800CD6E0=42480000,800CD6E4=40A00000,800CD6E8=40A00000,800CD7C4=00000020,800CD894=00000500,800CD8E4=80470000,800CD8EC=00005500,800CD8FC=00004400,800CD9F8=00000000,800CDD24=00000000,800CE050=00000000,800CE37C=00000000,800CE6A8=00000000,800CE9D4=00000000,800CED00=00000000,800CF02C=00000000,800CF358=00000000,800CF684=00000000,800CF9B0=00000000,800CFCDC=00000000,800D0008=00000000,800D0334=00000000,800D0660=00000000,800D098C=00000000,800D0CB8=00000000,800D0FE4=00000000,800D1310=00000000,800D196C=800CD074,800D1CB0=20001527,800D20F0=80450000,80450014=00000040 DIFFTEST_RET=1507BEE8=80470010,1505A9B0=00001000 DIFFTEST_RETF=1505AAAC=42000000"
 M68DC='s/dx = o->x_position - D_800D154C->x_position;/dx = D_800D154C->x_position - o->x_position;/'
-TRIALS=4 chkce EQUIV  func_150768DC "$S68DC"
-TRIALS=4 chkce DIFFER func_150768DC "$S68DC" "$M68DC"
-TRIALS=4 chkce EQUIV  func_150768DC "$S68DC DIFFTEST_DECLKW_OLD=1" "$M68DC"
-TRIALS=4 chkce EQUIV  func_150768DC "$S68DC DIFFTEST_NOPROTO=func_1505A630"
-TRIALS=4 chkce DIFFER func_150768DC "$S68DC DIFFTEST_NOPROTO=func_1505A630" "$M68DC"
-TRIALS=4 chkce EQUIV  func_150768DC "$S68DC DIFFTEST_NOPROTO=func_1505A630 DIFFTEST_JALARG_OLD=1" "$M68DC"
+TRIALS=4 chkce EQUIV  aiscript_find_visible_target "$S68DC"
+TRIALS=4 chkce DIFFER aiscript_find_visible_target "$S68DC" "$M68DC"
+TRIALS=4 chkce EQUIV  aiscript_find_visible_target "$S68DC DIFFTEST_DECLKW_OLD=1" "$M68DC"
+TRIALS=4 chkce EQUIV  aiscript_find_visible_target "$S68DC DIFFTEST_NOPROTO=math_atan2_u16"
+TRIALS=4 chkce DIFFER aiscript_find_visible_target "$S68DC DIFFTEST_NOPROTO=math_atan2_u16" "$M68DC"
+TRIALS=4 chkce EQUIV  aiscript_find_visible_target "$S68DC DIFFTEST_NOPROTO=math_atan2_u16 DIFFTEST_JALARG_OLD=1" "$M68DC"
 # P215: (1) P214 lost the `cnt = max(cnt, ...indw...)` line of the P211 jalr compare (indw computed, never used): the
 # object_state_dispatch_a `arg0 = 0` case above gave EQUIV (82 / 83 at the end of P214). (2) at a jalr the target register is not
 # an argument: func_1506B04C does `lw a2, D_800864B0(a2); jalr a2` (a2 = the handler address in the reference, `arg`
@@ -228,7 +228,7 @@ TRIALS=4 chkce DIFFER func_1506B04C "$SB04C DIFFTEST_JALRSKIP=3 DIFFTEST_JALRTGT
 TRIALS=4 chkce DIFFER func_1506B04C "$SB04C"
 # P215: (3) a TU-literal argument (candidate "%d" at TU_BASE vs the reference's rodata_inject D_8009DDF0) compared
 # "different" when the reference never touched that page (unmapped: mem_read failed). Now the page's initial content
-# is read (DIFFTEST_TUPEEK_OLD=1 = old). func_1508AB7C draws the counters with func_15042D94(x, y, 1, "%d", n / 50).
+# is read (DIFFTEST_TUPEEK_OLD=1 = old). func_1508AB7C draws the counters with text_printf_at(x, y, 1, "%d", n / 50).
 SAB7C="DIFFTEST_ROMDATA=1 DIFFTEST_TUCMP_LEN=4 DIFFTEST_EXACT=* DIFFTEST_POKE=800D27D0=80450000,80450010=3,800BEE04=2,800CCA0C=80460000,800CCD38=80460000,800CD064=80460000,80460198=00000000,804601AC=00000000,800E1000=00000000,80450E64=0,80450E68=1,80450E6C=2,804516BC=00B90000,800CC91C=0,800CCC48=0,800CCF74=0,80450014=00000000,80450018=00000000,8045035C=00000000,80450360=00000000,80450364=00000000,8045031C=00000000,80450320=00000000,80450324=00000000,800E0FE8=02000000,800BEA48=80470000,80470024=41200000,8047002C=42000000,80470030=43000000,800CC818=0,80083330=1,80451574=00000123,80451578=00000123,8045157C=00000123 DIFFTEST_RET=15085E1C=0 DIFFTEST_RETF=150ADF48=3F400000"
 TRIALS=4 chkce EQUIV  func_1508AB7C "$SAB7C"
 TRIALS=4 chkce DIFFER func_1508AB7C "$SAB7C" 's/(s32) "%d"/(s32) "%x"/'
@@ -240,14 +240,14 @@ TRIALS=32 chkce EQUIV  effect_handle_message ""
 TRIALS=32 chkce DIFFER effect_handle_message "DIFFTEST_BADJALR_OLD=1"
 TRIALS=32 chkce DIFFER effect_handle_message "" 's/D_8008A3CC\[rec\[0x168\]\](rec/D_8008A3CC[rec[0x167]](rec/'
 TRIALS=32 chkce DIFFER effect_handle_message "" 's/(rec, msg, c);/(rec, msg, code);/'
-# P234: a callee declared only in a header the TU includes (func_150ADA20 / func_150ADA68 in functions.h) has a known
-# prototype: IDO's scratch f12 left right before `jal func_150ADA20` is not an argument (P232 func_15109DC8 first run
+# P234: a callee declared only in a header the TU includes (random_int / random_float in functions.h) has a known
+# prototype: IDO's scratch f12 left right before `jal random_int` is not an argument (P232 point_spark_spawn first run
 # was a false DIFFER; the case is the P232 block without its local declarations). DIFFTEST_INCHDR_OLD=1 = old.
 S9DC8="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=151308E4=0:92,151308E4=0+60:6,151530A8=0:89,151530A8=0+5C:15,151530A8=0+6C:8 DIFFTEST_RET=150ADF00=0;0;0 DIFFTEST_RETF=150ADF48=3F000000;3E800000"
-TRIALS=4 chkce EQUIV  func_15109DC8 "$S9DC8"
-TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8 DIFFTEST_INCHDR_OLD=1"
-TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8" 's/t.life = (func_150ADA20() \& 0xF) + 10;/t.life = (func_150ADA20() \& 0xF) + 11;/'
-TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8" 's/scale = (func_150ADA68() \* D_800A2A04/scale = (func_150ADA68() * D_800A2A08/'
+TRIALS=4 chkce EQUIV  point_spark_spawn "$S9DC8"
+TRIALS=4 chkce DIFFER point_spark_spawn "$S9DC8 DIFFTEST_INCHDR_OLD=1"
+TRIALS=4 chkce DIFFER point_spark_spawn "$S9DC8" 's/t.life = (random_int() \& 0xF) + 10;/t.life = (random_int() \& 0xF) + 11;/'
+TRIALS=4 chkce DIFFER point_spark_spawn "$S9DC8" 's/scale = (random_float() \* D_800A2A04/scale = (random_float() * D_800A2A08/'
 # P238: DIFFTEST_OUTP writes through a pointer read from an argument array (func_15145EA4's dst[i] points). Without
 # it the transformed start / end points stay stack fill (start == dir) and a swapped subtraction is EQUIV (the hole).
 S60E30="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=15146414=0:8,15145698=0:12 DIFFTEST_ARG=0=80450000 DIFFTEST_POKE=80450014=80460000,80450018=80470000,8045001C=07030000,80450038=42C80000,8045003C=03000000,80470000=00000001,80470014=42F73333,80470038=00000007,80470074=03000000,804701D4=80480000 DIFFTEST_RET=15145698=1 DIFFTEST_OUTA=15081A90=7:80490000;3F000000;C29B6666;4284CCCD;44BB8666;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;10000"
@@ -349,7 +349,7 @@ chkce DIFFER func_10001194 "$S1194" 's/(D_8003585C\[i\] ^ 0x8039CCCA)/(D_8003585
 SD290="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=0=80480000,1=7,2=1234 DIFFTEST_RET=10003EBC=80460000;80470000 DIFFTEST_OUTW=15143CAC=2:42C80000;C2480000/3:41200000;C1A00000 DIFFTEST_OUTA=15146324=2:43480000;C2C80000;44160000;41200000;C1200000;42F00000;3F800000;40000000;40400000;C0800000;C0A00000;C0C00000 DIFFTEST_ARGMEM=151307F0=0:102"
 TRIALS=4 chkce EQUIV  func_1518D290 "$SD290"
 TRIALS=1 chkce UNSURE func_1518D290 "$SD290 DIFFTEST_STUBMAP_OLD=1"
-TRIALS=1 chkce DIFFER func_1518D290 "$SD290" 's/(func_150ADA68() \* 202.0f/(func_150ADA68() * 200.0f/'
+TRIALS=1 chkce DIFFER func_1518D290 "$SD290" 's/(random_float() \* 202.0f/(random_float() * 200.0f/'
 # P260: a candidate path the container already read, rewritten on the host with a different size (what every
 # chkce sed mutant does with $T/FUNC.mut.c). After the P256 Docker restart the container kept the old size, so the
 # selftest's 5 re-used mutant paths compiled truncated (CERR). difftest.sh now refreshes the parent dir and compares
@@ -357,17 +357,17 @@ TRIALS=1 chkce DIFFER func_1518D290 "$SD290" 's/(func_150ADA68() \* 202.0f/(func
 F28=$T/sfx_cooldown_tick.mut.c
 sed -e 's/D_800BE9E4 + 1;/D_800BE9E4 + 3;/' $C/sfx_cooldown_tick.c > $F28; docker exec ${CONKERDEV:-conkerdev} cat ${F28/#$R//conker} > /dev/null
 TRIALS=8 chkce DIFFER sfx_cooldown_tick "" 's/D_800D9AB0\[i\] -= D_800BE9E4;/D_800D9AB0[i] -= D_800BE9E4 + 2;/'
-# P280: DIFFTEST_ARGMEM "N:LEN@K" compares only at the K-th call to ADDR. func_1501175C memcpys a 0x10 link record,
+# P280: DIFFTEST_ARGMEM "N:LEN@K" compares only at the K-th call to ADDR. obj_glow_smoke_attach memcpys a 0x10 link record,
 # then a 0x5C tail: LEN 92 on every call compares stack bytes past the link record (layout-dependent, DIFFER as is);
 # with @0 / @1 the case is EQUIV and a one-ulp change of a tail constant DIFFERs.
 S175C="DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=0=80460000,1=00000012,2=00000001 DIFFTEST_POKE=8046003B=07000000,8046014C=41200000,80460150=42C80000 DIFFTEST_RET=151496A0=80470000,1513D860=80480000,150ADF00=00000003,15160830=80490000"
-chkce DIFFER func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:92"
-chkce EQUIV  func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:16@0,10023360=1:92@1"
-chkce DIFFER func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:16@0,10023360=1:92@1" 's/0.396174014f/0.396175f/'
-chkce EQUIV  func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:16@0" 's/0.396174014f/0.396175f/'
-# P317: DIFFTEST_MEMCPY=1 makes the memcpy stub copy for real. func_1501175C's 0x5C tail record is memcpy'd to the
+chkce DIFFER obj_glow_smoke_attach "$S175C DIFFTEST_ARGMEM=10023360=1:92"
+chkce EQUIV  obj_glow_smoke_attach "$S175C DIFFTEST_ARGMEM=10023360=1:16@0,10023360=1:92@1"
+chkce DIFFER obj_glow_smoke_attach "$S175C DIFFTEST_ARGMEM=10023360=1:16@0,10023360=1:92@1" 's/0.396174014f/0.396175f/'
+chkce EQUIV  obj_glow_smoke_attach "$S175C DIFFTEST_ARGMEM=10023360=1:16@0" 's/0.396174014f/0.396175f/'
+# P317: DIFFTEST_MEMCPY=1 makes the memcpy stub copy for real. obj_glow_smoke_attach's 0x5C tail record is memcpy'd to the
 # heap: with the stub copying nothing, a tail-constant change was invisible without an ARGMEM compare (EQUIV above);
 # with the real copy the destination writes are compared and it DIFFERs, while the unmutated function stays EQUIV.
-chkce EQUIV  func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:16@0 DIFFTEST_MEMCPY=1"
-chkce DIFFER func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:16@0 DIFFTEST_MEMCPY=1" 's/0.396174014f/0.396175f/'
+chkce EQUIV  obj_glow_smoke_attach "$S175C DIFFTEST_ARGMEM=10023360=1:16@0 DIFFTEST_MEMCPY=1"
+chkce DIFFER obj_glow_smoke_attach "$S175C DIFFTEST_ARGMEM=10023360=1:16@0 DIFFTEST_MEMCPY=1" 's/0.396174014f/0.396175f/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

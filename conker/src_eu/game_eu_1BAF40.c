@@ -377,7 +377,7 @@ void func_1518DC50(u8 *arg0) {
                         }
                         m->vel[1] = 0.0f;
                         effect3d_set_handlers(slot->obj, m->tpl->end[0], m->tpl->end[1], m->tpl->end[2], m->tpl->end[3]);
-                        k = func_150ADA20();
+                        k = random_int();
                         *(s16 *) (slot->obj + 0x1C) = (u32) k % (u32) (m->tpl->range + 1) + m->tpl->life;
                         *(s32 *) (slot->obj + 0x58) |= 1;
                         slot->obj = NULL;
@@ -446,7 +446,7 @@ void func_1518DC50(u8 *arg0) {
                     if (nfree != 0 && !(e->accum < 1.0f) && e->live < cfg->max) {
                         do {
                             /* pick a random free slot */
-                            k = (u32) func_150ADA20() % (u32) (nfree + 1);
+                            k = (u32) random_int() % (u32) (nfree + 1);
                             while (k-- != 0) {
                                 tail = head;
                                 head = head->next;
@@ -461,9 +461,9 @@ void func_1518DC50(u8 *arg0) {
                                 if (cfg->attach == 2 || mode == 2) {
                                     switch (cfg->shape) {
                                     case 1: /* sphere */
-                                        a = func_150ADA20();
-                                        c = func_150ADA20();
-                                        r = func_150ADA68() * cfg->radius;
+                                        a = random_int();
+                                        c = random_int();
+                                        r = random_float() * cfg->radius;
                                         cb = angle_byte_cos((u8) (c - 0x40));
                                         sb = angle_byte_cos(c);
                                         ca = angle_byte_cos((u8) (a - 0x40));
@@ -473,10 +473,10 @@ void func_1518DC50(u8 *arg0) {
                                         head->off[2] = r * sb * sa;
                                         break;
                                     case 2: /* ring */
-                                        a = func_150ADA20();
-                                        r = func_150ADA68() * cfg->radius;
+                                        a = random_int();
+                                        r = random_float() * cfg->radius;
                                         head->off[0] = angle_byte_cos(a) * r;
-                                        head->off[1] = func_150ADA68() * cfg->height;
+                                        head->off[1] = random_float() * cfg->height;
                                         head->off[2] = -angle_byte_cos((u8) (a - 0x40)) * r;
                                         break;
                                     }
@@ -493,7 +493,7 @@ void func_1518DC50(u8 *arg0) {
                                 *(f32 *) (obj + 0x40) = *(f32 *) (obj + 0x34);
                                 *(f32 *) (obj + 0x44) = *(f32 *) (obj + 0x38);
                                 *(f32 *) (obj + 0x48) = *(f32 *) (obj + 0x3C);
-                                head->timer = (u32) func_150ADA20() % (u32) (cfg->range + 1) + cfg->base;
+                                head->timer = (u32) random_int() % (u32) (cfg->range + 1) + cfg->base;
                                 head = head->next;
                                 tail->next = head;
                                 e->live++;
@@ -606,10 +606,10 @@ void func_1518EA94(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, u8 *arg4, u8 *arg5, s
     s32 temp_v1;
 
     *arg1 = 2;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         *arg1 |= 1;
     }
-    temp_v1 = func_150ADA20() & 1;
+    temp_v1 = random_int() & 1;
     switch (temp_v1) {                              /* irregular */
     case 0:
         *arg0 = 0x13;
@@ -630,11 +630,11 @@ void func_151429E0(s32, s32, s32, s32);
 void func_1518EB48(s8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, s16 *arg6) {
     s32 var_v0;
 
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         *arg1 |= 1;
     }
     *arg0 = 0x16;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         var_v0 = 3;
     } else {
         var_v0 = 4;
@@ -666,8 +666,8 @@ s32 func_1518EC44(u8 *arg0) {
 #ifdef NON_MATCHING
 /* P203 */
 void func_151D6310(s32, s16, s32, u8 **, u8 *);
-f32 func_15048A40(u8);
-f32 func_150489B0(u8);
+f32 math_sin_u8(u8);
+f32 math_cos_u8(u8);
 extern f32 D_800DD608[]; /* per view: sin of the camera yaw */
 extern f32 D_800DD618[]; /* per view: cos of the camera yaw */
 
@@ -678,7 +678,7 @@ extern f32 D_800DD618[]; /* per view: cos of the camera yaw */
 // +0x48 - +0x3C) across the view (cos / sin of the view, D_800DD618 / D_800DD608) times D_800BEDC8, then
 // sqrt(|t|) * p +0x160, at most pi / 2, negative for a forward motion; byte angle = lean * 256 / (2 pi) (Rare's
 // unsigned conversion makes every negative angle 0xFF). Half width p +0x2C, half height p +0x30 rotated by the
-// angle (func_15048A40 sin, func_150489B0 cos) around the position p +0x34; the s16 corners go to +0x00, +0x10,
+// angle (math_sin_u8 sin, math_cos_u8 cos) around the position p +0x34; the s16 corners go to +0x00, +0x10,
 // +0x20, +0x30 of the block (the view's horizontal axis is (cos, -sin) in x / z). Returns the block, NULL when
 // none is available.
 u8 *func_1518ECAC(u8 *p, s16 view) {
@@ -716,8 +716,8 @@ u8 *func_1518ECAC(u8 *p, s16 view) {
     /* (u32) conversion as IDO does it: truncation, a negative result becomes 0xFFFFFFFF */
     n = (s32) (lean * 40.7436638f);
     ang = (n < 0) ? 0xFF : n;
-    sn = func_15048A40(ang);
-    cs = func_150489B0(ang);
+    sn = math_sin_u8(ang);
+    cs = math_cos_u8(ang);
     a = *(f32 *) (p + 0x2C) * cs;
     b = *(f32 *) (p + 0x2C) * sn;
     hs = *(f32 *) (p + 0x30) * sn;
@@ -917,24 +917,24 @@ s32 func_1518F710(u8 *arg0) {
 
     *(s16 *)(p + 0x1E) -= D_800BE9E4;
     if (*(s16 *)(p + 0x1E) < 0) {
-        *(s16 *)(p + 0x1E) = func_150ADA20() % 6U;
-        if (func_150ADA20() & 3) {
-            *(f32 *)(p + 0x18) = *(f32 *)(p + 0x10) + (*(f32 *)(p + 0xC) - *(f32 *)(p + 0x10)) * func_150ADA68();
+        *(s16 *)(p + 0x1E) = random_int() % 6U;
+        if (random_int() & 3) {
+            *(f32 *)(p + 0x18) = *(f32 *)(p + 0x10) + (*(f32 *)(p + 0xC) - *(f32 *)(p + 0x10)) * random_float();
         } else {
-            *(f32 *)(p + 0x18) = *(f32 *)(p + 0xC) + (*(f32 *)(p + 0x14) - *(f32 *)(p + 0xC)) * func_150ADA68();
+            *(f32 *)(p + 0x18) = *(f32 *)(p + 0xC) + (*(f32 *)(p + 0x14) - *(f32 *)(p + 0xC)) * random_float();
         }
     }
     *(f32 *)(arg0 + 0x30) += (*(f32 *)(p + 0x18) - *(f32 *)(arg0 + 0x30)) * 0.359f;
     *(s16 *)(p + 0x1C) -= D_800BE9E4;
     if (*(s16 *)(p + 0x1C) < 0) {
-        *(s16 *)(p + 0x1C) = func_150ADA20() % 17U;
-        *(f32 *)(p + 0x8) = *(f32 *)(p + 0x4) + (*(f32 *)(p + 0x0) - *(f32 *)(p + 0x4)) * func_150ADA68();
+        *(s16 *)(p + 0x1C) = random_int() % 17U;
+        *(f32 *)(p + 0x8) = *(f32 *)(p + 0x4) + (*(f32 *)(p + 0x0) - *(f32 *)(p + 0x4)) * random_float();
     }
     *(f32 *)(arg0 + 0x2C) += (*(f32 *)(p + 0x8) - *(f32 *)(arg0 + 0x2C)) * 0.186f;
     *(s16 *)(p + 0x2C) -= D_800BE9E4;
     if (*(s16 *)(p + 0x2C) < 0) {
-        *(s16 *)(p + 0x2C) = func_150ADA20() % 15U;
-        *(f32 *)(p + 0x28) = *(f32 *)(p + 0x24) + (*(f32 *)(p + 0x20) - *(f32 *)(p + 0x24)) * func_150ADA68();
+        *(s16 *)(p + 0x2C) = random_int() % 15U;
+        *(f32 *)(p + 0x28) = *(f32 *)(p + 0x24) + (*(f32 *)(p + 0x20) - *(f32 *)(p + 0x24)) * random_float();
     }
     *(s32 *)(arg0 + 0x24) = (s32)((*(f32 *)(p + 0x28) - *(s32 *)(arg0 + 0x24)) * 0.231f) + *(s32 *)(arg0 + 0x24);
     return 1;
@@ -945,13 +945,13 @@ s32 func_1518F8F4(u8 *arg0) {
 
     if (*(s16 *)(arg0 + 0x12C) == 0) {
         p = arg0 + 0x110;
-        *(f32 *)(p + 0x8) = *(f32 *)(p + 0x4) + (*(f32 *)(p + 0x0) - *(f32 *)(p + 0x4)) * func_150ADA68();
+        *(f32 *)(p + 0x8) = *(f32 *)(p + 0x4) + (*(f32 *)(p + 0x0) - *(f32 *)(p + 0x4)) * random_float();
         *(s16 *)(p + 0x1C) = 1;
     }
     p = arg0 + 0x110;
     if (p) {} // fakematch: keeps p in v1 for the 0x1E test
     if (*(s16 *)(p + 0x1E) == 0) {
-        *(f32 *)(p + 0x18) = *(f32 *)(p + 0x10) + (*(f32 *)(p + 0xC) - *(f32 *)(p + 0x10)) * func_150ADA68();
+        *(f32 *)(p + 0x18) = *(f32 *)(p + 0x10) + (*(f32 *)(p + 0xC) - *(f32 *)(p + 0x10)) * random_float();
         *(s16 *)(p + 0x1E) = 1;
     }
     *(f32 *)(arg0 + 0x30) += (*(f32 *)(p + 0x18) - *(f32 *)(arg0 + 0x30)) * 0.359f;
@@ -1091,7 +1091,7 @@ s32 func_1518FD34(u8 *self, void *pos) {
     f32 *count = (f32 *)(self + 0x30);
     s8 tick;
 
-    count[0] += (count[1] + func_150ADA68() * count[2]) * D_800BE9A4;
+    count[0] += (count[1] + random_float() * count[2]) * D_800BE9A4;
     func_1518FE50((s32)self);
     tick = (s8)self[0x88];
     if (tick != -1) {
@@ -1138,7 +1138,7 @@ s32 func_1518FE50(s32);
 s32 func_1518FE0C(u8 *self, void *pos) {
     f32 *count = (f32 *)(self + 0x30);
 
-    count[0] = count[3] + count[4] * func_150ADA68();
+    count[0] = count[3] + count[4] * random_float();
     func_1518FE50((s32)self);
     return 0;
 }
@@ -1151,7 +1151,7 @@ void func_1518FE0C(s32 arg0)
   temp_v0 = ((((((arg0 + 0x30) & 0xFFFFFFFF) & 0xFFFFFFFF) & 0xFFFFFFFF) & 0xFFFFFFFF) & 0xFFFFFFFF) & 0xFFFFFFFF;
   new_var2 = (f32 *) (((u8 *) temp_v0) + 0);
   new_var = temp_v0;
-  *new_var2 = (f32) ((*((f32 *) (((u8 *) new_var) + 0xC))) + ((*((f32 *) (((u8 *) temp_v0) + 0x10))) * func_150ADA68()));
+  *new_var2 = (f32) ((*((f32 *) (((u8 *) new_var) + 0xC))) + ((*((f32 *) (((u8 *) temp_v0) + 0x10))) * random_float()));
   func_1518FE50(arg0);
 }
 #endif
@@ -1202,12 +1202,12 @@ void func_1518FE50(s32 arg0) {
     do {
         if (*(s16 *)(self + 0x20) < *(s32 *)(self + 0x5C)) {
             set = *(s32 *)(self + 0x78);
-            point = (u8 *)D_800E0990[set] + ((u32)func_150ADA20() % (u16)D_800E0968[set]) * 16;
-            speed[0] = func_150ADA68() * *(f32 *)(self + 0x4C) + *(f32 *)(self + 0x44);
-            speed[1] = func_150ADA68() * *(f32 *)(self + 0x50) + *(f32 *)(self + 0x48);
+            point = (u8 *)D_800E0990[set] + ((u32)random_int() % (u16)D_800E0968[set]) * 16;
+            speed[0] = random_float() * *(f32 *)(self + 0x4C) + *(f32 *)(self + 0x44);
+            speed[1] = random_float() * *(f32 *)(self + 0x50) + *(f32 *)(self + 0x48);
             func_15143134(point + 4, at, *(u8 **)(owner + 0x1D4) + (point[0] << 6));
-            size = func_150ADA20();
-            kind = (func_150ADA20() & 1) ? 0x13 : 0x14;
+            size = random_int();
+            kind = (random_int() & 1) ? 0x13 : 0x14;
             part = func_1514BE54((u8 *)at, (u8 *)speed, -1, (u32)size % (self[0x55] + 1) + self[0x54], D_800A5860,
                                  0.0f, 1.0f, *(f32 *)(self + 0x80), 0, 0x23, 0, kind, 1, 1, 0xFF, 0, self[0xC],
                                  self[1]);
@@ -1218,7 +1218,7 @@ void func_1518FE50(s32 arg0) {
                 rec.offset[1] = ((f32 *)(point + 4))[1];
                 rec.offset[2] = ((f32 *)(point + 4))[2];
                 rec.bone = point[0];
-                rec.life = (u32)func_150ADA20() % (*(s16 *)(self + 0x58) + 1) + *(s16 *)(self + 0x56);
+                rec.life = (u32)random_int() % (*(s16 *)(self + 0x58) + 1) + *(s16 *)(self + 0x56);
                 rec.u18 = 1;
                 rec.u19 = (self[0x7C] & 1) ? 1 : 0;
                 rec.u1A = 0;
@@ -1275,11 +1275,11 @@ s32 func_151901F4(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *target) {
     *(f32 *)(p + 0x148) = (target->x - *(f32 *)(node + 0x34)) * *(f32 *)(cfg + 0x60);
     *(f32 *)(p + 0x14C) = (target->y - *(f32 *)(node + 0x38)) * *(f32 *)(cfg + 0x60);
     *(f32 *)(p + 0x150) = (target->z - *(f32 *)(node + 0x3C)) * *(f32 *)(cfg + 0x60);
-    *(f32 *)(p + 0x154) = func_150ADA68() * *(f32 *)(cfg + 0x68) + *(f32 *)(cfg + 0x64);
+    *(f32 *)(p + 0x154) = random_float() * *(f32 *)(cfg + 0x68) + *(f32 *)(cfg + 0x64);
     *(f32 *)(p + 0x158) = *(f32 *)(cfg + 0x6C);
     *(s16 *)(p + 0x6C) = *(s16 *)(cfg + 0x70);
     *(s16 *)(p + 0x6E) = *(s16 *)(cfg + 0x72);
-    r = func_150ADA20();
+    r = random_int();
     *(s16 *)(p + 0x1C) = (u32)r % (u32)(*(s16 *)(cfg + 0x76) + 1) + *(s16 *)(cfg + 0x74);
     p[0x70] = (cfg[0x7C] & 1) ? 0x21 : 0x20;
     p[0x71] = 0x24;
@@ -1680,7 +1680,7 @@ void func_15190AC0(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-s32 func_1505D024();
+s32 obj_send_hit();
 
 typedef struct {
     s32 step;
@@ -1701,7 +1701,7 @@ s32 func_15190B2C(Obj0B2C *arg0) {
 
     arg0->t.acc += D_800BE9E4;
     while (t->acc >= t->step) {
-        func_1505D024(arg0->unk10, 0x60021, 0, t->obj - D_800CC2D0);
+        obj_send_hit(arg0->unk10, 0x60021, 0, t->obj - D_800CC2D0);
         t->acc -= t->step;
     }
     v = *(u8 **)((u8 *)arg0->unk10 + 0x31C);

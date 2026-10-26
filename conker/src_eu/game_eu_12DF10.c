@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_15100700(u8 *arg0) {
+/* was func_15100700 */
+void obj_timer_link_post_remove(u8 *arg0) {
     struct {
         u8 *unk0;
         u8 unk4;
@@ -14,7 +15,8 @@ void func_15100700(u8 *arg0) {
     func_151494E0(&tmp, 0x48);
 }
 
-void func_15100734(u8 *arg0) {
+/* was func_15100734 */
+void obj_timer_link_spawn(u8 *arg0) {
     struct {
         u8 *unk0;
         u8 unk4;
@@ -35,7 +37,8 @@ void func_15100734(u8 *arg0) {
 // linked_obj_event_48: event handler of an object whose link record sits at +0x28 ({ s32 id, u8 key }): event 0x48 removes the
 // object (node_destroy) when the event's record matches by id or by key; any other event goes to the common
 // handler func_15149514.
-void func_151007B0(struct102 *obj, u8 *ev, u8 type) {
+/* was func_151007B0 */
+void obj_timer_link_handle_event(struct102 *obj, u8 *ev, u8 type) {
     u8 *link = (u8 *) obj + 0x28;
 
     if (type == 0x48) {
@@ -47,10 +50,11 @@ void func_151007B0(struct102 *obj, u8 *ev, u8 type) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12DF10/func_151007B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12DF10/obj_timer_link_handle_event.s")
 #endif
 
-void func_1510083C(u8 *arg0)
+/* was func_1510083C */
+void obj_timer_link_update(u8 *arg0)
 {
   u8 *q = arg0 + 0x28;
   u8 *o = *(u8 **)q;

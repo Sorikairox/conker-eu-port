@@ -54,7 +54,7 @@ for F in "$@"; do NR=$NR0
   cs=""; for k in $kn; do case $k in TR=*) [ -z "$TR" ] && tr=${k#TR=};; DRAFT=*) C=${k#DRAFT=};; CANDSED=*) cs=${k#CANDSED=};; NR=*) [ -z "$NR0" ] && NR=${k#NR=};; *) envs+=("$k");; esac; done
   # P244: knob CANDSED=file applies `sed -f file` to the candidate (and to the body layout) before every run, for test-only
   # edits that must track the current NM block (unlike DRAFT=); the sed must keep line numbers (mutants are line-numbered).
-  # func_15065E18: the C passes func_150DC2F0's unused a1 as 0, the asm leaves garbage there -> 1-argument prototype.
+  # func_15065E18: the C passes item_effect_spawn's unused a1 as 0, the asm leaves garbage there -> 1-argument prototype.
   if [ -n "$cs" ]; then sed -f "$cs" $C > $W/${F}_cs.c || { echo "$F: CANDSED $cs failed"; continue; }; C=$W/${F}_cs.c; fi
   T=build/difftest_rv_${F}_$$
   dt() { local u=(); [ -n "$NOARGMEM" ] && u=(-u DIFFTEST_ARGMEM)  # mut.sh P73: the random phase runs without ARGMEM

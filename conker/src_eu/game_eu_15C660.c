@@ -9,11 +9,11 @@ f32 func_150ADDE0(f32 *, f32 *);
 void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
 void camera_set_followed_obj(struct108 *, s32);
 void camera_update_target_height(struct108 *, f32 *);
-void func_15128D50(struct108 *, f32 *, f32 *);
+void camera_lean_from_heading(struct108 *, f32 *, f32 *);
 void camera_orbit_point_init(u8 *);
-void func_1512E6B0(u8 *);
-struct127 *func_1505EEF4(s32);
-void func_15130370(struct108 *, s32);
+void camera_update_eye_height(u8 *);
+struct127 *obj_find_by_spawn(s32);
+void camera_push_preset(struct108 *, s32);
 f32 sinf(f32);
 f32 cosf(f32);
 f32 sqrtf(f32);
@@ -54,12 +54,13 @@ extern u8 *D_800DC454;   /* the record of the current fixed position */
  *     +0x23C snaps); flags from the argument (+0x920): 0x10 keeps x/z, 8 keeps the height (cam +0x2FC);
  *  5: fixed position record D_800DC450[A] (argument 5 / 0x11: jump there once, camera_snap_to_object);
  *  0xB: store A / B / argument as floats in state +0x24..+0x2C;
- *  0xA / 0xE: look at object func_1505EEF4(func_15083E0C(A low byte)) (target +0x618, 0xE via camera_set_followed_obj);
+ *  0xA / 0xE: look at object obj_find_by_spawn(func_15083E0C(A low byte)) (target +0x618, 0xE via camera_set_followed_obj);
  *  0xF: camera_orbit_point_init; 3: look at the request point; 2 / 1 / 0: keep distance A from the target, pushing the eye
  *     out along the heading +0x39C; 0xD: camera_push_mode only.
  * Any other mode (or an inactive / pending request) settles: the state point (+0x18 / +0x20) blends into the
  * target +0x2A4 / +0x2AC (+0x10 += 0.015 up to 1), and a finished request (+0x6C8 == 1) is reset to mode 0xD. */
-void func_1512EE50(struct108 *arg0) {
+/* was func_1512EE50 */
+void camera_apply_request(struct108 *arg0) {
     u8 *p = (u8 *)arg0;
     u8 *req;
     u8 *st;
@@ -116,7 +117,7 @@ void func_1512EE50(struct108 *arg0) {
     if (ES16(0x6CC) != 0 && ST_PENDING == 0 && ST_EASING == 0) {
         ST_MODE = RQ_MODE;
         if (RQ_MODE != 0xA) {
-            func_15130370(arg0, RQ_ARG);
+            camera_push_preset(arg0, RQ_ARG);
         }
         mode = RQ_MODE;
         if (mode == 4) {
@@ -135,7 +136,7 @@ void func_1512EE50(struct108 *arg0) {
             nodePos[0] = *(s16 *)(node + 0);
             nodePos[1] = *(s16 *)(node + 2);
             nodePos[2] = *(s16 *)(node + 4);
-            func_15048F90((struct17 *)nodePos, (struct17 *)(p + 0x2F8), (struct17 *)toEye);
+            vec3_diff((struct17 *)nodePos, (struct17 *)(p + 0x2F8), (struct17 *)toEye);
             for (i = 0; i != 5; i++) {
                 l = node[9 + i];
                 if (l != 0xFF) {
@@ -143,9 +144,9 @@ void func_1512EE50(struct108 *arg0) {
                     linkPos[0] = *(s16 *)(link + 0);
                     linkPos[1] = *(s16 *)(link + 2);
                     linkPos[2] = *(s16 *)(link + 4);
-                    func_150491EC((struct17 *)nodePos, (struct17 *)linkPos, (struct17 *)axis);
-                    func_15049148((struct17 *)axis, func_150ADDE0(axis, toEye), (struct17 *)along);
-                    func_15048F20((struct17 *)nodePos, (struct17 *)along, (struct17 *)cand);
+                    vec3_dir_to((struct17 *)nodePos, (struct17 *)linkPos, (struct17 *)axis);
+                    vec3_scale((struct17 *)axis, func_150ADDE0(axis, toEye), (struct17 *)along);
+                    vec3_add((struct17 *)nodePos, (struct17 *)along, (struct17 *)cand);
                     dx = EF(0x2F8) - cand[0];
                     dy = EF(0x2FC) - cand[1];
                     dz = EF(0x300) - cand[2];
@@ -272,7 +273,7 @@ void func_1512EE50(struct108 *arg0) {
             return;
         }
         if (mode == 0xA || mode == 0xE) {
-            obj = (u8 *)func_1505EEF4(func_15083E0C(req[0x1F]));
+            obj = (u8 *)obj_find_by_spawn(func_15083E0C(req[0x1F]));
             if (obj == NULL) {
                 return;
             }
@@ -348,7 +349,7 @@ void func_1512EE50(struct108 *arg0) {
                 RQ_SAVED = RQ_B;
             }
             ES32(0x6C8) = 1;
-            func_1512E6B0(p);
+            camera_update_eye_height(p);
             dx = EF(0x2F8) - EF(0x2A4);
             dz = EF(0x300) - EF(0x2AC);
             dist = sqrtf(dx * dx + dz * dz);
@@ -362,7 +363,7 @@ void func_1512EE50(struct108 *arg0) {
                     ST_PUSH = 0.04f;
                 }
             }
-            func_15128D50(arg0, NULL, NULL);
+            camera_lean_from_heading(arg0, NULL, NULL);
             return;
         }
         if (mode == 1 || mode == 0) {
@@ -401,7 +402,7 @@ void func_1512EE50(struct108 *arg0) {
                 EF(0x2AC) += (ST_Z - EF(0x2AC)) * 0.5f;
             }
             if (RQ_MODE != 0) {
-                func_1512E6B0(p);
+                camera_update_eye_height(p);
                 camera_update_target_height(arg0, NULL);
                 ST_BLEND = 0.0f;
             }
@@ -511,10 +512,11 @@ void func_1512EE50(struct108 *arg0) {
 #undef ST_X
 #undef ST_Z
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15C660/func_1512EE50.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15C660/camera_apply_request.s")
 #endif
 #ifdef NON_MATCHING
-void func_15130370(struct108 *arg0, s32 arg1) {
+/* was func_15130370 */
+void camera_push_preset(struct108 *arg0, s32 arg1) {
     s32 temp_t0;
     s32 temp_t5;
     s32 temp_t9;
@@ -616,5 +618,5 @@ void func_15130370(struct108 *arg0, s32 arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15C660/func_15130370.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15C660/camera_push_preset.s")
 #endif

@@ -64,7 +64,7 @@ u16 func_10010F30(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4);
 void func_100111C8(u16 arg0);
 void func_1000F85C(u16 arg0, s16 arg1, s32 arg2);
 s32 allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32 func_150ADA20(void);
+s32 random_int(void);
 
 /* rain_update: per-frame rain state machine (view index arg0; D_800C35EA[arg0] != 0 pauses the timers).
  * D_800DD862 / D_800DD863: random gust timer and strength (after a strong gust (>= 40) a weak one of 20..50 frames,
@@ -89,11 +89,11 @@ void func_15179008(s32 arg0) {
     timer = D_800DD862 - D_800BE9E4;
     if (timer <= 0) {
         if (D_800DD863 < 40) {
-            timer = (u32) func_150ADA20() % 31 + 20;
-            D_800DD863 = (func_150ADA20() & 0xF) + 0xAA;
+            timer = (u32) random_int() % 31 + 20;
+            D_800DD863 = (random_int() & 0xF) + 0xAA;
         } else {
-            timer = (u32) func_150ADA20() % 63 + 60;
-            D_800DD863 = (func_150ADA20() & 0xF) + 0x14;
+            timer = (u32) random_int() % 63 + 60;
+            D_800DD863 = (random_int() & 0xF) + 0x14;
         }
     }
     D_800DD862 = timer;
@@ -257,14 +257,14 @@ void func_15179B70(s32 arg0, s32 arg1) {
     x = D_800DBFF0->unk2F8;
     y = D_800DBFF0->unk2FC;
     z = D_800DBFF0->unk300;
-    x2 = func_150ADA20() % 500 + x;
-    z2 = func_150ADA20() % 500 + z;
+    x2 = random_int() % 500 + x;
+    z2 = random_int() % 500 + z;
     if (arg0 == 0) {
         y2 = y + 500;
     } else {
-        y2 = func_150ADA20() % 500 + y;
+        y2 = random_int() % 500 + y;
     }
-    r = func_150ADA20() % 10U;
+    r = random_int() % 10U;
     sp.u8E = y2;
     sp.u8C = x2;
     sp.u90 = z2;
@@ -284,7 +284,7 @@ void func_15179B70(s32 arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-f32 func_150489B0(s32, struct102 *);
+f32 math_cos_u8(s32, struct102 *);
 
 void func_15179D20(struct102 *arg0) {
     f32 sp24;
@@ -309,16 +309,16 @@ void func_15179D20(struct102 *arg0) {
     temp_v1 = (*(u16 *)((u8 *)arg0 + 0xAE));
     (*(s8 *)((u8 *)arg0 + 0xB4)) = (s8) var_a2;
     sp1C = (s32) temp_v1;
-    var_v1 = (s32) ((f32) (temp_v1 + ((u32) (D_800DD863 * 0x10 * ((func_150ADA20() & 0xFF) + 0x80)) >> 9)) * 0.88889f);
+    var_v1 = (s32) ((f32) (temp_v1 + ((u32) (D_800DD863 * 0x10 * ((random_int() & 0xFF) + 0x80)) >> 9)) * 0.88889f);
     if (var_v1 >= 0x3201) {
         var_v1 = 0x3200;
     }
     (*(u16 *)((u8 *)arg0 + 0xAE)) = (u16) var_v1;
     sp24 = (f32) ((*(u8 *)((u8 *)arg0 + 0xB1)) * D_800BE9E4);
-    (*(s16 *)((u8 *)arg0 + 0x9C)) = (s16) (s32) ((f32) (*(s16 *)((u8 *)arg0 + 0x9C)) + (sp24 * func_15048A40(((s32) (*(u16 *)((u8 *)arg0 + 0xAE)) >> 8) & 0xFF)));
+    (*(s16 *)((u8 *)arg0 + 0x9C)) = (s16) (s32) ((f32) (*(s16 *)((u8 *)arg0 + 0x9C)) + (sp24 * math_sin_u8(((s32) (*(u16 *)((u8 *)arg0 + 0xAE)) >> 8) & 0xFF)));
     temp_v1_2 = (*(s16 *)((u8 *)arg0 + 0x9C));
     var_a3 = 0;
-    (*(s16 *)((u8 *)arg0 + 0x9E)) = (s16) (s32) ((f32) (*(s16 *)((u8 *)arg0 + 0x9E)) - (sp24 * func_150489B0(((s32) (*(u16 *)((u8 *)arg0 + 0xAE)) >> 8) & 0xFF, arg0)));
+    (*(s16 *)((u8 *)arg0 + 0x9E)) = (s16) (s32) ((f32) (*(s16 *)((u8 *)arg0 + 0x9E)) - (sp24 * math_cos_u8(((s32) (*(u16 *)((u8 *)arg0 + 0xAE)) >> 8) & 0xFF, arg0)));
     if (temp_v1_2 < ((*(s16 *)((u8 *)D_800DD868 + 0)) - 0x1F4)) {
         (*(s16 *)((u8 *)arg0 + 0x9C)) = (s16) (((*(s16 *)((u8 *)D_800DD868 + 0)) * 0) + temp_v1_2 + 0x3E8);
         goto block_8;
@@ -405,11 +405,11 @@ int func_1517A028(void)
 
 #ifdef NON_MATCHING
 /* P125 */
-s32 func_1510FE58(s32 arg0, s32 arg1, s32 arg2, s32 *arg3);
-s32 func_150ADA20(void);
+s32 collision_level_nearest_height(s32 arg0, s32 arg1, s32 arg2, s32 *arg3);
+s32 random_int(void);
 
 /* rain_spawn_splashes: count times, picks a random point in the 500 x 500 square from the rain centre
- * D_800DD868 (s16 x +0, z +4), finds the ground height there (func_1510FE58 from height 10000; -10000 = no ground)
+ * D_800DD868 (s16 x +0, z +4), finds the ground height there (collision_level_nearest_height from height 10000; -10000 = no ground)
  * and spawns a splash sprite (texture 0x12, flags 0x9804, size 0x19, 0x80 at +0x8A) on it. The spawn record is one
  * stack struct (node_spawn_vtx_sprite copies 0xA8 bytes of it). */
 void func_1517A084(s32 count) {
@@ -424,9 +424,9 @@ void func_1517A084(s32 count) {
     cx = ((s16 *) D_800DD868)[0];
     cz = ((s16 *) D_800DD868)[2];
     for (i = 0; i < count; i++) {
-        x = func_150ADA20() % 500 + cx;
-        z = func_150ADA20() % 500 + cz;
-        y = func_1510FE58(x, 10000, z, NULL);
+        x = random_int() % 500 + cx;
+        z = random_int() % 500 + cz;
+        y = collision_level_nearest_height(x, 10000, z, NULL);
         if ((f32) y != -10000.0f) {
             sp.u80 = 0;
             sp.u8A = 0x80;

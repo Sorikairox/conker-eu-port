@@ -347,7 +347,7 @@ u8 *func_15172634(u8 *arg0, u8 *arg1, s32 arg2) {
 #ifdef NON_MATCHING
 extern f32 D_800A7524;
 extern f32 D_800A7530;
-s32 func_1510E908(s32, s32, f32 *, f32 *);
+s32 floor_triangle_slope(s32, s32, f32 *, f32 *);
 extern s32 D_800A73B0;
 extern s32 D_800A73C0;
 extern s32 D_800A73D0;
@@ -402,7 +402,7 @@ s32 func_15172B6C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s3
         var_v1 = 1;
     }
     sp48 = var_v1;
-    if (func_1510E908(arg1, 0, &sp.u64, &sp.u68) == 0) {
+    if (floor_triangle_slope(arg1, 0, &sp.u64, &sp.u68) == 0) {
         return 0;
     }
     temp_f18 = (f32) -sp48;
@@ -502,10 +502,10 @@ s32 func_15172B6C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s3
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19FA20/func_15172B6C.s")
 #endif
 #ifdef NON_MATCHING
-void func_1510EDAC(s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, u16, s32);
+void collision_find_floor_default_range(s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, u16, s32);
 s32 func_15172B6C(s32, s32, f32, f32, f32, f32, s32, s32);
 // sprite_place_on_floor: moves (x, z) by `dist` along the angle `angle` - 90 degrees (x += dist sin, z += dist cos of
-// angle - 90), looks up the floor under the new point (func_1510EDAC: floor object and height) and places the
+// angle - 90), looks up the floor under the new point (collision_find_floor_default_range: floor object and height) and places the
 // sprite there (func_15172B6C with the floor, x, the floor height, z, angle, arg6 and the low byte of arg7).
 // Returns func_15172B6C's result, 0 when there is no floor or the floor height is the "none" value -10000.
 s32 func_15173090(u8 *spr, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 arg6, s32 arg7) {
@@ -521,7 +521,7 @@ s32 func_15173090(u8 *spr, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 arg6, s
     s = sinf(a);
     x += (f32) dist * s;
     z += (f32) dist * c;
-    func_1510EDAC((s32) &floor, 0, (s32) &floorY, 0, (s32) &tri, 0, x, y, z, y, 0, 0);
+    collision_find_floor_default_range((s32) &floor, 0, (s32) &floorY, 0, (s32) &tri, 0, x, y, z, y, 0, 0);
     if (floor == 0) {
         return 0;
     }

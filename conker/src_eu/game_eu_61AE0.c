@@ -10,9 +10,9 @@ s16 *func_150346A0(s16 *arg0, s32 arg1);
 u8 *func_15034710(u8 *arg0, s32 arg1);
 s16 *func_15034790(s16 *arg0, s32 arg1);
 s16 *func_150BE938(s16 *arg0, s32 arg1);
-s16 *func_150D8AA0(s16 *arg0, s32 arg1);
+s16 *obj2b_write_msg(s16 *arg0, s32 arg1);
 u8 *func_150B5DD0(u8 *arg0, s32 arg1);
-s16 *func_150F20C8(s16 *arg0, s32 arg1);
+s16 *obj7b_joint_swing_entries(s16 *arg0, s32 arg1);
 u8 func_1503DD2C(s32 arg0, s32 arg1);
 s16 *func_15034B50(s16 *buf, u8 *obj, s32 a2, s32 a3);
 
@@ -35,10 +35,10 @@ void func_150342D0(s16 *buf, s32 arg1) {
         switch (((u8 *)obj)[4]) {
         case 0x21: p = func_150BE938(buf, arg1); break;
         case 0x28: case 0x77: p = func_15034790(buf, arg1); break;
-        case 0x2B: p = func_150D8AA0(buf, arg1); break;
+        case 0x2B: p = obj2b_write_msg(buf, arg1); break;
         case 0x4B: p = (s16 *)func_150B5DD0((u8 *)buf, arg1); break;
         case 0x5A: case 0x74: case 0x7A: case 0x8D: p = func_150346A0(buf, arg1); break;
-        case 0x7B: p = func_150F20C8(buf, arg1); break;
+        case 0x7B: p = obj7b_joint_swing_entries(buf, arg1); break;
         case 0x8A: p = (s16 *)func_15034710((u8 *)buf, arg1); break;
         case 0x98: p = func_15034630(buf, arg1); break;
         }
@@ -182,7 +182,7 @@ void func_1503482C(s32 arg0) {
 
 s32 func_150351A4(struct127 *, s32, s32);
 void func_15036600(s32, s32, s32, s32);
-void func_150F1F80(struct127 *);
+void obj7b_update_pulse_scale(struct127 *);
 
 void func_150348D4(s32 arg0) {
 
@@ -205,10 +205,10 @@ void func_150348D4(s32 arg0) {
             func_150351A4(&D_800CC2D0[arg0], 0xA, 0xB);
             return;
         case 0x7B:
-            func_150F1F80(&D_800CC2D0[arg0]);
+            obj7b_update_pulse_scale(&D_800CC2D0[arg0]);
             return;
         case 0x60:
-            func_150E0324(&D_800CC2D0[arg0]);
+            obj_pin_root_height(&D_800CC2D0[arg0]);
             break;
         }
     }

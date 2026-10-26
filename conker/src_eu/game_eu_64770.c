@@ -490,7 +490,7 @@ void func_15037CCC(f32 *out, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32 mo
                     pt[1] = *(f32 *) (other + 0x18);
                     pt[2] = *(f32 *) (other + 0x1C);
                 } else {
-                    func_15043FF0((vertex *) pt, (struct113 *) mtx);
+                    vec_from_fixed_pos((vertex *) pt, (struct113 *) mtx);
                 }
                 if (func_15037988(id, j1, j2, pt[0], pt[1], pt[2], out, lim, 0, mode) != 0) {
                     return;
@@ -735,7 +735,7 @@ extern f32 D_80098550[][4];  /* per limit set: yaw / pitch follow factors, yaw /
 s32 func_15021E60(f32 *, f32 *, f32 *, f32 *, s32, s32);
 void func_15038758(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5);
 void func_1503A1C0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7);
-void func_150A8050(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
+void mtxf_rotate_xyz_deg(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
 void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 void func_15049F30(f32 q1[4], f32 q2[4]);
 void func_15049FA8(f32 mtx[4][4], f32 arg1[4]);
@@ -1042,20 +1042,20 @@ void func_15038910(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s32 
     b = lt->pitchOfs[slot] + pitch;
     switch (axis) {
         case 0:
-            func_150A8050(rot1, 0.0f, 0.0f, roll);
-            func_150A8050(rot2, -b, a, 0.0f);
+            mtxf_rotate_xyz_deg(rot1, 0.0f, 0.0f, roll);
+            mtxf_rotate_xyz_deg(rot2, -b, a, 0.0f);
             break;
         case 1:
-            func_150A8050(rot1, 0.0f, 0.0f, b);
-            func_150A8050(rot2, roll, a, 0.0f);
+            mtxf_rotate_xyz_deg(rot1, 0.0f, 0.0f, b);
+            mtxf_rotate_xyz_deg(rot2, roll, a, 0.0f);
             break;
         case 2:
-            func_150A8050(rot1, 0.0f, 0.0f, -b);
-            func_150A8050(rot2, roll, a, 0.0f);
+            mtxf_rotate_xyz_deg(rot1, 0.0f, 0.0f, -b);
+            mtxf_rotate_xyz_deg(rot2, roll, a, 0.0f);
             break;
         case 3:
-            func_150A8050(rot1, 0.0f, 0.0f, -b);
-            func_150A8050(rot2, -a, roll, 0.0f);
+            mtxf_rotate_xyz_deg(rot1, 0.0f, 0.0f, -b);
+            mtxf_rotate_xyz_deg(rot2, -a, roll, 0.0f);
             break;
     }
     func_150A7A48(rot1, rot2, rot);
@@ -1525,7 +1525,7 @@ void func_1503A968(void) {
     union {
         f32 f;
         s32 bits;
-    } sx, sy, sz; /* functions.h declares func_150A7CB0 (scale matrix) with s32 arguments: f32 bit patterns */
+    } sx, sy, sz; /* functions.h declares mtxf_scale (scale matrix) with s32 arguments: f32 bit patterns */
 
     if (obj->id != 0x22) {
         return;
@@ -1549,7 +1549,7 @@ void func_1503A968(void) {
     pos[1] = m[3][1];
     pos[2] = m[3][2];
     guMtxIdentF(tmp);
-    func_150A7CB0(tmp, sx.bits, sy.bits, sz.bits);
+    mtxf_scale(tmp, sx.bits, sy.bits, sz.bits);
     func_150A7A48(m, tmp, out);
     bcopy(out, m, 0x40);
     m[3][0] = pos[0];
@@ -1588,7 +1588,7 @@ extern u8 D_800C43FC;       /* one-shot: use D_800C4400 / D_800C4404 as the angl
 extern f32 D_800C4400;
 extern f32 D_800C4404;
 s32 func_150220CC(f32 *, f32 *, s32, s32);
-f32 func_150489B0(u8);
+f32 math_cos_u8(u8);
 u8 *func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
 
 /* move *cur toward target by at most step */
@@ -1723,19 +1723,19 @@ void func_1503AB20(struct127 *obj) {
                 LOOK_PHASE(obj) = (b << 8) | a;
                 k = (LOOK_TIMER(obj) < 30) ? LOOK_TIMER(obj) / 30.0f : 1.0f;
                 k = 11.0f * k;
-                s = func_15048A40(a & 0xFF);
-                c = func_150489B0(a & 0xFF);
+                s = math_sin_u8(a & 0xFF);
+                c = math_cos_u8(a & 0xFF);
                 LOOK_OFS(obj, 0) = s * k;
                 LOOK_OFS(obj, 1) = c * k;
-                s = func_15048A40(b & 0xFF);
-                c = func_150489B0(b & 0xFF);
+                s = math_sin_u8(b & 0xFF);
+                c = math_cos_u8(b & 0xFF);
                 LOOK_OFS(obj, 2) = s * k;
                 LOOK_OFS(obj, 3) = c * k;
                 break;
             case 1:
                 if (LOOK_PHASE(obj) == 0) {
                     LOOK_PHASE(obj) = 1;
-                    LOOK_OFS(obj, 3) += (u32) func_150ADA20() % 20;
+                    LOOK_OFS(obj, 3) += (u32) random_int() % 20;
                 }
                 n = (LOOK_TIMER(obj) < 0xAE) ? LOOK_TIMER(obj) / 6 + 1 : 30;
                 LOOK_OFS(obj, 0) = 0;
@@ -1754,7 +1754,7 @@ void func_1503AB20(struct127 *obj) {
                 if (sub != NULL) {
                     mtxs = *(u8 **) (sub + 0x48);
                     if (mtxs != NULL && ((s32 *) (mtxs + 0x3E8))[D_800BE9C0] != 0) {
-                        func_15043FF0((vertex *) D_800C4408,
+                        vec_from_fixed_pos((vertex *) D_800C4408,
                                       (struct113 *) (((s32 *) (mtxs + 0x3E8))[D_800BE9C0] + 0x80));
                         aimAllowed = FALSE;
                     }

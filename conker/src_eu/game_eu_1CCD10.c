@@ -361,7 +361,7 @@ block_17:
 #endif
 #ifdef NON_MATCHING
 /* P191 */
-s32 func_150ADA20(void); /* also in functions.h: declared again so difftest knows its arity (the asm leaves rec + 0x10 in a1) */
+s32 random_int(void); /* also in functions.h: declared again so difftest knows its arity (the asm leaves rec + 0x10 in a1) */
 /* footprint trail point (0x24 bytes, ring of t[0x25] points at t +0x94; head t +0x2E, tail +0x2D, count +0x2C) */
 typedef struct {
     f32 x;        /* 0x00 */
@@ -510,7 +510,7 @@ s32 func_1519FD60(u8 *t) {
         q->u14 = 0xFF;
         q->hold = *(s16 *) (rec + 0x32);
         q->u16 = *(s16 *) (rec + 0x28);
-        r = func_150ADA20();
+        r = random_int();
         *(s16 *) (rec + 0x28) = *(s16 *) (rec + 0x28) + rec[0x44] + (u32) r % (u32) (rec[0x45] + 1);
         q->x = q->x + q->vx * phase;
         q->z = q->z + q->vz * phase;

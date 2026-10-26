@@ -12,7 +12,7 @@
 // (+0x197), the heading +0x7A / +0x76 follows the part's yaw (+0x16C degrees, * 65536 / 360), +0x2E4 = its pitch
 // (+0x170, above 180 minus 360) * 10, +0x2E8 = 1 and +0x66 bit 0x20 is set. It does not read a controller.
 // Then the physics (func_15052590) and the hit states: +0x232 == state 2 -> func_15052F9C(o, 100, kind, 4, 0,
-// state 3, 0, 0, 0, 0); +0x232 == state 1 -> unless func_15072208(o, 0) finds something, the first player slot
+// state 3, 0, 0, 0, 0); +0x232 == state 1 -> unless obj_find_child_nth(o, 0) finds something, the first player slot
 // (< 25) of D_800CC268 & ~D_800D18A0 that has a pad (+0x127 != 0xFF), +0x65 == 0, +0x13C == 0 and a part with
 // +0x19B / +0x197 / +0x1AC == 0 and s16 +0x46 <= 0 becomes +0x124, gets func_1505327C(o, 44, 3.2, state 2, kind),
 // part +0x24 = 500 and part +0x19E = 0.
@@ -71,7 +71,7 @@ void func_150BE050(u8 *o) {
     if (o[0x232] != state1 || !(~D_800D18A0 & D_800CC268)) {
         return;
     }
-    if (func_15072208((struct127 *) o, 0) != NULL) {
+    if (obj_find_child_nth((struct127 *) o, 0) != NULL) {
         return;
     }
     mask = ~D_800D18A0 & D_800CC268;

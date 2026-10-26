@@ -102,9 +102,9 @@ static void p58_mul4(const float *a, const float *b, float *r) {
     memcpy(r, t, sizeof t);
 }
 
-/* ?p58anim=K (diagnostic): the animation driver func_1505E0C4 (asm) is a stub, so record 0's animation state
+/* ?p58anim=K (diagnostic): the animation driver anim_start_entry (asm) is a stub, so record 0's animation state
  * (+0x2D0) never gets a header and the evaluator always decodes an empty animation (bind pose). With p58anim, before
- * each evaluation of record 0 the state is filled the way func_1505E0C4 fills a fresh state for animation K - 1 of
+ * each evaluation of record 0 the state is filled the way anim_start_entry fills a fresh state for animation K - 1 of
  * the object's bank (from tools/port/difftest/anim_inputs.py, P51): A+0x40 <- the header record dir[key] read raw
  * from the ROM ((size + 15) & ~15 bytes, dir = obj +0x58, key = D_800D1588[id][anim].key), A+0x28 <- the ROM address
  * of the key-frame stream dir[key + 1] (1 when A[0x45] = 0), A+8 = the frame time (advanced by p58speed / 10 per

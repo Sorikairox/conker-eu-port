@@ -30,7 +30,7 @@ typedef struct {
 } Puff7F90;
 
 extern s32 D_8008CE04;
-f32 func_150489B0(u8 arg0);
+f32 math_cos_u8(u8 arg0);
 #endif
 
 #ifdef NON_MATCHING
@@ -90,14 +90,14 @@ void func_15177F90(u8 count, u8 *pos, s32 arg2, s32 x, s32 y, s32 z, s32 arg6, s
     t.u34 = 0;
     t.span = span;
     for (i = 0; i < count; i++) {
-        a = func_150ADA20();
-        c = func_15048A40(a);
-        s = func_150489B0(a);
-        r = (f32) (func_150ADA20() & 0xFFFF) * 50.0f * (1.0f / 65536.0f);
+        a = random_int();
+        c = math_sin_u8(a);
+        s = math_cos_u8(a);
+        r = (f32) (random_int() & 0xFFFF) * 50.0f * (1.0f / 65536.0f);
         px = (f32) x + r * c;
         pz = (f32) z + r * s;
-        py = (u8) func_150ADA20() + y - 0x4E;
-        t.life = (func_150ADA20() & 7) + 7;
+        py = (u8) random_int() + y - 0x4E;
+        t.life = (random_int() & 7) + 7;
         t.u0C = 0;
         t.u0E = 0;
         t.pos[0] = px;
@@ -116,13 +116,13 @@ void func_15177F90(u8 count, u8 *pos, s32 arg2, s32 x, s32 y, s32 z, s32 arg6, s
 #endif
 
 #ifdef NON_MATCHING
-s32 func_150490A8(struct17 *arg0);
+s32 vec3_heading_u8(struct17 *arg0);
 float sqrtf(float);
 extern u8 *D_8008CDEC[];
 
 // bird_follow_update: steering of a flying follower sprite (leader *+0x14: position s32 +0x18 / +0x1C / +0x20, height
 // offset s16 +0x30, speed s16 +0x32; fast when the speed is above 0x3C0). Every 10 frames (2 when fast; counter in
-// the low nibble of +0x18, heading target in bits 4..11) it re-aims at the leader (func_150490A8 of leader - own
+// the low nibble of +0x18, heading target in bits 4..11) it re-aims at the leader (vec3_heading_u8 of leader - own
 // x / z position +0x20 / +0x24, plus a random -15..16). The heading +0x2A (0..0xFF) turns towards the target by
 // +0x3B (doubled when fast) the short way round; the velocity +0x26 / +0x28 = (cos, -sin)(heading) * leader speed.
 // The climb +0x32 is 100..227, negated when the leader is lower than own +0x22 - 50 - random 0..63; +0x30 is
@@ -174,8 +174,8 @@ void func_151787D8(u8 *obj) {
     rel.unk8 = pz - *(s16 *) (obj + 0x24);
     count = *(s32 *) (obj + 0x18) & 0xF;
     if (count == 0) {
-        target = func_150490A8(&rel);
-        target = target + (func_150ADA20() & 0x1F) - 0xF;
+        target = vec3_heading_u8(&rel);
+        target = target + (random_int() & 0x1F) - 0xF;
         count = fast ? 2 : 10;
     } else {
         target = (*(s32 *) (obj + 0x18) >> 4) & 0xFF;
@@ -201,13 +201,13 @@ void func_151787D8(u8 *obj) {
         heading -= 0x100;
     }
     speed = *(s16 *) (lead + 0x32);
-    v = (s32) (func_15048A40(heading & 0xFF) * speed);
-    s = func_150489B0(heading & 0xFF);
+    v = (s32) (math_sin_u8(heading & 0xFF) * speed);
+    s = math_cos_u8(heading & 0xFF);
     *(s16 *) (obj + 0x26) = v;
     *(s16 *) (obj + 0x2A) = heading;
     *(s16 *) (obj + 0x28) = (s32) (-s * speed);
-    climb = (func_150ADA20() & 0x7F) + 100;
-    if ((f32) (u32) (func_150ADA20() & 0x3F) + (py + 50.0f) < (f32) *(s16 *) (obj + 0x22)) {
+    climb = (random_int() & 0x7F) + 100;
+    if ((f32) (u32) (random_int() & 0x3F) + (py + 50.0f) < (f32) *(s16 *) (obj + 0x22)) {
         *(s16 *) (obj + 0x32) = -climb;
     } else {
         *(s16 *) (obj + 0x32) = climb;
@@ -218,8 +218,8 @@ void func_151787D8(u8 *obj) {
         *(s16 *) (obj + 0x30) = -0x400;
     }
     view = (u32) (*(f32 *) ((u8 *) D_800DBFF0 + 0x380) * 0.7111111f); /* D_800A75C0 = 256 / 360 */
-    c = func_15048A40(view);
-    s = func_150489B0(view);
+    c = math_sin_u8(view);
+    s = math_cos_u8(view);
     v = (s32) ((f32) *(s16 *) (obj + 0x26) * s - (f32) *(s16 *) (obj + 0x28) * c);
     if (v >= 0) {
         *(s16 *) (obj + 0x44) = 0;

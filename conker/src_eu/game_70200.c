@@ -4,8 +4,8 @@
 #include "variables.h"
 #include <stdarg.h>
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-Gfx *func_15043384(Gfx *arg0);
-void func_15042ECC(s32 fmtArg, s32 *args);
+Gfx *text_queue_draw(Gfx *arg0);
+void text_queue_vprintf(s32 fmtArg, s32 *args);
 u8 *allocate_memory(s32, s32, s32, s32);
 int func_151F0754(char *s, const char *fmt, ...);
 extern u8 D_800CC18C;
@@ -20,16 +20,19 @@ extern char D_80098F44[];
 #endif
 
 
-void func_15042D50(void) {
+/* was func_15042D50 */
+void text_queue_reset(void) {
     D_800CBD64 = 0;
-    func_15043384(0);
+    text_queue_draw(0);
 }
 
-void func_15042D78(u8 arg0) {
+/* was func_15042D78 */
+void text_set_flags(u8 arg0) {
     D_800CBD74 = arg0;
 }
 
-void func_15042D94(s32 arg0, s32 arg1, u8 arg2, s32 arg3, ...) {
+/* was func_15042D94 */
+void text_printf_at(s32 arg0, s32 arg1, u8 arg2, s32 arg3, ...) {
     va_list ap;
     s32 args[16];
     s32 i;
@@ -41,9 +44,10 @@ void func_15042D94(s32 arg0, s32 arg1, u8 arg2, s32 arg3, ...) {
     for (i = 0; i < 16; i++) {
         args[i] = va_arg(ap, s32);
     }
-    func_15042ECC(arg3, args);
+    text_queue_vprintf(arg3, args);
 }
-void func_15042E3C(s32 arg0, ...) {
+/* was func_15042E3C */
+void text_printf(s32 arg0, ...) {
     va_list ap;
     s32 args[16];
     s32 i;
@@ -52,14 +56,15 @@ void func_15042E3C(s32 arg0, ...) {
     for (i = 0; i < 16; i++) {
         args[i] = va_arg(ap, s32);
     }
-    func_15042ECC(arg0, args);
+    text_queue_vprintf(arg0, args);
 }
 #ifdef NON_MATCHING
-/* Text queue printf (used by func_15042D94 / func_15042E3C): one 0x5C node per line ('\n' splits) appended to the
+/* Text queue printf (used by text_printf_at / text_printf): one 0x5C node per line ('\n' splits) appended to the
  * D_800CBD64 list (tail D_800CC188), text at +0x1C. Conversions are copied to D_80086064 and handed to sprintf
  * (func_151F0754): d/x/X/s take an int word; f/F take a float pointer and use D_80086060 = "%s%s" + spec (two empty
  * strings). "#c" puts the next argument in +0xD (icon). Position/scale/colour come from the D_800CBD6x/7x state. */
-void func_15042ECC(s32 fmtArg, s32 *args) {
+/* was func_15042ECC */
+void text_queue_vprintf(s32 fmtArg, s32 *args) {
     u8 *fmt = (u8 *)fmtArg;
     s32 argi = 0;
     u8 *node;
@@ -173,25 +178,29 @@ void func_15042ECC(s32 fmtArg, s32 *args) {
     D_800CBD78 = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15042ECC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/text_queue_vprintf.s")
 #endif
-void func_150432BC(f32 arg0) {
+/* was func_150432BC */
+void text_set_scale(f32 arg0) {
     D_800CBD80 = arg0;
 }
 
-void func_150432CC(s32 arg0, s32 arg1) {
+/* was func_150432CC */
+void text_set_box(s32 arg0, s32 arg1) {
     D_800CBD74 = D_800CBD74 | 1;
     D_800CBD74 = D_800CBD74;
     D_800CBD7C = arg1;
     D_800CBD78 = arg0;
 }
 
-void func_150432FC(s16 arg0, s16 arg1) {
+/* was func_150432FC */
+void text_set_pos(s16 arg0, s16 arg1) {
     D_800CBD70 = arg0;
     D_800CBD72 = arg1;
 }
 
-void func_1504332C(u8 arg0, u8 arg1, u8 arg2, u8 arg3) {
+/* was func_1504332C */
+void text_set_color(u8 arg0, u8 arg1, u8 arg2, u8 arg3) {
     D_800CBD60 = arg0;
     D_800CBD61 = arg1;
     D_800CBD62 = arg2;
@@ -227,7 +236,8 @@ Gfx *func_15041A9C(Gfx *arg0, f32 arg1, f32 arg2, u8 *arg3, s32 arg4, s32 arg5, 
 Gfx *func_151EDBE8(Gfx *, void *, s32, s32, s32, s32, f32, s32);
 void func_10004074(s32);
 
-Gfx *func_15043384(Gfx *arg0) {
+/* was func_15043384 */
+Gfx *text_queue_draw(Gfx *arg0) {
     Gfx *gdl = arg0;
     u8 *item;
     u8 *next;
@@ -379,9 +389,10 @@ Gfx *func_15043384(Gfx *arg0) {
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15043384.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/text_queue_draw.s")
 #endif
-void func_15043A00(struct105 *arg0, s32 arg1, s32 arg2) {
+/* was func_15043A00 */
+void ring_buffer_init(struct105 *arg0, s32 arg1, s32 arg2) {
     if (arg0 != 0) {
         arg0->unk0 = arg1; // are these structs?
         arg0->unk4 = arg2;
@@ -391,7 +402,8 @@ void func_15043A00(struct105 *arg0, s32 arg1, s32 arg2) {
 }
 
 // something with memcpy
-s32 func_15043A20(u8 *buf, s32 size, s32 pos, u8 *src, s32 len) {
+/* was func_15043A20 */
+s32 ring_buffer_write_wrap(u8 *buf, s32 size, s32 pos, u8 *src, s32 len) {
     s32 n;
 
     while (len != 0) {
@@ -410,7 +422,8 @@ s32 func_15043A20(u8 *buf, s32 size, s32 pos, u8 *src, s32 len) {
     }
     return pos;
 }
-s32 func_15043AC8(u8 *buf, s32 size, s32 pos, u8 *dst, s32 len) {
+/* was func_15043AC8 */
+s32 ring_buffer_read_wrap(u8 *buf, s32 size, s32 pos, u8 *dst, s32 len) {
     s32 n;
 
     while (len != 0) {
@@ -430,7 +443,8 @@ s32 func_15043AC8(u8 *buf, s32 size, s32 pos, u8 *dst, s32 len) {
     return pos;
 }
 
-s32 func_15043B70(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_15043B70 */
+s32 ring_buffer_advance(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     s32 n;
 
     while (arg3 != 0) {
@@ -451,7 +465,8 @@ s32 func_15043B70(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 // text_queue_put: appends a record (u32 length padded to 4, then the bytes) to the ring buffer q (D_800427A0:
 // +0 buffer, +4 size, +8 read, +C write); returns 1 when it does not fit, else 0 (also for no data). The padded
 // length is copied from src too (up to 3 bytes past len, as on N64).
-s32 func_15043BB8(struct105 *q, u8 *src, s32 len) {
+/* was func_15043BB8 */
+s32 ring_buffer_put_record(struct105 *q, u8 *src, s32 len) {
     s32 total;
     s32 pos;
 
@@ -469,37 +484,38 @@ s32 func_15043BB8(struct105 *q, u8 *src, s32 len) {
             return 1;
         }
         len -= 4;
-        pos = func_15043A20((u8 *) q->unk0, q->unk4, q->unkC, (u8 *) &len, 4);
-        q->unkC = func_15043A20((u8 *) q->unk0, q->unk4, pos, src, len);
+        pos = ring_buffer_write_wrap((u8 *) q->unk0, q->unk4, q->unkC, (u8 *) &len, 4);
+        q->unkC = ring_buffer_write_wrap((u8 *) q->unk0, q->unk4, pos, src, len);
     }
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15043BB8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/ring_buffer_put_record.s")
 #endif
 
 #ifdef NON_MATCHING
-// text_queue_get: takes the next record from the ring buffer q (see func_15043BB8) into dst (at most max - 1 bytes
+// text_queue_get: takes the next record from the ring buffer q (see ring_buffer_put_record) into dst (at most max - 1 bytes
 // plus a 0 when it is longer; the rest is skipped); returns the record's length, 0 when the queue is empty.
-s32 func_15043CA4(struct105 *q, u8 *dst, s32 max) {
+/* was func_15043CA4 */
+s32 ring_buffer_get_record(struct105 *q, u8 *dst, s32 max) {
     s32 len = 0;
     s32 pos = q->unk8;
 
     if (pos == q->unkC) {
         return 0;
     }
-    pos = func_15043AC8((u8 *) q->unk0, q->unk4, pos, (u8 *) &len, 4);
+    pos = ring_buffer_read_wrap((u8 *) q->unk0, q->unk4, pos, (u8 *) &len, 4);
     if (max < len) {
         max--;
-        pos = func_15043AC8((u8 *) q->unk0, q->unk4, pos, dst, max);
+        pos = ring_buffer_read_wrap((u8 *) q->unk0, q->unk4, pos, dst, max);
         dst[max] = 0;
-        pos = func_15043B70(q->unk0, q->unk4, pos, len - max);
+        pos = ring_buffer_advance(q->unk0, q->unk4, pos, len - max);
     } else if (len != 0) {
-        pos = func_15043AC8((u8 *) q->unk0, q->unk4, pos, dst, len);
+        pos = ring_buffer_read_wrap((u8 *) q->unk0, q->unk4, pos, dst, len);
     }
     q->unk8 = pos;
     return len;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15043CA4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/ring_buffer_get_record.s")
 #endif

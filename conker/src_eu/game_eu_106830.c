@@ -3,13 +3,15 @@
 #include "variables.h"
 
 
-void func_150D9020(f32 *arg0, f32 *arg1) {
+/* was func_150D9020 */
+void trail_get_emit_point(f32 *arg0, f32 *arg1) {
     arg1[0] = arg0[5];
     arg1[1] = arg0[6] + 20.0f;
     arg1[2] = arg0[7];
 }
 
-void func_150D904C(s32 arg0, s32 arg1) {
+/* was func_150D904C */
+void trail_get_aim(s32 arg0, s32 arg1) {
     f32 sp34[3];
     f32 sp28[3];
 
@@ -23,10 +25,11 @@ void func_1000D96C(s32 arg0, s32 arg1, s32 arg2);
 
 // obj_spawn_effect50_with_sound: for an object with a character record (+0x31C), starts a sound 0x1B6 / 0x1B7
 // (random, func_10010F88; 1500 or, outside level 0x34, 5000 frames) and an effect record of kind 0x50
-// (func_15147FF0, 300 frames) at the object's position + 20 in y (func_150D9020); its 0x50-byte data (rec + 0x98)
-// holds the object, its id, the position (twice), the aim of func_150D904C, the sound handle and a flag byte (bit 0
+// (func_15147FF0, 300 frames) at the object's position + 20 in y (trail_get_emit_point); its 0x50-byte data (rec + 0x98)
+// holds the object, its id, the position (twice), the aim of trail_get_aim, the sound handle and a flag byte (bit 0
 // cleared when the character record's +0x84 is set). In level 10 a func_1000D96C(10, 0x37, 0) cue comes first.
-void func_150D9098(u8 *obj) {
+/* was func_150D9098 */
+void obj_spawn_effect50_with_sound(u8 *obj) {
     struct {
         u8 *obj;        // 0x00 (sp58)
         u8 id;          // 0x04
@@ -61,7 +64,7 @@ void func_150D9098(u8 *obj) {
     if (D_800BE9F0 == 10) {
         func_1000D96C(10, 0x37, 0);
     }
-    func_150D9020((f32 *) obj, spec.pos);
+    trail_get_emit_point((f32 *) obj, spec.pos);
     data.flags = 1;
     data.u4D = 0;
     data.obj = obj;
@@ -72,7 +75,7 @@ void func_150D9098(u8 *obj) {
     data.pos1[0] = spec.pos[0];
     data.pos1[1] = spec.pos[1];
     data.pos1[2] = spec.pos[2];
-    func_150D904C((s32) obj, (s32) data.aim);
+    trail_get_aim((s32) obj, (s32) data.aim);
     data.u3C = D_800A0F18;
     if (D_800BE9F0 == 0x34) {
         data.sound = func_10010F88(0x1B6 + func_151EFDD0() % 2, 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 1500);
@@ -100,13 +103,14 @@ void func_150D9098(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/func_150D9098.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/obj_spawn_effect50_with_sound.s")
 #endif
 
 extern f32 D_800A0F1C;
 extern f32 D_800A0F20;
 
-void func_150D9304(f32 *arg0, f32 *arg1, f32 arg2) {
+/* was func_150D9304 */
+void trail_point_integrate(f32 *arg0, f32 *arg1, f32 arg2) {
     vertex sp4 = *(vertex *)arg1;
 
     arg1[1] += D_800A0F1C * arg2;
@@ -115,7 +119,8 @@ void func_150D9304(f32 *arg0, f32 *arg1, f32 arg2) {
     arg0[2] += sp4.z * arg2;
 }
 
-void func_150D939C(u8 *arg0) {
+/* was func_150D939C */
+void trail_stop_emitting(u8 *arg0) {
     arg0[0x30] = 0;
     *(u16 *)(arg0 + 0x1E) &= ~2;
     *(u16 *)(arg0 + 0x1E) |= 8;
@@ -125,13 +130,14 @@ void func_150D939C(u8 *arg0) {
 
 #ifdef NON_MATCHING
 // path_points_catch_up: P250. Handler (s32 (u8 *), function table at ELF file offset 0x24A5D8, next to
-// func_150D952C) of an object that walks a ring of 0x24-byte points (+0x94; +0x25 = point count, +0x2E = last
+// trail_emit_update) of an object that walks a ring of 0x24-byte points (+0x94; +0x25 = point count, +0x2E = last
 // processed point, +0x2D = current point, +0x2C = state). Returns 0 at once when the state is < 2 and flag 8 of +0x1E
 // is set. Otherwise every point from the last processed one back to the current one (walking backwards around the
-// ring) gets func_150D9304(point, point + 0xC, D_800BE9A4); +0x54..0x5C becomes the current point's position (zero
+// ring) gets trail_point_integrate(point, point + 0xC, D_800BE9A4); +0x54..0x5C becomes the current point's position (zero
 // in state <= 0). The timer +0x4D of the record at +0x98 advances by D_800BE9E4; past 50 it restarts and the
 // record's owner (+0) part +0x31C gets its counter +0x1AA bumped. Returns 1.
-s32 func_150D93CC(u8 *p) {
+/* was func_150D93CC */
+s32 path_points_catch_up(u8 *p) {
     u8 *pts = *(u8 **) (p + 0x94);
     u8 *rec = *(u8 **) (p + 0x98);
     s32 i;
@@ -146,7 +152,7 @@ s32 func_150D93CC(u8 *p) {
             if (i < 0) {
                 i = p[0x25] - 1;
             }
-            func_150D9304((f32 *) (pts + i * 0x24), (f32 *) (pts + i * 0x24 + 0xC), D_800BE9A4);
+            trail_point_integrate((f32 *) (pts + i * 0x24), (f32 *) (pts + i * 0x24 + 0xC), D_800BE9A4);
         } while (i != *(s8 *) (p + 0x2D));
     }
     if (*(s8 *) (p + 0x2C) > 0) {
@@ -173,7 +179,7 @@ s32 func_150D93CC(u8 *p) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/func_150D93CC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/path_points_catch_up.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -181,7 +187,8 @@ extern f32 D_800A0F24;
 extern f32 D_800A0F28;
 extern f32 D_800A0F2C;
 extern f32 D_800A0F34;
-s32 func_150D952C(u8 *arg0) {
+/* was func_150D952C */
+s32 trail_emit_update(u8 *arg0) {
     struct {
         f32 uAC;
         f32 uB0;
@@ -235,13 +242,13 @@ s32 func_150D952C(u8 *arg0) {
     temp_s5 = (*(s32 *)((u8 *)arg0 + 0x94));
     temp_s2 = (*(f32 **)((u8 *)temp_s1 + 0));
     if (((*(u8 *)((u8 *)((*(u8 **)((u8 *)temp_s2 + 0x31C))) + 0x78)) != 3) || ((s32) (*(u8 *)((u8 *)temp_s2 + 0x1CA)) <= 0)) {
-        func_150D939C(arg0);
+        trail_stop_emitting(arg0);
     }
     if (((*(s32 *)((u8 *)temp_s2 + 0)) == 0) || ((*(u8 *)((u8 *)temp_s1 + 4)) != (*(u8 *)((u8 *)temp_s2 + 0x3B)))) {
         return 0;
     }
-    func_150D9020(temp_s2, &sp.uF8);
-    func_150D904C((s32) temp_s2, (s32) &sp.uEC);
+    trail_get_emit_point(temp_s2, &sp.uF8);
+    trail_get_aim((s32) temp_s2, (s32) &sp.uEC);
     temp_v1 = temp_s1 + 0x20;
     (*(f32 *)((u8 *)arg0 + 0x10)) = (f32) (*(f32 *)((u8 *)(&sp.uF8) + 0));
     (*(s32 *)((u8 *)arg0 + 0x14)) = (s32) (*(s32 *)((u8 *)(&sp.uF8) + 4));
@@ -306,7 +313,7 @@ block_11:
             sp70 = var_f14;
             sp74 = var_f12;
             sp78 = var_f2;
-            func_150D9304(temp_a0, ((f32 *)((u8 *)temp_a0 + 0xC)), var_f20);
+            trail_point_integrate(temp_a0, ((f32 *)((u8 *)temp_a0 + 0xC)), var_f20);
             (*(s8 *)((u8 *)arg0 + 0x2E)) = (s8) ((*(s8 *)((u8 *)arg0 + 0x2E)) + 1);
             var_f20 -= var_f16;
             if ((*(u8 *)((u8 *)arg0 + 0x25)) == (*(s8 *)((u8 *)arg0 + 0x2E))) {
@@ -340,7 +347,7 @@ block_11:
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/func_150D952C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/trail_emit_update.s")
 #endif
 #ifdef NON_MATCHING
 typedef struct {
@@ -361,10 +368,10 @@ typedef struct {
 f32 sqrtf(f32);
 f32 func_15143E64(f32 *);
 s32 func_15081A90(u8 *, f32, f32, f32, f32, f32, f32, TrailHit *, f32, s32, s32, s32, s32, s32, s32);
-void func_150DABFC(u8 *, TrailHit *, f32 *);
-void func_1505A250(f32, f32, f32, f32 *, f32 *);
+void trail_hit_effects(u8 *, TrailHit *, f32 *);
+void move_xz_towards(f32, f32, f32, f32 *, f32 *);
 f32 func_150484A0(f32, f32);
-s32 func_1505D024(u8 *, s32, u16, s32);
+s32 obj_send_hit(u8 *, s32, u16, s32);
 f32 func_15144528(f32, f32, f32);
 extern f32 D_800BE9A4;
 static const f32 trail_max_len[1] = { 1195.0f };       /* D_800A0F38 */
@@ -385,13 +392,14 @@ static const f32 trail_fade[1] = { 0.80200005f };      /* D_800A0F6C */
 // head obj+0x2E; data = obj+0x98: owner object +0x00, sound +0x30, texture scroll +0x38). Walking from the newest point
 // (or the live position obj+0x10 when obj+0x1E bit 1 is set) to the tail it measures each segment (func_15143E64)
 // and cuts the trail at 1195 units (shortens the segment and drops the older points). Every segment is ray-cast
-// (func_15081A90, owner skipped): on a hit, func_150DABFC spawns the impact effects; an object hit (count >= 2) is
-// flagged (+0x2EC) and, by kind (+0x4), stunned (0x3A: state 10), pushed (0x10: func_1505A250 along the hit / trail
-// direction, state 0xF), set to state 3 (0x91) / 0x2C (0x90) or damaged (func_1505D024 0xE0036 with the trail's
+// (func_15081A90, owner skipped): on a hit, trail_hit_effects spawns the impact effects; an object hit (count >= 2) is
+// flagged (+0x2EC) and, by kind (+0x4), stunned (0x3A: state 10), pushed (0x10: move_xz_towards along the hit / trail
+// direction, state 0xF), set to state 3 (0x91) / 0x2C (0x90) or damaged (obj_send_hit 0xE0036 with the trail's
 // heading); the trail then ends at the hit point and the sound (data+0x30) plays there (func_1000F91C). Finally it
 // scrolls the texture (data+0x38, -395 / s, wrapped to +-16383 by func_15144528), gives each point its s, and fades
 // the oldest 80.2% of the length out (alpha 155 -> 0). Returns 1.
-s32 func_150D99AC(u8 *obj) {
+/* was func_150D99AC */
+s32 trail_stream_update(u8 *obj) {
     u8 *data = *(u8 **)(obj + 0x98);
     u8 *pts = *(u8 **)(obj + 0x94);
     u8 *owner = *(u8 **)data;
@@ -467,7 +475,7 @@ s32 func_150D99AC(u8 *obj) {
                 func_15081A90(owner, *(f32 *)(cur + 0), *(f32 *)(cur + 4), *(f32 *)(cur + 8), unit[0], unit[1],
                               unit[2], &hit, len, 0, 0, 1, -1, 0, 0);
                 if (hit.count != 0) {
-                    func_150DABFC(obj, &hit, unit);
+                    trail_hit_effects(obj, &hit, unit);
                     hobj = hit.obj;
                     if (hit.count >= 2) {
                         *(s32 *)(hobj + 0x2EC) = 1;
@@ -475,7 +483,7 @@ s32 func_150D99AC(u8 *obj) {
                             *(u8 *)(hobj + 0x232) = 10;
                             *(s32 *)(hobj + 0x218) = 0;
                         } else if (*(u8 *)(hobj + 4) == 0x10 && *(u8 *)(hobj + 0x251) == 1) {
-                            func_1505A250(*(f32 *)(hobj + 0x14) - hit.pos[0], *(f32 *)(hobj + 0x1C) - hit.pos[2],
+                            move_xz_towards(*(f32 *)(hobj + 0x14) - hit.pos[0], *(f32 *)(hobj + 0x1C) - hit.pos[2],
                                           (1.0f - (total - 50.0f) * trail_push_k[0]) * trail_push_a[0] + trail_push_b[0],
                                           (f32 *)(hobj + 0x164), (f32 *)(hobj + 0x168));
                             if (*(u8 *)(hobj + 0x232) == 0xF) {
@@ -487,7 +495,7 @@ s32 func_150D99AC(u8 *obj) {
                             if (*(u8 *)(hobj + 0x232) == 0x10) {
                                 *(f32 *)(hobj + 0x3C) *= trail_slow[0];
                                 s = 1.0f / (sqrtf(dx * dx + dz * dz) * trail_dir_k[0]);
-                                func_1505A250(dx * s, dz * s, 0.7f, (f32 *)(hobj + 0x164), (f32 *)(hobj + 0x168));
+                                move_xz_towards(dx * s, dz * s, 0.7f, (f32 *)(hobj + 0x164), (f32 *)(hobj + 0x168));
                             }
                             if (*(u8 *)(hobj + 0x125) == 0) {
                                 *(u8 *)(hobj + 0x232) = 0xF;
@@ -503,7 +511,7 @@ s32 func_150D99AC(u8 *obj) {
                             s32 slot = (owner - (u8 *)D_800CC2D0) / 0x32C;
                             u32 ang = func_150484A0(unit[0], unit[2]) * trail_ang_k[0];
 
-                            func_1505D024(hobj, 0xE0036, (u16)((ang - 0x4000) | 1), slot);
+                            obj_send_hit(hobj, 0xE0036, (u16)((ang - 0x4000) | 1), slot);
                         }
                     }
                     /* the trail ends at the hit point */
@@ -577,7 +585,7 @@ s32 func_150D99AC(u8 *obj) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/func_150D99AC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/trail_stream_update.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -598,7 +606,8 @@ extern s32 D_800D30BC;
 // 4 units along (a - b) x (P - camera), 4 vertices (tc t 0x400 / 0, white, the alpha of b) and two triangles. When s
 // drops along a segment (texture wrap), the last two vertices are copied for the next quad and the drawn ones get
 // s - 0x8000. Vertices come from func_151D6310 (count * 32 + 0xA0 bytes); returns the advanced display list.
-Gfx *func_150DA1FC(u8 *obj, Gfx *gfx, s16 id) {
+/* was func_150DA1FC */
+Gfx *trail_draw_ribbon(u8 *obj, Gfx *gfx, s16 id) {
     u8 *pts = *(u8 **)(obj + 0x94);  /* 0x24-byte trail points */
     u8 *data = *(u8 **)(obj + 0x98);
     u8 *pb;
@@ -765,10 +774,11 @@ Gfx *func_150DA1FC(u8 *obj, Gfx *gfx, s16 id) {
     return gfx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/func_150DA1FC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/trail_draw_ribbon.s")
 #endif
 
-void func_150DAA04(u8 *arg0) {
+/* was func_150DAA04 */
+void trail_stop_sound(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);
     u16 temp_a1 = *(u16 *)(temp_v0 + 0x30);
 
@@ -777,17 +787,20 @@ void func_150DAA04(u8 *arg0) {
     }
 }
 
-void func_150DAA34(s32 arg0) {
-    func_150DAA04(arg0);
+/* was func_150DAA34 */
+void trail_free(s32 arg0) {
+    trail_stop_sound(arg0);
     func_15147E64(arg0);
 }
 
-void func_150DAA60(s32 arg0) {
-    func_150DAA04(arg0);
+/* was func_150DAA60 */
+void trail_free_alt(s32 arg0) {
+    trail_stop_sound(arg0);
     func_15147E98(arg0);
 }
 
-void func_150DAA8C(struct102 *arg0, u8 *arg1, u8 arg2) {
+/* was func_150DAA8C */
+void trail_handle_msg(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = *(u8 **)((u8 *)arg0 + 0x98);
     if (arg2 == 0x44) {
         if ((u16)(*(s32 *)v == *(s32 *)arg1 || v[4] == arg1[4])) { // fakematch: permuter artifact (u16 cast of the condition)
@@ -810,7 +823,8 @@ dummy_label: ; // fakematch: permuter artifact (unused label)
     }
 }
 
-void func_150DAB6C(u8 *arg0, f32 arg1) {
+/* was func_150DAB6C */
+void trail_send_aim_msg(u8 *arg0, f32 arg1) {
     struct {
         u8 *unk0;
         u8 unk4;
@@ -830,7 +844,8 @@ void func_15131EC8(s32, f32, u8 *); /* P95: f32 (float bits were passed as an in
 void func_15131EC8(s32, s32, u8 *);
 #endif
 
-s32 func_150DABA8(s32 arg0, s32 arg1) {
+/* was func_150DABA8 */
+s32 particle_move_step(s32 arg0, s32 arg1) {
     u8 *sp20;
     u8 *temp_a2;
 
@@ -861,13 +876,14 @@ static const f32 hitfx_dust_q30[1] = { 0.2f };            /* D_800A0FA4 */
 static const f32 hitfx_smoke_rate[1] = { 0.2f };          /* D_800A0FA8 */
 static const f32 hitfx_smoke_rand[1] = { 0.104f };        /* D_800A0FAC */
 
-// trail_hit_effects: impact effects of a trail segment hit (func_150D99AC), with emission accumulators in the trail
+// trail_hit_effects: impact effects of a trail segment hit (trail_stream_update), with emission accumulators in the trail
 // data (obj+0x98: +0x40 smoke, +0x44 dust, +0x48 sparks; one emission per whole unit). A hit on a character (count
 // >= 2, kind 0x33 / 0x3A) emits spark particles (func_151307F0 with a 0x66-byte spec at the hit point, random size,
 // life, flip bits 0x80 / 0x40 and alpha; the 16-byte random tail goes to particle+0xA8). Any other hit emits debris
 // (func_1515423C, pushed back along -dir, for objects; func_151541F4 with the surface record hit+0x44 for the world)
 // from a func_150475B0 frame. A world hit (count 1) also puffs smoke (impact_debris_spawn kind 3).
-void func_150DABFC(u8 *obj, TrailHit *hit, f32 *dir) {
+/* was func_150DABFC */
+void trail_hit_effects(u8 *obj, TrailHit *hit, f32 *dir) {
     u8 *data = *(u8 **)(obj + 0x98);
     struct {
         u8 b[4];       /* 0x00 (sp140) */
@@ -930,7 +946,7 @@ void func_150DABFC(u8 *obj, TrailHit *hit, f32 *dir) {
         return;
     }
     if (hit->count >= 2 && (*(u8 *)(hit->obj + 4) == 0x33 || *(u8 *)(hit->obj + 4) == 0x3A)) {
-        *(f32 *)(data + 0x48) += (hitfx_spark_rate[0] + func_150ADA68() * hitfx_spark_rand[0]) * D_800BE9A4;
+        *(f32 *)(data + 0x48) += (hitfx_spark_rate[0] + random_float() * hitfx_spark_rand[0]) * D_800BE9A4;
         if (1.0f < *(f32 *)(data + 0x48)) {
             spark.u08 = 0x5103;
             spark.u22 = 0x2E;
@@ -966,20 +982,20 @@ void func_150DABFC(u8 *obj, TrailHit *hit, f32 *dir) {
             spark.acc[1] = ((f32 *)D_800A5860)[1];
             spark.acc[2] = ((f32 *)D_800A5860)[2];
             do {
-                tail.b[0] = func_150ADA20();
-                tail.b[1] = func_150ADA20();
-                tail.b[2] = (u32)func_150ADA20() % 5 + 4;
-                tail.b[3] = (u32)func_150ADA20() % 5 + 4;
-                tail.spin[0] = func_150ADA68() * 10.0f;
-                tail.spin[1] = func_150ADA68() * 10.0f;
-                spark.u54 = func_150ADA68() * hitfx_spark_life_k[0] + hitfx_spark_life[0];
+                tail.b[0] = random_int();
+                tail.b[1] = random_int();
+                tail.b[2] = (u32)random_int() % 5 + 4;
+                tail.b[3] = (u32)random_int() % 5 + 4;
+                tail.spin[0] = random_float() * 10.0f;
+                tail.spin[1] = random_float() * 10.0f;
+                spark.u54 = random_float() * hitfx_spark_life_k[0] + hitfx_spark_life[0];
                 spark.flags &= ~0xC0;
-                a = (func_150ADA20() & 1) ? 0x80 : 0;
-                b = (func_150ADA20() & 1) ? 0x40 : 0;
+                a = (random_int() & 1) ? 0x80 : 0;
+                b = (random_int() & 1) ? 0x40 : 0;
                 spark.flags |= b | a;
-                spark.col1[3] = (u32)func_150ADA20() % 101 + 100;
-                spark.u0A = (u32)func_150ADA20() % 11 + 70;
-                spark.size[1] = spark.size[0] = func_150ADA68() * 116.0f + 131.0f;
+                spark.col1[3] = (u32)random_int() % 101 + 100;
+                spark.u0A = (u32)random_int() % 11 + 70;
+                spark.size[1] = spark.size[0] = random_float() * 116.0f + 131.0f;
                 k = func_151307F0((s32)&spark, 1, 0, 16, *(u8 *)(obj + 0xC), *(u8 *)(obj + 1));
                 if (k != 0) {
                     memcpy((u8 *)k + 0xA8, &tail, 16);
@@ -989,7 +1005,7 @@ void func_150DABFC(u8 *obj, TrailHit *hit, f32 *dir) {
         }
     } else {
         f = hitfx_dust_rate[0];
-        *(f32 *)(data + 0x44) += (f + func_150ADA68() * f) * D_800BE9A4;
+        *(f32 *)(data + 0x44) += (f + random_float() * f) * D_800BE9A4;
         if (1.0f < *(f32 *)(data + 0x44)) {
             func_150475B0((f32 *)frame, hit);
             debris.pos[0] = hit->pos[0];
@@ -1048,12 +1064,12 @@ void func_150DABFC(u8 *obj, TrailHit *hit, f32 *dir) {
     }
 
     if (hit->count == 1) {
-        *(f32 *)(data + 0x40) += (hitfx_smoke_rate[0] + func_150ADA68() * hitfx_smoke_rand[0]) * D_800BE9A4;
+        *(f32 *)(data + 0x40) += (hitfx_smoke_rate[0] + random_float() * hitfx_smoke_rand[0]) * D_800BE9A4;
         if (1.0f < *(f32 *)(data + 0x40)) {
             do {
-                f = func_150ADA68();
-                r1 = func_150ADA20();
-                r2 = func_150ADA20();
+                f = random_float();
+                r1 = random_int();
+                r2 = random_int();
                 impact_debris_spawn(3, f * 30.0f + 15.0f, (u32)r1 % 101 + 100, (s32)&hit->surf, (struct17 *)hit->pos,
                               (u32)r2 % 81 + 60, 1, 1, 1, *(u8 *)(obj + 0xC), *(u8 *)(obj + 1));
                 *(f32 *)(data + 0x40) -= 1.0f;
@@ -1062,5 +1078,5 @@ void func_150DABFC(u8 *obj, TrailHit *hit, f32 *dir) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/func_150DABFC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/trail_hit_effects.s")
 #endif

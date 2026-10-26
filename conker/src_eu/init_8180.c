@@ -80,9 +80,9 @@ typedef struct {
 extern ALHeap D_8003E710;          /* the audio heap */
 extern u8 D_80044B20[];            /* its 0x3E000-byte arena */
 extern s32 D_8003E708;             /* the first bank of the instrument bank file */
-u8 *func_1502B020(s32 *arg0, s32 arg1, ...);
-s32 func_1502B8E0(s32 arg0, s32 arg1, s32 arg2, ...);
-s32 func_1502B9B4(s32 arg0, ...);
+u8 *asset_lookup_rom(s32 *arg0, s32 arg1, ...);
+s32 asset_load_into(s32 arg0, s32 arg1, s32 arg2, ...);
+s32 asset_get_size(s32 arg0, ...);
 void func_10008F90(AmSynConfig *c, s32 pri, AmConfig *arg2);
 void func_100046E4(u32 devAddr, u8 *dramAddr, u32 size);
 void func_10012934(ALBankFile *file, u8 *table, s32 arg2);
@@ -120,18 +120,18 @@ void func_10008180(void) {
     amc.frequency = 22020;
     amc.unk4 = 1;
     amc.unk8 = 0xBB0;
-    c.unk24 = (s32)func_1502B020(NULL, 2, 0x17, 2);
+    c.unk24 = (s32)asset_lookup_rom(NULL, 2, 0x17, 2);
     func_10008F90(&c, 12, &amc);
 
-    size = func_1502B9B4(2, 0x17, 0);
+    size = asset_get_size(2, 0x17, 0);
     bankFile = allocate_memory(size, 0xFF, 2, 0);
-    func_1502B8E0((s32)bankFile, size, 2, 0x17, 0);
-    ctlRom = func_1502B020(NULL, 2, 0x17, 1);
-    tblRom = func_1502B020(NULL, 2, 0x17, 2);
+    asset_load_into((s32)bankFile, size, 2, 0x17, 0);
+    ctlRom = asset_lookup_rom(NULL, 2, 0x17, 1);
+    tblRom = asset_lookup_rom(NULL, 2, 0x17, 2);
     func_10012934(bankFile, tblRom, (s32)ctlRom);
     D_8003E708 = (s32)bankFile->bankArray[0];
 
-    seqRom = func_1502B020(NULL, 2, 0x17, 3);
+    seqRom = asset_lookup_rom(NULL, 2, 0x17, 3);
     hdr = allocate_memory(0x10, 1, 2, 0);
     func_100046E4((u32)seqRom, (u8 *)hdr, 0x10);
     size = hdr->seqCount * 8 + 4;

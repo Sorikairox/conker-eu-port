@@ -15,7 +15,7 @@ extern u8 D_8009CF9C[];
  * `kind` (D_80087000[kind], D_8009CF9C[kind] entries of 10 bytes, same layout as func_1508154C: +0 bone, +2 radius,
  * +4 centre in bone space, bone matrices at +0x1D4) with each radius x +0x14C plus `grow` (x attacker scale). The
  * first sphere containing the point wins; unless the target's +0x125 is set the hit is reported to it with
- * func_1505D1C4(target position, `arg5`, the attacker's index in D_800CC2D0, 0, 0, 0). */
+ * attack_spawn_at_point(target position, `arg5`, the attacker's index in D_800CC2D0, 0, 0, 0). */
 s32 func_15081120(s32 arg0, u8 *target, s32 kind, f32 reach, f32 grow, s32 arg5) {
     u8 *att = (u8 *) arg0;
     u8 *type;
@@ -79,7 +79,7 @@ s32 func_15081120(s32 arg0, u8 *target, s32 kind, f32 reach, f32 grow, s32 arg5)
         radius = (f32) (u32) *(u16 *)(rec + 2) * *(f32 *)(target + 0x14C) + grow;
         if (!(radius * radius < dx * dx + dy * dy + dz * dz)) {
             if (target[0x125] == 0) {
-                func_1505D1C4(*(f32 *)(target + 0x14), *(f32 *)(target + 0x18), *(f32 *)(target + 0x1C), arg5,
+                attack_spawn_at_point(*(f32 *)(target + 0x14), *(f32 *)(target + 0x18), *(f32 *)(target + 0x1C), arg5,
                               (struct127 *) att - D_800CC2D0, 0, 0, 0);
             }
             return rec[0] + 1;

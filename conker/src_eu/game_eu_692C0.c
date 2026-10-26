@@ -9,7 +9,7 @@ void func_1503BAB0(u8 *arg0) {
     (*(u8 **)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x11C)) = allocate_memory(0x50, 1, 0, 0);
     bzero((*(u8 **)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x11C)), 0x50);
     (*(f32 *)((u8 *)((*(u8 **)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x11C))) + 0x44)) = 30.0f;
-    (*(s16 *)((u8 *)((*(u8 **)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x11C))) + 0x4C)) = (s16) (func_150ADA20() % 30U);
+    (*(s16 *)((u8 *)((*(u8 **)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x11C))) + 0x4C)) = (s16) (random_int() % 30U);
 }
 
 #ifdef NON_MATCHING
@@ -19,7 +19,7 @@ extern u16 D_80098B2E;
 extern u16 D_80098B30[88];
 
 /*
- * P70: object kind flags (called from func_150627D4 after it clears +0x2FB). Only for the active state 1:
+ * P70: object kind flags (called from obj_model_reset after it clears +0x2FB). Only for the active state 1:
  * an animation / model id +0x84 listed in D_80098BE0 (3 ids) sets bit 1 (2), one of D_80098B2C, D_80098B2E or the
  * 88 ids of D_80098B30 sets bit 0 (1). The first table wins.
  */
@@ -73,7 +73,7 @@ s32 func_1503BC4C(s32 arg0, u8 *arg1) {
 #ifdef NON_MATCHING
 f32 sinf(f32);
 f32 cosf(f32);
-f32 func_15048A70(f32, f32);
+f32 math_angle_diff_deg(f32, f32);
 f32 func_150484A0(f32, f32);
 f32 func_15048360(f32);
 extern u8 D_800BEE2C;
@@ -179,7 +179,7 @@ void func_1503BCAC(s32 arg0) {
         rec->phase = 0.0f;
         rec->sway = 0.0f;
         rec->swayAmp = 100.0f;
-        rec->timer = func_150ADA20() % 30U;
+        rec->timer = random_int() % 30U;
     }
 
     /* hidden: count down the fade-in instead */
@@ -251,7 +251,7 @@ void func_1503BCAC(s32 arg0) {
         if (a >= 360.0f) {
             a -= 360.0f;
         }
-        b = func_15048A70((f32) OBJ_U16(obj, 0x76) * 0.005493164f, a);
+        b = math_angle_diff_deg((f32) OBJ_U16(obj, 0x76) * 0.005493164f, a);
         if (fabsf(b) < 90.0f) {
             if (fabsf(b) < 0.5f) {
                 b = 0.0f;
@@ -335,9 +335,9 @@ void func_1503BCAC(s32 arg0) {
                 rec->timer -= D_800BE9E4;
                 if (rec->timer <= 0) {
                     rec->sway = 0.0f;
-                    rec->swayAmp = (f32) (u32) (func_150ADA20() % 100U);
-                    f = (f32) (u32) (func_150ADA20() % 10U + 10);
-                    if (func_150ADA20() & 1) {
+                    rec->swayAmp = (f32) (u32) (random_int() % 100U);
+                    f = (f32) (u32) (random_int() % 10U + 10);
+                    if (random_int() & 1) {
                         rec->swaySpeed = f;
                     } else {
                         rec->swaySpeed = -f;
@@ -365,7 +365,7 @@ void func_1503BCAC(s32 arg0) {
                                 rec->sway += 360.0f;
                             }
                         } else {
-                            rec->timer = func_150ADA20() % 200U;
+                            rec->timer = random_int() % 200U;
                         }
                     }
                 }
@@ -465,8 +465,8 @@ void func_1503BCAC(s32 arg0) {
 
 #ifdef NON_MATCHING
 void func_150A9B0C(f32 mtx[4][4], f32, f32, f32, f32, f32, f32);
-void func_150440A0(f32 mtx[4][4], f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy, f32 upz);
-void func_15043EC8(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 arg4, f32 arg5, f32 arg6);
+void mtxf_look_at(f32 mtx[4][4], f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy, f32 upz);
+void mtxf_scale_set_trans(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 arg4, f32 arg5, f32 arg6);
 
 /*
  * P70: tail joint matrices from the chain of func_1503BCAC (rec = the 0x50-byte tail record, points p[0..4]).
@@ -529,8 +529,8 @@ void func_1503CE88(s32 idx, s32 mode, f32 fade, u8 *rec) {
         if (ax == bx && az == bz) {
             ax += 1.0f; /* straight down: avoid a degenerate look-at */
         }
-        func_150440A0(joint, ax, ay, az, bx, by, bz, up[0], up[1], up[2]);
-        func_15043EC8(joint, obj->xz_scale, obj->y_scale, obj->xz_scale, ax, ay, az);
+        mtxf_look_at(joint, ax, ay, az, bx, by, bz, up[0], up[1], up[2]);
+        mtxf_scale_set_trans(joint, obj->xz_scale, obj->y_scale, obj->xz_scale, ax, ay, az);
     }
     if (mode != 2) {
         rec[0x4E] = 30;

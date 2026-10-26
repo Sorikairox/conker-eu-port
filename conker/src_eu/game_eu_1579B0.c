@@ -7,7 +7,7 @@
 f32 sinf(f32);
 f32 cosf(f32);
 f32 sqrtf(f32);
-void func_1510ED24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
+void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
 extern f32 D_80089900[];  /* per player: up / down speed */
 extern f32 D_80089910[];  /* per player: roll / strafe speed */
 extern f32 D_80089920[];  /* per player: pitch speed */
@@ -28,8 +28,9 @@ static const f32 freecam_far[1] = { -10000.0f };          /* D_800A3A2C */
 // height +0x2FC), A / B (0x8000 / 0x4000) pitch (D_80089920, +0x388 clamped to +-89.5 degrees), C-right / C-left
 // (2 / 1) strafe, or with Z (0x2000) roll (D_80089910, +0x5EC clamped to +-45). The speeds are capped (40 / 100 / 8).
 // The position +0x2F8..+0x300 moves along the yaw, the look-at point (+0x2A4 / +0x2BC) is 600 units ahead along yaw
-// and pitch; then the view is rebuilt with func_1510ED24 (far -10000).
-void func_1512A1A0(u8 *cam) {
+// and pitch; then the view is rebuilt with collision_find_floor (far -10000).
+/* was func_1512A1A0 */
+void camera_freecam_update(u8 *cam) {
     u8 *pad = *(u8 **)(cam + 0x36C);
     u16 buttons = *(u16 *)pad;
     u8 player = *(u8 *)(cam + 0x23D);
@@ -156,14 +157,15 @@ void func_1512A1A0(u8 *cam) {
     }
     *(f32 *)(cam + 0x380) = *(f32 *)(cam + 0x37C);
     *(f32 *)(cam + 0x39C) = *(f32 *)(cam + 0x3A0) = *(f32 *)(cam + 0x37C) * freecam_deg2rad[0];
-    func_1510ED24((s32)(cam + 0x644), (s32)(cam + 0x648), (s32)buf, (s32)(cam + 0x360), (s32)(cam + 0x640), 0,
+    collision_find_floor((s32)(cam + 0x644), (s32)(cam + 0x648), (s32)buf, (s32)(cam + 0x360), (s32)(cam + 0x640), 0,
                   *(f32 *)(cam + 0x2F8), *(f32 *)(cam + 0x2FC), *(f32 *)(cam + 0x300), *(f32 *)(cam + 0x2FC), 0, 0,
                   freecam_far[0], *(f32 *)(cam + 0x2FC));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1579B0/func_1512A1A0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1579B0/camera_freecam_update.s")
 #endif
 
-void func_1512A8D0(u8 *arg0) {
+/* was func_1512A8D0 */
+void camera_title_carousel_update(u8 *arg0) {
     func_151E73C8(arg0[0x23D], arg0);
 }

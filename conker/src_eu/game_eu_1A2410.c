@@ -61,15 +61,15 @@ void func_15174690(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
         var_f20 = temp_f20 - (10.0f * sinf(temp_f12));
         var_f22 = temp_f22 - (10.0f * cosf(temp_f12));
         if (arg1 != 0) {
-            temp_v0_2 = func_150ADA20();
+            temp_v0_2 = random_int();
             sp.u7C = temp_v0_2;
             var_f20 += (f32) (temp_v0_2 % arg1);
-            temp_v0_3 = func_150ADA20();
+            temp_v0_3 = random_int();
             sp.u7C = temp_v0_3;
             var_f22 += (f32) (temp_v0_3 % arg1);
         }
         if (arg3 != 0) {
-            arg2 += func_150ADA20() % (u32) arg3;
+            arg2 += random_int() % (u32) arg3;
         }
         sp.u44 = arg2;
         sp.u52 = (s16) (s32) sp.u84;

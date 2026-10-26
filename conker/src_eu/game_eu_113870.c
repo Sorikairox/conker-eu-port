@@ -5,8 +5,8 @@
 
 #ifdef NON_MATCHING
 /* P93: 28 arguments as the asm passes them (a0 = 0, a1..a3 = the first three floats in integer registers) */
-s32 func_150E2030(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
-void func_150E4A94(s32);
+s32 beam_effect_spawn(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
+void impact_scatter_ahead(s32);
 int func_151EFDD0(void);
 extern s32 D_80088DA4;
 extern s32 D_800D9E24;
@@ -15,7 +15,8 @@ extern s32 D_800D9E2C;
 extern s32 D_800D9E30;
 extern s32 D_800D9E34;
 
-void func_150E6060(void) {
+/* was func_150E6060 */
+void weather_lightning_storm_update(void) {
     f32 temp_f12;
     f32 temp_f14;
     f32 temp_f20;
@@ -65,7 +66,7 @@ void func_150E6060(void) {
         }
         temp_lo = (s32) (var_a0 + 0xA) / 10;
         var_s3 = var_a0 + 1;
-        func_150E4A94(var_a0);
+        impact_scatter_ahead(var_a0);
         var_s4 = 0;
         if (temp_lo > 0) {
             do {
@@ -93,7 +94,7 @@ void func_150E6060(void) {
                     temp_f2 = D_800DBFF0->unk2F8;
                     temp_f12 = D_800DBFF0->unk2FC;
                     temp_f14 = D_800DBFF0->unk300;
-                    func_150E2030(0, temp_f20 + temp_f2, var_f28 + temp_f12, temp_f22_2 + temp_f14, temp_f24 + temp_f2, var_f26 + temp_f12, (cosf(temp_f30) * 3000.0f) + temp_f14, 160.0f, 10.0f, 4.0f, 360.0f, 0xF, 0x43, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                    beam_effect_spawn(0, temp_f20 + temp_f2, var_f28 + temp_f12, temp_f22_2 + temp_f14, temp_f24 + temp_f2, var_f26 + temp_f12, (cosf(temp_f30) * 3000.0f) + temp_f14, 160.0f, 10.0f, 4.0f, 360.0f, 0xF, 0x43, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                 }
                 var_s4 += 1;
                 var_s3 -= 0xA;
@@ -102,5 +103,5 @@ void func_150E6060(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113870/func_150E6060.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113870/weather_lightning_storm_update.s")
 #endif

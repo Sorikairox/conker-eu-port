@@ -3,13 +3,14 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, ...);
+s32 event_dispatch(s32, s32, ...);
 #endif
 
 
-void func_150AE5B0(struct108 *arg0) {
+/* was func_150AE5B0 */
+void camera_update_event_modes(struct108 *arg0) {
     if ((D_800D2E4C->unk4 & 0x80) == 0) {
-        if (func_1509BE40(0, 0x2000, 0xBB) != -1) {
+        if (event_dispatch(0, 0x2000, 0xBB) != -1) {
             if (camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 8) != 0) {
                 arg0->unk84 |= 0x1000000;
                 camera_set_followed_obj(arg0, D_800CC335 - 1);
@@ -20,7 +21,7 @@ void func_150AE5B0(struct108 *arg0) {
     }
     arg0->unk84 &= -0x4001;
     if ((D_800D2E4C->unk1 & 4) == 0) {
-        if (func_1509BE40(1, 0x2000, 0x95, func_1509BE40(0, 0x2014, 0xB7) | 0x2000) != 0) {
+        if (event_dispatch(1, 0x2000, 0x95, event_dispatch(0, 0x2014, 0xB7) | 0x2000) != 0) {
             arg0->unk84 |= 0x1000000;
             if (((arg0->unk2C & 1) != 0) && (camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 0) != 0)) {
                 arg0->unk1B4 = 3;
@@ -32,7 +33,7 @@ void func_150AE5B0(struct108 *arg0) {
             arg0->unk84 &= 0xFEFFFFFF;
         }
     }
-    if (func_1509BE40(1, 0x4080, 6, 0x9000) != 0) {
+    if (event_dispatch(1, 0x4080, 6, 0x9000) != 0) {
         arg0->unk84 |= 0x10000;
     } else {
         arg0->unk84 &= 0xFFFEFFFF;
@@ -46,7 +47,8 @@ u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
 s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
 extern s32 D_8008CEB4;
 
-void func_150AE790(u8 *arg0) {
+/* was func_150AE790 */
+void owner_child_spark_burst(u8 *arg0) {
     struct {
         s32 uB4;
         s32 uB8;
@@ -141,7 +143,7 @@ void func_150AE790(u8 *arg0) {
                 sp.u140 = 8;
                 sp.u143 = 0xFF;
                 sp.u13C = (*(f32 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 0))) + 0x180));
-                var_s2 = (func_150ADA20() % 9U) + 0xC;
+                var_s2 = (random_int() % 9U) + 0xC;
                 sp.u104 = 0;
                 sp.u108 = 1;
                 sp.u10C = 0x160600;
@@ -153,19 +155,19 @@ void func_150AE790(u8 *arg0) {
                 sp.u121 = 9;
                 if (var_s2 != 0) {
                     do {
-                        temp_s0_2 = func_150ADA20() & 0xFF;
-                        temp_s1 = (func_150ADA20() % 51U) & 0xFF;
+                        temp_s0_2 = random_int() & 0xFF;
+                        temp_s1 = (random_int() % 51U) & 0xFF;
                         temp_f24 = angle_byte_cos(temp_s0_2 & 0xFF);
                         temp_f26 = angle_byte_cos((temp_s0_2 - 0x40) & 0xFF);
                         temp_f28 = angle_byte_cos(temp_s1 & 0xFF);
                         temp_f22 = angle_byte_cos((temp_s1 - 0x40) & 0xFF);
-                        temp_f6 = func_150ADA68() * 0.5f;
+                        temp_f6 = random_float() * 0.5f;
                         sp.u15D = 4;
                         temp_f20 = temp_f6 + 18.8f;
-                        sp.u154 = (func_150ADA20() & 0xF) + 0x23;
-                        sp.u128 = (func_150ADA68() * 2.3f) + 2.9f;
+                        sp.u154 = (random_int() & 0xF) + 0x23;
+                        sp.u128 = (random_float() * 2.3f) + 2.9f;
                         temp_f2 = temp_f20 * temp_f28;
-                        sp.u138 = (func_150ADA68() * 0.1f) + 0.7f;
+                        sp.u138 = (random_float() * 0.1f) + 0.7f;
                         sp.u12C = temp_f2 * temp_f26;
                         sp.u130 = -temp_f20 * temp_f22;
                         sp.u134 = temp_f2 * temp_f24;
@@ -173,8 +175,8 @@ void func_150AE790(u8 *arg0) {
                         var_s2 -= 1;
                     } while (var_s2 != 0);
                 }
-                temp_f20_2 = func_150ADA68() + 2.5f;
-                temp_f18 = func_150ADA68() * 200.0f;
+                temp_f20_2 = random_float() + 2.5f;
+                temp_f18 = random_float() * 200.0f;
                 sp.uE1 = 0xFF;
                 temp_f2_2 = temp_f18 + 600.0f;
                 sp.uE2 = 0xFF;
@@ -212,7 +214,7 @@ void func_150AE790(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/func_150AE790.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/owner_child_spark_burst.s")
 #endif
 // some funky xor going on
 // spawns the objects of D_80088A80[0]; also checksums the code range
@@ -223,7 +225,8 @@ void func_150AE790(u8 *arg0) {
 // stops when a spawn fails. The N64 code also sums the code words func_15001A08..D_15001B08 and on a mismatch
 // (anti-tamper) clears the object lists D_800DD280 +0x8C / +0x22C; the port has no MIPS code there, so the
 // NON_MATCHING build skips the check (as func_151E86A4, P127).
-void func_150AEB9C(u8 *owner) {
+/* was func_150AEB9C */
+void owner_spawn_children(u8 *owner) {
     s32 i;
     u8 *obj;
 
@@ -241,10 +244,10 @@ void func_150AEB9C(u8 *owner) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/func_150AEB9C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/owner_spawn_children.s")
 #endif
 // NON-MATCHING: regalloc; checksums code func_15001A08..D_15001B08 against 0x1B61AF60 (anti-tamper), clears object list 35 on mismatch
-// void func_150AEB9C(u8 *arg0) {
+// void owner_spawn_children(u8 *arg0) {
 //     u32 *p;
 //     u32 sum;
 //     s32 i;
@@ -273,7 +276,8 @@ void func_150AEB9C(u8 *owner) {
 //     }
 // }
 
-void func_150AECCC(struct42 *arg0) {
+/* was func_150AECCC */
+void particle_fall_step(struct42 *arg0) {
     arg0->unk96 = arg0->unk96 + (arg0->unk94 * D_800BE9E4);
     if (arg0->unk96 >= 0x1401) {
         arg0->unk96 = 0x1400;
@@ -285,7 +289,8 @@ void func_150AECCC(struct42 *arg0) {
     }
 }
 
-void func_150AED4C(struct114 *arg0) {
+/* was func_150AED4C */
+void sprite_grow_step(struct114 *arg0) {
     arg0->unk34 += arg0->unk14 * D_800BE9E4;
     if (arg0->unk2A < arg0->unk34) {
         arg0->unk3A = 70;
@@ -294,7 +299,8 @@ void func_150AED4C(struct114 *arg0) {
     arg0->unk36 = arg0->unk34;
 }
 
-s32 func_150AED9C(struct_eu_sprite *arg0) {
+/* was func_150AED9C */
+s32 sprite_fade_in_alpha(struct_eu_sprite *arg0) {
     struct_eu_sprite_sub *sub = arg0->unk98;
     s32 v = arg0->unk1C * 8;
 
@@ -308,14 +314,16 @@ s32 func_150AED9C(struct_eu_sprite *arg0) {
     return 1;
 }
 
-s32 func_150AEDD8(struct202 *arg0) {
+/* was func_150AEDD8 */
+s32 sprite_fade_in_age(struct202 *arg0) {
     if (arg0->unk1C < 0x20) {
         arg0->unk28 = arg0->unk1C * 8;
     }
     return 1;
 }
 
-void func_150AEDF8(u8 *arg0, s32 *arg1, u8 arg2)
+/* was func_150AEDF8 */
+void owner_child_handle_msg(u8 *arg0, s32 *arg1, u8 arg2)
 {
   s32 new_var;
   u8 *v = arg0 + 0x28;
@@ -346,7 +354,7 @@ void func_150AEDF8(u8 *arg0, s32 *arg1, u8 arg2)
     }
   }
 }
-// void func_150AEDF8(void *arg0, void *arg1, s32 arg2) {
+// void owner_child_handle_msg(void *arg0, void *arg1, s32 arg2) {
 //     s32 temp_a0;
 //     s32 temp_t6;
 //     s32 temp_v1;

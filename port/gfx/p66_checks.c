@@ -1,5 +1,5 @@
 /* P66 runtime checks of port-b P64's jump / idle C and of func_15085710 (link-time wraps; only cross-TU calls).
- *  ?p66jump=N  func_1505F298 (jump / swim / glide handler, called by func_1504CB98): record 0's buttons, anim id
+ *  ?p66jump=N  obj_jump_swim_glide_update (jump / swim / glide handler, called by func_1504CB98): record 0's buttons, anim id
  *              (+0x84), y (+0x18), y_velocity (+0x20), height (+0x28), in_water (+0xAD), hanging (+0x137), target
  *              speed (+0xC0) before -> after. Logged for the first N calls, every 64th, and for every call where the
  *              buttons, the anim id or the sign of y_velocity change or the record is airborne (+0x28 > 0.5) for the
@@ -7,7 +7,7 @@
  *  ?p66lowg=1  DIAGNOSTIC: D_800CC69C = 1 during calls with A pressed on the floor (reaches P64's low-gravity jump
  *              branches: Z long jump +0x81 = 0x81, y_velocity * 1.4); logged as "[p66] lowg".
  *  ?p66hud=N   func_15085710 (per-player HUD / status records, game_eu_B2980.c; called by func_150447B0 users,
- *              func_1507D4F8's restart path, ...): arguments of the first N calls (proves it is the C body). */
+ *              player_lose_life's restart path, ...): arguments of the first N calls (proves it is the C body). */
 #include <stdint.h>
 #include "../ultra/pc_mem.h"
 
@@ -28,8 +28,8 @@ static void idle_state(const unsigned char *ctl, unsigned char *out) {
     for (i = 0; i < 14; i++) out[i] = vbe_ld8(ctl + 0x58 + i);
 }
 
-void __real_func_1505F298(void *rec, void *pad);
-void __wrap_func_1505F298(void *rec, void *pad) {
+void __real_obj_jump_swim_glide_update(void *rec, void *pad);
+void __wrap_obj_jump_swim_glide_update(void *rec, void *pad) {
     static unsigned n, air, lastb = 0xFFFF, lastid = 0xFFFF;
     static int lastsign = 9;
     static unsigned char lastidle[14];
@@ -38,7 +38,7 @@ void __wrap_func_1505F298(void *rec, void *pad) {
     float y0, vy0, h0;
     int sign;
     if (fj < 0) fj = port_flag("p66jump");
-    if (!fj || !rec || recno(rec) != 0) { __real_func_1505F298(rec, pad); return; }
+    if (!fj || !rec || recno(rec) != 0) { __real_obj_jump_swim_glide_update(rec, pad); return; }
     n++;
     b = pad ? vbe_ld16(pad) : 0;
     id0 = vbe_ld16(r + 0x84); y0 = F(r, 0x18); vy0 = F(r, 0x20); h0 = F(r, 0x28);
@@ -46,12 +46,12 @@ void __wrap_func_1505F298(void *rec, void *pad) {
     if (flg && (b & 0x8000) && h0 < 0.5f) {   /* DIAGNOSTIC: D_800CC69C = 1 (P64's "low gravity" test) for this call */
         unsigned char old = vbe_ld8(D_800CC69C_);
         vbe_st8(D_800CC69C_, 1);
-        __real_func_1505F298(rec, pad);
+        __real_obj_jump_swim_glide_update(rec, pad);
         vbe_st8(D_800CC69C_, old);
         port_log("[p66] lowg call frame %u: D_800CC69C forced 1 (was %d): buttons %04X id %04X -> %04X vy %.2f -> %.2f "
                  "+81 %02X\n", port_frame_count, old, b, id0, vbe_ld16(r + 0x84), vy0, F(r, 0x20), vbe_ld8(r + 0x81));
     } else
-        __real_func_1505F298(rec, pad);
+        __real_obj_jump_swim_glide_update(rec, pad);
     id1 = vbe_ld16(r + 0x84);
     sign = F(r, 0x20) > 0.01f ? 1 : F(r, 0x20) < -0.01f ? -1 : 0;
     if (n <= (unsigned)fj || n % 64 == 0 || b != lastb || id1 != id0 || id1 != lastid || sign != lastsign ||

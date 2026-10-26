@@ -3,18 +3,18 @@
 
 usage: randinline.py in.c outprefix [--all]
 
-1. single-use temps assigned a bare rand call (`temp = func_150ADA20();` /
-   `func_150ADA68()`) are inlined at their use (IDO evaluates call arguments
+1. single-use temps assigned a bare rand call (`temp = random_int();` /
+   `random_float()`) are inlined at their use (IDO evaluates call arguments
    left to right, so the rand calls end up in the ref's order);
 2. `(rand() % (u32) G) + B` -> `(B + (rand() % (u32) G))` and
-   `(func_150ADA68() * E) + B` -> `(B + E * func_150ADA68())` (ref operand order).
+   `(random_float() * E) + B` -> `(B + E * random_float())` (ref operand order).
 
 Writes <outprefix>_<v>.c for v in: i (inline only), is (inline + int/float add
 swap), isf (inline + swap, float keeps rand*E), s (swap, no inline).
 """
 import re, sys
 
-RI, RF = 'func_150ADA20', 'func_150ADA68'
+RI, RF = 'random_int', 'random_float'
 
 
 def group_end(s, i):

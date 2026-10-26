@@ -3,11 +3,11 @@
  * ?p103boot=1 : one line per change of the game mode D_800E0B94 or the level D_800BE9F0 (called from the
  *               func_151E5928 wrap in p84_checks.c): mode, previous mode D_800E0FC5, mode timer D_800E0EC0,
  *               osTvType D_80000300, world objects D_800DC320, level events D_800D2F3C, scene slot 0 D_800C35EA.
- *               Also logs every func_1509B4A0 call (level-start event pass: the event ids D_800D2F40[0..n-1], their
+ *               Also logs every event_start_level_events call (level-start event pass: the event ids D_800D2F40[0..n-1], their
  *               D_800877D0 record, and what the asm func_1509CBD4 would answer, computed here from its asm), every
- *               func_1509B5AC call (start one event) and every func_1501D348 call (scene load).
+ *               event_start call (start one event) and every func_1501D348 call (scene load).
  * ?p103ev=1   : TEST ONLY. func_1509CBD4 (game_eu_CA630.c, still an asm stub = always 0) answers with the C below, so
- *               func_1509B4A0 goes on to func_1509B5AC (also an asm stub). Shows which events the stub suppresses.
+ *               event_start_level_events goes on to event_start (also an asm stub). Shows which events the stub suppresses.
  *
  * func_1509CBD4(id) from the asm: the u16 list D_800877D0[id] + 0xC (0xFFFF-terminated) holds prerequisite event ids;
  * for each one p, recurse on p, then require save flag bit p (D_800D2E4C byte p >> 3, bit p & 7) and the recursion's
@@ -105,11 +105,11 @@ int __wrap_func_1509CBD4(int id) {
     return __real_func_1509CBD4(id);
 }
 
-void __real_func_1509B4A0(int a0, int a1);
-void __wrap_func_1509B4A0(int a0, int a1) {
+void __real_event_start_level_events(int a0, int a1);
+void __wrap_event_start_level_events(int a0, int a1) {
     if (flag(&fboot, "p103boot")) {
         int n = vbe_ld8(&D_800D2F3C), i;
-        port_log("[p103] func_1509B4A0(%d, %d) frame %u level %X mode %d: %d level events, save flags %08X\n", a0, a1,
+        port_log("[p103] event_start_level_events(%d, %d) frame %u level %X mode %d: %d level events, save flags %08X\n", a0, a1,
                  port_frame_count, D_800BE9F0, vbe_ld8(&D_800E0B94), n, (unsigned)(uintptr_t)D_800D2E4C);
         for (i = 0; i < n && i < 32 && memok(D_800D2F40); i++) {
             int id = (short)vbe_ld16(D_800D2F40 + 2 * i);
@@ -126,21 +126,21 @@ void __wrap_func_1509B4A0(int a0, int a1) {
                      r[0], r[1], r[2], r[3], r[4], pre, p103_prereq(id, 0));
         }
     }
-    __real_func_1509B4A0(a0, a1);
+    __real_event_start_level_events(a0, a1);
 }
 
-void *__real_func_1509B5AC(int id, int a1);
-void *__wrap_func_1509B5AC(int id, int a1) {
+void *__real_event_start(int id, int a1);
+void *__wrap_event_start(int id, int a1) {
     if (flag(&fboot, "p103boot"))
-        port_log("[p103] func_1509B5AC(%X, %d) frame %u (start event)\n", id, a1, port_frame_count);
+        port_log("[p103] event_start(%X, %d) frame %u (start event)\n", id, a1, port_frame_count);
     { /* P110 TEST ONLY ?p110noev=1: do not start events (= the pre-P106 asm stub, returns 0). Since port P106 the
        * LogoScreen event 0xC9 starts a 1416-frame scene on level 0x21; at its end object removal (stubs
-       * func_150849C0 / func_15060D54) corrupts the heap. This keeps the old walk / death / 0x2C test path. */
+       * func_150849C0 / obj_forget_target) corrupts the heap. This keeps the old walk / death / 0x2C test path. */
         static int fnoev = -1;
         if (flag(&fnoev, "p110noev")) return 0;
     }
     { /* P178: the started event's struct (+0 = flags | id) */
-        void *e = __real_func_1509B5AC(id, a1);
+        void *e = __real_event_start(id, a1);
         /* P185: the P178 ?p178evid test (event id put back) is gone: vbe.py aligns stack slots to 4 since P185 */
         if (flag(&fboot, "p103boot"))
             port_log("[p103]   -> e %08x unk0 %04x unk2 %04x w0 %08x\n", (unsigned)(uintptr_t)e, e ? vbe_ld16(e) : 0, e ? vbe_ld16((char *)e + 2) : 0, e ? *(unsigned *)e : 0);
@@ -173,7 +173,7 @@ static void p113_cam_scan(unsigned a) {
 }
 
 /* P113 OPT-IN emulation ?p113g84=1 (remove when func_15084814 is game C): func_15084814 (game_eu_AF2A0, asm stub) is the
- * part-reference release under the object removal chain func_15060F28 -> func_150849C0 (C since port P112) ->
+ * part-reference release under the object removal chain obj_remove -> func_150849C0 (C since port P112) ->
  * func_150847B4 (C). The stub left the object's part words +0x28C + j*8 set, the shared-block reference counts
  * D_800D1F80[slot] up and the private copies allocated, and the heap was corrupt right after the LogoScreen scene
  * end (frame 2133-2137). This wrap does what the asm does (EU asm read by hand, 0x60 bytes): for both words of
@@ -203,16 +203,16 @@ void __wrap_func_15084814(unsigned char *obj, int j) {
     }
 }
 
-/* P113 DIAGNOSTIC: checkpoints of the ?p113watch write watch (pc_sched.c) around the calls of func_15019130 between its
+/* P113 DIAGNOSTIC: checkpoints of the ?p113watch write watch (pc_sched.c) around the calls of world_update between its
  * func_10004250 and node_lists_run_update, to find the stale writer after the LogoScreen scene end (pass-through wraps). */
 void p113_watch(const char *where);
 #define P113W0(f) void __real_##f(void); void __wrap_##f(void) { p113_watch(#f " in"); __real_##f(); p113_watch(#f " out"); }
 #define P113W1(f) void __real_##f(int); void __wrap_##f(int a) { p113_watch(#f " in"); __real_##f(a); p113_watch(#f " out"); }
 #define P113W2(f) void __real_##f(int, int); void __wrap_##f(int a, int b) { p113_watch(#f " in"); __real_##f(a, b); p113_watch(#f " out"); }
 P113W0(func_15035210)
-P113W0(func_1510BC10)
-P113W1(func_1510F800)
-P113W0(func_15113700)
+P113W0(camera_matrices_refresh_all)
+P113W1(collision_select_area)
+P113W0(world_records_flag_active)
 P113W0(func_15044D18)
 /* P116: func_1502457C also logs, when slot 0's +0x65 (parent) changed during the call, the scene events it queued in
  * D_800C4170 ({event ptr, time << 8, s8 track, s16 index}, 0xC bytes) this frame (first 8 entries). */
@@ -281,28 +281,28 @@ P113W1(func_15020F6C)
 P113W1(func_1501E364)
 P113W0(camera_update_all)
 P113W0(func_1504ADD0)
-P113W1(func_151101B4)
+P113W1(player_zone_update)
 P113W2(func_15174F68)
 P113W0(func_1501C860)
 P113W1(func_1511FC20)
 P113W1(func_151890E4)
 P113W0(func_1502C494)
-P113W0(func_15114208)
+P113W0(world_records_update_shadows)
 P113W1(func_15173E34)
 
 /* P113 guard REMOVED in P137: after the LogoScreen scene on level 0x21 (frame 2133) and the menu scene end (3053) the
- * object removal func_15060F28 used to leave camera record D_800DBFF0[i] (struct108, 0x9A0 bytes) with the freed +0x31C
+ * object removal obj_remove used to leave camera record D_800DBFF0[i] (struct108, 0x9A0 bytes) with the freed +0x31C
  * record as its target unk3D4, and the guard re-pointed it at a zeroed parking record. Since the scene VM / walker
  * fixes (P117) and the P127..P133 conversions the case no longer occurs: P137 runs (4 new-game Chrome runs incl.
  * ?p113noguard=1, node new game, noev walks) had 0 guard / NO GUARD lines. Kept as a check only: a stale target is
  * logged ("[p113] STALE camera target"), never patched. */
 extern int D_80082FA0;
-void __real_func_15060F28(unsigned char *obj, int mode);
-void __wrap_func_15060F28(unsigned char *obj, int mode) {
+void __real_obj_remove(unsigned char *obj, int mode);
+void __wrap_obj_remove(unsigned char *obj, int mode) {
     static int n;
     unsigned rec = *(unsigned *)(obj + 0x31C);
     int i;
-    __real_func_15060F28(obj, mode);
+    __real_obj_remove(obj, mode);
     if (rec == 0) return;
     for (i = 0; i <= D_80082FA0 && i < 4; i++) {
         unsigned *t = (unsigned *)(D_800DBFF0 + i * 0x9A0 + 0x3D4);
@@ -372,7 +372,7 @@ void __wrap_func_151EE704(void) {
 
 /* P123 DIAGNOSTIC ?p123fade=1: every screen-colour/fade request func_1517F3B0(r, g, b, frames, dir, player) with the
  * frame and the JS stack, and (from p103_frame, mode 3 and every 120 frames) the world-render gates of
- * func_15019464 / func_150195A0: D_800BEAC0, D_80084810, func_1517F51C(0) (fade level 0xFF = skip), D_800D18A0. */
+ * render_player_frame_setup / render_player_scene: D_800BEAC0, D_80084810, func_1517F51C(0) (fade level 0xFF = skip), D_800D18A0. */
 void p123_requests_stack(void);
 void __real_func_1517F3B0(int r, int g, int b, int n, int dir, int pl);
 void __wrap_func_1517F3B0(int r, int g, int b, int n, int dir, int pl) {
@@ -400,11 +400,11 @@ void p123_gates(void) {
 /* P123 ?p123fadeev (TEST-ONLY wrap of handler C func_15029EA8, 5/1 fade branch) removed in P126: port P124 converted
  * func_15029EA8 to C and the menu fades in by itself. */
 
-/* P131 (?p131mdl=1 or =FRAME, DIAGNOSTIC): log func_1510D3E0's display lists from frame 4400 (or FRAME) on (asset 9 models of the new
+/* P131 (?p131mdl=1 or =FRAME, DIAGNOSTIC): log texture_resolve_dl_ids's display lists from frame 4400 (or FRAME) on (asset 9 models of the new
  * game's level 0x18 trapped in it): dl, outList slot, first words, and how far the walk to G_ENDDL stays inside
  * the wasm memory. */
-int __real_func_1510D3E0(void *dl, int skip, int addRef, int age, void *outList);
-int __wrap_func_1510D3E0(void *dl, int skip, int addRef, int age, void *outList) {
+int __real_texture_resolve_dl_ids(void *dl, int skip, int addRef, int age, void *outList);
+int __wrap_texture_resolve_dl_ids(void *dl, int skip, int addRef, int age, void *outList) {
     static int f = -1; static unsigned n;
     extern unsigned char D_800DFDE8[];
     if (f < 0) f = port_flag("p131mdl");
@@ -415,21 +415,21 @@ int __wrap_func_1510D3E0(void *dl, int skip, int addRef, int age, void *outList)
             for (k = 0; a + 8 * k + 8 <= lim && k < 0x100000; k++)
                 if ((((uint32_t *)dl)[2 * k] >> 24) == 0xDF) { end = 1; break; }
         }
-        port_log("[p131] func_1510D3E0 #%u frame %u: dl %08X (mem %08X) out %08X (idx %ld) age %X | w %08X %08X | %s after %u cmds\n",
+        port_log("[p131] texture_resolve_dl_ids #%u frame %u: dl %08X (mem %08X) out %08X (idx %ld) age %X | w %08X %08X | %s after %u cmds\n",
                  n, port_frame_count, a, lim, (unsigned)(uintptr_t)outList,
                  outList ? (long)(((unsigned char *)outList - D_800DFDE8) / 4) : -1L, age,
                  (a >= 0x1000 && a + 8 <= lim) ? ((uint32_t *)dl)[0] : 0, (a >= 0x1000 && a + 8 <= lim) ? ((uint32_t *)dl)[1] : 0,
                  end ? "ENDDL" : "NO-END/OUT", k);
     }
-    return __real_func_1510D3E0(dl, skip, addRef, age, outList);
+    return __real_texture_resolve_dl_ids(dl, skip, addRef, age, outList);
 }
 
 /* P131 (?p131mdl, DIAGNOSTIC): asset loads of type 9 (models) from the same start frame: index, header, header words
  * 0..4 and the first two words at header[0] (table of DL offsets for func_15030100, a DL for func_1518C900). The
  * loader is variadic: forward up to 4 extra arguments (arg3 = their count). */
 #include <stdarg.h>
-int __real_func_1502B6BC(int *a0, int a1, int *a2, int a3, ...);
-int __wrap_func_1502B6BC(int *a0, int a1, int *a2, int a3, ...) {
+int __real_asset_load_with_subfiles(int *a0, int a1, int *a2, int a3, ...);
+int __wrap_asset_load_with_subfiles(int *a0, int a1, int *a2, int a3, ...) {
     static int f = -1; static unsigned n;
     int v[4] = {0, 0, 0, 0}, r, k;
     va_list ap;
@@ -437,11 +437,11 @@ int __wrap_func_1502B6BC(int *a0, int a1, int *a2, int a3, ...) {
     for (k = 0; k < a3 && k < 4; k++) v[k] = va_arg(ap, int);
     va_end(ap);
     switch (a3) {
-    case 0: r = __real_func_1502B6BC(a0, a1, a2, a3); break;
-    case 1: r = __real_func_1502B6BC(a0, a1, a2, a3, v[0]); break;
-    case 2: r = __real_func_1502B6BC(a0, a1, a2, a3, v[0], v[1]); break;
-    case 3: r = __real_func_1502B6BC(a0, a1, a2, a3, v[0], v[1], v[2]); break;
-    default: r = __real_func_1502B6BC(a0, a1, a2, a3, v[0], v[1], v[2], v[3]); break;
+    case 0: r = __real_asset_load_with_subfiles(a0, a1, a2, a3); break;
+    case 1: r = __real_asset_load_with_subfiles(a0, a1, a2, a3, v[0]); break;
+    case 2: r = __real_asset_load_with_subfiles(a0, a1, a2, a3, v[0], v[1]); break;
+    case 3: r = __real_asset_load_with_subfiles(a0, a1, a2, a3, v[0], v[1], v[2]); break;
+    default: r = __real_asset_load_with_subfiles(a0, a1, a2, a3, v[0], v[1], v[2], v[3]); break;
     }
     if (f < 0) f = port_flag("p131mdl");
     if (f > 0 && a3 == 2 && v[0] == 9 && port_frame_count >= (f > 1 ? (unsigned)f : 4400u) && n < 100) {
@@ -475,10 +475,10 @@ int __wrap_func_15082E44(unsigned char *e, int idx, int a2, int a3, int reuse) {
     return __real_func_15082E44(e, idx, a2, a3, reuse);
 }
 
-/* P131 (?p131mdl, DIAGNOSTIC): the level-setup asset load (func_1502B8E0(dst, 0, 2, 0xE, level), game_eu_44010.c):
+/* P131 (?p131mdl, DIAGNOSTIC): the level-setup asset load (asset_load_into(dst, 0, 2, 0xE, level), game_eu_44010.c):
  * size and the first entry it wrote (entry 5 of D_800D20FC on level 0x18), logged at load time (any frame). */
-int __real_func_1502B8E0(int a0, int a1, int a2, ...);
-int __wrap_func_1502B8E0(int a0, int a1, int a2, ...) {
+int __real_asset_load_into(int a0, int a1, int a2, ...);
+int __wrap_asset_load_into(int a0, int a1, int a2, ...) {
     static int f = -1;
     int v[4] = {0, 0, 0, 0}, r, k;
     va_list ap;
@@ -486,11 +486,11 @@ int __wrap_func_1502B8E0(int a0, int a1, int a2, ...) {
     for (k = 0; k < a2 && k < 4; k++) v[k] = va_arg(ap, int);
     va_end(ap);
     switch (a2) {
-    case 0: r = __real_func_1502B8E0(a0, a1, a2); break;
-    case 1: r = __real_func_1502B8E0(a0, a1, a2, v[0]); break;
-    case 2: r = __real_func_1502B8E0(a0, a1, a2, v[0], v[1]); break;
-    case 3: r = __real_func_1502B8E0(a0, a1, a2, v[0], v[1], v[2]); break;
-    default: r = __real_func_1502B8E0(a0, a1, a2, v[0], v[1], v[2], v[3]); break;
+    case 0: r = __real_asset_load_into(a0, a1, a2); break;
+    case 1: r = __real_asset_load_into(a0, a1, a2, v[0]); break;
+    case 2: r = __real_asset_load_into(a0, a1, a2, v[0], v[1]); break;
+    case 3: r = __real_asset_load_into(a0, a1, a2, v[0], v[1], v[2]); break;
+    default: r = __real_asset_load_into(a0, a1, a2, v[0], v[1], v[2], v[3]); break;
     }
     if (f < 0) f = port_flag("p131mdl");
     if (f > 0 && a2 == 2 && v[0] == 0xE) {

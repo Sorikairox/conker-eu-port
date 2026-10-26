@@ -4,14 +4,15 @@
 #include "variables.h"
 
 
-void func_150061B0(void) {
+/* was func_150061B0 */
+void controller_init_si_queue(void) {
     osCreateMesgQueue(&D_800BE900, &D_800BE2D0, 8);
     osSetEventMesg(OS_EVENT_SI, &D_800BE900, D_800BE9E0);
     D_800BE730.unk0 = &D_800BE748;
     D_800BE730.unk4 = &D_800BE74E;
     D_800BE730.unk8 = &D_800BE754;
     D_800BE730.unkC = &D_800BE75A;
-    func_15007644();
+    controller_init_hook_noop();
 }
 
 #ifdef NON_MATCHING
@@ -31,7 +32,8 @@ extern f32 D_800BED80;
 extern f32 D_800BED90;
 extern f32 D_800BEDA0;
 
-void func_15006234(void) {
+/* was func_15006234 */
+void controller_init_all(void) {
     struct {
         u8 u8F;
     } sp;
@@ -118,5 +120,5 @@ void func_15006234(void) {
     D_8002AE14 = 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33660/func_15006234.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_33660/controller_init_all.s")
 #endif

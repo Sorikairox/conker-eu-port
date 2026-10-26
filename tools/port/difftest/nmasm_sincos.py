@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""P24: compare func_150AD78C (sinf) / func_150AD780 (cosf) and func_150A8050 (rotation matrix) between the hand asm
+"""P24: compare func_150AD78C (sinf) / func_150AD780 (cosf) and mtxf_rotate_xyz_deg (rotation matrix) between the hand asm
 (build/conker.eu.elf) and the NON_MATCHING C (build_nm/conker.eu.elf), whole, in Unicorn: a small trampoline
 loads f12 from memory (Unicorn 2.0.1 ignores FPR reg_write), calls the function and stores f0 back.
 Run in the container from /conker/conker after both builds: python3 ../tools/port/difftest/nmasm_sincos.py [N] [seed]"""
@@ -41,7 +41,7 @@ class Img:
         mu.reg_write(UC_MIPS_REG_SP, 0x80700000)
         return mu
     def call(self, mu, fn, fl):
-        """f12 = fl[0]; a0 = SCR+0x100, a1..a3 = float bits of fl[1:] (func_150A8050's o32 layout); returns f0 bits"""
+        """f12 = fl[0]; a0 = SCR+0x100, a1..a3 = float bits of fl[1:] (mtxf_rotate_xyz_deg's o32 layout); returns f0 bits"""
         mu.mem_write(phys(SCR), struct.pack('>I', fl[0]))
         for k, w in enumerate(fl[1:]): mu.reg_write(UC_MIPS_REG_A1 + k, w)
         mu.reg_write(UC_MIPS_REG_A0, SCR + 0x100)
@@ -73,16 +73,16 @@ for t in range(n):
         if a != b:
             bad += 1
             if bad <= 10: print('DIFF %s(%r): ref %08X cand %08X' % (fn, x, a, b))
-# func_150A8050: whole (it calls the sin/cos above), 16 output words
+# mtxf_rotate_xyz_deg: whole (it calls the sin/cos above), 16 output words
 for t in range(n // 4):
     ang = [f2w(rng.uniform(-720, 720)) for _ in range(3)]
     outs = []
     for img, mu in ((ref, mr), (cand, mc)):
         mu.mem_write(phys(SCR + 0x100), bytes(64))
-        img.call(mu, 'func_150A8050', [0] + ang)
+        img.call(mu, 'mtxf_rotate_xyz_deg', [0] + ang)
         outs.append(bytes(mu.mem_read(phys(SCR + 0x100), 64)))
     cls['mtx'] = cls.get('mtx', 0) + 1
     if outs[0] != outs[1]:
         bad += 1
-        if bad <= 10: print('DIFF func_150A8050 angles %s' % ang)
+        if bad <= 10: print('DIFF mtxf_rotate_xyz_deg angles %s' % ang)
 print('%s: %d calls, %d differences, classes %s' % ('EQUIV' if bad == 0 else 'DIFFER', sum(cls.values()), bad, cls))

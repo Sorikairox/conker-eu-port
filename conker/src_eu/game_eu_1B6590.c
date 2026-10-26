@@ -514,7 +514,7 @@ u8 *func_15189B64(u8 *gfx, u8 *rec, s16 arg2) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15113D54(s32, u8 *, s32, s16, s32, s32);
+s32 world_mesh_draw(s32, u8 *, s32, s16, s32, s32);
 
 s32 func_15189D14(s32 arg0, u8 *arg1, s16 arg2) {
     s32 sp44;
@@ -539,7 +539,7 @@ s32 func_15189D14(s32 arg0, u8 *arg1, s16 arg2) {
     if ((s32) temp_a3 > 0) {
         do {
             (*(u8 *)((u8 *)((*(u8 **)((u8 *)arg1 + 0x10))) + 0x8A)) = (u8) (var_s1 >> 8);
-            temp_v0 = func_15113D54(var_s4, (*(u8 **)((u8 *)arg1 + 0x10)), (*(s32 *)((u8 *)arg1 + 8)) + (var_s2 << 6), arg2, 0, 0);
+            temp_v0 = world_mesh_draw(var_s4, (*(u8 **)((u8 *)arg1 + 0x10)), (*(s32 *)((u8 *)arg1 + 8)) + (var_s2 << 6), arg2, 0, 0);
             var_s0 += 1;
             var_s1 += temp_a0 << 5;
             var_s2 += 1;

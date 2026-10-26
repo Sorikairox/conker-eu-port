@@ -85,7 +85,7 @@ u8 *func_150B443C(s32 *arg0, u8 *arg1, s16 arg2) {
     temp_v0 = func_15147FF0(&sp.u9C, 0x58, 0x24, 7, 7, 7, 0, 0, 0, 0xFFU, 1);
     sp40 = temp_v0;
     if (temp_v0 != NULL) {
-        func_1000FA64(0x221U, (s16) (s32) (*(f32 *)((u8 *)arg1 + 0)), (s16) (s32) (*(f32 *)((u8 *)arg1 + 4)), (s16) (s32) (*(f32 *)((u8 *)arg1 + 8)), 0x61A8, 0xFA0U, 0x258, (s32) func_1000EF40, NULL, 0, 8, func_150ADA20() & 0x40);
+        func_1000FA64(0x221U, (s16) (s32) (*(f32 *)((u8 *)arg1 + 0)), (s16) (s32) (*(f32 *)((u8 *)arg1 + 4)), (s16) (s32) (*(f32 *)((u8 *)arg1 + 8)), 0x61A8, 0xFA0U, 0x258, (s32) func_1000EF40, NULL, 0, 8, random_int() & 0x40);
         memcpy((*(s32 **)((u8 *)sp40 + 0x98)), &sp.u44, 0x58);
     }
     return sp40;
@@ -180,7 +180,7 @@ s32 func_150B4774(u8 *arg0) {
 
     temp_s2 = (*(u8 **)((u8 *)arg0 + 0x98));
     temp_s3 = (*(s32 *)((u8 *)arg0 + 0x94));
-    temp_a0 = (*(u8 *)((u8 *)temp_s2 + 0x50)) + ((func_150ADA20() % (u32) ((*(u8 *)((u8 *)temp_s2 + 0x10)) + 1)) * D_800BE9E4);
+    temp_a0 = (*(u8 *)((u8 *)temp_s2 + 0x50)) + ((random_int() % (u32) ((*(u8 *)((u8 *)temp_s2 + 0x10)) + 1)) * D_800BE9E4);
     (*(u8 *)((u8 *)temp_s2 + 0x50)) = temp_a0;
     (*(f32 *)((u8 *)temp_s2 + 0x4C)) = (f32) ((angle_byte_cos((temp_a0 - 0x40) & 0xFF) * (*(f32 *)((u8 *)temp_s2 + 0x18))) + (*(f32 *)((u8 *)temp_s2 + 0x14)));
     (*(f32 *)((u8 *)temp_s2 + 0x44)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 0x44)) + ((*(f32 *)((u8 *)temp_s2 + 0x20)) * D_800BE9A4));
@@ -211,7 +211,7 @@ s32 func_150B4774(u8 *arg0) {
             (*(s16 *)((u8 *)((temp_s3 + ((*(s8 *)((u8 *)arg0 + 0x2E)) * 0x24))) + 0x1C)) = 0xFF;
             (*(s16 *)((u8 *)((temp_s3 + ((*(s8 *)((u8 *)arg0 + 0x2E)) * 0x24))) + 0x1E)) = (s16) (*(s16 *)((u8 *)temp_s2 + 0x36));
             (*(u8 *)((u8 *)((temp_s3 + ((*(s8 *)((u8 *)arg0 + 0x2E)) * 0x24))) + 0x20)) = (u8) (*(u8 *)((u8 *)temp_s2 + 0x48));
-            temp_f0 = func_150ADA68();
+            temp_f0 = random_float();
             temp_t4 = (*(u8 *)((u8 *)temp_s2 + 0x30));
             var_f6 = (f32) temp_t4;
             if ((s32) temp_t4 < 0) {
@@ -597,9 +597,9 @@ void func_150B5568(u8 *arg0) {
     (*(s32 *)((u8 *)(&sp.uE0) + 4)) = (s32) (*(s32 *)((u8 *)arg0 + 0x14));
     (*(s32 *)((u8 *)(&sp.uE0) + 8)) = (s32) (*(s32 *)((u8 *)arg0 + 0x18));
     do {
-        temp_f20 = (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 8))) + (*(f32 *)((u8 *)temp_s0 + 4));
-        temp_s1 = func_150ADA20() & 0xFF;
-        temp_s2 = func_150ADA20() & 0xFF;
+        temp_f20 = (random_float() * (*(f32 *)((u8 *)temp_s0 + 8))) + (*(f32 *)((u8 *)temp_s0 + 4));
+        temp_s1 = random_int() & 0xFF;
+        temp_s2 = random_int() & 0xFF;
         temp_f22 = angle_byte_cos((temp_s1 - 0x40) & 0xFF);
         temp_f24 = angle_byte_cos(temp_s1 & 0xFF);
         temp_f26 = angle_byte_cos((temp_s2 - 0x40) & 0xFF);
@@ -608,10 +608,10 @@ void func_150B5568(u8 *arg0) {
         temp_f28 = (*(f32 *)((u8 *)temp_s3 + 0)) + (temp_f12 * temp_f22);
         temp_f30 = (*(f32 *)((u8 *)temp_s3 + 4)) - (temp_f2 * temp_f26);
         spB4 = (*(f32 *)((u8 *)temp_s3 + 8)) + (temp_f12 * temp_f24);
-        sp.uF5 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x22)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x20));
-        sp.uEC = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1E)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x1C));
-        sp.uC0 = (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 0x10))) + (*(f32 *)((u8 *)temp_s0 + 0xC));
-        temp_f18 = (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 0x18))) + (*(f32 *)((u8 *)temp_s0 + 0x14));
+        sp.uF5 = (random_int() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x22)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x20));
+        sp.uEC = (random_int() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1E)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x1C));
+        sp.uC0 = (random_float() * (*(f32 *)((u8 *)temp_s0 + 0x10))) + (*(f32 *)((u8 *)temp_s0 + 0xC));
+        temp_f18 = (random_float() * (*(f32 *)((u8 *)temp_s0 + 0x18))) + (*(f32 *)((u8 *)temp_s0 + 0x14));
         sp.uC4 = temp_f20 * temp_f28;
         sp.uD0 = temp_f18;
         sp.uC8 = temp_f20 * temp_f30;

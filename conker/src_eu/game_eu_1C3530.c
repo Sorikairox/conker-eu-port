@@ -332,7 +332,7 @@ s32 func_15196344(s32 dl, s32 texId, s32 doubled, s32 which, s32 alwaysNew, s32 
 #endif
 
 // texture_anim_start_for: starts a texture animation on the model's texture set (arg0 +0x1C) and returns
-// func_15196344's handle (asm callers func_15116690 / func_1511D0CC / func_150BFC60 store v0; P172).
+// func_15196344's handle (asm callers scenery_start_pending_anim / scenery_rippling_wall_update / func_150BFC60 store v0; P172).
 s32 func_15195FB0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
     return func_15196344(*(s32 *)(arg0 + 0x1C), arg1, arg2, arg3, arg4, arg5, arg6);
 }
@@ -908,7 +908,7 @@ s32 func_151970BC(u8 *e) {
         pt->u1E = rec->u54;
         pt->alpha = 0xFF;
         pt->seed = rec->u50;
-        rec->u50 = rec->u50 + func_150ADA20() % 6U + 3;
+        rec->u50 = rec->u50 + random_int() % 6U + 3;
         pt->vel.y += rec->u40 * time;
         pt->pos.x += pt->vel.x * time;
         pt->pos.y += pt->vel.y * time;
@@ -1463,7 +1463,7 @@ void func_15198680(u8 *obj, s32 idx, f32 *unused2, u8 *unused3) {
     hdr.grow = (rec.grow0 + rec.grow1) * 0.5f;
     hdr.u38 = 0.0f;
     rec.grow = hdr.grow;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         hdr.type = 0x13;
     } else {
         hdr.type = 0x14;
@@ -1481,14 +1481,14 @@ void func_15198680(u8 *obj, s32 idx, f32 *unused2, u8 *unused3) {
     rec.vel1[1] = *(f32 *) (cur + 0x10);
     rec.vel1[2] = *(f32 *) (cur + 0x14);
     do {
-        a = func_150ADA20();
-        b = func_150ADA20();
+        a = random_int();
+        b = random_int();
         sa = angle_byte_cos(a - 0x40);
         ca = angle_byte_cos(a);
         sb = angle_byte_cos(b - 0x40);
         cb = angle_byte_cos(b);
         r = *(f32 *) (next + 0x18) * 0.8f;
-        hdr.life = (u32) func_150ADA20() % (u32) (kind->life_range + 1) + kind->life_min;
+        hdr.life = (u32) random_int() % (u32) (kind->life_range + 1) + kind->life_min;
         h = r * cb;
         dx = h * sa;
         dy = -r * sb;
@@ -1499,7 +1499,7 @@ void func_15198680(u8 *obj, s32 idx, f32 *unused2, u8 *unused3) {
         hdr.p1[0] = *(f32 *) (cur + 0) + dx;
         hdr.p1[1] = *(f32 *) (cur + 4) + dy;
         hdr.p1[2] = *(f32 *) (cur + 8) + dz;
-        fx = (u8 *) effect3d_spawn_default((s32) &hdr, 10, 11, 0, 9, (func_150ADA20() & 1 ? 1 : 0) | 2, 0x5C, 0xFF, 0);
+        fx = (u8 *) effect3d_spawn_default((s32) &hdr, 10, 11, 0, 9, (random_int() & 1 ? 1 : 0) | 2, 0x5C, 0xFF, 0);
         if (fx != NULL) {
             memcpy(fx + 0x110, &rec, 0x5C);
         }
@@ -1511,12 +1511,12 @@ void func_15198680(u8 *obj, s32 idx, f32 *unused2, u8 *unused3) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1505D024(struct127 *obj, s32 flags, u16 val, s32 arg3);
+s32 obj_send_hit(struct127 *obj, s32 flags, u16 val, s32 arg3);
 u8 *func_1518D1C0(u8 *obj, s16 type, s16 time, u8 clear, u8 view, s32 arg5, char *name);
 // path_flame_touch_player: path handler 0 of D_8008FC20 (`s32 (*)(u8 *)`, result tested by the path updater).
 // Walks back from the path's head point +0x2E to the current point +0x2D (ring of +0x25 points of 0x24 bytes at
 // +0x94); when player 0 (D_800CC2D0[0]: x +0x14, y +0x18 + s16 +0xE8, z +0x1C) is within its radius s16 +0xE4 of a
-// point (the height difference scaled by (1 + r / +0xE6) / 2), it is hurt (func_1505D024 flags 0x60006 with its u16
+// point (the height difference scaled by (1 + r / +0xE6) / 2), it is hurt (obj_send_hit flags 0x60006 with its u16
 // +0x7A, by the owner object **(arg0 + 0x98)), gets the flame-thrower effect (func_1518D1C0 type 0xB with the
 // emitter's +0x0C / +0x01), and the current point advances to that point (count +0x2C drops by one per step).
 // Always returns 1.
@@ -1545,7 +1545,7 @@ s32 func_15198AE0(u8 *arg0) {
         dz = pt[2] - *(f32 *) (player + 0x1C);
         dy = (pt[1] - (*(f32 *) (player + 0x18) + *(s16 *) (player + 0xE8))) * ((1.0f + radius / height) * 0.5f);
         if (dx * dx + dy * dy + dz * dz < radius * radius) {
-            func_1505D024(D_800CC2D0, 0x60006, *(u16 *) (player + 0x7A),
+            obj_send_hit(D_800CC2D0, 0x60006, *(u16 *) (player + 0x7A),
                           (s32) (*(u8 **) owner - (u8 *) D_800CC2D0) / 0x32C);
             func_1518D1C0(player, 0xB, 0, 1, arg0[0xC], arg0[1], "Characterflamethrower");
             while (i != *(s8 *) (arg0 + 0x2D)) {
@@ -1618,7 +1618,7 @@ s32 func_15198D3C(u8 *arg0) {
 
 #ifdef NON_MATCHING
 void func_1518403C(s32);
-s32 func_1510FE58(s32, s32, s32, s32 *);
+s32 collision_level_nearest_height(s32, s32, s32, s32 *);
 extern u8 D_8008FC40[3];
 // path_hit_scene_nodes: path handler 1 of D_8008FC20 (`s32 (*)(u8 *)`, result tested by the path updater). Returns 0
 // when the owner's (**(arg0 + 0x98)) attachment +0x31C is missing, or (clearing bit 0x100 of the owner's u16
@@ -1627,7 +1627,7 @@ extern u8 D_8008FC40[3];
 // point +0x2E back to the current point +0x2D (ring of +0x25 points of 0x24 bytes at +0x94, radius f32 +0x18), hits
 // the node when its position (+0x98 / +0x9C / +0xA0) is within radius^2 + 900 of a point: sound func_1518403C(5),
 // node_set_type(node, 0x18), state +0xED = 5, +0x94 = D_800DDE80[27], s16 +0x92 = 9, +0xB8 = +0xA8 = 40, +0xB4 = 0,
-// +0xC8 = func_1510FE58 at the node's position (then +0x91 = 4). As in the asm, the walk index is set once per list,
+// +0xC8 = collision_level_nearest_height at the node's position (then +0x91 = 4). As in the asm, the walk index is set once per list,
 // so only the first node of each list sees the points (later nodes start at +0x2D). Returns 1.
 s32 func_15198EEC(u8 *arg0) {
     u8 *points = *(u8 **) (arg0 + 0x94);
@@ -1688,7 +1688,7 @@ s32 func_15198EEC(u8 *arg0) {
                     *(f32 *) (n + 0xB8) = 40.0f;
                     *(f32 *) (n + 0xA8) = 40.0f;
                     *(f32 *) (n + 0xB4) = 0.0f;
-                    v = func_1510FE58((s32) *(f32 *) (n + 0x98), (s32) *(f32 *) (n + 0x9C), (s32) *(f32 *) (n + 0xA0),
+                    v = collision_level_nearest_height((s32) *(f32 *) (n + 0x98), (s32) *(f32 *) (n + 0x9C), (s32) *(f32 *) (n + 0xA0),
                                       NULL);
                     n[0x91] = 4;
                     *(f32 *) (n + 0xC8) = v;
@@ -1814,9 +1814,9 @@ void func_151992F8(u8 *arg0, u8 *arg1) {
     sp.u124 = 0;
     sp.u125 = 9;
     do {
-        temp_f20 = (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 8))) + (*(f32 *)((u8 *)temp_s0 + 4));
-        temp_s1 = func_150ADA20() & 0xFF;
-        temp_s2 = func_150ADA20() & 0xFF;
+        temp_f20 = (random_float() * (*(f32 *)((u8 *)temp_s0 + 8))) + (*(f32 *)((u8 *)temp_s0 + 4));
+        temp_s1 = random_int() & 0xFF;
+        temp_s2 = random_int() & 0xFF;
         temp_f22 = angle_byte_cos((temp_s1 - 0x40) & 0xFF);
         temp_f24 = angle_byte_cos(temp_s1 & 0xFF);
         temp_f26 = angle_byte_cos((temp_s2 - 0x40) & 0xFF);
@@ -1825,10 +1825,10 @@ void func_151992F8(u8 *arg0, u8 *arg1) {
         temp_f28 = (*(f32 *)((u8 *)arg1 + 0)) + (temp_f12 * temp_f22);
         temp_f30 = (*(f32 *)((u8 *)arg1 + 4)) - (temp_f2 * temp_f26);
         spBC = (*(f32 *)((u8 *)arg1 + 8)) + (temp_f12 * temp_f24);
-        sp.uFD = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x22)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x20));
-        sp.uF4 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1E)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x1C));
-        sp.uC8 = (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 0x10))) + (*(f32 *)((u8 *)temp_s0 + 0xC));
-        sp.uD8 = (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 0x18))) + (*(f32 *)((u8 *)temp_s0 + 0x14));
+        sp.uFD = (random_int() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x22)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x20));
+        sp.uF4 = (random_int() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1E)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x1C));
+        sp.uC8 = (random_float() * (*(f32 *)((u8 *)temp_s0 + 0x10))) + (*(f32 *)((u8 *)temp_s0 + 0xC));
+        sp.uD8 = (random_float() * (*(f32 *)((u8 *)temp_s0 + 0x18))) + (*(f32 *)((u8 *)temp_s0 + 0x14));
         sp.uCC = (temp_f28 - (*(f32 *)((u8 *)arg0 + 0x10))) * temp_f20;
         sp.uD0 = (temp_f30 - (*(f32 *)((u8 *)arg0 + 0x14))) * temp_f20;
         sp.uD4 = (spBC - (*(f32 *)((u8 *)arg0 + 0x18))) * temp_f20;
@@ -1917,9 +1917,9 @@ void func_1519961C(u8 *arg0, u8 *arg1) {
     t.u28 = 300;
     t.u14 = *(f32 *)(arg0 + 0x18);
     do {
-        speed = func_150ADA68() * *(f32 *)(desc + 8) + *(f32 *)(desc + 4);
-        a = func_150ADA20() & 0xFF;
-        b = func_150ADA20() & 0xFF;
+        speed = random_float() * *(f32 *)(desc + 8) + *(f32 *)(desc + 4);
+        a = random_int() & 0xFF;
+        b = random_int() & 0xFF;
         sinA = angle_byte_cos((a - 0x40) & 0xFF);
         cosA = angle_byte_cos(a);
         sinB = angle_byte_cos((b - 0x40) & 0xFF);
@@ -1928,9 +1928,9 @@ void func_1519961C(u8 *arg0, u8 *arg1) {
         t.u16 = ((*(f32 *)(arg1 + 0) + ring * sinA) - *(f32 *)(arg0 + 0x10)) * speed;
         t.u20 = ((*(f32 *)(arg1 + 4) - radius * sinB) - *(f32 *)(arg0 + 0x14)) * speed;
         t.u18 = ((*(f32 *)(arg1 + 8) + ring * cosA) - *(f32 *)(arg0 + 0x18)) * speed;
-        t.u22 = func_150ADA20() % (u32) (*(s16 *)(desc + 0xE) + 1) + *(s16 *)(desc + 0xC);
-        t.u2A = func_150ADA20() % (u32) (*(s16 *)(desc + 0x12) + 1) + *(s16 *)(desc + 0x10);
-        v = func_150ADA20() % (u32) (*(s16 *)(desc + 0x16) + 1) + *(s16 *)(desc + 0x14);
+        t.u22 = random_int() % (u32) (*(s16 *)(desc + 0xE) + 1) + *(s16 *)(desc + 0xC);
+        t.u2A = random_int() % (u32) (*(s16 *)(desc + 0x12) + 1) + *(s16 *)(desc + 0x10);
+        v = random_int() % (u32) (*(s16 *)(desc + 0x16) + 1) + *(s16 *)(desc + 0x14);
         t.u26 = v;
         t.u24 = v;
         node_spawn_sprite(&t, 0, 0, -1, arg0[0xC], arg0[1]);
@@ -2500,7 +2500,7 @@ s32 func_1519A1A4(u8 *e) {
 
     /* first spray: func_15148310 sparks towards tgt */
     if (*(u8 **) (obj + 0x1D4) != NULL && (obj[0x74] & 0xF) != 0xF) {
-        r = func_150ADA68();
+        r = random_float();
         rec->u138 += (spr->rate + r * spr->rateRnd) * D_800BE9A4;
         if (1.0f < rec->u138) {
             sparkDraw.u00 = 0;
@@ -2522,9 +2522,9 @@ s32 func_1519A1A4(u8 *e) {
             sparkMove.u1C = spr->u18;
             sparkMove.u1E = spr->u1A;
             do {
-                spark.shade = (u32) func_150ADA20() % (u32) (spr->shadeRnd + 1) + spr->shade;
-                spark.life = (u32) func_150ADA20() % (u32) (spr->lifeRnd + 1) + spr->life;
-                sparkMove.size = func_150ADA68() * spr->sizeRnd + spr->size;
+                spark.shade = (u32) random_int() % (u32) (spr->shadeRnd + 1) + spr->shade;
+                spark.life = (u32) random_int() % (u32) (spr->lifeRnd + 1) + spr->life;
+                sparkMove.size = random_float() * spr->sizeRnd + spr->size;
                 spark.pos[0] = pos[0];
                 spark.pos[1] = pos[1];
                 spark.pos[2] = pos[2];
@@ -2532,14 +2532,14 @@ s32 func_1519A1A4(u8 *e) {
                 off[1] = tgt[1] - spark.pos[1];
                 off[2] = tgt[2] - spark.pos[2];
                 if (func_15146078(off, u, v)) {
-                    speed = func_150ADA68() * spr->speedRnd + spr->speed;
-                    angle = func_150ADA20();
-                    func_15143874(angle & 0xFF, func_150ADA68() * spr->spreadRnd, &cs, &sn);
+                    speed = random_float() * spr->speedRnd + spr->speed;
+                    angle = random_int();
+                    func_15143874(angle & 0xFF, random_float() * spr->spreadRnd, &cs, &sn);
                     sparkMove.vel[0] = (u[0] * cs + v[0] * sn + off[0]) * speed;
                     sparkMove.vel[1] = (u[1] * cs + v[1] * sn + off[1]) * speed;
                     sparkMove.vel[2] = (u[2] * cs + v[2] * sn + off[2]) * speed;
-                    sparkMove.u10 = func_150ADA68() * spr->u10Rnd + spr->u10;
-                    r = func_150ADA68();
+                    sparkMove.u10 = random_float() * spr->u10Rnd + spr->u10;
+                    r = random_float();
                     sparkMove.rgba[3] = EMIT2_F2U(r * (f32) spr->alphaRnd + (f32) spr->alpha);
                     func_15148310((u8 *) &spark, (s32) &sparkMove, 0, 1, 0, 0, 0, 0, 0, 0, 0, (u8 *) &sparkDraw, 0,
                                   e[0xC], e[1]);
@@ -2551,7 +2551,7 @@ s32 func_1519A1A4(u8 *e) {
 
     /* second spray: func_151307F0 sprites towards tgt2 */
     if (*(u8 **) (obj + 0x1D4) != NULL && (obj[0x74] & 0xF) != 0xF) {
-        r = func_150ADA68();
+        r = random_float();
         rec->u13C += (spr->rate2 + r * spr->rate2Rnd) * D_800BE9A4;
         if (1.0f < rec->u13C) {
             sprite.u1D = 0x28;
@@ -2585,20 +2585,20 @@ s32 func_1519A1A4(u8 *e) {
             sprite.u65 = 0;
             sprite.u20 = spr->u20;
             do {
-                sprite.life = (u32) func_150ADA20() % (u32) (spr->life2Rnd + 1) + spr->life2;
-                sprite.shade = (u32) func_150ADA20() % (u32) (spr->shade2Rnd + 1) + spr->shade2;
-                sprite.size2 = sprite.size = func_150ADA68() * spr->size2Rnd + spr->size2;
+                sprite.life = (u32) random_int() % (u32) (spr->life2Rnd + 1) + spr->life2;
+                sprite.shade = (u32) random_int() % (u32) (spr->shade2Rnd + 1) + spr->shade2;
+                sprite.size2 = sprite.size = random_float() * spr->size2Rnd + spr->size2;
                 off[0] = tgt2[0] - sprite.pos[0];
                 off[1] = tgt2[1] - sprite.pos[1];
                 off[2] = tgt2[2] - sprite.pos[2];
                 if (func_15146078(off, u, v)) {
-                    speed = func_150ADA68() * spr->speed2Rnd + spr->speed2;
-                    angle = func_150ADA20();
-                    func_15143874(angle & 0xFF, func_150ADA68() * spr->spread2Rnd, &cs, &sn);
+                    speed = random_float() * spr->speed2Rnd + spr->speed2;
+                    angle = random_int();
+                    func_15143874(angle & 0xFF, random_float() * spr->spread2Rnd, &cs, &sn);
                     sprite.vel[0] = (u[0] * cs + v[0] * sn + off[0]) * speed;
                     sprite.vel[1] = (u[1] * cs + v[1] * sn + off[1]) * speed;
                     sprite.vel[2] = (u[2] * cs + v[2] * sn + off[2]) * speed;
-                    sprite.u54 = func_150ADA68() * spr->u54Rnd + spr->u54;
+                    sprite.u54 = random_float() * spr->u54Rnd + spr->u54;
                     func_151307F0((s32) &sprite, 1, 0, 0, e[0xC], e[1]);
                 }
                 rec->u13C -= 1.0f;
@@ -2619,12 +2619,12 @@ s32 func_1519A1A4(u8 *e) {
         rec->u152 -= D_800BE9E4;
         if (rec->u152 < 0) {
             burst.unk0 = 1;
-            burst.unk2 = (u32) func_150ADA20() % 21 + 20;
+            burst.unk2 = (u32) random_int() % 21 + 20;
             burst.unk5 = 1 << (*(u8 **) (obj + 0x318))[0x23D];
-            burst.unk4 = (u32) func_150ADA20() % 7 + 2;
+            burst.unk4 = (u32) random_int() % 7 + 2;
             burst.unk6 = -1;
             func_151D8E18(&burst, 0, e[0xC], e[1]);
-            rec->u152 = (u32) func_150ADA20() % 21 + 0x78;
+            rec->u152 = (u32) random_int() % 21 + 0x78;
         }
     }
     return 1;
@@ -2642,8 +2642,8 @@ f32 func_15143E64(struct17 *);
 f32 func_15144528(f32, f32, f32);
 void func_15143794(s16, s16, f32, void *);
 void func_1508B20C(f32, f32, f32, f32);
-f32 func_150ADA68(void);
-s32 func_150ADA20(void);
+f32 random_float(void);
+s32 random_int(void);
 void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 extern s32 (*D_8008FC48[])(u8 *); /* func_1519CEB8 / func_1519CEE0 / func_1519CF08: all take the trail object only */
 
@@ -2841,7 +2841,7 @@ s32 func_1519AF14(u8 *obj) {
 
     /* 5. sparks */
     if ((s8)obj[0x2C] >= 3 && !((st[0x150] & 0x20) && (st[0x150] & 0x10)) && maxLen <= *(f32 *)(st + 0x14C)) {
-        *(f32 *)(st + 0x134) += (*(f32 *)(st + 0x4C) + func_150ADA68() * *(f32 *)(st + 0x50)) *
+        *(f32 *)(st + 0x134) += (*(f32 *)(st + 0x4C) + random_float() * *(f32 *)(st + 0x50)) *
                                 pts[(s8)obj[0x2D]].width * D_800BE9A4;
         if (1.0f < *(f32 *)(st + 0x134)) {
             tail = (s8)obj[0x2D];
@@ -2910,9 +2910,9 @@ s32 func_1519AF14(u8 *obj) {
             pOld = &pts[tail];
             pNew = &pts[next];
             do {
-                sizeA = func_150ADA68() * *(f32 *)(st + 0x60) + *(f32 *)(st + 0x58);
-                sizeB = func_150ADA68() * *(f32 *)(st + 0x64) + *(f32 *)(st + 0x5C);
-                speed = func_150ADA68() * *(f32 *)(st + 0x6C) + *(f32 *)(st + 0x68);
+                sizeA = random_float() * *(f32 *)(st + 0x60) + *(f32 *)(st + 0x58);
+                sizeB = random_float() * *(f32 *)(st + 0x64) + *(f32 *)(st + 0x5C);
+                speed = random_float() * *(f32 *)(st + 0x6C) + *(f32 *)(st + 0x68);
                 spec.sizeA = 24.222889f * sizeA;
                 spec.sizeB = 3.4404585f * sizeB;
                 mot.vel0[0] = pNew->dir[0] * speed;
@@ -2921,19 +2921,19 @@ s32 func_1519AF14(u8 *obj) {
                 mot.vel1[0] = pOld->dir[0] * speed;
                 mot.vel1[1] = pOld->dir[1] * speed;
                 mot.vel1[2] = pOld->dir[2] * speed;
-                mot.spin = func_150ADA68() * *(f32 *)(st + 0x74) + *(f32 *)(st + 0x70);
-                spec.kind = (func_150ADA20() & 1) ? 0x13 : 0x14;
-                spec.life = (u32)func_150ADA20() % (u32)(*(s16 *)(st + 0x56) + 1) + *(s16 *)(st + 0x54);
-                r1 = func_150ADA20();
-                func_15143794(r1 & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, width, &jit);
+                mot.spin = random_float() * *(f32 *)(st + 0x74) + *(f32 *)(st + 0x70);
+                spec.kind = (random_int() & 1) ? 0x13 : 0x14;
+                spec.life = (u32)random_int() % (u32)(*(s16 *)(st + 0x56) + 1) + *(s16 *)(st + 0x54);
+                r1 = random_int();
+                func_15143794(r1 & 0xFF, (random_int() & 0x7F) - 0x3F, width, &jit);
                 spec.p0[0] = pos.unk0 + jit.unk0;
                 spec.p0[1] = pos.unk4 + jit.unk4;
                 spec.p0[2] = pos.unk8 + jit.unk8;
                 spec.p1[0] = spec.p0[0] + seg.unk0;
                 spec.p1[1] = spec.p0[1] + seg.unk4;
                 spec.p1[2] = spec.p0[2] + seg.unk8;
-                spec.frame = (u32)func_150ADA20() % (u32)(st[0x89] + 1) + st[0x88];
-                spark = effect3d_spawn_full(&spec, (s32)&D_800A4AA0, 0x1F, 0x22, 0, 0x1A, (func_150ADA20() & 1) | 2, 0, 0,
+                spec.frame = (u32)random_int() % (u32)(st[0x89] + 1) + st[0x88];
+                spark = effect3d_spawn_full(&spec, (s32)&D_800A4AA0, 0x1F, 0x22, 0, 0x1A, (random_int() & 1) | 2, 0, 0,
                                       0x2C, obj[0xC], obj[1]);
                 if (spark != NULL) {
                     memcpy(spark + 0x110, &mot, 0x2C);
@@ -3776,7 +3776,7 @@ void func_1519D2D4(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-// path_trail_spawn_effects: spawns effect `kind` (func_1505D1C4) at even spacing along the path of `arg0` (needs a
+// path_trail_spawn_effects: spawns effect `kind` (attack_spawn_at_point) at even spacing along the path of `arg0` (needs a
 // count +0x2C >= 2): walks back from the head point +0x2E to the current point +0x2D (ring of +0x25 points of 0x28
 // bytes at +0x94, +0x1C = segment length), starting from the position at +0x10; whenever the walked length reaches
 // the next mark (0, then every owner +0x14C * step), one effect is spawned on that segment, interpolated back towards
@@ -3813,7 +3813,7 @@ void func_1519D320(s32 arg0, f32 step, s32 kind) {
         if (mark <= walked) {
             obj = *(u8 **) owner;
             t = (walked - mark) / len;
-            func_1505D1C4(pt[0] + (prev[0] - pt[0]) * t, pt[1] + (prev[1] - pt[1]) * t, pt[2] + (prev[2] - pt[2]) * t,
+            attack_spawn_at_point(pt[0] + (prev[0] - pt[0]) * t, pt[1] + (prev[1] - pt[1]) * t, pt[2] + (prev[2] - pt[2]) * t,
                           kind, (s32) (obj - (u8 *) D_800CC2D0) / 0x32C, *(u16 *) (obj + 0x76), 0, 0);
             mark += spacing;
         }

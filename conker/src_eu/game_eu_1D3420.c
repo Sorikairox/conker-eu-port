@@ -123,10 +123,10 @@ void func_151A5C10(u8 *arg0) {
                     temp_f22 = angle_byte_cos((temp_t3 - 0x40) & 0xFF);
                     temp_f24 = angle_byte_cos(temp_t3 & 0xFF);
                     temp_v0_3 = (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 0))) + 6));
-                    temp_f26 = (func_150ADA68() * (2.0f * (f32) temp_v0_3)) + (f32) -temp_v0_3;
+                    temp_f26 = (random_float() * (2.0f * (f32) temp_v0_3)) + (f32) -temp_v0_3;
                     temp_v0_4 = (*(u8 **)((u8 *)temp_s0 + 0));
                     temp_a1 = (*(s16 *)((u8 *)temp_v0_4 + 0xA));
-                    temp_f2 = (func_150ADA68() * (2.0f * (f32) temp_a1)) + (f32) -temp_a1;
+                    temp_f2 = (random_float() * (2.0f * (f32) temp_a1)) + (f32) -temp_a1;
                     sp.uBC = (f32) (*(s16 *)((u8 *)temp_v0_4 + 0)) + ((temp_f26 * temp_f24) + (temp_f2 * temp_f22));
                     sp.uC4 = (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 0))) + 4)) + ((temp_f2 * temp_f24) - (temp_f26 * temp_f22));
                     temp_v0_5 = (*(u8 **)((u8 *)temp_s0 + 0));
@@ -136,11 +136,11 @@ void func_151A5C10(u8 *arg0) {
                     var_f20 = (f32) (temp_v1_2 - temp_a0_3);
                     break;
                 case 0:
-                    temp_v0_6 = func_150ADA20();
+                    temp_v0_6 = random_int();
                     temp_f22_2 = angle_byte_cos((temp_v0_6 - 0x40) & 0xFF);
                     temp_f24_2 = angle_byte_cos(temp_v0_6 & 0xFF & 0xFF);
                     temp_v0_7 = (*(u8 **)((u8 *)temp_s0 + 0));
-                    temp_f2_2 = func_150ADA68() * (f32) (*(s16 *)((u8 *)temp_v0_7 + 6));
+                    temp_f2_2 = random_float() * (f32) (*(s16 *)((u8 *)temp_v0_7 + 6));
                     sp.uBC = (f32) (*(s16 *)((u8 *)temp_v0_7 + 0)) + (temp_f2_2 * temp_f24_2);
                     sp.uC4 = (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 0))) + 4)) - (temp_f2_2 * temp_f22_2);
                     temp_v0_8 = (*(u8 **)((u8 *)temp_s0 + 0));
@@ -149,11 +149,11 @@ void func_151A5C10(u8 *arg0) {
                     var_f14 = (f32) (temp_v1_3 + (*(s16 *)((u8 *)temp_v0_8 + 8)));
                     break;
                 case 1:
-                    temp_v0_9 = func_150ADA20();
+                    temp_v0_9 = random_int();
                     temp_f22_3 = angle_byte_cos((temp_v0_9 - 0x40) & 0xFF);
                     temp_f24_3 = angle_byte_cos(temp_v0_9 & 0xFF & 0xFF);
                     temp_v0_10 = (*(u8 **)((u8 *)temp_s0 + 0));
-                    temp_f2_3 = func_150ADA68() * (f32) (*(s16 *)((u8 *)temp_v0_10 + 6));
+                    temp_f2_3 = random_float() * (f32) (*(s16 *)((u8 *)temp_v0_10 + 6));
                     sp.uBC = (f32) (*(s16 *)((u8 *)temp_v0_10 + 0)) + (temp_f2_3 * temp_f24_3);
                     sp.uC4 = (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 0))) + 4)) - (temp_f2_3 * temp_f22_3);
                     temp_v0_11 = (*(u8 **)((u8 *)temp_s0 + 0));
@@ -175,19 +175,19 @@ void func_151A5C10(u8 *arg0) {
                 } else {
                     sp.uC0 = var_f20;
                 }
-                temp_f20 = (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 0x18))) + (*(f32 *)((u8 *)temp_s0 + 0x14));
-                temp_f2_4 = (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 0x20))) + (*(f32 *)((u8 *)temp_s0 + 0x1C));
+                temp_f20 = (random_float() * (*(f32 *)((u8 *)temp_s0 + 0x18))) + (*(f32 *)((u8 *)temp_s0 + 0x14));
+                temp_f2_4 = (random_float() * (*(f32 *)((u8 *)temp_s0 + 0x20))) + (*(f32 *)((u8 *)temp_s0 + 0x1C));
                 temp_f18 = 57.969f * temp_f2_4;
                 sp.uC8 = 22.6f * temp_f20;
                 sp.uD0 = 13.786f * temp_f20;
                 sp.uCC = temp_f18;
                 sp.uD4 = 42.714f * temp_f2_4;
                 sp.uD8 = 118.763f * temp_f2_4;
-                sp.uE0 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x26)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x24));
-                sp.uF4 = (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 0x2C))) + (*(f32 *)((u8 *)temp_s0 + 0x28));
-                sp.uFC = (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 0x34))) + (*(f32 *)((u8 *)temp_s0 + 0x30));
-                sp.u100 = (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 0x3C))) + (*(f32 *)((u8 *)temp_s0 + 0x38));
-                sp.uE8 = (func_150ADA20() % (u32) ((*(u8 *)((u8 *)temp_s0 + 0x42)) + 1)) + (*(u8 *)((u8 *)temp_s0 + 0x41));
+                sp.uE0 = (random_int() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x26)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x24));
+                sp.uF4 = (random_float() * (*(f32 *)((u8 *)temp_s0 + 0x2C))) + (*(f32 *)((u8 *)temp_s0 + 0x28));
+                sp.uFC = (random_float() * (*(f32 *)((u8 *)temp_s0 + 0x34))) + (*(f32 *)((u8 *)temp_s0 + 0x30));
+                sp.u100 = (random_float() * (*(f32 *)((u8 *)temp_s0 + 0x3C))) + (*(f32 *)((u8 *)temp_s0 + 0x38));
+                sp.uE8 = (random_int() % (u32) ((*(u8 *)((u8 *)temp_s0 + 0x42)) + 1)) + (*(u8 *)((u8 *)temp_s0 + 0x41));
                 func_15149AC0(&sp.uBC, 0xA, 0, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 (*(f32 *)((u8 *)temp_s0 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0xC)) - 1.0f);
             } while ((*(f32 *)((u8 *)temp_s0 + 0xC)) > 1.0f);
@@ -303,9 +303,9 @@ struct210 *func_151A6308(f32 arg0, u8 arg1, s32 arg2, u8 *arg3, s16 arg4, u8 arg
     sp.u72 = 0;
     sp.u73 = 6;
     sp.u7C = 0xFF;
-    sp48 = func_150ADA20();
-    sp4C = func_150ADA20();
-    temp_t0 = func_150ADA20();
+    sp48 = random_int();
+    sp4C = random_int();
+    temp_t0 = random_int();
     if (arg5 != 0) {
         var_v1 = 3;
     } else {
@@ -417,11 +417,11 @@ void func_151A6618(u8 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
 
     tmp.p = arg0;
     tmp.u4 = 0.0f;
-    tmp.u8 = (func_150ADA68() * 80.0f) + -380.0f;
-    tmp.uC = (func_150ADA68() * D_800A9178) + D_800A917C;
+    tmp.u8 = (random_float() * 80.0f) + -380.0f;
+    tmp.uC = (random_float() * D_800A9178) + D_800A917C;
     tmp.u10 = 0;
-    tmp.u14 = func_150ADA20() & 0xFF;
-    tmp.u15 = (func_150ADA20() & 3) + 4;
+    tmp.u14 = random_int() & 0xFF;
+    tmp.u15 = (random_int() & 3) + 4;
     tmp.u16 = 0xFF;
     tmp.u18 = 0.0f;
     tmp.u17 = arg3;
@@ -472,7 +472,7 @@ void func_151A6618(u8 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
         }
     }
     if (arg2 != 0) {
-        func_1000FA64(0x1AA, *(s16 *)(arg0 + 0), *(s16 *)(arg0 + 2), *(s16 *)(arg0 + 4), 0x4000, 0x3E8, 0x2EE, (s32)func_1000EF40, arg0, 0, 8, func_150ADA20() & 0x300);
+        func_1000FA64(0x1AA, *(s16 *)(arg0 + 0), *(s16 *)(arg0 + 2), *(s16 *)(arg0 + 4), 0x4000, 0x3E8, 0x2EE, (s32)func_1000EF40, arg0, 0, 8, random_int() & 0x300);
     }
 }
 
@@ -619,7 +619,7 @@ s32 func_151A6BB0(u8 *fx) {
     if (func_151464B8(*(s32 *)(fx + 0x60)) != 0) {
         return 1;
     }
-    mv[6] += (D_800A9180 + func_150ADA68() * D_800A9184) * D_800BE9A4;
+    mv[6] += (D_800A9180 + random_float() * D_800A9184) * D_800BE9A4;
     if (mv[6] > 1.0f) {
         req.u1D = 0x28;
         req.u8 = 0x2203;
@@ -649,21 +649,21 @@ s32 func_151A6BB0(u8 *fx) {
         req.u60[4] = -1;
         req.u60[5] = 0;
         do {
-            r0 = func_150ADA20();
+            r0 = random_int();
             src = *(s16 **)(fx + 0x110);
-            func_15143874(r0 & 0xFF, func_150ADA68() * src[3], &req.pos[0], &req.pos[2]);
+            func_15143874(r0 & 0xFF, random_float() * src[3], &req.pos[0], &req.pos[2]);
             src = *(s16 **)(fx + 0x110);
             req.pos[0] += src[0];
             req.pos[1] = src[1];
             req.pos[2] += src[2];
-            req.sprite = (func_150ADA20() & 0xF) + 0x19;
-            req.life = (func_150ADA20() % 101U) + 100;
-            req.size[0] = req.size[1] = func_150ADA68() * 205.0f + 98.0f;
-            r0 = func_150ADA20();
-            r1 = func_150ADA20();
-            rf = func_150ADA68();
+            req.sprite = (random_int() & 0xF) + 0x19;
+            req.life = (random_int() % 101U) + 100;
+            req.size[0] = req.size[1] = random_float() * 205.0f + 98.0f;
+            r0 = random_int();
+            r1 = random_int();
+            rf = random_float();
             func_15143794(r0 & 0xFF, ((u32)r1 % 35U) - 0x40, rf * 10.0f + 10.0f, req.vel);
-            req.fade = func_150ADA68() * D_800A918C + D_800A9188;
+            req.fade = random_float() * D_800A918C + D_800A9188;
             func_151307F0((s32)&req, 1, 0, 0, fx[0xC], fx[1]);
             mv[6] -= 1.0f;
         } while (mv[6] > 1.0f);
@@ -698,7 +698,7 @@ void func_151A70EC(struct210 * arg0) {
 }
 
 u8 *func_151A7188(s32);
-s32 func_1505D024();
+s32 obj_send_hit();
 void func_151A7118(u8 *arg0, s32 arg1) {
     s32 pad; // fakematch: unused local moves v to sp18
     struct127 *v = NULL;
@@ -713,7 +713,7 @@ void func_151A7118(u8 *arg0, s32 arg1) {
     } else {
         a3 = -1;
     }
-    func_1505D024(arg0, 0x60034, *(u16 *)(arg0 + 0x7A), a3);
+    obj_send_hit(arg0, 0x60034, *(u16 *)(arg0 + 0x7A), a3);
 }
 
 u8 *func_151A7188(s32 arg0) {
@@ -779,7 +779,7 @@ void func_151A7240(u8 *obj, u8 arg1, s32 arg2) {
     if (obj == NULL) {
         return;
     }
-    f.spray.count = (func_150ADA20() & 3) + 6;
+    f.spray.count = (random_int() & 3) + 6;
     f.spray.pos[0] = f.pos[0];
     f.spray.pos[1] = f.pos[1];
     f.spray.pos[2] = f.pos[2];
@@ -810,9 +810,9 @@ void func_151A7240(u8 *obj, u8 arg1, s32 arg2) {
     func_151D58E4((u8 *) f.pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
     func_151D45A4((u8 *) f.pos, arg1, arg2);
     func_151D5AC4((u8 *) f.pos, arg1, arg2);
-    r = func_150ADA68();
+    r = random_float();
     size = r * 4.0f + 12.0f;
-    func_15154728((u8 *) f.pos, size, 1.6409999f, (f32) ((u32) func_150ADA20() % 56 + 200), 0.0f, arg1, arg2);
+    func_15154728((u8 *) f.pos, size, 1.6409999f, (f32) ((u32) random_int() % 56 + 200), 0.0f, arg1, arg2);
     func_151D5404((struct17 *) f.pos, 1502.0f, 3000.0f, 0.00033333333f, 0xC, 0xF, 0xFF, 0);
 }
 #else

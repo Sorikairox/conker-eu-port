@@ -6,7 +6,7 @@
 
 void func_1500ED80(void) {
     func_15177410(1, 0xD8, -0xDAC, 0, 0x4BB, 0.0f, 15000, 30.0f, 0x4D, 0xF, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F);
-    func_150124A0();
+    pipe_spray_points_init();
 }
 
 void func_1500EE18(struct127 *arg0, s32 arg1, s32 arg2) {

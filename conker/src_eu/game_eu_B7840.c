@@ -9,7 +9,7 @@ void func_15089BB0(void) {
 
 #ifdef NON_MATCHING
 void func_1508C07C(void);
-s8 *func_1509B570(s32);
+s8 *event_get_vars(s32);
 extern s32 D_80087650;
 extern s32 D_80087690;
 extern s32 D_80087698;
@@ -24,7 +24,7 @@ s32 func_1508A040(void) {
 
     temp_a0 = D_800D3268;
     sp1C = temp_a0;
-    temp_v0 = func_1509B570(temp_a0);
+    temp_v0 = event_get_vars(temp_a0);
     if (temp_v0 == NULL) {
         return 0;
     }
@@ -451,9 +451,9 @@ s32 func_1508AB7C(void) {
                     /* boost point: random spot within 50 of the racer, 40 above it, pulled halfway to the target */
                     boost[i] = 0x1E;
                     ((f32 *) ((u8 *) D_800D27D0 + 0x1868))[i] = ((f32 *) &D_80087698)[D_800E1000];
-                    ((f32 *) ((u8 *) D_800D27D0 + 0x17A8))[i] = func_150ADA68() * 50.0f + *(f32 *) (obj + 0x14);
+                    ((f32 *) ((u8 *) D_800D27D0 + 0x17A8))[i] = random_float() * 50.0f + *(f32 *) (obj + 0x14);
                     ((f32 *) ((u8 *) D_800D27D0 + 0x17E8))[i] = *(f32 *) (obj + 0x18) + 40.0f;
-                    ((f32 *) ((u8 *) D_800D27D0 + 0x1828))[i] = func_150ADA68() * 50.0f + *(f32 *) (obj + 0x1C);
+                    ((f32 *) ((u8 *) D_800D27D0 + 0x1828))[i] = random_float() * 50.0f + *(f32 *) (obj + 0x1C);
                     if (target[i] - 2 >= 2) {
                         other = (u8 *) &D_800CC2D0[target[i] - 2];
                         ((f32 *) ((u8 *) D_800D27D0 + 0x17A8))[i] +=
@@ -490,13 +490,13 @@ s32 func_1508AB7C(void) {
                 /* new random steering offsets */
                 ((s8 *) D_800D27D0)[0x1705 + i] = 0;
                 ((s8 *) D_800D27D0)[0x1715 + i] = 0;
-                if (D_80087688[D_800E1000] < (s32) (func_150ADA68() * 100.0f)) {
-                    if (0.5f < func_150ADA68()) {
+                if (D_80087688[D_800E1000] < (s32) (random_float() * 100.0f)) {
+                    if (0.5f < random_float()) {
                         ((s8 *) D_800D27D0)[0x1705 + i] = -50;
                     } else {
                         ((s8 *) D_800D27D0)[0x1705 + i] = 50;
                     }
-                    if (0.5f < func_150ADA68()) {
+                    if (0.5f < random_float()) {
                         ((s8 *) D_800D27D0)[0x1715 + i] = 50;
                     } else {
                         ((s8 *) D_800D27D0)[0x1715 + i] = 0;
@@ -529,12 +529,12 @@ s32 func_1508AB7C(void) {
         /* each player's counter, centred on its viewport */
         view = *(u8 **) &D_800BE628;
         half = (s32) (*(f32 *) (view + 0x30) - *(f32 *) (view + 0x2C)) >> 1;
-        func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
+        text_set_color(0xFF, 0xFF, 0xFF, 0xFF);
         obj = (u8 *) D_800CC2D0;
         for (i = 0; i <= D_80082FA0; i++, obj += 0x32C) {
             if (obj[0x128] == 0) {
                 view = *(u8 **) &D_800BE628 + i * 0x180;
-                func_15042D94((s32) (*(f32 *) (view + 0x2C) + (f32) half), (s32) (*(f32 *) (view + 0x24) + 6.0f), 1,
+                text_printf_at((s32) (*(f32 *) (view + 0x2C) + (f32) half), (s32) (*(f32 *) (view + 0x24) + 6.0f), 1,
                               (s32) "%d", counter[i] / 50);
             }
         }
@@ -794,7 +794,7 @@ s32 func_1508BE18(void) {
 #ifdef NON_MATCHING
 /*
  * rail_lane_shuffle: P230: for each of the D_8008FD8C racers (row i = D_800D27D0 + 0x15B4 + i * 0x10), picks a
- * random free start column (func_150ADA68 * n, then steps in a random direction past the columns already taken
+ * random free start column (random_float * n, then steps in a random direction past the columns already taken
  * this row) and writes a triangle wave into the row from there: 0x55, + step, ... (step = 0xAA / max(n / 2, 2),
  * negated each time the value reaches 0x100; values >= 0x100 are stored as 0xFF), wrapping at column n.
  */
@@ -822,8 +822,8 @@ void func_1508C07C(void) {
         for (k = 0; k < 16; k++) {
             used[k] = 0;
         }
-        j = (s32) (func_150ADA68() * nf);
-        if (func_150ADA68() > 0.5f) {
+        j = (s32) (random_float() * nf);
+        if (random_float() > 0.5f) {
             dir = 1;
         }
         while (used[j] != 0) {
@@ -939,7 +939,7 @@ s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f
 extern s16 D_80087664[];
 
 // rail_pair_sight: P237. Line-of-sight test between rail racers a and b (func_1508CA14 pairs them). Each racer's
-// record (func_1505EEF4(id & 0xFFFF0FFF)) gives an eye point: a racer whose state block (+0x31C) has +0x84 set
+// record (obj_find_by_spawn(id & 0xFFFF0FFF)) gives an eye point: a racer whose state block (+0x31C) has +0x84 set
 // looks from y + 0.75 * height (+0x114, s16), 50 lower for state kind 9 (+0x75 & 0x7F); a record of kind 0x1F from
 // y + 80; when only the OTHER racer has +0x84 set and the difficulty's D_80087664 entry is not -1, from the s16
 // point +0x1A4 / +0x1A6 / +0x1A8; else from y + 40. The ray a -> b is cast with func_150ACEA0: no hit, or a hit
@@ -953,8 +953,8 @@ void func_1508C600(s32 a, s32 b) {
 
     clear = 0;
     seen = 0;
-    ra = (u8 *) func_1505EEF4(a & 0xFFFF0FFF);
-    rb = (u8 *) func_1505EEF4(b & 0xFFFF0FFF);
+    ra = (u8 *) obj_find_by_spawn(a & 0xFFFF0FFF);
+    rb = (u8 *) obj_find_by_spawn(b & 0xFFFF0FFF);
     if (ra != NULL && rb != NULL) {
         sa = *(u8 **) (ra + 0x31C);
         sb = *(u8 **) (rb + 0x31C);
@@ -1176,7 +1176,7 @@ s32 func_1508CEE4(void) {
 extern s32 D_800BEDCC;    /* frame counter (the wobble phase of kind 3) */
 extern s8 D_80087678[];   /* by difficulty D_800E1000: rail time (+0x29C) after which mode 1 stops boosting */
 f32 func_15144BC8(f32);
-void func_150DAB6C(u8 *, f32);
+void trail_send_aim_msg(u8 *, f32);
 
 #define CF34_F(p, off) (*(f32 *) ((u8 *) (p) + (off)))
 #define CF34_ST(obj) (*(u8 **) ((obj) + 0x31C))
@@ -1185,14 +1185,14 @@ void func_150DAB6C(u8 *, f32);
 
 // rail_racer_steer: P234. Script command 9 (func_1509E3D4, (i, node, limit, replan, 0, 0)) and the per-racer steering of
 // func_1508AB7C (which also passes its smoothed s8 offsets ox / oz). Racer i (record D_800CC2D0[i], state block +0x31C,
-// vehicle +0x318) aims at rail node `node` (func_1505EEF4(node & 0xFFFF0FFF); NULL -> 1, node -1 -> 0). Some kinds
+// vehicle +0x318) aims at rail node `node` (obj_find_by_spawn(node & 0xFFFF0FFF); NULL -> 1, node -1 -> 0). Some kinds
 // lead the node by its motion (+0x14 - +0x2C) scaled by the distance in race 0xB9 or difficulty >= 3. The aim point
 // (rail +0x17A8 / +0x1828 / +0x17E8 per racer, s16 targets +0x1A4 / +0x1A6 / +0x1A8 with `replan`) moves towards the
 // node at rate +0x1868 * frame time (at most 1); ox swings the aim sideways (50 when close). The yaw / pitch errors
-// (func_1505A630 angles, func_15144BC8 normalised) give the stick bytes (+0x85 / +0x86 or the vehicle's control block
+// (math_atan2_u16 angles, func_15144BC8 normalised) give the stick bytes (+0x85 / +0x86 or the vehicle's control block
 // +0x36C[2] / [3]); kinds that turn by themselves (`turn`) rotate +0x16C / +0x170 directly through func_15048758 instead.
 // Then the button bits (+0x8A / +0x8C / +0x8E) follow the kind (mode 1: boost until D_80087678; 2: `limit` -> 10;
-// kind 0x1B: when the target is close below and paired in +0x16C0; kind 3 flies with func_150DAB6C), the height
+// kind 0x1B: when the target is close below and paired in +0x16C0; kind 3 flies with trail_send_aim_msg), the height
 // value (+0x90 or the vehicle's +0x1A4) eases by 1/8 towards the pitch-derived height, and the vehicle's +0x1A8 is
 // rescaled by the view ratio. Returns 1 when the yaw error is beyond 45 degrees (func_1508AB7C then resets the
 // racer's boost time), else 0.
@@ -1216,7 +1216,7 @@ s32 func_1508CF34(s32 i, s32 node, s32 limit, s32 replan, s32 ox, s32 oz) {
     if (kind == 9 || kind == 0x38 || kind == 0x15) {
         hasVeh = 0;
     }
-    rec = (u8 *) func_1505EEF4(node & 0xFFFF0FFF);
+    rec = (u8 *) obj_find_by_spawn(node & 0xFFFF0FFF);
     if (rec == NULL) {
         return 1;
     }
@@ -1317,7 +1317,7 @@ s32 func_1508CF34(s32 i, s32 node, s32 limit, s32 replan, s32 ox, s32 oz) {
     }
 
     /* yaw error */
-    ang = (f32) (u32) func_1505A630(dx, -dz, 0) * 0.0054931640625f;
+    ang = (f32) (u32) math_atan2_u16(dx, -dz, 0) * 0.0054931640625f;
     if (kind == 3) {
         cur = CF34_F(obj, 0x40) - 90.0f;
     } else {
@@ -1339,7 +1339,7 @@ s32 func_1508CF34(s32 i, s32 node, s32 limit, s32 replan, s32 ox, s32 oz) {
         h = (f32) *(s16 *) (rec + 0x1A6) - (f32) oz - CF34_RAILF(0x17E8, i);
     }
     CF34_RAILF(0x17E8, i) += h * rate;
-    pitch = (f32) (u32) func_1505A630(dist, CF34_F(CF34_ST(obj), 0x140) - CF34_RAILF(0x17E8, i), 0) * 0.0054931640625f;
+    pitch = (f32) (u32) math_atan2_u16(dist, CF34_F(CF34_ST(obj), 0x140) - CF34_RAILF(0x17E8, i), 0) * 0.0054931640625f;
     curp = CF34_F(CF34_ST(obj), 0x170);
     while (180.0f < pitch) {
         pitch -= 360.0f;
@@ -1419,7 +1419,7 @@ s32 func_1508CF34(s32 i, s32 node, s32 limit, s32 replan, s32 ox, s32 oz) {
             *(u16 *) (obj + 0x76) = v;
             *(s16 *) (obj + 0x7A) = v;
             CF34_F(obj, 0x40) = (f32) (s16) (v + 0x4000) * 0.0054931640625f;
-            func_150DAB6C(obj, t);
+            trail_send_aim_msg(obj, t);
         } else if (CF34_RAILW(0x29C, i) >= 0) {
             *(u16 *) (CF34_ST(obj) + 0x8A) = 0x2000;
             if (mode == 1) {
@@ -1474,7 +1474,7 @@ extern s8 D_80087688[];
 extern f32 D_8009DE5C;
 extern s8 D_800E1000;
 void func_1508EFEC(s32, s32, s32);
-f32 func_150ADA68(void);
+f32 random_float(void);
 
 // rail_rival_pace: script command 14 (func_1509E3D4). Object `i` of D_800CC2D0 races towards the object in its rail
 // slot +0x11C (copied to its record's +0x129). The distance band to it (0 far = beyond D_8009DE5C, 1 beyond 2000,
@@ -1519,7 +1519,7 @@ s32 func_1508DCAC(s32 i) {
         return band;
     }
     *((u8 *) obj->unk31C + 0x12A) = 0;
-    if (D_80087688[D_800E1000] < (s32) (func_150ADA68() * 100.0f)) {
+    if (D_80087688[D_800E1000] < (s32) (random_float() * 100.0f)) {
         *((u8 *) obj->unk31C + 0x12A) = 1;
     }
     return 0;
@@ -1616,11 +1616,11 @@ void func_1502ED40(struct127 *);
 void func_1502ECFC(struct127 *, s32, s32, s32, s32, s32);
 s32 func_15034118(u8 *, s32 *);
 void func_15030448(struct127 *, s32);
-void func_151027E8(u8 *);
-u8 *func_151149AC(s32);
+void obj_glow_post_remove_event(u8 *);
+u8 *world_record_find(s32);
 s32 func_150871B8(s32);
 s32 func_1508712C(s32, f32 *, f32 *, f32 *);
-f32 func_150ADA68(void);
+f32 random_float(void);
 // rail_weapons_update: script command 11 (func_1509E3D4; its result is never read: returns the rail state pointer like
 // the asm). Pass 1, every racer i (count +0x10; skipped in race mode 0xB9 while the object's +0x128 is set): the weapon
 // it should hold (+0xFF0[i]; 0x3A / 0x26 when its +0x19B ammo level is >= 5 / > 0; when none, the weapon of its pickup
@@ -1630,7 +1630,7 @@ f32 func_150ADA68(void);
 // +0x12C; otherwise func_15080A20). For the racer D_800876E0 (not in mode 0xB8) the carried items (func_15034118) that
 // do not belong to the weapon are dropped (func_15030448), the weapon item is given back when missing
 // (func_15083568), and an object of kind 0x6E owned by the racer (+0x65 = i + 1) beyond the racers is removed.
-// D_800876E0 then moves to the next racer. Pass 2, every pickup slot i (+0xEA4): its object (func_151149AC of +0xEF0[i])
+// D_800876E0 then moves to the next racer. Pass 2, every pickup slot i (+0xEA4): its object (world_record_find of +0xEF0[i])
 // counts down its hide timer +0x12F4 (then the respawn timer +0x1070 = 4) and its respawn timer; on respawn it goes
 // back to its home position (+0x1374 / +0x13F4 / +0x1474) or, unless flag 4 of +0x11F4, to a rail point: a random
 // one not used by another slot (flag 1; +0x10F0) or the fixed +0x1274, placed with func_150871B8 / func_1508712C
@@ -1786,8 +1786,8 @@ s32 func_1508E080(void) {
         if (item != 0x55 && *(s32 *) ((u8 *) D_800D27D0 + 0x10) < 25) {
             for (p = &D_800CC2D0[*(s32 *) ((u8 *) D_800D27D0 + 0x10)]; p < &D_800CC2D0[25]; p++) {
                 if (*(s32 *) p != 0 && *((u8 *) p + 0x65) == i + 1 && *((u8 *) p + 4) == 0x6E) {
-                    func_151027E8((u8 *) p);
-                    func_15060F28(p, 0);
+                    obj_glow_post_remove_event((u8 *) p);
+                    obj_remove(p, 0);
                     break;
                 }
             }
@@ -1799,7 +1799,7 @@ s32 func_1508E080(void) {
     }
 
     for (i = 0; i < *(s32 *) ((u8 *) D_800D27D0 + 0xEA4); i++) {
-        pick = func_151149AC((u8) slotObj[i]);
+        pick = world_record_find((u8) slotObj[i]);
         if (pick == NULL) {
             continue;
         }
@@ -1829,7 +1829,7 @@ s32 func_1508E080(void) {
             if (flags[i] & 1) {
                 scale = *(s32 *) ((u8 *) D_800D27D0 + 0xEA8);
                 do {
-                    pt = func_150ADA68() * 0.99999f * scale;
+                    pt = random_float() * 0.99999f * scale;
                     for (k = 0; k < *(s32 *) ((u8 *) D_800D27D0 + 0xEA8); k++) {
                         if (pt == point[k]) {
                             pt = -1;
@@ -1997,7 +1997,7 @@ s32 func_1508EBDC(s32 arg0) {
 extern u8 D_800D1CC4[];
 extern u16 D_800D1CC2;
 extern s8 D_80090134;
-void func_15062800(struct127 *, struct127 *);
+void obj_slots_swap(struct127 *, struct127 *);
 
 #define RAIL_WORDS(off) ((s32 *) ((u8 *) D_800D27D0 + (off)))
 
@@ -2005,7 +2005,7 @@ void func_15062800(struct127 *, struct127 *);
 // D_800D1CC4 byte is >= 0x33 and i is not yet marked in D_800D1CC2. Marks i there, moves the D_800D18A0 bit from i to
 // j, gives i j's func_150859AC(j, 3) value through func_15085710 (j gets 0), moves the rail flag word +0x18 bit i -> j,
 // copies j's rail slots (+0x9C, +0x39C, +0x3DC, +0xEB0 with its back link +0xF70, +0x16C0) to i, swaps the two
-// objects (func_15062800), on level 0x3F re-points the D_800D3268 record's racer entry of the object's carrier
+// objects (obj_slots_swap), on level 0x3F re-points the D_800D3268 record's racer entry of the object's carrier
 // (unk13C >= 100) at the moved object, then resets object i (+0x125 = 0x5A, unk31C state byte 0x84, 0x1AA kept from
 // before the swap, 0x1AF = 0x40), refreshes its camera (camera_snap_to_object) and counts D_80090134. Returns 0 (asm too).
 s32 func_1508ECF8(s32 i, s32 j) {
@@ -2057,10 +2057,10 @@ s32 func_1508ECF8(s32 i, s32 j) {
 
     obj = &D_800CC2D0[i];
     saved1AA = obj->unk31C->unk1AA;
-    func_15062800(&D_800CC2D0[j], obj);
+    obj_slots_swap(&D_800CC2D0[j], obj);
     if (D_800BE9F0 == 0x3F && obj->unk13C >= 100) {
         carrier = &D_800CC2D0[(u8) (obj->unk13C - 100)];
-        rec = func_1509B570(D_800D3268);
+        rec = event_get_vars(D_800D3268);
         if (rec != NULL) {
             slot = obj - D_800CC2D0;
             entry = (u8 *) rec + (carrier->unique_id - 0x14) * 4;
@@ -2085,17 +2085,17 @@ s32 func_1508ECF8(s32 i, s32 j) {
 void func_1508EFEC(s32 arg0, s32 arg1, s32 arg2) {
     s32 t;
     t = *((u8 *)&D_800CC82F + arg0 * 0x32C);
-    func_1509BFB0(1, t | 0x2000, arg1, arg2);
+    event_dispatch_alt(1, t | 0x2000, arg1, arg2);
 }
 
 void func_1508F054(s32 arg0, s32 arg1) {
     s32 t;
     t = *((u8 *)&D_800CC82F + arg0 * 0x32C);
-    func_1509BFB0(1, t | 0x2000, 0x14, arg1);
+    event_dispatch_alt(1, t | 0x2000, 0x14, arg1);
 }
 
 void func_1508F0B8(s32 arg0, s32 arg1) {
     s32 t;
     t = *((u8 *)&D_800CC82F + arg0 * 0x32C);
-    func_1509BFB0(1, t | 0x2000, 0x61, arg1);
+    event_dispatch_alt(1, t | 0x2000, 0x61, arg1);
 }

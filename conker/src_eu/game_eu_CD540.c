@@ -4,8 +4,8 @@
 
 
 #ifdef NON_MATCHING
-struct249 *func_1509B704(s16 arg0);
-struct249 *func_1509B5AC(s32 id, s32 arg1);
+struct249 *event_find(s16 arg0);
+struct249 *event_start(s32 id, s32 arg1);
 void func_150AE760(void);
 void func_1501C710(s32, s32, s32, s32, s32);
 void func_151733EC(struct127 *arg0, s32 arg1, s32 arg2);
@@ -13,7 +13,7 @@ void func_1517F3B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s8 arg4, s32 arg5);
 void func_151E5B94(s32 arg0);
 void func_151E89C0(void);
 void func_151E5528(void);
-void func_15042E3C(s32 arg0, ...);
+void text_printf(s32 arg0, ...);
 extern s32 D_800D3268;          /* id of the event the VM is running */
 extern s32 D_800D3378;          /* save bits changed */
 extern s32 D_800D3C60;          /* values pushed for the current native call */
@@ -43,7 +43,7 @@ s32 func_1509FD30(s32 id, s32 action, s32 *args) {
             D_800D2E43 = 1;
             /* fallthrough */
         case 3: /* stop the event (abort when it is the one running) */
-            ev = func_1509B704(id);
+            ev = event_find(id);
             if (ev == NULL) {
                 return 0;
             }
@@ -54,7 +54,7 @@ s32 func_1509FD30(s32 id, s32 action, s32 *args) {
             }
             return 1;
         case 2: /* stop the event and keep only its done bit (as the asm: byte & 7 & bit) */
-            ev = func_1509B704(id);
+            ev = event_find(id);
             bits = (u8 *) D_800D2E4C + (id >> 3);
             *bits = (*bits & 7) & (1 << (id & 7));
             D_800D3378 = 1;
@@ -65,21 +65,21 @@ s32 func_1509FD30(s32 id, s32 action, s32 *args) {
             ev->unk0 |= 0x8000;
             return 1;
         case 4: /* pause the event */
-            ev = func_1509B704(id);
+            ev = event_find(id);
             if (ev == NULL) {
                 return 0;
             }
             ev->unk0 |= 0x4000;
             return 1;
         case 5: /* clear the event's variables */
-            ev = func_1509B704(id);
+            ev = event_find(id);
             if (ev == NULL) {
                 return 0;
             }
             bzero((u8 *) ev + ((u16 *) ev)[5], ((u16 *) ev)[3]);
             return 0;
         case 6: /* start the event */
-            func_1509B5AC(id, 0);
+            event_start(id, 0);
             return 0;
         case 7: /* change level (four values pushed) */
             if (D_800D3C60 == 4) {
@@ -105,7 +105,7 @@ s32 func_1509FD30(s32 id, s32 action, s32 *args) {
             func_151E5B94(args[2]);
             return 0;
         case 11: /* finish the event, func_151E5B94(0) and abort the running script */
-            ev = func_1509B704(id);
+            ev = event_find(id);
             bits = (u8 *) D_800D2E4C + (id >> 3);
             *bits |= 1 << (id & 7);
             D_800D3378 = 1;
@@ -165,7 +165,7 @@ s32 func_1509FD30(s32 id, s32 action, s32 *args) {
             func_151E5528();
             return 0;
         case 22: /* debug print */
-            func_15042E3C((s32) D_8009F870, args[2]);
+            text_printf((s32) D_8009F870, args[2]);
             return 0;
         case 23:
             D_800D2E44 = (args[2] != 0) ? 1 : 0;
@@ -178,8 +178,8 @@ s32 func_1509FD30(s32 id, s32 action, s32 *args) {
 #endif
 
 #ifdef NON_MATCHING
-struct249 *func_1509B704(s16 arg0);
-f32 func_150ADA68(void);
+struct249 *event_find(s16 arg0);
+f32 random_float(void);
 s32 func_151E6710(s32 arg0);
 s32 func_1517F51C(s32 arg0);
 extern s32 D_800D3C60;          /* values pushed for the current native call */
@@ -202,7 +202,7 @@ s32 func_150A02EC(s32 id, s32 query, s32 *args) {
         case 0x1A: /* the event's done bit */
             return ((u8 *) D_800D2E4C)[id >> 3] & (1 << (id & 7));
         case 0x1B: /* the event's state word (no NULL check in the asm) */
-            return ((u16 *) func_1509B704(id))[1];
+            return ((u16 *) event_find(id))[1];
         case 0x1C:
             return D_800BE9F0;
         case 0x1D: /* bit mask of the D_8008FD8C slots whose D_80087270 byte is not 10, minus the D_800D18A0 bits */
@@ -226,7 +226,7 @@ s32 func_150A02EC(s32 id, s32 query, s32 *args) {
             for (i = 0; i < args[2]; i++) {
                 sum += args[3 + i];
             }
-            pick = func_150ADA68() * (f32) sum;
+            pick = random_float() * (f32) sum;
             sum = 0;
             for (i = 0; i < args[2]; i++) {
                 sum += args[3 + i];
@@ -253,7 +253,7 @@ s32 func_150A02EC(s32 id, s32 query, s32 *args) {
             return args[2] & D_800E9D00;
         case 0x2B: /* the event is not paused (0x2000 clear); no event: 0 */
             {
-                struct249 *ev = func_1509B704(id);
+                struct249 *ev = event_find(id);
 
                 if (ev == NULL) {
                     return 0;

@@ -82,12 +82,12 @@ void func_15171100(u8 *obj, s32 id, s32 arg2, s32 flags, s32 kind, s32 owner) {
         t.spin[0] = (*off)[0] * 0.08f;               /* D_800A7374 */
         t.spin[1] = fabsf((*off)[1]) * 0.08f + 7.0f;
         t.spin[2] = (*off)[2] * 0.08f;
-        t.spin[0] += (func_150ADA20() >> 16) * 0.00006103515625f;
-        t.spin[1] += (func_150ADA20() >> 16) * 0.00006103515625f;
-        t.spin[2] += (func_150ADA20() >> 16) * 0.00006103515625f;
-        t.u24 = (func_150ADA20() >> 16) * 0.0000762939453125f;
-        t.u28 = (func_150ADA20() >> 16) * 0.0000762939453125f;
-        t.u2C = (func_150ADA20() >> 16) * 0.0000762939453125f;
+        t.spin[0] += (random_int() >> 16) * 0.00006103515625f;
+        t.spin[1] += (random_int() >> 16) * 0.00006103515625f;
+        t.spin[2] += (random_int() >> 16) * 0.00006103515625f;
+        t.u24 = (random_int() >> 16) * 0.0000762939453125f;
+        t.u28 = (random_int() >> 16) * 0.0000762939453125f;
+        t.u2C = (random_int() >> 16) * 0.0000762939453125f;
         node_spawn_model_fx((u8 *) &t, kind, owner);
     }
     func_15171E60(x, y - 80.0f, z, 70.0f, 500, 0.00457763671875f, 0, 10, kind, owner);
@@ -186,8 +186,8 @@ void func_151714BC(u8 *obj, u8 kind, s32 arg2) {
         t.u24 = t.vel[0] * 0.1f;                  /* D_800A7384 */
         t.vel[1] = pc->vel[1];
         t.vel[2] = pc->vel[2];
-        t.u28 = func_150ADA68() * 4.0f - 2.0f;
-        t.u2C = func_150ADA68() * 10.0f - 5.0f;
+        t.u28 = random_float() * 4.0f - 2.0f;
+        t.u2C = random_float() * 10.0f - 5.0f;
         node_spawn_model_fx((u8 *) &t, kind, arg2);
     }
     obj[0x6E] = 1;
@@ -198,9 +198,9 @@ void func_151714BC(u8 *obj, u8 kind, s32 arg2) {
 
 void func_15171734(u8 *arg0) {
     if (arg0[4] == 0x33) {
-        func_150C3D5C(arg0);
+        bomb_explode(arg0);
     }
-    func_15060F28(arg0, 1);
+    obj_remove(arg0, 1);
 }
 
 #ifdef NON_MATCHING
@@ -268,19 +268,19 @@ void func_15171770(s32 count, s32 id, f32 x, f32 y, f32 z, f32 spinY, f32 scaleM
     t.u5D = 1;
     t.life = life;
     for (i = 0; i < count; i++) {
-        t.pos[0] = (func_150ADA20() >> 16) * spread + x;
-        t.pos[1] = (func_150ADA20() >> 16) * spread + y;
-        t.pos[2] = (func_150ADA20() >> 16) * spread + z;
+        t.pos[0] = (random_int() >> 16) * spread + x;
+        t.pos[1] = (random_int() >> 16) * spread + y;
+        t.pos[2] = (random_int() >> 16) * spread + z;
         t.model = func_1518C900(id);
-        t.spin[0] = (func_150ADA20() >> 16) * 0.00022888184f;
-        t.spin[1] = (u32) (func_150ADA20() & 0xFFFF) * spinYRange + spinYMin;
-        t.spin[2] = (func_150ADA20() >> 16) * 0.00022888184f;
-        t.u24 = (func_150ADA20() >> 16) * 0.00015258789f;
-        t.u28 = (func_150ADA20() >> 16) * 0.00015258789f;
-        t.u2C = (func_150ADA20() >> 16) * 0.00015258789f;
-        t.scale[0] = (u32) (func_150ADA20() & 0xFFFF) * 1.5258789e-05f * scaleRange + scaleMin;
-        t.scale[1] = (u32) (func_150ADA20() & 0xFFFF) * 1.5258789e-05f * scaleRange + scaleMin;
-        scale2 = (u32) (func_150ADA20() & 0xFFFF) * 1.5258789e-05f * scaleRange + scaleMin;
+        t.spin[0] = (random_int() >> 16) * 0.00022888184f;
+        t.spin[1] = (u32) (random_int() & 0xFFFF) * spinYRange + spinYMin;
+        t.spin[2] = (random_int() >> 16) * 0.00022888184f;
+        t.u24 = (random_int() >> 16) * 0.00015258789f;
+        t.u28 = (random_int() >> 16) * 0.00015258789f;
+        t.u2C = (random_int() >> 16) * 0.00015258789f;
+        t.scale[0] = (u32) (random_int() & 0xFFFF) * 1.5258789e-05f * scaleRange + scaleMin;
+        t.scale[1] = (u32) (random_int() & 0xFFFF) * 1.5258789e-05f * scaleRange + scaleMin;
+        scale2 = (u32) (random_int() & 0xFFFF) * 1.5258789e-05f * scaleRange + scaleMin;
         t.u54[5] = (u32) ((t.scale[0] + t.scale[1] + scale2) * D_800A739C_c[0] + 20.0f);
         t.scale[2] = scale2;
         node_spawn_model_fx((u8 *) &t, kind, owner);
@@ -337,7 +337,7 @@ void func_15171D6C(s16 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, 
 }
 
 #ifdef NON_MATCHING
-f32 func_150489B0(u8);
+f32 math_cos_u8(u8);
 void func_1516DA58(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA,
                    u8 argB, u8 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, u8 arg13, u8 arg14,
                    u8 arg15, u8 arg16, s16 arg17, s16 arg18, u8 arg19, s16 arg1A, s32 arg1B, s32 arg1C, u8 arg1D,
@@ -375,13 +375,13 @@ void func_15171E60(f32 x, f32 y, f32 z, f32 radius, s32 speedBase, f32 speedScal
     py = (s32) y;
     col = colours[colour].rgb;
     for (i = 0, angle = 0; i != count; i++, angle += step) {
-        s = func_15048A40((angle >> 8) & 0xFF);
-        c = func_150489B0((angle >> 8) & 0xFF);
+        s = math_sin_u8((angle >> 8) & 0xFF);
+        c = math_cos_u8((angle >> 8) & 0xFF);
         pz = radius * c + z;
         vz = (s32) (200.0f * c);
-        spread = (func_150ADA20() & 0xFFFF) * 0.0000152587890625f + 100.0f;
-        speed = (s32) ((func_150ADA20() & 0xFFFF) * speedScale + (f32) speedBase);
-        life = (func_150ADA20() & 0xF) + 10;
+        spread = (random_int() & 0xFFFF) * 0.0000152587890625f + 100.0f;
+        speed = (s32) ((random_int() & 0xFFFF) * speedScale + (f32) speedBase);
+        life = (random_int() & 0xF) + 10;
         vx = (s32) (200.0f * s);
         func_1516DA58((s32) (radius * s + x), py, (s32) pz, 0xD, 0, col[0], col[1], col[2], 0, 0, 0, 0, 2,
                       (vx >> 8) & 0xFF, vx & 0xFF, (vz >> 8) & 0xFF, vz & 0xFF, 0, 0, 5, 0, 0, 0, speed, speed,

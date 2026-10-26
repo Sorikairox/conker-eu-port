@@ -87,7 +87,7 @@ RET_END = RET_MAGIC + 4 * len(EPILOGUE_CODE)
 PAGESTUB_OLD = os.environ.get('DIFFTEST_PAGESTUB_OLD') == '1'
 # P198: memory the stubs write (DIFFTEST_OUTW / OUTA / OUTB) now updates the compared write log: the final memory
 # compare used the function's own store values only, so a word a stub clobbered (OUTW '@ADDR') and the function
-# should restore compared equal when the restore was dropped (func_15063254 +0xB8 / +0xC4 / +0x318 mutants survived).
+# should restore compared equal when the restore was dropped (obj_model_swap_keep_pose +0xB8 / +0xC4 / +0x318 mutants survived).
 # DIFFTEST_STUBW_OLD=1 = pre-P198 behaviour (selftest).
 STUBW_OLD = os.environ.get('DIFFTEST_STUBW_OLD') == '1'   # P176: pre-P176 page-end stub behaviour (selftest)
 STUBMAP_OLD = os.environ.get('DIFFTEST_STUBMAP_OLD') == '1'   # P288/P292: stub_write without ensure() (selftest)
@@ -554,9 +554,9 @@ def all_hdr_protos():
 
 # P234: the headers the TU includes (#include "x" / <x>, recursively, resolved like the Makefile's INCLUDE_CFLAGS plus
 # the TU's own directory). The candidate is compiled with those prototypes, so a callee declared only there (e.g.
-# `s32 func_150ADA20(void);` in functions.h) has a known prototype: before P234 its FP-argument set was unknown and the
-# P214 rule compared IDO's scratch f12 left right before `jal func_150ADA20` as an argument (false DIFFER, P232
-# func_15109DC8). DIFFTEST_INCHDR_OLD=1 = old behaviour (TU text, then the P93 / P100 header fallbacks only).
+# `s32 random_int(void);` in functions.h) has a known prototype: before P234 its FP-argument set was unknown and the
+# P214 rule compared IDO's scratch f12 left right before `jal random_int` as an argument (false DIFFER, P232
+# point_spark_spawn). DIFFTEST_INCHDR_OLD=1 = old behaviour (TU text, then the P93 / P100 header fallbacks only).
 INCHDR_OLD = os.environ.get('DIFFTEST_INCHDR_OLD') == '1'
 INC_DIRS = ['.', 'include', 'include/2.0L', 'include/2.0L/PR', 'include/libc', 'src/libultra/os', 'src/libultra/audio',
             'src/libultra/io']
@@ -602,7 +602,7 @@ def lookup_proto(p, tu, pn):
             # P134: the arity and the a-register slots of the leading float parameters come from the same
             # header declaration: before P134 a TU without its own `cosf` declaration (declared only in
             # gu.h / math.h) had an unknown arity, so a0 was compared whenever the call site wrote it
-            # (func_150F1F80: a0 = &D_800CC298 before `jal cosf` -> false DIFFER). DIFFTEST_HDRSLOT_OLD=1 = old.
+            # (obj7b_update_pulse_scale: a0 = &D_800CC298 before `jal cosf` -> false DIFFER). DIFFTEST_HDRSLOT_OLD=1 = old.
             if new[pn][0] is None and os.environ.get('DIFFTEST_HDRSLOT_OLD') != '1':
                 new[pn] = (proto_arity(all_hdr_protos(), pn), proto_fslots(all_hdr_protos(), pn), hf)
     return new[pn]
@@ -643,9 +643,9 @@ def _split_top(ps):
     return out + [cur]
 
 # P214: `return func_X(...);` is a statement, not a declaration with type `return` (port-b P210: a `return
-# func_1505A630(temp_v0[0] - ..., ...)` line in game_A28B0 was read as func_1505A630's prototype, whose `[` made
-# its FP argument set empty, so f12 / f14 were never compared at any func_1505A630 call in that TU and the swapped
-# x arguments of func_150768DC survived). DIFFTEST_DECLKW_OLD=1 = old behaviour.
+# math_atan2_u16(temp_v0[0] - ..., ...)` line in game_A28B0 was read as math_atan2_u16's prototype, whose `[` made
+# its FP argument set empty, so f12 / f14 were never compared at any math_atan2_u16 call in that TU and the swapped
+# x arguments of aiscript_find_visible_target survived). DIFFTEST_DECLKW_OLD=1 = old behaviour.
 _DECL_PRE = re.compile(r'^\s*(?:(?:extern|static|inline)\s+)*' + ('' if os.environ.get('DIFFTEST_DECLKW_OLD') == '1' else
                        r'(?!(?:return|else|case|goto|do|sizeof)\b)') + r'[A-Za-z_]\w*[\s*]+$')
 def _is_decl(tu, m):
@@ -808,7 +808,7 @@ for _p in _knob_items('DIFFTEST_RETF'):
 
 # P34 (opt-in): DIFFTEST_OUTW="ADDR=N:V1;V2;...,..." (hex ADDR/V, decimal N): at each call to ADDR the stub
 # writes the word V (V1 on the first call, V2 on the second, ..., the last repeats) through aN, e.g. the
-# found / count out-params of func_1502B6BC. Several "N:V" for one ADDR are separated by '/'. P64: N >= 4 = stack argument.
+# found / count out-params of asset_load_with_subfiles. Several "N:V" for one ADDR are separated by '/'. P64: N >= 4 = stack argument.
 def _outn(s):
     # P100: N may be '@ADDR' (hex): the stub writes at that absolute address instead of through an argument
     # (results a callee leaves in globals, e.g. func_1517C11C's per-voice flags read by func_1517E3CC).
@@ -863,7 +863,7 @@ for _p in filter(None, os.environ.get('DIFFTEST_ARGMEM', '').split(',')):
     _d = '*' in _n
     _n, _o = (_n.split('*' if _d else '+') + ['0'])[:2]
     # P280: 'LEN@K' (decimal K) compares only at the K-th call (0-based) to ADDR, e.g. memcpy called twice with
-    # different source structs and lengths (func_1501175C: a 0x10 link record, then a 0x5C tail): a LEN that fits
+    # different source structs and lengths (obj_glow_smoke_attach: a 0x10 link record, then a 0x5C tail): a LEN that fits
     # the second call made the first one compare stack bytes past its struct (layout-dependent, false DIFFER).
     _l, _k = (_l.split('@') + [None])[:2]
     ARGMEM.setdefault(int(_a, 16) & 0x1FFFFFFF, []).append((int(_n), int(_l), int(_o, 16), _d, None if _k is None else int(_k)))
@@ -917,7 +917,7 @@ def param_kinds(tu, func):
     return out
 
 # P20 (opt-in): DIFFTEST_ARG="N=V1|V2|...,..." (hex) gives integer argument slot N (0-3 = a0-a3, 4+ = stack) one of the
-# listed values per trial, to reach paths behind rare argument bits (func_1502B350's packed-record flag).
+# listed values per trial, to reach paths behind rare argument bits (asset_load_alloc's packed-record flag).
 ARGFIX = {}
 JALRFPR_OLD = os.environ.get('DIFFTEST_JALRFPR_OLD') == '1'   # P250: see the jalr FPR compare
 JALRARG_OLD = os.environ.get('DIFFTEST_JALRARG_OLD') == '1'   # P211: old jalr argument compare (see compare)
@@ -1307,7 +1307,7 @@ class Run:
         self.minsp = min(self.minsp, sp)
         regs = [mu.reg_read(r) for r in A_REGS]
         # P90: all outgoing stack words a prototype can name (args 4..63); before P90 only sp+0x10..0x3C (args 4..15)
-        # were captured, so arguments 16+ (func_1516DF0C's 49, func_150E2030's 28, func_1516FAB8's 17) were never
+        # were captured, so arguments 16+ (func_1516DF0C's 49, beam_effect_spawn's 28, func_1516FAB8's 17) were never
         # compared. DIFFTEST_STKW_OLD=1 restores the old window.
         stkw = [struct.unpack('>I', mu.mem_read(phys(sp) + o, 4))[0] for o in range(16, 0x40 if STKW_OLD else 0x100, 4)]
         fregs = {n: 0 for n in (12, 13, 14, 15)}   # filled by flush_fregs once the helper ran
@@ -1377,7 +1377,7 @@ class Run:
             for _n, _ws in OUTA[addr & 0x1FFFFFFF]:
                 _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
                 # P156 (opt-in): DIFFTEST_OUTA_PERCALL=1 adds k * 0x10000 to every word on call k (a different vector
-                # per call: func_1510A98C's four bone points, func_150B8020's top / side points)
+                # per call: vent_smoke_emitter_update's four bone points, func_150B8020's top / side points)
                 _dk = (k * 0x10000) if OUTA_PERCALL else 0
                 self.stub_write(_p, struct.pack('>%dI' % len(_ws), *[(_w + _dk) & 0xFFFFFFFF for _w in _ws]))
         # P317 (opt-in): DIFFTEST_MEMCPY=1 makes the memcpy stub (EU 10023360) copy for real: a2 bytes from a1 to a0
@@ -1457,7 +1457,7 @@ def same_val(R, a, C, b):
     if R.norm(a) == C.norm(b): return True
     if TU_BASE <= b < TU_BASE + 0x80000 or TU_BASE <= a < TU_BASE + 0x80000:
         # P156 (opt-in): DIFFTEST_TUCMP_LEN=N compares N bytes instead of 32 (a 12-byte vector at the end of a
-        # candidate table is followed by other data than the reference's rodata vector, e.g. func_1510A98C)
+        # candidate table is followed by other data than the reference's rodata vector, e.g. vent_smoke_emitter_update)
         n = int(os.environ.get('DIFFTEST_TUCMP_LEN') or '32')
         try:
             if os.environ.get('DIFFTEST_TUPEEK_OLD') == '1':
@@ -1470,7 +1470,7 @@ def same_val(R, a, C, b):
 
 def _peek(run, a, n):
     """P215: n bytes at a; a page the run never touched gives its initial content (ROM image / pokes / random)
-    instead of failing (the reference's own string D_8009DDF0, passed by func_1508AB7C to func_15042D94 but never
+    instead of failing (the reference's own string D_8009DDF0, passed by func_1508AB7C to text_printf_at but never
     read by it, sat on an unmapped page, so the TU-literal compare was always 'different'). DIFFTEST_TUPEEK_OLD=1 = old."""
     out = b''; p = phys(a)
     while len(out) < n:
@@ -1508,11 +1508,11 @@ def compare(R, C, rk, arity):
         # happens to compute something in a2 right before a 1-arg call was a false DIFFER)
         cnt = max(na if na is not None else 0, max(a['a'] if na not in (None, 99) else a['a'] | b['a'], default=-1) + 1)
         # P65: a known prototype fixes the register arguments (func_1503AB20 reloads a spilled a2 right before a
-        # one-argument call to func_15048A40, which made a2 look like an argument)
+        # one-argument call to math_sin_u8, which made a2 look like an argument)
         if na is not None and na != 99 and os.environ.get('DIFFTEST_PROTO_ARGS', '1') == '1': cnt = min(cnt, na)
         if na is None or na == 99: cnt = max(cnt, max(a['a'], default=-1) + 1)
         # P120 (opt-in): DIFFTEST_VARARGS_REF=1: a varargs callee's register arguments are the ones the reference's
-        # call site writes (the candidate's IDO code left a loop constant in a2 before a 2-argument func_15042E3C call)
+        # call site writes (the candidate's IDO code left a loop constant in a2 before a 2-argument text_printf call)
         if na == 99 and os.environ.get('DIFFTEST_VARARGS_REF') == '1': cnt = max(a['a'], default=-1) + 1
         # P112: an indirect call (jalr) of an unknown function: the reference may set an argument register in an
         # earlier block (event natives 5 / 6 load a1 before branching to their shared jalr tail), which the
@@ -1567,7 +1567,7 @@ def compare(R, C, rk, arity):
         # P65: a known prototype with > 4 args fixes the slots exactly (hand asm func_150A69E0 keeps ra at sp+0x20,
         # right after its 8th argument, so the contiguous run took it for a 9th)
         if na is not None and na != 99 and na > 4: slots = {16 + 4 * j for j in range(na - 4)}
-        # P24: a known prototype with <= 4 args has no stack args (hand asm such as func_150A8050 keeps ra at sp+0x10)
+        # P24: a known prototype with <= 4 args has no stack args (hand asm such as mtxf_rotate_xyz_deg keeps ra at sp+0x10)
         if na is not None and na != 99 and na <= 4: slots = set()
         for o in sorted(slots):
             j = (o - 16) // 4
@@ -1586,7 +1586,7 @@ def compare(R, C, rk, arity):
             frs |= a.get('awf_all', set()) | b.get('awf_all', set())
         # P214: a direct call of unknown prototype compares the FPRs EITHER side set in the straight-line run right before
         # the call (before P214: only those BOTH sides set there, so a candidate that computes f12 before a branch and
-        # the jal block compared nothing; selftest func_150768DC with DIFFTEST_NOPROTO). DIFFTEST_JALARG_OLD=1 = old;
+        # the jal block compared nothing; selftest aiscript_find_visible_target with DIFFTEST_NOPROTO). DIFFTEST_JALARG_OLD=1 = old;
         # DIFFTEST_JALARG_WIDE=1 adds every f12-f15 either side wrote since the previous call.
         if not a.get('ind') and pf is None and not JALARG_OLD:
             frs |= a['f'] | b['f']
@@ -1836,7 +1836,7 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         else:
             # P16: each trial runs in a forked child that exits without closing its emulators. With unicorn
             # 2.0.1 (aarch64 container) a uc_close -- explicit, or unicorn's weakref finalizer when the GC
-            # collects a dropped Run/Uc -- makes a LATER emulator segfault inside emu_start (func_1509BA04: all
+            # collects a dropped Run/Uc -- makes a LATER emulator segfault inside emu_start (event_list_unload: all
             # seeds exit 139; never closing: EQUIV). These were the "random Unicorn segfaults" of P7-P15, and
             # through them the convert.py Pool deadlock. A child that still dies counts as inconclusive.
             sys.stdout.flush()

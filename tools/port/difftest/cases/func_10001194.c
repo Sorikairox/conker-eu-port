@@ -12,7 +12,7 @@ extern u8 D_80032E90[];
 extern u8 *D_80035858;
 extern u32 *D_8003585C;          /* per-4 KB-page offsets of the compressed game code */
 extern u8 D_151FA920[];          /* end of the game segment's code */
-void func_15000000(void);
+void game_init_message_queues(void);
 void func_15007830(void);
 void func_10003570(OSPri pri);
 void func_10003BD0(void);
@@ -71,7 +71,7 @@ void func_10001194(s32 arg0) {
     func_10004514(src, (void *) dst, size, 1);
     func_10006530(dst, (s32) &D_80082EB0, D_8003809C);
     func_10004074(dst);
-    npages = ((u32) D_151FA920 - (u32) func_15000000 + 0xFFF) >> 12;
+    npages = ((u32) D_151FA920 - (u32) game_init_message_queues + 0xFFF) >> 12;
     D_80035858 = (u8 *) (((u32) D_80033690 + 0xF) & ~0xF);
     D_8003585C = (u32 *) (((u32) D_80032E90 + 0xF) & ~0xF);
     func_10004514((s32) D_427B0 + 4, D_8003585C, (((npages + 2) * 4 + 0xF) | 0xF) ^ 0xF, 1);

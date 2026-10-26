@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """spinline.py <indir> <outdir> [func ...]  m2c names the stack slots that hold call results across later calls
-(`sp58 = func_150ADA68(); ... func_x(..., sp58 * 2.0f, ...)`). IDO spills such values itself when the call is nested in the
+(`sp58 = random_float(); ... func_x(..., sp58 * 2.0f, ...)`). IDO spills such values itself when the call is nested in the
 argument list; a named local instead takes a (different) frame slot. Inline body-level `spXX = <call expr>;` into its single
 later use (statement at the same indent), drop the declaration. Order of the inlined calls stays the assignment order. (s55)"""
 import sys,os,re

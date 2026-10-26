@@ -174,13 +174,13 @@ void object_sound_play_cooldown(s32 arg0, s32 arg1, u32 arg2, s32 arg3, s32 arg4
     sp48 = 0;
     if ((*temp_v0 == 0) || (var_s1 == 0x58D)) {
         sp40 = temp_v0;
-        temp_v0_2 = func_1505EEF4(arg1);
+        temp_v0_2 = obj_find_by_spawn(arg1);
         if ((temp_v0_2 != NULL) && (func_10010894(temp_v0_2) == 0)) {
             if (arg2 != 0) {
                 if (arg4 != 0) {
-                    var_s1 += (func_150ADA20() % arg2) * 2;
+                    var_s1 += (random_int() % arg2) * 2;
                 } else {
-                    var_s1 += func_150ADA20() % arg2;
+                    var_s1 += random_int() % arg2;
                 }
             }
             if (temp_v0_2->camera != NULL) {

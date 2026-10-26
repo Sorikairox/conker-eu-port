@@ -100,26 +100,48 @@ def read(p):
         return None
 
 
+_MAP = None
+
+
 def map_addr(names):
-    try:
-        txt = open(os.path.join(ROOT, MAP)).read()
-    except OSError:
-        return None
+    global _MAP
+    if _MAP is None:    # parsed once: name -> address (re-reading the map per row made big tables take hours)
+        _MAP = {}
+        try:
+            for m in re.finditer(r'^\s+0x([0-9a-fA-F]+)\s+([A-Za-z_][A-Za-z0-9_]*)$', open(os.path.join(ROOT, MAP)).read(), re.M):
+                _MAP.setdefault(m.group(2), int(m.group(1), 16))
+        except OSError:
+            pass
     for n in names:
-        m = re.search(r'^\s+0x([0-9a-fA-F]+)\s+' + re.escape(n) + r'$', txt, re.M)
-        if m:
-            return int(m.group(1), 16)
+        if n in _MAP:
+            return _MAP[n]
     return None
+
+
+_TOK = re.compile(r'[A-Za-z_][A-Za-z0-9_]*')
+
+
+def tokens(text):
+    """identifiers in text, also without a _ / __wrap_ / __real_ prefix (the forms word() matches)"""
+    out = set()
+    for w in set(_TOK.findall(text)):
+        out.add(w)
+        for pre in ('__wrap_', '__real_', '_'):
+            if w.startswith(pre):
+                out.add(w[len(pre):])
+    return out
 
 
 DEF = r'^[A-Za-z_][^\n;#/(){}=]*?\b%s\s*\([^;{]*?\)\s*\{'
 PRAG = r'^#pragma GLOBAL_ASM\("[^"]*/%s\.s"\)'
 
 
-def comment_site(texts, old, new):
+def comment_site(texts, old, new, cand=None):
     """(path, line index) above which `/* was old */` goes, or None when present already / no site"""
     for rx in (DEF, PRAG):
         for p, t in texts.items():
+            if cand is not None and p not in cand:
+                continue
             if not p.startswith('conker/src_eu/') or not p.endswith('.c'):
                 continue
             m = re.search(rx % re.escape(new), t, re.M)
@@ -151,6 +173,12 @@ def plan(rows, only):
     moves = []
     symtxt = texts.get(SYMS, '')
     sym_add = []
+    # identifier -> files using it, so each row only looks at the files that mention its names
+    ren = {o: n for o, n, _ in rows}    # descriptions written to the symbol list use the new names
+    inv = {}
+    for p, t in texts.items():
+        for w in tokens(t):
+            inv.setdefault(w, set()).add(p)
     for old, new, desc in rows:
         if only and old not in only:
             continue
@@ -167,14 +195,16 @@ def plan(rows, only):
         if not ours:
             # only code counts: comments (naming proposals, notes that mention the same function) and '#' note lines
             # are not a use of the name
-            used = [p for p, t in texts.items() if word(new).search(t) and word(new).search(code_only(p, t))]
+            used = [p for p in sorted(inv.get(new, ())) if word(new).search(edits.get(p, texts[p]))
+                    and word(new).search(code_only(p, edits.get(p, texts[p])))]
             if used:
                 sys.exit('%s: new name %s is already used in %s' % (old, new, ', '.join(used[:5])))
         for p in files:
             t = edits.get(p, texts.get(p))
             if t is None:
                 continue
-            if rx.search(t):
+            if p in inv.get(old, ()) and rx.search(t):
+                inv.setdefault(new, set()).add(p)
                 out = []
                 for i, line in enumerate(t.split('\n'), 1):
                     if rx.search(line):
@@ -185,7 +215,7 @@ def plan(rows, only):
                     else:
                         out.append(line)
                 edits[p] = '\n'.join(out)
-            if re.search(r'(?<![A-Za-z0-9_])' + re.escape(old) + r'(?![A-Za-z0-9_])', p):
+            if old in p and re.search(r'(?<![A-Za-z0-9_])' + re.escape(old) + r'(?![A-Za-z0-9_])', p):
                 np_ = re.sub(r'(?<![A-Za-z0-9_])' + re.escape(old) + r'(?![A-Za-z0-9_])', new, p)
                 moves.append((p, np_)); report.append('git mv %s %s' % (p, np_))
         # symbol list: rename in place (old listed) or add new = EU address
@@ -196,7 +226,8 @@ def plan(rows, only):
                 sys.exit('%s: no address for %s in %s (build first: tools/eu_port/verify_all.sh)' % (old, old, MAP))
             if re.search(r'^\s*\S+\s*=\s*0x%08X\s*;' % a, symnow, re.M | re.I):
                 sys.exit('%s: address 0x%08X already has another name in %s' % (old, a, SYMS))
-            sym_add.append('// was %s: %s\n%-31s = 0x%08X; // type:func' % (old, desc, new, a))
+            d = _TOK.sub(lambda m: ren.get(m.group(0), m.group(0)), desc)
+            sym_add.append('// was %s: %s\n%-31s = 0x%08X; // type:func' % (old, d, new, a))
             report.append('%s: add %s = 0x%08X' % (SYMS, new, a))
             hits += 1
         if hits == 0:
@@ -209,7 +240,7 @@ def plan(rows, only):
             sym_add = []
         # `/* was old */` above the definition
         merged = dict(texts); merged.update(edits)
-        site = comment_site(merged, old, new)
+        site = comment_site(merged, old, new, inv.get(new, set()))
         if site is None:
             report.append('WARNING: no C definition or GLOBAL_ASM pragma of %s in conker/src_eu: add `/* was %s */` by hand'
                           % (new, old))
@@ -233,12 +264,15 @@ def verify(rows):
     env = dict(os.environ, PATH='/Applications/Docker.app/Contents/Resources/bin:' + os.environ.get('PATH', ''))
     ok = True
     left = []
+    olds = {old for old, new, _ in rows}
     for p in scope_files():
         t = read(p)
         if t is None:
             continue
-        for old, new, _ in rows:
-            if word(old).search(t):
+        # comments (descriptions in the symbol list mention other functions) are not uses
+        tc = code_only(p, t) if p != SYMS else re.sub(r'//[^\n]*', ' ', t)
+        for old in sorted(olds & tokens(tc)):
+            if word(old).search(tc):
                 left.append('%s still uses %s' % (p, old))
     print('old names left in scope: %d' % len(left)); print('\n'.join(left[:20])); ok &= not left
     r = subprocess.run(['tools/eu_port/verify_all.sh'], cwd=ROOT, env=env, capture_output=True, text=True)

@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, ...);
+s32 event_dispatch(s32, s32, ...);
 
 void func_150D1A40(struct108 *arg0) {
     f32 sp34;
@@ -42,10 +42,10 @@ void func_150D1A40(struct108 *arg0) {
             arg0->unk34C = temp_f0;
             if (D_800BE9F0 == 0x32) {
                 sp34 = temp_f2_2;
-                var_v0 = func_1509BE40(4, arg0->unk23D | 0x2000, 0xAC, 0x4027, 0x4035, 0x4036, 0x4037, 0);
+                var_v0 = event_dispatch(4, arg0->unk23D | 0x2000, 0xAC, 0x4027, 0x4035, 0x4036, 0x4037, 0);
             } else {
                 sp34 = temp_f2_2;
-                var_v0 = func_1509BE40(5, arg0->unk23D | 0x2000, 0xAC, 0x400A, 0x400B, 0x400C, 0x400D, 0x400E);
+                var_v0 = event_dispatch(5, arg0->unk23D | 0x2000, 0xAC, 0x400A, 0x400B, 0x400C, 0x400D, 0x400E);
             }
             if (var_v0 != 0) {
                 arg0->unk84 |= 0x10000000;
@@ -70,7 +70,7 @@ void func_150D1A40(struct108 *arg0) {
             arg0->unk190 = 0.0f;
         }
         if (D_800BE9F0 == 0x32) {
-            if (func_1509BE40(1, 0x4039, 6, 0x9000, 0, 0, 0, 0) != 0) {
+            if (event_dispatch(1, 0x4039, 6, 0x9000, 0, 0, 0, 0) != 0) {
                 arg0->unk84 |= 0x1000;
                 return;
             }

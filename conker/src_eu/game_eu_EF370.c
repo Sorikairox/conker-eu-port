@@ -9,7 +9,7 @@ s32 func_1514C860(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
 
 /* spawn_ring_kind2_small: P238: emits 25 points of spawn handler kind 2 (D_8008ADA0) on a radius-80 ring around
  * (x, y, z), starting at byte angle 0 and stepping by 3, with arg8 / arg9 / argA 0 and the byte `tag` as argB
- * (func_1514C860, spawn_ring_emit). Its only caller (func_150C3994, asm) passes 0xFF and ignores v0; the asm leaves
+ * (func_1514C860, spawn_ring_emit). Its only caller (bouncing_bomb_update, asm) passes 0xFF and ignores v0; the asm leaves
  * func_1514C860's v0 in place, so it is returned. */
 s32 func_150C1B60(f32 x, f32 y, f32 z, s32 tag) {
     return func_1514C860(x, y, z, 80.0f, 0, 3, 0x19, 2, 0, 0.0f, 0, tag & 0xFF);
@@ -83,16 +83,16 @@ s32 func_150C1BC0(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
     sb.pos[2] = z;
     n = 1;
     do {
-        pitch = (u32) func_150ADA20() % 13U - 0x3F;
+        pitch = (u32) random_int() % 13U - 0x3F;
         sp = angle_byte_cos(pitch & 0xFF);
         cp = angle_byte_cos((pitch - 0x40) & 0xFF);
         sa = angle_byte_cos(a & 0xFF);
         ca = angle_byte_cos((a - 0x40) & 0xFF);
-        v = func_150ADA68() * 17.4f + 25.5f;
-        sb.tint = (u32) func_150ADA20() % 9U + 5;
-        sb.sprite = (func_150ADA20() & 0x3F) + 0x5A;
-        mb.speed = func_150ADA68() * 20.2f + 24.7f;
-        mb.scale = func_150ADA68() * 0.2f + 0.4f;
+        v = random_float() * 17.4f + 25.5f;
+        sb.tint = (u32) random_int() % 9U + 5;
+        sb.sprite = (random_int() & 0x3F) + 0x5A;
+        mb.speed = random_float() * 20.2f + 24.7f;
+        mb.scale = random_float() * 0.2f + 0.4f;
         h = v * sp;
         mb.vel[0] = h * ca;
         mb.vel[1] = -v * cp;

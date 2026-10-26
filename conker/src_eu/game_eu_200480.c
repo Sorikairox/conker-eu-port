@@ -56,7 +56,7 @@ void func_151D2D0C(Obj2D0C *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1510D66C(s32 *, s32, s32, s32);
+s32 texture_cache_lookup(s32 *, s32, s32, s32);
 extern s32 D_A4A;
 
 u8 *func_151D2DE0(u8 *arg0, u8 *arg1, s16 arg2) {
@@ -98,7 +98,7 @@ u8 *func_151D2DE0(u8 *arg0, u8 *arg1, s16 arg2) {
         (*(s32 *)((u8 *)temp_s0_3 + 0)) = 0xEF002C3F;
         (*(s32 *)((u8 *)temp_s0_3 + 4)) = 0x504244;
         temp_s0_4 = temp_s0_3 + 8;
-        temp_v0 = func_1510D66C(&D_A4A, 0, 3, 0);
+        temp_v0 = texture_cache_lookup(&D_A4A, 0, 3, 0);
         (*(s32 *)((u8 *)temp_s0_4 + 0)) = 0xFD700000;
         (*(s32 *)((u8 *)temp_s0_4 + 4)) = temp_v0;
         temp_s0_5 = temp_s0_4 + 8;

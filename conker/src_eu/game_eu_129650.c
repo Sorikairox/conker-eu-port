@@ -4,11 +4,11 @@
 
 
 #ifdef NON_MATCHING
-struct127 *func_1507515C(struct127 *, struct127 *, s32);
+struct127 *player_find_owned_object(struct127 *, struct127 *, s32);
 void func_15145EA4(f32 **src, f32 **dst, u8 *bone, s32 n);
 s32 func_151C284C(f32 *, f32 *, f32 *, f32 *, s32, s32, f32, f32, f32, f32, f32, s32, u8 *, s32, s32, s32, s32, s32,
                   s32, s32, s32, f32, s32, s32, s32, s32, s32);
-void func_151030B8(u8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
+void attached_particle_spawn(u8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
 void func_151559FC(void *, s32, s32, s32, s32, s32, s32);
 extern f32 D_800A21A4[2][3];   /* per side: muzzle offsets (non-0x23 characters) */
 extern f32 D_800A21BC[2][3];
@@ -45,13 +45,14 @@ typedef struct {
 } GunfireFlash;       /* func_151559FC's spec */
 
 // gun_fire_effects: muzzle flash, tracer and shells for one shot of `obj`'s gun on hand `side` (0 / 1), `dt` into the
-// frame. Unless `noOwner`, the shooter is func_1507515C(obj) (no shooter -> nothing); `aimed` = its record's 0x197.
+// frame. Unless `noOwner`, the shooter is player_find_owned_object(obj) (no shooter -> nothing); `aimed` = its record's 0x197.
 // func_15145EA4 places the muzzle point / direction points from the hand bone (obj+0x1D4, 64-byte bones; character
 // 0x23 has its own tables). Aimed shots project onto the shooter's aim line (unk31C 0x13C point, 0x130 direction).
 // func_151C284C spawns the tracer (kind 5 in levels 0x34 / 0x26, else 4; hidden from the shooter's own camera); unless
-// obj+0x74's low nibble is 0xF a 1-in-8 spark (light_create_with_ctrl) and a 1-in-2 shell (func_151030B8) follow; aimed shots
+// obj+0x74's low nibble is 0xF a 1-in-8 spark (light_create_with_ctrl) and a 1-in-2 shell (attached_particle_spawn) follow; aimed shots
 // with a camera also get the screen flash (func_151559FC) and func_15155C9C event 0x37.
-void func_150FBE40(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxowner) {
+/* was func_150FBE40 */
+void gun_shot_effects(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxowner) {
     struct127 *owner;
     u8 aimed;
     f32 *tbl[3];
@@ -97,8 +98,8 @@ void func_150FBE40(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxowner
         owner = NULL;
         aimed = 0;
     } else {
-        /* the asm leaves side / dt's bits in a1 / a2 (func_1507515C ignores both) */
-        owner = func_1507515C((struct127 *)obj, (struct127 *)(u32)side, *(s32 *)&dt);
+        /* the asm leaves side / dt's bits in a1 / a2 (player_find_owned_object ignores both) */
+        owner = player_find_owned_object((struct127 *)obj, (struct127 *)(u32)side, *(s32 *)&dt);
         if (owner == NULL || owner->unk31C == NULL) {
             return;
         }
@@ -113,7 +114,7 @@ void func_150FBE40(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxowner
         tbl[2] = D_800A2250[side];
         bone = *(u8 **)(obj + 0x1D4) + D_800A2204[side] * 64;
     } else {
-        r1 = func_150ADA68();
+        r1 = random_float();
         sgn = side ? -1 : 1;
         alt[0] = (f32)sgn * (13.0f - (1.0f + r1 * 6.0f));
         alt[1] = D_800A21BC[side][1];
@@ -157,42 +158,42 @@ void func_150FBE40(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxowner
         mask = 0xFF;
     }
     kind = (D_800BE9F0 == 0x34 || D_800BE9F0 == 0x26) ? 5 : 4;
-    r1 = func_150ADA68();
-    r2 = func_150ADA68();
-    r3 = func_150ADA20();
+    r1 = random_float();
+    r2 = random_float();
+    r3 = random_int();
     func_151C284C(pos, aimed ? NULL : tip, aimed ? hit : NULL, aimed ? dir : NULL, aimed ? 1 : 0, 0, 252.0f,
                   gunfire_tracer_k[0], r1 * 20.0f + 75.0f, r2 * 250.0f + 502.0f, 50.0f, r3 % 31 + 225,
                   (owner != NULL) ? (u8 *)owner : obj, 1, 1, D_800BE616 ? 0 : 1, 50, 0, 1, kind, 0x2C, dt, mask, 0,
                   0, (u8)fxflag, fxowner);
     if ((obj[0x74] & 0xF) != 0xF) {
-        if ((func_150ADA20() & 7) == 0) {
+        if ((random_int() & 7) == 0) {
             spark.b0 = 3;
             spark.b1 = 0xFF;
-            spark.h2 = (u32)func_150ADA20() % 5 + 4;
+            spark.h2 = (u32)random_int() % 5 + 4;
             ipos[0] = pos[0];
             ipos[1] = pos[1];
             ipos[2] = pos[2];
             spark.b4 = 0;
-            light_create_with_ctrl((Header *)&spark, (Header2 *)ipos, (u32)func_150ADA20() % 31 + 0x46, 0xFF, 0xFF, 0xFF, 0xFF,
+            light_create_with_ctrl((Header *)&spark, (Header2 *)ipos, (u32)random_int() % 31 + 0x46, 0xFF, 0xFF, 0xFF, 0xFF,
                           0, 0, (u8)fxflag, fxowner);
         }
-        if ((func_150ADA20() & 1) == 0) {
-            vel[1] = func_150ADA68() * gunfire_shell_v1m[0] + gunfire_shell_v1a[0];
-            vel[0] = func_150ADA68() * gunfire_shell_v0m[0] + gunfire_shell_v0a[0];
+        if ((random_int() & 1) == 0) {
+            vel[1] = random_float() * gunfire_shell_v1m[0] + gunfire_shell_v1a[0];
+            vel[0] = random_float() * gunfire_shell_v0m[0] + gunfire_shell_v0a[0];
             if (aimed && owner->camera != NULL) {
                 mask = ~(1 << *((u8 *)owner->camera + 0x23D));
             } else {
                 mask = 0xFF;
             }
-            r4 = func_150ADA20();
-            r5 = func_150ADA20();
-            r1 = func_150ADA68();
+            r4 = random_int();
+            r5 = random_int();
+            r1 = random_float();
             if (obj[4] == 0x23) {
-                func_151030B8(obj, D_800A2204[side], D_800A2208[side], D_800A2220[side], vel, r4 % 3 + 4,
+                attached_particle_spawn(obj, D_800A2204[side], D_800A2208[side], D_800A2220[side], vel, r4 % 3 + 4,
                               r5 % 101 + 0x9B, r1 * 1012.0f + gunfire_shell_life[0], pos, mask, 0, -1,
                               (u8)fxflag, fxowner);
             } else {
-                func_151030B8(obj, D_800A21A0[side], D_800A21A4[side], D_800A21BC[side], vel, r4 % 3 + 4,
+                attached_particle_spawn(obj, D_800A21A0[side], D_800A21A4[side], D_800A21BC[side], vel, r4 % 3 + 4,
                               r5 % 101 + 0x9B, r1 * 1012.0f + gunfire_shell_life[0], pos, mask, 0, -1,
                               (u8)fxflag, fxowner);
             }
@@ -203,10 +204,10 @@ void func_150FBE40(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxowner
     }
     flash.pos[0] = side ? -59.0f : 59.0f;
     flash.pos[1] = 68.0f;
-    flash.size[0] = func_150ADA68() * 20.0f + 40.0f;
-    flash.size[1] = func_150ADA68() * 20.0f + 80.0f;
+    flash.size[0] = random_float() * 20.0f + 40.0f;
+    flash.size[1] = random_float() * 20.0f + 80.0f;
     flash.b10 = 0x80;
-    flash.h12 = (func_150ADA20() & 3) + 5;
+    flash.h12 = (random_int() & 3) + 5;
     flash.h14 = (side ? 2 : 0) | 0x39;
     flash.h16 = 3;
     flash.h18 = 0x55;
@@ -214,7 +215,7 @@ void func_150FBE40(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxowner
     flash.b1A[1] = 0xFF;
     flash.b1A[2] = 0xFF;
     flash.b1A[3] = 0xFF;
-    flash.b1A[4] = (u32)func_150ADA20() % 56 + 0xC8;
+    flash.b1A[4] = (u32)random_int() % 56 + 0xC8;
     flash.b1A[5] = 0xFF;
     flash.b1A[6] = 0xFF;
     flash.b1A[7] = 0xFF;
@@ -236,11 +237,12 @@ void func_150FBE40(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxowner
     func_15155C9C(&ev, 0x37);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/func_150FBE40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/gun_shot_effects.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_150FC8E8(u8 *arg0) {
+/* was func_150FC8E8 */
+void tracer_draw_masked(u8 *arg0) {
     s32 var_v0;
     u8 *temp_v0;
     u8 *temp_v1;
@@ -255,7 +257,7 @@ void func_150FC8E8(u8 *arg0) {
     func_151C40BC((s32) arg0, 1.0f, 1.0f, 0.6f, 0.0f, 0xFFU, 0xFFU, (u8) var_v0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/func_150FC8E8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/tracer_draw_masked.s")
 #endif
 #ifdef NON_MATCHING
 extern f32 D_800A2280, D_800A2284, D_800A2288, D_800A228C, D_800A2290, D_800A2294, D_800A2298, D_800A229C, D_800A22A0;
@@ -265,8 +267,9 @@ u8 *func_15164CF0(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
 // data (rec + 0x28) holds `obj` and its id (+0x3B), the flag `a`, `other`, its id (0xFF without one) and its player
 // (+0x318 -> +0x23D, -1 without one) and the value `b`. When `other` has a player record, a kind-4 screen effect of
 // 300 frames for that player is started too (func_15164CF0, scales 12 / 20 / 19 and the D_800A2280.. table); its record
-// goes to data + 0x10. Called by the B-pad item action func_15065E18 and by func_15071278 (game_981E0).
-void func_150FC438(struct127 *obj, struct127 *other, u8 a, u8 b) {
+// goes to data + 0x10. Called by the B-pad item action func_15065E18 and by objfx_fc438 (game_981E0).
+/* was func_150FC438 */
+void gunfire_burst_spawn(struct127 *obj, struct127 *other, u8 a, u8 b) {
     struct {
         u8 kind;    // 0x00
         s8 u1;      // 0x01
@@ -335,13 +338,14 @@ void func_150FC438(struct127 *obj, struct127 *other, u8 a, u8 b) {
     *(u8 **) (rec + 0x28 + 0x10) = func_15164CF0((u8 *) &fx, 0, 0xFF, 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/func_150FC438.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/gunfire_burst_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_150FBE40(u8 *, u8, f32, u8, s32, s32);
+void gun_shot_effects(u8 *, u8, f32, u8, s32, s32);
 
-void func_150FCB94(u8 *arg0) {
+/* was func_150FCB94 */
+void gunfire_burst_update(u8 *arg0) {
     struct {
         s8 u50;
         u8 pad51[0x1];
@@ -367,7 +371,7 @@ void func_150FCB94(u8 *arg0) {
     (*(f32 *)((u8 *)temp_s0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 8)) - D_800BE9A4);
     if ((*(f32 *)((u8 *)temp_s0 + 8)) < 0.0f) {
         do {
-            func_150FBE40(temp_s1, (*(u8 *)((u8 *)temp_s0 + 0xC)), -(*(f32 *)((u8 *)temp_s0 + 8)), (*(u8 *)((u8 *)temp_s0 + 0xD)), (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            gun_shot_effects(temp_s1, (*(u8 *)((u8 *)temp_s0 + 0xC)), -(*(f32 *)((u8 *)temp_s0 + 8)), (*(u8 *)((u8 *)temp_s0 + 0xD)), (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             temp_v1 = (*(u8 **)((u8 *)temp_s0 + 0x18));
             (*(u8 *)((u8 *)temp_s0 + 0xC)) = (u8) ((*(u8 *)((u8 *)temp_s0 + 0xC)) ^ 1);
             if (temp_v1 != NULL) {
@@ -376,28 +380,29 @@ void func_150FCB94(u8 *arg0) {
                     (*(s16 *)((u8 *)temp_v0 + 0x1AA)) = (s16) ((*(s16 *)((u8 *)temp_v0 + 0x1AA)) + 1);
                 }
             }
-            (*(f32 *)((u8 *)temp_s0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 8)) + (4.0f + (func_150ADA68() * 4.0f)));
+            (*(f32 *)((u8 *)temp_s0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 8)) + (4.0f + (random_float() * 4.0f)));
         } while ((*(f32 *)((u8 *)temp_s0 + 8)) < 0.0f);
     }
     if ((*(s8 *)((u8 *)temp_s0 + 0x16)) != -1) {
         (*(s16 *)((u8 *)temp_s0 + 0x14)) = (s16) ((*(s16 *)((u8 *)temp_s0 + 0x14)) - D_800BE9E4);
         if ((*(s16 *)((u8 *)temp_s0 + 0x14)) < 0) {
             sp.u50 = 1;
-            func_150ADA20();
+            random_int();
             sp.u52 = 0x1E;
             sp.u55 = 1 << (*(s8 *)((u8 *)temp_s0 + 0x16));
-            sp.u54 = (func_150ADA20() % 6U) + 3;
+            sp.u54 = (random_int() % 6U) + 3;
             sp.u56 = -1;
             func_151D8E18((structEU_151D8E18 *) &sp.u50, 0, (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
-            func_150ADA20();
+            random_int();
             (*(s16 *)((u8 *)temp_s0 + 0x14)) = 0xFA;
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/func_150FCB94.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/gunfire_burst_update.s")
 #endif
-void func_150FCD98(struct102 *arg0, u8 *arg1, u8 arg2) {
+/* was func_150FCD98 */
+void gunfire_burst_handle_event(struct102 *arg0, u8 *arg1, u8 arg2) {
     s32 new_var; // fakematch: permuter temp
     u8 *v = (u8 *)arg0 + 0x28;
     if (arg2 == 0) {
@@ -428,7 +433,8 @@ void func_150FCD98(struct102 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-s32 func_150FCEB0(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_150FCEB0 */
+s32 gunfire_target_filter(u8 *arg0, s32 arg1, s32 arg2) {
     switch (arg0[4]) {
         case 0x12:
         case 0x23:
@@ -440,18 +446,21 @@ s32 func_150FCEB0(u8 *arg0, s32 arg1, s32 arg2) {
     }
 }
 
-void func_150FCEF4(u8 *arg0) {
+/* was func_150FCEF4 */
+void gunfire_burst_free(u8 *arg0) {
     if (*(s32 *)(arg0 + 0x38) != 0) {
         node_destroy(*(struct102 **)(arg0 + 0x38));
     }
 }
 
-void func_150FCF24(void *arg0) {
-    func_150FCEF4(arg0);
+/* was func_150FCF24 */
+void gunfire_burst_retire(void *arg0) {
+    gunfire_burst_free(arg0);
     func_1514933C(arg0);
 }
 
-void func_150FCF50(void *arg0) {
-    func_150FCEF4(arg0);
+/* was func_150FCF50 */
+void gunfire_burst_delete(void *arg0) {
+    gunfire_burst_free(arg0);
     func_15149368(arg0);
 }

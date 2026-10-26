@@ -164,7 +164,7 @@ void port_pif_dma(int write, void *d) {
  * long write's timer message (osEepromLongWrite func_151DD4A0 -> osSetTimer) was dropped by osSendMesg, the per-frame
  * pump func_151DD588(0) never advanced, and the NEXT save blocked for good in func_151DD4A0's
  * `while (func_151DD588(1))` (osRecvMesg OS_MESG_BLOCK on a queue nobody can fill). Seen after P232 made
- * func_15006BEC save_slot_pack C: first save at the level 6 entry (frame 17824), the game thread froze at the next one
+ * save_slot_write save_slot_pack C: first save at the level 6 entry (frame 17824), the game thread froze at the next one
  * (level 0x18 scene 2 request, frame 19116). Created once, as libultra does (guarded by __osContinitialized). */
 extern OSMesgQueue D_80042E08; /* __osEepromTimerQ */
 extern OSMesg D_80042E20;      /* __osEepromTimerMsg */

@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_150FE290(s32 arg0) {
+/* was func_150FE290 */
+void sfx_tick_poke_kind28_objs(s32 arg0) {
     struct127 *p;
 
     sfx_cooldown_tick();
@@ -11,7 +12,7 @@ void func_150FE290(s32 arg0) {
         p = D_800CC2D0;
         do {
             if (p->id == 0x28) {
-                func_150EDBB8(p, 0x14, 0x14);
+                tank_set_track_speeds(p, 0x14, 0x14);
             }
             p++;
         } while (p != (struct127 *)&D_800D121C);

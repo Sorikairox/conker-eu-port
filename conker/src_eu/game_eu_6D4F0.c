@@ -91,8 +91,8 @@ extern u8 D_8008482C[];    /* empty text */
 // D_80084828 in the middle). `select` buttons pick the selected entry when it is unlocked (bit func_1509CEA8(i + 1) of
 // D_800D2E4C) and return its id; `cancel` or B (0x4000) return -1. Up (4) / down (8) or the stick (func_1503FCE0)
 // start a scroll (D_80084818 = -1 / 1) that moves the offset D_800C6C70 by 1.25 per tick up to +-11, then steps the
-// selection by 1 (3 with Z held). Pressing 0x30 together locks the menu for 60 ticks (func_15017790 /
-// func_150177F8, D_8008481C) and shows D_80098CE0 on every row. Rows fade in / out at the edges (alpha 64 per
+// selection by 1 (3 with Z held). Pressing 0x30 together locks the menu for 60 ticks (level_state_clear /
+// level_state_init, D_8008481C) and shows D_80098CE0 on every row. Rows fade in / out at the edges (alpha 64 per
 // row); the selected row is red (blinking D_80098CF8 every 30 ticks, D_80084820 / D_80084824), others white;
 // entries with func_1509CE88 < 0 get the marker D_80098CF4 above them. Returns -2 while no choice is made.
 s32 func_1503FE30(Gfx **gfxp, u16 cancel, u16 select) {
@@ -135,8 +135,8 @@ s32 func_1503FE30(Gfx **gfxp, u16 cancel, u16 select) {
 
     if (D_8008481C == 0 && (buttons & 0x20) && (buttons & 0x10)) {
         D_8008481C = 60;
-        func_15017790();
-        func_150177F8();
+        level_state_clear();
+        level_state_init();
     }
     if (D_8008481C != 0) {
         buttons = 0;

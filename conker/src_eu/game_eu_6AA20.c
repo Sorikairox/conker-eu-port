@@ -7,7 +7,7 @@ void func_1503D728(s32 *arg0, s32 arg1);
 
 
 #ifdef NON_MATCHING
-s32 func_1502B6BC(s32 *, s32, s32 *, s32, ...);
+s32 asset_load_with_subfiles(s32 *, s32, s32 *, s32, ...);
 void func_1503D658(s8 *arg0, s32 arg1);
 s32 func_1503DF2C(s32 arg0);
 void func_1503DC74(s32 arg0);
@@ -17,7 +17,7 @@ s32 func_1503DA64(s32 arg0, s32 arg1);
 s32 func_1503D950(s32 arg0, s32 arg1);
 void func_1503E00C(s32 arg0);
 void func_10004074(s32);
-s32 func_1510D3E0(Gfx *, s32, s32, s32, s16 **);
+s32 texture_resolve_dl_ids(Gfx *, s32, s32, s32, s16 **);
 extern s32 D_800C48A8[];
 extern s32 D_800C4D10[];
 extern s32 D_800C5000[];
@@ -32,11 +32,11 @@ extern s32 D_800C6360[187];
 extern s32 D_800C5C08[187];
 extern s32 D_800C6070[187];
 /* P51: model load of id arg0 (< 0xBB, not 0xFF; nothing to do when D_800D19A0[id] is set). Model asset (1, id)
- * through func_1502B6BC (7 relocated {offset, size} pairs): D_800D19A0[id] = base + 0x38, D_800C4440 (+0),
+ * through asset_load_with_subfiles (7 relocated {offset, size} pairs): D_800D19A0[id] = base + 0x38, D_800C4440 (+0),
  * D_800C48A8 (+8, display lists), D_800C4D10 (+0x28), D_800C5000 (+0x10, skeleton), D_800C5758 (+0x18),
  * D_800C5468 (+0x20), the counts D_800C4730 (+4 / 4), D_800C5BC0, D_800C4B98 (+0xC / 4), D_800C5A48 (+0x1C / 12),
  * D_800C52F0 (+0x14 / 16, joints). The display lists of +8 and +0x28 are relocated (func_1503D728 / func_1503D658).
- * Then (arg3) func_1503DF2C and func_1510D3E0 per display list, func_1503DC74 / func_1503DAF4, (arg2 +0x18 & 0x4000
+ * Then (arg3) func_1503DF2C and texture_resolve_dl_ids per display list, func_1503DC74 / func_1503DAF4, (arg2 +0x18 & 0x4000
  * or arg4 & 1) func_150028BC, func_1503DA64, func_1503D950 (animation bank); any error frees everything again.
  * Returns 0, 1 (no asset) or the error bits. */
 s32 func_1503D210(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
@@ -57,7 +57,7 @@ s32 func_1503D210(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     if (((s32 *)&D_800D19A0)[id] != 0) {
         return 0;
     }
-    m = (u8 *)func_1502B6BC(&sz, 7, NULL, 2, 1, id);
+    m = (u8 *)asset_load_with_subfiles(&sz, 7, NULL, 2, 1, id);
     if (m == NULL) {
         return 1;
     }
@@ -90,7 +90,7 @@ s32 func_1503D210(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
         err = func_1503DF2C(id);
         if (err == 0) {
             for (i = 0; i < D_800C4B98[id]; i++) {
-                func_1510D3E0(((Gfx **)D_800C48A8[id])[i], 0, 0, 0x3E, NULL);
+                texture_resolve_dl_ids(((Gfx **)D_800C48A8[id])[i], 0, 0, 0x3E, NULL);
             }
         }
     }
@@ -291,8 +291,8 @@ block_6:
 #endif
 s32 func_1503D8E0(s32);
 void func_1503D800(s32);
-s32 func_1502B350(u8 *, s32, s32 *);
-s32 func_1502B5C8(s32 *, s32, ...);
+s32 asset_load_alloc(u8 *, s32, s32 *);
+s32 asset_load(s32 *, s32, ...);
 void func_1503D74C(s32 *arg0, s32 arg1);
 void func_1503D774(u8 *arg0, s32 arg1);
 
@@ -303,7 +303,7 @@ s32 func_1503D950(s32 arg0, s32 arg1) {
     if (*(s32 **)&D_800D1588[arg0] != NULL) {
         return 0;
     }
-    p = (s32 *)func_1502B5C8(&sp34, 2, 0xF, func_1503D8E0(arg0));
+    p = (s32 *)asset_load(&sp34, 2, 0xF, func_1503D8E0(arg0));
     if (p == NULL) {
         *(s32 **)&D_800D1588[arg0] = NULL;
         D_800C5A90[arg0] = 0;
@@ -327,7 +327,7 @@ s32 func_1503D950(s32 arg0, s32 arg1) {
     return 0;
 }
 
-s32 func_1502B6BC(s32 *, s32, s32 *, s32, ...);
+s32 asset_load_with_subfiles(s32 *, s32, s32 *, s32, ...);
 
 s32 func_1503DA64(s32 arg0, s32 arg1) {
     s32 sp2C;
@@ -336,7 +336,7 @@ s32 func_1503DA64(s32 arg0, s32 arg1) {
     if (D_800D1C90[arg0] != NULL) {
         return 0;
     }
-    v = (s32 *)func_1502B6BC(&sp2C, 2, NULL, 2, 0x11, arg0);
+    v = (s32 *)asset_load_with_subfiles(&sp2C, 2, NULL, 2, 0x11, arg0);
     if (v == NULL) {
         D_800D1C90[arg0] = NULL;
         return 2;
@@ -501,7 +501,7 @@ s32 func_150844AC(struct127 *, s32);
 /* func_1503DD8C (P57): make model id ready for object obj (variant var). Not loaded (D_800D19A0[id] == 0):
  * func_1503D210(id, 0, obj+0x144, flag, obj[0xAC]). Loaded: func_150028BC(id) once (D_800C5C08[id] == 0) when
  * obj+0x144 has +0x18 & 0x4000 or obj[0xAC] & 1; with flag, a vertex block (D_800C5A48[id]) and its first word
- * still below 0x10000000 (not yet relocated): func_1503DF2C(id) and func_1510D3E0 on each display list.
+ * still below 0x10000000 (not yet relocated): func_1503DF2C(id) and texture_resolve_dl_ids on each display list.
  * If that all returned 0: func_150844AC(obj, var). Non-zero = not drawable (func_1502CFEC returns). */
 s32 func_1503DD8C(struct127 *obj, s32 id, s32 var, s32 flag) {
     u8 *o = (u8 *)obj;
@@ -521,7 +521,7 @@ s32 func_1503DD8C(struct127 *obj, s32 id, s32 var, s32 flag) {
         if (flag != 0 && ((u16 *)&D_800C5A48)[id] != 0 && **(u32 **)&((s32 *)&D_800C5758)[id] < 0x10000000) {
             r = func_1503DF2C(id);
             for (i = 0; i < D_800C4B98[id]; i++) {
-                func_1510D3E0(((Gfx **)D_800C48A8[id])[i], 0, 0, 0x3E, NULL);
+                texture_resolve_dl_ids(((Gfx **)D_800C48A8[id])[i], 0, 0, 0x3E, NULL);
             }
         }
     }
@@ -535,7 +535,7 @@ s32 func_1503DD8C(struct127 *obj, s32 id, s32 var, s32 flag) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1510D66C(s32, s32, s32, s32);
+s32 texture_cache_lookup(s32, s32, s32, s32);
 extern s32 D_800C5758;
 extern s32 D_800C5A48;
 
@@ -556,7 +556,7 @@ s32 func_1503DF2C(s32 arg0) {
         var_s0 = *temp_s2;
         var_s1 = 0;
         do {
-            *(s32 *)(*temp_s2 + var_s1) = func_1510D66C((*(s32 *)((u8 *)var_s0 + 4)), 0, 0x3E, 1);
+            *(s32 *)(*temp_s2 + var_s1) = texture_cache_lookup((*(s32 *)((u8 *)var_s0 + 4)), 0, 0x3E, 1);
             temp_s0 = (s32 *)(*temp_s2 + var_s1);
             if (*temp_s0 == 0x80000000) {
                 var_s4 |= 0x10;
@@ -572,7 +572,7 @@ s32 func_1503DF2C(s32 arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DF2C.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1510DD2C(s32, s32, u16);
+s32 texture_cache_release(s32, s32, u16);
 extern s32 D_800C5758;
 extern s32 D_800C5A48;
 
@@ -594,7 +594,7 @@ void func_1503E00C(s32 arg0) {
             if (temp_v1 != 0x80000000) {
                 temp_a1 = (*(s32 *)((u8 *)temp_v0 + 4));
                 if (temp_v1 != temp_a1) {
-                    func_1510DD2C(temp_a1, temp_a1, *temp_s3);
+                    texture_cache_release(temp_a1, temp_a1, *temp_s3);
                 }
             }
             var_s0 += 1;

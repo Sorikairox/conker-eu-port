@@ -7,7 +7,8 @@ s32 func_151308E4(void *, s32, s32, u8, s32);
 s32 func_15132FBC(void *, s32, s32, s32, u8, s32);
 void func_15143794(s16, s16, f32, void *);
 typedef struct { f32 x, y, z; } V3s96;
-s32 func_150E9E10(s32 *arg0, s32 *arg1, f32 arg2, u8 arg3, s32 arg4) {
+/* was func_150E9E10 */
+s32 fx_spark_burst_with_light(s32 *arg0, s32 *arg1, f32 arg2, u8 arg3, s32 arg4) {
     struct {
         s32 u34;
         s32 u38;
@@ -83,11 +84,11 @@ s32 func_150E9E10(s32 *arg0, s32 *arg1, f32 arg2, u8 arg3, s32 arg4) {
     Header2 h2;
     s32 i;
 
-    sp.u52 = sp.u56 = sp.u3E = (func_150ADA20() % 31U) + 0x14;
+    sp.u52 = sp.u56 = sp.u3E = (random_int() % 31U) + 0x14;
     sp.u54 = 0xFF / sp.u52;
     sp.u4F = 0xFF;
-    sp.u5C = sp.u60 = ((func_150ADA68() * 608.0f) + 808.0f) * arg2;
-    sp.u58 = ((func_150ADA68() * 18.0f) + 1016.0f) * 0.001f;
+    sp.u5C = sp.u60 = ((random_float() * 608.0f) + 808.0f) * arg2;
+    sp.u58 = ((random_float() * 18.0f) + 1016.0f) * 0.001f;
     sp.u51 = 0x16;
     sp.u3C = 0x2001;
     sp.u34 = 0x200005;
@@ -104,10 +105,10 @@ s32 func_150E9E10(s32 *arg0, s32 *arg1, f32 arg2, u8 arg3, s32 arg4) {
     sp.u70 = 0.0f;
     sp.u74 = 0.0f;
     sp.u78 = 0.0f;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x80;
     }
     sp.u4C = 0xFF;
@@ -120,7 +121,7 @@ s32 func_150E9E10(s32 *arg0, s32 *arg1, f32 arg2, u8 arg3, s32 arg4) {
     sp.u7C = *(V3s96 *)arg1;
     sp.u88 = 0.0f;
     func_151308E4(&sp, 0, 0, arg3, arg4);
-    i = (func_150ADA20() & 7) + 5;
+    i = (random_int() & 7) + 5;
     sp2.u78 = 0x21E8;
     sp2.u7E = 0x1B;
     sp2.u28[0] = 0.0f;
@@ -149,34 +150,35 @@ s32 func_150E9E10(s32 *arg0, s32 *arg1, f32 arg2, u8 arg3, s32 arg4) {
     sp2.u28[1] = 0.2f;
     for (; i > 0; i--) {
         sp2.u34 = *(V3s96 *)arg0;
-        sp2.u7C = (func_150ADA20() % 41U) + 0x1D;
-        sp2.u88 = (func_150ADA20() % 76U) + 0xB4;
-        func_15143794(func_150ADA20() & 0xFF, -(func_150ADA20() % 65U), ((func_150ADA68() * 2031.0f) + 1641.0f) * 0.01f, &sp2.u5C);
-        sp2.u28[3] = sp2.u28[2] = ((func_150ADA68() * 3047.0f) + 1016.0f) * 0.0001f * arg2;
-        sp2.u74 = ((func_150ADA68() * 99.0f) + -206.0f) * 0.01f;
-        sp2.u68 = (func_150ADA68() * 101.0f) + -49.0f;
-        sp2.u70 = (func_150ADA68() * 101.0f) + -49.0f;
+        sp2.u7C = (random_int() % 41U) + 0x1D;
+        sp2.u88 = (random_int() % 76U) + 0xB4;
+        func_15143794(random_int() & 0xFF, -(random_int() % 65U), ((random_float() * 2031.0f) + 1641.0f) * 0.01f, &sp2.u5C);
+        sp2.u28[3] = sp2.u28[2] = ((random_float() * 3047.0f) + 1016.0f) * 0.0001f * arg2;
+        sp2.u74 = ((random_float() * 99.0f) + -206.0f) * 0.01f;
+        sp2.u68 = (random_float() * 101.0f) + -49.0f;
+        sp2.u70 = (random_float() * 101.0f) + -49.0f;
         func_15132FBC(&sp2, 3, 0xFF, 0, arg3, arg4);
     }
     hdr.unk0 = 3;
     hdr.unk1 = -1;
-    hdr.unk2 = (func_150ADA20() % 13U) + 8;
+    hdr.unk2 = (random_int() % 13U) + 8;
     hdr.unk4 = 0;
     h2.unk0 = ((f32 *)arg0)[0];
     h2.unk4 = ((f32 *)arg0)[1];
     h2.unk8 = ((f32 *)arg0)[2];
-    light_create_with_ctrl(&hdr, &h2, (func_150ADA20() % 31U) + 0x46, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
+    light_create_with_ctrl(&hdr, &h2, (random_int() % 31U) + 0x46, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
 }
 
 void func_15143794(s16, s16, f32, void *);
-s32 func_150E9E10(s32 *, s32 *, f32, u8, s32);
+s32 fx_spark_burst_with_light(s32 *, s32 *, f32, u8, s32);
 #ifdef NON_MATCHING
 void func_1514470C(u8 *arg0, u8 *arg1);
 #else
 s32 func_1514470C(s32, s32 *);
 #endif
 
-void func_150EA3B4(u8 *arg0)
+/* was func_150EA3B4 */
+void fx_marker_spark_emitter_update(u8 *arg0)
 {
   f32 temp_f20;
   s32 sp80[3];
@@ -184,15 +186,15 @@ void func_150EA3B4(u8 *arg0)
   u8 *temp_s0;
   temp_s0 = arg0 + 0x28;
   ;
-  *((f32 *) (((u8 *) temp_s0) + 0x14)) = (f32) ((((*((f32 *) (((u8 *) temp_s0) + 4))) + (func_150ADA68() * (*((f32 *) (((u8 *) temp_s0) + 8))))) * D_800BE9A4) + (*((f32 *) (((u8 *) temp_s0) + 0x14))));
+  *((f32 *) (((u8 *) temp_s0) + 0x14)) = (f32) ((((*((f32 *) (((u8 *) temp_s0) + 4))) + (random_float() * (*((f32 *) (((u8 *) temp_s0) + 8))))) * D_800BE9A4) + (*((f32 *) (((u8 *) temp_s0) + 0x14))));
   if ((*((f32 *) (((u8 *) temp_s0) + 0x14))) > 1.0f)
   {
     do
     {
-      temp_f20 = (*((f32 *) (((u8 *) temp_s0) + 0xC))) + ((*((f32 *) (((u8 *) temp_s0) + 0x10))) * func_150ADA68());
+      temp_f20 = (*((f32 *) (((u8 *) temp_s0) + 0xC))) + ((*((f32 *) (((u8 *) temp_s0) + 0x10))) * random_float());
       func_1514470C(*((s32 *) (((u8 *) temp_s0) + 0)), sp80);
-      func_15143794((s16) (func_150ADA20() & 0xFF), (s16) (0x40 - (((u32) func_150ADA20()) % 129U)), (func_150ADA68() * 600.0f) * 0.01f, sp74);
-      func_150E9E10(sp80, sp74, temp_f20, *((u8 *) (((u8 *) arg0) + 0xC)), (s32) (*((u8 *) (((u8 *) arg0) + 1))));
+      func_15143794((s16) (random_int() & 0xFF), (s16) (0x40 - (((u32) random_int()) % 129U)), (random_float() * 600.0f) * 0.01f, sp74);
+      fx_spark_burst_with_light(sp80, sp74, temp_f20, *((u8 *) (((u8 *) arg0) + 0xC)), (s32) (*((u8 *) (((u8 *) arg0) + 1))));
       *((f32 *) (((u8 *) temp_s0) + 0x14)) = (f32) ((*((f32 *) (((u8 *) temp_s0) + 0x14))) - 1.0f);
     }
     while ((*((f32 *) (((u8 *) temp_s0) + 0x14))) > 1.0f);

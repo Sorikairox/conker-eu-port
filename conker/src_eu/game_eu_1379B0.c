@@ -4,7 +4,8 @@
 
 typedef struct { f32 x, y, z; } V3;
 
-void func_1510A1A0(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5)
+/* was func_1510A1A0 */
+void segment_debris_spawn(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5)
 {
   f32 temp_f0;
   u8 *spA0;
@@ -47,14 +48,14 @@ void func_1510A1A0(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5)
     f32 u9C;
   } sp;
   spA0 = *((u8 **) (((u8 *) arg0) - -0x28));
-  sp.u9C = ((func_150ADA68() * 4611.0f) + 1581.0f) * 0.001f;
+  sp.u9C = ((random_float() * 4611.0f) + 1581.0f) * 0.001f;
   sp.u20[0] = 1.0f;
   sp.u20[1] = 1.0f;
-  sp.u20[3] = ((func_150ADA68() * 3522.0f) + 4599.0f) * 0.000001f;
+  sp.u20[3] = ((random_float() * 3522.0f) + 4599.0f) * 0.000001f;
   sp.u20[2] = sp.u20[3];
-  sp.u20[4] = func_150ADA68() * 360.0f;
-  sp.u20[5] = func_150ADA68() * 360.0f;
-  temp_f0 = func_150ADA68();
+  sp.u20[4] = random_float() * 360.0f;
+  sp.u20[5] = random_float() * 360.0f;
+  temp_f0 = random_float();
   sp.u20[7] = 1.0f;
   sp.u20[8] = 1.0f;
   sp.u20[9] = 1.0f;
@@ -64,13 +65,13 @@ void func_1510A1A0(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5)
   sp.u54 = (*((f32 *) (((u8 *) arg5) + 0))) * temp_f0;
   sp.u58 = (*((f32 *) (((u8 *) arg5) + 4))) * temp_f0;
   sp.u5C = (*((f32 *) (((u8 *) arg5) + 8))) * temp_f0;
-  sp.u60 = ((func_150ADA68() * 24546.0f) + (-12273.0f)) * 0.001f;
+  sp.u60 = ((random_float() * 24546.0f) + (-12273.0f)) * 0.001f;
   sp.u64 = 0.0f;
-  sp.u68 = ((func_150ADA68() * 24546.0f) + (-12273.0f)) * 0.001f;
-  temp_f0 = (func_150ADA68() * 124.0f) + (-231.0f); // fakematch: permuter temp
+  sp.u68 = ((random_float() * 24546.0f) + (-12273.0f)) * 0.001f;
+  temp_f0 = (random_float() * 124.0f) + (-231.0f); // fakematch: permuter temp
   sp.u70 = 0x29E8;
   sp.u6C = temp_f0 * 0.001f;
- sp.u74 = (func_150ADA20() % 15U) + 0x14; if (func_150ADA20() & 1) { sp.u76 = 0x23; } else { sp.u76 = 0x24;
+ sp.u74 = (random_int() % 15U) + 0x14; if (random_int() & 1) { sp.u76 = 0x23; } else { sp.u76 = 0x24;
   }
   sp.u78 = 0;
   sp.u7C = 0;
@@ -98,7 +99,8 @@ void func_1510A1A0(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5)
   func_15132FBC(&sp, 3, 0xFF, 0, (s32) (*((u8 *) (((u8 *) arg0) + 0xC))), (s32) (*((u8 *) (((u8 *) arg0) + 1))));
 }
 
-struct260 *func_1510A454(u8 *volatile arg0, s16 arg1, s8 arg2, s8 arg3, f32 arg4, s32 arg5, u8 arg6, s32 arg7) { // fakematch: volatile gives the arg0 home reload (s101 recipe)
+/* was func_1510A454 */
+struct260 *segment_effect_spawn(u8 *volatile arg0, s16 arg1, s8 arg2, s8 arg3, f32 arg4, s32 arg5, u8 arg6, s32 arg7) { // fakematch: volatile gives the arg0 home reload (s101 recipe)
     struct260 *temp_v0;
     struct {
         u8 *unk0;
@@ -139,20 +141,21 @@ extern f32 D_800A2938[];        /* segment start / end points (12-byte points, r
 extern f32 D_800A298C[];        /* per-segment target points */
 extern void *D_80089000[];      /* end handlers (s8 +0x34) */
 extern void *D_80089004[];      /* point handlers (s8 +0x35) */
-f32 func_150ADA68(void);
-void func_15114E8C(f32 (*)[4], u8 *);
+f32 random_float(void);
+void world_record_build_matrix(f32 (*)[4], u8 *);
 void func_150A7E40(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
 s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
 
-// segment_effect_update: P232. Update callback of effect type 0x1B (func_1510A454 fills its +0x28 data: owner object,
+// segment_effect_update: P232. Update callback of effect type 0x1B (segment_effect_spawn fills its +0x28 data: owner object,
 // accumulator, rate, end handler +0x34, point handler +0x35). The accumulator grows by rate * D_800A28EC * frame step;
 // for every whole unit, when there is a point handler: picks a segment of the owner's model by the weights
 // D_800A28D4, a random point on it, and transforms it, the segment ends and the segment's target point by the
-// owner's matrix (func_15114E8C); the direction from the start to a random point between the end and the target is
+// owner's matrix (world_record_build_matrix); the direction from the start to a random point between the end and the target is
 // normalised (func_15145128), then D_80089004[handler](fx, point, start, end, target, dir) runs. Without a point
 // handler the units are dropped. Finally the end handler D_80089000[+0x34](fx) runs unless it is -1. Sibling of
-// func_15109A7C (game_eu_1371A0, effect 0x1A).
-void func_1510A538(u8 *fx) {
+// obj_point_effect_emitter_update (game_eu_1371A0, effect 0x1A).
+/* was func_1510A538 */
+void segment_effect_update(u8 *fx) {
     u8 *rec = fx + 0x28;
     f32 mtx[4][4];
     f32 pt[3];
@@ -170,9 +173,9 @@ void func_1510A538(u8 *fx) {
     *(f32 *) (rec + 4) += *(f32 *) (rec + 8) * D_800A28EC * D_800BE9A4;
     if ((s8) rec[0xD] != -1) {
         while (*(f32 *) (rec + 4) > 1.0f) {
-            func_15114E8C(mtx, *(u8 **) rec);
+            world_record_build_matrix(mtx, *(u8 **) rec);
             i = 0;
-            sel = D_800A28D4[6] * func_150ADA68();
+            sel = D_800A28D4[6] * random_float();
             w = D_800A28D4;
             if (D_800A28D4[0] < sel) {
                 wt = D_800A28D4[0];
@@ -183,7 +186,7 @@ void func_1510A538(u8 *fx) {
                     w++;
                 } while (wt < sel);
             }
-            r = func_150ADA68();
+            r = random_float();
             seg = &D_800A2938[i * 3];
             func_150A7E40(mtx, (seg[3] - seg[0]) * r + seg[0], (seg[4] - seg[1]) * r + seg[1],
                           (seg[5] - seg[2]) * r + seg[2], &pt[0], &pt[1], &pt[2]);
@@ -191,7 +194,7 @@ void func_1510A538(u8 *fx) {
             func_150A7E40(mtx, seg[3], seg[4], seg[5], &end[0], &end[1], &end[2]);
             func_150A7E40(mtx, D_800A298C[i * 3], D_800A298C[i * 3 + 1], D_800A298C[i * 3 + 2], &target[0],
                           &target[1], &target[2]);
-            r = func_150ADA68();
+            r = random_float();
             dir[0] = ((target[0] - end[0]) * r + end[0]) - start[0];
             dir[1] = ((target[1] - end[1]) * r + end[1]) - start[1];
             dir[2] = ((target[2] - end[2]) * r + end[2]) - start[2];
@@ -210,10 +213,11 @@ void func_1510A538(u8 *fx) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1379B0/func_1510A538.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1379B0/segment_effect_update.s")
 #endif
 
-struct260 *func_1510A8C4(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
+/* was func_1510A8C4 */
+struct260 *vent_smoke_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     struct260 *temp_v0;
     struct {
         u8 *unk0;
@@ -243,13 +247,13 @@ struct260 *func_1510A8C4(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
 void func_15143134(void *arg0, void *arg1, void *arg2);
 s32 func_151308E4(void *, u8, s32, u8, s32);
 
-/* func_1510A98C's model-space vent points (D_800A29D4 / D_800A29E0) and aim points (D_800A29EC / D_800A29F8) */
+/* vent_smoke_emitter_update's model-space vent points (D_800A29D4 / D_800A29E0) and aim points (D_800A29EC / D_800A29F8) */
 static const f32 sVentPoints[4][3] = {
     { -11.0f, -24.0f, 43.0f }, { 31.0f, -24.0f, 43.0f },  /* vents 0 / 1 */
     { -51.0f, -24.0f, 43.0f }, { 81.0f, -24.0f, 43.0f },  /* their aim points */
 };
 
-/* func_1510A98C's puff request (func_151308E4) */
+/* vent_smoke_emitter_update's puff request (func_151308E4) */
 typedef struct {
     /* 0x00 */ s32 kind;
     /* 0x04 */ s32 u04;
@@ -273,13 +277,14 @@ typedef struct {
     /* 0x60 */ u8  u60[6];
 } VentPuff;
 
-// vent_smoke_emitter_update: update handler of the emitter made by func_1510A8C4 (data at +0x28: owner object,
+// vent_smoke_emitter_update: update handler of the emitter made by vent_smoke_emitter_spawn (data at +0x28: owner object,
 // its unique id, an accumulator, base rate, random rate). Kills the emitter (+0xE = -1) when the owner is gone or
 // was replaced; otherwise adds (base + random * rand) * D_800BE9A4 to the accumulator and, while it is above 1,
 // spawns one puff from one of the two vents of the owner's model (bone matrix +0x240), blowing outward at
 // 0.096..0.299 with a random size 60..120 and life 20..35 and random flip flags. Without a model the
 // accumulator is just drained (P156).
-void func_1510A98C(u8 *arg0) {
+/* was func_1510A98C */
+void vent_smoke_emitter_update(u8 *arg0) {
     struct {
         u8 *obj;
         u8 uid;
@@ -300,7 +305,7 @@ void func_1510A98C(u8 *arg0) {
         *(s16 *)(arg0 + 0xE) = -1;
         return;
     }
-    rec->accum += (rec->rate + func_150ADA68() * rec->rateRand) * D_800BE9A4;
+    rec->accum += (rec->rate + random_float() * rec->rateRand) * D_800BE9A4;
     if (1.0f < rec->accum && *(u8 **)(rec->obj + 0x1D4) != NULL) {
         model = *(u8 **)(rec->obj + 0x1D4) + 0x240;
         func_15143134((void *)sVentPoints[0], pts[0], model);
@@ -346,20 +351,20 @@ void func_1510A98C(u8 *arg0) {
         puff.u60[4] = 0xFF;
         puff.u60[5] = 0;
         do {
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 puff.flags |= 0x40;
             } else {
                 puff.flags &= ~0x40;
             }
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 puff.flags |= 0x80;
             } else {
                 puff.flags &= ~0x80;
             }
-            side = func_150ADA20() & 1;
-            speed = (func_150ADA68() * 203.0f + 96.0f) * 0.001f;
-            puff.life = (func_150ADA20() & 0xF) + 20;
-            puff.sizeX = puff.sizeY = func_150ADA68() * 60.0f + 60.0f;
+            side = random_int() & 1;
+            speed = (random_float() * 203.0f + 96.0f) * 0.001f;
+            puff.life = (random_int() & 0xF) + 20;
+            puff.sizeX = puff.sizeY = random_float() * 60.0f + 60.0f;
             puff.pos[0] = pts[side][0];
             puff.pos[1] = pts[side][1];
             puff.pos[2] = pts[side][2];
@@ -379,10 +384,11 @@ void func_1510A98C(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1379B0/func_1510A98C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1379B0/vent_smoke_emitter_update.s")
 #endif
 
-void func_1510ADF0(u8 *arg0, struct212 *arg1, u8 arg2) {
+/* was func_1510ADF0 */
+void segment_effect_handle_event(u8 *arg0, struct212 *arg1, u8 arg2) {
     struct212 *temp_v0 = (struct212 *)(arg0 + 0x28);
     if (arg2 == 0x2D) {
         if (temp_v0->unk0 == arg1->unk0) {
@@ -395,7 +401,8 @@ void func_1510ADF0(u8 *arg0, struct212 *arg1, u8 arg2) {
     }
 }
 
-void func_1510AE4C(u8 *arg0, struct212 *arg1, u8 arg2) {
+/* was func_1510AE4C */
+void vent_smoke_emitter_handle_event(u8 *arg0, struct212 *arg1, u8 arg2) {
     struct212 *temp_v0 = (struct212 *)(arg0 + 0x28);
     if (arg2 == 0x2D) {
         if (temp_v0->unk0 == arg1->unk0) {

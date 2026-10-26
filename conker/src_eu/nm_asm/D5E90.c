@@ -213,7 +213,7 @@ static s32 nmD5E90_diagonal(TriPt *v, f32 *n, f32 sy, f32 sz) {
 
 /* Triangle (9 floats, the 3 vertices relative to the box centre) vs the box D_800CC64C/50/54.
  * Returns 0 if they intersect, 1 if the triangle is outside. When the test gets past the vertex-in-box
- * check, the triangle's plane is left in D_800CC630..3C. Used by func_15049260 (quadtree culling). */
+ * check, the triangle's plane is left in D_800CC630..3C. Used by quadtree_tri_box_test (quadtree culling). */
 s32 func_150AB278(struct_eu_bytes24 arg0) {
     TriPt *v = (TriPt *) arg0.unk0;
     f32 n[4];
@@ -330,7 +330,7 @@ extern u8 D_800D3C00[], D_800DC26C[], D_800DC270[], D_800DC274[], D_800DC278[], 
 s32 func_1507C7C0(struct127 *, s16 *, s16 *, s16 *);
 s32 func_150A69A8(s32, s32, s32 *, s32);
 s32 func_150A49D0(s32, s32 *, s32);
-void func_1510F800(s32);
+void collision_select_area(s32);
 
 /* BSP node of the level collision tree (D_800DBE08): a square of half size `half` around (cx, cz); `next` = byte
  * offset to the next sibling (0: last), `child` = byte offset to the first child (0: leaf, the triangle list follows). */
@@ -588,7 +588,7 @@ typedef struct {
     u32 keepFall;        /* 0x4C rec+0x20 copy; walls clear rec+0x20 when this was zeroed */
     NmwReg dy;           /* 0x50 rec+0x20 (bits), after the first push pos y - target y */
     f32 yoff;            /* 0x54 D_800CC1FC: box centre above the record */
-    f32 half[3];         /* 0x58 box half extents (D_800CC64C..54, set by func_150492CC) */
+    f32 half[3];         /* 0x58 box half extents (D_800CC64C..54, set by quadtree_set_test_box) */
     s32 prev;            /* 0x64 previous triangle of the leaf list (relative entries) */
     s32 nVisited;        /* 0x68 / gp */
     u16 visited[100];    /* 0x6C level triangles already tested (a triangle can be in several leaves) */
@@ -1184,7 +1184,7 @@ static s32 nmw_engine(u8 *rec, f32 x, f32 y, u32 zbits, s32 mark, s32 ledge) {
         w.yoff = NMW_F32(D_800CC1FC);
         { /* P317: volatile zero: IDO folds `0.0f + x` (the asm adds $f3, taken as 0.0; P310) */
             volatile f32 p317z = 0.0f;
-            func_150492CC((f32) w.margin * 2.0f, NMW_F32(D_800CC1F8) + p317z, (f32) w.radius * 2.0f);
+            quadtree_set_test_box((f32) w.margin * 2.0f, NMW_F32(D_800CC1F8) + p317z, (f32) w.radius * 2.0f);
         }
     } else {
         w.radiusF = rd;
@@ -1193,7 +1193,7 @@ static s32 nmw_engine(u8 *rec, f32 x, f32 y, u32 zbits, s32 mark, s32 ledge) {
         w.yoff = NMW_F32(D_800CC1FC);
         dx = x - *(f32 *) (rec + 0x14);
         dz = z.f - *(f32 *) (rec + 0x1C);
-        func_150492CC((f32) w.margin * 2.0f, NMW_F32(D_800CC1F8), (f32) w.radius * 2.0f + sqrtf(dx * dx + dz * dz));
+        quadtree_set_test_box((f32) w.margin * 2.0f, NMW_F32(D_800CC1F8), (f32) w.radius * 2.0f + sqrtf(dx * dx + dz * dz));
     }
     w.nVisited = 0;
     w.si = 0.0f;
@@ -1461,7 +1461,7 @@ static NmrNode *nmr_find_leaf(f32 x, f32 z, NmrNode *skip) {
  * Outputs (each optional): *outRec = the hit triangle's D_800DC26C record, *outX / Y / Z = the point, outVerts = its
  * 3 vertices (s16 x, y, z each), *outDist, *outObj = the object index (-1: level), *outFlags = the triangle's flags
  * (level: D_800DBE5C[tri]; object: its table +0x44 [tri - first], or +0x40 for all). Returns 1 on a hit, else 0.
- * func_1510F800(0 / 2) marks the level / object phases (profiler).
+ * collision_select_area(0 / 2) marks the level / object phases (profiler).
  */
 s32 func_150ACEA0(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRec, s32 outVerts, s32 outX, s32 outY,
                   s32 outZ, s32 outDist, s32 outObj, s32 outFlags, f32 maxDist) {
@@ -1484,7 +1484,7 @@ s32 func_150ACEA0(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRec, s3
     u32 tri, triEnd, vbase, prev, flags;
     s32 n, i, r;
 
-    func_1510F800(0);
+    collision_select_area(0);
     if (*(u32 *) &dx == 0 && dy == 0.0f && dz == 0.0f) {
         return 0;
     }
@@ -1576,7 +1576,7 @@ s32 func_150ACEA0(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRec, s3
     }
 
     /* objects */
-    func_1510F800(2);
+    collision_select_area(2);
     obj = (u8 *) D_800DBEF4;
     objEnd = obj + D_800DC320 * NMR_OBJ_SIZE;
     if (obj != objEnd) {

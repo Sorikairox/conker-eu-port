@@ -12,13 +12,13 @@ void func_150D2050(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, ...);
+s32 event_dispatch(s32, s32, ...);
 #else
-s32 func_1509BE40(s32, s32, s32, s32);
+s32 event_dispatch(s32, s32, s32, s32);
 #endif
 
 void func_150D20E0(u8 *arg0) {
-    if (func_1509BE40(1, 0x402C, 6, 0x2000) != 0) {
+    if (event_dispatch(1, 0x402C, 6, 0x2000) != 0) {
         (*(s32 *)((u8 *)arg0 + 0x84)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x84)) | 0x10);
         return;
     }

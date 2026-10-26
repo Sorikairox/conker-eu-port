@@ -9,7 +9,8 @@ s32 func_151ACBD4(s8 *, s32);
 extern s32 D_80090648;
 extern s32 D_80096750;
 
-void func_15010110(void) {
+/* was func_15010110 */
+void level_obj_init_ropes(void) {
     struct {
         s8 u4C;
         u8 pad4D[0x3];
@@ -46,5 +47,5 @@ void func_15010110(void) {
     } while (temp_s2 != 6);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3D5C0/func_15010110.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_3D5C0/level_obj_init_ropes.s")
 #endif

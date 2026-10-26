@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15011D40(void) {
+/* was func_15011D40 */
+void level_hook_call_15103800(void) {
     sfx_cooldown_clear();
 }
 
@@ -12,14 +13,15 @@ void func_15011D40(void) {
 #ifdef NON_MATCHING
 // marker_effect_spawn: P256: spawns a type 0x12C effect (func_15149130, 0x4C-byte state copied to +0x28) for `obj`
 // and its slot byte (low byte of the word at obj +0x1C): the state holds obj, the slot, slot >= 4, a life of
-// 300 + rand % 121, eight handles func_151149AC(D_800A1FD0[i * 8 + slot]) and the position of the slot's map marker
+// 300 + rand % 121, eight handles world_record_find(D_800A1FD0[i * 8 + slot]) and the position of the slot's map marker
 // (func_151438D8 over D_800D3094 with a key of type 3 / 0x15 / slot, flags 0x11A0: its s16 x, y, z at +0 / +4 / +6),
 // or (0, 0, 10) without one. Always returns 1.
-s32 func_151149AC(u8);
+s32 world_record_find(u8);
 u8 *func_151438D8(s32, s32, u16, u8 *);
 void *memcpy(void *, const void *, unsigned int);
 extern u8 D_800A1FD0[];
-s32 func_15011D60(u8 *obj) {
+/* was func_15011D60 */
+s32 marker_effect_spawn(u8 *obj) {
     struct {
         u8 pad0[0x15];
         u8 type;        /* +0x15 */
@@ -45,12 +47,12 @@ s32 func_15011D60(u8 *obj) {
 
     bzero(&state, sizeof(state));
     state.b8 = 0;
-    state.life = func_150ADA20() % 121U + 300;
+    state.life = random_int() % 121U + 300;
     state.obj = obj;
     state.slot = *(s32 *)(obj + 0x1C);
     state.high = (state.slot < 4) ? 0 : 1;
     for (i = 0; i < 8; i++) {
-        state.handle[i] = func_151149AC(D_800A1FD0[i * 8 + state.slot]);
+        state.handle[i] = world_record_find(D_800A1FD0[i * 8 + state.slot]);
     }
     state.h3C = 0;
     state.f2C[0] = 0.0f;
@@ -75,5 +77,5 @@ s32 func_15011D60(u8 *obj) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3F1F0/func_15011D60.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_3F1F0/marker_effect_spawn.s")
 #endif

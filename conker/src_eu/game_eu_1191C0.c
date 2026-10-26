@@ -1,27 +1,29 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-// hoisted forward declaration(s) for func_150EBA04
-s32 func_150EBA04(u8 *arg0, f32 *arg1, s32 arg2);
+// hoisted forward declaration(s) for target_volume_hit_check
+s32 target_volume_hit_check(u8 *arg0, f32 *arg1, s32 arg2);
 
 
 
-void func_150EB430(void *arg0, void *arg1, s32 arg2) {
+/* was func_150EB430 */
+void target_volume_hit_check_offset(void *arg0, void *arg1, s32 arg2) {
     f32 sp1C[3];
 
     sp1C[0] = ((f32 *)arg1)[0] + ((f32 *)arg0)[0];
     sp1C[1] = ((f32 *)arg1)[1] + ((f32 *)arg0)[1];
     sp1C[2] = ((f32 *)arg1)[2] + ((f32 *)arg0)[2];
-    func_150EBA04(arg0, sp1C, arg2);
+    target_volume_hit_check(arg0, sp1C, arg2);
 }
 
 s32 func_150A2D44(s32, s32);
-s32 func_150EC200(u8 *, s32, s32);
+s32 target_volume_explode(u8 *, s32, s32);
 extern s32 D_80088E40[];
 extern s32 D_80088E50[];
 extern s32 D_80088E70;
 
-s32 func_150EBA04(u8 *arg0, f32 *arg1, s32 arg2) {
+/* was func_150EBA04 */
+s32 target_volume_hit_check(u8 *arg0, f32 *arg1, s32 arg2) {
     s32 pad[2]; // fakematch: unused 8 bytes, the ref frame is 0x50
     struct127 *sp44;
     s32 *var_s0;
@@ -37,7 +39,7 @@ s32 func_150EBA04(u8 *arg0, f32 *arg1, s32 arg2) {
             if (func_150A3990(temp_lo + D_800D34B8, arg0, arg1, arg2) != 0) {
                 func_150A2D44(temp_s2, 1);
                 sp44->unk2E8 = var_s1 + 1;
-                func_150EC200(temp_lo + D_800D34B8, 0xFF, 1);
+                target_volume_explode(temp_lo + D_800D34B8, 0xFF, 1);
                 return 1;
             }
         }
@@ -55,17 +57,18 @@ s32 func_150EBA04(u8 *arg0, f32 *arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-void func_15117CF0(f32 *arg0);
+void scenery_pendulum_x_update(f32 *arg0);
 float sqrtf(float);
 
 // tilt_spring_update: spring-driven angle at obj +0x0 (velocity +0x84, damping +0x7C, stiffness +0x80; state in the
-// low 2 bits of +0x73). State 3: idle. State 2: func_15117CF0 steps the angle; once it stops changing the state
+// low 2 bits of +0x73). State 3: idle. State 2: scenery_pendulum_x_update steps the angle; once it stops changing the state
 // becomes 3 and the angle 0. States 0 / 1: the target is -40, or, for objects with +0x4F bit 2, -40 plus 0.0108 *
 // the distance to the player (D_800CC2D0[0] position +0x14..+0x1C, at most 740); when the player's +0x31C
 // record has +0x57 set, the state becomes 2 with damping 0.5, stiffness 0.3, velocity 0 and +0x3C = 0. The angle
-// moves by velocity * D_800BE9E4, the velocity by +-|diff| * stiffness (diff = func_15048A70(angle, target)) and is
+// moves by velocity * D_800BE9E4, the velocity by +-|diff| * stiffness (diff = math_angle_diff_deg(angle, target)) and is
 // damped; it snaps to the target when both |diff| and |velocity| are below 0.01, else wraps into [0, 360).
-void func_150EBB94(u8 *obj) {
+/* was func_150EBB94 */
+void world_obj_tilt_spring_update(u8 *obj) {
     u8 *player = (u8 *) D_800CC2D0;
     f32 target;
     f32 dx, dy, dz;
@@ -82,7 +85,7 @@ void func_150EBB94(u8 *obj) {
     }
     if ((state & 3) == 2) {
         angle = *(f32 *) obj;
-        func_15117CF0((f32 *) obj);
+        scenery_pendulum_x_update((f32 *) obj);
         if (angle == *(f32 *) obj) {
             obj[0x73] = (obj[0x73] & ~3) | 3;
             *(f32 *) obj = 0.0f;
@@ -116,7 +119,7 @@ void func_150EBB94(u8 *obj) {
         return;
     }
     angle += vel * D_800BE9E4;
-    diff = func_15048A70(angle, target);
+    diff = math_angle_diff_deg(angle, target);
     if (0.0f < diff) {
         vel += fabsf(diff) * stiffness;
     } else {
@@ -135,11 +138,11 @@ void func_150EBB94(u8 *obj) {
     *(f32 *) obj = angle;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1191C0/func_150EBB94.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1191C0/world_obj_tilt_spring_update.s")
 #endif
 
 #ifdef NON_MATCHING
-/* func_15132BBC spark template (func_150EBE44); pad bytes stay unset like the asm's */
+/* func_15132BBC spark template (fx_fireworks_burst); pad bytes stay unset like the asm's */
 typedef struct {
     f32 u0;         /* 0x00 9.0 */
     f32 u4;         /* 0x04 D_800A18B8 (0.435) */
@@ -185,7 +188,7 @@ extern u8 D_800A18A8[];
 #endif
 
 #ifdef NON_MATCHING
-void func_150E892C(void *, s16, u8, s32);
+void fx_debris_emitter_spawn(void *, s16, u8, s32);
 s32 func_15154728(f32 *, f32, f32, f32, f32, s32, s32);
 s32 func_1516547C(s32, s32, s32, s32, s32);
 void func_151D45A4(u8 *, u8, s32);
@@ -193,12 +196,13 @@ s32 func_151D5AC4(f32 *, s32, s32);
 s32 func_15132BBC(f32 *, s32, s32, s32, s32, s32, s32);
 void func_15143794(s16, s16, f32, void *);
 
-// fireworks_burst: sound (func_1516547C 2), a flash at D_800A186C (func_150E892C, size 120..181) and the effects at
+// fireworks_burst: sound (func_1516547C 2), a flash at D_800A186C (fx_debris_emitter_spawn, size 120..181) and the effects at
 // D_800A1860 (func_151D5AC4 / func_151D45A4 / func_15154728 radius 12..16), then four spark showers (func_15132BBC
 // type 3), one per D_800A1878 direction, each with a random launch velocity (func_15143794: angle 45..70, yaw
 // -25..-10, speed 15..45), sizes and a life of 50..100 frames. Returns the last func_15132BBC result; `arg0` (the
 // event id the dispatcher func_1509DB90 passes) is unused.
-s32 func_150EBE44(s32 arg0) {
+/* was func_150EBE44 */
+s32 fx_fireworks_burst(s32 arg0) {
     SparkBE44 t;
     f32 f;
     u8 i;
@@ -207,11 +211,11 @@ s32 func_150EBE44(s32 arg0) {
     s32 ret;
 
     func_1516547C(2, D_800BEE0B, 0, 0xFF, 1);
-    func_150E892C(D_800A186C, (u32) func_150ADA20() % 62 + 120, 0xFF, 1);
+    fx_debris_emitter_spawn(D_800A186C, (u32) random_int() % 62 + 120, 0xFF, 1);
     func_151D5AC4(D_800A1860, 0xFF, 1);
     func_151D45A4((u8 *) D_800A1860, 0xFF, 1);
-    f = func_150ADA68();
-    func_15154728(D_800A1860, f * 4.0f + 12.0f, 1.64099991f, (u32) func_150ADA20() % 56 + 200, 0.0f, 0xFF, 1);
+    f = random_float();
+    func_15154728(D_800A1860, f * 4.0f + 12.0f, 1.64099991f, (u32) random_int() % 56 + 200, 0.0f, 0xFF, 1);
     t.u8 = 1.0f;
     t.uC = 1.0f;
     t.u0 = 9.0f;
@@ -241,31 +245,32 @@ s32 func_150EBE44(s32 arg0) {
     t.u78 = 0;
     for (i = 0; i < 4; i++) {
         *(VecBE44 *) t.dir = D_800A1878[i];
-        a = func_150ADA20();
-        b = func_150ADA20();
-        f = func_150ADA68();
+        a = random_int();
+        b = random_int();
+        f = random_float();
         func_15143794(a % 26 + 45, (b & 0xF) - 25, f * 30.0f + 15.0f, t.vel);
-        t.u40 = func_150ADA68() * 15.1080008f + -7.55400038f; /* D_800A18C8, D_800A18C4 */
-        t.u48 = func_150ADA68() * 15.1080008f + -7.55400038f;
-        t.u4C = func_150ADA68() * 0.617000043f + -1.62100005f; /* D_800A18C0, D_800A18BC */
-        t.life = (u32) func_150ADA20() % 51 + 50;
+        t.u40 = random_float() * 15.1080008f + -7.55400038f; /* D_800A18C8, D_800A18C4 */
+        t.u48 = random_float() * 15.1080008f + -7.55400038f;
+        t.u4C = random_float() * 0.617000043f + -1.62100005f; /* D_800A18C0, D_800A18BC */
+        t.life = (u32) random_int() % 51 + 50;
         t.u56 = D_800A18A8[i];
         ret = func_15132BBC((f32 *) &t, 3, 0xFF, 0, 0, 0xFF, 1);
     }
     return ret;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1191C0/func_150EBE44.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1191C0/fx_fireworks_burst.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_150E892C(void *, s16, u8, s32);
+void fx_debris_emitter_spawn(void *, s16, u8, s32);
 s32 func_15154728(f32 *, f32, f32, f32, f32, s32, s32);
 s32 func_1516547C(s32, s32, s32, s32, s32);
 void func_151D45A4(u8 *, u8, s32);
 s32 func_151D5AC4(f32 *, s32, s32);
 
-s32 func_150EC200(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_150EC200 */
+s32 target_volume_explode(u8 *arg0, s32 arg1, s32 arg2) {
     struct {
         s8 u7C;
         u8 pad7D[0x1];
@@ -293,9 +298,9 @@ s32 func_150EC200(u8 *arg0, s32 arg1, s32 arg2) {
     sp.u90 = (f32) (*(s16 *)((u8 *)arg0 + 2));
     sp.u94 = (f32) (*(s16 *)((u8 *)arg0 + 4));
     temp_f30 = (f32) (*(s16 *)((u8 *)arg0 + 8)) * 0.5f;
-    func_150E892C(&sp.u8C, (s16) ((func_150ADA20() % 101U) + 0x12C), temp_s1 & 0xFF, arg2);
+    fx_debris_emitter_spawn(&sp.u8C, (s16) ((random_int() % 101U) + 0x12C), temp_s1 & 0xFF, arg2);
     sp.u7C = 1;
-    sp.u7E = (func_150ADA20() % 21U) + 0xF;
+    sp.u7E = (random_int() % 21U) + 0xF;
     sp.u80 = 0;
     sp.u82 = -1;
     sp.u81 = 1;
@@ -305,8 +310,8 @@ s32 func_150EC200(u8 *arg0, s32 arg1, s32 arg2) {
     do {
         func_151D45A4(&sp.u8C, temp_s1 & 0xFF, arg2);
         func_151D5AC4(&sp.u8C, temp_s1 & 0xFF, arg2);
-        temp_f20 = func_150ADA68();
-        temp_t8 = (func_150ADA20() % 56U) + 0xC8;
+        temp_f20 = random_float();
+        temp_t8 = (random_int() % 56U) + 0xC8;
         var_f18 = (f32) temp_t8;
         if (temp_t8 < 0) {
             var_f18 += 4294967296.0f;
@@ -320,5 +325,5 @@ s32 func_150EC200(u8 *arg0, s32 arg1, s32 arg2) {
     return temp_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1191C0/func_150EC200.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1191C0/target_volume_explode.s")
 #endif

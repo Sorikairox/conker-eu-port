@@ -12,14 +12,14 @@ s32 func_150ADE40(s32, s32, s32, s32);
 
 
 #ifdef NON_MATCHING
-s32 func_1510FE58(s32 x, s32 y, s32 z, s32 *tri);
+s32 collision_level_nearest_height(s32 x, s32 y, s32 z, s32 *tri);
 extern s32 D_800DC26C; /* triangle table: 12 bytes per triangle */
 
 // leaf_burst_spawn: spawns up to `count` falling leaves (node_alloc list 0xA, type 3) around (x, y, z) facing away
 // from player `player`'s camera position (+0x2F8): position jittered by -63..64 in x / z, life 10..24, yaw = the
 // direction +-15 degrees, speed jitter 0.01 * (-128..127), fall -1, size `base` + rand * `scale`, one of the two
 // D_800DE2B8 models. Only the first leaf starts sound 0xA2. With `ground` & 1 each leaf records the floor below it
-// (func_1510FE58: height +0xC8, surface type +0xE8, colour D_800A7550[(type >> 5) & 3] at +0xEC).
+// (collision_level_nearest_height: height +0xC8, surface type +0xE8, colour D_800A7550[(type >> 5) & 3] at +0xEC).
 void func_15175160(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 player, f32 base, f32 scale, s32 ground) {
     struct { f32 x, y, z; } d;
     s32 tri;
@@ -39,7 +39,7 @@ void func_15175160(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 player, f32 bas
     fy = (f32)y;
     d.y = fy - *(f32 *)(pl + 0x2FC);
     d.z = (f32)z - *(f32 *)(pl + 0x300);
-    yaw = (s32)func_15048FC8((struct17 *)&d);
+    yaw = (s32)vec3_heading_deg((struct17 *)&d);
 
     for (i = 0; i < count; i++) {
         p = node_alloc(0xA, 0, 0xF8, 1, 0xFF, 1);
@@ -47,29 +47,29 @@ void func_15175160(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 player, f32 bas
             break;
         }
         onGround = ground & 1;
-        px = (func_150ADA20() & 0x7F) + x - 0x3F;
-        pz = (func_150ADA20() & 0x7F) + z - 0x3F;
+        px = (random_int() & 0x7F) + x - 0x3F;
+        pz = (random_int() & 0x7F) + z - 0x3F;
         *(s16 *)(p + 0x92) = 3;
         *(f32 *)(p + 0x98) = (f32)px;
         *(f32 *)(p + 0x9C) = fy;
         *(f32 *)(p + 0xA0) = (f32)pz;
         p[0x90] = slot;
-        *(s16 *)(p + 0xA4) = (u32)func_150ADA20() % 15 + 10;
+        *(s16 *)(p + 0xA4) = (u32)random_int() % 15 + 10;
         *(s16 *)(p + 0xA6) = 1;
-        a = (func_150ADA20() & 0x1F) + yaw - 15;
+        a = (random_int() & 0x1F) + yaw - 15;
         if (a < 0) {
             a += 360;
         } else if (a >= 360) {
             a -= 360;
         }
-        *(f32 *)(p + 0xA8) = (f32)((func_150ADA20() & 0x1F) - 15);
+        *(f32 *)(p + 0xA8) = (f32)((random_int() & 0x1F) - 15);
         *(f32 *)(p + 0xAC) = (f32)a;
         *(f32 *)(p + 0xB0) = 0.0f;
         *(f32 *)(p + 0xB4) = -1.0f;
-        *(f32 *)(p + 0xB8) = (f32)((func_150ADA20() & 0xFF) - 0x80) * 0.01f;
+        *(f32 *)(p + 0xB8) = (f32)((random_int() & 0xFF) - 0x80) * 0.01f;
         *(f32 *)(p + 0xBC) = 0.0f;
-        *(f32 *)(p + 0xC0) = (f32)(func_150ADA20() & 0xFFFF) * (1.0f / 32768.0f) * scale + base;
-        m = func_150ADA20() & 1;
+        *(f32 *)(p + 0xC0) = (f32)(random_int() & 0xFFFF) * (1.0f / 32768.0f) * scale + base;
+        m = random_int() & 1;
         *(s32 *)(p + 0x94) = D_800DE2B8[m].x0;
         p[0xED] = m;
         if (i == 0) {
@@ -80,7 +80,7 @@ void func_15175160(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 player, f32 bas
         *(s32 *)(p + 0xE8) = 0;
         if (onGround) {
             *(s16 *)(p + 0x92) |= 0x80;
-            *(f32 *)(p + 0xC8) = (f32)func_1510FE58(px, y, pz, &tri);
+            *(f32 *)(p + 0xC8) = (f32)collision_level_nearest_height(px, y, pz, &tri);
             v = 0;
             if (tri != 0) {
                 v = ((s32 *)D_800DBE5C)[(tri - D_800DC26C) / 12];
@@ -99,13 +99,13 @@ void func_15175160(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 player, f32 bas
 #endif
 
 #ifdef NON_MATCHING
-void func_1510F800(s32 arg0);
+void collision_select_area(s32 arg0);
 s32 func_150A3F50(s32 x, s32 z);
 extern s32 D_800D3720; /* floor candidates (16 bytes: +0 height in 24.8) left by func_150A3F50 */
 
 // leaf_drop_spawn: spawns up to `count` leaves of model row 7 (node_alloc list 0x13) in a `width` square around
 // (x, z) at height y: life 4..6, spin / tilt jitter, size `base` + rand * `scale`. Each leaf takes the lowest floor
-// below it (func_150A3F50; none -> the leaf is freed with node_delete). mode 0 (after func_1510F800(0)) puts the
+// below it (func_150A3F50; none -> the leaf is freed with node_delete). mode 0 (after collision_select_area(0)) puts the
 // leaf 10 above that floor in state 1; otherwise it falls from 300..427 above it in state 4 (+0x91 = 2).
 // `player` is not used.
 void func_15175514(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 width, s32 player, s32 mode, f32 base, f32 scale) {
@@ -119,7 +119,7 @@ void func_15175514(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 width, s32 play
     s32 h;
 
     if (mode == 0) {
-        func_1510F800(0);
+        collision_select_area(0);
     }
     for (i = 0; i < count; i++) {
         p = node_alloc(0x13, 0, 0xF8, 1, 0xFF, 1);
@@ -127,21 +127,21 @@ void func_15175514(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 width, s32 play
             break;
         }
         half = width >> 1;
-        px = (u32)func_150ADA20() % width + x - half;
-        pz = (u32)func_150ADA20() % width + z - half;
+        px = (u32)random_int() % width + x - half;
+        pz = (u32)random_int() % width + z - half;
         *(f32 *)(p + 0x98) = (f32)px;
         *(f32 *)(p + 0x9C) = (f32)y;
         *(f32 *)(p + 0xA0) = (f32)pz;
         p[0x90] = slot;
-        *(s16 *)(p + 0xA4) = (u32)func_150ADA20() % 3 + 4;
+        *(s16 *)(p + 0xA4) = (u32)random_int() % 3 + 4;
         *(s16 *)(p + 0xA6) = 0;
-        *(f32 *)(p + 0xA8) = (f32)((func_150ADA20() & 0x1F) - 15);
-        *(f32 *)(p + 0xAC) = (f32)((u32)func_150ADA20() % 360);
-        *(f32 *)(p + 0xB0) = (f32)((func_150ADA20() & 0x1F) - 15);
+        *(f32 *)(p + 0xA8) = (f32)((random_int() & 0x1F) - 15);
+        *(f32 *)(p + 0xAC) = (f32)((u32)random_int() % 360);
+        *(f32 *)(p + 0xB0) = (f32)((random_int() & 0x1F) - 15);
         *(f32 *)(p + 0xB4) = 0.0f;
         *(f32 *)(p + 0xB8) = 3.0f;
         *(f32 *)(p + 0xBC) = 0.0f;
-        *(f32 *)(p + 0xC0) = (f32)(func_150ADA20() & 0xFFFF) * (1.0f / 32768.0f) * scale + base;
+        *(f32 *)(p + 0xC0) = (f32)(random_int() & 0xFFFF) * (1.0f / 32768.0f) * scale + base;
         *(s32 *)(p + 0x94) = D_800DE2B8[7].x0;
         p[0xED] = 7;
 
@@ -166,8 +166,8 @@ void func_15175514(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 width, s32 play
         } else {
             p[0x91] = 2;
             *(s16 *)(p + 0x92) = 4;
-            *(f32 *)(p + 0xE4) = (f32)((func_150ADA20() & 0x7F) + floorY + 300);
-            *(f32 *)(p + 0x9C) = (f32)((func_150ADA20() & 0x7F) + floorY + 300);
+            *(f32 *)(p + 0xE4) = (f32)((random_int() & 0x7F) + floorY + 300);
+            *(f32 *)(p + 0x9C) = (f32)((random_int() & 0x7F) + floorY + 300);
         }
         *(f32 *)(p + 0xCC) = 0.0f;
         *(s16 *)(p + 0xD0) = x;
@@ -186,13 +186,13 @@ void func_15175514(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 width, s32 play
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1510FE58(s32 x, s32 y, s32 z, s32 *tri);
-s32 func_150ADA20(void);
+s32 collision_level_nearest_height(s32 x, s32 y, s32 z, s32 *tri);
+s32 random_int(void);
 extern s32 D_800DC26C; /* triangle table: 12 bytes per triangle */
 
 // leaf_field_spawn: spawns up to `count` leaf / debris particles (node_alloc list `list` + rand % `listRand`)
 // in a ring around (x, z): each axis offset is rand % (rMax - rMin) pushed out by rMin (away from 0), so |offset| is
-// in rMin .. rMax - 1. Height: the floor below the point (func_1510FE58, +0xC8) when `mode` is 0, else
+// in rMin .. rMax - 1. Height: the floor below the point (collision_level_nearest_height, +0xC8) when `mode` is 0, else
 // y + rand % yRange (y when yRange is 0). flags (stored at +0x92): 0x40 = nothing when yRange <= 0; 0x10000 = yaw
 // away from player `player`'s camera (+0x2F8) +-15 degrees (else a random yaw); 0x20000 = tilt (rand & 0x1F) - 15
 // and fall -1. Model row (D_800DE2B8, +0xED): `model` + (rand & modelMask), + 0 for mask 0 and + the list offset for
@@ -227,12 +227,12 @@ void func_15175900(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 rMax, s32 playe
         d.x = (f32)x - *(f32 *)(pl + 0x2F8);
         d.y = (f32)y - *(f32 *)(pl + 0x2FC);
         d.z = (f32)z - *(f32 *)(pl + 0x300);
-        yaw = (s32)func_15048FC8((struct17 *)&d);
+        yaw = (s32)vec3_heading_deg((struct17 *)&d);
     }
     for (i = 0; i < count; i++) {
         off = 0;
         if (listRand != 0) {
-            off = (u32)func_150ADA20() % (u32)listRand;
+            off = (u32)random_int() % (u32)listRand;
         }
         p = node_alloc(list + off, 0, 0xF8, 1, 0xFF, 1);
         if (p == NULL) {
@@ -242,17 +242,17 @@ void func_15175900(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 rMax, s32 playe
         tilt = flags & 0x20000;
         py = y;
         range = rMax - rMin;
-        r = func_150ADA20() % range;
+        r = random_int() % range;
         px = (r < 0 ? r - rMin : r + rMin) + x;
-        r = func_150ADA20() % range;
+        r = random_int() % range;
         pz = (r < 0 ? r - rMin : r + rMin) + z;
         if (mode == 0 || onGround) {
-            *(f32 *)(p + 0xC8) = (f32)func_1510FE58(px, y, pz, &tri);
+            *(f32 *)(p + 0xC8) = (f32)collision_level_nearest_height(px, y, pz, &tri);
         }
         if (mode == 0) {
             py = (s32)*(f32 *)(p + 0xC8);
         } else if (yRange != 0) {
-            py = y + (u32)func_150ADA20() % (u32)yRange;
+            py = y + (u32)random_int() % (u32)yRange;
         }
         p[0x90] = slot;
         *(s16 *)(p + 0x92) = flags;
@@ -260,20 +260,20 @@ void func_15175900(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 rMax, s32 playe
         p[0x91] = mode;
         *(f32 *)(p + 0x9C) = (f32)py;
         *(f32 *)(p + 0xA0) = (f32)pz;
-        *(s16 *)(p + 0xA4) = (u32)func_150ADA20() % 15 + 10;
+        *(s16 *)(p + 0xA4) = (u32)random_int() % 15 + 10;
         *(s16 *)(p + 0xA6) = 0;
         if (aimed) {
-            a = (func_150ADA20() & 0x1F) + yaw - 15;
+            a = (random_int() & 0x1F) + yaw - 15;
             if (a < 0) {
                 a += 360;
             } else if (a >= 360) {
                 a -= 360;
             }
         } else {
-            a = (u32)func_150ADA20() % 360;
+            a = (u32)random_int() % 360;
         }
         if (tilt) {
-            *(f32 *)(p + 0xA8) = (f32)((func_150ADA20() & 0x1F) - 15);
+            *(f32 *)(p + 0xA8) = (f32)((random_int() & 0x1F) - 15);
             *(f32 *)(p + 0xB4) = -1.0f;
         } else {
             *(f32 *)(p + 0xA8) = 0.0f;
@@ -281,15 +281,15 @@ void func_15175900(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 rMax, s32 playe
         }
         *(f32 *)(p + 0xB0) = 0.0f;
         *(f32 *)(p + 0xAC) = (f32)a;
-        *(f32 *)(p + 0xB8) = (f32)((func_150ADA20() & 0xFF) - 0x80) * 0.01f;
+        *(f32 *)(p + 0xB8) = (f32)((random_int() & 0xFF) - 0x80) * 0.01f;
         *(f32 *)(p + 0xBC) = 0.0f;
-        *(f32 *)(p + 0xC0) = (f32)(func_150ADA20() & 0xFFFF) * (1.0f / 32768.0f) * scale + base;
+        *(f32 *)(p + 0xC0) = (f32)(random_int() & 0xFFFF) * (1.0f / 32768.0f) * scale + base;
         if (modelMask == -1) {
             /* off (the list offset) is kept */
         } else if (modelMask == 0) {
             off = 0;
         } else {
-            off = func_150ADA20() & modelMask;
+            off = random_int() & modelMask;
         }
         off += model;
         p[0xED] = off;
@@ -395,8 +395,8 @@ extern f32 D_800D9F3C;
 extern f32 D_800D9F40;
 extern u8 D_800DA030[];
 extern u8 D_800DA070[];
-s32 func_150490A8(struct17 *);
-s32 func_1510B460(u8 *, f32, f32, f32, f32, f32, f32, f32, s32, s32);
+s32 vec3_heading_u8(struct17 *);
+s32 view_point_cull_test(u8 *, f32, f32, f32, f32, f32, f32, f32, s32, s32);
 
 /* rodata copies (D_800A755C..D_800A7588) */
 static const f32 sFlyerCircleX[1] = { -3478.0f };       /* D_800A755C / D_800A757C */
@@ -503,7 +503,7 @@ void func_15175EC8(u8 *arg0) {
         if (dist > f->rangeMax || near) {
             dir.unk0 = (f32)f->homeX - f->x;
             dir.unk8 = f->z - (f32)f->homeZ;
-            ang = func_150490A8(&dir);
+            ang = vec3_heading_u8(&dir);
             if (near) {
                 ang += 0x80;
             }
@@ -544,7 +544,7 @@ void func_15175EC8(u8 *arg0) {
             }
             f->timer -= D_800BE9E4;
             if (f->timer <= 0) {
-                f->targetHeading = (f32)((u32)func_150ADA20() % 360);
+                f->targetHeading = (f32)((u32)random_int() % 360);
                 f->state = 3;
                 f->timer = t->wanderTime;
             }
@@ -559,7 +559,7 @@ void func_15175EC8(u8 *arg0) {
     }
 
     if (f->flags & 0x80) {
-        f->floorY = (f32)func_1510FE58((s32)f->x, (s32)f->y, (s32)f->z, &tri);
+        f->floorY = (f32)collision_level_nearest_height((s32)f->x, (s32)f->y, (s32)f->z, &tri);
         v = 0;
         if (tri != 0) {
             v = ((s32 *)D_800DBE5C)[(tri - D_800DC26C) / 12];
@@ -572,7 +572,7 @@ void func_15175EC8(u8 *arg0) {
             f->climbTimer -= D_800BE9E4;
             if (f->climbTimer <= 0) {
                 f->climbTimer = -1;
-                f->targetY = (f32)((u32)func_150ADA20() % f->yRange) + (f32)f->homeY;
+                f->targetY = (f32)((u32)random_int() % f->yRange) + (f32)f->homeY;
                 if (f->y < f->targetY) {
                     f->pitchVel = -1.0f;
                 } else {
@@ -684,13 +684,13 @@ void func_15175EC8(u8 *arg0) {
     }
 
     if (f->kind == 0x13 && D_800DDF60[f->slot] == 0) {
-        func_10010F88(0x10, 0x7FFF, func_150ADA20() & 0x7F, 0, 0, (s32)f->x, (s32)f->y, (s32)f->z, 500, 4000);
-        D_800DDF60[f->slot] = (func_150ADA20() & 0x3F) + 30;
+        func_10010F88(0x10, 0x7FFF, random_int() & 0x7F, 0, 0, (s32)f->x, (s32)f->y, (s32)f->z, 500, 4000);
+        D_800DDF60[f->slot] = (random_int() & 0x3F) + 30;
     }
     if ((f->flags & 2)
-        && func_1510B460(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0
+        && view_point_cull_test(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0
         && (D_800D2138 != 1
-            || func_1510B460(D_800DA070, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0)
+            || view_point_cull_test(D_800DA070, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0)
                    != 0)) {
         node_destroy((struct102 *)f);
     }
@@ -714,7 +714,7 @@ void func_15176DCC(u8 *arg0) {
         case 0:
             if (func_150ADE40((s32) D_800CC2D0->x_position, (s32) D_800CC2D0->z_position, (s32) (*(f32 *)((u8 *)arg0 + 0x98)), (s32) (*(f32 *)((u8 *)arg0 + 0xA0))) < 0x190) {
                 (*(u8 *)((u8 *)arg0 + 0x91)) = 1U;
-                temp_f10 = (f32) (-1 - (func_150ADA20() & 3));
+                temp_f10 = (f32) (-1 - (random_int() & 3));
                 (*(f32 *)((u8 *)arg0 + 0xA8)) = -8.0f;
                 (*(f32 *)((u8 *)arg0 + 0xB4)) = temp_f10;
                 return;
@@ -728,7 +728,7 @@ void func_15176DCC(u8 *arg0) {
                 temp_f0_2 = (*(f32 *)((u8 *)arg0 + 0xA8));
                 if (temp_f0_2 > 45.0f) {
                     (*(f32 *)((u8 *)arg0 + 0xCC)) = -5.0f;
-                } else if (((*(f32 *)((u8 *)arg0 + 0xCC)) < 0.0f) && (temp_f0_2 > 25.0f) && ((func_150ADA20() & 0xFF) < 0x33)) {
+                } else if (((*(f32 *)((u8 *)arg0 + 0xCC)) < 0.0f) && (temp_f0_2 > 25.0f) && ((random_int() & 0xFF) < 0x33)) {
                     (*(f32 *)((u8 *)arg0 + 0xCC)) = 5.0f;
                 }
                 if ((*(f32 *)((u8 *)arg0 + 0xA8)) <= 10.0f) {
@@ -736,11 +736,11 @@ void func_15176DCC(u8 *arg0) {
                     return;
                 }
             } else {
-                temp_v1 = func_150ADA20() & 0xFF;
+                temp_v1 = random_int() & 0xFF;
                 if (temp_v1 < 0x19) {
                     (*(f32 *)((u8 *)arg0 + 0xCC)) = 5.0f;
                     if (temp_v1 < 0xD) {
-                        (*(f32 *)((u8 *)arg0 + 0xB8)) = (f32) ((func_150ADA20() % 6U) - 3);
+                        (*(f32 *)((u8 *)arg0 + 0xB8)) = (f32) ((random_int() % 6U) - 3);
                         return;
                     }
                     (*(f32 *)((u8 *)arg0 + 0xB8)) = 0.0f;
@@ -753,7 +753,7 @@ void func_15176DCC(u8 *arg0) {
                 (*(u8 *)((u8 *)arg0 + 0x91)) = 2U;
                 (*(s16 *)((u8 *)arg0 + 0x92)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x92)) & 0xFFFE);
                 (*(s16 *)((u8 *)arg0 + 0x92)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x92)) | 4);
-                (*(f32 *)((u8 *)arg0 + 0xE4)) = (f32) ((f32) (func_150ADA20() & 0x7F) + (300.0f + (*(f32 *)((u8 *)arg0 + 0xC8))));
+                (*(f32 *)((u8 *)arg0 + 0xE4)) = (f32) ((f32) (random_int() & 0x7F) + (300.0f + (*(f32 *)((u8 *)arg0 + 0xC8))));
             }
             func_15175EC8(arg0);
             return;
@@ -813,7 +813,7 @@ void func_151770F4(u8 *arg0) {
             if (func_150ADE40(*(f32 *)((u8 *)D_800CC2D0 + 0x14), *(f32 *)((u8 *)D_800CC2D0 + 0x1C),
                               *(f32 *)(arg0 + 0x98), *(f32 *)(arg0 + 0xA0)) < 200) {
                 arg0[0x91] = 2;
-                *(f32 *)(arg0 + 0xE4) = (f32)((u32)func_150ADA20() % *(s16 *)(arg0 + 0xDA));
+                *(f32 *)(arg0 + 0xE4) = (f32)((u32)random_int() % *(s16 *)(arg0 + 0xDA));
                 *(f32 *)(arg0 + 0xE4) += *(s16 *)(arg0 + 0xD2);
                 *(s32 *)(arg0 + 0x94) = D_800DE2B8[arg0[0xED]].x0;
             } else {
@@ -854,8 +854,8 @@ Gfx *func_15177360(Gfx *gdl, u8 *obj, s16 arg2) {
     if (((Row20 *)D_800DDE80)[obj[0xED]].x0 == 0 || D_800DDF78[obj[0xED]] == 0) {
         return gdl;
     }
-    func_150A8050(mf, 0.0f, *(f32 *)(obj + 0xAC), 0.0f);
-    func_150A8050(rot, *(f32 *)(obj + 0xA8), 0.0f, *(f32 *)(obj + 0xB0));
+    mtxf_rotate_xyz_deg(mf, 0.0f, *(f32 *)(obj + 0xAC), 0.0f);
+    mtxf_rotate_xyz_deg(rot, *(f32 *)(obj + 0xA8), 0.0f, *(f32 *)(obj + 0xB0));
     func_150A7A48(rot, mf, mf);
     mf[3][0] = *(f32 *)(obj + 0x98);
     mf[3][1] = *(f32 *)(obj + 0x9C);
@@ -901,9 +901,9 @@ Gfx *func_15177360(Gfx *gdl, u8 *obj, s16 arg2) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1510B460(u8 *, f32, f32, f32, f32, f32, f32, f32, s32, s32);
+s32 view_point_cull_test(u8 *, f32, f32, f32, f32, f32, f32, f32, s32, s32);
 #else
-s32 func_1510B460(u8 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
+s32 view_point_cull_test(u8 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
 #endif
 Gfx *func_15177360(Gfx *, u8 *, s16);
 extern f32 D_800D3A00;
@@ -916,13 +916,13 @@ Gfx *func_15177638(Gfx *gdl, u8 *arg1, s16 arg2) {
     s32 pad[2];
 
 #ifdef NON_MATCHING
-    if (func_1510B460(&D_800DA030[arg2 << 6], *(f32 *)(arg1 + 0x98), *(f32 *)(arg1 + 0x9C), *(f32 *)(arg1 + 0xA0), D_800D9F40, 4000.0f, D_800D3A00, D_800D3A04, 0, 0) == 0) {
+    if (view_point_cull_test(&D_800DA030[arg2 << 6], *(f32 *)(arg1 + 0x98), *(f32 *)(arg1 + 0x9C), *(f32 *)(arg1 + 0xA0), D_800D9F40, 4000.0f, D_800D3A00, D_800D3A04, 0, 0) == 0) {
 #else
-    if (func_1510B460(&D_800DA030[arg2 << 6], *(s32 *)(arg1 + 0x98), *(s32 *)(arg1 + 0x9C), *(s32 *)(arg1 + 0xA0), D_800D9F40, 4000.0f, D_800D3A00, D_800D3A04, 0, 0) == 0) {
+    if (view_point_cull_test(&D_800DA030[arg2 << 6], *(s32 *)(arg1 + 0x98), *(s32 *)(arg1 + 0x9C), *(s32 *)(arg1 + 0xA0), D_800D9F40, 4000.0f, D_800D3A00, D_800D3A04, 0, 0) == 0) {
 #endif
         switch (arg1[0x91]) {
         case 0:
-            func_150A8050(mf, *(f32 *)(arg1 + 0xA8), *(f32 *)(arg1 + 0xAC), *(f32 *)(arg1 + 0xB0));
+            mtxf_rotate_xyz_deg(mf, *(f32 *)(arg1 + 0xA8), *(f32 *)(arg1 + 0xAC), *(f32 *)(arg1 + 0xB0));
             mf[3][0] = *(f32 *)(arg1 + 0x98);
             mf[3][1] = *(f32 *)(arg1 + 0x9C);
             mf[3][2] = *(f32 *)(arg1 + 0xA0);

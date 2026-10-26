@@ -137,7 +137,7 @@ extern f32 D_800A7624;          /* degrees -> radians */
 f32 sinf(f32);
 f32 cosf(f32);
 void *allocate_memory(s32, s32, s32, s32);
-s32 func_150AD9A0(s32 dx, s32 dy, s32 dz);
+s32 approx_dist3_int(s32 dx, s32 dy, s32 dz);
 void func_15170A70(s32 x, s32 y, s32 z, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 void func_10004074(s32);
 void func_1517BE0C(s32 lo, s32 hi);
@@ -287,7 +287,7 @@ void func_1517C11C(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
     if (D_800DDD0C != 0 && AMBIENT_IN_RANGE(idx)) {
         do {
             e = &D_800DE148[idx];
-            dist = func_150AD9A0(e->pos[0] - x, e->pos[1] - y, e->pos[2] - z);
+            dist = approx_dist3_int(e->pos[0] - x, e->pos[1] - y, e->pos[2] - z);
             if (dist >= radius) {
                 goto next;
             }
@@ -295,7 +295,7 @@ void func_1517C11C(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
             if ((u32) dist < D_800DE070[voice]) {
                 D_800DE070[voice] = dist;
             }
-            dist2 = func_150AD9A0(e->pos[0] - px, e->pos[1] - py, e->pos[2] - pz);
+            dist2 = approx_dist3_int(e->pos[0] - px, e->pos[1] - py, e->pos[2] - pz);
             if (dist2 < 0x8D) {
                 goto next;
             }
@@ -337,7 +337,7 @@ void func_1517C11C(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
             }
             // Flare-up when the point D_800DD8A0 (set when x != 0) comes near, or when the camera is close.
             if (D_800DD8A0[0] != 0 &&
-                func_150AD9A0(e->pos[0] - D_800DD8A0[0], e->pos[1] - D_800DD8A0[1], e->pos[2] - D_800DD8A0[2]) < 0x50 &&
+                approx_dist3_int(e->pos[0] - D_800DD8A0[0], e->pos[1] - D_800DD8A0[1], e->pos[2] - D_800DD8A0[2]) < 0x50 &&
                 D_800DDFF0[voice] == 0 && e->flare != 0x21) {
                 e->flare = 0x21;
                 func_15170A70(e->pos[0], e->pos[1] + 0x44, e->pos[2], 0, 0, 0xFF, 0);
@@ -648,7 +648,7 @@ s32 func_1517DC00(s32 arg0, u16 *arg1) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1510D338(s32, s32, s32, s32);
+s32 tint_emit_prim_env_colors(s32, s32, s32, s32);
 extern s32 D_8008D340;
 extern u16 *D_800DE154;
 
@@ -712,7 +712,7 @@ void func_1517D7B0(s32 *arg0, s32 arg1) {
             (*(s32 *)((u8 *)temp_v0 + 0)) = 0xDE000000;
             sp44 = 0;
             var_v1 = 0;
-            *arg0 = func_1510D338(*arg0, 0xFF, 0xFF, 0);
+            *arg0 = tint_emit_prim_env_colors(*arg0, 0xFF, 0xFF, 0);
             sp48 = 0;
             if (D_800DE188 != 0) {
                 do {

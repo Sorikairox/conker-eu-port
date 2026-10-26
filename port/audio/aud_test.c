@@ -62,7 +62,7 @@ static u64 cmds[0x800];
 static s16 out[FRAME * 2] __attribute__((aligned(16)));
 static u32 sbuf[4] __attribute__((aligned(16)));
 
-/* asset table walk (func_1502AC88 without its cache): entry i of the table at p is {s32 offset, u32
+/* asset table walk (asset_rec_read_cached without its cache): entry i of the table at p is {s32 offset, u32
  * info}; the next table / the data is at p + offset */
 static u32 asset(u32 a, u32 b, u32 *info) {
     u32 p = ASSET_TABLE;
@@ -142,14 +142,14 @@ int port_audio_test(u32 rec_off, int frames) {
  * envelope mixer setup and ENVMIXER. Each call covers 184 samples; the test appends INTERLEAVE +
  * SAVEBUFF and runs the list through the audio HLE (aud_abi.c), like the game's func at init_1FB40.c.
  *
- * Voice clips are asset (0x16, id) (func_1001263C: func_1502B020(&size, 2, 22, id)); the decoder's
+ * Voice clips are asset (0x16, id) (func_1001263C: asset_lookup_rom(&size, 2, 22, id)); the decoder's
  * tables are assets (0x17,4) Huffman tree index, (0x17,5) fast table, (0x17,6) trees, which
  * func_151F2960 loads with the asm asset loader; here they are DMA'd directly. The game's stream
  * DMA callback func_151F3C4C uses the audio DMA table (asm-initialised), so a PC one reads the ROM.
  * Entry: port_voice_test(id, max_calls); node: VOICETEST=<hex id>[:calls]. */
 s32 func_151F2E88(s32 count, u64 **cmdp);
 void func_151F2960(s32 rom, s32 size);
-s32 func_151F3DE0(void);
+s32 mp3dec_init(void);
 void func_151F2D6C(s32 vol, s32 t);
 void func_151F2DFC(s32 pan, s32 now);
 void func_151F2E4C(s32 a, s32 b);
@@ -217,7 +217,7 @@ int port_voice_test(u32 id, int calls) {
     D_800E0E24 = mp3_fast;
     D_800E0E28 = (s32)mp3_trees;
     D_800E0E30 = mp3_pow;
-    if (!func_151F3DE0()) { port_log("[voicetest] mp3dec init failed\n"); return 1; }
+    if (!mp3dec_init()) { port_log("[voicetest] mp3dec init failed\n"); return 1; }
     D_800E0E2C = 1; /* tables loaded: func_151F2960 skips its loader */
 
     D_800E1224 = mp3_state;

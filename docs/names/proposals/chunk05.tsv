@@ -1,0 +1,341 @@
+old	new	confidence	description
+func_15062800	obj_slots_swap	high	Swaps two objects in D_800CC2D0 and fixes slot-bound data: index fields, unique ids, camera record, +0x144, +0x65 links, carrier back-link
+func_15062AC4	obj_update_inner_extent_ratios	med	Recomputes +0xEC = E4/E6 and +0xF0 = E6/E4 from the object's scaled extents (both 0 when either is 0)
+func_15062B1C	obj_set_inner_extent_width	med	Sets +0xE4 = xz_scale * value and refreshes the inner extent ratios
+func_15062B50	obj_set_inner_extent_height	med	Sets +0xE6 = y_scale * value and refreshes the inner extent ratios
+func_15062B84	obj_update_outer_extent_ratios	med	Recomputes +0xDC = D2/D4 and +0xE0 = D4/D2 from the object's scaled extents (both 0 when either is 0)
+func_15062BDC	obj_set_scale	high	Sets xz_scale / y_scale and rescales the object's extents (+0xD2.. / +0xE4..) from its type record D_800D1C90[id], then refreshes ratios
+func_15062D10	gfx_tile_scroll_coords	med	Offsets (or sets) the packed 12-bit s/t of a texture tile command in D_800C48A8[set][list][idx], wrapping at the tile size, when D_800D19A0[set]
+func_15062E24	obj_type_tex_scroll_apply	med	For every live object of a type with a display list, scrolls a texture command (func_15094EC8) by an amount sized by the type's texture table
+func_15062FC0	obj_vtx_scroll_uv	med	Writes the object's current-screen vertex texcoords as the other buffer's texcoords plus a (wrapped) s/t offset for count vertices
+func_15063168	obj_hit_react_other_players	med	Calls character_hit_react (attached) from obj on every other active player whose +0x31C block is not already marked
+func_15063254	obj_model_swap_keep_pose	high	Changes the object's model record (type, variant, scale), resets and respawns the object, then restores position, yaw and a few fields
+func_1506AD30	anim_events_run	med	Runs the object's animation event list (+0x1C4, 12-byte entries) up to time t, dispatching each command through D_8008679C
+func_1506AF74	objev_anim_38	low	Event: moves flag bit 8 of +0x100 to bit 4, then starts animation 0x38 on the current object
+func_1506AFE0	objev_anim_48	low	Event: starts animation 0x48 on the current object
+func_1506B020	objev_anim_39	low	Event: sets +0x1CB and starts animation 0x39 on the current object
+func_1506B070	objev_nop_1506B070	low	Event: empty handler
+func_1506B078	objev_anim_d1_by_depth	med	Event: starts animation 0xD1 with a speed from the object's height relative to the water level (+0x118)
+func_1506B100	objev_play_anim	high	Starts animation anim on the current object (D_800D154C) with the given speed and blend frames
+func_1506B14C	objev_anim_next	med	Event: starts the animation after the current one (+0x84 + 1) at the current animation speed
+func_1506B198	objev_anim_next_flagged	med	Event: as objev_anim_next with the last flag set
+func_1506B1E8	objev_anim_3c	low	Event: starts animation 0x3C on the current object
+func_1506B228	objev_anim_54	low	Event: starts animation 0x54 on the current object
+func_1506B268	objev_anim_f_allow_run	low	Event: clears +0x83 and disable_run, then starts animation 0xF
+func_1506B2BC	objev_release_if_player_link	low	Event: when the object's linked object is the one player 0 refers to (+0x274), clears +0x218 and sets +0x232 = 4
+func_1506B328	objev_anim_3e	low	Event: starts animation 0x3E on the current object
+func_1506B368	objev_nop_1506B368	low	Event: empty handler
+func_1506B370	objev_player_lose_life	med	Event: calls the player-lost-a-life handler for the current object's slot index
+func_1506B3B0	objev_nop_1506B3B0	low	Event: empty handler
+func_1506B3B8	objev_pick_turn_to_player	med	Event: picks a turn animation (D_80099DFC) from the angle between the object's facing and player 0, sets +0x244 and +0x21C = 20000
+func_1506B4EC	objev_pick_turn_to_player_wrap	med	Event: calls objev_pick_turn_to_player
+func_1506B50C	objev_clear_21c	low	Event: clears the current object's +0x21C timer
+func_1506B520	objev_hurt_or_die	med	Event: with health left starts hurt animation 240 (427 for +0x31C state 0x25), else kills the object (func_1507CD64 mode 1)
+func_1506B5A4	objev_nop_1506B5A4	low	Event: empty handler
+func_1506B5AC	objev_nop_1506B5AC	low	Event: empty handler
+func_1506B5B4	objev_set_1cb	low	Event: sets the current object's +0x1CB flag
+func_1506B5CC	objev_set_1cb_b	low	Event: sets the current object's +0x1CB flag (second copy)
+func_1506B5E4	objev_stop_anim	med	Event: fade command 2 on the current object, then zeroes its animation speed and the animation record's speed
+func_1506B634	objev_pick_random_idle	med	Picks a random idle id out of n from tables D_80099E74/E7C into +0x31C->unkE; idle 0xA7 also chains a 2..4 repeat count
+func_1506B740	objev_random_idle_or_swim	med	Event: under water sets idle 0x2D0, else maybe picks a random idle out of 8 (with a repeat count for idle 0xA7)
+func_1506B7F4	objev_allow_run_pick_idle	low	Event: clears disable_run / +0x83 and picks a random idle out of 2
+func_1506B82C	objev_allow_run_idle	med	Event: clears disable_run / +0x83 and starts the player idle animation
+func_1506B860	objev_anim_b5	low	Event: starts animation 181 at speed 0.63
+func_1506B88C	objev_anim_b6	low	Event: starts animation 182
+func_1506B8B4	objev_reset_state_idle	med	Event: clears +0x31C->unk78, disable_run and +0x83, then starts the player idle animation
+func_1506B8F4	objev_anim_de	low	Event: starts animation 222 at speed 0.75
+func_1506B91C	objev_anim_bf	low	Event: starts animation 191
+func_1506B944	objev_anim_c5_allow_run	low	Event: clears disable_run / +0x83 and starts animation 0xC5
+func_1506B984	objev_anim_af	low	Event: starts animation 0xAF
+func_1506B9AC	objev_clear_244	low	Event: clears the current object's +0x244
+func_1506B9C0	objev_finish_and_idle	low	Event: sets flag 0x4000 for the current player, clears +0x31C->unk78, sets bit D_800D1940 of D_800D2E60, then idles
+func_1506BA4C	objev_sound_or_stop	med	Event: plays sound D_800D1580 at the object (louder for non-players) or stops its sound when the id is 0
+func_1506BAD8	objev_sound_alt_or_stop	med	Event: as objev_sound_or_stop with the second sound call (func_10010344 / func_10010A3C)
+func_1506BB64	objev_sound_hi_word_3	low	Event: plays the sound in the command's high half (D_800D1582) with func_10012718
+func_1506BBA8	objev_sound_hi_word	low	Event: plays the sound in the command's high half at reduced volume (func_10010154)
+func_1506BC24	objev_sound_hi_word_alt	low	Event: plays the sound in the command's high half at reduced volume (func_10010344)
+func_1506BCA0	objev_set_y_velocity	high	Event: sets the current object's y_velocity to the command value
+func_1506BCC8	objev_hop	med	Event: on the ground gives a y velocity from the command (plus random, scaled by xz speed in state 0x16)
+func_1506BDE8	objev_jump_if_low	low	Event: sets y_velocity to the command value when the object is below y = -1750
+func_1506BE2C	objev_set_gravity	high	Event: sets the current object's gravity to the command value
+func_1506BE54	objev_set_gravity_tenth	high	Event: sets the current object's gravity to a tenth of the command value
+func_1506BE84	objev_allow_run	high	Event: clears the current object's disable_run
+func_1506BE98	objev_set_target_speed	high	Event: sets the current object's target_speed to the command value
+func_1506BEC0	objev_set_disable_run	high	Event: sets the current object's disable_run to the command value
+func_1506BEDC	objev_set_d0_114	low	Event: sets +0xD0 to the command and +0x114 to the command >> 8
+func_1506BF1C	objev_sound_if_above_water	med	Event: plays the command sound (objev_play_sound) when the object is not under water
+func_1506BF5C	objev_play_sound	high	Event: plays sound by command word modes (plain, alt, footstep from floor surface, once); actor-type conditions and defer bit
+func_1506C32C	objev_play_random_sound	high	Event: while the deferred-sound counter D_800D1C9C runs, picks one of up to four sound ids at random and plays it
+func_1506C418	objev_stop_sound_alt	med	Event: stops the current object's sound (func_10010A3C)
+func_1506C43C	objev_stop_sound	med	Event: stops the current object's sound (func_100109D0)
+func_1506D2E8	objev_throw_object	med	Event: spawns object kind (cmd & 0xFF) ahead of the current object, aimed 5000 units forward; lobbed or dropped by cmd bits 8..15
+func_1506D4EC	objev_nop_1506D4EC	low	Event: empty handler (entry 16 of the D_8008679C table)
+func_1506D4F4	objev_anim_slow	low	Event: restarts the current animation at speed 0.01
+func_1506D538	objev_lose_life_cur_player	med	Event: unless D_800C35EA is 1 calls the player-lost-a-life handler for the current player D_800C3E78
+func_1506D570	objev_clear_6e	low	Event: clears the current object's +0x6E
+func_1506D584	objev_start_anim_cmd	high	Event: starts animation (cmd byte 3) at priority (byte 2) for the command's frame count scaled by the animation speed, unless in state 0x2A
+func_1506D6B4	objev_anim_in_water_by_health	med	Event: in water, starts animation 0x2C (health >= 2) or 0x29 through objev_start_anim_cmd
+func_1506D74C	objev_ledge_climb_up	med	Event: lifts the object 70 units, moves it forward by the command distance, starts animation 0xF and sets climb timers
+func_1506D898	objev_ledge_drop_down	med	Event: lowers the object 80 units, starts animation 663 and clears run / state fields
+func_1506D934	objev_set_103	low	Event: sets the current object's +0x103 to the command value
+func_1506D950	objev_nop_1506D950	low	Event: empty handler
+func_1506D958	objev_set_owned_obj_flags	low	Event: for the first live object of id cmd & 0xFF owned by the current player, replaces bit 0 of +0x101 with cmd bits 8..15
+func_1506DA78	objev_set_immune	high	Event: sets the current object's immune field to the command value
+func_1506DA94	objev_screen_effect_stop	low	Event: optionally stops running at speed, then starts a screen effect for the current player (func_15174690)
+func_1506DB30	objev_set_1890_update	low	Event: stores the command byte in D_800D1890 and calls func_15076760
+func_1506DB5C	objev_set_xz_velocity	high	Event: sets the current object's xz_velocity to the command value
+func_1506DB84	objev_set_239	low	Event: sets the current object's +0x239 to the command byte
+func_1506DBA0	objev_set_1e5_1e6	low	Event: sets +0x1E5 / +0x1E6 from the command's bytes 0 and 1
+func_1506DBD4	objev_link_nearby_object	low	Event: finds an object near the current one (func_15072208) and links them with func_15054A5C
+func_1506DC10	objev_random_voice	low	Event: plays one of four random voice ids (0x8F.. / 0x612..) or id 9 under water through func_15060A9C
+func_1506DCA4	objev_set_2e8	low	Event: sets the current object's +0x2E8 to the command value
+func_1506DCC0	objev_set_2ec	low	Event: sets the current object's +0x2EC to the command value
+func_1506DCDC	objev_set_health	high	Event: sets the current object's health to the command byte
+func_1506DCF8	objev_nop_1506DCF8	low	Event: empty handler
+func_1506DD00	objev_set_flags_f8	med	Event: ORs the command into flags +0xF8, or resets them to the model record's default when the command is 0
+func_1506DD44	objev_clear_flags_f8	med	Event: clears the command bits from flags +0xF8
+func_1506DD6C	objev_set_matrix_physics	med	Event: sets +0x31C->matrix_physics to cmd & 0x7F; with 0 also snaps +0x76 to the facing +0x7A
+func_1506DDB8	objev_nop_1506DDB8	low	Event: empty handler
+func_1506DDC0	objev_level_screen_effect	low	Event: when func_15178E50(current level) passes, starts screen effect func_1516EED4 of the command for the current player
+func_1506DE04	objev_screen_effect_twice	low	Event: starts the same screen effect (func_15174690) twice for the current player
+func_1506DE84	objev_effect_by_mode	med	Event: per command 0..13 spawns dust (func_15187B50), screen flashes (func_1516F730 / F868), squares, or joint beams
+func_1506E0EC	objev_dust_square_large	med	Event 8: projects a 540x540 square around the object onto its floor (func_15170648) and puffs dust at each corner
+func_1506E2CC	objev_shadow_square_small	low	Event 11: projects a 200x200 square around the object in model space onto its floor height through func_15170648
+func_1506E46C	sound_word_resolve	high	Resolves a packed sound word: optional playing test, per-level id table (>= 2000), random chance byte and variant pick; 0 = skip
+func_1506E5FC	objev_sound_300_1800	med	Event: resolves the command sound word (mode 0) and plays it with range 300..1800
+func_1506E63C	objev_sound_100_800	med	Event: resolves the command sound word (mode 0) and plays it with range 100..800
+func_1506E67C	objev_sound_190_1300	med	Event: resolves the command sound word (mode 0) and plays it with range 190..1300
+func_1506E6BC	objev_sound_300_3000	med	Event: resolves the command sound word (mode 0) and plays it with range 300..3000
+func_1506E6FC	objev_sound_700_4000	med	Event: resolves the command sound word (mode 0) and plays it with range 700..4000
+func_1506E73C	objev_sound_3000_8000	med	Event: resolves the command sound word (mode 0) and plays it with range 3000..8000
+func_1506E77C	objev_sound_hi_300_1800	med	Event: resolves the command sound word and plays the high-half sound quietly with range 300..1800
+func_1506E7BC	objev_sound_hi_300_3000	med	Event: resolves the command sound word and plays the high-half sound quietly with range 300..3000
+func_1506E7FC	objev_sound_if_grounded	med	Event: when the object is on the ground (+0x28 == 0) and +0x107 is clear, plays objev_sound_300_1800
+func_1506E848	objev_sound_if_not_playing	med	Event: resolves the sound word and plays it (80..800) unless the high-half sound is already playing
+func_1506E898	objev_sound_global_300_1800	med	Event: resolves the sound word (mode 2, global test) and plays it with func_10012718, range 300..1800
+func_1506E8D8	objev_sound_alt_300_1800	med	Event: resolves the sound word (mode 1) and plays it with the alt call, range 300..1800
+func_1506E918	objev_sound_alt_100_800	med	Event: resolves the sound word (mode 1) and plays it with the alt call, range 100..800
+func_1506E958	objev_sound_alt_190_1300	med	Event: resolves the sound word (mode 1) and plays it with the alt call, range 190..1300
+func_1506E998	objev_sound_alt_300_3000	med	Event: resolves the sound word (mode 1) and plays it with the alt call, range 300..3000
+func_1506E9D8	objev_sound_alt_700_4000	med	Event: resolves the sound word (mode 1) and plays it with the alt call, range 700..4000
+func_1506EA18	objev_sound_alt_3000_8000	med	Event: resolves the sound word (mode 1) and plays it with the alt call, range 3000..8000
+func_1506EA58	objev_sound_alt_hi_300_3000	med	Event: resolves the sound word (mode 1) and plays the high-half sound quietly with the alt call, range 300..3000
+func_1506EA98	objev_throw_carried	med	Event: releases the carried object (+0x13C = 100 + slot) with a throw velocity along the facing, stunned and re-homed
+func_1506EBC0	objev_drop_carried	med	Event: releases the carried object (+0x13C = 100 + slot) with no velocity so it falls
+func_1506EC50	objev_hold_frame_airborne	med	Event: while airborne (optionally only above player 0) stops the event run and holds the animation at frame cmd & 0xFF
+func_1506ECD0	objev_anim_set_flag_8000	low	Event: sets flag 0x8000 in the animation record's +0x4
+func_1506ECF0	objev_set_3a	low	Event: sets the current object's +0x3A to the command byte
+func_1506ED0C	objev_set_83_lock	low	Event: sets +0x83 to the command, flag 0x10 in +0x100 and +0x31C->unk31
+func_1506ED4C	objev_set_100	low	Event: sets the current object's +0x100 flags byte to the command
+func_1506ED68	objev_unlock_a9	low	Event: sets +0xA9 = 5 and clears +0x31C->unk31
+func_1506ED90	objev_set_21c	low	Event: sets the current object's +0x21C timer to the command value
+func_1506EDAC	objev_set_flags_f4	med	Event: sets flags +0xF4 to the command value
+func_1506EDC8	objev_clear_flags_f4	med	Event: clears the command bits from flags +0xF4
+func_1506EDF0	objev_or_flags_f4	med	Event: ORs the command bits into flags +0xF4
+func_1506EE14	objev_or_flags_25c	med	Event: ORs the command bits into flags +0x25C
+func_1506EE38	objev_clear_flags_25c	med	Event: clears the command bits from flags +0x25C
+func_1506EE60	objev_trail_start_or_stop	med	Event: starts the object trail effect (style low half, time high half), or stops it when the command is 0
+func_1506EEAC	objev_trail_set	low	Event: passes the command to func_151898C0 for the current object (trail effect family)
+func_1506EED8	objev_set_24e	low	Event: sets the current object's +0x24E to the command byte
+func_1506EEF4	objev_set_path_cmd	low	Event: sets +0x276 / +0x278 / +0x282 from the command and clears the byte pairs +0x284..+0x287
+func_1506EF5C	objev_set_path_pair	low	Event: +0x282 = 0xFFFF, +0x276 = 5, and byte pair +0x284 + 2*i (i = cmd bits 16..23) = cmd bits 8..15 / 0..7
+func_1506EFB4	objev_clear_282	low	Event: clears the current object's +0x282
+func_1506EFC8	objfx_bb760_unless_8c	low	Action: calls func_150BB760 on the current object unless its id is 0x8C
+func_1506F004	objfx_bcbbc	low	Action: calls func_150BCBBC on the current object
+func_1506F02C	objfx_ba4c0	low	Action: calls func_150BA4C0(current object, 0xFF, 0)
+func_1506F05C	objfx_dust_50	med	Action: spawns the dust effect for the current object's kind with size 0x32
+func_1506F090	objfx_dust_default	med	Action: spawns the dust effect for the current object's kind with the default size
+func_1506F0C4	objfx_c1260_0	low	Action: calls func_150C1260(current object, 0)
+func_1506F0F0	objfx_c1260_1	low	Action: calls func_150C1260(current object, 1)
+func_1506F11C	objfx_spray_0	low	Action: spray / ripple effect func_150BABE0 on the current object, variant 0
+func_1506F14C	objfx_spray_1	low	Action: spray / ripple effect func_150BABE0 on the current object, variant 1
+func_1506F17C	objfx_aeeb0	low	Action: calls func_150AEEB0(current object, 0xFF)
+func_1506F1A8	objfx_emitter_c	med	Action: spawns the kind-0xC particle emitter on the current object with a constant spec
+func_1506F524	objfx_197a7c	low	Action: calls func_15197A7C on the current object
+func_1506F54C	objfx_emitter_d	med	Action: spawns the kind-0xD particle emitter on the current object with a constant spec
+func_1506F8C0	objfx_19ef70	low	Action: calls func_1519EF70(current object, 0, 0)
+func_1506F8F0	objfx_arc_a	low	Action: spawns a line effect (func_150E2EA4, kind 0x14) between two local points on the current object
+func_1506F9C0	objfx_arc_b	low	Action: as objfx_arc_a with a shorter first segment
+func_1506FA90	objfx_arc_c	low	Action: spawns a line effect (func_150E2EA4, kind 0x1A) between two other local points on the current object
+func_1506FB60	objfx_gun_shot	med	Action: fires gun shot variant (arg - 0x13) from the current object, alternate path when func_151044F4 is set
+func_1506FBE8	objfx_1a0a10_70	low	Action: calls func_151A0A10(current object, 0x46)
+func_1506FC1C	objfx_1a0a10_40	low	Action: calls func_151A0A10(current object, 0x28)
+func_1506FC50	objfx_buddy_marker_clear	med	Action: clears the buddy markers (func_1519E688)
+func_1506FC74	objfx_buddy_marker_create	med	Action: creates a buddy marker on the current object
+func_1506FC9C	objfx_b3ab0	low	Action: calls func_150B3AB0(current object, 0xFF)
+func_1506FCC8	objfx_emitter_kind6	med	Action: spawns emitter kind 6 on the current object (func_15196438)
+func_1506FCFC	objfx_emitter_kind5	med	Action: spawns emitter kind 5 on the current object (func_15196438)
+func_1506FD30	objfx_arc_d	low	Action: spawns a line effect (func_150E2EA4, kind 1) along the object's z axis (345..414)
+func_1506FDF0	objfx_1aabc4_0	low	Action: calls func_151AABC4(current object, 0)
+func_1506FE1C	objfx_1aabc4_1	low	Action: calls func_151AABC4(current object, 1)
+func_1506FE48	objfx_1aabc4_0_b	low	Action: calls func_151AABC4(current object, 0) (second table entry)
+func_1506FE74	objfx_1aabc4_1_b	low	Action: calls func_151AABC4(current object, 1) (second table entry)
+func_1506FEA0	objfx_1aabc4_2	low	Action: calls func_151AABC4(current object, 2)
+func_1506FECC	objfx_1aabc4_3	low	Action: calls func_151AABC4(current object, 3)
+func_1506FEF8	objfx_1ab920_0	low	Action: calls func_151AB920(current object, 0)
+func_1506FF24	objfx_1ab920_1	low	Action: calls func_151AB920(current object, 1)
+func_1506FF50	objfx_1ab930	low	Action: calls func_151AB930 on the current object
+func_1506FF78	objfx_cbf80_0	low	Action: calls func_150CBF80(current object, 0, 1, 0xFF)
+func_1506FFAC	objfx_cbf80_1	low	Action: calls func_150CBF80(current object, 1, 1, 0xFF)
+func_1506FFE0	objfx_cbf80_2	low	Action: calls func_150CBF80(current object, 2, 1, 0xFF)
+func_15070014	objfx_ca150	low	Action: calls func_150CA150 on the current object
+func_1507003C	objfx_1b01b8_1b09bc	low	Action: calls func_151B01B8(obj, 0) then func_151B09BC(obj, 0, 1000) on the current object
+func_15070084	objfx_1aeca0	low	Action: calls func_151AECA0(current object, 0xFF, 1)
+func_150700B4	objfx_1b03b8	low	Action: calls func_151B03B8(current object, 0xFF, 1)
+func_150700E4	objfx_193660	low	Action: calls func_15193660(current object, 0xFF, 1)
+func_15070114	objfx_1937f4	low	Action: calls func_151937F4(current object, 0xFF, 1)
+func_15070144	objfx_shot_self	low	Action: fires func_151C0698 from the current object with a self-targeted record (variant 3 in level 0x2B) and func_151C1FB8
+func_150701C4	objfx_1c5280	low	Action: calls func_151C5280(current object, 0xFF, 1)
+func_150701F4	objfx_1c9740	low	Action: calls func_151C9740(current object, 0xFF, 1)
+func_15070224	objfx_debris_burst	low	Action: spawns 4..6 random pieces (func_151602C0, kind 3) at the current object's position
+func_15070300	objfx_gun_fire	med	Action: gun fire for actor 0x77 / 0x28: fires at the target (func_151C0698) or a projectile, plus a muzzle flash on matrix 4
+func_15070690	objfx_eee00	low	Action: calls func_150EEE00(current object, arg - 0x3E, arg)
+func_150706C4	objfx_eef40	low	Action: calls func_150EEF40(current object, arg - 0x3E, arg)
+func_150706F8	objfx_f03f8_both	low	Action: calls func_150F03F8 for sides 0 and 1 of the current object unless masked by +0x94 bits 0x10 / 8
+func_15070760	objfx_ebec0_0	low	Action: calls func_150EBEC0(current object, 0, 0xFF, 1)
+func_15070794	objfx_ebec0_1	low	Action: calls func_150EBEC0(current object, 1, 0xFF, 1)
+func_150707C8	objfx_fdda0	low	Action: calls func_150FDDA0(current object, 0xFF, 1)
+func_150707F8	objfx_fdf38	low	Action: calls func_150FDF38(current object, 0xFF, 1, 0, 0)
+func_15070830	objfx_fe320	low	Action: calls func_150FE320(current object, 0xFF, 1)
+func_15070860	objfx_fe49c	low	Action: calls func_150FE49C(current object, 0xFF, 1, 0, 0)
+func_15070898	objfx_emitter_9	med	Action: spawns the kind-9 particle emitter on the current object with a constant spec
+func_15070C18	objfx_199834	low	Action: calls func_15199834 on the current object
+func_15070C40	objfx_hit_at_self	low	Calls func_151043C0 at the current object's position with its owner (+0x124) as source and the given flag
+func_15070CDC	objfx_hit_at_self_1	low	Action: objfx_hit_at_self(1)
+func_15070D00	objfx_hit_at_self_0	low	Action: objfx_hit_at_self(0)
+func_15070D24	objfx_sparks_joint1	med	Action: spark spray (func_151030B8) plus random debris (func_151602C0) from the current object's joint matrix 1
+func_15070F60	objfx_sparks_shake	med	Sparks and debris from joint 1 or 2 of the current object plus a positional shake / rumble (func_151D5404 / func_151D58E4)
+func_15071230	objfx_sparks_shake_2	med	Action: objfx_sparks_shake from joint 2
+func_15071254	objfx_sparks_shake_1	med	Action: objfx_sparks_shake from joint 1
+func_15071278	objfx_fc438	low	Action: calls func_150FC438(current object, 0, 1, animation byte +0x85)
+func_150712AC	objfx_fede0_cam_shake	low	Action: effect func_150FEDE0 on the current object plus a random shake of its camera (func_151D8E18)
+func_15071360	objfx_ff2b0_cam_shake	low	Action: effect func_150FF604 or func_150FF2B0 on the current object plus a random shake of its camera
+func_15071434	objfx_ff840_1_0	low	Action: calls func_150FF840(current object, 1, 0)
+func_15071470	objfx_ff840_0_0	low	Action: calls func_150FF840(current object, 0, 0)
+func_150714AC	objfx_ff840_0_1	low	Action: calls func_150FF840(current object, 0, 1)
+func_150714E8	objfx_1d5714_a	low	Action: calls func_151D5714 on the current object with the D_800A2148 / D_800A2154 data at scale 1.0
+func_15071544	objfx_1d469c_4	low	Action: resets (func_151D4668) then starts func_151D469C variant 4 for 120 on the current object
+func_1507158C	objfx_1d469c_2	low	Action: resets (func_151D4668) then starts func_151D469C variant 2 for 120 on the current object
+func_150715D4	objfx_1d469c_3	low	Action: resets (func_151D4668) then starts func_151D469C variant 3 for 120 on the current object
+func_1507161C	objfx_nop_1507161C	low	Action: empty handler
+func_15071628	objfx_1d0058	low	Action: calls func_151D0058(current object, arg - 0x55)
+func_15071668	objfx_1d0024	low	Action: calls func_151D0024 on the current object
+func_15071690	objfx_b5c38	low	Action: when the object has visible joints, builds a record with func_150B60E0 and passes it to func_150B5C38
+func_150716EC	objfx_shake_large	low	Action: large positional shake / rumble (func_151D5404, 1502..3000) at the current object's position
+func_15071764	objfx_kind18_activate	low	Action: on the first object of kind 18: func_150F0BEC, func_150F10D4 and a fade-in (func_15161E24)
+func_150717E0	objfx_kind18_notify_43	low	Action: sends event 0x43 (func_151322BC / func_151494E0) for the first object of kind 18
+func_15071830	objfx_f9bb0	low	Action: calls func_150F9BB0(current object, 0xFF, 1)
+func_15071860	objfx_19072c	low	Action: calls func_1519072C on the current object
+func_15071888	objfx_1d5714_b	low	Action: calls func_151D5714 on the current object with the D_800A1FB0 / D_800A1FBC data at scale 0.7
+func_150718E4	objfx_1c384c_random_joint	low	Action: at a random one of four joints (D_80099F78), at floor height +20, calls func_151C384C
+func_15071998	objfx_fa520_0	low	Action: calls func_150FA520(current object, 0, 0xFF, 1)
+func_150719CC	objfx_fa520_1	low	Action: calls func_150FA520(current object, 1, 0xFF, 1)
+func_15071A00	objfx_fa520_2	low	Action: calls func_150FA520(current object, 2, 0xFF, 1)
+func_15071A34	objfx_1d09a8	low	Action: calls func_151D09A8(current object, 0xFF, 1)
+func_15071A64	objfx_1dc484_vs_player	low	Action: half the time, while player 0 is stunned and alive, spawns effect func_151DC484 at joint 15 of the current object
+func_15071B18	objfx_joint7_burst	low	Action: at a random point on joint 7 maybe spawns effects func_151DC260 / func_151DC484 and a particle burst (func_15152700)
+func_15071D08	objfx_f2230	low	Action: calls func_150F2230(current object, 0xFF, 1)
+func_15071D38	objev_run_action	high	Event: calls action handler D_80086150[cmd] with the command value (when set)
+func_15071D78	objev_run_action_on_child	high	Event: runs objev_run_action with the current object's first child as current object
+func_15071DC8	objev_141a7c	low	Event: calls func_15141A7C(current object, command)
+func_15071DF4	objev_192800	low	Event: calls func_15192800(current object, command)
+func_15071E20	objev_set_247	low	Event: sets the current object's +0x247 to the command byte
+func_15071E3C	objev_set_248	low	Event: sets the current object's +0x248 to the command byte
+func_15071E58	objev_anim_at_frame	med	Event: starts animation (cmd byte 1, stored in +0x244) at speed 1.2 from frame cmd & 0xFF
+func_15071ED4	objev_anim_59	low	Event: starts animation 0x59 on the current object
+func_15071F14	objev_anim_24	low	Event: starts animation 0x24 on the current object
+func_15071F54	objev_7c8e0	low	Event: calls func_1507C8E0(current object, command)
+func_15071F80	objev_skip_if_cutscene	low	Event: when D_800C35EA is 1 skips the next animation event (+0x138++)
+func_15071FB0	objev_clear_10c_grounded	low	Event: clears +0x10C when the object is on the ground
+func_15071FDC	objev_player_react_anim	low	Event: starts a reaction animation (0x194 / 0x2E5 / 0x32) on player 0 aligned to the current object and copies its +0x2D8.. values
+func_150721A4	objev_fade_cmd	med	Event: fade / visibility command (cmd byte 2) on the current object with args cmd bytes 0 and 1
+func_150721E8	obj_find_child	high	Returns the first object whose +0x65 owner link is obj, or NULL
+func_15072208	obj_find_child_nth	high	Returns the n-th object whose +0x65 owner link is obj, or NULL
+func_150722F0	objev_child_fade	med	Event: fade command 2 on the current object's first child with args from the command
+func_1507233C	objev_set_mask_94	low	Event: sets +0x94 to ~(cmd | 1)
+func_15072360	objev_clear_mask_94	low	Event: clears the command bits from +0x94
+func_15072388	objev_or_mask_94	low	Event: ORs the command bits into +0x94
+func_150723AC	objev_remove_kind	med	Event: removes the first object of kind cmd byte 3 (func_15060F28 mode 0)
+func_150723E0	objev_remove_kind_owned	med	Event: removes the first object of kind cmd byte 3 when it has an owner
+func_15072420	objev_respawn_record_object	med	Event: respawns level-setup record (cmd byte 0) on the current object, owned by it, with +0x5C / mode / state from the command
+func_1507266C	objev_adopt_remembered_obj	low	Event: makes the remembered object (+0x222) owned by the current player with fresh state / scale ratios and links it (func_151B6150)
+func_15072740	objev_own_remembered_obj	low	Event: makes the remembered object (+0x222) owned by the current player, +0x5C = cmd >> 16, mode 4
+func_150727AC	objev_set_anim_speed	high	Event: sets the current object's animation speed (and the animation record's) to a tenth of the command
+func_150727F0	objev_set_owned_state	med	Event: sets state +0x232 = command (and clears +0x218) on every live object owned by the current player
+func_15072918	objev_remove_self	high	Event: removes the current object (func_15060F28 mode 0)
+func_15072940	objev_kill_self	high	Event: removes the current object as killed (func_15060F28 mode 1)
+func_15072968	objev_anim_2c_lock_run	low	Event: starts animation 44 at speed 1.5 and blocks running for 25 frames
+func_150729B4	objev_set_2e4	low	Event: sets the current object's +0x2E4 to the command value
+func_150729D0	objev_action21_idle	low	Event: sets +0x31C->unk8, calls func_1507EB4C(obj, 21) and the allow-run idle event
+func_15072A14	objev_clear_66_idle	low	Event: clears +0x31C->unk66 and starts the player idle animation
+func_15072A40	objev_clear_19b_idle	low	Event: clears +0x31C->unk19B / unk78 and starts the player idle animation
+func_15072A7C	objev_maybe_anim_18a	low	Event: increments +0x31C->unk1A9 and, with growing chance, starts animation 394
+func_15072AF8	objev_anim_next_blend6	med	Event: starts the next animation (+0x84 + 1) at speed 1 with 6 blend frames
+func_15072B44	objev_anim_follow_up	high	Event: when the player's animation ends starts the one that follows it (fixed pairs and cycles, some flag-dependent)
+func_15072DA0	objev_set_2f8_low3	low	Event: replaces the low 3 bits of +0x2F8 with the command
+func_15072DD8	objev_loop_sound_start	med	Event: starts the object's looping sound (func_15083568) with the command id; advances +0x31C->unk11A 1 -> 2
+func_15072E38	objev_loop_sound_stop	med	Event: stops the object's looping sound (func_150836CC) and clears +0x31C->unk11A
+func_15072E7C	objev_set_10c	low	Event: sets the current object's +0x10C to the command value
+func_15072E98	objev_scale_anim_speed	med	Event: multiplies the animation record's speed by the command float D_800D1874
+func_15072EC0	objev_clear_10c_if_slow	low	Event: clears +0x10C when the animation speed is below the command float
+func_15072EF4	objev_set_stunned	high	Event: sets the current object's stunned field to the command byte
+func_15072F10	objev_fire_beam_forward	med	Event: fires a beam / shot (func_150E1AF0) from the object's head toward a point 5000 units along facing and tilt
+func_15073054	objev_set_22e	low	Event: sets the current object's +0x22E to the command value
+func_15073070	objev_nop_15073070	low	Event: empty handler
+func_15073078	objev_12d748	low	Event: calls func_1512D748(0, command, 1)
+func_150730A4	objev_set_1ff_200	low	Event: sets +0x1FF = 3 and +0x200 = command byte
+func_150730D0	objev_toggle_2f8_100	low	Event: sets (command 1) or clears flag 0x100 in +0x2F8
+func_15073118	obj_spawn_child_at_joint	high	Spawns a type-0x21 child object of parent at an offset from a joint (or its position), yawed from the parent, with scale fields
+func_1506C460	camera_object_spawn	med	Spawns a type-4 view object (max 5) at a target / the player's attach point with yaw, distance, rise, aim search and per-mode sound
+func_1506CE6C	objev_player_camera_view	med	Event: sets up a view object (camera_object_spawn) for mode D_800D1580 from the player's facing / camera pitch or hand matrix
+func_1507342C	objev_spawn_shot_kind	med	Event: spawns a shot child object of kind 0..3 (obj_spawn_child_at_joint); kind 0 may be aimed at the owner's camera
+func_150738E8	objev_toss_carried	med	Event: releases the carried object (+0x13C) in state 6 with fixed flags and starts animation 0x97
+func_150739A4	objev_set_wait_timer	med	Event: sets the current object's +0x64 timer to the command byte
+func_150739C0	objev_wait_timer	med	Event: counts the +0x64 timer down by the frame step; while not expired holds the event run at frame cmd
+func_15073A28	objev_set_44	low	Event: sets the current object's +0x44 float to the command value
+func_15073A50	objev_launch_owner_obj	low	Event: releases the owner-slot object (+0x124) with func_1505D024 (cmd mask 0xFF00FF), yaw offset and immunity
+func_15073B38	objev_set_31c_a8_ac_ad	low	Event: sets +0x31C->unkA8 (float, low half), unkAC (byte 2) and unkAD (byte 3) from the command
+func_15073C28	objev_idle	med	Event: starts the player idle animation
+func_15073C48	objev_nop_15073C48	low	Event: empty handler
+func_15073C50	objev_set_height_above_remembered	low	Event: sets +0x224 = y of the remembered object (+0x222) plus the command
+func_15073CB8	objev_release_kind53_wait	low	Event: clears +0x21C of the first object of kind 0x53 when its +0x244 is 0x1F
+func_15073CF4	objev_set_inner_extent_width	med	Event: obj_set_inner_extent_width(current object, command)
+func_15073D34	objev_set_inner_extent_height	med	Event: obj_set_inner_extent_height(current object, command)
+func_15073D74	objev_unlink_kind	low	Event: clears the owner link +0x65 of the first object of kind cmd byte 3
+func_15073DA4	objev_camera_view_close	low	Event: camera_object_spawn mode 18 / 2 at distance 150 along the object's yaw, snapping
+func_15073E2C	objev_camera_view_mode11	low	Event: camera_object_spawn mode 11 at distance 80, flags 14, snapping
+func_15073EA4	objev_camera_view_mode12	low	Event: camera_object_spawn mode 12 at distance 60, flags 14, snapping
+func_15073F1C	objev_set_timer_3c_2000	low	Event: on the record func_1503195C(obj, 0x3C) sets +0x38 = 2000
+func_15073F54	objev_nop_15073F54	low	Event: empty handler
+func_15073F5C	objev_set_2cb	low	Event: sets the current object's +0x2CB to the command byte
+func_15073F78	objev_clear_flags_10b	low	Event: clears the command bits from +0x10B
+func_15073FA0	objev_spawn_helper_object	med	Event: spawns a level-setup record's object at the current object (joint or above it), owned, with heading, throw speed and per-kind setup
+func_15074644	objev_set_31c_11a	low	Event: sets +0x31C->unk11A to the command byte
+func_15074664	objev_set_music_mode	low	Event: sets +0x31C->unk94 to the command, switching func_10011FDC to 5 when it becomes 1 or back to 0 when it leaves 1
+func_150746F0	objev_damage	med	Event: deals command damage to the current object (multiplayer) or player 0 when carrying; kills at 0 health, flashes the camera otherwise
+func_150747E4	objev_set_owner_state	med	Event: sets state +0x232 = command (and clears +0x218) on the current object's owner (+0x65)
+func_15074840	objev_add_31c_1aa	low	Event: adds the command to +0x31C->unk1AA
+func_15074870	objev_set_24f	low	Event: sets the current object's +0x24F to the command byte
+func_1507488C	objev_skip_if_flags	med	Event: skips cmd byte 3 events (+0x138) when the flag test on word +0x2E4[i] & mask matches the wanted polarity
+func_150748F4	objev_set_cc3d7	low	Event: stores the command byte in D_800CC3D7 (player 0 record byte +0x107)
+func_1507490C	objev_set_carried_state	med	Event: sets state +0x232 = command on the carried object (+0x13C) and clears its +0x218 / stunned
+func_15074980	objev_alert_players_near	med	Event: sets +0x31C->chasing = 20 on every player within command * 8 of the current object
+func_15074A44	objev_set_31c_26	low	Event: sets +0x31C->unk26 to the command byte
+func_15074A6C	objev_skip_if_not_carrying	med	Event: skips the next animation event when the current object carries nothing (+0x13C == 0)
+func_15074A94	objev_speed_by_player_dist	med	Event: sets the object's speed factor (+0x154 / +0x158) by distance to player 0: 0.3 near, +0x148 far, linear between
+func_15074B7C	objev_hold_frame	med	Event: stops the event run and holds the animation at frame cmd; 0 = frame 0.1, sets +0x1FC bit 4 and rewinds the events
+func_15074BD8	objhit_nop_15074BD8	low	Hit handler: empty
+func_15074BEC	objhit_nop_15074BEC	low	Hit handler: empty
+func_15074C00	objhit_burst_state5	low	Hit handler: when b's +0x239 state is 5 spawns effect func_150C04C0 (kind 0x16) at D_800CC2C0 with b's frame
+func_15074C80	objhit_camera_object	med	Hit handler of a type-4 view object: per mode handles the hit (func_15194858 / func_150335C8 with mode sound) and a ripple on kind 0x19
+func_15074DEC	objhit_set_2e8	low	Hit handler: sets a's +0x2E8 = 1
+func_15074E04	objhit_screen_flash_b	low	Hit handler: screen effect for b's slot (func_1516FE1C) and effect func_1518D1C0 on b
+func_15074E80	objhit_grab_player_6	low	Hit handler: func_15194794, then when b is active makes the remembered object owned with state 6 and sets immunities
+func_15074EE8	objhit_grab_player_7	low	Hit handler: when b is active makes the remembered object owned with state 7 and sets immunities
+func_15074F30	objhit_take_state_from_b	low	Hit handler: sets a's state +0x232 from b's +0x109 and clears +0x218
+func_15074F48	objhit_fling_to_point	low	Hit handler: aims b toward (-2641, 3039) with a speed from the distance and calls func_15194978
+func_15074FD4	objhit_grab_player_and_hit	low	Hit handler: grab as objhit_grab_player_6 (state 0x14 for kind 0x8E), then func_151942B0
+func_15075050	objhit_bounce	med	Hit handler: makes a bounce back: +0xB8 = +-5 against its motion, gravity 5, y velocity 12
+func_150750A4	objhit_set_gravity	med	Hit handler: sets a's gravity to 5
+func_150750C4	objhit_kill_b	med	Hit handler: func_15194794, then kills b (unless kind 0x53) with mode 8 and reports 39; kind 0x88 also skips 3 events
+func_1507515C	player_find_owned_object	high	Returns the first live object whose owner byte +0x65 is owner's slot + 1, or NULL

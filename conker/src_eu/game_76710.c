@@ -7,16 +7,18 @@
 // wtf?
 #ifdef NON_MATCHING
 /* P20: the asm caller func_15002248 tests v0, which is func_150AB278's return value passed through */
-s32 func_15049260(struct_eu_bytes24 arg0) {
+/* was func_15049260 */
+s32 quadtree_tri_box_test(struct_eu_bytes24 arg0) {
     return func_150AB278(arg0);
 }
 #else
-void func_15049260(struct_eu_bytes24 arg0) {
+void quadtree_tri_box_test(struct_eu_bytes24 arg0) {
     func_150AB278(arg0);
 }
 #endif
 
-void func_150492CC(f32 arg0, f32 arg1, f32 arg2) {
+/* was func_150492CC */
+void quadtree_set_test_box(f32 arg0, f32 arg1, f32 arg2) {
     D_800CC640 = arg0;
     D_800CC644 = arg1;
     D_800CC648 = arg2;
@@ -37,7 +39,8 @@ extern f32 D_800CC634;
 extern f32 D_800CC638;
 extern f32 D_800CC63C;
 
-void func_15049350(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8) {
+/* was func_15049350 */
+void tri_compute_plane(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8) {
     f32 sp10;
     f32 spC;
     f32 sp8;
@@ -69,5 +72,5 @@ void func_15049350(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f
     D_800CC63C = (arg2 * sp8) + ((temp_f6 * (*(f32 *)&(arg0))) + (spC * sp4));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_76710/func_15049350.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_76710/tri_compute_plane.s")
 #endif

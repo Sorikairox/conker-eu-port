@@ -3,9 +3,9 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_1510ED24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
+void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
 void camera_calc_relative_yaw(struct108 *arg0);
-void func_1512DAD0(struct108 *arg0, s32 arg1, void *arg2);
+void camera_queue_event(struct108 *arg0, s32 arg1, void *arg2);
 extern f32 D_80095DA0;
 extern f32 D_800C3A20[];
 #endif
@@ -13,10 +13,10 @@ extern f32 D_800C3A20[];
 
 #ifdef NON_MATCHING
 s32 allocate_memory(s32, s32, s32, s32);
-s32 func_1502B5C8(s32 *arg0, s32 arg1, ...);
-void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3);
-void func_1512B168(void);
-void func_1512D7A8(void);
+s32 asset_load(s32 *arg0, s32 arg1, ...);
+void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3);
+void camera_viewport_tables_reset(void);
+void camera_shake_tracks_load(void);
 extern s32 D_800DC450;
 extern s16 D_800898F0;
 extern s32 D_800DC6E0;
@@ -26,12 +26,13 @@ extern s32 D_800DC440;
 
 /* Level init: load the 0x18-byte records (D_800DC450), allocate the per-player camera controllers (D_800DBFF0,
  * 0x9A0 each) and view matrices, initialise each controller, then the camera tables. */
-void func_15005290(s32 arg0, s32 arg1) {
+/* was func_15005290 */
+void camera_level_init(s32 arg0, s32 arg1) {
     s32 size;
     s32 n;
     u32 i;
 
-    D_800DC450 = func_1502B5C8(&size, 3, 0xC, arg0, 8);
+    D_800DC450 = asset_load(&size, 3, 0xC, arg0, 8);
     D_800898F0 = (u32)size / 0x18;
     n = D_80082FA0 + 1;
     D_800DBFF0 = (struct108 *)allocate_memory(n * 0x9A0, 1, 1, 0);
@@ -41,27 +42,27 @@ void func_15005290(s32 arg0, s32 arg1) {
     i = 0;
     do {
         D_800BE6D0[i] = allocate_memory(D_800BE620 * 2, 1, 2, 0);
-        func_150054C4((struct108 *)((u8 *)D_800DBFF0 + i * 0x9A0), i, (s16)arg0, arg1);
+        camera_controller_init((struct108 *)((u8 *)D_800DBFF0 + i * 0x9A0), i, (s16)arg0, arg1);
         D_800DBFF4[i] = 0;
         i++;
     } while (i <= (u32)D_80082FA0);
-    func_1512B168();
-    func_1512D7A8();
+    camera_viewport_tables_reset();
+    camera_shake_tracks_load();
     D_800894B0 = 0;
     D_800DC440 = allocate_memory(D_80082FA0 * 0x9A0 + 0x9A0, 1, 2, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_32740/func_15005290.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_32740/camera_level_init.s")
 #endif
 // NON-MATCHING: first half ok, second half needs work
-// void func_15005290(s32 arg0, s32 arg1) {
+// void camera_level_init(s32 arg0, s32 arg1) {
 //     s32 pad0;
 //     s32 sp68;
 //     s32 pad1;
 //     s32 temp_s0;
 //     s32 i;
 //
-//     D_800DC020 = func_1502B5C8(&sp68, 3, 12, arg0, 8);
+//     D_800DC020 = asset_load(&sp68, 3, 12, arg0, 8);
 //     D_80089550 = (sp68 / 24U);
 //     temp_s0 = D_80082FA0 + 1;
 //     D_800DBFF0 = allocate_memory(temp_s0 * 0x9A0, 1, 1, 0);
@@ -72,7 +73,7 @@ void func_15005290(s32 arg0, s32 arg1) {
 //     i = 0;
 //     do {
 //         D_800BE2B0[i] = allocate_memory(D_800BE620 * 2, 1, 2, 0);
-//         func_150054C4(&D_800DBFF0[i], i, arg0, arg1);
+//         camera_controller_init(&D_800DBFF0[i], i, arg0, arg1);
 //         D_800DBFF4[i] = 0;
 //     } while (D_80082FA0 >= i++) ;
 //
@@ -88,9 +89,9 @@ void camera_apply_zoom_level(struct108 *arg0);
 void camera_calc_view_dir(struct108 *arg0);
 void camera_update_mode_index(struct108 *arg0);
 void func_15005A60(struct108 *arg0, s32 arg1);
-void func_1512DBDC(struct108 *arg0);
-void func_15129E30(struct108 *arg0, s32 arg1);
-void func_1512DC60(struct108 *arg0);
+void camera_event_queue_clear(struct108 *arg0);
+void camera_pivot_slot_reset(struct108 *arg0, s32 arg1);
+void camera_shake_reset(struct108 *arg0);
 void camera_update_underwater_mode(struct108 *arg0);
 void func_150858A0(void *arg0, s32 arg1, s32 arg2);
 extern s32 D_800898C0;
@@ -103,9 +104,10 @@ extern s32 D_800898D4[];
 
 /* Initialise one per-player camera controller (0x9A0 bytes, D_800DBFF0[player]): clear it, reset the 21 camera
  * slots (camera_pop_mode, 999 timers), link it with the player's object record D_800CC2D0[player] (0x32C each,
- * record +0x318 = controller, controller +0x3D0 = record, +0x3D4 = record +0x31C), mode arg2 (func_15129E30 /
+ * record +0x318 = controller, controller +0x3D0 = record, +0x3D4 = record +0x31C), mode arg2 (camera_pivot_slot_reset /
  * func_15005A60), then the default distances / limits. */
-void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
+/* was func_150054C4 */
+void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
     u8 *p = (u8 *)arg0;
     u8 *rec;
     u16 i;
@@ -148,21 +150,21 @@ void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
     camera_update_mode_index(arg0);
     CAM_H(0x5FC) = 10;
     CAM_F(0x26C) = 1.0f;
-    func_1512DBDC(arg0);
+    camera_event_queue_clear(arg0);
     CAM_W(0x238) = -1;
     CAM_H(0x3CC) = p[0x23D];
     CAM_H(0x368) = p[0x23D];
     rec = (u8 *)D_800CC2D0 + p[0x23D] * 0x32C;
     *(u8 **)(p + 0x3D0) = rec;
     CAM_W(0x3D4) = *(s32 *)(rec + 0x31C);
-    func_15129E30(arg0, arg2);
+    camera_pivot_slot_reset(arg0, arg2);
     CAM_W(0x7CC) = 2;
     CAM_F(0x3F4) = -1.0f;
     CAM_F(0x3F8) = -1.0f;
     CAM_F(0x7BC) = 999.0f; /* D_80095D94 */
     CAM_F(0x3E0) = CAM_F(0x3A0);
     *(f32 *)(*(u8 **)(p + 0x3D4) + 0x18C) = 999.0f;
-    func_1512DC60(arg0);
+    camera_shake_reset(arg0);
     camera_update_underwater_mode(arg0);
     CAM_F(0x674) = 1.0f;
     func_150858A0(*(void **)(p + 0x3D0), arg3, 0);
@@ -188,10 +190,10 @@ void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 #undef CAM_H
 #undef CAM_F
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_32740/func_150054C4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_32740/camera_controller_init.s")
 #endif
 // NON-MATCHING: not a terrible start.
-// void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
+// void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 //     f32 temp_f2;
 //     f32 temp_f4;
 //     s32 temp_s2;
@@ -291,9 +293,10 @@ void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 #ifdef NON_MATCHING
 /* P41: initial camera eye. Controller arg0 (D_800DBFF0[player]) gets eye = arg2 (0x2F8, copied to 0x27C and 0x304),
  * at = the record arg1's position (0x2A4, copied to 0x2BC / 0x2B0 / 0x2E0), the horizontal distance 0x374, the
- * eye height state (func_1510ED24 → 0x354..0x360, 0x348 / 0x34C), then the camera setup callees. Outside level
+ * eye height state (collision_find_floor → 0x354..0x360, 0x348 / 0x34C), then the camera setup callees. Outside level
  * 0x21 and unless D_800C35EA == 1, camera events 5 / 8 (with D_800C3A20[3] = yaw 0x37C) / 6. */
-void func_15005818(struct108 *arg0, u8 *arg1, f32 *arg2) {
+/* was func_15005818 */
+void camera_set_initial_eye(struct108 *arg0, u8 *arg1, f32 *arg2) {
     u8 *p = (u8 *)arg0;
     f32 dx;
     f32 dz;
@@ -309,7 +312,7 @@ void func_15005818(struct108 *arg0, u8 *arg1, f32 *arg2) {
     *(s32 *)(p + 0x304) = *(s32 *)(p + 0x2F8);
     *(s32 *)(p + 0x308) = *(s32 *)(p + 0x2FC);
     *(s32 *)(p + 0x30C) = *(s32 *)(p + 0x300);
-    func_1510ED24((s32)(p + 0x644), (s32)(p + 0x648), (s32)(p + 0x354), (s32)(p + 0x360), (s32)(p + 0x640), 0,
+    collision_find_floor((s32)(p + 0x644), (s32)(p + 0x648), (s32)(p + 0x354), (s32)(p + 0x360), (s32)(p + 0x640), 0,
                   *(f32 *)(p + 0x2F8), *(f32 *)(p + 0x2FC), *(f32 *)(p + 0x300), *(f32 *)(p + 0x2FC), 0, 0, D_80095DA0, *(f32 *)(p + 0x2FC));
     *(f32 *)(p + 0x358) = *(f32 *)(p + 0x354);
     *(f32 *)(p + 0x35C) = *(f32 *)(p + 0x354);
@@ -340,16 +343,16 @@ void func_15005818(struct108 *arg0, u8 *arg1, f32 *arg2) {
     camera_calc_relative_yaw(arg0);
     *(s32 *)(p + 0x5F0) |= 4;
     if (D_800BE9F0 != 0x21 && D_800C35EA != 1) {
-        func_1512DAD0(arg0, 5, NULL);
+        camera_queue_event(arg0, 5, NULL);
         D_800C3A20[3] = *(f32 *)(p + 0x37C);
-        func_1512DAD0(arg0, 8, D_800C3A20);
-        func_1512DAD0(arg0, 6, NULL);
+        camera_queue_event(arg0, 8, D_800C3A20);
+        camera_queue_event(arg0, 6, NULL);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_32740/func_15005818.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_32740/camera_set_initial_eye.s")
 #endif
-// void func_15005818(struct108 *arg0, void *arg1, void *arg2) {
+// void camera_set_initial_eye(struct108 *arg0, void *arg1, void *arg2) {
 //     void *sp48;
 //     f32 temp_f0;
 //     f32 temp_f12;

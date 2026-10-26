@@ -710,7 +710,7 @@ _VARH = None
 
 def width_problems(code, func):
     """P18: `*D_X` / `D_X[0]` read with the declared element type while the asm accesses %lo(D_X) with another width
-    (func_15008BF0: rodata f32 words declared u8[] in variables.h, read as one byte)"""
+    (area_drift_emitter_spawn: rodata f32 words declared u8[] in variables.h, read as one byte)"""
     global _VARH
     p = asm_path(func) if func else None
     if not p: return []

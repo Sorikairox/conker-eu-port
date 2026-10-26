@@ -73,7 +73,7 @@ void func_15192F14(u8 *arg0) {
     u8 a;
 
     p = arg0 + 0x28;
-    *(f32 *)(p + 8) += (312.0f + func_150ADA68() * 599.0f) * 0.001f * D_800BE9A4;
+    *(f32 *)(p + 8) += (312.0f + random_float() * 599.0f) * 0.001f * D_800BE9A4;
     if (*(f32 *)(p + 8) > 1.0f) {
         if (func_1515C668(*(u8 **)p, &out) != 0) {
             sp.u51 = 0x29;
@@ -102,19 +102,19 @@ void func_15192F14(u8 *arg0) {
             sp.u58 = 1.04f;
             scale = 0.95000005f;
             do {
-                a = func_150ADA20() & 1;
-                sp.u3E = (func_150ADA20() % 31U) + 0x14;
-                sp.u4F = (func_150ADA20() % 156U) + 0x64;
-                sp.u5C = sp.u60 = (func_150ADA68() * 150.0f) + 100.0f;
+                a = random_int() & 1;
+                sp.u3E = (random_int() % 31U) + 0x14;
+                sp.u4F = (random_int() % 156U) + 0x64;
+                sp.u5C = sp.u60 = (random_float() * 150.0f) + 100.0f;
                 func_15143874(*(u16 *)(*(u8 **)p + 0x7A) >> 8, a ? 20.0f : -20.0f, &sp.u64[0], &sp.u64[2]);
                 sp.u64[0] += *(f32 *)(*(u8 **)p + 0x14);
                 sp.u64[2] += *(f32 *)(*(u8 **)p + 0x1C);
                 sp.u64[1] = *(f32 *)(*(u8 **)p + 0x180) + 20.0f;
                 sp.u8C &= ~0xC0;
-                if (func_150ADA20() & 1) {
+                if (random_int() & 1) {
                     sp.u8C |= 0x40;
                 }
-                if (func_150ADA20() & 1) {
+                if (random_int() & 1) {
                     sp.u8C |= 0x80;
                 }
                 sp.u7C[0] = out[0] * -1.516f;
@@ -200,7 +200,7 @@ void func_15193360(u8 *arg0) {
     s16 ang;
 
     p = arg0 + 0x28;
-    *(f32 *)(p + 8) += (792.0f + func_150ADA68() * 1202.0f) * 0.001f * D_800BE9A4;
+    *(f32 *)(p + 8) += (792.0f + random_float() * 1202.0f) * 0.001f * D_800BE9A4;
     if (*(f32 *)(p + 8) > 1.0f) {
         if (*(s32 *)(*(u8 **)p + 0x1D4) == 0) {
             while (*(f32 *)(p + 8) > 1.0f) {
@@ -233,27 +233,27 @@ void func_15193360(u8 *arg0) {
             sp.u58 = 1.02f;
             scale = 0.9709f;
             do {
-                ang = (func_150ADA20() % 51U) - 0x82;
-                v[0] = (func_150ADA68() * 20.0f) + 30.0f;
-                v[1] = (func_150ADA68() * 60.0f) + -20.0f;
+                ang = (random_int() % 51U) - 0x82;
+                v[0] = (random_float() * 20.0f) + 30.0f;
+                v[1] = (random_float() * 60.0f) + -20.0f;
                 v[2] = 0.0f;
-                if (func_150ADA20() & 1) {
+                if (random_int() & 1) {
                     v[0] = -v[0];
                     ang = ang + base;
                 } else {
                     ang = base - ang;
                 }
-                sp.u3E = (func_150ADA20() % 11U) + 0x1E;
-                sp.u4F = (func_150ADA20() % 101U) + 0x64;
-                sp.u5C = sp.u60 = (func_150ADA68() * 150.0f) + 100.0f;
+                sp.u3E = (random_int() % 11U) + 0x1E;
+                sp.u4F = (random_int() % 101U) + 0x64;
+                sp.u5C = sp.u60 = (random_float() * 150.0f) + 100.0f;
                 func_15143134(v, sp.u64, *(s32 *)(*(u8 **)p + 0x1D4) + 0x40);
-                r = func_150ADA20();
-                func_15143794(ang, (s16)((u32)r % 28U - 0x19), func_150ADA68() * 3998.0f * 0.001f, sp.u7C);
+                r = random_int();
+                func_15143794(ang, (s16)((u32)r % 28U - 0x19), random_float() * 3998.0f * 0.001f, sp.u7C);
                 sp.u8C &= ~0xC0;
-                if (func_150ADA20() & 1) {
+                if (random_int() & 1) {
                     sp.u8C |= 0x40;
                 }
-                if (func_150ADA20() & 1) {
+                if (random_int() & 1) {
                     sp.u8C |= 0x80;
                 }
                 obj = func_151308E4(&sp, 1, 4, arg0[0xC], arg0[1]);

@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, ...);
+s32 event_dispatch(s32, s32, ...);
 s32 camera_pop_mode(struct108 *arg0, s32 arg1);
 void camera_set_followed_obj(struct108 *, s32);
 extern s32 D_80088E30;
@@ -16,20 +16,21 @@ extern s32 D_80088E30;
 // +0x190 = 180, D_80088E30 = 1, flag 0x405C cleared. Otherwise leaves it (camera_pop_mode(.., 3): +0x190 = 0, anim
 // +0x23D, +0x5F0 &= ~0x10, +0x674 = 0, D_80088E30 = 0), sets 0x405C, clears 0x405D..0x4061 and mirrors event
 // 0x4040 / 6 / 0x9000 into +0x84 bit 0x80.
-void func_150EB740(u8 *obj) {
+/* was func_150EB740 */
+void camera_update_event_lock(u8 *obj) {
     s32 a;
     s32 b;
     s32 c;
 
-    a = func_1509BE40(0, 0x2006, 0xB7);
-    b = func_1509BE40(0, a | 0x2000, 0xBC);
-    c = func_1509BE40(0, 0x2000, 0xBB);
+    a = event_dispatch(0, 0x2006, 0xB7);
+    b = event_dispatch(0, a | 0x2000, 0xBC);
+    c = event_dispatch(0, 0x2000, 0xBB);
     if (b != 0 && c != 0) {
-        func_1509BFB0(0, 0x405D, 1);
-        func_1509BFB0(0, 0x405E, 1);
-        func_1509BFB0(0, 0x405F, 1);
-        func_1509BFB0(0, 0x4060, 1);
-        func_1509BFB0(0, 0x4061, 1);
+        event_dispatch_alt(0, 0x405D, 1);
+        event_dispatch_alt(0, 0x405E, 1);
+        event_dispatch_alt(0, 0x405F, 1);
+        event_dispatch_alt(0, 0x4060, 1);
+        event_dispatch_alt(0, 0x4061, 1);
         if (*(s32 *) (obj + 0x2C) == 0x100 || *(s32 *) (obj + 0x6C8) != 0) {
             return;
         }
@@ -46,7 +47,7 @@ void func_150EB740(u8 *obj) {
         *(f32 *) (obj + 0x374) = 550.0f; /* D_800A1850 */
         *(f32 *) (obj + 0x190) = 180.0f;
         D_80088E30 = 1;
-        func_1509BFB0(0, 0x405C, 0);
+        event_dispatch_alt(0, 0x405C, 0);
         return;
     }
     if (camera_pop_mode((struct108 *) obj, 3) != 0) {
@@ -56,18 +57,18 @@ void func_150EB740(u8 *obj) {
         *(f32 *) (obj + 0x674) = 0.0f;
         D_80088E30 = 0;
     }
-    func_1509BFB0(0, 0x405C, 1);
-    func_1509BFB0(0, 0x405D, 0);
-    func_1509BFB0(0, 0x405E, 0);
-    func_1509BFB0(0, 0x405F, 0);
-    func_1509BFB0(0, 0x4060, 0);
-    func_1509BFB0(0, 0x4061, 0);
-    if (func_1509BE40(1, 0x4040, 6, 0x9000) != 0) {
+    event_dispatch_alt(0, 0x405C, 1);
+    event_dispatch_alt(0, 0x405D, 0);
+    event_dispatch_alt(0, 0x405E, 0);
+    event_dispatch_alt(0, 0x405F, 0);
+    event_dispatch_alt(0, 0x4060, 0);
+    event_dispatch_alt(0, 0x4061, 0);
+    if (event_dispatch(1, 0x4040, 6, 0x9000) != 0) {
         *(s32 *) (obj + 0x84) |= 0x80;
     } else {
         *(s32 *) (obj + 0x84) &= ~0x80;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_118F50/func_150EB740.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_118F50/camera_update_event_lock.s")
 #endif

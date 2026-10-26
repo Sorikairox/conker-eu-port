@@ -4,15 +4,15 @@
 
 
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, ...);
+s32 event_dispatch(s32, s32, ...);
 #else
-s32 func_1509BE40(s32, s32, s32);
+s32 event_dispatch(s32, s32, s32);
 #endif
 void camera_set_followed_obj(struct108 *, s32);
 
 void func_150D0B60(struct108 *arg0) {
     if (!(D_800D2E4C->unk0 & 0x80)) {
-        if (func_1509BE40(0, 0x2000, 0xBB) != -1) {
+        if (event_dispatch(0, 0x2000, 0xBB) != -1) {
             if (camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 8) != 0) {
                 arg0->unk84 |= 0x01000000;
                 camera_set_followed_obj(arg0, D_800CC335 - 1);

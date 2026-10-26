@@ -1,0 +1,212 @@
+old	new	confidence	description
+func_15075400	aiscript_branch	high	Script branch: skips arg0 commands forward, or for arg0 >= 247 scans forward (max 100 steps) to the label byte arg0
+func_15075498	aiscript_apply_move_flags	med	Shared move setup tail: unk244 from arg 3 (low 7 bits), sets/clears unkF4 move flags by arg 0 (0xFA / 0xFB) and arg 3 bit 7
+func_15075548	aiscript_move_setup	high	Shared move command setup: mode 0, wait timer = arg0 * 100, move speed unk44 = arg2 (1 -> 0.5, MP scaling), then the flag tail
+func_15075650	aiscript_move_setup_path_point	high	Move setup that also picks the target path point: arg1 0xFF random in range, 0xFE random different from current, else arg1
+func_15075884	aiscript_move_timed_to_point	med	Move setup with speed set so the object reaches its current path point in arg1 time units (speed = 2 * distance / arg1)
+func_15075938	aiscript_if_path_offset	med	Branches to arg0 when the path point offset (current - step, wrapped) compares with arg1 by op arg2 (==, !=, <, >)
+func_15075A50	aiscript_if_path_point	high	Branches to arg0 when the current path point is (arg2 0) or is not (arg2 1) point arg1
+func_15075AAC	aiscript_move_stop_near_point	med	Move setup, then stops (timer 0, speed 0) when the object is within 40 units (manhattan) of path point arg1
+func_15075B60	aiscript_mode10	low	Move setup, then movement mode 10 (a target-object mode)
+func_15075B8C	aiscript_mode10_path_point	low	Path point move setup, then movement mode 10
+func_15075BB8	aiscript_move_setup_flag2	low	Move setup and sets bit 2 of the script flags unk22C
+func_15075BE8	aiscript_set_reaction_script	low	Sets reaction script kind unk233 to arg0; arg3 non-zero also sets unk22C bit 0x80
+func_15075C24	aiscript_set_y_vel_gravity	high	Sets y velocity (s16 from arg2:arg0) unless arg3 is 1, and gravity (s8 arg1) unless arg3 is 2
+func_15075CA0	aiscript_chase_target	med	Move setup, then movement mode 1 (chase the target object unk222)
+func_15075CCC	aiscript_intercept_target	med	Move setup, then movement mode 16 (chase the target's predicted position), lead time unk231 = arg1
+func_15075D0C	aiscript_mode15	low	Move setup, then movement mode 15 (a chase variant)
+func_15075D38	aiscript_mode14	low	Chase setup, then movement mode 14 (chase variant pulled towards the object on bounce)
+func_15075D64	aiscript_mode12_player	med	Move setup, then movement mode 12 with target object 0 (the player)
+func_15075D9C	aiscript_mode9	low	Move setup, then movement mode 9 (stay on the target object)
+func_15075DC8	aiscript_chase_target_alt	med	Second script command for movement mode 1 (calls aiscript_chase_target)
+func_15075DE8	aiscript_goto_script	high	Jumps to script kind arg1 (0 = current unk232); arg3 non-zero also makes arg3 the object's current script kind
+func_15075E6C	aiscript_flee_target	med	Move setup, then movement mode 2 (move away from the target object)
+func_15075E98	aiscript_set_reaction_script2	low	Sets the second reaction script kind unk235 to arg0
+func_15075EB4	aiscript_if_random_percent	high	Branches to arg0 with probability arg2 percent
+func_15075F00	aiscript_set_attack	med	Sets the attack script kind unk234, attack range unk236 and attack cone width unk237 from args 0..2
+func_15075F40	aiscript_mode3	low	Move setup, then movement mode 3 (follow mode used by the follow-player-speed command)
+func_15075F6C	aiscript_set_jump	med	Sets y velocity arg0 (negated when arg2), gravity arg1 when non-zero, and unk3A = arg3
+func_1507602C	aiscript_jump_to_point	high	Ballistic jump to path point arg1: flight time from distance and speed (min 12), up velocity from gravity, mode 4
+func_150761C8	aiscript_walk_to_point	med	Path point move setup, then movement mode 5 (walk to the path point)
+func_150761F4	aiscript_jump_at_target	low	Movement mode 6 (jump towards the target object) and clears unk22C bit 0
+func_15076220	aiscript_jump_at_point	low	Movement mode 6 with unk22C bit 0 set (jump towards the path point instead of the target)
+func_15076250	aiscript_play_sound_3d	med	Plays positional sound (arg0 << 8 | arg1) on the object, volume 0x7D00, range 500..2500, flag arg2
+func_150762B0	aiscript_set_music_param	low	Sets field +0x4E (with +0x50 = 0x500) of both global sound channel records D_800417B0 to arg0
+func_150762D4	aiscript_spawn_effect_above	low	Spawns an effect (func_15166F10, size 0.45) 100 units above the object
+func_15076340	aiscript_if_flag107_clear	low	Branches to arg0 when unk107 is 0; arg1 non-zero clears unk107
+func_15076394	aiscript_set_attack_range	med	Sets the attack range unk236 to arg0
+func_150763B0	aiscript_set_turn_rate	med	Sets turn rate unk1E5 (128 = type default, + random arg2) and its limit unk1E6 by arg3 mode / arg1
+func_150764C8	aiscript_set_field238	low	Sets byte unk238 to arg0
+func_150764E4	aiscript_set_field239	low	Sets byte unk239 to arg0
+func_15076500	aiscript_set_field22e	low	Sets u16 unk22E to arg0 << 8 | arg1 (non-zero disables the attack range check)
+func_1507652C	aiscript_set_immune	high	Sets the immune byte of the object (arg1 0) or of its linked object unk124 (arg1 non-zero) to arg0
+func_1507659C	aiscript_raise_y	med	Adds arg0 * 100 to the object's y position; arg3 non-zero sets y to 1800 instead
+func_15076600	aiscript_nop_a	high	Empty script command
+func_15076608	aiscript_set_field24a	low	Sets byte unk24A to arg0
+func_15076624	aiscript_set_flags_f8	high	ORs the 32-bit value built from args 0..3 into flags unkF8
+func_15076678	aiscript_clear_flags_f8	high	Clears the bits of the 32-bit value built from args 0..3 in flags unkF8
+func_150766D0	aiscript_wait_until_landed	med	Repeats this command (timer 99) while the object is above the ground (unk28 > 0, or > arg0 * 50)
+func_15076760	aiscript_nop_b	high	Empty script command
+func_15076768	aiscript_spawn_special_fx	low	arg0 0: func_15197A7C on the object; 1: particle burst at the object's x/z at height -390
+func_150767F4	aiscript_if_facing_target	med	Branches to arg0 when the target object's heading points at this object within +-arg1 (1/256 turns)
+func_150768DC	aiscript_find_visible_target	high	Finds the nearest live targetable object inside the view cone and range; jumps scripts of both when found
+func_15076B5C	aiscript_target_seen_object	high	Sets the target object unk222 to the object remembered in unkA8
+func_15076B78	aiscript_set_field5	low	Sets byte +5 of the object to arg0
+func_15076B94	aiscript_goto_object_by_id	med	Finds a live object of id arg0 (below this one, or all with arg1) and moves to it: mode 9, target = it, timer 1000
+func_15076C7C	aiscript_fade_cmd	med	Sends fade / visibility command 1 with value arg0 to the object (func_1506160C)
+func_15076CB4	aiscript_heading_to_target	high	Sets the heading unk76 to the target heading unk78
+func_15076CCC	aiscript_remove_wait_long	med	Sets a 10000 wait and starts removing the object (func_15060F28 mode 1)
+func_15076D04	aiscript_set_xz_velocity	high	Sets the object's xz velocity to arg0
+func_15076D3C	aiscript_set_scale	high	Sets the object's xz and y scale from two s16 hundredths in the args and applies them with obj_set_scale
+func_15076DF4	aiscript_set_interaction_state	high	Sets the object's interaction_state to arg0
+func_15076E10	aiscript_set_field1d0	low	Sets unk1D0 to arg0 and ORs arg1 into the script flags unk22C
+func_15076E48	aiscript_nop_c	high	Empty script command
+func_15076E50	aiscript_random_hop	high	Move setup, then a random hop: y velocity 55..74, gravity 2, random heading, speed 15..34, mode 7
+func_15076F40	aiscript_remove_wait	med	Sets a 1000 wait and starts removing the object (func_15060F28 mode 1)
+func_15076F78	aiscript_set_fieldcc	low	Sets the s16 fields unkCC / unkCE from the s8 args 0 and 1
+func_15076FA8	aiscript_jitter_position	med	arg3 0: moves the object by a random x/z offset (+-arg0/arg1 halves, x3); else raises xz velocity to at least arg3
+func_150770E4	aiscript_if_target_slower	med	Branches to arg3 when the target object's xz velocity is below arg2
+func_15077174	aiscript_set_field10e	low	Sets byte unk10E to arg0
+func_15077190	aiscript_play_sound_3d_b	med	Plays positional sound (arg0 << 8 | arg1, if non-zero) on the object with volume arg2 << 7 (func_10010630)
+func_150771F0	aiscript_fade_or_anim_cmd	low	arg3 0: fade command 1 / 2 with values arg0, arg1; else func_1502ED50 / func_1502ED6C with arg0 by arg2
+func_15077294	aiscript_set_health	high	Sets the object's health to arg0 (arg1 0) or decrements it (arg1 1)
+func_150772E8	aiscript_set_flag_entry	med	Sets the flags of entry arg0 on the object (eu_sets_flags_entry, set -1)
+func_15077318	aiscript_set_flag101_bit0	med	Sets (arg0 non-zero) or clears bit 0 of unk101
+func_1507735C	aiscript_nop_d	high	Empty script command
+func_15077364	aiscript_set_field246	low	Sets unk246 = arg0 (+ random arg3), unk249 = 0, unk247 = arg1, unk248 = arg2
+func_15077404	aiscript_adjust_field246	low	arg3 non-zero: adds arg1:arg2 * frame time to the 13-bit value in unk246/unk249 (clamped at 0); else unk246 = arg0
+func_150774B4	aiscript_if_nav_arrived	low	Branches to arg0 (and sets unk25C bit 0x800) when nav node unk20F equals goal unk211 or there is no goal
+func_15077508	aiscript_nav_next_node	low	Navigation: chooses the next nav node towards goal unk211 (D_800D2778) and writes its jittered position into path point 0
+func_150778F0	aiscript_path_advance	high	Advances the current path point by the step unk221, wrapping at the point count (or unk21F) and clamping at unk220
+func_150779A8	aiscript_mode11_path_point	low	Path point move setup, then movement mode 11
+func_150779D4	aiscript_if_near_object	med	Branches to arg0 when object 0 (or the target with arg2) is closer than arg3 * 8 (not itself, not riding)
+func_15077AA0	aiscript_set_field239_b	low	Sets byte unk239 to arg0 (second command doing so)
+func_15077ABC	aiscript_set_field258	low	Sets unk258 = arg0, unk257 = arg1 and a random phase unk86
+func_15077B14	aiscript_set_field24c	low	Sets bytes unk24C / unk24D to arg0 / arg1
+func_15077B44	aiscript_play_sound	med	Plays sound (arg0 << 8) + arg1 on the object (func_15060A30)
+func_15077B80	aiscript_set_flags_25c	high	ORs (arg0 << 8) + arg1 into flags unk25C
+func_15077BB4	aiscript_send_script_to_id	high	Restarts the live object of id arg1 with script kind arg0
+func_15077BE4	aiscript_clear_flags_25c	high	Clears the bits (arg0 << 8) + arg1 in flags unk25C
+func_15077C1C	aiscript_set_sight_range	med	Sets unk23D (range in 8-unit steps used by the mover and by aiscript_if_target_dist) to arg0
+func_15077C38	aiscript_find_target	high	Sets the target unk222 to the first (or nearest with arg3) live, non-immune object of id arg0 or state arg1
+func_15077DA0	aiscript_set_path_point	high	Sets the current path point unk21E to arg0
+func_15077DBC	aiscript_warp_to_path_point	high	Moves the object to path point arg0 (0xFA = the current one) and makes it the current point
+func_15077E9C	aiscript_play_sound_3d_c	med	Plays positional sound (arg0 << 8) + arg1 on the object, volume 0x5DC0, range 500..2500 (func_10012718)
+func_15077EEC	aiscript_set_field254	low	Sets byte unk254 to arg0
+func_15077F08	aiscript_set_field1ea	low	Sets u16 unk1EA to arg0 << 8 | arg1
+func_15077F34	aiscript_set_field24f	low	Sets bytes unk24F / unk250 to arg0 / arg1
+func_15077F64	aiscript_turn_to_point_react	med	Turns the target heading to the current path point; above row arg0-1's threshold plays a hit-reaction turn anim
+func_15078074	aiscript_if_any_object_near	high	Branches to arg0 when any live object other than this one is closer than arg3 * 8
+func_1507813C	aiscript_if_target_gone	high	Branches to arg0 when the target object unk222 is no longer live
+func_150781A4	aiscript_set_fields23f	low	Sets bytes unk23F..unk242 from args 1, 2, 0, 3
+func_150781F4	aiscript_if_point_dist	high	Branches to arg0 when path point arg1 is closer (arg2 0) or farther (arg2 1) than arg3 * 8
+func_150782CC	aiscript_set_field23e	low	Sets byte unk23E to arg0
+func_150782E8	aiscript_if_unique_id	high	Branches to arg0 when the object's unique_id is (arg2 0) or is not (arg2 1) arg1
+func_15078358	aiscript_target_by_unique_id	high	Sets the target unk222 to the object with unique id arg0 (0 when none)
+func_1507839C	aiscript_if_target_dist	high	Branches to arg0 when the target's 2D / 3D / height distance (arg2) is below or above (arg1) arg3 * 8
+func_15078520	aiscript_jump	high	Unconditional branch to arg0
+func_15078544	aiscript_path_point_from_target	high	Sets path point arg0 & 0x3F to an x/z offset from the target object, rotated by its heading, none or direction
+func_1507879C	aiscript_if_target_2d0_x	low	Branches to arg0 when the target's unk2D0 record +8 value is below / above (arg2) arg1
+func_15078874	aiscript_set_counter251	med	Sets the object's counter / index byte unk251 to arg0
+func_15078890	aiscript_if_counter251	med	Branches to arg0 when unk251 equals (arg2 0) or differs from (arg2 1) arg1
+func_15078900	aiscript_if_target_counter251	med	Branches to arg0 when the target is object 0 (arg3), or when the target's unk251 equals / differs from arg1
+func_15078A08	aiscript_copy_target_2d0_pos	low	Copies the target's unk2D0 record +8 / +0xC values into the object's own unk2D0 record
+func_15078A60	aiscript_test_object_value	high	Script condition: compares value kind arg2 (0..18) of object idx with arg3 by operator arg1; returns 1 when true
+func_1507900C	aiscript_if_value	high	Branches to arg0 when aiscript_test_object_value holds for object 0 (the player)
+func_1507903C	aiscript_goto_if_value	high	Jumps to script kind arg0 when aiscript_test_object_value holds for object 0
+func_15079090	aiscript_if_self_value	high	Branches to arg0 when aiscript_test_object_value holds for the current object
+func_150790C4	aiscript_goto_if_self_value	high	Jumps to script kind arg0 when aiscript_test_object_value holds for the current object
+func_1507911C	aiscript_if_below_coord	med	Branches to arg0 when object 0 / self (arg3 bit 0) has y (or x with bit 1) below the s16 arg1:arg2
+func_150791F0	aiscript_set_field1c9	low	Sets unk1C9 to arg0, or 0xFF when arg0 exceeds unk2C9
+func_15079228	aiscript_send_dir_message	low	Sends message arg0 (func_1505D024) with the angle from cylinder unk251 of D_800D34B8 to the object, then waits 1
+func_150792E0	aiscript_set_script_kind	high	Sets the object's script kind unk232 to arg0 (used on the next restart)
+func_150792FC	aiscript_set_field2f8_low	low	Sets the low 3 bits of unk2F8 to arg0
+func_15079334	aiscript_send_script_to_seen	high	Restarts the object remembered in unkA8 (if any) with script kind arg0
+func_15079390	aiscript_send_event	med	Sends state event arg0 with values arg1, arg2 to the object's handlers (func_1514D3B0)
+func_150793D8	aiscript_random_point_near_player	med	Sets path point arg0 to a random point 550 units from the player (centre 0 if out of bounds), clamped to +-1200
+func_15079570	aiscript_aim_jump_at_target	high	Sets y velocity so a jump at current xz speed lands on the target object (accounts for height difference)
+func_1507965C	aiscript_send_script_to_uid	high	Restarts the object with unique id arg0 with script kind arg1
+func_150796CC	aiscript_uid_immune_or_if_stunned	med	arg2: sets the immune byte of unique id arg0 to arg1; else branches to arg1 when that object is stunned
+func_15079790	aiscript_respawn_near_path	low	arg2: sets id 0xFF; else id 0x3A and a random position within 250 of the first path point
+func_15079880	aiscript_move_at_player_speed	med	Move setup with speed = player xz velocity + s8 arg2, clamped to [arg1, 250]
+func_150798F8	aiscript_if_current_point_dist	high	Distance branch (aiscript_if_point_dist) against the current path point
+func_15079928	aiscript_start_anim	high	Starts animation arg0 with priority arg3 for arg1:arg2 frames (0 = forever) (start_animation_anim)
+func_15079988	aiscript_set_anim_field70	med	Sets the object's animation field unk70 to arg0 (func_1507EB4C)
+func_150799B4	aiscript_play_sound_random	med	Plays sound (arg0 << 8) + arg1 plus a random 0..arg2-1 on the object (func_15060A30)
+func_15079A28	aiscript_set_field252	low	Sets bytes unk252 / unk253 to arg0 / arg1
+func_15079A58	aiscript_set_path_param	low	Sets D_800D2530 entry of the object's path to arg0 << 8 | arg1
+func_15079A98	aiscript_path_point_angle	high	Angle from object arg0 to the first point of the current object's path
+func_15079B30	aiscript_object_var_cmd	high	Command on an object (self or by unique id): counters unk2E4..2EC, script restart, unkC8, unkB8 and self fields
+func_15079F24	aiscript_set_field48	low	Sets unk48 to entry arg0 of the float table D_800D1898
+func_15079F50	aiscript_set_field23b	low	Sets byte unk23B to arg0
+func_15079F6C	aiscript_set_field224	low	Sets unk224 = arg0 << 8 | arg1, unk22B = arg2, unk226 = arg3
+func_15079FBC	aiscript_follow_player_speed	high	Follows the player at its speed (mode 3, heading from its rider); if the player rides nothing or is slow, jumps to script arg1
+func_1507A100	aiscript_set_path_point_coord	high	Sets coordinate arg1 of path point arg0 to the s16 arg2:arg3
+func_1507A164	aiscript_speed_from_player	med	Sets move speed unk44 = player xz velocity + s8 arg2, clamped to [arg1, arg0]
+func_1507A210	aiscript_wait	high	Waits arg0 * 100 (mode 0), clears unk22C bit 1, then the move flag tail
+func_1507A270	aiscript_set_flag_entry_set	med	Sets the flags of entry arg0 of flag set (s8) arg1 on the object (eu_sets_flags_entry)
+func_1507A2A4	aiscript_chase_random_arg3	low	Adds random 0..arg1-1 to arg3, then the chase command (mode 1)
+func_1507A2F8	aiscript_target_random_by_id	high	Saves the target in unkA8 and picks a random live object of id arg0 as target
+func_1507A3B4	aiscript_target_restore	high	Restores the target unk222 from unkA8
+func_1507A3CC	aiscript_set_field229	low	Sets byte unk229 to arg0
+func_1507A3E8	aiscript_args_word	high	Returns the four command argument bytes as one big-endian 32-bit word
+func_1507A428	aiscript_set_flags_94_inv	med	Sets flags unk94 to the complement of (args word | 1)
+func_1507A47C	aiscript_clear_flags_94	high	Clears the bits of the args word in flags unk94
+func_1507A4D4	aiscript_set_flags_94	high	ORs the args word into flags unk94
+func_1507A528	aiscript_set_path_step	high	Path direction: arg0 0 sets step unk221 = arg1, 1 reverses it, 2 reverses and moves the current point by arg3
+func_1507A620	aiscript_if_target_angle	med	Branches to arg0 when the angle to the target (or target heading with arg1) is within [arg2, arg3)
+func_1507A6FC	aiscript_pad_buttons	high	Returns the button word of controller arg0 (6-byte entries of D_800BE748)
+func_1507A71C	aiscript_if_buttons_held	high	Branches to arg3 when controller arg0 holds all buttons of mask arg1:arg2
+func_1507A774	aiscript_if_level	high	Branches to arg0 when the current level D_800BE9F0 is arg1:arg2
+func_1507A7C0	aiscript_set_disable_run	high	Sets the object's disable_run byte to arg0
+func_1507A7DC	aiscript_remove_spawned	med	Runs spawn command list arg0 for the object and removes the objects it spawned (func_150836CC)
+func_1507A808	aiscript_mask_flags_22c	high	Sets the script flags unk22C to (unk22C & arg0) | arg1
+func_1507A838	aiscript_if_health	high	Branches to arg0 when the object's health equals arg1
+func_1507A878	aiscript_call_15b470	low	Calls func_1512D748(0, arg0, arg1)
+func_1507A8A8	aiscript_if_mp_or_cc335	low	Branches to arg0 when D_800CC335 or D_800BE616 is set
+func_1507A8EC	aiscript_if_target_id	high	Branches to arg0 when the target's id is arg1, inverted by arg2
+func_1507A984	aiscript_attach_to_id	med	Attaches the object to the object of id arg0 (unk65 = index + 1, unk5C = arg1, flags by arg2/arg3); arg0 0 detaches
+func_1507AA48	aiscript_set_heading	high	Sets target heading unk78 / heading unk76: add, subtract, set, sync, along a path segment, random, from target
+func_1507ACB0	aiscript_set_path_range	high	Sets the path point range: first point unk220 = arg0, end unk21F = arg1
+func_1507ACE0	aiscript_set_turn_rate_exact	med	Sets turn rate and limit (unk1E5 / unk1E6 = arg0, fractions unk1E7 / unk1E8 = arg1)
+func_1507AD30	aiscript_set_field255	low	Sets bytes unk255 / unk256 to arg0 / arg1
+func_1507AD60	aiscript_set_field1e4	low	Sets byte unk1E4 to arg0
+func_1507AD7C	aiscript_set_flags_f4	high	ORs the args word into flags unkF4
+func_1507ADAC	aiscript_clear_flags_f4	high	Clears the bits of the args word in flags unkF4
+func_1507ADE0	aiscript_turn_in_time	med	Sets the turn rate so the heading reaches the target heading in arg0 steps (|unk78 - unk7A| / arg0)
+func_1507AE78	aiscript_set_field229_b	low	Sets byte unk229 to arg0 (second command doing so)
+func_1507AE94	aiscript_set_extent_d2	med	Sets extents unkD2 / unkD4 from arg0:arg1 / arg2:arg3 scaled by xz / y scale
+func_1507AF3C	aiscript_set_extent_d6	med	Sets extent unkD6 from arg0:arg1 scaled by the y scale
+func_1507AF98	aiscript_set_extent_d8	med	Sets extents unkD8 / unkDA from arg0:arg1 / arg2:arg3 scaled by the xz scale
+func_1507B040	aiscript_heading_from_facing	high	Sets the heading unk76 to the facing unk7A
+func_1507B058	aiscript_rider_cmd	med	On the first object attached to this one: fade command arg1 (arg0 0), or restart with script kind arg1 (1 / 2)
+func_1507B15C	aiscript_set_disable_jump	high	Sets the object's disable_jump byte to arg0
+func_1507B178	aiscript_set_inner_extent	med	Sets inner extent from s16 arg1:arg0: +0xE8 (arg3 2), height (1) or width (0)
+func_1507B234	aiscript_sound_ev_300_1800	med	Sound event (args word) with the alt call, range 300..1800
+func_1507B280	aiscript_sound_ev_300_3000	med	Sound event (args word) with the alt call, range 300..3000
+func_1507B2CC	aiscript_sound_ev_b_300_1800	med	Sound event (args word) with the main call, range 300..1800
+func_1507B318	aiscript_sound_ev_b_300_3000	med	Sound event (args word) with the main call, range 300..3000
+func_1507B364	aiscript_sound_ev_700_4000	med	Sound event (args word) with the alt call, range 700..4000
+func_1507B3B0	aiscript_sound_ev_b_700_4000	med	Sound event (args word) with the main call, range 700..4000
+func_1507B3FC	aiscript_sound_ev_3000_8000	med	Sound event (args word) with the alt call, range 3000..8000
+func_1507B448	aiscript_sound_ev_190_1300	med	Sound event (args word) with the alt call, range 190..1300
+func_1507B494	aiscript_sound_ev_b_190_1300	med	Sound event (args word) with the main call, range 190..1300
+func_1507B4E0	aiscript_sound_ev_100_800	med	Sound event (args word) with the alt call, range 100..800
+func_1507B52C	aiscript_sound_ev_b_100_800	med	Sound event (args word) with the main call, range 100..800
+func_1507B578	aiscript_set_fieldd0	low	Sets unkD0 = arg0 and unk114 = arg1
+func_1507B5C4	aiscript_if_player_field75	low	Branches to arg0 when the object's player record unk31C +0x75 is arg1, inverted by arg2
+func_1507B630	aiscript_player_jump_when_grounded	low	Waits until the object can run and is on the ground, then (arg0 xor rec +0x78) sets player record bit 0x4000
+func_1507B6E0	aiscript_wait_grounded	med	Repeats this command (timer 100) while the object cannot run or is more than 5 above the ground
+func_1507B734	aiscript_set_player_input	low	Sets player record unk31C +0x8C/+0x8F (arg3) or +0x8A/+0x8E to arg0:arg1 and arg2
+func_1507B7BC	aiscript_mode17	low	Move setup, then movement mode 17 (handled as mode 0 by the mover)
+func_1507B7E8	aiscript_if_target_down	high	Branches to arg0 when the target is stunned or dead, inverted by arg1
+func_1507B884	aiscript_call_hook	med	Calls hook arg0 of the table D_80086150 (if set), preserving the current object
+func_1507B8F4	aiscript_if_mp_flag	low	In D_800BE616 mode, branches to arg0 when arg1 is set or the player record +0x84 is non-zero
+func_1507B958	aiscript_set_fieldb0	low	Sets s8 unkB0 to arg0
+func_1507B974	aiscript_if_point_tag	med	Branches to arg0 when the tag word +6 of path point (current + arg3) of self or its carrier is arg1, inverted by arg2
+func_1507BA48	aiscript_play_sound_random_b	med	Plays sound arg2:arg3 plus a random 0..arg0-1 on the object (func_15060A9C)
+func_1507BAD0	aiscript_set_flags_fc	high	Sets the word unkFC to the args word
+func_1507BAF8	aiscript_set_field2cc	low	Sets the word unk2CC to the args word
+func_1507BB20	aiscript_nop_e	high	Empty script command
+func_1507BB28	aiscript_find_by_kind	high	Returns the script of kind `kind` for the current object: its type's list, else the default list D_80086E28
+func_1507BC14	aiscript_run	high	Script interpreter: counts the wait timer down, then runs 5-byte commands (D_80086730 table) until one sets a wait

@@ -75,7 +75,7 @@ void func_1508F21C(u32 arg0) {
 
 #ifdef NON_MATCHING
 void func_1503E0C0(s32);
-void func_15115114(u32);
+void world_record_remove(u32);
 
 void func_1508F26C(s32 arg0, s32 arg1) {
     s32 temp_a1;
@@ -113,7 +113,7 @@ loop_4:
                         temp_a1 = temp_v0 & 0xFFF;
                         switch (temp_v1) {          /* irregular */
                         case 2:
-                            func_15115114(temp_a1);
+                            world_record_remove(temp_a1);
                             var_a0 = (*(u16 *)((u8 *)((D_800D23C0 + var_s3)) + 2));
                             break;
                         case 3:

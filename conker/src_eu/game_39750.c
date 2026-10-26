@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_1500C2A0(void) {
+/* was func_1500C2A0 */
+void debris_counts_reset(void) {
     s32 i;
 
     for (i = 0; i < 233; i++) {
@@ -18,9 +19,9 @@ void func_1500C2A0(void) {
 
 
 #ifdef NON_MATCHING
-s32 func_15008340(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
-void func_1510F800(s32);
-s32 func_1510FD20(s32, s32);
+s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
+void collision_select_area(s32);
+s32 zone_tree_find_leaf(s32, s32);
 s32 func_15132FBC(f32 *, s32, s32, s32, s32, s32);
 extern u16 D_800964A0[9]; /* sound ids; the heavy ones (0x48, 0x4B, 0x4E..0x51) get smaller pieces */
 extern f32 D_800964D0;    /* pieces per unit of record length x scale */
@@ -33,11 +34,12 @@ extern f32 D_800964E8;
 
 // record_debris_spawn: D_80082EA0 entry 0x22 (level-start record). With n = length x scale x D_800964D0
 // (length = func_1514462C(rec)), spawns a piece while n > 1 (n -= 1 each): at a random point of the record
-// (func_15008340: x / z and the height range lo..hi), at a random height in the middle half of the range, with
+// (spawn_zone_pick_point: x / z and the height range lo..hi), at a random height in the middle half of the range, with
 // a random radius (up to the distance to the nearer end), angle, spins and one of the D_800964A0 sounds, on the
-// ground level of (x, z) (func_1510FD20), spawned by func_15132FBC (kind 3). The start dispatcher passes no scale
+// ground level of (x, z) (zone_tree_find_leaf), spawned by func_15132FBC (kind 3). The start dispatcher passes no scale
 // (N64: a1 = the dispatcher's own address as an f32, ~3e-26), so nothing is spawned from there.
-void func_1500C2F0(struct_eu_15144598 *rec, f32 scale) {
+/* was func_1500C2F0 */
+void record_debris_spawn(struct_eu_15144598 *rec, f32 scale) {
     struct {
         f32 u00;            /* 0x00 = 1 */
         f32 u04;            /* 0x04 = 1 */
@@ -56,7 +58,7 @@ void func_1500C2F0(struct_eu_15144598 *rec, f32 scale) {
         s16 u54;            /* 0x54 = 300 */
         u16 sound;          /* 0x56 */
         u8 u58;             /* 0x58 = 0 */
-        s32 ground;         /* 0x5C, func_1510FD20 */
+        s32 ground;         /* 0x5C, zone_tree_find_leaf */
         u8 u60[8];          /* 0x60: FF, E, 0.. */
         u8 u68;             /* 0x68 = 2 */
         u8 pad69;
@@ -78,7 +80,7 @@ void func_1500C2F0(struct_eu_15144598 *rec, f32 scale) {
     u16 id;
     s32 i;
 
-#define RND() (c = osGetCount(), (f32) ((c * func_150ADA20()) & 0xFFFF) * D_800964D4)
+#define RND() (c = osGetCount(), (f32) ((c * random_int()) & 0xFFFF) * D_800964D4)
     n = func_1514462C(rec) * scale * D_800964D0;
     if (!(1.0f < n)) {
         return;
@@ -104,7 +106,7 @@ void func_1500C2F0(struct_eu_15144598 *rec, f32 scale) {
     blk.u74 = 0xFF;
     blk.u44 = 0.0f;
     do {
-        func_15008340(rec, &blk.pos[0], &blk.pos[2], &hi, &lo);
+        spawn_zone_pick_point(rec, &blk.pos[0], &blk.pos[2], &hi, &lo);
         h = hi - lo;
         y = RND() * (h * 0.5f) + (lo + h * 0.25f);
         blk.y2 = y;
@@ -123,7 +125,7 @@ void func_1500C2F0(struct_eu_15144598 *rec, f32 scale) {
         blk.u40 = RND() * D_800964E4;
         blk.u48 = RND() * D_800964E8;
         c = osGetCount();
-        id = D_800964A0[(c * func_150ADA20()) % 9];
+        id = D_800964A0[(c * random_int()) % 9];
         blk.sound = id;
         if (id == 0x4B || id == 0x48 || id == 0x4E || id == 0x4F || id == 0x50 || id == 0x51) {
             blk.size[0] = RND() * 0.25f + 0.5f;
@@ -131,23 +133,24 @@ void func_1500C2F0(struct_eu_15144598 *rec, f32 scale) {
             blk.size[0] = RND() * 0.25f + 1.0f;
         }
         blk.size[1] = blk.size[0];
-        func_1510F800(0);
-        blk.ground = func_1510FD20((s32) blk.pos[0], (s32) blk.pos[2]);
+        collision_select_area(0);
+        blk.ground = zone_tree_find_leaf((s32) blk.pos[0], (s32) blk.pos[2]);
         func_15132FBC((f32 *) &blk, 3, 0xFF, 0, 0xFF, 1);
         n -= 1.0f;
     } while (1.0f < n);
 #undef RND
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/func_1500C2F0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/record_debris_spawn.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15008340(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
-void func_1510F800(s32);
+s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
+void collision_select_area(s32);
 s32 func_151307F0(s32 *, s32, s32, s32, s32, s32);
 s32 memcpy(s32, f32 *, s32);
 
-void func_1500C8D0(struct_eu_15144598 *arg0, f32 arg1) {
+/* was func_1500C8D0 */
+void record_particle_spawn_a(struct_eu_15144598 *arg0, f32 arg1) {
     struct {
         f32 u80;
         f32 u84;
@@ -275,13 +278,13 @@ void func_1500C8D0(struct_eu_15144598 *arg0, f32 arg1) {
         sp.uA0 = 1.0f;
         do {
             temp_s0 = osGetCount();
-            temp_t0 = (func_150ADA20() * temp_s0) & 0xFFFF;
+            temp_t0 = (random_int() * temp_s0) & 0xFFFF;
             var_f10 = (f32) temp_t0;
             if (temp_t0 < 0) {
                 var_f10 += 4294967296.0f;
             }
             temp_f20 = (var_f10 * 0.000015259022f * 350.0f) + 50.0f;
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 sp.uC5 = 0x58;
                 sp.uD4 = temp_f20;
                 sp.uD0 = temp_f20;
@@ -294,40 +297,40 @@ void func_1500C8D0(struct_eu_15144598 *arg0, f32 arg1) {
                 sp.u8C = temp_f0;
             }
             temp_s0_2 = osGetCount();
-            sp.uC3 = ((u32) (func_150ADA20() * temp_s0_2) % 101U) + 0x32;
+            sp.uC3 = ((u32) (random_int() * temp_s0_2) % 101U) + 0x32;
             temp_s0_3 = osGetCount();
-            sp.u92 = ((func_150ADA20() * temp_s0_3) & 3) + 2;
+            sp.u92 = ((random_int() * temp_s0_3) & 3) + 2;
             temp_s0_4 = osGetCount();
-            sp.u93 = ((func_150ADA20() * temp_s0_4) & 3) + 2;
+            sp.u93 = ((random_int() * temp_s0_4) & 3) + 2;
             temp_s0_5 = osGetCount();
-            temp_t4 = (func_150ADA20() * temp_s0_5) & 0xFFFF;
+            temp_t4 = (random_int() * temp_s0_5) & 0xFFFF;
             var_f18 = (f32) temp_t4;
             if (temp_t4 < 0) {
                 var_f18 += 4294967296.0f;
             }
             sp.u94 = ((var_f18 * 0.000015259022f * 0.25f) + 0.2f) * sp.u8C;
             temp_s0_6 = osGetCount();
-            temp_t6 = (func_150ADA20() * temp_s0_6) & 0xFFFF;
+            temp_t6 = (random_int() * temp_s0_6) & 0xFFFF;
             var_f6 = (f32) temp_t6;
             if (temp_t6 < 0) {
                 var_f6 += 4294967296.0f;
             }
             sp.u98 = ((var_f6 * 0.000015259022f * 0.25f) + 0.2f) * sp.u8C;
             var_v1 = 0;
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 var_v1 = 0x40;
             }
             sp64 = var_v1;
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 var_s0 = 0x80;
             } else {
                 var_s0 = 0;
             }
             sp.u100 = var_s0 | var_v1 | 0xC000 | 0x10000 | 0x20000;
-            func_15008340(arg0, &sp.uD8, &sp.uE0, &sp.u84, &sp.u80);
+            spawn_zone_pick_point(arg0, &sp.uD8, &sp.uE0, &sp.u84, &sp.u80);
             temp_f20_2 = sp.u84 - sp.u80;
             temp_s0_7 = osGetCount();
-            temp_t6_2 = (func_150ADA20() * temp_s0_7) & 0xFFFF;
+            temp_t6_2 = (random_int() * temp_s0_7) & 0xFFFF;
             var_f10_2 = (f32) temp_t6_2;
             if (temp_t6_2 < 0) {
                 var_f10_2 += 4294967296.0f;
@@ -343,28 +346,28 @@ void func_1500C8D0(struct_eu_15144598 *arg0, f32 arg1) {
                 var_f20 = temp_f12;
             }
             temp_s0_8 = osGetCount();
-            temp_t8 = (func_150ADA20() * temp_s0_8) & 0xFFFF;
+            temp_t8 = (random_int() * temp_s0_8) & 0xFFFF;
             var_f6_2 = (f32) temp_t8;
             if (temp_t8 < 0) {
                 var_f6_2 += 4294967296.0f;
             }
             sp.uFC = ((var_f6_2 * 0.000015259022f * 0.75f) + 0.25f) * var_f20;
             temp_s0_9 = osGetCount();
-            temp_t0_2 = (func_150ADA20() * temp_s0_9) & 0xFFFF;
+            temp_t0_2 = (random_int() * temp_s0_9) & 0xFFFF;
             var_f16 = (f32) temp_t0_2;
             if (temp_t0_2 < 0) {
                 var_f16 += 4294967296.0f;
             }
             sp.uF0 = 2.0f * (var_f16 * 0.000015259022f) * 3.1415927f;
             temp_s0_10 = osGetCount();
-            temp_t2 = (func_150ADA20() * temp_s0_10) & 0xFFFF;
+            temp_t2 = (random_int() * temp_s0_10) & 0xFFFF;
             var_f10_3 = (f32) temp_t2;
             if (temp_t2 < 0) {
                 var_f10_3 += 4294967296.0f;
             }
             sp.uF8 = (var_f10_3 * 0.000015259022f * 0.013f) + 0.0050000004f;
-            func_1510F800(0);
-            sp.u104 = func_1510FD20((s32) sp.uD8, (s32) sp.uE0);
+            collision_select_area(0);
+            sp.u104 = zone_tree_find_leaf((s32) sp.uD8, (s32) sp.uE0);
             temp_v0 = func_151307F0(&sp.uA8, 2, 0, 0x1C, 0xFF, 1);
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0xA8, &sp.u8C, 0x1C);
@@ -374,14 +377,15 @@ void func_1500C8D0(struct_eu_15144598 *arg0, f32 arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/func_1500C8D0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/record_particle_spawn_a.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15008340(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
-void func_1510F800(s32);
+s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
+void collision_select_area(s32);
 s32 memcpy(s32, f32 *, s32);
 
-void func_1500CE4C(struct_eu_15144598 *arg0, f32 arg1) {
+/* was func_1500CE4C */
+void record_scatter_spawn(struct_eu_15144598 *arg0, f32 arg1) {
     struct {
         f32 u94;
         f32 u98;
@@ -483,7 +487,7 @@ void func_1500CE4C(struct_eu_15144598 *arg0, f32 arg1) {
         sp.uCA = 0xFF;
         do {
             temp_s0 = osGetCount();
-            temp_t7 = (func_150ADA20() * temp_s0) & 0xFFFF;
+            temp_t7 = (random_int() * temp_s0) & 0xFFFF;
             var_f10 = (f32) temp_t7;
             if (temp_t7 < 0) {
                 var_f10 += 4294967296.0f;
@@ -491,10 +495,10 @@ void func_1500CE4C(struct_eu_15144598 *arg0, f32 arg1) {
             temp_f0 = (var_f10 * 0.000015259022f * 12.0f) + 10.0f;
             sp.uCC = temp_f0;
             sp.uD0 = temp_f0;
-            func_15008340(arg0, &sp.uD4, &sp.uDC, &sp.u98, &sp.u94);
+            spawn_zone_pick_point(arg0, &sp.uD4, &sp.uDC, &sp.u98, &sp.u94);
             temp_f20 = sp.u98 - sp.u94;
             temp_s0_2 = osGetCount();
-            temp_t9 = (func_150ADA20() * temp_s0_2) & 0xFFFF;
+            temp_t9 = (random_int() * temp_s0_2) & 0xFFFF;
             var_f18 = (f32) temp_t9;
             if (temp_t9 < 0) {
                 var_f18 += 4294967296.0f;
@@ -510,65 +514,65 @@ void func_1500CE4C(struct_eu_15144598 *arg0, f32 arg1) {
                 var_f20 = temp_f12;
             }
             temp_s0_3 = osGetCount();
-            temp_t1 = (func_150ADA20() * temp_s0_3) & 0xFFFF;
+            temp_t1 = (random_int() * temp_s0_3) & 0xFFFF;
             var_f16 = (f32) temp_t1;
             if (temp_t1 < 0) {
                 var_f16 += 4294967296.0f;
             }
             sp.uA0 = ((var_f16 * 0.000015259022f * 0.75f) + 0.25f) * var_f20;
             temp_s0_4 = osGetCount();
-            temp_t3 = (func_150ADA20() * temp_s0_4) & 0xFFFF;
+            temp_t3 = (random_int() * temp_s0_4) & 0xFFFF;
             var_f10_2 = (f32) temp_t3;
             if (temp_t3 < 0) {
                 var_f10_2 += 4294967296.0f;
             }
             sp.uA4 = 2.0f * (var_f10_2 * 0.000015259022f) * 3.1415927f;
             temp_s0_5 = osGetCount();
-            temp_t5 = (func_150ADA20() * temp_s0_5) & 0xFFFF;
+            temp_t5 = (random_int() * temp_s0_5) & 0xFFFF;
             var_f18_2 = (f32) temp_t5;
             if (temp_t5 < 0) {
                 var_f18_2 += 4294967296.0f;
             }
             sp.uA8 = (var_f18_2 * 0.000015259022f * 0.013f) + 0.0050000004f;
             temp_s0_6 = osGetCount();
-            temp_t7_2 = (func_150ADA20() * temp_s0_6) & 0xFFFF;
+            temp_t7_2 = (random_int() * temp_s0_6) & 0xFFFF;
             var_f8 = (f32) temp_t7_2;
             if (temp_t7_2 < 0) {
                 var_f8 += 4294967296.0f;
             }
             sp.uAC = var_f8 * 0.000015259022f;
             temp_s0_7 = osGetCount();
-            temp_t9_2 = (func_150ADA20() * temp_s0_7) & 0xFFFF;
+            temp_t9_2 = (random_int() * temp_s0_7) & 0xFFFF;
             var_f10_3 = (f32) temp_t9_2;
             if (temp_t9_2 < 0) {
                 var_f10_3 += 4294967296.0f;
             }
             sp.uB4 = var_f10_3 * 0.000015259022f;
             temp_s0_8 = osGetCount();
-            temp_t1_2 = (func_150ADA20() * temp_s0_8) & 0xFFFF;
+            temp_t1_2 = (random_int() * temp_s0_8) & 0xFFFF;
             var_f4 = (f32) temp_t1_2;
             if (temp_t1_2 < 0) {
                 var_f4 += 4294967296.0f;
             }
             sp.uE0 = var_f4 * 0.000015259022f * 360.0f;
             temp_s0_9 = osGetCount();
-            temp_t3_2 = (func_150ADA20() * temp_s0_9) & 0xFFFF;
+            temp_t3_2 = (random_int() * temp_s0_9) & 0xFFFF;
             var_f8_2 = (f32) temp_t3_2;
             if (temp_t3_2 < 0) {
                 var_f8_2 += 4294967296.0f;
             }
             sp.uE4 = var_f8_2 * 0.000015259022f * 360.0f;
             temp_s0_10 = osGetCount();
-            temp_t5_2 = (func_150ADA20() * temp_s0_10) & 0xFFFF;
+            temp_t5_2 = (random_int() * temp_s0_10) & 0xFFFF;
             var_f6 = (f32) temp_t5_2;
             if (temp_t5_2 < 0) {
                 var_f6 += 4294967296.0f;
             }
             sp.uE8 = var_f6 * 0.000015259022f * 360.0f;
             temp_s0_11 = osGetCount();
-            sp.uFC = ((u32) (func_150ADA20() * temp_s0_11) % 156U) + 0x64;
-            func_1510F800(0);
-            sp.u100 = func_1510FD20((s32) sp.uD4, (s32) sp.uDC);
+            sp.uFC = ((u32) (random_int() * temp_s0_11) % 156U) + 0x64;
+            collision_select_area(0);
+            sp.u100 = zone_tree_find_leaf((s32) sp.uD4, (s32) sp.uDC);
             temp_v0 = effect3d_spawn_full(&sp.uB8, (s32) ((u8 *)&D_800A4AA0), 0x23U, 0U, 0U, 0x1EU, 0U, 3, 0xFF, 0x1C, 0xFFU, 1);
             if (temp_v0 != NULL) {
                 memcpy(temp_v0 + 0x110, &sp.u9C, 0x1C);
@@ -578,14 +582,15 @@ void func_1500CE4C(struct_eu_15144598 *arg0, f32 arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/func_1500CE4C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/record_scatter_spawn.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15008340(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
-void func_1510F800(s32);
+s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
+void collision_select_area(s32);
 s32 func_15132FBC(f32 *, s32, s32, s32, s32, s32);
 
-void func_1500D3AC(struct_eu_15144598 *arg0, f32 arg1) {
+/* was func_1500D3AC */
+void record_debris_spawn_c(struct_eu_15144598 *arg0, f32 arg1) {
     struct {
         f32 u8C;
         f32 u90;
@@ -698,10 +703,10 @@ void func_1500D3AC(struct_eu_15144598 *arg0, f32 arg1) {
         sp.uEA = 0x53;
         sp.uD8 = 0.0f;
         do {
-            func_15008340(arg0, &sp.uBC, &sp.uC4, &sp.u90, &sp.u8C);
+            spawn_zone_pick_point(arg0, &sp.uBC, &sp.uC4, &sp.u90, &sp.u8C);
             temp_f20 = sp.u90 - sp.u8C;
             temp_s0 = osGetCount();
-            temp_t5 = (func_150ADA20() * temp_s0) & 0xFFFF;
+            temp_t5 = (random_int() * temp_s0) & 0xFFFF;
             var_f18 = (f32) temp_t5;
             if (temp_t5 < 0) {
                 var_f18 += 4294967296.0f;
@@ -717,63 +722,63 @@ void func_1500D3AC(struct_eu_15144598 *arg0, f32 arg1) {
                 var_f20 = temp_f12;
             }
             temp_s0_2 = osGetCount();
-            temp_t7 = (func_150ADA20() * temp_s0_2) & 0xFFFF;
+            temp_t7 = (random_int() * temp_s0_2) & 0xFFFF;
             var_f10 = (f32) temp_t7;
             if (temp_t7 < 0) {
                 var_f10 += 4294967296.0f;
             }
             sp.uE0 = ((var_f10 * 0.000015259022f * 0.75f) + 0.25f) * var_f20;
             temp_s0_3 = osGetCount();
-            temp_t9 = (func_150ADA20() * temp_s0_3) & 0xFFFF;
+            temp_t9 = (random_int() * temp_s0_3) & 0xFFFF;
             var_f16 = (f32) temp_t9;
             if (temp_t9 < 0) {
                 var_f16 += 4294967296.0f;
             }
             sp.uC8 = 2.0f * (var_f16 * 0.000015259022f) * 3.1415927f;
             temp_s0_4 = osGetCount();
-            temp_t1 = (func_150ADA20() * temp_s0_4) & 0xFFFF;
+            temp_t1 = (random_int() * temp_s0_4) & 0xFFFF;
             var_f18_2 = (f32) temp_t1;
             if (temp_t1 < 0) {
                 var_f18_2 += 4294967296.0f;
             }
             sp.uD0 = (var_f18_2 * 0.000015259022f * 0.013f) + 0.0050000004f;
             temp_s0_5 = osGetCount();
-            temp_t3 = (func_150ADA20() * temp_s0_5) & 0xFFFF;
+            temp_t3 = (random_int() * temp_s0_5) & 0xFFFF;
             var_f8 = (f32) temp_t3;
             if (temp_t3 < 0) {
                 var_f8 += 4294967296.0f;
             }
             sp.uA4 = var_f8 * 0.000015259022f * 360.0f;
             temp_s0_6 = osGetCount();
-            temp_t5_2 = (func_150ADA20() * temp_s0_6) & 0xFFFF;
+            temp_t5_2 = (random_int() * temp_s0_6) & 0xFFFF;
             var_f18_3 = (f32) temp_t5_2;
             if (temp_t5_2 < 0) {
                 var_f18_3 += 4294967296.0f;
             }
             sp.uA8 = var_f18_3 * 0.000015259022f * 360.0f;
             temp_s0_7 = osGetCount();
-            temp_t7_2 = (func_150ADA20() * temp_s0_7) & 0xFFFF;
+            temp_t7_2 = (random_int() * temp_s0_7) & 0xFFFF;
             var_f16_2 = (f32) temp_t7_2;
             if (temp_t7_2 < 0) {
                 var_f16_2 += 4294967296.0f;
             }
             sp.uAC = var_f16_2 * 0.000015259022f * 360.0f;
             temp_s0_8 = osGetCount();
-            temp_t9_2 = (func_150ADA20() * temp_s0_8) & 0xFFFF;
+            temp_t9_2 = (random_int() * temp_s0_8) & 0xFFFF;
             var_f10_2 = (f32) temp_t9_2;
             if (temp_t9_2 < 0) {
                 var_f10_2 += 4294967296.0f;
             }
             sp.uD4 = var_f10_2 * 0.000015259022f * 1.6f;
             temp_s0_9 = osGetCount();
-            temp_t1_2 = (func_150ADA20() * temp_s0_9) & 0xFFFF;
+            temp_t1_2 = (random_int() * temp_s0_9) & 0xFFFF;
             var_f6 = (f32) temp_t1_2;
             if (temp_t1_2 < 0) {
                 var_f6 += 4294967296.0f;
             }
             sp.uDC = var_f6 * 0.000015259022f * 1.6f;
             temp_s0_10 = osGetCount();
-            temp_t3_2 = (func_150ADA20() * temp_s0_10) & 0xFFFF;
+            temp_t3_2 = (random_int() * temp_s0_10) & 0xFFFF;
             var_f10_3 = (f32) temp_t3_2;
             if (temp_t3_2 < 0) {
                 var_f10_3 += 4294967296.0f;
@@ -781,17 +786,17 @@ void func_1500D3AC(struct_eu_15144598 *arg0, f32 arg1) {
             temp_f0_2 = (var_f10_3 * 0.000015259022f * 0.25f) + 1.0f;
             sp.u9C = temp_f0_2;
             sp.uA0 = temp_f0_2;
-            func_1510F800(0);
-            sp.uF0 = func_1510FD20((s32) sp.uBC, (s32) sp.uC4);
+            collision_select_area(0);
+            sp.uF0 = zone_tree_find_leaf((s32) sp.uBC, (s32) sp.uC4);
             func_15132FBC(&sp.u94, 3, 0xFF, 0, 0xFF, 1);
             var_f30 -= 1.0f;
         } while (var_f30 > 1.0f);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/func_1500D3AC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/record_debris_spawn_c.s")
 #endif
-// void func_1500D3AC(s32 arg0, f32 arg1) {
+// void record_debris_spawn_c(s32 arg0, f32 arg1) {
 //
 //     f32 temp_f0;
 //     struct171 tmp;
@@ -829,8 +834,8 @@ void func_1500D3AC(struct_eu_15144598 *arg0, f32 arg1) {
 //         tmp.unk4C = 0.0f;
 //
 //         do {
-//             func_15008340(arg0, &tmp.unk30, &tmp.unk38, &tmp.unk4, &tmp.unk0);
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
+//             spawn_zone_pick_point(arg0, &tmp.unk30, &tmp.unk38, &tmp.unk4, &tmp.unk0);
+//             phi_f18 = (u16) (osGetCount() * random_int());
 //             tmp.unk34 = tmp.unk40 = (phi_f18 * D_80096170 * ((tmp.unk4 - tmp.unk0) * 0.5f)) + (tmp.unk0 + ((tmp.unk4 - tmp.unk0) * 0.25f));
 //
 //             temp_f12 = fabsf(tmp.unk40 - tmp.unk4);
@@ -841,35 +846,35 @@ void func_1500D3AC(struct_eu_15144598 *arg0, f32 arg1) {
 //             } else {
 //                 temp_f0 = temp_f12;
 //             }
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
+//             phi_f18 = (u16) (osGetCount() * random_int());
 //             tmp.unk54 = ((phi_f18 * D_80096170 * 0.75f) + 0.25f) * temp_f0;
 //
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
+//             phi_f18 = (u16) (osGetCount() * random_int());
 //             tmp.unk3C = ((phi_f18 * D_80096170) + (phi_f18 * D_80096170)) * D_80096174;
 //
-//             phi_f18 = (u16)(osGetCount() * func_150ADA20());
+//             phi_f18 = (u16)(osGetCount() * random_int());
 //             tmp.unk44 = (phi_f18 * D_80096170 * D_80096178) + D_8009617C;
 //
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
+//             phi_f18 = (u16) (osGetCount() * random_int());
 //             tmp.unk18 = phi_f18 * D_80096170 * 360.0f;
 //
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
+//             phi_f18 = (u16) (osGetCount() * random_int());
 //             tmp.unk1C = phi_f18 * D_80096170 * 360.0f;
 //
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
+//             phi_f18 = (u16) (osGetCount() * random_int());
 //             tmp.unk20 = phi_f18 * D_80096170 * 360.0f;
 //
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
+//             phi_f18 = (u16) (osGetCount() * random_int());
 //             tmp.unk48 = phi_f18 * D_80096170 * D_80096180;
 //
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
+//             phi_f18 = (u16) (osGetCount() * random_int());
 //             tmp.unk50 = phi_f18 * D_80096170 * D_80096184;
 //
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
+//             phi_f18 = (u16) (osGetCount() * random_int());
 //             tmp.unk10 = tmp.unk14 = (phi_f18 * D_80096170 * 0.25f) + 1.0f;
 //
-//             func_1510F800(0);
-//             tmp.unk64 = func_1510FD20(tmp.unk30, tmp.unk38);
+//             collision_select_area(0);
+//             tmp.unk64 = zone_tree_find_leaf(tmp.unk30, tmp.unk38);
 //             func_15132A4C(&tmp, 3, 0xFF, 0, 0xFF, 1);
 //
 //         } while ((phi_f30 -= 1.0f) > 1.0f);
@@ -877,9 +882,9 @@ void func_1500D3AC(struct_eu_15144598 *arg0, f32 arg1) {
 // }
 
 #ifdef NON_MATCHING
-s32 func_15008340(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
-void func_1510F800(s32);
-s32 func_1510FD20(s32, s32);
+s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
+void collision_select_area(s32);
+s32 zone_tree_find_leaf(s32, s32);
 s32 func_15132FBC(f32 *, s32, s32, s32, s32, s32);
 extern u16 D_800964B4[14]; /* sound ids; 0x39 gets D_80096554-scaled pieces */
 extern f32 D_80096538;    /* pieces per unit of record length x scale */
@@ -891,10 +896,11 @@ extern f32 D_8009654C;
 extern f32 D_80096550;
 extern f32 D_80096554;
 
-// record_debris_spawn_b: D_80082EA0 entry 0x26 (level-start record). As record_debris_spawn (func_1500C2F0) with
+// record_debris_spawn_b: D_80082EA0 entry 0x26 (level-start record). As record_debris_spawn (record_debris_spawn) with
 // n = length x scale x D_80096538, other constants, the 14 D_800964B4 sounds and sizes 0.5..0.75 (x D_80096554
 // for sound 0x39). Spawns nothing from the start dispatcher (no scale passed).
-void func_1500D8C8(struct_eu_15144598 *rec, f32 scale) {
+/* was func_1500D8C8 */
+void record_debris_spawn_b(struct_eu_15144598 *rec, f32 scale) {
     struct {
         f32 u00;            /* 0x00 = 1 */
         f32 u04;            /* 0x04 = 1 */
@@ -913,7 +919,7 @@ void func_1500D8C8(struct_eu_15144598 *rec, f32 scale) {
         s16 u54;            /* 0x54 = 300 */
         u16 sound;          /* 0x56 */
         u8 u58;             /* 0x58 = 0 */
-        s32 ground;         /* 0x5C, func_1510FD20 */
+        s32 ground;         /* 0x5C, zone_tree_find_leaf */
         u8 u60[8];          /* 0x60: FF, E, 0.. */
         u8 u68;             /* 0x68 = 2 */
         u8 pad69;
@@ -935,7 +941,7 @@ void func_1500D8C8(struct_eu_15144598 *rec, f32 scale) {
     u16 id;
     s32 i;
 
-#define RND() (c = osGetCount(), (f32) ((c * func_150ADA20()) & 0xFFFF) * D_8009653C)
+#define RND() (c = osGetCount(), (f32) ((c * random_int()) & 0xFFFF) * D_8009653C)
     n = func_1514462C(rec) * scale * D_80096538;
     if (!(1.0f < n)) {
         return;
@@ -961,7 +967,7 @@ void func_1500D8C8(struct_eu_15144598 *rec, f32 scale) {
     blk.u74 = 0xFF;
     blk.u44 = 0.0f;
     do {
-        func_15008340(rec, &blk.pos[0], &blk.pos[2], &hi, &lo);
+        spawn_zone_pick_point(rec, &blk.pos[0], &blk.pos[2], &hi, &lo);
         h = hi - lo;
         y = RND() * (h * 0.5f) + (lo + h * 0.25f);
         blk.y2 = y;
@@ -980,31 +986,32 @@ void func_1500D8C8(struct_eu_15144598 *rec, f32 scale) {
         blk.u40 = RND() * D_8009654C;
         blk.u48 = RND() * D_80096550;
         c = osGetCount();
-        id = D_800964B4[(c * func_150ADA20()) % 14];
+        id = D_800964B4[(c * random_int()) % 14];
         blk.sound = id;
         blk.size[0] = blk.size[1] = RND() * 0.25f + 0.5f;
         if (id == 0x39) {
             blk.size[0] = blk.size[0] * D_80096554;
             blk.size[1] = blk.size[1] * D_80096554;
         }
-        func_1510F800(0);
-        blk.ground = func_1510FD20((s32) blk.pos[0], (s32) blk.pos[2]);
+        collision_select_area(0);
+        blk.ground = zone_tree_find_leaf((s32) blk.pos[0], (s32) blk.pos[2]);
         func_15132FBC((f32 *) &blk, 3, 0xFF, 0, 0xFF, 1);
         n -= 1.0f;
     } while (1.0f < n);
 #undef RND
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/func_1500D8C8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/record_debris_spawn_b.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15008340(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
-void func_1510F800(s32);
+s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
+void collision_select_area(s32);
 s32 func_151307F0(s32 *, s32, s32, s32, s32, s32);
 s32 memcpy(s32, f32 *, s32);
 
-void func_1500DE88(struct_eu_15144598 *arg0, f32 arg1) {
+/* was func_1500DE88 */
+void record_particle_spawn_b(struct_eu_15144598 *arg0, f32 arg1) {
     struct {
         f32 u78;
         f32 u7C;
@@ -1132,7 +1139,7 @@ void func_1500DE88(struct_eu_15144598 *arg0, f32 arg1) {
         sp.uBD = 0x6C;
         do {
             temp_s0 = osGetCount();
-            temp_t1 = (func_150ADA20() * temp_s0) & 0xFFFF;
+            temp_t1 = (random_int() * temp_s0) & 0xFFFF;
             var_f10 = (f32) temp_t1;
             if (temp_t1 < 0) {
                 var_f10 += 4294967296.0f;
@@ -1142,44 +1149,44 @@ void func_1500DE88(struct_eu_15144598 *arg0, f32 arg1) {
             sp.uC8 = temp_f0;
             sp.u84 = temp_f0;
             temp_s0_2 = osGetCount();
-            sp.uBB = ((u32) (func_150ADA20() * temp_s0_2) % 71U) + 0x32;
+            sp.uBB = ((u32) (random_int() * temp_s0_2) % 71U) + 0x32;
             temp_s0_3 = osGetCount();
-            sp.u8A = (s8) ((u32) (func_150ADA20() * temp_s0_3) % 3U);
+            sp.u8A = (s8) ((u32) (random_int() * temp_s0_3) % 3U);
             temp_s0_4 = osGetCount();
-            sp.u8B = (s8) ((u32) (func_150ADA20() * temp_s0_4) % 3U);
+            sp.u8B = (s8) ((u32) (random_int() * temp_s0_4) % 3U);
             temp_s0_5 = osGetCount();
-            temp_t0 = (func_150ADA20() * temp_s0_5) & 0xFFFF;
+            temp_t0 = (random_int() * temp_s0_5) & 0xFFFF;
             var_f10_2 = (f32) temp_t0;
             if (temp_t0 < 0) {
                 var_f10_2 += 4294967296.0f;
             }
             sp.u8C = ((var_f10_2 * 0.000015259022f * 0.15f) + 0.3f) * sp.u84;
             temp_s0_6 = osGetCount();
-            temp_t2 = (func_150ADA20() * temp_s0_6) & 0xFFFF;
+            temp_t2 = (random_int() * temp_s0_6) & 0xFFFF;
             var_f4 = (f32) temp_t2;
             if (temp_t2 < 0) {
                 var_f4 += 4294967296.0f;
             }
             sp.u90 = ((var_f4 * 0.000015259022f * 0.15f) + 0.3f) * sp.u84;
             var_v1 = 0;
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 var_v1 = 0x40;
             }
             sp60 = var_v1;
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 var_s0 = 0x80;
             } else {
                 var_s0 = 0;
             }
             sp.uF8 = var_s0 | var_v1 | 0xC000 | 0x20000 | 0x800000;
             temp_s0_7 = osGetCount();
-            sp.uB8 = ((u32) (func_150ADA20() * temp_s0_7) % 56U) + 0x50;
+            sp.uB8 = ((u32) (random_int() * temp_s0_7) % 56U) + 0x50;
             temp_s0_8 = osGetCount();
-            sp.uB4 = ((u32) (func_150ADA20() * temp_s0_8) % 46U) + 0xB4;
-            func_15008340(arg0, &sp.uD0, &sp.uD8, &sp.u7C, &sp.u78);
+            sp.uB4 = ((u32) (random_int() * temp_s0_8) % 46U) + 0xB4;
+            spawn_zone_pick_point(arg0, &sp.uD0, &sp.uD8, &sp.u7C, &sp.u78);
             temp_f20 = sp.u7C - sp.u78;
             temp_s0_9 = osGetCount();
-            temp_t8 = (func_150ADA20() * temp_s0_9) & 0xFFFF;
+            temp_t8 = (random_int() * temp_s0_9) & 0xFFFF;
             var_f16 = (f32) temp_t8;
             if (temp_t8 < 0) {
                 var_f16 += 4294967296.0f;
@@ -1195,28 +1202,28 @@ void func_1500DE88(struct_eu_15144598 *arg0, f32 arg1) {
                 var_f20 = temp_f12;
             }
             temp_s0_10 = osGetCount();
-            temp_t0_2 = (func_150ADA20() * temp_s0_10) & 0xFFFF;
+            temp_t0_2 = (random_int() * temp_s0_10) & 0xFFFF;
             var_f18 = (f32) temp_t0_2;
             if (temp_t0_2 < 0) {
                 var_f18 += 4294967296.0f;
             }
             sp.uF4 = ((var_f18 * 0.000015259022f * 0.75f) + 0.25f) * var_f20;
             temp_s0_11 = osGetCount();
-            temp_t2_2 = (func_150ADA20() * temp_s0_11) & 0xFFFF;
+            temp_t2_2 = (random_int() * temp_s0_11) & 0xFFFF;
             var_f6 = (f32) temp_t2_2;
             if (temp_t2_2 < 0) {
                 var_f6 += 4294967296.0f;
             }
             sp.uE8 = 2.0f * (var_f6 * 0.000015259022f) * 3.1415927f;
             temp_s0_12 = osGetCount();
-            temp_t4 = (func_150ADA20() * temp_s0_12) & 0xFFFF;
+            temp_t4 = (random_int() * temp_s0_12) & 0xFFFF;
             var_f10_3 = (f32) temp_t4;
             if (temp_t4 < 0) {
                 var_f10_3 += 4294967296.0f;
             }
             sp.uF0 = (var_f10_3 * 0.000015259022f * 0.010000001f) + 0.002f;
-            func_1510F800(0);
-            sp.uFC = func_1510FD20((s32) sp.uD0, (s32) sp.uD8);
+            collision_select_area(0);
+            sp.uFC = zone_tree_find_leaf((s32) sp.uD0, (s32) sp.uD8);
             temp_v0 = func_151307F0(&sp.uA0, 2, 0, 0x1C, 0xFF, 1);
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0xA8, &sp.u84, 0x1C);
@@ -1226,10 +1233,10 @@ void func_1500DE88(struct_eu_15144598 *arg0, f32 arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/func_1500DE88.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/record_particle_spawn_b.s")
 #endif
 // NON-MATCHING: not a bad start..
-// void func_1500DE88(s32 arg0, f32 arg1) {
+// void record_particle_spawn_b(s32 arg0, f32 arg1) {
 //
 //     f32 temp_f0;    // tmp
 //     f32 phi_f10;    // tmp
@@ -1281,37 +1288,37 @@ void func_1500DE88(struct_eu_15144598 *arg0, f32 arg1) {
 //         temp_f22 = D_800961B4;
 //
 //         do {
-//             phi_f10 = (u16) (osGetCount() * func_150ADA20()) ;
+//             phi_f10 = (u16) (osGetCount() * random_int()) ;
 //
 //             tmp.unk68 = tmp.unk6C = tmp.unk24 = (phi_f10 * temp_f22 * 600.0f) + 200.0f;
 //
-//             tmp.unk5B = (osGetCount() * func_150ADA20()) % 0x47U + 0x32;
-//             tmp.unk2A = (osGetCount() * func_150ADA20()) % 3U;
-//             tmp.unk2B = (osGetCount() * func_150ADA20()) % 3U;
+//             tmp.unk5B = (osGetCount() * random_int()) % 0x47U + 0x32;
+//             tmp.unk2A = (osGetCount() * random_int()) % 3U;
+//             tmp.unk2B = (osGetCount() * random_int()) % 3U;
 //
-//             phi_f10 = (u16) (osGetCount() * func_150ADA20());
+//             phi_f10 = (u16) (osGetCount() * random_int());
 //             tmp.unk2C = ((phi_f10 * temp_f22 * temp_f28) + temp_f30) * tmp.unk24;
 //
-//             phi_f10 = (u16) (osGetCount() * func_150ADA20());
+//             phi_f10 = (u16) (osGetCount() * random_int());
 //             tmp.unk30 = ((phi_f10 * temp_f22 * temp_f28) + temp_f30) * tmp.unk24;
 //
-//             if ((func_150ADA20() & 1) != 0) {
+//             if ((random_int() & 1) != 0) {
 //                 tmp.unk0 = 0x40;
 //             } else {
 //                 tmp.unk0 = 0;
 //             }
 //
-//             if ((func_150ADA20() & 1) != 0) {
+//             if ((random_int() & 1) != 0) {
 //                 phi_v1 = 0x80;
 //             } else {
 //                 phi_v1 = 0;
 //             }
 //             tmp.unk98 = phi_v1 | tmp.unk0 | 0xC000 | 0x20000 | 0x800000;
-//             tmp.unk58 = ((osGetCount() * func_150ADA20()) % 0x38U) + 0x50;
-//             tmp.unk54 = ((osGetCount() * func_150ADA20()) % 0x2EU) + 0xB4;
-//             func_15008340(arg0, &tmp.unk70, &tmp.unk78, &tmp.unk1C, &tmp.unk18);
+//             tmp.unk58 = ((osGetCount() * random_int()) % 0x38U) + 0x50;
+//             tmp.unk54 = ((osGetCount() * random_int()) % 0x2EU) + 0xB4;
+//             spawn_zone_pick_point(arg0, &tmp.unk70, &tmp.unk78, &tmp.unk1C, &tmp.unk18);
 //
-//             phi_f10 = (u16) (osGetCount() * func_150ADA20());
+//             phi_f10 = (u16) (osGetCount() * random_int());
 //
 //             temp_f0 = tmp.unk1C - tmp.unk18;
 //             tmp.unk8C = (phi_f10 * temp_f22 * (temp_f0 * 0.5f)) + (tmp.unk18 + (temp_f0 * 0.25f));
@@ -1321,17 +1328,17 @@ void func_1500DE88(struct_eu_15144598 *arg0, f32 arg1) {
 //                 temp_f0 = tmp.unk74;
 //             }
 //
-//             phi_f10 = (u16) (osGetCount() * func_150ADA20());
+//             phi_f10 = (u16) (osGetCount() * random_int());
 //             tmp.unk94 = ((phi_f10 * temp_f22 * 0.75f) + 0.25f) * temp_f0;
 //
-//             phi_f10 = (u16) (osGetCount() * func_150ADA20());
+//             phi_f10 = (u16) (osGetCount() * random_int());
 //             temp_f0 = phi_f10 * temp_f22;
 //             tmp.unk88 = (temp_f0 + temp_f0) * D_800961B8;
 //
-//             phi_f10 = (u16) (osGetCount() * func_150ADA20());
+//             phi_f10 = (u16) (osGetCount() * random_int());
 //             tmp.unk90 = (phi_f10 * temp_f22 * D_800961BC) + D_800961C0;
-//             func_1510F800(0);
-//             tmp.unk9C = func_1510FD20(tmp.unk70, tmp.unk78);
+//             collision_select_area(0);
+//             tmp.unk9C = zone_tree_find_leaf(tmp.unk70, tmp.unk78);
 //             temp_v0 = func_15130280(&tmp.unk40, 2, 0, 28, 255, 1);
 //             if (temp_v0 != NULL) {
 //                 memcpy(&temp_v0->unkA8, &tmp.unk24, 28); // memcpy  temp_v0->A8 ?

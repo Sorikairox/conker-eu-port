@@ -98,9 +98,9 @@ extern u8 D_800ABBD8[];
 extern u8 D_800ABBDC[];
 extern u8 D_800ABBE0[];
 s32 func_1517F54C();
-void func_15042E3C(s32, ...);   /* varargs, as its definition (game_70200) */
-void func_15042D94(s32, s32, u8, s32, ...);
-void func_1504332C(u8 arg0, u8 arg1, u8 arg2, u8 arg3);
+void text_printf(s32, ...);   /* varargs, as its definition (game_70200) */
+void text_printf_at(s32, s32, u8, s32, ...);
+void text_set_color(u8 arg0, u8 arg1, u8 arg2, u8 arg3);
 void func_151E2FCC(void);
 void func_10024190(void *, s32); /* osWritebackDCache (hand-written cache loop) */
 
@@ -183,8 +183,8 @@ void func_151DE100(void) {
             D_80090118 = 0;
         }
         secs = D_80090118 / 50;
-        func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
-        func_15042D94(0x87, y, 0x80, (s32) D_800ABBB8, secs / 60, secs % 60);
+        text_set_color(0xFF, 0xFF, 0xFF, 0xFF);
+        text_printf_at(0x87, y, 0x80, (s32) D_800ABBB8, secs / 60, secs % 60);
     }
 
     if (D_8009029C > 0) {
@@ -237,35 +237,35 @@ void func_151DE100(void) {
     }
     D_800902A0 = stickX;
     D_800E0EB5 = stickY;
-    func_1504332C(0xFF, 0xFF, 0xFF, D_8009016D);
+    text_set_color(0xFF, 0xFF, 0xFF, D_8009016D);
     y = yOff + 0x73;
     if (simple) {
         D_800901CC = 0;
-        func_15042D94(0x94, y, 1, (s32) D_800ABBC0, 0xD);
+        text_printf_at(0x94, y, 1, (s32) D_800ABBC0, 0xD);
     } else {
-        func_15042D94(0x94, y, 1, (s32) D_800ABBC4, 0x1A);
+        text_printf_at(0x94, y, 1, (s32) D_800ABBC4, 0x1A);
         if ((s8) D_800901CC < count) {
-            func_15042D94(0xD5, y, 1, (s32) D_800ABBC8, ((s8) D_800901CC == 0) + 0xC);
+            text_printf_at(0xD5, y, 1, (s32) D_800ABBC8, ((s8) D_800901CC == 0) + 0xC);
         }
-        func_150432FC(0x94, yOff + 0x55);
+        text_set_pos(0x94, yOff + 0x55);
         if (count == (s8) D_800901CC) {
-            func_15042E3C((s32) D_800ABBCC, 0x32);
+            text_printf((s32) D_800ABBCC, 0x32);
         } else if (count < (s8) D_800901CC) {
-            func_15042E3C((s32) D_800ABBD0, 0x33);
+            text_printf((s32) D_800ABBD0, 0x33);
         }
     }
-    func_150432FC(0x53, y);
+    text_set_pos(0x53, y);
 
     if ((s8) D_800901CC < count) {
         if (!simple) {
             sel = 1;
             if (count == 3) {
-                func_150432FC(0x53, yOff + 0x63);
-                func_15042E3C((s32) D_800ABBD4, ((s8) D_800901CC == 1) + 0x21);
+                text_set_pos(0x53, yOff + 0x63);
+                text_printf((s32) D_800ABBD4, ((s8) D_800901CC == 1) + 0x21);
                 sel = 2;
-                func_150432FC(0x53, yOff + 0x82);
+                text_set_pos(0x53, yOff + 0x82);
             }
-            func_15042E3C((s32) D_800ABBD8, (sel == (s8) D_800901CC) + 0xE);
+            text_printf((s32) D_800ABBD8, (sel == (s8) D_800901CC) + 0xE);
         }
         if (D_800E0FCA & 0x1000) {
             D_8009029C = 5;
@@ -285,8 +285,8 @@ void func_151DE100(void) {
             sfx = 0x500;
         }
     } else {
-        func_15042D94(0x6C, y, 1, (s32) D_800ABBDC, D_80090138 + 0x1F);
-        func_15042D94(0xBC, y, 1, (s32) D_800ABBE0, 0x1E - D_80090138);
+        text_printf_at(0x6C, y, 1, (s32) D_800ABBDC, D_80090138 + 0x1F);
+        text_printf_at(0xBC, y, 1, (s32) D_800ABBE0, 0x1E - D_80090138);
         if (D_800E0FCA & 0x8000) {
             if (D_80090138 != 0) {
                 D_800E0B94 = 7;
@@ -299,7 +299,7 @@ void func_151DE100(void) {
                         D_800E0EB8 = (s32 *) func_151E2FCC;
                     }
                 } else if (D_8008FDA8 >= 0) {
-                    func_15007718(D_8008FDA8);
+                    save_request_slot_write(D_8008FDA8);
                 }
                 D_800901CC = 0;
                 D_80087270[0] = 0;
@@ -318,8 +318,8 @@ void func_151DE100(void) {
                 ((u32 *) p)[0] -= 0x3E0EF0F0;
                 ((u32 *) p)[1] -= 0x3E0EF0F0;
                 if (((u32 *) p)[0] != 0x3050A14A || ((u32 *) p)[1] != 0xBCFCF506) {
-                    i = func_150ADA20();
-                    osPiStartDma(&D_80038C40, 0, 0, i & 0xFFFF, (void *) ((func_150ADA20() & 0xFFFFE) + 0x80300000), 0x100,
+                    i = random_int();
+                    osPiStartDma(&D_80038C40, 0, 0, i & 0xFFFF, (void *) ((random_int() & 0xFFFFE) + 0x80300000), 0x100,
                                  &gMessageQueue[0]);
                     osRecvMesg(&gMessageQueue[0], NULL, 1);
                 }
@@ -378,7 +378,7 @@ void func_151DECFC(void) {
     D_80090114 = 4;
     D_800E0FC6 = 0;
     if (D_800901D0 == 0) {
-        func_1500764C();
+        save_request_options_load();
     }
 }
 
@@ -450,16 +450,16 @@ extern u8 D_800E0EC5;
 extern u8 D_800E0EC6;
 extern u8 D_800901CC;
 void func_151EE704(void);
-void func_15007778(void);
+void save_slots_reset(void);
 void func_151E856C(void);
 void func_151E8998(void);
-void func_150076BC(s32 arg0);
-void func_15007684(void);
-void func_1500764C(void);
+void save_request_slot_load(s32 arg0);
+void save_request_config_load(void);
+void save_request_options_load(void);
 void func_151E5AB8(void);
 void func_1501D348(s32, s32, s32, s32, s32);
-void func_1504332C(u8 arg0, u8 arg1, u8 arg2, u8 arg3);
-void func_15042D94(s32, s32, u8, s32, ...);  /* varargs, as its definition (game_70200) */
+void text_set_color(u8 arg0, u8 arg1, u8 arg2, u8 arg3);
+void text_printf_at(s32, s32, u8, s32, ...);  /* varargs, as its definition (game_70200) */
 void func_1000E7A0(u32, s32);
 void func_151DF6A4(void);
 void func_151DFD0C(void);
@@ -493,19 +493,19 @@ void func_151DEDD0(void) {
     if (frame < 5) {
         if (frame == 0) {
             func_151EE704();
-            func_15007778();
+            save_slots_reset();
             func_151E856C();
             func_151E8998();
             frame = (u8) D_80090144;
         }
         if (frame < 4) {
-            func_150076BC(frame);
+            save_request_slot_load(frame);
         } else {
-            func_15007684();
+            save_request_config_load();
         }
         D_80090144 = (u8) D_80090144 + 1;
     } else if (D_800901D0 == 0) {
-        func_1500764C();
+        save_request_options_load();
     }
 
     if ((u8) D_80090120 != 0) {
@@ -623,8 +623,8 @@ void func_151DEDD0(void) {
                     D_800902AC = 0x64;
                 }
             }
-            func_1504332C(0xFF, 0x32, 0x32, (a - (a >> 2)) & 0xFF);
-            func_15042D94(0x94, 0xC0, 0x81, *(s32 *) ((u8 *) D_800E1008 + 0x23C));
+            text_set_color(0xFF, 0x32, 0x32, (a - (a >> 2)) & 0xFF);
+            text_printf_at(0x94, 0xC0, 0x81, *(s32 *) ((u8 *) D_800E1008 + 0x23C));
         }
     }
 
@@ -731,7 +731,7 @@ extern s8 D_800E1028;
 extern s8 D_800E102A;
 extern s8 D_800E102B;
 extern s8 D_800E1019;
-struct216 *func_1507BB28(s32, u8);
+struct216 *aiscript_find_by_kind(s32, u8);
 void func_151E3AE4(s32, s32, s32, s32, s32);
 void func_151E8648(void);
 void func_1000DE1C(u8, s32);
@@ -741,7 +741,7 @@ s32 func_151F2CDC();
 // of the page alpha D_800E0EC5 (32 per tick); at 0 it toggles either the "info" screen D_800902A4 (playing Conker's
 // animation 0xE / 0xF and a random voice 0xC8..0xC9 / 0xBE..0xC0) or, for 2, the screen-position screen D_800902A8;
 // otherwise the alpha fades in. The plain page draws the title (func_151E3AE4) and handles accept (menu item 0x15 ->
-// info, 0x19 -> screen position), left/right on item 9 (language: next voice bank), back (func_15007668). The info
+// info, 0x19 -> screen position), left/right on item 9 (language: next voice bank), back (save_request_options_write). The info
 // screen shows text 0x10 and reads the controller pak flags D_800E9D00 into D_800BEE0C; the screen-position screen
 // moves the picture offset D_800E1010[0x17 / 0x18] with the stick and its scale [0x1A / 0x1B] with the C buttons.
 void func_151DF6A4(void) {
@@ -764,16 +764,16 @@ void func_151DF6A4(void) {
                 D_800902A4 = !D_800902A4;
                 if (!D_800902A4) {
                     voice = 0xE;
-                    func_1001263C((func_150ADA20() & 1) + 0xC8, 0x7D00, 0x40);
+                    func_1001263C((random_int() & 1) + 0xC8, 0x7D00, 0x40);
                 } else {
                     voice = 0xF;
-                    func_1001263C((u32) func_150ADA20() % 3 + 0xBE, 0x7D00, 0x40);
+                    func_1001263C((u32) random_int() % 3 + 0xBE, 0x7D00, 0x40);
                 }
                 if (obj != NULL) {
                     obj->unk232 = voice;
                     D_800D154C = obj;
                     D_800C3E78 = (s32) ((u8 *) obj - (u8 *) D_800CC2D0) / (s32) sizeof(struct127);
-                    obj->unk218 = func_1507BB28(0, obj->unk232);
+                    obj->unk218 = aiscript_find_by_kind(0, obj->unk232);
                     obj->unk21C = 0;
                     obj->unk201 = 0x14;
                 }
@@ -815,7 +815,7 @@ void func_151DF6A4(void) {
             }
         }
         if (in & 0x20) {
-            func_15007668();
+            save_request_options_write();
         }
     }
 
@@ -835,8 +835,8 @@ void func_151DF6A4(void) {
         }
         ((MenuState *) D_80090174)->input &= ~0x20;
         if (D_800902A4) {
-            func_1504332C(0xFF, 0, 0, alpha & 0xFF);
-            func_15042D94(0x94, 0x14, 0x81, (s32) D_800ABBE4, 0x10);
+            text_set_color(0xFF, 0, 0, alpha & 0xFF);
+            text_printf_at(0x94, 0x14, 0x81, (s32) D_800ABBE4, 0x10);
         }
         D_800BEE0C = 0;
         if (D_800E9D00 & 0x400000) {
@@ -850,13 +850,13 @@ void func_151DF6A4(void) {
         y = D_800E1010[0x18];
         sx = D_800E1010[0x1A];
         sy = D_800E1010[0x1B];
-        func_1504332C(0xFF, 0, 0, alpha & 0xFF);
-        func_15042D94(0x94, 0x28, 0x81, (s32) D_800ABBE8, 0x3E);
-        func_15042D94(0x94, 0x64, 0x81, (s32) D_800ABBEC, 0x1A);
-        func_15042D94(0x7B, 0x64, 0x81, (s32) D_800ABBF0, 0x3B);
-        func_15042D94(0xAD, 0x64, 0x81, (s32) D_800ABBF4, 0x3C);
-        func_15042D94(0x94, 0x4B, 0x81, (s32) D_800ABBF8, 0x5D);
-        func_15042D94(0x94, 0x7D, 0x81, (s32) D_800ABBFC, 0x5E);
+        text_set_color(0xFF, 0, 0, alpha & 0xFF);
+        text_printf_at(0x94, 0x28, 0x81, (s32) D_800ABBE8, 0x3E);
+        text_printf_at(0x94, 0x64, 0x81, (s32) D_800ABBEC, 0x1A);
+        text_printf_at(0x7B, 0x64, 0x81, (s32) D_800ABBF0, 0x3B);
+        text_printf_at(0xAD, 0x64, 0x81, (s32) D_800ABBF4, 0x3C);
+        text_printf_at(0x94, 0x4B, 0x81, (s32) D_800ABBF8, 0x5D);
+        text_printf_at(0x94, 0x7D, 0x81, (s32) D_800ABBFC, 0x5E);
         in = ((MenuState *) D_80090174)->input;
         if ((in & 4) && x > 0) {
             x--;
@@ -1116,8 +1116,8 @@ void func_151DFD0C(void) {
         D_800902D4 = 0;
         sfx = 0;
     }
-    func_1504332C(0xFF, 0xFF, 0xFF, textAlpha & 0xFF);
-    func_15042D94(0x94, 0x4D, 0x81, (s32) D_800ABC0C, D_800902B0 + 0x42);
+    text_set_color(0xFF, 0xFF, 0xFF, textAlpha & 0xFF);
+    text_printf_at(0x94, 0x4D, 0x81, (s32) D_800ABC0C, D_800902B0 + 0x42);
 
     /* the unlocked scenes' numbers, in order */
     bit = 0;
@@ -1130,7 +1130,7 @@ void func_151DFD0C(void) {
     }
 
     col = &D_eu_800902B8[D_800902B0 * 3];
-    func_1504332C(0xFF, 0, 0, textAlpha & 0xFF);
+    text_set_color(0xFF, 0, 0, textAlpha & 0xFF);
     pass = -1;
     if (count < 6) {
         listEnd = count * 11;
@@ -1186,9 +1186,9 @@ void func_151DFD0C(void) {
         if (textAlpha < lineAlpha) {
             lineAlpha = textAlpha;
         }
-        func_1504332C((col[0] * rgb) >> 8, (col[1] * rgb) >> 8, (col[2] * rgb) >> 8, lineAlpha & 0xFF);
+        text_set_color((col[0] * rgb) >> 8, (col[1] * rgb) >> 8, (col[2] * rgb) >> 8, lineAlpha & 0xFF);
         if (y >= 0x46 && y < listEnd + 0x50 && pass == 0) {
-            func_15042D94(0x94, y + 0xF, 0x81, (s32) D_800E0FB8[rows[k] + first]);
+            text_printf_at(0x94, y + 0xF, 0x81, (s32) D_800E0FB8[rows[k] + first]);
         }
         y += 11;
         k++;
@@ -1235,14 +1235,14 @@ extern u8 D_800ABC3C[];
 extern s32 D_800BE804;
 extern s32 *D_800E0EB8;
 void func_151E3A1C(void);
-void func_15042E3C(s32, ...);
+void text_printf(s32, ...);
 
 // title_slot_page: title menu pages 3..5 = save slot 0..2 (rec->titlePage - 3). Draws the slot in its colour (slot 2
 // red, 1 green, 0 blue) with its score ("%d"; 0x7D00 is shown as 1000000 at 0.75 scale) and play time (h:mm:ss), then
 // the options: a used slot offers continue / erase (D_800901CC 0 / 1, left-right toggles), erase asks no / yes
 // (D_800901CC 2 / 3); an empty slot (+8 == -1) only offers "start" (text 0x31). Accept on 0 starts the game: mode 7
-// (fade) with the callback func_151E3A1C, D_8008FDA8 = slot, func_150076BC(slot +0xE); accept on "yes" erases the slot
-// (func_15007750, func_15017790, slot marked empty, D_80090144 = 0 re-runs the menu setup). Plays sound 0x62D on a
+// (fade) with the callback func_151E3A1C, D_8008FDA8 = slot, save_request_slot_load(slot +0xE); accept on "yes" erases the slot
+// (save_request_slot_erase, level_state_clear, slot marked empty, D_80090144 = 0 re-runs the menu setup). Plays sound 0x62D on a
 // move, 0x500 on accept.
 void func_151E06D0(void) {
     MenuState *rec;
@@ -1269,49 +1269,49 @@ void func_151E06D0(void) {
         D_800901CC = 5 - sel;
         sfx = 0x62D;
     }
-    func_150432FC(0x94, 0x46);
+    text_set_pos(0x94, 0x46);
     save = &D_800BE818[slot];
     if (save->unk8 == -1) {
         D_800901CC = 0;
     }
     if (slot == 2) {
-        func_1504332C(0xFF, 0x37, 0x37, alpha);
+        text_set_color(0xFF, 0x37, 0x37, alpha);
     } else if (slot == 1) {
-        func_1504332C(0x78, 0xFF, 0x16, alpha);
+        text_set_color(0x78, 0xFF, 0x16, alpha);
     } else {
-        func_1504332C(0x20, 0x55, 0xFF, alpha);
+        text_set_color(0x20, 0x55, 0xFF, alpha);
     }
     if (save->unk8 != -1) {
         v = ((u32 *) save)[1];
         y = 0;
         if (v == 0x7D00) {
             v = 1000000;
-            func_150432BC(0.75f);
+            text_set_scale(0.75f);
             y = 2;
         }
-        func_15042D94(0x70, y + 0x33, 0, (s32) D_800ABC10, v);
-        func_150432BC(1.0f);
+        text_printf_at(0x70, y + 0x33, 0, (s32) D_800ABC10, v);
+        text_set_scale(1.0f);
         v = ((u32 *) save)[0];
-        func_15042D94(0xA4, 0x33, 0, (s32) D_800ABC14, v / 60 / 60, v / 60 % 60, v % 60);
+        text_printf_at(0xA4, 0x33, 0, (s32) D_800ABC14, v / 60 / 60, v / 60 % 60, v % 60);
     }
-    func_1504332C(0xFF, 0xFF, 0xFF, alpha);
+    text_set_color(0xFF, 0xFF, 0xFF, alpha);
     if (save->unk8 >= 0) {
-        func_15042D94(0x94, 0xAF, 1, (s32) D_800ABC24, 0x1A);
-        func_150432FC(0x58, 0xAF);
+        text_printf_at(0x94, 0xAF, 1, (s32) D_800ABC24, 0x1A);
+        text_set_pos(0x58, 0xAF);
         sel = (s8) D_800901CC;
         if (sel < 2) {
-            func_15042E3C((s32) D_800ABC28, (sel == 0) + 0x16, 1);
+            text_printf((s32) D_800ABC28, (sel == 0) + 0x16, 1);
         } else {
-            func_15042D94(0x94, 0x91, 1, (s32) D_800ABC2C, 0x19);
+            text_printf_at(0x94, 0x91, 1, (s32) D_800ABC2C, 0x19);
         }
     } else {
-        func_15042D94(0x94, 0x6E, 1, (s32) D_800ABC30, 0x31);
+        text_printf_at(0x94, 0x6E, 1, (s32) D_800ABC30, 0x31);
     }
-    func_150432FC(0xD0, 0xAF);
+    text_set_pos(0xD0, 0xAF);
     sel = (s8) D_800901CC;
     if (sel < 2) {
         if (save->unk8 >= 0) {
-            func_15042E3C((s32) D_800ABC34, (sel != 0) + 0x18, 1);
+            text_printf((s32) D_800ABC34, (sel != 0) + 0x18, 1);
             sel = (s8) D_800901CC;
         }
         if (sel == 0) {
@@ -1322,7 +1322,7 @@ void func_151E06D0(void) {
                 D_8008FDA8 = slot;
                 D_800BE7FC = -1;
                 D_80082F50 = 0;
-                func_150076BC(save->unkE);
+                save_request_slot_load(save->unkE);
                 sfx = 0x500;
             }
         } else if (((MenuState *) D_80090174)->input & 0x10) {
@@ -1330,18 +1330,18 @@ void func_151E06D0(void) {
             sfx = 0x500;
         }
     } else {
-        func_15042D94(0x6C, 0xAF, 1, (s32) D_800ABC38, (sel == 3) + 0x1F);
-        func_15042D94(0xBC, 0xAF, 1, (s32) D_800ABC3C, ((s8) D_800901CC == 2) + 0x1D);
+        text_printf_at(0x6C, 0xAF, 1, (s32) D_800ABC38, (sel == 3) + 0x1F);
+        text_printf_at(0xBC, 0xAF, 1, (s32) D_800ABC3C, ((s8) D_800901CC == 2) + 0x1D);
         rec = (MenuState *) D_80090174;
         in = rec->input;
         if (in & 0x10) {
             if ((s8) D_800901CC == 3) {
                 D_800901CC = 0;
-                func_15007750(slot);
+                save_request_slot_erase(slot);
                 D_800BE3DF = 0x29;
                 D_800BE800 = 0;
                 D_800BE804 = 0;
-                func_15017790();
+                level_state_clear();
                 save->padC[0] = 0x18;
                 ((u32 *) save)[1] = 0;
                 save->unk8 = -1;
@@ -1444,10 +1444,10 @@ void func_151E0BBC(void) {
         D_800901CC = 1 - (s8) D_800901CC;
         func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
     }
-    func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-    func_15042D94(0x94, 0x7E, 1, (s32) D_800ABC40, 0x1A);
-    func_1504332C(0xFF, 0xFF, 0xFF, textAlpha);
-    func_15042D94(0xD5, 0x7E, 1, (s32) D_800ABC44, ((s8) D_800901CC == 1) + 0x1B);
+    text_set_color(0xFF, 0xFF, 0xFF, alpha);
+    text_printf_at(0x94, 0x7E, 1, (s32) D_800ABC40, 0x1A);
+    text_set_color(0xFF, 0xFF, 0xFF, textAlpha);
+    text_printf_at(0xD5, 0x7E, 1, (s32) D_800ABC44, ((s8) D_800901CC == 1) + 0x1B);
     if (textAlpha == 0xFF && (s8) D_800901CC == 0 && (n != 5 || D_80090188 == 0.0f)) {
         rec = (MenuState *) D_80090174;
         if (rec->input & 1) {
@@ -1479,12 +1479,12 @@ void func_151E0BBC(void) {
         x = 0x8C - ((n * 0x1C) >> 1);
         tab = D_800ABA70[first];
         for (i = 0; i < n; i++) {
-            func_150432FC(0x53, x);
+            text_set_pos(0x53, x);
             id = *(s16 *) tab;
             if (i == row && (s8) D_800901CC == 0) {
                 id++;
             }
-            func_15042E3C((s32) D_800ABC48, id);
+            text_printf((s32) D_800ABC48, id);
             tab += 10;
             x += 0x1C;
         }
@@ -1534,7 +1534,7 @@ void func_151E0BBC(void) {
 #endif
 
 #ifdef NON_MATCHING
-void func_15042D78(u8);
+void text_set_flags(u8);
 void func_151E2B9C(void);
 void func_151E3AE4(s32, s32, s32, s32, s32);
 extern s8 D_80090180;
@@ -1551,9 +1551,9 @@ void func_151E1174(void) {
     s32 mask;
     s32 alpha;
 
-    func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
-    func_15042D94(0x94, 0x7E, 1, (s32) D_800ABC4C, 0x1A);
-    func_15042D78(0x81);
+    text_set_color(0xFF, 0xFF, 0xFF, 0xFF);
+    text_printf_at(0x94, 0x7E, 1, (s32) D_800ABC4C, 0x1A);
+    text_set_flags(0x81);
     rec = (MenuState *) D_80090174;
     mask = D_800ABB38[((s8 *) &D_800ABA74)[rec->x42 * 10]];
     if ((s8) D_800E0EC6 == 0) {
@@ -1590,9 +1590,9 @@ void func_151E1174(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E1174.s")
 #endif
 #ifdef NON_MATCHING
-void func_15060F28(struct127 *arg0, s32 arg1);
+void obj_remove(struct127 *arg0, s32 arg1);
 void func_151E870C(s32 slot, s32 character);
-void func_15042D94(s32, s32, u8, s32, ...);
+void text_printf_at(s32, s32, u8, s32, ...);
 extern u8 D_800E0EC5;           /* page alpha */
 extern u8 D_800E0EC6;           /* pending page (read signed, -1 = none) */
 extern s32 D_800E0FD0;          /* struct127 *[4]: character object per controller */
@@ -1648,7 +1648,7 @@ void func_151E1308(void) {
             D_800E0EC6 = -1;
             for (obj = (struct127 **) &D_800E0FD0; obj != (struct127 **) &D_800E0FD0 + 4; obj++) {
                 if (*obj != NULL) {
-                    func_15060F28(*obj, 1);
+                    obj_remove(*obj, 1);
                     *obj = NULL;
                 }
             }
@@ -1662,7 +1662,7 @@ void func_151E1308(void) {
         }
         D_800E0EC5 = alpha;
     }
-    func_1504332C(0xFF, 0xFF, 0xFF, alpha & 0xFF);
+    text_set_color(0xFF, 0xFF, 0xFF, alpha & 0xFF);
     rec = (MenuState *) D_80090174;
     code = D_800ABA70[rec->x42][5];
     if (code < 0) {
@@ -1703,7 +1703,7 @@ void func_151E1308(void) {
         if (*(struct127 **) &D_800E0FD0 == NULL) {
             func_151E870C(0, D_800E0FC0[0]);
         }
-        func_15042D94(0x94, 0x9B, 1, (s32) D_800ABC50, 0x1A);
+        text_printf_at(0x94, 0x9B, 1, (s32) D_800ABC50, 0x1A);
         D_800E0FBC = 1;
         rec = (MenuState *) D_80090174;
     }
@@ -1814,7 +1814,7 @@ void func_151E1308(void) {
 #endif
 
 #ifdef NON_MATCHING
-void func_15042E3C(s32, ...);
+void text_printf(s32, ...);
 void func_151E2FCC(void);
 void func_151E4A78(void);
 extern s8 D_80090140;           /* first queue slot shown / number of extra slots */
@@ -1860,7 +1860,7 @@ void func_151E19AC(void) {
         }
         D_800E0EC5 = alpha;
     }
-    func_1504332C(0xFF, 0xFF, 0xFF, alpha & 0xFF);
+    text_set_color(0xFF, 0xFF, 0xFF, alpha & 0xFF);
 
     joined = D_800901E0;
     rec = (MenuState *) D_80090174;
@@ -1911,15 +1911,15 @@ void func_151E19AC(void) {
             D_800E0EB8 = (s32 *) func_151E4A78;
         }
     }
-    func_15042D94(0x94, 0x55, 1, (s32) D_800ABC54, 0x1A);
+    text_printf_at(0x94, 0x55, 1, (s32) D_800ABC54, 0x1A);
     x = 0xA1 - D_800901E0 * 13 - D_80090140 * 10;
     for (i = 0; i < slots; i++) {
-        func_150432FC(x, 0x82);
+        text_set_pos(x, 0x82);
         if ((&D_800901E4)[i] >= 0) {
-            func_15042E3C((s32) D_800ABC58, (&D_800901E4)[i] + 1);
+            text_printf((s32) D_800ABC58, (&D_800901E4)[i] + 1);
             x += 0x1A;
         } else {
-            func_15042E3C((s32) D_800ABC5C, 5);
+            text_printf((s32) D_800ABC5C, 5);
             x += 0x14;
         }
     }
@@ -2005,7 +2005,7 @@ void func_151E1EDC(void) {
         }
         D_800E0EC5 = alpha;
     }
-    func_1504332C(0xFF, 0xFF, 0xFF, alpha);
+    text_set_color(0xFF, 0xFF, 0xFF, alpha);
     rec = (MenuState *) D_80090174;
     row = D_800ABAF4[(&D_800ABA75)[rec->x42 * 10]];
     D_800E0FE0 = row[0];
@@ -2147,29 +2147,29 @@ void func_151E1EDC(void) {
         }
     }
     rec->input &= ~0x20;
-    func_1504332C(0xFF, 0xFF, 0, alpha);
-    func_150432FC(0x94, (s16) ((D_800E0FE0 == 4) * 32 + 0x78));
-    func_15042E3C((s32) D_800ABC60, 0x1A);
+    text_set_color(0xFF, 0xFF, 0, alpha);
+    text_set_pos(0x94, (s16) ((D_800E0FE0 == 4) * 32 + 0x78));
+    text_printf((s32) D_800ABC60, 0x1A);
     for (i = 0; i < D_800E0FE0; i++) {
-        func_1504332C(D_800ABA0C[D_800E0FF8[i]][0], D_800ABA0C[D_800E0FF8[i]][1], D_800ABA0C[D_800E0FF8[i]][2], alpha);
-        func_150432FC(colX[i], 0x50);
+        text_set_color(D_800ABA0C[D_800E0FF8[i]][0], D_800ABA0C[D_800E0FF8[i]][1], D_800ABA0C[D_800E0FF8[i]][2], alpha);
+        text_set_pos(colX[i], 0x50);
         v = D_800E0FF8[i];
         if (v == 4) {
-            func_15042E3C((s32) D_800ABC64, 9);
+            text_printf((s32) D_800ABC64, 9);
         } else if (v == 5) {
-            func_15042E3C((s32) D_800ABC68, 8);
+            text_printf((s32) D_800ABC68, 8);
         } else if (v == 7) {
-            func_15042E3C((s32) D_800ABC6C, 0xA);
+            text_printf((s32) D_800ABC6C, 0xA);
         } else if (v == 8) {
-            func_15042E3C((s32) D_800ABC70, 0xB);
+            text_printf((s32) D_800ABC70, 0xB);
         } else if (v == 9) {
-            func_15042E3C((s32) D_800ABC74, 0x34);
+            text_printf((s32) D_800ABC74, 0x34);
         } else {
-            func_15042E3C((s32) D_800ABC78, v + (v < 4 ? 0x59 : 0x4C));
+            text_printf((s32) D_800ABC78, v + (v < 4 ? 0x59 : 0x4C));
         }
     }
     haveScores = func_151E2C88((s32) scores);
-    func_1504332C(0xFF, 0xFF, 0xFF, alpha);
+    text_set_color(0xFF, 0xFF, 0xFF, alpha);
     for (i = 0; i < total; i++) {
         team = D_800E1030[i];
         if (total == D_800E0FE0) {
@@ -2181,13 +2181,13 @@ void func_151E1EDC(void) {
         if (off[team] < 0) {
             colY[team] = py + 0x18;
         }
-        func_150432FC(px, py);
+        text_set_pos(px, py);
         if ((&D_800901E4)[i] < 0) {
-            func_15042E3C((s32) D_800ABC88, 5);
+            text_printf((s32) D_800ABC88, 5);
         } else {
-            func_15042E3C((s32) D_800ABC7C, (&D_800901E4)[i] + 1);
+            text_printf((s32) D_800ABC7C, (&D_800901E4)[i] + 1);
             if (haveScores) {
-                func_15042E3C((s32) D_800ABC80, scores[i] + 1);
+                text_printf((s32) D_800ABC80, scores[i] + 1);
             }
         }
     }
@@ -2195,9 +2195,9 @@ void func_151E1EDC(void) {
         func_10010F30(sfx, sfx == 0x4FF ? 0x4650 : 0x7D00, 0x40, 0, 0);
     }
     if (D_800E0FE0 == 2) {
-        func_15042D94(0x94, 0xB4, 0x81, (s32) D_800ABC8C, 0x3A);
-        func_15042D94(0x7B, 0xB4, 0x81, (s32) D_800ABC90, 0x3B);
-        func_15042D94(0xAD, 0xB4, 0x81, (s32) D_800ABC94, 0x3C);
+        text_printf_at(0x94, 0xB4, 0x81, (s32) D_800ABC8C, 0x3A);
+        text_printf_at(0x7B, 0xB4, 0x81, (s32) D_800ABC90, 0x3B);
+        text_printf_at(0xAD, 0xB4, 0x81, (s32) D_800ABC94, 0x3C);
     }
 }
 #else
@@ -2269,7 +2269,7 @@ void func_151E2A54(void) {
 // settings_save: P127: the inverse of func_151E2A54: copies the settings bytes D_800E1010 into the 10-byte save
 // record of the menu's settings set (D_800ABA74 row of the save slot x42; record D_80082F4C + set * 10): byte 0
 // cleared, 1..4 = settings 2, 3, 0x10, 0x11, the set-specific bytes 5 / 6 (set 0: 4; sets 1, 2: 0xD, 0xE; sets 5, 7:
-// 0x12; sets 8, 9: 7, 0x13; others none), 8 = 0x16, 9 = 6, then writes the save (func_150076A0).
+// 0x12; sets 8, 9: 7, 0x13; others none), 8 = 0x16, 9 = 6, then writes the save (save_request_config_write).
 void func_151E2B9C(void) {
     s32 set;
     s8 *rec;
@@ -2302,7 +2302,7 @@ void func_151E2B9C(void) {
     }
     rec[8] = D_800E1010[0x16];
     rec[9] = D_800E1010[6];
-    func_150076A0();
+    save_request_config_write();
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E2B9C.s")
@@ -2572,7 +2572,7 @@ void func_151E2FCC(void) {
     }
     D_8009013C = 0;
     D_80090110 = 0;
-    func_15017790();
+    level_state_clear();
     D_800BE804 = 0;
     bzero(D_80090174 + 0x66, 0x30);
     bzero(D_80090174 + 0x46, 0x20);
@@ -2684,7 +2684,7 @@ void func_151E2FCC(void) {
                 if (D_800E1030[i] != 0) {
                     *slot = 3;
                 } else {
-                    *slot = (func_150ADA20() & 0xF) + 0x11;
+                    *slot = (random_int() & 0xF) + 0x11;
                 }
             } else if (D_800E1030[i] != 0 && rec[8] == 4) {
                 *slot = 3;
@@ -2779,7 +2779,7 @@ void func_151E3864(void) {
         func_1509D49C(D_800902B0, D_800902B4, &sp24[1], sp24);
         func_1509D464();
     }
-    func_15017790();
+    level_state_clear();
     func_1509D0A4(sp24[1]);
     func_1509D1EC(sp24[1]);
     D_800BE9F4 = func_1509CE40(sp24[1]);
@@ -3043,29 +3043,29 @@ void func_151E3AE4(s32 mask, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
                 pos += 0x22;
             }
             /* label */
-            func_1504332C(0xFF, 0xFF, 0xFF, (u8) itemAlpha);
-            func_150432FC(px, py);
+            text_set_color(0xFF, 0xFF, 0xFF, (u8) itemAlpha);
+            text_set_pos(px, py);
             if (item[0] >= 0) {
-                func_15042E3C(((s32 *) D_800E1008)[item[0]]);
+                text_printf(((s32 *) D_800E1008)[item[0]]);
             } else if (item[0] < -1) {
-                func_150432FC(px, py + 9);
-                func_15042E3C((s32) D_800ABC98, -item[0]);
-                func_150432FC(px, py + 0x16);
+                text_set_pos(px, py + 9);
+                text_printf((s32) D_800ABC98, -item[0]);
+                text_set_pos(px, py + 0x16);
             }
             /* value */
             if (i == D_800901D4 && D_800901D8 <= 0.0f) {
-                func_1504332C(0xFF, 0xFF, 0xFF, (u8) itemAlpha);
+                text_set_color(0xFF, 0xFF, 0xFF, (u8) itemAlpha);
                 if (fadeIn != 0) {
                     value = shownValue;
                 }
             } else if (fadeIn != 0) {
-                func_1504332C(0xFF, 0xFF, 0xFF, alpha);
+                text_set_color(0xFF, 0xFF, 0xFF, alpha);
             } else {
-                func_1504332C(0xFF, 0xFF, 0xFF, (alpha >> 2) & 0xFF);
+                text_set_color(0xFF, 0xFF, 0xFF, (alpha >> 2) & 0xFF);
             }
             if (type < 0) {
                 if (type < -1) {
-                    func_15042E3C((s32) D_800ABC9C, value - type);
+                    text_printf((s32) D_800ABC9C, value - type);
                 }
             } else {
                 switch (type) {
@@ -3073,36 +3073,36 @@ void func_151E3AE4(s32 mask, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
                         break;
                     case 0x7A:
                         if (value == 0) {
-                            func_15042E3C((s32) D_800ABCA4, ((s32 *) D_800E1008)[0x73]);
+                            text_printf((s32) D_800ABCA4, ((s32 *) D_800E1008)[0x73]);
                         } else {
-                            func_15042E3C((s32) D_800ABCA8, value);
+                            text_printf((s32) D_800ABCA8, value);
                         }
                         break;
                     case 0x7B:
                         if (D_800E1013 >= 3) {
-                            func_15042E3C((s32) D_800ABCAC, ((s32 *) D_800E1008)[0x2D]);
+                            text_printf((s32) D_800ABCAC, ((s32 *) D_800E1008)[0x2D]);
                         } else {
-                            func_15042E3C((s32) D_800ABCB0, value);
+                            text_printf((s32) D_800ABCB0, value);
                         }
                         break;
                     case 0x7C:
-                        func_15042E3C((s32) D_800ABCB4, value * 1000);
+                        text_printf((s32) D_800ABCB4, value * 1000);
                         break;
                     case 0x7D:
                         if (value >= 3) {
-                            func_15042E3C((s32) D_800ABCB8, value, ((s32 *) D_800E1008)[0x72]);
+                            text_printf((s32) D_800ABCB8, value, ((s32 *) D_800E1008)[0x72]);
                         } else {
-                            func_15042E3C(((s32 *) D_800E1008)[0x73]);
+                            text_printf(((s32 *) D_800E1008)[0x73]);
                         }
                         break;
                     case 0x7E:
-                        func_15042E3C((s32) D_800ABCA0, value);
+                        text_printf((s32) D_800ABCA0, value);
                         break;
                     case 0x7F:
-                        func_15042E3C(((s32 *) D_800E1008)[value != 0]);
+                        text_printf(((s32 *) D_800E1008)[value != 0]);
                         break;
                     default:
-                        func_15042E3C(((s32 *) D_800E1008)[item[1 + value]]);
+                        text_printf(((s32 *) D_800E1008)[item[1 + value]]);
                         break;
                 }
             }
@@ -3241,9 +3241,9 @@ void func_151E3AE4(s32 mask, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
         arrowX = (s32) ((100.0f + D_80090188 * (f32) 0) * 0.5f);
         arrowY = (s32) ((f32) (D_80090184 * 0x22 + 0x46) + D_80090188 * (f32) ((cursorRow - D_80090184) * 0x22));
         arrowX = (s32) ((f32) arrowX + 20.0f * sinf(D_80090188 * 3.1415f));
-        func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-        func_15042D94(arrowX + 0x94, arrowY, 1, (s32) D_800ABCC0, 0x1A);
-        func_15042D94(0x94 - arrowX, arrowY, 1, (s32) D_800ABCC4, 0x1A);
+        text_set_color(0xFF, 0xFF, 0xFF, alpha);
+        text_printf_at(arrowX + 0x94, arrowY, 1, (s32) D_800ABCC0, 0x1A);
+        text_printf_at(0x94 - arrowX, arrowY, 1, (s32) D_800ABCC4, 0x1A);
         if (cursorRow != D_80090184) {
             D_80090188 += 0.1f * (f32) D_800BE9E4;
             if (D_80090188 >= 1.0f) {
@@ -3318,7 +3318,7 @@ extern s8 D_800BED3A;           /* controller 1 stick y */
 extern u8 D_800C40AC;
 extern u8 D_800ABCC8[], D_800ABCCC[], D_800ABCD0[], D_800ABCDC[], D_800ABCE0[], D_800ABCE4[], D_800ABCE8[],
     D_800ABCEC[], D_800ABCF0[], D_800ABCF4[], D_800ABCF8[], D_800ABD00[], D_800ABCFC[];
-void func_150916B4(s32 x, s32 y, s32 value, s32 arg3);
+void hud_time_draw(s32 x, s32 y, s32 value, s32 arg3);
 extern s8 D_800E100C;
 void func_151E5564(void);
 // menu_level_start_page: main page 3 / level start prompt, driven by D_80090120. State 1 starts the level of
@@ -3378,11 +3378,11 @@ void func_151E4B40(void) {
             D_8009016C = 0xFF;
         }
         D_800E100C = 0xFF - D_8009016C;
-        func_1504332C(0xFF, 0xFF, 0, D_8009016C);
-        func_15042D94(0x94, 0x14, 0x81, (s32) D_800ABCC8, 0x4B);
-        func_15042E3C((s32) D_800ABCCC);
-        func_1504332C(0xFF, 0xFF, 0xFF, D_8009016C);
-        func_150432FC(0x94, 0x32);
+        text_set_color(0xFF, 0xFF, 0, D_8009016C);
+        text_printf_at(0x94, 0x14, 0x81, (s32) D_800ABCC8, 0x4B);
+        text_printf((s32) D_800ABCCC);
+        text_set_color(0xFF, 0xFF, 0xFF, D_8009016C);
+        text_set_pos(0x94, 0x32);
         if (D_80090120 == 4) {
             D_800DBFF0->unk2C = 0x80000;
         }
@@ -3394,12 +3394,12 @@ void func_151E4B40(void) {
                     if ((&D_800901E4)[i] < 0) {
                         continue;
                     }
-                    func_15042D94(0x58, y, 0x81, (s32) D_800ABCD0,
+                    text_printf_at(0x58, y, 0x81, (s32) D_800ABCD0,
                                   *(s32 *) ((u8 *) D_800E1008 + D_800E0EF0[i] * 4 + 0x174));
-                    func_150916B4(0x8A, y, D_800E1048[i], 0x80);
-                    func_150916B4(0xBC, y, D_800E1040[i], 0x80);
-                    func_15042D94(0xA8, y, 0x80, (s32) D_800ABCDC);
-                    func_15042D94(0xD6, y, 0x80, (s32) D_800ABCE0);
+                    hud_time_draw(0x8A, y, D_800E1048[i], 0x80);
+                    hud_time_draw(0xBC, y, D_800E1040[i], 0x80);
+                    text_printf_at(0xA8, y, 0x80, (s32) D_800ABCDC);
+                    text_printf_at(0xD6, y, 0x80, (s32) D_800ABCE0);
                     y += 0x12;
                 }
             }
@@ -3417,16 +3417,16 @@ void func_151E4B40(void) {
                 }
             }
             if (flagged >= 2) {
-                func_15042D94(0x94, 0x32, 0x81, (s32) D_800ABCE4, 0x58);
+                text_printf_at(0x94, 0x32, 0x81, (s32) D_800ABCE4, 0x58);
             } else if (joined == 1) {
-                func_15042D94(0x76, 0x32, 0x81, (s32) D_800ABCE8, 0x52);
-                func_15042D94(0xB2, 0x32, 0x81, (s32) D_800ABCEC, D_800E0EF0[D_800E1030[0]] == 1 ? 0x56 : 0x57);
+                text_printf_at(0x76, 0x32, 0x81, (s32) D_800ABCE8, 0x52);
+                text_printf_at(0xB2, 0x32, 0x81, (s32) D_800ABCEC, D_800E0EF0[D_800E1030[0]] == 1 ? 0x56 : 0x57);
             } else {
                 for (i = 0; i < 4; i++) {
                     if (D_800E0EF0[i] == 1) {
-                        func_15042D94(0x71 - (D_800E0FF8[i] == 4 ? -0xC : 0), 0x32, 0x81, (s32) D_800ABCF0,
+                        text_printf_at(0x71 - (D_800E0FF8[i] == 4 ? -0xC : 0), 0x32, 0x81, (s32) D_800ABCF0,
                                       D_800E0FF8[i] + 0x4C);
-                        func_15042D94((D_800E0FF8[i] == 4 ? 0x15 : 0) + 0xB7, 0x32, 0x81, (s32) D_800ABCF4, 0x56);
+                        text_printf_at((D_800E0FF8[i] == 4 ? 0x15 : 0) + 0xB7, 0x32, 0x81, (s32) D_800ABCF4, 0x56);
                         break;
                     }
                 }
@@ -3439,9 +3439,9 @@ void func_151E4B40(void) {
             func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
         }
         D_eu_800902EC = stickY;
-        func_15042D94(0x53, 0xB4, 1, (s32) D_800ABCF8, ((s8) D_800901CC == 0) + 0x21);
-        func_15042D94(0xD5, 0xB4, 1, (s32) D_800ABCFC, ((s8) D_800901CC == 1) + 0xE);
-        func_15042D94(0x94, 0xB4, 1, (s32) D_800ABD00, 0x1A);
+        text_printf_at(0x53, 0xB4, 1, (s32) D_800ABCF8, ((s8) D_800901CC == 0) + 0x21);
+        text_printf_at(0xD5, 0xB4, 1, (s32) D_800ABCFC, ((s8) D_800901CC == 1) + 0xE);
+        text_printf_at(0x94, 0xB4, 1, (s32) D_800ABD00, 0x1A);
         if ((D_800E0FCA & 0x8000) || D_800E0EC0 > 0x7D0) {
             if (D_800C35EA == 1 && func_151F2CDC() == 1) {
                 func_151F2D6C(0, 0x370C);
@@ -3694,7 +3694,7 @@ void func_151E582C(void) {
             *(s8 *)(D_80090174 + 0x2C) = D_800AB950[*(s8 *)(D_80090174 + 0x2C)];
         }
     }
-    func_15017790();
+    level_state_clear();
     D_800E0B94 = 11;
     D_800D3260 = 0;
     func_1501C710(6, 0x25, 0, 0, 1);
@@ -3720,7 +3720,7 @@ void func_151E5928(void) {
                   D_800E1010[0x1B] * D_800ABE3C + 1.0f);
     D_8003C8E0 = 0x08000000;
     D_800E100C = 0xFF;
-    func_15042D78(0x81);
+    text_set_flags(0x81);
     D_800E0FCA = D_800BED50;
     if (D_800901C8 != 0) {
         D_800901C8--;
@@ -3988,7 +3988,7 @@ s32 func_151E5E08(void) {
             }
         }
     }
-    func_150432FC(20, 20);
+    text_set_pos(20, 20);
     n = D_800E0FE0;
     for (i = 0; i < n; i++) {
         if (D_800E0EE0[i] != -1) {
@@ -4066,7 +4066,7 @@ s8 func_151E6758(void) {
 #ifdef NON_MATCHING
 extern s16 D_8009015C;
 extern u8 D_800E0FE8[];
-s32 func_150ADA20(void);
+s32 random_int(void);
 s32 func_1000F568(s32, s32);
 void func_10010558(u16, struct127 *, s32, s32, s32, s32);
 
@@ -4145,7 +4145,7 @@ void func_151E67A0(struct127 *attacker, struct127 *victim, s32 kind) {
                 n = 4;
             }
         } else if (kind == 0x34) {
-            if ((func_150ADA20() & 3) == 3) {
+            if ((random_int() & 3) == 3) {
                 sound = 0x52A;
             }
         } else {
@@ -4170,26 +4170,26 @@ void func_151E67A0(struct127 *attacker, struct127 *victim, s32 kind) {
                 sound = 0x65A;
             }
         } else if (mode == 2) {
-            if (victim->health == 0 || (func_150ADA20() & 7) == 0) {
+            if (victim->health == 0 || (random_int() & 7) == 0) {
                 sound = 0x571;
                 n = 3;
             }
         } else if (*((u8 *)victim->unk31C + 0x1AC) != 0) {
-            if (kind != 0x21 && (victim->health == 0 || (func_150ADA20() & 3) == 3)) {
+            if (kind != 0x21 && (victim->health == 0 || (random_int() & 3) == 3)) {
                 n = 4;
                 sound = 0x582;
                 arg5 = 25;
             }
         } else if (kind == 0x2E) {
             arg5 = 25;
-            if (*((u8 *)src->unk31C + 0x78) == 0x23 && (func_150ADA20() & 3) == 0) {
+            if (*((u8 *)src->unk31C + 0x78) == 0x23 && (random_int() & 3) == 0) {
                 sound = 0x587;
             } else {
                 sound = 0x579;
                 n = 3;
             }
         } else if (kind == 0x2F) {
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 sound = 0x588;
                 arg5 = 25;
             }
@@ -4198,7 +4198,7 @@ void func_151E67A0(struct127 *attacker, struct127 *victim, s32 kind) {
             n = 7;
             arg5 = 50;
         } else if (kind == 0x21 || kind == 0x20 || kind == 0x31) {
-            if (victim->health == 0 || (func_150ADA20() & 7) == 3) {
+            if (victim->health == 0 || (random_int() & 7) == 3) {
                 sound = 0x571;
                 n = 3;
                 arg5 = 25;
@@ -4217,7 +4217,7 @@ void func_151E67A0(struct127 *attacker, struct127 *victim, s32 kind) {
             mode = (u16)attacker->unk278;
         }
         if (mode == 2) {
-            if (victim->health == 0 || (func_150ADA20() & 7) == 7) {
+            if (victim->health == 0 || (random_int() & 7) == 7) {
                 sound = 0x538;
                 n = 3;
             }
@@ -4240,12 +4240,12 @@ void func_151E67A0(struct127 *attacker, struct127 *victim, s32 kind) {
                 arg5 = 25;
             }
         } else if (kind == 0x21) {
-            if ((func_150ADA20() & 3) == 3) {
+            if ((random_int() & 3) == 3) {
                 sound = 0x52C;
                 arg5 = 25;
             }
         } else if (kind == 0x20) {
-            r = func_150ADA20() & 0xF;
+            r = random_int() & 0xF;
             if (r != 0) {
                 r++;
             }
@@ -4266,7 +4266,7 @@ void func_151E67A0(struct127 *attacker, struct127 *victim, s32 kind) {
             return;
         }
         if (kind == 0x34) {
-            if ((func_150ADA20() & 3) == 3) {
+            if ((random_int() & 3) == 3) {
                 sound = 0x52A;
             }
         } else if (kind == 0x21) {
@@ -4294,14 +4294,14 @@ void func_151E67A0(struct127 *attacker, struct127 *victim, s32 kind) {
 #ifdef NON_MATCHING
 /* Load the text bank `bank` (1, 2, 4: picked per game mode by func_151E5928) for the current language.
  * D_800E101A = language, D_800BEECB = language of the loaded banks, D_800E1003 = loaded bank (0 = none).
- * A bank is a block of NUL-terminated strings (runs of NULs between them), loaded with func_1502B5C8
+ * A bank is a block of NUL-terminated strings (runs of NULs between them), loaded with asset_load
  * (asset group 3, type 0x1C, language, entry bank - 1) into D_800E1004; D_800E1008 = its string pointer table.
  * Bank 1 also loads entry 2 into D_80090178 with an 80-entry table D_800E0FB8. The old banks are freed
  * with func_10004074 first (the bank-1 extras only when they exist). */
 extern u8 D_800BEECB;
 extern s8 D_800E101A;
 extern u8 **D_800E0FB8;
-u8 *func_1502B5C8(s32 *size, s32 group, s32 type, s32 lang, s32 entry);
+u8 *asset_load(s32 *size, s32 group, s32 type, s32 lang, s32 entry);
 void *allocate_memory(s32, s32, s32, s32);
 void func_10004074(s32);
 
@@ -4336,7 +4336,7 @@ void func_151E7110(s32 bank) {
     }
 
     entry = bank - 1;
-    p = func_1502B5C8(&size, 3, 0x1C, D_800BEECB, entry);
+    p = asset_load(&size, 3, 0x1C, D_800BEECB, entry);
     D_800E1004 = (s32)p;
     end = p + size;
     count = 0;
@@ -4359,7 +4359,7 @@ void func_151E7110(s32 bank) {
     if (entry != 0) {
         return;
     }
-    D_80090178 = (s32)func_1502B5C8(&size, 3, 0x1C, D_800BEECB, 2);
+    D_80090178 = (s32)asset_load(&size, 3, 0x1C, D_800BEECB, 2);
     D_800E0FB8 = allocate_memory(80 * sizeof(u8 *), 1, 0, 0);
     p = (u8 *)D_80090178;
     for (i = 0; i != 80; i++) {
@@ -4383,7 +4383,7 @@ s32 func_150871B8(s32 id);
 s32 func_1508712C(s32 point, f32 *x, f32 *y, f32 *z);
 f32 func_15049AD0(s32 points, s32 segment, f32 t);
 void func_1000D96C(s32 sound, s32 prevSound, s32 arg2);
-u8 *func_151149AC(u8 id);
+u8 *world_record_find(u8 id);
 f32 sinf(f32);
 extern u8 D_800902F0[];         /* menu 0: carousel stop -> path point id (6 stops) */
 extern f32 D_800902F8[];        /* menu 0: zoom speed per stop */
@@ -4539,7 +4539,7 @@ void func_151E73C8(s32 arg0) {
         /* the title page's world objects appear / disappear at the page's zoom percentages */
         for (i = 0; i < 2; i++) {
             if (D_80090360[i][rec->titlePage] != 0xFF) {
-                obj = func_151149AC(D_80090360[i][rec->titlePage]);
+                obj = world_record_find(D_80090360[i][rec->titlePage]);
                 if (obj != NULL) {
                     rec = (MenuState *) D_80090174;
                     if (rec->xC > 0.0f || D_80090170 < 1.0f) {
@@ -4752,12 +4752,12 @@ void func_151E73C8(s32 arg0) {
     cam->unk1A8 = 15.0f;
     cam->unk1A0 = 15.0f;
 
-    obj = func_151149AC(0xF8);
+    obj = world_record_find(0xF8);
     if (obj != NULL) {
         obj[0x6E] = 1;
     }
-    obj = func_151149AC(0xF6);
-    objB = func_151149AC(0xF7);
+    obj = world_record_find(0xF6);
+    objB = world_record_find(0xF7);
     if (obj != NULL && objB != NULL) {
         if (((MenuState *) D_80090174)->menu == 0) {
             obj[0x6E] = 0;
@@ -4772,7 +4772,7 @@ void func_151E73C8(s32 arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E73C8.s")
 #endif
 extern f32 D_800ABE94;
-u8 *func_151149AC(u8);
+u8 *world_record_find(u8);
 extern u8 D_80090360[][6];
 
 void func_151E856C(void)
@@ -4786,7 +4786,7 @@ void func_151E856C(void)
       {
         var_a0 = D_80090360[var_s0][0];
       }
-      temp_v0 = func_151149AC(var_a0);
+      temp_v0 = world_record_find(var_a0);
       var_s0 += 1;
       if (temp_v0 != 0)
       {
@@ -4839,22 +4839,22 @@ void func_151E86A4(void) {
 #endif
 
 #ifdef NON_MATCHING
-void func_15060F28(struct127 *arg0, s32 arg1);
+void obj_remove(struct127 *arg0, s32 arg1);
 s32 func_15083E0C(u8);
 s32 func_15082E44(u8 *, s32, s32, s32, s32);
 void func_15083784(struct127 *, s32);
-void func_1505E650(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6);
+void obj_start_anim(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6);
 void *allocate_memory(s32, s32, s32, s32);
 extern s32 D_800E0FD0;           /* struct127 *[4]: the menu's character object per slot */
 extern u8 D_800AB95C[][8];       /* characters: +0 f32 scale, +4 s8 y offset, +5 object type, +6 animation */
 extern u8 D_800ABD3C[][8];       /* menu slot placement: +0 x, +2 y, +4 z (s16), +6 byte */
 
-// menu_spawn_character: replaces the menu slot's character object: frees the old one (func_15060F28), fills a
+// menu_spawn_character: replaces the menu slot's character object: frees the old one (obj_remove), fills a
 // spawn record (func_15083E0C(slot + 0x10) -> D_800D20FC[], 0x30 bytes) with the character's type (D_800AB95C[ch][5])
 // at the slot's position (D_800ABD3C[slot], the next slot's on title page 7, y + the character's offset) and spawns
 // it (func_15082E44, 1-based object index). The new object gets flags 3 at 0x2F8, state 7 at +5, the scale at
 // 0x14C / 0x150, a 0x1C0 zeroed work block at 0x31C if its +4 is 0 or 0x80, +0x68 = slot + 1 for type 0x3B, the
-// character's animation (func_15083784) and func_1505E650(obj, 0xF, 1.0, 0, 0, 0, 0).
+// character's animation (func_15083784) and obj_start_anim(obj, 0xF, 1.0, 0, 0, 0, 0).
 void func_151E870C(s32 slot, s32 character) {
     struct127 **slotObj = &((struct127 **) &D_800E0FD0)[slot];
     u8 *spawn;
@@ -4868,7 +4868,7 @@ void func_151E870C(s32 slot, s32 character) {
     void *work;
 
     if (*slotObj != NULL) {
-        func_15060F28(*slotObj, 1);
+        obj_remove(*slotObj, 1);
     }
     rec = func_15083E0C((slot + 0x10) & 0xFF);
     ch = D_800AB95C[character];
@@ -4910,7 +4910,7 @@ void func_151E870C(s32 slot, s32 character) {
         *((u8 *) obj + 0x68) = slot + 1;
     }
     func_15083784(obj, ch[6]);
-    func_1505E650(obj, 0xF, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    obj_start_anim(obj, 0xF, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E870C.s")

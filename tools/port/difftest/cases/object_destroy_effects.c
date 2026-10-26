@@ -3,32 +3,32 @@ extern s32 D_800BE9F0;
 extern u8 D_800C35EA;
 void func_150B0828(u8 *arg0, u8 arg1, s32 arg2);
 void func_150C04E0(u8 *obj);
-void func_150D8ABC(struct127 *arg0);
-void func_150F2290(u8 *arg0, s32 arg1, s32 arg2);
+void explosion_ground_effect(struct127 *arg0);
+void fx_big_explosion_at_obj(u8 *arg0, s32 arg1, s32 arg2);
 void func_151C9740(struct127 *obj, u8 arg1, s32 arg2);
 void func_151CFFFC(u8 *obj, u8 flag, s32 arg2);
 void func_150BE994(u8 *arg0, s32 arg1, s32 arg2);
-void func_1507DB44(s32 arg0, s32 arg1);
-void func_150AEB9C(u8 *owner);
-s32 func_1507CD64(struct127 *obj, s32 kind);
+void object_set_all_flags(s32 arg0, s32 arg1);
+void owner_spawn_children(u8 *owner);
+s32 player_hit_reaction(struct127 *obj, s32 kind);
 void func_151BAAC8(u8 *obj, u8 arg1, s32 arg2);
 void func_15145A50(struct127 *arg0);
-u8 *func_151149AC(u8 id);
-struct127 *func_1507515C(struct127 *owner); // test copy: callee ignores a1 / a2
+u8 *world_record_find(u8 id);
+struct127 *player_find_owned_object(struct127 *owner); // test copy: callee ignores a1 / a2
 s32 object_hit_effects(u8 *obj, u8 smoke, u8 splats, u8 debris, u8 finish, u8 fewer, u8 arg6, s32 arg7);
 void func_150B8020(u8 *obj, u8 owner, s32 arg2);
 void func_150BC968(u8 *obj);
 void func_150BC03C(u8 *obj);
 void func_151A7240(u8 *obj, u8 arg1, s32 arg2);
-void func_150E0DF0(u8 *obj, u8 owner, s32 arg2);
+void object_explode(u8 *obj, u8 owner, s32 arg2);
 void func_151D2860(struct127 *arg0, u8 arg1, s32 arg2);
 /* object_destroy_effects: the break / death effects of an object by its type (byte +4): one effect function per
  * type (owner 0xFF, flag 1), the type-0x20 crate picks the hard / soft debris by its y speed +0x20. Types 5 /
- * 0xAD..0xAF clear +0x328, release (func_1507DB44 / func_150AEB9C) and return 1. Types 0x28 / 0x77 shatter the
- * model, drop the held item and spawn a pickup record (func_151149AC: multiplayer id obj[0x127] + 11 after
- * func_1507CD64(obj, 6), else id 1 in level 0x23) placed at the object; multiplayer types 0x28 / 0x77 / 0x53 /
+ * 0xAD..0xAF clear +0x328, release (object_set_all_flags / owner_spawn_children) and return 1. Types 0x28 / 0x77 shatter the
+ * model, drop the held item and spawn a pickup record (world_record_find: multiplayer id obj[0x127] + 11 after
+ * player_hit_reaction(obj, 6), else id 1 in level 0x23) placed at the object; multiplayer types 0x28 / 0x77 / 0x53 /
  * 0x90 (level 0x33 only) return 2 (respawn), everything else 0. */
-s32 func_1507D754(struct127 *arg0) {
+s32 object_destroy_effects(struct127 *arg0) {
     u8 *obj = (u8 *) arg0;
     u8 *rec;
     struct127 *item;
@@ -39,8 +39,8 @@ s32 func_1507D754(struct127 *arg0) {
         case 0xAE:
         case 0xAF:
             obj[0x328] = 0;
-            func_1507DB44((s32) obj, 0);
-            func_150AEB9C(obj);
+            object_set_all_flags((s32) obj, 0);
+            owner_spawn_children(obj);
             return 1;
         case 0x0D:
             func_150B8020(obj, 0xFF, 1);
@@ -68,13 +68,13 @@ s32 func_1507D754(struct127 *arg0) {
             func_151BAAC8(obj, 0xFF, 1);
             func_15145A50(arg0);
             if (D_800BE616 != 0) {
-                func_1507CD64(arg0, 6);
-                rec = func_151149AC(obj[0x127] + 0xB);
+                player_hit_reaction(arg0, 6);
+                rec = world_record_find(obj[0x127] + 0xB);
             } else {
                 if (D_800BE9F0 == 0x23) {
-                    rec = func_151149AC(1);
+                    rec = world_record_find(1);
                 }
-                item = func_1507515C(arg0);
+                item = player_find_owned_object(arg0);
                 if (item != NULL && D_800C35EA != 1) {
                     object_hit_effects((u8 *) item, 1, 1, 1, 1, 0, 0xFF, 1);
                 }
@@ -94,11 +94,11 @@ s32 func_1507D754(struct127 *arg0) {
             }
             return (D_800BE616 != 0) ? 2 : 0;
         case 0x34:
-            func_150E0DF0(obj, 0xFF, 1);
+            object_explode(obj, 0xFF, 1);
             break;
         case 0x3A:
         case 0x3D:
-            func_150D8ABC(arg0);
+            explosion_ground_effect(arg0);
             break;
         case 0x44:
             func_151D2860(arg0, 0xFF, 1);
@@ -107,7 +107,7 @@ s32 func_1507D754(struct127 *arg0) {
             func_151C9740((struct127 *) obj, 0xFF, 1);
             break;
         case 0x4A:
-            func_150F2290(obj, 0xFF, 1);
+            fx_big_explosion_at_obj(obj, 0xFF, 1);
             break;
         case 0x4F:
         case 0x83:
@@ -115,7 +115,7 @@ s32 func_1507D754(struct127 *arg0) {
             break;
         case 0x53:
             if (D_800BE616 != 0) {
-                func_1507CD64(arg0, 10);
+                player_hit_reaction(arg0, 10);
                 return 2;
             }
             break;
@@ -127,7 +127,7 @@ s32 func_1507D754(struct127 *arg0) {
             break;
         case 0x90:
             if (D_800BE616 != 0 && D_800BE9F0 == 0x33) {
-                func_1507CD64(arg0, 8);
+                player_hit_reaction(arg0, 8);
                 return 2;
             }
             break;

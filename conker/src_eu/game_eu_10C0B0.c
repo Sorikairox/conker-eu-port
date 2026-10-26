@@ -3,29 +3,31 @@
 #include "variables.h"
 
 
-void func_150DE8A0(s32 arg0) {
+/* was func_150DE8A0 */
+void zone_stub(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
 extern u8 D_80088CF0[8];
 extern u8 D_80088CF8[8];
 s32 func_150A3794(u8 *, s32, s32, s32);
-u8 *func_151149AC(u8);
+u8 *world_record_find(u8);
 void func_150A2D44(s32, s32);
 
 // trigger_zones_check: hit callback (D_800E0D64, set in game_3DC30) for the point (x, y, z): for each of
 // the 8 zones D_80088CF0 (D_800D34B8 records of 0x34 bytes) that contains it (func_150A3794), the matching
-// D_80088CF8 object id gets state 3 in its +0x73 low bits (func_151149AC), or the zone itself is triggered
+// D_80088CF8 object id gets state 3 in its +0x73 low bits (world_record_find), or the zone itself is triggered
 // (func_150A2D44(zone, 1)) when the id is 0. Returns 0 (the asm leaves the last helper's v0; the caller
 // ignores it).
-s32 func_150DE8AC(s32 x, s32 y, s32 z) {
+/* was func_150DE8AC */
+s32 trigger_zones_check(s32 x, s32 y, s32 z) {
     u8 *obj;
     s32 i;
 
     for (i = 0; i < 8; i++) {
         if (func_150A3794(D_800D34B8 + D_80088CF0[i] * 0x34, x, y, z) != 0) {
             if (D_80088CF8[i] != 0) {
-                obj = func_151149AC(D_80088CF8[i]);
+                obj = world_record_find(D_80088CF8[i]);
                 obj[0x73] = (obj[0x73] & ~3) | 3;
             } else {
                 func_150A2D44(D_80088CF0[i], 1);
@@ -35,15 +37,16 @@ s32 func_150DE8AC(s32 x, s32 y, s32 z) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/func_150DE8AC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/trigger_zones_check.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1510D66C(s32, s32 *, s32, s32);
-void func_1510DDF4(s32, s32, s32, s32, s32);
+s32 texture_cache_lookup(s32, s32 *, s32, s32);
+void segment_override_add(s32, s32, s32, s32, s32);
 extern s32 D_800905B4;
 
-void func_150DE9D8(u8 *arg0) {
+/* was func_150DE9D8 */
+void zone_debris_fall_update(u8 *arg0) {
     struct {
         s32 u54;
     } sp;
@@ -96,8 +99,8 @@ void func_150DE9D8(u8 *arg0) {
         var_s1 = (s32 *) ((u8 *) &D_800905B4 + (*(s32 *)((u8 *)arg0 + 0x7C)) * 8);
         var_s0 = 5;
         do {
-            temp_v0_2 = func_1510D66C(*var_s1, &sp.u54, 3, 0);
-            func_1510DDF4(arg0, temp_v0_2, (sp.u54 + temp_v0_2) - 0x200, var_s2, var_s0);
+            temp_v0_2 = texture_cache_lookup(*var_s1, &sp.u54, 3, 0);
+            segment_override_add(arg0, temp_v0_2, (sp.u54 + temp_v0_2) - 0x200, var_s2, var_s0);
             var_s0 += 2;
             var_s1++;
             var_s2 += 2;
@@ -105,19 +108,20 @@ void func_150DE9D8(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/func_150DE9D8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/zone_debris_fall_update.s")
 #endif
 #ifdef NON_MATCHING
-void func_150DEC58(u8 *arg0) {
-    (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) (s32) ((func_15048A40(((s32) (*(s32 *)((u8 *)arg0 + 0x7C)) >> 3) & 0xFF) * 10.2f) + 1130.0f);
-    (*(f32 *)((u8 *)arg0 + 0)) = (f32) (func_15048A40(((s32) (*(s32 *)((u8 *)arg0 + 0x80)) >> 3) & 0xFF) * 1.1f);
-    (*(f32 *)((u8 *)arg0 + 8)) = (f32) (func_15048A40(((s32) (*(s32 *)((u8 *)arg0 + 0x84)) >> 3) & 0xFF) * 1.1f);
+/* was func_150DEC58 */
+void obj_sine_wobble_update(u8 *arg0) {
+    (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) (s32) ((math_sin_u8(((s32) (*(s32 *)((u8 *)arg0 + 0x7C)) >> 3) & 0xFF) * 10.2f) + 1130.0f);
+    (*(f32 *)((u8 *)arg0 + 0)) = (f32) (math_sin_u8(((s32) (*(s32 *)((u8 *)arg0 + 0x80)) >> 3) & 0xFF) * 1.1f);
+    (*(f32 *)((u8 *)arg0 + 8)) = (f32) (math_sin_u8(((s32) (*(s32 *)((u8 *)arg0 + 0x84)) >> 3) & 0xFF) * 1.1f);
     (*(s32 *)((u8 *)arg0 + 0x7C)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x7C)) + (D_800BE9E4 * 0xC));
     (*(s32 *)((u8 *)arg0 + 0x80)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x80)) + (D_800BE9E4 * 0x10));
     (*(s32 *)((u8 *)arg0 + 0x84)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x84)) + (D_800BE9E4 * 0x18));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/func_150DEC58.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/obj_sine_wobble_update.s")
 #endif
 #ifdef NON_MATCHING
 void func_1514470C(u8 *, f32 *);
@@ -129,7 +133,8 @@ s32 memcpy(u8 *, void *, s32);
 // at the first object's position) towards the second object at speed 25..55 (x0.18 for kind 0xBF); the bolt's +0x110
 // gets {velocity, travel time = distance / speed, the flat side vector (-z, 0, x) and flat direction (x, 0, z) of the
 // normalised horizontal offset}. The timer restarts at 200..400.
-void func_150DED40(u8 *p) {
+/* was func_150DED40 */
+void beam_link_fire(u8 *p) {
     struct {
         u8 kind;            /* 0x00 */
         u8 u1;              /* 0x01 */
@@ -174,7 +179,7 @@ void func_150DED40(u8 *p) {
     }
     kinds[0] = 0xBE;
     kinds[1] = 0xBF;
-    t.kind = kinds[func_150ADA20() & 1];
+    t.kind = kinds[random_int() & 1];
     timer = (s16 *) (p + 0x28);
     func_1514470C(*(u8 **) (p + 0x2C), t.pos);
     func_1514470C(*(u8 **) (p + 0x30), to);
@@ -182,7 +187,7 @@ void func_150DED40(u8 *p) {
     d[1] = to[1] - t.pos[1];
     d[2] = to[2] - t.pos[2];
     func_15145128(d, rec.vel, &len, &unused);
-    speed = func_150ADA68() * 30.0f + 25.0f;
+    speed = random_float() * 30.0f + 25.0f;
     spd = speed;
     if (t.kind == 0xBF) {
         spd = speed * 0.18f;
@@ -210,7 +215,7 @@ void func_150DED40(u8 *p) {
     t.colour[1] = 0xFF;
     t.colour[2] = 0xFF;
     t.colour[3] = 0xFF;
-    func_150ADA68(); /* result unused */
+    random_float(); /* result unused */
     t.size[1] = 706.0f;
     t.size[0] = 706.0f;
     t.u28[0] = ((f32 *) D_800A5860)[0];
@@ -233,13 +238,14 @@ void func_150DED40(u8 *p) {
     if (e != NULL) {
         memcpy(e + 0x110, &rec, 0x28);
     }
-    *timer = (u32) func_150ADA20() % 201 + 200;
+    *timer = (u32) random_int() % 201 + 200;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/func_150DED40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/beam_link_fire.s")
 #endif
 
-s32 func_150DF04C(u8 *arg0) {
+/* was func_150DF04C */
+s32 bolt_move_step(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x34)) += ((*(f32 *)((u8 *)arg0 + 0x110)) * D_800BE9A4);
     (*(f32 *)((u8 *)arg0 + 0x38)) += ((*(f32 *)((u8 *)arg0 + 0x114)) * D_800BE9A4);
     (*(f32 *)((u8 *)arg0 + 0x3C)) += ((*(f32 *)((u8 *)arg0 + 0x118)) * D_800BE9A4);
@@ -251,26 +257,29 @@ s32 func_150DF04C(u8 *arg0) {
 }
 
 s32 sprite_quad_build_axes(s32, s32, s32, s16);
-s32 func_150DF0D8(s32 arg0, s16 arg1) {
+/* was func_150DF0D8 */
+s32 bolt_build_quad(s32 arg0, s16 arg1) {
     if (D_800DBFF0[D_80082FA0].unk388 < 5.0f) {
         return 0;
     }
     return sprite_quad_build_axes(arg0, arg0 + 0x120, arg0 + 0x12C, arg1);
 }
 
-void func_150DF1A8(u8 arg0, s32 arg1);
+void light_group_send_msg22(u8 arg0, s32 arg1);
 
-void func_150DF160(s32 arg0) {
+/* was func_150DF160 */
+void light_groups_send_msg22_all(s32 arg0) {
     u8 i;
 
     for (i = 0; i < 4; i++) {
-        func_150DF1A8(i, 1);
+        light_group_send_msg22(i, 1);
     }
 }
 
 extern u8 D_800A10DB[];
 extern u8 D_800A10FB[];
-void func_150DF1A8(u8 arg0, s32 arg1) {
+/* was func_150DF1A8 */
+void light_group_send_msg22(u8 arg0, s32 arg1) {
     s32 i = arg0 * 4;
     light_ctrl_broadcast(D_800A10DB[i], 0x22, 0);
     effect_broadcast_message(D_800A10FB[i], 0x22);

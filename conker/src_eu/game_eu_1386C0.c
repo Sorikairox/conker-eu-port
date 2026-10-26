@@ -41,7 +41,8 @@ extern s32 D_80091B9C;
 
 // effect_spawn_sum_counter: spawns a type-0xA effect (template D_80091B9C at 228, 252.59) whose words 8 / 0xC
 // pack the three arguments (a0 << 16 | a1, a2 << 16 | sum) and whose +0x14 is the sum a0 + a1 + a2.
-void func_1510AEB0(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_1510AEB0 */
+void effect_spawn_sum_counter(s32 arg0, s32 arg1, s32 arg2) {
     EffectTemplate1386C0 t;
     s32 sum;
 
@@ -73,5 +74,5 @@ void func_1510AEB0(s32 arg0, s32 arg1, s32 arg2) {
     func_15169ED8(&t);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1386C0/func_1510AEB0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1386C0/effect_spawn_sum_counter.s")
 #endif

@@ -24,7 +24,7 @@ extern f32 D_800C3A20[];
 extern s32 D_800DC450;
 extern f32 D_800D31D8;
 extern s32 D_800D3250[];
-void func_1512DAD0(struct108 *, s32, void *);
+void camera_queue_event(struct108 *, s32, void *);
 
 // camera_timed_record_update: steps timed camera record `idx` (D_800D31E0, 0x24 bytes, filled by camera script op 12:
 // +1 camera id, +2 marker, +4 s16 timer, +0xC flags, +0x10 f32 speed, +0x20 saved +0x3A4). State 1 starts it: saves the
@@ -53,8 +53,8 @@ s32 func_15096E78(s32 idx) {
         D_800C3A20[9] = *(f32 *) (mk + 0xC);
         D_800C3A20[2] = 0.0f;
         D_800C3A20[10] = *(f32 *) (mk + 0x10);
-        func_1512DAD0(cam, 5, NULL);
-        func_1512DAD0(cam, 7, D_800C3A20);
+        camera_queue_event(cam, 5, NULL);
+        camera_queue_event(cam, 7, D_800C3A20);
         if (!(*(s32 *) (rec + 0xC) & 1)) {
             *((u8 *) cam->unk3D0 + 7) = 0;
             *(s32 *) ((u8 *) cam->unk3D0 + 0x25C) |= 0x200;
@@ -74,7 +74,7 @@ s32 func_15096E78(s32 idx) {
         }
         *(f32 *) ((u8 *) cam + 0x3A4) = *(f32 *) (rec + 0x20);
         if (!(*(s32 *) (rec + 0xC) & 2)) {
-            func_1512DAD0(cam, 6, NULL);
+            camera_queue_event(cam, 6, NULL);
         }
         D_800D2DB4 = 0;
         if (!(*(s32 *) (rec + 0xC) & 1)) {
@@ -125,8 +125,8 @@ extern f32 D_800C3A20[];
 extern u8 D_800C3A80;
 extern s32 D_800DC740;
 extern s32 D_800898C0;
-void func_1512A390(struct108 *);
-void func_1512DAD0(struct108 *, s32, void *);
+void camera_update_eye_base(struct108 *);
+void camera_queue_event(struct108 *, s32, void *);
 s32 func_15084000(s32);
 void camera_set_followed_obj(struct108 *, s32);
 s32 func_15096DB0(s32);
@@ -138,7 +138,7 @@ extern s32 D_800DC450;
 /* camera_script_set: the "set" half of the camera script commands (table EU 80088894, the "get" half is
  * func_150979AC at 80088858). `id` picks the camera record D_800DBFF0[id] (0x9A0 bytes), `op` the command and
  * `cmd` its words (arguments from cmd + 8). Covers the camera position / target vectors (+0x2A4, +0x2BC, +0x2F8),
- * the door camera (op 10 / 11: the D_800C3A20 path record from a D_800DC450 marker, func_1512DAD0 modes 5 / 7 / 6,
+ * the door camera (op 10 / 11: the D_800C3A20 path record from a D_800DC450 marker, camera_queue_event modes 5 / 7 / 6,
  * object 0's flag 0x200), timed camera records (op 12, D_800D31E0), fixed-point (/ 65536) speeds and the
  * remaining per-camera settings. Returns 1 for ops 4-9, 0 otherwise; 0 when id > D_80082FA0. */
 s32 func_15097188(s32 id, s32 op, u8 *cmd) {
@@ -156,7 +156,7 @@ s32 func_15097188(s32 id, s32 op, u8 *cmd) {
         cam->unk2FC = (f32) a[3];
         cam->unk358 = cam->unk2FC;
         cam->unk300 = (f32) a[4];
-        func_1512A390(cam);
+        camera_update_eye_base(cam);
         return 0;
     case 3: /* camera position */
         cam->unk2A4 = (f32) a[2];
@@ -204,12 +204,12 @@ s32 func_15097188(s32 id, s32 op, u8 *cmd) {
         D_800C3A20[2] = 0.0f;
         D_800C3A20[10] = *(f32 *) (mk + 0x10);
         D_800C3A80 = 0;
-        func_1512DAD0(cam, 5, NULL);
-        func_1512DAD0(cam, 7, D_800C3A20);
+        camera_queue_event(cam, 5, NULL);
+        camera_queue_event(cam, 7, D_800C3A20);
         *(s32 *) ((u8 *) D_800CC2D0 + 0x25C) |= 0x200;
         return 0;
     case 11: /* door camera off */
-        func_1512DAD0(cam, 6, NULL);
+        camera_queue_event(cam, 6, NULL);
         D_800D2DB4 = 0;
         *(s32 *) ((u8 *) D_800CC2D0 + 0x25C) &= ~0x200;
         return 0;
@@ -245,7 +245,7 @@ s32 func_15097188(s32 id, s32 op, u8 *cmd) {
         cam->unk2FC = (f32) a[6];
         cam->unk358 = cam->unk2FC;
         cam->unk300 = (f32) a[7];
-        func_1512A390(cam);
+        camera_update_eye_base(cam);
         return 0;
     case 15:
         cam->unk198 = (f32) a[2];
@@ -261,7 +261,7 @@ s32 func_15097188(s32 id, s32 op, u8 *cmd) {
         return 0;
     case 17:
         if ((D_800D3C60 == 5 && a[4] != 0) || *(s32 *) ((u8 *) &D_800DC740 + id * 0x68) == 5) {
-            func_1512D748(cam, a[2], a[3]);
+            camera_shake_start(cam, a[2], a[3]);
             return 1;
         }
         return 0;
@@ -361,7 +361,7 @@ s32 func_150979AC(s32 arg0, s32 arg1, u8 *arg2) {
         return (s32) sqrtf((temp_f2 * temp_f2) + (temp_f12 * temp_f12));
     case 33:
         sp.u4C = temp_a3;
-        temp_v0 = func_1505EEF4((*(s32 *)((u8 *)arg2 + 8)) & 0xFFF, temp_a3);
+        temp_v0 = obj_find_by_spawn((*(s32 *)((u8 *)arg2 + 8)) & 0xFFF, temp_a3);
         sp.u28 = temp_v0;
         if (temp_v0 == NULL) {
             return -1;
@@ -372,7 +372,7 @@ s32 func_150979AC(s32 arg0, s32 arg1, u8 *arg2) {
         sp.u3C = sinf(temp_f12_2);
         sp.u40 = 0.0f;
         sp.u44 = cosf(temp_f12_2);
-        func_15048F90((struct17 *) &temp_a3->unk2F8, (struct17 *) &sp.u28->x_position, &sp.u30);
+        vec3_diff((struct17 *) &temp_a3->unk2F8, (struct17 *) &sp.u28->x_position, &sp.u30);
         sp.u30.unk4 = 0.0f;
         if (func_150ADDE0(&sp.u3C, &sp.u30) >= 0.0f) {
             return -1;
@@ -389,7 +389,7 @@ block_13:
 #ifdef NON_MATCHING
 extern s32 D_800D3250[];
 /* Pushes player `id` back along the direction between its two position vectors (+0x2A4 and +0x2F8): d =
- * normalised direction (func_15048F90 / func_1504917C); both vectors move by d * (-2.5, -2.0, -2.5) times the
+ * normalised direction (vec3_diff / vec3_normalize); both vectors move by d * (-2.5, -2.0, -2.5) times the
  * per-player factor D_800D3250[id]. Only while D_800D2DB4 is set. Returns the record (v0 holds it on both paths;
  * the caller in game_14FF90 declares s32 and ignores it). */
 s32 func_15097BA8(s32 id) {
@@ -401,8 +401,8 @@ s32 func_15097BA8(s32 id) {
     if (D_800D2DB4 != 0) {
         a = (struct17 *) &r->unk2A4;
         b = (struct17 *) &r->unk2F8;
-        func_15048F90(a, b, &d);
-        func_1504917C(&d, &d);
+        vec3_diff(a, b, &d);
+        vec3_normalize(&d, &d);
         a->unk0 += d.unk0 * -2.5f * (f32) D_800D3250[id];
         a->unk4 += d.unk4 * -2.0f * (f32) D_800D3250[id];
         a->unk8 += d.unk8 * -2.5f * (f32) D_800D3250[id];

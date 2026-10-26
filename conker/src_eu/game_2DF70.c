@@ -5,7 +5,8 @@
 
 #include "macros.h"
 
-void func_15000AC0(void) {
+/* was func_15000AC0 */
+void texture_scroll_clear(void) {
     D_800D9E64 = (u8)0;
 }
 
@@ -18,8 +19,8 @@ extern s32 D_800DC2E0;        /* per player: two Mtx (one per frame buffer) */
 extern Vtx *D_800DC2B8[][2];  /* per player: two vertex buffers (one per frame buffer) */
 extern s32 *D_8008955C[];
 void *allocate_memory(s32, s32, s32, s32);
-s32 func_1510D66C(s32, s32 *, s32, s32);
-void func_15111DD8(void);
+s32 texture_cache_lookup(s32, s32 *, s32, s32);
+void star_field_generate(void);
 
 /* Sky gradient of mode 2: a start colour, then three segments (end colour, end row) blended linearly row by
  * row; the rows after the last segment keep its colour. Picked by level (D_800BE9F0). */
@@ -45,18 +46,19 @@ static const SkyGradient sSkyGradients[] = {
 };
 
 /*
- * P74: per-level setup of the sky / backdrop buffers (called by func_15007B3C with D_800BE9F0; the argument is
+ * P74: per-level setup of the sky / backdrop buffers (called by level_load with D_800BE9F0; the argument is
  * unused). D_800DC2D8[0..2] = level header +5..+7. Backdrop mode = header +8 (4 becomes 2 when D_800BE616 is set):
  *  - 4: per player (0..D_80082FA0) a vertex buffer of 2 x n vertices (n = 0x1C0 with D_80082FA0 == 1, else 0x130),
- *       D_800DC2B0 loaded as asset (0xD, header +9) by func_1502B7F0, 0x168 entries of D_8008955C[+9] requested
+ *       D_800DC2B0 loaded as asset (0xD, header +9) by asset_load_ptr, 0x168 entries of D_8008955C[+9] requested
  *       when D_80038080 is set, two Mtx per player in D_800DC2E0, D_800DC2DB = (level == 0x3C).
  *  - 2: D_800DC2B0 = 256-row sky gradient texture (4 RGBA32 texels per row, sSkyGradients), two Mtx per player in
  *       D_800DC2E0, and per player two 4-vertex quads (+-0x6D6, z -1000, s 0x2000) in D_800DC2B8 (read by
  *       func_1510FD50 / game_eu_FF530.c).
- *  - 1: func_15111DD8.
+ *  - 1: star_field_generate.
  * Always: D_800DC2DC = bit 0 of D_800D2E4C->unk14.
  */
-void func_15000AD0(s32 level) {
+/* was func_15000AD0 */
+void level_setup_sky_backdrop(s32 level) {
     const SkyGradient *g;
     const SkySegment *s;
     u32 *tex;
@@ -86,10 +88,10 @@ void func_15000AD0(s32 level) {
             D_800DC2B8[p][0] = buf;
             D_800DC2B8[p][1] = buf + n;
         }
-        func_1502B7F0(&D_800DC2B0, 2, 0xD, D_800B0DF0->unk9);
+        asset_load_ptr(&D_800DC2B0, 2, 0xD, D_800B0DF0->unk9);
         if (D_80038080 != 0) {
             for (i = 0; i < 0x168; i++) {
-                func_1510D66C(*D_8008955C[D_800B0DF0->unk9] + i, NULL, 0x3F, 0);
+                texture_cache_lookup(*D_8008955C[D_800B0DF0->unk9] + i, NULL, 0x3F, 0);
             }
         }
         D_800DC2E0 = (s32) allocate_memory((D_80082FA0 + 1) * 2 * sizeof(Mtx), 1, 2, 0);
@@ -161,13 +163,13 @@ void func_15000AD0(s32 level) {
             }
         }
     } else if (D_800B0DF0->unk8 == 1) {
-        func_15111DD8();
+        star_field_generate();
     }
 
     D_800DC2DC = (D_800D2E4C->unk14 & 1) ? 1 : 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/func_15000AD0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/level_setup_sky_backdrop.s")
 #endif
 // loops!
 #ifdef NON_MATCHING
@@ -183,7 +185,8 @@ extern u8 D_800D3088;     /* 1 while object DLs are scanned: segment addresses l
  * fields) append triangles at D_800DBE38: the 3 vertex pointers and the bounds (x / z in D_800DC270, y in D_800DC274;
  * full range when D_800DBE63 is set). The bounds are recomputed only when cache entry 0 holds a pointer above
  * 0x100000; otherwise the previous triangle's bounds are written again. */
-void func_15001460(s32 arg0) {
+/* was func_15001460 */
+void collision_scan_level_dl(s32 arg0) {
     s32 verts[35];
     s16 idx[12];
     s16 vmax[3];
@@ -298,5 +301,5 @@ void func_15001460(s32 arg0) {
     D_800DBE38 = count;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/func_15001460.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/collision_scan_level_dl.s")
 #endif

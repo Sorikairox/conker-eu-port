@@ -2,15 +2,17 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_1511F8A4(u8 *arg0);
-u8 *func_151149AC(u8);
+void scenery_attach_to_record(u8 *arg0);
+u8 *world_record_find(u8);
 #endif
 
 
-void func_15115630(s32 arg0) {
+/* was func_15115630 */
+void scenery_handler_noop(s32 arg0) {
 }
 
-void func_1511563C(u8 *arg0) {
+/* was func_1511563C */
+void scenery_spin_z_update(u8 *arg0) {
     f32 temp_f0;
 
     (*(f32 *)((u8 *)arg0 + 0x68)) = (f32) ((f32) (((s32) (*(s32 *)((u8 *)arg0 + 0x3C)) >> 0x10) * D_800BE9E4) * 0.00390625f);
@@ -25,7 +27,8 @@ void func_1511563C(u8 *arg0) {
     }
 }
 
-void func_151156DC(u8 *arg0) {
+/* was func_151156DC */
+void scenery_spin_y_update(u8 *arg0) {
     f32 temp_f0;
 
     (*(f32 *)((u8 *)arg0 + 0x64)) = (f32) ((f32) (((s32) (*(s32 *)((u8 *)arg0 + 0x3C)) >> 0x10) * D_800BE9E4) * 0.00390625f);
@@ -40,7 +43,8 @@ void func_151156DC(u8 *arg0) {
     }
 }
 
-void func_1511577C(u8 *arg0) {
+/* was func_1511577C */
+void scenery_spin_x_update(u8 *arg0) {
     f32 temp_f0;
 
     (*(f32 *)((u8 *)arg0 + 0x60)) = (f32) ((f32) (((s32) (*(s32 *)((u8 *)arg0 + 0x3C)) >> 0x10) * D_800BE9E4) * 0.00390625f);
@@ -55,11 +59,13 @@ void func_1511577C(u8 *arg0) {
     }
 }
 
-void func_1511581C(s32 arg0) {
+/* was func_1511581C */
+void scenery_handler_noop2(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_15115828(u8 *arg0) {
+/* was func_15115828 */
+void scenery_sink_when_stood_update(u8 *arg0) {
     s16 temp_v1;
     s32 temp_a1;
     s32 var_v0;
@@ -80,10 +86,11 @@ void func_15115828(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15115828.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_sink_when_stood_update.s")
 #endif
 #ifdef NON_MATCHING
-void func_151158E8(u8 *arg0) {
+/* was func_151158E8 */
+void scenery_crumble_platform_update(u8 *arg0) {
     f32 sp34;
     f32 sp1C;
     f32 temp_f0;
@@ -168,15 +175,16 @@ void func_151158E8(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151158E8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_crumble_platform_update.s")
 #endif
 #ifdef NON_MATCHING
-// lift_y_update: world-object mover (update table next to func_15115CDC): moves the object's y (+0x12, s16) between
+// lift_y_update: world-object mover (update table next to scenery_trigger_move_update): moves the object's y (+0x12, s16) between
 // its rest height (+0x7C, taken from y on the first call) and the target in the params word +0x3C (low half), in
 // `steps` (byte 1) equal steps, with a pause of byte 0 + 1 frames. Timer +0x80: > 0 = going up (counts down at
 // the target), < 0 = waiting to return (counts up), 0 = at rest (starts again by itself when flag 4 of +0x4F is set)
 // or going back down. +0x5C gets this frame's y change.
-void func_15115B40(u8 *obj) {
+/* was func_15115B40 */
+void scenery_lift_y_update(u8 *obj) {
     s32 params = *(s32 *) (obj + 0x3C);
     s32 steps = (params >> 16) & 0xFF;
     s32 pause = ((params >> 24) & 0xFF) + 1;
@@ -249,11 +257,12 @@ void func_15115B40(u8 *obj) {
     *(s16 *) (obj + 0x5C) = *(s16 *) (obj + 0x12) - old_y;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15115B40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_lift_y_update.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_15115CDC(u8 *arg0) {
+/* was func_15115CDC */
+void scenery_trigger_move_update(u8 *arg0) {
     u8 sp97;
     s16 sp94;
     s16 sp8A;
@@ -407,9 +416,10 @@ void func_15115CDC(u8 *arg0) {
     (*(s32 *)((u8 *)arg0 + 0x84)) = (s32) ((var_s1 << 0x10) | sp4C);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15115CDC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_trigger_move_update.s")
 #endif
-void func_1511638C(u8 *arg0, u8 *arg1) {
+/* was func_1511638C */
+void scenery_push_accumulate(u8 *arg0, u8 *arg1) {
     f32 sp1C;
     f32 temp_f0;
     f32 temp_f12;
@@ -426,7 +436,8 @@ void func_1511638C(u8 *arg0, u8 *arg1) {
 }
 
 #ifdef NON_MATCHING
-void func_1511645C(u8 *arg0, u8 *arg1) {
+/* was func_1511645C */
+void scenery_push_accumulate_boost(u8 *arg0, u8 *arg1) {
     f32 sp1C;
     f32 sp18;
     f32 temp_f0;
@@ -438,7 +449,7 @@ void func_1511645C(u8 *arg0, u8 *arg1) {
     temp_f14 = (*(f32 *)((u8 *)arg0 + 0x80));
     sp1C = temp_f12;
     sp18 = temp_f14;
-    func_1511638C(arg0, arg1);
+    scenery_push_accumulate(arg0, arg1);
     if ((*(u16 *)((u8 *)arg1 + 0x84)) == 0x4B) {
         temp_f0 = (*(f32 *)((u8 *)arg0 + 0x7C));
         temp_f2 = (*(f32 *)((u8 *)arg0 + 0x80));
@@ -447,10 +458,11 @@ void func_1511645C(u8 *arg0, u8 *arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511645C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_push_accumulate_boost.s")
 #endif
 #ifdef NON_MATCHING
-void func_151164E8(u8 *arg0) {
+/* was func_151164E8 */
+void scenery_tilt_from_push_update(u8 *arg0) {
     f32 temp_f0;
     f32 var_f2;
     s32 temp_a1;
@@ -477,10 +489,11 @@ block_6:
     (*(f32 *)((u8 *)arg0 + 0x7C)) = 0.0f;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151164E8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_tilt_from_push_update.s")
 #endif
 #ifdef NON_MATCHING
-void func_151165D8(u8 *arg0) {
+/* was func_151165D8 */
+void scenery_uv_scroll_update(u8 *arg0) {
     s32 temp_t4;
     s32 var_a2;
     s32 var_t0;
@@ -498,14 +511,15 @@ void func_151165D8(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151165D8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_uv_scroll_update.s")
 #endif
 #ifdef NON_MATCHING
 s32 func_15195FB0(u8 *, s32, s32, s32, s32, s32, s32);
 
 // object_start_pending_anim: if the object has no animation handle yet (+0x7C), starts the one requested in +0x3C
 // (bits 0-14 id, bits 15+ passed as is, bits 16-23 / 24-31 as the last two arguments) and clears the request.
-void func_15116690(u8 *obj) {
+/* was func_15116690 */
+void scenery_start_pending_anim(u8 *obj) {
     s32 req;
 
     if (*(s32 *)(obj + 0x7C) != 0) {
@@ -516,14 +530,15 @@ void func_15116690(u8 *obj) {
     *(s32 *)(obj + 0x3C) = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116690.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_start_pending_anim.s")
 #endif
 
 #ifdef NON_MATCHING
-f32 func_1510FBC8(f32, f32, f32);
+f32 collision_object_floor_height(f32, f32, f32);
 extern u16 D_800CC774;
 
-void func_151166FC(u8 *arg0) {
+/* was func_151166FC */
+void scenery_float_on_floor_update(u8 *arg0) {
     s16 sp1E;
     f32 temp_f0;
     s16 temp_v0;
@@ -533,7 +548,7 @@ void func_151166FC(u8 *arg0) {
 
     temp_v0 = (*(s16 *)((u8 *)arg0 + 0x12));
     sp1E = temp_v0;
-    temp_f0 = func_1510FBC8((f32) (*(s16 *)((u8 *)arg0 + 0x10)), (f32) temp_v0, (f32) (*(s16 *)((u8 *)arg0 + 0x14)));
+    temp_f0 = collision_object_floor_height((f32) (*(s16 *)((u8 *)arg0 + 0x10)), (f32) temp_v0, (f32) (*(s16 *)((u8 *)arg0 + 0x14)));
     (*(f32 *)((u8 *)arg0 + 0x7C)) = temp_f0;
     if (fabsf(temp_f0 - (f32) (*(s16 *)((u8 *)arg0 + 0x12))) > 200.0f) {
         (*(s32 *)((u8 *)arg0 + 0x3C)) = 0;
@@ -553,13 +568,14 @@ void func_151166FC(u8 *arg0) {
     (*(s16 *)((u8 *)arg0 + 0x5C)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x12)) - sp1E);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151166FC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_float_on_floor_update.s")
 #endif
 #ifdef NON_MATCHING
 // object_bob_update: cosine bob around the base value +0x12 (s16): the offset +0x18 (f32) becomes
 // cos(phase +0x7C * 360/65536) * amplitude (low half of +0x3C, s16), the phase advances by the speed (high half of
 // +0x3C) * D_800BE9E4, and +0x5C (s16) = the change of the bobbed value (base + offset, truncated) this frame.
-void func_15116854(u8 *obj) {
+/* was func_15116854 */
+void scenery_bob_update(u8 *obj) {
     s16 before;
     s32 cfg;
     f32 amplitude;
@@ -576,11 +592,12 @@ void func_15116854(u8 *obj) {
     *(s16 *) (obj + 0x5C) = (s32) (((f32) *(s16 *) (obj + 0x12) + offset) - before);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116854.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_bob_update.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_15116940(u8 *arg0) {
+/* was func_15116940 */
+void scenery_bob_rock_update(u8 *arg0) {
     f32 sp2C;
     s32 sp28;
     s32 sp24;
@@ -613,19 +630,20 @@ void func_15116940(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x60)) = (f32) (temp_f2 - sp18);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116940.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_bob_rock_update.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15116E08(s32 arg0, s32 arg1, s32 arg2, u8 *arg3);
+s32 scenery_push_strength(s32 arg0, s32 arg1, s32 arg2, u8 *arg3);
 
 // platform_drift_update: speed (s16 +0x3C) of a drifting platform. With flag 4 (+0x4F) a push from the player
-// (func_15116E08 / 8; only forward pushes with `flags` bit 1) adds to it and clears the +0x80 timer. Without the timer
+// (scenery_push_strength / 8; only forward pushes with `flags` bit 1) adds to it and clears the +0x80 timer. Without the timer
 // the speed loses 0.32 % and one unit per frame towards 0; on reaching 0 without a push it starts a 20-frame timer
 // (or, if the timer had run out (-1), stops). While the timer runs the speed grows by one unit away from 0 and the
-// timer counts down by the frame step (ends at -1). Then func_151156DC moves it; with a `sound` id, a looping sound
+// timer counts down by the frame step (ends at -1). Then scenery_spin_y_update moves it; with a `sound` id, a looping sound
 // (pitch 20000 + 12767 * min(|+0x64| * 0.1, 1), volume that factor * `dist` - 500) is started at the position while
 // +0x64 > 0.01 (handle at +0x74), updated, or stopped and cleared.
-void func_15116A8C(u8 *obj, s32 flags, s32 sound, f32 dist) {
+/* was func_15116A8C */
+void scenery_platform_drift_update(u8 *obj, s32 flags, s32 sound, f32 dist) {
     s32 push;
     s32 speed;
     s32 drag;
@@ -637,7 +655,7 @@ void func_15116A8C(u8 *obj, s32 flags, s32 sound, f32 dist) {
     if (!(obj[0x4F] & 4)) {
         push = 0;
     } else {
-        push = func_15116E08(*(s16 *) (obj + 0x10), *(s16 *) (obj + 0x14), (s32) (obj + 0x7C), (u8 *) D_800CC2D0) >> 3;
+        push = scenery_push_strength(*(s16 *) (obj + 0x10), *(s16 *) (obj + 0x14), (s32) (obj + 0x7C), (u8 *) D_800CC2D0) >> 3;
     }
     if ((flags & 1) && push < 0) {
         push = 0;
@@ -687,7 +705,7 @@ void func_15116A8C(u8 *obj, s32 flags, s32 sound, f32 dist) {
         }
     }
     *(s16 *) (obj + 0x3C) = speed;
-    func_151156DC(obj);
+    scenery_spin_y_update(obj);
     if (sound == 0) {
         return;
     }
@@ -712,11 +730,12 @@ void func_15116A8C(u8 *obj, s32 flags, s32 sound, f32 dist) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116A8C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_platform_drift_update.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15116E08(s32 arg0, s32 arg1, s32 arg2, u8 *arg3) {
+/* was func_15116E08 */
+s32 scenery_push_strength(s32 arg0, s32 arg1, s32 arg2, u8 *arg3) {
     struct {
         f32 u1C;
         u8 pad20[0x4];
@@ -725,12 +744,13 @@ s32 func_15116E08(s32 arg0, s32 arg1, s32 arg2, u8 *arg3) {
 
     sp.u1C = (f32) ((s32) (*(f32 *)((u8 *)arg3 + 0x14)) - arg0);
     sp.u24 = (f32) ((s32) (*(f32 *)((u8 *)arg3 + 0x1C)) - arg1);
-    return (s32) ((*(f32 *)((u8 *)arg3 + 0x3C)) * func_15048A40(((0x40 - ((s32) (*(u16 *)((u8 *)arg3 + 0x76)) >> 8)) - func_150490A8(&sp.u1C, arg1, arg0)) & 0xFF));
+    return (s32) ((*(f32 *)((u8 *)arg3 + 0x3C)) * math_sin_u8(((0x40 - ((s32) (*(u16 *)((u8 *)arg3 + 0x76)) >> 8)) - vec3_heading_u8(&sp.u1C, arg1, arg0)) & 0xFF));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116E08.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_push_strength.s")
 #endif
-void func_15116EA4(s32 arg0) {
+/* was func_15116EA4 */
+void scenery_touch_noop(s32 arg0) {
 }
 
 typedef struct {
@@ -750,7 +770,8 @@ typedef struct {
     struct_15116EB0_2 *unk31C;
 } struct_15116EB0_1;
 
-void func_15116EB0(struct_15116EB0 *arg0, struct_15116EB0_1 *arg1) {
+/* was func_15116EB0 */
+void scenery_mover_open_on_use(struct_15116EB0 *arg0, struct_15116EB0_1 *arg1) {
     if (arg0->unk4F & 4) {
         if (!(arg0->unk73 & 3) && !(arg0->unk73 & 4)) {
             if (arg1->unk31C->unk57 == 1) {
@@ -762,18 +783,19 @@ void func_15116EB0(struct_15116EB0 *arg0, struct_15116EB0_1 *arg1) {
 }
 
 #ifdef NON_MATCHING
-void func_15116F34(u8 *obj);
+void scenery_mover_step(u8 *obj);
 #endif
-void func_15116F04(u8 *arg0) {
+/* was func_15116F04 */
+void scenery_mover_step_if_opening(u8 *arg0) {
     if (arg0[0x73] & 2) {
-        func_15116F34(arg0);
+        scenery_mover_step(arg0);
     }
 }
 
 #ifdef NON_MATCHING
 // mover_step: moves the object's s16 position +0x10 towards its s32 target +0x7C (+0x3C: sound entry index >> 10,
 // speed in the other bits; +0x5A gets the per-axis delta). At the target the deltas are cleared and the entry's
-// stop sound plays if the move sound was on (+0x74); entries with a near-arrival sound go to func_1511712C;
+// stop sound plays if the move sound was on (+0x74); entries with a near-arrival sound go to scenery_mover_step_sfx;
 // otherwise the move sound starts (unless +0x74) and each axis steps by (speed * D_800BE9E4) / 2, clamped.
 typedef struct {
     /* 0x0 */ s16 move_sfx;
@@ -784,11 +806,12 @@ typedef struct {
     /* 0xA */ s16 near_lead;
 } MoverSfx; // 0xC
 extern MoverSfx D_80089600[];
-s32 func_151152A4(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags);
+s32 world_object_sound_play(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags);
 
-void func_1511712C(u8 *obj);
+void scenery_mover_step_sfx(u8 *obj);
 
-void func_15116F34(u8 *obj) {
+/* was func_15116F34 */
+void scenery_mover_step(u8 *obj) {
     s32 bits = *(s32 *)(obj + 0x3C);
     s32 kind = bits >> 10;
     s16 *pos = (s16 *)(obj + 0x10);
@@ -803,18 +826,18 @@ void func_15116F34(u8 *obj) {
         delta[0] = delta[2];
         if (*(u16 *)(obj + 0x74) != 0) {
             if (kind != 0 && D_80089600[kind].stop_sfx != 0) {
-                func_151152A4(obj, D_80089600[kind].stop_sfx, 0x5DC0, 0x7D0, 0xFA0, 4);
+                world_object_sound_play(obj, D_80089600[kind].stop_sfx, 0x5DC0, 0x7D0, 0xFA0, 4);
             }
             *(u16 *)(obj + 0x74) = 0;
         }
         return;
     }
     if (kind != 0 && D_80089600[kind].near_sfx != 0) {
-        func_1511712C(obj);
+        scenery_mover_step_sfx(obj);
         return;
     }
     if (kind != 0 && *(u16 *)(obj + 0x74) == 0 && D_80089600[kind].move_sfx != 0) {
-        func_151152A4(obj, D_80089600[kind].move_sfx, 0x5DC0, 0x7D0, 0xFA0, 0);
+        world_object_sound_play(obj, D_80089600[kind].move_sfx, 0x5DC0, 0x7D0, 0xFA0, 0);
     }
     step = ((bits & 0xFFFF03FF) * D_800BE9E4) >> 1;
     for (i = 0; i < 3; i++) {
@@ -836,16 +859,17 @@ void func_15116F34(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116F34.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_mover_step.s")
 #endif
 
 #ifdef NON_MATCHING
-// mover_step_sfx: func_15116F34's path for movers whose sound entry has a near-arrival sound: starts the move sound
+// mover_step_sfx: scenery_mover_step's path for movers whose sound entry has a near-arrival sound: starts the move sound
 // (entry +0, unless +0x74 says it already plays), steps the s16 position +0x10 towards the s32 target +0x7C by
 // ((+0x3C & 0xFFFF03FF) * D_800BE9E4) / 2 per axis (clamped; +0x5A gets the per-axis delta) and plays the entry's
 // +8 sound once the largest remaining distance minus +0xA * speed / 2 drops to 0 (on the frame it crosses, or
 // when the move sound started this frame).
-void func_1511712C(u8 *obj) {
+/* was func_1511712C */
+void scenery_mover_step_sfx(u8 *obj) {
     s32 bits = *(s32 *)(obj + 0x3C);
     s32 kind = bits >> 10;
     s32 speed = bits & 0xFFFF03FF;
@@ -859,7 +883,7 @@ void func_1511712C(u8 *obj) {
     s32 i;
 
     if (kind != 0 && *(u16 *)(obj + 0x74) == 0 && D_80089600[kind].move_sfx != 0) {
-        func_151152A4(obj, D_80089600[kind].move_sfx, 0x5DC0, 0x7D0, 0xFA0, 0);
+        world_object_sound_play(obj, D_80089600[kind].move_sfx, 0x5DC0, 0x7D0, 0xFA0, 0);
         started = TRUE;
     }
     step = (speed * D_800BE9E4) >> 1;
@@ -885,19 +909,20 @@ void func_1511712C(u8 *obj) {
     if (kind != 0 && D_80089600[kind].near_sfx != 0) {
         farthest -= (D_80089600[kind].near_lead * speed) >> 1;
         if (farthest <= 0 && (-step < farthest || started)) {
-            func_151152A4(obj, D_80089600[kind].near_sfx, 0x5DC0, 0x7D0, 0xFA0, 0);
+            world_object_sound_play(obj, D_80089600[kind].near_sfx, 0x5DC0, 0x7D0, 0xFA0, 0);
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511712C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_mover_step_sfx.s")
 #endif
 
 #ifdef NON_MATCHING
 /* spin_angles_update: three angles in degrees at +0x00 (f32[3]) turn by their rates +0x60 (f32[3]) times the ticks
  * D_800BE9E4 and stay in [0, 360); each rate first moves toward its target +0x7C (f32[3]) by +0x3C / 256 (s32) without
  * overshooting. No direct caller (reached through a table); the asm's v0 is the loop bound 0xC, not a result. */
-void func_151172FC(u8 *o) {
+/* was func_151172FC */
+void scenery_spin_angles_update(u8 *o) {
     f32 *angle = (f32 *) o;
     f32 *rate = (f32 *) (o + 0x60);
     f32 *target = (f32 *) (o + 0x7C);
@@ -928,12 +953,12 @@ void func_151172FC(u8 *o) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151172FC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_spin_angles_update.s")
 #endif
 
 #ifdef NON_MATCHING
 s16 *allocate_memory(s32, s32, s32, s32);
-/* func_15117424 morph settings, indexed by +0x3C & 0xFFFF: ROM block (index into D_8002AE00) and keyframe count */
+/* scenery_mesh_morph_update morph settings, indexed by +0x3C & 0xFFFF: ROM block (index into D_8002AE00) and keyframe count */
 typedef struct {
     u8 block;
     u8 frames;
@@ -947,7 +972,8 @@ extern s32 D_8002AE00[][2]; /* ROM start / end of each block */
 // (the last keyframe blends to itself at 1); each vertex (0x10-byte records in the current buffer, +0x20 / +0x24 by
 // D_800BE9C0) becomes the blended point plus the object origin (+0x10 / +0x12 / +0x14; keyframe y goes to vertex +4,
 // z to +2). Then the position moves towards the target +0x7C by the speed +0x3C >> 16 without overshooting.
-void func_15117424(u8 *obj) {
+/* was func_15117424 */
+void scenery_mesh_morph_update(u8 *obj) {
     s32 info = *(s32 *) (obj + 0x3C);
     Morph15117424 *m = &D_800896C0[info & 0xFFFF];
     s32 *block = D_8002AE00[m->block];
@@ -1009,17 +1035,18 @@ void func_15117424(u8 *obj) {
     *(s32 *) (obj + 0x84) = pos;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15117424.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_mesh_morph_update.s")
 #endif
 
 #ifdef NON_MATCHING
 // swing_angle_step: spring-damped swing of one angle (degrees) of a swinging object towards its rest angle (the signed
-// low 10 bits of +0x3C); returns the new angle (callers func_15117A20 / 15117A48 / 15117A70 pick the axis). Speed
+// low 10 bits of +0x3C); returns the new angle (callers scenery_swing_z_update / 15117A48 / 15117A70 pick the axis). Speed
 // +0x84, spring +0x80, damping +0x7C. At rest at the target nothing happens; a swing that starts from rest plays the
 // move sound of the D_80089600 entry (+0x3C >> 10). The speed gains spring * |offset| towards the target
-// (func_15048A70 = signed angle difference) and is damped; when both are below 0.01 the angle snaps to the target.
+// (math_angle_diff_deg = signed angle difference) and is damped; when both are below 0.01 the angle snaps to the target.
 // The angle stays in [0, 360).
-f32 func_15117858(f32 *arg0, f32 angle) {
+/* was func_15117858 */
+f32 scenery_swing_angle_step(f32 *arg0, f32 angle) {
     u8 *obj = (u8 *) arg0;
     f32 damp = *(f32 *) (obj + 0x7C);
     s32 params = *(s32 *) (obj + 0x3C);
@@ -1034,10 +1061,10 @@ f32 func_15117858(f32 *arg0, f32 angle) {
     }
     kind = params >> 10;
     if (speed == 0.0f && kind != 0 && D_80089600[kind].move_sfx != 0) {
-        func_151152A4(obj, D_80089600[kind].move_sfx, 0x5DC0, 0xC8, 0x9C4, 0);
+        world_object_sound_play(obj, D_80089600[kind].move_sfx, 0x5DC0, 0xC8, 0x9C4, 0);
     }
     angle += speed * (f32) D_800BE9E4;
-    diff = func_15048A70(angle, rest);
+    diff = math_angle_diff_deg(angle, rest);
     if (0.0f < diff) {
         speed += fabsf(diff) * spring;
     } else {
@@ -1056,28 +1083,32 @@ f32 func_15117858(f32 *arg0, f32 angle) {
     return angle;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15117858.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_swing_angle_step.s")
 #endif
 
-void func_15117A20(f32 *arg0) {
-    arg0[2] = func_15117858(arg0, arg0[2]);
+/* was func_15117A20 */
+void scenery_swing_z_update(f32 *arg0) {
+    arg0[2] = scenery_swing_angle_step(arg0, arg0[2]);
 }
 
-void func_15117A48(f32 *arg0) {
-    arg0[1] = func_15117858(arg0, arg0[1]);
+/* was func_15117A48 */
+void scenery_swing_y_update(f32 *arg0) {
+    arg0[1] = scenery_swing_angle_step(arg0, arg0[1]);
 }
 
-void func_15117A70(f32 *arg0) {
-    arg0[0] = func_15117858(arg0, arg0[0]);
+/* was func_15117A70 */
+void scenery_swing_x_update(f32 *arg0) {
+    arg0[0] = scenery_swing_angle_step(arg0, arg0[0]);
 }
 
 #ifdef NON_MATCHING
-// pendulum_angle_step: like func_15117858 with a bounce instead of a spring: the swing speed (+0x84) grows by
+// pendulum_angle_step: like scenery_swing_angle_step with a bounce instead of a spring: the swing speed (+0x84) grows by
 // +0x80 * D_800BE9E4 towards the rest angle (signed low 10 bits of +0x3C); when the angle crosses the rest angle it
 // lands on it and the speed reverses scaled by +0x7C (-bounce * speed). A swing that starts from rest plays the
 // move sound of the D_80089600 entry (+0x3C >> 10). Near rest (|offset| < 2, |speed| < 1) it stops; the angle
-// stays in [0, 360). Returns the new angle (callers func_15117CF0 / 15117D18 pick the axis).
-f32 func_15117A98(f32 *arg0, f32 angle) {
+// stays in [0, 360). Returns the new angle (callers scenery_pendulum_x_update / 15117D18 pick the axis).
+/* was func_15117A98 */
+f32 scenery_pendulum_angle_step(f32 *arg0, f32 angle) {
     u8 *obj = (u8 *) arg0;
     f32 bounce = *(f32 *) (obj + 0x7C);
     f32 accel = *(f32 *) (obj + 0x80) * (f32) D_800BE9E4;
@@ -1093,11 +1124,11 @@ f32 func_15117A98(f32 *arg0, f32 angle) {
     }
     kind = params >> 10;
     if (speed == 0.0f && kind != 0 && D_80089600[kind].move_sfx != 0) {
-        func_151152A4(obj, D_80089600[kind].move_sfx, 0x5DC0, 0xC8, 0x9C4, 0);
+        world_object_sound_play(obj, D_80089600[kind].move_sfx, 0x5DC0, 0xC8, 0x9C4, 0);
     }
-    before = func_15048A70(angle, rest);
+    before = math_angle_diff_deg(angle, rest);
     angle += speed * (f32) D_800BE9E4;
-    diff = func_15048A70(angle, rest);
+    diff = math_angle_diff_deg(angle, rest);
     if ((diff <= 0.0f && 0.0f < before) || (0.0f <= diff && before < 0.0f)) {
         diff = 0.0f;
         angle = rest;
@@ -1119,21 +1150,24 @@ f32 func_15117A98(f32 *arg0, f32 angle) {
     return angle;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15117A98.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_pendulum_angle_step.s")
 #endif
 
-void func_15117CF0(f32 *arg0) {
-    arg0[0] = func_15117A98(arg0, arg0[0]);
+/* was func_15117CF0 */
+void scenery_pendulum_x_update(f32 *arg0) {
+    arg0[0] = scenery_pendulum_angle_step(arg0, arg0[0]);
 }
 
-void func_15117D18(f32 *arg0) {
-    arg0[2] = func_15117A98(arg0, arg0[2]);
+/* was func_15117D18 */
+void scenery_pendulum_z_update(f32 *arg0) {
+    arg0[2] = scenery_pendulum_angle_step(arg0, arg0[2]);
 }
 
 #ifdef NON_MATCHING
 void prop_owner_effects_clear(u8 *);
 
-void func_15117D40(u8 *arg0) {
+/* was func_15117D40 */
+void scenery_press_button_update(u8 *arg0) {
     s32 sp1C;
     void (*var_t0)(u8 *); // P256: only prop_owner_effects_clear (prop_owner_effects_clear), called with the object in a0
     s16 temp_v0_2;
@@ -1211,12 +1245,13 @@ void func_15117D40(u8 *arg0) {
     (*(u8 *)((u8 *)arg0 + 0x73)) = (u8) (temp_t9 | var_a3);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15117D40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_press_button_update.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_150AD9A0(s32, s32, s32);
+s32 approx_dist3_int(s32, s32, s32);
 
-void func_15117F3C(u8 *arg0) {
+/* was func_15117F3C */
+void scenery_slide_axis_update(u8 *arg0) {
     s16 sp56;
     s16 sp54;
     s16 sp52;
@@ -1270,7 +1305,7 @@ void func_15117F3C(u8 *arg0) {
     sp38 = temp_t1;
     sp3C = temp_t6;
     sp50 = (s16) temp_t7;
-    temp_v0_3 = func_150AD9A0((s16) temp_v0_2 - (*(s16 *)((u8 *)arg0 + 0x10)), (s16) temp_t3 - (*(s16 *)((u8 *)arg0 + 0x12)), (s16) var_v1 - (*(s16 *)((u8 *)arg0 + 0x14)));
+    temp_v0_3 = approx_dist3_int((s16) temp_v0_2 - (*(s16 *)((u8 *)arg0 + 0x10)), (s16) temp_t3 - (*(s16 *)((u8 *)arg0 + 0x12)), (s16) var_v1 - (*(s16 *)((u8 *)arg0 + 0x14)));
     var_t0 = temp_t6;
     if (var_t0 == 3) {
         if ((s16) temp_t7 < 0) {
@@ -1338,9 +1373,10 @@ void func_15117F3C(u8 *arg0) {
     (*(u8 *)((u8 *)arg0 + 0x73)) = (u8) (temp_t9 | var_t0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15117F3C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_slide_axis_update.s")
 #endif
-void func_151182BC(u8 *arg0, u8 *arg1) {
+/* was func_151182BC */
+void scenery_open_on_touch(u8 *arg0, u8 *arg1) {
     s32 lo = *(s32 *)(arg0 + 0x3C) & 0xFFFF;
     s32 f;
     if (*(s32 *)arg1 == 1 && (arg0[0x4F] & 4)) {
@@ -1353,7 +1389,8 @@ void func_151182BC(u8 *arg0, u8 *arg1) {
 }
 
 #ifdef NON_MATCHING
-void func_15118324(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 *arg4) {
+/* was func_15118324 */
+void scenery_local_to_world(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 *arg4) {
     f32 temp_f0;
     f32 temp_f0_2;
     f32 temp_f10;
@@ -1370,9 +1407,9 @@ void func_15118324(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 *arg4) {
     var_f14 = arg2;
     var_s0 = arg0;
     if (((*(u16 *)((u8 *)var_s0 + 0x54)) == 0x8006) && (D_800BE9F0 == 0x35)) {
-        temp_v0 = func_151149AC(0xFDU);
+        temp_v0 = world_record_find(0xFDU);
         var_s0 = temp_v0;
-        func_1511F8A4(temp_v0);
+        scenery_attach_to_record(temp_v0);
         var_f14 = -555.0f;
         arg1 = 0.0f;
         arg3 = 0.0f;
@@ -1397,7 +1434,7 @@ void func_15118324(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 *arg4) {
     (*(f32 *)((u8 *)arg4 + 8)) = (f32) ((*(f32 *)((u8 *)arg4 + 8)) + (f32) (*(s16 *)((u8 *)var_s0 + 0x14)));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15118324.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_local_to_world.s")
 #endif
 #ifdef NON_MATCHING
 // gate_swing_update: world mesh record (D_800DBEF4, 0xA0 bytes) handler at D_800893D8 for the per-level push gate / door
@@ -1409,10 +1446,11 @@ void func_15118324(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 *arg4) {
 // (open). With bit 2 of +0x73 the gate is pushed from the other side and only drives the player's +0x6B state (3 -> 4).
 // The player's +0x6C..+0x70 get the handle position. Without a player it swings shut (state 1 -> 0). +0x4F bit 5 is set
 // while it is opening or waiting.
-void func_15060A30(s32, void *);
-void func_15118324(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 *arg4);
+void obj_sfx_play(s32, void *);
+void scenery_local_to_world(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 *arg4);
 
-void func_151184BC(u8 *rec) {
+/* was func_151184BC */
+void scenery_gate_swing_update(u8 *rec) {
     f32 pos[3];
     f32 open = 40.0f;
     f32 reach = 40000.0f;
@@ -1520,7 +1558,7 @@ void func_151184BC(u8 *rec) {
     timer = (*(s32 *) (rec + 0x7C) >> 8) & 0xFF;
     started = *(s32 *) (rec + 0x7C) & 1;
     spd = *(f32 *) (rec + 0x84);
-    func_15118324(rec, x, y, z, (u8 *) pos);
+    scenery_local_to_world(rec, x, y, z, (u8 *) pos);
 
     player = NULL;
     if (state != 3 && state != 1) {
@@ -1557,7 +1595,7 @@ void func_151184BC(u8 *rec) {
 
     if (player != NULL || state == 2) {
         if (player != NULL && !started) {
-            func_15060A30(0x16B, player);
+            obj_sfx_play(0x16B, player);
         }
         if (!back) {
             if (!started) {
@@ -1578,7 +1616,7 @@ void func_151184BC(u8 *rec) {
                 }
                 acc += 0.03f;
                 if (acc > 0.2f && *(u16 *) (rec + 0x74) == 0) {
-                    func_151152A4(rec, sound, 0x7D00, 0x5DC, 0xDAC, 0);
+                    world_object_sound_play(rec, sound, 0x7D00, 0x5DC, 0xDAC, 0);
                 }
                 *(f32 *) rec += spd;
                 if (open <= *(f32 *) rec) {
@@ -1587,14 +1625,14 @@ void func_151184BC(u8 *rec) {
                     started = 0;
                     spd = 0.0f;
                     acc = 0.0f;
-                    func_151152A4(rec, 0x14, 0x7D00, 0x5DC, 0xDAC, 4);
+                    world_object_sound_play(rec, 0x14, 0x7D00, 0x5DC, 0xDAC, 4);
                     if (player != NULL) {
                         (*(u8 **) (player + 0x31C))[0x6B] = 0;
                     }
                 }
             }
             if (player != NULL) {
-                func_15118324(rec, x, y, z, (u8 *) pos);
+                scenery_local_to_world(rec, x, y, z, (u8 *) pos);
                 q = *(u8 **) (player + 0x31C);
                 *(s16 *) (q + 0x6C) = (s32) pos[0];
                 *(s16 *) (q + 0x6E) = (s32) pos[1];
@@ -1616,7 +1654,7 @@ void func_151184BC(u8 *rec) {
             }
         }
         if (player != NULL && *(u8 **) (player + 0x31C) != NULL) {
-            func_15118324(rec, x, y, z, (u8 *) pos);
+            scenery_local_to_world(rec, x, y, z, (u8 *) pos);
             q = *(u8 **) (player + 0x31C);
             *(s16 *) (q + 0x6C) = (s32) pos[0];
             *(s16 *) (q + 0x6E) = (s32) pos[1];
@@ -1653,18 +1691,20 @@ void func_151184BC(u8 *rec) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151184BC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_gate_swing_update.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_15118F2C(s32 arg0, s32 arg1);
+void scenery_mover_swing_step(s32 arg0, s32 arg1);
 #endif
-void func_15118EEC(s32 arg0) {
-    func_15118F2C(arg0, 0);
+/* was func_15118EEC */
+void scenery_door_swing_update(s32 arg0) {
+    scenery_mover_swing_step(arg0, 0);
 }
 
-void func_15118F0C(s32 arg0) {
-    func_15118F2C(arg0, 3);
+/* was func_15118F0C */
+void scenery_door_swing_update_alt(s32 arg0) {
+    scenery_mover_swing_step(arg0, 3);
 }
 
 #ifdef NON_MATCHING
@@ -1675,17 +1715,18 @@ void func_15118F0C(s32 arg0) {
 // (velocity * -accel) until it is below 1, then snaps, sets state 3 / 0 and plays the open / close stop sound. The new
 // yaw is stored unless the netplay owner check says otherwise; on level 2 it sets func_1000E75C's level from the open
 // fraction, elsewhere a light slot is dimmed by it (func_151885BC / func_151741D0, plus func_15174200 for slot 0 on level 1).
-// func_15118EEC / func_15118F0C pass arg1 (0 / 3) through to func_1511FF00. Reached through the D_800893D8 table.
-void func_1511FF00(u8 *arg0, s32 arg1);
-f32 func_15048A70(f32 arg0, f32 arg1);
-s32 func_151152A4(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags);
+// scenery_door_swing_update / scenery_door_swing_update_alt pass arg1 (0 / 3) through to scenery_door_group_sync. Reached through the D_800893D8 table.
+void scenery_door_group_sync(u8 *arg0, s32 arg1);
+f32 math_angle_diff_deg(f32 arg0, f32 arg1);
+s32 world_object_sound_play(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags);
 s32 func_15022BB0(s32 arg0, s32 arg1);
 void func_1000E75C(s32 arg0);
 void func_151885BC(s32 arg0, f32 arg1);
 void func_151741D0(s32 arg0, s32 arg1);
 void func_15174200(s32 arg0, s32 arg1, s32 arg2);
 
-void func_15118F2C(s32 arg0, s32 arg1) {
+/* was func_15118F2C */
+void scenery_mover_swing_step(s32 arg0, s32 arg1) {
     u8 *rec = (u8 *) arg0;
     MoverSfx *row;
     s32 bits;
@@ -1704,7 +1745,7 @@ void func_15118F2C(s32 arg0, s32 arg1) {
     f32 diff;
     f32 frac;
 
-    func_1511FF00(rec, arg1);
+    scenery_door_group_sync(rec, arg1);
     bits = *(s32 *) (rec + 0x3C);
     angle = (bits << 22) >> 22;
     kind = (bits & 0xFC00) >> 10;
@@ -1736,7 +1777,7 @@ void func_15118F2C(s32 arg0, s32 arg1) {
             sound = (target == 0.0f) ? row->unk2 : row->move_sfx;
         }
         yaw += vel;
-        diff = func_15048A70(yaw, target);
+        diff = math_angle_diff_deg(yaw, target);
         if (fabsf(diff) < fabsf(vel)) {
             vel = -vel * accel;
             if (fabsf(vel) < 1.0f) {
@@ -1773,7 +1814,7 @@ void func_15118F2C(s32 arg0, s32 arg1) {
         }
         rec[0x73] = (rec[0x73] & ~3) | state;
         if (sound != 0) {
-            func_151152A4(rec, sound, 0x5DC0, 0x9C4, 0x1194, 0);
+            world_object_sound_play(rec, sound, 0x5DC0, 0x9C4, 0x1194, 0);
         }
         *(f32 *) (rec + 0x84) = vel;
     }
@@ -1802,7 +1843,7 @@ void func_15118F2C(s32 arg0, s32 arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15118F2C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_mover_swing_step.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -1813,13 +1854,14 @@ void func_151741D0(s32, s32);
 // bell_swing_update: per-frame swing of a hanging object (angle +0x8 in degrees, velocity +0x84). Mode (+0x73 & 3):
 // 0 = at rest, 1 = swinging to 0, 2 = swinging to +0x3E, 3 = held at +0x3E. Gravity pulls the velocity towards the
 // rest angle by +0x80 * (angle, or 180 - angle past 90) (+0.1 when it starts from rest, with sound 0x4BA unless the
-// rest angle is 0), capped at +-10. When the angle passes the rest angle (func_15048A70 difference smaller than the
+// rest angle is 0), capped at +-10. When the angle passes the rest angle (math_angle_diff_deg difference smaller than the
 // step) it bounces back at velocity * -(+0x7C), with a thud (func_15166F10); a bounce slower than +0x80 * 133.3
 // stops it at rest (mode 3, sound 0x4BB; mode 0 when the rest angle is 0), else +0x80 halves. +0x7C / +0x80 default
 // to 0.3 / 0.0075. The angle wraps to [0, 360). When it changed (or D_800BE9B4 is set) it is stored and, for a
 // light slot (+0x3C >> 24, 1-based) and a non-zero +0x3E, the slot gets 1 - |angle - rest| / rest (func_151885BC /
 // func_151741D0 * 255).
-void func_151194A4(u8 *obj) {
+/* was func_151194A4 */
+void scenery_bell_swing_update(u8 *obj) {
     s32 restInt;
     f32 restF;
     f32 rest;
@@ -1833,7 +1875,7 @@ void func_151194A4(u8 *obj) {
     s32 mode;
     s32 slot;
 
-    func_1511FF00(obj, 1);
+    scenery_door_group_sync(obj, 1);
     restInt = *(s16 *) (obj + 0x3E);
     restF = restInt;
     rest = restF;
@@ -1871,7 +1913,7 @@ void func_151194A4(u8 *obj) {
             pull += 0.1f;
         }
         angle += vel;
-        diff = func_15048A70(angle, rest);
+        diff = math_angle_diff_deg(angle, rest);
         if (fabsf(diff) < fabsf(vel)) {
             vel = -vel * bounce;
             if (fabsf(vel) < *(f32 *) (obj + 0x80) * 133.33334f) {
@@ -1922,10 +1964,11 @@ void func_151194A4(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151194A4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_bell_swing_update.s")
 #endif
 
-void func_1511992C(u8 *arg0, s32 *arg1) {
+/* was func_1511992C */
+void scenery_open_on_player_touch(u8 *arg0, s32 *arg1) {
     if ((arg1[0] == 1) && (((u8 *)arg1)[0x65] == 0) && !(arg0[0x73] & 3) && !(arg0[0x73] & 4)) {
         arg0[0x73] &= ~3;
         arg0[0x73] |= 2;
@@ -1938,7 +1981,8 @@ void func_1511992C(u8 *arg0, s32 *arg1) {
 // is latched once into +0x84 (low half = the starting y, bit 31 marks it as set). It moves at most +0x7C (speed) per
 // call; +0x7C == 0 does nothing. The "arrived" bits 0 / 1 of +0x73 are cleared while it moves and both set when y is
 // already at the target.
-void func_15119974(u8 *rec) {
+/* was func_15119974 */
+void scenery_mover_bob_y_update(u8 *rec) {
     s16 *y = (s16 *) (rec + 0x12);
     s32 speed;
     s32 target;
@@ -1971,11 +2015,12 @@ void func_15119974(u8 *rec) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15119974.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_mover_bob_y_update.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_15119A54(u8 *arg0, u8 *arg1, s32 arg2, u16 arg3) {
+/* was func_15119A54 */
+void scenery_mesh_cluster_fill(u8 *arg0, u8 *arg1, s32 arg2, u16 arg3) {
     s8 *sp4C;
     u32 sp44;
     s16 temp_v0;
@@ -2027,7 +2072,7 @@ void func_15119A54(u8 *arg0, u8 *arg1, s32 arg2, u16 arg3) {
                             temp_v0 = (*(s16 *)((u8 *)temp_a1_2 + 0));
                             if (arg2 < ((temp_v1_2 * temp_v1_2) + (temp_v0 * temp_v0))) {
                                 (*(u16 *)((u8 *)temp_a1_2 + 6)) = arg3;
-                                func_15119A54(arg0, temp_a1_2, arg2, arg3);
+                                scenery_mesh_cluster_fill(arg0, temp_a1_2, arg2, arg3);
                             }
                         }
                         var_s1_2 += 1;
@@ -2044,19 +2089,20 @@ void func_15119A54(u8 *arg0, u8 *arg1, s32 arg2, u16 arg3) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15119A54.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_mesh_cluster_fill.s")
 #endif
 #ifdef NON_MATCHING
 f32 func_150484A0(f32, f32);
-f32 func_150489B0(u8);
-f32 func_15048A40(u8);
+f32 math_cos_u8(u8);
+f32 math_sin_u8(u8);
 
 // mesh_cluster_spin: splits the vertices (obj + 0x28, 16-byte records, count +0x16) into clusters with
-// func_15119A54 (seed = each unassigned vertex outside the radius, 100 or 400 for kinds 0x21 / 0x22; cluster tag at
+// scenery_mesh_cluster_fill (seed = each unassigned vertex outside the radius, 100 or 400 for kinds 0x21 / 0x22; cluster tag at
 // +6). Then, last cluster first, rotates each cluster whose centre angle a (func_150484A0(sum x, sum z) in 256ths)
-// exceeds its tag by -a (sin func_15048A40 / cos func_150489B0) in the x/z plane and re-tags its vertices
+// exceeds its tag by -a (sin math_sin_u8 / cos math_cos_u8) in the x/z plane and re-tags its vertices
 // ((tag - 1) & 3) << 8 | a. Sets the done flag +0x84.
-void func_15119C54(u8 *obj) {
+/* was func_15119C54 */
+void scenery_mesh_cluster_spin(u8 *obj) {
     s16 *v = *(s16 **) (obj + 0x28);
     s32 radius = 100;
     s32 tag = 0;
@@ -2072,7 +2118,7 @@ void func_15119C54(u8 *obj) {
         if (*(u16 *) &v[3] == 0 && radius < v[2] * v[2] + v[0] * v[0]) {
             tag++;
             v[3] = tag;
-            func_15119A54(obj, (u8 *) v, radius, tag);
+            scenery_mesh_cluster_fill(obj, (u8 *) v, radius, tag);
         }
     }
     for (; tag != 0; tag--) {
@@ -2092,8 +2138,8 @@ void func_15119C54(u8 *obj) {
         if (tag >= a) {
             continue;
         }
-        s = func_15048A40(-a & 0xFF);
-        c = func_150489B0(-a & 0xFF);
+        s = math_sin_u8(-a & 0xFF);
+        c = math_cos_u8(-a & 0xFF);
         v = *(s16 **) (obj + 0x28);
         for (i = 0; i < *(u16 *) (obj + 0x16); i++, v += 8) {
             if (*(u16 *) &v[3] == tag) {
@@ -2107,13 +2153,13 @@ void func_15119C54(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15119C54.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_mesh_cluster_spin.s")
 #endif
 
 #ifdef NON_MATCHING
-u8 *func_1505EFD0(s32);
-f32 func_150489B0(u8);
-void func_15119C54(u8 *);
+u8 *obj_find_by_link(s32);
+f32 math_cos_u8(u8);
+void scenery_mesh_cluster_spin(u8 *);
 s32 func_151EFDD0(void);
 f32 sinf(f32);
 
@@ -2123,16 +2169,17 @@ static const f32 D_800A3534_c[1] = { 0.1f };           /* 0x3DCCCCCD */
 static const f32 D_800A3538_c[1] = { 6.2831855f };     /* 0x40C90FDB, 2 pi */
 static const f32 D_800A353C_c[1] = { 0.3926991f };     /* 0x3EC90FDB, pi / 8 */
 
-// mesh_cluster_flap_update: per-frame update of the clustered mesh that func_15119C54 sets up (called once, when
+// mesh_cluster_flap_update: per-frame update of the clustered mesh that scenery_mesh_cluster_spin sets up (called once, when
 // +0x84 is 0). Every source vertex (+0x28, 16-byte records, count +0x16) with a cluster tag (+6: group << 8 | angle)
 // is bent in its y/z plane by the group's angle (4 groups, sin / cos pairs), its y kept >= 1, then turned around y by
 // (tag + the object's heading +4 in 256ths); the result is scaled (+0x2C..+0x34), moved to the object's position
 // (+0x10..+0x14, s16) and written to this frame's vertex buffer (+0x20 + D_800BE9C0 * 4). State +0x7C / phase +0x80:
 // below 0x400 the groups flap (phase += (0.0195 + 0.0039 * rand % 6) * D_800BE9A4, amplitude sin(+0x7C / 2) drops
 // by rand % 3 per frame, back to 0xEC under 0x14); 0x400 + n eases the angle +0x80 towards n by 0.1 per frame
-// (0x41F counts down and ends at state 0; 0x420 stays). The player (func_1505EFD0(0)) within sqrt(3072) closes it:
+// (0x41F counts down and ends at state 0; 0x420 stays). The player (obj_find_by_link(0)) within sqrt(3072) closes it:
 // 0x420 when its +0x31C record's +0x57 is 1, else 0x41F.
-void func_15119EB8(u8 *obj) {
+/* was func_15119EB8 */
+void scenery_mesh_cluster_flap_update(u8 *obj) {
     f32 sc[4][2];
     s16 *src;
     s16 *dst;
@@ -2157,7 +2204,7 @@ void func_15119EB8(u8 *obj) {
     kz = *(f32 *) (obj + 0x34);
     heading = (s32) (*(f32 *) (obj + 4) * D_eu_800A3530_c[0]);
     if (*(s32 *) (obj + 0x84) == 0) {
-        func_15119C54(obj);
+        scenery_mesh_cluster_spin(obj);
     }
 
     state = *(s32 *) (obj + 0x7C);
@@ -2184,24 +2231,24 @@ void func_15119EB8(u8 *obj) {
     for (i = 0; i < 4; i++) {
         state = *(s32 *) (obj + 0x7C);
         if (state >= 0x400) {
-            sc[i][0] = func_15048A40((u32) *(f32 *) (obj + 0x80) & 0xFF);
-            sc[i][1] = func_150489B0((u32) *(f32 *) (obj + 0x80) & 0xFF);
+            sc[i][0] = math_sin_u8((u32) *(f32 *) (obj + 0x80) & 0xFF);
+            sc[i][1] = math_cos_u8((u32) *(f32 *) (obj + 0x80) & 0xFF);
         } else {
             t = *(f32 *) (obj + 0x80) * D_800A3538_c[0] - D_800A353C_c[0] * (f32) i;
             if (t <= 0.0f) {
                 t = 5.0f;
             } else {
-                s = func_15048A40((state >> 1) & 0xFF);
+                s = math_sin_u8((state >> 1) & 0xFF);
                 t = sinf(t) * (s + s) + 5.0f;
             }
             a = (u32) t & 0xFF;
-            sc[i][0] = func_15048A40(a);
-            sc[i][1] = func_150489B0(a);
+            sc[i][0] = math_sin_u8(a);
+            sc[i][1] = math_cos_u8(a);
         }
     }
 
     if (*(s32 *) (obj + 0x7C) != 0x420) {
-        pl = func_1505EFD0(0);
+        pl = obj_find_by_link(0);
         if (pl != NULL) {
             dx = *(f32 *) (pl + 0x14) - ox;
             dy = *(f32 *) (pl + 0x18) - oy;
@@ -2215,8 +2262,8 @@ void func_15119EB8(u8 *obj) {
     for (i = 0; i < *(u16 *) (obj + 0x16); i++, src += 8, dst += 8) {
         tag = *(u16 *) &src[3];
         if (tag != 0) {
-            s = func_15048A40((tag + heading) & 0xFF);
-            c = func_150489B0((*(u16 *) &src[3] + heading) & 0xFF);
+            s = math_sin_u8((tag + heading) & 0xFF);
+            c = math_cos_u8((*(u16 *) &src[3] + heading) & 0xFF);
             by = src[1];
             bz = src[2];
             ps = sc[tag >> 8][0];
@@ -2241,7 +2288,7 @@ void func_15119EB8(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15119EB8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_mesh_cluster_flap_update.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -2250,16 +2297,17 @@ void func_15119EB8(u8 *obj) {
 // spin +0x4 (phase * 60 / pi) and the bob of y +0x12 around the base +0x80 (latched from y). While +0x84 (respawn
 // timer, in ticks) is 0, the first live player (D_800CC2D0, D_8008FD8C of them; +0x3C >= 0) within 80 units on the
 // ground plane and in its height band fades it in by distance; touching it with +0x1CA set gives the item
-// (func_15060BA4): respawning pickups (+0x3C high half = respawn time / 50) start their timer and set +0x70 bit 2,
+// (obj_add_health): respawning pickups (+0x3C high half = respawn time / 50) start their timer and set +0x70 bit 2,
 // others are marked taken (+0x6E) and saved through func_1508F26C(2, index); then sound 0x1CF and the effect
 // func_151D6F64. +0x8A is the alpha, +0x4F the draw flags (0x21 idle, 0x31 fading, 0x20 taken).
 s32 func_1507C7C0(struct127 *, s16 *, s16 *, s16 *);
-s32 func_15060BA4(struct127 *arg0, s32 arg1);
+s32 obj_add_health(struct127 *arg0, s32 arg1);
 void func_1508F26C(s32 arg0, s32 arg1);
 u16 func_10010344(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4);
 void func_151D6F64(s16 *arg0, struct127 *arg1);
 
-void func_1511A540(u8 *rec) {
+/* was func_1511A540 */
+void scenery_pickup_spin_update(u8 *rec) {
     u8 *p;
     f32 phase;
     f32 d2;
@@ -2305,7 +2353,7 @@ void func_1511A540(u8 *rec) {
                 rec[0x4F] = 0x31;
                 y = *(s16 *) (rec + 0x12);
                 if (*(f32 *) (p + 0x18) < y + 80.0f && y - 80.0f < *(f32 *) (p + 0x18) + height && p[0x1CA] != 0) {
-                    if (func_15060BA4((struct127 *) p, 1) != 0) {
+                    if (obj_add_health((struct127 *) p, 1) != 0) {
                         v = *(s32 *) (rec + 0x3C);
                         if (v != 0) {
                             *(s32 *) (rec + 0x84) = ((v >> 16) & 0xFFFF) * 50;
@@ -2336,11 +2384,12 @@ void func_1511A540(u8 *rec) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511A540.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_pickup_spin_update.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1511A998(s8 *arg0, s32 *arg1) {
+/* was func_1511A998 */
+s32 scenery_dl_find_tex_slots(s8 *arg0, s32 *arg1) {
     struct {
         s32 uC;
         s32 u10;
@@ -2371,15 +2420,15 @@ loop_2:
     return sp.uC;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511A998.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_dl_find_tex_slots.s")
 #endif
 #ifdef NON_MATCHING
 // obj_texture_anim_step: steps the animated texture of a scenery object. The first D_800896C4 entry that applies
 // (level filter -1 or the current level D_800BE9F0; id 0xFF = any, else the object's +0x54 type, with 0x8000 set for
 // level-filtered entries) gives the frame table, frame count, ticks per frame and ping-pong flag. *slots holds the
-// object's texture slot (looked up once from its +0x1C texture list by func_1511A998: index << 16 | slot) and
+// object's texture slot (looked up once from its +0x1C texture list by scenery_dl_find_tex_slots: index << 16 | slot) and
 // *state the playing direction (high half) and the tick counter (low half). The frame texture is loaded
-// (func_1510D66C, age 3 on levels 6 / 0x3B else 0x3E) and patched into the display list (func_1510DDF4).
+// (texture_cache_lookup, age 3 on levels 6 / 0x3B else 0x3E) and patched into the display list (segment_override_add).
 typedef struct {
     /* 0x0 */ s32 *frames;
     /* 0x4 */ u8 count;
@@ -2389,11 +2438,12 @@ typedef struct {
     /* 0x8 */ u8 pingpong;
 } TexAnim; // 0xC
 extern TexAnim D_800896C4[24];
-s32 func_1511A998(s8 *arg0, s32 *arg1);
-s32 func_1510D66C(s32 id, s32 *outSize, s32 age, s32 addRef);
-void func_1510DDF4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+s32 scenery_dl_find_tex_slots(s8 *arg0, s32 *arg1);
+s32 texture_cache_lookup(s32 id, s32 *outSize, s32 age, s32 addRef);
+void segment_override_add(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
-void func_1511AA1C(u8 *obj, s32 *slots, s32 *state) {
+/* was func_1511AA1C */
+void scenery_texture_anim_step(u8 *obj, s32 *slots, s32 *state) {
     TexAnim *e;
     TexAnim *found = NULL;
     s32 id;
@@ -2423,7 +2473,7 @@ void func_1511AA1C(u8 *obj, s32 *slots, s32 *state) {
         return;
     }
     if (*slots == 0) {
-        *slots = func_1511A998(*(s8 **)(obj + 0x1C), &second);
+        *slots = scenery_dl_find_tex_slots(*(s8 **)(obj + 0x1C), &second);
         *slots |= second << 16;
     } else {
         second = (*slots >> 16) & 0xFFFF;
@@ -2445,39 +2495,42 @@ void func_1511AA1C(u8 *obj, s32 *slots, s32 *state) {
         tick -= found->count * found->ticks;
         dir = 1;
     }
-    tex = func_1510D66C(found->frames[tick / found->ticks], &size,
+    tex = texture_cache_lookup(found->frames[tick / found->ticks], &size,
                         (D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) ? 3 : 0x3E, 0);
     end = 0;
     if (second != 0) {
         end = size + tex - 0x20;
     }
-    func_1510DDF4((s32)obj, tex, end, 4, 5);
+    segment_override_add((s32)obj, tex, end, 4, 5);
     *state = (dir << 16) | tick;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511AA1C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_texture_anim_step.s")
 #endif
 
-void func_1511AC84(u8 *arg0) {
+/* was func_1511AC84 */
+void scenery_anim_and_tex_update(u8 *arg0) {
     if (*(s32 *)(arg0 + 0x3C) != 0) {
-        func_15116690(arg0);
+        scenery_start_pending_anim(arg0);
     }
-    func_1511AA1C(arg0, arg0 + 0x80, arg0 + 0x84);
+    scenery_texture_anim_step(arg0, arg0 + 0x80, arg0 + 0x84);
 }
 
 s32 func_15022BB0(s32, s32);
-void func_15116854(u8 *);
+void scenery_bob_update(u8 *);
 
-void func_1511ACC0(u8 *arg0) {
+/* was func_1511ACC0 */
+void scenery_bob_and_tex_update(u8 *arg0) {
     if ((D_800C35EA == 1) && (func_15022BB0((arg0 - (u8 *)D_800DBEF4) / 160, 0) != 0)) {
         *(s32 *)(arg0 + 0x7C) = 0;
         *(f32 *)(arg0 + 0x18) = 0.0f;
     }
-    func_15116854(arg0);
-    func_1511AA1C(arg0, arg0 + 0x80, arg0 + 0x84);
+    scenery_bob_update(arg0);
+    scenery_texture_anim_step(arg0, arg0 + 0x80, arg0 + 0x84);
 }
 
-void func_1511AD48(u8 *arg0) {
+/* was func_1511AD48 */
+void scenery_wobble_start_wave(u8 *arg0) {
     s32 var_a1;
     s32 var_v1;
     u8 *temp_v0;
@@ -2502,11 +2555,11 @@ void func_1511AD48(u8 *arg0) {
 #ifdef NON_MATCHING
 s16 *allocate_memory(s32, s32, s32, s32);
 f32 sqrtf(f32);
-f32 func_150489B0(u8);
+f32 math_cos_u8(u8);
 void func_150A7E40(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
-void func_15114E8C(f32 (*)[4], u8 *);
-void func_1511AA1C(u8 *obj, s32 *slots, s32 *state);
-void func_1511AD48(u8 *arg0);
+void world_record_build_matrix(f32 (*)[4], u8 *);
+void scenery_texture_anim_step(u8 *obj, s32 *slots, s32 *state);
+void scenery_wobble_start_wave(u8 *arg0);
 
 /* rodata copies (NM link drops the asm rodata) */
 static const f32 D_800A3550_c[1] = { 1.2f };  /* 0x3F99999A */
@@ -2525,20 +2578,21 @@ typedef struct {
     u8 speed;       /* 0x1D */
     u8 active;      /* 0x1E */
     u8 pad1F;
-    s32 slots;      /* 0x20 func_1511AA1C */
-    s32 state;      /* 0x24 func_1511AA1C */
+    s32 slots;      /* 0x20 scenery_texture_anim_step */
+    s32 state;      /* 0x24 scenery_texture_anim_step */
 } WobbleADC0;
 
 // mesh_wobble_update: per-frame update of a wobbling mesh object (vertices +0x28, 16-byte records, count +0x16).
 // First call: allocates the +0x80 state; per vertex at distance d (x/z) from the centre and radius = high half of
 // +0x3C: lift / follow rates, a random phase shared by vertices at the same position. Flags 3 in +0x73 start a wave
-// (func_1511AD48). While a wave runs its angle advances by speed * D_800BE9E4, the amplitude shrinks (x 0.5 below
+// (scenery_wobble_start_wave). While a wave runs its angle advances by speed * D_800BE9E4, the amplitude shrinks (x 0.5 below
 // +0x18, else x 0.8) on each wrap / half turn and the wave stops at amplitude <= 3; each vertex height follows it.
 // Every vertex not flagged 0x4000 in the output (+6) circles by the low byte of +0x3C (angle = its phase + one of
 // the 4 phase bytes of +0x84, negated for phase bit 7) and is lifted by lift * wave; all go through the object's
-// matrix (func_15114E8C) into this frame's buffer (+0x20 + D_800BE9C0 * 4). Advances the phase bytes by 1 / 2 / 3 /
-// 4 and runs the animation slots (func_1511AA1C).
-void func_1511ADC0(u8 *obj) {
+// matrix (world_record_build_matrix) into this frame's buffer (+0x20 + D_800BE9C0 * 4). Advances the phase bytes by 1 / 2 / 3 /
+// 4 and runs the animation slots (scenery_texture_anim_step).
+/* was func_1511ADC0 */
+void scenery_mesh_wobble_update(u8 *obj) {
     f32 mtx[4][4];
     u8 ph[4];
     f32 ox, oy, oz;
@@ -2581,7 +2635,7 @@ void func_1511ADC0(u8 *obj) {
         radius = (u16) (*(s32 *) (obj + 0x3C) >> 16);
         inv = (radius == 0.0f) ? 1.0f : 1.0f / radius;
         for (i = 0, v = verts; i < *(u16 *) (obj + 0x16); i++, v += 8) {
-            phase[i] = (u32) func_150ADA20() % 255;
+            phase[i] = (u32) random_int() % 255;
             d = sqrtf((f32) v[0] * (f32) v[0] + (f32) v[2] * (f32) v[2]);
             lift[i] = (radius - d) * inv;
             follow[i] = (radius - d * D_800A3550_c[0]) * inv;
@@ -2590,7 +2644,7 @@ void func_1511ADC0(u8 *obj) {
             }
         }
         for (i = 0; i < *(u16 *) (obj + 0x16); i++) {
-            phase[i] = func_150ADA20();
+            phase[i] = random_int();
             v = verts + i * 8;
             for (j = 0, w = verts; j < *(u16 *) (obj + 0x16); j++, w += 8) {
                 if (v[0] == w[0] && v[1] == w[1] && v[2] == w[2]) {
@@ -2612,7 +2666,7 @@ void func_1511ADC0(u8 *obj) {
     follow = st->follow;
     lift = st->lift;
     if ((obj[0x73] & 3) == 3) {
-        func_1511AD48(obj);
+        scenery_wobble_start_wave(obj);
         obj[0x73] &= ~3;
     }
     if (st->active) {
@@ -2622,7 +2676,7 @@ void func_1511ADC0(u8 *obj) {
         if (st->angle < old || (st->angle > 0x80 && old <= 0x80)) {
             st->amp *= k;
         }
-        sx = func_15048A40(st->angle);
+        sx = math_sin_u8(st->angle);
         st->cur = st->amp * sx;
         if (st->amp <= 3.0f) {
             st->cur = 0.0f;
@@ -2633,7 +2687,7 @@ void func_1511ADC0(u8 *obj) {
         }
     }
 
-    func_15114E8C(mtx, obj);
+    world_record_build_matrix(mtx, obj);
     dst = *(s16 **) (obj + 0x20 + D_800BE9C0 * 4);
     ph[0] = *(s32 *) (obj + 0x84);
     ph[1] = *(s32 *) (obj + 0x84) >> 8;
@@ -2648,8 +2702,8 @@ void func_1511ADC0(u8 *obj) {
             if (phase[i] & 0x80) {
                 a = -a;
             }
-            sx = func_15048A40(a) * amp;
-            cz = func_150489B0(a) * amp;
+            sx = math_sin_u8(a) * amp;
+            cz = math_cos_u8(a) * amp;
             if (st->active) {
                 up = (s32) (lift[i] * wave[i]);
             }
@@ -2664,17 +2718,18 @@ void func_1511ADC0(u8 *obj) {
     ph[1] += 2;
     ph[2] += 3;
     *(s32 *) (obj + 0x84) = (ph[3] << 24) | ph[0] | (ph[1] << 8) | (ph[2] << 16);
-    func_1511AA1C(obj, &st->slots, &st->state);
+    scenery_texture_anim_step(obj, &st->slots, &st->state);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511ADC0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_mesh_wobble_update.s")
 #endif
 
 #ifdef NON_MATCHING
 extern f32 D_800A3558;
 extern f32 D_800A355C;
 extern f32 D_800A3564;
-void func_1511B4B8(u8 *arg0) {
+/* was func_1511B4B8 */
+void scenery_jitter_tilt_update(u8 *arg0) {
     u32 temp_hi;
     s32 var_v0;
     f32 temp_f2;
@@ -2701,7 +2756,7 @@ void func_1511B4B8(u8 *arg0) {
         (*(f32 *)((u8 *)arg0 + 0x80)) = 0.0f;
     } else {
         sp1C = temp_f0;
-        temp_hi = func_150ADA20() % 1000U;
+        temp_hi = random_int() % 1000U;
         if ((s32) temp_hi < 0x1F4) {
             (*(f32 *)((u8 *)arg0 + 0x84)) = (f32) ((f32) temp_hi * 5.0f * sp1C * D_800A355C * D_800A3558);
         }
@@ -2711,7 +2766,7 @@ void func_1511B4B8(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x7C)) + (*(f32 *)((u8 *)arg0 + 0x80)));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511B4B8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_jitter_tilt_update.s")
 #endif
 #ifdef NON_MATCHING
 // sliding_door_update: per-frame update of a sliding door / gate (type +0x3C & 0x3FF, 0..7). On a networked game
@@ -2719,11 +2774,12 @@ void func_1511B4B8(u8 *arg0) {
 // z +0x14) is saved at +0x7C (bit 31 = saved) / +0x80 on first use. Mode +0x73 & 3: 0 = closed, 1 = closing,
 // 2 = opening, 3 = open. While opening / open each type has its open position (x first, or z first for types 4 /
 // 7; types 0 / 1 / 7 move x without waiting for z) and speed (7, 15 for types 4 / 7); closing goes back to the saved
-// position. A start sound plays when the move begins (func_151152A4; 0x4E, type 5: 0x4C1). Modes 0 / 3 snap to the
+// position. A start sound plays when the move begins (world_object_sound_play; 0x4E, type 5: 0x4C1). Modes 0 / 3 snap to the
 // target. The speed +0x84 eases towards the type's speed (3% per frame) and each frame moves one axis by at most
 // the speed; x reaching its target stops (sound 0x4E for type 0). When both axes are there, opening becomes open and
 // closing closed, the looping sound +0x74 is stopped (func_100111C8) and sound 0x4C8 plays.
-void func_1511B604(u8 *obj) {
+/* was func_1511B604 */
+void scenery_sliding_door_update(u8 *obj) {
     f32 maxSpeed = 7.0f;
     s32 xFirst = 0;
     s32 zFirst = 0;
@@ -2748,7 +2804,7 @@ void func_1511B604(u8 *obj) {
     tz = *(s32 *) (obj + 0x80);
     kind = *(s32 *) (obj + 0x3C) & 0x3FF;
     if (kind >= 4 && kind < 7) {
-        func_1511FF00(obj, 1);
+        scenery_door_group_sync(obj, 1);
     }
     mode = obj[0x73] & 3;
     if (mode == 3 || mode == 2) {
@@ -2817,7 +2873,7 @@ void func_1511B604(u8 *obj) {
         }
     }
     if (sound != 0) {
-        func_151152A4(obj, sound, 0x7D00, 100, 2500, 1);
+        world_object_sound_play(obj, sound, 0x7D00, 100, 2500, 1);
     }
     vel = *(f32 *) (obj + 0x84);
     if (mode == 0 || mode == 3) {
@@ -2842,7 +2898,7 @@ void func_1511B604(u8 *obj) {
         if (tx == *(s16 *) (obj + 0x10)) {
             vel = 0.0f;
             if (kind == 0) {
-                func_151152A4(obj, 0x4E, 0x7D00, 100, 2500, 1);
+                world_object_sound_play(obj, 0x4E, 0x7D00, 100, 2500, 1);
             }
         }
         *(f32 *) (obj + 0x84) = vel;
@@ -2863,13 +2919,13 @@ void func_1511B604(u8 *obj) {
         if (*(u16 *) (obj + 0x74) != 0) {
             func_100111C8(*(u16 *) (obj + 0x74));
             *(u16 *) (obj + 0x74) = 0;
-            func_151152A4(obj, 0x4C8, 0x7D00, 100, 2500, 1);
+            world_object_sound_play(obj, 0x4C8, 0x7D00, 100, 2500, 1);
         }
     }
     *(f32 *) (obj + 0x84) = vel;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511B604.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_sliding_door_update.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -2878,12 +2934,13 @@ void func_151885BC(s32 arg0, f32 arg1);
 
 // door_swing_update: swings the door angle obj +0x8 (velocity +0x84) by the state in the low 2 bits of +0x73:
 // 0 closed / 3 open (angle pinned to 0 / the open angle s16 +0x3E), 1 closing (target 0), 2 opening (target
-// +0x3E). The angle moves by the velocity; on overshoot (|func_15048A70(angle, target)| < |velocity|) the
+// +0x3E). The angle moves by the velocity; on overshoot (|math_angle_diff_deg(angle, target)| < |velocity|) the
 // velocity bounces back scaled by +0x7C (0.45 when 0) and the door settles (state 0 / 3) once it is below 0.05 *
 // +0x80 (0.5 when 0); else the velocity accelerates towards +-(+0x80) by 1%. The angle wraps into [0, 360). When it
 // changes (or D_800BE9B4 is set) it is stored and, for a door with a light slot (byte +0x3C), the slot's light
 // (func_151885BC) and vertex colours (func_151741D0) follow the open fraction.
-void func_1511BAA4(u8 *obj) {
+/* was func_1511BAA4 */
+void scenery_door_swing_angle_update(u8 *obj) {
     s16 open = *(s16 *) (obj + 0x3E);
     s32 state = obj[0x73] & 3;
     f32 openAngle = open;
@@ -2915,7 +2972,7 @@ void func_1511BAA4(u8 *obj) {
             speed = 0.5f;
         }
         angle += vel;
-        diff = func_15048A70(angle, target);
+        diff = math_angle_diff_deg(angle, target);
         if (fabsf(diff) < fabsf(vel)) {
             vel = -vel * bounce;
             if (fabsf(vel) < speed * 0.05f /* D_800A3590 */) {
@@ -2953,7 +3010,7 @@ void func_1511BAA4(u8 *obj) {
     func_151741D0((s32) ((1.0f - frac) * 255.0f), slot - 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511BAA4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_door_swing_angle_update.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -2971,7 +3028,8 @@ static const u8 D_800A3340_pairs[17] = {
 // counter +0x7C is non-zero; a change of either reference yaw (cached at +0x80 / +0x84) restarts it at 2.
 // Only for obj + 0x3C == 0: otherwise the asm reads uninitialised locals (the reference pointers and the table
 // are set only in that branch) and draws nothing; the C does nothing in that case.
-void func_1511BD5C(u8 *obj) {
+/* was func_1511BD5C */
+void scenery_part_vertices_follow_refs(u8 *obj) {
     u8 *ref[2];
     const u8 *pair;
     s32 n;
@@ -3018,13 +3076,14 @@ void func_1511BD5C(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511BD5C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_part_vertices_follow_refs.s")
 #endif
 
 #ifdef NON_MATCHING
 void func_15188580(s32, f32 *);
 
-void func_1511BFAC(u8 *arg0) {
+/* was func_1511BFAC */
+void scenery_alpha_from_level_value(u8 *arg0) {
     struct {
         f32 u1C;
     } sp;
@@ -3039,7 +3098,7 @@ void func_1511BFAC(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511BFAC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_alpha_from_level_value.s")
 #endif
 #ifdef NON_MATCHING
 extern f32 D_800A35A0;
@@ -3047,7 +3106,8 @@ extern f32 D_800A35A4;
 extern f32 D_800A35A8;
 s16 *allocate_memory(s32, s32, s32, s32);
 
-s32 func_1511C08C(u8 *arg0, s32 arg1, s32 arg2, f32 arg3, f32 arg4) {
+/* was func_1511C08C */
+s32 scenery_tex_project_follow(u8 *arg0, s32 arg1, s32 arg2, f32 arg3, f32 arg4) {
     f32 temp_f4;
     f32 var_f14;
     f32 var_f16;
@@ -3137,10 +3197,11 @@ s32 func_1511C08C(u8 *arg0, s32 arg1, s32 arg2, f32 arg3, f32 arg4) {
     return (s32) var_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511C08C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_tex_project_follow.s")
 #endif
-s32 func_1511C08C(u8 *, s32, s32, f32, f32);
-void func_1511C37C(u8 *arg0)
+s32 scenery_tex_project_follow(u8 *, s32, s32, f32, f32);
+/* was func_1511C37C */
+void scenery_tex_follow_object_update(u8 *arg0)
 {
   u8 *v;
   u8 *s;
@@ -3151,20 +3212,22 @@ void func_1511C37C(u8 *arg0)
     v = (u8 *)func_15083E90(arg0[0x3F]);
   }
   if (v != NULL) {
-    func_1511C08C(arg0, *(s32 *)(v + 0x14), *(s32 *)(v + 0x1C), 1.0f, 1.0f);
+    scenery_tex_project_follow(arg0, *(s32 *)(v + 0x14), *(s32 *)(v + 0x1C), 1.0f, 1.0f);
   }
 }
 
-void func_1511C3E4(u8 *arg0) {
+/* was func_1511C3E4 */
+void scenery_face_camera_yaw(u8 *arg0) {
     *(f32 *)(arg0 + 4) = func_150484A0(*(s16 *)(arg0 + 0x10) - *(f32 *)((u8 *)D_800DBFF0 + 0x2F8),
                                        *(s16 *)(arg0 + 0x14) - *(f32 *)((u8 *)D_800DBFF0 + 0x300)) * 57.295776f;
 }
 
 #ifdef NON_MATCHING
-void func_15060A30(s32, void *);
-void func_150DE450(u8 *);
+void obj_sfx_play(s32, void *);
+void fountain_spawn_by_marker(u8 *);
 
-void func_1511C444(u8 *arg0) {
+/* was func_1511C444 */
+void scenery_ride_lift_update(u8 *arg0) {
     f32 sp7C;
     f32 sp78;
     f32 sp74;
@@ -3202,7 +3265,7 @@ void func_1511C444(u8 *arg0) {
     u8 temp_t6;
     u8 temp_v0;
 
-    func_1511C3E4(arg0);
+    scenery_face_camera_yaw(arg0);
     temp_v0 = (*(u8 *)((u8 *)arg0 + 0x73));
     var_t1 = (*(s32 *)((u8 *)arg0 + 0x80));
     var_t2 = temp_v0 & 3;
@@ -3274,19 +3337,19 @@ loop_21:
                 sp3C = var_t1;
                 sp5C = var_t2;
                 sp40 = temp_t4;
-                func_15060A30(0x16B, var_s1);
+                obj_sfx_play(0x16B, var_s1);
             }
             if (temp_t4 == 0) {
                 var_t2 = 2;
                 if (var_t1 == 0) {
                     var_t0 = 0x32;
                     var_t1 += 1;
-                    if (func_150DE450 != NULL) {
+                    if (fountain_spawn_by_marker != NULL) {
                         sp72 = var_a3;
                         sp48 = 0x32;
                         sp3C = var_t1;
                         sp5C = 2;
-                        func_150DE450(arg0);
+                        fountain_spawn_by_marker(arg0);
                         var_t0 = 0x32;
                         var_t2 = 2;
                     }
@@ -3391,12 +3454,14 @@ block_45:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511C444.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_ride_lift_update.s")
 #endif
-void func_1511CAC8(void) {
+/* was func_1511CAC8 */
+void scenery_noop3(void) {
 }
 
-void func_1511CAD0(u8 *arg0) {
+/* was func_1511CAD0 */
+void scenery_sway_xz_update(u8 *arg0) {
     f32 temp_f8;
     f32 sp20;
 
@@ -3421,11 +3486,12 @@ void func_1511CAD0(u8 *arg0) {
 s32 func_150B2C20(s32, s32);
 void func_151714BC(u8 *, u8, s32); /* P274: 3 arguments, void (the asm caller also sets a3 = 1, unused) */
 void func_151741D0(s32, s32);
-/* D_800A3354 (rodata in func_1511BD5C's GLOBAL_ASM): the three hit sound ids, copied to the stack table */
+/* D_800A3354 (rodata in scenery_part_vertices_follow_refs's GLOBAL_ASM): the three hit sound ids, copied to the stack table */
 static const u16 D_800A3354_ids[3] = { 0x2B6, 0x2BD, 0x2BE };
 s32 func_1000EC24(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c), not data */
 
-void func_1511CBC0(u8 *arg0) {
+/* was func_1511CBC0 */
+void scenery_smash_reveal_update(u8 *arg0) {
     struct {
         u16 u50[3]; /* P274: was u8 * (indexing read bytes through an uninitialised pointer) */
         u8 pad56[0x2];
@@ -3503,25 +3569,25 @@ void func_1511CBC0(u8 *arg0) {
                     func_10010F30(0x2BE, 0x7FFFU, 0x40U, 0, 0U);
                     break;
                 case 0:
-                    temp_t9 = func_150ADA20() % 3U;
+                    temp_t9 = random_int() % 3U;
                     sp.u50[0] = D_800A3354_ids[0];
                     sp.u50[1] = D_800A3354_ids[1];
                     sp.u50[2] = D_800A3354_ids[2];
                     sp.u5A = (u16) temp_t9;
-                    temp_t1 = (&sp.u50[0])[((u32) ((func_150ADA20() & 1) + sp.u5A + 1) % 3U) & 0xFFFF];
+                    temp_t1 = (&sp.u50[0])[((u32) ((random_int() & 1) + sp.u5A + 1) % 3U) & 0xFFFF];
                     sp.u5A = (&sp.u50[0])[sp.u5A];
                     sp.u58 = temp_t1;
                     func_10010F30(0x2B7, 0x7FFFU, 0x40U, 0, 0U);
                     func_10010F30((s32) sp.u5A, 0x7FFFU, 0xAU, 0, 0U);
                     func_10010F30((s32) sp.u58, 0x7FFFU, 0x36U, 0, 0U);
-                    sp.u5A = (u16) (func_150ADA20() % 5U);
-                    temp_t5 = (u32) ((func_150ADA20() & 3) + sp.u5A + 1) % 5U;
+                    sp.u5A = (u16) (random_int() % 5U);
+                    temp_t5 = (u32) ((random_int() & 3) + sp.u5A + 1) % 5U;
                     sp44 = (s32 *)&func_1000EC24;
                     sp.u58 = (u16) temp_t5;
                     func_1000FA64((sp.u5A + 0x2B1) & 0xFFFF, (*(s16 *)((u8 *)arg0 + 0x10)), (*(s16 *)((u8 *)arg0 + 0x12)), (*(s16 *)((u8 *)arg0 + 0x14)), 0x4000, 0x2711U, 0x2710, (s32) &func_1000EC24, (u8 *)0x1001E, 0, 0x200, 0);
                     func_1000FA64((sp.u58 + 0x2B1) & 0xFFFF, (*(s16 *)((u8 *)arg0 + 0x10)), (*(s16 *)((u8 *)arg0 + 0x12)), (*(s16 *)((u8 *)arg0 + 0x14)), 0x4000, 0x2711U, 0x2710, (s32) sp44, (u8 *)0x1001E, 0, 0, 0);
-                    sp.u5A = (u16) (func_150ADA20() % 5U);
-                    temp_hi = (u32) ((func_150ADA20() & 3) + sp.u5A + 1) % 5U;
+                    sp.u5A = (u16) (random_int() % 5U);
+                    temp_hi = (u32) ((random_int() & 3) + sp.u5A + 1) % 5U;
                     sp.u58 = (u16) temp_hi;
                     func_1000FA64((sp.u5A + 0x2B1) & 0xFFFF, (*(s16 *)((u8 *)arg0 + 0x10)), (*(s16 *)((u8 *)arg0 + 0x12)), (*(s16 *)((u8 *)arg0 + 0x14)), 0x4000, 0x2711U, 0x2710, (s32) sp44, (u8 *)0x32, 0, 0x300, 0);
                     func_1000FA64((temp_hi + 0x2B1) & 0xFFFF, (*(s16 *)((u8 *)arg0 + 0x10)), (*(s16 *)((u8 *)arg0 + 0x12)), (*(s16 *)((u8 *)arg0 + 0x14)), 0x4000, 0x2711U, 0x2710, (s32) sp44, (u8 *)0x32, 0, 0x100, 0);
@@ -3557,16 +3623,17 @@ void func_1511CBC0(u8 *arg0) {
     (*(u8 *)((u8 *)arg0 + 0x73)) = (u8) (temp_t6_3 | sp.u64);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511CBC0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_smash_reveal_update.s")
 #endif
-void func_1511D0B4(s32 arg0, f32 *arg1) {
+/* was func_1511D0B4 */
+void scenery_ripple_top_height(s32 arg0, f32 *arg1) {
     *arg1 = 22000.0f;
 }
 
 #ifdef NON_MATCHING
 s16 *allocate_memory(s32, s32, s32, s32);
-f32 func_150489B0(u8);
-void func_1511D0B4(s32 arg0, f32 *arg1);
+f32 math_cos_u8(u8);
+void scenery_ripple_top_height(s32 arg0, f32 *arg1);
 s32 func_15195FB0(u8 *, s32, s32, s32, s32, s32, s32);
 void func_15094EC8(u8 *, s32 *, s32, f32, s32, s32);
 extern s32 D_80090688;
@@ -3593,7 +3660,7 @@ typedef struct {
 } RippleD0CC;
 
 // rippling_wall_update: per-frame update of a rippling vertical surface (levels D_800BE9F0 4 and 0x13 only; vertex
-// records 0x10 bytes, template +0x28, output +0x20 + D_800BE9C0 * 4). The top is 22000 (func_1511D0B4) above +0x14.
+// records 0x10 bytes, template +0x28, output +0x20 + D_800BE9C0 * 4). The top is 22000 (scenery_ripple_top_height) above +0x14.
 // First call: the +0x7C state; level 4: speed 0x1DA, height 100, phase = (top - z) * 0.1; level 0x13: speed 0x259,
 // height 36, phase = top - z, a sound (func_15195FB0 D_80090688), and for the +0x72 == 0xFE variant a texture that
 // turns 0.453 degrees a frame (uv copy at +0x18, func_15094EC8 32 x 32). Level 4 objects other than 0xF2 glow
@@ -3601,7 +3668,8 @@ typedef struct {
 // y = template y + +0x12 + cos(phase + clock) * height and the shade 32.5 * (cos + 1) + 190; on level 4 vertices
 // below z 12000 are pulled towards it (by 0.81 .. 1 of the distance) and the clock speed swings with
 // cos(clock + speedPhase).
-void func_1511D0CC(u8 *obj) {
+/* was func_1511D0CC */
+void scenery_rippling_wall_update(u8 *obj) {
     f32 top;
     f32 spin;
     f32 k;
@@ -3635,7 +3703,7 @@ void func_1511D0CC(u8 *obj) {
     } else {
         return;
     }
-    func_1511D0B4((s32) obj, &top);
+    scenery_ripple_top_height((s32) obj, &top);
     top -= *(s16 *) (obj + 0x14);
 
     st = *(RippleD0CC **) (obj + 0x7C);
@@ -3691,7 +3759,7 @@ void func_1511D0CC(u8 *obj) {
     dst = *(s16 **) (obj + 0x20 + D_800BE9C0 * 4);
     src = *(s16 **) (obj + 0x28);
     for (i = 0; i < *(u16 *) (obj + 0x16); i++, src += 8, dst += 8) {
-        c = func_150489B0((st->phase[i] + t) & 0xFF);
+        c = math_cos_u8((st->phase[i] + t) & 0xFF);
         y = (f32) (src[1] + *(s16 *) (obj + 0x12)) + c * st->height;
         f = c;
         if (!lvl13) {
@@ -3712,7 +3780,7 @@ void func_1511D0CC(u8 *obj) {
 
     if (!lvl13) {
         half = (u16) (st->speed >> 1);
-        c = func_150489B0(((st->time >> 8) + st->speedPhase) & 0xFF);
+        c = math_cos_u8(((st->time >> 8) + st->speedPhase) & 0xFF);
         speed = (u16) (u32) ((f32) half + (c + 1.0f) * 0.5f * (f32) half);
     } else {
         speed = st->speed;
@@ -3720,7 +3788,7 @@ void func_1511D0CC(u8 *obj) {
     st->time -= speed * D_800BE9E4;
     if (st->glow) {
         st->glowTimer += D_800BE9E4 * 2;
-        c = func_150489B0((st->glowTimer + st->glowPhase) & 0xFF);
+        c = math_cos_u8((st->glowTimer + st->glowPhase) & 0xFF);
         obj[0x8A] = (u32) ((c + 1.0f) * 0.5f * 205.0f + 50.0f);
     }
     if (spin != 0.0f) {
@@ -3734,12 +3802,12 @@ void func_1511D0CC(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511D0CC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_rippling_wall_update.s")
 #endif
 
 #ifdef NON_MATCHING
 s16 *allocate_memory(s32, s32, s32, s32);
-/* func_1511D91C wave settings, indexed by (+0x3C >> 8) & 0xFF (0x14 bytes each) */
+/* scenery_water_wave_update wave settings, indexed by (+0x3C >> 8) & 0xFF (0x14 bytes each) */
 typedef struct {
     /* 0x00 */ f32 gain;   /* scales the distance to the target height into a velocity cap */
     /* 0x04 */ f32 accel;  /* velocity change per frame */
@@ -3755,7 +3823,7 @@ typedef struct {
 extern Wave1511D91C D_800897E4[];
 
 // water_surface_wave_update: per-frame update of a waving surface mesh (vertex records 0x10 bytes; two vertex buffers
-// at +0x20 / +0x24, the current one picked by D_800BE9C0). The wave source object is func_151149AC(+0x3C low byte);
+// at +0x20 / +0x24, the current one picked by D_800BE9C0). The wave source object is world_record_find(+0x3C low byte);
 // nothing happens unless it exists and has its +0x7C record. On first use the rest heights (vertex +8 of the
 // +0x28 template) are copied to a new array at +0x7C and the glow timer is reset. The target height
 // (sin(phase) + 1) / 2 (phase = source record +4 >> 8 plus the setting's phaseAdd) is followed by a spring: the
@@ -3763,7 +3831,8 @@ extern Wave1511D91C D_800897E4[];
 // straight to the target. Each vertex gets y = rest - (height * depth + offset) and x = the other buffer's x + sway *
 // (cos(phase) + 0.5) / 2 (minus 0x800 when the first vertex's x is above 0x800). The glow timer then advances by
 // 2 * D_800BE9E4 and +0x8A = 50 + 205 * (sin(timer + glowPhase) + 1) / 2.
-void func_1511D91C(u8 *obj) {
+/* was func_1511D91C */
+void scenery_water_wave_update(u8 *obj) {
     u8 *src;
     u8 *rec;
     Wave1511D91C *w;
@@ -3778,7 +3847,7 @@ void func_1511D91C(u8 *obj) {
     f32 d;
     u8 *verts;
 
-    src = func_151149AC(*(s32 *) (obj + 0x3C) & 0xFF);
+    src = world_record_find(*(s32 *) (obj + 0x3C) & 0xFF);
     if (src == NULL) {
         return;
     }
@@ -3799,8 +3868,8 @@ void func_1511D91C(u8 *obj) {
         first = 1;
     }
     phase = (*(u16 *) (rec + 4) >> 8) + w->phaseAdd;
-    target = (func_150489B0(phase) + 1.0f) * 0.5f;
-    swing = (func_15048A40(phase) + 0.5f) * 0.5f;
+    target = (math_cos_u8(phase) + 1.0f) * 0.5f;
+    swing = (math_sin_u8(phase) + 0.5f) * 0.5f;
     if (first) {
         *(f32 *) (obj + 0x84) = target;
         *(f32 *) (obj + 0x80) = 0.0f;
@@ -3831,22 +3900,23 @@ void func_1511D91C(u8 *obj) {
             *(s16 *) (*(u8 **) (obj + 0x20 + (D_800BE9C0 == 0) * 4) + i * 0x10 + 0xA) + sway;
     }
     w->glowTimer += D_800BE9E4 * 2;
-    *(u8 *) (obj + 0x8A) = (u32) ((func_150489B0(w->glowTimer + w->glowPhase) + 1.0f) * 0.5f * 205.0f + 50.0f);
+    *(u8 *) (obj + 0x8A) = (u32) ((math_cos_u8(w->glowTimer + w->glowPhase) + 1.0f) * 0.5f * 205.0f + 50.0f);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511D91C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_water_wave_update.s")
 #endif
 
 #ifdef NON_MATCHING
-f32 func_150489B0(u8);
+f32 math_cos_u8(u8);
 
 // mesh_tex_wave_update: handler (table EU 8008912C) for a mesh object: on first use allocates its 12-byte state
 // (+0x7C: cached texture coordinates, two texture-animation words) and caches each source vertex's texture
 // coordinates; every frame offsets the current vertex buffer's coordinates by (amp_s * cos-like(phase),
-// amp_t * sin-like(phase)) (func_150489B0 / func_15048A40 of (+0x80 >> 4) & 0xFF; amplitudes = the low 12 bits and
+// amp_t * sin-like(phase)) (math_cos_u8 / math_sin_u8 of (+0x80 >> 4) & 0xFF; amplitudes = the low 12 bits and
 // the next 12 bits of +0x3C), advances the phase +0x80 by the top byte of +0x3C * D_800BE9E4, then runs the texture
-// animation (func_1511AA1C).
-void func_1511DD44(u8 *obj) {
+// animation (scenery_texture_anim_step).
+/* was func_1511DD44 */
+void scenery_mesh_tex_wave_update(u8 *obj) {
     s32 *st = *(s32 **)(obj + 0x7C);
     s16 *uv;
     s16 *dst;
@@ -3883,8 +3953,8 @@ void func_1511DD44(u8 *obj) {
     amp_t = (packed >> 12) & 0xFFF;
     speed = (packed >> 24) & 0xFF;
     phase = (*(s32 *)(obj + 0x80) >> 4) & 0xFF;
-    a = func_15048A40(phase);
-    b = func_150489B0(phase);
+    a = math_sin_u8(phase);
+    b = math_cos_u8(phase);
     *(s32 *)(obj + 0x80) += speed * D_800BE9E4;
     if (*(u16 *)(obj + 0x16) > 0) {
         ds = (s32)((f32)amp_s * b);
@@ -3894,10 +3964,10 @@ void func_1511DD44(u8 *obj) {
             *(s16 *)(*(u8 **)(obj + 0x20 + D_800BE9C0 * 4) + off + 0xA) = uv[i * 2 + 1] + dt;
         }
     }
-    func_1511AA1C(obj, st + 1, st + 2);
+    scenery_texture_anim_step(obj, st + 1, st + 2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511DD44.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_mesh_tex_wave_update.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -3908,7 +3978,8 @@ void func_15094EC8(u8 *, s32 *, s32, f32, s32, s32);
 // into both vertex buffers (+0x24, +0x20); every frame advances the scroll (+0x80) by speed * 0.01 * D_800BE9E4
 // (speed = low half of +0x3C) and rebuilds the current buffer's texture coordinates (func_15094EC8) with the two
 // packed bytes of +0x3C (top byte signed).
-void func_1511DF6C(u8 *obj) {
+/* was func_1511DF6C */
+void scenery_mesh_tex_scroll_update(u8 *obj) {
     s16 *uv = *(s16 **)(obj + 0x7C);
     s16 *dst;
     s32 i;
@@ -3939,11 +4010,12 @@ void func_1511DF6C(u8 *obj) {
                   packed >> 24, (packed >> 16) & 0xFF);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511DF6C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_mesh_tex_scroll_update.s")
 #endif
 
 struct B73 { u8 hi : 6; u8 lo : 2; };
-void func_1511E14C(u8 *arg0)
+/* was func_1511E14C */
+void scenery_lid_open_update(u8 *arg0)
 {
   s32 var_v0;
   u8 *var_v1;
@@ -4013,7 +4085,8 @@ void func_1511E14C(u8 *arg0)
 
 s32 func_10010558(s32, struct127 *, s32, s32, s32, s32);
 
-void func_1511E320(u8 *arg0, struct127 *arg1) {
+/* was func_1511E320 */
+void pickup_collect_sound_play(u8 *arg0, struct127 *arg1) {
     s32 snd;
     s32 vol;
     s32 isA;
@@ -4038,7 +4111,7 @@ void func_1511E320(u8 *arg0, struct127 *arg1) {
         break;
     case 0x3A:
         if (isA) {
-            snd = (func_150ADA20() & 1) + 0x53E;
+            snd = (random_int() & 1) + 0x53E;
         } else if (isB) {
             snd = 0x567;
         } else {
@@ -4068,7 +4141,7 @@ void func_1511E320(u8 *arg0, struct127 *arg1) {
         break;
     case 0x50:
     case 0x55:
-        snd = (func_150ADA20() & 1) + 0xB;
+        snd = (random_int() & 1) + 0xB;
         break;
     case 0x52:
     case 0x58:
@@ -4105,7 +4178,7 @@ void func_1511E320(u8 *arg0, struct127 *arg1) {
 
 #ifdef NON_MATCHING
 s32 func_15031C4C(struct127 *, s32, s32);
-u8 *func_1509B570(s32);
+u8 *event_get_vars(s32);
 void func_151D6F20(s32, s32);
 f32 cosf(f32);
 typedef struct {
@@ -4127,10 +4200,11 @@ typedef struct {
  * +0x1FE4 is <= 0. While not taken (state < 3) the first player that is active (+0x0), alive (+0x1CA), not 0xFF
  * (+0x127), playing (+0x300), on the right team for the +0x84 filter (1 team 0, 2 not team 0, 3 even teams), that
  * does not already hold the item, and is within 100 * size (ctl +0x1AF / 64, * 1.4 with ctl +0x84) horizontally and
- * overlaps vertically (func_1507C7C0 height) takes it: +0x80 = the player's +0x3B, state 3, func_1511E320 and
+ * overlaps vertically (func_1507C7C0 height) takes it: +0x80 = the player's +0x3B, state 3, pickup_collect_sound_play and
  * func_151D6F20. Then the scale animation: grow by 0.26 * scale per tick, wobble (amplitude 0.3 falling by 0.02 *
  * scale) and shrink to 0 after being taken (then +0x6E = 1). */
-void func_1511E4F4(u8 *obj) {
+/* was func_1511E4F4 */
+void pickup_update(u8 *obj) {
     Pickup1511E4F4 *s;
     struct127 *p;
     s32 off = 0;
@@ -4156,7 +4230,7 @@ void func_1511E4F4(u8 *obj) {
     case 0x54:
         item = 0x17;
         if (D_800BE9F0 == 0x2D) {
-            o = func_1509B570(0xBA);
+            o = event_get_vars(0xBA);
             if (o != NULL && *(s32 *) (o + 0x1FE4) <= 0) {
                 off = 1;
             }
@@ -4200,7 +4274,7 @@ void func_1511E4F4(u8 *obj) {
                 if (y < PK_F32(p, 0x17C) && PK_F32(p, 0x18) < y + r && y - r < PK_F32(p, 0x18) + (f32) h) {
                     *(s32 *) (obj + 0x80) = PK_U8(p, 0x3B);
                     s->state = 3;
-                    func_1511E320(obj, p);
+                    pickup_collect_sound_play(obj, p);
                     func_151D6F20((s32) p, (s32) obj);
                     break;
                 }
@@ -4243,7 +4317,7 @@ void func_1511E4F4(u8 *obj) {
 #undef PK_S16
 #undef PK_ANG
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511E4F4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/pickup_update.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -4254,7 +4328,8 @@ void func_1511E4F4(u8 *obj) {
 // (0 closed, 1 closing, 2 opening, 3 open). Types 0 / 3: move y +0x8 / x +0x4 down to -110 / 260; 2, 8: x up by at most
 // 70 (80 for type 2); 4, 6, 7: x down by at most 70 (80 / 82, type 6 at half speed); 10, 11: y bobs as sin(phase) * 10
 // with a splash sound when the phase wraps after 4 pi; 12, 13: y = 180 - sin(phase) * 10 (10 / 12 add a fixed step first).
-void func_1511ED08(u8 *rec) {
+/* was func_1511ED08 */
+void scenery_mover_slide_step(u8 *rec) {
     f32 *x = (f32 *) (rec + 4);
     f32 *y = (f32 *) (rec + 8);
     f32 *rest = (f32 *) (rec + 0x84);
@@ -4287,7 +4362,7 @@ void func_1511ED08(u8 *rec) {
     if (sfx != -1) {
         sound = ((s16 *) &D_80089600[*(s32 *) (rec + 0x3C) & 0xFFFF])[sfx];
         if (sound > 0) {
-            func_151152A4(rec, sound, 0x5DC0, 0xC8, 0x9C4, 0);
+            world_object_sound_play(rec, sound, 0x5DC0, 0xC8, 0x9C4, 0);
         }
     }
     dt = D_800BE9E4;
@@ -4371,8 +4446,8 @@ void func_1511ED08(u8 *rec) {
             *rest += 0.04f * dt;
             *y = sinf(*rest) * 10.0f;
             if (*rest > 12.566371f) {
-                *rest -= 12.566371f * ((func_150ADA20() & 4) + 1);
-                func_151152A4(rec, 0x503, 0x1F40, 0x96, 0x258, 0);
+                *rest -= 12.566371f * ((random_int() & 4) + 1);
+                world_object_sound_play(rec, 0x503, 0x1F40, 0x96, 0x258, 0);
             }
             break;
         case 12:
@@ -4388,11 +4463,12 @@ void func_1511ED08(u8 *rec) {
     rec[0x73] = (rec[0x73] & ~3) | state;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511ED08.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_mover_slide_step.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_1511F1D8(u8 *arg0) {
+/* was func_1511F1D8 */
+void scenery_rise_and_hide_update(u8 *arg0) {
     f32 temp_f0;
     f32 temp_f12;
     f32 temp_f12_2;
@@ -4423,9 +4499,10 @@ void func_1511F1D8(u8 *arg0) {
     (*(s32 *)((u8 *)arg0 + 0x7C)) = 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511F1D8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_rise_and_hide_update.s")
 #endif
-void func_1511F30C(u8 *arg0) {
+/* was func_1511F30C */
+void scenery_slide_z_update(u8 *arg0) {
     s32 dir;
     f32 step;
     f32 lim;
@@ -4469,7 +4546,8 @@ void func_1511F30C(u8 *arg0) {
 s32 func_1508712C(s32, f32 *, s32 *, f32 *);
 s32 func_150871B8(s32);
 
-void func_1511F4C8(u8 *arg0) {
+/* was func_1511F4C8 */
+void scenery_carry_player_arc_update(u8 *arg0) {
     struct {
         f32 u40;
         s32 u44;
@@ -4570,11 +4648,12 @@ void func_1511F4C8(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511F4C8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_carry_player_arc_update.s")
 #endif
-void func_15114E8C(f32 (*)[4], u8 *);
-u8 *func_151149AC(u8);
-void func_1511F8A4(u8 *arg0) {
+void world_record_build_matrix(f32 (*)[4], u8 *);
+u8 *world_record_find(u8);
+/* was func_1511F8A4 */
+void scenery_attach_to_record(u8 *arg0) {
     s32 pad[2]; // fakematch: frame pad
     f32 sp48[4][4];
     f32 sp44;
@@ -4583,9 +4662,9 @@ void func_1511F8A4(u8 *arg0) {
     u8 *temp_v0;
     u16 t = *(u16 *)(arg0 + 0x3E);
     if ((*(u16 *)(arg0 + 0x54) == 0x8005) && (D_800BE9F0 == 0x35)) {
-        temp_v0 = func_151149AC(t);
+        temp_v0 = world_record_find(t);
         if (temp_v0 != 0) {
-            func_15114E8C(sp48, temp_v0);
+            world_record_build_matrix(sp48, temp_v0);
             func_150A7E40(sp48, -3.0f, 223.0f, 549.0f, &sp44, &sp40, &sp3C);
             *(s16 *)(arg0 + 0x10) = (s32)sp44;
             *(s16 *)(arg0 + 0x12) = (s32)sp40;
@@ -4595,7 +4674,8 @@ void func_1511F8A4(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_1511F970(u8 *arg0) {
+/* was func_1511F970 */
+void scenery_delayed_fade_out_update(u8 *arg0) {
     s32 temp_t2;
     s32 temp_t4;
     s32 temp_v1;
@@ -4626,10 +4706,11 @@ void func_1511F970(u8 *arg0) {
     (*(s8 *)((u8 *)arg0 + 0x6E)) = 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511F970.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_delayed_fade_out_update.s")
 #endif
 #ifdef NON_MATCHING
-void func_1511FA68(u8 *arg0) {
+/* was func_1511FA68 */
+void scenery_split_door_update(u8 *arg0) {
     s32 sp8;
     s32 sp4;
     s32 temp_a2;
@@ -4718,15 +4799,17 @@ void func_1511FA68(u8 *arg0) {
     (*(u8 *)((u8 *)arg0 + 0x73)) = (u8) ((temp_t4_2 & 0xFF) | var_v0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511FA68.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_split_door_update.s")
 #endif
-void func_1511FD00(s32 *arg0, s32 arg1) {
+/* was func_1511FD00 */
+void scenery_trigger_on_touch(s32 *arg0, s32 arg1) {
     if (arg0[0x80 / 4] == 0) {
         arg0[0x80 / 4] = 1;
     }
 }
 
-void func_1511FD20(u8 *arg0) {
+/* was func_1511FD20 */
+void scenery_sinking_bob_update(u8 *arg0) {
     s32 pad[2]; // fakematch: frame size (unused locals)
     s32 lim;
     s32 pad2; // fakematch: frame slot
@@ -4737,7 +4820,7 @@ void func_1511FD20(u8 *arg0) {
     lim = *(s32 *)(arg0 + 0x3C);
     lim = lim * 50 / 60;
     if (D_800BE9B4 != 0) {
-        *(s32 *)(arg0 + 0x7C) = func_150ADA20() & 0xFFFF;
+        *(s32 *)(arg0 + 0x7C) = random_int() & 0xFFFF;
     }
     *(f32 *)(arg0 + 0x18) = cosf(*(s32 *)(arg0 + 0x7C) * 0.005493164f) * 25.0f;
     st = *(s32 *)(arg0 + 0x80);
@@ -4756,8 +4839,9 @@ void func_1511FD20(u8 *arg0) {
     *(s16 *)(arg0 + 0x5C) = (*(f32 *)(arg0 + 0x18) + *(s16 *)(arg0 + 0x12)) - old;
 }
 
-void func_1511FEA8(u8 *arg0) {
-    u8 *temp_v0 = func_151149AC(arg0[0x3F]);
+/* was func_1511FEA8 */
+void scenery_follow_record_position(u8 *arg0) {
+    u8 *temp_v0 = world_record_find(arg0[0x3F]);
 
     if (temp_v0 != NULL) {
         *(s16 *)(arg0 + 0x10) = *(s16 *)(temp_v0 + 0x10);
@@ -4766,14 +4850,16 @@ void func_1511FEA8(u8 *arg0) {
     }
 }
 
-void func_1511FEF0(void) {
+/* was func_1511FEF0 */
+void scenery_door_groups_reset(void) {
     D_800DC3F0 = 0;
 }
 
 #ifdef NON_MATCHING
 extern s32 D_800DC3F8;
 
-void func_1511FF00(u8 *arg0, s32 arg1) {
+/* was func_1511FF00 */
+void scenery_door_group_sync(u8 *arg0, s32 arg1) {
     s32 *var_a1;
     s32 temp_t4;
     s32 temp_t7;
@@ -4870,5 +4956,5 @@ block_7:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511FF00.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_door_group_sync.s")
 #endif

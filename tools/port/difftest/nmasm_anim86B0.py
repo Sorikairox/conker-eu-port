@@ -317,7 +317,7 @@ def scene(rng, mem, base, inp, st):
     if A[0x45] == 0:
         st['static'] += 1
     if mode < 0.3:
-        # blend with a second animation (func_1505E0C4 copies slot 1 to slot 2)
+        # blend with a second animation (anim_start_entry copies slot 1 to slot 2)
         k2 = rng.choice(inp.ok)
         s2 = inp.state(k2, rng.uniform(0, 40), BLOB2)
         if s2 is not None:

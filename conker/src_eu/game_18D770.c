@@ -6,7 +6,7 @@
 // rodata_inject: inside 0x24C014
 // rodata_inject: inside 0x24C04C
 
-s32 func_151149AC(u8);
+s32 world_record_find(u8);
 
 struct225 *light_create_with_ctrl(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
 struct225 *light_ctrl_alloc(Header *src, struct226 *arg1, s32 size, u8 arg3, s32 arg4);
@@ -224,7 +224,7 @@ s32 light_beh_rotated_offset(struct225 *arg0) {
     f32 y;
     f32 x;
 
-    func_150A8050(mtx, (*pp)->unk0, (*pp)->unk4, (*pp)->unk8);
+    mtxf_rotate_xyz_deg(mtx, (*pp)->unk0, (*pp)->unk4, (*pp)->unk8);
     mtx[3][0] = ((s16 *)*pp)[8];
     mtx[3][1] = ((s16 *)*pp)[9];
     mtx[3][2] = ((s16 *)*pp)[10];
@@ -251,8 +251,8 @@ s32 light_beh_lightning(struct225 *arg0) {
         } else {
             temp_a1->unkC -= D_800BE9A4;
         }
-    } else if (func_150ADA68() < 0.0050000004f) {
-        temp_a1->unk10 = (func_150ADA20() % 5U) + 1;
+    } else if (random_float() < 0.0050000004f) {
+        temp_a1->unk10 = (random_int() % 5U) + 1;
         light_lightning_start_flash(&temp_a1->unk4, &temp_a1->unk0, &temp_a1->unk8, &temp_a1->unkC, arg0);
     }
     arg0->unk14->unk2F = arg0->unk1C;
@@ -266,8 +266,8 @@ void light_lightning_start_flash(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, str
     s32 pad1;
 
     *arg0 = 0.0f;
-    *arg2 = *arg1 / ((func_150ADA68() * 12.0f) + 8.0f);
-    *arg3 = (func_150ADA68() * 28.0f) + 1.0f;
+    *arg2 = *arg1 / ((random_float() * 12.0f) + 8.0f);
+    *arg3 = (random_float() * 28.0f) + 1.0f;
 
     tmp.unk0 = arg4->unk14->unkE;
     tmp.unk4 = arg4->unk14->unk10;
@@ -514,7 +514,7 @@ struct225 *light_spawn_pulse_a(s32 arg0, u8 arg1, s32 arg2) {
 
     src[0] = 50.0f;
     src[1] = 40.0f;
-    src[2] = func_150ADA68() * 6.2831855f;
+    src[2] = random_float() * 6.2831855f;
 
     header.unk0 = 0;
     header.unk1 = 1;
@@ -564,7 +564,7 @@ struct225 *light_spawn_kind8(s32 arg0, u8 arg1, s32 arg2) {
     Header header;
     s32 tmp;
 
-    tmp = func_151149AC(249); // what does this return?
+    tmp = world_record_find(249); // what does this return?
 
     header.unk0 = 0;
     header.unk1 = 3;
@@ -610,7 +610,7 @@ struct225 *light_spawn_pulse_c(s32 arg0, u8 arg1, s32 arg2) {
 
     tmp[0] = 28.0f;
     tmp[1] = 27.0f;
-    tmp[2] = func_150ADA68() * 6.2831855f;
+    tmp[2] = random_float() * 6.2831855f;
     tmp[3] = 0.0766f;
 
     header.unk0 = 0;
@@ -729,7 +729,7 @@ extern struct_eu_151618BC D_800A6AC4;
 void light_play_zap_sfx(u16 arg0, s16 arg1, u8 arg2, s32 arg3, f32 *arg4, s16 arg5, s16 arg6) {
     struct_eu_151618BC tbl = D_800A6AC4;
 
-    func_10010F88(tbl.unk0[(u32)func_150ADA20() % 10], arg0, arg1, arg2, arg3, arg4[0], arg4[1], arg4[2], arg5, arg6);
+    func_10010F88(tbl.unk0[(u32)random_int() % 10], arg0, arg1, arg2, arg3, arg4[0], arg4[1], arg4[2], arg5, arg6);
 }
 
 /* was func_151619A0 */
@@ -1319,7 +1319,7 @@ void light_env_phase_on(struct239 *arg0) {
     s8 sp1C[9]; // FIXME: what size should this be?
     struct240 *temp_v0;
 
-    temp_v0 = func_151149AC(arg0->unk48);
+    temp_v0 = world_record_find(arg0->unk48);
     if (temp_v0 != NULL) {
         temp_v0->unk7C |= 1;
     }
@@ -1336,7 +1336,7 @@ void light_env_phase_off(struct239 *arg0) {
     s8 sp1C[9]; // FIXME: what size should this be?
     struct240 *temp_v0;
 
-    temp_v0 = func_151149AC(arg0->unk48);
+    temp_v0 = world_record_find(arg0->unk48);
     if (temp_v0 != NULL) {
         temp_v0->unk7C &= ~1;
     }
@@ -1390,7 +1390,7 @@ struct225 *light_spawn_burst_flash(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4
 // delay from func_151EFDD0 that EU's two-pointer func_1000E770 never reads). Between bursts +0x20 counts down; at zero
 // a burst of rand % (+0x34 + 1) + +0x30 flashes is queued and the next pause is rand * +0x28 + +0x24.
 s32 func_1000E770(s32 *arg0, s32 *arg1);
-f32 func_150ADA68(void);
+f32 random_float(void);
 int func_151EFDD0(void);
 
 /* was func_151630F4 */
@@ -1409,8 +1409,8 @@ s32 light_beh_burst_flash(u8 *rec) {
     if (*(s32 *) (rec + 0x2C) > 0) {
         *(f32 *) (rec + 0x38) -= D_800BE9A4;
         if (*(f32 *) (rec + 0x38) < 0.0f) {
-            *level = func_150ADA68() * *(f32 *) (rec + 0x48) + *(f32 *) (rec + 0x44);
-            *(f32 *) (rec + 0x38) = func_150ADA68() * *(f32 *) (rec + 0x40) + *(f32 *) (rec + 0x3C);
+            *level = random_float() * *(f32 *) (rec + 0x48) + *(f32 *) (rec + 0x44);
+            *(f32 *) (rec + 0x38) = random_float() * *(f32 *) (rec + 0x40) + *(f32 *) (rec + 0x3C);
             func_151EFDD0();
             func_1000E770(NULL, NULL);
             *(s32 *) (rec + 0x2C) -= 1;
@@ -1418,9 +1418,9 @@ s32 light_beh_burst_flash(u8 *rec) {
     } else {
         *(f32 *) (rec + 0x20) -= D_800BE9A4;
         if (*(f32 *) (rec + 0x20) < 0.0f) {
-            *(s32 *) (rec + 0x2C) = (u32) func_150ADA20() % (u32) (*(s32 *) (rec + 0x34) + 1) + *(s32 *) (rec + 0x30);
+            *(s32 *) (rec + 0x2C) = (u32) random_int() % (u32) (*(s32 *) (rec + 0x34) + 1) + *(s32 *) (rec + 0x30);
             *(f32 *) (rec + 0x38) = 0.0f;
-            *(f32 *) (rec + 0x20) = func_150ADA68() * *(f32 *) (rec + 0x28) + *(f32 *) (rec + 0x24);
+            *(f32 *) (rec + 0x20) = random_float() * *(f32 *) (rec + 0x28) + *(f32 *) (rec + 0x24);
         }
     }
     return 1;
@@ -1508,7 +1508,7 @@ struct225 *light_spawn_pulse_preset(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg
 
     src[0] = D_800A6964[arg1];
     src[1] = D_800A699C[arg1];
-    src[2] = func_150ADA68() * 6.2831855f;
+    src[2] = random_float() * 6.2831855f;
     src[3] = D_800A69D4[arg1];
 
     header.unk0 = arg4;
@@ -1607,13 +1607,13 @@ struct225 *light_create_obj_pulse(u8 arg0, u8 arg1, s32 arg2) {
     struct226 *temp_v0;
     Header2 header2;
 
-    temp_v0 = func_151149AC(arg0); // maybe different types?
+    temp_v0 = world_record_find(arg0); // maybe different types?
     if (temp_v0 == 0) {
         return 0;
     }
     tmp1[0] = D_800A6964[6]; // D_800A697C
     tmp1[1] = D_800A699C[6]; // D_800A69B4
-    tmp1[2] = func_150ADA68() * 6.2831855f;
+    tmp1[2] = random_float() * 6.2831855f;
     tmp1[3] = D_800A69D4[6]; // D_800A69EC;
 
     header2.unk0 = temp_v0->unk10;
@@ -1655,7 +1655,7 @@ struct225 *light_create_joint_pulse(s32 arg0, u8 arg1, s32 arg2) {
 
     src[0] = D_800A6964[6];
     src[1] = D_800A699C[6];
-    src[2] = func_150ADA68() * 6.2831855f;
+    src[2] = random_float() * 6.2831855f;
     src[3] = D_800A69D4[6];
 
     temp_v0 = light_create_obj_joint(arg0, 1, &D_800A6A0C, 2, 300, 100, 0, 0xFF, 0, 0xFF, 0, 0, sizeof(src), 1, arg1, arg2);
@@ -1683,11 +1683,11 @@ void light_sine_intensity_step(struct227 *arg0, struct225 *arg1) {
 void light_flicker_intensity_step(struct225 *arg0, struct228 *arg1) {
     arg1->unk10 = arg1->unk10 - D_800BE9A4;
     if (arg1->unk10 < 0.0f) {
-        arg1->unk10 = func_150ADA68() * arg1->unk14;
-        if ((func_150ADA20() & 3) != 0) {
-            arg1->unkC = (func_150ADA68() * (arg1->unk0 - arg1->unk4)) + arg1->unk4;
+        arg1->unk10 = random_float() * arg1->unk14;
+        if ((random_int() & 3) != 0) {
+            arg1->unkC = (random_float() * (arg1->unk0 - arg1->unk4)) + arg1->unk4;
         } else {
-            arg1->unkC = (func_150ADA68() * (arg1->unk8 - arg1->unk0)) + arg1->unk0;
+            arg1->unkC = (random_float() * (arg1->unk8 - arg1->unk0)) + arg1->unk0;
         }
     }
     arg1->unk1C += (arg1->unkC - arg1->unk1C) * arg1->unk18;
@@ -1964,7 +1964,7 @@ void light_set_orbit_pos(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f3
     f32 x;
     f32 mf[4][4];
 
-    func_150A8050(mf, arg3, 0.0f, arg4);
+    mtxf_rotate_xyz_deg(mf, arg3, 0.0f, arg4);
     mf[3][0] = arg1->unk0;
     mf[3][1] = arg1->unk4;
     mf[3][2] = arg1->unk8;
@@ -1981,7 +1981,7 @@ void light_set_orbit_pos(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f3
 //
 //     f32 tmp[16];
 //
-//     func_150A8050(&tmp, arg3, 0.0f, arg4);
+//     mtxf_rotate_xyz_deg(&tmp, arg3, 0.0f, arg4);
 //
 //     tmp[13] = arg1->unk0;
 //     tmp[14] = arg1->unk4;
@@ -1997,7 +1997,7 @@ void light_set_orbit_pos(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f3
 extern u8 D_80088A90[];
 extern u8 D_80088A94[];
 extern u8 D_80088A98[];
-void func_15111CAC(s32);
+void overlay_mode_set(s32);
 void func_1515F170(s32, s32);
 
 /* was func_151645C4 */
@@ -2006,11 +2006,11 @@ void level_set_lights_mode(u8 arg0) {
     if (arg0) {
         switch (D_800BE9F0) {
         case 0xB:
-            func_15111CAC(4);
+            overlay_mode_set(4);
             break;
         case 0x6:
             func_1515F170(0xA, 1);
-            func_15111CAC(4);
+            overlay_mode_set(4);
         case 0x39:
             ((u8 *)&D_800DCD20)[0] = D_80088A90[0];
             ((u8 *)&D_800DCD20)[1] = D_80088A90[1];
@@ -2030,7 +2030,7 @@ void level_set_lights_mode(u8 arg0) {
         case 0x7:
         case 0xC:
         case 0x39:
-            func_15111CAC(6);
+            overlay_mode_set(6);
             ((u8 *)&D_800DCD20)[0] = D_80088A98[0];
             ((u8 *)&D_800DCD20)[1] = D_80088A98[1];
             ((u8 *)&D_800DCD20)[2] = D_80088A98[2];
@@ -2039,10 +2039,10 @@ void level_set_lights_mode(u8 arg0) {
             D_800B0DF0->unk7 = 0xFF;
             break;
         case 0xB:
-            func_15111CAC(6);
+            overlay_mode_set(6);
             break;
         case 0x29:
-            func_15111CAC(1);
+            overlay_mode_set(1);
             break;
         }
     }

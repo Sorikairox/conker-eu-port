@@ -5,20 +5,22 @@
 
 // ???
 #ifdef NON_MATCHING
-u8 *func_151149AC(s32);
+u8 *world_record_find(s32);
 extern s32 D_800D9D70;
 
-void func_150104F0(void) {
+/* was func_150104F0 */
+void level_obj_init_d9d70(void) {
     (*(s8 *)((u8 *)(&D_800D9D70) + 1)) = 0;
     (*(s8 *)((u8 *)(&D_800D9D70) + 0)) = 0;
     (*(s8 *)((u8 *)(&D_800D9D70) + 2)) = 0;
-    (*(f32 *)((u8 *)(func_151149AC(0xF6)) + 0x7C)) = 2.0f;
+    (*(f32 *)((u8 *)(world_record_find(0xF6)) + 0x7C)) = 2.0f;
     D_80088D20 = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3D9A0/func_150104F0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_3D9A0/level_obj_init_d9d70.s")
 #endif
-void func_15010538(struct127 *arg0) {
+/* was func_15010538 */
+void obj_spawn_effect_80(struct127 *arg0) {
     struct175 tmp;
     struct37 *temp_v0;
 
@@ -45,7 +47,8 @@ extern u8 D_800D9D4A[];
 extern u8 D_800D9D58;
 extern u8 D_800D9D59;
 extern u8 D_800D9D5A[];
-void func_15010600(void)
+/* was func_15010600 */
+void level_clear_d9d40_flags(void)
 {
   s32 i;
   D_800D9D41 = 0;
@@ -62,7 +65,7 @@ void func_15010600(void)
 
 }
 // NON-MATCHING: addresses are wrong :(
-// void func_15010600(void) {
+// void level_clear_d9d40_flags(void) {
 //     s32 i;
 //
 //     for (i = 0; i < 11; i++) {

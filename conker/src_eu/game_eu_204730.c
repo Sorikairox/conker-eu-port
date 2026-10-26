@@ -8,7 +8,7 @@ extern u8 D_800A5860[];
 
 void func_151D6F20(s32 arg0, s32 arg1) {
     if ((D_800BE9F0 == 50) || (D_800BE9F0 == 51)) {
-        func_150D6C40(arg0, 0xFF, 1);
+        obj_sprite_burst_spawn(arg0, 0xFF, 1);
     }
 }
 
@@ -101,7 +101,7 @@ void func_151D6F64(s16 *arg0, struct127 *arg1) {
 }
 
 #ifdef NON_MATCHING
-u8 *func_1509B570(s32);
+u8 *event_get_vars(s32);
 u8 *func_150D0420(s32, s32 *, s32, s32, s32, s32, s32, s32);
 s32 func_15157580(s8 *, s32, f32, s32, s32, s32, s32, s32); /* P95: f32 (float bits were passed as an int) */
 s32 memcpy(s32, u8 **, s32);
@@ -202,7 +202,7 @@ void func_151D71AC(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u4A = 0x1F;
     sp.u40 = (*(u8 *)((u8 *)arg0 + 0x3B));
     sp.u44 = func_150859AC(0, 6);
-    temp_v0 = func_1509B570(0x83);
+    temp_v0 = event_get_vars(0x83);
     if (temp_v0 != NULL) {
         temp_v1 = (*(s32 *)((u8 *)temp_v0 + 0x64)) + 1;
         if (temp_v1 == 0xFF) {
@@ -230,7 +230,7 @@ block_7:
 f32 func_15144AA8(s32);
 #define MTX_7410(a) (((f32 (*)[16])((a) + 0x7C))[D_800BE9C0])
 s32 func_151D7410(u8 *arg0) {
-    func_150A8050(&MTX_7410(arg0), 0.0f, func_15144AA8(0) + 25.0f, 0.0f);
+    mtxf_rotate_xyz_deg(&MTX_7410(arg0), 0.0f, func_15144AA8(0) + 25.0f, 0.0f);
     MTX_7410(arg0)[12] = (*(f32 **)(arg0 + 0x4C))[5];
     MTX_7410(arg0)[13] = (*(f32 **)(arg0 + 0x4C))[6] + 120.0f;
     MTX_7410(arg0)[14] = (*(f32 **)(arg0 + 0x4C))[7];
@@ -253,10 +253,10 @@ s32 func_151D7410(u8 *arg0) {
 // when the result is 0). Returns 0 once the owner object (data +0) is gone or its id byte +0x3B no longer matches
 // data +4; otherwise prints "$ %d" (D_800AB634, the amount at data +8) above the owner in colour (0x32, 0x7D, 0x1C)
 // with alpha fading in over the first data +0xC frames (timer * step data +0xE, clamped at 0; 0xFF after) and keeps
-// the record. The asm returns func_15042E3C's leftover v0 there (the last text node, non-zero unless the text pool
+// the record. The asm returns text_printf's leftover v0 there (the last text node, non-zero unless the text pool
 // is full), like its siblings' explicit 1.
 extern u8 D_800AB634[];
-void func_15042E3C(s32, ...); /* varargs, as its definition (game_70200) */
+void text_printf(s32, ...); /* varargs, as its definition (game_70200) */
 s32 func_151D75B0(u8 *rec) {
     u8 *data = *(u8 **) (rec + 0x48);
     u8 *owner = *(u8 **) data;
@@ -274,10 +274,10 @@ s32 func_151D75B0(u8 *rec) {
             alpha = 0;
         }
     }
-    func_150432CC((s32) owner, 0x109);
-    func_1504332C(0x32, 0x7D, 0x1C, alpha);
-    func_15042D78(0x81);
-    func_15042E3C((s32) D_800AB634, *(s32 *) (data + 8));
+    text_set_box((s32) owner, 0x109);
+    text_set_color(0x32, 0x7D, 0x1C, alpha);
+    text_set_flags(0x81);
+    text_printf((s32) D_800AB634, *(s32 *) (data + 8));
     return 1;
 }
 #else

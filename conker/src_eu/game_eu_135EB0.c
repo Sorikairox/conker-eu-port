@@ -7,11 +7,12 @@ extern u8 D_800A2800[];
 
 
 #ifdef NON_MATCHING
-void func_150E892C(void *, s16, u8, s32);
+void fx_debris_emitter_spawn(void *, s16, u8, s32);
 s32 object_hit_effects(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800A2804;
 
-void func_151086A0(struct127 *arg0, u8 arg1, s32 arg2) {
+/* was func_151086A0 */
+void obj_impact_burst(struct127 *arg0, u8 arg1, s32 arg2) {
     struct {
         s32 u34;
         s32 u38;
@@ -44,7 +45,7 @@ void func_151086A0(struct127 *arg0, u8 arg1, s32 arg2) {
     sp.u70 = arg0->x_position;
     sp.u74 = arg0->y_position + 30.0f;
     sp.u78 = arg0->z_position;
-    func_150E892C(&sp.u7C, (s16) ((func_150ADA20() % 201U) + 0x1F4), arg1, arg2);
+    fx_debris_emitter_spawn(&sp.u7C, (s16) ((random_int() % 201U) + 0x1F4), arg1, arg2);
     sp.u34 = 0xF;
     sp.u38 = 8;
     (*(f32 *)((u8 *)(&sp.u3C) + 0)) = (f32) (*(f32 *)((u8 *)(&sp.u70) + 0));
@@ -67,5 +68,5 @@ void func_151086A0(struct127 *arg0, u8 arg1, s32 arg2) {
     object_hit_effects(arg0, 1, 1, 1, 0, 0, (s32) arg1, arg2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_135EB0/func_151086A0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_135EB0/obj_impact_burst.s")
 #endif

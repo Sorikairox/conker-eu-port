@@ -6,17 +6,17 @@
 #ifdef NON_MATCHING
 extern f32 D_800A0480;
 extern f32 D_800A0484;
-s32 func_1509BE40(s32, s32, ...);
+s32 event_dispatch(s32, s32, ...);
 
 void func_150BED50(struct108 *arg0) {
     s32 sp28;
     s32 temp_t0;
     s32 temp_v0;
 
-    sp28 = func_1509BE40(0, func_1509BE40(0, 0x2006, 0xB7) | 0x2000, 0xBC);
-    temp_v0 = func_1509BE40(0, 0x2000, 0xBB);
+    sp28 = event_dispatch(0, event_dispatch(0, 0x2006, 0xB7) | 0x2000, 0xBC);
+    temp_v0 = event_dispatch(0, 0x2000, 0xBB);
     if ((sp28 != 0) && (temp_v0 != -1)) {
-        func_1509BFB0(0, 0x400E, 1);
+        event_dispatch_alt(0, 0x400E, 1);
         if (arg0->unk2C != 8) {
             camera_init_controller(arg0);
         }
@@ -39,7 +39,7 @@ void func_150BED50(struct108 *arg0) {
     s32 pad;
         camera_set_followed_obj(arg0, 0);
         arg0->unk674 = 0.0f;
-        func_1509BFB0(0, 0x400E, 0);
+        event_dispatch_alt(0, 0x400E, 0);
     }
 }
 #else

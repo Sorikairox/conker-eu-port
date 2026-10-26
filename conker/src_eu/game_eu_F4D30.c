@@ -59,8 +59,8 @@ void func_150C7520(u8 *arg0, s16 arg1, s32 arg2, s32 arg3) {
         } else {
             sp.u46 = 0x12C;
         }
-        sp.u42 = (func_150ADA20() % 66U) + 0x23;
-        sp.u44 = (func_150ADA20() % 26U) + 0x19;
+        sp.u42 = (random_int() % 66U) + 0x23;
+        sp.u44 = (random_int() % 26U) + 0x19;
         bone_emitter_spawn(&sp.u1C, 0);
         sp.u24 = 0xC;
         sp.u30 = 34.0f;
@@ -69,8 +69,8 @@ void func_150C7520(u8 *arg0, s16 arg1, s32 arg2, s32 arg3) {
         sp.u2C = 0.0f;
         sp.u38 = 0.0f;
         sp.u34 = 15.0f;
-        sp.u42 = (func_150ADA20() % 66U) + 0x23;
-        sp.u44 = (func_150ADA20() % 26U) + 0x19;
+        sp.u42 = (random_int() % 66U) + 0x23;
+        sp.u44 = (random_int() % 26U) + 0x19;
         bone_emitter_spawn(&sp.u1C, 0);
     }
 }
@@ -90,6 +90,6 @@ void func_150C76C0(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5) {
     sp54[0] = ((*(f32 *)((u8 *)arg1 + 0)) - (*(f32 *)((u8 *)arg0 + 0))) * 0.407f;
     sp54[1] = ((*(f32 *)((u8 *)arg1 + 4)) - (*(f32 *)((u8 *)arg0 + 4))) * 0.407f;
     sp54[2] = ((*(f32 *)((u8 *)arg1 + 8)) - (*(f32 *)((u8 *)arg0 + 8))) * 0.407f;
-    sp52 = (func_150ADA20() % 31U) + 0x2A;
-    impact_tinted_particle_spawn(0, arg0, sp54, ((func_150ADA68()) * 70.0f) + 30.0f, ((func_150ADA68()) * 0.020000001f) + 1.0400001f, 1.0f, ((func_150ADA68()) * 0.194f) + -0.35000002f, (s32) sp52, (func_150ADA20() % 101U) + 0x9B, (s32) sp52, 0xFF / sp52, 1, (s32) (*(u8 *)((u8 *)arg5 + 0xC)), (s32) (*(u8 *)((u8 *)arg5 + 1)));
+    sp52 = (random_int() % 31U) + 0x2A;
+    impact_tinted_particle_spawn(0, arg0, sp54, ((random_float()) * 70.0f) + 30.0f, ((random_float()) * 0.020000001f) + 1.0400001f, 1.0f, ((random_float()) * 0.194f) + -0.35000002f, (s32) sp52, (random_int() % 101U) + 0x9B, (s32) sp52, 0xFF / sp52, 1, (s32) (*(u8 *)((u8 *)arg5 + 0xC)), (s32) (*(u8 *)((u8 *)arg5 + 1)));
 }

@@ -267,14 +267,14 @@ void func_1501C51C(void) {
 
 #ifdef NON_MATCHING
 void func_10004074(s32);
-void func_15006590(s8);
-void func_15006BEC(s8);
-void func_1500707C(s8);
-void func_15007168(void);
-void func_1500727C(void);
-void func_15007360(void);
-void func_15007440(void);
-void func_15007558(void);
+void save_slot_load(s8);
+void save_slot_write(s8);
+void save_slot_erase(s8);
+void save_config_reset(void);
+void save_config_load(void);
+void save_config_write(void);
+void save_options_load(void);
+void save_options_write(void);
 s32 func_151DD588(s32);
 s32 func_151DDA10(OSMesgQueue *);
 extern u8 D_800843F4;
@@ -297,21 +297,21 @@ void func_1501C55C(void) {
     }
     if (state != 2) {
         if (mode == 1) {
-            func_150064E0();
+            save_game_defaults();
         } else if (mode == 4) {
-            func_15007168();
+            save_config_reset();
         }
         D_80082BB4 = 0;
         return;
     }
     switch (mode) {
-        case 1: func_15006590((s8)D_800BE3EC); break;
-        case 2: func_15006BEC((s8)D_800BE3EC); break;
-        case 3: func_1500707C((s8)D_800BE3EC); break;
-        case 4: func_1500727C(); break;
-        case 5: func_15007360(); break;
-        case 6: func_15007440(); break;
-        case 7: func_15007558(); break;
+        case 1: save_slot_load((s8)D_800BE3EC); break;
+        case 2: save_slot_write((s8)D_800BE3EC); break;
+        case 3: save_slot_erase((s8)D_800BE3EC); break;
+        case 4: save_config_load(); break;
+        case 5: save_config_write(); break;
+        case 6: save_options_load(); break;
+        case 7: save_options_write(); break;
     }
     D_80082BB4 = 0;
     if (D_800BE810 != 0) {

@@ -442,7 +442,7 @@ void fx_source_emitter_update(u8 *arg0) {
 
     temp_s0 = ((*(u8 *)((u8 *)arg0 + 0x30)) << 6) + ((u8 *)&D_800A6880);
     temp_s1 = arg0 + 0x28;
-    (*(f32 *)((u8 *)temp_s1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 4)) + ((*(f32 *)((u8 *)temp_s0 + 0)) + (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 4)))));
+    (*(f32 *)((u8 *)temp_s1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 4)) + ((*(f32 *)((u8 *)temp_s0 + 0)) + (random_float() * (*(f32 *)((u8 *)temp_s0 + 4)))));
     if ((*(f32 *)((u8 *)temp_s1 + 4)) > 1.0f) {
         do {
             sp.u5C = (*(s32 *)((u8 *)temp_s0 + 8));
@@ -494,8 +494,8 @@ void fx_source_emitter_update(u8 *arg0) {
             sp.uCC = -1;
             sp.uCD = 0;
             sp.uC8 = (*(f32 *)((u8 *)temp_s0 + 0x3C));
-            temp_s2 = func_150ADA20();
-            func_15143794((s16) (temp_s2 & 0xFF), (s16) (0x40 - (func_150ADA20() & 0x7F)), (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0))) + 6)), &sp.u64);
+            temp_s2 = random_int();
+            func_15143794((s16) (temp_s2 & 0xFF), (s16) (0x40 - (random_int() & 0x7F)), (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0))) + 6)), &sp.u64);
             sp.u64 += (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0))) + 0));
             sp.u68 += (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0))) + 2));
             sp.u6C += (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0))) + 4));

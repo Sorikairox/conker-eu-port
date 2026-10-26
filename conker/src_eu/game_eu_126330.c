@@ -1,13 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-// hoisted forward declaration(s) for func_150F8DFC
-void func_150F8EAC(u8 *arg0);
+// hoisted forward declaration(s) for fire_handle_event
+void fire_burn_update(u8 *arg0);
 
 typedef struct { s32 x, y, z; } V3i;
 s32 func_151530A8(s32 *, u8, s32);
 
-void func_150F8B20(s32 arg0, u8 *arg1, s32 arg2) {
+/* was func_150F8B20 */
+void fire_flash_burst_spawn(s32 arg0, u8 *arg1, s32 arg2) {
 
     f32 pos[3];
     Header header;
@@ -79,12 +80,12 @@ void func_150F8B20(s32 arg0, u8 *arg1, s32 arg2) {
     if ((arg1 && arg1) && arg1) {
     } // fakematch
     header.unk1 = -1;
-    header.unk2 = (func_150ADA20() % 9U) + 5;
+    header.unk2 = (random_int() % 9U) + 5;
     header.unk4 = 0;
     header2.unk0 = pos[0];
     header2.unk4 = pos[1];
     header2.unk8 = pos[2];
-    light_create_with_ctrl(&header, &header2, (func_150ADA20() % 31U) + 0x5A, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
+    light_create_with_ctrl(&header, &header2, (random_int() % 31U) + 0x5A, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
     sp.u3C = 8;
     sp.u40 = 0xC;
     *(V3i *) &sp.u44 = *(V3i *) pos;
@@ -140,13 +141,15 @@ void func_150F8B20(s32 arg0, u8 *arg1, s32 arg2) {
     func_151530A8(&sp.u3C, 0xFF, 1);
 }
 
-void func_150F8DCC(s32 arg0, s32 arg1) {
+/* was func_150F8DCC */
+void fire_post_tick_event(s32 arg0, s32 arg1) {
     s32 tmp[2];
     tmp[0] = arg1;
     func_151494E0(tmp, 0x3F);
 }
 
-void func_150F8DFC(struct102 *arg0, u8 *arg1, u8 arg2)
+/* was func_150F8DFC */
+void fire_handle_event(struct102 *arg0, u8 *arg1, u8 arg2)
 {
   u8 *w = (u8 *) arg0;
   u8 *v = w + 0x28;
@@ -172,7 +175,7 @@ void func_150F8DFC(struct102 *arg0, u8 *arg1, u8 arg2)
   {
     if ((*((s32 *) arg1)) == (*((s32 *) (w + 0x28))))
     {
-      func_150F8EAC(arg0);
+      fire_burn_update(arg0);
     }
   }
 }
@@ -185,7 +188,7 @@ u8 *func_15132BBC(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extraSize, u8
 s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 s32 impact_tinted_particle_spawn(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s16 arg7, u8 arg8, s16 arg9, s16 argA, u8 argB, u8 argC, s32 argD);
 
-/* func_150F8DFC's object from +0x28 on (the fire state) */
+/* fire_handle_event's object from +0x28 on (the fire state) */
 typedef struct {
     s32 unk0;
     u8 unk4;
@@ -213,7 +216,8 @@ typedef struct {
 // point on the ring (angle (rng % 126 - 220) mirrored by flags bit 0, `radius`, around x / z, height 30..180):
 // embers (func_151C384C), 5..11 flame particles (func_15132BBC), 7..19 smoke sprites (func_151307F0, random
 // flips) and sparks (impact_tinted_particle_spawn).
-void func_150F8EAC(u8 *arg0) {
+/* was func_150F8EAC */
+void fire_burn_update(u8 *arg0) {
     FireState *st = (FireState *)(arg0 + 0x28);
     structEU_151D8E18 burst;
     structEU_151D8E18 crackle;
@@ -302,7 +306,7 @@ void func_150F8EAC(u8 *arg0) {
         st->timer -= D_800BE9E4 * count;
         if (st->timer < 0) {
             part = st->parts[st->stage];
-            func_10010F88((func_150ADA20() % 3U) + 0x2B3, 0x5DC0, 0, 0, -1, *(s16 *)(part + 0x10),
+            func_10010F88((random_int() % 3U) + 0x2B3, 0x5DC0, 0, 0, -1, *(s16 *)(part + 0x10),
                           *(s16 *)(part + 0x12), *(s16 *)(part + 0x14), 500, 1000);
             st->parts[st->stage][0x6E] = 1;
             st->stage++;
@@ -314,7 +318,7 @@ void func_150F8EAC(u8 *arg0) {
             burst.unk4 = 8;
             burst.unk6 = -1;
             func_151D8E18(&burst, 0, arg0[0xC], arg0[1]);
-            st->timer = (func_150ADA20() % 31U) + 70;
+            st->timer = (random_int() % 31U) + 70;
         }
     }
 
@@ -322,26 +326,26 @@ void func_150F8EAC(u8 *arg0) {
     st->crackle -= D_800BE9E4 * count;
     if (st->crackle < 0) {
         crackle.unk0 = 1;
-        crackle.unk2 = (func_150ADA20() % 21U) + 10;
+        crackle.unk2 = (random_int() % 21U) + 10;
         crackle.unk5 = 1;
-        crackle.unk4 = (func_150ADA20() & 3) + 1;
+        crackle.unk4 = (random_int() & 3) + 1;
         crackle.unk6 = -1;
         func_151D8E18(&crackle, 0, arg0[0xC], arg0[1]);
         part = st->parts[st->stage];
-        func_10010F88((func_150ADA20() & 3) + 0x6D6, 0x5DC0, 0, 0, -1, *(s16 *)(part + 0x10),
+        func_10010F88((random_int() & 3) + 0x6D6, 0x5DC0, 0, 0, -1, *(s16 *)(part + 0x10),
                       *(s16 *)(part + 0x12), *(s16 *)(part + 0x14), 500, 1000);
-        st->crackle = (func_150ADA20() % 151U) + 150;
+        st->crackle = (random_int() % 151U) + 150;
     }
 
     /* embers */
     countf = count;
-    st->emberAcc += (0.020000001f + func_150ADA68() * 0.025f) * (D_800BE9A4 * countf);
+    st->emberAcc += (0.020000001f + random_float() * 0.025f) * (D_800BE9A4 * countf);
     if (1.0f < st->emberAcc) {
         dir = (st->flags & 1) ? -1 : 1;
         do {
-            angle = ((s32)(func_150ADA20() % 126U) - 0xDC) * dir;
+            angle = ((s32)(random_int() % 126U) - 0xDC) * dir;
             func_15143874(angle, st->radius, &ember[0], &ember[2]);
-            ember[1] = func_150ADA68() * 150.0f + 30.0f;
+            ember[1] = random_float() * 150.0f + 30.0f;
             ember[0] += st->x;
             ember[2] += st->z;
             func_151C384C(ember, arg0[0xC], arg0[1]);
@@ -350,7 +354,7 @@ void func_150F8EAC(u8 *arg0) {
     }
 
     /* flames */
-    st->flameAcc += (0.020000001f + func_150ADA68() * 0.060000002f) * (D_800BE9A4 * countf);
+    st->flameAcc += (0.020000001f + random_float() * 0.060000002f) * (D_800BE9A4 * countf);
     if (1.0f < st->flameAcc) {
         dir = (st->flags & 1) ? -1 : 1;
         flame.scale[0] = 1.0f;
@@ -379,28 +383,28 @@ void func_150F8EAC(u8 *arg0) {
         flame.u78 = 0;
         flame.u44 = 0.0f;
         do {
-            k = (func_150ADA20() % 7U) + 5;
-            angle = ((s32)(func_150ADA20() % 126U) - 0xDC) * dir;
+            k = (random_int() % 7U) + 5;
+            angle = ((s32)(random_int() % 126U) - 0xDC) * dir;
             func_15143874(angle, st->radius, &flame.pos[0], &flame.pos[2]);
-            flame.pos[1] = func_150ADA68() * 150.0f + 30.0f;
+            flame.pos[1] = random_float() * 150.0f + 30.0f;
             flame.pos[0] += st->x;
             flame.pos[2] += st->z;
             base = angle - 7;
             while (k > 0) {
-                flame.life = (func_150ADA20() & 0xF) + 0x23;
-                size = func_150ADA68() * 0.012f + 0.005f;
+                flame.life = (random_int() & 0xF) + 0x23;
+                size = random_float() * 0.012f + 0.005f;
                 flame.size[0] = size;
                 flame.size[1] = size;
-                flame.rot[0] = func_150ADA68() * 360.0f;
-                flame.rot[1] = func_150ADA68() * 360.0f;
-                flame.rot[2] = func_150ADA68() * 360.0f;
-                r1 = func_150ADA20();
-                r2 = func_150ADA20();
-                speed = func_150ADA68() * 8.0f + 10.0f;
+                flame.rot[0] = random_float() * 360.0f;
+                flame.rot[1] = random_float() * 360.0f;
+                flame.rot[2] = random_float() * 360.0f;
+                r1 = random_int();
+                r2 = random_int();
+                speed = random_float() * 8.0f + 10.0f;
                 func_15143794((r1 & 0xF) + base, ((u32)r2 % 37U) - 0x3F, speed, (struct17 *)flame.vel);
-                flame.u40 = func_150ADA68() * 32.41f + -16.205f;
-                flame.u48 = func_150ADA68() * 32.41f + -16.205f;
-                flame.u4C = func_150ADA68() * 0.337f + -1.177f;
+                flame.u40 = random_float() * 32.41f + -16.205f;
+                flame.u48 = random_float() * 32.41f + -16.205f;
+                flame.u4C = random_float() * 0.337f + -1.177f;
                 func_15132BBC((u8 *)&flame, 3, 1, NULL, 0, 0xFF, 1);
                 k--;
             }
@@ -409,7 +413,7 @@ void func_150F8EAC(u8 *arg0) {
     }
 
     /* smoke */
-    st->smokeAcc += (0.055000003f + func_150ADA68() * 0.05f) * (D_800BE9A4 * countf);
+    st->smokeAcc += (0.055000003f + random_float() * 0.05f) * (D_800BE9A4 * countf);
     if (1.0f < st->smokeAcc) {
         dir = (st->flags & 1) ? -1 : 1;
         smoke.texture = 0x86;
@@ -444,28 +448,28 @@ void func_150F8EAC(u8 *arg0) {
         smoke.range = 0.0f;
         smoke.u24 = 1.0f;
         do {
-            n = (func_150ADA20() % 13U) + 7;
-            angle = ((s32)(func_150ADA20() % 126U) - 0xDC) * dir;
+            n = (random_int() % 13U) + 7;
+            angle = ((s32)(random_int() % 126U) - 0xDC) * dir;
             func_15143874(angle, st->radius, &smoke.pos[0], &smoke.pos[2]);
-            smoke.pos[1] = func_150ADA68() * 150.0f + 30.0f;
+            smoke.pos[1] = random_float() * 150.0f + 30.0f;
             smoke.pos[0] += st->x;
             smoke.pos[2] += st->z;
             base = angle - 4;
             while (n > 0) {
-                smoke.life = (func_150ADA20() % 21U) + 0x1E;
-                smoke.alpha = (func_150ADA20() % 156U) + 100;
-                size = func_150ADA68() * 110.0f + 70.0f;
+                smoke.life = (random_int() % 21U) + 0x1E;
+                smoke.alpha = (random_int() % 156U) + 100;
+                size = random_float() * 110.0f + 70.0f;
                 smoke.flags &= ~0xC0;
                 smoke.halfW = size;
                 smoke.halfH = size;
-                flipB = (func_150ADA20() & 1) ? 0x80 : 0;
-                flipA = (func_150ADA20() & 1) ? 0x40 : 0;
+                flipB = (random_int() & 1) ? 0x80 : 0;
+                flipA = (random_int() & 1) ? 0x40 : 0;
                 smoke.flags |= flipA | flipB;
-                r1 = func_150ADA20();
-                r2 = func_150ADA20();
-                speed = func_150ADA68() * 10.0f + 6.0f;
+                r1 = random_int();
+                r2 = random_int();
+                speed = random_float() * 10.0f + 6.0f;
                 func_15143794(((u32)r1 % 9U) + base, (r2 & 7) - 0x10, speed, (struct17 *)smoke.vel);
-                smoke.value = func_150ADA68() * 0.268f + -0.38700002f;
+                smoke.value = random_float() * 0.268f + -0.38700002f;
                 func_151307F0((s32)&smoke, 1, 0, 0, 0xFF, 1);
                 n--;
             }
@@ -474,23 +478,23 @@ void func_150F8EAC(u8 *arg0) {
     }
 
     /* sparks */
-    st->sparkAcc += (0.33600003f + func_150ADA68() * 0.126f) * (D_800BE9A4 * countf);
+    st->sparkAcc += (0.33600003f + random_float() * 0.126f) * (D_800BE9A4 * countf);
     if (1.0f < st->sparkAcc) {
         dir = (st->flags & 1) ? -1 : 1;
         do {
-            angle = ((s32)(func_150ADA20() % 126U) - 0xDC) * dir;
+            angle = ((s32)(random_int() % 126U) - 0xDC) * dir;
             func_15143874(angle, st->radius, &pos[0], &pos[2]);
-            pos[1] = func_150ADA68() * 150.0f + 30.0f;
+            pos[1] = random_float() * 150.0f + 30.0f;
             pos[0] += st->x;
             pos[2] += st->z;
-            r1 = func_150ADA20();
-            r2 = func_150ADA20();
-            speed = func_150ADA68() * 6.0f + 4.0f;
+            r1 = random_int();
+            r2 = random_int();
+            speed = random_float() * 6.0f + 4.0f;
             func_15143794(((u32)r1 % 9U) + angle - 4, (r2 & 7) - 0x10, speed, (struct17 *)vel);
-            size = func_150ADA68();
-            spread = func_150ADA68();
-            r1 = func_150ADA20();
-            r2 = func_150ADA20();
+            size = random_float();
+            spread = random_float();
+            r1 = random_int();
+            r2 = random_int();
             impact_tinted_particle_spawn(8, (u8 *)pos, (u8 *)vel, size * 200.0f + 200.0f, 1.025439f, 0.938816f,
                           spread * 0.20700002f + -0.16900001f, ((u32)r1 % 21U) + 0x23, ((u32)r2 % 121U) + 100, 0x32,
                           5, 0, 0xFF, 1);
@@ -499,12 +503,13 @@ void func_150F8EAC(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_126330/func_150F8EAC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_126330/fire_burn_update.s")
 #endif
 
 extern u8 D_800A2010[][2];
 
-void func_150F9CA0(u8 arg0) {
+/* was func_150F9CA0 */
+void fire_post_finish_events(u8 arg0) {
     struct {
         s32 unk0;
         u8 unk4;
@@ -517,26 +522,30 @@ void func_150F9CA0(u8 arg0) {
     func_151494E0(&tmp, 0x42);
 }
 
-void func_150F9D08(s32 arg0) {
+/* was func_150F9D08 */
+void fire_free(s32 arg0) {
 }
 
-void func_150F9D14(struct260 *arg0) {
-    func_150F9D08(arg0);
+/* was func_150F9D14 */
+void fire_retire(struct260 *arg0) {
+    fire_free(arg0);
     func_1514933C(arg0);
 }
 
-void func_150F9D40(struct260 *arg0) {
-    func_150F9D08(arg0);
+/* was func_150F9D40 */
+void fire_delete(struct260 *arg0) {
+    fire_free(arg0);
     func_15149368(arg0);
 }
 
-s32 func_151030B8(u8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, s32 *, s32, s32, s32, s32, s32);
+s32 attached_particle_spawn(u8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, s32 *, s32, s32, s32, s32, s32);
 s32 func_15145EA4(f32 **, s32 **, s32, s32);
 extern u8 D_80088EF0;
 extern f32 D_800A2018[];
 extern f32 D_800A2024[];
 
-void func_150F9D6C(u8 *arg0, u8 arg1, s32 arg2)
+/* was func_150F9D6C */
+void obj_bone_spark_spray(u8 *arg0, u8 arg1, s32 arg2)
 {
   s32 sp64[3];
   f32 sp58[3];
@@ -551,18 +560,19 @@ void func_150F9D6C(u8 *arg0, u8 arg1, s32 arg2)
   sp50 = sp64;
   m = *(s32 *)(arg0 + 0x1D4) + (D_80088EF0 << 6);
   func_15145EA4((0, &sp54), &sp50, (0, m), 1); // fakematch: permuter comma operands fix the 0x48/0x4C spill slot
-  sp58[1] = (func_150ADA68() * 1) + 2.0f; // fakematch: int * 1 keeps the result scheduling
-  sp58[0] = (func_150ADA68() * 14.0f) + 28.0f;
-  func_151030B8(arg0, D_80088EF0, D_800A2018, D_800A2024, sp58, (func_150ADA20() % 3U) + 4, (func_150ADA20() % 156U) + 0x64, (func_150ADA68() * 300.0f) + 400.0f, sp64, 0xFF, 0, -1, arg1, arg2);
+  sp58[1] = (random_float() * 1) + 2.0f; // fakematch: int * 1 keeps the result scheduling
+  sp58[0] = (random_float() * 14.0f) + 28.0f;
+  attached_particle_spawn(arg0, D_80088EF0, D_800A2018, D_800A2024, sp58, (random_int() % 3U) + 4, (random_int() % 156U) + 0x64, (random_float() * 300.0f) + 400.0f, sp64, 0xFF, 0, -1, arg1, arg2);
 }
 
-u8 *func_150FF808(u8 *);
-s32 func_150FF9F4(s32 *, s32 *, u8, s32);
-s32 func_150FFC60(f32 *, f32 *, f32 *, f32 *, f32 *, u8 *, s32); /* P210: port P209's prototype (game_eu_12CAC0) */
+u8 *obj_muzzle_node_get(u8 *);
+s32 beam_impact_sparks(s32 *, s32 *, u8, s32);
+s32 model_points_find(f32 *, f32 *, f32 *, f32 *, f32 *, u8 *, s32); /* P210: port P209's prototype (game_eu_12CAC0) */
 s32 func_151D44C4(s32 *, u8, s32);
 s32 func_151D49B8(s32 *, s32 *, s32, u8 *, f32, s32, s32);
 
-void func_150F9ED0(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150F9ED0 */
+void obj_muzzle_blast(u8 *arg0, u8 arg1, s32 arg2) {
     s32 pad[15]; // fakematch: frame is 0xA8, pad first keeps the vectors at 0x30-0x60
     s32 sp60[3];
     s32 sp54[3];
@@ -572,13 +582,13 @@ void func_150F9ED0(u8 *arg0, u8 arg1, s32 arg2) {
     u8 *temp_v0;
     u8 *sp2C;
 
-    temp_v0 = func_150FF808(arg0);
+    temp_v0 = obj_muzzle_node_get(arg0);
     if (temp_v0 != NULL) {
         sp2C = temp_v0;
-        if (func_150FFC60((f32 *)sp60, (f32 *)sp54, (f32 *)sp48, (f32 *)sp3C, (f32 *)sp30, arg0, (s32)temp_v0) != 0) {
+        if (model_points_find((f32 *)sp60, (f32 *)sp54, (f32 *)sp48, (f32 *)sp3C, (f32 *)sp30, arg0, (s32)temp_v0) != 0) {
             func_151D44C4(sp54, arg1, arg2);
             func_151D49B8(sp48, sp3C, (*(u8 *)(sp2C + 2) << 6) + *(s32 *)(arg0 + 0x1D4), arg0, 1.0f, arg1, arg2);
-            func_150FF9F4(sp54, sp60, arg1, arg2);
+            beam_impact_sparks(sp54, sp60, arg1, arg2);
         }
     }
 }

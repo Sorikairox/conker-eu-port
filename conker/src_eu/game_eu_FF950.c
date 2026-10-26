@@ -12,7 +12,7 @@ extern f32 D_800A0CC0[6][3];  /* beam end points (beam space) */
 
 // beam_rays_update: obj + 0x28 is the source point, +0x34 the beam position (moved by its velocity +0x40 x
 // D_800BE9A4), +0x4C six ray parts. While obj + 0x6C bit 0 is set, each ray's end D_800A0CC0[i] is moved to the
-// beam's position (func_150A8050 / func_150A7E40) and traced from the source (func_150ACEA0): on a hit the part's
+// beam's position (mtxf_rotate_xyz_deg / func_150A7E40) and traced from the source (func_150ACEA0): on a hit the part's
 // sprite (+0x14) is shown at the hit point with alpha +0x64 x hit fraction, otherwise it is hidden. Without the bit
 // every ray sprite is hidden.
 void func_150D2140(u8 *obj) {
@@ -28,7 +28,7 @@ void func_150D2140(u8 *obj) {
         *(f32 *) (obj + 0x34) += *(f32 *) (obj + 0x40) * D_800BE9A4;
         *(f32 *) (obj + 0x38) += *(f32 *) (obj + 0x44) * D_800BE9A4;
         *(f32 *) (obj + 0x3C) += *(f32 *) (obj + 0x48) * D_800BE9A4;
-        func_150A8050(mtx, *(f32 *) (obj + 0x34), *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x3C));
+        mtxf_rotate_xyz_deg(mtx, *(f32 *) (obj + 0x34), *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x3C));
         for (i = 0; i < 6; i++) {
             part = ((u8 **) (obj + 0x4C))[i];
             if (part == NULL) {

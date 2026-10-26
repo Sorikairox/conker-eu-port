@@ -1,5 +1,5 @@
 /* P75 runtime checks of port P70 / P74 C (link-time wraps; only cross-TU calls are seen).
- *  ?p75sky=1     func_15000AD0 (game_2DF70.c, sky / backdrop buffers; called by func_15007B3C per level): level,
+ *  ?p75sky=1     level_setup_sky_backdrop (game_2DF70.c, sky / backdrop buffers; called by level_load per level): level,
  *                header +5..+8 (mode), D_80082FA0, the buffers D_800DC2E0 / D_800DC2B8[p][0..1] / D_800DC2B0, and in
  *                mode 2 the gradient texture (rows 0 / 32 / ... / 255) and the first quad's vertices. Also, every
  *                256 frames (from the tail wrap), the quad vertex t coordinates and the first Mtx word that func_150D1D20 writes (it is
@@ -55,13 +55,13 @@ static void quad_dump(const char *what) {
     }
 }
 
-void __real_func_15000AD0(int level);
-void __wrap_func_15000AD0(int level) {
+void __real_level_setup_sky_backdrop(int level);
+void __wrap_level_setup_sky_backdrop(int level) {
     const unsigned char *h = (const unsigned char *)(uintptr_t)W(D_800B0DF0_, 0);
     unsigned m0 = h ? vbe_ld8(h + 8) : 0xFFFF;
-    __real_func_15000AD0(level);
+    __real_level_setup_sky_backdrop(level);
     if (!flag(&fsky, "p75sky")) return;
-    port_log("[p75] func_15000AD0 frame %u level %d: header %p +5..+7 %u %u %u mode %u -> %u, D_80082FA0 %d, "
+    port_log("[p75] level_setup_sky_backdrop frame %u level %d: header %p +5..+7 %u %u %u mode %u -> %u, D_80082FA0 %d, "
              "D_800DC2E0 %08X D_800DC2B0 %08X D_800DC2B8 %08X %08X %08X %08X\n", port_frame_count, level, (void *)h,
              vbe_ld8(D_800DC2D8_), vbe_ld8(D_800DC2D8_ + 1), vbe_ld8(D_800DC2D8_ + 2), m0, h ? vbe_ld8(h + 8) : 0xFFFF,
              (int)W(D_80082FA0_, 0), W(D_800DC2E0_, 0), W(D_800DC2B0_, 0), W(D_800DC2B8_, 0), W(D_800DC2B8_, 4),
@@ -74,7 +74,7 @@ void __wrap_func_15000AD0(int level) {
                 port_log("[p75]   gradient row %3d: %08X %08X %08X %08X\n", r, W(t, r * 16), W(t, r * 16 + 4),
                          W(t, r * 16 + 8), W(t, r * 16 + 12));
     }
-    quad_dump("after func_15000AD0");
+    quad_dump("after level_setup_sky_backdrop");
 }
 
 static unsigned tail_calls, tail_frame, tail_inframe, tail_maxinframe, tail_nonzero;
@@ -86,9 +86,9 @@ void __wrap_func_1503BCAC(int arg0) {
         tail_frame = port_frame_count; tail_inframe = 0;
         static unsigned next = 256;
         if (flag(&fsky, "p75sky") && port_frame_count >= next) { next = port_frame_count + 256; quad_dump("frame"); }
-        { /* P78: ?p78sky=N: every N frames the inputs of func_15110420's backdrop dispatch (game_eu_13DC30.c):
+        { /* P78: ?p78sky=N: every N frames the inputs of view_background_draw's backdrop dispatch (game_eu_13DC30.c):
            * D_800C3682 (viewport-clear path instead), mode = header +8 (index into D_80089578: 2 = func_150D1D20),
-           * and func_15110E44's level-0 case: handle 0 (no backdrop call) when player y < 1600 and yaw > 26 */
+           * and sky_level_distance's level-0 case: handle 0 (no backdrop call) when player y < 1600 and yaw > 26 */
             static int f78 = -1; static unsigned n78;
             extern unsigned char D_800C3682_[] __asm__("D_800C3682"), D_800BE9F0_[] __asm__("D_800BE9F0"),
                 D_800DBFF0_[] __asm__("D_800DBFF0"), D_800DD210_[] __asm__("D_800DD210"), D_80082FA4_[] __asm__("D_80082FA4");

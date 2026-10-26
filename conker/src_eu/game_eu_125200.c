@@ -22,7 +22,8 @@ s32 memcpy(s32, s32 *, s32); /* as declared later in this file */
 // bytes, arg18 / arg19) moves from a0 along the direction x arg6, angles from func_15145974, colour D_800A5860,
 // owner arg9 (kind byte +0x3B) and, when arg16 is set, sound 0x4650 at a0 (func_10010F88 = func_10010E78(0, ...),
 // called directly because the C func_10010F88 is void and drops the handle); the light block goes to +0x170.
-void func_150F79F0(f32 *a0, void *a1, void *a2, void *a3, u8 arg4, u8 *arg5, f32 arg6, f32 arg7, f32 arg8, u8 *arg9,
+/* was func_150F79F0 */
+void beam_light_effect_spawn(f32 *a0, void *a1, void *a2, void *a3, u8 arg4, u8 *arg5, f32 arg6, f32 arg7, f32 arg8, u8 *arg9,
                    u8 arg10, u8 arg11, u8 arg12, u8 arg13, s32 arg14, s8 arg15, s32 arg16, u8 arg17, u8 arg18,
                    s32 arg19) {
     struct {
@@ -162,13 +163,13 @@ void func_150F79F0(f32 *a0, void *a1, void *a2, void *a3, u8 arg4, u8 *arg5, f32
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/func_150F79F0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/beam_light_effect_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
 s32 func_15081A90(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
 void func_151D535C(u8 *obj, u8 *attacker, u8 *pos, f32 *pos2, u8 *rec, s32 flags, f32 *dir, u8 arg7, s32 arg8);
-void func_150F850C(u8 *arg0, u8 arg1, s32 arg2);
+void rocket_explode(u8 *arg0, u8 arg1, s32 arg2);
 
 /* rodata copies (NM link drops the asm rodata) */
 static const f32 D_800A1F94_c[1] = { 0.014285714f }; /* 0x3C6A0EA1, 1 / 70 */
@@ -226,11 +227,12 @@ typedef struct {
 // dt = frame time D_800BE9A4, capped at the remaining life d +0x68. Moves its sound (+0x88) to the position; with d
 // +0x70 & 2 ray casts the move (func_15081A90 from the position along d +0x38 for d +0x6C * dt, filter
 // !(d +0x70 & 4), d +0xB0): on 2+ hits applies func_151D535C (flags 0x1A, d +0x38) and, with d +0x70 & 1, explodes
-// (func_150F850C) and dies. Then moves by the velocity +0x44 * dt; when not dead counts the life down (at 0 dies,
+// (rocket_explode) and dies. Then moves by the velocity +0x44 * dt; when not dead counts the life down (at 0 dies,
 // exploding with d +0x70 & 1 at the position). Trail: d +0x8C += distance, d +0x90 += dt; every 70 units of d +0x8C
 // one effect3d_spawn_full smoke puff at d +0x98 (stepped by d +0xA4, d +0x90 by d +0x94), its +0x110 extra from d
 // +0x74..+0x88 and (27 - d +0x90) * 6.48 alpha.
-s32 func_150F7E34(u8 *obj) {
+/* was func_150F7E34 */
+s32 rocket_update(u8 *obj) {
     Puff7E34 rec;
     PuffExtra7E34 extra;
     Hit7E34 hit;
@@ -258,7 +260,7 @@ s32 func_150F7E34(u8 *obj) {
             func_151D535C(hit.obj, (u8 *) owner, hit.pos, hit.pos2, (u8 *) &hit, 0x1A, (f32 *) (d + 0x38), obj[0xC],
                           obj[1]);
             if (d[0x70] & 1) {
-                func_150F850C(hit.pos, obj[0xC], obj[1]);
+                rocket_explode(hit.pos, obj[0xC], obj[1]);
             }
             alive = 0;
         }
@@ -271,7 +273,7 @@ s32 func_150F7E34(u8 *obj) {
         if (*(f32 *) (d + 0x68) <= 0.0f) {
             alive = 0;
             if (d[0x70] & 1) {
-                func_150F850C(obj + 0x38, obj[0xC], obj[1]);
+                rocket_explode(obj + 0x38, obj[0xC], obj[1]);
             }
         }
     }
@@ -335,11 +337,12 @@ s32 func_150F7E34(u8 *obj) {
     return alive;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/func_150F7E34.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/rocket_update.s")
 #endif
 
 extern f32 D_800A1FA8;
-s32 func_150F83A0(u8 *arg0)
+/* was func_150F83A0 */
+s32 pulse_sprite_update(u8 *arg0)
 {
   u8 *v = arg0 + 0x110;
   f32 f;
@@ -359,11 +362,12 @@ s32 func_150F83A0(u8 *arg0)
 #ifdef NON_MATCHING
 /* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
    matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
-u8 * func_150F84D8(u8 *arg0, s16 arg1) {
+/* was func_150F84D8 */
+u8 * pulse_sprite_draw(u8 *arg0, s16 arg1) {
     return (u8 *) sprite_quad_build_axes(arg0, arg0 + 0x110, arg0 + 0x11C, arg1);
 }
 #else
-void func_150F84D8(u8 *arg0, s16 arg1) {
+void pulse_sprite_draw(u8 *arg0, s16 arg1) {
     sprite_quad_build_axes(arg0, arg0 + 0x110, arg0 + 0x11C, arg1);
 }
 #endif
@@ -375,11 +379,12 @@ void func_15154728(u8 *, f32, s32, f32, f32, u8, s32);
 #endif
 void func_151D44C4(u8 *, u8, s32);
 
-void func_150F850C(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150F850C */
+void rocket_explode(u8 *arg0, u8 arg1, s32 arg2) {
 #ifdef NON_MATCHING
-    func_15154728(arg0, 9.0f + func_150ADA68() * 3.0f, 0.511905f, 70.0f + func_150ADA68() * 70.0f, 0.0f, arg1, arg2); /* P95: float literal (asm passes the bits 0x3F030C35) */
+    func_15154728(arg0, 9.0f + random_float() * 3.0f, 0.511905f, 70.0f + random_float() * 70.0f, 0.0f, arg1, arg2); /* P95: float literal (asm passes the bits 0x3F030C35) */
 #else
-    func_15154728(arg0, 9.0f + func_150ADA68() * 3.0f, 0x3F030C35, 70.0f + func_150ADA68() * 70.0f, 0.0f, arg1, arg2);
+    func_15154728(arg0, 9.0f + random_float() * 3.0f, 0x3F030C35, 70.0f + random_float() * 70.0f, 0.0f, arg1, arg2);
 #endif
     func_151D44C4(arg0, arg1, arg2);
 }
@@ -392,7 +397,8 @@ s32 memcpy(s32, s32 *, s32);
 // record_particle_spawn: spawns particle type 0x2F (func_15132BBC) lasting `life` at the record's point rec[0..2]
 // with the angles rec[3..5], scale 1 / 0.02 and the colour of D_800A5860; the 0x14 extra bytes at +0x170 keep
 // the record pointer, its point and 0.0.
-void func_150F85AC(f32 *rec, s16 life, u8 flag, s32 arg3) {
+/* was func_150F85AC */
+void trail_follower_spawn(f32 *rec, s16 life, u8 flag, s32 arg3) {
     struct {
         /* spawn block for func_15132BBC (0x7C bytes) */
         f32 scale[4];
@@ -476,7 +482,7 @@ void func_150F85AC(f32 *rec, s16 life, u8 flag, s32 arg3) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/func_150F85AC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/trail_follower_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -484,7 +490,8 @@ s32 func_15145128(f32 *, f32 *, f32 *, s32 *);
 s32 func_15146078(f32 *, s32 *, s32 *);
 s32 memcpy(s32, s32 *, s32);
 
-s32 func_150F873C(u8 *arg0) {
+/* was func_150F873C */
+s32 trail_follower_update(u8 *arg0) {
     struct {
         s32 u98;
         u8 pad9C[0x8];
@@ -616,5 +623,5 @@ s32 func_150F873C(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/func_150F873C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/trail_follower_update.s")
 #endif

@@ -4,7 +4,8 @@
 
 
 #ifdef NON_MATCHING
-void func_150D2960(u8 *arg0) {
+/* was func_150D2960 */
+void ambient_sine_colour_update(u8 *arg0) {
     f32 sp24;
     f32 sp20;
     u8 *temp_s0;
@@ -18,5 +19,5 @@ void func_150D2960(u8 *arg0) {
     (*(f32 *)((u8 *)temp_s0 + 0x20)) = func_15144B68((*(f32 *)((u8 *)temp_s0 + 0x20)) + ((*(f32 *)((u8 *)temp_s0 + 0x2C)) * D_800BE9A4));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_100170/func_150D2960.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_100170/ambient_sine_colour_update.s")
 #endif

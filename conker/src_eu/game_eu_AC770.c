@@ -203,13 +203,13 @@ void func_1507F2D4(void)
     p[0xC] = 1;
     p[0xD] = 0;
   } else if (type == 1) {
-    func_150ADA20();
+    random_int();
     if (p[0xD] >= 3) {
       p[0xC] = 2;
       p[0xD] = 0;
     }
   } else {
-    if (p[0xD] >= (func_150ADA20() & 3) + 8) {
+    if (p[0xD] >= (random_int() & 3) + 8) {
       p[0xC] = 1;
       p[0xD] = 0;
     }
@@ -347,7 +347,7 @@ choose:
     seen = func_1507F018(list, n, picked, &npicked, st->recent);
     i = 0;
     if (npicked >= 2) {
-        i = (u32)func_150ADA20() % (u32)npicked;
+        i = (u32)random_int() % (u32)npicked;
     }
     st->entry = 0;
     st->count++;
@@ -405,7 +405,7 @@ s32 func_1507F8A0(s32 arg0) {
         var_a0 = 0x1E;
     }
 block_7:
-    return (func_150ADA20() % var_a0) + var_v1;
+    return (random_int() % var_a0) + var_v1;
 }
 
 extern u8 D_800B89C4[];
@@ -433,14 +433,14 @@ void func_1507F92C(struct127 *arg0) {
             v = 0xD8;
             break;
         }
-        func_1505E650(arg0, v, 1.0f, 4.0f, 0.0f, 0.0f, 0);
+        obj_start_anim(arg0, v, 1.0f, 4.0f, 0.0f, 0.0f, 0);
     } else {
-        func_1505E650(arg0, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
+        obj_start_anim(arg0, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
     }
 }
 
 #ifdef NON_MATCHING
-s32 func_1507CD64(struct127 *, s32);
+s32 player_hit_reaction(struct127 *, s32);
 void func_1507F3B0(void);
 s32 func_1507F834(void);
 extern u8 *D_80086F40[];
@@ -448,7 +448,7 @@ extern u8 D_8009BC80[][8];
 
 /* P60: idle animation of the current player record D_800D154C (D_800C3E78 = its index, players only; not when
  * D_800C35EA == 1 or the record's +5 is 4). Marks the controller's idle state (ctl +0x58 = 1); while the idle
- * delay ctl +0x59 runs it counts down. Out of health: func_1507CD64(rec, 0). Else the run / jump locks and the
+ * delay ctl +0x59 runs it counts down. Out of health: player_hit_reaction(rec, 0). Else the run / jump locks and the
  * turn are reset and an idle animation is chosen: ctl +0x17 (random 0x4F / 0x4D), a per-character idle
  * (ctl +0x78, below), carried items / states (ctl +0x1B2, +0x4E, +0x8, +0x1A, +0x32), held by another record
  * (func_1507F92C), the cutscene idle 0xF (D_800BE616), else the idle sets D_80086F40 / D_8009BC80 (u16 anim,
@@ -481,7 +481,7 @@ void func_1507F640(void) {
     }
     rec = D_800D154C;
     if (rec->health == 0) {
-        func_1507CD64(rec, 0);
+        player_hit_reaction(rec, 0);
         return;
     }
     if (rec->disable_run >= 0xFA) {
@@ -499,8 +499,8 @@ void func_1507F640(void) {
     rec = D_800D154C;
     ctl = rec->unk31C;
     if (ctl->pad17[0] != 0) {
-        anim = (func_150ADA20() & 3) ? 0x4D : 0x4F;
-        func_1505E650(D_800D154C, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
+        anim = (random_int() & 3) ? 0x4D : 0x4F;
+        obj_start_anim(D_800D154C, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
         return;
     }
     ch = ctl->unk78;
@@ -548,7 +548,7 @@ void func_1507F640(void) {
         blend = 8.0f;
     }
     if (anim != -1) {
-        func_1505E650(rec, anim, speed, blend, 0.0f, 0.0f, 0);
+        obj_start_anim(rec, anim, speed, blend, 0.0f, 0.0f, 0);
         return;
     }
     if (rec->unk13C >= 100) {
@@ -556,7 +556,7 @@ void func_1507F640(void) {
         return;
     }
     if (D_800BE616 != 0 && ch != 0x23 && ch != 0x16 && ch != 9) {
-        func_1505E650(rec, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
+        obj_start_anim(rec, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
         return;
     }
 
@@ -572,7 +572,7 @@ void func_1507F640(void) {
                     func_1507F92C(rec);
                     return;
             }
-            func_1505E650(rec, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
+            obj_start_anim(rec, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
             return;
         }
         func_1507F3B0();
@@ -597,7 +597,7 @@ void func_1507F640(void) {
             e = D_8009BC80[anim];
         }
     }
-    func_1505E650(D_800D154C, *(u16 *) e, e[2] * 0.01f, e[3] * 0.1f, 0.0f, 0.0f, 0);
+    obj_start_anim(D_800D154C, *(u16 *) e, e[2] * 0.01f, e[3] * 0.1f, 0.0f, 0.0f, 0);
     ctl->unk58 = 1;
     ctl->unk59 = e[4];
 }

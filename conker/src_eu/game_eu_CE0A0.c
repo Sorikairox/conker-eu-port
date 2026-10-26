@@ -30,11 +30,11 @@ s32 func_150A0890(s32 arg0, u32 arg1, u8 *arg2) {
 }
 
 #ifdef NON_MATCHING
-/* Sequence-slot query handler: entry 3 of func_1509BE40's handler table D_80088838, called as
+/* Sequence-slot query handler: entry 3 of event_dispatch's handler table D_80088838, called as
  * handler(slot, cmd, args) like func_1509A024 (args[2] = first extra argument, D_800D3C60 = number of words).
  * `slot` indexes the 0x34-byte records at D_800D34B8 (the per-slot words +0x17 / +0x18 / +0x1C / +0x20 that
  * func_150A3810 / func_150A3878 read and write). Object ids passed as arguments drop bits 12..15; their kind is
- * bits 12..15: 0x2000 = an object (func_1505EEF4, index in D_800CC2D0), 0x9000 = a player / character id. */
+ * bits 12..15: 0x2000 = an object (obj_find_by_spawn, index in D_800CC2D0), 0x9000 = a player / character id. */
 s32 func_150A3184(s32);
 s32 func_150A3264(s32, u32);
 s32 func_150A33C4(s32, s32);
@@ -60,7 +60,7 @@ s32 func_150A09B8(s32 slot, s32 cmd, s32 *args) {
         r = 0; /* the original leaves r uninitialised for any other kind (stack word, 0 in practice) */
         switch (arg & 0xF000) {
         case 0x2000:
-            obj = (u8 *)func_1505EEF4(arg & 0xFFFF0FFF);
+            obj = (u8 *)obj_find_by_spawn(arg & 0xFFFF0FFF);
             if (obj == NULL) {
                 return 0;
             }
@@ -103,7 +103,7 @@ s32 func_150A09B8(s32 slot, s32 cmd, s32 *args) {
         r = 0; /* uninitialised in the original for any other kind */
         switch (arg & 0xF000) {
         case 0x2000:
-            obj = (u8 *)func_1505EEF4(arg & 0xFFFF0FFF);
+            obj = (u8 *)obj_find_by_spawn(arg & 0xFFFF0FFF);
             r = func_150A33C4(B9B8_INDEX(obj), slot);
             break;
         case 0x9000:

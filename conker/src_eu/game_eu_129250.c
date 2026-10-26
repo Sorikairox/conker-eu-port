@@ -69,9 +69,10 @@ static f32 star_half_to_f32(s16 h) {
  * inside the current player's viewport (D_800BE628[D_80082FA4]: scale +0xC / +0x10, origin +0x2C (+ scale x) /
  * +0x24 (+ scale y, y grows down), size +4 / +8), splatted as 4 one-pixel fill rectangles around the point with
  * bilinear weights: prim colour (tint | alpha * weight, rounded) then G_FILLRECT, 8 commands per star. The list is
- * padded to 16 bytes before and after with zero commands. Returns the new list end. Only caller func_150FA030.
+ * padded to 16 bytes before and after with zero commands. Returns the new list end. Only caller camera_view_clear_draw.
  */
-Gfx *func_150FBA40(Gfx *gdl, f32 (*mtx)[4]) {
+/* was func_150FBA40 */
+Gfx *star_field_draw(Gfx *gdl, f32 (*mtx)[4]) {
     StarPoint *star;
     StarPoint *end;
     u8 *cam;
@@ -152,5 +153,5 @@ Gfx *func_150FBA40(Gfx *gdl, f32 (*mtx)[4]) {
     return STAR_CACHED(g);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129250/func_150FBA40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129250/star_field_draw.s")
 #endif

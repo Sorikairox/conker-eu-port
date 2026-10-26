@@ -39,12 +39,12 @@ s16 *func_15034B50(s16 *buf, u8 *obj, s32 a2, s32 a3) {
             obj[0x203] = sp;
             obj[0x202] = 0;
         } else if ((s8)obj[0x203] == 0 || obj[0x1FE] == 0 || obj[0x1FE] == 0xFF) {
-            r = func_150ADA20();
+            r = random_int();
             obj[0x203] = (u32)r % (u32)(sp - lo) + lo;
             if (obj[0x1FE] == 0xFF) {
                 obj[0x203] = -(s8)obj[0x203];
             } else if (obj[0x1FE] == 0 && rnd != 0) {
-                r = func_150ADA20();
+                r = random_int();
                 obj[0x202] = (u32)r % (u32)(rnd * 2) - rnd;
             }
         }
@@ -88,7 +88,7 @@ s16 *func_15034B50(s16 *buf, u8 *obj, s32 a2, s32 a3) {
         }
     }
     if (go) {
-        r = func_150ADA20();
+        r = random_int();
         obj[0x209] = (u32)r % 20 + 0x28;
         obj[0x209] = (s8)obj[0x209] * sgn;
     }
@@ -203,8 +203,8 @@ void func_15035220(struct127 *obj, struct_eu_size0C *e, s32 mode, s32 model, s32
         dist = y - b;
     } else if (mode == 2) {
         flip[0][0] = -1.0f;
-        func_150A8050(rot1, 0.0f, -f, 0.0f);
-        func_150A8050(rot2, 0.0f, f, 0.0f);
+        mtxf_rotate_xyz_deg(rot1, 0.0f, -f, 0.0f);
+        mtxf_rotate_xyz_deg(rot2, 0.0f, f, 0.0f);
         for (i = 0; i < nmtx; i++) {
             if (fixed) {
                 guMtxL2F(tmp, (Mtx *) (model + (i << 6)));
@@ -295,7 +295,7 @@ s32 func_15035A04(s32 arg0, u8 *arg1, u8 *arg2, f32 arg3) {
 void func_15035220(struct127 *obj, struct_eu_size0C *e, s32 mode, s32 model, s32 mtx, s32 nmtx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 x, f32 y, f32 z, f32 g, f32 h, f32 alpha, s32 shadow, s32 sub);
 s32 func_1502DE10(s32 id);
 void func_1502D83C(s32 id, u8 *col);
-s32 func_150AD9A0(s32 dx, s32 dy, s32 dz);
+s32 approx_dist3_int(s32 dx, s32 dy, s32 dz);
 s32 func_15031360(u8 *att, u8 *obj, s32 *model, s32 *out);
 f32 *allocate_memory(s32, s32, s32, s32);
 
@@ -342,7 +342,7 @@ void func_15035AF8(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 g, 
     if (D_800C35EA == 1) {
         max = 10000;
     }
-    dist = func_150AD9A0((s32) (D_800DBFF0->unk2F8 - obj->x_position), (s32) (D_800DBFF0->unk2FC - obj->y_position),
+    dist = approx_dist3_int((s32) (D_800DBFF0->unk2F8 - obj->x_position), (s32) (D_800DBFF0->unk2FC - obj->y_position),
                          (s32) (D_800DBFF0->unk300 - obj->z_position));
     if ((f32) max < (f32) dist) {
         return;

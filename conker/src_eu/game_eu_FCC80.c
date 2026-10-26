@@ -6,14 +6,14 @@
 #ifdef NON_MATCHING
 /* P241: readable C for func_150CF470 (game_eu_FCC80, 56 insns). */
 // level_light2_orbit: level update handler (D_8008D0A4 entry 6, `void (s32)`, argument unused): turns the point
-// (76, 241) around (-1, 44) by the angle (degrees) at +8 of func_151149AC(4) and stores it, with z = -1805, as the
+// (76, 241) around (-1, 44) by the angle (degrees) at +8 of world_record_find(4) and stores it, with z = -1805, as the
 // position of light slot 2 (func_150A3924); then steps the D_800DD835 frame counter (func_15174F10(5, 3)). The
 // constants are the ELF's D_800A0C00 (pi / 180, 0x3C8EFA35) and D_800A0C04 (-1805.0, 0xC4E1A000).
-s32 func_151149AC(u8);
+s32 world_record_find(u8);
 void func_150A3924(s32, s16, s16, s16);
 void func_15174F10(s32, s32);
 void func_150CF470(s32 arg0) {
-    f32 angle = *(f32 *) (func_151149AC(4) + 8) * 0.017453292f;
+    f32 angle = *(f32 *) (world_record_find(4) + 8) * 0.017453292f;
     f32 s = func_150AD78C(angle);
     f32 c = func_150AD780(angle);
     f32 dx = 76.0f - -1.0f;

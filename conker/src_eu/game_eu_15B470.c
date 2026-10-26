@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_1512DC60(u8 *arg0) {
+/* was func_1512DC60 */
+void camera_shake_reset(u8 *arg0) {
     u8 *temp_v0 = D_800DC6F0[arg0[0x23D]];
 
     *(s32 *)(temp_v0 + 0x50) = 5;
@@ -18,7 +19,8 @@ void func_1512DC60(u8 *arg0) {
 #ifdef NON_MATCHING
 extern s32 D_80089970;
 
-s32 func_1512D748(struct108 *arg0, s32 arg1, s32 arg2) {
+/* was func_1512D748 */
+s32 camera_shake_start(struct108 *arg0, s32 arg1, s32 arg2) {
     f32 sp4;
     f32 temp_f0;
     f32 temp_f12;
@@ -128,10 +130,11 @@ s32 func_1512D748(struct108 *arg0, s32 arg1, s32 arg2) {
     return (s32) temp_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15B470/func_1512D748.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15B470/camera_shake_start.s")
 #endif
 #ifdef NON_MATCHING
-void func_1512DEF0(u8 *arg0) {
+/* was func_1512DEF0 */
+void camera_shake_update(u8 *arg0) {
     f32 sp20;
     f32 temp_f12;
     f32 temp_f14;
@@ -142,7 +145,7 @@ void func_1512DEF0(u8 *arg0) {
     u8 *temp_s0;
 
     temp_s0 = D_800DC6F0[(*(u8 *)((u8 *)arg0 + 0x23D))];
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         var_f14 = 1.0f;
     } else {
         var_f14 = -1.0f;
@@ -178,7 +181,7 @@ void func_1512DEF0(u8 *arg0) {
                 }
                 (*(f32 *)((u8 *)temp_s0 + 0x2C)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x2C)) - ((*(f32 *)((u8 *)temp_s0 + 0x4C)) * D_800BE9A4));
             } else {
-                func_1512DC60(arg0);
+                camera_shake_reset(arg0);
             }
             var_f10 = (f32) D_800BE9A0;
             if ((s32) D_800BE9A0 < 0) {
@@ -191,5 +194,5 @@ void func_1512DEF0(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15B470/func_1512DEF0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15B470/camera_shake_update.s")
 #endif

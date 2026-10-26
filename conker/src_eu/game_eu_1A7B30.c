@@ -73,8 +73,8 @@ void func_1517A550(u8 colour, s16 x, s16 y, s16 z, s8 tilt, u16 arg5, u16 mode, 
     *(s16 *) (obj + 0x92) = y;
     *(s16 *) (obj + 0x94) = z;
     *(s16 *) (obj + 0xA2) = tilt;
-    *(s16 *) (obj + 0xA0) = (u32) func_150ADA20() % spread - (spread >> 1);
-    *(s16 *) (obj + 0xA4) = (u32) func_150ADA20() % spread - (spread >> 1);
+    *(s16 *) (obj + 0xA0) = (u32) random_int() % spread - (spread >> 1);
+    *(s16 *) (obj + 0xA4) = (u32) random_int() % spread - (spread >> 1);
     if (mode == 5) {
         *(s16 *) (obj + 0x90) += *(s16 *) (obj + 0xA0) * 4;
         *(s16 *) (obj + 0x92) -= *(s16 *) (obj + 0xA2) * 4;
@@ -83,10 +83,10 @@ void func_1517A550(u8 colour, s16 x, s16 y, s16 z, s8 tilt, u16 arg5, u16 mode, 
     *(s16 *) (obj + 0x96) = 0;
     *(s16 *) (obj + 0x98) = 0;
     *(s16 *) (obj + 0x9A) = 0;
-    obj[0x9C] = (u32) func_150ADA20() % jitter - (jitter >> 1);
-    obj[0x9D] = (u32) func_150ADA20() % jitter - (jitter >> 1);
-    obj[0x9E] = (u32) func_150ADA20() % jitter - (jitter >> 1);
-    *(f32 *) (obj + 0xA8) = (f32) ((func_150ADA20() & 0x7F) + 0x8C) * 0.01f;
+    obj[0x9C] = (u32) random_int() % jitter - (jitter >> 1);
+    obj[0x9D] = (u32) random_int() % jitter - (jitter >> 1);
+    obj[0x9E] = (u32) random_int() % jitter - (jitter >> 1);
+    *(f32 *) (obj + 0xA8) = (f32) ((random_int() & 0x7F) + 0x8C) * 0.01f;
     *(u16 *) (obj + 0xA6) = arg5;
     obj[0x9F] = colour;
     *(u16 *) (obj + 0xAC) = mode;
@@ -128,14 +128,14 @@ void func_1517A75C(u8 *obj) {
     }
     life = *(u16 *) (obj + 0xA6);
     if (life < (s32) mode) {
-        r = (u32) func_150ADA20() % *(u16 *) (obj + 0xAE);
+        r = (u32) random_int() % *(u16 *) (obj + 0xAE);
         v = *(s16 *) (obj + 0xA0);
         sign = 1;
         if (v < 0) {
             sign = -1;
         }
         *(s16 *) (obj + 0xA0) = v + -sign * r;
-        r = (u32) func_150ADA20() % *(u16 *) (obj + 0xAE);
+        r = (u32) random_int() % *(u16 *) (obj + 0xAE);
         v = *(s16 *) (obj + 0xA4);
         sign = 1;
         if (v < 0) {
@@ -168,7 +168,7 @@ s32 func_1517A904(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1510B460(u8 *, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
+s32 view_point_cull_test(u8 *, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
 u8 *func_15142FBC(s32, s32, s32, s8 *);
 s32 func_1517AF18(s32 arg0, s32 arg1);
 extern f32 D_800D9F40;     /* screen width */
@@ -179,7 +179,7 @@ extern Gfx D_8008D190[];
 extern s32 D_800D30BC;
 
 // puff_sprite_draw: draw handler of the puff sprite objects (types 8, 9, 0xC, 0x59) for `player`. Except for
-// types 0xC and 0x59, a puff outside the player's view (func_1510B460) is skipped; a culled type 8 puff that was seen
+// types 0xC and 0x59, a puff outside the player's view (view_point_cull_test) is skipped; a culled type 8 puff that was seen
 // by this player (obj + 0xB2 bit 1 << player) also gets bit 0x10 << player. Otherwise it marks itself seen (all but
 // type 9), sets the texture (func_1517AF18, obj + 0x9F), builds its matrix (rotation 0x96.., scale 0xA8, position
 // 0x90..) and draws D_8008D190 with alpha obj + 0xB3 (prim colour reloaded only when it changed, D_800DD880).
@@ -191,7 +191,7 @@ s32 func_1517A910(s32 gfxArg, u8 *obj, s16 player) {
     s32 mode;
 
     if (obj[0] != 0xC && obj[0] != 0x59) {
-        if (func_1510B460((u8 *) D_800DA030[player], *(s16 *) (obj + 0x90), *(s16 *) (obj + 0x92),
+        if (view_point_cull_test((u8 *) D_800DA030[player], *(s16 *) (obj + 0x90), *(s16 *) (obj + 0x92),
                           *(s16 *) (obj + 0x94), D_800D9F40, D_800D9F3C, D_800D3A00[0], D_800D3A00[1], NULL,
                           NULL) != 0) {
             if (obj[0] == 8 && (obj[0xB2] & (1 << player))) {
@@ -206,7 +206,7 @@ s32 func_1517A910(s32 gfxArg, u8 *obj, s16 player) {
     gfx = (Gfx *) func_1517AF18(gfxArg, obj[0x9F]);
     scale = *(f32 *) (obj + 0xA8);
     mtx = &((Mtx *) (obj + 0x10))[D_800BE9C0];
-    func_15043D90(mtx, *(s16 *) (obj + 0x96), *(s16 *) (obj + 0x98), *(s16 *) (obj + 0x9A), scale, scale, scale,
+    mtx_build_rot_scale_trans(mtx, *(s16 *) (obj + 0x96), *(s16 *) (obj + 0x98), *(s16 *) (obj + 0x9A), scale, scale, scale,
                   *(s16 *) (obj + 0x90), *(s16 *) (obj + 0x92), *(s16 *) (obj + 0x94));
     gSPMatrix(gfx++, &((Mtx *) (obj + 0x10))[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     if (obj[0xB3] != D_800DD880) {
@@ -228,7 +228,7 @@ s32 func_1517A910(s32 gfxArg, u8 *obj, s16 player) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/func_1517A910.s")
 #endif
 
-s32 func_1510EDAC(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
+s32 collision_find_floor_default_range(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
 
 void func_1517ABB4(f32 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4)
 {
@@ -243,23 +243,23 @@ void func_1517ABB4(f32 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4)
     obj = node_alloc(9, 0, 0xB8, 1, 0xFF, 1);
     if (obj)
     {
-      func_1510EDAC(0, 0, &d, 0, 0, 0, arg2, arg3, arg4, arg3, 0, 0);
+      collision_find_floor_default_range(0, 0, &d, 0, 0, 0, arg2, arg3, arg4, arg3, 0, 0);
  if (0) {} // fakematch: block boundary, puts the shared s16 store value in v0
       *((s16 *) (obj + 0x92)) = (*((s16 *) (obj + 0xB0)) = d + 3.0f);
       *((s16 *) (obj + 0x90)) = arg2;
       *((s16 *) (obj + 0x94)) = arg4;
       *((s16 *) (obj + 0x96)) = 0x5A;
-      *((s16 *) (obj + 0x98)) = func_150ADA20() % 360U;
+      *((s16 *) (obj + 0x98)) = random_int() % 360U;
       *((s16 *) (obj + 0x9A)) = 0;
       *((s16 *) (obj + 0xA0)) = 0;
       *((s16 *) (obj + 0xA4)) = 0;
       *((u8 *) (obj + 0x9F)) = arg1;
-      *((f32 *) (obj + 0xA8)) = ((s32) ((func_150ADA20() % 80U) + 0x64)) * 0.01f;
+      *((f32 *) (obj + 0xA8)) = ((s32) ((random_int() % 80U) + 0x64)) * 0.01f;
       *((s16 *) (obj + 0xA2)) = arg0 * 0.4f;
       h = arg0 * 0.5f;
-      *((s8 *) (obj + 0x9C)) = (func_150ADA20() % ((u32) n)) - h;
-      *((s8 *) (obj + 0x9D)) = (func_150ADA20() % ((u32) n)) - h;
-      *((s8 *) (obj + 0x9E)) = (func_150ADA20() % ((u32) n)) - h;
+      *((s8 *) (obj + 0x9C)) = (random_int() % ((u32) n)) - h;
+      *((s8 *) (obj + 0x9D)) = (random_int() % ((u32) n)) - h;
+      *((s8 *) (obj + 0x9E)) = (random_int() % ((u32) n)) - h;
       *((s16 *) (obj + 0xA6)) = 0;
       *((u8 *) (obj + 0xB3)) = 0xFF;
     }
@@ -340,16 +340,16 @@ void func_1517AF90(f32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
   arg0 *= 0.5f;
   for (i = 0; i < arg4; i++)
   {
-    x = func_150ADA20() & 0x3F;
-    z = func_150ADA20() & 0x3F;
+    x = random_int() & 0x3F;
+    z = random_int() & 0x3F;
     x -= 0x20;
     z -= 0x20;
-    f = ((((u32) func_150ADA20()) % m) >> 4) + arg0;
-    func_1517ABB4(f, func_150ADA20() & 1, arg1 + x, arg2, arg3 + z);
+    f = ((((u32) random_int()) % m) >> 4) + arg0;
+    func_1517ABB4(f, random_int() & 1, arg1 + x, arg2, arg3 + z);
   }
 
 }
 
 void func_1517B0EC(s32 arg0, s32 arg1, s16 arg2) {
-    func_1510BD34(arg0, arg2);
+    view_dl_begin(arg0, arg2);
 }

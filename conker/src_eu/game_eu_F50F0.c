@@ -25,7 +25,7 @@ s32 func_150C78E0(u8 *arg0, u8 *arg1) {
         }
     } else {
         if (temp_v1 < 0x32) {
-            temp_t1 = func_150ADA20() & 1;
+            temp_t1 = random_int() & 1;
             var_f16 = (f32) temp_t1;
             if (temp_t1 < 0) {
                 var_f16 += 4294967296.0f;
@@ -50,7 +50,7 @@ s32 func_150C78E0(u8 *arg0, u8 *arg1) {
         (*(s32 *)((u8 *)arg0 + 0x3C)) = (s32) (var_f0 * 255.0f);
         if (var_f0 != 0.0f) {
             if ((*(u8 *)((u8 *)arg0 + 0x13)) != 2) {
-                func_10010F30((func_150ADA20() & 7) + 0x44B, 0x7D00U, 0x40U, 0, 0U);
+                func_10010F30((random_int() & 7) + 0x44B, 0x7D00U, 0x40U, 0, 0U);
             }
             (*(u8 *)((u8 *)arg0 + 0x13)) = 2U;
             if ((*(s32 *)((u8 *)arg1 + 0x2E4)) != 1) {

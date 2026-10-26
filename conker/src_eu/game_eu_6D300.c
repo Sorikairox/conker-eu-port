@@ -20,7 +20,7 @@ s32 func_1503FAF0(u8 *arg0, s16 arg1, s16 arg2, s32 arg3, s32 arg4) {
     temp_a1 = arg1;
     arg1 = temp_a1;
     arg2 = temp_a2;
-    func_1510F800(0, temp_a1, temp_a2);
+    collision_select_area(0, temp_a1, temp_a2);
     var_v1 = D_800DC278;
     if (var_v1 != NULL) {
 loop_1:

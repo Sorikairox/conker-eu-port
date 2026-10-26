@@ -228,7 +228,7 @@ s32 func_151CDD6C(u8 *arg0) {
     (*(f32 *)((u8 *)temp_s1 + 0x2C)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x2C)) + ((*(f32 *)((u8 *)temp_s1 + 0x30)) * D_800BE9A4));
     (*(f32 *)((u8 *)temp_s1 + 0x2C)) = func_15144B68((*(f32 *)((u8 *)temp_s1 + 0x2C)));
     (*(f32 *)((u8 *)temp_s1 + 0x40)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x40)) + (0.273013f * D_800BE9A4));
-    (*(f32 *)((u8 *)temp_s1 + 0x3C)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x3C)) + ((10220.0f + (func_150ADA68() * 9434.0f)) * 0.01f * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 0x3C)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x3C)) + ((10220.0f + (random_float() * 9434.0f)) * 0.01f * D_800BE9A4));
     if ((*(f32 *)((u8 *)temp_s1 + 0x3C)) >= 16384.0f) {
         do {
             (*(f32 *)((u8 *)temp_s1 + 0x3C)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x3C)) - 16384.0f);
@@ -563,7 +563,7 @@ void func_151CEA8C(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1505D024(s32, s32, s32, s32);
+s32 obj_send_hit(s32, s32, s32, s32);
 void func_1515C710(u8 *, f32 *, f32 *, f32 *);
 u8 *func_151CEBE4(s32);
 
@@ -589,11 +589,11 @@ void func_151CEACC(s32 arg0, u8 *arg1) {
                     var_v0 = (*(u8 *)((u8 *)sp38 + 0x25)) - 1;
                 }
                 if ((sp.u48 - sp.u3C) <= (*(f32 *)((u8 *)(((*(s32 *)((u8 *)sp38 + 0x94)) + (var_v0 * 0x1C))) + 4))) {
-                    func_1505D024(arg0, 0x60019, 0, -1);
+                    obj_send_hit(arg0, 0x60019, 0, -1);
                 }
             }
         } else if (((*(s8 *)((u8 *)sp38 + 0x2C)) > 0) && ((*(f32 *)((u8 *)(((*(s32 *)((u8 *)sp38 + 0x94)) + ((*(s8 *)((u8 *)sp38 + 0x2D)) * 0x1C))) + 4)) <= (sp.u48 + sp.u3C))) {
-            func_1505D024(arg0, 0x60019, 0, -1);
+            obj_send_hit(arg0, 0x60019, 0, -1);
         }
     }
 }
@@ -665,7 +665,7 @@ void func_151CEC80(u8 *arg0) {
     u8 *temp_s0;
 
     temp_s0 = arg0 + 0x28;
-    (*(f32 *)((u8 *)temp_s0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 8)) + ((5624.0f + (func_150ADA68() * 3973.0f)) * 1e-10f * D_800BE9A4 * (*(f32 *)((u8 *)temp_s0 + 4))));
+    (*(f32 *)((u8 *)temp_s0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 8)) + ((5624.0f + (random_float() * 3973.0f)) * 1e-10f * D_800BE9A4 * (*(f32 *)((u8 *)temp_s0 + 4))));
     if ((*(f32 *)((u8 *)temp_s0 + 8)) > 1.0f) {
         var_v0 = 0;
         var_v1 = 0;
@@ -702,14 +702,14 @@ void func_151CEC80(u8 *arg0) {
         sp.uEB = 7;
         sp.uEC = (*(u8 **)((u8 *)temp_s0 + 0xC));
         do {
-            sp.uCC = ((func_150ADA68() * 409.0f) + -1308.0f) * 0.001f;
-            sp.uD8 = ((func_150ADA68() * 121.0f) + 23.0f) * 0.001f;
-            sp.uB8 = (func_150ADA68() * 25.0f) + 10.0f;
-            sp.uBC = (func_150ADA68() * 60.0f) + 60.0f;
+            sp.uCC = ((random_float() * 409.0f) + -1308.0f) * 0.001f;
+            sp.uD8 = ((random_float() * 121.0f) + 23.0f) * 0.001f;
+            sp.uB8 = (random_float() * 25.0f) + 10.0f;
+            sp.uBC = (random_float() * 60.0f) + 60.0f;
             func_151432BC((*(s32 *)((u8 *)temp_s0 + 0)), &sp.uC0, &sp.uC8, &sp.uA0, &sp.uC4);
             if (func_150455FC(&sp.uC0, sp.uA0, temp_s0 + 0x10) != 0) {
                 sp.uC4 = (*(f32 *)((u8 *)temp_s0 + 0x10));
-                sp.uE8 = (func_150ADA20() % 101U) + 0x9B;
+                sp.uE8 = (random_int() % 101U) + 0x9B;
                 effect3d_spawn_full(&sp.uA4, (s32) ((u8 *)&D_800A4AA0), 0x1CU, 0U, 0U, 0x22U, 0U, 0, 0, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             }
             (*(f32 *)((u8 *)temp_s0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 8)) - 1.0f);
@@ -792,8 +792,8 @@ u8 *func_151CF05C(u8 *arg0, u8 *arg1, u8 arg2, u8 arg3, s32 arg4) {
         fl = 0;
     }
     sp.f60 = fl;
-    sp.f64 = func_150ADA68() * 400.0f + 400.0f;
-    sp.f68 = 2.0f * func_150ADA68() * D_800AB3E8;
+    sp.f64 = random_float() * 400.0f + 400.0f;
+    sp.f68 = 2.0f * random_float() * D_800AB3E8;
     if (func_151CF1C0(&sp.pos, arg0, arg1) == 0) {
         sp.pos.x = 0.0f;
         sp.pos.y = 0.0f;
@@ -1240,11 +1240,11 @@ void func_151CFE48(s32 arg0, f32 arg1, f32 arg2) {
     struct260 *temp_v0;
 
     p = *(u8 **)((u8 *)arg0 + 0x318);
-    if (p != NULL && func_150ADA68() < 0.22200002f) {
+    if (p != NULL && random_float() < 0.22200002f) {
         base = func_15144B34(p[0x23D]);
         a = func_15144AA8(p[0x23D]);
-        angle = (func_150ADA68() * 80.0f + (a - 40.0f)) * 0.017453292f;
-        dist = func_150ADA68() * 2000.0f;
+        angle = (random_float() * 80.0f + (a - 40.0f)) * 0.017453292f;
+        dist = random_float() * 2000.0f;
         pos.x = base[0] - sinf(angle) * dist;
         pos.y = arg1;
         pos.z = base[2] - cosf(angle) * dist;
@@ -1252,7 +1252,7 @@ void func_151CFE48(s32 arg0, f32 arg1, f32 arg2) {
             pos.y = D_800D9C80;
             tmp.unk0 = pos;
             tmp.unkC = 0.0f;
-            temp_v0 = func_15149130(func_150ADA20() % 131U + 51, -1, 0x20, -1, 1, 0, 0x10, 0xFF, 1);
+            temp_v0 = func_15149130(random_int() % 131U + 51, -1, 0x20, -1, 1, 0, 0x10, 0xFF, 1);
             if (temp_v0 != NULL) {
                 memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
             }
@@ -1381,13 +1381,13 @@ void func_151CFFFC(u8 *obj, u8 arg1, s32 arg2) {
     for (i = 0; i < 7; i++) {
         s.kind = D_800AB320[i];
         func_15143134(D_800AB2CC[i], s.offset, *(void **) (obj + 0x1D4));
-        a = func_150ADA20();
-        b = func_150ADA20();
-        func_15143794((u8) a, b % 25 - 64, func_150ADA68() * 11.45f + 16.93f, s.dir);
-        s.u40 = func_150ADA68() * 19.752f + -9.876f;
-        s.u48 = func_150ADA68() * 19.752f + -9.876f;
-        s.u4C = func_150ADA68() * 0.518f + -1.539f;
-        s.life = (u32) func_150ADA20() % 101 + 100;
+        a = random_int();
+        b = random_int();
+        func_15143794((u8) a, b % 25 - 64, random_float() * 11.45f + 16.93f, s.dir);
+        s.u40 = random_float() * 19.752f + -9.876f;
+        s.u48 = random_float() * 19.752f + -9.876f;
+        s.u4C = random_float() * 0.518f + -1.539f;
+        s.life = (u32) random_int() % 101 + 100;
         func_15132FBC(&s, 3, 0xFF, 0, arg1, arg2);
     }
 
@@ -1456,7 +1456,7 @@ void func_151CFFFC(u8 *obj, u8 arg1, s32 arg2) {
 
     func_1504715C(ground, obj);
     debrisKind = 2;
-    func_151A9DE4(pos, pos[1] - 2000.0f, 200.0f, ground, (func_150ADA20() & 3) + 7, 0, (s32) &debrisKind, arg1, arg2);
+    func_151A9DE4(pos, pos[1] - 2000.0f, 200.0f, ground, (random_int() & 3) + 7, 0, (s32) &debrisKind, arg1, arg2);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CFFFC.s")
@@ -1490,7 +1490,7 @@ void func_151D0058(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     tmp.unk4 = arg0[0x3B];
     tmp.unk8 = (*(f32 *)(arg0 + 0x150) + *(f32 *)(arg0 + 0x14C)) * 0.5f;
     tmp.unkD = arg1;
-    tmp.unkC = (func_150ADA20() % 56U) + 200;
+    tmp.unkC = (random_int() % 56U) + 200;
     tmp.unk6 = *(u16 *)(arg0 + 0x84);
     temp_v0 = func_15149130(0x12C, -1, 0x61, 4, 0, 0x31, 0x10, arg2, arg3);
     if (temp_v0 != NULL) {
@@ -1669,7 +1669,7 @@ Gfx *func_151D06FC(Gfx *gfx, u8 *obj, s16 slot) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D06FC.s")
 #endif
 
-/* NEAR 2 from func_150D5E7C: sib -li at,#; sib -beq a2,at,T */
+/* NEAR 2 from fire_smoke_trail_handle_msg: sib -li at,#; sib -beq a2,at,T */
 void func_151D0EA0(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = (u8 *)arg0 + 0x28;
     if (arg2 == 0 || arg2 == 24) {
@@ -1889,7 +1889,7 @@ void func_151D09A8(u8 *arg0, s32 arg1, s32 arg2) {
         func_1515423C(&sp.u180, &sp.uEC, &sp.u1AC, temp_s2 & 0xFF, arg2);
         if (func_1514FC58(&sp.u180) != 0) {
             sp.u1A8 = 1000.0f;
-            temp_hi = func_150ADA20() % 6U;
+            temp_hi = random_int() % 6U;
             sp.u95 = 0x3E;
             sp.u80 = 0x2203;
             sp.u78 = 0x200005;
@@ -1915,7 +1915,7 @@ void func_151D09A8(u8 *arg0, s32 arg1, s32 arg2) {
             sp.u9A = 1;
             sp.uD0 = 0xC007;
             sp.u9C = 1.0f;
-            sp.u82 = (func_150ADA20() % 11U) + 0x28;
+            sp.u82 = (random_int() % 11U) + 0x28;
             sp.u96 = 1;
             sp.u98 = 0xFF;
             sp.uD8 = 6;
@@ -1932,8 +1932,8 @@ void func_151D09A8(u8 *arg0, s32 arg1, s32 arg2) {
             sp.uE4 = 10000.0f;
             if (var_s1 != 0) {
                 do {
-                    func_1514FD78(&sp.u180, (func_150ADA68() * 0.04f) + 0.049999997f, &sp.uC0);
-                    sp.uCC = (func_150ADA68() * 1.34f) + -2.329f;
+                    func_1514FD78(&sp.u180, (random_float() * 0.04f) + 0.049999997f, &sp.uC0);
+                    sp.uCC = (random_float() * 1.34f) + -2.329f;
                     temp_v0 = func_151307F0(&sp.u78, 1, 0, 4, temp_s2, arg2);
                     if (temp_v0 != NULL) {
                         (*(u8 **)((u8 *)temp_v0 + 0xA8)) = func_151CF05C(NULL, temp_v0, 0U, temp_s2 & 0xFF, arg2);
@@ -2055,14 +2055,14 @@ typedef struct {
     u8 point;               /* 0x34 D_8008FFD0 index (which point of the object) */
 } ObjPointTrail;
 
-s32 func_1510FE4C(s32);
+s32 floor_flags_surface_type(s32);
 void func_151D19F8(u8 *);
 
 // object_point_trail_update: per-frame handler (D_8008A980[0x21], void (u8 *)) of an effect that follows a
 // point of an object: kills itself (+0xE = -1) when the object is gone or was replaced (id byte changed);
 // else moves the point (D_8008FFD0[point]; keeps the old one when the query fails), stores the step and its
 // length, and releases the effect (func_151D1990) when the query failed, the step is longer than 300 or zero,
-// the object's +0x28 is non-zero, its +0xAD is set, or its state (func_1510FE4C of +0x184) is 5, 6, 9, 13 or
+// the object's +0x28 is non-zero, its +0xAD is set, or its state (floor_flags_surface_type of +0x184) is 5, 6, 9, 13 or
 // 14; otherwise it (re)creates the effect when there is none (func_151D19F8).
 void func_151D16E8(u8 *self) {
     ObjPointTrail *t = (ObjPointTrail *) (self + 0x28);
@@ -2083,7 +2083,7 @@ void func_151D16E8(u8 *self) {
     t->delta.y = t->cur.y - t->prev.y;
     t->delta.z = t->cur.z - t->prev.z;
     t->dist = func_15143E64(&t->delta.x);
-    state = func_1510FE4C(*(s32 *) (obj + 0x184));
+    state = floor_flags_surface_type(*(s32 *) (obj + 0x184));
     if (t->dist > 300.0f || t->dist <= 0.0f || *(f32 *) (obj + 0x28) != 0.0f || obj[0xAD] != 0
         || state == 5 || state == 6 || state == 9 || state == 13 || state == 14) {
         stop = 1;

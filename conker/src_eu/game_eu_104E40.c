@@ -9,7 +9,8 @@ void func_151C0AA8(u8 *, u8, s32);
 void func_151C0B54(void *, u8, s32); /* P253: was s32 (a pointer in both callers) */
 void func_151C0BA0(void *, u8, s32);
 
-void func_150D7630(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150D7630 */
+void impact_burst_effect(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
         s16 u1C;
         s16 u1E;
@@ -74,7 +75,7 @@ void func_150D7630(u8 *arg0, u8 arg1, s32 arg2) {
     func_15150258(&sp.u1C, arg1, arg2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_104E40/func_150D7630.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_104E40/impact_burst_effect.s")
 #endif
 #ifdef NON_MATCHING
 void func_151C01F0(f32 *, f32 *);
@@ -96,7 +97,8 @@ typedef struct {
 // With a triangle (tri != NULL: the surface that was hit) builds { -dir, the triangle, size, info } and calls
 // func_1515016C (a mark on the triangle); without one builds { -dir, size, info } and calls func_15150108. info / size
 // come from func_151C01F0; info's position is the hit position.
-void func_150D779C(ImpactTri_150D779C *tri, f32 *pos, f32 *dir, u8 kind, s32 arg4) {
+/* was func_150D779C */
+void bullet_impact_effect(ImpactTri_150D779C *tri, f32 *pos, f32 *dir, u8 kind, s32 arg4) {
     func_151C0AA8((u8 *) pos, kind, arg4);
     func_151C0B54(pos, kind, arg4);
     func_151C0BA0(pos, kind, arg4);
@@ -135,5 +137,5 @@ void func_150D779C(ImpactTri_150D779C *tri, f32 *pos, f32 *dir, u8 kind, s32 arg
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_104E40/func_150D779C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_104E40/bullet_impact_effect.s")
 #endif

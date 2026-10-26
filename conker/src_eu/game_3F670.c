@@ -3,10 +3,11 @@
 #include "variables.h"
 
 
-void func_1510F800(s32);
+void collision_select_area(s32);
 void *memcpy(void *, const void *, u32);
 
-void func_150121C0(s32 arg0) {
+/* was func_150121C0 */
+void debris_spawn_linked(s32 arg0) {
     u8 *temp_v0;
     s32 i;
     struct {
@@ -70,8 +71,8 @@ void func_150121C0(s32 arg0) {
     sp.u7E = 0x21;
     sp34 = arg0;
     sp.u80 = 0;
-    func_1510F800(0);
-    sp.u84 = func_1510FD20((s32) (&D_80096900)[0], (s32) (&D_80096900)[2]);
+    collision_select_area(0);
+    sp.u84 = zone_tree_find_leaf((s32) (&D_80096900)[0], (s32) (&D_80096900)[2]);
     sp.u88 = 0xFF;
     sp.u89 = 0;
     sp.u8A = 6;

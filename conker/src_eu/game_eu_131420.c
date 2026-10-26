@@ -6,14 +6,16 @@ extern u8 D_800A2720[];
 #endif
 
 
-void func_15103C10(s32 arg0) {
+/* was func_15103C10 */
+void level_update_sfx_tick_b(s32 arg0) {
     sfx_cooldown_tick();
 }
 
 #ifdef NON_MATCHING
 extern s32 D_800A2724;
 
-void func_15103C34(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_15103C34 */
+void pos_debris_burst_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
         s32 u2C;
         s32 u30;
@@ -59,8 +61,9 @@ void func_15103C34(u8 *arg0, u8 arg1, s32 arg2) {
     func_15152700(&sp.u34, &sp.u30, &sp.u2C, 1, 0.0f, 1U, (u8) (s32) arg1, arg2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_131420/func_15103C34.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_131420/pos_debris_burst_spawn.s")
 #endif
-s32 func_15103D5C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_15103D5C */
+s32 callback_return_zero(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     return 0;
 }

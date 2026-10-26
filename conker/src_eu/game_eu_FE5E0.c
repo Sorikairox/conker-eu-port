@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, ...);
+s32 event_dispatch(s32, s32, ...);
 void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 extern f32 D_80088C60; // tint red, green, blue (current)
 extern f32 D_80088C64;
@@ -22,17 +22,17 @@ extern f32 D_80088C80;
 // 0x80021000 and gains 8. The tint D_80088C60..68 eases toward the target (func_150498A0, rate 4, max 6, the
 // player's +0x7B4 step) and is published as bytes in event flags 0x12/0x30F5..0x30F3 and 0x30FA..0x30F8.
 void func_150D0DD0(u8 *obj) {
-    if (func_1509BE40(1, 0x403D, 6, 0x9000) != 0) {
+    if (event_dispatch(1, 0x403D, 6, 0x9000) != 0) {
         *(s32 *) (obj + 0x84) |= 0x80021000;
-        if (func_1509BE40(1, 0x4043, 6, 0x9000) != 0) {
+        if (event_dispatch(1, 0x4043, 6, 0x9000) != 0) {
             D_80088C6C = 64.0f;
             D_80088C70 = 255.0f;
             D_80088C74 = 255.0f;
-        } else if (func_1509BE40(1, 0x4044, 6, 0x9000) != 0) {
+        } else if (event_dispatch(1, 0x4044, 6, 0x9000) != 0) {
             D_80088C6C = 255.0f;
             D_80088C70 = 64.0f;
             D_80088C74 = 255.0f;
-        } else if (func_1509BE40(1, 0x4045, 6, 0x9000) != 0) {
+        } else if (event_dispatch(1, 0x4045, 6, 0x9000) != 0) {
             D_80088C6C = 255.0f;
             D_80088C70 = 255.0f;
             D_80088C74 = 64.0f;
@@ -51,12 +51,12 @@ void func_150D0DD0(u8 *obj) {
     func_150498A0(&D_80088C60, D_80088C6C, &D_80088C78, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
     func_150498A0(&D_80088C64, D_80088C70, &D_80088C7C, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
     func_150498A0(&D_80088C68, D_80088C74, &D_80088C80, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
-    func_1509BFB0(1, 0x30F5, 0x12, (u32) D_80088C60 & 0xFF);
-    func_1509BFB0(1, 0x30F4, 0x12, (u32) D_80088C64 & 0xFF);
-    func_1509BFB0(1, 0x30F3, 0x12, (u32) D_80088C68 & 0xFF);
-    func_1509BFB0(1, 0x30FA, 0x12, (u32) D_80088C60 & 0xFF);
-    func_1509BFB0(1, 0x30F9, 0x12, (u32) D_80088C64 & 0xFF);
-    func_1509BFB0(1, 0x30F8, 0x12, (u32) D_80088C68 & 0xFF);
+    event_dispatch_alt(1, 0x30F5, 0x12, (u32) D_80088C60 & 0xFF);
+    event_dispatch_alt(1, 0x30F4, 0x12, (u32) D_80088C64 & 0xFF);
+    event_dispatch_alt(1, 0x30F3, 0x12, (u32) D_80088C68 & 0xFF);
+    event_dispatch_alt(1, 0x30FA, 0x12, (u32) D_80088C60 & 0xFF);
+    event_dispatch_alt(1, 0x30F9, 0x12, (u32) D_80088C64 & 0xFF);
+    event_dispatch_alt(1, 0x30F8, 0x12, (u32) D_80088C68 & 0xFF);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE5E0/func_150D0DD0.s")
@@ -68,15 +68,15 @@ extern s32 D_80088C34;
 extern s32 D_80088C38;
 extern s32 D_80088C3C;
 extern s32 *D_800DC3C4;
-s32 func_151149AC(u8);
+s32 world_record_find(u8);
 void func_15195750(struct127 *);
 s32 object_hit_effects(void *, s32, s32, s32, s32, s32, s32, s32);
-s32 func_1507CD64(struct127 *, s32);
+s32 player_hit_reaction(struct127 *, s32);
 
 // level_item_flags_update: advances the four scroll counters D_80088C30..3C by the frame step (x40, x-66, x-8, x92);
 // unless the player's held object (object 0 +0x31C, byte 0x120) is busy: for items 0xFA..0xF8 with flag bit 0
-// (func_151149AC entry index = (item - D_800DBEF4) / 160 into D_800DC3C4) calls func_15195750 on the player and plays
-// sound 0x627; for item 0xFB plays it and resets the player (object_hit_effects, func_15145A50, mode 6 via func_1507CD64).
+// (world_record_find entry index = (item - D_800DBEF4) / 160 into D_800DC3C4) calls func_15195750 on the player and plays
+// sound 0x627; for item 0xFB plays it and resets the player (object_hit_effects, func_15145A50, mode 6 via player_hit_reaction).
 void func_150D13A0(s32 arg0) {
     s32 step = D_800BE9E4;
     s32 i;
@@ -90,18 +90,18 @@ void func_150D13A0(s32 arg0) {
         return;
     }
     for (i = 0; i < 3; i++) {
-        item = func_151149AC(0xFA - i);
+        item = world_record_find(0xFA - i);
         if (D_800DC3C4[(item - (s32) D_800DBEF4) / 160] & 1) {
             func_15195750(D_800CC2D0);
             func_10010154(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);
         }
     }
-    item = func_151149AC(0xFB);
+    item = world_record_find(0xFB);
     if (D_800DC3C4[(item - (s32) D_800DBEF4) / 160] & 1) {
         func_10010154(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);
         object_hit_effects(D_800CC2D0, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(D_800CC2D0);
-        func_1507CD64(D_800CC2D0, 6);
+        player_hit_reaction(D_800CC2D0, 6);
     }
 }
 #else
@@ -171,7 +171,7 @@ void func_150D15F4(u8 *arg0, s32 arg1) {
 extern f32 D_800A0C64;
 
 s32 func_150D16C4(u8 *arg0) {
-    (*(f32 *)((u8 *)arg0 + 0x74)) = (f32) (((func_150ADA68() * 150.0f) + 350.0f) * D_800A0C64);
+    (*(f32 *)((u8 *)arg0 + 0x74)) = (f32) (((random_float() * 150.0f) + 350.0f) * D_800A0C64);
     return 1;
 }
 
@@ -202,9 +202,9 @@ void func_150D1714(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, f32 arg4, u8 *arg5) {
     d[0] = *(f32 *)(arg5 + 0x74) * (x - a[0]);
     d[1] = *(f32 *)(arg5 + 0x74) * (y - a[1]);
     d[2] = *(f32 *)(arg5 + 0x74) * (z - a[2]);
-    r1 = func_150ADA68();
-    r2 = func_150ADA68();
-    r3 = func_150ADA20();
-    r4 = func_150ADA20();
+    r1 = random_float();
+    r2 = random_float();
+    r3 = random_int();
+    r4 = random_int();
     impact_tinted_particle_spawn(0, a, d, r1 * 61.0f + 60.0f, D_800A0C68, D_800A0C6C, r2 * D_800A0C70 + D_800A0C74, (r3 & 0xF) + 0x23, r4 % 156U + 0x64, 0x1E, 8, 0, arg5[0xC], arg5[1]);
 }

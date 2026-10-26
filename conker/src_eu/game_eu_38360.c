@@ -5,7 +5,7 @@
 
 void func_1500ABA0(s32 arg0) {
     bzero(&D_800BE4A0, 60);
-    func_1502B8E0(&D_800BE4A0, 60, 3, 12, arg0, 10);
+    asset_load_into(&D_800BE4A0, 60, 3, 12, arg0, 10);
     bzero(&D_800DDA90, 240);
     bzero(&D_800DD478, 1560);
 }
@@ -14,11 +14,11 @@ void func_1500ABA0(s32 arg0) {
 extern u16 D_800BE898[];  /* per ambient sound: loaded even when it is not id 0x3B */
 extern s16 D_800DDFB0[];  /* per ambient sound: 2 x s16 */
 extern u8 D_80096090[];   /* per sound id, 10 bytes: +2 u16 length, +8 u8 rate (asm rodata_inject block; ROM) */
-u8 *func_1502B020(s32 *arg0, s32 arg1, ...);
+u8 *asset_lookup_rom(s32 *arg0, s32 arg1, ...);
 
 // ambient_sounds_load: for each of the 15 ambient sound slots (ids at D_800BE4A0, 4-byte stride; 0xFF = empty)
 // clears its voice record (D_800DDA90, 16 bytes) and, when D_800BE898[slot] is set or the id is 0x3B, loads the
-// sample (func_1502B020 kind 2) into +0 with the 16-byte rounded size in +4 (+0 = NULL when the size or the id's
+// sample (asset_lookup_rom kind 2) into +0 with the 16-byte rounded size in +4 (+0 = NULL when the size or the id's
 // length is 0), and sets D_800DDFB0[slot] = { rate * 32 - 1, (length / rate) * 64 / 5 - 1 } (unsigned divisions;
 // rate 0 traps like the asm's divu check).
 void func_1500AC14(void) {
@@ -46,7 +46,7 @@ void func_1500AC14(void) {
             continue;
         }
         timing = &D_800DDFB0[slot * 2];
-        data = func_1502B020(&size, 2, 0, id);
+        data = asset_lookup_rom(&size, 2, 0, id);
         info = &D_80096090[id * 10];
         *(u8 **) (voice + 0) = data;
         *(s32 *) (voice + 4) = (size + 15) & ~15;
@@ -92,7 +92,7 @@ extern u16 D_800BE850;       /* per slot alternating bit (shape placer) */
 extern u8 D_80096074[];      /* per slot (ROM) */
 extern f32 D_80096014[][2];  /* (u, v) triangle coordinates for the point placers (ROM) */
 extern f32 *D_80083110[];    /* shape placer point lists: [0] = pair count, then (x, z) offsets (ROM) */
-extern f32 D_800CC630;       /* plane of the last func_15049350 triangle: a x + b y + c z = d */
+extern f32 D_800CC630;       /* plane of the last tri_compute_plane triangle: a x + b y + c z = d */
 extern f32 D_800CC634;
 extern f32 D_800CC638;
 extern f32 D_800CC63C;
@@ -102,8 +102,8 @@ extern s16 D_8008D2A0[][8][2];  /* per placement row and kind: { placer type, pl
 extern s32 D_800DC26C;       /* level triangle table: 3 vertex pointers per triangle */
 s32 func_151EFDD0(void);
 void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-void func_1510F800(s32 arg0);
-void func_15049350(s32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
+void collision_select_area(s32 arg0);
+void tri_compute_plane(s32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
 void func_1517BE0C(s32 lo, s32 hi);
 s32 func_1500AF08(u32 index, s32 slot, s32 mode, s16 x, s16 y, s16 z, s32 spread, u8 kind, s32 phase);
 #endif
@@ -238,7 +238,7 @@ s32 func_1500B1F4(s16 count, u8 kind, s32 slot, s32 mode, s32 index, s16 **tri) 
 
 #ifdef NON_MATCHING
 // ambient_place_shape: placer type 4: emitters at the (x, z) offsets of point list D_80083110[shape] around the
-// triangle's centroid, y on the triangle's plane (func_15049350; the centroid's y when the plane is vertical);
+// triangle's centroid, y on the triangle's plane (tri_compute_plane; the centroid's y when the plane is vertical);
 // phase = D_800BE850 >> slot, then the slot's D_800BE850 bit flips. Returns the next emitter index.
 s32 func_1500B3B0(s16 shape, u8 kind, s32 slot, s32 mode, s32 index, s16 **tri) {
     f32 v[3][3];
@@ -260,7 +260,7 @@ s32 func_1500B3B0(s16 shape, u8 kind, s32 slot, s32 mode, s32 index, s16 **tri) 
         cy += v[i][1] / 3.0f;
         cz += v[i][2] / 3.0f;
     }
-    func_15049350(*(s32 *) &v[0][0], v[0][1], v[0][2], v[1][0], v[1][1], v[1][2], v[2][0], v[2][1], v[2][2]);
+    tri_compute_plane(*(s32 *) &v[0][0], v[0][1], v[0][2], v[1][0], v[1][1], v[1][2], v[2][0], v[2][1], v[2][2]);
     pts = D_80083110[shape];
     for (k = 1; (f32) k <= pts[0] * 2.0f; k += 2) {
         x = pts[k] + cx;
@@ -420,7 +420,7 @@ void func_1500BEC0(void) {
         func_1500AD84(i, slots[i * 2], slots[i * 2 + 1]);
     }
     D_800DE148 = allocate_memory(*(u16 *) ((u8 *) D_800B0DF0 + 0x18) * 14, 1, 2, 0);
-    func_1510F800(0);
+    collision_select_area(0);
     if (D_800DBE5C != 0) {
         for (i = 0; i < D_800DBE4C; i++) {
             flags = ((u32 *) D_800DBE5C)[i];

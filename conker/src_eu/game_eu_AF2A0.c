@@ -5,8 +5,8 @@
 extern s32 D_8008704C;
 void func_15036F60(u8 *arg0);
 struct197 *allocate_memory(s32, s32, s32, s32);
-void func_1505F188(struct127 *);
-struct127 *func_1505ED34(void);
+void obj_reset(struct127 *);
+struct127 *obj_alloc_slot(void);
 void func_150848F0(u8 *, s32, s32);
 s32 func_151E6710(s32);
 void func_15083E20(u8 *, u16, u8 *);
@@ -27,7 +27,7 @@ extern u8 D_80038080;
 extern u8 D_800A7610[];
 extern u8 D_800A7620[];
 u8 func_15085170(u8 *arg0);
-u8 *func_1502B020(s32 *arg0, s32 arg1, ...);
+u8 *asset_lookup_rom(s32 *arg0, s32 arg1, ...);
 s32 func_15083F30(struct127 *, u8, u8, s32, s32, s32, s32, s32, f32);
 struct127 *func_15030DE4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 *arg9, s32 argA, s32 argB, s32 argC);
 extern s32 D_80087064;
@@ -252,26 +252,26 @@ s32 func_15082020(f32 *start, f32 *dir, u8 *obj, f32 *hitIn, f32 *hitOut, f32 *d
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15082020.s")
 #endif
 
-void func_1507DF10(u8 *, s32, u8);
+void obj_set_hit_flags_by_kind(u8 *, s32, u8);
 void func_1508220C(u8 *arg0, u16 v, u8 arg2) {
     if (D_800BE616 == 0) {
         if (arg0[0x1CA] != 0) {
             arg0[0x1CA] = 7;
         }
         if (arg2 == 0 || v != 10) {
-            func_1507DF10(arg0, v, arg2);
+            obj_set_hit_flags_by_kind(arg0, v, arg2);
         }
     }
 }
 
 #ifdef NON_MATCHING
-s32 func_150EBA04(u8 *arg0, f32 *arg1, s32 arg2);
-void func_150D779C(f32 *normal, f32 *pos, f32 *dir, s32 arg3, s32 arg4);
-void func_15104B88(f32 arg0, f32 arg1, s32 arg2, s32 arg3);
+s32 target_volume_hit_check(u8 *arg0, f32 *arg1, s32 arg2);
+void bullet_impact_effect(f32 *normal, f32 *pos, f32 *dir, s32 arg3, s32 arg4);
+void stub_hit_point_noop(f32 arg0, f32 arg1, s32 arg2, s32 arg3);
 void func_150B5C38(u8 *arg0, u8 arg1, s32 arg2);
 void func_150B6C34(u8 arg0, s32 arg1);
-void func_150D7630(u8 *arg0, u8 arg1, s32 arg2);
-extern u8 D_80099E84[];   /* per weapon kind: the hit-effect id passed to func_1505D024 */
+void impact_burst_effect(u8 *arg0, u8 arg1, s32 arg2);
+extern u8 D_80099E84[];   /* per weapon kind: the hit-effect id passed to obj_send_hit */
 extern f32 D_8009CFF8;    /* 65536 / 360 */
 /* the hit record a ray cast fills (func_15081A90); only the fields used here */
 typedef struct {
@@ -309,16 +309,16 @@ typedef struct {
 // shot_hit_apply: P194. Applies a weapon ray hit `h` (filled by func_15081A90) of shooter obj with weapon kind `kind`;
 // counts the shot in the shooter's controller (+0x31C, +0x1AA). Returns 0 when nothing was hit. World hits (type 1):
 // per-kind impact effect func_151D3A30 (kind 2: 1, 6: 0, 7: 5, 11: 3, 12: 2, 18: 4, others 5); kind 13 a decal
-// func_150D779C instead, kinds 5 / 9 / 10 a ricochet (func_15104B88, an empty function, and func_1506B04C(obj, 2)),
-// with on level 0xE kind 5 also the probe func_150EBA04 5 units around the point; returns 1.
+// bullet_impact_effect instead, kinds 5 / 9 / 10 a ricochet (stub_hit_point_noop, an empty function, and func_1506B04C(obj, 2)),
+// with on level 0xE kind 5 also the probe target_volume_hit_check 5 units around the point; returns 1.
 // Object hits (types 2 / 3, target h->target): kinds 5 / 9 / 10 call func_1506B04C(obj, 3); a target that is
 // invulnerable (+0x125 / +0x104) and already reacting (+0x1CA) is skipped (return 2). Type 2: target type 0x94 gets
 // func_150B5C38 / func_150B6C34 and no blood (object_impact_effects). Type 3: with sub 10 (head shot) and no earlier head shot
-// (controller +0x1AD) the target dies (func_1507DE4C, its sounds 0x2E3.. / object_hit_effect / sound 0xAA, effect 0x20 /
+// (controller +0x1AD) the target dies (obj_set_dying_flags, its sounds 0x2E3.. / object_hit_effect / sound 0xAA, effect 0x20 /
 // 0x3D) or, for kinds 2 / 11 / 12 / 18, only plays sound 0x107; targets 0x9F / 0xA0 (unless D_800BE616) farther than
 // 1000 call func_1508220C instead. Kinds 2 / 18 / 12 / 11 start the reaction func_150335C8 (0x2A / 0x22 / 0x6B / 0x6D)
-// while +0x1CA < 2. Then the blood / sparks object_impact_effects, kind 13 func_150D7630, and when the target was already
-// reacting, func_1505D024(target, effect | 0x80000, (direction - 90) as a u16 angle, shooter player index). Returns 2.
+// while +0x1CA < 2. Then the blood / sparks object_impact_effects, kind 13 impact_burst_effect, and when the target was already
+// reacting, obj_send_hit(target, effect | 0x80000, (direction - 90) as a u16 angle, shooter player index). Returns 2.
 s32 func_15082278(u8 *obj, u8 *hit, s32 kind) {
     Hit15082278 *h = (Hit15082278 *) hit;
     Reaction15082278 r;
@@ -351,7 +351,7 @@ s32 func_15082278(u8 *obj, u8 *hit, s32 kind) {
             case 12: effect = 2; break;
             case 13:
                 effect = -1;
-                func_150D779C(h->normal, h->pos, h->dir, 0xFF, 1);
+                bullet_impact_effect(h->normal, h->pos, h->dir, 0xFF, 1);
                 break;
             case 5:
                 if (D_800BE9F0 == 0xE) {
@@ -361,13 +361,13 @@ s32 func_15082278(u8 *obj, u8 *hit, s32 kind) {
                     b[0] = h->pos[0] - h->dir[0] * 5.0f;
                     b[1] = h->pos[1] - h->dir[1] * 5.0f;
                     b[2] = h->pos[2] - h->dir[2] * 5.0f;
-                    func_150EBA04((u8 *) a, b, (s32) &probe);
+                    target_volume_hit_check((u8 *) a, b, (s32) &probe);
                 }
                 /* fallthrough */
             case 9:
             case 10:
                 effect = -1;
-                func_15104B88(h->pos[0], h->pos[1], *(s32 *) &h->pos[2], obj[0x124]);
+                stub_hit_point_noop(h->pos[0], h->pos[1], *(s32 *) &h->pos[2], obj[0x124]);
                 func_1506B04C((struct127 *) obj, 2, NULL);
                 break;
             default:
@@ -407,21 +407,21 @@ s32 func_15082278(u8 *obj, u8 *hit, s32 kind) {
         ctrl = *(u8 **) (target + 0x31C);
         if (h->sub == 10 && (ctrl == NULL || ctrl[0x1AD] == 0) && !far) {
             if (kind == 2 || kind == 18 || kind == 11 || kind == 12) {
-                func_15060A30(0x107, (struct127 *) target);
+                obj_sfx_play(0x107, (struct127 *) target);
             } else {
-                func_1507DE4C((struct127 *) target);
+                obj_set_dying_flags((struct127 *) target);
                 if (*(u8 **) (target + 0x31C) != NULL) {
                     (*(u8 **) (target + 0x31C))[0x1AD] = 1;
                 }
                 if (target[4] == 0x80 && h->u5A == 0 && h->f18 < h->pos[1] - 5.5f) {
-                    func_15060A9C((func_150ADA20() & 7) + 0x2E3, (struct127 *) target);
+                    obj_sfx_play_alt((random_int() & 7) + 0x2E3, (struct127 *) target);
                 }
                 object_hit_effect((struct127 *) target, 0xFF, 1);
                 effect = 0x20;
                 if ((target[4] == 0x9F || target[4] == 0xA0) && *(s32 *) (target + 0x2EC) != 0) {
                     effect = 0x3D;
                 }
-                func_15060A30(0xAA, (struct127 *) target);
+                obj_sfx_play(0xAA, (struct127 *) target);
             }
             if (kind != 11 && kind != 12 && target[0x1CA] != 0) {
                 target[0x1CA] = 1;
@@ -455,7 +455,7 @@ s32 func_15082278(u8 *obj, u8 *hit, s32 kind) {
         object_impact_effects(h->target, h->pos, h->v20, h->dir, 0xFF, 1);
     }
     if (kind == 13) {
-        func_150D7630((u8 *) h->pos, 0xFF, 1);
+        impact_burst_effect((u8 *) h->pos, 0xFF, 1);
     }
     if (!fresh) {
         /* (u32) of the angle the IDO way: truncation, values >= 2^31 through the -2^31 retry, negatives -> -1 */
@@ -468,7 +468,7 @@ s32 func_15082278(u8 *obj, u8 *hit, s32 kind) {
         } else {
             angle = 0xFFFFFFFF;
         }
-        func_1505D024((struct127 *) target, effect | 0x80000, angle & 0xFFFF,
+        obj_send_hit((struct127 *) target, effect | 0x80000, angle & 0xFFFF,
                       (obj - (u8 *) D_800CC2D0) / 0x32C);
     }
     return 2;
@@ -624,8 +624,8 @@ void func_15082DD8(u8 *arg0) {
 
 #ifdef NON_MATCHING
 /* Spawns the level-setup object e (0x30-byte entry of D_800D20FC) into an object slot of D_800CC2D0 (0x32C each):
- * slot = reuse+reset (func_1505F188) of slot reuse - 1 when reuse != 0, of slot idx when idx < D_8008FD8C (the
- * player / character slots), else a new one (func_1505ED34). Returns slot + 1, or 0 when D_800D252C[idx] & 0x7F
+ * slot = reuse+reset (obj_reset) of slot reuse - 1 when reuse != 0, of slot idx when idx < D_8008FD8C (the
+ * player / character slots), else a new one (obj_alloc_slot). Returns slot + 1, or 0 when D_800D252C[idx] & 0x7F
  * (already spawned) or no slot is free (25). Fills position (+0x14.., from e+6/8/A), angle (e+0xC << 8), the setup
  * flags e+0x18 (+0xF8), model / type (e+4) via func_15083E20 / func_15083C3C / func_15083D54, the player record
  * (+0x31C, 0x1C0 bytes) for character slots and types 0x98 / 0x28, and the other per-type defaults. */
@@ -654,12 +654,12 @@ s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
     type = e[4];
     if (reuse != 0) {
         obj = (u8 *)D_800CC2D0 + reuse * 0x32C - 0x32C;
-        func_1505F188((struct127 *)obj);
+        obj_reset((struct127 *)obj);
     } else if (idx != -1 && idx < D_8008FD8C) {
         obj = (u8 *)D_800CC2D0 + idx * 0x32C;
-        func_1505F188((struct127 *)obj);
+        obj_reset((struct127 *)obj);
     } else {
-        obj = (u8 *)func_1505ED34();
+        obj = (u8 *)obj_alloc_slot();
     }
     slot = (s32)(obj - (u8 *)D_800CC2D0) / 0x32C;
     if (slot == 0x19) {
@@ -705,7 +705,7 @@ s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
     OF(0x1C) = *(s16 *)(e + 0xA);
     OF(0x34) = OF(0x1C);
     if (*(u16 *)e & 6) {
-        func_1506160C((struct127 *)obj, 4, 0, 0, 0);
+        obj_fade_command((struct127 *)obj, 4, 0, 0, 0);
     }
     O8(0x232) = e[0xD];
     if (idx < D_8008FD8C && D_800901E4[idx] == -2) {
@@ -1004,14 +1004,14 @@ s32 func_15083568(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3) {
 #ifdef NON_MATCHING
 extern s32 D_80087064;
 void func_150305E0(s32 arg0, s32 arg1);
-struct127 *func_1505F0AC(s32 arg0);
+struct127 *obj_find_by_id(s32 arg0);
 void func_15054A5C(struct127 *arg0, struct127 *arg1);
-void func_15060F28(struct127 *arg0, s32 arg1);
+void obj_remove(struct127 *arg0, s32 arg1);
 
 // object_setup_undo: undoes setup command list D_80087064[n - 1] on obj (the list func_15083568 runs): first
-// func_150305E0(obj, n), then for every type-0 command (+3 == 0) the object it spawned (func_1505F0AC(cmd[0])) is
+// func_150305E0(obj, n), then for every type-0 command (+3 == 0) the object it spawned (obj_find_by_id(cmd[0])) is
 // removed if it is still attached to obj (+0x65 == obj's index + 1): kinds 0x1D / 0x6E / 0x2F are detached with
-// func_15054A5C(o, owner), other kinds removed with func_15060F28(o, 0). No return value (callers ignore v0).
+// func_15054A5C(o, owner), other kinds removed with obj_remove(o, 0). No return value (callers ignore v0).
 s32 func_150836CC(struct127 *obj, s32 n) {
     u8 *list = (u8 *) &D_80087064 + (n - 1) * 8;
     u8 *cmd;
@@ -1024,14 +1024,14 @@ s32 func_150836CC(struct127 *obj, s32 n) {
         if (cmd[3] != 0) {
             continue;
         }
-        o = (u8 *) func_1505F0AC(cmd[0]);
+        o = (u8 *) obj_find_by_id(cmd[0]);
         if (o == NULL || o[0x65] != ((u8 *) obj - (u8 *) D_800CC2D0) / 0x32C + 1) {
             continue;
         }
         if (o[4] == 0x1D || o[4] == 0x6E || o[4] == 0x2F) {
             func_15054A5C((struct127 *) o, (struct127 *) ((u8 *) D_800CC2D0 + o[0x65] * 0x32C - 0x32C));
         } else {
-            func_15060F28((struct127 *) o, 0);
+            obj_remove((struct127 *) o, 0);
         }
     }
     return 0;
@@ -1041,8 +1041,8 @@ s32 func_150836CC(struct127 *obj, s32 n) {
 #endif
 #ifdef NON_MATCHING
 /* P36: set object slot's type (+4). 0xFF (no type): clears +0xE4/E6/E8, +0xD2 = +0xD4 = 0x46, +0xD6, +0x160, +0xC8 = 0.
- * Else +0xC8 = type record D_800D1C90[type]->+6 (s16), func_15062BDC(obj, +0x14C, +0x150), +5 = record +0x12.
- * Then +6 = func_15085170(obj) (model id); +0x58 = func_1502B020(0, 2, 2, id) when D_800C5A90[id] != 0. arg2 unused. */
+ * Else +0xC8 = type record D_800D1C90[type]->+6 (s16), obj_set_scale(obj, +0x14C, +0x150), +5 = record +0x12.
+ * Then +6 = func_15085170(obj) (model id); +0x58 = asset_lookup_rom(0, 2, 2, id) when D_800C5A90[id] != 0. arg2 unused. */
 void func_15083C3C(s32 slot, s32 type, s32 arg2) {
     u8 *obj = (u8 *) D_800CC2D0 + slot * 0x32C;
     u8 *rec;
@@ -1061,13 +1061,13 @@ void func_15083C3C(s32 slot, s32 type, s32 arg2) {
     } else {
         rec = (u8 *) D_800D1C90[type];
         *(f32 *) (obj + 0xC8) = (f32) *(s16 *) (rec + 6);
-        func_15062BDC((struct127 *) obj, *(f32 *) (obj + 0x14C), *(f32 *) (obj + 0x150));
+        obj_set_scale((struct127 *) obj, *(f32 *) (obj + 0x14C), *(f32 *) (obj + 0x150));
         obj[5] = ((u8 *) D_800D1C90[type])[0x12];
     }
     id = func_15085170(obj);
     obj[6] = id;
     if ((u16) D_800C5A90[id] != 0) {
-        *(u8 **) (obj + 0x58) = func_1502B020(0, 2, 2, id);
+        *(u8 **) (obj + 0x58) = asset_lookup_rom(0, 2, 2, id);
     }
 }
 #else
@@ -1093,7 +1093,7 @@ s32 func_15083D54(struct127 *arg0, u16 arg1, s32 arg2, f32 arg3) {
         return 1;
     }
     bzero(arg0->unk2D0, 0x40);
-    func_1505E650(arg0, arg1, arg3, 0.0f, 0.0f, 0.0f, arg2);
+    obj_start_anim(arg0, arg1, arg3, 0.0f, 0.0f, 0.0f, arg2);
 block_7:
     return 0;
 }
@@ -1147,8 +1147,8 @@ void func_15083E20(u8 *arg0, u16 type, u8 *arg2) {
 #ifdef NON_MATCHING
 s32 func_1503D950(s32, s32);
 s32 func_1503DA64(s32, s32);
-struct127 *func_1505ED34(void);
-void func_150615DC(struct127 *arg0);
+struct127 *obj_alloc_slot(void);
+void obj_fade_reset(struct127 *arg0);
 s32 func_1515D9F0(s32);
 s32 func_1515D9B0(void);
 void func_15083E20(u8 *, u16, u8 *);
@@ -1156,7 +1156,7 @@ void func_15083C3C(s32 slot, s32 type, s32 arg2);
 s32 func_15083D54(struct127 *, u16, s32, f32);
 
 // object_spawn_attached: setup command type 0 (func_15083568): makes a new object of kind `kind` in a free slot
-// (func_1505ED34; no NULL check, as the asm) attached to owner: +0x65 = owner slot + 1, +0x3B = 0xFF - own slot,
+// (obj_alloc_slot; no NULL check, as the asm) attached to owner: +0x65 = owner slot + 1, +0x3B = 0xFF - own slot,
 // +0x5C = mode, +0xAB = arg3, +0 = arg4, +0xAC = flags (bit 0: +0xF8 |= 0x4000 and +0x270 = kind record +0xE * scale;
 // bit 1: passed to func_15083D54), +0x101 = keepScale (0: scales 1.0, else the owner's), copies of the owner's
 // +0x66 (without bit 4) and +0x1DD..+0x1E2 (+0x1DF takes the owner's +0x1DE, as the asm does), per-camera slots
@@ -1172,11 +1172,11 @@ s32 func_15083F30(struct127 *owner, u8 mode, u8 kind, s32 arg3, s32 arg4, s32 fl
 
     func_1503DA64(kind, 0);
     func_1503D950(kind, 0);
-    o = (u8 *) func_1505ED34();
+    o = (u8 *) obj_alloc_slot();
     o[0x3B] = 0xFF - (o - (u8 *) D_800CC2D0) / 0x32C;
     o[0xAB] = arg3;
     *(s32 *) o = arg4;
-    func_150615DC((struct127 *) o);
+    obj_fade_reset((struct127 *) o);
     o[0x232] = 1;
     o[0x1CA] = 1;
     o[0x125] = 0xFF;
@@ -1303,9 +1303,9 @@ s32 func_15083FB0(u8 arg0) {
     return -1;
 }
 
-/* P80: one argument (func_1505EEF4 reads only the id); the callers in game_CB1C0.c pass one */
+/* P80: one argument (obj_find_by_spawn reads only the id); the callers in game_CB1C0.c pass one */
 s32 func_15084000(s32 arg0) {
-    struct127 *temp_v0 = func_1505EEF4(arg0);
+    struct127 *temp_v0 = obj_find_by_spawn(arg0);
 
     if (temp_v0 != NULL) {
         return temp_v0 - D_800CC2D0;
@@ -1520,7 +1520,7 @@ void func_100043B4(s32 *arg0, u32 arg1);
 void func_10004074(void *);
 
 // object_release_models: release the shared model resources of an object that goes away (called by the object
-// removal func_15060F28 for kinds other than 2 / 3). For each part id of the object (+0x2C4 list, +0x2C9 count):
+// removal obj_remove for kinds other than 2 / 3). For each part id of the object (+0x2C4 list, +0x2C9 count):
 // the D_800D1588 and D_800D1C90 blocks of the part are freed unless another live object (of the first 25, kind byte
 // +4 != 0xFF, +5 != 2) has a part that uses the same block; then every D_800D1588 slot holding that block is
 // cleared. When no other object has the same part id, the per-kind buffers D_800C5C08 / D_800C6070 / D_800C6360
@@ -1638,9 +1638,9 @@ u8 func_15084E34(struct_eu_AF2A0 *arg0, s32 *arg1) {
  * (D_800D19A0[i]) that is not locked (D_800C5C08[i] == 0), the block is released: object references to
  * it (struct127 words 0x28C.., two per entry, unk2C9 entries) are cleared, objects whose entry list
  * (unk2C4) names slot i are notified through func_15084814, the slot's 12-byte records
- * (D_800C5758[i], D_800C5A48[i] of them) free their texture through func_1510DCA0, then the block
+ * (D_800C5758[i], D_800C5A48[i] of them) free their texture through texture_unref_age2, then the block
  * (minus its 0x38-byte header) goes back to the allocator. */
-void func_1510DCA0(s32);
+void texture_unref_age2(s32);
 extern u16 D_800C5A48[];         /* record count per slot */
 extern u8 *D_800C5758[];         /* 12-byte records per slot */
 void func_15084E80(void) {
@@ -1682,7 +1682,7 @@ void func_15084E80(void) {
             rec = records[i];
             for (j = 0; j < counts[i]; j++, rec += 0xC) {
                 if (*(u32 *)rec >= 0x10000000U) {
-                    func_1510DCA0(*(s32 *)(rec + 4));
+                    texture_unref_age2(*(s32 *)(rec + 4));
                 }
             }
             func_10004074(blocks[i] - 0x38);
@@ -1701,7 +1701,7 @@ void func_15085098(u8 *arg0) {
     f32 r;
     if (arg0[4] == 0x94) {
         p = *(u8 **)(arg0 + 0x2D0);
-        r = (f32)((u32)func_150ADA20() % (u32)(s32)*(f32 *)(p + 0x18));
+        r = (f32)((u32)random_int() % (u32)(s32)*(f32 *)(p + 0x18));
         *(f32 *)(p + 8) = r;
     }
 }

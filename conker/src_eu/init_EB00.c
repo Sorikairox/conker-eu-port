@@ -49,8 +49,8 @@ s32 func_1000EB00(struct04 *arg0, s32 arg1, s32 *arg2, s32 *arg3, s32 arg6, s32 
         *arg2 = 0;
         *arg8 = 0;
     } else {
-        arg0->unk18 = (func_150ADA20() & 0x7F) + 0x80;
-        arg0->unk0 = (func_150ADA20() % 3U) + 0x6C;
+        arg0->unk18 = (random_int() & 0x7F) + 0x80;
+        arg0->unk0 = (random_int() % 3U) + 0x6C;
     }
     return 0;
 }
@@ -218,10 +218,10 @@ s32 func_1000EFB4(struct_eu_sfx *arg0, s32 arg1, s32 *arg2, struct11 *arg3, s32 
             func_10010F30(0xCB, id, arg3->unk3, 0, *arg5);
         } else if (*arg6 == 0x2CF) {
             func_10010F30(0x2D7, id, arg3->unk3, 0, *arg5);
-            func_10010F30((func_150ADA20() % 3U) + 0x2EB, 0x3E80, arg3->unk3, 0, *arg5);
+            func_10010F30((random_int() % 3U) + 0x2EB, 0x3E80, arg3->unk3, 0, *arg5);
         } else if (*arg6 == 0x2D2) {
             func_10010F30(0x2DA, id, arg3->unk3, 0, *arg5);
-            func_10010F30((func_150ADA20() % 3U) + 0x2EB, 0x3E80, arg3->unk3, 0, *arg5);
+            func_10010F30((random_int() % 3U) + 0x2EB, 0x3E80, arg3->unk3, 0, *arg5);
         }
     }
     return 1;
@@ -335,7 +335,7 @@ s32 func_1000F4D8(u16 arg0) {
 // D_80041F5C[base] remembers the variants already played (bit 7 = valid) so every variant plays once before one
 // repeats, and the last one played is never picked first in the next round; for n >= 8 it only stores pick + 1.
 // base >= 0x6E2 returns 1, n < 2 returns base.
-s32 func_150ADA20(void);
+s32 random_int(void);
 
 u16 func_1000F568(s32 base, u16 n) {
     u8 *played;
@@ -343,7 +343,7 @@ u16 func_1000F568(s32 base, u16 n) {
     s32 mask;
     s32 bits;
 
-    pick = (u32)func_150ADA20() % n;
+    pick = (u32)random_int() % n;
     if (base >= 0x6E2) {
         return 1;
     }
@@ -1482,7 +1482,7 @@ void func_10011E94(s32 arg0) {
     }
 }
 
-s32 func_1510FE4C(s32);
+s32 floor_flags_surface_type(s32);
 #ifdef NON_MATCHING
 u16 func_1000F568(s32, u16); /* P157: two parameters (the asm reads a0 / a1 only, as every other caller declares) */
 #else
@@ -1519,7 +1519,7 @@ u16 func_10011EB8(s32 arg0, s16 *arg1, s32 arg2)
 {
   s32 *new_var;
   s32 v;
-  arg0 = func_1510FE4C(arg0);
+  arg0 = floor_flags_surface_type(arg0);
   if (arg1 != 0)
   {
     if (D_80082FA0 != 0)

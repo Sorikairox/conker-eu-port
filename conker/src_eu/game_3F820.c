@@ -7,7 +7,8 @@
 #ifdef NON_MATCHING
 void func_151F0114(void *, float, float, float, float, float, float, float);
 
-void func_15012370(void) {
+/* was func_15012370 */
+void camera_init_player_projections(void) {
     f32 temp_f0;
     f32 temp_f2;
     s32 temp_t0;
@@ -27,9 +28,9 @@ void func_15012370(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3F820/func_15012370.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_3F820/camera_init_player_projections.s")
 #endif
-// void func_15012370(void) {
+// void camera_init_player_projections(void) {
 //     f32 temp_f0;
 //     f32 temp_f2;
 //     u8 i;
@@ -44,7 +45,8 @@ void func_15012370(void) {
 //     }
 // }
 
-void func_15012470(void) {
+/* was func_15012470 */
+void fx_alloc_d88750(void) {
     D_80088750 = func_1518AADC(4, 300, 0);
 }
 
@@ -66,7 +68,8 @@ static const u8 sPipeAngles[3] = { 0x94, 0xEA, 0x3F };
 // units of 256 per turn via angle_byte_cos) and stores the hits, pulled 3% toward the origin, in D_800DCE60[pipe][i]
 // ((0, 0, 0) when nothing is hit); then spawns effect 300 (func_151491F4) with the 6-byte parameter block
 // {20, 50, 0} at +0x28.
-void func_150124A0(void) {
+/* was func_150124A0 */
+void pipe_spray_points_init(void) {
     struct {
         s16 a;
         s16 b;
@@ -89,8 +92,8 @@ void func_150124A0(void) {
     for (pipe = 0; pipe < 3; pipe++) {
         pt = D_800DCE60[pipe];
         for (i = 0; i < 10; i++, pt++) {
-            yaw = (u32) func_150ADA20() % 13 + sPipeAngles[pipe] - 0x86;
-            pitch = (func_150ADA20() & 0xF) - 10;
+            yaw = (u32) random_int() % 13 + sPipeAngles[pipe] - 0x86;
+            pitch = (random_int() & 0xF) - 10;
             yaw_c = angle_byte_cos(yaw - 0x40);
             yaw_s = angle_byte_cos(yaw);
             pitch_c = angle_byte_cos(pitch - 0x40);
@@ -116,5 +119,5 @@ void func_150124A0(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3F820/func_150124A0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_3F820/pipe_spray_points_init.s")
 #endif

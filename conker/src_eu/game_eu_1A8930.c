@@ -42,7 +42,7 @@ void func_1517ABB0(void) {
 
 #ifdef NON_MATCHING
 u8 func_15084E08(struct127 *);
-s32 func_1502B5C8(s32 *arg0, s32 arg1, ...);
+s32 asset_load(s32 *arg0, s32 arg1, ...);
 void func_10024190(void *, s32); /* osWritebackDCache */
 s32 allocate_memory(s32, s32, s32, s32);
 extern s32 D_800C4440;
@@ -61,7 +61,7 @@ typedef struct {
  * over `frames` ticks. The shape set D_800A7610[i] is picked by the player's type (func_15084E08); a player with
  * +0x1C8 set and no vertex buffer (+0x28C[D_800BE9C0]) or no D_800D19A0 entry only advances the blend factor. On
  * a new target the old one becomes `prev` and t restarts at 0. Shape vertex sets (one per part j, loaded on demand
- * with func_1502B5C8 and cached in D_800DD460[i][j][shape]) are lerped s16 x / y / z by t into the player's vertex
+ * with asset_load and cached in D_800DD460[i][j][shape]) are lerped s16 x / y / z by t into the player's vertex
  * buffer at the part's index D_800C4440[type][j] (16-byte vertices), then written back from the cache. The finished
  * blend (t == 1) counts +0xA down; returns 0, or -1 when nothing was written.
  */
@@ -181,14 +181,14 @@ s32 func_1517B270(s32 target, s32 frames, s32 idx) {
     for (j = 0; j < D_800C4730[desc->type]; j++) {
         ents = (*cache)[j];
         if (ents[b->cur].h == 0) {
-            ents[b->cur].h = func_1502B5C8(args, 4, 0x13, i, j, b->cur);
+            ents[b->cur].h = asset_load(args, 4, 0x13, i, j, b->cur);
             ents = (*cache)[j];
             if (ents[b->cur].h == 0) {
                 return -1;
             }
         }
         if (ents[b->prev].h == 0) {
-            ents[b->prev].h = func_1502B5C8(args, 4, 0x13, i, j, b->prev);
+            ents[b->prev].h = asset_load(args, 4, 0x13, i, j, b->prev);
             ents = (*cache)[j];
             if (ents[b->prev].h == 0) {
                 func_10004074(ents[b->cur].h);

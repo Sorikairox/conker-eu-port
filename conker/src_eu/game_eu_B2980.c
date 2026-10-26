@@ -7,9 +7,9 @@ extern f32 D_8009DD30;
 extern f32 D_8009DD34;
 f32 sinf(f32);
 f32 cosf(f32);
-void func_15005818(u8 *arg0, u8 *arg1, f32 *arg2);
-void func_1505D6F0(u8 *arg0, s32 arg1);
-f32 func_1506AD30(struct127 *arg0, f32 arg1, s32 arg2);
+void camera_set_initial_eye(u8 *arg0, u8 *arg1, f32 *arg2);
+void obj_contact_pass(u8 *arg0, s32 arg1);
+f32 anim_events_run(struct127 *arg0, f32 arg1, s32 arg2);
 s32 func_1507C7C0(struct127 *, u16 *, u16 *, u16 *);
 void node_broadcast_all(s32 arg0, u8 arg1);
 #endif
@@ -149,7 +149,7 @@ s32 func_150851E0(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8 *arg5, 
                     d = q;
                 }
             }
-            r = func_150ADA68() * 500.0f;
+            r = random_float() * 500.0f;
             d = d + r * r;
             if (bestd < d) {
                 best = i;
@@ -197,7 +197,7 @@ s32 func_150851E0(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8 *arg5, 
     *arg8 = *(s8 *)(e + 0x15);
     if (D_800BE616 != 0 && D_800D18A8 == 0) {
         f32 ang = ((f32)*arg6 * D_8009DD34) * 0.0078125f;
-        f32 r = func_150ADA68() * 80.0f - 40.0f;
+        f32 r = random_float() * 80.0f - 40.0f;
         arg3[0] = (s16)(s32)((f32)arg3[0] + sinf(ang) * r);
         arg3[2] = (s16)(s32)((f32)arg3[2] + cosf(ang) * r);
     }
@@ -219,9 +219,9 @@ u8 func_15085890(struct_eu_B2980 *arg0) {
 
 #ifdef NON_MATCHING
 /* Place object record arg0 (D_800CC2D0[i]) at level start arg1: func_150851E0 gives the start point, angle and
- * flags; func_1506AD30 runs with D_800D154C / D_800C3E78 temporarily set to this record; then position
+ * flags; anim_events_run runs with D_800D154C / D_800C3E78 temporarily set to this record; then position
  * (+0x14 / +0x2C / +0x180 / +0x1CC), yaw (+0x76..+0x7A, +0x40, +0xB8) and the camera controller's start eye
- * (func_15005818). */
+ * (camera_set_initial_eye). */
 void func_150858A0(void *arg0, s32 arg1, s32 arg2) {
     u8 *rec = arg0;
     s16 pos[3];
@@ -246,7 +246,7 @@ void func_150858A0(void *arg0, s32 arg1, s32 arg2) {
     saveb = D_800C3E78;
     D_800D154C = (struct127 *)rec;
     D_800C3E78 = idx;
-    func_1506AD30((struct127 *)rec, 800.0f, 1);
+    anim_events_run((struct127 *)rec, 800.0f, 1);
     D_800D154C = save;
     D_800C3E78 = saveb;
     *(f32 *)(rec + 0x14) = (f32)pos[0];
@@ -282,7 +282,7 @@ void func_150858A0(void *arg0, s32 arg1, s32 arg2) {
     } else {
         (*(u8 **)(rec + 0x31C))[0x23] = o64;
         if (D_800BE616 != 0 && D_800D18A8 != 0) {
-            func_1505D6F0(rec, idx);
+            obj_contact_pass(rec, idx);
         }
         ctl = *(u8 **)(rec + 0x31C);
         if (ctl[0x78] == 0 && ctl[0x19B] != 4 && ctl[0x19B] != 7) {
@@ -290,7 +290,7 @@ void func_150858A0(void *arg0, s32 arg1, s32 arg2) {
         }
     }
     if (*(u8 **)(rec + 0x318) != NULL) {
-        func_15005818(*(u8 **)(rec + 0x318), rec, eye);
+        camera_set_initial_eye(*(u8 **)(rec + 0x318), rec, eye);
     }
     msg.rec = rec;
     msg.b = rec[0x3B];

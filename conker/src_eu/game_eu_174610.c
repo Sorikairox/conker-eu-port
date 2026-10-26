@@ -168,7 +168,7 @@ int func_15147168(arg0, arg1, arg2, arg3)
 // object_effect10_spawn: for an object with a model (+0x1D4), func_15146E00 finds the point `id` of obj (position into
 // pt, a record into rec); when found, spawns effect kind 10 through fx_spawn_impact_particle with size arg2 * (1 / 85) and the
 // byte (u32) (obj+0x40 scale * 0.7111111) (late rodata D_800A5B08 / D_800A5B0C), the point and the id. Twin of
-// func_150EB610 (game_eu_118CE0, which uses func_150EB4D0). No caller in the decomp (no jal, no data word): void, as
+// footstep_dust_spawn (game_eu_118CE0, which uses obj_foot_pos_probe_ground). No caller in the decomp (no jal, no data word): void, as
 // the twin; the asm returns no defined value. (fx_spawn_impact_particle: the declaration above func_15147168's caller block.)
 
 void func_151472D0(u8 *obj, u8 id, s32 arg2) {
@@ -218,15 +218,15 @@ void func_151473F4(u8 *obj, u8 id, s32 strength) {
             pos[0] = sp.pt[0];
             pos[1] = *(f32 *) &sp.rec[0];
             pos[2] = sp.pt[2];
-            if (func_150ADA20() & 1) {
-                r = func_150ADA68();
-                a = func_150ADA20();
-                b = func_150ADA20();
+            if (random_int() & 1) {
+                r = random_float();
+                a = random_int();
+                b = random_int();
                 impact_debris_spawn(slot, r * 10.0f + 10.0f, a % 101 + 100, (s32) &sp.rec[1], (struct17 *) pos,
                               b % 41 + 80, 1, 1, 0, 0xFF, 1);
             } else {
-                r = func_150ADA68();
-                a = func_150ADA20();
+                r = random_float();
+                a = random_int();
                 impact_splash_ring_spawn(slot, r * 8.0f + 5.0f, a % 101 + 100, pos, 1, 0xFF, 1);
             }
         }
@@ -249,11 +249,11 @@ void func_151475B0(u8 *arg0, volatile u8 arg1, s32 arg2) {
     if (*(s32 *)(*q + 0x1D4) != 0) {
         do {} while (0); // fakematch: permuter
         func_15146E00(sp44, *q, 0, arg1);
-        sp42 = (func_150ADA20() % 11U) + 5;
+        sp42 = (random_int() % 11U) + 5;
 #ifdef NON_MATCHING
-        func_1514CBE8(sp44[0], sp44[1], sp44[2], func_150ADA68() * 11.0f, 0, 0xFF, sp42, 0x16, 0, 0.0f, 0, 0xFF);
+        func_1514CBE8(sp44[0], sp44[1], sp44[2], random_float() * 11.0f, 0, 0xFF, sp42, 0x16, 0, 0.0f, 0, 0xFF);
 #else
-        func_1514CBE8(sp44[0], sp44[1], *(s32 *)&sp44[2], func_150ADA68() * 11.0f, 0, 0xFF, sp42, 0x16, 0, 0.0f, 0, 0xFF);
+        func_1514CBE8(sp44[0], sp44[1], *(s32 *)&sp44[2], random_float() * 11.0f, 0, 0xFF, sp42, 0x16, 0, 0.0f, 0, 0xFF);
 #endif
     }
 }
@@ -305,7 +305,7 @@ s32 func_1514766C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u3C = 0xE03;
     sp.u34 = 0x200005;
     sp.u38 = 0;
-    sp.u3E = (func_150ADA20() & 0xF) + 0x14;
+    sp.u3E = (random_int() & 0xF) + 0x14;
     sp.u40 = 0;
     sp.u44 = 0;
     sp.u4C = 0xB0;
@@ -315,21 +315,21 @@ s32 func_1514766C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u49 = 0xB;
     sp.u4A = 0x6A;
     sp.u4B = 0xFF;
-    sp.u4F = (func_150ADA20() % 101U) + 0x64;
+    sp.u4F = (random_int() % 101U) + 0x64;
     sp.u50 = 0xFF;
     sp.u94 = 3;
     sp.u95 = 3;
-    sp.u5C = sp.u60 = (func_150ADA68() * 95.0f) + 101.0f;
+    sp.u5C = sp.u60 = (random_float() * 95.0f) + 101.0f;
     sp.u64 = arg2;
     sp.u68 = arg3;
     sp.u6C = arg4;
-    func_15143794(arg8, (s16) ((func_150ADA20() % 11U) - 0xB), ((func_150ADA68() * 396.0f) + 202.0f) * 0.01f, sp.u7C);
+    func_15143794(arg8, (s16) ((random_int() % 11U) - 0xB), ((random_float() * 396.0f) + 202.0f) * 0.01f, sp.u7C);
     sp.u8C = 0xE05;
     sp.u88 = 0.0f;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x80;
     }
     sp.u96 = 0xA;

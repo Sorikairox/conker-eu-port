@@ -16,7 +16,7 @@ void func_1500FDE0(void) {
     for (i = 0; i < 10; i++) {
         ((S0A *)D_eu_800BE900)[i].a = i / 5;
         ((S0A *)D_eu_800BE900)[i].b = -1;
-        ((S0A *)D_eu_800BE900)[i].c = func_150ADA20() % 5U;
+        ((S0A *)D_eu_800BE900)[i].c = random_int() % 5U;
     }
     func_150C851C(0x64);
     for (i = 0; i < 10; i++) {
@@ -25,7 +25,7 @@ void func_1500FDE0(void) {
 }
 
 void func_1500FF4C(void) {
-    func_1510CA2C(D_80091B68, 0, 0xAD, 0x75);
+    tex_scroll_create(D_80091B68, 0, 0xAD, 0x75);
 }
 
 #ifdef NON_MATCHING

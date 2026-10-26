@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-void func_151037D4(s16, u8, f32, u8 *, u8, u8, s32);
+void flip_sprite_particle_spawn(s16, u8, f32, u8 *, u8, u8, s32);
 s32 func_151506E8(s16 *, s32 *, s32, u8, s32);
 s32 func_15182BE0(s32, s32, s32, s32, s32, s32, s32, s32);
 void func_151D44C4(u8 *, u8, s32);
@@ -41,9 +41,9 @@ void func_151DCC50(u8 *arg0, u8 arg1, s32 arg2) {
     s32 sp30;
     s32 sp2C;
 
-    sp2C = func_150ADA20();
-    sp30 = func_150ADA20();
-    func_151037D4((s16) (((u32) sp2C % 5U) + 0xC), (((u32) sp30 % 56U) + 0xC8) & 0xFF, (func_150ADA68() * 600.0f) + 1700.0f, arg0, 0xFF, (s32) arg1, arg2);
+    sp2C = random_int();
+    sp30 = random_int();
+    flip_sprite_particle_spawn((s16) (((u32) sp2C % 5U) + 0xC), (((u32) sp30 % 56U) + 0xC8) & 0xFF, (random_float() * 600.0f) + 1700.0f, arg0, 0xFF, (s32) arg1, arg2);
     (*(s32 *)((u8 *)(&sp.u40) + 0)) = (s32) (*(s32 *)((u8 *)arg0 + 0));
     (*(s32 *)((u8 *)(&sp.u40) + 4)) = (s32) (*(s32 *)((u8 *)arg0 + 4));
     (*(s32 *)((u8 *)(&sp.u40) + 8)) = (s32) (*(s32 *)((u8 *)arg0 + 8));
@@ -70,8 +70,8 @@ void func_151DCC50(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u7C = 1.0f;
     func_151506E8(&sp.u38, &sp.u40, 0, arg1, arg2);
     func_151D44C4(arg0, arg1, arg2);
-    sp2C = func_150ADA20();
-    func_15182BE0(0xFF, 0xFF, 0xFF, (((u32) sp2C % 51U) + 0x96) & 0xFF, (func_150ADA20() % 5U) + 8, 0, (s32) arg1, arg2);
+    sp2C = random_int();
+    func_15182BE0(0xFF, 0xFF, 0xFF, (((u32) sp2C % 51U) + 0x96) & 0xFF, (random_int() % 5U) + 8, 0, (s32) arg1, arg2);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20A460/func_151DCC50.s")
@@ -170,7 +170,7 @@ void func_151DCF2C(u8 *arg0) {
     u8 *temp_v1;
 
     temp_s1 = arg0 + 0x28;
-    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((0.136f + (func_150ADA68() * 0.12100001f)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((0.136f + (random_float() * 0.12100001f)) * D_800BE9A4));
     if ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f) {
         sp.uD9 = 0x6C;
         sp.uC4 = 0x5103;
@@ -212,26 +212,26 @@ void func_151DCF2C(u8 *arg0) {
             sp.uD6 = 0x30;
         }
         do {
-            sp.uAE = (func_150ADA20() % 5U) + 4;
-            sp.uAF = (func_150ADA20() % 5U) + 4;
-            sp.uB0 = func_150ADA68() * 50.0f;
-            sp.uB4 = func_150ADA68() * 50.0f;
-            temp_f4 = func_150ADA68() * 0.15100001f;
+            sp.uAE = (random_int() % 5U) + 4;
+            sp.uAF = (random_int() % 5U) + 4;
+            sp.uB0 = random_float() * 50.0f;
+            sp.uB4 = random_float() * 50.0f;
+            temp_f4 = random_float() * 0.15100001f;
             sp.u114 &= ~0xC0;
             sp.u110 = temp_f4 + 0.19100001f;
             var_s0 = 0;
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 var_s0 = 0x80;
             }
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 var_v0 = 0x40;
             } else {
                 var_v0 = 0;
             }
             sp.u114 |= var_v0 | var_s0;
-            sp.uD7 = (func_150ADA20() % 56U) + 0xC8;
-            sp.uC6 = (func_150ADA20() % 36U) + 0x6E;
-            temp_f16 = (func_150ADA68() * 370.0f) + 403.0f;
+            sp.uD7 = (random_int() % 56U) + 0xC8;
+            sp.uC6 = (random_int() % 36U) + 0x6E;
+            temp_f16 = (random_float() * 370.0f) + 403.0f;
             sp.uE8 = temp_f16;
             sp.uE4 = temp_f16;
             if ((*(u8 *)((u8 *)temp_s1 + 0x10)) != 0) {
@@ -241,7 +241,7 @@ void func_151DCF2C(u8 *arg0) {
                 (*(s32 *)((u8 *)(&sp.u90) + 0)) = (s32) (*(s32 *)((u8 *)(&D_800AB8EC) + 0));
                 (*(s32 *)((u8 *)(&sp.u90) + 4)) = (s32) (*(s32 *)((u8 *)(&D_800AB8EC) + 4));
                 (*(u8 *)((u8 *)(&sp.u90) + 8)) = (u8) (*(u8 *)((u8 *)(&D_800AB8EC) + 8));
-                temp_lo = ((func_150ADA20() % 3U) & 0xFF) * 3;
+                temp_lo = ((random_int() % 3U) & 0xFF) * 3;
                 temp_v1 = &sp.u9C + temp_lo;
                 temp_a0 = &sp.u90 + temp_lo;
                 sp.uD0 = (*(u8 *)((u8 *)temp_v1 + 0));

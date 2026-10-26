@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_1510DBB0(s16 *arg0);
+void texture_id_list_release(s16 *arg0);
 void func_10004074(s32);
 #endif
 
@@ -108,7 +108,7 @@ s32 func_15183800(s32 x, s32 y, s32 z, s32 a, s32 kind, s32 unused, s32 player, 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1010/func_15183800.s")
 #endif
 
-u8 *func_1502B6BC(s32, s32, s32, s32, s32, s32);
+u8 *asset_load_with_subfiles(s32, s32, s32, s32, s32, s32);
 void func_1518403C(s32);
 extern u8 D_800DE399;
 
@@ -119,7 +119,7 @@ void func_15183E20(s32 arg0) {
         func_1518403C(arg0);
     }
     if (*(s32 *)(((u8 *)D_800DDE80 + arg0 * 0x14) + 0x14) == 0) {
-        temp_v0 = func_1502B6BC(0, 0, 0, 2, 9, arg0 + 0xAE);
+        temp_v0 = asset_load_with_subfiles(0, 0, 0, 2, 9, arg0 + 0xAE);
         if (temp_v0 != NULL) {
             *(u8 **)(((u8 *)D_800DDE80 + arg0 * 0x14) + 0x14) = temp_v0;
             *(s32 *)(((u8 *)D_800DDE80 + arg0 * 0x14) + 0x18) = *(s32 *)(temp_v0 + 0);
@@ -156,7 +156,7 @@ void func_15183F60(s32 arg0, s32 arg1)
   {
     if ((*((s32 *) (((u8 *) D_800DDE80) + (arg1 * 0x14)))) == 0)
     {
-      temp_v0 = func_1502B6BC(0, 0, 0, 2, 9, arg1 + 0xAD);
+      temp_v0 = asset_load_with_subfiles(0, 0, 0, 2, 9, arg1 + 0xAD);
       if (temp_v0 != 0)
       {
         *((u8 **) (((u8 *) D_800DDE80) + (arg1 * 0x14))) = temp_v0;
@@ -172,11 +172,11 @@ void func_15183F60(s32 arg0, s32 arg1)
 
 #ifdef NON_MATCHING
 /* P133 */
-s32 func_1510D3E0(Gfx *, s32, s32, s32, s16 **);
+s32 texture_resolve_dl_ids(Gfx *, s32, s32, s32, s16 **);
 
 /*
- * hud_model_load: loads model idx once (asset 9, id idx + 0xAD, through func_1502B6BC) into the 0x14-byte slot
- * D_800DDE80[idx]: +0 the asset, +4 / +8 / +0xC its words 0 / 2 / 6, +0x10 the vertex list func_1510D3E0 fills
+ * hud_model_load: loads model idx once (asset 9, id idx + 0xAD, through asset_load_with_subfiles) into the 0x14-byte slot
+ * D_800DDE80[idx]: +0 the asset, +4 / +8 / +0xC its words 0 / 2 / 6, +0x10 the vertex list texture_resolve_dl_ids fills
  * while relocating the asset's display list (word 4, also kept in D_800DDF78[idx]); D_800DDF68[idx] = 1 marks it
  * loaded. Nothing when the slot is already set or the asset is missing.
  */
@@ -187,7 +187,7 @@ void func_1518403C(s32 idx) {
     if (slot[0] != 0) {
         return;
     }
-    asset = (s32 *) func_1502B6BC(0, 0, 0, 2, 9, idx + 0xAD);
+    asset = (s32 *) asset_load_with_subfiles(0, 0, 0, 2, 9, idx + 0xAD);
     if (asset == NULL) {
         return;
     }
@@ -196,7 +196,7 @@ void func_1518403C(s32 idx) {
     slot[2] = asset[2];
     slot[3] = asset[6];
     D_800DDF78[idx] = asset[4];
-    func_1510D3E0((Gfx *) asset[4], 0, 1, 0x3E, (s16 **) &slot[4]);
+    texture_resolve_dl_ids((Gfx *) asset[4], 0, 1, 0x3E, (s16 **) &slot[4]);
     D_800DDF68[idx] = 1;
 }
 #else
@@ -231,14 +231,14 @@ extern s8 D_800DE3A1;
 extern s32 D_800DE3C8;
 
 /* Release slot arg0 of the D_800DDE80 table (0x14-byte entries): its texture (word 0x10) through
- * func_1510DBB0 and its block (word 0) back to the allocator, clearing the slot's DL D_800DDF78[arg0].
+ * texture_id_list_release and its block (word 0) back to the allocator, clearing the slot's DL D_800DDF78[arg0].
  * Slot 8 keeps its block unless D_800DE3A1 == -2; slot 9 with D_800DE3A0 == -2 also frees D_800DE350.
  * (P15, hand C from the asm) */
 void func_15184198(s32 arg0) {
     s32 *e = &D_800DDE80[arg0 * 5];
 
     if (e[4] != 0) {
-        func_1510DBB0((s16 *)e[4]);
+        texture_id_list_release((s16 *)e[4]);
         e[4] = 0;
     }
     if (arg0 == 8) {

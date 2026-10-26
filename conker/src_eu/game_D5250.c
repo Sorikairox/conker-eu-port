@@ -5,7 +5,8 @@
 
 // setting W values in identity matrix
 #ifdef NON_MATCHING
-void func_150A7DA0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_150A7DA0 */
+void mtxf_translate(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     (*(s32 *)((u8 *)arg0 + 4)) = 0;
     (*(f32 *)((u8 *)arg0 + 0)) = 1.0f;
     (*(s32 *)((u8 *)arg0 + 8)) = 0;
@@ -24,10 +25,10 @@ void func_150A7DA0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     (*(f32 *)((u8 *)arg0 + 0x3C)) = 1.0f;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_D5250/func_150A7DA0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_D5250/mtxf_translate.s")
 #endif
 // NON-MATCHING: same issues as other matrix funcs
-// void func_150A7DA0(f32 arg0[4][4], s32 arg1, s32 arg2, s32 arg3) {
+// void mtxf_translate(f32 arg0[4][4], s32 arg1, s32 arg2, s32 arg3) {
 //     if (0) {};
 //     ((s32)arg0[0][1]) = 0;
 //     (arg0[0][0]) = 1.0f;

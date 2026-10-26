@@ -12,15 +12,16 @@ extern f32 D_80096854;
 extern f32 D_80096858;
 extern f32 D_8009685C;
 extern f32 D_80096860;
-void func_150E8854(void);
-void func_1510F800(s32);
+void storm_controller_spawn(void);
+void collision_select_area(s32);
 s32 func_15132FBC(f32 *, s32, s32, s32, s32, s32);
 u8 *mesh_effect_spawn(s8 *, s32, s32, s32, s32);
 s32 memcpy(u8 *, f32 *, s32);
 extern s32 D_80096800;
 extern u8 D_80096848;
 
-void func_15010A60(void) {
+/* was func_15010A60 */
+void level_obj_init_debris_table(void) {
     struct {
         s32 uA0;
         u8 padA4[0xC];
@@ -134,7 +135,7 @@ void func_15010A60(void) {
     u8 *var_s2;
     u8 *temp_v0_2;
 
-    func_150E8854();
+    storm_controller_spawn();
     sp.u115 = 3;
     sp.u116 = 6;
     sp.u118 = 0x12C;
@@ -192,10 +193,10 @@ void func_15010A60(void) {
         (*(f32 *)((u8 *)(&sp.u17C) + 8)) = (f32) (*(f32 *)((u8 *)(&sp.uA0) + 8));
         (*(f32 *)((u8 *)(&sp.u100) + 0)) = (f32) (*(f32 *)((u8 *)(&sp.uA0) + 0));
         (*(f32 *)((u8 *)(&sp.u100) + 8)) = (f32) (*(f32 *)((u8 *)(&sp.uA0) + 8));
-        func_1510F800(0);
-        sp.u1B0 = func_1510FD20((s32) sp.u17C, (s32) sp.u184);
+        collision_select_area(0);
+        sp.u1B0 = zone_tree_find_leaf((s32) sp.u17C, (s32) sp.u184);
         temp_s0 = osGetCount();
-        temp_t2_2 = (func_150ADA20() * temp_s0) & 0xFFFF;
+        temp_t2_2 = (random_int() * temp_s0) & 0xFFFF;
         var_f18 = (f32) temp_t2_2;
         if (temp_t2_2 < 0) {
             var_f18 += 4294967296.0f;
@@ -204,7 +205,7 @@ void func_15010A60(void) {
         sp.uE8 = temp_f2;
         sp.uD0 = temp_f2;
         temp_s0_2 = osGetCount();
-        temp_t3 = (func_150ADA20() * temp_s0_2) & 0xFFFF;
+        temp_t3 = (random_int() * temp_s0_2) & 0xFFFF;
         var_f10 = (f32) temp_t3;
         if (temp_t3 < 0) {
             var_f10 += 4294967296.0f;
@@ -213,7 +214,7 @@ void func_15010A60(void) {
         sp.uEC = temp_f2_2;
         sp.uD4 = temp_f2_2;
         temp_s0_3 = osGetCount();
-        temp_t7 = (func_150ADA20() * temp_s0_3) & 0xFFFF;
+        temp_t7 = (random_int() * temp_s0_3) & 0xFFFF;
         var_f6 = (f32) temp_t7;
         if (temp_t7 < 0) {
             var_f6 += 4294967296.0f;
@@ -222,7 +223,7 @@ void func_15010A60(void) {
         sp.uF8 = temp_f0;
         sp.uE0 = temp_f0;
         temp_s0_4 = osGetCount();
-        temp_t8 = (func_150ADA20() * temp_s0_4) & 0xFFFF;
+        temp_t8 = (random_int() * temp_s0_4) & 0xFFFF;
         var_f18_2 = (f32) temp_t8;
         if (temp_t8 < 0) {
             var_f18_2 += 4294967296.0f;
@@ -231,7 +232,7 @@ void func_15010A60(void) {
         sp.uFC = temp_f0_2;
         sp.uE4 = temp_f0_2;
         temp_s0_5 = osGetCount();
-        temp_t1 = (func_150ADA20() * temp_s0_5) & 0xFFFF;
+        temp_t1 = (random_int() * temp_s0_5) & 0xFFFF;
         var_f4 = (f32) temp_t1;
         if (temp_t1 < 0) {
             var_f4 += 4294967296.0f;
@@ -240,7 +241,7 @@ void func_15010A60(void) {
         sp.uF0 = temp_f0_3;
         sp.uD8 = temp_f0_3;
         temp_s0_6 = osGetCount();
-        temp_t2_3 = (func_150ADA20() * temp_s0_6) & 0xFFFF;
+        temp_t2_3 = (random_int() * temp_s0_6) & 0xFFFF;
         var_f10_2 = (f32) temp_t2_3;
         if (temp_t2_3 < 0) {
             var_f10_2 += 4294967296.0f;
@@ -275,5 +276,5 @@ void func_15010A60(void) {
     } while (var_s2 != ((u8 *)&D_8009684E));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3DF10/func_15010A60.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_3DF10/level_obj_init_debris_table.s")
 #endif

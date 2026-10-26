@@ -3,7 +3,8 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15000000(void) {
+/* was func_15000000 */
+void game_init_message_queues(void) {
     OSMesgQueue *msgQueue;
     s32 i;
 
@@ -18,7 +19,8 @@ void func_15000000(void) {
     func_1000E934();
 }
 
-void func_15000090(void) {
+/* was func_15000090 */
+void level_music_stop_all(void) {
     func_1000DEC4();
 }
 
@@ -48,7 +50,8 @@ typedef struct {
 
 // Level start: request the level's songs. Songs already playing that the level wants are kept (volume and
 // fade set again); the rest are stopped, oldest-slot songs reused for the new ones.
-void func_150000B0(void) {
+/* was func_150000B0 */
+void level_start_music(void) {
     LevelMusic m;
     s32 playing[3];
     s32 restart;
@@ -235,7 +238,7 @@ void func_150000B0(void) {
     func_10017944(1, m.unkD);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2D4B0/func_150000B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2D4B0/level_start_music.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -253,20 +256,21 @@ extern f32 D_800D9EE0[][3];       /* per player, 0xC each: first float = -1 (no 
 extern u8 D_800D9F10;
 extern f32 D_800D9F18[][2];       /* per player projection request: first float = -1 (none) */
 extern u8 D_800D9F38;             /* projection request count / pending flag */
-void func_15000940(s32 arg0);
+void level_init_color_tables(s32 arg0);
 s32 func_1515D9F0(s32 arg0);
 
-/* Per-level setup of the screen / projection-request state: screen size floats, func_15000940, clear the
+/* Per-level setup of the screen / projection-request state: screen size floats, level_init_color_tables, clear the
  * D_800D9F88 / D_800D9F98 4x3 tables and the small flags, then per player (0..D_80082FA0): D_800DA230 handle,
  * D_800D9FF0 colour slots = 0xFF, D_800D9EE0 / D_800D9F18 requests = -1, and the request counters to 0.
- * arg0 (the level, D_800BE9F0) is passed through to func_15000940 in a0. The asm returns a stale v0 (callers ignore it). */
-s32 func_150006E0(s32 arg0) {
+ * arg0 (the level, D_800BE9F0) is passed through to level_init_color_tables in a0. The asm returns a stale v0 (callers ignore it). */
+/* was func_150006E0 */
+s32 level_setup_screen_projection(s32 arg0) {
     s32 i, j;
 
     D_800D9F40 = (f32)D_800B0DF0->unk2;
     D_800D9F3C = (f32)D_800B0DF0->unk0;
     D_800D3A90 = 100.0f - D_800D9F3C;
-    func_15000940(arg0);
+    level_init_color_tables(arg0);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             D_800D9F88[i * 3 + j] = 0;
@@ -304,10 +308,10 @@ s32 func_150006E0(s32 arg0) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2D4B0/func_150006E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2D4B0/level_setup_screen_projection.s")
 #endif
 // NON-MATCHING: almost only reg remaining
-// void func_150006E0(void) {
+// void level_setup_screen_projection(void) {
 //     s32 i;
 //     s32 j;
 //
@@ -315,7 +319,7 @@ s32 func_150006E0(s32 arg0) {
 //     D_800D9B1C = D_800B0DF0->unk0;
 //     D_800D3670 = 100.0f - D_800D9B1C;
 //
-//     func_15000940();
+//     level_init_color_tables();
 //
 //     // downhill from here!
 //     for (i = 0; i < 4; i++) {

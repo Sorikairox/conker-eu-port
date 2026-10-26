@@ -45,7 +45,7 @@ extern f32 D_150AA11C[]; /* sine table: 513 entries over a quarter turn */
 #define ANIM_S16(a, o) (*(s16 *)((u8 *)(a) + (o)))
 #define ANIM_PTR(a, o) (*(u8 **)((u8 *)(a) + (o)))
 
-/* The descriptors (state +0x40 / +0x210) are animation headers read raw from the ROM by func_1505E0C4, and the
+/* The descriptors (state +0x40 / +0x210) are animation headers read raw from the ROM by anim_start_entry, and the
  * key-frame stream is raw ROM data (func_1502DB14): both are read as big-endian bytes (on the N64 the same as the
  * asm's lh / lhu / ldl / ldr; in a little-endian port they stay correct as long as the loader does not swap them). */
 #define DESC_U16(p) ((u16)(((p)[0] << 8) | (p)[1]))

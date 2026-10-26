@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15075400(s32 arg0) {
+/* was func_15075400 */
+void aiscript_branch(s32 arg0) {
     s32 tmp;
     u8 i;
 
@@ -27,7 +28,8 @@ void func_15075400(s32 arg0) {
     }
 }
 
-void func_15075498(void) {
+/* was func_15075498 */
+void aiscript_apply_move_flags(void) {
     s32 tmp = D_800D1893 & 0x7F;
 
     if (tmp != 0x7F) {
@@ -44,7 +46,8 @@ void func_15075498(void) {
     }
 }
 
-void func_15075548(void) {
+/* was func_15075548 */
+void aiscript_move_setup(void) {
     f32 temp_f6;
     u8 temp_a0;
 
@@ -63,11 +66,12 @@ void func_15075548(void) {
             }
         }
     }
-    func_15075498();
+    aiscript_apply_move_flags();
 }
 
 #ifdef NON_MATCHING
-void func_15075650(void) {
+/* was func_15075650 */
+void aiscript_move_setup_path_point(void) {
     u8 sp1F;
     u8 sp1D;
     f32 var_f6;
@@ -92,7 +96,7 @@ void func_15075650(void) {
     if (D_800D1891 == 0xFF) {
         if (var_v1->unk223 != 0xD) {
             sp1F = temp_t2;
-            D_800D154C->unk21E = (func_150ADA20() % sp1F) + D_800D154C->unk220;
+            D_800D154C->unk21E = (random_int() % sp1F) + D_800D154C->unk220;
             goto block_14;
         }
     } else if (D_800D1891 == 0xFE) {
@@ -105,7 +109,7 @@ void func_15075650(void) {
             sp1D = var_a2;
             sp1F = temp_t2;
             var_v1 = D_800D154C;
-            temp_t4 = ((func_150ADA20() % temp_t2) + var_v1->unk220) & 0xFF;
+            temp_t4 = ((random_int() % temp_t2) + var_v1->unk220) & 0xFF;
             if (var_a2 != temp_t4) {
                 var_v1->unk21E = temp_t4;
                 var_v1 = D_800D154C;
@@ -136,13 +140,13 @@ block_14:
     if ((s32) D_800D154C->unk21E < (s32) temp_v0_3) {
         D_800D154C->unk21E = temp_v0_3;
     }
-    func_15075498();
+    aiscript_apply_move_flags();
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15075650.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_move_setup_path_point.s")
 #endif
 // NON-MATCHING: 95% there
-// void func_15075650(void) {
+// void aiscript_move_setup_path_point(void) {
 //     u8 phi_a0;
 //     u8 phi_a2;
 //
@@ -153,7 +157,7 @@ block_14:
 //     phi_a0 = phi_a0 - D_800D154C->unk220;
 //     if (D_800D1891 == 0xFF) { // -1
 //         if (D_800D154C->unk223 != 0xD) {
-//             D_800D154C->unk21E = (func_150ADA20() % (u32) phi_a0) + D_800D154C->unk220;
+//             D_800D154C->unk21E = (random_int() % (u32) phi_a0) + D_800D154C->unk220;
 //         }
 //     } else if (D_800D1891 == 0xFE) { // -2
 //         if (D_800D154C->unk223 != 0xD) {
@@ -161,7 +165,7 @@ block_14:
 //             if (D_800D154C->unk21E <= D_800D154C->unk220) {
 //                 phi_a2 = phi_a0 - 1;
 //             }
-//             phi_a0 = (func_150ADA20() % (u32) phi_a0) + D_800D154C->unk220;
+//             phi_a0 = (random_int() % (u32) phi_a0) + D_800D154C->unk220;
 //             if (phi_a0 != phi_a2) {
 //                 D_800D154C->unk21E = phi_a0;
 //             }
@@ -187,18 +191,19 @@ block_14:
 //     if (D_800D154C->unk21E < D_800D154C->unk220) {
 //         D_800D154C->unk21E = D_800D154C->unk220;
 //     }
-//     func_15075498();
+//     aiscript_apply_move_flags();
 // }
 
 #ifdef NON_MATCHING
-void func_15075884(void) {
+/* was func_15075884 */
+void aiscript_move_timed_to_point(void) {
     f32 temp_f0;
     f32 temp_f12;
     f32 temp_f2;
     f32 var_f2;
     u8 *temp_v1;
 
-    func_15075548();
+    aiscript_move_setup();
     temp_v1 = D_800D2104[D_800D154C->unk13F] + (D_800D154C->unk21E * 8);
     temp_f2 = (f32) (*(s16 *)((u8 *)temp_v1 + 8)) - D_800D154C->x_position;
     temp_f12 = (f32) (*(s16 *)((u8 *)temp_v1 + 0xC)) - D_800D154C->z_position;
@@ -210,17 +215,17 @@ void func_15075884(void) {
     D_800D154C->unk44 = 2.0f * (temp_f0 / var_f2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15075884.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_move_timed_to_point.s")
 #endif
 // NON-MATCHING: array index is wrong
-// void func_15075884(void) {
+// void aiscript_move_timed_to_point(void) {
 //     f32 temp_f0;
 //     f32 temp_f12;
 //     f32 temp_f2;
 //     struct169 *temp_v1;
 //     f32 phi_f2;
 //
-//     func_15075548();
+//     aiscript_move_setup();
 //     temp_v1 = D_800D2104[(D_800D154C->unk13F) + (D_800D154C->unk21E)];
 //     temp_f2 = temp_v1->unk8 - D_800D154C->x_position;
 //     temp_f12 = temp_v1->unkC - D_800D154C->z_position;
@@ -229,7 +234,8 @@ void func_15075884(void) {
 // }
 
 #ifdef NON_MATCHING
-void func_15075938(void) {
+/* was func_15075938 */
+void aiscript_if_path_offset(void) {
     s32 var_a0;
     s32 var_a2;
     u8 var_v0;
@@ -267,14 +273,14 @@ block_16:
         var_a2 = 1;
     }
     if (var_a2 != 0) {
-        func_15075400((s32) D_800D1890);
+        aiscript_branch((s32) D_800D1890);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15075938.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_if_path_offset.s")
 #endif
 // NON-MATCHING: 2nd half ok, 1st is a mystery
-// void func_15075938(void) {
+// void aiscript_if_path_offset(void) {
 //     u8 tmp;
 //     u8 changed;
 //     s32 temp_a0;
@@ -319,24 +325,26 @@ block_16:
 //     }
 //
 //     if (changed) {
-//         func_15075400(D_800D1890);
+//         aiscript_branch(D_800D1890);
 //     }
 // }
 
-void func_15075A50(void) {
+/* was func_15075A50 */
+void aiscript_if_path_point(void) {
     u8 temp_v0 = D_800D154C->unk21E;
     if (((D_800D1892 == 0) && (D_800D1891 == temp_v0)) ||
        ((D_800D1892 == 1) && (D_800D1891 != temp_v0))) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_15075AAC(void) {
+/* was func_15075AAC */
+void aiscript_move_stop_near_point(void) {
     f32 dx;
     f32 dz;
     s16 *temp_v0;
 
-    func_15075548();
+    aiscript_move_setup();
     temp_v0 = ((s16 (*)[4])D_800D2104[D_800D154C->unk13F])[D_800D1891];
     dx = temp_v0[0] - D_800D154C->x_position;
     dz = temp_v0[2] - D_800D154C->z_position;
@@ -346,29 +354,34 @@ void func_15075AAC(void) {
     }
 }
 
-void func_15075B60(void) {
-    func_15075548();
+/* was func_15075B60 */
+void aiscript_mode10(void) {
+    aiscript_move_setup();
     D_800D154C->unk223 = 10;
 }
 
-void func_15075B8C(void) {
-    func_15075650();
+/* was func_15075B8C */
+void aiscript_mode10_path_point(void) {
+    aiscript_move_setup_path_point();
     D_800D154C->unk223 = 10;
 }
 
-void func_15075BB8(void) {
-    func_15075548();
+/* was func_15075BB8 */
+void aiscript_move_setup_flag2(void) {
+    aiscript_move_setup();
     D_800D154C->unk22C |= 2;
 }
 
-void func_15075BE8(void) {
+/* was func_15075BE8 */
+void aiscript_set_reaction_script(void) {
     if (D_800D1893 != 0) {
         D_800D154C->unk22C |= 0x80;
     }
     D_800D154C->unk233 = D_800D1890;
 }
 
-void func_15075C24(void) {
+/* was func_15075C24 */
+void aiscript_set_y_vel_gravity(void) {
     if (D_800D1893 != 1) {
         D_800D154C->y_velocity = (s16)((D_800D1892 << 8) | D_800D1890);
     }
@@ -377,80 +390,94 @@ void func_15075C24(void) {
     }
 }
 
-void func_15075CA0(void) {
-    func_15075548();
+/* was func_15075CA0 */
+void aiscript_chase_target(void) {
+    aiscript_move_setup();
     D_800D154C->unk223 = 1;
 }
 
-void func_15075CCC(void) {
-    func_15075548();
+/* was func_15075CCC */
+void aiscript_intercept_target(void) {
+    aiscript_move_setup();
     D_800D154C->unk223 = 16;
     D_800D154C->unk231 = D_800D1891;
 }
 
-void func_15075D0C(void) {
-    func_15075548();
+/* was func_15075D0C */
+void aiscript_mode15(void) {
+    aiscript_move_setup();
     D_800D154C->unk223 = 15;
 }
 
-void func_15075D38(void) {
-    func_15075CA0();
+/* was func_15075D38 */
+void aiscript_mode14(void) {
+    aiscript_chase_target();
     D_800D154C->unk223 = 14;
 }
 
-void func_15075D64(void) {
-    func_15075548();
+/* was func_15075D64 */
+void aiscript_mode12_player(void) {
+    aiscript_move_setup();
     D_800D154C->unk223 = 12;
     D_800D154C->unk222 = 0;
 }
 
-void func_15075D9C(void) {
-    func_15075548();
+/* was func_15075D9C */
+void aiscript_mode9(void) {
+    aiscript_move_setup();
     D_800D154C->unk223 = 9;
 }
 
-void func_15075DC8(void) {
-    func_15075CA0();
+/* was func_15075DC8 */
+void aiscript_chase_target_alt(void) {
+    aiscript_chase_target();
 }
 
-void func_15075DE8(void) {
+/* was func_15075DE8 */
+void aiscript_goto_script(void) {
     if (D_800D1891 == 0) {
         D_800D1891 = D_800D154C->unk232;
     }
     if (D_800D1893 != 0) {
         D_800D154C->unk232 = D_800D1893;
     }
-    D_800D154C->unk218 = func_1507BB28(0, D_800D1891);
+    D_800D154C->unk218 = aiscript_find_by_kind(0, D_800D1891);
     D_800D154C->unk218 -= 1;
 }
 
-void func_15075E6C(void) {
-    func_15075548();
+/* was func_15075E6C */
+void aiscript_flee_target(void) {
+    aiscript_move_setup();
     D_800D154C->unk223 = 2;
 }
 
-void func_15075E98(void) {
+/* was func_15075E98 */
+void aiscript_set_reaction_script2(void) {
     D_800D154C->unk235 = D_800D1890;
 }
 
-void func_15075EB4(void) {
-    if ((func_150ADA20() % 0x64U) < D_800D1892) {
-        func_15075400(D_800D1890);
+/* was func_15075EB4 */
+void aiscript_if_random_percent(void) {
+    if ((random_int() % 0x64U) < D_800D1892) {
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_15075F00(void) {
+/* was func_15075F00 */
+void aiscript_set_attack(void) {
     D_800D154C->unk234 = D_800D1890;
     D_800D154C->unk236 = D_800D1891;
     D_800D154C->unk237 = D_800D1892;
 }
 
-void func_15075F40(void) {
-    func_15075548();
+/* was func_15075F40 */
+void aiscript_mode3(void) {
+    aiscript_move_setup();
     D_800D154C->unk223 = 3;
 }
 
-void func_15075F6C(void) {
+/* was func_15075F6C */
+void aiscript_set_jump(void) {
     if (D_800D1890 != 0) {
         if (D_800D1892 == 0) {
             D_800D154C->y_velocity = D_800D1890;
@@ -470,12 +497,13 @@ extern f32 D_8009A500; /* 1 / 12 */
 // path_jump_to_point: P210: script command: jump (ballistic) to point D_800D1891 of the object's path
 // (D_800D2104[unk13F]); unk21E = that point. Flight time t = 2 * distance / speed (unk44); below 12 the speed is
 // scaled by t / 12 and t = 12. unk21C = t * 100, upward velocity = gravity * t / 2, unk223 = 4.
-void func_1507602C(void) {
+/* was func_1507602C */
+void aiscript_jump_to_point(void) {
     s16 *pt;
     f32 dx, dz;
     f32 t;
 
-    func_15075548();
+    aiscript_move_setup();
     D_800D154C->unk21E = D_800D1891;
     pt = (s16 *)(D_800D2104[D_800D154C->unk13F] + D_800D1891 * 8 + 8);
     dx = pt[0] - D_800D154C->x_position;
@@ -491,16 +519,16 @@ void func_1507602C(void) {
     D_800D154C->unk223 = 4;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_1507602C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_jump_to_point.s")
 #endif
 // NON-MATCHING: indexing is wrong
-// void func_1507602C(void) {
+// void aiscript_jump_to_point(void) {
 //     f32 temp_f12;
 //     f32 temp_f14;
 //     f32 temp_f2;
 //     struct169 *temp_v1;
 //
-//     func_15075548();
+//     aiscript_move_setup();
 //     D_800D154C->unk21E = D_800D1891;
 //     temp_v1 = D_800D2104[D_800D154C->unk13F + D_800D1891]; // wrong
 //     temp_f2 = temp_v1->unk8 - D_800D154C->x_position;
@@ -515,49 +543,58 @@ void func_1507602C(void) {
 //     D_800D154C->unk223 = 4;
 // }
 
-void func_150761C8(void) {
-    func_15075650();
+/* was func_150761C8 */
+void aiscript_walk_to_point(void) {
+    aiscript_move_setup_path_point();
     D_800D154C->unk223 = 5;
 }
 
-void func_150761F4(void) {
+/* was func_150761F4 */
+void aiscript_jump_at_target(void) {
 
     D_800D154C->unk223 = 6;
     D_800D154C->unk22C &= 0xFFFE;
 }
 
-void func_15076220(void) {
-    func_150761F4();
+/* was func_15076220 */
+void aiscript_jump_at_point(void) {
+    aiscript_jump_at_target();
     D_800D154C->unk22C |= 1;
 }
 
-void func_15076250(void) {
+/* was func_15076250 */
+void aiscript_play_sound_3d(void) {
     s32 tmp = (D_800D1890 << 8) | D_800D1891;
-    func_15060778(tmp, D_800D154C, 0x7D00, -0x64, 0x1F4, 0x9C4, D_800D1892);
+    obj_sfx_play_attached(tmp, D_800D154C, 0x7D00, -0x64, 0x1F4, 0x9C4, D_800D1892);
 }
 
-void func_150762B0(void) {
+/* was func_150762B0 */
+void aiscript_set_music_param(void) {
     func_1000CBA8(D_800D1890);
 }
 
-void func_150762D4(void) {
+/* was func_150762D4 */
+void aiscript_spawn_effect_above(void) {
     func_15166F10(D_800D154C->x_position, D_800D154C->y_position + 100.0f, D_800D154C->z_position, 0.45f, 0xFF, 0);
 }
 
-void func_15076340(void) {
+/* was func_15076340 */
+void aiscript_if_flag107_clear(void) {
     if (D_800D154C->unk107 == 0) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
     if (D_800D1891 != 0) {
         D_800D154C->unk107 = 0;
     }
 }
 
-void func_15076394(void) {
+/* was func_15076394 */
+void aiscript_set_attack_range(void) {
     D_800D154C->unk236 = D_800D1890;
 }
 
-void func_150763B0(void) {
+/* was func_150763B0 */
+void aiscript_set_turn_rate(void) {
 
     if (D_800D1890 == 128) {
         D_800D154C->unk1E5 = D_800D154C->unk144->unkF;
@@ -567,7 +604,7 @@ void func_150763B0(void) {
     D_800D154C->unk1E7 = 0;
 
     if (D_800D1892 != 0) {
-        D_800D154C->unk1E5 += (func_150ADA20() % (u32) D_800D1892);
+        D_800D154C->unk1E5 += (random_int() % (u32) D_800D1892);
     }
     if (D_800D1893 == 1) {
         D_800D154C->unk1E6 = 0;
@@ -585,19 +622,23 @@ void func_150763B0(void) {
     }
 }
 
-void func_150764C8(void) {
+/* was func_150764C8 */
+void aiscript_set_field238(void) {
     D_800D154C->unk238 = D_800D1890;
 }
 
-void func_150764E4(void) {
+/* was func_150764E4 */
+void aiscript_set_field239(void) {
     D_800D154C->unk239 = D_800D1890;
 }
 
-void func_15076500(void) {
+/* was func_15076500 */
+void aiscript_set_field22e(void) {
     D_800D154C->unk22E = (D_800D1890 << 8) | D_800D1891;
 }
 
-void func_1507652C(void) {
+/* was func_1507652C */
+void aiscript_set_immune(void) {
     if (D_800D1891 != 0) {
         D_800CC3F5[D_800D154C->unk124 * 0x32C] = D_800D1890;
     } else {
@@ -605,31 +646,37 @@ void func_1507652C(void) {
     }
 }
 
-void func_1507659C(void) {
+/* was func_1507659C */
+void aiscript_raise_y(void) {
     D_800D154C->y_position = D_800D154C->y_position + D_800D1890 * 100;
     if (D_800D1893 != 0) {
         D_800D154C->y_position = 1800.0f;
     }
 }
 
-void func_15076600(void) {
+/* was func_15076600 */
+void aiscript_nop_a(void) {
 }
 
-void func_15076608(void) {
+/* was func_15076608 */
+void aiscript_set_field24a(void) {
     D_800D154C->unk24A = D_800D1890;
 }
 
-void func_15076624(void) {
+/* was func_15076624 */
+void aiscript_set_flags_f8(void) {
     s32 tmp = (D_800D1890 << 0x18) | (D_800D1891 << 0x10) | (D_800D1892 << 8) | D_800D1893;
     D_800D154C->unkF8 |= tmp;
 }
 
-s32 func_15076678(void) {
+/* was func_15076678 */
+s32 aiscript_clear_flags_f8(void) {
     s32 tmp = (D_800D1890 << 0x18) | (D_800D1891 << 0x10) | (D_800D1892 << 8) | D_800D1893;
     D_800D154C->unkF8 &= ~tmp;
 }
 
-void func_150766D0(void) {
+/* was func_150766D0 */
+void aiscript_wait_until_landed(void) {
     if (((D_800D154C->unk28 > 0.0f) && (D_800D1890 == 0)) ||
         (((D_800D1890 * 0x32) < D_800D154C->unk28) && (D_800D1890 != 0))) {
         D_800D154C->unk21C = 99;
@@ -637,7 +684,8 @@ void func_150766D0(void) {
     }
 }
 
-void func_15076760(void) {
+/* was func_15076760 */
+void aiscript_nop_b(void) {
 }
 
 // ???
@@ -649,7 +697,8 @@ void func_1514B8D4(f32 *, f32 *, s32, s32);
 #endif
 void func_15197A7C(struct127 *);
 
-void func_15076768(void) {
+/* was func_15076768 */
+void aiscript_spawn_special_fx(void) {
     f32 pos[3];
 
     switch (D_800D1890) {
@@ -670,25 +719,27 @@ void func_15076768(void) {
 }
 
 
-void func_150767F4(void) {
+/* was func_150767F4 */
+void aiscript_if_facing_target(void) {
     struct127 *temp_v1 = &D_800CC2D0[D_800D154C->unk222];
-    u8 temp_t0 = func_1505A630(temp_v1->x_position - D_800D154C->x_position, D_800D154C->z_position - temp_v1->z_position, 0) >> 8;
+    u8 temp_t0 = math_atan2_u16(temp_v1->x_position - D_800D154C->x_position, D_800D154C->z_position - temp_v1->z_position, 0) >> 8;
 
     if ((((temp_t0 - (D_800CC2D0[D_800D154C->unk222].unk7A >> 8)) + D_800D1891) & 0xFF) < (D_800D1891 * 2)) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
 #ifdef NON_MATCHING
-int func_1507BB28(s32, s32);
+int aiscript_find_by_kind(s32, s32);
 
 // find_visible_target: P210: script command: looks for the nearest object the current one can see: live (state,
 // health), targetable (unkF8 bit 0x20), not itself, of another id unless D_800D1891 is set, within 50 in height,
-// closer than D_800D1890 * 8 (func_1505A72C), and inside its view cone (width byte 0x17 of its type record
+// closer than D_800D1890 * 8 (obj_dist_3d), and inside its view cone (width byte 0x17 of its type record
 // D_800D1C90[id], in 1/256 turns around heading unk76 >> 8 + unk2CA). The nearest one is stored as unkA8 =
 // 0x80 + its number; then the object's script jumps to D_800D1893 and, when D_800D1892 is set, the target's
 // script to D_800D1892 with unk222 = the current object's number.
-void func_150768DC(void) {
+/* was func_150768DC */
+void aiscript_find_visible_target(void) {
     s32 self = ((s32)D_800D154C - (s32)D_800CC2D0) / 0x32C;
     f32 best = D_800D1890 * 8;
     struct127 *o = D_800CC2D0;
@@ -709,19 +760,19 @@ void func_150768DC(void) {
         if (50.0f < fabsf(D_800D154C->y_position - o->y_position)) {
             continue;
         }
-        d = func_1505A72C(D_800D154C, o);
+        d = obj_dist_3d(D_800D154C, o);
         if (!(d < best)) {
             continue;
         }
         fov = D_800D1C90[D_800D154C->id]->unk17;
-        ang = func_1505A630(o->x_position - D_800D154C->x_position, D_800D154C->z_position - o->z_position, 0);
+        ang = math_atan2_u16(o->x_position - D_800D154C->x_position, D_800D154C->z_position - o->z_position, 0);
         if (((((D_800D154C->unk76 >> 8) + D_800D154C->unk2CA) - (ang >> 8) + fov / 2) & 0xFF) < fov) {
             D_800D154C->unkA8 = i + 0x80;
             best = d;
         }
     }
     if (D_800D154C->unkA8 != 0) {
-        D_800D154C->unk218 = (struct216 *)func_1507BB28(0, D_800D1893);
+        D_800D154C->unk218 = (struct216 *)aiscript_find_by_kind(0, D_800D1893);
         D_800D154C->unk218--;
         if (D_800D1892 != 0) {
             t = &D_800CC2D0[D_800D154C->unkA8 & 0x7F];
@@ -732,10 +783,10 @@ void func_150768DC(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_150768DC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_find_visible_target.s")
 #endif
 // NON-MATCHING: almost JUSTREG
-// void func_150768DC(void) {
+// void aiscript_find_visible_target(void) {
 //     u8 temp_s2;
 //     f32 temp_f20;
 //     s32 temp_fp;
@@ -757,11 +808,11 @@ void func_150768DC(void) {
 //         if ((current->unk0 != 0) && (current->health != 0) && ((current->unkF8 & 0x20) != 0) && (i != temp_fp)) {
 //             if ((D_800D1891 != 0) || (D_800D154C->id != current->id)) {
 //                 if (!(fabsf(D_800D154C->y_position - current->y_position) > 50.0f)) {
-//                     temp_f20 = func_1505A72C(D_800D154C, current);
+//                     temp_f20 = obj_dist_3d(D_800D154C, current);
 //                     if (temp_f20 < phi_f22) {
 //                         foo = D_800D1C90[D_800D154C->id];
 //                         temp_s2 = foo->unk17;
-//                         tmp1 = func_1505A630(current->x_position - D_800D154C->x_position, D_800D154C->z_position - current->z_position, 0) >> 8;
+//                         tmp1 = math_atan2_u16(current->x_position - D_800D154C->x_position, D_800D154C->z_position - current->z_position, 0) >> 8;
 //                         if ((((((D_800D154C->unk76 >> 8) + D_800D154C->unk2CA) - tmp1) + (temp_s2 / 2)) & 0xFF) < temp_s2) {
 //                             D_800D154C->unkA8 = i;
 //                             phi_f22 = temp_f20;
@@ -773,7 +824,7 @@ void func_150768DC(void) {
 //     }
 //
 //     if (D_800D154C->unkA8 != 0) {
-//         D_800D154C->unk218 = func_1507BB28(0, D_800D1893);
+//         D_800D154C->unk218 = aiscript_find_by_kind(0, D_800D1893);
 //         D_800D154C->unk218 -= 1;
 //         tmp0 = D_800D1892;
 //         if (tmp0 != 0) {
@@ -785,15 +836,18 @@ void func_150768DC(void) {
 //     }
 // }
 
-void func_15076B5C(void) {
+/* was func_15076B5C */
+void aiscript_target_seen_object(void) {
     D_800D154C->unk222 = (D_800D154C->unkA8 & 0x7F);
 }
 
-void func_15076B78(void) {
+/* was func_15076B78 */
+void aiscript_set_field5(void) {
     D_800D154C->unk5 = D_800D1890;
 }
 
-void func_15076B94(void) {
+/* was func_15076B94 */
+void aiscript_goto_object_by_id(void) {
     s32 idx = ((s32)D_800D154C - (s32)D_800CC2D0) / (s32)sizeof(struct127);
 
     if (D_800D1891) {
@@ -801,7 +855,7 @@ void func_15076B94(void) {
     }
     while (idx != 0) {
         if ((D_800D1890 == D_800CC2D0[idx-1].id) && (D_800CC2D0[idx-1].health != 0)) {
-            func_15075548();
+            aiscript_move_setup();
             D_800D154C->unk223 = 9;
             D_800D154C->unk222 = idx - 1;
             D_800D154C->unk21C = 1000;
@@ -811,28 +865,33 @@ void func_15076B94(void) {
     };
 }
 
-void func_15076C7C(void) {
-    func_1506160C(D_800D154C, 1, D_800D1890, 0, 0);
+/* was func_15076C7C */
+void aiscript_fade_cmd(void) {
+    obj_fade_command(D_800D154C, 1, D_800D1890, 0, 0);
 }
 
-void func_15076CB4(void) {
+/* was func_15076CB4 */
+void aiscript_heading_to_target(void) {
     D_800D154C->unk76 = D_800D154C->unk78;
 }
 
-void func_15076CCC(void) {
+/* was func_15076CCC */
+void aiscript_remove_wait_long(void) {
     D_800D154C->unk21C = 10000;
-    func_15060F28(D_800D154C, 1);
+    obj_remove(D_800D154C, 1);
 }
 
-void func_15076D04(void) {
+/* was func_15076D04 */
+void aiscript_set_xz_velocity(void) {
     D_800D154C->xz_velocity = D_800D1890;
 }
 
 #ifdef NON_MATCHING
 // object_set_scale: P210: script command: sets the current object's scale from the command bytes (two s16 in
 // hundredths: D_800D1890 / D_800D1891 = xz, D_800D1892 / D_800D1893 = y, low byte first; D_8009A504 = 0.01),
-// copies it to unk154 / unk158 and applies it with func_15062BDC.
-void func_15076D3C(void) {
+// copies it to unk154 / unk158 and applies it with obj_set_scale.
+/* was func_15076D3C */
+void aiscript_set_scale(void) {
     s16 xz = D_800D1890 | (D_800D1891 << 8);
     s16 y = D_800D1892 | (D_800D1893 << 8);
 
@@ -840,13 +899,13 @@ void func_15076D3C(void) {
     D_800D154C->y_scale = y * D_8009A504;
     D_800D154C->unk154 = D_800D154C->xz_scale;
     D_800D154C->unk158 = D_800D154C->y_scale;
-    func_15062BDC(D_800D154C, D_800D154C->xz_scale, D_800D154C->y_scale);
+    obj_set_scale(D_800D154C, D_800D154C->xz_scale, D_800D154C->y_scale);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15076D3C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_set_scale.s")
 #endif
 // ???
-// void func_15076D3C(void) {
+// void aiscript_set_scale(void) {
 //     s32 temp_a3;
 //     s32 tmp2;
 //
@@ -856,37 +915,43 @@ void func_15076D3C(void) {
 //     D_800D154C->y_scale = (s16)temp_a3 * D_8009A144;
 //     D_800D154C->unk154 = D_800D154C->xz_scale;
 //     D_800D154C->unk158 = D_800D154C->y_scale;
-//     func_15062BDC(&D_800D154C, D_800D154C->xz_scale, D_800D154C->y_scale);
+//     obj_set_scale(&D_800D154C, D_800D154C->xz_scale, D_800D154C->y_scale);
 // }
 
-void func_15076DF4(void) {
+/* was func_15076DF4 */
+void aiscript_set_interaction_state(void) {
     D_800D154C->interaction_state = D_800D1890;
 }
 
-void func_15076E10(void) {
+/* was func_15076E10 */
+void aiscript_set_field1d0(void) {
     D_800D154C->unk1D0 = D_800D1890;
     D_800D154C->unk22C |= D_800D1891;
 }
 
-void func_15076E48(void) {
+/* was func_15076E48 */
+void aiscript_nop_c(void) {
 }
 
-void func_15076E50(void) {
-    func_15075548();
-    D_800D154C->y_velocity = ((f32) (u32) (func_150ADA20() % 0x14U) + 55.0f);
+/* was func_15076E50 */
+void aiscript_random_hop(void) {
+    aiscript_move_setup();
+    D_800D154C->y_velocity = ((f32) (u32) (random_int() % 0x14U) + 55.0f);
     D_800D154C->gravity = 2.0f;
-    D_800D154C->unk78 = func_150ADA20() % 0xFFFFU;
-    D_800D154C->xz_velocity = (u32) ((func_150ADA20() % 0x14U) + 0xF);
+    D_800D154C->unk78 = random_int() % 0xFFFFU;
+    D_800D154C->xz_velocity = (u32) ((random_int() % 0x14U) + 0xF);
     D_800D154C->unk44 = D_800D154C->xz_velocity;
     D_800D154C->unk223 = 7;
 }
 
-void func_15076F40(void) {
+/* was func_15076F40 */
+void aiscript_remove_wait(void) {
     D_800D154C->unk21C = 1000;
-    func_15060F28(D_800D154C, 1);
+    obj_remove(D_800D154C, 1);
 }
 
-void func_15076F78(void) {
+/* was func_15076F78 */
+void aiscript_set_fieldcc(void) {
     s8 tmp;
     tmp = D_800D1890;
     D_800D154C->unkCC = tmp;
@@ -894,12 +959,13 @@ void func_15076F78(void) {
     D_800D154C->unkCE = tmp;
 }
 
-void func_15076FA8(void) {
+/* was func_15076FA8 */
+void aiscript_jitter_position(void) {
     if (D_800D1893 == 0) {
         s16 tmp;
-        tmp = (func_150ADA20() % (u32) D_800D1890) - (D_800D1890 / 2);
+        tmp = (random_int() % (u32) D_800D1890) - (D_800D1890 / 2);
         D_800D154C->x_position += tmp * 3.0f;
-        tmp = (func_150ADA20() % (u32) D_800D1891) - (D_800D1891 / 2);
+        tmp = (random_int() % (u32) D_800D1891) - (D_800D1891 / 2);
         D_800D154C->z_position += tmp * 3.0f;
     } else {
         if (D_800D154C->xz_velocity < D_800D1893) {
@@ -908,17 +974,20 @@ void func_15076FA8(void) {
     }
 }
 
-void func_150770E4(void) {
+/* was func_150770E4 */
+void aiscript_if_target_slower(void) {
     if (D_800CC2D0[D_800D154C->unk222].xz_velocity < (f32)(u32)D_800D1892) {
-        func_15075400(D_800D1893);
+        aiscript_branch(D_800D1893);
     }
 }
 
-void func_15077174(void) {
+/* was func_15077174 */
+void aiscript_set_field10e(void) {
     D_800D154C->unk10E = D_800D1890;
 }
 
-void func_15077190(void) {
+/* was func_15077190 */
+void aiscript_play_sound_3d_b(void) {
     s32 tmp0 = (D_800D1890 << 8) | D_800D1891;
     if (tmp0 != 0) {
         s32 tmp1 = D_800D1892 << 7;
@@ -926,7 +995,8 @@ void func_15077190(void) {
     }
 }
 
-void func_150771F0(void) {
+/* was func_150771F0 */
+void aiscript_fade_or_anim_cmd(void) {
     u8 var_a1;
     u8 a2, a3;
 
@@ -938,7 +1008,7 @@ void func_150771F0(void) {
         } else {
             var_a1 = 2;
         }
-        func_1506160C(D_800D154C, var_a1, a2, a3, 0);
+        obj_fade_command(D_800D154C, var_a1, a2, a3, 0);
     } else if (D_800D1892 == 0) {
         func_1502ED50(D_800D154C, D_800D1890);
     } else {
@@ -946,7 +1016,8 @@ void func_150771F0(void) {
     }
 }
 
-void func_15077294(void) {
+/* was func_15077294 */
+void aiscript_set_health(void) {
     switch (D_800D1891) {
         case 0:
             D_800D154C->health = D_800D1890;
@@ -957,11 +1028,13 @@ void func_15077294(void) {
     }
 }
 
-void func_150772E8(void) {
+/* was func_150772E8 */
+void aiscript_set_flag_entry(void) {
     func_1503DE70(D_800D154C, D_800D1890, -1);
 }
 
-void func_15077318(void) {
+/* was func_15077318 */
+void aiscript_set_flag101_bit0(void) {
     if (D_800D1890 != 0) {
         D_800D154C->unk101 |= 1;
     } else {
@@ -969,13 +1042,15 @@ void func_15077318(void) {
     }
 }
 
-void func_1507735C(void) {
+/* was func_1507735C */
+void aiscript_nop_d(void) {
 
 }
 
-void func_15077364(void) {
+/* was func_15077364 */
+void aiscript_set_field246(void) {
     if (D_800D1893 != 0) {
-        D_800D1890 += func_150ADA20() % (u32) D_800D1893;
+        D_800D1890 += random_int() % (u32) D_800D1893;
     }
     D_800D154C->unk246 = (u8) D_800D1890;
     D_800D154C->unk249 = (u8) 0;
@@ -985,7 +1060,8 @@ void func_15077364(void) {
 
 // ??
 #ifdef NON_MATCHING
-void func_15077404(void) {
+/* was func_15077404 */
+void aiscript_adjust_field246(void) {
     s16 var_v0;
 
     if (D_800D1893 != 0) {
@@ -1000,12 +1076,13 @@ void func_15077404(void) {
     D_800D154C->unk246 = D_800D1890;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15077404.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_adjust_field246.s")
 #endif
-void func_150774B4(void) {
+/* was func_150774B4 */
+void aiscript_if_nav_arrived(void) {
     if ((D_800D154C->unk20F == D_800D154C->unk211) || (D_800D154C->unk211 == 0xFF)) {
         D_800D154C->unk25C |= 0x800;
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
@@ -1015,7 +1092,8 @@ s32 func_150867D4(u8, s8, s8, u8 *, u8 *);
 s32 func_1508712C(s32, f32 *, f32 *, f32 *);
 extern s32 D_800D277C;
 
-void func_15077508(void) {
+/* was func_15077508 */
+void aiscript_nav_next_node(void) {
     struct {
         f32 u78;
         f32 u7C;
@@ -1102,7 +1180,7 @@ block_5:
                         sp70 = var_a0;
                         sp6C = var_a1_2;
                         sp58 = var_f2;
-                        temp_f0 = func_150ADA68();
+                        temp_f0 = random_float();
                         if (temp_f0 < var_f2) {
                             var_f2 = temp_f0;
                             var_a1_2 = (s32) var_v1->pad8[1];
@@ -1144,7 +1222,7 @@ block_28:
                     sp48 = temp_f14;
                     sp44 = temp_f16;
                     sp4C = temp_f18;
-                    temp_f12_2 = (func_150ADA68() * temp_f18) / temp_f12;
+                    temp_f12_2 = (random_float() * temp_f18) / temp_f12;
                     sp.u80 -= temp_f16 * temp_f12_2;
                     sp.u78 += temp_f14 * temp_f12_2;
                 }
@@ -1156,9 +1234,10 @@ block_28:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15077508.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_nav_next_node.s")
 #endif
-void func_150778F0(void) {
+/* was func_150778F0 */
+void aiscript_path_advance(void) {
     u8 var_v0 = D_800D2528[D_800D154C->unk13F] - 1;
 
     if (D_800D154C->unk21F != 0) {
@@ -1172,12 +1251,14 @@ void func_150778F0(void) {
     }
 }
 
-void func_150779A8(void) {
-    func_15075650();
+/* was func_150779A8 */
+void aiscript_mode11_path_point(void) {
+    aiscript_move_setup_path_point();
     D_800D154C->unk223 = 0xB;
 }
 
-void func_150779D4(void) {
+/* was func_150779D4 */
+void aiscript_if_near_object(void) {
     u8 var_v0 = 0;
     struct127 *temp_a1;
     f32 dist;
@@ -1189,55 +1270,64 @@ void func_150779D4(void) {
     if (D_800C3E78 != var_v0) {
         temp_a1 = &D_800CC2D0[var_v0];
         if ((temp_a1->interaction_state != 1) || (temp_a1->unk65 == 0)) {
-            dist = func_1505A6F8(D_800D154C, temp_a1);
+            dist = obj_dist_xz(D_800D154C, temp_a1);
             range = D_800D1893 * 8;
             if (dist < range) {
-                func_15075400(D_800D1890);
+                aiscript_branch(D_800D1890);
             }
         }
     }
 }
 
-void func_15077AA0(void) {
+/* was func_15077AA0 */
+void aiscript_set_field239_b(void) {
     D_800D154C->unk239 = D_800D1890;
 }
 
-void func_15077ABC(void) {
+/* was func_15077ABC */
+void aiscript_set_field258(void) {
     D_800D154C->unk258 = D_800D1890;
     D_800D154C->unk257 = D_800D1891;
-    D_800D154C->unk86 = func_150ADA20() % 0xFFU;
+    D_800D154C->unk86 = random_int() % 0xFFU;
 }
 
-void func_15077B14(void) {
+/* was func_15077B14 */
+void aiscript_set_field24c(void) {
     D_800D154C->unk24C = D_800D1890;
     D_800D154C->unk24D = D_800D1891;
 }
 
-void func_15077B44(void) {
-    func_15060A30((D_800D1890 << 8) + D_800D1891, D_800D154C);
+/* was func_15077B44 */
+void aiscript_play_sound(void) {
+    obj_sfx_play((D_800D1890 << 8) + D_800D1891, D_800D154C);
 }
 
-void func_15077B80(void) {
+/* was func_15077B80 */
+void aiscript_set_flags_25c(void) {
     s32 tmp = (D_800D1890 << 8) + D_800D1891;
     D_800D154C->unk25C |= tmp;
 }
 
-void func_15077BB4(void) {
-    struct127 *tmp = func_1505F0AC(D_800D1891);
+/* was func_15077BB4 */
+void aiscript_send_script_to_id(void) {
+    struct127 *tmp = obj_find_by_id(D_800D1891);
     tmp->unk218 = 0;
     tmp->unk232 = D_800D1890;
 }
 
-void func_15077BE4(void) {
+/* was func_15077BE4 */
+void aiscript_clear_flags_25c(void) {
     s32 tmp = ~((D_800D1890 << 8) + D_800D1891);
     D_800D154C->unk25C &= tmp;
 }
 
-void func_15077C1C(void) {
+/* was func_15077C1C */
+void aiscript_set_sight_range(void) {
     D_800D154C->unk23D = D_800D1890;
 }
 
-void func_15077C38(void) {
+/* was func_15077C38 */
+void aiscript_find_target(void) {
     struct127 *phi_s0;
     f32 tmp0;
     f32 distance;
@@ -1257,7 +1347,7 @@ void func_15077C38(void) {
                 D_800D154C->unk222 = i;
                 return;
             }
-            distance = func_1505A72C(D_800D154C, phi_s0);
+            distance = obj_dist_3d(D_800D154C, phi_s0);
             if (tmp0 > distance) {
                 D_800D154C->unk222 = i;
                 tmp0 = distance;
@@ -1266,11 +1356,13 @@ void func_15077C38(void) {
     }
 }
 
-void func_15077DA0(void) {
+/* was func_15077DA0 */
+void aiscript_set_path_point(void) {
     D_800D154C->unk21E = D_800D1890;
 }
 
-void func_15077DBC(void) {
+/* was func_15077DBC */
+void aiscript_warp_to_path_point(void) {
     if (D_800D1890 != 0xFA) {
         D_800D154C->unk21E = D_800D1890;
     }
@@ -1279,26 +1371,31 @@ void func_15077DBC(void) {
     D_800D154C->z_position = ((s16 (*)[4])D_800D2104[D_800D154C->unk13F])[D_800D154C->unk21E][6];
 }
 
-void func_15077E9C(void) {
+/* was func_15077E9C */
+void aiscript_play_sound_3d_c(void) {
     s32 tmp = ((D_800D1890 << 8) + D_800D1891);
     func_10012718(tmp, D_800D154C, 0x5DC0, 0x1F4, 0x9C4);
 }
 
-void func_15077EEC(void) {
+/* was func_15077EEC */
+void aiscript_set_field254(void) {
     D_800D154C->unk254 = D_800D1890;
 }
 
-void func_15077F08(void) {
+/* was func_15077F08 */
+void aiscript_set_field1ea(void) {
     D_800D154C->unk1EA = (D_800D1890 << 8) | D_800D1891;
 }
 
-void func_15077F34(void) {
+/* was func_15077F34 */
+void aiscript_set_field24f(void) {
     D_800D154C->unk24F = D_800D1890;
     D_800D154C->unk250 = D_800D1891;
 }
 
 #ifdef NON_MATCHING
-void func_15077F64(void) {
+/* was func_15077F64 */
+void aiscript_turn_to_point_react(void) {
     u8 sp1E;
     s32 temp_t3;
     s32 var_a0;
@@ -1309,7 +1406,7 @@ void func_15077F64(void) {
     temp_t6 = D_800D1890 - 1;
     temp_v0 = D_800D2104[D_800D154C->unk13F] + (D_800D154C->unk21E * 8);
     sp1E = temp_t6;
-    D_800D154C->unk78 = func_1505A630((f32) (*(s16 *)((u8 *)temp_v0 + 8)) - D_800D154C->x_position, D_800D154C->z_position - (f32) (*(s16 *)((u8 *)temp_v0 + 0xC)), 0);
+    D_800D154C->unk78 = math_atan2_u16((f32) (*(s16 *)((u8 *)temp_v0 + 8)) - D_800D154C->x_position, D_800D154C->z_position - (f32) (*(s16 *)((u8 *)temp_v0 + 0xC)), 0);
     temp_t3 = ((s32) (D_800D154C->unk78 - D_800D154C->unk76) >> 8) & 0xFF;
     var_a1 = temp_t3;
     var_a0 = temp_t3;
@@ -1319,15 +1416,15 @@ void func_15077F64(void) {
     }
     if ((s32) *D_80099DFC[temp_t6] < var_a0) {
         D_800D154C->unk250 = D_800D1891;
-        func_15056A00(D_800D154C, var_a1, temp_t6 & 0xFF);
+        obj_start_hit_reaction(D_800D154C, var_a1, temp_t6 & 0xFF);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15077F64.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_turn_to_point_react.s")
 #endif
 // NON-MATCHING: what is D_800D2104 ???
-// void func_15056A00(s32, s32, u8);
-// void func_15077F64(void) {
+// void obj_start_hit_reaction(s32, s32, u8);
+// void aiscript_turn_to_point_react(void) {
 //     u8 temp_t6;
 //     struct169 *temp_v0;
 //     s32 phi_a0;
@@ -1335,18 +1432,19 @@ void func_15077F64(void) {
 //
 //     temp_t6 = D_800D1890 - 1;
 //     temp_v0 = D_800D2104[D_800D154C->unk13F] + (D_800D154C->unk21E);
-//     D_800D154C->unk78 = func_1505A630(temp_v0->unk8 - D_800D154C->x_position, D_800D154C->z_position - temp_v0->unkC, 0);
+//     D_800D154C->unk78 = math_atan2_u16(temp_v0->unk8 - D_800D154C->x_position, D_800D154C->z_position - temp_v0->unkC, 0);
 //     phi_a0 = phi_a1 = ((s32) (D_800D154C->unk78 - D_800D154C->unk76) >> 8) & 0xff;
 //     if ((phi_a0 & 0x80) != 0) {
 //         phi_a1 = phi_a0 = -phi_a0 & 0xFF;
 //     }
 //     if ((u8)D_80099A3C[temp_t6 * 0xA] < phi_a0) {
 //         D_800D154C->unk250 = (u8) D_800D1891;
-//         func_15056A00(D_800D154C, phi_a1, temp_t6);
+//         obj_start_hit_reaction(D_800D154C, phi_a1, temp_t6);
 //     }
 // }
 
-void func_15078074(void) {
+/* was func_15078074 */
+void aiscript_if_any_object_near(void) {
     f32 temp_f20;
     struct127 *tmp;
     s32 i;
@@ -1356,22 +1454,24 @@ void func_15078074(void) {
     for (i = 0; i < 25; i++) {
         tmp = &D_800CC2D0[i];
         if ((tmp->interaction_state != 0) && (D_800C3E78 != i)) {
-            if (func_1505A6F8(D_800D154C, tmp) < temp_f20) {
-                func_15075400(D_800D1890);
+            if (obj_dist_xz(D_800D154C, tmp) < temp_f20) {
+                aiscript_branch(D_800D1890);
                 return;
             }
         }
     }
 }
 
-void func_1507813C(void) {
+/* was func_1507813C */
+void aiscript_if_target_gone(void) {
     s32 idx = D_800D154C->unk222;
     if (D_800CC2D0[idx].interaction_state == 0) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_150781A4(void) {
+/* was func_150781A4 */
+void aiscript_set_fields23f(void) {
     D_800D154C->unk23F = D_800D1891;
     D_800D154C->unk240 = D_800D1892;
     D_800D154C->unk241 = D_800D1890;
@@ -1379,7 +1479,8 @@ void func_150781A4(void) {
 }
 
 // another function with D_800D2104
-void func_150781F4(void) {
+/* was func_150781F4 */
+void aiscript_if_point_dist(void) {
     f32 dx;
     f32 dz;
     f32 dist;
@@ -1392,22 +1493,25 @@ void func_150781F4(void) {
     dist = sqrtf((dx * dx) + (dz * dz));
     dx = D_800D1893 * 8;
     if (((D_800D1892 == 0) && (dist < dx)) || ((D_800D1892 != 0) && (dx < dist))) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_150782CC(void) {
+/* was func_150782CC */
+void aiscript_set_field23e(void) {
     D_800D154C->unk23E = D_800D1890;
 }
 
-void func_150782E8(void) {
+/* was func_150782E8 */
+void aiscript_if_unique_id(void) {
     if (((D_800D1892 == 0) && (D_800D154C->unique_id == D_800D1891)) ||
         ((D_800D1892 == 1) && (D_800D154C->unique_id != D_800D1891))) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_15078358(void) {
+/* was func_15078358 */
+void aiscript_target_by_unique_id(void) {
     s32 tmp = func_15083FB0(D_800D1890);
     D_800D154C->unk222 = tmp;
     if (tmp == -1) {
@@ -1415,14 +1519,15 @@ void func_15078358(void) {
     }
 }
 
-void func_1507839C(void) {
+/* was func_1507839C */
+void aiscript_if_target_dist(void) {
     f32 var_f0;
     f32 var_f2;
 
     if (D_800D1892 == 0) {
-        var_f0 = func_1505A6F8(D_800D154C, &D_800CC2D0[D_800D154C->unk222]);
+        var_f0 = obj_dist_xz(D_800D154C, &D_800CC2D0[D_800D154C->unk222]);
     } else if (D_800D1892 == 1) {
-        var_f0 = func_1505A72C(D_800D154C, &D_800CC2D0[D_800D154C->unk222]);
+        var_f0 = obj_dist_3d(D_800D154C, &D_800CC2D0[D_800D154C->unk222]);
     } else {
         var_f0 = fabsf(D_800D154C->y_position - *(f32 *)((u8 *)D_800CC2E8 + D_800D154C->unk222 * 0x32C));
     }
@@ -1431,21 +1536,21 @@ void func_1507839C(void) {
         var_f2 = (f32) (D_800D154C->unk23D * 8);
     }
     if (((D_800D1891 == 0) && (var_f0 < var_f2)) || ((D_800D1891 == 1) && (var_f2 < var_f0))) {
-        func_15075400((s32) D_800D1890);
+        aiscript_branch((s32) D_800D1890);
     }
 }
 // NON-MATCHING: JUSTREG
-// void func_1507839C(void) {
+// void aiscript_if_target_dist(void) {
 //     struct127 *tmp;
 //     f32 phi_f0;
 //     f32 phi_f2;
 //
 //     if (D_800D1892 == 0) {
 //         tmp = &D_800CC2D0[D_800D154C->unk222];
-//         phi_f0 = func_1505A6F8(D_800D154C, tmp);
+//         phi_f0 = obj_dist_xz(D_800D154C, tmp);
 //     } else if (D_800D1892 == 1) {
 //         tmp = &D_800CC2D0[D_800D154C->unk222];
-//         phi_f0 = func_1505A72C(D_800D154C, tmp);
+//         phi_f0 = obj_dist_3d(D_800D154C, tmp);
 //     } else {
 //         phi_f0 = fabsf(D_800D154C->y_position - D_800CC2D0[D_800D154C->unk222].y_position);
 //     }
@@ -1456,23 +1561,25 @@ void func_1507839C(void) {
 //     }
 //     if (((D_800D1891 == 0) && (phi_f0 > phi_f2)) ||
 //         ((D_800D1891 == 1) && (phi_f0 > phi_f2))) {
-//         func_15075400(D_800D1890);
+//         aiscript_branch(D_800D1890);
 //     }
 // }
 
-void func_15078520(void) {
-    func_15075400(D_800D1890);
+/* was func_15078520 */
+void aiscript_jump(void) {
+    aiscript_branch(D_800D1890);
 }
 
 #ifdef NON_MATCHING
-f32 func_150489B0(u8);
+f32 math_cos_u8(u8);
 
 // path_point_from_object: P210: script command: sets point D_800D1890 & 0x3F of the current object's path
 // (D_800D2104[unk13F], s16 x / y / z after an 8-byte header) to an offset from object unk222 (D_800CC2D0). The
 // offset is x = 8 * (s8 D_800D1891 << 4 | D_800D1893 >> 4), z = 8 * (s8 D_800D1892 << 4 | D_800D1893 & 0xF),
 // rotated by the object's heading (D_800D1890 bits 6-7 = 0), not rotated (1), or by the direction from the
 // object to the current one (2, 3); y is the object's height. D_800D1890 keeps the masked point number.
-void func_15078544(void) {
+/* was func_15078544 */
+void aiscript_path_point_from_target(void) {
     u8 cmd = D_800D1890;
     struct127 *o;
     s32 mode;
@@ -1492,8 +1599,8 @@ void func_15078544(void) {
     if (mode == 0) {
         u8 a = (o->unk7A >> 8) - 0x40;
 
-        s = func_15048A40(a);
-        c = func_150489B0(a);
+        s = math_sin_u8(a);
+        c = math_cos_u8(a);
     } else if (mode == 1) {
         s = 0.0f;
         c = 1.0f;
@@ -1513,42 +1620,47 @@ void func_15078544(void) {
     pt[2] = z;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15078544.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_path_point_from_target.s")
 #endif
-void func_1507879C(void) {
+/* was func_1507879C */
+void aiscript_if_target_2d0_x(void) {
     struct197 *temp_v0 = D_800CC2D0[D_800D154C->unk222].unk2D0;
     f32 temp_f0 = temp_v0->unk8;
 
     if (((D_800D1892 == 0) && (temp_f0 < (u32)D_800D1891)) || ((D_800D1892 == 1) && ((u32)D_800D1891 < temp_f0))) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_15078874(void) {
+/* was func_15078874 */
+void aiscript_set_counter251(void) {
     D_800D154C->unk251 = D_800D1890;
 }
 
-void func_15078890(void) {
+/* was func_15078890 */
+void aiscript_if_counter251(void) {
     if (((D_800D1892 == 0) && (D_800D154C->unk251 == D_800D1891)) ||
         ((D_800D1892 == 1) && (D_800D154C->unk251 != D_800D1891))) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_15078900(void) {
+/* was func_15078900 */
+void aiscript_if_target_counter251(void) {
     if (D_800D1893 != 0) {
         if (D_800D154C->unk222 == 0) {
-            func_15075400(D_800D1890);
+            aiscript_branch(D_800D1890);
         }
     } else {
         if (((D_800D1892 == 0) && (D_800D1891 == D_800CC521[D_800D154C->unk222 * 0x32C])) ||
             ((D_800D1892 == 1) && (D_800D1891 != D_800CC521[D_800D154C->unk222 * 0x32C]))) {
-            func_15075400(D_800D1890);
+            aiscript_branch(D_800D1890);
         }
     }
 }
 
-void func_15078A08(void) {
+/* was func_15078A08 */
+void aiscript_copy_target_2d0_pos(void) {
     struct197 *temp_a0;
     struct197 *temp_v0;
 
@@ -1580,7 +1692,8 @@ extern u8 D_800CC779[];
 // difference 0..128 (256 per turn) between the object's heading (+0x7A >> 8, - 0x40) and its direction to the
 // player D_800D154C; value 9 is 2 when the object's +0xCA0C record has +0x8 and +0x16 set. Returns 1 when true.
 // For a value kind above 18 the asm compares an unset stack slot (kept: `v` uninitialised there).
-s32 func_15078A60(s32 idx) {
+/* was func_15078A60 */
+s32 aiscript_test_object_value(s32 idx) {
     s32 v;
     s32 off = idx * 0x32C;
     u8 *obj;
@@ -1668,36 +1781,41 @@ s32 func_15078A60(s32 idx) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15078A60.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_test_object_value.s")
 #endif
 
-void func_1507900C(void) {
-    if (func_15078A60(0) != 0) {
-        func_15075400(D_800D1890);
+/* was func_1507900C */
+void aiscript_if_value(void) {
+    if (aiscript_test_object_value(0) != 0) {
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_1507903C(void) {
-    if (func_15078A60(0) != 0) {
-        D_800D154C->unk218 = func_1507BB28(0, D_800D1890);
+/* was func_1507903C */
+void aiscript_goto_if_value(void) {
+    if (aiscript_test_object_value(0) != 0) {
+        D_800D154C->unk218 = aiscript_find_by_kind(0, D_800D1890);
         D_800D154C->unk218 -= 1;
     }
 }
 
-void func_15079090(void) {
-    if (func_15078A60(D_800C3E78) != 0) {
-        func_15075400(D_800D1890);
+/* was func_15079090 */
+void aiscript_if_self_value(void) {
+    if (aiscript_test_object_value(D_800C3E78) != 0) {
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_150790C4(void) {
-    if (func_15078A60(D_800C3E78) != 0) {
-        D_800D154C->unk218 = func_1507BB28(0, D_800D1890);
+/* was func_150790C4 */
+void aiscript_goto_if_self_value(void) {
+    if (aiscript_test_object_value(D_800C3E78) != 0) {
+        D_800D154C->unk218 = aiscript_find_by_kind(0, D_800D1890);
         D_800D154C->unk218 -= 1;
     }
 }
 
-u8 func_1507911C(void) {
+/* was func_1507911C */
+u8 aiscript_if_below_coord(void) {
     s16 temp_a2;
     s16 phi_a0;
     u8 idx;
@@ -1712,11 +1830,12 @@ u8 func_1507911C(void) {
         phi_a0 = D_800CC2D0[idx].x_position;
     }
     if (phi_a0 < temp_a2) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_150791F0(void) {
+/* was func_150791F0 */
+void aiscript_set_field1c9(void) {
     if ((s32) D_800D154C->unk2C9 < (s32) D_800D1890) {
         D_800D154C->unk1C9 = (u8)0xFFU;
     } else {
@@ -1725,31 +1844,35 @@ void func_150791F0(void) {
 }
 
 // ???
-void func_15079228(void) {
+/* was func_15079228 */
+void aiscript_send_dir_message(void) {
     s16 *temp_v0 = ((s16 (*)[26])D_800D34B8)[D_800D154C->unk251];
     f32 px = temp_v0[0];
     f32 pz = temp_v0[2];
-    s32 temp_v0_2 = func_1505A630(D_800D154C->x_position - px, pz - D_800D154C->z_position, 0);
+    s32 temp_v0_2 = math_atan2_u16(D_800D154C->x_position - px, pz - D_800D154C->z_position, 0);
     s32 var_a2 = temp_v0_2 & 0xFFFF;
 
     if (temp_v0_2 == 0) {
         var_a2 = 1;
     }
-    func_1505D024(D_800D154C, D_800D1890, var_a2, -1);
+    obj_send_hit(D_800D154C, D_800D1890, var_a2, -1);
     D_800D154C->unk218--;
     D_800D154C->unk21C = 1;
 }
 
-void func_150792E0(void) {
+/* was func_150792E0 */
+void aiscript_set_script_kind(void) {
     D_800D154C->unk232 = D_800D1890;
 }
 
-void func_150792FC(void) {
+/* was func_150792FC */
+void aiscript_set_field2f8_low(void) {
     D_800D154C->unk2F8 &= 0xFFF8;
     D_800D154C->unk2F8 |= D_800D1890;
 }
 
-void func_15079334(void) {
+/* was func_15079334 */
+void aiscript_send_script_to_seen(void) {
     struct127 *tmp;
 
     if (D_800D154C->unkA8 != 0) {
@@ -1759,7 +1882,8 @@ void func_15079334(void) {
     }
 }
 
-void func_15079390(void) {
+/* was func_15079390 */
+void aiscript_send_event(void) {
     u16 tmp0 = D_800D1890;
     u8 tmp1 = D_800D1891;
     u8 tmp2 = D_800D1892;
@@ -1767,7 +1891,8 @@ void func_15079390(void) {
 }
 
 #ifdef NON_MATCHING
-void func_150793D8(void) {
+/* was func_150793D8 */
+void aiscript_random_point_near_player(void) {
     struct {
         f32 u2C;
         f32 u30;
@@ -1792,7 +1917,7 @@ void func_150793D8(void) {
     }
     sp24 = var_v1;
     sp22 = var_t0;
-    func_1505A184(func_150ADA20() & 0xFFFF, 550.0f, 0.0f, &sp.u34, &sp.u30, &sp.u2C);
+    vec_from_yaw_pitch(random_int() & 0xFFFF, 550.0f, 0.0f, &sp.u34, &sp.u30, &sp.u2C);
     var_v1_2 = (s16) (s32) ((f32) sp24 + sp.u34);
     var_t0_2 = (s16) (s32) ((f32) sp22 + sp.u30);
     if (var_v1_2 < -0x4B0) {
@@ -1811,20 +1936,22 @@ void func_150793D8(void) {
     (*(s16 *)((u8 *)((D_800D2104[D_800D154C->unk13F] + (D_800D1890 * 8))) + 0xC)) = var_t0_2;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_150793D8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_random_point_near_player.s")
 #endif
-void func_15079570(void) {
+/* was func_15079570 */
+void aiscript_aim_jump_at_target(void) {
     f32 dist;
     f32 time;
 
-    dist = func_1505A6F8(D_800D154C, &D_800CC2D0[D_800D154C->unk222]);
+    dist = obj_dist_xz(D_800D154C, &D_800CC2D0[D_800D154C->unk222]);
     D_800D154C->unk44 = D_800D154C->xz_velocity;
     time = 2.0f * (dist / D_800D154C->unk44);
     D_800D154C->y_velocity = D_800D154C->gravity * time * 0.5f;
     D_800D154C->y_velocity += 2.0f * ((D_800CC2D0[D_800D154C->unk222].y_position - D_800D154C->y_position) / time);
 }
 
-void func_1507965C(void) {
+/* was func_1507965C */
+void aiscript_send_script_to_uid(void) {
     s32 idx;
     struct127 *temp_v1;
 
@@ -1837,18 +1964,20 @@ void func_1507965C(void) {
     }
 }
 
-void func_150796CC(void) {
+/* was func_150796CC */
+void aiscript_uid_immune_or_if_stunned(void) {
     s32 idx = func_15083FB0(D_800D1890);
     if (D_800D1892 != 0) {
         if (idx != -1) {
             D_800CC3F5[idx * sizeof(struct127)] = D_800D1891;
         }
     } else if ((idx != -1) && (D_800CC3D4[idx * sizeof(struct127)] != 0)) {
-        func_15075400(D_800D1891);
+        aiscript_branch(D_800D1891);
     }
 }
 
-void func_15079790(void) {
+/* was func_15079790 */
+void aiscript_respawn_near_path(void) {
     s16 sp1E;
     s16 temp_t0;
 
@@ -1856,14 +1985,15 @@ void func_15079790(void) {
         D_800D154C->id = 0xFF;
     } else {
         D_800D154C->id = 0x3A;
-        sp1E = (func_150ADA20() % 500U) - 250;
-        temp_t0 = (func_150ADA20() % 500U) - 250;
+        sp1E = (random_int() % 500U) - 250;
+        temp_t0 = (random_int() % 500U) - 250;
         D_800D154C->x_position = ((s16 *)D_800D2104[D_800D154C->unk13F])[0] + sp1E;
         D_800D154C->z_position = ((s16 *)D_800D2104[D_800D154C->unk13F])[2] + temp_t0;
     }
 }
 
-void func_15079880(void) {
+/* was func_15079880 */
+void aiscript_move_at_player_speed(void) {
     s32 tmp = D_800CC30C[0] + (s8)D_800D1892;
 
     if (tmp < D_800D1891) {
@@ -1872,15 +2002,17 @@ void func_15079880(void) {
         tmp = 250;
     }
     D_800D1892 = tmp;
-    func_15075548();
+    aiscript_move_setup();
 }
 
-void func_150798F8(void) {
+/* was func_150798F8 */
+void aiscript_if_current_point_dist(void) {
     D_800D1891 = D_800D154C->unk21E;
-    func_150781F4();
+    aiscript_if_point_dist();
 }
 
-void func_15079928(void) {
+/* was func_15079928 */
+void aiscript_start_anim(void) {
     s32 phi_a3;
 
     phi_a3 = ((D_800D1891 << 0x10) + D_800D1892) & 0xFFFF;
@@ -1890,51 +2022,57 @@ void func_15079928(void) {
     func_1507E7E4(D_800D154C, D_800D1890, D_800D1893, phi_a3, 0);
 }
 
-void func_15079988(void) {
+/* was func_15079988 */
+void aiscript_set_anim_field70(void) {
     func_1507EB4C(D_800D154C, D_800D1890);
 }
 
-void func_150799B4(void) {
+/* was func_150799B4 */
+void aiscript_play_sound_random(void) {
     s32 temp_a0 = (D_800D1890 << 8) + D_800D1891;
     if (D_800D1892 != 0) {
-        temp_a0 += func_150ADA20() % (u32) D_800D1892;
+        temp_a0 += random_int() % (u32) D_800D1892;
     }
-    func_15060A30(temp_a0, D_800D154C);
+    obj_sfx_play(temp_a0, D_800D154C);
 }
 
-void func_15079A28(void) {
+/* was func_15079A28 */
+void aiscript_set_field252(void) {
     D_800D154C->unk252 = D_800D1890;
     D_800D154C->unk253 = D_800D1891;
 }
 
-void func_15079A58(void) {
+/* was func_15079A58 */
+void aiscript_set_path_param(void) {
     D_800D2530[D_800D154C->unk13F] = (D_800D1890 << 8) + D_800D1891;
 }
 
-// path_point_angle: angle (u16, func_1505A630) from object arg0 (D_800CC2D0) to the current path point of the
+// path_point_angle: angle (u16, math_atan2_u16) from object arg0 (D_800CC2D0) to the current path point of the
 // active character (D_800D2104[D_800D154C +0x13F]: x at +0, z at +4). P179: was `void` and dropped the return; its
-// asm caller func_15079B30 stores / subtracts the two results (`sh v0` / `subu` after the jal).
-u16 func_15079A98(s32 arg0) {
+// asm caller aiscript_object_var_cmd stores / subtracts the two results (`sh v0` / `subu` after the jal).
+/* was func_15079A98 */
+u16 aiscript_path_point_angle(s32 arg0) {
     s16 *temp_v0 = (s16 *)D_800D2104[D_800D154C->unk13F];
     struct127 *temp_v1 = &D_800CC2D0[arg0];
 
-    return func_1505A630(temp_v0[0] - temp_v1->x_position, temp_v1->z_position - temp_v0[2], 0);
+    return math_atan2_u16(temp_v0[0] - temp_v1->x_position, temp_v1->z_position - temp_v0[2], 0);
 }
 
 // requires jump table
 #ifdef NON_MATCHING
 /* func_15083FB0 (s32 (u8), game_eu_AF2A0) is used undeclared in this file, like its other callers here */
-int func_1507BB28(s32, s32);
-u16 func_15079A98(s32 arg0);
+int aiscript_find_by_kind(s32, s32);
+u16 aiscript_path_point_angle(s32 arg0);
 
 // object_var_cmd: P210: script command on object `idx` (D_800D1891 0 / 1: the current one D_800C3E78, else
 // func_15083FB0(D_800D1891 - 2); -1 = none). D_800D1892 selects: 1..3 counter unk2E4 / unk2E8 / unk2EC, updated by
 // D_800D1893 (0 = D_800D1890, 1 -1, 2 + frame time D_800BE9E4, 3 +1, 4 - frame time, 5 - D_800CC264,
 // 6 + D_800CC264); 4 / 5 start script D_800D1890 on the object (when it is not running it already); 6 unkC8 =
 // D_800D1890; 7 unkB8 = 0; for the current object: 8 unk221 = D_800D1890 when the path point angle
-// (func_15079A98) from object D_800C3E78 minus the one from object unk222 has bit 15 set, 9 unk244 = D_800D1893 << 8 | D_800D1890, 10 unk236 = unk23D + (s8)D_800D1890, 11 unk22A = D_800D1890.
+// (aiscript_path_point_angle) from object D_800C3E78 minus the one from object unk222 has bit 15 set, 9 unk244 = D_800D1893 << 8 | D_800D1890, 10 unk236 = unk23D + (s8)D_800D1890, 11 unk22A = D_800D1890.
 // Other D_800D1892 values: the asm then updates a counter through an unset stack pointer; here nothing happens.
-void func_15079B30(void) {
+/* was func_15079B30 */
+void aiscript_object_var_cmd(void) {
     s32 idx;
     s32 *var;
     struct127 *saved;
@@ -1967,7 +2105,7 @@ void func_15079B30(void) {
             D_800C3E78 = idx;
             if (D_800D1890 != D_800D154C->unk232) {
                 D_800D154C->unk232 = D_800D1890;
-                D_800D154C->unk218 = (struct216 *)func_1507BB28(0, D_800D154C->unk232);
+                D_800D154C->unk218 = (struct216 *)aiscript_find_by_kind(0, D_800D154C->unk232);
                 D_800D154C->unk21C = 0;
             }
             D_800C3E78 = savedNum;
@@ -1980,8 +2118,8 @@ void func_15079B30(void) {
             D_800CC2D0[idx].unkB8 = 0.0f;
             return;
         case 8:
-            a = func_15079A98(D_800D154C->unk222);
-            if ((func_15079A98(D_800C3E78) - a) & 0x8000) {
+            a = aiscript_path_point_angle(D_800D154C->unk222);
+            if ((aiscript_path_point_angle(D_800C3E78) - a) & 0x8000) {
                 D_800D154C->unk221 = D_800D1890;
             }
             return;
@@ -2022,18 +2160,21 @@ void func_15079B30(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15079B30.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_object_var_cmd.s")
 #endif
 
-void func_15079F24(void) {
+/* was func_15079F24 */
+void aiscript_set_field48(void) {
     D_800D154C->unk48 = D_800D1898[D_800D1890];
 }
 
-void func_15079F50(void) {
+/* was func_15079F50 */
+void aiscript_set_field23b(void) {
     D_800D154C->unk23B = D_800D1890;
 }
 
-void func_15079F6C(void) {
+/* was func_15079F6C */
+void aiscript_set_field224(void) {
     u8 temp_v0 = D_800D1890; s32 temp_v1 = D_800D1891 & 0xFF;
 
     D_800D154C->unk224 = (temp_v0 << 8) | temp_v1;
@@ -2042,21 +2183,22 @@ void func_15079F6C(void) {
 }
 
 #ifdef NON_MATCHING
-int func_1507BB28(s32, s32);
+int aiscript_find_by_kind(s32, s32);
 extern f32 D_8009A5A4; /* 0.7 */
 
 // follow_player_speed: P210: script command: when player 1 (D_800CC2D0[0]) rides nothing (unk65 0) or is slower
-// than 5, jumps the current object's script to D_800D1891 (unk232, script pointer func_1507BB28 - one entry);
-// otherwise copies the player's controller heading (unk31C +0x4C) into unk78 and starts func_15075F40 with speed
+// than 5, jumps the current object's script to D_800D1891 (unk232, script pointer aiscript_find_by_kind - one entry);
+// otherwise copies the player's controller heading (unk31C +0x4C) into unk78 and starts aiscript_mode3 with speed
 // parameter D_800D1892 = player speed (times 0.7 unless the player is chased), D_800D1893 + 1 and D_800D1890 = 8
 // below 17; sets flag 0x40 in unkF4.
-void func_15079FBC(void) {
+/* was func_15079FBC */
+void aiscript_follow_player_speed(void) {
     struct127 *player = &D_800CC2D0[0];
     s16 speed;
 
     if (player->unk65 == 0 || player->unk44 < 5.0f) {
         D_800D154C->unk232 = D_800D1891;
-        D_800D154C->unk218 = (struct216 *)func_1507BB28(0, D_800D154C->unk232);
+        D_800D154C->unk218 = (struct216 *)aiscript_find_by_kind(0, D_800D154C->unk232);
         D_800D154C->unk218--;
         return;
     }
@@ -2071,19 +2213,19 @@ void func_15079FBC(void) {
         D_800D1890 = 8;
     }
     D_800D1892 = speed;
-    func_15075F40();
+    aiscript_mode3();
     D_800D154C->unkF4 |= 0x40;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15079FBC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_follow_player_speed.s")
 #endif
 // NON-MATCHING: JUSTREG
-// void func_15079FBC(void) {
+// void aiscript_follow_player_speed(void) {
 //     s16 phi_v1;
 //
 //     if ((D_800CC2D0->unk65 == 0) || (D_800CC2D0->unk44 < 5.0f)) {
 //         D_800D154C->unk232 = D_800D1891;
-//         D_800D154C->unk218 = func_1507BB28(0, D_800D154C->unk232, D_800D154C);
+//         D_800D154C->unk218 = aiscript_find_by_kind(0, D_800D154C->unk232, D_800D154C);
 //         D_800D154C->unk218 -= 1;
 //         return;
 //     }
@@ -2100,18 +2242,20 @@ void func_15079FBC(void) {
 //         D_800D1890 = 8;
 //     }
 //     D_800D1892 = phi_v1;
-//     func_15075F40();
+//     aiscript_mode3();
 //     D_800D154C->unkF4 |= 0x40;
 // }
 
 // D_800D2104!
-void func_1507A100(void) {
+/* was func_1507A100 */
+void aiscript_set_path_point_coord(void) {
     s32 temp_v0 = ((s8)D_800D1892 << 8) | D_800D1893;
 
     ((s16 (*)[4])D_800D2104[D_800D154C->unk13F])[D_800D1890][D_800D1891 + 4] = temp_v0;
 }
 
-s32 func_1507A164(void) {
+/* was func_1507A164 */
+s32 aiscript_speed_from_player(void) {
     s32 tmp = D_800CC30C[0] + (s8)D_800D1892;
 
     if (tmp < D_800D1891) {
@@ -2125,23 +2269,27 @@ s32 func_1507A164(void) {
     }
 }
 
-void func_1507A210(void) {
+/* was func_1507A210 */
+void aiscript_wait(void) {
     D_800D154C->unk223 = 0;
     D_800D154C->unk21C = D_800D1890 * 0x64;
     D_800D154C->unk22C &= 0xFD;
-    func_15075498();
+    aiscript_apply_move_flags();
 }
 
-void func_1507A270(void) {
+/* was func_1507A270 */
+void aiscript_set_flag_entry_set(void) {
     func_1503DE70(D_800D154C, D_800D1890, (s8)D_800D1891);
 }
 
-void func_1507A2A4(void) {
-    D_800D1893 = (func_150ADA20() % (u32) D_800D1891) + D_800D1893;
-    func_15075CA0();
+/* was func_1507A2A4 */
+void aiscript_chase_random_arg3(void) {
+    D_800D1893 = (random_int() % (u32) D_800D1891) + D_800D1893;
+    aiscript_chase_target();
 }
 
-void func_1507A2F8(void) {
+/* was func_1507A2F8 */
+void aiscript_target_random_by_id(void) {
     s32 i;
     u32 used;
     u8 sp1C[25];
@@ -2154,42 +2302,49 @@ void func_1507A2F8(void) {
         }
     }
     if (used != 0) {
-        i = func_150ADA20();
+        i = random_int();
         D_800D154C->unkA8 = D_800D154C->unk222;
         D_800D154C->unk222 = sp1C[i % used];
     }
 }
 
-void func_1507A3B4(void) {
+/* was func_1507A3B4 */
+void aiscript_target_restore(void) {
     D_800D154C->unk222 = D_800D154C->unkA8;
 }
 
-void func_1507A3CC(void) {
+/* was func_1507A3CC */
+void aiscript_set_field229(void) {
     D_800D154C->unk229 = D_800D1890;
 }
 
 //  what is up with these??
-s32 func_1507A3E8(void) {
+/* was func_1507A3E8 */
+s32 aiscript_args_word(void) {
     return ((D_800D1890 & 0xFF) << 24) | ((D_800D1891 & 0xFF) << 16) | ((D_800D1892 & 0xFF) << 8) | (D_800D1893 & 0xFF);
 }
 
-void func_1507A428(void) {
+/* was func_1507A428 */
+void aiscript_set_flags_94_inv(void) {
     s32 temp_v0 = ((D_800D1890 & 0xFF) << 24) | ((D_800D1891 & 0xFF) << 16) | ((D_800D1892 & 0xFF) << 8) | (D_800D1893 & 0xFF);
 
     D_800D154C->unk94 = ~(temp_v0 | 1);
 }
-void func_1507A47C(void) {
+/* was func_1507A47C */
+void aiscript_clear_flags_94(void) {
     s32 temp_v0 = ((D_800D1890 & 0xFF) << 24) | ((D_800D1891 & 0xFF) << 16) | ((D_800D1892 & 0xFF) << 8) | (D_800D1893 & 0xFF);
 
     D_800D154C->unk94 &= ~temp_v0;
 }
-void func_1507A4D4(void) {
+/* was func_1507A4D4 */
+void aiscript_set_flags_94(void) {
     s32 temp_v0 = ((D_800D1890 & 0xFF) << 24) | ((D_800D1891 & 0xFF) << 16) | ((D_800D1892 & 0xFF) << 8) | (D_800D1893 & 0xFF);
 
     D_800D154C->unk94 |= temp_v0;
 }
 
-void func_1507A528(void) {
+/* was func_1507A528 */
+void aiscript_set_path_step(void) {
     s32 count;
     s32 pos;
 
@@ -2219,7 +2374,8 @@ void func_1507A528(void) {
     }
 }
 
-void func_1507A620(void) {
+/* was func_1507A620 */
+void aiscript_if_target_angle(void) {
     u8 idx;
     u16 tmp;
 
@@ -2227,74 +2383,85 @@ void func_1507A620(void) {
     if (D_800D1891 != 0) {
         tmp = D_800D154C->unk78 >> 8;
     } else {
-        tmp = (D_800D154C->unk7A - func_1505A630(D_800CC2D0[idx].x_position - D_800D154C->x_position, D_800D154C->z_position - D_800CC2D0[idx].z_position, 0)) >> 8;
+        tmp = (D_800D154C->unk7A - math_atan2_u16(D_800CC2D0[idx].x_position - D_800D154C->x_position, D_800D154C->z_position - D_800CC2D0[idx].z_position, 0)) >> 8;
     }
     if ((u8)(tmp - D_800D1892) < (u8)(D_800D1893 - D_800D1892)) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
-s32 func_1507A6FC(s32 arg0) {
+/* was func_1507A6FC */
+s32 aiscript_pad_buttons(s32 arg0) {
     // really??
     u32 tmp0 = (3 * arg0) & 0xFFFFFFFFFFFFFFFF;
     u32 tmp1 = tmp0 & 0xFFFFFFFFFFFFFFFF;
     return D_800BE748[tmp1 & 0xFFFFFFFFFFFFFFFF];
 }
 
-void func_1507A71C(void) {
-    u16 tmp0 = func_1507A6FC(D_800D1890);
+/* was func_1507A71C */
+void aiscript_if_buttons_held(void) {
+    u16 tmp0 = aiscript_pad_buttons(D_800D1890);
     u16 tmp1 = ((D_800D1891 << 8) | D_800D1892);
 
     if ((tmp0 & tmp1) == tmp1) {
-        func_15075400(D_800D1893);
+        aiscript_branch(D_800D1893);
     }
 }
 
-void func_1507A774(void) {
+/* was func_1507A774 */
+void aiscript_if_level(void) {
     u16 temp_v0 = (D_800D1891 << 8) | D_800D1892;
     if (D_800BE9F0 == temp_v0) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_1507A7C0(void) {
+/* was func_1507A7C0 */
+void aiscript_set_disable_run(void) {
     D_800D154C->disable_run = (u8) D_800D1890;
 }
 
-void func_1507A7DC(void) {
+/* was func_1507A7DC */
+void aiscript_remove_spawned(void) {
     func_150836CC(D_800D154C, D_800D1890);
 }
 
-void func_1507A808(void) {
+/* was func_1507A808 */
+void aiscript_mask_flags_22c(void) {
     D_800D154C->unk22C = (D_800D154C->unk22C & D_800D1890) | D_800D1891;
 }
 
-void func_1507A838(void) {
+/* was func_1507A838 */
+void aiscript_if_health(void) {
     if (D_800D154C->health == D_800D1891) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_1507A878(void) {
-    func_1512D748(0, D_800D1890, D_800D1891);
+/* was func_1507A878 */
+void aiscript_call_15b470(void) {
+    camera_shake_start(0, D_800D1890, D_800D1891);
 }
 
-void func_1507A8A8(void) {
+/* was func_1507A8A8 */
+void aiscript_if_mp_or_cc335(void) {
     if ((D_800CC335 != 0) || (D_800BE616 != 0)) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_1507A8EC(void) {
+/* was func_1507A8EC */
+void aiscript_if_target_id(void) {
     if (D_800D1891 == D_800CC2D4[D_800D154C->unk222 * sizeof(struct127)]) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_1507A984(void) {
+/* was func_1507A984 */
+void aiscript_attach_to_id(void) {
     s32 temp_v0;
 
     if (D_800D1890 != 0) {
@@ -2323,9 +2490,10 @@ extern f32 D_8009A5CC; /* 65536 / (2 pi) */
 // set_heading_cmd: P210: script command: sets the current object's target heading unk78 (or its heading unk76)
 // from the 16-bit value D_800D1890 << 8 | D_800D1891 by mode D_800D1892: 0 heading + value, 1 heading - value,
 // 2 value, 3 turn now (unk76 = unk7A = unk78), 4 direction from path point D_800D1890 to point D_800D1891
-// (D_800D2104[unk13F]) + D_800D1893 << 8 + 0x4000, 5 random (func_150ADA20), 6 keep the heading, 7 unk76 = object
+// (D_800D2104[unk13F]) + D_800D1893 << 8 + 0x4000, 5 random (random_int), 6 keep the heading, 7 unk76 = object
 // unk222's facing + value, 8 unk76 = own facing unk7A.
-void func_1507AA48(void) {
+/* was func_1507AA48 */
+void aiscript_set_heading(void) {
     u16 v = (D_800D1890 << 8) | D_800D1891;
 
     switch (D_800D1892) {
@@ -2352,7 +2520,7 @@ void func_1507AA48(void) {
             break;
         }
         case 5:
-            D_800D154C->unk78 = func_150ADA20();
+            D_800D154C->unk78 = random_int();
             break;
         case 6:
             D_800D154C->unk78 = D_800D154C->unk76;
@@ -2366,39 +2534,46 @@ void func_1507AA48(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_1507AA48.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_set_heading.s")
 #endif
 
-void func_1507ACB0(void) {
+/* was func_1507ACB0 */
+void aiscript_set_path_range(void) {
     D_800D154C->unk220 = D_800D1890;
     D_800D154C->unk21F = D_800D1891;
 }
 
-void func_1507ACE0(void) {
+/* was func_1507ACE0 */
+void aiscript_set_turn_rate_exact(void) {
     D_800D154C->unk1E5 = D_800D1890;
     D_800D154C->unk1E6 = D_800D1890;
     D_800D154C->unk1E7 = D_800D1891;
     D_800D154C->unk1E8 = D_800D1891;
 }
 
-void func_1507AD30(void) {
+/* was func_1507AD30 */
+void aiscript_set_field255(void) {
     D_800D154C->unk255 = D_800D1890;
     D_800D154C->unk256 = D_800D1891;
 }
 
-void func_1507AD60(void) {
+/* was func_1507AD60 */
+void aiscript_set_field1e4(void) {
     D_800D154C->unk1E4 = D_800D1890;
 }
 
-void func_1507AD7C(void) {
-    D_800D154C->unkF4 |= func_1507A3E8();
+/* was func_1507AD7C */
+void aiscript_set_flags_f4(void) {
+    D_800D154C->unkF4 |= aiscript_args_word();
 }
 
-void func_1507ADAC(void) {
-    D_800D154C->unkF4 &= ~func_1507A3E8();
+/* was func_1507ADAC */
+void aiscript_clear_flags_f4(void) {
+    D_800D154C->unkF4 &= ~aiscript_args_word();
 }
 
-void func_1507ADE0(void) {
+/* was func_1507ADE0 */
+void aiscript_turn_in_time(void) {
     s32 res;
     s32 temp_lo;
     s32 b = D_800D154C->unk7A;
@@ -2419,49 +2594,55 @@ void func_1507ADE0(void) {
     D_800D154C->unk1E8 = temp_lo & 0xFF;
 }
 
-void func_1507AE78(void) {
+/* was func_1507AE78 */
+void aiscript_set_field229_b(void) {
     D_800D154C->unk229 = D_800D1890;
 }
 
-void func_1507AE94(void) {
+/* was func_1507AE94 */
+void aiscript_set_extent_d2(void) {
     D_800D154C->unkD2 = (D_800D1890 << 8) | D_800D1891;
     D_800D154C->unkD4 = (D_800D1892 << 8) | D_800D1893;
     D_800D154C->unkD2 *= D_800D154C->xz_scale;
     D_800D154C->unkD4 *= D_800D154C->y_scale;
 }
 
-void func_1507AF3C(void) {
+/* was func_1507AF3C */
+void aiscript_set_extent_d6(void) {
     D_800D154C->unkD6 = (D_800D1890 << 8) | D_800D1891;
     D_800D154C->unkD6 *= D_800D154C->y_scale;
 }
 
-void func_1507AF98(void) {
+/* was func_1507AF98 */
+void aiscript_set_extent_d8(void) {
     D_800D154C->unkD8 = (D_800D1890 << 8) | D_800D1891;
     D_800D154C->unkDA = (D_800D1892 << 8) | D_800D1893;
     D_800D154C->unkD8 *= D_800D154C->xz_scale;
     D_800D154C->unkDA *= D_800D154C->xz_scale;
 }
 
-void func_1507B040(void) {
+/* was func_1507B040 */
+void aiscript_heading_from_facing(void) {
     D_800D154C->unk76 = D_800D154C->unk7A;
 }
 
-void func_1507B058(void) {
+/* was func_1507B058 */
+void aiscript_rider_cmd(void) {
     struct127 *sp24 = D_800D154C;
     s32 sp20 = D_800C3E78;
 
-    D_800D154C = func_15072208(D_800D154C, 0);
+    D_800D154C = obj_find_child_nth(D_800D154C, 0);
     D_800C3E78 = ((s32)D_800D154C - (s32)&D_800CC2D0) / 0x32C;
 
     if (D_800D154C != 0) {
         switch (D_800D1890) {
             case 0:
-                func_1506160C(D_800D154C, 1, D_800D1891, 0, 0);
+                obj_fade_command(D_800D154C, 1, D_800D1891, 0, 0);
                 break;
             case 1:
                 D_800D154C->unk232 = D_800D1891;
             case 2:
-                D_800D154C->unk218 = func_1507BB28(0, D_800D1891);
+                D_800D154C->unk218 = aiscript_find_by_kind(0, D_800D1891);
                 D_800D154C->unk21C = 0;
         }
     }
@@ -2469,113 +2650,129 @@ void func_1507B058(void) {
     D_800D154C = sp24;
 }
 
-void func_1507B15C(void) {
+/* was func_1507B15C */
+void aiscript_set_disable_jump(void) {
     D_800D154C->disable_jump = D_800D1890;
 }
 
-void func_1507B178(void) {
+/* was func_1507B178 */
+void aiscript_set_inner_extent(void) {
     s16 tmp  = (D_800D1891 << 8) | D_800D1890;
     if (D_800D1893 == 2) {
         D_800D154C->unkE8 = (s16) (tmp * D_800D154C->y_scale);
     } else if (D_800D1893 == 1) {
-        func_15062B50(D_800D154C, tmp);
+        obj_set_inner_extent_height(D_800D154C, tmp);
     } else {
-        func_15062B1C(D_800D154C, tmp);
+        obj_set_inner_extent_width(D_800D154C, tmp);
     }
 }
 
-void func_1507B234(void) {
-    D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 1) != 0) {
-        func_1506BAD8(300, 1800);
+/* was func_1507B234 */
+void aiscript_sound_ev_300_1800(void) {
+    D_800D1580 = aiscript_args_word();
+    if (sound_word_resolve(D_800D154C, &D_800D1580, 1) != 0) {
+        objev_sound_alt_or_stop(300, 1800);
     }
 }
 
-void func_1507B280(void) {
-    D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 1) != 0) {
-        func_1506BAD8(300, 3000);
+/* was func_1507B280 */
+void aiscript_sound_ev_300_3000(void) {
+    D_800D1580 = aiscript_args_word();
+    if (sound_word_resolve(D_800D154C, &D_800D1580, 1) != 0) {
+        objev_sound_alt_or_stop(300, 3000);
     }
 }
 
-void func_1507B2CC(void) {
-    D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) {
-        func_1506BA4C(300, 1800);
+/* was func_1507B2CC */
+void aiscript_sound_ev_b_300_1800(void) {
+    D_800D1580 = aiscript_args_word();
+    if (sound_word_resolve(D_800D154C, &D_800D1580, 0) != 0) {
+        objev_sound_or_stop(300, 1800);
     }
 }
 
-void func_1507B318(void) {
-    D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) {
-        func_1506BA4C(300, 0xBB8);
+/* was func_1507B318 */
+void aiscript_sound_ev_b_300_3000(void) {
+    D_800D1580 = aiscript_args_word();
+    if (sound_word_resolve(D_800D154C, &D_800D1580, 0) != 0) {
+        objev_sound_or_stop(300, 0xBB8);
     }
 }
 
-void func_1507B364(void) {
-    D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 1) != 0) {
-        func_1506BAD8(0x2BC, 0xFA0);
+/* was func_1507B364 */
+void aiscript_sound_ev_700_4000(void) {
+    D_800D1580 = aiscript_args_word();
+    if (sound_word_resolve(D_800D154C, &D_800D1580, 1) != 0) {
+        objev_sound_alt_or_stop(0x2BC, 0xFA0);
     }
 }
 
-void func_1507B3B0(void) {
-    D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) {
-        func_1506BA4C(0x2BC, 0xFA0);
+/* was func_1507B3B0 */
+void aiscript_sound_ev_b_700_4000(void) {
+    D_800D1580 = aiscript_args_word();
+    if (sound_word_resolve(D_800D154C, &D_800D1580, 0) != 0) {
+        objev_sound_or_stop(0x2BC, 0xFA0);
     }
 }
 
-void func_1507B3FC(void) {
-    D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 1) != 0) {
-        func_1506BAD8(0xBB8, 0x1F40);
+/* was func_1507B3FC */
+void aiscript_sound_ev_3000_8000(void) {
+    D_800D1580 = aiscript_args_word();
+    if (sound_word_resolve(D_800D154C, &D_800D1580, 1) != 0) {
+        objev_sound_alt_or_stop(0xBB8, 0x1F40);
     }
 }
 
-void func_1507B448(void) {
-    D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 1) != 0) {
-        func_1506BAD8(0xBE, 0x514);
+/* was func_1507B448 */
+void aiscript_sound_ev_190_1300(void) {
+    D_800D1580 = aiscript_args_word();
+    if (sound_word_resolve(D_800D154C, &D_800D1580, 1) != 0) {
+        objev_sound_alt_or_stop(0xBE, 0x514);
     }
 }
 
-void func_1507B494(void) {
-    D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) {
-        func_1506BA4C(0xBE, 0x514);
+/* was func_1507B494 */
+void aiscript_sound_ev_b_190_1300(void) {
+    D_800D1580 = aiscript_args_word();
+    if (sound_word_resolve(D_800D154C, &D_800D1580, 0) != 0) {
+        objev_sound_or_stop(0xBE, 0x514);
     }
 }
 
-void func_1507B4E0(void) {
-    D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 1) != 0) {
-        func_1506BAD8(100, 800);
+/* was func_1507B4E0 */
+void aiscript_sound_ev_100_800(void) {
+    D_800D1580 = aiscript_args_word();
+    if (sound_word_resolve(D_800D154C, &D_800D1580, 1) != 0) {
+        objev_sound_alt_or_stop(100, 800);
     }
 }
 
-void func_1507B52C(void) {
-    D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) {
-        func_1506BA4C(100, 800);
+/* was func_1507B52C */
+void aiscript_sound_ev_b_100_800(void) {
+    D_800D1580 = aiscript_args_word();
+    if (sound_word_resolve(D_800D154C, &D_800D1580, 0) != 0) {
+        objev_sound_or_stop(100, 800);
     }
 }
 
-void func_1507B578(void) {
+/* was func_1507B578 */
+void aiscript_set_fieldd0(void) {
     D_800D154C->unkD0 = D_800D1890;
     D_800D154C->unk114 = D_800D1891;
 }
 
-void func_1507B5C4(void) {
+/* was func_1507B5C4 */
+void aiscript_if_player_field75(void) {
     if (D_800D154C->unk31C->unk75 == D_800D1891) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_1507B630(void) {
+/* was func_1507B630 */
+void aiscript_player_jump_when_grounded(void) {
     if ((D_800D154C->disable_run == 0) && (D_800D154C->unk28 == 0.0f)) {
         if (D_800D154C->unk31C->unk78 != 0) {
             D_800D1890 ^= 1;
@@ -2590,14 +2787,16 @@ void func_1507B630(void) {
     D_800D154C->unk21C = 100;
 }
 
-void func_1507B6E0(void) {
+/* was func_1507B6E0 */
+void aiscript_wait_grounded(void) {
     if ((D_800D154C->disable_run != 0) || (D_800D154C->unk28 > 5.0f)) {
         D_800D154C->unk218 -= 1;
         D_800D154C->unk21C = 0x64;
     }
 }
 
-void func_1507B734(void) {
+/* was func_1507B734 */
+void aiscript_set_player_input(void) {
     u16 tmp = ((D_800D1890 << 8) | D_800D1891);
     if (D_800D1893 != 0) {
         D_800D154C->unk31C->unk8C = tmp;
@@ -2608,22 +2807,25 @@ void func_1507B734(void) {
     }
 }
 
-void func_1507B7BC(void) {
-    func_15075548();
+/* was func_1507B7BC */
+void aiscript_mode17(void) {
+    aiscript_move_setup();
     D_800D154C->unk223 = 17;
 }
 
-void func_1507B7E8(void) {
+/* was func_1507B7E8 */
+void aiscript_if_target_down(void) {
     struct127 *tmp = &D_800CC2D0[D_800D154C->unk222];
     if ((tmp->stunned != 0) || (tmp->health == 0)) {
         D_800D1891 ^= 1;
     }
     if (D_800D1891 != 0) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
-u8 func_1507B884(void) {
+/* was func_1507B884 */
+u8 aiscript_call_hook(void) {
     s32 tmp0;
     s32 tmp1;
     u8 temp_v0;
@@ -2640,20 +2842,23 @@ u8 func_1507B884(void) {
     }
 }
 
-void func_1507B8F4(void) {
+/* was func_1507B8F4 */
+void aiscript_if_mp_flag(void) {
 
     if (D_800BE616 != 0) {
         if ((D_800D1891 != 0) || ((D_800D154C->unk31C != 0) && (D_800D154C->unk31C->unk84 != 0))) {
-            func_15075400(D_800D1890);
+            aiscript_branch(D_800D1890);
         }
     }
 }
 
-void func_1507B958(void) {
+/* was func_1507B958 */
+void aiscript_set_fieldb0(void) {
     D_800D154C->unkB0 = D_800D1890;
 }
 
-void func_1507B974(void) {
+/* was func_1507B974 */
+void aiscript_if_point_tag(void) {
     struct127 *var_v1 = D_800D154C;
 
     if (D_800D154C->unk65 != 0) {
@@ -2663,27 +2868,31 @@ void func_1507B974(void) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {
-        func_15075400(D_800D1890);
+        aiscript_branch(D_800D1890);
     }
 }
 
-void func_1507BA48(void) {
+/* was func_1507BA48 */
+void aiscript_play_sound_random_b(void) {
     u16 tmp = ((D_800D1892 << 8) | D_800D1893);
     if (D_800D1890 != 0) {
-        tmp += func_150ADA20() % (u32) D_800D1890;
+        tmp += random_int() % (u32) D_800D1890;
     }
-    func_15060A9C(tmp, D_800D154C);
+    obj_sfx_play_alt(tmp, D_800D154C);
 }
 
-void func_1507BAD0(void) {
-    D_800D154C->unkFC = func_1507A3E8();
+/* was func_1507BAD0 */
+void aiscript_set_flags_fc(void) {
+    D_800D154C->unkFC = aiscript_args_word();
 }
 
-void func_1507BAF8(void) {
-    D_800D154C->unk2CC = func_1507A3E8();
+/* was func_1507BAF8 */
+void aiscript_set_field2cc(void) {
+    D_800D154C->unk2CC = aiscript_args_word();
 }
 
-void func_1507BB20(void) {
+/* was func_1507BB20 */
+void aiscript_nop_e(void) {
 }
 
 // scary loops
@@ -2698,7 +2907,8 @@ extern u8 D_80086E28[];          /* default script list, 8-byte entries {script,
  * type's D_800D1588 entry) is searched first; a list without that kind (a NULL script ends it) falls back to the
  * default list D_80086E28, which must contain it (the asm spins forever otherwise). No type entry / list: the
  * empty script D_8009A4E0. */
-int func_1507BB28(s32 unused, s32 kind) {
+/* was func_1507BB28 */
+int aiscript_find_by_kind(s32 unused, s32 kind) {
     u8 *type;
     u8 *list;
     s32 i;
@@ -2725,9 +2935,10 @@ int func_1507BB28(s32 unused, s32 kind) {
     return *(s32 *)(list + i * 8);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_1507BB28.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_find_by_kind.s")
 #endif
-void func_1507BC14(struct127 *arg0) {
+/* was func_1507BC14 */
+void aiscript_run(struct127 *arg0) {
 
     if (arg0->unk21C != 0) {
         if (arg0->unk218 != 0) {
@@ -2748,7 +2959,7 @@ void func_1507BC14(struct127 *arg0) {
     }
 
     if (arg0->unk218 == 0) {
-        arg0->unk218 = func_1507BB28(0, arg0->unk232);
+        arg0->unk218 = aiscript_find_by_kind(0, arg0->unk232);
         arg0->unk21C = 0;
     }
 

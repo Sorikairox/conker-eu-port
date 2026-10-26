@@ -25,13 +25,13 @@ void func_150B5E30(u8 *arg0) {
         return;
     }
     if (*(s32 *)(a3 + 0x1D4) != 0) {
-        if (func_150ADA68() < 0.10824f) {
+        if (random_float() < 0.10824f) {
             sp28[0] = *(f32 *)(a3 + 0x14);
             sp28[1] = *(f32 *)(a3 + 0x18);
             sp28[2] = *(f32 *)(a3 + 0x1C);
             func_150B5F1C(sp28, arg0[0xC], arg0[1]);
         }
-        if (func_150ADA68() < 0.10824f) {
+        if (random_float() < 0.10824f) {
             func_150B60E0(a3, (u8 *)sp28);
             func_150B5F1C(sp28, arg0[0xC], arg0[1]);
         }
@@ -342,7 +342,7 @@ s32 func_150B6314(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u30 = 0x4403;
     sp.u28 = 0x200005;
     sp.u2C = 0x20000;
-    sp.u32 = (func_150ADA20() % 7U) + 4;
+    sp.u32 = (random_int() % 7U) + 4;
     sp.u34 = 0;
     sp.u38 = 0;
     sp.u3C = 0xFF;
@@ -354,7 +354,7 @@ s32 func_150B6314(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u42 = 0xFF;
     sp.u43 = 0xFF;
     sp.u44 = 0xFF;
-    temp_f6 = (func_150ADA68() * 500.0f) + 500.0f;
+    temp_f6 = (random_float() * 500.0f) + 500.0f;
     sp.u54 = temp_f6;
     sp.u50 = temp_f6;
     (*(s32 *)((u8 *)(&sp.u58) + 0)) = (s32) (*(s32 *)((u8 *)arg0 + 0));
@@ -372,11 +372,11 @@ s32 func_150B6314(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u7C = 0.0f;
     sp.u4C = 1.0f;
     var_v1 = 0;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         var_v1 = 0x40;
     }
     sp20 = var_v1;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         var_v0 = 0x80;
     } else {
         var_v0 = 0;
@@ -399,12 +399,12 @@ void func_150B64E0(u8 *arg0, u8 arg1, s32 arg2) {
 
     sp48[0] = 3;
     sp48[1] = -1;
-    *(s16 *)(sp48 + 2) = (func_150ADA20() % 9U) + 3;
+    *(s16 *)(sp48 + 2) = (random_int() % 9U) + 3;
     sp48[4] = 0;
     sp3C[0] = *(f32 *)(arg0 + 0);
     sp3C[1] = *(f32 *)(arg0 + 4);
     sp3C[2] = *(f32 *)(arg0 + 8);
-    light_create_with_ctrl(sp48, sp3C, (func_150ADA20() % 201U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, arg1, arg2);
+    light_create_with_ctrl(sp48, sp3C, (random_int() % 201U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, arg1, arg2);
 }
 
 void func_150B60E0(u8 *arg0, u8 *arg1) {
@@ -418,7 +418,7 @@ void func_150B60E0(u8 *arg0, u8 *arg1) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15107518(f32 *, f32 *, s32, f32 *, f32, s32, s32, s32);
+s32 bolt_spawn(f32 *, f32 *, s32, f32 *, f32, s32, s32, s32);
 void func_1514373C(f32, f32, f32 *, f32 *);
 
 void func_150B65F0(u8 *arg0) {
@@ -466,7 +466,7 @@ void func_150B65F0(u8 *arg0) {
         }
     } else {
         temp_s2 = arg0 + 0x28;
-        (*(f32 *)((u8 *)temp_s2 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 4)) + ((0.15f + (func_150ADA68() * 0.155f)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s2 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 4)) + ((0.15f + (random_float() * 0.155f)) * D_800BE9A4));
         if ((*(f32 *)((u8 *)temp_s2 + 4)) > 1.0f) {
             sp.uA0 = 0x28;
             sp.u8C = 35.0f;
@@ -488,11 +488,11 @@ void func_150B65F0(u8 *arg0) {
             sp.u84 = (f32) ((*(s16 *)((u8 *)temp_s1 + 2)) + (*(s16 *)((u8 *)temp_s1 + 8)));
             sp.u78 = (f32) ((*(s16 *)((u8 *)temp_s1 + 2)) + (*(s16 *)((u8 *)temp_s1 + 8)));
             do {
-                temp_v0_2 = func_150ADA20();
+                temp_v0_2 = random_int();
                 func_1514373C((f32) (temp_v0_2 & 0xFF), (f32) (*(s16 *)((u8 *)temp_s1 + 6)), &sp.u80, &sp.u88);
                 sp.u80 += (f32) (*(s16 *)((u8 *)temp_s1 + 0));
                 sp.u88 += (f32) (*(s16 *)((u8 *)temp_s1 + 4));
-                temp_t1 = ((temp_v0_2 & 0xFF) + (func_150ADA20() % 129U) + 0x40) & 0xFF;
+                temp_t1 = ((temp_v0_2 & 0xFF) + (random_int() % 129U) + 0x40) & 0xFF;
                 var_f12 = (f32) temp_t1;
                 if (temp_t1 < 0) {
                     var_f12 += 4294967296.0f;
@@ -500,7 +500,7 @@ void func_150B65F0(u8 *arg0) {
                 func_1514373C(var_f12, (f32) (*(s16 *)((u8 *)temp_s1 + 6)), &sp.u74, &sp.u7C);
                 sp.u74 += (f32) (*(s16 *)((u8 *)temp_s1 + 0));
                 sp.u7C += (f32) (*(s16 *)((u8 *)temp_s1 + 4));
-                func_15107518(&sp.u80, &sp.u74, 4, &sp.u8C, 0.43500003f, 1, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                bolt_spawn(&sp.u80, &sp.u74, 4, &sp.u8C, 0.43500003f, 1, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 (*(f32 *)((u8 *)temp_s2 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 4)) - 1.0f);
             } while ((*(f32 *)((u8 *)temp_s2 + 4)) > 1.0f);
         }
@@ -627,6 +627,6 @@ void func_150B6C34(u8 arg0, s32 arg1) {
     s32 pad;
     u32 sp28;
 
-    sp28 = func_150ADA20();
-    func_15182BE0(0xCC, 0xCC, 0xFF, ((sp28 % 56U) + 0xC8) & 0xFF, (func_150ADA20() % 11U) + 0xF, 0, (s32) arg0, arg1);
+    sp28 = random_int();
+    func_15182BE0(0xCC, 0xCC, 0xFF, ((sp28 % 56U) + 0xC8) & 0xFF, (random_int() % 11U) + 0xF, 0, (s32) arg0, arg1);
 }

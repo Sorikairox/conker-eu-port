@@ -34,15 +34,15 @@ void func_151F2960(s32 arg0, s32 arg1) {
             D_800E0E2C = 0;
             return;
         }
-        D_800E0E20 = func_1502B5C8(0, 2, 0x17, 4);
+        D_800E0E20 = asset_load(0, 2, 0x17, 4);
         if (D_800E0E20 != 0) {
             func_100043B4(D_800E0E20, 0xFF);
         }
-        D_800E0E24 = func_1502B5C8(0, 2, 0x17, 5);
+        D_800E0E24 = asset_load(0, 2, 0x17, 5);
         if (D_800E0E24 != 0) {
             func_100043B4(D_800E0E24, 0xFF);
         }
-        D_800E0E28 = func_1502B5C8(0, 2, 0x17, 6);
+        D_800E0E28 = asset_load(0, 2, 0x17, 6);
         if (D_800E0E28 != 0) {
             func_100043B4(D_800E0E28, 0xFF);
         }
@@ -61,7 +61,7 @@ void func_151F2960(s32 arg0, s32 arg1) {
             D_800E0E2C = 0;
             return;
         }
-        func_151F3DE0();
+        mp3dec_init();
     }
     D_800E0D80 = arg0;
     D_800E0DE0 = arg1;
@@ -178,8 +178,8 @@ void func_1001CF38(void *, f32); /* P95: f32 parameter */
 #else
 void func_1001CF38(void *, s32);
 #endif
-s32 func_151F85C4(s32, s32, s32);
-s32 func_151F86B0(s32, s16 **, s32 *);
+s32 mp3main_init(s32, s32, s32);
+s32 mp3main_decode_next_frame(s32, s16 **, s32 *);
 void func_151F3D78(void);
 void func_151F39E4();
 
@@ -213,7 +213,7 @@ s32 func_151F2E88(s32 count, Acmd **cmdp) {
     if (D_800E0E04 == 5) {
         func_151F3D78();
         if (D_800E0E18 == 0) {
-            D_800E11B4 = func_151F85C4(0, D_800E0DFC, D_800E0DE0);
+            D_800E11B4 = mp3main_init(0, D_800E0DFC, D_800E0DE0);
             if (D_800E11B4 == 0) {
                 D_800E0DE4 = 0;
                 D_800E0E10 = 0;
@@ -252,7 +252,7 @@ s32 func_151F2E88(s32 count, Acmd **cmdp) {
             }
             D_800E1220 = 0;
             D_800E121C = 0;
-            if (func_151F86B0(D_800E11B4, &buf, &n) != 0) {
+            if (mp3main_decode_next_frame(D_800E11B4, &buf, &n) != 0) {
                 D_800E1218 = buf;
                 for (i = 0; i < n; i++) {
                     CMD(*cmdp, 0x08000000, osVirtualToPhysical((void *)D_800E1224[i]));

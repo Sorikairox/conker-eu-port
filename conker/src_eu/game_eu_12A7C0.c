@@ -7,7 +7,7 @@ extern u8 D_800A22BC[];
 #endif
 
 
-void func_150FD140(u8);
+void view_sparkle_burst(u8);
 s32 func_1516547C(s32, s32, s32, s32, s32);
 #ifdef NON_MATCHING
 s32 func_1000EC24(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c), not data */
@@ -15,13 +15,14 @@ s32 func_1000EC24(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c
 extern s32 func_1000EC24;
 #endif
 
-void func_150FCFB0(void) {
+/* was func_150FCFB0 */
+void view_spots_flash_event(void) {
     s32 var_s0;
     struct { s8 u44; s8 u45; s16 u46; s8 u48; s8 u49; s8 u4A; } sp;
 
-    func_150FD140(0);
-    func_150FD140(1);
-    func_150FD140(2);
+    view_sparkle_burst(0);
+    view_sparkle_burst(1);
+    view_sparkle_burst(2);
     func_1000FA64(0x2B8U, -0x7F6, 0x618, -0xA47, 0x6D60, 0x2328U, 0x1B58, (s32) &func_1000EC24, (u8 *)0x2D, 0, 0, 0);
     func_1000FA64(0x2B7U, -0x13F, -0x111, -0xD5B, 0x6D60, 0x2328U, 0x1B58, (s32) &func_1000EC24, NULL, 0, 0, 0);
     func_1000FA64(0x2B6U, 0x5EF, 0x3B3, -0xA49, 0x6D60, 0x2328U, 0x1B58, (s32) &func_1000EC24, (u8 *)0x5A, 0, 0, 0);
@@ -52,7 +53,8 @@ void func_15150258(u8 *, u8, s32);
  * height: size random * 4 + 12, brightness 200..255. Each spray (func_15150258 block, layout of func_15150258 in
  * game_eu_17D3C0) starts on the circle of the spot's radius at angle base + random [0, range] (D_800A22B0[view]:
  * s16 base, range; angle byte), at a random height in [y, y + height], and fans out from that angle - 40 over 80. */
-void func_150FD140(u8 view) {
+/* was func_150FD140 */
+void view_sparkle_burst(u8 view) {
     s16 *spot;
     s16 *arc;
     f32 pos[3];
@@ -99,10 +101,10 @@ void func_150FD140(u8 view) {
     pos[0] = spot[0];
     pos[1] = spot[1] + spot[4] * 0.5f;
     pos[2] = spot[2];
-    size = func_150ADA68();
-    r = func_150ADA20();
+    size = random_float();
+    r = random_int();
     func_15154728(pos, size * 4.0f + 12.0f, 6.6943097f, r % 56 + 200, 2.6090002f, 0xFF, 1);
-    n = (func_150ADA20() & 1) + 3;
+    n = (random_int() & 1) + 3;
     if (n <= 0) {
         return;
     }
@@ -132,18 +134,18 @@ void func_150FD140(u8 view) {
     spray.b58 = -1;
     arc = &D_800A22B0[view * 2];
     do {
-        a = func_150ADA20() % (u32) (arc[1] + 1) + arc[0];
+        a = random_int() % (u32) (arc[1] + 1) + arc[0];
         spray.angle = a - 0x28;
         func_15143874(a, spot[3], &spray.pos[0], &spray.pos[2]);
         spray.pos[0] += spot[0];
         spray.pos[2] += spot[2];
-        spray.pos[1] = func_150ADA68() * spot[4] + spot[1];
+        spray.pos[1] = random_float() * spot[4] + spot[1];
         func_15150258((u8 *) &spray, 0xFF, 1);
         n--;
     } while (n > 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/func_150FD140.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/view_sparkle_burst.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -153,7 +155,8 @@ f32 func_15166120(void *, void *, s32, s32, f32);
  * Fade factor of `obj` against view 0's spot (D_800D9AA0[0], s16 x / y / z as floats): func_15166120 with near
  * distance 2007, range 9005 and scale 1 / 9005 (D_800A22FC, 0x38E8E334). 1.0 when there is no spot. The near /
  * range parameters are f32 bit patterns in func_15166120's s32 slots (it reads them as floats). */
-f32 func_150FD49C(u8 *obj) {
+/* was func_150FD49C */
+f32 view_spot_distance_fade(u8 *obj) {
     f32 pos[3];
     f32 nearDist = 2007.0f;
     f32 range = 9005.0f;
@@ -168,21 +171,23 @@ f32 func_150FD49C(u8 *obj) {
     return func_15166120(obj, pos, *(s32 *) &nearDist, *(s32 *) &range, 0.00011104942f);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/func_150FD49C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/view_spot_distance_fade.s")
 #endif
 
-void func_150FD530(s32 arg0) {
+/* was func_150FD530 */
+void level_update_sfx_tick_a(s32 arg0) {
     sfx_cooldown_tick();
 }
 
 #ifdef NON_MATCHING
 s32 func_15046F70(u8 *, u16, f32, u8 *);
 void func_1504715C(void *, u8 *);
-s32 func_1505D024(struct127 *, s32, u16, s32);
+s32 obj_send_hit(struct127 *, s32, u16, s32);
 s32 light_create_flicker_preset(s8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 memcpy(u8 *, struct127 **, s32);
 
-void func_150FD554(struct127 *arg0, u8 arg1, s32 arg2) {
+/* was func_150FD554 */
+void bound_cloud_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
     struct {
         s8 u60;
         s8 u61;
@@ -307,18 +312,18 @@ void func_150FD554(struct127 *arg0, u8 arg1, s32 arg2) {
             sp.u197 = 0;
             sp.u19C = arg0->y_position;
         }
-        func_1505D024(arg0, 0x39, arg0->unk7A, -1);
+        obj_send_hit(arg0, 0x39, arg0->unk7A, -1);
         sp.uD4 = arg0;
         sp.uDC = 60.0f;
         sp.uD8 = arg0->unique_id;
         sp.uE0 = 50.0f;
-        temp_f0 = func_150ADA68();
+        temp_f0 = random_float();
         sp.u12C = 0;
         sp.uE8 = -2048.0f;
         sp.uEC = -2048.0f;
         sp.uE4 = temp_f0 * 6.2831855f;
-        sp.uF0 = func_150ADA68() * 6.2831855f;
-        temp_f16 = func_150ADA68() * 6.2831855f;
+        sp.uF0 = random_float() * 6.2831855f;
+        temp_f16 = random_float() * 6.2831855f;
         sp.uF8 = 0;
         sp.uFC = 0;
         sp.u100 = 0.0f;
@@ -414,7 +419,7 @@ void func_150FD554(struct127 *arg0, u8 arg1, s32 arg2) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/func_150FD554.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/bound_cloud_spawn.s")
 #endif
 #ifdef NON_MATCHING
 /* P146 */
@@ -430,20 +435,21 @@ extern f32 D_800A2330;
 extern f32 D_800A2334;
 extern f32 D_800A2338;
 void func_1502ED88(u8 *, s32, s32, s32, s32, s32, s32);
-void func_151080F8(u8 *, s16, s16, u8, s32);
+void obj_angle_point_effect(u8 *, s16, s16, u8, s32);
 void func_151D58E4(u8 *, f32, f32, f32, u8, u8, s32);
-void func_150E856C(f32, u8, s32, u8 *, s16, u8, u8, u8, u8, u8, u8, s32);
-void func_150E892C(f32 *, s16, u8, s32);
+void fx_scorch_decal_spawn(f32, u8, s32, u8 *, s16, u8, u8, u8, u8, u8, u8, s32);
+void fx_debris_emitter_spawn(f32 *, s16, u8, s32);
 // bound_cloud_update: update handler (D_8008A100 slot 43) of a cloud effect that can be bound to an object. The
 // state block at +0x110 holds the object (+0x110, valid while its +0 is set and its id +0x3B equals +0x114), the
 // peak alpha scale (+0x118), the remaining life (+0x11C), a pulse phase (+0x120), two wobble phases (+0x12C,
 // +0x130) with their outputs (+0x124, +0x128), a linked effect (+0x138), a spawn accumulator (+0x13C), a height
 // (+0x140), a sound block (+0x144), a "burst done" byte (+0x168) and flags (+0x169). A bound object is tinted
-// and gets random particles (func_151080F8) at a random rate; the effect follows its x/z. The scale fades in
+// and gets random particles (obj_angle_point_effect) at a random rate; the effect follows its x/z. The scale fades in
 // over life 50..20, holds to 10, then fades out; at life 10 the burst fires once (object animation 0x16 and a
 // sound, two shock waves, and with flag 1 a smoke puff + flash). Alpha +0x5C pulses (sin), the linked effect
 // copies scale / alpha / x / z. Returns 0 once the life drops below 0.
-s32 func_150FDA94(u8 *fx) {
+/* was func_150FDA94 */
+s32 bound_cloud_update(u8 *fx) {
     u8 *st = fx + 0x110;
     u8 *obj = *(u8 **)st;
     u8 *link;
@@ -470,11 +476,11 @@ s32 func_150FDA94(u8 *fx) {
     }
     if (obj != NULL) {
         func_1502ED88(obj, 0xFF, 0, 0, 0xFF, 0, 4);
-        *(f32 *)(st + 0x2C) += (D_800A2310 + func_150ADA68() * D_800A2314) * D_800BE9A4;
+        *(f32 *)(st + 0x2C) += (D_800A2310 + random_float() * D_800A2314) * D_800BE9A4;
         while (*(f32 *)(st + 0x2C) > 1.0f) {
-            r0 = func_150ADA20();
-            r1 = func_150ADA20();
-            func_151080F8(obj, (s16)(r0 & 0xFF), (s16)((u32)r1 % 101 - 63), fx[0xC], fx[1]);
+            r0 = random_int();
+            r1 = random_int();
+            obj_angle_point_effect(obj, (s16)(r0 & 0xFF), (s16)((u32)r1 % 101 - 63), fx[0xC], fx[1]);
             *(f32 *)(st + 0x2C) -= 1.0f;
         }
     }
@@ -487,7 +493,7 @@ s32 func_150FDA94(u8 *fx) {
         *(f32 *)(fx + 0x2C) = life * D_800A231C * *(f32 *)(st + 0x8);
         if (st[0x58] == 0) {
             if (obj != NULL) {
-                func_1505D024((struct127 *)obj, 0x16, *(u16 *)(obj + 0x7A), -1);
+                obj_send_hit((struct127 *)obj, 0x16, *(u16 *)(obj + 0x7A), -1);
                 func_10010F88(0x69D, 0x7D00, 0, 0, 0, (s16)(s32) * (f32 *)(fx + 0x34),
                               (s16)(s32) * (f32 *)(fx + 0x38), (s16)(s32) * (f32 *)(fx + 0x3C), 500, 3000);
             }
@@ -498,12 +504,12 @@ s32 func_150FDA94(u8 *fx) {
                 pos[0] = *(f32 *)(fx + 0x34);
                 pos[1] = *(f32 *)(st + 0x30);
                 pos[2] = *(f32 *)(fx + 0x3C);
-                size = func_150ADA68();
-                r0 = func_150ADA20();
-                r1 = func_150ADA20();
-                func_150E856C(size * 78.0f + 125.0f, ((u32)r0 % 76 + 180) & 0xFF, (s32)(st + 0x34), (u8 *)pos,
+                size = random_float();
+                r0 = random_int();
+                r1 = random_int();
+                fx_scorch_decal_spawn(size * 78.0f + 125.0f, ((u32)r0 % 76 + 180) & 0xFF, (s32)(st + 0x34), (u8 *)pos,
                               (u32)r1 % 207 + 302, 0, 1, 0, 0, 0, fx[0xC], 0);
-                func_150E892C(pos, (s16)((u32)func_150ADA20() % 80 + 243), fx[0xC], fx[1]);
+                fx_debris_emitter_spawn(pos, (s16)((u32)random_int() % 80 + 243), fx[0xC], fx[1]);
             }
         }
     }
@@ -534,10 +540,11 @@ s32 func_150FDA94(u8 *fx) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/func_150FDA94.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/bound_cloud_update.s")
 #endif
 
-void func_150FE08C(u8 *arg0, u8 *arg1, u8 arg2)
+/* was func_150FE08C */
+void bound_cloud_handle_event(u8 *arg0, u8 *arg1, u8 arg2)
 {
   s32 new_var2; // fakematch: permuter temp
   u8 new_var; // fakematch: permuter temp
@@ -572,7 +579,8 @@ void func_150FE08C(u8 *arg0, u8 *arg1, u8 arg2)
   }
 }
 
-u8 *func_150FE120(u8 *arg0, s16 arg1) {
+/* was func_150FE120 */
+u8 *bound_cloud_draw(u8 *arg0, s16 arg1) {
     u8 *v = (u8 *)sprite_quad_build_screen_b((s32)arg0, arg1);
     if (v != NULL) {
         *(s16 *)(v + 0x8) = *(f32 *)(arg0 + 0x124);
@@ -583,7 +591,8 @@ u8 *func_150FE120(u8 *arg0, s16 arg1) {
     return v;
 }
 
-void func_150FE1AC(u8 *arg0)
+/* was func_150FE1AC */
+void bound_cloud_free(u8 *arg0)
 {
   u8 *v = arg0 + 0x110; // fakematch: v defined first so IDO keeps it as a separate pointer (not folded)
   
@@ -593,12 +602,14 @@ void func_150FE1AC(u8 *arg0)
   if (*(u16 *)(v + 0x56) != 0) func_100111C8(*(u16 *)(v + 0x56));
 }
 
-void func_150FE22C(void *arg0) {
-    func_150FE1AC(arg0);
+/* was func_150FE22C */
+void bound_cloud_retire(void *arg0) {
+    bound_cloud_free(arg0);
     effect3d_retire(arg0);
 }
 
-void func_150FE258(void *arg0) {
-    func_150FE1AC(arg0);
+/* was func_150FE258 */
+void bound_cloud_delete(void *arg0) {
+    bound_cloud_free(arg0);
     effect3d_free(arg0);
 }

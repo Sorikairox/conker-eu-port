@@ -1,0 +1,208 @@
+old	new	confidence	description
+func_1510D090	tint_channels_update	high	Per-frame update of a player's three tint colour channels: ease levels to requested/default and add a sine wobble to the up/down bytes
+func_1510D338	tint_emit_prim_env_colors	high	Emits gDPSetPrimColor/gDPSetEnvColor from a player's tint up/down bytes (D_800D9F88 / D_800D9F98) with the given alphas
+func_1510D3E0	texture_resolve_dl_ids	high	Resolves texture ids in a display list's G_SETTIMG commands to cache addresses (with palette offsets); optionally builds an id list
+func_1510D66C	texture_cache_lookup	high	Texture cache lookup: returns the expanded data of a texture id, DMAing and decompressing it on a miss; updates age and refcount
+func_1510D8F4	texture_rom_offset	high	ROM offset of a texture's compressed block: base D_1A3B40 plus the sum of the compressed sizes of all lower ids
+func_1510D984	texture_cache_age_tick	high	Per-frame texture cache ageing: counts down ages of pending slots and frees them at 0, re-expands slots flagged 0x40
+func_1510DB88	texture_cache_set_age	high	Sets a cached texture's age to a new value, keeping its 0x40 flag (no-op when the slot is empty)
+func_1510DBB0	texture_id_list_release	high	Releases every texture id of an s16 id list {n, ids...} (func_1510DC14) and frees the list
+func_1510DC14	texture_unref_age3	high	Drops one reference to a cached texture; on the last one marks it pending with age 3 for delayed freeing
+func_1510DCA0	texture_unref_age2	high	Drops one reference to a cached texture; on the last one marks it pending with age 2 for delayed freeing
+func_1510DD2C	texture_cache_release	high	Drops one reference to a texture id and frees its cached data immediately when the last reference goes
+func_1510DDE4	segment_override_clear	med	Clears the list of segment override entries (D_800DA2F0 = 0)
+func_1510DDF4	segment_override_add	med	Adds a segment override entry (key, two addresses, two segment numbers) to the 8-entry list D_800DA2F8
+func_1510DE40	segment_override_emit	med	Emits G_MOVEWORD segment commands (0xDB06) for every override entry whose key matches; returns the advanced display list
+func_1510DEF0	blob_shadow_create	high	Allocates a blob shadow record node (type 0x4B) for an owner, initialising its vertex UVs, owner kind, texture index and flags
+func_1510E004	blob_shadow_update	high	Per-frame blob shadow update: finds the floor under the owner, computes slope, scale and alpha and writes the quad vertices
+func_1510E6A0	blob_shadow_draw	high	Emits a blob shadow's display list: translation matrix to the floor point, texture, prim alpha and two triangles
+func_1510E908	floor_triangle_slope	high	Computes the floor plane slope (dy/dx, dy/dz) of a triangle given as vertex pointers or packed s16 vertices; 0 when degenerate
+func_1510EBB4	gfx_load_identity_modelview	med	Emits a gSPMatrix loading the fixed matrix D_80089810 into the modelview (no push)
+func_1510EBF0	collision_candidate_is_floor	high	Says whether collision candidate i (D_800D3720) faces up: cross product of its triangle edges has a non-negative y
+func_1510ED24	collision_find_floor	high	Floor lookup wrapper around func_1510EED0 with no ceiling-vertex output and caller-given object y range
+func_1510EDAC	collision_find_floor_default_range	high	Floor lookup wrapper around func_1510EED0 with no ceiling-vertex output and the default object y range (-10000..20000)
+func_1510EE3C	collision_find_floor_no_fallback	med	Floor lookup wrapper around func_1510EED0 with the default object y range and a caller-given no-fallback flag
+func_1510EED0	collision_find_floor_ceiling	high	Floor/ceiling lookup under (x, z) over the 4 collision areas; outputs floor triangle, vertices, heights, flags and area
+func_1510F800	collision_select_area	med	Selects the collision area for the following candidate queries (wraps func_150A4ED4)
+func_1510FBC8	collision_object_floor_height	high	Floor height under (x, z) among world objects (collision area 2) near y; -10000 when none
+func_1510FCA0	zone_tree_collect_near	med	Collects the leaf zones of the D_800DC278 zone tree within a margin of (x, z) into a list; returns the count
+func_1510FD20	zone_tree_find_leaf	high	Walks the D_800DC278 zone tree to the leaf zone whose square contains (x, z); 0 when none
+func_1510FDA0	floor_slope_direction	med	Gets a triangle's floor slope (func_1510E908) and its direction normalised to 50x the slope length
+func_1510FE4C	floor_flags_surface_type	high	Returns the surface type bits (flags & 0x1F) of a floor flag word
+func_1510FE58	collision_level_nearest_height	high	Level-tree floor height under (x, z) nearest to y (preferring heights below); optionally returns the triangle
+func_151101B4	player_zone_update	med	Per-player zone update: finds the zone under the camera, and when its index changed calls func_150A6C40; tick 0x3C hook
+func_151103B0	zone_tree_leaf_index	high	Index of a leaf zone in the D_800DC278 zone tree (counting sibling steps); 0 when not found
+func_15110420	view_background_draw	high	Per-view background pass: clears tint bytes, draws the screen border/fill, then calls the level's camera/sky callback with wrapped angles
+func_1511084C	matrix_rotate_ypr	high	Builds a rotation matrix from yaw, pitch and roll (three func_150A8050 rotations multiplied together)
+func_151108E0	camera_view_rotation_matrix	high	Rotation matrix (yaw, pitch, roll) multiplied by camera record's matrix (+0xBC) of the given camera
+func_15110948	view_clear_level_colour	high	Default camera callback: fills the player's viewport with the level colour and draws split-screen divider bars from player 0
+func_15110AC4	gfx_fill_rect_colour	high	Emits fill-mode setup and a filled rectangle in an RGB colour (converted to RGBA5551)
+func_15110B80	view_border_clear	high	Camera callback: on levels 0x1B / 0x1E (and 0x31 in a state) fills the screen inset by 2 pixels with the level colour
+func_15110C28	view_frame_clear	med	For player 0 only: clears the colour image with a fill rectangle and draws split-screen divider bars
+func_15110E44	sky_level_distance	med	Per-level sky distance/visibility value from the camera position and angle (0 = sky hidden), passed to the sky callback
+func_1511127C	sky_box_face_build	high	Builds one face of the sky box as a grid of textured quads in the vertex buffer and queues their texture loads
+func_15111CAC	overlay_mode_set	high	Switches the camera overlay mode/id: frees the old overlay asset and textures, loads the new asset or generates stars
+func_15111DD8	star_field_generate	high	Allocates the overlay buffer and fills it with 8000 random stars on a sphere (position, brightness, colour)
+func_15112074	sky_box_draw	high	Camera callback drawing the textured sky box of the current player: view matrix, visible faces, texture loads, triangles
+func_15112AA0	world_object_turn_to_player	low	World object callback: turns the object's yaw/pitch toward player 0 within range (rate limited), playing a turn sound
+func_15113000	world_records_build_visible	high	Per frame, rebuilds each player's list of visible world-object records with per-player fade bytes and view depths
+func_15113700	world_records_flag_active	med	Sets flag 0x40 of +0x6F on world-object records that have a callback (+0x38) and are visible/flagged; clears it on others
+func_15113798	world_records_update_matrices	high	Per-frame matrix pass over the visible world-object records (position/orientation, following objects, fallback)
+func_15113B44	world_meshes_draw_player	high	Draws the visible world mesh list of a player: geometry setup, light block, one world_mesh draw per entry, matrix pop
+func_15113D54	world_mesh_draw	high	Draws one world mesh record for a player: alpha fade, render mode, colour, segments, matrix and the mesh display list
+func_15114208	world_records_update_shadows	high	Creates or destroys the blob shadow node (+0x94) of each world-object record depending on its visibility and flags
+func_151143D4	world_records_run_callbacks	high	Runs the update callback of every pending world-object record, copying group leader positions to members first
+func_151145D0	world_record_touched_by	high	Says whether a world-object record (flag 0x80) is touched by object index arg1 (-1 = any) via D_800DC3C4
+func_15114644	world_record_first_toucher	high	Returns the lowest object index whose bit is set in a touched world-object record's D_800DC3C4 mask; 0 when none
+func_15114708	world_records_dispatch_touches	high	For every world-object record touched by objects, calls its touch callback (+0x78) per object and updates carried objects
+func_151148C8	world_object_rotate_point	high	Rotates a point by a world-object record's angles around its pivot and adds the record's offset delta
+func_15114CBC	world_object_timer_update	high	Refreshes a carried object's position by its world-object record and advances its timer (+0x76) by the record speed
+func_15114E28	world_record_base_rotation	med	Builds the base rotation matrix of a world-object record from its three f32 angles (+0, +4, +8)
+func_15114E8C	world_record_build_matrix	med	Builds a world-object record's matrix: base rotation times the record's s32 rotation angles (+0x2C..+0x34)
+func_151149AC	world_record_find	high	Returns the world-object record whose id byte (+0x72) equals id, or NULL; id 0 never matches
+func_15114F9C	world_records_release_blocks	high	Per-frame release of world-object record blocks (D_800DC328), immediately or after a frame countdown
+func_15115114	world_record_remove	high	Hides a world-object record (destroying its shadow) and trims hidden records off the end of the table
+func_15115244	object_sound_position_cb	high	Positional sound callback: copies the world object's position into the voice; returns 1 when it has no object
+func_151152A4	world_object_sound_play	high	Plays, updates or stops the positional sound of a world object according to flags (one-shot, tracked, restart)
+func_15115484	object_sound_set_volume_pitch	med	Sets volume and pitch (cents) of the tracked positional sound of a world object (func_1001001C keyed by its callback)
+func_151154C4	level_tri_tables_check	low	On levels 0x12 / 0x13 / 0x36 validates the triangle pointer tables (crashes on a bad pointer) and stores three values
+func_15115630	scenery_handler_noop	high	Empty world mesh handler (does nothing)
+func_1511563C	scenery_spin_z_update	high	Scenery handler: turns angle +0x8 by speed (high half of +0x3C / 256 per tick), wrapped into [0, 360); rate in +0x68
+func_151156DC	scenery_spin_y_update	high	Scenery handler: turns angle +0x4 by speed (high half of +0x3C / 256 per tick), wrapped into [0, 360); rate in +0x64
+func_1511577C	scenery_spin_x_update	high	Scenery handler: turns angle +0x0 by speed (high half of +0x3C / 256 per tick), wrapped into [0, 360); rate in +0x60
+func_1511581C	scenery_handler_noop2	high	Empty world mesh handler (does nothing; second copy)
+func_15115828	scenery_sink_when_stood_update	high	Scenery handler: sinks y down to a depth while stood on (flag 4 of +0x4F), else eases back to the rest height
+func_151158E8	scenery_crumble_platform_update	med	Scenery handler: platform that shakes after a delay while stood on, then falls and hides; respawns when player 0 is far away
+func_15115B40	scenery_lift_y_update	high	Scenery handler: moves y between its rest height and a target in equal steps with pauses (lift); +0x5C gets the y change
+func_15115CDC	scenery_trigger_move_update	med	Scenery handler: when stood on, moves the object from its rest position to an offset over time, waits, then returns, with sounds
+func_1511638C	scenery_push_accumulate	med	Touch handler: adds the toucher's position relative to the object (rotated by its yaw) to the push accumulators +0x7C/+0x80 while stood on
+func_1511645C	scenery_push_accumulate_boost	med	Like scenery_push_accumulate, but multiplies the change by 5 when the toucher's +0x84 is 0x4B
+func_151164E8	scenery_tilt_from_push_update	med	Scenery handler: tilts angle +0x0 by the push accumulator (or a constant rate), clamped to the range in +0x3C; clears the push
+func_151165D8	scenery_uv_scroll_update	high	Scenery handler: scrolls the texture coordinates of every vertex by the two halves of +0x3C (from the other vertex buffer)
+func_15116690	scenery_start_pending_anim	high	If the object has no animation handle yet (+0x7C), starts the one requested in +0x3C and clears the request
+func_151166FC	scenery_float_on_floor_update	med	Scenery handler: keeps y on the object floor below plus an offset that dips while stood on (bobbing float)
+func_15116854	scenery_bob_update	high	Scenery handler: cosine bob of y around its base (amplitude/speed from +0x3C); +0x5C gets the change this frame
+func_15116940	scenery_bob_rock_update	high	Scenery handler: cosine bob of y and cosine rocking of angle +0x0, both with amplitudes and speeds packed in +0x3C
+func_15116A8C	scenery_platform_drift_update	high	Speed update of a drifting platform pushed by the player, decaying to rest, with a looping pitch-varying sound
+func_15116E08	scenery_push_strength	med	Push amount of an object on a platform: its speed (+0x3C) times the sine of its heading relative to the platform direction
+func_15116EA4	scenery_touch_noop	high	Empty world mesh touch handler (does nothing)
+func_15116EB0	scenery_mover_open_on_use	high	Touch handler: while stood on and closed, opens the mover (state 2) when the player's +0x57 action flag is 1
+func_15116F04	scenery_mover_step_if_opening	high	Scenery handler: runs scenery_mover_step while state bit 2 (opening) of +0x73 is set
+func_15116F34	scenery_mover_step	high	Moves the object's position toward its target with move/stop sounds; near-arrival sound entries go to func_1511712C
+func_1511712C	scenery_mover_step_sfx	high	Mover step for sound entries with a near-arrival sound: steps toward the target and plays the arrival sound once
+func_151172FC	scenery_spin_angles_update	high	Scenery handler: three angles turn by their rates, each rate easing toward its target rate; angles wrapped to [0, 360)
+func_15117424	scenery_mesh_morph_update	high	Per-frame vertex morph of a mesh between keyframes loaded from ROM; position eases toward its target
+func_15117858	scenery_swing_angle_step	high	Spring-damped swing of one angle toward its rest angle, with a start sound; returns the new angle
+func_15117A20	scenery_swing_z_update	high	Scenery handler: spring swing of angle +0x8 (scenery_swing_angle_step)
+func_15117A48	scenery_swing_y_update	high	Scenery handler: spring swing of angle +0x4 (scenery_swing_angle_step)
+func_15117A70	scenery_swing_x_update	high	Scenery handler: spring swing of angle +0x0 (scenery_swing_angle_step)
+func_15117A98	scenery_pendulum_angle_step	high	Bouncing pendulum step of one angle toward its rest angle, with a start sound; returns the new angle
+func_15117CF0	scenery_pendulum_x_update	high	Scenery handler: pendulum swing of angle +0x0 (scenery_pendulum_angle_step)
+func_15117D18	scenery_pendulum_z_update	high	Scenery handler: pendulum swing of angle +0x8 (scenery_pendulum_angle_step)
+func_15117D40	scenery_press_button_update	med	Scenery handler: pressable button/plate that moves y down by a per-level depth when opening and back up when closing
+func_15117F3C	scenery_slide_axis_update	med	Scenery handler: slides along its rotated local axis to an offset when opening, waits a time, then slides back
+func_151182BC	scenery_open_on_touch	high	Touch handler: a player standing on a closed mover opens it (state 2), if no action is needed or the action flag is 1
+func_15118324	scenery_local_to_world	med	Transforms a local point (x, y, z) by a scenery record's angles +0x0 / +0x4 and position into a world point
+func_151184BC	scenery_gate_swing_update	high	Per-level push gate/door handler: players near the handle push it open with a delay, sound and swing; swings shut otherwise
+func_15118EEC	scenery_door_swing_update	high	Scenery handler: door swing (scenery_mover_swing_step) with pass-through argument 0
+func_15118F0C	scenery_door_swing_update_alt	high	Scenery handler: door swing (scenery_mover_swing_step) with pass-through argument 3
+func_15118F2C	scenery_mover_swing_step	high	Swings a world mesh record about its yaw like a door through its open/close states, with sounds and light dimming
+func_151194A4	scenery_bell_swing_update	high	Per-frame swing of a hanging object toward its rest angle with gravity, bounces, thud sounds and light slot dimming
+func_1511992C	scenery_open_on_player_touch	high	Touch handler: a player toucher (type 1, +0x65 == 0) opens the closed mover (state 2)
+func_15119974	scenery_mover_bob_y_update	high	Scenery handler: moves y toward base + phase * amplitude / 256 at a limited speed, setting the arrived bits at the target
+func_15119A54	scenery_mesh_cluster_fill	high	Recursively tags the mesh vertices connected (via the display list triangles) to a seed vertex outside a radius with a cluster tag
+func_15119C54	scenery_mesh_cluster_spin	high	Splits a mesh's vertices into connected clusters and rotates each cluster in the x/z plane, re-tagging its vertices
+func_15119EB8	scenery_mesh_cluster_flap_update	high	Per-frame update of a clustered flapping mesh (petals): bends groups by angle, closes when the player is near
+func_1511A540	scenery_pickup_spin_update	high	Spinning, bobbing pickup handler: fades in by player distance, gives the item on touch, respawns or is marked taken
+func_1511A998	scenery_dl_find_tex_slots	med	Finds the first two texture markers (0xFD commands) in a display list; returns the first index, the second via the out pointer
+func_1511AA1C	scenery_texture_anim_step	high	Steps the animated texture of a scenery object from the D_800896C4 table and patches the frame into its display list
+func_1511AC84	scenery_anim_and_tex_update	high	Scenery handler: starts the pending animation (if any) and steps the object's animated texture
+func_1511ACC0	scenery_bob_and_tex_update	high	Scenery handler: bobs the object (reset when netplay says so) and steps its animated texture
+func_1511AD48	scenery_wobble_start_wave	high	Starts a wave on a wobbling mesh: resets the wave state (angle, amplitude 260, speed 100) and the per-vertex heights
+func_1511ADC0	scenery_mesh_wobble_update	high	Per-frame update of a wobbling mesh: per-vertex circling phases, waves, matrix transform into the vertex buffer
+func_1511B4B8	scenery_jitter_tilt_update	med	Scenery handler: eases angle +0x0 to a base tilt from +0x3C, then adds random jitter smoothed over time
+func_1511B604	scenery_sliding_door_update	high	Per-frame update of a sliding door/gate by type: opens/closes along x/z with eased speed and start/stop sounds
+func_1511BAA4	scenery_door_swing_angle_update	high	Swings a door angle (+0x8) through its open/close states with bounce and settling; drives a light slot by the open fraction
+func_1511BD5C	scenery_part_vertices_follow_refs	high	Rotates a part's template vertices around two reference objects by their yaws into the current vertex buffer
+func_1511BFAC	scenery_alpha_from_level_value	med	Scenery handler: sets the alpha +0x8A from the value func_15188580 returns for id +0x3C (times 255, at least 1)
+func_1511C08C	scenery_tex_project_follow	med	Offsets a mesh's texture coordinates by a tracked (x, z) position relative to the object, scaled; caches the source UVs once
+func_1511C37C	scenery_tex_follow_object_update	med	Scenery handler: projects the mesh texture to follow an object (+0x80, or the one found by id +0x3F)
+func_1511C3E4	scenery_face_camera_yaw	high	Sets the object's yaw (+0x4) to face the player 0 camera position (billboard yaw)
+func_1511C444	scenery_ride_lift_update	low	Billboard handler with a player-ridden lift on level 0xA: moves y up/down with start/stop sounds while a player rides it
+func_1511CAC8	scenery_noop3	high	Empty function (does nothing)
+func_1511CAD0	scenery_sway_xz_update	high	Scenery handler: sways angles +0x0 / +0x8 by 16 * sin of two phases advancing at different rates
+func_1511CBC0	scenery_smash_reveal_update	low	Scenery handler: when triggered, after a delay plays smash/hit sounds or an effect and reveals the next records, fading a light slot
+func_1511D0B4	scenery_ripple_top_height	high	Returns the fixed top height 22000 used by the rippling wall (through the out pointer)
+func_1511D0CC	scenery_rippling_wall_update	high	Per-frame update of a rippling vertical surface (levels 4 and 0x13): cosine wave heights, shading, texture spin and sound
+func_1511D91C	scenery_water_wave_update	high	Per-frame update of a waving surface mesh driven by a source record: spring-followed height, per-vertex sway, glow alpha
+func_1511DD44	scenery_mesh_tex_wave_update	high	Mesh handler: offsets the vertex texture coordinates by a circular wave and runs the texture animation
+func_1511DF6C	scenery_mesh_tex_scroll_update	high	Mesh handler: scrolls the vertex texture coordinates by a speed from +0x3C (func_15094EC8), caching source UVs once
+func_1511E14C	scenery_lid_open_update	med	Scenery handler: hinged lid angle +0x8 accelerates open to 90 degrees (wobbles while open) and drops shut when closing
+func_1511E320	pickup_collect_sound_play	high	Plays the collect sound for a pickup kind (+0x54) at the collecting object, with extra voice lines for two character ids
+func_1511E4F4	pickup_update	high	Floating pickup callback: spins, bobs, is taken by the first eligible player in range, then scale/wobble/shrink animation
+func_1511ED08	scenery_mover_slide_step	high	Sliding/bobbing scenery handler: per motion type moves x/y between rest and open positions or bobs, with move sounds
+func_1511F1D8	scenery_rise_and_hide_update	med	Scenery handler: rises up to 500 units above its base when triggered (+0x80) and then hides, else sinks back to its base
+func_1511F30C	scenery_slide_z_update	high	Scenery handler: slides z up to 350 units from its base in a direction from id bit 0, toward or away by the +0x80 command
+func_1511F4C8	scenery_carry_player_arc_update	low	Scenery handler: carries player +0x84 along an arc toward a target with a temporary camera mode, then hides itself
+func_1511F8A4	scenery_attach_to_record	med	On level 0x35 for kind 0x8005: places the object at a fixed local offset of world record +0x3E (its matrix)
+func_1511F970	scenery_delayed_fade_out_update	high	Scenery handler: waits a delay (high half of +0x3C * 50), then fades the alpha out over a time and hides the record
+func_1511FA68	scenery_split_door_update	med	Four-part door handler: opens/closes in two phases moving this and the next three records apart in y and x
+func_1511FD00	scenery_trigger_on_touch	high	Touch handler: sets the record's trigger state +0x80 to 1 when it is 0
+func_1511FD20	scenery_sinking_bob_update	high	Scenery handler: bobs y with a cosine; once triggered, waits a time and then sinks until hidden below -10000
+func_1511FEA8	scenery_follow_record_position	high	Copies the position of the world record whose id is byte +0x3F into this record
+func_1511FEF0	scenery_door_groups_reset	high	Clears the linked door group list (D_800DC3F0 = 0)
+func_1511FF00	scenery_door_group_sync	med	Registers a door in the linked door group list (up to 4) and syncs open/close states between doors of the same group
+func_151201D0	camera_look_enter	high	Enters the player look camera (state 1 at +0x73C): per-mode yaw/pitch/distance targets, riding mode setup, move-in direction
+func_151206C8	camera_look_update	high	Per-frame player look camera: floor test, per-mode defaults, then states move-in / free stick orbit / return, look offset, view rebuild
+func_15121A00	camera_ride_view_set	med	With button 0x10 in a riding mode, places the camera object's eye/target 100 units beside the vehicle and sets its view direction
+func_15121C68	camera_look_mode_defaults	high	Sets the look camera's per-mode defaults (+0x190 pitch, +0x784 distance, +0x99C) by player mode +0x23E and level
+func_15121E34	camera_look_exit	high	When the look button (0x10) is released: ends the look camera (state 0 or return state 3) and resets distances and riding mode
+func_15121F40	camera_group_side_view	med	Multiplayer group camera: targets the players' bounding box (max x, mid z, mean y + 150) and backs off along +x to fit them all
+func_15122170	camera_yaw_ease_to	high	Eases the camera yaw (+0x37C) toward a target with the given gains (func_15049978) and updates the yaw in radians (+0x39C)
+func_151221D4	camera_mode_noop	high	Empty camera mode handler (does nothing)
+func_151221F0	camera_follow_yaw_update	high	Per-frame yaw update of a following player camera (multiplayer, riding, locked cases), then position, orbit and height steps
+func_151220D0	camera_follow_keep_offset	med	Unless pad bit 4 is held, sets the camera yaw from the eye-to-target vector plus the target's movement, then runs the follow mode
+func_151226E0	camera_follow_target_update	high	Camera mode turning the yaw toward a target point (+0x614) with eased rates, then position/orbit/height steps
+func_151229B0	camera_orbit_update	high	Third-person camera placement around the target: pitch/yaw/distance, eased eye position with min distance and floor clearance
+func_15122EF0	camera_follow_mode_update	high	Camera mode 1 (follow): turns the yaw toward the eye-to-target heading at an eased rate, then orbit, height and position steps
+func_15128D50	camera_lean_from_heading	high	Computes the camera's two lean offsets from its heading and the lean preset; outputs them or eases them into the camera
+func_15129220	camera_process_events	high	Per-frame camera event pump: starts script requests and handles queued events (request, save, restore, fixed view, FOV...)
+func_15129E30	camera_pivot_slot_reset	med	When the pivot camera system (D_800898F0) is on, resets the player's pivot record in D_800DC458
+func_15129EA4	camera_pivot_follow_update	high	Camera mode 0x40: target follows a pivot toward the eye at a distance; position eased or snapped, then collision and state flags
+func_1512A1A0	camera_freecam_update	high	Debug free-fly camera driven by the controller: turn, move, climb, pitch, strafe, roll, with speed caps
+func_1512A8D0	camera_title_carousel_update	med	Camera mode 0x80000: runs the title/menu carousel camera (func_151E73C8) for the player
+func_1512A390	camera_update_eye_base	high	Camera eye base / floor height of the followed object: floor, water and ceiling checks, eye height, swim bob, minimum eye y
+func_1512B168	camera_viewport_tables_reset	high	Copies the default viewport rects into the 4 per-player-count tables (halved for split screen, scaled on two levels)
+func_1512B2C4	freecam_auto_step	high	Auto free-camera step: projects the eye to the screen, scans the z-buffer for obstacles and turns/drops the camera target
+func_1512B670	freecam_auto_update	high	Runs the auto free-camera step when the camera mode and flags allow it, else resets its state and countdowns
+func_1512B728	freecam_scan_depth	high	Free-camera z-buffer scan left and right of a screen column to find obstacles on each side of the camera axis
+func_1512BAAC	freecam_reset_countdown	high	Free-camera reset countdown: while frames remain, clears the z-buffer scan row and counts down; returns 1 then
+func_1512BB6C	freecam_axis_record_set	high	Updates a free-camera axis record: previous direction, new direction from the position change, threshold and position
+func_1512BBA0	freecam_axis_threshold_test	high	Free-camera axis test: below the limit marks the axis blocked with a direction, else resets the axis record
+func_1512BCA0	freecam_turn	high	Free-camera turn from the four axis records: picks the blocked side, computes the turn and adjusts distances while it runs
+func_1512C080	camera_eye_collision	high	Camera eye collision: eases the probe ellipsoid size and moves a probe object from the old to the new eye position
+func_1512C5D8	camera_too_close_swing	high	When the camera is within 42 units of the target horizontally, swings it 45x2 degrees aside and starts the yaw fade-in
+func_1512C6C0	camera_yaw_fade_in	high	Fade-in of +0x5CC up to 1.0, turning +0x384 toward the yaw at that rate; at 1.0 clears flag 2 and sets +0x384 to 999
+func_1512C770	camera_step_noop	high	Empty camera step (does nothing)
+func_1512C77C	camera_cylinder_push	high	Pushes the camera out of a requested collision cylinder, turning it 5 degrees when the push is close to the view direction
+func_1512C9EC	camera_always_true	high	Returns 1 (always-true camera predicate)
+func_1512C490	camera_build_view_matrix	high	Builds the gameplay view matrix of a camera controller: eased orbit, look-at, then shake, roll and per-player extra rotation/translation
+func_1512D5E0	camera_wobble_apply	high	Applies a sine wobble (x/y scale pulsing) to the camera's view matrix in some modes, with an eased strength
+func_1512D7A8	camera_shake_tracks_load	med	Loads the 4 camera track assets (type 0x1B) into D_800DC6B0 and stores their lengths in 24-byte frames
+func_1512D854	camera_track_start	med	Starts camera track arg1 on the camera (+0x850 = track, state +0x84D = 1)
+func_1512D868	camera_track_update	med	Advances the camera track timer (+0x84E) and ends it (state 0) after the track's frame count
+func_1512D8D8	camera_track_noop	high	Empty camera function (does nothing)
+func_1512D900	camera_sideways_tilt	high	Camera sideways tilt from pad buttons 0/1: tilt angle moves and decays, rotating the eye around the target
+func_1512DAD0	camera_queue_event	high	Appends an event (type, data) to the camera's 20-slot event queue
+func_1512DB74	camera_dequeue_event	high	Returns the next event of the camera's event queue and advances the read index (wraps at 20)
+func_1512DBDC	camera_event_queue_clear	high	Clears the camera's event queue (read and write indices to 0)
+func_1512DC20	camera_event_queue_empty	high	Says whether the camera's event queue is empty (read index == write index)
+func_1512D748	camera_shake_start	high	Starts a camera shake from preset arg1 (D_80089970: frequencies, phase times, rates) unless the target has its own view
+func_1512DC60	camera_shake_reset	high	Stops the camera shake: state 5, offsets and amplitude 0, time -1
+func_1512DEF0	camera_shake_update	high	Per-frame camera shake: sine offsets per axis and roll, amplitude ramping through the preset's phases, reset at the end
+func_1512E6B0	camera_update_eye_height	high	Camera eye height: eases the eye height over its base toward the target height (ceiling cut, clamps, water), sets eye y
+func_1512EA20	camera_over_shoulder_place	med	Camera mode 0x100000: target at player 0 (player 1 for camera 3) head height, eye 60 units behind along its heading
+func_1512EB60	camera_read_depth_row	high	Display list copying one z-buffer row into the camera's depth-row buffer for the free-camera depth scan, then restores state
+func_1512EE50	camera_apply_request	high	Per-frame handler of the camera request record (+0x6FC): hold, node-graph follow, fixed positions, look-at and distance modes
+func_15130370	camera_push_preset	high	Pushes camera mode slot 7 with the current mode and a preset's flag/pitch changes (by preset number)
+func_151307A0	player_state_handler_dispatch	med	Calls the level's player state handler D_80089A10[D_800B0DF0 +0xF] (when non-zero) with the camera controller

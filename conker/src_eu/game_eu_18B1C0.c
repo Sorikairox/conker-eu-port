@@ -14,7 +14,7 @@ void func_1515F61C(f32, s32);
 
 f32 func_1515F578(s16 *, s32);
 
-s32 func_1505D024();
+s32 obj_send_hit();
 
 
 void *func_1515D9B0(void) {
@@ -906,7 +906,7 @@ void func_1515F7E0(void *arg0, u8 *arg1) {
 }
 
 void func_1515F828(u8 *arg0, s32 arg1) {
-    func_1505D024(arg0, 0x6001D, *(u16 *)(arg0 + 0x7A), -1);
+    obj_send_hit(arg0, 0x6001D, *(u16 *)(arg0 + 0x7A), -1);
 }
 
 extern void (*D_8008B460[])(u8 *, u8 *);

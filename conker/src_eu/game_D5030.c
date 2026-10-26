@@ -7,8 +7,9 @@
 #ifdef NON_MATCHING
 /* mtx_set_identity: writes the fixed-point identity into the Mtx m (64 bytes: the 16 integer halves, then the 16
  * fraction halves, row-major as s16); only the diagonal integer halves (0, 5, 10, 15) are 1. Used for the matrix of
- * disabled world records (func_15113798) and by mesh_effect_load_identity (game_168A90.c). */
-void func_150A7B80(Mtx *m) {
+ * disabled world records (world_records_update_matrices) and by mesh_effect_load_identity (game_168A90.c). */
+/* was func_150A7B80 */
+void mtx_set_identity(Mtx *m) {
     s16 *h = (s16 *) m;
     s32 i;
 
@@ -21,7 +22,7 @@ void func_150A7B80(Mtx *m) {
     h[15] = 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_D5030/func_150A7B80.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_D5030/mtx_set_identity.s")
 #endif
 
 // struct WORD {
@@ -101,7 +102,7 @@ void func_150A7B80(Mtx *m) {
 //     // s16 unk3E;
 // } foobar;
 //
-// void func_150A7B80(baz *arg0)
+// void mtx_set_identity(baz *arg0)
 // {
 //     arg0->u0.w.unk0 = 0;
 //     arg0->u1.w.unk0 = 0;

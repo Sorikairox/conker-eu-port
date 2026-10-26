@@ -19,7 +19,7 @@ void attach_fx_asset_acquire(s32 arg0) {
     (&D_800E0950)[arg0] = (&D_800E0950)[arg0] + 1;
 
     if ((&D_800E0950)[arg0] < 2) {
-        D_800E0990[arg0] = func_1502B5C8(&tmp, 2, 9, D_800AB140[arg0]);
+        D_800E0990[arg0] = asset_load(&tmp, 2, 9, D_800AB140[arg0]);
         D_800E0968[arg0] = tmp >> 4;
     }
 }

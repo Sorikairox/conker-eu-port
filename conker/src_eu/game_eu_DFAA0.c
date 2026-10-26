@@ -26,20 +26,20 @@ void func_150B2290(u16 *start, u16 *end) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, ...);
+s32 event_dispatch(s32, s32, ...);
 #else
-s32 func_1509BE40(s32, s32, s32, s32);
+s32 event_dispatch(s32, s32, s32, s32);
 #endif
 
 void func_150B2300(u8 *arg0) {
     u8 *temp_v0;
 
-    if (func_1509BE40(1, 0x4054, 6, 0x9000) != 0) {
+    if (event_dispatch(1, 0x4054, 6, 0x9000) != 0) {
         (*(s32 *)((u8 *)arg0 + 0x84)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x84)) | 0x10000);
     } else {
         (*(s32 *)((u8 *)arg0 + 0x84)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x84)) & 0xFFFEFFFF);
     }
-    if ((func_1509BE40(1, 0x405C, 6, 0x9000) == 0) && (func_1509BE40(1, 0x405B, 6, 0x2000) != 0) && ((*(s32 *)((u8 *)arg0 + 0x2C)) != 0x40)) {
+    if ((event_dispatch(1, 0x405C, 6, 0x9000) == 0) && (event_dispatch(1, 0x405B, 6, 0x2000) != 0) && ((*(s32 *)((u8 *)arg0 + 0x2C)) != 0x40)) {
         temp_v0 = (*(u8 **)((u8 *)arg0 + 0x3D0));
         (*(f32 *)((u8 *)temp_v0 + 0x17C)) = (f32) ((*(f32 *)((u8 *)temp_v0 + 0x180)) + 10.0f);
     }
@@ -55,7 +55,7 @@ void func_150B23C0(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
 
     tmp.unk0 = *(Blk12 *)arg1;
     tmp.unkC = 0.0f;
-    temp_v0 = func_15149130((func_150ADA20() % 133U) + 69, -1, 0x49, -1, 1, 0, 0x10, arg0[0xC], arg0[0x1]);
+    temp_v0 = func_15149130((random_int() % 133U) + 69, -1, 0x49, -1, 1, 0, 0x10, arg0[0xC], arg0[0x1]);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
     }
@@ -121,7 +121,7 @@ void func_150B2470(u8 *arg0) {
     u8 *temp_s1;
 
     temp_s1 = arg0 + 0x28;
-    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((0.0786f + (func_150ADA68() * 0.0346f)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((0.0786f + (random_float() * 0.0346f)) * D_800BE9A4));
     if ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f) {
         sp.uB9 = 0x6C;
         sp.uA4 = 0x5103;
@@ -161,26 +161,26 @@ void func_150B2470(u8 *arg0) {
         sp.uE8 = 0.0f;
         sp.uEC = 0.0f;
         do {
-            sp.u8E = (func_150ADA20() % 5U) + 4;
-            sp.u8F = (func_150ADA20() % 5U) + 4;
-            sp.u90 = func_150ADA68() * 27.0f;
-            sp.u94 = func_150ADA68() * 27.0f;
-            temp_f4 = func_150ADA68() * 0.209f;
+            sp.u8E = (random_int() % 5U) + 4;
+            sp.u8F = (random_int() % 5U) + 4;
+            sp.u90 = random_float() * 27.0f;
+            sp.u94 = random_float() * 27.0f;
+            temp_f4 = random_float() * 0.209f;
             sp.uF4 &= ~0xC0;
             sp.uF0 = temp_f4 + 0.135f;
             var_s0 = 0;
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 var_s0 = 0x80;
             }
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 var_v0 = 0x40;
             } else {
                 var_v0 = 0;
             }
             sp.uF4 |= var_v0 | var_s0;
-            sp.uB7 = (func_150ADA20() % 101U) + 0x64;
-            sp.uA6 = (func_150ADA20() % 78U) + 0x7E;
-            temp_f16 = (func_150ADA68() * 503.0f) + 405.0f;
+            sp.uB7 = (random_int() % 101U) + 0x64;
+            sp.uA6 = (random_int() % 78U) + 0x7E;
+            temp_f16 = (random_float() * 503.0f) + 405.0f;
             sp.uC8 = temp_f16;
             sp.uC4 = temp_f16;
             temp_v0 = func_151307F0(&sp.u9C, 1, 0, 0x10, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
@@ -197,7 +197,7 @@ void func_150B2470(u8 *arg0) {
 #ifdef NON_MATCHING
 /* P249: readable C for func_150B2820 (game_eu_DFAA0, 79 insns; compiled C, not hand asm: IDO prologue / delay slots). */
 // view_progress_setup: configures a view record (+0x84 flags, +0x190, +0x348 / +0x34C / +0x374, +0x5F0) from the game
-// progress queries func_1509BE40 (kind 0 = 3 arguments, kind 1 = 4). Query 0x5043 / 0x1A set: +0x84 |= 0x400000
+// progress queries event_dispatch (kind 0 = 3 arguments, kind 1 = 4). Query 0x5043 / 0x1A set: +0x84 |= 0x400000
 // (and 0x4000 when 0x5045 / 0x1A is set too), +0x190 = 0; else 0x4030 (kind 1): +0x190 = 235; else +0x348 / +0x34C =
 // 114, +0x374 = 384, +0x190 = 60. +0x5F0 bit 0x100 = (query (0x2007 / 0xB7 | 0x2000) / 0xBC != 0 and query
 // 0x2000 / 0xBB != -1).
@@ -205,15 +205,15 @@ void func_150B2820(u8 *v) {
     s32 a;
     s32 b;
 
-    a = func_1509BE40(0, func_1509BE40(0, 0x2007, 0xB7) | 0x2000, 0xBC);
-    b = func_1509BE40(0, 0x2000, 0xBB);
-    if (func_1509BE40(0, 0x5043, 0x1A) != 0) {
-        if (func_1509BE40(0, 0x5045, 0x1A) != 0) {
+    a = event_dispatch(0, event_dispatch(0, 0x2007, 0xB7) | 0x2000, 0xBC);
+    b = event_dispatch(0, 0x2000, 0xBB);
+    if (event_dispatch(0, 0x5043, 0x1A) != 0) {
+        if (event_dispatch(0, 0x5045, 0x1A) != 0) {
             *(s32 *) (v + 0x84) |= 0x4000;
         }
         *(s32 *) (v + 0x84) |= 0x400000;
         *(f32 *) (v + 0x190) = 0.0f;
-    } else if (func_1509BE40(1, 0x4030, 6, 0x2000) != 0) {
+    } else if (event_dispatch(1, 0x4030, 6, 0x2000) != 0) {
         *(f32 *) (v + 0x190) = 235.0f;
     } else {
         *(f32 *) (v + 0x348) = 114.0f;

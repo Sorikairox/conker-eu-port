@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15040350(void *arg0, u32 arg1) {
+/* was func_15040350 */
+void dl_validate(void *arg0, u32 arg1) {
     s32 i;
 
     D_800C68A0 = D_800848B0 = 0;
@@ -14,20 +15,20 @@ void func_15040350(void *arg0, u32 arg1) {
         D_800C6860[i] = -1;
     }
     D_800C6860[0] = 0;
-    func_150403C8(arg0, arg1, 0);
+    dl_validate_list(arg0, arg1, 0);
 }
 
 // contains jump relative
 #ifdef NON_MATCHING
 void func_150ADC50(void);
 void func_10008090(void);
-void func_15040CC8(u8 *arg0);
-s32 func_15040754(struct148 *arg0);
+void dl_dump_around(u8 *arg0);
+s32 dlcheck_vtx_invalid(struct148 *arg0);
 
 /* debug trap: error code 0x0C00005B in D_8003C8E0, then the break handler */
 #define DL_TRAP() (D_8003C8E0 = 0x0C00005B, func_150ADC50())
-/* trap, dump the command (func_15040CC8) and stop in func_10008090 with the frame index D_800BE9C0 flipped */
-#define DL_STOP(c) (func_15040CC8((u8 *) (c)), DL_TRAP(), D_800BE9C0 = 1 - D_800BE9C0, func_10008090(), \
+/* trap, dump the command (dl_dump_around) and stop in func_10008090 with the frame index D_800BE9C0 flipped */
+#define DL_STOP(c) (dl_dump_around((u8 *) (c)), DL_TRAP(), D_800BE9C0 = 1 - D_800BE9C0, func_10008090(), \
                     D_800BE9C0 = 1 - D_800BE9C0)
 
 // dl_validate: debug walk over a display list of 8-byte commands until `end` (or, with end 0, until G_ENDDL 0xDF),
@@ -35,8 +36,9 @@ s32 func_15040754(struct148 *arg0);
 // 8-aligned KSEG0 address) and tracking G_MOVEWORD segment writes (index 6) and G_SETTIMG (D_800848B0). Primitives
 // (0xE4 / 0xE5 / 0xF6, 1, 5, 6, 7, 0x10-0x1F) mark D_800C68A0 "drawn since pipe sync", G_RDPPIPESYNC clears it; an
 // RDP state command (0xE2 / 0xE3 / 0xEA-0xEE / 0xF7-0xF9 / 0xFB-0xFF) while it is set, a failed command check
-// (func_150408CC / func_1504082C / func_15040754) or a bad branch stops in the debugger; unknown opcodes trap.
-void func_150403C8(void *list, u32 end, s32 parent) {
+// (dlcheck_dl_invalid / dlcheck_tri_invalid / dlcheck_vtx_invalid) or a bad branch stops in the debugger; unknown opcodes trap.
+/* was func_150403C8 */
+void dl_validate_list(void *list, u32 end, s32 parent) {
     u32 *dl = list;
     s32 bad = 0;
     s32 needSync;
@@ -48,14 +50,14 @@ void func_150403C8(void *list, u32 end, s32 parent) {
         switch (*(u8 *) dl) {
             case 0xDE:
                 w1 = dl[1];
-                bad = func_150408CC((struct148 *) dl);
+                bad = dlcheck_dl_invalid((struct148 *) dl);
                 addr = ((w1 & 0xFFFFFF) + D_800C6860[(w1 >> 24) & 0xF]) | 0x80000000;
                 if (++D_800C68A1 == 20) {
-                    func_15040CC8((u8 *) dl);
+                    dl_dump_around((u8 *) dl);
                     DL_TRAP();
                 }
                 if (addr >= 0x80000001 && addr < 0xA0000000 && !(addr & 7)) {
-                    func_150403C8((void *) addr, 0, (s32) dl);
+                    dl_validate_list((void *) addr, 0, (s32) dl);
                 } else {
                     DL_STOP(dl);
                 }
@@ -81,11 +83,11 @@ void func_150403C8(void *list, u32 end, s32 parent) {
                 D_800C68A0 = 1;
                 break;
             case 5:
-                bad = func_1504082C(dl);
+                bad = dlcheck_tri_invalid(dl);
                 D_800C68A0 = 1;
                 break;
             case 1:
-                bad = func_15040754((struct148 *) dl);
+                bad = dlcheck_vtx_invalid((struct148 *) dl);
                 break;
             case 0xFD:
                 D_800848B0 = dl[1];
@@ -124,7 +126,7 @@ void func_150403C8(void *list, u32 end, s32 parent) {
                 break;
         }
         if (needSync && D_800C68A0) {
-            func_15040CC8((u8 *) dl);
+            dl_dump_around((u8 *) dl);
             D_800C68A0 = 0;
             DL_TRAP();
             D_800BE9C0 = 1 - D_800BE9C0;
@@ -141,20 +143,23 @@ void func_150403C8(void *list, u32 end, s32 parent) {
 #undef DL_STOP
 #undef DL_TRAP
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6D800/func_150403C8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_6D800/dl_validate_list.s")
 #endif
 
-s32 func_1504072C(s32 arg0) {
+/* was func_1504072C */
+s32 dlcheck_addr_misaligned(s32 arg0) {
     if ((arg0 & 7) != 0) {
         return 1;
     }
     return 0;
 }
 
-void func_15040748(s32 arg0) {
+/* was func_15040748 */
+void dldump_unknown(s32 arg0) {
 }
 
-s32 func_15040754(struct148 *arg0) { // overly simple
+/* was func_15040754 */
+s32 dlcheck_vtx_invalid(struct148 *arg0) { // overly simple
     s32 temp_a2;
     s32 temp_a1;
 
@@ -165,46 +170,59 @@ s32 func_15040754(struct148 *arg0) { // overly simple
     if (temp_a1 < 0) {
         return 1;
     }
-    return func_1504072C(arg0->unk4);
+    return dlcheck_addr_misaligned(arg0->unk4);
 }
 
-void func_150407A0(void) {
+/* was func_150407A0 */
+void dldump_vtx(void) {
 }
 
-void func_150407A8(s32 arg0) {
+/* was func_150407A8 */
+void dldump_modifyvtx(s32 arg0) {
 }
 
-void func_150407B4(s32 arg0) {
+/* was func_150407B4 */
+void dldump_culldl(s32 arg0) {
 }
 
-void func_150407C0(s32 arg0) {
+/* was func_150407C0 */
+void dldump_branch_z(s32 arg0) {
 }
 
-void func_150407CC(s32 arg0) {
+/* was func_150407CC */
+void dldump_line3d(s32 arg0) {
 }
 
-void func_150407D8(s32 arg0) {
+/* was func_150407D8 */
+void dldump_rdphalf_1(s32 arg0) {
 }
 
-void func_150407E4(s32 arg0) {
+/* was func_150407E4 */
+void dldump_rdphalf_2(s32 arg0) {
 }
 
-void func_150407F0(s32 arg0) {
+/* was func_150407F0 */
+void dldump_setkeygb(s32 arg0) {
 }
 
-void func_150407FC(s32 arg0) {
+/* was func_150407FC */
+void dldump_setkeyr(s32 arg0) {
 }
 
-void func_15040808(s32 arg0) {
+/* was func_15040808 */
+void dldump_quad(s32 arg0) {
 }
 
-void func_15040814(s32 arg0) {
+/* was func_15040814 */
+void dldump_tri2(s32 arg0) {
 }
 
-void func_15040820(s32 arg0) {
+/* was func_15040820 */
+void dldump_tri_ext(s32 arg0) {
 }
 
-s32 func_1504082C(u32 *arg0) {
+/* was func_1504082C */
+s32 dlcheck_tri_invalid(u32 *arg0) {
     s32 tmp0 = (*arg0 >> 16) & 0xff;
     s32 tmp1 = (*arg0 >> 8) & 0xff;
     s32 tmp2 = (*arg0 >> 0) & 0xff;
@@ -216,131 +234,173 @@ s32 func_1504082C(u32 *arg0) {
     }
 }
 
-void func_1504086C(s32 arg0) {
+/* was func_1504086C */
+void dldump_tri1(s32 arg0) {
 }
 
-void func_15040878(s32 arg0) {
+/* was func_15040878 */
+void dldump_loadtlut(s32 arg0) {
 }
 
-void func_15040884(s32 arg0) {
+/* was func_15040884 */
+void dldump_loadtile(s32 arg0) {
 }
 
-void func_15040890(s32 arg0) {
+/* was func_15040890 */
+void dldump_rdptilesync(s32 arg0) {
 }
 
-void func_1504089C(s32 arg0) {
+/* was func_1504089C */
+void dldump_rdpfullsync(s32 arg0) {
 }
 
-void func_150408A8(s32 arg0) {
+/* was func_150408A8 */
+void dldump_rdppipesync(s32 arg0) {
 }
 
-void func_150408B4(s32 arg0) {
+/* was func_150408B4 */
+void dldump_rdploadsync(s32 arg0) {
 }
 
-void func_150408C0(s32 arg0) {
+/* was func_150408C0 */
+void dldump_setcombine(s32 arg0) {
 }
 
-s32 func_150408CC(struct148 *arg0) {
-    return func_1504072C(arg0->unk4);
+/* was func_150408CC */
+s32 dlcheck_dl_invalid(struct148 *arg0) {
+    return dlcheck_addr_misaligned(arg0->unk4);
 }
 
-void func_150408F0(s32 arg0) {
+/* was func_150408F0 */
+void dldump_dl(s32 arg0) {
 }
 
-void func_150408FC(s32 arg0) {
+/* was func_150408FC */
+void dldump_setothermode_h(s32 arg0) {
 }
 
-void func_15040908(s32 arg0) {
+/* was func_15040908 */
+void dldump_setothermode_l(s32 arg0) {
 }
 
-void func_15040914(s32 arg0) {
+/* was func_15040914 */
+void dldump_setconvert(s32 arg0) {
 }
 
-void func_15040920(s32 arg0) {
+/* was func_15040920 */
+void dldump_setscissor(s32 arg0) {
 }
 
-void func_1504092C(s32 arg0) {
+/* was func_1504092C */
+void dldump_spnoop(s32 arg0) {
 }
 
-void func_15040938(s32 arg0) {
+/* was func_15040938 */
+void dldump_noop(s32 arg0) {
 }
 
-void func_15040944(s32 arg0) {
+/* was func_15040944 */
+void dldump_setcimg(s32 arg0) {
 }
 
-void func_15040950(s32 arg0) {
+/* was func_15040950 */
+void dldump_setzimg(s32 arg0) {
 }
 
-void func_1504095C(s32 arg0) {
+/* was func_1504095C */
+void dldump_settimg(s32 arg0) {
 }
 
-void func_15040968(s32 arg0) {
+/* was func_15040968 */
+void dldump_setenvcolor(s32 arg0) {
 }
 
-void func_15040974(s32 arg0) {
+/* was func_15040974 */
+void dldump_setprimcolor(s32 arg0) {
 }
 
-void func_15040980(s32 arg0) {
+/* was func_15040980 */
+void dldump_setblendcolor(s32 arg0) {
 }
 
-void func_1504098C(s32 arg0) {
+/* was func_1504098C */
+void dldump_setfogcolor(s32 arg0) {
 }
 
-void func_15040998(s32 arg0) {
+/* was func_15040998 */
+void dldump_special_3(s32 arg0) {
 }
 
-void func_150409A4(s32 arg0) {
+/* was func_150409A4 */
+void dldump_special_2(s32 arg0) {
 }
 
-void func_150409B0(s32 arg0) {
+/* was func_150409B0 */
+void dldump_special_1(s32 arg0) {
 }
 
-void func_150409BC(s32 arg0) {
+/* was func_150409BC */
+void dldump_dma_io(s32 arg0) {
 }
 
-void func_150409C8(s32 arg0) {
+/* was func_150409C8 */
+void dldump_setfillcolor(s32 arg0) {
 }
 
-void func_150409D4(s32 arg0) {
+/* was func_150409D4 */
+void dldump_fillrect(s32 arg0) {
 }
 
-void func_150409E0(s32 arg0) {
+/* was func_150409E0 */
+void dldump_texrect(s32 arg0) {
 }
 
-void func_150409EC(s32 arg0) {
+/* was func_150409EC */
+void dldump_texrectflip(s32 arg0) {
 }
 
-void func_150409F8(s32 arg0) {
+/* was func_150409F8 */
+void dldump_loadblock(s32 arg0) {
 }
 
-void func_15040A04(s32 arg0) {
+/* was func_15040A04 */
+void dldump_settile(s32 arg0) {
 }
 
-void func_15040A10(s32 arg0) {
+/* was func_15040A10 */
+void dldump_settilesize(s32 arg0) {
 }
 
-void func_15040A1C(s32 arg0) {
+/* was func_15040A1C */
+void dldump_enddl(s32 arg0) {
 }
 
-void func_15040A28(s32 arg0) {
+/* was func_15040A28 */
+void dldump_popmtx(s32 arg0) {
 }
 
-void func_15040A34(s32 arg0) {
+/* was func_15040A34 */
+void dldump_mtx(s32 arg0) {
 }
 
-void func_15040A40(s32 arg0) {
+/* was func_15040A40 */
+void dldump_geometrymode(s32 arg0) {
 }
 
-void func_15040A4C(void) {
+/* was func_15040A4C */
+void dlcheck_stub(void) {
 }
 
-void func_15040A54(s32 arg0) {
+/* was func_15040A54 */
+void dldump_load_ucode(s32 arg0) {
 }
 
-void func_15040A60(s32 arg0) {
+/* was func_15040A60 */
+void dldump_movemem(s32 arg0) {
 }
 
-void func_15040A6C(s32 arg0) {
+/* was func_15040A6C */
+void dldump_moveword(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
@@ -351,7 +411,8 @@ extern void (*D_80084840[])(u8 *);
 // writes (G_MW_SEGMENT), follows G_DL (0xDE) calls into known segments (unknown segment: skipped) and returns on
 // G_ENDDL (0xDF) to the saved command; G_VTX (1) only steps (the asm counts its vertices in an empty loop).
 // No callers in the ROM (only the symbol table names it).
-void func_15040A78(u8 *dl, u8 *from, u8 *end) {
+/* was func_15040A78 */
+void dl_trace_segments(u8 *dl, u8 *from, u8 *end) {
     u8 *stack[21];
     u8 *cmd;
     u32 w0;
@@ -413,12 +474,13 @@ void func_15040A78(u8 *dl, u8 *from, u8 *end) {
     } while (cmd <= end || depth > 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6D800/func_15040A78.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_6D800/dl_trace_segments.s")
 #endif
 
 extern void (*D_80084840[])(u8 *);
 
-void func_15040CC8(u8 *arg0)
+/* was func_15040CC8 */
+void dl_dump_around(u8 *arg0)
 {
   u8 *new_var2;
   s32 i;
@@ -438,11 +500,11 @@ void func_15040CC8(u8 *arg0)
   while (i < 0xA);
   if (D_800848B0 != 0)
   {
-    func_1500390C(D_800848B0);
+    texture_table_find(D_800848B0);
   }
 }
 // NON-MATCHING: todo
-// void func_15040CC8(s32 *arg0) {
+// void dl_dump_around(s32 *arg0) {
 //     s32 temp_a0_2;
 //     s32 temp_s0;
 //     s32 temp_s0_2;
@@ -466,15 +528,18 @@ void func_15040CC8(u8 *arg0)
 //     }
 //     temp_a0_2 = D_800848B0;
 //     if (temp_a0_2 != 0) {
-//         func_1500390C(temp_a0_2);
+//         texture_table_find(temp_a0_2);
 //     }
 // }
 
-void func_15040D60(s32 arg0) {
+/* was func_15040D60 */
+void dldump_setprimdepth(s32 arg0) {
 }
 
-void func_15040D6C(s32 arg0) {
+/* was func_15040D6C */
+void dldump_texture(s32 arg0) {
 }
 
-void func_15040D78(s32 arg0) {
+/* was func_15040D78 */
+void dldump_rdpsetothermode(s32 arg0) {
 }

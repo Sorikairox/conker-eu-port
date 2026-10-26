@@ -6,12 +6,12 @@
 
 #ifdef NON_MATCHING
 void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, ...);
-s32 func_1502B7F0(s32 *arg0, s32 arg1, ...);
-s32 func_1510D3E0(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList);
-s32 func_15004BF0(s32 arg0);
-void func_15004CE0(Gfx *arg0, s32 arg1);
-void func_15004AAC(u8 *arg0, s32 arg1);
+s32 asset_load_with_subfiles(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, ...);
+s32 asset_load_ptr(s32 *arg0, s32 arg1, ...);
+s32 texture_resolve_dl_ids(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList);
+s32 world_object_alloc_id(s32 arg0);
+void gfx_dl_relocate_seg_e(Gfx *arg0, s32 arg1);
+void world_object_calc_radius(u8 *arg0, s32 arg1);
 extern u16 D_800BE6C0;
 extern u16 D_800BE6C2;
 extern u16 D_800BE6C4;
@@ -38,13 +38,14 @@ extern s32 D_800DC3C8;
  * D_800DC3C8 multiplayer objects). Per object: position (s16 +0x10..), origin floats, scale, the type's callback
  * table D_80089030 (types < 0xFFFF; 0x28 / 0x42 set the +0x70 bit 2 and keep it for the next multiplayer ones, type
  * 0x16 = "has a callback"), its model: an earlier object with the same key (+0xC / +0x10) shares its vertices /
- * display list, else the model is loaded (func_1502B6BC 3/id, kind 0 in +0x1C) or taken from the level segments
+ * display list, else the model is loaded (asset_load_with_subfiles 3/id, kind 0 in +0x1C) or taken from the level segments
  * D_800B1260 (kind 1 / 2). Then the vertex buffers (+0x20 / +0x24 copies for moving objects, bit 0 of +0x70),
- * the per-object arrays D_800DC310 / 314 / 328 / 32C / 300[4] / 3C4, and object ids +0x72 (func_15004BF0).
+ * the per-object arrays D_800DC310 / 314 / 328 / 32C / 300[4] / 3C4, and object ids +0x72 (world_object_alloc_id).
  * arg1 is unused. Literal quirks kept: the model segment `seg` is only loaded for kind-0 objects but is also passed
- * to func_15004CE0 for kind 1 / 2 / other objects without a shared model (the asm keeps it in s6 from the previous
+ * to gfx_dl_relocate_seg_e for kind 1 / 2 / other objects without a shared model (the asm keeps it in s6 from the previous
  * kind-0 object; uninitialised stack before the first one: NULL here); a type >= 0xFFFF is stored as the callback. */
-void func_150039E0(s32 arg0, s32 arg1) {
+/* was func_150039E0 */
+void world_objects_load(s32 arg0, s32 arg1) {
     s32 bufA;          /* sp+0xA0: level placement list */
     s32 bufB;          /* sp+0x9C: multiplayer placement list */
     s32 found;         /* sp+0xA8 */
@@ -72,10 +73,10 @@ void func_150039E0(s32 arg0, s32 arg1) {
     bufB = 0;
     keepBit2 = 0;
     D_800BE6C0 = 0;
-    nA = (u32) func_1502B7F0(&bufA, 2, 0xB, arg0) / 0x44;
+    nA = (u32) asset_load_ptr(&bufA, 2, 0xB, arg0) / 0x44;
     D_800DBF00 = nA;
     D_800DC320 = D_800DBF00;
-    nB = (u32) func_1502B7F0(&bufB, 3, 0xC, arg0, 2) / 0x44;
+    nB = (u32) asset_load_ptr(&bufB, 3, 0xC, arg0, 2) / 0x44;
     D_800DC3C8 = nB;
     D_800DC320 = D_800DC320 + nB;
     D_800DBEF4 = allocate_memory(D_800DC320 * 0xA0, 1, 2, 0);
@@ -160,7 +161,7 @@ void func_150039E0(s32 arg0, s32 arg1) {
                 }
             }
             if (link == 0) {
-                seg = (u8 *) func_1502B6BC(&found, 0, NULL, 2, 3, id);
+                seg = (u8 *) asset_load_with_subfiles(&found, 0, NULL, 2, 3, id);
                 WPTR(obj, 0xC) = seg;
             }
             if (link != 0) {
@@ -201,7 +202,7 @@ void func_150039E0(s32 arg0, s32 arg1) {
                 if (W8(src, 0x33) != 0) {
                     W8(obj, 0x72) = W8(src, 0x33);
                 } else {
-                    W8(obj, 0x72) = func_15004BF0(1);
+                    W8(obj, 0x72) = world_object_alloc_id(1);
                 }
             }
             if (id == 0x71) {
@@ -261,16 +262,16 @@ void func_150039E0(s32 arg0, s32 arg1) {
             if (W8(src, 0x33) != 0) {
                 W8(obj, 0x72) = W8(src, 0x33);
             } else {
-                W8(obj, 0x72) = func_15004BF0(1);
+                W8(obj, 0x72) = world_object_alloc_id(1);
             }
         }
-        func_15004AAC(obj, (s32) src);
+        world_object_calc_radius(obj, (s32) src);
         if (W32(obj, 0x38) == 0 && hasCb == 0) {
             W8(obj, 0x6F) |= 0x20;
         }
         if (link == 0) {
-            func_1510D3E0((Gfx *) WPTR(obj, 0x1C), 0, 1, 0x3F, NULL);
-            func_15004CE0((Gfx *) WPTR(obj, 0x1C), (s32) seg);
+            texture_resolve_dl_ids((Gfx *) WPTR(obj, 0x1C), 0, 1, 0x3F, NULL);
+            gfx_dl_relocate_seg_e((Gfx *) WPTR(obj, 0x1C), (s32) seg);
         }
     }
 
@@ -318,7 +319,7 @@ void func_150039E0(s32 arg0, s32 arg1) {
     }
     for (k = D_800DBF00; k < D_800DC320; k++) {
         if (W8(WOBJ(k), 0x72) == 0) {
-            W8(WOBJ(k), 0x72) = func_15004BF0(0);
+            W8(WOBJ(k), 0x72) = world_object_alloc_id(0);
         }
     }
 }
@@ -330,41 +331,44 @@ void func_150039E0(s32 arg0, s32 arg1) {
 #undef WPTR
 #undef WF32
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/func_150039E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/world_objects_load.s")
 #endif
 
 // FIXME: matches but something isnt right
-void func_15004574(void) {
+/* was func_15004574 */
+void world_object_cache_selected(void) {
     if (D_800DBF88 != 0xFF) {
         D_800DBF8C = D_800DBEF4[D_800DBF88].unk1C;
         D_800DBF90 = D_800DBEF4[D_800DBF88].unk28;
     }
 }
 
-void func_150045BC(void) {
+/* was func_150045BC */
+void world_objects_noop(void) {
 }
 
 #ifdef NON_MATCHING
-void func_15004A4C(void);
-void func_15114E8C(f32 (*arg0)[4], u8 *arg1);
+void world_objects_clear_arrays(void);
+void world_record_build_matrix(f32 (*arg0)[4], u8 *arg1);
 void func_150A7E40(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-void func_1510F800(s32 arg0);
+void collision_select_area(s32 arg0);
 s32 func_150A49D0(s32 count, s32 *idList, s32 force);
-void func_1510ED24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
-void func_15115630();
-void func_151165D8();
-void func_15116690();
+void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
+void scenery_handler_noop();
+void scenery_uv_scroll_update();
+void scenery_start_pending_anim();
 extern f32 D_800DC338[4][4];
 extern f32 D_800DC378[4][4];
 extern Mtx **D_800895F0[2];       /* per DL buffer: -> the world-object matrix array (0x40 each) */
 extern u16 D_800D3C00;
 
 /* Level start for the D_800DC320 world objects (0xA0-byte records at D_800DBEF4): reset, identity camera matrices,
- * then per object: kind 3 for no/known callbacks, its matrix (func_15114E8C) into both DL buffers' D_800895F0
+ * then per object: kind 3 for no/known callbacks, its matrix (world_record_build_matrix) into both DL buffers' D_800895F0
  * arrays unless static (+0x70 bit 0); static objects get their vertices (+0x28, 0x10 stride) transformed once into
- * +0x20 and copied to +0x24; func_150A49D0 for flagged ones. Second pass: func_1510ED24 per visible object
+ * +0x20 and copied to +0x24; func_150A49D0 for flagged ones. Second pass: collision_find_floor per visible object
  * (bounds from +0x10/+0x12/+0x14, range -10000..20000) into +0x80/+0x84. arg0 (the level) is unused. */
-void func_150045C4(s32 arg0) {
+/* was func_150045C4 */
+void world_objects_level_start(s32 arg0) {
     f32 mf[4][4];     /* sp+0x98 */
     f32 ox, oy, oz;   /* sp+0x84, 0x80, 0x7C */
     s32 out0;         /* sp+0x88 */
@@ -377,26 +381,26 @@ void func_150045C4(s32 arg0) {
     s32 b;
     void *cb;
 
-    func_15004A4C();
+    world_objects_clear_arrays();
     guMtxIdentF(D_800DC338);
     guMtxIdentF(D_800DC378);
     for (i = 0; i < D_800DC320; i++) {
         r = (u8 *)D_800DBEF4 + i * 0xA0;
         cb = *(void **)(r + 0x38);
-        if (cb == NULL || cb == (void *)func_151165D8 || cb == (void *)func_15116690) {
+        if (cb == NULL || cb == (void *)scenery_uv_scroll_update || cb == (void *)scenery_start_pending_anim) {
             r[0x4E] = 3;
         }
         if (!(r[0x70] & 1)) {
-            func_15114E8C(mf, r);
+            world_record_build_matrix(mf, r);
             guMtxF2L(mf, *D_800895F0[D_800BE9C0] + i);
             b = D_800BE9C0;
             bcopy(*D_800895F0[b] + i, *D_800895F0[b == 0] + i, 0x40);
         }
-        if (*(void **)(r + 0x38) == (void *)func_15115630) {
+        if (*(void **)(r + 0x38) == (void *)scenery_handler_noop) {
             *(void **)(r + 0x38) = NULL;
         }
         if ((r[0x70] & 1) == 1) {
-            func_15114E8C(mf, r);
+            world_record_build_matrix(mf, r);
             for (j = 0; j < *(u16 *)(r + 0x16); j++) {
                 v = (s16 *)(*(u8 **)(r + 0x28) + j * 0x10);
                 func_150A7E40(mf, v[0], v[1], v[2], &ox, &oy, &oz);
@@ -409,7 +413,7 @@ void func_150045C4(s32 arg0) {
             }
             bcopy(*(void **)(r + 0x20), *(void **)(r + 0x24), *(u16 *)(r + 0x16) << 4);
         }
-        func_1510F800(2);
+        collision_select_area(2);
         if ((r[0x6F] & 0x80) == 0x80 && (r[0x4F] & 0x60) != 0x20) {
             D_800D3C00 = i;
             func_150A49D0(1, (s32 *)&D_800D3C00, 1);
@@ -423,16 +427,17 @@ void func_150045C4(s32 arg0) {
         if ((r[0x6F] & 0x20) != 0x20) {
             continue;
         }
-        func_1510ED24((s32)&out0, 0, (s32)&out1, 0, (s32)&out2, 0, *(s16 *)(r + 0x10), *(s16 *)(r + 0x12),
+        collision_find_floor((s32)&out0, 0, (s32)&out1, 0, (s32)&out2, 0, *(s16 *)(r + 0x10), *(s16 *)(r + 0x12),
                       *(s16 *)(r + 0x14), *(s16 *)(r + 0x12), i + 1, 0, -10000.0f, 20000.0f);
         *(s32 *)(r + 0x80) = out0;
         *(f32 *)(r + 0x84) = out1;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/func_150045C4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/world_objects_level_start.s")
 #endif
-void func_150049A4(Gfx *arg0, s32 arg1, s32 arg2) {
+/* was func_150049A4 */
+void gfx_dl_relocate_segments(Gfx *arg0, s32 arg1, s32 arg2) {
     s32 i;
 
     for (i = 0; ((struct_eu_cmd8 *)&arg0[i])->cmd != -0x21; i++) {
@@ -451,7 +456,8 @@ void func_150049A4(Gfx *arg0, s32 arg1, s32 arg2) {
         }
     }
 }
-void func_15004A4C(void) {
+/* was func_15004A4C */
+void world_objects_clear_arrays(void) {
     s32 i;
 
     for (i = 0; i < D_800DC320; i++) {
@@ -465,7 +471,8 @@ extern u16 D_800BE6C0;
 extern u16 D_800BE6C2;
 extern u16 D_800BE6C4;
 
-void func_15004AAC(u8 *arg0, s32 arg1) {
+/* was func_15004AAC */
+void world_object_calc_radius(u8 *arg0, s32 arg1) {
     f32 temp_f0;
     f32 temp_f14;
     f32 temp_f18;
@@ -515,9 +522,10 @@ void func_15004AAC(u8 *arg0, s32 arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/func_15004AAC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/world_object_calc_radius.s")
 #endif
-s32 func_15004BF0(s32 arg0) {
+/* was func_15004BF0 */
+s32 world_object_alloc_id(s32 arg0) {
     s32 i;
     s32 id;
     s32 first;
@@ -550,7 +558,8 @@ s32 func_15004BF0(s32 arg0) {
     }
     return id;
 }
-void func_15004CE0(Gfx *arg0, s32 arg1) {
+/* was func_15004CE0 */
+void gfx_dl_relocate_seg_e(Gfx *arg0, s32 arg1) {
     s32 i;
     struct_eu_cmd8 *p;
 

@@ -95,9 +95,9 @@ void func_151741D0(s32 arg0, s32 arg1) {
     func_15173F20(0, 0, arg0, arg1, 0);
 }
 
-s32 func_151149AC(u8);
+s32 world_record_find(u8);
 void func_15174200(s32 arg0, s32 arg1, s32 arg2) {
-    u8 *p = (u8 *)func_151149AC(arg2);
+    u8 *p = (u8 *)world_record_find(arg2);
     u32 v; // fakematch: named temp fixes the order of the argument setup
 
     if (p != NULL) {

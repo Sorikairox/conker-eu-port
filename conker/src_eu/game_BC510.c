@@ -3,10 +3,10 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_1508F7BC(void);
-void func_1508F0D4(void);
-void func_1508F9F4(void); /* P129 */
-void func_1509093C(void); /* P129 */
+void hud_health_drop_piece(void);
+void hud_health_update(void);
+void underwater_bubbles_update(void); /* P129 */
+void underwater_air_meter_update(void); /* P129 */
 s32 func_1518C900(s32);
 void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 extern s16 D_8009E060[];
@@ -18,7 +18,8 @@ extern u8 D_800D2880[];
 extern s8 D_800D288D;
 extern s8 D_800D289D;
 extern s32 D_800D28E0;
-void func_1508F060(void)
+/* was func_1508F060 */
+void hud_bubbles_reset(void)
 {
   int *new_var2;
   int new_var;
@@ -35,10 +36,11 @@ void func_1508F060(void)
   D_800D28E0 = 0;
 }
 
-void func_1508F0A4(void) {
-    func_1508F0D4();
-    func_1508F9F4();
-    func_1509093C();
+/* was func_1508F0A4 */
+void hud_health_air_update(void) {
+    hud_health_update();
+    underwater_bubbles_update();
+    underwater_air_meter_update();
 }
 
 #ifdef NON_MATCHING
@@ -50,7 +52,8 @@ extern f32 D_800D2848;
 extern s32 D_800D2858;
 extern s32 D_800D2864;
 
-void func_1508F0D4(void) {
+/* was func_1508F0D4 */
+void hud_health_update(void) {
     s32 sp40;
     s32 sp34;
     s32 *sp30;
@@ -112,7 +115,7 @@ void func_1508F0D4(void) {
             do {
                 D_800D2457 = var_v0 - 1;
                 if (D_800D2848 == (f32) D_8009E08A) {
-                    func_1508F7BC();
+                    hud_health_drop_piece();
                 }
                 var_v0 = D_800D2457;
             } while (var_v0 != D_800CC8BA);
@@ -124,7 +127,7 @@ void func_1508F0D4(void) {
             do {
                 D_800D2457 = var_v0 + 1;
                 if (D_800D2848 == (f32) D_8009E08A) {
-                    func_1508F9C4();
+                    hud_health_add_piece();
                 }
                 var_v0 = D_800D2457;
             } while (var_v0 != D_800CC8BA);
@@ -171,7 +174,7 @@ void func_1508F0D4(void) {
                     do {
                         sp34 = var_v0_2;
                         sp40 = var_a0_3;
-                        func_1508F7BC();
+                        hud_health_drop_piece();
                         var_a0_3 += 1;
                     } while (var_a0_3 != var_v0_2);
                 }
@@ -187,7 +190,7 @@ void func_1508F0D4(void) {
                     do {
                         sp34 = var_v0_3;
                         sp40 = var_a0_4;
-                        func_1508F9C4();
+                        hud_health_add_piece();
                         var_a0_4 += 1;
                     } while (var_a0_4 != var_v0_3);
                 }
@@ -251,15 +254,16 @@ void func_1508F0D4(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1508F0D4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_health_update.s")
 #endif
-void func_1508F7BC(void) {
+/* was func_1508F7BC */
+void hud_health_drop_piece(void) {
     f32 sp48[4][4];
     f32 sp44;
     struct256 *temp_v0;
 
     D_800D2456 -= 1;
-    D_800D2890.unk0 = (u32) (func_150ADA20() % 5U);
+    D_800D2890.unk0 = (u32) (random_int() % 5U);
     D_800D2890.unk8 = sqrtf(25.0f - (D_800D2890.unk0 * D_800D2890.unk0));
     temp_v0 = allocate_memory(sizeof(*temp_v0), 1, 1, 0);
     temp_v0->unk80 = D_800D245C;
@@ -267,21 +271,22 @@ void func_1508F7BC(void) {
     guMtxL2F(&sp48, (D_800D2456 << 7) + ((D_800BE9C0 ^ 1) << 6) + &D_800D2590);
     func_1503E5F8(&sp48, &temp_v0->unk84, &temp_v0->unk88, &temp_v0->unk8C, &temp_v0->unk9C, &temp_v0->unkA0, &temp_v0->unkA4, &sp44, &sp44, &sp44);
 
-    temp_v0->unk90 = (u32)((func_150ADA20() & 0xF) + 10);
-    temp_v0->unk94 = (u32)((func_150ADA20() & 0x1F) + 20);
+    temp_v0->unk90 = (u32)((random_int() & 0xF) + 10);
+    temp_v0->unk94 = (u32)((random_int() & 0x1F) + 20);
     temp_v0->unk98 = 0.0f;
-    temp_v0->unkA8 = (u32)(func_150ADA20() & 0xF);
-    temp_v0->unkAC = (u32)(func_150ADA20() & 0xF);
-    temp_v0->unkB0 = (u32)(func_150ADA20() & 0xF);
+    temp_v0->unkA8 = (u32)(random_int() & 0xF);
+    temp_v0->unkAC = (u32)(random_int() & 0xF);
+    temp_v0->unkB0 = (u32)(random_int() & 0xF);
     temp_v0->unkB4 = 120;
 }
 
-void func_1508F9C4(void) {
+/* was func_1508F9C4 */
+void hud_health_add_piece(void) {
     D_800D2410[D_800D2456++] = 0.0f;
 }
 
 #ifdef NON_MATCHING
-/* P129: the six 16-byte bubble records D_800D2880 .. D_800D28E0 (drawn by func_15090630):
+/* P129: the six 16-byte bubble records D_800D2880 .. D_800D28E0 (drawn by hud_bubbles_draw):
  *   +0 s16 x, +2 s16 y, +4 s16 x centre, +6 s16 size, +8 s16 sway amplitude, +A s16 timer,
  *   +C u8 rise speed, +D u8 state (0 free, 1 growing, 2 rising, 3 popped), +E u8 sway phase, +F u8 wobble phase.
  * D_800D28E0 = frames until the next bubble may spawn. */
@@ -289,7 +294,8 @@ void func_1508F9C4(void) {
 
 // underwater_bubbles_update: spawns, grows, floats and pops the HUD air bubbles; a new bubble needs the player
 // (object 0) under water for unkB2 >= 0x5B and a free spawn timer; its pop delay is (6 - min(unkB2 / 240, 6)) * 9.
-void func_1508F9F4(void) {
+/* was func_1508F9F4 */
+void underwater_bubbles_update(void) {
     u8 *r;
     s32 value;
     s32 spawn;
@@ -308,8 +314,8 @@ void func_1508F9F4(void) {
     value = D_800CC2D0[0].in_water ? D_800CC2D0[0].unkB2 : 0;
     /* The asm never sets the spawn flag (sp+0x44) to non-zero: it only clears it (value < 0x5B, or delay 0) and
      * otherwise reads whatever the stack slot holds. On the N64 that slot is always the s1 that func_1517ABB0
-     * saved there just before (func_15019414 -> func_1517ABB0, then -> func_1508F0A4 -> func_1508F0D4, which
-     * never writes it): func_1501878C's s1 = the address of its display list pointer (EU 0x800BEDF0), never 0. So the
+     * saved there just before (game_frame_end_update -> func_1517ABB0, then -> hud_health_air_update -> hud_health_update, which
+     * never writes it): game_frame_step's s1 = the address of its display list pointer (EU 0x800BEDF0), never 0. So the
      * flag is effectively "spawn allowed". The asm's delay (s7) is stack garbage only when value < 0x5B, where
      * it is never used (no spawn); 0 here. */
     delay = 0;
@@ -341,9 +347,9 @@ void func_1508F9F4(void) {
                 BUB_S16(r, 2) = 0x60;
                 BUB_S16(r, 6) = 0;
                 r[0xC] = 0;
-                r[0xE] = func_150ADA20();
+                r[0xE] = random_int();
                 BUB_S16(r, 8) = 0x500;
-                sway = func_15048A40(r[0xE]);
+                sway = math_sin_u8(r[0xE]);
                 r[0xF] = 0;
                 BUB_S16(r, 0xA) = delay;
                 BUB_S16(r, 4) = 0xFC - ((s32)(sway * BUB_S16(r, 8)) >> 8);
@@ -374,7 +380,7 @@ void func_1508F9F4(void) {
             BUB_S16(r, 6) = v;
             r[0xE] += frames * 5;
             BUB_S16(r, 8) += frames * 30;
-            sway = func_15048A40(r[0xE]);
+            sway = math_sin_u8(r[0xE]);
             r[0xF] += D_800BE9E4 * 10;
             BUB_S16(r, 0) = ((s32)(sway * BUB_S16(r, 8)) >> 8) + BUB_S16(r, 4);
             break;
@@ -388,18 +394,18 @@ void func_1508F9F4(void) {
 }
 #undef BUB_S16
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1508F9F4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/underwater_bubbles_update.s")
 #endif
 #ifdef NON_MATCHING
-s32 *func_150938BC(s32 *arg0);
+s32 *hud_clock_draw(s32 *arg0);
 Gfx *func_15095350(Gfx *arg0);
 Gfx *func_15096D44(Gfx *arg0);
 void func_1518CF74(s32 arg0);
-Gfx *func_150900F0(Gfx *, s32);
-Gfx *func_150911F4(Gfx *);
-Gfx *func_150918EC(Gfx *);
-Gfx *func_15090630(Gfx *);
-Gfx *func_15093B58(Gfx *, s32, s16 *, s32, s32);
+Gfx *hud_health_draw(Gfx *, s32);
+Gfx *hud_air_meter_draw(Gfx *);
+Gfx *mp_hud_draw_views(Gfx *);
+Gfx *hud_bubbles_draw(Gfx *);
+Gfx *radar_draw(Gfx *, s32, s16 *, s32, s32);
 extern u16 D_800D2874;
 extern u8 D_800D27F0[];
 extern s32 D_800BEFC4;          /* display list capacity, in Gfx commands */
@@ -409,7 +415,8 @@ extern f32 D_800D2848;
 extern s32 D_800D29A8;
 
 /* Overlay pass after the world: returns `gdl` unchanged when the list would overflow. */
-u8 *func_1508FD38(u8 *arg0) {
+/* was func_1508FD38 */
+u8 *hud_draw(u8 *arg0) {
     Gfx *start = (Gfx *)arg0;
     Gfx *gdl = start;
     s16 table[33];
@@ -428,14 +435,14 @@ u8 *func_1508FD38(u8 *arg0) {
     gdl++;
 
     if (D_800BE616 != 0) {
-        gdl = func_150918EC(gdl);
+        gdl = mp_hud_draw_views(gdl);
         if (D_800BEFC4 < gdl - D_800BEDE8[D_800BE9C0]) {
             return (u8 *)start;
         }
         return (u8 *)gdl;
     }
     if (D_800D2458 != 0) {
-        gdl = (Gfx *)func_150938BC((s32 *)gdl);
+        gdl = (Gfx *)hud_clock_draw((s32 *)gdl);
     }
     if (D_800C35EA == 1) {
         return (u8 *)gdl;
@@ -454,17 +461,17 @@ u8 *func_1508FD38(u8 *arg0) {
                 table[i] = (f32)i * f;
             }
         }
-        gdl = func_15093B58(gdl, scale, table, 0x2C30, 1);
+        gdl = radar_draw(gdl, scale, table, 0x2C30, 1);
     }
     if (D_800D2848 != (f32)D_8009E084) {
-        gdl = func_150900F0(gdl, 0);
+        gdl = hud_health_draw(gdl, 0);
     } else if (D_800D29A8 != 0) {
         func_1518CF74(0xB8);
         D_800D29A8 = 0;
     }
-    gdl = func_150911F4(gdl);
+    gdl = hud_air_meter_draw(gdl);
     gdl = func_15095350(gdl);
-    gdl = func_15090630(gdl);
+    gdl = hud_bubbles_draw(gdl);
     gdl = func_15096D44(gdl);
     if (D_800BEFC4 < gdl - D_800BEDE8[D_800BE9C0]) {
         return (u8 *)start;
@@ -472,12 +479,13 @@ u8 *func_1508FD38(u8 *arg0) {
     return (u8 *)gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1508FD38.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_draw.s")
 #endif
 #ifdef NON_MATCHING
 /* Draws the D_800D29A8 display list once per world piece (D_8009E060 positions, D_800D2410 scales; matrices in
  * D_800D2590) and, in the level variant (arg1 == 0), once per D_800D245C object. arg1 != 0: front-end variant. */
-Gfx *func_150900F0(Gfx *gdlArg, s32 arg1) {
+/* was func_150900F0 */
+Gfx *hud_health_draw(Gfx *gdlArg, s32 arg1) {
     u8 *arg0 = (u8 *)gdlArg;
     f32 rot[4][4];   /* spB8 */
     f32 mf[4][4];    /* spF8; row 3 = sp128 */
@@ -546,7 +554,7 @@ Gfx *func_150900F0(Gfx *gdlArg, s32 arg1) {
         count = D_800CC8BA;
         py = (f32)((s16 *)&D_8009E084)[4] - 52.0f;
         pz = (f32)((s16 *)&D_8009E084)[5] - 344.7f;
-        func_150A8050(rot, 50.0f, -20.0f, -20.0f);
+        mtxf_rotate_xyz_deg(rot, 50.0f, -20.0f, -20.0f);
         scale = 1.0f;
         var_v0 = dl;
         do {
@@ -562,17 +570,17 @@ Gfx *func_150900F0(Gfx *gdlArg, s32 arg1) {
         px = (&D_800D2848)[0];
         py = (&D_800D2848)[1];
         pz = (&D_800D2848)[2];
-        func_150A8050(rot, ((f32 *)&D_800D2858)[0] + 50.0f, -20.0f, ((f32 *)&D_800D2858)[2] + -20.0f);
+        mtxf_rotate_xyz_deg(rot, ((f32 *)&D_800D2858)[0] + 50.0f, -20.0f, ((f32 *)&D_800D2858)[2] + -20.0f);
         scale = 0.0f; /* asm: uninitialised sp138, always replaced by D_800D2410[i] below */
     }
-    func_15043EC8(rot, 1.0f, 1.0f, 1.0f, px, py, pz);
+    mtxf_scale_set_trans(rot, 1.0f, 1.0f, 1.0f, px, py, pz);
     pos = D_8009E060;
     mtx = &D_800D2590;
     for (i = 0; i < count; i++) {
         if (arg1 == 0) {
             scale = D_800D2410[i];
         }
-        func_150A7CB0(mf, *(s32 *)&scale, *(s32 *)&scale, *(s32 *)&scale);
+        mtxf_scale(mf, *(s32 *)&scale, *(s32 *)&scale, *(s32 *)&scale);
         mf[3][0] = (f32)pos[0];
         mf[3][1] = (f32)pos[1];
         mf[3][2] = (f32)pos[2];
@@ -589,7 +597,7 @@ Gfx *func_150900F0(Gfx *gdlArg, s32 arg1) {
     }
     if (arg1 == 0) {
         for (obj = D_800D245C; obj != NULL; obj = obj->unk80) {
-            func_15043E68((Mtx *)((u8 *)obj + (D_800BE9C0 << 6)), obj->unk9C, obj->unkA0, obj->unkA4, obj->unk84, obj->unk88, obj->unk8C);
+            mtx_build_rot_trans((Mtx *)((u8 *)obj + (D_800BE9C0 << 6)), obj->unk9C, obj->unkA0, obj->unkA4, obj->unk84, obj->unk88, obj->unk8C);
             ((s32 *)var_s1)[0] = 0xDA380003;
             ((s32 *)var_s1)[1] = (s32)((u8 *)obj + (D_800BE9C0 << 6));
             var_s1 += 8;
@@ -601,16 +609,17 @@ Gfx *func_150900F0(Gfx *gdlArg, s32 arg1) {
     return (Gfx *)var_s1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150900F0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_health_draw.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1510D66C(s32, s32 *, s32, s32);
+s32 texture_cache_lookup(s32, s32 *, s32, s32);
 u8 *func_15095380(u8 *, s32 *, s32, s32 *, s32, s32, s32, s32, s32);
 u8 *func_15095E58(u8 *, s32 *, f32, f32);
 extern s32 D_80090784;
 extern s32 D_80091BF0;
 
-Gfx *func_15090630(Gfx *gdlArg) {
+/* was func_15090630 */
+Gfx *hud_bubbles_draw(Gfx *gdlArg) {
     u8 *arg0 = (u8 *)gdlArg;
     s32 sprBuf[4]; /* sprite state for func_15095380 / func_15095E58: +6 w, +8 h (s16), +0xA alpha, +0xD flip flags */
     u8 *spr = (u8 *)sprBuf;
@@ -649,10 +658,10 @@ Gfx *func_15090630(Gfx *gdlArg) {
         if ((temp_v0 == 1) || (temp_v0 == 2)) {
             if (var_s5 != 0) {
                 var_s5 = 0;
-                func_1510D66C(D_80091BF0, &sp84, 3, 0);
+                texture_cache_lookup(D_80091BF0, &sp84, 3, 0);
                 var_s2 = func_15095380(var_s2, &D_80090784, 0, (s32 *)spr, 0, 0, 0, 2, 3);
             }
-            temp_f0 = func_15048A40((*(u8 *)((u8 *)var_s0 + 0xF)));
+            temp_f0 = math_sin_u8((*(u8 *)((u8 *)var_s0 + 0xF)));
             temp_f2 = (f32) (*(s16 *)((u8 *)var_s0 + 6));
             *(s16 *)(spr + 6) = (s16) (s32) (temp_f2 * ((0.2f * temp_f0) + 1.0f));
             *(s16 *)(spr + 8) = (s16) (s32) (temp_f2 * ((-0.2f * temp_f0) + 1.0f));
@@ -670,10 +679,10 @@ Gfx *func_15090630(Gfx *gdlArg) {
             temp_s4 = (*(s16 *)((u8 *)var_s0_2 + 2));
             *(s16 *)(spr + 6) = temp_v0_2;
             *(s16 *)(spr + 8) = temp_v0_2;
-            if ((u32) (func_150ADA20() & 0xFF) < 0x80U) {
+            if ((u32) (random_int() & 0xFF) < 0x80U) {
                 var_s1 = 1;
             }
-            if ((u32) (func_150ADA20() & 0xFF) < 0x80U) {
+            if ((u32) (random_int() & 0xFF) < 0x80U) {
                 var_s1 |= 2;
             }
             *(s8 *)(spr + 0xD) = var_s1;
@@ -693,7 +702,7 @@ Gfx *func_15090630(Gfx *gdlArg) {
     return (Gfx *)(var_s2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_15090630.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_bubbles_draw.s")
 #endif
 #ifdef NON_MATCHING
 /* P129: the air meter state at D_800D28E8 + 0x80 (drawn by func_15090AE8 with D_800D28E8's two 0x40 matrices). */
@@ -731,7 +740,8 @@ s32 func_15030100(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out
 // underwater_air_meter_update: animates the HUD air meter while the player is under water (object 0's in_water,
 // unkB2 = time under water): loads model 0xB9 once, blends its vertices towards the target shape around the air
 // level, tints them, wobbles the meter when air runs low and drops it once the air is gone (unkB2 >= 1440).
-void func_1509093C(void) {
+/* was func_1509093C */
+void underwater_air_meter_update(void) {
     AirMeter *am = (AirMeter *)((u8 *)&D_800D28E8 + 0x80);
     s32 used;
     s32 *dls;
@@ -762,7 +772,7 @@ void func_1509093C(void) {
         am->wobble = 0.0f;
         am->wobble_vel = 0.0f;
         am->drop_vel = D_8009E0FC;
-        am->wobble_timer = (func_150ADA20() & 0x3F) + 0x3C;
+        am->wobble_timer = (random_int() & 0x3F) + 0x3C;
     }
     am->level = (f32)D_800CC2D0[0].unkB2 / 720.0f;
     if (am->level > 1.0f) {
@@ -807,7 +817,7 @@ void func_1509093C(void) {
             am->base[i * 10 + 9] = *(u8 *)(data + i * 16 + 0xF);
         }
         /* (the asm runs this as a one-pass loop) */
-        func_1502B7F0((s32 *)&am->target, 2, 0x18, 0);
+        asset_load_ptr((s32 *)&am->target, 2, 0x18, 0);
     }
     vtx = am->vtx[D_800BE9C0];
     base = am->base;
@@ -885,7 +895,7 @@ void func_1509093C(void) {
         am->wobble = -4.0f - am->wobble;
     } else if (am->wobble_timer == 0 && used < 1200 && am->wobble >= 0.0f && am->wobble < step) {
         /* a swing passed through 0 with no kick pending: rest until the next random kick */
-        am->wobble_timer = (func_150ADA20() & 0x3F) + 0x3C;
+        am->wobble_timer = (random_int() & 0x3F) + 0x3C;
         am->wobble = 0.0f;
         am->wobble_vel = 0.0f;
     }
@@ -895,18 +905,19 @@ void func_1509093C(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1509093C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/underwater_air_meter_update.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1510D66C(s32, s32 *, s32, s32);
+s32 texture_cache_lookup(s32, s32 *, s32, s32);
 extern s32 D_800837D0;
 extern s32 D_80083950;
 extern s32 D_800844F0;
 extern s32 D_80084520;
 extern s32 D_800D28E8;
 
-Gfx *func_150911F4(Gfx *gdlArg) {
+/* was func_150911F4 */
+Gfx *hud_air_meter_draw(Gfx *gdlArg) {
     u8 *arg0 = (u8 *)gdlArg;
     s32 sp90;
     s32 temp_v0;
@@ -952,7 +963,7 @@ Gfx *func_150911F4(Gfx *gdlArg) {
             (*(s32 **)((u8 *)temp_s0_4 + 4)) = &D_80083950;
             var_s0_2 = temp_s0_4 + 8;
         }
-        func_15043D90((u8 *)&D_800D28E8 + (D_800BE9C0 << 6), -1.0f - (*(f32 *)((u8 *)(&D_800D28E8) + 0xA0)), -11.0f + (*(f32 *)((u8 *)(&D_800D28E8) + 0xA8)), 0.0f, 4.05f, 4.05f, 4.05f, 667.0f, 152.0f, -1668.0f);
+        mtx_build_rot_scale_trans((u8 *)&D_800D28E8 + (D_800BE9C0 << 6), -1.0f - (*(f32 *)((u8 *)(&D_800D28E8) + 0xA0)), -11.0f + (*(f32 *)((u8 *)(&D_800D28E8) + 0xA8)), 0.0f, 4.05f, 4.05f, 4.05f, 667.0f, 152.0f, -1668.0f);
         (*(s32 *)((u8 *)var_s0_2 + 0)) = 0xDA380003;
         temp_s0_5 = var_s0_2 + 8;
         (*(u8 **)((u8 *)var_s0_2 + 4)) = (u8 *) ((u8 *)&D_800D28E8 + (D_800BE9C0 << 6));
@@ -972,25 +983,25 @@ Gfx *func_150911F4(Gfx *gdlArg) {
         var_s0_3 = temp_s0_9 + 8;
         (*(s32 *)((u8 *)temp_s0_9 + 4)) = (s32) (*(s32 *)((u8 *)(((u8 *)&D_800D28E8 + (D_800BE9C0 * 4))) + 0x84));
         if ((*(u16 *)((u8 *)(&D_800D28E8) + 0xB0)) != 0) {
-            temp_v0 = func_1510D66C((*(u16 *)((u8 *)(&D_800D28E8) + 0xB0)), &sp90, 3, 0);
+            temp_v0 = texture_cache_lookup((*(u16 *)((u8 *)(&D_800D28E8) + 0xB0)), &sp90, 3, 0);
             (*(s32 *)((u8 *)var_s0_3 + 0)) = 0xDB060018;
             (*(s32 *)((u8 *)var_s0_3 + 4)) = temp_v0;
             var_s0_3 += 8;
         }
         if ((*(u16 *)((u8 *)(&D_800D28E8) + 0xB2)) != 0) {
-            temp_v0_2 = func_1510D66C((*(u16 *)((u8 *)(&D_800D28E8) + 0xB2)), &sp90, 3, 0);
+            temp_v0_2 = texture_cache_lookup((*(u16 *)((u8 *)(&D_800D28E8) + 0xB2)), &sp90, 3, 0);
             (*(s32 *)((u8 *)var_s0_3 + 0)) = 0xDB06001C;
             (*(s32 *)((u8 *)var_s0_3 + 4)) = temp_v0_2;
             var_s0_3 += 8;
         }
         if ((*(u16 *)((u8 *)(&D_800D28E8) + 0xB4)) != 0) {
-            temp_v0_3 = func_1510D66C((*(u16 *)((u8 *)(&D_800D28E8) + 0xB4)), &sp90, 3, 0);
+            temp_v0_3 = texture_cache_lookup((*(u16 *)((u8 *)(&D_800D28E8) + 0xB4)), &sp90, 3, 0);
             (*(s32 *)((u8 *)var_s0_3 + 0)) = 0xDB060028;
             (*(s32 *)((u8 *)var_s0_3 + 4)) = temp_v0_3;
             var_s0_3 += 8;
         }
         if ((*(u16 *)((u8 *)(&D_800D28E8) + 0xB6)) != 0) {
-            temp_v0_4 = func_1510D66C((*(u16 *)((u8 *)(&D_800D28E8) + 0xB6)), &sp90, 3, 0);
+            temp_v0_4 = texture_cache_lookup((*(u16 *)((u8 *)(&D_800D28E8) + 0xB6)), &sp90, 3, 0);
             (*(s32 *)((u8 *)var_s0_3 + 0)) = 0xDB06002C;
             (*(s32 *)((u8 *)var_s0_3 + 4)) = temp_v0_4;
             var_s0_3 += 8;
@@ -1005,19 +1016,20 @@ Gfx *func_150911F4(Gfx *gdlArg) {
     return (Gfx *)(var_s0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150911F4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_air_meter_draw.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1510D66C(s32, s32 *, s32, s32);
+s32 texture_cache_lookup(s32, s32 *, s32, s32);
 
 // hud_icon_sheet_load: P208: loads HUD icon sheet `sheet` (texture 0xD18 + sheet: CI4 64x64, its 16-colour RGBA16
-// palette 0x800 bytes in) for the status icons of func_150918EC. *ready is 1 when the sheet is resident and the
+// palette 0x800 bytes in) for the status icons of mp_hud_draw_views. *ready is 1 when the sheet is resident and the
 // load commands were added; otherwise it is 0 and `gdl` is returned unchanged.
-Gfx *func_15091534(Gfx *gdl, s32 sheet, u8 *ready) {
+/* was func_15091534 */
+Gfx *hud_icon_sheet_load(Gfx *gdl, s32 sheet, u8 *ready) {
     s32 tex;
 
     *ready = 0;
-    tex = func_1510D66C(0xD18 + sheet, NULL, 3, 0);
+    tex = texture_cache_lookup(0xD18 + sheet, NULL, 3, 0);
     if (tex == 0x80000000) {
         return gdl;
     }
@@ -1052,10 +1064,10 @@ Gfx *func_15091534(Gfx *gdl, s32 sheet, u8 *ready) {
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_15091534.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_icon_sheet_load.s")
 #endif
 // NON-MATCHING: needs some love
-// Gfx* func_15091534(Gfx* arg0, struct257 *arg1, u8 *arg2) {
+// Gfx* hud_icon_sheet_load(Gfx* arg0, struct257 *arg1, u8 *arg2) {
 //     u32 temp_v0;
 //
 //     *arg2 = 0;
@@ -1095,7 +1107,7 @@ Gfx *func_15091534(Gfx *gdl, s32 sheet, u8 *ready) {
 
 #ifdef NON_MATCHING
 /* P153 */
-void func_15042D94(s32, s32, u8, s32, ...);
+void text_printf_at(s32, s32, u8, s32, ...);
 extern char D_8009E090[]; /* "%d" */
 extern char D_8009E094[]; /* ":%02d" */
 extern char D_8009E09C[]; /* ":%02d" */
@@ -1104,9 +1116,10 @@ extern char D_8009E0A8[]; /* ": --" */
 extern char D_8009E0B0[]; /* ": --" */
 
 // hud_time_draw: P153: draws a time of `ticks` (50 per second, at most 99:00.00) as minutes ":" seconds ":"
-// hundredths at (x, y) with alpha (func_15042D94); the minutes field moves 5 left from 10 minutes on. A negative
+// hundredths at (x, y) with alpha (text_printf_at); the minutes field moves 5 left from 10 minutes on. A negative
 // time draws "--: --: --".
-void func_150916B4(s32 x, s32 y, s32 ticks, u8 alpha) {
+/* was func_150916B4 */
+void hud_time_draw(s32 x, s32 y, s32 ticks, u8 alpha) {
     s32 hundredths;
     s32 seconds;
     s32 minutes;
@@ -1128,22 +1141,22 @@ void func_150916B4(s32 x, s32 y, s32 ticks, u8 alpha) {
         } else {
             shift = 0;
         }
-        func_15042D94(x - shift - 8, y, alpha, (s32) D_8009E090, minutes);
-        func_15042D94(x, y, alpha, (s32) D_8009E094, seconds % 60);
-        func_15042D94(x + 0x10, y, alpha, (s32) D_8009E09C, hundredths);
+        text_printf_at(x - shift - 8, y, alpha, (s32) D_8009E090, minutes);
+        text_printf_at(x, y, alpha, (s32) D_8009E094, seconds % 60);
+        text_printf_at(x + 0x10, y, alpha, (s32) D_8009E09C, hundredths);
         return;
     }
-    func_15042D94(x - 8, y, alpha, (s32) D_8009E0A4);
-    func_15042D94(x, y, alpha, (s32) D_8009E0A8);
-    func_15042D94(x + 0x10, y, alpha, (s32) D_8009E0B0);
+    text_printf_at(x - 8, y, alpha, (s32) D_8009E0A4);
+    text_printf_at(x, y, alpha, (s32) D_8009E0A8);
+    text_printf_at(x + 0x10, y, alpha, (s32) D_8009E0B0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150916B4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_time_draw.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1510D66C(s32, s32 *, s32, s32);
-Gfx *func_15091534(Gfx *gdl, s32 sheet, u8 *ready);
-Gfx *func_15093B58(Gfx *, s32, s16 *, s32, s32);
+s32 texture_cache_lookup(s32, s32 *, s32, s32);
+Gfx *hud_icon_sheet_load(Gfx *gdl, s32 sheet, u8 *ready);
+Gfx *radar_draw(Gfx *, s32, s16 *, s32, s32);
 extern Gfx D_80087730[];   /* 2D HUD setup display list */
 extern u8 D_80087750[4];   /* initial bar lengths (all 0) */
 extern u8 D_80087754[];    /* icon sheet: t of each icon row, in 32nds */
@@ -1163,22 +1176,23 @@ extern f32 D_8009E240;     /* map scale factor in hi-res (1.56) */
 extern f32 D_8009E244;     /* map centre y offset (3.4) */
 extern f32 D_8009E248;     /* map centre x offset (3.6) */
 
-// mp_hud_draw: P208: the multiplayer HUD overlay (func_1508FD38 when D_800BE616 is set). The layout table
-// (33 entries, scaled by the hi-res factor D_800901BC, texture step `scale`) is the same as func_1508FD38's.
+// mp_hud_draw: P208: the multiplayer HUD overlay (hud_draw when D_800BE616 is set). The layout table
+// (33 entries, scaled by the hi-res factor D_800901BC, texture step `scale`) is the same as hud_draw's.
 // D_80090160 selects the parts, each drawn per view (D_80082FA0 + 1 views, skipped when D_80087270[p] == 10;
 // view rectangle D_800BE628: y top 0x24, y bottom 0x28, x left 0x2C, x right 0x30):
 //   0x002: placing digit (sheet 0xD16, cell from func_150859AC(p, 3)) at the top left;
 //   0x400 / 0x800: score (D_80090174 s16 table at 0x46) / "(team name)" text at the top centre;
 //   0x010: two lives bars (sheet 0xD18 cell 0x620 / 0xA0, lengths from func_150859AC(p, 4));
-//   0x004: status icons at the top right: icon by the player's state (sheet 0xD18 via func_15091534), and in
+//   0x004: status icons at the top right: icon by the player's state (sheet 0xD18 via hud_icon_sheet_load), and in
 //          interaction state 0x1E the vehicle / weapon icons (sheet 0xD19) with a red ammo / fuel bar;
 //   the "on fire" counter (sheet 0xD15) for players in state 0x26 / 0x3A, one icon per unit of 0x19A;
 //   0x080 (race, D_80087640 records): best / current lap times and "lap n/m";
 //   0x1000: the overview map (texture 0xCF3 / 0xCF4) with a dot per player (green = self, red = players,
 //          white = other objects with a team);
-//   0x020: the radar (func_15093B58, not big).
+//   0x020: the radar (radar_draw, not big).
 // Returns the advanced display list.
-Gfx *func_150918EC(Gfx *gdl) {
+/* was func_150918EC */
+Gfx *mp_hud_draw_views(Gfx *gdl) {
     struct_eu_BE628 *view;
     struct127 *obj;
     struct_eu_80087640 *race;
@@ -1198,7 +1212,7 @@ Gfx *func_150918EC(Gfx *gdl) {
     fire = 0;
     width = ((struct_eu_BE628 *)D_800BE628)->unk30 - ((struct_eu_BE628 *)D_800BE628)->unk2C;
     gSPDisplayList(gdl++, D_80087730);
-    func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
+    text_set_color(0xFF, 0xFF, 0xFF, 0xFF);
 
     f = D_800901BC;
     scale = 0x400;
@@ -1228,7 +1242,7 @@ Gfx *func_150918EC(Gfx *gdl) {
             if (D_80090160 & 2) {
                 if (!loaded) {
                     loaded = 1;
-                    tex = func_1510D66C(0xD16, NULL, 3, 0);
+                    tex = texture_cache_lookup(0xD16, NULL, 3, 0);
                     if (tex != 0x80000000) {
                         gdl->words.w0 = 0xFD180000; /* texture image CI8 */
                         gdl->words.w1 = tex;
@@ -1269,14 +1283,14 @@ Gfx *func_150918EC(Gfx *gdl) {
                 if (D_800901BC != 1.0f) {
                     ix -= 8;
                 }
-                func_15042D94(ix, y, 0x41, (s32)D_8009E0B8, *(s16 *)(D_80090174 + 0x46 + p * 2));
+                text_printf_at(ix, y, 0x41, (s32)D_8009E0B8, *(s16 *)(D_80090174 + 0x46 + p * 2));
             }
             if (D_80090160 & 0x800) {
                 ix = (width >> 1) + x + 16;
                 if (D_800901BC != 1.0f) {
                     ix += 16;
                 }
-                func_15042D94(ix, y, 0x41, (s32)D_8009E0BC, ((u8 **)D_800E1008)[8 + D_800E0EF0[p]]);
+                text_printf_at(ix, y, 0x41, (s32)D_8009E0BC, ((u8 **)D_800E1008)[8 + D_800E0EF0[p]]);
             }
         }
     }
@@ -1337,7 +1351,7 @@ Gfx *func_150918EC(Gfx *gdl) {
                 if (icon >= 0) {
                     if (!loaded) {
                         loaded = 1;
-                        gdl = func_15091534(gdl, 0, &ready);
+                        gdl = hud_icon_sheet_load(gdl, 0, &ready);
                     }
                     row = icon / 3;
                     ix = (right - table[25]) * 4;
@@ -1363,7 +1377,7 @@ Gfx *func_150918EC(Gfx *gdl) {
             }
             if (D_80090160 & 0x10) {
                 if (!loaded) {
-                    gdl = func_15091534(gdl, 0, &ready);
+                    gdl = hud_icon_sheet_load(gdl, 0, &ready);
                 }
                 k = func_150859AC((s16)p, 4);
                 ix = table[22] + x;
@@ -1438,7 +1452,7 @@ Gfx *func_150918EC(Gfx *gdl) {
             }
             if (!loaded) {
                 loaded = 1;
-                gdl = func_15091534(gdl, 1, &ready);
+                gdl = hud_icon_sheet_load(gdl, 1, &ready);
             }
             s = (icon % 3) * 800;
             ix = right - table[25];
@@ -1478,7 +1492,7 @@ Gfx *func_150918EC(Gfx *gdl) {
 
     /* on-fire counter */
     if (fire) {
-        tex = func_1510D66C(0xD15, NULL, 3, 0);
+        tex = texture_cache_lookup(0xD15, NULL, 3, 0);
         gdl->words.w0 = 0xFD100000; /* texture image RGBA16 */
         gdl->words.w1 = tex;
         gdl++;
@@ -1532,18 +1546,18 @@ Gfx *func_150918EC(Gfx *gdl) {
         for (p = 0; p <= D_80082FA0; p++) {
             view = (struct_eu_BE628 *)D_800BE628 + p;
             iy = (s32)view->unk24 + 5;
-            func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
+            text_set_color(0xFF, 0xFF, 0xFF, 0xFF);
             race = &D_80087640[p];
             if (*(s32 *)((u8 *)race + 0x20) > 0) { /* best lap */
-                func_150916B4((s32)view->unk2C + 0x17, iy + 0x19, *(s32 *)((u8 *)race + 0x20), 0xC0);
+                hud_time_draw((s32)view->unk2C + 0x17, iy + 0x19, *(s32 *)((u8 *)race + 0x20), 0xC0);
                 race = &D_80087640[p];
             }
             lap = race->unk27 + 1;
             ix = (s32)view->unk2C + (width >> 1);
             if (lap <= laps) {
-                func_15042D94(ix, iy, 0xC1, (s32)D_8009E0C4, ((u8 **)D_800E1008)[8 + D_800E0EF0[p]]);
-                func_15042D94((s32)view->unk2C + 0x1D, iy + 0xE, 0xC1, (s32)D_8009E0C8, lap, laps);
-                func_150916B4(ix, (s32)view->unk28 - 0xC, *(s32 *)((u8 *)&D_80087640[p] + 0x1C), 0xC0);
+                text_printf_at(ix, iy, 0xC1, (s32)D_8009E0C4, ((u8 **)D_800E1008)[8 + D_800E0EF0[p]]);
+                text_printf_at((s32)view->unk2C + 0x1D, iy + 0xE, 0xC1, (s32)D_8009E0C8, lap, laps);
+                hud_time_draw(ix, (s32)view->unk28 - 0xC, *(s32 *)((u8 *)&D_80087640[p] + 0x1C), 0xC0);
             }
         }
     }
@@ -1560,7 +1574,7 @@ Gfx *func_150918EC(Gfx *gdl) {
             size = 0x40;
             dot = 4;
         }
-        tex = func_1510D66C((D_8009015C & 0x40) ? 0xCF4 : 0xCF3, NULL, 3, 0);
+        tex = texture_cache_lookup((D_8009015C & 0x40) ? 0xCF4 : 0xCF3, NULL, 3, 0);
         gdl->words.w0 = 0xFD700000; /* texture image IA16 */
         gdl->words.w1 = tex;
         gdl++;
@@ -1623,18 +1637,19 @@ Gfx *func_150918EC(Gfx *gdl) {
     }
 
     if (D_800BEAC1 == 0 && (D_80090160 & 0x20)) {
-        gdl = func_15093B58(gdl, scale, table, 0x2C30, 0);
+        gdl = radar_draw(gdl, scale, table, 0x2C30, 0);
     }
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150918EC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/mp_hud_draw_views.s")
 #endif
 
-void func_15093818(s32 arg0) {
+/* was func_15093818 */
+void hud_clock_set_enabled(s32 arg0) {
     if ((arg0 != 0) && (D_800D2458 == 0)) {
         D_800D2458 = 1;
-        func_15093878();
+        hud_clock_load();
         return;
     }
     if ((arg0 == 0) && (D_800D2458 != 0)) {
@@ -1642,18 +1657,20 @@ void func_15093818(s32 arg0) {
     }
 }
 
-void func_15093878(void) {
+/* was func_15093878 */
+void hud_clock_load(void) {
     D_800D2448 = func_1518C900(0xBA);
     D_800D244C = allocate_memory(0x80, 1, 1, 0);
 }
 
 #ifdef NON_MATCHING
-void func_150A7D00(s32, f32, f32, f32);
-s32 func_1510D66C(s32, s32 *, s32, s32);
+void mtx_translate_fixed(s32, f32, f32, f32);
+s32 texture_cache_lookup(s32, s32 *, s32, s32);
 extern s32 D_11AF;
 extern s32 D_800D2870;
 
-s32 *func_150938BC(s32 *arg0) {
+/* was func_150938BC */
+s32 *hud_clock_draw(s32 *arg0) {
     s32 *temp_v1;
     s32 *var_s2;
     s32 temp_v0;
@@ -1665,7 +1682,7 @@ s32 *func_150938BC(s32 *arg0) {
     var_s0 = 4;
     var_s1 = (s32) ((s32) D_800D2870 / 25) % 60;
 loop_1:
-    temp_v0 = func_1510D66C((s32)((u8 *)&D_11AF + (var_s1 % 10)), NULL, 3, 0);
+    temp_v0 = texture_cache_lookup((s32)((u8 *)&D_11AF + (var_s1 % 10)), NULL, 3, 0);
     temp_v1 = var_s2;
     if (temp_v0 == 0x80000000) {
         return var_s2;
@@ -1680,7 +1697,7 @@ loop_1:
     }
     var_s0 -= 1;
     if (var_s0 == 0) {
-        func_150A7D00((D_800BE9C0 << 6) + D_800D244C, (f32) 0x78, (f32) 0x81, (f32) -0x12F);
+        mtx_translate_fixed((D_800BE9C0 << 6) + D_800D244C, (f32) 0x78, (f32) 0x81, (f32) -0x12F);
         (*(s32 *)((u8 *)var_s2 + 0)) = 0xDA380003;
         temp_s2 = ((s32 *)((u8 *)var_s2 + 8));
         (*(s32 *)((u8 *)var_s2 + 4)) = (s32) ((D_800BE9C0 << 6) + D_800D244C);
@@ -1691,7 +1708,7 @@ loop_1:
     goto loop_1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150938BC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_clock_draw.s")
 #endif
 #ifdef NON_MATCHING
 s32 func_15086218(f32 y);
@@ -1704,7 +1721,7 @@ extern f32 D_8009E260; /* degrees -> radians */
 extern u8 D_800ABA0C[]; /* radar dot colours: r, g, b per team (unk328 - 1) */
 extern u16 D_800E0FFC;  /* bit per player object: hidden from the radar */
 
-// radar_draw: P206: draws the multiplayer radar of every active view (func_1508FD38 / func_150918EC). The radar
+// radar_draw: P206: draws the multiplayer radar of every active view (hud_draw / mp_hud_draw_views). The radar
 // disc (texture 0xCF5, IA16 32x32) sits at the view's corner from the view rectangle (D_800BE628) and the layout
 // table (table[7] / table[21] the corner offsets, table[16] the radius, table[24] in one-player mode, where the
 // texture step is size * 2 / 3); `big` moves it by (-0x1C6, -0x46) quarter pixels and scales it. Every other
@@ -1714,7 +1731,8 @@ extern u16 D_800E0FFC;  /* bit per player object: hidden from the radar */
 // or below the dot shows a different height level (func_15086218). When the view's object is in state 0x25 the
 // radar centres on player 0 (or 1 when its camera mode is 3), which is skipped as well. Returns the advanced DL,
 // or `gdl` unchanged when the texture is not loaded.
-Gfx *func_15093B58(Gfx *gdl, s32 size, s16 *table, s32 mode, s32 big) {
+/* was func_15093B58 */
+Gfx *radar_draw(Gfx *gdl, s32 size, s16 *table, s32 mode, s32 big) {
     struct_eu_BE628 *view;
     struct127 *me, *ref, *obj;
     u8 *col;
@@ -1742,7 +1760,7 @@ Gfx *func_15093B58(Gfx *gdl, s32 size, s16 *table, s32 mode, s32 big) {
     if (D_800901BC == 1.0f) {
         dot = 4;
     }
-    tex = func_1510D66C(0xCF5, NULL, 3, 0);
+    tex = texture_cache_lookup(0xCF5, NULL, 3, 0);
     if (tex == 0x80000000) {
         return gdl;
     }
@@ -1884,5 +1902,5 @@ Gfx *func_15093B58(Gfx *gdl, s32 size, s16 *table, s32 mode, s32 big) {
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_15093B58.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/radar_draw.s")
 #endif

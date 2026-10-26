@@ -5,19 +5,19 @@
 
 
 #ifdef NON_MATCHING
-/* P98: D_800E1230 callback (func_151F86B0 calls it with (0, line, length)); a1 / a2 reach func_15043BB8 untouched */
+/* P98: D_800E1230 callback (mp3main_decode_next_frame calls it with (0, line, length)); a1 / a2 reach ring_buffer_put_record untouched */
 void func_10012560(s32 arg0, u8 *arg1, s32 arg2) {
-    func_15043BB8(&D_800427A0, arg1, arg2);
+    ring_buffer_put_record(&D_800427A0, arg1, arg2);
 }
 #else
 void func_10012560(s32 arg0) {
-    func_15043BB8(&D_800427A0);
+    ring_buffer_put_record(&D_800427A0);
 }
 #endif
 
 void func_10012588(s32 arg0) {
-    func_15016170(arg0);
-    func_15043A00(&D_800427A0, &D_800427B0, 64);
+    audio_fx_mixer_init(arg0);
+    ring_buffer_init(&D_800427A0, &D_800427B0, 64);
     func_151F3C1C(func_10012560);
 }
 
@@ -39,7 +39,7 @@ void func_1001263C(s32 arg0, s32 arg1, s32 arg2) {
     s32 sp18;
 
     sp18 = 0;
-    temp_v0 = func_1502B020(&sp18, 2, 22, arg0);
+    temp_v0 = asset_lookup_rom(&sp18, 2, 22, arg0);
     D_800427F4 = (s16) arg0;
     if ((temp_v0 != 0) && (sp18 != 0)) {
         func_151F2D6C(arg1, 0);
@@ -54,9 +54,9 @@ void func_1001263C(s32 arg0, s32 arg1, s32 arg2) {
 }
 
 // text_queue_read: takes the next record of the text queue D_800427A0 into the buffer arg0 (at most arg1 bytes,
-// func_15043CA4) and returns its length (P182: the asm caller func_15080628 loops while it is non-zero; it was void).
+// ring_buffer_get_record) and returns its length (P182: the asm caller func_15080628 loops while it is non-zero; it was void).
 s32 func_100126E8(s32 arg0, s32 arg1) {
-    return func_15043CA4(&D_800427A0, arg0, arg1);
+    return ring_buffer_get_record(&D_800427A0, arg0, arg1);
 }
 
 s32 func_10012718(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4) {

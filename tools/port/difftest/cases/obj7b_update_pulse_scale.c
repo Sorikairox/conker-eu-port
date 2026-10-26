@@ -2,14 +2,14 @@
 extern u16 D_80088EA0[3];
 
 /*
- * object_7B_pulse_scale: per-frame "breathing" of object type 0x7B (func_150348D4's case 0x7B; func_150F20C8 below
+ * object_7B_pulse_scale: per-frame "breathing" of object type 0x7B (func_150348D4's case 0x7B; obj7b_joint_swing_entries below
  * builds the same object's joint entries). A shared phase (the s16 at D_800CC298 + 0x14) advances by
  * D_80088EA0[sel] * D_800BE9E4 (speeds 720 / 2000 / 3000: sel 1 when the object's +0x2E4 flags have both bits 0-1
  * set, sel 2 when both bits 2-3 are set, else 0); the scale 0.9 + 0.35 * (cos(phase) + 1) / 2 (0.9 .. 1.25, the
  * phase in 1/65536 turns) multiplies the 3x3 part of the 4x4 float matrix at the model's (+0x1D4) +0xF80.
  * The asm leaves a pointer in v0; no caller reads it (void).
  */
-void func_150F1F80(struct127 *object) {
+void obj7b_update_pulse_scale(struct127 *object) {
     u8 *obj = (u8 *) object;
     s16 *phase = (s16 *)((u8 *)&D_800CC298 + 0x14);
     u16 speeds[3];

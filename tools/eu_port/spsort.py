@@ -3,7 +3,7 @@
 
 m2c emits the stores of a spawner/stack-struct initialiser in the scheduled (ref asm) order;
 the source wrote them in field order, and IDO's scheduler only reproduces the ref order from
-that (func_150F0FA4: SIZE/DIFF92 -> OK by sorting alone).
+that (fx_spark_burst_at: SIZE/DIFF92 -> OK by sorting alone).
 
 usage: spsort.py in.c out.c [--const]
   Every maximal run of consecutive lines `    sp.u<hex>[...] = <expr>;` is sorted by the hex

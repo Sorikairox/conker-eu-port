@@ -401,31 +401,31 @@ int __wrap_func_10006530(int src, int dst, unsigned work) {
     return ret;
 }
 
-/* P37 (diagnostic, ?infcheck=1): texture ids outside the cache (>= 0x1E54). func_1510D66C stores the id in the dirty
- * range D_800DA378 / D_800DA37C before its range check, and func_1510D984 then walks past the end of its tables. */
-int __real_func_1510D66C(int id, int *outSize, int age, int addRef);
-int __wrap_func_1510D66C(int id, int *outSize, int age, int addRef) {
+/* P37 (diagnostic, ?infcheck=1): texture ids outside the cache (>= 0x1E54). texture_cache_lookup stores the id in the dirty
+ * range D_800DA378 / D_800DA37C before its range check, and texture_cache_age_tick then walks past the end of its tables. */
+int __real_texture_cache_lookup(int id, int *outSize, int age, int addRef);
+int __wrap_texture_cache_lookup(int id, int *outSize, int age, int addRef) {
     static int on = -1, n;
     if (on < 0) on = port_flag("infcheck");
     if (on && ((unsigned)id >= 0x1E54) && n++ < 6) {
-        port_log("[texid] func_1510D66C id 0x%X age %d addRef %d\n", (unsigned)id, age, addRef);
+        port_log("[texid] texture_cache_lookup id 0x%X age %d addRef %d\n", (unsigned)id, age, addRef);
         port_js_stack(1, 5);
     }
-    return __real_func_1510D66C(id, outSize, age, addRef);
+    return __real_texture_cache_lookup(id, outSize, age, addRef);
 }
-/* P37: ?infcheck=2 also logs which level asset func_150031EC asks for (to tie inflate calls to the level model list) */
-void __real_func_150031EC(int level);
-void __wrap_func_150031EC(int level) {
+/* P37: ?infcheck=2 also logs which level asset level_load_models asks for (to tie inflate calls to the level model list) */
+void __real_level_load_models(int level);
+void __wrap_level_load_models(int level) {
     static int on = -1;
     if (on < 0) on = port_flag("infcheck");
-    if (on > 1) port_log("[infcheck] level loader func_150031EC(0x%X) begins\n", level);
-    __real_func_150031EC(level);
-    if (on > 1) port_log("[infcheck] level loader func_150031EC(0x%X) ends\n", level);
+    if (on > 1) port_log("[infcheck] level loader level_load_models(0x%X) begins\n", level);
+    __real_level_load_models(level);
+    if (on > 1) port_log("[infcheck] level loader level_load_models(0x%X) ends\n", level);
     if (on && level == 0x21) { /* texture 0xED0 through the game's own cache once the level is loaded (slots are -1 now);
                                 * the func_10006530 wrapper checks the C inflater's output against the 768-byte header */
         extern unsigned D_800B1268[];
-        int sz = 0, had = D_800B1268[0xED0] != 0xFFFFFFFFu, p = __wrap_func_1510D66C(0xED0, &sz, 3, 0);
-        port_log("[infcheck] texture 0xED0 via func_1510D66C: %s, data %08X size %d\n", had ? "already cached" : "loaded", p, sz);
+        int sz = 0, had = D_800B1268[0xED0] != 0xFFFFFFFFu, p = __wrap_texture_cache_lookup(0xED0, &sz, 3, 0);
+        port_log("[infcheck] texture 0xED0 via texture_cache_lookup: %s, data %08X size %d\n", had ? "already cached" : "loaded", p, sz);
     }
 }
 int port_infcheck_on(void) { return port_flag("infcheck"); } /* for the vbe TU game_entry.c (its literals are vbe) */

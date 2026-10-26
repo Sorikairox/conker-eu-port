@@ -22,7 +22,7 @@ u8 impact_current_kind(void) {
 /* was func_151D8E6C */
 u8 impact_puff_tex_kind0(void) {
     u8 tmp[3] = D_800AB340;
-    return tmp[(func_150ADA20() % 3U)];
+    return tmp[(random_int() % 3U)];
 }
 
 /* was func_151D8EB0 */
@@ -39,7 +39,7 @@ u8 impact_puff_tex_kind2(void) {
 u8 impact_puff_tex_kind3(void) {
     s32 tmp;
 
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         tmp = 17;
     } else {
         tmp = 147;
@@ -51,7 +51,7 @@ u8 impact_puff_tex_kind3(void) {
 u8 impact_puff_tex_kind4(void) {
     s32 tmp;
 
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         tmp = 90;
     } else {
         tmp = 91;
@@ -62,14 +62,14 @@ u8 impact_puff_tex_kind4(void) {
 /* was func_151D8F30 */
 u8 impact_puff_tex_kind5(void) {
     u8 tmp[5] = D_800AB344;
-    return tmp[func_150ADA20() % 5U];
+    return tmp[random_int() % 5U];
 }
 
 /* was func_151D8F7C */
 u8 impact_puff_tex_kind6(void) {
     s32 tmp;
 
-    if ((func_150ADA20() & 1) != 0) {
+    if ((random_int() & 1) != 0) {
         tmp = 102;
     } else {
         tmp = 103;
@@ -100,15 +100,15 @@ u8 impact_puff_tex_kind10(void) {
 /* was func_151D8FE0 */
 u8 impact_puff_tex_kind11(void) {
     u8 tmp[4] = D_800AB34C;
-    return tmp[func_150ADA20() & 3];
+    return tmp[random_int() & 3];
 }
 
 // big struct definition
 // void impact_dust_cloud_spawn(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, u8 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, u8 argC, u8 argD, u8 argE, s32 argF);
 #ifdef NON_MATCHING
 /* P170 */
-s32 func_150ADA20(void);
-f32 func_150ADA68(void);
+s32 random_int(void);
+f32 random_float(void);
 extern u8 (*D_80090070[])(void);
 extern s32 D_800AB710;
 s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
@@ -200,8 +200,8 @@ s32 impact_dust_cloud_spawn(void *pos, f32 *vel, u8 kind, f32 arg3, s16 life, u8
     req.u22 = 1;
     req.value = arg3;
     req.u24 = 1.0f;
-    flipB = (func_150ADA20() & 1) ? 0x80 : 0;
-    flipA = (func_150ADA20() & 1) ? 0x40 : 0;
+    flipB = (random_int() & 1) ? 0x80 : 0;
+    flipA = (random_int() & 1) ? 0x40 : 0;
     req.flags = (((u8 *) &D_800AB710)[kind] ? 0x800000 : 0) | (life != -0x63) | 6 | flipA | flipB | 0xC200 |
                 (lit ? 0x10000 : 0);
     if (life == -0x63) {
@@ -228,8 +228,8 @@ s32 impact_dust_cloud_spawn(void *pos, f32 *vel, u8 kind, f32 arg3, s16 life, u8
     req.u68 = 0;
     req.range = 10000.0f;
 
-    extra.phase[0] = func_150ADA20();
-    extra.phase[1] = func_150ADA20();
+    extra.phase[0] = random_int();
+    extra.phase[1] = random_int();
     if (req.texture == 0x40 || req.texture == 0x67) {
         s = size * 0.7f;
     } else {
@@ -238,10 +238,10 @@ s32 impact_dust_cloud_spawn(void *pos, f32 *vel, u8 kind, f32 arg3, s16 life, u8
     req.halfW = s;
     extra.size = s;
     req.halfH = s;
-    extra.rate[0] = (u32) func_150ADA20() % 6 + 5;
-    extra.rate[1] = (u32) func_150ADA20() % 6 + 5;
-    extra.grow[0] = (func_150ADA68() * 0.25f + 0.2f) * extra.size;
-    extra.grow[1] = (func_150ADA68() * 0.25f + 0.2f) * extra.size;
+    extra.rate[0] = (u32) random_int() % 6 + 5;
+    extra.rate[1] = (u32) random_int() % 6 + 5;
+    extra.grow[0] = (random_float() * 0.25f + 0.2f) * extra.size;
+    extra.grow[1] = (random_float() * 0.25f + 0.2f) * extra.size;
     extra.growX = growX;
     extra.kind = kind;
     extra.growY = growY;
@@ -334,7 +334,7 @@ u8 impact_dust_cloud_ground(u8 *arg0, u8 *arg1) {
                     impact_spawn_burst((*(u8 *)((u8 *)temp_v0 + 0x18)), (*(f32 *)((u8 *)temp_v0 + 0x14)) * temp_f0, (*(u8 *)((u8 *)arg0 + 0x2B)), (s32) (arg0 + 0x84), (s32) &sp.u50, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 } else {
                     sp48 = temp_f0;
-                    if (func_150ADA20() & 1) {
+                    if (random_int() & 1) {
                         temp_v0_2 = arg0 + 0xA8;
                         impact_debris_spawn((*(u8 *)((u8 *)temp_v0_2 + 0x18)), temp_f0 * 0.09f * (*(f32 *)((u8 *)temp_v0_2 + 0x10)), (*(u8 *)((u8 *)arg0 + 0x2B)), (s32) (arg0 + 0x84), (struct17 *) &sp.u50, 0x64, 0U, 1U, 0U, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                     } else {
@@ -355,55 +355,55 @@ block_12:
 /* was func_151D97A8 */
 u8 impact_debris_tex_kind0(void) {
     s32 tmp[7] = D_800AB350;
-    return tmp[func_150ADA20() % 7U];
+    return tmp[random_int() % 7U];
 }
 
 /* was func_151D9820 */
 u8 impact_debris_tex_kind1(void) {
     s32 tmp[3] = D_800AB36C;
-    return tmp[func_150ADA20() % 3U];
+    return tmp[random_int() % 3U];
 }
 
 /* was func_151D9878 */
 u8 impact_debris_tex_kind2(void) {
     s32 tmp[3] = D_800AB378;
-    return tmp[func_150ADA20() % 3U];
+    return tmp[random_int() % 3U];
 }
 
 /* was func_151D98D0 */
 u8 impact_debris_tex_kind3(void) {
     s32 tmp[2] = D_800AB384;
-    return tmp[func_150ADA20() & 1];
+    return tmp[random_int() & 1];
 }
 
 /* was func_151D9918 */
 u8 impact_debris_tex_kind4(void) {
     s32 tmp[2] = D_800AB38C;
-    return tmp[func_150ADA20() & 1];
+    return tmp[random_int() & 1];
 }
 
 /* was func_151D9960 */
 u8 impact_debris_tex_kind5(void) {
     s32 tmp[5] = D_800AB394;
-    return tmp[func_150ADA20() % 5U];
+    return tmp[random_int() % 5U];
 }
 
 /* was func_151D99C8 */
 u8 impact_debris_tex_kind6(void) {
     s32 tmp[3] = D_800AB3A8;
-    return tmp[func_150ADA20() % 3U];
+    return tmp[random_int() % 3U];
 }
 
 /* was func_151D9A20 */
 u8 impact_debris_tex_kind7(void) {
     s32 tmp[2] = D_800AB3B4;
-    return tmp[func_150ADA20() & 1];
+    return tmp[random_int() & 1];
 }
 
 /* was func_151D9A68 */
 u8 impact_debris_tex_kind8(void) {
     s32 tmp[3] = D_800AB3BC;
-    return tmp[func_150ADA20() % 3U];
+    return tmp[random_int() % 3U];
 }
 
 /* was func_151D9AC0 */
@@ -415,13 +415,13 @@ u8 impact_debris_tex_kind9(void) {
 /* was func_151D9ADC */
 u8 impact_debris_tex_kind10(void) {
     s32 tmp[3] = D_800AB3CC;
-    return tmp[func_150ADA20() % 3U];
+    return tmp[random_int() % 3U];
 }
 
 /* was func_151D9B34 */
 u8 impact_debris_tex_kind11(void) {
     s32 tmp[4] = D_800AB3D8;
-    return tmp[func_150ADA20() & 3];
+    return tmp[random_int() & 3];
 }
 
 #ifdef NON_MATCHING
@@ -528,9 +528,9 @@ s32 impact_debris_spawn(u8 arg0, f32 arg1, u8 arg2, s32 arg3, struct17 *arg4, s1
     sp.uC7 = 7;
     sp.uD0 = 0xFF;
     sp.uCC = 0;
-    sp4C = func_150ADA20();
-    sp50 = func_150ADA20();
-    temp_t1 = func_150ADA20();
+    sp4C = random_int();
+    sp50 = random_int();
+    temp_t1 = random_int();
     if (arg7 != 0) {
         var_v1_3 = 3;
     } else {
@@ -587,8 +587,8 @@ void impact_cloud_emitter_update(struct_eu_2062D0_e *arg0) {
 
     sub->unk0 -= D_800BE9E4;
     if (sub->unk0 < 0) {
-        impact_dust_cloud_spawn(sub->unk8, (f32 *)D_800A5860, sub->unk16, func_150ADA68() * D_800AB844 + D_800AB848, (u32)func_150ADA20() % 41 + 0x23, sub->unk14, sub->unk4, 0, 1.0f, 1.0f, sub->unk15, 0, 1, 0, arg0->unkC, arg0->unk1);
-        sub->unk0 = (u32)func_150ADA20() % 111 + 30;
+        impact_dust_cloud_spawn(sub->unk8, (f32 *)D_800A5860, sub->unk16, random_float() * D_800AB844 + D_800AB848, (u32)random_int() % 41 + 0x23, sub->unk14, sub->unk4, 0, 1.0f, 1.0f, sub->unk15, 0, 1, 0, arg0->unkC, arg0->unk1);
+        sub->unk0 = (u32)random_int() % 111 + 30;
     }
 }
 
@@ -662,10 +662,10 @@ s32 impact_smoke_puff_spawn(u8 kind, f32 scale, f32 arg2, u8 arg3, s16 life, s32
     rec.scale = scale;
     rec.u0 = 0;
     rec.u1 = 0;
-    rec.u2 = (u32)func_150ADA20() % 5 + 2;
-    rec.u3 = (u32)func_150ADA20() % 5 + 2;
-    rec.u4 = (func_150ADA68() * D_800AB850 + D_800AB854) * rec.scale;
-    rec.u8 = (func_150ADA68() * D_800AB858 + D_800AB85C) * rec.scale;
+    rec.u2 = (u32)random_int() % 5 + 2;
+    rec.u3 = (u32)random_int() % 5 + 2;
+    rec.u4 = (random_float() * D_800AB850 + D_800AB854) * rec.scale;
+    rec.u8 = (random_float() * D_800AB858 + D_800AB85C) * rec.scale;
     rec.kind = kind;
     rec.uC = 0.0f;
     blk.u00 = handlers[kind]();
@@ -706,9 +706,9 @@ s32 impact_smoke_puff_spawn(u8 kind, f32 scale, f32 arg2, u8 arg3, s16 life, s32
     blk.u4C = 0xFF;
     blk.u50 = 0;
     blk.u44 = arg3;
-    ra = func_150ADA20();
-    rb = func_150ADA20();
-    rc = func_150ADA20();
+    ra = random_int();
+    rb = random_int();
+    rc = random_int();
     p = (u8 *)effect3d_spawn_oriented_simple((s32)&blk, 0, 0xE, 0x13, 0, (rb & 1) + (ra & 1), rc & 0xFF, 500.0f, 500.0f, 0, arg5, 0,
                             0x1C, 0xFF, 0);
     if (p != NULL) {
@@ -749,14 +749,14 @@ s32 impact_smoke_puff_update(u8 *arg0) {
     temp_s2 = arg0 + 0x128;
     (*(f32 *)((u8 *)arg0 + 0x2C)) = (f32) ((angle_byte_cos((temp_a0 - 0x40) & 0xFF) * (*(f32 *)((u8 *)temp_s2 + 4))) + (*(f32 *)((u8 *)temp_s2 + 0x10)));
     (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) ((angle_byte_cos(((*(u8 *)((u8 *)temp_s2 + 1)) - 0x40) & 0xFF) * (*(f32 *)((u8 *)temp_s2 + 8))) + (*(f32 *)((u8 *)temp_s2 + 0x10)));
-    (*(f32 *)((u8 *)temp_s2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 0xC)) + ((0.15f + (func_150ADA68() * 0.1f)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 0xC)) + ((0.15f + (random_float() * 0.1f)) * D_800BE9A4));
     temp_f2 = ((*(f32 *)((u8 *)arg0 + 0x2C)) + (*(f32 *)((u8 *)arg0 + 0x30))) * 0.5f;
     if ((*(f32 *)((u8 *)temp_s2 + 0xC)) > 1.0f) {
         sp98 = temp_f2 * 500.0f;
         sp94 = temp_f2 * 471.0f;
         do {
-            temp_s0 = func_150ADA20() & 0xFF;
-            temp_f20 = func_150ADA68() * sp98;
+            temp_s0 = random_int() & 0xFF;
+            temp_f20 = random_float() * sp98;
             temp_f22 = angle_byte_cos((temp_s0 - 0x40) & 0xFF);
             sp.uC4 = (*(f32 *)((u8 *)arg0 + 0x34)) + (angle_byte_cos(temp_s0 & 0xFF) * temp_f20);
             sp.uC8 = (*(f32 *)((u8 *)arg0 + 0x38)) + -3.5f;
@@ -764,9 +764,9 @@ s32 impact_smoke_puff_update(u8 *arg0) {
             sp.uB8 = 0.0f;
             sp.uBC = 0.0f;
             sp.uC0 = 0.0f;
-            temp_s0_2 = (func_150ADA20() % 51U) + 0x96;
-            temp_f20_2 = func_150ADA68();
-            impact_tinted_particle_spawn((*(u8 *)((u8 *)temp_s2 + 0x18)), &sp.uC4, &sp.uB8, sp94, ((temp_f20_2 * 154.0f) + 10106.0f) * 0.0001f, 1.0f, ((func_150ADA68() * 25.0f) + -50.0f) * 0.001f, (s32) temp_s0_2, 0x9B, (s32) temp_s0_2, 0xFF / temp_s0_2, 1, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            temp_s0_2 = (random_int() % 51U) + 0x96;
+            temp_f20_2 = random_float();
+            impact_tinted_particle_spawn((*(u8 *)((u8 *)temp_s2 + 0x18)), &sp.uC4, &sp.uB8, sp94, ((temp_f20_2 * 154.0f) + 10106.0f) * 0.0001f, 1.0f, ((random_float() * 25.0f) + -50.0f) * 0.001f, (s32) temp_s0_2, 0x9B, (s32) temp_s0_2, 0xFF / temp_s0_2, 1, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             (*(f32 *)((u8 *)temp_s2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 0xC)) - 1.0f);
         } while ((*(f32 *)((u8 *)temp_s2 + 0xC)) > 1.0f);
     }
@@ -922,7 +922,7 @@ s32 streak_on_land_debris(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 
   pos[0] = ((Node14 *) tbl)[*((s8 *) (arg0 + 0x2D))].x;
   pos[1] = arg4 + 2.0f;
   pos[2] = ((Node14 *) tbl)[*((s8 *) (arg0 + 0x2D))].z;
-  if (func_150ADA20() & 1)
+  if (random_int() & 1)
   {
     p = obj + pad;
     impact_debris_spawn(*((u8 *) (p + 8)), (*((f32 *) p)) * ((*((f32 *) (obj + 0))) * 3.0f), *((u8 *) (obj + 0x1B)), arg5, (struct17 *) pos, 0x64, 0, 1, 0, *((u8 *) (arg0 + 0xC)), *((u8 *) (arg0 + 1)));
@@ -1021,16 +1021,16 @@ void impact_splash_ring_spawn(u8 type, f32 size, u8 alpha, f32 *pos, u8 lit, u8 
     req.u46 = 0;
     req.u47 = 7;
     extra.u0 = 0;
-    extra.steps = (func_150ADA20() % 3U) + 6;
-    extra.growA = func_150ADA68() * D_800AB880 + D_800AB884;
-    extra.growB = func_150ADA68() * D_800AB888 + D_800AB88C;
+    extra.steps = (random_int() % 3U) + 6;
+    extra.growA = random_float() * D_800AB880 + D_800AB884;
+    extra.growB = random_float() * D_800AB888 + D_800AB88C;
     req.u1 = 0;
     req.u48 = 0;
     req.u4C = 0xFF;
     req.u50 = 0;
     req.fadeStart = 0x20;
     req.fadeRate = 7;
-    fx = effect3d_spawn_full(&req, (s32)&D_800A4AA0, 0, 0x14, 0, 0xE, (func_150ADA20() & 1) | 2, lit ? 3 : 0,
+    fx = effect3d_spawn_full(&req, (s32)&D_800A4AA0, 0, 0x14, 0, 0xE, (random_int() & 1) | 2, lit ? 3 : 0,
                        lit ? 0xFF : 0, 0xC, room, owner);
     if (fx != NULL) {
         memcpy(fx + 0x110, &extra, 0xC);
@@ -1125,49 +1125,49 @@ u8 *impact_splash_ring_verts(u8 *arg0, s16 arg1) {
 #endif
 /* was func_151DB004 */
 void impact_tint_red(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 0x38U) + 80;
+    arg0->unk14 = (random_int() % 0x38U) + 80;
     arg0->unk15 = 0;
     arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk18 = (random_int() % 0x2EU) + 180;
     arg0->unk19 = 0;
     arg0->unk1A = 0;
 }
 
 /* was func_151DB068 */
 void impact_tint_yellow(struct218 *arg0) {
-    arg0->unk14 = arg0->unk15 = (func_150ADA20() % 0x38U) + 100;
+    arg0->unk14 = arg0->unk15 = (random_int() % 0x38U) + 100;
     arg0->unk16 = 0;
-    arg0->unk18 = arg0->unk19 = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk18 = arg0->unk19 = (random_int() % 0x2EU) + 180;
     arg0->unk1A = 0;
 }
 
 /* was func_151DB0CC */
 void impact_tint_red_green_a(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 0x38U) + 80;
-    arg0->unk15 = (func_150ADA20() % 0x38U) + 80;
+    arg0->unk14 = (random_int() % 0x38U) + 80;
+    arg0->unk15 = (random_int() % 0x38U) + 80;
     arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 0x2EU) + 180;
-    arg0->unk19 = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk18 = (random_int() % 0x2EU) + 180;
+    arg0->unk19 = (random_int() % 0x2EU) + 180;
     arg0->unk1A = 0;
 }
 
 /* was func_151DB15C */
 void impact_tint_red_green_b(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 0x38U) + 80;
-    arg0->unk15 = (func_150ADA20() % 0x38U) + 80;
+    arg0->unk14 = (random_int() % 0x38U) + 80;
+    arg0->unk15 = (random_int() % 0x38U) + 80;
     arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 0x2EU) + 180;
-    arg0->unk19 = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk18 = (random_int() % 0x2EU) + 180;
+    arg0->unk19 = (random_int() % 0x2EU) + 180;
     arg0->unk1A = 0;
 }
 
 /* was func_151DB1EC */
 void impact_tint_red_green_c(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 0x38U) + 80;
-    arg0->unk15 = (func_150ADA20() % 0x38U) + 80;
+    arg0->unk14 = (random_int() % 0x38U) + 80;
+    arg0->unk15 = (random_int() % 0x38U) + 80;
     arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 0x2EU) + 180;
-    arg0->unk19 = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk18 = (random_int() % 0x2EU) + 180;
+    arg0->unk19 = (random_int() % 0x2EU) + 180;
     arg0->unk1A = 0;
 }
 
@@ -1194,49 +1194,49 @@ void impact_tint_green_fixed(struct218 *arg0) {
 /* was func_151DB2CC */
 void impact_tint_green(struct218 *arg0) {
     arg0->unk14 = 0;
-    arg0->unk15 = (func_150ADA20() % 0x38U) + 80;
+    arg0->unk15 = (random_int() % 0x38U) + 80;
     arg0->unk16 = 0;
     arg0->unk18 = 0;
-    arg0->unk19 = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk19 = (random_int() % 0x2EU) + 180;
     arg0->unk1A = 0;
 }
 
 /* was func_151DB330 */
 void impact_tint_brown(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 0x15U) + 95;
-    arg0->unk15 = (func_150ADA20() % 0x15U) + 95;
-    arg0->unk16 = (func_150ADA20() % 0xBU) + 45;
-    arg0->unk18 = (func_150ADA20() & 0xF) + 58;
-    arg0->unk19 = (func_150ADA20() & 0xF) + 60;
-    arg0->unk1A = (func_150ADA20() % 0xBU) + 25;
+    arg0->unk14 = (random_int() % 0x15U) + 95;
+    arg0->unk15 = (random_int() % 0x15U) + 95;
+    arg0->unk16 = (random_int() % 0xBU) + 45;
+    arg0->unk18 = (random_int() & 0xF) + 58;
+    arg0->unk19 = (random_int() & 0xF) + 60;
+    arg0->unk1A = (random_int() % 0xBU) + 25;
 }
 
 /* was func_151DB3D8 */
 void impact_tint_cyan(struct218 *arg0) {
     arg0->unk14 = 0;
-    arg0->unk15 = arg0->unk16 = (func_150ADA20() % 0x38U) + 80;
+    arg0->unk15 = arg0->unk16 = (random_int() % 0x38U) + 80;
     arg0->unk18 = 0;
-    arg0->unk19 = arg0->unk1A = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk19 = arg0->unk1A = (random_int() % 0x2EU) + 180;
 }
 
 /* was func_151DB43C */
 void impact_tint_magenta(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 0x38U) + 80;
+    arg0->unk14 = (random_int() % 0x38U) + 80;
     arg0->unk15 = 0;
-    arg0->unk16 = (func_150ADA20() % 0x38U) + 80;
-    arg0->unk18 = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk16 = (random_int() % 0x38U) + 80;
+    arg0->unk18 = (random_int() % 0x2EU) + 180;
     arg0->unk19 = 0;
-    arg0->unk1A = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk1A = (random_int() % 0x2EU) + 180;
 }
 
 /* was func_151DB4CC */
 void impact_tint_bright(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 56U) + 200;
-    arg0->unk15 = (func_150ADA20() % 56U) + 200;
-    arg0->unk16 = (func_150ADA20() % 56U) + 200;
-    arg0->unk18 = (func_150ADA20() % 56U) + 200;
-    arg0->unk19 = (func_150ADA20() % 56U) + 200;
-    arg0->unk1A = (func_150ADA20() % 56U) + 200;
+    arg0->unk14 = (random_int() % 56U) + 200;
+    arg0->unk15 = (random_int() % 56U) + 200;
+    arg0->unk16 = (random_int() % 56U) + 200;
+    arg0->unk18 = (random_int() % 56U) + 200;
+    arg0->unk19 = (random_int() % 56U) + 200;
+    arg0->unk1A = (random_int() % 56U) + 200;
 }
 
 #ifdef NON_MATCHING
@@ -1327,12 +1327,12 @@ s32 impact_tinted_particle_spawn(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4
     sp.u39 = 0;
     sp.u3A = 0;
     if (argB != 0) {
-        sp.u3B = (func_150ADA20() % 7U) - 3;
-        sp.u3C = (func_150ADA20() % 7U) - 3;
-        sp.u3D = (func_150ADA20() % 7U) - 3;
-        sp.u40 = ((func_150ADA68() * 0.05f) + 0.05f) * arg3;
-        sp.u44 = ((func_150ADA68() * 0.03f) + 0.03f) * arg3;
-        sp.u48 = ((func_150ADA68() * 0.05f) + 0.05f) * arg3;
+        sp.u3B = (random_int() % 7U) - 3;
+        sp.u3C = (random_int() % 7U) - 3;
+        sp.u3D = (random_int() % 7U) - 3;
+        sp.u40 = ((random_float() * 0.05f) + 0.05f) * arg3;
+        sp.u44 = ((random_float() * 0.03f) + 0.03f) * arg3;
+        sp.u48 = ((random_float() * 0.05f) + 0.05f) * arg3;
     } else {
         temp_t8 = ((u8 *)&D_800A5860);
         sp.u3B = 0;
@@ -1379,11 +1379,11 @@ s32 impact_tinted_particle_spawn(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4
     }
     sp.u74 = arg4;
     var_t1 = 0;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         var_t1 = 0x80;
     }
     sp20 = var_t1;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         var_t0 = 0x40;
     } else {
         var_t0 = 0;
@@ -1501,10 +1501,10 @@ void impact_spawn_debris_up(struct17 *arg0, s32 arg1, u8 *arg2, u8 arg3, s32 arg
     tmp.unk8 = arg0->unk8;
 
     tmp2.unkF = *arg2;
-    tmp2.unk0 = func_150ADA68();
-    tmp2.unk4 = func_150ADA20();
+    tmp2.unk0 = random_float();
+    tmp2.unk4 = random_int();
 
-    impact_debris_spawn(tmp2.unkF, (tmp2.unk0 * 25.0f) + 10.0f, ((tmp2.unk4 % 0x38U) + 200), arg1 + 4, &tmp, (func_150ADA20() % 0x97U) + 150, 0, 1, 0, arg3, arg4);
+    impact_debris_spawn(tmp2.unkF, (tmp2.unk0 * 25.0f) + 10.0f, ((tmp2.unk4 % 0x38U) + 200), arg1 + 4, &tmp, (random_int() % 0x97U) + 150, 0, 1, 0, arg3, arg4);
 }
 
 #ifdef NON_MATCHING
@@ -1560,9 +1560,9 @@ void impact_dust_particle_spawn(u8 arg0, f32 arg1, s16 arg2, s32 arg3, void * ar
     sp.u63 = (*(u8 *)((u8 *)temp_v0 + 1));
     sp.u64 = (*(u8 *)((u8 *)temp_v0 + 2));
     if (arg3 != 0) {
-        sp44 = func_150ADA20();
-        sp48 = func_150ADA20();
-        sprite_fx_spawn_cam((s32) &sp.u50, 0U, 0U, arg3, (*(f32 *)((u8 *)arg4 + 0)), (*(f32 *)((u8 *)arg4 + 4)), (*(f32 *)((u8 *)arg4 + 8)), arg1, arg1, (u8) (sp44 & 0xFF), (u8) (((func_150ADA20() & 1) * 2) + (sp48 & 1)), 0, (u8) (s32) arg5, arg6);
+        sp44 = random_int();
+        sp48 = random_int();
+        sprite_fx_spawn_cam((s32) &sp.u50, 0U, 0U, arg3, (*(f32 *)((u8 *)arg4 + 0)), (*(f32 *)((u8 *)arg4 + 4)), (*(f32 *)((u8 *)arg4 + 8)), arg1, arg1, (u8) (sp44 & 0xFF), (u8) (((random_int() & 1) * 2) + (sp48 & 1)), 0, (u8) (s32) arg5, arg6);
         return;
     }
     sprite_fx_spawn_quad((s32) &sp.u50, 0, 0U, 0U, (*(f32 *)((u8 *)arg4 + 0)), (*(f32 *)((u8 *)arg4 + 4)), (*(f32 *)((u8 *)arg4 + 8)), arg1, arg1, 0U, 0U, 0, (u8) (s32) arg5, arg6);
@@ -1651,9 +1651,9 @@ void impact_flat_fx_spawn(s32 arg0, f32 arg1, f32 arg2, s16 arg3, u8 *arg4, s32 
     sp.u84 = 0.0f;
     sp.u88 = 0.0f;
     sp.u9C = arg6;
-    sp4C = func_150ADA20();
-    sp50 = func_150ADA20();
-    effect3d_spawn_oriented_simple((s32) &sp.u58, 0, 0xBU, 0x11U, 0U, (u8) ((sp50 & 1) + (sp4C & 1)), (s16) (func_150ADA20() & 0xFF), arg1, arg1, 0, arg5, 0U, 0, (u8) (s32) arg8, arg9);
+    sp4C = random_int();
+    sp50 = random_int();
+    effect3d_spawn_oriented_simple((s32) &sp.u58, 0, 0xBU, 0x11U, 0U, (u8) ((sp50 & 1) + (sp4C & 1)), (s16) (random_int() & 0xFF), arg1, arg1, 0, arg5, 0U, 0, (u8) (s32) arg8, arg9);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_flat_fx_spawn.s")
@@ -1734,10 +1734,10 @@ s32 impact_glow_spawn(f32 *pos, f32 size, u8 alpha, s16 life, u8 type, u8 arg5, 
     t.u54 = 0.0f;
     t.u24 = 1.0f;
     bit80 = 0;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         bit80 = 0x80;
     }
-    bit40 = (func_150ADA20() & 1) ? 0x40 : 0;
+    bit40 = (random_int() & 1) ? 0x40 : 0;
     t.mode = (((u8 *) &D_800AB710)[type] != 0 ? 0x800000 : 0) | 1 | bit40 | bit80 | 0xC200 | 0x10000;
     t.u60[0] = 6;
     t.u60[1] = 8;

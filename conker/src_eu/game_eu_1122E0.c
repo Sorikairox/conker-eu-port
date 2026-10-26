@@ -3,12 +3,12 @@
 #include "variables.h"
 
 #ifdef NON_MATCHING
-/* Impact effect kinds read by func_150E4AD0 (its .s owns this rodata; the NM link drops it). */
+/* Impact effect kinds read by impact_effect_spawn (its .s owns this rodata; the NM link drops it). */
 typedef struct {
     u16 sparkKind; /* +0 spark record kind for sprite_vtx_quads_init, 0 = none */
     u16 debris;    /* +2 debris effect id (func_151722BC / func_15172474), 0 = none, 0x13 = special burst */
     u8 smokePct;   /* +4 chance (percent) of a smoke puff when size != 0 */
-    u8 subEffect;  /* +5 func_150E5384 effect, 0 = none */
+    u8 subEffect;  /* +5 impact_dust_spawn effect, 0 = none */
     u8 countBase;  /* +6 debris count = base + rand % range + 1 */
     u8 countRange; /* +7 */
 } ImpactKind;
@@ -49,7 +49,7 @@ typedef struct {
 s32 func_151EFDD0(void);
 s32 func_151722BC(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
 void func_15172474(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s16 arg4, u16 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC);
-void func_150E5384(f32, f32, f32, s32, s32, s32 *, s32);
+void impact_dust_spawn(f32, f32, f32, s32, s32, s32 *, s32);
 s32 sprite_vtx_quads_init(void *, s32, s32, s32, s32);
 void *node_spawn_vtx_sprite(void *, u8, s32);
 extern u8 D_800D9D83[]; /* byte +3 of the 28-byte records at D_800D9D80 */
@@ -58,9 +58,10 @@ extern u8 D_800D9D83[]; /* byte +3 of the 28-byte records at D_800D9D80 */
 // to the sub-effect) at (x, y, z). size (0..2) scales the debris count (D_800A14EC) and picks the spark size
 // (D_800A14E0); size 1 gives the debris a wider spread (0x78 instead of 0x1E). Debris: the special burst for id 0x13,
 // debris placed on the triangle `tri` (three vertex pointers) when there is one, else a free burst. Then the
-// sub-effect (func_150E5384), a random smoke puff 20 units up (not for size 0), which also sets byte +3 of record
+// sub-effect (impact_dust_spawn), a random smoke puff 20 units up (not for size 0), which also sets byte +3 of record
 // `slot` in D_800D9D80 to 100 (0 when no puff; slot 0xFF = none), and a spark record. Callers ignore v0 (v0use).
-s32 func_150E4AD0(f32 x, f32 y, f32 z, s32 size, s32 kind, s32 *tri, s32 slot) {
+/* was func_150E4AD0 */
+s32 impact_effect_spawn(f32 x, f32 y, f32 z, s32 size, s32 kind, s32 *tri, s32 slot) {
     const ImpactKind *k;
     s32 flag = 0;
     s32 spread = 0x78;
@@ -88,7 +89,7 @@ s32 func_150E4AD0(f32 x, f32 y, f32 z, s32 size, s32 kind, s32 *tri, s32 slot) {
         }
     }
     if (k->subEffect != 0) {
-        func_150E5384(x, y, z, k->subEffect | flag, size, tri, slot);
+        impact_dust_spawn(x, y, z, k->subEffect | flag, size, tri, slot);
     }
     if (size != 0 && (func_151EFDD0() % 100) < k->smokePct) {
         pos[0] = x;
@@ -120,14 +121,14 @@ s32 func_150E4AD0(f32 x, f32 y, f32 z, s32 size, s32 kind, s32 *tri, s32 slot) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1122E0/func_150E4AD0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1122E0/impact_effect_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_1510F800(s32);
+void collision_select_area(s32);
 s32 func_150A49D0(s32 count, s32 *idList, s32 force);
 s32 func_150A48C0(s32, s32, s32, s32 *);
-s32 func_1510FE4C(s32);
+s32 floor_flags_surface_type(s32);
 extern struct {
     s32 height;  /* floor height * 256 */
     s32 *tri;    /* collision triangle (12-byte records at D_800DC26C) */
@@ -138,11 +139,12 @@ extern s32 D_800DC26C;
 // object_impact_effect: impact effect for the world object `obj` (0xA0-byte records at D_800DBEF4, count
 // D_800DC320). Probes the object's floor (func_150A48C0, only this object's id in the list) at its x / z (+0x10 /
 // +0x14) jittered by up to +-(+0x50) units, at most 5 tries. Takes the highest hit: its height (/ 256) becomes the
-// effect y, and its triangle, moved into world space with the object's matrix (func_15114E8C; vertex offsets +
+// effect y, and its triangle, moved into world space with the object's matrix (world_record_build_matrix; vertex offsets +
 // the object's vertex base for the current frame buffer D_800BE9C0), carries the debris. The effect kind comes from
-// the triangle's material (func_1510FE4C of the object's per-triangle table +0x44 indexed from base +0x58, or +0x40
+// the triangle's material (floor_flags_surface_type of the object's per-triangle table +0x44 indexed from base +0x58, or +0x40
 // for all). Nothing when the object index is out of range or every probe missed. Callers ignore v0.
-s32 func_150E4EA8(u8 *obj) {
+/* was func_150E4EA8 */
+s32 impact_effect_at_world_object(u8 *obj) {
     s32 idx = ((u8 *) obj - (u8 *) D_800DBEF4) / 0xA0;
     u16 id;
     s32 tries = 5;
@@ -161,7 +163,7 @@ s32 func_150E4EA8(u8 *obj) {
         return 0;
     }
     id = idx;
-    func_1510F800(2);
+    collision_select_area(2);
     func_150A49D0(1, (s32 *) &id, 0);
     do {
         x = *(s16 *) (obj + 0x10);
@@ -196,7 +198,7 @@ s32 func_150E4EA8(u8 *obj) {
     } else {
         material = *(s32 *) (obj + 0x40);
     }
-    func_15114E8C(mtx, obj);
+    world_record_build_matrix(mtx, obj);
     if (tri != NULL) {
         world[0] = tri[0] + *(s32 *) (obj + 0x20 + D_800BE9C0 * 4);
         world[1] = tri[1] + *(s32 *) (obj + 0x20 + D_800BE9C0 * 4);
@@ -212,11 +214,11 @@ s32 func_150E4EA8(u8 *obj) {
         }
         tri = world;
     }
-    func_150E4AD0(x, height, z, 1, func_1510FE4C(material), tri, 0);
+    impact_effect_spawn(x, height, z, 1, floor_flags_surface_type(material), tri, 0);
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1122E0/func_150E4EA8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1122E0/impact_effect_at_world_object.s")
 #endif
 
 typedef struct {
@@ -232,7 +234,8 @@ typedef struct {
     u8 uB4;
 } E523S;
 
-void func_150E523C(E523S *arg0) {
+/* was func_150E523C */
+void fx_ring_sprite_update(E523S *arg0) {
     if (arg0->u90 < 9) {
         arg0->uA4 = (((arg0->u90 * 90) / 9) * arg0->u96) * 0.00390625f;
     } else {
@@ -272,26 +275,27 @@ typedef struct {
     s16 u34;        /* +0x34 */
     u8 pad36[2];
 } ImpactDust;
-void func_15049350(s32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
-extern f32 D_800CC630, D_800CC634, D_800CC638; /* plane of the last func_15049350 triangle */
-void func_150440A0(f32 mtx[4][4], f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy,
+void tri_compute_plane(s32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
+extern f32 D_800CC630, D_800CC634, D_800CC638; /* plane of the last tri_compute_plane triangle */
+void mtxf_look_at(f32 mtx[4][4], f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy,
                    f32 upz);
-f32 func_150489B0(u8);
+f32 math_cos_u8(u8);
 void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
-void func_150E5AD8(f32, f32, f32, f32, f32, f32, s32);
+void impact_dust_smoke_puff(f32, f32, f32, f32, f32, f32, s32);
 extern u8 D_80091C2C[], D_80091C50[], D_80091C5C[], D_800908D0[];
 extern u8 D_800D9D80[]; /* 28-byte records; +0x10..+0x18 a direction (f32 x3) */
 
-// impact_dust_spawn: the dust sub-effect of an impact (func_150E4AD0) at (x, y, z). Kind (flag 0x8000 = only update
+// impact_dust_spawn: the dust sub-effect of an impact (impact_effect_spawn) at (x, y, z). Kind (flag 0x8000 = only update
 // the record, spawn nothing) picks the texture: 0x11 D_80091C2C, 4 / 9 / 10 D_80091C50, 8 D_800908D0 (fixed sizes
 // 180..380), else D_80091C5C. With the triangle `tri` (three s16 vertex pointers) the dust leaves along its normal
-// (func_15049350 plane; nothing at all for a degenerate one): a lookat matrix on the normal turns the cone, and
+// (tri_compute_plane plane; nothing at all for a degenerate one): a lookat matrix on the normal turns the cone, and
 // record `slot` of D_800D9D80 gets the normal's direction at +0x10. A flat (|ny| >= 0.9) or missing triangle, or
 // slot 0xFF, sprays upwards, and the record's byte +3 is cleared. size 0 / 2 spray 12 particles (2: random speed
 // scale, double speed, stronger gravity), size 1 one; it stops when node_spawn_sprite has no free record. Kinds 4 / 5 /
-// 9 then add a smoke puff (func_150E5AD8) one time in five. The asm passes size as an 8th argument, which
-// func_150E5AD8 does not take. Callers ignore v0 (v0use).
-void func_150E5384(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 slot) {
+// 9 then add a smoke puff (impact_dust_smoke_puff) one time in five. The asm passes size as an 8th argument, which
+// impact_dust_smoke_puff does not take. Callers ignore v0 (v0use).
+/* was func_150E5384 */
+void impact_dust_spawn(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 slot) {
     f32 v[3][3];
     f32 mtx[4][4];
     ImpactDust rec;
@@ -319,7 +323,7 @@ void func_150E5384(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 slot) 
             v[i][1] = ((s16 **) tri)[i][1];
             v[i][2] = ((s16 **) tri)[i][2];
         }
-        func_15049350(*(s32 *) &v[0][0], v[0][1], v[0][2], v[1][0], v[1][1], v[1][2], v[2][0], v[2][1], v[2][2]);
+        tri_compute_plane(*(s32 *) &v[0][0], v[0][1], v[0][2], v[1][0], v[1][1], v[1][2], v[2][0], v[2][1], v[2][2]);
         nx = -D_800CC630;
         ny = -D_800CC634;
         nz = -D_800CC638;
@@ -331,7 +335,7 @@ void func_150E5384(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 slot) 
         dy = ny / len;
         dz = nz / len;
         if (slot != 0xFF && fabsf(dy) < 0.9f) {
-            func_150440A0(mtx, 0.0f, 0.0f, 0.0f, dx, dy, dz, 0.0f, 1.0f, 0.0f);
+            mtxf_look_at(mtx, 0.0f, 0.0f, 0.0f, dx, dy, dz, 0.0f, 1.0f, 0.0f);
             func_150A7E40(mtx, 0.0f, 0.0f, 1.0f, (f32 *) (D_800D9D80 + slot * 28 + 0x10),
                           (f32 *) (D_800D9D80 + slot * 28 + 0x14), (f32 *) (D_800D9D80 + slot * 28 + 0x18));
         } else {
@@ -386,18 +390,18 @@ void func_150E5384(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 slot) 
         rec.gravity = -0xDA;
     }
     while (count-- != 0 && more) {
-        speed = func_150ADA68() * 957.0f + base;
+        speed = random_float() * 957.0f + base;
         angle = func_151EFDD0() % 256;
         if (fast) {
             speed += speed;
         }
         if (flat) {
-            dx = func_15048A40(angle);
+            dx = math_sin_u8(angle);
             dy = 1.0f;
-            dz = func_150489B0(angle);
+            dz = math_cos_u8(angle);
         } else {
-            s = func_15048A40(angle);
-            c = func_150489B0(angle);
+            s = math_sin_u8(angle);
+            c = math_cos_u8(angle);
             func_150A7E40(mtx, s * 0.5f, c * 0.5f, 1.0f, &dx, &dy, &dz);
         }
         kx = 0.315f * dx;
@@ -408,26 +412,27 @@ void func_150E5384(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 slot) 
         rec.vz = (s32) (speed * kz);
         func_151EFDD0();
         rec.u2A = 10;
-        rec.size0 = (s32) (func_150ADA68() * sizeRange + sizeBase);
-        rec.size1 = (s32) (func_150ADA68() * sizeRange + sizeBase);
+        rec.size0 = (s32) (random_float() * sizeRange + sizeBase);
+        rec.size1 = (s32) (random_float() * sizeRange + sizeBase);
         if (node_spawn_sprite(&rec, 0, 0, -1, 0xFF, 0) == NULL) {
             more = 0;
         }
     }
     if (kind == 4 || kind == 9 || kind == 5) {
         if (func_151EFDD0() % 5 == 0) {
-            func_150E5AD8(x, y, z, dx, dy, dz, kind);
+            impact_dust_smoke_puff(x, y, z, dx, dy, dz, kind);
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1122E0/func_150E5384.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1122E0/impact_dust_spawn.s")
 #endif
 
 s32 func_15132FBC(void *, s32, s32, s32, u8, s32);
 s32 func_151EFDD0(void);
 
-void func_150E5AD8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6) {
+/* was func_150E5AD8 */
+void impact_dust_smoke_puff(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6) {
     struct {
         f32 u28[13];
         f32 u5C;
@@ -501,14 +506,14 @@ void func_150E5AD8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s
     }
     sp.u7C = (func_151EFDD0() % 60) + 60;
     sp.u78 = 0x29E9;
-    t = (func_150ADA68() * 4.6f) + 1.5f;
+    t = (random_float() * 4.6f) + 1.5f;
     sp.u74 = -0.78f;
     sp.u5C = t * arg3;
     sp.u60 = -t * arg4;
     sp.u64 = t * arg5;
-    sp.u68 = (func_150ADA68() * 6.0f) + -3.0f;
-    sp.u70 = (func_150ADA68() * 6.0f) + -3.0f;
-    sp.u6C = (func_150ADA68() * 6.0f) + -3.0f;
+    sp.u68 = (random_float() * 6.0f) + -3.0f;
+    sp.u70 = (random_float() * 6.0f) + -3.0f;
+    sp.u6C = (random_float() * 6.0f) + -3.0f;
     sp.u80 = 0;
     sp.u84 = 0;
     sp.u88 = 0xFF;
@@ -529,18 +534,19 @@ void func_150E5AD8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s
 }
 
 #ifdef NON_MATCHING
-void func_15049350(s32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
+void tri_compute_plane(s32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
 f32 func_150ADDE0(f32 *a, f32 *b);
-extern f32 D_800CC630, D_800CC634, D_800CC638; /* plane of the last func_15049350 triangle */
+extern f32 D_800CC630, D_800CC634, D_800CC638; /* plane of the last tri_compute_plane triangle */
 
 // debris_ground_bounce: ground handler 4 of D_80089CD4 (`s32 (u8 *, f32, f32, f32, f32, u8 *)`, func_15132BBC's
 // dispatcher; x / y / z unused). Puts the object on the ground (+0x3C = +0x10 * 1.1 + ground). Slower than 2 downwards
 // it stops: velocities +0x44..+0x4C cleared, flags 0x6F of +0x60 dropped. Otherwise it bounces: with the ground
 // triangle `tri` (nine s16) the velocity is reflected about the triangle's normal (v - 2 (v.n) n, from the
-// func_15049350 plane D_800CC630; skipped when the normal is shorter than 1e-5) and scaled by +0x14 (x / z also
+// tri_compute_plane plane D_800CC630; skipped when the normal is shorter than 1e-5) and scaled by +0x14 (x / z also
 // by 0.8); without a triangle only the y velocity is flipped. The spin +0x50..+0x58 is scaled by +0x14 too.
 // Returns 1 (keep the object).
-s32 func_150E5D90(u8 *p, f32 x, f32 y, f32 z, f32 ground, s16 *tri) {
+/* was func_150E5D90 */
+s32 debris_ground_bounce(u8 *p, f32 x, f32 y, f32 z, f32 ground, s16 *tri) {
     f32 vy = *(f32 *) (p + 0x48);
     f32 v[3][3];
     f32 n[3];
@@ -564,19 +570,19 @@ s32 func_150E5D90(u8 *p, f32 x, f32 y, f32 z, f32 ground, s16 *tri) {
             v[i][1] = tri[i * 3 + 1];
             v[i][2] = tri[i * 3 + 2];
         }
-        func_15049350(*(s32 *) &v[0][0], v[0][1], v[0][2], v[1][0], v[1][1], v[1][2], v[2][0], v[2][1], v[2][2]);
+        tri_compute_plane(*(s32 *) &v[0][0], v[0][1], v[0][2], v[1][0], v[1][1], v[1][2], v[2][0], v[2][1], v[2][2]);
         n[0] = -D_800CC630;
         n[1] = -D_800CC634;
         n[2] = -D_800CC638;
         len = func_150AD930(n);
         if (1e-05f < len) {
-            func_15049148((struct17 *) n, 1.0f / len, (struct17 *) unit);
+            vec3_scale((struct17 *) n, 1.0f / len, (struct17 *) unit);
             vel[0] = *(f32 *) (p + 0x44);
             vel[1] = *(f32 *) (p + 0x48);
             vel[2] = *(f32 *) (p + 0x4C);
             len = func_150ADDE0(unit, vel);
-            func_15049148((struct17 *) unit, len + len, (struct17 *) n);
-            func_15048F58((struct17 *) vel, (struct17 *) n, (struct17 *) n);
+            vec3_scale((struct17 *) unit, len + len, (struct17 *) n);
+            vec3_sub((struct17 *) vel, (struct17 *) n, (struct17 *) n);
             fac = *(f32 *) (p + 0x14);
             *(f32 *) (p + 0x44) = fac * n[0] * 0.8f;
             *(f32 *) (p + 0x48) = fac * n[1];
@@ -595,5 +601,5 @@ s32 func_150E5D90(u8 *p, f32 x, f32 y, f32 z, f32 ground, s16 *tri) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1122E0/func_150E5D90.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1122E0/debris_ground_bounce.s")
 #endif

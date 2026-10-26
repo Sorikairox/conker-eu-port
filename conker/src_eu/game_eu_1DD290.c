@@ -52,6 +52,6 @@ void func_151AFA80(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
         m = base; m += e[0] << 6;
         func_15143134(e + 4, &a, m);
         func_15143134(e + 0x10, &b, m);
-        beam_impact_effects(&a, &b, ((func_150ADA68() * 170.0f) + 71.0f) * 0.01f, arg2, arg3);
+        beam_impact_effects(&a, &b, ((random_float() * 170.0f) + 71.0f) * 0.01f, arg2, arg3);
     }
 }

@@ -4,13 +4,14 @@
 
 
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, ...);
+s32 event_dispatch(s32, s32, ...);
 #else
-s32 func_1509BE40(s32, s32, s32, s32);
+s32 event_dispatch(s32, s32, s32, s32);
 #endif
 
-void func_150F5830(u8 *arg0) {
-    if (func_1509BE40(1, 0x401C, 6, 0x9000) != 0) {
+/* was func_150F5830 */
+void camera_update_flag_401c(u8 *arg0) {
+    if (event_dispatch(1, 0x401C, 6, 0x9000) != 0) {
         (*(s32 *)((u8 *)arg0 + 0x84)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x84)) | 0x80000000);
         return;
     }
@@ -19,6 +20,7 @@ void func_150F5830(u8 *arg0) {
 
 void func_15182D40(void);
 
-void func_150F5890(s32 arg0) {
+/* was func_150F5890 */
+void area_points_hook(s32 arg0) {
     func_15182D40();
 }

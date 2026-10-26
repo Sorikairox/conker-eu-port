@@ -7,8 +7,9 @@
 // event_object_effect_spawn: spawns a type-0x1A effect for an object (obj NULL: none) through func_15149130:
 // lifetime `span` (negative: 300, untimed), sub-list arg5 + 0x14, arg6 / arg7 passed on. Its data (+0x28, 20 bytes):
 // the object, the object's byte +0x3B, 0.0f, arg4, arg2, arg3 (bytes +0x12 / +0x13 uninitialised, as in the asm).
-// Returns the effect (NULL if none). Event command 0x65 cases 1 / 2 (game_eu_51190); sibling of func_1510A454.
-struct260 *func_15109990(u8 *obj, s16 span, s8 arg2, s8 arg3, f32 arg4, s32 arg5, u8 arg6, s32 arg7) {
+// Returns the effect (NULL if none). Event command 0x65 cases 1 / 2 (game_eu_51190); sibling of segment_effect_spawn.
+/* was func_15109990 */
+struct260 *event_object_effect_spawn(u8 *obj, s16 span, s8 arg2, s8 arg3, f32 arg4, s32 arg5, u8 arg6, s32 arg7) {
     struct260 *fx;
     struct {
         u8 *obj;
@@ -46,7 +47,7 @@ struct260 *func_15109990(u8 *obj, s16 span, s8 arg2, s8 arg3, f32 arg4, s32 arg5
     return fx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1371A0/func_15109990.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1371A0/event_object_effect_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -57,7 +58,8 @@ extern u8 D_800A2880[];         /* 12-byte points, read as the segment start / e
 extern u8 D_800A28F0[];
 s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
 
-void func_15109A7C(u8 *arg0) {
+/* was func_15109A7C */
+void obj_point_effect_emitter_update(u8 *arg0) {
     struct {
         f32 u78;
         f32 u7C;
@@ -106,7 +108,7 @@ void func_15109A7C(u8 *arg0) {
             sp.uC0 = temp_v0;
             do {
                 var_s0 = 0;
-                var_f2 = (*(f32 *)((u8 *)(&D_800A28D4) + 0x18)) * func_150ADA68();
+                var_f2 = (*(f32 *)((u8 *)(&D_800A28D4) + 0x18)) * random_float();
                 var_v0 = &D_800A28D4;
                 if ((*(f32 *)((u8 *)(&D_800A28D4) + 0)) < var_f2) {
                     var_f0 = (*(f32 *)((u8 *)(&D_800A28D4) + 0));
@@ -117,7 +119,7 @@ void func_15109A7C(u8 *arg0) {
                         var_v0++;
                     } while (var_f0 < var_f2);
                 }
-                temp_f0 = func_150ADA68();
+                temp_f0 = random_float();
                 temp_s3 = var_s0 * 0xC;
                 temp_s1 = D_800A2880 + temp_s3;
                 temp_f2 = (*(f32 *)((u8 *)temp_s1 + 0));
@@ -131,7 +133,7 @@ void func_15109A7C(u8 *arg0) {
                 func_15143134(temp_s1, &sp.uA8, temp_s2);
                 func_15143134(temp_s1 + 0xC, &sp.u9C, temp_s2);
                 func_15143134(D_800A28F0 + temp_s3, &sp.u90, temp_s2);
-                temp_f0_2 = func_150ADA68();
+                temp_f0_2 = random_float();
                 sp.u84 = (((sp.u90 - sp.u9C) * temp_f0_2) + sp.u9C) - sp.uA8;
                 sp.u88 = (((sp.u94 - sp.uA0) * temp_f0_2) + sp.uA0) - sp.uAC;
                 sp.u8C = (((sp.u98 - sp.uA4) * temp_f0_2) + sp.uA4) - sp.uB0;
@@ -151,7 +153,7 @@ void func_15109A7C(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1371A0/func_15109A7C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1371A0/obj_point_effect_emitter_update.s")
 #endif
 #ifdef NON_MATCHING
 extern f32 D_800A2A04;
@@ -163,8 +165,8 @@ extern f32 D_800A2A18;
 extern f32 D_800A2A1C;
 s32 func_151308E4(void *, s32, s32, u8, s32);
 s32 func_151530A8(void *, u8, s32);
-s32 func_150ADA20(void);
-f32 func_150ADA68(void);
+s32 random_int(void);
+f32 random_float(void);
 
 /* particle template of func_151308E4 (0x70 bytes; bytes 0x5C-0x5F / 0x66-0x6F unset, as in the asm) */
 typedef struct {
@@ -221,11 +223,12 @@ typedef struct {
     s8 u70[4];        /* 0x70 */
 } EmitBlk9DC8;
 
-// spark_burst_spawn: P232. Handler 0 of the D_80089004 point-effect table (called by func_15109A7C with the
+// spark_burst_spawn: P232. Handler 0 of the D_80089004 point-effect table (called by obj_point_effect_emitter_update with the
 // object, the point `pos` and three more points; `dir` = the unit direction): spawns one spark particle (kind 0x2B,
 // random life 10..25, random size 35..60, velocity dir * a random scale, random flip bits 0x40 / 0x80) through
 // func_151308E4 and a small emitter (func_151530A8) at the same point. b / c / d are not used.
-void func_15109DC8(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
+/* was func_15109DC8 */
+void point_spark_spawn(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     PartTmpl9DC8 t;
     f32 scale;
     EmitBlk9DC8 e;
@@ -234,18 +237,18 @@ void func_15109DC8(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     s32 flipY;
     s32 i;
 
-    scale = (func_150ADA68() * D_800A2A04 + D_800A2A08) * D_800A2A0C;
+    scale = (random_float() * D_800A2A04 + D_800A2A08) * D_800A2A0C;
     t.kind = 0x2B;
     t.flags = 0x4401;
     t.u0 = 0x200005;
     t.u4 = 0x20000;
-    t.life = (func_150ADA20() & 0xF) + 10;
+    t.life = (random_int() & 0xF) + 10;
     t.uC = 0;
     t.u10 = 0;
     for (i = 0; i < 9; i++) {
         t.colour[i] = 0xFF;
     }
-    size = func_150ADA68() * 25.0f + 35.0f;
+    size = random_float() * 25.0f + 35.0f;
     t.size[1] = size;
     t.size[0] = size;
     t.pos[0] = pos[0];
@@ -262,8 +265,8 @@ void func_15109DC8(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     t.u54 = 0.0f;
     t.u24 = 1.0f;
     t.dir[2] = dir[2] * scale;
-    flipX = (func_150ADA20() & 1) ? 0x40 : 0;
-    flipY = (func_150ADA20() & 1) ? 0x80 : 0;
+    flipX = (random_int() & 1) ? 0x40 : 0;
+    flipY = (random_int() & 1) ? 0x80 : 0;
     t.mode = flipY | 5 | flipX | 0xC200;
     t.u60[0] = 6;
     t.u60[1] = 6;
@@ -327,5 +330,5 @@ void func_15109DC8(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     func_151530A8(&e, obj[0xC], obj[1]);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1371A0/func_15109DC8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1371A0/point_spark_spawn.s")
 #endif

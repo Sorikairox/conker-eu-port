@@ -32,7 +32,7 @@ void func_150C5220(u8 *arg0) {
     }
     (*(s32 *)((u8 *)arg0 + 0x7C)) = var_v0;
     sp44 = temp_f2;
-    var_f2 = temp_f2 + (func_15048A40(var_v0 & 0xFF) * 0.1f);
+    var_f2 = temp_f2 + (math_sin_u8(var_v0 & 0xFF) * 0.1f);
     if (((*(u8 *)((u8 *)arg0 + 0x4F)) & 4) == 4) {
         var_f2 += 0.1f;
     }
@@ -53,9 +53,9 @@ void func_150C5220(u8 *arg0) {
 #endif
 #ifdef NON_MATCHING
 u8 *allocate_memory(s32, s32, s32, s32);
-s32 func_1510D66C(s32 *, s32 *, s32, s32);
-void func_1510DDF4(s32, s32, s32, s32, s32);
-s32 func_1511A998(s32, u8 *);
+s32 texture_cache_lookup(s32 *, s32 *, s32, s32);
+void segment_override_add(s32, s32, s32, s32, s32);
+s32 scenery_dl_find_tex_slots(s32, u8 *);
 extern s32 D_1C0;
 extern s32 D_2C1;
 
@@ -98,7 +98,7 @@ void func_150C539C(u8 *arg0) {
         temp_v0_2 = allocate_memory(0x10, 1, 0, 0);
         (*(u8 **)((u8 *)arg0 + 0x7C)) = temp_v0_2;
         sp44 = temp_v0_2;
-        func_1511A998((*(s32 *)((u8 *)arg0 + 0x1C)), temp_v0_2);
+        scenery_dl_find_tex_slots((*(s32 *)((u8 *)arg0 + 0x1C)), temp_v0_2);
         var_t0 = sp44;
         var_v1 = sp40;
         (*(f32 *)((u8 *)var_t0 + 8)) = 0.0f;
@@ -178,12 +178,12 @@ void func_150C539C(u8 *arg0) {
     }
     sp48 = 0;
     sp44 = var_t0;
-    temp_v0_3 = func_1510D66C(sp.u54, &sp.u50, 3, 0);
+    temp_v0_3 = texture_cache_lookup(sp.u54, &sp.u50, 3, 0);
     var_a2 = sp48;
     if ((*(s32 *)((u8 *)sp44 + 0)) != 0) {
         var_a2 = (sp.u50 + temp_v0_3) - 0x200;
     }
-    func_1510DDF4(arg0, temp_v0_3, var_a2, 4, 5);
+    segment_override_add(arg0, temp_v0_3, var_a2, 4, 5);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F2A30/func_150C539C.s")

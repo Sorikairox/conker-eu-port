@@ -503,7 +503,7 @@ extern f32 D_80095B2C;
 extern f32 D_80095B30;
 extern f32 D_80095B40;
 extern f32 D_80095B44;
-// func_15009990 suggests they are u8, but they look like floats!
+// hotspot_fx_type24_27 suggests they are u8, but they look like floats!
 extern u8 D_80095B48[]; // 0.002188183832913637
 extern u8 D_80095B4C[]; // 20.100000381469727
 extern u8 D_80095B50[]; // 0.4000000059604645

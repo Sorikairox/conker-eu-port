@@ -15,7 +15,8 @@ extern f32 D_800DC434;
  * 0x102 / +0x3D4 / 0x137 / 0x84 == 0x194 / 0x80 tests all clear). Then eye.y = base + dy, +0x344 = eye.y - base,
  * and with object +0xAD == 1 and +0x73C, eye.y >= +0x360 + 5 (unless +0x360 == -10000).
  * sp44 (ceiling) is stale stack in the asm when the ceiling test is skipped; C starts it at 0. */
-void func_1512E6B0(u8 *arg0) {
+/* was func_1512E6B0 */
+void camera_update_eye_height(u8 *arg0) {
     f32 dy;       /* sp48 */
     s32 ceiling;  /* sp44 */
     f32 h;
@@ -114,5 +115,5 @@ void func_1512E6B0(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15BEC0/func_1512E6B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15BEC0/camera_update_eye_height.s")
 #endif

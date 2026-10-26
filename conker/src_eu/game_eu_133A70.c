@@ -2,17 +2,17 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_15108060(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
-void func_15107FA0(u8 *arg0, s16 arg1, s16 arg2, u8 *arg3, u8 *arg4);
-void func_151084D4(u8 *arg0, u8 arg1, void *arg2, void *arg3);
+void arc_control_points_thirds(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
+void obj_attach_point_at_angles(u8 *arg0, s16 arg1, s16 arg2, u8 *arg3, u8 *arg4);
+void obj_bone_point_transform(u8 *arg0, u8 arg1, void *arg2, void *arg3);
 #endif
 
 
 #ifdef NON_MATCHING
-void func_15106794(struct102 *);
-void func_15106B90(struct102 *);
+void bolt_arc_sample_curve(struct102 *);
+void bolt_arc_jitter_points(struct102 *);
 s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-s32 func_150ADA20(void);
+s32 random_int(void);
 void *memcpy(void *, const void *, unsigned int);
 
 /* The 0x70-byte particle spec func_151307F0 gets for each arc end. */
@@ -45,9 +45,10 @@ typedef struct {
 // arc spec `spec` (copied to +0x10; +0x38 = segment count n, +0x40 width, +0x44 / +0x46 life base / random range,
 // +0x48 colour). The object's data area (+0x60) follows its 0x88-byte header, n * 0x34 + (n + 2) * 0xC bytes in and
 // `extra` more bytes are reserved for the caller. Sets the step 1 / (n + 1) (+0x64) and the life (+0x68), builds the
-// points (func_15106794, func_15106B90), clears +0x6C..+0x83, sets +0x84 = n * 0x30 + 0x60 and spawns one glow
+// points (bolt_arc_sample_curve, bolt_arc_jitter_points), clears +0x6C..+0x83, sets +0x84 = n * 0x30 + 0x60 and spawns one glow
 // particle at each arc end (func_151307F0, handles at +0x6C / +0x70). Returns the object (NULL when none is free).
-u8 *func_15106260(s16 *spec, s32 extra, u8 layer, s32 arg3) {
+/* was func_15106260 */
+u8 *bolt_arc_spawn(s16 *spec, s32 extra, u8 layer, s32 arg3) {
     ArcEndSpec ps;
     u8 *p = (u8 *)spec;
     u8 *obj;
@@ -62,9 +63,9 @@ u8 *func_15106260(s16 *spec, s32 extra, u8 layer, s32 arg3) {
     memcpy(obj + 0x10, p, 0x50);
     *(u8 **)(obj + 0x60) = obj + n * 0x34 + (n + 2) * 0xC + 0x88;
     *(f32 *)(obj + 0x64) = 1.0f / (f32)(*(s32 *)(p + 0x38) + 1);
-    *(s16 *)(obj + 0x68) = (u32)func_150ADA20() % (u32)(*(s16 *)(p + 0x46) + 1) + *(s16 *)(p + 0x44);
-    func_15106794((struct102 *)obj);
-    func_15106B90((struct102 *)obj);
+    *(s16 *)(obj + 0x68) = (u32)random_int() % (u32)(*(s16 *)(p + 0x46) + 1) + *(s16 *)(p + 0x44);
+    bolt_arc_sample_curve((struct102 *)obj);
+    bolt_arc_jitter_points((struct102 *)obj);
     *(s32 *)(obj + 0x6C) = 0;
     *(s32 *)(obj + 0x70) = 0;
     bzero(obj + 0x74, 0x10);
@@ -116,22 +117,23 @@ u8 *func_15106260(s16 *spec, s32 extra, u8 layer, s32 arg3) {
         ps.pos[0] = end[0];
         ps.pos[1] = end[1];
         ps.pos[2] = end[2];
-        flags = func_150ADA20() ? 0x40 : 0;
-        ps.flags = (func_150ADA20() ? 0x80 : 0) | flags;
+        flags = random_int() ? 0x40 : 0;
+        ps.flags = (random_int() ? 0x80 : 0) | flags;
         *(s32 *)(obj + 0x6C + i * 4) = func_151307F0((s32)&ps, 0, 0, 0, layer, arg3);
     }
     return obj;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15106260.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/bolt_arc_spawn.s")
 #endif
 
 typedef struct { f32 x, y, z; } V3_133A70;
-void func_15106794(struct102 *);
-void func_15106B90(struct102 *);
+void bolt_arc_sample_curve(struct102 *);
+void bolt_arc_jitter_points(struct102 *);
 extern s32 D_80088FB0;
 
-void func_1510660C(struct102 *arg0) {
+/* was func_1510660C */
+void bolt_arc_update(struct102 *arg0) {
     s32 (*temp_v1)(struct102 *, u8 *);
     u8 sp2B;
     s8 temp_v0;
@@ -152,12 +154,12 @@ void func_1510660C(struct102 *arg0) {
         }
     }
     if (sp2B != 0) {
-        func_15106794(arg0);
+        bolt_arc_sample_curve(arg0);
     }
     (*(s16 *)((u8 *)arg0 + 0x68)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x68)) - D_800BE9E4);
     if ((*(s16 *)((u8 *)arg0 + 0x68)) < 0) {
-        func_15106B90(arg0);
-        (*(s16 *)((u8 *)arg0 + 0x68)) = (s16) (((*(s16 *)((u8 *)arg0 + 0x54)) + (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x56)) + 1))));
+        bolt_arc_jitter_points(arg0);
+        (*(s16 *)((u8 *)arg0 + 0x68)) = (s16) (((*(s16 *)((u8 *)arg0 + 0x54)) + (random_int() % (u32) ((*(s16 *)((u8 *)arg0 + 0x56)) + 1))));
     }
     temp_v0_3 = (*(u8 **)((u8 *)arg0 + 0x6C));
     if (temp_v0_3 != NULL) {
@@ -169,7 +171,8 @@ void func_1510660C(struct102 *arg0) {
     }
 }
 
-s32 func_15106760(s32 arg0) {
+/* was func_15106760 */
+s32 bolt_arc_samples_get(s32 arg0) {
     return arg0 + 0x88;
 }
 
@@ -184,7 +187,8 @@ typedef struct {
     struct_eu_133A70_elem unk88[1];
 } struct_eu_133A70;
 
-struct_eu_133A70_elem *func_1510676C(struct_eu_133A70 *arg0) {
+/* was func_1510676C */
+struct_eu_133A70_elem *bolt_arc_points_get(struct_eu_133A70 *arg0) {
     s32 temp_v1 = arg0->unk48;
 
     return &arg0->unk88[temp_v1];
@@ -192,20 +196,21 @@ struct_eu_133A70_elem *func_1510676C(struct_eu_133A70 *arg0) {
 
 #ifdef NON_MATCHING
 s32 func_15146078(f32 *, f32 *, f32 *);
-f32 func_15106A34(f32);
-f32 func_15106A5C(f32);
-f32 func_15106A90(f32);
-f32 func_15106AC0(f32);
-f32 func_15106AD8(f32);
-f32 func_15106B04(f32);
-f32 func_15106B3C(f32);
-f32 func_15106B6C(f32);
+f32 bezier_basis0(f32);
+f32 bezier_basis1(f32);
+f32 bezier_basis2(f32);
+f32 bezier_basis3(f32);
+f32 bezier_basis0_deriv(f32);
+f32 bezier_basis1_deriv(f32);
+f32 bezier_basis2_deriv(f32);
+f32 bezier_basis3_deriv(f32);
 // bolt_arc_sample_curve: samples the arc's cubic Bezier curve (control points +0x14, +0x20, +0x2C, +0x38) at the
 // +0x48 points t = step, 2 * step, ... (step +0x64 = 1 / (n + 1)) into the 0x34-byte records at +0x88: t, the
-// position (Bernstein weights func_15106A34 / A5C / A90 / AC0), the tangent (derivatives func_15106AD8 / B04 / B3C /
+// position (Bernstein weights bezier_basis0 / A5C / A90 / AC0), the tangent (derivatives bezier_basis0_deriv / B04 / B3C /
 // B6C) and two side vectors at +0x1C / +0x28 from func_15146078 (zero when it fails, e.g. a zero tangent).
-// The asm leaves a stale v0; the only caller (func_15106260) ignores it, so the C is void.
-void func_15106794(struct102 *arg0) {
+// The asm leaves a stale v0; the only caller (bolt_arc_spawn) ignores it, so the C is void.
+/* was func_15106794 */
+void bolt_arc_sample_curve(struct102 *arg0) {
     u8 *obj = (u8 *) arg0;
     f32 *rec;
     f32 *p0 = (f32 *) (obj + 0x14);
@@ -219,19 +224,19 @@ void func_15106794(struct102 *arg0) {
     s32 i;
     s32 k;
 
-    rec = (f32 *) func_15106760((s32) arg0);
+    rec = (f32 *) bolt_arc_samples_get((s32) arg0);
     step = *(f32 *) (obj + 0x64);
     t = step;
     for (i = 0; i < *(s32 *) (obj + 0x48); i++) {
         rec[0] = t;
-        b0 = func_15106A34(t);
-        b1 = func_15106A5C(t);
-        b2 = func_15106A90(t);
-        b3 = func_15106AC0(t);
-        d0 = func_15106AD8(t);
-        d1 = func_15106B04(t);
-        d2 = func_15106B3C(t);
-        d3 = func_15106B6C(t);
+        b0 = bezier_basis0(t);
+        b1 = bezier_basis1(t);
+        b2 = bezier_basis2(t);
+        b3 = bezier_basis3(t);
+        d0 = bezier_basis0_deriv(t);
+        d1 = bezier_basis1_deriv(t);
+        d2 = bezier_basis2_deriv(t);
+        d3 = bezier_basis3_deriv(t);
         for (k = 0; k < 3; k++) {
             rec[1 + k] = p0[k] * b0 + p1[k] * b1 + p2[k] * b2 + p3[k] * b3;
         }
@@ -251,56 +256,65 @@ void func_15106794(struct102 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15106794.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/bolt_arc_sample_curve.s")
 #endif
 
-f32 func_15106A34(f32 arg0) {
+/* was func_15106A34 */
+f32 bezier_basis0(f32 arg0) {
     f32 temp_f2 = 1.0f - arg0;
     return temp_f2 * temp_f2 * temp_f2;
 }
 
-f32 func_15106A5C(f32 arg0) {
+/* was func_15106A5C */
+f32 bezier_basis1(f32 arg0) {
     f32 temp_f2 = 1.0f - arg0;
     return 3.0f * arg0 * temp_f2 * temp_f2;
 }
 
-f32 func_15106A90(f32 arg0) {
+/* was func_15106A90 */
+f32 bezier_basis2(f32 arg0) {
     return 3.0f * arg0 * arg0 * (1.0f - arg0);
 }
 
-f32 func_15106AC0(f32 arg0) {
+/* was func_15106AC0 */
+f32 bezier_basis3(f32 arg0) {
     return arg0 * arg0 * arg0;
 }
 
-f32 func_15106AD8(f32 arg0) {
+/* was func_15106AD8 */
+f32 bezier_basis0_deriv(f32 arg0) {
     f32 temp_f2 = 1.0f - arg0;
     return -3.0f * temp_f2 * temp_f2;
 }
 
-f32 func_15106B04(f32 arg0) {
+/* was func_15106B04 */
+f32 bezier_basis1_deriv(f32 arg0) {
     return ((9.0f * arg0 * arg0) - (12.0f * arg0)) + 3.0f;
 }
 
-f32 func_15106B3C(f32 arg0) {
+/* was func_15106B3C */
+f32 bezier_basis2_deriv(f32 arg0) {
     return (-9.0f * arg0 * arg0) + (6.0f * arg0);
 }
 
-f32 func_15106B6C(f32 arg0) {
+/* was func_15106B6C */
+f32 bezier_basis3_deriv(f32 arg0) {
     return 3.0f * arg0 * arg0;
 }
 
 // PERMUTER CHANGED DECL: voidfunc_15106B90(struct102*) (base: voidfunc_15106B90(struct102*arg0))
 void func_15143874(s16, f32, f32 *, f32 *);
 
-void func_15106B90(struct102 *arg0)
+/* was func_15106B90 */
+void bolt_arc_jitter_points(struct102 *arg0)
 {
   s32 i;
   u8 *src;
   V3_133A70 *d;
   V3_133A70 *dst;
   u8 *q;
-  src = (u8 *) func_15106760((s32) arg0);
-  d = (V3_133A70 *) func_1510676C((struct_eu_133A70 *) arg0);
+  src = (u8 *) bolt_arc_samples_get((s32) arg0);
+  d = (V3_133A70 *) bolt_arc_points_get((struct_eu_133A70 *) arg0);
   d[0] = *((V3_133A70 *) (((u8 *) arg0) + 0x14));
   d[(*((s32 *) (((u8 *) arg0) + 0x48))) + 1] = *((V3_133A70 *) (((u8 *) arg0) + 0x38));
   for (i = 1; i < ((*((s32 *) (((u8 *) arg0) + 0x48))) + 1); i++)
@@ -312,7 +326,7 @@ void func_15106B90(struct102 *arg0)
     q = src + ((i - 1) * 0x34);
     if (!arg0) { // fakematch: permuter (s-register order of i / dst / src)
     }
-    func_15143874(func_150ADA20() & 0xFF, (*((f32 *) (((u8 *) arg0) + 0x4C))) * func_150ADA68(), &c, &s);
+    func_15143874(random_int() & 0xFF, (*((f32 *) (((u8 *) arg0) + 0x4C))) * random_float(), &c, &s);
     dst->x = (*((f32 *) (q + 4))) + (((*((f32 *) (q + 0x28))) * s) + ((*((f32 *) (q + 0x1C))) * c));
     dst->y = (*((f32 *) (q + 8))) + (((*((f32 *) (q + 0x2C))) * s) + ((*((f32 *) (q + 0x20))) * c));
     dst->z = (*((f32 *) (q + 0xC))) + (((*((f32 *) (q + 0x30))) * s) + ((*((f32 *) (q + 0x24))) * c));
@@ -345,13 +359,14 @@ static const f32 sRibbonMinLen2B[1] = { 0.0001f };  /* 0x38D1B717 */
         (vp)++; \
     } while (0)
 
-// ribbon_draw: draws the object's point chain (func_1510676C: obj +0x48 + 2 points) as a camera-facing ribbon of
+// ribbon_draw: draws the object's point chain (bolt_arc_points_get: obj +0x48 + 2 points) as a camera-facing ribbon of
 // half width obj +0x50: each point gets 3 vertices (p + n, p, p - n with s = 0 / 0x200 / 0x400, n = the side normal of
 // the segment and the camera of view id, func_15144B34), each segment one 6-vertex load and 4 triangles. Vertices
 // from func_151D6310 (obj +0x74 pool, obj +0x84 count; nothing drawn without). Texture D_80091120 (combine 3), prim
 // colour obj +0x58..+0x5B, geometry 0x200005 / 0x1F0600, combine 0x44, render mode 0x80000 | 0x2CA0 | D_800D30BC
 // with the second D_800A4EA8 pair. Returns the display list end.
-s32 func_15106D38(s32 gfx, u8 *obj, s16 id) {
+/* was func_15106D38 */
+s32 bolt_arc_ribbon_draw(s32 gfx, u8 *obj, s16 id) {
     Vtx *vtx;
     f32 *cam;
     f32 *pts;
@@ -372,7 +387,7 @@ s32 func_15106D38(s32 gfx, u8 *obj, s16 id) {
     }
     cam = func_15144B34(id);
     flag = 1;
-    pts = (f32 *) func_1510676C((struct_eu_133A70 *) obj);
+    pts = (f32 *) bolt_arc_points_get((struct_eu_133A70 *) obj);
     gfx = func_15142E24(gfx, D_80091120, 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
     gfx = func_15142C10(gfx, obj[0x58], obj[0x59], obj[0x5A], obj[0x5B], &flag);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
@@ -451,11 +466,12 @@ s32 func_15106D38(s32 gfx, u8 *obj, s16 id) {
     return gfx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15106D38.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/bolt_arc_ribbon_draw.s")
 #endif
 
 extern void (*D_80088FB8[])(u8 *);
-void func_151073F8(u8 *arg0)
+/* was func_151073F8 */
+void bolt_arc_free(u8 *arg0)
 {
   void (*fn)(u8 *) = D_80088FB8[arg0[0x5C]];
   struct102 *a;
@@ -474,17 +490,20 @@ void func_151073F8(u8 *arg0)
   func_151D5E30(arg0 + 0x74);
 }
 
-void func_15107478(struct102 *arg0) {
-    func_151073F8(arg0);
+/* was func_15107478 */
+void bolt_arc_retire(struct102 *arg0) {
+    bolt_arc_free(arg0);
     node_retire(arg0);
 }
 
-void func_151074A4(struct102 * arg0) {
-    func_151073F8(arg0);
+/* was func_151074A4 */
+void bolt_arc_delete(struct102 * arg0) {
+    bolt_arc_free(arg0);
     node_unlink_free(arg0);
 }
 
-void func_151074D0(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_151074D0 */
+void bolt_arc_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
     void (*temp_v0)(u8 *, s32, u8) = D_80088FC8[arg0[0x5C]];
 
     if (temp_v0 != NULL) {
@@ -501,13 +520,14 @@ typedef struct {
     f32 params[12]; // 0x10
     u8 kind;    // 0x40
 } BoltSpec;     // copied to rec + 0x28
-void func_15107678(u8 *rec, s16 lo, s16 hi, f32 jitter);
+void bolt_points_subdivide(u8 *rec, s16 lo, s16 hi, f32 jitter);
 void *memcpy(void *, const void *, unsigned int);
 
 // bolt_spawn: spawns a bolt record (func_15149130 type 0x3E, 0x48-byte header + (2^depth + 1) points) whose block at
 // +0x28 gets the point count, the 12 `params` words and `kind`; the point list (+0x28 + 0x48) runs from `start` to
-// `end` and func_15107678 fills the inner points with midpoint displacement (`jitter`). Returns the record or 0.
-s32 func_15107518(f32 *start, f32 *end, s32 depth, f32 *params, f32 jitter, u8 kind, u8 arg6, s32 arg7) {
+// `end` and bolt_points_subdivide fills the inner points with midpoint displacement (`jitter`). Returns the record or 0.
+/* was func_15107518 */
+s32 bolt_spawn(f32 *start, f32 *end, s32 depth, f32 *params, f32 jitter, u8 kind, u8 arg6, s32 arg7) {
     BoltSpec spec;
     u8 *rec;
     f32 *pts;
@@ -533,21 +553,22 @@ s32 func_15107518(f32 *start, f32 *end, s32 depth, f32 *params, f32 jitter, u8 k
         pts[0] = end[0];
         pts[1] = end[1];
         pts[2] = end[2];
-        func_15107678(rec, 0, spec.count - 1, jitter);
+        bolt_points_subdivide(rec, 0, spec.count - 1, jitter);
     }
     return (s32) rec;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15107518.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/bolt_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-f32 func_150ADA68(void);
+f32 random_float(void);
 
 // bolt_subdivide: fills the points between `lo` and `hi` of a bolt record's point list (rec + 0x28 + 0xC, 12-byte
 // x / y / z) by midpoint displacement: each midpoint lies on the segment at a random fraction 0.5 +- `jitter`
-// (func_150ADA68), then the left half recurses and the right half loops.
-void func_15107678(u8 *rec, s16 lo, s16 hi, f32 jitter) {
+// (random_float), then the left half recurses and the right half loops.
+/* was func_15107678 */
+void bolt_points_subdivide(u8 *rec, s16 lo, s16 hi, f32 jitter) {
     f32 *a;
     f32 *b;
     f32 *m;
@@ -564,25 +585,25 @@ void func_15107678(u8 *rec, s16 lo, s16 hi, f32 jitter) {
         dx = b[0] - a[0];
         dy = b[1] - a[1];
         dz = b[2] - a[2];
-        t = func_150ADA68() * (jitter + jitter) + (0.5f - jitter);
+        t = random_float() * (jitter + jitter) + (0.5f - jitter);
         m = *(f32 **) (rec + 0x34) + mid * 3;
         m[0] = a[0] + dx * t;
         m = *(f32 **) (rec + 0x34) + mid * 3;
         m[1] = a[1] + dy * t;
         m = *(f32 **) (rec + 0x34) + mid * 3;
         m[2] = a[2] + dz * t;
-        func_15107678(rec, lo, mid, jitter);
+        bolt_points_subdivide(rec, lo, mid, jitter);
         lo = mid;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15107678.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/bolt_points_subdivide.s")
 #endif
 
 #ifdef NON_MATCHING
 typedef struct {
     u8 *rec;      // 0x00 copied into the arc object (its +0x60 data) after the spawn
-    s16 life;     // 0x04 <- passed to func_15106260 from here
+    s16 life;     // 0x04 <- passed to bolt_arc_spawn from here
     u8 u06;       // 0x06
     f32 a[3];     // 0x08 segment start
     f32 c1[3];    // 0x14 start + random offset
@@ -598,18 +619,19 @@ typedef struct {
     u8 u4F;       // 0x4F
     u8 u50;       // 0x50
 } BoltArcSpawn;
-u8 *func_15106260(s16 *spec, s32 extra, u8 layer, s32 arg3);
-s32 func_150ADA20(void);
-f32 func_150ADA68(void);
+u8 *bolt_arc_spawn(s16 *spec, s32 extra, u8 layer, s32 arg3);
+s32 random_int(void);
+f32 random_float(void);
 void func_15143794(s16, s16, f32, u8 *);
 void *memcpy(void *, const void *, unsigned int);
 
-// bolt_record_update: record handler of the bolt spawned by func_15107518 (type 0x3E). While no arc is alive
-// (+0x30 == 0) it spawns the next segment arc (func_15106260 kind 4) between points +0x2C and +0x2D of the point list,
+// bolt_record_update: record handler of the bolt spawned by bolt_spawn (type 0x3E). While no arc is alive
+// (+0x30 == 0) it spawns the next segment arc (bolt_arc_spawn kind 4) between points +0x2C and +0x2D of the point list,
 // with two control points pushed sideways by func_15143794 (random angle, random pitch around -0x40) and life,
 // colour, width and the other values from the bolt parameters (+0x38..); the arc gets the record pointer. When the
 // last segment is done it marks the record finished (+0xE = -1, +0xD bit 0).
-void func_1510783C(u8 *rec) {
+/* was func_1510783C */
+void bolt_record_update(u8 *rec) {
     u8 *spec = rec + 0x28;  // BoltSpec: +0 count, +4 segment, +8 live arc, +0xC points, +0x10 params
     u8 *p = spec + 0x10;
     BoltArcSpawn s;
@@ -631,7 +653,7 @@ void func_1510783C(u8 *rec) {
     s.rec = rec;
     s.u06 = 1;
     s.u38 = -1;
-    s.u44 = func_150ADA68() * *(f32 *) (p + 4) + *(f32 *) p;
+    s.u44 = random_float() * *(f32 *) (p + 4) + *(f32 *) p;
     s.u40 = *(f32 *) (p + 8);
     s.u48 = *(s16 *) (p + 0x16);
     s.u4A = *(s16 *) (p + 0x18);
@@ -644,20 +666,20 @@ void func_1510783C(u8 *rec) {
     s.b[1] = pt[4];
     s.b[2] = pt[5];
 
-    r1 = func_150ADA20();
-    r2 = func_150ADA20();
+    r1 = random_int();
+    r2 = random_int();
     spread = *(s16 *) (p + 0x14);
     func_15143794((u8) r1, r2 % (u32) (spread + 1) - (spread >> 1) - 0x40,
-                  func_150ADA68() * *(f32 *) (p + 0x10) + *(f32 *) (p + 0xC), (u8 *) off);
+                  random_float() * *(f32 *) (p + 0x10) + *(f32 *) (p + 0xC), (u8 *) off);
     s.c1[0] = s.a[0] + off[0];
     s.c1[1] = s.a[1] + off[1];
     s.c1[2] = s.a[2] + off[2];
 
-    r1 = func_150ADA20();
-    r2 = func_150ADA20();
+    r1 = random_int();
+    r2 = random_int();
     spread = *(s16 *) (p + 0x14);
     func_15143794((u8) r1, r2 % (u32) (spread + 1) - (spread >> 1) - 0x40,
-                  func_150ADA68() * *(f32 *) (p + 0x10) + *(f32 *) (p + 0xC), (u8 *) off);
+                  random_float() * *(f32 *) (p + 0x10) + *(f32 *) (p + 0xC), (u8 *) off);
     s.c2[0] = s.b[0] + off[0];
     s.c2[1] = s.b[1] + off[1];
     s.c2[2] = s.b[2] + off[2];
@@ -665,11 +687,11 @@ void func_1510783C(u8 *rec) {
     s.rgb[0] = p[0x28];
     s.rgb[1] = p[0x29];
     s.rgb[2] = p[0x2A];
-    s.life = (u32) func_150ADA20() % (u32) (*(s16 *) (p + 0x1C) + 1) + *(s16 *) (p + 0x1A);
-    s.u4F = (u32) func_150ADA20() % (u32) (p[0x2C] + 1) + p[0x2B];
+    s.life = (u32) random_int() % (u32) (*(s16 *) (p + 0x1C) + 1) + *(s16 *) (p + 0x1A);
+    s.u4F = (u32) random_int() % (u32) (p[0x2C] + 1) + p[0x2B];
     s.u50 = 1;
-    s.u3C = (u32) func_150ADA20() % (u32) (*(s32 *) (p + 0x24) + 1) + *(s32 *) (p + 0x20);
-    arc = (u8 *) func_15106260(&s.life, 4, rec[0xC], rec[1]);
+    s.u3C = (u32) random_int() % (u32) (*(s32 *) (p + 0x24) + 1) + *(s32 *) (p + 0x20);
+    arc = (u8 *) bolt_arc_spawn(&s.life, 4, rec[0xC], rec[1]);
     *(u8 **) (spec + 8) = arc;
     if (arc != NULL) {
         memcpy(*(u8 **) (arc + 0x60), &s.rec, 4);
@@ -677,10 +699,11 @@ void func_1510783C(u8 *rec) {
     *(s32 *) (spec + 4) += 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_1510783C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/bolt_record_update.s")
 #endif
 
-void func_15107B84(s32 ***arg0) {
+/* was func_15107B84 */
+void bolt_arc_unlink_from_bolt(s32 ***arg0) {
     s32 **temp_v0 = arg0[0x18];
     s32 *temp_v1 = *temp_v0;
 
@@ -688,20 +711,24 @@ void func_15107B84(s32 ***arg0) {
     temp_v1[2] = 0;
 }
 
-void func_15107B9C(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0x30) != 0) { node_destroy(*(struct102 **)(p + 0x30)); } }
+/* was func_15107B9C */
+void bolt_record_free(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0x30) != 0) { node_destroy(*(struct102 **)(p + 0x30)); } }
 
-void func_15107BCC(struct260 * arg0) {
-    func_15107B9C(arg0);
+/* was func_15107BCC */
+void bolt_record_retire(struct260 * arg0) {
+    bolt_record_free(arg0);
     func_1514933C(arg0);
 }
 
-void func_15107BF8(struct260 * arg0) {
-    func_15107B9C(arg0);
+/* was func_15107BF8 */
+void bolt_record_delete(struct260 * arg0) {
+    bolt_record_free(arg0);
     func_15149368(arg0);
 }
 
 extern void (*D_80088FD8[])(u8 *, s32, u8);
-void func_15107C24(u8 *arg0, s32 arg1, u8 arg2)
+/* was func_15107C24 */
+void bolt_record_handle_event(u8 *arg0, s32 arg1, u8 arg2)
 {
   int new_var;
   void (**tab)(u8 *, s32, u8) = D_80088FD8;
@@ -715,12 +742,12 @@ void func_15107C24(u8 *arg0, s32 arg1, u8 arg2)
 #ifdef NON_MATCHING
 s32 func_15081A90(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
 
-/* The 0x50-byte arc spec func_15106260 copies into the arc object (+0x10). */
+/* The 0x50-byte arc spec bolt_arc_spawn copies into the arc object (+0x10). */
 typedef struct {
     /* 0x00 */ s16 life;        /* 300 when the caller passes -1 */
     /* 0x02 */ u8 u02;          /* 0 when the caller passes -1, else 1 */
     /* 0x04 */ f32 start[3];
-    /* 0x10 */ f32 c1[3];       /* control points (func_15108060: 1/3 and 2/3 of the way) */
+    /* 0x10 */ f32 c1[3];       /* control points (arc_control_points_thirds: 1/3 and 2/3 of the way) */
     /* 0x1C */ f32 c2[3];
     /* 0x28 */ f32 end[3];
     /* 0x34 */ u8 u34;
@@ -742,11 +769,12 @@ typedef struct {
 } ArcLink;
 
 // object_arc_to_surface_spawn: casts a ray (func_15081A90) from the object's attachment point at angles
-// (angle0, angle1) (func_15107FA0) outwards from the object's centre and, when it hits something, spawns a lightning arc
-// (func_15106260, 0xC extra bytes for an ArcLink back to the object) from the point to the hit, with control points at
-// 1/3 and 2/3 (func_15108060). life -1 = 300 and spec +0x02 = 0. Returns the arc, 0 when the object has no +0x1D4, the
+// (angle0, angle1) (obj_attach_point_at_angles) outwards from the object's centre and, when it hits something, spawns a lightning arc
+// (bolt_arc_spawn, 0xC extra bytes for an ArcLink back to the object) from the point to the hit, with control points at
+// 1/3 and 2/3 (arc_control_points_thirds). life -1 = 300 and spec +0x02 = 0. Returns the arc, 0 when the object has no +0x1D4, the
 // ray hits nothing or no arc could be spawned.
-s32 func_15107C80(u8 *obj, s16 angle0, s16 angle1, s16 life, s32 segments, f32 jitter, f32 width, s32 lifeBase,
+/* was func_15107C80 */
+s32 object_arc_to_surface_spawn(u8 *obj, s16 angle0, s16 angle1, s16 life, s32 segments, f32 jitter, f32 width, s32 lifeBase,
                   s32 lifeRange, s8 *rgba, s32 layer, s32 arg11) {
     u8 hit[0x64];
     f32 origin[3];
@@ -774,7 +802,7 @@ s32 func_15107C80(u8 *obj, s16 angle0, s16 angle1, s16 life, s32 segments, f32 j
     spec.rgba[2] = rgba[2];
     spec.rgba[3] = rgba[3];
     spec.u4C = 2;
-    func_15107FA0(obj, angle0, angle1, (u8 *)spec.start, (u8 *)origin);
+    obj_attach_point_at_angles(obj, angle0, angle1, (u8 *)spec.start, (u8 *)origin);
     func_15081A90((struct127 *)obj, spec.start[0], spec.start[1], spec.start[2], spec.start[0] - origin[0],
                   spec.start[1] - origin[1], spec.start[2] - origin[2], hit, 0.0f, 0, 1, 1, -1, 0, 0);
     if (hit[0x59] == 0) {
@@ -783,25 +811,27 @@ s32 func_15107C80(u8 *obj, s16 angle0, s16 angle1, s16 life, s32 segments, f32 j
     spec.end[0] = *(f32 *)(hit + 0x08);
     spec.end[1] = *(f32 *)(hit + 0x0C);
     spec.end[2] = *(f32 *)(hit + 0x10);
-    func_15108060(spec.start, spec.end, spec.c1, spec.c2);
-    arc = func_15106260(&spec.life, 0xC, layer, arg11);
+    arc_control_points_thirds(spec.start, spec.end, spec.c1, spec.c2);
+    arc = bolt_arc_spawn(&spec.life, 0xC, layer, arg11);
     if (arc != NULL) {
         memcpy(*(u8 **)(arc + 0x60), &link, 0xC);
     }
     return (s32)arc;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15107C80.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/object_arc_to_surface_spawn.s")
 #endif
 
-void func_15107E64(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_15107E64 */
+void obj_arc_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
     s32 temp_a2 = *(s32 *)(arg0 + 0x60);
 
     node_handle_link_message(arg1, arg2, temp_a2, temp_a2 + 4, (s32)arg0);
 }
 
 #ifdef NON_MATCHING
-s32 func_15107EA4(u8 *arg0, s8 *arg1) {
+/* was func_15107EA4 */
+s32 obj_arc_follow_update(u8 *arg0, s8 *arg1) {
     struct {
         f32 u2C;
         f32 u30;
@@ -824,15 +854,15 @@ s32 func_15107EA4(u8 *arg0, s8 *arg1) {
     (*(s32 *)((u8 *)(&sp.u2C) + 4)) = (s32) (*(s32 *)((u8 *)temp_a3 + 4));
     (*(s32 *)((u8 *)(&sp.u2C) + 8)) = (s32) (*(s32 *)((u8 *)temp_a3 + 8));
     sp28 = temp_a3;
-    func_15107FA0(sp.u38, (*(s16 *)((u8 *)temp_v0 + 6)), (*(s16 *)((u8 *)temp_v0 + 8)), temp_a3, NULL);
+    obj_attach_point_at_angles(sp.u38, (*(s16 *)((u8 *)temp_v0 + 6)), (*(s16 *)((u8 *)temp_v0 + 8)), temp_a3, NULL);
     if ((sp.u2C != (*(f32 *)((u8 *)arg0 + 0x14))) || (sp.u30 != (*(f32 *)((u8 *)arg0 + 0x18))) || (sp.u34 != (*(f32 *)((u8 *)arg0 + 0x1C)))) {
         *arg1 = 1;
-        func_15108060((f32 *) sp28, arg0 + 0x38, arg0 + 0x20, arg0 + 0x2C);
+        arc_control_points_thirds((f32 *) sp28, arg0 + 0x38, arg0 + 0x20, arg0 + 0x2C);
     }
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15107EA4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/obj_arc_follow_update.s")
 #endif
 #ifdef NON_MATCHING
 void func_15143794(s16, s16, f32, u8 *); /* P95: f32 (float bits were passed as an int) */
@@ -841,7 +871,8 @@ s32 func_15143794(s16, s16, s32, u8 *);
 #endif
 s32 func_1515C7B4(u8 *, f32 *, s32 *, s32 *);
 
-void func_15107FA0(u8 *arg0, s16 arg1, s16 arg2, u8 *arg3, u8 *arg4) {
+/* was func_15107FA0 */
+void obj_attach_point_at_angles(u8 *arg0, s16 arg1, s16 arg2, u8 *arg3, u8 *arg4) {
     f32 sp2C[3];
     s32 sp28;
     s32 sp24;
@@ -861,7 +892,8 @@ void func_15107FA0(u8 *arg0, s16 arg1, s16 arg2, u8 *arg3, u8 *arg4) {
     }
 }
 
-void func_15108060(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+/* was func_15108060 */
+void arc_control_points_thirds(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     f32 dx = arg1[0] - arg0[0];
     f32 dy = arg1[1] - arg0[1];
     f32 dz = arg1[2] - arg0[2];
@@ -874,7 +906,8 @@ void func_15108060(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     arg3[2] = arg0[2] + dz * 0.6667f;
 }
 
-void func_151080F8(u8 *arg0, s16 arg1, s16 arg2, u8 arg3, s32 arg4) {
+/* was func_151080F8 */
+void obj_angle_point_effect(u8 *arg0, s16 arg1, s16 arg2, u8 arg3, s32 arg4) {
     f32 sp2C[3];
     f32 sp20[3];
     s32 sp1C;
@@ -904,11 +937,12 @@ typedef struct {
     u8 kind;                    /* 0x14 */
 } ArcPointLink;
 
-// object_arc_from_point_spawn: like func_15107C80 but from the object's point `pos` / `kind` (func_151084D4) in the
+// object_arc_from_point_spawn: like object_arc_to_surface_spawn but from the object's point `pos` / `kind` (obj_bone_point_transform) in the
 // direction of angles (angle0, angle1) (func_15143794, unit length): the ray (func_15081A90, length 300) ends the
 // arc at the hit, or 300 units out when it hits nothing. Spec +0x34 = 1, +0x4C = 3, 0x18 extra bytes for an
 // ArcPointLink. Returns the arc, 0 when the object has no +0x1D4 or no arc could be spawned.
-s32 func_1510819C(u8 *obj, u8 kind, f32 *pos, s16 angle0, s16 angle1, s16 life, s32 segments, f32 jitter,
+/* was func_1510819C */
+s32 object_arc_from_point_spawn(u8 *obj, u8 kind, f32 *pos, s16 angle0, s16 angle1, s16 life, s32 segments, f32 jitter,
                   f32 width, s32 lifeBase, s32 lifeRange, s8 *rgba, s32 layer, s32 arg13) {
     u8 hit[0x64];
     f32 dir[3];
@@ -938,7 +972,7 @@ s32 func_1510819C(u8 *obj, u8 kind, f32 *pos, s16 angle0, s16 angle1, s16 life, 
     spec.rgba[2] = rgba[2];
     spec.rgba[3] = rgba[3];
     spec.u4C = 3;
-    func_151084D4(obj, kind, pos, spec.start);
+    obj_bone_point_transform(obj, kind, pos, spec.start);
     func_15143794(angle0, angle1, 1.0f, (u8 *)dir);
     func_15081A90((struct127 *)obj, spec.start[0], spec.start[1], spec.start[2], dir[0], dir[1], dir[2], hit,
                   300.0f, 0, 1, 1, -1, 0, 0);
@@ -951,19 +985,20 @@ s32 func_1510819C(u8 *obj, u8 kind, f32 *pos, s16 angle0, s16 angle1, s16 life, 
         spec.end[1] = *(f32 *)(hit + 0x0C);
         spec.end[2] = *(f32 *)(hit + 0x10);
     }
-    func_15108060(spec.start, spec.end, spec.c1, spec.c2);
-    arc = func_15106260(&spec.life, 0x18, layer, arg13);
+    arc_control_points_thirds(spec.start, spec.end, spec.c1, spec.c2);
+    arc = bolt_arc_spawn(&spec.life, 0x18, layer, arg13);
     if (arc != NULL) {
         memcpy(*(u8 **)(arc + 0x60), &link, 0x18);
     }
     return (s32)arc;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_1510819C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/object_arc_from_point_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_151083C8(u8 *arg0, s8 *arg1) {
+/* was func_151083C8 */
+s32 obj_point_arc_follow_update(u8 *arg0, s8 *arg1) {
     struct {
         f32 u24;
         f32 u28;
@@ -988,21 +1023,23 @@ s32 func_151083C8(u8 *arg0, s8 *arg1) {
     (*(s32 *)((u8 *)(&sp.u24) + 4)) = (s32) (*(s32 *)((u8 *)temp_a3 + 4));
     (*(s32 *)((u8 *)(&sp.u24) + 8)) = (s32) (*(s32 *)((u8 *)temp_a3 + 8));
     sp20 = temp_a3;
-    func_151084D4(temp_s1, (*(u8 *)((u8 *)temp_v0 + 0x14)), temp_v0 + 8, temp_a3);
+    obj_bone_point_transform(temp_s1, (*(u8 *)((u8 *)temp_v0 + 0x14)), temp_v0 + 8, temp_a3);
     if ((sp.u24 != (*(f32 *)((u8 *)arg0 + 0x14))) || (sp.u28 != (*(f32 *)((u8 *)arg0 + 0x18))) || (sp.u2C != (*(f32 *)((u8 *)arg0 + 0x1C)))) {
         *arg1 = 1;
-        func_15108060(sp20, arg0 + 0x38, arg0 + 0x20, arg0 + 0x2C);
+        arc_control_points_thirds(sp20, arg0 + 0x38, arg0 + 0x20, arg0 + 0x2C);
     }
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_151083C8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/obj_point_arc_follow_update.s")
 #endif
-void func_151084D4(u8 *arg0, u8 arg1, void *arg2, void *arg3) {
+/* was func_151084D4 */
+void obj_bone_point_transform(u8 *arg0, u8 arg1, void *arg2, void *arg3) {
     func_15143134(arg2, arg3, *(u8 **)(arg0 + 0x1D4) + (arg1 << 6));
 }
 
-void func_15108518(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_15108518 */
+void obj_point_arc_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
     s32 temp_a2 = *(s32 *)(arg0 + 0x60);
 
     node_handle_link_message(arg1, arg2, temp_a2, temp_a2 + 4, (s32)arg0);

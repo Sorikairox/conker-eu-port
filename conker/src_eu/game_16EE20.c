@@ -81,7 +81,7 @@ void interact_fx_handle_message(struct102 *arg0, u8 *arg1, s32 arg2) {
 //     }
 // }
 #ifdef NON_MATCHING
-u32 func_1510FE4C(s32);
+u32 floor_flags_surface_type(s32);
 s32 obj_interaction_category(struct127 *);
 
 /* was func_15141A7C */
@@ -97,7 +97,7 @@ void obj_interaction_update(struct127 *arg0, s32 arg1) {
     if (D_800BE616 == 0) {
         temp_v0 = obj_interaction_category(arg0);
         if (D_8008A084[temp_v0] != 0) {
-            temp_v0_2 = ((s32 (*)(s32, struct127 *)) D_8008A084[temp_v0])(interaction_mode_for_level(func_1510FE4C(arg0->unk184)), arg0);
+            temp_v0_2 = ((s32 (*)(s32, struct127 *)) D_8008A084[temp_v0])(interaction_mode_for_level(floor_flags_surface_type(arg0->unk184)), arg0);
             if (temp_v0_2 != -1) {
                 temp_v1 = &D_8008A0B4[temp_v0_2];
                 if (temp_v1->unk0 != 0) {
@@ -324,10 +324,10 @@ void fx_spawn_impact_particle(u8 arg0, u8 *arg1, f32 arg2, u8 arg3, u8 *arg4, u8
     sp.u6 = arg0;
     sp.u7 = 0;
     sp.u0 = 0x6F701;
-    sp.u4 = func_150ADA20() % 61U + 100;
+    sp.u4 = random_int() % 61U + 100;
     sp.u8_ = 0;
     sp.uC = 0;
-    sp.u10[0] = (func_150ADA20() & 0x7F) + 0x80;
+    sp.u10[0] = (random_int() & 0x7F) + 0x80;
     sp.u10[1] = 0xFF;
     sp.u10[2] = 0xFF;
     sp.u10[3] = 0xFF;
@@ -340,7 +340,7 @@ void fx_spawn_impact_particle(u8 arg0, u8 *arg1, f32 arg2, u8 arg3, u8 *arg4, u8
     sp.u1C = *(s32 *)(arg1 + 0x18);
     sp.u22 = 0x28;
     sp.u24 = 6;
-    f = (func_150ADA68() * 5.0f + 10.0f) * arg2;
+    f = (random_float() * 5.0f + 10.0f) * arg2;
     if (arg5 == 2) {
         v = 1;
     } else {
@@ -359,10 +359,10 @@ void fx_spawn_impact_particle(u8 arg0, u8 *arg1, f32 arg2, u8 arg3, u8 *arg4, u8
 //     tmp.unk6 = arg0;
 //     tmp.unk7 = 0;
 //     tmp.unk0 = 0x6F701;
-//     tmp.unk4 = (func_150ADA20() % 61U) + 100;
+//     tmp.unk4 = (random_int() % 61U) + 100;
 //     tmp.unk8 = 0;
 //     tmp.unkC = 0;
-//     tmp.unk10 = (func_150ADA20() & 0x7F) + 128;
+//     tmp.unk10 = (random_int() & 0x7F) + 128;
 //     tmp.unk11 = 0xFF;
 //     tmp.unk12 = 0xFF;
 //     tmp.unk13 = 0xFF;
@@ -375,7 +375,7 @@ void fx_spawn_impact_particle(u8 arg0, u8 *arg1, f32 arg2, u8 arg3, u8 *arg4, u8
 //     tmp.unk1C = arg1->unk18;
 //     tmp.unk22 = 0x28;
 //     tmp.unk24 = 6;
-//     temp_f2 = ((func_150ADA68() * 5.0f) + 10.0f) * arg2;
+//     temp_f2 = ((random_float() * 5.0f) + 10.0f) * arg2;
 //     // --- matching to here ---
 //     if (arg5 == 2) {
 //         phi_v0 = 1;
@@ -500,7 +500,7 @@ struct127 *obj_resolve_with_model(u8 arg0, struct127 *arg1) {
 void mtx_rot_scale_trans_l(Mtx *m, f32 s1, f32 s2, f32 rx, f32 ry, f32 rz, f32 sx, f32 sy, f32 sz, f32 tx, f32 ty, f32 tz) {
     f32 mf[4][4];
 
-    func_150A8050(mf, rx, ry, rz);
+    mtxf_rotate_xyz_deg(mf, rx, ry, rz);
     mf[3][0] = tx;
     mf[3][1] = ty;
     mf[3][2] = tz;
@@ -566,7 +566,7 @@ void mtx_look_along_scaled(Mtx *m, f32 scale, f32 up_scale, f32 sx, f32 sy, f32 
 void mtx_rot_scale2_trans_l(Mtx *m, f32 sx, f32 sy, f32 rx, f32 ry, f32 rz, f32 tx, f32 ty, f32 tz) {
     f32 mf[4][4];
 
-    func_150A8050(mf, rx, ry, rz);
+    mtxf_rotate_xyz_deg(mf, rx, ry, rz);
     mf[3][0] = tx;
     mf[3][1] = ty;
     mf[3][2] = tz;
@@ -583,7 +583,7 @@ void mtx_rot_scale2_trans_l(Mtx *m, f32 sx, f32 sy, f32 rx, f32 ry, f32 rz, f32 
 }
 /* was func_15142914 */
 void mtxf_rot_scale2_trans(f32 mf[4][4], f32 sx, f32 sy, f32 rx, f32 ry, f32 rz, f32 tx, f32 ty, f32 tz) {
-    func_150A8050(mf, rx, ry, rz);
+    mtxf_rotate_xyz_deg(mf, rx, ry, rz);
     mf[3][0] = tx;
     mf[3][1] = ty;
     mf[3][2] = tz;

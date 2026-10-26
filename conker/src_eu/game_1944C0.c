@@ -871,7 +871,7 @@ Gfx *node_model_fx_draw(Gfx *gfx, u8 *arg1, s32 arg2) {
     u8 flag;
     s32 pad2; // fakematch: frame
 
-    func_15043D90(&((Mtx *)(arg1 + 0x10))[D_800BE9C0], *(f32 *)(arg1 + 0x9C), *(f32 *)(arg1 + 0xA0), *(f32 *)(arg1 + 0xA4), *(f32 *)(arg1 + 0xC0), *(f32 *)(arg1 + 0xC4), *(f32 *)(arg1 + 0xC8), *(f32 *)(arg1 + 0x90), *(f32 *)(arg1 + 0x94), *(f32 *)(arg1 + 0x98));
+    mtx_build_rot_scale_trans(&((Mtx *)(arg1 + 0x10))[D_800BE9C0], *(f32 *)(arg1 + 0x9C), *(f32 *)(arg1 + 0xA0), *(f32 *)(arg1 + 0xA4), *(f32 *)(arg1 + 0xC0), *(f32 *)(arg1 + 0xC4), *(f32 *)(arg1 + 0xC8), *(f32 *)(arg1 + 0x90), *(f32 *)(arg1 + 0x94), *(f32 *)(arg1 + 0x98));
     gDPPipeSync(gfx++);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, arg1[0xE5]);
     D_800DD5F6 = arg1[0xE5];

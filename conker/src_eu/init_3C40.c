@@ -343,7 +343,7 @@ void func_10004308(void) {
 
     mask = osSetIntMask(1);
     phi_s0 = D_800380B4;
-    func_15042D50();
+    text_queue_reset();
 
     if (phi_s0) {
         do {

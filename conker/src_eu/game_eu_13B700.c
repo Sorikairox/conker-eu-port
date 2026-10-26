@@ -4,7 +4,8 @@
 
 
 #ifdef NON_MATCHING
-u8 *func_1510DEF0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* was func_1510DEF0 */
+u8 *blob_shadow_create(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 sp28;
     s32 sp20;
     s32 temp_t0;
@@ -61,27 +62,28 @@ u8 *func_1510DEF0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     return temp_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13B700/func_1510DEF0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13B700/blob_shadow_create.s")
 #endif
 #ifdef NON_MATCHING
 /* P125 */
-f32 func_150489B0(u8);
-f32 func_15048A40(u8 arg0);
+f32 math_cos_u8(u8);
+f32 math_sin_u8(u8 arg0);
 s32 func_150A44A4(f32 x, f32 z, s32 tri, u8 *packed, f32 *out);
-s32 func_1510E908(s16 **tris, s16 *verts, f32 *outA, f32 *outB);
-void func_1510ED24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
+s32 floor_triangle_slope(s16 **tris, s16 *verts, f32 *outA, f32 *outB);
+void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
 
-/* blob_shadow_update: per frame, the blob shadow record rec (func_1510DEF0) of its owner *(rec + 0x110):
+/* blob_shadow_update: per frame, the blob shadow record rec (blob_shadow_create) of its owner *(rec + 0x110):
  * rec[0x120] 0 = an object (f32 position +0x14..+0x1C, floor height +0x180 (id 0x25 uses it as its height), floor
  * triangles +0x188 / +0x18C, size u16 +0x160 * f32 +0x14C, facing u16 +0x7A), 1 = a node with s16 position +0x10..
  * +0x14 (skipped when its byte +0x6E is 1; its floor comes from func_150A44A4 on the packed floor *(+0x94) + 0x128,
- * else func_1510ED24 fills it; size (byte +0x4D * 4) * f32 +0x2C). Stores the floor point at +0x114..+0x11C; above
- * the floor, gets the floor slope (func_1510E908), scales the shadow by size / clamp(200 + height, 800), sets the
+ * else collision_find_floor fills it; size (byte +0x4D * 4) * f32 +0x2C). Stores the floor point at +0x114..+0x11C; above
+ * the floor, gets the floor slope (floor_triangle_slope), scales the shadow by size / clamp(200 + height, 800), sets the
  * alpha +0x122 (fade in by 5 per frame step when rec[0x124] & 1, else 32000 / distance up to 0xA0) and writes the
  * quad corners A, B, -A, -B (100 units along / across the facing, tilted onto the slope, normalised and scaled) into
  * the 4 vertices +0x90 of this frame's buffer (D_800BE9C0, 0x40 each); rec[0x123] = 1 when drawn.
  * Other rec[0x120] values are never created (the asm would use stale stack values); they do nothing here. */
-void func_1510E004(u8 *rec) {
+/* was func_1510E004 */
+void blob_shadow_update(u8 *rec) {
     u8 *o;
     s16 **tris;
     s16 *verts;
@@ -120,7 +122,7 @@ void func_1510E004(u8 *rec) {
         packed = *(u8 **) (o + 0x94) + 0x128;
         if (func_150A44A4(*(s16 *) (o + 0x10), *(s16 *) (o + 0x14), 0, packed, &floor_y) == 0) {
             y = *(s16 *) (o + 0x12);
-            func_1510ED24(0, (s32) packed, (s32) &floor_y, 0, 0, 0, *(s16 *) (o + 0x10), y, *(s16 *) (o + 0x14), y,
+            collision_find_floor(0, (s32) packed, (s32) &floor_y, 0, 0, 0, *(s16 *) (o + 0x10), y, *(s16 *) (o + 0x14), y,
                           o[0x71] + 1, 0, -10000.0f, y);
         }
         tris = NULL;
@@ -139,7 +141,7 @@ void func_1510E004(u8 *rec) {
     if (y < floor_y) {
         return;
     }
-    if (func_1510E908(tris, verts, &slope_x, &slope_z) == 0) {
+    if (floor_triangle_slope(tris, verts, &slope_x, &slope_z) == 0) {
         return;
     }
     if (size == 0.0f) {
@@ -173,8 +175,8 @@ void func_1510E004(u8 *rec) {
     a[0] = 0.0f;
     a[2] = -100.0f;
     if (angle != 0) {
-        s = func_15048A40(angle);
-        c = func_150489B0(angle);
+        s = math_sin_u8(angle);
+        c = math_cos_u8(angle);
         a[0] = 0.0f * c + -100.0f * s;
         a[2] = -100.0f * c - 0.0f * s;
     }
@@ -219,24 +221,25 @@ void func_1510E004(u8 *rec) {
     rec[0x123] = 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13B700/func_1510E004.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13B700/blob_shadow_update.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P130 */
 extern s32 D_800DD5E4;     /* texture of the last drawn blob shadow */
 extern s32 D_80091B20[];   /* blob shadow texture ids */
-void func_150A7D00(s16 *mtx, f32 x, f32 y, f32 z);
-s32 func_1510D66C(s32, s32 *, s32, s32);
-s32 func_1506196C(struct127 *, s32);
+void mtx_translate_fixed(s16 *mtx, f32 x, f32 y, f32 z);
+s32 texture_cache_lookup(s32, s32 *, s32, s32);
+s32 obj_get_player_alpha(struct127 *, s32);
 
-// blob_shadow_draw: emits the display list of a blob shadow record rec (set up by func_1510E004 this frame, which
+// blob_shadow_draw: emits the display list of a blob shadow record rec (set up by blob_shadow_update this frame, which
 // sets rec[0x123] when it is visible): its translation Mtx (this frame's +0x10 slot) to the floor point (+0x114 x,
 // +0x11C floor y, +0x118 z), the texture D_80091B20[rec[0x121]] when it changed (D_800DD5E4), geometry mode off,
-// the prim alpha rec[0x122] * owner alpha / 256 when it changed (D_800DD5F6) - owner alpha from func_1506196C for
+// the prim alpha rec[0x122] * owner alpha / 256 when it changed (D_800DD5F6) - owner alpha from obj_get_player_alpha for
 // an object owner (rec[0x120] 0), else owner u8 +0x8A * u8 +0x8B[idx] / 256 - and the 4 vertices (+0x90 slot) as
-// two triangles. Other owner kinds never get rec[0x123] (func_1510E004 returns first). Returns the DL end.
-Gfx *func_1510E6A0(Gfx *g, u8 *rec, s16 idx) {
+// two triangles. Other owner kinds never get rec[0x123] (blob_shadow_update returns first). Returns the DL end.
+/* was func_1510E6A0 */
+Gfx *blob_shadow_draw(Gfx *g, u8 *rec, s16 idx) {
     s16 *mtx;
     u8 *owner;
     s32 tex;
@@ -246,13 +249,13 @@ Gfx *func_1510E6A0(Gfx *g, u8 *rec, s16 idx) {
         return g;
     }
     mtx = (s16 *) (rec + D_800BE9C0 * 0x40 + 0x10);
-    func_150A7D00(mtx, *(f32 *) (rec + 0x114), *(f32 *) (rec + 0x11C), *(f32 *) (rec + 0x118));
+    mtx_translate_fixed(mtx, *(f32 *) (rec + 0x114), *(f32 *) (rec + 0x11C), *(f32 *) (rec + 0x118));
     g->words.w0 = 0xDA380003;                     /* gSPMatrix modelview, load, push */
     g->words.w1 = (s32) mtx;
     g++;
     if (rec[0x121] != D_800DD5E4) {
         D_800DD5E4 = rec[0x121];
-        tex = func_1510D66C(D_80091B20[rec[0x121]], NULL, 0x3E, 0);
+        tex = texture_cache_lookup(D_80091B20[rec[0x121]], NULL, 0x3E, 0);
         g->words.w0 = 0xE7000000;                 /* gDPPipeSync */
         g->words.w1 = 0;
         g++;
@@ -271,7 +274,7 @@ Gfx *func_1510E6A0(Gfx *g, u8 *rec, s16 idx) {
     g++;
     owner = *(u8 **) (rec + 0x110);
     if (rec[0x120] == 0) {
-        alpha = func_1506196C((struct127 *) owner, idx);
+        alpha = obj_get_player_alpha((struct127 *) owner, idx);
     } else if (rec[0x120] == 1) {
         alpha = (owner[0x8B + idx] * owner[0x8A] + 0xFF) >> 8;
     } else {
@@ -302,7 +305,7 @@ Gfx *func_1510E6A0(Gfx *g, u8 *rec, s16 idx) {
     return g;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13B700/func_1510E6A0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13B700/blob_shadow_draw.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -315,7 +318,8 @@ Gfx *func_1510E6A0(Gfx *g, u8 *rec, s16 idx) {
  * and returns 1 (y = *outA * x + *outB * z on the plane, up to the offset). No triangle, or the 6th attempt (even a
  * good one, as the asm does): both 0, returns 0.
  */
-s32 func_1510E908(s16 **tris, s16 *verts, f32 *outA, f32 *outB) {
+/* was func_1510E908 */
+s32 floor_triangle_slope(s16 **tris, s16 *verts, f32 *outA, f32 *outB) {
     s32 attempt = 0;
     s32 state;
     s32 swap;
@@ -379,10 +383,11 @@ s32 func_1510E908(s16 **tris, s16 *verts, f32 *outA, f32 *outB) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13B700/func_1510E908.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13B700/floor_triangle_slope.s")
 #endif
 
-Gfx *func_1510EBB4(Gfx *gdl, s32 arg1, s32 arg2) {
+/* was func_1510EBB4 */
+Gfx *gfx_load_identity_modelview(Gfx *gdl, s32 arg1, s32 arg2) {
     gSPMatrix(gdl++, D_80089810, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     return gdl;
 }

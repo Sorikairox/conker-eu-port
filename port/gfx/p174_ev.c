@@ -105,9 +105,9 @@ s32 __wrap_func_150AE5F8(s32 *args) {
 }
 /* native 6: game-state actions D_80088874[n - 1](id & 0xFFFF0FFF, args[1], args) */
 s32 __real_func_150AE60C(s32 *args);
-extern u8 D_800877B0[]; extern s32 D_800D3268; extern u8 *D_800D2E4C; void *func_1509B704(s32);
+extern u8 D_800877B0[]; extern s32 D_800D3268; extern u8 *D_800D2E4C; void *event_find(s32);
 static void p178fin(const char *w, s32 id) {   /* P178: state around action 1 (finish event) */
-    u8 *e = (u8 *)func_1509B704(id);
+    u8 *e = (u8 *)event_find(id);
     port_log("[p178bf] frame %u %s 5%03X(1): 877B0[1] %u running %X save[%X] %02x bit %u ev %08x flags %04x\n", port_frame_count, w,
              (unsigned)id, vbe_ld8(D_800877B0 + 1), (unsigned)D_800D3268, (unsigned)(id >> 3),
              D_800D2E4C ? vbe_ld8(D_800D2E4C + (id >> 3)) : 0xFFu, (unsigned)(id & 7), (unsigned)(uintptr_t)e, e ? vbe_ld16(e) : 0);
@@ -131,8 +131,8 @@ s32 __wrap_func_150AE60C(s32 *args) {
     return r;
 }
 
-/* P174 ?p174ev: pointer probe before func_150619A8 (game_83300.c; it calls func_150623F4 per active object): the
- * pointers func_150623F4 dereferences (obj +0x144, D_800D2104[obj +0x13F] if D_800D2528[obj +0x13F], D_800D1C90[id]),
+/* P174 ?p174ev: pointer probe before objects_update_visibility (game_83300.c; it calls obj_check_visible per active object): the
+ * pointers obj_check_visible dereferences (obj +0x144, D_800D2104[obj +0x13F] if D_800D2528[obj +0x13F], D_800D1C90[id]),
  * logged when outside the wasm memory (raw N64 addresses / garbage) - the trap at 10732 with ?p174fix (scene 3 of
  * level 0x18). Up to 40 lines. */
 extern u8 D_800CC2D0[];
@@ -141,8 +141,8 @@ extern u8 *D_800D2528;
 extern u8 *D_800D1C90[];
 extern s32 D_80082FA0;
 static int badp(unsigned p) { return p != 0 && (p < 0x1000 || p >= 0x16000000u); }
-void __real_func_150619A8(void);
-void __wrap_func_150619A8(void) {
+void __real_objects_update_visibility(void);
+void __wrap_objects_update_visibility(void) {
     if (on()) {
         static unsigned nlog, nfr;
         if (port_frame_count >= 10731 && nfr < 16) {
@@ -164,5 +164,5 @@ void __wrap_func_150619A8(void) {
                                  (unsigned)(uintptr_t)D_800D2104, p2104, p1c90);
         }
     }
-    __real_func_150619A8();
+    __real_objects_update_visibility();
 }

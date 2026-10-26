@@ -1,4 +1,4 @@
-/* func_1501175C records (stack images; pad bytes stay unset like the asm's) */
+/* obj_glow_smoke_attach records (stack images; pad bytes stay unset like the asm's) */
 typedef struct {
     u8 *obj;        /* 0x00 */
     u8 room;        /* 0x04 obj +0x3B */
@@ -75,7 +75,7 @@ typedef struct {
 // smoke), a glow (effect3d_spawn_full with the D_800A4AA0 model, variant 1 or 3 at random; its +0x110 tail holds obj, the
 // light constants, the new object and the mid height of obj +0x14C / +0x150) and a light_create_with_ctrl effect, storing both
 // at +0x30 / +0x34 of the new object.
-void func_1501175C(u8 *obj, u8 arg1, s32 arg2) {
+void obj_glow_smoke_attach(u8 *obj, u8 arg1, s32 arg2) {
     Link175C link;
     Glow175CTail tail;
     Glow175C g;
@@ -142,7 +142,7 @@ void func_1501175C(u8 *obj, u8 arg1, s32 arg2) {
     g.u46 = 0;
     g.u47 = 7;
     g.u48 = 0;
-    v = (func_150ADA20() & 1) ? 2 : 0;
+    v = (random_int() & 1) ? 2 : 0;
     e = effect3d_spawn_full(&g, (s32) &D_800A4AA0, 0, 0x25, 0, 0x1D, v + 1, 0, 0, 0x5C, arg1, arg2);
     l->glow = e;
     if (e != NULL) {

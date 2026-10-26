@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15010780(void) {
+/* was func_15010780 */
+void level_obj_init_vertex_lights(void) {
     func_15177410(1, 255,    0, 108, 0, 0.0f, 15000, 80.0f, 77, 15, 127, 127, 127, 127, 127, 127);
     func_15177410(0, 255, 6628, 108, 0, 0.0f, 15000, 80.0f, 77, 15, 127, 127, 127, 127, 127, 127);
 }
@@ -12,9 +13,10 @@ void func_15010780(void) {
 #ifdef NON_MATCHING
 s32 memcpy(s32, s16 *, s32);
 extern s32 *D_800E0D64;
-s32 func_150DE8AC(s32, s32, s32); // hit callback (C since P196; was declared as data)
+s32 trigger_zones_check(s32, s32, s32); // hit callback (C since P196; was declared as data)
 
-void func_15010880(void) {
+/* was func_15010880 */
+void level_obj_init_d34b8_effect(void) {
     struct {
         s16 u54;
         u8 pad56[0x2];
@@ -24,7 +26,7 @@ void func_15010880(void) {
     struct260 *temp_v0;
 
     func_15177410(0x10U, 0xE9U, -0x1B5, 0x463, -0xCBF, 90.0f, 0x3A98U, 36.0f, 0x4D, 0xF, 0x7FU, 0x7FU, 0x7FU, 0x7FU, 0x7FU, 0x7FU);
-    D_800E0D64 = (s32 *) func_150DE8AC;
+    D_800E0D64 = (s32 *) trigger_zones_check;
     sp.u54 = 0;
     sp.u58 = D_800D34B8 + 0xEA0;
     sp.u5C = D_800D34B8 + 0xED4;
@@ -37,10 +39,10 @@ void func_15010880(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3DC30/func_15010880.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_3DC30/level_obj_init_d34b8_effect.s")
 #endif
 // NON-MATCHING: ops in wrong order
-// void func_15010880(void) {
+// void level_obj_init_d34b8_effect(void) {
 //     struct177 tmp;
 //     struct37 *temp_v0;
 
@@ -60,7 +62,8 @@ void func_15010880(void) {
 //     }
 // }
 
-void func_150109D0(void) {
+/* was func_150109D0 */
+void level_obj_init_rope(void) {
     struct179 tmp;
 
     tmp.unk20 = 0;  
@@ -70,5 +73,5 @@ void func_150109D0(void) {
     tmp.unk0 = 1;
     tmp.unk1C = fabsf(tmp.unk4.unk4 - tmp.unk4.unk10); 
     func_151ACBD4(&tmp, 0);
-    func_150E8854();
+    storm_controller_spawn();
 }

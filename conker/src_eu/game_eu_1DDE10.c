@@ -17,9 +17,9 @@ s32 func_151B0600(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     v[0] = arg2;
     v[1] = arg3;
     v[2] = arg4;
-    r = func_150ADA68();
+    r = random_float();
     func_15143794(arg9, arg8, (r * 5.3f) + 4.4f, sp68);
-    impact_spark_spawn(v, sp68, (func_150ADA68() * (f32)0) + 0.68f, (func_150ADA20() % 20U) + 0x1F, (func_150ADA20() % 101U) + 0x9B, (func_150ADA68() * 2.33f) + 6.7f, (func_150ADA20() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 0x10, 0xF, 0, argE, 1); // fakematch: (f32)0 keeps the rand * 0 multiply (0.0f folds it)
+    impact_spark_spawn(v, sp68, (random_float() * (f32)0) + 0.68f, (random_int() % 20U) + 0x1F, (random_int() % 101U) + 0x9B, (random_float() * 2.33f) + 6.7f, (random_int() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 0x10, 0xF, 0, argE, 1); // fakematch: (f32)0 keeps the rand * 0 multiply (0.0f folds it)
     return 1;
 }
 
@@ -207,7 +207,7 @@ void func_151B03B8(struct127 *arg0, s32 arg1, s32 arg2) {
         sp.u154 = 11.8f;
         sp.u16C = 0.5f;
         func_15154488((struct_eu_15154488 *) &sp.u12C, (struct17 *) &sp.u134, (s32) &sp.u108, 0xFFU, 1);
-        temp_hi = func_150ADA20() % 6U;
+        temp_hi = random_int() % 6U;
         sp.uF8 = 0;
         sp.uFC = 0;
         sp.uFD = 0;
@@ -217,8 +217,8 @@ void func_151B03B8(struct127 *arg0, s32 arg1, s32 arg2) {
         sp.uD8 = arg0->y_position + 100.0f;
         if (var_s1 != 0) {
 loop_3:
-            temp_s0 = func_150ADA20();
-            func_15143874((s16) (temp_s0 & 0xFF), (func_150ADA68() * 100.0f) + 110.0f, &sp.uC8, &sp.uD0);
+            temp_s0 = random_int();
+            func_15143874((s16) (temp_s0 & 0xFF), (random_float() * 100.0f) + 110.0f, &sp.uC8, &sp.uD0);
             temp_f4 = sp.uC8 + arg0->x_position;
             sp.uC8 = temp_f4;
             sp.uD4 = temp_f4;
@@ -227,12 +227,12 @@ loop_3:
             sp.uDC = temp_f10;
             if ((func_15046F70(&sp.uD4, 0, arg0->y_position - 500.0f, &sp.uE0) != 0) && (sp.uFD != 3)) {
                 sp.uCC = sp.uE0 + 10.0f;
-                if (func_150ADA20() & 1) {
-                    temp_f20 = func_150ADA68();
-                    impact_debris_spawn(0U, (temp_f20 * 4.5f) + 15.0f, (u32) ((func_150ADA68() * 100.0f) + 155.0f) & 0xFF, (s32) &sp.uE4, (struct17 *) &sp.uC8, 0x64, 0U, 1U, 0U, (u8) temp_s4, arg2);
+                if (random_int() & 1) {
+                    temp_f20 = random_float();
+                    impact_debris_spawn(0U, (temp_f20 * 4.5f) + 15.0f, (u32) ((random_float() * 100.0f) + 155.0f) & 0xFF, (s32) &sp.uE4, (struct17 *) &sp.uC8, 0x64, 0U, 1U, 0U, (u8) temp_s4, arg2);
                 } else {
-                    temp_f20_2 = func_150ADA68();
-                    impact_splash_ring_spawn(0, (temp_f20_2 * 5.9f) + 6.1f, (u32) ((func_150ADA68() * 100.0f) + 155.0f) & 0xFF, &sp.uC8, 1, temp_s4, arg2);
+                    temp_f20_2 = random_float();
+                    impact_splash_ring_spawn(0, (temp_f20_2 * 5.9f) + 6.1f, (u32) ((random_float() * 100.0f) + 155.0f) & 0xFF, &sp.uC8, 1, temp_s4, arg2);
                 }
                 var_s1 -= 1;
                 if (var_s1 == 0) {
@@ -255,11 +255,11 @@ block_9:
             sp.u94 = sp.uC4;
             if ((func_15046C6C(&sp.u8C, 0, sp.uC0 - 500.0f, &sp.u98) != 0) && (sp.uB5 != 3)) {
                 sp.uC0 = sp.u98 + 10.0f;
-                temp_f20_3 = func_150ADA68();
-                temp_f22 = func_150ADA68();
-                temp_s0_2 = func_150ADA20();
-                temp_s1 = func_150ADA20();
-                fx_splash_spawn(((temp_f20_3 * 40.0f) + 120.0f) * 0.001f, ((temp_f22 * 123.0f) + 123.0f) * 0.00001f, (((u32) temp_s0_2 % 101U) + 0x9B) & 0xFF, (((u32) temp_s1 % 101U) + 0x64) & 0xFF, (func_150ADA20() % 56U) + 0x46, &sp.u9C, &sp.uBC, 0, 1, temp_s4, arg2);
+                temp_f20_3 = random_float();
+                temp_f22 = random_float();
+                temp_s0_2 = random_int();
+                temp_s1 = random_int();
+                fx_splash_spawn(((temp_f20_3 * 40.0f) + 120.0f) * 0.001f, ((temp_f22 * 123.0f) + 123.0f) * 0.00001f, (((u32) temp_s0_2 % 101U) + 0x9B) & 0xFF, (((u32) temp_s1 % 101U) + 0x64) & 0xFF, (random_int() % 56U) + 0x46, &sp.u9C, &sp.uBC, 0, 1, temp_s4, arg2);
             }
         }
     }
@@ -478,12 +478,12 @@ void func_151B1138(u8 *obj) {
                 }
             }
             if (nfree != 0) {
-                s->accum = s->accum + func_150ADA68() * 307.0f * 0.001f * D_800BE9A4;
+                s->accum = s->accum + random_float() * 307.0f * 0.001f * D_800BE9A4;
                 if (1.0f < s->accum) {
                     last->next = free; /* the free list becomes a ring */
                     t.sprite = D_800AB6F0[s->kind];
                     t.flags = 0x1001;
-                    t.life = (u32) func_150ADA20() % 51 + 52;
+                    t.life = (u32) random_int() % 51 + 52;
                     t.u8w = 0;
                     t.uC = 0;
                     t.colour[0] = 0;
@@ -500,7 +500,7 @@ void func_151B1138(u8 *obj) {
                     *(f32 *) &t.prev[1] = 0.0f;
                     *(f32 *) &t.prev[2] = 0.0f;
                     m.kind = s->kind;
-                    m.u24 = func_150ADA20() & 1;
+                    m.u24 = random_int() & 1;
                     m.u14 = 5.0f;
                     m.u18 = 25.0f;
                     m.u1C = 2.0f;
@@ -508,25 +508,25 @@ void func_151B1138(u8 *obj) {
                     t.u18 = 0.0f;
                     m.u20 = 8.0f;
                     do {
-                        for (k = (u32) func_150ADA20() % (u32) nfree; k != 0; k--) {
+                        for (k = (u32) random_int() % (u32) nfree; k != 0; k--) {
                             last = free;
                             free = free->next;
                         }
                         pt = &D_800AA50C[free - s->slots];
-                        t.u45 = (u32) func_150ADA20() % 101 + 100;
-                        t.u44 = (u32) func_150ADA20() % 101 + 155;
-                        m.u12 = (u32) func_150ADA20() % 5 + 4;
-                        m.u13 = (u32) func_150ADA20() % 5 + 4;
-                        m.spin = (func_150ADA68() * 506.0f + -703.0f) * 0.001f;
+                        t.u45 = (u32) random_int() % 101 + 100;
+                        t.u44 = (u32) random_int() % 101 + 155;
+                        m.u12 = (u32) random_int() % 5 + 4;
+                        m.u13 = (u32) random_int() % 5 + 4;
+                        m.spin = (random_float() * 506.0f + -703.0f) * 0.001f;
                         func_15143134(pt->ofs, t.pos, (void *) (pt->bone * 64 + *(s32 *) (s->target + 0x1D4)));
                         t.prev[0] = *(s32 *) &t.pos[0];
                         t.prev[1] = *(s32 *) &t.pos[1];
                         t.prev[2] = *(s32 *) &t.pos[2];
-                        func_150ADA20(); /* RNG advance, result unused */
+                        random_int(); /* RNG advance, result unused */
                         free->rec = (u8 *) effect3d_spawn_default((s32) &t, 0x11, 0, 0, 0x10, 2, 0x28, obj[0xC], obj[1]);
                         if (free->rec != NULL) {
                             memcpy(free->rec + 0x110, &m, 0x28);
-                            free->timer = (u32) func_150ADA20() % 31 + 20;
+                            free->timer = (u32) random_int() % 31 + 20;
                             free = free->next;
                             nfree--;
                             last->next = free;
@@ -601,7 +601,7 @@ s32 func_151B173C(u8 *fx) {
             hit[1] = *(f32 *)(fx + 0x78) + 5.0f;
             hit[2] = probe[2];
             size = ((mv[5] + mv[7] * 0.5f) + (mv[6] + mv[8] * 0.5f)) * 0.5f;
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 impact_debris_spawn(fx[0x135], size * D_800AA6D4, fx[0x5C], (s32)(fx + 0x7C), (struct17 *)hit, 100, 0, 1, 0,
                               fx[0xC], fx[1]);
             } else {
@@ -878,7 +878,7 @@ void func_151B20E4(u8 *arg0) {
     V3_20E4 a;
 
     p = arg0 + 0x28;
-    *(f32 *)(p + 8) += (697.0f + func_150ADA68() * 342.0f) * 0.001f * D_800BE9A4;
+    *(f32 *)(p + 8) += (697.0f + random_float() * 342.0f) * 0.001f * D_800BE9A4;
     if (*(f32 *)(p + 8) > 1.0f) {
         if (*(s32 *)(*(u8 **)p + 0x1D4) != 0) {
             V3_20E4 c = D_8008FE70;
@@ -916,30 +916,30 @@ void func_151B20E4(u8 *arg0) {
                 s32 base;
                 s16 ang;
 
-                sp.u3E = (func_150ADA20() % 41U) + 0x1E;
-                sp.u4F = (func_150ADA20() % 156U) + 0x64;
-                sp.u5C = sp.u60 = (func_150ADA68() * 104.0f) + 199.0f;
-                if (func_150ADA20() & 1) {
+                sp.u3E = (random_int() % 41U) + 0x1E;
+                sp.u4F = (random_int() % 156U) + 0x64;
+                sp.u5C = sp.u60 = (random_float() * 104.0f) + 199.0f;
+                if (random_int() & 1) {
                     q = &b;
                 } else {
                     q = &a;
                 }
                 base = ((*(u16 *)(*(u8 **)p + 0x7A) >> 8) + 0x40) & 0xFF;
-                ang = ((func_150ADA20() % 100U) + base) - 0x31;
+                ang = ((random_int() % 100U) + base) - 0x31;
                 func_15143874(ang, 36.0f, &sp.u64[0], &sp.u64[2]);
                 sp.u64[1] = 0.0f;
                 sp.u64[0] += q->x;
                 sp.u64[1] = q->y;
                 sp.u64[2] += q->z;
-                func_15143874(ang, ((func_150ADA68() * 1497.0f) + 995.0f) * 0.01f, &sp.u7C[0], &sp.u7C[2]);
+                func_15143874(ang, ((random_float() * 1497.0f) + 995.0f) * 0.01f, &sp.u7C[0], &sp.u7C[2]);
                 sp.u7C[1] = 0.0f;
                 if (!p && !p && !p) { // fakematch: basic-block boundary (remote permuter)
                 }
                 sp.u8C &= ~0xC0;
-                if (func_150ADA20() & 1) {
+                if (random_int() & 1) {
                     sp.u8C |= 0x40;
                 }
-                if (func_150ADA20() & 1) {
+                if (random_int() & 1) {
                     sp.u8C |= 0x80;
                 }
                 obj = func_151308E4(&sp, 1, 4, arg0[0xC], arg0[1]);

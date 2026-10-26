@@ -4,7 +4,8 @@
 
 
 s32 bone_emitter_spawn(void *, s32, u8 *, s16);
-s32 func_150EA560(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
+/* was func_150EA560 */
+s32 anim_fx_bone_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     struct {
         u8 u2C;
         u8 *u30;
@@ -65,14 +66,16 @@ s32 func_150EA560(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     return obj;
 }
 
-s32 func_150EA68C(u8 *arg0) {
+/* was func_150EA68C */
+s32 anim_fx_emitter_reset_phase(u8 *arg0) {
     *(s32 *)(arg0 + 0x80) = 0;
     return 1;
 }
 
 typedef struct { f32 x, y, z; } V3s99;
 s32 func_1513092C(void *, s32, s32);
-void func_150EA69C(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
+/* was func_150EA69C */
+void anim_fx_puff_spawn(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
     struct {
         s32 u34;
         s32 u38;
@@ -171,31 +174,32 @@ void func_150EA69C(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5)
     sp.u64.x += sp.u7C * arg4;
     sp.u64.y += sp.u80 * arg4;
     sp.u64.z += sp.u84 * arg4;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x80;
     }
-    sp.u3E = (func_150ADA20() % 51U) + 0x32;
-    sp.u4F = (func_150ADA20() % 101U) + 0x64;
-    b.scale = sp.u5C = sp.u60 = (func_150ADA68() * 39.0f) + 31.0f;
-    b.u22 = (func_150ADA20() % 5U) + 4;
-    b.u23 = (func_150ADA20() % 5U) + 4;
-    b.u24 = ((func_150ADA68() * 0.25f) + 0.15f) * b.scale;
-    b.u28 = ((func_150ADA68() * 0.25f) + 0.15f) * b.scale;
-    b.u36 = (func_150ADA20() % 5U) + 4;
-    b.u37 = (func_150ADA20() % 5U) + 4;
-    b.u38 = ((func_150ADA68() * 0.1f) + 0.08f) * b.scale;
-    b.u3C = ((func_150ADA68() * 0.1f) + 0.08f) * b.scale;
-    sp.u88 = ((func_150ADA68() * 70.0f) + 73.0f) * 0.001f;
+    sp.u3E = (random_int() % 51U) + 0x32;
+    sp.u4F = (random_int() % 101U) + 0x64;
+    b.scale = sp.u5C = sp.u60 = (random_float() * 39.0f) + 31.0f;
+    b.u22 = (random_int() % 5U) + 4;
+    b.u23 = (random_int() % 5U) + 4;
+    b.u24 = ((random_float() * 0.25f) + 0.15f) * b.scale;
+    b.u28 = ((random_float() * 0.25f) + 0.15f) * b.scale;
+    b.u36 = (random_int() % 5U) + 4;
+    b.u37 = (random_int() % 5U) + 4;
+    b.u38 = ((random_float() * 0.1f) + 0.08f) * b.scale;
+    b.u3C = ((random_float() * 0.1f) + 0.08f) * b.scale;
+    sp.u88 = ((random_float() * 70.0f) + 73.0f) * 0.001f;
     obj = func_1513092C(&sp, 2, 0x28);
     if (obj != 0) {
         memcpy(obj + 0xA8, &b, 0x28);
     }
 }
 
-f32 func_150EAA10(u8 *arg0) {
+/* was func_150EAA10 */
+f32 anim_fx_emitter_pulse_scale(u8 *arg0) {
     u8 **q;
     u8 *p;
     f32 r;
@@ -227,7 +231,8 @@ typedef struct {
     u8 u6D;
 } sp_EAA80;
 u8 *emitter_trail_spawn(void *, s32, u8, s32);
-void func_150EAA80(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
+/* was func_150EAA80 */
+void anim_fx_trail_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     sp_EAA80 sp;
     s32 v;
 
@@ -259,7 +264,8 @@ void func_150EAA80(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
 }
 
 s32 func_1513092C(void *, s32, s32);
-void func_150EAB4C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
+/* was func_150EAB4C */
+void anim_fx_puff_spawn_large(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
     struct {
         s32 u34;
         s32 u38;
@@ -360,35 +366,37 @@ void func_150EAB4C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp.u7C = -arg3 * 0.2f;
     sp.u80 = 0.0f;
     sp.u84 = -arg5 * 0.2f;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x80;
     }
-    sp.u3E = (func_150ADA20() % 51U) + 0x6A;
-    sp.u4F = (func_150ADA20() % 101U) + 0x64;
-    b.scale = sp.u5C = sp.u60 = (func_150ADA68() * 62.0f) + 41.0f;
-    b.u22 = (func_150ADA20() % 5U) + 4;
-    b.u23 = (func_150ADA20() % 5U) + 4;
-    b.u24 = ((func_150ADA68() * 0.25f) + 0.15f) * b.scale;
-    b.u28 = ((func_150ADA68() * 0.25f) + 0.15f) * b.scale;
-    b.u36 = (func_150ADA20() % 5U) + 4;
-    b.u37 = (func_150ADA20() % 5U) + 4;
-    b.u38 = ((func_150ADA68() * 0.1f) + 0.08f) * b.scale;
-    b.u3C = ((func_150ADA68() * 0.1f) + 0.08f) * b.scale;
-    sp.u88 = ((func_150ADA68() * 60.0f) + 21.0f) * 0.001f;
+    sp.u3E = (random_int() % 51U) + 0x6A;
+    sp.u4F = (random_int() % 101U) + 0x64;
+    b.scale = sp.u5C = sp.u60 = (random_float() * 62.0f) + 41.0f;
+    b.u22 = (random_int() % 5U) + 4;
+    b.u23 = (random_int() % 5U) + 4;
+    b.u24 = ((random_float() * 0.25f) + 0.15f) * b.scale;
+    b.u28 = ((random_float() * 0.25f) + 0.15f) * b.scale;
+    b.u36 = (random_int() % 5U) + 4;
+    b.u37 = (random_int() % 5U) + 4;
+    b.u38 = ((random_float() * 0.1f) + 0.08f) * b.scale;
+    b.u3C = ((random_float() * 0.1f) + 0.08f) * b.scale;
+    sp.u88 = ((random_float() * 60.0f) + 21.0f) * 0.001f;
     obj = func_1513092C(&sp, 2, 0x28);
     if (obj != 0) {
         memcpy(obj + 0xA8, &b, 0x28);
     }
 }
 
-void func_150EAE60(s32 arg0) {
-    func_150E6060();
+/* was func_150EAE60 */
+void weather_lightning_storm_tick(s32 arg0) {
+    weather_lightning_storm_update();
 }
 
-void func_150EA904(s32 arg0, s32 arg1)
+/* was func_150EA904 */
+void world_obj_hit_activate(s32 arg0, s32 arg1)
 {
   u8 *p;
   p = ((u8 *) D_800DBEF4) + (arg1 * 0xA0);
@@ -420,7 +428,8 @@ typedef struct {
     u8 pad80[0x8A - 0x80];
     u8 u8A;
 } S_EAEC4;
-void func_150EAEC4(S_EAEC4 *arg0) {
+/* was func_150EAEC4 */
+void world_obj_tumble_update(S_EAEC4 *arg0) {
     f32 f;
     s32 v;
 

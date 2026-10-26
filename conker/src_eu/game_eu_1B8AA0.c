@@ -117,14 +117,14 @@ s32 func_1518B290(u8 *arg0) {
         sp.u14A = 1;
         sp.u14C = 0xFF;
         sp.u108 = (*(f32 *)((u8 *)arg0 + 0x40));
-        temp_v1 = (func_150ADA20() & 3) + 4;
+        temp_v1 = (random_int() & 3) + 4;
         var_s2 = temp_v1;
         if (temp_v1 > 0) {
             do {
-                temp_f22 = (func_150ADA68() * ((*(f32 *)((u8 *)arg0 + 0x10)) * 0.5f)) + 0.05f;
-                temp_s0 = func_150ADA20() & 0xFF;
-                temp_s1 = (-0x20 - (func_150ADA20() & 0x1F)) & 0xFF;
-                temp_f20 = (func_150ADA68() * 10.0f) + 5.0f;
+                temp_f22 = (random_float() * ((*(f32 *)((u8 *)arg0 + 0x10)) * 0.5f)) + 0.05f;
+                temp_s0 = random_int() & 0xFF;
+                temp_s1 = (-0x20 - (random_int() & 0x1F)) & 0xFF;
+                temp_f20 = (random_float() * 10.0f) + 5.0f;
                 temp_f24 = angle_byte_cos((temp_s0 - 0x40) & 0xFF);
                 temp_f26 = angle_byte_cos(temp_s0 & 0xFF);
                 temp_f28 = angle_byte_cos((temp_s1 - 0x40) & 0xFF);
@@ -135,11 +135,11 @@ s32 func_1518B290(u8 *arg0) {
                 sp.u10C = temp_f2 * temp_f24;
                 sp.u110 = -temp_f20 * temp_f28;
                 sp.u114 = temp_f2 * temp_f26;
-                sp.uE8 = func_150ADA68() * 360.0f;
-                sp.uEC = func_150ADA68() * 360.0f;
-                sp.uF0 = func_150ADA68() * 360.0f;
-                sp.u118 = 25.0f - (func_150ADA68() * 50.0f);
-                sp.u11C = 25.0f - (func_150ADA68() * 50.0f);
+                sp.uE8 = random_float() * 360.0f;
+                sp.uEC = random_float() * 360.0f;
+                sp.uF0 = random_float() * 360.0f;
+                sp.u118 = 25.0f - (random_float() * 50.0f);
+                sp.u11C = 25.0f - (random_float() * 50.0f);
                 if (temp_f22 > 0.25f) {
                     sp.u13A = 2;
                 } else {
@@ -167,14 +167,14 @@ s32 func_1518B290(u8 *arg0) {
         temp_f16 = (s32) ((*(f32 *)((u8 *)arg0 + 0x10)) * 200.0f);
         sp.uBA = (s16) temp_f16;
         sp.uBC = (s16) temp_f16;
-        temp_f4 = func_150ADA68() * 10.0f;
+        temp_f4 = random_float() * 10.0f;
         sp.uC2 = 0;
         sp.uC4 = 0;
         temp_f10 = (s32) ((temp_f4 + 20.0f) * (*(f32 *)((u8 *)arg0 + 0x10)));
         sp.uBE = (s16) temp_f10;
         sp.uC0 = (s16) temp_f10;
         temp_s0_2 = var_s1 & 0xFF;
-        sp.uC6 = (func_150ADA20() % 201U) + 0x12C;
+        sp.uC6 = (random_int() % 201U) + 0x12C;
         sp.uC8 = 0;
         sp.uCA = 0x258;
         func_151429E0(temp_s0_2 & 0xFF, &sp.uCC, &(*(s32 *)((u8 *)&sp + 0x29)), &(*(s32 *)((u8 *)&sp + 0x2A)));
@@ -336,43 +336,43 @@ void func_1518B818(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u
         sp.u100 = -1.3f;
         if (var_s5 > 0) {
             do {
-                temp_s0 = func_150ADA20() & 0xFF;
-                temp_f0 = func_150ADA68();
+                temp_s0 = random_int() & 0xFF;
+                temp_f0 = random_float();
                 sp.uBC = arg2;
                 temp_f20 = temp_f0 * arg1;
                 sp.uC0 = arg2;
                 sp.uB4 = arg2;
-                sp.uC4 = func_150ADA68() * 360.0f;
-                sp.uC8 = func_150ADA68() * 360.0f;
-                sp.uCC = func_150ADA68() * 360.0f;
+                sp.uC4 = random_float() * 360.0f;
+                sp.uC8 = random_float() * 360.0f;
+                sp.uCC = random_float() * 360.0f;
                 sp.uDC = (angle_byte_cos(temp_s0 & 0xFF) * temp_f20) + (*(f32 *)((u8 *)arg0 + 0));
-                sp.uE0 = ((*(f32 *)((u8 *)arg0 + 4)) + arg1) - (2.0f * func_150ADA68() * arg1);
+                sp.uE0 = ((*(f32 *)((u8 *)arg0 + 4)) + arg1) - (2.0f * random_float() * arg1);
                 sp.uE4 = (*(f32 *)((u8 *)arg0 + 8)) - (angle_byte_cos((temp_s0 - 0x40) & 0xFF) * temp_f20);
-                sp.uF4 = 25.0f - (func_150ADA68() * 50.0f);
-                sp.uF8 = 25.0f - (func_150ADA68() * 50.0f);
+                sp.uF4 = 25.0f - (random_float() * 50.0f);
+                sp.uF8 = 25.0f - (random_float() * 50.0f);
                 if (func_15046F70(&sp.uDC, 0, -10000.0f, &sp.u90) != 0) { /* P95: was 0xC61C4000 as an int */
                     sp.u116 = 2;
                     temp_v0 = func_15132FBC(&sp.uB4, 3, 0xFF, 4, (s32) arg6, 0);
                     if (temp_v0 != NULL) {
                         (*(f32 *)((u8 *)temp_v0 + 0x170)) = sp.u90;
                     }
-                    var_s1 = (func_150ADA20() & 3) + 1;
+                    var_s1 = (random_int() & 3) + 1;
                     if (var_s1 > 0) {
                         do {
-                            temp_s0_2 = func_150ADA20() & 0xFF;
-                            temp_f20_2 = func_150ADA68() * arg2 * 16.0f;
-                            temp_f2 = (func_150ADA68() * 0.3f) + 0.1f;
+                            temp_s0_2 = random_int() & 0xFF;
+                            temp_f20_2 = random_float() * arg2 * 16.0f;
+                            temp_f2 = (random_float() * 0.3f) + 0.1f;
                             sp.uC0 = temp_f2;
                             sp.uBC = temp_f2;
                             sp.uB4 = temp_f2;
-                            sp.uC4 = func_150ADA68() * 360.0f;
-                            sp.uC8 = func_150ADA68() * 360.0f;
-                            sp.uCC = func_150ADA68() * 360.0f;
+                            sp.uC4 = random_float() * 360.0f;
+                            sp.uC8 = random_float() * 360.0f;
+                            sp.uCC = random_float() * 360.0f;
                             sp.uDC += angle_byte_cos(temp_s0_2 & 0xFF) * temp_f20_2;
-                            sp.uE0 = (func_150ADA68() * 25.0f) + ((arg2 * 16.0f) + sp.uE0);
+                            sp.uE0 = (random_float() * 25.0f) + ((arg2 * 16.0f) + sp.uE0);
                             sp.uE4 -= angle_byte_cos((temp_s0_2 - 0x40) & 0xFF) * temp_f20_2;
-                            sp.uF4 = 25.0f - (func_150ADA68() * 50.0f);
-                            temp_f0_2 = func_150ADA68();
+                            sp.uF4 = 25.0f - (random_float() * 50.0f);
+                            temp_f0_2 = random_float();
                             sp.u116 = 3;
                             sp.uF8 = 25.0f - (temp_f0_2 * 50.0f);
                             temp_v0_2 = func_15132FBC(&sp.uB4, 3, 0xFF, 4, (s32) arg6, 0);

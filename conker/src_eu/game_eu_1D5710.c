@@ -80,7 +80,7 @@ void func_151A8040(u8 *obj) {
         *(f32 *) (obj + 0x68) -= D_800BE9A4;
         if (*(f32 *) (obj + 0x68) < 0.0f) {
             func_151A88F0(obj, 0, *(s16 *) (obj + 0x12) - 1, *(f32 *) (obj + 0x20), 100);
-            *(f32 *) (obj + 0x68) = func_150ADA68() * *(f32 *) (obj + 0x18) + *(f32 *) (obj + 0x14);
+            *(f32 *) (obj + 0x68) = random_float() * *(f32 *) (obj + 0x18) + *(f32 *) (obj + 0x14);
         }
         if (obj[0x1C] & 2) {
             fwd.unk0 = *(f32 *) (obj + 0x3C) - *(f32 *) (obj + 0x30);
@@ -287,7 +287,7 @@ u8 *func_151A831C(u8 *arg0, u8 *arg1, s16 arg2) {
 #define BOLT_PT(obj, i) ((f32 *) (*(u8 **) ((u8 *) (obj) + 0x64) + (i) * 0x18))
 
 // bolt_subdivide: midpoint displacement of a lightning bolt's point list (obj+0x64, 0x18-byte points): the midpoint
-// of [lo, hi] becomes the average of the two ends, x / y jittered by +-amp (func_150ADA68), z not; recurses on the
+// of [lo, hi] becomes the average of the two ends, x / y jittered by +-amp (random_float), z not; recurses on the
 // left half and loops on the right half while the span has an inner point and depth (decremented per split) > 0.
 void func_151A88F0(u8 *obj, s16 lo, s16 hi, f32 amp, s16 depth) {
     f32 *a;
@@ -304,8 +304,8 @@ void func_151A88F0(u8 *obj, s16 lo, s16 hi, f32 amp, s16 depth) {
         dx = b[0] - a[0];
         dy = b[1] - a[1];
         dz = b[2] - a[2];
-        BOLT_PT(obj, mid)[0] = (func_150ADA68() * (amp + amp) + -amp) + (a[0] + dx * 0.5f);
-        BOLT_PT(obj, mid)[1] = (func_150ADA68() * (amp + amp) + -amp) + (a[1] + dy * 0.5f);
+        BOLT_PT(obj, mid)[0] = (random_float() * (amp + amp) + -amp) + (a[0] + dx * 0.5f);
+        BOLT_PT(obj, mid)[1] = (random_float() * (amp + amp) + -amp) + (a[1] + dy * 0.5f);
         BOLT_PT(obj, mid)[2] = a[2] + dz * 0.5f;
         depth--;
         func_151A88F0(obj, lo, mid, amp, depth);
@@ -586,8 +586,8 @@ typedef struct {
 s32 func_15046F70(f32 *, s32, f32, Obj9DE4 *);
 
 s32 memcpy(void *, void *, s32);
-void func_1510F800(s32);
-s32 func_1510FD20(s32 arg0, s32 arg1);
+void collision_select_area(s32);
+s32 zone_tree_find_leaf(s32 arg0, s32 arg1);
 f32 func_15144598(struct_eu_15144598 *arg0);
 struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
 
@@ -640,8 +640,8 @@ struct260 *func_151A8B20(void *arg0, s16 arg1, s32 arg2, u8 arg3, s32 arg4) {
                 x = p->x;
                 z = p->z;
             }
-            func_1510F800(0);
-            p->u50 = func_1510FD20(x, z);
+            collision_select_area(0);
+            p->u50 = zone_tree_find_leaf(x, z);
         } else {
             p->u50 = 0;
         }
@@ -692,7 +692,7 @@ void func_151A929C(u8 *arg0) {
     if (!(p->flags & 1)) {
         return;
     }
-    p->acc += (p->f8 + func_150ADA68() * p->fC) * D_800BE9A4 * p->f54;
+    p->acc += (p->f8 + random_float() * p->fC) * D_800BE9A4 * p->f54;
     if (p->acc > 1.0f) {
         f32 pos[3];
         f32 y;
@@ -734,7 +734,7 @@ void func_151A951C(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     f32 *p;
 
     p = (f32 *)(arg0 + 0x28);
-    func_15143874(func_150ADA20() & 0xFF, p[8] * func_150ADA68(), arg1, arg1 + 2);
+    func_15143874(random_int() & 0xFF, p[8] * random_float(), arg1, arg1 + 2);
     arg1[0] += p[4];
     arg1[2] += p[6];
     arg1[1] = p[5];
@@ -827,8 +827,8 @@ void func_151A975C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
     Tbl975C t;
 
     t = D_8008FD44;
-    f = func_150ADA68() * 50.0f + 50.0f;
-    sp.u6 = t.v[func_150ADA20() % 3U];
+    f = random_float() * 50.0f + 50.0f;
+    sp.u6 = t.v[random_int() % 3U];
     sp.u7 = 0;
     sp.u10[6] = 0;
     sp.u10[7] = 7;
@@ -843,7 +843,7 @@ void func_151A975C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
     sp.u10[4] = 0;
     sp.u10[5] = 0xFF;
     sp.u18 = 0x3B0002;
-    sprite_fx_spawn_cam_at((s32)&sp, 1, 0, (s32)(arg0 + 0x58), *(f32 *)(arg1 + 0), *(f32 *)(arg1 + 4), *(f32 *)(arg1 + 8), f, f, func_150ADA20() & 0xFF, (func_150ADA20() & 1) + (func_150ADA20() & 1), 3, 0xFF, 0, arg0[0xC], arg0[1]);
+    sprite_fx_spawn_cam_at((s32)&sp, 1, 0, (s32)(arg0 + 0x58), *(f32 *)(arg1 + 0), *(f32 *)(arg1 + 4), *(f32 *)(arg1 + 8), f, f, random_int() & 0xFF, (random_int() & 1) + (random_int() & 1), 3, 0xFF, 0, arg0[0xC], arg0[1]);
 }
 
 void func_151A98CC(u8 *arg0, s32 arg1, u8 arg2)
@@ -982,17 +982,17 @@ void func_151A9BE4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     u8 *temp_s0;
 
     temp_s0 = arg0 + 0x80;
-    sp.u88 = (func_150ADA68() * (*(f32 *)((u8 *)arg0 + 0x88))) + (*(f32 *)((u8 *)arg0 + 0x80));
-    sp.u8C = (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 0xC))) + (*(f32 *)((u8 *)temp_s0 + 4));
-    sp.u7C = (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 0x24))) + (*(f32 *)((u8 *)temp_s0 + 0x20));
-    sp.u80 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x16)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x14));
-    sp64 = func_150ADA20();
-    temp_t1 = func_150ADA20();
+    sp.u88 = (random_float() * (*(f32 *)((u8 *)arg0 + 0x88))) + (*(f32 *)((u8 *)arg0 + 0x80));
+    sp.u8C = (random_float() * (*(f32 *)((u8 *)temp_s0 + 0xC))) + (*(f32 *)((u8 *)temp_s0 + 4));
+    sp.u7C = (random_float() * (*(f32 *)((u8 *)temp_s0 + 0x24))) + (*(f32 *)((u8 *)temp_s0 + 0x20));
+    sp.u80 = (random_int() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x16)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x14));
+    sp64 = random_int();
+    temp_t1 = random_int();
     if ((*(u8 *)((u8 *)temp_s0 + 0x28)) & 1) {
         var_t0 = 0x71;
     } else {
         sp68 = temp_t1;
-        if (func_150ADA20() & 1) {
+        if (random_int() & 1) {
             var_v0 = 0x13;
         } else {
             var_v0 = 0x14;
@@ -1032,8 +1032,8 @@ void func_151A9DE4(f32 *arg0, f32 arg1, f32 arg2, Obj9DE4 *arg3, s32 arg4, u8 ar
     }
     pos[1] = arg0[1];
     for (; arg4 > 0; arg4--) {
-        a = func_150ADA68();
-        func_1514373C(2.0f * a * 3.1415927f, func_150ADA68() * arg2, &pos[0], &pos[2]);
+        a = random_float();
+        func_1514373C(2.0f * a * 3.1415927f, random_float() * arg2, &pos[0], &pos[2]);
         pos[0] += arg0[0];
         pos[2] += arg0[2];
         if (func_15046F70(pos, 0, arg1, arg3)) {

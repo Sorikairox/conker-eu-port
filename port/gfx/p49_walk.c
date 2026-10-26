@@ -87,7 +87,7 @@ void __wrap_func_1504CB98(void *arg0) {
 }
 
 /* P52: with ?p49walk set, also
- *  - wrap func_1505A770 (P50 C gravity; the call from the walk handler): y / y_velocity / +0x28 before and after,
+ *  - wrap obj_apply_gravity (P50 C gravity; the call from the walk handler): y / y_velocity / +0x28 before and after,
  *    gravity +0x24 and the frame time D_800D1550[0] (an f32 array, P50), first p49walk calls then every p49every;
  *  - wrap func_1502C1D4 (P48 C object update loop, called from game_45B80.c): record 0's model fields after it
  *    (+0x1D4 model instance, +0x2D0 animation state, id +4, D_800D19A0[id] loaded model, D_800C52F0[id]). */
@@ -95,14 +95,14 @@ extern float D_800D1550[];
 extern unsigned D_800D19A0[];
 extern unsigned short D_800C52F0[];
 extern unsigned char D_800CC2D0[];
-void __real_func_1505A770(void *rec);
-void __wrap_func_1505A770(void *rec) {
+void __real_obj_apply_gravity(void *rec);
+void __wrap_obj_apply_gravity(void *rec) {
     static int flag = -1, every = -1;
     static unsigned calls;
     const unsigned char *r = (const unsigned char *)rec;
     float y0 = F(0x18), v0 = F(0x20), h0 = F(0x28);
     if (flag < 0) { flag = port_flag("p49walk"); every = port_flag("p49every"); if (every <= 0) every = 32; }
-    __real_func_1505A770(rec);
+    __real_obj_apply_gravity(rec);
     calls++;
     if (flag && (calls <= (unsigned)flag || calls % (unsigned)every == 0))
         port_log("[p52] gravity call %u frame %u: dt D_800D1550[0] %g (bits %08X) grav %g | y %g -> %g yv %g -> %g "
@@ -233,11 +233,11 @@ int __wrap_func_150A3F50(int x, int z) {
 /* P55 ?p55synth=1: one-shot in-wasm check of the C floor query on sloped synthetic geometry (level 0x21 is flat, y 0).
  * At the first record-0 floor query: only area 0 enabled (D_800894C0), and after func_150A4ED4(0) the area-0 tables
  * D_800DC26C / D_800DC270 / D_800DBE4C / D_800DBE62 (0: all-triangles path) / D_800DBE5C point at PC buffers written
- * through vbe (s16 vertices and bounds), then func_1510EE3C runs over an integer grid with y = prevY = 1000 (so the
+ * through vbe (s16 vertices and bounds), then collision_find_floor_no_fallback runs over an integer grid with y = prevY = 1000 (so the
  * highest floor below wins) and record 0 = NULL. Its height is compared with a float barycentric reference. All
  * globals are restored afterwards. */
 extern unsigned char D_800894C0[];
-void __real_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
+void __real_collision_find_floor_no_fallback(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
                           unsigned short aA, int aB, int aC, int aD, int aE);
 extern unsigned D_800DC270, D_800DBE5C;
 static int synth_on;
@@ -255,7 +255,7 @@ static void synth_tables(void) {
         float ux = syn_v[b][0] - syn_v[a][0], uz = syn_v[b][2] - syn_v[a][2];
         float wx = syn_v[c][0] - syn_v[a][0], wz = syn_v[c][2] - syn_v[a][2];
         short mnx = 32767, mnz = 32767, mxx = -32768, mxz = -32768;
-        if (uz * wx - ux * wz < 0) { t = b; b = c; c = t; } /* func_1510EBF0: cross(b - a, c - a).y >= 0 = floor */
+        if (uz * wx - ux * wz < 0) { t = b; b = c; c = t; } /* collision_candidate_is_floor: cross(b - a, c - a).y >= 0 = floor */
         syn_ofs[i * 3 + 0] = (unsigned)(uintptr_t)((char *)syn_vbuf + a * 6);
         syn_ofs[i * 3 + 1] = (unsigned)(uintptr_t)((char *)syn_vbuf + b * 6);
         syn_ofs[i * 3 + 2] = (unsigned)(uintptr_t)((char *)syn_vbuf + c * 6);
@@ -302,7 +302,7 @@ static void p55_synth(void) {
     for (z = -197; z <= 197; z += 6)
         for (x = -197; x <= 197; x += 6) {
             int inside; float r = syn_ref((float)x, (float)z, &inside), d;
-            __real_func_1510EE3C((int)(uintptr_t)&tri, (int)(uintptr_t)vtx, (int)(uintptr_t)&h, (int)(uintptr_t)&ceil,
+            __real_collision_find_floor_no_fallback((int)(uintptr_t)&tri, (int)(uintptr_t)vtx, (int)(uintptr_t)&h, (int)(uintptr_t)&ceil,
                                  (int)(uintptr_t)&flags, (int)(uintptr_t)area, (float)x, 1000.0f, (float)z, 1000.0f, 0, 0,
                                  0, 0, 0);
             n++;
@@ -402,11 +402,11 @@ void p245_coldump(float x, float y, float z) {
 }
 /* P248 DIAGNOSTIC ?p248mesh=F (needs ?p205obj; called from p205_obj_hook): once at retrace >= F, dump the world objects
  * (D_800DC320 records of 0xA0 at D_800DBEF4): angle +0x0, yaw +0x4, pos +0x10..+0x14, scale +0x2C..+0x34, update
- * +0x38 (compared with gate_swing_update func_151184BC), +0x4F, tri +0x58 / count +0x56, +0x5A pos, +0x6E busy,
+ * +0x38 (compared with gate_swing_update scenery_gate_swing_update), +0x4F, tri +0x58 / count +0x56, +0x5A pos, +0x6E busy,
  * +0x6F flags, +0x73 state; and every triangle of collision areas 2 and 3 ("[p248tri] area idx x0 .. z2").
  * Then every retrace: a "[p248gate]" line whenever a world object's +0x0 angle (rounded) or +0x73 changes, with
  * player 0's position and ctx +0x6B (gate push state) and the pad buttons. */
-extern void func_151184BC(unsigned char *);
+extern void scenery_gate_swing_update(unsigned char *);
 void p248_mesh(void) {
     static int f = -2, done, n0;
     static int lastang[256], last73[256], last6b = -1;
@@ -418,14 +418,14 @@ void p248_mesh(void) {
     if (!done) {
         done = 1; n0 = n;
         port_log("[p248mesh] frame %u: %d world objects, gate fn %08X, area counts %d %d %d %d\n", port_frame_count, n,
-                 (unsigned)(uintptr_t)func_151184BC, D_800DBE18[0], D_800DBE18[1], D_800DBE18[2], D_800DBE18[3]);
+                 (unsigned)(uintptr_t)scenery_gate_swing_update, D_800DBE18[0], D_800DBE18[1], D_800DBE18[2], D_800DBE18[3]);
         for (i = 0; i < n; i++) {
             const unsigned char *o = D_800DBEF4 + i * 0xA0;
             port_log("[p248mesh] %d ang %.1f yaw %.1f pos %d %d %d scale %.2f %.2f %.2f upd %08X%s 4F %02X tri %u +%u pos5A %d %d %d busy %u fl %02X 73 %02X DL %08X\n",
                      i, *(const float *)o, *(const float *)(o + 4), (short)vbe_ld16(o + 0x10), (short)vbe_ld16(o + 0x12),
                      (short)vbe_ld16(o + 0x14), *(const float *)(o + 0x2C), *(const float *)(o + 0x30),
                      *(const float *)(o + 0x34), *(const unsigned *)(o + 0x38),
-                     *(const unsigned *)(o + 0x38) == (unsigned)(uintptr_t)func_151184BC ? " GATE" : "",
+                     *(const unsigned *)(o + 0x38) == (unsigned)(uintptr_t)scenery_gate_swing_update ? " GATE" : "",
                      vbe_ld8(o + 0x4F), vbe_ld16(o + 0x58), vbe_ld16(o + 0x56), (short)vbe_ld16(o + 0x5A),
                      (short)vbe_ld16(o + 0x5C), (short)vbe_ld16(o + 0x5E), vbe_ld8(o + 0x6E), vbe_ld8(o + 0x6F),
                      vbe_ld8(o + 0x73), *(const unsigned *)(o + 0x1C));
@@ -457,7 +457,7 @@ void p248_mesh(void) {
     for (i = 0; i < n && i < n0; i++) {
         const unsigned char *o = D_800DBEF4 + i * 0xA0;
         int ang = (int)*(const float *)o, s = vbe_ld8(o + 0x73), b6 = q ? vbe_ld8(q + 0x6B) : -1;
-        if (ang != lastang[i] || s != last73[i] || (*(const unsigned *)(o + 0x38) == (unsigned)(uintptr_t)func_151184BC && b6 != last6b)) {
+        if (ang != lastang[i] || s != last73[i] || (*(const unsigned *)(o + 0x38) == (unsigned)(uintptr_t)scenery_gate_swing_update && b6 != last6b)) {
             port_log("[p248gate] frame %u obj %d ang %d (was %d) 73 %02X (was %02X) 7C %08X | player %.1f %.1f %.1f ctx6B %d\n",
                      port_frame_count, i, ang, lastang[i], s, last73[i], *(const unsigned *)(o + 0x7C),
                      *(const float *)(pl + 0x14), *(const float *)(pl + 0x18), *(const float *)(pl + 0x1C), b6);
@@ -466,7 +466,7 @@ void p248_mesh(void) {
     }
     if (q) last6b = vbe_ld8(q + 0x6B);
     {   /* P261 DIAGNOSTIC ?p261lever=1: every 10 retraces while player 0 is within 600 (x/z) of a gate's handle point,
-         * log the handle point as gate_swing_update (func_151184BC) computes it on levels 1 / 0x29 (offset -13 76 354
+         * log the handle point as gate_swing_update (scenery_gate_swing_update) computes it on levels 1 / 0x29 (offset -13 76 354
          * scaled, rotated by +0x0 then yaw +0x4, plus pos +0x10), the player's feet y, head y (+0x18 + s16 +0xE6), the
          * squared distance (head) vs reach 10000*sz^2, feet+40 < handle y, and the busy bytes the gate skips on
          * (+0x65, +0x104, ctx +0x17, +0x27, +0x6B >= 4). */
@@ -491,7 +491,7 @@ void p248_mesh(void) {
             for (i = 0; i < n && i < n0; i++) {
                 const unsigned char *o = D_800DBEF4 + i * 0xA0;
                 float a, b, sx, sy, sz, hx, hy, hz, t0, t1, t2, px, py, pz, hd, dx, dy, dz;
-                if (*(const unsigned *)(o + 0x38) != (unsigned)(uintptr_t)func_151184BC) continue;
+                if (*(const unsigned *)(o + 0x38) != (unsigned)(uintptr_t)scenery_gate_swing_update) continue;
                 sx = *(const float *)(o + 0x2C); sy = *(const float *)(o + 0x30); sz = *(const float *)(o + 0x34);
                 a = *(const float *)o * 0.017453292f; b = *(const float *)(o + 4) * 0.017453292f;
                 t0 = -13.f * sx; t1 = 76.f * sy * cosf(a) - 354.f * sz * sinf(a); t2 = 76.f * sy * sinf(a) + 354.f * sz * cosf(a);
@@ -511,9 +511,9 @@ void p248_mesh(void) {
         }
     }
 }
-void __real_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
+void __real_collision_find_floor_no_fallback(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
                           unsigned short aA, int aB, int aC, int aD, int aE);
-void __wrap_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
+void __wrap_collision_find_floor_no_fallback(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
                           unsigned short aA, int aB, int aC, int aD, int aE) {
     static int flag = -1, walk = -1, every = -1;
     static unsigned calls;
@@ -521,7 +521,7 @@ void __wrap_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float 
     if (flag < 0) { flag = port_flag("p52void"); walk = port_flag("p49walk"); every = port_flag("p49every"); if (every <= 0) every = 32; }
     if (r_minx == 0 && r_maxx == 0) { r_minx = 1e9f; r_maxx = -1e9f; r_minz = 1e9f; r_maxz = -1e9f; r_miny = 1e9f; r_maxy = -1e9f; }
     r_on = walk && aB == (int)(uintptr_t)D_800CC2D0; r_y = a7; r_calls = 0; r_bi = -3; r_n3f50 = -1; r_n48c0 = -1; r_n5480 = -1; r_ntri = 0; r_best = r_top = -10000.0f;
-    __real_func_1510EE3C(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aA, aB, aC, aD, aE);
+    __real_collision_find_floor_no_fallback(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aA, aB, aC, aD, aE);
     r_on = 0;
     if (flag) {
         if (a2) *(float *)(uintptr_t)a2 = -10000.0f;
@@ -546,50 +546,50 @@ void __wrap_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float 
     if (aB == (int)(uintptr_t)D_800CC2D0) p101_col(a2 ? *(float *)(uintptr_t)a2 : 0, a6, a7, a8);
 }
 
-/* P55 ?p49walk: landing func_1505A9AC (P54 C, called by the walk handler with +0x180): y / vy / +0x28 / +0x180 before and
+/* P55 ?p49walk: landing obj_ctrl_floor_contact (P54 C, called by the walk handler with +0x180): y / vy / +0x28 / +0x180 before and
  * after, and the record state. */
-void __real_func_1505A9AC(void *rec, float a1);
-void __wrap_func_1505A9AC(void *rec, float a1) {
+void __real_obj_ctrl_floor_contact(void *rec, float a1);
+void __wrap_obj_ctrl_floor_contact(void *rec, float a1) {
     static int flag = -1, every = -1;
     static unsigned calls;
     const unsigned char *r = (const unsigned char *)rec;
     float y0 = F(0x18), v0 = F(0x20), h0 = F(0x28);
     int s0 = *(const int *)r;
     if (flag < 0) { flag = port_flag("p49walk"); every = port_flag("p49every"); if (every <= 0) every = 32; }
-    __real_func_1505A9AC(rec, a1);
+    __real_obj_ctrl_floor_contact(rec, a1);
     calls++;
     if (flag && (calls <= (unsigned)flag || calls % (unsigned)every == 0 || v0 != F(0x20) || s0 != *(const int *)r))
         port_log("[p55] landing call %u frame %u: arg1 %g | state %d -> %d y %g -> %g yv %g -> %g +28 %g -> %g +180 %g\n",
                  calls, port_frame_count, a1, s0, *(const int *)r, y0, F(0x18), v0, F(0x20), h0, F(0x28), F(0x180));
 }
 
-/* P101 DIAGNOSTIC ?p101mus=1: at each call of the level-start music function func_150000B0 (game_2D4B0.c, still an
+/* P101 DIAGNOSTIC ?p101mus=1: at each call of the level-start music function level_start_music (game_2D4B0.c, still an
  * asm stub = does nothing; its m2c draft starts the level songs from the level header D_800B0DF0 +0x2C..+0x39 through
  * func_1000D96C): the level D_800BE9F0, the header bytes +0x2C..+0x39, and the level model count D_800B1248. */
 extern unsigned char *D_800B0DF0;
 extern int D_800BE9F0, D_800B1248;
 int port_p110_inmus;
-void __real_func_150000B0(void);
-void __wrap_func_150000B0(void) {
+void __real_level_start_music(void);
+void __wrap_level_start_music(void) {
     static int f = -1;
     if (f < 0) f = port_flag("p101mus");
     if (f) {
         const unsigned char *h = D_800B0DF0;
         char b[64]; int i, o = 0;
         for (i = 0x2C; h && i < 0x3A; i++) o += snprintf(b + o, sizeof b - o, "%02X%s", vbe_ld8(h + i), (i & 3) == 3 ? " " : "");
-        port_log("[p101] func_150000B0 (level music start, asm stub) frame %u: level %X header %08X +2C: %s| models %d\n",
+        port_log("[p101] level_start_music (level music start, asm stub) frame %u: level %X header %08X +2C: %s| models %d\n",
                  port_frame_count, D_800BE9F0, (unsigned)(uintptr_t)h, h ? b : "-", D_800B1248);
     }
     port_p110_inmus = 1; /* P110: func_1000D96C / DE1C calls from inside are logged by p61_checks.c */
-    __real_func_150000B0();
+    __real_level_start_music();
     port_p110_inmus = 0;
 }
-/* P261 DIAGNOSTIC (always on, logs only on a bad key): --wrap of func_1506AD30 (game_981E0, anim event keys). Before
+/* P261 DIAGNOSTIC (always on, logs only on a bad key): --wrap of anim_events_run (game_981E0, anim event keys). Before
  * the real call, walks the keys the real code would dispatch (time <= arg1, < 900) and logs any key byte (+7) whose
  * D_8008679C handler word is not a small table index, with the record and the key list. The real function runs. */
-extern float __real_func_1506AD30(unsigned char *a0, float a1, int a2);
+extern float __real_anim_events_run(unsigned char *a0, float a1, int a2);
 extern unsigned char D_8008679C[];
-float __wrap_func_1506AD30(unsigned char *a0, float a1, int a2) {
+float __wrap_anim_events_run(unsigned char *a0, float a1, int a2) {
     static int nlog;
     const unsigned char *keys = (const unsigned char *)(uintptr_t)*(const unsigned *)(a0 + 0x1C4);
     if (keys && vbe_ld8(a0 + 5) != 4 && nlog < 20) {
@@ -610,11 +610,11 @@ float __wrap_func_1506AD30(unsigned char *a0, float a1, int a2) {
             }
         }
     }
-    return __real_func_1506AD30(a0, a1, a2);
+    return __real_anim_events_run(a0, a1, a2);
 }
 /* P261 (port-side, not a diagnostic): EU 0x1506D8AC is a separate 2-instruction function (jr ra; nop) that the split
- * glued to the end of func_1506D2E8's asm (game_981E0). It is entry 16 of the anim-key handler table D_8008679C
- * (dispatched by func_1506AD30). Without a definition the table word stayed the N64 address and call_indirect trapped
+ * glued to the end of objev_throw_object's asm (game_981E0). It is entry 16 of the anim-key handler table D_8008679C
+ * (dispatched by anim_events_run). Without a definition the table word stayed the N64 address and call_indirect trapped
  * ("table index is out of bounds") when the level-0x2E mushroom played its hit animation. port/tools/n64mem.py lists it
  * in VM_NATIVES so the relocation maps the word here. Proper fix: split it in game_981E0 (port). */
 void func_1506D8AC(void) {}

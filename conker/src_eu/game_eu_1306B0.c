@@ -7,9 +7,10 @@ void func_15145548(void *, void *, void *, void *, f32 *); /* P270 */
 
 
 #ifdef NON_MATCHING
-s32 func_1510FE4C(s32);
+s32 floor_flags_surface_type(s32);
 
-struct210 *func_15102EA0(f32 arg0, u8 arg1, s32 arg2, u8 *arg3, s16 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
+/* was func_15102EA0 */
+struct210 *cam_sprite_puff_spawn(f32 arg0, u8 arg1, s32 arg2, u8 *arg3, s16 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
     struct {
         s32 u64;
         s16 u68;
@@ -40,7 +41,7 @@ struct210 *func_15102EA0(f32 arg0, u8 arg1, s32 arg2, u8 *arg3, s16 arg4, u8 arg
 
     sp.u86 = 0xA;
     sp.u88 = 0x19;
-    temp_v0 = func_1510FE4C(arg7);
+    temp_v0 = floor_flags_surface_type(arg7);
     sp.u6A = 0x5C;
     if (D_800BE9F0 != 0x26) {
         if (D_800BE9F0 == 0x36) {
@@ -96,17 +97,17 @@ block_7:
         sp60 = 0;
         sp5C = 0;
     }
-    sp4C = func_150ADA20();
-    sp50 = func_150ADA20();
-    return sprite_fx_spawn_cam_at((s32) &sp.u64, 0U, 0U, arg2, (*(f32 *)((u8 *)arg3 + 0)), (*(f32 *)((u8 *)arg3 + 4)), (*(f32 *)((u8 *)arg3 + 8)), arg0, arg0, (u8) (sp4C & 0xFF), (u8) (((func_150ADA20() & 1) * 2) + (sp50 & 1)), sp60, sp5C, 0, (u8) (s32) arg8, arg9);
+    sp4C = random_int();
+    sp50 = random_int();
+    return sprite_fx_spawn_cam_at((s32) &sp.u64, 0U, 0U, arg2, (*(f32 *)((u8 *)arg3 + 0)), (*(f32 *)((u8 *)arg3 + 4)), (*(f32 *)((u8 *)arg3 + 8)), arg0, arg0, (u8) (sp4C & 0xFF), (u8) (((random_int() & 1) * 2) + (sp50 & 1)), sp60, sp5C, 0, (u8) (s32) arg8, arg9);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/func_15102EA0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/cam_sprite_puff_spawn.s")
 #endif
 #ifdef NON_MATCHING
-void func_151037D4(s16, u8, f32, u8 *, u8, u8, s32);
+void flip_sprite_particle_spawn(s16, u8, f32, u8 *, u8, u8, s32);
 s32 memcpy(s32, u8 *, s32); /* as declared further down in this file */
-/* the owner attachment block copied to the particle emitter at +0x110 (read by func_15103310) */
+/* the owner attachment block copied to the particle emitter at +0x110 (read by attached_points_update) */
 typedef struct {
     u8 *owner;         /* 0x00 */
     u8 unique_id;      /* 0x04 owner's unique id when attached */
@@ -142,8 +143,9 @@ typedef struct {
 // at random) attached to `owner`'s matrix `matrix` (joint `joint`, -1 = none): kind 0x5F / 5, flags 0x2203,
 // `count` particles at `pos` toward `dir`, range from `range`, alpha `alpha`; copies the attachment block (owner,
 // its unique id, matrix offset, joint, zero points D_800A5860) to the emitter's +0x110, then starts the matching
-// trail / sound (func_151037D4). Returns the emitter, or NULL (also when `owner` is NULL).
-void *func_151030B8(u8 *owner, u8 matrix, f32 *pos, f32 *dir, f32 *range, s16 count, u8 alpha, f32 speed,
+// trail / sound (flip_sprite_particle_spawn). Returns the emitter, or NULL (also when `owner` is NULL).
+/* was func_151030B8 */
+void *attached_particle_spawn(u8 *owner, u8 matrix, f32 *pos, f32 *dir, f32 *range, s16 count, u8 alpha, f32 speed,
                     u8 *target, u8 arg9, s32 argA, s16 joint, u8 argC, s32 argD) {
     EmitterAttach att;
     EmitterSpawn spawn;
@@ -193,19 +195,20 @@ void *func_151030B8(u8 *owner, u8 matrix, f32 *pos, f32 *dir, f32 *range, s16 co
     spawn.vel[2] = 0.0f;
     spawn.alpha = alpha;
     spawn.unk4C = arg9;
-    emitter = effect3d_spawn_full(&spawn, (s32) &D_800A4AA0, 0x29, 0, 0, 0x16, ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0,
+    emitter = effect3d_spawn_full(&spawn, (s32) &D_800A4AA0, 0x29, 0, 0, 0x16, ((random_int() & 1) ? 2 : 0) + 1, 0, 0,
                             argA + 0x30, argC, argD);
     if (emitter != NULL) {
         memcpy((s32) emitter + 0x110, (u8 *) &att, sizeof(att));
     }
-    func_151037D4(count, alpha, speed, target, arg9, argC, argD);
+    flip_sprite_particle_spawn(count, alpha, speed, target, arg9, argC, argD);
     return emitter;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/func_151030B8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/attached_particle_spawn.s")
 #endif
 
-void func_151032D0(s32 arg0, s32 arg1, u8 arg2) {
+/* was func_151032D0 */
+void attached_particle_handle_event(s32 arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, arg0 + 0x110, arg0 + 0x114, arg0);
 }
 
@@ -218,7 +221,8 @@ s32 func_1514654C(u8 *, s32, s32, u8 **, u8 **, s32);
 // (arg0 + 0x110): 0 when the owner changed or is gone, 1 when it has no model / is hidden or after the update. With
 // a joint id (+0x11C != -1) the points come from that joint (func_1514654C), else from the owner's matrix list
 // (func_15145EA4); sets bit 0 of +0x124 on success. P124: the point lists are 2-element arrays (m2c had 4 locals).
-s32 func_15103310(u8 *arg0) {
+/* was func_15103310 */
+s32 attached_points_update(u8 *arg0) {
     u8 *dst[2];
     u8 *src[2];
     s16 joint;
@@ -255,12 +259,13 @@ s32 func_15103310(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/func_15103310.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/attached_points_update.s")
 #endif
 #ifdef NON_MATCHING
 s32 memcpy(s32, u8 *, s32);
 
-s16 *func_15103438(u8 *arg0, s16 arg1) {
+/* was func_15103438 */
+s16 *attached_strip_draw(u8 *arg0, s16 arg1) {
     struct {
         u8 u43;
         f32 u44;
@@ -387,13 +392,14 @@ s16 *func_15103438(u8 *arg0, s16 arg1) {
     return NULL;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/func_15103438.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/attached_strip_draw.s")
 #endif
 #ifdef NON_MATCHING
 s32 func_151308E4(s32 *, s32, s32, u8, s32);
 extern s32 D_80088F70;
 
-void func_151037D4(s16 arg0, u8 arg1, f32 arg2, u8 *arg3, u8 arg4, u8 arg5, s32 arg6) {
+/* was func_151037D4 */
+void flip_sprite_particle_spawn(s16 arg0, u8 arg1, f32 arg2, u8 *arg3, u8 arg4, u8 arg5, s32 arg6) {
     struct {
         s32 u2C;
         s32 u30;
@@ -441,7 +447,7 @@ void func_151037D4(s16 arg0, u8 arg1, f32 arg2, u8 *arg3, u8 arg4, u8 arg5, s32 
     s32 var_v0;
     s32 var_v1;
 
-    temp_t8 = *(((s32 *)((u8 *)&D_80088F70 + ((func_150ADA20() & 3) * 4))));
+    temp_t8 = *(((s32 *)((u8 *)&D_80088F70 + ((random_int() & 3) * 4))));
     sp.u30 = 0x20000;
     sp.u40 = 0xFF;
     sp.u34 = 0x2203;
@@ -475,11 +481,11 @@ void func_151037D4(s16 arg0, u8 arg1, f32 arg2, u8 *arg3, u8 arg4, u8 arg5, s32 
     sp.u80 = 0.0f;
     sp.u50 = 1.0f;
     var_v1 = 0;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         var_v1 = 0x40;
     }
     sp24 = var_v1;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         var_v0 = 0x80;
     } else {
         var_v0 = 0;
@@ -495,5 +501,5 @@ void func_151037D4(s16 arg0, u8 arg1, f32 arg2, u8 *arg3, u8 arg4, u8 arg5, s32 
     func_151308E4(&sp.u2C, 1, 0, arg5, arg6);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/func_151037D4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/flip_sprite_particle_spawn.s")
 #endif

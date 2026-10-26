@@ -294,11 +294,11 @@ Gfx *func_1517EFBC(Gfx *arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_151108E0(s32, f32 (*)[4], f32, f32, f32);
+void camera_view_rotation_matrix(s32, f32 (*)[4], f32, f32, f32);
 void func_150A7EE0(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 
 // world_to_screen: projects (x, y, z) with the current player's camera (D_800DBFF0[D_80082FA4]: view matrix from
-// func_151108E0 with -pitch +0x388, -yaw +0x380 and +0x5EC) into its viewport (D_800BE628 + player * 0x180: half
+// camera_view_rotation_matrix with -pitch +0x388, -yaw +0x380 and +0x5EC) into its viewport (D_800BE628 + player * 0x180: half
 // width +0xC, half height +0x10). In front (w > 10): *outX / *outY = viewport centre + projected x / - projected y,
 // returns 1; else both 0 and returns 0.
 s32 func_1517F01C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
@@ -314,7 +314,7 @@ s32 func_1517F01C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     f32 w;
 
     cam = (u8 *) D_800DBFF0 + D_80082FA4 * 0x9A0;
-    func_151108E0(D_80082FA4, mtx, -*(f32 *) (cam + 0x388), -*(f32 *) (cam + 0x380), *(f32 *) (cam + 0x5EC));
+    camera_view_rotation_matrix(D_80082FA4, mtx, -*(f32 *) (cam + 0x388), -*(f32 *) (cam + 0x380), *(f32 *) (cam + 0x5EC));
     vp = (u8 *) D_800BE628 + D_80082FA4 * 0x180;
     hw = *(f32 *) (vp + 0xC);
     hh = *(f32 *) (vp + 0x10);

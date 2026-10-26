@@ -4,10 +4,11 @@
 #include "variables.h"
 
 
-void func_15043D90(Mtx *m, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9) {
+/* was func_15043D90 */
+void mtx_build_rot_scale_trans(Mtx *m, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9) {
     f32 sp18[4][4];
 
-    func_150A8050(&sp18, arg1, arg2, arg3);
+    mtxf_rotate_xyz_deg(&sp18, arg1, arg2, arg3);
     sp18[3][0] = arg7;
     sp18[3][1] = arg8;
     sp18[3][2] = arg9;
@@ -23,17 +24,19 @@ void func_15043D90(Mtx *m, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32
     guMtxF2L(&sp18, m);
 }
 
-void func_15043E68(Mtx *m, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6) {
+/* was func_15043E68 */
+void mtx_build_rot_trans(Mtx *m, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6) {
     f32 sp18[4][4];
 
-    func_150A8050(&sp18, arg1, arg2, arg3);
+    mtxf_rotate_xyz_deg(&sp18, arg1, arg2, arg3);
     sp18[3][0] = arg4;
     sp18[3][1] = arg5;
     sp18[3][2] = arg6;
     guMtxF2L(&sp18, m);
 }
 
-void func_15043EC8(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 arg4, f32 arg5, f32 arg6) {
+/* was func_15043EC8 */
+void mtxf_scale_set_trans(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 arg4, f32 arg5, f32 arg6) {
     mtx[3][0] = arg4;
     mtx[3][1] = arg5;
     mtx[3][2] = arg6;
@@ -48,7 +51,8 @@ void func_15043EC8(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 arg4, f32 arg5, f32 a
     mtx[2][2] *= z;
 }
 
-void func_15043F6C(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9) {
+/* was func_15043F6C */
+void mtxf_build_basis_trans(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9) {
     func_150A9B0C(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
     arg0[3][0] = arg7;
     arg0[3][1] = arg8;
@@ -59,7 +63,8 @@ void func_15043F6C(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 a
     arg0[3][3] = 1.0f;
 }
 
-void func_15043FF0(vertex *arg0, struct113 *arg1) {
+/* was func_15043FF0 */
+void vec_from_fixed_pos(vertex *arg0, struct113 *arg1) {
     arg0->x = arg1->unk18;
     arg0->y = arg1->unk1A;
     arg0->z = arg1->unk1C;
@@ -69,7 +74,8 @@ void func_15043FF0(vertex *arg0, struct113 *arg1) {
 }
 
 #pragma function sqrtf
-void func_150440A0(f32 mtx[4][4], f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy, f32 upz)
+/* was func_150440A0 */
+void mtxf_look_at(f32 mtx[4][4], f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy, f32 upz)
 {
 	f32 a;
 	f32 b;

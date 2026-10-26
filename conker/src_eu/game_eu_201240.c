@@ -68,7 +68,7 @@ void func_15145974(f32 *dir, f32 *yaw, f32 *pitch);
 s32 func_15145128(f32 *dir, f32 *out, f32 *a, f32 *b);
 s32 func_151530A8(ImpactSparks *spec, u8 arg1, s32 arg2);
 u8 *func_15132FBC(ImpactParticle *spec, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-void *func_15102EA0(f32 size, u8 arg1, ImpactSurface *surf, f32 *pos, s16 life, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+void *cam_sprite_puff_spawn(f32 size, u8 arg1, ImpactSurface *surf, f32 *pos, s16 life, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
 s32 func_1000EC24(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c), passed by address */
 void *memcpy(void *, const void *, s32);
 extern u8 D_800DCE50;  /* spark count shift (0 = full) */
@@ -83,7 +83,7 @@ extern f32 D_800DCE54; /* spark chance */
 // spark burst (func_151530A8, 5 >> D_800DCE50 sparks). In one- and two-player modes the particle of the kind: when
 // big a fast debris piece thrown back along the surface normal (func_15145128) with random spin, else a slow puff
 // with a trail block (+0x170) along the direction's angles. A material surface that was hit also gets a decal
-// (func_15102EA0, size 15..35, life 300). arg4 / arg5 are passed to every spawner (view / owner).
+// (cam_sprite_puff_spawn, size 15..35, life 300). arg4 / arg5 are passed to every spawner (view / owner).
 // Returns 0: the asm leaves the last callee's v0, which no caller reads (s32 for game_eu_981C0's prototype).
 s32 func_151D3A30(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 arg4, s32 arg5) {
     f32 hit_pos[3];
@@ -141,14 +141,14 @@ s32 func_151D3A30(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 arg4, s3
         found = TRUE;
     }
     material = func_15145C90(surf_id);
-    if ((func_150ADA20() & 1) || material == 0) {
+    if ((random_int() & 1) || material == 0) {
         big = TRUE;
     } else {
         big = FALSE;
     }
     if (kind == 1) {
         if (big) {
-            snd = (u32) func_150ADA20() % 3 + 0x459;
+            snd = (u32) random_int() % 3 + 0x459;
             if (D_80082FA0 == 0) {
                 func_1000FA64(snd, (s32) pos[0], (s32) pos[1], (s32) pos[2], 0x4000, 0x4B0, 0x320, (s32) func_1000EC24,
                               (void *) 0x28, 0, 0, 0);
@@ -157,10 +157,10 @@ s32 func_151D3A30(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 arg4, s3
         } else {
             snd = 0xB0;
         }
-        func_10010E78(0, snd, 0x6590, (u32) func_150ADA20() % 500 - 250, 0, 0, (s32) pos[0], (s32) pos[1],
+        func_10010E78(0, snd, 0x6590, (u32) random_int() % 500 - 250, 0, 0, (s32) pos[0], (s32) pos[1],
                       (s32) pos[2], 500, 800);
     }
-    if (func_150ADA68() < D_800DCE54) {
+    if (random_float() < D_800DCE54) {
         sparks.count = 5 >> D_800DCE50;
         sparks.count2 = 4 >> D_800DCE50;
         sparks.pos[0] = pos[0];
@@ -231,24 +231,24 @@ s32 func_151D3A30(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 arg4, s3
         part.kind = type;
         if (big) {
             if (func_15145128(dir, normal, &na, &nb) != 0) {
-                speed = func_150ADA68() * 12.0f + 3.0f;
-                part.life = (u32) func_150ADA20() % 11 + 0x1E;
+                speed = random_float() * 12.0f + 3.0f;
+                part.life = (u32) random_int() % 11 + 0x1E;
                 part.vel[0] = -normal[0] * speed;
                 part.vel[1] = -normal[1] * speed;
                 part.vel[2] = -normal[2] * speed;
-                part.spin[0] = (func_150ADA68() * 203280.0f + -101640.0f) * 0.0001f;
-                part.spin[1] = (func_150ADA68() * 203280.0f + -101640.0f) * 0.0001f;
-                part.spin[2] = (func_150ADA68() * 203280.0f + -101640.0f) * 0.0001f;
-                part.spin[3] = (func_150ADA68() * 449.0f + -744.0f) * 0.001f;
+                part.spin[0] = (random_float() * 203280.0f + -101640.0f) * 0.0001f;
+                part.spin[1] = (random_float() * 203280.0f + -101640.0f) * 0.0001f;
+                part.spin[2] = (random_float() * 203280.0f + -101640.0f) * 0.0001f;
+                part.spin[3] = (random_float() * 449.0f + -744.0f) * 0.001f;
                 part.tex = 0x39E8;
                 part.b61 = 8;
                 func_15132FBC(&part, 3, 0xFF, 0, arg4, arg5);
             }
         } else {
-            trail.life = (func_150ADA20() & 0xF) + 0x14;
+            trail.life = (random_int() & 0xF) + 0x14;
             trail.f4 = 0.0f;
-            trail.f8 = (func_150ADA68() * 10000.0f + 10000.0f) * 0.0001f;
-            trail.fC = (func_150ADA68() * 21000.0f + 4000.0f) * 0.0001f;
+            trail.f8 = (random_float() * 10000.0f + 10000.0f) * 0.0001f;
+            trail.fC = (random_float() * 21000.0f + 4000.0f) * 0.0001f;
             part.life = 0x12C;
             part.vel[0] = 0.0f;
             part.vel[1] = 0.0f;
@@ -266,7 +266,7 @@ s32 func_151D3A30(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 arg4, s3
         }
     }
     if (found && material != 0) {
-        func_15102EA0(func_150ADA68() * 20.0f + 15.0f, 0xFF, &surf, hit_pos, 0x12C, 1, 1, 0, arg4, arg5);
+        cam_sprite_puff_spawn(random_float() * 20.0f + 15.0f, 0xFF, &surf, hit_pos, 0x12C, 1, 1, 0, arg4, arg5);
     }
     return 0;
 }
@@ -303,7 +303,7 @@ void func_151D43B4(s32 arg0, s32 arg1, void *arg2, u8 arg3, f32 arg4) {
 
 #ifdef NON_MATCHING
 /* P159 */
-// object_sound_between: plays sound `sound` (func_1505D1C4) at the midpoint of a and b for object obj (its index
+// object_sound_between: plays sound `sound` (attack_spawn_at_point) at the midpoint of a and b for object obj (its index
 // in D_800CC2D0); the facing is obj's u16 at +0x76, minus the s16 at +0x12 of its parent (+0x31C) when it has one.
 void func_151D441C(struct127 *obj, f32 *a, f32 *b, s32 sound) {
     u8 *parent;
@@ -315,7 +315,7 @@ void func_151D441C(struct127 *obj, f32 *a, f32 *b, s32 sound) {
     } else {
         facing = *(u16 *)((u8 *)obj + 0x76);
     }
-    func_1505D1C4((a[0] + b[0]) * 0.5f, (a[1] + b[1]) * 0.5f, (a[2] + b[2]) * 0.5f, sound, obj - D_800CC2D0,
+    attack_spawn_at_point((a[0] + b[0]) * 0.5f, (a[1] + b[1]) * 0.5f, (a[2] + b[2]) * 0.5f, sound, obj - D_800CC2D0,
                   facing, 0, 0);
 }
 #else
@@ -328,12 +328,12 @@ void func_151D44C4(u8 *arg0, u8 arg1, s32 arg2) {
 
     sp48[0] = 3;
     sp48[1] = -1;
-    *(s16 *)(sp48 + 2) = (func_150ADA20() % 3U) + 4;
+    *(s16 *)(sp48 + 2) = (random_int() % 3U) + 4;
     sp48[4] = 0;
     sp3C[0] = *(f32 *)(arg0 + 0);
     sp3C[1] = *(f32 *)(arg0 + 4);
     sp3C[2] = *(f32 *)(arg0 + 8);
-    light_create_with_ctrl(sp48, sp3C, (func_150ADA20() % 13U) + 0x14, 0xFF, 0xE8, 0xAB, 0xFFU, 0U, 0, arg1, arg2);
+    light_create_with_ctrl(sp48, sp3C, (random_int() % 13U) + 0x14, 0xFF, 0xE8, 0xAB, 0xFFU, 0U, 0, arg1, arg2);
 }
 
 void func_151D45A4(u8 *arg0, u8 arg1, s32 arg2) {
@@ -342,18 +342,18 @@ void func_151D45A4(u8 *arg0, u8 arg1, s32 arg2) {
 
     sp48[0] = 3;
     sp48[1] = -1;
-    *(s16 *)(sp48 + 2) = (func_150ADA20() % 11U) + 0x14;
+    *(s16 *)(sp48 + 2) = (random_int() % 11U) + 0x14;
     sp48[4] = 0;
     sp3C[0] = *(f32 *)(arg0 + 0);
     sp3C[1] = *(f32 *)(arg0 + 4);
     sp3C[2] = *(f32 *)(arg0 + 8);
-    light_create_with_ctrl(sp48, sp3C, (func_150ADA20() % 24U) + 0x22, 0xFF, 0xA1, 0xA2, 0xFFU, 0U, 0, arg1, arg2);
+    light_create_with_ctrl(sp48, sp3C, (random_int() % 24U) + 0x22, 0xFF, 0xA1, 0xA2, 0xFFU, 0U, 0, arg1, arg2);
 }
 
 #ifdef NON_MATCHING
 /* P155 */
-s32 func_1505D1C4(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, u16 arg5, s32 arg6, s32 arg7);
-// object_sounds_at: plays the sounds `sound1` and `sound2` (func_1505D1C4) at pos for object obj (its index in
+s32 attack_spawn_at_point(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, u16 arg5, s32 arg6, s32 arg7);
+// object_sounds_at: plays the sounds `sound1` and `sound2` (attack_spawn_at_point) at pos for object obj (its index in
 // D_800CC2D0) with `flags` and a source point: with dir, pos - 90 * dir and dir's binary angle - 0x4000 (odd) as
 // facing; without, pos raised by half the height of `model` (func_1507C7C0, when given) and facing 0. arg4 is
 // unused. Returns 0 (the asm leaves v0 unset; the caller ignores it).
@@ -384,8 +384,8 @@ s32 func_151D4684(f32 *pos, f32 *dir, struct127 *obj, struct127 *model, s32 arg4
         facing = 0;
     }
     index = obj - D_800CC2D0;
-    func_1505D1C4(pos[0], pos[1], pos[2], sound1, index, facing, flags, (s32)at);
-    func_1505D1C4(pos[0], pos[1], pos[2], sound2, index, facing, flags, (s32)at);
+    attack_spawn_at_point(pos[0], pos[1], pos[2], sound1, index, facing, flags, (s32)at);
+    attack_spawn_at_point(pos[0], pos[1], pos[2], sound2, index, facing, flags, (s32)at);
     return 0;
 }
 #else
@@ -394,7 +394,7 @@ s32 func_151D4684(f32 *pos, f32 *dir, struct127 *obj, struct127 *model, s32 arg4
 
 #ifdef NON_MATCHING
 /* P155 */
-// object_sound_at: plays sound `sound` (func_1505D1C4) at pos for object obj (its index in D_800CC2D0), with the
+// object_sound_at: plays sound `sound` (attack_spawn_at_point) at pos for object obj (its index in D_800CC2D0), with the
 // direction of dir (x / z, binary angle - 0x4000, odd) or 0 without dir. arg3 is unused.
 void func_151D4898(f32 *pos, f32 *dir, struct127 *obj, s32 arg3, s32 sound) {
     f32 a;
@@ -408,7 +408,7 @@ void func_151D4898(f32 *pos, f32 *dir, struct127 *obj, s32 arg3, s32 sound) {
         angle = (a <= -1.0f) ? 0xFFFFFFFF : (u32)a;
         facing = ((angle - 0x4000) | 1) & 0xFFFF;
     }
-    func_1505D1C4(pos[0], pos[1], pos[2], sound, obj - D_800CC2D0, facing, 0, 0);
+    attack_spawn_at_point(pos[0], pos[1], pos[2], sound, obj - D_800CC2D0, facing, 0, 0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D4898.s")
@@ -466,7 +466,7 @@ void func_151D49B8(u8 *arg0, u8 *arg1, s32 arg2, u8 *arg3, f32 arg4, u8 arg5, s3
     {
         f32 temp_f0;
 
-        temp_f0 = func_150ADA68();
+        temp_f0 = random_float();
         sp.u54[0] = 1.0f;
         sp.u54[1] = 1.0f;
         sp.u70 = 1.0f;
@@ -479,12 +479,12 @@ void func_151D49B8(u8 *arg0, u8 *arg1, s32 arg2, u8 *arg3, f32 arg4, u8 arg5, s3
         sp.u88 = (*(f32 *)((u8 *)arg1 + 0)) * arg4;
         sp.u8C = (*(f32 *)((u8 *)arg1 + 4)) * arg4;
         sp.u90 = (*(f32 *)((u8 *)arg1 + 8)) * arg4;
-        sp.u94 = ((func_150ADA68() * 6378.0f) + -3189.0f) * 0.001f;
+        sp.u94 = ((random_float() * 6378.0f) + -3189.0f) * 0.001f;
         sp.u98 = 0.0f;
-        sp.u9C = ((func_150ADA68() * 6378.0f) + -3189.0f) * 0.001f;
-        sp.uA0 = ((func_150ADA68() * 320.0f) + -707.0f) * 0.001f;
+        sp.u9C = ((random_float() * 6378.0f) + -3189.0f) * 0.001f;
+        sp.uA0 = ((random_float() * 320.0f) + -707.0f) * 0.001f;
         sp.uA4 = 0x29E8;
-        sp.uA8 = (func_150ADA20() & 7) + 0x1C;
+        sp.uA8 = (random_int() & 7) + 0x1C;
         sp.uAA = 0x25;
         sp.uAC = 0;
         sp.uB0 = 0;
@@ -633,7 +633,7 @@ void func_151D4D44(u8 *ev) {
     if (func_15143E64(&d) > 5.0f) {
         return;
     }
-    rec->unkC += (0.2f + func_150ADA68() * 0.209f) * D_800BE9A4;
+    rec->unkC += (0.2f + random_float() * 0.209f) * D_800BE9A4;
     if (!(rec->unkC > 1.0f)) {
         return;
     }
@@ -665,26 +665,26 @@ void func_151D4D44(u8 *ev) {
     spec.b64 = 0xFF;
     spec.b65 = 0;
     do {
-        t = func_150ADA68();
+        t = random_float();
         spec.pos[0] = d.unk0 * t + old.unk0;
         spec.pos[1] = d.unk4 * t + old.unk4;
         spec.pos[2] = d.unk8 * t + old.unk8;
         spec.vel[0] = d.unk0 * D_800BEDC8 * 0.298f;
         spec.vel[1] = d.unk4 * D_800BEDC8 * 0.298f;
         spec.vel[2] = d.unk8 * D_800BEDC8 * 0.298f;
-        data.b0 = func_150ADA20();
-        data.b1 = func_150ADA20();
-        data.b2 = (u32) func_150ADA20() % 5 + 4;
-        data.b3 = (u32) func_150ADA20() % 5 + 4;
-        data.f4 = func_150ADA68() * 6.0f;
-        data.f8 = func_150ADA68() * 6.0f;
-        spec.f54 = func_150ADA68() * 0.18f + 0.13000001f;
-        b80 = (func_150ADA20() & 1) ? 0x80 : 0;
-        b40 = (func_150ADA20() & 1) ? 0x40 : 0;
+        data.b0 = random_int();
+        data.b1 = random_int();
+        data.b2 = (u32) random_int() % 5 + 4;
+        data.b3 = (u32) random_int() % 5 + 4;
+        data.f4 = random_float() * 6.0f;
+        data.f8 = random_float() * 6.0f;
+        spec.f54 = random_float() * 0.18f + 0.13000001f;
+        b80 = (random_int() & 1) ? 0x80 : 0;
+        b40 = (random_int() & 1) ? 0x40 : 0;
         spec.flags = (spec.flags & ~0xC0) | b40 | b80;
-        spec.rgba1[3] = (u32) func_150ADA20() % 61 + 0x3C;
-        spec.life = (u32) func_150ADA20() % 11 + 0x46;
-        spec.size[0] = spec.size[1] = func_150ADA68() * 40.0f + 40.0f;
+        spec.rgba1[3] = (u32) random_int() % 61 + 0x3C;
+        spec.life = (u32) random_int() % 11 + 0x46;
+        spec.size[0] = spec.size[1] = random_float() * 40.0f + 40.0f;
         p = (u8 *) func_151307F0((s32) &spec, 1, 0, 0x10, ev[0xC], ev[1]);
         if (p != NULL) {
             memcpy(p + 0xA8, &data, 0x10);
@@ -754,16 +754,16 @@ void func_151D5308(s32 arg0) {
 /* P179 */
 void func_151C2600(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3, f32 arg4);
 void object_impact_effects(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5);
-void func_1507DE4C(struct127 *arg0);
+void obj_set_dying_flags(struct127 *arg0);
 void object_hit_effect(struct127 *arg0, s32 arg1, s32 arg2);
-s32 func_1505D024(struct127 *, s32, u16, s32);
+s32 obj_send_hit(struct127 *, s32, u16, s32);
 
 // object_take_hit: P179: a hit on `obj` by `attacker` (or NULL) at `pos` / `pos2`, direction `dir`, hit record `rec`
 /* (or NULL). Body kinds that react with a spark (the list below) get func_151C2600 (attacker, pos, dir, 9, rec +4
  * or 0). A kind-0xA / type-3 hit record (rec +0x58 / +0x59) wears down the shield count obj +0x1CA: at 3 or more it
- * loses one, else it is cleared, func_1507DE4C / object_hit_effect (obj, 0xFF, 1) run and the message flags become
+ * loses one, else it is cleared, obj_set_dying_flags / object_hit_effect (obj, 0xFF, 1) run and the message flags become
  * 0x100020 (else `flags` | 0x60000). Then object_impact_effects (obj, pos, pos2, dir, arg7, arg8); and only if the count
- * was non-zero on entry, the message func_1505D024(obj, flags | 0x80000, (dir angle - 0x4000) | 1, attacker index
+ * was non-zero on entry, the message obj_send_hit(obj, flags | 0x80000, (dir angle - 0x4000) | 1, attacker index
  * or -1). The angle is func_150484A0(dir x, dir z) x 65536 / 2pi converted as IDO's float -> unsigned (negative ->
  * 0xFFFF). */
 void func_151D535C(u8 *obj, u8 *attacker, u8 *pos, f32 *pos2, u8 *rec, s32 flags, f32 *dir, u8 arg7, s32 arg8) {
@@ -790,7 +790,7 @@ void func_151D535C(u8 *obj, u8 *attacker, u8 *pos, f32 *pos2, u8 *rec, s32 flags
             obj[0x1CA] = count - 1;
         } else {
             obj[0x1CA] = 0;
-            func_1507DE4C((struct127 *) obj);
+            obj_set_dying_flags((struct127 *) obj);
             object_hit_effect((struct127 *) obj, 0xFF, 1);
             flags = 0x100020;
         }
@@ -801,7 +801,7 @@ void func_151D535C(u8 *obj, u8 *attacker, u8 *pos, f32 *pos2, u8 *rec, s32 flags
     }
     w = (s32) (func_150484A0(dir[0], dir[2]) * 10430.378f);
     angle = (w < 0) ? 0xFFFF : w;
-    func_1505D024((struct127 *) obj, flags | 0x80000, (u16) ((angle - 0x4000) | 1),
+    obj_send_hit((struct127 *) obj, flags | 0x80000, (u16) ((angle - 0x4000) | 1),
                   (attacker != NULL) ? (struct127 *) attacker - D_800CC2D0 : -1);
 }
 #else
@@ -913,7 +913,7 @@ void func_151D5404(struct17 *arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 a
     sp38.unk10 = arg2;
     sp38.unk14 = arg3;
     sp30.unk0 = 1;
-    sp30.unk2 = (func_150ADA20() % (u32) (arg5 + 1)) + arg4;
+    sp30.unk2 = (random_int() % (u32) (arg5 + 1)) + arg4;
     sp30.unk4 = 0;
     sp30.unk6 = 0;
     for (i = 0; i < D_80082FA0 + 1; i++) {
@@ -1009,9 +1009,9 @@ void func_151D5BF8(u8 *arg0, u8 arg1, s32 arg2) {
     func_151D5AC4(arg0, arg1, arg2);
     func_151D45A4(arg0, arg1, arg2);
 #ifdef NON_MATCHING
-    func_15154728(arg0, (func_150ADA68() * 4.0f) + 12.0f, 1.6409999f, (func_150ADA20() % 56U) + 0xC8, 0.0f, arg1, arg2); /* P95: float literal (asm passes the bits 0x3FD20C49) */
+    func_15154728(arg0, (random_float() * 4.0f) + 12.0f, 1.6409999f, (random_int() % 56U) + 0xC8, 0.0f, arg1, arg2); /* P95: float literal (asm passes the bits 0x3FD20C49) */
 #else
-    func_15154728(arg0, (func_150ADA68() * 4.0f) + 12.0f, 0x3FD20C49, (func_150ADA20() % 56U) + 0xC8, 0.0f, arg1, arg2);
+    func_15154728(arg0, (random_float() * 4.0f) + 12.0f, 0x3FD20C49, (random_int() % 56U) + 0xC8, 0.0f, arg1, arg2);
 #endif
 }
 

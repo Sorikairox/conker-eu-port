@@ -107,7 +107,7 @@ void func_15155E0C(u8 *arg0) {
             (*(s16 *)((u8 *)temp_a1_2 + 0xE)) = (s16) (s32) temp_t0->x_position;
             sp38 = var_f2;
             sp48 = temp_t0;
-            (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x14))) + 0x10)) = (s16) (s32) ((func_15048A40((*(u8 *)((u8 *)arg0 + 0x12))) * 15.0f) + (temp_t0->y_position + 160.0f + (*(f32 *)((u8 *)arg0 + 0x98)) + var_f2));
+            (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x14))) + 0x10)) = (s16) (s32) ((math_sin_u8((*(u8 *)((u8 *)arg0 + 0x12))) * 15.0f) + (temp_t0->y_position + 160.0f + (*(f32 *)((u8 *)arg0 + 0x98)) + var_f2));
             (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x14))) + 0x12)) = (s16) (s32) temp_t0->z_position;
             return;
         }
@@ -139,7 +139,7 @@ block_38:
         if (temp_a1_4 != NULL) {
             (*(s16 *)((u8 *)temp_a1_4 + 0xE)) = (s16) (s32) temp_t0->x_position;
             sp48 = temp_t0;
-            (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x14))) + 0x10)) = (s16) (s32) ((func_15048A40((*(u8 *)((u8 *)arg0 + 0x12))) * 15.0f) + (temp_t0->y_position + 160.0f));
+            (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x14))) + 0x10)) = (s16) (s32) ((math_sin_u8((*(u8 *)((u8 *)arg0 + 0x12))) * 15.0f) + (temp_t0->y_position + 160.0f));
             (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x14))) + 0x12)) = (s16) (s32) temp_t0->z_position;
             return;
         }
@@ -182,8 +182,8 @@ Gfx *func_1515626C(Gfx *gdl, Unk1515626C *arg1, s16 arg2) {
         }
         rot = D_800DBFF0[arg2].unk380;
         gdl = func_15096D44(gdl);
-        func_15043D90(&arg1->mtx[D_800BE9C0], 0.0f, rot, 0.0f, 2.25f, 2.25f, 2.25f, p->x_position,
-                      func_15048A40(arg1->ang) * 15.0f + (p->y_position + 160.0f + h + arg1->yoff), p->z_position);
+        mtx_build_rot_scale_trans(&arg1->mtx[D_800BE9C0], 0.0f, rot, 0.0f, 2.25f, 2.25f, 2.25f, p->x_position,
+                      math_sin_u8(arg1->ang) * 15.0f + (p->y_position + 160.0f + h + arg1->yoff), p->z_position);
         gSPMatrix(gdl++, &arg1->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         gSPClearGeometryMode(gdl++, G_ZBUFFER);
         gSPDisplayList(gdl++, *D_800E0810);

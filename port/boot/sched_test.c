@@ -98,9 +98,9 @@ int port_heap_check(void) {
     return bad != 0;
 }
 
-/* asset-table walker: the game's func_1502B020 (C) -> func_1502AC88 (C since P7, cache insert
- * func_1502AB04 still asm) against a direct walk with PI DMA (as port/audio/aud_test.c) */
-u8 *func_1502B020(s32 *arg0, s32 arg1, ...);
+/* asset-table walker: the game's asset_lookup_rom (C) -> asset_rec_read_cached (C since P7, cache insert
+ * asset_rec_cache_insert still asm) against a direct walk with PI DMA (as port/audio/aud_test.c) */
+u8 *asset_lookup_rom(s32 *arg0, s32 arg1, ...);
 s32 osPiRawStartDma(s32 dir, u32 devAddr, void *dramAddr, u32 size);
 int port_asset_check(void) {
     static u32 w[2];
@@ -109,7 +109,7 @@ int port_asset_check(void) {
     for (a = 0; a < 8; a++) {
         s32 ok = -1;
         u32 p = 0xAB2240, info;
-        u32 got = (u32)func_1502B020(&ok, 2, keys[a][0], keys[a][1]);
+        u32 got = (u32)asset_lookup_rom(&ok, 2, keys[a][0], keys[a][1]);
         for (b = 0; b < 2; b++) { osPiRawStartDma(0, p + 8 * keys[a][b], w, 8); p += w[0]; }
         info = w[1] & 0x0FFFFFFF;
         if (got != (info ? p : 0) || (u32)ok != info) bad++;

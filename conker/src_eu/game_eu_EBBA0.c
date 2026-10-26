@@ -74,11 +74,11 @@ void func_150BE40C(u8 *arg0) {
 
     (*(s16 *)((u8 *)arg0 + 0x2C)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x2C)) - D_800BE9E4);
     if ((*(s16 *)((u8 *)arg0 + 0x2C)) < 0) {
-        temp_f6 = func_150ADA68() * 270.0f;
+        temp_f6 = random_float() * 270.0f;
         sp.u98 = -120.0f;
         sp.u94 = temp_f6 + -135.0f;
-        sp.u9C = (func_150ADA68() * 10.0f) + 3.0f;
-        sp.uA0 = (func_150ADA68() * 17.0f) + 9.0f;
+        sp.u9C = (random_float() * 10.0f) + 3.0f;
+        sp.uA0 = (random_float() * 17.0f) + 9.0f;
         sp.uA4 = 0xAB;
         sp.uA6 = 0x3E8;
         sp.uA8 = 0x31;
@@ -88,7 +88,7 @@ void func_150BE40C(u8 *arg0) {
         sp.uAF = 0xFF;
         sp.uB0 = 0xFF;
         sp.uB1 = 0xFF;
-        sp.uB2 = (func_150ADA20() % 156U) + 0x64;
+        sp.uB2 = (random_int() % 156U) + 0x64;
         sp.uB3 = 0xFF;
         sp.uB4 = 0xFF;
         sp.uB5 = 0xFF;
@@ -113,12 +113,12 @@ void func_150BE40C(u8 *arg0) {
         sp.u44 = 0;
         sp34 = temp_v1;
         sp.u38 = *temp_v1;
-        sp.u48 = (func_150ADA68() * 4.064f) + 2.513f;
+        sp.u48 = (random_float() * 4.064f) + 2.513f;
         temp_v0 = func_151559FC(&sp.u94, 0xA, 0, 0, 0x58, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), 0);
         if (temp_v0 != 0) {
             memcpy(temp_v0 + 0x70, &sp.u38, 0x58);
         }
-        (*(s16 *)((u8 *)sp34 + 4)) = (s16) ((func_150ADA20() % 151U) + 0x19);
+        (*(s16 *)((u8 *)sp34 + 4)) = (s16) ((random_int() % 151U) + 0x19);
     }
 }
 #else

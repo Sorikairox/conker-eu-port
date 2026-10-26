@@ -24,7 +24,8 @@ typedef struct {
     u8 u3F;
 } P_EB090;
 extern f32 D_800BE9A4;
-void func_150EB090(u8 *arg0) {
+/* was func_150EB090 */
+void fx_light_sweep_emitter_update(u8 *arg0) {
     P_EB090 *p;
     struct {
         u8 u0;
@@ -57,7 +58,7 @@ void func_150EB090(u8 *arg0) {
     f32 g;
 
     p = (P_EB090 *)(arg0 + 0x28);
-    p->acc += (p->rate + func_150ADA68() * p->rrate) * D_800BE9A4;
+    p->acc += (p->rate + random_float() * p->rrate) * D_800BE9A4;
     if (p->acc > 1.0f) {
         h.t.uF0 = 0;
         h.t.uF4 = 0;
@@ -71,12 +72,12 @@ void func_150EB090(u8 *arg0) {
         h.u2 = 300;
         h.u4 = 0;
         do {
-            r = func_150ADA68() * p->range + p->min;
+            r = random_float() * p->range + p->min;
             if (r != 0.0f) {
-                f = func_150ADA68();
+                f = random_float();
                 a.x = p->p0[0] + p->d[0] * f;
                 a.z = p->p0[1] + p->d[1] * f;
-                g = func_150ADA68();
+                g = random_float();
                 b.x = p->p0[2] + p->d[2] * g;
                 b.z = p->p0[3] + p->d[3] * g;
                 h.t.dx = b.x - a.x;
@@ -86,7 +87,7 @@ void func_150EB090(u8 *arg0) {
                     inv = 1.0f / len;
                     h.t.dx *= inv;
                     h.t.dz *= inv;
-                    if (func_150ADA20() & 1) {
+                    if (random_int() & 1) {
                         h.t.pos = a;
                     } else {
                         h.t.pos = b;
@@ -117,8 +118,9 @@ s32 func_15046F70(f32 *, s32, f32, s32 *);
  * times the frame time D_800BE9A4 and go to the sprite (+0x14) s16 x / z (+0xE / +0x12); the sprite's s16 y (+0x10)
  * is the ground height func_15046F70 finds at (x, +0x28, z) (range +0x2C, result in +0x34), or +0x28 when there is
  * none. The lifetime +0x30 counts down by the frame time; returns 0 once it is <= 0 (done), else 1. Table word
- * 0x8008B4AC (dispatcher not identified; neighbours func_15190940 / func_150F2B20 take one u8 *). */
-s32 func_150EB3A4(u8 *o) {
+ * 0x8008B4AC (dispatcher not identified; neighbours func_15190940 / fx_pendulum_sprite_update take one u8 *). */
+/* was func_150EB3A4 */
+s32 fx_drifting_sprite_update(u8 *o) {
     f32 pt[3];
 
     *(f32 *) (o + 0x18) += *(f32 *) (o + 0x20) * D_800BE9A4;
@@ -140,5 +142,5 @@ s32 func_150EB3A4(u8 *o) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1188A0/func_150EB3A4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1188A0/fx_drifting_sprite_update.s")
 #endif

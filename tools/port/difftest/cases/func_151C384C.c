@@ -1,8 +1,8 @@
 extern f32 D_800AAE24[4]; /* the ember emitter's 4 float parameters (D_800AAE24..D_800AAE30) */
 s32 func_151530A8(s32 *, u8, s32);
 s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-s32 func_150ADA20(void);
-f32 func_150ADA68(void);
+s32 random_int(void);
+f32 random_float(void);
 
 // fire_embers_spawn: the ember burst of a fire at `pos` (room `room`, owner `owner`): an ember emitter
 // (func_151530A8, type 5 / 7, 4 parameters from D_800AAE24, sizes 15 / 30, colour block, handlers 0x200005 /
@@ -140,7 +140,7 @@ void func_151C384C(void *arg0, u8 room, s32 owner) {
     req.texSet = 0x4403;
     req.handlers = 0x200005;
     req.u04 = 0x20000;
-    req.life = func_150ADA20() % 7U + 6;
+    req.life = random_int() % 7U + 6;
     req.u0C = 0;
     req.u10 = 0;
     req.color[0] = 0xFF;
@@ -152,7 +152,7 @@ void func_151C384C(void *arg0, u8 room, s32 owner) {
     req.u18[2] = 0xFF;
     req.alpha = 0xFF;
     req.u1C = 0xFF;
-    s = func_150ADA68() * 196.0f + 106.0f;
+    s = random_float() * 196.0f + 106.0f;
     req.halfH = s;
     req.halfW = s;
     req.pos[0] = pos[0];
@@ -169,8 +169,8 @@ void func_151C384C(void *arg0, u8 room, s32 owner) {
     req.vel[2] = 0.0f;
     req.value = 0.0f;
     req.u24 = 1.0f;
-    flipA = (func_150ADA20() & 1) ? 0x40 : 0;
-    flipB = (func_150ADA20() & 1) ? 0x80 : 0;
+    flipA = (random_int() & 1) ? 0x40 : 0;
+    flipB = (random_int() & 1) ? 0x80 : 0;
     req.flags = (flipB | 1) | flipA | 0xC200;
     req.draw = 6;
     req.update = 6;
@@ -182,10 +182,10 @@ void func_151C384C(void *arg0, u8 room, s32 owner) {
 
     flash.unk0 = 3;
     flash.unk1 = -1;
-    flash.unk2 = func_150ADA20() % 7U + 6;
+    flash.unk2 = random_int() % 7U + 6;
     flash.unk4 = 0;
     at.unk0 = pos[0];
     at.unk4 = pos[1];
     at.unk8 = pos[2];
-    light_create_with_ctrl(&flash, &at, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, room, owner);
+    light_create_with_ctrl(&flash, &at, (random_int() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, room, owner);
 }

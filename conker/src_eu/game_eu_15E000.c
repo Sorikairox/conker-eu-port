@@ -798,8 +798,8 @@ s32 func_15132454(u8 *arg0, f32 arg1, u8 arg2, s32 arg3) {
 
     sp.u2C = 0.0f;
     sp.u34 = 594.49f * arg1;
-    sp.u30 = (2.0f * func_150ADA68()) + 5.0f;
-    temp_f10 = (func_150ADA68() * 15.0f) + 240.0f;
+    sp.u30 = (2.0f * random_float()) + 5.0f;
+    temp_f10 = (random_float() * 15.0f) + 240.0f;
     sp.u38 = temp_f10;
     sp.u3C = temp_f10 / (sp.u30 * sp.u30);
     sp.u44 = 1;
@@ -829,11 +829,11 @@ s32 func_15132454(u8 *arg0, f32 arg1, u8 arg2, s32 arg3) {
     sp.u62 = 1;
     sp.u64 = 1.0f;
     var_v1_2 = 0;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         var_v1_2 = 0x40;
     }
     sp20 = var_v1_2;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         var_v0 = 0x80;
     } else {
         var_v0 = 0;

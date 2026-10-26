@@ -4,22 +4,23 @@
 
 
 #ifdef NON_MATCHING
-void func_151108E0(s32 arg0, f32 (*arg1)[4], f32 arg2, f32 arg3, f32 arg4);
-Gfx *func_15110AC4(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 r, u8 g, u8 b);
-Gfx *func_150FBA40(Gfx *gdl, f32 (*mtx)[4]);
+void camera_view_rotation_matrix(s32 arg0, f32 (*arg1)[4], f32 arg2, f32 arg3, f32 arg4);
+Gfx *gfx_fill_rect_colour(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 r, u8 g, u8 b);
+Gfx *star_field_draw(Gfx *gdl, f32 (*mtx)[4]);
 
-// camera_view_clear_draw: camera callback (D_80089578[1], called by func_15110420 with the D_80089578 signature):
-// builds the current player's view matrix from yaw / pitch / roll (func_151108E0), clears the player's viewport
-// (D_800BE628[D_80082FA4] +0x24..0x30) to black (func_15110AC4), sets pipe sync, other modes 0xEF002C0F / 0x0F0A4004
-// and combiner 0xFC357E6A / 0xFFFFFFFF, and draws with the matrix (func_150FBA40, which returns the new list end).
+// camera_view_clear_draw: camera callback (D_80089578[1], called by view_background_draw with the D_80089578 signature):
+// builds the current player's view matrix from yaw / pitch / roll (camera_view_rotation_matrix), clears the player's viewport
+// (D_800BE628[D_80082FA4] +0x24..0x30) to black (gfx_fill_rect_colour), sets pipe sync, other modes 0xEF002C0F / 0x0F0A4004
+// and combiner 0xFC357E6A / 0xFFFFFFFF, and draws with the matrix (star_field_draw, which returns the new list end).
 // The position and handle arguments are unused.
-Gfx *func_150FA030(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s32 handle) {
+/* was func_150FA030 */
+Gfx *camera_view_clear_draw(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s32 handle) {
     f32 mtx[4][4];
     u8 *cam;
 
-    func_151108E0(D_80082FA4, mtx, yaw, pitch, roll);
+    camera_view_rotation_matrix(D_80082FA4, mtx, yaw, pitch, roll);
     cam = (u8 *) D_800BE628 + D_80082FA4 * 0x180;
-    gdl = func_15110AC4(gdl, (s32) *(f32 *) (cam + 0x2C), (s32) *(f32 *) (cam + 0x24),
+    gdl = gfx_fill_rect_colour(gdl, (s32) *(f32 *) (cam + 0x2C), (s32) *(f32 *) (cam + 0x24),
                         (s32) (*(f32 *) (cam + 0x30) - 1.0f), (s32) *(f32 *) (cam + 0x28), 0, 0, 0);
     gdl[0].words.w0 = 0xE7000000;
     gdl[0].words.w1 = 0;
@@ -27,10 +28,10 @@ Gfx *func_150FA030(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, 
     gdl[1].words.w1 = 0x0F0A4004;
     gdl[2].words.w0 = 0xFC357E6A;
     gdl[2].words.w1 = 0xFFFFFFFF;
-    return func_150FBA40(gdl + 3, mtx);
+    return star_field_draw(gdl + 3, mtx);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FA030.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/camera_view_clear_draw.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -127,7 +128,7 @@ void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 ar
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
 s32 func_151D8E18(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3);
 s32 light_create_obj_joint(u8 *, u8, void *, u8, s16, s32, s32, s32, s32, s32, s32, s8, s32, u8, u8, s32);
-s32 func_150ADA20(void);
+s32 random_int(void);
 void *memcpy(void *, const void *, size_t);
 extern s32 D_800A4AA0;
 extern s32 D_800A2090;
@@ -151,7 +152,8 @@ extern f32 D_800A2160;
 // (particles at +0x110 also get the mid height (obj +0x14C + +0x150) / 2); the group records them at +0x30 / +0x38.
 // Always then calls func_151D8E18 {1, 0x46, 8, 1, -1} and light_create_obj_joint (D_800A2090, 3, 0x46, 0x28).
 // `alpha` / `owner` are passed to every spawner.
-void func_150F9BB0(u8 *obj, u8 alpha, s32 owner) {
+/* was func_150F9BB0 */
+void aura_group_spawn(u8 *obj, u8 alpha, s32 owner) {
     structEU_151D8E18 shake;
     EmitExtraF9BB0 ee;
     PartSpecF9BB0 spawn;
@@ -227,7 +229,7 @@ void func_150F9BB0(u8 *obj, u8 alpha, s32 owner) {
         fr.spec.u48 = 0;
         for (fr.extra.index = 0; fr.extra.index < 2; fr.extra.index++) {
             g->part[fr.extra.index] = effect3d_spawn_full(&fr.spec, (s32)&D_800A4AA0, 0, 0x25, 0, 0x1D,
-                                              ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, 0x5C,
+                                              ((random_int() & 1) ? 2 : 0) + 1, 0, 0, 0x5C,
                                               alpha, owner);
             if (g->part[fr.extra.index] != NULL) {
                 memcpy(g->part[fr.extra.index] + 0x110, &fr.extra, 0x5C);
@@ -312,7 +314,7 @@ void func_150F9BB0(u8 *obj, u8 alpha, s32 owner) {
     light_create_obj_joint(obj, 1, &D_800A2090, 3, 0x46, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, alpha, owner);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150F9BB0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/aura_group_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -328,7 +330,8 @@ extern f32 D_800A2164;
 // and +0x34 / +0x3C) its position and direction: the first kind gets the flag 1 at +0x168, the second the flag 2 (and
 // loses 4) at +0x58. Without matrices both flags are cleared. Then the first kind's +0x158 / +0x15C become 0 / 0 while
 // +0xE < 10, else 6 / 15, and the second kind's +0x174 becomes 0, else D_800A2164 (1.306).
-void func_150FA738(u8 *arg0) {
+/* was func_150FA738 */
+void aura_group_follow_owner(u8 *arg0) {
     u8 *owner = *(u8 **) (arg0 + 0x28);
     u8 **a = (u8 **) (arg0 + 0x30);
     u8 **b = (u8 **) (arg0 + 0x38);
@@ -408,10 +411,11 @@ void func_150FA738(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FA738.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/aura_group_follow_owner.s")
 #endif
 
-void func_150FA9E8(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_150FA9E8 */
+void screen_flash_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
     s32 temp_t6;
 
     temp_t6 = arg2;
@@ -500,8 +504,8 @@ void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, 
 s32 func_151506E8(RingSpecFA520 *, struct17 *, s32, u8, s32);
 s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 void func_151C384C(void *arg0, u8 arg1, s32 arg2);
-s32 func_150ADA20(void);
-f32 func_150ADA68(void);
+s32 random_int(void);
+f32 random_float(void);
 void *memcpy(void *, const void *, size_t);
 extern struct17 D_800A20CC[]; /* model-space points, indexed by `point` */
 extern f32 D_800A2168;
@@ -518,7 +522,8 @@ extern f32 D_800A2184;
 // func_1504715C), a glow particle (func_151307F0, texture 0x79, life 300, blend 0x27, random flip flags 0x40 / 0x80,
 // alpha = size = 100..200 random) whose +0xA8 gets a 0x14-byte growth block (0, rate 10..13, D_800A2184, size,
 // size / rate^2), and func_151C384C at the point. `alpha` / `owner` are passed to every spawner.
-void func_150FA520(u8 *obj, u8 point, u8 alpha, s32 owner) {
+/* was func_150FA520 */
+void obj_point_burst_spawn(u8 *obj, u8 point, u8 alpha, s32 owner) {
     struct {
         f32 u00;
         f32 rate;
@@ -597,9 +602,9 @@ void func_150FA520(u8 *obj, u8 point, u8 alpha, s32 owner) {
 
     extra.u00 = 0.0f;
     extra.u08 = D_800A2184;
-    rate = func_150ADA68() * 3.0f + 10.0f;
+    rate = random_float() * 3.0f + 10.0f;
     extra.rate = rate;
-    size = func_150ADA68() * 100.0f + 100.0f;
+    size = random_float() * 100.0f + 100.0f;
     extra.accel = size / (rate * rate);
     req.alpha = (u32)size;
     req.texture = 0x79;
@@ -627,8 +632,8 @@ void func_150FA520(u8 *obj, u8 point, u8 alpha, s32 owner) {
     req.u22 = 1;
     extra.size = size;
     req.u24 = 1.0f;
-    flipA = (func_150ADA20() & 1) ? 0x40 : 0;
-    flipB = (func_150ADA20() & 1) ? 0x80 : 0;
+    flipA = (random_int() & 1) ? 0x40 : 0;
+    flipB = (random_int() & 1) ? 0x80 : 0;
     req.flags = flipB | 0x4C000 | flipA;
     req.draw = 6;
     req.update = 6;
@@ -652,12 +657,13 @@ void func_150FA520(u8 *obj, u8 point, u8 alpha, s32 owner) {
     func_151C384C(&pos, alpha, owner);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FA520.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/obj_point_burst_spawn.s")
 #endif
 
 extern u8 D_80088F00;
 
-void func_150FAFC0(u8 arg0, s32 arg1) {
+/* was func_150FAFC0 */
+void arc_bolts_spawn_once(u8 arg0, s32 arg1) {
     struct {
         u8 *unk0;
         u8 *unk4;
@@ -681,15 +687,16 @@ void func_150FAFC0(u8 arg0, s32 arg1) {
 
 #ifdef NON_MATCHING
 void func_1514470C(u8 *node, u8 *pos);
-void func_150F4AF0(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+void lightning_bolt_spawn(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
 extern u8 D_80088ECC;   /* number of bolt styles */
 extern u8 *D_80088ED0;  /* per style: 2 bytes, [1] = colour index */
 extern f32 *D_80088ED4; /* per style: width */
 // arc_bolts_emit: handler 25 of D_8008A980 (`void (u8 *)`). Accumulates (0.08 + 0.18 * random) * D_800BE9A4 bolts
-// per frame in +0x30; for each whole bolt it spawns one (func_150F4AF0) between the positions of the nodes +0x28 and
+// per frame in +0x30; for each whole bolt it spawns one (lightning_bolt_spawn) between the positions of the nodes +0x28 and
 // +0x2C (func_1514470C), with a random style (D_80088ECC styles: colour D_80088ED0[2 * i + 1], width D_80088ED4[i] *
 // (1..2)), length 30..55 (and 1 / length), life 750..752, and the object's +0x0C / +0x01 bytes.
-void func_150FB06C(u8 *arg0) {
+/* was func_150FB06C */
+void arc_bolts_emit(u8 *arg0) {
     u8 *ends = arg0 + 0x28;
     f32 from[3];
     f32 to[3];
@@ -697,43 +704,47 @@ void func_150FB06C(u8 *arg0) {
     f32 len;
     f32 width;
 
-    ((f32 *) ends)[2] += (0.0800000057f + func_150ADA68() * 0.18f) * D_800BE9A4;
+    ((f32 *) ends)[2] += (0.0800000057f + random_float() * 0.18f) * D_800BE9A4;
     while (1.0f < ((f32 *) ends)[2]) {
         func_1514470C(((u8 **) ends)[0], (u8 *) from);
         func_1514470C(((u8 **) ends)[1], (u8 *) to);
-        style = (u8) ((u32) func_150ADA20() % D_80088ECC);
-        len = func_150ADA68() * 25.0f + 30.0f;
-        width = func_150ADA68();
-        func_150F4AF0((u8 *) from, (u8 *) to, D_80088ED0[style * 2 + 1], len, 1.0f / len,
-                      (width * 1.0f + 1.0f) * D_80088ED4[style], 1, (u32) func_150ADA20() % 3 + 750, arg0[0xC], arg0[1]);
+        style = (u8) ((u32) random_int() % D_80088ECC);
+        len = random_float() * 25.0f + 30.0f;
+        width = random_float();
+        lightning_bolt_spawn((u8 *) from, (u8 *) to, D_80088ED0[style * 2 + 1], len, 1.0f / len,
+                      (width * 1.0f + 1.0f) * D_80088ED4[style], 1, (u32) random_int() % 3 + 750, arg0[0xC], arg0[1]);
         ((f32 *) ends)[2] -= 1.0f;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FB06C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/arc_bolts_emit.s")
 #endif
 
-void func_150FB264(struct102 *arg0, s32 arg1, u8 arg2) {
+/* was func_150FB264 */
+void arc_bolts_handle_event(struct102 *arg0, s32 arg1, u8 arg2) {
     if ((arg2 == 0x4E) || (arg2 == 0x4F)) {
         node_destroy(arg0);
     }
 }
 
-void func_150FB2A8(void) {
+/* was func_150FB2A8 */
+void level_cue_switch_on(void) {
     func_1515F170(8, 0);
     func_1515F170(0xB, 1);
     func_151494E0((s32)(D_800D34B8 + 0x514), 0x30);
     func_151494E0(0, 0x4D);
 }
 
-void func_150FB2F8(void) {
+/* was func_150FB2F8 */
+void level_cue_switch_off(void) {
     func_1515F170(8, 1);
     func_1515F170(7, 0);
     func_151494E0((s32)(D_800D34B8 + 0x514), 0x31);
     func_151494E0(0, 0x4C);
 }
 
-void func_150FB348(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_150FB348 */
+void effect_flag2_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 0x53) {
         *(s32 *)(arg0 + 0x58) |= 2;
     } else if (arg2 == 0x54) {
@@ -810,7 +821,8 @@ extern s16 D_800A20F0[]; /* 8 sprite kinds: 0xCE, 0xC5, then 0xC4 */
 // score_banner_spawn: spawns the model effect 0x61 (func_15157580) and a row of 8 sprites (list 0xE, kinds
 // D_800A20F0, x = -65 + 24.75 * i, y = 62, scale 16) for `span`, copying `span` into each new record (+0x120 for the
 // model effect, +0x70 for the sprites). `flag` / `owner` are passed through to both spawners.
-void func_150FB398(s16 span, u8 flag, s32 owner) {
+/* was func_150FB398 */
+void score_banner_spawn(s16 span, u8 flag, s32 owner) {
     ModelFxSpecFB398 fx;
     SpriteSpecFB398 spr;
     s32 rec;
@@ -885,13 +897,14 @@ void func_150FB398(s16 span, u8 flag, s32 owner) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FB398.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/score_banner_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
 void func_1515835C(u8 *arg0, u8 *arg1);
 
-s32 func_150FB708(u8 *arg0) {
+/* was func_150FB708 */
+s32 score_banner_model_update(u8 *arg0) {
     struct {
         f32 u1C;
         f32 u20;
@@ -912,15 +925,17 @@ s32 func_150FB708(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FB708.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/score_banner_model_update.s")
 #endif
 s32 func_151584F0(s32, s32, s32, s32, s32);
 s32 func_151D76BC(s32, s32, s32, s32, s32);
-void func_150FB768(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* was func_150FB768 */
+void banner_sprite_draw(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_151584F0(func_151D76BC(arg0, arg1, arg2, arg3, arg4), arg1, arg2, arg3, arg4);
 }
 
-void func_150FB7C0(u8 *arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4) {
+/* was func_150FB7C0 */
+void fade_alpha_from_timer(u8 *arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4) {
     if ((arg2 - arg3) < arg1) {
         *arg0 = (arg2 - arg1) * arg4;
         return;
@@ -928,18 +943,20 @@ void func_150FB7C0(u8 *arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4) {
     *arg0 = 0xFF;
 }
 
-s32 func_150FB81C(u8 *arg0) {
-    func_150FB7C0(arg0 + 0x43, *(s16 *)(arg0 + 0x16), *(s16 *)(arg0 + 0x120), *(s16 *)(arg0 + 0x64), *(s16 *)(arg0 + 0x66));
+/* was func_150FB81C */
+s32 banner_model_fade_update(u8 *arg0) {
+    fade_alpha_from_timer(arg0 + 0x43, *(s16 *)(arg0 + 0x16), *(s16 *)(arg0 + 0x120), *(s16 *)(arg0 + 0x64), *(s16 *)(arg0 + 0x66));
     return 1;
 }
 
-s32 func_150FB860(u8 *arg0) {
-    func_150FB7C0(arg0 + 0x2E, *(s16 *)(arg0 + 0x22), *(s16 *)(arg0 + 0x70), *(s16 *)(arg0 + 0x26), *(s16 *)(arg0 + 0x28));
+/* was func_150FB860 */
+s32 banner_sprite_fade_update(u8 *arg0) {
+    fade_alpha_from_timer(arg0 + 0x2E, *(s16 *)(arg0 + 0x22), *(s16 *)(arg0 + 0x70), *(s16 *)(arg0 + 0x26), *(s16 *)(arg0 + 0x28));
     return 1;
 }
 
 #ifdef NON_MATCHING
-void func_150FF1A8(s32, u8, s32, s32, s32, u8, s32);
+void bone_point_spark_spray(s32, u8, s32, s32, s32, u8, s32);
 void func_15145EA4(f32 **, f32 **, void *, s32);
 void func_151D49B8(u8 *, u8 *, s32, u8 *, f32, u8, s32);
 extern s32 D_800A2100;
@@ -947,7 +964,8 @@ extern s32 D_800A210C;
 extern s32 D_800A2118;
 extern s32 D_800A2124;
 
-void func_150FB8A4(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150FB8A4 */
+void obj_bone14_spark_burst(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
         s32 * u2C;
         f32 * u30;
@@ -999,10 +1017,10 @@ void func_150FB8A4(u8 *arg0, u8 arg1, s32 arg2) {
         sp.u7C -= sp.u88;
         sp.u80 -= sp.u8C;
         sp.u84 -= sp.u90;
-        func_150FF1A8(arg0, 0xE, &sp.u68, &sp.u5C, &sp.u94, (s32) arg1, arg2);
+        bone_point_spark_spray(arg0, 0xE, &sp.u68, &sp.u5C, &sp.u94, (s32) arg1, arg2);
         func_151D49B8(&sp.u88, &sp.u7C, sp.u78, arg0, 1.0f, (s32) arg1, arg2);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FB8A4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/obj_bone14_spark_burst.s")
 #endif

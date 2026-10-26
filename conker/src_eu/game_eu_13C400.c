@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_1510F800(s32 arg0);
+void collision_select_area(s32 arg0);
 extern u8 *D_800DC278;
-s32 func_151103B0(u8 *arg0);
+s32 zone_tree_leaf_index(u8 *arg0);
 #endif
 
 
@@ -12,7 +12,8 @@ s32 func_151103B0(u8 *arg0);
 void func_150ADD90(u8 *, u8 *, u8 *);
 extern s32 D_800D3720;
 
-s32 func_1510EBF0(s32 arg0) {
+/* was func_1510EBF0 */
+s32 collision_candidate_is_floor(s32 arg0) {
     struct {
         s32 u20;
         s32 u24;
@@ -57,21 +58,24 @@ s32 func_1510EBF0(s32 arg0) {
     return var_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510EBF0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/collision_candidate_is_floor.s")
 #endif
-s32 func_1510EED0(s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, u16, s32, f32, f32, s32);
-void func_1510ED24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD) {
-    func_1510EED0(arg0, arg1, 0, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, 0);
+s32 collision_find_floor_ceiling(s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, u16, s32, f32, f32, s32);
+/* was func_1510ED24 */
+void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD) {
+    collision_find_floor_ceiling(arg0, arg1, 0, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, 0);
 }
 
-s32 func_1510EED0(s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, u16, s32, f32, f32, s32);
-void func_1510EDAC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB) {
-    func_1510EED0(arg0, arg1, 0, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, -10000.0f, 20000.0f, 0);
+s32 collision_find_floor_ceiling(s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, u16, s32, f32, f32, s32);
+/* was func_1510EDAC */
+void collision_find_floor_default_range(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB) {
+    collision_find_floor_ceiling(arg0, arg1, 0, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, -10000.0f, 20000.0f, 0);
 }
 
-s32 func_1510EED0(s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, u16, s32, f32, f32, s32);
-void func_1510EE3C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, s32 argC, s32 argD, s32 argE) {
-    func_1510EED0(arg0, arg1, 0, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, -10000.0f, 20000.0f, argE);
+s32 collision_find_floor_ceiling(s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, u16, s32, f32, f32, s32);
+/* was func_1510EE3C */
+void collision_find_floor_no_fallback(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, s32 argC, s32 argD, s32 argE) {
+    collision_find_floor_ceiling(arg0, arg1, 0, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, -10000.0f, 20000.0f, argE);
 }
 
 #ifdef NON_MATCHING
@@ -79,7 +83,7 @@ void func_1510EE3C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f
  * P53: floor / ceiling lookup under (x, z) = (arg7, arg9) over the 4 collision areas (D_800894C0[area] == 1):
  * 0 / 1 level tree (func_150A3F50), 2 world objects (func_150A6A48 + func_150A49D0 + func_150A48C0), 3 records
  * (func_150A5480). Each area leaves its candidate floors in D_800D3720 (16 bytes: +0 height in 24.8, +4 triangle
- * (3 vertex offsets), +8 vertex base (0 = level), +0xC object / record index); func_1510EBF0(i) says whether
+ * (3 vertex offsets), +8 vertex base (0 = level), +0xC object / record index); collision_candidate_is_floor(i) says whether
  * candidate i is not a floor (a ceiling).
  * Outputs: arg0 = floor triangle, arg1 / arg2 = s16[9] vertices of the floor / object ceiling, arg3 = floor y,
  * arg4 = ceiling y (area 2 objects), arg5 = floor flags, arg6 = floor area; record argC (+0x19E triangle,
@@ -91,7 +95,7 @@ s32 func_150A48C0(s32, s32, s32, s32 *);
 s32 func_150A5480(s32, s32);
 s32 func_150A6A48(s32, s32, s32 *, s32, s32, s32, s32, s32);
 s32 func_150A49D0(s32 count, s32 *idList, s32 force);
-s32 func_1510EBF0(s32 arg0);
+s32 collision_candidate_is_floor(s32 arg0);
 extern s32 D_800D3720;
 extern s32 D_800D3C00;
 extern s32 D_800D3C50;
@@ -112,7 +116,8 @@ extern u8 D_800894C0[];
     ((*(s32 *)((o) + 0x44) != 0) ? *(s32 *)(*(s32 *)((o) + 0x44) + (tri) * 4 - *(u16 *)((o) + 0x58) * 4)             \
                                  : *(s32 *)((o) + 0x40))
 
-s32 func_1510EED0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, f32 arg7, f32 arg8, f32 arg9,
+/* was func_1510EED0 */
+s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, f32 arg7, f32 arg8, f32 arg9,
                   f32 argA, u16 argB, s32 argC, f32 argD, f32 argE, s32 argF) {
     s32 total;   /* sp124 */
     s32 tri;     /* sp114 */
@@ -183,7 +188,7 @@ s32 func_1510EED0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
         z = (s32)arg9;
         i = 0;
         found = 0;
-        func_1510F800(area);
+        collision_select_area(area);
         if (area == 2) {
             objs = func_150A6A48((s16)x, (s16)z, &objList, argB, x, z, (s32)argD, (s32)argE);
             func_150A49D0(objs, &D_800D3C00, 0);
@@ -229,7 +234,7 @@ s32 func_1510EED0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
         }
         for (i = 0; i < n; i++) {
             h = EED0_H(i);
-            if (argF == 0 && noFloor && *(f32 *)arg3 == -10000.0f && func_1510EBF0(i) != 0) {
+            if (argF == 0 && noFloor && *(f32 *)arg3 == -10000.0f && collision_candidate_is_floor(i) != 0) {
                 fbFound = 1;
                 fbIdx = i;
                 fbArea = area;
@@ -250,7 +255,7 @@ s32 func_1510EED0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
             }
             if (hit) {
                 hit = 0;
-                if (func_1510EBF0(i) != 0) {
+                if (collision_candidate_is_floor(i) != 0) {
                     bestArea = area;
                     found = 1;
                     floorY = h;
@@ -311,7 +316,7 @@ s32 func_1510EED0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
             lo = (*(f32 *)arg3 < arg8) ? arg8 : *(f32 *)arg3;
             for (i = 0; i < n; i++) {
                 h = EED0_H(i);
-                if (lo < h && h < ceil && func_1510EBF0(i) == 0) {
+                if (lo < h && h < ceil && collision_candidate_is_floor(i) == 0) {
                     ceil = h;
                     ti = (*(s32 *)(EED0_E(i) + 4) - D_800DC26C) / 12;
                     if (area == 0) {
@@ -372,7 +377,7 @@ s32 func_1510EED0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
     return argC;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510EED0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/collision_find_floor_ceiling.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -382,7 +387,8 @@ s32 func_150A69A8(s32, s32, s32 *, s32);
 extern s32 D_800D3720;
 extern s32 D_800D3C50;
 
-f32 func_1510FBC8(f32 arg0, f32 arg1, f32 arg2) {
+/* was func_1510FBC8 */
+f32 collision_object_floor_height(f32 arg0, f32 arg1, f32 arg2) {
     struct {
         s32 u28;
     } sp;
@@ -392,7 +398,7 @@ f32 func_1510FBC8(f32 arg0, f32 arg1, f32 arg2) {
     s32 temp_f10;
     s32 temp_f6;
 
-    func_1510F800(2);
+    collision_select_area(2);
     temp_f6 = (s32) arg0;
     temp_f10 = (s32) arg2;
     sp20 = temp_f6;
@@ -407,10 +413,11 @@ f32 func_1510FBC8(f32 arg0, f32 arg1, f32 arg2) {
     return var_f2;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510FBC8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/collision_object_floor_height.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1510FCA0(s32 arg0, s32 arg1, s32 arg2, u8 **arg3) {
+/* was func_1510FCA0 */
+s32 zone_tree_collect_near(s32 arg0, s32 arg1, s32 arg2, u8 **arg3) {
     s16 temp_a1_3;
     s16 var_a2_2;
     s32 temp_a1;
@@ -466,19 +473,21 @@ block_10:
     return var_v1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510FCA0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/zone_tree_collect_near.s")
 #endif
-void func_1510F800(s32 arg0) {
+/* was func_1510F800 */
+void collision_select_area(s32 arg0) {
     func_150A4ED4(arg0);
 }
 
-s32 func_1510E908(s32, s32, f32 *, f32 *);
-void func_1510FDA0(s32 arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, f32 *arg5, f32 *arg6)
+s32 floor_triangle_slope(s32, s32, f32 *, f32 *);
+/* was func_1510FDA0 */
+void floor_slope_direction(s32 arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, f32 *arg5, f32 *arg6)
 {
   f32 sp24;
   f32 sp20;
   f32 temp_f2;
-  func_1510E908(arg0, arg1, &sp24, &sp20);
+  floor_triangle_slope(arg0, arg1, &sp24, &sp20);
   temp_f2 = sqrtf((sp24 * sp24) + (sp20 * sp20));
   *arg5 = sp24;
   *arg6 = sp20;
@@ -492,7 +501,8 @@ void func_1510FDA0(s32 arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, f32 *arg5
   *arg3 = sp20 / temp_f2;
 }
 
-s32 func_1510FE4C(s32 arg0) {
+/* was func_1510FE4C */
+s32 floor_flags_surface_type(s32 arg0) {
     return arg0 & 0x1F;
 }
 
@@ -500,7 +510,8 @@ s32 func_1510FE4C(s32 arg0) {
 s32 func_150A3F50(s32, s32);
 extern s32 D_800D3720;
 
-s32 func_1510FE58(s32 arg0, s32 arg1, s32 arg2, s32 *arg3) {
+/* was func_1510FE58 */
+s32 collision_level_nearest_height(s32 arg0, s32 arg1, s32 arg2, s32 *arg3) {
     f32 temp_f0;
     f32 temp_f0_2;
     f32 temp_f0_3;
@@ -514,7 +525,7 @@ s32 func_1510FE58(s32 arg0, s32 arg1, s32 arg2, s32 *arg3) {
     s32 var_v1;
     u8 *var_v0;
 
-    func_1510F800(0);
+    collision_select_area(0);
     temp_v0 = func_150A3F50(arg0, arg2);
     if (temp_v0 == 0) {
         return -0x2710;
@@ -570,11 +581,11 @@ block_13:
     return (s32) ((f32) *(s32 *)((u8 *)&D_800D3720 + (var_a0 * 0x10)) * 0.00390625f);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510FE58.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/collision_level_nearest_height.s")
 #endif
 #ifdef NON_MATCHING
 void func_150A6C40(s32);
-void func_150F3978(s32);
+void camera_zone_flag_update(s32);
 extern s32 D_800DC1F0;
 extern s32 D_800DC1F4;
 extern s32 D_800DC1F8;
@@ -582,7 +593,8 @@ extern f32 D_800DC1FC;
 extern f32 D_800DC200;
 extern s32 D_800DC260;
 
-void func_151101B4(s32 arg0) {
+/* was func_151101B4 */
+void player_zone_update(s32 arg0) {
     s16 *temp_v1;
     s32 temp_f10;
     s32 temp_f6;
@@ -596,9 +608,9 @@ void func_151101B4(s32 arg0) {
     temp_f10 = (s32) temp_v0->unk300;
     D_800DC1FC = (f32) temp_f6;
     D_800DC200 = (f32) temp_f10;
-    temp_v0_2 = func_1510FD20(temp_f6, temp_f10);
+    temp_v0_2 = zone_tree_find_leaf(temp_f6, temp_f10);
     D_800DC1F8 = temp_v0_2;
-    temp_v0_3 = func_151103B0((u8 *) temp_v0_2);
+    temp_v0_3 = zone_tree_leaf_index((u8 *) temp_v0_2);
     D_800DC1F4 = temp_v0_3;
     temp_v1 = ((s32 *)((u8 *)&D_800DC260 + (arg0 * 2)));
     if (temp_v0_3 != *temp_v1) {
@@ -606,14 +618,15 @@ void func_151101B4(s32 arg0) {
         func_150A6C40(arg0);
     }
     if (D_800BE9F0 == 0x3C) {
-        func_150F3978(arg0);
+        camera_zone_flag_update(arg0);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_151101B4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/player_zone_update.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1510FD20(s32 arg0, s32 arg1) {
+/* was func_1510FD20 */
+s32 zone_tree_find_leaf(s32 arg0, s32 arg1) {
     s16 temp_v0;
     s16 temp_v0_2;
     s16 temp_v0_3;
@@ -698,10 +711,11 @@ block_22:
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510FD20.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/zone_tree_find_leaf.s")
 #endif
 extern u8 *D_800DC278;
-s32 func_151103B0(u8 *arg0) {
+/* was func_151103B0 */
+s32 zone_tree_leaf_index(u8 *arg0) {
     s32 count = 0;
     u8 *p = D_800DC278;
 

@@ -4,7 +4,7 @@
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_150A28C4(u8 *arg0);
 s32 func_150A2280(struct127 *arg0, u8 *arg1, s32 arg2);
-s32 func_150AD9A0(s32, s32, s32);
+s32 approx_dist3_int(s32, s32, s32);
 s32 func_151733EC(struct127 *, u8, s32);
 void func_150A2AB4(u8 *, struct127 *, s32, u64);
 void func_150A29A0();
@@ -184,7 +184,7 @@ void func_150A126C(void) {
                             if ((*(u8 *)((u8 *)temp_s0_2 + 0x17)) == 0) {
                                 temp_s0_3 = &D_800D34B8[var_s4];
                                 temp_v1 = (*(s16 *)((u8 *)temp_s0_3 + 6));
-                                if (func_150AD9A0((s16) (s32) (var_s1->x_position - (f32) (*(s16 *)((u8 *)temp_s0_2 + 0))), (s16) (s32) (var_s1->y_position - (f32) (*(s16 *)((u8 *)temp_s0_2 + 2))), (s16) (s32) (var_s1->z_position - (f32) (*(s16 *)((u8 *)temp_s0_2 + 4)))) < temp_v1) {
+                                if (approx_dist3_int((s16) (s32) (var_s1->x_position - (f32) (*(s16 *)((u8 *)temp_s0_2 + 0))), (s16) (s32) (var_s1->y_position - (f32) (*(s16 *)((u8 *)temp_s0_2 + 2))), (s16) (s32) (var_s1->z_position - (f32) (*(s16 *)((u8 *)temp_s0_2 + 4)))) < temp_v1) {
                                     temp_f2 = (f32) temp_v1;
                                     var_f0 = temp_f2 * D_8009F978;
                                     if (var_f0 > 100.0f) {
@@ -400,7 +400,7 @@ void func_150A16A4(struct127 *arg0) {
                     switch (v) {
                     case 0:
                         if (spB8 != NULL && e[0x17] != 0xC) {
-                            func_1512DAD0(spB8, 1, D_800D34B8 + off);
+                            camera_queue_event(spB8, 1, D_800D34B8 + off);
                             *(u16 *)((u8 *)spB8 + 0x700) = i;
                         }
                         break;
@@ -552,7 +552,7 @@ void func_150A16A4(struct127 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A16A4.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_150AD9A0(s32, s32, s32);
+s32 approx_dist3_int(s32, s32, s32);
 s32 func_150ADE40(s16, s16, s32, s32);
 
 s32 func_150A2280(struct127 *arg0, u8 *arg1, s32 arg2) {
@@ -650,7 +650,7 @@ s32 func_150A2280(struct127 *arg0, u8 *arg1, s32 arg2) {
             goto block_35;
         case 1:
             sp58 = var_t0;
-            if (func_150AD9A0(sp5E, sp5C, sp5A) < ((*(s16 *)((u8 *)arg1 + 6)) + var_t0)) {
+            if (approx_dist3_int(sp5E, sp5C, sp5A) < ((*(s16 *)((u8 *)arg1 + 6)) + var_t0)) {
                 return 0;
             }
             goto block_35;
@@ -792,7 +792,7 @@ void func_150A29A0(Unk34B8 *arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-void func_150E6E30(struct127 *, s32, u8 *, u8);
+void arc_spark_spawn(struct127 *, s32, u8 *, u8);
 void func_151CEACC(struct127 *, u8 *);
 extern u8 D_800D34B0;
 extern s32 D_800DA2D8;
@@ -807,7 +807,7 @@ void func_150A2AB4(u8 *arg0, struct127 *arg1, s32 arg2, u64 arg4) { // P45: was 
     switch (temp_t6) {
     case 1:
         if (arg2 != 0xFF) {
-            func_150E7810(arg2, 0xFF, 0);
+            screen_lightning_random_flash(arg2, 0xFF, 0);
             return;
         }
     default:
@@ -823,7 +823,7 @@ void func_150A2AB4(u8 *arg0, struct127 *arg1, s32 arg2, u64 arg4) { // P45: was 
         break;
     case 3:
         if (arg2 != 0xFF) {
-            func_150E6E30(arg1, arg2, arg0, (*(u8 *)((u8 *)arg0 + 0x1B)));
+            arc_spark_spawn(arg1, arg2, arg0, (*(u8 *)((u8 *)arg0 + 0x1B)));
             return;
         }
         break;

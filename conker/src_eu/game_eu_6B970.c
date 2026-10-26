@@ -247,7 +247,7 @@ void func_1503E6B4(s32 i, s32 piece, s32 jointOffset, u8 *pc, s32 detached) {
 f32 func_150AD930(f32 *arg0);
 void func_150ADD90(u8 *, u8 *, u8 *);
 f32 func_150ADDE0(f32 *a, f32 *b);
-f32 func_150487E0(f32 arg0);
+f32 math_asin_scaled(f32 arg0);
 f32 func_150AD780(f32);
 f32 func_150484A0(f32 arg0, f32 arg1);
 
@@ -255,7 +255,7 @@ f32 func_150484A0(f32 arg0, f32 arg1);
  * P74: decomposes the f32 4x4 matrix m into translation (*x, *y, *z = row 3), Euler angles in degrees
  * (*rx, *ry, *rz) and scale (*sx, *sy, *sz = lengths of rows 0..2, a zero length counted as 1e-4). The rows are
  * normalised; when row 0 points against row 1 x row 2 (a mirrored matrix) the scale and the rows are negated.
- * ry = asin(-m[0][2]) (func_150487E0); with cos(ry) != 0: rx = atan2(m[1][2], m[2][2]), rz = atan2(m[0][1], m[0][0]);
+ * ry = asin(-m[0][2]) (math_asin_scaled); with cos(ry) != 0: rx = atan2(m[1][2], m[2][2]), rz = atan2(m[0][1], m[0][0]);
  * otherwise (gimbal lock) rx = atan2(m[1][0], m[1][1]), rz = 0 (func_150484A0 / func_150AD780).
  */
 void func_1503E5F8(f32 *m, f32 *x, f32 *y, f32 *z, f32 *rx, f32 *ry, f32 *rz, f32 *sx, f32 *sy, f32 *sz) {
@@ -284,7 +284,7 @@ void func_1503E5F8(f32 *m, f32 *x, f32 *y, f32 *z, f32 *rx, f32 *ry, f32 *rz, f3
         } else {
             *sz = len;
         }
-        func_15049148((struct17 *) mat[r], 1.0f / len, (struct17 *) mat[r]);
+        vec3_scale((struct17 *) mat[r], 1.0f / len, (struct17 *) mat[r]);
     }
     func_150ADD90((u8 *) mat[1], (u8 *) mat[2], (u8 *) cross);
     if (func_150ADDE0(mat[0], cross) < 0.0f) {
@@ -297,7 +297,7 @@ void func_1503E5F8(f32 *m, f32 *x, f32 *y, f32 *z, f32 *rx, f32 *ry, f32 *rz, f3
             }
         }
     }
-    ay = func_150487E0(-mat[0][2]);
+    ay = math_asin_scaled(-mat[0][2]);
     if (func_150AD780(ay) != 0.0f) {
         ax = func_150484A0(mat[1][2], mat[2][2]);
         az = func_150484A0(mat[0][1], mat[0][0]);
@@ -316,15 +316,15 @@ void func_1503E5F8(f32 *m, f32 *x, f32 *y, f32 *z, f32 *rx, f32 *ry, f32 *rz, f3
 #ifdef NON_MATCHING
 extern s8 *D_800847E4[];
 extern u8 D_80098CC4[];
-void func_150A7DA0(u8 *, s32, s32, s32);
+void mtxf_translate(u8 *, s32, s32, s32);
 void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 
 /*
  * P74: matrices of slot i's breakable pieces into object i's joint matrices (unk1D4, one f32 4x4 per piece).
  * Pieces marked -2 in D_800847E4[kind] and inactive pieces (+0x64 == 0) are skipped. A free piece (-1) gets
- * rotation (+0x30..+0x38) then scale (+0x3C..+0x44) and translation (+0x24..+0x2C) by func_15043EC8. A piece attached
+ * rotation (+0x30..+0x38) then scale (+0x3C..+0x44) and translation (+0x24..+0x2C) by mtxf_scale_set_trans. A piece attached
  * to piece `parent` gets translate(+0x24..) * parent's matrix, then its rotation, times that, then scale
- * (func_150A7CB0) times the result. The translate / scale helpers take the floats as bit patterns.
+ * (mtxf_scale) times the result. The translate / scale helpers take the floats as bit patterns.
  */
 void func_1503EB1C(s32 i) {
     struct127 *obj = &D_800CC2D0[i];
@@ -354,18 +354,18 @@ void func_1503EB1C(s32 i) {
         parent = D_800847E4[(u8) rec->pad[2]][k];
         m = (f32 (*)[4]) ((u8 *) obj->unk1D4 + k * 0x40);
         if (parent != -1) {
-            func_150A7DA0((u8 *) tmp, *(s32 *) (pc + 0x24), *(s32 *) (pc + 0x28), *(s32 *) (pc + 0x2C));
+            mtxf_translate((u8 *) tmp, *(s32 *) (pc + 0x24), *(s32 *) (pc + 0x28), *(s32 *) (pc + 0x2C));
             func_150A7A48(tmp, (f32 (*)[4]) ((u8 *) obj->unk1D4 + parent * 0x40), tmp);
             pc = (u8 *) rec->unk0 + k * 0x68;
-            func_150A8050(m, *(f32 *) (pc + 0x30), *(f32 *) (pc + 0x34), *(f32 *) (pc + 0x38));
+            mtxf_rotate_xyz_deg(m, *(f32 *) (pc + 0x30), *(f32 *) (pc + 0x34), *(f32 *) (pc + 0x38));
             func_150A7A48(m, tmp, m);
             pc = (u8 *) rec->unk0 + k * 0x68;
-            func_150A7CB0(tmp, *(s32 *) (pc + 0x3C), *(s32 *) (pc + 0x40), *(s32 *) (pc + 0x44));
+            mtxf_scale(tmp, *(s32 *) (pc + 0x3C), *(s32 *) (pc + 0x40), *(s32 *) (pc + 0x44));
             func_150A7A48(tmp, m, m);
         } else {
-            func_150A8050(m, *(f32 *) (pc + 0x30), *(f32 *) (pc + 0x34), *(f32 *) (pc + 0x38));
+            mtxf_rotate_xyz_deg(m, *(f32 *) (pc + 0x30), *(f32 *) (pc + 0x34), *(f32 *) (pc + 0x38));
             pc = (u8 *) rec->unk0 + k * 0x68;
-            func_15043EC8(m, *(f32 *) (pc + 0x3C), *(f32 *) (pc + 0x40), *(f32 *) (pc + 0x44),
+            mtxf_scale_set_trans(m, *(f32 *) (pc + 0x3C), *(f32 *) (pc + 0x40), *(f32 *) (pc + 0x44),
                           *(f32 *) (pc + 0x24), *(f32 *) (pc + 0x28), *(f32 *) (pc + 0x2C));
         }
     }
@@ -446,14 +446,14 @@ void func_1503EE68(s32 arg0, f32 arg1, f32 arg2, s32 arg3) {
         temp_f18 = (*(f32 *)((u8 *)var_s0 + 0x48));
         var_s1 = (f32 *)((u8 *)var_s1 + (4));
         var_s0 += 4;
-        (*(f32 *)((u8 *)var_s0 + 0x44)) = (f32) (temp_f18 * (((f32) (s32) ((func_150ADA20() & var_s3) + var_s4) * temp_f8) + 2.0f));
+        (*(f32 *)((u8 *)var_s0 + 0x44)) = (f32) (temp_f18 * (((f32) (s32) ((random_int() & var_s3) + var_s4) * temp_f8) + 2.0f));
     } while ((u32) var_s1 < (u32) &sp.u5C);
     var_s2 = 0;
     var_s0_2 = arg0;
     do {
         var_s2 += 1;
         var_s0_2 += 4;
-        (*(f32 *)((u8 *)var_s0_2 + 0x50)) = (f32) ((f32) (s32) ((func_150ADA20() & 0xFF) - 0x80) * 0.03125f);
+        (*(f32 *)((u8 *)var_s0_2 + 0x50)) = (f32) ((f32) (s32) ((random_int() & 0xFF) - 0x80) * 0.03125f);
     } while (var_s2 != 3);
     *(f32 *)((u8 *)arg0 + 0x60) = D_80098CD4;
 }
@@ -463,13 +463,13 @@ void func_1503EE68(s32 arg0, f32 arg1, f32 arg2, s32 arg3) {
 #ifdef NON_MATCHING
 extern s8 *D_800847E4[];
 extern u8 D_80098CC4[];
-void func_1510F800(s32);
-s32 func_1510FE58(s32, s32, s32, s32 *);
+void collision_select_area(s32);
+s32 collision_level_nearest_height(s32, s32, s32, s32 *);
 
 /*
- * P74: ground collision of slot i's free breakable pieces (see func_1503ED44): after func_1510F800(0), every active,
+ * P74: ground collision of slot i's free breakable pieces (see func_1503ED44): after collision_select_area(0), every active,
  * unattached piece with a non-zero gravity (+0x60) that has fallen below the floor height under it
- * (func_1510FE58 + 5) is put on the floor; when it hit fast (y rate +0x4C < -4) it bounces (x / z rates * 0.8,
+ * (collision_level_nearest_height + 5) is put on the floor; when it hit fast (y rate +0x4C < -4) it bounces (x / z rates * 0.8,
  * y rate * -0.5, spins +0x54 / +0x5C reversed, +0x58 * 0.4), otherwise it comes to rest (all rates and the gravity 0).
  */
 void func_1503EF90(s32 i) {
@@ -479,7 +479,7 @@ void func_1503EF90(s32 i) {
     u8 *pc;
     f32 floor;
 
-    func_1510F800(0);
+    collision_select_area(0);
     rec = &D_800C6660[i];
     n = D_80098CC4[(u8) rec->pad[2]];
     for (k = 0; k < n; k++) {
@@ -490,7 +490,7 @@ void func_1503EF90(s32 i) {
         if (*(f32 *) (pc + 0x60) == 0.0f) {
             continue;
         }
-        floor = func_1510FE58((s32) *(f32 *) (pc + 0x24), (s32) *(f32 *) (pc + 0x28), (s32) *(f32 *) (pc + 0x2C), NULL) + 5;
+        floor = collision_level_nearest_height((s32) *(f32 *) (pc + 0x24), (s32) *(f32 *) (pc + 0x28), (s32) *(f32 *) (pc + 0x2C), NULL) + 5;
         if (!(*(f32 *) (pc + 0x28) < floor)) {
             continue;
         }
@@ -531,7 +531,7 @@ void func_1503F1B0(s32 arg0) {
     temp_v0 = temp_v0 - D_800BE9E4; // fakematch: split load/subtract (permuter) gives the ref register order
     (*(s16 *)((u8 *)temp_v1 + 0xC)) = temp_v0;
     if (temp_v0 <= 0) {
-        func_15060F28(&D_800CC2D0[arg0], 1);
+        obj_remove(&D_800CC2D0[arg0], 1);
     }
 }
 
@@ -569,7 +569,7 @@ void func_1503F2B4(s32 arg0) {
     *(s16 *)&p->pad[0] = 0x78;
     n = D_80098CC4[(u8)p->pad[2]];
     for (i = 0; i < n; i++) {
-        *(f32 *)(p->unk0 + i * 0x68 + 0x4C) = (s32)(func_150ADA20() % 20U) - 5;
+        *(f32 *)(p->unk0 + i * 0x68 + 0x4C) = (s32)(random_int() % 20U) - 5;
     }
 }
 

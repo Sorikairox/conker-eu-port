@@ -8,7 +8,7 @@
 #ifdef NON_MATCHING
 // particle_emitter_spawn: spawns a particle record from the spawn block (type byte 1 = 3, flags 0x40400000 set
 // first) through effect3d_spawn_default, copies the emitter block (emitSize bytes) to rec + 0x110, clears its word +0x44,
-// stores arg7 at +0x59 and counts the record in D_800DCE20. Returns the record or NULL. func_150113E0 passes
+// stores arg7 at +0x59 and counts the record in D_800DCE20. Returns the record or NULL. level_fire_emitters_create passes
 // (emit, 0x7C, spawn, 0, 0x20, 0, 0, -1, 0xFF, 1).
 /* was func_151407D0 */
 struct210 *particle_emitter_spawn(void *emit, s32 emitSize, u8 *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
@@ -317,16 +317,16 @@ s32 effect_flicker_update(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x180)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x180)) - D_800BE9A4);
     if ((*(f32 *)((u8 *)arg0 + 0x180)) < 0.0f) {
         temp_v1 = arg0 + 0x170;
-        (*(f32 *)((u8 *)temp_v1 + 0x10)) = (f32) (func_150ADA68() * (*(f32 *)((u8 *)temp_v1 + 0x14)));
+        (*(f32 *)((u8 *)temp_v1 + 0x10)) = (f32) (random_float() * (*(f32 *)((u8 *)temp_v1 + 0x14)));
         sp24 = temp_v1;
-        if (func_150ADA20() & 3) {
+        if (random_int() & 3) {
             sp24 = temp_v1;
             temp_f2 = (*(f32 *)((u8 *)temp_v1 + 4));
-            (*(f32 *)((u8 *)temp_v1 + 0xC)) = (f32) ((func_150ADA68() * ((*(f32 *)((u8 *)temp_v1 + 0)) - temp_f2)) + temp_f2);
+            (*(f32 *)((u8 *)temp_v1 + 0xC)) = (f32) ((random_float() * ((*(f32 *)((u8 *)temp_v1 + 0)) - temp_f2)) + temp_f2);
         } else {
             sp24 = temp_v1;
             temp_f2_2 = (*(f32 *)((u8 *)temp_v1 + 0));
-            (*(f32 *)((u8 *)temp_v1 + 0xC)) = (f32) ((func_150ADA68() * ((*(f32 *)((u8 *)temp_v1 + 8)) - temp_f2_2)) + temp_f2_2);
+            (*(f32 *)((u8 *)temp_v1 + 0xC)) = (f32) ((random_float() * ((*(f32 *)((u8 *)temp_v1 + 8)) - temp_f2_2)) + temp_f2_2);
         }
     }
     temp_a0 = arg0 + 0x110;
@@ -439,7 +439,7 @@ void effect_set_orbit_pos(structEU_16DC80 *arg0, void *arg1, s32 arg2, s32 arg3,
     f32 x;
     f32 mf[4][4];
 
-    func_150A8050(mf, arg4, 0.0f, arg5);
+    mtxf_rotate_xyz_deg(mf, arg4, 0.0f, arg5);
     mf[3][0] = ((f32 *)arg1)[0];
     mf[3][1] = ((f32 *)arg1)[1];
     mf[3][2] = ((f32 *)arg1)[2];
@@ -460,7 +460,7 @@ void effect_set_orbit_pos(structEU_16DC80 *arg0, void *arg1, s32 arg2, s32 arg3,
 //     f32 temp_f12;
 //     f32 temp_f2;
 //
-//     func_150A8050(&sp34, arg4, 0, arg5);
+//     mtxf_rotate_xyz_deg(&sp34, arg4, 0, arg5);
 //     sp64 = arg1->unk0;
 //     sp68 = arg1->unk4;
 //     sp6C = arg1->unk8;

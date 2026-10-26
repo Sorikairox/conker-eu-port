@@ -55,20 +55,23 @@ f32 D_80099010 = 65535.0;
 f32 D_80099014 = 1.5707963705062866;
 #endif
 
-f32 func_150487E0(f32 arg0) {
+/* was func_150487E0 */
+f32 math_asin_scaled(f32 arg0) {
     f32 temp_f14 = (D_80098E00[(s32)(fabsf(arg0) * D_80099000)] * D_80099004) / 65536.0f;
 
     return (arg0 < 0.0f) ? -temp_f14 : temp_f14;
 }
 
-f32 func_15048864(f32 arg0) {
+/* was func_15048864 */
+f32 math_asin_u8(f32 arg0) {
     f32 temp_f14 = (s32)(D_80098E00[(s32)(fabsf(arg0) * D_80099008)]) >> 0xA;
 
     return (arg0 < 0.0f) ? (255.0f - temp_f14) : temp_f14;
 }
 
 #ifdef NON_MATCHING
-f32 func_150488C8(f32 arg0) {
+/* was func_150488C8 */
+f32 math_asinf_table(f32 arg0) {
     f32 temp_f16;
     f32 temp_f2;
     f32 var_f0;
@@ -102,10 +105,10 @@ f32 func_150488C8(f32 arg0) {
     return temp_f16;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_75C90/func_150488C8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_75C90/math_asinf_table.s")
 #endif
 // NON-MATCHING: needs more work
-// f32 func_150488C8(f32 arg0) {
+// f32 math_asinf_table(f32 arg0) {
 //     f32 temp_f16;
 //     f32 temp_f2;
 //     s32 index;

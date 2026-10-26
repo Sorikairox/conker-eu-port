@@ -78,9 +78,9 @@ void func_150CD3C0(SparkIn_D3C0 *in, u8 room, u8 group) {
     s.pos[0] = in->pos[0];
     s.pos[1] = in->pos[1];
     s.pos[2] = in->pos[2];
-    s.rot[0] = func_150ADA68() * 360.0f;
-    s.rot[1] = func_150ADA68() * 360.0f;
-    s.rot[2] = func_150ADA68() * 360.0f;
+    s.rot[0] = random_float() * 360.0f;
+    s.rot[1] = random_float() * 360.0f;
+    s.rot[2] = random_float() * 360.0f;
     s.w40 = 0xC03E1;
     s.u34[0] = 0.0f;
     s.u34[1] = 0.0f;
@@ -95,15 +95,15 @@ void func_150CD3C0(SparkIn_D3C0 *in, u8 room, u8 group) {
     x.z = in->z;
     x.a = in->a;
     x.b = in->b;
-    x.spin[0] = (func_150ADA68() * 20000.0f - 10000.0f) * 0.001f;
-    x.spin[1] = (func_150ADA68() * 20000.0f - 10000.0f) * 0.001f;
+    x.spin[0] = (random_float() * 20000.0f - 10000.0f) * 0.001f;
+    x.spin[1] = (random_float() * 20000.0f - 10000.0f) * 0.001f;
     x.u24 = 0.0f;
-    x.spin[2] = (func_150ADA68() * 20000.0f - 10000.0f) * 0.001f;
-    x.u28 = (func_150ADA68() * 206.0f + 58.0f) * 0.001f;
+    x.spin[2] = (random_float() * 20000.0f - 10000.0f) * 0.001f;
+    x.u28 = (random_float() * 206.0f + 58.0f) * 0.001f;
     x.u30 = 0.0f;
-    x.u2C = func_150ADA68() * 360.0f;
-    x.u34 = func_150ADA68() * 1210.0f * 0.0001f;
-    x.u38 = (func_150ADA68() * 12960.0f + 15241.0f) * 0.0001f;
+    x.u2C = random_float() * 360.0f;
+    x.u34 = random_float() * 1210.0f * 0.0001f;
+    x.u38 = (random_float() * 12960.0f + 15241.0f) * 0.0001f;
     rec = (u8 *) effect3d_spawn_default((s32) &s, 0x13, 0x1E, 0, 0x11, 0, 0x40, room, group);
     if (rec != NULL) {
         memcpy(rec + 0x110, &x, sizeof(x));
@@ -279,7 +279,7 @@ void *memcpy(void *, const void *, s32);
 // Gets 0x40 bytes of vertices for the view slot from the record's buffers at +0x100 (func_151D6310; on a fresh
 // buffer the matrix at +0xC0 is copied into both halves of it) and returns them (NULL when none). The four corners
 // (+/- half width +0x2C, +/- half height +0x30, z 0) are rotated by the angles +0x40 / +0x44 / +0x48
-// (func_150A8050 / func_150A7E40) and stored as s16 x, y, z with flag 0. (The asm also sums the position +0x34 and,
+// (mtxf_rotate_xyz_deg / func_150A7E40) and stored as s16 x, y, z with flag 0. (The asm also sums the position +0x34 and,
 // when +0x114 < 0, the offset +0x4C into a stack vector it never reads; that dead code is left out.)
 s16 *func_150CDAAC(u8 *arg0, s16 arg1) {
     s16 *vtx;
@@ -312,7 +312,7 @@ s16 *func_150CDAAC(u8 *arg0, s16 arg1) {
     p[3][0] = *(f32 *) (arg0 + 0x2C);
     p[3][1] = -*(f32 *) (arg0 + 0x30);
     p[3][2] = 0.0f;
-    func_150A8050(mtx, *(f32 *) (arg0 + 0x40), *(f32 *) (arg0 + 0x44), *(f32 *) (arg0 + 0x48));
+    mtxf_rotate_xyz_deg(mtx, *(f32 *) (arg0 + 0x40), *(f32 *) (arg0 + 0x44), *(f32 *) (arg0 + 0x48));
     for (i = 0; i < 4; i++) {
         func_150A7E40(mtx, p[i][0], p[i][1], 0.0f, &p[i][0], &p[i][1], &p[i][2]);
         vtx[0] = (s32) p[i][0];
@@ -387,8 +387,8 @@ void func_150CDD08(u8 *obj) {
         lanes[2] = D_80088C14[2];
         lanes[3] = D_80088C14[3];
         lanes[4] = D_80088C14[4];
-        k = (u32) func_150ADA20() % 5;
-        ang = func_150ADA68() * D_800A0B40 + lanes[k];
+        k = (u32) random_int() % 5;
+        ang = random_float() * D_800A0B40 + lanes[k];
         h = *(f32 *) ((u8 *) D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x380) - 180.0f;
         while (360.0f < h) {
             h -= 360.0f;
@@ -397,7 +397,7 @@ void func_150CDD08(u8 *obj) {
             h += 360.0f;
         }
         if (fabsf(ang - h * D_800A0B44) < D_800A0B48) {
-            r = func_150ADA68();
+            r = random_float();
             spr.y = r * D_800A0B4C + D_800A0B50 + 500.0f;
             func_1514373C(ang, (f32) (r * D_800A0B38 + D_800A0B30), &spr.x, &spr.z);
             spr.type = 0xF;

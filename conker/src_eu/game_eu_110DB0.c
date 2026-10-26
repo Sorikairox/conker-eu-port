@@ -2,12 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_150E35A0(s32, s32, s32, s32, s32, s32, s32, f32, s32, f32, f32, f32, s32, s16);
+s32 zap_bolt_spawn(s32, s32, s32, s32, s32, s32, s32, f32, s32, f32, f32, f32, s32, s16);
 
 
 #ifdef NON_MATCHING
 extern f32 D_800A1400;
-s32 func_150E35A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, f32 arg7, s32 arg8, f32 arg9, f32 argA, f32 argB, s32 argC, s16 argD) {
+/* was func_150E35A0 */
+s32 zap_bolt_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, f32 arg7, s32 arg8, f32 arg9, f32 argA, f32 argB, s32 argC, s16 argD) {
     f32 temp_f0;
     s32 *var_v1;
     s8 var_a1;
@@ -69,24 +70,26 @@ loop_3:
     return (s32) temp_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E35A0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/zap_bolt_spawn.s")
 #endif
-s32 func_150AD9A0(s32, s32, s32);
+s32 approx_dist3_int(s32, s32, s32);
 
-s32 func_150E3788(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+/* was func_150E3788 */
+s32 zap_bolt_spawn_between(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
     s32 temp_v0;
 
-    temp_v0 = func_150E35A0(arg0, arg1, arg2, arg3, arg4, arg5, arg6, (f32) func_150AD9A0(arg0 - arg3, arg1 - arg4, arg2 - arg5) / (f32) arg7, 0, 0.0f, 0.0f, 0.0f, 0, -0x63);
+    temp_v0 = zap_bolt_spawn(arg0, arg1, arg2, arg3, arg4, arg5, arg6, (f32) approx_dist3_int(arg0 - arg3, arg1 - arg4, arg2 - arg5) / (f32) arg7, 0, 0.0f, 0.0f, 0.0f, 0, -0x63);
     if (temp_v0 != 0) {
         return (*(u8 *)((u8 *)temp_v0 + 0x48)) + 1;
     }
     return 0;
 }
 
-s32 func_150E3850(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, f32 arg5) {
+/* was func_150E3850 */
+s32 zap_bolt_spawn_follow(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, f32 arg5) {
     s32 temp_v0;
 
-    temp_v0 = func_150E35A0(arg0, arg1, arg2, 0, 0, 0, arg4, arg5, arg3, 0.0f, 0.0f, 0.0f, 0, -0x63);
+    temp_v0 = zap_bolt_spawn(arg0, arg1, arg2, 0, 0, 0, arg4, arg5, arg3, 0.0f, 0.0f, 0.0f, 0, -0x63);
     if (temp_v0 != 0) {
         return (*(u8 *)((u8 *)temp_v0 + 0x48)) + 1;
     }
@@ -94,7 +97,8 @@ s32 func_150E3850(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, f32 arg5) {
 }
 
 
-void func_150E38C0(u8 *arg0, u8 *arg1, s32 arg2, s16 arg3) {
+/* was func_150E38C0 */
+void zap_bolt_spawn_path(u8 *arg0, u8 *arg1, s32 arg2, s16 arg3) {
     s32 temp_a0;
     s32 temp_a1;
     s32 temp_a2;
@@ -102,16 +106,17 @@ void func_150E38C0(u8 *arg0, u8 *arg1, s32 arg2, s16 arg3) {
     temp_a0 = (*(s32 *)arg1);
     temp_a1 = (*(s32 *)((u8 *)arg1 + 4));
     temp_a2 = (*(s32 *)((u8 *)arg1 + 8));
-    func_150E35A0(temp_a0, temp_a1, temp_a2, temp_a0, temp_a1, temp_a2, 0x1A, 10.0f, 0, (*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(f32 *)((u8 *)arg0 + 8)), arg2, (s32) arg3);
+    zap_bolt_spawn(temp_a0, temp_a1, temp_a2, temp_a0, temp_a1, temp_a2, 0x1A, 10.0f, 0, (*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(f32 *)((u8 *)arg0 + 8)), arg2, (s32) arg3);
 }
 
 #ifdef NON_MATCHING
 void func_1000E7A0(u32, s32);
 /*
- * sound_handle_release_cb: P190. Callback that func_150E3994 passes to func_1000FA64: 1 while the handle *handle is
+ * sound_handle_release_cb: P190. Callback that zap_bolt_spawn_with_sound passes to func_1000FA64: 1 while the handle *handle is
  * 0, else releases it (func_1000E7A0(2, handle)) and returns 0.
  */
-s32 func_150E394C(s32 arg0, s32 arg1, s32 *handle, s32 arg3) {
+/* was func_150E394C */
+s32 zap_sound_release_cb(s32 arg0, s32 arg1, s32 *handle, s32 arg3) {
     if (*handle == 0) {
         return 1;
     }
@@ -119,25 +124,27 @@ s32 func_150E394C(s32 arg0, s32 arg1, s32 *handle, s32 arg3) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E394C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/zap_sound_release_cb.s")
 
-extern s32 func_150E394C;
+extern s32 zap_sound_release_cb;
 #endif
 
-s32 func_150E3994(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8) {
+/* was func_150E3994 */
+s32 zap_bolt_spawn_with_sound(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8) {
     s32 temp_v0;
     s32 sp44;
 
-    temp_v0 = func_150E35A0(arg3, arg4, arg5, 0, 0, 0, arg7, arg8, arg6, (f32) arg0, (f32) arg1, (f32) arg2, 0, -0x63);
+    temp_v0 = zap_bolt_spawn(arg3, arg4, arg5, 0, 0, 0, arg7, arg8, arg6, (f32) arg0, (f32) arg1, (f32) arg2, 0, -0x63);
     if (temp_v0 != 0) {
         sp44 = temp_v0;
-        (*(u16 *)((u8 *)sp44 + 0x4A)) = func_1000FA64(0x2D0U, (s16) arg0, (s16) arg1, (s16) arg2, 0x5DC0, 0x1770U, 0x3E8, (s32) &func_150E394C, NULL, 0, 0, 0);
+        (*(u16 *)((u8 *)sp44 + 0x4A)) = func_1000FA64(0x2D0U, (s16) arg0, (s16) arg1, (s16) arg2, 0x5DC0, 0x1770U, 0x3E8, (s32) &zap_sound_release_cb, NULL, 0, 0, 0);
         return (*(u8 *)((u8 *)sp44 + 0x48)) + 1;
     }
     return 0;
 }
 
-void func_150E3A94(struct102 *arg0) {
+/* was func_150E3A94 */
+void zap_bolt_free(struct102 *arg0) {
     s32 idx;
     s32 *p;
 
@@ -156,7 +163,8 @@ void func_150E3A94(struct102 *arg0) {
     node_destroy(arg0);
 }
 
-void func_150E3B5C(s32 arg0) {
+/* was func_150E3B5C */
+void zap_bolt_free_slot(s32 arg0) {
     s32 i;
     arg0 = arg0 - 1;
     for (i = 0; i < 2; i++) {
@@ -165,7 +173,7 @@ void func_150E3B5C(s32 arg0) {
         while (node != NULL) {
             D_800DD5C8[D_800DD5C0] = node->next;
             if (arg0 == -1 || arg0 == ((u8 *)node)[0x48]) {
-                func_150E3A94(node);
+                zap_bolt_free(node);
             }
             node = D_800DD5C8[D_800DD5C0];
         }
@@ -173,7 +181,8 @@ void func_150E3B5C(s32 arg0) {
     }
 }
 
-void func_150E3C3C(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
+/* was func_150E3C3C */
+void zap_bolt_get_pos(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
     s32 temp_v0;
     arg0 = arg0 - 1;
     if ((arg0 >= 0) && (arg0 < 8)) {
@@ -199,21 +208,22 @@ s32 func_15046F70(f32 *, s32, f32, f32 *);
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
 s32 func_151C284C(f32 *, s32, s32, s32, u8, void *, f32, f32, f32, f32, f32, u8, s32, u8, u8, u8, u8, u8, u8, s8, s32,
                   f32, u8, s8, s32, u8, s32);
-void func_151037D4(s16, u8, f32, u8 *, u8, u8, s32);
+void flip_sprite_particle_spawn(s16, u8, f32, u8 *, u8, u8, s32);
 
 typedef struct {
     u8 b[0x12];
 } ZapStyle; /* 0x12 bytes copied from the bolt object (+0x58) into the beam request */
 
-// zap_bolt_update: per-frame update of a type-0x27 lightning bolt object `obj` (made by func_150E35A0). Counts down
-// its life (+0x7C, -0x63 = forever; func_150E3A94 frees it at < 0 but the update goes on), aims at the followed object
+// zap_bolt_update: per-frame update of a type-0x27 lightning bolt object `obj` (made by zap_bolt_spawn). Counts down
+// its life (+0x7C, -0x63 = forever; zap_bolt_free frees it at < 0 but the update goes on), aims at the followed object
 // (+0x3C, its +0x14 position; freed when that object's first word is 0) or the path point (+0x78), and moves its head
 // (+0x10) by speed (+0x34) * D_800BE9E4 frames toward the target (+0x1C). When it arrives (no path), a followed
 // target makes it shoot 500 lengths further for 25 frames (+0x44); otherwise it is freed. The +0x4C accumulator then
 // spawns beam segments from the anchor (+0x28) to a random point near the head (func_151C284C, ground snapped with
 // func_15046F70 and shortened by a random amount), and without a path the +0x50 accumulator spawns sparks
-// (func_151037D4) at the anchor.
-void func_150E3CB8(u8 *obj) {
+// (flip_sprite_particle_spawn) at the anchor.
+/* was func_150E3CB8 */
+void zap_bolt_update(u8 *obj) {
     f32 *pos = (f32 *) (obj + 0x10);
     f32 *target = (f32 *) (obj + 0x1C);
     f32 *anchor = (f32 *) (obj + 0x28);
@@ -260,7 +270,7 @@ void func_150E3CB8(u8 *obj) {
     if (*(s16 *) (obj + 0x7C) != -0x63) {
         *(s16 *) (obj + 0x7C) -= D_800BE9E4;
         if (*(s16 *) (obj + 0x7C) < 0) {
-            func_150E3A94((struct102 *) obj);
+            zap_bolt_free((struct102 *) obj);
         }
     }
     old[0] = pos[0];
@@ -270,7 +280,7 @@ void func_150E3CB8(u8 *obj) {
     follow = *(u8 **) (obj + 0x3C);
     if (follow != NULL) {
         if (*(s32 *) follow == 0) {
-            func_150E3A94((struct102 *) obj);
+            zap_bolt_free((struct102 *) obj);
             return;
         }
         target[0] = *(f32 *) (follow + 0x14);
@@ -294,7 +304,7 @@ void func_150E3CB8(u8 *obj) {
         if (*(s32 *) (obj + 0x44) == 0) {
             if (dist <= step) {
                 if (*(s32 *) (obj + 0x3C) == 0) {
-                    func_150E3A94((struct102 *) obj);
+                    zap_bolt_free((struct102 *) obj);
                     return;
                 }
                 *(s32 *) (obj + 0x44) = 25;
@@ -306,7 +316,7 @@ void func_150E3CB8(u8 *obj) {
         } else {
             *(s32 *) (obj + 0x44) -= D_800BE9E4;
             if (*(s32 *) (obj + 0x44) <= 0) {
-                func_150E3A94((struct102 *) obj);
+                zap_bolt_free((struct102 *) obj);
                 return;
             }
         }
@@ -332,14 +342,14 @@ void func_150E3CB8(u8 *obj) {
     pos[1] = newPos[1];
     pos[2] = newPos[2];
 
-    *(f32 *) (obj + 0x4C) += (D_800A1404 + func_150ADA68() * D_800A1408) * D_800A140C * D_800BE9A4;
+    *(f32 *) (obj + 0x4C) += (D_800A1404 + random_float() * D_800A1408) * D_800A140C * D_800BE9A4;
     while (1.0f < *(f32 *) (obj + 0x4C)) {
         start[0] = anchor[0];
         start[1] = anchor[1];
         start[2] = anchor[2];
-        t = func_150ADA68();
-        r = func_150ADA20();
-        func_15143874((u8) r, func_150ADA68() * 129.0f, &ox, &oz);
+        t = random_float();
+        r = random_int();
+        func_15143874((u8) r, random_float() * 129.0f, &ox, &oz);
         tip[0] = t * vel[0] + old[0] + ox;
         tip[1] = t * vel[1] + old[1] + 200.0f;
         tip[2] = t * vel[2] + old[2] + oz;
@@ -353,7 +363,7 @@ void func_150E3CB8(u8 *obj) {
         dir[1] = end[1] - start[1];
         dir[2] = end[2] - start[2];
         if (func_15145128(dir, dir, &len, &unused)) {
-            k = 190.0f * (func_150ADA68() * D_800BE9A4);
+            k = 190.0f * (random_float() * D_800BE9A4);
             start[0] += dir[0] * k;
             start[1] += dir[1] * k;
             start[2] += dir[2] * k;
@@ -387,9 +397,9 @@ void func_150E3CB8(u8 *obj) {
             seg.owner = 0;
         }
         seg.u60 = *(s32 *) (obj + 0x6C);
-        a = func_150ADA68();
-        b = func_150ADA68();
-        r = func_150ADA20();
+        a = random_float();
+        b = random_float();
+        r = random_int();
         mode = (hit != 0 || *(s32 *) (obj + 0x78) != 0) ? 2 : 1;
         if (func_151C284C(start, 0, 0, 0, 0, &seg, 190.0f, D_800A1410, a * 50.0f + 10.0f, b * 191.0f + 160.0f, 80.0f,
                           r % 176U + 80, 0, 0, 0, 0, 0, 0, 1, mode, *(s32 *) (obj + 0x40), 0.0f, 0xFF, -1, 0, obj[0xC],
@@ -402,37 +412,40 @@ void func_150E3CB8(u8 *obj) {
     if (*(s32 *) (obj + 0x78) != 0) {
         return;
     }
-    *(f32 *) (obj + 0x50) += (56.0f + func_150ADA68() * 235.0f) * D_800A1414 * D_800BE9A4;
+    *(f32 *) (obj + 0x50) += (56.0f + random_float() * 235.0f) * D_800A1414 * D_800BE9A4;
     while (1.0f < *(f32 *) (obj + 0x50)) {
-        u32 count = func_150ADA20();
-        u32 alpha = func_150ADA20();
-        func_151037D4((count & 3) + 6, alpha % 156U + 100, func_150ADA68() * D_800A141C + D_800A1418, anchor, 0xFF,
+        u32 count = random_int();
+        u32 alpha = random_int();
+        flip_sprite_particle_spawn((count & 3) + 6, alpha % 156U + 100, random_float() * D_800A141C + D_800A1418, anchor, 0xFF,
                       obj[0xC], obj[1]);
         *(f32 *) (obj + 0x50) -= 1.0f;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E3CB8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/zap_bolt_update.s")
 #endif
 
 extern f32 D_800A1420;
 
-void func_150E4590(u8 *arg0) {
+/* was func_150E4590 */
+void obj_spawn_linked_effect(u8 *arg0) {
     u8 *temp_v0;
 
     temp_v0 = arg0 + 0x110;
     if ((*(s32 *)((u8 *)arg0 + 0x1B4)) != 0) {
-        func_1505D1C4((*(f32 *)((u8 *)temp_v0 + 0x30)), (*(f32 *)((u8 *)temp_v0 + 0x34)), (*(f32 *)((u8 *)temp_v0 + 0x38)), (*(s32 *)((u8 *)temp_v0 + 0xA4)) | 0x60000, -1, (u16) ((((u32) (func_150484A0((*(f32 *)((u8 *)temp_v0 + 0x60)), (*(f32 *)((u8 *)temp_v0 + 0x64))) * D_800A1420) & 0xFFFF) - 0x4000) | 1), 0, 0);
+        attack_spawn_at_point((*(f32 *)((u8 *)temp_v0 + 0x30)), (*(f32 *)((u8 *)temp_v0 + 0x34)), (*(f32 *)((u8 *)temp_v0 + 0x38)), (*(s32 *)((u8 *)temp_v0 + 0xA4)) | 0x60000, -1, (u16) ((((u32) (func_150484A0((*(f32 *)((u8 *)temp_v0 + 0x60)), (*(f32 *)((u8 *)temp_v0 + 0x64))) * D_800A1420) & 0xFFFF) - 0x4000) | 1), 0, 0);
     }
 }
 
 extern f32 D_800A1424;
 
-void func_150E469C(s32 arg0) {
+/* was func_150E469C */
+void fx_set_tint_preset(s32 arg0) {
     func_151C40BC(arg0, 0.35200003f, 0.70100003f, 0.56600004f, D_800A1424, 0xFF, 0xFF, 0xFF);
 }
 
-s32 func_150E46F4(f32 *arg0) {
+/* was func_150E46F4 */
+s32 fx_scroll_step(f32 *arg0) {
     arg0[0x2C / 4] += arg0[0x4C / 4] * D_800BE9A4;
     arg0[0x30 / 4] += arg0[0x54 / 4] * D_800BE9A4;
     return 1;

@@ -4,8 +4,8 @@
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_15031D40(u8 *arg0, u8 *arg1);
 f32 *allocate_memory(s32, s32, s32, s32);
-s32 *func_1502B6BC(s32, s32, s32, s32, s32, s32);
-s32 func_1510D3E0(s32, s32, s32, s32, s32 *);
+s32 *asset_load_with_subfiles(s32, s32, s32, s32, s32, s32);
+s32 texture_resolve_dl_ids(s32, s32, s32, s32, s32 *);
 void gfx_dl_relocate(s32, s32 *);
 void func_100043B4(s32 *arg0, u32 arg1);
 void func_10004074(s32);
@@ -35,8 +35,8 @@ s32 func_15030600(u8 *, s32, s32);
 /*
  * P71: reference-counted load of asset (9, idx) with several display lists (the one-list variant is
  * func_1518C900; func_1518CF74 releases both). Header words: +0 the display-list offset table (+4 >> 2 entries),
- * +8, +0xC (>> 4), +0x10, the data from +0x18. First use: func_1502B6BC(0, 0, 0, 2, 9, idx) (none: return 1),
- * each table entry is relocated by the header address, func_1510D3E0 resolves its segments
+ * +8, +0xC (>> 4), +0x10, the data from +0x18. First use: asset_load_with_subfiles(0, 0, 0, 2, 9, idx) (none: return 1),
+ * each table entry is relocated by the header address, texture_resolve_dl_ids resolves its segments
  * (&D_800DFDE8[idx] keeps the list), gfx_dl_relocate patches its addresses; the header is kept in D_800E0578[idx].
  * The count D_800DFC00[idx] is not saturated here. Returns 0 once loaded.
  */
@@ -46,7 +46,7 @@ s32 func_15030100(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out
     s32 i;
 
     if (*refs == 0) {
-        hdr = func_1502B6BC(0, 0, 0, 2, 9, idx);
+        hdr = asset_load_with_subfiles(0, 0, 0, 2, 9, idx);
         if (hdr == NULL) {
             return 1;
         }
@@ -54,7 +54,7 @@ s32 func_15030100(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out
         *count = (u32) hdr[1] >> 2;
         for (i = 0; i < *count; i++) {
             (*dls)[i] += (s32) hdr;
-            func_1510D3E0((*dls)[i], 0, 1, 0x3E, &D_800DFDE8[idx]);
+            texture_resolve_dl_ids((*dls)[i], 0, 1, 0x3E, &D_800DFDE8[idx]);
             gfx_dl_relocate((*dls)[i], hdr);
         }
         D_800E0578[idx] = hdr;
@@ -430,7 +430,7 @@ void func_15030758(void) {
                             guMtxF2L(res, out);
                         } else if (rec->spin != 0) {
                             /* extra rotation by spin (65536 = 360 degrees) */
-                            func_150A8050(rot, 0.0f, 0.0f, rec->spin * (360.0f / 65536.0f));
+                            mtxf_rotate_xyz_deg(rot, 0.0f, 0.0f, rec->spin * (360.0f / 65536.0f));
                             func_150A7A48(rot, m, res);
                             guMtxF2L(res, out);
                         } else {
@@ -634,7 +634,7 @@ s32 func_150310F8(s32 arg0, s32 arg1, s32 arg2) {
                         goto block_19;
                     }
                 } else {
-                    temp_v0_2 = func_1506196C(temp_v0, arg1);
+                    temp_v0_2 = obj_get_player_alpha(temp_v0, arg1);
                     if (arg2 == 1) {
                         if (!((*(u8 *)((u8 *)var_s0 + 4)) & 2) && (temp_v0_2 == 0xFF) && (temp_v0->unk5 != 1)) {
 
@@ -780,7 +780,7 @@ void func_1502CF24(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3, s32 *arg4, s32 *arg5,
 void func_150836AC(u8 *);
 u8 *func_1515EAB4(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4);
 Gfx *func_1515DE84(Gfx *, s32, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, u8 *, s32, u8 *);
-s32 func_1510D66C(s32, s32 *, s32, s32);
+s32 texture_cache_lookup(s32, s32 *, s32, s32);
 u8 *func_1503605C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4);
 
 /* one display list command */
@@ -794,7 +794,7 @@ u8 *func_1503605C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4);
 /*
  * P76: draw attachment att (+3 alpha, +5 visible, +0x13 / +0x14 hidden-part mask / part count, +0x18 / +0x1A
  * texture ids for segments 6 / 7, +0x24 part display lists, +0x28 per-buffer segment 1) of object obj for player
- * view `player`: alpha scaled by func_1506196C, segment 8 = blended or opaque material set, matrix (segment 3) from
+ * view `player`: alpha scaled by obj_get_player_alpha, segment 8 = blended or opaque material set, matrix (segment 3) from
  * func_15031360 (nothing drawn without one), fog / tint colours from func_1502D83C / func_1502D920 / func_1502CF24,
  * lighting by the object's +0x66 mode (lights +0x304[player] built by func_150836AC on demand, func_1515EAB4 /
  * func_1515DE84), then the parts (or func_1503605C when special != 0). When the display list would overflow
@@ -822,7 +822,7 @@ s32 func_150314B4(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special) {
     }
     ATT_DL(gfx, 0xE7000000, 0);     /* pipe sync */
     alpha = att[3];
-    v = func_1506196C(objp, player);
+    v = obj_get_player_alpha(objp, player);
     if (v != 0xFF) {
         alpha = (v * alpha) >> 8;
     }
@@ -890,11 +890,11 @@ s32 func_150314B4(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special) {
     ATT_DL(gfx, 0xDB06000C, mtx);
     ATT_DL(gfx, 0xDB060004, *(s32 *) (att + 0x28 + D_800BE9C0 * 4));
     if (*(u16 *) (att + 0x18) != 0) {
-        v = func_1510D66C(*(u16 *) (att + 0x18), &size, 0x3E, 0);
+        v = texture_cache_lookup(*(u16 *) (att + 0x18), &size, 0x3E, 0);
         ATT_DL(gfx, 0xDB060018, v);
     }
     if (*(u16 *) (att + 0x1A) != 0) {
-        v = func_1510D66C(*(u16 *) (att + 0x1A), &size, 0x3E, 0);
+        v = texture_cache_lookup(*(u16 *) (att + 0x1A), &size, 0x3E, 0);
         ATT_DL(gfx, 0xDB06001C, v);
     }
     if (!special) {
@@ -990,9 +990,9 @@ u8 *func_15031CBC(s32 arg0, u8 *arg1) {
 }
 
 #ifdef NON_MATCHING
-s32 func_150D3870(u8 *, s32, s32);
-void func_150D5950(u8 *, u8, s32);
-void func_15100734(u8 *);
+s32 object_fire_spawn(u8 *, s32, s32);
+void fire_smoke_trail_spawn(u8 *, u8, s32);
+void obj_timer_link_spawn(u8 *);
 s32 light_create_joint_pulse(u8 *, s32, s32);
 s32 func_151BDDD8(u8 *, s32, s32);
 void func_151D7A60(u8 *, u8, s8, u8, s32);
@@ -1036,7 +1036,7 @@ void func_15031D40(u8 *arg0, u8 *arg1) {
     }
     switch (kind) {
     case 0x37:
-        func_15100734(arg1);
+        obj_timer_link_spawn(arg1);
         break;
     case 0x3D:
         func_151BDDD8(arg1, 0xFF, 1);
@@ -1051,8 +1051,8 @@ void func_15031D40(u8 *arg0, u8 *arg1) {
         }
         break;
     case 0x5D:
-        func_150D3870(arg1, 0xFF, 1);
-        func_150D5950(arg1, 0xFF, 1);
+        object_fire_spawn(arg1, 0xFF, 1);
+        fire_smoke_trail_spawn(arg1, 0xFF, 1);
         break;
     case 0x5E:
         *(s32 *)(arg1 + 0x9C) |= 0x6000;
@@ -1064,21 +1064,21 @@ void func_15031D40(u8 *arg0, u8 *arg1) {
 #endif
 #ifdef NON_MATCHING
 struct127 *func_15083E90(u8);
-void func_15100700(u8 *);
+void obj_timer_link_post_remove(u8 *);
 void light_ctrl_broadcast(u8, u8, s32);
 void func_151482D4(s32, u8);
 void func_151494E0(s32, u8);
 void func_151BDDA4(u8 *);
 void func_151D4668(u8 *);
 void func_151D7A2C(u8 *);
-void func_151027E8(u8 *);
+void obj_glow_post_remove_event(u8 *);
 
 /*
  * P71: undoes what attachment record rec (model id +1) did to its owner object (func_15083E90(+0), none: nothing):
  * flag bits of +0x9C are cleared per model (0x90: 0x70, 0x8F: 0xE00, 0x85 / 0x5E: 0x6000), models 0x37 / 0x4B / 0x4C
- * queue func_15033ECC (func_1000FD38; 0x37 also func_15100700), 0x49 / 0x5D send messages with the owner and its
+ * queue func_15033ECC (func_1000FD38; 0x37 also obj_timer_link_post_remove), 0x49 / 0x5D send messages with the owner and its
  * +0x3B, 0x5A lowers +0x31C->+0x1A6 by 0xAA; others call per-model handlers. Records of kind +6 = 0x16 / 0x63 /
- * 0x89 also call func_151027E8 and func_151D4668.
+ * 0x89 also call obj_glow_post_remove_event and func_151D4668.
  */
 void func_15031F04(u8 *rec) {
     struct {
@@ -1125,7 +1125,7 @@ void func_15031F04(u8 *rec) {
         case 0x4C:
             func_1000FD38((s32 *) func_15033ECC, rec, obj);
             if (rec[1] == 0x37) {
-                func_15100700(obj);
+                obj_timer_link_post_remove(obj);
             }
             break;
         case 0x49:
@@ -1144,7 +1144,7 @@ void func_15031F04(u8 *rec) {
             break;
     }
     if (rec[6] == 0x16 || rec[6] == 0x63 || rec[6] == 0x89) {
-        func_151027E8(obj);
+        obj_glow_post_remove_event(obj);
         func_151D4668(obj);
     }
 }
@@ -1224,7 +1224,7 @@ s32 func_1503216C(u8 *arg0, struct127 *obj) {
 #ifdef NON_MATCHING
 extern s32 D_80090680;      /* att+0x18 for kinds 0x5A / 0x74 / 0x7A when obj+0x2E8 == 0 */
 extern s32 D_80090684;      /* ... and when obj+0x2E8 != 0 */
-void func_1505E060(u8 *);
+void anim_state_snapshot(u8 *);
 
 /* Tables of func_150322B8: animation index by animation id, generated from the ROM's jump tables by
  * docs/port/sessions/p80/gen_150322B8.py (do not edit by hand). 0 = the model's default animation. */
@@ -1530,7 +1530,7 @@ s32 func_150322B8(u8 *att, u8 *obj) {
     if (src != NULL) {
         anim = *(u8 **) (att + 0x48);
         if (idx == cur && *(s16 *) (src + 0x3C) == 0x3FF) {
-            func_1505E060(anim);
+            anim_state_snapshot(anim);
             anim = *(u8 **) (att + 0x48);
         }
         *(f32 *) (anim + 8) = *(f32 *) (src + 8);
@@ -1765,7 +1765,7 @@ s32 func_150335C8(u8 *arg0, struct127 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
             *(u8 *)(ret + 0x16) |= 4;
         }
         guMtxL2F(m1, (Mtx *)((u8 *)arg1->unk1D4 + (arg3 << 6)));
-        func_15048B10((s32)m1, (s32)m2);
+        obj_build_inverse_mtx((s32)m1, (s32)m2);
         func_150A9B0C(m3, *(f32 *)(arg0 + 0xB8), *(f32 *)(arg0 + 0x40), *(f32 *)(arg0 + 0xC4), *(f32 *)(arg0 + 0x14C), *(f32 *)(arg0 + 0x150), *(f32 *)(arg0 + 0x14C));
         m3[3][0] = *(f32 *)(arg0 + 0x14);
         m3[3][1] = *(f32 *)(arg0 + 0x18);
@@ -1808,8 +1808,8 @@ s32 func_15033AD4(u8 *arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-void func_151027E8(u8 *);
-s32 func_15102C3C(u8 *, s32, s32, s32, s32, s32);
+void obj_glow_post_remove_event(u8 *);
+s32 object_effect_start(u8 *, s32, s32, s32, s32, s32);
 
 s32 func_15033B28(u8 *arg0, u8 *arg1) {
     s32 var_a2;
@@ -1842,11 +1842,11 @@ block_10:
     if ((*(s32 *)((u8 *)arg0 + 0x38)) == 0) {
         if ((var_v1 != 0) && ((temp_v0_3 = (*(u8 **)((u8 *)arg1 + 0x31C)), ((*(u8 *)((u8 *)temp_v0_3 + 0x197)) != 0)) || (var_a2 == 6)) && (((*(u16 *)((u8 *)temp_v0_3 + 0x8A)) & 0x2000) == 0x2000) && ((*(u16 *)((u8 *)temp_v0_3 + 0x19E)) == 0)) {
             (*(s32 *)((u8 *)arg0 + 0x38)) = 1;
-            func_15102C3C(arg1, -1, var_a2, 1, 0xFF, 1);
+            object_effect_start(arg1, -1, var_a2, 1, 0xFF, 1);
         }
     } else if ((var_v1 == 0) || (temp_v0_4 = (*(u8 **)((u8 *)arg1 + 0x31C)), (((*(u16 *)((u8 *)temp_v0_4 + 0x8A)) & 0x2000) == 0)) || (((*(u8 *)((u8 *)temp_v0_4 + 0x197)) == 0) && (var_a2 != 6))) {
         (*(s32 *)((u8 *)arg0 + 0x38)) = 0;
-        func_151027E8(arg1);
+        obj_glow_post_remove_event(arg1);
     }
     return 0;
 }
@@ -1897,7 +1897,7 @@ s32 func_15033DC8(u8 *arg0, u8 *arg1) {
 }
 
 #ifdef NON_MATCHING
-s32 func_150ADA20(void);
+s32 random_int(void);
 void func_10010FFC(s32, s32, s32, s32, s32, u8 *);
 
 /*
@@ -1934,7 +1934,7 @@ s32 func_15033ECC(u8 *voice, s32 arg1, s32 *playing, s32 arg3, s32 arg4, s32 arg
     if (rec[1] == 0x37) {
         snd = -1;
         if ((*(s32 *) (rec + 0x38) & 0xFFFF) != *(u16 *) (obj + 0x84) && *(u16 *) (obj + 0x84) == 0x15F) {
-            snd = (func_150ADA20() & 3) + 0x444;
+            snd = (random_int() & 3) + 0x444;
         }
         if (snd != -1) {
             func_10010FFC(0, snd, 0x5DC0, 0, 0, obj);

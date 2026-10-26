@@ -4,15 +4,16 @@
 
 
 #ifdef NON_MATCHING
-void func_1508EF80(u8 *, u8 *, f32, u8 *);
+void vec_rotate_xz_about_point(u8 *, u8 *, f32, u8 *);
 
 /* Player sideways tilt: while button bit 0 or 1 of the pad word (*unk36C) is held (and flag 0x200000 of unk84 is
  * clear, and unk698 is 0), the direction +1 / -1 goes to unk6B0, a hold counter (+0x6C0) counts up and the tilt
  * angle (+0x6C4) moves by dir * 0.5 * D_800BE9A4 (frame scale), clamped to [-10, 10]. With unk2C bit 0x400 the
  * counter is set to 20 and nothing is rotated. Released, the angle decays by 0.2 * angle * D_800BE9A4 (D_800A3AC0)
- * until it is 0. Each step rotates the +0x2F8 vector about +0x2A4 by angle * D_800BE9A4 / 2.5 (func_1508EF80).
+ * until it is 0. Each step rotates the +0x2F8 vector about +0x2A4 by angle * D_800BE9A4 / 2.5 (vec_rotate_xz_about_point).
  * Returns 0: game_14FF90 declares it s32 but ignores the result (the asm leaves v0 undefined). */
-s32 func_1512D900(struct108 *p) {
+/* was func_1512D900 */
+s32 camera_sideways_tilt(struct108 *p) {
     s32 *count = (s32 *) ((u8 *) p + 0x6C0);
     f32 *angle = (f32 *) ((u8 *) p + 0x6C4);
     u16 pad = *p->unk36C;
@@ -46,9 +47,9 @@ s32 func_1512D900(struct108 *p) {
         }
         *angle = a - a * 0.2f * D_800BE9A4;
     }
-    func_1508EF80((u8 *) &p->unk2F8, (u8 *) &p->unk2A4, *angle * D_800BE9A4 / 2.5f, (u8 *) &p->unk2F8);
+    vec_rotate_xz_about_point((u8 *) &p->unk2F8, (u8 *) &p->unk2A4, *angle * D_800BE9A4 / 2.5f, (u8 *) &p->unk2F8);
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15B110/func_1512D900.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15B110/camera_sideways_tilt.s")
 #endif

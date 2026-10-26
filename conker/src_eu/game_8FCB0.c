@@ -6,13 +6,13 @@
 void func_15195564(struct127 *obj, struct127 *target, u8 attached);
 
 
-void func_15058F24(struct127 *arg0, f32, f32);
-u8   func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);
-void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
-f32  func_1505A3A8(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
+void obj_water_buoyancy(struct127 *arg0, f32, f32);
+u8   obj_turn_towards(struct127 *arg0, u8 arg1, u16 arg2);
+void move_xz_towards(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
+f32  obj_approach_speed(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
 
-u8  func_1505B9C4(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 arg6);
-s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+u8  obj_apply_hit(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 arg6);
+s32 obj_receive_hit(struct127 *arg0, struct127 *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
 // EU: split from game_83300.c, EU pads to a file boundary before this.
 
@@ -24,8 +24,9 @@ void func_150341B4(s32, s32);
 // +0x3D4 takes b's +0x31C, and that record's byte +0x197 is cleared), `a` none; func_150341B4 swaps the unique ids;
 // both objects' +0x2D4 handles are released (node_destroy); other live objects' +0x65 links (unique id) to either
 // slot are swapped; when b's +0x13C names a carrier (>= 100), that object's +0x13D = 100 + b's index; then
-// func_150615DC(b) / func_150627D4(b).
-void func_15062800(struct127 *a, struct127 *b) {
+// obj_fade_reset(b) / obj_model_reset(b).
+/* was func_15062800 */
+void obj_slots_swap(struct127 *a, struct127 *b) {
     struct127 tmp;
     struct129 *p144;
     struct127 *obj;
@@ -62,7 +63,7 @@ void func_15062800(struct127 *a, struct127 *b) {
         node_destroy((struct102 *) a->unk2D4);
         a->unk2D4 = NULL;
     }
-    func_150615DC(b);
+    obj_fade_reset(b);
     for (i = 0; i < 25; i++) {
         if (i == ib || i == ia) {
             continue;
@@ -81,13 +82,14 @@ void func_15062800(struct127 *a, struct127 *b) {
     if (b->unk13C >= 100) {
         D_800CC2D0[(u8) (b->unk13C - 100)].unk13D = ib + 100;
     }
-    func_150627D4(b);
+    obj_model_reset(b);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/func_15062800.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/obj_slots_swap.s")
 #endif
 
-void func_15062AC4(struct127 *arg0) {
+/* was func_15062AC4 */
+void obj_update_inner_extent_ratios(struct127 *arg0) {
     if (arg0->unkE6 && arg0->unkE4) {
         f32 tmp = arg0->unkE4;
         arg0->unkEC = tmp / arg0->unkE6;
@@ -97,17 +99,20 @@ void func_15062AC4(struct127 *arg0) {
     }
 }
 
-void func_15062B1C(struct127 *arg0, f32 arg1) {
+/* was func_15062B1C */
+void obj_set_inner_extent_width(struct127 *arg0, f32 arg1) {
     arg0->unkE4 = arg0->xz_scale * arg1;
-    func_15062AC4(arg0);
+    obj_update_inner_extent_ratios(arg0);
 }
 
-void func_15062B50(struct127 *arg0, f32 arg1) {
+/* was func_15062B50 */
+void obj_set_inner_extent_height(struct127 *arg0, f32 arg1) {
     arg0->unkE6 = arg0->y_scale * arg1;
-    func_15062AC4(arg0);
+    obj_update_inner_extent_ratios(arg0);
 }
 
-void func_15062B84(struct127 *arg0) {
+/* was func_15062B84 */
+void obj_update_outer_extent_ratios(struct127 *arg0) {
     if (arg0->unkD4 && arg0->unkD2) {
         f32 tmp = arg0->unkD2;
         arg0->unkDC = tmp / arg0->unkD4;
@@ -118,7 +123,8 @@ void func_15062B84(struct127 *arg0) {
     }
 }
 
-void func_15062BDC(struct127 *arg0, f32 arg1, f32 arg2) {
+/* was func_15062BDC */
+void obj_set_scale(struct127 *arg0, f32 arg1, f32 arg2) {
     struct124 *temp_v0;
 
     arg0->xz_scale = arg1;
@@ -131,15 +137,16 @@ void func_15062BDC(struct127 *arg0, f32 arg1, f32 arg2) {
         arg0->unkE4 = (s32) (temp_v0->unk1A * arg0->xz_scale);
         arg0->unkE6 = (s32) (temp_v0->unk1C * arg0->y_scale);
         arg0->unkE8 = (s32) (temp_v0->unk1E * arg0->y_scale);
-        func_15062AC4(arg0);
-        func_15062B84(arg0);
+        obj_update_inner_extent_ratios(arg0);
+        obj_update_outer_extent_ratios(arg0);
     }
 }
 
 #ifdef NON_MATCHING
 extern s32 D_800C48A8;
 
-void func_15062D10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+/* was func_15062D10 */
+void gfx_tile_scroll_coords(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     s32 temp_a0;
     s32 temp_a1;
     s32 temp_a1_2;
@@ -182,7 +189,7 @@ void func_15062D10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/func_15062D10.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/gfx_tile_scroll_coords.s")
 #endif
 #ifdef NON_MATCHING
 extern u8 *D_800C5758[]; /* per object type: 12-byte texture entries, u16 size at +8 / +0xA */
@@ -192,7 +199,8 @@ void func_15094EC8(u8 *, s32 *, s32, f32, s32, s32);
 // for the current screen (+0x28C[D_800BE9C0]), calls func_15094EC8 on entry `dl` (16-byte steps) of it with the
 // type's texture-command table D_800C6360[type] at `cmd`, `arg2`, the amount `amount`, and the size of texture
 // `tex` of D_800C5758[type] (doubled when `twice`).
-void func_15062E24(s32 type, s32 dl, s32 arg2, s32 cmd, s32 amount, s32 tex, s32 twice) {
+/* was func_15062E24 */
+void obj_type_tex_scroll_apply(s32 type, s32 dl, s32 arg2, s32 cmd, s32 amount, s32 tex, s32 twice) {
     s32 *table;
     struct127 *o;
     u8 *entry;
@@ -223,12 +231,13 @@ void func_15062E24(s32 type, s32 dl, s32 arg2, s32 cmd, s32 amount, s32 tex, s32
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/func_15062E24.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/obj_type_tex_scroll_apply.s")
 #endif
 #ifdef NON_MATCHING
 extern s32 D_800C4440;
 
-void func_15062FC0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+/* was func_15062FC0 */
+void obj_vtx_scroll_uv(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
     s16 temp_a1;
     s16 temp_a3;
     s16 temp_t5;
@@ -317,9 +326,10 @@ block_18:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/func_15062FC0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/obj_vtx_scroll_uv.s")
 #endif
-void func_15063168(struct127 *arg0) {
+/* was func_15063168 */
+void obj_hit_react_other_players(struct127 *arg0) {
     s32 i;
 
     for (i = 0; i < D_8008FD8C; i++) {
@@ -331,14 +341,15 @@ void func_15063168(struct127 *arg0) {
     }
 }
 #ifdef NON_MATCHING
-void func_15060F28(struct127 *obj, s32 mode);
+void obj_remove(struct127 *obj, s32 mode);
 s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
 
 // obj_model_swap_keep_pose: sets the object's model record (+0x144: +4 = `a1`, +3 = `a2`, +0x20 / +0x24 = `scale`,
-// +2 = 0), resets the object (func_15060F28 mode 0) and reloads model slot +0x13F (func_15082E44, owner = object
+// +2 = 0), resets the object (obj_remove mode 0) and reloads model slot +0x13F (func_15082E44, owner = object
 // index + 1), then puts back what the reset clears: position (+0x14..+0x1C, copied to +0x2C..+0x34, y also to
 // +0x1CC), +0x318 (whose +0x3D4 gets the object's +0x31C), +0xB8, +0x40, +0xC4 and the yaw (+0x76, also +0x7A).
-void func_15063254(struct127 *obj, s32 a1, s32 a2, f32 scale) {
+/* was func_15063254 */
+void obj_model_swap_keep_pose(struct127 *obj, s32 a1, s32 a2, f32 scale) {
     u8 *o = (u8 *) obj;
     u8 slot = o[0x13F];
     u8 *e = *(u8 **) (o + 0x144);
@@ -364,7 +375,7 @@ void func_15063254(struct127 *obj, s32 a1, s32 a2, f32 scale) {
     f40 = *(f32 *) (o + 0x40);
     fC4 = *(f32 *) (o + 0xC4);
     yaw = *(u16 *) (o + 0x76);
-    func_15060F28(obj, 0);
+    obj_remove(obj, 0);
     func_15082E44(e, slot, 0, 0, (obj - D_800CC2D0) + 1);
     *(f32 *) (o + 0x14) = x;
     *(f32 *) (o + 0x18) = y;
@@ -382,5 +393,5 @@ void func_15063254(struct127 *obj, s32 a1, s32 a2, f32 scale) {
     *(s32 *) (link + 0x3D4) = *(s32 *) (o + 0x31C);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/func_15063254.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/obj_model_swap_keep_pose.s")
 #endif

@@ -5,7 +5,7 @@
 
 
 #ifdef NON_MATCHING
-void func_15012470(void);
+void fx_alloc_d88750(void);
 extern s32 D_800D9CF0;
 extern s8 D_800D9D40;
 extern s8 D_800D9D41;
@@ -19,12 +19,13 @@ extern s32 D_800D9D66;
 extern s32 D_800D9D70;
 extern s32 D_800E0D94;
 
-void func_1500E5C0(void) {
+/* was func_1500E5C0 */
+void level_objects_reset_state(void) {
     s32 *var_v0_2;
     s32 *var_v1;
     u8 *var_v0;
 
-    func_15012470();
+    fx_alloc_d88750();
     func_15008A10();
     func_15012770();
     var_v0 = &D_800E0950;
@@ -74,9 +75,10 @@ void func_1500E5C0(void) {
     D_80088B40 = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3BA70/func_1500E5C0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_3BA70/level_objects_reset_state.s")
 #endif
-void func_1500E70C(s32 arg0) {
+/* was func_1500E70C */
+void level_hook_level_2b(s32 arg0) {
     if (arg0 == 0x2B) {
         func_15011C70();
     }
@@ -87,7 +89,8 @@ extern f32 D_800DCE54;
 extern s8 D_800DCE58;
 extern f32 D_800DCE5C;
 
-void func_1500E738(void) {
+/* was func_1500E738 */
+void level_set_lod_shifts(void) {
     switch (D_80082FA0) {
     case 0:
         D_800DCE50 = 0;
@@ -139,17 +142,19 @@ void func_1500E738(void) {
     }
 }
 
-void func_1500E890(void) {
-    func_15008E00();
-    func_15008E10(0);
-    func_15008E10(1);
+/* was func_1500E890 */
+void level_obj_init_area_points(void) {
+    area_points_reset();
+    area_points_alloc(0);
+    area_points_alloc(1);
 }
 
 #ifdef NON_MATCHING
 void func_15189E70(void *arg0, u8 arg1);
 extern s32 D_800B1214;
 
-void func_1500E8C0(void) {
+/* was func_1500E8C0 */
+void level_obj_init_drift_scene(void) {
     struct {
         s16 u40;
         s16 u42;
@@ -213,10 +218,10 @@ void func_1500E8C0(void) {
     func_1000FA64(0x61FU, var_v0, 0, 0, 0x2EE0, 0x3E8U, 0x190, (s32) func_1000EF40, NULL, 0, 0x48, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3BA70/func_1500E8C0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_3BA70/level_obj_init_drift_scene.s")
 #endif
 // NON-MATCHING: fair bit to figure out
-// void func_1500E8C0(void) {
+// void level_obj_init_drift_scene(void) {
 //     struct145 tmp;
 //     s32 phi_v0;
 //
@@ -255,7 +260,8 @@ void func_1500E8C0(void) {
 //     func_1000FA64(1567, (s16)phi_v0, 0, 0, 12000, 1000, 400, func_1000EF40, 0, 0, 72, 0);
 // }
 
-void func_1500EAA0(void) {
+/* was func_1500EAA0 */
+void level_obj_init_tex_scroll(void) {
     func_15195AA8(D_800B0E00[0], D_80090320, 0, -1, 0, 0, 0, -8);
     func_15195AA8(D_800B0E00[1], D_80090320, 0, -1, 0, 1, 0, -8);
 }

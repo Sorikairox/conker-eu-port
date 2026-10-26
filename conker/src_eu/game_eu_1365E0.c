@@ -8,7 +8,8 @@ u8 *mesh_effect_spawn(s8 *, s32, s32, s32, s32);
 s32 light_ctrl_alloc(s8 *, s32, s32, s32, s32);
 s32 memcpy(u8 *, u8 **, s32);
 
-void func_15108850(s32 arg0) {
+/* was func_15108850 */
+void swing_lamp_spawn(s32 arg0) {
     struct {
         u8 * u28;
         f32 u2C;
@@ -154,12 +155,13 @@ void func_15108850(s32 arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/func_15108850.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/swing_lamp_spawn.s")
 #endif
-s32 func_15109100(u8 *);
-s32 func_15109140(u8 *);
+s32 swing_lamp_target_timer_tick(u8 *);
+s32 swing_lamp_height_update(u8 *);
 
-s32 func_15109034(u8 *arg0) {
+/* was func_15109034 */
+s32 swing_lamp_update(u8 *arg0) {
     u8 *temp_s0;
     u8 *temp_s0_2;
     u8 *new_var;
@@ -177,13 +179,14 @@ s32 func_15109034(u8 *arg0) {
     *(f32 *)(temp_s0 + 0) = sinf(*(f32 *)(temp_s0 + 8)) * 7.1050005f;
     new_var = temp_s0;
     *(f32 *)(temp_s0 + 4) = sinf(*(f32 *)(new_var + 0xC)) * 7.1050005f;
-    func_15109100(arg0);
-    func_15109140(arg0);
+    swing_lamp_target_timer_tick(arg0);
+    swing_lamp_height_update(arg0);
     return 1;
 }
 
 #ifdef NON_MATCHING
-s32 func_15109100(u8 *arg0) {
+/* was func_15109100 */
+s32 swing_lamp_target_timer_tick(u8 *arg0) {
     s32 temp_t0;
     u8 *temp_v0;
 
@@ -198,10 +201,11 @@ s32 func_15109100(u8 *arg0) {
     return (s32) (temp_v0 + 0xF8);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/func_15109100.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/swing_lamp_target_timer_tick.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15109140(u8 *arg0) {
+/* was func_15109140 */
+s32 swing_lamp_height_update(u8 *arg0) {
     s32 temp_v1;
     u8 *temp_v0;
     u8 *temp_v0_2;
@@ -221,13 +225,14 @@ s32 func_15109140(u8 *arg0) {
     return (s32) temp_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/func_15109140.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/swing_lamp_height_update.s")
 #endif
 #ifdef NON_MATCHING
 extern f32 D_800A2850;
 extern f32 D_800A2854;
 extern f32 D_800A2858;
-s32 func_151091B8(u8 *arg0) {
+/* was func_151091B8 */
+s32 swing_lamp_update_b(u8 *arg0) {
     u8 *temp_s0;
     u8 *temp_s0_2;
 
@@ -239,8 +244,8 @@ s32 func_151091B8(u8 *arg0) {
     (*(f32 *)((u8 *)temp_s0_2 + 0xC)) = func_15144B68((*(f32 *)((u8 *)temp_s0_2 + 0xC)));
     (*(f32 *)((u8 *)temp_s0_2 + 0)) = (f32) (sinf((*(f32 *)((u8 *)temp_s0_2 + 8))) * D_800A2858);
     (*(f32 *)((u8 *)temp_s0_2 + 4)) = (f32) (sinf((*(f32 *)((u8 *)temp_s0_2 + 0xC))) * D_800A2858);
-    func_15109100(arg0);
-    func_15109140(arg0);
+    swing_lamp_target_timer_tick(arg0);
+    swing_lamp_height_update(arg0);
     if ((*(u8 *)((u8 *)temp_s0_2 + 0x20)) != 0) {
     s32 pad;
         (*(s8 *)((u8 *)arg0 + 0x12)) = 4;
@@ -250,14 +255,15 @@ s32 func_151091B8(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/func_151091B8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/swing_lamp_update_b.s")
 #endif
-s32 func_151092A4(u8 *arg0, s32 arg1) {
+/* was func_151092A4 */
+s32 swing_lamp_matrix_build(u8 *arg0, s32 arg1) {
     f32 mf[4][4];
     u8 *q;
 
     q = arg0; q += *(s32 *)(arg0 + 0x50); q += 0xF8;
-    func_150A8050(mf, *(f32 *)q, 0.0f, *(f32 *)(q + 4));
+    mtxf_rotate_xyz_deg(mf, *(f32 *)q, 0.0f, *(f32 *)(q + 4));
     mf[3][1] = *(f32 *)(q + 0x10);
     mf[0][0] *= 0.157f;
     mf[0][1] *= 0.157f;
@@ -275,7 +281,8 @@ s32 func_151092A4(u8 *arg0, s32 arg1) {
 s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
 typedef struct { f32 x, y, z; } V3_09390;
 
-s32 func_15109390(u8 *arg0)
+/* was func_15109390 */
+s32 swing_lamp_light_update(u8 *arg0)
 {
   u8 *base;
   u8 *p;
@@ -288,7 +295,7 @@ s32 func_15109390(u8 *arg0)
   p = base;
   p += *((s32 *) (base + 0x50));
   p += 0xF8;
-  func_150A8050(mf, *((f32 *) (p + 0)), 0.0f, *((f32 *) (p + 4)));
+  mtxf_rotate_xyz_deg(mf, *((f32 *) (p + 0)), 0.0f, *((f32 *) (p + 4)));
   mf[3][1] = *((f32 *) (p + 0x10));
   mf[0][0] *= 0.157f;
   mf[0][1] *= 0.157f;
@@ -322,7 +329,8 @@ s32 func_15109390(u8 *arg0)
   return 1;
 }
 
-void func_1510957C(s32 arg0, s32 arg1, u8 arg2) {
+/* was func_1510957C */
+void swing_lamp_post_target(s32 arg0, s32 arg1, u8 arg2) {
     struct {
         s32 unk0;
         s32 unk4;
@@ -336,7 +344,8 @@ void func_1510957C(s32 arg0, s32 arg1, u8 arg2) {
     node_broadcast_types(sp1C, 2, (s32)&sp24, 0x1D);
 }
 
-void func_151095E4(u8 *arg0, s32 arg1, u8 arg2)
+/* was func_151095E4 */
+void swing_lamp_handle_event(u8 *arg0, s32 arg1, u8 arg2)
 {
   u8 *p = arg0;
   p += *(s32 *)(arg0 + 0x50);
@@ -360,7 +369,8 @@ void func_151095E4(u8 *arg0, s32 arg1, u8 arg2)
   }
 }
 
-void func_1510965C(void) {
+/* was func_1510965C */
+void swing_lamp_post_toggle(void) {
     s32 sp18[2] = {0x38, 0x54};
 
     node_broadcast_types(sp18, 2, 0, 0x1E);
@@ -374,7 +384,8 @@ void func_1510965C(void) {
 // slot's copy (rec +0x58[D_800BE9C0 * 4 + slot]) to texture coordinates: each vertex goes through the matrix; s
 // follows its position across the camera direction (func_15144B34(slot), x / z normalised; straight ahead when its
 // x and y are both tiny) as 32 * (26 + 0.213 * side), t its height as 32 * (81 + 0.358 * y). Returns 1.
-s32 func_151096A0(u8 *rec, s32 slot) {
+/* was func_151096A0 */
+s32 sky_dome_project_uv(u8 *rec, s32 slot) {
     f32 mtx[4][4];
     f32 ox;
     f32 oy;
@@ -388,7 +399,7 @@ s32 func_151096A0(u8 *rec, s32 slot) {
     s32 i;
 
     p = (f32 *) (rec + *(s32 *) (rec + 0x50) + 0xF8);
-    func_150A8050(mtx, p[0], 0.0f, p[1]);
+    mtxf_rotate_xyz_deg(mtx, p[0], 0.0f, p[1]);
     mtx[3][1] = p[4];
     mtx[0][0] *= 0.157f;
     mtx[0][1] *= 0.157f;
@@ -418,5 +429,5 @@ s32 func_151096A0(u8 *rec, s32 slot) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/func_151096A0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/sky_dome_project_uv.s")
 #endif

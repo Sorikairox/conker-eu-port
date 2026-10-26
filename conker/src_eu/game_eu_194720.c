@@ -17,16 +17,16 @@ void func_15166F10(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg5) {
         (*(s16 *)((u8 *)temp_v0 + 0xD4)) = (s16) arg1;
         (*(s16 *)((u8 *)temp_v0 + 0xD6)) = (s16) arg2;
         (*(f32 *)((u8 *)temp_v0 + 0xD8)) = arg3;
-        var_s0 = func_150ADA20() & 0x7F;
+        var_s0 = random_int() & 0x7F;
         var_s2 = 0;
         var_s1 = temp_v0 + 0x10;
         do {
             if (arg3 != 1.0f) {
-                func_15043D90((Mtx *)var_s1, 0.0f, (f32) var_s0, 0.0f, arg3, arg3, arg3, (f32) arg0, (f32) arg1, (f32) arg2);
+                mtx_build_rot_scale_trans((Mtx *)var_s1, 0.0f, (f32) var_s0, 0.0f, arg3, arg3, arg3, (f32) arg0, (f32) arg1, (f32) arg2);
             } else {
-                func_15043E68((Mtx *)var_s1, 0.0f, (f32) var_s0, 0.0f, (f32) arg0, (f32) arg1, (f32) arg2);
+                mtx_build_rot_trans((Mtx *)var_s1, 0.0f, (f32) var_s0, 0.0f, (f32) arg0, (f32) arg1, (f32) arg2);
             }
-            temp = func_150ADA20() & 0x3F; // fakematch: temp + split increments reproduce the schedule
+            temp = random_int() & 0x3F; // fakematch: temp + split increments reproduce the schedule
             var_s2 += 0x40;
             var_s0 += temp;
             var_s1 += 0x40;
@@ -102,7 +102,7 @@ void func_eu_151670C0(u8 *obj) {
         for (i = 0; i < 3; i++) {
             guMtxL2F(mf, (Mtx *) (obj + 0x10 + i * 0x40));
             func_150A7E40(mf, -400.0f, 10.0f, 0.0f, &x, &y, &z);
-            rec.u0E = (func_150ADA20() & 0x7F) + 0x55;
+            rec.u0E = (random_int() & 0x7F) + 0x55;
             rec.pos[0] = (s32) x;
             rec.pos[1] = (s32) y;
             rec.pos[2] = (s32) z;

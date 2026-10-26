@@ -4,25 +4,29 @@
 
 
 #ifdef NON_MATCHING
-void func_15104B60(s32 arg0, s32 arg1, f32 arg2) { /* P95: f32 (float bits were passed as an int) */
+/* was func_15104B60 */
+void stub_obj_set_param(s32 arg0, s32 arg1, f32 arg2) { /* P95: f32 (float bits were passed as an int) */
 #else
-void func_15104B60(s32 arg0, s32 arg1, s32 arg2) {
+void stub_obj_set_param(s32 arg0, s32 arg1, s32 arg2) {
 #endif
 }
 
-s32 func_15104B74(s32 arg0, s32 arg1) {
+/* was func_15104B74 */
+s32 stub_return_one_a(s32 arg0, s32 arg1) {
     return 1;
 }
 
-void func_15104B88(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
+/* was func_15104B88 */
+void stub_hit_point_noop(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 }
 
-s32 func_15104BA0(s32 arg0, s32 arg1) {
+/* was func_15104BA0 */
+s32 stub_return_one_b(s32 arg0, s32 arg1) {
     return 1;
 }
 
 #ifdef NON_MATCHING
-void func_1510F800(s32 arg0);
+void collision_select_area(s32 arg0);
 s32 func_150A3F50(s32, s32);
 /* floor triangles found by func_150A3F50 (16-byte records) */
 typedef struct {
@@ -38,7 +42,8 @@ extern f32 D_800A2740; /* 10000.0 */
 // point in D_800D3720; those whose third vertex lies on the positive side of the edge from vertex 0 to 1 (x / z
 // plane) are kept, and of these the one whose height (h / 256) is nearest to y is written to *out. Returns 0
 // when nothing is found, else 1.
-s32 func_15104BB4(f32 x, f32 z, f32 y, f32 *out) {
+/* was func_15104BB4 */
+s32 floor_height_below(f32 x, f32 z, f32 y, f32 *out) {
     s32 list[26];
     f32 vz[3];
     f32 vx[3];
@@ -48,7 +53,7 @@ s32 func_15104BB4(f32 x, f32 z, f32 y, f32 *out) {
     f32 ex, ez, c, side;
     s16 *v;
 
-    func_1510F800(0);
+    collision_select_area(0);
     n = func_150A3F50((s32) x, (s32) z);
     if (n == 0) {
         return 0;
@@ -87,5 +92,5 @@ s32 func_15104BB4(f32 x, f32 z, f32 y, f32 *out) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_132370/func_15104BB4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_132370/floor_height_below.s")
 #endif

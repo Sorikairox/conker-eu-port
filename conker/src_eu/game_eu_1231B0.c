@@ -3,7 +3,7 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_15179008(s32);
-void func_150F5B48(u8 *arg0);
+void screen_overlay_update_alpha(u8 *arg0);
 extern u8 D_800A1EE8[];
 extern u8 D_800A1EF4[];
 void func_15145EA4(f32 **, f32 **, void *, s32);
@@ -48,7 +48,8 @@ extern u8 D_80091CE0[];
 extern u8 D_80091CEC[];
 extern u8 D_80091BA8[];
 s32 func_15169ED8(S59A0 *);
-void func_150F59A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_150F59A0 */
+void screen_overlay_show_timed(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     S59A0 s;
     s32 sum;
 
@@ -101,16 +102,18 @@ void func_150F59A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     func_15169ED8(&s);
 }
 
-void func_150F5B10(u8 *arg0) {
+/* was func_150F5B10 */
+void screen_overlay_update_scale(u8 *arg0) {
     s32 temp_v0 = 0x1000 - *(s16 *)(arg0 + 0x24) * 4;
 
     *(s16 *)(arg0 + 0x38) = temp_v0;
     *(s16 *)(arg0 + 0x3A) = *(s16 *)(arg0 + 0x38);
-    func_150F5B48(arg0);
+    screen_overlay_update_alpha(arg0);
 }
 
 #ifdef NON_MATCHING
-void func_150F5B48(u8 *arg0) {
+/* was func_150F5B48 */
+void screen_overlay_update_alpha(u8 *arg0) {
     s16 temp_t2;
     s32 temp_a1;
     s32 temp_a2;
@@ -135,16 +138,18 @@ void func_150F5B48(u8 *arg0) {
     (*(s8 *)((u8 *)arg0 + 0x45)) = (s8) ((s32) (temp_t2 * 0xFF) / (s32) (temp_v1 >> 0x10));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/func_150F5B48.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/screen_overlay_update_alpha.s")
 #endif
-void func_150F5C0C(s32 arg0) {
+/* was func_150F5C0C */
+void screen_overlay_on_end(s32 arg0) {
     func_15179008(0);
 }
 
 #ifdef NON_MATCHING
 extern s32 D_80090624;
 
-s32 func_150F5C30(u8 *arg0, u8 *arg1) {
+/* was func_150F5C30 */
+s32 model_anim_texture_frame_cb(u8 *arg0, u8 *arg1) {
     f32 temp_f2;
     s32 var_v1;
     s32 var_v1_2;
@@ -193,7 +198,7 @@ block_30:
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/func_150F5C30.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/model_anim_texture_frame_cb.s")
 #endif
 #ifdef NON_MATCHING
 /* P204 */
@@ -203,7 +208,8 @@ block_30:
 // (+0x2D0)->+8: 1 below 69, 0 above 84 (state 2), linear in between. The first G_SETTILESIZE of the node's
 // display list (*(n +0x24)) gets ult = 44 + 58 * fade (uls 2). Returns 0.
 // Rare leaves the fade uninitialised for a state other than 0..2 when pl +0x84 is not 5 (asm: a stack slot); 0 here.
-s32 func_150F5FD4(u8 *n, u8 *pl) {
+/* was func_150F5FD4 */
+s32 model_tile_fade_cb(u8 *n, u8 *pl) {
     u8 *ref = *(u8 **) (pl + 0x2D0);
     Gfx *dl;
     s32 reset;
@@ -255,10 +261,11 @@ s32 func_150F5FD4(u8 *n, u8 *pl) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/func_150F5FD4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/model_tile_fade_cb.s")
 #endif
 
-void func_150F6188(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
+/* was func_150F6188 */
+void obj_bone_glow_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     struct {
         u8 *unk0;
         u8 unk4;
@@ -278,7 +285,8 @@ void func_150F6188(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
 #ifdef NON_MATCHING
 s32 func_151307F0(s32 *, s32, s32, s32, s32, s32);
 
-void func_150F6218(u8 *arg0) {
+/* was func_150F6218 */
+void obj_bone_glow_emitter_update(u8 *arg0) {
     struct {
         f32 * u98;
         f32 * u9C;
@@ -355,7 +363,7 @@ void func_150F6218(u8 *arg0) {
         return;
     }
     if ((*(s32 *)((u8 *)temp_s0 + 0x1D4)) != 0) {
-        (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((0.26000002f + (func_150ADA68() * 0.19500001f)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((0.26000002f + (random_float() * 0.19500001f)) * D_800BE9A4));
         if ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f) {
             sp.uE4 = 0xFF;
             sp.uE5 = 0xFF;
@@ -394,30 +402,30 @@ void func_150F6218(u8 *arg0) {
             sp.uCC = 0.973034f;
             sp.uF4 = 1.022472f;
             do {
-                temp_v1 = (func_150ADA20() % 21U) + 0x14;
+                temp_v1 = (random_int() % 21U) + 0x14;
                 sp.uF2 = temp_v1;
                 sp.uEE = temp_v1;
                 sp.uF0 = (s16) (0xFF / temp_v1);
                 sp.uDA = temp_v1;
-                sp.uEB = (func_150ADA20() % 26U) + 8;
-                temp_f2 = (func_150ADA68() * 70.0f) + 148.0f;
+                sp.uEB = (random_int() % 26U) + 8;
+                temp_f2 = (random_float() * 70.0f) + 148.0f;
                 sp.uF8 = temp_f2;
                 sp.uFC = temp_f2;
-                sp.u124 = (func_150ADA68() * 0.21900001f) + 0.086f;
-                temp_f2_2 = (func_150ADA68() * 0.041f) + 0.078f;
+                sp.u124 = (random_float() * 0.21900001f) + 0.086f;
+                temp_f2_2 = (random_float() * 0.041f) + 0.078f;
                 sp.u118 = (sp.uB4 - sp.uC0) * temp_f2_2;
                 sp.u11C = (sp.uB8 - sp.uC4) * temp_f2_2;
                 sp.u120 = (sp.uBC - sp.uC8) * temp_f2_2;
-                temp_f2_3 = func_150ADA68() * D_800BE9A4;
+                temp_f2_3 = random_float() * D_800BE9A4;
                 sp.u128 &= ~0xC0;
                 sp.u100 = (sp.u118 * temp_f2_3) + sp.uC0;
                 sp.u104 = (sp.u11C * temp_f2_3) + sp.uC4;
                 sp.u108 = (sp.u120 * temp_f2_3) + sp.uC8;
                 var_s0 = 0;
-                if (func_150ADA20() & 1) {
+                if (random_int() & 1) {
                     var_s0 = 0x80;
                 }
-                if (func_150ADA20() & 1) {
+                if (random_int() & 1) {
                     var_v0 = 0x40;
                 } else {
                     var_v0 = 0;
@@ -433,16 +441,18 @@ void func_150F6218(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/func_150F6218.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/obj_bone_glow_emitter_update.s")
 #endif
-void func_150F66B8(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_150F66B8 */
+void obj_bone_glow_emitter_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, (s32)(arg0 + 0x28), (s32)(arg0 + 0x2C), (s32)arg0);
 }
 
 #ifdef NON_MATCHING
 void func_15145EA4(f32 **, f32 **, void *, s32);
 
-void func_150F66F8(u8 *arg0) {
+/* was func_150F66F8 */
+void obj_bone_fx_pair_update(u8 *arg0) {
     struct {
         f32 * u38;
         s32 * u3C;
@@ -517,9 +527,10 @@ void func_150F66F8(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/func_150F66F8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/obj_bone_fx_pair_update.s")
 #endif
-void func_150F689C(u8 *arg0) {
+/* was func_150F689C */
+void obj_bone_fx_pair_destroy_children(u8 *arg0) {
     struct102 *temp_a0;
 
     if (*(s32 *)(arg0 + 0x30) != 0) {
@@ -531,21 +542,25 @@ void func_150F689C(u8 *arg0) {
     }
 }
 
-void func_150F68E8(void *arg0) {
-    func_150F689C(arg0);
+/* was func_150F68E8 */
+void obj_bone_fx_pair_retire(void *arg0) {
+    obj_bone_fx_pair_destroy_children(arg0);
     func_1514933C(arg0);
 }
 
-void func_150F6914(void *arg0) {
-    func_150F689C(arg0);
+/* was func_150F6914 */
+void obj_bone_fx_pair_free(void *arg0) {
+    obj_bone_fx_pair_destroy_children(arg0);
     func_15149368(arg0);
 }
 
-void func_150F6940(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_150F6940 */
+void obj_bone_fx_pair_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, (s32)(arg0 + 0x28), (s32)(arg0 + 0x2C), (s32)arg0);
 }
 
-void func_150F6980(u8 *arg0)
+/* was func_150F6980 */
+void obj_bone_fx_child_detach(u8 *arg0)
 {
   int new_var;
   s32 *new_var3;
@@ -558,30 +573,35 @@ void func_150F6980(u8 *arg0)
   }
 }
 
-void func_150F69A0(void *arg0) {
-    func_150F6980(arg0);
+/* was func_150F69A0 */
+void obj_bone_fx_child_retire(void *arg0) {
+    obj_bone_fx_child_detach(arg0);
     effect3d_retire(arg0);
 }
 
-void func_150F69CC(void *arg0) {
-    func_150F6980(arg0);
+/* was func_150F69CC */
+void obj_bone_fx_child_free(void *arg0) {
+    obj_bone_fx_child_detach(arg0);
     effect3d_free(arg0);
 }
 
-void func_150F69F8(s32 arg0) {
+/* was func_150F69F8 */
+void obj_bone_fx_light_detach(s32 arg0) {
 }
 
-void func_150F6A04(void *arg0) {
-    func_150F69F8(arg0);
+/* was func_150F6A04 */
+void obj_bone_fx_light_retire(void *arg0) {
+    obj_bone_fx_light_detach(arg0);
     effect_free_buffers_retire(arg0);
 }
 
-void func_150F6A30(void *arg0) {
-    func_150F69F8(arg0);
+/* was func_150F6A30 */
+void obj_bone_fx_light_free(void *arg0) {
+    obj_bone_fx_light_detach(arg0);
     effect_free_buffers_delete(arg0);
 }
 
-s32 func_1510819C(u8 *, s32, f32 *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, u8, u8);
+s32 object_arc_from_point_spawn(u8 *, s32, f32 *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, u8, u8);
 extern f32 D_800A1F00[];
 
 typedef struct {
@@ -591,7 +611,8 @@ typedef struct {
     s16 t6;
 } Sub6A5C;
 
-void func_150F6A5C(u8 *arg0) {
+/* was func_150F6A5C */
+void obj_electric_zap_emitter_update(u8 *arg0) {
     Sub6A5C *s;
     u8 *obj;
     s8 n;
@@ -610,39 +631,41 @@ void func_150F6A5C(u8 *arg0) {
         s->t6 -= D_800BE9E4;
         if (s->t6 < 0) {
             func_10010F88(0x679, 0x18CE, 0, 0, 0, *(f32 *)(obj + 0x14), *(f32 *)(obj + 0x18), *(f32 *)(obj + 0x1C), 0x7918, 0x7D00);
-            n = (func_150ADA20() & 1) + 2;
+            n = (random_int() & 1) + 2;
             goto lbl; // fakematch: scheduling barrier (permuter)
             lbl:
             func_15143134(D_800A1F00, pos, *(u8 **)(obj + 0x1D4));
             header.unk0 = 3;
             header.unk1 = -1;
-            header.unk2 = (func_150ADA20() % 9U) + 0xA;
+            header.unk2 = (random_int() % 9U) + 0xA;
             header.unk4 = 0;
             header2.unk0 = pos[0];
             header2.unk4 = pos[1];
             header2.unk8 = pos[2];
-            light_create_with_ctrl(&header, &header2, (func_150ADA20() % 61U) + 0x3C, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg0[0xC], arg0[1]);
+            light_create_with_ctrl(&header, &header2, (random_int() % 61U) + 0x3C, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg0[0xC], arg0[1]);
             do {
                 col[0] = 0xA0;
                 col[1] = 0xA0;
                 col[2] = 0xFF;
-                col[3] = (func_150ADA20() % 101U) + 0x9B;
-                func_1510819C(obj, 0, D_800A1F00, func_150ADA20() & 0xFF, (func_150ADA20() % 43U) - 0x32, (func_150ADA20() % 18U) + 5, 4, 27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, col, arg0[0xC], arg0[1]);
+                col[3] = (random_int() % 101U) + 0x9B;
+                object_arc_from_point_spawn(obj, 0, D_800A1F00, random_int() & 0xFF, (random_int() % 43U) - 0x32, (random_int() % 18U) + 5, 4, 27.0f, (random_float() * 16.0f) + 20.0f, 0, 2, col, arg0[0xC], arg0[1]);
                 n--;
             } while (n > 0);
-            s->t6 = (func_150ADA20() % 91U) + 0x5A;
+            s->t6 = (random_int() % 91U) + 0x5A;
         }
     }
 }
 
-void func_150F6DD0(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_150F6DD0 */
+void obj_electric_zap_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, (s32)(arg0 + 0x28), (s32)(arg0 + 0x2C), (s32)arg0);
 }
 
 extern f32 D_800A1F40;
 s32 bone_emitter_spawn(void *, s32, u8 *, s16);
 
-void func_150F6E10(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
+/* was func_150F6E10 */
+void obj_bone_spark_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     struct {
         u8 u2C;
         u8 *u30;
@@ -699,7 +722,8 @@ void func_1504715C(void *, u8 *);
 // 1..3 (random). With chance 0.6 the particle gets a floor record from func_1504715C for the object (+0x1C) and
 // then bounces with chance 0.5; otherwise the record says "no floor" (height -10000). Spawned by impact_dust_cloud_spawn
 // with gravity 1.8, the effect's colour (+0xC) and layer (+1) bytes.
-void func_150F6EDC(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5) {
+/* was func_150F6EDC */
+void fx_bone_spark_dust_spawn(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5) {
     struct {
         f32 floor_y;
         s32 unk4[5];
@@ -720,9 +744,9 @@ void func_150F6EDC(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg
     f32 r;
 
     bone_emitter_spark_params(arg0, arg1, arg2, arg3, arg4, arg5, pos, unused, dir, &speed, &angle, &alpha, &size);
-    r = func_150ADA68();
+    r = random_float();
     size *= 1.0f + (r + r);
-    hit = (func_150ADA68() < 0.6f) ? 1 : 0;
+    hit = (random_float() < 0.6f) ? 1 : 0;
     if (hit) {
         func_1504715C(&floor, *(u8 **) (arg5 + 0x1C));
     } else {
@@ -734,7 +758,7 @@ void func_150F6EDC(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg
     }
     bounce = 0;
     if (hit) {
-        if (func_150ADA68() < 0.5f) {
+        if (random_float() < 0.5f) {
             bounce = 1;
         }
     }
@@ -742,5 +766,5 @@ void func_150F6EDC(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg
                   arg5[1]);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/func_150F6EDC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/fx_bone_spark_dust_spawn.s")
 #endif

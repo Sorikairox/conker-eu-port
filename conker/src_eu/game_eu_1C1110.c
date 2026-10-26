@@ -53,7 +53,7 @@ void func_15193900(u8 *arg0) {
     sp.uCB = (*(u8 *)((u8 *)temp_v0 + 8));
     sprite_vtx_quads_init(&sp.u28, 0xFF, 0xFF, 0xFF, 0x80);
     node_spawn_vtx_sprite(&sp.u28, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
-    (*(s16 *)((u8 *)arg0 + 0xE)) = (s16) ((func_150ADA20() & 0x7F) + 0x64);
+    (*(s16 *)((u8 *)arg0 + 0xE)) = (s16) ((random_int() & 0x7F) + 0x64);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1110/func_15193900.s")

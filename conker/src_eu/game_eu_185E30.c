@@ -132,7 +132,7 @@ s32 func_15158AFC(Mtx *arg0, u8 *arg1) {
     f32 mf[4][4];
 
     r = (f32 *)(arg1 + 0xF8);
-    func_150A8050(mf, r[0], r[1], r[2]);
+    mtxf_rotate_xyz_deg(mf, r[0], r[1], r[2]);
     mf[3][0] = *(f32 *)(arg1 + 0x48);
     mf[3][1] = *(f32 *)(arg1 + 0x4C);
     mf[3][2] = *(f32 *)(arg1 + 0x50);

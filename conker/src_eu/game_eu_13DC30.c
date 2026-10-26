@@ -2,13 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_15115244();
+s32 object_sound_position_cb();
 
 
 #ifdef NON_MATCHING
-Gfx *func_15110AC4(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 r, u8 g, u8 b);
-u8 *func_15110C28(u8 *);
-s32 func_15110E44(f32 arg0, f32 arg1, f32 arg2, f32 arg3);
+Gfx *gfx_fill_rect_colour(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 r, u8 g, u8 b);
+u8 *view_frame_clear(u8 *);
+s32 sky_level_distance(f32 arg0, f32 arg1, f32 arg2, f32 arg3);
 extern u8 D_800D9F89, D_800D9F8A, D_800D9F8B, D_800D9F8C, D_800D9F8D, D_800D9F8E, D_800D9F8F, D_800D9F90;
 extern u8 D_800D9F91, D_800D9F92, D_800D9F93, D_800D9F99, D_800D9F9A, D_800D9F9B, D_800D9F9C, D_800D9F9D;
 extern u8 D_800D9F9E, D_800D9F9F, D_800D9FA0, D_800D9FA1, D_800D9FA2, D_800D9FA3;
@@ -18,7 +18,8 @@ extern s16 D_80083336;
 /* camera/overlay draw callbacks, indexed by D_800B0DF0->unk8 */
 extern Gfx *(*D_80089578[])(Gfx *, f32, f32, f32, f32, f32, f32, s32);
 
-Gfx *func_15110420(Gfx *gdl, s32 arg1) {
+/* was func_15110420 */
+Gfx *view_background_draw(Gfx *gdl, s32 arg1) {
     u8 *view;
     struct108 *player;
     f32 yaw;
@@ -56,10 +57,10 @@ Gfx *func_15110420(Gfx *gdl, s32 arg1) {
 
     gdl->words.w0 = 0xD9FFF9FF;
     gdl->words.w1 = 0;
-    gdl = (Gfx *)func_15110C28((u8 *)(gdl + 1));
+    gdl = (Gfx *)view_frame_clear((u8 *)(gdl + 1));
     gDPPipeSync(gdl++);
     if (D_800BEA55 != 0) {
-        gdl = func_15110AC4(gdl, 0, 0, D_800BE620, D_800BE624, 0, 0, 0);
+        gdl = gfx_fill_rect_colour(gdl, 0, 0, D_800BE620, D_800BE624, 0, 0, 0);
     }
     if ((D_800C35EA == 1) && (D_800C3681 != 0)) {
         return gdl;
@@ -95,97 +96,102 @@ Gfx *func_15110420(Gfx *gdl, s32 arg1) {
 
     if (D_800C3682 != 0) {
         u8 *cam = (u8 *)D_800BE628 + D_80082FA4 * 0x180;
-        return func_15110AC4(gdl, (s32)*(f32 *)(cam + 0x2C), (s32)*(f32 *)(cam + 0x24),
+        return gfx_fill_rect_colour(gdl, (s32)*(f32 *)(cam + 0x2C), (s32)*(f32 *)(cam + 0x24),
                              (s32)(*(f32 *)(cam + 0x30) - 1.0f), (s32)*(f32 *)(cam + 0x28), 0x16, 0x1C, 0x1B);
     }
 
-    handle = func_15110E44(x, y, z, yaw);
+    handle = sky_level_distance(x, y, z, yaw);
     if (handle != 0) {
         gdl = D_80089578[D_800B0DF0->unk8](gdl, x, y, z, yaw, pitch, roll, handle);
     }
-    gdl = (Gfx *)func_1501A490((s32)gdl, D_80083336, 0, 0, 0, 0);
+    gdl = (Gfx *)render_set_scissor((s32)gdl, D_80083336, 0, 0, 0, 0);
     gdl->words.w1 = 0x400;
     gdl->words.w0 = 0xD9FFFFFF;
     return gdl + 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110420.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/view_background_draw.s")
 #endif
 void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
-void func_1511084C(f32 (*arg0)[4], f32 arg1, f32 arg2, f32 arg3) {
+/* was func_1511084C */
+void matrix_rotate_ypr(f32 (*arg0)[4], f32 arg1, f32 arg2, f32 arg3) {
     f32 sp28[4][4];
-    func_150A8050(arg0, 0.0f, arg2, 0.0f);
-    func_150A8050(sp28, arg1, 0.0f, 0.0f);
+    mtxf_rotate_xyz_deg(arg0, 0.0f, arg2, 0.0f);
+    mtxf_rotate_xyz_deg(sp28, arg1, 0.0f, 0.0f);
     func_150A7A48(arg0, sp28, arg0);
-    func_150A8050(sp28, 0.0f, 0.0f, arg3);
+    mtxf_rotate_xyz_deg(sp28, 0.0f, 0.0f, arg3);
     func_150A7A48(arg0, sp28, arg0);
 }
 
 void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
-void func_1511084C(f32 (*)[4], f32, f32, f32);
-void func_151108E0(s32 arg0, f32 (*arg1)[4], f32 arg2, f32 arg3, f32 arg4) {
-    func_1511084C(arg1, arg2, arg3, arg4);
+void matrix_rotate_ypr(f32 (*)[4], f32, f32, f32);
+/* was func_151108E0 */
+void camera_view_rotation_matrix(s32 arg0, f32 (*arg1)[4], f32 arg2, f32 arg3, f32 arg4) {
+    matrix_rotate_ypr(arg1, arg2, arg3, arg4);
     func_150A7A48(arg1, (f32 (*)[4])((u8 *)D_800BE628 + arg0 * 0x180 + 0xBC), arg1);
 }
 
 #ifdef NON_MATCHING
-Gfx *func_1501A6CC(Gfx *gdl, s32 ulx, s32 uly, s32 lrx, s32 lry);
+Gfx *render_fill_rect_clamped(Gfx *gdl, s32 ulx, s32 uly, s32 lrx, s32 lry);
 extern u8 D_800DC2D8[];
 
-/* Default camera callback (D_80089578[0], called by func_15110420): clear the current player's viewport
- * (D_800BE628[D_80082FA4] +0x24..0x30) to the level colour D_800DC2D8 via func_15110AC4; in split screen, from
+/* Default camera callback (D_80089578[0], called by view_background_draw): clear the current player's viewport
+ * (D_800BE628[D_80082FA4] +0x24..0x30) to the level colour D_800DC2D8 via gfx_fill_rect_colour; in split screen, from
  * player 0 only, draw the black divider bars (horizontal across the middle; vertical too with 3-4 players). The
  * position / angle arguments are unused. */
-Gfx *func_15110948(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s32 handle) {
+/* was func_15110948 */
+Gfx *view_clear_level_colour(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s32 handle) {
     u8 *cam = (u8 *)D_800BE628 + D_80082FA4 * 0x180;
     s32 h;
 
-    gdl = func_15110AC4(gdl, (s32)*(f32 *)(cam + 0x2C), (s32)*(f32 *)(cam + 0x24), (s32)(*(f32 *)(cam + 0x30) - 1.0f),
+    gdl = gfx_fill_rect_colour(gdl, (s32)*(f32 *)(cam + 0x2C), (s32)*(f32 *)(cam + 0x24), (s32)(*(f32 *)(cam + 0x30) - 1.0f),
                         (s32)*(f32 *)(cam + 0x28), D_800DC2D8[0], D_800DC2D8[1], D_800DC2D8[2]);
     if (D_80082FA0 == 0 || D_80082FA4 != 0) {
         return gdl;
     }
     gdl->words.w0 = 0xE7000000;
     gdl->words.w1 = 0;
-    gdl = (Gfx *)func_1501A490((s32)(gdl + 1), 0xFF, 0, 0, 0, 0);
+    gdl = (Gfx *)render_set_scissor((s32)(gdl + 1), 0xFF, 0, 0, 0, 0);
     gdl->words.w0 = 0xF7000000;
     gdl->words.w1 = 0x10001;
     h = D_800BE624 >> 1;
-    gdl = func_1501A6CC(gdl + 1, 0, h - 6, D_800BE620, h + 6);
+    gdl = render_fill_rect_clamped(gdl + 1, 0, h - 6, D_800BE620, h + 6);
     if (D_80082FA0 != 1) {
         h = D_800BE620 >> 1;
-        gdl = func_1501A6CC(gdl, h - 1, 0, h + 1, D_800BE624);
+        gdl = render_fill_rect_clamped(gdl, h - 1, 0, h + 1, D_800BE624);
     }
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110948.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/view_clear_level_colour.s")
 #endif
-Gfx *func_15110AC4(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 r, u8 g, u8 b) {
+/* was func_15110AC4 */
+Gfx *gfx_fill_rect_colour(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 r, u8 g, u8 b) {
     gDPPipeSync(gdl++);
     gDPSetOtherMode(gdl++, 0x302C0F, 4);
-    gdl = func_1501A680(gdl);
+    gdl = render_set_color_image(gdl);
     gDPSetFillColor(gdl++, (GPACK_RGBA5551(r, g, b, 1) << 16) | GPACK_RGBA5551(r, g, b, 1));
-    return func_1501A6CC(gdl, arg1, arg2, arg3, arg4);
+    return render_fill_rect_clamped(gdl, arg1, arg2, arg3, arg4);
 }
 
 extern u8 D_800DC2D8[];
 #ifdef NON_MATCHING
-// view_border_clear: camera callback D_80089578[3] (dispatcher func_15110420 passes 8 arguments; only gdl is used).
+// view_border_clear: camera callback D_80089578[3] (dispatcher view_background_draw passes 8 arguments; only gdl is used).
 // On levels 0x1B / 0x1E, and on 0x31 while D_800DBFF0's record +0x3D4 has byte +0x78 == 3, fills the rectangle
-// (2, 0)..(D_800BE620 - 2, D_800BE624) with the level colour D_800DC2D8 (func_15110AC4); otherwise draws nothing.
+// (2, 0)..(D_800BE620 - 2, D_800BE624) with the level colour D_800DC2D8 (gfx_fill_rect_colour); otherwise draws nothing.
 // P244: NM signature = the dispatcher's type (it took 4 parameters: a wasm call_indirect signature mismatch).
-Gfx *func_15110B80(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s32 handle) {
+/* was func_15110B80 */
+Gfx *view_border_clear(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s32 handle) {
     if (D_800BE9F0 == 0x1B || D_800BE9F0 == 0x1E
         || (D_800BE9F0 == 0x31 && *(u8 *)((u8 *)D_800DBFF0->unk3D4 + 0x78) == 3)) {
-        gdl = func_15110AC4(gdl, 2, 0, D_800BE620 - 2, D_800BE624, D_800DC2D8[0], D_800DC2D8[1], D_800DC2D8[2]);
+        gdl = gfx_fill_rect_colour(gdl, 2, 0, D_800BE620 - 2, D_800BE624, D_800DC2D8[0], D_800DC2D8[1], D_800DC2D8[2]);
     }
     return gdl;
 }
 #else
-Gfx *func_15110B80(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3) {
+Gfx *view_border_clear(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3) {
     if ((D_800BE9F0 == 0x1B) || (D_800BE9F0 == 0x1E) || ((D_800BE9F0 == 0x31) && (*(u8 *)((u8 *)D_800DBFF0->unk3D4 + 0x78) == 3))) {
-        arg0 = func_15110AC4(arg0, 2, 0, D_800BE620 - 2, D_800BE624, D_800DC2D8[0], D_800DC2D8[1], D_800DC2D8[2]);
+        arg0 = gfx_fill_rect_colour(arg0, 2, 0, D_800BE620 - 2, D_800BE624, D_800DC2D8[0], D_800DC2D8[1], D_800DC2D8[2]);
     }
     return arg0;
 }
@@ -194,7 +200,8 @@ Gfx *func_15110B80(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3) {
 #ifdef NON_MATCHING
 extern u8 D_800BEEE2;
 
-u8 *func_15110C28(u8 *arg0) {
+/* was func_15110C28 */
+u8 *view_frame_clear(u8 *arg0) {
     s32 temp_t5;
     s32 temp_t7;
     u8 *temp_a0;
@@ -222,37 +229,38 @@ u8 *func_15110C28(u8 *arg0) {
         (*(s32 *)((u8 *)temp_a0_3 + 4)) = (s32) D_800BEDE4;
         (*(s32 *)((u8 *)temp_a0_4 + 0)) = 0xF7000000;
         (*(s32 *)((u8 *)temp_a0_4 + 4)) = 0xFFFCFFFC;
-        temp_v0 = func_1501A490((s32) (temp_a0_4 + 8), 0xFF, 0, 0, 0, 0);
+        temp_v0 = render_set_scissor((s32) (temp_a0_4 + 8), 0xFF, 0, 0, 0, 0);
         (*(s32 *)((u8 *)temp_v0 + 4)) = 0x8000;
         (*(s32 *)((u8 *)temp_v0 + 0)) = (s32) ((((D_800BE620 - 2) & 0x3FF) << 0xE) | 0xF6000000 | ((D_800BE624 & 0x3FF) * 4));
         (*(s32 *)((u8 *)temp_v0 + 8)) = 0xE7000000;
         (*(s32 *)((u8 *)temp_v0 + 0xC)) = 0;
-        temp_v0_2 = func_1501A680(temp_v0 + 0x10);
+        temp_v0_2 = render_set_color_image(temp_v0 + 0x10);
         var_a0 = temp_v0_2;
         if (D_80082FA0 != 0) {
             (*(s32 *)((u8 *)temp_v0_2 + 0)) = 0xE7000000;
             (*(s32 *)((u8 *)temp_v0_2 + 4)) = 0;
-            temp_v0_3 = func_1501A490((s32) (var_a0 + 8), 0xFF, 0, 0, 0, 0);
+            temp_v0_3 = render_set_scissor((s32) (var_a0 + 8), 0xFF, 0, 0, 0, 0);
             (*(s32 *)((u8 *)temp_v0_3 + 0)) = 0xF7000000;
             (*(s32 *)((u8 *)temp_v0_3 + 4)) = 0x10001;
             temp_t5 = (s32) D_800BE624 >> 1;
-            var_a0 = func_1501A6CC(temp_v0_3 + 8, 0, temp_t5 - 6, D_800BE620, temp_t5 + 6);
+            var_a0 = render_fill_rect_clamped(temp_v0_3 + 8, 0, temp_t5 - 6, D_800BE620, temp_t5 + 6);
             if (D_80082FA0 != 1) {
                 temp_t7 = (s32) D_800BE620 >> 1;
-                var_a0 = func_1501A6CC(var_a0, temp_t7 - 1, 0, temp_t7 + 1, D_800BE624);
+                var_a0 = render_fill_rect_clamped(var_a0, temp_t7 - 1, 0, temp_t7 + 1, D_800BE624);
             }
             if (D_800BEEE2 != 0) {
-                var_a0 = func_1501A6CC(var_a0, 0, 0, D_800BE620, D_800BE624);
+                var_a0 = render_fill_rect_clamped(var_a0, 0, 0, D_800BE620, D_800BE624);
             }
         }
     }
     return var_a0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110C28.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/view_frame_clear.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15110E44(f32 arg0, f32 arg1, f32 arg2, f32 arg3) {
+/* was func_15110E44 */
+s32 sky_level_distance(f32 arg0, f32 arg1, f32 arg2, f32 arg3) {
     struct {
         s32 u1C;
     } sp;
@@ -356,7 +364,7 @@ block_46:
     return var_v1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110E44.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/sky_level_distance.s")
 #endif
 #ifdef NON_MATCHING
 /* P188: one face of the sky box (D_800A3170, 16 bytes): texture size in texels and two opposite corners; the axis
@@ -366,7 +374,7 @@ typedef struct {
     s16 a[3];
     s16 b[3];
 } SkyFace;
-/* P188: a texture load the vertex builder func_1511127C queued (filled through its pointer argument) */
+/* P188: a texture load the vertex builder sky_box_face_build queued (filled through its pointer argument) */
 typedef struct {
     s32 addr; /* texture (palette at addr + tlut_offset[fmt]) */
     s32 fmt;  /* 0 = 8-bit CI (256 colours), 1 = 4-bit CI (16 colours) */
@@ -375,31 +383,32 @@ extern SkyFace D_800A3170[];
 extern s32 D_800DC2B8[];
 extern s32 D_800DC2E0;
 /* (one line: tools/port/protocheck.py reads single-line prototypes) */
-Gfx *func_1511127C(Gfx *gdl, s32 *vtx, s32 tex, s32 arg3, s32 arg4, u32 w, u32 h, u32 step_s, u32 step_t, f32 x, f32 y, f32 z, s32 axis, f32 (*view)[4], s32 dist, s32 *count, s32 *first, SkyLoad *loads, s32 *last_fmt, u8 *arg19, u8 *arg20, s16 *tlut_offset, u8 *tlut_count, u8 *tile, s32 face);
+Gfx *sky_box_face_build(Gfx *gdl, s32 *vtx, s32 tex, s32 arg3, s32 arg4, u32 w, u32 h, u32 step_s, u32 step_t, f32 x, f32 y, f32 z, s32 axis, f32 (*view)[4], s32 dist, s32 *count, s32 *first, SkyLoad *loads, s32 *last_fmt, u8 *arg19, u8 *arg20, s16 *tlut_offset, u8 *tlut_count, u8 *tile, s32 face);
 #endif
 #ifdef NON_MATCHING
 /* P203 */
 s32 func_150A66F0(f32 *m, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far);
-s32 func_1510D66C(s32, s32 *, s32, s32);
+s32 texture_cache_lookup(s32, s32 *, s32, s32);
 extern f32 D_800A32F0; /* sky tile view-test far distance */
 extern u8 D_800DC2DB;  /* 1 on level 0x3C: load every visible tile's texture, even beyond the distance limit */
 extern u8 D_800DC2DC;  /* bit 0 of D_800D2E4C->unk14: sky 1 face 2 shows the replacement tiles 0x1675.. */
 extern s32 D_800DC2B0; /* sky asset: one format byte per tile (0 = CI8, 1 = CI4) */
 
-// sky_box_face_build: P203: builds one face of the sky box (func_15112074) as a grid of textured quads in the
+// sky_box_face_build: P203: builds one face of the sky box (sky_box_draw) as a grid of textured quads in the
 // frame's vertex buffer and queues their texture loads. The face lies in the plane `axis` ('x' / 'y' / 'z') through
 // the corner (x, y, z) * 8 and spans w x h texels in tiles of step_s x step_t texels (8 world units per texel); rows
 // run down from the corner's second coordinate, columns along its first. Per tile: the view test func_150A66F0
 // (centre of the quad, half sizes step * 8, far D_800A32F0) drops tiles outside the view; for the side faces
 // (face < 4) only the first `dist` rows are kept with dist scaled from 0..320 to 0..rows (rounded up); the texture
 // (tex + col * rows + row, or on sky 1 face 2 with D_800DC2DC the replacement 0x1675 + col * 3 + row - 10 for
-// rows 4..6 / columns 2..3) is fetched with func_1510D66C(id, NULL, 3, 0) and queued in loads[] with the tile's
+// rows 4..6 / columns 2..3) is fetched with texture_cache_lookup(id, NULL, 3, 0) and queued in loads[] with the tile's
 // format byte from the sky asset D_800DC2B0. On the 'y' faces the first and last columns grow by 3 units on each
 // side (hides the seams). Every 16 vertices (4 quads) it emits one G_VTX and per quad the block / palette loads,
 // a tile switch when the format changes (*last_fmt) and two triangles; *count / *first keep the partial batch for
 // the caller, which flushes the rest. arg3 / arg4 are unused. Returns the advanced display list.
 // Port: for an upper-case axis the asm leaves the start coordinates unset (garbage); the C starts them at 0.
-Gfx *func_1511127C(Gfx *gdl, s32 *vtx, s32 tex, s32 arg3, s32 arg4, u32 w, u32 h, u32 step_s, u32 step_t, f32 x, f32 y, f32 z, s32 axis, f32 (*view)[4], s32 dist, s32 *count, s32 *first, SkyLoad *loads, s32 *last_fmt, u8 *arg19, u8 *arg20, s16 *tlut_offset, u8 *tlut_count, u8 *tile, s32 face) {
+/* was func_1511127C */
+Gfx *sky_box_face_build(Gfx *gdl, s32 *vtx, s32 tex, s32 arg3, s32 arg4, u32 w, u32 h, u32 step_s, u32 step_t, f32 x, f32 y, f32 z, s32 axis, f32 (*view)[4], s32 dist, s32 *count, s32 *first, SkyLoad *loads, s32 *last_fmt, u8 *arg19, u8 *arg20, s16 *tlut_offset, u8 *tlut_count, u8 *tile, s32 face) {
     s32 q[4][3]; /* the quad's corners in vertex order */
     s32 vbuf, cur_first, n, fmt_last;
     s32 fx, fy, fz;
@@ -489,7 +498,7 @@ Gfx *func_1511127C(Gfx *gdl, s32 *vtx, s32 tex, s32 arg3, s32 arg4, u32 w, u32 h
                 col < 4) {
                 id = 0x1675 + (col * 3 + row - 10);
             }
-            addr = func_1510D66C(id, NULL, 3, 0);
+            addr = texture_cache_lookup(id, NULL, 3, 0);
             if (D_800DC2DB != 0 && row >= dist) {
                 continue;
             }
@@ -570,24 +579,25 @@ Gfx *func_1511127C(Gfx *gdl, s32 *vtx, s32 tex, s32 arg3, s32 arg4, u32 w, u32 h
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_1511127C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/sky_box_face_build.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P133 */
 void func_10004074(s32);
-void func_1510DC14(s32);
-void func_15111DD8(void);
-s32 func_1502B7F0(s32 *, s32, ...);
+void texture_unref_age3(s32);
+void star_field_generate(void);
+s32 asset_load_ptr(s32 *, s32, ...);
 extern s32 *D_8008955C[];
 
 /*
  * overlay_mode_set: switches the camera overlay (D_800B0DF0: +8 state, +9 overlay id). mode 1: state 1, frees the
- * overlay asset D_800DC2B0 (when loaded) and calls func_15111DD8. Other modes, only when the id changes and the
+ * overlay asset D_800DC2B0 (when loaded) and calls star_field_generate. Other modes, only when the id changes and the
  * state is 4: releases the 0x168 textures of the current overlay (D_8008955C[id], when D_80038080 is set), frees
- * D_800DC2B0, stores the new id and loads its asset (type 0xD) into D_800DC2B0 with func_1502B7F0.
+ * D_800DC2B0, stores the new id and loads its asset (type 0xD) into D_800DC2B0 with asset_load_ptr.
  */
-void func_15111CAC(s32 mode) {
+/* was func_15111CAC */
+void overlay_mode_set(s32 mode) {
     s32 i;
 
     if (mode == 1) {
@@ -595,7 +605,7 @@ void func_15111CAC(s32 mode) {
         if (D_800DC2B0 != 0) {
             func_10004074(D_800DC2B0);
         }
-        func_15111DD8();
+        star_field_generate();
         return;
     }
     if (mode == D_800B0DF0->unk9 || D_800B0DF0->unk8 != 4) {
@@ -603,21 +613,21 @@ void func_15111CAC(s32 mode) {
     }
     if (D_80038080 != 0) {
         for (i = 0; i < 0x168; i++) {
-            func_1510DC14(*D_8008955C[D_800B0DF0->unk9] + i);
+            texture_unref_age3(*D_8008955C[D_800B0DF0->unk9] + i);
         }
     }
     func_10004074(D_800DC2B0);
     D_800B0DF0->unk9 = mode;
-    func_1502B7F0(&D_800DC2B0, 2, 0xD, D_800B0DF0->unk9);
+    asset_load_ptr(&D_800DC2B0, 2, 0xD, D_800B0DF0->unk9);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15111CAC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/overlay_mode_set.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P136 */
 void *allocate_memory(s32, s32, s32, s32);
-s32 func_150ADA20(void); /* random */
+s32 random_int(void); /* random */
 f32 func_150AD78C(f32);  /* sinf */
 f32 func_150AD780(f32);  /* cosf */
 extern f32 D_800A32F4; /* latitude spread scale */
@@ -636,7 +646,8 @@ extern f32 D_800A32FC; /* latitude: degrees -> radians */
 /* the upper halfword of (f32) v, endian-neutral (c: the function's float/word union) */
 #define STAR_FLOAT_HI16(c, v) ((c).f = (f32) (v), (u16) ((c).u >> 16))
 
-void func_15111DD8(void) {
+/* was func_15111DD8 */
+void star_field_generate(void) {
     u8 *star;
     s32 i;
     f32 lon, lat, t, r;
@@ -649,8 +660,8 @@ void func_15111DD8(void) {
     star = allocate_memory(0xFA00, 1, 0, 0);
     D_800DC2B0 = (s32) star;
     for (i = 0; i < 8000; i++, star += 8) {
-        lon = (f32) ((u32) func_150ADA20() % 36000U) * D_800A32F8;
-        t = (f32) (s32) (((u32) func_150ADA20() % 1584400U) - 792100) * D_800A32F4;
+        lon = (f32) ((u32) random_int() % 36000U) * D_800A32F8;
+        t = (f32) (s32) (((u32) random_int() % 1584400U) - 792100) * D_800A32F4;
         if (t >= 0.0f) {
             lat = 89.0f - sqrtf(t);
         } else {
@@ -661,37 +672,38 @@ void func_15111DD8(void) {
         r = sqrtf((f32) (s32) (0x10000 - (u32) (y * y)));
         *(u16 *) (star + 0) = STAR_FLOAT_HI16(c, (s32) (func_150AD78C(lon) * r));
         *(u16 *) (star + 4) = STAR_FLOAT_HI16(c, (s32) (func_150AD780(lon) * r));
-        star[7] = (u32) func_150ADA20() % 191U + 0x40;
-        star[6] = (u32) func_150ADA20() % 5U;
+        star[7] = (u32) random_int() % 191U + 0x40;
+        star[6] = (u32) random_int() % 5U;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15111DD8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/star_field_generate.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P188 */
 
 /*
- * sky_box_draw: camera callback (D_80089578[], same signature as func_15110948) that draws the textured sky box of
+ * sky_box_draw: camera callback (D_80089578[], same signature as view_clear_level_colour) that draws the textured sky box of
  * the current player D_80082FA4. The position arguments are unused. Steps:
- *  - texture on, func_1501A490 (D_80083336) / func_1501A680; on level 60 (and on level 19 in mode D_800C35EA == 1
- *    with D_800C3A08 == 1 or 2) the viewport is first cleared to black through func_15110AC4 (the camera record
- *    D_800BE628[p] +0x24..0x30, as func_15110948);
+ *  - texture on, render_set_scissor (D_80083336) / render_set_color_image; on level 60 (and on level 19 in mode D_800C35EA == 1
+ *    with D_800C3A08 == 1 or 2) the viewport is first cleared to black through gfx_fill_rect_colour (the camera record
+ *    D_800BE628[p] +0x24..0x30, as view_clear_level_colour);
  *  - on level 65 the pitch is turned by -119 degrees (wrapped into [0, 360));
  *  - pipe sync, combiner: plain texture when the sky colour (D_800B0DF0 +5..7) is white, else texture * env colour;
  *    other modes, the 4-bit / 8-bit tile descriptors;
- *  - view matrix: func_1511084C(yaw, pitch, roll) times the camera matrix (+0xBC) into the frame's Mtx
+ *  - view matrix: matrix_rotate_ypr(yaw, pitch, roll) times the camera matrix (+0xBC) into the frame's Mtx
  *    D_800DC2E0[p * 2 + D_800BE9C0], D_80089810 as the projection, perspective normalisation (+0xB8);
  *  - faces `first`..`last - 1` (0..4; 4..4 on level 25; 0..5 on level 12): faces 0..3 (the sides, every 90 degrees
  *    of pitch) only when the pitch is within the field of view (95 degrees in mode D_80082FA0 == 1, else 80) of the
- *    face, faces 4 / 5 (down / up) by the yaw, face 5 only from distance `dist` >= 300. func_1511127C builds each
+ *    face, faces 4 / 5 (down / up) by the yaw, face 5 only from distance `dist` >= 300. sky_box_face_build builds each
  *    face's quads into the frame's vertex buffer D_800DC2B8[p * 2 + D_800BE9C0] and queues the texture loads (the
  *    face's textures D_8008955C[sky +9][face, 0 for face 5]);
  *  - one G_VTX for all `count` vertices, then per quad (4 vertices): load its texture block and palette (tile
  *    changes only when the format does) and two triangles.
  */
-Gfx *func_15112074(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s32 dist) {
+/* was func_15112074 */
+Gfx *sky_box_draw(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s32 dist) {
     u8 tile[2];        /* {0, 1} */
     u8 tlut_count[2];  /* {0xFF, 0x0F} */
     s16 tlut_offset[2]; /* {0x800, 0x400} */
@@ -726,8 +738,8 @@ Gfx *func_15112074(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, 
     arg19[1] = 4;
     gdl->words.w0 = 0xD7000002;
     gdl->words.w1 = 0xFFFFFFFF;
-    gdl = (Gfx *) func_1501A490((s32) (gdl + 1), D_80083336, 0, 0, 0, 0);
-    gdl = (Gfx *) func_1501A680(gdl);
+    gdl = (Gfx *) render_set_scissor((s32) (gdl + 1), D_80083336, 0, 0, 0, 0);
+    gdl = (Gfx *) render_set_color_image(gdl);
     if (D_80082FA0 == 1) {
         fov = 95.0f;
     } else {
@@ -741,7 +753,7 @@ Gfx *func_15112074(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, 
     } else if (D_800BE9F0 == 60 ||
                (D_800BE9F0 == 19 && D_800C35EA == 1 && (D_800C3A08 == 2 || D_800C3A08 == 1))) {
         cam = (u8 *) D_800BE628 + D_80082FA4 * 0x180;
-        gdl = func_15110AC4(gdl, (s32) *(f32 *) (cam + 0x2C), (s32) *(f32 *) (cam + 0x24),
+        gdl = gfx_fill_rect_colour(gdl, (s32) *(f32 *) (cam + 0x2C), (s32) *(f32 *) (cam + 0x24),
                             (s32) (*(f32 *) (cam + 0x30) - 1.0f), (s32) *(f32 *) (cam + 0x28), 0, 0, 0);
     }
     sky = (u8 *) D_800B0DF0;
@@ -784,7 +796,7 @@ Gfx *func_15112074(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, 
     gdl->words.w0 = 0xF5000100;
     gdl->words.w1 = 0x06000000;
     gdl++;
-    func_1511084C(view, yaw, pitch, roll);
+    matrix_rotate_ypr(view, yaw, pitch, roll);
     func_150A7A48(view, (f32 (*)[4]) ((u8 *) D_800BE628 + D_80082FA4 * 0x180 + 0xBC), m);
     guMtxF2L(m, (Mtx *) D_800DC2E0 + (D_80082FA4 * 2 + D_800BE9C0));
     gdl->words.w0 = 0xDA380007;
@@ -852,7 +864,7 @@ Gfx *func_15112074(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, 
             axis = 'z';
         }
         face = (i == 5) ? 0 : i;
-        gdl = func_1511127C(gdl, &vtx, texs[face], 0, 2, f->w, f->h, 60, 30, f->a[0], f->a[1], f->a[2], axis, view, dist,
+        gdl = sky_box_face_build(gdl, &vtx, texs[face], 0, 2, f->w, f->h, 60, 30, f->a[0], f->a[1], f->a[2], axis, view, dist,
                             &count, &first_vtx, loads, &last_fmt, arg19, arg20, tlut_offset, tlut_count, tile, face);
     }
     if (count != 0) {
@@ -897,14 +909,15 @@ Gfx *func_15112074(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, 
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15112074.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/sky_box_draw.s")
 #endif
 
 #ifdef NON_MATCHING
 extern s16 D_800895D4;
 extern f32 D_800DC2F0;
 
-void func_15112AA0(u8 *arg0) {
+/* was func_15112AA0 */
+void world_object_turn_to_player(u8 *arg0) {
     f32 sp58;
     f32 sp4C;
     f32 sp40;
@@ -981,7 +994,7 @@ void func_15112AA0(u8 *arg0) {
         }
         sp4C = var_f16_2;
         sp3C = temp_t0;
-        temp_f0_2 = func_15048A70((*(f32 *)((u8 *)temp_t0 + 0x24)), var_f20_2);
+        temp_f0_2 = math_angle_diff_deg((*(f32 *)((u8 *)temp_t0 + 0x24)), var_f20_2);
         var_f16_3 = var_f16_2;
         if (var_f16_3 > 180.0f) {
             var_f16_3 -= 360.0f;
@@ -1028,7 +1041,7 @@ void func_15112AA0(u8 *arg0) {
     }
     sp4C = var_f16;
     sp3C = temp_t0;
-    temp_f0_4 = func_15048A70((*(f32 *)((u8 *)arg0 + 4)), var_f20);
+    temp_f0_4 = math_angle_diff_deg((*(f32 *)((u8 *)arg0 + 4)), var_f20);
     var_f12 = temp_f0_4;
     temp_f0_5 = fabsf(temp_f0_4);
     temp_f14_3 = (*(f32 *)((u8 *)temp_t0 + 8));
@@ -1051,7 +1064,7 @@ void func_15112AA0(u8 *arg0) {
         (*(f32 *)((u8 *)arg0 + 4)) = (f32) (temp_f0_6 - 360.0f);
     }
     sp3C = temp_t0;
-    temp_f0_7 = func_15048A70((*(f32 *)((u8 *)arg0 + 0)), 360.0f - var_f16);
+    temp_f0_7 = math_angle_diff_deg((*(f32 *)((u8 *)arg0 + 0)), 360.0f - var_f16);
     var_a1 = D_800895D4;
     (*(f32 *)((u8 *)arg0 + 0)) = (f32) ((*(f32 *)((u8 *)arg0 + 0)) + (temp_f0_7 * sp40));
     if ((var_a1 == 0) && (fabsf(temp_f0_7) > 4.0f)) {
@@ -1076,7 +1089,7 @@ void func_15112AA0(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15112AA0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_object_turn_to_player.s")
 #endif
 #ifdef NON_MATCHING
 extern u8 D_800C3A7C;
@@ -1089,7 +1102,7 @@ s32 func_15022BB0(s32, s32);
 s32 func_1503FAF0(u8 *, s16, s16, s32, s32);
 s32 func_150A6840(s32 cam, s32 *mtx, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far);
 
-/* world_records_build_visible: per frame (func_15019130 path, view arg0), for every active player view
+/* world_records_build_visible: per frame (world_update path, view arg0), for every active player view
  * (func_150859AC(player, 0)) rebuilds the list of visible world-object records (0xA0 bytes, D_800DBEF4[0 ..
  * D_800DC320 - 1]). Records come in groups: a record's +0x70 >> 4 is the number of records following it in the group.
  * For each record the player's bit in +0x6F is cleared; a record takes part unless it is kind 1 (+0x6E), hidden
@@ -1102,7 +1115,8 @@ s32 func_150A6840(s32 cam, s32 *mtx, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far
  * distance +0x88, fades out by D_800BE9E4 * 10 per frame below it and in above it (0 = not visible), without one 0xFF.
  * If any record of a group is visible, every record of the group gets the player's +0x6F bit and an entry
  * (index, depth) in the player's list D_800895E0[player] (length D_800DC318[player]). */
-void func_15113000(s32 view) {
+/* was func_15113000 */
+void world_records_build_visible(s32 view) {
     s32 depth[16];
     s32 player;
     s32 cam;
@@ -1198,11 +1212,12 @@ void func_15113000(s32 view) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15113000.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_records_build_visible.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_15113700(void) {
+/* was func_15113700 */
+void world_records_flag_active(void) {
     s32 var_v0;
     s32 var_v1;
     u8 *temp_a0;
@@ -1226,26 +1241,27 @@ void func_15113700(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15113700.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_records_flag_active.s")
 #endif
 #ifdef NON_MATCHING
-void func_150A7B80(Mtx *arg0);
-void func_15114E8C(f32 (*arg0)[4], u8 *arg1);
+void mtx_set_identity(Mtx *arg0);
+void world_record_build_matrix(f32 (*arg0)[4], u8 *arg1);
 extern s32 D_800895E0[];     /* per group: pointer to the group's entry list pointer (entries: u16 record id, u16) */
 extern s32 D_800895F0[];     /* per DL buffer: pointer to the matrix array pointer (one Mtx per record id) */
 extern u16 D_800DC318[];     /* per group: entry count */
 extern f32 D_800DC338[][4][4]; /* per DL buffer: fallback matrix */
 
-/* world_records_update_matrices: per-frame matrix pass over the world-object records (called by func_15019130, the
+/* world_records_update_matrices: per-frame matrix pass over the world-object records (called by world_update, the
  * world update). For each group 0..D_80082FA0 that func_150859AC(group, 0) accepts, every listed record id gets its
  * Mtx in the current DL buffer's array (D_800895F0[D_800BE9C0]):
- *  - disabled record (+0x70 & 1): func_150A7B80;
- *  - kind +0x4E 3: left as it is; kind < 3: from func_15114E8C (record orientation / position);
+ *  - disabled record (+0x70 & 1): mtx_set_identity;
+ *  - kind +0x4E 3: left as it is; kind < 3: from world_record_build_matrix (record orientation / position);
  *  - kind 0x65..0x7C (follows object D_800CC2D0[kind - 100]): rotation from the record angles +0x2C / +0x30 /
- *    +0x34 (func_150A7CB0) at the object's position +0x14; with an attachment +0x1D4, at its +0x30 position,
- *    raised by the object's +0x90 (func_150442C0), and that point is written back to the record (+0x10 / 12 / 14);
+ *    +0x34 (mtxf_scale) at the object's position +0x14; with an attachment +0x1D4, at its +0x30 position,
+ *    raised by the object's +0x90 (mtxf_translate_local), and that point is written back to the record (+0x10 / 12 / 14);
  *  - any other kind: the buffer's fallback matrix D_800DC338[D_800BE9C0]. */
-void func_15113798(void) {
+/* was func_15113798 */
+void world_records_update_matrices(void) {
     f32 mf[4][4];
     s32 group;
     s32 j;
@@ -1263,7 +1279,7 @@ void func_15113798(void) {
             id = *(u16 *)(*(u8 **)D_800895E0[group] + j * 4);
             rec = (u8 *)D_800DBEF4 + id * 0xA0;
             if ((rec[0x70] & 1) == 1) {
-                func_150A7B80((Mtx *)(*(u8 **)D_800895F0[D_800BE9C0] + id * 0x40));
+                mtx_set_identity((Mtx *)(*(u8 **)D_800895F0[D_800BE9C0] + id * 0x40));
                 continue;
             }
             kind = rec[0x4E];
@@ -1271,21 +1287,21 @@ void func_15113798(void) {
                 continue;
             }
             if (kind < 3) {
-                func_15114E8C(mf, rec);
+                world_record_build_matrix(mf, rec);
             } else if (kind >= 0x65 && kind < 0x7D) {
                 obj = (u8 *)D_800CC2D0 + (kind - 100) * 0x32C;
                 if (*(u8 **)(obj + 0x1D4) == NULL) {
-                    func_150A7CB0(mf, *(s32 *)(rec + 0x2C), *(s32 *)(rec + 0x30), *(s32 *)(rec + 0x34));
+                    mtxf_scale(mf, *(s32 *)(rec + 0x2C), *(s32 *)(rec + 0x30), *(s32 *)(rec + 0x34));
                     mf[3][0] = *(f32 *)(obj + 0x14);
                     mf[3][1] = *(f32 *)(obj + 0x18);
                     mf[3][2] = *(f32 *)(obj + 0x1C);
                 } else {
                     att = *(u8 **)(obj + 0x1D4);
-                    func_150A7CB0(mf, *(s32 *)(rec + 0x2C), *(s32 *)(rec + 0x30), *(s32 *)(rec + 0x34));
+                    mtxf_scale(mf, *(s32 *)(rec + 0x2C), *(s32 *)(rec + 0x30), *(s32 *)(rec + 0x34));
                     mf[3][0] = *(f32 *)(att + 0x30);
                     mf[3][1] = *(f32 *)(att + 0x34);
                     mf[3][2] = *(f32 *)(att + 0x38);
-                    func_150442C0(mf, 0.0f, (f32) * (s16 *)(obj + 0x90), 0.0f);
+                    mtxf_translate_local(mf, 0.0f, (f32) * (s16 *)(obj + 0x90), 0.0f);
                     *(s16 *)(rec + 0x10) = (s32)mf[3][0];
                     *(s16 *)(rec + 0x12) = (s32)mf[3][1];
                     *(s16 *)(rec + 0x14) = (s32)mf[3][2];
@@ -1300,13 +1316,13 @@ void func_15113798(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15113798.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_records_update_matrices.s")
 #endif
 
 #ifdef NON_MATCHING
 s32 func_15173948(s32 arg0, s32 arg1);
 u8 *func_1515EAB4(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4);
-s32 func_15113D54(s32, u8 *, s32, s16, s32, s32);
+s32 world_mesh_draw(s32, u8 *, s32, s16, s32, s32);
 extern s32 D_800895E0[];
 extern s32 D_800895F0[];
 extern u8 D_800D9FF0[];
@@ -1316,10 +1332,11 @@ extern u8 D_800DA241;
 extern u16 D_800DC318[];
 
 /* Draws the sky/world mesh list of player arg2: geometry-mode setup, the player's light block
- * (func_1515EAB4), then one func_15113D54 per entry of the player's u16-pair list
+ * (func_1515EAB4), then one world_mesh_draw per entry of the player's u16-pair list
  * (entry index into the 0xA0-byte D_800DBEF4 records, extra value), then a fixed matrix pop
  * and the geometry-mode reset. arg1 != 0 passes flag 0x10 to every entry. */
-Gfx *func_15113B44(Gfx *arg0, s32 arg1, s16 arg2) {
+/* was func_15113B44 */
+Gfx *world_meshes_draw_player(Gfx *arg0, s32 arg1, s16 arg2) {
     s32 flags;
     s32 i;
     u8 *gdl;
@@ -1341,7 +1358,7 @@ Gfx *func_15113B44(Gfx *arg0, s32 arg1, s16 arg2) {
     for (i = 0; i < D_800DC318[arg2]; i++) {
         entry = (u16 *) (*(u8 **) D_800895E0[arg2] + i * 4);
         idx = entry[0];
-        gdl = (u8 *) func_15113D54((s32) gdl, (u8 *) D_800DBEF4 + idx * 0xA0,
+        gdl = (u8 *) world_mesh_draw((s32) gdl, (u8 *) D_800DBEF4 + idx * 0xA0,
                                    (idx << 6) + *(s32 *) D_800895F0[D_800BE9C0], arg2, entry[1], flags);
     }
     *(s32 *) (gdl + 0x0) = 0xDA380003;
@@ -1353,12 +1370,12 @@ Gfx *func_15113B44(Gfx *arg0, s32 arg1, s16 arg2) {
     return (Gfx *) (gdl + 0x18);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15113B44.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_meshes_draw_player.s")
 #endif
 #ifdef NON_MATCHING
 /* P183 */
-Gfx *func_1510D338(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3);
-u8 *func_1510DE40(u8 *arg0, s32 arg1);
+Gfx *tint_emit_prim_env_colors(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3);
+u8 *segment_override_emit(u8 *arg0, s32 arg1);
 Gfx *func_150CFAF8(Gfx *gdl);
 Gfx *func_150A55A0(s32, Gfx *, u8 *, s32, s32, s32);
 extern u8 D_800840D0[];   /* combiner/othermode block for translucent meshes (segment 6 + 0x20) */
@@ -1370,11 +1387,12 @@ extern s32 D_800BEFC4;    /* display list capacity (commands) */
 // obj[0x8B + player] * obj[0x8A] / 255 (0xFF when both are 0xFF), nothing when 0 or when the opaque/translucent
 // pass flag `pass` (0 or 0x10) does not match (opaque meshes draw only when obj[0x4F] & 0x10 differs from pass,
 // translucent ones only in pass 0). Flags obj+0x6C bits 0/4/5 call the debug position hooks. Then pipe sync,
-// render-mode block (D_800840D0 translucent / D_80084250 opaque), cull mode (obj[0x4F] & 2), func_1510D338 colour
-// (0xFF, alpha), func_1510DE40, segment 1 = obj+0x20[frame], matrix `mtx`, optional func_150CFAF8 (flag 0x200),
+// render-mode block (D_800840D0 translucent / D_80084250 opaque), cull mode (obj[0x4F] & 2), tint_emit_prim_env_colors colour
+// (0xFF, alpha), segment_override_emit, segment 1 = obj+0x20[frame], matrix `mtx`, optional func_150CFAF8 (flag 0x200),
 // the mesh (func_150A55A0 when obj[0x70] & 2, else a G_DL to obj+0x1C). Returns the new gdl, or the start when
 // the frame display list overflows. `unused` is never read.
-s32 func_15113D54(s32 arg0, u8 *obj, s32 mtx, s16 player, s32 unused, s32 pass) {
+/* was func_15113D54 */
+s32 world_mesh_draw(s32 arg0, u8 *obj, s32 mtx, s16 player, s32 unused, s32 pass) {
     Gfx *gdl = (Gfx *) arg0;
     Gfx *start = gdl;
     s32 a = obj[0x8B + player];
@@ -1435,8 +1453,8 @@ s32 func_15113D54(s32 arg0, u8 *obj, s32 mtx, s16 player, s32 unused, s32 pass) 
     gdl->words.w0 = 0xD9FFFFFF;
     gdl->words.w1 = 0x20000;
     gdl++;
-    gdl = func_1510D338(gdl, 0xFF, alpha, player);
-    gdl = (Gfx *) func_1510DE40((u8 *) gdl, (s32) obj);
+    gdl = tint_emit_prim_env_colors(gdl, 0xFF, alpha, player);
+    gdl = (Gfx *) segment_override_emit((u8 *) gdl, (s32) obj);
     if (pass == 0) {
         gdl->words.w0 = 0xD9FFFFFF;
         gdl->words.w1 = 0x110000;
@@ -1474,14 +1492,15 @@ s32 func_15113D54(s32 arg0, u8 *obj, s32 mtx, s16 player, s32 unused, s32 pass) 
     return (s32) gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15113D54.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_mesh_draw.s")
 #endif
 
 extern u8 D_800C3A7C;
 s32 func_15022BB0(s32, s32);
-void *func_1510DEF0(s32, struct131 *, s32, s32, s32);
+void *blob_shadow_create(s32, struct131 *, s32, s32, s32);
 
-void func_15114208(void) {
+/* was func_15114208 */
+void world_records_update_shadows(void) {
     s32 i;
     s32 j;
     s32 found;
@@ -1507,7 +1526,7 @@ void func_15114208(void) {
         }
         if (ok) {
             if (*(void **)((u8 *)e + 0x94) == NULL) {
-                *(void **)((u8 *)e + 0x94) = func_1510DEF0(1, e, 0, 1, 0);
+                *(void **)((u8 *)e + 0x94) = blob_shadow_create(1, e, 0, 1, 0);
             }
         } else if (*(struct102 **)((u8 *)e + 0x94) != NULL) {
             node_destroy(*(struct102 **)((u8 *)e + 0x94));
@@ -1517,7 +1536,7 @@ void func_15114208(void) {
 }
 
 #ifdef NON_MATCHING
-/* the D_800DBEF4 record fields func_151143D4 uses (0xA0 bytes) */
+/* the D_800DBEF4 record fields world_records_run_callbacks uses (0xA0 bytes) */
 typedef struct {
     u8  pad0[0x38];
     void (*update)(void *);   /* 0x38 */
@@ -1544,7 +1563,8 @@ extern s32 D_800DC3C8;
 /* Runs the update callback of every pending record (flags & 0x40, not busy): first the first
  * D_800DC320 - D_800DC3C8 records, then the type-2 groups. In a group, the first record's position (0x5A..0x5E)
  * and 0x80 value are copied to each following member before its update. arg0 is not used. */
-void func_151143D4(s32 arg0) {
+/* was func_151143D4 */
+void world_records_run_callbacks(s32 arg0) {
     Rec151143D4 *rec;
     Group151143D4 *grp;
     s16 x, y, z;
@@ -1592,12 +1612,13 @@ void func_151143D4(s32 arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151143D4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_records_run_callbacks.s")
 #endif
 
 extern s32 *D_800DC3C4;
 
-s32 func_151145D0(struct131 *arg0, s32 arg1) {
+/* was func_151145D0 */
+s32 world_record_touched_by(struct131 *arg0, s32 arg1) {
     if (*((u8 *)arg0 + 0x4F) & 0x80) {
         if (arg1 == -1) {
             return 1;
@@ -1609,7 +1630,8 @@ s32 func_151145D0(struct131 *arg0, s32 arg1) {
     return 0;
 }
 
-s32 func_15114644(u8 *arg0) {
+/* was func_15114644 */
+s32 world_record_first_toucher(u8 *arg0) {
     s32 i;
     s32 v;
     s32 m; // fakematch: mask temp fixes the and operand order
@@ -1632,11 +1654,12 @@ loop:
 }
 
 #ifdef NON_MATCHING
-void func_15114CBC(struct127 *, s32);
+void world_object_timer_update(struct127 *, s32);
 extern s32 *D_800DC3C4;
 typedef void (*fn15114708)(u8 *, struct127 *, u8 *, void *);
 
-void func_15114708(void) {
+/* was func_15114708 */
+void world_records_dispatch_touches(void) {
     s32 i;
     s32 j;
     s32 *mask;
@@ -1666,7 +1689,7 @@ void func_15114708(void) {
             }
             f = e[0x4F];
             if ((f & 4) == 4 && !(f & 8)) {
-                func_15114CBC(obj, i);
+                world_object_timer_update(obj, i);
             }
         }
         e = (u8 *)D_800DBEF4 + i * 0xA0;
@@ -1674,7 +1697,7 @@ void func_15114708(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114708.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_records_dispatch_touches.s")
 #endif
 #ifdef NON_MATCHING
 /* P136 */
@@ -1688,7 +1711,8 @@ void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
  * Rare's result kept: each coordinate gets s16 offset (+0x5A/+0x5C/+0x5E) + (rotated - unrotated) added, where
  * the unrotated value is relative to the pivot.
  */
-void func_151148C8(s32 idx, f32 *px, f32 *py, f32 *pz) {
+/* was func_151148C8 */
+void world_object_rotate_point(s32 idx, f32 *px, f32 *py, f32 *pz) {
     f32 ax[3], ay[3], az[3];
     f32 m2[4][4];
     f32 m[4][4];
@@ -1739,22 +1763,23 @@ void func_151148C8(s32 idx, f32 *px, f32 *py, f32 *pz) {
     *pz += rz;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151148C8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_object_rotate_point.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P133 */
-void func_151148C8(s32, f32 *, f32 *, f32 *);
+void world_object_rotate_point(s32, f32 *, f32 *, f32 *);
 extern f32 D_800A3330;   /* world-object timer scale */
 extern u16 D_800CC1C0[]; /* per object: world-object index + 1 it follows */
 
 /*
  * world_object_timer_update: for a visible world-object record idx (< D_800DC320) and its object, refreshes the
- * object's +0x14 / +0x18 / +0x1C (func_151148C8) and advances its u16 timer +0x76 by the record's +0x64 speed
+ * object's +0x14 / +0x18 / +0x1C (world_object_rotate_point) and advances its u16 timer +0x76 by the record's +0x64 speed
  * times D_800A3330 (float -> unsigned as IDO, stored as u16); when the object's +0x137 flag is set and its
  * D_800CC1C0 entry (index from the 0x32C-byte array D_800CC2D0) is idx + 1, +0x7A gets the same value.
  */
-void func_15114CBC(struct127 *arg0, s32 idx) {
+/* was func_15114CBC */
+void world_object_timer_update(struct127 *arg0, s32 idx) {
     u8 *obj = (u8 *) arg0;
     u8 *rec;
     u32 t;
@@ -1762,7 +1787,7 @@ void func_15114CBC(struct127 *arg0, s32 idx) {
     if (obj == NULL || idx >= D_800DC320) {
         return;
     }
-    func_151148C8(idx, (f32 *) (obj + 0x14), (f32 *) (obj + 0x18), (f32 *) (obj + 0x1C));
+    world_object_rotate_point(idx, (f32 *) (obj + 0x14), (f32 *) (obj + 0x18), (f32 *) (obj + 0x1C));
     rec = (u8 *) D_800DBEF4 + idx * 0xA0;
     t = (f32) *(u16 *) (obj + 0x76) + *(f32 *) (rec + 0x64) * D_800A3330;
     *(u16 *) (obj + 0x76) = t;
@@ -1771,32 +1796,35 @@ void func_15114CBC(struct127 *arg0, s32 idx) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114CBC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_object_timer_update.s")
 #endif
 
 void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
-void func_15114E28(f32 (*arg0)[4], u8 *arg1) {
+/* was func_15114E28 */
+void world_record_base_rotation(f32 (*arg0)[4], u8 *arg1) {
     f32 sp18[4][4];
-    func_150A8050(arg0, 0.0f, *(f32 *)(arg1 + 4), 0.0f);
-    func_150A8050(sp18, *(f32 *)arg1, 0.0f, *(f32 *)(arg1 + 8));
+    mtxf_rotate_xyz_deg(arg0, 0.0f, *(f32 *)(arg1 + 4), 0.0f);
+    mtxf_rotate_xyz_deg(sp18, *(f32 *)arg1, 0.0f, *(f32 *)(arg1 + 8));
     func_150A7A48(sp18, arg0, arg0);
 }
 
-void func_15114E8C(f32 (*arg0)[4], u8 *arg1) {
+/* was func_15114E8C */
+void world_record_build_matrix(f32 (*arg0)[4], u8 *arg1) {
     f32 sp20[4][4];
 
-    func_15114E28(arg0, arg1);
+    world_record_base_rotation(arg0, arg1);
     (*(f32 *)((u8 *)arg0 + 0x30)) = *(s16 *)(arg1 + 0x10);
     (*(f32 *)((u8 *)arg0 + 0x34)) = *(f32 *)(arg1 + 0x18) + *(s16 *)(arg1 + 0x12);
     (*(f32 *)((u8 *)arg0 + 0x38)) = *(s16 *)(arg1 + 0x14);
-    func_150A7CB0(sp20, *(s32 *)(arg1 + 0x2C), *(s32 *)(arg1 + 0x30), *(s32 *)(arg1 + 0x34));
+    mtxf_scale(sp20, *(s32 *)(arg1 + 0x2C), *(s32 *)(arg1 + 0x30), *(s32 *)(arg1 + 0x34));
     func_150A7A48(sp20, arg0, arg0);
 }
 
 #ifdef NON_MATCHING
 // world_record_find: returns the world-object record (0xA0 bytes, D_800DBEF4[0 .. D_800DC320 - 1]) whose id byte
 // +0x72 equals id, or NULL; id 0 never matches. Scene tracks with ref kind 3 and scene event 5 / 3 look records up here.
-u8 *func_151149AC(u8 id) {
+/* was func_151149AC */
+u8 *world_record_find(u8 id) {
     u8 *rec;
     s32 i;
 
@@ -1812,7 +1840,7 @@ u8 *func_151149AC(u8 id) {
     return NULL;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151149AC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_record_find.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -1821,7 +1849,8 @@ u8 *func_151149AC(u8 id) {
  * kept (0x6F & 0x80). Otherwise a live block is freed at once, or, for kept / type-3 entries (0x4E),
  * after its D_800DC32C[i] frame countdown reaches 0. */
 void func_10004074(s32);
-void func_15114F9C(void) {
+/* was func_15114F9C */
+void world_records_release_blocks(void) {
     s32 i;
 
     for (i = 0; i < D_800DC320; i++) {
@@ -1845,11 +1874,12 @@ void func_15114F9C(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114F9C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_records_release_blocks.s")
 #endif
 extern s32 D_800DC3C8;
 
-void func_15115114(u32 arg0) {
+/* was func_15115114 */
+void world_record_remove(u32 arg0) {
     struct131 *p;
     u32 j;
 
@@ -1883,7 +1913,8 @@ void func_15115114(u32 arg0) {
     }
 }
 
-s32 func_15115244(u8 *arg0, s32 arg1, s32 *arg2, s32 arg3) {
+/* was func_15115244 */
+s32 object_sound_position_cb(u8 *arg0, s32 arg1, s32 *arg2, s32 arg3) {
     u8 *temp_v1;
 
     temp_v1 = (*(u8 **)((u8 *)arg0 + 0x18));
@@ -1906,10 +1937,11 @@ s32 func_15115244(u8 *arg0, s32 arg1, s32 *arg2, s32 arg3) {
  * the handle (func_100111C8) and clears it. flags 8: start a new voice instead of reusing the handle. flags 4:
  * func_10010E78 (one-shot at the position, volume vol, ranges r0 / r1); the handle is cleared unless flags 8.
  * flags 2: releases the old handle (func_1001123C) and stores func_10010E78's new one. Otherwise releases it and
- * starts a tracked sound with func_1000FA64 (update callback func_15115244 with the object). Returns 0 (callers
+ * starts a tracked sound with func_1000FA64 (update callback object_sound_position_cb with the object). Returns 0 (callers
  * declare s32 and ignore it; the asm returns nothing).
  */
-s32 func_151152A4(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags) {
+/* was func_151152A4 */
+s32 world_object_sound_play(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags) {
     u16 *handle = (u16 *) (obj + 0x74);
     s16 *pos = (s16 *) (obj + 0x10);
     u16 h;
@@ -1940,16 +1972,17 @@ s32 func_151152A4(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags) {
         if (h != 0) {
             func_1001123C(h);
         }
-        *handle = func_1000FA64(sound, pos[0], pos[1], pos[2], vol, r1, r0, (s32) func_15115244, obj, 0, 0, 0);
+        *handle = func_1000FA64(sound, pos[0], pos[1], pos[2], vol, r1, r0, (s32) object_sound_position_cb, obj, 0, 0, 0);
     }
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151152A4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_object_sound_play.s")
 #endif
 
-void func_15115484(s32 arg0, s32 arg1, s32 arg2) {
-    func_1001001C(func_15115244, arg0, 0, arg1, arg2);
+/* was func_15115484 */
+void object_sound_set_volume_pitch(s32 arg0, s32 arg1, s32 arg2) {
+    func_1001001C(object_sound_position_cb, arg0, 0, arg1, arg2);
 }
 
 s32 func_150ADC50();
@@ -1957,7 +1990,8 @@ extern s32 D_800DC3CC;
 extern s32 D_800DC3D0;
 extern s32 D_800DC3D4;
 
-void func_151154C4(s32 arg0, s32 arg1, s32 arg2)
+/* was func_151154C4 */
+void level_tri_tables_check(s32 arg0, s32 arg1, s32 arg2)
 {
     s32 i;
     s32 j;

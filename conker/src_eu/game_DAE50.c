@@ -7,7 +7,8 @@
 // some mips3/64bit stuff going on here
 
 #ifdef NON_MATCHING
-s32 func_150AD9A0(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_150AD9A0 */
+s32 approx_dist3_int(s32 arg0, s32 arg1, s32 arg2) {
     s32 temp_a1;
     s32 temp_a2;
     s32 temp_v0;
@@ -42,10 +43,10 @@ s32 func_150AD9A0(s32 arg0, s32 arg1, s32 arg2) {
     return ((u32) (var_a1 * 0xB) >> 5) + (((u32) var_a2 >> 2) + var_a0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DAE50/func_150AD9A0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_DAE50/approx_dist3_int.s")
 #endif
 // NON-MATCHING: I am nothing without mip2c.
-// s32 func_150AD9A0(s32 arg0, s32 arg1, s32 arg2) {
+// s32 approx_dist3_int(s32 arg0, s32 arg1, s32 arg2) {
 //     s32 v0;
 //     s32 tmp0 = (s32)arg0; // = arg0;
 //     s32 tmp1 = (s32)arg1;
@@ -132,8 +133,9 @@ s32 func_150AD9A0(s32 arg0, s32 arg1, s32 arg2) {
 extern s64 D_80088950;
 
 /* random_int: (P106) one step of the 64-bit shift-register generator in D_80088950 (MIPS III ld / sd; the same step
- * as func_150ADA68), the low word of the new state returned. Model-checked (docs/port/sessions/p106/ada20). */
-s32 func_150ADA20(void) {
+ * as random_float), the low word of the new state returned. Model-checked (docs/port/sessions/p106/ada20). */
+/* was func_150ADA20 */
+s32 random_int(void) {
     u64 x = (u64) D_80088950;
     u64 t;
 
@@ -144,9 +146,9 @@ s32 func_150ADA20(void) {
     return (s32) x;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DAE50/func_150ADA20.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_DAE50/random_int.s")
 #endif
-// s32 func_150ADA20() {
+// s32 random_int() {
 //     // u32 tmp1;
 //     u64 tmp2;
 //     u64 tmp0;
@@ -191,9 +193,10 @@ s32 func_150ADA20(void) {
 #ifdef NON_MATCHING
 extern s64 D_80088950;
 
-/* P95: random float in [0, 1]: one step of the 64-bit shift-register generator in D_80088950 (as func_150ADA20),
+/* P95: random float in [0, 1]: one step of the 64-bit shift-register generator in D_80088950 (as random_int),
  * low 16 bits of the new state times 1/65535 (rodata D_8009FB10 = 0x37800080). */
-f32 func_150ADA68(void) {
+/* was func_150ADA68 */
+f32 random_float(void) {
     u64 x = (u64) D_80088950;
     u64 t;
 
@@ -204,20 +207,21 @@ f32 func_150ADA68(void) {
     return (f32) (s32) (x & 0xFFFF) * 1.5259022e-05f;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DAE50/func_150ADA68.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_DAE50/random_float.s")
 #endif
 
 #ifdef NON_MATCHING
 extern s64 D_80088950;
 
 /* MIPS III: a 64-bit add of the (sign-extended) argument */
-void func_150ADACC(s32 arg0) {
+/* was func_150ADACC */
+void random_seed(s32 arg0) {
     D_80088950 = (s64)arg0 + 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DAE50/func_150ADACC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_DAE50/random_seed.s")
 #endif
 // NON-MATCHING: hand-written function
-// void func_150ADACC(s64 arg0) {
+// void random_seed(s64 arg0) {
 //     D_800885B0 = arg0 + 1;
 // }

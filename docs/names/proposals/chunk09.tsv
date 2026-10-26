@@ -1,0 +1,226 @@
+old	new	confidence	description
+func_150F7330	glow_pair_post_remove_event	med	Posts event 0x3E with {obj, obj id +0x3B} so the glow-pair objects linked to obj remove themselves
+func_150F7364	glow_pair_spawn	high	Creates a type-0x43 effect object linked to obj and spawns its two glow particles (blue and red), stored in its record
+func_150F75EC	glow_pair_update	med	Glow-pair update: ends when the owner is gone; otherwise ray-casts from the owner and positions / shows the two glow particles
+func_150F7890	glow_pair_handle_event	high	Glow-pair event handler: event 0x3E destroys the object when the link record matches; other events go to the common handler
+func_150F791C	glow_pair_free_particles	med	Destroys the glow pair's two particle nodes and releases the record's link (func_1514EDF0)
+func_150F798C	glow_pair_retire	low	Frees the glow pair's particles, then retires the object through func_1514933C
+func_150F79B8	glow_pair_delete	low	Frees the glow pair's particles, then deletes the object through func_15149368
+func_150F79F0	beam_light_effect_spawn	med	Spawns a beam/muzzle light effect between a start point and an optional target point, with its 0xB4-byte light block and sound
+func_150F7E34	rocket_update	high	Rocket update handler: moves and ray-casts the projectile, explodes on hit or when its life runs out, and drops smoke trail puffs
+func_150F83A0	pulse_sprite_update	med	Sprite update: alpha from +0x128, size = base + amplitude * sin(phase), advances the phase, counts life down (0 when expired)
+func_150F84D8	pulse_sprite_draw	low	Draw entry: builds the sprite quad from the axes at +0x110 / +0x11C
+func_150F850C	rocket_explode	med	Explosion at a position: a randomised blast (func_15154728) plus the follow-up effect func_151D44C4
+func_150F85AC	trail_follower_spawn	med	Spawns particle type 0x2F that follows a position/angle record, keeping the record pointer and its start point
+func_150F873C	trail_follower_update	med	Follower update: copies the record's position / angles and spawns smoke puffs every 20 units along the distance moved
+func_150F8B20	fire_flash_burst_spawn	low	Flash light (light_create_with_ctrl) 50 units above the object's point plus a func_151530A8 particle burst there
+func_150F8DCC	fire_post_tick_event	low	Posts event 0x3F with id arg1; the matching fire object (func_150F8DFC) then runs its burn update
+func_150F8DFC	fire_handle_event	med	Fire event handler: 0x42 with a matching key hides the stage objects and jumps to the last stage; 0x3F with its id runs the burn update
+func_150F8EAC	fire_burn_update	high	Fire update: advances burn stages while target objects are unlit, plays crackle sounds and spawns embers, flames, smoke and sparks
+func_150F9CA0	fire_post_finish_events	med	Posts event 0x42 for the two fire keys of table D_800A2010[arg0], finishing those fires
+func_150F9D08	fire_free	low	Empty release callback of the fire object
+func_150F9D14	fire_retire	low	Fire release (no-op), then retires the object through func_1514933C
+func_150F9D40	fire_delete	low	Fire release (no-op), then deletes the object through func_15149368
+func_150F9D6C	obj_bone_spark_spray	med	Spawns a random spark spray (func_151030B8) attached to the object's bone matrix at model point D_800A2018
+func_150F9ED0	obj_muzzle_blast	low	At the object's muzzle node: an explosion (func_151D44C4), the func_151D49B8 effect and func_150FF9F4 from the muzzle frame
+func_150FA030	camera_view_clear_draw	high	Camera callback: builds the player's view matrix from yaw / pitch / roll, clears the viewport to black and draws the star field
+func_150F9BB0	aura_group_spawn	high	Creates an aura group object for obj with two particles and two emitters around it, plus a flash and a joint light
+func_150FA738	aura_group_follow_owner	med	Aura group update: ends when the owner is gone, else moves its two emitters to the owner's bone matrices
+func_150FA9E8	screen_flash_handle_event	low	Event handler: 0x4C / 0x4F set a black / white screen colour (func_1515D4D4) and +0x11, 0x4D sets +0x11 to 30, 0x4E clears it
+func_150FA520	obj_point_burst_spawn	high	At model point D_800A20CC[point] of obj's matrix 5 spawns a burst and a ring clipped to the object's bounds
+func_150FAFC0	arc_bolts_spawn_once	med	Spawns (once, guarded by D_80088F00) the type-0x57 object that fires bolts between two level nodes of D_800D34B8
+func_150FB06C	arc_bolts_emit	high	Arc-bolts update: accumulates a random rate per frame and spawns lightning bolts between its two nodes
+func_150FB264	arc_bolts_handle_event	med	Arc-bolts event handler: events 0x4E / 0x4F destroy the object
+func_150FB2A8	level_cue_switch_on	low	Level script cue: sets level states 8 = 0 / 0xB = 1 and posts events 0x30 (level slot +0x514) and 0x4D
+func_150FB2F8	level_cue_switch_off	low	Level script cue: sets level states 8 = 1 / 7 = 0 and posts events 0x31 (level slot +0x514) and 0x4C
+func_150FB348	effect_flag2_handle_event	low	Event handler: event 0x53 sets bit 2 of +0x58, event 0x54 clears it
+func_150FB398	score_banner_spawn	high	Spawns the banner model effect 0x61 and a row of 8 sprites for `span` frames
+func_150FB708	score_banner_model_update	low	Banner model update: sets its offsets (+0x54 = -95, +0x58 = -80, +0x5C = 0) and scale 0.3 through func_1515835C
+func_150FB768	banner_sprite_draw	low	Calls func_151584F0 with the result of func_151D76BC on the same arguments
+func_150FB7C0	fade_alpha_from_timer	med	Sets *alpha: 0xFF until the last `fade` frames of `span`, then (span - t) * step
+func_150FB81C	banner_model_fade_update	med	Fades the model record's alpha (+0x43) by its timer fields; returns 1
+func_150FB860	banner_sprite_fade_update	med	Fades the sprite record's alpha (+0x2E) by its timer fields; returns 1
+func_150FB8A4	obj_bone14_spark_burst	low	With a bone matrix table, takes three points of bone 14 and spawns a spark spray (func_150FF1A8) and the func_151D49B8 effect there
+func_150FBA40	star_field_draw	high	Draws the 8000-point star field: transforms each star by the view rotation and plots visible ones as tinted pixels
+func_150FBE40	gun_shot_effects	high	Muzzle flash, tracer, spark and shell for one shot of obj's gun on hand `side`, plus the screen flash for aimed shots
+func_150FC8E8	tracer_draw_masked	low	Draws the effect (func_151C40BC, scale 1 / 1 / 0.6) hidden from its shooter's camera when the owner at +0x1A0 is still valid
+func_150FC438	gunfire_burst_spawn	high	Starts a kind-0x27 gunfire burst record for obj aimed at `other`, plus a 300-frame screen effect for other's player
+func_150FCB94	gunfire_burst_update	high	Gunfire burst update: fires a shot every 4..8 frames alternating hands, counts hits on the target and rumbles its player
+func_150FCD98	gunfire_burst_handle_event	med	Burst event handler: event 0 destroys it when the shooter or target is removed; 0x2D follows an object swap to the new id
+func_150FCEB0	gunfire_target_filter	low	Filter callback: 0 for object kinds 0x12, 0x23, 0x73 and 0x8A, 1 for everything else
+func_150FCEF4	gunfire_burst_free	med	Destroys the burst's screen-effect node (+0x38) when set
+func_150FCF24	gunfire_burst_retire	low	Frees the burst's screen effect, then retires the object through func_1514933C
+func_150FCF50	gunfire_burst_delete	low	Frees the burst's screen effect, then deletes the object through func_15149368
+func_150FCFB0	view_spots_flash_event	med	Sparkle bursts at the three view spots, three positional sounds (0x2B6..0x2B8), a kind-4 screen effect for every player and a rumble
+func_150FD140	view_sparkle_burst	high	One flash plus 3..4 spark sprays at view `view`'s spot (D_800D9AA0[view]); nothing when the slot is NULL
+func_150FD49C	view_spot_distance_fade	high	Fade factor of obj by its distance to view 0's spot (D_800D9AA0[0])
+func_150FD530	level_update_sfx_tick_a	low	Callback wrapper that just calls sfx_cooldown_tick (argument unused)
+func_150FD554	bound_cloud_spawn	med	Spawns a cloud effect bound to obj (hit 0x39, sound 0x69E, flicker light, ground decal when a floor is found below)
+func_150FDA94	bound_cloud_update	high	Bound cloud update: follows its object while valid, grows / fades the cloud and keeps its light and sound in place
+func_150FE08C	bound_cloud_handle_event	med	Cloud event handler: 0x2D follows an object swap to the new id, event 0 clears the bound object when it is removed
+func_150FE120	bound_cloud_draw	med	Builds the cloud's screen sprite quad and sets its texture coordinates from +0x124 / +0x128
+func_150FE1AC	bound_cloud_free	med	Destroys the cloud's light and ground-decal nodes and stops its two sounds
+func_150FE22C	bound_cloud_retire	med	Frees the cloud's resources, then effect3d_retire
+func_150FE258	bound_cloud_delete	med	Frees the cloud's resources, then effect3d_free
+func_150FE290	sfx_tick_poke_kind28_objs	low	Runs sfx_cooldown_tick and, when D_800C35EA == 1, calls func_150EDBB8(obj, 20, 20) on every object of id 0x28
+func_150FDDA0	weapon_a_fire	med	Fires weapon A from obj: muzzle effects (weapon_a_muzzle_effects) and a 300-unit tracer along the facing; returns the tracer
+func_150FDF38	weapon_a_muzzle_effects	med	Weapon A muzzle: two hand-bone points (or 56 above the object), muzzle flash, blast, shell sparks and rumble; outputs the points
+func_150FE638	weapon_a_shell_sparks	med	Weapon A: random spark spray at the hand bone (func_151030B8), hidden from the shooter's own aiming camera
+func_150FE7C8	weapon_a_bone_effect	low	Weapon A: func_151D43B4 at the hand bone point table D_800A2340
+func_150FE808	weapon_a_rumble	med	Weapon A: short rumble (15..23 frames, strength 3..6) for the shooter's player when it has one
+func_150FE320	weapon_b_fire	med	Fires weapon B from obj: muzzle effects (weapon_b_muzzle_effects) and a 300-unit tracer along the facing; returns the tracer
+func_150FE49C	weapon_b_muzzle_effects	med	Weapon B muzzle: two hand-bone points (or 70 above the object), muzzle flash, blast, shell sparks and rumble; outputs the points
+func_150FEB84	weapon_b_shell_sparks	med	Weapon B: random spark spray at the hand bone (func_151030B8), hidden from the shooter's own aiming camera
+func_150FED14	weapon_b_bone_effect	low	Weapon B: func_151D43B4 at the hand bone point table D_800A2398
+func_150FED54	weapon_b_rumble	med	Weapon B: rumble (20..32 frames, strength 8) for the shooter's player when it has one
+func_150FEDE0	character_smoke_puff	high	Smoke puff from a character: from its bone matrix points (or its position) along its facing, owner room and owner passed on
+func_150FF148	character_smoke_point_get	med	Transforms model point D_800A23D0 by the object's bone D_80088F40 matrix into *out
+func_150FF1A8	bone_point_spark_spray	med	Spawns a random 6..9-spark spray (func_151030B8) attached to bone arg1 between the given points
+func_150FF2B0	object_bolt_fire	high	Fires a lightning bolt from the object's muzzle node: aims, spawns the bolt and, when aimed, the muzzle flash, node glow and impact
+func_150FF550	obj_joint_point_get	med	Position of model node `node` of obj by joint name D_800A2420 into *out; the object's position when node is -1 or missing
+func_150FF604	object_beam_fire	high	Fires a beam from the object's muzzle node: aims, spawns the beam light effect and, with a matrix block, flash, glow and impact
+func_150FF808	obj_muzzle_node_get	high	Returns the object's muzzle model node (node 0x82, func_15031C4C)
+func_150FF82C	obj_muzzle_frame_get	med	Reads the muzzle frame of the object (func_15145740 with scale 0.811): position and two axes
+func_150FF854	beam_aim_compute	med	Aims a beam: model joint points when available, else 34 to the side / 49 above the object, then resolves the hit (func_151D5724)
+func_150FF9F4	beam_impact_sparks	med	Six spark particles (effect3d_spawn_full texture 0x5F) at the impact point, one per given direction vector
+func_150FFC34	beam_target_filter	low	Filter callback: 0 for objects of kind 0x98, 1 otherwise
+func_150FFC60	model_points_find	high	Looks up 10 joints of a model by name (two random point sets); makes `out` relative to `ref`; 1 on success
+func_150FF840	weapon_c_fire	high	Weapon C shot: muzzle flash, sparks and shot effect, optional three trail attacks and a 2000-unit hit ray, then the rumble
+func_151000EC	weapon_c_trail_attack_spawn	med	Spawns an attack (attack_spawn_at_point, kind arg3 | 0x60000) at a trail point for the shooting object
+func_1510015C	weapon_c_muzzle_point_get	med	Transforms the spray point D_800A2500 by the object's hand bone (D_80088BB0) matrix into *out
+func_151001BC	weapon_c_rumble	med	Weapon C: rumble (20..30 frames, strength 7..8) for the shooter's player when it has one
+func_15100248	weapon_c_muzzle_frame_get	med	Weapon C muzzle position / direction (func_151D5FC8) plus its muzzle flash call func_151D441C
+func_151002AC	weapon_c_hit_callback	low	Hit callback: objects of kind 0x9F / 0xA0 without flag 0x80 at +0x94 get func_1508220C(obj, 4, 0)
+func_15100304	gun_shot_sparks	high	10..18 spark particles at `pos` sprayed around the shot direction `dir`
+func_15100700	obj_timer_link_post_remove	med	Posts event 0x48 with {obj, obj id +0x3B} so the timer link records of obj remove themselves
+func_15100734	obj_timer_link_spawn	med	Creates a type-0x4E link record {obj, obj id, timer 0} that follows obj
+func_151007B0	obj_timer_link_handle_event	high	Link event handler: event 0x48 destroys the record when it matches by id or key; other events go to the common handler
+func_1510083C	obj_timer_link_update	med	Link update: ends when the object is gone or replaced; while it has a player record counts the timer (+6) down by the frame step
+func_151008C0	sky_segments_flicker	high	Level update: advances the sky animation frame and randomly toggles the 5 sky segments, sending light commands for each change
+func_151009E4	sky_segments_set	high	Points RSP segments 2 / 3 at two sky animation frames and segments 4..8 at the selected segment textures; returns the DL end
+func_15100B80	obj_glow_effect_spawn	high	Builds the compound glow effect on obj: main record plus child record, light, spark particle, emitter and glow particle in its colour
+func_15101610	laser_sight_retire	med	Laser sight release (retire variant): stops its sound and ends each of its linked effects, then the default retire
+func_151016C8	laser_sight_free	med	Laser sight release (free variant): deletes each of its linked effects, then the default effect3d_free
+func_15101768	obj_glow_child_retire	med	Glow child record release: clears the parent's +0x28 link, then effect3d_retire
+func_15101790	obj_glow_child_free	med	Glow child record release: clears the parent's +0x28 link, then effect3d_free
+func_151017B8	obj_glow_light_retire	med	Glow light release: clears the parent's +0x2C link, then light_ctrl_retire
+func_151017E0	obj_glow_light_free	med	Glow light release: clears the parent's +0x2C link, then light_ctrl_free
+func_15101808	obj_glow_spark_retire	med	Glow spark particle release: clears the parent's +0x24 link, then func_15131CAC
+func_15101830	obj_glow_spark_free	med	Glow spark particle release: clears the parent's +0x24 link, then func_15131CCC
+func_15101858	obj_glow_emitter_retire	med	Glow emitter release: clears the parent's +0x30 link, then effect_free_buffers_retire
+func_15101880	obj_glow_emitter_free	med	Glow emitter release: clears the parent's +0x30 link, then effect_free_buffers_delete
+func_151018A8	obj_glow_halo_retire	med	Glow halo particle release: clears the parent's +0x34 link, then func_15131CAC
+func_151018D0	obj_glow_halo_free	med	Glow halo particle release: clears the parent's +0x34 link, then func_15131CCC
+func_151018F8	laser_sight_update	high	Laser sight update: places the beam from the object's bone point to its aim target or ray hit and moves its linked effects
+func_15101F44	laser_beam_draw	med	Draws the laser beam as a camera-facing quad from start to end (capped at 3508 units), hidden from the aiming owner's view
+func_151024D0	laser_marker_draw	low	Draws a flat quad marker at +0x34 from two transformed axes scaled by +0x2C / +0x30 when flag bit 0 of +0x110 is set
+func_1510282C	obj_glow_spin_flicker	med	Glow main update: spins and flickers (random targets eased in), sets the children's scale / alpha and the light's flicker
+func_15102B74	obj_glow_halo_update	med	Halo update: wobbles its offsets with sin of two phases and advances the phases by their rates
+func_15102C3C	object_effect_start	high	Starts glow effect `kind` on obj (table positions / directions / ids) with team-dependent colours
+func_151027E8	obj_glow_post_remove_event	med	Broadcasts event 0x1A with {obj, obj id +0x3B} so the object's glow effects end
+func_15102D9C	obj_glow_spark_visible	med	Visibility test of the spark child: hidden for the owner's own view while it aims, or when its flag bit 0 is clear
+func_15102E04	obj_glow_halo_visible	med	Visibility test of the halo child: 1 when its flag bit 0 (+0xAC) is set
+func_15102E2C	obj_glow_emitter_visible	med	Visibility test of the emitter child: hidden for the owner's own view while it aims, or when its flag bit 0 is clear
+func_15102EA0	cam_sprite_puff_spawn	low	Spawns a camera-facing sprite puff at pos (sprite_fx_spawn_cam_at), skipped / scaled for some views in levels 0x26 / 0x36
+func_151030B8	attached_particle_spawn	high	Spawns particle emitter 0x29 attached to an owner's bone matrix with a random spray of `count` particles
+func_151032D0	attached_particle_handle_event	med	Event handler of an attached particle: passes the message to node_handle_link_message with the owner link at +0x110
+func_15103310	attached_points_update	high	Refreshes the two attachment points (+0x34 / +0x40) from the owner's joint; 0 when the owner changed or is gone
+func_15103438	attached_strip_draw	low	Draws the attached particle as a quad strip between its two attachment points when flag bit 0 of +0x124 is set
+func_151037D4	flip_sprite_particle_spawn	low	Spawns one sprite particle (func_151308E4) at pos with size arg2, life arg0 + 1 and random horizontal / vertical flips
+func_151039B0	player_update_level_event_flags	med	Sets / clears player flags in +0x84 from the level's event states (event_dispatch queries, levels 0x2D / 0x30 / 0x34)
+func_15103C10	level_update_sfx_tick_b	low	Callback wrapper that just calls sfx_cooldown_tick (argument unused)
+func_15103C34	pos_debris_burst_spawn	low	Spawns a small particle burst (func_15152700, 8 x 4 block, D_800A2720 / D_800A2724) at the given position
+func_15103D5C	callback_return_zero	low	Stub callback that ignores its arguments and returns 0
+func_151043C0	ground_explosion	high	Explosion at pos: blast, floor scorch mark, sparks, blast effects, optional blast damage (kind 1 / 2), sound and flash
+func_151046F0	camera_cut_fade_spawn	med	Allocates the camera-cut node (kind 0x20): mode arg0, the two objects, 12-frame timer, state 0
+func_15104764	camera_cut_fade_update	med	Camera cut: waits for its trigger, plays sound 0x5B2, fades the screen and follows the other object, holds, then switches back and fades out
+func_15104A0C	obj_fog_alpha_gfx	high	For index 0 and a non-zero alpha at obj +0x1B appends a black colour command with alpha * 63 / 256; returns the DL end
+func_151044F4	held_obj_byte7d_get	low	Returns byte +0x7D of the object D_800CCA0C (0 when there is none)
+func_15104AA0	camera_update_close_snap	low	Camera update: sets default distances when unlocked and snaps to its target when it is slow and too far behind
+func_15104B60	stub_obj_set_param	low	Empty stub (obj, id, f32 value); its callers pass 0xF / 250.0
+func_15104B74	stub_return_one_a	low	Stub callback that ignores its two arguments and returns 1
+func_15104B88	stub_hit_point_noop	low	Empty stub taking two floats and two words (called from the hit code in game_eu_AF2A0)
+func_15104BA0	stub_return_one_b	low	Stub callback that ignores its two arguments and returns 1
+func_15104BB4	floor_height_below	high	Floor height at (x, z) closest to y from the floor triangles listed by func_150A3F50; 0 when none is found
+func_15106260	bolt_arc_spawn	high	Creates a lightning arc object (type 0x40) from a 0x50-byte arc spec: curve control points, segment count, width, life and colour
+func_1510660C	bolt_arc_update	med	Arc update: runs its kind hook (D_80088FB0), counts its life down, resamples the curve when moved and re-jitters it on a random timer
+func_15106760	bolt_arc_samples_get	med	Returns the arc's curve sample records (+0x88)
+func_1510676C	bolt_arc_points_get	med	Returns the arc's point list, which follows its +0x48 curve sample records
+func_15106794	bolt_arc_sample_curve	high	Samples the arc's cubic Bezier curve at n evenly spaced points into its 0x34-byte sample records (position and frame)
+func_15106A34	bezier_basis0	high	Cubic Bezier basis 0: (1 - t)^3
+func_15106A5C	bezier_basis1	high	Cubic Bezier basis 1: 3t (1 - t)^2
+func_15106A90	bezier_basis2	high	Cubic Bezier basis 2: 3t^2 (1 - t)
+func_15106AC0	bezier_basis3	high	Cubic Bezier basis 3: t^3
+func_15106AD8	bezier_basis0_deriv	high	Derivative of Bezier basis 0: -3 (1 - t)^2
+func_15106B04	bezier_basis1_deriv	high	Derivative of Bezier basis 1: 9t^2 - 12t + 3
+func_15106B3C	bezier_basis2_deriv	high	Derivative of Bezier basis 2: -9t^2 + 6t
+func_15106B6C	bezier_basis3_deriv	high	Derivative of Bezier basis 3: 3t^2
+func_15106B90	bolt_arc_jitter_points	med	Rebuilds the arc's point list: fixed ends and each sample point offset by a random angle / radius in its normal plane
+func_15106D38	bolt_arc_ribbon_draw	high	Draws the arc's point chain as a camera-facing textured ribbon of half width +0x50
+func_151073F8	bolt_arc_free	med	Arc release: runs its kind release hook, destroys its two linked nodes and frees its buffers (func_151D5E30)
+func_15107478	bolt_arc_retire	med	Frees the arc's resources, then node_retire
+func_151074A4	bolt_arc_delete	med	Frees the arc's resources, then node_unlink_free
+func_151074D0	bolt_arc_handle_event	med	Arc event handler: dispatches to the kind's handler in D_80088FC8
+func_15107518	bolt_spawn	high	Spawns a bolt record (type 0x3E) with (2^depth + 1) points from start to end, subdivided with jitter
+func_15107678	bolt_points_subdivide	high	Fills a bolt's points between lo and hi by recursive midpoint displacement with jitter
+func_1510783C	bolt_record_update	high	Bolt update: while no arc is alive spawns the next segment arc between consecutive points, ending after the last one
+func_15107B84	bolt_arc_unlink_from_bolt	med	Arc kind-4 release hook: clears the parent bolt record's alive-arc pointer (+0x30)
+func_15107B9C	bolt_record_free	med	Destroys the bolt record's current arc (+0x30) when set
+func_15107BCC	bolt_record_retire	low	Frees the bolt's arc, then retires the record through func_1514933C
+func_15107BF8	bolt_record_delete	low	Frees the bolt's arc, then deletes the record through func_15149368
+func_15107C24	bolt_record_handle_event	med	Bolt event handler: dispatches to the kind's handler in D_80088FD8 (kind byte +0x68)
+func_15107C80	object_arc_to_surface_spawn	high	Ray-casts from obj's attachment point at two angles and, on a hit, spawns a lightning arc from the object to the surface
+func_15107E64	obj_arc_handle_event	med	Event handler of an object-attached arc: passes the message to node_handle_link_message with its link record
+func_15107EA4	obj_arc_follow_update	med	Arc kind hook: 0 when the object is gone; moves the arc start to the object's attachment point and recomputes the controls
+func_15107FA0	obj_attach_point_at_angles	med	Point on obj's attachment sphere at angles (a0, a1), height scaled by +0xF0; optionally also returns the centre
+func_15108060	arc_control_points_thirds	high	Sets the two control points at 1/3 and 2/3 of the segment from start to end
+func_151080F8	obj_angle_point_effect	low	With a bone table, takes obj's attachment point at angles (a0, a1) and spawns func_151C384C there
+func_1510819C	object_arc_from_point_spawn	high	Ray-casts 300 units from obj's bone point in the direction of two angles and spawns a lightning arc to the hit or end
+func_151083C8	obj_point_arc_follow_update	med	Arc kind hook: 0 when the object or its bones are gone; moves the arc start to the bone point and recomputes the controls
+func_151084D4	obj_bone_point_transform	med	Transforms a point by the object's bone `bone` matrix (func_15143134)
+func_15108518	obj_point_arc_handle_event	med	Event handler of a bone-point arc: passes the message to node_handle_link_message with its link record
+func_15108560	camera_update_object_state9	low	Camera update: when its object's state is 9 pushes camera mode 8 with fixed distances; sets flag 0x10000 from level events 0x401A / 0x401B
+func_151086A0	obj_impact_burst	med	At obj: sparks (func_150E892C), a debris burst 30 above it (func_15152700) and object_hit_effects
+func_eu_15108850	area_sparkle_emitter_update	med	Emitter update: while enabled spawns sprite sparkles at a random point inside its cylinder region at a random rate
+func_15108BD8	area_sparkle_update	med	Sparkle particle update: picks its blend mode from its fade timers, randomly twinkles, counts its life down (0 when expired)
+func_15108D7C	area_sparkle_emitter_handle_event	med	Emitter event handler: event 0x2B enables it (flag bit 0), 0x2C disables it
+func_15108850	swing_lamp_spawn	med	Spawns the two swinging mesh effects (types 0x38 / 0x54) and a light controller linked to the first one
+func_15109034	swing_lamp_update	med	Swinging mesh update: advances two sway phases, sets the tilt angles from their sines, then the target timer and height
+func_15109100	swing_lamp_target_timer_tick	med	Counts the swing mesh's target timer down; at 0 clears the target (999)
+func_15109140	swing_lamp_height_update	med	Sets the swing mesh's height: the target player's record height in mode 1, else 226
+func_151091B8	swing_lamp_update_b	med	Second swing mesh update: same sway with other rates, then render mode 4 when lit, else 2
+func_151092A4	swing_lamp_matrix_build	med	Builds the swing mesh's matrix (tilt angles, height, scale 0.157) into this frame's buffer
+func_15109390	swing_lamp_light_update	med	Moves the linked light to where the swing mesh's axis hits the ground (1108 below) and switches it on or off
+func_1510957C	swing_lamp_post_target	med	Broadcasts event 0x1D {target, timer, byte} to all type 0x38 / 0x54 swing mesh objects
+func_151095E4	swing_lamp_handle_event	med	Swing mesh event handler: 0x1D sets its target and timer, 0x1E toggles its lit flag
+func_1510965C	swing_lamp_post_toggle	med	Broadcasts event 0x1E (toggle lit) to all type 0x38 / 0x54 swing mesh objects
+func_151096A0	sky_dome_project_uv	high	Mesh kind-4 handler: builds this frame's matrix for the double-buffered vertex record and projects its texture coordinates
+func_15109990	event_object_effect_spawn	high	Spawns a type-0x1A point-effect record for an object with lifetime `span`, rate and handler indices
+func_15109A7C	obj_point_effect_emitter_update	med	Emitter update: ends when the object is gone; accumulates a rate and, per whole unit, runs the point-effect handler on a weighted random bone segment
+func_15109DC8	point_spark_spawn	high	Point-effect handler 0: spawns one spark particle (kind 0x2B) at `pos` moving along `dir`
+func_1510A1A0	segment_debris_spawn	med	Point-effect handler: spawns a spinning debris particle (func_15132FBC) at the point, flung along the direction at a random speed
+func_1510A454	segment_effect_spawn	med	Creates a type-0x1B segment effect record for an object: lifetime (300 untimed), rate, end and point handler indices
+func_1510A538	segment_effect_update	high	Segment effect update: accumulates its rate and runs the point handler on random skeleton segments of its owner
+func_1510A8C4	vent_smoke_emitter_spawn	med	Creates a type-0x1C smoke emitter record for an object (base rate 0.204, random rate 0.822) lasting `span`
+func_1510A98C	vent_smoke_emitter_update	high	Smoke emitter update: ends when the owner is gone, otherwise spawns smoke puffs from the owner at its rate
+func_1510ADF0	segment_effect_handle_event	low	Event handler: 0x2D (object swap) moves the effect's owner link to the replacement object
+func_1510AE4C	vent_smoke_emitter_handle_event	low	Event handler: 0x2D (object swap) moves the emitter's owner link to the replacement object
+func_1510AEB0	effect_spawn_sum_counter	high	Spawns a type-0xA effect whose words pack the three arguments and their sum (template D_80091B9C)
+func_1510AFA0	clock_level_callback	low	Callback wrapper that calls func_15179008(0) (argument unused)
+func_1510AFC4	clock_hands_update	med	Clock update: advances the time (synced once from D_800BE804), sets the hour / minute hand angles and chimes (sound 0x4CC) on the hour
+func_1510B34C	clock_pendulum_update	med	Pendulum update: swings by cos of its phase and plays the tick / tock sounds (0x4CA / 0x4CB) at each end
+func_1510B460	view_point_cull_test	med	Tests a point against a view matrix: 1 when outside near / far or the side limits, else 0 with the two edge fade factors
+func_1510B5F0	camera_set_screen_ortho	med	Reads the screen size (D_800DD722 / 4) and builds an orthographic projection over the current camera extent
+func_1510B6A8	camera_projection_update	high	Per-player projection: field of view from base + fovX / fovY, half extents from cot(fov / 2), then the perspective matrix
+func_1510B8AC	camera_projection_set_fov	med	Applies a player's fov / scale now and remembers it in D_800D9EE0 to be applied again (D_800D9F10 = pending)
+func_1510B930	camera_projection_apply_pending_fov	med	Re-applies every player's remembered fov / scale request (D_800D9EE0) and clears the pending flag
+func_1510B9D8	camera_projection_set_viewport	high	Rebuilds the player's perspective for a viewport size now and remembers it in D_800D9F18 (D_800D9F38 = pending)
+func_1510BA9C	camera_projection_apply_pending_viewport	high	Re-applies every player's remembered viewport size (D_800D9F18) and clears the pending flag
+func_1510BB78	camera_perspective_build	high	guPerspectiveF into the player's camera record (+0xBC) and converts it to this frame's fixed-point matrix (+0x100)
+func_1510BC10	camera_matrices_refresh_all	high	Per player: converts projection and view to float, multiplies them and updates the frustum planes
+func_1510BD34	view_dl_begin	med	Writes the view's opening display list commands: pipe sync, blend colour, base matrix, perspective normal and segment setup
+func_1510BED8	camera_zoom_factors_calc	med	Stores the player's zoom factors (current / base fov ratio, with offsets) in D_800D3A00[0..1]
+func_1510BF50	player_view_dl_build	high	Builds the display list of player `player`'s view
+func_1510C4E0	dl_find_texture_vertices	high	Scans a display list for a texture's G_SETTIMG and returns the vertices of the triangles drawn with it
+func_1510CA2C	tex_scroll_create	high	Creates the texture scroller record for a texture key: vertex ranges in both buffers and their base texture coordinates
+func_1510CE28	tex_scroll_update	high	Per frame advances each enabled texture scroller's angle and offsets its vertices' texture coordinates on a circle

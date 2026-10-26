@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_150E2030(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, struct127 *, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
+s32 beam_effect_spawn(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, struct127 *, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
 
 
 #ifdef NON_MATCHING
@@ -17,7 +17,8 @@ extern u8 *D_8008CDEC[];
 // (+0xDC, freed again with node_delete when NULL) with the extra parameters +0xD2 .. +0xF8. Returns the asm's
 // leftover v0: 0 when the allocation fails, else obj + 0x80 (the quad loop pointer; no caller uses it); 0 on the
 // node_delete path (the asm passes on that void call's v0).
-s32 func_150E2030(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 w0, f32 w1, f32 w2, f32 w3,
+/* was func_150E2030 */
+s32 beam_effect_spawn(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 w0, f32 w1, f32 w2, f32 w3,
                   s32 kind, s32 tex, s32 mode, s32 d2, s32 d4, struct127 *target, s32 da, s32 e2, s32 e0, s32 fc,
                   s32 fe, f32 e4, f32 e8, f32 ec, f32 f0, f32 f4, f32 f8) {
     u8 *obj;
@@ -99,7 +100,7 @@ s32 func_150E2030(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 
     return (s32) (obj + 0x80);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/func_150E2030.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/beam_effect_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -109,13 +110,13 @@ extern s32 D_800DC26C;
 extern u8 D_800D9D80[];
 int func_151EFDD0(void);
 f32 func_150ADDE0(u8 *, u8 *);
-s32 func_1510FE4C(s32);
+s32 floor_flags_surface_type(s32);
 s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-s32 func_150E1AF0(struct127 *, f32, f32, f32, f32, f32, f32, s32, s32);
-s32 func_150E4AD0(f32, f32, f32, s32, s32, s32, s32);
+s32 object_ray_hit_nearest(struct127 *, f32, f32, f32, f32, f32, f32, s32, s32);
+s32 impact_effect_spawn(f32, f32, f32, s32, s32, s32, s32);
 
-// beam_effect_update: P310: update handler of the beam objects of func_150E2030 (object type 0xB descriptor at
-// ROM 0x230D00, same layout as func_150E3CB8's; void (u8 *obj)). The life +0x90 counts down by D_800BE9E4 frames;
+// beam_effect_update: P310: update handler of the beam objects of beam_effect_spawn (object type 0xB descriptor at
+// ROM 0x230D00, same layout as zap_bolt_update's; void (u8 *obj)). The life +0x90 counts down by D_800BE9E4 frames;
 // the beam is freed when it runs out or its followed object +0xDC changed (+0xE0 vs the object's +0x84 serial).
 // Mode beams (+0xD0 != 0) re-attach both ends to the followed character's matrix +0xE2 (offsets +0xE4 / +0xF0,
 // every 4th frame by the +0xE3 delay) and, each time the +0xD6 timer passes -(+0xD4), restart it (+0xD2) and pick a
@@ -123,9 +124,10 @@ s32 func_150E4AD0(f32, f32, f32, s32, s32, s32, s32);
 // beam + sound when D_800BE616 is off), else a point 2000 ahead along its facing; with no aim record (0xFF) every
 // 3rd frame (+0xFD) a ray (func_150ACEA0) 75 * width ahead decides the end. Then (+0xD6 > 0) the head +0x94 moves
 // toward the end along the yaw / pitch +0xA4 / +0xA0 at speed +0xA8 (clamped to the distance when +0xAC != 0);
-// +0xFE == 1 leaves a trail (func_150E1AF0). With +0xAC != 0 the beam is freed (after a func_150E4AD0 impact when
+// +0xFE == 1 leaves a trail (object_ray_hit_nearest). With +0xAC != 0 the beam is freed (after a impact_effect_spawn impact when
 // +0xFC != 0) once the head is within +0xAC of the end or past the start distance, otherwise +0xC0 shrinks to it.
-void func_150E2294(u8 *obj) {
+/* was func_150E2294 */
+void beam_effect_update(u8 *obj) {
     u8 *target;
     u8 *mtx;
     u8 *aimrec;
@@ -223,12 +225,12 @@ void func_150E2294(u8 *obj) {
                         vec[2] = *(f32 *) (obj + 0xB8) - *(f32 *) (obj + 0x9C);
                         dir = (f32 *) (aimrec + 0x10);
                         d = func_150ADDE0((u8 *) dir, (u8 *) vec);
-                        func_15049148((struct17 *) dir, d + d, (struct17 *) out);
-                        func_15048F58((struct17 *) vec, (struct17 *) out, (struct17 *) out);
+                        vec3_scale((struct17 *) dir, d + d, (struct17 *) out);
+                        vec3_sub((struct17 *) vec, (struct17 *) out, (struct17 *) out);
                         out[0] += *(f32 *) (obj + 0xB0);
                         out[1] += *(f32 *) (obj + 0xB4);
                         out[2] += *(f32 *) (obj + 0xB8);
-                        func_150E2030(0, *(f32 *) (obj + 0xB0), *(f32 *) (obj + 0xB4), *(f32 *) (obj + 0xB8), out[0],
+                        beam_effect_spawn(0, *(f32 *) (obj + 0xB0), *(f32 *) (obj + 0xB4), *(f32 *) (obj + 0xB8), out[0],
                                       out[1], out[2], (f32) (func_151EFDD0() % 35) + 20.0f, 0.0f, 8.0f, 320.0f, 0x1E,
                                       0x23, 0, 0, 0, NULL, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                         func_10010F88(func_151EFDD0() % 6 + 0x2B, 0x2710, 0, 0, aim, (s32) * (f32 *) (obj + 0xB0),
@@ -236,7 +238,7 @@ void func_150E2294(u8 *obj) {
                     }
                     alpha = 1.0f;
                 } else {
-                    func_1505A184(heading, 2000.0f, (f32) (s16) (*(s8 *) (target + 0x1D1) * 200) * 0.0054931640625f,
+                    vec_from_yaw_pitch(heading, 2000.0f, (f32) (s16) (*(s8 *) (target + 0x1D1) * 200) * 0.0054931640625f,
                                   (f32 *) (obj + 0xB0), (f32 *) (obj + 0xB8), (f32 *) (obj + 0xB4));
                     *(f32 *) (obj + 0xB0) += *(f32 *) (obj + 0x94);
                     *(f32 *) (obj + 0xB4) += *(f32 *) (obj + 0x98);
@@ -258,7 +260,7 @@ void func_150E2294(u8 *obj) {
                         alpha = 1.0f;
                         idx = (u32) (rayhit - D_800DC26C) / 12;
                         if (idx >= 0 && idx < D_800DBE4C && D_800DBE5C != 0) {
-                            hitobj = func_1510FE4C(((s32 *) D_800DBE5C)[idx]);
+                            hitobj = floor_flags_surface_type(((s32 *) D_800DBE5C)[idx]);
                         }
                     }
                 }
@@ -273,7 +275,7 @@ void func_150E2294(u8 *obj) {
             *(f32 *) (obj + 0xC8) = 0.0f;
             *(f32 *) (obj + 0xCC) = 0.0f;
             if (ray) {
-                func_150E2030(0, *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), *(f32 *) (obj + 0x9C),
+                beam_effect_spawn(0, *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), *(f32 *) (obj + 0x9C),
                               *(f32 *) (obj + 0xB0), *(f32 *) (obj + 0xB4), *(f32 *) (obj + 0xB8), width, alpha, 15.0f,
                               820.0f, 0x4B, tex, 0, 0, 0, *(struct127 **) (obj + 0xDC), 0, 0, 0, hitobj, obj[0xFE],
                               0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
@@ -323,7 +325,7 @@ void func_150E2294(u8 *obj) {
     }
     if (obj[0xFE] == 1) {
         target = *(u8 **) (obj + 0xDC);
-        func_150E1AF0((struct127 *) target, *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), *(f32 *) (obj + 0x9C),
+        object_ray_hit_nearest((struct127 *) target, *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), *(f32 *) (obj + 0x9C),
                       *(f32 *) (obj + 0x94) + vx, *(f32 *) (obj + 0x98) + vy, *(f32 *) (obj + 0x9C) + vz,
                       target != NULL ? (target - (u8 *) D_800CC2D0) / 0x32C : 0, 0);
     }
@@ -341,7 +343,7 @@ void func_150E2294(u8 *obj) {
     d = sqrtf(dx * dx + dy * dy + dz * dz);
     if (d < limit || dist0 < d) {
         if (obj[0xFC] != 0) {
-            func_150E4AD0(endX, *(f32 *) (obj + 0xB4), *(f32 *) (obj + 0xB8), 1, obj[0xFC], 0, 0xFF);
+            impact_effect_spawn(endX, *(f32 *) (obj + 0xB4), *(f32 *) (obj + 0xB8), 1, obj[0xFC], 0, 0xFF);
         }
         node_destroy((struct102 *) obj);
         return;
@@ -351,7 +353,7 @@ void func_150E2294(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/func_150E2294.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/beam_effect_update.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -359,7 +361,7 @@ extern s32 D_800D30BC;
 Gfx *func_15095380(Gfx *gfx, u8 *header, s32 tmem, void *spr, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 
-// beam_effect_draw: draw handler of the beam objects of func_150E2030 (Gfx *(Gfx *, u8 *obj, s16 viewer)). With a
+// beam_effect_draw: draw handler of the beam objects of beam_effect_spawn (Gfx *(Gfx *, u8 *obj, s16 viewer)). With a
 // texture (+0xD6 > 0) the beam from +0x94 along the direction +0xC4 times the length +0xC0 is drawn as one quad
 // facing character `viewer` (D_800DBFF0 entry, position +0x2F8): at each end the offset cross(end - eye, dir) scaled
 // to the half width +0xBC gives the two corners end +- offset (far end first). The corners go to this frame's 4
@@ -368,7 +370,8 @@ Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 // (func_15142FBC) and gSPVertex + 2 triangles are emitted; +0xDB = 1. Returns gfx unchanged without setting +0xDB
 // when an end lies on the eye line (zero offset). The asm also computes the squared eye distances of both ends and
 // an unused first offset; neither is read.
-Gfx *func_150E2E5C(Gfx *gfx, u8 *obj, s16 viewer) {
+/* was func_150E2E5C */
+Gfx *beam_effect_draw(Gfx *gfx, u8 *obj, s16 viewer) {
     f32 ends[2][3];
     f32 verts[4][3];
     u8 spr[0x10];
@@ -439,26 +442,31 @@ Gfx *func_150E2E5C(Gfx *gfx, u8 *obj, s16 viewer) {
     return gfx + 3;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/func_150E2E5C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/beam_effect_draw.s")
 #endif
 
-s32 func_150E3324(s32 arg0, s32 arg1) {
+/* was func_150E3324 */
+s32 beam_effect_stub(s32 arg0, s32 arg1) {
     return arg0;
 }
 
-void func_150E3334(s32 arg0, u8 arg1, s16 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s16 argA, s16 argB, u16 argC, u8 argD) {
-    func_150E2030(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 40.0f, 400.0f, (s32) argC, 0x27, 1, (s32) argA, (s32) argB, (struct127 *)arg0, (s32) arg1, (s32) arg2, arg3, 0, (s32) argD, arg4, arg5, arg6, arg7, arg8, arg9);
+/* was func_150E3334 */
+void beam_effect_spawn_attached(s32 arg0, u8 arg1, s16 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s16 argA, s16 argB, u16 argC, u8 argD) {
+    beam_effect_spawn(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 40.0f, 400.0f, (s32) argC, 0x27, 1, (s32) argA, (s32) argB, (struct127 *)arg0, (s32) arg1, (s32) arg2, arg3, 0, (s32) argD, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 
-void func_150E2EA4(struct127 *arg0, u8 arg1, s16 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s16 argA, s16 argB, u16 argC, f32 argD, f32 argE, u8 argF, f32 arg10) {
-    func_150E2030(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, arg10, 0.0f, argD, argE, (s32) argC, 0x27, 1, (s32) argA, (s32) argB, arg0, (s32) arg1, (s32) arg2, arg3, 0, (s32) argF, arg4, arg5, arg6, arg7, arg8, arg9);
+/* was func_150E2EA4 */
+void beam_effect_spawn_attached_ex(struct127 *arg0, u8 arg1, s16 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s16 argA, s16 argB, u16 argC, f32 argD, f32 argE, u8 argF, f32 arg10) {
+    beam_effect_spawn(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, arg10, 0.0f, argD, argE, (s32) argC, 0x27, 1, (s32) argA, (s32) argB, arg0, (s32) arg1, (s32) arg2, arg3, 0, (s32) argF, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 
-void func_150E3510(s32 arg0, s32 arg1, s16 arg2) {
-    func_150E3324(arg0, arg2);
+/* was func_150E3510 */
+void beam_effect_handler_stub(s32 arg0, s32 arg1, s16 arg2) {
+    beam_effect_stub(arg0, arg2);
 }
 
-void func_150E3540(u8 *arg0, s32 *arg1, u8 arg2) {
+/* was func_150E3540 */
+void beam_effect_on_target_swap(u8 *arg0, s32 *arg1, u8 arg2) {
     if (arg2 == 0x2D) {
         if (arg1[0] == *(s32 *)(arg0 + 0xDC)) {
             *(s32 *)(arg0 + 0xDC) = arg1[1];

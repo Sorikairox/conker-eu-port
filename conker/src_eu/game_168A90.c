@@ -6,14 +6,14 @@
 
 #ifdef NON_MATCHING
 // mesh_effect_spawn: spawns an animated mesh effect record (P195). The 0x3C-byte spawn block p (copied to rec + 0x10) names
-// a model by its +0x30 / +0x34 words (func_1502B6BC, kind 2 lookup); the model header starts with its display list
+// a model by its +0x30 / +0x34 words (asset_load_with_subfiles, kind 2 lookup); the model header starts with its display list
 // pointer, followed at +0x28 by the vertex block (size = dl - header - 0x28). The record (kind 0x54 when arg1 != 0,
 // else 0x38; node_alloc with group arg4 and priority arg3) gets D_80082FA0 + 1 double-buffered vertex copies at
 // +0xF8 (+0x58[i] / +0x68[i] point at the two halves), +0x4C = header, +0x50 = the copies' size, +0x54 = the display
-// list, which is registered with func_1510D3E0 (age 0x3E). arg2 extra bytes follow the copies. Returns NULL when the
-// pool is full. Callers: func_15010A60 (ambient fires), func_15108850, water_effect_spawn, game_eu_1E7CC0.
-s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, ...);
-s32 func_1510D3E0(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList);
+// list, which is registered with texture_resolve_dl_ids (age 0x3E). arg2 extra bytes follow the copies. Returns NULL when the
+// pool is full. Callers: level_obj_init_debris_table (ambient fires), swing_lamp_spawn, water_effect_spawn, game_eu_1E7CC0.
+s32 asset_load_with_subfiles(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, ...);
+s32 texture_resolve_dl_ids(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList);
 void *node_alloc(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5);
 void *memcpy(void *, const void *, s32);
 
@@ -28,7 +28,7 @@ struct102 *mesh_effect_spawn(void *p, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     s32 total;
     s32 i;
 
-    hdr = (u8 *) func_1502B6BC(&found, 0, &count, 2, *(s32 *) ((u8 *) p + 0x30), *(s32 *) ((u8 *) p + 0x34));
+    hdr = (u8 *) asset_load_with_subfiles(&found, 0, &count, 2, *(s32 *) ((u8 *) p + 0x30), *(s32 *) ((u8 *) p + 0x34));
     size = *(s32 *) hdr - (s32) hdr - 0x28;
     total = size * 2 * (D_80082FA0 + 1);
     rec = node_alloc(arg1 ? 0x54 : 0x38, arg4, arg2 + total + 0xF8, 2, arg3, 1);
@@ -47,7 +47,7 @@ struct102 *mesh_effect_spawn(void *p, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     }
     *(s32 *) (rec + 0x54) = *(s32 *) hdr;
     *(s32 *) (rec + 0x50) = total;
-    func_1510D3E0(*(Gfx **) hdr, 0, 1, 0x3E, NULL);
+    texture_resolve_dl_ids(*(Gfx **) hdr, 0, 1, 0x3E, NULL);
     return (struct102 *) rec;
 }
 #else
@@ -111,7 +111,7 @@ u8 *mesh_effect_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     temp_v0 = (*(s8 *)((u8 *)arg1 + 0x12));
     if (temp_v0 != -1) {
         arg2 = var_a2;
-        // P250: the handlers (func_151096A0, func_151BA634) are s32 (u8 *, s32); a2 / a3 are only leftovers in the asm
+        // P250: the handlers (sky_dome_project_uv, func_151BA634) are s32 (u8 *, s32); a2 / a3 are only leftovers in the asm
         temp_v0_2 = ((s32 (**)(u8 *, s32)) &D_80089FC8)[temp_v0](arg1, var_a2);
         var_a2 = arg2;
         if (temp_v0_2 == 0) {
@@ -134,7 +134,7 @@ u8 *mesh_effect_draw(u8 *arg0, u8 *arg1, s16 arg2) {
 /* was func_1513B968 */
 s32 mesh_effect_load_identity(s32 arg0, s32 arg1) {
     // FIXME: &arg0->unk_120[D_800BE9C0]
-    func_150A7B80(arg0 + 120 + (D_800BE9C0 << 6));
+    mtx_set_identity(arg0 + 120 + (D_800BE9C0 << 6));
     return 1;
 }
 
@@ -177,7 +177,7 @@ void object_mode_dispatch_b(struct132 *arg0) {
 void mesh_effect_on_msg(u8 *arg0, s32 arg1, u8 arg2) {
     switch (arg0[0x48]) {
     case 1:
-        func_151095E4(arg0, arg1, arg2);
+        swing_lamp_handle_event(arg0, arg1, arg2);
         break;
     case 2:
         func_151BAA18(arg0, arg1, arg2);

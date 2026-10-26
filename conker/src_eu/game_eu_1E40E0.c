@@ -475,8 +475,8 @@ void func_151B7664(u8 *arg0, s32 *arg1, u8 arg2)
 }
 
 #ifdef NON_MATCHING
-s32 func_150ADA20(void);
-f32 func_150ADA68(void);
+s32 random_int(void);
+f32 random_float(void);
 s32 func_151307F0(void *spec, s32 count, s32 arg2, s32 arg3, s32 alpha, s32 arg5);
 extern f32 D_800AA85C;
 /* particle spec read by func_151307F0 (offsets from its start) */
@@ -504,7 +504,7 @@ typedef struct {
     /* 0x60 */ s8 unk60[6];
 } SmokePuffSpec;
 // obj_smoke_puff_spawn: one random smoke puff particle at obj's position (func_151307F0, alpha arg1, arg2 passed
-// on): size 89..139 (func_150ADA68 * 50 + 89), life 30..39, colours DD D3 CD FF / 57 55 5A (200..255 alpha),
+// on): size 89..139 (random_float * 50 + 89), life 30..39, colours DD D3 CD FF / 57 55 5A (200..255 alpha),
 // random mirror flags 0x40 / 0x80. Called by func_1506ADC8 (with func_151B68D0), handler 8 of func_1506B04C.
 void func_151B76F4(u8 *obj, s32 alpha, s32 arg2) {
     SmokePuffSpec p;
@@ -520,8 +520,8 @@ void func_151B76F4(u8 *obj, s32 alpha, s32 arg2) {
     p.unk10 = 0;
     p.unk1E = 0x12;
     p.unk20 = 0xE;
-    flipX = (func_150ADA20() & 1) ? 0x40 : 0;
-    flipY = (func_150ADA20() & 1) ? 0x80 : 0;
+    flipX = (random_int() & 1) ? 0x40 : 0;
+    flipY = (random_int() & 1) ? 0x80 : 0;
     p.flags = flipY | 1 | flipX | 0xCE00 | 0x10000;
     p.unk60[0] = 3;
     p.unk60[1] = 3;
@@ -546,9 +546,9 @@ void func_151B76F4(u8 *obj, s32 alpha, s32 arg2) {
     p.vel[0] = 0.0f;
     p.vel[1] = 0.0f;
     p.vel[2] = 0.0f;
-    p.color[7] = (u32) func_150ADA20() % 0x38 + 0xC8;
-    p.life = (u32) func_150ADA20() % 10 + 0x1E;
-    size = func_150ADA68() * 50.0f + 89.0f;
+    p.color[7] = (u32) random_int() % 0x38 + 0xC8;
+    p.life = (u32) random_int() % 10 + 0x1E;
+    size = random_float() * 50.0f + 89.0f;
     p.accel[0] = 0.0f;
     p.accel[1] = 0.0f;
     p.size[0] = size;
@@ -640,7 +640,7 @@ u8 *func_151B78D8(void *src, u8 type, s32 size, u8 alpha, s32 arg4) {
         }
         p.unk8 = 0x1303;
         p.type = 0x200005;
-        p.unk1D = D_800AA840[func_150ADA20() & 3];
+        p.unk1D = D_800AA840[random_int() & 3];
         p.unk4 = 0;
         p.life = 300;
         p.unkC = 0;
@@ -654,7 +654,7 @@ u8 *func_151B78D8(void *src, u8 type, s32 size, u8 alpha, s32 arg4) {
         p.color[6] = 0xFF;
         p.color[7] = 0xFF;
         p.unk1C = 0xFF;
-        glowSize = func_150ADA68() * 800.0f + D_800AA860;
+        glowSize = random_float() * 800.0f + D_800AA860;
         p.size[1] = glowSize;
         p.size[0] = glowSize;
         p.pos[0] = a.pos[0];
@@ -667,8 +667,8 @@ u8 *func_151B78D8(void *src, u8 type, s32 size, u8 alpha, s32 arg4) {
         p.unk22 = 1;
         p.unk54 = 0.0f;
         p.unk24 = 1.0f;
-        flipX = (func_150ADA20() & 1) ? 0x40 : 0;
-        flipY = (func_150ADA20() & 1) ? 0x80 : 0;
+        flipX = (random_int() & 1) ? 0x40 : 0;
+        flipY = (random_int() & 1) ? 0x80 : 0;
         p.flags = (flipY | flipX) | 0xC000 | 0x40000;
         p.unk60[0] = 6;
         p.unk60[1] = 5;
@@ -709,7 +709,7 @@ s32 func_151B7C7C(u8 *arg0, f32 *arg1) {
     p = *(u8 **)(arg0 + 0x98);
     q = *(u8 **)(p + 4);
     obj = *(u8 **)q;
-    func_150A8050(mf, *(f32 *)(obj + 0x20), *(f32 *)(obj + 0x24), *(f32 *)(obj + 0x28));
+    mtxf_rotate_xyz_deg(mf, *(f32 *)(obj + 0x20), *(f32 *)(obj + 0x24), *(f32 *)(obj + 0x28));
     mf[3][0] = *(f32 *)(obj + 0x38);
     mf[3][1] = *(f32 *)(obj + 0x3C);
     mf[3][2] = *(f32 *)(obj + 0x40);

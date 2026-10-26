@@ -2,7 +2,7 @@
 """P56: the hand-asm wall engine (func_150AB6D0 / func_150AC8C4 -> func_150AB708) and the ray cast func_150ACEA0
 vs their NON_MATCHING C (src_eu/nm_asm/D5E90.c + D5E90_walls.inc (asm2c_hand.py); the ray cast is readable C since P291).
 Reference: VR4300 interpreter (nmasm_vr.Ref) on build/conker.eu.elf; candidate: Unicorn on build_nm/conker.eu.elf.
-Callees (func_1507C7C0, func_150492CC, sinf / cosf, func_150A69A8, func_150A49D0, func_1510F800) run on both sides.
+Callees (func_1507C7C0, quadtree_set_test_box, sinf / cosf, func_150A69A8, func_150A49D0, collision_select_area) run on both sides.
 Synthetic mode: random triangles around a record (walls = vertical quads' halves, slopes, floors, degenerate ones),
 bounds tables (sometimes perturbed), flags D_800DBE5C, a BSP tree (one leaf or nmasm_floorsets' random trees),
 area kind 0 / 1 (level) and 3 (records' own models), record kinds 0 / 4 / 0x2C (func_1507C7C0's sizes), moves of
@@ -354,7 +354,7 @@ def synth(ref, cand, base, rng, n, only):
             nobj, ovs = ray_objects(rng, m, nt, pos)
             if far and rng.random() < 0.7: nobj, ovs = 0, []
             W(m, DC320, 'i', nobj); vs = vs + ovs
-            STUBS[:] = [{ref.s['func_1510F800']: lambda r, f, mm: None}, {cand.s['func_1510F800']: lambda r, f, mm: None}]
+            STUBS[:] = [{ref.s['collision_select_area']: lambda r, f, mm: None}, {cand.s['collision_select_area']: lambda r, f, mm: None}]
             ref.trace = []
             try:
                 ok, v0, info, m1 = ray_call(ref, cand, m, rng, pos, vs, far)
@@ -395,7 +395,7 @@ def level_mode(ref, cand, rng, n, levelno, rom, only):
     L.knobs(rng, mem, levelno, 0)
     emu.load(mem, {})
     emu.mu.mem_write(0x10000D24, struct.pack('>I', 0x12345678))
-    emu.call('func_15003668', [levelno]); emu.call('func_150038A0', [])
+    emu.call('collision_build_level_tris', [levelno]); emu.call('collision_build_quadtrees', [])
     lv = emu.ram()
     recs = ref.s['D_800CC2D0']
     bad = 0; hist = {}
@@ -500,7 +500,7 @@ def unit(ref, cand, base, rng, n, which):
         if nm == 'aacf4' and rng.random() < 0.5: W(m, SY['D_8009FAB0'], 'f', rng.choice([0.0, 1.0, 0.5, 2.0]))
         if nm == 'aaf00':
             for i, a in enumerate(('D_800CC64C', 'D_800CC650', 'D_800CC654')): W(m, SY[a], 'I', fv[i])
-            # P288: the box diagonals' slopes ky / kz = hy / hx, hz / hx (func_150492CC sets them with the box); they
+            # P288: the box diagonals' slopes ky / kz = hy / hx, hz / hx (quadtree_set_test_box sets them with the box); they
             # were left as the image's values, so the diagonal stage saw ky = kz = 0 and its mutants survived
             hx = f32(fv[0]) or 1.0
             W(m, SY['D_800CC658'], 'f', f32(fv[1]) / hx); W(m, SY['D_800CC65C'], 'f', f32(fv[2]) / hx)

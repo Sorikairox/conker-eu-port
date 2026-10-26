@@ -107,7 +107,7 @@ void func_15080BF4(s32 arg0, s32 arg1, s32 arg2) {
 
 #ifdef NON_MATCHING
 s32 allocate_memory(s32, s32, s32, s32);
-s32 func_1502B6BC(s32, s32, s32, s32, s32, s32, s32);
+s32 asset_load_with_subfiles(s32, s32, s32, s32, s32, s32, s32);
 s32 func_1516AD20(s32, s32, s32, void (*)(s32, s32, s32), s32 *, s32);
 s32 strlen(u8 *);
 extern u8 D_800BEECB;
@@ -139,14 +139,14 @@ void func_15080C28(s32 arg0) {
 block_4:
         sp40 = 0;
     }
-    temp_v0 = func_1502B6BC(0, 0, 0, 3, 0x1A, (s32) D_800BEECB, (s32) D_800D1940);
+    temp_v0 = asset_load_with_subfiles(0, 0, 0, 3, 0x1A, (s32) D_800BEECB, (s32) D_800D1940);
     D_800D1944 = temp_v0;
     if (temp_v0 != 0) {
         D_800D1994 = 0;
         D_800D1998 = (*(s32 *)((u8 *)temp_v0 + 8));
         D_800D1995 = (u8) ((u32) (*(u32 *)((u8 *)temp_v0 + 0xC)) >> 1);
         if (sp40 != 0) {
-            temp_v0_2 = func_1502B6BC(0, 0, 0, 3, 0x1A, (s32) D_800BEECB, 0x43);
+            temp_v0_2 = asset_load_with_subfiles(0, 0, 0, 3, 0x1A, (s32) D_800BEECB, 0x43);
             D_800D1948 = temp_v0_2;
             if (D_800D1944 != 0) {
                 sp3C = strlen(*(s32 *)temp_v0_2) + 1;

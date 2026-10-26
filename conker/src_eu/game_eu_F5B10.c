@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, ...);
+s32 event_dispatch(s32, s32, ...);
 void camera_set_followed_obj(struct108 *, s32);
 void camera_calc_relative_yaw(struct108 *arg0);
 extern s32 D_80088BA0;
@@ -32,10 +32,10 @@ void func_150C8300(u8 *obj) {
     f32 t;
     u8 *other;
 
-    b = func_1509BE40(0, func_1509BE40(0, 0x2010, 0xB7) | 0x2000, 0xBC);
-    c = func_1509BE40(0, 0x2000, 0xBB);
-    e = func_1509BE40(0, func_1509BE40(0, 0x2010, 0xB7) | 0x2000, 0xBB);
-    if (func_1509BE40(0, 0x5071, 0x1A) == 0) {
+    b = event_dispatch(0, event_dispatch(0, 0x2010, 0xB7) | 0x2000, 0xBC);
+    c = event_dispatch(0, 0x2000, 0xBB);
+    e = event_dispatch(0, event_dispatch(0, 0x2010, 0xB7) | 0x2000, 0xBB);
+    if (event_dispatch(0, 0x5071, 0x1A) == 0) {
         if (c != -1 && b == 0) {
             if (camera_push_mode((struct108 *) obj, *(s32 *) (obj + 0x2C), 0, *(s32 *) (obj + 0x134), 3) == 0) {
                 return;
@@ -69,17 +69,17 @@ void func_150C8300(u8 *obj) {
         }
         return;
     }
-    if (func_1509BE40(0, 0x5072, 0x1A) == 0) {
+    if (event_dispatch(0, 0x5072, 0x1A) == 0) {
         if (**(u16 **) (obj + 0x36C) & 4) {
             *(f32 *) (obj + 0x190) = 20.0f;
         }
-        if (func_1509BE40(0, 0x2000, 0x93) == 0) {
+        if (event_dispatch(0, 0x2000, 0x93) == 0) {
             *(f32 *) (obj + 0x190) = 0.0f;
             return;
         }
-        v = func_1509BE40(1, func_1509BE40(0, 0x2011, 0xB7) | 0x2000, 0x9C, 0x2000);
-        func_1509BFB0(1, 0x9000, 0x17, v);
-        v = func_1509BE40(1, func_1509BE40(0, 0x2011, 0xB7) | 0x2000, 0x9A, 0x2000);
+        v = event_dispatch(1, event_dispatch(0, 0x2011, 0xB7) | 0x2000, 0x9C, 0x2000);
+        event_dispatch_alt(1, 0x9000, 0x17, v);
+        v = event_dispatch(1, event_dispatch(0, 0x2011, 0xB7) | 0x2000, 0x9A, 0x2000);
         t = ((f32) v - 300.0f) / 900.0f;
         if (t < 0.0f) {
             t = 0.0f;
@@ -96,8 +96,8 @@ void func_150C8300(u8 *obj) {
             *(f32 *) (obj + 0x34C) = 231.0f * t;
             *(f32 *) (obj + 0x348) = 231.0f * t;
         }
-        func_1509BFB0(2, 0x9000, 6, 1, 0x20000);
-        func_1509BFB0(2, 0x9000, 6, 0, 4);
+        event_dispatch_alt(2, 0x9000, 6, 1, 0x20000);
+        event_dispatch_alt(2, 0x9000, 6, 0, 4);
         if (e != -1) {
             *(f32 *) (obj + 0x670) = 0.0f;
         }

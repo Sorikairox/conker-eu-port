@@ -1,0 +1,249 @@
+old	new	confidence	description
+func_15016170	audio_fx_mixer_init	med	Allocates and initialises the D_800E0D80 audio mixer/effect record from the heap (centred pan, full volume) and installs its mixer callback
+func_15016500	level_globals_reset	low	Clears the D_800D1940..D_800D1998 block of level globals (flags, counters, three floats, 48-byte table)
+func_15016588	level_build_flag_bitmask	low	Builds the 67-bit mask D_eu_800BE9A0: bit i set when asset table 3/0x1A entry i of the current level is non-empty
+func_15017300	level_lights_init	low	Clears the D_800D2138 block and, for every bit set in mask arg1, sets entries 0/5/2/(9) via func_15085710 from fixed tables
+func_1501748C	level_lights_stub	med	Empty stub called by func_15017300 for each slot
+func_15017498	level_lights_clear	low	Zeroes the 524-byte D_800D2138 block
+func_150174C0	level_table_relocate	low	Double loop over the D_800D23C0 table of 24-byte records (D_80087380 entries) fixing them up against arg0
+func_15017578	level_table_load	med	Loads asset 3/12 entry arg0 into D_800D23C0, sets its record count (size / 24) and fixes the records up with func_150174C0
+func_150175E0	render_set_detail_level	low	Sets D_800D2456 / D_800D2457 to 3 in single normal play, 6 in multiplayer or when the level flag +0x18 & 1 is set
+func_15017640	camera_view_state_init	med	Resets the view state block (positions, scale table to 1.0, light slots) and builds the default perspective matrix D_800D27F0
+func_15017790	level_state_clear	low	Calls func_1509C120 and clears the D_800D2E4C / D_800D2E50 / D_800D2E60 / D_800D2E70 level state blocks
+func_150177F8	level_state_init	low	Initialises level state: func_1509BA04(1), clears D_800D2F48, func_150A00F0 and sets D_800D2DB0 / D_800D2E41 / D_800D2E42 defaults
+func_15017868	level_apply_flag_entries	low	For each id in D_800D2F40 whose record has flag 0x1000, stores D_800BE9F0 in its second halfword; then func_1509BA04(0) and func_1509B4A0
+func_15017930	zones_load	med	Loads the level zone table (asset 3/0xC, 0x34-byte zones), counts them, builds overlap masks and sorts zones by type into lists
+func_15017B20	zones_build_overlap_masks	high	Builds the 0x28-byte zone records (bounding box, 3x64-bit overlap masks) and the D_800D34C0 / D_800D34D8 zone sets
+func_15017FA4	zone_compute_bbox	high	Computes the axis-aligned bounding box of a 0x34-byte zone (cylinder, cube or rotated box) into its 0x28-byte record
+func_150186D0	game_main_loop	high	Game main loop: init, run func_1501878C each frame until it returns 0, then shut down the display and wait for the scheduler
+func_1501878C	game_frame_step	high	Per-frame main step: wait for the frame message, update the world, build and submit the frame display list, handle teardown
+func_15018DFC	world_update_objects	med	Part of the world update: timers, object/effect updates and (unpaused) the cutscene-or-actor step and func_15085ABC
+func_15018E88	render_scene_layers_pre	med	Draws the pre-scene layers (group 0 model layers, optional func_1517D7B0 1) and returns the new DL pointer
+func_15018F08	render_scene_layers_post	med	Draws the post-scene layers (func_15174B48, group 1 model layers, func_1517D7B0 2) and returns the new DL pointer
+func_15018F80	camera_player_update	med	Per-player camera step: camera update when not frozen and unpaused, func_1501B640, far clip value from +0x388, func_15172D80
+func_1501905C	game_frame_begin	med	Start of a frame: select DL buffer, frame timing, pause/menu updates, audio listener position from camera 0
+func_15019130	world_update	high	Per-frame world update: camera, objects, players and effects steps, then ages the D_80043ED0 records; returns 1
+func_15019414	game_frame_end_update	low	End-of-frame update: func_15167010 when unpaused, func_1517ABB0, and func_1508F0A4 in single player
+func_15019464	render_player_frame_setup	high	Per-player frame setup: camera update, viewport, the player's view DL and in normal play the light setup
+func_150195A0	render_player_scene	high	Per-player scene pass: viewport/projection, sky, model groups, effects, HUD layers; skipped while paused
+func_150198FC	render_overlay_pass	med	Full-screen overlay pass: viewport, pause-screen frame capture, HUD layers, and model group 3
+func_15019BB8	render_player_hud	low	Per-player overlay: viewport, view DL, three HUD layers, func_1507DB6C when the player is flagged, model group 4
+func_15019CC8	render_player_3d_setup	high	Per-player 3D setup: viewport, projection, group-5 models, view and model matrices
+func_15019E60	render_final_overlay	low	Final full-screen viewport pass running func_151E8620 and func_15043384 (text queue) on the DL
+func_15019F20	game_update_frame_timing	med	Computes the frame delta (D_800BE9E4) and frame-rate scale from the retrace count, with fixed-step mode D_800BEE2C
+func_1501A220	viewports_init	high	Sets the player count, allocates the 0x180-byte camera records and viewport buffers, computes the 2-player width scale and sets up every view
+func_1501A39C	render_dl_buffers_init	high	Writes the fixed DL prologue (segments, init DL, depth image, viewport) into both display list buffers
+func_1501A490	render_set_scissor	high	Emits a pipe sync and a scissor rectangle: full screen for view 0xFF, else the view's (optionally clipped) camera rectangle
+func_1501A680	render_set_color_image	high	Emits gDPSetColorImage for the current frame buffer (D_8002AAE8[D_800BE9C0])
+func_1501A6CC	render_fill_rect_clamped	high	Clamps a rectangle to the screen bounds and emits gDPFillRectangle
+func_1501A764	camera_world_to_screen	high	Projects a world point through view `view`'s matrix into screen x / y and depth using the view's camera record
+func_1501A8C0	camera_record_setup	high	Fills the camera record of player p for a screen split into n + 1 views (viewport size, aspect, fov, clip planes)
+func_1501AE94	camera_rect_on_screen	med	Returns 1 when camera record arg0's screen rectangle lies within the frame buffer bounds
+func_1501AF44	screen_clamp_rect	high	Clamps the rectangle (x0, y0, x1, y1) to the visible frame buffer (x in 2..width-2, y in 0..height)
+func_1501B0A0	camera_setup_perspective	med	Computes view arg0's field of view from its camera record (aspect and fov tables) and sets its perspective via func_1510B6A8
+func_1501B22C	camera_compute_frustum_planes	med	Computes the side / top frustum plane normals of camera record arg0 from its horizontal and vertical fov angles
+func_1502AAF0	asset_system_stub_a	med	Empty stub called during level setup (func_15007B3C)
+func_1502AAF8	asset_system_stub_b	med	Empty stub taking one argument, called during level setup (func_15007B3C)
+func_1502AB04	asset_rec_cache_insert	high	ROM record MRU cache insert: drops the n oldest of the 16 entries and appends n records with consecutive keys, stamped arg2
+func_1502AC88	asset_rec_read_cached	high	Reads the 8-byte ROM table record at arg0 + arg1 * 8 through the 16-entry MRU cache; returns the offset, stores the info word
+func_1502AF04	asset_rec_fetch_block	high	DMAs n consecutive 8-byte ROM table records into an aligned buffer, makes their offsets absolute and returns the first record
+func_1502B020	asset_lookup_rom	high	Walks the nested ROM asset tables by the variadic index path; returns the asset's ROM address and stores its size in *arg0
+func_1502B110	asset_lookup_records	high	Walks the ROM asset tables by the index path and fetches n records of the last table into buf (animation header lookup)
+func_1502B224	asset_dma_into	high	DMAs (and unpacks when packed) a ROM asset into the caller's buffer, limited to arg3 bytes; returns the loaded size
+func_1502B350	asset_load_alloc	high	Allocates a buffer and DMAs a ROM asset into it, unpacking packed assets; stores the loaded size in *size_out
+func_1502B4A8	asset_relocate_subfiles	high	Relocates a loaded asset's sub-file table of {offset, info} entries to absolute pointers; returns the entry count
+func_1502B5C8	asset_load	high	Loads the asset at the variadic index path into a new buffer; returns the pointer, size in *arg0
+func_1502B6BC	asset_load_with_subfiles	high	Loads the asset at the index path and relocates its sub-file table; returns the pointer, sub-file count in *arg2
+func_1502B7F0	asset_load_ptr	high	Loads the asset at the index path into a new buffer stored in *arg0; returns the loaded size
+func_1502B8E0	asset_load_into	high	Loads the asset at the index path into the caller's buffer arg0 (max arg1 bytes); returns the loaded size
+func_1502B9B4	asset_get_size	high	Returns the (unpacked) size of the asset at the index path, reading the packed header when needed
+func_150407A0	dldump_vtx	high	Empty display-list dump handler for GBI opcode 0x01 G_VTX in the D_80084840 table (stripped debug print)
+func_150407A8	dldump_modifyvtx	high	Empty display-list dump handler for GBI opcode 0x02 G_MODIFYVTX in the D_80084840 table (stripped debug print)
+func_150407B4	dldump_culldl	high	Empty display-list dump handler for GBI opcode 0x03 G_CULLDL in the D_80084840 table (stripped debug print)
+func_150407C0	dldump_branch_z	high	Empty display-list dump handler for GBI opcode 0x04 G_BRANCH_Z in the D_80084840 table (stripped debug print)
+func_150407CC	dldump_line3d	high	Empty display-list dump handler for GBI opcode 0x08 G_LINE3D in the D_80084840 table (stripped debug print)
+func_150407D8	dldump_rdphalf_1	high	Empty display-list dump handler for GBI opcode 0xE1 G_RDPHALF_1 in the D_80084840 table (stripped debug print)
+func_150407E4	dldump_rdphalf_2	high	Empty display-list dump handler for GBI opcode 0xF1 G_RDPHALF_2 in the D_80084840 table (stripped debug print)
+func_150407F0	dldump_setkeygb	high	Empty display-list dump handler for GBI opcode 0xEA G_SETKEYGB in the D_80084840 table (stripped debug print)
+func_150407FC	dldump_setkeyr	high	Empty display-list dump handler for GBI opcode 0xEB G_SETKEYR in the D_80084840 table (stripped debug print)
+func_15040808	dldump_quad	high	Empty display-list dump handler for GBI opcode 0x07 G_QUAD in the D_80084840 table (stripped debug print)
+func_15040814	dldump_tri2	high	Empty display-list dump handler for GBI opcode 0x06 G_TRI2 in the D_80084840 table (stripped debug print)
+func_15040820	dldump_tri_ext	high	Empty display-list dump handler for GBI opcode 0x10 G_TRI_EXT (opcodes 0x10-0x1F) in the D_80084840 table (stripped debug print)
+func_1504086C	dldump_tri1	high	Empty display-list dump handler for GBI opcode 0x05 G_TRI1 in the D_80084840 table (stripped debug print)
+func_15040878	dldump_loadtlut	high	Empty display-list dump handler for GBI opcode 0xF0 G_LOADTLUT in the D_80084840 table (stripped debug print)
+func_15040884	dldump_loadtile	high	Empty display-list dump handler for GBI opcode 0xF4 G_LOADTILE in the D_80084840 table (stripped debug print)
+func_15040890	dldump_rdptilesync	high	Empty display-list dump handler for GBI opcode 0xE8 G_RDPTILESYNC in the D_80084840 table (stripped debug print)
+func_1504089C	dldump_rdpfullsync	high	Empty display-list dump handler for GBI opcode 0xE9 G_RDPFULLSYNC in the D_80084840 table (stripped debug print)
+func_150408A8	dldump_rdppipesync	high	Empty display-list dump handler for GBI opcode 0xE7 G_RDPPIPESYNC in the D_80084840 table (stripped debug print)
+func_150408B4	dldump_rdploadsync	high	Empty display-list dump handler for GBI opcode 0xE6 G_RDPLOADSYNC in the D_80084840 table (stripped debug print)
+func_150408C0	dldump_setcombine	high	Empty display-list dump handler for GBI opcode 0xFC G_SETCOMBINE in the D_80084840 table (stripped debug print)
+func_150408F0	dldump_dl	high	Empty display-list dump handler for GBI opcode 0xDE G_DL in the D_80084840 table (stripped debug print)
+func_150408FC	dldump_setothermode_h	high	Empty display-list dump handler for GBI opcode 0xE3 G_SETOTHERMODE_H in the D_80084840 table (stripped debug print)
+func_15040908	dldump_setothermode_l	high	Empty display-list dump handler for GBI opcode 0xE2 G_SETOTHERMODE_L in the D_80084840 table (stripped debug print)
+func_15040914	dldump_setconvert	high	Empty display-list dump handler for GBI opcode 0xEC G_SETCONVERT in the D_80084840 table (stripped debug print)
+func_15040920	dldump_setscissor	high	Empty display-list dump handler for GBI opcode 0xED G_SETSCISSOR in the D_80084840 table (stripped debug print)
+func_1504092C	dldump_spnoop	high	Empty display-list dump handler for GBI opcode 0x00 G_SPNOOP in the D_80084840 table (stripped debug print)
+func_15040938	dldump_noop	high	Empty display-list dump handler for GBI opcode 0xE0 G_NOOP in the D_80084840 table (stripped debug print)
+func_15040944	dldump_setcimg	high	Empty display-list dump handler for GBI opcode 0xFF G_SETCIMG in the D_80084840 table (stripped debug print)
+func_15040950	dldump_setzimg	high	Empty display-list dump handler for GBI opcode 0xFE G_SETZIMG in the D_80084840 table (stripped debug print)
+func_1504095C	dldump_settimg	high	Empty display-list dump handler for GBI opcode 0xFD G_SETTIMG in the D_80084840 table (stripped debug print)
+func_15040968	dldump_setenvcolor	high	Empty display-list dump handler for GBI opcode 0xFB G_SETENVCOLOR in the D_80084840 table (stripped debug print)
+func_15040974	dldump_setprimcolor	high	Empty display-list dump handler for GBI opcode 0xFA G_SETPRIMCOLOR in the D_80084840 table (stripped debug print)
+func_15040980	dldump_setblendcolor	high	Empty display-list dump handler for GBI opcode 0xF9 G_SETBLENDCOLOR in the D_80084840 table (stripped debug print)
+func_1504098C	dldump_setfogcolor	high	Empty display-list dump handler for GBI opcode 0xF8 G_SETFOGCOLOR in the D_80084840 table (stripped debug print)
+func_15040998	dldump_special_3	high	Empty display-list dump handler for GBI opcode 0xD3 G_SPECIAL_3 in the D_80084840 table (stripped debug print)
+func_150409A4	dldump_special_2	high	Empty display-list dump handler for GBI opcode 0xD4 G_SPECIAL_2 in the D_80084840 table (stripped debug print)
+func_150409B0	dldump_special_1	high	Empty display-list dump handler for GBI opcode 0xD5 G_SPECIAL_1 in the D_80084840 table (stripped debug print)
+func_150409BC	dldump_dma_io	high	Empty display-list dump handler for GBI opcode 0xD6 G_DMA_IO in the D_80084840 table (stripped debug print)
+func_150409C8	dldump_setfillcolor	high	Empty display-list dump handler for GBI opcode 0xF7 G_SETFILLCOLOR in the D_80084840 table (stripped debug print)
+func_150409D4	dldump_fillrect	high	Empty display-list dump handler for GBI opcode 0xF6 G_FILLRECT in the D_80084840 table (stripped debug print)
+func_150409E0	dldump_texrect	high	Empty display-list dump handler for GBI opcode 0xE4 G_TEXRECT in the D_80084840 table (stripped debug print)
+func_150409EC	dldump_texrectflip	high	Empty display-list dump handler for GBI opcode 0xE5 G_TEXRECTFLIP in the D_80084840 table (stripped debug print)
+func_150409F8	dldump_loadblock	high	Empty display-list dump handler for GBI opcode 0xF3 G_LOADBLOCK in the D_80084840 table (stripped debug print)
+func_15040A04	dldump_settile	high	Empty display-list dump handler for GBI opcode 0xF5 G_SETTILE in the D_80084840 table (stripped debug print)
+func_15040A10	dldump_settilesize	high	Empty display-list dump handler for GBI opcode 0xF2 G_SETTILESIZE in the D_80084840 table (stripped debug print)
+func_15040A1C	dldump_enddl	high	Empty display-list dump handler for GBI opcode 0xDF G_ENDDL in the D_80084840 table (stripped debug print)
+func_15040A28	dldump_popmtx	high	Empty display-list dump handler for GBI opcode 0xD8 G_POPMTX in the D_80084840 table (stripped debug print)
+func_15040A34	dldump_mtx	high	Empty display-list dump handler for GBI opcode 0xDA G_MTX in the D_80084840 table (stripped debug print)
+func_15040A40	dldump_geometrymode	high	Empty display-list dump handler for GBI opcode 0xD9 G_GEOMETRYMODE in the D_80084840 table (stripped debug print)
+func_15040A54	dldump_load_ucode	high	Empty display-list dump handler for GBI opcode 0xDD G_LOAD_UCODE in the D_80084840 table (stripped debug print)
+func_15040A60	dldump_movemem	high	Empty display-list dump handler for GBI opcode 0xDC G_MOVEMEM in the D_80084840 table (stripped debug print)
+func_15040A6C	dldump_moveword	high	Empty display-list dump handler for GBI opcode 0xDB G_MOVEWORD in the D_80084840 table (stripped debug print)
+func_15040D60	dldump_setprimdepth	high	Empty display-list dump handler for GBI opcode 0xEE G_SETPRIMDEPTH in the D_80084840 table (stripped debug print)
+func_15040D6C	dldump_texture	high	Empty display-list dump handler for GBI opcode 0xD7 G_TEXTURE in the D_80084840 table (stripped debug print)
+func_15040D78	dldump_rdpsetothermode	high	Empty display-list dump handler for GBI opcode 0xEF G_RDPSETOTHERMODE in the D_80084840 table (stripped debug print)
+func_15040748	dldump_unknown	high	Empty display-list dump handler used for every unassigned opcode in the D_80084840 table
+func_15040A4C	dlcheck_stub	low	Empty no-argument stub in the display-list checker (not referenced by the dump table)
+func_15040350	dl_validate	high	Resets the display-list checker state (segment table, sync flag, texture) and validates the list up to arg1
+func_150403C8	dl_validate_list	high	Debug walk over a display list checking commands, branches, segment writes and missing pipe syncs; stops in the debugger on errors
+func_1504072C	dlcheck_addr_misaligned	high	Returns 1 when address arg0 is not 8-byte aligned
+func_15040754	dlcheck_vtx_invalid	high	Checks a G_VTX command: fails when the vertex count exceeds the end index or the address is misaligned
+func_1504082C	dlcheck_tri_invalid	high	Checks a G_TRI1 command: fails when any of the three vertex indices is odd
+func_150408CC	dlcheck_dl_invalid	high	Checks a G_DL command: fails when the branch address is misaligned
+func_15040A78	dl_trace_segments	med	Uncalled debug walk over a display list tracking G_MOVEWORD segment writes and following G_DL calls until G_ENDDL
+func_15040CC8	dl_dump_around	high	Dumps the 30 display-list commands around arg0 through the per-opcode table D_80084840, then the current texture image
+func_15040D90	debug_marker_stub	low	Empty one-argument debug stub next to the framebuffer marker drawers
+func_15040D9C	debug_marker_fill_draw	med	Draws a solid red 8x8 block at (200 + x, 225) straight into both framebuffers and clears it in the depth buffer
+func_15040FCC	debug_marker_box_draw	high	Draws an 8x8 box (red outline, black inside) at (200 + x, 225) straight into both framebuffers and clears it in the depth buffer
+func_1504129C	debug_busy_wait	high	Busy-waits by counting to 0x18000000
+func_15042D50	text_queue_reset	high	Empties the on-screen text queue D_800CBD64 and flushes it with func_15043384(0)
+func_15042D78	text_set_flags	med	Sets the text queue flags byte D_800CBD74 used for subsequent lines
+func_15042D94	text_printf_at	high	Queues formatted text at position (arg0, arg1) with flags arg2, format arg3 and up to 16 variadic words
+func_15042E3C	text_printf	high	Queues formatted text with the current position and flags (format arg0, up to 16 variadic words)
+func_15042ECC	text_queue_vprintf	high	Formats text into 0x5C-byte line nodes appended to the D_800CBD64 text queue, one node per line
+func_150432BC	text_set_scale	med	Sets the text scale D_800CBD80 used for subsequent lines
+func_150432CC	text_set_box	low	Sets text flag bit 0 and stores the two box parameters D_800CBD78 / D_800CBD7C
+func_150432FC	text_set_pos	high	Sets the text cursor position D_800CBD70 / D_800CBD72
+func_1504332C	text_set_color	high	Sets the RGBA text colour D_800CBD60..D_800CBD63
+func_15043384	text_queue_draw	high	Draws every queued text line and icon into the display list and frees the queue; returns the new DL pointer
+func_15043A00	ring_buffer_init	high	Initialises a ring buffer record with buffer arg1, size arg2 and zero read / write positions
+func_15043A20	ring_buffer_write_wrap	high	Copies len bytes from src into the ring buffer at pos with wrap-around; returns the new position
+func_15043AC8	ring_buffer_read_wrap	high	Copies len bytes from the ring buffer at pos into dst with wrap-around; returns the new position
+func_15043B70	ring_buffer_advance	high	Advances position arg2 by arg3 bytes in a ring buffer of size arg1 with wrap-around; returns the new position
+func_15043BB8	ring_buffer_put_record	high	Appends a length-prefixed record to the ring buffer; returns 1 when it does not fit, else 0
+func_15043CA4	ring_buffer_get_record	high	Takes the next length-prefixed record from the ring buffer into dst (truncated to max - 1 bytes); returns its length
+func_15043D90	mtx_build_rot_scale_trans	high	Builds a fixed-point Mtx from rotation angles (arg1..arg3), per-axis scale (arg4..arg6) and translation (arg7..arg9)
+func_15043E68	mtx_build_rot_trans	high	Builds a fixed-point Mtx from rotation angles (arg1..arg3) and translation (arg4..arg6)
+func_15043EC8	mtxf_scale_set_trans	high	Scales the three axis rows of a float matrix by (x, y, z) and sets its translation row
+func_15043F6C	mtxf_build_basis_trans	med	Builds a float matrix from six basis parameters (func_150A9B0C) and a translation, with the homogeneous column set to (0, 0, 0, 1)
+func_15043FF0	vec_from_fixed_pos	high	Converts a fixed-point position (s16 integer part + s16 1/65536 fraction) of a record into a float vector
+func_150440A0	mtxf_look_at	high	Builds a look-at view matrix from eye position, target and up vector
+func_150442C0	mtxf_translate_local	high	Translates a float matrix by (x, y, z) expressed in its own local axes
+func_150487E0	math_asin_scaled	med	Arcsine of arg0 from the D_80098E00 table, scaled by D_80099004 (angle unit), sign preserved
+func_15048864	math_asin_u8	med	Arcsine of arg0 from the D_80098E00 table as a 0..255 byte angle (negative inputs wrap to 255 - angle)
+func_150488C8	math_asinf_table	high	Interpolated arcsine of arg0 in radians from the 256-entry u16 table D_80098E00, sign preserved
+func_150489B0	math_cos_u8	high	Cosine of a byte angle (256 = full turn) from the quarter-wave table, using its symmetries
+func_15048A40	math_sin_u8	high	Sine of a byte angle (256 = full turn) computed as cos(angle - 64)
+func_15048A70	math_angle_diff_deg	high	Signed shortest difference arg1 - arg0 between two float angles in degrees (wraps at 180)
+func_15048AD0	math_angle_diff_deg_int	high	Signed shortest difference arg1 - arg0 between two integer angles in degrees (wraps at 180)
+func_15048B10	obj_build_inverse_mtx	high	Builds the world-to-local matrix of object arg0 (inverse translation, then inverse Z / Y / X rotations) into arg1
+func_15048C30	math_asinf	high	Polynomial arcsine of arg0 in radians (fdlibm-style ranges by exponent)
+func_15048F20	vec3_add	high	out = a + b for float 3-vectors
+func_15048F58	vec3_sub	high	out = a - b for float 3-vectors
+func_15048F90	vec3_diff	high	out = b - a for float 3-vectors (vector from a to b)
+func_15048FC8	vec3_heading_deg	high	Heading of a vector in the XZ plane in degrees (0..360), 0 for a vertical or zero vector
+func_150490A8	vec3_heading_u8	high	Heading of a vector in the XZ plane as a byte angle, 0 for a vertical or zero vector
+func_15049148	vec3_scale	high	out = v * s for a float 3-vector
+func_1504917C	vec3_normalize	high	out = v / |v| (unchanged when the length is 0)
+func_150491EC	vec3_dir_to	high	out = normalize(b - a), the unit direction from a to b
+func_15049260	quadtree_tri_box_test	high	Triangle vs current box test for quadtree culling (func_150AB278); returns 0 when they intersect, 1 when outside
+func_150492CC	quadtree_set_test_box	high	Sets the triangle test box size D_800CC640.., its half extents and the y / x and z / x ratios
+func_15049350	tri_compute_plane	high	Computes the plane (normal and distance) of the triangle given by three points into D_800CC630..D_800CC63C
+func_15055E50	obj_push_out_of_blockers	med	Clamps object 0x3A to the arena and pushes the object out of the level's cylinder / box blockers (D_800D1CD0) at its height
+func_15056150	obj_leash_to_spawn	high	Keeps an object within its leash radius (+0x2E8 * 8) around its spawn point D_800D2104[+0x13F]
+func_15056258	obj_follow_water_level	med	Moves a floating object up or down with the change of its water surface height (+0x118)
+func_150562FC	obj_carried_update	high	Per-frame update of an object while it is held by another object (immunity, height, hold timer, per-type pose)
+func_1505693C	obj_in_spawn_radius	high	Returns 1 when record arg1 is inside the XZ radius of object arg0's spawn point (or the spawn has no radius)
+func_15056A00	obj_start_hit_reaction	high	Starts a hit reaction animation chosen by strength and side from row D_80099DFC[row]; costs health, stuns and stops the object
+func_15056B08	obj_walk_update	low	Large per-object movement step: speed integration, hit reactions, animation choice and turning for walking objects
+func_1505841C	obj_update_move_anim	med	Picks the playback speed of the object's movement animation from its XZ speed and starts it
+func_150585F0	obj_stun_update	high	Per-frame stun / hit-recovery update of an object (hover physics, lift, gravity, recovery)
+func_15058898	obj_update_floor	med	Looks up the floor under the object, integrates the fall and handles deep falls (fall effect) or sets the floor height
+func_15058EA4	obj_set_gravity_band	high	Sets gravity arg2 above height arg1 or arg4 below arg3, and clamps the vertical speed to [arg6, arg5]
+func_15058F24	obj_water_buoyancy	med	Water entry and buoyancy of an object at the surface height +0x118 (sets in_water, gravity and damps vertical speed)
+func_15059140	obj_physics_step	med	Per-frame physics of an object: blockers, leash, walk update, floor, water, gravity, contacts and attack tests
+func_150593C4	obj_blend_push_velocity	high	Blends the object's push velocity (+0x16C / +0x170) towards speed arg2 along angle arg1 by factor arg3
+func_15059444	obj_apply_level_current	med	Applies the per-level current or path push to an object (level-specific cases by D_800BE9F0)
+func_1505959C	obj_attach_to_carrier	med	Makes the object held by carrier record arg1 (+0x13D = arg1 + 100), resets timers and picks the carry pose by type
+func_150597FC	obj_find_carrier	low	Looks for a free nearby record able to carry the object and attaches it with func_1505959C
+func_150599C8	obj_turn_towards	med	Turns the object's heading +0x7A towards angle arg2 at rate arg1 (scaled by the frame time), limited to its turn range
+func_15059B54	obj_turn_to_target_yaw	med	Turns the object's heading +0x76 towards +0x78 at rate arg1, limited to its turn range; returns the remaining difference
+func_15059C84	obj_update_ground_tilt	low	Updates the object's tilt / pitch from its movement and the ground plane (func_15049350) unless disabled
+func_1505A184	vec_from_yaw_pitch	med	Converts speed arg1 at yaw arg0 (u16) and pitch arg2 into x / z / y velocity components
+func_1505A250	move_xz_towards	high	Moves the point (*arg3, *arg4) towards (arg0, arg1) by speed arg2 per frame without overshooting
+func_1505A3A8	obj_approach_speed	med	Accelerates or brakes speed arg0 towards target arg2 with rate arg3, adjusted for water, slopes and object state
+func_1505A5CC	pad_stick_speed	med	Returns the analog stick magnitude of controller record arg0 times 0.6, capped at 35
+func_1505A630	math_atan2_u16	high	Returns the u16 angle (65536 = full turn) of the direction (arg0, arg1)
+func_1505A6F8	obj_dist_xz	high	Returns the horizontal (XZ) distance between two objects
+func_1505A72C	obj_dist_3d	high	Returns the 3D distance between two objects
+func_1505A770	obj_apply_gravity	high	Applies gravity to the object's vertical speed and height in 0.1 steps while airborne, one step on the ground
+func_1505A9AC	obj_ctrl_floor_contact	low	Floor and water contact of a controlled object at floor height arg1 (landing, water entry, swim surface)
+func_1505B5F8	obj_land_on_floor	med	Handles landing on the floor at height arg1: fall-damage stun, on-ground flag, landing rumble and effects
+func_1505B9C4	obj_apply_hit	high	Applies a hit descriptor from an attacker to an object: knock-back, damage, reaction and effects
+func_1505C140	obj_facing_angle_diff	high	Absolute difference between arg1's heading and the direction from arg1 to arg0
+func_1505C1A4	obj_get_hit_rules	med	Returns the hit reaction rule table of the object's type, or the default table D_8009A9F8
+func_1505C1E4	obj_receive_hit	high	Applies an incoming hit through the object's reaction rules (may redirect, block or modify it), then func_1505B9C4
+func_1505C7D8	attack_hit_test	high	Tests the attacker's active attack (sphere or box) against every vulnerable record, with optional line-of-sight check
+func_1505D024	obj_send_hit	high	Sends a hit / message of kind flags & 0xFF to an object from the current object unless immune, stunned or dead
+func_1505D1C4	attack_spawn_at_point	med	Fires an attack / effect arg3 at a world point through the shared spawn record D_800D121C; returns the hit test result
+func_1505D2B8	obj_start_knockback	med	Starts preset knock-back arg1 (D_8009A6D8: speeds and gravity) on an object and advances its hit reaction
+func_1505D34C	math_rotate_offset_deg	high	Rotates the offset (arg1, arg2) scaled by arg3 by heading arg0 degrees; returns x and stores z in *arg4
+func_1505D408	obj_contact_resolve	med	Resolves a contact between two records: marks the contact mask and pushes them apart by weight and flags
+func_1505D5D0	obj_box_contact_test	high	Box test of a record's cylinder against an object's rotated box; calls func_1505D408 on overlap
+func_1505D6F0	obj_contact_pass	high	Record-vs-record push / contact pass for one record against the other live records
+func_1505DADC	obj_find_visible_target	med	Finds the nearest record within the cone and pitch limits with a clear line of sight; returns its index or 0xFF
+func_1505DDA8	obj_find_seen_player	high	Returns the first player within sight range and heading cone of the record, -1 for none
+func_1505DF10	obj_vec_to_record	high	Returns the squared distance from a position to record arg1 and stores the direction angle and height difference
+func_1505DFDC	obj_anim_reset	high	Resets the object's animation state (clears the 0x3A0-byte state, sets the default animation)
+func_1505E060	anim_state_snapshot	high	Copies the current animation state fields into the previous-state copy (for blending)
+func_1505E0C4	anim_start_entry	high	Starts or restarts an animation on an animation state, loading its header from ROM when needed
+func_1505E650	obj_start_anim	high	Starts animation arg1 of an object at the given speed unless blocked by cutscene, missing model or range
+func_1505E7CC	obj_find_reaction_row	high	Returns the index of the type's 24-byte reaction row whose kind is arg0, 0 when none
+func_1505E874	obj_hit_reaction_advance	high	Plays the next phase of the object's current hit reaction (animation, sound, flags)
+func_1505ED34	obj_alloc_slot	high	Returns a free object record of the 25 in D_800CC2D0, evicting a disposable (state 0x27) one when full
+func_1505EEB0	obj_find_by_state	high	Returns the first object record with interaction state arg0 and stores its index in *arg1
+func_1505EEF4	obj_find_by_spawn	high	Returns the live object whose spawn index +0x13F is arg0, NULL when none
+func_1505EFD0	obj_find_by_link	med	Returns the live object whose link byte +0x127 is arg0, NULL when none
+func_1505F0AC	obj_find_by_id	high	Returns the first live object of type id arg0, NULL when none
+func_1505F188	obj_reset	high	Clears an object record and sets its default fields (scale, floor heights, ids, gravity, fades)
+func_1505F298	obj_jump_swim_glide_update	high	Jump / swim / glide handler of a walking record driven by its controller buttons and stick
+func_1506045C	obj_ctrl_action_update	low	Per-frame action input update of a controlled object (timers, action buttons) calling func_15065E18 / func_15064668
+func_15060778	obj_sfx_play_attached	med	Plays sound arg2 attached to a camera-owning object (player), with variant / pitch flags in arg6
+func_15060A30	obj_sfx_play	med	Plays sound arg0 for an object: positional for plain objects, attached for players (volume 28000 / 24000)
+func_15060A9C	obj_sfx_play_alt	low	Plays sound arg0 for an object with the alternate positional routine (volume 24000)
+func_15060B04	obj_sfx_play_vol	med	Plays sound arg0 for an object at volume arg2: positional for plain objects, attached for players
+func_15060B70	obj_sfx_play_simple	low	Plays sound arg0 for an object through func_10010154 (volume 28000)
+func_15060BA4	obj_add_health	high	Adds arg1 health to an object, capped at 6; returns 0 when it was already full
+func_15060BE0	obj_calc_bone_offset	low	Uncalled: computes a scaled offset vector from the object's model bone data (D_800D1C90 type info)
+func_15060D54	obj_forget_target	high	Clears the target byte +0x65 of every live object that targets obj
+func_15060F28	obj_remove	high	Removes an object (plain, killed or without trace): releases model / sound / effects and its children
+func_150611E8	obj_follow_path	high	Moves an object along path arg1: finds the nearest segment and pushes it towards the next point
+func_150615DC	obj_fade_reset	high	Resets the object's fade / visibility bytes to fully visible
+func_1506160C	obj_fade_command	high	Fade / visibility command for an object (hide or show per player, fade modes)
+func_150617BC	obj_fade_update	high	Per-frame fades of an object: per-player visibility and alpha fade, removing it when a fade-out ends
+func_1506196C	obj_get_player_alpha	high	Returns the object's alpha for player arg1 (per-player visibility times alpha, 0..255)
+func_150619A8	objects_update_visibility	med	Per-frame update of all live objects: timers, fades, visibility test and the list of objects to animate
+func_15061B4C	objects_animate_textures	high	Per-frame texture / colour animation of the visible live objects by kind
+func_150623F4	obj_check_visible	med	Returns 1 when the object is visible (forced cases, or within view distance of a player camera)
+func_150626EC	obj_remove_children	high	Removes the objects attached to obj with func_15060F28(child, mode)
+func_150627D4	obj_model_reset	low	Clears +0x2FB and resets the object's model state via func_1503B840 and func_15039CC8

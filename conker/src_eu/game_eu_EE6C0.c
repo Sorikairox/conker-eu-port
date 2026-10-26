@@ -234,18 +234,18 @@ void func_150C1138(Trail1138 *obj) {
                 self = obj;
                 while (1.0f < obj->accum && self->free != -1) {
                     slot = obj->free;
-                    r = func_150ADA20();
+                    r = random_int();
                     cs = angle_byte_cos(r - 0x40);
                     sn = angle_byte_cos(r);
-                    speed = func_150ADA68() * 33.0f + 40.0f;
+                    speed = random_float() * 33.0f + 40.0f;
                     t.colour[4] = 0x52;
                     t.colour[5] = 0x6B;
                     t.colour[6] = 0x97;
                     t.colour[0] = 0x87;
                     t.colour[1] = 0x6B;
                     t.colour[2] = 0x97;
-                    t.colour[7] = (u32) func_150ADA20() % 121 + 80;
-                    t.size[0] = t.size[1] = func_150ADA68() * 17.0f + 67.0f;
+                    t.colour[7] = (u32) random_int() % 121 + 80;
+                    t.size[0] = t.size[1] = random_float() * 17.0f + 67.0f;
                     t.pos[0] = pos[0];
                     t.pos[1] = pos[1];
                     t.pos[2] = pos[2];
@@ -253,9 +253,9 @@ void func_150C1138(Trail1138 *obj) {
                     t.dir[2] = speed * sn;
                     t.dir[1] = 0.0f;
                     t.mode &= ~0xC0;
-                    flipX = (func_150ADA20() & 1) ? 0x80 : 0;
-                    t.mode |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipX;
-                    t.life = t.u22 = (u32) func_150ADA20() % 22 + 70;
+                    flipX = (random_int() & 1) ? 0x80 : 0;
+                    t.mode |= ((random_int() & 1) ? 0x40 : 0) | flipX;
+                    t.life = t.u22 = (u32) random_int() % 22 + 70;
                     t.u24 = 1.0352269f; /* D_800A0590 */
                     obj->slots[slot].rec = (u8 *) func_151307F0((s32) &t, 1, 0, 4, obj->room, obj->owner);
                     rec = obj->slots[slot].rec;

@@ -6,7 +6,7 @@
 #include "macros.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 s32 func_15002248(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in, u16 **out);
-s32 func_15049260(struct_eu_bytes24 arg0);
+s32 quadtree_tri_box_test(struct_eu_bytes24 arg0);
 void func_15002008(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list);
 extern s32 D_800DC26C;   /* triangle table: 3 vertex pointers (s16 x, y, z) per entry */
 extern s32 D_800DC274;   /* grid table: s16 x, z per entry */
@@ -126,7 +126,7 @@ void func_15001BC8(s32 arg0, s16 *arg1, s16 *arg2) {
     s16 *sp20;
     s32 i;
 
-    func_1510F800(arg0);
+    collision_select_area(arg0);
     D_800B0DD8 = 10;
     D_800B0DD4 = 512;
     sp20 = allocate_memory((D_800DBE4C + 1) << 1, 1, 0, 0);
@@ -157,7 +157,7 @@ void func_15001CEC(s32 arg0) {
     s16 *sp20;
     s32 i;
 
-    func_1510F800(arg0);
+    collision_select_area(arg0);
     temp_v0 = func_15001B10();
 
     D_800DBE08[arg0] = temp_v0;
@@ -244,7 +244,7 @@ u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 #ifdef NON_MATCHING
 /* Leaf list of a quadtree node, appended to the node pool after the node: the entries of the u16 index list
  * `list` (list[0] = count) whose triangle (relative to the box centre, (x0 + x1) / 2 and (z0 + z1) / 2) passes
- * the box test func_15049260 (0 = inside). The first kept index is written as a big-endian halfword | 0x8000;
+ * the box test quadtree_tri_box_test (0 = inside). The first kept index is written as a big-endian halfword | 0x8000;
  * the next ones as one byte (index - previous) when that is below 0x80, else again as a halfword | 0x8000.
  * A 0 byte ends the list. Vertex pointers up to 0x80000000 count as (0, 0, 0). */
 void func_15002008(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list) {
@@ -259,7 +259,7 @@ void func_15002008(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list) {
         f32 v[9];
     } tri;
 
-    func_150492CC((f32) (x1 - x0), 32000.0f, (f32) (z1 - z0));
+    quadtree_set_test_box((f32) (x1 - x0), 32000.0f, (f32) (z1 - z0));
     prev = -1;
     n = list[0];
     if (n > 0) {
@@ -281,7 +281,7 @@ void func_15002008(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list) {
                     tri.v[k * 3 + 2] = (f32) (p[2] - (z0 + z1) / 2);
                 }
             }
-            if (func_15049260(tri.s) == 0) {
+            if (quadtree_tri_box_test(tri.s) == 0) {
                 if (prev == -1) {
                     func_15001B8C(idx | 0x8000);
                 } else {
@@ -305,7 +305,7 @@ void func_15002008(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list) {
 #ifdef NON_MATCHING
 
 /* Quadtree build helper of func_15001DE0: keeps the entries of the u16 index list `in` (in[0] = count)
- * whose triangle (relative to the box centre) passes the box test func_15049260 (0 = inside), writes
+ * whose triangle (relative to the box centre) passes the box test quadtree_tri_box_test (0 = inside), writes
  * them to a new list *out (in[0] layout; the caller frees it) and returns their count. *xmin / *zmax get
  * the grid-snapped x minimum / z maximum of the kept entries (grid step 2 << D_80082FA0). */
 s32 func_15002248(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in, u16 **out) {
@@ -324,7 +324,7 @@ s32 func_15002248(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in,
         f32 v[9];
     } tri;
 
-    func_150492CC((f32) (x1 - x0), 32000.0f, (f32) (z1 - z0));
+    quadtree_set_test_box((f32) (x1 - x0), 32000.0f, (f32) (z1 - z0));
     n = in[0] + 1;
     cnt = 0;
     list = (u16 *) allocate_memory(n * 2, 1, 0, 0);
@@ -352,7 +352,7 @@ s32 func_15002248(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in,
                 tri.v[k * 3 + 2] = (f32) (p[2] - ((z0 + z1) >> 1));
             }
         }
-        if (func_15049260(tri.s) != 0) {
+        if (quadtree_tri_box_test(tri.s) != 0) {
             continue;
         }
         list[++cnt] = idx;
@@ -418,8 +418,8 @@ void func_150025FC(void) {
     tmp1 = D_800DBE2C;
 
     D_800DBE28 = (((tmp0 + 7) / 8) + 0xF) & 0xFFF0;
-    tmp2 = func_1502B5C8(0, 2, 5, D_800BE9F0 << 1);
-    tmp3 = func_1502B5C8(0, 2, 5, (D_800BE9F0 << 1) + 1);
+    tmp2 = asset_load(0, 2, 5, D_800BE9F0 << 1);
+    tmp3 = asset_load(0, 2, 5, (D_800BE9F0 << 1) + 1);
     if (tmp2 == 0) {
         D_800BE5D0 = 0;
     } else {
@@ -430,7 +430,7 @@ void func_150025FC(void) {
 
 void func_150026C4(s32 arg0) {
     D_800DBE38 = 0;
-    func_1510F800(arg0);
+    collision_select_area(arg0);
 }
 
 void func_150026E8(s32 arg0) {
@@ -451,7 +451,7 @@ void func_15002754(void) {
     D_800B0DC0 += D_800DBE38 * 8;
     D_800DC228[D_800DC280] = D_800B0DC0;
     D_800B0DC0 += D_800DBE38 * 4;
-    func_1510F800(D_800DC280);
+    collision_select_area(D_800DC280);
     D_800DBE38 = 0;
 }
 
@@ -680,7 +680,7 @@ void func_15002FB4(s32 arg0) {
     struct104 *temp_v0;
     s32 sp2C;
 
-    sp3C = func_1502B6BC(&sp34, 0, &sp38, 2, 21, arg0);
+    sp3C = asset_load_with_subfiles(&sp34, 0, &sp38, 2, 21, arg0);
     if ((sp38 != 0) && ((sp3C->unk4 << 8) != 0)) {
         D_800B0DF0 = sp3C->unk0;
         if (sp34 == 0) {

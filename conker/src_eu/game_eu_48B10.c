@@ -53,14 +53,14 @@ void func_1501B300(s32 player) {
     smoothPitch = &D_800BEAE0[player];
     smoothHeading = &D_800BEAF0[player];
     *smoothPitch = *smoothPitch + (pitch - *smoothPitch) * rate;
-    *smoothHeading = *smoothHeading + rate * func_15048A70(*smoothHeading, heading);
+    *smoothHeading = *smoothHeading + rate * math_angle_diff_deg(*smoothHeading, heading);
     if (*smoothHeading < 0.0f) {
         *smoothHeading += 360.0f;
     } else if (360.0f <= *smoothHeading) {
         *smoothHeading -= 360.0f;
     }
 
-    delta = func_15048A70(*smoothHeading, heading);
+    delta = math_angle_diff_deg(*smoothHeading, heading);
     if (fabsf(delta) > 90.0f) {
         *smoothHeading = heading - (f32)((delta < 0.0f) ? -1 : 1) * 90.0f;
     }

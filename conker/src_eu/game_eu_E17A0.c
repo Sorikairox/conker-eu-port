@@ -13,13 +13,13 @@ void func_150B3AB0(struct127 *arg0, u8 arg1) {
     structEU_151D8E18 blk;
 
     if (arg0 != NULL && arg0->unk1D4 != NULL) {
-        func_1512D748(&D_800DBFF0[D_800BEE08], 6, 1);
+        camera_shake_start(&D_800DBFF0[D_800BEE08], 6, 1);
         angle = (*(u16 *)((u8 *)arg0 + 0x7A) >> 8) + 0x40;
         func_15143134(D_8009FF90, &pos, (u8 *)arg0->unk1D4 + 0x640);
-        func_1514CDC8(pos.unk0, pos.unk4, pos.unk8, 10.0f, angle, 0, 0xFF, (u32)func_150ADA20() % 31 + 0x28, 8, 0, 0.0f, 0, arg1);
+        func_1514CDC8(pos.unk0, pos.unk4, pos.unk8, 10.0f, angle, 0, 0xFF, (u32)random_int() % 31 + 0x28, 8, 0, 0.0f, 0, arg1);
         blk.unk0 = 1;
-        blk.unk2 = (func_150ADA20() & 0xF) + 0xC;
-        blk.unk4 = (func_150ADA20() & 3) + 5;
+        blk.unk2 = (random_int() & 0xF) + 0xC;
+        blk.unk4 = (random_int() & 3) + 5;
         blk.unk6 = -1;
         blk.unk5 = 1;
         func_151D8E18(&blk, 0, arg1, 0);
@@ -69,15 +69,15 @@ s32 func_150B40EC(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
     sp.vel[0] = spd * ch;
     sp.vel[1] = -10.0f * ct;
     sp.vel[2] = spd * sh;
-    sp.a = func_150ADA68() * 1.9530001f + 3.736f;
-    sp.b = func_150ADA68() * 0.94000006f + 2.223f;
+    sp.a = random_float() * 1.9530001f + 3.736f;
+    sp.b = random_float() * 0.94000006f + 2.223f;
     func_151429E0(8, &sp.c[0], &sp.c[1], &sp.c[2]);
     func_151429E0(8, &sp.c[4], &sp.c[5], &sp.c[6]);
     sp.c[3] = 0xFF;
     sp.c[7] = 0xFF;
     sp.c[8] = 9;
-    sp.d = (func_150ADA20() & 0xF) + 0xF;
-    sp.f = func_150ADA68() * 2.6599998f + 1.8499999f;
+    sp.d = (random_int() & 0xF) + 0xF;
+    sp.f = random_float() * 2.6599998f + 1.8499999f;
     sp.e = 0x1601;
     sp.g = -1;
     sp.h = 0xA;

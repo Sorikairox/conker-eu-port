@@ -27,7 +27,7 @@ RDRAM = (0x80000000, 0x800000)
 SEG16 = (0x16000000, 0x10000)
 VM_NATIVES = ['func_150AE5D8', 'func_150AE5E8', 'func_150AE5F8', 'func_150AE60C', 'func_150AE674',
               'func_150AE690', 'func_150AE6A0', 'func_150AE6BC', 'func_150AE6D4', 'func_150AE714',
-              # P261: empty anim-key handler (jr ra; nop) at the tail of func_1506D2E8's asm (game_981E0), entry 16
+              # P261: empty anim-key handler (jr ra; nop) at the tail of objev_throw_object's asm (game_981E0), entry 16
               # of D_8008679C; defined port-side in port/gfx/p49_walk.c (the table word trapped: frying-pan hit, 0x2E)
               'func_1506D8AC']
 CT = {'i32': 'int', 'i64': 'long long', 'f32': 'float', 'f64': 'double'}

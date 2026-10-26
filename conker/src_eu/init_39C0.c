@@ -13,7 +13,7 @@ void func_100039C0(void) {
     D_800380A4 = (f32) D_800BE624 / 216.0f;
     D_800BE9C4 = allocate_memory(D_800BE620 * D_800BE624 * 2, 255, 3, 0);
     func_10003ACC(0, 0, 0);
-    func_15015FBC(D_800BE620, D_800BE624);
+    screen_setup_viewports(D_800BE620, D_800BE624);
     // EU: the VI mode is no longer set here
 }
 

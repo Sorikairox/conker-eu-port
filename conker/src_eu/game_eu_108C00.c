@@ -40,7 +40,8 @@ extern u8 D_80088CE0[];      // record +0x138
 extern f32 D_80088CE4[];     // record +0x12C
 extern f32 D_80088CE8[];     // record +0x130
 
-void func_150DB3F0(u8 *obj, s32 idx, u8 group, s32 arg3) {
+/* was func_150DB3F0 */
+void joint_beam_spawn(u8 *obj, s32 idx, u8 group, s32 arg3) {
     EffSpawn150DB3F0 spec;
     f32 b[3];
     f32 a[3];
@@ -108,13 +109,14 @@ void func_150DB3F0(u8 *obj, s32 idx, u8 group, s32 arg3) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/func_150DB3F0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/joint_beam_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
 extern f32 D_800A0FB4;
 extern f32 D_800A0FB8;
-s32 func_150DB694(u8 *arg0) {
+/* was func_150DB694 */
+s32 beam_motion_step(u8 *arg0) {
     f32 temp_f0;
     f32 temp_f0_2;
     f32 temp_f2;
@@ -161,13 +163,14 @@ s32 func_150DB694(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/func_150DB694.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/beam_motion_step.s")
 #endif
 #ifdef NON_MATCHING
 void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
 
-u8 *func_150DB858(u8 *arg0, s16 arg1) {
+/* was func_150DB858 */
+u8 *beam_build_quad_vtx_b(u8 *arg0, s16 arg1) {
     struct {
         u8 u37;
         u8 pad38[0x8];
@@ -217,7 +220,7 @@ u8 *func_150DB858(u8 *arg0, s16 arg1) {
     return NULL;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/func_150DB858.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/beam_build_quad_vtx_b.s")
 #endif
 #ifdef NON_MATCHING
 // anim_event_effect_spawn: animation event 0x32 (func_150268BC): when all five pointers are set and span != 0, spawns
@@ -239,7 +242,8 @@ typedef struct {
     /* 0x46 */ u8 pad46[2];
 } EffSpawn150DBA98;
 
-void func_150DBA98(u8 *a0, u8 *a1, u8 *a2, u8 *a3, u8 *a4, s16 span, u8 arg6, s32 arg7) {
+/* was func_150DBA98 */
+void beam_spawn_points(u8 *a0, u8 *a1, u8 *a2, u8 *a3, u8 *a4, s16 span, u8 arg6, s32 arg7) {
     EffSpawn150DBA98 spec;
     u8 *rec;
 
@@ -268,10 +272,11 @@ void func_150DBA98(u8 *a0, u8 *a1, u8 *a2, u8 *a3, u8 *a4, s16 span, u8 arg6, s3
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/func_150DBA98.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/beam_spawn_points.s")
 #endif
 
-s32 func_150DBBB0(u8 *arg0) {
+/* was func_150DBBB0 */
+s32 beam_alpha_from_value(u8 *arg0) {
     f32 **pp = (f32 **)(arg0 + 0x120); // fakematch: pointer to the field keeps the reload of 0x120 in the else-if (permuter)
     if (**pp > 255.0f) {
         arg0[0x5C] = 0xFF;
@@ -287,7 +292,8 @@ s32 func_150DBBB0(u8 *arg0) {
 void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
 
-u8 *func_150DBC94(u8 *arg0, s16 arg1) {
+/* was func_150DBC94 */
+u8 *beam_build_quad_vtx_c(u8 *arg0, s16 arg1) {
     struct {
         u8 u37;
         u8 pad38[0xC];
@@ -346,5 +352,5 @@ u8 *func_150DBC94(u8 *arg0, s16 arg1) {
     return NULL;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/func_150DBC94.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/beam_build_quad_vtx_c.s")
 #endif

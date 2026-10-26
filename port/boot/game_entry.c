@@ -24,25 +24,25 @@ extern s16 D_800BEEC8;
 /* callees: prototypes must match the wasm signature of the definition (C body or stub) */
 void func_15007A20(void);
 void func_100050A0(OSMesgQueue *);
-void func_15003570(void);
+void texture_build_size_table(void);
 void func_10008180(void);
-void func_15000000(void);
-void func_15016588(void);
+void game_init_message_queues(void);
+void level_build_flag_bitmask(void);
 void func_151EF7B0(void);
-void func_150061B0(void);
-void func_15006234(void);
+void controller_init_si_queue(void);
+void controller_init_all(void);
 void func_151DDF20(void);
 void func_150158D0(s32);
 void func_15008A60(void);
-void func_15042D50(void);
-void func_1509C120(void);
+void text_queue_reset(void);
+void save_block_realloc_random(void);
 void func_151E582C(void);
-void func_15017498(void);
-s32 func_150ADACC(s32);
-void func_15007A70(s32, s32, s32);
-void func_15007B3C(void);
+void level_lights_clear(void);
+s32 random_seed(s32);
+void level_start_game(s32, s32, s32);
+void level_load(void);
 void func_100051E8(void);
-void func_150186D0(void);
+void game_main_loop(void);
 
 int port_entry_iterations;
 void port_wait_frame(void); /* main-loop passes (for the log) */
@@ -62,26 +62,26 @@ void func_15007830(void) {
     D_800BEE88[0x10] = 2;  /* sh 0x20(D_800BEE88) */
     D_800BEA37 = 0;
     func_100050A0(&D_800BEE30);
-    func_15003570();
+    texture_build_size_table();
     D_800BEECB = 0;
     func_10008180();
-    func_15000000();
-    func_15016588();
+    game_init_message_queues();
+    level_build_flag_bitmask();
     func_151EF7B0();
     D_800BEEC8 = 0;
-    func_150061B0();
-    func_15006234();
+    controller_init_si_queue();
+    controller_init_all();
     func_151DDF20();
     func_150158D0(0);
     func_15008A60();
-    func_15042D50();
+    text_queue_reset();
     D_800BEA35 = 5;
     D_800BEE24 = 0;
     D_800BEE20 = 1;
     D_800BEECA = 1;
-    func_1509C120();
+    save_block_realloc_random();
     port_log("[entry] init sequence done, entering main loop (state %d)\n", D_800BEA35);
-    { /* session P9: func_15003570 (C) DMAs the texture bank at &D_1A3B40; texture 0xED0 inflates to 768 */
+    { /* session P9: texture_build_size_table (C) DMAs the texture bank at &D_1A3B40; texture 0xED0 inflates to 768 */
         extern s16 D_800B8BB8[];
         if (D_800B8BB8[0xED0] == 768 && D_800B8BB8[0] > 0) port_log("[romsym] size table PASS (tex 0xED0 = 768, tex 0 = %d)\n", D_800B8BB8[0]);
         else port_log("[romsym] size table FAIL (tex 0xED0 = %d, want 768)\n", D_800B8BB8[0xED0]);
@@ -96,13 +96,13 @@ void func_15007830(void) {
                 func_151E582C();
                 /* fallthrough */
             case 0x15007944:
-                func_15017498();
-                if (D_800E0B94 == 2) func_150ADACC(0x81280783);
+                level_lights_clear();
+                if (D_800E0B94 == 2) random_seed(0x81280783);
                 /* lh 0x2(...): the low halves of three s32 globals (mixed-width access) */
-                func_15007A70(((s16 *)&D_800BEE24)[1], ((s16 *)&D_800BEE20)[1], ((s16 *)&D_800BE9F4)[1]);
+                level_start_game(((s16 *)&D_800BEE24)[1], ((s16 *)&D_800BEE20)[1], ((s16 *)&D_800BE9F4)[1]);
                 /* fallthrough */
             case 0x15007970:
-                func_15007B3C();
+                level_load();
                 D_800BEA35 = 0;
                 /* fallthrough */
             case 0x1500797C:
@@ -113,19 +113,19 @@ void func_15007830(void) {
         }
         func_100051E8();
         D_800BEE08 = 0;
-        func_150186D0();
+        game_main_loop();
         port_wait_frame(); /* PC: the frame wait happens inside asm stubs today; pace one pass per frame */
     }
 }
 #endif /* P318_ENTRY_PC_OLD */
 #ifndef P318_ENTRY_PC_OLD
-/* P318: the game C main loop (game/entrypoint.c) ends each pass with func_150186D0. The PC version above paced one
+/* P318: the game C main loop (game/entrypoint.c) ends each pass with game_main_loop. The PC version above paced one
  * pass per frame with port_wait_frame(); keep that pacing (same frame timing, so det=2 routes stay comparable) by
- * wrapping the pass's last call (port/Makefile -Wl,--wrap=func_150186D0; the main loop is its only caller). */
-void __real_func_150186D0(void);
-void __wrap_func_150186D0(void) {
+ * wrapping the pass's last call (port/Makefile -Wl,--wrap=game_main_loop; the main loop is its only caller). */
+void __real_game_main_loop(void);
+void __wrap_game_main_loop(void) {
     if (port_entry_iterations++ < 3) port_log("[entry] game C main loop pass %d (state %d)\n", port_entry_iterations, D_800BEA35);
-    __real_func_150186D0();
+    __real_game_main_loop();
     port_wait_frame();
 }
 #endif

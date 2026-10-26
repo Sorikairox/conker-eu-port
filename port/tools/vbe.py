@@ -247,7 +247,7 @@ class Pass:
     def do_alloca(self, m, out):
         """P185: stack slots get IDO's layout: every alloca starts on a word (align >= 4; 8-byte types keep clang's
         align 8) and a fixed-size slot is padded to a multiple of 4 bytes. So no two locals share a word: a 32-bit
-        access to a 2-aligned `s16 x[2]` (passed as `s32 *`, P178 func_1509B8FC) or an xor-2 / xor-3 sub-word access
+        access to a 2-aligned `s16 x[2]` (passed as `s32 *`, P178 event_load) or an xor-2 / xor-3 sub-word access
         can no longer reach a neighbouring slot."""
         parts = split_top(m[2])
         ty, rest = parts[0].strip(), [x.strip() for x in parts[1:]]
@@ -428,16 +428,16 @@ def port_owned(text, st, src=''):
 # addresses in conker.eu.ld / port/stubs/stubs_report.txt (session P9).
 ROM_ABS = {'D_11AF': 0x11AF, 'D_2D810': 0x2D810, 'D_1A3B40': 0x1A3B40, 'D_AB2240': 0xAB2240,
            # P37: more absolute symbols used as numbers (undefined_syms_auto.txt): texture ids passed as &D_D11 /
-           # &D_A4A to func_1510D66C (game_A9D90.c, game_eu_200480.c) and values &D_2C1 / &D_1C0 (game_eu_F2A30.c).
-           # As data stubs they were wasm addresses: func_1510D66C stored the id in D_800DA37C (before its range
-           # check), so func_1510D984 walked its cache tables up to 0x10xxxxxx and fed garbage to the inflater.
+           # &D_A4A to texture_cache_lookup (game_A9D90.c, game_eu_200480.c) and values &D_2C1 / &D_1C0 (game_eu_F2A30.c).
+           # As data stubs they were wasm addresses: texture_cache_lookup stored the id in D_800DA37C (before its range
+           # check), so texture_cache_age_tick walked its cache tables up to 0x10xxxxxx and fed garbage to the inflater.
            'D_D11': 0xD11, 'D_A4A': 0xA4A, 'D_2C1': 0x2C1, 'D_1C0': 0x1C0,
            # P37: texture ids stored as D_89C / D_85D (boot screen func_151EC300, game_eu_216470.c), and the ROM range of
            # the fixed player-slot setup table that func_15016950 (game_eu_44010.c) DMAs: D_1A3750..D_1A3840..D_1A3B40.
            'D_89C': 0x89C, 'D_85D': 0x85D, 'D_1A3750': 0x1A3750, 'D_1A3840': 0x1A3840,
            # P228: texture ids D_88C (barrel menu title) / D_87B (fill bar) of the C barrel_menu_draw func_151ECE00
-           # (port P226): as data stubs they were wasm addresses (0x10A377xx) -> func_1510D66C range -> fatal
-           # func_150ADC50 + trap in func_1510D984 in the multiplayer barrel menu (frame 4442).
+           # (port P226): as data stubs they were wasm addresses (0x10A377xx) -> texture_cache_lookup range -> fatal
+           # func_150ADC50 + trap in texture_cache_age_tick in the multiplayer barrel menu (frame 4442).
            'D_88C': 0x88C, 'D_87B': 0x87B,
            # P318: ROM offsets of the compressed game segment used by func_10001194's NM C (init_1050.c, P281/P288).
            'D_427B0': 0x427B0, 'D_19EDE8': 0x19EDE8}
@@ -451,11 +451,11 @@ RAM_ALIAS = {'D_89810': 'D_80089810'}
 # instead of a zero-filled data stub. (func_151DE100 used to be a data stub, read as code bytes by func_151E86A4's
 # checksum; since P127 the NON_MATCHING func_151E86A4 skips the checksum and func_151DE100 is C, so it is a
 # plain function and n64mem.py relocates D_8009018C[0] to its table slot - P131.)
-FUNC_AS_DATA = ['func_15033ECC', 'func_150D5634', 'func_150E394C', 'func_151BB690',
+FUNC_AS_DATA = ['func_15033ECC', 'rocket_sound_update', 'zap_sound_release_cb', 'func_151BB690',
                 'func_150ADC50',  # P23: debugger.c compares a thread pc with &func_150ADC50
                 # P26: callbacks handed to func_1000FA64 / stored in D_800E0D64 / debug_cont_get_read_data.
                 # func_1000EC24 (P26) dropped in P29: port P28 declares it as a function under NON_MATCHING.
-                'object_sound_delayed', 'object_sound_follow_cam', 'func_150DE8AC', 'debug_cont_pad_buf']
+                'object_sound_delayed', 'object_sound_follow_cam', 'trigger_zones_check', 'debug_cont_pad_buf']
 ABS_REF = re.compile(r'@(' + '|'.join(ROM_ABS) + r')\b(?![.\w])')
 ALIAS_REF = re.compile(r'@(' + '|'.join(RAM_ALIAS) + r')\b(?![.\w])')
 EXT_DECL = re.compile(r'^@([\w.$-]+) = external (?:dso_local )?global [^\n]*$', re.M)
@@ -529,12 +529,12 @@ def k0_checks(text, st):
 # 0x0Exxxxxx) stay on the "not a pointer" side, as on the N64. Scoped by function, with the expected count:
 #   func_15002008 (game_eu_2F180, leaf lists):        (u32)p < 0x80000001 -> (u32)p < 0x10000000
 #   func_15002248 (game_eu_2F180, quadtree helper):   (u32)p < 0x80000001 -> (u32)p < 0x10000000
-#   func_15004CE0 (game_30E90, DL MOVEWORD reloc):    unk4 < 0x80000000   -> unk4 < 0x10000000
-# Not rewritten: func_15001460's `>= 0x100001` holds for wasm pointers as it is. List: docs/port/MEMORY.md.
+#   gfx_dl_relocate_seg_e (game_30E90, DL MOVEWORD reloc):    unk4 < 0x80000000   -> unk4 < 0x10000000
+# Not rewritten: collision_scan_level_dl's `>= 0x100001` holds for wasm pointers as it is. List: docs/port/MEMORY.md.
 K0_PTR_SITES = {
     'func_15002008': ('ult', '-2147483647', 1),
     'func_15002248': ('ult', '-2147483647', 1),
-    'func_15004CE0': ('ult', '-2147483648', 1),
+    'gfx_dl_relocate_seg_e': ('ult', '-2147483648', 1),
 }
 
 
@@ -554,7 +554,7 @@ def k0_ptr_sites(text, st):
 
 
 # P185: PHYS_TO_K0 on an address the PC layer already returns as a wasm pointer. func_151F3C4C (libultra/audio
-# game_21FC90, the mixer's read callback, installed by func_15016170 since port P172) does `p = dma(...); p +=
+# game_21FC90, the mixer's read callback, installed by audio_fx_mixer_init since port P172) does `p = dma(...); p +=
 # 0x80000000; bcopy(p, ...)`: the dma proc returns osVirtualToPhysical(buf), which is the wasm address on the PC
 # (pc_os.c), so the add is dropped (+0). Without it the first mixer read traps (bcopy out of bounds, boot ~retrace 120).
 K0_ADD_SITES = {'func_151F3C4C': 1}

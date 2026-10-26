@@ -77,20 +77,20 @@ s32 func_150BF5F4(u8 *e) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_151152A4(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags);
-void func_15115484(s32 arg0, s32 arg1, s32 arg2);
-void func_150A7DA0(u8 *mtx, s32 x, s32 y, s32 z);
-void func_15043F6C(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
+s32 world_object_sound_play(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags);
+void object_sound_set_volume_pitch(s32 arg0, s32 arg1, s32 arg2);
+void mtxf_translate(u8 *mtx, s32 x, s32 y, s32 z);
+void mtxf_build_basis_trans(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 
 // lift_platform_update: world-object callback (D_80089030[9][0], obj +0x38) of a lift that moves its model up to the
 // target height +0x3C (s32). The current height is +0x7C, the speed +0x84; while D_800C35EA is set and D_800C3A08 is
 // not 1 nothing moves (height 0 in the matrix, the bob is left alone). D_800BE9B4 snaps the height to the target.
 // At the target: the bob phase +0x80 advances by 0.05, the bob amplitude is (height / 1500 + 1) * D_800BE9A4 (not
-// below 0) and the move sound stops (func_151152A4 -1). Moving: the phase is reset, the speed accelerates by -5
+// below 0) and the move sound stops (world_object_sound_play -1). Moving: the phase is reset, the speed accelerates by -5
 // (down to -60) or +0.5 (up to 6, with the move sound 0xB9 looping); while the step is shorter than the remaining
 // distance the height moves by speed * D_800BE9A4, +0x124 = speed * 0.4 (-10 below -25), +0xDC = 0x7D00, mode
-// (+0x73 & 3) 2, the start sound when +0x74 is 0, and func_15115484 with the speed * 500; else it lands on the
+// (+0x73 & 3) 2, the start sound when +0x74 is 0, and object_sound_set_volume_pitch with the speed * 500; else it lands on the
 // target (+0xDC = 0x80 when going down, +0x124 = 0, mode 3, sound stop). The offsets +0/+4/+8 ease (0.05, 0.2 while
 // moving) toward the bob (amp * 3 sin(ph), amp * 4 sin(1.1 ph), amp * 3 cos(ph)); then the vertex list +0x28
 // (+0x16 entries of 16 bytes) is transformed by translate(0, height, 0) * model(pos, scale +0x2C, angles +0x10)
@@ -132,7 +132,7 @@ void func_150BF71C(u8 *p) {
             if (amp < 0.0f) {
                 amp = 0.0f;
             }
-            func_151152A4(p, -1, 0x7D00, 0x1F4, 0x7D0, 0);
+            world_object_sound_play(p, -1, 0x7D00, 0x1F4, 0x7D0, 0);
         } else {
             ease = 0.2f;
             *(f32 *) (p + 0x80) = 0.0f;
@@ -145,7 +145,7 @@ void func_150BF71C(u8 *p) {
                 if (speed < 6.0f) {
                     speed += 0.5f;
                 }
-                func_151152A4(p, 0xB9, 0x7D00, 0x1F4, 0x7D0, 1);
+                world_object_sound_play(p, 0xB9, 0x7D00, 0x1F4, 0x7D0, 1);
             }
             *(f32 *) (p + 0x84) = speed;
             if (fabsf(speed) < fabsf(dist)) {
@@ -159,9 +159,9 @@ void func_150BF71C(u8 *p) {
                 p[0x73] &= 0xFC;
                 p[0x73] |= 2;
                 if (*(u16 *) (p + 0x74) == 0) {
-                    func_151152A4(p, 0xB9, 0x3E80, 0x3E8, 0xFA0, 0);
+                    world_object_sound_play(p, 0xB9, 0x3E80, 0x3E8, 0xFA0, 0);
                 }
-                func_15115484((s32) p, 0x3E80, (s32) (speed * 500.0f));
+                object_sound_set_volume_pitch((s32) p, 0x3E80, (s32) (speed * 500.0f));
             } else {
                 height = *(s32 *) (p + 0x3C);
                 if (speed < 0.0f) {
@@ -170,7 +170,7 @@ void func_150BF71C(u8 *p) {
                 *(f32 *) (p + 0x124) = 0.0f;
                 p[0x73] &= 0xFC;
                 p[0x73] |= 3;
-                func_151152A4(p, -1, 0, 0, 0, 0);
+                world_object_sound_play(p, -1, 0, 0, 0, 0);
             }
             *(f32 *) (p + 0x84) = speed;
             *(f32 *) (p + 0x7C) = height;
@@ -180,8 +180,8 @@ void func_150BF71C(u8 *p) {
         *(f32 *) (p + 0x4) += (amp * 4.0f * sinf(*(f32 *) (p + 0x80) * 1.1f) - *(f32 *) (p + 0x4)) * ease;
         *(f32 *) (p + 0x8) += (amp3 * cosf(*(f32 *) (p + 0x80)) - *(f32 *) (p + 0x8)) * ease;
     }
-    func_150A7DA0((u8 *) trans, 0, *(s32 *) &height, 0);
-    func_15043F6C(model, *(f32 *) (p + 0x0), *(f32 *) (p + 0x4), *(f32 *) (p + 0x8), *(f32 *) (p + 0x2C),
+    mtxf_translate((u8 *) trans, 0, *(s32 *) &height, 0);
+    mtxf_build_basis_trans(model, *(f32 *) (p + 0x0), *(f32 *) (p + 0x4), *(f32 *) (p + 0x8), *(f32 *) (p + 0x2C),
                   *(f32 *) (p + 0x30), *(f32 *) (p + 0x34), *(s16 *) (p + 0x10), *(s16 *) (p + 0x12),
                   *(s16 *) (p + 0x14));
     func_150A7A48(trans, model, trans);
@@ -199,15 +199,15 @@ void func_150BF71C(u8 *p) {
 #endif
 
 #ifdef NON_MATCHING
-void func_1511BAA4(u8 *);
+void scenery_door_swing_angle_update(u8 *);
 s32 func_15195FB0(u8 *, s32, s32, s32, s32, s32, s32);
 s32 func_150829C0(s32, s32);
 
 // door_lift_update: per-frame update of the object driven by object 0x14's animation (skipped while D_800C35EA is 1
-// and D_800C3A08 is not). Runs func_1511BAA4, starts its looping sound D_800902B8 once (handle at +0x124), and takes
+// and D_800C3A08 is not). Runs scenery_door_swing_angle_update, starts its looping sound D_800902B8 once (handle at +0x124), and takes
 // the animation progress `ratio` = frame (+8) / (length (+0x18) - 2) of object 0x14's +0x2D0 (0 without the object).
 // +0xA8 (a sway offset) is cleared, then by mode (+0x73 & 3): 2: sway -10 sin(ratio * pi * 4/3) up to ratio 0.75,
-// spawning object 0x14 when missing, and its state +0x232 set to 2 (+0x218 = 0); 3: func_15060F28(obj, 0) once the
+// spawning object 0x14 when missing, and its state +0x232 set to 2 (+0x218 = 0); 3: obj_remove(obj, 0) once the
 // animation ends (ratio >= 1); 0: sway 10 sin((ratio - 1) * 4pi/3) from ratio 0.25 and the same end call; 1: the same
 // sway, spawning object 0x14 when missing. Mode 1's state-3 store is only reached when the spawn fails and then
 // writes through NULL, as in the asm.
@@ -221,7 +221,7 @@ void func_150BFC60(u8 *p) {
     if (D_800C35EA == 1 && D_800C3A08 != 1) {
         return;
     }
-    func_1511BAA4(p);
+    scenery_door_swing_angle_update(p);
     if (*(s32 *) (p + 0x124) == 0) {
         *(s32 *) (p + 0x124) = func_15195FB0(p, D_800902B8, 1, -1, 0, 0, -8);
     }
@@ -248,14 +248,14 @@ void func_150BFC60(u8 *p) {
         }
     } else if (mode == 3) {
         if (obj != NULL && 1.0f <= ratio) {
-            func_15060F28((struct127 *) obj, 0);
+            obj_remove((struct127 *) obj, 0);
         }
     } else if (mode == 0) {
         if (0.25f <= ratio) {
             *(f32 *) (p + 0xA8) = sinf(ratio * 4.18878937f - 4.18878937f) * 10.0f;
         }
         if (obj != NULL && 1.0f <= ratio) {
-            func_15060F28((struct127 *) obj, 0);
+            obj_remove((struct127 *) obj, 0);
         }
     } else if (mode == 1) {
         if (0.25f <= ratio) {
@@ -455,7 +455,7 @@ typedef struct {
     /* 0x68 */ f32 u68;
 } PuffRequest;
 
-/* object_land_puff: func_1507D754 callee: object_hit_effects(obj, 0, 0, 1, 0, 0, 0xFF, 1), then one func_15153BA4
+/* object_land_puff: object_destroy_effects callee: object_hit_effects(obj, 0, 0, 1, 0, 0, 0xFF, 1), then one func_15153BA4
  * effect (constant request: model 0x11 / 7, colours 4E 54 7B FF / A4 A1 C8 9B / 64 FF, flags 0x40040E07) 35 above
  * the point 70 over the object's floor height (+0x180) at its x / z. */
 void func_150C04E0(u8 *obj) {
@@ -846,7 +846,7 @@ s32 func_150C0B48(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
     f32 temp_f2;
     s8 var_v0;
 
-    if (func_150ADA68() < (*(f32 *)((u8 *)arg0 + 0x170))) {
+    if (random_float() < (*(f32 *)((u8 *)arg0 + 0x170))) {
         sp.uA0 = D_800A04DC;
         sp.uB0 = 2;
         sp.uB4 = 0;

@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15012FE0(void) {
+/* was func_15012FE0 */
+void level_clear_be570(void) {
     D_800BE570 = 0;
     D_800BE574 = 0;
     D_800BE575 = 0;
@@ -19,7 +20,8 @@ typedef struct {
 extern void (*D_800831C0[])();
 
 #ifdef NON_MATCHING
-void func_15013000(void) {
+/* was func_15013000 */
+void hotspots_start_all(void) {
     s32 var_s0;
     u32 var_s1;
     void (*temp_a1)(u8 *, s32);
@@ -40,10 +42,10 @@ void func_15013000(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_15013000.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/hotspots_start_all.s")
 #endif
 // NON-MATCHING: global stores/loads scheduled differently, regalloc
-// void func_15013000(void) {
+// void hotspots_start_all(void) {
 //     u32 i;
 //     void (*func)();
 //     struct_eu_40490_obj *obj;
@@ -72,12 +74,12 @@ extern f32 D_800969E0;
 extern f32 D_800969E4;
 extern f32 D_800969E8;
 extern u8 D_80083228[6];
-void func_1510F800(s32);
-u8 *func_151149AC(u8);
+void collision_select_area(s32);
+u8 *world_record_find(u8);
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
                   s32 arg9);
 
-/* the record func_150130B4 reads (D_80082EA0 start handlers get the level record) */
+/* the record record_particle_emitter_start reads (D_80082EA0 start handlers get the level record) */
 typedef struct {
     s16 x, y, z;        /* 0x00 */
     s16 rangeX;         /* 0x06 */
@@ -132,13 +134,14 @@ typedef struct {
 /*
  * record_particle_emitter_start: P230: start handler of a particle-emitter record. Marks the record started
  * (+0x16 |= 4) and fills a spawn block: position from the record, the "to" point = position + (0, 0, -500)
- * rotated by the record's angles (func_150A8050 / func_150A7E40), kind D_8009693C[colour >> 24], flags
+ * rotated by the record's angles (mtxf_rotate_xyz_deg / func_150A7E40), kind D_8009693C[colour >> 24], flags
  * D_80096950[colour >> 24] + 3, life 300, colour from +0x18, scale 1, and an optional sound
- * (opts top byte: func_1510F800(0); func_1510FD20(x, z)). The emitter block gets the ranges +6 / +8, the spreads
+ * (opts top byte: collision_select_area(0); zone_tree_find_leaf(x, z)). The emitter block gets the ranges +6 / +8, the spreads
  * (opts bytes 1 / 0) / 255 and a per-type sub kind (+0x58); type 8 and 13..18 emitters also get a tail at +0x170
- * (types 13..18: the target object func_151149AC(D_80083228[type - 13]) and its position; none -> no emitter).
+ * (types 13..18: the target object world_record_find(D_80083228[type - 13]) and its position; none -> no emitter).
  */
-s32 func_150130B4(Rec150130B4 *rec) {
+/* was func_150130B4 */
+s32 record_particle_emitter_start(Rec150130B4 *rec) {
     f32 m[4][4];
     Blk150130B4 b;
     union {                 /* copied to the new emitter's +0x170 */
@@ -162,7 +165,7 @@ s32 func_150130B4(Rec150130B4 *rec) {
     b.spawn.pos0[0] = rec->x;
     b.spawn.pos0[1] = rec->y;
     b.spawn.pos0[2] = rec->z;
-    func_150A8050(m, rec->angX, rec->angY, 0.0f);
+    mtxf_rotate_xyz_deg(m, rec->angX, rec->angY, 0.0f);
     func_150A7E40(m, 0.0f, 0.0f, -500.0f, &b.spawn.pos1[0], &b.spawn.pos1[1], &b.spawn.pos1[2]);
     b.spawn.pos1[0] += b.spawn.pos0[0];
     b.spawn.pos1[1] += b.spawn.pos0[1];
@@ -205,8 +208,8 @@ s32 func_150130B4(Rec150130B4 *rec) {
     b.spawn.u44[3] = 6;
 
     if (snd != 0) {
-        func_1510F800(0);
-        b.spawn.sound = func_1510FD20((s32) b.spawn.pos0[0], (s32) b.spawn.pos0[2]);
+        collision_select_area(0);
+        b.spawn.sound = zone_tree_find_leaf((s32) b.spawn.pos0[0], (s32) b.spawn.pos0[2]);
     } else {
         b.spawn.sound = 0;
     }
@@ -255,7 +258,7 @@ s32 func_150130B4(Rec150130B4 *rec) {
         case 16:
         case 17:
         case 18:
-            tail.t13.obj = func_151149AC(D_80083228[type - 13]); /* the asm indexes a stack copy */
+            tail.t13.obj = world_record_find(D_80083228[type - 13]); /* the asm indexes a stack copy */
             if (tail.t13.obj == NULL) {
                 break;
             }
@@ -282,11 +285,12 @@ s32 func_150130B4(Rec150130B4 *rec) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_150130B4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/record_particle_emitter_start.s")
 #endif
 
 // record_start_dispatch: runs the record's start handler D_80082EA0[rec->unk17] (EU 0x80083230) on the record.
-s32 func_1501370C(struct16 *arg0) {
+/* was func_1501370C */
+s32 record_start_dispatch(struct16 *arg0) {
     u8 idx = arg0->unk17;
 #ifdef NON_MATCHING
     /* P164 (P161 null+0x14 writer): the handlers take the record (asm 150136BC keeps a0 = arg0 at the jalr) */
@@ -305,7 +309,8 @@ s32 func_1501370C(struct16 *arg0) {
     return 1;
 }
 
-s32 func_1501374C(struct16 *arg0) {
+/* was func_1501374C */
+s32 record_start_15d088(struct16 *arg0) {
     arg0->unk16 |= 4;
     fx_source_emitter_spawn(arg0);
     return 1;
@@ -318,10 +323,11 @@ extern f32 D_800969F4;
 /*
  * P80: effect spawn from a record (s16 x, y, z at +0 / +2 / +4, s16 +6, s16 radius +8, f32 angles +0xC / +0x10):
  * nothing for radius 0. Else an effect (func_15149130 type 0x19) gets a 0x34-byte block: position, the unit
- * direction (0, 2r, 0) rotated by the angles (func_150A8050 / func_150A7E40) times 1 / 2r, 2r, (f32) +6, the two
+ * direction (0, 2r, 0) rotated by the angles (mtxf_rotate_xyz_deg / func_150A7E40) times 1 / 2r, 2r, (f32) +6, the two
  * angles, 0 and D_800969F0 / D_800969F4; then a sound / particle (func_1000FA64 0x67C) at (x, y + r, z).
  */
-s32 func_15013778(s16 *rec) {
+/* was func_15013778 */
+s32 effect_spawn_record(s16 *rec) {
     f32 m[4][4];
     struct {
         f32 pos[3];
@@ -352,7 +358,7 @@ s32 func_15013778(s16 *rec) {
     blk.pos[0] = rec[0];
     blk.pos[1] = rec[1];
     blk.pos[2] = rec[2];
-    func_150A8050(m, *(f32 *) (rec + 6), *(f32 *) (rec + 8), 0.0f);
+    mtxf_rotate_xyz_deg(m, *(f32 *) (rec + 6), *(f32 *) (rec + 8), 0.0f);
     func_150A7E40(m, 0.0f, blk.size, 0.0f, &blk.dir[0], &blk.dir[1], &blk.dir[2]);
     blk.dir[0] *= inv;
     blk.dir[1] *= inv;
@@ -366,12 +372,13 @@ s32 func_15013778(s16 *rec) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_15013778.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/effect_spawn_record.s")
 #endif
 
-s32 func_1501396C(struct16 *arg0) {
+/* was func_1501396C */
+s32 record_dispatch_82ecc(struct16 *arg0) {
     u8 idx = arg0->unk17;
-    /* P76: the handlers take the record (a0 still holds arg0 at the jalr; func_15013D38 writes arg0->unk16) */
+    /* P76: the handlers take the record (a0 still holds arg0 at the jalr; record_emitter_start writes arg0->unk16) */
     void (*func)(struct16 *) = (void (*)(struct16 *)) D_80082ECC[idx];
 
     if (func != NULL) {
@@ -421,7 +428,8 @@ typedef struct {
 extern f32 D_800969F8;
 extern f32 D_800969FC;
 
-s32 func_150139AC(Obj150139AC *arg0) {
+/* was func_150139AC */
+s32 record_ambient_effect_start(Obj150139AC *arg0) {
     struct {
         Obj150139AC *unk0;
         f32 unk4;
@@ -500,8 +508,8 @@ s32 func_150139AC(Obj150139AC *arg0) {
     tmp.unk65 = 0;
     tmp.unk68 = 0;
     if (e->unk34) {
-        func_1510F800(0);
-        tmp.unk6C = func_1510FD20(arg0->unk0, arg0->unk4);
+        collision_select_area(0);
+        tmp.unk6C = zone_tree_find_leaf(arg0->unk0, arg0->unk4);
     } else {
         tmp.unk6C = 0;
     }
@@ -519,7 +527,8 @@ s32 func_150139AC(Obj150139AC *arg0) {
 
 extern void (*D_800832B8[])(struct134 *, f32);
 
-s32 func_15013C38(struct134 *arg0) {
+/* was func_15013C38 */
+s32 record_scripted_dispatch(struct134 *arg0) {
     s32 idx = arg0->unk18;
     void (*func)(struct134 *, f32);
 
@@ -541,7 +550,8 @@ s32 func_15013C38(struct134 *arg0) {
     return 1;
 }
 
-s32 func_15013D38(struct134 *arg0) {
+/* was func_15013D38 */
+s32 record_emitter_start(struct134 *arg0) {
     f32 pos[3];
     s32 temp_v0;
 
@@ -570,7 +580,8 @@ extern f32 D_80096A20;
 extern f32 D_80096A24;
 extern f32 D_80096A28;
 
-s32 func_15013DE8(u8 *arg0) {
+/* was func_15013DE8 */
+s32 record_particle_burst_start(u8 *arg0) {
     struct {
         f32 u30;
         f32 u34;
@@ -625,7 +636,7 @@ s32 func_15013DE8(u8 *arg0) {
     sp.u68 = 0.0f;
     sp.u70 = D_80096A10;
     sp.u74 = D_80096A14;
-    sp.u5C = (func_150ADA20() % 56U) + 0xC8;
+    sp.u5C = (random_int() % 56U) + 0xC8;
     sp.u3C = D_80096A18 * b;
     sp.u44 = D_80096A1C * b;
     sp.u40 = D_80096A20 * c; sp.u48 = D_80096A24 * c; sp.u4C = D_80096A28 * c;
@@ -635,12 +646,14 @@ s32 func_15013DE8(u8 *arg0) {
 }
 
 
-s32 func_15013F9C(s32 arg0) {
+/* was func_15013F9C */
+s32 record_start_1cd2c0(s32 arg0) {
     func_151CD2C0(arg0, 0xFF, 1);
     return 1;
 }
 
-s32 func_15013FC4(struct133 *arg0) {
+/* was func_15013FC4 */
+s32 record_dispatch_82f40(struct133 *arg0) {
     s32 idx = ((u8 *)arg0)[0x1B];
     void (*func)(void) = D_80082F40[idx];
 
@@ -650,7 +663,8 @@ s32 func_15013FC4(struct133 *arg0) {
     return 1;
 }
 
-s32 func_15014004(struct134 *arg0) {
+/* was func_15014004 */
+s32 record_register_e0900(struct134 *arg0) {
     s32 temp_v1 = arg0->unk1C;
     if (temp_v1 < 0) {
         return 1;
@@ -662,7 +676,8 @@ s32 func_15014004(struct134 *arg0) {
     return 1;
 }
 
-s32 func_15014040(struct134 *arg0) {
+/* was func_15014040 */
+s32 record_register_d9a20(struct134 *arg0) {
     s32 temp_v0 = arg0->unk18;
     arg0->unk16 |= 4;
     if (temp_v0 == 0) {
@@ -673,12 +688,14 @@ s32 func_15014040(struct134 *arg0) {
     return 1;
 }
 
-s32 func_1501407C(s32 arg0) {
+/* was func_1501407C */
+s32 record_clear_d987c(s32 arg0) {
     D_800D987C = (u8)0;
     return 1;
 }
 
-s32 func_15014094(struct134 *arg0) {
+/* was func_15014094 */
+s32 record_effect33_start(struct134 *arg0) {
     struct {
         struct134 *unk0;
         f32 unk4;
@@ -694,8 +711,8 @@ s32 func_15014094(struct134 *arg0) {
     tmp.unk0 = arg0;
     tmp.unk4 = func_15144598(arg0);
     tmp.unk8 = 0.0f;
-    func_1510F800(0);
-    tmp.unkC = func_1510FD20(arg0->unk0, arg0->unk4);
+    collision_select_area(0);
+    tmp.unkC = zone_tree_find_leaf(arg0->unk0, arg0->unk4);
     tmp.unk2C = 0;
     temp_v0 = func_15149130(300, -1, 33, -1, 0, 0, 52, 255, 1);
     if (temp_v0 != NULL) {
@@ -703,7 +720,8 @@ s32 func_15014094(struct134 *arg0) {
     }
 }
 
-s32 func_15014144(struct134 *arg0) {
+/* was func_15014144 */
+s32 record_kind_effect_start(struct134 *arg0) {
     s32 flags = arg0->unk18;
     s32 f8 = (flags & 8) ? 8 : 0;
     s32 f4 = (flags & 4) ? 4 : 0;
@@ -715,7 +733,8 @@ s32 func_15014144(struct134 *arg0) {
     return 1;
 }
 
-s32 func_15014220(struct134 *arg0) {
+/* was func_15014220 */
+s32 record_effect38_start(struct134 *arg0) {
     struct {
         f32 unk0;
         struct134 *unk4;
@@ -733,7 +752,8 @@ s32 func_15014220(struct134 *arg0) {
     }
     return 1;
 }
-s32 func_150142AC(struct134 *arg0) {
+/* was func_150142AC */
+s32 record_register_d9aa0(struct134 *arg0) {
     s32 idx = ((u8 *)arg0)[0x1B];
     arg0->unk16 |= 4;
     if (idx < 0 || idx >= 3) {
@@ -746,7 +766,8 @@ s32 func_150142AC(struct134 *arg0) {
 extern f32 D_80096A30;
 extern f32 D_80096A34;
 
-s32 func_150142EC(struct134 *arg0) {
+/* was func_150142EC */
+s32 record_effect29_start(struct134 *arg0) {
     struct {
         struct134 *unk0;
         f32 unk4;
@@ -788,7 +809,7 @@ s32 func_150142EC(struct134 *arg0) {
 }
 #ifdef NON_MATCHING
 void func_15145974(void *, f32 *, f32 *);
-/* the 0x38-byte parameter block func_150144B8 copies to the effect at +0x28 */
+/* the 0x38-byte parameter block screen_effect_start copies to the effect at +0x28 */
 typedef struct {
     u8 *rec;          /* 0x00 */
     s32 count;        /* 0x04 min + rand % (range + 1) */
@@ -808,11 +829,12 @@ typedef struct {
 } Effect150144B8;
 // screen_effect_start: P259: start handler of a level record `rec` (s16 +6 / +8, f32 +0xC / +0x10, flags +0x16,
 // packed bytes +0x18 / +0x1C): sets flag 4; in single player (D_80082FA0 < 2) projects the point 100 above
-// (+0xC, 0, +0x10) to the screen (func_150A8050 / func_150A7E40 / func_15145974, scaled by pi/180) and spawns effect
+// (+0xC, 0, +0x10) to the screen (mtxf_rotate_xyz_deg / func_150A7E40 / func_15145974, scaled by pi/180) and spawns effect
 // 300 / 0x2A (func_15149130) with a parameter block from the packed bytes: count min + rand % (range + 1), two s16,
 // two scales / 64, angle func_150484A0(+6, +8), spin byte / 256 * pi/4, a frame count with its inverse and
 // +8 / frames. Always returns 1.
-s32 func_150144B8(u8 *rec) {
+/* was func_150144B8 */
+s32 screen_effect_start(u8 *rec) {
     f32 mtx[4][4];
     f32 pos[3];
     Effect150144B8 e;
@@ -824,7 +846,7 @@ s32 func_150144B8(u8 *rec) {
     if (D_80082FA0 >= 2) {
         return 1;
     }
-    func_150A8050(mtx, *(f32 *) (rec + 0xC), *(f32 *) (rec + 0x10), 0.0f);
+    mtxf_rotate_xyz_deg(mtx, *(f32 *) (rec + 0xC), *(f32 *) (rec + 0x10), 0.0f);
     func_150A7E40(mtx, 0.0f, 100.0f, 0.0f, &pos[0], &pos[1], &pos[2]);
     func_15145974(pos, &e.screen_x, &e.screen_y);
     e.screen_x *= 0.017453292f;
@@ -834,7 +856,7 @@ s32 func_150144B8(u8 *rec) {
     lo = e.min;
     hi = e.range;
     e.rec = rec;
-    e.count = (u32) func_150ADA20() % (hi + 1) + lo;
+    e.count = (u32) random_int() % (hi + 1) + lo;
     e.b2 = (*(u32 *) (rec + 0x18) >> 16) & 0xFF;
     e.b3 = (*(u32 *) (rec + 0x18) >> 24) & 0xFF;
     e.scale0 = (f32) (*(u32 *) (rec + 0x1C) & 0xFF) * 0.015625f;
@@ -851,10 +873,10 @@ s32 func_150144B8(u8 *rec) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_150144B8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/screen_effect_start.s")
 #endif
 #ifdef NON_MATCHING
-/* the level record func_1501474C reads */
+/* the level record record_zone_box_start reads */
 typedef struct {
     s16 x, y, z;        /* 0x00 */
     s16 halfX;          /* 0x06 */
@@ -880,7 +902,8 @@ f32 cosf(f32);
 // around (x, z) and hands a 0x40-byte block to a new func_15149130 object (type 0x12C, 0x2C; +0x28): two opposite
 // corners, the two edge vectors from them, the top (y + height) and bottom y, parameters 0 / 1 as (p / 256) * 0.5,
 // 0, parameters 2 / 3 as (p / 256) * 250, and the colour bytes in reverse order.
-s32 func_1501474C(Rec1501474C *rec) {
+/* was func_1501474C */
+s32 record_zone_box_start(Rec1501474C *rec) {
     struct {
         f32 c1[2];          /* 0x00 */
         f32 c2[2];          /* 0x08 */
@@ -941,10 +964,10 @@ s32 func_1501474C(Rec1501474C *rec) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_1501474C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/record_zone_box_start.s")
 #endif
 #ifdef NON_MATCHING
-/* the level record func_15014B60 reads */
+/* the level record record_light_ring_start reads */
 typedef struct {
     s16 x, y, z;        /* 0x00 */
     u8 pad06[0x10];
@@ -966,11 +989,12 @@ extern u8 D_800A0D08[]; /* 6 rgb triples */
 #ifdef NON_MATCHING
 // record_light_ring_start: start handler (s32, returns 1) of a level record: marks it started (+0x16 |= 4) and
 // builds a 0x48-byte block for a new func_15149130 object (type 0x12C, 0x2E, kind 0x29; +0x28): the position, three
-// random angles ((u16) (func_150ADA20() * osGetCount()) scaled by D_80096A48 / 4C / 58 and 360), three sizes from the
+// random angles ((u16) (random_int() * osGetCount()) scaled by D_80096A48 / 4C / 58 and 360), three sizes from the
 // record's u16 halves (* D_80096A50 * D_80096A54), six lights (light_create_with_ctrl at the record position, colour
 // D_800A0D08[i], red in level 0x40), a fourth value (* D_80096A5C * D_80096A60), the record and a 1 byte. When
 // no object is free the lights are freed again (node_destroy).
-s32 func_15014B60(Rec15014B60 *rec) {
+/* was func_15014B60 */
+s32 record_light_ring_start(Rec15014B60 *rec) {
     struct {
         f32 pos[3];         /* 0x00 */
         f32 ang[3];         /* 0x0C */
@@ -1001,11 +1025,11 @@ s32 func_15014B60(Rec15014B60 *rec) {
     blk.pos[1] = rec->y;
     blk.pos[2] = rec->z;
     t = osGetCount();
-    blk.ang[0] = (u16) (func_150ADA20() * t) * D_80096A48 * 360.0f;
+    blk.ang[0] = (u16) (random_int() * t) * D_80096A48 * 360.0f;
     t = osGetCount();
-    blk.ang[1] = (u16) (func_150ADA20() * t) * D_80096A4C * 360.0f;
+    blk.ang[1] = (u16) (random_int() * t) * D_80096A4C * 360.0f;
     t = osGetCount();
-    blk.ang[2] = (u16) (func_150ADA20() * t) * D_80096A58 * 360.0f;
+    blk.ang[2] = (u16) (random_int() * t) * D_80096A58 * 360.0f;
     blk.size[0] = (rec->sizeXY & 0xFFFF) * D_80096A50 * D_80096A54;
     blk.size[1] = ((rec->sizeXY >> 16) & 0xFFFF) * D_80096A50 * D_80096A54;
     blk.size[2] = (rec->sizeZW & 0xFFFF) * D_80096A50 * D_80096A54;
@@ -1042,9 +1066,10 @@ s32 func_15014B60(Rec15014B60 *rec) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_15014B60.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/record_light_ring_start.s")
 #endif
-s32 func_15014F6C(struct134 *arg0) {
+/* was func_15014F6C */
+s32 record_effect49_start(struct134 *arg0) {
     struct {
         struct134 *unk0;
         u32 unk4;
@@ -1068,8 +1093,8 @@ s32 func_15014F6C(struct134 *arg0) {
     tmp.unk0 = arg0;
     tmp.unk4 = arg0->unk18 & 0xFFFF;
     tmp.unk8 = ((u32)arg0->unk18 >> 16) & 0xFFFF;
-    tmp.unkC = (func_150ADA20() % (tmp.unk8 + 1)) + tmp.unk4;
-    func_150A8050((void *)tmp.unk10, *(f32 *)&arg0->unkC, *(f32 *)&arg0->unk10, 0.0f);
+    tmp.unkC = (random_int() % (tmp.unk8 + 1)) + tmp.unk4;
+    mtxf_rotate_xyz_deg((void *)tmp.unk10, *(f32 *)&arg0->unkC, *(f32 *)&arg0->unk10, 0.0f);
     tmp.unk40 = arg0->unk0;
     tmp.unk44 = (s16)arg0->unk2;
     tmp.unk48 = arg0->unk4;
@@ -1080,7 +1105,8 @@ s32 func_15014F6C(struct134 *arg0) {
     return 1;
 }
 
-s32 func_150150A4(s32 arg0) {   /* P76: a0 passes through to func_1515F1B0 */
+/* was func_150150A4 */
+s32 record_light_list_add(s32 arg0) {   /* P76: a0 passes through to func_1515F1B0 */
     struct17 *temp_v0 = func_1515F1B0(arg0);
     if (temp_v0 == NULL) {
         return 1;
@@ -1091,7 +1117,8 @@ s32 func_150150A4(s32 arg0) {   /* P76: a0 passes through to func_1515F1B0 */
     return 1;
 }
 
-s32 func_15015104(struct134 *arg0) {
+/* was func_15015104 */
+s32 record_effect44_start(struct134 *arg0) {
     struct {
         struct134 *unk0;
         s8  unk4;
@@ -1106,8 +1133,8 @@ s32 func_15015104(struct134 *arg0) {
     *(u8 *)&arg0->unk14 = 1;
     tmp.unk0 = arg0;
     tmp.unk4 = arg0->unk1C;
-    func_1510F800(0);
-    tmp.unk8 = func_1510FD20(arg0->unk0, arg0->unk4);
+    collision_select_area(0);
+    tmp.unk8 = zone_tree_find_leaf(arg0->unk0, arg0->unk4);
     f1 = arg0->unk20 ? 1 : 0;
     f2 = arg0->unk20 ? 2 : 0;
     tmp.unkC = f2 | f1;
@@ -1118,7 +1145,8 @@ s32 func_15015104(struct134 *arg0) {
     }
     return 1;
 }
-s32 func_150151D4(struct134 *arg0) {
+/* was func_150151D4 */
+s32 record_effect60_start(struct134 *arg0) {
     struct {
         struct134 *unk0;
         f32 unk4;
@@ -1153,8 +1181,8 @@ s32 func_150151D4(struct134 *arg0) {
     tmp.unk3C = 0;
     tmp.unk38 = 0;
     tmp.unk20 = D_80096A64;
-    func_1510F800(0);
-    tmp.unk44 = func_1510FD20(arg0->unk0, arg0->unk4);
+    collision_select_area(0);
+    tmp.unk44 = zone_tree_find_leaf(arg0->unk0, arg0->unk4);
     temp_v0 = func_15149130(300, -1, 60, -1, 0, 45, 72, 255, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, sizeof(tmp));
@@ -1162,7 +1190,8 @@ s32 func_150151D4(struct134 *arg0) {
     return 1;
 }
 
-s32 func_15015300(struct134 *arg0) {
+/* was func_15015300 */
+s32 record_dispatch_82f70(struct134 *arg0) {
     void (*func)(void);
     s32 idx = arg0->unk1C;
 
@@ -1180,7 +1209,7 @@ s32 func_15015300(struct134 *arg0) {
 
 
 #ifdef NON_MATCHING
-/* the level record func_15015354 reads (D_80082EA0 entry 0x34) */
+/* the level record record_quad_zone_start reads (D_80082EA0 entry 0x34) */
 typedef struct {
     s16 x, y, z;        /* 0x00 */
     s16 halfX;          /* 0x06 */
@@ -1192,10 +1221,11 @@ typedef struct {
 } Rec15015354;
 
 // record_quad_zone_start: start handler (void, D_80082EA0 entry 0x34) of a rectangular zone record: marks it started
-// (+0x14 = 1), turns the rectangle (+-halfX, 0, +-halfZ) around the record's position by its angles (func_150A8050 /
+// (+0x14 = 1), turns the rectangle (+-halfX, 0, +-halfZ) around the record's position by its angles (mtxf_rotate_xyz_deg /
 // func_150A7E40) into 4 world corners, stores the 4 edge vectors (next corner - corner) and the sound id of the spot
-// (func_1510F800(0); func_1510FD20(x, z)), and hands that 0x74-byte block to a new func_15149130 object (+0x28).
-void func_15015354(Rec15015354 *src) {
+// (collision_select_area(0); zone_tree_find_leaf(x, z)), and hands that 0x74-byte block to a new func_15149130 object (+0x28).
+/* was func_15015354 */
+void record_quad_zone_start(Rec15015354 *src) {
     struct {
         Rec15015354 *src;   /* 0x00 */
         s16 u4;             /* 0x04 */
@@ -1231,7 +1261,7 @@ void func_15015354(Rec15015354 *src) {
     local[3][0] = -src->halfX;
     local[3][1] = 0.0f;
     local[3][2] = src->halfZ;
-    func_150A8050(m, src->angX, src->angY, 0.0f);
+    mtxf_rotate_xyz_deg(m, src->angX, src->angY, 0.0f);
     m[3][0] = pos[0];
     m[3][1] = pos[1];
     m[3][2] = pos[2];
@@ -1245,8 +1275,8 @@ void func_15015354(Rec15015354 *src) {
         blk.edge[i][1] = blk.corner[j][1] - blk.corner[i][1];
         blk.edge[i][2] = blk.corner[j][2] - blk.corner[i][2];
     }
-    func_1510F800(0);
-    blk.sound = func_1510FD20(src->x, src->z);
+    collision_select_area(0);
+    blk.sound = zone_tree_find_leaf(src->x, src->z);
     blk.u70 = 0;
     e = (u8 *) func_15149130(0x12C, -1, 0x3D, -1, 0, 0x2E, (struct37 *) 0x74, 0xFF, 0);
     if (e != NULL) {
@@ -1254,9 +1284,10 @@ void func_15015354(Rec15015354 *src) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_15015354.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/record_quad_zone_start.s")
 #endif
-s32 func_15015644(struct134 *arg0) {
+/* was func_15015644 */
+s32 record_effect68_start(struct134 *arg0) {
     struct {
         struct134 *unk0;
         f32 unk4;
@@ -1269,8 +1300,8 @@ s32 func_15015644(struct134 *arg0) {
     *(u8 *)&arg0->unk14 = 1;
     tmp.unk0 = arg0;
     tmp.unk4 = func_15144598(arg0);
-    func_1510F800(0);
-    tmp.unk8 = func_1510FD20(arg0->unk0, arg0->unk4);
+    collision_select_area(0);
+    tmp.unk8 = zone_tree_find_leaf(arg0->unk0, arg0->unk4);
     tmp.unkC = 0;
     temp_v0 = func_15149130(300, -1, 68, -1, 0, 47, 16, 255, 0);
     if (temp_v0 != NULL) {
@@ -1287,7 +1318,8 @@ s32 func_151ACBD4(s8 *, s32);
  * (0, length, 0) direction rotated by the angles (not added to the position, as in the original); the upper / lower
  * point (by y) and the height |dy| go to func_151ACBD4 with the kind. Always returns 1.
  */
-s32 func_150156F4(u8 *rec) {
+/* was func_150156F4 */
+s32 record_rope_zone_start(u8 *rec) {
     f32 m[4][4];
     f32 pos[3];
     f32 pts[2][3];
@@ -1314,7 +1346,7 @@ s32 func_150156F4(u8 *rec) {
             return 1;
         }
     }
-    func_150A8050(m, *(f32 *) (rec + 0xC), *(f32 *) (rec + 0x10), 0.0f);
+    mtxf_rotate_xyz_deg(m, *(f32 *) (rec + 0xC), *(f32 *) (rec + 0x10), 0.0f);
     pos[0] = *(s16 *) (rec + 0);
     pos[1] = *(s16 *) (rec + 2);
     pos[2] = *(s16 *) (rec + 4);
@@ -1337,5 +1369,5 @@ s32 func_150156F4(u8 *rec) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_150156F4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/record_rope_zone_start.s")
 #endif

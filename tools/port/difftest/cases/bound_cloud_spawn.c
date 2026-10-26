@@ -1,10 +1,10 @@
 s32 func_15046F70(u8 *, u16, f32, u8 *);
 void func_1504715C(void *, u8 *);
-s32 func_1505D024(struct127 *, s32, u16, s32);
+s32 obj_send_hit(struct127 *, s32, u16, s32);
 s32 light_create_flicker_preset(s8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 memcpy(u8 *, struct127 **, s32);
 
-void func_150FD554(struct127 *arg0, u8 arg1, s32 arg2) {
+void bound_cloud_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
     struct {
         s8 u60;
         s8 u61;
@@ -129,18 +129,18 @@ void func_150FD554(struct127 *arg0, u8 arg1, s32 arg2) {
             sp.u197 = 0;
             sp.u19C = arg0->y_position;
         }
-        func_1505D024(arg0, 0x39, arg0->unk7A, -1);
+        obj_send_hit(arg0, 0x39, arg0->unk7A, -1);
         sp.uD4 = arg0;
         sp.uDC = 60.0f;
         sp.uD8 = arg0->unique_id;
         sp.uE0 = 50.0f;
-        temp_f0 = func_150ADA68();
+        temp_f0 = random_float();
         sp.u12C = 0;
         sp.uE8 = -2048.0f;
         sp.uEC = -2048.0f;
         sp.uE4 = temp_f0 * 6.2831855f;
-        sp.uF0 = func_150ADA68() * 6.2831855f;
-        temp_f16 = func_150ADA68() * 6.2831855f;
+        sp.uF0 = random_float() * 6.2831855f;
+        temp_f16 = random_float() * 6.2831855f;
         sp.uF8 = 0;
         sp.uFC = 0;
         sp.u100 = 0.0f;

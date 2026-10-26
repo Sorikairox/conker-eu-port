@@ -8,7 +8,8 @@ s32 func_15132BBC(f32 *, s32, s32, s32, s32, s32, s32);
 s32 func_15145128(f32 *, f32 *, f32 *, s32 *);
 s32 memcpy(s32, f32 *, s32);
 
-void func_150F4AF0(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
+/* was func_150F4AF0 */
+void lightning_bolt_spawn(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
     struct {
         f32 u3C;
         s32 u40;
@@ -101,13 +102,13 @@ void func_150F4AF0(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 arg5, u8
         (*(f32 *)((u8 *)(&sp.u40) + 0)) = (f32) (*(f32 *)((u8 *)arg0 + 0));
         (*(f32 *)((u8 *)(&sp.u40) + 4)) = (f32) (*(f32 *)((u8 *)arg0 + 4));
         (*(f32 *)((u8 *)(&sp.u40) + 8)) = (f32) (*(f32 *)((u8 *)arg0 + 8));
-        sp.u4C = func_150ADA68() * 6.2831855f;
-        sp.u50 = (func_150ADA68() * 0.2f) + 0.080000006f;
-        if (func_150ADA20() & 1) {
+        sp.u4C = random_float() * 6.2831855f;
+        sp.u50 = (random_float() * 0.2f) + 0.080000006f;
+        if (random_int() & 1) {
             sp.u50 = -sp.u50;
         }
-        sp.u5C = (func_150ADA68() * 21.0f) + 13.0f;
-        temp_f12 = func_150ADA68() * 6.2831855f;
+        sp.u5C = (random_float() * 21.0f) + 13.0f;
+        temp_f12 = random_float() * 6.2831855f;
         sp34 = temp_f12;
         sp.u54 = cosf(temp_f12);
         sp.u58 = sinf(temp_f12);
@@ -115,9 +116,9 @@ void func_150F4AF0(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 arg5, u8
         sp.u88 = 1.0f;
         sp.u90 = arg5;
         sp.u8C = arg5;
-        sp.u94 = func_150ADA68() * 360.0f;
-        sp.u98 = func_150ADA68() * 360.0f;
-        temp_f0 = func_150ADA68();
+        sp.u94 = random_float() * 360.0f;
+        sp.u98 = random_float() * 360.0f;
+        temp_f0 = random_float();
         sp.uA0 = 1.0f;
         sp.uA4 = 1.0f;
         sp.uA8 = 1.0f;
@@ -128,10 +129,10 @@ void func_150F4AF0(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 arg5, u8
         sp.uB8 = sp.u78 * arg3;
         sp.uBC = sp.u7C * arg3;
         sp.uC0 = sp.u80 * arg3;
-        temp_f8 = func_150ADA68() * 21.903002f;
+        temp_f8 = random_float() * 21.903002f;
         sp.uC8 = 0.0f;
         sp.uC4 = temp_f8 + -10.951501f;
-        temp_f10 = (func_150ADA68() * 21.903002f) + -10.951501f;
+        temp_f10 = (random_float() * 21.903002f) + -10.951501f;
         sp.uE4 = 0xFF;
         sp.uE5 = 0x16;
         sp.uDA = (s16) arg2;
@@ -162,12 +163,13 @@ void func_150F4AF0(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 arg5, u8
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/func_150F4AF0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/lightning_bolt_spawn.s")
 #endif
 #ifdef NON_MATCHING
 void func_1514373C(f32, f32, f32 *, f32 *);
 
-u8 *func_150F4E50(u8 *arg0) {
+/* was func_150F4E50 */
+u8 *lightning_bolt_update(u8 *arg0) {
     struct {
         f32 u1C;
         f32 u20;
@@ -195,7 +197,7 @@ u8 *func_150F4E50(u8 *arg0) {
     return sp18;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/func_150F4E50.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/lightning_bolt_update.s")
 #endif
 #ifdef NON_MATCHING
 f32 func_15143E64(f32 *);
@@ -205,7 +207,8 @@ f32 func_15143E64(f32 *);
 // between); flag 2 (unless flag 4) keeps a looping sound: when a handle is in the high half of +0x88 it is moved to
 // the position (func_1000F9D4), otherwise within 200 units sound id (+0x88 low half) starts at a random pitch
 // 0x4000..0x7FFF (func_10010F88) and its handle goes to the high half. Returns 1.
-s32 func_150F4FB8(u8 *obj) {
+/* was func_150F4FB8 */
+s32 ambient_obj_update(u8 *obj) {
     f32 delta[3];
     f32 *cam;
     f32 dist;
@@ -234,7 +237,7 @@ s32 func_150F4FB8(u8 *obj) {
             func_1000F9D4(sound >> 16, (s32) * (f32 *) (obj + 0x38), (s32) * (f32 *) (obj + 0x3C),
                           (s32) * (f32 *) (obj + 0x40));
         } else if (dist < 200.0f) {
-            handle = func_10010F88(*(u32 *) (obj + 0x88) & 0xFFFF, (func_150ADA20() & 0x3FFF) + 0x4000, 0, 0, -1,
+            handle = func_10010F88(*(u32 *) (obj + 0x88) & 0xFFFF, (random_int() & 0x3FFF) + 0x4000, 0, 0, -1,
                                    (s32) * (f32 *) (obj + 0x38), (s32) * (f32 *) (obj + 0x3C),
                                    (s32) * (f32 *) (obj + 0x40), 10000, 20000);
             *(u32 *) (obj + 0x88) |= handle << 16;
@@ -243,10 +246,11 @@ s32 func_150F4FB8(u8 *obj) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/func_150F4FB8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/ambient_obj_update.s")
 #endif
 
-void func_150F527C(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_150F527C */
+void ambient_obj_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     u8 *v = arg0 + 0x170;
 
     if (arg2 == 0x4E) {
@@ -257,7 +261,8 @@ void func_150F527C(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-void func_150F4D5C(u8 *arg0, s8 arg1, u8 arg2, u8 arg3, s32 arg4) {
+/* was func_150F4D5C */
+void lightning_emitter_spawn(u8 *arg0, s8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     struct {
         u8 *unk0;
         f32 unk4;
@@ -291,11 +296,12 @@ void func_15143874(s16, f32, f32 *, f32 *);
 
 // lightning_emitter_update: per-frame update of an emitter (record at +0x28: owner, accumulator, condition +0x30,
 // bolt set +0x31). If a condition function (D_80088ED8[+0x30], -1 = none) says no, nothing happens. Otherwise the
-// accumulator grows by (~0.051 + rand x ~0.153) x frame time and every whole unit spawns one bolt (func_150F4AF0)
+// accumulator grows by (~0.051 + rand x ~0.153) x frame time and every whole unit spawns one bolt (lightning_bolt_spawn)
 // between two points around the owner's camera (func_15144B34(owner[0x23D])): both at a random distance 254..635
 // along the camera heading (owner +0x380 degrees, to 256-unit angle) +-21, at height -133..79 relative to it, in
 // random order; style / scale picked at random from the D_80088EC0 set, width 5..15.
-void func_150F536C(u8 *obj) {
+/* was func_150F536C */
+void lightning_emitter_update(u8 *obj) {
     struct {
         u8 *owner;
         f32 acc;
@@ -319,7 +325,7 @@ void func_150F536C(u8 *obj) {
             return;
         }
     }
-    em->acc += (0.0510000028f + func_150ADA68() * 0.153000012f) * D_800BE9A4;
+    em->acc += (0.0510000028f + random_float() * 0.153000012f) * D_800BE9A4;
     if (!(1.0f < em->acc)) {
         return;
     }
@@ -328,30 +334,30 @@ void func_150F536C(u8 *obj) {
     left = angle - 21;
     right = angle + 21;
     do {
-        func_15143874(right, func_150ADA68() * 381.0f + 254.0f, &a.v[0], &a.v[2]);
-        a.v[1] = func_150ADA68() * 212.0f + -133.0f;
+        func_15143874(right, random_float() * 381.0f + 254.0f, &a.v[0], &a.v[2]);
+        a.v[1] = random_float() * 212.0f + -133.0f;
         a.v[0] += cam[0];
         a.v[1] += cam[1];
         a.v[2] += cam[2];
-        func_15143874(left, func_150ADA68() * 381.0f + 254.0f, &b.v[0], &b.v[2]);
-        b.v[1] = func_150ADA68() * 212.0f + -133.0f;
+        func_15143874(left, random_float() * 381.0f + 254.0f, &b.v[0], &b.v[2]);
+        b.v[1] = random_float() * 212.0f + -133.0f;
         b.v[0] += cam[0];
         b.v[1] += cam[1];
         b.v[2] += cam[2];
-        if (func_150ADA20() & 1) {
+        if (random_int() & 1) {
             tmp = a;
             a = b;
             b = tmp;
         }
         set = &D_80088EC0[em->set];
-        k = (u32) func_150ADA20() % set->count;
-        width = func_150ADA68() * 10.0f + 5.0f;
-        r = func_150ADA68();
-        func_150F4AF0((u8 *) &a, (u8 *) &b, set->pairs[k * 2 + 1], width, 1.0f / width,
+        k = (u32) random_int() % set->count;
+        width = random_float() * 10.0f + 5.0f;
+        r = random_float();
+        lightning_bolt_spawn((u8 *) &a, (u8 *) &b, set->pairs[k * 2 + 1], width, 1.0f / width,
                       (r * 0.075f + 0.075f) * set->scales[k], 0, 0, obj[0xC], obj[1]);
         em->acc -= 1.0f;
     } while (1.0f < em->acc);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/func_150F536C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/lightning_emitter_update.s")
 #endif

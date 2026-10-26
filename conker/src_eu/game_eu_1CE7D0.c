@@ -5,7 +5,7 @@
 void func_151A177C(f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 
-s32 func_1510FE4C(s32);
+s32 floor_flags_surface_type(s32);
 
 void func_151A0A10(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     struct260 *temp_v0;
@@ -24,7 +24,7 @@ void func_151A0A10(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
         if (D_800C35EA != 1) {
             tmp.unk4 = *(f32 *)(arg0 + 0x180);
             tmp.unk10 = 0.0f;
-            switch (func_1510FE4C(*(s32 *)(arg0 + 0x184))) {
+            switch (floor_flags_surface_type(*(s32 *)(arg0 + 0x184))) {
             case 0xA:
                 tmp.unkC = 0;
                 break;
@@ -57,9 +57,9 @@ void func_151A10A8(u8 *arg0) {
         temp_s0 = arg0 + 0x28;
         do {
 #ifdef NON_MATCHING
-            func_1514CBE8((*(f32 *)temp_s0), (*(f32 *)((u8 *)temp_s0 + 4)), (*(f32 *)((u8 *)temp_s0 + 8)), (func_150ADA68() * 25.0f) + 15.0f, 0, 0xFF, 5, 4, (s32) (*(u8 *)((u8 *)temp_s0 + 0xC)), 0.0f, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)));
+            func_1514CBE8((*(f32 *)temp_s0), (*(f32 *)((u8 *)temp_s0 + 4)), (*(f32 *)((u8 *)temp_s0 + 8)), (random_float() * 25.0f) + 15.0f, 0, 0xFF, 5, 4, (s32) (*(u8 *)((u8 *)temp_s0 + 0xC)), 0.0f, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)));
 #else
-            func_1514CBE8((*(f32 *)temp_s0), (*(f32 *)((u8 *)temp_s0 + 4)), (*(s32 *)((u8 *)temp_s0 + 8)), (func_150ADA68() * 25.0f) + 15.0f, 0, 0xFF, 5, 4, (s32) (*(u8 *)((u8 *)temp_s0 + 0xC)), 0.0f, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)));
+            func_1514CBE8((*(f32 *)temp_s0), (*(f32 *)((u8 *)temp_s0 + 4)), (*(s32 *)((u8 *)temp_s0 + 8)), (random_float() * 25.0f) + 15.0f, 0, 0xFF, 5, 4, (s32) (*(u8 *)((u8 *)temp_s0 + 0xC)), 0.0f, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)));
 #endif
             (*(f32 *)((u8 *)temp_s0 + 0x10)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x10)) - 1.0f);
         } while ((*(f32 *)((u8 *)temp_s0 + 0x10)) > 1.0f);
@@ -112,19 +112,19 @@ s32 func_151A11BC(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
     s16 size;
     u8 g, xb;
 
-    pitch = (u32) func_150ADA20() % 15U - 0x3F;
+    pitch = (u32) random_int() % 15U - 0x3F;
     sp = angle_byte_cos(pitch & 0xFF);
     cp = angle_byte_cos((pitch - 0x40) & 0xFF);
     sa = angle_byte_cos(a & 0xFF);
     ca = angle_byte_cos((a - 0x40) & 0xFF);
-    v = func_150ADA68() * 503.0f + 801.0f;
+    v = random_float() * 503.0f + 801.0f;
     h = v * sp;
     rec.vx = (s32) (h * ca);
     rec.vy = (s32) (-v * cp);
     rec.vz = (s32) (h * sa);
-    rec.h22 = (u32) func_150ADA20() % 41U - 0x82;
-    rec.b2A = (u32) func_150ADA20() % 3U + 6;
-    size = (u32) func_150ADA20() % 451U + 0xFA;
+    rec.h22 = (u32) random_int() % 41U - 0x82;
+    rec.b2A = (u32) random_int() % 3U + 6;
+    size = (u32) random_int() % 451U + 0xFA;
     g = D_8008FC70[arg8];
     xb = (s32) (x * 256.0f);
     rec.size0 = size;
@@ -305,25 +305,25 @@ void func_151A1794(u8 *obj) {
     t.u26 = 0x7D0;
     t.u24 = 0x7D0;
     do {
-        r1 = func_150ADA20();
-        r2 = func_150ADA20();
+        r1 = random_int();
+        r2 = random_int();
         sin1 = angle_byte_cos(r1 - 0x40);
         cos1 = angle_byte_cos(r1);
         sin2 = angle_byte_cos(r2 - 0x40);
         cos2 = angle_byte_cos(r2);
-        dist = func_150ADA68() * e->spread;
+        dist = random_float() * e->spread;
         horiz = dist * cos2;
         tx = e->pos[0] + horiz * sin1;
         ty = e->pos[1] - dist * sin2;
         tz = e->pos[2] + horiz * cos1;
-        if (func_150ADA20() & 1) {
+        if (random_int() & 1) {
             t.flags |= 4;
         }
-        if (func_150ADA20() & 1) {
+        if (random_int() & 1) {
             t.flags |= 8;
         }
-        t.life = (u32) func_150ADA20() % (u32) (e->lifeRange + 1) + e->lifeMin;
-        fade = (u32) func_150ADA20() % (u32) (e->fadeRange + 1) + e->fadeMin;
+        t.life = (u32) random_int() % (u32) (e->lifeRange + 1) + e->lifeMin;
+        fade = (u32) random_int() % (u32) (e->fadeRange + 1) + e->fadeMin;
         t.total = ((u8 *) D_80090F10)[0x1D8] * (0x100 / t.life);
 
         n = t.total;
@@ -534,26 +534,26 @@ void func_151A1F48(u8 *arg0) {
         sp.uD8 = 0x7D0;
         sp.uDA = 0x7D0;
         do {
-            temp_s1 = func_150ADA20() & 0xFF;
-            temp_s2 = func_150ADA20() & 0xFF;
+            temp_s1 = random_int() & 0xFF;
+            temp_s2 = random_int() & 0xFF;
             temp_f20 = angle_byte_cos((temp_s1 - 0x40) & 0xFF);
             temp_f22 = angle_byte_cos(temp_s1 & 0xFF);
             temp_f24 = angle_byte_cos((temp_s2 - 0x40) & 0xFF);
             temp_f26 = angle_byte_cos(temp_s2 & 0xFF);
-            temp_f2 = func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 0xC));
+            temp_f2 = random_float() * (*(f32 *)((u8 *)temp_s0 + 0xC));
             temp_f12 = temp_f2 * temp_f26;
             temp_f28 = (*(f32 *)((u8 *)temp_s0 + 0)) + (temp_f12 * temp_f20);
             temp_f30 = (*(f32 *)((u8 *)temp_s0 + 4)) - (temp_f2 * temp_f24);
             sp80 = (*(f32 *)((u8 *)temp_s0 + 8)) + (temp_f12 * temp_f22);
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 sp.uE8 |= 4;
             }
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 sp.uE8 |= 8;
             }
-            temp_t5 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1A)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x18));
+            temp_t5 = (random_int() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1A)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x18));
             sp.uC2 = temp_t5;
-            temp_t1 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1E)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x1C));
+            temp_t1 = (random_int() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1E)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x1C));
             sp.uDC = (*(u8 *)((u8 *)D_80090F10 + 0x1D8)) * (0x100 / temp_t5);
             temp_v1 = sp.uDC >> 2;
             temp_t2 = sp.uDC - temp_v1;
@@ -746,25 +746,25 @@ void func_151A2564(u8 *arg0) {
         sp.uEA = 0x7D0;
         sp.uE8 = 0x7D0;
         do {
-            temp_s1 = func_150ADA20() & 0xFF;
-            temp_s2 = func_150ADA20() & 0xFF;
+            temp_s1 = random_int() & 0xFF;
+            temp_s2 = random_int() & 0xFF;
             temp_f20 = angle_byte_cos((temp_s1 - 0x40) & 0xFF);
             temp_f22 = angle_byte_cos(temp_s1 & 0xFF);
             temp_f24 = angle_byte_cos((temp_s2 - 0x40) & 0xFF);
             temp_f26 = angle_byte_cos(temp_s2 & 0xFF);
-            temp_f2 = func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 0xC));
+            temp_f2 = random_float() * (*(f32 *)((u8 *)temp_s0 + 0xC));
             temp_f12 = temp_f2 * temp_f26;
             temp_f28 = (*(f32 *)((u8 *)temp_s0 + 0)) + (temp_f12 * temp_f20);
             temp_f30 = (*(f32 *)((u8 *)temp_s0 + 4)) - (temp_f2 * temp_f24);
             sp88 = (*(f32 *)((u8 *)temp_s0 + 8)) + (temp_f12 * temp_f22);
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 sp.uF8 |= 4;
             }
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 sp.uF8 |= 8;
             }
-            sp.uD2 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1A)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x18));
-            temp_a1 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1E)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x1C));
+            sp.uD2 = (random_int() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1A)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x18));
+            temp_a1 = (random_int() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1E)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x1C));
             sp.uEC = (*(u8 *)((u8 *)D_80090F10 + 0x1D8)) * (0x100 / sp.uD2);
             temp_a0 = sp.uEC >> 2;
             temp_t0 = sp.uEC - temp_a0;
@@ -780,9 +780,9 @@ void func_151A2564(u8 *arg0) {
             sp.uBC = (s16) temp_v1;
             sp.uAA = sp.uEC;
             sp.uB0 = sp.uEC;
-            sp.uBE = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x22)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x20));
+            sp.uBE = (random_int() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x22)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x20));
             sp.uC0 = (s16) (sp.uEC >> 1);
-            sp.uC2 = (func_150ADA20() % 81U) + 0x50;
+            sp.uC2 = (random_int() % 81U) + 0x50;
             sp.uD4 = (s16) (s32) temp_f28;
             sp.uD6 = (s16) (s32) temp_f30;
             sp.uD8 = (s16) (s32) sp88;
@@ -888,7 +888,7 @@ void func_151A2B90(u8 *arg0) {
 #ifdef NON_MATCHING
 /* P160 */
 s32 func_151308E4(void *, s32, s32, u8, s32);
-s32 func_150ADA20(void);
+s32 random_int(void);
 
 typedef struct { f32 x, y, z; } V3_151A2C9C;
 typedef struct {
@@ -975,8 +975,8 @@ s32 func_151A2C9C(f32 *pos, f32 *vel, f32 *acc, f32 arg3, f32 arg4, f32 scale, s
     blk.vel = *(V3_151A2C9C *)vel;
     blk.acc = *(V3_151A2C9C *)acc;
     blk.u54 = arg4;
-    bit40 = (func_150ADA20() & 1) ? 0x40 : 0;
-    bit80 = (func_150ADA20() & 1) ? 0x80 : 0;
+    bit40 = (random_int() & 1) ? 0x40 : 0;
+    bit80 = (random_int() & 1) ? 0x80 : 0;
     blk.flags = bit80 | 7 | bit40 | 0x80D200;
     blk.u60[0] = 7;
     blk.u60[1] = 2;
@@ -1096,16 +1096,16 @@ s32 func_151A31D4(s32 pos, s32 accel, s16 dirA, s16 dirB, f32 accelSpeed, f32 sc
     t = 0.0f;
     step = 1.0f / count;
     for (; count != 0; count--) {
-        period = (u32)func_150ADA20() % (periodRange + 1) + periodBase;
-        a = func_150ADA20();
-        b = func_150ADA20();
-        func_15143794((u8)a, (u8)b, func_150ADA68() * speedMax, (s32)vel);
+        period = (u32)random_int() % (periodRange + 1) + periodBase;
+        a = random_int();
+        b = random_int();
+        func_15143794((u8)a, (u8)b, random_float() * speedMax, (s32)vel);
         accelFn((f32 *)accel, dirA, dirB, accelSpeed, t, acc);
         *(Blk12_151A31D4 *)colors = *(Blk12_151A31D4 *)D_8008FC88;
-        c = func_150ADA20() & 3;
-        lifeRand = func_150ADA68();
-        b = func_150ADA20();
-        extra = (func_150ADA68() < 0.0802f) ? 0x19 : -1;
+        c = random_int() & 3;
+        lifeRand = random_float();
+        b = random_int();
+        extra = (random_float() < 0.0802f) ? 0x19 : -1;
         func_151A2C9C((f32 *)pos, vel, acc, arg9, lifeRand * lifeRange + lifeBase, scaleSlope * t + scaleBase,
                       period + minPeriod, (u32)b % (fadeRange + 1) + fadeBase, period2, fade2, extra, arg12,
                       colors[c * 3 + 0], colors[c * 3 + 1], colors[c * 3 + 2], arg13, arg14);

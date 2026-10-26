@@ -17,8 +17,9 @@ extern f32 D_80089890[][5]; /* camera lean presets: {k0, k1, k2, k3, base} per +
  *    +0x2C & 0x100); goes to *outA, else is snapped into +0x3A8 (+0x65C = 0) when +0x23C, else eased (1.5 / 2.5).
  *  - Offset B (heading folded to -90..90 around the front): b = -h * k1 / 90 - h * s * k3 / 2700; goes to *outB,
  *    else snapped into +0x5E8 (+0x660 = 0) when +0x23C, else eased (6 / 9 when +0x2C & 0x100, else 1.5 / 2.5).
- * Called per frame by camera_update_controller / camera_update_transition (NULL, NULL) and func_1512EE50 mode 2. */
-void func_15128D50(struct108 *arg0, f32 *outB, f32 *outA) {
+ * Called per frame by camera_update_controller / camera_update_transition (NULL, NULL) and camera_apply_request mode 2. */
+/* was func_15128D50 */
+void camera_lean_from_heading(struct108 *arg0, f32 *outB, f32 *outA) {
     u8 *p = (u8 *)arg0;
     s32 saved = *(s32 *)(p + 0x134);
     f32 *e;
@@ -100,5 +101,5 @@ void func_15128D50(struct108 *arg0, f32 *outB, f32 *outA) {
     *(s32 *)(p + 0x134) = saved;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_156560/func_15128D50.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_156560/camera_lean_from_heading.s")
 #endif

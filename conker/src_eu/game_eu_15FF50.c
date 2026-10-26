@@ -74,7 +74,7 @@ void func_15132968(u8 *arg0) {
 }
 
 void func_15132B38(u8 *arg0);
-s32 func_1510DBB0(s32, s32 *, u16 *);
+s32 texture_id_list_release(s32, s32 *, u16 *);
 extern s32 D_800DCA70[];
 typedef struct Node29B4 {
     s32 *data;
@@ -96,7 +96,7 @@ void func_151329B4(Obj29B4 *arg0) {
         if (arg0->node->flag != 0) {
             D_800DC468[arg0->idx] = 1;
         } else {
-            func_1510DBB0(D_800DCA70[arg0->idx], &D_800DC63C, D_800DC468);
+            texture_id_list_release(D_800DCA70[arg0->idx], &D_800DC63C, D_800DC468);
             if (arg0->node->prev == NULL) {
                 D_800DC460 = (s32)arg0->node->next;
                 if (D_800DC460 != 0) {
@@ -145,7 +145,7 @@ void func_15132B38(u8 *arg0) {
 #ifdef NON_MATCHING
 /* one shared model per particle model id (D_800DC468 counts the users, D_800DC460 / D_800DC464 = list head / tail) */
 typedef struct ParticleModelRef {
-    s32 *model;                      /* loaded model file (func_1502B6BC) */
+    s32 *model;                      /* loaded model file (asset_load_with_subfiles) */
     struct ParticleModelRef *next;
     struct ParticleModelRef *prev;
     u16 modelId;
@@ -666,8 +666,8 @@ void func_15133AF8(u8 *arg0, u8 *arg1, u8 arg2)
 
 #ifdef NON_MATCHING
 extern s32 D_800A3C60[];             /* model file per particle model id (ROM table) */
-s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, ...);
-s32 func_1510D3E0(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList);
+s32 asset_load_with_subfiles(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, ...);
+s32 texture_resolve_dl_ids(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList);
 void gfx_dl_relocate(s8 *arg0, s32 arg1);
 
 // particle_model_load: loads the model file of particle model id modelId into ref->model, resolves its display
@@ -676,11 +676,11 @@ s32 func_15133C18(s32 modelId, ParticleModelRef *ref, void *particle) {
     s32 found;
     s32 size;
 
-    ref->model = (s32 *)func_1502B6BC(&found, 0, &size, 2, 9, D_800A3C60[modelId]);
+    ref->model = (s32 *)asset_load_with_subfiles(&found, 0, &size, 2, 9, D_800A3C60[modelId]);
     if (ref->model == NULL) {
         return 0;
     }
-    func_1510D3E0((Gfx *)*ref->model, 0, 1, 0x3E, (s16 **)&D_800DCA70[modelId] /* resolved segment list per model id */);
+    texture_resolve_dl_ids((Gfx *)*ref->model, 0, 1, 0x3E, (s16 **)&D_800DCA70[modelId] /* resolved segment list per model id */);
     gfx_dl_relocate((s8 *)*ref->model, (s32)ref->model);
     return 1;
 }
@@ -848,16 +848,16 @@ s32 func_15134108(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5)
 
 s32 func_151341C8(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
     func_15134108(arg0, arg1, arg2, arg3, arg4, arg5);
-    if (func_150ADA20() & 1) {
-        func_10010F88((func_150ADA20() % 9U) + 0x2DE, 0x2EE0U, 0, 0U, 0, (s16) (s32) arg1, (s16) (s32) arg2, (s16) (s32) arg3, 0x1F4, 0x3E8);
+    if (random_int() & 1) {
+        func_10010F88((random_int() % 9U) + 0x2DE, 0x2EE0U, 0, 0U, 0, (s16) (s32) arg1, (s16) (s32) arg2, (s16) (s32) arg3, 0x1F4, 0x3E8);
     }
     return 1;
 }
 
 s32 func_15134290(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
     func_15134108(arg0, arg1, arg2, arg3, arg4, arg5);
-    if (func_150ADA20() & 1) {
-        func_10010F88((func_150ADA20() % 10U) + 0x1B8, 0x5DC0U, 0, 0U, 0, (s16) (s32) arg1, (s16) (s32) arg2, (s16) (s32) arg3, 0x1F4, 0x3E8);
+    if (random_int() & 1) {
+        func_10010F88((random_int() % 10U) + 0x1B8, 0x5DC0U, 0, 0U, 0, (s16) (s32) arg1, (s16) (s32) arg2, (s16) (s32) arg3, 0x1F4, 0x3E8);
     }
     return 1;
 }
@@ -886,7 +886,7 @@ void func_15134428(s32 arg0, u8 *arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1510D66C(s32, s32 *, s32, s32);
+s32 texture_cache_lookup(s32, s32 *, s32, s32);
 
 s32 *func_1513445C(u8 *arg0, u16 arg1, u8 arg2, s32 arg3) {
     struct {
@@ -905,7 +905,7 @@ s32 *func_1513445C(u8 *arg0, u16 arg1, u8 arg2, s32 arg3) {
     temp_v0 = &D_80090F10[arg1];
     sp.u3B = temp_v0->padA[0];
     sp.u3A = temp_v0->padA[1];
-    temp_v0_2 = func_1510D66C(*(*(s32 **)((u8 *)temp_v0 + 0)), &sp.u30, arg3, 0);
+    temp_v0_2 = texture_cache_lookup(*(*(s32 **)((u8 *)temp_v0 + 0)), &sp.u30, arg3, 0);
     (*(s32 *)((u8 *)arg0 + 4)) = temp_v0_2;
     temp_t2 = arg2 * 4;
     (*(s32 *)((u8 *)arg0 + 0)) = (s32) ((temp_t2 & 0xFFFF) | 0xDB060000);

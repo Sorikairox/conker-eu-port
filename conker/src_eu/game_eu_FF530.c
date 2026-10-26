@@ -4,9 +4,9 @@
 
 
 #ifdef NON_MATCHING
-Gfx *func_1501A680(Gfx *);
+Gfx *render_set_color_image(Gfx *);
 Gfx *func_150954E4(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_1511084C(f32 (*)[4], f32, f32, f32);
+void matrix_rotate_ypr(f32 (*)[4], f32, f32, f32);
 void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 extern s32 D_800DC2E0;
 extern Vtx *D_800DC2B8[][2];
@@ -22,13 +22,13 @@ typedef struct {
 } TexDesc_D1D20;
 
 /* P64: draws a scrolling textured quad over the view of player D_80082FA4 (word 0 = player index, half +2 = a
- * parameter of func_1501A490): texture, pipe sync, other modes and combiner, func_1501A490 / func_1501A680,
+ * parameter of render_set_scissor): texture, pipe sync, other modes and combiner, render_set_scissor / render_set_color_image,
  * the texture load (func_150954E4), then the player's view matrix (D_800BE628[p] +0xBC, 0x180-byte records)
- * multiplied by a Z rotation `angle` (func_1511084C) into the frame's Mtx D_800DC2E0[p * 2 + D_800BE9C0],
+ * multiplied by a Z rotation `angle` (matrix_rotate_ypr) into the frame's Mtx D_800DC2E0[p * 2 + D_800BE9C0],
  * D_80089810 as the projection, perspective normalisation D_800BE628[p] +0xB8 and the 4 vertices
  * D_800DC2B8[p][D_800BE9C0] whose t coordinates are scrolled by `scroll` * 81 (top / bottom rows depend on the
  * level D_800BE9F0: 0x32 / 0x33 / 0x3F use -0x62 / 0x27, else -0x13 / 0x65), drawn as two triangles. */
-/* P243: D_80089578 camera callback: takes the dispatcher's 8 arguments (func_15110420 passes gdl, x, y, z, yaw, pitch,
+/* P243: D_80089578 camera callback: takes the dispatcher's 8 arguments (view_background_draw passes gdl, x, y, z, yaw, pitch,
  * roll, handle); only yaw (= scroll) and roll (= angle) are used. Was 7 arguments with s32 x / y / z / pitch: same o32
  * slots, but a wasm signature mismatch through the table. */
 Gfx *func_150D1D20(Gfx *gdl, f32 x, f32 y, f32 z, f32 scroll, f32 pitch, f32 angle, s32 handle) {
@@ -60,11 +60,11 @@ Gfx *func_150D1D20(Gfx *gdl, f32 x, f32 y, f32 z, f32 scroll, f32 pitch, f32 ang
     gdl->words.w0 = 0xE7000000; gdl->words.w1 = 0; gdl++;             /* gDPPipeSync */
     gdl->words.w0 = 0xEF082C0F; gdl->words.w1 = 0x0F0A4004; gdl++;    /* gDPSetOtherMode */
     gdl->words.w0 = 0xFCFFFFFF; gdl->words.w1 = 0xFFFCF279; gdl++;    /* gDPSetCombineMode */
-    gdl = (Gfx *)func_1501A490((s32)gdl, ((s16 *)&D_80082FA4)[1], 0, 0, 0, 0);
-    gdl = func_1501A680(gdl);
+    gdl = (Gfx *)render_set_scissor((s32)gdl, ((s16 *)&D_80082FA4)[1], 0, 0, 0, 0);
+    gdl = render_set_color_image(gdl);
     gdl = func_150954E4(gdl, &tex, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
 
-    func_1511084C(rot, 0.0f, 0.0f, angle);
+    matrix_rotate_ypr(rot, 0.0f, 0.0f, angle);
     p = D_80082FA4;
     player = (u8 *)D_800BE628 + p * 0x180;
     func_150A7A48(rot, (f32 (*)[4])(player + 0xBC), view);

@@ -33,7 +33,7 @@ static void ict_check(const char *what, u32 got, u32 want) {
 }
 static u32 fbits(f32 f) { union { f32 f; u32 u; } x; x.f = f; return x.u; }
 
-/* P29: func_15110420's camera callback site (port P28, game_eu_13DC30.c:104):
+/* P29: view_background_draw's camera callback site (port P28, game_eu_13DC30.c:104):
  *   gdl = D_80089578[D_800B0DF0->unk8](gdl, x, y, z, yaw, pitch, roll, handle);
  * typed Gfx *(*)(Gfx *, f32 x6, s32), i.e. the wasm site i:iffffffi. o32 (int first argument): the 3 first
  * floats travel as bits in a1..a3, the rest on the stack, so a C callee written with int parameters must

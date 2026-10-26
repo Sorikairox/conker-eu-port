@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_150F7330(u8 *arg0) {
+/* was func_150F7330 */
+void glow_pair_post_remove_event(u8 *arg0) {
     struct {
         u8 *unk0;
         u8 unk4;
@@ -63,7 +64,8 @@ typedef struct {
 // 0, 0, ..., +0x74 = 0} to its +0x28, then spawns two func_151307F0 glow particles (flags 0x4417, life 300, size
 // 1511, sprite 100, mode 0x64C000, the second one red instead of blue in colour[4..7]) and stores them at the
 // record's fx[0] / fx[1]. Returns the new object (NULL when the alloc fails).
-void *func_150F7364(struct127 *obj) {
+/* was func_150F7364 */
+void *glow_pair_spawn(struct127 *obj) {
     Rec7364 rec;
     Tmpl7364 t;
     struct260 *o;
@@ -135,18 +137,19 @@ void *func_150F7364(struct127 *obj) {
     return o;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_124B40/func_150F7364.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_124B40/glow_pair_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
 extern f32 D_800A1F84;
 extern f32 D_800A1F88;
 void func_1502ED88(u8 *, s32, s32, s32, s32, s32, s32);
-s32 func_1506196C(s32, s32);
+s32 obj_get_player_alpha(s32, s32);
 s32 func_15081A90(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800D9E70;
 
-void func_150F75EC(u8 *arg0) {
+/* was func_150F75EC */
+void glow_pair_update(u8 *arg0) {
     struct {
         s32 u60;
         u8 pad64[0x8];
@@ -208,7 +211,7 @@ void func_150F75EC(u8 *arg0) {
                 (*(s8 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0xC))) + 0x74)) = 3;
                 return;
             }
-            if (func_1506196C((*(s32 *)((u8 *)temp_s1 + 0x10)), 0) < 0xFF) {
+            if (obj_get_player_alpha((*(s32 *)((u8 *)temp_s1 + 0x10)), 0) < 0xFF) {
                 (*(s8 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 8))) + 0x74)) = -1;
                 (*(s8 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0xC))) + 0x74)) = 3;
                 return;
@@ -223,13 +226,14 @@ block_16:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_124B40/func_150F75EC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_124B40/glow_pair_update.s")
 #endif
 #ifdef NON_MATCHING
 // linked_obj_event_3e: event handler of an object whose link record sits at +0x28 ({ s32 id, u8 key }): event 0x3E removes the
 // object (node_destroy) when the event's record matches by id or by key; any other event goes to the common
 // handler func_15149514.
-void func_150F7890(struct102 *obj, u8 *ev, u8 type) {
+/* was func_150F7890 */
+void glow_pair_handle_event(struct102 *obj, u8 *ev, u8 type) {
     u8 *link = (u8 *) obj + 0x28;
 
     if (type == 0x3E) {
@@ -241,11 +245,12 @@ void func_150F7890(struct102 *obj, u8 *ev, u8 type) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_124B40/func_150F7890.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_124B40/glow_pair_handle_event.s")
 #endif
 
 s32 func_1514EDF0(s32, s32);
-void func_150F791C(s32 arg0) {
+/* was func_150F791C */
+void glow_pair_free_particles(s32 arg0) {
     s32 *p;
     s32 i;
     struct102 *a;
@@ -262,12 +267,14 @@ void func_150F791C(s32 arg0) {
     func_1514EDF0(arg0, *p);
 }
 
-void func_150F798C(void *arg0) {
-    func_150F791C(arg0);
+/* was func_150F798C */
+void glow_pair_retire(void *arg0) {
+    glow_pair_free_particles(arg0);
     func_1514933C(arg0);
 }
 
-void func_150F79B8(void *arg0) {
-    func_150F791C(arg0);
+/* was func_150F79B8 */
+void glow_pair_delete(void *arg0) {
+    glow_pair_free_particles(arg0);
     func_15149368(arg0);
 }

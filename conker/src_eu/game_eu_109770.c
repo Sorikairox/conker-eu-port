@@ -12,7 +12,8 @@ extern u8 D_800908C4[];
 // spark_effect_on_event: event effect for obj. mode 0: starts emitter kind 1 on obj (func_15196438), a spark burst
 // (func_151534E0 spec at x 177.9 / z -1708), sound effect 0x1E (func_151491F4) and a sprite burst (func_15153808 spec,
 // D_800908C4 animation); mode 1: emitter kind 2 only; other modes and a NULL obj do nothing. flag goes to every call.
-void func_150DBF60(u8 *obj, s32 mode, u8 flag) {
+/* was func_150DBF60 */
+void spark_effect_on_event(u8 *obj, s32 mode, u8 flag) {
     struct {
         f32 x, y, z;            // 0x00
         f32 u0C, u10;           // 0x0C
@@ -104,13 +105,14 @@ void func_150DBF60(u8 *obj, s32 mode, u8 flag) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/func_150DBF60.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/spark_effect_on_event.s")
 #endif
 
 #ifdef NON_MATCHING
 void func_151534E0(u8 *arg0, s32 arg1);
 
-void func_150DC1E0(u8 *arg0) {
+/* was func_150DC1E0 */
+void spark_burst_handler(u8 *arg0) {
     struct {
         f32 u18;
         f32 u1C;
@@ -176,7 +178,7 @@ void func_150DC1E0(u8 *arg0) {
     func_151534E0((u8 *) &sp.u18, (*(u8 *)((u8 *)arg0 + 0xC)));   /* the callee never reads a2 */
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/func_150DC1E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/spark_burst_handler.s")
 #endif
 #ifdef NON_MATCHING
 extern f32 D_800A1028, D_800A102C, D_800A1030, D_800A1034, D_800A1038, D_800A103C, D_800A1040, D_800A1044, D_800A1048,
@@ -191,8 +193,9 @@ struct127 *func_15083E90(u8 arg0);
 // and fills its 0x11C-byte data (rec + 0x98). Presets 0 / 5 use the D_80090778 animation and positions of their own;
 // presets 1..4 the D_800907C4 one, placed by the object func_15083E90(6) (y 736; z depends on kind, the x / z pair
 // and +0x24 on whether that object's +0x84 is 6). Returns the record, NULL for an unknown preset, a missing
-// object or a full pool. arg1 is unused (func_150DE508 passes its record).
-u8 *func_150DC2F0(u8 kind, s32 arg1) {
+// object or a full pool. arg1 is unused (fountain_start_preset passes its record).
+/* was func_150DC2F0 */
+u8 *item_effect_spawn(u8 kind, s32 arg1) {
     struct {
         f32 u00; u8 u04; s16 u06; f32 u08; u8 u0C; s16 u0E;
         f32 pos[2];             // 0x10: x / z of the spec
@@ -443,12 +446,12 @@ u8 *func_150DC2F0(u8 kind, s32 arg1) {
     return rec;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/func_150DC2F0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/item_effect_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-/* Shared by func_150DCAD8 / func_150DD420 / func_150DDBC0 (the fountain effect of func_150DC2F0). */
-/* The 0x11C-byte effect data of func_150DC2F0 (obj +0x98); same layout as its local `d`. */
+/* Shared by fountain_step / fountain_emit / fountain_draw (the fountain effect of item_effect_spawn). */
+/* The 0x11C-byte effect data of item_effect_spawn (obj +0x98); same layout as its local `d`. */
 typedef struct {
     f32 u00; u8 u04; s16 u06; f32 u08; u8 u0C; s16 u0E;
     f32 pos[2];             /* 0x10: emitter x / z */
@@ -502,7 +505,7 @@ void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 u8 *impact_spark_spawn(f32 *, f32 *, f32, s16, u8, f32, s32, u8, f32, f32, u8, u8, s32, s16, s16, s32, u8, s32);
 
 // fountain_step: step handler 4 of D_8008A5A0 (`s32 (u8 *)`, func_15147FF0's per-frame step) for the effect of
-// func_150DC2F0. Moves the water points of the ring obj +0x94 (see func_150DD420) from the newest back to the oldest:
+// item_effect_spawn. Moves the water points of the ring obj +0x94 (see fountain_emit) from the newest back to the oldest:
 // vy (+0xC) gains d +0x18 per second, y follows. A point that drops below the water level d +0x24 lands: it makes
 // sprites (impact_spark_spawn, counter d +0xA0 / rate +0x9C; half alpha and tint 7 when d +0x41 is 0x18), drops
 // (node_spawn_sprite, counter +0xD0 / rate +0xCC) and splash rings (sprite_fx_spawn_quad, counter +0x108 / rate +0x104) around
@@ -510,7 +513,8 @@ u8 *impact_spark_spawn(f32 *, f32 *, f32, s16, u8, f32, s32, u8, f32, f32, u8, u
 // in (alpha 0 / 0x3F / 0x7F / 0xBE). When d +0x116 is a sound id it is replayed (func_10010F30, id + rand % 10)
 // whenever the countdown +0x114 runs out. obj +0x54..+0x5C gets the oldest point (0 when the ring is empty).
 // Always returns 1.
-s32 func_150DCAD8(u8 *obj) {
+/* was func_150DCAD8 */
+s32 fountain_step(u8 *obj) {
     FountainFx *d = *(FountainFx **) (obj + 0x98);
     u8 *pts = *(u8 **) (obj + 0x94);
     FountainDrop drop;
@@ -536,14 +540,14 @@ s32 func_150DCAD8(u8 *obj) {
                 /* landed: sprites */
                 d->uA0 += d->u9C;
                 while (1.0f < d->uA0) {
-                    speed = func_150ADA68() * d->uB0 + d->uAC;
-                    a = func_150ADA20();
+                    speed = random_float() * d->uB0 + d->uAC;
+                    a = random_int();
                     sinA = angle_byte_cos(a);
                     cosA = angle_byte_cos(a - 0x40);
-                    b = (u32) func_150ADA20() % (d->uAA + 1) + d->uA8;
+                    b = (u32) random_int() % (d->uAA + 1) + d->uA8;
                     sinB = angle_byte_cos(b);
                     cosB = angle_byte_cos(b - 0x40);
-                    r = func_150ADA68() * d->uA4;
+                    r = random_float() * d->uA4;
                     pos[0] = *(f32 *) (pt + 0x0) + r * cosA;
                     pos[1] = d->u24;
                     pos[2] = *(f32 *) (pt + 0x8) + r * sinA;
@@ -551,10 +555,10 @@ s32 func_150DCAD8(u8 *obj) {
                     vel[0] = h * cosA;
                     vel[1] = -speed * cosB;
                     vel[2] = h * sinA;
-                    scale = func_150ADA68();
+                    scale = random_float();
                     alpha = (d->u41 == 0x18) ? 0x7D : 0xFF;
-                    speed2 = func_150ADA68();
-                    t = func_150ADA20();
+                    speed2 = random_float();
+                    t = random_int();
                     tint = (d->u41 == 0x18) ? 7 : 2;
                     impact_spark_spawn(pos, vel, scale * d->uC0 + d->uBC, d->uC4, alpha, speed2 * d->uB8 + d->uB4,
                                   (u32) t % (d->uC8 + 1) + d->uC6, 1, D_800A10C0, D_800A10C0, 1, tint, 0, 0x10, 0xF,
@@ -583,23 +587,23 @@ s32 func_150DCAD8(u8 *obj) {
                     drop.y = (s32) d->u24;
                     drop.u28 = d->uE4;
                     do {
-                        speed = func_150ADA68() * d->uE0 + d->uDC;
-                        a = func_150ADA20();
+                        speed = random_float() * d->uE0 + d->uDC;
+                        a = random_int();
                         sinA = angle_byte_cos(a);
                         cosA = angle_byte_cos(a - 0x40);
-                        b = (u32) func_150ADA20() % (d->uDA + 1) + d->uD8;
+                        b = (u32) random_int() % (d->uDA + 1) + d->uD8;
                         sinB = angle_byte_cos(b);
                         cosB = angle_byte_cos(b - 0x40);
-                        r = func_150ADA68() * d->uD4;
+                        r = random_float() * d->uD4;
                         drop.x = (s32) (*(f32 *) (pt + 0x0) + r * cosA);
                         h = speed * sinB;
                         drop.vx = (s32) (h * cosA);
                         drop.z = (s32) (*(f32 *) (pt + 0x8) + r * sinA);
                         drop.vy = (s32) (-speed * cosB);
                         drop.vz = (s32) (h * sinA);
-                        drop.gravity = (u32) func_150ADA20() % (d->uE8 + 1) + d->uE6;
-                        drop.u2A = (u32) func_150ADA20() % (d->uEC + 1) + d->uEA;
-                        drop.size1 = drop.size0 = (s32) (func_150ADA68() * d->uF0 + d->uEE);
+                        drop.gravity = (u32) random_int() % (d->uE8 + 1) + d->uE6;
+                        drop.u2A = (u32) random_int() % (d->uEC + 1) + d->uEA;
+                        drop.size1 = drop.size0 = (s32) (random_float() * d->uF0 + d->uEE);
                         if (node_spawn_sprite(&drop, 0, 0, -1, obj[0xC], obj[1]) == NULL) {
                             more = 0;
                         }
@@ -625,11 +629,11 @@ s32 func_150DCAD8(u8 *obj) {
                     ring.a = 0xFF;
                     ring.u18 = 0x30001;
                     do {
-                        size = func_150ADA68() * d->u110 + d->u10C;
-                        ring.u06 = (func_150ADA20() & 1) ? 0x1E : 0x1D;
-                        r2 = func_150ADA20();
-                        r1 = func_150ADA20();
-                        r0 = func_150ADA20();
+                        size = random_float() * d->u110 + d->u10C;
+                        ring.u06 = (random_int() & 1) ? 0x1E : 0x1D;
+                        r2 = random_int();
+                        r1 = random_int();
+                        r0 = random_int();
                         if (sprite_fx_spawn_quad((s32) &ring, 0, 5, 0, *(f32 *) (pt + 0x0), d->u100, *(f32 *) (pt + 0x8),
                                           size, size, r2, (r0 & 1) + (r1 & 1), 0, 0xFF, 0) == NULL) {
                             more = 0;
@@ -683,8 +687,8 @@ s32 func_150DCAD8(u8 *obj) {
         if (t > 0) {
             d->u114 = t;
         } else {
-            func_10010F30((u32) func_150ADA20() % 10 + d->u116, 0x7FFF, 0x40, 0, 0);
-            d->u114 = func_150ADA20() & 0xC;
+            func_10010F30((u32) random_int() % 10 + d->u116, 0x7FFF, 0x40, 0, 0);
+            d->u114 = random_int() & 0xC;
         }
     }
     if (*(s8 *) (obj + 0x2C) > 0) {
@@ -700,7 +704,7 @@ s32 func_150DCAD8(u8 *obj) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/func_150DCAD8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/fountain_step.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -708,14 +712,15 @@ extern f32 D_800A10C4;
 void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 
 // fountain_emit: emitter handler 4 of D_8008A5DC (`s32 (u8 *)`, func_15147FF0's per-frame step) for the effect of
-// func_150DC2F0. The data d = obj +0x98 swings the emitter around obj +0x10 / +0x18 (angles +0x04 / +0x0C advance
+// item_effect_spawn. The data d = obj +0x98 swings the emitter around obj +0x10 / +0x18 (angles +0x04 / +0x0C advance
 // by a random step per frame, radii +0x00 / +0x08) and moves it there in +0x20 steps (+0x20 grows by rate +0x1C;
 // nothing happens until it passes 0.99999). Each step adds a point to the ring obj +0x94 (0x18 bytes: x, y, z, vy,
 // width, s16 alpha, byte; newest at obj +0x2E, oldest +0x2D, count +0x2C, ring size +0x25) and, while the drop
 // counter +0x68 (rate +0x64) passes 1, sprays drops (node_spawn_sprite) until the pool is full. Once the lifetime +0x118
 // runs out the newest four points fade (alpha 0 / 0x3F / 0x7F / 0xBE), obj +0x30 is cleared (no more emitting) and
 // flag 2 of obj +0x1E dropped. Always returns 1.
-s32 func_150DD420(u8 *obj) {
+/* was func_150DD420 */
+s32 fountain_emit(u8 *obj) {
     FountainFx *d = *(FountainFx **) (obj + 0x98);
     u8 *pts = *(u8 **) (obj + 0x94);
     FountainDrop drop;
@@ -725,8 +730,8 @@ s32 func_150DD420(u8 *obj) {
     s32 more, i;
     u8 *pt;
 
-    d->u04 += ((u32) func_150ADA20() % (d->u06 + 1)) * D_800BE9E4;
-    d->u0C += ((u32) func_150ADA20() % (d->u0E + 1)) * D_800BE9E4;
+    d->u04 += ((u32) random_int() % (d->u06 + 1)) * D_800BE9E4;
+    d->u0C += ((u32) random_int() % (d->u0E + 1)) * D_800BE9E4;
     d->u20 += d->u1C * D_800BE9A4;
     if (D_800A10C4 < d->u20) {
         inv = 1.0f / d->u20;
@@ -761,11 +766,11 @@ s32 func_150DD420(u8 *obj) {
                     drop.y = (s32) *(f32 *) (obj + 0x14);
                     drop.u28 = d->u7C;
                     do {
-                        speed = func_150ADA68() * d->u78 + d->u74;
-                        a = func_150ADA20();
+                        speed = random_float() * d->u78 + d->u74;
+                        a = random_int();
                         sinA = angle_byte_cos(a);
                         cosA = angle_byte_cos(a - 0x40);
-                        b = (u32) func_150ADA20() % (d->u72 + 1) + d->u70;
+                        b = (u32) random_int() % (d->u72 + 1) + d->u70;
                         sinB = angle_byte_cos(b);
                         cosB = angle_byte_cos(b - 0x40);
                         drop.x = (s32) (*(f32 *) (obj + 0x10) + d->u6C * cosA);
@@ -774,9 +779,9 @@ s32 func_150DD420(u8 *obj) {
                         drop.vx = (s32) (h * cosA);
                         drop.vy = (s32) (-speed * cosB);
                         drop.vz = (s32) (h * sinA);
-                        drop.gravity = (s32) (func_150ADA68() * d->u80 + d->u7E);
-                        drop.u2A = (u32) func_150ADA20() % (d->u86 + 1) + d->u84;
-                        drop.size1 = drop.size0 = (s32) (func_150ADA68() * d->u8C + d->u88);
+                        drop.gravity = (s32) (random_float() * d->u80 + d->u7E);
+                        drop.u2A = (u32) random_int() % (d->u86 + 1) + d->u84;
+                        drop.size1 = drop.size0 = (s32) (random_float() * d->u8C + d->u88);
                         if (node_spawn_sprite(&drop, 0, 0, -1, obj[0xC], obj[1]) == NULL) {
                             more = 0;
                         }
@@ -791,11 +796,11 @@ s32 func_150DD420(u8 *obj) {
                 *(f32 *) (pt + 0x4) = *(f32 *) (obj + 0x14);
                 *(f32 *) (pt + 0x8) = z;
                 *(f32 *) (pt + 0xC) = d->u38;
-                d->u34 += (u32) func_150ADA20() % (d->u36 + 1);
+                d->u34 += (u32) random_int() % (d->u36 + 1);
                 *(f32 *) (pt + 0x10) = angle_byte_cos(d->u34 - 0x40) * d->u30 + d->u2C;
                 *(s16 *) (pt + 0x14) = d->u29;
                 pt[0x16] = d->u40;
-                d->u40 = d->u40 + d->u3C + (u32) func_150ADA20() % (d->u3E + 1);
+                d->u40 = d->u40 + d->u3C + (u32) random_int() % (d->u3E + 1);
                 *(f32 *) (pt + 0xC) += d->u18 * dt;
                 *(f32 *) (pt + 0x4) += *(f32 *) (pt + 0xC) * dt;
                 (*(s8 *) (obj + 0x2E))++;
@@ -855,7 +860,7 @@ s32 func_150DD420(u8 *obj) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/func_150DD420.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/fountain_emit.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -886,14 +891,15 @@ u8 *func_15142FBC(s32, s32, s32, s8 *);
     } while (0)
 
 // fountain_draw: draw handler 4 of D_8008A644 (`s32 (u8 *, s32 gfx, s16 view)`, func_151481BC) for the effect of
-// func_150DC2F0: the water points (obj +0x94, see func_150DD420) as one strip from the newest to the oldest, each
+// item_effect_spawn: the water points (obj +0x94, see fountain_emit) as one strip from the newest to the oldest, each
 // point widened by its +0x10 sideways to the camera (D_800DD608 / D_800DD618[view]); while the effect still emits
 // (obj +0x1E flag 2) the strip starts at the object itself. Texture D_80090F10[d +0x41] (s from the point byte
 // +0x16; where s grows backwards the last pair is repeated with s - 0x4000 so the texture wraps), colour d +0x28,
 // combine / render mode from the nibbles of d +0x42. Vertices come from func_151D6310. Returns the display list
 // end; draws nothing with fewer than 2 points. The asm takes the head's alpha (emitting case) through an index it
 // never sets (stack slot sp+0x98): this C uses the newest point there.
-s32 func_150DDBC0(u8 *obj, s32 gfx, s16 view) {
+/* was func_150DDBC0 */
+s32 fountain_draw(u8 *obj, s32 gfx, s16 view) {
     FountainFx *d;
     u8 *pts;
     u8 *v;
@@ -1012,10 +1018,11 @@ s32 func_150DDBC0(u8 *obj, s32 gfx, s16 view) {
 }
 #undef FOUNTAIN_VTX
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/func_150DDBC0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/fountain_draw.s")
 #endif
 
-void func_150DE450(u8 *arg0) {
+/* was func_150DE450 */
+void fountain_spawn_by_marker(u8 *arg0) {
     struct260 *o;
     o = func_151491F4(0x64, 2, -1, 1U, 0U, 1, 0xFFU, 0);
     if (o != NULL) {
@@ -1029,11 +1036,13 @@ void func_150DE450(u8 *arg0) {
     }
 }
 
-void func_150DE508(struct102 *arg0) {
-    func_150DC2F0(arg0->unk28, arg0);
+/* was func_150DE508 */
+void fountain_start_preset(struct102 *arg0) {
+    item_effect_spawn(arg0->unk28, arg0);
 }
 
-s32 func_150DE52C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
+/* was func_150DE52C */
+s32 fountain_splash_sprite_big(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
 
     u8 *sp8C;
     struct {
@@ -1061,9 +1070,9 @@ s32 func_150DE52C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
 
     sp8C = (*(u8 **)((u8 *)arg0 + 0x98));
     sp.u88 = (*(s32 *)((u8 *)arg0 + 0x94));
-    size = (func_150ADA68() * 70.0f) + 10.0f;
+    size = (random_float() * 70.0f) + 10.0f;
     (*(s8 *)((u8 *)sp8C + 0x20)) = 4;
-    switch (func_150ADA20() & 1) {
+    switch (random_int() & 1) {
     case 0:
         sp.u66 = 0x1D;
         break;
@@ -1082,13 +1091,14 @@ s32 func_150DE52C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     sp.u74 = 0;
     sp.u75 = 0xFF;
     sp.u78 = 0x30002;
-    r50 = func_150ADA20();
-    r54 = func_150ADA20();
-    sprite_fx_spawn_cam((s32) &sp.u60, 5U, 0U, arg5, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][0], arg4, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][2], size, size, (u8) (r50 & 0xFF), (u8) ((func_150ADA20() & 1) + (r54 & 1)), 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+    r50 = random_int();
+    r54 = random_int();
+    sprite_fx_spawn_cam((s32) &sp.u60, 5U, 0U, arg5, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][0], arg4, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][2], size, size, (u8) (r50 & 0xFF), (u8) ((random_int() & 1) + (r54 & 1)), 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
     return 1;
 }
 
-s32 func_150DE6AC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
+/* was func_150DE6AC */
+s32 fountain_splash_sprite_small(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
 
     u8 *sp8C;
     struct {
@@ -1116,9 +1126,9 @@ s32 func_150DE6AC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
 
     sp8C = (*(u8 **)((u8 *)arg0 + 0x98));
     sp.u88 = (*(s32 *)((u8 *)arg0 + 0x94));
-    size = (func_150ADA68() * 10.0f) + 10.0f;
+    size = (random_float() * 10.0f) + 10.0f;
     (*(s8 *)((u8 *)sp8C + 0x20)) = 4;
-    switch (func_150ADA20() & 1) {
+    switch (random_int() & 1) {
     case 0:
         sp.u66 = 0x1B;
         break;
@@ -1137,13 +1147,14 @@ s32 func_150DE6AC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     sp.u74 = 0;
     sp.u75 = 0xAA;
     sp.u78 = 0x30002;
-    r50 = func_150ADA20();
-    r54 = func_150ADA20();
-    sprite_fx_spawn_cam((s32) &sp.u60, 5U, 0U, arg5, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][0], arg4, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][2], size, size, (u8) (r50 & 0xFF), (u8) ((func_150ADA20() & 1) + (r54 & 1)), 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+    r50 = random_int();
+    r54 = random_int();
+    sprite_fx_spawn_cam((s32) &sp.u60, 5U, 0U, arg5, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][0], arg4, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][2], size, size, (u8) (r50 & 0xFF), (u8) ((random_int() & 1) + (r54 & 1)), 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
     return 1;
 }
 
-s32 func_150DE824(struct102 *arg0) {
+/* was func_150DE824 */
+s32 sprite_fade_in_age_b(struct102 *arg0) {
     s16 temp_v0 = arg0->unk1C;
     if (temp_v0 < 32) {
         arg0->unk28 = temp_v0 * 8;
@@ -1151,7 +1162,8 @@ s32 func_150DE824(struct102 *arg0) {
     return 1;
 }
 
-void func_150DE844(s16 *arg0) {
+/* was func_150DE844 */
+void sprite_shrink_step(s16 *arg0) {
     arg0[0x34 / 2] -= 0x1A;
     arg0[0x36 / 2] -= 0x1A;
     if ((arg0[0x34 / 2] < 10) || (arg0[0x36 / 2] < 10)) {

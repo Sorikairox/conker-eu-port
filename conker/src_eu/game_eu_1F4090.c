@@ -128,19 +128,19 @@ void func_151C62D0(u8 *obj, u8 side, s32 aimed_, u8 *att, s32 kind, s32 flag, s3
                   (u8 *) start);
     if (*(u8 **) (obj + 0x318) != NULL) {
         snd.unk0 = 1;
-        snd.unk2 = (u32) func_150ADA20() % 11 + 11;
+        snd.unk2 = (u32) random_int() % 11 + 11;
         snd.unk5 = 1 << (*(u8 **) (obj + 0x318))[0x23D];
-        func_150ADA20();
+        random_int();
         snd.unk4 = 8;
         snd.unk6 = -1;
         func_151D8E18(&snd, 0, 255, 1);
     }
     if (*(u8 **) (obj + 0x1D4) != NULL && (obj[0x74] & 0xF) != 15) {
-        if (aimed || (D_80082FA0 < 2 && (func_150ADA20() & 1))) {
+        if (aimed || (D_80082FA0 < 2 && (random_int() & 1))) {
             func_151D44C4((u8 *) muzzle, flag, arg6);
         }
         if (aimed || D_80082FA0 < 2) {
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 func_151D49B8((u8 *) second, (u8 *) dir, (s32) bone, obj, 1.0f, flag, arg6);
             }
         }
@@ -148,13 +148,13 @@ void func_151C62D0(u8 *obj, u8 side, s32 aimed_, u8 *att, s32 kind, s32 flag, s3
         for (n = D_800DCE50; n != 0; n--) {
             mask |= 1 << n;
         }
-        if (aimed || !(func_150ADA20() & mask)) {
+        if (aimed || !(random_int() & mask)) {
             func_151C7320((s32) obj, side, (s32) muzzle, kind, flag, arg6);
         }
     }
-    r1 = func_150ADA68();
-    r2 = func_150ADA68();
-    r = func_150ADA20();
+    r1 = random_float();
+    r2 = random_float();
+    r = random_int();
     func_151C284C((u8 *) start, (u8 *) aim, hit244, hit240, 1, 0, 300.0f, D_800AAFE0, r1 * 10.0f + 25.0f,
                                r2 * 150.0f + 400.0f, 50.0f, r % 156 + 100, obj, !aimed, !aimed, !aimed, 8, !aimed, 1,
                                0, 26, 0.0f, 255, -1, 0, flag, arg6);
@@ -210,7 +210,7 @@ void func_15145EA4(f32 **, f32 **, void *, s32);
 void func_151D44C4(u8 *, u8, s32);
 void func_151D49B8(u8 *, u8 *, s32, u8 *, f32, u8, s32);
 void func_151C7320(s32 arg0, u8 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5);
-void func_150F79F0(f32 *, void *, void *, void *, u8, u8 *, f32, f32, f32, u8 *, u8, u8, u8, u8, s32, s8, s32, u8, u8, s32);
+void beam_light_effect_spawn(f32 *, void *, void *, void *, u8, u8 *, f32, f32, f32, u8 *, u8, u8, u8, u8, s32, s8, s32, u8, u8, s32);
 extern u32 D_800AAEE0[];  /* [2 kind] bone matrix byte offset */
 extern u8 D_800AAEE8[];   /* [2 kind] f32[3] muzzle point */
 extern u8 D_800AAF18[];   /* [2 kind] f32[3] second point */
@@ -224,7 +224,7 @@ extern f32 D_800AAFEC;
 // kind's three D_800AAEE8 / D_800AAF18 / D_800AAF30 points to world space by the bone matrix, spawns the muzzle
 // puff (func_151D44C4), the tracer from the second point along (third - second) (func_151D49B8) and the shot
 // (func_151C7320); when the object's link 0x1B record is active (+0x9C bit 0) with a light at +0x91, spawns its
-// light effect (func_150F79F0) from the muzzle with a copy of the record's 0x64-byte light block whose position
+// light effect (beam_light_effect_spawn) from the muzzle with a copy of the record's 0x64-byte light block whose position
 // (+0x2C) is the record's point (+0x40), or for light kinds >= 2 part of the way from the muzzle to it
 s32 func_151C6A28(u8 *obj, u8 arg1, u8 arg2, s32 arg3) {
     f32 *src[3];
@@ -290,7 +290,7 @@ s32 func_151C6A28(u8 *obj, u8 arg1, u8 arg2, s32 arg3) {
     *(f32 *)(blk + 0x2C) = at[0];
     *(f32 *)(blk + 0x30) = at[1];
     *(f32 *)(blk + 0x34) = at[2];
-    func_150F79F0(muzzle, NULL, NULL, NULL, 0, blk, D_800AAFE8, D_800AAFEC, 500.0f, obj, 0, (light[0x59] < 2) ? 1 : 0, 1,
+    beam_light_effect_spawn(muzzle, NULL, NULL, NULL, 0, blk, D_800AAFE8, D_800AAFEC, 500.0f, obj, 0, (light[0x59] < 2) ? 1 : 0, 1,
                   0, 0x1A, -1, 0, 1, arg2, arg3);
     return 0;
 }
@@ -299,9 +299,9 @@ s32 func_151C6A28(u8 *obj, u8 arg1, u8 arg2, s32 arg3) {
 #endif
 
 #ifdef NON_MATCHING /* P262: the C definition's exact types (game_eu_1306B0) */
-void *func_151030B8(u8 *, u8, f32 *, f32 *, f32 *, s16, u8, f32, u8 *, u8, s32, s16, u8, s32);
+void *attached_particle_spawn(u8 *, u8, f32 *, f32 *, f32 *, s16, u8, f32, u8 *, u8, s32, s16, u8, s32);
 #else
-s32 func_151030B8(s32, u8, u8 *, u8 *, f32 *, s32, s32, f32, s32, s32, s32, s32, s32, s32);
+s32 attached_particle_spawn(s32, u8, u8 *, u8 *, f32 *, s32, s32, f32, s32, s32, s32, s32, s32, s32);
 #endif
 extern u32 D_800AAEE0[];
 extern u8 D_800AAEE8[];
@@ -317,12 +317,12 @@ void func_151C7320(s32 arg0, u8 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5)
   f32 v[2];
   f32 t; // fakematch: named rand temp (s162 recipe: named float temps)
   s32 r[2];
-  v[1] = (func_150ADA68() * D_800AAFF0) + D_800AAFF4;
-  v[0] = (func_150ADA68() * D_800AAFF8) + D_800AAFFC;
-  r[0] = func_150ADA20();
-  r[1] = func_150ADA20();
-  t = func_150ADA68();
-  func_151030B8((u8 *)arg0, D_800AAEE0[arg1] >> 6, (f32 *)(D_800AAEE8 + (arg1 * 12)), (f32 *)(D_800AAF00 + (arg1 * 12)), v, (r[0] & 3) + 6, 0xFF, (t * 270.0f) + D_800AB000, (u8 *)arg2, 0xFF, 0, arg3, arg4, arg5);
+  v[1] = (random_float() * D_800AAFF0) + D_800AAFF4;
+  v[0] = (random_float() * D_800AAFF8) + D_800AAFFC;
+  r[0] = random_int();
+  r[1] = random_int();
+  t = random_float();
+  attached_particle_spawn((u8 *)arg0, D_800AAEE0[arg1] >> 6, (f32 *)(D_800AAEE8 + (arg1 * 12)), (f32 *)(D_800AAF00 + (arg1 * 12)), v, (r[0] & 3) + 6, 0xFF, (t * 270.0f) + D_800AB000, (u8 *)arg2, 0xFF, 0, arg3, arg4, arg5);
 }
 
 void *memcpy(void *, const void *, s32);

@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-s32 func_1506196C(struct127 *, s32);
+s32 obj_get_player_alpha(struct127 *, s32);
 void func_1502E228(s32 arg0, s32 arg1);
 void func_1502C8F8(s32 arg0);
 void func_1502FED8(struct127 *arg0);
@@ -78,13 +78,13 @@ block_8:
                         }
                     } else if (arg1 == 1) {
                         if ((temp_v0 != 7) && (temp_v0 != 1)) {
-                            if ((temp_v0 == 0) && (func_1506196C(var_s0, arg2) < 0xFF)) {
+                            if ((temp_v0 == 0) && (obj_get_player_alpha(var_s0, arg2) < 0xFF)) {
 
                             } else {
                                 goto block_27;
                             }
                         }
-                    } else if ((arg1 != 2) || (temp_v0 == 2) || ((temp_v0 != 7) && ((temp_v0 == 0) || (temp_v0 == 1)) && ((temp_v0 != 0) || (func_1506196C(var_s0, arg2) != 0xFF)))) {
+                    } else if ((arg1 != 2) || (temp_v0 == 2) || ((temp_v0 != 7) && ((temp_v0 == 0) || (temp_v0 == 1)) && ((temp_v0 != 0) || (obj_get_player_alpha(var_s0, arg2) != 0xFF)))) {
 block_27:
                         if (var_s0->unk5 == 2) {
                             var_v0 = func_1502C6F8(var_s2, var_s1, arg2);
@@ -259,8 +259,8 @@ void func_1502C1D4(void) {
 
 #ifdef NON_MATCHING
 s32 func_15022A8C(struct127 *);
-s32 func_1506196C(struct127 *, s32);
-struct102 *func_1510DEF0(s32, struct127 *, s32, s32, s32);
+s32 obj_get_player_alpha(struct127 *, s32);
+struct102 *blob_shadow_create(s32, struct127 *, s32, s32, s32);
 extern u8 D_800C3A7A;
 
 void func_1502C494(void) {
@@ -279,7 +279,7 @@ void func_1502C494(void) {
                 var_s0 = 0;
                 if (D_80082FA0 >= 0) {
                     do {
-                        if (func_1506196C(var_s1, var_s0) != 0) {
+                        if (obj_get_player_alpha(var_s1, var_s0) != 0) {
                             var_s2 = 1;
                         }
                         var_s0 += 1;
@@ -294,7 +294,7 @@ void func_1502C494(void) {
                         var_a2 = 2;
                         var_v0 = 1;
                     }
-                    var_s1->unk2D4 = func_1510DEF0(0, var_s1, var_a2, 0, var_v0);
+                    var_s1->unk2D4 = blob_shadow_create(0, var_s1, var_a2, 0, var_v0);
                 }
             } else {
                 temp_a0 = var_s1->unk2D4;
@@ -489,9 +489,9 @@ extern s32 D_800DFBF0;
 extern u8 D_800DFBF4;
 
 /* P43: one object of the frame DL (object arg1, part arg2, mode arg3). Skipped (returns gdl) when the object is
- * culled, part bit arg2 of +0x74 is set, func_1506196C(obj, part) == 0 or +0x1D4 == NULL. Colour block col[6]
+ * culled, part bit arg2 of +0x74 is set, obj_get_player_alpha(obj, part) == 0 or +0x1D4 == NULL. Colour block col[6]
  * (sp40): func_1502D83C fills it, func_1502D920 adjusts it when D_800B0DF0->+0x3E != 0 (else col[3] = 0xFF);
- * col[5] = +0x1C8 (func_1502C9D8 path) or from func_15084E34 (modes 3 / 4 / 5). Alpha = func_1506196C, 0xFF when the
+ * col[5] = +0x1C8 (func_1502C9D8 path) or from func_15084E34 (modes 3 / 4 / 5). Alpha = obj_get_player_alpha, 0xFF when the
  * object's camera record is in mode 0x100 and the part is not +0x127; mode 4 scales it by D_800DFBF4 and draws
  * D_800DFBF0 instead of +0x1D4. The DL from func_1502CFEC is dropped (gdl returned) when it overflows
  * D_800BEFC4 commands of the frame buffer D_800BEDE8[D_800BE9C0]. */
@@ -510,7 +510,7 @@ u8 *func_1502CC64(u8 *gdl, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
     if ((rec[0x74] & (1 << arg2)) == (1 << arg2)) {
         return gdl;
     }
-    if (func_1506196C((struct127 *)rec, arg2) == 0) {
+    if (obj_get_player_alpha((struct127 *)rec, arg2) == 0) {
         return gdl;
     }
     if (*(s32 *)(rec + 0x1D4) == 0) {
@@ -528,7 +528,7 @@ u8 *func_1502CC64(u8 *gdl, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
     } else {
         col[3] = 0xFF;
     }
-    alpha = func_1506196C((struct127 *)rec, arg2);
+    alpha = obj_get_player_alpha((struct127 *)rec, arg2);
     if (alpha < 0xFF) {
         cam = *(u8 **)(rec + 0x318);
         if (cam != NULL && *(s32 *)(cam + 0x2C) == 0x100 && arg2 != rec[0x127]) {
@@ -833,9 +833,9 @@ void func_1502D920(u8 *rec, s32 *col, s32 view) {
 #endif
 
 #ifdef NON_MATCHING
-void func_1505DFDC(struct127 *arg0);
+void obj_anim_reset(struct127 *arg0);
 /* P51: per-frame key-frame copy for the skeleton evaluator func_150A86B0. For the animation state a (arg0, or
- * object arg1's +0x2D0 after func_1505DFDC when its animation +0x84 is 0xFFFF) and each active slot k (2 with a
+ * object arg1's +0x2D0 after obj_anim_reset when its animation +0x84 is 0xFFFF) and each active slot k (2 with a
  * blend weight +0x3C > 0; slot k's header byte +0x45 = bytes per key frame, +0x48 = key-frame step - 1, at
  * +0x40 + k * 0x1D0): the key frame of frame time +8 + 4k (frame count +0x18 + 4k) and the next one are DMA'd from
  * the stream (ROM +0x28 + 4k, word-aligned down) to the next 16-byte boundary of arg2. +0x30 + 4k = the key frame,
@@ -857,7 +857,7 @@ void func_1502DB14(u8 *arg0, s32 arg1, s32 arg2) {
 
     if (obj != NULL) {
         if (*(u16 *)(obj + 0x84) == 0xFFFF) {
-            func_1505DFDC((struct127 *)obj);
+            obj_anim_reset((struct127 *)obj);
         }
         a = *(u8 **)(obj + 0x2D0);
     }
@@ -1063,8 +1063,8 @@ void func_1502DE74(f32 (*m)[4], s32 arg1) {
 void func_1502DE74(f32 (*mtx)[4], s32 arg1);
 extern s32 D_800C4294;
 /* P48: object arg0's model matrix. Skipped (nothing written) when the object is hidden for every player (+0x74 low
- * nibble 0xF, or every func_1506196C alpha 0), unless it is forced (+0x66 & 0x20, a player-controlled object
- * (+0x31C +0x197), bit arg0 of D_800C4294, or id 0x8A whose func_15072208 target is player-controlled).
+ * nibble 0xF, or every obj_get_player_alpha alpha 0), unless it is forced (+0x66 & 0x20, a player-controlled object
+ * (+0x31C +0x197), bit arg0 of D_800C4294, or id 0x8A whose obj_find_child_nth target is player-controlled).
  * A child (+0x65 = parent index + 1, without +0x101 & 0x10) takes the parent's joint +0x5C matrix (+0x1D4 + 0x40 *
  * joint) with rows 0 / 2 scaled by +0x14C and row 1 by +0x150 (+0x101 & 4: rows normalised first); otherwise
  * func_150A9B0C builds it from the angles (+0xB8, +0x40, +0xC4) and scales, at the position (with +0x101 & 0x10:
@@ -1097,7 +1097,7 @@ void func_1502E228(s32 arg0, s32 arg1) {
         force = 0;
     }
     if (obj[4] == 0x8A) {
-        u8 *t = (u8 *)func_15072208((struct127 *)obj, 0);
+        u8 *t = (u8 *)obj_find_child_nth((struct127 *)obj, 0);
         if (t != NULL && *(u8 **)(t + 0x31C) != NULL && (*(u8 **)(t + 0x31C))[0x197] != 0) {
             force = 0;
         }
@@ -1108,7 +1108,7 @@ void func_1502E228(s32 arg0, s32 arg1) {
         }
         best = 0;
         for (i = 0; i <= D_80082FA4; i++) {
-            a = func_1506196C((struct127 *)obj, i);
+            a = obj_get_player_alpha((struct127 *)obj, i);
             if (best < a) {
                 best = a;
             }
@@ -1188,7 +1188,7 @@ void func_1502E764(void) {
 void func_1502ECEC(s32 arg0, s32 arg1);
 s32 func_15022A8C(struct127 *);
 s32 func_1503FBF4(struct127 *, s32, s32);
-s32 func_1506196C(struct127 *, s32);
+s32 obj_get_player_alpha(struct127 *, s32);
 s32 func_150A6840(s32, s32 *, f32, f32, f32, f32, f32, f32);
 extern u8 D_800C3A7A;
 extern u8 D_800C3A84;
@@ -1198,7 +1198,7 @@ extern s32 D_800DA030;
  * all four bits are set, and when the object is not culled and in an active view group (+0x127 bit of D_800D2340):
  * a child (+0x65 = parent index + 1) copies its parent's mask; else each player's view test func_150A6840
  * (radius from the model header D_800D1C90[id] +0xE / +0x10 and the scales) and the fade distance (+0x10, or
- * 100000 for player-controlled cameras) choose func_1506160C events 8 / 9 / 10 and clear the player's bit.
+ * 100000 for player-controlled cameras) choose obj_fade_command events 8 / 9 / 10 and clear the player's bit.
  * The m2c draft stepped D_800DA030 by 0x100 and D_800DBFF0 by sizeof(struct108) * 0x9A0: both are byte offsets. */
 void func_1502E7B4(s32 arg0) {
     f32 sp7C;
@@ -1310,11 +1310,11 @@ block_37:
                         } else {
                             var_s0_2 = 9;
                         }
-                        func_1506160C(temp_s1, var_s0_2 & 0xFF, 0U, 0U, (u8) var_s2);
+                        obj_fade_command(temp_s1, var_s0_2 & 0xFF, 0U, 0U, (u8) var_s2);
                     } else {
                         temp_s1->unkE.ub[1] |= (1 << (var_s2 & 0x1F)) << 4;
                         var_s0_2 = -1;
-                        func_1506160C(temp_s1, 9U, 0U, 0U, (u8) var_s2);
+                        obj_fade_command(temp_s1, 9U, 0U, 0U, (u8) var_s2);
                     }
                     if ((temp_s1->unkF8 & 0x800000) && (var_s0_2 != 8) && (D_800C35EA != 1) && (func_1503FBF4(temp_s1, var_s2, sp54) != 0)) {
                         var_s3 = 1;
@@ -1323,12 +1323,12 @@ block_37:
                     var_s0_2 = 0xA;
                 }
                 if (var_s0_2 != -1) {
-                    func_1506160C(temp_s1, var_s0_2 & 0xFF, 1U, 0U, (u8) var_s2);
+                    obj_fade_command(temp_s1, var_s0_2 & 0xFF, 1U, 0U, (u8) var_s2);
                 }
                 if (var_s3 == 0) {
                     temp_s1->unk74 &= ~var_s7;
                 }
-                if (func_1506196C(temp_s1, var_s2) == 0) {
+                if (obj_get_player_alpha(temp_s1, var_s2) == 0) {
                     temp_s1->unk74 |= var_s7;
                 }
                 var_s7 *= 2;
@@ -1830,7 +1830,7 @@ void func_1502FC38(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void * func_150C3160(void *, void *);
+void * obj_timer_scroll_tex_dl(void *, void *);
 extern s32 D_800C5758;
 
 u8 *func_1502FCEC(u8 *arg0, s32 arg1) {
@@ -1847,7 +1847,7 @@ u8 *func_1502FCEC(u8 *arg0, s32 arg1) {
     temp_a2 = &D_800CC2D0[arg1];
     temp_v0 = temp_a2->id;
     if ((temp_v0 == 0x89) || (temp_v0 == 0xBA)) {
-        return func_150C3160(var_s0, temp_a2);
+        return obj_timer_scroll_tex_dl(var_s0, temp_a2);
     }
     if (temp_v0 == 0) {
         var_v1 = 0xE;
@@ -1891,7 +1891,7 @@ void func_1507EE9C(struct127 *);
  * P70: pending model switch of an object. +0x1C9 holds the requested entry + 1 of the object's model list
  * +0x2C4 (+0x2C9 entries; 0xFF = entry 0 again). When it differs from the current entry +0x1C8, model
  * list[entry] is set up by func_15083C3C; if that model has another animation set than the object's id
- * (D_800D1588), the animation is restarted (func_1505E650: from +0x84 when it exists in the new set, i.e. below
+ * (D_800D1588), the animation is restarted (obj_start_anim: from +0x84 when it exists in the new set, i.e. below
  * D_800C5A90[model], else from 0) with +0x84 = 0xFFFF. D_800C3638 is cleared around it in mode D_800C35EA == 1.
  * The request +0x1C9 stays set (except 0xFF, which is consumed).
  */
@@ -1928,10 +1928,10 @@ void func_1502FED8(struct127 *obj) {
         anim = obj->unk84.uh;
         if (anim < (u16) D_800C5A90[model]) {
             obj->unk84.uh = 0xFFFF;
-            func_1505E650(obj, anim, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+            obj_start_anim(obj, anim, 1.0f, 0.0f, 0.0f, 0.0f, 0);
         } else {
             obj->unk84.uh = 0xFFFF;
-            func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+            obj_start_anim(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
         }
     }
     if (D_800C35EA == 1) {

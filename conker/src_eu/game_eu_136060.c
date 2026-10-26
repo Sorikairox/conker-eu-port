@@ -8,7 +8,8 @@ s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 void func_1514373C(f32, f32, f32 *, f32 *);
 s32 memcpy(s32, f32 *, s32);
 
-void func_eu_15108850(u8 *arg0) {
+/* was func_eu_15108850 */
+void area_sparkle_emitter_update(u8 *arg0) {
     struct {
         f32 u80;
         f32 u84;
@@ -65,7 +66,7 @@ void func_eu_15108850(u8 *arg0) {
     u8 *temp_v0;
 
     temp_s0 = arg0 + 0x28;
-    (*(f32 *)((u8 *)temp_s0 + 0)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0)) + ((0.030000001f + (func_150ADA68() * 0.010000001f)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s0 + 0)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0)) + ((0.030000001f + (random_float() * 0.010000001f)) * D_800BE9A4));
     if ((*(f32 *)((u8 *)temp_s0 + 0)) > 1.0f) {
         if ((*(u8 *)((u8 *)temp_s0 + 8)) & 1) {
             sp.uB1 = 0x74;
@@ -103,26 +104,26 @@ void func_eu_15108850(u8 *arg0) {
             sp.uAE = 0xFF;
             sp.u90 = 0.0f;
             do {
-                temp_f2 = (func_150ADA68() * 20.0f) + 30.0f;
+                temp_f2 = (random_float() * 20.0f) + 30.0f;
                 temp_f12 = temp_f2 * 0.15f;
                 sp.u80 = temp_f2;
                 sp.u84 = temp_f2;
                 sp.u88 = temp_f12;
                 sp.u8C = temp_f12 * 0.5f;
-                temp_f2_2 = (func_150ADA68() * 500.0f) + 600.0f;
+                temp_f2_2 = (random_float() * 500.0f) + 600.0f;
                 sp.uBC = temp_f2_2;
                 sp.uC0 = temp_f2_2 * 0.5f;
-                func_1514373C(2.0f * (func_150ADA68() * 3.1415927f), (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 4))) + 6)), &sp.uC4, &sp.uCC);
+                func_1514373C(2.0f * (random_float() * 3.1415927f), (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 4))) + 6)), &sp.uC4, &sp.uCC);
                 sp.uC4 += (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 4))) + 0));
                 sp.uCC += (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 4))) + 4));
                 temp_v0 = (*(u8 **)((u8 *)temp_s0 + 4));
-                sp.uC8 = (func_150ADA68() * (f32) (*(s16 *)((u8 *)temp_v0 + 8))) + (f32) (*(s16 *)((u8 *)temp_v0 + 2));
+                sp.uC8 = (random_float() * (f32) (*(s16 *)((u8 *)temp_v0 + 8))) + (f32) (*(s16 *)((u8 *)temp_v0 + 2));
                 var_v0 = 0;
-                if (func_150ADA20() & 1) {
+                if (random_int() & 1) {
                     var_v0 = 0x40;
                 }
                 sp.uEC = var_v0 | 0xC000;
-                sp.uAF = (func_150ADA20() & 0x7F) + 0x80;
+                sp.uAF = (random_int() & 0x7F) + 0x80;
                 temp_v0_2 = func_151307F0(&sp.u94, 2, 0, 0x14, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 if (temp_v0_2 != 0) {
                     memcpy(temp_v0_2 + 0xA8, &sp.u80, 0x14);
@@ -137,12 +138,13 @@ void func_eu_15108850(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_136060/func_eu_15108850.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_136060/area_sparkle_emitter_update.s")
 #endif
 #ifdef NON_MATCHING
 extern f32 D_800A2830;
 extern f32 D_800A2834;
-s32 func_15108BD8(u8 *arg0, s32 arg1) {
+/* was func_15108BD8 */
+s32 area_sparkle_update(u8 *arg0, s32 arg1) {
     u8 *var_v0;
     f32 temp_f2;
     f32 temp_f0_3;
@@ -185,7 +187,7 @@ s32 func_15108BD8(u8 *arg0, s32 arg1) {
     }
     if ((*(s32 *)((u8 *)arg0 + 0x1C)) == 0x20000) {
         sp18 = var_v0;
-        if (func_150ADA68() < D_800A2834) {
+        if (random_float() < D_800A2834) {
             (*(f32 *)((u8 *)sp18 + 0x10)) = 11.0f;
         }
     }
@@ -193,9 +195,10 @@ block_19:
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_136060/func_15108BD8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_136060/area_sparkle_update.s")
 #endif
-void func_15108D7C(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_15108D7C */
+void area_sparkle_emitter_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
     struct212 *temp_v0 = (struct212 *)(arg0 + 0x28);
 
     if (arg2 == 0x2B) {

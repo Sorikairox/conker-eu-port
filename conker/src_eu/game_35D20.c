@@ -3,7 +3,8 @@
 #include "variables.h"
 
 // loops and loops
-void func_15008870(s32 arg0) {
+/* was func_15008870 */
+void effect_lists_clear(s32 arg0) {
     s32 start = 0;
     s32 end = 0x68;
     s32 i;
@@ -20,7 +21,8 @@ void func_15008870(s32 arg0) {
         }
     }
 }
-void func_15008930(s32 arg0) {
+/* was func_15008930 */
+void effect_run_init_hooks(s32 arg0) {
     void (**funcs)(void);
     s32 i;
     s32 count;

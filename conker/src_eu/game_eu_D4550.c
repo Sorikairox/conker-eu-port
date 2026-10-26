@@ -14,8 +14,8 @@
 #ifdef NON_MATCHING
 /* P133 */
 s32 func_15095380(s32, s32, s32, s32, s32, s32, s32, s32, s32);
-f32 func_15048A40(u8);
-f32 func_150489B0(u8);
+f32 math_sin_u8(u8);
+f32 math_cos_u8(u8);
 extern u8 *D_8008CDEC[];
 extern f32 D_800DD600[2]; /* camera yaw: [0] sin, [1] cos (node_billboard_draw's caller in game_1944C0.c) */
 extern s32 D_800DD5E4;    /* last sprite texture: the hand asm keeps it in the upper half (lh / sh) */
@@ -83,12 +83,12 @@ Gfx *func_150A6D40(Gfx *gfx, u8 *rec, s32 idx) {
     roll = *(u16 *) (spr + 0x9C) >> 8;
     pitch = *(u16 *) (spr + 0x9E) >> 8;
     if (roll != 0) {
-        rollC = func_15048A40(roll);
-        rollS = func_150489B0(roll);
+        rollC = math_sin_u8(roll);
+        rollS = math_cos_u8(roll);
     }
     if (pitch != 0) {
-        pitchC = func_15048A40(pitch);
-        pitchS = func_150489B0(pitch);
+        pitchC = math_sin_u8(pitch);
+        pitchS = math_cos_u8(pitch);
     }
 
     /* the quad in camera yaw: (a, -b) and (-a, b) horizontally, lo..hi vertically */

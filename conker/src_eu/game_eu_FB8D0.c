@@ -24,8 +24,8 @@ void func_150CE0C0(u8 *arg0, u8 arg1, s32 arg2)
     {
       sp6C[1] = sp48[0];
       dummy_label_506575: ; // fakematch: empty label keeps the sp6C[1] store out of the jal delay slot
-      func_1514CBE8(sp6C[0], sp6C[1], sp6C[2], 251.0f, 0, 0xFF, (func_150ADA20() & 0xF) + 0x23, 0x17, 0, 0.0f, 0, arg1);
-      func_1514CBE8(sp6C[0], sp6C[1], sp6C[2], 290.0f, 0, 0xFF, (func_150ADA20() % 21U) + 0x1E, 0x18, 0, 0.0f, 0, arg1);
+      func_1514CBE8(sp6C[0], sp6C[1], sp6C[2], 251.0f, 0, 0xFF, (random_int() & 0xF) + 0x23, 0x17, 0, 0.0f, 0, arg1);
+      func_1514CBE8(sp6C[0], sp6C[1], sp6C[2], 290.0f, 0, 0xFF, (random_int() % 21U) + 0x1E, 0x18, 0, 0.0f, 0, arg1);
     }
   }
 }
@@ -77,7 +77,7 @@ s32 func_150CE204(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u3C = 0xE03;
     sp.u34 = 0x200005;
     sp.u38 = 0;
-    sp.u3E = (func_150ADA20() % 41U) + 0x32;
+    sp.u3E = (random_int() % 41U) + 0x32;
     sp.u40 = 0;
     sp.u44 = 0;
     sp.u4C = 0xB0;
@@ -87,21 +87,21 @@ s32 func_150CE204(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u49 = 0xB;
     sp.u4A = 0x6A;
     sp.u4B = 0xFF;
-    sp.u4F = (func_150ADA20() % 101U) + 0x64;
+    sp.u4F = (random_int() % 101U) + 0x64;
     sp.u50 = 0xFF;
     sp.u94 = 3;
     sp.u95 = 3;
-    sp.u5C = sp.u60 = (func_150ADA68() * 401.0f) + 404.0f;
+    sp.u5C = sp.u60 = (random_float() * 401.0f) + 404.0f;
     sp.u64 = arg2;
     sp.u68 = arg3;
     sp.u6C = arg4;
-    func_15143794(arg8, (s16) ((func_150ADA20() % 20U) - 0x13), ((func_150ADA68() * 150.0f) + 150.0f) * 0.1f, sp.u7C);
+    func_15143794(arg8, (s16) ((random_int() % 20U) - 0x13), ((random_float() * 150.0f) + 150.0f) * 0.1f, sp.u7C);
     sp.u8C = 0xE05;
     sp.u88 = 0.0f;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x80;
     }
     sp.u96 = 0xA;
@@ -169,16 +169,16 @@ s32 func_150CE420(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u7E = 0x20;
     sp.u28[12] = arg4;
     sp.u28[1] = 0.2f;
-    func_15143794(arg8, (s16) (((u32) func_150ADA20() % 41U) - 0x3D), ((func_150ADA68() * 101.0f) + 150.0f) * 0.1f, &sp.u5C);
-    sp.u68 = ((func_150ADA68() * 260.0f) + -130.0f) * 0.1f;
-    sp.u70 = ((func_150ADA68() * 260.0f) + -130.0f) * 0.1f;
-    sp.u7C = (func_150ADA20() % 21U) + 0x32;
-    sp.u74 = ((func_150ADA68() * 311.0f) + -1217.0f) * 0.001f;
-    sp.u28[3] = ((func_150ADA68() * 302.0f) + 52.0f) * 0.001f;
+    func_15143794(arg8, (s16) (((u32) random_int() % 41U) - 0x3D), ((random_float() * 101.0f) + 150.0f) * 0.1f, &sp.u5C);
+    sp.u68 = ((random_float() * 260.0f) + -130.0f) * 0.1f;
+    sp.u70 = ((random_float() * 260.0f) + -130.0f) * 0.1f;
+    sp.u7C = (random_int() % 21U) + 0x32;
+    sp.u74 = ((random_float() * 311.0f) + -1217.0f) * 0.001f;
+    sp.u28[3] = ((random_float() * 302.0f) + 52.0f) * 0.001f;
     sp.u28[2] = sp.u28[3];
     sp.u80 = 0;
     sp.u84 = 0;
-    sp.u88 = (func_150ADA20() % 76U) + 0xB4;
+    sp.u88 = (random_int() % 76U) + 0xB4;
     sp.u89 = 8;
     sp.u8A = 0;
     sp.u8B = 0;

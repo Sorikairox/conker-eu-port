@@ -69,7 +69,7 @@ void func_1506A9B0(u8 *arg0, s32 arg1) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/func_1506A9B0.s")
 #endif
 void func_1506AABC(s32 arg0, s32 arg1) {
-    func_150E08C8(arg0, 0xFF, 1);
+    obj_emitter_trail_spawn(arg0, 0xFF, 1);
 }
 
 void func_1506AAE4(s32 arg0, s32 arg1) {
@@ -194,11 +194,11 @@ void func_1506AEA0(u8 *obj, void *arg) {
 #endif
 
 void func_1506AF3C(struct127 *arg0, u8 *arg1) {
-    func_151043C0(arg0, *(struct127 **)arg1, (f32 *)(arg1 + 4), 1, *(s32 *)(arg1 + 0x10), 0xFF, 1);
+    ground_explosion(arg0, *(struct127 **)arg1, (f32 *)(arg1 + 4), 1, *(s32 *)(arg1 + 0x10), 0xFF, 1);
 }
 
 void func_1506AF84(struct127 *arg0, u8 *arg1) {
-    func_151043C0(arg0, *(struct127 **)arg1, (f32 *)(arg1 + 4), 2, *(s32 *)(arg1 + 0x10), 0xFF, 1);
+    ground_explosion(arg0, *(struct127 **)arg1, (f32 *)(arg1 + 4), 2, *(s32 *)(arg1 + 0x10), 0xFF, 1);
 }
 
 void func_1506AFCC(u8 *arg0, s32 arg1) {

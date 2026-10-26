@@ -41,8 +41,8 @@ s32 func_151BF444(u8 *arg0);
 
 #ifdef NON_MATCHING
 /* P142 */
-void func_1510F800(s32);
-s32 func_1510FD20(s32 x, s32 z);
+void collision_select_area(s32);
+s32 zone_tree_find_leaf(s32 x, s32 z);
 void func_151436B4(f32 yaw, f32 pitch, f32 dist, struct17 *out);
 s32 func_15157580(void *sprite, s32, f32 alpha, s32, s32, s32 depth, s32, s32);
 s32 func_151BF490(f32 yaw, s32 posArg, s32 arg2, u8 arg3, s32 colour, s32 flag, s32 arg6, s32 arg7, s32 arg8);
@@ -66,8 +66,8 @@ s32 func_151BEE00(f32 *pos, f32 angle, u8 kind, u8 flag, u8 size, s32 arg5, s32 
     s32 room;
     s32 obj;
 
-    func_1510F800(0);
-    room = func_1510FD20((s32) pos[0], (s32) pos[2]);
+    collision_select_area(0);
+    room = zone_tree_find_leaf((s32) pos[0], (s32) pos[2]);
     if (size >= 3) {
         return 0;
     }
@@ -128,7 +128,7 @@ s32 func_151BEE00(f32 *pos, f32 angle, u8 kind, u8 flag, u8 size, s32 arg5, s32 
 #endif
 
 s32 func_151BF0D0(u8 *arg0) {
-    func_150A8050(((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0], 0.0f, *(f32 *)(arg0 + 0x120), 0.0f);
+    mtxf_rotate_xyz_deg(((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0], 0.0f, *(f32 *)(arg0 + 0x120), 0.0f);
     ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][3][0] = *(f32 *)(arg0 + 0x54);
     ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][3][1] = *(f32 *)(arg0 + 0x58);
     ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][3][2] = *(f32 *)(arg0 + 0x5C);
@@ -335,7 +335,7 @@ s32 func_151BF490(f32 yaw, s32 posArg, s32 arg2, u8 arg3, s32 colour, s32 flag, 
 void func_15151500(u8 *req, u8, u8, s32);
 void func_15153BA4(u8 *req, s32, s32, s32);
 // pickup_burst_spawn: the burst played when a pickup at pos is collected: a debris spray (func_15151500 request:
-// 24..34 pieces) and a flash particle (func_15153BA4 request, the same layout as in func_150D8ABC).
+// 24..34 pieces) and a flash particle (func_15153BA4 request, the same layout as in explosion_ground_effect).
 void func_151BF678(f32 *pos) {
     struct {
         s16 u0;

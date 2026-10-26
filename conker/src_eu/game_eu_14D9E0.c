@@ -2,14 +2,15 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_15121C68(u8 *arg0);
+void camera_look_mode_defaults(u8 *arg0);
 #endif
 
 
 #ifdef NON_MATCHING
 void func_151CA150(u8 *arg0, s32 arg1); // defined in game_eu_1F7960 (two arguments)
 
-void func_151201D0(u8 *arg0) {
+/* was func_151201D0 */
+void camera_look_enter(u8 *arg0) {
     s32 sp20;
     u8 *sp1C;
     f32 temp_f0;
@@ -76,7 +77,7 @@ block_43:
     }
     sp1C = var_v1;
     sp20 = (s32) temp_v0;
-    func_15121C68(arg0);
+    camera_look_mode_defaults(arg0);
     func_15048758(var_v1 + 0x34);
     if ((*(u8 *)((u8 *)var_v1 + 0x4C)) != 0) {
         temp_f0 = (*(f32 *)((u8 *)var_v1 + 0x50));
@@ -132,10 +133,10 @@ block_43:
     (*(f32 *)((u8 *)arg0 + 0x374)) = (f32) (*(f32 *)((u8 *)var_v1 + 0x44));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_14D9E0/func_151201D0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_14D9E0/camera_look_enter.s")
 #endif
 #ifdef NON_MATCHING
-// Camera state block at player +0x740 (shared by func_151201D0 / func_15121C68 / func_15121E34).
+// Camera state block at player +0x740 (shared by camera_look_enter / camera_look_mode_defaults / camera_look_exit).
 typedef struct {
     f32 eye[3];    // 0x00: camera position (orbit point behind the player)
     f32 offX;      // 0x0C: sideways look offset x / z (eased)
@@ -172,23 +173,24 @@ typedef struct {
 #define CAM_MODE_RIDE(m) ((m) == 9 || (m) == 0x38 || (m) == 0x39 || (m) == 0x37 || (m) == 0x3B || (m) == 0x15 || \
                           (m) == 0x26 || (m) == 0x3A)
 
-void func_1510ED24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9,
+void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9,
                    u16 argA, s32 argB, f32 argC, f32 argD);
 void func_15049978(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
-void func_15121E34(u8 *arg0);
+void camera_look_exit(u8 *arg0);
 void camera_update_eye_orbit(u8 *arg0);
-void func_1512E6B0(u8 *arg0);
+void camera_update_eye_height(u8 *arg0);
 void func_151CA484(u8 *arg0);
 
 // player_camera_update: per-frame player camera (+0x740 block, camera object +0x3D4, player object +0x3D0,
-// controller +0x36C). Gets the floor height under the camera (func_1510ED24), the player distance +0x370, sets the
+// controller +0x36C). Gets the floor height under the camera (collision_find_floor), the player distance +0x370, sets the
 // per-mode defaults (+0x23E), then runs the camera state +0x73C: 1 = moving into place (timer +0x84A, ends when
 // close enough or not following), 2 = free orbit from the stick (yaw / pitch with per-mode pitch limits, riding
 // modes take the yaw from the vehicle), 3 = returning to the default view (timer +0x84A, until the yaw is within
 // 0.05 degrees). Then the sideways look offset (aim modes) is eased in and added to the camera, and the view is
-// rebuilt (func_150491EC, camera_update_eye_orbit, func_1512E6B0, camera_sync_angles).
-void func_151206C8(u8 *arg0) {
+// rebuilt (vec3_dir_to, camera_update_eye_orbit, camera_update_eye_height, camera_sync_angles).
+/* was func_151206C8 */
+void camera_look_update(u8 *arg0) {
     CameraState *cam = (CameraState *) (arg0 + 0x740);
     s32 mode;
     s32 special;
@@ -211,7 +213,7 @@ void func_151206C8(u8 *arg0) {
 
     mode = PU8(0x23E);
     special = (D_800D1940 == 0x42) && (mode == 0x1A);
-    func_1510ED24(0, 0, (s32) &floorY, (s32) (arg0 + 0x360), 0, 0, PF32(0x2F8), PF32(0x2FC), PF32(0x300), PF32(0x2FC), 0,
+    collision_find_floor(0, 0, (s32) &floorY, (s32) (arg0 + 0x360), 0, 0, PF32(0x2F8), PF32(0x2FC), PF32(0x300), PF32(0x2FC), 0,
                   0, -10000.0f, PF32(0x2FC));
     *(s8 *) (PPTR(0x3D4) + 0x198) = PS16(0x73C);
     dx = PF32(0x2F8) - PF32(0x2BC);
@@ -245,12 +247,12 @@ void func_151206C8(u8 *arg0) {
         } else {
             PF32(0x190) = 20.0f;
             PF32(0x198) = 0.0f;
-            func_15121C68(arg0);
+            camera_look_mode_defaults(arg0);
         }
     }
     PF32(0x354) = PF32(0x2C0);
     PF32(0x35C) = PF32(0x2C0);
-    func_1506160C((struct127 *) PPTR(0x3D0), 2, 0xFF, 0x20, PU8(0x23D));
+    obj_fade_command((struct127 *) PPTR(0x3D0), 2, 0xFF, 0x20, PU8(0x23D));
     dist = cam->dist;
 
     if (PS16(0x73C) == 1) {
@@ -281,7 +283,7 @@ void func_151206C8(u8 *arg0) {
             PF32(0x39C) = PF32(0x37C) * 0.017453292f;
         }
         if (cam->follow != 0) {
-            func_15048A70(PF32(0x37C), cam->yawTarget); // result unused (compared with 0.01, no effect)
+            math_angle_diff_deg(PF32(0x37C), cam->yawTarget); // result unused (compared with 0.01, no effect)
             if (cam->dir == -1) {
                 reach = PF32(0x370) < cam->distLimit;
             } else {
@@ -471,10 +473,10 @@ void func_151206C8(u8 *arg0) {
         } else {
             cam->pitchSigned = cam->pitch;
         }
-        func_15121E34(arg0);
+        camera_look_exit(arg0);
     } else if (PS16(0x73C) == 3) {
         // returning to the default view
-        angle = fabsf(func_15048A70(PF32(0x37C), cam->yawGoal));
+        angle = fabsf(math_angle_diff_deg(PF32(0x37C), cam->yawGoal));
         PS32(0x134) = PS32(0x13C);
         if (PS16(0x84A) != 0) {
             PS16(0x84A) = PS16(0x84A) - D_800BE9E4;
@@ -537,9 +539,9 @@ void func_151206C8(u8 *arg0) {
     view = PPTR(0x3D4);
     *(f32 *) (view + 0x144) = *(f32 *) (view + 0x144) + cam->offZ;
     view = PPTR(0x3D4);
-    func_150491EC((struct17 *) (view + 0x13C), (struct17 *) (view + 0x148), (struct17 *) (view + 0x130));
+    vec3_dir_to((struct17 *) (view + 0x13C), (struct17 *) (view + 0x148), (struct17 *) (view + 0x130));
     camera_update_eye_orbit(arg0);
-    func_1512E6B0(arg0);
+    camera_update_eye_height(arg0);
     camera_sync_angles((struct108 *) arg0);
 }
 #undef PF32
@@ -549,11 +551,12 @@ void func_151206C8(u8 *arg0) {
 #undef PPTR
 #undef CAM_MODE_RIDE
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_14D9E0/func_151206C8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_14D9E0/camera_look_update.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_15121A00(struct127 *arg0, u16 *arg1) {
+/* was func_15121A00 */
+void camera_ride_view_set(struct127 *arg0, u16 *arg1) {
     struct {
         f32 u28;
         f32 u2C;
@@ -611,9 +614,10 @@ void func_15121A00(struct127 *arg0, u16 *arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_14D9E0/func_15121A00.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_14D9E0/camera_ride_view_set.s")
 #endif
-void func_15121C68(u8 *arg0) {
+/* was func_15121C68 */
+void camera_look_mode_defaults(u8 *arg0) {
     if (arg0[0x23E] != 0) {
         if (arg0[0x23E] == 0x34) {
             (*(f32 *)((u8 *)arg0 + 0x190)) = 80.0f;
@@ -673,7 +677,8 @@ void func_151CA484(u8 *arg0);
 s32 func_151CA484(u8 *);
 #endif
 
-void func_15121E34(u8 *arg0)
+/* was func_15121E34 */
+void camera_look_exit(u8 *arg0)
 {
   u8 *new_var;
   u8 *temp_v0;
@@ -707,7 +712,7 @@ void func_15121E34(u8 *arg0)
     *((f32 *) (((u8 *) arg0) + 0x190)) = 0.0f;
     *((f32 *) (((u8 *) arg0) + 0x99C)) = 0.0f;
     *((f32 *) (((u8 *) arg0) + 0x198)) = 0.0f;
-    func_1506160C(*((struct127 **) (((u8 *) arg0) + 0x3D0)), 2U, 0xFFU, 0x20U, (s32) (*((u8 *) (((u8 *) arg0) + 0x23D))));
+    obj_fade_command(*((struct127 **) (((u8 *) arg0) + 0x3D0)), 2U, 0xFFU, 0x20U, (s32) (*((u8 *) (((u8 *) arg0) + 0x23D))));
     if ((*((u8 *) (((u8 *) arg0) + 0x84C))) != 0)
     {
       func_151CA484(arg0);

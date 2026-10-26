@@ -4,9 +4,10 @@
 
 
 extern u8 D_800A13B0[];
-u8 *func_151149AC(u8);
+u8 *world_record_find(u8);
 
-struct260 *func_150E15E0(u8 arg0, u8 arg1, s32 arg2) {
+/* was func_150E15E0 */
+struct260 *fx_model_emitter_spawn(u8 arg0, u8 arg1, s32 arg2) {
     struct260 *temp_v0;
     struct {
         u8 unk0;
@@ -23,12 +24,12 @@ struct260 *func_150E15E0(u8 arg0, u8 arg1, s32 arg2) {
         return NULL;
     }
     tmp.unk0 = arg0;
-    tmp.unk4 = func_151149AC(D_800A13B0[arg0]);
+    tmp.unk4 = world_record_find(D_800A13B0[arg0]);
     if (tmp.unk4 == NULL) {
         return NULL;
     }
-    func_1510F800(0);
-    tmp.unk8 = func_1510FD20(*(s16 *)(tmp.unk4 + 0x10), *(s16 *)(tmp.unk4 + 0x14));
+    collision_select_area(0);
+    tmp.unk8 = zone_tree_find_leaf(*(s16 *)(tmp.unk4 + 0x10), *(s16 *)(tmp.unk4 + 0x14));
     tmp.unkC = 0.0f;
     temp_v0 = func_15149130(300, -1, 0x1F, -1, 0, 0x1F, 0x10, arg1, arg2);
     if (temp_v0 != NULL) {
@@ -43,7 +44,8 @@ void func_15145CD0(void *, void *, void *, s32);
 extern s32 D_800A13B4;
 extern s32 D_800A13CC;
 
-void func_150E16CC(u8 *arg0) {
+/* was func_150E16CC */
+void fx_model_emitter_update(u8 *arg0) {
     struct {
         f32 * u94;
         f32 * u98;
@@ -105,7 +107,7 @@ void func_150E16CC(u8 *arg0) {
     u8 *temp_s1;
 
     temp_s1 = arg0 + 0x28;
-    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((204.0f + (func_150ADA68() * 159.0f)) * 0.001f * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((204.0f + (random_float() * 159.0f)) * 0.001f * D_800BE9A4));
     if ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f) {
         var_v0 = 0;
         var_v1 = 0;
@@ -160,10 +162,10 @@ void func_150E16CC(u8 *arg0) {
         do {
             sp.u10C &= ~0xC0;
             var_s0 = 0;
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 var_s0 = 0x80;
             }
-            if (func_150ADA20() & 1) {
+            if (random_int() & 1) {
                 var_v0_2 = 0x40;
             } else {
                 var_v0_2 = 0;
@@ -173,11 +175,11 @@ void func_150E16CC(u8 *arg0) {
             sp.uF4 = 0.0f;
             sp.uF8 = 0.0f;
             sp.uCF = 0xFF;
-            sp.uBE = (func_150ADA20() % 17U) + 0x32;
-            temp_f2 = (func_150ADA68() * 165.0f) + 357.0f;
+            sp.uBE = (random_int() % 17U) + 0x32;
+            temp_f2 = (random_float() * 165.0f) + 357.0f;
             sp.uDC = temp_f2;
             sp.uE0 = temp_f2;
-            temp_f2_2 = ((func_150ADA68() * 195.0f) + 356.0f) * 0.001f;
+            temp_f2_2 = ((random_float() * 195.0f) + 356.0f) * 0.001f;
             sp.uFC = sp.uA4 * temp_f2_2;
             sp.u100 = sp.uA8 * temp_f2_2;
             sp.u104 = sp.uAC * temp_f2_2;
@@ -190,5 +192,5 @@ void func_150E16CC(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10EDF0/func_150E16CC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10EDF0/fx_model_emitter_update.s")
 #endif

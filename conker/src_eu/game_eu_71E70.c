@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_1510F800(s32);
+void collision_select_area(s32);
 #endif
 
 
@@ -36,7 +36,7 @@ s32 func_15044670(f32 arg0, f32 arg1, s32 arg2, u8 *arg3, s32 arg4, s32 arg5) {
     sp5C = (s32) D_800CC1F3;
     do {
         if ((*var_s1 == 1) && ((var_s0 != 3) || !((*(s32 *)((u8 *)arg3 + 0xF8)) & 0x200))) {
-            func_1510F800(var_s0);
+            collision_select_area(var_s0);
             if (D_800DBE62 != 0) {
                 var_s6 += func_150AB6D0(arg0, arg1, arg2, arg3, arg4);
             }
@@ -49,7 +49,7 @@ s32 func_15044670(f32 arg0, f32 arg1, s32 arg2, u8 *arg3, s32 arg4, s32 arg5) {
     if (arg5 != 0) {
         do {
             if (*var_s1_2 == 1) {
-                func_1510F800(var_s0_2);
+                collision_select_area(var_s0_2);
                 if (D_800DBE62 != 0) {
                     func_150AC8C4(arg0, arg1, arg2, arg3, 0);
                 }
@@ -58,7 +58,7 @@ s32 func_15044670(f32 arg0, f32 arg1, s32 arg2, u8 *arg3, s32 arg4, s32 arg5) {
             var_s1_2 += 1;
         } while (var_s0_2 != 3);
     }
-    func_1510F800(0);
+    collision_select_area(0);
     D_800CC1F3 = (u8) sp5C;
     return var_s6;
 }
@@ -292,7 +292,7 @@ void func_15044D18(void) {
 #endif
 
 #ifdef NON_MATCHING
-f32 func_150489B0(u8, u8 *);
+f32 math_cos_u8(u8, u8 *);
 
 s32 func_15044E68(u8 *arg0) {
     f32 sp40;
@@ -317,8 +317,8 @@ s32 func_15044E68(u8 *arg0) {
     sp30 = D_800CC2D0->z_position - (f32) (*(s16 *)((u8 *)arg0 + 0xA));
     sp38 = temp_f2;
     sp20 = temp_t6;
-    sp40 = func_15048A40((*(u8 *)((u8 *)arg0 + 0x16)));
-    temp_f0 = func_150489B0((*(u8 *)((u8 *)arg0 + 0x16)), arg0);
+    sp40 = math_sin_u8((*(u8 *)((u8 *)arg0 + 0x16)));
+    temp_f0 = math_cos_u8((*(u8 *)((u8 *)arg0 + 0x16)), arg0);
     temp_f14 = (sp30 * temp_f0) + (temp_f2 * sp40);
     var_v0 = 0;
     temp_f2_2 = (temp_f2 * temp_f0) - (sp30 * sp40);
@@ -352,21 +352,21 @@ typedef struct { f32 unk0; s16 unk4[3][3]; s32 unk18; u8 unk1C; u8 unk1D; s32 un
 extern Unk3720 D_800D3720[];
 extern f32 D_800990F8; // 99999.9f
 extern f32 D_800990FC;
-void func_1510F800(s32);
+void collision_select_area(s32);
 s32 func_150451C0(f32 *, f32, Unk45674 *);
 s32 func_15046C6C(u8 *, u16, f32, u8 *);
 s32 func_15046FF0(u8 *, u16, f32, u8 *);
 s32 func_150469E8(u8 *, u16, f32, u8 *);
 
 s32 func_15045030(u8 *arg0) {
-    func_1505D1C4((f32)*(s16 *)(arg0 + 6), (f32)*(s16 *)(arg0 + 8), (f32)*(s16 *)(arg0 + 0xA), *(s16 *)(arg0 + 0x10), 0xFF, 0, 0, 0);
+    attack_spawn_at_point((f32)*(s16 *)(arg0 + 6), (f32)*(s16 *)(arg0 + 8), (f32)*(s16 *)(arg0 + 0xA), *(s16 *)(arg0 + 0x10), 0xFF, 0, 0, 0);
     return 0;
 }
 
 void func_15045090(void) {
     if (D_800CC2D0->stunned == 0) {
         if (D_800CC2D0->immune == 0) {
-            func_1505D024(D_800CC2D0, 5, D_800CC2D0->unk7A, -1);
+            obj_send_hit(D_800CC2D0, 5, D_800CC2D0->unk7A, -1);
         }
     }
 }
@@ -375,7 +375,7 @@ void func_150450D8(void) {
     if (D_800CC2D0->stunned == 0) {
         if (D_800CC2D0->immune == 0) {
             if (D_800C35EA != 1) {
-                func_1505D024(D_800CC2D0, 4, D_800CC2D0->unk7A, -1);
+                obj_send_hit(D_800CC2D0, 4, D_800CC2D0->unk7A, -1);
             }
         }
     }
@@ -384,7 +384,7 @@ void func_150450D8(void) {
 void func_15045130(void) {
     if (D_800CC2D0->stunned == 0) {
         if (D_800CC2D0->immune == 0) {
-            func_1505D024(D_800CC2D0, 0x40, D_800CC2D0->unk7A, -1);
+            obj_send_hit(D_800CC2D0, 0x40, D_800CC2D0->unk7A, -1);
         }
     }
 }
@@ -392,7 +392,7 @@ void func_15045130(void) {
 void func_15045178(void) {
     if (D_800CC2D0->stunned == 0) {
         if (D_800CC2D0->immune == 0) {
-            func_1505D024(D_800CC2D0, 1, D_800CC2D0->unk7A, -1);
+            obj_send_hit(D_800CC2D0, 1, D_800CC2D0->unk7A, -1);
         }
     }
 }
@@ -421,7 +421,7 @@ s32 func_150451C0(f32 *pos, f32 maxY, Unk45674 *out) {
     }
     out->unk0 = D_800990F0;
     best = -1;
-    func_1510F800(0);
+    collision_select_area(0);
     n = func_150A3F50((s32) pos[0], (s32) pos[2]);
     for (i = 0; i < n; i++) {
         d = D_800D3720[i].unk0 * 0.00390625f;
@@ -486,7 +486,7 @@ s32 func_150453BC(u8 *arg0, f32 maxY, u8 *arg2) {
     }
     out->unk0 = D_800990F4;
     best = -1;
-    func_1510F800(0);
+    collision_select_area(0);
     D_800DC298 = pos[0];
     D_800DC29C = pos[1];
     *(f32 *)&D_800DC2A0 = pos[2];
@@ -559,7 +559,7 @@ s32 func_15045674(f32 *arg0, f32 arg1, Unk45674 *arg2) {
     }
     arg2->unk0 = D_800990F8;
     best = -1;
-    func_1510F800(3);
+    collision_select_area(3);
     n = func_150A5480((s32) arg0[0], (s32) arg0[2]);
     for (i = 0; i < n; i++) {
         d = D_800D3720[i].unk0 * 0.00390625f;
@@ -610,7 +610,7 @@ s32 func_1504583C(f32 *arg0, f32 arg1, Unk45674 *arg2) {
     }
     arg2->unk0 = D_800990FC;
     best = -1;
-    func_1510F800(3);
+    collision_select_area(3);
     n = func_150A5480((s32) arg0[0], (s32) arg0[2]);
     for (i = 0; i < n; i++) {
         d = D_800D3720[i].unk0 * 0.00390625f;
@@ -646,10 +646,10 @@ s32 func_1504583C(f32 *arg0, f32 arg1, Unk45674 *arg2) {
 }
 
 s32 func_150A69E0(s16, s16, s32, u16);
-void func_1510F800(s32);
+void collision_select_area(s32);
 
 void func_15045A04(u8 *arg0, u16 arg1, s32 *arg2, s32 arg3) {
-    func_1510F800(2);
+    collision_select_area(2);
     *arg2 = func_150A69E0((s16) (s32) (*(f32 *)((u8 *)arg0 + 0)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 8)), arg3, arg1);
 }
 

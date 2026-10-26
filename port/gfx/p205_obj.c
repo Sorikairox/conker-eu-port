@@ -361,7 +361,7 @@ void p205_goto_apply(int *btn, int *sx, int *sy) {
                  go_i, d, x, F(r, 0x18), z, cam, go_base, *sx, *sy);
 }
 
-/* P205 DIAGNOSTIC ?p205dust=N: func_150CA150 landing_dust_burst (port-b P201 C; only caller func_15070014 in
+/* P205 DIAGNOSTIC ?p205dust=N: func_150CA150 landing_dust_burst (port-b P201 C; only caller objfx_ca150 in
  * game_981E0.c, so the --wrap sees every call): frame, character, position and floor (+0x180) before the call, first N
  * calls then every 16th. */
 int __real_func_150CA150(unsigned char *obj);

@@ -4,7 +4,8 @@
 
 
 #ifdef NON_MATCHING
-void func_1512EA20(u8 *arg0) {
+/* was func_1512EA20 */
+void camera_over_shoulder_place(u8 *arg0) {
     f32 sp18;
     f32 temp_f12;
     f32 temp_f8;
@@ -27,5 +28,5 @@ void func_1512EA20(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x300)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x2C4)) - (cosf(temp_f12) * 60.0f));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15C230/func_1512EA20.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15C230/camera_over_shoulder_place.s")
 #endif

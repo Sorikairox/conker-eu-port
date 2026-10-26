@@ -110,7 +110,7 @@ def main():
     import glob, re
     pt_re = re.compile(r'([A-Za-z_][\w\[\]\.>-]*)\s*=\s*(?:\([^()]*\)\s*)?(func_\w+)\(\s*(?:\([^()]*\)\s*)?([A-Za-z_][\w\[\]\.>-]*)\s*[,)]')
     # P23: also any function declared (prototype or definition) as `Gfx *f(Gfx *, ...)`, e.g. one only
-    # used as `return f(gdl, ...)` (func_1510BF50 in func_15019464).
+    # used as `return f(gdl, ...)` (player_view_dl_build in render_player_frame_setup).
     gfx_re = re.compile(r'\bGfx\s*\*\s*(func_\w+)\s*\(\s*Gfx\s*\*')
     passthru = set(); passthru_k = {}
     gfx_any_re = re.compile(r'\bGfx\s*\*\s*(func_\w+)\s*\(([^()]*)\)')
@@ -121,7 +121,7 @@ def main():
                 passthru.add(m.group(2))
         passthru.update(gfx_re.findall(text))
         # P29: `Gfx *f(T, Gfx *, ...)`: the DL pointer is not the first argument (func_150A5858 in the now-C
-        # func_1510BF50 takes it as a1), so the stub returns that argument instead of 0 / a0.
+        # player_view_dl_build takes it as a1), so the stub returns that argument instead of 0 / a0.
         for m in gfx_any_re.finditer(text):
             parms = [x.strip() for x in m.group(2).split(',')]
             k = next((i for i, x in enumerate(parms) if re.match(r'Gfx\s*\*', x)), None)

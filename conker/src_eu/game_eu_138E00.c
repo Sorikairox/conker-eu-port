@@ -3,7 +3,7 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
-void func_1501B22C(s32);
+void camera_compute_frustum_planes(s32);
 #endif
 
 
@@ -18,7 +18,8 @@ extern f32 D_800A2FF0;
 void func_151F0114(void *, float, float, float, float, float, float, float);
 
 /* screen size from D_800DD722/4, then an orthographic projection (guOrtho) over the current camera extent */
-void func_1510B5F0(s32 arg0) {
+/* was func_1510B5F0 */
+void camera_set_screen_ortho(s32 arg0) {
     f32 w;
     f32 h;
 
@@ -30,7 +31,7 @@ void func_1510B5F0(s32 arg0) {
     func_151F0114(&D_800D9F48, -w, w, -h, h, 1.0f, D_800A2FF0, 1.0f);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510B5F0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_set_screen_ortho.s")
 #endif
 #ifdef NON_MATCHING
 extern f32 D_800C3A6C;            /* extra angle added to both fields of view */
@@ -38,13 +39,14 @@ extern f32 D_800C3A70;            /* viewport width override (0: use arg4 or the
 extern f32 D_800C3A74;            /* viewport height override (0: the screen height) */
 extern f32 D_800D9F40;
 extern f32 D_800D9F3C;
-void func_1510BB78(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
+void camera_perspective_build(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 
 /* Per-player projection: camera record r = D_800BE628 + player * 0x180. Field of view r+0x74 / r+0x78 (degrees) =
  * base r+0x6C / r+0x70 + fovX / fovY + D_800C3A6C; the half extents r+0x1C / r+0x20 = r+0x7C * r+0x14 * r+0xC *
- * cot(fov / 2) * scale (r+0x80, r+0x18, r+0x10 for y); then func_1510BB78 builds the matrix into r+0xB8 with the
+ * cot(fov / 2) * scale (r+0x80, r+0x18, r+0x10 for y); then camera_perspective_build builds the matrix into r+0xB8 with the
  * viewport size (D_800C3A70 / width / the screen width, D_800C3A74 / the screen height). */
-void func_1510B6A8(s32 player, f32 fovX, f32 fovY, f32 scale, f32 width) {
+/* was func_1510B6A8 */
+void camera_projection_update(s32 player, f32 fovX, f32 fovY, f32 scale, f32 width) {
     s32 off = player * 0x180;
     u8 *r;
     f32 a, c, w, h;
@@ -76,31 +78,33 @@ void func_1510B6A8(s32 player, f32 fovX, f32 fovY, f32 scale, f32 width) {
         h = D_800D9F3C;
     }
     r = (u8 *)D_800BE628 + off;
-    func_1510BB78(player, (u16 *)(r + 0xB8), *(f32 *)(r + 0x78), *(f32 *)(r + 0x74), w, h, scale);
+    camera_perspective_build(player, (u16 *)(r + 0xB8), *(f32 *)(r + 0x78), *(f32 *)(r + 0x74), w, h, scale);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510B6A8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_projection_update.s")
 #endif
 #ifndef NON_MATCHING
-s32 func_1510B6A8(s32, f32, f32, f32, f32);
+s32 camera_projection_update(s32, f32, f32, f32, f32);
 #endif
 struct V3 { f32 x, y, z; };
 extern struct V3 D_800D9EE0[];
 extern u8 D_800D9F10;
-void func_1510B8AC(s32 arg0, f32 arg1, f32 arg2, f32 arg3) {
-    func_1510B6A8(arg0, arg1, arg2, arg3, 0.0f);
+/* was func_1510B8AC */
+void camera_projection_set_fov(s32 arg0, f32 arg1, f32 arg2, f32 arg3) {
+    camera_projection_update(arg0, arg1, arg2, arg3, 0.0f);
     D_800D9EE0[arg0].x = arg3;
     D_800D9EE0[arg0].y = arg1;
     D_800D9EE0[arg0].z = arg2;
     D_800D9F10 = 1;
 }
 
-void func_1510B930(void)
+/* was func_1510B930 */
+void camera_projection_apply_pending_fov(void)
 {
     s32 i;
     for (i = 0; i <= D_80082FA0; i++) {
         if (D_800D9EE0[i].x != -1.0f) {
-            func_1510B6A8(i, D_800D9EE0[i].y, D_800D9EE0[i].z, D_800D9EE0[i].x, 0.0f);
+            camera_projection_update(i, D_800D9EE0[i].y, D_800D9EE0[i].z, D_800D9EE0[i].x, 0.0f);
             D_800D9EE0[i].x = -1.0f;
         }
     }
@@ -113,11 +117,12 @@ extern struct PendingF2 D_800D9F18[];
 extern u8 D_800D9F38;
 extern f32 D_800D9F40;
 extern f32 D_800D9F3C;
-void func_1510BB78(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
+void camera_perspective_build(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 
 /* Rebuild the player's projection for a viewport of width x height (0: the screen size) now, and remember the size
- * in D_800D9F18[player] (applied again by func_1510BA9C; D_800D9F38 = pending). */
-void func_1510B9D8(s32 player, f32 width, f32 height) {
+ * in D_800D9F18[player] (applied again by camera_projection_apply_pending_viewport; D_800D9F38 = pending). */
+/* was func_1510B9D8 */
+void camera_projection_set_viewport(s32 player, f32 width, f32 height) {
     u8 *r;
 
     if (width == 0.0f) {
@@ -127,29 +132,30 @@ void func_1510B9D8(s32 player, f32 width, f32 height) {
         height = D_800D9F3C;
     }
     r = (u8 *)D_800BE628 + player * 0x180;
-    func_1510BB78(player, (u16 *)(r + 0xB8), *(f32 *)(r + 0x78), *(f32 *)(r + 0x74), width, height, *(f32 *)(r + 0x84));
+    camera_perspective_build(player, (u16 *)(r + 0xB8), *(f32 *)(r + 0x78), *(f32 *)(r + 0x74), width, height, *(f32 *)(r + 0x84));
     D_800D9F18[player].x = width;
     D_800D9F18[player].y = height;
     D_800D9F38 = 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510B9D8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_projection_set_viewport.s")
 #endif
 #ifdef NON_MATCHING
-// Apply the pending per-player requests queued in D_800D9F18 (x == -1.0f: none) through func_1510BB78,
+// Apply the pending per-player requests queued in D_800D9F18 (x == -1.0f: none) through camera_perspective_build,
 // with the player's camera record (D_800BE628, 0x180 bytes each).
 extern struct PendingF2 D_800D9F18[];
 extern u8 D_800D9F38;
-void func_1510BB78(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
+void camera_perspective_build(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 
-void func_1510BA9C(void) {
+/* was func_1510BA9C */
+void camera_projection_apply_pending_viewport(void) {
     s32 i;
     u8 *cam;
 
     for (i = 0; i <= D_80082FA0; i++) {
         if (D_800D9F18[i].x != -1.0f) {
             cam = (u8 *)D_800BE628 + i * 0x180;
-            func_1510BB78(i, (u16 *)(cam + 0xB8), *(f32 *)(cam + 0x78), *(f32 *)(cam + 0x74), D_800D9F18[i].x,
+            camera_perspective_build(i, (u16 *)(cam + 0xB8), *(f32 *)(cam + 0x78), *(f32 *)(cam + 0x74), D_800D9F18[i].x,
                           D_800D9F18[i].y, *(f32 *)(cam + 0x84));
             D_800D9F18[i].x = -1.0f;
         }
@@ -157,10 +163,11 @@ void func_1510BA9C(void) {
     D_800D9F38 = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BA9C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_projection_apply_pending_viewport.s")
 #endif
 #ifdef NON_MATCHING
-void func_1510BB78(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6) {
+/* was func_1510BB78 */
+void camera_perspective_build(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6) {
     s32 sp2C;
     s32 temp_v0;
     s32 temp_v1;
@@ -172,7 +179,7 @@ void func_1510BB78(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, 
     guMtxF2L(temp_v0 + 0xBC, temp_v0 + (D_800BE9C0 << 6) + 0x100);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BB78.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_perspective_build.s")
 #endif
 #ifdef NON_MATCHING
 extern f32 D_800DA030[][4][4];   /* per player: view matrix (float) */
@@ -181,8 +188,9 @@ extern u8 *D_800DC6D0[];         /* per DL buffer: fixed-point view matrices, 0x
 
 /* Per-player matrix refresh (P15, hand C from the asm): converts this frame's fixed-point projection
  * (player record + 0x100 in D_800BE628, 0x180 per player, 0x40 per DL buffer) and view matrix to float,
- * multiplies them into D_800DA130[i] and runs the per-player update func_1501B22C(i). */
-void func_1510BC10(void) {
+ * multiplies them into D_800DA130[i] and runs the per-player update camera_compute_frustum_planes(i). */
+/* was func_1510BC10 */
+void camera_matrices_refresh_all(void) {
     f32 proj[4][4];
     s16 i;
 
@@ -190,14 +198,15 @@ void func_1510BC10(void) {
         guMtxL2F(proj, (Mtx *)(D_800BE628 + i * 0x180 + D_800BE9C0 * 0x40 + 0x100));
         guMtxL2F(D_800DA030[i], (Mtx *)(D_800DC6D0[D_800BE9C0] + i * 0x40));
         func_150A7A48(D_800DA030[i], proj, D_800DA130[i]);
-        func_1501B22C(i);
+        camera_compute_frustum_planes(i);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BC10.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_matrices_refresh_all.s")
 #endif
 #ifdef NON_MATCHING
-u8 *func_1510BD34(u8 *arg0, s32 arg1) {
+/* was func_1510BD34 */
+u8 *view_dl_begin(u8 *arg0, s32 arg1) {
     u8 *temp_a0;
     u8 *temp_a0_10;
     u8 *temp_a0_11;
@@ -248,12 +257,13 @@ u8 *func_1510BD34(u8 *arg0, s32 arg1) {
     return temp_a0 + 8;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BD34.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/view_dl_begin.s")
 #endif
 #ifdef NON_MATCHING
 extern f32 D_800D3A00;
 
-void func_1510BED8(s32 arg0) {
+/* was func_1510BED8 */
+void camera_zoom_factors_calc(s32 arg0) {
     u8 *temp_v0;
 
     temp_v0 = D_800BE628 + (arg0 * 0x180);
@@ -261,19 +271,19 @@ void func_1510BED8(s32 arg0) {
     *(((f32 *)((u8 *)&D_800D3A00 + 4))) = ((((*(f32 *)((u8 *)temp_v0 + 0x78)) / (*(f32 *)((u8 *)temp_v0 + 0x70))) - 1.0f) * -1.0f) + (*(f32 *)((u8 *)temp_v0 + 0x68));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BED8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_zoom_factors_calc.s")
 #endif
 #ifdef NON_MATCHING
 Gfx *func_150A55A0(s32, Gfx *, u8 *, s32, s32, s32);
 Gfx *func_150A5858(s32, Gfx *, u8 *, s32, s32, s32);
 Gfx *func_150C8B00(Gfx *);
 Gfx *func_150CFAF8(Gfx *);
-Gfx *func_150D7B6C(Gfx *);
-Gfx *func_150E0150(Gfx *);
-Gfx *func_151009E4(Gfx *);
-void func_1510D090(s16);
-Gfx *func_1510D338(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3);
-Gfx *func_1512EB60(Gfx *, struct108 *);
+Gfx *anim_segments_set(Gfx *);
+Gfx *level_parts_set_segments(Gfx *);
+Gfx *sky_segments_set(Gfx *);
+void tint_channels_update(s16);
+Gfx *tint_emit_prim_env_colors(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3);
+Gfx *camera_read_depth_row(Gfx *, struct108 *);
 Gfx *func_1515DE84(Gfx *, s16, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, s32, s32, u8 *);
 Gfx *func_1515EAB4(Gfx *, s32, u8, s32, u8 *);
 Gfx *func_15173948(Gfx *, s32);
@@ -291,7 +301,8 @@ extern u8 D_800DA241;
 extern u8 D_800DA248;
 
 /* Build the display list of player `player`'s view. */
-Gfx *func_1510BF50(Gfx *gdl, s16 player) {
+/* was func_1510BF50 */
+Gfx *player_view_dl_build(Gfx *gdl, s16 player) {
     struct108 *p = &D_800DBFF0[player];
     s32 skipWorld;
     s32 mask;
@@ -308,14 +319,14 @@ Gfx *func_1510BF50(Gfx *gdl, s16 player) {
         skipWorld = TRUE;
     }
 
-    gdl = (Gfx *)func_1510BD34((u8 *)gdl, player);
+    gdl = (Gfx *)view_dl_begin((u8 *)gdl, player);
     gdl[0].words.w0 = 0xDC08000A;
     gdl[0].words.w1 = (u32)(D_800D9FB0 + (D_800BE9C0 << 5));
     gdl[1].words.w0 = 0xDC08060A;
     gdl[1].words.w1 = (u32)(D_800D9FB0 + (D_800BE9C0 << 5) + 0x10);
     gdl += 2;
-    func_1510D090(player);
-    gdl = func_15173948(func_1510D338(gdl, 0xFF, 0xFF, player), 1);
+    tint_channels_update(player);
+    gdl = func_15173948(tint_emit_prim_env_colors(gdl, 0xFF, 0xFF, player), 1);
     gdl->words.w0 = 0xDA380003;
     gdl->words.w1 = (u32)D_80089810;
     gdl++;
@@ -326,21 +337,21 @@ Gfx *func_1510BF50(Gfx *gdl, s16 player) {
             gdl = func_150C8B00(gdl);
             break;
         case 0x1A:
-            gdl = func_151009E4(gdl);
+            gdl = sky_segments_set(gdl);
             break;
         case 0x13:
-            gdl = func_150E0150(gdl);
+            gdl = level_parts_set_segments(gdl);
             break;
         case 0x35:
             gdl = func_150CFAF8(gdl);
             break;
         case 0x33:
-            gdl = func_150D7B6C(gdl);
+            gdl = anim_segments_set(gdl);
             break;
         }
     }
 
-    func_1510F800(0);
+    collision_select_area(0);
     if (D_800DCD7C == 0) {
         gdl->words.w0 = 0xDC280C0A;
         gdl->words.w1 = (u32)(D_800D9FF0 + player * 0x10 + D_800BE9C0 * 8);
@@ -367,7 +378,7 @@ Gfx *func_1510BF50(Gfx *gdl, s16 player) {
                     }
                     if (D_800B1214 != 0) {
                         gDPPipeSync(gdl++);
-                        gdl = func_15173948(func_1510D338(gdl, 0xFF, 0xFF, player), 1);
+                        gdl = func_15173948(tint_emit_prim_env_colors(gdl, 0xFF, 0xFF, player), 1);
                         if (D_800BE9F0 == 0x35) {
                             gdl = func_150CFAF8(gdl);
                         }
@@ -378,7 +389,7 @@ Gfx *func_1510BF50(Gfx *gdl, s16 player) {
                     D_800BEFC0 = 0;
                     p = &D_800DBFF0[player];
                     if ((p->pad880[0x38] != 0) && (p->unk84 & 8)) {
-                        gdl = func_1512EB60(gdl, p);
+                        gdl = camera_read_depth_row(gdl, p);
                         gDPPipeSync(gdl++);
                     }
                 } else {
@@ -395,7 +406,7 @@ Gfx *func_1510BF50(Gfx *gdl, s16 player) {
         gdl = func_1515EAB4(gdl, *dataPtr, D_800DA240, D_800DA241, vpPtr + D_800BE9C0 * 8);
         if (D_800B1218 != 0) {
             gDPPipeSync(gdl++);
-            gdl = func_1510D338(gdl, 0xFF, 0xFF, player);
+            gdl = tint_emit_prim_env_colors(gdl, 0xFF, 0xFF, player);
             gdl->words.w0 = 0xDE000000;
             gdl->words.w1 = D_800B1218;
             gdl++;
@@ -406,11 +417,11 @@ Gfx *func_1510BF50(Gfx *gdl, s16 player) {
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BF50.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/player_view_dl_build.s")
 #endif
 #ifdef NON_MATCHING
 /* P181 */
-s32 func_1510D66C(s32, s32 *, s32, s32);
+s32 texture_cache_lookup(s32, s32 *, s32, s32);
 extern s32 D_800B1268[]; /* per texture key: the texture address its G_SETTIMG loads */
 
 // dl_find_texture_vertices: P181: scans display list `dl` for the (skip+1)-th G_SETTIMG (0xFD) of texture
@@ -421,7 +432,8 @@ extern s32 D_800B1268[]; /* per texture key: the texture address its G_SETTIMG l
 // index used of the last load. 0 when the texture is not found. The G_VTX scan back steps one command before the
 // load (the asm re-reads that command as part of the triangle phase). `vbase` is an uninitialised stack slot in
 // the asm (only read when a texture or G_ENDDL ends the list before any vertex load); 0 here.
-s32 func_1510C4E0(Gfx *dl, s32 key, Vtx **out, s32 skip) {
+/* was func_1510C4E0 */
+s32 dl_find_texture_vertices(Gfx *dl, s32 key, Vtx **out, s32 skip) {
     s32 idx[12];
     s32 tmp;
     s32 state;
@@ -437,7 +449,7 @@ s32 func_1510C4E0(Gfx *dl, s32 key, Vtx **out, s32 skip) {
     u32 vbase;
     s32 c;
 
-    func_1510D66C(key, &tmp, 3, 0);
+    texture_cache_lookup(key, &tmp, 3, 0);
     *out = NULL;
     state = 0;
     max = 0;
@@ -559,24 +571,25 @@ s32 func_1510C4E0(Gfx *dl, s32 key, Vtx **out, s32 skip) {
     return (s32)(vbase + (max + 1) * 16 - (u32)*out) >> 4;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510C4E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/dl_find_texture_vertices.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P181 */
 u8 *allocate_memory(s32, s32, s32, s32);
-s32 func_1510C4E0(Gfx *dl, s32 key, Vtx **out, s32 skip);
+s32 dl_find_texture_vertices(Gfx *dl, s32 key, Vtx **out, s32 skip);
 extern s32 D_800B0E00[];  /* level display lists */
 extern s32 D_800B1214;    /* = D_800B0E00[1] */
 extern u8 *D_800DA280[];  /* texture scroller records, D_800D9E64 of them */
 extern Vtx *D_800B1220[2]; /* the two vertex buffers the scrollers patch */
 
-// tex_scroll_create: P181: creates the (only) texture scroller record (20 bytes, see func_1510CE28): disabled flag
+// tex_scroll_create: P181: creates the (only) texture scroller record (20 bytes, see tex_scroll_update): disabled flag
 // +0xC = `off`, angle +0xE = 0, speed +0x10, radius +0x12. For texture key `key` in level display list 0 and key
-// D_80091B68 in list 1 (func_1510C4E0) it stores the vertex count (+8 / +9), the first vertex index in vertex
+// D_80091B68 in list 1 (dl_find_texture_vertices) it stores the vertex count (+8 / +9), the first vertex index in vertex
 // buffer 0 / 1 (+0xA / +0xB) and a copy of their base texture coordinates (s16 pairs, +0 / +4). NULL when a record
 // exists already or the allocation fails (the coordinate arrays are not checked).
-u8 *func_1510CA2C(s32 key, s32 off, s32 speed, s32 radius) {
+/* was func_1510CA2C */
+u8 *tex_scroll_create(s32 key, s32 off, s32 speed, s32 radius) {
     u8 *r;
     s16 *base;
     Vtx *v;
@@ -597,7 +610,7 @@ u8 *func_1510CA2C(s32 key, s32 off, s32 speed, s32 radius) {
     r[0xC] = off;
     *(u16 *)(r + 0x10) = speed;
     *(u16 *)(r + 0x12) = radius;
-    n = func_1510C4E0((Gfx *)D_800B0E00[0], key, &v, 0);
+    n = dl_find_texture_vertices((Gfx *)D_800B0E00[0], key, &v, 0);
     if (n != 0) {
         r[8] = n;
         r[0xA] = ((u8 *)v - (u8 *)D_800B1220[0]) >> 4;
@@ -608,7 +621,7 @@ u8 *func_1510CA2C(s32 key, s32 off, s32 speed, s32 radius) {
             base[i * 2 + 1] = v[i].v.tc[1];
         }
     }
-    n = func_1510C4E0((Gfx *)D_800B1214, D_80091B68, &v, 0);
+    n = dl_find_texture_vertices((Gfx *)D_800B1214, D_80091B68, &v, 0);
     if (n != 0) {
         r[9] = n;
         r[0xB] = ((u8 *)v - (u8 *)D_800B1220[1]) >> 4;
@@ -622,7 +635,7 @@ u8 *func_1510CA2C(s32 key, s32 off, s32 speed, s32 radius) {
     return r;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510CA2C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/tex_scroll_create.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -638,7 +651,8 @@ extern Vtx *D_800B1220[2]; /* the two vertex buffers the scrollers patch */
 // base pairs at +0) and r[9] vertices of buffer 1 (from vertex r[0xB], base pairs at +4). A record without the
 // buffer-0 list uses the offset of the previous record (the asm keeps it in registers; it starts as two
 // uninitialised stack halfwords, 0 here). The asm returns nothing; s32 matches the caller's prototype.
-s32 func_1510CE28(void) {
+/* was func_1510CE28 */
+s32 tex_scroll_update(void) {
     u8 *r;
     Vtx *v;
     s16 *base;
@@ -687,5 +701,5 @@ s32 func_1510CE28(void) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510CE28.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/tex_scroll_update.s")
 #endif

@@ -76,7 +76,7 @@ void func_150C851C(s32 arg0) {
         lo = (arg0 * 300) >> 8;
         for (i = 0; i < 10; i++) {
             v = lo;
-            v += func_150ADA20() % (u32)range;
+            v += random_int() % (u32)range;
             *(s16 *)&D_eu_800BE900[i].pad6[2] = v;
         }
     }
@@ -84,7 +84,7 @@ void func_150C851C(s32 arg0) {
 
 typedef struct { s32 *a[2]; } P2;
 extern P2 D_eu_80088BB0;
-s32 func_1510D66C(s32, s32 *, s32, s32);
+s32 texture_cache_lookup(s32, s32 *, s32, s32);
 Gfx *func_150C8B00(Gfx *gfx) {
     s32 i;
     s32 buf[3];
@@ -101,13 +101,13 @@ Gfx *func_150C8B00(Gfx *gfx) {
         if (D_eu_800BE900[i].u0 >= 2) {
             D_eu_800BE900[i].u0 = 0;
         }
-        lvl = func_1510D66C(tabs.a[D_eu_800BE900[i].u0][lvl], buf, 3, 0);
+        lvl = texture_cache_lookup(tabs.a[D_eu_800BE900[i].u0][lvl], buf, 3, 0);
         gSPSegment(gfx++, i + 1, lvl);
     }
     return gfx;
 }
 
-u8 *func_15073118(struct127 *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
+u8 *obj_spawn_child_at_joint(struct127 *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
 void func_1503E5F8(f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 extern f32 D_800A08C0;
 extern f32 D_800A08C4;
@@ -145,7 +145,7 @@ s32 func_150C8C30(u8 *arg0, struct127 *arg1) {
         m[2][3] = 0.0f;
         m[3][3] = 1.0f;
         func_1503E5F8((f32 *)m, &x, &y, &z, &r0, &r1, &r2, &u0, &u1, &u2);
-        e = func_15073118(arg1, -1, 0x4E, 0.0f, 0.0f, 0.0f, 0.0f, D_800A08C0, D_800A08C4, D_800A08C8, 0xC8);
+        e = obj_spawn_child_at_joint(arg1, -1, 0x4E, 0.0f, 0.0f, 0.0f, 0.0f, D_800A08C0, D_800A08C4, D_800A08C8, 0xC8);
         *(f32 *)(e + 0x14) = x;
         *(f32 *)(e + 0x18) = y;
         *(f32 *)(e + 0x1C) = z;
@@ -210,7 +210,7 @@ extern f32 D_800A08FC; /* 2 pi */
 extern f32 D_800A0900; /* max squared horizontal distance of a spawn point: 10894295 (3300.6^2) */
 extern f32 D_800A0904; /* 256 / 360: degrees -> angle byte */
 f32 angle_byte_cos(u8);
-s32 func_150ADA20(void);
+s32 random_int(void);
 void node_destroy(struct102 *arg0);
 
 // ring_effect_update: per frame for a ring effect node: counts the life timer (+0x28, flag +0x1C & 1) down, grows
@@ -242,7 +242,7 @@ void func_150C8F68(u8 *node) {
             *(f32 *)(node + 0x50) += *(f32 *)(node + 0x38) * D_800BE9A4 * (D_800A08FC * *(f32 *)(node + 0x44));
             while (1.0f < *(f32 *)(node + 0x50)) {
                 s32 view = (s32)(*(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x380) * D_800A0904);
-                s32 a = (u32)func_150ADA20() % 81 + view - 0x28;
+                s32 a = (u32)random_int() % 81 + view - 0x28;
                 f32 s = angle_byte_cos((u8)(a - 0x40));
                 f32 c = angle_byte_cos((u8)a);
                 f32 pos[3]; /* sp74 */
@@ -283,7 +283,7 @@ typedef struct {
 extern RingProfile D_80088BC0;
 extern s32 *D_80091234;  /* the ring texture's id */
 extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
-s32 func_1510D66C(s32, s32 *, s32, s32);
+s32 texture_cache_lookup(s32, s32 *, s32, s32);
 Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *arg7);
@@ -294,7 +294,7 @@ void func_150CD2A0(f32, f32 *, f32 *, f32 *);
 #define RING_DL(a, b) (gdl->words.w0 = (a), gdl->words.w1 = (b), gdl++)
 
 // ring_effect_draw: draws a ring effect node: render state (geometry mode, colours, combiner 0x21, render mode
-// D_800A4EA8 entry 14), the ring texture (func_1510D66C(*D_80091234): CI4 with 6 mip levels in tiles 0..5, its TLUT is
+// D_800A4EA8 entry 14), the ring texture (texture_cache_lookup(*D_80091234): CI4 with 6 mip levels in tiles 0..5, its TLUT is
 // the last 0x20 bytes) and a surface of revolution: the cross-section D_80088BC0 (radial offset, height, scaled by
 // +0x40) swept around the centre +0x10 / +0x14 / +0x18 at radius +0x44, one vertex column per direction (+0x360:
 // cos / sin pairs, +0x24 of them, the last column repeats the first). Columns farther than 3300.6 from the world
@@ -318,7 +318,7 @@ Gfx *func_150C92B8(Gfx *gdl, u8 *node, s16 arg2) {
     gdl = func_15142CF0(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gdl = gfx_set_combine_mode(gdl, 0x21, &flag);
     gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4EA8[29] | D_800A4EA8[28], &flag);
-    tex = func_1510D66C(*D_80091234, &size, 3, 0);
+    tex = texture_cache_lookup(*D_80091234, &size, 3, 0);
     gSPTexture(gdl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     RING_DL(0xFD500000, tex);        /* texture image: CI, 16-bit words (block load) */
     RING_DL(0xF5500000, 0x07000000); /* tile 7: load tile */
@@ -436,7 +436,7 @@ void func_150C9EB4(u8 *arg0, f32 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P220: 
     sp.u3C = 0xC01;
     sp.u34 = 0x200005;
     sp.u38 = 0;
-    sp.u3E = (func_150ADA20() % 81U) + 0x19;
+    sp.u3E = (random_int() % 81U) + 0x19;
     sp.u40 = 0;
     sp.u44 = 0;
     sp.u94 = 5;
@@ -448,24 +448,24 @@ void func_150C9EB4(u8 *arg0, f32 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P220: 
     sp.u4C = 0;
     sp.u4D = 0;
     sp.u4E = 0;
-    sp.u4F = (func_150ADA20() % 156U) + 0x64;
+    sp.u4F = (random_int() % 156U) + 0x64;
     sp.u50 = 0xFF;
-    sp.u5C = sp.u60 = (func_150ADA68() * 500.0f) + 500.0f;
+    sp.u5C = sp.u60 = (random_float() * 500.0f) + 500.0f;
     *(V3i_B8AA0 *)sp.u64 = *(V3i_B8AA0 *)arg1;
     sp.u70 = 0.0f;
     sp.u74 = 0.0f;
     sp.u78 = 0.0f;
-    sp.u88 = ((func_150ADA68() * 550.0f) + -1416.0f) * 0.001f;
+    sp.u88 = ((random_float() * 550.0f) + -1416.0f) * 0.001f;
     sp.u52 = 0x14;
     sp.u54 = 0xC;
     sp.u56 = 0;
     sp.u58 = 1.0f;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         a = 0x40;
     } else {
         a = 0;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         b = 0x80;
     } else {
         b = 0;
@@ -473,8 +473,8 @@ void func_150C9EB4(u8 *arg0, f32 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P220: 
     sp.u8C = b | 7 | a | 0x200;
     sp.u96 = -1;
     sp.u97 = -1;
-    r = (func_150ADA20() % 11U) - 0x12;
-    f = (*(f32 *)(arg0 + 0x20) * 0.961f) + ((*(f32 *)(arg0 + 0x20) * 0.24300002f) * func_150ADA68());
+    r = (random_int() % 11U) - 0x12;
+    f = (*(f32 *)(arg0 + 0x20) * 0.961f) + ((*(f32 *)(arg0 + 0x20) * 0.24300002f) * random_float());
     func_15143794(arg2, r, f, sp.u7C);
     func_151308E4(&sp, 1, 0, arg0[0xC], arg0[1]);
 }
@@ -485,10 +485,10 @@ void func_150C9EB4(u8 *arg0, f32 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P220: 
  * and not immune, that is a player (state 1) or type 0x53, is hit when the ring of radius node +0x44 has reached
  * it: ring - (horizontal distance to the node centre +0x10 / +0x18 - 100, 150 more for an unlifted type 0x53)
  * in [0, 250). Type 0x53 gets disable_run = 10, its script restarted (unk218 NULL) at command 0x13 (0x14 when its
- * holder D_800CC2D0[unk124] holds something, unk65); others the hit func_1505D024(obj, 0x6000E, facing, -1).
- * The asm returns its leftover v0: the state of the last object, or func_1505D024's result when that one was hit;
+ * holder D_800CC2D0[unk124] holds something, unk65); others the hit obj_send_hit(obj, 0x6000E, facing, -1).
+ * The asm returns its leftover v0: the state of the last object, or obj_send_hit's result when that one was hit;
  * the C keeps that value. */
-s32 func_1505D024(struct127 *obj, s32 flags, u16 val, s32 arg3);
+s32 obj_send_hit(struct127 *obj, s32 flags, u16 val, s32 arg3);
 s32 func_150CA0DC(u8 *node) {
     struct127 *o;
     s32 ret = 0;
@@ -523,7 +523,7 @@ s32 func_150CA0DC(u8 *node) {
                 o->unk232 = 0x14;
             }
         } else {
-            ret = func_1505D024(o, 0x6000E, o->unk7A, -1);
+            ret = obj_send_hit(o, 0x6000E, o->unk7A, -1);
         }
     }
     return ret;
@@ -604,27 +604,27 @@ void func_150CA2C4(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P220: a
     sp.u54 = 1.0f;
     sp.u58 = 1.0f;
     sp.u84 = 0x29E8;
-    sp.u44 = func_150ADA68() * 360.0f;
-    sp.u48 = func_150ADA68() * 360.0f;
-    temp_f18 = func_150ADA68() * 360.0f;
+    sp.u44 = random_float() * 360.0f;
+    sp.u48 = random_float() * 360.0f;
+    temp_f18 = random_float() * 360.0f;
     sp.u8A = 0x20;
     sp.u38 = D_800A0950;
     sp.u4C = temp_f18;
     sp.u78 = 0.0f;
     sp.u34 = 1.0f;
-    sp20 = func_150ADA20();
-    func_15143794((s16) arg2, (s16) (((u32) sp20 % 26U) - 0x2D), ((func_150ADA68() * 81.0f) + 60.0f) * (*(f32 *)((u8 *)arg0 + 0x20)) * D_800A0954, &sp.u68);
-    sp.u74 = ((func_150ADA68() * 260.0f) + -130.0f) * D_800A0958;
-    sp.u7C = ((func_150ADA68() * 260.0f) + -130.0f) * D_800A0958;
-    sp.u88 = (func_150ADA20() % 41U) + 0x28;
-    sp.u80 = ((func_150ADA68() * D_800A0960) + D_800A0964) * D_800A0968;
-    temp_f4 = func_150ADA68() * 400.0f;
+    sp20 = random_int();
+    func_15143794((s16) arg2, (s16) (((u32) sp20 % 26U) - 0x2D), ((random_float() * 81.0f) + 60.0f) * (*(f32 *)((u8 *)arg0 + 0x20)) * D_800A0954, &sp.u68);
+    sp.u74 = ((random_float() * 260.0f) + -130.0f) * D_800A0958;
+    sp.u7C = ((random_float() * 260.0f) + -130.0f) * D_800A0958;
+    sp.u88 = (random_int() % 41U) + 0x28;
+    sp.u80 = ((random_float() * D_800A0960) + D_800A0964) * D_800A0968;
+    temp_f4 = random_float() * 400.0f;
     sp.u8C = 0;
     sp.u90 = 0;
     temp_f2 = (temp_f4 + 199.0f) * D_800A0968;
     sp.u3C = temp_f2;
     sp.u40 = temp_f2;
-    sp.u94 = (func_150ADA20() % 101U) + 0x9B;
+    sp.u94 = (random_int() % 101U) + 0x9B;
     sp.u95 = 7;
     sp.u96 = 0;
     sp.u97 = 0;
@@ -655,16 +655,16 @@ s32 func_150CA57C(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-// landing_dust_burst: P201: the burst of effects under the character `obj` (the only caller, func_15070014, passes
+// landing_dust_burst: P201: the burst of effects under the character `obj` (the only caller, objfx_ca150, passes
 // D_800D154C) when it lands / stamps: position = obj x, y + 100, z; the ground below it (func_15046F70 down to
 // y - 300, HitInfo started by func_1504715C) gives y, else the floor height obj +0x180. Rumbles the current
-// player's pad (func_1512D748(view, 7, 1)), takes the ground colour at the position (func_150CD2A0, three floats
+// player's pad (camera_shake_start(view, 7, 1)), takes the ground colour at the position (func_150CD2A0, three floats
 // -> bytes), shakes the camera (func_151D5404) and creates a 13-point dust ring (func_150C8DD0, view 0xFF, group 1).
 // On real ground it also throws four dust puffs (sprite_fx_spawn_quad kinds 0x51..0x54) at the corners of a square of
 // half-size (rand * 96 + 352) / 2 turned by the character's yaw (obj +0x7A), then func_150CAE30 and a debris spray
 // func_1514CBE8 in the ground colour. The N64 code also sums the code words func_15194210..func_151942B0 and on a
 // mismatch (anti-tamper) clears the matrix count D_800C3E7C; the port has no MIPS code there, so the
-// NON_MATCHING build skips the check (as func_150AEB9C, func_151E86A4). Returns 0: game_981E0 calls it without a
+// NON_MATCHING build skips the check (as owner_spawn_children, func_151E86A4). Returns 0: game_981E0 calls it without a
 // prototype (implicit int); the asm leaves a callee's v0 that nobody reads (tested as the void variant d_a150.c).
 s32 func_15046F70(u8 *, u16, f32, u8 *);
 void func_1504715C(void *, u8 *);
@@ -725,7 +725,7 @@ s32 func_150CA150(u8 *obj) {
         return 0;
     }
     func_1504715C(hit, obj);
-    func_1512D748((struct108 *) ((u8 *) D_800DBFF0 + D_800BEE08 * 0x9A0), 7, 1);
+    camera_shake_start((struct108 *) ((u8 *) D_800DBFF0 + D_800BEE08 * 0x9A0), 7, 1);
     pos[0] = *(f32 *) (obj + 0x14);
     pos[1] = *(f32 *) (obj + 0x18) + 100.0f;
     pos[2] = *(f32 *) (obj + 0x1C);
@@ -764,13 +764,13 @@ s32 func_150CA150(u8 *obj) {
     angle = -0x40 - (*(u16 *) (obj + 0x7A) >> 8);
     s = angle_byte_cos(angle);
     c = angle_byte_cos((u8) (angle - 0x40));
-    size = (func_150ADA68() * 96.0f + 352.0f) * 0.5f;
+    size = (random_float() * 96.0f + 352.0f) * 0.5f;
     puff.w0 = 0x701;
-    func_150ADA20();
+    random_int();
     puff.h4 = 0x408;
     puff.w8 = 0;
     puff.wC = 0;
-    puff.life = func_150ADA20() % 41U + 0xB4;
+    puff.life = random_int() % 41U + 0xB4;
     puff.b11 = puff.b12 = puff.b13 = 0xFF;
     puff.b14 = 0xFF;
     puff.b15 = 0xFF;
@@ -802,11 +802,11 @@ s32 func_150CA150(u8 *obj) {
     sprite_fx_spawn_quad((s32) &puff, (s32) col, 0xC, 0, (ns + pos[0]) - nc, pos[1] + 10.0f, (ns + pos[2]) + nc, size, size,
                   angle, 0, 0, 0xFF, 0);
     func_150CAE30((u8 *) pos);
-    i = func_150ADA20() % 21U + 0xA;
+    i = random_int() % 21U + 0xA;
     rgb[0] = cr;
     rgb[1] = cg;
     rgb[2] = cb;
-    func_1514CBE8(pos[0], pos[1], pos[2], func_150ADA68() * 81.0f + 150.0f, 0, 0xFF, (s16) i, 0x14, 0, 0.0f,
+    func_1514CBE8(pos[0], pos[1], pos[2], random_float() * 81.0f + 150.0f, 0, 0xFF, (s16) i, 0x14, 0, 0.0f,
                   (s32) rgb, 0xFF);
     return 0;
 }
@@ -823,11 +823,11 @@ s32 func_1514CBE8(f32, f32, s32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
 void func_150CAE30(u8 *arg0) {
     s16 sp3E;
 
-    sp3E = (func_150ADA20() % 21U) + 0xA;
+    sp3E = (random_int() % 21U) + 0xA;
 #ifdef NON_MATCHING
-    func_1514CBE8((*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(f32 *)((u8 *)arg0 + 8)), (func_150ADA68() * 59.0f) + 170.0f, 0, 0xFF, (s32) sp3E, 0x13, 0, 0.0f, 0, 0xFF);
+    func_1514CBE8((*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(f32 *)((u8 *)arg0 + 8)), (random_float() * 59.0f) + 170.0f, 0, 0xFF, (s32) sp3E, 0x13, 0, 0.0f, 0, 0xFF);
 #else
-    func_1514CBE8((*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(s32 *)((u8 *)arg0 + 8)), (func_150ADA68() * 59.0f) + 170.0f, 0, 0xFF, (s32) sp3E, 0x13, 0, 0.0f, 0, 0xFF);
+    func_1514CBE8((*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(s32 *)((u8 *)arg0 + 8)), (random_float() * 59.0f) + 170.0f, 0, 0xFF, (s32) sp3E, 0x13, 0, 0.0f, 0, 0xFF);
 #endif
 }
 
@@ -892,7 +892,7 @@ s32 func_150CAF04(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u3C = 0xE03;
     sp.u34 = 0x200005;
     sp.u38 = 0;
-    sp.u3E = (func_150ADA20() % 26U) + 0x19;
+    sp.u3E = (random_int() % 26U) + 0x19;
     sp.u40 = 0;
     sp.u44 = 0;
     sp.u4C = 0xB0;
@@ -902,21 +902,21 @@ s32 func_150CAF04(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u49 = 0xB;
     sp.u4A = 0x6A;
     sp.u4B = 0xFF;
-    sp.u4F = (func_150ADA20() % 156U) + 0x64;
+    sp.u4F = (random_int() % 156U) + 0x64;
     sp.u50 = 0xFF;
     sp.u94 = 3;
     sp.u95 = 3;
-    sp.u5C = sp.u60 = (func_150ADA68() * 401.0f) + 800.0f;
+    sp.u5C = sp.u60 = (random_float() * 401.0f) + 800.0f;
     sp.u64 = arg2;
     sp.u68 = arg3;
     sp.u6C = arg4;
-    func_15143794(arg8, (s16) ((func_150ADA20() % 12U) - 0x15), ((func_150ADA68() * 300.0f) + 498.0f) * 0.1f, sp.u7C);
+    func_15143794(arg8, (s16) ((random_int() % 12U) - 0x15), ((random_float() * 300.0f) + 498.0f) * 0.1f, sp.u7C);
     sp.u8C = 0xE05;
     sp.u88 = 0.0f;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x80;
     }
     sp.u96 = 9;
@@ -994,16 +994,16 @@ s32 func_150CB2D0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u7E = 0x20;
     sp.u28[12] = arg4;
     sp.u28[1] = 0.2f;
-    func_15143794(arg8, (s16) (((u32) func_150ADA20() % 21U) - 0x28), ((func_150ADA68() * 204.0f) + 500.0f) * 0.1f, &sp.u5C);
-    sp.u68 = ((func_150ADA68() * 260.0f) + -130.0f) * 0.1f;
-    sp.u70 = ((func_150ADA68() * 260.0f) + -130.0f) * 0.1f;
-    sp.u7C = (func_150ADA20() % 51U) + 0x32;
-    sp.u74 = ((func_150ADA68() * 1008.0f) + -3085.0f) * 0.001f;
-    sp.u28[3] = ((func_150ADA68() * 601.0f) + 200.0f) * 0.001f;
+    func_15143794(arg8, (s16) (((u32) random_int() % 21U) - 0x28), ((random_float() * 204.0f) + 500.0f) * 0.1f, &sp.u5C);
+    sp.u68 = ((random_float() * 260.0f) + -130.0f) * 0.1f;
+    sp.u70 = ((random_float() * 260.0f) + -130.0f) * 0.1f;
+    sp.u7C = (random_int() % 51U) + 0x32;
+    sp.u74 = ((random_float() * 1008.0f) + -3085.0f) * 0.001f;
+    sp.u28[3] = ((random_float() * 601.0f) + 200.0f) * 0.001f;
     sp.u28[2] = sp.u28[3];
     sp.u80 = 0;
     sp.u84 = 0;
-    sp.u88 = (func_150ADA20() % 76U) + 0xB4;
+    sp.u88 = (random_int() % 76U) + 0xB4;
     sp.u89 = 4;
     sp.u8A = 0;
     sp.u8B = 0;

@@ -8,7 +8,7 @@
  *                (written by func_15036FD8): first N calls, then every 128th and every angle change of record 0
  *                (first 200).
  *  ?p69tri=N     func_150028BC (per-model triangle tables, called by func_1503D210 / func_1503DD8C): id -> result.
- *  ?p69att=N     func_1505C7D8 (attack hit test, from func_1504CB98 when +0xD0 != 0), func_150D5F7C (debris burst),
+ *  ?p69att=N     attack_hit_test (attack hit test, from func_1504CB98 when +0xD0 != 0), debris_burst_destroyed_object (debris burst),
  *                func_1507E7E4 (object animation start): every call up to N each, with the attacker's attack entry,
  *                health of the 25 records before -> after (hits), return value.
  *  ?p69floor=N   func_15046C6C (floor / wall probe pair; its func_150453BC call is in the same TU): position, max y,
@@ -128,17 +128,17 @@ static void healths(unsigned char *h) {
     for (i = 0; i < 25; i++) h[i] = vbe_ld8(D_800CC2D0 + i * REC + 0x1CA);
 }
 
-int __real_func_1505C7D8(void *self, int skip);
-int __wrap_func_1505C7D8(void *self, int skip) {
+int __real_attack_hit_test(void *self, int skip);
+int __wrap_attack_hit_test(void *self, int skip) {
     if (stubbed(128)) return 0;
     static unsigned n;
     unsigned char h0[25], h1[25];
     const unsigned char *r = self;
     int v, i, d0;
-    if (!flag(&fk, "p69att")) return __real_func_1505C7D8(self, skip);
+    if (!flag(&fk, "p69att")) return __real_attack_hit_test(self, skip);
     healths(h0);
     d0 = vbe_ld8(r + 0xD0);
-    v = __real_func_1505C7D8(self, skip);
+    v = __real_attack_hit_test(self, skip);
     healths(h1);
     if (n++ < (unsigned)fk) {
         port_log("[p69] attack call %u frame %u: rec %d id %02X skip %d +D0 %d -> %d anim %04X -> %d\n", n,
@@ -151,14 +151,14 @@ int __wrap_func_1505C7D8(void *self, int skip) {
     return v;
 }
 
-void __real_func_150D5F7C(void *obj, int a1, int a2);
-void __wrap_func_150D5F7C(void *obj, int a1, int a2) {
+void __real_debris_burst_destroyed_object(void *obj, int a1, int a2);
+void __wrap_debris_burst_destroyed_object(void *obj, int a1, int a2) {
     static unsigned n;
     if (stubbed(256)) return;
     if (flag(&fk, "p69att") && n++ < (unsigned)fk)
         port_log("[p69] debris call %u frame %u: rec %d id %02X args %d %d pos %.1f %.1f %.1f\n", n, port_frame_count,
                  recno(obj), vbe_ld8((unsigned char *)obj + 4), a1, a2, F(obj, 0x14), F(obj, 0x18), F(obj, 0x1C));
-    __real_func_150D5F7C(obj, a1, a2);
+    __real_debris_burst_destroyed_object(obj, a1, a2);
 }
 
 void __real_func_1507E7E4(void *obj, int anim, int prio, int time, int a4);
@@ -292,14 +292,14 @@ void __real_func_15036FD8(void);
 void p81_look_hook(int pre);
 void __wrap_func_15036FD8(void) { if (!stubbed(32)) { p81_look_hook(1); __real_func_15036FD8(); p81_look_hook(0); } }
 
-/* func_150D71D4 (P67 debris piece; reached through a ROM function table, so the wrap also replaces the table entry):
+/* debris_follow_owner_update (P67 debris piece; reached through a ROM function table, so the wrap also replaces the table entry):
  * ?p69att logs the first N calls; ?p69stub bit 64 skips it (returns 0). */
-int __real_func_150D71D4(void *a0, int a1);
-int __wrap_func_150D71D4(void *a0, int a1) {
+int __real_debris_follow_owner_update(void *a0, int a1);
+int __wrap_debris_follow_owner_update(void *a0, int a1) {
     static unsigned n;
     int v;
     if (stubbed(64)) return 0;
-    v = __real_func_150D71D4(a0, a1);
+    v = __real_debris_follow_owner_update(a0, a1);
     if (flag(&fk, "p69att") && n++ < (unsigned)fk)
         port_log("[p69] debris piece call %u frame %u: obj %p a1 %d -> %d\n", n, port_frame_count, a0, a1, v);
     return v;

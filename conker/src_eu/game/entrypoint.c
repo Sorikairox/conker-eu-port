@@ -7,7 +7,7 @@
 // game entrypoint
 #ifdef NON_MATCHING
 /* P281: readable C for func_15007830 (game entry point, compiled C, 128 insns; replaces the commented US draft
-   below). Verified with difftest up to the N-th frame (DIFFTEST_STOPCALL on func_150186D0): the loop never returns. */
+   below). Verified with difftest up to the N-th frame (DIFFTEST_STOPCALL on game_main_loop): the loop never returns. */
 extern s32 D_800D3048;
 extern OSMesgQueue D_800BEE30;   /* main message queue */
 extern OSMesg D_800BEE48[16];
@@ -20,24 +20,24 @@ extern s16 D_800BEEC8;
 extern s32 D_800BEE24;
 extern s32 D_800BEE20;
 extern s32 D_800BEE08;
-void func_15003570(void);
+void texture_build_size_table(void);
 void func_10008180(void);
-void func_15016588(void);
+void level_build_flag_bitmask(void);
 void func_151EF7B0(void);
-void func_15006234(void);
+void controller_init_all(void);
 void func_151DDF20(void);
 void func_150158D0(s16 idx);
 void func_151E582C(void);
-void func_15017498(void);
-void func_150ADACC(s32 arg0);
-void func_15007B3C(void);
-void func_150186D0(void);
+void level_lights_clear(void);
+void random_seed(s32 arg0);
+void level_load(void);
+void game_main_loop(void);
 void func_15008A60(void);
-void func_1509C120(void);
+void save_block_realloc_random(void);
 // game_main: the game thread's entry. Initialises the subsystems and the message queue, then loops forever: frame
-// states 1 / 5 run func_151E582C, then (from 2) the frame update, the 0x81280783 hook in mode 2 and func_15007A70
-// with the low halves of D_800BEE24 / D_800BEE20 / D_800BE9F4, then (from 3) func_15007B3C and the state goes back
-// to 0; every pass ends with func_100051E8, D_800BEE08 = 0 and func_150186D0.
+// states 1 / 5 run func_151E582C, then (from 2) the frame update, the 0x81280783 hook in mode 2 and level_start_game
+// with the low halves of D_800BEE24 / D_800BEE20 / D_800BE9F4, then (from 3) level_load and the state goes back
+// to 0; every pass ends with func_100051E8, D_800BEE08 = 0 and game_main_loop.
 void func_15007830(void) {
     func_15007A20();
     D_800D3048 = 0;
@@ -46,24 +46,24 @@ void func_15007830(void) {
     D_800BEE88[0x10] = 2;
     D_800BEA37 = 0;
     func_100050A0(&D_800BEE30);
-    func_15003570();
+    texture_build_size_table();
     D_800BEECB = 0;
     func_10008180();
-    func_15000000();
-    func_15016588();
+    game_init_message_queues();
+    level_build_flag_bitmask();
     func_151EF7B0();
     D_800BEEC8 = 0;
-    func_150061B0();
-    func_15006234();
+    controller_init_si_queue();
+    controller_init_all();
     func_151DDF20();
     func_150158D0(0);
     func_15008A60();
-    func_15042D50();
+    text_queue_reset();
     D_800BEA35 = 5;
     D_800BEE24 = 0;
     D_800BEE20 = 1;
     D_800BEECA = 1;
-    func_1509C120();
+    save_block_realloc_random();
     while (TRUE) {
         switch (D_800BEA35) {
             case 1:
@@ -71,21 +71,21 @@ void func_15007830(void) {
                 func_151E582C();
                 /* fallthrough */
             case 2:
-                func_15017498();
+                level_lights_clear();
                 if (D_800E0B94 == 2) {
-                    func_150ADACC(0x81280783);
+                    random_seed(0x81280783);
                 }
                 /* D_800BE9F4 is declared `u16 *` in variables.h; the code reads the low half of the word */
-                func_15007A70((s16) D_800BEE24, (s16) D_800BEE20, ((s16 *) &D_800BE9F4)[1]);
+                level_start_game((s16) D_800BEE24, (s16) D_800BEE20, ((s16 *) &D_800BE9F4)[1]);
                 /* fallthrough */
             case 3:
-                func_15007B3C();
+                level_load();
                 D_800BEA35 = 0;
                 break;
         }
         func_100051E8();
         D_800BEE08 = 0;
-        func_150186D0();
+        game_main_loop();
     }
 }
 #else
@@ -100,42 +100,42 @@ void func_15007830(void) {
 //     D_800BEA68->unk20 = 2;
 //     D_800BE617 = 0;
 //     func_100050A0(&D_800BEA10);
-//     func_15003570();
+//     texture_build_size_table();
 //     D_800BEAAB = 0;
 //     func_10008180();
-//     func_15000000();
-//     func_15016588();
+//     game_init_message_queues();
+//     level_build_flag_bitmask();
 //     func_151EEFF0();
 //     D_800BEAA8 = 0;
-//     func_150061B0();
-//     func_15006234();
+//     controller_init_si_queue();
+//     controller_init_all();
 //     func_151DD970();
 //     func_15015920(0);
 //     func_15008A60();
-//     func_15042D50();
+//     text_queue_reset();
 //     D_800BEA04[0] = 0;
 //     D_800BEA00[0] = 1;
 //     D_800BE615 = 5;
 //     D_800BEAAA = 1;
-//     func_1509C120();
+//     save_block_realloc_random();
 //     do {
 //         switch(D_800BE615) {
 //             case 0:
 //             case 4:
 //                 func_151E50C8();
 //             case 1:
-//                 func_15017498();
+//                 level_lights_clear();
 //                 if (2 == D_800E0B94) {
-//                     func_150ADACC(0x81280783);
+//                     random_seed(0x81280783);
 //                 }
-//                 func_15007A70(D_800BEA04[1], D_800BEA00[1], D_800BE9F4[1]);
+//                 level_start_game(D_800BEA04[1], D_800BEA00[1], D_800BE9F4[1]);
 //             case 2:
-//                 func_15007B3C();
+//                 level_load();
 //                 D_800BE615 = 0U;
 //             case 3:
 //                 func_100051E8();
 //                 D_800BE9E8 = 0;
-//                 func_150186D0();
+//                 game_main_loop();
 //         }
 //     } while (1);
 // }

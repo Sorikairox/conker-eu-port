@@ -6,13 +6,13 @@
 #ifdef NON_MATCHING
 /* P188 */
 void *allocate_memory(s32, s32, s32, s32);
-u8 *func_151149AC(u8 id);
+u8 *world_record_find(u8 id);
 /* P188: IDO's f32 -> u32 conversion kept to a byte: values <= -1 give 0xFFFFFFFF */
 #define P188_F2U8(v) (((v) <= -1.0f) ? 0xFF : (u8) (u32) (v))
 
 /*
  * model_light_create: P188: creates a light record (44 bytes, allocate_memory) for the model `id`
- * (func_151149AC: origin s16 +0x10..+0x14, vertex count u16 +0x16, vertices +0x28, 16 bytes each, s16 x / y / z) and
+ * (world_record_find: origin s16 +0x10..+0x14, vertex count u16 +0x16, vertices +0x28, 16 bytes each, s16 x / y / z) and
  * appends it to the list D_800DD410 (count D_800DD418). Record: +0 id, +1 flags, +2 another light of the same model
  * was there before, +4 1 / (range * 0.01)^2 (0 for range 0), +8 intensity, +0xC range, +0xE..+0x12 light position
  * relative to the model origin, +0x14 0, +0x16 / +0x17 the two s8 factors, +0x18..+0x1D six colour bytes (kind 1).
@@ -43,7 +43,7 @@ void func_15177410(u8 flags, u8 id, s16 x, s16 y, s16 z, f32 angle, u16 range, f
     }
     ((u8 **) D_800DD410)[D_800DD418] = light;
     D_800DD418++;
-    model = func_151149AC(id);
+    model = world_record_find(id);
     light[1] = flags;
     light[0] = id;
     found = 0;
@@ -137,8 +137,8 @@ void func_15177410(u8 flags, u8 id, s16 x, s16 y, s16 z, f32 angle, u16 range, f
 
 #ifdef NON_MATCHING
 /* P122 */
-u8 *func_151149AC(u8 id);
-void func_15114E8C(f32 (*mf)[4], u8 *model);
+u8 *world_record_find(u8 id);
+void world_record_build_matrix(f32 (*mf)[4], u8 *model);
 void func_150A7E40(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 void func_150A7480(Vtx *out, s32 count, u8 *state, u8 *phase, f32 *amp, Vtx *base);
 void func_150A75A0(Vtx *out, s32 count, u8 *state, u8 *phase, Vtx *base);
@@ -146,7 +146,7 @@ void func_150A76A8(Vtx *out, s32 count, u8 *state, u8 *colour, u8 *phase, Vtx *b
 void func_150A7840(Vtx *out, s32 count, u8 *state, u8 *colour, u8 *phase, f32 *amp, Vtx *base);
 void func_150A79FC(Vtx *out, s32 count, u8 *state, u8 *hue, u8 *phase, f32 *amp, Vtx *base);
 
-/* Model record (func_151149AC(id)): f32 position +0x0..+0x8, s16 integer offset +0x10..+0x14, u16 vertex count
+/* Model record (world_record_find(id)): f32 position +0x0..+0x8, s16 integer offset +0x10..+0x14, u16 vertex count
  * +0x16, Vtx *frame[2] +0x20 (the buffer drawn in frame D_800BE9C0), Vtx *base +0x28, f32 scale +0x2C..+0x34,
  * u8 flags +0x6F (low nibble: visible). */
 #define VTXANIM_COUNT(m) (*(u16 *) ((m) + 0x16))
@@ -161,7 +161,7 @@ void func_150A79FC(Vtx *out, s32 count, u8 *state, u8 *hue, u8 *phase, f32 *amp,
  * (0: height, 1: height + colour, 2: height + direction colour; bit 2: per-vertex amplitudes, required for 2)
  * writes the model's frame buffer. Then the animations on the base vertices are moved to the model's place:
  * the integer offset +0x10 when the model is not moved / scaled (x, z from the base, y added), else the model
- * matrix (func_15114E8C) applied to (base x, wave y, base z), truncated. */
+ * matrix (world_record_build_matrix) applied to (base x, wave y, base z), truncated. */
 void func_15178004(void) {
     u8 *anim;
     u8 *model;
@@ -176,7 +176,7 @@ void func_15178004(void) {
 
     for (i = 0; i < D_800DD418; i++) {
         anim = ((u8 **) D_800DD410)[i];
-        model = func_151149AC(anim[0]);
+        model = world_record_find(anim[0]);
         if (!(model[0x6F] & 0xF)) {
             continue;
         }
@@ -211,10 +211,10 @@ void func_15178004(void) {
 
     for (i = 0; i < D_800DD418; i++) {
         anim = ((u8 **) D_800DD410)[i];
-        if (!(func_151149AC(anim[0])[0x6F] & 0xF) || anim[2] != 0) {
+        if (!(world_record_find(anim[0])[0x6F] & 0xF) || anim[2] != 0) {
             continue;
         }
-        model = func_151149AC(anim[0]);
+        model = world_record_find(anim[0]);
         if (VTXANIM_F32(model, 0) == 0.0f && VTXANIM_F32(model, 4) == 0.0f && VTXANIM_F32(model, 8) == 0.0f &&
             VTXANIM_F32(model, 0x2C) == 1.0f && VTXANIM_F32(model, 0x30) == 1.0f &&
             VTXANIM_F32(model, 0x34) == 1.0f) {
@@ -226,7 +226,7 @@ void func_15178004(void) {
                 VTXANIM_FRAME(model)[j].v.ob[2] = VTXANIM_BASE(model)[j].v.ob[2] + VTXANIM_S16(model, 0x14);
             }
         } else {
-            func_15114E8C(mf, model);
+            world_record_build_matrix(mf, model);
             for (j = 0; j < VTXANIM_COUNT(model); j++) {
                 base = &VTXANIM_BASE(model)[j];
                 func_150A7E40(mf, base->v.ob[0], VTXANIM_FRAME(model)[j].v.ob[1], base->v.ob[2], &x, &y, &z);

@@ -3,12 +3,14 @@
 #include "variables.h"
 
 
-void func_15040D90(s32 arg0) {
+/* was func_15040D90 */
+void debug_marker_stub(s32 arg0) {
 
 }
 
 #ifdef NON_MATCHING
-void func_15040D9C(s32 arg0) {
+/* was func_15040D9C */
+void debug_marker_fill_draw(s32 arg0) {
     s32 temp_a3;
     s32 temp_a3_2;
     s32 temp_a3_3;
@@ -52,14 +54,15 @@ loop_2:
     } while (var_a1 != 8);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6E240/func_15040D9C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_6E240/debug_marker_fill_draw.s")
 #endif
 #ifdef NON_MATCHING
 // debug_marker_box_draw: draws an 8x8 box at (200 + x, 225) straight into both framebuffers (D_8002AAE8, the
 // other one first, row stride D_800BE620 pixels) and the D_800BEDE4 buffer: a red (0xF800) outline with a black
 // inside in the framebuffers, 0 everywhere in D_800BEDE4.
 #define MARKER_PIXEL(col, row) (x + (col) + D_800BE620 * ((row) + 225) + 200)
-void func_15040FCC(s32 x) {
+/* was func_15040FCC */
+void debug_marker_box_draw(s32 x) {
     u16 *other = (u16 *) D_8002AAE8[D_800BE9C0 == 0];
     u16 *current = (u16 *) D_8002AAE8[D_800BE9C0];
     u16 *aux = (u16 *) D_800BEDE4;
@@ -93,10 +96,11 @@ void func_15040FCC(s32 x) {
 }
 #undef MARKER_PIXEL
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6E240/func_15040FCC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_6E240/debug_marker_box_draw.s")
 #endif
 
-void func_1504129C(void) {
+/* was func_1504129C */
+void debug_busy_wait(void) {
     s32 i = 0;
     do {} while (++i < 0x18000000);
 }

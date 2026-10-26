@@ -19,7 +19,7 @@ typedef struct {
     /* 0x2C */ s32 u2C;
 } Probe1515B500;
 
-// character_dust_drop_spawn: one call in 16 (func_150ADA20() & 0xF == 0) spawns a falling dust object near character
+// character_dust_drop_spawn: one call in 16 (random_int() & 0xF == 0) spawns a falling dust object near character
 // idx (D_800DBFF0 entries of 0x9A0 bytes: position +0x2F8, yaw +0x380). The spot is 107..2010 units away at the yaw
 // (in 256ths of a turn, 256 / 360 per degree) +-20; it needs ground under it: a probe from y 19500 down to the
 // character's y gives the ground height, a second probe from the character's y down 250 more gives the start height
@@ -39,14 +39,14 @@ void func_1515B500(s16 idx) {
     f32 y0;
     struct260 *obj;
 
-    if (func_150ADA20() & 0xF) {
+    if (random_int() & 0xF) {
         return;
     }
     ok = 1;
     pos = (f32 *) ((u8 *) D_800DBFF0 + idx * 0x9A0 + 0x2F8);
     yaw = *(f32 *) ((u8 *) D_800DBFF0 + idx * 0x9A0 + 0x380) * 0.7111111f;
-    angle = (u32) func_150ADA20() % 41 + yaw - 20;
-    dist = func_150ADA68() * 1903.0f + 107.0f;
+    angle = (u32) random_int() % 41 + yaw - 20;
+    dist = random_float() * 1903.0f + 107.0f;
     c = angle_byte_cos((u8) angle);
     s = angle_byte_cos((u8) (angle - 0x40));
     rec[0] = pos[0] - dist * s;
@@ -80,13 +80,13 @@ void func_1515B500(s16 idx) {
             rec[1] = y0;
         }
     }
-    func_150ADA68(); /* result unused */
+    random_float(); /* result unused */
     rec[4] = 0.0f;
     rec[3] = 195.0f * 0.001f;
     if (!ok) {
         return;
     }
-    obj = func_151491F4((s16) ((u32) func_150ADA20() % 61 + 5), -1, 0xC, 1, 7, 0x18, 0xFF, 0);
+    obj = func_151491F4((s16) ((u32) random_int() % 61 + 5), -1, 0xC, 1, 7, 0x18, 0xFF, 0);
     if (obj != NULL) {
         memcpy((s32) obj + 0x28, rec, 0x18);
     }
@@ -199,29 +199,29 @@ void func_1515B78C(u8 *arg0) {
         sp.u7C = 1.2f;
         sp.u80 = 0.8333333f;
         sp.u90 = (*(f32 *)((u8 *)temp_s0 + 0x14));
-        if (func_150ADA20() & 1) {
+        if (random_int() & 1) {
             sp.uEC |= 0x40;
         }
-        if (func_150ADA20() & 1) {
+        if (random_int() & 1) {
             sp.uEC |= 0x80;
         }
         do {
-            sp.uE0 = func_150ADA68() * 12.0f * 0.1f;
-            sp.u9E = (func_150ADA20() % 152U) + 0x96;
-            sp.uAF = (func_150ADA20() % 151U) + 0x37;
-            temp_f2 = (func_150ADA68() * 200.0f) + 100.0f;
+            sp.uE0 = random_float() * 12.0f * 0.1f;
+            sp.u9E = (random_int() % 152U) + 0x96;
+            sp.uAF = (random_int() % 151U) + 0x37;
+            temp_f2 = (random_float() * 200.0f) + 100.0f;
             sp.uBC = temp_f2;
             sp.u6C = temp_f2;
             sp.uC0 = temp_f2;
-            sp.u72 = (func_150ADA20() % 5U) + 4;
-            sp.u73 = (func_150ADA20() % 5U) + 4;
-            sp.u74 = ((func_150ADA68() * 0.25f) + 0.15f) * sp.u6C;
-            sp.u78 = ((func_150ADA68() * 0.25f) + 0.15f) * sp.u6C;
-            sp.u86 = (func_150ADA20() & 3) + 2;
-            sp.u87 = (func_150ADA20() & 3) + 2;
-            sp.u88 = ((func_150ADA68() * 0.07f) + 0.06f) * sp.u6C;
-            sp.u8C = ((func_150ADA68() * 0.07f) + 0.06f) * sp.u6C;
-            sp.uE8 = ((func_150ADA68() * 1005.0f) + 600.0f) * 0.001f;
+            sp.u72 = (random_int() % 5U) + 4;
+            sp.u73 = (random_int() % 5U) + 4;
+            sp.u74 = ((random_float() * 0.25f) + 0.15f) * sp.u6C;
+            sp.u78 = ((random_float() * 0.25f) + 0.15f) * sp.u6C;
+            sp.u86 = (random_int() & 3) + 2;
+            sp.u87 = (random_int() & 3) + 2;
+            sp.u88 = ((random_float() * 0.07f) + 0.06f) * sp.u6C;
+            sp.u8C = ((random_float() * 0.07f) + 0.06f) * sp.u6C;
+            sp.uE8 = ((random_float() * 1005.0f) + 600.0f) * 0.001f;
             temp_v0 = func_1513092C(&sp.u94, 2, 0x28);
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0xA8, &sp.u6C, 0x28);
@@ -257,7 +257,7 @@ extern u8 (*D_800900A4[])(void);
 // sprite's +0x70 gets the 0x18-byte block {id, speed (105..210) * 0.001, spin 0..3008 * 0.001, size, size 2
 // ((94..395) * 0.01), ...}; size = (489..2068) * 0.01. Each starts at (-100..100, -100..48), with the texture byte of
 // the current kind's D_800900A4 handler (impact_current_kind), life 50..100, alpha 100..200 and random flip flags 2 / 4.
-// The first func_150ADA20 call's result is not used.
+// The first random_int call's result is not used.
 void func_1515BBE4(s16 id) {
     struct {
         s16 id;             /* 0x00 */
@@ -298,7 +298,7 @@ void func_1515BBE4(s16 id) {
     s32 n;
     u8 *e;
 
-    func_150ADA20(); /* result unused */
+    random_int(); /* result unused */
     spr.flags = 0x19;
     spr.u1A = 1;
     spr.u16 = 0x14;
@@ -323,22 +323,22 @@ void func_1515BBE4(s16 id) {
     spr.u38 = 0x80;
     spr.u3C = 0x20;
     for (n = 10; n != 0; n--) {
-        blk.speed = (func_150ADA68() * 105.0f + 105.0f) * 0.001f;
-        blk.spin = func_150ADA68() * 3008.0f * 0.001f;
-        size = (func_150ADA68() * 1579.0f + 489.0f) * 0.01f;
+        blk.speed = (random_float() * 105.0f + 105.0f) * 0.001f;
+        blk.spin = random_float() * 3008.0f * 0.001f;
+        size = (random_float() * 1579.0f + 489.0f) * 0.01f;
         spr.w = size;
         spr.h = size;
         blk.size = size;
-        blk.size2 = (func_150ADA68() * 301.0f + 94.0f) * 0.01f;
-        spr.x = func_150ADA68() * 200.0f + -100.0f;
-        spr.y = func_150ADA68() * 148.0f + -100.0f;
+        blk.size2 = (random_float() * 301.0f + 94.0f) * 0.01f;
+        spr.x = random_float() * 200.0f + -100.0f;
+        spr.y = random_float() * 148.0f + -100.0f;
         spr.tex = D_800900A4[impact_current_kind()]();
-        spr.life = (u32) func_150ADA20() % 51 + 50;
-        spr.colour[3] = (u32) func_150ADA20() % 101 + 100;
-        if (func_150ADA20() & 1) {
+        spr.life = (u32) random_int() % 51 + 50;
+        spr.colour[3] = (u32) random_int() % 101 + 100;
+        if (random_int() & 1) {
             spr.flags |= 2;
         }
-        if (func_150ADA20() & 1) {
+        if (random_int() & 1) {
             spr.flags |= 4;
         }
         e = (u8 *) func_151559FC(&spr, 2, 0, 0, 0x18, 0xFF, 1);

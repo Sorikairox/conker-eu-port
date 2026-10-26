@@ -3,18 +3,20 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_15179008(s32);
-s32 func_151152A4(u8 *, s32, s32, s16, s16, s32);
+s32 world_object_sound_play(u8 *, s32, s32, s16, s16, s32);
 #endif
 
 
-void func_1510AFA0(s32 arg0) {
+/* was func_1510AFA0 */
+void clock_level_callback(s32 arg0) {
     func_15179008(0);
 }
 
 #ifdef NON_MATCHING
 extern s32 D_800BE804;
 
-void func_1510AFC4(u8 *arg0) {
+/* was func_1510AFC4 */
+void clock_hands_update(u8 *arg0) {
     s32 sp38;
     f32 sp24;
     f32 temp_f2;
@@ -83,7 +85,7 @@ void func_1510AFC4(u8 *arg0) {
         (*(s32 *)((u8 *)arg0 + 0x7C)) = (s32) (temp_v0 - 1);
         sp24 = temp_f2;
         sp38 = var_t0;
-        func_151152A4(arg0, 0x4CC, 0x7FFF, 0xC8, 0x3E8, 0xC);
+        world_object_sound_play(arg0, 0x4CC, 0x7FFF, 0xC8, 0x3E8, 0xC);
     }
     (*(f32 *)((u8 *)arg0 + 0x68)) = 5.0f;
     (*(f32 *)((u8 *)arg0 + 0x108)) = 5.0f;
@@ -91,11 +93,12 @@ void func_1510AFC4(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 8)) = (f32) -((f32) var_t0 * 6.0f);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1387B0/func_1510AFC4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1387B0/clock_hands_update.s")
 #endif
-s32 func_151152A4(u8 *, s32, s32, s16, s16, s32);
+s32 world_object_sound_play(u8 *, s32, s32, s16, s16, s32);
 
-void func_1510B34C(u8 *arg0) {
+/* was func_1510B34C */
+void clock_pendulum_update(u8 *arg0) {
     f32 x;
 
     *(f32 *)(arg0 + 0x80) += (3.1415927f * D_800BE9E4) / 50.0f;
@@ -105,11 +108,11 @@ void func_1510B34C(u8 *arg0) {
     if (*(s32 *)(arg0 + 0x7C) == 0) {
         if (*(f32 *)(arg0 + 0x80) >= 3.1415927f) {
             *(s32 *)(arg0 + 0x7C) = 1;
-            func_151152A4(arg0, 0x4CA, 0x2EE0, 0xC8, 0x3E8, 4);
+            world_object_sound_play(arg0, 0x4CA, 0x2EE0, 0xC8, 0x3E8, 4);
         }
     } else if (*(f32 *)(arg0 + 0x80) >= 6.2831855f) {
         *(s32 *)(arg0 + 0x7C) = 0;
         *(f32 *)(arg0 + 0x80) -= 6.2831855f;
-        func_151152A4(arg0, 0x4CB, 0x2EE0, 0xC8, 0x3E8, 4);
+        world_object_sound_play(arg0, 0x4CB, 0x2EE0, 0xC8, 0x3E8, 4);
     }
 }

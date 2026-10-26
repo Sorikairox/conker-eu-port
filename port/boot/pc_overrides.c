@@ -5,7 +5,7 @@
  * semantics: D_80088950 below is a big-endian u64 in virtual big-endian memory.
  *
  *   func_100061F8  handwritten TLB loop (init_eu_5DA0.c)
- *   (func_150ADA20 guRandom: game C since port P106, removed here in P110)
+ *   (random_int guRandom: game C since port P106, removed here in P110)
  *   (the TEMPORARY P58 / P61 / P63 versions were removed in P66 and P69; none are left)
  */
 #include <ultra64.h>
@@ -22,10 +22,10 @@ s32 func_100061F8(s32 lo, s32 hi) {
     return 0;
 }
 
-/* P110: func_150ADA20 (guRandom on a u64 seed) was removed here: port P106 wrote the same formula as C in
+/* P110: random_int (guRandom on a u64 seed) was removed here: port P106 wrote the same formula as C in
  * game_DAE50.c (NM), which caused a duplicate symbol. The self-test below now checks the game C. */
 extern u64 D_80088950;
-s32 func_150ADA20(void);
+s32 random_int(void);
 
 /* self-test: three guRandom steps from a known seed (expected values from the u64 formula in
  * Python, docs/port/sessions/P8.md); checks the vbe 64-bit load/store of the seed too */
@@ -37,7 +37,7 @@ int port_overrides_test(void) {
     int bad = 0, i;
     D_80088950 = 0x0123456789ABCDEFULL;
     for (i = 0; i < 3; i++) {
-        u32 got = (u32)func_150ADA20();
+        u32 got = (u32)random_int();
         if (got != want[i]) { port_log("[overrides] guRandom step %d: %08X, want %08X\n", i, got, want[i]); bad++; }
     }
     if (D_80088950 != 0xA90FD6A5ULL) { port_log("[overrides] seed after 3 steps wrong\n"); bad++; }
@@ -48,19 +48,19 @@ int port_overrides_test(void) {
 }
 
 /* ROM-offset symbols (session P9): &D_1A3B40 must be the texture bank's ROM offset, not a wasm
- * address (port/tools/vbe.py ROM_ABS). The game's own C func_1510D8F4 (game_eu_13A8A0.c) computes
+ * address (port/tools/vbe.py ROM_ABS). The game's own C texture_rom_offset (game_eu_13A8A0.c) computes
  * texture 0xED0's ROM offset; a PI DMA of the first 16 bytes there must give the bytes Python reads
  * from the ROM at 0x6F1618 (rzip header: BE u32 size 0x300, then DEFLATE). D_800B8BB8 is the
- * inflated-size table that func_15003570 (game_305D0.c, C) builds from the same bank by DMA. */
-s32 func_1510D8F4(s32 id);
+ * inflated-size table that texture_build_size_table (game_305D0.c, C) builds from the same bank by DMA. */
+s32 texture_rom_offset(s32 id);
 extern s16 D_800B8BB8[];
 int port_romsym_test(void) {
     static const u8 want[16] = {0x00, 0x00, 0x03, 0x00, 0xED, 0x4F, 0x21, 0x56,
                                 0x43, 0x31, 0x10, 0xFC, 0x9B, 0x6C, 0x36, 0xBB};
     static u8 buf[16];
-    u32 rom = (u32)func_1510D8F4(0xED0);
+    u32 rom = (u32)texture_rom_offset(0xED0);
     int bad = 0, i;
-    if (rom != 0x6F1618) { port_log("[romsym] func_1510D8F4(0xED0) = 0x%X, want 0x6F1618\n", rom); bad++; }
+    if (rom != 0x6F1618) { port_log("[romsym] texture_rom_offset(0xED0) = 0x%X, want 0x6F1618\n", rom); bad++; }
     osPiRawStartDma(OS_READ, rom, buf, 16);
     for (i = 0; i < 16; i++) bad += buf[i] != want[i];
     port_log("[romsym] tex 0xED0 @ROM 0x%X: %02X%02X%02X%02X %02X%02X%02X%02X, size table %d\n", rom,
@@ -70,10 +70,10 @@ int port_romsym_test(void) {
     return bad;
 }
 
-/* P19: the P11 TEMPORARY overrides of func_15019130 and func_eu_1501C860 were removed: both are
+/* P19: the P11 TEMPORARY overrides of world_update and func_eu_1501C860 were removed: both are
  * NON_MATCHING C on the port branch since P15-P17 (game_45B80.c, game_eu_4A070.c). */
 
-/* P23: the P19 TEMPORARY overrides of func_1502B350, func_1502B4A8 and func_15002248 were removed:
+/* P23: the P19 TEMPORARY overrides of asset_load_alloc, asset_relocate_subfiles and func_15002248 were removed:
  * the port branch converted them in P20 (game_57FA0.c, game_eu_2F180.c). */
 
 /* P23: ?dlstat=N probe of the frame builder's state (logged with the gfx frame statistics). */
@@ -89,11 +89,11 @@ void port_frame_probe(unsigned task) {
 }
 
 /* P26: camera / view-matrix state and the P24 / P22 runtime checks (logged with ?dlstat=N).
- *   VIEW  D_800DC6D0[2]: per DL buffer, player view matrices (allocated by asm func_15005290, filled by
- *         asm func_1512C490 via func_15047E70 + guMtxCatL); the frame DL multiplies them onto the projection.
+ *   VIEW  D_800DC6D0[2]: per DL buffer, player view matrices (allocated by asm camera_level_init, filled by
+ *         asm camera_build_view_matrix via func_15047E70 + guMtxCatL); the frame DL multiplies them onto the projection.
  *   CAMREC D_800BE628: camera records (0x180 per player); +0x100 + buf * 0x40 = projection Mtx, written by
- *         func_1510BB78 (guPerspectiveF + guMtxF2L) from asm func_1510B6A8 / func_1510B9D8 or the request
- *         queue D_800D9F18 drained by func_1510BA9C.
+ *         camera_perspective_build (guPerspectiveF + guMtxF2L) from asm camera_projection_update / camera_projection_set_viewport or the request
+ *         queue D_800D9F18 drained by camera_projection_apply_pending_viewport.
  *   CAM   D_800DBFF0: struct108 camera-controller records (0x9A0 each, camera_update_all / camera_update_controller). */
 struct PendingF2_ { float x, y; };
 extern unsigned D_800DC6D0[2], D_800DBFF0, D_800DDD64;
@@ -151,20 +151,20 @@ void port_cam_probe(unsigned task) {
     }
 }
 
-/* P37: the P31 TEMPORARY overrides func_1501A8C0 (camera record), func_150031EC / func_15003120 (level model
+/* P37: the P31 TEMPORARY overrides camera_record_setup (camera record), level_load_models / level_model_relocate_table (level model
  * loader), func_150479F0 (lookat) and the P31 diagnostic func_150A5858 were removed: the port branch converted
  * all of them in P34 (game_476D0.c, game_305D0.c, game_eu_71E70.c, game_eu_D2DB0.c). ?dlapprox=1 is now a
  * link-time wrapper of the game's C func_150A5858 (port/gfx/gfx_f3dex2.c, -Wl,--wrap). */
 
 /* P39: the ?camwatch write watch lives in port/gfx/gfx_f3dex2.c (a host TU: port_flag / %s need host strings). */
 
-/* P52: the P49 TEMPORARY overrides func_15059C84 (position integrator) and func_1504C0E8 (partial animation
+/* P52: the P49 TEMPORARY overrides obj_update_ground_tilt (position integrator) and func_1504C0E8 (partial animation
  * choice) were removed: the port-b branch converted both in P50 (game_83300.c, game_eu_78230.c, NON_MATCHING). */
 
 /* P66: the TEMPORARY PC func_150A9B0C (P58), func_150A9E64 and func_150844AC (P61) were removed: the port branch
  * converted all three in P62 (nm_asm/D5E90_mtx.c, game_eu_AF2A0.c, NON_MATCHING). */
 
-/* P69: the TEMPORARY PC func_1502AF04, func_150A69E0 and func_1510E908 (P63) were removed: the port branch
+/* P69: the TEMPORARY PC asset_rec_fetch_block, func_150A69E0 and floor_triangle_slope (P63) were removed: the port branch
  * converted all three in P65 (game_57FA0.c, game_eu_D3880.c, game_eu_13B700.c, NON_MATCHING). */
 
 /* P88: the TEMPORARY PC func_151DDF6C (P84, settings clamp) was removed: the port branch converted it in P85

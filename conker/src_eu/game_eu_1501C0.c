@@ -2,13 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_15048F90(struct17 *arg0, struct17 *arg1, struct17 *arg2);
-f32 func_15048FC8(struct17 *arg0);
-f32 func_15048A70(f32 arg0, f32 arg1);
+void vec3_diff(struct17 *arg0, struct17 *arg1, struct17 *arg2);
+f32 vec3_heading_deg(struct17 *arg0);
+f32 math_angle_diff_deg(f32 arg0, f32 arg1);
 void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void camera_update_eye_orbit(u8 *);
-void func_1512A390(u8 *);
-void func_1512E6B0(u8 *);
+void camera_update_eye_base(u8 *);
+void camera_update_eye_height(u8 *);
 #endif
 
 
@@ -18,7 +18,7 @@ f32 sqrtf(f32);
 f32 sinf(f32);
 f32 cosf(f32);
 void camera_calc_relative_yaw(u8 *arg0);
-void func_150491EC(struct17 *arg0, struct17 *arg1, struct17 *arg2);
+void vec3_dir_to(struct17 *arg0, struct17 *arg1, struct17 *arg2);
 extern f32 D_80089860;  /* last yaw (degrees) */
 extern f32 D_800A3850;  /* pi / 180 */
 extern f32 D_800A3854;  /* pi / 2 */
@@ -36,7 +36,8 @@ extern f32 D_800A3868;  /* 0.15 */
 // once (+0x23C) or eased per axis by func_150498A0 (speeds +0x3C0.., rate 2 / 2.2+2.2, doubled when +0x102), kept
 // at least 120 away from the target, at least 30 above the floor +0x35C. Also eases +0x5E8 to +0x5EC, sets
 // +0x3DC (pitch), +0x344 / +0x348 (eye height over +0x354) and +0x370 (horizontal distance).
-void func_151229B0(u8 *cam) {
+/* was func_151229B0 */
+void camera_orbit_update(u8 *cam) {
     u8 *tgt;
     f32 pitch, yaw, prev, dist;
     f32 sinP, cosP;
@@ -47,7 +48,7 @@ void func_151229B0(u8 *cam) {
     f32 dir[3];
 
     pitch = (*(f32 *) (*(u8 **) (cam + 0x3D0) + 0x40) + 90.0f) * D_800A3850;
-    func_1512A390(cam);
+    camera_update_eye_base(cam);
     if (!(*(s32 *) (cam + 0x5F0) & 1) && *(*(u8 **) (cam + 0x3D0) + 0x102) == 0) {
         pitch = CAMF(0x39C) - D_800A3854;
     }
@@ -123,7 +124,7 @@ void func_151229B0(u8 *cam) {
         dy = CAMF(0x2FC) - CAMF(0x2C0);
         dz = CAMF(0x300) - CAMF(0x2C4);
         if (sqrtf(dx * dx + dy * dy + dz * dz) < 120.0f) {
-            func_150491EC((struct17 *) &CAMF(0x2BC), (struct17 *) &CAMF(0x2F8), (struct17 *) dir);
+            vec3_dir_to((struct17 *) &CAMF(0x2BC), (struct17 *) &CAMF(0x2F8), (struct17 *) dir);
             CAMF(0x2F8) = CAMF(0x2BC) + 120.0f * dir[0];
             CAMF(0x2FC) = CAMF(0x2C0) + 120.0f * dir[1];
             CAMF(0x300) = CAMF(0x2C4) + 120.0f * dir[2];
@@ -140,15 +141,16 @@ void func_151229B0(u8 *cam) {
 }
 #undef CAMF
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1501C0/func_151229B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1501C0/camera_orbit_update.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P41: camera mode 1 (follow). Unless 0xDC == 4: turn yaw 0x37C by the angle between eye->0x2C8 and eye->at
- * (func_15048A70 of the two headings) times the eased rate 0x8DC (toward 0x8D4: 0 when 0x298 is clear, 0.75 for
+ * (math_angle_diff_deg of the two headings) times the eased rate 0x8DC (toward 0x8D4: 0 when 0x298 is clear, 0.75 for
  * flag 0x100000 of 0x84 or 180 < 0x390 < 270, else 0.5); 0x39C = 0x37C in radians. Then the eye orbit
- * camera_update_eye_orbit, func_1512E6B0 and func_1512A390. */
-void func_15122EF0(u8 *arg0) {
+ * camera_update_eye_orbit, camera_update_eye_height and camera_update_eye_base. */
+/* was func_15122EF0 */
+void camera_follow_mode_update(u8 *arg0) {
     struct17 sp44;
     struct17 sp38;
     f32 a;
@@ -156,10 +158,10 @@ void func_15122EF0(u8 *arg0) {
     f32 v;
 
     if (*(s32 *)(arg0 + 0xDC) != 4) {
-        func_15048F90((struct17 *)(arg0 + 0x2F8), (struct17 *)(arg0 + 0x2C8), &sp44);
-        func_15048F90((struct17 *)(arg0 + 0x2F8), (struct17 *)(arg0 + 0x2BC), &sp38);
-        a = func_15048FC8(&sp44);
-        b = func_15048FC8(&sp38);
+        vec3_diff((struct17 *)(arg0 + 0x2F8), (struct17 *)(arg0 + 0x2C8), &sp44);
+        vec3_diff((struct17 *)(arg0 + 0x2F8), (struct17 *)(arg0 + 0x2BC), &sp38);
+        a = vec3_heading_deg(&sp44);
+        b = vec3_heading_deg(&sp38);
         if (*(s16 *)(arg0 + 0x298) == 0) {
             v = 0.0f;
         } else if ((*(s32 *)(arg0 + 0x84) & 0x100000) ||
@@ -171,13 +173,13 @@ void func_15122EF0(u8 *arg0) {
         *(f32 *)(arg0 + 0x8D4) = v;
         func_150498A0((f32 *)(arg0 + 0x8DC), *(f32 *)(arg0 + 0x8D4), (f32 *)(arg0 + 0x8D8), 1.0f, 2.0f,
                       *(f32 *)(arg0 + 0x7B4));
-        *(f32 *)(arg0 + 0x37C) = *(f32 *)(arg0 + 0x37C) + func_15048A70(a, b) * *(f32 *)(arg0 + 0x8DC);
+        *(f32 *)(arg0 + 0x37C) = *(f32 *)(arg0 + 0x37C) + math_angle_diff_deg(a, b) * *(f32 *)(arg0 + 0x8DC);
         *(f32 *)(arg0 + 0x39C) = *(f32 *)(arg0 + 0x37C) * 0.017453292f;
     }
     camera_update_eye_orbit(arg0);
-    func_1512E6B0(arg0);
-    func_1512A390(arg0);
+    camera_update_eye_height(arg0);
+    camera_update_eye_base(arg0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1501C0/func_15122EF0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1501C0/camera_follow_mode_update.s")
 #endif

@@ -170,13 +170,13 @@ void func_1509D274(s32 listp, void (*cb)(s32), s32 arg2) {
 #endif
 
 #ifdef NON_MATCHING
-/* P132: the save-route table func_1502B6BC loads (asset 3, 8-byte records): record 0's info word gets the record
+/* P132: the save-route table asset_load_with_subfiles loads (asset 3, 8-byte records): record 0's info word gets the record
  * count - 1; record i >= 1 points at its own block, a list of (offset, flags) pairs ended by flag 0x80000000. */
 typedef struct SaveRouteRec {
     u32 *data;
     u32 info;
 } SaveRouteRec;
-s32 func_1502B6BC(s32 *, s32, s32 *, s32, ...);
+s32 asset_load_with_subfiles(s32 *, s32, s32 *, s32, ...);
 
 // save_route_table_load: loads the save-route table into D_800D33D0 (arg0 selects it), stores the number of routes
 // (records - 1) in record 0 and *count, and relocates each route block: every pair's first word gets the block
@@ -190,7 +190,7 @@ s32 func_1509D338(s32 arg0, s32 *count) {
     SaveRouteRec *tbl;
 
     n = 0;
-    D_800D33D0 = func_1502B6BC(NULL, 0, (s32 *) &n, 3, 8, 0, arg0);
+    D_800D33D0 = asset_load_with_subfiles(NULL, 0, (s32 *) &n, 3, 8, 0, arg0);
     tbl = (SaveRouteRec *) D_800D33D0;
     if (tbl == NULL) {
         *count = 0;
@@ -288,23 +288,23 @@ s32 func_15046F70(void *, u16, f32, void *);
 struct260 *func_150B58B0(u8 *, s16, u8, s32);
 void func_150BD550(u8, s32);
 void func_150BF47C(s32);
-void func_150D5F7C(struct127 *, s32, s32);
-void func_150DF240(f32 *, u8, s32);
-void func_150E0880(void);
-struct260 *func_150E15E0(u8, u8, s32);
-s32 func_150E3788(s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_150E3850(s32, s32, s32, s32, s32, f32);
-s32 func_150E3994(s32, s32, s32, s32, s32, s32, s32, s32, f32);
-void func_150E8728(s32, u8, s32);
-void func_150E8EB0(void);
-void func_150ED180(s32, u8, s32);
-void *func_150F7364(struct127 *);
-void func_150FAFC0(u8, s32);
-void func_150FB2A8(void);
-void func_150FB2F8(void);
-void func_150FCFB0(void);
-void func_150FD554(struct127 *, u8, s32);
-void func_151086A0(struct127 *, u8, s32);
+void debris_burst_destroyed_object(struct127 *, s32, s32);
+void big_explosion_spawn(f32 *, u8, s32);
+void water_effect_start_once(void);
+struct260 *fx_model_emitter_spawn(u8, u8, s32);
+s32 zap_bolt_spawn_between(s32, s32, s32, s32, s32, s32, s32, s32);
+s32 zap_bolt_spawn_follow(s32, s32, s32, s32, s32, f32);
+s32 zap_bolt_spawn_with_sound(s32, s32, s32, s32, s32, s32, s32, s32, f32);
+void fx_scripted_blast(s32, u8, s32);
+void storm_lightning_strike(void);
+void obj_hit_green_tint(s32, u8, s32);
+void *glow_pair_spawn(struct127 *);
+void arc_bolts_spawn_once(u8, s32);
+void level_cue_switch_on(void);
+void level_cue_switch_off(void);
+void view_spots_flash_event(void);
+void bound_cloud_spawn(struct127 *, u8, s32);
+void obj_impact_burst(struct127 *, u8, s32);
 s32 object_hit_effects(u8 *, u8, u8, u8, u8, u8, u8, s32);
 void func_15155D6C(s32, s32, f32);
 struct225 *light_create_obj_pulse(u8, u8, s32);
@@ -315,10 +315,10 @@ void func_151C0648(u8 *, s32, u8, s32, s32);
 void func_151CD90C(s32);
 void func_151D2C70(s16);
 /* event_effect_command: handler 14 of the event VM's native table D_800887C0 (id = the command word without its
- * nibble, args = the operands, args[1] mostly an object id resolved with func_1505EEF4 & 0xFFF). Starts effects /
+ * nibble, args = the operands, args[1] mostly an object id resolved with obj_find_by_spawn & 0xFFF). Starts effects /
  * spawns: 0 func_150B58B0, 1 func_150BF47C (returns 1), 2 sets D_800D9D40, 3 func_1517946C, 4 / 5 / 6 spawn through
- * func_150E3788 / func_150E3850 (at an object) / func_150E3994 (at the player) and return the handle as
- * (h << 6) | 0xE004, 7 func_150DF240 at a point (args[1] == 999) or func_150E8728, 0x10 / 0x16 light_ctrl_broadcast
+ * zap_bolt_spawn_between / zap_bolt_spawn_follow (at an object) / zap_bolt_spawn_with_sound (at the player) and return the handle as
+ * (h << 6) | 0xE004, 7 big_explosion_spawn at a point (args[1] == 999) or fx_scripted_blast, 0x10 / 0x16 light_ctrl_broadcast
  * pairs, 0x18 func_1518FA8C on character args[1], 0x21 func_151C0648 50 above an object, 0x22 func_151C0434 at the
  * ground below (args[1], args[2]) found by func_15046F70, 0x24 func_1514F18C (0x1B), others single calls. Returns 0
  * unless noted. */
@@ -339,7 +339,7 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
 
     switch ((u32) id) {
     case 0x00:
-        func_150B58B0((u8 *) func_1505EEF4(args[1] & 0xFFF), (s16) args[2], 0xFF, 1);
+        func_150B58B0((u8 *) obj_find_by_spawn(args[1] & 0xFFF), (s16) args[2], 0xFF, 1);
         break;
     case 0x01:
         func_150BF47C(args[1]);
@@ -351,22 +351,22 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
         func_1517946C(args[1]);
         break;
     case 0x04:
-        ret = func_150E3788(args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
+        ret = zap_bolt_spawn_between(args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
         if (ret != 0) {
             ret = (ret << 6) | 0xE004;
         }
         break;
     case 0x05:
-        obj = func_1505EEF4(args[4] & 0xFFF);
+        obj = obj_find_by_spawn(args[4] & 0xFFF);
         if (obj != NULL) {
-            ret = func_150E3850(args[1], args[2], args[3], (s32) obj, args[5], (f32) args[7]);
+            ret = zap_bolt_spawn_follow(args[1], args[2], args[3], (s32) obj, args[5], (f32) args[7]);
             if (ret != 0) {
                 ret = (ret << 6) | 0xE004;
             }
         }
         break;
     case 0x06:
-        ret = func_150E3994(args[1], args[2], args[3], args[4], args[5], args[6], (s32) D_800CC2D0, args[7],
+        ret = zap_bolt_spawn_with_sound(args[1], args[2], args[3], args[4], args[5], args[6], (s32) D_800CC2D0, args[7],
                             (f32) args[8]);
         if (ret != 0) {
             ret = (ret << 6) | 0xE004;
@@ -377,13 +377,13 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
             pos[0] = (f32) args[2];
             pos[1] = (f32) args[3];
             pos[2] = (f32) args[4];
-            func_150DF240(pos, 0xFF, 1);
+            big_explosion_spawn(pos, 0xFF, 1);
         } else {
-            func_150E8728(args[1] & 0xFF, 0xFF, 1);
+            fx_scripted_blast(args[1] & 0xFF, 0xFF, 1);
         }
         break;
     case 0x0F:
-        func_150E8EB0();
+        storm_lightning_strike();
         break;
     case 0x10:
         func_1000E7A0(0x10, 0);
@@ -396,7 +396,7 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
         func_151D2C70((s16) args[1]);
         break;
     case 0x14:
-        func_150E15E0((u8) args[1], 0xFF, 1);
+        fx_model_emitter_spawn((u8) args[1], 0xFF, 1);
         break;
     case 0x16:
         light_ctrl_broadcast(0x23, 0x27, 0);
@@ -410,13 +410,13 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
         func_1518FA8C((s32) func_15083E90((u8) args[1]), tbl[args[2]], (s16) args[3], -1, -1, -1, 0, 0, 0xFF, 1);
         break;
     case 0x1B:
-        func_150FCFB0();
+        view_spots_flash_event();
         break;
     case 0x20:
-        func_150D5F7C(func_1505EEF4(args[1] & 0xFFF), 0xFF, 1);
+        debris_burst_destroyed_object(obj_find_by_spawn(args[1] & 0xFFF), 0xFF, 1);
         break;
     case 0x21:
-        obj = func_1505EEF4(args[1] & 0xFFF);
+        obj = obj_find_by_spawn(args[1] & 0xFFF);
         if (obj != NULL) {
             pos[0] = obj->x_position;
             pos[1] = obj->y_position + 50.0f;
@@ -442,46 +442,46 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
         }
         break;
     case 0x23:
-        object_hit_effects((u8 *) func_1505EEF4(args[1] & 0xFFF), 1, 1, 1, 1, 0, 0xFF, 1);
+        object_hit_effects((u8 *) obj_find_by_spawn(args[1] & 0xFFF), 1, 1, 1, 1, 0, 0xFF, 1);
         break;
     case 0x24:
-        obj = func_1505EEF4(args[1] & 0xFFF);
+        obj = obj_find_by_spawn(args[1] & 0xFFF);
         if (obj != NULL) {
-            func_1514F18C(func_150F7364(obj), obj, 0x1B);
+            func_1514F18C(glow_pair_spawn(obj), obj, 0x1B);
         }
         break;
     case 0x25:
         func_15155D6C(args[1] & 0xFFF, 0x78, (f32) args[2]);
         break;
     case 0x2A:
-        obj = func_1505EEF4(args[1] & 0xFFF);
+        obj = obj_find_by_spawn(args[1] & 0xFFF);
         if (obj != NULL) {
-            func_150FD554(obj, 0xFF, 1);
+            bound_cloud_spawn(obj, 0xFF, 1);
         }
         break;
     case 0x2B:
-        func_150E0880();
+        water_effect_start_once();
         break;
     case 0x2C:
-        func_150FB2F8();
+        level_cue_switch_off();
         break;
     case 0x2E:
-        obj = func_1505EEF4(args[1] & 0xFFF);
+        obj = obj_find_by_spawn(args[1] & 0xFFF);
         if (obj != NULL) {
-            func_150ED180((s32) obj, 0xFF, 1);
+            obj_hit_green_tint((s32) obj, 0xFF, 1);
         }
         break;
     case 0x2F:
-        obj = func_1505EEF4(args[1] & 0xFFF);
+        obj = obj_find_by_spawn(args[1] & 0xFFF);
         if (obj != NULL) {
-            func_151086A0(obj, 0xFF, 1);
+            obj_impact_burst(obj, 0xFF, 1);
         }
         break;
     case 0x30:
-        func_150FAFC0(0xFF, 1);
+        arc_bolts_spawn_once(0xFF, 1);
         break;
     case 0x31:
-        func_150FB2A8();
+        level_cue_switch_on();
         break;
     case 0x33:
         func_150BD550(0xFF, 1);
@@ -497,10 +497,10 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
 void func_150B42B0(void);
 void func_150C572C(void);
 void func_150C619C(s32);
-void func_150E3B5C(s32);
-s32 func_150EBE44(s32);
-void func_150F7330(u8 *);
-void func_150F9CA0(u8);
+void zap_bolt_free_slot(s32);
+s32 fx_fireworks_burst(s32);
+void glow_pair_post_remove_event(u8 *);
+void fire_post_finish_events(u8);
 void light_ctrl_broadcast(u8, u8, s32);
 void func_151CD944(s32);
 void func_151D2CC8(s16);
@@ -512,18 +512,18 @@ void func_1509DB90(s32 arg0, u8 *arg1) {
 
     switch (arg0) {
     case 41:
-        func_150EBE44(arg0);
+        fx_fireworks_burst(arg0);
         return;
     case 39:
-        func_150F9CA0((*(u8 *)((u8 *)arg1 + 7)));
+        fire_post_finish_events((*(u8 *)((u8 *)arg1 + 7)));
         return;
     case 38:
         light_ctrl_broadcast(0x29, 0x18, 0);
         return;
     case 36:
-        temp_v0 = func_1505EEF4((*(s32 *)((u8 *)arg1 + 4)) & 0xFFF);
+        temp_v0 = obj_find_by_spawn((*(s32 *)((u8 *)arg1 + 4)) & 0xFFF);
         if (temp_v0 != NULL) {
-            func_150F7330(temp_v0);
+            glow_pair_post_remove_event(temp_v0);
             return;
         }
     default:
@@ -540,13 +540,13 @@ void func_1509DB90(s32 arg0, u8 *arg1) {
     case 4:
     case 5:
     case 6:
-        func_150E3B5C(arg0 >> 6);
+        zap_bolt_free_slot(arg0 >> 6);
         return;
     case 8:
         func_150B42B0();
         return;
     case 9:
-        temp_v0_2 = func_1505EEF4((*(s32 *)((u8 *)arg1 + 4)) & 0xFFF);
+        temp_v0_2 = obj_find_by_spawn((*(s32 *)((u8 *)arg1 + 4)) & 0xFFF);
         if (temp_v0_2 == NULL) {
             return;
         }
@@ -594,7 +594,7 @@ s32 func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
     switch (arg0) {
     case 0x34:
         if (arg1 == 3) {
-            func_15197A7C(func_1505EEF4((*(s32 *)((u8 *)arg2 + 4)) & 0xFFF));
+            func_15197A7C(obj_find_by_spawn((*(s32 *)((u8 *)arg2 + 4)) & 0xFFF));
             return 0;
         }
     default:
@@ -686,7 +686,7 @@ s32 func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
         light_ctrl_broadcast(var_a0, var_a1, 0);
         return 0;
     case 0x11:
-        func_150DF1A8((*(u8 *)((u8 *)arg2 + 0xB)), (arg1 == 3) & 0xFF);
+        light_group_send_msg22((*(u8 *)((u8 *)arg2 + 0xB)), (arg1 == 3) & 0xFF);
         break;
     }
     return 0;
@@ -695,7 +695,7 @@ s32 func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509DD0C.s")
 #endif
 #ifdef NON_MATCHING
-void func_150E3C3C(s32, s32 *, s32 *, s32 *);
+void zap_bolt_get_pos(s32, s32 *, s32 *, s32 *);
 
 s32 func_1509DFCC(s32 arg0, s32 arg1, s32 arg2) {
     struct {
@@ -749,7 +749,7 @@ loop_7:
     if ((arg1 == 0) || (arg1 == 1)) {
         temp_a0 = arg0 >> 6;
         if (temp_a0 != 0) {
-            func_150E3C3C(temp_a0, &sp.u3C, &sp.u38, &sp.u34);
+            zap_bolt_get_pos(temp_a0, &sp.u3C, &sp.u38, &sp.u34);
             if (arg1 == 0) {
                 sp.u38 = (sp.u3C << 0x10) | (sp.u34 & 0xFFFF);
             }

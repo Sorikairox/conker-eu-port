@@ -12,9 +12,9 @@ s32 func_150106D0(struct39 *arg0) {
     tmp.unk4 = func_15144598(arg0);
     tmp.unkC = 0.0f;
 
-    func_1510F800(0);
+    collision_select_area(0);
 
-    tmp.unk8 = func_1510FD20(arg0->unk0, arg0->unk4);
+    tmp.unk8 = zone_tree_find_leaf(arg0->unk0, arg0->unk4);
     if (tmp.unk8 == 0) {
         return 1;
     } else {

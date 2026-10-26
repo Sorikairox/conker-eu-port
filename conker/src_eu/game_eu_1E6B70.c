@@ -64,7 +64,7 @@ u8 *func_15132FBC(DripParticle *spec, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32
 u8 *light_ctrl_alloc(Header *header, s32 arg1, s32 size, u8 arg3, s32 arg4);
 s32 particle_emitter_spawn(DripEmit *emit, s32 emitSize, DripSpawn *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
                   s32 arg9);
-void func_1510F800(s32);
+void collision_select_area(s32);
 void *memcpy(void *, const void *, s32);
 static const f32 sDripPos[6][3] = { /* D_800AA8C0 */
     { 1993.0f, 367.0f, 7294.0f }, { 1993.0f, 367.0f, 6183.0f }, { 695.0f, 737.0f, -2.0f },
@@ -73,7 +73,7 @@ static const f32 sDripPos[6][3] = { /* D_800AA8C0 */
 static const f32 sDripScale[6] = { 1.0f, 1.0f, 2.0f, 2.0f, 2.0f, 2.0f }; /* D_800AA908 */
 
 // level_drip_spawn: spawns drip `which` (0..5) of a level at its fixed place (D_800AA8C0, size D_800AA908): a
-// swinging particle (func_15132FBC, kind 0x22, 9-float swing block at +0x170, flag 0x400 when func_1510FD20 finds
+// swinging particle (func_15132FBC, kind 0x22, 9-float swing block at +0x170, flag 0x400 when zone_tree_find_leaf finds
 // the place in water), a link object (light_ctrl_alloc, type 7) holding the particle and 1 / size, and a falling
 // emitter (particle_emitter_spawn) from the place to 500 below whose handle goes into the link.
 void func_151B8DB0(s32 arg0, u8 which, u8 arg2, u8 arg3) {
@@ -92,7 +92,7 @@ void func_151B8DB0(s32 arg0, u8 which, u8 arg2, u8 arg3) {
     swing[0] = 0.0f;
     swing[1] = 17.316f;
     swing[4] = 17.316f;
-    rnd = func_150ADA68();
+    rnd = random_float();
     scale = &sDripScale[which];
     swing[2] = rnd * 6.2831855f;
     swing[3] = 0.088f;
@@ -113,8 +113,8 @@ void func_151B8DB0(s32 arg0, u8 which, u8 arg2, u8 arg3) {
     part.kind = 0x22;
     part.vel[0] = part.vel[1] = part.vel[2] = 0.0f;
     part.spin[0] = part.spin[1] = part.spin[2] = part.spin[3] = 0.0f;
-    func_1510F800(0);
-    water = func_1510FD20((s32)part.pos[0], (s32)part.pos[2]);
+    collision_select_area(0);
+    water = zone_tree_find_leaf((s32)part.pos[0], (s32)part.pos[2]);
     part.w5C = water;
     part.flags = (water != 0 ? 0x400 : 0) | 0x900;
     part.b58 = 0;
@@ -225,7 +225,7 @@ s32 func_151B98C0(Mtx *arg0, u8 *arg1) {
     u8 *p;
 
     p = arg1;
-    func_150A8050(mf, 0.0f, 0.0f, *(f32 *)(p + 0x170));
+    mtxf_rotate_xyz_deg(mf, 0.0f, 0.0f, *(f32 *)(p + 0x170));
     mf[3][0] = *(f32 *)(p + 0x38);
     mf[3][1] = *(f32 *)(p + 0x3C);
     mf[3][2] = *(f32 *)(p + 0x40);
@@ -257,7 +257,7 @@ s32 func_151B99B8(struct225 *arg0) {
     f32 x, y, z;
     f32 k, s, dx, dy, dz;
 
-    func_150A8050(mf, 0.0f, 0.0f, *(f32 *) (obj + 0x170));
+    mtxf_rotate_xyz_deg(mf, 0.0f, 0.0f, *(f32 *) (obj + 0x170));
     mf[3][0] = *(f32 *) (obj + 0x38);
     mf[3][1] = *(f32 *) (obj + 0x3C);
     mf[3][2] = *(f32 *) (obj + 0x40);

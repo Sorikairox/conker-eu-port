@@ -41,7 +41,7 @@ void func_15088434(s32, s32);
 s32 func_15088568(s32, s32);
 void func_1508B630(s32);
 void func_15182388(s32);
-void func_15042D94(s32, s32, u8, s32, ...);
+void text_printf_at(s32, s32, u8, s32, ...);
 void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
 void func_15049978(f32 *, f32, f32 *, f32, f32, f32);
 extern char D_8009F6D0[]; /* "%d" */
@@ -64,15 +64,15 @@ s32 func_1509E3D4(s32 arg0, u32 cmd, u8 *args) {
         func_15182388(0);
         return 0;
     case 1:
-        func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
-        func_15042D94(0x96, 0x56, 1, (s32) D_8009F6D0, (a[2] + 59) / 60);
+        text_set_color(0xFF, 0xFF, 0xFF, 0xFF);
+        text_printf_at(0x96, 0x56, 1, (s32) D_8009F6D0, (a[2] + 59) / 60);
         D_8009015C |= 0x80;
         break;
     case 2:
         D_800D2870 = a[2];
         break;
     case 3:
-        func_15093818(a[2]);
+        hud_clock_set_enabled(a[2]);
         return 0;
     case 4:
         return func_1508A040();
@@ -129,7 +129,7 @@ s32 func_1509E3D4(s32 arg0, u32 cmd, u8 *args) {
     case 24:
         obj = func_15083E90(args[0xB]);
         if (obj != NULL) {
-            func_15060F28(obj, 0);
+            obj_remove(obj, 0);
         }
         break;
     case 25:

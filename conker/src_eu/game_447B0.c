@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15017300(s16 arg0, s16 arg1) {
+/* was func_15017300 */
+void level_lights_init(s16 arg0, s16 arg1) {
     s32 i;
     s16 tmp;
 
@@ -22,22 +23,25 @@ void func_15017300(s16 arg0, s16 arg1) {
                 func_15085710(i, 9, D_80087264);
             }
         }
-        func_1501748C(arg1);
+        level_lights_stub(arg1);
     }
     D_800D2340 = arg1;
     D_800D2132 = 0;
 }
 
-void func_1501748C(s16 arg0) {
+/* was func_1501748C */
+void level_lights_stub(s16 arg0) {
 }
 
-void func_15017498(void) {
+/* was func_15017498 */
+void level_lights_clear(void) {
     bzero(&D_800D2138, 524);
 }
 
 // double-loop
 #ifdef NON_MATCHING
-void func_150174C0(s32 arg0) {
+/* was func_150174C0 */
+void level_table_relocate(s32 arg0) {
     s32 var_a0;
     s32 var_a2;
     s32 var_a3;
@@ -75,11 +79,12 @@ void func_150174C0(s32 arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_447B0/func_150174C0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_447B0/level_table_relocate.s")
 #endif
-void func_15017578(s32 arg0) {
+/* was func_15017578 */
+void level_table_load(s32 arg0) {
     u32 tmp = 0;
-    D_800D23C0 = func_1502B5C8(&tmp, 3, 12, arg0, 4);
+    D_800D23C0 = asset_load(&tmp, 3, 12, arg0, 4);
     D_80087380 = tmp / 24;
-    func_150174C0(D_800DBF00);
+    level_table_relocate(D_800DBF00);
 }

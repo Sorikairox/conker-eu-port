@@ -15,7 +15,7 @@ void port_glog(const char *fmt, ...);
 float cosf(float);
 float func_150AD78C(float);
 float func_150AD780(float);
-void func_150A7B80(Mtx *); /* game_D5030.c (P131) */
+void mtx_set_identity(Mtx *); /* game_D5030.c (P131) */
 
 static int cmp_words(int what, /* 1 F2L, 2 L2F, 3 L2F->F2L, 4 perspF, 5 persp, 6 lookat, 7 ident */ const u32 *got, const unsigned *want, int n) {
     int bad = 0, i;
@@ -56,10 +56,10 @@ int port_gu_test(void) {
     /* 4 */
     guMtxF2L((float (*)[4])gu_look_in, &m);
     bad += cmp_words(6, (u32 *)&m, gu_look_want, 16);
-    /* identity (func_150A7B80) == F2L(identity) */
+    /* identity (mtx_set_identity) == F2L(identity) */
     guMtxIdentF(mf);
     guMtxF2L(mf, &id);
-    func_150A7B80(&m);
+    mtx_set_identity(&m);
     bad += cmp_words(7, (u32 *)&m, (const unsigned *)&id, 16);
     /* 5 */
     for (i = 0; i < 10; i++) {

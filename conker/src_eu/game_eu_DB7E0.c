@@ -11,7 +11,7 @@
  * D_800D3858 for the abort entry func_150AE760, uses `add` / `sub` / `neg`, and dispatches through five jump tables).
  * This is a readable interpreter of the same machine, not a register-level translation.
  *
- * Event block (loaded by func_1509B8FC, relocated by func_1509B950), u16 header:
+ * Event block (loaded by event_load, relocated by event_block_relocate), u16 header:
  *   +0x08 offset of the data area (operand mode 2), +0x0A offset of the variables (mode 1),
  *   +0x0E / +0x10 / +0x12 / +0x14 entry points 1..4; entry 0 starts at +0x20.
  * Instruction: one u16 opcode word, then up to three operands of one u16 each:
@@ -41,7 +41,7 @@
  */
 f32 func_15144B68(f32);
 f32 sinf(f32);
-s32 func_150ADA20(void);
+s32 random_int(void);
 
 typedef s32 (*EvNative)(s32 *args, s32 mode, s32 *operand);
 typedef s32 (*EvHandlerA)(s32 id, s32 *args, s32 *operand);
@@ -298,7 +298,7 @@ s32 func_150AE60C(s32 *args) {
 
 /* event_native_random: random number below args[0] (unsigned; VR4300 x % 0 = x) */
 s32 func_150AE674(s32 *args) {
-    u32 r = func_150ADA20();
+    u32 r = random_int();
     u32 n = args[0];
 
     return (n == 0) ? r : r % n;

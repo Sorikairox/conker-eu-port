@@ -37,7 +37,7 @@ _conker_guard()
 ROOT = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker')
 LINE = re.compile(r'/\* [0-9A-F]+ ([0-9A-F]{8}) [0-9A-F]{8} \*/\s+(\S+)\s*(.*)')
 CALLEE = {'func_15149130': 9, 'func_151491F4': 8}
-PURE = {'func_150ADA20': ('$v0', 'u'), 'func_150ADA68': ('$f0', 'f')}   # no-arg helpers (random u8 / f32)
+PURE = {'random_int': ('$v0', 'u'), 'random_float': ('$f0', 'f')}   # no-arg helpers (random u8 / f32)
 _SYMS = []
 
 

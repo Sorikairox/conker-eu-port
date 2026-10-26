@@ -17,10 +17,10 @@ typedef struct {
     s32 unk12C[1];
 } struct_eu_11CB90_elem;
 
-void func_150F0820(void *arg0);
-void func_150F0898(void *arg0);
-void func_150F0900(void *arg0);
-void func_150F0968(void *arg0);
+void tether_flame_clear_slot(void *arg0);
+void tether_glow_clear_slot(void *arg0);
+void tether_smoke_clear_slot(void *arg0);
+void tether_light_clear_slot(void *arg0);
 void light_ctrl_retire(void *arg0);
 void light_ctrl_free(void *arg0);
 
@@ -28,14 +28,15 @@ void light_ctrl_free(void *arg0);
 extern u16 D_80088EA0[3];
 
 /*
- * object_7B_pulse_scale: per-frame "breathing" of object type 0x7B (func_150348D4's case 0x7B; func_150F20C8 below
+ * object_7B_pulse_scale: per-frame "breathing" of object type 0x7B (func_150348D4's case 0x7B; obj7b_joint_swing_entries below
  * builds the same object's joint entries). A shared phase (the s16 at D_800CC298 + 0x14) advances by
  * D_80088EA0[sel] * D_800BE9E4 (speeds 720 / 2000 / 3000: sel 1 when the object's +0x2E4 flags have both bits 0-1
  * set, sel 2 when both bits 2-3 are set, else 0); the scale 0.9 + 0.35 * (cos(phase) + 1) / 2 (0.9 .. 1.25, the
  * phase in 1/65536 turns) multiplies the 3x3 part of the 4x4 float matrix at the model's (+0x1D4) +0xF80.
  * The asm leaves a pointer in v0; no caller reads it (void).
  */
-void func_150F1F80(struct127 *object) {
+/* was func_150F1F80 */
+void obj7b_update_pulse_scale(struct127 *object) {
     u8 *obj = (u8 *) object;
     s16 *phase = (s16 *)((u8 *)&D_800CC298 + 0x14);
     u16 speeds[3];
@@ -68,7 +69,7 @@ void func_150F1F80(struct127 *object) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/func_150F1F80.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/obj7b_update_pulse_scale.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -78,7 +79,8 @@ void func_150F1F80(struct127 *object) {
  * -0x1999, -6553.6 as a float) and back up otherwise (below 0x1555, 5461.33); the sum is compared as an int, not
  * an s16. Then six entries {joint * 6 + 4, angle} for joints 29..34; returns the end of the entries.
  */
-s16 *func_150F20C8(s16 *p, s32 i) {
+/* was func_150F20C8 */
+s16 *obj7b_joint_swing_entries(s16 *p, s32 i) {
     s16 *angle = (s16 *)((u8 *)&D_800CC298 + 0x12);
     s32 step = D_800BE9E4 * 0x222;
     s32 v;
@@ -106,10 +108,11 @@ s16 *func_150F20C8(s16 *p, s32 i) {
     return p + 12;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/func_150F20C8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/obj7b_joint_swing_entries.s")
 #endif
 
-void func_eu_150F2230(u8 *arg0) {
+/* was func_eu_150F2230 */
+void obj7b_set_anim_ids(u8 *arg0) {
     if ((*(u16 *)((u8 *)arg0 + 0x84)) == 0x14) {
         (*(u8 *)((u8 *)arg0 + 0x68)) = 0x1B;
     } else {
@@ -132,7 +135,8 @@ extern s32 D_800A1C9C;
 extern s32 D_800A1CB0;
 
 void func_151D58E4(void *, f32, f32, f32, u8, u8, s32); /* P95 */
-void func_150F2290(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_150F2290 */
+void fx_big_explosion_at_obj(u8 *arg0, s32 arg1, s32 arg2) {
     struct {
         s32 u60;
         s32 u64;
@@ -190,10 +194,10 @@ void func_150F2290(u8 *arg0, s32 arg1, s32 arg2) {
         func_151D5404((struct17 *) &sp.uE4, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, temp_s1, arg2);
         func_151D58E4(&sp.uE4, 506.0f, 1013.0f, 0.0009871669f, 5, temp_s1, arg2); /* P95: was 0x43FD0000 as an int */
         func_151D5AC4(&sp.uE4, temp_s1 & 0xFF, arg2);
-        func_10010F88((func_150ADA20() & 8) + 0x2B6, 0x7FFFU, 0, 0U, 0, (s16) (s32) sp.uE4, (s16) (s32) sp.uE8, (s16) (s32) sp.uEC, 0xFA0, 0x1770);
+        func_10010F88((random_int() & 8) + 0x2B6, 0x7FFFU, 0, 0U, 0, (s16) (s32) sp.uE4, (s16) (s32) sp.uE8, (s16) (s32) sp.uEC, 0xFA0, 0x1770);
         func_151D45A4(&sp.uE4, temp_s1 & 0xFF, arg2);
-        sp58 = func_150ADA68();
-        temp_t8 = (func_150ADA20() % 56U) + 0xC8;
+        sp58 = random_float();
+        temp_t8 = (random_int() % 56U) + 0xC8;
         var_f10 = (f32) temp_t8;
         if (temp_t8 < 0) {
             var_f10 += 4294967296.0f;
@@ -242,17 +246,18 @@ void func_150F2290(u8 *arg0, s32 arg1, s32 arg2) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/func_150F2290.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/fx_big_explosion_at_obj.s")
 #endif
 #ifdef NON_MATCHING
-/* P249: readable C for func_150F2670 (game_eu_11F790, 80 insns). */
+/* P249: readable C for ambient_far_sound_update (game_eu_11F790, 80 insns). */
 // ambient_far_sound_update: random ambient sound while object `slot` is far out. A cooldown D_800D9D10 (u8) counts
 // down by D_800BE9E4 per frame (to 0); when it is 0 and x^4 + z^4 of D_800CC2D0[slot] exceeds 6760000, plays sound
-// 0x6C..0x6E (func_150ADA20() % 3) at volume 0x5DC0 with the pan of func_100114D0(0, y, 0, 0x7FFF, 20000, 19000)
+// 0x6C..0x6E (random_int() % 3) at volume 0x5DC0 with the pan of func_100114D0(0, y, 0, 0x7FFF, 20000, 19000)
 // (+0x80, low byte) and restarts the cooldown at 0x80..0xFF frames.
 s32 func_100114D0(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *outPan, s32 *outVol, s32 *outDist);
-s32 func_150ADA20(void);
-void func_150F2670(s32 slot) {
+s32 random_int(void);
+/* was func_150F2670 */
+void ambient_far_sound_update(s32 slot) {
     struct127 *obj = &D_800CC2D0[slot];
     u8 *timer = (u8 *) D_800D9D10;
     f32 x2, z2;
@@ -271,12 +276,12 @@ void func_150F2670(s32 slot) {
     if (x2 * x2 + z2 * z2 > 6760000.0f) {
         func_100114D0(0, (s32) obj->y_position, 0, 0x7FFF, 0x4E20, 0x4A38, &pan, &vol, &dist);
         pan += 0x80;
-        *timer = (func_150ADA20() & 0x7F) + 0x80;
-        func_10010F30((u32) func_150ADA20() % 3 + 0x6C, 0x5DC0, (u8) pan, 0, 0);
+        *timer = (random_int() & 0x7F) + 0x80;
+        func_10010F30((u32) random_int() % 3 + 0x6C, 0x5DC0, (u8) pan, 0, 0);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/func_150F2670.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/ambient_far_sound_update.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -285,7 +290,8 @@ s32 func_15143874(s16, f32, f32 *, f32 *); /* P95: f32 parameter */
 s32 func_15143874(s16, s32, f32 *, f32 *);
 #endif
 
-void func_150F2230(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150F2230 */
+void obj_bone_smoke_puff(u8 *arg0, u8 arg1, s32 arg2) {
     f32 sp2C[3];
     s32 sp20[3];
 
@@ -294,9 +300,9 @@ void func_150F2230(u8 *arg0, u8 arg1, s32 arg2) {
         sp2C[1] = 0.0f;
         sp2C[2] = 0.0f;
 #ifdef NON_MATCHING
-        func_15143874(func_150ADA20() & 0xFF, 100.0f, sp2C, &sp2C[2]); /* P95: float literal (asm passes the bits 0x42C80000) */
+        func_15143874(random_int() & 0xFF, 100.0f, sp2C, &sp2C[2]); /* P95: float literal (asm passes the bits 0x42C80000) */
 #else
-        func_15143874(func_150ADA20() & 0xFF, 0x42C80000, sp2C, &sp2C[2]);
+        func_15143874(random_int() & 0xFF, 0x42C80000, sp2C, &sp2C[2]);
 #endif
         func_15143134(sp2C, sp20, *(s32 *)(arg0 + 0x1D4) + 0x4C0);
         func_151C384C(sp20, arg1, arg2);

@@ -18,8 +18,8 @@ void func_150B15D0(struct127 *arg0) {
     arg0->unk178 = arg0->z_position;
     arg0->immune = 0x64;
     arg0->unk40 = (f32) (s16) (arg0->unk7A + 0x4000) * 0.005493164f;
-    if (func_1505A6F8(D_800CC2D0, arg0) < 1100.0f) {
-        temp_f0 = func_1505A6F8(arg0, D_800CC2D0);
+    if (obj_dist_xz(D_800CC2D0, arg0) < 1100.0f) {
+        temp_f0 = obj_dist_xz(arg0, D_800CC2D0);
         temp_f16 = temp_f0;
         temp_f2 = arg0->y_position - D_800CC2D0->y_position;
         if (temp_f2 < 0.0f) {
@@ -30,24 +30,24 @@ void func_150B15D0(struct127 *arg0) {
         if ((temp_f0 < temp_f2) && (D_800CC2D0->in_water == 1)) {
             
             temp_f0_2 = 1100.0f - temp_f16;
-            temp_v1 = func_1505A630(arg0->unk174 - D_800CC2D0->x_position, D_800CC2D0->z_position - arg0->unk178, 0);
+            temp_v1 = math_atan2_u16(arg0->unk174 - D_800CC2D0->x_position, D_800CC2D0->z_position - arg0->unk178, 0);
             if (temp_f0_2 > 850.0f) {
                 temp_f2 = (temp_f0_2 - 820.0f) * 0.09f;
                 *D_800CC2E8 = D_800CC2D0->y_position - *D_800D1550 * (0, temp_f2);
             }
-            func_1505A184(temp_v1 - 0x3000, (temp_f0_2 * 0.045f) + 5.0f, 0.0f, &sp50, &sp4C, &sp48);
+            vec_from_yaw_pitch(temp_v1 - 0x3000, (temp_f0_2 * 0.045f) + 5.0f, 0.0f, &sp50, &sp4C, &sp48);
             D_800CC2D0->unk164 = sp50;
             D_800CC2D0->unk168 = sp4C;
         }
     }
-    func_1505E650(arg0, 0U, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    obj_start_anim(arg0, 0U, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
 #ifdef NON_MATCHING
 extern f32 D_8009FC8C;
 extern f32 D_8009FC90;
 void func_15021834(struct127 *, s32, s32);
-void func_15056B08(struct127 *);
+void obj_walk_update(struct127 *);
 s32 func_150535F4(struct127 *);
 
 void func_150B17DC(struct127 *arg0) {
@@ -61,8 +61,8 @@ void func_150B17DC(struct127 *arg0) {
     arg0->unk80 = 0xA;
     sp34 = arg0->unk76;
     temp_f0 = (f32) (*(s16 *)((u8 *)(D_800D2104[arg0->unk13F]) + 2));
-    func_15058EA4(arg0, temp_f0, 1.0f, temp_f0, D_8009FC8C, 12.0f, -16.0f);
-    func_15056B08(arg0);
+    obj_set_gravity_band(arg0, temp_f0, 1.0f, temp_f0, D_8009FC8C, 12.0f, -16.0f);
+    obj_walk_update(arg0);
     var_f2 = 6.0f;
     temp_f12 = arg0->unkC4;
     var_f0 = ((f32) (s16) ((sp34 - arg0->unk76) * 6) * 0.00390625f) - temp_f12;
@@ -78,7 +78,7 @@ block_3:
     arg0->unk148 = temp_f2 + ((var_f0 - temp_f2) * D_8009FC90);
     arg0->unkC4 = temp_f12 + arg0->unk148;
     arg0->unk40 = (f32) (s16) (arg0->unk7A + 0x4000) * 0.005493164f;
-    func_15059140(arg0);
+    obj_physics_step(arg0);
     if (func_150535F4(arg0) == 0) {
         func_15021834(arg0, 0, -1);
     }
@@ -88,17 +88,17 @@ block_3:
 #endif
 
 #ifdef NON_MATCHING
-void func_150585F0(struct127 *);
+void obj_stun_update(struct127 *);
 void func_15052760(struct127 *, s16);
 
 // held_object_update: update of an object that may be held, thrown or resting: unk80 = 10; stunned objects only run
-// func_150585F0. Otherwise its resting height is 210 above the floor entry D_800D20FC[unk13F] (+8), the vertical
+// obj_stun_update. Otherwise its resting height is 210 above the floor entry D_800D20FC[unk13F] (+8), the vertical
 // bounce speed unkB8 is -vy / 2 (0 in mode 3) unless unk22C bit 3; in mode 14 (unk223) it is pulled towards object
-// unk222 (no gravity, vy = (its height + unk224 - y) / (distance func_1505A6F8 / speed)); otherwise (mode 1: 210 above
+// unk222 (no gravity, vy = (its height + unk224 - y) / (distance obj_dist_xz / speed)); otherwise (mode 1: 210 above
 // the player) the height comes from unk224 (10000: the D_800D2104 path point unk21E, else 8 x unk224, + unk180 for
-// all but kinds 5 / 0x50 / 0xAD..0xAF) and, unless unk100 bit 6, the collision box (func_15058EA4, 3 x 12 for kind
-// 0x44 at its path point height, else 5 x 35). Then the move (func_15056B08), the facing unk40 from unk7A, the
-// animation (func_15059140), kinds 5 / 0xAD..0xAF / 0x44 turn from the old heading (func_15052760), and the object
+// all but kinds 5 / 0x50 / 0xAD..0xAF) and, unless unk100 bit 6, the collision box (obj_set_gravity_band, 3 x 12 for kind
+// 0x44 at its path point height, else 5 x 35). Then the move (obj_walk_update), the facing unk40 from unk7A, the
+// animation (obj_physics_step), kinds 5 / 0xAD..0xAF / 0x44 turn from the old heading (func_15052760), and the object
 // is released (func_15021834) when func_150535F4 says so.
 void func_150B1964(struct127 *obj) {
     s16 heading;
@@ -122,7 +122,7 @@ void func_150B1964(struct127 *obj) {
         }
         if (obj->unk223 == 14) {
             target = &D_800CC2D0[obj->unk222];
-            dist = func_1505A6F8(target, obj);
+            dist = obj_dist_xz(target, obj);
             obj->gravity = 0.0f;
             obj->y_velocity = (D_800CC2D0[obj->unk222].y_position + (s16) obj->unk224 - obj->y_position) /
                               (dist / obj->xz_velocity);
@@ -150,15 +150,15 @@ void func_150B1964(struct127 *obj) {
                     half = 5.0f;
                     depth = 35.0f;
                 }
-                func_15058EA4(obj, height, half, height, -half, depth, -depth);
+                obj_set_gravity_band(obj, height, half, height, -half, depth, -depth);
             }
         }
-        func_15056B08(obj);
+        obj_walk_update(obj);
     } else {
-        func_150585F0(obj);
+        obj_stun_update(obj);
     }
     obj->unk40 = (f32) (s16) (obj->unk7A + 0x4000) * 0.0054931640625f;
-    func_15059140(obj);
+    obj_physics_step(obj);
     if (obj->id == 5 || obj->id == 0xAD || obj->id == 0xAE || obj->id == 0xAF || obj->id == 0x44) {
         func_15052760(obj, heading);
     }
@@ -171,9 +171,9 @@ void func_150B1964(struct127 *obj) {
 #endif
 
 #ifdef NON_MATCHING
-void func_15056B08(struct127 *);
-void func_1505A770(struct127 *);
-u8 *func_1505EEB0(s32, s32 *);
+void obj_walk_update(struct127 *);
+void obj_apply_gravity(struct127 *);
+u8 *obj_find_by_state(s32, s32 *);
 
 void func_150B1CBC(struct127 *arg0) {
     struct {
@@ -188,8 +188,8 @@ void func_150B1CBC(struct127 *arg0) {
     u8 temp_t9;
     u8 *temp_s0;
 
-    temp_s0 = func_1505EEB0(0xA, &sp.u3C);
-    func_15056B08(arg0);
+    temp_s0 = obj_find_by_state(0xA, &sp.u3C);
+    obj_walk_update(arg0);
     if (arg0->unk1E5 == 2) {
         arg0->x_position = (*(f32 *)((u8 *)temp_s0 + 0x14));
         arg0->z_position = (*(f32 *)((u8 *)temp_s0 + 0x1C));
@@ -204,10 +204,10 @@ void func_150B1CBC(struct127 *arg0) {
             var_f12 += 4294967296.0f;
         }
         (*(f32 *)((u8 *)temp_s0 + 0xB8)) = (f32) (func_150AD78C(var_f12 * 0.2f) * 6.0f);
-        func_1505A770(arg0);
+        obj_apply_gravity(arg0);
         (*(f32 *)((u8 *)temp_s0 + 0x18)) = (f32) (arg0->y_position - 170.0f);
         (*(s8 *)((u8 *)temp_s0 + 0x13C)) = (s8) (D_800C3E78 + 0x64);
-        func_1505A184((*(u16 *)((u8 *)temp_s0 + 0x7A)), (*(f32 *)((u8 *)temp_s0 + 0xB8)) * -7.0f, 0.0f, &sp.u34, &sp.u30, &sp.u2C);
+        vec_from_yaw_pitch((*(u16 *)((u8 *)temp_s0 + 0x7A)), (*(f32 *)((u8 *)temp_s0 + 0xB8)) * -7.0f, 0.0f, &sp.u34, &sp.u30, &sp.u2C);
         (*(f32 *)((u8 *)temp_s0 + 0x14)) = (f32) (arg0->x_position + sp.u34);
         (*(f32 *)((u8 *)temp_s0 + 0x1C)) = (f32) (arg0->z_position + sp.u30);
         (*(u16 *)((u8 *)temp_s0 + 0x7A)) = (u16) ((*(u16 *)((u8 *)temp_s0 + 0x7A)) + (D_800BE9A0 << 8));
@@ -217,7 +217,7 @@ void func_150B1CBC(struct127 *arg0) {
         (*(f32 *)((u8 *)temp_s0 + 0x16C)) = 0.0f;
         (*(f32 *)((u8 *)temp_s0 + 0x170)) = 0.0f;
     }
-    temp_v0 = func_1505A630(D_800CC2D0->x_position - arg0->x_position, arg0->z_position - D_800CC2D0->z_position, 0);
+    temp_v0 = math_atan2_u16(D_800CC2D0->x_position - arg0->x_position, arg0->z_position - D_800CC2D0->z_position, 0);
     arg0->unk7A = temp_v0;
     arg0->unk40 = (f32) (s16) (temp_v0 + 0x4000) * 0.005493164f;
 }
@@ -228,18 +228,18 @@ void func_150B1CBC(struct127 *arg0) {
 extern u8 D_800B8AC4[];
 extern s32 D_800CC670;
 extern s32 D_8008CE80;
-void func_150562FC(struct127 *);
-void func_150597FC(struct127 *);
-f32 func_150489B0(u8);
-void func_1510F800(s32);
-s32 func_1510FE58(s32, s32, s32, s32 *);
+void obj_carried_update(struct127 *);
+void obj_find_carrier(struct127 *);
+f32 math_cos_u8(u8);
+void collision_select_area(s32);
+s32 collision_level_nearest_height(s32, s32, s32, s32 *);
 void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 
 // sinking_object_update: per-frame update of an object sinking / floating in water: flags (0x80, 0x4 while moving
 // faster than 1), unkB0 25, stunned 10, unk239 3, unkFC 0xA7, unk80 1; a pending reset (unk25C bit 6) puts its old
-// position on the player's. In a water region (unk13D) it calls func_150562FC and sinks (unkB8 eases towards -20 with
+// position on the player's. In a water region (unk13D) it calls obj_carried_update and sinks (unkB8 eases towards -20 with
 // factor 0.2, else towards 0) once unk21C reaches 9, unless the region's D_800B8AC4 entry is set and D_800CC670 bit 2
-// is clear. Facing / animation / func_150597FC / func_1505E650 / release as usual. In water, 40 in 256 frames spawn
+// is clear. Facing / animation / obj_find_carrier / obj_start_anim / release as usual. In water, 40 in 256 frames spawn
 // a ripple record (node_spawn_sprite) at a random point up to 40 x xz_scale around it, drifting with the player's speed.
 void func_150B1EC0(struct127 *obj) {
     struct {
@@ -294,41 +294,41 @@ void func_150B1EC0(struct127 *obj) {
     }
     target = 0.0f;
     if (obj->unk13D != 0) {
-        func_150562FC(obj);
+        obj_carried_update(obj);
         if ((D_800B8AC4[obj->unk13D * 0x32C] == 0 || (D_800CC670 & 4)) && obj->unk21C >= 9) {
             target = -20.0f;
         }
     }
     obj->unkB8 = obj->unkB8 + (target - obj->unkB8) * 0.2f;
     obj->unk40 = (f32) (s16) (obj->unk7A + 0x4000) * 0.0054931640625f;
-    func_15059140(obj);
-    func_150597FC(obj);
-    func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    obj_physics_step(obj);
+    obj_find_carrier(obj);
+    obj_start_anim(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
     func_15021834(obj, 0, -1);
-    if (obj->unk13D == 0 || (u8) func_150ADA20() >= 40) {
+    if (obj->unk13D == 0 || (u8) random_int() >= 40) {
         return;
     }
-    dist = obj->xz_scale * (f32) ((u32) func_150ADA20() % 40);
-    a = func_150ADA20();
-    s = func_150489B0(a);
-    c = func_15048A40(a);
+    dist = obj->xz_scale * (f32) ((u32) random_int() % 40);
+    a = random_int();
+    s = math_cos_u8(a);
+    c = math_sin_u8(a);
     rec.u00 = D_8008CE80;
     rec.u0C = 0;
     rec.u0E = 0;
     rec.pos[0] = (s32) (obj->x_position + s * dist);
     rec.pos[1] = (s32) obj->y_position;
     rec.pos[2] = (s32) (obj->z_position + c * dist);
-    func_1510F800(0);
-    rec.u04 = func_1510FE58(rec.pos[0], rec.pos[1], rec.pos[2], NULL);
+    collision_select_area(0);
+    rec.u04 = collision_level_nearest_height(rec.pos[0], rec.pos[1], rec.pos[2], NULL);
     speed = D_800CC2D0[0].xz_velocity * 64.0f;
     a = D_800CC2D0[0].unk76 >> 8;
-    rec.u16 = (s32) (func_150489B0(a) * speed);
-    rec.u18 = (s32) (func_15048A40(a) * -speed);
+    rec.u16 = (s32) (math_cos_u8(a) * speed);
+    rec.u18 = (s32) (math_sin_u8(a) * -speed);
     rec.u1A = -30;
     rec.u1F = 7;
     rec.u20 = 0;
     rec.u22 = -80;
-    r = func_150ADA20();
+    r = random_int();
     rec.u24 = (r << 12) / 5100 + 204;
     rec.u26 = (r << 12) / 12750 + 81;
     rec.u28 = 400;

@@ -39,17 +39,17 @@ s32 func_15097D20(s32 entity, s32 unused) {
 
 #ifdef NON_MATCHING
 s32 func_15053430(struct127 *);
-void func_15060F28(struct127 *arg0, s32 arg1);
+void obj_remove(struct127 *arg0, s32 arg1);
 extern u8 D_800D2520;
 extern s32 D_800D3C60;
 
 /* Removes object `id`: sets flag +2 of its entity record (when id < D_800D2520) and kills it with
- * func_15060F28(obj, 0), or with func_15053430 when called with two words and args[1] != 0. Returns 999999,
+ * obj_remove(obj, 0), or with func_15053430 when called with two words and args[1] != 0. Returns 999999,
  * 0 for a missing object. */
 s32 func_15097DDC(s32 id, s32 *args) {
     struct127 *obj;
 
-    obj = func_1505EEF4(id);
+    obj = obj_find_by_spawn(id);
     if (obj == NULL) {
         return 0;
     }
@@ -59,7 +59,7 @@ s32 func_15097DDC(s32 id, s32 *args) {
     if (D_800D3C60 == 2 && args[1] != 0) {
         func_15053430(obj);
     } else {
-        func_15060F28(obj, 0);
+        obj_remove(obj, 0);
     }
     return 999999;
 }
@@ -77,29 +77,29 @@ s32 func_15084000(s32);
 void func_15085880(void *, s32);
 void func_15085710(s16, s16, s32);
 s32 func_150859AC(s16, s32);
-void func_150432CC(s32, s32);
-void func_150432FC(s16, s16);
-void func_15042D78(u8);
+void text_set_box(s32, s32);
+void text_set_pos(s16, s16);
+void text_set_flags(u8);
 void func_1518C000(struct127 *, s32, s32);
 void func_1518C164(u8 *);
 void func_15173298(u8 *, s32);
 void func_1507EF0C(struct127 *);
 void func_1507EB4C(struct127 *, s32);
 void func_15080A20(s32, s32, s32, s32);
-s32 func_1505D024(struct127 *, s32, u16, s32);
-s32 func_1505D1C4(f32, f32, f32, s32, s32, u16, s32, s32);
+s32 obj_send_hit(struct127 *, s32, u16, s32);
+s32 attack_spawn_at_point(f32, f32, f32, s32, s32, u16, s32, s32);
 void func_1503DE70(struct127 *, s32, s32);
-struct127 *func_15072208(struct127 *, s32);
-void func_15062BDC(struct127 *, f32, f32);
-void func_1505E650(struct127 *, u16, f32, f32, f32, f32, s32);
-void func_1510ED24(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, u16, s32, f32, f32);
-s32 func_150ADA20(void);
-s32 func_15048AD0(s32, s32);
+struct127 *obj_find_child_nth(struct127 *, s32);
+void obj_set_scale(struct127 *, f32, f32);
+void obj_start_anim(struct127 *, u16, f32, f32, f32, f32, s32);
+void collision_find_floor(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, u16, s32, f32, f32);
+s32 random_int(void);
+s32 math_angle_diff_deg_int(s32, s32);
 s32 func_15083568(struct127 *, s32, f32, s32);
 s32 func_150836CC(struct127 *, s32);
 u8 *func_15031C4C(struct127 *, s32, s32);
 struct127 *func_15083E90(u8);
-void func_1506160C(struct127 *, u8, u8, u8, u8);
+void obj_fade_command(struct127 *, u8, u8, u8, u8);
 void func_150637B4(struct127 *);
 void func_15063920(struct127 *);
 void func_15063894(struct127 *);
@@ -108,14 +108,14 @@ f32 func_15052F9C(struct127 *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_15193660(u8 *, u8, s32);
 void func_151937F4(u8 *, s32, s32);
 void func_151D71AC(u8 *, u8, s32);
-void func_1505959C(struct127 *, s32);
-void func_15063254(struct127 *, s32, s32, f32);
-void func_1507D1D8(struct127 *);
-void func_1507D4F8(s32);
-s32 func_1507CD64(struct127 *, s32);
+void obj_attach_to_carrier(struct127 *, s32);
+void obj_model_swap_keep_pose(struct127 *, s32, s32, f32);
+void mp_player_respawn(struct127 *);
+void player_lose_life(s32);
+s32 player_hit_reaction(struct127 *, s32);
 void func_1517F3B0(s32, s32, s32, s32, s8, s32);
-void func_15060F28(struct127 *, s32);
-void *func_1507BB28(s32, s32);
+void obj_remove(struct127 *, s32);
+void *aiscript_find_by_kind(s32, s32);
 extern s32 D_800D3C60;
 extern s32 D_800BE804;
 extern u16 D_800BEB30[];
@@ -138,10 +138,10 @@ extern u16 D_8009015C;
                       : ((f) > -1.0f) ? (u32)(s32)(f) : 0xFFFFFFFF)
 
 // object_run_command: performs one scripted object command (move, turn, animate, spawn, ...) on the object `id`.
-/* Object command handler: entry 0 of func_1509BE40's handler table (event ids 0x2xxx), called as
+/* Object command handler: entry 0 of event_dispatch's handler table (event ids 0x2xxx), called as
  * handler(id, cmd, args) with args = {id, cmd, x1, x2, ...} (args[2] is the first extra argument, D_800D3C60 the
  * number of words; 16.16 fixed point for speeds / scales, degrees for angles). `id` names an object
- * (func_1505EEF4); returns 0 when it does not exist or for an unknown command, else 1. */
+ * (obj_find_by_spawn); returns 0 when it does not exist or for an unknown command, else 1. */
 s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
     struct127 *obj;
     u8 *o;
@@ -157,7 +157,7 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
     f32 pz;
     u32 u;
 
-    obj = func_1505EEF4(id);
+    obj = obj_find_by_spawn(id);
     if (obj == NULL) {
         return 0;
     }
@@ -241,11 +241,11 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
     case 0x13:
         E9C_U8(o, 0x125) = args[2];
         return 1;
-    case 0x14: /* +0x232 = args[2], restart its script (func_1507BB28) */
+    case 0x14: /* +0x232 = args[2], restart its script (aiscript_find_by_kind) */
         E9C_U8(o, 0x232) = args[2];
         D_800D154C = obj;
         D_800C3E78 = E9C_INDEX(o);
-        E9C_S32(o, 0x218) = (s32)func_1507BB28(0, E9C_U8(o, 0x232));
+        E9C_S32(o, 0x218) = (s32)aiscript_find_by_kind(0, E9C_U8(o, 0x232));
         E9C_U16(o, 0x21C) = 0;
         return 1;
     case 0x15:
@@ -369,13 +369,13 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         E9C_U8(o, 0x251) = args[2];
         return 1;
     case 0x2A:
-        func_1505D024(obj, args[2], args[3], -1);
+        obj_send_hit(obj, args[2], args[3], -1);
         return 1;
     case 0x2B:
-        func_1505D024(obj, args[2], args[3], args[4]);
+        obj_send_hit(obj, args[2], args[3], args[4]);
         return 1;
     case 0x2C: /* spawn at (args[3], args[4], args[5]) */
-        func_1505D1C4(args[3], args[4], args[5], args[2], args[6], args[7], 0, 0);
+        attack_spawn_at_point(args[3], args[4], args[5], args[2], args[6], args[7], 0, 0);
         return 1;
     case 0x2D:
         E9C_U8(o, 0x21E) = args[2];
@@ -384,15 +384,15 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         D_800BEB30[args[2]] = args[3];
         *((u16 **)D_800BE728[0])[args[2]] = args[3];
         return 1;
-    case 0x2F: /* attached object args[2] (func_15072208): 0 scale, 1 move, 2 script */
-        p = (u8 *)func_15072208(obj, args[2]);
+    case 0x2F: /* attached object args[2] (obj_find_child_nth): 0 scale, 1 move, 2 script */
+        p = (u8 *)obj_find_child_nth(obj, args[2]);
         if (p == NULL) {
             return 1;
         }
         if (args[3] == 0) {
-            func_15062BDC(obj, E9C_FIX(args[4]), E9C_FIX(args[5]));
+            obj_set_scale(obj, E9C_FIX(args[4]), E9C_FIX(args[5]));
         } else if (args[3] == 1) {
-            func_1505E650((struct127 *)p, args[4], E9C_FIX(args[5]), E9C_FIX(args[6]), 0.0f, 0.0f, 0);
+            obj_start_anim((struct127 *)p, args[4], E9C_FIX(args[5]), E9C_FIX(args[6]), 0.0f, 0.0f, 0);
         } else if (args[3] == 2) {
             E9C_S32(p, 0x218) = 0;
             E9C_U8(p, 0x232) = args[4];
@@ -416,8 +416,8 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         z = E9C_F32(D_800DBFF0, 0x300);
         x = x - sinf(E9C_F32(D_800DBFF0, 0x3A0)) * 1800.0f;
         z = z - cosf(E9C_F32(D_800DBFF0, 0x3A0)) * 1800.0f;
-        x += (u32)func_150ADA20() % 800 - 400;
-        z += (u32)func_150ADA20() % 800 - 400;
+        x += (u32)random_int() % 800 - 400;
+        z += (u32)random_int() % 800 - 400;
         if (x < args[2]) {
             x = args[2] - x + args[2];
         } else if (args[3] < x) {
@@ -431,7 +431,7 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         px = x;
         pz = z;
         py = E9C_F32(D_800DBFF0, 0x2FC);
-        func_1510ED24(0, 0, &py, 0, 0, 0, px, py, pz, py, 0, 0, -10000.0f, 20000.0f);
+        collision_find_floor(0, 0, &py, 0, 0, 0, px, py, pz, py, 0, 0, -10000.0f, 20000.0f);
         obj->x_position = px;
         obj->z_position = pz;
         obj->y_position = (f32)args[6] + py;
@@ -439,7 +439,7 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
     case 0x35:
         D_800D154C = obj;
         D_800C3E78 = E9C_INDEX(o);
-        E9C_S32(o, 0x218) = (s32)func_1507BB28(0, args[2]);
+        E9C_S32(o, 0x218) = (s32)aiscript_find_by_kind(0, args[2]);
         E9C_U16(o, 0x21C) = 0;
         return 1;
     case 0x36:
@@ -460,7 +460,7 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         return 1;
     case 0x3A:
         f = E9C_FIX(args[2]);
-        func_15062BDC(obj, f, f);
+        obj_set_scale(obj, f, f);
         return 1;
     case 0x3B:
         E9C_U16(E9C_REC(o), 0x32) |= args[2];
@@ -575,9 +575,9 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         return 1;
     case 0x54: /* fade: 3 words = mode 1 to args[2], else mode 2 args[2] / args[3] */
         if (D_800D3C60 == 3) {
-            func_1506160C(obj, 1, args[2], 0, 0);
+            obj_fade_command(obj, 1, args[2], 0, 0);
         } else {
-            func_1506160C(obj, 2, args[2], args[3], 0);
+            obj_fade_command(obj, 2, args[2], args[3], 0);
         }
         return 1;
     case 0x55: /* players 0..3: button bit 0x4000 */
@@ -624,7 +624,7 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         E9C_U8(o, 0x232) = args[3];
         D_800D154C = obj;
         D_800C3E78 = E9C_INDEX(o);
-        E9C_S32(o, 0x218) = (s32)func_1507BB28(0, E9C_U8(o, 0x232));
+        E9C_S32(o, 0x218) = (s32)aiscript_find_by_kind(0, E9C_U8(o, 0x232));
         E9C_U16(o, 0x21C) = 0;
         return 1;
     case 0x61: /* record +0x8C (args[2], -1 = 0x8000); -1 / 4 / 0x2000 also set +0x8A and mode 2 */
@@ -673,13 +673,13 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         }
         return 1;
     case 0x66:
-        func_150432CC((s32)obj, args[2]);
+        text_set_box((s32)obj, args[2]);
         return 1;
     case 0x67: /* screen position of player args[2] (bit 0: column, >> 1: row) in 2 / 3 player modes */
         n = args[2];
-        func_15042D78(0);
+        text_set_flags(0);
         if (D_80082FA0 == 2 || D_80082FA0 == 3) {
-            func_150432FC((n & 1) * 150 + 10, (n >> 1) * 115);
+            text_set_pos((n & 1) * 150 + 10, (n >> 1) * 115);
         }
         return 1;
     case 0x68:
@@ -734,9 +734,9 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
             args[6] = args[7];
             args[7] = n;
         }
-        n = func_15048AD0((f32)args[6], (f32)args[7]);
-        x = (u32)func_150ADA20() % (u32)n + args[6];
-        z = (u32)func_150ADA20() % (u32)(args[5] - args[4]) + args[4];
+        n = math_angle_diff_deg_int((f32)args[6], (f32)args[7]);
+        x = (u32)random_int() % (u32)n + args[6];
+        z = (u32)random_int() % (u32)(args[5] - args[4]) + args[4];
         f = (f32)x * 0.017453292f;
         obj->x_position = sinf(f) * -(f32)z + (f32)args[2];
         obj->z_position = cosf(f) * -(f32)z + (f32)args[3];
@@ -777,7 +777,7 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
             func_15083568(obj, 0x79, 0.0f, 0);
             if (E9C_INDEX(o) < D_80090130) {
                 E9C_U8(E9C_REC(o), 0x4E) = 2;
-                func_1505E650(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+                obj_start_anim(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
             }
             break;
         case 1:
@@ -788,7 +788,7 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
             E9C_U8(o, 0x1C9) = 6;
             break;
         case 3: /* object args[3] */
-            p = (u8 *)func_1505EEF4(args[3] & 0xFFFF0FFF);
+            p = (u8 *)obj_find_by_spawn(args[3] & 0xFFFF0FFF);
             if (p != NULL) {
                 E9C_U8(E9C_REC(o), 0x4E) = 1;
                 func_15052F9C((struct127 *)p, 50.0f, 0x17, 4, 0, 1, 0, 0, 1, 0);
@@ -800,21 +800,21 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
             func_151D71AC(o, 0xFF, 1);
             break;
         case 5:
-            func_1505E650(obj, 0x16, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+            obj_start_anim(obj, 0x16, 1.0f, 0.0f, 0.0f, 0.0f, 0);
             break;
         }
         return 1;
     case 0x79:
         E9C_U8(E9C_REC(o), 0x7D) = (args[2] != 0) ? 1 : 0;
         return 1;
-    case 0x7A: /* grab entity args[2]: +0x13C = its object number + 100, stop, func_1505959C(it, this number) */
+    case 0x7A: /* grab entity args[2]: +0x13C = its object number + 100, stop, obj_attach_to_carrier(it, this number) */
         p = (u8 *)func_15083E90(args[2]);
         if (p == NULL) {
             return 1;
         }
         E9C_U8(o, 0x13C) = E9C_INDEX(p) + 100;
         obj->xz_velocity = 0.0f;
-        func_1505959C((struct127 *)p, E9C_INDEX(o));
+        obj_attach_to_carrier((struct127 *)p, E9C_INDEX(o));
         return 1;
     case 0x7B:
         E9C_U8(E9C_REC(o), 0x1AF) = args[2];
@@ -832,15 +832,15 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         **(u16 **)(o + 0x144) = args[2];
         return 1;
     case 0x80:
-        func_15063254(obj, args[2], args[3], (f32)args[4] * 0.01f);
+        obj_model_swap_keep_pose(obj, args[2], args[3], (f32)args[4] * 0.01f);
         return 1;
     case 0x81:
         E9C_U8(o, 0x275) = args[2];
         return 1;
-    case 0x82: /* func_1507D1D8 with D_8009015C cleared */
+    case 0x82: /* mp_player_respawn with D_8009015C cleared */
         n = D_8009015C;
         D_8009015C = 0;
-        func_1507D1D8(obj);
+        mp_player_respawn(obj);
         D_8009015C = n;
         return 1;
     case 0x83:
@@ -850,16 +850,16 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         E9C_U8(E9C_REC(o), 0x4E) = args[2];
         return 1;
     case 0x85:
-        func_1507D4F8(E9C_INDEX(o));
+        player_lose_life(E9C_INDEX(o));
         return 1;
     case 0x86:
         E9C_U8(o, 0x23D) = args[2];
         return 1;
     case 0x87:
-        func_1507CD64(obj, 0xF);
+        player_hit_reaction(obj, 0xF);
         return 1;
     case 0x88:
-        func_1507CD64(obj, 9);
+        player_hit_reaction(obj, 9);
         return 1;
     case 0x89:
         E9C_U16(o, 0x22E) = args[2];
@@ -883,7 +883,7 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         for (i = 0; i < 25; i++) {
             p = (u8 *)D_800CC2D0 + i * 0x32C;
             if (E9C_S32(p, 0) != 0 && E9C_U8(p, 0x124) == E9C_INDEX(o) + 1 && E9C_U8(p, 5) == 5) {
-                func_15060F28((struct127 *)p, 0);
+                obj_remove((struct127 *)p, 0);
             }
         }
         return 1;
@@ -897,9 +897,9 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C5530/func_15097E9C.s")
 #endif
 #ifdef NON_MATCHING
-/* Object query handler: entry 1 of func_1509BE40's handler table D_80088838 (event ids 0x2xxx), called as
+/* Object query handler: entry 1 of event_dispatch's handler table D_80088838 (event ids 0x2xxx), called as
  * handler(id & 0xFFF, cmd, args) with args = D_800D3380 = {id, cmd, x1, x2, ...} (args[2] is the first extra
- * argument; D_800D3C60 = the number of words). `id` names an object (func_1505EEF4). 0xB7 asks func_15083E0C,
+ * argument; D_800D3C60 = the number of words). `id` names an object (obj_find_by_spawn). 0xB7 asks func_15083E0C,
  * 0xB0 / 0xB1 test whether the object is missing (0xB1: or of kind 8 / 0x27); every other query returns 0 for a
  * missing object and otherwise a field or a derived value (positions packed as x << 16 | z, distances, angles in
  * degrees, ...). Object ids passed as arguments drop bits 12..15 (& 0xFFFF0FFF). */
@@ -934,7 +934,7 @@ extern f32 D_8009E80C;
 #define A024_S32(p, o) (*(s32 *)((u8 *)(p) + (o)))
 #define A024_F32(p, o) (*(f32 *)((u8 *)(p) + (o)))
 #define A024_REC(p) (*(u8 **)((u8 *)(p) + 0x31C))
-#define A024_OBJ(arg) func_1505EEF4((arg) & 0xFFFF0FFF)
+#define A024_OBJ(arg) obj_find_by_spawn((arg) & 0xFFFF0FFF)
 #define A024_INDEX(p) (((u8 *)(p) - (u8 *)D_800CC2D0) / 0x32C)   /* index in D_800CC2D0 (0x32C each) */
 #define A024_POINT(i) (((u8 *)D_800D2778 + (i) * 0x10)[7])
 #define A024_DEG (360.0f / 65536.0f)
@@ -970,7 +970,7 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
     if (cmd == 0xB7) {
         return func_15083E0C(id & 0xFF);
     }
-    obj = func_1505EEF4(id);
+    obj = obj_find_by_spawn(id);
     if (cmd == 0xB0) {
         return (obj == NULL) ? 1 : 0;
     }
@@ -1023,10 +1023,10 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
         return sqrtf(dz * dz + dx * dx);
     case 0x9C: /* heading to object args[2] */
         other = A024_OBJ(args[2]);
-        r = func_1505A630(other->x_position - obj->x_position, other->z_position - obj->z_position, 0);
+        r = math_atan2_u16(other->x_position - obj->x_position, other->z_position - obj->z_position, 0);
         return (f32)(r + 0x4000) * A024_DEG * 65536.0f;
     case 0x9D: /* heading to the point (args[2], args[3]) */
-        r = func_1505A630((f32)args[2] - obj->x_position, (f32)args[3] - obj->z_position, 0);
+        r = math_atan2_u16((f32)args[2] - obj->x_position, (f32)args[3] - obj->z_position, 0);
         return (f32)(u32)((r - 0x4000) & 0xFFFF) * A024_DEG * 65536.0f;
     case 0x9E: /* within args[4] of the point (args[2], args[3]), integer xz */
         ox = (s32)obj->x_position - args[2];
@@ -1202,7 +1202,7 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
         return (p - D_800D34B8) / 0x34;
     case 0xCD: /* angle between the heading +0x40 and the direction to object args[2] (args[3] == 1: absolute) */
         other = A024_OBJ(args[2]);
-        r = func_1505A630(other->x_position - obj->x_position, other->z_position - obj->z_position, 0);
+        r = math_atan2_u16(other->x_position - obj->x_position, other->z_position - obj->z_position, 0);
         dist = A024_F32(obj, 0x40);
         d = func_15144BC8((f32)(r + 0x4000) * A024_DEG);
         d = func_15144BC8(func_15144BC8(dist) - d);
@@ -1218,7 +1218,7 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
         dx = other->x_position - obj->x_position;
         dz = other->z_position - obj->z_position;
         dy = other->y_position - obj->y_position;
-        r = func_1505A630(sqrtf(dx * dx + dz * dz), dy, 0);
+        r = math_atan2_u16(sqrtf(dx * dx + dz * dz), dy, 0);
         d = func_15144BC8((f32)(u32)r * A024_DEG);
         if (180.0f < d) {
             d += -360.0f;
@@ -1408,7 +1408,7 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
     case 0xED:
         return D_800BEB30[id];
     case 0xEE: /* the point args[2] ahead of the object (heading +0x7A turned 180 degrees): x << 16 | z */
-        func_1505A184(A024_U16(obj, 0x7A) + 0x8000, (f32)args[2], 0.0f, &hit[2], &hit[0], &hit[1]);
+        vec_from_yaw_pitch(A024_U16(obj, 0x7A) + 0x8000, (f32)args[2], 0.0f, &hit[2], &hit[0], &hit[1]);
         return ((s32)((f32)(s16)(s32)obj->x_position + hit[2]) << 16)
              | ((s32)((f32)(s16)(s32)obj->z_position + hit[0]) & 0xFFFF);
     case 0xEF:

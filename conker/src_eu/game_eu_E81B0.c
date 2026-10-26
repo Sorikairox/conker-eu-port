@@ -15,7 +15,7 @@ void func_150BA4C0(u8 *arg0, u8 arg1, s32 arg2) {
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
     tmp.unk8 = 0.0f;
-    temp_v0 = func_15149130((func_150ADA20() % 9U) + 15, -1, 0x52, -1, 1, 0x3F, 0xC, arg1, arg2);
+    temp_v0 = func_15149130((random_int() % 9U) + 15, -1, 0x52, -1, 1, 0x3F, 0xC, arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0xC);
     }
@@ -63,32 +63,32 @@ void func_150BAA3C(u8 *arg0) {
         return;
     }
     if ((*(s32 *)((u8 *)temp_s4 + 0x1D4)) != 0) {
-        (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((0.3143f + (func_150ADA68() * 0.58100003f)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((0.3143f + (random_float() * 0.58100003f)) * D_800BE9A4));
         if ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f) {
             sp.uD8 = ((*(f32 *)((u8 *)temp_s4 + 0x14C)) + (*(f32 *)((u8 *)temp_s4 + 0x150))) * 0.5f;
             temp_s5 = ((s32) (*(u16 *)((u8 *)temp_s4 + 0x76)) >> 8) - 0x40;
             func_1515C7B4(temp_s4, &sp.uF0, &sp.uEC, &sp.uE8);
             sp.uE0 = 0.0f;
             do {
-                temp_s0 = func_150ADA20();
-                func_15143794((s16) ((((u32) temp_s0 % 127U) + temp_s5) - 0x3F), (s16) ((func_150ADA20() % 31U) - 0x32), sp.uEC, &sp.uCC);
+                temp_s0 = random_int();
+                func_15143794((s16) ((((u32) temp_s0 % 127U) + temp_s5) - 0x3F), (s16) ((random_int() % 31U) - 0x32), sp.uEC, &sp.uCC);
                 temp_f6 = sp.uD0 * (*(f32 *)((u8 *)temp_s4 + 0xF0));
                 sp.uCC += sp.uF0;
                 sp.uD0 = temp_f6;
                 sp.uD0 = temp_f6 + sp.uF4;
                 sp.uD4 += sp.uF8;
-                sp.uC0 = func_150ADA68() * 360.0f;
-                sp.uC4 = func_150ADA68() * 360.0f;
-                sp.uC8 = func_150ADA68() * 360.0f;
-                temp_f2 = (func_150ADA68() * 0.094000004f) + 0.051000003f;
+                sp.uC0 = random_float() * 360.0f;
+                sp.uC4 = random_float() * 360.0f;
+                sp.uC8 = random_float() * 360.0f;
+                temp_f2 = (random_float() * 0.094000004f) + 0.051000003f;
                 sp.uB4 = (sp.uCC - sp.uF0) * temp_f2;
                 sp.uB8 = (sp.uD0 - sp.uF4) * temp_f2;
                 sp.uBC = (sp.uD4 - sp.uF8) * temp_f2;
-                sp.uDC = (func_150ADA68() * 18.645f) + -9.3225f;
-                sp.uE4 = (func_150ADA68() * 18.645f) + -9.3225f;
-                temp_f22 = func_150ADA68();
-                temp_f20 = func_150ADA68();
-                func_1518A930(&sp.uCC, &sp.uC0, ((temp_f22 * 0.080000006f) + 0.1f) * sp.uD8, &sp.uB4, &sp.uDC, (temp_f20 * 0.324f) + -0.563f, 0.944854f, 7, (func_150ADA20() % 41U) + 0x3C, 0, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                sp.uDC = (random_float() * 18.645f) + -9.3225f;
+                sp.uE4 = (random_float() * 18.645f) + -9.3225f;
+                temp_f22 = random_float();
+                temp_f20 = random_float();
+                func_1518A930(&sp.uCC, &sp.uC0, ((temp_f22 * 0.080000006f) + 0.1f) * sp.uD8, &sp.uB4, &sp.uDC, (temp_f20 * 0.324f) + -0.563f, 0.944854f, 7, (random_int() % 41U) + 0x3C, 0, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) - 1.0f);
             } while ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f);
         }
@@ -153,8 +153,8 @@ void func_150BAEF4(u8 *arg0, u8 arg1, s32 arg2) {
         if (sp43 != 0) {
             sp44 = (s32) (D_800DBFF0[D_80082FA4].unk380 * 0.7111111f);
             func_151664F0(-1, (s32) sp.u6C, (s32) (sp.u70 + 6.0f), (s32) sp.u74, 0x19, 0x12, 0, 0xFF, 1);
-            sp38 = func_150ADA68();
-            func_1514CBE8(sp.u6C, sp.u70, sp.u74, (sp38 * 50.0f) + 40.0f, sp44 + 0x3C, sp44 - 0x3C, (func_150ADA20() % 11U) + 0x1E, 5, 0, 0.0f, 0, 0xFF);
+            sp38 = random_float();
+            func_1514CBE8(sp.u6C, sp.u70, sp.u74, (sp38 * 50.0f) + 40.0f, sp44 + 0x3C, sp44 - 0x3C, (random_int() % 11U) + 0x1E, 5, 0, 0.0f, 0, 0xFF);
         }
     }
 }

@@ -305,7 +305,7 @@ void func_151D6CA0(s32 arg0, s32 arg1) {
 
 #ifdef NON_MATCHING
 s32 allocate_memory(s32, s32, s32, s32);
-u8 *func_1501A680(u8 *);
+u8 *render_set_color_image(u8 *);
 u8 *func_151D6440(u8 *, s32, s32, s32);
 u8 *func_151D69C8(u8 *, s32, s32, s32);
 
@@ -342,7 +342,7 @@ block_10:
             (*(s32 *)((u8 *)temp_v0_2 + 4)) = 0x552230;
             (*(s32 *)((u8 *)temp_v0_2 + 8)) = 0xD9FFFFFF;
             (*(s32 *)((u8 *)temp_v0_2 + 0xC)) = 0x220405;
-            var_s0 = func_1501A680(temp_v0_2 + 0x10);
+            var_s0 = render_set_color_image(temp_v0_2 + 0x10);
         }
     }
     return var_s0;

@@ -6,7 +6,8 @@
 s8 func_151E6758(s16);
 extern s32 D_800BEE08;
 
-void func_15015F40(s16 arg0, s32 arg1) {
+/* was func_15015F40 */
+void mp_set_mode_for_level(s16 arg0, s32 arg1) {
     switch (arg1) {
     case 0x1A:
     case 0x24:
@@ -37,7 +38,8 @@ extern s32 D_800BEA80;
 extern s32 D_800BEA84;
 extern s32 D_800BEA88;
 
-void func_15015FBC(s32 arg0, s32 arg1) {
+/* was func_15015FBC */
+void screen_setup_viewports(s32 arg0, s32 arg1) {
     s32 *var_a1;
     s32 *var_v1;
     s16 temp_lo;
@@ -123,9 +125,9 @@ void func_15015FBC(s32 arg0, s32 arg1) {
     (*(s16 *)((u8 *)(&D_800BEA88) + 0x4E)) = (s16) temp_a1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_433F0/func_15015FBC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_433F0/screen_setup_viewports.s")
 #endif
-// s32 func_15015FBC(s32 arg0, s32 arg1) {
+// s32 screen_setup_viewports(s32 arg0, s32 arg1) {
 //     s16 temp_lo;
 //     s16 temp_lo_2;
 //     s32 temp_a1_2;

@@ -33,7 +33,7 @@ s32 func_151506E8(S2700 *, f32 *, s32, u8, s32);
 #ifdef NON_MATCHING
 void func_15151FA8(u8 *arg0, s32 arg1, s32 arg2);
 
-/* func_15151FA8's smoke spec (layout as func_150C2290's) */
+/* func_15151FA8's smoke spec (layout as smoke_column_spawn_far's) */
 typedef struct {
     /* 0x00 */ struct17 pos;
     /* 0x0C */ f32 u0C;
@@ -71,7 +71,8 @@ typedef struct {
 
 // smoke_columns_spawn: queues two smoke columns (func_15151FA8, owner byte `flag`) at (8152, 40, -309): a wide one
 // (size 9 x 21.9, ...) and a thin one (55.6 x 39, ...), then a func_151506E8 effect at the same place.
-void func_150C1F60(u8 flag) {
+/* was func_150C1F60 */
+void smoke_columns_spawn(u8 flag) {
     SmokeSpec150C1F60 spec;
     S2700 t;
 
@@ -166,11 +167,12 @@ void func_150C1F60(u8 flag) {
     func_151506E8(&t, &t.u8, 0, flag, 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C1F60.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/smoke_columns_spawn.s")
 #endif
 #ifdef NON_MATCHING
 
-void func_150C2290(s32 arg0) {
+/* was func_150C2290 */
+void smoke_column_spawn_far(s32 arg0) {
     struct {
         f32 u18;
         f32 u1C;
@@ -268,10 +270,10 @@ void func_150C2290(s32 arg0) {
     func_15151FA8(&sp.u18, arg0 & 0xFF, 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C2290.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/smoke_column_spawn_far.s")
 #endif
 // TODO: figure out this struct!
-// void func_150C2290(s32 arg0) {
+// void smoke_column_spawn_far(s32 arg0) {
 //     s16 sp9A;
 //     s16 sp98;
 //     s8 sp95;
@@ -364,15 +366,17 @@ void func_150C2290(s32 arg0) {
 //     func_15151A38(&sp18, arg0 & 0xFF, 1);
 // }
 
-void func_150C2424(u8 arg0) {
+/* was func_150C2424 */
+void fx_twin_beams_spawn(u8 arg0) {
     f32 r;
 
-    r = func_150ADA68() * 8.0f + 8.0f;
+    r = random_float() * 8.0f + 8.0f;
     func_1514C9E0(8500.0f, -490.0f, -328.0f, 8500.0f, -490.0f, 328.0f, r, 1, 0, 0.0f, 0, arg0);
-    r = func_150ADA68() * 3.0f + 4.0f;
+    r = random_float() * 3.0f + 4.0f;
     func_1514C9E0(8843.0f, -560.0f, -580.0f, 8117.0f, -560.0f, -580.0f, r, 3, 0, 0.0f, 0, arg0);
 }
-s32 func_150C251C(struct_eu_sprite *arg0) {
+/* was func_150C251C */
+s32 sprite_fade_in_alpha_b(struct_eu_sprite *arg0) {
     struct_eu_sprite_sub *sub = arg0->unk98;
     s32 v = arg0->unk1C * 8;
 
@@ -386,7 +390,7 @@ s32 func_150C251C(struct_eu_sprite *arg0) {
     return 1;
 }
 #ifdef NON_MATCHING
-/* P243: readable C for func_150C2558 (game_EF410, 106 insns). */
+/* P243: readable C for emit_point_smoke (game_EF410, 106 insns). */
 // emit_point_smoke: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a,
 // s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`): queues one func_15151FA8 smoke puff (owner byte argB,
 // arg 1) at (x, y, z + 15 - rand * 30), sizes 22 / 44, 200 / 150, the byte angle (s32) (pz * 0.07012195f) - 0x40 and
@@ -411,16 +415,17 @@ typedef struct {
     /* 0x82 */ s16 u82;
     /* 0x84 */ s32 u84;
 } Smoke2558;
-f32 func_150ADA68(void);
+f32 random_float(void);
 
-s32 func_150C2558(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a, s32 angle0, f32 r, s32 arg8,
+/* was func_150C2558 */
+s32 emit_point_smoke(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a, s32 angle0, f32 r, s32 arg8,
                   f32 arg9, s32 argA, s32 argB) {
     Smoke2558 sm;
     f32 pz;
 
     sm.pos[0] = x;
     sm.pos[1] = y;
-    pz = (z + 15.0f) - func_150ADA68() * 30.0f;
+    pz = (z + 15.0f) - random_float() * 30.0f;
     sm.pos[2] = pz;
     sm.sizeA = 22.0f;
     sm.sizeB = 44.0f;
@@ -467,10 +472,11 @@ s32 func_150C2558(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C2558.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/emit_point_smoke.s")
 #endif
 
-s32 func_150C2700(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+/* was func_150C2700 */
+s32 fx_blast_spawn_preset(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     extern f32 D_800A064C;
     S2700 s;
 
@@ -502,7 +508,8 @@ s32 func_150C2700(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     return 1;
 }
 extern f32 D_800A0650, D_800A0654; // s105: 0x64C-0x664 stay externs (1655.0f is loaded from .rodata, not lui)
-void func_150C2804(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5) {
+/* was func_150C2804 */
+void fx_point_emitter_spawn(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5) {
     struct_eu_EF410 sp1C;
 
     sp1C.unkC = D_800A0650;
@@ -518,7 +525,8 @@ void func_150C2804(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5) {
     point_emitter_spawn(&sp1C, 0, arg4, arg5);
 }
 extern f32 D_800A0658, D_800A065C, D_800A0660; // C2898 keeps these as externs: literals add 8 frame bytes (s105)
-void func_150C2898(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, struct_eu_2062D0_c *arg6) {
+/* was func_150C2898 */
+void fx_debris_spray(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, struct_eu_2062D0_c *arg6) {
     f32 sp6C[3];
     f32 sp60[3];
     f32 temp_f2;
@@ -530,18 +538,19 @@ void func_150C2898(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s
     sp6C[0] = arg0;
     sp6C[1] = arg1;
     sp6C[2] = arg2;
-    temp_f2 = ((func_150ADA68() * 112.0f) + 247.0f) * D_800A0658;
+    temp_f2 = ((random_float() * 112.0f) + 247.0f) * D_800A0658;
     sp60[0] = -arg3 * temp_f2;
     sp60[1] = -arg4 * temp_f2;
     sp60[2] = -arg5 * temp_f2;
-    sp4C = func_150ADA68();
-    sp50 = func_150ADA20();
-    sp54 = func_150ADA20();
-    impact_dust_cloud_spawn(sp6C, sp60, 6, (sp4C * D_800A065C) + D_800A0660, (sp50 & 0xF) + 0x19, (sp54 % 101) + 0x9B, (func_150ADA68() * 119.0f) + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6->unkC, arg6->unk1);
+    sp4C = random_float();
+    sp50 = random_int();
+    sp54 = random_int();
+    impact_dust_cloud_spawn(sp6C, sp60, 6, (sp4C * D_800A065C) + D_800A0660, (sp50 & 0xF) + 0x19, (sp54 % 101) + 0x9B, (random_float() * 119.0f) + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6->unkC, arg6->unk1);
 }
 extern f32 D_800A0670, D_800A0674, D_800A0678, D_800A067C, D_800A0680, D_800A0684, D_800A0688, D_800A068C;
 s32 func_15149AC0(f32 *, s32, s32, s32, s32, s32);
-void func_150C29F0(u8 *arg0)
+/* was func_150C29F0 */
+void fx_ring_particle_spawn(u8 *arg0)
 {
   f32 t;
   struct 
@@ -580,9 +589,9 @@ void func_150C29F0(u8 *arg0)
   f32 c;
   f32 s;
   f32 m;
-  r = func_150ADA20() & 0xFF;
+  r = random_int() & 0xFF;
   c = angle_byte_cos(r - 0x40);
- do { s = angle_byte_cos(r); p = (f32 *) (arg0 + 0x28); m = p[2] * func_150ADA68(); sp.u5C = 0x6231; sp.u5E = 0x1A4D; } while (0); // fakematch: same-line do-while (permuter) orders the two sh stores
+ do { s = angle_byte_cos(r); p = (f32 *) (arg0 + 0x28); m = p[2] * random_float(); sp.u5C = 0x6231; sp.u5E = 0x1A4D; } while (0); // fakematch: same-line do-while (permuter) orders the two sh stores
   sp.u62 = 0;
   sp.u63 = 0;
   sp.u64 = 0;
@@ -593,7 +602,7 @@ void func_150C29F0(u8 *arg0)
   sp.u66 = 1;
   sp.u6A = 0;
   sp.u6B = 1;
-  sp.u60 = (func_150ADA20() % 201U) + 100;
+  sp.u60 = (random_int() % 201U) + 100;
   sp.u70 = 0xF;
   sp.u74 = 0.0f;
   sp.u7C = D_800A0670;
@@ -602,21 +611,22 @@ void func_150C29F0(u8 *arg0)
   sp.u40 = p[3];
   sp.u44 = p[1] + (m * s);
   sp.u78 = D_800A0678;
-  scale = (func_150ADA68() * 0.5f) + 1.0f;
-  t = (func_150ADA68() * 0.5f) + 1.0f;
+  scale = (random_float() * 0.5f) + 1.0f;
+  t = (random_float() * 0.5f) + 1.0f;
   sp.u48 = D_800A067C * scale;
   sp.u50 = D_800A0680 * scale;
   sp.u4C = D_800A0684 * t;
   sp.u54 = D_800A0688 * t;
   sp.u58 = D_800A068C * t;
   func_15149AC0(&sp.u3C, 0xA, 1, 0, arg0[0xC], arg0[1]);
-  *((s16 *) (arg0 + 0xE)) = (func_150ADA20() % 51U) + 0x19;
+  *((s16 *) (arg0 + 0xE)) = (random_int() % 51U) + 0x19;
 }
 #ifdef NON_MATCHING
 void func_1514373C(f32, f32, f32 *, f32 *);
 s32 memcpy(s32, f32 *, s32);
 
-void func_150C2C00(u8 *arg0) {
+/* was func_150C2C00 */
+void fx_distant_burst_update(u8 *arg0) {
     struct {
         f32 u8C;
         u8 pad90[0x4];
@@ -658,7 +668,7 @@ void func_150C2C00(u8 *arg0) {
     s32 temp_v0_2;
 
     temp_s0 = arg0 + 0x28;
-    *temp_s0 += func_150ADA68() * 20.0f * 1e-9f * D_800BE9A4 * 3.6447764e7f;
+    *temp_s0 += random_float() * 20.0f * 1e-9f * D_800BE9A4 * 3.6447764e7f;
     if (*temp_s0 > 1.0f) {
         temp_v0 = func_15144B34(D_80082FA4);
         temp_f0 = (*(f32 *)((u8 *)temp_v0 + 0));
@@ -681,20 +691,20 @@ void func_150C2C00(u8 *arg0) {
             sp.uD8 = 0.7f;
             sp.uD0 = 0.0f;
             do {
-                sp.u8C = (func_150ADA68() * 5.8659425f) + 0.957204f;
+                sp.u8C = (random_float() * 5.8659425f) + 0.957204f;
                 if (func_15144C8C(func_150484A0((*(f32 *)((u8 *)temp_v0 + 0)), (*(f32 *)((u8 *)temp_v0 + 8))), sp.u8C) < 0.4f) {
-                    func_1514373C(sp.u8C, (func_150ADA68() * 1278.0f) + 3900.0f, &sp.u94, &sp.u9C);
-                    temp_f20 = ((func_150ADA68() * 1991.0f) + 1985.0f) * 0.001f;
-                    temp_f6 = func_150ADA68() * 1493.0f;
+                    func_1514373C(sp.u8C, (random_float() * 1278.0f) + 3900.0f, &sp.u94, &sp.u9C);
+                    temp_f20 = ((random_float() * 1991.0f) + 1985.0f) * 0.001f;
+                    temp_f6 = random_float() * 1493.0f;
                     sp.uA0 = 22.6f * temp_f20;
                     sp.uA8 = 13.786f * temp_f20;
                     temp_f2_2 = (temp_f6 + 3000.0f) * 0.001f;
                     sp.uA4 = 57.969f * temp_f2_2;
                     sp.uAC = 42.714f * temp_f2_2;
                     sp.uB0 = 118.763f * temp_f2_2;
-                    sp.uB8 = (func_150ADA20() % 151U) + 0x32;
-                    sp.uCC = func_150ADA68() * 500.0f * 0.001f;
-                    sp.uC0 = (func_150ADA20() % 156U) + 0x64;
+                    sp.uB8 = (random_int() % 151U) + 0x32;
+                    sp.uCC = random_float() * 500.0f * 0.001f;
+                    sp.uC0 = (random_int() % 156U) + 0x64;
                     temp_v0_2 = func_15149AC0(&sp.u94, 0xA, 1, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                     if (temp_v0_2 != 0) {
                         memcpy(temp_v0_2 + 0x160, &sp.u8C, 4);
@@ -710,9 +720,10 @@ void func_150C2C00(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C2C00.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/fx_distant_burst_update.s")
 #endif
-s32 func_150C2FCC(struct_eu_EF410_b *arg0) {
+/* was func_150C2FCC */
+s32 smoke_puff_shrink_rise(struct_eu_EF410_b *arg0) {
     arg0->unk2C -= arg0->unk2C * arg0->unk150;
     arg0->unk30 -= arg0->unk30 * arg0->unk150;
     arg0->unk38 += arg0->unk50 * D_800BE9A4 + 0.5f * arg0->unk4C * D_800BE9A4 * D_800BE9A4;
@@ -722,7 +733,8 @@ s32 func_150C2FCC(struct_eu_EF410_b *arg0) {
     }
     return 1;
 }
-s32 func_150C308C(struct_eu_EF410_d *arg0) {
+/* was func_150C308C */
+s32 fx_wake_near_camera(struct_eu_EF410_d *arg0) {
     u8 flag = FALSE;
     struct17 *v;
     f32 d;
@@ -741,7 +753,7 @@ s32 func_150C308C(struct_eu_EF410_d *arg0) {
     }
     return 1;
 }
-// ? func_150C308C(void *arg0) {
+// ? fx_wake_near_camera(void *arg0) {
 //     u8 sp1F;
 //     f32 temp_f0;
 //     f32 temp_f2;
@@ -773,7 +785,8 @@ s32 func_150C308C(struct_eu_EF410_d *arg0) {
 //     return 1;
 // }
 
-Gfx *func_150C3160(Gfx *gfx, struct_eu_EF410_c *arg1) {
+/* was func_150C3160 */
+Gfx *obj_timer_scroll_tex_dl(Gfx *gfx, struct_eu_EF410_c *arg1) {
     f32 r;
     s32 v;
     s32 t;
@@ -794,20 +807,21 @@ Gfx *func_150C3160(Gfx *gfx, struct_eu_EF410_c *arg1) {
     return gfx;
 }
 #ifdef NON_MATCHING
-void func_15059C84(struct127 *);
-void func_1505A770(struct127 *);
+void obj_update_ground_tilt(struct127 *);
+void obj_apply_gravity(struct127 *);
 void func_1507C700(struct127 *, struct127 *);
 void func_1506B04C(struct127 *, s32, void *);
 
 // carried_object_update: update of an object that another one (unk65, 1-based D_800CC2D0 slot) can carry: always
 // flag 0x4000000 in unkF8; when a carrier was set (unk222) and none is now, it restarts from its owner's position
-// (unk124); then the usual movement steps (func_15059C84 / func_1505A770 / func_15058898 / func_1505B5F8), half the
-// speed when unk28 is 0, the animation (func_1505E650 mode 0, or 2 / 3 / 1 by the carrier's unk84 0x1F9 / 0x1FB /
+// (unk124); then the usual movement steps (obj_update_ground_tilt / obj_apply_gravity / obj_update_floor / obj_land_on_floor), half the
+// speed when unk28 is 0, the animation (obj_start_anim mode 0, or 2 / 3 / 1 by the carrier's unk84 0x1F9 / 0x1FB /
 // other) and the carrier link (func_1507C700). With a timer (unk2E4): a carrier in state 5 drops it; the timer stops
 // when nothing (D_800BE616 / D_800C35EA / carrier) holds it; while running it counts down by D_800BE9E4 (sound
 // func_1508B20C when D_800BE616); when it runs out the carrier is released (stunned / immune cleared, health 1) and
 // the object sends event 0xB (D_800BE616) or 0xE (func_1506B04C, its owner, position, carrier) and goes to state 1.
-void func_150C3230(struct127 *obj) {
+/* was func_150C3230 */
+void carried_object_update(struct127 *obj) {
     struct {
         struct127 *owner;
         f32 pos[3];
@@ -826,10 +840,10 @@ void func_150C3230(struct127 *obj) {
         obj->old_z_position = owner->z_position;
         obj->unk222 = 0;
     }
-    func_15059C84(obj);
-    func_1505A770(obj);
-    func_15058898(obj, obj->old_y_position);
-    func_1505B5F8(obj, obj->unk180);
+    obj_update_ground_tilt(obj);
+    obj_apply_gravity(obj);
+    obj_update_floor(obj, obj->old_y_position);
+    obj_land_on_floor(obj, obj->unk180);
     if (obj->unk28 == 0.0f) {
         obj->xz_velocity *= 0.5f;
     }
@@ -846,7 +860,7 @@ void func_150C3230(struct127 *obj) {
     } else {
         mode = 0;
     }
-    func_1505E650(obj, mode, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+    obj_start_anim(obj, mode, 0.0f, 0.0f, 0.0f, 0.0f, 0);
     if (obj->unk65 != 0) {
         func_1507C700(obj, &D_800CC2D0[obj->unk65 - 1]);
     }
@@ -884,29 +898,30 @@ void func_150C3230(struct127 *obj) {
         }
     }
     func_1506B04C(obj, D_800BE616 ? 0xB : 0xE, &msg);
-    func_15060F28(obj, 1);
+    obj_remove(obj, 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C3230.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/carried_object_update.s")
 #endif
 #ifdef NON_MATCHING
-void func_1505A250(f32, f32, f32, f32 *, f32 *);
-f32 func_1505A3A8(f32, struct127 *, f32, f32, u8);
-u8 func_150599C8(struct127 *, u8, u16);
+void move_xz_towards(f32, f32, f32, f32 *, f32 *);
+f32 obj_approach_speed(f32, struct127 *, f32, f32, u8);
+u8 obj_turn_towards(struct127 *, u8, u16);
 void func_1001091C(u8 *, s32);
 
 // rolling_object_update: per-frame update of a rolling object (barrel / ball; kinds 0x25, 0x10, 0xAC): unk80 = 10;
-// kind 0x25 first damps its push vector (func_1505A250, 0.15) and, when unk87 bit 0, keeps its height in unk224;
-// friction (func_1505A3A8, 2 / 0.1 or 0.25), gravity 3, the move (func_15056B08, water func_150562FC) and animation.
+// kind 0x25 first damps its push vector (move_xz_towards, 0.15) and, when unk87 bit 0, keeps its height in unk224;
+// friction (obj_approach_speed, 2 / 0.1 or 0.25), gravity 3, the move (obj_walk_update, water obj_carried_update) and animation.
 // Its frame velocity (unkBC / unk148 = position delta x D_800BEDC8) gives the speed d; xz_velocity is capped at 2d
-// when it exceeds 2(d + 4). unk87 == 4 (a hit) fires event 0xFF020133 as the player (func_1506E8D8) and stores the
+// when it exceeds 2(d + 4). unk87 == 4 (a hit) fires event 0xFF020133 as the player (objev_sound_alt_300_1800) and stores the
 // velocity as the push vector. unk87 shifts left each frame. Moving faster than 0.5 on land turns the heading unk78
-// towards the motion (func_1505A630) and the facing towards it or its opposite (func_150599C8). The roll speed unk44
+// towards the motion (math_atan2_u16) and the facing towards it or its opposite (obj_turn_towards). The roll speed unk44
 // decays by 0.9 in the air (unk28 > 30), else is 2d (0 in water) and spins the model (func_15052490, scale
 // (2 - xz_scale) x 0.375 / 0.28125 / 1.125 by kind). Below 0.2 the rolling sound stops (func_100109D0); otherwise it
-// is started (func_1506E5FC with sound 0x630 / 0x67A / 0x62A by kind) or its pitch set to unk44 x 2500 (max 28000,
+// is started (objev_sound_300_1800 with sound 0x630 / 0x67A / 0x62A by kind) or its pitch set to unk44 x 2500 (max 28000,
 // halved for kind 0x25, func_1001091C).
-void func_150C3574(struct127 *obj) {
+/* was func_150C3574 */
+void rolling_object_update(struct127 *obj) {
     f32 scale;
     f32 friction;
     f32 d;
@@ -917,7 +932,7 @@ void func_150C3574(struct127 *obj) {
     scale = 0.5f;
     obj->unk80 = 10;
     if (obj->id == 0x25) {
-        func_1505A250(0.0f, 0.0f, 0.15f, &obj->unk164, &obj->unk168);
+        move_xz_towards(0.0f, 0.0f, 0.15f, &obj->unk164, &obj->unk168);
         friction = 0.1f;
         if (obj->unk87 & 1) {
             obj->unk224 = (s32) obj->y_position;
@@ -926,7 +941,7 @@ void func_150C3574(struct127 *obj) {
     } else {
         friction = 0.25f;
     }
-    func_1505A3A8(0.0f, obj, 2.0f, friction, 0);
+    obj_approach_speed(0.0f, obj, 2.0f, friction, 0);
     obj->gravity = 3.0f;
     if (obj->id == 0x10) {
         scale = 0.375f;
@@ -935,11 +950,11 @@ void func_150C3574(struct127 *obj) {
         scale = 1.5f;
     }
     scale *= 0.75f;
-    func_15056B08(obj);
+    obj_walk_update(obj);
     if (obj->unk13D != 0) {
-        func_150562FC(obj);
+        obj_carried_update(obj);
     }
-    func_15059140(obj);
+    obj_physics_step(obj);
     obj->unkBC = (obj->x_position - obj->old_x_position) * D_800BEDC8;
     obj->unk148 = (obj->z_position - obj->old_z_position) * D_800BEDC8;
     d = sqrtf(obj->unkBC * obj->unkBC + obj->unk148 * obj->unk148);
@@ -950,7 +965,7 @@ void func_150C3574(struct127 *obj) {
     if (flags == 4) {
         D_800D1580 = 0xFF020133;
         D_800D154C = D_800CC2D0;
-        func_1506E8D8();
+        objev_sound_alt_300_1800();
         D_800D154C = obj;
         obj->unk164 = obj->unkBC;
         obj->unk168 = obj->unk148;
@@ -959,13 +974,13 @@ void func_150C3574(struct127 *obj) {
     }
     obj->unk87 = flags << 1;
     if (0.5f < d && obj->unk13D == 0) {
-        obj->unk78 = func_1505A630(obj->x_position - obj->old_x_position, obj->old_z_position - obj->z_position, 0);
+        obj->unk78 = math_atan2_u16(obj->x_position - obj->old_x_position, obj->old_z_position - obj->z_position, 0);
     }
     heading = obj->unk78;
     if ((obj->unk7A - heading - 0x4000) & 0x8000) {
-        func_150599C8(obj, 2, heading);
+        obj_turn_towards(obj, 2, heading);
     } else {
-        func_150599C8(obj, 2, heading ^ 0x8000);
+        obj_turn_towards(obj, 2, heading ^ 0x8000);
     }
     if (30.0f < obj->unk28) {
         obj->unk44 *= 0.9f;
@@ -986,7 +1001,7 @@ void func_150C3574(struct127 *obj) {
         } else {
             D_800D1580 = 0x62A;
         }
-        func_1506E5FC();
+        objev_sound_300_1800();
     } else {
         pitch = (s32) (obj->unk44 * 2500.0f);
         if (pitch > 28000) {
@@ -1002,12 +1017,12 @@ void func_150C3574(struct127 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C3574.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/rolling_object_update.s")
 #endif
 #ifdef NON_MATCHING
 void func_15188D80(struct127 *, s32, s32);
 s32 func_150C1B60(f32, f32, f32, s32);
-void func_150C3D5C(struct127 *);
+void bomb_explode(struct127 *);
 void func_151BA1A0(s32, s32, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 // bouncing_bomb_update: per-frame update of a falling / bouncing object. In state 20 it spawns a small dust puff
@@ -1016,9 +1031,10 @@ void func_151BA1A0(s32, s32, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s
 // it sets the spin speed unk148 = 70, spawns a big puff plus a light (func_150C1B60) and sends event 6, or with a
 // timer shows it, plays sound 0x1A9, sets unkD0, flags 0x1008000 and unk114 = 500. Each frame: unk83 counts up,
 // immune 0xFF, flag 0x8000 cleared from frame 11; facing unk40 from unk7A, animation, spin unkB8 += unk148 with
-// unk148 x 0.96. It ends (func_150C3D5C, sound 0x93, state 1) once it rests (unk28 0) after frame 20 with unkCC 0,
+// unk148 x 0.96. It ends (bomb_explode, sound 0x93, state 1) once it rests (unk28 0) after frame 20 with unkCC 0,
 // or when unk107 is set or its health is 0.
-void func_150C3994(struct127 *obj) {
+/* was func_150C3994 */
+void bouncing_bomb_update(struct127 *obj) {
     if (obj->interaction_state == 20) {
         if (obj->unk2E4 == 0) {
             func_151BA1A0(0x2F, 1, (s16) (s32) obj->x_position, (s16) (s32) (obj->y_position + 30.0f),
@@ -1053,20 +1069,21 @@ void func_150C3994(struct127 *obj) {
         obj->unkF8 &= ~0x8000;
     }
     obj->unk40 = (f32) (obj->unk7A + 0x4000) * 0.0054931640625f;
-    func_15059140(obj);
+    obj_physics_step(obj);
     obj->unkB8 += obj->unk148;
     obj->unk148 *= 0.96f;
     if ((obj->unk28 == 0.0f && obj->unk83 >= 21 && obj->unkCC == 0) || obj->unk107 != 0 || obj->health == 0) {
-        func_150C3D5C(obj);
+        bomb_explode(obj);
         func_10010630(0x93, obj, 0x7D00, 200, 2500);
-        func_15060F28(obj, 1);
+        obj_remove(obj, 1);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C3994.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/bouncing_bomb_update.s")
 #endif
 
-s32 func_150C3D48(s32 arg0) {
+/* was func_150C3D48 */
+s32 checksum_key_offset(s32 arg0) {
     return arg0 + 0xEDCBA988;
 }
 
@@ -1078,7 +1095,7 @@ void func_151BA1A0(s32, s32, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s
 #else
 s32 func_151BA1A0(s32, s32, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 #endif
-s32 func_150C3D48(s32 arg0);
+s32 checksum_key_offset(s32 arg0);
 s32 func_151EF800(u32, u32 *);
 #ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
 void func_10004074(s32);
@@ -1086,14 +1103,15 @@ void func_10004074(s32);
 s32 func_10004074(s32);
 #endif
 
-void func_150C3D5C(struct127 *arg0) {
+/* was func_150C3D5C */
+void bomb_explode(struct127 *arg0) {
     s32 sum;
     s32 pad[2]; // fakematch: unused 8-byte slot above the Header locals
     Header header;
     Header2 header2;
 
     func_151BA1A0(0x2F, 1, arg0->x_position, arg0->y_position, arg0->z_position, 0x578, 0x500, 0x320, 0x4B0, 0x200, 0x200, 0x1E, 1, 0, 0xFF, 0);
-    ((s32 (*)(u32, u32 *))func_151EF800)(func_150C3D48(sum = 0xC23459B8), (u32 *)&sum);
+    ((s32 (*)(u32, u32 *))func_151EF800)(checksum_key_offset(sum = 0xC23459B8), (u32 *)&sum);
     if (sum != 0x0330C820) {
         ((u32 *)&func_10004074)[0] = 0x03E00008;
         ((u32 *)&func_10004074)[1] = 0;
@@ -1103,10 +1121,10 @@ void func_150C3D5C(struct127 *arg0) {
     func_1516DF0C(arg0->x_position, arg0->y_position, arg0->z_position, 0xD, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0, 0, 0, 0x14, 0x14, 2, 0, 0, 0, 0, 0x51, 0x51, 0x51, 0x51, 0xA, 1, 0, 0xFF, 0xA, 0x578, 0x190, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0xFF, 0);
     header.unk0 = 3;
     header.unk1 = -1;
-    header.unk2 = (func_150ADA20() % 11U) + 0xA;
+    header.unk2 = (random_int() % 11U) + 0xA;
     header.unk4 = 0;
     header2.unk0 = arg0->x_position;
     header2.unk4 = arg0->y_position;
     header2.unk8 = arg0->z_position;
-    light_create_with_ctrl(&header, &header2, (func_150ADA20() % 52U) + 0x28, 0xFF, 0xFF, 0x5A, 0xFF, 0, 0, 0xFF, 1);
+    light_create_with_ctrl(&header, &header2, (random_int() % 52U) + 0x28, 0xFF, 0xFF, 0x5A, 0xFF, 0, 0, 0xFF, 1);
 }

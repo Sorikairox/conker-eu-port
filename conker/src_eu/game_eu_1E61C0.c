@@ -135,8 +135,8 @@ void func_151B8CA4(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp6C[6] = arg0;
     sp6C[7] = arg1;
     sp6C[8] = arg2;
-    func_15143794((s16) (func_150ADA20() & 0xFF), (s16) ((func_150ADA20() % 65U) - 0x20), func_150ADA68() * 945.0f * 0.01f, &sp6C[3]);
-    temp_f2 = (func_150ADA68() * 157.0f) + 604.0f;
+    func_15143794((s16) (random_int() & 0xFF), (s16) ((random_int() % 65U) - 0x20), random_float() * 945.0f * 0.01f, &sp6C[3]);
+    temp_f2 = (random_float() * 157.0f) + 604.0f;
     sp6C[0] = 0.0f;
     sp6C[1] = 0.0f;
     temp_f2 = temp_f2 * 0.001f;
@@ -145,9 +145,9 @@ void func_151B8CA4(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp6C[4] += -arg4 * D_800BEDC8 * temp_f2;
     sp6C[5] += -arg5 * D_800BEDC8 * temp_f2;
 #ifdef NON_MATCHING
-    func_151A2C9C(&sp6C[6], sp6C, &sp6C[3], 1.0f, ((func_150ADA68() * 157.0f) + -151.0f) * 0.001f, (func_150ADA68() * 55.0f) + 75.0f, (func_150ADA20() % 26U) + 0x19, (func_150ADA20() % 101U) + 0x64, 0xA, 0x19, 0, -1, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
+    func_151A2C9C(&sp6C[6], sp6C, &sp6C[3], 1.0f, ((random_float() * 157.0f) + -151.0f) * 0.001f, (random_float() * 55.0f) + 75.0f, (random_int() % 26U) + 0x19, (random_int() % 101U) + 0x64, 0xA, 0x19, 0, -1, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
 #else
-    func_151A2C9C(&sp6C[6], sp6C, &sp6C[3], 0x3F800000, ((func_150ADA68() * 157.0f) + -151.0f) * 0.001f, (func_150ADA68() * 55.0f) + 75.0f, (func_150ADA20() % 26U) + 0x19, (func_150ADA20() % 101U) + 0x64, 0xA, 0x19, 0, -1, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
+    func_151A2C9C(&sp6C[6], sp6C, &sp6C[3], 0x3F800000, ((random_float() * 157.0f) + -151.0f) * 0.001f, (random_float() * 55.0f) + 75.0f, (random_int() % 26U) + 0x19, (random_int() % 101U) + 0x64, 0xA, 0x19, 0, -1, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
 #endif
 }
 
@@ -155,8 +155,8 @@ void func_151B8CA4(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
 extern u8 D_800AA898[]; /* s32[4]: the 4 smoke textures */
 extern u8 D_800A5860[]; /* zero vector */
 s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-s32 func_150ADA20(void);
-f32 func_150ADA68(void);
+s32 random_int(void);
+f32 random_float(void);
 
 // smoke_puff_spawn: spawns one big smoke puff particle (random texture of the 4 in D_800AA898, half size
 // 900..1400, white, alpha 0xFF, 300 frames, fade from 1 at rate 0xFF, draw 6 / update 5, random flip flags 0x40 /
@@ -205,7 +205,7 @@ s32 func_151B8EB8(u8 *obj) {
     textures[1] = ((s32 *) D_800AA898)[1];
     textures[2] = ((s32 *) D_800AA898)[2];
     textures[3] = ((s32 *) D_800AA898)[3];
-    req.texture = textures[func_150ADA20() & 3];
+    req.texture = textures[random_int() & 3];
     req.texSet = 0x1303;
     req.handlers = 0x200005;
     req.u04 = 0;
@@ -221,7 +221,7 @@ s32 func_151B8EB8(u8 *obj) {
     req.u18[2] = 0xFF;
     req.alpha = 0xFF;
     req.u1C = 0xFF;
-    s = func_150ADA68() * 500.0f + 900.0f;
+    s = random_float() * 500.0f + 900.0f;
     req.halfH = s;
     req.halfW = s;
     req.pos[0] = *(s32 *) (obj + 0x38);
@@ -238,8 +238,8 @@ s32 func_151B8EB8(u8 *obj) {
     req.u22 = 1;
     req.value = 0.0f;
     req.u24 = 1.0f;
-    flipA = (func_150ADA20() & 1) ? 0x40 : 0;
-    flipB = (func_150ADA20() & 1) ? 0x80 : 0;
+    flipA = (random_int() & 1) ? 0x40 : 0;
+    flipB = (random_int() & 1) ? 0x80 : 0;
     req.flags = flipB | flipA | 0xC000 | 0x40000 | 0x800000;
     req.draw = 6;
     req.update = 5;

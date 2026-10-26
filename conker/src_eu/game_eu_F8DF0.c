@@ -91,7 +91,7 @@ void func_150CB6F4(u8 *obj, s32 arg1, s32 arg2) {
     if (func_150CB5E0(pos, obj, (s32) ground, (u8) arg1) == 0) {
         return;
     }
-    func_1512D748((struct108 *) ((u8 *) D_800DBFF0 + D_800BEE08 * 0x9A0), 7, 1);
+    camera_shake_start((struct108 *) ((u8 *) D_800DBFF0 + D_800BEE08 * 0x9A0), 7, 1);
     if (!(*(s32 *) (obj + 0xF4) & 0x2000)) {
         func_151D5404((struct17 *) pos, 1502.0f, 3000.0f, 0.00033333333f, 0xC, 0xF, 0xFF, 0);
     }
@@ -115,7 +115,7 @@ void func_150CB6F4(u8 *obj, s32 arg1, s32 arg2) {
     part.col[1] = 0xFF;
     part.col[2] = 0xFF;
     part.col[3] = 0xFF;
-    part.size[0] = part.size[1] = (func_150ADA68() * 50.0f + sDiveSizeBase[0]) * sDiveScaleA[0];
+    part.size[0] = part.size[1] = (random_float() * 50.0f + sDiveSizeBase[0]) * sDiveScaleA[0];
     part.pos[0] = pos[0];
     part.pos[1] = *(f32 *) &ground[0] + 10.0f;
     part.pos[2] = pos[2];
@@ -126,10 +126,10 @@ void func_150CB6F4(u8 *obj, s32 arg1, s32 arg2) {
     part.u38[0] = 1.0f;
     part.u38[1] = 1.0f;
     part.flags = 0x401C0000;
-    part.u44[0] = func_150ADA20() % 51U + 0xA0;
+    part.u44[0] = random_int() % 51U + 0xA0;
     part.u44[1] = 0xFF;
-    tail.life = (func_150ADA20() & 3) + 7;
-    tail.scale = (func_150ADA68() * 30.0f + 30.0f) * part.size[0] * sDiveScaleB[0];
+    tail.life = (random_int() & 3) + 7;
+    tail.scale = (random_float() * 30.0f + 30.0f) * part.size[0] * sDiveScaleB[0];
     part.u44[2] = 0;
     part.u44[3] = 6;
     height = (*(u16 *) (obj + 0x7A) >> 8) - ((arg1 == 1) ? -8 : 8);
@@ -141,14 +141,14 @@ void func_150CB6F4(u8 *obj, s32 arg1, s32 arg2) {
             node_destroy((struct102 *) p);
         }
     }
-    ringLife = (func_150ADA20() & 0xF) + 0xA;
-    rnd = func_150ADA68();
+    ringLife = (random_int() & 0xF) + 0xA;
+    rnd = random_float();
     func_1514CBE8(pos[0], pos[1], pos[2], rnd * 59.0f + 80.0f, 0, 0xFF, ringLife, 0xE, 0, 0.0f, 0, 0xFF);
-    ringLife = (func_150ADA20() & 0xF) + 5;
+    ringLife = (random_int() & 0xF) + 5;
     ringCol[0] = cr;
     ringCol[1] = cg;
     ringCol[2] = cb;
-    rnd = func_150ADA68();
+    rnd = random_float();
     func_1514CBE8(pos[0], pos[1], pos[2], rnd * 59.0f + 70.0f, 0, 0xFF, ringLife, 0xF, 0, 0.0f, (s32) ringCol, 0xFF);
 }
 #else
@@ -216,16 +216,16 @@ s32 func_150CBD10(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u7E = 0x20;
     sp.u28[12] = arg4;
     sp.u28[1] = 0.2f;
-    func_15143794(arg8, (s16) (((u32) func_150ADA20() % 36U) - 0x37), ((func_150ADA68() * 200.0f) + 200.0f) * 0.1f, &sp.u5C);
-    sp.u68 = ((func_150ADA68() * 300.0f) + -149.0f) * 0.1f;
-    sp.u70 = ((func_150ADA68() * 300.0f) + -149.0f) * 0.1f;
-    sp.u7C = (func_150ADA20() % 33U) + 0x20;
-    sp.u74 = ((func_150ADA68() * 603.0f) + -2402.0f) * 0.001f;
-    sp.u28[3] = ((func_150ADA68() * 300.0f) + 101.0f) * 0.001f;
+    func_15143794(arg8, (s16) (((u32) random_int() % 36U) - 0x37), ((random_float() * 200.0f) + 200.0f) * 0.1f, &sp.u5C);
+    sp.u68 = ((random_float() * 300.0f) + -149.0f) * 0.1f;
+    sp.u70 = ((random_float() * 300.0f) + -149.0f) * 0.1f;
+    sp.u7C = (random_int() % 33U) + 0x20;
+    sp.u74 = ((random_float() * 603.0f) + -2402.0f) * 0.001f;
+    sp.u28[3] = ((random_float() * 300.0f) + 101.0f) * 0.001f;
     sp.u28[2] = sp.u28[3];
     sp.u80 = 0;
     sp.u84 = 0;
-    sp.u88 = (func_150ADA20() % 101U) + 0x9B;
+    sp.u88 = (random_int() % 101U) + 0x9B;
     sp.u89 = 2;
     sp.u8A = 0;
     sp.u8B = 0;
@@ -313,7 +313,7 @@ s32 func_150CBFCC(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u3C = 0xE03;
     sp.u34 = 0x200005;
     sp.u38 = 0;
-    sp.u3E = (func_150ADA20() % 41U) + 0x28;
+    sp.u3E = (random_int() % 41U) + 0x28;
     sp.u40 = 0;
     sp.u44 = 0;
     sp.u4C = 0xB0;
@@ -323,21 +323,21 @@ s32 func_150CBFCC(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u49 = 0xB;
     sp.u4A = 0x6A;
     sp.u4B = 0xFF;
-    sp.u4F = (func_150ADA20() % 157U) + 0x64;
+    sp.u4F = (random_int() % 157U) + 0x64;
     sp.u50 = 0xFF;
     sp.u94 = 3;
     sp.u95 = 3;
-    sp.u5C = sp.u60 = (func_150ADA68() * 401.0f) + 300.0f;
+    sp.u5C = sp.u60 = (random_float() * 401.0f) + 300.0f;
     sp.u64 = arg2;
     sp.u68 = arg3;
     sp.u6C = arg4;
-    func_15143794(arg8, (s16) ((func_150ADA20() % 26U) - 0x19), ((func_150ADA68() * 500.0f) + 1000.0f) * 0.01f, sp.u7C);
+    func_15143794(arg8, (s16) ((random_int() % 26U) - 0x19), ((random_float() * 500.0f) + 1000.0f) * 0.01f, sp.u7C);
     sp.u8C = 0xE05;
     sp.u88 = 0.0f;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x80;
     }
     sp.u96 = 7;

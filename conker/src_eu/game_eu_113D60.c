@@ -47,7 +47,8 @@ typedef struct {
 // gets hit bit 0, the hit point and side = sign of func_15144A74(hit - from, hit). Spawns the object (effect3d_spawn_default
 // 0xF / 0x15, flags random bits 2 | 1, size 0x30, room arg5, owner arg6) and copies the record to its +0x110.
 // Returns the object (0 when the spawn fails).
-s32 func_150E6550(u8 *from, f32 *to, f32 a2, f32 a3, f32 arg4, u8 room, s32 owner, u8 cast, u8 arg8, s16 arg9,
+/* was func_150E6550 */
+s32 beam_ray_spawn(u8 *from, f32 *to, f32 a2, f32 a3, f32 arg4, u8 room, s32 owner, u8 cast, u8 arg8, s16 arg9,
                   s8 arg10) {
     Rec6550 r;
     s32 hitObj;
@@ -96,8 +97,8 @@ s32 func_150E6550(u8 *from, f32 *to, f32 a2, f32 a3, f32 arg4, u8 room, s32 owne
             r.side = 1.0f;
         }
     }
-    bit2 = (func_150ADA20() & 1) ? 2 : 0;
-    bit1 = (func_150ADA20() & 1) ? 1 : 0;
+    bit2 = (random_int() & 1) ? 2 : 0;
+    bit1 = (random_int() & 1) ? 1 : 0;
     o = effect3d_spawn_default((s32) &q, 0xF, 0x15, 0, 0xF, bit1 | bit2, 0x30, room, owner);
     if (o != NULL) {
         memcpy((s32) o + 0x110, (s32) &r, 0x30);
@@ -105,14 +106,15 @@ s32 func_150E6550(u8 *from, f32 *to, f32 a2, f32 a3, f32 arg4, u8 room, s32 owne
     return (s32) o;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113D60/func_150E6550.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113D60/beam_ray_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
 f32 func_15144A74(void *, void *);
 extern s32 D_80088DB0;
 
-s8 func_150E67B0(u8 *arg0) {
+/* was func_150E67B0 */
+s8 beam_ray_update(u8 *arg0) {
     struct {
         f32 u30;
         f32 u34;
@@ -156,13 +158,14 @@ s8 func_150E67B0(u8 *arg0) {
     return var_a3;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113D60/func_150E67B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113D60/beam_ray_update.s")
 #endif
 #ifdef NON_MATCHING
 void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
 
-s16 *func_150E6920(u8 *arg0, s16 arg1) {
+/* was func_150E6920 */
+s16 *beam_ray_build_verts(u8 *arg0, s16 arg1) {
     struct {
         u8 u43;
         s16 * u44;
@@ -280,9 +283,10 @@ s16 *func_150E6920(u8 *arg0, s16 arg1) {
     return NULL;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113D60/func_150E6920.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113D60/beam_ray_build_verts.s")
 #endif
-s32 func_150E6D1C(u8 *arg0) {
+/* was func_150E6D1C */
+s32 beam_ray_fade_out(u8 *arg0) {
     s16 temp_v0 = *(s16 *)(arg0 + 0x1C);
     s32 temp_v1;
 
@@ -296,7 +300,8 @@ s32 func_150E6D1C(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_150E6D50(u8 *arg0) {
+/* was func_150E6D50 */
+s32 beam_ray_hit_spark(u8 *arg0) {
     struct {
         s32 u48;
         s16 u4C;
@@ -328,9 +333,9 @@ s32 func_150E6D50(u8 *arg0) {
     sp.u5D = 0xFF;
     sp.u60 = 0x130001;
     temp_v1 = arg0 + 0x110;
-    sprite_fx_spawn_cam((s32) &sp.u48, 0U, 0U, (s32) (temp_v1 + 0x14), (*(f32 *)((u8 *)temp_v1 + 4)), (*(f32 *)((u8 *)temp_v1 + 8)), (*(f32 *)((u8 *)temp_v1 + 0xC)), 50.0f, 50.0f, (u8) (func_150ADA20() & 0xFF), 0U, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+    sprite_fx_spawn_cam((s32) &sp.u48, 0U, 0U, (s32) (temp_v1 + 0x14), (*(f32 *)((u8 *)temp_v1 + 4)), (*(f32 *)((u8 *)temp_v1 + 8)), (*(f32 *)((u8 *)temp_v1 + 0xC)), 50.0f, 50.0f, (u8) (random_int() & 0xFF), 0U, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113D60/func_150E6D50.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113D60/beam_ray_hit_spark.s")
 #endif

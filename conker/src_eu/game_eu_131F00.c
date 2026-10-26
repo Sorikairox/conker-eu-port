@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_151046F0(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_151046F0 */
+void camera_cut_fade_spawn(s32 arg0, s32 arg1, s32 arg2) {
     u8 *temp_v0;
 
     temp_v0 = node_alloc(0x64, 0, 0x20, 0, 0xFFU, 1U);
@@ -20,7 +21,8 @@ void func_151046F0(s32 arg0, s32 arg1, s32 arg2) {
 #ifdef NON_MATCHING
 extern s8 D_800BEE2C;
 
-void func_15104764(struct102 *arg0) {
+/* was func_15104764 */
+void camera_cut_fade_update(struct102 *arg0) {
     u8 *sp34;
     u8 *sp30;
     u8 *sp28;
@@ -104,7 +106,7 @@ block_11:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_131F00/func_15104764.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_131F00/camera_cut_fade_update.s")
 #endif
 #ifdef NON_MATCHING
 Gfx *func_1517F5FC(Gfx *gfx, s32 a, s32 r, s32 g, s32 b, s32 i);
@@ -113,17 +115,19 @@ Gfx *func_1517F5FC(Gfx *gfx, s32 a, s32 r, s32 g, s32 b, s32 i);
 #ifdef NON_MATCHING
 // obj_fog_alpha_gfx: with i == 0 and a non-zero alpha byte at obj +0x1B, appends func_1517F5FC's colour command
 // (alpha * 63 / 256, colour 0, 0, 0, index 0) to gfx; returns the new display list end (gfx unchanged otherwise).
-Gfx *func_15104A0C(Gfx *gfx, u8 *obj, s16 i) {
+/* was func_15104A0C */
+Gfx *obj_fog_alpha_gfx(Gfx *gfx, u8 *obj, s16 i) {
     if (i == 0 && obj[0x1B] != 0) {
         return func_1517F5FC(gfx, (obj[0x1B] * 63) >> 8, 0, 0, 0, i);
     }
     return gfx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_131F00/func_15104A0C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_131F00/obj_fog_alpha_gfx.s")
 #endif
 
-s32 func_151044F4(void) {
+/* was func_151044F4 */
+s32 held_obj_byte7d_get(void) {
     u8 *temp_v1 = D_800CCA0C;
     s32 ret = 0;
 

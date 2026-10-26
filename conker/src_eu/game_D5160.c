@@ -2,7 +2,8 @@
 
 
 #ifdef NON_MATCHING
-void func_150A7CB0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_150A7CB0 */
+void mtxf_scale(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     (*(s32 *)((u8 *)arg0 + 0)) = arg1;
     (*(s32 *)((u8 *)arg0 + 4)) = 0;
     (*(s32 *)((u8 *)arg0 + 8)) = 0;
@@ -21,10 +22,10 @@ void func_150A7CB0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     (*(s32 *)((u8 *)arg0 + 0x38)) = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_D5160/func_150A7CB0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_D5160/mtxf_scale.s")
 #endif
 // NON-MATCHING: sw/jr in wrong order
-// void func_150A7CB0(f32 mtx[4][4], s32 x, s32 y, s32 z) {
+// void mtxf_scale(f32 mtx[4][4], s32 x, s32 y, s32 z) {
 //     ((s32)mtx[0][0]) = x;
 //     ((s32)mtx[0][1]) = 0;
 //     ((s32)mtx[0][2]) = 0;

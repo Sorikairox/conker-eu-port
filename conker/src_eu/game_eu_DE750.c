@@ -10,8 +10,8 @@ void func_150B0F40(u8 *arg0, u8 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, s16 *arg
     f32 m;
 
     *arg5 = *(f32 *)(arg0 + 0x40) * D_8009FC40 - 128.0f;
-    r = func_150ADA68() * 248.0f;
-    s = func_150ADA68() + -0.5f;
+    r = random_float() * 248.0f;
+    s = random_float() + -0.5f;
     if (r < 122.0f) {
         arg4[0] = arg2[0] * -31.5f + arg3[0] * s * 122.0f;
         arg4[1] = 0.0f;
@@ -67,8 +67,8 @@ void func_150B11C0(s32 arg0, s32 arg1, u8 arg2) {
 s32 func_1515C668(u8 *arg0, u8 **arg1);
 void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 void func_15143794(s16, s16, f32, void *);
-s32 func_150ADA20(void);
-f32 func_150ADA68(void);
+s32 random_int(void);
+f32 random_float(void);
 
 // wake_spray_update: update handler of the effect func_150B1138 creates (+0x28 = the object, +0x2C its id, +0x30
 // the spray accumulator). Ends the effect (+0xE = -1) when the object is gone or reused. While the owner rides in
@@ -113,7 +113,7 @@ void func_150B1200(u8 *fx) {
     if (!fast) {
         return;
     }
-    r = func_150ADA68();
+    r = random_float();
     *(f32 *) (fx + 0x30) += (1.2590001f + r * 1.079f) * D_800BE9A4;
     if (!(*(f32 *) (fx + 0x30) > 1.0f)) {
         return;
@@ -126,16 +126,16 @@ void func_150B1200(u8 *fx) {
     fwd[0] = side[1];
     do {
         func_150B0F40(obj, owner, side, fwd, pos, &yaw);
-        n1 = func_150ADA20();
-        r = func_150ADA68() * 3.77f;
+        n1 = random_int();
+        r = random_float() * 3.77f;
         func_15143794(yaw, n1 % 26 - 0x29, r + 4.06f, vel);
         vel[0] -= ((f32 *) ground)[0] * 0.9250001f;
         vel[2] -= ((f32 *) ground)[2] * 0.9250001f;
-        r = func_150ADA68();
-        n1 = func_150ADA20();
-        n2 = func_150ADA20();
-        r2 = func_150ADA68();
-        r3 = func_150ADA68();
+        r = random_float();
+        n1 = random_int();
+        n2 = random_int();
+        r2 = random_float();
+        r3 = random_float();
         impact_dust_cloud_spawn(pos, vel, 5, r * 0.178f + -0.44200003f, n1 % 21 + 0x14, n2 % 101 + 0x9B, r2 * 50.0f + 80.0f,
                       r3 < 0.044000003f, 1.4f, 1.4f, 1, 0, 1, 0, fx[0xC], fx[1]);
         *(f32 *) (fx + 0x30) -= 1.0f;

@@ -104,8 +104,8 @@ u8 *func_1518C240(s32 arg0, u8 arg1, s32 arg2) {
         return NULL;
     }
     memcpy(temp_v0 + 0x10, arg0, 0x1C);
-    (*(s32 *)((u8 *)temp_v0 + 0x2C)) = (s32) (func_150ADA20() & 0x1F);
-    (*(s32 *)((u8 *)temp_v0 + 0x30)) = (s32) (func_150ADA20() & 0x1F);
+    (*(s32 *)((u8 *)temp_v0 + 0x2C)) = (s32) (random_int() & 0x1F);
+    (*(s32 *)((u8 *)temp_v0 + 0x30)) = (s32) (random_int() & 0x1F);
     return temp_v0;
 }
 
@@ -165,11 +165,11 @@ void func_1518C2D0(u8 *arg0) {
         temp_v1 = (*(u8 **)((u8 *)arg0 + 0x24));
         if ((temp_v1 != NULL) && ((*(s32 *)((u8 *)temp_v1 + 0)) != 0) && ((*(s32 *)((u8 *)temp_v1 + 0x1D4)) != 0) && ((*(u8 *)((u8 *)arg0 + 0x28)) == (*(u8 *)((u8 *)temp_v1 + 0x3B)))) {
             if (temp_t9 < 0) {
-                temp_hi = func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x22)) + 1);
+                temp_hi = random_int() % (u32) ((*(s16 *)((u8 *)arg0 + 0x22)) + 1);
                 temp_f22 = angle_byte_cos(temp_hi & 0xFF);
                 temp_f24 = angle_byte_cos((temp_hi - 0x40) & 0xFF);
-                temp_f20 = (func_150ADA68() * (*(f32 *)((u8 *)arg0 + 0x14))) + (*(f32 *)((u8 *)arg0 + 0x10));
-                (*(s32 *)((u8 *)temp_s2 + 0x2C)) = (s32) ((func_150ADA20() % 23U) + 5);
+                temp_f20 = (random_float() * (*(f32 *)((u8 *)arg0 + 0x14))) + (*(f32 *)((u8 *)arg0 + 0x10));
+                (*(s32 *)((u8 *)temp_s2 + 0x2C)) = (s32) ((random_int() % 23U) + 5);
                 sp.uB8 = 0;
                 sp.uBC = 1;
                 sp.uC0 = 0x160600;
@@ -179,12 +179,12 @@ void func_1518C2D0(u8 *arg0) {
                 sp.uD0 = 0x20;
                 sp.uD4 = 0;
                 sp.uD5 = 9;
-                sp.u111 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x20)) + 1)) + 3;
+                sp.u111 = (random_int() % (u32) ((*(s16 *)((u8 *)arg0 + 0x20)) + 1)) + 3;
                 sp.u10C = 1;
                 sp.u10A = 1;
-                sp.u108 = (func_150ADA20() % 21U) + 0x50;
+                sp.u108 = (random_int() % 21U) + 0x50;
                 sp.uF5 = (*(u8 *)((u8 *)arg0 + 0x29));
-                temp_f0 = func_150ADA68();
+                temp_f0 = random_float();
                 sp.uE4 = 0.0f;
                 sp.uEC = 0.654f;
                 sp.uE0 = temp_f20 * temp_f24;
@@ -401,7 +401,7 @@ s32 func_1518CAEC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     sp.u8C = ((Node14 *)tbl)[*(s8 *)(arg0 + 0x2D)].x;
     sp.u8E = arg2;
     sp.u90 = ((Node14 *)tbl)[*(s8 *)(arg0 + 0x2D)].z;
-    sp.u92 = sp.u94 = func_150ADA20() % 21U + 0x23;
+    sp.u92 = sp.u94 = random_int() % 21U + 0x23;
     sp.uA2 = -1;
     sp.uA0 = 0x12;
     sp.u98 = 0xC;
@@ -440,7 +440,7 @@ s32 func_1518CC0C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     sp.u48 = temp_v1;
     sp30 = temp_f10;
     sp.u50.u90 = (s16) (s32) (*(f32 *)((u8 *)((temp_v1 + ((*(s8 *)((u8 *)arg0 + 0x2D)) * 0x14))) + 8));
-    temp_t4 = (func_150ADA20() % 21U) + 0x23;
+    temp_t4 = (random_int() % 21U) + 0x23;
     sp.u50.u92 = temp_t4;
     sp.u50.uA2 = -1;
     sp.u50.uA0 = 0x12;
@@ -455,7 +455,7 @@ s32 func_1518CC0C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     sp.u38 = *(s32 *)(sp.u48 + ((*(s8 *)((u8 *)arg0 + 0x2D)) * 0x14));
     sp.u40 = (*(f32 *)((u8 *)((sp.u48 + ((*(s8 *)((u8 *)arg0 + 0x2D)) * 0x14))) + 8));
     sp.u47 = impact_current_kind(0x14);
-    impact_dust_particle_spawn(sp.u47, (func_150ADA68() * 40.0f) + 100.0f, 0xFF, arg5, &sp.u38, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+    impact_dust_particle_spawn(sp.u47, (random_float() * 40.0f) + 100.0f, 0xFF, arg5, &sp.u38, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
     return 1;
 }
 #else

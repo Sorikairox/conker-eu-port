@@ -4,7 +4,7 @@
 Why: IDO code often leaves a value in a0..a3 that the callee uses although the decomp's C call passes nothing
 (`f()` through a K&R `void f();` declaration, or a `void (*)(void)` pointer). On N64 it works by accident; in the
 port sigs.py fills missing arguments with 0 (direct) or the icall passes none (indirect) -> wrong object / NULL
-writes. Known cases: func_1503BCAC() in func_1503482C (P75), D_80082ECC[idx]() in func_1501396C (P78).
+writes. Known cases: func_1503BCAC() in func_1503482C (P75), D_80082ECC[idx]() in record_dispatch_82ecc (P78).
 
 Usage (from the worktree root, after `eval "$(tools/eu_port/wt.sh env <wt>)"`):
     python3 tools/port/arity_scan.py [--out docs/port/arity_scan.tsv] [--top 30] [--func NAME] [--redis]
@@ -24,7 +24,7 @@ Method
             when a0..a3 are all provided and the slot is never loaded back in the function (else it is a
             local). Function asm live-in arity = highest a-reg / f12,f14 / stack arg slot read while still E,
             plus a fixpoint for pass-through wrappers (a0.. never written and handed to a callee that reads
-            them, e.g. func_15084000 -> func_1505EEF4).
+            them, e.g. func_15084000 -> obj_find_by_spawn).
             asm_regs column: per provided reg W (written since last call) and/or E (caller's entry value).
   tables  : the ELF data sections (objdump -s) and symbols (-t) give, for an indirect call whose pointer the
             IR traces to a global table, the functions stored in that table (words up to the next data
@@ -33,7 +33,7 @@ Method
             When the counts differ the site uses the max over all asm sites (match=loose; none = no asm call).
 Findings (kind column)
   D1  direct, callee is C and passed < its C definition (port passes 0 for the rest: P75's missing_args.txt
-      method). Includes byval-struct vs scalar-list mismatches (func_15049350: 1 struct of 9 words < 9).
+      method). Includes byval-struct vs scalar-list mismatches (tri_compute_plane: 1 struct of 9 words < 9).
   D2  direct, callee is still asm/stub, passed < callee asm live-in and the asm site provides more (latent:
       becomes a bug when the callee is converted).
   D3  direct, callee is C, passed == its definition (no byval/double/i64 params) but callee asm live-in AND

@@ -143,9 +143,9 @@ s32 func_1508AB7C(void) {
                     /* boost point: random spot within 50 of the racer, 40 above it, pulled halfway to the target */
                     boost[i] = 0x1E;
                     ((f32 *) ((u8 *) D_800D27D0 + 0x1868))[i] = ((f32 *) &D_80087698)[D_800E1000];
-                    ((f32 *) ((u8 *) D_800D27D0 + 0x17A8))[i] = func_150ADA68() * 50.0f + *(f32 *) (obj + 0x14);
+                    ((f32 *) ((u8 *) D_800D27D0 + 0x17A8))[i] = random_float() * 50.0f + *(f32 *) (obj + 0x14);
                     ((f32 *) ((u8 *) D_800D27D0 + 0x17E8))[i] = *(f32 *) (obj + 0x18) + 40.0f;
-                    ((f32 *) ((u8 *) D_800D27D0 + 0x1828))[i] = func_150ADA68() * 50.0f + *(f32 *) (obj + 0x1C);
+                    ((f32 *) ((u8 *) D_800D27D0 + 0x1828))[i] = random_float() * 50.0f + *(f32 *) (obj + 0x1C);
                     if (target[i] - 2 >= 2) {
                         other = (u8 *) &D_800CC2D0[target[i] - 2];
                         ((f32 *) ((u8 *) D_800D27D0 + 0x17A8))[i] +=
@@ -182,13 +182,13 @@ s32 func_1508AB7C(void) {
                 /* new random steering offsets */
                 ((s8 *) D_800D27D0)[0x1705 + i] = 0;
                 ((s8 *) D_800D27D0)[0x1715 + i] = 0;
-                if (D_80087688[D_800E1000] < (s32) (func_150ADA68() * 100.0f)) {
-                    if (0.5f < func_150ADA68()) {
+                if (D_80087688[D_800E1000] < (s32) (random_float() * 100.0f)) {
+                    if (0.5f < random_float()) {
                         ((s8 *) D_800D27D0)[0x1705 + i] = -50;
                     } else {
                         ((s8 *) D_800D27D0)[0x1705 + i] = 50;
                     }
-                    if (0.5f < func_150ADA68()) {
+                    if (0.5f < random_float()) {
                         ((s8 *) D_800D27D0)[0x1715 + i] = 50;
                     } else {
                         ((s8 *) D_800D27D0)[0x1715 + i] = 0;
@@ -221,12 +221,12 @@ s32 func_1508AB7C(void) {
         /* each player's counter, centred on its viewport */
         view = *(u8 **) &D_800BE628;
         half = (s32) (*(f32 *) (view + 0x30) - *(f32 *) (view + 0x2C)) >> 1;
-        func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
+        text_set_color(0xFF, 0xFF, 0xFF, 0xFF);
         obj = (u8 *) D_800CC2D0;
         for (i = 0; i <= D_80082FA0; i++, obj += 0x32C) {
             if (obj[0x128] == 0) {
                 view = *(u8 **) &D_800BE628 + i * 0x180;
-                func_15042D94((s32) (*(f32 *) (view + 0x2C) + (f32) half), (s32) (*(f32 *) (view + 0x24) + 6.0f), 1,
+                text_printf_at((s32) (*(f32 *) (view + 0x2C) + (f32) half), (s32) (*(f32 *) (view + 0x24) + 6.0f), 1,
                               (s32) "%d", counter[i] / 50);
             }
         }

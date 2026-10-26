@@ -269,7 +269,7 @@ s32 func_151A3D70(u8 *obj) {
             *(s16 *) (pt + 0x10) = *(s16 *) (st->raw + 0x18);
             *(s16 *) (pt + 0x12) = *(s16 *) (st->raw + 0x1A);
             pt[0x15] = st->u44;
-            st->u44 = st->u44 + st->raw[0x28] + (u32) func_150ADA20() % (st->raw[0x29] + 1);
+            st->u44 = st->u44 + st->raw[0x28] + (u32) random_int() % (st->raw[0x29] + 1);
             pt[0x14] = 0xFF;
             (*(s8 *) (obj + 0x2E))++;
             if (obj[0x25] == *(s8 *) (obj + 0x2E)) {
@@ -624,7 +624,7 @@ void func_151A4BE8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp.u3C = 0x1401;
     sp.u34 = 0x200005;
     sp.u38 = 0;
-    sp.u3E = (func_150ADA20() % 5U) + 0xF;
+    sp.u3E = (random_int() % 5U) + 0xF;
     sp.u40 = 0;
     sp.u44 = 0;
     sp.u48 = 0x8A;
@@ -638,7 +638,7 @@ void func_151A4BE8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp.u54 = 0xFF;
     sp.u56 = 1;
     sp.u58 = 1.0f;
-    sp.u5C = sp.u60 = (func_150ADA68() * 50.0f) + 500.0f;
+    sp.u5C = sp.u60 = (random_float() * 50.0f) + 500.0f;
     sp.u64 = arg0;
     sp.u68 = arg1;
     sp.u6C = arg2;
@@ -650,10 +650,10 @@ void func_151A4BE8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp.u95 = 1;
     sp.u84 = -arg5 * k;
     sp.u88 = 0.0f;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x80;
     }
     sp.u4F = 0xFF;
@@ -872,10 +872,10 @@ void func_151A4FE8(u8 *obj) {
     t.u4C = 0.0f;
     t.u2C = 1.0f;
     t.u50 = 15.0f;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         t.mode |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         t.mode |= 0x80;
     }
     t.colour[7] = 0xFF;

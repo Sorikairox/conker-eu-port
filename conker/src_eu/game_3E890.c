@@ -82,7 +82,7 @@ f32 D_8009650C = 5.8676557540893555;
 // } structaaa;
 
 #ifdef NON_MATCHING
-/* P127: the stack blocks of func_150113E0, one struct so the layout is the N64 one (sp38 / sp54 / spAC) */
+/* P127: the stack blocks of level_fire_emitters_create, one struct so the layout is the N64 one (sp38 / sp54 / spAC) */
 typedef struct {
     f32 tail[7];            /* 0x00 (sp38): copied to the emitter's +0x170 */
     struct {                /* 0x1C (sp54): spawn block, particle_emitter_spawn argument 2 (0x58 bytes) */
@@ -119,7 +119,8 @@ u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 ar
 // level_fire_emitters_create: P127: level start (new game, level 0x18): creates four particle emitters
 // (particle_emitter_spawn, flags 0x20) with one spawn block whose from / to positions change per emitter ((+-520, 72,
 // 2337 / 2220), (-710 / -584, 70, 926), (506, 47, -339 / -208)); each new emitter gets the 7-float tail at +0x170.
-void func_150113E0(void) {
+/* was func_150113E0 */
+void level_fire_emitters_create(void) {
     Fire150113E0 b;
     u8 *e;
 
@@ -209,11 +210,11 @@ void func_150113E0(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3E890/func_150113E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_3E890/level_fire_emitters_create.s")
 #endif
 
 #ifdef NON_MATCHING
-/* func_1501175C records (stack images; pad bytes stay unset like the asm's) */
+/* obj_glow_smoke_attach records (stack images; pad bytes stay unset like the asm's) */
 typedef struct {
     u8 *obj;        /* 0x00 */
     u8 room;        /* 0x04 obj +0x3B */
@@ -290,7 +291,8 @@ typedef struct {
 // smoke), a glow (effect3d_spawn_full with the D_800A4AA0 model, variant 1 or 3 at random; its +0x110 tail holds obj, the
 // light constants, the new object and the mid height of obj +0x14C / +0x150) and a light_create_with_ctrl effect, storing both
 // at +0x30 / +0x34 of the new object.
-void func_1501175C(u8 *obj, u8 arg1, s32 arg2) {
+/* was func_1501175C */
+void obj_glow_smoke_attach(u8 *obj, u8 arg1, s32 arg2) {
     Link175C link;
     Glow175CTail tail;
     Glow175C g;
@@ -357,7 +359,7 @@ void func_1501175C(u8 *obj, u8 arg1, s32 arg2) {
     g.u46 = 0;
     g.u47 = 7;
     g.u48 = 0;
-    v = (func_150ADA20() & 1) ? 2 : 0;
+    v = (random_int() & 1) ? 2 : 0;
     e = effect3d_spawn_full(&g, (s32) &D_800A4AA0, 0, 0x25, 0, 0x1D, v + 1, 0, 0, 0x5C, arg1, arg2);
     l->glow = e;
     if (e != NULL) {
@@ -373,10 +375,11 @@ void func_1501175C(u8 *obj, u8 arg1, s32 arg2) {
     l->smoke = light_create_with_ctrl((Header *) &h, (Header2 *) &h2, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 1, 0, arg1, arg2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3E890/func_1501175C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_3E890/obj_glow_smoke_attach.s")
 #endif
 
-void func_15011A78(struct127 *arg0, u8 arg1, s32 arg2) {
+/* was func_15011A78 */
+void obj_spawn_effect_85(struct127 *arg0, u8 arg1, s32 arg2) {
     struct182 tmp;
     struct37 *temp_v0;
 

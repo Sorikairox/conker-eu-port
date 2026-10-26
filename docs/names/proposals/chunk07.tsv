@@ -1,0 +1,211 @@
+old	new	confidence	description
+func_1507C8E0	player_set_respawn_wait	med	Sets a player object's controller state (+0x120) to 2 with countdown arg1 (+0x124); state 2 ends in player_enter_dead_state
+func_1507C8FC	player_update_life_states	med	Per-frame loop over player objects: advances the controller life / death state machine (timers, fades, lose-life calls)
+func_1507CD0C	player_enter_dead_state	med	Sets a player's controller state to 3 and, for a human player index, calls func_15181D70 (camera / HUD)
+func_1507CD64	player_hit_reaction	high	Puts a player object into hit / death reaction kind (0..16) unless already reacting; MP hit count, anim, motion reset, state
+func_1507D158	player_send_event	med	Dispatches event (player's id byte +0x55F OR 0x2000) on the second event table with four arguments (func_1509BFB0)
+func_1507D1D8	mp_player_respawn	high	Multiplayer respawn of a player object after a lost life: keeps team bytes, resets object, places it at a start point, invulnerability
+func_1507D4F8	player_lose_life	high	A player lost a life: respawn (MP) or checkpoint restart if lives remain, else game over (SP) or mark the player out (MP)
+func_1507D754	object_destroy_effects	high	Break / death effects of an object by type byte +4 (debris, shatter, pickup drop); returns 1 released, 2 respawn, 0 otherwise
+func_1507DB44	object_set_all_flags	low	Wrapper: func_1503DE70(obj, set, -1), sets every flag entry of flag set arg1 on the object's record
+func_1507DB64	a9d90_stub	low	Empty function
+func_1507DB6C	player_draw_out_overlay	med	Builds the display list overlay drawn over a player's viewport when the player is out / dead (D_800D18A0 / D_800D1CC2 bit set)
+func_1507DE4C	obj_set_dying_flags	med	Sets an object's death flags in +0x9C (and stops sounds 0x44 / 0x23 when interacting) depending on its id
+func_1507DF10	obj_set_hit_flags_by_kind	med	Sets hit flags +0x94 / +0x9C and hit class +0x2E4 of an object according to damage kind 4..9
+func_1507DFE4	level_restart_at_start_point	low	Looks up a level start point (level_start_point_lookup) and, unless D_800C35EA is 1, starts scene 0x25 transition there
+func_1507E114	checkpoint_get_restart_index	med	Returns 0 without a checkpoint (D_800D18A8) or in levels 0x22 / 0x18; else start point lookup, returns its index + 1
+func_1507E1D0	obj_get_held_point	med	Returns the world point of an object: from its bone matrix +0x1D4 offset upward by +0x150 * 30, else its position +0x14
+func_1508EF80	vec_rotate_xz_about_point	high	Rotates point arg0 about centre arg1 by angle (degrees) in the XZ plane, writing x / z of the result to arg3 (camera orbit)
+func_1508F060	hud_bubbles_reset	med	Clears the four HUD air bubble slots (D_800D2880, 0x10 each) and the bubble spawn timer D_800D28E0
+func_1508F0A4	hud_health_air_update	med	Per-frame HUD update: health pieces, air bubbles and air meter (func_1508F0D4, func_1508F9F4, func_1509093C)
+func_1508F0D4	hud_health_update	med	Animates the HUD health pieces towards the player's health D_800CC8BA: slide-in / out, adds and drops pieces, sound 0x1A6
+func_1508F7BC	hud_health_drop_piece	med	Removes the last HUD health piece and spawns a falling piece record (D_800D245C list) with random spin, lasting 120 frames
+func_1508F9C4	hud_health_add_piece	med	Adds a HUD health piece at scale 0 (D_800D2410[D_800D2456++])
+func_1508F9F4	underwater_bubbles_update	high	Spawns, grows, floats and pops the HUD air bubbles while player 0 is under water
+func_1508FD38	hud_draw	high	Overlay pass after the world: MP HUD, countdown clock, radar, health pieces, air meter, bubbles; returns gdl unchanged on overflow
+func_150900F0	hud_health_draw	med	Draws the HUD health piece model (D_800D29A8) once per piece and per falling piece; arg1 != 0 is the front-end variant
+func_15090630	hud_bubbles_draw	med	Draws the HUD air bubble sprites from D_800D2880 (types 1 / 2 pulse, type 3 random flip with countdown)
+func_1509093C	underwater_air_meter_update	high	Animates the HUD air meter model 0xB9 while the player is under water: vertex blend to air level, tint, wobble, drop
+func_150911F4	hud_air_meter_draw	med	Draws the HUD air meter model from the D_800D28E8 state (alpha, up to 4 textures, matrix per buffer)
+func_15091534	hud_icon_sheet_load	high	Loads HUD icon sheet (texture 0xD18 + sheet, CI4 64x64 + palette) into the DL; *ready says whether it was resident
+func_150916B4	hud_time_draw	high	Draws a time in ticks (50 per second) as minutes:seconds:hundredths at (x, y) with alpha; negative draws dashes
+func_150918EC	mp_hud_draw_views	high	Multiplayer HUD overlay per view: placing, score, lives bars, status icons, race laps, overview map and radar
+func_15093818	hud_clock_set_enabled	med	Enables (loading clock model 0xBA and an 0x80 buffer) or disables the HUD countdown clock flag D_800D2458
+func_15093878	hud_clock_load	med	Loads the HUD clock model 0xBA into D_800D2448 and allocates its 0x80 byte buffer D_800D244C
+func_150938BC	hud_clock_draw	med	Draws the HUD clock model with digit textures (0x11AF + digit) for the minutes and seconds of D_800D2870 (25 per second)
+func_15093B58	radar_draw	high	Draws the multiplayer radar of every active view: disc texture plus a coloured dot per teamed object, rotated by view yaw
+func_1509B4A0	event_start_level_events	med	Reshuffles the save block, resets event state, then starts every event of the level list D_800D2F40 that passes func_1509CBD4
+func_1509B570	event_get_vars	med	Finds a loaded event by id and returns a pointer to its variable area (block + unkA), or NULL
+func_1509B5AC	event_start	high	Starts event id: loads, links and runs it once unless its save bit is set; clears variables of a running one when asked
+func_1509B704	event_find	high	Searches the loaded event list D_800D2F48 for the event whose id (flags & 0xFFFF03FF) matches; NULL if absent
+func_1509B764	event_unlink_free	high	Unlinks an event from the doubly linked list D_800D2F48, frees it and decrements the count
+func_1509B810	event_link_sorted	high	Inserts an event into the list D_800D2F48 kept sorted by id (flags without bits 0xFC00)
+func_1509B8FC	event_load	high	Loads event block id (asset 20), tags it with the id and current level, and relocates it (event_block_relocate)
+func_1509B950	event_block_relocate	high	Copies a loaded event block to a new allocation with its 8-aligned, cleared variable area after the script; frees the old one
+func_1509BA04	event_list_unload	med	Runs the exit entry of and removes events that are done (save bit), level-bound to another level, or all when arg0 != 0
+func_1509BBA0	event_list_run_phase	med	Runs every loaded event at phase arg0 (1 level start, 2, 4) according to its flags and save bit, updating D_800D2E70 states
+func_1509BE40	event_dispatch	high	Variadic event dispatch: packs id, arg and n words into D_800D3380 and calls handler table D_80088838 by id >> 12
+func_1509BFB0	event_dispatch_alt	high	Variadic event dispatch on the second handler table D_80088874 (same packing as event_dispatch), no result
+func_1509C120	save_block_realloc_random	med	Moves the 0x1B byte save state block D_800D2E4C to a randomly chosen fresh allocation (copying it), heap shuffle
+func_1509C228	event_send_cmd36	low	Dispatches command 0x36 on the second event table with 0 or 1 depending on D_800D2E68 bit 8 / save flag unkF bit 0
+func_1509C2A4	level_is_game_over_level	low	Returns true when the current level D_800BE9F0 is in a fixed list of level ids (used before applying a pending game over)
+func_1509C3A0	game_over_apply_pending	med	If a game over is pending (D_800D2E43) and the level qualifies, records the level and restarts via func_15007718; clears the flag
+func_1509C414	event_make_bank_id	low	Returns arg0 + 0x1400 plus 0x400 when save flag unk3 bit 0 is set (event id in the right bank)
+func_1509DD10	fxevt_nop_a	low	Particle event handler that does nothing and returns 1
+func_1509DD20	fxevt_nop_b	low	Particle event handler that does nothing and returns 1
+func_1509DD30	fxevt_nop_c	low	Particle event handler that does nothing and returns 1
+func_1509DD40	fxevt_nop_d	low	Particle event handler that does nothing and returns 1
+func_1509DD50	fxevt_debris_burst	med	Particle event handler: spawns a debris burst emitter (func_15177F90) from the event's parameters; returns 1
+func_1509DDC4	fxevt_emitter_kill	med	Particle event handler: kills emitter arg0 and its particles (func_15178E14); returns 0
+func_1509DDFC	fxevt_emitter_set_target	med	Particle event handler: points emitter arg0 at an object's position (mode 0) or at a packed point (mode 1)
+func_1509DEC4	fxevt_emitter_dist_to_obj	med	Particle event handler (mode 0): returns the distance from emitter arg0 to the event's object (func_15178C9C)
+func_150A7770	fill_bytes	high	memset: stores val into dst[0 .. n-1]; the first byte is written before n is tested, so n must be >= 1
+func_150A7B80	mtx_set_identity	high	Writes the fixed-point identity into an Mtx (all halves 0 except the diagonal integer halves)
+func_150A7CB0	mtxf_scale	high	Float 4x4 scale matrix: diagonal (arg1, arg2, arg3, 1.0), the three scales passed as raw float bits
+func_150A7D00	mtx_translate_fixed	high	guTranslate-style fixed-point Mtx: identity with the translation (x, y, z) in s15.16
+func_150A7DA0	mtxf_translate	high	Float 4x4 translation matrix: identity with row 3 = (arg1, arg2, arg3, 1.0), values passed as raw float bits
+func_150A8050	mtxf_rotate_xyz_deg	high	Float 4x4 rotation matrix from three angles in degrees (x, y, z) with zero translation
+func_150AD9A0	approx_dist3_int	high	Approximate integer 3D length of (dx, dy, dz): sorts the absolute values and combines them without a square root
+func_150ADA20	random_int	high	One step of the 64-bit shift-register generator in D_80088950; returns the low word of the new state
+func_150ADA68	random_float	high	One step of the 64-bit shift-register generator in D_80088950; returns its low 16 bits scaled to [0, 1]
+func_150ADACC	random_seed	high	Seeds the random generator state D_80088950 with the sign-extended argument plus 1
+func_150AE5B0	camera_update_event_modes	low	Pushes / pops camera mode slots 8 and 0 and sets camera flags +0x84 according to save flags and event queries
+func_150AE790	owner_child_spark_burst	med	Child of an owner object: spawns a random burst of sparks at the owner's bone (+0x2D) with sound, while the owner matches
+func_150AEB9C	owner_spawn_children	high	Spawns the objects of spawn list D_80088A80[0] for owner (owner, sub-type and entry byte set on each); stops on failure
+func_150AECCC	particle_fall_step	low	Adds acceleration +0x94 * dt to speed +0x96 (capped 0x1400), lowers +0x9E by speed >> 8, ages +0xA4 up to 25
+func_150AED4C	sprite_grow_step	low	Grows +0x34 by +0x14 * dt up to the limit +0x2A (then sets +0x3A = 70) and copies it to +0x36
+func_150AED9C	sprite_fade_in_alpha	low	Sets the sprite's sub-record alpha +0x1B to age * 8 (max 0xFF); returns 0 when negative
+func_150AEDD8	sprite_fade_in_age	low	While age +0x1C is below 32 sets +0x28 to age * 8 (fade in); returns 1
+func_150AEDF8	owner_child_handle_msg	med	Message handler of an owner child: message 0x2D swaps its owner between two objects, message 0 frees it when its owner goes
+func_150C1F60	smoke_columns_spawn	high	Queues two smoke columns (wide and thin) at (8152, 40, -309) and a blast effect there; part of event 0x2E
+func_150C2290	smoke_column_spawn_far	med	Queues a smoke column (func_15151FA8) at (8152, 40, 309) with fixed sizes; part of event 0x2E with smoke_columns_spawn
+func_150C2424	fx_twin_beams_spawn	low	Spawns two beam / streak effects (func_1514C9E0) between fixed points near x 8500 with random widths; part of event 0x2E
+func_150C251C	sprite_fade_in_alpha_b	low	Sets the sprite's sub-record alpha +0x1B to age * 8 (max 0xFF); returns 0 when negative (twin of sprite_fade_in_alpha)
+func_150C2558	emit_point_smoke	high	Spawn handler: queues one smoke puff at (x, y, z jittered) with fixed sizes and an angle from z; always returns 1
+func_150C2700	fx_blast_spawn_preset	low	Fills a blast spec (fixed colours and sizes, position x / y / z) and spawns it with func_151506E8; returns 1
+func_150C2804	fx_point_emitter_spawn	med	Spawns a point emitter (point_emitter_spawn) following the three given float pointers with span arg3 and owner arg4
+func_150C2898	fx_debris_spray	low	Spawns a debris spray (func_151D9014) from a point against a direction with random speed, count and colour
+func_150C29F0	fx_ring_particle_spawn	low	Effect handler: spawns one particle at a random angle and random fraction of the radius around the object's +0x28 point
+func_150C2C00	fx_distant_burst_update	low	Ambient effect: on a random timer spawns a particle burst 3900..5178 away in a direction not in view of the camera
+func_150C2FCC	smoke_puff_shrink_rise	low	Shrinks a puff's sizes +0x2C / +0x30 by rate +0x150 and integrates its rise +0x38 / +0x50; returns 0 once below 10
+func_150C308C	fx_wake_near_camera	low	After age 6, sets state 5 when the camera is within 1500 or the direction to it is near +0x160; returns 1
+func_150C3160	obj_timer_scroll_tex_dl	low	Adds a texture tile scroll to the DL whose speed grows as timer +0x2E4 / +0x2E8 runs out (objects 0x89 / 0xBA)
+func_150C3230	carried_object_update	high	Update of an object another can carry: movement, animation, carrier link, drop timer, release and events when it runs out
+func_150C3574	rolling_object_update	high	Per-frame update of a rolling object (barrel / ball): friction, gravity, move, heading, spin and rolling sound
+func_150C3994	bouncing_bomb_update	high	Per-frame update of a falling / bouncing object: dust puffs, landing sound, spin, ends with func_150C3D5C once at rest
+func_150C3D48	checksum_key_offset	med	Returns arg0 + 0xEDCBA988 (decodes the address key for the anti-tamper checksum)
+func_150C3D5C	bomb_explode	med	Explosion of a bouncing bomb: dust, flash, blast, debris and particles; also runs an anti-tamper code checksum
+func_150D2960	ambient_sine_colour_update	med	Sets the ambient colour (func_1515D4D4) to base + amp * sin(phase) per channel and advances the three wrapped phases
+func_150D2C00	flake_spawner_update	med	Timer of a flake spawner (flag +0x78 bit 0): when it runs out spawns a flake particle and restarts with a random delay
+func_150D2C9C	flake_particle_spawn	high	Spawns one flake particle (life 100..200) with random angle, scale, spin, the given matrix and a white / red / green colour
+func_150D2E34	fx_sprite_shower_update	low	Effect update: advances its timers and spawns random 3D sprite effects (effect3d_spawn_full) around a ring point
+func_150D327C	beam_build_quad_vtx	med	Builds the camera-facing quad vertices of a beam between two points (width +0x2C) in a per-view vertex buffer; returns it
+func_150D368C	beam_scroll_fade_step	low	Advances a beam's texture scroll phases, sways its coords by sines, counts life down and sets alpha; 0 when expired
+func_150D380C	flake_spawner_handle_msg	med	Message handler: on message 0x34 from the matching sender spawns a flake particle from the spawner's settings
+func_150D3870	object_fire_spawn	high	Creates the burning / thrust effect object for obj: effect handle, position from its joints, looping sounds and two emitters
+func_150D3F78	track_follow_record	high	Trail record update: follows its target's beam point, records positions in its ring, picks a speed class and spawns dust
+func_150D44E4	track_trail_update	low	Trail record update: trims the position ring and sets the trail width from the surface under the target (0..600)
+func_150D4810	track_trail_draw	med	Builds the vertices and DL of a trail ribbon from the record's position ring for view arg2; returns the advanced DL
+func_150D4ED0	object_fire_message	high	Message handler of the fire effect object: frees itself when its owner is removed, follows the owner on a replace (0x2D)
+func_150D4FF0	object_get_beam_ends	high	Gets the two end points of an object's beam from two named joints (1), else its position + 100 / + 600 in y (2)
+func_150D50E4	object_fire_free	med	Stops the fire effect's sounds and emitters (object_fire_cleanup), then frees the object (func_15147E64)
+func_150D5110	object_fire_free_alt	med	Stops the fire effect's sounds and emitters (object_fire_cleanup), then frees the object (func_15147E98)
+func_150D513C	object_fire_cleanup	med	Stops the three looping sounds (0x5B3 / 0x5B4 / 0x5BC) of a fire effect object and frees its two emitters
+func_150D51D4	fire_emitter_flicker	med	Emitter update: on a random 3..10 frame timer picks a random flame sprite of D_800A0D90 and eases +0x48 to +0x174
+func_150D5268	smoke_puff_burst	high	Spawns 10..20 smoke sprites at pos with random sprite, life, alpha, size and a velocity against the source's motion
+func_150D5634	rocket_sound_update	high	Per-frame sound callback of the fire effect's three looping sounds: volume / pitch from the owner's speed and state
+func_150D5950	fire_smoke_trail_spawn	med	Spawns the smoke trail effect record (life 300) that follows obj (object, its +0x3B and timer 0); with object_fire_spawn
+func_150D59D8	fire_smoke_trail_update	med	Smoke trail record update: while its owner remains, spawns smoke sprites behind it from its heading and the surface below
+func_150D5E7C	fire_smoke_trail_handle_msg	med	Message handler of the smoke trail: frees it when its owner is removed (0 / 0x2F / 3), follows the owner on a replace (0x2D)
+func_150D5F3C	debris_particle_free_a	low	Wrapper: calls func_1514933C on a particle record
+func_150D5F5C	debris_particle_free_b	low	Wrapper: calls func_15149368 on a particle record
+func_150D5F7C	debris_burst_destroyed_object	high	Debris burst of a destroyed object: sounds, two particle bursts along the hit surface or upward, then dust, scorch, flash
+func_150D6898	debris_smoke_ring_spawn	low	Spawns a smoke ring effect (func_15154728) at pos with random size 15..19 and alpha 200..255; part of the debris burst
+func_150D6944	debris_dust_cloud_spawn	low	Spawns a dust cloud effect (func_15154DF4) at pos with random size and life; part of the debris burst
+func_150D69F8	debris_spec_fill_preset	low	Fills a particle spec with a fixed preset (kinds 6 / 3, sizes 150 / 105 / 396 / 612, 25 ...) and a float out value
+func_150D6B00	debris_scorch_mark_spawn	low	Spawns a scorch decal (func_151A6308) on the hit triangle with random size and alpha; part of the debris burst
+func_150D6BB4	debris_screen_flash	low	Starts a white screen flash (func_15182BE0) with random alpha 200..255 and length 25..30 for the view
+func_150D6C40	obj_sprite_burst_spawn	low	Spawns a burst of sprites flying out from the object's centre plus a following glow (levels 50 / 51 only via caller)
+func_150D71A8	obj_get_center_point	med	Writes the object's position (+0x14) raised by 60 in y to out
+func_150D71D4	debris_follow_owner_update	high	Update of a debris piece that follows its owner: returns 0 when the owner is gone, else follows it with gravity and motion
+func_150D7370	debris_follow_handle_msg	med	Message handler of an owner-following debris record: follows the owner on a replace (0x2D), frees itself on message 0
+func_150D741C	glow_follow_owner_update	med	Update of a glow that follows its owner: size grows with sqrt(age), alpha fades by age^2; 0 when the owner goes or it expires
+func_150D7578	glow_follow_handle_msg	med	Message handler of an owner-following glow: follows the owner on a replace (0x2D), frees itself on message 0
+func_150D7630	impact_burst_effect	low	Effect at a point: the three impact spawners (func_151C0AA8 / B54 / BA0) plus a fixed-preset particle burst there
+func_150D779C	bullet_impact_effect	high	Effect at a hit point: impact spawners, then a mark on the hit triangle (func_1515016C) or a free one (func_15150108)
+func_150D7930	start_light_1_handle_msg	med	Message 0x36 handler of race start lamp 1: red for states 1 / 2, green for 3, off otherwise (flag +0x58 bit 2, colour +0x28)
+func_150D79EC	start_light_2_handle_msg	med	Message 0x36 handler of race start lamp 2: off for state 1, red for 2, green for 3, off otherwise
+func_150D7A9C	start_light_3_handle_msg	med	Message 0x36 handler of race start lamp 3: green only for state 3, off otherwise
+func_150D7B40	anim_segments_clock_tick	med	Advances the animated texture clock D_800D9D30 by D_800BE9E4 << 6 when arg0 is 0
+func_150D7B6C	anim_segments_set	high	Points DL segments 2..7 at textures from two 5-entry tables of D_80088CA0, cycling with the D_800D9D30 clock
+func_150D7CA0	obj_fire_weapon_kind	low	Uses a held item by kind: 50 / 0x33 spawn a projectile (func_1506C460) and decrement ammo +0x1AE; 48 / 49 set a timer, sound
+func_150D7E38	liftable_object_update	high	Interaction state 0x20 handler of a liftable object (ids 0x48 / 0x7F): follows the holder, falls, latches, spin and sound
+func_150D87C0	mat_handler_stub	low	Empty function (handler slot that does nothing)
+func_150D87CC	mat_tile_slide_anim_d	low	Material handler: while the actor plays anim 0xD at frames 23..40 sets the texture id and slides the G_SETTILESIZE ult; returns 0
+func_150D88E8	tile_slide_by_anim_update	high	Material handler: 4-state open / close level driven by the actor's anims 0x18D / 0x18E, written into the DL tile size
+func_150D8AA0	obj2b_write_msg	low	Writes the two halfwords {0x42, 0} at arg0 for object type 0x2B and returns arg0 + 2
+func_150D8ABC	explosion_ground_effect	med	Destroy effect of object types 0x3A / 0x3D: ground probe, scorch decal on a hit, ground burst and a flash particle
+func_150D8DBC	mat_toggle_by_flag	low	Material handler: sets byte 9 of +0x14 to 0 when the actor's +0x6F byte is set, else 1; returns 1
+func_150D8DF0	obj_get_mode_joint_point	low	Writes the world point of a joint chosen by mode 3..6 (joints 0x12 / 0x15 ...) with a fixed offset from the object's model
+func_150D8F30	handler_return_8	low	Returns 8
+func_150D8F44	obj_joint_dust_puff	low	With a model, spawns a dust puff (func_15187B50) and a ground effect (func_151664F0) at the mode's joint point
+func_150D9020	trail_get_emit_point	med	Writes the object's position (+0x14) raised by 20 in y to out (emission point of its stream trail)
+func_150D904C	trail_get_aim	low	Computes the stream trail's aim for an object with func_15145740 (range constant differs in multiplayer)
+func_150D9098	obj_spawn_effect50_with_sound	high	Starts a random sound 0x1B6 / 0x1B7 and a kind 0x50 stream trail record at the object's position + 20 with its aim
+func_150D9304	trail_point_integrate	med	Ballistic step of a trail point over time t: adds gravity to its velocity and moves the position by v t + g t^2
+func_150D939C	trail_stop_emitting	med	Marks a trail record as no longer emitting (+0x30 cleared, +0x1E flags: clear 2, set 8 and 1, timer +0x1C = 40)
+func_150D93CC	path_points_catch_up	high	Trail handler: integrates every pending ring point over the frame, sets the current position and bumps the owner's counter
+func_150D952C	trail_emit_update	med	Stream trail update: stops when the owner ends, else adds new ring points from the emit point along the aim and ages them
+func_150D99AC	trail_stream_update	high	Per-frame update of an object's point trail: measures and cuts it, ray-casts segments, hits objects, scrolls and fades it
+func_150DA1FC	trail_draw_ribbon	high	Draws the object's point trail as a camera-facing textured ribbon of quads; returns the advanced display list
+func_150DAA04	trail_stop_sound	med	Stops the stream trail's sound (data +0x30) when one is playing
+func_150DAA34	trail_free	med	Stops the trail's sound, then frees the record (func_15147E64)
+func_150DAA60	trail_free_alt	med	Stops the trail's sound, then frees the record (func_15147E98)
+func_150DAA8C	trail_handle_msg	med	Message handler of a stream trail: 0x44 sets its aim value from the owner, 0 frees it, 0x2D follows a replaced owner
+func_150DAB6C	trail_send_aim_msg	med	Broadcasts message 0x44 {object, its +0x3B, value} so the object's stream trail takes the new aim value
+func_150DABA8	particle_move_step	low	Particle update: func_15131D98 on its state, then func_15131EC8 moves its velocity block; returns 1
+func_150DABFC	trail_hit_effects	high	Impact effects of a trail segment hit: sparks on characters, debris on objects / world, smoke puff on world hits
+func_150DB3F0	joint_beam_spawn	med	Spawns a type 0x17 beam effect between two joint points of obj chosen by table index idx (span, scale, width from tables)
+func_150DBA98	beam_spawn_points	med	Spawns a type 0x17 beam effect from five given position / parameter pointers with span; nothing when any is NULL
+func_150DB694	beam_motion_step	low	Beam update: damps and applies its velocity, advances and clamps its two widths, counts its life down; 0 when expired
+func_150DB858	beam_build_quad_vtx_b	low	Builds the camera-facing quad vertices of a type 0x17 beam in a per-view vertex buffer; returns it or NULL
+func_150DBBB0	beam_alpha_from_value	low	Sets the effect's alpha +0x5C from the float pointed to by +0x120, clamped to 0..255; returns 1
+func_150DBC94	beam_build_quad_vtx_c	low	Builds the camera-facing quad vertices of a beam variant with width from +0x44 in a per-view vertex buffer; returns it
+func_150DBF60	spark_effect_on_event	high	Event effect for obj: mode 0 starts emitter 1, a spark burst, sound effect 0x1E and a sprite burst; mode 1 emitter 2 only
+func_150DC1E0	spark_burst_handler	low	Effect handler: spawns a fixed spark burst spec (func_151534E0) at x 177.9 with the effect's owner byte
+func_150DC2F0	item_effect_spawn	high	Starts the fountain effect record of preset kind (0..5) and fills its 0x11C-byte data; returns the record or NULL
+func_150DCAD8	fountain_step	high	Fountain step handler: moves the water points, lands those below the water level with sprites / drops / rings, fades, sound
+func_150DD420	fountain_emit	high	Fountain emitter handler: swings the emitter, adds water points to the ring, sprays drops, stops emitting at end of life
+func_150DDBC0	fountain_draw	high	Fountain draw handler: draws the water points as one camera-facing textured strip; returns the display list end
+func_150DE450	fountain_spawn_by_marker	med	Spawns an effect node (type 0x64) whose preset 1..4 comes from the object's marker byte +0x72 (0xFB..0xFE); else frees it
+func_150DE508	fountain_start_preset	med	Starts the fountain effect of the node's preset byte +0x28 (item_effect_spawn)
+func_150DE52C	fountain_splash_sprite_big	low	Spawn callback: camera sprite (kind 0x1D / 0x1E, size 10..80) at the current ring point of the effect; returns 1
+func_150DE6AC	fountain_splash_sprite_small	low	Spawn callback: camera sprite (kind 0x1B / 0x1C, size 10..20, alpha 0xAA) at the current ring point of the effect; returns 1
+func_150DE824	sprite_fade_in_age_b	low	While age +0x1C is below 32 sets +0x28 to age * 8 (fade in); returns 1
+func_150DE844	sprite_shrink_step	low	Shrinks sizes +0x34 / +0x36 by 26 and clears +0x38 when either falls below 10
+func_150DE8A0	zone_stub	low	Empty function
+func_150DE8AC	trigger_zones_check	high	Hit callback for a point: for each of 8 zones containing it, sets the matching object to state 3 or triggers the zone
+func_150DE9D8	zone_debris_fall_update	low	Update of an object set to state 3 by a trigger zone: moves it by its velocity with gravity and cycles its textures
+func_150DEC58	obj_sine_wobble_update	low	Sets the object's y (1130 + sine * 10.2) and x / z offsets (sine * 1.1) from three phases advancing at 12 / 16 / 24 per frame
+func_150DED40	beam_link_fire	high	Timer handler of a link effect: fires a bolt from the first object towards the second at random speed, restarts 200..400
+func_150DF04C	bolt_move_step	med	Bolt update: moves by its velocity +0x110 over the frame and counts its travel time +0x11C down; 0 when it arrives
+func_150DF0D8	bolt_build_quad	med	Builds the bolt's camera quad (sprite_quad_build_axes with its side / direction axes) unless the camera is very close
+func_150DF160	light_groups_send_msg22_all	med	Sends message 0x22 to the lights and effects of all four groups (light_group_send_msg22 0..3)
+func_150DF1A8	light_group_send_msg22	med	Broadcasts message 0x22 to the light controllers and effects of group arg0 (ids from D_800A10DB / D_800A10FB)
+func_150DF240	big_explosion_spawn	high	Explosion at pos: 15 fragments, light, two shock waves, sound, a shock ring and a type 0xF object at the position
+func_150DF8B4	ground_burst_effect	high	Effect handler: probes the ground below the effect and spawns a ground burst and falling pieces there (or at its position)
+func_150DFA38	puff_cluster_spawn	low	Spawns a particle puff (kind 0xA) at a point plus 1..3 more at random angles 30 units around it, random sizes and life
+func_150DFDA0	camera_update_water_mode	med	Camera flags for the followed object: under water sets distance 750 and water flags; back out restores the zoom level
+func_150DFE40	level_part_is_active	med	Returns 1 when the zone record (D_800D34B8) of level part arg0 (table D_80088D24) has its +0x14 flag set, else 0
+func_150DFEA0	level_lights_and_scroll_update	high	Per-frame level handler: steps a counter, places light slots 3 / 4 at objects 6 / 7, fades and scrolls the three parts' textures
+func_150E0150	level_parts_set_segments	med	Sets DL segments 2..4 to each level part's texture: an animated frame when the part is active, else the idle texture
+func_150E0228	obj_bob_update	low	Bobbing motion: integrates +0x4 by speed +0x64, eases the speed towards +-0.55 to reverse between 11 and 55
+func_150E0324	obj_pin_root_height	low	Sets the translation of the object's first model matrix to its x / z with y fixed at 2706
+func_150E0350	mat_hit_flash_update	low	Material handler: while the actor's hit timer +0x2EC runs, fades the material's DL colour / tile values and sets +0x13 = 2
+func_150E047C	fx_flicker_lights_update	low	Effect update: on random timers creates short-lived flickering lights and 2..4 spark sprites around the effect
+func_150E0840	effect_attach_to_obj	low	Wrapper: func_15149514(arg1, arg2, &obj +0x28, &obj +0x2C, obj)
+func_150E0880	water_effect_start_once	med	First call only (D_80088D20): func_1515F170(6, 0) and water_effect_spawn, then sets the done flag
+func_150E08C8	obj_emitter_trail_spawn	med	Spawns an emitter trail (emitter_trail_spawn) following object arg0 with fixed kind, life 300 and sizes
+func_150E0978	fx_debris_spray_vel	low	Spawns a debris spray (func_151A2C9C) from a point with random direction, minus the source velocity times a drag
+func_150E0B78	fade_by_camera_distance	med	Sets alpha +0x8A from the camera distance to the record's s16 position: 255 within 2570, 0 beyond 3850, linear between
+func_150E0C58	obj_joint_spark_spray	low	With a model, spawns a spark spray (func_151030B8) from joint D_80088D28 with offsets / directions of preset arg1

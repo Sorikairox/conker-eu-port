@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-f32 func_1506AD30(struct127 *arg0, f32 arg1, s32 arg2);
+f32 anim_events_run(struct127 *arg0, f32 arg1, s32 arg2);
 extern u8 D_800BEE2C;
 extern u8 D_800C3A82[];
 extern f32 D_8009B860;
@@ -13,7 +13,7 @@ extern f32 D_8009B860;
  * +0x20 loop start, +0x28 current animation, +0 end-of-animation callback, +0x3A / +0x3C a countdown) by one
  * frame. With a record, the step is scaled by the frame time D_800BE9A4 (x 1.2, at most 2 frames), the record
  * becomes the current one (D_800C3E78 / D_800D154C), its flags +0xF4 (2 / 4 / 8) change the looping, and
- * func_1506AD30 (the record's frame hook) may replace the frame. The final frame is copied to rec->unkB4.
+ * anim_events_run (the record's frame hook) may replace the frame. The final frame is copied to rec->unkB4.
  * The callback's arguments are not set up by the asm (it sees anim / player, or scratch after the hook): it is
  * called with anim here (UNVERIFIED). */
 void func_1507C170(struct197 *anim, f32 step, struct127 *rec, s32 player) {
@@ -51,7 +51,7 @@ void func_1507C170(struct197 *anim, f32 step, struct127 *rec, s32 player) {
         D_800D154C = rec;
     }
     if (rec != NULL && ((&D_800C35EA)[player] != 1 || D_800C3A82[player] != 0)) {
-        f = func_1506AD30(D_800D154C, frame, 0);
+        f = anim_events_run(D_800D154C, frame, 0);
         if (f != 0.0f) {
             frame = f;
         }
@@ -133,7 +133,7 @@ void func_1507C170(struct197 *anim, f32 step, struct127 *rec, s32 player) {
     }
     if (rec != NULL) {
         if (resync) {
-            func_1506AD30(D_800D154C, anim->unk8, 0);
+            anim_events_run(D_800D154C, anim->unk8, 0);
         }
         rec->unkB4 = anim->unk8;
     }

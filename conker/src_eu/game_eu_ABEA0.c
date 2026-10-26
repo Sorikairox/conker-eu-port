@@ -42,7 +42,7 @@ void func_1507E690(u8 *obj) {
     obj[0x6A] ^= 1;
     obj[0x6B] ^= 1;
     if (obj[0x6A] == 0) {
-        obj[0x6E] = (u32)func_150ADA20() % 140 + 10;
+        obj[0x6E] = (u32)random_int() % 140 + 10;
     } else {
         obj[0x6E] = 1;
     }

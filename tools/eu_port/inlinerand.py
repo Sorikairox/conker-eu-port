@@ -3,13 +3,13 @@
 
 usage: inlinerand.py draft.c outprefix [--rand f1,f2] [--keep-named]
 
-For every `v = RAND();` statement (RAND = func_150ADA20 / func_150ADA68 by default) whose variable is read
+For every `v = RAND();` statement (RAND = random_int / random_float by default) whose variable is read
 exactly once afterwards, writes variants:
   <outprefix>_in.c     every such temp inlined at its single use (s106 recipe 1: IDO evaluates call args
                        left to right, so inline rands keep the ref's call order when they are used in order)
   <outprefix>_named.c  input unchanged except that m2c's `(u8) (v & 0xFF)` casts become `v & 0xFF`
   <outprefix>_mix<k>.c only the first k temps stay named (the ref often names the early rands and inlines
-                       the last one: s109 func_150BA26C / func_150E9C9C / func_150D1714)
+                       the last one: s109 func_150BA26C / storm_debris_ground_splash / func_150D1714)
 Also rewrites `(u8) (RAND() & 0xFF)` into `RAND() & 0xFF` (an explicit mask gives the ref's `andi`).
 Screen the outputs with `m2c/tryall <func> <outprefix>_*.c`. Self-contained, no repo imports.
 """
@@ -20,7 +20,7 @@ def main():
     if len(a) < 2:
         print(__doc__); sys.exit(1)
     src, pre = a[0], a[1]
-    rands = ['func_150ADA20', 'func_150ADA68']
+    rands = ['random_int', 'random_float']
     if '--rand' in a:
         rands = a[a.index('--rand') + 1].split(',')
     text = open(src).read()

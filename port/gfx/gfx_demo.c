@@ -9,8 +9,8 @@
  * Model DLs address their file through segments 0/1; bone matrices (segment 3) get copies of the
  * viewer's modelview; segment 8 (engine material DL) is an empty list.
  * Texture ids (P8): G_SETTIMG words with segment nibble 0 are texture ids, which the engine resolves
- * in place when it loads a model: func_1510D3E0 (asm) walks the DL and calls the texture cache
- * func_1510D66C (asm). tex_patch_dl() below does the same on the PC side (see its comment), so these
+ * in place when it loads a model: texture_resolve_dl_ids (asm) walks the DL and calls the texture cache
+ * texture_cache_lookup (asm). tex_patch_dl() below does the same on the PC side (see its comment), so these
  * draw with their real texels and palettes. Texture-bank segments (2, 4-11) are still unresolved
  * and draw with a placeholder pattern (gfx_tex_unresolved_segs). */
 #include <stdint.h>
@@ -93,7 +93,7 @@ static int load(Asset *a) {
 /* ---- texture ids (P8; docs/port/sessions/P8.md "Texture ids")
  * The texture bank: texture id i (0 <= i < 0x1E54) is an rzip file at ROM
  *   D_1A3B40 (0x1A3B40) + sum of D_800920D0[0..i)       (u16 compressed sizes, game_data)
- * which is func_1510D8F4 (C) + func_1510D66C (asm: cache D_800B1268[id], DMA, inflate). */
+ * which is texture_rom_offset (C) + texture_cache_lookup (asm: cache D_800B1268[id], DMA, inflate). */
 #define TEX_IDS 0x1E54
 #define TEX_ROM 0x1A3B40u
 static unsigned char *tex_buf[TEX_IDS];
@@ -123,7 +123,7 @@ static unsigned char *tex_get(unsigned id, unsigned *size) {
     return tex_buf[id];
 }
 
-/* PC equivalent of func_1510D3E0 (asm, game_eu_13A8A0), the engine's model-DL texture resolver,
+/* PC equivalent of texture_resolve_dl_ids (asm, game_eu_13A8A0), the engine's model-DL texture resolver,
  * applied once at load. For every G_SETTIMG (0xFD) up to G_ENDDL whose w1 has segment nibble 0 and
  * top byte < 0x06: id = w1 & 0xF03FFFFF, flags = w1 >> 22; w1 := texture address (cache, loaded on
  * demand), then flags & 1: + size - 0x200 (256-colour TLUT at the end of the texture), flags & 2:

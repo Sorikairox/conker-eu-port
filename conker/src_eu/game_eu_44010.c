@@ -3,8 +3,8 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void *allocate_memory(s32, s32, s32, s32);
-u32 func_1502B8E0(u8 *, s32, s32, s32, s32);
-s32 func_1502B9B4(s32, s32, s32);
+u32 asset_load_into(u8 *, s32, s32, s32, s32);
+s32 asset_get_size(s32, s32, s32);
 void func_150170C4(s32);
 u8 func_15084208(s32, s32);
 void func_15082D5C(s32, s32, s32);
@@ -62,7 +62,7 @@ loop_4:
                 var_v1 = temp_a2 * 0x30;
             } else {
                 if ((s32) temp_s0 < 0xBB) {
-                    func_1502B7F0(&sp.u50, 2, 0x12, temp_s0);
+                    asset_load_ptr(&sp.u50, 2, 0x12, temp_s0);
                 }
                 var_v1 = temp_a2 * 0x30;
                 if (sp.u50 != 0) {
@@ -81,8 +81,8 @@ loop_4:
 #ifdef NON_MATCHING
 /* P36: level setup load (level arg0). DMAs the fixed player-slot setup table (ROM D_1A3840..D_1A3B40 for the
  * multiplayer-style levels 0x1A / 0x24 / 0x2B / 0x2D / 0x30 / 0x33 / 0x34 / 0x3F, else D_1A3750..D_1A3840) into
- * D_800D20FC (allocated with room for the level's setup asset (2, 0xE, level) from func_1502B9B4), D_800D2521 =
- * D_800D2520 = its entry count (0x30 bytes each), then appends the level's entries (func_1502B8E0) and counts them in
+ * D_800D20FC (allocated with room for the level's setup asset (2, 0xE, level) from asset_get_size), D_800D2521 =
+ * D_800D2520 = its entry count (0x30 bytes each), then appends the level's entries (asset_load_into) and counts them in
  * D_800D2520; func_150170C4(level); allocates + clears D_800D252C (spawned flags, 1 byte each) and D_800D2530 (respawn
  * timers, u16); D_800D1968 = 0. Each player slot i < D_8008FD8C enabled in the mask D_800D2340 gets e[2] = 0, a type
  * byte e[4] (and extra fields) from its character func_150859AC(i, 1), flag 0x4000000 in levels 0x32 / 0x33, and the
@@ -120,12 +120,12 @@ void func_15016950(s32 arg0) {
             break;
     }
     size = tblEnd - tbl;
-    D_800D20FC = allocate_memory(func_1502B9B4(2, 0xE, arg0) + size, 1, 2, 0);
+    D_800D20FC = allocate_memory(asset_get_size(2, 0xE, arg0) + size, 1, 2, 0);
     func_10004514((s32) tbl, (void *) D_800D20FC, size, 1);
     n = size / 0x30;
     D_800D2520 = n;
     D_800D2521 = n & 0xFF;
-    D_800D2520 += func_1502B8E0((u8 *) D_800D20FC + (n & 0xFF) * 0x30, 0, 2, 0xE, arg0) / 0x30;
+    D_800D2520 += asset_load_into((u8 *) D_800D20FC + (n & 0xFF) * 0x30, 0, 2, 0xE, arg0) / 0x30;
     func_150170C4(arg0);
     cnt = D_800D2520;
     D_800D252C = allocate_memory(cnt, 1, 0, 0);
@@ -293,7 +293,7 @@ void func_150170C4(s32 level) {
         bzero(((u8 **) D_800D2104)[i], 0x10);
         D_800D2528[i] = 2;
     }
-    if (func_1502B7F0((s32 *) &asset, 2, 0x10, level) == 0) {
+    if (asset_load_ptr((s32 *) &asset, 2, 0x10, level) == 0) {
         return;
     }
     for (i = D_800D2521; i < D_800D2520; i++) {

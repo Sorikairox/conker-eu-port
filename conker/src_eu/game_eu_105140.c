@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_150D7930(u8 *arg0, u8 *arg1, u8 arg2) {
+/* was func_150D7930 */
+void start_light_1_handle_msg(u8 *arg0, u8 *arg1, u8 arg2) {
     if (arg2 == 0x36) {
         switch (*arg1) {
         case 1:
@@ -32,7 +33,8 @@ void func_150D7930(u8 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-void func_150D79EC(u8 *arg0, u8 *arg1, u8 arg2) {
+/* was func_150D79EC */
+void start_light_2_handle_msg(u8 *arg0, u8 *arg1, u8 arg2) {
     if (arg2 == 0x36) {
         switch (*arg1) {
         case 1:
@@ -58,7 +60,8 @@ void func_150D79EC(u8 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-void func_150D7A9C(u8 *arg0, u8 *arg1, u8 arg2) {
+/* was func_150D7A9C */
+void start_light_3_handle_msg(u8 *arg0, u8 *arg1, u8 arg2) {
     if (arg2 == 0x36) {
         switch (*arg1) {
         case 1:
@@ -81,7 +84,8 @@ void func_150D7A9C(u8 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-void func_150D7B40(s32 arg0) {
+/* was func_150D7B40 */
+void anim_segments_clock_tick(s32 arg0) {
     if (arg0 == 0) {
         D_800D9D30 += D_800BE9E4 << 6;
     }
@@ -89,12 +93,13 @@ void func_150D7B40(s32 arg0) {
 
 #ifdef NON_MATCHING
 extern s32 *D_80088CA0[2];
-s32 func_1510D66C(s32, s32 *, s32, s32);
+s32 texture_cache_lookup(s32, s32 *, s32, s32);
 
-// anim_segments_set: points segments 2..7 at textures (func_1510D66C, mode 3) taken from the two 5-entry texture id
+// anim_segments_set: points segments 2..7 at textures (texture_cache_lookup, mode 3) taken from the two 5-entry texture id
 // tables of D_80088CA0 (segments 2..5 from the first, 6 and 7 from the second): entry (D_800D9D30 >> 8) + 13 per
-// segment, mod 5, so the frames cycle with the D_800D9D30 clock (func_150D7B40). Returns the advanced display list.
-Gfx *func_150D7B6C(Gfx *gdl) {
+// segment, mod 5, so the frames cycle with the D_800D9D30 clock (anim_segments_clock_tick). Returns the advanced display list.
+/* was func_150D7B6C */
+Gfx *anim_segments_set(Gfx *gdl) {
     s32 *tabs[2];
     s32 size[4];
     s32 tab;
@@ -110,13 +115,13 @@ Gfx *func_150D7B6C(Gfx *gdl) {
         if (seg >= 6) {
             tab = 1;
         }
-        tex = func_1510D66C(tabs[tab][frame % 5], size, 3, 0);
+        tex = texture_cache_lookup(tabs[tab][frame % 5], size, 3, 0);
         gSPSegment(gdl++, seg, tex);
     }
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105140/func_150D7B6C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105140/anim_segments_set.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -124,7 +129,8 @@ s32 func_150889D8(struct127 *, s32);
 s32 func_15088A68(s32, s32, s32);
 s32 func_15088B08(s32, s32);
 
-void func_150D7CA0(struct127 *arg0, s32 arg1) {
+/* was func_150D7CA0 */
+void obj_fire_weapon_kind(struct127 *arg0, s32 arg1) {
     s32 sp48;
     s32 sp40;
     s32 sp38;
@@ -149,7 +155,7 @@ void func_150D7CA0(struct127 *arg0, s32 arg1) {
         case 50:
             temp_v1 = (var_t0 * 0x1E) + 0x1E;
             sp38 = temp_v1;
-            temp_v0_2 = func_1506C460(arg0->unk40, 310.0f, 0.0f, 0.0f, (u8) temp_v1, 0xD, 0.0f, 1.0f, 0, 1, var_t0 == 0);
+            temp_v0_2 = camera_object_spawn(arg0->unk40, 310.0f, 0.0f, 0.0f, (u8) temp_v1, 0xD, 0.0f, 1.0f, 0, 1, var_t0 == 0);
             if (temp_v0_2 != 0) {
                 (*(s8 *)((u8 *)temp_v0_2 + 0x124)) = (s8) (D_800C3E78 + 1);
             }
@@ -184,12 +190,12 @@ void func_150D7CA0(struct127 *arg0, s32 arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105140/func_150D7CA0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105140/obj_fire_weapon_kind.s")
 #endif
 #ifdef NON_MATCHING
 u8 *func_15034174(u8 *arg0);
-s32 func_1505C7D8(struct127 *self, s32 skip);
-f32 func_1505A3A8(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
+s32 attack_hit_test(struct127 *self, s32 skip);
+f32 obj_approach_speed(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
 f32 func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 s32 func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 void func_10010FFC(s32, s32, s32, s32, s32, u8 *);
@@ -199,10 +205,11 @@ s32 func_150535F4(struct127 *arg0);
 // carried_object_update: interaction state 0x20 handler (entry 32 of D_800863B4, called as `(obj)` by
 // func_1504A730) of a liftable object (id 0x48 rides on a partner object of kind 0x7A; id 0x7F is held). While a
 // player holds it (unk13C, player D_800CC2D0[unk124] with unk31C +0x4E set) it copies the player's position block,
-// turn and speed; otherwise it falls / spins (func_1505A3A8 / func_15059140), lets a player land on it
+// turn and speed; otherwise it falls / spins (obj_approach_speed / obj_physics_step), lets a player land on it
 // (func_15052F9C when unk232 == 4) or picks a player to latch on (func_1505327C). Then the scale bounce, spin
 // angle, carry height (player unkCC) and the rolling sound (0x678), and finally func_150535F4.
-void func_150D7E38(struct127 *self) {
+/* was func_150D7E38 */
+void liftable_object_update(struct127 *self) {
     struct127 *pl;
     s16 *dst;
     s16 *src;
@@ -275,7 +282,7 @@ void func_150D7E38(struct127 *self) {
         self->unk76 = old;
         self->xz_velocity = pl->xz_velocity;
         if (self->unkD0 != 0) {
-            func_1505C7D8(self, D_800C3E78);
+            attack_hit_test(self, D_800C3E78);
         }
     } else {
         self->unk21C = self->unk7A;
@@ -290,10 +297,10 @@ void func_150D7E38(struct127 *self) {
         slot = D_800C3E78;
         self->unk65 = 0;
         self->unkE4 = self->unk90;
-        func_1505A3A8(0.0f, self, 0.0f, 0.5f, 1);
+        obj_approach_speed(0.0f, self, 0.0f, 0.5f, 1);
         vel = self->xz_velocity;
         self->stunned = 0x1E;
-        func_15059140(self);
+        obj_physics_step(self);
         self->xz_velocity = vel;
         turn = (self->unkC4 - self->unk44) * 0.8f;
         if (self->unk232 == 4) {
@@ -329,7 +336,7 @@ void func_150D7E38(struct127 *self) {
         if (partner == 0x7A) {
             self->unkF8 |= 0x10000;
             top = self->unk180 + 180.0f;
-            func_15058EA4(self, top + 10.0f, 1.2f, top, -1.1f, 4.0f, -4.0f);
+            obj_set_gravity_band(self, top + 10.0f, 1.2f, top, -1.1f, 4.0f, -4.0f);
             if (self->unk13C != 0) {
                 D_800CC2D0[self->unk124].unkCC = 0x1E;
             }
@@ -337,7 +344,7 @@ void func_150D7E38(struct127 *self) {
             self->unk40 = (f32) self->unk7A * 0.0054931640625f; /* 360 / 65536 */
         }
     } else {
-        func_1506B100(0, 2.0f, 4.0f);
+        objev_play_anim(0, 2.0f, 4.0f);
         if (self->unk28 > 75.0f) {
             if (self->unk102 < 30) {
                 self->unk102++;
@@ -404,5 +411,5 @@ void func_150D7E38(struct127 *self) {
     func_150535F4(self);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105140/func_150D7E38.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105140/liftable_object_update.s")
 #endif

@@ -4,8 +4,8 @@
 
 
 #ifdef NON_MATCHING
-void func_1510F800(s32);
-s32 func_1510FE58(s32, s32, s32, s32 *);
+void collision_select_area(s32);
+s32 collision_level_nearest_height(s32, s32, s32, s32 *);
 void func_1518CF74(s32);
 s32 func_15171770(s32, s32, f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, s32);
 void func_15171E60(f32, f32, f32, f32, s32, f32, s32, s32, s32, s32);
@@ -20,7 +20,7 @@ extern f32 D_800A70A4; /* -0.7 */
 // debris_update: moves a falling debris object (pos +0x90, velocity +0xA8, spin angles +0x9C..+0xA4 with rates
 // +0xB4..+0xBC, gravity 0.5 per tick, ticks D_800BE9E4). Flag +0xE8 bit 1 wobbles the scale +0xC4 (phase +0xE7),
 // bit 2 turns the object along its velocity (+0xA0 yaw, +0x9C pitch, degrees). When it falls below the ground
-// (func_1510FE58 + radius +0xE9) it lands; by kind +0xEB: 1 = splash + two ripples, 4 = splash, 3 = splash + dust
+// (collision_level_nearest_height + radius +0xE9) it lands; by kind +0xEB: 1 = splash + two ripples, 4 = splash, 3 = splash + dust
 // burst (all three free the object), 6 = stops and rests 60 ticks, 8 = freed; other kinds bounce (velocity scaled by
 // +0xD8, vertical by +0xDC, a ripple; stop under 2.0; kind 2 may get a random spin, kind 5 a dust burst; spin rates
 // scaled by +0xE0). The timer +0xCC then counts down; at 0 the object fades (+0xE5 by 4 per tick, +0xEC = 2) and is
@@ -41,7 +41,7 @@ void func_1516A1E0(u8 *obj) {
 
     if (obj[0xE8] & 1) {
         obj[0xE7] += D_800BE9E4 * 8;
-        *(f32 *) (obj + 0xC4) = (func_15048A40(obj[0xE7]) * D_800A7090 + 1.0f) * *(f32 *) (obj + 0xD4);
+        *(f32 *) (obj + 0xC4) = (math_sin_u8(obj[0xE7]) * D_800A7090 + 1.0f) * *(f32 *) (obj + 0xD4);
     }
     if (obj[0xE8] & 2) {
         *(f32 *) (obj + 0xA0) = func_150484A0(*(f32 *) (obj + 0xA8), *(f32 *) (obj + 0xB0)) * D_800A7094;
@@ -51,8 +51,8 @@ void func_1516A1E0(u8 *obj) {
             D_800A7098;
     }
 
-    func_1510F800(0);
-    ground = func_1510FE58(*(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), NULL) + obj[0xE9];
+    collision_select_area(0);
+    ground = collision_level_nearest_height(*(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), NULL) + obj[0xE9];
     if (*(f32 *) (obj + 0x94) < ground && *(f32 *) (obj + 0xAC) < 0.0f) {
         *(f32 *) (obj + 0x94) = ground;
         switch (obj[0xEB]) {
@@ -112,8 +112,8 @@ void func_1516A1E0(u8 *obj) {
                     func_15171E60(*(f32 *) (obj + 0x90), (*(f32 *) (obj + 0x94) - obj[0xE9]) + 15.0f,
                                   *(f32 *) (obj + 0x98), 20.0f, 0x32, 0.00045776367f, 0, 4, obj[0xC], obj[1]);
                     if (obj[0xEB] == 2) {
-                        if (func_150ADA20() & 0x8000) {
-                            *(f32 *) (obj + 0xB4) = (func_150ADA20() >> 16) * 0.00015258789f + 40.0f;
+                        if (random_int() & 0x8000) {
+                            *(f32 *) (obj + 0xB4) = (random_int() >> 16) * 0.00015258789f + 40.0f;
                         }
                     } else if (obj[0xEB] == 5) {
                         func_15170F24(*(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94) + 10.0f, *(f32 *) (obj + 0x98), 4,
@@ -178,8 +178,8 @@ void func_1516A964(u8 *arg0) {
     var_t0 = (*(s16 *)((u8 *)arg0 + 0x22)) + (*(s16 *)((u8 *)arg0 + 0x2A));
     if (var_v1 >= var_t0) {
         sp.u48 = var_t0;
-        func_1510F800(0);
-        temp_v0 = func_1510FE58((*(s16 *)((u8 *)arg0 + 0x20)), (*(s16 *)((u8 *)arg0 + 0x22)), (*(s16 *)((u8 *)arg0 + 0x24)), 0);
+        collision_select_area(0);
+        temp_v0 = collision_level_nearest_height((*(s16 *)((u8 *)arg0 + 0x20)), (*(s16 *)((u8 *)arg0 + 0x22)), (*(s16 *)((u8 *)arg0 + 0x24)), 0);
         var_t0 = sp.u48;
         (*(s32 *)((u8 *)arg0 + 0x14)) = temp_v0;
         var_v1 = temp_v0;
@@ -218,9 +218,9 @@ void func_1516AAA8(u8 *arg0) {
     s32 sp44;
 
     if ((*(s16 *)((u8 *)arg0 + 0x14)) >= 0x300) {
-        sp48 = func_150ADA20() % 3U;
+        sp48 = random_int() % 3U;
         sp44 = (s32) (*(u8 *)((u8 *)arg0 + 0x25));
-        func_151722BC((f32) (*(s16 *)((u8 *)arg0 + 0x18)), (f32) ((*(s16 *)((u8 *)arg0 + 0x1A)) - 0xA), (f32) (*(s16 *)((u8 *)arg0 + 0x1C)), 0x64, 0, sp48 + 0x20, (f32) (func_150ADA20() % 360U), 0, ((s32) (sp44 * 0x19) / 255) + 0x19, 0, 0x100, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+        func_151722BC((f32) (*(s16 *)((u8 *)arg0 + 0x18)), (f32) ((*(s16 *)((u8 *)arg0 + 0x1A)) - 0xA), (f32) (*(s16 *)((u8 *)arg0 + 0x1C)), 0x64, 0, sp48 + 0x20, (f32) (random_int() % 360U), 0, ((s32) (sp44 * 0x19) / 255) + 0x19, 0, 0x100, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
     }
 }
 
@@ -249,7 +249,7 @@ s32 func_1516ABB8(u8 *arg0) {
     }
     *(s16 *)(arg0 + 0x18) -= 300;
     func_1516FDD4(arg0);
-    h = func_1510FE58(*(s16 *)(arg0 + 0xE), *(s16 *)(arg0 + 0x10), *(s16 *)(arg0 + 0x12), 0) + 10;
+    h = collision_level_nearest_height(*(s16 *)(arg0 + 0xE), *(s16 *)(arg0 + 0x10), *(s16 *)(arg0 + 0x12), 0) + 10;
     arg0[0x2C] = h >> 8;
     arg0[0x2D] = h & 0xFF;
     if (*(s16 *)(arg0 + 0x10) < h) {

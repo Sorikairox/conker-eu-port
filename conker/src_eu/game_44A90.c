@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_150175E0(void) {
+/* was func_150175E0 */
+void render_set_detail_level(void) {
     if ((D_800BE616 == 0) && ((D_800D2E4C->unk18 & 1) == 0)) {
         D_800D2457 = D_800D2456 = 3;
     } else {
@@ -26,7 +27,8 @@ extern s32 D_800D28E0;
 extern s32 D_800D28E8;
 extern s32 D_800D29A8;
 
-void func_15017640(void) {
+/* was func_15017640 */
+void camera_view_state_init(void) {
     f32 *var_v0;
     u8 *temp_v0;
 
@@ -57,9 +59,9 @@ void func_15017640(void) {
     guPerspective(&D_800D27F0, &D_800D2874, 50.0f, 60.6f, 53.0f, 20000.0f, 1.0f);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_44A90/func_15017640.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_44A90/camera_view_state_init.s")
 #endif
-// void func_15017640(void) {
+// void camera_view_state_init(void) {
 //     s32 i;
 //     D_800D2458 = 0;
 //     D_800D2588 = 0;

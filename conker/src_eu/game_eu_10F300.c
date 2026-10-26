@@ -7,9 +7,10 @@
 void func_15047680(f32 mf[4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
 // line_of_sight_hit_object: looks from (x0, y0, z0) towards (x1, y1, z1) and finds the live object (D_800CC2D0,
 // except index `skip`, dead or immune ones and `self`'s own slot unk124 - 1) that func_15049440 rates lowest
-// (non-zero) in that view within the eye-target distance; spawns effect `kind` (func_1505D1C4) at that object,
-// copies self's heading unk76 to it and returns func_1505D1C4's result (0 when nothing was hit).
-s32 func_150E1AF0(struct127 *self, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, s32 skip, s32 kind) {
+// (non-zero) in that view within the eye-target distance; spawns effect `kind` (attack_spawn_at_point) at that object,
+// copies self's heading unk76 to it and returns attack_spawn_at_point's result (0 when nothing was hit).
+/* was func_150E1AF0 */
+s32 object_ray_hit_nearest(struct127 *self, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, s32 skip, s32 kind) {
     f32 view[4][4];
     struct127 *obj;
     s32 ret = 0;
@@ -45,12 +46,12 @@ s32 func_150E1AF0(struct127 *self, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z
     }
     if (best != -1) {
         obj = &D_800CC2D0[best];
-        ret = func_1505D1C4(obj->x_position, obj->y_position + (f32)obj->unkD6, obj->z_position, kind, D_800C3E78, 0,
+        ret = attack_spawn_at_point(obj->x_position, obj->y_position + (f32)obj->unkD6, obj->z_position, kind, D_800C3E78, 0,
                             0, 0);
         obj->unk76 = self->unk76;
     }
     return ret;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F300/func_150E1AF0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F300/object_ray_hit_nearest.s")
 #endif

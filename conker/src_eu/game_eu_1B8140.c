@@ -75,9 +75,9 @@ s32 func_1518A930(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, u8 *arg4, f32 arg5, f3
     sp.u68 = arg7;
     sp.u6C = arg8;
     if (arg9 != 0) {
-        sp.u6E = (s8) *(s32 *) ((u8 *) &D_8008D958 + (func_150ADA20() & 1) * 4);
+        sp.u6E = (s8) *(s32 *) ((u8 *) &D_8008D958 + (random_int() & 1) * 4);
     } else {
-        sp.u6E = (s8) *(s32 *) ((u8 *) &D_8008D950 + (func_150ADA20() & 1) * 4);
+        sp.u6E = (s8) *(s32 *) ((u8 *) &D_8008D950 + (random_int() & 1) * 4);
     }
     sp.u90 = 0xFF;
     sp.u74 = 0x220205;
@@ -216,7 +216,7 @@ s32 func_1518AE84(Mtx *arg0, u8 *arg1) {
     f32 mf[4][4];
 
     r = (f32 *)(arg1 + 0x100);
-    func_150A8050(mf, r[0], r[1], r[2]);
+    mtxf_rotate_xyz_deg(mf, r[0], r[1], r[2]);
     mf[3][0] = *(f32 *)(arg1 + 0x48);
     mf[3][1] = *(f32 *)(arg1 + 0x4C);
     mf[3][2] = *(f32 *)(arg1 + 0x50);

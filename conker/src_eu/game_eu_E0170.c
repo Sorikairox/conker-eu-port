@@ -21,9 +21,9 @@ void func_150B2974(u8 *arg0, s32 arg1, s32 arg2) {
     sp3C[1] = *(f32 *)(arg0 + 0x180);
     sp3C[2] = *(f32 *)(arg0 + 0x1C);
 #ifdef NON_MATCHING
-    func_1514CBE8(sp3C[0], sp3C[1], sp3C[2], 135.0f, 0, 0xFF, (func_150ADA20() % 15U) + 0x1B, 7, 0, 0.0f, 0, 0xFF);
+    func_1514CBE8(sp3C[0], sp3C[1], sp3C[2], 135.0f, 0, 0xFF, (random_int() % 15U) + 0x1B, 7, 0, 0.0f, 0, 0xFF);
 #else
-    func_1514CBE8(sp3C[0], sp3C[1], *(s32 *)&sp3C[2], 0x43070000, 0, 0xFF, (func_150ADA20() % 15U) + 0x1B, 7, 0, 0.0f, 0, 0xFF);
+    func_1514CBE8(sp3C[0], sp3C[1], *(s32 *)&sp3C[2], 0x43070000, 0, 0xFF, (random_int() % 15U) + 0x1B, 7, 0, 0.0f, 0, 0xFF);
 #endif
     func_151D5404((struct17 *)sp3C, 1502.0f, 3000.0f, 0.00033333333f, 0xC, 0xF, 0xFF, 0);
     func_151D45A4(sp3C, 0xFF, 0);
@@ -63,7 +63,7 @@ s32 func_150B2A50(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
 
     ca = angle_byte_cos((a - 0x40) & 0xFF);
     sa = angle_byte_cos(a & 0xFF);
-    pitch = (u32) func_150ADA20() % 21U - 30;
+    pitch = (u32) random_int() % 21U - 30;
     cp = angle_byte_cos((pitch - 0x40) & 0xFF);
     spd = 10.0f * angle_byte_cos(pitch & 0xFF);
     sp.pos[0] = x;
@@ -72,15 +72,15 @@ s32 func_150B2A50(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
     sp.vel[0] = spd * ca;
     sp.vel[1] = -10.0f * cp;
     sp.vel[2] = spd * sa;
-    sp.a = func_150ADA68() * 0.859f + 3.6080003f;
-    sp.b = func_150ADA68() * 0.30900002f + 2.371f;
+    sp.a = random_float() * 0.859f + 3.6080003f;
+    sp.b = random_float() * 0.30900002f + 2.371f;
     func_151429E0(8, &sp.c[0], &sp.c[1], &sp.c[2]);
     func_151429E0(8, &sp.c[4], &sp.c[5], &sp.c[6]);
     sp.c[3] = 0xFF;
     sp.c[7] = 0xFF;
     sp.c[8] = 9;
-    sp.d = (u32) func_150ADA20() % 7U + 0x12;
-    sp.f = func_150ADA68() * 1.39f + 3.21f;
+    sp.d = (u32) random_int() % 7U + 0x12;
+    sp.f = random_float() * 1.39f + 3.21f;
     sp.e = 0x1601;
     sp.g = -1;
     sp.h = 8;

@@ -183,7 +183,7 @@ u8 *func_15174270(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s1
     temp_a0_30 = temp_a0_29 + 8;
     (*(s32 *)((u8 *)temp_a0_30 + 0)) = 0xF1000000;
     (*(s32 *)((u8 *)temp_a0_30 + 4)) = 0x10000400;
-    temp_v0 = func_1501A490(func_1501A680(temp_a0_30 + 8, temp_a0_30, var_a2_2, var_a3_2), D_80083336, 0, 0, 0, 0);
+    temp_v0 = render_set_scissor(render_set_color_image(temp_a0_30 + 8, temp_a0_30, var_a2_2, var_a3_2), D_80083336, 0, 0, 0, 0);
     (*(s32 *)((u8 *)temp_v0 + 4)) = 0x80000;
     (*(s32 *)((u8 *)temp_v0 + 0)) = 0xE3000C00;
     return temp_v0 + 8;
@@ -207,7 +207,7 @@ extern s32 D_800DD730[];          /* per entry: projected depth */
 extern s32 D_800DD770;
 extern s32 D_800899D0[][2];       /* z-buffer decode table: (shift, add) per exponent */
 extern void (*D_8008A420[])(Ent_DD778_nm *, s32, s32, s32);
-void func_1501A764(s32 arg0, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz);
+void camera_world_to_screen(s32 arg0, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz);
 
 /* Occlusion probes (3 entries, e.g. lens flares): first, for entries read back in the current DL buffer
  * (state == D_800BE9C0 + 1), decode the z-buffer word and, when within 300 of the projected depth, call the entry's
@@ -248,7 +248,7 @@ Gfx *func_1517485C(Gfx *gdl, s16 player) {
         }
         D_800DD740[i][0] = 0xFFFF;
         e->state = D_800BE9C0 + 1;
-        func_1501A764(player, e->x, e->y, e->z, &sx, &sy, &sz);
+        camera_world_to_screen(player, e->x, e->y, e->z, &sx, &sy, &sz);
         D_800DD730[i] = (s32)sz;
         cam = (u8 *)D_800BE628 + player * 0x180;
         x = (s32)sx;

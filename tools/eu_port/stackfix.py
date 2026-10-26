@@ -4,7 +4,7 @@
 usage: stackfix.py <func> <draft.c> [--rounds N] [--beam K] [--max M] [--out DIR]
        stackfix.py --scan <list>     (lines `func draft.c`): which drafts are off by stack offsets only
        stackfix.py --bisect <func> <draft.c>   statements whose removal changes the frame size
-                     (finds hidden compiler temps: func_150144B8's `tmp.unk1C *= D_80096A38` costs 8 bytes)
+                     (finds hidden compiler temps: screen_effect_start's `tmp.unk1C *= D_80096A38` costs 8 bytes)
 
 1. Screens the draft (m2c/screen.py, SCREEN_V=1) and compares the stack accesses
    (`sp+N` loads/stores/address computations) and frame size of the target .s with the
@@ -16,7 +16,7 @@ usage: stackfix.py <func> <draft.c> [--rounds N] [--beam K] [--max M] [--out DIR
      pad     `s32 padN;` / `u8 padN[8]` inserted at each position of a declaration list
      array   each local array size +-1, +-2, +4 elements
      into    a function-level local moved into the innermost/each enclosing block that
-             contains all of its uses (loop bodies: session 14, `func_15016588`)
+             contains all of its uses (loop bodies: session 14, `level_build_flag_bitmask`)
      outof   a block-level local moved to function level
      split   `T a, b;` declarations are split first (one declarator per line)
 3. Screens them in parallel (8 at a time, like m2c/tryall), keeps the best K by

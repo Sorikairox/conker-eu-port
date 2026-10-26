@@ -4,9 +4,10 @@
 #include "variables.h"
 
 
-void func_150064E0(void) {
+/* was func_150064E0 */
+void save_game_defaults(void) {
     s32 i = 0;
-    func_15017790();
+    level_state_clear();
 
     do {
         D_800C3A60[i++] = 0;
@@ -18,14 +19,14 @@ void func_150064E0(void) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1502B5C8(s32 *arg0, s32 arg1, ...);
+s32 asset_load(s32 *arg0, s32 arg1, ...);
 void func_10024190(void *, s32); /* osWritebackDCache */
 extern u8 *D_800BE810;           /* bit widths of the 69 packed save fields (asset 1/7, +8) */
 extern s32 D_800BE804;
 
 /* save_slot_unpack: reads EEPROM save slot arg0 (block arg0 * 16 + 4, 0x80 bytes into D_800BE778) and checks the
  * checksum (0xCC + sum of bytes 2..0x7F shifted left by index & 3, 16 bits) against the first u16. Bad block:
- * func_150064E0 (defaults) and, if a slot is loaded (D_800BE7FC >= 0) while D_80082F50 is set, the 27-byte state
+ * save_game_defaults (defaults) and, if a slot is loaded (D_800BE7FC >= 0) while D_80082F50 is set, the 27-byte state
  * at D_800D2E4C is put back. Good block: byte 2 = slot kind (sp+0x7F), bytes 3..6 = a time stamp (big-endian),
  * 27 bytes of D_800D2E4C, 9 bytes of D_800D2E60, D_800BE3DF, D_800BE800, D_800BE804 (u16, also passed to
  * func_15085710(0, 9, .)), D_800BE3E8, then the 69 bit fields of D_800C3A60 (u64 each, widths D_800BE810, MSB
@@ -33,7 +34,8 @@ extern s32 D_800BE804;
  * is newer (count of set bits in D_800D2E4C, D_800BE3E8, D_800BE3DF, stamp, slot, D_800BE804); D_800BE7FC keeps the
  * best count (D_800BE7FE = 1 when D_800D2E68 bit 5 is set), otherwise the old D_800D2E4C state is put back.
  * Block 0x34 (slot 3) clears D_80082F50 at the end. */
-void func_15006590(s8 arg0) {
+/* was func_15006590 */
+void save_slot_load(s8 arg0) {
     u8 saved[27];   /* sp+0x5C */
     u8 kind;        /* sp+0x7F */
     s32 stamp;      /* sp+0x78 */
@@ -52,7 +54,7 @@ void func_15006590(s8 arg0) {
         saved[i] = ((u8 *) D_800D2E4C)[i];
     }
     if (D_800BE810 == NULL) {
-        D_800BE810 = (u8 *) func_1502B5C8(NULL, 1, 7) + 8;
+        D_800BE810 = (u8 *) asset_load(NULL, 1, 7) + 8;
     }
     func_10024190(D_800BE778, 0x80);
     osInvalDCache(D_800BE778, 0x80);
@@ -63,7 +65,7 @@ void func_15006590(s8 arg0) {
         sum = (sum + (D_800BE778[i] << (i & 3))) & 0xFFFF;
     }
     if (sum != *(u16 *) D_800BE778) {
-        func_150064E0();
+        save_game_defaults();
         if (D_800BE7FC >= 0 && D_80082F50 != 0) {
             for (i = 0; i < 27; i++) {
                 ((u8 *) D_800D2E4C)[i] = saved[i];
@@ -153,7 +155,7 @@ void func_15006590(s8 arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15006590.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_slot_load.s")
 #endif
 #ifdef NON_MATCHING
 s32 func_150859AC(s16, s32);
@@ -161,12 +163,13 @@ s32 func_150859AC(s16, s32);
 /* save_slot_pack: P232. Writes save slot `slot` (record D_800BE818[slot]): bumps the slot's time stamp (+8, 31 bits)
  * and moves it to the highest EEPROM slot area (0..3) that no live record (+8 >= 0) uses (+0xE). Unless the EEPROM
  * is disabled (D_8002AC5C), the area's last block (area * 16 + 0x13) is first overwritten with 0xFE bytes. The
- * 0x80-byte block D_800BE778 is the inverse of func_15006590's layout: u16 checksum, slot, stamp (big-endian), 27
+ * 0x80-byte block D_800BE778 is the inverse of save_slot_load's layout: u16 checksum, slot, stamp (big-endian), 27
  * bytes of *D_800D2E4C, 9 bytes of D_800D2E60, D_800BE3DF, D_800BE800, D_800BE804 = func_150859AC(0, 6) (u16),
  * D_800BE3E8 (u32), then the 69 values of D_800C3A60 packed MSB first with the widths D_800BE810 (a last partial
  * byte is not stored; the 0x45 bytes after D_800BE3E8 are cleared first). Checksum = 0xCC + bytes 2..0x7F shifted
  * left by index & 3 (16 bits). Written with func_151DD4A0 (osEepromLongWrite) to block area * 16 + 4. */
-void func_15006BEC(s32 slot) { /* the asm uses the whole a0 (callers pass an s8) */
+/* was func_15006BEC */
+void save_slot_write(s32 slot) { /* the asm uses the whole a0 (callers pass an s8) */
     u8 *rec = (u8 *) &D_800BE818[slot];
     s32 stamp;
     s32 used;
@@ -203,7 +206,7 @@ void func_15006BEC(s32 slot) { /* the asm uses the whole a0 (callers pass an s8)
         func_151DDA90(&D_800BE900, area * 16 + 0x13, D_800BE778);
     }
     if (D_800BE810 == NULL) {
-        D_800BE810 = (u8 *) func_1502B5C8(NULL, 1, 7) + 8;
+        D_800BE810 = (u8 *) asset_load(NULL, 1, 7) + 8;
     }
     p = &D_800BE778[2];
     p[0] = slot;
@@ -261,10 +264,11 @@ void func_15006BEC(s32 slot) { /* the asm uses the whole a0 (callers pass an s8)
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15006BEC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_slot_write.s")
 #endif
 #ifdef NON_MATCHING
-void func_1500707C(s32 arg0) {
+/* was func_1500707C */
+void save_slot_erase(s32 arg0) {
     s32 temp_v0;
     s32 var_s0;
     s32 var_s0_2;
@@ -293,7 +297,7 @@ void func_1500707C(s32 arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_1500707C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_slot_erase.s")
 #endif
 #ifdef NON_MATCHING
 extern u8 *D_80082F4C; /* -> D_800BE712: the ten 10-byte records of the save data */
@@ -301,8 +305,9 @@ extern u8 *D_80082F4C; /* -> D_800BE712: the ten 10-byte records of the save dat
 // save_data_reset: clears the save data D_800BE710 (0x68 bytes) and gives its ten records their defaults: bytes
 // +1 / +2 / +3 / +4 = 3 / 10 / 2 / 1, +9 = 0 and per record (asm jump table jtbl_80095DB0) +5 = 3 (records 0, 8,
 // 9), 5 (1, 2) or 20 (5, 7), record 5 also +2 = 0; records 3, 4, 6 keep +5 = 0. Takes no arguments (the C caller
-// func_1500727C used to pass two that the asm never reads).
-void func_15007168(void) {
+// save_config_load used to pass two that the asm never reads).
+/* was func_15007168 */
+void save_config_reset(void) {
     u8 *p;
     u8 *rec;
     s32 i;
@@ -338,11 +343,12 @@ void func_15007168(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15007168.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_config_reset.s")
 #endif
 #ifdef NON_MATCHING
 
-void func_1500727C(void) {
+/* was func_1500727C */
+void save_config_load(void) {
     s32 temp_t9;
     s32 var_v0;
     s32 var_v1;
@@ -359,14 +365,15 @@ void func_1500727C(void) {
         var_a0 += 4;
     } while (var_v1 != 0x68);
     if (temp_t9 != D_800BE710.checksum) {
-        func_15007168();
+        save_config_reset();
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_1500727C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_config_load.s")
 #endif
 #ifdef NON_MATCHING
-void func_15007360(void) {
+/* was func_15007360 */
+void save_config_write(void) {
     s32 sp18;
     s32 var_v1;
     u16 temp_t9;
@@ -388,7 +395,7 @@ void func_15007360(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15007360.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_config_write.s")
 #endif
 #ifdef NON_MATCHING
 void func_151DDF6C(void); /* P85: takes no arguments (the asm reads none) */
@@ -396,7 +403,8 @@ void func_151E86A4(void);
 extern u8 D_800BE77A;
 extern s32 D_800E102C;
 
-void func_15007440(void) {
+/* was func_15007440 */
+void save_options_load(void) {
     s32 temp_t7;
     s32 temp_t9;
     s32 var_a0;
@@ -454,13 +462,14 @@ void func_15007440(void) {
     D_800901D0 = 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15007440.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_options_load.s")
 #endif
 #ifdef NON_MATCHING
 // save_options_write: copies the 0x1C option bytes D_800E1010..D_800E102C to D_800BE778 + 2, stores their checksum
 // (0xCC + sum of byte i << (i & 3) over bytes 2..29, 16 bits) in the first halfword and, unless EEPROM writes are
 // off (D_8002AC5C), writes the 0x20-byte block to EEPROM block 0 (func_151DD4A0 = osEepromLongWrite).
-void func_15007558(void) {
+/* was func_15007558 */
+void save_options_write(void) {
     s8 *src;
     u8 *dst = &D_800BE778[2];
     u16 sum;
@@ -479,35 +488,41 @@ void func_15007558(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15007558.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_options_write.s")
 #endif
 
-void func_15007644(void) {
+/* was func_15007644 */
+void controller_init_hook_noop(void) {
 }
 
-void func_1500764C(void) {
+/* was func_1500764C */
+void save_request_options_load(void) {
     D_80082BB4 = (u8)6;
     D_800BE3EC = (u8)0;
 }
 
-void func_15007668(void) {
+/* was func_15007668 */
+void save_request_options_write(void) {
     D_80082BB4 = (u8)7;
     D_800BE3EC = (u8)0;
 }
 
-void func_15007684(void) {
+/* was func_15007684 */
+void save_request_config_load(void) {
     D_80082BB4 = (u8)4;
     D_800BE3EC = (u8)0;
 }
 
-void func_150076A0(void) {
+/* was func_150076A0 */
+void save_request_config_write(void) {
     D_80082BB4 = (u8)5;
     D_800BE3EC = (u8)0;
 }
 
-void func_150076BC(s32 arg0) {
+/* was func_150076BC */
+void save_request_slot_load(s32 arg0) {
     if (arg0 < 0) {
-        func_150064E0();
+        save_game_defaults();
     }
     if ((arg0 >= 0) && (arg0 < 4) && (D_800BE616 == 0)) {
         D_80082BB4 = (u8)1;
@@ -515,14 +530,16 @@ void func_150076BC(s32 arg0) {
     }
 }
 
-void func_15007718(s32 arg0) {
+/* was func_15007718 */
+void save_request_slot_write(s32 arg0) {
     if ((arg0 >= 0) && (arg0 < 3) && (D_800BE616 == 0)) {
         D_80082BB4 = (u8)2;
         D_800BE3EC = arg0;
     }
 }
 
-void func_15007750(s32 arg0) {
+/* was func_15007750 */
+void save_request_slot_erase(s32 arg0) {
     if ((arg0 >= 0) && (arg0 < 3)) {
         D_80082BB4 = (u8)3;
         D_800BE3EC = arg0;
@@ -533,7 +550,8 @@ void func_15007750(s32 arg0) {
 // save_slots_reset: marks the three save-slot summaries D_800BE818 empty (+8 = -1, +0xE = -1), clears the current slot
 // D_800BE7FC / D_800BE7FE, sets D_80082F50, clears the 27 bytes at D_800D2E4C (pointer) and the 9 save bits
 // D_800D2E60, and sets the four bytes D_800BE7F8[0..3] to -1. Mode 3 (menu) calls it on its first frame.
-void func_15007778(void) {
+/* was func_15007778 */
+void save_slots_reset(void) {
     s32 i;
 
     for (i = 0; i < 3; i++) {
@@ -557,10 +575,10 @@ void func_15007778(void) {
     D_800BE7F8[0] = -1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15007778.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_slots_reset.s")
 #endif
 // NON-MATCHING: should probably start over..
-// void func_15007778(void) {
+// void save_slots_reset(void) {
 //     s32 phi_v0;
 //
 //     D_800BE3F8->unk8 = -1;

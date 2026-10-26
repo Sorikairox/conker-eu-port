@@ -156,7 +156,7 @@ s32 func_1517FA48(s32 arg0, s32 arg1) {
 #ifdef NON_MATCHING
 extern u8 D_8008D3B0[][6];
 
-/* Pulsing overlay: alpha D_800DE1BB (scaled by a 0..1 wave from func_15048A40 when D_800DE1BC is set),
+/* Pulsing overlay: alpha D_800DE1BB (scaled by a 0..1 wave from math_sin_u8 when D_800DE1BC is set),
  * colour D_8008D3B0[D_800DE1BA] (first of its two RGB triples). */
 Gfx *func_1517FAD4(Gfx *gdl) {
     u8 *c;
@@ -174,7 +174,7 @@ Gfx *func_1517FAD4(Gfx *gdl) {
      * use 0 on both paths (UNVERIFIED for the non-wave path) */
     t = 0.0f;
     if (D_800DE1BC != 0) {
-        a = (f32)D_800DE1BB * ((func_15048A40(D_800DE1B9) + 1.0f) * 0.5f);
+        a = (f32)D_800DE1BB * ((math_sin_u8(D_800DE1B9) + 1.0f) * 0.5f);
     }
     c = D_8008D3B0[D_800DE1BA];
     return func_1517F5FC(gdl, a, (s32)((c[3] - c[0]) * t + c[0]), (s32)((c[4] - c[1]) * t + c[1]),
@@ -375,7 +375,7 @@ extern u8 D_800DE1A8[];        /* per view: range finder frame (0..2) */
 extern f32 *D_800DE274;        /* zoom */
 extern f32 *D_800DE278;        /* aim offset x */
 extern f32 *D_800DE27C;        /* aim offset y */
-s32 func_1510D66C(s32, s32, s32, s32);
+s32 texture_cache_lookup(s32, s32, s32, s32);
 u8 *func_1517FF64(u8 *, s32, s32, s32, s32, s32); /* P85: the callee compares full words (callers pass s16 values) */
 Gfx *func_1518010C(Gfx *, s32, s32, f32, f32, s32);
 
@@ -504,7 +504,7 @@ Gfx *func_15180AF0(Gfx *gdl, s32 view) {
         gDPPipeSync(gdl++);
         gDPSetCombine(gdl++, 0xFFFFFF, 0xFFFFF3F9);
         gSPTexture(gdl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
-        gDPSetTextureImage(gdl++, G_IM_FMT_I, G_IM_SIZ_16b, 1, func_1510D66C(D_80090648[1], 0, 3, 0));
+        gDPSetTextureImage(gdl++, G_IM_FMT_I, G_IM_SIZ_16b, 1, texture_cache_lookup(D_80090648[1], 0, 3, 0));
         gDPSetTile(gdl++, G_IM_FMT_I, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
         gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);
         gDPSetTile(gdl++, G_IM_FMT_I, G_IM_SIZ_8b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 6, 0, G_TX_CLAMP, 6, 0);
@@ -514,7 +514,7 @@ Gfx *func_15180AF0(Gfx *gdl, s32 view) {
         if ((&D_800DDE1C)[view] != 0) {
             /* rim (IA16 loaded as a 64x64 IA8 tile), half size */
             gDPPipeSync(gdl++);
-            gDPSetTextureImage(gdl++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, func_1510D66C(D_80090648[2], 0, 3, 0));
+            gDPSetTextureImage(gdl++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, texture_cache_lookup(D_80090648[2], 0, 3, 0));
             gDPSetTile(gdl++, G_IM_FMT_IA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
             gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);
             gDPSetTile(gdl++, G_IM_FMT_IA, G_IM_SIZ_8b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 6, 0, G_TX_CLAMP, 6, 0);
@@ -523,7 +523,7 @@ Gfx *func_15180AF0(Gfx *gdl, s32 view) {
                 /* range finder: 32x32 RGBA16 frame, drawn twice */
                 gDPSetCombine(gdl++, 0xFFFFFF, 0xFFFCF279);
                 gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
-                                   func_1510D66C(D_80090648[3 + D_800DE1A8[view]], 0, 3, 0));
+                                   texture_cache_lookup(D_80090648[3 + D_800DE1A8[view]], 0, 3, 0));
                 gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
                 gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, 0x3FF, 0);
                 gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 5, 0, G_TX_CLAMP,
@@ -557,11 +557,11 @@ extern u8 D_800DE1A0[];  /* per player: wobble timer */
 extern u8 D_800DE1A4[];  /* per player: wobble angle */
 extern u16 D_800DE1B0[]; /* per player: hold timer of lens state 3 */
 extern u8 D_800BE9B4;
-f32 func_15048A40(u8);
+f32 math_sin_u8(u8);
 void func_150A7E40(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
 void func_1517FD84(s32 project, f32 x, f32 y, f32 z, s32 player);
 
-/* hud_lens_update: per frame (func_15019130 path) for every player: zoom D_800DDDC8[p] += rate D_800DDDD8[p] * step
+/* hud_lens_update: per frame (world_update path) for every player: zoom D_800DDDC8[p] += rate D_800DDDD8[p] * step
  * (D_800BE9E4). Scripted zoom (D_800DDE20[p]) follows the player object's +0x31C record state +0x120 (no record:
  * zoom 1): 3 zooms in to the rest zoom (0.8 one player, 0.9 split screen) -> 4 (wobble 30 frames); 4 wobbles
  * sin(angle) * 0.01 (fading over the last 30 frames) around the rest zoom -> 5 (holds it); 6 zooms in at 0.009 to
@@ -612,7 +612,7 @@ void func_15181A6C(void) {
                     D_800DE1A0[p] = (D_800DE1A0[p] < D_800BE9E4) ? 0 : D_800DE1A0[p] - D_800BE9E4;
                     D_800DE1A4[p] += D_800BE9E4 * 20;
                     amp = (D_800DE1A0[p] < 30) ? D_800DE1A0[p] * 0.01f / 30.0f : 0.01f;
-                    *zoom = func_15048A40(D_800DE1A4[p]) * amp + restZoom[D_80082FA0];
+                    *zoom = math_sin_u8(D_800DE1A4[p]) * amp + restZoom[D_80082FA0];
                 } else {
                     *zoom = restZoom[D_80082FA0];
                     ((u8 *) obj->unk31C)[0x120] = 5;
@@ -678,7 +678,7 @@ void func_15181A6C(void) {
                     D_800DE1A0[p] = (D_800DE1A0[p] < D_800BE9E4) ? 0 : D_800DE1A0[p] - D_800BE9E4;
                     D_800DE1A4[p] -= D_800BE9E4 * 20;
                     amp = (D_800DE1A0[p] < 30) ? D_800DE1A0[p] * 0.01f / 30.0f : 0.01f;
-                    *zoom = func_15048A40(D_800DE1A4[p]) * amp + 0.9f;
+                    *zoom = math_sin_u8(D_800DE1A4[p]) * amp + 0.9f;
                 } else {
                     *zoom = 0.9f;
                     *lens = 3;
@@ -783,7 +783,7 @@ void func_15182388(s32 arg0) {
 
 #ifdef NON_MATCHING
 /* P38: m2c draft (ctx K&R header fixed), func_1517FF64 calls fixed by hand */
-s32 func_1510D66C(s32, s32, s32, s32);
+s32 texture_cache_lookup(s32, s32, s32, s32);
 u8 *func_1517FF64(u8 *, s32, s32, s32, s32, s32); /* P85: the callee compares full words (callers pass s16 values) */
 extern s32 D_80090678;
 extern s32 D_8009067C;
@@ -923,7 +923,7 @@ u8 *func_15182450(u8 *arg0) {
             spA8 = temp_v0 + 0x20;
             (*(s32 *)((u8 *)temp_v0 + 0x20)) = 0xFD900000;
             temp_s0_5 = temp_v0 + 0x28;
-            (*(s32 *)((u8 *)spA8 + 4)) = func_1510D66C(D_80090678, 0, 3, 0);
+            (*(s32 *)((u8 *)spA8 + 4)) = texture_cache_lookup(D_80090678, 0, 3, 0);
             (*(s32 *)((u8 *)temp_s0_5 + 4)) = 0x07000000;
             (*(s32 *)((u8 *)temp_s0_5 + 0)) = 0xF5900000;
             temp_s0_6 = temp_s0_5 + 8;
@@ -1006,7 +1006,7 @@ u8 *func_15182450(u8 *arg0) {
             sp34 = (s32) temp_t6;
             sp88 = temp_s0_12;
             temp_s0_13 = temp_s0_12 + 8;
-            (*(s32 *)((u8 *)temp_s0_12 + 4)) = func_1510D66C(D_8009067C, 0, 3, 0);
+            (*(s32 *)((u8 *)temp_s0_12 + 4)) = texture_cache_lookup(D_8009067C, 0, 3, 0);
             (*(s32 *)((u8 *)temp_s0_13 + 4)) = 0x07000000;
             (*(s32 *)((u8 *)temp_s0_13 + 0)) = 0xF5900000;
             temp_s0_14 = temp_s0_13 + 8;

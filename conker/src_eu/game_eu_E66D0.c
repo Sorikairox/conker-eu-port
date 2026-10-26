@@ -74,7 +74,7 @@ typedef struct {
 
 // projectile_bounce_update: handler (D_80089CD4 table: obj, x, y, z, w, ext; returns keep). +0x3C = +0x10 + w.
 // Speed +0x140 <= 15: stops (+0x72 / +0x78 = 1, low byte of +0x60 cleared), turns the velocity (0, 0, 200) by
-// func_150A8050(+0x20, +0x24, +0x28) into +0x20..+0x28 and adds +0x38..+0x40 (keep). Speed > 30: breaks: a
+// mtxf_rotate_xyz_deg(+0x20, +0x24, +0x28) into +0x20..+0x28 and adds +0x38..+0x40 (keep). Speed > 30: breaks: a
 // effect3d_spawn_oriented flash record at (x, w, z) (random size, gets an 8-byte random spin at +0x128 of the new record), a
 // func_15151FA8 burst, a random break sound (D_80088AD4) at +0x38..+0x40; returns 0. Otherwise bounces: scales
 // +0x44..+0x58 by +0x14 (flipping +0x48) and plays D_80088ADC (keep).
@@ -94,7 +94,7 @@ s32 func_150B8EC0(u8 *obj, f32 x, f32 y, f32 z, f32 w, u8 *ext) {
         obj[0x72] = 1;
         obj[0x78] = 1;
         *(s32 *) (obj + 0x60) &= ~0xFF;
-        func_150A8050(mtx, *(f32 *) (obj + 0x20), *(f32 *) (obj + 0x24), *(f32 *) (obj + 0x28));
+        mtxf_rotate_xyz_deg(mtx, *(f32 *) (obj + 0x20), *(f32 *) (obj + 0x24), *(f32 *) (obj + 0x28));
         func_150A7E40(mtx, 0.0f, 0.0f, 200.0f, (f32 *) (obj + 0x20), (f32 *) (obj + 0x24), (f32 *) (obj + 0x28));
         *(f32 *) (obj + 0x20) += *(f32 *) (obj + 0x38);
         *(f32 *) (obj + 0x24) += *(f32 *) (obj + 0x3C);
@@ -107,14 +107,14 @@ s32 func_150B8EC0(u8 *obj, f32 x, f32 y, f32 z, f32 w, u8 *ext) {
         a.u00 = 4;
         a.u01 = 0;
         a.u02 = 0x3B02;
-        a.u04 = (u32) func_150ADA20() % 31 + 40;
+        a.u04 = (u32) random_int() % 31 + 40;
         a.u08 = 0;
         a.u0C = 0;
         a.colour[0] = 0xFF;
         a.colour[1] = 0xFF;
         a.colour[2] = 0xFF;
         a.colour[3] = 0xFF;
-        k = (func_150ADA68() * 25.0f + 25.0f) * D_800A0180_c[0];
+        k = (random_float() * 25.0f + 25.0f) * D_800A0180_c[0];
         a.u44[0] = 0xFF;
         a.u44[1] = 0xFF;
         a.u44[2] = 0;
@@ -131,11 +131,11 @@ s32 func_150B8EC0(u8 *obj, f32 x, f32 y, f32 z, f32 w, u8 *ext) {
         a.u28[5] = 0.0f;
         a.pos[1] = w;
         a.pos[2] = z;
-        spin[0] = (func_150ADA68() * 80.0f + 50.0f) * D_800A0184_c[0];
+        spin[0] = (random_float() * 80.0f + 50.0f) * D_800A0184_c[0];
         a.u50 = *(s32 *) (obj + 0x128);
-        r0 = func_150ADA20();
-        r1 = func_150ADA20();
-        r2 = func_150ADA20();
+        r0 = random_int();
+        r1 = random_int();
+        r2 = random_int();
         rec = (u8 *) effect3d_spawn_oriented((s32) &a, (s32) &D_800A4AA0, 0x18, 0, 0, (r0 & 1) * 2 + (r1 & 1), r2 & 0xFF, 500.0f,
                                    500.0f, 0, (s32) ext, *(s32 *) (obj + 0x14C), *(s32 *) (obj + 0x168), 0, 8,
                                    obj[0xC], obj[1]);
@@ -188,7 +188,7 @@ s32 func_150B8EC0(u8 *obj, f32 x, f32 y, f32 z, f32 w, u8 *ext) {
         b.u5C = *(s32 *) (obj + 0x168);
         b.u84 = *(s32 *) (obj + 0x128);
         func_15151FA8((u8 *) &b, obj[0xC], obj[1]);
-        func_10010F88(D_80088AD4[func_150ADA20() & 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), w + 25.0f,
+        func_10010F88(D_80088AD4[random_int() & 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), w + 25.0f,
                       *(f32 *) (obj + 0x40), 1000, 4000);
         return 0;
     }
@@ -315,14 +315,14 @@ s32 func_150B9424(u8 *obj, u8 *hit, f32 x, f32 y, f32 z) {
                 a.u00 = 4;
                 a.u01 = 0;
                 a.u02 = 0x3B02;
-                a.u04 = (u32) func_150ADA20() % 31 + 40;
+                a.u04 = (u32) random_int() % 31 + 40;
                 a.u08 = 0;
                 a.u0C = 0;
                 a.colour[0] = 0xFF;
                 a.colour[1] = 0xFF;
                 a.colour[2] = 0xFF;
                 a.colour[3] = 0xFF;
-                k = (func_150ADA68() * 25.0f + 25.0f) * D_800A018C_c[0];
+                k = (random_float() * 25.0f + 25.0f) * D_800A018C_c[0];
                 a.scale[1] = k;
                 a.scale[0] = k;
                 a.pos[0] = hp[0];
@@ -339,11 +339,11 @@ s32 func_150B9424(u8 *obj, u8 *hit, f32 x, f32 y, f32 z) {
                 a.u28[3] = 0.0f;
                 a.u28[4] = 0.0f;
                 a.u28[5] = 0.0f;
-                spin[0] = (func_150ADA68() * 80.0f + 50.0f) * D_800A0190_c[0];
+                spin[0] = (random_float() * 80.0f + 50.0f) * D_800A0190_c[0];
                 a.u50 = *(s32 *) (obj + 0x128);
-                r0 = func_150ADA20();
-                r1 = func_150ADA20();
-                r2 = func_150ADA20();
+                r0 = random_int();
+                r1 = random_int();
+                r2 = random_int();
                 rec = (u8 *) effect3d_spawn_oriented((s32) &a, (s32) &D_800A4AA0, 0x18, 0, 0, (r0 & 1) * 2 + (r1 & 1), r2 & 0xFF,
                                            500.0f, 500.0f, 0, (s32) &surf, *(s32 *) (obj + 0x14C),
                                            *(s32 *) (obj + 0x168), 0, 8, obj[0xC], obj[1]);
@@ -400,7 +400,7 @@ s32 func_150B9424(u8 *obj, u8 *hit, f32 x, f32 y, f32 z) {
             func_15151BE0((u8 *) &b, obj[0xC], obj[1]);
         }
     }
-    func_10010F88(D_80088AD4[func_150ADA20() & 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x3C),
+    func_10010F88(D_80088AD4[random_int() & 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x3C),
                   *(f32 *) (obj + 0x40), 1000, 4000);
     return 0;
 }
@@ -556,7 +556,7 @@ s32 func_150B9B1C(u8 *obj) {
         dy = *(f32 *) (obj + 0x3C) - *(f32 *) (h + 0x18);
         dz = *(f32 *) (obj + 0x40) - *(f32 *) (h + 0x1C);
         if (dx * dx + dy * dy + dz * dz < *(f32 *) (obj + 0x10) * *(f32 *) (obj + 0x10) + D_800A01B0_c[0]) {
-            if (15.0f < *(f32 *) (h + 0x3C) && (func_150ADA20() & 1)) {
+            if (15.0f < *(f32 *) (h + 0x3C) && (random_int() & 1)) {
                 s = angle_byte_cos(*(u16 *) ((u8 *) D_80088730 + 0x76) >> 8);
                 c = angle_byte_cos((*(u16 *) ((u8 *) D_80088730 + 0x76) >> 8) + 0x40);
                 obj[0x71] = 1;
@@ -565,7 +565,7 @@ s32 func_150B9B1C(u8 *obj) {
                 obj[0x75] = 1;
                 obj[0x78] = 0;
                 *(f32 *) (obj + 0x44) = *(f32 *) ((u8 *) D_80088730 + 0x3C) * s * D_800A01B4_c[0];
-                *(f32 *) (obj + 0x48) = func_150ADA68() * 15.0f + 10.0f;
+                *(f32 *) (obj + 0x48) = random_float() * 15.0f + 10.0f;
                 *(s16 *) (obj + 0x64) = 0x12C;
                 *(s32 *) (obj + 0x60) |= 0x80;
                 *(f32 *) (obj + 0x4C) = *(f32 *) ((u8 *) D_80088730 + 0x3C) * c * D_800A01B8_c[0];
@@ -584,14 +584,14 @@ s32 func_150B9B1C(u8 *obj) {
                 a.u00 = 4;
                 a.u01 = 0;
                 a.u02 = 0x3B02;
-                a.u04 = (u32) func_150ADA20() % 31 + 40;
+                a.u04 = (u32) random_int() % 31 + 40;
                 a.u08 = 0;
                 a.u0C = 0;
                 a.colour[0] = 0xFF;
                 a.colour[1] = 0xFF;
                 a.colour[2] = 0xFF;
                 a.colour[3] = 0xFF;
-                k = (func_150ADA68() * 25.0f + 25.0f) * D_800A01BC_c[0];
+                k = (random_float() * 25.0f + 25.0f) * D_800A01BC_c[0];
                 a.scale[1] = k;
                 a.scale[0] = k;
                 *(Vec9B1C *) a.pos = *(Vec9B1C *) pos;
@@ -606,11 +606,11 @@ s32 func_150B9B1C(u8 *obj) {
                 a.u28[3] = 0.0f;
                 a.u28[4] = 0.0f;
                 a.u28[5] = 0.0f;
-                spin[0] = (func_150ADA68() * 80.0f + 50.0f) * D_800A01C0_c[0];
+                spin[0] = (random_float() * 80.0f + 50.0f) * D_800A01C0_c[0];
                 a.u50 = *(s32 *) (obj + 0x128);
-                r0 = func_150ADA20();
-                r1 = func_150ADA20();
-                r2 = func_150ADA20();
+                r0 = random_int();
+                r1 = random_int();
+                r2 = random_int();
                 rec = (u8 *) effect3d_spawn_oriented((s32) &a, (s32) &D_800A4AA0, 0x18, 0, 0, (r0 & 1) * 2 + (r1 & 1), r2 & 0xFF,
                                            500.0f, 500.0f, 0, (s32) (obj + 0x114), *(s32 *) (obj + 0x14C),
                                            *(s32 *) (obj + 0x168), 0, 8, obj[0xC], obj[1]);
@@ -722,9 +722,9 @@ void func_150BA26C(u8 *arg0) {
         s.u14 = 0;
         s.u15 = 0xFF;
         s.u18 = 0x30001;
-        a = func_150ADA20();
-        b = func_150ADA20();
-        c = func_150ADA20();
+        a = random_int();
+        b = random_int();
+        c = random_int();
         sprite_fx_spawn_at((s32)&s, 0, 2, 0, *(s16 *)(arg0 + 0x9C), *(s16 *)(arg0 + 0xA6) + 2, *(s16 *)(arg0 + 0xA0), *(s16 *)(arg0 + 0xA2), *(s16 *)(arg0 + 0xA2), a & 0xFF, (u8)((b & 1) + (c & 1) * (a = 2)) /* fakematch: permuter, reuses a's register */, 3, 0xFF, 0, arg0[0xC], arg0[1]);
     }
 }

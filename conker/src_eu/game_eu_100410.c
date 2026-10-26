@@ -6,8 +6,9 @@ s32 memcpy(s32, s32, s32);
 #endif
 
 
-s32 func_150D2C9C(s32, u8 *, u8, u8);
-void func_150D2C00(u8 *arg0)
+s32 flake_particle_spawn(s32, u8 *, u8, u8);
+/* was func_150D2C00 */
+void flake_spawner_update(u8 *arg0)
 {
   u8 **q = &arg0; // fakematch: arg0 reloaded from its home (shape C)
   if ((*q)[0x78] & 1)
@@ -16,8 +17,8 @@ void func_150D2C00(u8 *arg0)
     v[3] -= D_800BE9E4;
     if (v[3] < 0)
     {
-      func_150D2C9C(v[0], (u8 *) (&v[4]), (*q)[0xC], (*q)[1]);
-      v[3] = v[1] + (func_150ADA20() % ((u32) (v[2] + 1)));
+      flake_particle_spawn(v[0], (u8 *) (&v[4]), (*q)[0xC], (*q)[1]);
+      v[3] = v[1] + (random_int() % ((u32) (v[2] + 1)));
     }
   }
 }
@@ -39,43 +40,45 @@ typedef struct {
 // flake_particle_spawn: P253. Spawns one particle (func_15149130: lifetime 100..200, 0x60 bytes of state; arg2 /
 // arg3 are the owner's +0xC / +1) whose state is: kind, a random angle, scale 0.3..0.7 and its inverse, a spin of
 // 0.3..0.43 with a random sign, the 64-byte matrix mtx and a random colour (white, red or green). Callers:
-// func_150D2C00 (timer) and func_150D380C (message 0x34); both ignore the result (the asm leaves memcpy's result, or
+// flake_spawner_update (timer) and flake_spawner_handle_msg (message 0x34); both ignore the result (the asm leaves memcpy's result, or
 // 0 when no particle was free; s32 as in this file's prototype).
-s32 func_150D2C9C(s32 kind, u8 *mtx, u8 arg2, u8 arg3) {
+/* was func_150D2C9C */
+s32 flake_particle_spawn(s32 kind, u8 *mtx, u8 arg2, u8 arg3) {
     Flake_150D2C9C f;
     static const u8 colours[3][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0, 0 }, { 0, 0xFF, 0 } };
     u8 c;
     struct260 *part;
 
     f.kind = kind;
-    f.angle = func_150ADA68() * 2.0f * 3.1415927f;
-    f.scale = func_150ADA68() * 0.4f + 0.3f;
+    f.angle = random_float() * 2.0f * 3.1415927f;
+    f.scale = random_float() * 0.4f + 0.3f;
     f.invScale = 1.0f / f.scale;
-    f.spin = func_150ADA68() * 0.13000001f + 0.3f;
-    if (func_150ADA20() & 1) {
+    f.spin = random_float() * 0.13000001f + 0.3f;
+    if (random_int() & 1) {
         f.spin = -f.spin;
     }
     f.unk14 = 0.0f;
     f.unk18 = 0.0f;
     memcpy((s32) f.mtx, (s32) mtx, 0x40);
-    c = func_150ADA20() % 3U;
+    c = random_int() % 3U;
     f.colour[0] = colours[c][0];
     f.colour[1] = colours[c][1];
     f.colour[2] = colours[c][2];
-    part = func_15149130((func_150ADA20() % 101U) + 100, -1, 0x32, -1, 1, 0, (struct37 *) 0x60, arg2, arg3);
+    part = func_15149130((random_int() % 101U) + 100, -1, 0x32, -1, 1, 0, (struct37 *) 0x60, arg2, arg3);
     if (part == NULL) {
         return 0;
     }
     return memcpy((s32) ((u8 *) part + 0x28), (s32) &f, 0x60);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_100410/func_150D2C9C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_100410/flake_particle_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
 void func_1514373C(f32, f32, f32 *, f32 *);
 
-void func_150D2E34(u8 *arg0) {
+/* was func_150D2E34 */
+void fx_sprite_shower_update(u8 *arg0) {
     struct {
         f32 u9C;
         f32 uA0;
@@ -168,17 +171,17 @@ void func_150D2E34(u8 *arg0) {
                 func_1514373C((*(f32 *)((u8 *)temp_s0 + 4)), (f32) (*(s16 *)((u8 *)temp_s2 + 6)), &sp.u9C, &sp.uA4);
                 sp.uA0 = (f32) (*(s16 *)((u8 *)temp_s2 + 8));
                 func_150A7E40(temp_s0 + 0x1C, sp.u9C, sp.uA0, sp.uA4, &sp.u104, &sp.u108, &sp.u10C);
-                sp.uF0 = (func_150ADA68() * 25.0f) + 50.0f;
-                temp_f2 = (func_150ADA68() * 1024.0f) + -2560.0f + 2048.0f;
+                sp.uF0 = (random_float() * 25.0f) + 50.0f;
+                temp_f2 = (random_float() * 1024.0f) + -2560.0f + 2048.0f;
                 sp.uA8 = temp_f2;
                 sp.uB0 = temp_f2;
-                temp_f2_2 = (func_150ADA68() * 1024.0f) + 1536.0f + 2048.0f;
+                temp_f2_2 = (random_float() * 1024.0f) + 1536.0f + 2048.0f;
                 sp.uAC = temp_f2_2;
                 sp.uB4 = temp_f2_2;
-                sp.uB8 = (func_150ADA68() * 768.0f) + 768.0f;
-                sp.uBC = (func_150ADA68() * 768.0f) + 768.0f;
-                sp.uC8 = ((func_150ADA68() * 80.0f) + 50.0f) * 0.001f;
-                sp.uCC = ((func_150ADA68() * 80.0f) + 50.0f) * 0.001f;
+                sp.uB8 = (random_float() * 768.0f) + 768.0f;
+                sp.uBC = (random_float() * 768.0f) + 768.0f;
+                sp.uC8 = ((random_float() * 80.0f) + 50.0f) * 0.001f;
+                sp.uCC = ((random_float() * 80.0f) + 50.0f) * 0.001f;
                 sp.u120 = (s8) (u32) (sp.uD4 * sp.uD0);
                 temp_v0 = effect3d_spawn_full(&sp.uDC, (s32) ((u8 *)&D_800A4AA0), 0U, 0x26U, 0U, 0x1FU, 0U, 0, 0, 0x30, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 if (temp_v0 != NULL) {
@@ -192,12 +195,13 @@ void func_150D2E34(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_100410/func_150D2E34.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_100410/fx_sprite_shower_update.s")
 #endif
 #ifdef NON_MATCHING
 s32 memcpy(s32, s32, s32);
 
-u8 *func_150D327C(u8 *arg0, s16 arg1) {
+/* was func_150D327C */
+u8 *beam_build_quad_vtx(u8 *arg0, s16 arg1) {
     struct {
         u8 u47;
         u8 pad48[0x8];
@@ -311,9 +315,10 @@ u8 *func_150D327C(u8 *arg0, s16 arg1) {
     return NULL;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_100410/func_150D327C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_100410/beam_build_quad_vtx.s")
 #endif
-s32 func_150D368C(u8 *arg0) {
+/* was func_150D368C */
+s32 beam_scroll_fade_step(u8 *arg0) {
     u8 *temp_s0;
 
     *(f32 *)(arg0 + 0x128) = (*(f32 *)(arg0 + 0x130) * D_800BE9A4) + *(f32 *)(arg0 + 0x128);
@@ -331,12 +336,13 @@ s32 func_150D368C(u8 *arg0) {
     return 0;
 }
 
-void func_150D380C(u8 *arg0, u8 *arg1, u8 arg2) {
+/* was func_150D380C */
+void flake_spawner_handle_msg(u8 *arg0, u8 *arg1, u8 arg2) {
     u8 *p;
     if (arg2 == 0x34) {
         p = (*(u8 **)&arg0) + 0x28;
         if (arg1[0] == p[0x51]) {
-            func_150D2C9C(*(s32 *)p, p + 0x10, arg0[0xC], arg0[1]);
+            flake_particle_spawn(*(s32 *)p, p + 0x10, arg0[0xC], arg0[1]);
         }
     }
 }

@@ -4,27 +4,27 @@
 
 
 #ifdef NON_MATCHING
-s32 func_1512DC20(u8 *arg0);
-s32 func_1509BE40(s32, s32, ...);
-void func_1512DAD0(u8 *, s32, void *);
+s32 camera_event_queue_empty(u8 *arg0);
+s32 event_dispatch(s32, s32, ...);
+void camera_queue_event(u8 *, s32, void *);
 s32 camera_pop_mode(struct108 *arg0, s32 arg1);
-u8 *func_1512DB74(u8 *arg0);
+u8 *camera_dequeue_event(u8 *arg0);
 void camera_exit_aim_mode(struct108 *);
-void func_1512DC60(struct108 *arg0);
+void camera_shake_reset(struct108 *arg0);
 void func_151CA484(u8 *arg0);
 s32 camera_push_mode(struct108 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void camera_start_transition(struct108 *arg0, s32 arg1, s32 arg2);
-void func_1512EE50(struct108 *);
+void camera_apply_request(struct108 *);
 void func_151CA150(u8 *arg0, s32 arg1);
 void camera_update_follow(struct108 *);
 void func_150A09D0(s32 arg0);
 void func_150A16A4(struct127 *arg0);
 void camera_dispatch_mode(struct108 *);
-void func_15128D50(struct108 *, f32 *, f32 *);
-f32 func_15048A70(f32 arg0, f32 arg1);
-void func_1510B6A8(s32 player, f32 fovX, f32 fovY, f32 scale, f32 width);
+void camera_lean_from_heading(struct108 *, f32 *, f32 *);
+f32 math_angle_diff_deg(f32 arg0, f32 arg1);
+void camera_projection_update(s32 player, f32 fovX, f32 fovY, f32 scale, f32 width);
 void func_1501B300(s32 player);
-void func_1510ED24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
+void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
 void camera_update_state_flags(struct108 *arg0);
 f32 sinf(f32);
 f32 cosf(f32);
@@ -40,10 +40,10 @@ extern s32 D_800C3A9C;
 extern f32 D_800C3A6C;
 
 /* camera_process_events: per-frame camera event pump (called by camera_update_controller and the game camera setup in
- * game_eu_4A070.c). +0x6CC = 0; a pending script request +0x734 is started (func_1512DAD0 with record
- * D_800D34B8[id & 0xFFF], 0x34 bytes, id kept in +0x700) when func_1509BE40(1, id, 6, 0x9000) and +0x738 allow it,
- * else cleared. If the queue (func_1512DC20) is busy, only flag 1 of +0x2C sets mode 0xC; otherwise every queued
- * event (func_1512DB74: {type, data}) is handled until the queue is empty:
+ * game_eu_4A070.c). +0x6CC = 0; a pending script request +0x734 is started (camera_queue_event with record
+ * D_800D34B8[id & 0xFFF], 0x34 bytes, id kept in +0x700) when event_dispatch(1, id, 6, 0x9000) and +0x738 allow it,
+ * else cleared. If the queue (camera_event_queue_empty) is busy, only flag 1 of +0x2C sets mode 0xC; otherwise every queued
+ * event (camera_dequeue_event: {type, data}) is handled until the queue is empty:
  *  1: copy a camera request (mode, values, point, ...) from the data into +0x6FC..+0x72C, +0x6CC = 1;
  *  5: save the camera: D_800DC440[data] = D_800DBFF0[player], keeping the target's +0x197 / +0x198 bytes in
  *     D_800898C4 / D_800898D4 (or resetting them, mode 1, when the target's +0x78 is 0); then mode 0xA;
@@ -51,10 +51,11 @@ extern f32 D_800C3A6C;
  *     and camera_start_transition; else D_800DBFF0[player] = D_800DC440[data], re-applies the request and the target bytes,
  *     resets eye / target history, and reruns the per-frame camera steps;
  *  7: place the camera at a fixed eye (+0x2F8) and target (data kind 0 / 2: given; else orbiting the eye at
- *     -400 by the data angles), then optional FOV (func_1510B6A8) and the camera collision probe func_1510ED24;
+ *     -400 by the data angles), then optional FOV (camera_projection_update) and the camera collision probe collision_find_floor;
  *  8: +0x3A4 = data[3]; 9: +0x364 = data[0]; 10: +0x834 = data +0x10, +0x820 = data[3] (999: target heading - 180).
  */
-void func_15129220(struct108 *arg0) {
+/* was func_15129220 */
+void camera_process_events(struct108 *arg0) {
     u8 *p = (u8 *)arg0;
     s32 *ev;
     u8 *d;
@@ -69,23 +70,23 @@ void func_15129220(struct108 *arg0) {
     f32 probe;
 
     *(s16 *)(p + 0x6CC) = 0;
-    if (*(s32 *)(p + 0x734) != 0 && func_1512DC20(p) != 0) {
-        if (func_1509BE40(1, *(s32 *)(p + 0x734), 6, 0x9000) != 0 && *(s32 *)(p + 0x738) != 0) {
-            func_1512DAD0(p, 1, (s32 *)(D_800D34B8 + (*(s32 *)(p + 0x734) & 0xFFF) * 0x34));
+    if (*(s32 *)(p + 0x734) != 0 && camera_event_queue_empty(p) != 0) {
+        if (event_dispatch(1, *(s32 *)(p + 0x734), 6, 0x9000) != 0 && *(s32 *)(p + 0x738) != 0) {
+            camera_queue_event(p, 1, (s32 *)(D_800D34B8 + (*(s32 *)(p + 0x734) & 0xFFF) * 0x34));
             *(s16 *)(p + 0x700) = *(s32 *)(p + 0x734) & 0xFFF;
         } else {
             *(s32 *)(p + 0x734) = 0;
             *(s32 *)(p + 0x738) = 0;
         }
     }
-    if (func_1512DC20(p) != 0) {
+    if (camera_event_queue_empty(p) != 0) {
         if (*(s32 *)(p + 0x2C) & 1) {
             camera_pop_mode(arg0, 0xC);
         }
         return;
     }
-    while (func_1512DC20(p) == 0) {
-        ev = (s32 *)func_1512DB74(p);
+    while (camera_event_queue_empty(p) == 0) {
+        ev = (s32 *)camera_dequeue_event(p);
         switch (ev[0]) {
         case 5: /* save the camera state */
             tgt = *(u8 **)(p + 0x3D4);
@@ -105,7 +106,7 @@ void func_15129220(struct108 *arg0) {
                 D_800898C4[p[0x23D]] = tgt[0x197];
                 D_800898D4[p[0x23D]] = (*(u8 **)(p + 0x3D4))[0x198];
             }
-            func_1512DC60(arg0);
+            camera_shake_reset(arg0);
             if (p[0x84C] != 0) {
                 func_151CA484(p);
                 p[0x84C] = 0;
@@ -159,7 +160,7 @@ void func_15129220(struct108 *arg0) {
             *(u16 *)(p + 0x36A) = D_800BEB30[pl];
             p[0x23C] = 1;
             p[0x23E] = tgt[0x78];
-            func_1512EE50(arg0);
+            camera_apply_request(arg0);
             if (D_800898D4[p[0x23D]] != 0) {
                 *(u16 *)(p + 0x36A) |= 0x10;
                 **(u16 **)(p + 0x36C) |= 0x10;
@@ -204,8 +205,8 @@ void func_15129220(struct108 *arg0) {
             }
             func_150A09D0(D_800BE9E4);
             func_150A16A4((struct127 *)((u8 *)D_800CC2D0 + p[0x23D] * 0x32C));
-            func_1512EE50(arg0);
-            func_15128D50(arg0, NULL, NULL);
+            camera_apply_request(arg0);
+            camera_lean_from_heading(arg0, NULL, NULL);
             camera_dispatch_mode(arg0);
             camera_update_follow(arg0);
             *(s32 *)(p + 0x5F0) |= 4;
@@ -280,7 +281,7 @@ void func_15129220(struct108 *arg0) {
                 }
                 /* yaw: from the current heading +0x37C toward +0x28 */
                 heading = *(f32 *)(p + 0x37C);
-                ang = (heading + func_15048A70(heading, *(f32 *)(d + 0x28)) * 1.0f) * 0.017453292f;
+                ang = (heading + math_angle_diff_deg(heading, *(f32 *)(d + 0x28)) * 1.0f) * 0.017453292f;
                 pos[0] = sinf(ang) * pos[2];
                 pos[2] = cosf(ang) * pos[2];
                 pos[0] += *(f32 *)(d + 0x14);
@@ -302,13 +303,13 @@ void func_15129220(struct108 *arg0) {
             }
             if ((&D_800C35EA)[*(s32 *)(d + 4)] == 1) {
                 D_800C3A6C = *(f32 *)(d + 8);
-                func_1510B6A8(p[0x23D], *(f32 *)(p + 0x19C), *(f32 *)(p + 0x1A0), 1.0f, 0.0f);
+                camera_projection_update(p[0x23D], *(f32 *)(p + 0x19C), *(f32 *)(p + 0x1A0), 1.0f, 0.0f);
             }
             if (D_800DBFF4[0] != 0) {
                 func_1501B300(0);
             }
             if (D_800BEAC0 == 0) {
-                func_1510ED24((s32)(p + 0x644), (s32)(p + 0x648), (s32)&probe, (s32)(p + 0x360), (s32)(p + 0x640), 0,
+                collision_find_floor((s32)(p + 0x644), (s32)(p + 0x648), (s32)&probe, (s32)(p + 0x360), (s32)(p + 0x640), 0,
                               *(f32 *)(p + 0x2F8), *(f32 *)(p + 0x2FC), *(f32 *)(p + 0x300), *(f32 *)(p + 0x2FC), 0, 0,
                               -10000.0f, *(f32 *)(p + 0x2FC));
                 camera_update_state_flags(arg0);
@@ -337,14 +338,15 @@ void func_15129220(struct108 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_156A30/func_15129220.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_156A30/camera_process_events.s")
 #endif
 
 extern s16 D_800898F0;
 extern u8 D_800DC458[];
 extern f32 D_800A39F0;
 
-void func_15129E30(u8 *arg0, s32 arg1)
+/* was func_15129E30 */
+void camera_pivot_slot_reset(u8 *arg0, s32 arg1)
 {
   if (D_800898F0 != 0)
   {
@@ -356,13 +358,13 @@ void func_15129E30(u8 *arg0, s32 arg1)
 
 #ifdef NON_MATCHING
 /* P142 */
-void func_15048F90(struct17 *a, struct17 *b, struct17 *out);
-void func_1504917C(struct17 *v, struct17 *out);
-void func_15049148(struct17 *v, f32 len, struct17 *out);
+void vec3_diff(struct17 *a, struct17 *b, struct17 *out);
+void vec3_normalize(struct17 *v, struct17 *out);
+void vec3_scale(struct17 *v, f32 len, struct17 *out);
 void func_150498A0(f32 *cur, f32 target, f32 *vel, f32 arg3, f32 arg4, f32 arg5);
 s32 func_150A44A4(f32 x, f32 z, s32 tri, u8 *packed, f32 *out);
-void func_1510ED24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
-s32 func_1512C6C0(struct108 *);
+void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
+s32 camera_yaw_fade_in(struct108 *);
 void camera_update_state_flags(struct108 *);
 extern s16 D_800898F0;
 extern f32 D_800A39F4;
@@ -372,10 +374,11 @@ extern f32 D_800A39FC;
  * +0x27C = +0x288; the camera target is the pivot plus the direction pivot -> eye (+0x2BC) scaled to the eye
  * distance minus +0x278 (at least 0), its y part scaled by D_800A39F4 unless +0x704 & 0xF. The camera position
  * +0x2F8 eases towards it (func_150498A0 with velocity +0x3C0, rates 3 / 2 / 3, +0x7B4), or snaps there (also
- * +0x304, velocity 0) when +0x23C. Then func_1512C6C0; when snapped, flag 0x400000 of +0x84, or no floor under
- * the camera (func_150A44A4 into +0x35C), the collision probe func_1510ED24 runs (+0x360 kept unless the result
+ * +0x304, velocity 0) when +0x23C. Then camera_yaw_fade_in; when snapped, flag 0x400000 of +0x84, or no floor under
+ * the camera (func_150A44A4 into +0x35C), the collision probe collision_find_floor runs (+0x360 kept unless the result
  * +0x364 equals D_800A39FC) and camera_update_state_flags. Finally the four zoom pairs +0x964..+0x980 = 1 / 2. */
-void func_15129EA4(struct108 *cam) {
+/* was func_15129EA4 */
+void camera_pivot_follow_update(struct108 *cam) {
     u8 *c = (u8 *) cam;
     f32 dir[3];
     s32 probe[4];
@@ -393,8 +396,8 @@ void func_15129EA4(struct108 *cam) {
     *(f32 *) (c + 0x27C) = *(f32 *) (c + 0x288);
     *(f32 *) (c + 0x280) = *(f32 *) (c + 0x28C);
     *(f32 *) (c + 0x284) = *(f32 *) (c + 0x290);
-    func_15048F90((struct17 *) (c + 0x27C), (struct17 *) (c + 0x2BC), (struct17 *) dir);
-    func_1504917C((struct17 *) dir, (struct17 *) dir);
+    vec3_diff((struct17 *) (c + 0x27C), (struct17 *) (c + 0x2BC), (struct17 *) dir);
+    vec3_normalize((struct17 *) dir, (struct17 *) dir);
     dx = *(f32 *) (c + 0x2BC) - *(f32 *) (c + 0x27C);
     dy = *(f32 *) (c + 0x2C0) - *(f32 *) (c + 0x280);
     dz = *(f32 *) (c + 0x2C4) - *(f32 *) (c + 0x284);
@@ -402,7 +405,7 @@ void func_15129EA4(struct108 *cam) {
     if (dist < 0.0f) {
         dist = 0.0f;
     }
-    func_15049148((struct17 *) dir, dist, (struct17 *) dir);
+    vec3_scale((struct17 *) dir, dist, (struct17 *) dir);
     tx = *(f32 *) (c + 0x27C) + dir[0];
     if (*(s32 *) (c + 0x704) & 0xF) {
         ty = *(f32 *) (c + 0x280);
@@ -431,11 +434,11 @@ void func_15129EA4(struct108 *cam) {
     } else {
         func_150498A0((f32 *) (c + 0x300), tz, (f32 *) (c + 0x3C8), 1.0f, 3.0f, *(f32 *) (c + 0x7B4));
     }
-    func_1512C6C0(cam);
+    camera_yaw_fade_in(cam);
     if (c[0x23C] != 0 || (*(s32 *) (c + 0x84) & 0x400000) ||
         func_150A44A4(*(f32 *) (c + 0x2F8), *(f32 *) (c + 0x300), *(s32 *) (c + 0x644), c + 0x648,
                       (f32 *) (c + 0x35C)) == 0) {
-        func_1510ED24(0, 0, (s32) probe, (s32) (c + 0x360), (s32) (c + 0x640), 0, *(f32 *) (c + 0x2F8),
+        collision_find_floor(0, 0, (s32) probe, (s32) (c + 0x360), (s32) (c + 0x640), 0, *(f32 *) (c + 0x2F8),
                       *(f32 *) (c + 0x2FC), *(f32 *) (c + 0x300), *(f32 *) (c + 0x2FC), 0, 0, D_800A39F8,
                       *(f32 *) (c + 0x2FC));
         if (D_800A39FC != *(f32 *) (c + 0x364)) {
@@ -453,5 +456,5 @@ void func_15129EA4(struct108 *cam) {
     *(f32 *) (c + 0x970) = 2.0f;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_156A30/func_15129EA4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_156A30/camera_pivot_follow_update.s")
 #endif

@@ -27,3 +27,5 @@ you didn't do in a line `# not done: file1.c file2.c` at the end.
 - Read only. Don't edit any source, don't run builds, don't run git (no commits, no stash). Write only your
   proposals file.
 - Look at the callers and callees too: a function called only by `cutscene_*` code is probably cutscene code.
+- Several naming sessions run at once and share one scratchpad folder: keep temporary files in a folder named after
+  your chunk (`<scratchpad>/chunkNN/`), never under shared names like `out.tsv`.

@@ -1,8 +1,8 @@
 /* P61 ?p61check=N: runtime checks of port-b P59's converted C (link-time wraps, N = calls logged in detail per
  * function, then every 256th). Only cross-TU calls are wrapped (wasm-ld --wrap redirects undefined references), so
  * the intra-TU ones are seen through their cross-TU callees:
- *  - func_1507D4F8 (life lost: respawn / checkpoint restart / game over), its callee func_1501C710 (arguments);
- *  - func_1505D6F0 (record-vs-record contact pass): calls, and whether it moved the record (x / z before / after);
+ *  - player_lose_life (life lost: respawn / checkpoint restart / game over), its callee func_1501C710 (arguments);
+ *  - obj_contact_pass (record-vs-record contact pass): calls, and whether it moved the record (x / z before / after);
  *  - func_1508000C (floor-material effects, only called inside game_eu_AC770.c): seen through its sound calls
  *    func_1000D96C / func_1000DE1C (ambient loop ids 0x15..0x17, D_800D1CE4) and func_1000E7A0 / func_1000E8C4;
  *  - func_1507C170 (animation frame advance; called from game_eu_6CFB0.c): frame before / after, the end callback
@@ -23,20 +23,20 @@ static int want(unsigned n) { return on() && (n <= (unsigned)fl || n % 256 == 0)
 static float F(const unsigned char *r, int o) { return *(const float *)(r + o); }
 static int recno(const void *r) { return (int)(((const unsigned char *)r - D_800CC2D0) / REC); }
 
-/* ---- func_1507D4F8 (life lost) and func_1501C710 */
+/* ---- player_lose_life (life lost) and func_1501C710 */
 static int in_d4f8;
-void __real_func_1507D4F8(int idx);
-void __wrap_func_1507D4F8(int idx) {
+void __real_player_lose_life(int idx);
+void __wrap_player_lose_life(int idx) {
     static unsigned n;
     const unsigned char *r = D_800CC2D0 + idx * REC;
     float x = F(r, 0x14), y = F(r, 0x18), z = F(r, 0x1C);
     int st = *(const int *)r;
     n++;
     in_d4f8++;
-    __real_func_1507D4F8(idx);
+    __real_player_lose_life(idx);
     in_d4f8--;
     if (want(n))
-        port_log("[p61] func_1507D4F8 call %u frame %u: idx %d | state %d -> %d pos %.1f %.1f %.1f -> %.1f %.1f %.1f "
+        port_log("[p61] player_lose_life call %u frame %u: idx %d | state %d -> %d pos %.1f %.1f %.1f -> %.1f %.1f %.1f "
                  "+65 %02X +E4 %04X\n", n, port_frame_count, idx, st, *(const int *)r, x, y, z, F(r, 0x14), F(r, 0x18),
                  F(r, 0x1C), vbe_ld8(r + 0x65), vbe_ld16(r + 0xE4));
 }
@@ -46,26 +46,26 @@ void __wrap_func_1501C710(int a0, int a1, int a2, int a3, int a4) {
     n++;
     if (want(n))
         port_log("[p61] func_1501C710 call %u frame %u%s: a0 %d a1 %08X (%04X) a2 %d a3 %d a4 %d\n", n, port_frame_count,
-                 in_d4f8 ? " (inside func_1507D4F8)" : "", a0, a1, a1 ? vbe_ld16((void *)(uintptr_t)a1) : 0, a2, a3, a4);
+                 in_d4f8 ? " (inside player_lose_life)" : "", a0, a1, a1 ? vbe_ld16((void *)(uintptr_t)a1) : 0, a2, a3, a4);
     __real_func_1501C710(a0, a1, a2, a3, a4);
 }
 
-/* ---- func_1505D6F0 (contact pass) */
-void __real_func_1505D6F0(void *rec, int idx);
-void __wrap_func_1505D6F0(void *rec, int idx) {
+/* ---- obj_contact_pass (contact pass) */
+void __real_obj_contact_pass(void *rec, int idx);
+void __wrap_obj_contact_pass(void *rec, int idx) {
     static unsigned n, moved;
     const unsigned char *r = rec;
     float x = F(r, 0x14), z = F(r, 0x1C);
     n++;
-    __real_func_1505D6F0(rec, idx);
+    __real_obj_contact_pass(rec, idx);
     if (x != F(r, 0x14) || z != F(r, 0x1C)) moved++;
     if (want(n))
-        port_log("[p61] func_1505D6F0 call %u frame %u: rec %d idx %d | x %.2f -> %.2f z %.2f -> %.2f | moved so far %u\n",
+        port_log("[p61] obj_contact_pass call %u frame %u: rec %d idx %d | x %.2f -> %.2f z %.2f -> %.2f | moved so far %u\n",
                  n, port_frame_count, recno(rec), idx, x, F(r, 0x14), z, F(r, 0x1C), moved);
 }
 
 /* ---- func_1508000C's sound calls */
-extern int port_p110_inmus; /* P110: set during func_150000B0 (level music) */
+extern int port_p110_inmus; /* P110: set during level_start_music (level music) */
 void __real_func_1000D96C(int a0, int a1, int a2);
 void __wrap_func_1000D96C(int a0, int a1, int a2) {
     static unsigned n;
@@ -139,12 +139,12 @@ static void p63_anim_log(const unsigned char *a, float step, int rec, unsigned i
 }
 
 
-/* ---- P63: func_1505E650 (start animation `anim` of an object; game_83300.c, called from many TUs) under
+/* ---- P63: obj_start_anim (start animation `anim` of an object; game_83300.c, called from many TUs) under
  * ?p63anim: record 0's calls with id / speed / blend / frame / hold, logged when the id differs from the previous
  * call or every 64th; the first 3 calls of each new id get a JS stack (?p63stack=1). */
 void port_js_stack(int skip, int n);
-void __real_func_1505E650(void *obj, int id, float speed, float blend, float frame, float loop, int hold);
-void __wrap_func_1505E650(void *obj, int id, float speed, float blend, float frame, float loop, int hold) {
+void __real_obj_start_anim(void *obj, int id, float speed, float blend, float frame, float loop, int hold);
+void __wrap_obj_start_anim(void *obj, int id, float speed, float blend, float frame, float loop, int hold) {
     static unsigned n, last = 0xFFFFFFFF, same;
     static int stk = -1;
     if (fl63 < 0) fl63 = port_flag("p63anim");
@@ -165,7 +165,7 @@ void __wrap_func_1505E650(void *obj, int id, float speed, float blend, float fra
         }
         last = id & 0xFFFF;
     }
-    __real_func_1505E650(obj, id, speed, blend, frame, loop, hold);
+    __real_obj_start_anim(obj, id, speed, blend, frame, loop, hold);
 }
 
 

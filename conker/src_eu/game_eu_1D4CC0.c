@@ -136,26 +136,26 @@ s32 func_151A74B0(void *arg0, s32 mode, u8 arg2, s32 arg3) {
     sp.u15C = 7;
     extra.u58 = s->u58;
     while (n-- != 0) {
-        yaw = func_150ADA20() % (u32)(s->yawRange + 1) + s->yawMin;
-        pitch = func_150ADA20() % (u32)(s->pitchRange + 1) + s->pitchMin;
+        yaw = random_int() % (u32)(s->yawRange + 1) + s->yawMin;
+        pitch = random_int() % (u32)(s->pitchRange + 1) + s->pitchMin;
         sy = angle_byte_cos(yaw - 0x40);
         cy = angle_byte_cos(yaw);
         sp_ = angle_byte_cos(pitch - 0x40);
         cp = angle_byte_cos(pitch);
-        r = func_150ADA68() * s->radius;
+        r = random_float() * s->radius;
         h = r * cp;
         sp.pos[0] = s->pos[0] + h * sy;
         sp.pos[1] = s->pos[1] - r * sp_;
         sp.pos[2] = s->pos[2] + h * cy;
         switch ((u8)mode) {
         case 0:
-            v = func_150ADA68() * s->speedRange + s->speedMin;
-            sp.vel[1] = func_150ADA68() * s->upRange + s->upMin;
+            v = random_float() * s->speedRange + s->speedMin;
+            sp.vel[1] = random_float() * s->upRange + s->upMin;
             sp.vel[0] = v * sy;
             sp.vel[2] = v * cy;
             break;
         case 1:
-            v = func_150ADA68() * s->speedRange + s->speedMin;
+            v = random_float() * s->speedRange + s->speedMin;
             h = v * cp;
             sp.vel[0] = h * sy;
             sp.vel[1] = -v * sp_;
@@ -167,19 +167,19 @@ s32 func_151A74B0(void *arg0, s32 mode, u8 arg2, s32 arg3) {
             ((s32 *)sp.vel)[2] = ((s32 *)s->dir)[2];
             break;
         case 3:
-            v = func_150ADA68() * s->speedRange + s->speedMin;
+            v = random_float() * s->speedRange + s->speedMin;
             sp.vel[0] = s->dir[0] * v;
             sp.vel[1] = s->dir[1] * v;
             sp.vel[2] = s->dir[2] * v;
             break;
         }
-        size = func_150ADA68() * s->sizeRange + s->sizeMin;
+        size = random_float() * s->sizeRange + s->sizeMin;
         sp.uF4 = size;
         sp.uF0 = size;
         sp.scale = size * 30.0f;
-        sp.u134 = func_150ADA68() * s->spinRange + s->spinMin;
-        sp.spin[0] = func_150ADA68() * s->rotRange + s->rotMin;
-        sp.spin[2] = func_150ADA68() * s->rotRange + s->rotMin;
+        sp.u134 = random_float() * s->spinRange + s->spinMin;
+        sp.spin[0] = random_float() * s->rotRange + s->rotMin;
+        sp.spin[2] = random_float() * s->rotRange + s->rotMin;
         p = (u8 *)func_15132FBC(&sp, 0, 0, 0x10, arg2, arg3);
         if (p != NULL) {
             memcpy(p + 0x170, &extra, 0x10);
@@ -260,9 +260,9 @@ s32 func_151A79EC(u8 *arg0, f32 arg1, s32 arg2, s32 arg3, f32 arg4)
         b = 1;
       }
 #ifdef NON_MATCHING
-      func_1514B0CC(arg1, arg4, arg3, (*((f32 *) (arg0 + 0x18))) * 35.0f, (func_150ADA20() % 3U) + 2, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((s16 *) (p + 0xA)), *((s16 *) (p + 0xC)), b);
+      func_1514B0CC(arg1, arg4, arg3, (*((f32 *) (arg0 + 0x18))) * 35.0f, (random_int() % 3U) + 2, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((s16 *) (p + 0xA)), *((s16 *) (p + 0xC)), b);
 #else
-      func_1514B0CC(arg1, arg4, arg3, (*((f32 *) (arg0 + 0x18))) * 35.0f, (func_150ADA20() % 3U) + 2, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((s16 *) (p + 0xA)), *((s16 *) (p + 0xC)), b);
+      func_1514B0CC(arg1, arg4, arg3, (*((f32 *) (arg0 + 0x18))) * 35.0f, (random_int() % 3U) + 2, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((s16 *) (p + 0xA)), *((s16 *) (p + 0xC)), b);
 #endif
     }
   }
@@ -304,7 +304,7 @@ void func_151A7BC0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp74[6] = arg0;
     sp74[7] = arg1;
     sp74[8] = arg2;
-    temp_f18 = (func_150ADA68() * 166.0f) + 160.0f;
+    temp_f18 = (random_float() * 166.0f) + 160.0f;
     sp74[0] = 0.0f;
     sp74[1] = 0.0f;
     sp74[2] = 0.0f;
@@ -313,9 +313,9 @@ void func_151A7BC0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp74[4] = -arg4 * D_800BEDC8 * temp_f2;
     sp74[5] = -arg5 * D_800BEDC8 * temp_f2;
 #ifdef NON_MATCHING
-    func_151A2C9C(&sp74[6], sp74, &sp74[3], 1.0f, ((func_150ADA68() * 591.0f) + -600.0f) * 0.001f, ((func_150ADA68() * 500.0f) + 400.0f) * sp6C, ((u32) func_150ADA20() % 21U) + 0xF, (func_150ADA20() % 101U) + 0x64, 0xF, 0x14, 0, -1, 0x56, 0x27, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
+    func_151A2C9C(&sp74[6], sp74, &sp74[3], 1.0f, ((random_float() * 591.0f) + -600.0f) * 0.001f, ((random_float() * 500.0f) + 400.0f) * sp6C, ((u32) random_int() % 21U) + 0xF, (random_int() % 101U) + 0x64, 0xF, 0x14, 0, -1, 0x56, 0x27, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
 #else
-    func_151A2C9C(&sp74[6], sp74, &sp74[3], 0x3F800000, ((func_150ADA68() * 591.0f) + -600.0f) * 0.001f, ((func_150ADA68() * 500.0f) + 400.0f) * sp6C, ((u32) func_150ADA20() % 21U) + 0xF, (func_150ADA20() % 101U) + 0x64, 0xF, 0x14, 0, -1, 0x56, 0x27, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
+    func_151A2C9C(&sp74[6], sp74, &sp74[3], 0x3F800000, ((random_float() * 591.0f) + -600.0f) * 0.001f, ((random_float() * 500.0f) + 400.0f) * sp6C, ((u32) random_int() % 21U) + 0xF, (random_int() % 101U) + 0x64, 0xF, 0x14, 0, -1, 0x56, 0x27, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
 #endif
 }
 

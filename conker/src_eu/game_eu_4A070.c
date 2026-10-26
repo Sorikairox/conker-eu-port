@@ -3,7 +3,7 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_15080628(void);
-u8 *func_151149AC(u8);
+u8 *world_record_find(u8);
 extern u8 D_800C3938[][0x19];
 void func_15021834(struct127 *, s32, s32);
 extern s32 D_eu_800C3A60;
@@ -40,7 +40,7 @@ extern s32 D_800BEFD0;            /* ucode text / data pairs */
 extern s32 D_800C1480;
 extern u8 *D_800BEFBC;
 extern u8 *D_800BEEF0;
-void func_1501A39C(void);
+void render_dl_buffers_init(void);
 void func_1501CC1C(void);
 
 void func_eu_1501C860(s32 arg0, s32 arg1) {
@@ -57,7 +57,7 @@ void func_eu_1501C860(s32 arg0, s32 arg1) {
     base = (s32)D_800BEDE8[D_800BE9C0];
     n = (D_800BE9D0 - base) >> 3;
     if (n < 0 || cap < n) {
-        func_1501A39C();
+        render_dl_buffers_init();
         D_800BE9D0 = D_800BE9D8[D_800BE9C0];
         g = (s32 *)D_800BE9D0; D_800BE9D0 += 8; g[1] = 0; g[0] = 0xE9000000;
         g = (s32 *)D_800BE9D0; D_800BE9D0 += 8; g[1] = 0; g[0] = 0xDF000000;
@@ -316,7 +316,7 @@ void func_1502348C(void);
 void func_15023684(s32);
 void func_1501EA84(s32);
 void func_1501E5AC(s32);
-void func_1510B8AC(s32, f32, f32, f32);
+void camera_projection_set_fov(s32, f32, f32, f32);
 void func_1501E7A8(s32);
 void func_1501D348(s32, s32, s32, s32, s32);
 #endif
@@ -368,7 +368,7 @@ void func_1501D044(s32 slot) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501D044.s")
 #endif
 
-s32 func_1502B6BC(s32 *, s32, s32 *, s32, s32, s32, s32);
+s32 asset_load_with_subfiles(s32 *, s32, s32 *, s32, s32, s32, s32);
 extern s32 D_800C3A88;
 
 s32 func_1501D240(s32 arg0, s32 arg1, s32 arg2) {
@@ -376,7 +376,7 @@ s32 func_1501D240(s32 arg0, s32 arg1, s32 arg2) {
     s32 sp30;
     s32 temp_v0;
 
-    temp_v0 = func_1502B6BC(&sp30, 0, &sp34, 3, 6, arg0, arg1);
+    temp_v0 = asset_load_with_subfiles(&sp30, 0, &sp34, 3, 6, arg0, arg1);
     if (temp_v0 != 0) {
         (&D_800C3A88)[arg2] = temp_v0;
     } else {
@@ -694,14 +694,14 @@ void func_1501DE84(s32 slot) {
 #ifdef NON_MATCHING
 s32 func_100127D0(void);
 void func_151F2BA8(void);
-struct127 *func_15072208(struct127 *, s32);
-void func_15060F28(struct127 *, s32);
+struct127 *obj_find_child_nth(struct127 *, s32);
+void obj_remove(struct127 *, s32);
 void func_1501DE84(s32 slot);
 void func_1517F3B0(s32, s32, s32, s32, s8, s32);
 void func_1000E17C(void);
 
 /* End of cutscene slot `slot` (called by cutscene_update_skip with the slot left in a0): func_151F2BA8 when
- * func_100127D0, remove object 0's attachment 0 (func_15072208 / func_15060F28), run func_1501DE84(slot) once and
+ * func_100127D0, remove object 0's attachment 0 (obj_find_child_nth / obj_remove), run func_1501DE84(slot) once and
  * again while D_800C40B9 was set before the call and no level change is pending (D_800C35C4); screen colour
  * func_1517F3B0(0, 0, 0, 0x19, 0, 0) unless D_800C39C9, D_800C40AA == 1 or D_800C40AD; clear +0xA4 of every live
  * object (D_800CC2D0, 25), D_800C3663 = 0, func_1000E17C, D_800DBFF4[0] = 4, D_800C3A92 = 1. */
@@ -713,9 +713,9 @@ void func_1501DF70(s32 slot) {
     if (func_100127D0() != 0) {
         func_151F2BA8();
     }
-    p = func_15072208(D_800CC2D0, 0);
+    p = obj_find_child_nth(D_800CC2D0, 0);
     if (p != NULL) {
-        func_15060F28(p, 0);
+        obj_remove(p, 0);
     }
     do {
         flag = D_800C40B9;
@@ -1031,7 +1031,7 @@ void func_1501E7A8(s32 arg0)
 /* End of cutscene slot `slot` (skipped != 0: cut short, event 0xF, else 0x10 to node_broadcast_all with the scene
  * number): position back to the start D_800C40AE, scene marked as seen (func_1501D2C4), slot unloaded,
  * per-scene teardown (func_1501E7A8, func_1502348C, func_15023684, func_1501EA84, func_1501E5AC), view reset
- * (func_1510B8AC with the game camera's +0x19C / +0x1A0). A queued follow-up scene (D_800C39E2 = scene + 1,
+ * (camera_projection_set_fov with the game camera's +0x19C / +0x1A0). A queued follow-up scene (D_800C39E2 = scene + 1,
  * level D_800C39E3, 0x25 = load it into level 0x25 temporarily) is loaded at once (func_1501D348, slot state
  * 2); otherwise the screen fade / pause flags are cleared. */
 void func_1501E888(s32 skipped, s32 slot) {
@@ -1063,7 +1063,7 @@ void func_1501E888(s32 skipped, s32 slot) {
     D_800C3A6C = 0.0f;
     D_800C3A70 = 0.0f;
     D_800C3A74 = 0.0f;
-    func_1510B8AC(0, *(f32 *)((u8 *)gameCam + 0x19C), *(f32 *)((u8 *)gameCam + 0x1A0), 1.0f);
+    camera_projection_set_fov(0, *(f32 *)((u8 *)gameCam + 0x19C), *(f32 *)((u8 *)gameCam + 0x1A0), 1.0f);
     if (D_800C39E2 != 0) {
         *loaded = 2;
         level = D_800C39E3;
@@ -1091,7 +1091,7 @@ void func_1501E888(s32 skipped, s32 slot) {
 
 #ifdef NON_MATCHING
 /* P92: declarations for func_1501EA84 */
-void func_1512DAD0(struct108 *, s32, void *);
+void camera_queue_event(struct108 *, s32, void *);
 void func_15022864(s32);
 void func_1502298C(s32);
 extern s32 D_800C3A20;   /* camera event block */
@@ -1103,7 +1103,7 @@ extern f32 D_80096D78;   /* unset D_800C3A98 */
 #ifdef NON_MATCHING
 /* Scene end, camera and objects of cutscene slot `slot` (called by func_1501E888). The camera event block
  * D_800C3A20 = {1, slot, .., eye = game camera +0x2F8..0x300, 0, +0x388, +0x37C} is sent to the game camera
- * (func_1512DAD0 event 7) unless D_800C3671; then event 8 with D_800C3A94 at +0xC unless it is unset
+ * (camera_queue_event event 7) unless D_800C3671; then event 8 with D_800C3A94 at +0xC unless it is unset
  * (D_80096D74), and event 10 with D_800C3A98 / D_800C3A9C unless that is unset (D_80096D78). Without a queued
  * follow-up scene (D_800C39E2) and D_800C3671: event 6 (with the slot number as its data), skipped once when
  * D_800C3AA0 is set (it is cleared). Then func_1502298C (unless D_800C3A7E[slot]) and func_15022864; every
@@ -1126,20 +1126,20 @@ void func_1501EA84(s32 slot) {
     ((f32 *)ev)[9] = *(f32 *)((u8 *)cam + 0x388);
     ((f32 *)ev)[10] = *(f32 *)((u8 *)cam + 0x37C);
     if (D_800C3671 == 0) {
-        func_1512DAD0(cam, 7, ev);
+        camera_queue_event(cam, 7, ev);
         if (D_800C3A94 != D_80096D74) {
             ((f32 *)ev)[3] = D_800C3A94;
-            func_1512DAD0(cam, 8, ev);
+            camera_queue_event(cam, 8, ev);
         }
         if (D_800C3A98 != D_80096D78) {
             ((f32 *)ev)[3] = D_800C3A98;
             ev[4] = D_800C3A9C;
-            func_1512DAD0(cam, 10, ev);
+            camera_queue_event(cam, 10, ev);
         }
     }
     if (D_800C39E2 == 0 && D_800C3671 == 0) {
         if (D_800C3AA0 == 0) {
-            func_1512DAD0(cam, 6, (void *)slot);
+            camera_queue_event(cam, 6, (void *)slot);
         } else {
             D_800C3AA0 = 0;
         }
@@ -1917,11 +1917,11 @@ void func_15020920(s32 actor, s32 seg, s32 slot) {
 #endif
 #ifdef NON_MATCHING
 s32 func_1502330C(s32, s32);
-void func_1512DAD0(struct108 *, s32, void *);
-void func_15129220(struct108 *);
+void camera_queue_event(struct108 *, s32, void *);
+void camera_process_events(struct108 *);
 void func_1517DB6C(s16, s16, s16, s32, s32, s32);
 extern u8 D_800C3A18;
-extern s32 D_800C3A20;   /* camera event block (func_1512DAD0 event 7) */
+extern s32 D_800C3A20;   /* camera event block (camera_queue_event event 7) */
 extern f32 D_800C3A40;   /* D_800C3A20 + 0x20: look target */
 extern f32 D_800C3A44;
 extern f32 D_800C3A48;
@@ -1934,9 +1934,9 @@ extern f32 D_800C3A48;
  * D_800C3A10[slot] + i * 8: u16 type, u8 a, s8 b, s16 c.
  *   type 1 (camera, only actor D_800C3A18): clamps cam[13] / cam[15] / cam[16] to -20 .. 40, fills the camera
  *     event block D_800C3A20 (eye cam[0..2]; target by a: 1 = actor b's position raised by c (+ cam[14]),
- *     2 = object func_15083E90(b), 3 = entity func_151149AC(b) raised by c, 0 = angle mode) and sends it to the
- *     game camera D_800DBFF0 (func_1512DAD0 event 7; event 5 + func_15129220 first unless flag 0x40000).
- *   type 3: entity func_151149AC(a) gets position / angles / scale (* 0.01) / alpha from the record.
+ *     2 = object func_15083E90(b), 3 = entity world_record_find(b) raised by c, 0 = angle mode) and sends it to the
+ *     game camera D_800DBFF0 (camera_queue_event event 7; event 5 + camera_process_events first unless flag 0x40000).
+ *   type 3: entity world_record_find(a) gets position / angles / scale (* 0.01) / alpha from the record.
  *   type 2: object func_15083E90(a) takes its actor frame (func_15021834(obj, slot, i)).
  *   type 5: when cam[13] >= 1, func_1517DB6C at the record position with cam[6] / cam[7].
  * D_800C3638 = 0 while running, 1 after. */
@@ -1984,9 +1984,9 @@ void func_15020F6C(s32 slot) {
                     }
                     if (!(*(s32 *)((u8 *)gameCam + 0x2C) & 0x40000)) {
                         if (D_800C3671 == 0) {
-                            func_1512DAD0(gameCam, 5, (void *)slot);
+                            camera_queue_event(gameCam, 5, (void *)slot);
                         }
-                        func_15129220(gameCam);
+                        camera_process_events(gameCam);
                     }
                     cam = (f32 *)(&D_800C3958)[slot] + i * 17;
                     f = cam[13];
@@ -2049,7 +2049,7 @@ void func_15020F6C(s32 slot) {
                             break;
                         case 3:
                             /* look at entity ent[3] (s16 position) */
-                            e = func_151149AC(ent[3]);
+                            e = world_record_find(ent[3]);
                             if (e == NULL) {
                                 continue;
                             }
@@ -2075,11 +2075,11 @@ void func_15020F6C(s32 slot) {
                             break;
                     }
                     if (D_800C3671 == 0) {
-                        func_1512DAD0(gameCam, 7, ev);
+                        camera_queue_event(gameCam, 7, ev);
                     }
                     break;
                 case 3:
-                    e = func_151149AC(ent[2]);
+                    e = world_record_find(ent[2]);
                     if (e == NULL) {
                         continue;
                     }
@@ -2125,10 +2125,10 @@ void func_15020F6C(s32 slot) {
 #ifdef NON_MATCHING
 /*
  * P53: place an actor on its spawn / cutscene marker of player slot arg1 (arg2 = one marker, -1 = all) and refresh
- * its floor (func_1510ED24: floor triangle, height, water level). Hand-written (m2c gave no draft: the f32 -> u32
+ * its floor (collision_find_floor: floor triangle, height, water level). Hand-written (m2c gave no draft: the f32 -> u32
  * angle conversion minus 0x4000 and the 0x44-byte marker records).
  */
-void func_1510ED24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
+void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
 extern u16 *D_800C39E8[];
 extern u8 *D_800C3A10[];
 extern u8 D_800D39FC;
@@ -2190,7 +2190,7 @@ void func_15021834(struct127 *arg0, s32 arg1, s32 arg2) {
         A834_F(0x54) = 0.0f;
         *(s16 *)((u8 *)obj + 0xCC) = 0;
         D_800D39FC = (arg0 - D_800CC2D0) + 1;
-        func_1510ED24((s32)obj + 0x188, (s32)obj + 0x18C, (s32)&floorY, (s32)obj + 0x118, (s32)obj + 0x184,
+        collision_find_floor((s32)obj + 0x188, (s32)obj + 0x18C, (s32)&floorY, (s32)obj + 0x118, (s32)obj + 0x184,
                       (s32)obj + 0x1A2, A834_F(0x14), A834_F(0x18), A834_F(0x1C), A834_F(0x18), 0, (s32)obj,
                       D_80096DB4, *(f32 *)((u8 *)arg0 + 0x18));
         D_800D39FC = 0;
@@ -2217,7 +2217,7 @@ void func_15021834(struct127 *arg0, s32 arg1, s32 arg2) {
             A834_F(0x158) = A834_M(0x1C) * D_80096DB8;
         }
         if (scaled) {
-            func_15062BDC(obj, A834_F(0x14C), A834_F(0x150));
+            obj_set_scale(obj, A834_F(0x14C), A834_F(0x150));
         }
         A834_F(0xB8) = A834_M(0xC);
         a = A834_M(0x10) + 180.0f;
@@ -2234,7 +2234,7 @@ void func_15021834(struct127 *arg0, s32 arg1, s32 arg2) {
         } else {
             A834_M(0x34) = (A834_M(0x34) > 255.0f) ? 255.0f : A834_M(0x34);
         }
-        func_1506160C(obj, 1, (u32)A834_M(0x34) & 0xFF, 0, 0);
+        obj_fade_command(obj, 1, (u32)A834_M(0x34) & 0xFF, 0, 0);
         A834_F(0x2C) = A834_F(0x14);
         A834_F(0x30) = A834_F(0x18);
         A834_F(0x34) = A834_F(0x1C);
@@ -2461,7 +2461,7 @@ s32 func_15022440(s32 arg0, s32 arg1) {
             if (var_v0 != -1) {
                 sp38 = var_v0;
                 sp2C = temp_a2;
-                var_v0 = func_1505EEF4(var_v0);
+                var_v0 = obj_find_by_spawn(var_v0);
                 if (var_v0 != 0) {
                     if ((*(u8 *)((u8 *)var_v0 + 5)) == 3) {
                         if (temp_a2 != D_800C3A10) {
@@ -2479,10 +2479,10 @@ s32 func_15022440(s32 arg0, s32 arg1) {
                 }
                 if (sp38 < (s32) D_800D2520) {
                     func_15082E44((u8 *) D_800D20FC + sp38 * 0x30, sp38, 0, arg1, 0);
-                    var_v0 = func_1505EEF4(sp38);
+                    var_v0 = obj_find_by_spawn(sp38);
                     if (var_v0 != 0) {
                         sp3C = (struct127 *) var_v0;
-                        func_1505E650((struct127 *) var_v0, 0U, 0.0f, 0.0f, 0.0f, 0.0f, 1);
+                        obj_start_anim((struct127 *) var_v0, 0U, 0.0f, 0.0f, 0.0f, 0.0f, 1);
                         var_v0 = func_15022304(((u8 *) sp3C - (u8 *) D_800CC2D0) / 812, arg1);
                     }
                 }
@@ -2559,7 +2559,7 @@ s32 func_15022764(s32 arg0, s32 arg1) {
     if (D_800C39E8[arg1][arg0] != 0) {
         temp_v1 = D_800C3A10[arg1] + (arg0 * 8);
         if ((*(u16 *)((u8 *)temp_v1 + 0)) == 3) {
-            var_v0 = func_151149AC((*(u8 *)((u8 *)temp_v1 + 2)));
+            var_v0 = world_record_find((*(u8 *)((u8 *)temp_v1 + 2)));
             if ((var_v0 != 0) && ((*(u8 *)((u8 *)var_v0 + 0x6E)) == 1)) {
                 sp1C = (u8 *) var_v0;
                 var_v0 = func_150226E8((*(u8 *)((u8 *)var_v0 + 0x72)), arg1);
@@ -2588,7 +2588,7 @@ void func_150227FC(s32 arg0) {
     }
 }
 
-u8 *func_151149AC(u8);
+u8 *world_record_find(u8);
 extern u8 D_800C3970[];
 void func_15022864(s32 arg0)
 {
@@ -2596,7 +2596,7 @@ void func_15022864(s32 arg0)
   u8 *cnt;
   u8 *p;
   cnt = &D_800C396A[arg0];
- do { i = 0; if ((*cnt) > 0) { p = D_800C3970 + (arg0 * 0x1E); do { func_151149AC(*p)[0x6E] = 1; i += 1; p += 1; } while (i < (*cnt)); } } while (0);
+ do { i = 0; if ((*cnt) > 0) { p = D_800C3970 + (arg0 * 0x1E); do { world_record_find(*p)[0x6E] = 1; i += 1; p += 1; } while (i < (*cnt)); } } while (0);
 }
 
 void func_15022388(s32, s32);
@@ -2636,7 +2636,7 @@ void func_1502298C(s32 arg0)
       if (e->interaction_state)
       {
         new_var = &(*cnt);
-        func_15060F28(e, 0);
+        obj_remove(e, 0);
         n = *new_var;
       }
       i++;
@@ -2734,7 +2734,7 @@ f32 cosf(f32);
 /* Places the scene of cutscene slot `slot` in the level: the first actor whose entry (D_800C3A10[slot] + i * 8)
  * is an anchor moves every actor's path keys (s16 x, y, z at D_eu_800C3C88[slot][j] + k * 8):
  *   type 6: by the offset from the anchor's first key to object func_15083E90(b) (a == 0) or entity
- *     func_151149AC(b) (a == 1); other a: nothing.
+ *     world_record_find(b) (a == 1); other a: nothing.
  *   type 7: rotated about the anchor's first key by D_800C39B4 - its channel-7 key angle (stored in
  *     D_800C39C4) and moved onto D_800C39AC; the channel-7 keys of the other camera tracks turn by the same
  *     angle unless their sound record +0x20 is 7.
@@ -2789,7 +2789,7 @@ void func_15022C4C(s32 slot) {
                 ty = *(f32 *)(o + 0x18);
                 tz = *(f32 *)(o + 0x1C);
             } else if (ent[2] == 1) {
-                o = func_151149AC(ent[3]);
+                o = world_record_find(ent[3]);
                 if (o == NULL) {
                     return;
                 }
@@ -3009,14 +3009,14 @@ loop_1:
 #endif
 #ifdef NON_MATCHING
 /* P92: declarations for func_15023684 */
-void func_1508F060(void);
+void hud_bubbles_reset(void);
 void func_1507F640(void);
 extern f32 D_80096DCC;   /* no water level (-10000) */
 #endif
 #ifdef NON_MATCHING
 /* Scene teardown, player (func_1501E888): clears flag 0x200 of object 0 (+0x25C) and, unless D_800C39CA, resets
  * the player object func_15083E90(1) (D_800C3E78 = its index): speeds / timers cleared; in water (water level
- * +0x118 set, D_80096DCC = none, and above the feet +0x18): swimming (+0xAD = 1, func_1508F060 when the water
+ * +0x118 set, D_80096DCC = none, and above the feet +0x18): swimming (+0xAD = 1, hud_bubbles_reset when the water
  * is deeper than 50 above the floor +0x1A6 or the model flag +0x31C->+0x20 bit 0 is set), else standing on the
  * floor +0x180 (+0x20 = -4, +0x24 = 5). Then the height above the floor (+0x28), cleared input / state bytes,
  * D_800D154C = the player and the idle animation (func_1507F640). `slot` is not read. */
@@ -3047,7 +3047,7 @@ void func_15023684(s32 slot) {
         *(f32 *)(p + 0x24) = 0.0f;
         if (water - 50.0f < (f32)*(s16 *)(p + 0x1A6) || (*(u8 **)(p + 0x31C))[0x20] & 1) {
             *(s16 *)(p + 0xB2) = 0;
-            func_1508F060();
+            hud_bubbles_reset();
         }
     } else {
         p[0xAD] = 0;
@@ -3081,7 +3081,7 @@ extern s32 D_eu_800C3A60;
 extern s32 D_800C39D0;
 s32 func_15022A8C(s32 *);
 void func_1504A730(void);
-void func_15061B4C(void);
+void objects_animate_textures(void);
 void func_1507EB1C(s32 *);
 void func_150802A8(s32 *);
 extern u8 D_800C3A78;
@@ -3103,7 +3103,7 @@ void func_1502378C(void) {
             func_1507EB1C(&var_s0->interaction_state);
             if (func_15022A8C(&var_s0->interaction_state) != 0) {
                 func_15021834(&var_s0->interaction_state, 0, -1);
-                func_150627D4(var_s0);
+                obj_model_reset(var_s0);
                 func_150802A8(&var_s0->interaction_state);
                 var_s0->unk2FF = 1;
             }
@@ -3111,7 +3111,7 @@ void func_1502378C(void) {
         var_s1 += 1;
         var_s0 = (struct127 *)((u8 *)var_s0 + (0x32C));
     } while (var_s1 != 0x19);
-    func_15061B4C();
+    objects_animate_textures();
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1502378C.s")

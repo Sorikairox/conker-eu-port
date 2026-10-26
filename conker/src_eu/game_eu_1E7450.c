@@ -50,20 +50,20 @@ void func_151B9C40(s32 tex, s32 mode, s16 x, s16 y, s16 z, s32 unused, f32 angle
 
     y0 = y;
     angle += 180.0f;
-    angle += (f32) (s32) ((u32) func_150ADA20() % (u32) angSpread - (angSpread >> 1));
+    angle += (f32) (s32) ((u32) random_int() % (u32) angSpread - (angSpread >> 1));
     rad = angle * 0.017453292f;
     sn = sinf(rad);
     cs = cosf(rad);
     if (speedSpread == 0) {
         speedSpread = 1;
     }
-    r = (u32) func_150ADA20() % (u32) speedSpread - (speedSpread >> 1);
+    r = (u32) random_int() % (u32) speedSpread - (speedSpread >> 1);
     d = dist;
     x = (s32) (x + d * sn);
     z = (s32) (z + d * cs);
     spd = speed + (f32) r;
     y++;
-    r = rise + (s32) ((u32) func_150ADA20() % (u32) riseSpread - (riseSpread >> 1));
+    r = rise + (s32) ((u32) random_int() % (u32) riseSpread - (riseSpread >> 1));
     if (mode == 2) {
         red = 0x68;
         green = 0x38;
@@ -91,7 +91,7 @@ void func_151B9C40(s32 tex, s32 mode, s16 x, s16 y, s16 z, s32 unused, f32 angle
     rec.pos[2] = z;
     rec.vel[0] = (s32) (spd * sn);
     rec.vel[1] = (s32) (spd * cs);
-    rec.u2B = func_150ADA20();
+    rec.u2B = random_int();
     rec.colour[3] = 0xFF;
     rec.u34 = 0;
     rec.colour[0] = red;
@@ -106,7 +106,7 @@ void func_151B9C40(s32 tex, s32 mode, s16 x, s16 y, s16 z, s32 unused, f32 angle
 #ifdef NON_MATCHING
 extern f32 D_800AA964;
 extern f32 D_800AA968;
-f32 func_150489B0(u8);
+f32 math_cos_u8(u8);
 s32 func_151722BC(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 void func_151B9F14(u8 *arg0) {
@@ -130,8 +130,8 @@ void func_151B9F14(u8 *arg0) {
         sp50 = temp_a2;
         sp4F = temp_t9;
         sp5C = (f32) (*(s16 *)((u8 *)arg0 + 0x2A));
-        (*(s16 *)((u8 *)arg0 + 0x34)) = (s16) (s32) ((func_15048A40(temp_t9) + 3.0f) * sp5C * D_800AA968);
-        (*(s16 *)((u8 *)arg0 + 0x36)) = (s16) (s32) ((func_150489B0(sp4F) + 3.0f) * sp5C * D_800AA968);
+        (*(s16 *)((u8 *)arg0 + 0x34)) = (s16) (s32) ((math_sin_u8(temp_t9) + 3.0f) * sp5C * D_800AA968);
+        (*(s16 *)((u8 *)arg0 + 0x36)) = (s16) (s32) ((math_cos_u8(sp4F) + 3.0f) * sp5C * D_800AA968);
     } else {
         temp_a1 = (*(s16 *)((u8 *)arg0 + 0x34));
         temp_a0 = (s32) (*(s32 *)((u8 *)arg0 + 0x14)) >> 0x10;
@@ -149,11 +149,11 @@ void func_151B9F14(u8 *arg0) {
         (*(s16 *)((u8 *)arg0 + 0x38)) = 0;
         if (temp_a2 == 0) {
             sp5A = (s16) (*(s32 *)((u8 *)arg0 + 0x14));
-            if ((func_150ADA20() & 0xFF) < 0x40) {
+            if ((random_int() & 0xFF) < 0x40) {
                 func_151722BC((f32) (*(s16 *)((u8 *)arg0 + 0x20)), (f32) sp5A, (f32) (*(s16 *)((u8 *)arg0 + 0x24)), 0xA, 0, 0x13, 0.0f, 0, 0x32, 0xF, 0x100, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             }
-            if ((func_150ADA20() & 0xFF) < 0xF) {
-                func_150ADA20();
+            if ((random_int() & 0xFF) < 0xF) {
+                random_int();
                 func_10010F88(0x70, 0x1388U, 0, 0U, 0, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x20)), (s16) (s32) sp5A, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x24)), 0x1F4, 0x7D0);
             }
         }

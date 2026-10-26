@@ -3,7 +3,7 @@
 #include "variables.h"
 
 #ifdef NON_MATCHING
-void func_15042D94(s32, s32, u8, s32, ...);
+void text_printf_at(s32, s32, u8, s32, ...);
 
 s32 func_150D06B0(u8 *arg0) {
     u8 *sp20;
@@ -28,14 +28,14 @@ s32 func_150D06B0(u8 *arg0) {
         *temp_v0 = temp_v1 - D_800BE9E4;
     }
     if (var_a3 != 0) {
-        func_1504332C(0xCEU, 0xC4U, 0x61U, var_a3);
-        func_15042D94(0x92, 0xBE, 0x81, (*(s32 *)((u8 *)((arg0 + 0x28 + ((*(u8 *)((u8 *)arg0 + 0x3D)) * 4))) + 0x18)));
+        text_set_color(0xCEU, 0xC4U, 0x61U, var_a3);
+        text_printf_at(0x92, 0xBE, 0x81, (*(s32 *)((u8 *)((arg0 + 0x28 + ((*(u8 *)((u8 *)arg0 + 0x3D)) * 4))) + 0x18)));
     }
     if (var_s0 != 0) {
         temp_v0_2 = arg0 + 0x28;
         sp20 = temp_v0_2;
-        func_1504332C(0xCEU, 0xC4U, 0x61U, var_s0 & 0xFF);
-        func_15042D94(0x92, 0xBE, 0x81, (*(s32 *)((u8 *)((temp_v0_2 + (((*(u8 *)((u8 *)temp_v0_2 + 0x15)) ^ 1) * 4))) + 0x18)));
+        text_set_color(0xCEU, 0xC4U, 0x61U, var_s0 & 0xFF);
+        text_printf_at(0x92, 0xBE, 0x81, (*(s32 *)((u8 *)((temp_v0_2 + (((*(u8 *)((u8 *)temp_v0_2 + 0x15)) ^ 1) * 4))) + 0x18)));
     }
     return 1;
 }
@@ -86,14 +86,14 @@ s32 func_150D083C(u8 *p) {
             st->t -= 1.0f;
         }
     }
-    /* memcpy / func_15042D94 take the buffer as s32 in this file's declarations */
+    /* memcpy / text_printf_at take the buffer as s32 in this file's declarations */
     memcpy((s32) buf, prompt, 4);
     memcpy((s32) (buf + 4), *(u8 **) (txt + 0x18 + txt[0x15] * 4), st->n);
     buf[st->n + 4] = ' ';
     buf[st->n + 5] = 0xBB;
     buf[st->n + 6] = 0;
-    func_1504332C(0, 0xFF, 0, 0x96);
-    func_15042D94(0xF, 0xBE, 0x80, (s32) buf);
+    text_set_color(0, 0xFF, 0, 0x96);
+    text_printf_at(0xF, 0xBE, 0x80, (s32) buf);
     return 1;
 }
 #else
@@ -112,7 +112,7 @@ void func_150D09D4(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
 }
 
 #ifdef NON_MATCHING
-void func_15042D94(s32, s32, u8, s32, ...);
+void text_printf_at(s32, s32, u8, s32, ...);
 
 s32 func_150D0A44(u8 *arg0) {
     u8 *sp20;
@@ -137,14 +137,14 @@ s32 func_150D0A44(u8 *arg0) {
         *temp_v0 = temp_v1 - D_800BE9E4;
     }
     if (var_a3 != 0) {
-        func_1504332C(0xFFU, 0xFFU, 0xFFU, var_a3);
-        func_15042D94(0x14, 0x14, 0x80, (*(s32 *)((u8 *)((arg0 + 0x28 + ((*(u8 *)((u8 *)arg0 + 0x3D)) * 4))) + 0x18)));
+        text_set_color(0xFFU, 0xFFU, 0xFFU, var_a3);
+        text_printf_at(0x14, 0x14, 0x80, (*(s32 *)((u8 *)((arg0 + 0x28 + ((*(u8 *)((u8 *)arg0 + 0x3D)) * 4))) + 0x18)));
     }
     if (var_s0 != 0) {
         temp_v0_2 = arg0 + 0x28;
         sp20 = temp_v0_2;
-        func_1504332C(0xFFU, 0xFFU, 0xFFU, var_s0 & 0xFF);
-        func_15042D94(0x14, 0x14, 0x80, (*(s32 *)((u8 *)((temp_v0_2 + (((*(u8 *)((u8 *)temp_v0_2 + 0x15)) ^ 1) * 4))) + 0x18)));
+        text_set_color(0xFFU, 0xFFU, 0xFFU, var_s0 & 0xFF);
+        text_printf_at(0x14, 0x14, 0x80, (*(s32 *)((u8 *)((temp_v0_2 + (((*(u8 *)((u8 *)temp_v0_2 + 0x15)) ^ 1) * 4))) + 0x18)));
     }
     return 1;
 }

@@ -1495,7 +1495,7 @@ void gfx_run_dl(const void *dl) {
         case 0xDE: {                                          /* G_DL / G_BRANCH_DL */
             const unsigned char *t = gfx_addr(w1);
             if (!t) { gfx_stats.bad_addr++; break; }
-            if (w1 == 0) { /* P55: G_DL 0 only comes from an asm stub that returned a NULL DL (func_150900F0 draws
+            if (w1 == 0) { /* P55: G_DL 0 only comes from an asm stub that returned a NULL DL (hud_health_draw draws
                             * D_800D29A8 = stub func_1518C900(0xB8)); RDRAM 0 is code, running it crashed the renderer */
                 static int logged;
                 gfx_stats.bad_addr++;
@@ -1767,7 +1767,7 @@ void gfx_run_task(void *task) {
 
 /* P37: ?dlapprox=1 and the visibility-walk check, as a link-time wrapper (-Wl,--wrap=func_150A5858, port/Makefile)
  * of the game's C func_150A5858 (game_eu_D2DB0.c, port P34; the P31 PC stand-in is gone). The level loader is the
- * game's C func_150031EC (P34), so the P33 ?nolvlload flag is gone too.
+ * game's C level_load_models (P34), so the P33 ?nolvlload flag is gone too.
  *   default: call the game C; with ?vislog=N log the first N calls: source tris (0x05: 1, 0x06: 2, 0x10-0x1F: 4 vis
  *            slots), kept tris and commands in the emitted DL, visible tri slots, and once the leaf-list check below.
  *   dlapprox: emit gSPDisplayList(dl) instead (the whole level DL, no culling; diagnostic only).
@@ -1801,10 +1801,10 @@ uint32_t *__wrap_func_150A5858(int dl, uint32_t *gdl, unsigned char *mtx, int a3
     (void)npre;
     if (D_800D3A8C <= D_800D3668 || (D_800D3A8C - D_800D3668) & 7 || !D_800DC278) {
         /* P37 GUARD (not a stand-in): the walk's inputs are missing. The visibility-byte range [D_800D3668, D_800D3A8C)
-         * (EU 0x800D3A88 / 0x800D3A8C) is sized by func_15003668 from func_15002878() = the largest per-area triangle
-         * count D_800DBE18[], which the still-asm func_15001460 (game_2DF70, the level-DL triangle walk) counts in
+         * (EU 0x800D3A88 / 0x800D3A8C) is sized by collision_build_level_tris from func_15002878() = the largest per-area triangle
+         * count D_800DBE18[], which the still-asm collision_scan_level_dl (game_2DF70, the level-DL triangle walk) counts in
          * D_800DBE38; the node tree D_800DC278 = D_800DBE08[area] (func_150A4ED4) is built from those triangles.
-         * With func_15001460 stubbed the range is empty, and the clear loop (a do-while, as in the asm) runs off the end
+         * With collision_scan_level_dl stubbed the range is empty, and the clear loop (a do-while, as in the asm) runs off the end
          * of memory. Do what the old stub did: emit nothing. */
         static int nlog;
         if (nlog++ < 2) port_log("[vis] skipped (inputs missing): vis [%08X, %08X) tree %08X\n", D_800D3668, D_800D3A8C, D_800DC278);
@@ -1869,10 +1869,10 @@ uint32_t *__wrap_func_150A5858(int dl, uint32_t *gdl, unsigned char *mtx, int a3
 }
 
 /* P39: ?camwatch=N: write watch on the camera chain, checked at every asm-stub entry (port_stub_hit) and around
- * every func_1512C490 call (-Wl,--wrap). Watched: the camera target D_800DBFF0[0]+0x3D4 (= D_800CC2D0[0]+0x31C)
+ * every camera_build_view_matrix call (-Wl,--wrap). Watched: the camera target D_800DBFF0[0]+0x3D4 (= D_800CC2D0[0]+0x31C)
  * +0x130..+0x154 (dir / eye / at), the controller's smoothed target 0x2A4..0x2AC, at 0x2BC..0x2C4, eye
  * 0x2F8..0x300, orbit 0x18C..0x198 and yaw 0x3A0, and the followed record (+0x3D0) position +0x14..+0x1C.
- * The first N changes are logged with the stub (or wrapper point) that saw them and a JS stack; func_1512C490
+ * The first N changes are logged with the stub (or wrapper point) that saw them and a JS stack; camera_build_view_matrix
  * calls are counted, and its inputs / outputs are logged at the first call and every 64th. */
 #define CW_N 36
 extern unsigned port_frame_count;
@@ -1937,9 +1937,9 @@ void port_camwatch(const char *where) {
     for (i = 0; i < CW_N; i++) cw_prev[i] = v[i];
     cw_have = 1;
 }
-void __real_func_1512C490(void *arg0);
+void __real_camera_build_view_matrix(void *arg0);
 void func_1000D96C(int, int, int);
-void __wrap_func_1512C490(void *arg0) {
+void __wrap_camera_build_view_matrix(void *arg0) {
     { /* P99 DIAGNOSTIC ?p99snd=F: at frame >= F start sound 0x15 once through the game's own entry (the floor-material
        * ambient loop func_1508000C starts), to tell "no sound requested" from "audio path broken" */
         static int sf = -1, done = 0;
@@ -1948,23 +1948,23 @@ void __wrap_func_1512C490(void *arg0) {
     }
     if (cw_flag < 0) cw_flag = port_flag("camwatch");
     if (cw_flag) {
-        port_camwatch("func_1512C490 entry");
-        if (cw_calls == 0) { port_log("[camwatch] first func_1512C490(%08X) call, stack:\n", (unsigned)arg0); port_js_stack(1, 10); }
+        port_camwatch("camera_build_view_matrix entry");
+        if (cw_calls == 0) { port_log("[camwatch] first camera_build_view_matrix(%08X) call, stack:\n", (unsigned)arg0); port_js_stack(1, 10); }
     }
-    __real_func_1512C490(arg0);
+    __real_camera_build_view_matrix(arg0);
     if (cw_flag) {
         unsigned v[CW_N];
         static int every = -1; /* P44: ?camevery=N logs the summary line every N calls (default 64) */
         if (every < 0) { every = port_flag("camevery"); if (every <= 0) every = 64; }
-        port_camwatch("func_1512C490 exit");
+        port_camwatch("camera_build_view_matrix exit");
         if (cw_calls % (unsigned)every == 0 && cw_snap(v))
-            port_log("[camwatch] func_1512C490 call %u frame %u: mode %08X rec %08X pos %g %g %g | cam 2A4 %g %g %g at %g %g %g eye %g %g %g "
+            port_log("[camwatch] camera_build_view_matrix call %u frame %u: mode %08X rec %08X pos %g %g %g | cam 2A4 %g %g %g at %g %g %g eye %g %g %g "
                       "orbit 18C %g 190 %g 194 %g 198 %g yaw %g | obj %08X eye %g %g %g at %g %g %g\n", cw_calls, port_frame_count,
                       v[29], v[28], *(float *)&v[24], *(float *)&v[25], *(float *)&v[26], *(float *)&v[10], *(float *)&v[11],
                       *(float *)&v[12], *(float *)&v[13], *(float *)&v[14], *(float *)&v[15], *(float *)&v[16], *(float *)&v[17],
                       *(float *)&v[18], *(float *)&v[19], *(float *)&v[20], *(float *)&v[21], *(float *)&v[22], *(float *)&v[23],
                       v[27], *(float *)&v[3], *(float *)&v[4], *(float *)&v[5], *(float *)&v[6], *(float *)&v[7], *(float *)&v[8]);
-        if (cw_calls % (unsigned)every == 0 && D_800DBFF0) { /* P46: the eye-height state of P43's func_1512E6B0 / func_1512A390 */
+        if (cw_calls % (unsigned)every == 0 && D_800DBFF0) { /* P46: the eye-height state of P43's camera_update_eye_height / camera_update_eye_base */
             const unsigned char *c = (const unsigned char *)D_800DBFF0;
 #define CWF(o) (*(const float *)(c + (o)))
             port_log("[camwatch]   height: 344 dy %g 348 h %g 354 base %g 360 water %g 364 %g 6F0 %g 6F4 %g | 84 %08X 5F0 %08X "
@@ -2000,7 +2000,7 @@ uint8_t *__real_func_15186D04(uint8_t *gdl, int arg1);
 /* P158 DIAGNOSTIC ?p158null=1: character_spawn_handlers func_1514D6CC (game_eu_17A800) dispatches D_8008AE10 handlers by
  * the indices of character_handler_indices func_1514CFF0 (C, side-effect free). Logs the call when the null zone word
  * null+0x14 changes across it (the 0x400 written at the new-game scene start, frame 4560), with the indices / handlers. */
-/* P161 ?p161fix=1 test wrap of func_1501370C removed in P171: port-b P164 passes the record in the game C. */
+/* P161 ?p161fix=1 test wrap of record_start_dispatch removed in P171: port-b P164 passes the record in the game C. */
 int __real_func_1514D6CC(void *arg0);
 int func_1514CFF0(void *arg0, int *outSub, int *outMode, int *outType);
 int __wrap_func_1514D6CC(void *arg0) {
@@ -2151,7 +2151,7 @@ int __wrap_func_150A6840(int cam, int *mtx, float x, float y, float z, float r, 
  *  - func_15196560 (texture scrolling): the D_800E0D18 list, scroll position (+0xE / +0x10) and speed (+0x12 / +0x13). */
 static int p46_flag = -1;
 extern unsigned char D_800CC2D0[], D_800C3638, D_800C3A7A;
-int func_1506196C(void *rec, int part);
+int obj_get_player_alpha(void *rec, int part);
 static unsigned p46_bdc0_calls, p46_bdc0_cmds[4], p46_bdc0_n[4], p46_6560_calls;
 void *__real_func_1502BDC0(void *gdl, int mode, short player);
 void *__wrap_func_1502BDC0(void *gdl, int mode, short player) {
@@ -2164,10 +2164,10 @@ void *__wrap_func_1502BDC0(void *gdl, int mode, short player) {
         if (p46_bdc0_calls < (unsigned)p46_flag || (p46_bdc0_calls & 255) == 0) {
             const unsigned char *r0 = D_800CC2D0;
             port_log("[p46] func_1502BDC0 #%u frame %u mode %d player %d: %u commands appended | rec0 state %u id %02X "
-                     "unk5 %02X +74 %02X +1D4 %08X +1C8 %02X alpha(func_1506196C) %d | D_800C3638 %u D_800C3A7A %u\n",
+                     "unk5 %02X +74 %02X +1D4 %08X +1C8 %02X alpha(obj_get_player_alpha) %d | D_800C3638 %u D_800C3A7A %u\n",
                      p46_bdc0_calls, port_frame_count, mode, player, d, *(const unsigned *)r0, vbe_ld8(r0 + 4),
                      vbe_ld8(r0 + 5), vbe_ld8(r0 + 0x74), *(const unsigned *)(r0 + 0x1D4), vbe_ld8(r0 + 0x1C8),
-                     func_1506196C((void *)r0, player), vbe_ld8(&D_800C3638), vbe_ld8(&D_800C3A7A));
+                     obj_get_player_alpha((void *)r0, player), vbe_ld8(&D_800C3638), vbe_ld8(&D_800C3A7A));
         }
         if ((p46_bdc0_calls & 1023) == 1023)
             port_log("[p46] func_1502BDC0 %u calls: mode1 %u calls %u cmds, mode2 %u calls %u cmds, other %u calls %u cmds\n",

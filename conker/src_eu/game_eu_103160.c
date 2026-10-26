@@ -3,13 +3,13 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A5860[];
-void func_150D71A8(f32 *arg0, f32 *arg1);
-void func_150D6898(s32 arg0, u8 arg1, s32 arg2);
-void func_150D6944(s32 arg0, u8 arg1, s32 arg2);
-void func_150D6B00(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
-void func_150D6BB4(u8 arg0, u8 arg1, s32 arg2);
+void obj_get_center_point(f32 *arg0, f32 *arg1);
+void debris_smoke_ring_spawn(s32 arg0, u8 arg1, s32 arg2);
+void debris_dust_cloud_spawn(s32 arg0, u8 arg1, s32 arg2);
+void debris_scorch_mark_spawn(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
+void debris_screen_flash(u8 arg0, u8 arg1, s32 arg2);
 #endif
-// hoisted forward declaration(s) for func_150D6898
+// hoisted forward declaration(s) for debris_smoke_ring_spawn
 #ifdef NON_MATCHING
 s32 func_15154728(s32, f32, f32, f32, f32, s32, s32); /* P95: f32 parameter */
 #else
@@ -17,7 +17,8 @@ s32 func_15154728(s32, f32, s32, f32, f32, s32, s32);
 #endif
 
 
-void func_150D5950(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150D5950 */
+void fire_smoke_trail_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
         u8 *unk0;
         u8 unk4;
@@ -39,7 +40,8 @@ s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 void func_1514373C(f32, f32, f32 *, f32 *);
 s32 func_1515C668(u8 *, u8 **);
 
-void func_150D59D8(u8 *arg0) {
+/* was func_150D59D8 */
+void fire_smoke_trail_update(u8 *arg0) {
     struct {
         u8 * u84;
         u8 pad88[0x8];
@@ -111,7 +113,7 @@ void func_150D59D8(u8 *arg0) {
         return;
     }
     if (((*(f32 *)((u8 *)temp_s2 + 0x28)) < 8.0f) && (((*(s32 *)((u8 *)temp_s2 + 0x184)) & 0x1F) == 0xE)) {
-        (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((3.0000002f + (func_150ADA68() * 1.0f)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((3.0000002f + (random_float() * 1.0f)) * D_800BE9A4));
         if ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f) {
             if (func_1515C668(temp_s2, &sp.u84) == 0) {
                 sp.u84 = ((u8 *)&D_800A5860);
@@ -149,9 +151,9 @@ void func_150D59D8(u8 *arg0) {
             sp.uDC = 0.0f;
             temp_f24 = -sp.u90;
             do {
-                temp_s0 = func_150ADA20() & 1;
-                temp_f20 = func_150ADA68();
-                temp_f0 = func_150ADA68();
+                temp_s0 = random_int() & 1;
+                temp_f20 = random_float();
+                temp_f0 = random_float();
                 if (temp_s0 != 0) {
                     var_f14 = 35.0f;
                 } else {
@@ -177,19 +179,19 @@ void func_150D59D8(u8 *arg0) {
                     var_f12_2 = -var_f2;
                 }
                 sp.uE8 = (var_f12_2 * temp_f24) - ((*(f32 *)((u8 *)sp.u84 + 8)) * 0.564f);
-                sp.uA2 = (func_150ADA20() % 10U) + 0x1F;
-                sp.uB3 = (func_150ADA20() % 76U) + 0xB4;
-                temp_f2_2 = (func_150ADA68() * 364.0f) + 111.0f;
+                sp.uA2 = (random_int() % 10U) + 0x1F;
+                sp.uB3 = (random_int() % 76U) + 0xB4;
+                temp_f2_2 = (random_float() * 364.0f) + 111.0f;
                 sp.uC0 = temp_f2_2;
                 sp.uC4 = temp_f2_2;
-                temp_f6 = func_150ADA68() * 0.157f;
+                temp_f6 = random_float() * 0.157f;
                 sp.uF0 &= ~0xC0;
                 sp.uEC = temp_f6 + -2.111f;
                 var_s0 = 0;
-                if (func_150ADA20() & 1) {
+                if (random_int() & 1) {
                     var_s0 = 0x80;
                 }
-                if (func_150ADA20() & 1) {
+                if (random_int() & 1) {
                     var_v0 = 0x40;
                 } else {
                     var_v0 = 0;
@@ -202,9 +204,10 @@ void func_150D59D8(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/func_150D59D8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/fire_smoke_trail_update.s")
 #endif
-void func_150D5E7C(struct102 *arg0, u8 *arg1, u8 arg2) {
+/* was func_150D5E7C */
+void fire_smoke_trail_handle_msg(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = (u8 *)arg0 + 0x28;
     if (arg2 == 0 || arg2 == 0x2F || arg2 == 3) {
         s32 t = *(s32 *)arg1;
@@ -222,11 +225,13 @@ void func_150D5E7C(struct102 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-void func_150D5F3C(struct260 *arg0) {
+/* was func_150D5F3C */
+void debris_particle_free_a(struct260 *arg0) {
     func_1514933C(arg0);
 }
 
-void func_150D5F5C(struct260 *arg0) {
+/* was func_150D5F5C */
+void debris_particle_free_b(struct260 *arg0) {
     func_15149368(arg0);
 }
 
@@ -277,7 +282,8 @@ typedef struct {
 
 /* P67: debris burst of a destroyed object: sounds, two particle bursts thrown out along the surface it hit (ray cast
  * along its last movement) or straight up, then the dust / scorch effects. arg1 / arg2 are passed through. */
-void func_150D5F7C(struct127 *arg0, s32 arg1, s32 arg2) {
+/* was func_150D5F7C */
+void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
     DebrisParticle p;
     f32 pos[3];          /* sp1B4: centre, 50 above the object */
     f32 dir[3];          /* sp1A8: last movement (normalised) */
@@ -312,8 +318,8 @@ void func_150D5F7C(struct127 *arg0, s32 arg1, s32 arg2) {
     } else {
         func_10010630(0x4C8, arg0, -0x7D00, 0x2BC, 0x7D0);
     }
-    func_10010630((func_150ADA20() & 1) + 0x2B6, arg0, 0x7D00, 0x3E8, 0xBB8);
-    func_10010630((func_150ADA20() & 3) + 0x2B1, arg0, 0x7D00, 0x2BC, 0x7D0);
+    func_10010630((random_int() & 1) + 0x2B6, arg0, 0x7D00, 0x3E8, 0xBB8);
+    func_10010630((random_int() & 3) + 0x2B1, arg0, 0x7D00, 0x2BC, 0x7D0);
     func_151C0B54(pos, id, arg2);
     func_151C0BA0(pos, id, arg2);
     func_15145A50(arg0);
@@ -393,21 +399,21 @@ void func_150D5F7C(struct127 *arg0, s32 arg1, s32 arg2) {
 
     /* burst 1: one particle per D_800A0E00 sprite, thrown in a random direction around the normal */
     for (i = 0; i < 3; i++) {
-        f32 speed = func_150ADA68() * 0.0132f + 0.0298f;
-        s32 ang = func_150ADA20();
+        f32 speed = random_float() * 0.0132f + 0.0298f;
+        s32 ang = random_int();
         f32 c, d;
 
-        func_15143874(ang & 0xFF, func_150ADA68() * 759.0f, &c, &d);
+        func_15143874(ang & 0xFF, random_float() * 759.0f, &c, &d);
         p.vel[0] = (axisA[0] * c + axisB[0] * d + normal[0]) * speed;
         p.vel[1] = (axisA[1] * c + axisB[1] * d + normal[1]) * speed;
         p.vel[2] = (axisA[2] * c + axisB[2] * d + normal[2]) * speed;
-        p.rot[0] = func_150ADA68() * 360.0f;
-        p.rot[1] = func_150ADA68() * 360.0f;
-        p.rot[2] = func_150ADA68() * 360.0f;
-        p.spinX = func_150ADA68() * 38.444f + -19.222f;
-        p.spinZ = func_150ADA68() * 38.444f + -19.222f;
-        p.gravity = func_150ADA68() * 0.648f + -1.3970001f;
-        p.life = (u32)func_150ADA20() % 21 + 30;
+        p.rot[0] = random_float() * 360.0f;
+        p.rot[1] = random_float() * 360.0f;
+        p.rot[2] = random_float() * 360.0f;
+        p.spinX = random_float() * 38.444f + -19.222f;
+        p.spinZ = random_float() * 38.444f + -19.222f;
+        p.gravity = random_float() * 0.648f + -1.3970001f;
+        p.life = (u32)random_int() % 21 + 30;
         p.sprite = D_800A0E00[i];
         func_15132FBC(&p, 0, 0, 0, id, arg2);
     }
@@ -416,49 +422,50 @@ void func_150D5F7C(struct127 *arg0, s32 arg1, s32 arg2) {
     p.u72 = 0xC;
     p.u74 = 0x15;
     for (i = 2; i < D_800A42F4[type]; i++) {
-        f32 speed = func_150ADA68() * 0.02f + 0.0052f;
-        s32 ang = func_150ADA20();
+        f32 speed = random_float() * 0.02f + 0.0052f;
+        s32 ang = random_int();
         f32 c, d;
 
-        func_15143874(ang & 0xFF, func_150ADA68() * 723.0f, &c, &d);
+        func_15143874(ang & 0xFF, random_float() * 723.0f, &c, &d);
         p.vel[0] = (axisA[0] * c + axisB[0] * d + normal[0]) * speed;
         p.vel[1] = (axisA[1] * c + axisB[1] * d + normal[1]) * speed;
         p.vel[2] = (axisA[2] * c + axisB[2] * d + normal[2]) * speed;
-        p.rot[0] = func_150ADA68() * 360.0f;
-        p.rot[1] = func_150ADA68() * 360.0f;
-        p.rot[2] = func_150ADA68() * 360.0f;
-        p.spinX = func_150ADA68() * 40.45f + -20.225f;
-        p.spinZ = func_150ADA68() * 40.45f + -20.225f;
-        p.gravity = func_150ADA68() * 0.62600005f + -1.0890001f;
-        p.life = (u32)func_150ADA20() % 41 + 40;
+        p.rot[0] = random_float() * 360.0f;
+        p.rot[1] = random_float() * 360.0f;
+        p.rot[2] = random_float() * 360.0f;
+        p.spinX = random_float() * 40.45f + -20.225f;
+        p.spinZ = random_float() * 40.45f + -20.225f;
+        p.gravity = random_float() * 0.62600005f + -1.0890001f;
+        p.life = (u32)random_int() % 41 + 40;
         p.sprite = D_80089DC0[type][i];
         func_15132FBC(&p, 0, 0, 0, id, arg2);
     }
 
     if (arg0->camera != NULL && D_80082FA0 <= 0) {
-        func_150D6BB4(arg0->camera->unk23D, id, arg2);
+        debris_screen_flash(arg0->camera->unk23D, id, arg2);
     }
     if (hitWall && arg0->camera != NULL) {
         if ((surface & 0x1F) == 0xE) {
-            func_150D6B00((s32)tri, (s32)hit, id, arg2);
+            debris_scorch_mark_spawn((s32)tri, (s32)hit, id, arg2);
         } else {
             func_151C0910(tri, hit, id, arg2);
         }
     }
-    func_150D6944((s32)pos, id, arg2);
-    func_150D6898((s32)pos, id, arg2);
+    debris_dust_cloud_spawn((s32)pos, id, arg2);
+    debris_smoke_ring_spawn((s32)pos, id, arg2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/func_150D5F7C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/debris_burst_destroyed_object.s")
 #endif
-void func_150D6898(s32 arg0, u8 arg1, s32 arg2) {
+/* was func_150D6898 */
+void debris_smoke_ring_spawn(s32 arg0, u8 arg1, s32 arg2) {
     f32 temp_f12;
     f32 sp28;
     f32 temp_f14;
     f32 var_f18;
     u32 temp_t7;
-    sp28 = func_150ADA68();
-    temp_t7 = (func_150ADA20() % 56U) + 0xC8;
+    sp28 = random_float();
+    temp_t7 = (random_int() % 56U) + 0xC8;
     temp_f14 = sp28 * 4.0f;
     temp_f12 = temp_f14 + 15.0f;
     var_f18 = (f32) temp_t7;
@@ -473,14 +480,15 @@ s32 func_15154DF4(s32, f32, f32, f32, u8, s32);
 extern f32 D_800A0E80;
 extern f32 D_800A0E84;
 
-void func_150D6944(s32 arg0, u8 arg1, s32 arg2) {
+/* was func_150D6944 */
+void debris_dust_cloud_spawn(s32 arg0, u8 arg1, s32 arg2) {
     s32 pad;
     f32 sp28;
     f32 sp24;
 
-    sp24 = func_150ADA68();
-    sp28 = func_150ADA68();
-    func_15154DF4(arg0, (sp24 * 3.0f) + 8.0f, (sp28 * D_800A0E80) + D_800A0E84, (func_150ADA68() * 50.0f) + 100.0f, (s32) arg1, arg2);
+    sp24 = random_float();
+    sp28 = random_float();
+    func_15154DF4(arg0, (sp24 * 3.0f) + 8.0f, (sp28 * D_800A0E80) + D_800A0E84, (random_float() * 50.0f) + 100.0f, (s32) arg1, arg2);
 }
 
 #ifdef NON_MATCHING
@@ -489,7 +497,8 @@ extern f32 D_800A0E8C;
 extern f32 D_800A0E90;
 extern f32 D_800A0E94;
 extern f32 D_800A0E98;
-void func_150D69F8(u8 *arg0, f32 *arg1) {
+/* was func_150D69F8 */
+void debris_spec_fill_preset(u8 *arg0, f32 *arg1) {
     (*(s32 *)((u8 *)arg0 + 0)) = 6;
     (*(s32 *)((u8 *)arg0 + 4)) = 3;
     *arg1 = D_800A0E88;
@@ -519,34 +528,37 @@ void func_150D69F8(u8 *arg0, f32 *arg1) {
     (*(s8 *)((u8 *)arg0 + 0x50)) = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/func_150D69F8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/debris_spec_fill_preset.s")
 #endif
 s32 func_151A6308(f32, s32, s32, s32, s16, u8, u8, u8, s32);
 
-void func_150D6B00(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
+/* was func_150D6B00 */
+void debris_scorch_mark_spawn(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     s32 pad;
     u32 sp38;
     f32 sp34;
 
-    sp34 = func_150ADA68();
-    sp38 = func_150ADA20();
-    func_151A6308((sp34 * 100.0f) + 150.0f, ((sp38 % 71U) + 0x82) & 0xFF, arg0, arg1, (func_150ADA20() % 31U) + 0x32, 0, 1, (s32) arg2, arg3);
+    sp34 = random_float();
+    sp38 = random_int();
+    func_151A6308((sp34 * 100.0f) + 150.0f, ((sp38 % 71U) + 0x82) & 0xFF, arg0, arg1, (random_int() % 31U) + 0x32, 0, 1, (s32) arg2, arg3);
 }
 
 s32 func_15182BE0(u8, u8, u8, s32, s16, u8, u8, s32); 
 
-void func_150D6BB4(u8 arg0, u8 arg1, s32 arg2) {
+/* was func_150D6BB4 */
+void debris_screen_flash(u8 arg0, u8 arg1, s32 arg2) {
     s32 pad;
     u32 sp28;
 
-    sp28 = func_150ADA20();
-    func_15182BE0(0xFF, 0xFF, 0xFF, ((sp28 % 56U) + 0xC8) & 0xFF, (func_150ADA20() % 6U) + 0x19, (s32) arg0, (s32) arg1, arg2);
+    sp28 = random_int();
+    func_15182BE0(0xFF, 0xFF, 0xFF, ((sp28 % 56U) + 0xC8) & 0xFF, (random_int() % 6U) + 0x19, (s32) arg0, (s32) arg1, arg2);
 }
 
 #ifdef NON_MATCHING
 void func_15143794(s16, s16, f32, void *);
 
-void func_150D6C40(f32 *arg0, s32 arg1, s32 arg2) {
+/* was func_150D6C40 */
+void obj_sprite_burst_spawn(f32 *arg0, s32 arg1, s32 arg2) {
     struct {
         f32 * u48;
         u8 u4C;
@@ -658,7 +670,7 @@ void func_150D6C40(f32 *arg0, s32 arg1, s32 arg2) {
     u8 *temp_s2;
 
     temp_s3 = arg1 & 0xFF;
-    temp_hi = func_150ADA20() % 11U;
+    temp_hi = random_int() % 11U;
     sp.uD8 = arg0;
     sp.u101 = 0x6C;
     sp.uDC = (*(u8 *)((u8 *)arg0 + 0x3B));
@@ -677,7 +689,7 @@ void func_150D6C40(f32 *arg0, s32 arg1, s32 arg2) {
     sp.uFA = 0x4B;
     sp.u100 = 0xFF;
     sp.uE0 = 0.871118f;
-    func_150D71A8(arg0, &sp.u114);
+    obj_get_center_point(arg0, &sp.u114);
     sp.u102 = 0xF;
     sp.u104 = 0x11;
     sp.u13C = 0x84DE01;
@@ -694,24 +706,24 @@ void func_150D6C40(f32 *arg0, s32 arg1, s32 arg2) {
     sp.u128 = 0.0f;
     sp.u108 = 1.062733f;
     do {
-        sp.uFF = (func_150ADA20() % 156U) + 0x64;
-        temp_t1 = (func_150ADA20() % 14U) + 8;
+        sp.uFF = (random_int() % 156U) + 0x64;
+        temp_t1 = (random_int() % 14U) + 8;
         sp.u106 = temp_t1;
         sp.uEE = temp_t1;
-        temp_f2 = (func_150ADA68() * 207.0f) + 238.0f;
+        temp_f2 = (random_float() * 207.0f) + 238.0f;
         sp.u10C = temp_f2;
         sp.u110 = temp_f2;
-        temp_s1 = func_150ADA20();
-        temp_s0 = func_150ADA20();
-        func_15143794((s16) (temp_s1 & 0xFF), (s16) (((u32) temp_s0 % 36U) - 0x19), (func_150ADA68() * 30.0f) + 25.0f, &sp.u12C);
-        temp_f16 = func_150ADA68() * 0.0f;
+        temp_s1 = random_int();
+        temp_s0 = random_int();
+        func_15143794((s16) (temp_s1 & 0xFF), (s16) (((u32) temp_s0 % 36U) - 0x19), (random_float() * 30.0f) + 25.0f, &sp.u12C);
+        temp_f16 = random_float() * 0.0f;
         sp.u13C &= ~0xC0;
         sp.u138 = temp_f16;
         var_s1 = 0;
-        if (func_150ADA20() & 1) {
+        if (random_int() & 1) {
             var_s1 = 0x80;
         }
-        if (func_150ADA20() & 1) {
+        if (random_int() & 1) {
             var_s0 = 0x40;
         } else {
             var_s0 = 0;
@@ -727,9 +739,9 @@ void func_150D6C40(f32 *arg0, s32 arg1, s32 arg2) {
     sp.u4C = (*(u8 *)((u8 *)arg0 + 0x3B));
     sp.u50 = 0.0f;
     sp.u58 = 2392.16f;
-    temp_f12 = (func_150ADA68() * 3.0f) + 9.0f;
+    temp_f12 = (random_float() * 3.0f) + 9.0f;
     sp.u54 = temp_f12;
-    temp_f2_2 = (func_150ADA68() * 80.0f) + 100.0f;
+    temp_f2_2 = (random_float() * 80.0f) + 100.0f;
     sp.u60 = temp_f2_2 / (temp_f12 * temp_f12);
     sp.u7F = (s8) (u32) temp_f2_2;
     sp.u81 = 0x79;
@@ -747,7 +759,7 @@ void func_150D6C40(f32 *arg0, s32 arg1, s32 arg2) {
     sp.u7A = 0xFF;
     sp.u80 = 0xFF;
     sp.u5C = temp_f2_2;
-    func_150D71A8(arg0, &sp.u94);
+    obj_get_center_point(arg0, &sp.u94);
     temp_s2 = ((u8 *)&D_800A5860);
     (*(s32 *)((u8 *)(&sp.uA0) + 0)) = (s32) (*(s32 *)((u8 *)temp_s2 + 0));
     (*(s32 *)((u8 *)(&sp.uA0) + 4)) = (s32) (*(s32 *)((u8 *)temp_s2 + 4));
@@ -757,10 +769,10 @@ void func_150D6C40(f32 *arg0, s32 arg1, s32 arg2) {
     sp.u86 = 1;
     sp.u88 = 1.0f;
     var_s1_2 = 0;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         var_s1_2 = 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         var_s0_2 = 0x80;
     } else {
         var_s0_2 = 0;
@@ -787,9 +799,10 @@ void func_150D6C40(f32 *arg0, s32 arg1, s32 arg2) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/func_150D6C40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/obj_sprite_burst_spawn.s")
 #endif
-void func_150D71A8(f32 *arg0, f32 *arg1) {
+/* was func_150D71A8 */
+void obj_get_center_point(f32 *arg0, f32 *arg1) {
     arg1[0] = arg0[5];
     arg1[1] = arg0[6] + 60.0f;
     arg1[2] = arg0[7];
@@ -799,10 +812,11 @@ void func_150D71A8(f32 *arg0, f32 *arg1) {
 void func_15131EC8(f32 *, f32);
 
 /* P67: update of a debris piece that follows its owner (obj +0xA8 = owner record, +0xAC = the owner's unique_id when
- * spawned). Returns 0 when the owner is gone or reused; else follows it (func_150D71A8 into obj +0x40), adds gravity
+ * spawned). Returns 0 when the owner is gone or reused; else follows it (obj_get_center_point into obj +0x40), adds gravity
  * (obj +0x64) to the velocity (obj +0x58), lets func_15131EC8 adjust it and moves obj +0x4C by the average of the
  * old and new velocity over the frame (D_800BE9A4; D_800BEDC8 scales the change). Returns 1. */
-s32 func_150D71D4(u8 *arg0, s32 arg1) {
+/* was func_150D71D4 */
+s32 debris_follow_owner_update(u8 *arg0, s32 arg1) {
     struct127 *owner = *(struct127 **)(arg0 + 0xA8);
     f32 *pos = (f32 *)(arg0 + 0x4C);
     f32 *vel = (f32 *)(arg0 + 0x58);
@@ -811,7 +825,7 @@ s32 func_150D71D4(u8 *arg0, s32 arg1) {
     if (owner->interaction_state == 0 || arg0[0xAC] != owner->unique_id) {
         return 0;
     }
-    func_150D71A8((f32 *)owner, (f32 *)(arg0 + 0x40));
+    obj_get_center_point((f32 *)owner, (f32 *)(arg0 + 0x40));
     old[0] = vel[0];
     old[1] = vel[1];
     old[2] = vel[2];
@@ -823,9 +837,10 @@ s32 func_150D71D4(u8 *arg0, s32 arg1) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/func_150D71D4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/debris_follow_owner_update.s")
 #endif
-void func_150D7370(struct102 *arg0, u8 *arg1, u8 arg2) {
+/* was func_150D7370 */
+void debris_follow_handle_msg(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = (u8 *)arg0 + 0xA8;
     if (arg2 == 0x2D) {
         if (*(s32 *)arg1 == *(s32 *)v) {
@@ -852,7 +867,8 @@ end:        ;
 }
 
 #ifdef NON_MATCHING
-s32 func_150D741C(u8 *arg0, s32 arg1) {
+/* was func_150D741C */
+s32 glow_follow_owner_update(u8 *arg0, s32 arg1) {
     u8 *sp18;
     f32 *temp_a3;
     f32 temp_f12;
@@ -866,7 +882,7 @@ s32 func_150D741C(u8 *arg0, s32 arg1) {
         return 0;
     }
     sp18 = temp_v0;
-    func_150D71A8(temp_a3, arg0 + 0x40);
+    obj_get_center_point(temp_a3, arg0 + 0x40);
     temp_f2 = sqrtf((*(f32 *)((u8 *)temp_v0 + 8))) * (*(f32 *)((u8 *)temp_v0 + 0x10));
     (*(f32 *)((u8 *)arg0 + 0x3C)) = temp_f2;
     (*(f32 *)((u8 *)arg0 + 0x38)) = temp_f2;
@@ -880,9 +896,10 @@ s32 func_150D741C(u8 *arg0, s32 arg1) {
     return var_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/func_150D741C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/glow_follow_owner_update.s")
 #endif
-void func_150D7578(struct102 *arg0, u8 *arg1, u8 arg2) {
+/* was func_150D7578 */
+void glow_follow_handle_msg(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = (u8 *)arg0 + 0xA8;
     if (arg2 == 0x2D) {
         if (*(s32 *)arg1 == *(s32 *)v) {

@@ -1,12 +1,12 @@
 /* P114: struct_1502AB94_ref and D_800C3A10 are now in the hoisted NM block of game_eu_51190.c */
-u8 *func_151149AC(u8);
+u8 *world_record_find(u8);
 s32 func_15024910(s32, u8, u16, s32, s32, struct127 *, u8 *, u8 *, s32);
 s32 func_150268BC(s32, u8, u16, s32, s32, struct127 *, u8 *, u8 *, s32);
 s32 func_15029EA8(s32, u8, u16, s32, s32, struct127 *, u8 *, u8 *, s32, s32);
 
 /* Runs entry arg1 of player `player` through the three handlers in turn; the first non-zero result is returned.
  * The entry may refer to an object (kind 2: its data at +0x14 replaces the player's D_800C3958 record) or to a
- * func_151149AC record (kind 3); a missing reference returns 0. When D_800C3C88 == 2 the middle handler is skipped
+ * world_record_find record (kind 3); a missing reference returns 0. When D_800C3C88 == 2 the middle handler is skipped
  * and the last one gets 1 instead of 0. */
 s32 func_1502AB94(s32 arg0, u8 arg1, u16 arg2, s32 arg3, s32 player) {
     struct127 *obj;
@@ -28,7 +28,7 @@ s32 func_1502AB94(s32 arg0, u8 arg1, u16 arg2, s32 arg3, s32 player) {
         }
         data = (u8 *) obj + 0x14;
     } else if (ref->kind == 3) {
-        rec = func_151149AC(ref->id);
+        rec = world_record_find(ref->id);
         if (rec == NULL) {
             return 0;
         }

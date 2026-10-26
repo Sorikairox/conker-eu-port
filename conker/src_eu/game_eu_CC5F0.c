@@ -3,14 +3,14 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_1509FC5C(u16 arg0, s32 arg1, s16 arg2, s32 arg3, s32 arg4);
-s32 func_151149AC(u8);
+s32 world_record_find(u8);
 #endif
 
 
 #ifdef NON_MATCHING
 s32 func_1508712C(s32, f32 *, f32 *, f32 *);
 s32 func_150871B8(s32);
-s32 func_150E4EA8(s32);
+s32 impact_effect_at_world_object(s32);
 void func_15174200(s32, s32, s32);
 extern s32 D_80089030;
 
@@ -44,7 +44,7 @@ s32 func_1509EDE0(s32 arg0, u32 arg1, u8 *arg2) {
     s32 temp_v1_9;
     u8 temp_t7;
 
-    temp_v0 = func_151149AC(arg0 & 0xFF);
+    temp_v0 = world_record_find(arg0 & 0xFF);
     if (temp_v0 == 0) {
         goto block_62;
     }
@@ -132,7 +132,7 @@ s32 func_1509EDE0(s32 arg0, u32 arg1, u8 *arg2) {
         (*(f32 *)((u8 *)temp_v0 + 0x7C)) = (*(f32 *)&((*(s32 *)((u8 *)arg2 + 0xC))));
         return 1;
     case 9:
-        func_150E4EA8(temp_v0);
+        impact_effect_at_world_object(temp_v0);
     default:
 block_62:
         return 0;
@@ -210,7 +210,7 @@ u8 func_1509F254(s32 arg0, s32 arg1, u8 *arg2) {
     s32 var_s0;
     struct127 *var_v1;
 
-    temp_v0 = func_151149AC(arg0 & 0xFF);
+    temp_v0 = world_record_find(arg0 & 0xFF);
     if (temp_v0 == 0) {
         goto block_42;
     }
@@ -223,7 +223,7 @@ u8 func_1509F254(s32 arg0, s32 arg1, u8 *arg2) {
 loop_7:
         if (var_v1->interaction_state == (*(s32 *)((u8 *)arg2 + 8))) {
             sp24 = var_v1;
-            if (func_151145D0(temp_v0, var_s0, arg2) != 0) {
+            if (world_record_touched_by(temp_v0, var_s0, arg2) != 0) {
                 return 1U;
             }
         }
@@ -241,7 +241,7 @@ block_42:
         }
         goto block_42;
     case 23:
-        temp_v0_2 = func_15114644(temp_v0);
+        temp_v0_2 = world_record_first_toucher(temp_v0);
         if (temp_v0_2 < 0) {
             goto block_42;
         }
@@ -416,7 +416,7 @@ u32 func_1509F834(s32 arg0, s32 arg1, u32 mask, u32 arg3, s32 arg4, s16 arg5, s3
     u8 n;
     u8 r;
 
-    p = func_1505EEF4(arg4);
+    p = obj_find_by_spawn(arg4);
     if (arg3 >= 0x8000U) {
         arg3 = 0x7FFF;
     }
@@ -429,7 +429,7 @@ u32 func_1509F834(s32 arg0, s32 arg1, u32 mask, u32 arg3, s32 arg4, s16 arg5, s3
         }
         n = arg1 - arg0 + 1;
         do {
-            r = func_150ADA20() % (u32)n;
+            r = random_int() % (u32)n;
         } while (!((1 << r) & mask));
         if (func_10010344((u16)(r + arg0), p, arg3, arg5, arg6) != 0) {
             mask ^= 1 << r;
@@ -439,14 +439,14 @@ u32 func_1509F834(s32 arg0, s32 arg1, u32 mask, u32 arg3, s32 arg4, s16 arg5, s3
 }
 
 s32 func_1000F568(s32, s32);
-s32 func_151149AC(u8);
-s32 func_151152A4(s32, s32, s32, s16, s16, s32);
+s32 world_record_find(u8);
+s32 world_object_sound_play(s32, s32, s32, s16, s16, s32);
 
 void func_1509F95C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s16 arg4, s32 arg5) {
     s32 sp24;
 
-    sp24 = func_151149AC(arg3);
-    func_151152A4(sp24, func_1000F568(arg0, ((arg1 - arg0) + 1) & 0xFF), arg2, arg4, arg5, 0);
+    sp24 = world_record_find(arg3);
+    world_object_sound_play(sp24, func_1000F568(arg0, ((arg1 - arg0) + 1) & 0xFF), arg2, arg4, arg5, 0);
 }
 
 #ifdef NON_MATCHING
@@ -485,7 +485,7 @@ u16 func_1509FA88(s32 arg0, s32 arg1, s32 arg2) {
 }
 
 void func_1509FAD4(u16 arg0, s32 arg1, s32 arg2, s16 arg3, s32 arg4, s32 arg5) {
-    struct127 *obj = func_1505EEF4(arg2);
+    struct127 *obj = obj_find_by_spawn(arg2);
 
     if (obj != NULL) {
         if (arg5 || func_10010894(obj) == 0) {
@@ -495,7 +495,7 @@ void func_1509FAD4(u16 arg0, s32 arg1, s32 arg2, s16 arg3, s32 arg4, s32 arg5) {
 }
 
 void func_1509FB40(s32 arg0, s32 arg1) {
-    struct127 *temp_v0 = func_1505EEF4(arg0);
+    struct127 *temp_v0 = obj_find_by_spawn(arg0);
 
     if (temp_v0 != NULL) {
         if (arg1 != 0) {
@@ -514,7 +514,7 @@ u16 func_1509FB90(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 u16 func_1509FBC8(s32 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4) {
     struct127 *temp_v0;
 
-    temp_v0 = func_1505EEF4(arg1);
+    temp_v0 = obj_find_by_spawn(arg1);
     if (temp_v0 == NULL) {
         return 0;
     }
@@ -527,7 +527,7 @@ u16 func_1509FBC8(s32 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4) {
 void func_1509FC5C(u16 arg0, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
     struct127 *temp_v0;
 
-    temp_v0 = func_1505EEF4(arg1);
+    temp_v0 = obj_find_by_spawn(arg1);
     func_1000F91C(arg0, 0x7FFFU, arg2, 0U, 0, (s16) (s32) temp_v0->x_position, (s16) (s32) temp_v0->y_position, (s16) (s32) temp_v0->z_position, (s16) arg3, (s16) arg4);
 }
 #else

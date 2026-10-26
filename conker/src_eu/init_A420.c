@@ -11,11 +11,11 @@ s32 func_1000A420(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32 *, s32 *, s32
 void func_1000E40C(s32, s32);
 #ifdef NON_MATCHING
 s32 func_150ADE40(s32 x0, s32 z0, s32 x1, s32 z1);
-s32 func_150AD9A0(s32 arg0, s32 arg1, s32 arg2);
+s32 approx_dist3_int(s32 arg0, s32 arg1, s32 arg2);
 
 // sound_pan_volume: stereo pan and volume of a sound source (P151). (dx, dy, dz) is the source relative to the
 // listener, `yaw` the listener's heading in degrees, (ox, oy, oz) the offset used for the distance (planar
-// func_150ADE40 when bit 0x8000 of `near` is set, else 3-D func_150AD9A0). Volume = 0x7FFF - ((far - dist) << 15) /
+// func_150ADE40 when bit 0x8000 of `near` is set, else 3-D approx_dist3_int). Volume = 0x7FFF - ((far - dist) << 15) /
 // (far - near), clamped to 0..0x7FFF and 0 when <= 400. With `outPan` the pan is 0x40 +/- the source's angle
 // (acos of dx over the planar distance, mirrored for dz > 0, turned by the heading) folded into -95..95, with flag
 // 0x80 unless it is in the front +/-32 band (then doubled); sources within 31 units pan centre (0x40). The
@@ -34,7 +34,7 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 oz, s32 n
         near &= 0x7FFF;
         dist = func_150ADE40(ox, oz, 0, 0);
     } else {
-        dist = func_150AD9A0(ox, oy, oz);
+        dist = approx_dist3_int(ox, oy, oz);
     }
     span = far - near;
     vol = 0x7FFF - ((far - dist) << 15) / span;
@@ -46,7 +46,7 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 oz, s32 n
                 if (0.01f < len) {
                     c = (f32)dx / len;
                 }
-                ang = (s16)(s32)(func_150487E0(c) * 40.74366543152521); /* 128 / pi */
+                ang = (s16)(s32)(math_asin_scaled(c) * 40.74366543152521); /* 128 / pi */
                 if (dz > 0) {
                     ang = (ang < 0) ? (s16)(-128 - ang) : (s16)(128 - ang);
                 }
@@ -86,7 +86,7 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 oz, s32 n
 #endif
 // NON-MATCHING: mostly just regalloc
 // s32 func_150AD960(s32, s32, s32, s32);
-// s32 func_150AD9A0(s32, s32, s32);
+// s32 approx_dist3_int(s32, s32, s32);
 // s32 func_1000A420(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 *arg9, s32 *argA, s32 *argB) {
 //     f64 dbl;
 //     s32 temp_v1;
@@ -102,7 +102,7 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 oz, s32 n
 //         arg7 = arg7 & 0x7FFF;
 //         ret = func_150AD960(arg4, arg6, 0, 0);
 //     } else {
-//         ret = func_150AD9A0(arg4, arg5, arg6);
+//         ret = approx_dist3_int(arg4, arg5, arg6);
 //     }
 //     temp_v1 = 0x7FFF - ((arg8 - ret) << 15) / (arg8 - arg7);
 //     if (temp_v1 >= 401) {
@@ -112,7 +112,7 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 oz, s32 n
 //                 if (D_8002C200 < phi_f12) { // rodata, 0.009999999776482582
 //                     phi_f12 = arg0 / phi_f12;
 //                 }
-//                 dbl = (func_150487E0(phi_f12) * D_8002C208);
+//                 dbl = (math_asin_scaled(phi_f12) * D_8002C208);
 //                 tmp0 = dbl;
 //                 if (arg2 > 0) {
 //                     if (tmp0 < 0) {
@@ -157,7 +157,7 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 oz, s32 n
 #ifdef NON_MATCHING
 f32 func_150ADDE0(f32 *a, f32 *b);
 f32 func_150AD930(f32 *);
-void func_15049148(struct17 *v, f32 len, struct17 *out);
+void vec3_scale(struct17 *v, f32 len, struct17 *out);
 typedef struct { s16 x, y, z, pad; } PathSoundPoint; /* D_800D2104[path] points */
 // path_sound_pan_volume: func_1000A420 (pan / volume / distance) for a sound that runs along path `path`
 // (D_800D2104 points, D_800D2528 counts) instead of sitting at one spot: the sound position is the path point
@@ -255,7 +255,7 @@ s32 func_1000A750(s32 path, s32 ex, s32 ey, s32 ez, f32 yaw, s32 x, s32 y, s32 z
         }
         if (len2 != 0.0f) {
             if (t < len2) {
-                func_15049148((struct17 *) dir, t / len2, (struct17 *) dir);
+                vec3_scale((struct17 *) dir, t / len2, (struct17 *) dir);
             }
             px = pts[seg].x + dir[0];
             py = pts[seg].y + dir[1];
@@ -282,7 +282,7 @@ s32 func_1000B060(f32 arg0, f32 arg1, s32 arg2) {
         d = arg0 / d;
     }
     flag = 0x80;
-    t = func_150487E0(d) * D_8002C578;
+    t = math_asin_scaled(d) * D_8002C578;
     a = t;
     if (arg1 > 0.0f) {
         if ((s16)t < 0) {
@@ -319,7 +319,7 @@ s32 func_1000B060(f32 arg0, f32 arg1, s32 arg2) {
 //         sp18 = arg0 / sp18;
 //     }
 //     phi_a1 = 128;
-//     temp_f6 = func_150487E0(sp18) * D_8002C218;
+//     temp_f6 = math_asin_scaled(sp18) * D_8002C218;
 //     phi_v1_2 = temp_f6;
 //     if (0.0f < arg1) {
 //         temp_t8 = temp_f6;

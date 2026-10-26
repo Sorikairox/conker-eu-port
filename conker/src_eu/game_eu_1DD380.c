@@ -103,14 +103,14 @@ void func_151AFC84(u8 *obj, s32 arg1, s32 arg2) {
     }
     part.type = 0x50;
     part.u02 = 0x2502;
-    part.life = func_150ADA20() % 61U + 0x58;
+    part.life = random_int() % 61U + 0x58;
     part.u08 = 0;
     part.u0C = 0;
     part.col[0] = 0xFF;
     part.col[1] = 0xFF;
     part.col[2] = 0xFF;
     part.col[3] = 0xFF;
-    part.size[0] = part.size[1] = (func_150ADA68() * 21.0f + 91.0f) * sSplashScaleA[0];
+    part.size[0] = part.size[1] = (random_float() * 21.0f + 91.0f) * sSplashScaleA[0];
     part.pos[0] = pos[0];
     part.pos[1] = *(f32 *) &ground[0];
     part.pos[2] = pos[2];
@@ -121,10 +121,10 @@ void func_151AFC84(u8 *obj, s32 arg1, s32 arg2) {
     part.u38[0] = 1.0f;
     part.u38[1] = 1.0f;
     part.flags = 0x401C0001;
-    part.u44[0] = func_150ADA20() % 41U + 0x50;
+    part.u44[0] = random_int() % 41U + 0x50;
     part.u44[1] = 0xFF;
-    tail.life = part.life - func_150ADA20() % 6U - 8;
-    tail.scale = (func_150ADA68() * 40.0f + 51.0f) * part.size[0] * sSplashScaleB[0];
+    tail.life = part.life - random_int() % 6U - 8;
+    tail.scale = (random_float() * 40.0f + 51.0f) * part.size[0] * sSplashScaleB[0];
     part.u44[2] = 0;
     part.u44[3] = 6;
     height = (*(u16 *) (obj + 0x7A) >> 8) - ((arg1 == 1) ? -10 : 10);
@@ -133,8 +133,8 @@ void func_151AFC84(u8 *obj, s32 arg1, s32 arg2) {
     if (p != NULL) {
         memcpy(p + 0x128, &tail, 8);
     }
-    ringLife = func_150ADA20() % 11U + 5;
-    func_1514CBE8(pos[0], pos[1], pos[2], func_150ADA68() * 17.0f + 29.0f, 0, 0xFF, ringLife, 0x10, 0, 0.0f, 0, 0xFF);
+    ringLife = random_int() % 11U + 5;
+    func_1514CBE8(pos[0], pos[1], pos[2], random_float() * 17.0f + 29.0f, 0, 0xFF, ringLife, 0x10, 0, 0.0f, 0, 0xFF);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DD380/func_151AFC84.s")
@@ -228,7 +228,7 @@ s32 func_151B0238(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u3C = 0xE03;
     sp.u34 = 0x200005;
     sp.u38 = 0;
-    sp.u3E = (func_150ADA20() & 0xF) + 0x19;
+    sp.u3E = (random_int() & 0xF) + 0x19;
     sp.u40 = 0;
     sp.u44 = 0;
     sp.u4C = 0xB0;
@@ -238,21 +238,21 @@ s32 func_151B0238(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u49 = 0xB;
     sp.u4A = 0x6A;
     sp.u4B = 0xFF;
-    sp.u4F = (func_150ADA20() % 156U) + 0x64;
+    sp.u4F = (random_int() % 156U) + 0x64;
     sp.u50 = 0xFF;
     sp.u94 = 3;
     sp.u95 = 3;
-    sp.u5C = sp.u60 = (func_150ADA68() * 202.0f) + 101.0f;
+    sp.u5C = sp.u60 = (random_float() * 202.0f) + 101.0f;
     sp.u64 = arg2;
     sp.u68 = arg3;
     sp.u6C = arg4;
-    func_15143794(arg8, (s16) ((func_150ADA20() % 21U) - 0x14), ((func_150ADA68() * 301.0f) + 500.0f) * 0.01f, sp.u7C);
+    func_15143794(arg8, (s16) ((random_int() % 21U) - 0x14), ((random_float() * 301.0f) + 500.0f) * 0.01f, sp.u7C);
     sp.u8C = 0xE05;
     sp.u88 = 0.0f;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x80;
     }
     sp.u96 = 6;

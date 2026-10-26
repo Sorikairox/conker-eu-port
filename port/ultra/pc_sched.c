@@ -214,7 +214,7 @@ void osCreateThread(OSThread *t, OSId id, void (*entry)(void *), void *arg, void
     /* P21: the C stack MUST be 16-byte aligned. wasm code assumes a 16-aligned __stack_pointer: clang
      * gives arrays 16-byte alignment and then folds the game's own ((u32)buf + 15) & ~15 to buf. malloc
      * only guarantees 8, so whether a fiber stack was 16-aligned depended on earlier mallocs (WebGL
-     * context creation in the browser, none in node): the asset-table walk func_1502AC88 then read
+     * context creation in the browser, none in node): the asset-table walk asset_rec_read_cached then read
      * its record 8 bytes off, loaded the wrong assets and corrupted the game heap (P19 §6). */
     if (!p->cstack) { p->cstack = aligned_alloc(16, C_STACK); p->astack = aligned_alloc(16, A_STACK); }
     p->t = t; p->entry = entry; p->arg = arg; p->state = P_STOPPED; p->waitq = NULL;

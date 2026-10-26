@@ -195,7 +195,7 @@ void func_15190E08(u8 *e) {
                         *(f32 *) (obj + 0x118) = (*(f32 *) (obj + 0x3C) - *(f32 *) (obj + 0x48)) * D_800BEDC8;
                         r = &D_800AA120[obj[0x130]];
                         effect3d_set_handlers(obj, 13, 18, 0, 13);
-                        *(s16 *) (obj + 0x1C) = (u32) func_150ADA20() % (u32) (r->range + 1) + r->base;
+                        *(s16 *) (obj + 0x1C) = (u32) random_int() % (u32) (r->range + 1) + r->base;
                         *(s32 *) (obj + 0x58) |= 1;
                         slot->obj = NULL;
                         *(s32 *) (e + 0x20) -= 1;
@@ -249,21 +249,21 @@ void func_15190E08(u8 *e) {
                     src = (s32 *) ((u8 *) r + 4);
                     do {
                         /* pick a random free slot */
-                        k = (u32) func_150ADA20() % (u32) n;
+                        k = (u32) random_int() % (u32) n;
                         while (k-- != 0) {
                             tail = head;
                             head = head->next;
                         }
                         idx = head - slots;
-                        spawn.b44 = (u32) func_150ADA20() % 101 + 100;
+                        spawn.b44 = (u32) random_int() % 101 + 100;
                         spawn.f14 = 0.0f;
                         spawn.f18 = 0.0f;
                         blk.rng[0] = src[0];
                         blk.rng[1] = src[1];
                         blk.rng[2] = src[2];
                         blk.rng[3] = src[3];
-                        blk.b23 = (u32) func_150ADA20() % 5 + 4;
-                        blk.b24 = (u32) func_150ADA20() % 5 + 4;
+                        blk.b23 = (u32) random_int() % 5 + 4;
+                        blk.b24 = (u32) random_int() % 5 + 4;
                         func_15143134(cfg->points + idx * 0x10, spawn.pos,
                                       *(u8 **) (*(u8 **) (e + 0x10) + 0x1D4) + cfg->points[idx * 0x10 + 0xC] * 0x40);
                         spawn.pos2[0] = spawn.pos[0];
@@ -271,12 +271,12 @@ void func_15190E08(u8 *e) {
                         spawn.pos2[2] = spawn.pos[2];
                         if (*(f32 *) (*(u8 **) (e + 0x10) + 0x118) <
                             spawn.pos[1] - *(f32 *) &blk.rng[1] - *(f32 *) &blk.rng[3]) {
-                            func_150ADA20();
+                            random_int();
                             drop = (u8 *) effect3d_spawn_default((s32) &spawn, 12, 0, 0, 13, D_800AB7E4[e[0x2C]] ? 0 : 2, 96, 255, 0);
                             head->obj = drop;
                             if (drop != NULL) {
                                 memcpy((s32) (drop + 0x110), (f32 *) &blk, 0x60);
-                                head->timer = (u32) func_150ADA20() % (u32) (cfg->range + 1) + cfg->base;
+                                head->timer = (u32) random_int() % (u32) (cfg->range + 1) + cfg->base;
                                 n--;
                                 head = head->next;
                                 tail->next = head;
@@ -433,7 +433,7 @@ void func_15191970(u8 *arg0) {
             *(f32 *)(q + 8) = 0.0f;
             r = &D_800AA120[*(u8 *)(q + 0x20)];
             effect3d_set_handlers(*p, 0xD, 0x12, 0, 0xD);
-            *(s16 *)(*p + 0x1C) = func_150ADA20() % (u32)(r->range + 1) + r->base;
+            *(s16 *)(*p + 0x1C) = random_int() % (u32)(r->range + 1) + r->base;
             *(s32 *)(*p + 0x58) |= 1;
         }
     }
@@ -497,9 +497,9 @@ s32 func_15191A90(u8 *fx) {
         if (fx[0x165] == 3) {
             impact_dust_particle_spawn(fx[0x16C], *(f32 *)(fx + 0x2C) * *(f32 *)(fx + 0x30) * 0.25f, fx[0x5C], (s32)(fx + 0x14C),
                           probe, fx[0xC], fx[1]);
-        } else if (func_150ADA20() & 1) {
+        } else if (random_int() & 1) {
             impact_debris_spawn(fx[0x16C], *(f32 *)(fx + 0x2C) * *(f32 *)(fx + 0x30) * D_800A83FC, fx[0x5C],
-                          (s32)(fx + 0x14C), (struct17 *)probe, (func_150ADA20() % 41U) + 0x50, 1, 1, 0, fx[0xC],
+                          (s32)(fx + 0x14C), (struct17 *)probe, (random_int() % 41U) + 0x50, 1, 1, 0, fx[0xC],
                           fx[1]);
         } else {
             impact_splash_ring_spawn(fx[0x16C], *(f32 *)(fx + 0x2C) * *(f32 *)(fx + 0x30) * D_800A8400, fx[0x5C], probe, 1,

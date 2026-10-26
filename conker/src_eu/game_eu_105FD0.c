@@ -3,13 +3,15 @@
 #include "variables.h"
 
 
-void func_150D87C0(s32 arg0) {
+/* was func_150D87C0 */
+void mat_handler_stub(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
 extern s32 D_80090648;
 
-s32 func_150D87CC(u8 *arg0, u8 *arg1) {
+/* was func_150D87CC */
+s32 mat_tile_slide_anim_d(u8 *arg0, u8 *arg1) {
     f32 temp_f0;
     s32 *temp_a0;
     s32 temp_f6;
@@ -46,18 +48,19 @@ s32 func_150D87CC(u8 *arg0, u8 *arg1) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/func_150D87CC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/mat_tile_slide_anim_d.s")
 #endif
 #ifdef NON_MATCHING
 extern s32 D_80090648;
 extern s32 D_800BE9E4;
 
-// tile_slide_by_anim_update: material handler (s32 (u8 *mat, u8 *actor) table, as func_150D87CC): a 4-state
+// tile_slide_by_anim_update: material handler (s32 (u8 *mat, u8 *actor) table, as mat_tile_slide_anim_d): a 4-state
 // open / close level 0..100 in mat +0x3C driven by the actor's animation (+0x84) and its frame (+0x2D0 -> +8):
 // state 0 waits for anim 0x18D past frame 46, state 1 opens by the frame step D_800BE9E4, state 2 waits for anim 0x18E
 // past frame 34, state 3 closes 4x as fast, state 4 stays shut. The level sets the ult field of the material display
 // list's G_SETTILESIZE (first 8-byte command whose opcode byte is 0xF2). mat +0x18 takes texture ids from D_80090648.
-s32 func_150D88E8(u8 *mat, u8 *actor) {
+/* was func_150D88E8 */
+s32 tile_slide_by_anim_update(u8 *mat, u8 *actor) {
     s32 *state = (s32 *) (mat + 0x38);
     s32 *level = (s32 *) (mat + 0x3C);
     s32 v;
@@ -111,10 +114,11 @@ s32 func_150D88E8(u8 *mat, u8 *actor) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/func_150D88E8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/tile_slide_by_anim_update.s")
 #endif
 
-s16 *func_150D8AA0(s16 *arg0, s32 arg1) {
+/* was func_150D8AA0 */
+s16 *obj2b_write_msg(s16 *arg0, s32 arg1) {
     arg0[0] = 0x42;
     arg0[1] = 0;
     return arg0 + 2;
@@ -123,11 +127,12 @@ s16 *func_150D8AA0(s16 *arg0, s32 arg1) {
 #ifdef NON_MATCHING
 s32 func_15046F70(f32 *, s32, f32, f32 *);
 void func_1504715C(void *, u8 *);
-void func_150E856C(f32, s32, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_150E892C(void *, s16, u8, s32);
+void fx_scorch_decal_spawn(f32, s32, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, s32);
+void fx_debris_emitter_spawn(void *, s16, u8, s32);
 void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 
-void func_150D8ABC(struct127 *arg0) {
+/* was func_150D8ABC */
+void explosion_ground_effect(struct127 *arg0) {
     struct {
         s16 u48;
         s16 u4A;
@@ -201,11 +206,11 @@ void func_150D8ABC(struct127 *arg0) {
         sp.uE4 = sp.uD8;
         sp.uE8 = sp.uB4;
         sp.uEC = sp.uE0;
-        sp3C = func_150ADA68();
-        sp40 = func_150ADA20();
-        func_150E856C((sp3C * 109.0f) + 140.0f, (((u32) sp40 % 86U) + 0xAA) & 0xFF, &sp.uB8, &sp.uE4, (func_150ADA20() % 251U) + 0x1F4, 0, 1, 0, 0, 0, 0xFF, 0);
+        sp3C = random_float();
+        sp40 = random_int();
+        fx_scorch_decal_spawn((sp3C * 109.0f) + 140.0f, (((u32) sp40 % 86U) + 0xAA) & 0xFF, &sp.uB8, &sp.uE4, (random_int() % 251U) + 0x1F4, 0, 1, 0, 0, 0, 0xFF, 0);
     }
-    func_150E892C(&sp.uE4, (s16) ((func_150ADA20() % 62U) + 0x78), 0xFF, 1);
+    fx_debris_emitter_spawn(&sp.uE4, (s16) ((random_int() % 62U) + 0x78), 0xFF, 1);
     sp.u7C = 298.0f;
     sp.u4E = 0x5103;
     sp.u74 = 1.022876f;
@@ -253,9 +258,10 @@ void func_150D8ABC(struct127 *arg0) {
     func_15153BA4(&sp.u48, 0xFF, 0xFF, 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/func_150D8ABC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/explosion_ground_effect.s")
 #endif
-s32 func_150D8DBC(u8 *arg0) {
+/* was func_150D8DBC */
+s32 mat_toggle_by_flag(u8 *arg0) {
     if ((*(u8 **)(arg0 + 0x18))[0x6F] != 0) {
         (*(u8 **)(arg0 + 0x14))[9] = 0;
     } else {
@@ -264,7 +270,8 @@ s32 func_150D8DBC(u8 *arg0) {
     return 1;
 }
 
-s32 func_150D8DF0(f32 *arg0, u8 *arg1, u8 arg2) {
+/* was func_150D8DF0 */
+s32 obj_get_mode_joint_point(f32 *arg0, u8 *arg1, u8 arg2) {
     s32 idx;
     f32 x;
     f32 y;
@@ -300,7 +307,8 @@ s32 func_150D8DF0(f32 *arg0, u8 *arg1, u8 arg2) {
     return 1;
 }
 
-s32 func_150D8F30(s32 arg0, s32 arg1) {
+/* was func_150D8F30 */
+s32 handler_return_8(s32 arg0, s32 arg1) {
     return 8;
 }
 
@@ -308,7 +316,8 @@ s32 func_150D8F30(s32 arg0, s32 arg1) {
 void func_151664F0(s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void func_15187B50(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
 
-void func_150D8F44(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150D8F44 */
+void obj_joint_dust_puff(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
         f32 u34;
         f32 u38;
@@ -316,11 +325,11 @@ void func_150D8F44(u8 *arg0, u8 arg1, s32 arg2) {
     } sp;
 
     if ((*(s32 *)((u8 *)arg0 + 0x1D4)) != 0) {
-        func_150D8DF0(&sp.u34, arg0, arg1);
+        obj_get_mode_joint_point(&sp.u34, arg0, arg1);
         func_15187B50(sp.u34, sp.u38, sp.u3C, 0x1E, 0xF, 7, 0.1f, 0.03f);
         func_151664F0(-1, (s32) sp.u34, (s32) ((*(f32 *)((u8 *)arg0 + 0x180)) + 4.0f), (s32) sp.u3C, 4, 0x32, 0, 0xFF, 0);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/func_150D8F44.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/obj_joint_dust_puff.s")
 #endif

@@ -8,7 +8,7 @@ void func_1515F61C(f32, s32);
 
 f32 func_1515F578(s16 *, s32);
 
-s32 func_1505D024();
+s32 obj_send_hit();
 
 void func_1515FDC0(s32 arg0, s32 arg1) {
     f32 s;
@@ -50,7 +50,7 @@ void func_151600E0(u8 *obj, u8 *arg1) {
 #endif
 
 void func_15160104(u8 *arg0, s32 arg1) {
-    func_1505D024(arg0, 0x6002D, *(u16 *)(arg0 + 0x7A), -1);
+    obj_send_hit(arg0, 0x6002D, *(u16 *)(arg0 + 0x7A), -1);
 }
 
 u8 *scene_node_find_type2e(s32);
@@ -69,14 +69,14 @@ void func_15160134(u8 *arg0, s32 arg1) {
     } else {
         a3 = -1;
     }
-    func_1505D024(arg0, 0x6002E, *(u16 *)(arg0 + 0x7A), a3);
+    obj_send_hit(arg0, 0x6002E, *(u16 *)(arg0 + 0x7A), a3);
 }
 
 void func_151601A4(s32 arg0, s32 arg1) {
-    func_1505D024(arg0, 0x33, 0xC000, -1);
+    obj_send_hit(arg0, 0x33, 0xC000, -1);
 }
 
-s32 func_1507CD64(struct127 *, s32);
+s32 player_hit_reaction(struct127 *, s32);
 s32 func_150ADE40(s16, s16, s32, s32);
 s32 object_hit_effects(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 void func_151601D0(struct127 *arg0, u8 *arg1) {
@@ -91,9 +91,9 @@ void func_151601D0(struct127 *arg0, u8 *arg1) {
                 return;
             }
         }
-        func_1505D024(arg0, 0x2F, 0, -1);
+        obj_send_hit(arg0, 0x2F, 0, -1);
         object_hit_effects(arg0, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(arg0);
-        func_1507CD64(arg0, 6);
+        player_hit_reaction(arg0, 6);
     }
 }

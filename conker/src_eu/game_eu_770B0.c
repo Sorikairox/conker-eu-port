@@ -47,7 +47,7 @@ void func_15049978(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5)
     f32 var_f16;
     s32 var_t6;
 
-    temp_f0 = func_15048A70(*arg0, arg1);
+    temp_f0 = math_angle_diff_deg(*arg0, arg1);
     temp_f0_2 = fabsf(temp_f0);
     if (temp_f0 < 0.0f) {
         var_f16 = -1.0f;
@@ -62,7 +62,7 @@ void func_15049978(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5)
     }
     if (var_t6 != 0) {
         sp1C = var_f16;
-        if (func_15048A70((*arg2 * arg5) + *arg0, arg1) < 0.0f) {
+        if (math_angle_diff_deg((*arg2 * arg5) + *arg0, arg1) < 0.0f) {
             var_f0 = -1.0f;
         } else {
             var_f0 = 1.0f;

@@ -350,7 +350,7 @@ s32 func_1519D9C4(u8 *obj) {
             e->frame = st[7];
             e->u1C = *(s16 *) (st + 0x42);
             e->u1E = *(s16 *) (st + 0x44);
-            st[7] += *(s16 *) (st + 0x48) + (u32) func_150ADA20() % (*(s16 *) (st + 0x4A) + 1);
+            st[7] += *(s16 *) (st + 0x48) + (u32) random_int() % (*(s16 *) (st + 0x4A) + 1);
             e->alpha = 0xFF;
             e->vel[1] += *(f32 *) (st + 0x24) * t;
             e->pos[0] += e->vel[0] * t;

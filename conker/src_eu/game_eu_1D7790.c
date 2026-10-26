@@ -298,17 +298,17 @@ void func_151AA8BC(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
             sp48 = 0;
         }
         vel[0] = 0.0f;
-        vel[1] = -((func_150ADA68() * 196.0f + 199.0f) * D_800A9378 * arg4);
+        vel[1] = -((random_float() * 196.0f + 199.0f) * D_800A9378 * arg4);
         vel[2] = 0.0f;
         pos[0] = arg0;
         pos[1] = arg1;
         pos[2] = arg2;
 #ifdef NON_MATCHING
-        func_1515A7A8(pos, vel, (func_150ADA68() * D_800A937C + 454.0f) * D_800A9380, 0.972683f /* 0x3F7901C1 */, (u8 *) sp48,
-            func_150ADA68() * 101.0f + 101.0f, func_150ADA20() % 31U + 0x32, func_150ADA20() % 101U + 0x64, 1, arg6[0xC], arg6[1]);
+        func_1515A7A8(pos, vel, (random_float() * D_800A937C + 454.0f) * D_800A9380, 0.972683f /* 0x3F7901C1 */, (u8 *) sp48,
+            random_float() * 101.0f + 101.0f, random_int() % 31U + 0x32, random_int() % 101U + 0x64, 1, arg6[0xC], arg6[1]);
 #else
-        func_1515A7A8(pos, vel, (func_150ADA68() * D_800A937C + 454.0f) * D_800A9380, 0x3F7901C1, sp48,
-            func_150ADA68() * 101.0f + 101.0f, func_150ADA20() % 31U + 0x32, func_150ADA20() % 101U + 0x64, 1, arg6[0xC], arg6[1]);
+        func_1515A7A8(pos, vel, (random_float() * D_800A937C + 454.0f) * D_800A9380, 0x3F7901C1, sp48,
+            random_float() * 101.0f + 101.0f, random_int() % 31U + 0x32, random_int() % 101U + 0x64, 1, arg6[0xC], arg6[1]);
 #endif
     }
 }
@@ -388,7 +388,7 @@ s32 func_151EFDD0();
 
 s32 func_151AAB54(u8 *arg0) {
     (*(s32 *)((u8 *)arg0 + 0x88)) = 0;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         func_10010F88(0xA, 0x55F0U, (s16) ((func_151EFDD0() % 1200) - 0x258), 0U, 0, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x58)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x5C)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x60)), 0x1F4, 0x9C4);
     } else {
         func_10010F88(0xB, 0x55F0U, (s16) ((func_151EFDD0() % 1200) - 0x258), 0U, 0, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x58)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x5C)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x60)), 0x1F4, 0x9C4);
@@ -500,27 +500,27 @@ void func_151AAC88(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
     sp.u78 += temp_f4 * arg4;
     sp.u7C += sp.u94 * arg4;
     sp.u80 += sp.u98 * arg4;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.uA0 |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.uA0 |= 0x80;
     }
-    sp.u52 = (func_150ADA20() % 51U) + 0x32;
-    sp.u63 = (func_150ADA20() % 101U) + 0x64;
-    temp_f2 = (func_150ADA68() * 39.0f) + 31.0f;
+    sp.u52 = (random_int() % 51U) + 0x32;
+    sp.u63 = (random_int() % 101U) + 0x64;
+    temp_f2 = (random_float() * 39.0f) + 31.0f;
     sp.u70 = temp_f2;
     sp.u1C = temp_f2;
     sp.u74 = temp_f2;
-    sp.u22 = (func_150ADA20() % 5U) + 4;
-    sp.u23 = (func_150ADA20() % 5U) + 4;
-    sp.u24 = ((func_150ADA68() * 0.25f) + 0.15f) * sp.u1C;
-    sp.u28 = ((func_150ADA68() * 0.25f) + 0.15f) * sp.u1C;
-    sp.u36 = (func_150ADA20() % 5U) + 4;
-    sp.u37 = (func_150ADA20() % 5U) + 4;
-    sp.u38 = ((func_150ADA68() * 0.1f) + 0.08f) * sp.u1C;
-    sp.u3C = ((func_150ADA68() * 0.1f) + 0.08f) * sp.u1C;
-    sp.u9C = ((func_150ADA68() * 70.0f) + 73.0f) * 0.001f;
+    sp.u22 = (random_int() % 5U) + 4;
+    sp.u23 = (random_int() % 5U) + 4;
+    sp.u24 = ((random_float() * 0.25f) + 0.15f) * sp.u1C;
+    sp.u28 = ((random_float() * 0.25f) + 0.15f) * sp.u1C;
+    sp.u36 = (random_int() % 5U) + 4;
+    sp.u37 = (random_int() % 5U) + 4;
+    sp.u38 = ((random_float() * 0.1f) + 0.08f) * sp.u1C;
+    sp.u3C = ((random_float() * 0.1f) + 0.08f) * sp.u1C;
+    sp.u9C = ((random_float() * 70.0f) + 73.0f) * 0.001f;
     temp_v0 = func_1513092C(&sp.u48, 2, 0x28);
     if (temp_v0 != 0) {
         memcpy(temp_v0 + 0xA8, &sp.u1C, 0x28);
@@ -613,7 +613,7 @@ typedef struct {
 } FootHitAABC4;
 
 // footstep_splash: P191: footstep effect of the player p for foot `foot` (0..3, animation event callbacks
-// func_1506FDF0 ... in game_981E0): when p has a model (+0x1D4), takes the foot bone's position (mtx_get_translation, bone
+// objfx_1aabc4_0 ... in game_981E0): when p has a model (+0x1D4), takes the foot bone's position (mtx_get_translation, bone
 // D_800A9350[foot]), probes the ground from 50 above to 50 below it (func_1504715C / func_15046C6C) and, on a hit,
 // spawns a splash sprite at (bone x, ground y, bone z) (impact_dust_particle_spawn: light, size 40, 150, the hit's surface) and a
 // ring burst there (func_15154488 with D_800A93AC's five parameters). s32 although the asm leaves no defined result:
@@ -751,7 +751,7 @@ void func_151AB3A8(u8 *arg0) {
         sp5B = impact_current_kind();
         temp_f18 = (*(f32 *)((u8 *)arg0 + 0x34));
         sp.uAC = temp_f18;
-        temp_f6 = func_150ADA68() * 30.0f;
+        temp_f6 = random_float() * 30.0f;
         sp.u64 = 1;
         sp5C = temp_f6 + 50.0f;
         sp.u76 = 0xA;
@@ -777,9 +777,9 @@ void func_151AB3A8(u8 *arg0) {
         sp.u92 = (*(u8 *)((u8 *)temp_v0_2 + 0));
         sp.u93 = (*(u8 *)((u8 *)temp_v0_2 + 1));
         sp.u94 = (*(u8 *)((u8 *)temp_v0_2 + 2));
-        sp4C = func_150ADA20();
-        sp50 = func_150ADA20();
-        temp_v0_3 = sprite_fx_spawn_cam((s32) &sp.u80, 7U, 1U, (s32) (arg0 + 0x38), sp.uA8, temp_f18, sp.uB0, sp5C, sp5C, (u8) (sp4C & 0xFF), (u8) (((func_150ADA20() & 1) * 2) + (sp50 & 1)), 0x20, 0xFFU, 1);
+        sp4C = random_int();
+        sp50 = random_int();
+        temp_v0_3 = sprite_fx_spawn_cam((s32) &sp.u80, 7U, 1U, (s32) (arg0 + 0x38), sp.uA8, temp_f18, sp.uB0, sp5C, sp5C, (u8) (sp4C & 0xFF), (u8) (((random_int() & 1) * 2) + (sp50 & 1)), 0x20, 0xFFU, 1);
         (*(struct210 **)((u8 *)((arg0 + 0x58)) + 0x18)) = temp_v0_3;
         if (temp_v0_3 != NULL) {
             memcpy(&temp_v0_3->unkA4[3], &sp.u60, 0x20);
@@ -813,8 +813,8 @@ s8 func_151AB640(u8 *arg0) {
     p->unk4 = 0;
     p->unk14 -= D_800BE9E4;
     if (p->unk14 < 0) {
-        p->unk14 = ((u32)func_150ADA20() % (u32)(p->unk18 + 1)) + p->unk16;
-        p->unk10 = (func_150ADA68() * p->unkC) + p->unk8;
+        p->unk14 = ((u32)random_int() % (u32)(p->unk18 + 1)) + p->unk16;
+        p->unk10 = (random_float() * p->unkC) + p->unk8;
     }
     *(s32 *)(arg0 + 0x24) += (s32)((p->unk10 - (f32)*(s32 *)(arg0 + 0x24)) * p->unk1C);
     return ret;
@@ -1018,27 +1018,27 @@ void func_151AB954(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp.u90 = -arg3 * 0.2f;
     sp.u94 = 0.0f;
     sp.u98 = -arg5 * 0.2f;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.uA0 |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.uA0 |= 0x80;
     }
-    sp.u52 = (func_150ADA20() % 51U) + 0x6A;
-    sp.u63 = (func_150ADA20() % 101U) + 0x64;
-    temp_f2 = (func_150ADA68() * 62.0f) + 41.0f;
+    sp.u52 = (random_int() % 51U) + 0x6A;
+    sp.u63 = (random_int() % 101U) + 0x64;
+    temp_f2 = (random_float() * 62.0f) + 41.0f;
     sp.u70 = temp_f2;
     sp.u1C = temp_f2;
     sp.u74 = temp_f2;
-    sp.u22 = (func_150ADA20() % 5U) + 4;
-    sp.u23 = (func_150ADA20() % 5U) + 4;
-    sp.u24 = ((func_150ADA68() * 0.25f) + 0.15f) * sp.u1C;
-    sp.u28 = ((func_150ADA68() * 0.25f) + 0.15f) * sp.u1C;
-    sp.u36 = (func_150ADA20() % 5U) + 4;
-    sp.u37 = (func_150ADA20() % 5U) + 4;
-    sp.u38 = ((func_150ADA68() * 0.1f) + 0.08f) * sp.u1C;
-    sp.u3C = ((func_150ADA68() * 0.1f) + 0.08f) * sp.u1C;
-    sp.u9C = ((func_150ADA68() * 60.0f) + 21.0f) * 0.001f;
+    sp.u22 = (random_int() % 5U) + 4;
+    sp.u23 = (random_int() % 5U) + 4;
+    sp.u24 = ((random_float() * 0.25f) + 0.15f) * sp.u1C;
+    sp.u28 = ((random_float() * 0.25f) + 0.15f) * sp.u1C;
+    sp.u36 = (random_int() % 5U) + 4;
+    sp.u37 = (random_int() % 5U) + 4;
+    sp.u38 = ((random_float() * 0.1f) + 0.08f) * sp.u1C;
+    sp.u3C = ((random_float() * 0.1f) + 0.08f) * sp.u1C;
+    sp.u9C = ((random_float() * 60.0f) + 21.0f) * 0.001f;
     temp_v0 = func_1513092C(&sp.u48, 2, 0x28);
     if (temp_v0 != 0) {
         memcpy(temp_v0 + 0xA8, &sp.u1C, 0x28);
@@ -1251,17 +1251,17 @@ block_5:
     if (var_v1 == 0) {
         temp_s1_2 = arg0 + 0x28;
         sp.u113 = var_v1;
-        (*(f32 *)((u8 *)temp_s1_2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1_2 + 0xC)) + (((*(f32 *)((u8 *)temp_s1_2 + 0x10)) + (func_150ADA68() * (*(f32 *)((u8 *)temp_s1_2 + 0x14)))) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s1_2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1_2 + 0xC)) + (((*(f32 *)((u8 *)temp_s1_2 + 0x10)) + (random_float() * (*(f32 *)((u8 *)temp_s1_2 + 0x14)))) * D_800BE9A4));
         if ((*(f32 *)((u8 *)temp_s1_2 + 0xC)) > 1.0f) {
             func_1504715C(&sp.uEC, (*(u8 **)((u8 *)temp_s1_2 + 0)));
             do {
-                temp_s0 = func_150ADA20() & 0xFF;
-                temp_t5 = (func_150ADA20() % 46U) - 0x3F;
+                temp_s0 = random_int() & 0xFF;
+                temp_t5 = (random_int() % 46U) - 0x3F;
                 temp_f20 = angle_byte_cos(temp_t5 & 0xFF);
                 temp_f22 = angle_byte_cos((temp_t5 - 0x40) & 0xFF);
                 temp_f24 = angle_byte_cos(temp_s0 & 0xFF);
                 temp_f26 = angle_byte_cos((temp_s0 - 0x40) & 0xFF);
-                temp_f0 = func_150ADA68();
+                temp_f0 = random_float();
                 temp_f12 = 30.0f * temp_f20;
                 sp.uE0 = (*(f32 *)((u8 *)((*(u8 **)((u8 *)temp_s1_2 + 0))) + 0x14)) + (temp_f12 * temp_f26);
                 sp.uE4 = (*(f32 *)((u8 *)((*(u8 **)((u8 *)temp_s1_2 + 0))) + 0x18)) - (75.0f * temp_f22);
@@ -1271,10 +1271,10 @@ block_5:
                 sp.uD4 = temp_f14 * temp_f26;
                 sp.uD8 = -temp_f2 * temp_f22;
                 sp.uDC = temp_f14 * temp_f24;
-                temp_f20_2 = func_150ADA68();
-                temp_s0_2 = func_150ADA20();
-                temp_s2 = func_150ADA20();
-                impact_dust_cloud_spawn(&sp.uE0, &sp.uD4, (*(u8 *)((u8 *)temp_s1_2 + 0x18)), (temp_f20_2 * 0.5f) + -1.0f, (s16) (((u32) temp_s0_2 % 26U) + 0x20), (u8) (((u32) temp_s2 % 101U) + 0x64), (func_150ADA68() * 34.0f) + 52.0f, 1U, 1.0f, 1.0f, 1U, (s32) &sp.uEC, 1U, 0U, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                temp_f20_2 = random_float();
+                temp_s0_2 = random_int();
+                temp_s2 = random_int();
+                impact_dust_cloud_spawn(&sp.uE0, &sp.uD4, (*(u8 *)((u8 *)temp_s1_2 + 0x18)), (temp_f20_2 * 0.5f) + -1.0f, (s16) (((u32) temp_s0_2 % 26U) + 0x20), (u8) (((u32) temp_s2 % 101U) + 0x64), (random_float() * 34.0f) + 52.0f, 1U, 1.0f, 1.0f, 1U, (s32) &sp.uEC, 1U, 0U, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 (*(f32 *)((u8 *)temp_s1_2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1_2 + 0xC)) - 1.0f);
             } while ((*(f32 *)((u8 *)temp_s1_2 + 0xC)) > 1.0f);
         }

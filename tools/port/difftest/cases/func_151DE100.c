@@ -36,9 +36,9 @@ extern u8 D_800ABBD8[];
 extern u8 D_800ABBDC[];
 extern u8 D_800ABBE0[];
 s32 func_1517F54C();
-void func_15042E3C(s32, ...);   /* varargs, as its definition (game_70200) */
-void func_15042D94(s32, s32, u8, s32, ...);
-void func_1504332C(u8 arg0, u8 arg1, u8 arg2, u8 arg3);
+void text_printf(s32, ...);   /* varargs, as its definition (game_70200) */
+void text_printf_at(s32, s32, u8, s32, ...);
+void text_set_color(u8 arg0, u8 arg1, u8 arg2, u8 arg3);
 void func_151E2FCC(void);
 void func_10024190(void *, s32); /* osWritebackDCache (hand-written cache loop) */
 
@@ -121,8 +121,8 @@ void func_151DE100(void) {
             D_80090118 = 0;
         }
         secs = D_80090118 / 50;
-        func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
-        func_15042D94(0x87, y, 0x80, (s32) D_800ABBB8, secs / 60, secs % 60);
+        text_set_color(0xFF, 0xFF, 0xFF, 0xFF);
+        text_printf_at(0x87, y, 0x80, (s32) D_800ABBB8, secs / 60, secs % 60);
     }
 
     if (D_8009029C > 0) {
@@ -175,35 +175,35 @@ void func_151DE100(void) {
     }
     D_800902A0 = stickX;
     D_800E0EB5 = stickY;
-    func_1504332C(0xFF, 0xFF, 0xFF, D_8009016D);
+    text_set_color(0xFF, 0xFF, 0xFF, D_8009016D);
     y = yOff + 0x73;
     if (simple) {
         D_800901CC = 0;
-        func_15042D94(0x94, y, 1, (s32) D_800ABBC0, 0xD);
+        text_printf_at(0x94, y, 1, (s32) D_800ABBC0, 0xD);
     } else {
-        func_15042D94(0x94, y, 1, (s32) D_800ABBC4, 0x1A);
+        text_printf_at(0x94, y, 1, (s32) D_800ABBC4, 0x1A);
         if ((s8) D_800901CC < count) {
-            func_15042D94(0xD5, y, 1, (s32) D_800ABBC8, ((s8) D_800901CC == 0) + 0xC);
+            text_printf_at(0xD5, y, 1, (s32) D_800ABBC8, ((s8) D_800901CC == 0) + 0xC);
         }
-        func_150432FC(0x94, yOff + 0x55);
+        text_set_pos(0x94, yOff + 0x55);
         if (count == (s8) D_800901CC) {
-            func_15042E3C((s32) D_800ABBCC, 0x32);
+            text_printf((s32) D_800ABBCC, 0x32);
         } else if (count < (s8) D_800901CC) {
-            func_15042E3C((s32) D_800ABBD0, 0x33);
+            text_printf((s32) D_800ABBD0, 0x33);
         }
     }
-    func_150432FC(0x53, y);
+    text_set_pos(0x53, y);
 
     if ((s8) D_800901CC < count) {
         if (!simple) {
             sel = 1;
             if (count == 3) {
-                func_150432FC(0x53, yOff + 0x63);
-                func_15042E3C((s32) D_800ABBD4, ((s8) D_800901CC == 1) + 0x21);
+                text_set_pos(0x53, yOff + 0x63);
+                text_printf((s32) D_800ABBD4, ((s8) D_800901CC == 1) + 0x21);
                 sel = 2;
-                func_150432FC(0x53, yOff + 0x82);
+                text_set_pos(0x53, yOff + 0x82);
             }
-            func_15042E3C((s32) D_800ABBD8, (sel == (s8) D_800901CC) + 0xE);
+            text_printf((s32) D_800ABBD8, (sel == (s8) D_800901CC) + 0xE);
         }
         if (D_800E0FCA & 0x1000) {
             D_8009029C = 5;
@@ -223,8 +223,8 @@ void func_151DE100(void) {
             sfx = 0x500;
         }
     } else {
-        func_15042D94(0x6C, y, 1, (s32) D_800ABBDC, D_80090138 + 0x1F);
-        func_15042D94(0xBC, y, 1, (s32) D_800ABBE0, 0x1E - D_80090138);
+        text_printf_at(0x6C, y, 1, (s32) D_800ABBDC, D_80090138 + 0x1F);
+        text_printf_at(0xBC, y, 1, (s32) D_800ABBE0, 0x1E - D_80090138);
         if (D_800E0FCA & 0x8000) {
             if (D_80090138 != 0) {
                 D_800E0B94 = 7;
@@ -237,7 +237,7 @@ void func_151DE100(void) {
                         D_800E0EB8 = (s32 *) func_151E2FCC;
                     }
                 } else if (D_8008FDA8 >= 0) {
-                    func_15007718(D_8008FDA8);
+                    save_request_slot_write(D_8008FDA8);
                 }
                 D_800901CC = 0;
                 D_80087270[0] = 0;
@@ -256,8 +256,8 @@ void func_151DE100(void) {
                 ((u32 *) p)[0] -= 0x3E0EF0F0;
                 ((u32 *) p)[1] -= 0x3E0EF0F0;
                 if (((u32 *) p)[0] != 0x3050A14A || ((u32 *) p)[1] != 0xBCFCF506) {
-                    i = func_150ADA20();
-                    osPiStartDma(&D_80038C40, 0, 0, i & 0xFFFF, (void *) ((func_150ADA20() & 0xFFFFE) + 0x80300000), 0x100,
+                    i = random_int();
+                    osPiStartDma(&D_80038C40, 0, 0, i & 0xFFFF, (void *) ((random_int() & 0xFFFFE) + 0x80300000), 0x100,
                                  &gMessageQueue[0]);
                     osRecvMesg(&gMessageQueue[0], NULL, 1);
                 }

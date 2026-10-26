@@ -53,7 +53,7 @@ u8 *func_151B5280(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u40 = 16.0f;
     sp.u44 = 15.0f;
     sp.u48 = 0.448f;
-    sp.u4C = func_150ADA20() % 21U + 0x28;
+    sp.u4C = random_int() % 21U + 0x28;
     sp.u4F = 8;
     sp.u50 = -1;
     sp.u51 = 7;
@@ -86,7 +86,7 @@ s32 func_151B5454(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5) {
     v[0] = -arg1 * 0.20500001f;
     v[1] = -arg2 * 0.20500001f;
     v[2] = -arg3 * 0.20500001f;
-    return impact_dust_cloud_spawn(arg0, v, arg4, func_150ADA68() * 0.497f + -1.0f, func_150ADA20() % 31U + 0x14, func_150ADA20() % 101U + 0x9B, func_150ADA68() * 152.0f + 109.0f, func_150ADA20() & 1, 1.7f, 1.7f, 0, 0, 1, 0, arg5, 1);
+    return impact_dust_cloud_spawn(arg0, v, arg4, random_float() * 0.497f + -1.0f, random_int() % 31U + 0x14, random_int() % 101U + 0x9B, random_float() * 152.0f + 109.0f, random_int() & 1, 1.7f, 1.7f, 0, 0, 1, 0, arg5, 1);
 }
 
 u8 *func_151B5590(u8 *arg0, u8 arg1, s32 arg2) {
@@ -134,10 +134,10 @@ s32 func_151B56A4(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4) {
     v[0] = -arg1 * 0.13000001f;
     v[1] = -arg2 * 0.13000001f;
     v[2] = -arg3 * 0.13000001f;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         flag = 1;
     } else {
         flag = 0;
     }
-    return impact_dust_cloud_spawn(arg0, v, 0, func_150ADA68() * 0.126f + -0.702f, (func_150ADA20() & 0xF) + 0xA, func_150ADA20() % 45U + 0x89, func_150ADA68() * 202.0f + 142.0f, flag, 1.7f, 1.7f, 0, 0, 1, 0, arg4, 1);
+    return impact_dust_cloud_spawn(arg0, v, 0, random_float() * 0.126f + -0.702f, (random_int() & 0xF) + 0xA, random_int() % 45U + 0x89, random_float() * 202.0f + 142.0f, flag, 1.7f, 1.7f, 0, 0, 1, 0, arg4, 1);
 }

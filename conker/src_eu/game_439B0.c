@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15016500(void) {
+/* was func_15016500 */
+void level_globals_reset(void) {
     D_800D1940 = (u8)0;
     D_800D1941 = (u8)0;
     D_800D1944 = 0;
@@ -21,9 +22,10 @@ void func_15016500(void) {
 }
 
 // grim looking loop
-s32 func_1502B020(s32 *, s32, s32, u8, s32);
+s32 asset_lookup_rom(s32 *, s32, s32, u8, s32);
 extern u8 D_800BEECB;
-void func_15016588(void) {
+/* was func_15016588 */
+void level_build_flag_bitmask(void) {
     s32 idx;
     s32 i;
     bzero(D_eu_800BE9A0, 8);
@@ -37,7 +39,7 @@ void func_15016588(void) {
         } else {
             bit *= 2;
         }
-        func_1502B020(&sp40, 3, 0x1A, D_800BEECB, i);
+        asset_lookup_rom(&sp40, 3, 0x1A, D_800BEECB, i);
         if (sp40 != 0) {
             D_eu_800BE9A0[idx] |= bit;
         }

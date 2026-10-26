@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 """P40: whole-pipeline check of the level visibility data build, asm vs NON_MATCHING C, on real level data.
 
-Reference: build/conker.eu.elf (func_15003668 / func_15001460 / func_15001A08 / func_15002008 / func_15002248 /
+Reference: build/conker.eu.elf (collision_build_level_tris / collision_scan_level_dl / func_15001A08 / func_15002008 / func_15002248 /
 func_150183D0 + func_150184B0 are asm). Candidate: build_nm/conker.eu.elf (all C), on the reference's .game_data
 image (+ its own .nm_rodata). Both run in Unicorn MIPS32 (no 64-bit instructions on this path).
 
 Per trial:
   - the level model list (asset (4, level), Python zlib on the ROM record) is placed in RAM and relocated as
-    func_150031EC + func_150049A4 do (parts 0-3: D_800B0E00[i], vertex base hdr + 0x28 + 0xFF000000); part DLs
+    level_load_models + gfx_dl_relocate_segments do (parts 0-3: D_800B0E00[i], vertex base hdr + 0x28 + 0xFF000000); part DLs
     >= 4 become area-2 object records (D_800DBEF4, 0xA0 bytes, +0x1C DL, +0x4F flag, random 0x20 skips);
   - knobs: D_800DBE63 (full-range bounds), the cart word at ROM 0xD24 (pool size x1 / x2), D_80082FA0 (grid),
     segment table D_800D3048, PVS assets (2, 5, level * 2 / + 1) present or not;
-  - func_15003668(level) then func_150038A0() run; allocate_memory is a bump allocator (zeroed blocks),
-    func_1502B5C8 returns the PVS buffers, func_10004074 / PI access are no-ops.
+  - collision_build_level_tris(level) then collision_build_quadtrees() run; allocate_memory is a bump allocator (zeroed blocks),
+    asset_load returns the PVS buffers, func_10004074 / PI access are no-ops.
 Compared: all RDRAM except the stack and the candidate's .nm_rodata. Reported: triangle counts per area, node /
 leaf counts, PVS index size.
 Smoke: func_150A5858 (C) on the C-built area-0 tree with sample view matrices: emitted commands / triangles, and the
 same call through the VR4300 reference (nmasm_vis5858.Ref) on the same memory.
 Synthetic mode (--synth N): random DLs (VTX incl. segment addresses, TRI1 / TRI2 / 0x1x, other commands) through
-func_15001460 alone.
+collision_scan_level_dl alone.
 
 Run in the container from /conker/conker after both builds:
   python3 ../tools/port/difftest/nmasm_level.py ../baserom.eu.z64 [trials] [seed] [--level 0x21] [--synth N]"""
@@ -59,7 +59,7 @@ def syms(elf):
     return d
 
 
-# ---- ROM assets (func_1502B5C8 / func_1502B6BC / func_1502AC88 / func_1502B350 in Python) ----
+# ---- ROM assets (asset_load / asset_load_with_subfiles / asset_rec_read_cached / asset_load_alloc in Python) ----
 def asset(rom, keys):
     p = 0xAB2240
     info = 0
@@ -96,7 +96,7 @@ class Emu:
         self.mu = mu
         self.stubs = {self.s['allocate_memory']: self.st_alloc, self.s['func_10004074']: self.st_nop,
                       self.s['func_10023BC0']: self.st_nop, self.s['func_10023C04']: self.st_nop,
-                      self.s['func_1502B5C8']: self.st_asset}
+                      self.s['asset_load']: self.st_asset}
         for a in self.stubs: mu.hook_add(UC_HOOK_CODE, self.hook, begin=a, end=a)
 
     def hook(self, uc, addr, size, ud):
@@ -157,7 +157,7 @@ def R(mem, a, fmt):
 
 
 def relocate_dl(mem, dl, arg1, hdr):
-    """func_150049A4"""
+    """gfx_dl_relocate_segments"""
     i = 0
     while mem[phys(dl) + 8 * i] != 0xDF:
         c = phys(dl) + 8 * i
@@ -170,11 +170,11 @@ def relocate_dl(mem, dl, arg1, hdr):
 
 
 def level_setup(rng, base, models, level, stats):
-    """func_150031EC in Python: model list at 0x80100000; returns mem."""
+    """level_load_models in Python: model list at 0x80100000; returns mem."""
     mem = bytearray(base)
     H = 0x80105000
     mem[phys(H):phys(H) + len(models)] = models
-    # func_1502B4A8(base, 0): {offset, info} until info bit 31
+    # asset_relocate_subfiles(base, 0): {offset, info} until info bit 31
     n = 0
     while True:
         off, info = R(mem, H + 8 * n, 'iI')
@@ -233,7 +233,7 @@ def knobs(rng, mem, level, flag63):
     W(mem, 0x80000308, 'I', 0xB0000000)
     mem[phys(A['flag63'])] = flag63
     # segment table: 0 (the object DLs' other segments then give pointers below 0x80000001, i.e. 'no vertex';
-    # random kseg0 bases sent level 0x1d's object vertices outside RDRAM). func_15003668 clears segment 1 itself.
+    # random kseg0 bases sent level 0x1d's object vertices outside RDRAM). collision_build_level_tris clears segment 1 itself.
     for s in range(16): W(mem, A['seg'] + 4 * s, 'I', 0)
     W(mem, A['grid'], 'i', rng.choice([0, 1, 2, 3, R(mem, A['grid'], 'i')]))
 
@@ -263,7 +263,7 @@ def smoke(ref_vr, cand, m, rng, nview):
     OUT, MTX = 0x80705000, 0x80715000
     for v in range(nview):
         mm = bytearray(m)
-        # func_150038A0 ends with func_1510F800(0): area 0's tree / tables are selected
+        # collision_build_quadtrees ends with collision_select_area(0): area 0's tree / tables are selected
         W(mm, 0x800D3A00, 'ff', rng.uniform(0.5, 1.5), rng.uniform(0.5, 1.5))
         W(mm, 0x800D3A90, 'f', rng.uniform(-12000, -3000))
         mtx = [0.0] * 16
@@ -331,14 +331,14 @@ def synth(ref, cand, base, rng, n):
         res = []
         for e in (ref, cand):
             e.load(mem, {})
-            e.call('func_15001460', [DL])
+            e.call('collision_scan_level_dl', [DL])
             res.append(e.ram())
         d = compare(ref, cand, res[0], res[1])
         st['tris'] = st.get('tris', 0) + R(res[0], 0x800DC268, 'i')
         if d:
             bad += 1
             if bad <= 5: print('SYNTH DIFF trial %d: %d bytes, first %08X' % (t, len(d), 0x80000000 + d[0]))
-    print('synth func_15001460: %s, %d differences in %d trials, %s' % ('EQUIV' if not bad else 'DIFFER', bad, n, st))
+    print('synth collision_scan_level_dl: %s, %d differences in %d trials, %s' % ('EQUIV' if not bad else 'DIFFER', bad, n, st))
     return bad
 
 
@@ -390,8 +390,8 @@ def main():
             m = bytearray(mem)
             e.load(m, assets)
             e.mu.mem_write(0x10000D24, struct.pack('>I', 0x98CCE31A if magic else 0x12345678))
-            e.call('func_15003668', [level])
-            e.call('func_150038A0', [])
+            e.call('collision_build_level_tris', [level])
+            e.call('collision_build_quadtrees', [])
             res.append((e.ram(), list(e.allocs)))
         # area 2 (objects): vertex pointers are segment offsets (D_800D304C = 0), so the asm writes its stale
         # stack bounds (never recomputed: cache entry 0 <= 0x100000); the C writes 0. Those bounds are excluded,

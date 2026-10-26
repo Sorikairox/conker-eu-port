@@ -106,16 +106,16 @@ void func_150C4620(u8 *obj, s16 kind, u8 flag, s32 arg3) {
     }
     l = (Link4620 *) (rec + 0x28);
     memcpy(l, &link, 0x1C);
-    tail.u0 = func_150ADA20();
-    tail.u1 = func_150ADA20();
+    tail.u0 = random_int();
+    tail.u1 = random_int();
     g.u2C = 700.0f;
     g.u28 = 700.0f;
     tail.radius = 700.0f;
-    tail.u2 = (u32) func_150ADA20() % 6 + 5;
-    tail.u3 = (u32) func_150ADA20() % 6 + 5;
-    tail.u8 = (func_150ADA68() * 0.25f + 0.2f) * tail.radius;   /* D_800A077C */
-    tail.uC = (func_150ADA68() * 0.25f + 0.2f) * tail.radius;   /* D_800A0780 */
-    g.colour = D_800A0710[func_150ADA20() & 3];
+    tail.u2 = (u32) random_int() % 6 + 5;
+    tail.u3 = (u32) random_int() % 6 + 5;
+    tail.u8 = (random_float() * 0.25f + 0.2f) * tail.radius;   /* D_800A077C */
+    tail.uC = (random_float() * 0.25f + 0.2f) * tail.radius;   /* D_800A0780 */
+    g.colour = D_800A0710[random_int() & 3];
     g.u8 = 0x2203;
     g.u0 = 0x200005;
     g.u4 = 0;
@@ -136,8 +136,8 @@ void func_150C4620(u8 *obj, s16 kind, u8 flag, s32 arg3) {
     g.u22 = 1;
     g.u54 = 0.0f;
     g.u24 = 1.0f;
-    lo = (func_150ADA20() & 1) ? 0x40 : 0;
-    hi = (func_150ADA20() & 1) ? 0x80 : 0;
+    lo = (random_int() & 1) ? 0x40 : 0;
+    hi = (random_int() & 1) ? 0x80 : 0;
     g.flags = hi | lo | 0xC000;
     g.uA = 0x12C;
     g.u6C = 10000.0f;   /* D_800A0784 */
@@ -295,14 +295,14 @@ void func_150C49A4(u8 *self) {
         enabled = FALSE;
     }
     if (enabled) {
-        rec->smoke += (D_800A078C_c[0] + func_150ADA68() * D_800A0790_c[0]) * D_800BE9A4;
+        rec->smoke += (D_800A078C_c[0] + random_float() * D_800A0790_c[0]) * D_800BE9A4;
         while (1.0f < rec->smoke) {
             func_151C3C88((u8 *) pos, self[0xC], self[1]);
             rec->smoke -= 1.0f;
         }
     }
 
-    rec->sparks += (D_800A0794_c[0] + func_150ADA68() * D_800A0798_c[0]) * D_800BE9A4;
+    rec->sparks += (D_800A0794_c[0] + random_float() * D_800A0798_c[0]) * D_800BE9A4;
     if (!(1.0f < rec->sparks)) {
         return;
     }
@@ -310,17 +310,17 @@ void func_150C49A4(u8 *self) {
         up = (f32 *) D_800A5860;
     }
     do {
-        r1 = func_150ADA20();
-        r2 = func_150ADA20();
-        f = func_150ADA68();
+        r1 = random_int();
+        r2 = random_int();
+        f = random_float();
         func_15143794((s16) (r1 & 0xFF), (s16) ((u32) r2 % 25 - 0x40), f * D_800A07A0_c[0] + D_800A07A4_c[0], vel);
         vel[0] -= up[0] * D_800A079C_c[0];
         vel[2] -= up[2] * D_800A079C_c[0];
-        a = func_150ADA68();
-        r1 = func_150ADA20();
-        r2 = func_150ADA20();
-        b = func_150ADA68();
-        c = func_150ADA68();
+        a = random_float();
+        r1 = random_int();
+        r2 = random_int();
+        b = random_float();
+        c = random_float();
         impact_dust_cloud_spawn(pos, vel, 0xC, a * D_800A07A8_c[0] + D_800A07AC_c[0], (u32) r1 % 41 + 0x3C, (u32) r2 % 56 + 0xC8,
                       b * 160.0f + 121.0f, c < D_800A07B0_c[0], 1.0f, 1.0f, 0, (s32) basis, 1, 1,
                       self[0xC], self[1]);

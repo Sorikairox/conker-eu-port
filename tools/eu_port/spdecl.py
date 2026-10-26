@@ -18,7 +18,7 @@ for o in undef:
     t='f32' if isf else 's32'
     if idx or addr:
         n=max(max(idx)+1 if idx else 1, min(gap,16) if (gap>1 and (addr or idx)) else 1)
-        # matrices passed to guMtx*/func_150A8050 use 16
+        # matrices passed to guMtx*/mtxf_rotate_xyz_deg use 16
         if re.search(r'guMtx\w*\(\(f32 \(\*\)\[4\]\) &%s'%nm,s): n=16
         out.append('    f32 %s[%d];'%(nm,n))
     else:

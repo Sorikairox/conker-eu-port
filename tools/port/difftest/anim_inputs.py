@@ -8,7 +8,7 @@ for a single (unblended) animation:
   * func_1503D950(id)          anim bank asset (0xF, alias)   -> D_800D1588[id] (u16 key, u16 sfx, s32 ptr; 999 end),
                                                                  D_800C5A90[id] (animation count)
   * func_15083C3C              obj[6] = func_15085170(obj) (model alias), obj+0x58 = dir (2, obj[6])
-  * func_15083D54 -> func_1505E650 -> func_1505E0C4 (fresh state, t2 = 1 path)
+  * func_15083D54 -> obj_start_anim -> anim_start_entry (fresh state, t2 = 1 path)
                                A+0x40 <- header record dir[key] (DMA, (size + 15) & ~15 bytes), A+0x28 <- ROM addr
                                of the key-frame stream dir[key + 1], A+0x18 = (f32)A[0x43], A+8 = start frame ...
   * func_1502DB14 (per frame, just before the evaluator)
@@ -29,13 +29,13 @@ import struct, sys, os, zlib, subprocess, json, argparse
 ROOT = 0xAB2240  # D_AB2240
 
 
-# ---------------- ROM directory (func_1502AC88 / func_1502B5C8 / func_1502B350 / func_1502AF04) ----------------
+# ---------------- ROM directory (asset_rec_read_cached / asset_load / asset_load_alloc / asset_rec_fetch_block) ----------------
 def rec(rom, p, k):
     return struct.unpack('>iI', rom[p + 8 * k:p + 8 * k + 8])
 
 
 def walk(rom, keys):
-    """func_1502B020 / func_1502B110 path walk: p += rec(p, k).off for each key. Returns (p, info) or None."""
+    """asset_lookup_rom / asset_lookup_records path walk: p += rec(p, k).off for each key. Returns (p, info) or None."""
     p, info = ROOT, 1
     for k in keys:
         off, info = rec(rom, p, k)
@@ -46,7 +46,7 @@ def walk(rom, keys):
 
 
 def asset(rom, keys):
-    """func_1502B5C8 / func_1502B6BC: load (and zlib-unpack when info & 0x70000000 == 0x10000000)."""
+    """asset_load / asset_load_with_subfiles: load (and zlib-unpack when info & 0x70000000 == 0x10000000)."""
     w = walk(rom, keys)
     if w is None:
         return None
@@ -103,7 +103,7 @@ def model(rom, mid):
     m = asset(rom, [1, mid])
     if m is None:
         return None
-    ent = [struct.unpack('>iI', m[8 * i:8 * i + 8]) for i in range(7)]  # func_1502B4A8(base, 7)
+    ent = [struct.unpack('>iI', m[8 * i:8 * i + 8]) for i in range(7)]  # asset_relocate_subfiles(base, 7)
     off, info = ent[2]
     info &= 0x0FFFFFFF
     nj = info >> 4                                                     # D_800C52F0[id] = +0x14 >> 4
@@ -129,18 +129,18 @@ def bank(rom, elf, mid):
     return dict(raw=b, entries=ents, hdr=struct.unpack('>4i', b[:16]))
 
 
-# ---------------- animation state (func_1505E0C4 + func_1502DB14) ----------------
+# ---------------- animation state (anim_start_entry + func_1502DB14) ----------------
 def anim_state(rom, elf, mid, k, t, base, speed=1.0, obj6=None):
     bk = bank(rom, elf, mid)
     ents = bk['entries']
     key, sfx, _ = ents[k]
     if key == 999 or key >= 30000:
-        raise SystemExit('anim %d: key %d -> func_1505DFDC (no animation)' % (k, key))
+        raise SystemExit('anim %d: key %d -> obj_anim_reset (no animation)' % (k, key))
     if obj6 is None:
         obj6 = alias(elf, 'D_8009DD24', 'D_800875E0', 7, mid)        # obj[6] = func_15085170(obj)
-    d = walk(rom, [2, obj6])                                           # obj+0x58 = func_1502B020(0, 2, 2, obj[6])
+    d = walk(rom, [2, obj6])                                           # obj+0x58 = asset_lookup_rom(0, 2, 2, obj[6])
     p = d[0]
-    hoff, hinfo = rec(rom, p, key)                                     # func_1502AF04(p, buf, key, 2)
+    hoff, hinfo = rec(rom, p, key)                                     # asset_rec_fetch_block(p, buf, key, 2)
     soff, sinfo = rec(rom, p, key + 1)
     hdr_rom, stream_rom = p + hoff, p + soff
     hsize = (hinfo + 15) & ~15 & 0xFFFFFFFF

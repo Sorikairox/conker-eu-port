@@ -11,14 +11,14 @@ extern s32 D_800D27B4;
 extern s8 D_800D27B8;
 
 
-u8 *func_1502B5C8(s32, s32, s32, s32);
+u8 *asset_load(s32, s32, s32, s32);
 s32 func_15086058();
 extern s16 D_80087634;
 
 void func_15085FE0(s32 arg0) {
     u8 *temp_v0;
 
-    temp_v0 = func_1502B5C8(0, 2, 0x19, arg0);
+    temp_v0 = asset_load(0, 2, 0x19, arg0);
     if (temp_v0 == NULL) {
         D_80087630 = 0;
         D_80087634 = 0;
@@ -705,7 +705,7 @@ f32 func_15049B94(s32 *, s32, f32, s32 *);
 s32 func_15088E84(struct_eu_80087640 *, f32);
 s32 func_150893AC(struct_eu_80087640 *, s32 *, s32 *, s32 *);
 s32 func_1508849C(struct_eu_80087640 *, struct127 *, s32);
-void func_15042D78(u8);
+void text_set_flags(u8);
 
 // rail_track_update: moves `player`'s rail record (D_80087640 + player * 0x84) along its spline to the point nearest
 // the player object (D_800CC2D0 + rec[0x31]): the step +0 (start 0.5 when +0x30 is 0, else eased toward +4 by 1/8,
@@ -819,7 +819,7 @@ void func_150877C0(s32 player, s32 mode, f32 speed) {
         }
     } while (again);
 
-    func_15042D78(0x80);
+    text_set_flags(0x80);
     r[0x32] = r[0x33];
     r[0x33] = D_800BE9E4;
     rec->unk14 = ((*(f32 *) (obj + 0x2C) * dx + *(f32 *) (obj + 0x34) * dz + c) - d) * 4.0f / (s8) r[0x32];
@@ -974,8 +974,8 @@ void func_1508823C(s32 arg0, s32 arg1) {
 
 #ifdef NON_MATCHING
 // obj_yaw_clamp_to_track: keeps the object's yaw (+0x76) within 0x2400 of a quarter turn (+0x4000) past player
-// `player`'s track direction (record D_80087640 + player * 0x84, vector +0x10 / +0xC, func_1505A630). Nothing without
-// player records. Returns func_1505A630's raw result (the asm leaves v0 unset without records; the one caller
+// `player`'s track direction (record D_80087640 + player * 0x84, vector +0x10 / +0xC, math_atan2_u16). Nothing without
+// player records. Returns math_atan2_u16's raw result (the asm leaves v0 unset without records; the one caller
 // ignores it).
 s32 func_150882C4(u8 player, struct127 *obj) {
     struct_eu_80087640 *rec;
@@ -987,7 +987,7 @@ s32 func_150882C4(u8 player, struct127 *obj) {
         return 0;
     }
     rec = &D_80087640[player];
-    r = func_1505A630(*(f32 *) ((u8 *) rec + 0x10), *(f32 *) ((u8 *) rec + 0xC), 0);
+    r = math_atan2_u16(*(f32 *) ((u8 *) rec + 0x10), *(f32 *) ((u8 *) rec + 0xC), 0);
     dir = r + 0x4000;
     diff = dir - *(u16 *) ((u8 *) obj + 0x76);
     if (diff & 0x8000) {
@@ -1007,7 +1007,7 @@ s32 func_150882C4(u8 player, struct127 *obj) {
 extern s8 D_800D27C8;
 
 // player_face_track_side: turns the object (+0x76 yaw) a quarter turn (+0x3600 / +0x4A00) from the direction of
-// player `player`'s track vector (+0x10 / +0xC, func_1505A630), the side picked by the track position +0 against 0.5
+// player `player`'s track vector (+0x10 / +0xC, math_atan2_u16), the side picked by the track position +0 against 0.5
 // (mirrored when D_800D27C8 is set). Returns that direction (0 without player records); the one caller ignores it.
 s32 func_15088360(s32 player, struct127 *obj) {
     struct_eu_80087640 *rec;
@@ -1017,7 +1017,7 @@ s32 func_15088360(s32 player, struct127 *obj) {
         return 0;
     }
     rec = &D_80087640[player];
-    dir = func_1505A630(*(f32 *)((u8 *)rec + 0x10), *(f32 *)((u8 *)rec + 0xC), 0);
+    dir = math_atan2_u16(*(f32 *)((u8 *)rec + 0x10), *(f32 *)((u8 *)rec + 0xC), 0);
     if (D_800D27C8 == 0) {
         if (rec->unk0 < 0.5f) {
             *(u16 *)((u8 *)obj + 0x76) = dir + 0x4A00;
@@ -1055,7 +1055,7 @@ void func_1508845C(s32 arg0, s32 arg1) {
     }
 }
 
-struct216 *func_1507BB28(s32, s32);
+struct216 *aiscript_find_by_kind(s32, s32);
 
 s32 func_1508849C(struct_eu_80087640 *arg0, struct127 *arg1, s32 arg2) {
     struct126 *temp_v0;
@@ -1072,7 +1072,7 @@ s32 func_1508849C(struct_eu_80087640 *arg0, struct127 *arg1, s32 arg2) {
     arg1->unk232 = arg2;
     D_800D154C = arg1;
     D_800C3E78 = *(s8 *)&arg0->unk31;
-    arg1->unk218 = func_1507BB28(0, arg2);
+    arg1->unk218 = aiscript_find_by_kind(0, arg2);
     arg1->unk21C = 0;
     arg1->immune = 0xFF;
     arg0->pad28[8] = 2;
@@ -1587,7 +1587,7 @@ void func_150891D4(u8 *arg0)
     new_var2 = ((u8 *) arg0) + 0x18; // fakematch: permuter temp
     *((f32 *) new_var2) = func_15049AD0(sp78, 0, temp_s4->unk8);
     *((f32 *) (((u8 *) arg0) + 0x1C)) = func_15049B94(sp68, 0, temp_s4->unk8, sp98);
-    temp_f0 = func_15144BC8(((f32) (func_1505A630(*((f32 *) (((u8 *) temp_s4) + 0x10)), *((f32 *) (((u8 *) temp_s4) + 0xC)), 0) + 0x8000)) * 0.005493164f);
+    temp_f0 = func_15144BC8(((f32) (math_atan2_u16(*((f32 *) (((u8 *) temp_s4) + 0x10)), *((f32 *) (((u8 *) temp_s4) + 0xC)), 0) + 0x8000)) * 0.005493164f);
     new_var = (u8 *) arg0; // fakematch: permuter temp
     *((f32 *) (new_var + 0x40)) = temp_f0;
     temp_v0_2 = (s32) (temp_f0 * 182.04445f);
@@ -1677,7 +1677,7 @@ u8 func_150894F8(u8 node, u8 type, u8 prev, u8 band) {
 
 #ifdef NON_MATCHING
 extern u16 D_8009015C;
-void func_1512DAD0(u8 *, s32, void *);
+void camera_queue_event(u8 *, s32, void *);
 u8 func_150894F8(u8 node, u8 type, u8 prev, u8 band);
 
 // rail_camera_follow: rail camera of one player record (D_80087640 + i * 0x84, player = D_800CC2D0 + rec[0x31],
@@ -1753,7 +1753,7 @@ void func_15089664(u8 *rec, u8 *player) {
                 rec[0x4B] = next;
             }
         } while (cur != start);
-        func_1512DAD0(*(u8 **) (player + 0x318), 5, NULL);
+        camera_queue_event(*(u8 **) (player + 0x318), 5, NULL);
         rec[0x30] = 3;
     }
 
@@ -1794,7 +1794,7 @@ void func_15089664(u8 *rec, u8 *player) {
     *(f32 *) (rec + 0x7C) = 30.0f;
     *(f32 *) (rec + 0x80) = 30.0f;
     *(f32 *) (rec + 0x78) = 0.0f;
-    func_1512DAD0(*(u8 **) (player + 0x318), 7, rec + 0x4C);
+    camera_queue_event(*(u8 **) (player + 0x318), 7, rec + 0x4C);
     *(f32 *) (cam + 0x19C) = 30.0f;
     *(f32 *) (cam + 0x1A4) = 30.0f;
     *(f32 *) (cam + 0x1A0) = 30.0f;
@@ -1805,7 +1805,7 @@ void func_15089664(u8 *rec, u8 *player) {
 #endif
 
 #ifdef NON_MATCHING
-void func_1512DAD0(u8 *, s32, void *);
+void camera_queue_event(u8 *, s32, void *);
 u8 func_150894F8(u8 node, u8 type, u8 prev, u8 band);
 
 // rail_camera_spline: spline camera of one player record (D_80087640 + i * 0x84, camera = player + 0x318).
@@ -1835,8 +1835,8 @@ void func_15089B68(u8 *rec, u8 *player, s32 release) {
     if (release) {
         *(s32 *) (rec + 0x5C) = 120;
         *(f32 *) (rec + 0x58) = 999.0f;
-        func_1512DAD0(*(u8 **) (player + 0x318), 10, rec + 0x4C);
-        func_1512DAD0(*(u8 **) (player + 0x318), 6, (void *) (s32) cam[0x23D]);
+        camera_queue_event(*(u8 **) (player + 0x318), 10, rec + 0x4C);
+        camera_queue_event(*(u8 **) (player + 0x318), 6, (void *) (s32) cam[0x23D]);
         rec[0x49] = 0;
         return;
     }
@@ -1855,7 +1855,7 @@ void func_15089B68(u8 *rec, u8 *player, s32 release) {
         *(f32 *) (rec + 0x3C) = *(f32 *) (player + 0x18);
         *(f32 *) (rec + 0x34) = 0.0f;
         *(f32 *) (rec + 0x40) = *(f32 *) (player + 0x1C);
-        func_1512DAD0(*(u8 **) (player + 0x318), 5, (void *) (s32) cam[0x23D]);
+        camera_queue_event(*(u8 **) (player + 0x318), 5, (void *) (s32) cam[0x23D]);
         rec[0x49] = 1;
     }
     *(f32 *) (rec + 0x34) += 0.017f * (f32) D_800BE9E4;
@@ -1912,7 +1912,7 @@ void func_15089B68(u8 *rec, u8 *player, s32 release) {
     *(f32 *) (rec + 0x7C) = 30.0f;
     *(f32 *) (rec + 0x80) = 30.0f;
     *(f32 *) (rec + 0x78) = 0.0f;
-    func_1512DAD0(*(u8 **) (player + 0x318), 7, rec + 0x4C);
+    camera_queue_event(*(u8 **) (player + 0x318), 7, rec + 0x4C);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15089B68.s")

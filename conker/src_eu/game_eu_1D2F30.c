@@ -52,7 +52,7 @@ void func_151A5720(u8 *arg0, u8 *arg1, s16 arg2) {
     temp_a0_3 = temp_a0_2 + 8;
     (*(s32 *)((u8 *)temp_a0_2 + 4)) = (s32) (((*(u8 *)((u8 *)arg1 + 0x15)) << 0x18) | ((*(u8 *)((u8 *)arg1 + 0x16)) << 0x10) | ((*(u8 *)((u8 *)arg1 + 0x17)) << 8) | 0xFF);
     arg0 = temp_a0_3;
-    func_1501A490((s32) temp_a0_3, arg2, 0, 0, 0, 3);
+    render_set_scissor((s32) temp_a0_3, arg2, 0, 0, 0, 3);
     sp.uAB = 0;
     var_a0 = func_15142FBC(arg0, 0xC00, 0x0F0A4004, &sp.uAB);
     var_a2 = D_800BE628 + ((*(u8 *)((u8 *)arg1 + 0x1A)) * 0x180);

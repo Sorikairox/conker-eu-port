@@ -4,8 +4,9 @@
 #include "variables.h"
 
 
-void func_15017790(void) {
-    func_1509C120();
+/* was func_15017790 */
+void level_state_clear(void) {
+    save_block_realloc_random();
     bzero(D_800D2E4C, 0x1B);
     bzero(&D_800D2E50, 0x10);
     bzero(&D_800D2E60, 9);
@@ -13,8 +14,9 @@ void func_15017790(void) {
     D_800D2E44 = (u8)0;
 }
 
-void func_150177F8(void) {
-    func_1509BA04(1);
+/* was func_150177F8 */
+void level_state_init(void) {
+    event_list_unload(1);
     bzero(&D_800D2F48, 0xC);
     func_150A00F0();
     D_800D2DB0 = D_800968C0;
@@ -24,30 +26,32 @@ void func_150177F8(void) {
     D_800D2E44 = 0;
 }
 
-void func_15017868(void) {
+/* was func_15017868 */
+void level_apply_flag_entries(void) {
     u16 *temp_v0;
     s32 i;
 
     for (i = 0; i < D_800D2F3C; i++) {
-        temp_v0 = func_1509B704((s16)D_800D2F40[i]);
+        temp_v0 = event_find((s16)D_800D2F40[i]);
         if ((temp_v0 != 0) && ((temp_v0[0] & 0x1000) != 0)) {
             temp_v0[1] = D_800BE9F0;
         }
 
     }
-    func_1509BA04(0);
-    func_1509B4A0(*(((s16*)&D_800BE9F0)+1), 1); // er?
+    event_list_unload(0);
+    event_start_level_events(*(((s16*)&D_800BE9F0)+1), 1); // er?
 }
 
 #ifdef NON_MATCHING
 u8 **allocate_memory(s32, s32, s32, s32);
-void func_15017B20(u8 *, u32);
+void zones_build_overlap_masks(u8 *, u32);
 extern s32 D_800D34F0;
 extern s32 D_800D3510;
 extern u8 **D_800D3690;
 extern s32 D_800D3694;
 
-void func_15017930(s32 arg0) {
+/* was func_15017930 */
+void zones_load(s32 arg0) {
     s32 temp_t9;
     s32 var_a0;
     s32 var_a1;
@@ -63,11 +67,11 @@ void func_15017930(s32 arg0) {
     u8 temp_v0_2;
     u8 temp_v0_4;
 
-    temp_v0 = func_1502B7F0((s32 *) &D_800D34B8, 3, 0xC, arg0, 5);
+    temp_v0 = asset_load_ptr((s32 *) &D_800D34B8, 3, 0xC, arg0, 5);
     temp_lo = temp_v0 / 52U;
     D_800D3094 = (s32) temp_v0;
     D_800D3094 = (s32) temp_lo;
-    func_15017B20(D_800D34B8, temp_lo);
+    zones_build_overlap_masks(D_800D34B8, temp_lo);
     D_800D3694 = 0;
     D_800D3690 = NULL;
     var_a3 = 0;
@@ -141,17 +145,17 @@ block_18:
     bzero(&D_800D34F0, 0x20);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_44C40/func_15017930.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_44C40/zones_load.s")
 #endif
 #ifdef NON_MATCHING
 void func_150A11F4(u8 *);
-void func_15017FA4(u8 *, u8 *);
+void zone_compute_bbox(u8 *, u8 *);
 extern u8 *D_800D34BC;
 extern u64 D_800D34C0[3];
 extern u64 D_800D34D8[3];
 
 /* P43 (level load): per-zone records (0x28 bytes at D_800D34BC: u64 mask[3], u8 count at +0x18, s16 box x / y / z
- * min-max at +0x1A..+0x24) from func_15017FA4 for each 0x34-byte zone of arg0; D_800D34C0 = zones with (+0x15 & 3) == 3
+ * min-max at +0x1A..+0x24) from zone_compute_bbox for each 0x34-byte zone of arg0; D_800D34C0 = zones with (+0x15 & 3) == 3
  * or +0x16 & 8 (not +0x16 & 4), D_800D34D8 = the others without 8 / 4; then for every D_800D34D8 zone i the mask of the
  * D_800D34D8 zones j whose box overlaps i's on all three axes (count in +0x18). The 64-bit masks are __ll_lshift calls in
  * the asm (difftest compares the call sequence; the shift itself is the stub). The asm returns no value. */
@@ -160,7 +164,8 @@ extern u64 D_800D34D8[3];
      || (*(s16 *)((b) + (lo)) < *(s16 *)((a) + (lo)) && *(s16 *)((a) + (lo)) < *(s16 *)((b) + (hi))) \
      || (*(s16 *)((a) + (lo)) < *(s16 *)((b) + (hi)) && *(s16 *)((b) + (hi)) < *(s16 *)((a) + (hi))))
 
-void func_15017B20(u8 *arg0, u32 arg1) {
+/* was func_15017B20 */
+void zones_build_overlap_masks(u8 *arg0, u32 arg1) {
     s32 n = arg1;
     s32 i, j;
     u8 *e;
@@ -174,7 +179,7 @@ void func_15017B20(u8 *arg0, u32 arg1) {
     D_800D34BC = (u8 *)allocate_memory(n * 0x28, 1, 1, 0);
     for (i = 0; i < n; i++) {
         func_150A11F4(arg0 + i * 0x34);
-        func_15017FA4(arg0 + i * 0x34, D_800D34BC + i * 0x28);
+        zone_compute_bbox(arg0 + i * 0x34, D_800D34BC + i * 0x28);
     }
     bzero(D_800D34C0, 0x18);
     for (i = 0, e = arg0; i < n; i++, e += 0x34) {
@@ -222,21 +227,22 @@ void func_15017B20(u8 *arg0, u32 arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_44C40/func_15017B20.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_44C40/zones_build_overlap_masks.s")
 #endif
 #ifdef NON_MATCHING
-void func_150A7DA0(f32 (*)[4], s32, s32, s32); /* axis as f32 bit patterns (game_D5250.c) */
-void func_150A8050(f32 (*)[4], f32, f32, f32);
+void mtxf_translate(f32 (*)[4], s32, s32, s32); /* axis as f32 bit patterns (game_D5250.c) */
+void mtxf_rotate_xyz_deg(f32 (*)[4], f32, f32, f32);
 void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 void func_150A7E40(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
 
 /* P64 (level load): bounding box of a 0x34-byte zone (s16 x / y / z at +0, size +6 / +8 / +0xA, f32 angles +0xC /
  * +0x10, shape = +0x15 & 3) into the 0x28-byte zone record `out` (s16 min x / max x / min y / max y / min z / max z
  * at +0x1A..+0x24). Shape 0: cylinder-like (size6, size8 / 2, size6), 1: cube (size6), 2: box (size6, size8 / 2,
- * sizeA), each rotated by func_150A7DA0 / func_150A8050 except shape 1; shape 3 gives the point box. The eight
+ * sizeA), each rotated by mtxf_translate / mtxf_rotate_xyz_deg except shape 1; shape 3 gives the point box. The eight
  * corners (+-1, +-1, +-1) of the transformed unit cube are taken; min / max start at 0, so the box always holds the
  * zone origin, and a corner only raises the max when it did not lower the min (as the asm does). */
-void func_15017FA4(u8 *zone, u8 *out) {
+/* was func_15017FA4 */
+void zone_compute_bbox(u8 *zone, u8 *out) {
     f32 rot[4][4];
     f32 m[4][4];
     f32 cx, cy, cz;
@@ -247,33 +253,33 @@ void func_15017FA4(u8 *zone, u8 *out) {
     union {
         f32 f;
         s32 bits;
-    } sx, sy, sz; /* functions.h declares func_150A7CB0 (scale matrix) with s32 arguments: f32 bit patterns */
+    } sx, sy, sz; /* functions.h declares mtxf_scale (scale matrix) with s32 arguments: f32 bit patterns */
 
     switch (zone[0x15] & 3) {
         case 0:
-            func_150A7DA0(rot, 0, 0x3F800000, 0); /* (0, 1.0f, 0) */
+            mtxf_translate(rot, 0, 0x3F800000, 0); /* (0, 1.0f, 0) */
             sx.f = *(s16 *)(zone + 6);
             sy.f = *(s16 *)(zone + 8) * 0.5f;
             sz.f = *(s16 *)(zone + 6);
-            func_150A7CB0(m, sx.bits, sy.bits, sz.bits);
+            mtxf_scale(m, sx.bits, sy.bits, sz.bits);
             func_150A7A48(rot, m, m);
-            func_150A8050(rot, *(f32 *)(zone + 0xC), *(f32 *)(zone + 0x10), 0.0f);
+            mtxf_rotate_xyz_deg(rot, *(f32 *)(zone + 0xC), *(f32 *)(zone + 0x10), 0.0f);
             func_150A7A48(m, rot, m);
             break;
         case 1:
             sx.f = *(s16 *)(zone + 6);
             sy.f = *(s16 *)(zone + 6);
             sz.f = *(s16 *)(zone + 6);
-            func_150A7CB0(m, sx.bits, sy.bits, sz.bits);
+            mtxf_scale(m, sx.bits, sy.bits, sz.bits);
             break;
         case 2:
-            func_150A7DA0(rot, 0, 0x3F800000, 0); /* (0, 1.0f, 0) */
+            mtxf_translate(rot, 0, 0x3F800000, 0); /* (0, 1.0f, 0) */
             sx.f = *(s16 *)(zone + 6);
             sy.f = *(s16 *)(zone + 8) * 0.5f;
             sz.f = *(s16 *)(zone + 0xA);
-            func_150A7CB0(m, sx.bits, sy.bits, sz.bits);
+            mtxf_scale(m, sx.bits, sy.bits, sz.bits);
             func_150A7A48(rot, m, m);
-            func_150A8050(rot, *(f32 *)(zone + 0xC), *(f32 *)(zone + 0x10), 0.0f);
+            mtxf_rotate_xyz_deg(rot, *(f32 *)(zone + 0xC), *(f32 *)(zone + 0x10), 0.0f);
             func_150A7A48(m, rot, m);
             break;
         default:
@@ -312,5 +318,5 @@ void func_15017FA4(u8 *zone, u8 *out) {
     *(s16 *)(out + 0x24) = *(s16 *)(zone + 4) + max_z;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_44C40/func_15017FA4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_44C40/zone_compute_bbox.s")
 #endif

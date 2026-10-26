@@ -20,7 +20,8 @@ extern s32 D_800DA2D7;
 extern s32 D_800DA2D8;
 extern s32 D_800DA2E4;
 
-void func_15000940(s32 arg0) {
+/* was func_15000940 */
+void level_init_color_tables(s32 arg0) {
     s32 *var_a0;
     s32 *var_a1;
     s32 *var_a2;
@@ -86,5 +87,5 @@ loop_2:
     } while (var_v0 != &D_800DA2E4);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2DDF0/func_15000940.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2DDF0/level_init_color_tables.s")
 #endif

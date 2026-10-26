@@ -208,7 +208,7 @@ s32 func_15157E08(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s3
 s32 func_15157E88(u8 *arg0) {
     u8 *p;
 
-    func_150A8050(&MTX_7E88(arg0), *(f32 *)(arg0 + 0x120), *(f32 *)(arg0 + 0x124), *(f32 *)(arg0 + 0x128));
+    mtxf_rotate_xyz_deg(&MTX_7E88(arg0), *(f32 *)(arg0 + 0x120), *(f32 *)(arg0 + 0x124), *(f32 *)(arg0 + 0x128));
     p = arg0 + 0x120;
     MTX_7E88(arg0)[12] = *(f32 *)(arg0 + 0x54);
     MTX_7E88(arg0)[13] = *(f32 *)(arg0 + 0x58);
@@ -280,7 +280,7 @@ s32 func_15158338(s32 arg0) {
 
 #define MTX_835C(a) (((f32 (*)[16])((a) + 0x7C))[D_800BE9C0])
 void func_1515835C(u8 *arg0, u8 *arg1) {
-    func_150A8050(&MTX_835C(arg0), ((f32 *)arg1)[0], ((f32 *)arg1)[1], ((f32 *)arg1)[2]);
+    mtxf_rotate_xyz_deg(&MTX_835C(arg0), ((f32 *)arg1)[0], ((f32 *)arg1)[1], ((f32 *)arg1)[2]);
     MTX_835C(arg0)[12] = ((f32 *)arg0)[0x54 / 4];
     MTX_835C(arg0)[13] = ((f32 *)arg0)[0x58 / 4];
     MTX_835C(arg0)[14] = ((f32 *)arg0)[0x5C / 4];

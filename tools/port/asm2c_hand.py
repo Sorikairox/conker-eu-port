@@ -22,9 +22,9 @@ EXTERN = {
     'func_1507C7C0': 'v0 = func_1507C7C0((struct127 *) a0, (s16 *) a1, (s16 *) a2, (s16 *) a3);',
     'func_150A69A8': 'v0 = func_150A69A8((s32) a0, (s32) a1, (s32 *) a2, (s32) a3);',
     'func_150A49D0': 'v0 = func_150A49D0((s32) a0, (s32 *) a1, (s32) a2);',
-    'func_150492CC': 'func_150492CC(F[12].f, F[14].f, U2F(a2));',
+    'quadtree_set_test_box': 'quadtree_set_test_box(F[12].f, F[14].f, U2F(a2));',
     'func_150484A0': 'F[0].f = func_150484A0(F[12].f, F[14].f);',
-    'func_1510F800': 'func_1510F800((s32) a0);',
+    'collision_select_area': 'collision_select_area((s32) a0);',
     'sinf': 'F[0].f = sinf(F[12].f);',
     'cosf': 'F[0].f = cosf(F[12].f);',
 }

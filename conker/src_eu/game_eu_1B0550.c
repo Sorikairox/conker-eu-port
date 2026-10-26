@@ -126,9 +126,9 @@ loop_17:
             if ((var_s6 != 0) && (*(s32 *)((u8 *)&D_8008D407 + (*sp90 * 0x18)) == 0)) {
                 temp_s0 = &D_800CC2D0[var_s5];
                 temp_v1_2 = *sp90;
-                *(s32 *)((u8 *)&D_8008D407 + (temp_v1_2 * 0x18)) = (func_150ADA20() & 0x3F) + 0x96;
+                *(s32 *)((u8 *)&D_8008D407 + (temp_v1_2 * 0x18)) = (random_int() & 0x3F) + 0x96;
                 if ((temp_v1_2 == 2) || (temp_v1_2 == 3)) {
-                    func_10010F88((func_150ADA20() & 8) + 0x507, 0x5DC0U, 0, 0U, 0, (s16) (s32) (*(f32 *)((u8 *)temp_s0 + -0x318)), (s16) (s32) (*(f32 *)((u8 *)temp_s0 + -0x314)), (s16) (s32) (*(f32 *)((u8 *)temp_s0 + -0x310)), 0x12C, 0x320);
+                    func_10010F88((random_int() & 8) + 0x507, 0x5DC0U, 0, 0U, 0, (s16) (s32) (*(f32 *)((u8 *)temp_s0 + -0x318)), (s16) (s32) (*(f32 *)((u8 *)temp_s0 + -0x314)), (s16) (s32) (*(f32 *)((u8 *)temp_s0 + -0x310)), 0x12C, 0x320);
                 } else {
                     func_10010F88(0xF, 0x5DC0U, 0, 0U, 0, (s16) (s32) (*(f32 *)((u8 *)temp_s0 + -0x318)), (s16) (s32) (*(f32 *)((u8 *)temp_s0 + -0x314)), (s16) (s32) (*(f32 *)((u8 *)temp_s0 + -0x310)), 0x12C, 0x320);
                 }
@@ -178,7 +178,7 @@ void func_151831CC(u8 *obj) {
     f32 b;
     s16 *v;
 
-    func_150A8050(mtx, 0.0f, (f32)-D_8008D400[*kind][0], 0.0f);
+    mtxf_rotate_xyz_deg(mtx, 0.0f, (f32)-D_8008D400[*kind][0], 0.0f);
     for (i = 0, off = 0; i < *(u16 *)((u8 *)&D_800DBEF4[D_8008D400[*kind][1]] + 0x16); i++, off += 0x10, out += 8) {
         pos = func_151834C8(*(s16 *)(*(u8 **)(obj + 0x28) + off + 4), water);
         slot = (s32)pos;
@@ -253,7 +253,7 @@ s32 func_1518354C(struct127 *pl, s32 slot, s32 water) {
     }
     dx = pl->x_position - (f32) *(s16 *) (model + 0x10);
     dz = pl->z_position - (f32) *(s16 *) (model + 0x14);
-    func_150A8050(mtx, 0.0f, (f32) *(s16 *) (type + 0x10), 0.0f);
+    mtxf_rotate_xyz_deg(mtx, 0.0f, (f32) *(s16 *) (type + 0x10), 0.0f);
     func_150A7E40(mtx, dx, 0.0f, dz, &ox, &oy, &oz);
     type = (u8 *) &D_8008D3F0 + *kind * 0x18;
     if (oz > 0.0f || oz < (f32) *(s16 *) (type + 0xC) || ox < 0.0f || ox > (f32) *(s16 *) (type + 0xE)) {

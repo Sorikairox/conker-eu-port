@@ -67,14 +67,14 @@ void func_15095470(s32 arg0, s32 arg1, s32 arg2) {
 /* Texture loader behind func_15095380 / func_150953F8 (the sky quad, sprites, ...): appends the display-list
  * commands that load the texture `tex` into TMEM at `tmem` and set up render tile `tile`, and returns the new
  * display-list end. `tex` is the descriptor func_15095470 fills (D_800D30B0): +0 address, or an asset id below
- * 0x10000000 that the texture cache resolves (func_1510D66C with `age`), +4 width, +6 height, +8 format (G_IM_FMT_*;
+ * 0x10000000 that the texture cache resolves (texture_cache_lookup with `age`), +4 width, +6 height, +8 format (G_IM_FMT_*;
  * 5 = RGBA texels followed by an I4 plane that goes to tile + 1), +9 texel size (G_IM_SIZ_*), +0xA animated flag
  * (`frame` selects one of several equal textures stored after each other; 0 when not animated). The address used
  * is kept in D_800D30C0. Clamp / mirror `cm` applies to s and t; the tile rectangle starts at (uls, ult) with the
  * s fraction `sfrac` (10.2). For CI textures the palette after the texels is loaded too (D_800D30BC = 0x8000,
  * the CI flag for the caller's render mode; 0 otherwise). Note the I4 tile's ult is not shifted by 2 (as the
  * original). */
-s32 func_1510D66C(s32 id, s32 *outSize, s32 age, s32 addRef);
+s32 texture_cache_lookup(s32 id, s32 *outSize, s32 age, s32 addRef);
 extern s32 D_800D30BC;
 
 static const u8 s954E4_incr[4] = { G_IM_SIZ_4b_INCR, G_IM_SIZ_8b_INCR, G_IM_SIZ_16b_INCR, G_IM_SIZ_32b_INCR };
@@ -108,7 +108,7 @@ s32 func_150954E4(s32 gfxAddr, s32 *tex, s32 tmem, s32 tile, s32 frame, s32 sfra
     addr = *(s32 *)t;
     D_800D30C0 = addr;
     if ((u32)addr < 0x10000000) {
-        D_800D30C0 = func_1510D66C(addr, NULL, age, 0);
+        D_800D30C0 = texture_cache_lookup(addr, NULL, age, 0);
         addr = D_800D30C0;
     }
     if (addr != (s32)0x80000000) {

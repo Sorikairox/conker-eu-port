@@ -4,7 +4,8 @@
 
 
 #ifdef NON_MATCHING
-void func_150DFDA0(struct108 *arg0) {
+/* was func_150DFDA0 */
+void camera_update_water_mode(struct108 *arg0) {
     s32 temp_t1;
     s32 temp_t5;
     s32 temp_t7;
@@ -29,5 +30,5 @@ void func_150DFDA0(struct108 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10D5B0/func_150DFDA0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10D5B0/camera_update_water_mode.s")
 #endif

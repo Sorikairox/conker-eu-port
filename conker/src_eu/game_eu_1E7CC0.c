@@ -285,10 +285,10 @@ extern f32 D_800AAAB8[4][3];
 extern f32 D_800AAAE8[4];
 
 /* random launch speed factor 0.083..0.283 and spin -14.4..14.4 */
-#define SHARD_SPEED() ((func_150ADA68() * 200.0f + 83.0f) * 0.001f)
-#define SHARD_SPIN() ((func_150ADA68() * 28864.0f + -14432.0f) * 0.001f)
+#define SHARD_SPEED() ((random_float() * 200.0f + 83.0f) * 0.001f)
+#define SHARD_SPIN() ((random_float() * 28864.0f + -14432.0f) * 0.001f)
 
-// object_model_shatter: an object's model breaks apart (func_1507D754, a0 = obj, 0xFF, 1): a smoke burst at the
+// object_model_shatter: an object's model breaks apart (object_destroy_effects, a0 = obj, 0xFF, 1): a smoke burst at the
 // object (25 above its position) and, when it has a visible model instance (+0x1D4, +0x74 low nibble != 0xF),
 // pieces 0x27 .. 0x2C flung from model-space points (transformed by the instance matrix +0x40) towards other
 // points, spawned at the model's origin plus an offset, with random speed, life 30..65 and spin. The pieces
@@ -367,11 +367,11 @@ void func_151BAAC8(u8 *obj, u8 arg1, s32 arg2) {
 
     /* piece 0x27 */
     speed = SHARD_SPEED();
-    req.life = (func_150ADA20() % 36U) + 30;
+    req.life = (random_int() % 36U) + 30;
     req.model = 0x27;
     req.sizeZ = 0.75f;
     req.sizeX = 0.75f;
-    func_150ADA68();
+    random_float();
     req.gravity = -0.48800004f; /* -488 * 0.001 */
     func_15143134(D_800AA970, req.from, mtx);
     func_15143134(D_800AA97C, req.vel, mtx);
@@ -388,14 +388,14 @@ void func_151BAAC8(u8 *obj, u8 arg1, s32 arg2) {
 
     /* piece 0x28: towards one of two points */
     speed = SHARD_SPEED();
-    req.life = (func_150ADA20() % 36U) + 30;
+    req.life = (random_int() % 36U) + 30;
     req.model = 0x28;
     req.sizeZ = 0.5f;
     req.sizeX = 0.5f;
-    func_150ADA68();
+    random_float();
     req.gravity = -0.48800004f;
     func_15143134(D_800AA988, req.from, mtx);
-    func_15143134(D_800AA994[func_150ADA20() & 1], req.vel, mtx);
+    func_15143134(D_800AA994[random_int() & 1], req.vel, mtx);
     req.vel[0] = (req.vel[0] - req.from[0]) * speed;
     req.vel[1] = (req.vel[1] - req.from[1]) * speed;
     req.vel[2] = (req.vel[2] - req.from[2]) * speed;
@@ -409,12 +409,12 @@ void func_151BAAC8(u8 *obj, u8 arg1, s32 arg2) {
     /* pieces 0x29 */
     req.model = 0x29;
     for (i = 0; i < 4; i++) {
-        if (func_150ADA20() & 1) {
+        if (random_int() & 1) {
             speed = SHARD_SPEED();
-            req.life = (func_150ADA20() % 36U) + 30;
+            req.life = (random_int() % 36U) + 30;
             req.sizeX = D_800AAA0C[i];
             req.sizeZ = D_800AAA0C[i];
-            func_150ADA68();
+            random_float();
             req.gravity = -0.48800004f;
             func_15143134(D_800AA9AC[i], req.from, mtx);
             func_15143134(D_800AA9DC[i], req.vel, mtx);
@@ -436,10 +436,10 @@ void func_151BAAC8(u8 *obj, u8 arg1, s32 arg2) {
     req.sizeX = 0.551f;
     req.sizeZ = 0.551f;
     for (i = 0; i < 2; i++) {
-        if (func_150ADA20() & 1) {
+        if (random_int() & 1) {
             speed = SHARD_SPEED();
-            req.life = (func_150ADA20() % 36U) + 30;
-            func_150ADA68();
+            req.life = (random_int() % 36U) + 30;
+            random_float();
             req.gravity = -0.48800004f;
             func_15143134(D_800AAA28[i], req.vel, mtx);
             req.vel[0] = (req.vel[0] - req.from[0]) * speed;
@@ -460,12 +460,12 @@ void func_151BAAC8(u8 *obj, u8 arg1, s32 arg2) {
     /* pieces 0x2C */
     req.model = 0x2C;
     for (i = 0; i < 4; i++) {
-        if (func_150ADA20() & 1) {
+        if (random_int() & 1) {
             speed = SHARD_SPEED();
-            req.life = (func_150ADA20() % 36U) + 30;
+            req.life = (random_int() % 36U) + 30;
             req.sizeX = D_800AAAE8[i];
             req.sizeZ = D_800AAAE8[i];
-            func_150ADA68();
+            random_float();
             req.gravity = -0.48800004f;
             func_15143134(D_800AAA58[i], req.from, mtx);
             func_15143134(D_800AAA88[i], req.vel, mtx);
@@ -514,7 +514,7 @@ s32 func_1000F568(s32, s32);
 // while running (0x4A8) switches back to idle 0x4A7 (0x2000); while the wind-down 0x4A9 plays it waits (returns 1).
 // The run / wind-down voice fades its volume (*vol * level / 256) in (bit 7) or out by 8 a frame (returns 1 when
 // faded out); with a timer it counts down by D_800BE9E4 and, at the end while running, starts 0x4A9 and a new
-// random (func_150ADA20 & 0x200) timer. Its pitch is |speed| * +0xB8 / 2. Repacks +0x1C; when *vol is 0 or the
+// random (random_int & 0x200) timer. Its pitch is |speed| * +0xB8 / 2. Repacks +0x1C; when *vol is 0 or the
 // voice was flagged (+0x10 & 0x80) it stops its sound (+0x24) and clears the id, the flag and *vol. Returns 0.
 s32 func_151BB690(u8 *voice, s32 arg1, s32 *vol, s32 arg3, s32 *pitch, s32 arg5, u16 *id) {
     u8 *tank = *(u8 **) (voice + 0x18);
@@ -585,7 +585,7 @@ s32 func_151BB690(u8 *voice, s32 arg1, s32 *vol, s32 arg3, s32 *pitch, s32 arg5,
                 level += 8;
                 if (level >= 0x100) {
                     level = 0xFF;
-                    timer = (func_150ADA20() & 0x200) + 0x12C;
+                    timer = (random_int() & 0x200) + 0x12C;
                     fading = 0;
                 }
             } else {
@@ -602,7 +602,7 @@ s32 func_151BB690(u8 *voice, s32 arg1, s32 *vol, s32 arg3, s32 *pitch, s32 arg5,
                     func_1000FA64(0x4A9, (s32) *(f32 *) (tank + 0x14), (s32) *(f32 *) (tank + 0x18),
                                   (s32) *(f32 *) (tank + 0x1C), 0x2EE0, 0x320, 0xC8, (s32) &func_151BB690, tank,
                                   drive | 0x880, 8, 0);
-                    timer = (func_150ADA20() & 0x200) + 0x384;
+                    timer = (random_int() & 0x200) + 0x384;
                 }
             }
         }
@@ -965,18 +965,18 @@ void func_151BC494(u8 *arg0, u8 arg1, s32 arg2) {
 
     sp48[0] = 3;
     sp48[1] = -1;
-    *(s16 *)(sp48 + 2) = (func_150ADA20() & 0xF) + 5;
+    *(s16 *)(sp48 + 2) = (random_int() & 0xF) + 5;
     sp48[4] = 0;
     sp3C[0] = *(f32 *)(arg0 + 0);
     sp3C[1] = *(f32 *)(arg0 + 4);
     sp3C[2] = *(f32 *)(arg0 + 8);
-    light_create_with_ctrl(sp48, sp3C, (func_150ADA20() % 21U) + 0x1E, 0xFF, 0x61, 0x36, 0xFFU, 0U, 0, arg1, arg2);
+    light_create_with_ctrl(sp48, sp3C, (random_int() % 21U) + 0x1E, 0xFF, 0x61, 0x36, 0xFFU, 0U, 0, arg1, arg2);
 }
 
 #ifdef NON_MATCHING
-void func_150E856C(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
+void fx_scorch_decal_spawn(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
 #else
-s32 func_150E856C(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
+s32 fx_scorch_decal_spawn(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
 #endif
 
 void func_151BC56C(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
@@ -984,9 +984,9 @@ void func_151BC56C(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     u32 sp40;
     f32 sp3C;
 
-    sp3C = func_150ADA68();
-    sp40 = func_150ADA20();
-    func_150E856C((sp3C * 75.0f) + 75.0f, ((sp40 % 56U) + 0xC8) & 0xFF, arg0, arg1, (func_150ADA20() % 205U) + 0x12B, 1, 1, 0, 0, 0, (s32) arg2, 0);
+    sp3C = random_float();
+    sp40 = random_int();
+    fx_scorch_decal_spawn((sp3C * 75.0f) + 75.0f, ((sp40 % 56U) + 0xC8) & 0xFF, arg0, arg1, (random_int() % 205U) + 0x12B, 1, 1, 0, 0, 0, (s32) arg2, 0);
 }
 
 struct225 *light_create_obj_beam(struct127 *arg0, u8 arg1, struct17 *arg2, struct17 *arg3, f32 arg4, u8 arg5, s16 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, u8 argC, u8 argD, u8 argE, s32 argF);
@@ -1122,8 +1122,8 @@ void func_151BC920(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp6C[6] = arg0;
     sp6C[7] = arg1;
     sp6C[8] = arg2;
-    func_15143794((s16) (func_150ADA20() & 0xFF), (s16) ((func_150ADA20() % 65U) - 0x20), func_150ADA68() * 1680.0f * 0.01f, &sp6C[3]);
-    temp_f2 = (func_150ADA68() * 202.0f) + 208.0f;
+    func_15143794((s16) (random_int() & 0xFF), (s16) ((random_int() % 65U) - 0x20), random_float() * 1680.0f * 0.01f, &sp6C[3]);
+    temp_f2 = (random_float() * 202.0f) + 208.0f;
     sp6C[0] = 0.0f;
     sp6C[1] = 0.0f;
     temp_f2 = temp_f2 * 0.001f;
@@ -1132,9 +1132,9 @@ void func_151BC920(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp6C[4] += -arg4 * D_800BEDC8 * temp_f2;
     sp6C[5] += -arg5 * D_800BEDC8 * temp_f2;
 #ifdef NON_MATCHING
-    func_151A2C9C(&sp6C[6], sp6C, &sp6C[3], 1.0f, ((func_150ADA68() * 1049.0f) + -1022.0f) * 0.001f, (func_150ADA68() * 124.0f) + 202.0f, (func_150ADA20() & 0xF) + 0x14, (func_150ADA20() % 201U) + 0x37, 0xF, 0xF, 0, -1, 0xCB, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
+    func_151A2C9C(&sp6C[6], sp6C, &sp6C[3], 1.0f, ((random_float() * 1049.0f) + -1022.0f) * 0.001f, (random_float() * 124.0f) + 202.0f, (random_int() & 0xF) + 0x14, (random_int() % 201U) + 0x37, 0xF, 0xF, 0, -1, 0xCB, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
 #else
-    func_151A2C9C(&sp6C[6], sp6C, &sp6C[3], 0x3F800000, ((func_150ADA68() * 1049.0f) + -1022.0f) * 0.001f, (func_150ADA68() * 124.0f) + 202.0f, (func_150ADA20() & 0xF) + 0x14, (func_150ADA20() % 201U) + 0x37, 0xF, 0xF, 0, -1, 0xCB, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
+    func_151A2C9C(&sp6C[6], sp6C, &sp6C[3], 0x3F800000, ((random_float() * 1049.0f) + -1022.0f) * 0.001f, (random_float() * 124.0f) + 202.0f, (random_int() & 0xF) + 0x14, (random_int() % 201U) + 0x37, 0xF, 0xF, 0, -1, 0xCB, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
 #endif
 }
 
@@ -1699,16 +1699,16 @@ void func_151BD9EC(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
         sp.u4C = 0;
         sp.u54 = 0;
         sp.u58 = 0;
-        temp_f6 = func_150ADA68() * 251.0f;
+        temp_f6 = random_float() * 251.0f;
         sp.u66 = 0x14;
         sp.u68 = 0xC;
         sp.u9C = (temp_f6 + 44.0f) * 0.001f;
         var_v1 = 0;
-        if (func_150ADA20() & 1) {
+        if (random_int() & 1) {
             var_v1 = 0x40;
         }
         sp2C = var_v1;
-        if (func_150ADA20() & 1) {
+        if (random_int() & 1) {
             var_v0 = 0x80;
         } else {
             var_v0 = 0;
@@ -1729,10 +1729,10 @@ void func_151BD9EC(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
         sp.u62 = 0x5A;
         sp.u44 = (u8 *)0x3F6F49BF;
         sp.u6C = 1.034358f;
-        sp.u63 = (func_150ADA20() % 156U) + 0x64;
+        sp.u63 = (random_int() % 156U) + 0x64;
         sp.u64 = 0xFF;
-        sp.u52 = (func_150ADA20() % 18U) + 0x19;
-        temp_f18 = (func_150ADA68() * 53.0f) + 49.0f;
+        sp.u52 = (random_int() % 18U) + 0x19;
+        temp_f18 = (random_float() * 53.0f) + 49.0f;
         sp.u74 = temp_f18;
         sp.u70 = temp_f18;
         temp_f16 = ((*(f32 *)((u8 *)arg1 + 0)) - (*(f32 *)((u8 *)arg0 + 0))) * (*(f32 *)((u8 *)arg5 + 0x74));
@@ -1888,10 +1888,10 @@ typedef struct {
 struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
 void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
-s32 func_150ADA20(void);
+s32 random_int(void);
 extern s32 D_800A4AA0;
 
-// object_aura_burst_spawn: the func_150F9BB0 (object_aura_spawn) effect without its func_151D8E18 / light_create_obj_joint calls: creates
+// object_aura_burst_spawn: the aura_group_spawn (object_aura_spawn) effect without its func_151D8E18 / light_create_obj_joint calls: creates
 // a group object (func_15149130 kind 300, flag 0, 0x18-byte block {obj, obj+0x3B}) and, when it exists, two particles
 // (effect3d_spawn_full texture 0x5F, D_800A4AA0 list, random blend 1 / 3; +0x110 gets index, object, room, group, mid height
 // (obj +0x14C + +0x150) / 2 and this function's constants) and two emitters (particle_emitter_spawn texture 0x60, 0x2A; +0x170
@@ -1971,7 +1971,7 @@ s32 func_151BDDD8(u8 *obj, u8 alpha, s32 owner) {
         fr.spec.u48 = 0;
         for (fr.extra.index = 0; fr.extra.index < 2; fr.extra.index++) {
             g->part[fr.extra.index] = effect3d_spawn_full(&fr.spec, (s32)&D_800A4AA0, 0, 0x25, 0, 0x1D,
-                                              ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, 0x5C,
+                                              ((random_int() & 1) ? 2 : 0) + 1, 0, 0, 0x5C,
                                               alpha, owner);
             if (g->part[fr.extra.index] != NULL) {
                 memcpy(g->part[fr.extra.index] + 0x110, (u8 *)&fr.extra, 0x5C);
@@ -2206,24 +2206,24 @@ s32 func_151BE7C0(u8 *arg0) {
 
     s[9] -= D_800BE9A4;
     if (s[9] < 0.0f) {
-        s[9] = func_150ADA68() * 4.0f;
-        s[6] = s[2] + s[4] * func_150ADA68();
+        s[9] = random_float() * 4.0f;
+        s[6] = s[2] + s[4] * random_float();
     }
     *(f32 *)(arg0 + 0x2C) += (s[6] - *(f32 *)(arg0 + 0x2C)) * 0.35f;
     s[10] -= D_800BE9A4;
     if (s[10] < 0.0f) {
-        s[10] = func_150ADA68() * 9.0f;
-        if (func_150ADA20() & 1) {
-            s[7] = s[3] + s[5] * func_150ADA68();
+        s[10] = random_float() * 9.0f;
+        if (random_int() & 1) {
+            s[7] = s[3] + s[5] * random_float();
         } else {
-            s[7] = s[3] + s[8] * func_150ADA68();
+            s[7] = s[3] + s[8] * random_float();
         }
     }
     *(f32 *)(arg0 + 0x30) += (s[7] - *(f32 *)(arg0 + 0x30)) * 0.4f;
     s[14] -= D_800BE9A4;
     if (s[14] < 0.0f) {
-        s[14] = func_150ADA68() * 10.0f;
-        s[13] = s[11] + s[12] * func_150ADA68();
+        s[14] = random_float() * 10.0f;
+        s[13] = s[11] + s[12] * random_float();
     }
     s[15] += (s[13] - s[15]) * 0.4f;
     arg0[0x5C] = s[15];
@@ -2309,8 +2309,8 @@ s32 func_151BEC7C(u8 *arg0) {
     sp24 = D_800AAB88;
     *(s16 *)(arg0 + 0x170) = *(s16 *)(arg0 + 0x170) - D_800BE9E4;
     if (*(s16 *)(arg0 + 0x170) < 0) {
-        *(s8 *)(arg0 + 0x18) = sp24.a[func_150ADA20() & 3];
-        *(s16 *)(arg0 + 0x170) = (func_150ADA20() & 7) + 3;
+        *(s8 *)(arg0 + 0x18) = sp24.a[random_int() & 3];
+        *(s16 *)(arg0 + 0x170) = (random_int() & 7) + 3;
     }
     f = *(f32 *)(v + 0x48);
     *(f32 *)(v + 0x48) += (*(f32 *)(arg0 + 0x174) - f) * 0.65000004f;

@@ -56,8 +56,8 @@ void func_15035220(struct127 *obj, struct_eu_size0C *e, s32 mode, s32 model, s32
         dist = y - b;
     } else if (mode == 2) {
         flip[0][0] = -1.0f;
-        func_150A8050(rot1, 0.0f, -f, 0.0f);
-        func_150A8050(rot2, 0.0f, f, 0.0f);
+        mtxf_rotate_xyz_deg(rot1, 0.0f, -f, 0.0f);
+        mtxf_rotate_xyz_deg(rot2, 0.0f, f, 0.0f);
         for (i = 0; i < nmtx; i++) {
             if (fixed) {
                 guMtxL2F(tmp, (Mtx *) (model + (i << 6)));

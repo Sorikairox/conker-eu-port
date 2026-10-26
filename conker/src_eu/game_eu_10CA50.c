@@ -94,7 +94,8 @@ typedef struct {
 // (func_151664F0), two shock waves (func_151D5404 / func_151D58E4), func_151D5AC4, func_151D45A4, the sound
 // (func_15154728), a 3..6 piece shock ring (func_151A74B0, scaled by the current camera's +0x380) and a type 0xF
 // object whose +0x28 gets the position. Callers: func_1509D590 (asm) and game_eu_CA630's C, both (pos, 0xFF, 1).
-void func_150DF240(f32 *pos, u8 room, s32 arg2) {
+/* was func_150DF240 */
+void big_explosion_spawn(f32 *pos, u8 room, s32 arg2) {
     Frag240 fr;
     Ring240 ring;
     Vec240 at;
@@ -139,12 +140,12 @@ void func_150DF240(f32 *pos, u8 room, s32 arg2) {
         fr.pos[0] = D_800A1130[i][0] + pos[0];
         fr.pos[1] = D_800A1130[i][1] + pos[1];
         fr.pos[2] = D_800A1130[i][2] + pos[2];
-        fr.vel[1] = D_80088D0C[kind] * func_150ADA68() + D_80088D00[kind];
+        fr.vel[1] = D_80088D0C[kind] * random_float() + D_80088D00[kind];
         fr.spin[0] = D_800A1220[i] * D_800A125C[i] * D_800A12E4_c[0];
         fr.spin[2] = D_800A11E4[i] * D_800A125C[i] * D_800A12E4_c[0];
-        fr.u4C = func_150ADA68() * D_800A12E0_c[0] + D_800A12DC_c[0];
-        fr.life = (u32) func_150ADA20() % 111 + 0x82;
-        fr.tex = (func_150ADA20() & 1) ? 0xC4 : 0xC5;
+        fr.u4C = random_float() * D_800A12E0_c[0] + D_800A12DC_c[0];
+        fr.life = (u32) random_int() % 111 + 0x82;
+        fr.tex = (random_int() & 1) ? 0xC4 : 0xC5;
         func_15132BBC(&fr, 3, 0xFF, 0, 0, room, arg2);
     }
     func_151664F0(-1, (s32) pos[0], (s32) pos[1], (s32) pos[2], 0x1E, 0x32, 0, room, arg2);
@@ -152,10 +153,10 @@ void func_150DF240(f32 *pos, u8 room, s32 arg2) {
     func_151D58E4(pos, 506.0f, D_800A12E8_c[0], D_800A12EC_c[0], 5, room, arg2);
     func_151D5AC4(pos, room, arg2);
     func_151D45A4(pos, room, arg2);
-    f = func_150ADA68();
-    func_15154728(pos, f * 4.0f + 12.0f, 1.6409999f, (f32) ((u32) func_150ADA20() % 56 + 0xC8), 0.0f, room, arg2);
+    f = random_float();
+    func_15154728(pos, f * 4.0f + 12.0f, 1.6409999f, (f32) ((u32) random_int() % 56 + 0xC8), 0.0f, room, arg2);
 
-    ring.count = (func_150ADA20() & 3) + 3;
+    ring.count = (random_int() & 3) + 3;
     ring.u10 = 0xBE;
     ring.u18 = camv - 0x40;
     ring.u1A = 0x80;
@@ -189,20 +190,21 @@ void func_150DF240(f32 *pos, u8 room, s32 arg2) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10CA50/func_150DF240.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10CA50/big_explosion_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
 s32 func_15046C6C(f32 *, s32, f32, f32 *);
-void func_150E892C(f32 *, s16, u8, s32);
+void fx_debris_emitter_spawn(f32 *, s16, u8, s32);
 void func_151A9DE4(f32 *, f32, f32, void *, s32, u8, s32, u8, s32);
-// ground_burst_effect: P253. Handler (void (u8 *), function table at ELF file offset 0x24A880, next to func_150C29F0 /
-// func_150DF160) of an effect object at p (+0x28 position, +0xC / +1 passed on to the spawners). Probes the ground
+// ground_burst_effect: P253. Handler (void (u8 *), function table at ELF file offset 0x24A880, next to fx_ring_particle_spawn /
+// light_groups_send_msg22_all) of an effect object at p (+0x28 position, +0xC / +1 passed on to the spawners). Probes the ground
 // from 500 above the position down to 500 below (func_15046C6C; the hit record's first word is the ground height):
 // on a hit the effect sits on the ground (x, ground, z), else at the object's own position. Spawns
-// func_150E892C(pos, 120..181) there, then func_151A9DE4 from 500 above pos down to 500 below it (radius 250,
+// fx_debris_emitter_spawn(pos, 120..181) there, then func_151A9DE4 from 500 above pos down to 500 below it (radius 250,
 // 3..5 pieces).
-void func_150DF8B4(u8 *p) {
+/* was func_150DF8B4 */
+void ground_burst_effect(u8 *p) {
     f32 hit[10];
     f32 top[3];
     f32 probe[3];
@@ -220,23 +222,24 @@ void func_150DF8B4(u8 *p) {
         found = 1;
     }
     pos = found ? ground : (f32 *) (p + 0x28);
-    func_150E892C(pos, (s16) ((func_150ADA20() % 62U) + 120), p[0xC], p[1]);
+    fx_debris_emitter_spawn(pos, (s16) ((random_int() % 62U) + 120), p[0xC], p[1]);
     pos = found ? ground : (f32 *) (p + 0x28);
     *(s32 *) &top[0] = *(s32 *) &pos[0];   /* copied as words, like the asm */
     *(s32 *) &top[1] = *(s32 *) &pos[1];
     *(s32 *) &top[2] = *(s32 *) &pos[2];
     top[1] += 500.0f;
-    func_151A9DE4(top, top[1] - 1000.0f, 250.0f, hit, (func_150ADA20() % 3U) + 3, 1, 0, p[0xC], p[1]);
+    func_151A9DE4(top, top[1] - 1000.0f, 250.0f, hit, (random_int() % 3U) + 3, 1, 0, p[0xC], p[1]);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10CA50/func_150DF8B4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10CA50/ground_burst_effect.s")
 #endif
 
 #ifdef NON_MATCHING
 s32 func_15149AC0(f32 *, s32, s32, s32, s32, s32);
 
 void func_15143874(s16, f32, f32 *, f32 *); /* P95 */
-void func_150DFA38(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* was func_150DFA38 */
+void puff_cluster_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     struct {
         f32 u88;
         u8 pad8C[0x4];
@@ -279,8 +282,8 @@ void func_150DFA38(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     (*(f32 *)((u8 *)(&sp.u88) + 0)) = (*(f32 *)((u8 *)arg0 + 0));
     (*(s32 *)((u8 *)(&sp.u88) + 4)) = (s32) (*(s32 *)((u8 *)arg0 + 4));
     (*(f32 *)((u8 *)(&sp.u88) + 8)) = (f32) (*(f32 *)((u8 *)arg0 + 8));
-    temp_f20 = (func_150ADA68() * 0.5f) + 1.0f;
-    temp_f10 = func_150ADA68() * 0.5f;
+    temp_f20 = (random_float() * 0.5f) + 1.0f;
+    temp_f10 = random_float() * 0.5f;
     sp.u94 = 22.6f * temp_f20;
     sp.u9C = 13.786f * temp_f20;
     temp_f2 = temp_f10 + 1.0f;
@@ -289,13 +292,13 @@ void func_150DFA38(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     sp.u98 = 57.969f * temp_f2;
     sp.uA0 = 42.714f * temp_f2;
     sp.uA4 = 118.763f * temp_f2;
-    sp.uAC = (func_150ADA20() % 151U) + 0x96;
+    sp.uAC = (random_int() % 151U) + 0x96;
     sp.uAE = 0;
     sp.uAF = 0;
     sp.uB0 = 0;
     sp.uB1 = 0xFF;
     sp.uB2 = 1;
-    sp.uB4 = (func_150ADA20() % 156U) + 0x64;
+    sp.uB4 = (random_int() % 156U) + 0x64;
     sp.uB5 = 0xFF;
     sp.uB6 = 0;
     sp.uB7 = 1;
@@ -306,22 +309,22 @@ void func_150DFA38(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     sp.uC0 = 0.0f;
     sp.uCC = 0.7f;
     func_15149AC0(&sp.u88, 0xA, 0, 0, temp_s7, arg4);
-    var_s0 = (func_150ADA20() % 3U) + 1;
+    var_s0 = (random_int() % 3U) + 1;
     if (var_s0 > 0) {
         do {
-            func_15143874((s16) (func_150ADA20() & 0xFF), 30.0f, &sp.u88, &sp.u90); /* P95: was 0x41F00000 as an int */
+            func_15143874((s16) (random_int() & 0xFF), 30.0f, &sp.u88, &sp.u90); /* P95: was 0x41F00000 as an int */
             sp.u88 += (*(f32 *)((u8 *)arg0 + 0));
             sp.u90 += (*(f32 *)((u8 *)arg0 + 8));
-            temp_f20_2 = (func_150ADA68() * 0.5f) + 0.75f;
-            temp_f18 = func_150ADA68() * 0.5f;
+            temp_f20_2 = (random_float() * 0.5f) + 0.75f;
+            temp_f18 = random_float() * 0.5f;
             sp.u94 = 22.6f * temp_f20_2;
             sp.u9C = 13.786f * temp_f20_2;
             temp_f2_2 = temp_f18 + 0.75f;
             sp.u98 = 57.969f * temp_f2_2;
             sp.uA0 = 42.714f * temp_f2_2;
             sp.uA4 = 118.763f * temp_f2_2;
-            sp.uAC = (func_150ADA20() % 151U) + 0x96;
-            sp.uB4 = (func_150ADA20() % 156U) + 0x64;
+            sp.uAC = (random_int() % 151U) + 0x96;
+            sp.uB4 = (random_int() % 156U) + 0x64;
             sp.uB7 = 0;
             func_15149AC0(&sp.u88, 0xA, 0, 0, temp_s7, arg4);
             var_s0 -= 1;
@@ -329,5 +332,5 @@ void func_150DFA38(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10CA50/func_150DFA38.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10CA50/puff_cluster_spawn.s")
 #endif

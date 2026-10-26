@@ -238,7 +238,7 @@ void func_15193E6C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
             sp.u8A = 1;
             sp.u8B = -1;
             sp.u8C = -1;
-            sp.u8E = (func_150ADA20() % 41U) + 0x5A;
+            sp.u8E = (random_int() % 41U) + 0x5A;
             sp.u90 = 0xA0;
             sp.u94 = 0x13;
             sp.u9C = 0x220405;
@@ -273,22 +273,22 @@ void func_15193E6C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
             sp.uCC += temp_f10 * arg4;
             sp.uD0 += temp_f8 * arg4;
             sp.uD4 += temp_f16 * arg4;
-            sp.u54 = func_150ADA68() * 360.0f;
-            sp.u58 = func_150ADA68() * 360.0f;
-            sp.u5C = func_150ADA68() * 360.0f;
-            func_150ADA68();
+            sp.u54 = random_float() * 360.0f;
+            sp.u58 = random_float() * 360.0f;
+            sp.u5C = random_float() * 360.0f;
+            random_float();
             sp.u60 = 340.0f * 0.001f;
-            temp_f6 = func_150ADA68() * 1000.0f;
+            temp_f6 = random_float() * 1000.0f;
             sp.u74 = 0.0f;
             sp.u70 = (temp_f6 + -500.0f) * 0.01f;
-            sp.u78 = ((func_150ADA68() * 1000.0f) + -500.0f) * 0.01f;
-            temp_f18 = (func_150ADA68() * 121.0f) + -135.0f;
+            sp.u78 = ((random_float() * 1000.0f) + -500.0f) * 0.01f;
+            temp_f18 = (random_float() * 121.0f) + -135.0f;
             sp.uDC = 0x19;
             sp.uDE = 0xA;
             sp.u84 = 0xF;
             sp.u80 = 0.982883f;
             sp.u7C = temp_f18 * 0.001f;
-            func_15157E08(&sp.u88, &sp.u54, 0, func_150ADA68() * 1814.0f * 0.001f, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg5 + 0xC)), (s32) (*(u8 *)((u8 *)arg5 + 1)));
+            func_15157E08(&sp.u88, &sp.u54, 0, random_float() * 1814.0f * 0.001f, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg5 + 0xC)), (s32) (*(u8 *)((u8 *)arg5 + 1)));
         }
     }
 }

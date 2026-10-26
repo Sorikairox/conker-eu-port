@@ -7,7 +7,7 @@ Entry registers: $gp = 0 and $v1 = 0 (the asm uses the caller's $gp as the tag o
 the "previous index" of a leaf list starting with a delta; the C uses 0).
 Synthetic mode: random triangles (vertex pool, offsets / bounds tables, bounds sometimes perturbed), random trees
 (nested nodes, sibling chains, leaf lists mixing deltas and 15-bit indices, > 0x27 hits), objects, records.
-Level mode (--level L): the level's area tables are built by nmasm_level's pipeline (asm func_15003668 in Unicorn on
+Level mode (--level L): the level's area tables are built by nmasm_level's pipeline (asm collision_build_level_tris in Unicorn on
 build/conker.eu.elf from the ROM), func_150A4ED4(area) selects them, then func_150A3F50 runs at points on / near
 real triangles, with D_800DBE62 = 0 and 1. Compared: v0, s0-s7 / fp / sp, all RDRAM except the stack.
 Run in the container from /conker/conker: python3 ../tools/port/difftest/nmasm_floorsets.py [N] [seed]
@@ -187,7 +187,7 @@ def level_mode(ref, cand, rng, n, levelno, rom):
     L.knobs(rng, mem, levelno, 0)
     emu.load(mem, {})
     emu.mu.mem_write(0x10000D24, struct.pack('>I', 0x12345678))
-    emu.call('func_15003668', [levelno]); emu.call('func_150038A0', [])
+    emu.call('collision_build_level_tris', [levelno]); emu.call('collision_build_quadtrees', [])
     lv = emu.ram()
     print('level %#x built: %s' % (levelno, L.summary(lv)))
     bad = 0; hist = {}

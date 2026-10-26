@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-s32 func_1510D66C(s32 id, s32 *outSize, s32 age, s32 addRef);
-s32 func_1510D8F4(s32 arg0);
+s32 texture_cache_lookup(s32 id, s32 *outSize, s32 age, s32 addRef);
+s32 texture_rom_offset(s32 arg0);
 #endif
 
 
@@ -14,14 +14,15 @@ extern u8 D_800DA2B8[];  /* [player * 3 + i]: wobble amplitude */
 extern u8 D_800DA2C8[];  /* [player * 3 + i]: current level */
 extern u8 D_800DA2D4[];  /* [i]: default level */
 extern u8 D_800DA2D8[];  /* [player * 3 + i]: requested level; element 0 != 0 = a request is pending */
-f32 func_150489B0(u8);
+f32 math_cos_u8(u8);
 
 /* tint_channels_update: per frame for a player whose D_800DBFF0 record has +0x5F0 & 1: three colour channels.
  * Each level D_800DA2C8 moves by 2 * step (D_800BE9E4) toward the requested level (D_800DA2D8, when a request is
- * pending, else the default D_800DA2D4); a sine wobble (func_150489B0(phase >> 4) * amplitude) around it, minus
+ * pending, else the default D_800DA2D4); a sine wobble (math_cos_u8(phase >> 4) * amplitude) around it, minus
  * 0x7F, is added to the "up" byte D_800D9F88 when >= 0, else to the "down" byte D_800D9F98 (both capped at 0x7F);
  * the phase advances by its speed (mod 0x1000). The request flag is cleared afterwards. */
-void func_1510D090(s32 player) { /* s32: the asm uses a0 as it is (callers pass an s16) */
+/* was func_1510D090 */
+void tint_channels_update(s32 player) { /* s32: the asm uses a0 as it is (callers pass an s16) */
     s32 step;
     s32 pending;
     s32 i;
@@ -51,7 +52,7 @@ void func_1510D090(s32 player) { /* s32: the asm uses a0 as it is (callers pass 
             }
             D_800DA2C8[j] = level;
         }
-        v = (s32) (func_150489B0((D_800DA290[j] >> 4) & 0xFF) * D_800DA2B8[j]) + level - 0x7F; /* level not truncated to u8 here (as in the asm) */
+        v = (s32) (math_cos_u8((D_800DA290[j] >> 4) & 0xFF) * D_800DA2B8[j]) + level - 0x7F; /* level not truncated to u8 here (as in the asm) */
         if (v >= 0) {
             D_800D9F88[j] += v;
         } else {
@@ -68,10 +69,11 @@ void func_1510D090(s32 player) { /* s32: the asm uses a0 as it is (callers pass 
     D_800DA2D8[player * 3] = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D090.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/tint_channels_update.s")
 #endif
 
-Gfx *func_1510D338(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_1510D338 */
+Gfx *tint_emit_prim_env_colors(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
     gDPSetPrimColor(gdl++, 0xF2, 0, D_800D9F88[arg3 * 3], D_800D9F88[arg3 * 3 + 1], D_800D9F88[arg3 * 3 + 2], arg1);
     gDPSetEnvColor(gdl++, D_800D9F98[arg3 * 3], D_800D9F98[arg3 * 3 + 1], D_800D9F98[arg3 * 3 + 2], arg2);
     return gdl;
@@ -85,12 +87,13 @@ s32 allocate_memory(s32, s32, s32, s32);
 
 /* Resolve the texture ids of a model display list (up to G_ENDDL). For each G_SETTIMG (0xFD) whose w1 is
  * a texture id (top byte < 6, segment nibble 0): w1 = id | flags << 22, id = w1 & 0xF03FFFFF. The id is
- * looked up in the texture cache (func_1510D66C, with `age` and `addRef`) and w1 becomes the address;
+ * looked up in the texture cache (texture_cache_lookup, with `age` and `addRef`) and w1 becomes the address;
  * flag 1 (0x00400000) points at the 256-colour palette at size - 0x200, flag 2 (0x00800000) at the
  * 16-colour palette at size - 0x20. `skipResolved` leaves w1 alone when its top byte is set.
  * With `outList`, a newly allocated s16 list {n, id_0, ..., id_n-1} of the distinct ids (ascending) is
  * stored there. Returns 1 when every texture was found, 0 if one was missing. */
-s32 func_1510D3E0(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList) {
+/* was func_1510D3E0 */
+s32 texture_resolve_dl_ids(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList) {
     u8 seen[(TEXID_COUNT + 7) / 8];
     s32 count;
     s32 missing = 0;
@@ -124,7 +127,7 @@ s32 func_1510D3E0(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList)
         flags = (s32)w1 >> 22;
         id = w1 & 0xF03FFFFF;
         if ((w1 & 0x0F000000) == 0) {
-            last = func_1510D66C(id, &size, age, addRef);
+            last = texture_cache_lookup(id, &size, age, addRef);
             dl[i].words.w1 = last;
             /* The original has no bound check here (an id >= TEXID_COUNT, which the cache rejects, would
              * write past the bitmap on the stack). */
@@ -169,7 +172,7 @@ s32 func_1510D3E0(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList)
 #undef TEXCACHE_MISSING
 #undef TEXID_COUNT
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D3E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/texture_resolve_dl_ids.s")
 #endif
 #ifdef NON_MATCHING
 extern u16 D_800920D0[];
@@ -184,10 +187,11 @@ s32 func_10006530(s32, s32 *, u32);
 #define TEXCACHE_MISSING 0x80000000
 
 /* Texture cache lookup. Returns the expanded data of texture `id` (D_800B1268[id]), loading it on a miss:
- * DMA the compressed block (ROM offset func_1510D8F4(id), D_800920D0[id] bytes) into a temporary buffer,
+ * DMA the compressed block (ROM offset texture_rom_offset(id), D_800920D0[id] bytes) into a temporary buffer,
  * expand it into a D_800B8BB8[id]-byte buffer. Returns 0x80000000 for a bad id or when out of memory.
  * `*outSize` gets the expanded size; the slot's age is raised to `age`; `addRef` bumps its use count. */
-s32 func_1510D66C(s32 id, s32 *outSize, s32 age, s32 addRef) {
+/* was func_1510D66C */
+s32 texture_cache_lookup(s32 id, s32 *outSize, s32 age, s32 addRef) {
     s32 *slot;
     u16 len;
     s32 rom;
@@ -216,7 +220,7 @@ s32 func_1510D66C(s32 id, s32 *outSize, s32 age, s32 addRef) {
             age = 0x3E;
         }
         /* DMA needs an even ROM address and a 16-byte multiple length. */
-        rom = func_1510D8F4(id);
+        rom = texture_rom_offset(id);
         if (rom & 1) {
             rom -= 1;
             skew = 1;
@@ -257,11 +261,12 @@ s32 func_1510D66C(s32 id, s32 *outSize, s32 age, s32 addRef) {
 }
 #undef TEXCACHE_MISSING
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D66C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/texture_cache_lookup.s")
 #endif
 extern u16 D_800920D0[];
 extern s32 D_1A3B40;
-s32 func_1510D8F4(s32 arg0) {
+/* was func_1510D8F4 */
+s32 texture_rom_offset(s32 arg0) {
     s32 sum;
     s32 i;
 
@@ -284,7 +289,8 @@ void func_150ADC50(void);
 /* Texture cache ageing, once per frame. Slots lo..hi (D_800DA378..D_800DA37C) are pending: an age 1..3
  * counts down and frees the slot at 0; flag 0x40 asks for a refresh (re-expand the slot's data in
  * place, free the old buffer). Slots that still need work set the pending range for the next frame. */
-void func_1510D984(void) {
+/* was func_1510D984 */
+void texture_cache_age_tick(void) {
     s32 hi = D_800DA37C;
     s32 lo;
     s32 i;
@@ -341,9 +347,10 @@ void func_1510D984(void) {
     D_800DC1E0 = -2;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D984.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/texture_cache_age_tick.s")
 #endif
-void func_1510DB88(s32 arg0, s32 arg1) {
+/* was func_1510DB88 */
+void texture_cache_set_age(s32 arg0, s32 arg1) {
     s8 *p = &D_800BC860[arg0];
     s8 v = *p;
     if (v != 0) {
@@ -351,9 +358,10 @@ void func_1510DB88(s32 arg0, s32 arg1) {
     }
 }
 
-void func_1510DC14(s32);
+void texture_unref_age3(s32);
 void func_10004074(s16 *);
-void func_1510DBB0(s16 *arg0)
+/* was func_1510DBB0 */
+void texture_id_list_release(s16 *arg0)
 {
   s16 *new_var;
   s16 *q = arg0;
@@ -367,7 +375,7 @@ void func_1510DBB0(s16 *arg0)
     end = new_var;
     do
     {
-      func_1510DC14(*p);
+      texture_unref_age3(*p);
       p++;
     }
     while (end != p);
@@ -375,7 +383,8 @@ void func_1510DBB0(s16 *arg0)
   func_10004074(q);
 }
 
-void func_1510DC14(s32 arg0) {
+/* was func_1510DC14 */
+void texture_unref_age3(s32 arg0) {
     u8 *temp_v0 = &D_800DA388[arg0];
     if (D_800BC860[arg0] != 0) {
         if (*temp_v0 != 0) {
@@ -387,13 +396,14 @@ void func_1510DC14(s32 arg0) {
                 if (D_800DA37C < arg0) {
                     D_800DA37C = arg0;
                 }
-                func_1510DB88(arg0, 3);
+                texture_cache_set_age(arg0, 3);
             }
         }
     }
 }
 
-void func_1510DCA0(s32 arg0) {
+/* was func_1510DCA0 */
+void texture_unref_age2(s32 arg0) {
     u8 *temp_v0 = &D_800DA388[arg0];
     if (D_800BC860[arg0] != 0) {
         if (*temp_v0 != 0) {
@@ -405,7 +415,7 @@ void func_1510DCA0(s32 arg0) {
                 if (D_800DA37C < arg0) {
                     D_800DA37C = arg0;
                 }
-                func_1510DB88(arg0, 2);
+                texture_cache_set_age(arg0, 2);
             }
         }
     }
@@ -421,7 +431,8 @@ void func_10004074(s16 *);  /* free (as the file's other callers) */
 // D_800BC860[id] & 0x40) and empties the slot (D_800B1268[id] = -1, D_800BC860[id] = 0).
 // s32 with three parameters for game_eu_6AA20.c's prototype (its only caller passes id, id, a u16 and ignores the
 // result; the asm reads a0 only and leaves v0 undefined): returns 0. Verified as the void (s32 id) variant.
-s32 func_1510DD2C(s32 id, s32 unused1, u16 unused2) {
+/* was func_1510DD2C */
+s32 texture_cache_release(s32 id, s32 unused1, u16 unused2) {
     s8 state = D_800BC860[id];
 
     if (state == 0 || D_800DA388[id] == 0) {
@@ -439,18 +450,20 @@ s32 func_1510DD2C(s32 id, s32 unused1, u16 unused2) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510DD2C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/texture_cache_release.s")
 #endif
 
 extern s8 D_800DA2F0;
 
-void func_1510DDE4(void) {
+/* was func_1510DDE4 */
+void segment_override_clear(void) {
     D_800DA2F0 = 0;
 }
 
 extern u8 D_800DA2F8[];
 
-void func_1510DDF4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* was func_1510DDF4 */
+void segment_override_add(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     u8 *p;
     s32 i = (u8)D_800DA2F0;
 
@@ -466,7 +479,8 @@ void func_1510DDF4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 }
 
 #ifdef NON_MATCHING
-u8 *func_1510DE40(u8 *arg0, s32 arg1) {
+/* was func_1510DE40 */
+u8 *segment_override_emit(u8 *arg0, s32 arg1) {
     s32 var_v0;
     u8 *var_a0;
     u8 *temp_v1;
@@ -497,5 +511,5 @@ u8 *func_1510DE40(u8 *arg0, s32 arg1) {
     return var_a2;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510DE40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/segment_override_emit.s")
 #endif

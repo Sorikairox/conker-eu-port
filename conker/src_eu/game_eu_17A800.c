@@ -9,7 +9,7 @@ extern f32 D_800A6238;
 
 s32 func_1514F2FC(u8 *, u8 *);
 
-void func_1501175C(u8 *, u8, s32);
+void obj_glow_smoke_attach(u8 *, u8, s32);
 
 s32 func_1514F2AC(u8 *, s32, u8 **);
 
@@ -208,7 +208,7 @@ extern s32 (*D_8008AF04[])(u8 *, s32, s32);   /* state event handlers: func_1514
 // matching node's state record names its handler (s16 at +0, -1 = none) in D_8008AF04, called with the node's data
 // (+0x10). Returns whether the last handler called accepted the event (0 when none was called).
 // The event values are full words (P218: the asm passes a2 / a3 to the handler unmasked).
-// Callers: func_15079390 (game_A28B0), func_15024910 (game_eu_51190, state 0xD with an animation), func_150EDCC8.
+// Callers: aiscript_send_event (game_A28B0), func_15024910 (game_eu_51190, state 0xD with an animation), tank_update.
 s32 func_1514D3B0(s32 obj, s16 state, s32 arg2, s32 arg3) {
     u8 *node;
     s16 idx;
@@ -1513,8 +1513,8 @@ void func_1514FAD8(s32 arg0) {
 }
 
 void func_1514FB00(struct127 *arg0) {
-    func_1501175C(arg0, 0xFF, 1);
-    func_15011A78(arg0, 0xFF, 1);
+    obj_glow_smoke_attach(arg0, 0xFF, 1);
+    obj_spawn_effect_85(arg0, 0xFF, 1);
 }
 
 typedef struct {

@@ -23,7 +23,7 @@ void func_15016380(s32 arg0) {
     u8 *temp_v0_4;
     u8 *temp_v0_5;
 
-    if (func_1502B7F0(&D_800D1CD0, 3, 0xC, arg0, 9) > 0) {
+    if (asset_load_ptr(&D_800D1CD0, 3, 0xC, arg0, 9) > 0) {
         var_a0 = 1;
         var_a1 = 0;
         var_v0 = D_800D1CD0;

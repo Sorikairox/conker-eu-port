@@ -653,7 +653,7 @@ void * effect3d_spawn_full(void * arg0_p, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u
 #endif
 #ifdef NON_MATCHING
 // record_spawn: effect3d_spawn_full without extra words; returns the new record (the asm leaves effect3d_spawn_full's v0 in
-// v0 and func_15100B80 uses it). P153.
+// v0 and obj_glow_effect_spawn uses it). P153.
 /* was func_1513D4B8 */
 struct210 *effect3d_spawn(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
     return effect3d_spawn_full(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0, 0, arg7, arg8, arg9);
@@ -706,7 +706,7 @@ void effect3d_spawn_oriented_simple(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1510E908(s32, s32, f32 *, f32 *);
+s32 floor_triangle_slope(s32, s32, f32 *, f32 *);
 s32 func_15144E80(s32, f32 *, f32 *, s32 *);
 s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
 
@@ -763,7 +763,7 @@ s32 effect3d_build_axes(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4,
         temp_f0 = angle_byte_cos((u8) arg1);
         sp.uAC = arg2 * temp_f0;
         sp.uA4 = arg3 * temp_f0;
-        if (func_1510E908(arg4, arg5, &sp.uBC, &sp.uB8) == 0) {
+        if (floor_triangle_slope(arg4, arg5, &sp.uBC, &sp.uB8) == 0) {
             return 0;
         }
         temp_f18 = sp.uA4 * sp.uB8;
@@ -1268,12 +1268,12 @@ void sprite_quad_stub_b(void) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1510E908(s32, s32, f32 *, f32 *);
+s32 floor_triangle_slope(s32, s32, f32 *, f32 *);
 s32 func_15144E80(s32, f32 *, f32 *, s32 *);
 s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
 /* Corners of a sprite quad (4 Vtx at vtx + 0x40): centre (x, y, z), half sizes w / h, rotated by angle in the
  * screen plane. With a camera (arg2) the quad uses the camera's right / up axes (func_15144E80, normalised by
- * func_15145128); without one it is built in x / z and tilted by the view slopes of func_1510E908(arg1).
+ * func_15145128); without one it is built in x / z and tilted by the view slopes of floor_triangle_slope(arg1).
  * Returns 0 when the axes are not available. */
 /* was func_1513E2AC */
 s32 sprite_quad_place_cam(s32 vtx, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 w, f32 h, u8 angle) {
@@ -1320,7 +1320,7 @@ s32 sprite_quad_place_cam(s32 vtx, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 
         v[26] = (s32)((z - rz) - uz);
         return 1;
     }
-    if (func_1510E908(arg1, arg2, &slopeX, &slopeZ) == 0) {
+    if (floor_triangle_slope(arg1, arg2, &slopeX, &slopeZ) == 0) {
         return 0;
     }
     ws = w * s;
@@ -1443,7 +1443,7 @@ u8 *sprite_quad_build_scaled(u8 *fx, s16 slot) {
     corner[2][1] = -*(f32 *)(fx + 0x30);
     corner[3][0] = *(f32 *)(fx + 0x2C);
     corner[3][1] = -*(f32 *)(fx + 0x30);
-    func_150A8050(mtx, *(f32 *)(fx + 0x40), *(f32 *)(fx + 0x44), *(f32 *)(fx + 0x48));
+    mtxf_rotate_xyz_deg(mtx, *(f32 *)(fx + 0x40), *(f32 *)(fx + 0x44), *(f32 *)(fx + 0x48));
     mtx[3][0] = *(f32 *)(fx + 0x34);
     mtx[3][1] = *(f32 *)(fx + 0x38);
     mtx[3][2] = *(f32 *)(fx + 0x3C);
@@ -1630,7 +1630,7 @@ u8 *sprite_quad_build_rot(u8 *fx, s16 slot) {
         memcpy(*(u8 **)(fx + 0x100 + slot * 4), fx + 0xC0, 0x40);
         memcpy(*(u8 **)(fx + 0x100 + slot * 4) + 0x40, fx + 0xC0, 0x40);
     }
-    func_150A8050(mtx, *(f32 *)(fx + 0x40), *(f32 *)(fx + 0x44), *(f32 *)(fx + 0x48));
+    mtxf_rotate_xyz_deg(mtx, *(f32 *)(fx + 0x40), *(f32 *)(fx + 0x44), *(f32 *)(fx + 0x48));
     mtx[3][0] = *(f32 *)(fx + 0x34);
     mtx[3][1] = *(f32 *)(fx + 0x38);
     mtx[3][2] = *(f32 *)(fx + 0x3C);
@@ -2144,7 +2144,7 @@ u8 *sprite_quad_build_flat(u8 *fx, s16 slot) {
     corner[3][0] = *(f32 *)(fx + 0x2C);
     corner[3][1] = -*(f32 *)(fx + 0x30);
     corner[3][2] = 0.0f;
-    func_150A8050(mtx, *(f32 *)(fx + 0x40), *(f32 *)(fx + 0x44), *(f32 *)(fx + 0x48));
+    mtxf_rotate_xyz_deg(mtx, *(f32 *)(fx + 0x40), *(f32 *)(fx + 0x44), *(f32 *)(fx + 0x48));
     mtx[3][0] = *(f32 *)(fx + 0x34);
     mtx[3][1] = *(f32 *)(fx + 0x38);
     mtx[3][2] = *(f32 *)(fx + 0x3C);

@@ -25,7 +25,8 @@ extern f32 D_80099070;
 extern f32 D_80099074;
 
 
-void func_15048B10(s32 arg0, s32 arg1) {
+/* was func_15048B10 */
+void obj_build_inverse_mtx(s32 arg0, s32 arg1) {
     struct191 tmp;
 
     func_1503E5F8(arg0, &tmp.unk194, &tmp.unk190, &tmp.unk18C, &tmp.unk17C, &tmp.unk178, &tmp.unk174, &tmp.unk188, &tmp.unk184, &tmp.unk180);
@@ -34,9 +35,9 @@ void func_15048B10(s32 arg0, s32 arg1) {
     tmp.unkA8 = -tmp.unk190;
     tmp.unkAC = -tmp.unk18C;
 
-    func_150A8050(&tmp.unk134, -tmp.unk17C,           0,           0);
-    func_150A8050(&tmp.unkF4,            0, -tmp.unk178,           0);
-    func_150A8050(&tmp.unkB4,            0,           0, -tmp.unk174);
+    mtxf_rotate_xyz_deg(&tmp.unk134, -tmp.unk17C,           0,           0);
+    mtxf_rotate_xyz_deg(&tmp.unkF4,            0, -tmp.unk178,           0);
+    mtxf_rotate_xyz_deg(&tmp.unkB4,            0,           0, -tmp.unk174);
 
     func_150A7A48(&tmp.unk80,  &tmp.unkB4, &tmp.unk40);
     func_150A7A48(&tmp.unk40,  &tmp.unkF4, &tmp.unk0);
@@ -53,7 +54,8 @@ extern f32 D_80086384;
 extern f32 D_80086388;
 extern s32 D_800993E8;
 
-f32 func_15048C30(f32 arg0) {
+/* was func_15048C30 */
+f32 math_asinf(f32 arg0) {
     s32 *temp_v1;
     s32 *temp_v1_2;
     s32 *temp_v1_3;
@@ -111,10 +113,10 @@ f32 func_15048C30(f32 arg0) {
     return 0.0f;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_75FC0/func_15048C30.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_75FC0/math_asinf.s")
 #endif
 // NON-MATCHING: regs and ordering needs fixing
-// f32 func_15048C30(f32 arg0) {
+// f32 math_asinf(f32 arg0) {
 //     f32 temp_f0;
 //     f32 temp_f12;
 //     f32 temp_f14;
@@ -173,25 +175,29 @@ f32 func_15048C30(f32 arg0) {
 //     return 0.0f;
 // }
 
-void func_15048F20(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
+/* was func_15048F20 */
+void vec3_add(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
     arg2->unk0 = arg0->unk0 + arg1->unk0;
     arg2->unk4 = arg0->unk4 + arg1->unk4;
     arg2->unk8 = arg0->unk8 + arg1->unk8;
 }
 
-void func_15048F58(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
+/* was func_15048F58 */
+void vec3_sub(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
     arg2->unk0 = arg0->unk0 - arg1->unk0;
     arg2->unk4 = arg0->unk4 - arg1->unk4;
     arg2->unk8 = arg0->unk8 - arg1->unk8;
 }
 
-void func_15048F90(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
+/* was func_15048F90 */
+void vec3_diff(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
     arg2->unk0 = arg1->unk0 - arg0->unk0;
     arg2->unk4 = arg1->unk4 - arg0->unk4;
     arg2->unk8 = arg1->unk8 - arg0->unk8;
 }
 
-f32 func_15048FC8(struct17 *arg0) {
+/* was func_15048FC8 */
+f32 vec3_heading_deg(struct17 *arg0) {
     f32 tmp1;
     f32 tmp2;
     f32 tmp3;
@@ -202,7 +208,7 @@ f32 func_15048FC8(struct17 *arg0) {
     }
 
     tmp2 = -arg0->unk0 / tmp1;
-    tmp2 = func_15048C30(tmp2);
+    tmp2 = math_asinf(tmp2);
 
     if (arg0->unk8 > 0.0f) {
         tmp2 = 270.0f - (tmp2 * D_80099070);
@@ -218,7 +224,8 @@ f32 func_15048FC8(struct17 *arg0) {
     return tmp2;
 }
 
-s32 func_150490A8(struct17 *arg0) {
+/* was func_150490A8 */
+s32 vec3_heading_u8(struct17 *arg0) {
     f32 temp_f12;
     s32 phi_v1;
 
@@ -229,7 +236,7 @@ s32 func_150490A8(struct17 *arg0) {
     }
 
     temp_f12 = arg0->unk0 / temp_f12;
-    phi_v1 = func_15048864(temp_f12);
+    phi_v1 = math_asin_u8(temp_f12);
 
     if (0.0f < arg0->unk8) {
         if (phi_v1 < 64) {
@@ -241,13 +248,15 @@ s32 func_150490A8(struct17 *arg0) {
     return phi_v1;
 }
 
-void func_15049148(struct17 *arg0, f32 arg1, struct17 *arg2) {
+/* was func_15049148 */
+void vec3_scale(struct17 *arg0, f32 arg1, struct17 *arg2) {
     arg2->unk0 = arg0->unk0 * arg1;
     arg2->unk4 = arg0->unk4 * arg1;
     arg2->unk8 = arg0->unk8 * arg1;
 }
 
-void func_1504917C(struct17 *arg0, struct17 *arg1) {
+/* was func_1504917C */
+void vec3_normalize(struct17 *arg0, struct17 *arg1) {
     f32 tmp = func_150AD930(arg0);
     if (tmp != 0.0f) {
         tmp = 1.0f / tmp;
@@ -257,9 +266,10 @@ void func_1504917C(struct17 *arg0, struct17 *arg1) {
     arg1->unk8 = arg0->unk8 * tmp;
 }
 
-void func_150491EC(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
+/* was func_150491EC */
+void vec3_dir_to(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
     arg2->unk0 = arg1->unk0 - arg0->unk0;
     arg2->unk4 = arg1->unk4 - arg0->unk4;
     arg2->unk8 = arg1->unk8 - arg0->unk8;
-    func_1504917C(arg2, arg2);
+    vec3_normalize(arg2, arg2);
 }

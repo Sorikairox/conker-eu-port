@@ -14,7 +14,7 @@ typedef struct {
 #ifdef NON_MATCHING
 s32 func_1507C7C0(struct127 *, s16 *, s16 *, s16 *);
 s32 func_150A44A4(f32, f32, s32, u8 *, f32 *);
-void func_1510EE3C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, s32 argC, s32 argD, s32 argE);
+void collision_find_floor_no_fallback(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, s32 argC, s32 argD, s32 argE);
 void camera_update_state_flags(struct108 *); /* P68: void, v0 is undefined in the asm */
 s32 camera_target_deep_in_water(struct108 *arg0);
 void camera_calc_pitch(struct108 *arg0);
@@ -22,7 +22,7 @@ void camera_snap_to_object(struct108 *arg0, struct127 *arg1);
 void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
 
 /* P43: camera eye base / floor height of the followed object (+0x3D0). Floor (+0x35C, triangle +0x648) from
- * func_150A44A4 or the collision query func_1510EE3C (also when the floor is lost: +0x84 |= 0x800000, 10000.0), water
+ * func_150A44A4 or the collision query collision_find_floor_no_fallback (also when the floor is lost: +0x84 |= 0x800000, 10000.0), water
  * level +0x360 (from +0x364), ceiling check camera_snap_to_object; then +0x354 (eye base) = floor, raised to +0x360 when the
  * object is between water and eye, to the object's y (+0x180) when that differs by more than +0x928 (mode +0x92C),
  * or to +0x2A8; +0x348 = eye height (+0x730 with +0x6C8, else +0x34C); +0x360 + 50 in water (+0xAD == 1) unless
@@ -30,7 +30,8 @@ void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
  * direction, +0x848 latch, flag 0x10000000); eye y (+0x2FC) >= floor + 40 outside mode 0x100.
  * The asm's early test `(+0x84 == 0) & 0x40` is always false; the mode-0x80 branch after the 0x80 test is dead. */
 #define A390_F(o) (*(f32 *)(p + (o)))
-void func_1512A390(struct108 *arg0) {
+/* was func_1512A390 */
+void camera_update_eye_base(struct108 *arg0) {
     u8 *p = (u8 *)arg0;
     f32 bob;           /* sp7C (written, unused) */
     s32 swim;          /* sp78 */
@@ -65,7 +66,7 @@ void func_1512A390(struct108 *arg0) {
     floorY = (f32 *)(p + 0x35C);
     if (p[0x23C] != 0 || (flags & 0x400000) || (*(s32 *)(p + 0x5F0) & 0x40)
         || func_150A44A4(A390_F(0x2F8), A390_F(0x300), *(s32 *)(p + 0x644), (u8 *)floorTri, floorY) == 0) {
-        func_1510EE3C((s32)(p + 0x644), (s32)floorTri, (s32)floorY, (s32)(p + 0x360), (s32)(p + 0x640), 0,
+        collision_find_floor_no_fallback((s32)(p + 0x644), (s32)floorTri, (s32)floorY, (s32)(p + 0x360), (s32)(p + 0x640), 0,
                       A390_F(0x2F8), A390_F(0x35C), A390_F(0x300), A390_F(0x308), 0, 0, 0xC61C4000,
                       *(s32 *)(p + 0x2FC), 1);
     }
@@ -90,7 +91,7 @@ void func_1512A390(struct108 *arg0) {
             A390_F(0x35C) = 10000.0f;
             *(s32 *)(p + 0x84) |= 0x800000;
             f = A390_F(0x2FC);
-            func_1510EE3C((s32)(p + 0x644), (s32)floorTri, (s32)floorY, (s32)(p + 0x360), (s32)(p + 0x640), 0,
+            collision_find_floor_no_fallback((s32)(p + 0x644), (s32)floorTri, (s32)floorY, (s32)(p + 0x360), (s32)(p + 0x640), 0,
                           A390_F(0x2F8), f, A390_F(0x300), A390_F(0x308), 0, 0, 0xC61C4000, *(s32 *)&f, 1);
         }
     } else {
@@ -226,7 +227,7 @@ void func_1512A390(struct108 *arg0) {
 }
 #undef A390_F
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512A390.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/camera_update_eye_base.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -236,7 +237,8 @@ extern u8 D_800DC4F0[];
 
 /* Camera tables reset: copy the 4 default viewport rects into each of the 4 per-player-count tables, halving the
  * first two halfwords in split screen (1..3 extra players) and scaling them by 0.75 on levels 0x1B / 0x1E; clear D_800DC4F0. */
-void func_1512B168(void) {
+/* was func_1512B168 */
+void camera_viewport_tables_reset(void) {
     u8 i, j;
     s16 *r;
 
@@ -260,30 +262,31 @@ void func_1512B168(void) {
     bzero(D_800DC4F0, 0x130);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512B168.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/camera_viewport_tables_reset.s")
 #endif
 #ifdef NON_MATCHING
-/* P96: func_1512B2C4 */
-extern f32 D_800DC620;   /* screen x of the eye (func_1501A764) */
+/* P96: freecam_auto_step */
+extern f32 D_800DC620;   /* screen x of the eye (camera_world_to_screen) */
 extern f32 D_800DC624;   /* screen y */
 extern f32 D_800DC628;   /* depth */
-extern f32 D_800DC62C;   /* drop (func_1512BCA0) */
-s32 func_1512BAAC(u8 *);
-void func_1512B728(u8 *, s32, s32, s32);
-s32 func_1512BCA0(u8 *, f32 *, f32 *);
-void func_1501A764(s32 arg0, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz);
-void func_1508EF80(u8 *, u8 *, f32, u8 *);
+extern f32 D_800DC62C;   /* drop (freecam_turn) */
+s32 freecam_reset_countdown(u8 *);
+void freecam_scan_depth(u8 *, s32, s32, s32);
+s32 freecam_turn(u8 *, f32 *, f32 *);
+void camera_world_to_screen(s32 arg0, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz);
+void vec_rotate_xz_about_point(u8 *, u8 *, f32, u8 *);
 #endif
 #ifdef NON_MATCHING
-/* Free camera step of camera `arg0` (called by func_1512B670). Unless func_1512BAAC handles the frame, the eye
+/* Free camera step of camera `arg0` (called by freecam_auto_update). Unless freecam_reset_countdown handles the frame, the eye
  * (+0x2BC / +0x2C0 / +0x2C4; the height kept 40 below the holder's ceiling +0x17C when it is above its floor
- * +0x180, unless +0x84 bit 0x10) is projected to the screen (func_1501A764 into D_800DC620 / 624 / 628). Off the
+ * +0x180, unless +0x84 bit 0x10) is projected to the screen (camera_world_to_screen into D_800DC620 / 624 / 628). Off the
  * player's viewport (D_800BE628 entry +0x24..+0x30; x / y clamped first) +0x5F8 = 1 and +0x8B8 = 0. Else +0x8B8 = 1,
- * +0x8BA = y, func_1512B728 gets the clamped point and the depth, func_1512BCA0 gives the turn +0x3EC and the drop
- * D_800DC62C: a turn above 3 rotates the target +0x2F8 about the eye (func_1508EF80) and eases it in (speed 6 / 8,
+ * +0x8BA = y, freecam_scan_depth gets the clamped point and the depth, freecam_turn gives the turn +0x3EC and the drop
+ * D_800DC62C: a turn above 3 rotates the target +0x2F8 about the eye (vec_rotate_xz_about_point) and eases it in (speed 6 / 8,
  * * 1.2 with buttons 3 of the input record), +0x5F8 = 0; else +0x5F8 = 1. The drop lowers +0x2FC; +0x240 == 1 is
  * cleared, +0x698 always. */
-void func_1512B2C4(u8 *arg0) {
+/* was func_1512B2C4 */
+void freecam_auto_step(u8 *arg0) {
     u8 *p = arg0;
     u8 *hold;
     u8 *e;
@@ -299,7 +302,7 @@ void func_1512B2C4(u8 *arg0) {
     s32 depth;
 
     y = *(f32 *)(p + 0x2C0);
-    if (func_1512BAAC(p) != 0) {
+    if (freecam_reset_countdown(p) != 0) {
         return;
     }
     if (!(*(s32 *)(p + 0x84) & 0x10)) {
@@ -308,7 +311,7 @@ void func_1512B2C4(u8 *arg0) {
             y = *(f32 *)(hold + 0x17C) - 40.0f;
         }
     }
-    func_1501A764(p[0x23D], *(f32 *)(p + 0x2BC), y, *(f32 *)(p + 0x2C4), &D_800DC620, &D_800DC624, &D_800DC628);
+    camera_world_to_screen(p[0x23D], *(f32 *)(p + 0x2BC), y, *(f32 *)(p + 0x2C4), &D_800DC620, &D_800DC624, &D_800DC628);
     e = (u8 *)D_800BE628 + p[0x23D] * 0x180;
     depth = (s32)D_800DC628;
     lo = (s32)*(f32 *)(e + 0x2C);
@@ -335,13 +338,13 @@ void func_1512B2C4(u8 *arg0) {
     }
     p[0x8B8] = 1;
     *(s16 *)(p + 0x8BA) = yi;
-    func_1512B728(p, xi, yi, depth);
+    freecam_scan_depth(p, xi, yi, depth);
     sp[0] = *(f32 *)(p + 0x2F8);
     sp[1] = *(f32 *)(p + 0x2FC);
     sp[2] = *(f32 *)(p + 0x300);
-    func_1512BCA0(p, (f32 *)(p + 0x3EC), &D_800DC62C);
+    freecam_turn(p, (f32 *)(p + 0x3EC), &D_800DC62C);
     if (3.0f < fabsf(*(f32 *)(p + 0x3EC))) {
-        func_1508EF80((u8 *)sp, p + 0x2BC, *(f32 *)(p + 0x3EC), (u8 *)sp);
+        vec_rotate_xz_about_point((u8 *)sp, p + 0x2BC, *(f32 *)(p + 0x3EC), (u8 *)sp);
         speed = 6.0f;
         rate = 8.0f;
         if (**(u16 **)(p + 0x36C) & 3) {
@@ -364,15 +367,16 @@ void func_1512B2C4(u8 *arg0) {
     *(s32 *)(p + 0x698) = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512B2C4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/freecam_auto_step.s")
 #endif
 #ifdef NON_MATCHING
-void func_1512B2C4(u8 *arg0);
+void freecam_auto_step(u8 *arg0);
 #else
-s32 func_1512B2C4();
+s32 freecam_auto_step();
 #endif
 
-void func_1512B670(u8 *arg0) {
+/* was func_1512B670 */
+void freecam_auto_update(u8 *arg0) {
     s32 temp_v0;
     s32 temp_v0_2;
     s32 temp_v0_3;
@@ -385,9 +389,9 @@ void func_1512B670(u8 *arg0) {
                 temp_v0_3 = (*(s32 *)((u8 *)arg0 + 0x5F0));
                 if (!(temp_v0_3 & 0x80) && !(temp_v0_3 & 0x40)) {
 #ifdef NON_MATCHING
-                    func_1512B2C4(arg0);   /* P77: the asm passes arg0 in a0 (the callee reads it) */
+                    freecam_auto_step(arg0);   /* P77: the asm passes arg0 in a0 (the callee reads it) */
 #else
-                    func_1512B2C4();
+                    freecam_auto_step();
 #endif
                     return;
                 }
@@ -400,19 +404,20 @@ void func_1512B670(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1512BBA0(u8 *cam, u8 *out, s32 lo, s32 hi, s32 value, s32 second);
+s32 freecam_axis_threshold_test(u8 *cam, u8 *out, s32 lo, s32 hi, s32 value, s32 second);
 extern s16 D_800DC630[4][4][4];
 extern u8 D_800DC4F0[];
 extern s32 D_800899D0[8][2];   /* z-buffer decode per exponent (code >> 13): {shift, add} */
 
-/* free_camera_scan_depth: free-camera depth scan of camera `cam` at screen column `x` (called by func_1512B2C4;
+/* free_camera_scan_depth: free-camera depth scan of camera `cam` at screen column `x` (called by freecam_auto_step;
  * `y` is not used). The scan width +0x60C and height +0x610 ease (0.05) toward the player's viewport rect
  * (D_800DC630[player][+0x1B4 slot], w / h); n = round(+0x60C). For i from n / 4 to n, left (x - i, while right of
  * the viewport's +0x2C) and then right (x + i, while left of +0x30): the z-buffer row +0x8BC is decoded
- * (D_800899D0) and depth - z goes to func_1512BBA0 with the left / right axis record of D_800DC4F0[player]
+ * (D_800899D0) and depth - z goes to freecam_axis_threshold_test with the left / right axis record of D_800DC4F0[player]
  * (+0 / +0xC; threshold 3n / 4); a hit ends that side. (The asm also keeps every depth - z in a stack array
  * nobody reads; dropped.) */
-void func_1512B728(u8 *cam, s32 x, s32 y, s32 depth) {
+/* was func_1512B728 */
+void freecam_scan_depth(u8 *cam, s32 x, s32 y, s32 depth) {
     s16 *rect = D_800DC630[cam[0x23D]][*(s16 *)(cam + 0x1B4)];
     u8 *e;
     s32 n;
@@ -430,7 +435,7 @@ void func_1512B728(u8 *cam, s32 x, s32 y, s32 depth) {
         if (*(f32 *)(e + 0x2C) < (f32)(x - i)) {
             code = (*(u16 **)(cam + 0x8BC))[x - i];
             lo = depth - ((u32)(D_800899D0[code >> 13][1] + (((code >> 2) & 0x7FF) << D_800899D0[code >> 13][0])) >> 3);
-            if (func_1512BBA0(cam, D_800DC4F0 + cam[0x23D] * 0x4C, lo, i, n * 3 / 4, 0) != 0) {
+            if (freecam_axis_threshold_test(cam, D_800DC4F0 + cam[0x23D] * 0x4C, lo, i, n * 3 / 4, 0) != 0) {
                 i = n;
             }
         }
@@ -440,20 +445,21 @@ void func_1512B728(u8 *cam, s32 x, s32 y, s32 depth) {
         if ((f32)(x + i) < *(f32 *)(e + 0x30)) {
             code = (*(u16 **)(cam + 0x8BC))[x + i];
             lo = depth - ((u32)(D_800899D0[code >> 13][1] + (((code >> 2) & 0x7FF) << D_800899D0[code >> 13][0])) >> 3);
-            if (func_1512BBA0(cam, D_800DC4F0 + cam[0x23D] * 0x4C + 0xC, lo, i, n * 3 / 4, 0) != 0) {
+            if (freecam_axis_threshold_test(cam, D_800DC4F0 + cam[0x23D] * 0x4C + 0xC, lo, i, n * 3 / 4, 0) != 0) {
                 i = n;
             }
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512B728.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/freecam_scan_depth.s")
 #endif
 #ifdef NON_MATCHING
-/* Free-camera reset countdown (called by func_1512B2C4): while +0x5FC (frames) is set, mark +0x5F8, fill the first
+/* Free-camera reset countdown (called by freecam_auto_step): while +0x5FC (frames) is set, mark +0x5F8, fill the first
  * ceil(n) halfwords of the +0x8BC buffer with 0xFFFC (n = +4 of the camera's player entry in D_800BE628, 0x180
  * bytes each), clear +0x60C and count +0x5FC down; returns 1 then, else 0. */
-s32 func_1512BAAC(u8 *cam) {
+/* was func_1512BAAC */
+s32 freecam_reset_countdown(u8 *cam) {
     s32 i;
 
     if (*(s16 *)(cam + 0x5FC) == 0) {
@@ -468,9 +474,10 @@ s32 func_1512BAAC(u8 *cam) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512BAAC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/freecam_reset_countdown.s")
 #endif
-void func_1512BB6C(struct_eu_158110 *arg0, s32 arg1, s32 arg2) {
+/* was func_1512BB6C */
+void freecam_axis_record_set(struct_eu_158110 *arg0, s32 arg1, s32 arg2) {
     arg0->unk2 = arg0->unk1;
     if (arg0->unk4 < arg1) {
         arg0->unk1 = 0;
@@ -482,16 +489,17 @@ void func_1512BB6C(struct_eu_158110 *arg0, s32 arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-void func_1512BB6C(struct_eu_158110 *arg0, s32 arg1, s32 arg2);
+void freecam_axis_record_set(struct_eu_158110 *arg0, s32 arg1, s32 arg2);
 extern s16 D_800DC634[];
 extern s16 D_800DC636[];
 
-/* Stick threshold test for free-camera axis `out` (called twice by func_1512B728): limit = the camera's player
+/* Stick threshold test for free-camera axis `out` (called twice by freecam_scan_depth): limit = the camera's player
  * table entry (D_800DC634 / D_800DC636 by `second`, 0x20 bytes per player, 8 per +0x1B4 slot), doubled with
  * +0x84 bit 0x8000. Below `lo` with `hi` past `value` on either side: direction 2 (hi > value) or 1 (hi < value),
- * func_1512BB6C(out, hi, lo) (it reads a2 = lo, which the asm leaves there), return 1. Otherwise the axis is reset
+ * freecam_axis_record_set(out, hi, lo) (it reads a2 = lo, which the asm leaves there), return 1. Otherwise the axis is reset
  * (+0 / +1 = 0, +8 = 0xFFFC) and 0 is returned. */
-s32 func_1512BBA0(u8 *cam, u8 *out, s32 lo, s32 hi, s32 value, s32 second) {
+/* was func_1512BBA0 */
+s32 freecam_axis_threshold_test(u8 *cam, u8 *out, s32 lo, s32 hi, s32 value, s32 second) {
     s32 v;
     s32 off = cam[0x23D] * 0x20 + *(s16 *)(cam + 0x1B4) * 8;
 
@@ -505,12 +513,12 @@ s32 func_1512BBA0(u8 *cam, u8 *out, s32 lo, s32 hi, s32 value, s32 second) {
     }
     if (v < lo && hi < value) {
         out[0] = 2;
-        func_1512BB6C((struct_eu_158110 *)out, hi, lo);
+        freecam_axis_record_set((struct_eu_158110 *)out, hi, lo);
         return 1;
     }
     if (v < lo && value < hi) {
         out[0] = 1;
-        func_1512BB6C((struct_eu_158110 *)out, hi, lo);
+        freecam_axis_record_set((struct_eu_158110 *)out, hi, lo);
         return 1;
     }
     out[1] = 0;
@@ -519,7 +527,7 @@ s32 func_1512BBA0(u8 *cam, u8 *out, s32 lo, s32 hi, s32 value, s32 second) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512BBA0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/freecam_axis_threshold_test.s")
 #endif
 #ifdef NON_MATCHING
 extern s16 D_800DC630[4][4][4];
@@ -527,13 +535,14 @@ extern u8 D_800DC4F0[];
 
 /* free_camera_turn: turn of camera `cam` from its player's four free-camera axis records (D_800DC4F0, 0x4C per
  * player: left +0, right +0xC, +0x18, +0x24, each with direction byte +0 and position +4; last side +0x30). Called by
- * func_1512B2C4 (`unused` is never read). Left only / right only sets the last side 0 / 1 (+0x18 / +0x24: 2 / 3).
+ * freecam_auto_step (`unused` is never read). Left only / right only sets the last side 0 / 1 (+0x18 / +0x24: 2 / 3).
  * With left or right blocked (direction 2): *turn = w - (left + 1) or (right + 1) - w (w = viewport width + 1); both
  * blocked: the nearer side (or the last one) decides, the countdown +0x5FE drops by D_800BE9E4 (unless the holder
  * +0x3D0 has +0xAD == 1 or +0x3D4 has +0x120 set) and +0x3F0 = 30 unless mode +0x2C is 0x80; +0x26C = 0.005,
  * returns 1. Neither: both directions = 4, *turn decays by 10 %, +0x5FE = 50, returns 0. While +0x3F0 counts down
  * the distances +0x374 / +0x348 are saved in +0x3F4 / +0x3F8 and set to 150 / 275, and restored after. */
-s32 func_1512BCA0(u8 *cam, f32 *turn, f32 *unused) {
+/* was func_1512BCA0 */
+s32 freecam_turn(u8 *cam, f32 *turn, f32 *unused) {
     u8 *e = D_800DC4F0 + cam[0x23D] * 0x4C;
     f32 left = (f32)*(s32 *)(e + 0x4) + 1.0f;
     f32 right = (f32)*(s32 *)(e + 0x10) + 1.0f;
@@ -617,7 +626,7 @@ s32 func_1512BCA0(u8 *cam, f32 *turn, f32 *unused) {
     return hit;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512BCA0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/freecam_turn.s")
 #endif
 #ifdef NON_MATCHING
 /* Camera eye collision. Unless collision is off (+0x84 flags 0x40000 / 0x80 / 0x200, the followed object
@@ -628,7 +637,7 @@ s32 func_1512BCA0(u8 *cam, f32 *turn, f32 *unused) {
  * from the previous eye (+0x304) with the collision globals D_800CC1F2..F4 and D_800894C0[1..2] set for the
  * call and restored after it. The probe's final position is the new eye (y not in mode 0x100);
  * +0x3E8 = no collision, +0x26C eases to 1.0 (0.1 per frame) or drops to 0.005 on a hit. After a hit the
- * eye is kept 40 above the floor below it (func_1510EE3C), except in level 0x1B and mode 0x100.
+ * eye is kept 40 above the floor below it (collision_find_floor_no_fallback), except in level 0x1B and mode 0x100.
  * Always ends with camera_update_state_flags (state flags). The asm leaves v0 undefined: void under NM. */
 extern u8 D_800894C0[];
 extern u8 D_800CC1F2;
@@ -637,7 +646,8 @@ extern u8 D_800CC1F4;
 s32 func_15044670(f32 fromX, f32 fromY, s32 fromZBits, struct127 *probe, s32 arg4, s32 arg5);
 #define C080_F(o) (*(f32 *)(p + (o)))
 #define C080_W(o) (*(s32 *)(p + (o)))
-void func_1512C080(struct108 *arg0) {
+/* was func_1512C080 */
+void camera_eye_collision(struct108 *arg0) {
     u8 *p = (u8 *)arg0;
     struct127 probe;      /* sp74 */
     f32 floorY;           /* sp60 */
@@ -755,7 +765,7 @@ void func_1512C080(struct108 *arg0) {
     }
     C080_F(0x300) = probe.z_position;
     if (D_800BE9F0 != 0x1B && hit != 0 && C080_W(0x2C) != 0x100) {
-        func_1510EE3C(0, 0, (s32)&floorY, 0, 0, 0, C080_F(0x2F8), C080_F(0x2FC), C080_F(0x300), C080_F(0x308), 0, 0,
+        collision_find_floor_no_fallback(0, 0, (s32)&floorY, 0, 0, 0, C080_F(0x2F8), C080_F(0x2FC), C080_F(0x300), C080_F(0x308), 0, 0,
                       0xC61C4000 /* -10000.0f, D_800A3A70 */, *(s32 *)(p + 0x2FC), 1);
         if (C080_F(0x2FC) < floorY + 40.0f) {
             C080_F(0x2FC) = floorY + 40.0f;
@@ -764,13 +774,14 @@ void func_1512C080(struct108 *arg0) {
     camera_update_state_flags(arg0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512C080.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/camera_eye_collision.s")
 #endif
 
 void camera_update_eye_orbit(u8 *);
-s32 func_1512C6C0(u8 *);
+s32 camera_yaw_fade_in(u8 *);
 
-void func_1512C5D8(u8 *arg0) {
+/* was func_1512C5D8 */
+void camera_too_close_swing(u8 *arg0) {
     f32 temp_f0;
     f32 temp_f12;
     f32 temp_f2;
@@ -795,13 +806,14 @@ void func_1512C5D8(u8 *arg0) {
             (*(s32 *)((u8 *)arg0 + 0x240)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x240)) | 2);
         }
     }
-    func_1512C6C0(arg0);
+    camera_yaw_fade_in(arg0);
 }
 
 #ifdef NON_MATCHING
 /* P43: fade-in of +0x5CC (+0.006 per call, up to 1.0); at 1.0 clears flag 2 of +0x240 and sets +0x384 = 999.0,
- * else +0x384 += func_15048A70(+0x384, +0x37C) * +0x5CC. The asm returns no value (callers ignore it). */
-s32 func_1512C6C0(u8 *arg0) {
+ * else +0x384 += math_angle_diff_deg(+0x384, +0x37C) * +0x5CC. The asm returns no value (callers ignore it). */
+/* was func_1512C6C0 */
+s32 camera_yaw_fade_in(u8 *arg0) {
     f32 f;
 
     *(f32 *)(arg0 + 0x5CC) += 0.006f;
@@ -816,15 +828,16 @@ s32 func_1512C6C0(u8 *arg0) {
         *(f32 *)(arg0 + 0x384) = 999.0f;
         return 0;
     }
-    f = func_15048A70(*(f32 *)(arg0 + 0x384), *(f32 *)(arg0 + 0x37C));
+    f = math_angle_diff_deg(*(f32 *)(arg0 + 0x384), *(f32 *)(arg0 + 0x37C));
     *(f32 *)(arg0 + 0x384) += f * *(f32 *)(arg0 + 0x5CC);
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512C6C0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/camera_yaw_fade_in.s")
 #endif
 
-void func_1512C770(s32 arg0) {
+/* was func_1512C770 */
+void camera_step_noop(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
@@ -836,9 +849,10 @@ void func_1512C770(s32 arg0) {
  * heading +0x37C when outside; D_80089950 = horizontal distance to the target (0 when nothing was done).
  * The request flag is always cleared. The asm leaves v0 undefined: void under NM. */
 extern f32 D_80089950;
-void func_1508EF80(u8 *, u8 *, f32, u8 *);
+void vec_rotate_xz_about_point(u8 *, u8 *, f32, u8 *);
 #define C108_F32(o) (*(f32 *)(arg0 + (o)))
-void func_1512C77C(u8 *arg0) {
+/* was func_1512C77C */
+void camera_cylinder_push(u8 *arg0) {
     struct17 *camPos;
     struct17 *centre;
     struct17 pos;
@@ -875,13 +889,13 @@ void func_1512C77C(u8 *arg0) {
     C108_F32(0x940) = 0.0f;
     centre = (struct17 *)(arg0 + 0x93C);
 
-    func_150491EC(centre, &pos, &dir);
-    pushAngle = func_15048FC8(&dir) - 180.0f;
+    vec3_dir_to(centre, &pos, &dir);
+    pushAngle = vec3_heading_deg(&dir) - 180.0f;
     func_15048758(&pushAngle);
-    func_150491EC(&target, &pos, &toTarget);
+    vec3_dir_to(&target, &pos, &toTarget);
 
     /* onto the circle */
-    func_15049148(&dir, C108_F32(0x938), &dir);
+    vec3_scale(&dir, C108_F32(0x938), &dir);
     pos.unk0 = C108_F32(0x93C) + dir.unk0;
     pos.unk4 = 0.0f;
     pos.unk8 = C108_F32(0x944) + dir.unk8;
@@ -889,14 +903,14 @@ void func_1512C77C(u8 *arg0) {
     dz = target.unk8 - pos.unk8;
     targetDist = sqrtf(dx * dx + dz * dz);
 
-    func_15048F90(&pos, &target, &dir);
-    heading = func_15048FC8(&dir);
+    vec3_diff(&pos, &target, &dir);
+    heading = vec3_heading_deg(&dir);
     func_15048758(&heading);
     C108_F32(0x930) = heading;
 
-    delta = func_15048A70(pushAngle, heading);
+    delta = math_angle_diff_deg(pushAngle, heading);
     if (fabsf(delta) < 35.0f) {
-        func_1508EF80((u8 *)&pos, (u8 *)centre, (delta <= 0.0f) ? 5.0f : -5.0f, (u8 *)&pos);
+        vec_rotate_xz_about_point((u8 *)&pos, (u8 *)centre, (delta <= 0.0f) ? 5.0f : -5.0f, (u8 *)&pos);
     }
     D_80089950 = targetDist;
     pos.unk4 = C108_F32(0x2FC);
@@ -904,9 +918,10 @@ void func_1512C77C(u8 *arg0) {
     arg0[0x948] = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512C77C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/camera_cylinder_push.s")
 #endif
 
-s32 func_1512C9EC(s32 arg0) {
+/* was func_1512C9EC */
+s32 camera_always_true(s32 arg0) {
     return 1;
 }

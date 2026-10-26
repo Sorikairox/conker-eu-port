@@ -10,17 +10,18 @@ extern u8 D_800A1D20[];
 extern u8 D_800CC82C;
 extern u8 D_800CC8BA;
 extern s32 *D_800DC3C4;
-s32 func_151149AC(u8);
+s32 world_record_find(u8);
 s32 object_hit_effects(void *, s32, s32, s32, s32, s32, s32, s32);
-s32 func_1507CD64(struct127 *, s32);
+s32 player_hit_reaction(struct127 *, s32);
 void func_15196888(u8 *, s32, s32);
 
 // player_item_drop_check: unless the player's held object (D_800CCA0C, byte 0x120) is busy, checks items 0xFA and
-// 0xF9 (func_151149AC; entry index = (item - D_800DBEF4) / 160 into the flag words at D_800DC3C4). The first one
-// with bit 0 set: releases the player's current carried object (func_15060F28), clears D_800CC8BA and resets the
-// player (object_hit_effects, sound 0x627 via func_10010630, func_15145A50, mode 6 via func_1507CD64). Then the four
+// 0xF9 (world_record_find; entry index = (item - D_800DBEF4) / 160 into the flag words at D_800DC3C4). The first one
+// with bit 0 set: releases the player's current carried object (obj_remove), clears D_800CC8BA and resets the
+// player (object_hit_effects, sound 0x627 via func_10010630, func_15145A50, mode 6 via player_hit_reaction). Then the four
 // D_800BE4F0 nodes are offset by +-object 0xE's +0x2E4 value (func_15196888).
-void func_150F2FE0(s32 arg0) {
+/* was func_150F2FE0 */
+void player_item_drop_check(s32 arg0) {
     struct127 *o;
     s32 off;
     s32 i;
@@ -30,16 +31,16 @@ void func_150F2FE0(s32 arg0) {
         return;
     }
     for (i = 0; i < 2; i++) {
-        item = func_151149AC(0xFA - i);
+        item = world_record_find(0xFA - i);
         if (D_800DC3C4[(item - (s32) D_800DBEF4) / 160] & 1) {
             if (D_800CC82C != 0) {
-                func_15060F28((struct127 *) ((u8 *) D_800CC2D0 + (D_800CC82C - 100) * 0x32C), 0);
+                obj_remove((struct127 *) ((u8 *) D_800CC2D0 + (D_800CC82C - 100) * 0x32C), 0);
             }
             D_800CC8BA = 0;
             object_hit_effects(D_800CC2D0, 0, 0, 1, 1, 0, 0xFF, 1);
             func_10010630(0x627, D_800CC2D0, 0x6D60, 0x1F4, 0x3E8);
             func_15145A50(D_800CC2D0);
-            func_1507CD64(D_800CC2D0, 6);
+            player_hit_reaction(D_800CC2D0, 6);
             break;
         }
     }
@@ -51,10 +52,11 @@ void func_150F2FE0(s32 arg0) {
     func_15196888(((u8 **) D_800BE4F0)[3], -off, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F2FE0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/player_item_drop_check.s")
 #endif
 
-void func_150F320C(u8 *arg0) {
+/* was func_150F320C */
+void drip_emitter_spawn(u8 *arg0) {
     struct {
         u8 *unk0;
         u8 unk4;
@@ -92,7 +94,8 @@ extern f32 D_800A1D3C;
 // D_800A1D38 * frame time and every whole unit drops one: the line between the bone points D_800A1D20 / D_800A1D2C
 // (bone matrix +0x3C0) is probed (func_15146078) and a drop sprite (effect3d_spawn_full, template D_800A4AA0, size
 // 60..100, alpha 0x34-byte trail record copied to +0x110) is spawned at the first point.
-void func_150F3294(u8 *obj) {
+/* was func_150F3294 */
+void drip_emitter_update(u8 *obj) {
     struct {
         u8 *owner;
         u8 id;
@@ -171,9 +174,9 @@ void func_150F3294(u8 *obj) {
         trail.owner = owner;
         trail.id = owner[0x3B];
         trail.t = 0.0f;
-        trail.size = func_150ADA68() * 6.0f + 13.0f;
+        trail.size = random_float() * 6.0f + 13.0f;
         trail.unk10 = D_800A1D3C;
-        trail.speed = func_150ADA68() * 40.0f + 60.0f;
+        trail.speed = random_float() * 40.0f + 60.0f;
         trail.accel = trail.speed / (trail.size * trail.size);
         in[0] = (f32 *) D_800A1D20;
         in[1] = (f32 *) D_800A1D2C;
@@ -226,19 +229,22 @@ void func_150F3294(u8 *obj) {
     } while (*(s8 *) (st + 0xC) > 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F3294.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/drip_emitter_update.s")
 #endif
 
-void func_150F3714(s32 arg0, s32 arg1, u8 arg2) {
+/* was func_150F3714 */
+void drip_emitter_on_message(s32 arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
-void func_150F3754(s32 arg0, s32 arg1, u8 arg2) {
+/* was func_150F3754 */
+void drip_sprite_on_message(s32 arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, arg0 + 0x110, arg0 + 0x114, arg0);
 }
 
 #ifdef NON_MATCHING
-s32 func_150F3794(u8 *arg0) {
+/* was func_150F3794 */
+s32 drip_sprite_update(u8 *arg0) {
     u8 *sp18;
     f32 temp_f12;
     f32 temp_f2;
@@ -267,12 +273,13 @@ s32 func_150F3794(u8 *arg0) {
     return var_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F3794.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/drip_sprite_update.s")
 #endif
 s32 sprite_quad_build_axes();
 
 /* P224: draw table D_8008A1BC entry; the asm returns sprite_quad_build_axes's v0 and the dispatcher uses it. */
-u8 *func_150F38FC(u8 *arg0, s16 arg1) {
+/* was func_150F38FC */
+u8 *drip_sprite_draw(u8 *arg0, s16 arg1) {
     return (u8 *) sprite_quad_build_axes(arg0, arg0 + 0x12C, arg0 + 0x138, arg1);
 }
 
@@ -282,7 +289,8 @@ typedef struct {
     u8 unk4F_0 : 1;
 } struct_eu_150F3930;
 
-void func_150F3930(struct_eu_150F3930 *arg0) {
+/* was func_150F3930 */
+void map_obj_vis_by_cam_depth(struct_eu_150F3930 *arg0) {
     if (*(f32 *)((u8 *)D_800DBFF0 + 0x300) < -2000.0f) {
         arg0->unk4F_0 = 0;
         return;
@@ -292,7 +300,8 @@ void func_150F3930(struct_eu_150F3930 *arg0) {
 
 extern f32 D_800A1D40;
 
-void func_150F3978(s32 arg0) {
+/* was func_150F3978 */
+void camera_zone_flag_update(s32 arg0) {
     u8 *e = (u8 *)D_800DBFF0 + arg0 * 0x9A0;
 
     if (*(f32 *)(e + 0x300) < D_800A1D40) {
@@ -307,7 +316,8 @@ void func_150F3978(s32 arg0) {
 extern f32 D_800A1D50;
 extern f32 D_800A1D54;
 
-f32 func_150F3A20(s32 arg0, f32 arg1) {
+/* was func_150F3A20 */
+f32 player_swim_anim_speed(s32 arg0, f32 arg1) {
     f32 var_f2;
 
     if (arg1 < -5.0f) {
@@ -324,20 +334,21 @@ extern u8 *D_800CC6A4; /* controller: +0 buttons (u16), +2 stick x, +3 stick y (
 extern s32 D_800CC6A0;
 extern u8 D_800CC68D;
 extern u8 D_800CC1F3;
-void func_150585F0(struct127 *); /* P209: the asm reads only a0 (this caller leaves 0.25f in a1) */
-u8 func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);
-f32 func_1505A3A8(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
+void obj_stun_update(struct127 *); /* P209: the asm reads only a0 (this caller leaves 0.25f in a1) */
+u8 obj_turn_towards(struct127 *arg0, u8 arg1, u16 arg2);
+f32 obj_approach_speed(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
 void func_15052590(struct127 *);
-void func_15073FA0(void);
+void objev_spawn_helper_object(void);
 
 // player_swim_update: player interaction state 0x15 handler (entry 21 of D_800863B4, called as `(obj)` by
 // func_1504A730 / func_15022A40). Reads the controller (D_800CC6A4, cleared when the D_800DDE3C / D_800DDDC8 gate
 // of player D_800C3E78 holds). Stunned: drops the carried object (unk13C = 100 + index). Entry (unk102 == 0): heading
-// from the stick (func_1505A630 / func_1505A5CC), may grab object D_800CC68D, dives below unk118. Then each frame:
-// stick y / buttons 0x8000 / 0x4000 / 0x10 steer pitch (unkB8), turn (unkC4 -> unk76) and speed (func_1505A3A8),
+// from the stick (math_atan2_u16 / pad_stick_speed), may grab object D_800CC68D, dives below unk118. Then each frame:
+// stick y / buttons 0x8000 / 0x4000 / 0x10 steer pitch (unkB8), turn (unkC4 -> unk76) and speed (obj_approach_speed),
 // gravity damping and clamps, the closest grabbable object (ids 0x9C / 0x9D) to D_800D154C (unk222), carry / drop
-// sounds, the 0x2000 spawn (id 0x25, fewer than 5), surfacing near the floor, and the animation (func_1505E650).
-void func_150F3A74(struct127 *self) {
+// sounds, the 0x2000 spawn (id 0x25, fewer than 5), surfacing near the floor, and the animation (obj_start_anim).
+/* was func_150F3A74 */
+void player_swim_update(struct127 *self) {
     struct127 *pl;
     s32 i;
     s32 n;
@@ -378,8 +389,8 @@ void func_150F3A74(struct127 *self) {
         self->unk103--;
     }
     if (self->stunned != 0) {
-        func_150585F0(self);
-        func_15059140(self);
+        obj_stun_update(self);
+        obj_physics_step(self);
         self->unk40 = (f32) ((s16) self->unk7A + 0x4000) * 0.0054931640625f; /* 360 / 65536 */
         if (self->unk13C != 0) {
             /* let go of the carried object */
@@ -397,8 +408,8 @@ void func_150F3A74(struct127 *self) {
     if (self->unk102 == 0) {
         /* entering: face the stick direction */
         self->in_water = 0;
-        heading = func_1505A630((f32) ((s8 *) D_800CC6A4)[2], (f32) ((s8 *) D_800CC6A4)[3], 0);
-        mag = func_1505A5CC((struct49 *) D_800CC6A4);
+        heading = math_atan2_u16((f32) ((s8 *) D_800CC6A4)[2], (f32) ((s8 *) D_800CC6A4)[3], 0);
+        mag = pad_stick_speed((struct49 *) D_800CC6A4);
         if (*(u16 *) D_800CC6A4 & 0x10) {
             mag = 0.0f;
         }
@@ -418,8 +429,8 @@ void func_150F3A74(struct127 *self) {
             if (self->unk28 > 30.0f) {
                 /* grab object D_800CC68D - 100 */
                 D_800D1580 = 0xFF010074;
-                func_1506E8D8();
-                func_1505959C(&D_800CC2D0[D_800CC68D - 100], D_800C3E78);
+                objev_sound_alt_300_1800();
+                obj_attach_to_carrier(&D_800CC2D0[D_800CC68D - 100], D_800C3E78);
                 self->unk102 = 1;
                 self->unk13C = D_800CC68D;
             }
@@ -451,7 +462,7 @@ void func_150F3A74(struct127 *self) {
         for (i = 0, pl = D_800CC2D0; i != 25; i++, pl++) {
             if (pl->interaction_state != 0 && pl->health != 0 && pl->unk28 == 0.0f && pl->unk232 != 0x21 &&
                 (pl->id == 0x9C || pl->id == 0x9D)) {
-                d = func_1505A6F8(D_800D154C, pl);
+                d = obj_dist_xz(D_800D154C, pl);
                 if (d < best) {
                     self->unk222 = i;
                     best = d;
@@ -475,7 +486,7 @@ void func_150F3A74(struct127 *self) {
     self->unkC4 = c4 + ((f32) ((s8 *) D_800CC6A4)[2] - c4) * (0.2f * D_800D1550[0]);
     self->unk7E = 0x19;
     self->unk76 -= (s32) (self->unkC4 * D_800D1550[0] * 0.04f * ((100.0f - speed) * 0.015f) * 220.0f);
-    func_150599C8(self, 8, self->unk76);
+    obj_turn_towards(self, 8, self->unk76);
     self->target_speed = 0.0f;
     speed = 0.0f;
     if (self->y_position < self->unk118) {
@@ -506,7 +517,7 @@ void func_150F3A74(struct127 *self) {
             rate = 0.3f;
         }
     }
-    func_1505A3A8(self->target_speed, self, speed, rate, 1);
+    obj_approach_speed(self->target_speed, self, speed, rate, 1);
     self->unk40 = (f32) ((s16) self->unk7A + 0x4000) * 0.0054931640625f; /* 360 / 65536 */
     self->gravity = stick * 0.000125f * (200.0f - self->xz_velocity);
     if (self->unk13C == 0) {
@@ -552,7 +563,7 @@ void func_150F3A74(struct127 *self) {
     }
     speed = self->y_velocity;
     D_800CC1F3 = 1;
-    func_15059140(self);
+    obj_physics_step(self);
     D_800CC1F3 = 0;
     if (self->unk13C != 0 && self->unk28 < 50.0f) {
         floor_h = 50.0f;
@@ -562,10 +573,10 @@ void func_150F3A74(struct127 *self) {
             /* pick up object D_800CC68D - 100 from the ground */
             self->y_velocity = 20.0f;
             self->y_position = D_800CC2D0[D_800CC68D - 100].y_position + 70.0f;
-            func_1505959C(&D_800CC2D0[D_800CC68D - 100], D_800C3E78);
+            obj_attach_to_carrier(&D_800CC2D0[D_800CC68D - 100], D_800C3E78);
             self->unk13C = D_800CC68D;
             D_800D1580 = 0xFF010074;
-            func_1506E8D8();
+            objev_sound_alt_300_1800();
         }
         if (self->unk13C != 0) {
             if (self->unk25C & 2) {
@@ -581,7 +592,7 @@ void func_150F3A74(struct127 *self) {
                 self->unk13C = 0;
                 self->y_velocity = 0.0f;
                 D_800D1580 = 0x76;
-                func_1506E8D8();
+                objev_sound_alt_300_1800();
             }
         } else if ((D_800CC288 & 0x2000) && self->unk103 == 0 && D_800BE9F0 == 0x3C) {
             n = 0;
@@ -593,7 +604,7 @@ void func_150F3A74(struct127 *self) {
             if (n < 5) {
                 D_800D1580 = 6;
                 self->unk103 = 4;
-                func_15073FA0();
+                objev_spawn_helper_object();
             }
         }
     }
@@ -604,13 +615,13 @@ void func_150F3A74(struct127 *self) {
             if (self->unk13C != 0) {
                 if (self->y_velocity < -10.0f) {
                     D_800D1580 = 0xFF0100A7;
-                    func_1506E5FC();
+                    objev_sound_300_1800();
                     D_800D1580 = 0xFF060372;
-                    func_1506E8D8();
+                    objev_sound_alt_300_1800();
                 }
             } else if (self->y_position < 0.0f) {
                 D_800D1580 = 0xFF010072;
-                func_1506E8D8();
+                objev_sound_alt_300_1800();
             }
             if (self->unk13C == 0) {
                 self->y_velocity = 20.0f;
@@ -638,7 +649,7 @@ void func_150F3A74(struct127 *self) {
             anim_speed = 0.5f;
         }
     } else {
-        anim_speed = func_150F3A20((s32) self, stick);
+        anim_speed = player_swim_anim_speed((s32) self, stick);
     }
     anim = 0xF;
     if (40.0f < self->unkB8 && 20.0f < stick) {
@@ -654,20 +665,21 @@ void func_150F3A74(struct127 *self) {
         anim = 0x17;
         anim_speed += 0.2f;
     }
-    func_1505E650(self, anim, anim_speed, 9.0f, 0.0f, 0.0f, 0);
+    obj_start_anim(self, anim, anim_speed, 9.0f, 0.0f, 0.0f, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F3A74.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/player_swim_update.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, ...);
+s32 event_dispatch(s32, s32, ...);
 
-void func_150F4970(struct108 *arg0) {
+/* was func_150F4970 */
+void camera_update_state3b_view(struct108 *arg0) {
     s32 temp_t0;
 
     if (arg0->unk23E == 0x3B) {
-        func_1509BFB0(0, 0x405C, 1);
+        event_dispatch_alt(0, 0x405C, 1);
         if ((arg0->unk2C != 0x100) && (arg0->unk6C8 == 0)) {
             if (camera_push_mode(arg0, 8, 0, 0, 0) != 0) {
                 temp_t0 = arg0->unk84 | 0x300000;
@@ -687,14 +699,14 @@ void func_150F4970(struct108 *arg0) {
         }
     } else if ((arg0->unk2C == 8) && (arg0->unk6C8 == 0)) {
         camera_pop_mode(arg0, 0);
-        func_1509BFB0(0, 0x405C, 0);
+        event_dispatch_alt(0, 0x405C, 0);
     }
-    if ((func_1509BE40(1, 0x4054, 6, 0x9000) != 0) && (func_1509BE40(1, 0x405E, 6, 0x9000) == 0)) {
+    if ((event_dispatch(1, 0x4054, 6, 0x9000) != 0) && (event_dispatch(1, 0x405E, 6, 0x9000) == 0)) {
         arg0->unk84 |= 0x80000000;
         return;
     }
     arg0->unk84 &= 0x7FFFFFFF;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F4970.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/camera_update_state3b_view.s")
 #endif

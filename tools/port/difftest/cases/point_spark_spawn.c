@@ -63,11 +63,11 @@ typedef struct {
     s8 u70[4];        /* 0x70 */
 } EmitBlk9DC8;
 
-// spark_burst_spawn: P232. Handler 0 of the D_80089004 point-effect table (called by func_15109A7C with the
+// spark_burst_spawn: P232. Handler 0 of the D_80089004 point-effect table (called by obj_point_effect_emitter_update with the
 // object, the point `pos` and three more points; `dir` = the unit direction): spawns one spark particle (kind 0x2B,
 // random life 10..25, random size 35..60, velocity dir * a random scale, random flip bits 0x40 / 0x80) through
 // func_151308E4 and a small emitter (func_151530A8) at the same point. b / c / d are not used.
-void func_15109DC8(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
+void point_spark_spawn(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     PartTmpl9DC8 t;
     f32 scale;
     EmitBlk9DC8 e;
@@ -76,18 +76,18 @@ void func_15109DC8(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     s32 flipY;
     s32 i;
 
-    scale = (func_150ADA68() * D_800A2A04 + D_800A2A08) * D_800A2A0C;
+    scale = (random_float() * D_800A2A04 + D_800A2A08) * D_800A2A0C;
     t.kind = 0x2B;
     t.flags = 0x4401;
     t.u0 = 0x200005;
     t.u4 = 0x20000;
-    t.life = (func_150ADA20() & 0xF) + 10;
+    t.life = (random_int() & 0xF) + 10;
     t.uC = 0;
     t.u10 = 0;
     for (i = 0; i < 9; i++) {
         t.colour[i] = 0xFF;
     }
-    size = func_150ADA68() * 25.0f + 35.0f;
+    size = random_float() * 25.0f + 35.0f;
     t.size[1] = size;
     t.size[0] = size;
     t.pos[0] = pos[0];
@@ -104,8 +104,8 @@ void func_15109DC8(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     t.u54 = 0.0f;
     t.u24 = 1.0f;
     t.dir[2] = dir[2] * scale;
-    flipX = (func_150ADA20() & 1) ? 0x40 : 0;
-    flipY = (func_150ADA20() & 1) ? 0x80 : 0;
+    flipX = (random_int() & 1) ? 0x40 : 0;
+    flipY = (random_int() & 1) ? 0x80 : 0;
     t.mode = flipY | 5 | flipX | 0xC200;
     t.u60[0] = 6;
     t.u60[1] = 6;

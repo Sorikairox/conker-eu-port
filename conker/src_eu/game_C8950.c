@@ -3,38 +3,40 @@
 #include "variables.h"
 
 
-struct249 *func_1509B704(s16 arg0);
-void func_1509C120(void);
-void func_1509C3A0(void);
+struct249 *event_find(s16 arg0);
+void save_block_realloc_random(void);
+void game_over_apply_pending(void);
 #ifdef NON_MATCHING
-struct249 *func_1509B5AC(s32 id, s32 arg1);
+struct249 *event_start(s32 id, s32 arg1);
 #endif
 
 
-void func_1509B4A0(s32 arg0, s32 arg1) {
+/* was func_1509B4A0 */
+void event_start_level_events(s32 arg0, s32 arg1) {
     s32 i;
 
     if(0) {};
 
     D_8003C8E0 = 0x5000000;
-    func_1509C120();
+    save_block_realloc_random();
     func_15096970();
 
     for (i = 0; i < D_800D2F3C; i++) {
         if (func_1509CBD4(D_800D2F40[i])) {
-            func_1509B5AC(D_800D2F40[i], arg1);
+            event_start(D_800D2F40[i], arg1);
         }
     }
 
-    func_1509C3A0();
+    game_over_apply_pending();
     D_8003C8E0 = 0;
 }
 
-u16 *func_1509B570(s32 arg0) {
+/* was func_1509B570 */
+u16 *event_get_vars(s32 arg0) {
     struct248 *temp_v0;
     u16 res;
 
-    temp_v0 = func_1509B704(arg0);
+    temp_v0 = event_find(arg0);
     if (temp_v0 != 0) {
         res = temp_v0->unkA;
         return (s32)temp_v0 + (res & 0xFFFF);
@@ -43,17 +45,18 @@ u16 *func_1509B570(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
-struct249 *func_1509B704(s16 arg0);
-struct249 *func_1509B8FC(s16 arg0);
-void func_1509B810(struct249 *arg0);
+struct249 *event_find(s16 arg0);
+struct249 *event_load(s16 arg0);
+void event_link_sorted(struct249 *arg0);
 void func_150ADFD0(struct249 *, s32);
 
 /* event_start: start event `id` (arg1 = 0: level start, skipped when the event's own save bit is set). An event not yet in the
- * list is loaded (func_1509B8FC), linked (func_1509B810) and run once from entry 0 unless the save bit of its flags
+ * list is loaded (event_load), linked (event_link_sorted) and run once from entry 0 unless the save bit of its flags
  * (flags & 0x3FF) is set; flag 0x4000 marks it started (always at level start, else only with flag 0x400). An event
  * already in the list with flag 0x1000 and not 0x800 gets its variables cleared when arg1 != 0. */
-struct249 *func_1509B5AC(s32 id, s32 arg1) {
-    struct249 *e = func_1509B704(id);
+/* was func_1509B5AC */
+struct249 *event_start(s32 id, s32 arg1) {
+    struct249 *e = event_find(id);
     u8 *save = (u8 *) D_800D2E4C;
     u16 flags;
     s32 bit;
@@ -62,8 +65,8 @@ struct249 *func_1509B5AC(s32 id, s32 arg1) {
         return NULL;
     }
     if (e == NULL) {
-        e = func_1509B8FC(id);
-        func_1509B810(e);
+        e = event_load(id);
+        event_link_sorted(e);
         flags = e->unk0;
         bit = flags & 0x3FF;
         if (!(save[bit >> 3] & (1 << (bit & 7)))) {
@@ -86,10 +89,11 @@ struct249 *func_1509B5AC(s32 id, s32 arg1) {
     return e;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509B5AC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/event_start.s")
 #endif
 
-struct249 *func_1509B704(s16 arg0) {
+/* was func_1509B704 */
+struct249 *event_find(s16 arg0) {
     struct249 *tmp;
     s32 mask = 0xFFFF03FF;
     s32 i;
@@ -105,7 +109,8 @@ struct249 *func_1509B704(s16 arg0) {
 }
 
 
-void func_1509B764(struct249 *arg0) {
+/* was func_1509B764 */
+void event_unlink_free(struct249 *arg0) {
     if (D_800D2F48.length == 1) {
         D_800D2F48.unk4 = NULL;
         D_800D2F48.unk8 = NULL;
@@ -127,7 +132,8 @@ void func_1509B764(struct249 *arg0) {
     D_800D2F48.length--;
 }
 
-void func_1509B810(struct249 *arg0) {
+/* was func_1509B810 */
+void event_link_sorted(struct249 *arg0) {
     s32 var_a3;
     struct249 *temp_v0;
     struct249 *var_v0;
@@ -174,26 +180,27 @@ void func_1509B810(struct249 *arg0) {
 }
 
 #ifdef NON_MATCHING
-/* event_load: load event block `arg0` (asset 20) and relocate it; the caller func_1509B5AC uses the result (the matching
+/* event_load: load event block `arg0` (asset 20) and relocate it; the caller event_start uses the result (the matching
  * void version leaves it in v0). */
-struct249 *func_1509B8FC(s16 arg0) {
+/* was func_1509B8FC */
+struct249 *event_load(s16 arg0) {
     struct248 *temp_v0;
     s16 sp18[2];
 
-    temp_v0 = func_1502B5C8(&sp18, 2, 20, arg0);
+    temp_v0 = asset_load(&sp18, 2, 20, arg0);
     temp_v0->unk0 |= arg0;
     temp_v0->unk2 = D_800BE9F0;
-    return (struct249 *) func_1509B950((struct_eu_C8950_blk *) temp_v0);
+    return (struct249 *) event_block_relocate((struct_eu_C8950_blk *) temp_v0);
 }
 #else
-void func_1509B8FC(s16 arg0) {
+void event_load(s16 arg0) {
     struct248 *temp_v0;
     s16 sp18[2];
 
-    temp_v0 = func_1502B5C8(&sp18, 2, 20, arg0);
+    temp_v0 = asset_load(&sp18, 2, 20, arg0);
     temp_v0->unk0 |= arg0;
     temp_v0->unk2 = D_800BE9F0;
-    func_1509B950(temp_v0);
+    event_block_relocate(temp_v0);
 }
 #endif
 
@@ -201,7 +208,8 @@ void func_1509B8FC(s16 arg0) {
 /* event_block_relocate: relocate a loaded event block: the variable area (unk6 bytes) goes after the script at an 8-aligned offset
  * (unkA), the block size is rounded up to 8, the block is copied to a new allocation with the variables cleared,
  * and the old block is freed. */
-struct_eu_C8950_blk *func_1509B950(struct_eu_C8950_blk *blk) {
+/* was func_1509B950 */
+struct_eu_C8950_blk *event_block_relocate(struct_eu_C8950_blk *blk) {
     struct_eu_C8950_blk *new;
     u16 pos;
 
@@ -220,10 +228,10 @@ struct_eu_C8950_blk *func_1509B950(struct_eu_C8950_blk *blk) {
     return new;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509B950.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/event_block_relocate.s")
 #endif
 // NON-MATCHING: register allocation of pad/pos swapped (v1/t0)
-// struct_eu_C8950_blk *func_1509B950(struct_eu_C8950_blk *arg0) {
+// struct_eu_C8950_blk *event_block_relocate(struct_eu_C8950_blk *arg0) {
 //     u16 pos;
 //     s32 pad;
 //     struct_eu_C8950_blk *new;
@@ -246,10 +254,11 @@ struct_eu_C8950_blk *func_1509B950(struct_eu_C8950_blk *blk) {
 
 #ifdef NON_MATCHING
 void func_150ADFD0(struct249 *, s32);
-void func_1509B764(struct249 *);
-void func_1509C228(void);
+void event_unlink_free(struct249 *);
+void event_send_cmd36(void);
 
-void func_1509BA04(s32 arg0) {
+/* was func_1509BA04 */
+void event_list_unload(s32 arg0) {
     s32 count;
     s32 i;
     s32 id;
@@ -263,7 +272,7 @@ void func_1509BA04(s32 arg0) {
     e = D_800D2F48.unk4;
     count = D_800D2F48.length;
     if (D_800D3289 != 0) {
-        func_1509C228();
+        event_send_cmd36();
         D_800D3289 = 0;
     }
     for (i = 0; i < count; i++) {
@@ -273,14 +282,14 @@ void func_1509BA04(s32 arg0) {
         bit = 1 << (id & 7);
         next = e->next;
         if ((((u8 *)D_800D2E4C)[byte] & bit) && arg0 == 0) {
-            func_1509B764(e);
+            event_unlink_free(e);
             state[id] = 3;
         } else if (arg0 != 0 || (flags & 0x8000) ||
                    ((flags & 0x1000) && D_800BE9F0 != *(u16 *)((u8 *)e + 2))) {
             D_8003C8E0 = 0x06000001;
             func_150ADFD0(e, 3);
             D_8003C8E0 = 0;
-            func_1509B764(e);
+            event_unlink_free(e);
             if (((u8 *)D_800D2E4C)[byte] & bit) {
                 state[id] = 3;
             } else {
@@ -291,16 +300,17 @@ void func_1509BA04(s32 arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509BA04.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/event_list_unload.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, ...);
+s32 event_dispatch(s32, s32, ...);
 void func_150ADFD0(struct249 *, s32);
 extern s16 D_800BEE12;
 extern s32 D_800D3268;
 extern s32 D_800D3378;
 
-void func_1509BBA0(s32 arg0) {
+/* was func_1509BBA0 */
+void event_list_run_phase(s32 arg0) {
     s32 temp_v0;
     s32 var_a1;
     s32 var_s5;
@@ -311,8 +321,8 @@ void func_1509BBA0(s32 arg0) {
 
     var_s0 = D_800D2F48.unk4;
     func_15097118();
-    if ((D_800BE616 != 0) || (D_800BE9F0 == 0x32) || (func_1509BE40(0, 0x2000, 0x93) != 0) || (arg0 != 2)) {
-        func_1509C228();
+    if ((D_800BE616 != 0) || (D_800BE9F0 == 0x32) || (event_dispatch(0, 0x2000, 0x93) != 0) || (arg0 != 2)) {
+        event_send_cmd36();
         temp_a2 = D_800D2F48.length;
         var_s5 = 0;
         if ((s32) temp_a2 > 0) {
@@ -373,13 +383,13 @@ block_26:
         if (D_800D3378 != 0) {
     s32 pad;
             D_800D3378 = 0;
-            func_1509B4A0((s32) D_800BEE12, 0);
+            event_start_level_events((s32) D_800BEE12, 0);
         }
         D_800D3858 = 0;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509BBA0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/event_list_run_phase.s")
 #endif
 //
 #ifdef NON_MATCHING
@@ -388,10 +398,11 @@ extern s32 D_800D3380[];
 extern s32 D_800D3C60;
 extern s32 (*D_80088838[])(s32, s32, s32 *);
 
-/* P43: variadic event dispatch. func_1509BE40(n, id, arg, x1 .. xn): D_800D3380 = {id & 0xFFF, arg, x1 .. xn},
+/* P43: variadic event dispatch. event_dispatch(n, id, arg, x1 .. xn): D_800D3380 = {id & 0xFFF, arg, x1 .. xn},
  * D_800D3C60 = n + 2 during the call (restored after), returns D_80088838[(id >> 12 & 0xF) - 1](id & 0xFFF, arg,
  * D_800D3380). Callers pass 3 to 8 words; every caller's NON_MATCHING prototype is now `(s32, s32, ...)`. */
-s32 func_1509BE40(s32 n, s32 id, ...) {
+/* was func_1509BE40 */
+s32 event_dispatch(s32 n, s32 id, ...) {
     va_list ap;
     s32 saved;
     s32 arg;
@@ -413,16 +424,17 @@ s32 func_1509BE40(s32 n, s32 id, ...) {
     return r;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509BE40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/event_dispatch.s")
 #endif
 
 #ifdef NON_MATCHING
 extern void (*D_80088874[])(s32, s32, s32 *);
 
-/* Variadic event dispatch like func_1509BE40, on the second handler table: func_1509BFB0(n, id, arg, x1 .. xn) sets
+/* Variadic event dispatch like event_dispatch, on the second handler table: event_dispatch_alt(n, id, arg, x1 .. xn) sets
  * D_800D3380 = {id & 0xFFF, arg, x1 .. xn} and D_800D3C60 = n + 2 for the call (restored after), then calls
  * D_80088874[(id >> 12 & 0xF) - 1](id & 0xFFF, arg, D_800D3380). */
-void func_1509BFB0(s32 n, s32 id, s32 arg, ...) {
+/* was func_1509BFB0 */
+void event_dispatch_alt(s32 n, s32 id, s32 arg, ...) {
     va_list ap;
     s32 saved;
     s32 i;
@@ -440,18 +452,19 @@ void func_1509BFB0(s32 n, s32 id, s32 arg, ...) {
     D_800D3C60 = saved;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509BFB0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/event_dispatch_alt.s")
 #endif
 
 // need a bigger brain
-void func_1509C120(void) {
+/* was func_1509C120 */
+void save_block_realloc_random(void) {
     s32 n;
     s32 i;
     struct102 *sp38[4];
     struct102 *sp34;
-    n = func_150ADA20() & 3;
+    n = random_int() & 3;
     sp34 = D_800D2E4C;
-    if (sp34 == NULL || (func_150ADA20() & 4)) {
+    if (sp34 == NULL || (random_int() & 4)) {
         for (i = 0; i <= n; i++) {
             sp38[i] = (struct102 *)allocate_memory(0x1B, 0xFF, 2, 0);
         }
@@ -468,15 +481,17 @@ void func_1509C120(void) {
     }
 }
 
-void func_1509C228(void) {
+/* was func_1509C228 */
+void event_send_cmd36(void) {
     if ((D_800D2E68 & 8) || (D_800D2E4C->unkF & 1)) {
-        func_1509BFB0(2, 0x2000, 0x36, 0, 1);
+        event_dispatch_alt(2, 0x2000, 0x36, 0, 1);
         return;
     }
-    func_1509BFB0(2, 0x2000, 0x36, 1, 1);
+    event_dispatch_alt(2, 0x2000, 0x36, 1, 1);
 }
 
-s32 func_1509C2A4(void) {
+/* was func_1509C2A4 */
+s32 level_is_game_over_level(void) {
     s32 temp_v0 = D_800BE9F0;
     if ((temp_v0 == 3) ||
         (temp_v0 == 5) ||
@@ -511,17 +526,19 @@ s32 func_1509C2A4(void) {
     return 1;
 }
 
-void func_1509C3A0(void) {
-    if ((D_800D2E43 != 0) && (D_800D2E44 == 0) && (func_1509C2A4() != 0)) {
+/* was func_1509C3A0 */
+void game_over_apply_pending(void) {
+    if ((D_800D2E43 != 0) && (D_800D2E44 == 0) && (level_is_game_over_level() != 0)) {
         D_800BE3DF = (s8) D_800BE9F4;
         if (D_800C35C4 == 0) {
-            func_15007718(D_8008FDA8);
+            save_request_slot_write(D_8008FDA8);
         }
         D_800D2E43 = 0;
     }
 }
 
 
-s32 func_1509C414(s32 arg0) {
+/* was func_1509C414 */
+s32 event_make_bank_id(s32 arg0) {
     return ((D_800D2E4C->unk3 & 1) << 0xA) + arg0 + 0x1400;
 }

@@ -165,7 +165,7 @@ void func_1509CD0C(s32 arg0, s32 arg1) {
     f32 var_f0;
     struct127 *temp_v0;
 
-    temp_v0 = func_1505EEF4(arg0 & 0xFFF);
+    temp_v0 = obj_find_by_spawn(arg0 & 0xFFF);
     if (temp_v0 != NULL) {
         if (D_800DBFF0->unk2C & 0x100) {
             var_f0 = (*(f32 *)((u8 *)D_800DBFF0 + 0x760));

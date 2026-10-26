@@ -4,10 +4,11 @@
 
 
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, ...);
+s32 event_dispatch(s32, s32, ...);
 void camera_calc_relative_yaw(u8 *);
 
-void func_15108560(struct108 *arg0) {
+/* was func_15108560 */
+void camera_update_object_state9(struct108 *arg0) {
     s32 temp_t9;
 
     if (func_150859AC((s16) arg0->unk3D0->unk127, 1) == 9) {
@@ -27,12 +28,12 @@ void func_15108560(struct108 *arg0) {
     } else {
         arg0->unk5F0 &= ~0x800;
     }
-    if ((func_1509BE40(1, 0x401A, 6, 0x9000) != 0) || (func_1509BE40(1, 0x401B, 6, 0x9000) != 0)) {
+    if ((event_dispatch(1, 0x401A, 6, 0x9000) != 0) || (event_dispatch(1, 0x401B, 6, 0x9000) != 0)) {
         arg0->unk84 |= 0x10000;
         return;
     }
     arg0->unk84 &= 0xFFFEFFFF;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_135D70/func_15108560.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_135D70/camera_update_object_state9.s")
 #endif

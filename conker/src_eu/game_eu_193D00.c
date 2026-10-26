@@ -107,7 +107,7 @@ void func_15166774(struct102 *arg0) {
 }
 
 #ifdef NON_MATCHING
-f32 func_150489B0(u8);
+f32 math_cos_u8(u8);
 
 u8 *func_151667D8(u8 *arg0, u8 *arg1, s32 arg2) {
     struct {
@@ -252,10 +252,10 @@ u8 *func_151667D8(u8 *arg0, u8 *arg1, s32 arg2) {
             sp.u9C = temp_f2;
             sp.uD0 = (s32) temp_t5;
             sp.uD8 = (s32) temp_t4;
-            temp_f20 = func_15048A40((*(u8 *)((u8 *)arg1 + 0xA0)));
-            sp78 = func_15048A40((*(u8 *)((u8 *)arg1 + 0xA1)));
-            sp7C = func_150489B0((*(u8 *)((u8 *)arg1 + 0xA0)));
-            temp_f0_2 = func_150489B0((*(u8 *)((u8 *)arg1 + 0xA1)));
+            temp_f20 = math_sin_u8((*(u8 *)((u8 *)arg1 + 0xA0)));
+            sp78 = math_sin_u8((*(u8 *)((u8 *)arg1 + 0xA1)));
+            sp7C = math_cos_u8((*(u8 *)((u8 *)arg1 + 0xA0)));
+            temp_f0_2 = math_cos_u8((*(u8 *)((u8 *)arg1 + 0xA1)));
             temp_f22 = (f32) temp_t4;
             temp_f24 = (f32) sp.uD4;
             var_v0 = &sp.u84;

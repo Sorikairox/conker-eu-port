@@ -1,0 +1,211 @@
+old	new	confidence	description
+func_150E0DF0	object_explode	high	Big explosion at an object: sounds, ground scorch decal, shock wave/flash/smoke/sparks, debris, light, hit effects and blast damage
+func_150E1160	enemy_update_alert_move	low	Enemy update: alert counter unk83 / state 4 transitions, then normal or stunned movement and position deltas
+func_150E1310	camera_update_level_events	med	Camera per-map hook: on map 9/0x1E/0x2F/0x1B pushes/pops camera mode 8 and sets camera flags from event flags
+func_150E15E0	fx_model_emitter_spawn	low	Spawns (index 0/1) an effect object bound to a model (func_151149AC) storing the emitter state at +0x28
+func_150E16CC	fx_model_emitter_update	low	Update of func_150E15E0's emitter: accumulates time and spawns random particles from model points
+func_150E1AF0	object_ray_hit_nearest	high	Finds the live object best hit by a view ray from p0 to p1 and spawns effect kind at it; returns the effect
+func_150E1DE0	map_door_lights_update	high	Eases 4 lights toward on/off levels from event flags 0x4039+i, sends them as effect params and sets obj flags
+func_150E2030	beam_effect_spawn	high	Allocates a line/beam effect object from p0 to p1 with widths, texture and optional followed target
+func_150E2294	beam_effect_update	high	Beam object update: lifetime, re-attach to followed character matrix, retarget/raycast, move head, impact
+func_150E2E5C	beam_effect_draw	high	Beam object draw: camera-facing textured quad from head along direction times length
+func_150E3324	beam_effect_stub	low	Returns its first argument unchanged (stub handler)
+func_150E3334	beam_effect_spawn_attached	med	Spawns a beam (mode 1, texture 0x27) that follows a character matrix with given offsets and timers
+func_150E2EA4	beam_effect_spawn_attached_ex	med	Like beam_effect_spawn_attached but with caller-given widths and speed
+func_150E3510	beam_effect_handler_stub	low	Message handler stub that forwards to beam_effect_stub
+func_150E3540	beam_effect_on_target_swap	med	On message 0x2D re-points the beam's followed object from one of a swapped pair to the other
+func_150E35A0	zap_bolt_spawn	high	Allocates a type-0x27 lightning bolt object (head, target, anchor, speed, follow, life) and registers it in one of 8 slots
+func_150E3788	zap_bolt_spawn_between	med	Spawns a zap bolt from p0 to p1 whose speed covers the distance in the given frames; returns slot+1 or 0
+func_150E3850	zap_bolt_spawn_follow	med	Spawns a zap bolt at a point that chases a followed object at a given speed; returns slot+1 or 0
+func_150E38C0	zap_bolt_spawn_path	low	Spawns a zap bolt (kind 0x1A, speed 10) at a point with an anchor and a path pointer
+func_150E394C	zap_sound_release_cb	high	Sound callback: 1 while the handle is 0, else releases it and returns 0
+func_150E3994	zap_bolt_spawn_with_sound	med	Spawns a following zap bolt anchored at a point and starts its looping sound 0x2D0; returns slot+1 or 0
+func_150E3A94	zap_bolt_free	high	Frees a zap bolt: clears its slot, stops its sound (plays end sound 0x2D7) and destroys the node
+func_150E3B5C	zap_bolt_free_slot	high	Frees the zap bolts of slot n (1-based) or all of them when n is 0
+func_150E3C3C	zap_bolt_get_pos	high	Returns the integer head position of the zap bolt in slot n (1-based) if it exists
+func_150E3CB8	zap_bolt_update	high	Zap bolt update: life countdown, chase target/path, spawn lightning segments from anchor and sparks
+func_150E4590	obj_spawn_linked_effect	low	If obj+0x1B4 is set, spawns an effect (func_1505D1C4) at the position stored in the obj+0x110 block
+func_150E469C	fx_set_tint_preset	low	Calls func_151C40BC with a fixed colour/scale preset (0.352, 0.701, 0.566, white)
+func_150E46F4	fx_scroll_step	low	Advances two floats (+0x2C, +0x30) by their rates (+0x4C, +0x54) times the frame delta; returns 1
+func_150E4740	camera_calc_point_ahead	med	Stores the point 500 units ahead of the camera along its pitch and yaw into D_800D9E10 (s16 x,y,z)
+func_150E4878	impact_scatter_random	med	Spawns n impact effects at random ground points within 500 units of the D_800D9E10 point, by floor material
+func_150E4A94	impact_scatter_ahead	med	Computes the point ahead of the camera and scatters arg/30 random ground impacts around it
+func_150E4AD0	impact_effect_spawn	high	Spawns debris, dust, smoke and sparks of an impact of a given kind and size at a point
+func_150E4EA8	impact_effect_at_world_object	high	Probes a world object's floor around its position and spawns an impact effect with the hit triangle's material
+func_150E523C	fx_ring_sprite_update	low	Sprite update: grows +0xA4 over time, fades +0xB4 after 9 frames and kills the sprite after 0x261 frames
+func_150E5384	impact_dust_spawn	high	Dust sub-effect of an impact: sprays dust sprites along the hit triangle's normal (or upwards), maybe a smoke puff
+func_150E5AD8	impact_dust_smoke_puff	med	Spawns a smoke puff particle moving along a direction, texture by impact kind 4/9/other
+func_150E5D90	debris_ground_bounce	high	Debris ground handler: snaps to the ground, stops when slow, else reflects velocity about the triangle normal
+func_150E6060	weather_lightning_storm_update	med	While the storm flag D_80088DA4 is on, ramps an intensity and fires random sky beams around the camera plus ground impacts
+func_150E6550	beam_ray_spawn	high	Spawns a type-0x41 ray effect from->to, optionally ray casting to record the hit point and side at +0x110
+func_150E67B0	beam_ray_update	med	Ray effect update: detects crossing its recorded hit point (calls hit handler D_80088DB0[n]) and advances along its velocity
+func_150E6920	beam_ray_build_verts	med	Builds the ray's 4 camera-facing vertices for a viewer from its head, direction, length and width
+func_150E6D1C	beam_ray_fade_out	med	Clamps the ray's alpha (+0x5C) to life*32 during its last 8 frames; returns 1
+func_150E6D50	beam_ray_hit_spark	med	Ray hit handler: spawns a camera sprite effect at the recorded hit point; returns 0
+func_150E6E30	arc_spark_spawn	low	Zone event 3: by chance, picks arc start/end points via table callbacks and spawns a wavy electric arc emitter object
+func_150E7104	arc_spark_update	low	Arc emitter update: accumulates time and spawns beam_ray segments along a sine-wobbled path between its points
+func_150E73B4	arc_point_random_box2	low	Arc point getter: random point on one of two fixed segments (D_80088DDC / D_80088DE0)
+func_150E7458	arc_point_random_marker	low	Arc point getter: position of one of the two markers D_800D9A20 picked at random
+func_150E7498	arc_point_random_box6	low	Arc point getter: random point on one of six fixed segments (D_80088DE4 table)
+func_150E752C	arc_point_near_object	low	Arc point getter: random point around an object's bone 0x16 (or its position when the bone is missing)
+func_150E764C	arc_point_from_record	low	Arc point getter: copies floats 5..7 of a record into the output vector
+func_150E766C	arc_wobble_init_random	low	Arc path setup: yaw/pitch of the direction plus random wobble amplitudes, phases and rates
+func_150E7764	arc_wobble_init_fixed	low	Arc path setup: yaw of the direction plus fixed wobble amplitudes and random phases/rates
+func_150E7810	screen_lightning_random_flash	med	By small chance: screen-space lightning sprite, thunder sound 0x360, screen flash and rumble
+func_150E7B20	screen_sprite_spawn	med	Fills a screen-space sprite spec (pos, scale, life, flags, colour bytes) and spawns it with func_151559FC
+func_150E7C50	screen_sprite_spawn_edge	med	Spawns a screen-space sprite at a random point along one of the four screen edges
+func_150E7F14	screen_lightning_curve_spawn	med	Spawns a kind-0x12C object holding a random spline across the screen, with sound and rumble
+func_150E821C	screen_lightning_curve_update	med	Screen lightning update: spawns sprites along the next spline points with panned thunder sound; ends at the last point
+func_150E856C	fx_scorch_decal_spawn	med	Spawns a ground decal sprite (scorch mark) on a triangle at a point with size, alpha and colour
+func_150E8728	fx_scripted_blast	low	For kinds 4..7 spawns a blast flash, effect and rumble at the preset point D_800A1660[kind] (200 up)
+func_150E892C	fx_debris_emitter_spawn	med	Spawns a type-0x28 emitter object at a point (life given or 300) used for explosion debris
+func_150E89F0	fx_debris_emitter_update	low	Emitter update: accumulates a random rate and spawns particles (func_151307F0) at its point
+func_150E8DA4	fx_particle_anim_step	low	Particle callback: advances its animation fields (+0xA8/+0xAA/+0xAC) via func_15131D98; returns 1
+func_150E8854	storm_controller_spawn	med	Spawns the type-0x35 storm controller object with a 10-frame initial timer
+func_150E8E40	storm_controller_update	med	Storm controller update: when its timer runs out, resets it to 201..538 and triggers a lightning strike
+func_150E8EB0	storm_lightning_strike	med	Lightning strike: broadcasts message 0x1B, flash, rumble, thunder sounds and spawns the strike point emitters
+func_150E9000	storm_spawn_spark_emitter	low	Spawns a short type-0x33 emitter object with fixed rate parameters
+func_150E909C	storm_spark_emitter_update	low	Emitter update: picks weighted random strike points near the camera (<1800) and spawns type-0x34 objects there
+func_150E92DC	storm_spark_burst_update	low	Point burst update: spawns sprite particles randomly within 20 units of its point
+func_150E965C	storm_spawn_debris_emitter	low	Spawns a short type-0x36 emitter object with fixed rate parameters
+func_150E96F8	storm_debris_emitter_update	low	Emitter update: picks weighted random strike points near the camera (<1400) and spawns type-0x37 objects there
+func_150E995C	storm_debris_burst_update	low	Point burst update: spawns physics particles (func_15132FBC) randomly within 50 units of its point
+func_150E9C9C	storm_debris_ground_splash	low	Physics particle hook: below its ground height, kind 0xA spawns a splash sprite and returns 0; else 1
+func_150E9E10	fx_spark_burst_with_light	med	Spawns a sprite flash, 5..12 flying physics sparks and a short light at a point
+func_150EA3B4	fx_marker_spark_emitter_update	low	Emitter update: at a random rate spawns spark bursts at its marker's position (func_1514470C)
+func_150EA560	anim_fx_bone_emitter_spawn	med	Animation event 0x50: spawns a bone-attached emitter on the object with pulse parameters at +0x80
+func_150EA68C	anim_fx_emitter_reset_phase	low	Emitter init hook: clears the pulse phase at +0x80; returns 1
+func_150EA69C	anim_fx_puff_spawn	low	Spawns a puff particle (func_1513092C) offset along a direction with random size and wobble parameters
+func_150EAA10	anim_fx_emitter_pulse_scale	med	Returns base + amplitude * cos(phase) for the emitter and advances the phase by its rate
+func_150EAA80	anim_fx_trail_spawn	med	Animation event 0x51: spawns a trail emitter following the object (life given or 300)
+func_150EAB4C	anim_fx_puff_spawn_large	low	Spawns a larger puff particle (func_1513092C) with random size and wobble parameters
+func_150EAE60	weather_lightning_storm_tick	low	Wrapper calling weather_lightning_storm_update (argument ignored)
+func_150EA904	world_obj_hit_activate	low	World object hit callback: for type 0xE0 objects sets the active bits 3 in byte +0x73
+func_150EAEC4	world_obj_tumble_update	low	World object update: while active spins its rotations, moves under gravity and fades out, then flags done
+func_150EB090	fx_light_sweep_emitter_update	low	Emitter update: spawns moving lights that sweep between random points on two segments at a random speed
+func_150EB3A4	fx_drifting_sprite_update	high	Moves an effect sprite over the ground by its velocity, snapping y to the ground; returns 0 when its life ends
+func_150EB4D0	obj_foot_pos_probe_ground	med	Gets foot 1/2 bone position (bones 0x21 / 0x1D) and optionally probes the ground just below it
+func_150EB5B0	footstep_surface_override	low	For foot kind 1 on map 4 returns surface 6 or 3 (by obj_query_table6), else -1
+func_150EB610	footstep_dust_spawn	med	Spawns an impact dust particle at the given foot's ground point, scaled by the object's speed
+func_150EB740	camera_update_event_lock	med	Camera hook: when event flags 0xBC/0xBB are set pushes camera mode 8 locked on an object, else pops it; syncs flags
+func_150EB430	target_volume_hit_check_offset	low	Adds an offset to a position and runs target_volume_hit_check on the result
+func_150EBA04	target_volume_hit_check	low	Tests a point/sphere against target trigger volumes; on a target hit fires its event and explodes it; returns 1 on hit
+func_150EBB94	world_obj_tilt_spring_update	high	Spring-driven tilt angle of a world object toward -40 (or player-distance based), released into a fall state
+func_150EBE44	fx_fireworks_burst	med	Fireworks burst: sound, flash and light at fixed points, then four spark showers with random launch velocities
+func_150EC200	target_volume_explode	low	Explodes at a trigger volume record: debris emitter, rumble, sound and two stacked flash/smoke/light effects
+func_150EBEC0	gun_barrel_fire	high	Fires barrel 0/1 of a gun object: aim ray, tracer toward the hit point, muzzle flash and barrel smoke
+func_150EC954	gun_tracer_can_hit	med	Tracer hit filter: true for live objects other than self whose type is 0-4, 0x28 or 0x77
+func_150EC9DC	fx_set_tint_white	low	Calls func_151C40BC with white (1, 1, 1, 0) and full bytes
+func_150ECAA0	fx_area_emitter_update	low	Emitter update: unless its area is hidden, spawns type-0x5A effect objects at random points of the area
+func_150ECC30	fx_point_particle_emitter_update	low	Emitter update: at a random rate spawns particles (func_151307F0) at its stored point
+func_150ECFE8	obj_tint_fx_spawn	med	Spawns a type-0x5D effect object that keeps a colour overlay (RGBA + mode) on a character for a time
+func_150ED0CC	obj_tint_fx_on_message	med	Message handler of the tint effect: forwards to node_handle_link_message for its linked object
+func_150ED10C	obj_tint_fx_update	med	Tint effect update: re-applies the colour overlay (func_1502ED88) to its object; ends if the object is gone
+func_150ED180	obj_hit_green_tint	low	Calls func_151CA070 on an object and gives it a green colour overlay effect (mode 4)
+func_150ED1F0	camera_update_map_tint	med	Per-map hook: reads option event flags into flags/mode/value, sends settings and eases the global tint toward its target
+func_150ED750	angle_diff_signed_deg	high	Signed difference b - a of two angles in degrees, normalised into (-180, 180]
+func_150ED7B4	tank_yaw_offset_to_obj	med	Signed angle between an object's heading and the direction to another object (degrees)
+func_150ED818	tank_shell_aim_error	high	Ballistic aim helper of the tank turret: horizontal miss distance (or elevation error) of a shell toward a point
+func_150EDAF8	tank_mark_driver_view	low	Sets the driver's camera bit in +0x2FC when the driver part allows and the player has the view flag 0x10
+func_150EDBB8	tank_set_track_speeds	high	Clamps left/right track speeds to +-45 and sets the two track texture scroll rates
+func_150EDCC8	tank_update	high	Per-frame update of a drivable tank: driver input, boost, steering, AI, physics, hit reactions, tracks and turret aim
+func_150EF204	tank_dismount_enter	med	State table entry: puts the tank in state 3 and hands the rider's camera/controls back to its player
+func_150EF328	tank_parked_update	med	State handler: enters state 3 once (stop sound/anim), then runs the object physics
+func_150EEE00	tether_start_with_flash	med	Unless masked by the object's flags, starts the bone tether effect and spawns a flash and spark burst at the bone point
+func_150EEF40	tether_stop	med	Broadcasts message 0x43 with the object and side to the effect lists to stop its tether
+func_150EF500	tether_effect_start	med	Starts a bone-to-object beam effect with two flame sprites, a glow, a smoke emitter and a light; returns the effect
+func_150EF90C	tether_beam_update	med	Beam update: follows source bone to target object, pulses width/alpha, moves its light and ray casts to tint hit objects
+func_150EFD04	tether_filter_type28	low	Filter callback: true when the object's type byte is 0x28
+func_150EFD30	tether_effect_retire	high	Destroys the tether's flame sprites, glow, smoke and light nodes and retires the effect
+func_150EFDE0	tether_effect_free	high	Deletes the tether's flame sprites, glow, smoke and light nodes and frees the effect
+func_150EFE90	tether_effect_on_message	high	Tether message handler: ends on owner removal or stop (0x43), re-points source/target on object swap (0x2D)
+func_150EFFCC	tether_flame_anchor_update	med	Flame sprite update: copies the beam's endpoints and bone point while the beam is valid, else hides it; returns 1
+func_150F0100	tether_spark_emitter_update	low	Emitter update: while the tether beam is valid spawns streak particles with random launch directions
+func_150F0448	tether_smoke_emitter_spawn	med	Starts a 30-tick smoke particle emitter of a given colour bound to an object and effect
+func_150F066C	tether_smoke_emitter_update	low	Smoke emitter update: positions it on the beam while valid, else clears its active flag; returns 1
+func_150F0718	tether_light_spawn	med	Creates a point light of a given colour bound to the tether effect
+func_150F07E0	tether_flame_on_retire	low	Flame sprite retire hook: clears its slot in the tether effect
+func_150F0800	tether_flame_on_free	low	Flame sprite free hook: clears its slot in the tether effect
+func_150F0820	tether_flame_clear_slot	med	Clears the tether effect's pointer to this flame sprite (slot +0x12C[n])
+func_150F0840	tether_glow_retire	low	Clears the tether's glow pointer and retires the glow node
+func_150F086C	tether_glow_free	low	Clears the tether's glow pointer and frees the glow node
+func_150F0898	tether_glow_clear_slot	med	Clears the tether effect's glow pointer (+0x134)
+func_150F08A8	tether_smoke_retire	low	Clears the tether's smoke pointer and retires the emitter buffers
+func_150F08D4	tether_smoke_free	low	Clears the tether's smoke pointer and deletes the emitter buffers
+func_150F0900	tether_smoke_clear_slot	med	Clears the tether effect's smoke emitter pointer (+0x138)
+func_150F0910	tether_light_retire	low	Clears the tether's light pointer and retires the light controller
+func_150F093C	tether_light_free	low	Clears the tether's light pointer and frees the light controller
+func_150F0968	tether_light_clear_slot	med	Clears the tether effect's light pointer (+0x13C)
+func_150F03F8	obj_arm_tracer_fire	low	Fires from arm 0/1 of an object (needs a model and +0x2EC >= 0x5A): flash, spray and tracer from the bone
+func_150F0D64	tether_flame_on_message	med	Flame sprite message handler: ends on owner removal, re-points its object on swap (0x2D)
+func_150F0E0C	tether_smoke_on_message	med	Smoke emitter message handler: ends on owner removal, re-points its object on swap (0x2D)
+func_150F0EB8	obj_attach_twin_lights	low	Creates two joint lights on an object (joints 0x25 and 2) with fixed parameters
+func_150F0FA4	fx_spark_burst_at	low	Spawns a spark burst effect (func_151530A8) at a point
+func_150F0BEC	obj_glow_spawn	med	Spawns a glow effect 0x2B at an object's position remembering the object and three random phases
+func_150F13C8	obj_glow_follow_pulse	med	Glow update: follows its object and pulses its two sizes and alpha; ends when the object is gone
+func_150F15A0	obj_glow_on_message	med	Glow message handler: re-points on object swap (0x2D), ends on owner removal or stop (0x43)
+func_150F10D4	obj_trail_emitter_spawn	low	Spawns a type-0x4C effect object with a 0x18-byte record (object, target point) at +0x28
+func_150F16F0	obj_trail_emitter_update	low	Emitter update: while its object lives spawns particles along the object-to-point segment
+func_150F1B78	fx_target_effect_on_message	med	Effect message handler: ends on 0x43 from its target, else forwards to func_15149514
+func_150F1C04	fx_target_light_on_message	low	Light message handler: ends on 0x43 from its target object
+func_150F1C5C	obj_limb_muzzle_burst	med	Spawns a flash and a spray at a limb attachment point (side, slot) of an object, moved to world space by its bone
+func_150F1F80	obj7b_update_pulse_scale	high	Breathing scale of object type 0x7B: advances a shared phase (speed by +0x2E4 flags) and scales a model matrix
+func_150F20C8	obj7b_joint_swing_entries	high	Swings a shared angle down/up by object state 0x21 and writes six joint adjustment entries (joints 29..34)
+func_eu_150F2230	obj7b_set_anim_ids	med	Sets object type 0x7B animation bytes +0x68/+0x69 from its state (0x14) and +0x2E4 flag pairs
+func_150F2290	fx_big_explosion_at_obj	med	Big explosion effects at an object: shock wave, flash, smoke, sound 0x2B6/0x2BE, light, debris and fragments
+func_150F2670	ambient_far_sound_update	high	Random ambient sound 0x6C..0x6E with a cooldown while the object is far from the origin
+func_150F2230	obj_bone_smoke_puff	med	Spawns a smoke puff at a random point within 100 of an object's bone (+0x4C0) unless its +0x74 nibble is 0xF
+func_150F2850	obj_leg_tip_pos	med	For leg 3..8 transforms the point (0, -45, 0) by the leg's bone (0x29..0x3D) into world space; 0 for other legs
+func_150F28FC	footstep_surface_const_e	low	Footstep surface callback that always returns surface 0xE
+func_150F2910	obj_leg_dust_puff	low	Spawns a dust/smoke puff at the tip of an object's leg (obj_leg_tip_pos)
+func_150F2960	fx_sine_sway_update	low	Sets x/z velocity (+0x20/+0x28) from two sine phases and advances the phases by their rates; returns 1
+func_150F2A00	fx_sine_swing_update	low	Swing block update: sets two angles from sine phases times amplitudes and advances the phases; returns 1
+func_150F2A98	fx_swing_build_matrix	low	Builds this frame's matrix from the swing block's two angles and pivot position; returns 1
+func_150F2B20	fx_pendulum_sprite_update	low	Places a sprite 495 units below its swinging pivot, using the pivot's tilt angles; returns 1
+func_150F2C20	camera_update_ride_mode	med	Camera hook: while the followed object rides (unk102), pushes a close camera mode; else map 0x3B view or pops; syncs flags
+func_150F2F14	camera_set_ride_event_flags	low	Sets event flags 0x4016..0x4023, 0x405D, 0x405F (and 0x4063..0x4065 when enabled) to a value
+func_150F2FE0	player_item_drop_check	med	When item 0xFA/0xF9 is flagged, drops the player's carried object and resets the player; offsets four nodes by object 0xE
+func_150F320C	drip_emitter_spawn	low	Spawns a type-0x5C drip emitter object with a 0x10-byte record (owner, id, state) at +0x28
+func_150F3294	drip_emitter_update	med	Drip emitter update: follows its owner, refills 3 drops on a new state and spawns drop sprites between two bone points
+func_150F3714	drip_emitter_on_message	med	Drip emitter message handler: forwards to node_handle_link_message for its owner link at +0x28
+func_150F3754	drip_sprite_on_message	med	Drop sprite message handler: forwards to node_handle_link_message for its owner link at +0x110
+func_150F3794	drip_sprite_update	med	Drop sprite update: stays on the owner's bone point, grows and fades with time; returns 0 when its time is up
+func_150F38FC	drip_sprite_draw	med	Drop sprite draw entry: builds its quad via sprite_quad_build_axes from the stored axes
+func_150F3930	map_obj_vis_by_cam_depth	low	Sets an object's visible bit when the camera z is at least -2000, else clears it
+func_150F3978	camera_zone_flag_update	low	Sets/clears player n's bit in the D_800D9A40 flags when its camera is past a z limit and above y 840
+func_150F3A20	player_swim_anim_speed	med	Swim animation speed from the pitch stick value: scaled when below -5, else 0.75
+func_150F3A74	player_swim_update	high	Player swim state 0x15 update: stick steering, pitch, speed, carry/drop/pick-up objects, surfacing and animation
+func_150F4970	camera_update_state3b_view	low	Camera hook: in state 0x3B pushes camera mode 8 with fixed distances, else pops it; syncs flag 0x405C and bit 31
+func_150F4AF0	lightning_bolt_spawn	med	Spawns a bolt physics particle between two points with style, width and wobble, storing its path record at +0x170
+func_150F4E50	lightning_bolt_update	low	Bolt particle update: counts its life down, advances its wobble phase and moves along its velocity; NULL when done
+func_150F4FB8	ambient_obj_update	med	Ambient object update: fades alpha by camera distance and keeps a looping positional sound when close; returns 1
+func_150F527C	ambient_obj_on_message	med	Ambient object message handler: 0x4E hides it and stops its sound, 0x4F destroys it
+func_150F4D5C	lightning_emitter_spawn	med	Spawns a type-0x56 lightning emitter object (owner, condition index, bolt set) around a player's camera
+func_150F536C	lightning_emitter_update	med	Emitter update: if its condition holds, spawns bolts between random points ahead of the owner's camera
+func_150F5830	camera_update_flag_401c	low	Camera hook: mirrors event 0x401C flag 0x9000 into bit 31 of the flags word +0x84
+func_150F5890	area_points_hook	low	Hook that calls func_15182D40 (reads the level area point slots); argument ignored
+func_150F58C0	level_effects_reset	high	Resets effect slots 6..0x16 of D_800D34B8 (func_151C9CBC mode 1) and calls func_1515F170(9, 1)
+func_150F59A0	screen_overlay_show_timed	med	Animation event: shows a 2D screen overlay image (style 0..2 picks image/size) with fade-in, hold and fade-out times
+func_150F5B10	screen_overlay_update_scale	low	Overlay update: sets both scales from the elapsed time (0x1000 - t * 4), then updates the alpha
+func_150F5B48	screen_overlay_update_alpha	med	Overlay alpha from the elapsed time: ramps up over fade-in, 255 while held, ramps down over fade-out
+func_150F5C0C	screen_overlay_on_end	low	Overlay end hook: calls func_15179008(0); argument ignored
+func_150F5C30	model_anim_texture_frame_cb	low	Model node callback: for character state 0xAE picks a texture frame from D_80090624 by animation frame; returns 0
+func_150F5FD4	model_tile_fade_cb	med	Model node callback: fades a display list's tile size by the animation height while the character is in state 5
+func_150F6188	obj_bone_glow_emitter_spawn	low	Spawns a type-0x51 emitter object bound to an object (record at +0x28) with a given life
+func_150F6218	obj_bone_glow_emitter_update	low	Emitter update: while its object lives spawns glow particles along two points of its bone (+0x140)
+func_150F66B8	obj_bone_glow_emitter_on_message	low	Emitter message handler: forwards to func_15149514 with its object link at +0x28
+func_150F66F8	obj_bone_fx_pair_update	low	Emitter update: keeps its child effect and light on two bone points of its object, hiding them when unavailable
+func_150F689C	obj_bone_fx_pair_destroy_children	med	Destroys the emitter's child effect (+0x30) and light (+0x34) nodes if present
+func_150F68E8	obj_bone_fx_pair_retire	low	Destroys the emitter's children and retires it (func_1514933C)
+func_150F6914	obj_bone_fx_pair_free	low	Destroys the emitter's children and frees it (func_15149368)
+func_150F6940	obj_bone_fx_pair_on_message	low	Emitter message handler: forwards to node_handle_link_message for its object link at +0x28
+func_150F6980	obj_bone_fx_child_detach	med	Clears the parent emitter's pointer to this child effect (parent at +0x160)
+func_150F69A0	obj_bone_fx_child_retire	low	Detaches the child effect from its parent and retires it (effect3d_retire)
+func_150F69CC	obj_bone_fx_child_free	low	Detaches the child effect from its parent and frees it (effect3d_free)
+func_150F69F8	obj_bone_fx_light_detach	low	Empty detach hook for the child light (does nothing)
+func_150F6A04	obj_bone_fx_light_retire	low	Child light retire hook: retires its effect buffers
+func_150F6A30	obj_bone_fx_light_free	low	Child light free hook: deletes its effect buffers
+func_150F6A5C	obj_electric_zap_emitter_update	low	Emitter update: on a random timer plays zap sound 0x679, a flash and 2..3 spark arcs from its object's root bone
+func_150F6DD0	obj_electric_zap_on_message	low	Zap emitter message handler: forwards to node_handle_link_message for its object link at +0x28
+func_150F6E10	obj_bone_spark_emitter_spawn	low	Spawns a bone-attached spark emitter on an object with a given life (bone_emitter_spawn)
+func_150F6EDC	fx_bone_spark_dust_spawn	med	Bone emitter handler: turns emitter inputs into a dust/spark particle, maybe with floor bounce, via impact_dust_cloud_spawn

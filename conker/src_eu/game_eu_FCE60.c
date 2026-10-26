@@ -42,23 +42,23 @@ void func_150CF650(u8 *arg0) {
         return;
     }
     if ((*(s32 *)((u8 *)temp_s0 + 0x1D4)) != 0) {
-        (*(f32 *)((u8 *)temp_s2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 8)) + ((0.06f + (func_150ADA68() * 0.0704f)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 8)) + ((0.06f + (random_float() * 0.0704f)) * D_800BE9A4));
         func_1515C7B4(temp_s0, &sp.u104, &sp.uD8, &sp.uD4);
         sp.u100 = (sp.uD8 + sp.uD4) * 0.5f;
         func_1504715C(&sp.uDC, temp_s0);
         if ((*(f32 *)((u8 *)temp_s2 + 8)) > 1.0f) {
             do {
-                temp_s0_2 = func_150ADA20() & 0xFF;
-                func_15143794(temp_s0_2, (s16) ((func_150ADA20() % 76U) - 0x40), sp.u100, &sp.uC8);
+                temp_s0_2 = random_int() & 0xFF;
+                func_15143794(temp_s0_2, (s16) ((random_int() % 76U) - 0x40), sp.u100, &sp.uC8);
                 sp.uC8 += sp.u104;
                 sp.uCC += sp.u108;
                 sp.uD0 += sp.u10C;
-                temp_s0_3 = func_150ADA20();
-                func_15143794(temp_s0_2, (s16) (((u32) temp_s0_3 % 54U) - 0x38), (func_150ADA68() * 1.4430001f) + 2.2680001f, &sp.uBC);
-                temp_f20 = func_150ADA68();
-                temp_s1 = func_150ADA20();
-                temp_s0_4 = func_150ADA20();
-                impact_dust_cloud_spawn(&sp.uC8, &sp.uBC, 5U, (temp_f20 * 0.286f) + -0.78700006f, (s16) (((u32) temp_s1 % 21U) + 0x1E), (u8) (((u32) temp_s0_4 % 156U) + 0x64), (func_150ADA68() * 50.0f) + 48.0f, 1U, 1.0f, 1.0f, 0U, (s32) &sp.uDC, 1U, 0U, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                temp_s0_3 = random_int();
+                func_15143794(temp_s0_2, (s16) (((u32) temp_s0_3 % 54U) - 0x38), (random_float() * 1.4430001f) + 2.2680001f, &sp.uBC);
+                temp_f20 = random_float();
+                temp_s1 = random_int();
+                temp_s0_4 = random_int();
+                impact_dust_cloud_spawn(&sp.uC8, &sp.uBC, 5U, (temp_f20 * 0.286f) + -0.78700006f, (s16) (((u32) temp_s1 % 21U) + 0x1E), (u8) (((u32) temp_s0_4 % 156U) + 0x64), (random_float() * 50.0f) + 48.0f, 1U, 1.0f, 1.0f, 0U, (s32) &sp.uDC, 1U, 0U, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 (*(f32 *)((u8 *)temp_s2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 8)) - 1.0f);
             } while ((*(f32 *)((u8 *)temp_s2 + 8)) > 1.0f);
         }
@@ -280,7 +280,7 @@ s32 func_150CFD10(u8 *arg0) {
             (*(f32 *)((u8 *)var_v0 + 4)) = 1.0f;
             (*(u8 *)((u8 *)var_v0 + 0)) = (u8) ((*(u8 *)((u8 *)var_v0 + 0)) & 0xFFFE);
             sp84 = var_v0;
-            temp_v1 = (func_150ADA20() & 3) + 2;
+            temp_v1 = (random_int() & 3) + 2;
             temp_t0 = temp_v1;
             sp.uA8 = (*(f32 *)((u8 *)arg0 + 0x14)) + 15.0f;
             var_s2 = temp_t0;
@@ -313,20 +313,20 @@ s32 func_150CFD10(u8 *arg0) {
             sp.uF0 = (s8) D_80082FA0;
             if (temp_v1 > 0) {
                 do {
-                    sp.uCA = (func_150ADA20() % 101U) + 0x9B;
+                    sp.uCA = (random_int() % 101U) + 0x9B;
                     sp.uBC = (*(s8 (**)())((u8 *)(&D_80090070) + 8))();
-                    temp_s0 = func_150ADA20();
-                    func_15143874((s16) (((u32) temp_s0 % 65U) - 0xA0), (func_150ADA68() * 2.0f) + 2.5f, &sp.u9C, &sp.uA0);
-                    sp.uA4 = (func_150ADA68() * 0.333f) + 0.404f;
-                    temp_f2 = (func_150ADA68() * 1.79f) + 1.6999999f;
+                    temp_s0 = random_int();
+                    func_15143874((s16) (((u32) temp_s0 % 65U) - 0xA0), (random_float() * 2.0f) + 2.5f, &sp.u9C, &sp.uA0);
+                    sp.uA4 = (random_float() * 0.333f) + 0.404f;
+                    temp_f2 = (random_float() * 1.79f) + 1.6999999f;
                     sp.uB4 = temp_f2;
                     sp.uB8 = temp_f2;
-                    sp.uBE = (func_150ADA20() % 26U) + 0x1E;
+                    sp.uBE = (random_int() % 26U) + 0x1E;
                     var_s1 = 0;
-                    if (func_150ADA20() & 1) {
+                    if (random_int() & 1) {
                         var_s1 = 2;
                     }
-                    if (func_150ADA20() & 1) {
+                    if (random_int() & 1) {
                         var_s0 = 4;
                     } else {
                         var_s0 = 0;

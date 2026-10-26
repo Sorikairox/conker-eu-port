@@ -6,7 +6,8 @@
 #ifdef NON_MATCHING
 extern f32 D_800A37F0;
 extern f32 D_800A37F4;
-void func_15121F40(u8 *arg0) {
+/* was func_15121F40 */
+void camera_group_side_view(u8 *arg0) {
     f32 temp_f20;
     f32 temp_f20_2;
     f32 temp_f22;
@@ -86,5 +87,5 @@ void func_15121F40(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x2FC)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x2C0)) + (temp_f2 * 0.5f));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_14F750/func_15121F40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_14F750/camera_group_side_view.s")
 #endif

@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15004D50(void) { 
+/* was func_15004D50 */
+void vertex_anchor_alloc_players(void) { 
     s32 i; //s0
     struct222** s1;
 

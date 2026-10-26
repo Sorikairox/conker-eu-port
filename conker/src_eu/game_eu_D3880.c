@@ -363,7 +363,7 @@ s32 func_150A6A48(s32 x, s32 z, s32 *outCount, s32 n, s32 x2, s32 z2, s32 y, s32
 /* P128 */
 extern s32 D_eu_800BE9F4; /* PVS row index: per row {u16 byte index, s16 bit} (func_150183D0) */
 extern s32 D_eu_800BE9F8; /* Huffman tree: 6-byte nodes {s16 symbol (< 0: inner), s16 child 0, s16 child 1} */
-extern s16 D_800DC260[]; /* current PVS row per view (func_151101B4) */
+extern s16 D_800DC260[]; /* current PVS row per view (player_zone_update) */
 extern s32 D_800DC278; /* record list head (func_150A4ED4) */
 
 // pvs_row_apply: (hand asm) decodes PVS row D_800DC260[view] from the Huffman bit stream D_800BE5D0 and writes

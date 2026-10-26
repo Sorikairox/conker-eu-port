@@ -77,8 +77,8 @@ void func_150BABE0(u8 *obj, u8 kind, u8 alpha) {
     pos[1] = *(f32 *) (obj + 0x180);
     func_15143E94(5, 0x4022);
     func_151664F0(-1, (s32) pos[0], (s32) (pos[1] + 6.0f), (s32) pos[2], 0x19, 0x12, 0, alpha, 1);
-    size = func_150ADA68();
-    r1 = func_150ADA20();
+    size = random_float();
+    r1 = random_int();
     right = heading + 0x3C;
     left = heading - 0x3C;
     func_1514CBE8(pos[0], pos[1], pos[2], size * 50.0f + 40.0f, right, left, (u32) r1 % 11 + 30, 5, 0, 0.0f, 0, alpha);
@@ -87,13 +87,13 @@ void func_150BABE0(u8 *obj, u8 kind, u8 alpha) {
     probe[1] = pos[1] + 100.0f;
     probe[2] = pos[2];
     if (func_15046F70(probe, 0, pos[1] - 100.0f, hit)) {
-        size = func_150ADA68() * 200.0f + 200.0f;
+        size = random_float() * 200.0f + 200.0f;
         spr.type = 0x2A;
         spr.pad7 = 0;
         spr.tex = 0x7340;
         spr.life = 300;
         spr.unk8 = 0;
-        spr.rot = (u32) func_150ADA20() % 2001 + 2000;
+        spr.rot = (u32) random_int() % 2001 + 2000;
         spr.col[0] = 0xFF;
         spr.col[1] = 0xFF;
         spr.col[2] = 0;
@@ -105,17 +105,17 @@ void func_150BABE0(u8 *obj, u8 kind, u8 alpha) {
         spr.unk20 = 0xFF;
         spr.unk1C = 0;
         spr.flags = 0x170002;
-        r1 = func_150ADA20();
-        r2 = func_150ADA20();
-        r3 = func_150ADA20();
+        r1 = random_int();
+        r2 = random_int();
+        r3 = random_int();
         p = sprite_fx_spawn_cam((s32) &spr, 0, 0, (s32) &hit[1], pos[0], hit[0], pos[2], size, size, r1 & 0xFF,
                           (r3 & 1) + (r2 & 1) * 2, 4, alpha, 0);
         if (p != NULL && func_1518B140((u8 *) D_80088750, (s32) p, 1) == 0) {
             node_destroy((struct102 *) p);
         }
     }
-    size = func_150ADA68();
-    r1 = func_150ADA20();
+    size = random_float();
+    r1 = random_int();
     func_1514CBE8(pos[0], pos[1], pos[2], size * 40.0f + 60.0f, right, left, (u32) r1 % 7 + 6, 6, 0, 0.0f, 0, alpha);
 }
 #else
@@ -180,7 +180,7 @@ s32 func_150BB4CC(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u3C = 0xE03;
     sp.u34 = 0x200005;
     sp.u38 = 0;
-    sp.u3E = (func_150ADA20() % 36U) + 0x46;
+    sp.u3E = (random_int() % 36U) + 0x46;
     sp.u40 = 0;
     sp.u44 = 0;
     sp.u4C = 0xB0;
@@ -190,27 +190,27 @@ s32 func_150BB4CC(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u49 = 0xB;
     sp.u4A = 0x6A;
     sp.u4B = 0xFF;
-    sp.u4F = (func_150ADA20() % 52U) + 0x5A;
+    sp.u4F = (random_int() % 52U) + 0x5A;
     sp.u50 = 0xFF;
     sp.u94 = 3;
     sp.u95 = 3;
-    sp.u5C = sp.u60 = (func_150ADA68() * 165.0f) + 800.0f;
+    sp.u5C = sp.u60 = (random_float() * 165.0f) + 800.0f;
     sp.u64 = arg2;
     sp.u68 = arg3;
     sp.u6C = arg4;
-    spBE = (func_150ADA20() % 11U) - 0xC;
+    spBE = (random_int() % 11U) - 0xC;
     spB0 = angle_byte_cos(spBE - 0x40);
     spAC = angle_byte_cos(spBE);
-    temp_f2 = (func_150ADA68() * 11.0f) + 15.0f;
+    temp_f2 = (random_float() * 11.0f) + 15.0f;
     sp.u7C[0] = temp_f2 * spAC * spB8;
     sp.u7C[1] = -temp_f2 * spB0;
     sp.u7C[2] = temp_f2 * spAC * spB4;
     sp.u88 = 0.0f;
     sp.u8C = 0xE05;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u8C |= 0x80;
     }
     sp.u96 = 2;
@@ -310,20 +310,20 @@ s32 func_150BB978(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u28[11] = arg3;
     sp.u28[12] = arg4;
     sp.u28[1] = 0.2f;
-    spBE = (func_150ADA20() % 13U) - 0x34;
+    spBE = (random_int() % 13U) - 0x34;
     spB0 = angle_byte_cos(spBE - 0x40);
     spAC = angle_byte_cos(spBE);
-    temp_f2 = (func_150ADA68() * 9.0f) + 3.0f;
+    temp_f2 = (random_float() * 9.0f) + 3.0f;
     sp.u5C = temp_f2 * spAC * spB8;
     sp.u60 = -temp_f2 * spB0;
     sp.u64 = temp_f2 * spAC * spB4;
-    sp.u68 = (func_150ADA68() * 50.0f) + -25.0f;
+    sp.u68 = (random_float() * 50.0f) + -25.0f;
     sp.u6C = 0.0f;
-    sp.u70 = (func_150ADA68() * 50.0f) + -25.0f;
-    sp.u7C = (func_150ADA20() % 68U) + 0x26;
-    sp.u74 = (func_150ADA68() * -0.1f) + -0.3f;
+    sp.u70 = (random_float() * 50.0f) + -25.0f;
+    sp.u7C = (random_int() % 68U) + 0x26;
+    sp.u74 = (random_float() * -0.1f) + -0.3f;
     sp.u28[0] = 1.0f;
-    sp.u28[3] = (func_150ADA68() * 18.800001f) + 5.6f;
+    sp.u28[3] = (random_float() * 18.800001f) + 5.6f;
     sp.u28[2] = sp.u28[3];
     sp.u7E = 0x1F;
     sp.u80 = 0;

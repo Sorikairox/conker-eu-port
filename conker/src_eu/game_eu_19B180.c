@@ -298,7 +298,7 @@ typedef struct {
 } ParticleEmitter;
 
 extern s16 D_800A7210[][7]; /* object-attached emitter points: a xyz, b xyz, random z mask */
-f32 func_150489B0(s32 angle); // defined (u8); the file's unprototyped declaration rules out u8 here
+f32 math_cos_u8(s32 angle); // defined (u8); the file's unprototyped declaration rules out u8 here
 s32 func_151705A4(s32 flags, f32 *vx, f32 *vy, f32 *vz);
 
 // particle_emitter_update: emitter tick. The countdown +0x42 runs down by D_800BE9E4 frames; each time it passes 0
@@ -339,7 +339,7 @@ void func_1516E100(u8 *arg0) {
         }
         for (i = 0; i < e->count; i++) {
             if (e->chance != 0) {
-                roll = func_150ADA20();
+                roll = random_int();
                 if (e->flags & 4) {
                     chance = (s32) (e->timer * e->chance) / e->lifeTotal;
                 } else {
@@ -377,7 +377,7 @@ void func_1516E100(u8 *arg0) {
                 by = D_800A7210[e->posX][4];
                 bz = D_800A7210[e->posX][5];
                 if (D_800A7210[e->posX][6] != 0) {
-                    bz += (f32) (u32) (func_150ADA20() & D_800A7210[e->posX][6]);
+                    bz += (f32) (u32) (random_int() & D_800A7210[e->posX][6]);
                 }
                 obj = (u8 *) D_800CC2D0 + e->obj * 0x32C;
                 func_150A7E40((f32 (*)[4]) (*(u8 **) (obj + 0x1D4) + e->mtx * 64), ax, ay, az, &ax, &ay, &az);
@@ -389,9 +389,9 @@ void func_1516E100(u8 *arg0) {
                 vz = (bz - az) * 8.0f;
                 obj = (u8 *) D_800CC2D0 + e->obj * 0x32C;
                 ang = (0x40 - *(u16 *) (obj + 0x76)) & 0xFF;
-                vx -= *(f32 *) (obj + 0x3C) * func_15048A40(ang) * 64.0f;
+                vx -= *(f32 *) (obj + 0x3C) * math_sin_u8(ang) * 64.0f;
                 obj = (u8 *) D_800CC2D0 + e->obj * 0x32C;
-                vz -= *(f32 *) (obj + 0x3C) * func_150489B0(ang) * 64.0f;
+                vz -= *(f32 *) (obj + 0x3C) * math_cos_u8(ang) * 64.0f;
                 vi = (s32) vx;
                 a0D = (vi >> 8) & 0xFF;
                 a0E = vi & 0xFF;
@@ -409,7 +409,7 @@ void func_1516E100(u8 *arg0) {
                 y = (s32) ((f32) y + offset * vy);
                 vy = speed * vy;
                 rise = (s32) vy;
-                func_150ADA20();
+                random_int();
                 x = (s32) ((f32) x + vx * offset);
                 z = (s32) ((f32) z + vz * offset);
                 vx = vx * speed;
@@ -422,24 +422,24 @@ void func_1516E100(u8 *arg0) {
                 a10 = vi & 0xFF;
             }
             if (e->scatterXZ != 0) {
-                r = func_150ADA20();
-                dirA = func_15048A40(r & 0xFF);
-                dirB = func_150489B0(r & 0xFF);
-                dist = (f32) (u32) ((func_150ADA20() & 0xFFFF) * e->scatterXZ) * 1.52587890625e-05f;
+                r = random_int();
+                dirA = math_sin_u8(r & 0xFF);
+                dirB = math_cos_u8(r & 0xFF);
+                dist = (f32) (u32) ((random_int() & 0xFFFF) * e->scatterXZ) * 1.52587890625e-05f;
                 x = (s32) ((f32) x + dist * dirA);
                 z = (s32) ((f32) z + dist * dirB);
             }
             if (e->scatterY != 0) {
-                r = func_150ADA20();
-                dirA = func_15048A40(r & 0xFF);
-                dist = (f32) (u32) ((func_150ADA20() & 0xFFFF) * e->scatterY) * 1.52587890625e-05f;
+                r = random_int();
+                dirA = math_sin_u8(r & 0xFF);
+                dist = (f32) (u32) ((random_int() & 0xFFFF) * e->scatterY) * 1.52587890625e-05f;
                 y += (s32) (dist * dirA);
             }
             parmA = e->parmA;
             parmB = e->parmB;
             r = 0;
             if (e->parmRandAB != 0) {
-                r = (u32) func_150ADA20() % (u32) e->parmRandAB;
+                r = (u32) random_int() % (u32) e->parmRandAB;
             }
             if (e->flags & 1) {
                 parmA += r;
@@ -447,38 +447,38 @@ void func_1516E100(u8 *arg0) {
             } else {
                 parmA += r;
                 if (e->parmRandB != 0) {
-                    parmB += (u32) func_150ADA20() % (u32) e->parmRandB;
+                    parmB += (u32) random_int() % (u32) e->parmRandB;
                 }
             }
             if (!(e->flags & 8) && !(e->flags & 0x80)) {
                 rise = e->riseBase;
                 if (e->riseRand != 0) {
-                    rise += (u32) func_150ADA20() % e->riseRand;
+                    rise += (u32) random_int() % e->riseRand;
                 }
                 a0D = e->col[0];
                 if (e->colRand[0] != 0) {
-                    a0D += (u32) func_150ADA20() % e->colRand[0];
+                    a0D += (u32) random_int() % e->colRand[0];
                     if (a0D >= 0x100) {
                         a0D = 0xFF;
                     }
                 }
                 a0E = e->col[1];
                 if (e->colRand[1] != 0) {
-                    a0E += (u32) func_150ADA20() % e->colRand[1];
+                    a0E += (u32) random_int() % e->colRand[1];
                     if (a0E >= 0x100) {
                         a0E = 0xFF;
                     }
                 }
                 a0F = e->col[2];
                 if (e->colRand[2] != 0) {
-                    a0F += (u32) func_150ADA20() % e->colRand[2];
+                    a0F += (u32) random_int() % e->colRand[2];
                     if (a0F >= 0x100) {
                         a0F = 0xFF;
                     }
                 }
                 a10 = e->col[3];
                 if (e->colRand[3] != 0) {
-                    a10 += (u32) func_150ADA20() % e->colRand[3];
+                    a10 += (u32) random_int() % e->colRand[3];
                     if (a10 >= 0x100) {
                         a10 = 0xFF;
                     }
@@ -933,7 +933,7 @@ void func_1516FE1C(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516FE1C.s")
 #endif
-f32 func_150489B0();
+f32 math_cos_u8();
 s32 func_151705A4(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     s32 mask;
     s32 pad; // fakematch: frame slot 0x28
@@ -943,18 +943,18 @@ s32 func_151705A4(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     f32 t;
 
     mask = (arg0 & 0x40) ? 0x3F : 0x7F;
-    v = func_150ADA20() & mask;
-    *arg2 = func_150489B0(v & 0xFF);
-    c = func_15048A40(v);
-    v = func_150ADA20() & 0xFF;
-    s = func_150489B0(v & 0xFF);
-    t = func_15048A40(v);
+    v = random_int() & mask;
+    *arg2 = math_cos_u8(v & 0xFF);
+    c = math_sin_u8(v);
+    v = random_int() & 0xFF;
+    s = math_cos_u8(v & 0xFF);
+    t = math_sin_u8(v);
     *arg1 = c * t;
     *arg3 = c * s;
 }
 
 #ifdef NON_MATCHING
-s32 func_150ADA20(void);
+s32 random_int(void);
 extern f32 D_8008CFA0[3]; /* spread per variant: 571, 130, 130 */
 extern u8 D_8008CFAC[9];  /* colour per variant (3 bytes) */
 
@@ -1004,11 +1004,11 @@ void func_15170648(f32 *quad, f32 x, f32 z, s32 kind, f32 size, s32 variant, s32
             px = (q[0] - p[0]) * t + p[0];
             py = (q[1] - p[1]) * t + p[1];
             pz = (q[2] - p[2]) * t + p[2];
-            life = (func_150ADA20() & 0x1F) + 15;
-            speed = (u32)func_150ADA20() % (u32)speedRange + speedBase;
+            life = (random_int() & 0x1F) + 15;
+            speed = (u32)random_int() % (u32)speedRange + speedBase;
             func_1516DA58((s16)(s32)px, (s16)(s32)py, (s16)(s32)pz, 0xD, 0, col[0], col[1], col[2], 0, 0, 0, 0, 2,
                           (vx >> 8) & 0xFF, vx & 0xFF, (vz >> 8) & 0xFF, vz & 0xFF, 0, 0, kind, 0, 0, 0, speed, speed,
-                          life, (u32)func_150ADA20() % (u32)range + spreadBase, 0, 0, alpha, owner);
+                          life, (u32)random_int() % (u32)range + spreadBase, 0, 0, alpha, owner);
         }
     }
 }
@@ -1019,7 +1019,7 @@ void func_15170648(f32 *quad, f32 x, f32 z, s32 kind, f32 size, s32 variant, s32
 #ifdef NON_MATCHING
 extern u16 D_800CC76A;
 s32 func_151EFDD0(void);
-f32 func_150489B0(s32 angle); // defined (u8); the file's unprototyped declaration rules out u8 here
+f32 math_cos_u8(s32 angle); // defined (u8); the file's unprototyped declaration rules out u8 here
 // spark_particle_spawn: one spark at (x, y, z) thrown in direction `angle` (the camera angle D_800CC76A when `flare`
 // is 0) with a random pitch (rand % 50, both signs), horizontal speed from sin / cos of the angle, fixed fall -0x32;
 // flare != 0: long-lived flare particle (func_1516DA58), else short spark (func_1516DF0C). alpha and arg6 pass through.
@@ -1040,9 +1040,9 @@ void func_15170A70(s32 x, s32 y, s32 z, s32 angle, s32 flare, s32 alpha, s32 arg
         angle = D_800CC76A;
     }
     pitch = func_151EFDD0() % 50;
-    dirX = func_150489B0(angle & 0xFF);
-    dirZ = -func_15048A40(angle & 0xFF);
-    tilt = func_150489B0(pitch & 0xFF);
+    dirX = math_cos_u8(angle & 0xFF);
+    dirZ = -math_sin_u8(angle & 0xFF);
+    tilt = math_cos_u8(pitch & 0xFF);
     dx = dirX * tilt;
     dz = dirZ * tilt;
     dy = 0.0f;
@@ -1069,7 +1069,7 @@ void func_15170A70(s32 x, s32 y, s32 z, s32 angle, s32 flare, s32 alpha, s32 arg
 s32 func_151EFDD0(void);
 // sprite_flicker_drift_tick: particle tick (handler at 0x8008CF58 of D_8008CF40, same scheme as func_1516FF34).
 // While +0x24 (life) is set, the alpha +0x1F rises by 64 per frame (D_800BE9E4) up to 254; a particle whose alpha is
-// still 0 first gets a life of 200..224 (func_150ADA20). Otherwise the alpha falls by 16 per frame down to 0, and
+// still 0 first gets a life of 200..224 (random_int). Otherwise the alpha falls by 16 per frame down to 0, and
 // the particle is done (returns 1) once it reached 0. Else it moves (func_1516FDD4) and its velocity +0x26 / +0x28
 // is scaled by a random (230 + -31..31) / 256 when +0x2F is set, or by (220 + -31..31) / 256 when the 8.8
 // velocity +0x26 is above sqrt(1000); +0x18 is cleared and it returns 0.
@@ -1079,7 +1079,7 @@ s32 func_15170D50(u8 *arg0) {
 
     if (arg0[0x24] != 0) {
         if (alpha == 0) {
-            arg0[0x24] = (u32) func_150ADA20() % 25 + 200;
+            arg0[0x24] = (u32) random_int() % 25 + 200;
         }
         if (alpha != 0xFE) {
             alpha += D_800BE9E4 << 6;

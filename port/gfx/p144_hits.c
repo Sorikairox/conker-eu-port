@@ -26,23 +26,23 @@ void *__wrap_func_1518010C(void *g, s32 size, s32 tex, f32 dx, f32 dy, s32 view)
         port_log("[p144hits] lens #%u frame %u size %d tex %d d %.2f %.2f view %d\n", hits_, port_frame_count, size, tex, dx, dy, view);
     return __real_func_1518010C(g, size, tex, dx, dy, view);
 }
-WV(func_15111DD8, (void), ())                                                                                    /* star_field_generate */
+WV(star_field_generate, (void), ())                                                                                    /* star_field_generate */
 W0(s32, func_151432BC, (u8 *r, f32 *x, f32 *z, f32 *t, f32 *b), (r, x, z, t, b))                                  /* spawn_region_random_point */
 W0(s32, func_15096144, (s32 g, s32 s, s32 so, s32 to, s32 xa), (g, s, so, to, xa))                                 /* sprite_draw_rect */
 W0(uint32_t *, func_150966AC, (uint32_t *g, void *img, f32 sx, f32 sy, f32 x, f32 y, s32 w, s32 h, s32 fl, s32 so, s32 xa, s32 fr),
    (g, img, sx, sy, x, y, w, h, fl, so, xa, fr))                                                                 /* image_draw_tiled */
 W0(s32, func_15144CEC, (f32 *p, f32 *s, f32 *oz, f32 *ow, f32 *oi, u8 v), (p, s, oz, ow, oi, v))                  /* world_to_screen */
-WV(func_15129EA4, (void *cam), (cam))                                                                            /* camera_follow_update */
+WV(camera_pivot_follow_update, (void *cam), (cam))                                                                            /* camera_follow_update */
 WV(func_151BF678, (f32 *p), (p))                                                                                 /* pickup_burst_spawn */
 W0(s32, func_151BEE00, (f32 *p, f32 a, u8 k, u8 fl, u8 sz, s32 a5, s32 a6), (p, a, k, fl, sz, a5, a6))             /* marker_sprite_spawn */
 W0(s32, func_15053430, (void *o), (o))                                                                           /* object_death_resolve */
-W0(s32, func_151152A4, (u8 *o, s32 snd, s32 vol, s16 r0, s16 r1, s32 fl), (o, snd, vol, r0, r1, fl))               /* object_sound_play */
+W0(s32, world_object_sound_play, (u8 *o, s32 snd, s32 vol, s16 r0, s16 r1, s32 fl), (o, snd, vol, r0, r1, fl))               /* object_sound_play */
 W0(s32, func_151BF490, (f32 yaw, s32 p, s32 a2, u8 a3, s32 c, s32 fl, s32 a6, s32 a7, s32 a8), (yaw, p, a2, a3, c, fl, a6, a7, a8)) /* ring_particle_spawn */
 WV(func_15095F18, (s32 s, f32 x, f32 y, f32 w, s32 alt, s32 *vis), (s, x, y, w, alt, vis))                         /* sprite_screen_rect */
 W0(s32, func_15146078, (f32 *n, f32 *a, f32 *b), (n, a, b))                                                      /* plane_axes_from_normal */
 W0(s32, func_15159C2C, (u8 *o, u8 *a), (o, a))                                                                   /* orbit_object_step */
 W0(s32, func_1514654C, (u8 *o, u8 *nd, s32 i, f32 **in, f32 **out, s32 n), (o, nd, i, in, out, n))               /* model_node_points_to_world */
-WV(func_151148C8, (s32 i, f32 *x, f32 *y, f32 *z), (i, x, y, z))                                                 /* world_object_rotate_point */
+WV(world_object_rotate_point, (s32 i, f32 *x, f32 *y, f32 *z), (i, x, y, z))                                                 /* world_object_rotate_point */
 
 /* P149 DIAGNOSTIC ?p149hits=1 / PORT_P149HITS=1: per-250-retrace call counts of the P145 functions (framebuffer effect
  * pass func_15160310 and its handlers, particle update func_1513095C, its handler func_151A4DEC, death handler
@@ -76,7 +76,7 @@ void __real_node_destroy(void *o);            void __wrap_node_destroy(void *o) 
 
 /* P152 DIAGNOSTIC ?p152hits=1 / PORT_P152HITS=1: per-250-retrace call counts of the P143-P150 (port-b) and P148 (port)
  * frame-path conversions: 3D effect update effect3d_update and its draw effect3d_draw, particle sprite draw
- * func_1513100C, player morph blend func_1517B270, func_150A7EE0 / func_1501A764 (projection), water drop
+ * func_1513100C, player morph blend func_1517B270, func_150A7EE0 / camera_world_to_screen (projection), water drop
  * func_151928C8, burst spawner func_15153BA4. Same --wrap limits (calls from other TUs / tables in other TUs only). */
 static const char *p152_names[] = { "fx3d_1513CFE4", "fx3d_draw_1513DB00", "psprite_1513100C", "morph_1517B270",
                                     "xform_150A7EE0", "w2s_1501A764", "drop_151928C8", "burst_15153BA4" };
@@ -102,7 +102,7 @@ void *__real_func_1513100C(void *g, u8 *p, s16 v); void *__wrap_func_1513100C(vo
 s32 __real_func_1517B270(s32 t, s32 f, s32 i); s32 __wrap_func_1517B270(s32 t, s32 f, s32 i) { hit152(3); return __real_func_1517B270(t, f, i); }
 void __real_func_150A7EE0(f32 (*mf)[4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz, f32 *ow);
 void __wrap_func_150A7EE0(f32 (*mf)[4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz, f32 *ow) { hit152(4); __real_func_150A7EE0(mf, x, y, z, ox, oy, oz, ow); }
-void __real_func_1501A764(s32 v, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz);
-void __wrap_func_1501A764(s32 v, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz) { hit152(5); __real_func_1501A764(v, x, y, z, sx, sy, sz); }
+void __real_camera_world_to_screen(s32 v, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz);
+void __wrap_camera_world_to_screen(s32 v, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz) { hit152(5); __real_camera_world_to_screen(v, x, y, z, sx, sy, sz); }
 s32 __real_func_151928C8(u8 *a, s32 b); s32 __wrap_func_151928C8(u8 *a, s32 b) { hit152(6); return __real_func_151928C8(a, b); }
 void __real_func_15153BA4(u8 *r, s32 t, s32 o, s32 a); void __wrap_func_15153BA4(u8 *r, s32 t, s32 o, s32 a) { hit152(7); __real_func_15153BA4(r, t, o, a); }

@@ -98,10 +98,10 @@ void func_150BA3B0(u8 *obj, f32 x, f32 z, u8 arg3, s32 arg4) {
         f.drop.u6 = 6;
         f.drop.u7 = 0;
         f.drop.kindFlags = 0x9F01;
-        f.drop.life = (u32) func_150ADA20() % 51 + 100;
+        f.drop.life = (u32) random_int() % 51 + 100;
         f.drop.u8_ = 0;
         f.drop.uC = 0;
-        f.drop.u10[0] = (u32) func_150ADA20() % 101 + 155;
+        f.drop.u10[0] = (u32) random_int() % 101 + 155;
         f.drop.u10[1] = 0xFF;
         f.drop.u10[2] = 0xFF;
         f.drop.u10[3] = 0xFF;
@@ -112,12 +112,12 @@ void func_150BA3B0(u8 *obj, f32 x, f32 z, u8 arg3, s32 arg4) {
         f.drop.u10[7] = 7;
         f.drop.u22 = 0x19;
         f.drop.u24 = 0xA;
-        size0 = func_150ADA68();
-        size1 = func_150ADA68();
-        alpha = func_150ADA20();
-        flip = func_150ADA20();
+        size0 = random_float();
+        size1 = random_float();
+        alpha = random_int();
+        flip = random_int();
         sprite_fx_spawn_cam_at((s32) &f.drop, 0, 0, (s32) f.hit, f.pos[0], f.pos[1], f.pos[2], size0 * 20.0f + 40.0f,
-                      size1 * 20.0f + 40.0f, alpha & 0xFF, (func_150ADA20() & 1) + (flip & 1) * 2, 3, 0xFF, 0, arg3,
+                      size1 * 20.0f + 40.0f, alpha & 0xFF, (random_int() & 1) + (flip & 1) * 2, 3, 0xFF, 0, arg3,
                       arg4);
     }
     f.ring.u0 = 0xF;

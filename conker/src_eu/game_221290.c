@@ -152,8 +152,8 @@ struct mp3decfourbytes {
 	s8 unk03;
 };
 
-s32 func_151F8088(struct asistream *stream, s32 arg1); /* mp3main_read_frame */
-s32 func_151F78B4(struct asistream *stream); /* mp3dec_decode_frame */
+s32 mp3main_read_frame(struct asistream *stream, s32 arg1); /* mp3main_read_frame */
+s32 mp3dec_decode_frame(struct asistream *stream); /* mp3dec_decode_frame */
 f32 func_1504A6F0(f32 arg0, f32 arg1); /* func00045ed0 */
 
 struct mp3decthing {
@@ -2202,7 +2202,8 @@ extern struct mp3decfourbytes **D_800E0E20;
 extern s32 D_800E0E28;
 extern f32 *D_800E0E30;
 
-s32 func_151F3DE0(void) {
+/* was func_151F3DE0 */
+s32 mp3dec_init(void) {
     s32 i;
     f32 x;
     f32 x2;
@@ -2273,7 +2274,8 @@ s32 func_151F3DE0(void) {
     return 1;
 }
 /* mp3dec00040164 (Perfect Dark src/lib/mp3/decoder.c) */
-s32 func_151F42E8(struct asistream *stream, u32 gr, u32 ch)
+/* was func_151F42E8 */
+s32 mp3dec_dequantize(struct asistream *stream, u32 gr, u32 ch)
 {
 	s32 sp1bc;
 	s32 sp1b8;
@@ -2413,7 +2415,8 @@ s32 func_151F42E8(struct asistream *stream, u32 gr, u32 ch)
 	return 1;
 }
 /* mp3dec_unpack_scale_fac (Perfect Dark src/lib/mp3/decoder.c) */
-s32 func_151F4F38(struct asistream *stream, u32 gr, u32 ch)
+/* was func_151F4F38 */
+s32 mp3dec_unpack_scale_fac(struct asistream *stream, u32 gr, u32 ch)
 {
 	s32 i;
 	s32 sfb;
@@ -2483,7 +2486,8 @@ s32 func_151F4F38(struct asistream *stream, u32 gr, u32 ch)
 	return 1;
 }
 /* mp3dec00041600 (Perfect Dark src/lib/mp3/decoder.c) */
-s32 func_151F578C(struct asistream *stream, u32 gr, u32 ch)
+/* was func_151F578C */
+s32 mp3dec_unpack_scale_fac_lsf(struct asistream *stream, u32 gr, u32 ch)
 {
 	const s32 sp70[2][3][3][4] = {
 		{
@@ -2662,7 +2666,8 @@ void func00046650(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *
 void func00047550(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3);
 s32 func_151F9184(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 **arg6, u8 **arg7);
 s32 func_151F933C(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s16 **arg5, u8 **arg6);
-s32 func_151F63C4(struct asistream *stream, u32 gr, u32 ch)
+/* was func_151F63C4 */
+s32 mp3dec_read_granule(struct asistream *stream, u32 gr, u32 ch)
 {
 	s32 sp64 = stream->unk2020;
 	s32 sp60;
@@ -2680,9 +2685,9 @@ s32 func_151F63C4(struct asistream *stream, u32 gr, u32 ch)
 	s32 sp28;
 
 	if (stream->version != VERSION_2) {
-		func_151F4F38(stream, gr, ch);
+		mp3dec_unpack_scale_fac(stream, gr, ch);
 	} else {
-		func_151F578C(stream, gr, ch);
+		mp3dec_unpack_scale_fac_lsf(stream, gr, ch);
 	}
 
 	sp60 = stream->big_value[gr][ch] * 2;
@@ -2758,7 +2763,8 @@ s32 func_151F63C4(struct asistream *stream, u32 gr, u32 ch)
 
 	return 1;
 }
-s32 func_151F6970(struct_eu_221290 *arg0, s32 ch) {
+/* was func_151F6970 */
+s32 mp3dec_reorder(struct_eu_221290 *arg0, s32 ch) {
     s16 *table;
     f32 *dst;
     f32 *src;
@@ -2785,7 +2791,8 @@ s32 func_151F6970(struct_eu_221290 *arg0, s32 ch) {
     return 1;
 }
 /* mp3dec_reduce_aliases */
-s32 func_151F6B28(struct asistream *stream, u32 gr, u32 ch)
+/* was func_151F6B28 */
+s32 mp3dec_reduce_aliases(struct asistream *stream, u32 gr, u32 ch)
 {
 	s32 i;
 
@@ -2842,7 +2849,8 @@ s32 func_151F6B28(struct asistream *stream, u32 gr, u32 ch)
 	return 1;
 }
 /* mp3dec_set_side_info (Perfect Dark src/lib/mp3/decoder.c) */
-s32 func_151F6FD0(struct asistream *stream)
+/* was func_151F6FD0 */
+s32 mp3dec_set_side_info(struct asistream *stream)
 {
 	s32 sp34;
 	s32 ch;
@@ -2958,10 +2966,11 @@ void func_151F94E0(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 
 void func_151FA3E0(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3);
 s32 mp3util000462f8(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 **arg6, u8 **arg7);
 s32 mp3util000464a8(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s16 **arg5, u8 **arg6);
-s32 func_151F7F60(struct_eu_221290 *arg0);
-s32 func_151F6970(struct_eu_221290 *arg0, s32 ch);
-s32 func_151F63C4(struct asistream *stream, u32 gr, u32 ch);
-s32 func_151F78B4(struct asistream *stream)
+s32 mp3main_fill_buffer(struct_eu_221290 *arg0);
+s32 mp3dec_reorder(struct_eu_221290 *arg0, s32 ch);
+s32 mp3dec_read_granule(struct asistream *stream, u32 gr, u32 ch);
+/* was func_151F78B4 */
+s32 mp3dec_decode_frame(struct asistream *stream)
 {
 	s32 sp954;
 	s32 gr = 0;
@@ -2980,7 +2989,7 @@ s32 func_151F78B4(struct asistream *stream)
 	s32 sp20;
 
 	sp934 = stream->unk2070[stream->unk3ba0];
-	sp954 = func_151F7F60((struct_eu_221290 *)stream);
+	sp954 = mp3main_fill_buffer((struct_eu_221290 *)stream);
 
 	if (sp954 == 0) {
 		return 0;
@@ -2993,11 +3002,11 @@ s32 func_151F78B4(struct asistream *stream)
 	}
 
 	for (ch = 0; ch < stream->numchannels; ch++) {
-		func_151F63C4(stream, gr, ch);
-		func_151F42E8(stream, gr, ch);
+		mp3dec_read_granule(stream, gr, ch);
+		mp3dec_dequantize(stream, gr, ch);
 	}
 
-	func_151F6970((struct_eu_221290 *)stream, gr);
+	mp3dec_reorder((struct_eu_221290 *)stream, gr);
 
 	if (stream->window_switching[gr][0] != 0 && stream->block_type[gr][0] == 2) {
 		sp948 = 32;
@@ -3007,7 +3016,7 @@ s32 func_151F78B4(struct asistream *stream)
 	}
 
 	for (ch = 0; ch < stream->numchannels; ch++) {
-		func_151F6B28(stream, gr, ch);
+		mp3dec_reduce_aliases(stream, gr, ch);
 
 		if (stream->window_switching[gr][ch] != 0
 				&& stream->block_type[gr][ch] == 2
@@ -3080,7 +3089,8 @@ s32 func_151F78B4(struct asistream *stream)
 
 	return 1;
 }
-s32 func_151F7F60(struct_eu_221290 *arg0) {
+/* was func_151F7F60 */
+s32 mp3main_fill_buffer(struct_eu_221290 *arg0) {
     s32 sp1C;
     s32 sp18;
 
@@ -3099,7 +3109,8 @@ s32 func_151F7F60(struct_eu_221290 *arg0) {
     return arg0->unk201C - arg0->unk3F88;
 }
 /* mp3main_read_frame (Perfect Dark src/lib/mp3/main.c, plus a 0xFF/0xF3 sync byte check) */
-s32 func_151F8088(struct asistream *stream, s32 arg1)
+/* was func_151F8088 */
+s32 mp3main_read_frame(struct asistream *stream, s32 arg1)
 {
 	s32 sp24;
 	s32 sp20;
@@ -3167,7 +3178,7 @@ s32 func_151F8088(struct asistream *stream, s32 arg1)
 	stream->emphasis = func_151F9150(stream->buffer, &stream->offset, 2);
 
 	if (stream->bitrateindex == 15 || stream->samplerateindex == 3) { /* bad/reserved values */
-		return func_151F8088(stream, -1);
+		return mp3main_read_frame(stream, -1);
 	}
 
 	if (!stream->doneinitial) {
@@ -3186,7 +3197,7 @@ s32 func_151F8088(struct asistream *stream, s32 arg1)
 			|| stream->samplerateindex != stream->initialsamplerateindex
 			|| stream->channelmode != stream->initialchannelmode
 			|| stream->isoriginal != stream->initialisoriginal) {
-		return func_151F8088(stream, -1);
+		return mp3main_read_frame(stream, -1);
 	}
 
 	stream->unk2068 = 4;
@@ -3204,8 +3215,8 @@ s32 func_151F8088(struct asistream *stream, s32 arg1)
 	}
 
 	if (stream->layer == LAYER_3) {
-		stream->decodeframefunc = func_151F78B4;
-		stream->setsideinfofunc = func_151F6FD0;
+		stream->decodeframefunc = mp3dec_decode_frame;
+		stream->setsideinfofunc = mp3dec_set_side_info;
 	} else if (stream->layer == LAYER_2) {
 		return 0;
 	} else if (stream->layer == LAYER_1) {
@@ -3218,7 +3229,8 @@ s32 func_151F8088(struct asistream *stream, s32 arg1)
 
 	return 1;
 }
-struct_eu_221290 *func_151F85C4(s32 arg0, s32 (*arg1)(s32, u8 *, s32, s32), s32 arg2) {
+/* was func_151F85C4 */
+struct_eu_221290 *mp3main_init(s32 arg0, s32 (*arg1)(s32, u8 *, s32, s32), s32 arg2) {
     struct_eu_221290 *sp1C;
 
     sp1C = &D_800E1CB0;
@@ -3234,14 +3246,15 @@ struct_eu_221290 *func_151F85C4(s32 arg0, s32 (*arg1)(s32, u8 *, s32, s32), s32 
     sp1C->unk201C = 0;
     sp1C->unk2020 = 0;
     sp1C->unk3BA0 = 0;
-    if (func_151F8088((struct asistream *)sp1C, 0) == 0) {
+    if (mp3main_read_frame((struct asistream *)sp1C, 0) == 0) {
         return NULL;
     }
     sp1C->unk8474 = 0;
     bzero(sp1C->unk6A64, 0x900);
     return sp1C;
 }
-s32 func_151F86B0(struct_eu_221290 *arg0, u8 **arg1, s32 *arg2) {
+/* was func_151F86B0 */
+s32 mp3main_decode_next_frame(struct_eu_221290 *arg0, u8 **arg1, s32 *arg2) {
     struct_eu_221290 *sp12C;
     s32 sp128;
     u8 sp28[0x100];
@@ -3252,7 +3265,7 @@ s32 func_151F86B0(struct_eu_221290 *arg0, u8 **arg1, s32 *arg2) {
     if (sp12C->unk3BA0 >= 6) {
         sp12C->unk3BA0 = 0;
     }
-    if (func_151F8088((struct asistream *)sp12C, sp12C->unk8474) == 0) {
+    if (mp3main_read_frame((struct asistream *)sp12C, sp12C->unk8474) == 0) {
         D_800E0E04 = 3;
         return 0;
     }

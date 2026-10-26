@@ -703,7 +703,7 @@ Gfx *func_1516CEA4(Gfx *gfx, u8 *box, u8 r, u8 g, u8 b, u8 a) {
 #endif
 
 #ifdef NON_MATCHING
-void func_1501A764(s32 arg0, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz);
+void camera_world_to_screen(s32 arg0, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz);
 void func_1516D63C(u8 *, f32 *, f32 *, s32);
 extern u8 D_8009090C[]; /* box sprite header: u16 width +6, height +8 */
 extern u8 D_8009092C[]; /* pointer sprite header: u16 width +6, height +8 */
@@ -713,7 +713,7 @@ extern u8 D_800CC730[]; /* per-player records (0x32C bytes): f32 heading at +0 *
 // its pointer (towards the speaker). Descriptor flag 0x8000: position from the descriptor's percentages (+0x18 /
 // +0x1C words point at f32 x / y in %, +0x20 at the pointer angle in %, 55..125 degrees) scaled to the viewport
 // (D_800BE628 +4 / +8), kept on screen by func_1516D63C when flag 0x10000 is set. Otherwise the speaker's world
-// point (descriptor +0xC..+0x14) projected once (func_1501A764) and the angle from the player's heading relative to
+// point (descriptor +0xC..+0x14) projected once (camera_world_to_screen) and the angle from the player's heading relative to
 // the camera (D_800DBFF0 +0x37C), always kept on screen. +0x50 / +0x54: the pointer's corner.
 void func_1516D1C8(u8 *box) {
     u8 *t;
@@ -742,7 +742,7 @@ void func_1516D1C8(u8 *box) {
             func_1516D63C(box, (f32 *) (box + 0x5C), (f32 *) (box + 0x60), (s32) (box + 0x58));
         }
     } else {
-        func_1501A764(0, *(f32 *) (t + 0xC), *(f32 *) (t + 0x10), *(f32 *) (t + 0x14), &sx, &sy, &sz);
+        camera_world_to_screen(0, *(f32 *) (t + 0xC), *(f32 *) (t + 0x10), *(f32 *) (t + 0x14), &sx, &sy, &sz);
         if (box[0x1F] == 0) {
             *(f32 *) (box + 0x64) = sx;
             *(f32 *) (box + 0x68) = sy;

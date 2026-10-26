@@ -15,10 +15,10 @@ void func_15194210(u8 *obj, u8 alt, u8 view, s32 group);
 // hit). func_1504715C gives the object's matrix (9 words) on the stack first. Fire-like kinds spawn embers
 // (func_151C384C(pos, view, group)); the others pick a spark style (0 / 1 / 2 / 5 / 6) and spawn it with
 // impact_blast_spawn_small (`alt` != 0) or impact_blast_spawn_large (pos, matrix, style, view, group); unknown kinds spawn nothing.
-// Callers func_151942B0 (alt 0, reached from the Baddie hit handler func_15074FD4) / func_15194858 (alt 1).
+// Callers func_151942B0 (alt 0, reached from the Baddie hit handler objhit_grab_player_and_hit) / func_15194858 (alt 1).
 // The N64 code also XORs the code words func_150A16A4..func_150A2280 and on a mismatch (anti-tamper) scribbles
 // osGetCount() & 0x3FFFF7 into a random 0x20-byte record of D_80043ED0; the port has no MIPS code there, so the
-// NON_MATCHING build skips the check (as func_15046F70, func_150AEB9C).
+// NON_MATCHING build skips the check (as func_15046F70, owner_spawn_children).
 void impact_blast_spawn_large(void *pos, void *mtx, u8 style, u8 view, s32 group);
 void func_15194210(u8 *obj, u8 alt, u8 view, s32 group) {
     s32 mtx[9];
@@ -283,7 +283,7 @@ void func_15194D80(s32 arg0, u8 *arg1, s32 arg2) {
         sp50.unk40 = 0.5f;
         func_15154488(&sp50, &sp50.unk8, (s32) sp2C, 0xFF, 1);
         sp24.unk0 = 1;
-        sp24.unk2 = (func_150ADA20() % 11U) + 20;
+        sp24.unk2 = (random_int() % 11U) + 20;
         sp24.unk4 = 8;
         sp24.unk6 = -1;
         sp24.unk5 = 1;
@@ -297,13 +297,13 @@ void func_15194F50(s32 arg0, s32 arg1, s32 arg2) {
 
 void func_15194F64(s32 arg0, u8 *arg1, s32 arg2) {
     if ((D_80090130 == 1) && (arg1[0x127] == 0) && (D_800E9D00 & 8) && (*(u16 *)(*(u8 **)(arg1 + 0x31C) + 0x1A0) == 0)) {
-        func_151046F0(arg0, (s32)arg1, arg2);
+        camera_cut_fade_spawn(arg0, (s32)arg1, arg2);
         *(s16 *)(*(u8 **)(arg1 + 0x31C) + 0x1A0) = 0x3E8;
     }
 }
 
 void func_15194FD8(s32 arg0, s32 arg1, s32 arg2) {
-    func_1507DE4C(arg1);
+    obj_set_dying_flags(arg1);
     object_hit_effect_generic(arg1, 0xFF, 1);
     func_15194F64(0, arg0, arg1);
 }
@@ -354,12 +354,12 @@ void func_15195104(s32 arg0, u8 *arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1507CD64(struct127 *, s32);
+s32 player_hit_reaction(struct127 *, s32);
 void func_15063F14(struct127 *, s32);
 
 // obj_hit_retire: per-kind reaction of object `obj` (kind obj[4]): most enemy / prop kinds (0..4, 0x11, 0x14, 0x3B and
 // a set of kinds from 0x58 on) are switched off (object_hit_effects), released (func_15145A50), sent to state 6
-// (func_1507CD64) and lose their attached model (func_15063F14) when its +0x19B is set; kind 0x16 is switched off and
+// (player_hit_reaction) and lose their attached model (func_15063F14) when its +0x19B is set; kind 0x16 is switched off and
 // released, then like kind 0x7C hands back its rider: player obj[0x65] (1-based) gets +0x232 = 10, +0x218 = 0 and
 // obj[0x65] is cleared. Other kinds: nothing.
 void func_15195160(s32 arg0, u8 *obj, s8 *arg2) {
@@ -373,7 +373,7 @@ void func_15195160(s32 arg0, u8 *obj, s8 *arg2) {
         case 0xA0: case 0xB0: case 0xB1: case 0xB2: case 0xB4:
             object_hit_effects((s32) obj, 1, 1, 1, 1, 0, 0xFF, 1);
             func_15145A50((struct127 *) obj);
-            func_1507CD64((struct127 *) obj, 6);
+            player_hit_reaction((struct127 *) obj, 6);
             model = *(u8 **) (obj + 0x31C);
             if (model != NULL && model[0x19B] != 0) {
                 func_15063F14((struct127 *) obj, 0);
@@ -441,13 +441,13 @@ void func_15195418(s32 arg0, u8 *arg1, s32 arg2) {
 
     sp37 = 0;
     if ((*(u8 **)((u8 *)arg1 + 0x318)) != NULL) {
-        sp2C = func_150ADA20();
-        func_15182BE0(0xFF, 0xFF, 0xFF, 0xFF, (func_150ADA20() % 11U) + 0x23, (s32) (*(u8 *)((u8 *)((*(u8 **)((u8 *)arg1 + 0x318))) + 0x23D)), 0xFF, 1);
+        sp2C = random_int();
+        func_15182BE0(0xFF, 0xFF, 0xFF, 0xFF, (random_int() % 11U) + 0x23, (s32) (*(u8 *)((u8 *)((*(u8 **)((u8 *)arg1 + 0x318))) + 0x23D)), 0xFF, 1);
     }
     func_15195160(arg0, arg1, &sp37);
 }
 
-s32 func_1507CD64(struct127 *, s32);
+s32 player_hit_reaction(struct127 *, s32);
 #ifdef NON_MATCHING
 void func_151C0648(f32 *, struct127 *, s32, s32, s32);
 #else
@@ -462,7 +462,7 @@ void func_151954B8(s32 arg0, struct127 *arg1, s32 arg2) {
     func_151C0648(sp34, arg1, 1, 0xFF, 1);
     object_hit_effects(arg1, 0, 0, 1, 0, 0, 0xFF, 1);
     func_15145A50(arg1);
-    func_1507CD64(arg1, 6);
+    player_hit_reaction(arg1, 6);
 }
 
 #ifdef NON_MATCHING
@@ -543,7 +543,7 @@ void func_15195564(struct127 *obj, struct127 *target, u8 attached) {
 #endif
 
 #ifdef NON_MATCHING
-void * func_1505ED34(void);
+void * obj_alloc_slot(void);
 s32 func_15083D54(struct127 *, u16, s32, f32);
 void func_150D15F4(u8 *, s32);
 
@@ -560,16 +560,16 @@ void func_15195750(struct127 *arg0) {
     u32 temp_hi_3;
 
     arg0->health = 0;
-    func_1507CD64(arg0, 5);
+    player_hit_reaction(arg0, 5);
     func_15195024((s32) arg0);
     arg0->interaction_state = 0x28;
     arg0->xz_velocity = -3.0f;
-    arg0->unkBC = -10.0f - (f32) (func_150ADA20() % 5U);
-    temp_f8 = (f32) (func_150ADA20() % 10U);
+    arg0->unkBC = -10.0f - (f32) (random_int() % 5U);
+    temp_f8 = (f32) (random_int() % 10U);
     arg0->y_velocity = 0.0f;
     arg0->gravity = 0.0f;
     arg0->unk148 = temp_f8 - 5.0f;
-    temp_v0 = func_1505ED34();
+    temp_v0 = obj_alloc_slot();
     temp_v0->interaction_state = 0x28;
     temp_v0->immune = 0xFF;
     temp_v0->stunned = 0xFF;
@@ -584,13 +584,13 @@ void func_15195750(struct127 *arg0) {
     temp_v0->xz_scale = arg0->xz_scale;
     temp_v0->xz_velocity = 10.0f;
     temp_v0->y_scale = arg0->y_scale;
-    temp_hi = func_150ADA20() % 5U;
+    temp_hi = random_int() % 5U;
     var_f8 = (f32) temp_hi;
     if ((s32) temp_hi < 0) {
         var_f8 += 4294967296.0f;
     }
     temp_v0->unkBC = var_f8 + 10.0f;
-    temp_hi_2 = func_150ADA20() % 10U;
+    temp_hi_2 = random_int() % 10U;
     var_f16 = (f32) temp_hi_2;
     if ((s32) temp_hi_2 < 0) {
         var_f16 += 4294967296.0f;
@@ -602,7 +602,7 @@ void func_15195750(struct127 *arg0) {
     temp_v0->unk6B = arg0->unk6B;
     (*(u8 *)((u8 *)temp_v0 + 0x6C)) = (u8) (*(u8 *)((u8 *)arg0 + 0x6C));
     (*(u8 *)((u8 *)temp_v0 + 0x6D)) = (u8) (*(u8 *)((u8 *)arg0 + 0x6D));
-    temp_hi_3 = func_150ADA20() % 10922U;
+    temp_hi_3 = random_int() % 10922U;
     var_f4 = (f32) temp_hi_3;
     if ((s32) temp_hi_3 < 0) {
         var_f4 += 4294967296.0f;
@@ -638,7 +638,7 @@ void func_15195A98(u8 *arg0, u8 *arg1, s32 arg2) {
     } else if (arg1 != NULL) {
         angle = *(f32 *)(arg1 + 0x40) - 90.0f;
     } else {
-        angle = func_150ADA68() * 360.0f;
+        angle = random_float() * 360.0f;
     }
     func_1514373C(angle * 0.017453292f, 1.0f, &dir[0], &dir[2]);
     dir[1] = 0.0f;
@@ -658,13 +658,13 @@ void func_15195BC0(s32 arg0, s32 arg1, s32 arg2) {
     func_151B09BC(arg0, arg1, 1000, 0xFF, 0);
 }
 
-s32 func_1507CD64(struct127 *, s32);
+s32 player_hit_reaction(struct127 *, s32);
 
 void func_15195C08(u8 *arg0, struct127 *arg1, s32 arg2) {
     if ((arg1->health == 0) && (arg1->unk127 != 0xFF)) {
         object_hit_effects((s32) arg1, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(arg1);
-        func_1507CD64(arg1, 6);
+        player_hit_reaction(arg1, 6);
     }
     if ((*(u8 *)((u8 *)arg0 + 4)) == 0x47) {
         (*(s8 *)((u8 *)arg0 + 0x1CA)) = 0;
@@ -675,7 +675,7 @@ void func_15195CA8(s32 arg0, s32 arg1, s32 arg2) {
     structEU_151D8E18 sp18;
 
     sp18.unk0 = 1;
-    sp18.unk2 = (func_150ADA20() % 11U) + 20;
+    sp18.unk2 = (random_int() % 11U) + 20;
     sp18.unk4 = 8;
     sp18.unk6 = -1;
     sp18.unk5 = 1;

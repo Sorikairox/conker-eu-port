@@ -51,7 +51,7 @@ void func_151AC3F0(f32 *pos, u8 *src, s32 kind, u8 arg3, s32 arg4) {
         chunkOwner.light = light;
         chunkOwner.arg = arg4;
         d = &D_800A9420[def[0]];
-        func_1514CBE8(pos[0], pos[1], pos[2], d->size, 0, 0xFF, (u32) func_150ADA20() % (u32) (d->countRange + 1) + d->count,
+        func_1514CBE8(pos[0], pos[1], pos[2], d->size, 0, 0xFF, (u32) random_int() % (u32) (d->countRange + 1) + d->count,
                       0xB, kind, 0.0f, (s32) &chunkOwner, arg3);
     }
     if (def[2] != -1) {
@@ -59,7 +59,7 @@ void func_151AC3F0(f32 *pos, u8 *src, s32 kind, u8 arg3, s32 arg4) {
         dustOwner.arg = arg4;
         dustOwner.light = light;
         d = &D_800A9538[def[2]];
-        func_1514CBE8(pos[0], pos[1], pos[2], d->size, 0, 0xFF, (u32) func_150ADA20() % (u32) (d->countRange + 1) + d->count,
+        func_1514CBE8(pos[0], pos[1], pos[2], d->size, 0, 0xFF, (u32) random_int() % (u32) (d->countRange + 1) + d->count,
                       0xC, kind, 0.0f, (s32) &dustOwner, arg3);
     }
     if (def[4] != -1 && (src[0x1C] & 1)) {
@@ -160,7 +160,7 @@ s32 func_151AC628(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
     shape.col[0] = D_800AB7D4[owner->light];
     shape.col[1] = 0xFF;
     shape.flags = (D_800AB7E4[owner->light] ? 0x20 : 0) | 8;
-    if (func_150ADA68() < def->trailChance) {
+    if (random_float() < def->trailChance) {
         shape.flags |= 3;
         trailA = 6;
         trailB = 2;
@@ -169,19 +169,19 @@ s32 func_151AC628(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
         trailB = 0;
         shape.flags &= ~3;
     }
-    shape.col[2] = (u32) func_150ADA20() % (u32) (def->colRange + 1) + def->colBase;
-    pitch = (u32) func_150ADA20() % (u32) (def->pitchRange + 1) + def->pitchBase;
+    shape.col[2] = (u32) random_int() % (u32) (def->colRange + 1) + def->colBase;
+    pitch = (u32) random_int() % (u32) (def->pitchRange + 1) + def->pitchBase;
     sinP = angle_byte_cos(pitch & 0xFF);
     cosP = angle_byte_cos((pitch - 0x40) & 0xFF);
-    speed = func_150ADA68() * def->speedRange + def->speedBase;
+    speed = random_float() * def->speedRange + def->speedBase;
     hv = speed * sinP;
     shape.vel[0] = hv * cosA;
     shape.vel[1] = -speed * cosP;
     shape.vel[2] = hv * sinA;
-    at.b15 = (u32) func_150ADA20() % (u32) (def->b15Range + 1) + def->b15Base;
-    at.life = (u32) func_150ADA20() % (u32) (def->lifeRange + 1) + def->lifeBase;
-    shape.width = func_150ADA68() * def->widthRange + def->widthBase;
-    shape.v10 = func_150ADA68() * def->v10Range + def->v10Base;
+    at.b15 = (u32) random_int() % (u32) (def->b15Range + 1) + def->b15Base;
+    at.life = (u32) random_int() % (u32) (def->lifeRange + 1) + def->lifeBase;
+    shape.width = random_float() * def->widthRange + def->widthBase;
+    shape.v10 = random_float() * def->v10Range + def->v10Base;
     func_15148310((u8 *) &at, (s32) &shape, 0, 1, 8, 0, trailA, trailB, 0, 0, 0, (u8 *) &style, owner->src, argB & 0xFF,
                   owner->arg);
     return 1;
@@ -218,8 +218,8 @@ s32 func_151AC9B8(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     pos[1] = arg4;
     pos[2] = ((Node14 *)tbl)[*(s8 *)(arg0 + 0x2D)].z;
     id = impact_current_kind();
-    if (func_150ADA20() & 1) {
-        impact_debris_spawn(id, *(f32 *)(obj + 0) * 6.0f, *(u8 *)(obj + 0x1B), arg5, (struct17 *)pos, func_150ADA20() % 41U + 0x50, 1, 1, 0, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
+    if (random_int() & 1) {
+        impact_debris_spawn(id, *(f32 *)(obj + 0) * 6.0f, *(u8 *)(obj + 0x1B), arg5, (struct17 *)pos, random_int() % 41U + 0x50, 1, 1, 0, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
     } else {
         impact_splash_ring_spawn(id, *(f32 *)(obj + 0) * 1.5f, *(u8 *)(obj + 0x1B), pos, 1, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
     }
@@ -289,14 +289,14 @@ s32 func_151ACBCC(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
     pos[0] = x;
     pos[1] = y;
     pos[2] = z;
-    rPitch = func_150ADA20();
-    speed = func_150ADA68() * def->speedRange + def->speedBase;
+    rPitch = random_int();
+    speed = random_float() * def->speedRange + def->speedBase;
     func_15143794(a, (u32) rPitch % (u32) (def->pitchRange + 1) + def->pitchBase, speed, vel);
-    fVal = func_150ADA68();
-    rLife = func_150ADA20();
-    rAlpha = func_150ADA20();
-    fSize = func_150ADA68();
-    fAdd = func_150ADA68();
+    fVal = random_float();
+    rLife = random_int();
+    rAlpha = random_int();
+    fSize = random_float();
+    fAdd = random_float();
     impact_dust_cloud_spawn(pos, vel, owner->light, fVal * def->valRange + def->valBase,
                   (u32) rLife % (u32) (def->lifeRange + 1) + def->lifeBase,
                   (u32) rAlpha % (u32) (def->alphaRange + 1) + def->alphaBase, fSize * def->sizeRange + def->sizeBase,
@@ -536,7 +536,7 @@ s32 func_151ACBD4(s8 *arg0, s32 arg1) {
 #endif
 
 #ifdef NON_MATCHING
-f32 func_150489B0(u8);
+f32 math_cos_u8(u8);
 
 // rope_update: per-node update of the hanging rope (render layers 0x2F / 0x4E, built by func_151ACBD4): counts
 // down the +0x52 timer, applies the push of the attached object +0x44 (its controller +0x31C: point +0xAE gets
@@ -574,16 +574,16 @@ void func_151AD724(u8 *e) {
         ang = ctl[0xAC] + (*(u16 *) (obj + 0x76) >> 8);
         amp = *(f32 *) (ctl + 0xA8) * 1.9f;
         p = *(f32 **) (e + 0x38) + i * 6;
-        p[3] += amp * func_150489B0(ang);
+        p[3] += amp * math_cos_u8(ang);
         p = *(f32 **) (e + 0x38) + i * 6;
-        p[5] -= amp * func_15048A40(ang);
+        p[5] -= amp * math_sin_u8(ang);
         obj = *(u8 **) (e + 0x44);
         ang = *(u16 *) (obj + 0x76) >> 8;
         amp = *(f32 *) (obj + 0x3C) * 19.0f;
         p = *(f32 **) (e + 0x38) + i * 6;
-        p[3] += amp * func_150489B0(ang);
+        p[3] += amp * math_cos_u8(ang);
         p = *(f32 **) (e + 0x38) + i * 6;
-        p[5] -= amp * func_15048A40(ang);
+        p[5] -= amp * math_sin_u8(ang);
         p = *(f32 **) (e + 0x38) + i * 6;
         p[4] -= 1000.0f;
         ctl = *(u8 **) (*(u8 **) (e + 0x44) + 0x31C);
@@ -598,9 +598,9 @@ void func_151AD724(u8 *e) {
     }
     if (*(f32 *) (e + 0x4C) != 0.0f) {
         p = *(f32 **) (e + 0x38) + e[0x51] * 6;
-        p[3] -= *(f32 *) (e + 0x4C) * func_150489B0(e[0x50]);
+        p[3] -= *(f32 *) (e + 0x4C) * math_cos_u8(e[0x50]);
         p = *(f32 **) (e + 0x38) + e[0x51] * 6;
-        p[5] += *(f32 *) (e + 0x4C) * func_15048A40(e[0x50]);
+        p[5] += *(f32 *) (e + 0x4C) * math_sin_u8(e[0x50]);
         *(f32 *) (e + 0x4C) *= 0.9f;
     }
     for (i = 0; i < last + 1; i++) {
@@ -666,7 +666,7 @@ void func_151AD724(u8 *e) {
     }
     if (total > 250.0f) {
         if (*(u16 *) (e + 0x54) == 0 || func_1000F3D0(*(u16 *) (e + 0x54)) == 0) {
-            *(u16 *) (e + 0x54) = func_10010E78(0, (u32) func_150ADA20() % 9 + 0x507, 30000, 0, 0, 0, (s32) cur[0],
+            *(u16 *) (e + 0x54) = func_10010E78(0, (u32) random_int() % 9 + 0x507, 30000, 0, 0, 0, (s32) cur[0],
                                                 (s32) cur[1], (s32) cur[2], 250, -0x7E0C);
         }
     }

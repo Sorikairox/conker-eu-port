@@ -1,0 +1,211 @@
+old	new	confidence	description
+func_15000000	game_init_message_queues	med	Creates the three game message queues (D_80041E58) and registers each with func_10008570, then audio setup calls
+func_15000090	level_music_stop_all	low	Wrapper that calls func_1000DEC4 (used by level music start to stop the playing songs)
+func_150000B0	level_start_music	high	Level start: requests the level's songs, keeping already playing wanted ones and stopping the rest
+func_150006E0	level_setup_screen_projection	med	Per-level setup of screen size floats and projection-request tables, calls level colour table setup
+func_15000940	level_init_color_tables	low	Fills the D_800DA2xx 3x3 byte tables from the D_800A30A0 presets picked by level header unk29
+func_15000AC0	texture_scroll_clear	med	Resets the texture scroller record count D_800D9E64 to 0
+func_15000AD0	level_setup_sky_backdrop	high	Per-level setup of the sky / backdrop buffers (gradient texture, quads, matrices) from the level header
+func_15001460	collision_scan_level_dl	high	Scans a level display list and appends its triangles (vertex pointers and bounds) to the collision tables
+func_15003120	level_model_relocate_table	med	Relocates a level model's {ptr, ptr, x} table by base and stores pointer and count in D_800B1240 / D_800B1244
+func_150031EC	level_load_models	high	Level model loader: loads asset (2, 4, level) and relocates each model header's display list offsets
+func_150034B4	texture_table_reset	low	Sets all 7764 D_800B0E58 entries to -1 and clears D_800BC448, resets D_800D9F58/5C, D_800D9F60 by level
+func_15003570	texture_build_size_table	med	Reads the expanded size of each compressed texture from its ROM header into D_800B8BB8
+func_15003668	collision_build_level_tris	med	Builds the level collision triangle tables from the level models and world objects, then allocates buffers
+func_150038A0	collision_build_quadtrees	low	Builds the level collision quadtrees (node pool, three trees) and sets D_800DBE62
+func_1500390C	texture_table_find	low	Returns the index i where D_800B0E58[i] equals arg0, or -1
+func_150039B0	collision_noop	low	Empty function taking one argument (EU split of the collision setup file)
+func_150039BC	collision_set_tri_flags_table	med	Sets D_800DBE5C, the per-triangle flags table read by the collision queries, to arg0 + 8 (or 0)
+func_150039E0	world_objects_load	high	Builds the level's world objects (0xA0-byte records) from the level and multiplayer placement lists, loading models
+func_15004574	world_object_cache_selected	low	When D_800DBF88 is set, copies that world object's model (+0x1C) and vertex (+0x28) pointers to D_800DBF8C / D_800DBF90
+func_150045BC	world_objects_noop	low	Empty function
+func_150045C4	world_objects_level_start	high	Level start for world objects: matrices, static vertex transform, visibility ranges per object
+func_150049A4	gfx_dl_relocate_segments	high	Walks a display list adding arg1 to G_DL / G_VTX addresses and arg2 to segment 0xE G_MOVEWORD values
+func_15004A4C	world_objects_clear_arrays	high	Clears the per-world-object arrays D_800DC328 and D_800DC32C
+func_15004AAC	world_object_calc_radius	med	Computes a world object's scaled bounding radius from its vertices and stores or checks it at +0x50 / +0x52
+func_15004BF0	world_object_alloc_id	med	Returns a free world object id: counting up from 1 (arg0 0) or down from 0xFF - D_800DBF00 (multiplayer)
+func_15004CE0	gfx_dl_relocate_seg_e	high	Walks a display list adding arg1 to segment 0xE G_MOVEWORD values below 0x80000000
+func_15004D50	vertex_anchor_alloc_players	low	Allocates per-player copies (0x50 bytes) of the D_800C3FC0 vertex block template for players 1..D_80082FA0
+func_15004FE0	level_load_look_points	high	Loads the level's look points (6 floats each) into 0x14-byte records in D_800C6A70 and returns the count
+func_150061B0	controller_init_si_queue	high	Creates the SI message queue and event, sets up the controller pad pointers, calls an empty hook
+func_15006234	controller_init_all	med	Calls osContInit until it succeeds, resets per-pad state and detects connected pads and their paks
+func_150064E0	save_game_defaults	med	Resets the game save state to defaults: func_15017790, clears the 69 D_800C3A60 values, D_800BE3DF = 24
+func_15006590	save_slot_load	high	Reads EEPROM save slot arg0, checks its checksum and unpacks the progress state (defaults when bad)
+func_15006BEC	save_slot_write	high	Packs the progress state into a 0x80-byte block with checksum and writes it to a free EEPROM area
+func_1500707C	save_slot_erase	high	Overwrites the first two EEPROM blocks of every area belonging to save slot arg0 with 0xFF
+func_15007168	save_config_reset	med	Clears the 0x68-byte config block D_800BE710 and gives its ten 10-byte records their default values
+func_1500727C	save_config_load	high	Reads the config block D_800BE710 from EEPROM block 0x44 and resets it when the checksum is bad
+func_15007360	save_config_write	high	Recomputes the config block D_800BE710 checksum and writes it to EEPROM block 0x44
+func_15007440	save_options_load	high	Reads the 0x1C option bytes from EEPROM block 0 into D_800E1010 (0xFF when the checksum is bad) and applies them
+func_15007558	save_options_write	high	Copies the option bytes D_800E1010 into a 0x20-byte block with checksum and writes it to EEPROM block 0
+func_15007644	controller_init_hook_noop	low	Empty function called at the end of the SI queue setup
+func_1500764C	save_request_options_load	high	Queues EEPROM request 6 (load options) for the save handler
+func_15007668	save_request_options_write	high	Queues EEPROM request 7 (write options) for the save handler
+func_15007684	save_request_config_load	high	Queues EEPROM request 4 (load config block) for the save handler
+func_150076A0	save_request_config_write	high	Queues EEPROM request 5 (write config block) for the save handler
+func_150076BC	save_request_slot_load	high	Queues EEPROM request 1 (load slot arg0, 0..3); a negative slot resets the save state to defaults
+func_15007718	save_request_slot_write	high	Queues EEPROM request 2 (write slot arg0, 0..2) unless D_800BE616 is set
+func_15007750	save_request_slot_erase	high	Queues EEPROM request 3 (erase slot arg0, 0..2)
+func_15007778	save_slots_reset	high	Marks the three save slot summaries empty, clears the current progress state and the slot area map
+func_15007A70	level_start_game	med	Starts play of level arg2: sets the level ids, resets cutscene, camera and level state and runs the level setup chain
+func_15007B3C	level_load	high	Level loader run once per level change: music, models, objects, cameras and per-level subsystems
+func_150081E4	level_reset_globals	low	Clears assorted per-level globals (D_800D3668, D_800CBE00, D_800DDD64, D_800DF7C8[2], D_800D245C, D_800D2548)
+func_15008230	cutscene_clear_pending	med	Clears the pending cutscene request D_800C35C4 and D_800C3C88
+func_15008248	cutscene_reset_state	med	Resets the shared cutscene state and both cutscene slots (func_1501D044) and the three D_800C3CA0 records
+func_150082CC	cutscene_start_pending	med	Loads the pending cutscene scene (D_800C35C4 - 1) for the current level via func_1501D348 and clears the request
+func_15008340	spawn_zone_pick_point	high	Picks a random point (x, z) and height range in a spawn zone by its shape: disc, sphere, rotated box or point
+func_15008870	effect_lists_clear	med	Clears the effect node lists D_800DD280[2][] for types 0..0x67, 0..0x64 (arg 1) or 0x65..0x67 (arg 2)
+func_15008930	effect_run_init_hooks	low	Calls the init hook list D_80082F60 (arg 1) or D_80082F64 (arg 2), then sets D_800DD5E0 to -1
+func_15008BF0	area_drift_emitter_spawn	med	Builds area drift emitter parameters from a spawn record (position, size, angles) and creates it via func_15189E70
+func_15008E00	area_points_reset	high	Resets the area point slot count D_800DDE50 to 0
+func_15008E10	area_points_alloc	high	Takes the next area point slot for level area arg0 and allocates its 40 zeroed points
+func_150091D0	level_lights_reset	med	Resets the level light state: light lists, white ambient (func_1515D4D4), D_800DCD24 / D_800DCD28 colours and tables
+func_150092DC	level_hotspots_setup_all	high	Runs the per-hotspot light / effect setup for every D_800D34B8 hotspot (D_800D3094 of them)
+func_15009334	level_hotspot_setup	med	Sets up one hotspot by kind: point light plus effect (9), ambient colour (10), env colours (16), list links (15, 24)
+func_150095D8	hotspot_fx_type01	low	Hotspot effect handler for type 1 (D_80082BFC): func_1516127C(arg0, 0xFF, 1)
+func_15009600	hotspot_fx_type02	low	Hotspot effect handler for type 2 (D_80082BFC): func_15161334(arg0, 0xFF, 1)
+func_15009628	hotspot_fx_type03_06	low	Hotspot effect handler for types 3..6 (D_80082BFC): func_1516037C(&tmp, arg0, 0, 255, 1)
+func_1500969C	hotspot_fx_type07	low	Hotspot effect handler for type 7 (D_80082BFC): func_15161408(arg0, 0xFF, 1)
+func_150096C4	hotspot_fx_type08_12	low	Hotspot effect handler for types 8..12 (D_80082BFC): func_1516037C(&tmp, arg0, 0, 255, 1)
+func_15009740	hotspot_fx_type13	low	Hotspot effect handler for type 13 (D_80082BFC): func_15161494(arg0, 0xFF, 1)
+func_15009768	hotspot_fx_type14	low	Hotspot effect handler for type 14 (D_80082BFC): func_151615F8(arg0, 0, 0, 0xE, 0xFF, 1)
+func_150097A4	hotspot_fx_type15	low	Hotspot effect handler for type 15 (D_80082BFC): func_15161540(arg0, 0xFF, 1)
+func_150097CC	hotspot_fx_type16	low	Hotspot effect handler for type 16 (D_80082BFC): func_151615F8(arg0, 0, 2, 0xE, 0xFF, 1) func_150121C0(temp_v0)
+func_15009818	hotspot_fx_type17	low	Hotspot effect handler for type 17 (D_80082BFC): func_151B8DB0(arg0, 0, 0xFF, 1)
+func_15009844	hotspot_fx_type18	low	Hotspot effect handler for type 18 (D_80082BFC): func_151B8DB0(arg0, 1, 0xFF, 1)
+func_15009870	hotspot_fx_type19	low	Hotspot effect handler for type 19 (D_80082BFC): func_15108850(arg0)
+func_15009894	hotspot_fx_type20	low	Hotspot effect handler for type 20 (D_80082BFC): func_151615F8(arg0, 1, 0, 0xE, 0xFF, 1)
+func_150098D0	hotspot_fx_type21	low	Hotspot effect handler for type 21 (D_80082BFC): func_15162034(arg0, 0xFF, 1)
+func_150098F8	hotspot_fx_type22	low	Hotspot effect handler for type 22 (D_80082BFC): func_151623F4(arg0, 1, 22, 0, -1, 300, 0xFF, 1)
+func_15009944	hotspot_fx_type23	low	Hotspot effect handler for type 23 (D_80082BFC): func_15162740(arg0, 1, 6, 0, 300, 2, 0xFF, 1)
+func_15009990	hotspot_fx_type24_27	low	Hotspot effect handler for types 24..27 (D_80082BFC): func_1516295C(arg0, D_80095B48[arg1], D_80095B4C[arg1], 2, 300, 12, -1, 0, -1, 1, 1, 255, 1)
+func_15009AA0	hotspot_fx_type28	low	Hotspot effect handler for type 28 (D_80082BFC): func_15162FAC(arg0, 1, 0, 2, 300, 0xD, 0xFF, 1)
+func_15009AEC	hotspot_fx_type29	low	Hotspot effect handler for type 29 (D_80082BFC): func_15162740(arg0, 2, 6, 0, 300, 2, 0xFF, 1)
+func_15009B84	hotspot_fx_type30	low	Hotspot effect handler for type 30 (D_80082BFC): func_15162740(arg0, 3, 6, 0, 300, 2, 0xFF, 1)
+func_15009BD0	hotspot_fx_type31	low	Hotspot effect handler for type 31 (D_80082BFC): func_15187EC0(0, 0.0f, 0, 0, 0, 220, 220, 255) func_1516387C(arg0, 2, 16, 300, 0, 12, 255, 1)
+func_15009C7C	hotspot_fx_type32	low	Hotspot effect handler for type 32 (D_80082BFC): func_15187EC0(0, 0.0f, 0, 0, 0, 220, 220, 255) func_1516387C(arg0, 2, 16, 300, 0, 12, 255, 1)
+func_15009D28	hotspot_fx_type33	low	Hotspot effect handler for type 33 (D_80082BFC): func_15163604(arg0, 1, 5, 300, 0, 0, 255, 1)
+func_15009D6C	hotspot_fx_type34	low	Hotspot effect handler for type 34 (D_80082BFC): func_15163604(arg0, 2, 5, 300, 0, 0, 255, 1)
+func_15009DB0	hotspot_fx_type35	low	Hotspot effect handler for type 35 (D_80082BFC): func_15162740(arg0, 4, 6, 0, 300, 2, 255, 1)
+func_15009DFC	hotspot_fx_type36	low	Hotspot effect handler for type 36 (D_80082BFC): func_15162740(arg0, 5, 6, 0, 300, 2, 255, 1)
+func_15009E48	hotspot_fx_type37	low	Hotspot effect handler for type 37 (D_80082BFC): func_151615F8(arg0, 1, 1, 14, 255, 1)
+func_15009E84	hotspot_fx_type38	low	Hotspot effect handler for type 38 (D_80082BFC): func_15163604(arg0, 3, 5, 300, 0, 0, 255, 1)
+func_15009EC8	hotspot_fx_type39	low	Hotspot effect handler for type 39 (D_80082BFC): func_1516381C(arg0, 32, 255, 1)
+func_15009EF4	hotspot_fx_type40	low	Hotspot effect handler for type 40 (D_80082BFC): func_151615F8(arg0, 1, 3, 35, 255, 1)
+func_15009F30	hotspot_fx_type41	low	Hotspot effect handler for type 41 (D_80082BFC): func_15163604(arg0, 4, 36, 300, 0, 0, 255, 1)
+func_15009F74	hotspot_fx_type42	low	Hotspot effect handler for type 42 (D_80082BFC): func_15187EC0(1, 0.1f, 100, 100, 100, 255, 100, 100) func_1516387C(arg0, 2, 16, 300, 0, 12, 255
+func_1500A028	hotspot_fx_type43	low	Hotspot effect handler for type 43 (D_80082BFC): func_15163604(arg0, 5, 5, 300, 0, 0, 255, 1)
+func_1500A06C	hotspot_fx_type44	low	Hotspot effect handler for type 44 (D_80082BFC): func_15163604(arg0, 6, 5, 300, 0, 0, 255, 1)
+func_1500A0B0	hotspot_fx_type45	low	Hotspot effect handler for type 45 (D_80082BFC): func_15162740(arg0, 7, 6, 0, 300, 2, 255, 1)
+func_1500A0FC	hotspot_fx_type46	low	Hotspot effect handler for type 46 (D_80082BFC): func_15162740(arg0, 9, 6, 0, 300, 2, 255, 1)
+func_1500A148	hotspot_fx_type47	low	Hotspot effect handler for type 47 (D_80082BFC): func_15162740(arg0, 10, 6, 0, 300, 2, 255, 1)
+func_1500A194	hotspot_fx_type48	low	Hotspot effect handler for type 48 (D_80082BFC): func_15162740(arg0, 11, 38, 0, 300, 2, 255, 1)
+func_1500A1E0	hotspot_fx_type49	low	Hotspot effect handler for type 49 (D_80082BFC): func_151615F8(arg0, 1, 4, 14, 255, 1)
+func_1500A21C	hotspot_fx_type50	low	Hotspot effect handler for type 50 (D_80082BFC): func_15163604(arg0, 7, 5, 300, 0, 0, 255, 1)
+func_1500A2AC	hotspot_fx_type51_54	low	Hotspot effect handler for types 51..54 (D_80082BFC): func_151B8DB0(arg0, sp1C[arg1 - 0x33], 0xFF, 1)
+func_1500A260	hotspot_fx_type55	low	Hotspot effect handler for type 55 (D_80082BFC): func_15162FAC(arg0, 2, 0, 2, 300, 13, 255, 1)
+func_1500A2F4	hotspot_fx_type56_57	low	Hotspot effect handler for types 56..57 (D_80082BFC): func_15164208(arg0, sp1C[arg1 - 0x38], 0xFF, 1)
+func_1500A33C	hotspot_fx_type58	low	Hotspot effect handler for type 58 (D_80082BFC): func_15163604(arg0, 8, 5, 300, 0, 0, 255, 1)
+func_1500A380	hotspot_fx_type59	low	Hotspot effect handler for type 59 (D_80082BFC): func_15163604(arg0, 9, 0x28, 300, 0, 0, 255, 1)
+func_1500A3C4	hotspot_fx_type60	low	Hotspot effect handler for type 60 (D_80082BFC): func_15162740(arg0, 15, 6, 0, 300, 2, 255, 1)
+func_1500A410	hotspot_fx_type61	low	Hotspot effect handler for type 61 (D_80082BFC): func_15163604(arg0, 10, 5, 300, 0, 0, 255, 1)
+func_1500A454	hotspot_fx_type62	low	Hotspot effect handler for type 62 (D_80082BFC): func_151615F8(arg0, 0, 5, 14, 255, 1)
+func_1500A490	hotspot_fx_type63	low	Hotspot effect handler for type 63 (D_80082BFC): func_15163604(arg0, 11, 5, 300, 0, 0, 255, 1)
+func_1500A4D4	hotspot_fx_type64	low	Hotspot effect handler for type 64 (D_80082BFC): func_15163604(arg0, 12, 41, 300, 0, 0, 255, 1)
+func_1500A55C	hotspot_fx_type65	low	Hotspot effect handler for type 65 (D_80082BFC): func_151623F4(arg0, 1, 22, 0, -1, 300, 255, 1)
+func_1500A5A8	hotspot_fx_type66	low	Hotspot effect handler for type 66 (D_80082BFC): func_15162740(arg0, 17, 6, 0, 300, 2, 255, 1)
+func_1500A5F4	hotspot_fx_type67	low	Hotspot effect handler for type 67 (D_80082BFC): func_15162740(arg0, 18, 6, 0, 300, 2, 255, 1)
+func_1500A640	hotspot_fx_type68	low	Hotspot effect handler for type 68 (D_80082BFC): func_15162740(arg0, 19, 6, 0, 300, 2, 255, 1)
+func_15009A38	hotspot_fx_type69_72	low	Hotspot effect handler for types 69..72 (D_80082BFC): func_1516037C(&tmp, arg0, 0, 255, 1)
+func_1500A6D8	hotspot_fx_type73_75	low	Hotspot effect handler for types 73..75 (D_80082BFC): func_150B0AEC(sp24[i][arg1 - 0x49], sp30) != 0) func_1516037C(&sp48, arg0, 0x18, 255, 1)
+func_15009B38	hotspot_fx_type76	low	Hotspot effect handler for type 76 (D_80082BFC): func_15162740(arg0, 20, 6, 0, 300, 2, 0xFF, 1)
+func_1500A518	hotspot_fx_type77	low	Hotspot effect handler for type 77 (D_80082BFC): func_15163604(arg0, 13, 41, 300, 0, 0, 255, 1)
+func_1500A68C	hotspot_fx_type78	low	Hotspot effect handler for type 78 (D_80082BFC): func_15162740(arg0, 21, 6, 0, 300, 2, 255, 1)
+func_1500A79C	hotspot_fx_type79	low	Hotspot effect handler for type 79 (D_80082BFC): func_15162740(arg0, 22, 6, 0, 300, 2, 255, 1)
+func_1500A7E8	hotspot_fx_type80_85	low	Hotspot effect handler for types 80..85 (D_80082BFC): func_151149AC(sp24[arg1 - 0x50]) func_1516037C(&sp48, arg0, 0x18, 255, 1)
+func_1500A8C8	hotspot_fx_type86	low	Hotspot effect handler for type 86 (D_80082BFC): func_151615F8(arg0, 0, 6, 0xE, 255, 1)
+func_1500A904	hotspot_fx_type87_88	low	Hotspot effect handler for types 87..88 (D_80082BFC): func_151615F8(arg0, 1, tmp, 0xE, 255, 1)
+func_1500A94C	hotspot_fx_dispatch	high	Calls the hotspot effect handler D_80082BFC[arg1](arg0, arg1) for types 1..88
+func_1500A990	ambient_fx_spawn_type2	low	Ambient effect 2 (D_80082D60): spawns effect kind 45 (func_15149130) with random rotation angles and fixed sizes
+func_1500AB5C	ambient_fx_dispatch	high	Calls the ambient effect handler D_80082D60[arg0] for ids 1..5
+func_1500C2A0	debris_counts_reset	med	Clears the 233 per-type debris counts D_800DC468 and the totals D_800DC460 / D_800DC464 / D_800DC63C
+func_1500C2F0	record_debris_spawn	high	Level-start record 0x22: spawns debris pieces at random points of the record zone, count from length x scale
+func_1500C8D0	record_particle_spawn_a	low	Level record spawner: random points in the record zone (count from length x arg1) spawned via func_151307F0
+func_1500CE4C	record_scatter_spawn	low	Level record spawner: random points in the record zone (count from length x arg1) spawned via func_1513D2F0
+func_1500D3AC	record_debris_spawn_c	low	Level record spawner like record_debris_spawn: two passes of random pieces in the zone spawned via func_15132FBC
+func_1500D8C8	record_debris_spawn_b	high	Level-start record 0x26: as record_debris_spawn with other constants, sounds and sizes
+func_1500DE88	record_particle_spawn_b	low	Level record spawner like record_particle_spawn_a with other constants, spawned via func_151307F0
+func_1500E470	level_objects_init	med	Level object setup: resets object globals, look points, areas, per-level init hook D_80083120[header unkA] and more
+func_1500E5C0	level_objects_reset_state	low	Resets the level object state: func_15012470 / func_15008A10 / func_15012770, clears D_800E0950 and D_800D9Dxx flags
+func_1500E70C	level_hook_level_2b	low	Per-level hook: for level 0x2B calls func_15011C70 (clears D_800D9AA0 and calls func_15103800)
+func_1500E738	level_set_lod_shifts	med	Sets the per-player-count scale shift and factor (D_800DCE50 / 54) and the D_8008FD8C-based ones (D_800DCE58 / 5C)
+func_1500E890	level_obj_init_area_points	med	Level object init hook: resets the area point slots and allocates areas 0 and 1
+func_1500E8C0	level_obj_init_drift_scene	low	Level object init hook: scrolls both level DL textures, creates a drift emitter and starts ambient sound 0x61F
+func_1500EAA0	level_obj_init_tex_scroll	low	Level object init hook: scrolls texture D_80090320 on both level display lists (speed -8)
+func_15010110	level_obj_init_ropes	low	Level object init hook: scrolls both level DL textures and creates six rope / light columns from D_80096750
+func_150104F0	level_obj_init_d9d70	low	Level object init hook: clears the three D_800D9D70 bytes and D_80088D20, sets object 0xF6's +0x7C to 2.0
+func_15010538	obj_spawn_effect_80	low	Spawns a func_15161E24 effect on object arg0 and an effect kind 80 (func_15149130) linked to its unique id
+func_15010780	level_obj_init_vertex_lights	med	Level object init hook: adds two vertex lights (func_15177410 ids 1 and 0)
+func_15010880	level_obj_init_d34b8_effect	low	Level object init hook: vertex light, hit callback func_150DE8AC, effect kind 0x5E between two hotspots, flag effect
+func_150109D0	level_obj_init_rope	low	Level object init hook: creates one rope / light column from D_80096430 and calls func_150E8854
+func_15010A60	level_obj_init_debris_table	low	Level object init hook: spawns debris pieces with attached effects from a rodata table, after func_150E8854
+func_150113E0	level_fire_emitters_create	high	Level 0x18 start: creates four particle emitters (func_151407D0) with per-emitter spawn positions
+func_1501175C	obj_glow_smoke_attach	high	Spawns a linker object for obj plus a glow model (func_1513D2F0) and a smoke effect, stored in the linker
+func_15011A78	obj_spawn_effect_85	low	Spawns an effect kind 85 (func_15149130) holding object arg0 and its unique id
+func_15011D40	level_hook_call_15103800	low	Wrapper that calls func_15103800
+func_15011D60	marker_effect_spawn	high	Spawns a type 0x12C effect for obj and its slot, with eight handles and the slot's map marker position
+func_150121C0	debris_spawn_linked	low	Spawns a debris piece (func_15132FBC) at D_80096900 on the ground, storing arg0 at +0x170 and two matrices
+func_15012370	camera_init_player_projections	med	Builds each player's perspective matrix D_800DD040 from the viewport size (near 1, far 20000)
+func_15012470	fx_alloc_d88750	low	Sets D_80088750 to func_1518AADC(4, 300, 0)
+func_150124A0	pipe_spray_points_init	high	Casts random rays for each of three pipes to store spray points in D_800DCE60, then spawns effect 300
+func_15015F40	mp_set_mode_for_level	med	Sets multiplayer flag D_800BE616 for the multiplayer levels and D_800BEE08 from arg0 (via func_151E6758 in MP)
+func_15015FBC	screen_setup_viewports	med	Fills the split-screen viewport size tables D_800BEA5C / D_800BEA74 and the D_800BEA88 rectangles from width / height
+func_15005290	camera_level_init	high	Level camera init: loads the camera records, allocates and initialises per-player camera controllers and matrices
+func_150054C4	camera_controller_init	high	Initialises one per-player camera controller (0x9A0 bytes): clears it, resets its 21 camera slots and links it
+func_15005818	camera_set_initial_eye	high	Sets a camera controller's initial eye from arg2 and its look-at point from the camera record arg1
+func_15012FE0	level_clear_be570	low	Clears D_800BE570, D_800BE574 and D_800BE575 at level object setup
+func_15013000	hotspots_start_all	med	Resets D_800DCDC4 / D_800DCD90 and runs each hotspot's start handler D_800831C0[kind] (D_800D3094 hotspots)
+func_150130B4	record_particle_emitter_start	high	Start handler of a particle-emitter record: spawn block from position, angles and colour, emitter per type 1..19
+func_1501370C	record_start_dispatch	high	Runs the record's start handler D_80082EA0[rec->unk17] on the record
+func_1501374C	record_start_15d088	low	Marks the record started (+0x16 bit 2) and passes it to func_1515D088
+func_15013778	effect_spawn_record	high	Spawns an effect (type 0x19) from a record's position, radius and angles, plus sound 0x67C above it
+func_1501396C	record_dispatch_82ecc	med	Runs the record's handler from the second table D_80082ECC[rec->unk17] on the record
+func_150139AC	record_ambient_effect_start	med	Start handler: spawns effect 6 (func_151491F4) with area and the D_80096350[rec+0x18] preset, optional sound 0x4D
+func_15013C38	record_scripted_dispatch	low	Start handler: unless blocked by level 19 progress or cutscene state, calls D_800832B8[idx](rec, rec+0x1C scaled)
+func_15013D38	record_emitter_start	low	Start handler: marks the record and calls func_151BEE00 at its position with its radius and kind bytes
+func_15013DE8	record_particle_burst_start	med	Start handler: marks the record and spawns a particle burst (func_15149AC0) sized by its +6 / +8 values
+func_15013F9C	record_start_1cd2c0	low	Record handler that calls func_151CD2C0(rec, 0xFF, 1)
+func_15013FC4	record_dispatch_82f40	med	Runs the handler D_80082F40[rec byte +0x1B]
+func_15014004	record_register_e0900	med	Stores the record in slot D_800E0900[rec->unk1C] (0..5)
+func_15014040	record_register_d9a20	med	Marks the record started and stores it in D_800D9A20 (kind 0) or D_800D9A24 (kind 1)
+func_1501407C	record_clear_d987c	low	Record handler that clears D_800D987C
+func_15014094	record_effect33_start	low	Start handler: spawns effect kind 33 holding the record, its length (func_15144598) and its ground sound id
+func_15014144	record_kind_effect_start	med	Start handler: spawns a kind effect (func_151A9940) on the record with flags remapped from rec +0x18
+func_15014220	record_effect38_start	low	Start handler: spawns effect kind 38 holding the record
+func_150142AC	record_register_d9aa0	med	Marks the record started and stores it in D_800D9AA0[rec byte +0x1B] (0..2)
+func_150142EC	record_effect29_start	low	Start handler (single player only): spawns effect 0x29 with four scaled values from rec +0x1C / +0x20 and length
+func_150144B8	screen_effect_start	high	Start handler: projects a point to the screen and spawns effect 0x2A with packed record parameters
+func_1501474C	record_zone_box_start	high	Start handler of a box zone record: rotated corners, edges and heights handed to a new effect object
+func_15014B60	record_light_ring_start	high	Start handler: builds a block with random angles, sizes and six lights for a new effect object
+func_15014F6C	record_effect49_start	low	Start handler: spawns effect kind 49 holding the record and its rotation matrix
+func_150150A4	record_light_list_add	low	Creates a light list entry for the record (func_1515F1B0), links it to D_800DCDC4 and adds its +8 to D_800DCD90
+func_15015104	record_effect44_start	low	Start handler: marks the record (+0x14) and spawns effect kind 44 holding it with flags from +0x20
+func_150151D4	record_effect60_start	low	Start handler: marks the record and spawns effect kind 60 holding it
+func_15015300	record_dispatch_82f70	med	Runs the handler D_80082F70[rec->unk1C] (0..1)
+func_15015354	record_quad_zone_start	high	Start handler of a rectangular zone record: four world corners, edges and sound id handed to a new effect
+func_15015644	record_effect68_start	low	Start handler: marks the record and spawns effect kind 68 holding it
+func_150156F4	record_rope_zone_start	high	Spawn handler: builds a vertical zone from the record and creates a rope / light column (func_151ACBD4)
+func_151F3DE0	mp3dec_init	high	Builds the MP3 decoder IMDCT window tables (sine windows per block type), relocates the Huffman tables
+func_151F6970	mp3dec_reorder	high	Copies a granule's 576 samples, reordering short-block spectral lines by the scale factor band table
+func_151F7F60	mp3main_fill_buffer	high	Shifts the MP3 input buffer down when near full and reads the next frame's bytes via the read callback
+func_151F85C4	mp3main_init	high	Initialises the single MP3 stream (D_800E1CB0) with the source, read callback and argument, reads the first frame
+func_151F86B0	mp3main_decode_next_frame	high	Advances the output slot, reads and decodes the next MP3 frame, returns its samples and passes ID3 text to a callback
+func_15010600	level_clear_d9d40_flags	low	Clears the D_800D9D40 / D_800D9D48 / D_800D9D58 flags and the twelve-entry D_800D9D4A / D_800D9D5A arrays
+func_151F42E8	mp3dec_dequantize	med	MP3 decoder (Perfect Dark mp3dec00040164): scales a granule's spectral values by scale factor bands and block type
+func_151F4F38	mp3dec_unpack_scale_fac	high	MP3 decoder (Perfect Dark decoder.c): unpacks the MPEG-1 scale factors of a granule / channel
+func_151F578C	mp3dec_unpack_scale_fac_lsf	med	MP3 decoder (Perfect Dark mp3dec00041600): unpacks MPEG-2 (LSF) scale factors, including intensity stereo channel
+func_151F63C4	mp3dec_read_granule	med	MP3 decoder: unpacks the scale factors (MPEG-1 or 2) then Huffman-decodes the big values and count1 region
+func_151F6B28	mp3dec_reduce_aliases	high	MP3 decoder (Perfect Dark decoder.c): alias reduction butterflies between subbands for long blocks
+func_151F6FD0	mp3dec_set_side_info	high	MP3 decoder (Perfect Dark decoder.c): reads the frame side information
+func_151F78B4	mp3dec_decode_frame	high	MP3 decoder (Perfect Dark decoder.c): decodes one frame (granules, stereo, reorder, aliases, IMDCT, synthesis)
+func_151F8088	mp3main_read_frame	high	MP3 main (Perfect Dark main.c): reads and syncs the next frame header and data into the stream buffer

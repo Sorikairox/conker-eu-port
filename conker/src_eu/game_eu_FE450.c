@@ -5,7 +5,7 @@
 
 #ifdef NON_MATCHING
 void func_15182D40(void);
-s32 func_150ADA20(void);
+s32 random_int(void);
 // level_ambient_cue_update: level update handler (D_8008D0A4[14]): runs func_15182D40, then counts the cue timer
 // (byte at D_800D9D10) down by the frame delta D_800BE9E4; when it has run out, the first of the objects 0x15 /
 // 0x1A / 0x1B / 0x1C / 0x1D / 0x20 that func_150A29C8 reports absent (0) gets a random sound 0x6C..0x6E played at
@@ -41,9 +41,9 @@ void func_150D0C40(s32 arg0) {
     if (id == 0) {
         return;
     }
-    *timer = (func_150ADA20() & 0x7F) + 0x80;
+    *timer = (random_int() & 0x7F) + 0x80;
     pos = (s16 *) (D_800D34B8 + id * 0x34);
-    func_10010F88((u32) func_150ADA20() % 3 + 0x6C, 0x5DC0, 0, 0, 0, pos[0], pos[1], pos[2], 0x320, 0x5DC);
+    func_10010F88((u32) random_int() % 3 + 0x6C, 0x5DC0, 0, 0, 0, pos[0], pos[1], pos[2], 0x320, 0x5DC);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE450/func_150D0C40.s")

@@ -27,7 +27,7 @@ static const PipeSpot D_8009FCF0[3] = {
 };
 
 // pipe_explode_effects: P197 (difftest as a void variant, d_2c20.c): the effects of pipe `pipe` (0..2, D_8009FCF0: position and facing angle) bursting in
-// view `view` ("../Effects/PipeExploded/pipeexploded.c"): func_1512D748 on the current player's state (7, 1), a spray
+// view `view` ("../Effects/PipeExploded/pipeexploded.c"): camera_shake_start on the current player's state (7, 1), a spray
 // of 3..4 pieces (func_151A74B0), 1..2 debris bursts (func_1514CDC8, radius 31..104, 4..6 pieces), a smoke cloud
 // (func_15153F24), two spark bursts (func_151534E0), clears the pipe's two earlier effects of type 0x17
 // (func_151494E0, keys 2 * pipe and 2 * pipe + 1), a water / steam jet 150 units in front of the pipe
@@ -98,10 +98,10 @@ s32 func_150B2C20(s32 pipe, s32 view) {
     s16 n;
     f32 r, s, c;
 
-    func_1512D748((struct108 *) ((u8 *) D_800DBFF0 + D_800BEE08 * 0x9A0), 7, 1);
+    camera_shake_start((struct108 *) ((u8 *) D_800DBFF0 + D_800BEE08 * 0x9A0), 7, 1);
 
     /* spray of pieces */
-    spray.count = (func_150ADA20() & 1) + 3;
+    spray.count = (random_int() & 1) + 3;
     p = &D_8009FCF0[(u8) pipe];
     spray.pos[0] = p->pos[0];
     spray.pos[1] = p->pos[1];
@@ -132,10 +132,10 @@ s32 func_150B2C20(s32 pipe, s32 view) {
     func_151A74B0(&spray, 0, view, 1);
 
     /* debris bursts */
-    n = (func_150ADA20() & 1) + 1;
+    n = (random_int() & 1) + 1;
     while (n-- != 0) {
-        r = func_150ADA68() * 73.0f + 31.0f;
-        func_1514CDC8(p->pos[0], p->pos[1], p->pos[2], r, p->angle + 0x40, 0, 0xFF, (u32) func_150ADA20() % 3 + 4,
+        r = random_float() * 73.0f + 31.0f;
+        func_1514CDC8(p->pos[0], p->pos[1], p->pos[2], r, p->angle + 0x40, 0, 0xFF, (u32) random_int() % 3 + 4,
                       9, 0, 0.009615385f, 0, view);
     }
 
@@ -288,7 +288,7 @@ typedef struct {
 } PipeParticleReq;
 
 s32 func_15132FBC(void *req, s32, s32, s32, s32, s32);
-f32 func_150ADA68(void);
+f32 random_float(void);
 f32 angle_byte_cos(u8);
 /*
  * pipe_explode_spawn_chunk: D_8008ADA0 spawn handler 9 (called per ring point by func_1514C860 with (mode, index,
@@ -325,7 +325,7 @@ s32 func_150B3394(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 cx, f32 cy, f
     req.pos[1] = py;
     req.pos[2] = pz;
     req.scale[1] = 0.2f;
-    speed = func_150ADA68() * 31.0f + 18.0f;
+    speed = random_float() * 31.0f + 18.0f;
     yaw = angle0 + (s32) (60.0f * sinA * r * arg9) - 0x40;
     cosYaw = angle_byte_cos((yaw - 0x40) & 0xFF);
     sinYaw = angle_byte_cos(yaw & 0xFF);
@@ -335,13 +335,13 @@ s32 func_150B3394(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 cx, f32 cy, f
     req.vel[0] = horiz * cosYaw;
     req.vel[1] = -speed * cosPitch;
     req.vel[2] = horiz * sinYaw;
-    req.spinX = func_150ADA68() * 80.0f - 40.0f;
+    req.spinX = random_float() * 80.0f - 40.0f;
     req.spinY = 0.0f;
-    req.spinZ = func_150ADA68() * 80.0f - 40.0f;
+    req.spinZ = random_float() * 80.0f - 40.0f;
     req.life = 100;
-    req.gravity = func_150ADA68() * -1.7520001f - 0.837f;
+    req.gravity = random_float() * -1.7520001f - 0.837f;
     req.scale[0] = 1.0f;
-    size = func_150ADA68() * 72.5f + 29.800001f;
+    size = random_float() * 72.5f + 29.800001f;
     req.sprite = 0x1C;
     req.u58 = 0;
     req.scale[2] = size;
@@ -449,7 +449,7 @@ s32 func_150B3668(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 cx, f32 cy, f
     req.pos[1] = py;
     req.pos[2] = pz;
     req.scale[1] = 0.2f;
-    speed = func_150ADA68() * speedRange + minSpeed;
+    speed = random_float() * speedRange + minSpeed;
     yaw = angle0 + (s32) (xzAngle * sinA * r * arg9) - 0x40;
     cosYaw = angle_byte_cos((yaw - 0x40) & 0xFF);
     sinYaw = angle_byte_cos(yaw & 0xFF);
@@ -459,12 +459,12 @@ s32 func_150B3668(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 cx, f32 cy, f
     req.vel[0] = horiz * cosYaw;
     req.vel[1] = -speed * cosPitch;
     req.vel[2] = horiz * sinYaw;
-    req.spinX = func_150ADA68() * 4.0f - 2.0f;
+    req.spinX = random_float() * 4.0f - 2.0f;
     req.spinY = 0.0f;
-    req.spinZ = func_150ADA68() * 4.0f - 2.0f;
+    req.spinZ = random_float() * 4.0f - 2.0f;
     req.life = life + 0x20;
-    req.gravity = func_150ADA68() * gravRange + minGrav;
-    size = func_150ADA68() * scaleRange + minScale;
+    req.gravity = random_float() * gravRange + minGrav;
+    size = random_float() * scaleRange + minScale;
     req.scale[2] = size;
     req.sprite = 0x1C;
     req.u58 = 0;
@@ -611,8 +611,8 @@ s32 func_150B3CA8(u8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
     colours[1] = D_80088AA0[1];
     colours[2] = D_80088AA0[2];
     rec[0x20] = 4;
-    size = func_150ADA68() * 50.0f + 50.0f;
-    splash.colour = colours[(u32)func_150ADA20() % 3];
+    size = random_float() * 50.0f + 50.0f;
+    splash.colour = colours[(u32)random_int() % 3];
     splash.u8_ = 0;
     splash.uC = 0;
     splash.kind = 0x11;
@@ -624,9 +624,9 @@ s32 func_150B3CA8(u8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
     splash.u15 = 0xFF;
     splash.flags = 0x30002;
     splash.alpha1 = rec[0x1A];
-    r1 = func_150ADA20();
-    r2 = func_150ADA20();
-    r3 = func_150ADA20();
+    r1 = random_int();
+    r2 = random_int();
+    r3 = random_int();
     sprite_fx_spawn_cam((s32)&splash, 1, 0, arg5, *(f32 *)(pts + (s8)obj[0x2D] * 20), y,
                   *(f32 *)(pts + (s8)obj[0x2D] * 20 + 8), size, size, r1 & 0xFF, (r3 & 1) + (r2 & 1), 0, obj[0xC],
                   obj[1]);
@@ -654,7 +654,7 @@ s32 func_150B3CA8(u8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
     shape.width = *(f32 *)(rec + 0x0) * 0.75f;
     shape.v10 = *(f32 *)(rec + 0x10);
     shape.v4 = *(f32 *)(rec + 0x4);
-    shape.length = func_150ADA68() * 15.0f + 15.0f;
+    shape.length = random_float() * 15.0f + 15.0f;
     shape.vC = *(f32 *)(rec + 0xC);
     func_15148310((u8 *)&at, (s32)&shape, 0, 1, 7, 0, 0, 0, 0, 0, 0, (u8 *)&style, 0, obj[0xC], obj[1]);
     return 1;

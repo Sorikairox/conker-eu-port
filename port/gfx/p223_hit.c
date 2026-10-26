@@ -1,4 +1,4 @@
-/* P223 DIAGNOSTIC ?p223hit=N: knock-back check. Wraps func_1505C1E4 (object_receive_hit, game_83300.c; its callers are
+/* P223 DIAGNOSTIC ?p223hit=N: knock-back check. Wraps obj_receive_hit (object_receive_hit, game_83300.c; its callers are
  * in game_8FCB0.c, so --wrap sees them): logs the first N calls (then every 32nd) with the attacker / target records
  * (index into D_800CC2D0, id, uid), the target's reaction type (+0x239), the hit descriptor (kind, handler, damage,
  * push, xz / y speed), the result bits, and the target's speeds / angle / health / stun before and after. After a
@@ -25,12 +25,12 @@ static void st(const char *w, const unsigned char *o) {
              vbe_ld8(o + 0x104), vbe_ld8(o + 0x10B), vbe_ld8(o + 0x109));
 }
 
-int __real_func_1505C1E4(void *self, void *obj, void *descs, int idx, int slot, int hits, int mask);
-int __wrap_func_1505C1E4(void *self, void *obj, void *descs, int idx, int slot, int hits, int mask) {
+int __real_obj_receive_hit(void *self, void *obj, void *descs, int idx, int slot, int hits, int mask);
+int __wrap_obj_receive_hit(void *self, void *obj, void *descs, int idx, int slot, int hits, int mask) {
     static unsigned n;
     const unsigned char *s = self, *o = obj, *d = descs ? (const unsigned char *)descs + idx * 0x28 : 0;
     int r, lg;
-    if (on() <= 0) return __real_func_1505C1E4(self, obj, descs, idx, slot, hits, mask);
+    if (on() <= 0) return __real_obj_receive_hit(self, obj, descs, idx, slot, hits, mask);
     n++;
     lg = n <= (unsigned)on() || n % 32 == 0;
     if (lg) {
@@ -49,7 +49,7 @@ int __wrap_func_1505C1E4(void *self, void *obj, void *descs, int idx, int slot, 
         }
         if (o) st("before", o);
     }
-    r = __real_func_1505C1E4(self, obj, descs, idx, slot, hits, mask);
+    r = __real_obj_receive_hit(self, obj, descs, idx, slot, hits, mask);
     if (lg) {
         port_log("[p223hit]   -> %X (%s)\n", (unsigned)r, r != hits ? "landed" : "no change");
         if (o) st("after ", o);

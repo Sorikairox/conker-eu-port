@@ -7,7 +7,7 @@ extern SlotEnt D_800D3430[];
 
 
 #ifdef NON_MATCHING
-// slots_reset: clears the 10 slots of D_800D3430 (inactive, count and timer 0); level start (func_150177F8).
+// slots_reset: clears the 10 slots of D_800D3430 (inactive, count and timer 0); level start (level_state_init).
 void func_150A00F0(void) {
     SlotEnt *v;
 

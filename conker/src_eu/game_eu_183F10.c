@@ -408,21 +408,21 @@ void func_151570C4(u8 *obj) {
     if (*(s16 *)(obj + 0x2C) >= 0) {
         return;
     }
-    group = func_150ADA20() % 3U;
-    pt = D_800DCE60[group][func_150ADA20() % 10U];
+    group = random_int() % 3U;
+    pt = D_800DCE60[group][random_int() % 10U];
     if (pt[0] != 0.0f && pt[1] != 0.0f && pt[2] != 0.0f) {
         func_15157294((u8 *) pt, obj[0xC]);
         flash.unk0 = 3;
         flash.unk1 = -1;
-        flash.unk2 = func_150ADA20() % 11U + 5;
+        flash.unk2 = random_int() % 11U + 5;
         flash.unk4 = 0;
         at.unk0 = pt[0];
         at.unk4 = pt[1];
         at.unk8 = pt[2];
-        light_create_with_ctrl(&flash, &at, func_150ADA20() % 156U + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, obj[0xC], obj[1]);
+        light_create_with_ctrl(&flash, &at, random_int() % 156U + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, obj[0xC], obj[1]);
     }
     timer = (s16 *)(obj + 0x28);
-    timer[2] = func_150ADA20() % (u32) (timer[1] + 1) + timer[0];
+    timer[2] = random_int() % (u32) (timer[1] + 1) + timer[0];
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_151570C4.s")
@@ -528,25 +528,25 @@ void func_15157294(u8 *arg0, u8 arg1)
     sp.u60 = 0x1A01;
     sp.u64 = 0x200005;
     sp.u68 = 0;
-    sp.u6C = (func_150ADA20() % 3U) + 7;
+    sp.u6C = (random_int() % 3U) + 7;
     sp.u70 = 0;
     sp.u74 = 0;
     sp.u78 = 0xFF;
     sp.u79 = 0xFF;
     sp.u7A = 0xFF;
     sp.u7B = 0xFF;
-    sp.u7F = (func_150ADA20() % 1U) + 0xFF;
+    sp.u7F = (random_int() % 1U) + 0xFF;
     sp.u80 = 0xFF;
-    sp.u84 = sp.u88 = func_150ADA68() * 150.0f + 196.0f;
+    sp.u84 = sp.u88 = random_float() * 150.0f + 196.0f;
     sp.u8C = 4;
     sp.u8E = 0x3F;
     sp.u90 = 0x16;
     sp.u98 = 0xE01;
     sp.u94 = 1.25f;
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u98 |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (random_int() & 1) {
         sp.u98 |= 0x80;
     }
     sp.u9C = 4;

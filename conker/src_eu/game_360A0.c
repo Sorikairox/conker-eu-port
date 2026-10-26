@@ -9,7 +9,8 @@ void func_15143874(s16, f32, f32 *, f32 *);
 void func_15189E70(void *, u8);
 /* P18: D_80095B48/4C/50 are rodata f32 words (variables.h: u8[]); the body used to define them as u8[4] and read one byte */
 
-s32 func_15008BF0(u8 *arg0) {
+/* was func_15008BF0 */
+s32 area_drift_emitter_spawn(u8 *arg0) {
     struct {
         f32 u20;
         f32 u24;
@@ -69,10 +70,10 @@ s32 func_15008BF0(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_360A0/func_15008BF0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_360A0/area_drift_emitter_spawn.s")
 #endif
 // NON-MATCHING: absolute mess
-// s32 func_15008BF0(struct110 *arg0) {
+// s32 area_drift_emitter_spawn(struct110 *arg0) {
 //     struct109 tmp;
 //     f32 foo;
 //     f32 bar = D_80095B40;

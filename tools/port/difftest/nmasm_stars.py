@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""P291: whole-function harness for the hand-asm star field func_150FBA40 (game_eu_129250) vs its NON_MATCHING C.
+"""P291: whole-function harness for the hand-asm star field star_field_draw (game_eu_129250) vs its NON_MATCHING C.
 The asm builds 64-bit display-list words (dsll32 / daddu / sd), so difftest's MIPS32 Unicorn cannot run it.
 Reference: the VR4300 interpreter of nmasm_vis5858.py on build/conker.eu.elf; candidate: the NM C in
 build_nm/conker.eu.elf (Unicorn). Compared: v0 and all RDRAM except the stack page.
@@ -101,7 +101,7 @@ def main():
         for who in ('ref', 'cand'):
             mem = bytearray(mem0)
             try:
-                v0 = ref.run(mem, args, entry='func_150FBA40', maxi=6000000) if who == 'ref' else cand.run(mem, args, entry='func_150FBA40')
+                v0 = ref.run(mem, args, entry='star_field_draw', maxi=6000000) if who == 'ref' else cand.run(mem, args, entry='star_field_draw')
             except RuntimeError as e:
                 if 'range' in str(e) and who == 'ref': v0 = None
                 else: raise

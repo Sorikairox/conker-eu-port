@@ -283,9 +283,9 @@ s32 func_151C0894(u8 *arg0, u8 *arg1, s32 arg2, u8 **arg3) {
 }
 
 #ifdef NON_MATCHING
-void func_150E856C(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
+void fx_scorch_decal_spawn(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
 #else
-s32 func_150E856C(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
+s32 fx_scorch_decal_spawn(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
 #endif
 
 void func_151C0910(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
@@ -293,9 +293,9 @@ void func_151C0910(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     u32 sp40;
     f32 sp3C;
 
-    sp3C = func_150ADA68();
-    sp40 = func_150ADA20();
-    func_150E856C((sp3C * 75.0f) + 75.0f, ((sp40 % 56U) + 0xC8) & 0xFF, arg0, arg1, (func_150ADA20() % 205U) + 0x12B, 1, 1, 0, 0, 0, (s32) arg2, 0);
+    sp3C = random_float();
+    sp40 = random_int();
+    fx_scorch_decal_spawn((sp3C * 75.0f) + 75.0f, ((sp40 % 56U) + 0xC8) & 0xFF, arg0, arg1, (random_int() % 205U) + 0x12B, 1, 1, 0, 0, 0, (s32) arg2, 0);
 }
 
 void func_151C09C8(u8 *arg0, u8 arg1, s32 arg2) {
@@ -304,20 +304,20 @@ void func_151C09C8(u8 *arg0, u8 arg1, s32 arg2) {
 
     sp48[0] = 3;
     sp48[1] = -1;
-    *(s16 *)(sp48 + 2) = (func_150ADA20() % 11U) + 0x14;
+    *(s16 *)(sp48 + 2) = (random_int() % 11U) + 0x14;
     sp48[4] = 0;
     sp3C[0] = *(f32 *)(arg0 + 0);
     sp3C[1] = *(f32 *)(arg0 + 4);
     sp3C[2] = *(f32 *)(arg0 + 8);
-    light_create_with_ctrl(sp48, sp3C, (func_150ADA20() % 121U) + 0x3C, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, arg1, arg2);
+    light_create_with_ctrl(sp48, sp3C, (random_int() % 121U) + 0x3C, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, arg1, arg2);
 }
 
 void func_151C0AA8(u8 *arg0, u8 arg1, s32 arg2) {
     f32 temp_f12;
     f32 sp28;
     s32 temp_t7;
-    sp28 = func_150ADA68();
-    temp_t7 = (func_150ADA20() % 56U) + 0xC8;
+    sp28 = random_float();
+    temp_t7 = (random_int() % 56U) + 0xC8;
     temp_f12 = sp28 * 4.0f + 14.0f;
 #ifdef NON_MATCHING
     func_15154728(arg0, temp_f12, 1.1820899f, (f32) (u32) temp_t7, 0.0f, arg1, arg2); /* P95: float literal (asm passes the bits 0x3F974EB9) */
@@ -336,10 +336,10 @@ void func_151C0BA0(struct17 *arg0, u8 arg1, s32 arg2) {
     func_151D5404(arg0, 800.0f, 2000.0f, 0.0005f, 0xF, 0x14, (s32) arg1, arg2);
 }
 
-void func_150E892C(s32, s16, u8, s32);
+void fx_debris_emitter_spawn(s32, s16, u8, s32);
 
 void func_151C0BF4(s32 arg0, u8 arg1, s32 arg2) {
-    func_150E892C(arg0, (s16) ((func_150ADA20() % 62U) + 0x78), arg1, arg2);
+    fx_debris_emitter_spawn(arg0, (s16) ((random_int() % 62U) + 0x78), arg1, arg2);
 }
 
 #ifdef NON_MATCHING
@@ -357,11 +357,11 @@ s32 func_151B8C18(u8 *arg0, u8 arg1, s32 arg2);
 u16 func_1000FA64(u16, s16, s16, s16, s32, u16, s16, s32, void *, s32, s32, s32);
 s32 func_151C16BC(u8 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
 void func_15145EA4(f32 **, f32 **, void *, s32);
-s32 func_151030B8(struct127 *, u8, u8 *, s32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
-void func_151037D4(s16, u8, f32, u8 *, u8, u8, s32);
+s32 attached_particle_spawn(struct127 *, u8, u8 *, s32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
+void flip_sprite_particle_spawn(s16, u8, f32, u8 *, u8, u8, s32);
 void func_151C1E10(u8 *, u8, s32);
-f32 func_150ADA68(void);
-s32 func_150ADA20(void);
+f32 random_float(void);
+s32 random_int(void);
 f32 sinf(f32);
 f32 cosf(f32);
 extern f32 D_800AAD10[3]; /* muzzle flash points in the gun model's space: {3, 125, 35} */
@@ -547,7 +547,7 @@ s32 func_151C0698(struct127 *obj, struct127 *target, s32 *arg2, u8 arg3, u8 arg4
         B(hdr, 4) = 0;
         W(p, 0x80) = (s32)light_create_with_ctrl((Header *)hdr, (Header2 *)hpos, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg4, arg5);
         W(p, 0x84) = func_151B8EB8(particle);
-        r = func_150ADA20();
+        r = random_int();
         H(p, 0x90) = func_1000FA64((u32)r % 3 + 0x2EE, (s16)(s32)pos[0], (s16)(s32)pos[1], (s16)(s32)pos[2], 0x7530,
                                    0x3E8, 0x1F4, (s32)func_151C16BC, particle, 0, 4, 0);
         W(p, 0x88) = (s32)func_151B89B0(particle);
@@ -581,22 +581,22 @@ s32 func_151C0698(struct127 *obj, struct127 *target, s32 *arg2, u8 arg3, u8 arg4
         c1[0] = D_800AAD10[0]; c1[1] = D_800AAD10[1]; c1[2] = D_800AAD10[2];
         c2[0] = D_800AAD1C[0]; c2[1] = D_800AAD1C[1]; c2[2] = D_800AAD1C[2];
         c3[0] = D_800AAD28[0]; c3[1] = D_800AAD28[1]; c3[2] = D_800AAD28[2];
-        size[0] = func_150ADA68() * 10.0f + 25.0f;
-        size[1] = func_150ADA68() * 1.0090001f + 2.013f; /* D_800AAD90 (0x3F8126EA), D_800AAD94 */
+        size[0] = random_float() * 10.0f + 25.0f;
+        size[1] = random_float() * 1.0090001f + 2.013f; /* D_800AAD90 (0x3F8126EA), D_800AAD94 */
         in[0] = c1;
         in[1] = c2;
         out[0] = w1;
         out[1] = w2;
         func_15145EA4(in, out, (u8 *)W(obj, 0x1D4) + 0x240, 2);
-        r1 = func_150ADA20();
-        r2 = func_150ADA20();
-        rf = func_150ADA68();
-        func_151030B8(obj, 9, (u8 *)c1, (s32 *)c3, size, (u32)r1 % 3 + 8, (u32)r2 % 0x38 + 0xC8,
+        r1 = random_int();
+        r2 = random_int();
+        rf = random_float();
+        attached_particle_spawn(obj, 9, (u8 *)c1, (s32 *)c3, size, (u32)r1 % 3 + 8, (u32)r2 % 0x38 + 0xC8,
                       rf * 204.0f + 601.0f /* D_800AAD98 */, w1, 0xFF, 0, -1, arg4, arg5);
-        r1 = func_150ADA20();
-        r2 = func_150ADA20();
-        rf = func_150ADA68();
-        func_151037D4((u32)r1 % 3 + 8, (u32)r2 % 0x38 + 0xC8, rf * 204.0f + 601.0f /* D_800AAD9C */, (u8 *)w2, 0xFF,
+        r1 = random_int();
+        r2 = random_int();
+        rf = random_float();
+        flip_sprite_particle_spawn((u32)r1 % 3 + 8, (u32)r2 % 0x38 + 0xC8, rf * 204.0f + 601.0f /* D_800AAD9C */, (u8 *)w2, 0xFF,
                       arg4, arg5);
         func_151C1E10((u8 *)w2, arg4, arg5);
     }
@@ -844,12 +844,12 @@ void func_151C1E10(u8 *arg0, u8 arg1, s32 arg2) {
 
     sp48[0] = 3;
     sp48[1] = -1;
-    *(s16 *)(sp48 + 2) = (func_150ADA20() % 5U) + 5;
+    *(s16 *)(sp48 + 2) = (random_int() % 5U) + 5;
     sp48[4] = 0;
     sp3C[0] = *(f32 *)(arg0 + 0);
     sp3C[1] = *(f32 *)(arg0 + 4);
     sp3C[2] = *(f32 *)(arg0 + 8);
-    light_create_with_ctrl(sp48, sp3C, (func_150ADA20() % 11U) + 5, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, arg1, arg2);
+    light_create_with_ctrl(sp48, sp3C, (random_int() % 11U) + 5, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, arg1, arg2);
 }
 
 s32 func_151C0894();
@@ -1034,9 +1034,9 @@ void func_151C1FB8(u8 *arg0) {
     s8 sp18[8];
     if (*(s32 *)(arg0 + 0x318) != 0) {
         sp18[0] = 1;
-        *(s16 *)(sp18 + 2) = (func_150ADA20() & 7) + 0xD;
+        *(s16 *)(sp18 + 2) = (random_int() & 7) + 0xD;
         sp18[5] = 1 << (*(u8 **)(arg0 + 0x318))[0x23D];
-        sp18[4] = ((u32)func_150ADA20() % 3) + 6;
+        sp18[4] = ((u32)random_int() % 3) + 6;
         sp18[6] = -1;
         func_151D8E18(sp18, 0, 0xFF, 1);
     }
