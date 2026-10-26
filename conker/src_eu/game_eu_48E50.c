@@ -10,7 +10,8 @@ extern u8 D_80096CD0[];   /* per colour group 1..5: number of key colours (asm r
 // D_800BE9C0). Each vertex's group ((u16 +6 >> 8) & 0x7F, 1..5; 0 = keep) picks a key colour ramp; the group's
 // value t in 0..1 (vals[group - 1] when perGroup, else vals[0]) is linearly interpolated between the two key
 // colours around it and written to the vertex colour (+0xC..+0xE). Groups 6 and up are skipped.
-void func_eu_1501B640(struct127 *obj, f32 *vals, s32 perGroup) {
+/* was func_eu_1501B640 */
+void obj_vertex_colours_blend(struct127 *obj, f32 *vals, s32 perGroup) {
     u8 *o = (u8 *) obj;
     u8 *vtx;
     u8 *c0;
@@ -59,5 +60,5 @@ void func_eu_1501B640(struct127 *obj, f32 *vals, s32 perGroup) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_48E50/func_eu_1501B640.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_48E50/obj_vertex_colours_blend.s")
 #endif

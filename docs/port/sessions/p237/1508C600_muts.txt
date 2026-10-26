@@ -22,8 +22,8 @@ s/            yb = \*(f32 \*) (rb + 0x18) + 40.0f;/            yb = *(f32 *) (ra
 s/        dy = yb - ya;/        dy = ya - yb;/ % ff_clear
 s/        dx = xb - xa;/        dx = xb + xa;/ % ff_clear
 s/        dist = sqrtf(dx \* dx + dy \* dy + dz \* dz);/        dist = sqrtf(dx * dx + dz * dz);/ % ff_hit60
-s/        if (func_150ACEA0(xa, ya, za, dx, dy, dz, 0, 0, \&h0, \&h1, \&h2, \&hit, 0, 0, 0.0f) == 0 || dist < hit) {/        if (func_150ACEA0(xa, ya, za, dx, dy, dz, 0, 0, \&h0, \&h1, \&h2, \&hit, 0, 0, 0.0f) == 0 || dist > hit) {/ % ff_hitfar ff_hitnear
-s/        if (func_150ACEA0(xa, ya, za, dx, dy, dz, 0, 0, \&h0, \&h1, \&h2, \&hit, 0, 0, 0.0f) == 0 || dist < hit) {/        if (func_150ACEA0(xa, ya, za, dx, dy, dz, 0, 1, \&h0, \&h1, \&h2, \&hit, 0, 0, 0.0f) == 0 || dist < hit) {/ % ff_clear
+s/        if (collision_ray_cast(xa, ya, za, dx, dy, dz, 0, 0, \&h0, \&h1, \&h2, \&hit, 0, 0, 0.0f) == 0 || dist < hit) {/        if (collision_ray_cast(xa, ya, za, dx, dy, dz, 0, 0, \&h0, \&h1, \&h2, \&hit, 0, 0, 0.0f) == 0 || dist > hit) {/ % ff_hitfar ff_hitnear
+s/        if (collision_ray_cast(xa, ya, za, dx, dy, dz, 0, 0, \&h0, \&h1, \&h2, \&hit, 0, 0, 0.0f) == 0 || dist < hit) {/        if (collision_ray_cast(xa, ya, za, dx, dy, dz, 0, 1, \&h0, \&h1, \&h2, \&hit, 0, 0, 0.0f) == 0 || dist < hit) {/ % ff_clear
 s/            if (0.0f < rail_wall_hit(xa, ya, za, dx, dz)) {/            if (0.0f <= rail_wall_hit(xa, ya, za, dx, dz)) {/ % ff_ab
 s/            if (0.0f < rail_wall_hit(xa, ya, za, dx, dz)) {/            if (0.0f < rail_wall_hit(xa, ya, za, dx, dy)) {/ % ff_clear
 s/            seen = 1;/            seen = 0;/ % ff_clear

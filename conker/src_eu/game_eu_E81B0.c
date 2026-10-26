@@ -16,7 +16,7 @@ void crumble_emitter_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
     tmp.unk8 = 0.0f;
-    temp_v0 = func_15149130((random_int() % 9U) + 15, -1, 0x52, -1, 1, 0x3F, 0xC, arg1, arg2);
+    temp_v0 = effect_node_create((random_int() % 9U) + 15, -1, 0x52, -1, 1, 0x3F, 0xC, arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0xC);
     }
@@ -101,7 +101,7 @@ void crumble_emitter_update(u8 *arg0) {
 #endif
 /* was func_150BADD0 */
 void crumble_emitter_on_message(u8 *arg0, s32 arg1, u8 arg2) {
-    func_15149514(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
+    effect_node_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
 s32 hitinfo_from_obj_floor(s32, u8 *);

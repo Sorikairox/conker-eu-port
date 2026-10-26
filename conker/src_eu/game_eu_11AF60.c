@@ -33,8 +33,8 @@ f32 tank_yaw_offset_to_obj(u8 *arg0, u8 *arg1) {
 // time * horizontal speed; 5000 when the shell never comes down at a positive time), or, when the target is out of
 // reach (no real root), 1000 * (the elevation needed - pitch) in degrees. Callers multiply the result by 0.001.
 void mtxf_transform_point(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-f32 func_150484A0(f32, f32);
-f32 func_15048408(f32);
+f32 math_atan2f(f32, f32);
+f32 math_asinf_lut(f32);
 /* was func_150ED818 */
 f32 tank_shell_aim_error(u8 *obj, f32 pitch, f32 x, f32 y, f32 z, f32 radius) {
     f32 mf[4][4];
@@ -50,7 +50,7 @@ f32 tank_shell_aim_error(u8 *obj, f32 pitch, f32 x, f32 y, f32 z, f32 radius) {
         ox -= mf[3][0];
         oz -= mf[3][2];
         oy -= mf[3][1];
-        a = func_150484A0(oy, sqrtf(ox * ox + oz * oz)) * 57.295776f;
+        a = math_atan2f(oy, sqrtf(ox * ox + oz * oz)) * 57.295776f;
         if (a > 180.0f) {
             a -= 360.0f;
         }
@@ -88,7 +88,7 @@ f32 tank_shell_aim_error(u8 *obj, f32 pitch, f32 x, f32 y, f32 z, f32 radius) {
             result = dist - t * vx;
         }
     } else {
-        result = (func_15048408(sqrtf(-2.0f * dy * -2.5f) * 0.0067453627f) * 57.295776f - pitch) * 1000.0f;
+        result = (math_asinf_lut(sqrtf(-2.0f * dy * -2.5f) * 0.0067453627f) * 57.295776f - pitch) * 1000.0f;
     }
     return result;
 }
@@ -163,7 +163,7 @@ void tank_set_track_speeds(u8 *arg0, s32 arg1, s32 arg2) {
 //    single-player squash / bounce on player +0x124), the track speeds (tank_set_track_speeds), the turret: auto-aim at
 //    object part +0x129 (with +0x12A lead) when the driver's part +0x84 is set, else (driven) D-pad yaw (flags
 //    bits 0 / 1), lock-on to the best target in a 35-degree cone (tank_yaw_offset_to_obj / angle_diff_signed_deg) or along the camera
-//    view (views D_800DBFF0, 0x9A0 bytes each; ray cast func_150ACEA0 and object test ray_sphere_intersect; the view object
+//    view (views D_800DBFF0, 0x9A0 bytes each; ray cast collision_ray_cast and object test ray_sphere_intersect; the view object
 //    +0x3D4 bit 0x40 of +0x128 = an object was hit). Pitch (part +0x1B8) is kept in -20..80 and yaw (+0x1BC) in
 //    0..360; +0x2E4 / +0x2E6 = yaw * 50 / -pitch * 50.
 #define TANK_PART(o) ((u8 *) (o)->unk31C)
@@ -185,8 +185,8 @@ f32 obj_carry_release(struct127 *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 obj_carry_pickup(struct127 *, f32, f32, s32, s32);
 f32 obj_dist_xz(struct127 *, struct127 *);
 s32 char_fx_send_event(s32, s16, s32, s32);
-f32 func_150484A0(f32, f32);
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+f32 math_atan2f(f32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 s32 ray_sphere_intersect(struct17 *, struct17 *, struct17 *, f32, s32, s32, f32 *, f32 *);
 /* was func_150EDCC8 */
 void tank_update(struct127 *o) {
@@ -397,7 +397,7 @@ void tank_update(struct127 *o) {
             ry = sinf(ang);
             ry = cosf(*(f32 *) (ob + 0xC4) * 0.017453292f) * ry;
             cp = cosf(ang);
-            h = func_150484A0(ry * 1000.0f, cosf(*(f32 *) (ob + 0xB8) * 0.017453292f) * cp * 1000.0f);
+            h = math_atan2f(ry * 1000.0f, cosf(*(f32 *) (ob + 0xB8) * 0.017453292f) * cp * 1000.0f);
             lv = (f32) (s8) TANK_PART(o)[0x12A];
             sy = lv * 400.0f;
             TURRET_YAW(o) -= angle_diff_signed_deg(h * 57.295776f + lv * 10.0f, TURRET_YAW(o)) * 0.125f;
@@ -529,7 +529,7 @@ void tank_update(struct127 *o) {
                 dir[1] *= inv;
                 dir[2] *= inv;
                 dist = 100000.0f;
-                res = func_150ACEA0(*(f32 *) (vw + 0x2F8), *(f32 *) (vw + 0x2FC), *(f32 *) (vw + 0x300), dir[0],
+                res = collision_ray_cast(*(f32 *) (vw + 0x2F8), *(f32 *) (vw + 0x2FC), *(f32 *) (vw + 0x300), dir[0],
                                     dir[1], dir[2], 0, NULL, &hit[0], &hit[1], &hit[2], &dist, 0, 0, 0.0f);
                 if (res != 0) {
                     res = 1;

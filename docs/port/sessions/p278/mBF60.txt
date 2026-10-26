@@ -16,9 +16,9 @@
 \#^        spark\.u50 = 0;#s/0;/1;/
 \#^        spark\.u55 = #s/0xFF/0xFE/
 \#^        emit_sparks_by_angles_b(#s/flag/0/
-\#^        func_151491F4(#s/0x1E/0x1F/
-\#^        func_151491F4(#s/, flag, 0)/, 0, 0)/
-\#^        func_151491F4(#s/-1, 0, 1/-1, 0, 0/
+\#^        effect_node_create_nodraw(#s/0x1E/0x1F/
+\#^        effect_node_create_nodraw(#s/, flag, 0)/, 0, 0)/
+\#^        effect_node_create_nodraw(#s/-1, 0, 1/-1, 0, 0/
 \#^        burst\.z = #s/-1708\.0238f/-1708.0f/
 \#^        burst\.u0C = 6#s/6/7/
 \#^        burst\.u18 = #s/1285/1284/

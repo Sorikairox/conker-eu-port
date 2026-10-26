@@ -22,7 +22,8 @@ extern s32  D_800E1238;
 extern void *D_8002BA44;
 
 
-void func_151F2960(s32 arg0, s32 arg1) {
+/* was func_151F2960 */
+void mp3_stream_start(s32 arg0, s32 arg1) {
     if (D_800E0DFC == 0) {
         return;
     }
@@ -71,13 +72,15 @@ void func_151F2960(s32 arg0, s32 arg1) {
     D_800E0E04 = 5;
 }
 
-void func_151F2BA8(void) {
+/* was func_151F2BA8 */
+void mp3_stream_stop(void) {
     u32 mask = osSetIntMask(1);
     D_800E0E04 = 3;
     osSetIntMask(mask);
 }
 
-void func_151F2BE8(void) {
+/* was func_151F2BE8 */
+void mp3_stream_pause(void) {
     u32 mask = osSetIntMask(1);
     if (D_800E0E04 == 5) {
         D_800E0E04 = 6;
@@ -87,7 +90,8 @@ void func_151F2BE8(void) {
     osSetIntMask(mask);
 }
 
-void func_151F2C4C(void) {
+/* was func_151F2C4C */
+void mp3_stream_resume(void) {
     u32 mask = osSetIntMask(1);
     if (D_800E0E04 == 2) {
         D_800E0E18 = 5;
@@ -99,7 +103,8 @@ void func_151F2C4C(void) {
     osSetIntMask(mask);
 }
 
-s32 func_151F2CDC(void) {
+/* was func_151F2CDC */
+s32 mp3_stream_get_state(void) {
     s32 ret = 0;
     u32 mask = osSetIntMask(1);
     if ((D_800E0E04 == 1) || (D_800E0E04 == 5) || (D_800E0E04 == 6) || (D_800E0E04 == 7) || (D_800E0E04 == 2)) {
@@ -109,7 +114,8 @@ s32 func_151F2CDC(void) {
     return ret;
 }
 
-void func_151F2D6C(s32 arg0, s32 arg1) {
+/* was func_151F2D6C */
+void mp3_stream_set_volume(s32 arg0, s32 arg1) {
     u32 mask = osSetIntMask(1);
     if (arg0 < 0) {
         D_800E1238 = 0;
@@ -122,7 +128,8 @@ void func_151F2D6C(s32 arg0, s32 arg1) {
     osSetIntMask(mask);
 }
 
-void func_151F2DFC(s32 arg0, s32 arg1) {
+/* was func_151F2DFC */
+void mp3_stream_set_pan(s32 arg0, s32 arg1) {
     if (arg0 >= 0x80) {
         arg0 = (u16)0x7F;
     } else {
@@ -136,7 +143,8 @@ void func_151F2DFC(s32 arg0, s32 arg1) {
     }
 }
 
-void func_151F2E4C(s32 arg0, s32 arg1) {
+/* was func_151F2E4C */
+void mp3_stream_set_fx(s32 arg0, s32 arg1) {
     D_800E0DB2 = arg0;
     D_800E0DB0 = arg1;
     if (D_800E0DD8 == 0) {
@@ -174,19 +182,20 @@ extern u8 D_800E1249;
 extern s16 D_8002BF60[];
 s16 _getRate(f32 vol, f32 tgt, s32 count, u16 *ratel);
 #ifdef NON_MATCHING
-void func_1001CF38(void *, f32); /* P95: f32 parameter */
+void n_fx_lowpass_update_coefs(void *, f32); /* P95: f32 parameter */
 #else
-void func_1001CF38(void *, s32);
+void n_fx_lowpass_update_coefs(void *, s32);
 #endif
 s32 mp3main_init(s32, s32, s32);
 s32 mp3main_decode_next_frame(s32, s16 **, s32 *);
-void func_151F3D78(void);
-void func_151F39E4();
+void mp3_stream_prefetch(void);
+void mp3_stream_update_vol_pan();
 
 // One block-scoped Acmd temp per command (each takes its own -g stack slot, like the libaudio a* macros).
 #define CMD(p, a, b) { Acmd *_a = (p)++; _a->words.w0 = (a); _a->words.w1 = (b); }
 
-s32 func_151F2E88(s32 count, Acmd **cmdp) {
+/* was func_151F2E88 */
+s32 mp3_stream_synth_pull(s32 count, Acmd **cmdp) {
     s32 i;
     s32 diff;
     s32 n;
@@ -211,14 +220,14 @@ s32 func_151F2E88(s32 count, Acmd **cmdp) {
         }
     }
     if (D_800E0E04 == 5) {
-        func_151F3D78();
+        mp3_stream_prefetch();
         if (D_800E0E18 == 0) {
             D_800E11B4 = mp3main_init(0, D_800E0DFC, D_800E0DE0);
             if (D_800E11B4 == 0) {
                 D_800E0DE4 = 0;
                 D_800E0E10 = 0;
                 D_800E0E18 = 5;
-                func_151F3D78();
+                mp3_stream_prefetch();
                 D_800E0E04 = 5;
                 return 0;
             } else {
@@ -236,7 +245,7 @@ s32 func_151F2E88(s32 count, Acmd **cmdp) {
         }
     }
     if (D_800E0E04 == 7) {
-        func_151F3D78();
+        mp3_stream_prefetch();
         if (D_800E0E18 == 0) {
             D_800E0E04 = 1;
         } else {
@@ -265,7 +274,7 @@ s32 func_151F2E88(s32 count, Acmd **cmdp) {
             } else {
             }
         }
-        func_151F3D78();
+        mp3_stream_prefetch();
         if (D_800E1249 == 0) {
             outL = 0;
         }
@@ -288,7 +297,7 @@ s32 func_151F2E88(s32 count, Acmd **cmdp) {
             }
             D_800E1220 += count;
         }
-        func_151F39E4(&D_800E0D80);
+        mp3_stream_update_vol_pan(&D_800E0D80);
         if (D_800E1249 == 0) {
             CMD(*cmdp, 0x020004E0, 0x2E0);
             CMD(*cmdp, 0x020007C0, 0x2E0);
@@ -296,9 +305,9 @@ s32 func_151F2E88(s32 count, Acmd **cmdp) {
                 if (D_800E0DB2 > 0) {
                     if (D_800E0DD8 != 0) {
 #ifdef NON_MATCHING
-                        func_1001CF38((u8 *)&D_800E0D80 + 0x30, 22020.0f); /* P95: float literal (asm passes the bits 0x46AC0800) */
+                        n_fx_lowpass_update_coefs((u8 *)&D_800E0D80 + 0x30, 22020.0f); /* P95: float literal (asm passes the bits 0x46AC0800) */
 #else
-                        func_1001CF38((u8 *)&D_800E0D80 + 0x30, 0x46AC0800);
+                        n_fx_lowpass_update_coefs((u8 *)&D_800E0D80 + 0x30, 0x46AC0800);
 #endif
                     }
                     CMD(*cmdp, 0x0B000020, osVirtualToPhysical((u8 *)&D_800E0D80 + 0x38) & 0xFFFFFF);
@@ -375,9 +384,10 @@ extern s16 D_8002BF60[]; // eqpower
 extern u8 D_800428C1;
 extern u8 D_800428C2;
 s16 _getVol(s16 ivol, s32 samples, s16 ratem, u16 ratel);
-void func_151F2BA8(void);
+void mp3_stream_stop(void);
 
-void func_151F39E4(struct_151F39E4 *arg0) {
+/* was func_151F39E4 */
+void mp3_stream_update_vol_pan(struct_151F39E4 *arg0) {
     if ((arg0->volume != arg0->unk88) || (arg0->pan != arg0->unk94)) {
         if (arg0->delta >= arg0->segEnd) {
             arg0->ltgt = (D_8002BF60[arg0->pan] * arg0->volume) >> 15;
@@ -397,7 +407,7 @@ void func_151F39E4(struct_151F39E4 *arg0) {
         }
         arg0->volume = arg0->unk88;
         if ((arg0->volume == 0) && (arg0->unk90 != 0)) {
-            func_151F2BA8();
+            mp3_stream_stop();
         }
         if (arg0->pan != arg0->unk94) {
             if (D_800428C2 != 0) {
@@ -414,15 +424,18 @@ void func_151F39E4(struct_151F39E4 *arg0) {
     }
 }
 
-void func_151F3C1C(s32 arg0) {
+/* was func_151F3C1C */
+void mp3_stream_set_text_cb(s32 arg0) {
     D_800E0E00 = arg0;
 }
 
-void func_151F3C34(s32 arg0) {
+/* was func_151F3C34 */
+void mp3_stream_set_read_cb(s32 arg0) {
     D_800E0DFC = arg0;
 }
 
-s32 func_151F3C4C(s32 arg0, void *arg1, s32 arg2, s32 arg3) {
+/* was func_151F3C4C */
+s32 mp3_stream_rom_read(s32 arg0, void *arg1, s32 arg2, s32 arg3) {
     s32 sp1C;
     s32 (*dma)(s32, s32, s32);
 
@@ -444,7 +457,8 @@ s32 func_151F3C4C(s32 arg0, void *arg1, s32 arg2, s32 arg3) {
     return arg2;
 }
 
-void func_151F3D78(void) {
+/* was func_151F3D78 */
+void mp3_stream_prefetch(void) {
     s32 sp1C;
     void (*dma)(s32, s32, s32);
 

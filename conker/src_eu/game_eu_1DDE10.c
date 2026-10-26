@@ -275,11 +275,11 @@ block_9:
 s32 memcpy(s32, f32 *, s32);
 s32 obj_get_hit_kind(struct127 *);
 extern u8 D_800A43C6[];
-// object_link_effect_spawn: spawns a type 0x13 effect tied to obj (func_151491F4, 0x98-byte state copied to +0x28)
+// object_link_effect_spawn: spawns a type 0x13 effect tied to obj (effect_node_create_nodraw, 0x98-byte state copied to +0x28)
 // for the target's class: 4 without a target or for target types 0x53 / 0xA5, else obj_get_hit_kind(target);
 // class 0x63 or a class mode (D_800A43C6[class * 16]) of 2 spawns nothing. The state is {obj, obj[0x3B], zeros,
 // 0.0f, mode == 1}. life = span, or 300 (not fixed) when span is -1. Returns the effect or 0. The type 0x13
-// effects of obj are first cleared through func_151494E0({obj, obj[0x3B]}, 0x13).
+// effects of obj are first cleared through effect_nodes_broadcast({obj, obj[0x3B]}, 0x13).
 /* was func_151B09BC */
 s32 object_link_effect_spawn(u8 *obj, u8 *target, s16 span, u8 arg3, s32 arg4) {
     struct {
@@ -318,7 +318,7 @@ s32 object_link_effect_spawn(u8 *obj, u8 *target, s16 span, u8 arg3, s32 arg4) {
     state.single = (mode == 1) ? 1 : 0;
     key.obj = obj;
     key.id = obj[0x3B];
-    func_151494E0((s32)&key, 0x13);
+    effect_nodes_broadcast((s32)&key, 0x13);
     if (span == -1) {
         fixed = 0;
         life = 300;
@@ -332,7 +332,7 @@ s32 object_link_effect_spawn(u8 *obj, u8 *target, s16 span, u8 arg3, s32 arg4) {
         state.zero[i] = 0;
     }
     state.f90 = 0.0f;
-    part = (u8 *)func_151491F4(life, -1, 0x13, fixed, 0xF, 0x98, arg3, arg4);
+    part = (u8 *)effect_node_create_nodraw(life, -1, 0x13, fixed, 0xF, 0x98, arg3, arg4);
     if (part != NULL) {
         memcpy((s32)(part + 0x28), (f32 *)&state, 0x98);
     }
@@ -810,13 +810,13 @@ void character_sparks_handle_msg(struct102 *arg0, u8 *arg1, u8 arg2) {
 /* was func_151B2008 */
 void character_sparks_retire(void *arg0) {
     character_sparks_release(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_151B2034 */
 void character_sparks_free(void *arg0) {
     character_sparks_release(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 /* was func_151B2060 */
@@ -834,7 +834,7 @@ void bone_pair_drip_start(u8 *arg0) {
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
     tmp.unk8 = 0.0f;
-    temp_v0 = func_151491F4(0x3C, -1, 0x15, 1, 0x11, 0xC, 255, 1);
+    temp_v0 = effect_node_create_nodraw(0x3C, -1, 0x15, 1, 0x11, 0xC, 255, 1);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0xC);
     }

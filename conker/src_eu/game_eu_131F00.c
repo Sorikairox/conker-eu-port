@@ -58,7 +58,7 @@ block_11:
             sp30 = (*(u8 **)((u8 *)arg0 + 0x10));
             arg0->pad1A[0] = 1;
             D_800BEE2C = 1;
-            func_100176C4();
+            n_sndp_stop_all();
             sound_play_2d(0x5B2, 0x7FFFU, 0U, 0, 0U);
             sound_play_2d(0x5B2, 0x7FFFU, 0x7FU, -0x64, 0U);
             sound_play_2d(0x5B2, 0x7FFFU, 0U, 0, 0U);

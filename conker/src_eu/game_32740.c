@@ -88,7 +88,7 @@ s32 camera_pop_mode(struct108 *arg0, s32 arg1);
 void camera_apply_zoom_level(struct108 *arg0);
 void camera_calc_view_dir(struct108 *arg0);
 void camera_update_mode_index(struct108 *arg0);
-void func_15005A60(struct108 *arg0, s32 arg1);
+void camera_level_hook_dispatch(struct108 *arg0, s32 arg1);
 void camera_event_queue_clear(struct108 *arg0);
 void camera_pivot_slot_reset(struct108 *arg0, s32 arg1);
 void camera_shake_reset(struct108 *arg0);
@@ -105,7 +105,7 @@ extern s32 D_800898D4[];
 /* Initialise one per-player camera controller (0x9A0 bytes, D_800DBFF0[player]): clear it, reset the 21 camera
  * slots (camera_pop_mode, 999 timers), link it with the player's object record D_800CC2D0[player] (0x32C each,
  * record +0x318 = controller, controller +0x3D0 = record, +0x3D4 = record +0x31C), mode arg2 (camera_pivot_slot_reset /
- * func_15005A60), then the default distances / limits. */
+ * camera_level_hook_dispatch), then the default distances / limits. */
 /* was func_150054C4 */
 void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
     u8 *p = (u8 *)arg0;
@@ -168,7 +168,7 @@ void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
     camera_update_underwater_mode(arg0);
     CAM_F(0x674) = 1.0f;
     obj_place_at_start(*(void **)(p + 0x3D0), arg3, 0);
-    func_15005A60(arg0, arg2);
+    camera_level_hook_dispatch(arg0, arg2);
     CAM_W(0x2E0) = CAM_W(0x2BC);
     CAM_W(0x2E4) = CAM_W(0x2C0);
     CAM_W(0x2E8) = CAM_W(0x2C4);
@@ -271,7 +271,7 @@ void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 //     camera_update_underwater_mode(arg0);
 //     arg0->unk674 = 1.0f;
 //     func_15085430(arg0->unk3D0, arg3, 0);
-//     func_15005A60(arg0, arg2);
+//     camera_level_hook_dispatch(arg0, arg2);
 //     arg0->unk2E0 = arg0->unk2BC;
 //     arg0->unk364 = D_800959E8;
 //     arg0->unk2E8 = arg0->unk2C4;

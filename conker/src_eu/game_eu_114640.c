@@ -111,7 +111,7 @@ void arc_spark_spawn(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
                 sp.u78 = (*(s16 *)((u8 *)var_v0 + 8));
                 sp.u7A = (*(s16 *)((u8 *)var_v0 + 0xA));
                 sp.u7C = (*(u8 *)((u8 *)var_v0 + 0xC));
-                temp_v0 = func_151491F4((s16) (s32) ((random_float() * 70.0f) + 30.0f), -1, 0xF, 1U, 0xBU, 0x44, 0xFFU, 1);
+                temp_v0 = effect_node_create_nodraw((s16) (s32) ((random_float() * 70.0f) + 30.0f), -1, 0xF, 1U, 0xBU, 0x44, 0xFFU, 1);
                 if (temp_v0 != NULL) {
                     memcpy(((struct260 *)((u8 *)temp_v0 + 0x28)), &sp.u3C, 0x44);
                 }
@@ -257,20 +257,20 @@ void arc_wobble_init_random(s32 arg0, s32 arg1, u8 *arg2, u8 *arg3) {
     f32 temp_f16;
     f32 temp_f2;
 
-    (*(f32 *)arg3) = func_150484A0((*(f32 *)arg2), (*(f32 *)((u8 *)arg2 + 8)));
+    (*(f32 *)arg3) = math_atan2f((*(f32 *)arg2), (*(f32 *)((u8 *)arg2 + 8)));
     (*(f32 *)((u8 *)arg3 + 8)) = (f32) (random_float() * 0.09f);
     (*(f32 *)((u8 *)arg3 + 0x10)) = (f32) (random_float() * 6.2831855f);
     (*(f32 *)((u8 *)arg3 + 0x18)) = (f32) (random_float() * 0.5f);
     temp_f2 = (*(f32 *)arg2);
     temp_f16 = (*(f32 *)((u8 *)arg2 + 8));
-    (*(f32 *)((u8 *)arg3 + 4)) = (f32) (func_150484A0(sqrtf((temp_f2 * temp_f2) + (temp_f16 * temp_f16)), (*(f32 *)((u8 *)arg2 + 4))) - 1.5707964f);
+    (*(f32 *)((u8 *)arg3 + 4)) = (f32) (math_atan2f(sqrtf((temp_f2 * temp_f2) + (temp_f16 * temp_f16)), (*(f32 *)((u8 *)arg2 + 4))) - 1.5707964f);
     (*(f32 *)((u8 *)arg3 + 0xC)) = (f32) (random_float() * 0.07f);
     (*(f32 *)((u8 *)arg3 + 0x14)) = (f32) (random_float() * 6.2831855f);
     (*(f32 *)((u8 *)arg3 + 0x1C)) = (f32) (random_float() * 0.5f);
 }
 /* was func_150E7764 */
 void arc_wobble_init_fixed(s32 arg0, s32 arg1, u8 *arg2, u8 *arg3) {
-    (*(f32 *)arg3) = func_150484A0((*(f32 *)arg2), (*(f32 *)((u8 *)arg2 + 8)));
+    (*(f32 *)arg3) = math_atan2f((*(f32 *)arg2), (*(f32 *)((u8 *)arg2 + 8)));
     (*(f32 *)((u8 *)arg3 + 8)) = (f32) 0.47123894f;
     (*(f32 *)((u8 *)arg3 + 0x10)) = (f32) (random_float() * 6.2831855f);
     (*(f32 *)((u8 *)arg3 + 0x18)) = (f32) (random_float() * 0.2f);
@@ -504,7 +504,7 @@ f32 lagrange_cubic_w3(f32);
 extern s32 D_800BEE08;
 
 // spawn_random_curve_object: spawns a kind-0x12C object holding a random curve of `count` points (P151). Plays
-// sound +0x9A0 * D_800BEE08 of D_800DBFF0 and a 30..40 tick rumble/effect (rumble_request), then func_151491F4
+// sound +0x9A0 * D_800BEE08 of D_800DBFF0 and a 30..40 tick rumble/effect (rumble_request), then effect_node_create_nodraw
 // (group 0xC, count * 8 + 0x10 bytes, arg2 / arg3 passed on). The object gets {scale, 0, count, 0} at +0x28 and,
 // from +0x38, `count` (x, y) points of the cubic spline through four control points x = -146 / -50 / 50 / 146 with
 // random y in -80..80, sampled at t = -1 .. 2 (basis lagrange_cubic_w0 / AC0 / B04 / B44). Returns the object or
@@ -539,7 +539,7 @@ u8 *screen_lightning_curve_spawn(s16 count, f32 scale, u8 arg2, s32 arg3) {
     hdr.zero = 0.0f;
     hdr.count = count;
     hdr.pad = 0;
-    obj = (u8 *)func_151491F4(0x12C, -1, 0x10, 1, 0xC, count * 8 + 0x10, arg2, arg3);
+    obj = (u8 *)effect_node_create_nodraw(0x12C, -1, 0x10, 1, 0xC, count * 8 + 0x10, arg2, arg3);
     if (obj == NULL) {
         return NULL;
     }
@@ -804,7 +804,7 @@ void fx_debris_emitter_spawn(Vec3_150E892C *arg0, s16 arg1, u8 arg2, s32 arg3) {
 
     tmp.unk0 = *arg0;
     tmp.unkC = 0.0f;
-    temp_v0 = func_15149130((arg1 == -1) ? 300 : arg1, -1, 0x28, -1, (arg1 == -1) ? 0 : 1, 0, 0x10, arg2, arg3);
+    temp_v0 = effect_node_create((arg1 == -1) ? 300 : arg1, -1, 0x28, -1, (arg1 == -1) ? 0 : 1, 0, 0x10, arg2, arg3);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
     }
@@ -954,7 +954,7 @@ void storm_controller_spawn(void) {
     f32 sp30;
 
     sp30 = 10.0f;
-    temp_v0 = func_15149130(0x12C, -1, 0x35, -1, 0U, 0U, (struct37 *)4, 0xFFU, 1);
+    temp_v0 = effect_node_create(0x12C, -1, 0x35, -1, 0U, 0U, (struct37 *)4, 0xFFU, 1);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &sp30, 4);
     }
@@ -1006,7 +1006,7 @@ void storm_spawn_spark_emitter(void) {
     v[0] = 1.2e-07f;
     v[1] = 3.2e-07f;
     v[2] = 0.0f;
-    temp_v0 = func_15149130((random_int() % 41U) + 30, -1, 0x33, -1, 1, 0, 12, 255, 1);
+    temp_v0 = effect_node_create((random_int() % 41U) + 30, -1, 0x33, -1, 1, 0, 12, 255, 1);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, v, 12);
     }
@@ -1050,7 +1050,7 @@ void storm_spark_emitter_update(u8 *arg0)
       s.v[0] = 0.31712f;
       s.v[1] = 1.04651f;
       s.v[2] = 0.0f;
-      o = (u8 *) func_15149130((random_int() % 13U) + 5, -1, 0x34, -1, 1, 0, 0x18, arg0[0xC], arg0[1]);
+      o = (u8 *) effect_node_create((random_int() % 13U) + 5, -1, 0x34, -1, 1, 0, 0x18, arg0[0xC], arg0[1]);
       if (o != 0)
       {
         memcpy((s32) (o + 0x28), (f32 *) (&s), 0x18);
@@ -1192,7 +1192,7 @@ void storm_spawn_debris_emitter(void) {
     v[0] = 2e-07f;
     v[1] = 1.5e-07f;
     v[2] = 0.0f;
-    temp_v0 = func_15149130((random_int() % 26U) + 5, -1, 0x36, -1, 1, 0, 12, 255, 1);
+    temp_v0 = effect_node_create((random_int() % 26U) + 5, -1, 0x36, -1, 1, 0, 12, 255, 1);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, v, 12);
     }
@@ -1241,7 +1241,7 @@ void storm_debris_emitter_update(u8 *arg0)
       s.u34 = 0;
       s.u35 = 0;
       s.u38 = 0;
-      o = (u8 *) func_15149130((random_int() % 13U) + 5, -1, 0x37, -1, 1, 0, 0x3C, arg0[0xC], arg0[1]);
+      o = (u8 *) effect_node_create((random_int() % 13U) + 5, -1, 0x37, -1, 1, 0, 0x3C, arg0[0xC], arg0[1]);
       if (o != 0)
       {
         memcpy((s32) (o + 0x28), (f32 *) (&s), 0x3C);

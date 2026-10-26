@@ -16,7 +16,7 @@ s16 *obj7b_joint_swing_entries(s16 *arg0, s32 arg1);
 u8 model_get_face_joint(s32 arg0, s32 arg1);
 s16 *obj_adjust_entries_face(s16 *buf, u8 *obj, s32 a2, s32 a3);
 
-/* obj_adjust_list_build (P57): build the per-object adjustment list for func_150A86B0 (sbuf of objects_update_carried):
+/* obj_adjust_list_build (P57): build the per-object adjustment list for anim_eval_joint_matrices (sbuf of objects_update_carried):
  * {u16 offset, s16 value} pairs ending with 0x1000. No skeleton (+0x1D4 == 0): just the terminator.
  * The player (obj+0 == 1) gets obj_adjust_entries_player's entries, other objects a per-type helper; then the face
  * entries of obj_adjust_entries_face for the model's two face joints (model_get_face_joint(type, 0 / 1)). */

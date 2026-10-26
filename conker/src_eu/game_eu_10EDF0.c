@@ -31,7 +31,7 @@ struct260 *fx_model_emitter_spawn(u8 arg0, u8 arg1, s32 arg2) {
     collision_select_area(0);
     tmp.unk8 = zone_tree_find_leaf(*(s16 *)(tmp.unk4 + 0x10), *(s16 *)(tmp.unk4 + 0x14));
     tmp.unkC = 0.0f;
-    temp_v0 = func_15149130(300, -1, 0x1F, -1, 0, 0x1F, 0x10, arg1, arg2);
+    temp_v0 = effect_node_create(300, -1, 0x1F, -1, 0, 0x1F, 0x10, arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
     }

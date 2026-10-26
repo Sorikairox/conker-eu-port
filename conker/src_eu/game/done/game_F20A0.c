@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_150C4BF0(struct108 *arg0) {
+/* was func_150C4BF0 */
+void camera_hook_events_f20a0(struct108 *arg0) {
     if (event_dispatch(1, 0x403F, 6, 0x2000)) {
         arg0->unk84 |= 0x1000000;
     } else {

@@ -55,7 +55,7 @@ s/        height = 35.0f;/        height = 30.0f;/ % k3
 s/        roll = 0.0f;/        roll = 1.0f;/ % k3_nov
 s/        CF34_F(CF34_ST(obj), 0x16C) -= diff;/        CF34_F(CF34_ST(obj), 0x16C) += diff;/ % plain
 s/        CF34_F(CF34_ST(obj), 0x170) = pitch;/        CF34_F(CF34_ST(obj), 0x170) = curp;/ % plain plain_dp450
-s/        func_15048758((f32 \*) (CF34_ST(obj) + 0x16C));/        func_15048758((f32 *) (CF34_ST(obj) + 0x170));/ % plain
+s/        math_wrap_deg_360((f32 \*) (CF34_ST(obj) + 0x16C));/        math_wrap_deg_360((f32 *) (CF34_ST(obj) + 0x170));/ % plain
 s/        CF34_F(CF34_ST(obj), 0x178) = CF34_F(CF34_ST(obj), 0x170);/        CF34_F(CF34_ST(obj), 0x178) = CF34_F(CF34_ST(obj), 0x16C);/ % plain
 s/        CF34_ST(obj)\[0x85\] = 0;/        CF34_ST(obj)[0x84] = 0;/ % plain
 s/        (\*(u8 \*\*) (veh + 0x36C))\[2\] = (s32) yaw;/        (*(u8 **) (veh + 0x36C))[1] = (s32) yaw;/ % k15 k1B_bit k3 replan_veh

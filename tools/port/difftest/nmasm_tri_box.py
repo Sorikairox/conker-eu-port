@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""P22: compare func_150AB278 (hand asm in asm/D5E90.s, build/conker.eu.elf) with its NON_MATCHING C
+"""P22: compare collision_tri_box_test (hand asm in asm/D5E90.s, build/conker.eu.elf) with its NON_MATCHING C
 (src_eu/nm_asm/D5E90.c, build_nm/conker.eu.elf) in Unicorn. The asm uses private register conventions
 between its helpers, so difftest (which stubs every callee) cannot test it; here both run whole.
 Inputs: box half extents + diagonal ratios (D_800CC64C..5C), 9 vertex floats (a0-a3 + 5 stack words).
@@ -30,7 +30,7 @@ class Img:
         # so the candidate runs on the reference's data image
         self.secs = [section(data_from if (data_from and n == '.game_data') else elf, n)
                      for n in ('.game', '.game_data', '.nm_rodata') if n != '.nm_rodata' or 'build_nm' in elf]
-        self.entry = sym(elf, 'func_150AB278')
+        self.entry = sym(elf, 'collision_tri_box_test')
     def run(self, box, verts):
         mu = Uc(UC_ARCH_MIPS, UC_MODE_MIPS32 | UC_MODE_BIG_ENDIAN)
         mu.mem_map(0x15000000, 0x400000, UC_PROT_ALL)

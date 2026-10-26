@@ -23,7 +23,7 @@ typedef struct {
 // idx (D_800DBFF0 entries of 0x9A0 bytes: position +0x2F8, yaw +0x380). The spot is 107..2010 units away at the yaw
 // (in 256ths of a turn, 256 / 360 per degree) +-20; it needs ground under it: a probe from y 19500 down to the
 // character's y gives the ground height, a second probe from the character's y down 250 more gives the start height
-// (else y - 250). The func_151491F4 object (5..65, -1, 0xC, 1, 7, 0x18 bytes, 0xFF, 0) gets the record
+// (else y - 250). The effect_node_create_nodraw object (5..65, -1, 0xC, 1, 7, 0x18 bytes, 0xFF, 0) gets the record
 // {x, start y, z, 195 * 0.001, 0, ground y} at +0x28.
 /* was func_1515B500 */
 void dust_drop_spawn_near_char(s16 idx) {
@@ -87,7 +87,7 @@ void dust_drop_spawn_near_char(s16 idx) {
     if (!ok) {
         return;
     }
-    obj = func_151491F4((s16) ((u32) random_int() % 61 + 5), -1, 0xC, 1, 7, 0x18, 0xFF, 0);
+    obj = effect_node_create_nodraw((s16) ((u32) random_int() % 61 + 5), -1, 0xC, 1, 7, 0x18, 0xFF, 0);
     if (obj != NULL) {
         memcpy((s32) obj + 0x28, rec, 0x18);
     }

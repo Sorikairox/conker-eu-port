@@ -161,7 +161,7 @@ void port_cam_probe(unsigned task) {
 /* P52: the P49 TEMPORARY overrides obj_update_ground_tilt (position integrator) and walk_select_move_anim (partial animation
  * choice) were removed: the port-b branch converted both in P50 (game_83300.c, game_eu_78230.c, NON_MATCHING). */
 
-/* P66: the TEMPORARY PC func_150A9B0C (P58), func_150A9E64 and obj_model_vertex_blocks_get (P61) were removed: the port branch
+/* P66: the TEMPORARY PC mtx_rotate_scale_3x3 (P58), mtx_f_to_l_batch and obj_model_vertex_blocks_get (P61) were removed: the port branch
  * converted all three in P62 (nm_asm/D5E90_mtx.c, game_eu_AF2A0.c, NON_MATCHING). */
 
 /* P69: the TEMPORARY PC asset_rec_fetch_block, world_objects_at_point and floor_triangle_slope (P63) were removed: the port branch

@@ -1,6 +1,6 @@
 #include <n_libaudio.h>
 
-void func_10016F80(ALEventQueue *evtq, s32 arg1, u16 arg2);
+void _n_removeEvents(ALEventQueue *evtq, s32 arg1, u16 arg2);
 
 
 typedef struct {
@@ -27,9 +27,10 @@ extern N_ALUnknownStruct1 *D_8002BA28;
 extern N_ALSndPlayer *D_8002BA2C;
 extern s16 D_8002BA30;
 
-void func_10017298(N_ALUnknownStruct1 *arg0);
+void n_sndp_release_state(N_ALUnknownStruct1 *arg0);
 
-void func_10015550(N_ALCSPlayer *csp, s32 arg1) {
+/* was func_10015550 */
+void n_csp_set_bank(N_ALCSPlayer *csp, s32 arg1) {
     N_ALEvent event;
 
     event.type = 14;
@@ -92,11 +93,11 @@ typedef struct {
 ALSound *n_synth_load_instrument(N_ALSynth *drvr, SndTbl155 **arg1, s16 arg2);
 void n_synth_release_instrument(N_ALSynth *drvr, SndTbl155 *arg1, s16 arg2);
 void init_debug_printf_stub(const char *fmt, ...);
-void func_1001E2A0(N_ALVoice *v, u8 pan);
-void func_1001E350(N_ALVoice *v, u8 arg1);
-void func_10016E90();
-void func_10016F00();
-N_ALUnknownStruct1 *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6, s32 *arg7);
+void n_syn_set_voice_pan(N_ALVoice *v, u8 pan);
+void n_syn_set_voice_param17(N_ALVoice *v, u8 arg1);
+void n_sndp_free_state();
+void n_sndp_post_pitch_update();
+N_ALUnknownStruct1 *n_sndp_play_sound(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6, s32 *arg7);
 
 void _n_handleEvent(SndEvt155 *event);
 
@@ -117,9 +118,10 @@ typedef struct {
 
 extern N_ALSynth *D_8002BA44;
 extern u16 *D_80042C58;
-s32 func_10015878(N_ALSndPlayer *sp);
+s32 n_sndp_voice_handler(N_ALSndPlayer *sp);
 
-s32 func_100155A0(SndpConfig155 *c) {
+/* was func_100155A0 */
+s32 n_sndp_init(SndpConfig155 *c) {
     u32 i;
     ALEventListItem *items;
     N_ALEvent evt;
@@ -156,7 +158,7 @@ s32 func_100155A0(SndpConfig155 *c) {
     }
 
     D_8002BA2C->node.next = NULL;
-    D_8002BA2C->node.handler = func_10015878;
+    D_8002BA2C->node.handler = n_sndp_voice_handler;
     D_8002BA2C->node.clientData = D_8002BA2C;
     n_alSynAddPlayer(D_8002BA2C);
     evt.type = 0x20;
@@ -164,7 +166,8 @@ s32 func_100155A0(SndpConfig155 *c) {
     D_8002BA2C->nextDelta = n_alEvtqNextEvent(&D_8002BA2C->evtq, &D_8002BA2C->nextEvent);
 }
 
-s32 func_10015878(N_ALSndPlayer *sp) {
+/* was func_10015878 */
+s32 n_sndp_voice_handler(N_ALSndPlayer *sp) {
     N_ALSndPlayer *alsp;
     N_ALEvent event;
 
@@ -229,7 +232,7 @@ void _n_handleEvent(SndEvt155 *event)
                 }
                 n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)event, 33333, 2);
             } else {
-                func_10016E90(state);
+                n_sndp_free_state(state);
             }
         } else {
             switch (event->type) {
@@ -247,7 +250,7 @@ void _n_handleEvent(SndEvt155 *event)
                 }
                 if (sound != NULL) {
                     if ((u32)sound->envelope < 0x1000000) {
-                        func_10012C5C(sound, sound, ((SndPlayer155 *)D_8002BA2C)->unk54);
+                        n_bnkf_patch_sound(sound, sound, ((SndPlayer155 *)D_8002BA2C)->unk54);
                     }
                     if (((u32)sound->envelope & 0xFF000003) != 0x80000000) {
                         break;
@@ -287,7 +290,7 @@ void _n_handleEvent(SndEvt155 *event)
                         state->unk40--;
                         n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)event, 33333, 2);
                     } else {
-                        func_10016E90(state);
+                        n_sndp_free_state(state);
                     }
                     return;
                 }
@@ -317,7 +320,7 @@ void _n_handleEvent(SndEvt155 *event)
                         sp94.state = state;
                         n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)&sp94, delta, 2);
                         if (state->flags & 0x20) {
-                            func_10016F00(state);
+                            n_sndp_post_pitch_update(state);
                         }
                     } else {
                         sp94.type = 0x40;
@@ -334,7 +337,7 @@ void _n_handleEvent(SndEvt155 *event)
                 if (event->type != 0x1000 || (state->flags & 2)) {
                     switch (state->state) {
                     case AL_PLAYING:
-                        func_10016F80(&D_8002BA2C->evtq, (s32)state, 0x40);
+                        _n_removeEvents(&D_8002BA2C->evtq, (s32)state, 0x40);
                         if (1) { // fakematch: dead debug prints
                         } else {
                             init_debug_printf_stub("snd %d has been freed too early - %d\n\n\n\n\n", state->state, state->state);
@@ -348,12 +351,12 @@ void _n_handleEvent(SndEvt155 *event)
                             n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)&sp94, delta, 2);
                             state->state = AL_STOPPING;
                         } else {
-                            func_10016E90(state);
+                            n_sndp_free_state(state);
                         }
                         break;
                     case 4:
                     case 5:
-                        func_10016E90(state);
+                        n_sndp_free_state(state);
                         break;
                     default:
                         break;
@@ -369,7 +372,7 @@ void _n_handleEvent(SndEvt155 *event)
                 if (state->state == AL_PLAYING) {
                     tmppan = state->pan + sound->samplePan - AL_PAN_CENTER;
                     pan = SND_MIN155(SND_MAX155(tmppan, 0), 127);
-                    func_1001E2A0(&state->voice, pan);
+                    n_syn_set_voice_pan(&state->voice, pan);
                 }
                 break;
 
@@ -378,7 +381,7 @@ void _n_handleEvent(SndEvt155 *event)
                 if (state->state == AL_PLAYING) {
                     n_alSynSetPitch(&state->voice, state->pitch * state->basepitch);
                     if (state->flags & 0x20) {
-                        func_10016F00(state);
+                        n_sndp_post_pitch_update(state);
                     }
                 }
                 break;
@@ -434,18 +437,18 @@ void _n_handleEvent(SndEvt155 *event)
                     sp94.state = state;
                     n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)&sp94, delta, 2);
                     if (state->flags & 0x20) {
-                        func_10016F00(state);
+                        n_sndp_post_pitch_update(state);
                     }
                 }
                 break;
 
             case 0x80:
-                func_10016E90(state);
+                n_sndp_free_state(state);
                 break;
 
             case 0x200:
                 if (state->flags & 0x10) {
-                    func_10017438(event->unk0C, event->unk08, state->vol, state->pan,
+                    n_sndp_play_sound(event->unk0C, event->unk08, state->vol, state->pan,
                             state->pitch, state->fxmix, state->fxbus, (s32 *)state->unk38);
                 }
                 break;
@@ -453,7 +456,7 @@ void _n_handleEvent(SndEvt155 *event)
             case 0x8000:
                 state->unk52 = event->unk08;
                 if (state->state == AL_PLAYING) {
-                    func_1001E350(&state->voice, state->unk52);
+                    n_syn_set_voice_param17(&state->voice, state->unk52);
                 }
                 break;
 
@@ -469,16 +472,18 @@ void _n_handleEvent(SndEvt155 *event)
     } while (!done && state && !isspecial);
 }
 
-void func_10016E90(N_ALUnknownStruct1 *arg0) {
+/* was func_10016E90 */
+void n_sndp_free_state(N_ALUnknownStruct1 *arg0) {
     if ((arg0->unk53 & 4) != 0) {
         n_alSynStopVoice(&arg0->unk10);
         n_alSynFreeVoice(&arg0->unk10);
     }
-    func_10017298(arg0);
-    func_10016F80(&D_8002BA2C->evtq, (s32) arg0, 0xFFFF);
+    n_sndp_release_state(arg0);
+    _n_removeEvents(&D_8002BA2C->evtq, (s32) arg0, 0xFFFF);
 }
 
-void func_10016F00(struct154 *arg0) {
+/* was func_10016F00 */
+void n_sndp_post_pitch_update(struct154 *arg0) {
     N_ALEvent event;
     f32 res;
 
@@ -492,7 +497,8 @@ void func_10016F00(struct154 *arg0) {
     n_alEvtqPostEvent(&D_8002BA2C->evtq, &event, 33333, 2);
 }
 
-void func_10016F80(ALEventQueue *evtq, s32 arg1, u16 arg2) {
+/* was func_10016F80 */
+void _n_removeEvents(ALEventQueue *evtq, s32 arg1, u16 arg2) {
     ALLink *thisNode;
     ALLink *nextNode;
     N_ALEventListItem *thisItem;
@@ -537,7 +543,7 @@ void func_10016F80(ALEventQueue *evtq, s32 arg1, u16 arg2) {
 
     osSetIntMask(mask);
 }
-// void func_10016F80(void *arg0, s32 arg1, u16 arg2) {
+// void _n_removeEvents(void *arg0, s32 arg1, u16 arg2) {
 //     void *sp3C;
 //     void *sp38;
 //     void *sp34;
@@ -584,7 +590,8 @@ void func_10016F80(ALEventQueue *evtq, s32 arg1, u16 arg2) {
 //     osSetIntMask(sp28);
 // }
 
-N_ALUnknownStruct1 *func_10017100(s32 arg0, s16 arg1) {
+/* was func_10017100 */
+N_ALUnknownStruct1 *n_sndp_alloc_state(s32 arg0, s16 arg1) {
     N_ALUnknownStruct1 *sp24;
     u32 mask;
     N_ALUnknownStruct1 *sp1C;
@@ -627,7 +634,8 @@ N_ALUnknownStruct1 *func_10017100(s32 arg0, s16 arg1) {
     return sp24;
 }
 
-void func_10017298(N_ALUnknownStruct1 *arg0) {
+/* was func_10017298 */
+void n_sndp_release_state(N_ALUnknownStruct1 *arg0) {
     N_ALUnknownStruct1 *sp4;
 
     if (D_8002BA20 == arg0) {
@@ -668,7 +676,8 @@ void func_10017298(N_ALUnknownStruct1 *arg0) {
     }
 }
 
-s32 func_100173C4(N_ALUnknownEvent2 *arg0) {
+/* was func_100173C4 */
+s32 n_sndp_get_handle_state(N_ALUnknownEvent2 *arg0) {
     s32 ret;
     s32 mask;
 
@@ -683,7 +692,8 @@ s32 func_100173C4(N_ALUnknownEvent2 *arg0) {
     return ret;
 }
 
-N_ALUnknownStruct1 *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6, s32 *arg7) {
+/* was func_10017438 */
+N_ALUnknownStruct1 *n_sndp_play_sound(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6, s32 *arg7) {
     N_ALUnknownStruct1 *sp34;
     N_ALUnknownStruct1 *sp30;
     s16 sp2E;
@@ -698,7 +708,7 @@ N_ALUnknownStruct1 *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg
     sp2E = 0;
     if (arg1 != 0) {
         do {
-            sp34 = func_10017100(arg0, arg1 - 1);
+            sp34 = n_sndp_alloc_state(arg0, arg1 - 1);
             if (sp34 != NULL) {
                 D_8002BA2C->target = (s32) sp34;
                 ev.type = 0x4000;
@@ -726,7 +736,7 @@ N_ALUnknownStruct1 *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg
     }
     return sp30;
 }
-// void *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6, void *arg7) {
+// void *n_sndp_play_sound(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6, void *arg7) {
 //     void *sp34;
 //     void *sp30;
 //     s16 sp2E;
@@ -738,7 +748,7 @@ N_ALUnknownStruct1 *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg
 //     sp2E = 0;
 //     if (arg1 != 0) {
 // loop_1:
-//         sp34 = func_10017100(arg0, arg1 - 1);
+//         sp34 = n_sndp_alloc_state(arg0, arg1 - 1);
 //         if (sp34 != 0) {
 //             (*(void *)0x8002BA2C)->unk3C = sp34;
 //             sp18 = 0x4000;
@@ -768,7 +778,8 @@ N_ALUnknownStruct1 *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg
 //     return sp30;
 // }
 
-void func_10017594(N_ALUnknownStruct1 *arg0) {
+/* was func_10017594 */
+void n_sndp_stop_sound(N_ALUnknownStruct1 *arg0) {
     N_ALEvent event;
 
     if (arg0) {
@@ -779,7 +790,8 @@ void func_10017594(N_ALUnknownStruct1 *arg0) {
     }
 }
 
-void func_10017604(u8 arg0) {
+/* was func_10017604 */
+void n_sndp_stop_with_flags(u8 arg0) {
     u32 mask;
     struct {
         s16 type;
@@ -804,7 +816,7 @@ void func_10017604(u8 arg0) {
     osSetIntMask(mask);
 }
 // NON-MATCHING: stack isnt quite right
-// void func_10017604(u8 arg0) {
+// void n_sndp_stop_with_flags(u8 arg0) {
 //     s32 mask;
 //     struct31 *sp20;
 //     u16 foo;
@@ -829,15 +841,18 @@ void func_10017604(u8 arg0) {
 //     osSetIntMask(mask);
 // }
 
-void func_100176C4(void) {
-    func_10017604(1);
+/* was func_100176C4 */
+void n_sndp_stop_all(void) {
+    n_sndp_stop_with_flags(1);
 }
 
-void func_100176EC(void) {
-    func_10017604(3);
+/* was func_100176EC */
+void n_sndp_stop_all_looping(void) {
+    n_sndp_stop_with_flags(3);
 }
 
-void func_10017714(s32 arg0, s16 type, s32 arg2) {
+/* was func_10017714 */
+void n_sndp_post_event(s32 arg0, s16 type, s32 arg2) {
     N_ALEvent event;
 
     if (arg0 != 0) {
@@ -849,7 +864,8 @@ void func_10017714(s32 arg0, s16 type, s32 arg2) {
 }
 
 extern u16 *D_80042C58;
-void func_10017780(u8 arg0, u16 arg1) {
+/* was func_10017780 */
+void n_sndp_set_group_volume(u8 arg0, u16 arg1) {
     s32 mask;
     N_ALUnknownStruct1 *p;
     s32 count;
@@ -874,7 +890,7 @@ void func_10017780(u8 arg0, u16 arg1) {
     osSetIntMask(mask);
 }
 // NON-MATCHING: far from matching
-// void func_10017780(u8 arg0, u16 arg1) {
+// void n_sndp_set_group_volume(u8 arg0, u16 arg1) {
 //     s32 sp34;
 //     struct31 *sp30;
 //     s32 sp2C;

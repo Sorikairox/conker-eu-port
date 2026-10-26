@@ -4,15 +4,18 @@
 #include "variables.h"
 
 
-void func_15016670(void) {
+/* was func_15016670 */
+void level_clear_d18c0(void) {
     D_800D18C0 = 0;
 }
 
-void func_15016680(void) {
+/* was func_15016680 */
+void start_points_clear(void) {
     D_800D212C = 0;
 }
 
-void func_15016690(s32 arg0) {
+/* was func_15016690 */
+void start_points_load(s32 arg0) {
     s32 tmp;
 
     D_800D2120 = -1;

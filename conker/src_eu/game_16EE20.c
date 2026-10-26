@@ -256,7 +256,7 @@ void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
         rec.id = arg1;
         rec.owner = arg0;
         rec.uid = arg0->unique_id;
-        temp_v0_2 = func_15149130((*(s16 *)((u8 *)(&D_8008A0B4[arg1]) + 6)), -1, -1, -1, 1U, 0x32U, (struct37 *)0xC, 0xFFU, 1);
+        temp_v0_2 = effect_node_create((*(s16 *)((u8 *)(&D_8008A0B4[arg1]) + 6)), -1, -1, -1, 1U, 0x32U, (struct37 *)0xC, 0xFFU, 1);
         if (temp_v0_2 != NULL) {
             memcpy((u8 *)temp_v0_2 + 0x28, (s32 *)&rec, 0xC);
             char_fx_attach(temp_v0_2, arg0, 0x1A);
@@ -294,7 +294,7 @@ void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
 //         sp40.unk0 = arg1;
 //         sp40.unk4 = arg0;
 //         sp40.unk8 = arg0->unique_id;
-//         temp_v0 = func_15149130(D_8008A0B4[arg1].unk4, -1, -1, -1, 1, 0x32, 0xC, 0xFF, 1);
+//         temp_v0 = effect_node_create(D_8008A0B4[arg1].unk4, -1, -1, -1, 1, 0x32, 0xC, 0xFF, 1);
 //         if (temp_v0 != NULL) {
 //             memcpy((u8 *)temp_v0 + 0x28, &sp40, 0xC);
 //             char_fx_attach(temp_v0, arg0, 0x1A);

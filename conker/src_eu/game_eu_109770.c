@@ -10,7 +10,7 @@ u8 *object_emitter_spawn(u8 *, s32, u8, s32);
 extern u8 D_800908C4[];
 
 // spark_effect_on_event: event effect for obj. mode 0: starts emitter kind 1 on obj (object_emitter_spawn), a spark burst
-// (emit_sparks_by_angles_b spec at x 177.9 / z -1708), sound effect 0x1E (func_151491F4) and a sprite burst (emit_sprite_nodes_by_angles spec,
+// (emit_sparks_by_angles_b spec at x 177.9 / z -1708), sound effect 0x1E (effect_node_create_nodraw) and a sprite burst (emit_sprite_nodes_by_angles spec,
 // D_800908C4 animation); mode 1: emitter kind 2 only; other modes and a NULL obj do nothing. flag goes to every call.
 /* was func_150DBF60 */
 void spark_effect_on_event(u8 *obj, s32 mode, u8 flag) {
@@ -71,7 +71,7 @@ void spark_effect_on_event(u8 *obj, s32 mode, u8 flag) {
         spark.u54 = 0xFF;
         spark.u55 = 0xFF;
         emit_sparks_by_angles_b((u8 *) &spark, flag);
-        func_151491F4(0x1E, -1, 0, 1, 0, 0, flag, 0);
+        effect_node_create_nodraw(0x1E, -1, 0, 1, 0, 0, flag, 0);
         burst.x = 177.901749f;
         burst.y = -13.3882484f;
         burst.z = -1708.0238f;
@@ -1024,7 +1024,7 @@ s32 fountain_draw(u8 *obj, s32 gfx, s16 view) {
 /* was func_150DE450 */
 void fountain_spawn_by_marker(u8 *arg0) {
     struct260 *o;
-    o = func_151491F4(0x64, 2, -1, 1U, 0U, 1, 0xFFU, 0);
+    o = effect_node_create_nodraw(0x64, 2, -1, 1U, 0U, 1, 0xFFU, 0);
     if (o != NULL) {
         switch (arg0[0x72]) {
         case 0xFB: *((s8 *)o + 0x28) = 1; break;

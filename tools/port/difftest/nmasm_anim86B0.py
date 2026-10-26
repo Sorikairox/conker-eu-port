@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""P51: compare the hand-asm skeleton / animation evaluator func_150A86B0 (asm/D5E90.s, with its private helpers
+"""P51: compare the hand-asm skeleton / animation evaluator anim_eval_joint_matrices (asm/D5E90.s, with its private helpers
 func_150A8680 .. func_150A9E60) with its NON_MATCHING C (src_eu/nm_asm/D5E90_anim.c), whole.
 
 The asm decodes the key frames with 64-bit ldl / ldr / dsrlv / dsllv / dsra32 and sdl / sdr, and uses its own
@@ -73,7 +73,7 @@ class Ref:
     def word(self, pc):
         o = pc - self.cv
         return struct.unpack('>I', self.cb[o:o + 4])[0]
-    def run(self, mem, args, cblog, arena_rng, maxi=5000000, entry='func_150A86B0'):
+    def run(self, mem, args, cblog, arena_rng, maxi=5000000, entry='anim_eval_joint_matrices'):
         r = [0] * 32; f = [0] * 32; cc = False; hi = lo = 0
         for k, a in enumerate(args[:4]): r[4 + k] = sx32(a)
         r[29] = sx32(SP0); r[31] = sx32(RET)
@@ -239,7 +239,7 @@ class Cand:
         self.mu = mu
     def data(self):
         return [(v, b) for v, b in self.secs if v >= 0x80000000]
-    def run(self, mem, args, cblog, arena_rng, entry='func_150A86B0'):
+    def run(self, mem, args, cblog, arena_rng, entry='anim_eval_joint_matrices'):
         mu = self.mu; self.log = cblog; self.rng = arena_rng
         mu.mem_write(0x80000, bytes(mem[0x80000:RAM]))
         for k, a in enumerate(args[:4]): mu.reg_write(UC_MIPS_REG_A0 + k, a & 0xFFFFFFFF)

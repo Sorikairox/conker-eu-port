@@ -12,7 +12,7 @@ void glow_pair_post_remove_event(u8 *arg0) {
 
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
-    func_151494E0((s32)&tmp, 0x3E);
+    effect_nodes_broadcast((s32)&tmp, 0x3E);
 }
 
 #ifdef NON_MATCHING
@@ -60,7 +60,7 @@ typedef struct {
 #endif
 
 #ifdef NON_MATCHING
-// object_twin_glow_spawn: creates a type-0x43 object (func_15149130) for obj and copies a record {obj, obj +0x3B,
+// object_twin_glow_spawn: creates a type-0x43 object (effect_node_create) for obj and copies a record {obj, obj +0x3B,
 // 0, 0, ..., +0x74 = 0} to its +0x28, then spawns two particle_spawn_ex glow particles (flags 0x4417, life 300, size
 // 1511, sprite 100, mode 0x64C000, the second one red instead of blue in colour[4..7]) and stores them at the
 // record's fx[0] / fx[1]. Returns the new object (NULL when the alloc fails).
@@ -79,7 +79,7 @@ void *glow_pair_spawn(struct127 *obj) {
         rec.fx[i] = 0;
     }
     rec.u74 = 0;
-    o = func_15149130(0x12C, -1, 0x43, -1, 0, 0x37, (struct37 *) 0x78, 0xFF, 1);
+    o = effect_node_create(0x12C, -1, 0x43, -1, 0, 0x37, (struct37 *) 0x78, 0xFF, 1);
     if (o == NULL) {
         return NULL;
     }
@@ -231,7 +231,7 @@ block_16:
 #ifdef NON_MATCHING
 // linked_obj_event_3e: event handler of an object whose link record sits at +0x28 ({ s32 id, u8 key }): event 0x3E removes the
 // object (node_destroy) when the event's record matches by id or by key; any other event goes to the common
-// handler func_15149514.
+// handler effect_node_link_message.
 /* was func_150F7890 */
 void glow_pair_handle_event(struct102 *obj, u8 *ev, u8 type) {
     u8 *link = (u8 *) obj + 0x28;
@@ -241,7 +241,7 @@ void glow_pair_handle_event(struct102 *obj, u8 *ev, u8 type) {
             node_destroy(obj);
         }
     } else {
-        func_15149514((s32) ev, type, (s32) link, (s32) (link + 4), (s32) obj);
+        effect_node_link_message((s32) ev, type, (s32) link, (s32) (link + 4), (s32) obj);
     }
 }
 #else
@@ -270,11 +270,11 @@ void glow_pair_free_particles(s32 arg0) {
 /* was func_150F798C */
 void glow_pair_retire(void *arg0) {
     glow_pair_free_particles(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_150F79B8 */
 void glow_pair_delete(void *arg0) {
     glow_pair_free_particles(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }

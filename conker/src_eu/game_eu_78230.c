@@ -1022,7 +1022,7 @@ void walk_idle_variation(u8 *arg0, u16 *arg1, f32 *arg2, s8 *arg3) {
         (*(s8 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x3C)) = 1;
         (*(u16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x10)) = (u16) *arg1;
     }
-    func_150AD78C(temp_f12);
+    fast_sinf(temp_f12);
     temp_v0 = (*(u8 **)((u8 *)arg0 + 0x31C));
     (*(u8 *)((u8 *)temp_v0 + 0xB)) = (u8) ((*(u8 *)((u8 *)temp_v0 + 0xB)) + 2);
     if ((*(u8 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x16)) != 0) {
@@ -1349,7 +1349,7 @@ void obj_float_bob_setup(struct127 *arg0) {
 }
 #ifdef NON_MATCHING
 u16 math_atan2_u16(f32, f32, s32);
-f32 func_150AD78C(f32);
+f32 fast_sinf(f32);
 void obj_stun_update(struct127 *); /* P209: the asm reads only a0 and returns nothing */
 void obj_walk_update(struct127 *);
 void cutscene_actor_apply_track(struct127 *, s32, s32);
@@ -1912,7 +1912,7 @@ void obj_state_walk(struct127 *arg0) {
                     sp1BC = 28.0f;
                     arg0->unk31C->pad3C[0] = 4;
                     temp_t0_10 = arg0->unk31C;
-                    temp_f6 = func_150AD78C((f32) ((D_800CC670 * 0xC) & 0xFF) * 0.024543693f) * 10240.0f;
+                    temp_f6 = fast_sinf((f32) ((D_800CC670 * 0xC) & 0xFF) * 0.024543693f) * 10240.0f;
                     temp_t0_10->padA[1] += 0x10;
                     (*(s16 *)((u8 *)(arg0->unk31C) + 0x10)) = (s16) (s32) temp_f6;
                 }
@@ -3509,10 +3509,10 @@ f32 obj_slope_to_pitch_roll(u8 *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4) {
     temp_f20 = -arg2;
     temp_f12 = (*(f32 *)((u8 *)arg0 + 0x40)) * 0.017453292f;
     sp2C = temp_f12;
-    sp34 = func_150AD780(temp_f12);
-    temp_f0 = func_150AD78C(temp_f12);
-    var_f22 = func_150484A0((arg1 * sp34) + (temp_f20 * temp_f0), 1.0f) * 57.295776f;
-    temp_f2 = func_150484A0((-arg1 * temp_f0) + (temp_f20 * sp34), 1.0f) * 57.295776f;
+    sp34 = fast_cosf(temp_f12);
+    temp_f0 = fast_sinf(temp_f12);
+    var_f22 = math_atan2f((arg1 * sp34) + (temp_f20 * temp_f0), 1.0f) * 57.295776f;
+    temp_f2 = math_atan2f((-arg1 * temp_f0) + (temp_f20 * sp34), 1.0f) * 57.295776f;
     var_f20 = temp_f2;
     if (var_f22 >= 180.0f) {
         var_f22 -= 360.0f;
@@ -4355,7 +4355,7 @@ void obj_update_ground_tilt(struct127 *rec);
 void obj_apply_gravity(struct127 *rec);
 void obj_update_floor(struct127 *arg0, f32 arg1);
 void obj_land_on_floor(struct127 *arg0, f32 arg1);
-f32 func_150484A0(f32 arg0, f32 arg1);
+f32 math_atan2f(f32 arg0, f32 arg1);
 s32 obj_find_seen_player(struct127 *rec, s32 unused, u16 cone, f32 scale);
 s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
 s32 shot_hit_apply(u8 *obj, u8 *hit, s32 kind);
@@ -4572,7 +4572,7 @@ void obj_state_rail_follow(struct127 *obj) {
     case 13:
     case 15:
     case 17:
-        P38_F32(0xB8) = -func_150484A0(P38_F32(0x20), P38_F32(0x3C)) * 57.295776f;
+        P38_F32(0xB8) = -math_atan2f(P38_F32(0x20), P38_F32(0x3C)) * 57.295776f;
         switch (kind) {
         case 4:
         case 5:
@@ -5111,7 +5111,7 @@ void obj_state_projectile(struct127 *obj) {
     case 0x42:
         floor = 25.0f;
         if (obj->gravity != 0.0f && (obj->y_velocity > 0.0f || obj->unk28 > 25.0f)) {
-            obj->unkB8 = -func_150484A0(obj->y_velocity, obj->xz_velocity) * 57.295776f;
+            obj->unkB8 = -math_atan2f(obj->y_velocity, obj->xz_velocity) * 57.295776f;
         }
         hit = obj_find_reach_hit((s32)obj, 40.0f, 10.0f, &target, 0xF, 0x53);
         if (hit != 0) {
@@ -5130,7 +5130,7 @@ void obj_state_projectile(struct127 *obj) {
         obj->unkB8 += (f32)(D_800BE9E4 * 16);
         break;
     case 0x88:
-        obj->unkB8 = -func_150484A0(obj->y_velocity, obj->xz_velocity) * 57.295776f;
+        obj->unkB8 = -math_atan2f(obj->y_velocity, obj->xz_velocity) * 57.295776f;
         obj->unkD0 = 0x10;
         if (attack_hit_test(obj, D_800C3E78) != 0) {
             obj_remove(obj, 1);
@@ -5281,7 +5281,7 @@ void obj_state_projectile(struct127 *obj) {
 //             if (arg0->gravity != 0.0f) {
 //                 temp_f12 = arg0->y_velocity;
 //                 if ((temp_f12 > 0.0f) || (arg0->unk28 > 25.0f)) {
-//                     arg0->unkB8 = (-func_150484A0(temp_f12, arg0->xz_velocity) * D_80099408);
+//                     arg0->unkB8 = (-math_atan2f(temp_f12, arg0->xz_velocity) * D_80099408);
 //                 }
 //             }
 //             temp_v0 = func_15081574(arg0, 40.0f, 10.0f, &sp64, 0xF, 0x53);
@@ -5298,7 +5298,7 @@ void obj_state_projectile(struct127 *obj) {
 //             }
 //             break;
 //         case 0x88:
-//             temp_f6 = -func_150484A0(arg0->y_velocity, arg0->xz_velocity) * D_8009940C;
+//             temp_f6 = -math_atan2f(arg0->y_velocity, arg0->xz_velocity) * D_8009940C;
 //             arg0->unkD0 = 0x10;
 //             arg0->unkB8 = temp_f6;
 //             if (attack_hit_test(arg0, D_800C3E78) != 0) {

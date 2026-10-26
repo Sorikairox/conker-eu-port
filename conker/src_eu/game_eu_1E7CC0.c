@@ -637,17 +637,17 @@ void impact_spark_flash_spawn(u8 *, u8, s32);
 void impact_rumble_spawn(s32, u8, s32);
 void impact_cam_shake_spawn(void *, u8, s32);
 void impact_debris_emitter_spawn(s32, u8, s32);
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, void *, void *, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, void *, void *, s32, f32);
 u8 prop_is_flagged(s32);
 void emit_spray_from_surface(void *, u8, s32);
 void emit_impact_flash_spray(void *, s32 *, f32 *, s32, u8, s32);
-typedef struct { s16 v[9]; } HitSurface; /* 0x12-byte surface record written by func_150ACEA0 */
+typedef struct { s16 v[9]; } HitSurface; /* 0x12-byte surface record written by collision_ray_cast */
 /* impact flash keyframes for emit_impact_flash_spray: frame numbers and scales (rodata D_800AAAF8 / D_800AAB1C) */
 static const s32 sImpactFlashFrames[9] = { 4, 4, 7, 8, 0x18, 0x19, 0x1D, 0x1E, 0x20 };
 static const f32 sImpactFlashScales[9] = { 1.0f, 1.0f, 0.15f, 0.15f, 1.0f, 1.0f, 0.097f, 1.0f, 0.2f };
 // shot_impact_effects: effects of a shot fired from `pos` towards `target` (obj only gates it): sound
 // explosion_sfx_play and the muzzle effects (impact_rumble_spawn / impact_cam_shake_spawn / impact_spark_flash_spawn / fire_flash_light_spawn) at pos, then a
-// ray cast (func_150ACEA0) along target - pos. On a hit: shot_scorch_decal_spawn when the hit object passes prop_is_flagged,
+// ray cast (collision_ray_cast) along target - pos. On a hit: shot_scorch_decal_spawn when the hit object passes prop_is_flagged,
 // impact_debris_emitter_spawn when the surface's third axis points down (tri_calc_normal), a spark spray off the surface
 // (emit_spray_from_surface, 3 / 4 particles, range 494) and an animated impact flash (emit_impact_flash_spray, 9 keyframes).
 // Called by obj_effect_shot_impact (effect handler 2 of obj_effect_run_handler) with D_800D1980 / D_eu_800D1990.
@@ -712,7 +712,7 @@ void shot_impact_effects(s32 obj, f32 *pos, f32 *target, u8 arg3, s32 arg4) {
     impact_cam_shake_spawn(pos, arg3, arg4);
     impact_spark_flash_spawn((u8 *) pos, arg3, arg4);
     fire_flash_light_spawn((u8 *) pos, arg3, arg4);
-    if (func_150ACEA0(pos[0], pos[1], pos[2], dir[0], dir[1], dir[2], 0, &hit, &hitPos[0], &hitPos[1], &hitPos[2],
+    if (collision_ray_cast(pos[0], pos[1], pos[2], dir[0], dir[1], dir[2], 0, &hit, &hitPos[0], &hitPos[1], &hitPos[2],
                       NULL, &hitObj, 0, 0.0f) == 0) {
         return;
     }
@@ -1819,7 +1819,7 @@ void obj_aura_burst_stop(u8 *arg0) {
 
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
-    func_151494E0(&tmp, 0x3B);
+    effect_nodes_broadcast(&tmp, 0x3B);
 }
 
 #ifdef NON_MATCHING
@@ -1911,14 +1911,14 @@ typedef struct {
     /* 0x10 */ u8 *emit[2];
 } GroupBDDD8;
 
-struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
+struct260 *effect_node_create(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
 void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
 s32 random_int(void);
 extern s32 D_800A4AA0;
 
 // object_aura_burst_spawn: the aura_group_spawn (object_aura_spawn) effect without its rumble_request / light_create_obj_joint calls: creates
-// a group object (func_15149130 kind 300, flag 0, 0x18-byte block {obj, obj+0x3B}) and, when it exists, two particles
+// a group object (effect_node_create kind 300, flag 0, 0x18-byte block {obj, obj+0x3B}) and, when it exists, two particles
 // (effect3d_spawn_full texture 0x5F, D_800A4AA0 list, random blend 1 / 3; +0x110 gets index, object, room, group, mid height
 // (obj +0x14C + +0x150) / 2 and this function's constants) and two emitters (particle_emitter_spawn texture 0x60, 0x2A; +0x170
 // gets index, object, room, group); the group records them at +0x30 / +0x38. `alpha` / `owner` go to every spawner.
@@ -1941,7 +1941,7 @@ s32 aura_burst_group_spawn(u8 *obj, u8 alpha, s32 owner) {
     init.part[1] = NULL;
     init.emit[0] = NULL;
     init.emit[1] = NULL;
-    group = (u8 *)func_15149130(300, -1, 0x40, -1, 0, 0x33, (struct37 *)0x18, alpha, owner);
+    group = (u8 *)effect_node_create(300, -1, 0x40, -1, 0, 0x33, (struct37 *)0x18, alpha, owner);
     if (group != NULL) {
         g = (GroupBDDD8 *)(group + 0x28);
         memcpy((u8 *)g, (u8 *)&init, 0x18);
@@ -2224,13 +2224,13 @@ void aura_burst_free_effects(u8 *arg0)
 /* was func_151BE768 */
 void aura_burst_retire(struct260 * arg0) {
     aura_burst_free_effects(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_151BE794 */
 void aura_burst_delete(struct260 * arg0) {
     aura_burst_free_effects(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 /* was func_151BE7C0 */

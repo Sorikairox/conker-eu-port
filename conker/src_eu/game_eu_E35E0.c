@@ -470,7 +470,7 @@ void bolt_ring_update(u8 *arg0) {
     (*(u8 *)((u8 *)arg0 + 0x30)) = temp_t6;
     if ((*(u8 *)((u8 *)temp_s1 + 0x14)) == 1) {
         if (temp_v0 != (temp_t6 & 0xFF)) {
-            func_151494E0(0, 0x4AU);
+            effect_nodes_broadcast(0, 0x4AU);
         }
     } else {
         temp_s2 = arg0 + 0x28;

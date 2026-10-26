@@ -26,9 +26,9 @@ s32 debug_cont_read(void) {
         i = 0;
         end = osGetCount() + 200000;
         while (osGetCount() < end) {
-            i = func_160016F4(i);
+            i = debugger_identity(i);
         }
-        func_160016F4(i);
+        debugger_identity(i);
     }
     for (i = 0; i < 16; i++) {
         D_80042DA0.ramarray[i] = CONT_CMD_NOP;
@@ -39,9 +39,9 @@ s32 debug_cont_read(void) {
     i = 0;
     end = osGetCount() + 800000;
     while (osGetCount() < end) {
-        i = func_160016F4(i);
+        i = debugger_identity(i);
     }
-    func_160016F4(i);
+    debugger_identity(i);
     return ret;
 }
 // osContGetReadData

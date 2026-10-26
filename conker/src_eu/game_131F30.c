@@ -10,7 +10,7 @@ void sfx_emitter_stop_by_callback(s32, s32, s32);
 #ifdef NON_MATCHING
 // prop_owner_effects_clear: P256: for the prop `obj` (a 0xA0-byte record of D_800DBEF4), finds its owner, the first
 // live object (interaction_state != 0) of D_800CC2D0[0..24] whose bit is set in the prop's mask D_800DC3C4[index],
-// or NULL, then clears effects keyed on it (func_151494E0): kinds 0xF9 / 0xF8 / 0xF7 (obj +0x72) clear the type
+// or NULL, then clears effects keyed on it (effect_nodes_broadcast): kinds 0xF9 / 0xF8 / 0xF7 (obj +0x72) clear the type
 // 0x35 effects of {9, part list, owner} with the 9-entry part lists D_800A2750 / D_800A275C / D_800A2768 (copied to
 // the stack), kind 0xF6 the type 0x38 effects of {owner}; other kinds do nothing.
 typedef struct {
@@ -60,11 +60,11 @@ void prop_owner_effects_clear(u8 *obj) {
         }
         key.count = 9;
         key.parts = parts.b;
-        func_151494E0((s32) &key, 0x35);
+        effect_nodes_broadcast((s32) &key, 0x35);
         break;
     case 0xF6:
         key38.owner = owner;
-        func_151494E0((s32) &key38, 0x38);
+        effect_nodes_broadcast((s32) &key38, 0x38);
         break;
     }
 }
@@ -258,8 +258,8 @@ void fx_quad_bolts_update(u8 *arg0) {
     (*(s8 *)((u8 *)((*(u8 **)((u8 *)temp_s2 + 0))) + 0x14)) = 0;
     (*(s16 *)((u8 *)temp_s2 + 4)) = (s16) ((*(s16 *)((u8 *)temp_s2 + 4)) - D_800BE9E4);
     if ((*(s16 *)((u8 *)temp_s2 + 4)) < 0) {
-        func_151494E0(0, 0x39U);
-        func_151494E0(0, 0x4BU);
+        effect_nodes_broadcast(0, 0x39U);
+        effect_nodes_broadcast(0, 0x4BU);
     }
     if (player_mask_hides_all((*(s32 *)((u8 *)temp_s2 + 0x6C))) == 0) {
         (*(f32 *)((u8 *)temp_s2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 8)) + ((0.040000003f + (random_float() * 0.07f)) * D_800BE9A4));
@@ -330,7 +330,7 @@ void fx_quad_bolts_on_msg(struct207 *arg0, s32 *arg1, u8 arg2) {
 }
 
 #ifdef NON_MATCHING
-typedef struct { s16 v[9]; } HitSurface558C; /* 0x12-byte surface record (func_150ACEA0) */
+typedef struct { s16 v[9]; } HitSurface558C; /* 0x12-byte surface record (collision_ray_cast) */
 void fire_embers_spawn(void *, u8, s32);
 void emit_impact_flash_spray(void *, s32 *, f32 *, s32, u8, s32);
 struct210 *cam_sprite_puff_spawn(f32, u8, s32, u8 *, s16, u8, u8, s32, u8, s32);

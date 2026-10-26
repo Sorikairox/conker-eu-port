@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_1500C1E0(void) {
+/* was func_1500C1E0 */
+void anim_mesh_slots_reset(void) {
     s32 i;
 
     for (i = 0; i < 4; i++) {

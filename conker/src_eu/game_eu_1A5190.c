@@ -19,7 +19,7 @@ u8 *world_record_find(u8 id);
  * Per vertex, with d = the vertex distance to the light * 0.01 (flag 0x10: the signed distance along the direction
  * `angle` degrees in the x / z plane): +0x24[i] = scale * d; flag 4: +0x20[i] = falloff * intensity * t^2 when
  * t = d - range * 0.01 is negative, else 0; kind 2: +0x28[i] = the direction byte (flag 0x10: angle * 256 / 360,
- * else func_150484A0 (atan2) of the squared x / z offsets * 128 / pi, as Rare wrote it).
+ * else math_atan2f (atan2) of the squared x / z offsets * 128 / pi, as Rare wrote it).
  */
 /* was func_15177410 */
 void vtx_anim_light_create(u8 flags, u8 id, s16 x, s16 y, s16 z, f32 angle, u16 range, f32 intensity, s8 arg8, s8 scale,
@@ -126,7 +126,7 @@ void vtx_anim_light_create(u8 flags, u8 id, s16 x, s16 y, s16 z, f32 angle, u16 
             if (dir == 0x10) {
                 (*(u8 **) (light + 0x28))[i] = dirbyte;
             } else {
-                f = func_150484A0(ox, oz) * 40.743664f;
+                f = math_atan2f(ox, oz) * 40.743664f;
                 (*(u8 **) (light + 0x28))[i] = P188_F2U8(f);
             }
         }

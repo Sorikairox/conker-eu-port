@@ -1,10 +1,10 @@
-/* PC version of the game entrypoint func_15007830 (game/entrypoint.c is still GLOBAL_ASM), plus
+/* PC version of the game entrypoint game_thread_main (game/entrypoint.c is still GLOBAL_ASM), plus
  * the memory-model self-test (docs/port/MEMORY.md "Endianness test"). Compiled as a game TU, i.e.
  * through the vbe IR pass, so it has the N64's big-endian memory semantics.
  *
- * Translated from asm/nonmatchings/game/entrypoint/func_15007830.s (EU symbols). The main loop's
+ * Translated from asm/nonmatchings/game/entrypoint/game_thread_main.s (EU symbols). The main loop's
  * switch is the asm jump table jtbl_80095DE0 read *from the ROM data* (game_data, loaded by
- * port_mem_load): its words are code labels inside func_15007830, which the loader leaves as N64
+ * port_mem_load): its words are code labels inside game_thread_main, which the loader leaves as N64
  * addresses, so this file maps them back to the cases. */
 #include <ultra64.h>
 #include "../ultra/pc_mem.h"
@@ -22,7 +22,7 @@ extern u8 D_800BEA37, D_800BEECB, D_800BEA35, D_800BEECA, D_800E0B94;
 extern s16 D_800BEEC8;
 
 /* callees: prototypes must match the wasm signature of the definition (C body or stub) */
-void func_15007A20(void);
+void game_bss_clear(void);
 void sched_init(OSMesgQueue *);
 void texture_build_size_table(void);
 void audio_system_init(void);
@@ -33,7 +33,7 @@ void controller_init_si_queue(void);
 void controller_init_all(void);
 void settings_reset_defaults(void);
 void glyph_set_load_rom(s32);
-void func_15008A60(void);
+void view_zoom_state_reset(void);
 void text_queue_reset(void);
 void save_block_realloc_random(void);
 void menu_init(void);
@@ -47,15 +47,15 @@ void game_main_loop(void);
 int port_entry_iterations;
 void port_wait_frame(void); /* main-loop passes (for the log) */
 
-/* P318: the game main loop func_15007830 is game C now (game/entrypoint.c, P281/P317); this PC translation of the asm is kept for A/B runs only (-DP318_ENTRY_PC_OLD) */
+/* P318: the game main loop game_thread_main is game C now (game/entrypoint.c, P281/P317); this PC translation of the asm is kept for A/B runs only (-DP318_ENTRY_PC_OLD) */
 #ifdef P318_ENTRY_PC_OLD
-void func_15007830(void) {
+void game_thread_main(void) {
     const u32 *jtbl = port_n64_to_wasm(0x80095DE0); /* jtbl_80095DE0_game, 5 entries */
     u32 target;
 
-    port_log("[entry] func_15007830 (PC version) jtbl %08X %08X %08X %08X %08X\n", jtbl[0], jtbl[1],
+    port_log("[entry] game_thread_main (PC version) jtbl %08X %08X %08X %08X %08X\n", jtbl[0], jtbl[1],
              jtbl[2], jtbl[3], jtbl[4]);
-    func_15007A20();
+    game_bss_clear();
     D_800D3048 = 0;
     osCreateMesgQueue(&D_800BEE30, D_800BEE48, 16);
     D_800BEE88[0] = 2;     /* sh 0x0(D_800BEE88) */
@@ -73,7 +73,7 @@ void func_15007830(void) {
     controller_init_all();
     settings_reset_defaults();
     glyph_set_load_rom(0);
-    func_15008A60();
+    view_zoom_state_reset();
     text_queue_reset();
     D_800BEA35 = 5;
     D_800BEE24 = 0;

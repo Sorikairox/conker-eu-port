@@ -137,7 +137,7 @@ void aim_hud_clear(u8 *arg0) {
     fb_fx_broadcast(&sp.u24, 0x21);
     sprite2d_broadcast(&sp.u24, 0x21U);
     screen_tint_broadcast(&sp.u24, 0x21);
-    func_151494E0((s32) &sp.u24, 0x21U);
+    effect_nodes_broadcast((s32) &sp.u24, 0x21U);
     D_8008D0A0 = 0;
 }
 #else

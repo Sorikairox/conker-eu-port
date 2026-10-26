@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15010FB0(void) {
+/* was func_15010FB0 */
+void level_obj_init_scroll_handles(void) {
     D_800BE4F0 = allocate_memory(16, 1, 0, 0);
     D_800BE4F0->unk0 = level_dl_add_texture_scroll(D_800B0E00[1], D_80090310, 1, -1, 0, 1, 0, 0);
     D_800BE4F0->unk4 = level_dl_add_texture_scroll(D_800B0E00[0], D_80090314, 0, -1, 0, 0, 0, 0);

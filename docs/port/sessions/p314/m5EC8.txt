@@ -23,8 +23,8 @@
 125s/(f->flags \& 0xFFB3) | 0x200;/(f->flags \& 0xFFB7) | 0x200;/ % ev9go ev8go
 126s/dx = f->x - sFlyerCircleX\[0\];/dx = f->z - sFlyerCircleX[0];/ % ev8go
 127s/dz = f->z - sFlyerCircleZ\[0\];/dz = f->x - sFlyerCircleZ[0];/ % ev8go
-128s/sFlyerHalfPi\[0\] - func_150484A0(dx, dz);/sFlyerHalfPi[0] - func_150484A0(dz, dx);/ % ev8go
-128s/sFlyerHalfPi\[0\] - func_150484A0(dx, dz);/sFlyerHalfPi[0] + func_150484A0(dx, dz);/ % ev8go ev9go
+128s/sFlyerHalfPi\[0\] - math_atan2f(dx, dz);/sFlyerHalfPi[0] - math_atan2f(dz, dx);/ % ev8go
+128s/sFlyerHalfPi\[0\] - math_atan2f(dx, dz);/sFlyerHalfPi[0] + math_atan2f(dx, dz);/ % ev8go ev9go
 130s/f->rollVel = sqrtf(dx \* dx + dz \* dz);/f->rollVel = sqrtf(dx * dx + dx * dz);/ % ev8go
 134s/if (f->fading == 0) {/if (f->fading != 1) {/ % fadeout fadein
 135s/(f->flags \& 8) \&\& D_800DDF5C\[f->slot\] == 0/(f->flags \& 8) || D_800DDF5C[f->slot] == 0/ % fade8on base
@@ -144,8 +144,8 @@
 327s/f->rollVel -= sFlyerCircleShrink\[0\] \* d;/f->rollVel -= sFlyerCircleShrink[0];/ % ev8circ
 328s/if (f->rollVel < 60\.0f) {/if (f->rollVel < 59.0f) {/ % ev8sink circok ev8r59
 329s/f->rollVel = 60\.0f;/f->rollVel = 61.0f;/ % ev8sink circok
-331s/s = func_150AD78C(f->pitchVel);/s = func_150AD78C(f->turnVel);/ % ev8circ
-332s/c = func_150AD780(f->pitchVel);/c = func_150AD780(f->rollVel);/ % ev8circ
+331s/s = fast_sinf(f->pitchVel);/s = fast_sinf(f->turnVel);/ % ev8circ
+332s/c = fast_cosf(f->pitchVel);/c = fast_cosf(f->rollVel);/ % ev8circ
 333s/f->x = f->rollVel \* c + sFlyerCircleX\[0\];/f->x = f->rollVel * s + sFlyerCircleX[0];/ % ev8circ
 334s/f->z = f->rollVel \* s + sFlyerCircleZ\[0\];/f->z = f->rollVel * c + sFlyerCircleZ[0];/ % ev8circ
 335s/f->y -= 100\.0f \/ ((f->rollVel - 60\.0f) + 4\.0f);/f->y -= 100.0f \/ ((f->rollVel - 60.0f) + 2.0f);/ % ev8circ
@@ -153,8 +153,8 @@
 336s/|| D_800C3A08 != 0xF) {/|| D_800C3A08 != 0xE) {/ % circend
 341s/a = f->pitch \* sFlyerDegToRad\[0\];/a = f->roll * sFlyerDegToRad[0];/ % base
 342s/h = f->heading \* sFlyerDegToRad\[0\];/h = f->pitch * sFlyerDegToRad[0];/ % base
-344s/sh = func_150AD78C(h);/sh = func_150AD78C(a);/ % base
-346s/ch = func_150AD780(h);/ch = func_150AD780(a);/ % base
+344s/sh = fast_sinf(h);/sh = fast_sinf(a);/ % base
+346s/ch = fast_cosf(h);/ch = fast_cosf(a);/ % base
 347s/dir\.unk0 = ca \* sh;/dir.unk0 = sa * sh;/ % base
 348s/dir\.unk4 = -sa;/dir.unk4 = sa;/ % base
 349s/dir\.unk8 = ca \* ch;/dir.unk8 = ca * sh;/ % base

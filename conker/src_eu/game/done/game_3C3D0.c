@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_1500EF20(void) {
+/* was func_1500EF20 */
+void level_setup_scroll_fx_points(void) {
     struct102 *temp_v0;
     struct174 tmp;
 
@@ -15,7 +16,7 @@ void func_1500EF20(void) {
     tmp.unk4 = D_80096224;
     tmp.unkC = D_80096228;
     tmp.unk8 = 400.0f;
-    temp_v0 = (struct102 *)func_151491F4((s16) ((random_int() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = (struct102 *)effect_node_create_nodraw((s16) ((random_int() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, 16);
     }
@@ -23,13 +24,13 @@ void func_1500EF20(void) {
     tmp.unk0 = D_8009622C;
     tmp.unk4 = D_80096230;
     tmp.unkC = D_80096234;
-    temp_v0 = (struct102 *)func_151491F4((s16) ((random_int() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = (struct102 *)effect_node_create_nodraw((s16) ((random_int() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, 16);
     }
 
     tmp.unk4 = D_80096238;
-    temp_v0 = (struct102 *)func_151491F4((s16) ((random_int() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = (struct102 *)effect_node_create_nodraw((s16) ((random_int() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, 16);
     }
@@ -37,7 +38,7 @@ void func_1500EF20(void) {
     tmp.unk0 = D_8009623C;
     tmp.unk4 = D_80096240;
     tmp.unkC = D_80096244;
-    temp_v0 = (struct102 *)func_151491F4((s16) ((random_int() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = (struct102 *)effect_node_create_nodraw((s16) ((random_int() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, 16);
     }

@@ -72,8 +72,8 @@ void model_slots_age_release(void);
 void texture_cache_age_tick(void);
 void world_records_release_blocks(void);
 void gfx_task_submit(s32, s32);
-void func_151F2BE8(void);
-void func_151F2C4C(void);
+void mp3_stream_pause(void);
+void mp3_stream_resume(void);
 
 /* Per-frame main step: wait for the frame message, then build and submit the frame's display list
  * (message 1), release the DL buffers when the game is torn down (message 2) or halt (message 4).
@@ -209,14 +209,14 @@ s32 game_frame_step(void) {
         if (D_800BEAC0 != 0) {
             music_set_all_paused(1);
             sound_set_pause_mute(1);
-            if (func_151F2CDC() != 0) {
-                func_151F2BE8();
+            if (mp3_stream_get_state() != 0) {
+                mp3_stream_pause();
             }
         } else {
             music_set_all_paused(0);
             sound_set_pause_mute(0);
-            if (func_151F2CDC() != 0) {
-                func_151F2C4C();
+            if (mp3_stream_get_state() != 0) {
+                mp3_stream_resume();
             }
         }
     }
@@ -230,7 +230,7 @@ s32 game_frame_step(void) {
 void world_update_objects(void) {
     triggers_update(D_800BE9E4);
     objects_update_visibility();
-    func_1501C870();
+    frame_hook_nop_1501c870();
     if (D_800BEAC0 == 0) {
         if (D_800C35EA == 1) {
             cutscene_update_objects();
@@ -319,7 +319,7 @@ extern s32 D_80043ED0;
 extern s8 D_800D27C9;
 void heap_age_tagged_blocks(void);
 void world_update_objects(void);
-void func_1501C860(void);
+void frame_hook_nop_1501c860(void);
 void cutscene_check_finished(s32 arg0);
 void cutscene_advance_position(s32 arg0);
 void cutscene_camera_track_pass(s32 arg0);
@@ -347,7 +347,7 @@ void world_records_update_matrices(void);
 void world_records_update_shadows(void);
 void world_records_run_callbacks(s32 arg0);
 void world_records_dispatch_touches(void);
-void func_1511FC20(s32 arg0);
+void frame_hook_nop_1511fc20(s32 arg0);
 void camera_update_all(void);
 void light_stub(void);
 void node_run_global_hooks(void);
@@ -406,8 +406,8 @@ s32 world_update(void) {
     }
     world_records_build_visible(0);
     level_update_frame(D_800BE9F0, 0);
-    func_1501C860();
-    func_1511FC20(D_800BE9C0);
+    frame_hook_nop_1501c860();
+    frame_hook_nop_1511fc20(D_800BE9C0);
     afterimage_list_update(0);
     if (D_800BEAC0 == 0) {
         node_run_global_hooks();

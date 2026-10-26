@@ -370,7 +370,7 @@ f32 vec3_length(f32 *);
 s32 ray_cast_world(u8 *, f32, f32, f32, f32, f32, f32, TrailHit *, f32, s32, s32, s32, s32, s32, s32);
 void trail_hit_effects(u8 *, TrailHit *, f32 *);
 void move_xz_towards(f32, f32, f32, f32 *, f32 *);
-f32 func_150484A0(f32, f32);
+f32 math_atan2f(f32, f32);
 s32 obj_send_hit(u8 *, s32, u16, s32);
 f32 wrap_float_range(f32, f32, f32);
 extern f32 D_800BE9A4;
@@ -509,7 +509,7 @@ s32 trail_stream_update(u8 *obj) {
                             *(s32 *)(hobj + 0x218) = 0;
                         } else {
                             s32 slot = (owner - (u8 *)D_800CC2D0) / 0x32C;
-                            u32 ang = func_150484A0(unit[0], unit[2]) * trail_ang_k[0];
+                            u32 ang = math_atan2f(unit[0], unit[2]) * trail_ang_k[0];
 
                             obj_send_hit(hobj, 0xE0036, (u16)((ang - 0x4000) | 1), slot);
                         }

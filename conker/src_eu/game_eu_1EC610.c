@@ -486,7 +486,7 @@ void pickup_burst_spawn(f32 *pos) {
 #endif
 
 #ifdef NON_MATCHING
-/* Lives pop-up (called when a life pickup is collected, after sound 0x511): a HUD object (func_15149130, type
+/* Lives pop-up (called when a life pickup is collected, after sound 0x511): a HUD object (effect_node_create, type
  * 0x60, 0x18 bytes of state) holding a sprite (texture 0xA3) and the number of lives left, one or two digit
  * sprites from the glyph table D_800AAC94. Lives = player_stat_get(0, 3) minus the current one, at most 99.
  * D_800D2458 (set by the 4:3 / wide screen code) moves the sprite and the digits. `arg0` / `arg1` are passed
@@ -554,7 +554,7 @@ void lives_popup_spawn(u8 arg0, s32 arg1) {
     u8 *hud;
     LivesPopup *popup;
 
-    func_151494E0(0, 0x57);
+    effect_nodes_broadcast(0, 0x57);
     lives = player_stat_get(0, 3);
     if (lives != 0) {
         lives -= 1;
@@ -570,7 +570,7 @@ void lives_popup_spawn(u8 arg0, s32 arg1) {
     rec.x = 110.0f;
     rec.angle = sinf(1.9050001f);
     rec.done = 0;
-    hud = (u8 *)func_15149130(300, -1, 0x60, -1, 0, 0x49, (struct37 *)sizeof(LivesPopup), arg0, arg1);
+    hud = (u8 *)effect_node_create(300, -1, 0x60, -1, 0, 0x49, (struct37 *)sizeof(LivesPopup), arg0, arg1);
     if (hud == NULL) {
         return;
     }
@@ -776,13 +776,13 @@ void lives_popup_free_sprites(u8 *arg0) {
 /* was func_151C0154 */
 void lives_popup_retire(struct260 * arg0) {
     lives_popup_free_sprites(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_151C0180 */
 void lives_popup_delete(struct260 * arg0) {
     lives_popup_free_sprites(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 /* was func_151C01AC */

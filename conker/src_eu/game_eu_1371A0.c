@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-// event_object_effect_spawn: spawns a type-0x1A effect for an object (obj NULL: none) through func_15149130:
+// event_object_effect_spawn: spawns a type-0x1A effect for an object (obj NULL: none) through effect_node_create:
 // lifetime `span` (negative: 300, untimed), sub-list arg5 + 0x14, arg6 / arg7 passed on. Its data (+0x28, 20 bytes):
 // the object, the object's byte +0x3B, 0.0f, arg4, arg2, arg3 (bytes +0x12 / +0x13 uninitialised, as in the asm).
 // Returns the effect (NULL if none). Event command 0x65 cases 1 / 2 (game_eu_51190); sibling of segment_effect_spawn.
@@ -40,7 +40,7 @@ struct260 *event_object_effect_spawn(u8 *obj, s16 span, s8 arg2, s8 arg3, f32 ar
     tmp.unk11 = arg3;
     tmp.obj = obj;
     tmp.objByte3B = obj[0x3B];
-    fx = func_15149130(n, -1, 0x1A, -1, timed, 0x1A, (struct37 *) (arg5 + 0x14), arg6, arg7);
+    fx = effect_node_create(n, -1, 0x1A, -1, timed, 0x1A, (struct37 *) (arg5 + 0x14), arg6, arg7);
     if (fx != NULL) {
         memcpy((u8 *) fx + 0x28, &tmp, 0x14);
     }

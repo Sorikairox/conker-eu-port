@@ -24,7 +24,7 @@ extern u32 D_80000318; /* osMemSize */
 /* asm-only callees are left undeclared on purpose: the game's other callers use implicit `int f()`
  * declarations, and the generated stub takes the majority wasm signature. */
 void heap_init(void);
-void func_15007830(void); /* port/boot/game_entry.c */
+void game_thread_main(void); /* port/boot/game_entry.c */
 
 /* P11 (PC fix-up, port-only): mem_init_region_bounds (C, init_3930.c) stores the heap / scratch bounds as
  * KSEG0 constants (0x803F5000 / 0x803FE000). heap_init then computes the heap size as
@@ -84,9 +84,9 @@ void boot_game_thread_main(s32 arg0) {
     port_log("[boot] tlb_page_bitmap_reset\n");
     tlb_page_bitmap_reset();
     { void port_sched_test_start(void); int port_selftest_on(void); if (port_selftest_on()) port_sched_test_start(); } /* P11: C scheduler runtime check */
-    port_log("[boot] entering game: func_15007830\n");
-    func_15007830();
-    port_log("[boot] func_15007830 returned\n");
+    port_log("[boot] entering game: game_thread_main\n");
+    game_thread_main();
+    port_log("[boot] game_thread_main returned\n");
 }
 
 int port_mem_load(void);

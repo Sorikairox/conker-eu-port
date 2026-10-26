@@ -127,7 +127,7 @@ struct260 *segment_effect_spawn(u8 *volatile arg0, s16 arg1, s8 arg2, s8 arg3, f
     tmp.unkC = arg2;
     tmp.unkD = arg3;
     tmp.unk0 = arg0;
-    temp_v0 = func_15149130(n, -1, 0x1B, -1, flag, 0x1B, arg5 + 0x10, arg6, arg7);
+    temp_v0 = effect_node_create(n, -1, 0x1B, -1, flag, 0x1B, arg5 + 0x10, arg6, arg7);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
     }
@@ -236,7 +236,7 @@ struct260 *vent_smoke_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     tmp.unk8 = 0.0f;
     tmp.unkC = 0.20400001f;
     tmp.unk10 = 0.822f;
-    temp_v0 = func_15149130(arg1, -1, 0x1C, -1, 1, 0x1C, 0x14, arg2, arg3);
+    temp_v0 = effect_node_create(arg1, -1, 0x1C, -1, 1, 0x1C, 0x14, arg2, arg3);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x14);
     }

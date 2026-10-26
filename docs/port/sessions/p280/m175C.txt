@@ -1,7 +1,7 @@
 \#^    link.room = obj\[0x3B\];$#s/0x3B/0x3A/ % all
 \#^    link.smoke = NULL;$#d % all
-\#^    o = (u8 \*) func_15149130(#s/0x54/0x55/ % all
-\#^    o = (u8 \*) func_15149130(#s/arg1, arg2/arg1, 0/ % all
+\#^    o = (u8 \*) effect_node_create(#s/0x54/0x55/ % all
+\#^    o = (u8 \*) effect_node_create(#s/arg1, arg2/arg1, 0/ % all
 \#^    memcpy(l, &link, 0x10);$#s/0x10/0xC/ % all
 \#^    tail.u58 = 0;$#s/0;/1;/ % all
 \#^    tail.height = #s/0x150/0x14C/ % all

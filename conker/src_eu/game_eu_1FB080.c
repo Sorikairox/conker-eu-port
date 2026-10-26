@@ -25,7 +25,7 @@ struct260 *spout_ctrl_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     tmp.unk4 = *(s32 *)(arg0 + 0x18);
     tmp.unk8 = 0;
     tmp.unkC = *(s32 *)(arg0 + 0x1C);
-    temp_v0 = func_15149130(0x12C, -1, -1, -1, 0, 0x1E, 0x10, arg1, arg2);
+    temp_v0 = effect_node_create(0x12C, -1, -1, -1, 0, 0x1E, 0x10, arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
     }
@@ -37,7 +37,7 @@ void spout_broadcast_start(s32 arg0) {
     s32 tmp;
     if ((arg0 >= 0) && (arg0 < 4)) {
         tmp = arg0;
-        func_151494E0(&tmp, 0x17);
+        effect_nodes_broadcast(&tmp, 0x17);
     }
 }
 
@@ -46,7 +46,7 @@ void spout_broadcast_stop(s32 arg0) {
     s32 tmp;
     if ((arg0 >= 0) && (arg0 < 4)) {
         tmp = arg0;
-        func_151494E0(&tmp, 0x18);
+        effect_nodes_broadcast(&tmp, 0x18);
     }
 }
 
@@ -561,7 +561,7 @@ void spout_die_retire(u8 *arg0) {
     s32 tmp;
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);
     tmp = *(s32 *)(temp_v0 + 0x48);
-    func_151494E0(&tmp, 0x23);
+    effect_nodes_broadcast(&tmp, 0x23);
     fxrec_die_retire(arg0);
 }
 
@@ -570,7 +570,7 @@ void spout_die_free(u8 *arg0) {
     s32 tmp;
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);
     tmp = *(s32 *)(temp_v0 + 0x48);
-    func_151494E0(&tmp, 0x23);
+    effect_nodes_broadcast(&tmp, 0x23);
     fxrec_die_free(arg0);
 }
 
@@ -1275,7 +1275,7 @@ void ground_fx_spawn_random(s32 arg0, f32 arg1, f32 arg2) {
             pos.y = D_800D9C80;
             tmp.unk0 = pos;
             tmp.unkC = 0.0f;
-            temp_v0 = func_15149130(random_int() % 131U + 51, -1, 0x20, -1, 1, 0, 0x10, 0xFF, 1);
+            temp_v0 = effect_node_create(random_int() % 131U + 51, -1, 0x20, -1, 1, 0, 0x10, 0xFF, 1);
             if (temp_v0 != NULL) {
                 memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
             }
@@ -1495,7 +1495,7 @@ void obj_fx_broadcast_kill(u8 *arg0) {
 
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
-    func_151494E0(&tmp, 0x18);
+    effect_nodes_broadcast(&tmp, 0x18);
 }
 
 /* was func_151D0058 */
@@ -1518,7 +1518,7 @@ void obj_aura_fx_spawn(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     tmp.unkD = arg1;
     tmp.unkC = (random_int() % 56U) + 200;
     tmp.unk6 = *(u16 *)(arg0 + 0x84);
-    temp_v0 = func_15149130(0x12C, -1, 0x61, 4, 0, 0x31, 0x10, arg2, arg3);
+    temp_v0 = effect_node_create(0x12C, -1, 0x61, 4, 0, 0x31, 0x10, arg2, arg3);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
     }
@@ -2021,7 +2021,7 @@ void obj_point_trail_spawn(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     tmp.unk24 = *(Vec3_151D1510 *)D_800A5860;
     tmp.unk30 = 0.0f;
     tmp.unk34 = arg1;
-    temp_v0 = func_15149130(300, -1, 0x5F, -1, 0, 0x48, 0x38, arg2, arg3);
+    temp_v0 = effect_node_create(300, -1, 0x5F, -1, 0, 0x48, 0x38, arg2, arg3);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x38);
     }
@@ -2150,13 +2150,13 @@ void obj_point_trail_stop(void *arg0) {
 /* was func_151D1938 */
 void obj_point_trail_die_retire(void *arg0) {
     obj_point_trail_stop(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_151D1964 */
 void obj_point_trail_die_free(void *arg0) {
     obj_point_trail_stop(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 /* was func_151D1990 */

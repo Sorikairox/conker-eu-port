@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """P56: mechanical translator of hand-written MIPS asm (splat .s listing) into register-level portable C.
 
-Used for the hand-asm wall engine / ray cast of asm/D5E90.s (func_150AB6D0 / func_150AC8C4 -> func_150AB708,
-func_150ACEA0), whose helpers use private register conventions and jump through continuation pointers stored on the
+Used for the hand-asm wall engine / ray cast of asm/D5E90.s (collision_walls_slide / collision_ledge_probe -> func_150AB708,
+collision_ray_cast), whose helpers use private register conventions and jump through continuation pointers stored on the
 stack. The output is one C function body per "machine": GPRs are u32 locals, FPRs a union array F[32] (FR=0, single
 precision only), every instruction one C statement in program order; branch delay slots are executed after the branch
 condition is evaluated (likely branches only when taken); `jal` to a label inside the machine sets ra to the return
@@ -23,7 +23,7 @@ EXTERN = {
     'func_150A69A8': 'v0 = func_150A69A8((s32) a0, (s32) a1, (s32 *) a2, (s32) a3);',
     'world_objects_transform_mesh': 'v0 = world_objects_transform_mesh((s32) a0, (s32 *) a1, (s32) a2);',
     'quadtree_set_test_box': 'quadtree_set_test_box(F[12].f, F[14].f, U2F(a2));',
-    'func_150484A0': 'F[0].f = func_150484A0(F[12].f, F[14].f);',
+    'math_atan2f': 'F[0].f = math_atan2f(F[12].f, F[14].f);',
     'collision_select_area': 'collision_select_area((s32) a0);',
     'sinf': 'F[0].f = sinf(F[12].f);',
     'cosf': 'F[0].f = cosf(F[12].f);',

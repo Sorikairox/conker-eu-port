@@ -331,7 +331,7 @@ s32 cord_shape_arc(u8 *arg0) {
         temp_f24_2 = sp5C - sp68;
         var_s1 = 0;
         var_s2 = arg0 + 0x48;
-        var_f20 = func_150484A0(temp_f24_2, temp_f14_2) - 3.1415927f;
+        var_f20 = math_atan2f(temp_f24_2, temp_f14_2) - 3.1415927f;
         temp_f22_3 = sqrtf((temp_f14_2 * temp_f14_2) + (temp_f24_2 * temp_f24_2)) * 0.5f;
         do {
             temp_s0 = var_s2;

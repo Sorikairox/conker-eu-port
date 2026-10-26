@@ -33,7 +33,7 @@ dummy_label_927029:
     tmp.unk8 = 0;
     tmp.unkA = 0;
 
-    temp_v0 = func_15149130(300, -1, 80, -1, 0, 61, 12, 255, 1);
+    temp_v0 = effect_node_create(300, -1, 80, -1, 0, 61, 12, 255, 1);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, 12); // memcpy
     }

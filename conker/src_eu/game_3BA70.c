@@ -26,8 +26,8 @@ void level_objects_reset_state(void) {
     u8 *var_v0;
 
     fx_alloc_d88750();
-    func_15008A10();
-    func_15012770();
+    obj_holder_refs_init();
+    level_init_nop_15012770();
     var_v0 = &D_800E0950;
     do {
         var_v0 += 4;
@@ -80,7 +80,7 @@ void level_objects_reset_state(void) {
 /* was func_1500E70C */
 void level_hook_level_2b(s32 arg0) {
     if (arg0 == 0x2B) {
-        func_15011C70();
+        level_reset_d9aa0_sfx();
     }
 }
 

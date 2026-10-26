@@ -26,7 +26,7 @@ extern f32 D_800A3824;
 // camera modes +0x23E 9 / 0x3B) with ctl +0x1B3 set: the yaw +0x37C eases (math_spring_approach_angle) toward the player's facing
 // - 180, with the multiplayer gains +0x96C / +0x970 easing to 5 / 8 (math_spring_approach). Else the target yaw is the
 // facing + turn (+0x7C) - 180 - arg1, minus the locked-camera tilt (+0x2E4 >> 16) and the ctl +0x12 offset for the
-// riding modes (9, 0x37..0x39, 0x3B, 0x12), wrapped by func_15048758; +0x23C snaps the yaw to ctl +0x18C (taking its
+// riding modes (9, 0x37..0x39, 0x3B, 0x12), wrapped by math_wrap_deg_360; +0x23C snaps the yaw to ctl +0x18C (taking its
 // saved position +0x160 into +0x2F8 / +0x304 once) or the target, else it eases with mode-dependent gains (unless
 // D_800BEE2C). +0x39C = yaw * D_800A3810 / D_800A3824.
 /* was func_151221F0 */
@@ -67,7 +67,7 @@ void camera_follow_yaw_update(struct108 *arg0, f32 arg1) {
         if (mode == 9 || mode == 0x38 || mode == 0x39 || mode == 0x37 || mode == 0x3B || mode == 0x12) {
             yaw -= (f32) *(s16 *) (*(u8 **) (cam + 0x3D4) + 0x12) * 0.0054931640625f;
         }
-        func_15048758(&yaw);
+        math_wrap_deg_360(&yaw);
         if (cam[0x23C] != 0) {
             ctl = *(u8 **) (cam + 0x3D4);
             if (D_800A3818 != *(f32 *) (ctl + 0x18C)) {

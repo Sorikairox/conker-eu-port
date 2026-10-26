@@ -31,7 +31,7 @@ s/jet.vel\[2\] = 10.0f \* s;/jet.vel[2] = 10.0f * c;/
 s/jet.u30\[3\] = 0x33;/jet.u30[3] = 0x34;/
 s/jet.u3C = 0.3f;/jet.u3C = 0.4f;/
 s/key\[0\] = (u8) pipe \* 2;/key[0] = (u8) pipe * 2 + 1;/
-s/func_151494E0((s32) key, 0x17);/func_151494E0((s32) key, 0x18);/
+s/effect_nodes_broadcast((s32) key, 0x17);/effect_nodes_broadcast((s32) key, 0x18);/
 s/water_jet_spawn((s32 \*) \&jet, (u8 \*) at, 20);/water_jet_spawn((s32 *) \&jet, (u8 *) at, 21);/
 s/sound_play_at(0xE7, 0x7FFF, 0, 2, 0,/sound_play_at(0xE7, 0x7FFF, 0, 1, 0,/
 s/(s32) p->pos\[1\], (s32) p->pos\[2\], 1000, 3000);/(s32) p->pos[1], (s32) p->pos[2], 1000, 3001);/

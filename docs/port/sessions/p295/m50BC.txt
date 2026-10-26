@@ -29,10 +29,10 @@
 /^    } else if (hit->kind == 1) {/s/== 1/== 3/
 /^    } else if (from != NULL && to != NULL) {/s/from != NULL \&\& to != NULL/from != NULL/
 /^        len = hit->dist;/s/hit->dist/0.0f/
-/found = func_150ACEA0(hit->point\[0\], hit->point\[1\]/s/hit->point\[0\], hit->point\[1\]/pos[0], hit->point[1]/
+/found = collision_ray_cast(hit->point\[0\], hit->point\[1\]/s/hit->point\[0\], hit->point\[1\]/pos[0], hit->point[1]/
 /^            hit->dist += len;/s/+= len/= len/
 /^            hit->dist += len;/d
-/found = func_150ACEA0(pos\[0\], pos\[1\], pos\[2\]/s/pos\[1\], pos\[2\]/pos[2], pos[1]/
+/found = collision_ray_cast(pos\[0\], pos\[1\], pos\[2\]/s/pos\[1\], pos\[2\]/pos[2], pos[1]/
 1,/(u8 \*) &hit->extra, 0.0f);/s/(u8 \*) &hit->extra, 0.0f);/(u8 *) \&hit->extra, 1.0f);/
 /^    if (!found) {/s/!found/found == 1/
 /^        return dir != NULL || to != NULL;/s/|| to != NULL/|| from != NULL/

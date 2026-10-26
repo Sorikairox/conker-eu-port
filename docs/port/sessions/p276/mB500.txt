@@ -22,11 +22,11 @@
 \#^            rec\[1\] = y0;$#s/= y0/= pos[1]/
 \#^    rec\[4\] = 0.0f;$#s/0.0f/1.0f/
 \#^    rec\[3\] = 195.0f \* 0.001f;$#s/195/196/
-\#^    obj = func_151491F4#s/0x18, 0xFF, 0)/0x18, 0xFF, 1)/
-\#^    obj = func_151491F4#s/0xC, 1, 7/0xC, 1, 6/
+\#^    obj = effect_node_create_nodraw#s/0x18, 0xFF, 0)/0x18, 0xFF, 1)/
+\#^    obj = effect_node_create_nodraw#s/0xC, 1, 7/0xC, 1, 6/
 \#^        memcpy((s32) obj + 0x28, rec, 0x18);$#s/0x28/0x2C/
 \#^    if (!ok) {$#s/!ok/0/
 \#^    angle = (u32) random_int()#s/ 41 + yaw/ 40 + yaw/
 \#^    angle = (u32) random_int()#s/yaw - 20;/yaw - 21;/
 \#^    angle = (u32) random_int()#s/(u32) func/(s32) func/
-\#^    obj = func_151491F4#s/ 61 + 5)/ 61 + 6)/
+\#^    obj = effect_node_create_nodraw#s/ 61 + 5)/ 61 + 6)/

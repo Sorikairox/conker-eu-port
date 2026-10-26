@@ -20,7 +20,7 @@ void camera_orbit_update(struct108 *);
 void camera_follow_mode_update(struct108 *);
 void camera_pivot_follow_update(struct108 *);
 void camera_orbit_point_update(struct108 *);
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 void math_spring_approach_angle(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void vec3f_cross(u8 *, u8 *, u8 *);
 f32 vec3f_dot(f32 *a, f32 *b);
@@ -740,7 +740,7 @@ s32 camera_pop_mode(struct108 *arg0, s32 arg1) {
 /* P41: camera eye orbit. eye (0x2F8 / 0x300) = at (0x2BC / 0x2C4) + (sin, cos)(yaw) * distance 0x370, where 0x370
  * eases toward the wanted distance 0x374 (rates 0x3B4 / 0x3B8, chosen from the mode and flags). The yaw 0x37C / 0x39C
  * can be turned toward the record's heading (pad button 4 of 0x36C, the 0x8E4 / 0x8E8 timer; the 0x3D4 object's
- * +0x95 flag), and spun by D_800BEE2C. Two ray casts (func_150ACEA0) from the target toward the eye shorten
+ * +0x95 flag), and spun by D_800BEE2C. Two ray casts (collision_ray_cast) from the target toward the eye shorten
  * 0x374 against walls (0x600 / 0x604 = hit and distance). 0x374 is restored to its entry value at the end. */
 /* was func_15123A54 */
 void camera_update_eye_orbit(struct108 *arg0) {
@@ -883,7 +883,7 @@ void camera_update_eye_orbit(struct108 *arg0) {
         sp104[0] = sinf(*(f32 *)(p + 0x39C));
         sp104[1] = 0.0f;
         sp104[2] = cosf(*(f32 *)(p + 0x39C));
-        if (func_150ACEA0(*(f32 *)(p + 0x2A4), *(f32 *)(p + 0x2A8) + 140.0f, *(f32 *)(p + 0x2AC), sp104[0], sp104[1], sp104[2], 0, tri, &hitE4, &hitE8,
+        if (collision_ray_cast(*(f32 *)(p + 0x2A4), *(f32 *)(p + 0x2A8) + 140.0f, *(f32 *)(p + 0x2AC), sp104[0], sp104[1], sp104[2], 0, tri, &hitE4, &hitE8,
                           &hitEC, &hitE0, 0, 0, *(f32 *)(p + 0x374) + 30.0f) != 0 &&
             hitE0 < *(f32 *)(p + 0x374)) {
             bx = sinf(*(f32 *)(p + 0x39C) + 3.14159274f) * *(f32 *)(p + 0x374);
@@ -902,7 +902,7 @@ void camera_update_eye_orbit(struct108 *arg0) {
             vec3f_cross((u8 *)e2, (u8 *)e1, (u8 *)n);
             vec3_normalize((struct17 *)n, (struct17 *)n);
             if (0.325322002f < vec3f_dot(sp104, n) &&
-                func_150ACEA0(*(f32 *)(p + 0x2A4) - bx, *(f32 *)(p + 0x2A8) + 140.0f, *(f32 *)(p + 0x2AC) - bz, bx, 0.0f, bz, 0, triC8, &hit8C, &hit90,
+                collision_ray_cast(*(f32 *)(p + 0x2A4) - bx, *(f32 *)(p + 0x2A8) + 140.0f, *(f32 *)(p + 0x2AC) - bz, bx, 0.0f, bz, 0, triC8, &hit8C, &hit90,
                               &hit94, &hit88, 0, 0, *(f32 *)(p + 0x374) + 30.0f) != 0) {
                 dx = hit8C - hitE4;
                 dz = hit94 - hitEC;
@@ -1304,7 +1304,7 @@ void camera_calc_pitch(struct108 *arg0) {
     } else {
         phi_f14 = temp_f12;
     }
-    temp_f2 = func_150484A0(arg0->unk2FC - arg0->unk2C0, phi_f14) * 57.295776f;
+    temp_f2 = math_atan2f(arg0->unk2FC - arg0->unk2C0, phi_f14) * 57.295776f;
     arg0->unk388 = temp_f2;
     if (temp_f2 > 180.0f) {
         arg0->unk388 -= 360.0f;
@@ -1976,7 +1976,7 @@ s32 camera_update_aim_mode(struct108 *arg0) {
     } else {
         ang = A_F_OF(A_HOLD, 0x40) - 90.0f;
     }
-    func_15048758(&ang);
+    math_wrap_deg_360(&ang);
     rad = ang * 0.017453292f;
     camera_pop_mode(arg0, 1);
     pl[0x197] = 2;
@@ -2110,7 +2110,7 @@ done_start:
     }
     A_F_OF(pl, 0x174) -= dx;
     A_F_OF(pl, 0x178) += dy;
-    func_15048758((f32 *)(pl + 0x174));
+    math_wrap_deg_360((f32 *)(pl + 0x174));
     if (is1F || type == 0x29) {
         lo = -80.0f;
         hi = 30.0f;
@@ -2370,7 +2370,7 @@ s32 scope_zoom_sound_update(u8 *voice, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s
 // its not yet written eye slot to PL +0x13C there (rewritten below in the same call); kept as is.
 // Each frame in state 2: eye = (x, y + PL +0x114 * 0.75 + (y - +0x30), z) of arg0; without the aim button it
 // leaves (state 0, obj_model_reset, returns 0); else the stick turns PL yaw / pitch +0x174 / +0x178 by 0.025 per
-// unit, the yaw wraps (func_15048758), the pitch is clamped to -20..80 (types 0x1F / 0x29) or -80..80, both ease
+// unit, the yaw wraps (math_wrap_deg_360), the pitch is clamped to -20..80 (types 0x1F / 0x29) or -80..80, both ease
 // (math_spring_approach_angle, 6 / 8 / frame time x 0.02) into +0x16C / +0x170, and PL gets eye +0x13C, target eye + dir
 // +0x148, dir +0x130. Returns 1; 0 when off; the type byte PL +0x78 in any other state.
 /* was func_151279A0 */
@@ -2440,7 +2440,7 @@ s32 player_aim_look(struct127 *arg0, struct49 *arg1) {
 
     *(f32 *) (pl + 0x174) = *(f32 *) (pl + 0x174) - (f32) (s8) in[2] * 0.025f;
     *(f32 *) (pl + 0x178) = *(f32 *) (pl + 0x178) + (f32) (s8) in[3] * 0.025f;
-    func_15048758((f32 *) (pl + 0x174));
+    math_wrap_deg_360((f32 *) (pl + 0x174));
     if (type == 0x1F || type == 0x29) {
         lo = -20.0f;
     } else {
@@ -2554,8 +2554,8 @@ void camera_start_transition(struct108 *arg0, s32 arg1, s32 arg2) {
 /* Camera transition (+0x7F4 state: 0 idle, 1 start, 2 running): moves the eye +0x2BC from the start point +0x7F8
  * to the end point +0x804 (end x / z follow the player, y from camera_update_target_height) over +0x834 ticks (countdown
  * +0x840, progress t = +0x830), blending yaw +0x37C, distance D_800DC430, height D_800DC434 and the extra
- * angles +0x5E8 / +0x3A8 (func_15048720 = angle lerp). The camera mode +0x23C cancels it. Returns 0 when idle,
- * nonzero while it runs (on the last tick the asm returns the +0x3D0 pointer left in v0; func_15048720 does
+ * angles +0x5E8 / +0x3A8 (math_angle_lerp_deg = angle lerp). The camera mode +0x23C cancels it. Returns 0 when idle,
+ * nonzero while it runs (on the last tick the asm returns the +0x3D0 pointer left in v0; math_angle_lerp_deg does
  * not touch v0), the state itself for an unknown state. */
 /* was func_15128030 */
 s32 camera_update_transition(struct108 *arg0) {
@@ -2631,13 +2631,13 @@ s32 camera_update_transition(struct108 *arg0) {
     PF(0x2C0) = TF(0x8) + (TF(0x14) - TF(0x8)) * TF(0x3C);
     PF(0x2C4) = TF(0xC) + (TF(0x18) - TF(0xC)) * TF(0x3C);
     if (*(s32 *)(p + 0x2C) != 0x40) {
-        PF(0x37C) = yaw = func_15048720(TF(0x3C), TF(0x20), TF(0x2C));
+        PF(0x37C) = yaw = math_angle_lerp_deg(TF(0x3C), TF(0x20), TF(0x2C));
         PF(0x39C) = yaw * 0.017453292f;
     }
     D_800DC430 = TF(0x1C) + (TF(0x28) - TF(0x1C)) * TF(0x3C);
     D_800DC434 = PF(0x83C) + (PF(0x838) - PF(0x83C)) * TF(0x3C);
-    PF(0x5E8) = func_15048720(TF(0x3C), 0.0f, TF(0x34));
-    PF(0x3A8) = func_15048720(TF(0x3C), 0.0f, TF(0x38));
+    PF(0x5E8) = math_angle_lerp_deg(TF(0x3C), 0.0f, TF(0x34));
+    PF(0x3A8) = math_angle_lerp_deg(TF(0x3C), 0.0f, TF(0x38));
     if (last) {
         *(u16 *)(t + 0x40) = 0;
         *(u16 *)t = 0;
@@ -2755,7 +2755,7 @@ s32 camera_update_special_modes(struct108 *arg0) {
         return 1;
     }
     if (arg0->unk2C & 0x400000) {
-        func_1512D380((s32) arg0);
+        camera_hook_nop_1512d380((s32) arg0);
         camera_update_state_flags(arg0);
         camera_finish_frame(arg0);
         return 1;

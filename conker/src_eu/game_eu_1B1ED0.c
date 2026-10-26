@@ -108,7 +108,7 @@ void vec3_diff(struct17 *, struct17 *, struct17 *);
 f32 vec3f_magnitude(f32 *);
 void mtxf_transform_point(f32 mf[4][4], f32, f32, f32, f32 *, f32 *, f32 *);
 void mtxf_scale(f32 mtx[4][4], s32, s32, s32);
-f32 func_150484A0(f32, f32);
+f32 math_atan2f(f32, f32);
 
 /* shadow_light_projection: sets up shadow slot `slot` of object record `obj` (box half sizes sx, sy, sz).
  * Light: unless D_800DE464, the nearest enabled light of the list D_800DCD78 whose integer distance
@@ -296,8 +296,8 @@ f32 shadow_light_projection(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_
     D_800D3AAC = max_z;
     do {
         m = 1.0f;
-        fovy = func_150484A0(1.0f, D_800D3AA0[1]);
-        guPerspectiveF(mf, &D_800DF500[slot], fovy * 57.295776f, func_150484A0(1.0f, D_800D3AA0[0]) * 57.295776f,
+        fovy = math_atan2f(1.0f, D_800D3AA0[1]);
+        guPerspectiveF(mf, &D_800DF500[slot], fovy * 57.295776f, math_atan2f(1.0f, D_800D3AA0[0]) * 57.295776f,
                        -D_800D3AAC, -D_800D3AA8, persp_scale);
         mtxf_mul(view, mf, mf);
         for (i = 0; i < 16; i++) {

@@ -7,7 +7,7 @@
 \#^            part = ((u8 \*\*) (obj + 0x4C))\[i\];$#s/0x4C/0x50/
 \#^            mtxf_transform_point(mtx, D_800A0CC0\[i\]\[0\], D_800A0CC0\[i\]\[1\], D_800A0CC0\[i\]\[2\], &end\[0\], &end\[1\], &end\[2\]);$#s/D_800A0CC0\[i\]\[1\]/D_800A0CC0[0][1]/
 \#^            mtxf_transform_point(mtx, D_800A0CC0\[i\]\[0\], D_800A0CC0\[i\]\[1\], D_800A0CC0\[i\]\[2\], &end\[0\], &end\[1\], &end\[2\]);$#s/&end\[1\], &end\[2\]/\&end[2], \&end[1]/
-\#^            if (func_150ACEA0(\*(f32 \*) (obj + 0x28), \*(f32 \*) (obj + 0x2C), \*(f32 \*) (obj + 0x30), end\[0\], end\[1\],$#s/0x2C/0x28/
+\#^            if (collision_ray_cast(\*(f32 \*) (obj + 0x28), \*(f32 \*) (obj + 0x2C), \*(f32 \*) (obj + 0x30), end\[0\], end\[1\],$#s/0x2C/0x28/
 \#^                              end\[2\], 0, NULL, &hit\[0\], &hit\[1\], &hit\[2\], &frac, 0, 0, 0.0f) != 0) {$#s/0.0f/1.0f/
 \#^                              end\[2\], 0, NULL, &hit\[0\], &hit\[1\], &hit\[2\], &frac, 0, 0, 0.0f) != 0) {$#s/!= 0/== 0/
 \#^                (\*(u8 \*\*) (part + 0x14))\[9\] = 0;$#d

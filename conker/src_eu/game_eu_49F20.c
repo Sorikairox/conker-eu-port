@@ -7,7 +7,7 @@ extern s8 D_800BEA35;
 extern s32 D_800BEE20;
 extern s32 D_800BEE24;
 extern u16 D_800CC7A2;
-void func_15016680(void);
+void start_points_clear(void);
 void rumble_stop_all(void);
 
 /* was func_1501C710 */
@@ -39,7 +39,7 @@ void game_request_transition(s32 arg0, u16 *arg1, s32 arg2, s32 arg3, s32 arg4) 
     case 3:
         if (D_800BE616 == 0) {
             D_800BEA35 = 4;
-            func_15016680();
+            start_points_clear();
         }
         break;
     case 5:

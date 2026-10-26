@@ -6,7 +6,7 @@
 #ifdef NON_MATCHING
 /* P153 */
 s32 trigger_point_in_kind3(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
-s32 func_150ACEA0(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 a6, s32 a7, s32 a8, s32 a9, s32 a10, s32 a11,
+s32 collision_ray_cast(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 a6, s32 a7, s32 a8, s32 a9, s32 a10, s32 a11,
                   s32 a12, s32 a13, f32 a14);
 u8 prop_is_flagged(s32 arg0);
 void emit_effect3d_from_surface(u8 *arg0, s32 arg1, s32 arg2);
@@ -18,7 +18,7 @@ typedef struct {
         s16 u2;               /* 0x02 */
         f32 pos[3];           /* 0x04: ray hit point */
         f32 dir[3];           /* 0x10: ray direction, negated */
-        s16 hit[9];           /* 0x1C: hit record of func_150ACEA0 */
+        s16 hit[9];           /* 0x1C: hit record of collision_ray_cast */
         u8 pad2E[2];
         f32 u30;              /* 0x30 */
         u8 u34;               /* 0x34 */
@@ -64,7 +64,7 @@ typedef struct {
 
 // water_splash_spawn: P153: splash where obj (pos +0x14) meets the water between it and (x, z): when neither
 // trigger_point_in_kind3 test (2, 1) holds at the object's position, casts a ray from 80 units above the object towards
-// (x, z) (func_150ACEA0); on a hit whose surface passes prop_is_flagged it spawns a drop record (sprite_fx_spawn_cam_at,
+// (x, z) (collision_ray_cast); on a hit whose surface passes prop_is_flagged it spawns a drop record (sprite_fx_spawn_cam_at,
 // random life 100..150, alpha 155..255, random size 40..60 and flips) and always a ring (emit_effect3d_from_surface) at the hit
 // point. The original first checksums the code range menu_settings_apply_checked..menu_spawn_character (anti-tamper: sets
 // D_800843F0[0] = 0xFF unless the sum of ~words is 0x38424614); the port's code is not N64 code, so that check
@@ -90,7 +90,7 @@ void water_splash_spawn(u8 *obj, f32 x, f32 z, u8 arg3, s32 arg4) {
     }
     dx = -(*(f32 *) (obj + 0x14) - x);
     dz = -(*(f32 *) (obj + 0x1C) - z);
-    if (func_150ACEA0(*(f32 *) (obj + 0x14), *(f32 *) (obj + 0x18) + 80.0f, *(f32 *) (obj + 0x1C), dx, 0.0f, dz, 0,
+    if (collision_ray_cast(*(f32 *) (obj + 0x14), *(f32 *) (obj + 0x18) + 80.0f, *(f32 *) (obj + 0x1C), dx, 0.0f, dz, 0,
                       (s32) f.hit, (s32) &f.pos[0], (s32) &f.pos[1], (s32) &f.pos[2], 0, (s32) &f.surface, 0,
                       0.0f) == 0) {
         return;

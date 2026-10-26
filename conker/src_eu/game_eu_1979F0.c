@@ -45,9 +45,9 @@ void falling_debris_update(u8 *obj) {
         *(f32 *) (obj + 0xC4) = (math_sin_u8(obj[0xE7]) * D_800A7090 + 1.0f) * *(f32 *) (obj + 0xD4);
     }
     if (obj[0xE8] & 2) {
-        *(f32 *) (obj + 0xA0) = func_150484A0(*(f32 *) (obj + 0xA8), *(f32 *) (obj + 0xB0)) * D_800A7094;
+        *(f32 *) (obj + 0xA0) = math_atan2f(*(f32 *) (obj + 0xA8), *(f32 *) (obj + 0xB0)) * D_800A7094;
         *(f32 *) (obj + 0x9C) =
-            func_150484A0(-*(f32 *) (obj + 0xAC), sqrtf(*(f32 *) (obj + 0xA8) * *(f32 *) (obj + 0xA8) +
+            math_atan2f(-*(f32 *) (obj + 0xAC), sqrtf(*(f32 *) (obj + 0xA8) * *(f32 *) (obj + 0xA8) +
                                                         *(f32 *) (obj + 0xB0) * *(f32 *) (obj + 0xB0))) *
             D_800A7098;
     }

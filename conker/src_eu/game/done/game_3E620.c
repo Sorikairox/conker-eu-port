@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15011170(void) {
+/* was func_15011170 */
+void level_obj_init_storm_sounds(void) {
     D_80088B40 = 0;
     lightning_emitter_spawn(D_800DBFF0, 0, 0, 0xFF, 1);
     sfx_emitter_start(108, -3580,  -546, -6129, 18000, 1111, 1100, sfx_cb_ambient_random_chirp, 0, 0, 8, 0);

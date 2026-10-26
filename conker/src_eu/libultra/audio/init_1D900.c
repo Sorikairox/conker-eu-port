@@ -3,7 +3,7 @@
 #include "n_synthInternals.h"
 
 
-void func_1001CF38(s32, f32);
+void n_fx_lowpass_update_coefs(s32, f32);
 extern Acmd *(func_1001E530)(s32, Acmd *);
 
 
@@ -22,7 +22,8 @@ void n_alSynSetFXMix( N_ALVoice *v, u8 fxmix) {
     }
 }
 
-s32 func_1001D9B0(s16 arg0) {
+/* was func_1001D9B0 */
+s32 n_syn_get_aux_fx(s16 arg0) {
     N_ALMainBus *sp4;
 
     sp4 = n_syn->mainBus;
@@ -34,7 +35,8 @@ s32 func_1001D9B0(s16 arg0) {
 }
 
 // this is not right.
-s32 func_1001DA28(s16 arg0) {
+/* was func_1001DA28 */
+s32 n_syn_get_aux_filter(s16 arg0) {
     N_ALMainBus *sp4;
 
     sp4 = n_syn->mainBus;
@@ -44,7 +46,7 @@ s32 func_1001DA28(s16 arg0) {
         return 0;
     }
 }
-// s32 func_1001DA28(s16 arg0) {
+// s32 n_syn_get_aux_filter(s16 arg0) {
 //     N_ALMainBus *sp4;
 //
 //     sp4 = n_syn->mainBus;
@@ -55,16 +57,18 @@ s32 func_1001DA28(s16 arg0) {
 //     }
 // }
 
-void func_1001DAA0(s32 arg0, s16 arg1, s32 arg2) {
+/* was func_1001DAA0 */
+void n_fx_set_param(s32 arg0, s16 arg1, s32 arg2) {
     s32 sp1C = arg0;
     func_1001ED6C(sp1C, arg1, arg2);
 }
 
-void func_1001DAE4(ALVoiceConfig *arg0, s16 arg1, s32 *arg2) {
+/* was func_1001DAE4 */
+void n_fx_filter_set_param(ALVoiceConfig *arg0, s16 arg1, s32 *arg2) {
     if (arg1 == 8) {
         arg0->fxBus = (f32) *arg2 * 0.1f;
     } else if (arg1 == 9) {
         arg0->priority = *arg2;
     }
-    func_1001CF38(arg0, n_syn->outputRate);
+    n_fx_lowpass_update_coefs(arg0, n_syn->outputRate);
 }

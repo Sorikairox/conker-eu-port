@@ -15,8 +15,8 @@ void level_anim_frame_counter_tick(s32, s32);
 /* was func_150CF470 */
 void level_light2_orbit(s32 arg0) {
     f32 angle = *(f32 *) (world_record_find(4) + 8) * 0.017453292f;
-    f32 s = func_150AD78C(angle);
-    f32 c = func_150AD780(angle);
+    f32 s = fast_sinf(angle);
+    f32 c = fast_cosf(angle);
     f32 dx = 76.0f - -1.0f;
     f32 dy = 241.0f - 44.0f;
 
@@ -31,7 +31,7 @@ void level_light2_orbit(s32 arg0) {
 f32 math_angle_offset_scaled(s32 arg0, s32 arg1) {
     arg0++;
     arg1 -= 0x2C;
-    return func_150484A0(arg0, arg1) * D_800A0C08;
+    return math_atan2f(arg0, arg1) * D_800A0C08;
 }
 
 /* was func_150CF590 */

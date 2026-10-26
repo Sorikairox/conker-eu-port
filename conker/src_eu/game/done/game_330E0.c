@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15005C30(struct108 *arg0) {
+/* was func_15005C30 */
+void camera_level_hook09_setup(struct108 *arg0) {
     arg0->unk84 |= 0x100000;
     arg0->unk84 &= -5;
     arg0->unk1B4 = 2;

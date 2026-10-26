@@ -14,14 +14,14 @@ void mtxf_rotate_xyz_deg(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3) {
     f32 sxsy, cxsy;
 
     arg1 *= D_8009FA90;
-    cx = func_150AD780(arg1);
-    sx = func_150AD78C(arg1);
+    cx = fast_cosf(arg1);
+    sx = fast_sinf(arg1);
     arg2 *= D_8009FA90;
-    cy = func_150AD780(arg2);
-    sy = func_150AD78C(arg2);
+    cy = fast_cosf(arg2);
+    sy = fast_sinf(arg2);
     arg3 *= D_8009FA90;
-    cz = func_150AD780(arg3);
-    sz = func_150AD78C(arg3);
+    cz = fast_cosf(arg3);
+    sz = fast_sinf(arg3);
     sxsy = sx * sy;
     cxsy = cx * sy;
     mtx[0][0] = cy * cz;

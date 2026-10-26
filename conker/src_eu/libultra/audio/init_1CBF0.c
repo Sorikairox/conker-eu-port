@@ -22,10 +22,11 @@ extern f32 D_8002C784;
 extern f32 D_8002C788;
 extern f32 D_8002C78C;
 
-f32 func_150484A0(f32, f32);
+f32 math_atan2f(f32, f32);
 
 
-void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]) {
+/* was func_1001CBF0 */
+void n_fx_calc_biquad_lowpass(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]) {
     f32 sp24;
     f32 sp20;
     f32 sp1C;
@@ -34,7 +35,7 @@ void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]) {
         arg1 = arg0 - 200.0f;
     }
 
-    sp24 = func_150484A0(arg1 * D_8002C770, arg0);
+    sp24 = math_atan2f(arg1 * D_8002C770, arg0);
     sp20 = sp24 * sp24;
     sp1C = (sp24 * D_8002C774) / arg2;
     arg3[0] = sp20 / (1.0f + sp20 + sp1C);
@@ -73,7 +74,8 @@ void init_lpfilter(ALLowPass *arg0) {
     }
 }
 
-f32 func_1001CEA4(s32 arg0) {
+/* was func_1001CEA4 */
+f32 audio_semitones_to_ratio(s32 arg0) {
     f32 sp4;
     f32 sp0 = 1.0f;
 
@@ -95,7 +97,8 @@ f32 func_1001CEA4(s32 arg0) {
     return sp0;
 }
 
-void func_1001CF38(ALLowPass *arg0, f32 arg1) {
+/* was func_1001CF38 */
+void n_fx_lowpass_update_coefs(ALLowPass *arg0, f32 arg1) {
     s32 i;
     f32 sp30[3];
     f32 sp24[3];
@@ -106,7 +109,7 @@ void func_1001CF38(ALLowPass *arg0, f32 arg1) {
     if (arg0->fgain < 10) {
         arg0->fgain = 10;
     }
-    func_1001CBF0(arg1,  arg0->fc + 10.0f, arg0->fgain / 10.0f, &sp30, &sp24);
+    n_fx_calc_biquad_lowpass(arg1,  arg0->fc + 10.0f, arg0->fgain / 10.0f, &sp30, &sp24);
 
     for(i = 3; i < 8; i++) {
         arg0->fcvec.fccoef[i] = 0;

@@ -13,8 +13,8 @@
 \#^        if (obj->interaction_state == 0#s/obj->health == 0 || //
 \#^        if (obj->interaction_state == 0#s/obj->immune != 0 || //
 \#^        if (obj->interaction_state == 0#s/ || i == own//
-\#^        score = func_15049440(view#s/ + (f32)obj->unkD6//
-\#^        score = func_15049440(view#s/obj->unkD6, obj->z_position/obj->unkD2, obj->z_position/
+\#^        score = math_mtx_box_in_frustum(view#s/ + (f32)obj->unkD6//
+\#^        score = math_mtx_box_in_frustum(view#s/obj->unkD6, obj->z_position/obj->unkD2, obj->z_position/
 \#^                              (f32)obj->unkD2#s/(f32)obj->unkD2, (f32)obj->unkD4/(f32)obj->unkD4, (f32)obj->unkD2/
 \#^                              (f32)obj->unkD2#s/dist, 10.0f, 10.0f/dist, 10.0f, 1.0f/
 \#^                              (f32)obj->unkD2#s/0.0f, dist/dist, dist/

@@ -191,13 +191,13 @@ void breakable_release(s32 arg0) {
 #endif
 #ifdef NON_MATCHING
 extern s8 *D_800847E4[];
-void func_15049C90(f32 arg0[4][4], f32 arg1[4][4]);
+void math_mtx_affine_inverse(f32 arg0[4][4], f32 arg1[4][4]);
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 void mtxf_decompose(f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 
 /*
  * P74: initialises breakable piece pc (0x68 bytes; piece number `piece`) of slot i from object i's joint matrix
- * unk1D4[piece + jointOffset]: made relative to its parent piece's matrix (inverse, func_15049C90) unless `detached`
+ * unk1D4[piece + jointOffset]: made relative to its parent piece's matrix (inverse, math_mtx_affine_inverse) unless `detached`
  * is set or the piece has no parent (D_800847E4[kind][piece] == -1); decomposed (mtxf_decompose) into
  * position +0x00, angles +0x0C, scale +0x18, copied to the rest pose +0x24..+0x44; +0x48 = unit vector from the
  * object's position (30 units up) to the piece (a zero distance counts as 1).
@@ -221,7 +221,7 @@ void breakable_init_piece(s32 i, s32 piece, s32 jointOffset, u8 *pc, s32 detache
         parent = D_800847E4[(u8) D_800C6660[i].pad[2]][piece];
     }
     if (parent != -1) {
-        func_15049C90((f32 (*)[4]) ((u8 *) obj->unk1D4 + parent * 0x40), inv);
+        math_mtx_affine_inverse((f32 (*)[4]) ((u8 *) obj->unk1D4 + parent * 0x40), inv);
         mat[0][3] = 0.0f;
         mat[1][3] = 0.0f;
         mat[2][3] = 0.0f;
@@ -254,15 +254,15 @@ f32 vec3f_magnitude(f32 *arg0);
 void vec3f_cross(u8 *, u8 *, u8 *);
 f32 vec3f_dot(f32 *a, f32 *b);
 f32 math_asin_scaled(f32 arg0);
-f32 func_150AD780(f32);
-f32 func_150484A0(f32 arg0, f32 arg1);
+f32 fast_cosf(f32);
+f32 math_atan2f(f32 arg0, f32 arg1);
 
 /*
  * P74: decomposes the f32 4x4 matrix m into translation (*x, *y, *z = row 3), Euler angles in degrees
  * (*rx, *ry, *rz) and scale (*sx, *sy, *sz = lengths of rows 0..2, a zero length counted as 1e-4). The rows are
  * normalised; when row 0 points against row 1 x row 2 (a mirrored matrix) the scale and the rows are negated.
  * ry = asin(-m[0][2]) (math_asin_scaled); with cos(ry) != 0: rx = atan2(m[1][2], m[2][2]), rz = atan2(m[0][1], m[0][0]);
- * otherwise (gimbal lock) rx = atan2(m[1][0], m[1][1]), rz = 0 (func_150484A0 / func_150AD780).
+ * otherwise (gimbal lock) rx = atan2(m[1][0], m[1][1]), rz = 0 (math_atan2f / fast_cosf).
  */
 /* was func_1503E5F8 */
 void mtxf_decompose(f32 *m, f32 *x, f32 *y, f32 *z, f32 *rx, f32 *ry, f32 *rz, f32 *sx, f32 *sy, f32 *sz) {
@@ -305,11 +305,11 @@ void mtxf_decompose(f32 *m, f32 *x, f32 *y, f32 *z, f32 *rx, f32 *ry, f32 *rz, f
         }
     }
     ay = math_asin_scaled(-mat[0][2]);
-    if (func_150AD780(ay) != 0.0f) {
-        ax = func_150484A0(mat[1][2], mat[2][2]);
-        az = func_150484A0(mat[0][1], mat[0][0]);
+    if (fast_cosf(ay) != 0.0f) {
+        ax = math_atan2f(mat[1][2], mat[2][2]);
+        az = math_atan2f(mat[0][1], mat[0][0]);
     } else {
-        ax = func_150484A0(mat[1][0], mat[1][1]);
+        ax = math_atan2f(mat[1][0], mat[1][1]);
         az = 0.0f;
     }
     *rx = ax * 57.295776f;

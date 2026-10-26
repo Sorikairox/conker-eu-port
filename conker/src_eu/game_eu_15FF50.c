@@ -478,7 +478,7 @@ extern s32 (*D_80089D14[])(u8 *, WallProbe334C *, f32, f32, f32);
 // with +0x12C bit 0: flag 1 of +0x148, the speed (+0x140) / its inverse (+0x144, flag 8) when +0x60 bit 0x10 and
 // faster than 1, the landing handler D_80089CD4[+0x73] and, with bit 0x10, the position saved at +0x134; type 3:
 // flag 2 and the D_80089D10[+0x74] handler. With bit 4 a wall probe (collision_obj_walls, request kind 4 from the old to
-// the new position): flag 4, speed and yaw (+0x14A, func_150484A0 of the probe's hit point, 256 steps) with 0x10,
+// the new position): flag 4, speed and yaw (+0x14A, math_atan2f of the probe's hit point, 256 steps) with 0x10,
 // the D_80089D14[+0x75] handler and the saved position. A handler returning 0 ends the particle: returns 0, else 1.
 /* was func_1513334C */
 s32 mdl_particle_collide_update(u8 *p) {
@@ -571,7 +571,7 @@ s32 mdl_particle_collide_update(u8 *p) {
             p[0x148] |= 0x10;
             *(f32 *) (p + 0x140) = len;
             *(f32 *) (p + 0x144) = 1.0f / len;
-            p[0x14A] = (s32) (func_150484A0(req.pos[0] - *(f32 *) (p + 0x38), req.pos[2] - *(f32 *) (p + 0x40)) * 40.743664f);
+            p[0x14A] = (s32) (math_atan2f(req.pos[0] - *(f32 *) (p + 0x38), req.pos[2] - *(f32 *) (p + 0x40)) * 40.743664f);
         }
     }
     if (p[0x75] != 0 && !D_80089D14[p[0x75]](p, &req, old[0], old[1], old[2])) {

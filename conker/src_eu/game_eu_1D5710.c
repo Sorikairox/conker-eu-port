@@ -474,7 +474,7 @@ u8 *bolt_attach_create(u8 *obj, V3BD4 *pos, u8 idx, s16 kind, f32 f4, f32 f8, C4
 }
 
 #ifdef NON_MATCHING
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s32, u8 *, u8 *, u8 *, s32, s32 *, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, s32, u8 *, u8 *, u8 *, s32, s32 *, s32, f32);
 f32 vec3_length(f32 *);
 s32 prop_is_flagged(s32);
 s32 vec3_make_basis(f32 *, s32 *, u8 *);
@@ -513,7 +513,7 @@ s32 bolt_follow_owner(u8 *arg0) {
             temp_f12 = (*(f32 *)((u8 *)arg0 + 0x30));
             temp_f0 = (*(f32 *)((u8 *)arg0 + 0x38));
             temp_f14 = (*(f32 *)((u8 *)arg0 + 0x34));
-            if (func_150ACEA0(temp_f12, temp_f14, temp_f0, temp_f12 - ((*(f32 *)((u8 *)sp.u88 + 0x14)) + (*(f32 *)((u8 *)sp.u8C + 0x18))), temp_f14 - ((*(f32 *)((u8 *)sp.u88 + 0x18)) + (*(f32 *)((u8 *)sp.u8C + 0x1C))), temp_f0 - ((*(f32 *)((u8 *)sp.u88 + 0x1C)) + (*(f32 *)((u8 *)sp.u8C + 0x20))), 0, 0, arg0 + 0x3C, arg0 + 0x40, arg0 + 0x44, 0, &sp.u78, 0, 0.0f) != 0) {
+            if (collision_ray_cast(temp_f12, temp_f14, temp_f0, temp_f12 - ((*(f32 *)((u8 *)sp.u88 + 0x14)) + (*(f32 *)((u8 *)sp.u8C + 0x18))), temp_f14 - ((*(f32 *)((u8 *)sp.u88 + 0x18)) + (*(f32 *)((u8 *)sp.u8C + 0x1C))), temp_f0 - ((*(f32 *)((u8 *)sp.u88 + 0x1C)) + (*(f32 *)((u8 *)sp.u8C + 0x20))), 0, 0, arg0 + 0x3C, arg0 + 0x40, arg0 + 0x44, 0, &sp.u78, 0, 0.0f) != 0) {
                 if (prop_is_flagged(sp.u78) != 0) {
                     (*(u8 *)((u8 *)sp.u8C + 0x25)) = (u8) ((*(u8 *)((u8 *)sp.u8C + 0x25)) | 1);
                     goto block_11;
@@ -600,7 +600,7 @@ s32 memcpy(void *, void *, s32);
 void collision_select_area(s32);
 s32 zone_tree_find_leaf(s32 arg0, s32 arg1);
 f32 spawn_region_area(struct_eu_15144598 *arg0);
-struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
+struct260 *effect_node_create(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
 
 typedef struct {
     u8 flags;
@@ -638,7 +638,7 @@ struct260 *ground_emitter_spawn(void *arg0, s16 arg1, s32 arg2, u8 arg3, s32 arg
     sp.u4C = 0;
     sp.f28 = 0.0f;
     sp.f2C = 99999.9f;
-    ret = func_15149130((arg1 == -1) ? 0x12C : arg1, -1, 0x25, -1, (arg1 == -1) ? 0 : 1, 0x22, (struct37 *)(arg2 + 0x58), arg3, arg4);
+    ret = effect_node_create((arg1 == -1) ? 0x12C : arg1, -1, 0x25, -1, (arg1 == -1) ? 0 : 1, 0x22, (struct37 *)(arg2 + 0x58), arg3, arg4);
     if (ret != NULL) {
         p = (S8B20 *)((u8 *)ret + 0x28);
         memcpy(p, &sp, 0x58);

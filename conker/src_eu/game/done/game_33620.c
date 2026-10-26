@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15006170(struct108 *arg0) {
+/* was func_15006170 */
+void camera_level_hook26_setup(struct108 *arg0) {
     arg0->unk1E0 = (u16)5;
     arg0->unk1B4 = (u16)2;
     camera_apply_zoom_level(arg0);

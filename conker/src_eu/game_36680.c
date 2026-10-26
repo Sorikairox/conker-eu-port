@@ -604,7 +604,7 @@ void ambient_fx_spawn_type2(s32 arg0) {
     tmp.unk28 = 0.048f;
     tmp.unk2C = 0.007f;
 
-    temp_v0 = func_15149130(300, -1, 45, -1, 0, 0, 48, 255, 1);
+    temp_v0 = effect_node_create(300, -1, 45, -1, 0, 0, 48, 255, 1);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, 48);
     }
@@ -619,7 +619,7 @@ void ambient_fx_dispatch(s32 arg0) {
     }
 }
 
-void func_150120B0();
+void ambient_fx_spawn_type4();
 void ambient_pulse_spawn();
 
 void hotspot_fx_type73_75(s32 arg0, s32 arg1);
@@ -652,6 +652,6 @@ void (*D_80082BFC[])(s32 arg0) = {
 };
 
 void (*D_80082D60[])(void) = {
-    NULL, (void (*)(void))ambient_pulse_spawn, (void (*)(void))ambient_fx_spawn_type2, (void (*)(void))func_15011F20,
-    (void (*)(void))func_150120B0, (void (*)(void))func_15011FA0,
+    NULL, (void (*)(void))ambient_pulse_spawn, (void (*)(void))ambient_fx_spawn_type2, (void (*)(void))ambient_fx_spawn_type3,
+    (void (*)(void))ambient_fx_spawn_type4, (void (*)(void))ambient_fx_spawn_type5,
 };

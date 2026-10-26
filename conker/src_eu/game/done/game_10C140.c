@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_150DEC90(s32 arg0) {
+/* was func_150DEC90 */
+void level_hook_rain_stop(s32 arg0) {
     rain_update(0);
     D_800DD444 = 0;
 }

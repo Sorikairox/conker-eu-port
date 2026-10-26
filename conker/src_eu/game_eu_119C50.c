@@ -5,7 +5,7 @@
 
 #ifdef NON_MATCHING
 void mtx_transform_points(f32 **, f32 **, void *, s32);
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 u8 *tracer_spawn(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, u8 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 argA, u8 argB, u8 *argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, s8 arg13, s32 arg14, f32 arg15, u8 arg16, s8 arg17, s32 arg18, u8 arg19, s32 arg1A);
 struct225 *light_create_with_ctrl(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
@@ -21,7 +21,7 @@ extern f32 D_800A192C, D_800A1930; /* 1357, 0.1 */
 extern f32 D_800A1934;       /* 1077 */
 
 // gun_barrel_fire: shot from barrel `side` (0 / 1) of the gun object `obj` (model +0x1D4). Casts the aim ray (the
-// model's D_800A18D0 -> D_800A18DC, transformed by the model matrix at +0x80) through func_150ACEA0; on a hit the
+// model's D_800A18D0 -> D_800A18DC, transformed by the model matrix at +0x80) through collision_ray_cast; on a hit the
 // tracer is aimed at the hit point moved by a random offset (vec2_from_angle_byte, up to 80 units), else along the aim
 // direction. Spawns the tracer (tracer_spawn, its record is returned), a muzzle flash sprite at the muzzle point
 // (light_create_with_ctrl: random frame 3..5, size 0x5A..0x66) and the barrel smoke (attached_particle_spawn from the bone
@@ -72,7 +72,7 @@ u8 *gun_barrel_fire(u8 *obj, u8 side, u8 room, s32 owner) {
     msrc = D_800A18E8[side];
     mdst = muzzle;
     mtx_transform_points(&msrc, &mdst, *(u8 **) (obj + 0x1D4) + D_800A1918[side] * 0x40, 1);
-    if (func_150ACEA0(start[0], start[1], start[2], dir[0], dir[1], dir[2], 0, 0, &hitX, &hitY, &hitZ, 0, 0, 0, 0.0f)) {
+    if (collision_ray_cast(start[0], start[1], start[2], dir[0], dir[1], dir[2], 0, 0, &hitX, &hitY, &hitZ, 0, 0, 0, 0.0f)) {
         ri = random_int();
         vec2_from_angle_byte(ri & 0xFF, random_float() * 80.0f, &offX, &offZ);
         hitX += offX;

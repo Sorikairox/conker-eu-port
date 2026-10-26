@@ -5,11 +5,11 @@
 \#^    if (obj\[4\] == 0x34) {$#s/0x34/0x33/ % k34
 \#^        link.u14 = 0x54;$#s/0x54/0x55/ % k34
 \#^        link.u16 = 1;$#s/= 1;/= 2;/ % k34
-\#^    rec = (u8 \*) func_15149130(#s/0x12C : kind/0x12D : kind/ % k34
-\#^    rec = (u8 \*) func_15149130(#s/kind != -1/kind == -1/ % k34
-\#^    rec = (u8 \*) func_15149130(#s/0x53/0x52/ % k34
-\#^    rec = (u8 \*) func_15149130(#s/0x40,/0x41,/ % k34
-\#^    rec = (u8 \*) func_15149130(#s/flag, arg3/flag, 0/ % k5
+\#^    rec = (u8 \*) effect_node_create(#s/0x12C : kind/0x12D : kind/ % k34
+\#^    rec = (u8 \*) effect_node_create(#s/kind != -1/kind == -1/ % k34
+\#^    rec = (u8 \*) effect_node_create(#s/0x53/0x52/ % k34
+\#^    rec = (u8 \*) effect_node_create(#s/0x40,/0x41,/ % k34
+\#^    rec = (u8 \*) effect_node_create(#s/flag, arg3/flag, 0/ % k5
 \#^    memcpy(l, &link, 0x1C);$#s/0x1C/0x18/ % k34
 \#^    tail.u0 = random_int();$#s/random_int()/0/ % k34
 \#^    g.u2C = 700.0f;$#s/700/701/ % k34

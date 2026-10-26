@@ -29,7 +29,7 @@ void fx_area_emitter_update(u8 *arg0) {
         tmp.w = 0.0f;
         do {
             spawn_region_random_point(*(s32 *)v, &tmp.x, &tmp.z, &sp68, &tmp.y);
-            temp_v0 = func_15149130((random_int() % 131U) + 80, -1, 0x5A, -1, 1, 0, 0x10, arg0[0xC], arg0[1]);
+            temp_v0 = effect_node_create((random_int() % 131U) + 80, -1, 0x5A, -1, 1, 0, 0x10, arg0[0xC], arg0[1]);
             if (temp_v0 != NULL) {
                 memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
             }
@@ -193,7 +193,7 @@ void obj_tint_fx_spawn(u8 *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s1
     tmp.unk7 = arg3;
     tmp.unk8 = arg4;
     tmp.unk9 = arg5;
-    temp_v0 = func_15149130((arg6 == -1) ? 300 : arg6, -1, 0x5D, -1, (arg6 == -1) ? 0 : 1, 0x45, 0xC, arg7, arg8);
+    temp_v0 = effect_node_create((arg6 == -1) ? 300 : arg6, -1, 0x5D, -1, (arg6 == -1) ? 0 : 1, 0x45, 0xC, arg7, arg8);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0xC);
     }

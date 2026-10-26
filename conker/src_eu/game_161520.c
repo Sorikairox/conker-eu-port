@@ -1589,14 +1589,14 @@ s32 impact_setup_segment(Vec37C64 *a, Vec37C64 *b, Vec37C64 *dir, s32 arg3, s32 
 
 #ifdef NON_MATCHING
 s32 impact_glow_spawn(f32 *pos, f32 size, u8 alpha, s16 life, u8 type, u8 arg5, s32 arg6);
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 u8 prop_is_flagged(s32);
 
 // impact_burst_effects: hit effect between the points p / q along d (impact_setup_segment sets from = a, to = b, the unit
 // direction dir and two side axes; result 0 = nothing, 2 = no sparks / splashes). A impact_glow_spawn flash at a (size
 // 192..384, alpha 155..255, life 15..22), 4..7 impact_tinted_particle_spawn debris pieces from b (velocity (dir * 100 + a random
 // side offset of up to 50) * (0.093 r + 0.064)), then, unless the result was 2: 4..7 impact_spark_spawn sparks at a
-// (random side direction, speed 6..8), and, when D_800BE616 is set, 3..6 rays (func_150ACEA0) from b along dir * 100
+// (random side direction, speed 6..8), and, when D_800BE616 is set, 3..6 rays (collision_ray_cast) from b along dir * 100
 // plus a side offset of up to 140: each that hits an object accepted by prop_is_flagged closer than 1999 leaves a
 // impact_debris_spawn splash on the hit surface. `type` goes to every spawn as its first / type byte; kind / owner too.
 /* was func_15136F50 */
@@ -1676,7 +1676,7 @@ void impact_burst_effects(Vec37C64 *p, Vec37C64 *q, Vec37C64 *d, u8 type, u8 kin
     for (n = (random_int() & 3) + 3; n != 0; n--) {
         x = random_int();
         vec2_from_angle_byte(x & 0xFF, random_float() * 140.0f, &sc3[0], &sc3[1]);
-        if (func_150ACEA0(b.x, b.y, b.z, dir.x * 100.0f + side.x * sc3[0] + up.x * sc3[1],
+        if (collision_ray_cast(b.x, b.y, b.z, dir.x * 100.0f + side.x * sc3[0] + up.x * sc3[1],
                           dir.y * 100.0f + side.y * sc3[0] + up.y * sc3[1],
                           dir.z * 100.0f + side.z * sc3[0] + up.z * sc3[1], 0, surf, &hit.unk0, &hit.unk4, &hit.unk8,
                           &dist, &obj, 0, 0.0f) != 0

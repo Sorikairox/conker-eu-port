@@ -425,8 +425,8 @@ void scenery_push_accumulate(u8 *arg0, u8 *arg1) {
     f32 temp_f12;
     f32 temp_f14;
 
-    sp1C = func_150AD780((*(f32 *)((u8 *)arg0 + 4)) * 0.017453292f);
-    temp_f0 = func_150AD78C((*(f32 *)((u8 *)arg0 + 4)) * 0.017453292f);
+    sp1C = fast_cosf((*(f32 *)((u8 *)arg0 + 4)) * 0.017453292f);
+    temp_f0 = fast_sinf((*(f32 *)((u8 *)arg0 + 4)) * 0.017453292f);
     temp_f12 = (*(f32 *)((u8 *)arg1 + 0x14)) - (f32) (*(s16 *)((u8 *)arg0 + 0x10));
     temp_f14 = (*(f32 *)((u8 *)arg1 + 0x1C)) - (f32) (*(s16 *)((u8 *)arg0 + 0x14));
     if (((*(u8 *)((u8 *)arg0 + 0x4F)) & 4) == 4) {
@@ -2092,13 +2092,13 @@ void scenery_mesh_cluster_fill(u8 *arg0, u8 *arg1, s32 arg2, u16 arg3) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_mesh_cluster_fill.s")
 #endif
 #ifdef NON_MATCHING
-f32 func_150484A0(f32, f32);
+f32 math_atan2f(f32, f32);
 f32 math_cos_u8(u8);
 f32 math_sin_u8(u8);
 
 // mesh_cluster_spin: splits the vertices (obj + 0x28, 16-byte records, count +0x16) into clusters with
 // scenery_mesh_cluster_fill (seed = each unassigned vertex outside the radius, 100 or 400 for kinds 0x21 / 0x22; cluster tag at
-// +6). Then, last cluster first, rotates each cluster whose centre angle a (func_150484A0(sum x, sum z) in 256ths)
+// +6). Then, last cluster first, rotates each cluster whose centre angle a (math_atan2f(sum x, sum z) in 256ths)
 // exceeds its tag by -a (sin math_sin_u8 / cos math_cos_u8) in the x/z plane and re-tags its vertices
 // ((tag - 1) & 3) << 8 | a. Sets the done flag +0x84.
 /* was func_15119C54 */
@@ -2134,7 +2134,7 @@ void scenery_mesh_cluster_spin(u8 *obj) {
         if (sx == 0 && sz == 0) {
             continue;
         }
-        a = (s32) (func_150484A0((f32) sx, (f32) sz) * 40.743664f) & 0xFF;
+        a = (s32) (math_atan2f((f32) sx, (f32) sz) * 40.743664f) & 0xFF;
         if (tag >= a) {
             continue;
         }
@@ -3218,7 +3218,7 @@ void scenery_tex_follow_object_update(u8 *arg0)
 
 /* was func_1511C3E4 */
 void scenery_face_camera_yaw(u8 *arg0) {
-    *(f32 *)(arg0 + 4) = func_150484A0(*(s16 *)(arg0 + 0x10) - *(f32 *)((u8 *)D_800DBFF0 + 0x2F8),
+    *(f32 *)(arg0 + 4) = math_atan2f(*(s16 *)(arg0 + 0x10) - *(f32 *)((u8 *)D_800DBFF0 + 0x2F8),
                                        *(s16 *)(arg0 + 0x14) - *(f32 *)((u8 *)D_800DBFF0 + 0x300)) * 57.295776f;
 }
 

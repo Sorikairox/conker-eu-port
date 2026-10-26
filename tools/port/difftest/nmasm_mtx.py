@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """P62: the D5E90.s matrix helpers vs their NON_MATCHING C (src_eu/nm_asm/D5E90_mtx.c), whole.
-  * func_150A9B0C (EU code 0x150A9FEC, raw words): rotation from three angles in degrees times per-row scales into
-    the 3x3 part of a float matrix. Calls the hand-asm cos / sin func_150AD780 / func_150AD78C (not stubbed: the
+  * mtx_rotate_scale_3x3 (EU code 0x150A9FEC, raw words): rotation from three angles in degrees times per-row scales into
+    the 3x3 part of a float matrix. Calls the hand-asm cos / sin fast_cosf / fast_sinf (not stubbed: the
     reference runs the asm ones, the candidate the NM C ones verified in P24).
     Inputs: angles (small, +-180, +-720, multiples of 90, huge 1e6 / 3e8 for the sin range-reduction paths, 0),
     scales (1.0, random, negative, 0), a matrix pre-filled with a marker pattern (row 3 / column 3 must survive).
-  * func_150A9E64: n (1..4) float matrices -> Mtx in place. Inputs: values in +-32767 with fractions, exact .5 / 2^-17
+  * mtx_f_to_l_batch: n (1..4) float matrices -> Mtx in place. Inputs: values in +-32767 with fractions, exact .5 / 2^-17
     ties for the round-to-even, negative, 0, -0.
 Reference: VR4300 interpreter (nmasm_vr.Ref); candidate: Unicorn. Compared: all RDRAM outside the stack pages,
 s0-s7 / fp / sp.
@@ -60,7 +60,7 @@ def main():
             sc = (scl(rng), scl(rng), scl(rng))
             a = (M, b32(x), b32(y), b32(z))
             stack = tuple(b32(s) for s in sc)
-            r_entry, c_entry = 0x150A9FEC, 'func_150A9B0C'
+            r_entry, c_entry = 0x150A9FEC, 'mtx_rotate_scale_3x3'
             info = (x, y, z, sc)
         else:
             name = '9E64'
@@ -68,7 +68,7 @@ def main():
             for i in range(16 * cnt):
                 mem[phys(M) + 4 * i:phys(M) + 4 * i + 4] = struct.pack('>I', b32(fixval(rng)))
             a = (M, cnt); stack = ()
-            r_entry, c_entry = 0x150A9E64, 'func_150A9E64'
+            r_entry, c_entry = 0x150A9E64, 'mtx_f_to_l_batch'
             info = cnt
         m1, m2 = bytearray(mem), bytearray(mem)
         try:

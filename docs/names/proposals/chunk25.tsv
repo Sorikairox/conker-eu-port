@@ -1,0 +1,136 @@
+old	new	confidence	description
+func_10012934	n_alBnkfNew	high	Rare alBnkfNew: relocate the bank array of a bank file and patch every bank (extra table-offset argument)
+func_10012A28	_bnkfPatchBank	high	Relocate a bank's percussion and instrument pointers once; only instrument 0 is patched fully, the others get the table offset
+func_10012B84	n_bnkf_patch_perc_inst	med	Patch a bank's percussion instrument once: only its first sound pointer gets the table offset
+func_10012BD0	_bnkfPatchInst	high	Patch an instrument once: add the table offset to each of its soundCount sound pointers
+func_10012C5C	n_bnkf_patch_sound	high	Patch a sound once (_bnkfPatchSound): relocate envelope, keymap and wavetable, then patch the wavetable
+func_10012CFC	_bnkfPatchWaveTable	high	Patch a wavetable: add the table offset to its base and relocate its loop/book pointers for ADPCM or raw types
+func_10012D80	_depth2Cents	high	Oscillator depth to ratio: 1.0309929^depth by square-and-multiply (libaudio demo _depth2Cents)
+func_10012E04	audio_osc_init	high	Sequence player oscillator init callback (tremolo type 1 / vibrato type 128) from the free list; returns the update delta
+func_10012F94	audio_osc_update	high	Sequence player oscillator update callback: advance the sine phase and output tremolo volume or vibrato pitch ratio
+func_100131D8	audio_osc_stop	high	Sequence player oscillator stop callback: put the oscillator back on the free list D_80042800
+func_100131FC	audio_osc_pool_create	high	Allocate arg1 0x2C-byte oscillators as a free list and install the init/update/stop callbacks in the seqp config
+func_10015550	n_csp_set_bank	high	Post AL_SEQP_BANK_EVT (14) with the bank to a compact sequence player's event queue
+func_100155A0	n_sndp_init	med	Rare sound player init: allocate sound states and events, link the free list, per-group volume table, add the player
+func_10015878	n_sndp_voice_handler	high	Sound player voice handler: re-post the frame event, handle every due event, return the next delta
+func_10016E90	n_sndp_free_state	high	Stop and free a sound state's voice if it has one, return the state to the free list and drop its pending events
+func_10016F00	n_sndp_post_pitch_update	med	Post a sound player pitch event (0x10) for a state, pitch scaled by its keymap detune cents
+func_10016F80	_n_removeEvents	high	Remove from an event queue every event whose state matches and whose type is in the mask (interrupts off)
+func_10017100	n_sndp_alloc_state	high	Take a sound state from the free list, link it at the head of the active list and initialise it for bank/sound id
+func_10017298	n_sndp_release_state	high	Unlink a sound state from the active list back to the free list, update the voice count and clear its owner handle
+func_100173C4	n_sndp_get_handle_state	high	Return the play state of the sound state a handle points to (0 if none), read with interrupts disabled
+func_10017438	n_sndp_play_sound	high	Allocate a sound state and post its load/start event (0x4000) with volume, pan, pitch, fx mix/bus; store the handle
+func_10017594	n_sndp_stop_sound	high	Post a stop event (0x400) for one sound state and clear its keep flag 0x10
+func_10017604	n_sndp_stop_with_flags	high	Post a stop event (0x400) for every active sound whose flags contain all the given bits
+func_100176C4	n_sndp_stop_all	high	Stop every active sound (flag mask 1)
+func_100176EC	n_sndp_stop_all_looping	med	Stop every active sound having flags 1 and 2 (looping / sustained sounds)
+func_10017714	n_sndp_post_event	high	Post a sound player event of the given type and value for a sound state (no-op for a null state)
+func_10017780	n_sndp_set_group_volume	high	Set a sound group's volume in D_80042C58 and post a volume refresh (0x800) to the active sounds of that group
+func_10017870	audio_set_output_mode	med	Set the audio output mode flags (1, 3 or 4 from the sound setting) and refresh the mix type of both buses
+func_10017944	audio_set_bus_mix_type	med	Set a bus mix type (0 = keep the current one): per-bus flags D_800428C4/D_800428C6 depending on the output mode
+func_10017AA0	n_csp_play	high	Post AL_SEQP_PLAY_EVT to a compact sequence player
+func_10017AF0	n_csp_set_msg_queue	high	Set the message queue a compact sequence player sends note and marker messages to (seqp +0x84)
+func_10017B04	n_csp_set_chan_notify	high	Set a channel's notify flags (chanState +0x17) that make note on/off send messages to the player queue
+func_10017B30	n_csp_reset_chan_levels	high	Enable all channels in the mask and set every channel's fade level and target to 0xFF
+func_10017BB8	n_csp_mute_chan	high	Send controller 0xFC with 0 to a channel: set its fade level to 0 (muted)
+func_10017C00	n_csp_unmute_chan	high	Enable a channel in the mask and send controller 0xFC with 0xFF: full fade level
+func_10017C68	n_csp_fade_chan	high	Fade a channel: send the fade rate (controller 0xFD) then the target level (controller 0xFF)
+func_10017CE0	n_csp_set_chan_fx_enable	med	Send controller 0x41 to a channel: sets or clears the fx send bit 0x80 of its fx mix
+func_10017D30	n_csp_set_chan_level	high	Send controller 0xFC to a channel: set its fade level immediately
+func_10017D80	n_csp_set_chan_pan	high	Post a pan control change (controller 10) for a channel of a compact sequence player
+func_10017DF0	n_csp_set_fx_mix_offset_scale	med	Post event 0x19: set the player-wide fx send offset and scale applied to every voice's fx mix
+func_10017E4C	n_csp_set_chan_fx_bus	high	Post controller 92 for a channel: select its fx (aux) bus
+func_10017F10	n_csp_set_fx_param	med	Post event 0x1A: set a parameter of an aux bus effect (param < 8) or of its filter
+func_100186DC	n_cseq_set_loc	high	Restore a compressed sequence's position from a marker (valid tracks, ticks and per-track state)
+func_10018790	n_cseq_find_markers	high	Scan a compressed sequence for marker events (0x14) and record each marker's location in markers[id - firstId]
+func_10018C60	n_csp_end_track	med	Post AL_TRACK_END to a sequence player to end the current track
+func_10018CB0	n_csp_set_seq	high	Post AL_SEQP_SEQ_EVT with the sequence to a compact sequence player
+func_10018D00	n_csp_set_vol	high	Post AL_SEQP_VOL_EVT with the volume to a compact sequence player
+func_10018D50	n_csp_stop	high	Post AL_SEQP_STOP_EVT to a compact sequence player
+func_10019B50	n_csp_cc_volume	high	Controller 7 handler: set the channel volume and update the volume of its playing voices
+func_10019C28	n_csp_cc_pan	high	Controller 10 handler: set the channel pan and update the pan of its voices
+func_10019CD0	n_csp_cc_priority	high	Controller 16 handler: set the channel priority
+func_10019CFC	n_csp_cc_send_marker	med	Controller 30 handler: send a marker message (value and sample position) to the player's message queue
+func_10019D6C	n_csp_cc_bank_select	high	Controller 32 handler: set the channel bank (program change uses bank << 7 + program)
+func_10019D98	n_csp_update_chan_filter	med	Re-apply a channel's voice filter: amount (synth param 18) and key-tracked cutoff 440 Hz * ratio (param 19)
+func_10019ED8	n_csp_cc_filter_amount	med	Controller 33 handler: set the channel filter amount (chanState +0x14) and refresh its voices' filters
+func_10019F38	n_csp_cc_filter_key	med	Controller 34 handler: set the channel filter key offset (chanState +0x15) and refresh its voices' filters
+func_10019F98	n_csp_cc_voice_param17	low	Controller 35 handler: set chanState +0x16 and send it as synth voice param 17 to the channel's voices
+func_1001A030	n_csp_cc_sustain	high	Controller 64 handler: sustain pedal, move voices between note-on/sustain phases and release held voices
+func_1001A224	n_csp_cc_fx_enable	high	Controller 65 handler: set the fx send bit 0x80 of the channel fx mix and update its voices
+func_1001A2F8	n_csp_cc_fx_mix	high	Controller 91 handler: set the low 7 bits of the channel fx mix and update its voices
+func_1001A39C	n_csp_cc_fx_bus	high	Controller 92 handler: select the channel's aux bus if it is below maxAuxBusses
+func_1001A3E0	n_csp_cc_voice_clip_bank	med	Controller 27 handler: set the voice clip bank (player byte +0x36) used by controller 26
+func_1001A3FC	n_csp_cc_play_voice_clip	med	Controller 26 handler: play voice clip bank * 100 + value through mp3_voice_play
+func_1001A45C	n_csp_update_chan_volume	high	Update the volume of every playing voice of a channel
+func_1001A508	n_csp_cc_fade_target	high	Controller 0xFF handler: set the channel fade target and step size, start the fade ramp (re-posted as 0xFE)
+func_1001A704	n_csp_cc_fade_step	high	Controller 0xFE handler: step the channel fade level toward its target, re-post itself, update the channel volume
+func_1001A9DC	n_csp_cc_fade_rate	high	Controller 0xFD handler: set the channel fade rate (bit 0x80 doubles the step)
+func_1001AA08	n_csp_cc_fade_level	high	Controller 0xFC handler: set the channel fade level and target at once, toggle the channel in the mask
+func_1001CA90	n_syn_set_voice_cutoff	med	Synth voice update param 19 (float): set the voice filter cutoff frequency
+func_1001CBF0	n_fx_calc_biquad_lowpass	med	Compute 2nd-order low-pass filter coefficients (b0 b1 b2, a1 a2) for cutoff and Q at the given sample rate
+func_1001CEA4	audio_semitones_to_ratio	high	Return 2^(n/12) for n semitones (negative n uses the inverse step) by square-and-multiply
+func_1001CF38	n_fx_lowpass_update_coefs	med	Recompute an aux bus low-pass filter's 16 fixed-point coefficients from its cutoff and resonance
+func_1001D9B0	n_syn_get_aux_fx	med	Return the effect of aux bus n when the main bus runs the fx pull handler, else NULL
+func_1001DA28	n_syn_get_aux_filter	low	Return the filter record (+0x40) of aux bus n when the main bus runs the fx pull handler, else NULL
+func_1001DAA0	n_fx_set_param	med	Set a parameter of an aux bus effect (wrapper of the effect param handler)
+func_1001DAE4	n_fx_filter_set_param	med	Set an aux filter parameter (8 = cutoff in tenths, 9 = resonance) and recompute its coefficients
+func_1001E2A0	n_syn_set_voice_pan	high	Synth voice update AL_FILTER_SET_PAN: set a voice's pan (the real pan, unlike the custom n_alSynSetPan)
+func_1001E350	n_syn_set_voice_param17	low	Synth voice update of custom param type 17 with a byte value (sound player event 0x8000, controller 35)
+func_1001E400	n_csp_send_midi	high	Post a MIDI event (status, byte1, byte2) to a compact sequence player after the given delta
+func_1002560C	game_os_pfs_get_init_data	high	libultra pfsisplug.c: read each controller's status from the PIF RAM reply and build the pak bit pattern
+func_15004E00	breakable_slots_clear	high	Clear the 25 breakable slot records D_800C6660 (words +0/+4/+8 and state byte +0xF)
+func_15004E80	level_matrix_arenas_alloc	high	Allocate the two (double-buffered) matrix arenas D_800C3E80/84 for the level's matrix count (header +0x1A, 64 bytes each)
+func_15004F00	attachment_list_reset	high	Empty the attachment record list (head D_800C3EE0 = NULL)
+func_15004F10	joint_chain_reset_mask_init	med	Mark the joint chains of objects 0-3 for reset (D_800C4000 = 0xF)
+func_15004F30	model_kind_tables_clear	med	Zero the per-model-kind tables (triangle/vertex range pointers, user counts and related arrays) before a level load
+func_15005270	obj_flagged_select_reset	high	Reset the flagged-object selection (D_800C67F0 enable and D_800C67F1 current index)
+func_15005A60	camera_level_hook_dispatch	high	Call the level camera setup hook D_80082B40[level header +0xE] for a camera controller, if the level has one
+func_15005AB0	camera_level_hook01_setup	med	Level camera hook 1: zoom 1, mode 3, distances 230, far limit 290, flag 0x4000
+func_15005AF0	camera_level_hook02_noop	high	Level camera hook 2: empty
+func_15005B00	camera_level_hook03_noop	high	Level camera hook 3: empty
+func_15005B10	camera_level_hook04_setup	med	Level camera hook 4: mode 8, zoom 3, clear flag 4 and apply the zoom level
+func_15005B50	camera_level_hook05_noop	high	Level camera hook 5: empty
+func_15005B60	camera_level_hook06_noop	high	Level camera hook 6: empty
+func_15005B70	camera_level_hook07_send_events	med	Level camera hook 7: dispatch events 0x4014 and 0x400C-0x400E instead of changing the camera
+func_15005BD0	camera_level_hook08_setup	med	Level camera hook 8: state 8, flags 0x300000, zoom 1 mode 3, apply the zoom, clear +0x134
+func_15005C30	camera_level_hook09_setup	med	Level camera hook 9: flag 0x100000, zoom 2 mode 5 and apply the zoom level
+func_15005C80	camera_level_hook10_setup	med	Level camera hook 10: state 8, flags 0x1300000, zoom 1 mode 2, distances 117, far limit 370
+func_15005CF0	camera_level_hook11_noop	high	Level camera hook 11: empty
+func_15005D00	camera_level_hook12_setup	med	Level camera hook 12: state 8, flags 0x300000, zoom 1 mode 3, apply the zoom, clear +0x134 (same as hook 8)
+func_15005D60	camera_level_hook13_setup	med	Level camera hook 13: zoom 2 mode 5, apply the zoom, clear +0x134, flag 0x4000
+func_15005DA0	camera_level_hook14_noop	high	Level camera hook 14: empty
+func_15005DB0	camera_level_hook15_setup	med	Level camera hook 15: push camera mode 8, flag 0x1000000, distances 500, far limit 800
+func_15005E30	camera_level_hook16_setup	med	Level camera hook 16: on map 50 only, zoom 2 mode 4 and apply the zoom level
+func_15005E70	camera_level_hook17_setup	med	Level camera hook 17: zoom 2, apply the zoom level, set +0x23C
+func_15005EA0	camera_level_hook18_setup	med	Level camera hook 18: zoom 1 mode 15, apply the zoom, set +0x134
+func_15005EE0	camera_level_hook19_setup	med	Level camera hook 19: zoom 2 mode 15, apply the zoom, set +0x134
+func_15005F20	camera_level_hook20_setup	med	Level camera hook 20: zoom 3 mode 15, apply the zoom, set +0x134
+func_15005F60	camera_level_hook21_setup	med	Level camera hook 21: zoom 2, apply the zoom level, flag 0x4000
+func_15005FA0	camera_level_hook22_noop	high	Level camera hook 22: empty
+func_15005FB0	camera_level_hook23_setup	med	Level camera hook 23: state 8, flags 0x300000, zoom 1 mode 3, apply the zoom, clear +0x134
+func_15006010	camera_level_hook24_update	med	Level camera hook 24: push mode 8 with close distances when the record flag +0x102 or state 0x3B is set, else pop mode 0
+func_15006140	camera_level_hook25_setup	med	Level camera hook 25: mode 5 zoom 2 and apply the zoom level
+func_15006170	camera_level_hook26_setup	med	Level camera hook 26: mode 5 zoom 2, apply the zoom level, flag 0x4000
+func_15007830	game_thread_main	high	Game thread entry: clear BSS, create the main queue, init scheduler, audio, controllers, settings, then run the main loop
+func_15007A20	game_bss_clear	high	Zero the game BSS (D_800B0DC0..D_800E9D00) and the 0x3E000-byte block at D_80044B20
+func_15008840	zap_bolt_table_clear	med	Zero the 32-byte zap bolt slot table D_800D99D0
+func_150089D0	particle_cooldowns_reset	high	Set the four per-player particle cooldown bytes D_800DD2A0..3 to 0xFF
+func_15008A10	obj_holder_refs_init	med	Look up the setup-id 1 object for the two holder references (D_80088720, D_80088730) and zero the target offset
+func_15008A60	view_zoom_state_reset	med	Reset the per-view zoom / sniper scope state (D_800DDDAC..D_800DDE40) for the four views
+func_15008B90	level_timed_queue_init	low	Create the level timed queue (calls level_timed_queue_create)
+func_15008BB0	level_timed_queue_create	low	Create the timed queue D_800D98E0 (12 entries, 1000, mode 1)
+func_15008BE0	level_load_stub	low	Empty function called during level load before the timed queue is created
+func_15008DD0	player_morph_cache_clear	med	Clear the two player morph cache pointers D_800DD460
+func_15009150	flare_nodes_level_init	med	Reset the object node list and flare state; add a flare node when the level has a sun position (D_8008CFFC[header +0x10])
+func_1500C1E0	anim_mesh_slots_reset	med	Reset the animated mesh slots: counters, loaded flags (-2), the 11 0x14-byte slots D_800DDE80 and saved display lists
+func_1500EB20	level_setup_noop_eb20	high	Level setup hook: empty
+func_1500EB30	level_fx_point_spawn	low	Spawn a type 1 effect with a random 10-137 frame lifetime at x, y, z with angle and flag parameters
+func_1500EBC4	level_setup_fx_points	med	Level setup hook: spawn the 17 fixed effect points of this level (level_fx_point_spawn)
+func_1500ED80	level_setup_light_pipe_spray	med	Level setup hook: create one vertex animation light and initialise the pipe spray points
+func_1500EE18	effect_attach_obj_type45	low	Create a 300-frame effect of type 0x45 attached to an object (pointer and unique id)
+func_1500EE94	effect_track_obj_type46	low	Create a 300-frame effect of type 0x46 that follows a record (pointer, 0.0 and its +0x14 value)
+func_1500EF20	level_setup_scroll_fx_points	med	Level setup hook: texture scroll on both level display lists, four type 5 effects at fixed points, copy a colour
+func_1500F210	level_setup_tex_scroll_neg	med	Level setup hook: add a texture scroll (step -8) to both level display lists (D_800902B8)
+func_15010240	level_setup_tex_scroll_pos	med	Level setup hook: add a texture scroll (step 4) to both level display lists (D_800902E4)
+func_150102C0	level_setup_noop_102c0	high	Level setup hook: empty

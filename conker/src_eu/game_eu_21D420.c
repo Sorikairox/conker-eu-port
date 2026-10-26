@@ -39,7 +39,7 @@ s32 game_os_pfs_get_status(OSMesgQueue *queue, int channel) {
     osRecvMesg(queue, &dummy, OS_MESG_BLOCK);
     ret = os_si_raw_start_dma(OS_READ, &D_80042D60);
     osRecvMesg(queue, &dummy, OS_MESG_BLOCK);
-    func_1002560C(&pattern, data);
+    game_os_pfs_get_init_data(&pattern, data);
     if (((data[channel].status & CONT_CARD_ON) != 0) && ((data[channel].status & CONT_CARD_PULL) != 0)) {
         return PFS_ERR_NEW_PACK;
     }

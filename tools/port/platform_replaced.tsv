@@ -35,12 +35,12 @@ crash_print_hex32	init_eu_5DA0	20	exception	not reached on PC	none	private-regis
 crash_print_string	init_eu_5DA0	25	exception	not reached on PC	none	private-register helper (as above)
 crash_draw_glyph	init_eu_5DA0	30	exception	not reached on PC	none	private-register helper (8-step loop)
 debug_syscall_trap	init_eu_5DA0	3	trap	not reached on PC	none	syscall 0; jr ra (debugger trap)
-debugger_crash_entry	init_eu_5DA0	221	debugger	not reached on PC	none	crash / debugger entry: saves sp/ra, remaps TLB, DMA via osPiRawStartDma, calls func_16000B14
+debugger_crash_entry	init_eu_5DA0	221	debugger	not reached on PC	none	crash / debugger entry: saves sp/ra, remaps TLB, DMA via osPiRawStartDma, calls debugger_main
 func_150ADC50	D5E90	4	trap	not reached on PC (vbe.py FUNC_AS_DATA: only its address is compared)	none	syscall 0 (debugger break), no jr
 func_100229D0	229D0	16	pad	not code: 16 nops without jr (alignment padding in a raw asm segment)	none	-
 debug_cont_pad_buf	debugger_eu_259B40	4	pad	not code: 4 nops (vbe.py FUNC_AS_DATA: only its address is used)	none	-
 bzero	init_eu_22A10	40	libc	port/ultra/pc_libc.c vbe.bzero	todo	hand asm libultra bzero
 bcopy	init_eu_23CC0	196	libc	port/ultra/pc_libc.c vbe.bcopy (memmove)	todo	hand asm libultra bcopy
 os_vi_manager_main	init_eu_3570	102	libultra-c	port/ultra/pc_os.c osCreateViManager (no-op: the VI manager thread never runs)	todo	libultra viMgrMain (compiled C) (P281: NM C draft in docs/port/sessions/p281/drafts, random-EQUIV, mutants pending)
-func_15007830	entrypoint	124	boot	port/boot/game_entry.c (PC translation of the main loop)	todo	game entrypoint / main loop (compiled C) (P281: NM C draft in docs/port/sessions/p281/drafts, random-EQUIV, mutants pending)
+game_thread_main	entrypoint	124	boot	port/boot/game_entry.c (PC translation of the main loop)	todo	game entrypoint / main loop (compiled C) (P281: NM C draft in docs/port/sessions/p281/drafts, random-EQUIV, mutants pending)
 boot_game_thread_main	init_1050	203	boot	port/boot/game_main.c boot_game_thread_main (PC main thread)	todo	main thread (compiled C) (P281: NM C draft in docs/port/sessions/p281/drafts, random-EQUIV, mutants pending)

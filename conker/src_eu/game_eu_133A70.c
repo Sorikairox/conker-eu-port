@@ -523,7 +523,7 @@ typedef struct {
 void bolt_points_subdivide(u8 *rec, s16 lo, s16 hi, f32 jitter);
 void *memcpy(void *, const void *, unsigned int);
 
-// bolt_spawn: spawns a bolt record (func_15149130 type 0x3E, 0x48-byte header + (2^depth + 1) points) whose block at
+// bolt_spawn: spawns a bolt record (effect_node_create type 0x3E, 0x48-byte header + (2^depth + 1) points) whose block at
 // +0x28 gets the point count, the 12 `params` words and `kind`; the point list (+0x28 + 0x48) runs from `start` to
 // `end` and bolt_points_subdivide fills the inner points with midpoint displacement (`jitter`). Returns the record or 0.
 /* was func_15107518 */
@@ -541,7 +541,7 @@ s32 bolt_spawn(f32 *start, f32 *end, s32 depth, f32 *params, f32 jitter, u8 kind
     }
     spec.kind = kind;
     // arg 6 is the record size (functions.h types it struct37 *)
-    rec = (u8 *) func_15149130(0, -1, 0x3E, -1, 0, 0x30, (struct37 *) (spec.count * 12 + 0x48), arg6, arg7);
+    rec = (u8 *) effect_node_create(0, -1, 0x3E, -1, 0, 0x30, (struct37 *) (spec.count * 12 + 0x48), arg6, arg7);
     if (rec != NULL) {
         memcpy(rec + 0x28, &spec, sizeof(BoltSpec));
         pts = (f32 *) (rec + 0x28 + 0x48);
@@ -717,13 +717,13 @@ void bolt_record_free(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0x30) != 0) { n
 /* was func_15107BCC */
 void bolt_record_retire(struct260 * arg0) {
     bolt_record_free(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_15107BF8 */
 void bolt_record_delete(struct260 * arg0) {
     bolt_record_free(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 extern void (*D_80088FD8[])(u8 *, s32, u8);

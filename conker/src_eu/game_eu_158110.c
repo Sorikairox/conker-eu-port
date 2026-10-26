@@ -891,7 +891,7 @@ void camera_cylinder_push(u8 *arg0) {
 
     vec3_dir_to(centre, &pos, &dir);
     pushAngle = vec3_heading_deg(&dir) - 180.0f;
-    func_15048758(&pushAngle);
+    math_wrap_deg_360(&pushAngle);
     vec3_dir_to(&target, &pos, &toTarget);
 
     /* onto the circle */
@@ -905,7 +905,7 @@ void camera_cylinder_push(u8 *arg0) {
 
     vec3_diff(&pos, &target, &dir);
     heading = vec3_heading_deg(&dir);
-    func_15048758(&heading);
+    math_wrap_deg_360(&heading);
     C108_F32(0x930) = heading;
 
     delta = math_angle_diff_deg(pushAngle, heading);

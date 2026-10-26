@@ -797,7 +797,7 @@ for _p in _knob_items('DIFFTEST_RET'):
 
 # P281 (opt-in): DIFFTEST_STOPCALL="ADDR=N,..." (hex ADDR, decimal N >= 1) ends the trial when the stub at ADDR is
 # entered for the N-th time: that call is logged (its arguments compared), then the run stops as "stopped" instead of
-# returning. For endless main loops / thread entries (viMgrMain os_vi_manager_main, func_15007830, boot_game_thread_main,
+# returning. For endless main loops / thread entries (viMgrMain os_vi_manager_main, game_thread_main, boot_game_thread_main,
 # prenmi_thread_main's final `b .`) that never reach RET_MAGIC: without it every trial times out (UNSURE, prefix only).
 # Both sides stopped: the call lists, call counts and written memory are compared (not the registers / return value,
 # which do not exist yet); only one side stopped: DIFFER. No knob = old behaviour.
@@ -1913,7 +1913,7 @@ def knob_notes(called, ntrials):
     out = ' [knob callee never called: %s]' % ', '.join(un) if un else ''
     # P259: a key that is no jal / j target of the reference at all (static, so it also shows when no trial reaches
     # the call, and in setup runs): usually the US address of a callee whose EU jal target differs (P256:
-    # func_151494E0 is jal 0x15149A50; the ARGMEM compare silently did nothing). A callee reached only through jalr
+    # effect_nodes_broadcast is jal 0x15149A50; the ARGMEM compare silently did nothing). A callee reached only through jalr
     # (function pointer) is listed too. DIFFTEST_JALKEY_OLD=1 = no check.
     if os.environ.get('DIFFTEST_JALKEY_OLD') != '1' and REF_JAL:
         nj = []

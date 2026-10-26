@@ -24,7 +24,7 @@ void sky_flash_spawn(s16 arg0, f32 arg1, f32 arg2, u8 arg3, u8 arg4, u8 arg5, s3
     tmp.unk4 = 0.0f;
     tmp.unk14 = arg3;
     tmp.unk15 = arg4;
-    temp_v0 = func_15149130(arg0, -1, 0x2F, 2, 1, 0x26, 0x18, arg5, arg6);
+    temp_v0 = effect_node_create(arg0, -1, 0x2F, 2, 1, 0x26, 0x18, arg5, arg6);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x18);
     }
@@ -57,13 +57,13 @@ void sky_flash_update(u8 *arg0)
 /* was func_150D278C */
 void sky_flash_retire(struct260 *arg0) {
     sky_flash_uncount((s32)arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_150D27B8 */
 void sky_flash_delete(struct260 *arg0) {
     sky_flash_uncount((s32)arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 /* was func_150D27E4 */

@@ -4,8 +4,8 @@
 
 
 #ifdef NON_MATCHING
-void func_151F2BA8(void);
-void func_151F2D6C(s32, s32);
+void mp3_stream_stop(void);
+void mp3_stream_set_volume(s32, s32);
 extern s32 D_800D3C60;
 
 /* was func_1509EB20 */
@@ -23,13 +23,13 @@ s32 event_action_stream(s32 arg0, s32 arg1, u8 *arg2) {
     case 1:
         if (D_800D3C60 == 4) {
     s32 pad;
-            func_151F2D6C((*(s32 *)((u8 *)arg2 + 8)), (*(s32 *)((u8 *)arg2 + 0xC)));
+            mp3_stream_set_volume((*(s32 *)((u8 *)arg2 + 8)), (*(s32 *)((u8 *)arg2 + 0xC)));
             return 1;
         }
-        func_151F2D6C((*(s32 *)((u8 *)arg2 + 8)), 0);
+        mp3_stream_set_volume((*(s32 *)((u8 *)arg2 + 8)), 0);
         return 1;
     case 2:
-        func_151F2BA8();
+        mp3_stream_stop();
         return 1;
     default:
         return 0;
@@ -43,7 +43,7 @@ s32 event_query_stream(s32 arg0, s32 arg1, s32 arg2) {
     s32 ret = 0;
 
     if (arg1 == 3) {
-        return func_151F2CDC() == 1;
+        return mp3_stream_get_state() == 1;
     }
     return ret;
 }

@@ -1,12 +1,12 @@
 /*
  * NON_MATCHING C for the skeleton / animation evaluator of the raw asm file asm/D5E90.s (P51):
- * func_150A86B0 with its private helpers func_150A8680 (no animation: copy the root matrix),
+ * anim_eval_joint_matrices with its private helpers func_150A8680 (no animation: copy the root matrix),
  * func_150A8EF8 .. func_150A93A0 (key-frame decoder + per-object joint adjustments), func_150A8DF8 (Euler angles
  * to quaternion), func_150A88F4 .. func_150A8DF4 (blend of two animations) and func_150A94E0 .. func_150A99BC
  * (one animation), func_150A98E0 / func_150A99BC / func_150A9A4C (joint matrices times parent matrices).
  *
  * Built only with NON_MATCHING=1 (Makefile: NM_ASM_C_FUNCS_D5E90 line for this file, and the linker script line
- * that places D5E90_anim.c.o); the asm copy of func_150A86B0 is weakened so this definition wins.
+ * that places D5E90_anim.c.o); the asm copy of anim_eval_joint_matrices is weakened so this definition wins.
  * The file must not contain the word G-L-O-B-A-L_ASM (see the Makefile note on nm_asm files).
  *
  * Float operations are written in the asm's order (no reassociation): each line rounds like one mul.s / add.s.
@@ -402,7 +402,7 @@ static void nmAnimTrans(f32 *mt, u8 *e, s16 *tt) {
 }
 
 /*
- * func_150A86B0: the joint matrices of a model instance.
+ * anim_eval_joint_matrices: the joint matrices of a model instance.
  * arena: &D_800C42A8 (advanced by n matrices); m: root matrix; anim: animation state (object +0x2D0; 0: copy m
  * into one matrix, func_150A8680); skel: skeleton entries (D_800C5000[id]); n: joints; buf: per-object angle /
  * scale adjustments (obj_adjust_list_build); remap: per-slot callback index (model header +0x29) or NULL; height: added
@@ -411,7 +411,8 @@ static void nmAnimTrans(f32 *mt, u8 *e, s16 *tt) {
  * animation 2 (+0x3C weight / 1024). Each joint matrix is (scale x rotation, bone offset) times its parent's;
  * column 3 of the matrices is not written.
  */
-void func_150A86B0(s32 *arena, f32 (*m)[4], s32 anim, s32 skel, s32 n, u8 *arg5, u8 *remap, s32 height) {
+/* was func_150A86B0 */
+void anim_eval_joint_matrices(s32 *arena, f32 (*m)[4], s32 anim, s32 skel, s32 n, u8 *arg5, u8 *remap, s32 height) {
     u8 *a = (u8 *)anim;
     u16 *buf = (u16 *)arg5;
     u8 *e;

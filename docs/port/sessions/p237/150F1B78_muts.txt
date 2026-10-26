@@ -5,7 +5,7 @@ s/        if (other\[0\] == \*(s32 \*) p || p\[4\] == ((u8 \*) other)\[4\]) {/  
 s/        if (other\[0\] == \*(s32 \*) p || p\[4\] == ((u8 \*) other)\[4\]) {/        if (other[0] == *(s32 *) p \&\& p[4] == ((u8 *) other)[4]) {/ % ev43_id
 s/            node_destroy((struct102 \*) obj);/            node_destroy((struct102 *) other);/ % ev43_id
 s/        return;/        ;/ % ev43_none
-s/    func_15149514((s32) other, event, (s32) p, (s32) (p + 4), (s32) obj);/    func_15149514((s32) obj, event, (s32) p, (s32) (p + 4), (s32) obj);/ % ev10
-s/    func_15149514((s32) other, event, (s32) p, (s32) (p + 4), (s32) obj);/    func_15149514((s32) other, event, (s32) p, (s32) (p + 5), (s32) obj);/ % ev10
-s/    func_15149514((s32) other, event, (s32) p, (s32) (p + 4), (s32) obj);/    func_15149514((s32) other, event, (s32) p, (s32) (p + 4), (s32) p);/ % ev10
+s/    effect_node_link_message((s32) other, event, (s32) p, (s32) (p + 4), (s32) obj);/    effect_node_link_message((s32) obj, event, (s32) p, (s32) (p + 4), (s32) obj);/ % ev10
+s/    effect_node_link_message((s32) other, event, (s32) p, (s32) (p + 4), (s32) obj);/    effect_node_link_message((s32) other, event, (s32) p, (s32) (p + 5), (s32) obj);/ % ev10
+s/    effect_node_link_message((s32) other, event, (s32) p, (s32) (p + 4), (s32) obj);/    effect_node_link_message((s32) other, event, (s32) p, (s32) (p + 4), (s32) p);/ % ev10
 # dropped (equivalent): s8 event (the callee's u8 parameter re-masks it; 0x43 compares equal either way)

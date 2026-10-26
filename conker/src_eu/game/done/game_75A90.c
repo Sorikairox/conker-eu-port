@@ -47,7 +47,8 @@ u16 D_80085F3C[64] = {
 u16 D_80085FBC[4] = { 922, 798, 652, 461 };
 #endif
 
-s32 func_150485E0(s32 arg0) {
+/* was func_150485E0 */
+s32 math_acos_table_lookup(s32 arg0) {
     s32 index;
     s32 tmp1;
     s32 tmp2;
@@ -78,7 +79,8 @@ s32 func_150485E0(s32 arg0) {
     return tmp1 - (((tmp1 - tmp2) * (arg0 & phi_v1)) >> phi_a1);
 }
 
-u16 func_15048664(s16 arg0) {
+/* was func_15048664 */
+u16 math_acos_s16(s16 arg0) {
     s32 tmp;
 
     if (arg0 >= 0) {
@@ -87,14 +89,15 @@ u16 func_15048664(s16 arg0) {
        tmp = -arg0;
     }
 
-    tmp = func_150485E0(tmp);
+    tmp = math_acos_table_lookup(tmp);
     if (arg0 < 0) {
         tmp = 0xFFFF - tmp;
     }
     return tmp;
 }
 
-s16 func_150486B8(s16 arg0) {
+/* was func_150486B8 */
+s16 math_asin_s16(s16 arg0) {
     s32 tmp;
 
     if (arg0 >= 0) {
@@ -103,7 +106,7 @@ s16 func_150486B8(s16 arg0) {
         tmp = -arg0;
     }
 
-    tmp = func_150485E0(tmp);
+    tmp = math_acos_table_lookup(tmp);
     if (arg0 >= 0) {
         tmp = 0x7FFF - tmp;
     } else {

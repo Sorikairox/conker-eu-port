@@ -366,7 +366,7 @@ struct260 *fx_source_emitter_spawn(s32 *arg0) {
     }
     sp30.unk0 = arg0;
     sp30.unk4 = 0.0f;
-    temp_v0 = func_151491F4(300, -1, 0x11, 0, 0xD, 0xC, 0xFF, 1);
+    temp_v0 = effect_node_create_nodraw(300, -1, 0x11, 0, 0xD, 0xC, 0xFF, 1);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &sp30, 0xC);
     }

@@ -23,11 +23,11 @@ s/e.frames = (f32) ((\*(u32 \*) (rec + 0x1C) >> 24) \& 0xFF);/e.frames = (f32) (
 s/e.inv_frames = 1.0f \/ e.frames;/e.inv_frames = 2.0f \/ e.frames;/ % base
 s/e.step = (f32) \*(s16 \*) (rec + 8) \* e.inv_frames;/e.step = (f32) *(u16 *) (rec + 8) * e.inv_frames;/ % one
 s/e.step = (f32) \*(s16 \*) (rec + 8) \* e.inv_frames;/e.step = (f32) *(s16 *) (rec + 6) * e.inv_frames;/ % base
-s/func_150484A0((f32) \*(s16 \*) (rec + 6), (f32) \*(s16 \*) (rec + 8));/func_150484A0((f32) *(s16 *) (rec + 8), (f32) *(s16 *) (rec + 6));/ % base
-s/e.angle = func_150484A0(/e.angle = 1.0f + func_150484A0(/ % base
+s/math_atan2f((f32) \*(s16 \*) (rec + 6), (f32) \*(s16 \*) (rec + 8));/math_atan2f((f32) *(s16 *) (rec + 8), (f32) *(s16 *) (rec + 6));/ % base
+s/e.angle = math_atan2f(/e.angle = 1.0f + math_atan2f(/ % base
 s/\* 0.00390625f \* 0.7853982f;/* 0.00390625f * 0.785398f;/ % base
 s/>> 16) \& 0xFF) \* 0.00390625f/>> 16) \& 0xFE) * 0.00390625f/ % zr
-s/func_15149130(300, -1, 0x2A, -1, 0, 0,/func_15149130(300, -1, 0x2B, -1, 0, 0,/ % base
+s/effect_node_create(300, -1, 0x2A, -1, 0, 0,/effect_node_create(300, -1, 0x2B, -1, 0, 0,/ % base
 s/(struct37 \*) sizeof(e), 0xFF, 0);/(struct37 *) sizeof(e), 0xFF, 1);/ % base
 s/memcpy((u8 \*) fx + 0x28, \&e, sizeof(e));/memcpy((u8 *) fx + 0x2C, \&e, sizeof(e));/ % base
 s/if (fx != NULL) {/if (1) {/ % nofx

@@ -29,7 +29,7 @@ void fire_smoke_trail_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
     tmp.unk8 = 0.0f;
-    temp_v0 = func_15149130(300, -1, 0x38, -1, 0, 0x28, 0xC, arg1, arg2);
+    temp_v0 = effect_node_create(300, -1, 0x38, -1, 0, 0x28, 0xC, arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0xC);
     }
@@ -227,16 +227,16 @@ void fire_smoke_trail_handle_msg(struct102 *arg0, u8 *arg1, u8 arg2) {
 
 /* was func_150D5F3C */
 void debris_particle_free_a(struct260 *arg0) {
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_150D5F5C */
 void debris_particle_free_b(struct260 *arg0) {
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 #ifdef NON_MATCHING
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s16 *, f32 *, f32 *, f32 *, f32 *, s32, s32 *, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, s16 *, f32 *, f32 *, f32 *, f32 *, s32, s32 *, f32);
 s32 mdl_particle_spawn(void *, s32, s32, s32, s32, s32);
 s32 obj_get_hit_kind(struct127 *);
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
@@ -329,7 +329,7 @@ void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
 
     /* the surface it was moving into: basis (axisA, axisB, normal) of the hit triangle, facing back */
     moved = vec3_normalize_len(dir, dir, &tmp0, &tmp1) != 0;
-    if (moved && func_150ACEA0(arg0->old_x_position, arg0->old_y_position, arg0->old_z_position, dir[0], dir[1], dir[2],
+    if (moved && collision_ray_cast(arg0->old_x_position, arg0->old_y_position, arg0->old_z_position, dir[0], dir[1], dir[2],
                                0, tri, &hit[0], &hit[1], &hit[2], &t, 0, &surface, 0.0f) != 0 && t < 397.0f) {
         hitWall = 1;
     }

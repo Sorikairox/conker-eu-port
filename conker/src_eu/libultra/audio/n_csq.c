@@ -182,7 +182,8 @@ s32 __n_alCSeqGetTrackEvent(ALCSeq *seq, s32 track, N_ALEvent *event, s32 arg3) 
 }
 
 // n_alCSeqSetLoc
-void func_100186DC(ALCSeq *seq, ALCSeqMarker *m) {
+/* was func_100186DC */
+void n_cseq_set_loc(ALCSeq *seq, ALCSeqMarker *m) {
     s32 i;
 
     seq->validTracks = m->validTracks;
@@ -197,7 +198,7 @@ void func_100186DC(ALCSeq *seq, ALCSeqMarker *m) {
     }
 }
 
-// N_ALEvent as seen by func_10018790: a marker event's id is in the top 24 bits of the word at 0xC
+// N_ALEvent as seen by n_cseq_find_markers: a marker event's id is in the top 24 bits of the word at 0xC
 typedef struct {
     s16 type;
     s32 unk4;
@@ -209,7 +210,8 @@ typedef struct {
 
 // Rare: scan a compressed sequence for marker events (type 0x14) and record
 // the sequence location of each one in markers[id - firstId]
-void func_10018790(u8 **seqData, ALCSeqMarker *markers, u32 count, u32 firstId) {
+/* was func_10018790 */
+void n_cseq_find_markers(u8 **seqData, ALCSeqMarker *markers, u32 count, u32 firstId) {
     N_ALMarkerEvent evt;
     ALCSeq seq;
     s32 j;

@@ -246,11 +246,11 @@ void sound_voices_reset(void) {
         D_800425E0[i].unk2 = i + 16;
     }
     D_80041F50 = 0;
-    func_100176EC();
+    n_sndp_stop_all_looping();
     D_80041F60 = D_80041F61 = 0;
 }
 
-void func_10017780(u8 arg0, u16 arg1);
+void n_sndp_set_group_volume(u8 arg0, u16 arg1);
 s32* allocate_memory(s32, s32, s32, s32);
 /* was func_1000F248 */
 void sound_level_init(s32 arg0) {
@@ -291,9 +291,9 @@ void sound_level_init(s32 arg0) {
     }
     sound_level_hook_nop(arg0);
     D_80041F60 = D_80041F61 = 0;
-    func_10017780(0, D_80041F56);
-    func_10017780(1, D_80041F56);
-    func_10017780(2, 23000);
+    n_sndp_set_group_volume(0, D_80041F56);
+    n_sndp_set_group_volume(1, D_80041F56);
+    n_sndp_set_group_volume(2, 23000);
     // fakematch
     if (arg0) {}
 }
@@ -305,7 +305,7 @@ s32 sound_voice_is_playing(u16 arg0) {
     temp_v1 = &D_800425E0[arg0 & 0xF];
     if (temp_v1->unk8 != 0) {
         if ((temp_v1->unk0 == arg0) || (arg0 == (arg0 & 0xF))) {
-            if (func_100173C4(&temp_v1->unk8) != 0) {
+            if (n_sndp_get_handle_state(&temp_v1->unk8) != 0) {
                 return 1;
             }
         }
@@ -337,7 +337,7 @@ s32 sound_id_is_playing(u16 arg0) {
     arg0 &= 0x7FFF;
     for (i = 0; i < 16; i++) {
         if (D_800425E0[i].unk8 != NULL && arg0 == (D_800425E0[i].unk4 & 0x7FFF) &&
-            func_100173C4(&D_800425E0[i].unk8)) {
+            n_sndp_get_handle_state(&D_800425E0[i].unk8)) {
             return 1;
         }
     }
@@ -445,7 +445,7 @@ void sound_voice_set_param(u16 arg0, s16 arg1, s32 arg2) {
             } else if (arg1 == 0x11) {
                 arg1 = 0x10;
             }
-            func_10017714(D_80042988[arg0 & 0xF].unk0, arg1, arg2);
+            n_sndp_post_event(D_80042988[arg0 & 0xF].unk0, arg1, arg2);
         }
     }
 }
@@ -477,7 +477,7 @@ void sound_voice_set_param(u16 arg0, s16 arg1, s32 arg2) {
 //                     phi_a1 = (u16)0x10;
 //                 }
 //             }
-//             func_10017714((((sp18 & 0xF) * 0xC) + 0x80040000) - 0x25E8, phi_a1, arg2);
+//             n_sndp_post_event((((sp18 & 0xF) * 0xC) + 0x80040000) - 0x25E8, phi_a1, arg2);
 //         }
 //     }
 // }
@@ -974,7 +974,7 @@ void actor_sounds_stop_loops(struct127 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_10017438(s32, s16, u16, u8, f32, s32, s32, struct31 **);
+s32 n_sndp_play_sound(s32, s16, u16, u8, f32, s32, s32, struct31 **);
 extern s32 D_8003E708;
 extern u16 D_80042984;
 
@@ -1002,16 +1002,16 @@ u16 sound_voice_play(u16 arg0, s32 arg1, u16 arg2, u8 arg3, s16 arg4, u8 arg5, u
     var_s1 = temp_t6 & 0xF;
     temp_s0 = &D_800425E0[var_s1];
     if ((temp_t6 == temp_s0->unk0) && (temp_t6 != 0)) {
-        if ((temp_s0->unk8 != NULL) && (func_100173C4(&temp_s0->unk8) != 0)) {
-            func_10017594(temp_s0->unk8);
+        if ((temp_s0->unk8 != NULL) && (n_sndp_get_handle_state(&temp_s0->unk8) != 0)) {
+            n_sndp_stop_sound(temp_s0->unk8);
             temp_s0->unk8 = NULL;
         }
-    } else if ((((temp_s0->unk8 != NULL) && (func_100173C4(&temp_s0->unk8) != 0)) || (temp_s0->unk4 & 0x8000)) && (((var_s1 = 0, (D_80042988->unk0 != 0)) && (func_100173C4((struct31 **) D_80042988) != 0)) || (D_80042984 & 0x8000))) {
+    } else if ((((temp_s0->unk8 != NULL) && (n_sndp_get_handle_state(&temp_s0->unk8) != 0)) || (temp_s0->unk4 & 0x8000)) && (((var_s1 = 0, (D_80042988->unk0 != 0)) && (n_sndp_get_handle_state((struct31 **) D_80042988) != 0)) || (D_80042984 & 0x8000))) {
 loop_11:
         var_s1 += 1;
         if (var_s1 < 0x10U) {
             temp_s0_2 = &D_800425E0[var_s1];
-            if (((temp_s0_2->unk8 != NULL) && (func_100173C4(&temp_s0_2->unk8) != 0)) || (temp_s0_2->unk4 & 0x8000)) {
+            if (((temp_s0_2->unk8 != NULL) && (n_sndp_get_handle_state(&temp_s0_2->unk8) != 0)) || (temp_s0_2->unk4 & 0x8000)) {
                 goto loop_11;
             }
         }
@@ -1054,7 +1054,7 @@ loop_11:
     sp4E = temp_t0;
     sp34 = temp_t3;
     sp38 = temp_t2;
-    func_10017438(D_8003E708, (s16) temp_t3, arg2, arg3, alCents2Ratio((s32) arg4), var_s0, (s32) arg6, temp_t2);
+    n_sndp_play_sound(D_8003E708, (s16) temp_t3, arg2, arg3, alCents2Ratio((s32) arg4), var_s0, (s32) arg6, temp_t2);
     var_t0 = temp_t0;
 block_31:
     return var_t0;
@@ -1142,7 +1142,7 @@ void sound_voice_stop(u16 arg0) {
     if ((tmp->unk8 != 0) && (tmp->unk0 == arg0)) {
         tmp->unk0 = 0;
         tmp->unk4 = 0;
-        func_10017594(tmp->unk8);
+        n_sndp_stop_sound(tmp->unk8);
         tmp->unk8 = 0;
     }
 }
@@ -1153,7 +1153,7 @@ void sound_voice_stop_deferred(u16 arg0) {
 
     if ((tmp->unk8 != 0) && (tmp->unk0 == arg0)) {
         if (sound_stop_queue_push(arg0, 1) == 0) {
-            func_10017594(tmp->unk8);
+            n_sndp_stop_sound(tmp->unk8);
             tmp->unk8 = 0;
         }
     }
@@ -1209,7 +1209,7 @@ void sound_stop_queue_process(void)
         D_800425E0[slot].unk4 = 0;
         if (D_800425E0[slot].unk8 != 0)
         {
-          func_10017594(D_800425E0[slot].unk8);
+          n_sndp_stop_sound(D_800425E0[slot].unk8);
         }
         D_800425E0[slot].unk8 = 0;
       }
@@ -1506,11 +1506,11 @@ void sound_update_frame(void) {
     }
     if (D_80041F54 != D_80041FDC || D_80041F60 != D_80041F61) {
         if (D_80041F61 == 1) {
-            func_10017780(0, 0);
-            func_10017780(1, 0);
+            n_sndp_set_group_volume(0, 0);
+            n_sndp_set_group_volume(1, 0);
         } else {
-            func_10017780(0, D_80041F54);
-            func_10017780(1, D_80041F54);
+            n_sndp_set_group_volume(0, D_80041F54);
+            n_sndp_set_group_volume(1, D_80041F54);
             step = (D_80041FDC - D_80041F54) * D_80041F58;
             if (step != 0) {
                 D_80041F54 += step;

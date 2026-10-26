@@ -78,7 +78,7 @@ block_43:
     sp1C = var_v1;
     sp20 = (s32) temp_v0;
     camera_look_mode_defaults(arg0);
-    func_15048758(var_v1 + 0x34);
+    math_wrap_deg_360(var_v1 + 0x34);
     if ((*(u8 *)((u8 *)var_v1 + 0x4C)) != 0) {
         temp_f0 = (*(f32 *)((u8 *)var_v1 + 0x50));
         (*(f32 *)((u8 *)var_v1 + 0x38)) = temp_f0;
@@ -387,7 +387,7 @@ void camera_look_update(u8 *arg0) {
                 cam->pitchTarget = cam->pitchTarget + off;
                 PF32(0x8B4) = (f32) (*(u16 *) (*(u8 **) (PPTR(0x3D0) + 0x31C) + 0x1A2) >> 8) * 1.0986328125f;
             }
-            func_15048758(&cam->yawTarget);
+            math_wrap_deg_360(&cam->yawTarget);
             // pitch limits per mode
             if (mode == 0x34) {
                 lim = -5.0f;

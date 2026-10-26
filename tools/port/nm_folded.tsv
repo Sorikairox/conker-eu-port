@@ -2,25 +2,25 @@
 # progress_nm.py counts them as nm (pragma files use #ifndef NON_MATCHING around the pragma instead).
 # kind: readable = hand C; asm2c = register-level translation (tools/port/asm2c_hand.py, still to be rewritten readably); data = not code
 func	file	host	nm_source	kind	note
-func_150A8680	D5E90	func_150A86B0	src_eu/nm_asm/D5E90_anim.c	readable	no-animation path: copy the root matrix
-func_150A8EF8	D5E90	func_150A86B0	src_eu/nm_asm/D5E90_anim.c	readable	key-frame decoder
-func_150A8DF8	D5E90	func_150A86B0	src_eu/nm_asm/D5E90_anim.c	readable	half-angle sine/cosine (Euler to quaternion)
-func_150A99BC	D5E90	func_150A86B0	src_eu/nm_asm/D5E90_anim.c	readable	joint matrix times parent
-D_150AA11C	D5E90	func_150A86B0	src_eu/nm_asm/D5E90_anim.c	data	sine table (513 floats) in .text: read as data by the NM C, nothing to convert
-func_150AA950	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90.c	readable	outcode helper (P281: nmw_box_outcode)
-func_150AA9B0	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90.c	readable	edge-plane outcode (P285: nmw_box_edge_outcode)
-func_150AAA88	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90.c	readable	corner-plane outcode (P285: nmw_box_corner_outcode)
-func_150AAB24	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90.c	readable	lerp + outcode (P285: nmw_lerp_outcode)
-func_150AAB58	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90.c	readable	segment vs box faces (P285: nmw_segment_misses_box)
-func_150AAC58	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90.c	readable	edge sign helper (P285: nmD5E90_sign3)
-func_150AACF4	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90.c	readable	point in triangle (P285: nmD5E90_pointInTri)
-func_150AAE80	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90.c	readable	triangle plane (P285: nmD5E90_plane)
-func_150AAF00	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90.c	readable	triangle/box test (P288: nmw_tri_misses_box)
-func_150AC200	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90.c	readable	projected point inside the triangle (P294: nmw_projects_inside)
-func_150AC6A4	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90.c	readable	swept xz box of the move (P294: nmw_set_box)
-func_150AC824	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90.c	readable	triangle into the box frame (P285: nmw_tri_to_local)
-func_150ACE90	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90.c	readable	ledge tail jump to the engine exit (P294: nmw_engine)
-func_150AD844	D5E90	func_150ACEA0	src_eu/nm_asm/D5E90.c	readable	ray vs triangle (P288: nmr_ray_hits_triangle)
-func_150AB6D0	D5E90	func_150AB6D0	src_eu/nm_asm/D5E90.c	readable	wall engine entry, walls (NM_ASM_C_FUNCS; P294: nmw_engine)
-func_150AC8C4	D5E90	func_150AC8C4	src_eu/nm_asm/D5E90.c	readable	wall engine entry, ledges (NM_ASM_C_FUNCS; P294: nmw_engine)
-func_150ACEA0	D5E90	func_150ACEA0	src_eu/nm_asm/D5E90.c	readable	ray cast entry (NM_ASM_C_FUNCS; P291: readable, D5E90_ray.inc removed)
+func_150A8680	D5E90	anim_eval_joint_matrices	src_eu/nm_asm/D5E90_anim.c	readable	no-animation path: copy the root matrix
+func_150A8EF8	D5E90	anim_eval_joint_matrices	src_eu/nm_asm/D5E90_anim.c	readable	key-frame decoder
+func_150A8DF8	D5E90	anim_eval_joint_matrices	src_eu/nm_asm/D5E90_anim.c	readable	half-angle sine/cosine (Euler to quaternion)
+func_150A99BC	D5E90	anim_eval_joint_matrices	src_eu/nm_asm/D5E90_anim.c	readable	joint matrix times parent
+D_150AA11C	D5E90	anim_eval_joint_matrices	src_eu/nm_asm/D5E90_anim.c	data	sine table (513 floats) in .text: read as data by the NM C, nothing to convert
+func_150AA950	D5E90	collision_walls_slide collision_ledge_probe	src_eu/nm_asm/D5E90.c	readable	outcode helper (P281: nmw_box_outcode)
+func_150AA9B0	D5E90	collision_walls_slide collision_ledge_probe	src_eu/nm_asm/D5E90.c	readable	edge-plane outcode (P285: nmw_box_edge_outcode)
+func_150AAA88	D5E90	collision_walls_slide collision_ledge_probe	src_eu/nm_asm/D5E90.c	readable	corner-plane outcode (P285: nmw_box_corner_outcode)
+func_150AAB24	D5E90	collision_walls_slide collision_ledge_probe	src_eu/nm_asm/D5E90.c	readable	lerp + outcode (P285: nmw_lerp_outcode)
+func_150AAB58	D5E90	collision_walls_slide collision_ledge_probe	src_eu/nm_asm/D5E90.c	readable	segment vs box faces (P285: nmw_segment_misses_box)
+func_150AAC58	D5E90	collision_walls_slide collision_ledge_probe	src_eu/nm_asm/D5E90.c	readable	edge sign helper (P285: nmD5E90_sign3)
+func_150AACF4	D5E90	collision_walls_slide collision_ledge_probe	src_eu/nm_asm/D5E90.c	readable	point in triangle (P285: nmD5E90_pointInTri)
+func_150AAE80	D5E90	collision_walls_slide collision_ledge_probe	src_eu/nm_asm/D5E90.c	readable	triangle plane (P285: nmD5E90_plane)
+func_150AAF00	D5E90	collision_walls_slide collision_ledge_probe	src_eu/nm_asm/D5E90.c	readable	triangle/box test (P288: nmw_tri_misses_box)
+func_150AC200	D5E90	collision_walls_slide collision_ledge_probe	src_eu/nm_asm/D5E90.c	readable	projected point inside the triangle (P294: nmw_projects_inside)
+func_150AC6A4	D5E90	collision_walls_slide collision_ledge_probe	src_eu/nm_asm/D5E90.c	readable	swept xz box of the move (P294: nmw_set_box)
+func_150AC824	D5E90	collision_walls_slide collision_ledge_probe	src_eu/nm_asm/D5E90.c	readable	triangle into the box frame (P285: nmw_tri_to_local)
+func_150ACE90	D5E90	collision_walls_slide collision_ledge_probe	src_eu/nm_asm/D5E90.c	readable	ledge tail jump to the engine exit (P294: nmw_engine)
+func_150AD844	D5E90	collision_ray_cast	src_eu/nm_asm/D5E90.c	readable	ray vs triangle (P288: nmr_ray_hits_triangle)
+collision_walls_slide	D5E90	collision_walls_slide	src_eu/nm_asm/D5E90.c	readable	wall engine entry, walls (NM_ASM_C_FUNCS; P294: nmw_engine)
+collision_ledge_probe	D5E90	collision_ledge_probe	src_eu/nm_asm/D5E90.c	readable	wall engine entry, ledges (NM_ASM_C_FUNCS; P294: nmw_engine)
+collision_ray_cast	D5E90	collision_ray_cast	src_eu/nm_asm/D5E90.c	readable	ray cast entry (NM_ASM_C_FUNCS; P291: readable, D5E90_ray.inc removed)

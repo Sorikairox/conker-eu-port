@@ -60,12 +60,12 @@ SRC_DIRS := $(SRC_DIR) \
 # holds C for functions of asm/X.s; it is compiled and linked only with NON_MATCHING=1, and the asm copies of
 # the functions listed in NM_ASM_C_FUNCS_X are weakened in X.s.o so the C definitions win.
 NM_ASM_SRC_DIR := $(SRC_DIR)/nm_asm
-NM_ASM_C_FUNCS_D5E90 := func_150AB278 func_150AD780 func_150AD78C
+NM_ASM_C_FUNCS_D5E90 := collision_tri_box_test fast_cosf fast_sinf
 # P51: the skeleton / animation evaluator (src_eu/nm_asm/D5E90_anim.c)
-NM_ASM_C_FUNCS_D5E90 += func_150A86B0
-NM_ASM_C_FUNCS_D5E90 += func_150AB6D0 func_150AC8C4 func_150ACEA0
+NM_ASM_C_FUNCS_D5E90 += anim_eval_joint_matrices
+NM_ASM_C_FUNCS_D5E90 += collision_walls_slide collision_ledge_probe collision_ray_cast
 # P62: matrix helpers (src_eu/nm_asm/D5E90_mtx.c)
-NM_ASM_C_FUNCS_D5E90 += func_150A9B0C func_150A9E64
+NM_ASM_C_FUNCS_D5E90 += mtx_rotate_scale_3x3 mtx_f_to_l_batch
 ifeq ($(NON_MATCHING),1)
 SRC_DIRS += $(NM_ASM_SRC_DIR)
 endif

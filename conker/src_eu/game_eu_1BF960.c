@@ -27,7 +27,7 @@ typedef struct {
     /* 0x60 */ f32 u60;
     /* 0x64 */ u8 u64;
 } ObjDustData;
-// obj_dust_effect_spawn: starts an effect object (func_15149130, type 0x1D, 0x68 bytes of data) that follows obj
+// obj_dust_effect_spawn: starts an effect object (effect_node_create, type 0x1D, 0x68 bytes of data) that follows obj
 // at `offset` (an f32[3]) with the given parameters and a snapshot of obj's floor query; life `life` (-1: 300 and
 // not timed). Returns the effect object or NULL (also for a NULL obj). Only caller obj_dust_effect.
 /* was func_15192150 */
@@ -59,7 +59,7 @@ struct260 *obj_dust_effect_spawn(u8 *obj, f32 *offset, u8 kind, f32 a3, f32 arg4
     d.u60 = arg14;
     d.u64 = arg15;
     /* argument 6 is the data size here (the header types it struct37 *) */
-    fx = func_15149130((life == -1) ? 300 : life, -1, 0x1D, -1, life != -1, 0x1D, (struct37 *) 0x68, arg16, arg17);
+    fx = effect_node_create((life == -1) ? 300 : life, -1, 0x1D, -1, life != -1, 0x1D, (struct37 *) 0x68, arg16, arg17);
     if (fx != NULL) {
         memcpy((u8 *) fx + 0x28, &d, sizeof(d));
     }

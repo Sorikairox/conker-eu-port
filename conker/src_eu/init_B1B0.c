@@ -1082,7 +1082,7 @@ void music_player_update_frame(s32 arg0, f32 arg1, f32 arg2, s32 arg3) {
 void music_players_set_volume_ramp(s32, s32, s32);
 void music_player_process_messages(s32);
 void music_player_update_frame(s32, f32, f32, s32);
-s32 func_151F2CDC(void);
+s32 mp3_stream_get_state(void);
 extern s8 D_800422A0;
 
 /* was func_1000D758 */
@@ -1129,7 +1129,7 @@ void music_update_all(f32 arg0, f32 arg1, s32 arg2) {
         music_players_set_volume_ramp(0x8000, 0x800, m34);
     } else {
         lvl = D_800427F4;
-        if (func_151F2CDC() == 1) {
+        if (mp3_stream_get_state() == 1) {
             lvl = D_800427F4;
             if ((lvl < 0x7D || lvl >= 0x81) && lvl < 0x1C9 && lvl != 0x170 && lvl != 0x171) {
                 music_players_set_volume_ramp(0x36B0, 0x200, m12 ^ 0xFF);

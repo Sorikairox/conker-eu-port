@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15011360(void) {
+/* was func_15011360 */
+void level_obj_init_area_points_23(void) {
     area_points_reset();
     area_points_alloc(2);
     area_points_alloc(3);

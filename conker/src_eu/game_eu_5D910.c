@@ -424,7 +424,7 @@ void attachment_update_all(void) {
                         }
                         if (rec->transform != NULL) {
                             /* rotation +0xC..+0x14 and scale +0x40, then translation +0..+8, applied first */
-                            func_150A9B0C(xform, rec->transform[3], rec->transform[4], rec->transform[5],
+                            mtx_rotate_scale_3x3(xform, rec->transform[3], rec->transform[4], rec->transform[5],
                                           rec->scale, rec->scale, rec->scale);
                             xform[0][3] = 0.0f;
                             xform[1][3] = 0.0f;
@@ -1084,7 +1084,7 @@ struct127 *obj_find_by_setup_id(u8);
 void obj_timer_link_post_remove(u8 *);
 void light_ctrl_broadcast(u8, u8, s32);
 void fxrec_broadcast(s32, u8);
-void func_151494E0(s32, u8);
+void effect_nodes_broadcast(s32, u8);
 void obj_aura_burst_stop(u8 *);
 void obj_point_fx_broadcast_kill(u8 *);
 void char_glow_broadcast_kill(u8 *);
@@ -1155,7 +1155,7 @@ void attachment_undo_kind_effects(u8 *rec) {
             msg.obj = obj;
             msg.id = obj[0x3B];
             fxrec_broadcast((s32) &msg, 0x2E);
-            func_151494E0((s32) &msg, 0x2F);
+            effect_nodes_broadcast((s32) &msg, 0x2F);
             break;
         case 0x3D:
             obj_aura_burst_stop(obj);
@@ -1794,7 +1794,7 @@ s32 attachment_spawn_at_joint(u8 *arg0, struct127 *arg1, s32 arg2, s32 arg3, s32
         }
         guMtxL2F(m1, (Mtx *)((u8 *)arg1->unk1D4 + (arg3 << 6)));
         obj_build_inverse_mtx((s32)m1, (s32)m2);
-        func_150A9B0C(m3, *(f32 *)(arg0 + 0xB8), *(f32 *)(arg0 + 0x40), *(f32 *)(arg0 + 0xC4), *(f32 *)(arg0 + 0x14C), *(f32 *)(arg0 + 0x150), *(f32 *)(arg0 + 0x14C));
+        mtx_rotate_scale_3x3(m3, *(f32 *)(arg0 + 0xB8), *(f32 *)(arg0 + 0x40), *(f32 *)(arg0 + 0xC4), *(f32 *)(arg0 + 0x14C), *(f32 *)(arg0 + 0x150), *(f32 *)(arg0 + 0x14C));
         m3[3][0] = *(f32 *)(arg0 + 0x14);
         m3[3][1] = *(f32 *)(arg0 + 0x18);
         m3[3][2] = *(f32 *)(arg0 + 0x1C);

@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15004E00(void) {
+/* was func_15004E00 */
+void breakable_slots_clear(void) {
     u32 i;
 
     for (i = 0; i < 25; i++)
@@ -16,7 +17,8 @@ void func_15004E00(void) {
     }
 }
 
-void func_15004E80(void) {
+/* was func_15004E80 */
+void level_matrix_arenas_alloc(void) {
     D_800C3E7C = D_800B0DF0->unk1A;
     D_800C3E80 = allocate_memory(D_800C3E7C << 6, 1, 3, 0);
     D_800C3E84 = allocate_memory(D_800C3E7C << 6, 1, 3, 0);

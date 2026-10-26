@@ -275,7 +275,7 @@ void lightning_emitter_spawn(u8 *arg0, s8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     tmp.unk4 = 0.0f;
     tmp.unk8 = arg1;
     tmp.unk9 = arg2;
-    temp_v0 = func_15149130(300, -1, 0x56, -1, 0, 0, 0xC, arg3, arg4);
+    temp_v0 = effect_node_create(300, -1, 0x56, -1, 0, 0, 0xC, arg3, arg4);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0xC);
     }

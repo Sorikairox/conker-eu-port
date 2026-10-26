@@ -11,7 +11,7 @@ void __osSiGetAccess(void);
 void __osSiRelAccess(void);
 s32 os_si_raw_start_dma(s32, void *); // __osSiRawStartDma
 void __osPfsRequestData(u8 cmd);
-void func_1002560C(u8 *pattern, OSContStatus *data); // __osPfsGetInitData
+void game_os_pfs_get_init_data(u8 *pattern, OSContStatus *data); // __osPfsGetInitData
 
 s32 osPfsIsPlug(OSMesgQueue *queue, u8 *pattern)
 {
@@ -33,7 +33,7 @@ s32 osPfsIsPlug(OSMesgQueue *queue, u8 *pattern)
         osRecvMesg(queue, &dummy, OS_MESG_BLOCK);
         ret = os_si_raw_start_dma(OS_READ, &__osPfsPifRam);
         osRecvMesg(queue, &dummy, OS_MESG_BLOCK);
-        func_1002560C(&bitpattern, data);
+        game_os_pfs_get_init_data(&bitpattern, data);
         for (channel = 0; channel < _osContNumControllers; channel++)
         {
             if ((data[channel].status & CONT_ADDR_CRC_ER) == 0)
@@ -87,7 +87,8 @@ void __osPfsRequestData(u8 cmd) {
     *ptr = CONT_CMD_END;
 }
 
-void func_1002560C(u8 *pattern, OSContStatus *data)
+/* was func_1002560C */
+void game_os_pfs_get_init_data(u8 *pattern, OSContStatus *data)
 {
     u8 *ptr;
     __OSContRequesFormat requestformat;

@@ -47,7 +47,7 @@ typedef struct {
 extern s32 (*D_80087030[])(u8 *, s32, s32);
 s32 obj_ray_hit_model(u8 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32 *, s32 *, s16 *);
 s32 ray_hit_object_bounds(f32 *, f32 *, u8 *, f32 *, f32 *, f32 *, f32 *);
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *, f32 *, s32 *, u8 *, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *, f32 *, s32 *, u8 *, f32);
 // ray_cast_world: casts the ray (x, y, z) + t * (dx, dy, dz) against the level (unless noLevel) and the 25 objects
 // of D_800CC2D0 (unless noObjects) and keeps the nearest hit closer than maxDist (0 = 9999999) in hit:
 // +0 object, +4 distance (-1 = none), +0x8 point, +0x14 normal (model hits), +0x20 exit point, +0x2C start,
@@ -119,7 +119,7 @@ s32 ray_cast_world(struct127 *caster, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 d
     }
 
     if (noLevel == 0 &&
-        func_150ACEA0(x, y, z, dx, dy, dz, &surface, hit + 0x44, &hx, &hy, &hz, &dist, &material, hit + 0x60, 0.0f) !=
+        collision_ray_cast(x, y, z, dx, dy, dz, &surface, hit + 0x44, &hx, &hy, &hz, &dist, &material, hit + 0x60, 0.0f) !=
             0 &&
         dist < maxDist) {
         *(f32 *)(hit + 0x4) = dist;

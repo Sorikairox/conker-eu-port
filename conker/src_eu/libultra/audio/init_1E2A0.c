@@ -3,7 +3,8 @@
 #include "n_synthInternals.h"
 
 // n_alSynSetPan
-void func_1001E2A0(N_ALVoice *v, u8 pan) {
+/* was func_1001E2A0 */
+void n_syn_set_voice_pan(N_ALVoice *v, u8 pan) {
     ALParam *update;
 
     if (v->pvoice) {

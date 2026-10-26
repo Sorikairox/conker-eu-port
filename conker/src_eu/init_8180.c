@@ -6,7 +6,7 @@ typedef struct {
   u8 unk0[8][0xEC];
 } struct247; // something naudio related? size 0x760
 
-void func_100186DC(void *arg0, void *arg1);
+void n_cseq_set_loc(void *arg0, void *arg1);
 
 extern N_ALCSPlayer *D_8003C900[];
 extern ALCSeq        D_8003CA58[];
@@ -14,21 +14,21 @@ extern struct247     D_8003CD48[];
 
 // FIXME: create header file for audio related functions
 s32  func_10017A80(N_ALCSPlayer *csp);
-void func_10017AF0(N_ALCSPlayer *csp, s32 arg1);
-void func_10017B04(N_ALCSPlayer *arg0, s32 arg1, u8 arg2);
-void func_10017B30(N_ALCSPlayer *csp);
-void func_10017BB8(N_ALCSPlayer *csp, s32 arg1);
-void func_10017C00(N_ALCSPlayer *csp, s32 arg1);
-void func_10017C68(N_ALCSPlayer *arg0, s32 arg1, u8 arg2, u8 arg3);
-void func_10017CE0(N_ALCSPlayer *arg0, s32 arg1, u8 arg2);
-void func_10017D30(N_ALCSPlayer *arg0, s32 arg1, u8 arg2);
-void func_10017D80(N_ALCSPlayer *arg0, u8 arg1, u8 arg2);
-void func_10017DF0(N_ALCSPlayer *csp, f32 arg1, f32 arg2);
-void func_10017E4C(N_ALCSPlayer *csp, u8 chan, u8 arg2);
-void func_10017F10(N_ALCSPlayer *arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
-void func_10018790(N_ALCSPlayer *arg0, s32 arg1, u32 arg2, u32 arg3);
-void func_10018D00(N_ALCSPlayer *arg0, s16 arg1);
-void func_10018D50(N_ALCSPlayer *seqp);
+void n_csp_set_msg_queue(N_ALCSPlayer *csp, s32 arg1);
+void n_csp_set_chan_notify(N_ALCSPlayer *arg0, s32 arg1, u8 arg2);
+void n_csp_reset_chan_levels(N_ALCSPlayer *csp);
+void n_csp_mute_chan(N_ALCSPlayer *csp, s32 arg1);
+void n_csp_unmute_chan(N_ALCSPlayer *csp, s32 arg1);
+void n_csp_fade_chan(N_ALCSPlayer *arg0, s32 arg1, u8 arg2, u8 arg3);
+void n_csp_set_chan_fx_enable(N_ALCSPlayer *arg0, s32 arg1, u8 arg2);
+void n_csp_set_chan_level(N_ALCSPlayer *arg0, s32 arg1, u8 arg2);
+void n_csp_set_chan_pan(N_ALCSPlayer *arg0, u8 arg1, u8 arg2);
+void n_csp_set_fx_mix_offset_scale(N_ALCSPlayer *csp, f32 arg1, f32 arg2);
+void n_csp_set_chan_fx_bus(N_ALCSPlayer *csp, u8 chan, u8 arg2);
+void n_csp_set_fx_param(N_ALCSPlayer *arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
+void n_cseq_find_markers(N_ALCSPlayer *arg0, s32 arg1, u32 arg2, u32 arg3);
+void n_csp_set_vol(N_ALCSPlayer *arg0, s16 arg1);
+void n_csp_stop(N_ALCSPlayer *seqp);
 
 typedef struct {
     s32 unk0;
@@ -42,7 +42,7 @@ extern u16 D_8003CCB0[];
 void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 void heap_free(s32 arg0);
 s32 rom_dma_read(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
-void func_10018CB0(N_ALCSPlayer *csp, ALCSeq *seq);
+void n_csp_set_seq(N_ALCSPlayer *csp, ALCSeq *seq);
 
 // this one is a monster
 #ifdef NON_MATCHING
@@ -85,12 +85,12 @@ s32 asset_load_into(s32 arg0, s32 arg1, s32 arg2, ...);
 s32 asset_get_size(s32 arg0, ...);
 void audio_mgr_init(AmSynConfig *c, s32 pri, AmConfig *arg2);
 void rom_dma_read_chunked(u32 devAddr, u8 *dramAddr, u32 size);
-void func_10012934(ALBankFile *file, u8 *table, s32 arg2);
-void func_100131FC(ALSeqpConfig *arg0, s32 arg1);
-void func_10015550(N_ALCSPlayer *csp, s32 arg1);
-s32 func_100155A0(SndpConfig8180 *c);
-void func_10017870(u8 arg0);
-void func_10017944(s32 arg0, u32 arg1);
+void n_alBnkfNew(ALBankFile *file, u8 *table, s32 arg2);
+void audio_osc_pool_create(ALSeqpConfig *arg0, s32 arg1);
+void n_csp_set_bank(N_ALCSPlayer *csp, s32 arg1);
+s32 n_sndp_init(SndpConfig8180 *c);
+void audio_set_output_mode(u8 arg0);
+void audio_set_bus_mix_type(s32 arg0, u32 arg1);
 
 /* was func_10008180 */
 void audio_system_init(void) {
@@ -129,7 +129,7 @@ void audio_system_init(void) {
     asset_load_into((s32)bankFile, size, 2, 0x17, 0);
     ctlRom = asset_lookup_rom(NULL, 2, 0x17, 1);
     tblRom = asset_lookup_rom(NULL, 2, 0x17, 2);
-    func_10012934(bankFile, tblRom, (s32)ctlRom);
+    n_alBnkfNew(bankFile, tblRom, (s32)ctlRom);
     D_8003E708 = (s32)bankFile->bankArray[0];
 
     seqRom = asset_lookup_rom(NULL, 2, 0x17, 3);
@@ -154,13 +154,13 @@ void audio_system_init(void) {
     seqc.debugFlags = 0;
     seqc.maxChannels = 0x10;
     seqc.heap = &D_8003E710;
-    func_100131FC(&seqc, 0x58);
+    audio_osc_pool_create(&seqc, 0x58);
     for (i = 0; i < 3; i++) {
         D_8003CDDC[i] = 0xFFFF;
         D_8003CDE8[i] = NULL;
         D_8003C900[i] = alHeapDBAlloc(NULL, 0, &D_8003E710, 1, sizeof(N_ALCSPlayer));
         n_alCSPNew(D_8003C900[i], &seqc);
-        func_10015550(D_8003C900[i], (s32)bankFile->bankArray[0]);
+        n_csp_set_bank(D_8003C900[i], (s32)bankFile->bankArray[0]);
     }
 
     sndc.maxEvents = 0x40;
@@ -169,10 +169,10 @@ void audio_system_init(void) {
     sndc.unk14 = 8;
     sndc.heap = &D_8003E710;
     sndc.unk10 = (s32)tblRom;
-    func_100155A0(&sndc);
-    func_10017870(4);
-    func_10017944(0, 2);
-    func_10017944(1, 2);
+    n_sndp_init(&sndc);
+    audio_set_output_mode(4);
+    audio_set_bus_mix_type(0, 2);
+    audio_set_bus_mix_type(1, 2);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_8180/audio_system_init.s")
@@ -180,7 +180,7 @@ void audio_system_init(void) {
 /* was func_100084D8 */
 void music_player_play(u8 idx) {
     if ((n_alCSPGetState(D_8003C900[idx]) == 0) || (n_alCSPGetState(D_8003C900[idx]) == 3)) {
-        func_10017AA0(D_8003C900[idx]);
+        n_csp_play(D_8003C900[idx]);
     }
 }
 
@@ -191,7 +191,7 @@ s32 music_player_get_state(u8 idx) {
 
 /* was func_10008570 */
 void music_player_set_msg_queue(u8 idx, s32 arg1) { // arg1 is OSMesgQueue ?
-    func_10017AF0(D_8003C900[idx], arg1);
+    n_csp_set_msg_queue(D_8003C900[idx], arg1);
 }
 
 /* was func_100085A4 */
@@ -200,17 +200,17 @@ void music_stub_noop3(s32 arg0, s32 arg1, s32 arg2) {
 
 /* was func_100085B8 */
 void music_player_set_chan_flag17(u8 idx, s32 arg1, u8 arg2) {
-    func_10017B04(D_8003C900[idx], arg1, arg2);
+    n_csp_set_chan_notify(D_8003C900[idx], arg1, arg2);
 }
 
 /* was func_100085F8 */
 void music_chan_mute(u8 idx, s32 arg1) {
-    func_10017BB8(D_8003C900[idx], arg1);
+    n_csp_mute_chan(D_8003C900[idx], arg1);
 }
 
 /* was func_1000862C */
 void music_chan_unmute(u8 idx, s32 arg1) {
-    func_10017C00(D_8003C900[idx], arg1);
+    n_csp_unmute_chan(D_8003C900[idx], arg1);
 }
 
 /* was func_10008660 */
@@ -225,17 +225,17 @@ void music_chan_fade_volume(u8 idx, u8 chan, u8 arg2, s32 arg3) {
     } else {
         arg3 = 0; // empty?
     }
-    func_10017C68(D_8003C900[idx], chan, arg2, arg3);
+    n_csp_fade_chan(D_8003C900[idx], chan, arg2, arg3);
 }
 
 /* was func_100086FC */
 void music_chan_set_cc41(u8 idx, u8 arg1, u8 arg2) {
-    func_10017CE0(D_8003C900[idx], arg1, arg2);
+    n_csp_set_chan_fx_enable(D_8003C900[idx], arg1, arg2);
 }
 
 /* was func_10008744 */
 void music_chan_set_pan(u8 idx, u8 arg1, u8 arg2) {
-    func_10017D80(D_8003C900[idx], arg1, arg2);
+    n_csp_set_chan_pan(D_8003C900[idx], arg1, arg2);
 }
 
 /* was func_10008790 */
@@ -252,7 +252,7 @@ void music_chans_fade_volume(u8 idx, s32 mask, u8 arg2, s32 arg3) {
 
 /* was func_10008824 */
 void music_chan_set_volume(u8 idx, u8 arg1, u8 arg2) {
-    func_10017D30(D_8003C900[idx], arg1, arg2);
+    n_csp_set_chan_level(D_8003C900[idx], arg1, arg2);
 }
 
 /* was func_1000886C */
@@ -312,7 +312,7 @@ void music_chans_set_cc92(u8 idx, s32 mask, s32 arg2) {
     for(chan = 0; chan < 16; chan++)
     {
         if (((1 << chan) & mask) != 0) {
-            func_10017E4C(D_8003C900[idx], chan, arg2);
+            n_csp_set_chan_fx_bus(D_8003C900[idx], chan, arg2);
         }
     }
 }
@@ -324,22 +324,22 @@ void music_player_get_tempo(u8 idx) {
 
 /* was func_10008B60 */
 void music_player_set_voice_param(u8 idx, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
-    func_10017F10(D_8003C900[idx], arg1, arg2, arg3, arg4);
+    n_csp_set_fx_param(D_8003C900[idx], arg1, arg2, arg3, arg4);
 }
 
 /* was func_10008BC0 */
 void music_player_set_master_gain(u8 idx, f32 arg1, f32 arg2) {
-    func_10017DF0(D_8003C900[idx], arg1, arg2);
+    n_csp_set_fx_mix_offset_scale(D_8003C900[idx], arg1, arg2);
 }
 
 /* was func_10008C04 */
 void music_seq_new_marker(u8 idx, u8 arg1, s32 arg2) {
-    func_10018790(&D_8003CA58[idx], &D_8003CD48[idx], arg1, arg2);
+    n_cseq_find_markers(&D_8003CA58[idx], &D_8003CD48[idx], arg1, arg2);
 }
 
 /* was func_10008C6C */
 void music_seq_jump_marker(u8 idx, u8 arg1) {
-    func_100186DC(&D_8003CA58[idx], D_8003CD48[idx].unk0[arg1]);
+    n_cseq_set_loc(&D_8003CA58[idx], D_8003CD48[idx].unk0[arg1]);
 }
 
 // s129: (re)start sequence player idx with sequence arg1: wait for the player to stop, load the
@@ -351,12 +351,12 @@ s32 music_player_start_seq(u8 idx, s32 arg1) {
     u32 i;
 
     i = 0;
-    func_10018C60(D_8003C900[idx]);
+    n_csp_end_track(D_8003C900[idx]);
     while (n_alCSPGetState(D_8003C900[idx]) != 0 && i < 2000000) {
         i++;
     }
     if (i >= 2000000) {
-        func_10018C60(D_8003C900[idx]);
+        n_csp_end_track(D_8003C900[idx]);
         while (n_alCSPGetState(D_8003C900[idx]) != 0 && i < 4000000) {
             i++;
         }
@@ -375,23 +375,23 @@ s32 music_player_start_seq(u8 idx, s32 arg1) {
         D_8003CDDC[idx] = arg1;
     }
     n_alCSeqNew(&D_8003CA58[idx], D_8003CDE8[idx]);
-    func_10018CB0(D_8003C900[idx], &D_8003CA58[idx]);
-    func_10017B30(D_8003C900[idx]);
+    n_csp_set_seq(D_8003C900[idx], &D_8003CA58[idx]);
+    n_csp_reset_chan_levels(D_8003C900[idx]);
     return 0;
 }
 
 /* was func_10008EE0 */
 void music_player_set_volume(u8 idx, s32 arg1) {
-    func_10018D00(D_8003C900[idx], arg1);
+    n_csp_set_vol(D_8003C900[idx], arg1);
 }
 
 /* was func_10008F24 */
 void music_player_end_track(u8 idx) {
     // AL_TRACK_END
-    func_10018C60(D_8003C900[idx]);
+    n_csp_end_track(D_8003C900[idx]);
 }
 
 /* was func_10008F58 */
 void music_player_stop(u8 idx) {
-    func_10018D50(D_8003C900[idx]);
+    n_csp_stop(D_8003C900[idx]);
 }

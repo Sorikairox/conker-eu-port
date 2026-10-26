@@ -748,7 +748,7 @@ void obj_broadcast_bored(u8 *arg0)
     ((u8 *) sp20)[4] = arg0[0x3B];
     model_drip_broadcast(sp1C, 0xD);
   }
-  func_151494E0(0xFFFFFFFFFFFFFFFF & sp1C, 0xD);
+  effect_nodes_broadcast(0xFFFFFFFFFFFFFFFF & sp1C, 0xD);
 }
 
 #ifdef NON_MATCHING

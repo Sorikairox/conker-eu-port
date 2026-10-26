@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""P24: compare func_150AD78C (sinf) / func_150AD780 (cosf) and mtxf_rotate_xyz_deg (rotation matrix) between the hand asm
+"""P24: compare fast_sinf (sinf) / fast_cosf (cosf) and mtxf_rotate_xyz_deg (rotation matrix) between the hand asm
 (build/conker.eu.elf) and the NON_MATCHING C (build_nm/conker.eu.elf), whole, in Unicorn: a small trampoline
 loads f12 from memory (Unicorn 2.0.1 ignores FPR reg_write), calls the function and stores f0 back.
 Run in the container from /conker/conker after both builds: python3 ../tools/port/difftest/nmasm_sincos.py [N] [seed]"""
@@ -54,8 +54,8 @@ class Img:
         return struct.unpack('>I', bytes(mu.mem_read(phys(SCR + 4), 4)))[0]
 
 ref, cand = Img('build/conker.eu.elf'), Img('build_nm/conker.eu.elf', 'build/conker.eu.elf')
-assert ref.s['func_150AD780'] == 0x150ADC60 and ref.s['func_150AD78C'] == 0x150ADC6C, 'unexpected asm addresses'
-assert cand.s['func_150AD78C'] != ref.s['func_150AD78C'], 'NM build still uses the asm (weaken failed?)'
+assert ref.s['fast_cosf'] == 0x150ADC60 and ref.s['fast_sinf'] == 0x150ADC6C, 'unexpected asm addresses'
+assert cand.s['fast_sinf'] != ref.s['fast_sinf'], 'NM build still uses the asm (weaken failed?)'
 rng = random.Random(int(sys.argv[2]) if len(sys.argv) > 2 else 1)
 n = int(sys.argv[1]) if len(sys.argv) > 1 else 3000
 mr, mc = ref.mu(), cand.mu()
@@ -66,7 +66,7 @@ for t in range(n):
     else:
         x = rng.choice([rng.uniform(-1.6, 1.6), rng.uniform(-10, 10), rng.uniform(-1000, 1000), rng.uniform(-1e6, 1e6),
                         rng.uniform(-3e8, 3e8), rng.uniform(-1e-3, 1e-3), (rng.randrange(-200, 200) + 0.5) * math.pi])
-    for fn in ('func_150AD78C', 'func_150AD780'):
+    for fn in ('fast_sinf', 'fast_cosf'):
         a, b = ref.call(mr, fn, [f2w(x)]), cand.call(mc, fn, [f2w(x)])
         e = (f2w(x) >> 22) & 0x1FF; c = 'tiny' if e < 0xE6 else 'poly' if e < 0xFF else 'zero' if e >= 0x136 else 'reduce'
         cls[c] = cls.get(c, 0) + 1

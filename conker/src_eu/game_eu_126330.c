@@ -145,7 +145,7 @@ void fire_flash_burst_spawn(s32 arg0, u8 *arg1, s32 arg2) {
 void fire_post_tick_event(s32 arg0, s32 arg1) {
     s32 tmp[2];
     tmp[0] = arg1;
-    func_151494E0(tmp, 0x3F);
+    effect_nodes_broadcast(tmp, 0x3F);
 }
 
 /* was func_150F8DFC */
@@ -517,9 +517,9 @@ void fire_post_finish_events(u8 arg0) {
 
     tmp.unk0 = 0;
     tmp.unk4 = D_800A2010[arg0][0];
-    func_151494E0(&tmp, 0x42);
+    effect_nodes_broadcast(&tmp, 0x42);
     tmp.unk4 = D_800A2010[arg0][1];
-    func_151494E0(&tmp, 0x42);
+    effect_nodes_broadcast(&tmp, 0x42);
 }
 
 /* was func_150F9D08 */
@@ -529,13 +529,13 @@ void fire_free(s32 arg0) {
 /* was func_150F9D14 */
 void fire_retire(struct260 *arg0) {
     fire_free(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_150F9D40 */
 void fire_delete(struct260 *arg0) {
     fire_free(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 s32 attached_particle_spawn(u8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, s32 *, s32, s32, s32, s32, s32);

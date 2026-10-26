@@ -555,7 +555,7 @@ void char_fx_light_j2(struct127 *arg0) {
 
 /* was func_1514E1A8 */
 void char_fx_1500ee18_attach(struct127 *arg0) {
-    func_1500EE18(arg0, 0xFF, 1);
+    effect_attach_obj_type45(arg0, 0xFF, 1);
 }
 
 /* was func_1514E1CC */
@@ -1551,7 +1551,7 @@ void char_fx_spawn_linked_3a(u8 *arg0) {
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
     tmp.unk8 = 0.0f;
-    temp_v0 = func_15149130(300, -1, 0x3A, -1, 0, 0x2B, 0xC, 255, 1);
+    temp_v0 = effect_node_create(300, -1, 0x3A, -1, 0, 0x2B, 0xC, 255, 1);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0xC);
     }

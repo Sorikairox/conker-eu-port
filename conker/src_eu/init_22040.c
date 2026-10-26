@@ -32,7 +32,7 @@ typedef struct {
 
 #define func_global_asm_80740C50 func_10022040
 #define func_global_asm_80741070 func_10022460
-#define func_global_asm_8073BE54 func_1001CF38
+#define func_global_asm_8073BE54 n_fx_lowpass_update_coefs
 void *func_global_asm_80741070(CustomPVoice *, s16 *, Acmd *);
 void func_global_asm_8073BE54(void *arg0, f32 arg1);
 f32 sqrtf(f32);
@@ -104,7 +104,7 @@ void *func_global_asm_80740C50(CustomPVoice *arg0, s16 *arg1, s32 arg2, Acmd *ar
 //     }
 //     if ((s16)arg0->unkA2 > 0) {
 //         if (arg0->unkC8 != 0) {
-//             func_1001CF38(&arg0->unkA0, 22050.0f);
+//             n_fx_lowpass_update_coefs(&arg0->unkA0, 22050.0f);
 //         }
 //         sp20 = sp2C = &sp2C->unk8;
 //         sp20->unk0 = 0xB000020;

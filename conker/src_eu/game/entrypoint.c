@@ -6,7 +6,7 @@
 
 // game entrypoint
 #ifdef NON_MATCHING
-/* P281: readable C for func_15007830 (game entry point, compiled C, 128 insns; replaces the commented US draft
+/* P281: readable C for game_thread_main (game entry point, compiled C, 128 insns; replaces the commented US draft
    below). Verified with difftest up to the N-th frame (DIFFTEST_STOPCALL on game_main_loop): the loop never returns. */
 extern s32 D_800D3048;
 extern OSMesgQueue D_800BEE30;   /* main message queue */
@@ -32,14 +32,15 @@ void level_lights_clear(void);
 void random_seed(s32 arg0);
 void level_load(void);
 void game_main_loop(void);
-void func_15008A60(void);
+void view_zoom_state_reset(void);
 void save_block_realloc_random(void);
 // game_main: the game thread's entry. Initialises the subsystems and the message queue, then loops forever: frame
 // states 1 / 5 run menu_init, then (from 2) the frame update, the 0x81280783 hook in mode 2 and level_start_game
 // with the low halves of D_800BEE24 / D_800BEE20 / D_800BE9F4, then (from 3) level_load and the state goes back
 // to 0; every pass ends with sched_send_retrace_msg, D_800BEE08 = 0 and game_main_loop.
-void func_15007830(void) {
-    func_15007A20();
+/* was func_15007830 */
+void game_thread_main(void) {
+    game_bss_clear();
     D_800D3048 = 0;
     osCreateMesgQueue(&D_800BEE30, D_800BEE48, 16);
     D_800BEE88[0] = 2;
@@ -57,7 +58,7 @@ void func_15007830(void) {
     controller_init_all();
     settings_reset_defaults();
     glyph_set_load_rom(0);
-    func_15008A60();
+    view_zoom_state_reset();
     text_queue_reset();
     D_800BEA35 = 5;
     D_800BEE24 = 0;
@@ -89,11 +90,11 @@ void func_15007830(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game/entrypoint/func_15007830.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game/entrypoint/game_thread_main.s")
 #endif
 // NON-MATCHING: need to better understand jump tables
-// void func_15007830(void) {
-//     func_15007A20();
+// void game_thread_main(void) {
+//     game_bss_clear();
 //     D_800D2C28 = 0;
 //     osCreateMesgQueue(&D_800BEA10, &D_800BEA28, 16);
 //     D_800BEA68->unk0 = 2;
@@ -111,7 +112,7 @@ void func_15007830(void) {
 //     controller_init_all();
 //     func_151DD970();
 //     func_15015920(0);
-//     func_15008A60();
+//     view_zoom_state_reset();
 //     text_queue_reset();
 //     D_800BEA04[0] = 0;
 //     D_800BEA00[0] = 1;

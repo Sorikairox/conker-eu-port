@@ -1,9 +1,9 @@
 /* --- callees: C definitions elsewhere (signatures copied) --- */
 void mp3_voice_play(s32 arg0, s32 arg1, s32 arg2);
-void func_151F2D6C(s32, s32);
-void func_151F2BA8(void);
-void func_151F2BE8(void);
-void func_151F2C4C(void);
+void mp3_stream_set_volume(s32, s32);
+void mp3_stream_stop(void);
+void mp3_stream_pause(void);
+void mp3_stream_resume(void);
 void particle_emitter_node_spawn(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA,
                    u8 argB, u8 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, u8 arg13, u8 arg14, u8 arg15,
                    u8 arg16, u8 arg17, u8 arg18, u8 arg19, u8 arg1A, s16 arg1B, s16 arg1C, s16 arg1D, s16 arg1E, u16 arg1F,
@@ -25,7 +25,7 @@ void obj_blast_fx_spawn(u8 *arg0, s32 arg1, s32 arg2);
 void point_emitter_spawn_preset(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5);
 s32 fb_zoom_fx_spawn(u8 *arg0, s16 arg1, s32 arg2, s32 arg3);
 void bouncing_sprites_broadcast_drop(f32 arg0);
-void func_151494E0(s32, u8);
+void effect_nodes_broadcast(s32, u8);
 struct260 *segment_effect_spawn(u8 *arg0, s16 arg1, s8 arg2, s8 arg3, f32 arg4, s32 arg5, u8 arg6, s32 arg7);
 struct260 *vent_smoke_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
 struct225 *light_create_scripted(s32 arg0, s16 arg1, u8 arg2, s32 arg3);
@@ -33,7 +33,7 @@ void swing_lamp_post_target(s32 arg0, s32 arg1, u8 arg2);
 void kind_effect_spawn(u8 arg0, u8 arg1, void *arg2, s32 arg3, f32 arg4, f32 arg5, s16 arg6, u8 arg7, s32 arg8);
 u8 *model_drip_create(u8 **arg0, s32 arg1, u8 arg2, s32 arg3);
 void fb_fx_spawn_simple(s16 arg0, u8 arg1, s32 arg2);
-struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
+struct260 *effect_node_create(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
 void obj_bone_glow_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
 void seqfx_track_effect_spawn(u8 *arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4);
 void obj_bone_spark_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3);
@@ -212,13 +212,13 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         } else if (ev->b4 == 1) {
             span = scene_event_find_next((u32) ev, ev->type, track, &next, 1, ev->id, 1, 2, 0, 0, player) - now;
             vol = ev->w6 == 0 ? 0x10000 : (ev->w6 << 16) / 255;
-            func_151F2D6C(vol, (span * 0x5604) / 50);
+            mp3_stream_set_volume(vol, (span * 0x5604) / 50);
         } else if (ev->b4 == 3) {
-            func_151F2BA8();
+            mp3_stream_stop();
         } else if (ev->b4 == 4) {
-            func_151F2BE8();
+            mp3_stream_pause();
         } else if (ev->b4 == 5) {
-            func_151F2C4C();
+            mp3_stream_resume();
         }
         return 1;
     }
@@ -388,7 +388,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         if (ev->b4 == 2) {
             if (ev->b5 == 0x11 || ev->b5 == 0x12 || ev->b5 == 0x15) {
                 s8 level = ev->w6;
-                func_151494E0((s32) &level, 0x51);
+                effect_nodes_broadcast((s32) &level, 0x51);
             } else if (ev->b5 == 0x13) {
                 bouncing_sprites_broadcast_drop(ev->w6 * 0.01f * 300.0f - 150.0f);
             }
@@ -464,7 +464,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             fb_fx_spawn_simple(span, (u8) flag, 1);
             zero[0] = 0;
             zero[1] = 0;
-            e = func_15149130(span, -1, 0x4B, -1, 1, 0, (struct37 *) 4, (u8) flag, 1);
+            e = effect_node_create(span, -1, 0x4B, -1, 1, 0, (struct37 *) 4, (u8) flag, 1);
             if (e != NULL) {
                 memcpy((u8 *) e + 0x28, zero, 4);
             }

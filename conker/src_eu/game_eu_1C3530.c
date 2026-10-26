@@ -2683,7 +2683,7 @@ s32 emitter2_flame_update(u8 *e) {
 
 #ifdef NON_MATCHING
 void *memcpy(void *, const void *, s32);
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 f32 vec3_length(struct17 *);
 f32 wrap_float_range(f32, f32, f32);
 void vec3_from_angles_byte(s16, s16, f32, void *);
@@ -2740,7 +2740,7 @@ typedef struct {
 // obj +0x94 = ring of 0x28-byte TrailPoint, obj +0x98 = state, obj +0x2C = point count, +0x2D = tail (oldest),
 // +0x2E = head (next free), +0x25 = ring size; obj +0x1E bit 1: the newest end is the object position (+0x10)
 // instead of the point before the head. State: +0x28 max length, +0x14C current length, +0x150 flags.
-// 1. flag 4: a ray from the owner (state +0, position +0x14 raised by 48) to the newest end (func_150ACEA0) can
+// 1. flag 4: a ray from the owner (state +0, position +0x14 raised by 48) to the newest end (collision_ray_cast) can
 //    shorten the max length to the hit distance (+0x1D4 out).
 // 2. Walks from the newest end to the tail: segment lengths (+0x1C) and the total; once the total passes the max
 //    length the segment is cut back to fit and the tail moves up (count decremented) to that point.
@@ -2806,7 +2806,7 @@ s32 emitter2_trail_update(u8 *obj) {
         } else {
             newest = &pts[TRAIL_PREV((s8)obj[0x2E], obj)].x;
         }
-        if (func_150ACEA0(sx, sy, sz, newest[0] - sx, newest[1] - sy, newest[2] - sz, NULL, NULL, &o1, &o2, &o3,
+        if (collision_ray_cast(sx, sy, sz, newest[0] - sx, newest[1] - sy, newest[2] - sz, NULL, NULL, &o1, &o2, &o3,
                           &hit, 0, 0, 0.0f) != 0 &&
             hit < maxLen) {
             maxLen = hit;

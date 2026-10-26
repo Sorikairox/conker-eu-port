@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15012020(s32 arg0, s32 arg1) {
+/* was func_15012020 */
+void level_ground_emitter_spawn7(s32 arg0, s32 arg1) {
     struct183 tmp;
 
     tmp.unk0 = 7;

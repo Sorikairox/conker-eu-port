@@ -848,7 +848,7 @@ void obj_fog_alpha(u8 *rec, s32 *col, s32 view) {
 
 #ifdef NON_MATCHING
 void obj_anim_reset(struct127 *arg0);
-/* P51: per-frame key-frame copy for the skeleton evaluator func_150A86B0. For the animation state a (arg0, or
+/* P51: per-frame key-frame copy for the skeleton evaluator anim_eval_joint_matrices. For the animation state a (arg0, or
  * object arg1's +0x2D0 after obj_anim_reset when its animation +0x84 is 0xFFFF) and each active slot k (2 with a
  * blend weight +0x3C > 0; slot k's header byte +0x45 = bytes per key frame, +0x48 = key-frame step - 1, at
  * +0x40 + k * 0x1D0): the key frame of frame time +8 + 4k (frame count +0x18 + 4k) and the next one are DMA'd from
@@ -974,7 +974,7 @@ s32 model_joint_mtx_count(s32);
 void model_keep_resident(u8 *arg0);
 void obj_adjust_list_build(u8 *arg0, s32 arg1);
 void anim_copy_keyframes(u8 *, s32, s32);
-void func_150A86B0(s32 *arena, f32 (*mtx)[4], s32 anim, s32 skel, s32 n, u8 *arg5, u8 *remap, s32 h);
+void anim_eval_joint_matrices(s32 *arena, f32 (*mtx)[4], s32 anim, s32 skel, s32 n, u8 *arg5, u8 *remap, s32 h);
 extern u8 D_800C441A;
 extern u8 *D_800845BC[];
 extern s32 D_800C5000[];
@@ -985,7 +985,7 @@ extern s32 D_8008891C;
  * D_800D19A0[id] is empty (model_load), makes sure the object has an animation state +0x2D0 (obj_anim_state_alloc),
  * then reserves model_joint_mtx_count(id) joint matrices (0x40 bytes each) in the D_800C42A8 arena (none written and
  * +0x1D4 = 0 when the D_800C3E7C-matrix arena would overflow), sets +0x1D4 to the first one and fills them with the
- * hand-asm skeleton evaluator func_150A86B0 (D5E90.s). +0x29 of the model header selects a joint remap table
+ * hand-asm skeleton evaluator anim_eval_joint_matrices (D5E90.s). +0x29 of the model header selects a joint remap table
  * (D_800845BC, pairs ending in 0xFF). The evaluator's outputs D_800888F4 / D_800888F8 give the animation
  * position +0x1F8 / +0x1F4 (and +0x2D0 +0x10 with +0x246 & 0x40); +0x7C = D_8008891C. */
 /* was func_1502DE74 */
@@ -1046,7 +1046,7 @@ void obj_build_model_instance(f32 (*m)[4], s32 arg1) {
     } else {
         h = 0;
     }
-    func_150A86B0(&D_800C42A8, m, *(s32 *)(obj + 0x2D0), D_800C5000[id], n, sbuf, map, h);
+    anim_eval_joint_matrices(&D_800C42A8, m, *(s32 *)(obj + 0x2D0), D_800C5000[id], n, sbuf, map, h);
     *(s16 *)(obj + 0x7C) = D_8008891C;
     f1 = D_800888F8;
     if (f1 != 0) {
@@ -1084,7 +1084,7 @@ extern s32 D_800C4294;
  * (+0x31C +0x197), bit arg0 of D_800C4294, or id 0x8A whose obj_find_child_nth target is player-controlled).
  * A child (+0x65 = parent index + 1, without +0x101 & 0x10) takes the parent's joint +0x5C matrix (+0x1D4 + 0x40 *
  * joint) with rows 0 / 2 scaled by +0x14C and row 1 by +0x150 (+0x101 & 4: rows normalised first); otherwise
- * func_150A9B0C builds it from the angles (+0xB8, +0x40, +0xC4) and scales, at the position (with +0x101 & 0x10:
+ * mtx_rotate_scale_3x3 builds it from the angles (+0xB8, +0x40, +0xC4) and scales, at the position (with +0x101 & 0x10:
  * the parent's joint position), raised by +0xCC when +0x2D0 +0x28 is 0.
  * arg1 != 0: the matrix is copied to the D_800C42A8 arena and +0x1D4 points at it; else obj_build_model_instance(m, arg0). */
 /* was func_1502E228 */
@@ -1156,7 +1156,7 @@ void obj_build_model_matrix(s32 arg0, s32 arg1) {
         }
         m[3][3] = 1.0f;
     } else {
-        func_150A9B0C(m, *(f32 *)(obj + 0xB8), *(f32 *)(obj + 0x40), *(f32 *)(obj + 0xC4),
+        mtx_rotate_scale_3x3(m, *(f32 *)(obj + 0xB8), *(f32 *)(obj + 0x40), *(f32 *)(obj + 0xC4),
                       *(f32 *)(obj + 0x14C), *(f32 *)(obj + 0x150), *(f32 *)(obj + 0x14C));
         if (obj[0x101] & 0x10) {
             /* the parent (index +0x65 - 1; the asm does not check +0x65 != 0 here) */
@@ -1198,7 +1198,7 @@ void obj_build_model_matrix(s32 arg0, s32 arg1) {
 /* was func_1502E764 */
 void obj_mtx_buffer_flush(void) {
     if ((u16)D_800C429A != 0) {
-        func_150A9E64((&D_800C3E80)[D_800BE9C0], (u16)D_800C429A);
+        mtx_f_to_l_batch((&D_800C3E80)[D_800BE9C0], (u16)D_800C429A);
     }
     D_800C42B0 = 1;
 }

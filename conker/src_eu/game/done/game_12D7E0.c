@@ -1,5 +1,6 @@
 #include <ultra64.h>
 
 
-void func_15100330(s32 arg0) {
+/* was func_15100330 */
+void camera_hook_nop_15100330(s32 arg0) {
 }

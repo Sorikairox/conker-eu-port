@@ -1072,7 +1072,7 @@ void watch_spawn_random_effect(u8 *arg0, V3_AFF4 *arg1, f32 arg2, s32 arg3) {
     sp.u10 = arg2;
     sp.blk = *(Blk_AFF4 *)(arg0 + 0x84);
     r = (s16 *)(arg0 + 0x80);
-    p = func_15149130((s16)(r[0] + (u32)random_int() % (r[1] + 1)), -1, 0x3F, -1, 1, 0, (struct37 *)0x3C, arg0[0xC], arg0[1]);
+    p = effect_node_create((s16)(r[0] + (u32)random_int() % (r[1] + 1)), -1, 0x3F, -1, 1, 0, (struct37 *)0x3C, arg0[0xC], arg0[1]);
     if (p != NULL) {
         memcpy((u8 *)p + 0x28, &sp, 0x3C);
     }

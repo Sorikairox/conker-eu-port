@@ -287,7 +287,7 @@ typedef struct {
     f32 v[3];
 } Vec175C;
 
-// object_glow_attach: spawns a type 0x12C object (func_15149130) linked to obj (record at +0x28: obj, room, glow,
+// object_glow_attach: spawns a type 0x12C object (effect_node_create) linked to obj (record at +0x28: obj, room, glow,
 // smoke), a glow (effect3d_spawn_full with the D_800A4AA0 model, variant 1 or 3 at random; its +0x110 tail holds obj, the
 // light constants, the new object and the mid height of obj +0x14C / +0x150) and a light_create_with_ctrl effect, storing both
 // at +0x30 / +0x34 of the new object.
@@ -307,7 +307,7 @@ void obj_glow_smoke_attach(u8 *obj, u8 arg1, s32 arg2) {
     link.room = obj[0x3B];
     link.glow = NULL;
     link.smoke = NULL;
-    o = (u8 *) func_15149130(0x12C, -1, 0x54, -1, 0, 0x34, (struct37 *) 0x10, arg1, arg2);
+    o = (u8 *) effect_node_create(0x12C, -1, 0x54, -1, 0, 0x34, (struct37 *) 0x10, arg1, arg2);
     if (o == NULL) {
         return;
     }
@@ -387,7 +387,7 @@ void obj_spawn_effect_85(struct127 *arg0, u8 arg1, s32 arg2) {
     tmp.unk4 = arg0->unique_id;
     tmp.unk6 = 0;
 
-    temp_v0 = func_15149130(300, -1, 85, -1, 0, 66, 8, arg1, arg2);
+    temp_v0 = effect_node_create(300, -1, 85, -1, 0, 66, 8, arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, 8);
     }

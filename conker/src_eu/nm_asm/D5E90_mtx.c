@@ -1,8 +1,8 @@
 /*
  * NON_MATCHING C for two matrix helpers of the raw asm file asm/D5E90.s (P62):
- *   func_150A9B0C  rotation (three angles in degrees) times scale into the 3x3 part of a float matrix
+ *   mtx_rotate_scale_3x3  rotation (three angles in degrees) times scale into the 3x3 part of a float matrix
  *                  (the US name; the EU code is the raw-word block at 0x150A9FEC);
- *   func_150A9E64  n float matrices converted in place to the RSP's fixed-point Mtx.
+ *   mtx_f_to_l_batch  n float matrices converted in place to the RSP's fixed-point Mtx.
  *
  * Built only with NON_MATCHING=1 (Makefile: NM_ASM_C_FUNCS_D5E90 line for these two, and the linker script line
  * that places D5E90_mtx.c.o); the asm copies are weakened so these definitions win.
@@ -19,26 +19,27 @@ extern f32 D_8009FAA0; /* pi / 180 */
 
 /*
  * m[0..2][0..2] = rotation(x, y, z) scaled per row by (sx, sy, sz); row 3 and column 3 are left alone.
- * With cX = cos(x), sX = sin(x) (func_150AD780 is cos, func_150AD78C is sin):
+ * With cX = cos(x), sX = sin(x) (fast_cosf is cos, fast_sinf is sin):
  *   row 0 = sx * (cZ cY,                      sZ,      -cZ sY)
  *   row 1 = sy * (-cX sZ cY + sX sY,          cX cZ,    cX sZ sY + sX cY)
  *   row 2 = sz * ( sX sZ cY + cX sY,         -sX cZ,   -sX sZ sY + cX cY)
  * The order of each product and sum is the asm's.
  */
-void func_150A9B0C(f32 m[4][4], f32 x, f32 y, f32 z, f32 sx, f32 sy, f32 sz) {
+/* was func_150A9B0C */
+void mtx_rotate_scale_3x3(f32 m[4][4], f32 x, f32 y, f32 z, f32 sx, f32 sy, f32 sz) {
     f32 cosX, sinX, cosY, sinY, cosZ, sinZ;
     f32 cxsz, sxsz; /* cos(x) * -sin(z), -sin(x) * -sin(z) */
     f32 m00, m02, m10, m11, m12, m20, m21, m22;
 
     x = x * D_8009FAA0;
-    cosX = func_150AD780(x);
-    sinX = func_150AD78C(x);
+    cosX = fast_cosf(x);
+    sinX = fast_sinf(x);
     y = y * D_8009FAA0;
-    cosY = func_150AD780(y);
-    sinY = func_150AD78C(y);
+    cosY = fast_cosf(y);
+    sinY = fast_sinf(y);
     z = z * D_8009FAA0;
-    cosZ = func_150AD780(z);
-    sinZ = func_150AD78C(z);
+    cosZ = fast_cosf(z);
+    sinZ = fast_sinf(z);
 
     m11 = cosX * cosZ;
     m21 = -sinX * cosZ;
@@ -79,7 +80,8 @@ static s32 nmMtxRound(f32 f) {
  * +0x20, element (i, j) at 2 * (4 * i + j)). Only the 3x4 part is read (column 3 of rows 0..2 is taken as 0 and
  * element (3, 3) as 1.0). n is decremented before the test, so n = 0 runs 2^32 times like the asm.
  */
-void func_150A9E64(f32 *m, s32 n) {
+/* was func_150A9E64 */
+void mtx_f_to_l_batch(f32 *m, s32 n) {
     s32 fx[4][3];
     s16 *ip;
     u16 *fp;

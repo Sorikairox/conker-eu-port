@@ -1505,9 +1505,9 @@ void obj_get_aim_vectors(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4
 
 /* was func_15145974 */
 void vec3_to_yaw_pitch_deg(struct17 *arg0, f32 *arg1, f32 *arg2) {
-    *arg1 = func_150484A0(arg0->unk0, arg0->unk8) * 57.295776f;
+    *arg1 = math_atan2f(arg0->unk0, arg0->unk8) * 57.295776f;
     if (arg2 != NULL) {
-        *arg2 = (func_150484A0(sqrtf(arg0->unk0 * arg0->unk0 + arg0->unk8 * arg0->unk8), arg0->unk4) * 57.295776f) - 90.0f;
+        *arg2 = (math_atan2f(sqrtf(arg0->unk0 * arg0->unk0 + arg0->unk8 * arg0->unk8), arg0->unk4) * 57.295776f) - 90.0f;
     }
 }
 

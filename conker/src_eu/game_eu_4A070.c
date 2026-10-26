@@ -704,14 +704,14 @@ void cutscene_start(s32 slot) {
 
 #ifdef NON_MATCHING
 s32 mp3_voice_is_playing(void);
-void func_151F2BA8(void);
+void mp3_stream_stop(void);
 struct127 *obj_find_child_nth(struct127 *, s32);
 void obj_remove(struct127 *, s32);
 void cutscene_start(s32 slot);
 void screen_fade_start(s32, s32, s32, s32, s8, s32);
 void music_restart_type13_songs(void);
 
-/* End of cutscene slot `slot` (called by cutscene_update_skip with the slot left in a0): func_151F2BA8 when
+/* End of cutscene slot `slot` (called by cutscene_update_skip with the slot left in a0): mp3_stream_stop when
  * mp3_voice_is_playing, remove object 0's attachment 0 (obj_find_child_nth / obj_remove), run cutscene_start(slot) once and
  * again while D_800C40B9 was set before the call and no level change is pending (D_800C35C4); screen colour
  * screen_fade_start(0, 0, 0, 0x19, 0, 0) unless D_800C39C9, D_800C40AA == 1 or D_800C40AD; clear +0xA4 of every live
@@ -723,7 +723,7 @@ void cutscene_end_skip(s32 slot) {
     s32 i;
 
     if (mp3_voice_is_playing() != 0) {
-        func_151F2BA8();
+        mp3_stream_stop();
     }
     p = obj_find_child_nth(D_800CC2D0, 0);
     if (p != NULL) {
@@ -830,7 +830,7 @@ s32 cutscene_can_skip(s32 slot, u8 *unused) {
 void music_restart_type13_songs(void);
 void cutscene_end_skip(s32);
 s32 cutscene_can_skip(s32, u8 *);
-s32 func_151F2CDC(void);
+s32 mp3_stream_get_state(void);
 extern s8 D_80090124;
 extern s32 D_800C39D0;
 extern u8 D_800C40A9;
@@ -846,8 +846,8 @@ void cutscene_update_skip(s32 arg0) {
                 D_800C40A9 = 0x19;
                 screen_fade_start(0, 0, 0, 0x19, 1, 0);
                 music_restart_type13_songs();
-                if ((func_151F2CDC() == 1) || (func_151F2CDC() == 2)) {
-                    func_151F2D6C(0, 0x2B02);
+                if ((mp3_stream_get_state() == 1) || (mp3_stream_get_state() == 2)) {
+                    mp3_stream_set_volume(0, 0x2B02);
                 }
             }
         }
@@ -928,7 +928,7 @@ void cutscene_advance_position(s32 i) {
     if (D_800C39E0[i] == 0 && D_800C40AE == D_800C39D8[i] && D_800C40AE != *cur) {
         D_800C39D8[i] = -1;
     }
-    if (func_151F2CDC() == 1) {
+    if (mp3_stream_get_state() == 1) {
         lipsync_poll_text_queue();
     }
     lim = (&D_eu_800C3A60)[i];
@@ -1611,7 +1611,7 @@ void cutscene_actor_place_at(s32 actor, f32 t, f32 *x, f32 *y, f32 *z, s32 slot)
 #endif
 #ifdef NON_MATCHING
 /* Heading of actor `actor` of cutscene slot `slot` at `t` percent (clamped to 0..100) of its path length (needs
- * >= 2 path keys), in degrees (func_150484A0(dx, dz) * D_80096D8C). cutscene_path_point_at finds the segment for that
+ * >= 2 path keys), in degrees (math_atan2f(dx, dz) * D_80096D8C). cutscene_path_point_at finds the segment for that
  * distance: on a curved segment (key shape +6 == 0, cutscene_path_compute_length) the direction runs between the two curve
  * points it returns (first - second), on a straight one between the segment's middle control points
  * (cutscene_path_ctrl_points, third - second). */
@@ -1641,7 +1641,7 @@ void cutscene_actor_heading_at(s32 actor, f32 t, f32 *out, s32 slot) {
         dx = pts[6] - pts[3];
         dz = pts[8] - pts[5];
     }
-    *out = func_150484A0(dx, dz) * D_80096D8C;
+    *out = math_atan2f(dx, dz) * D_80096D8C;
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_actor_heading_at.s")

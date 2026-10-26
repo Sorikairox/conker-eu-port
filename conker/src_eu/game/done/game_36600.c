@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15009150(s32 arg0) {
+/* was func_15009150 */
+void flare_nodes_level_init(s32 arg0) {
     struct162 *tmp;
 
     D_800DDD64 = 0;

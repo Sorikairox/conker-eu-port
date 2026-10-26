@@ -692,7 +692,7 @@ void fx_distant_burst_update(u8 *arg0) {
             sp.uD0 = 0.0f;
             do {
                 sp.u8C = (random_float() * 5.8659425f) + 0.957204f;
-                if (angle_diff_rad(func_150484A0((*(f32 *)((u8 *)temp_v0 + 0)), (*(f32 *)((u8 *)temp_v0 + 8))), sp.u8C) < 0.4f) {
+                if (angle_diff_rad(math_atan2f((*(f32 *)((u8 *)temp_v0 + 0)), (*(f32 *)((u8 *)temp_v0 + 8))), sp.u8C) < 0.4f) {
                     vec2_from_angle_rad(sp.u8C, (random_float() * 1278.0f) + 3900.0f, &sp.u94, &sp.u9C);
                     temp_f20 = ((random_float() * 1991.0f) + 1985.0f) * 0.001f;
                     temp_f6 = random_float() * 1493.0f;
@@ -744,7 +744,7 @@ s32 fx_wake_near_camera(struct_eu_EF410_d *arg0) {
         d = v->unk0 * v->unk0 + v->unk8 * v->unk8;
         if (d < 2500000.0f) {
             flag = TRUE;
-        } else if (0.4f < angle_diff_rad(func_150484A0(v->unk0, v->unk8), arg0->unk160)) {
+        } else if (0.4f < angle_diff_rad(math_atan2f(v->unk0, v->unk8), arg0->unk160)) {
             flag = TRUE;
         }
     }
@@ -774,7 +774,7 @@ s32 fx_wake_near_camera(struct_eu_EF410_d *arg0) {
 //         } else {
 //             sp1F = temp_a1;
 //             phi_a1 = temp_a1;
-//             if (D_800A0314 < angle_diff_rad(func_150484A0(temp_v0->unk0, temp_v0->unk8, temp_a1), arg0->unk160)) {
+//             if (D_800A0314 < angle_diff_rad(math_atan2f(temp_v0->unk0, temp_v0->unk8, temp_a1), arg0->unk160)) {
 //                 goto block_4;
 //             }
 //         }

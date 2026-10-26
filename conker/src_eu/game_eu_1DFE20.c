@@ -48,7 +48,7 @@ void cord_rig_spawn(u8 *arg0) {
         tmp.unkD = 0;
         bzero(tmp.unk10, 0xC);
         tmp.unk1C = 0;
-        temp_v0 = func_151491F4(300, -1, 0x16, 0, 0x12, 0x20, 0xFF, 1);
+        temp_v0 = effect_node_create_nodraw(300, -1, 0x16, 0, 0x12, 0x20, 0xFF, 1);
         if (temp_v0 != NULL) {
             memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x20);
         }
@@ -122,13 +122,13 @@ void cord_rig_free_ropes(u8 *arg0) {
 /* was func_151B284C */
 void cord_rig_retire(void *arg0) {
     cord_rig_free_ropes_wrap(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_151B2878 */
 void cord_rig_delete(void *arg0) {
     cord_rig_free_ropes_wrap(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 /* was func_151B28A4 */
@@ -310,7 +310,7 @@ typedef struct {
     u8 pad2D[3];
 } Light2C40;
 
-/* the 0x28-byte record copied to the func_15149130 object (+0x28) */
+/* the 0x28-byte record copied to the effect_node_create object (+0x28) */
 typedef struct {
     u8 *owner;      /* 0x00 */
     u8 room;        /* 0x04 */
@@ -346,7 +346,7 @@ extern f32 D_800AA754[3]; /* (-27, 42, 0) */
 
 // twin_lights_spawn: obj +0x28 holds the owner. Spawns two lights (cord_spawn: template at the owner position,
 // rate 0.0015) whose records attach them to the owner at (+-77, 20, 67) (mode 5) and (+-27, 42, 0) (mode 2), the
-// first one flagged; stores them at obj +0x3C / +0x38. Then a type 0x13 object (func_15149130) for the beam between
+// first one flagged; stores them at obj +0x3C / +0x38. Then a type 0x13 object (effect_node_create) for the beam between
 // (27, 42, 0) and (-27, 42, 0), stored at obj +0x44.
 /* was func_151B2C40 */
 void cord_rig_spawn_twin_ropes(u8 *obj) {
@@ -405,7 +405,7 @@ void cord_rig_spawn_twin_ropes(u8 *obj) {
     *(Vec3f2C40 *) beam.right = *(Vec3f2C40 *) D_800AA754;
     beam.u20 = 5.0f;
     beam.obj = obj;
-    b = func_15149130(0x12C, -1, -1, 0, 0, 0x13, (struct37 *) 0x28, 0xFF, 1);
+    b = effect_node_create(0x12C, -1, -1, 0, 0, 0x13, (struct37 *) 0x28, 0xFF, 1);
     *(struct260 **) (obj + 0x44) = b;
     if (b != NULL) {
         memcpy((u8 *) b + 0x28, &beam, 0x28);
@@ -631,13 +631,13 @@ void cord_plank_unlink(struct_eu_1DFE20 *arg0) {
 /* was func_151B3598 */
 void cord_plank_retire(void *arg0) {
     cord_plank_unlink(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_151B35C4 */
 void cord_plank_delete(void *arg0) {
     cord_plank_unlink(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 /* was func_151B35F0 */

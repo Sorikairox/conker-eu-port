@@ -13,7 +13,7 @@ s/yaw_c = angle_byte_cos(yaw - 0x40);/yaw_c = angle_byte_cos(yaw + 0x40);/ % mix
 s/yaw_s = angle_byte_cos(yaw);/yaw_s = angle_byte_cos(pitch);/ % mix
 s/pitch_c = angle_byte_cos(pitch - 0x40);/pitch_c = angle_byte_cos(pitch + 0x40);/ % mix
 s/r = 10.0f \* angle_byte_cos(pitch);/r = 11.0f * angle_byte_cos(pitch);/ % mix
-s/func_150ACEA0(0.0f, 300.0f, 0.0f,/func_150ACEA0(0.0f, 301.0f, 0.0f,/ % mix
+s/collision_ray_cast(0.0f, 300.0f, 0.0f,/collision_ray_cast(0.0f, 301.0f, 0.0f,/ % mix
 s/r \* yaw_c, -10.0f \* pitch_c, r \* yaw_s/r * yaw_s, -10.0f * pitch_c, r * yaw_c/ % mix
 s/-10.0f \* pitch_c/10.0f * pitch_c/ % mix
 s/\&hx, \&hy, \&hz,/\&hx, \&hz, \&hy,/ % allhit
@@ -25,8 +25,8 @@ s/pt->y = (hy - 300.0f) \* 0.97f + 300.0f;/pt->y = hy * 0.97f;/ % allhit
 s/params.a = 20;/params.a = 21;/ % mix
 s/params.b = 50;/params.b = 5;/ % mix
 s/params.c = 0;/params.c = 1;/ % mix
-s/func_151491F4(300, -1, 7, 0, 0, 6, 0xFF, 0);/func_151491F4(300, -1, 7, 0, 0, 5, 0xFF, 0);/ % mix
-s/func_151491F4(300, -1, 7,/func_151491F4(301, -1, 7,/ % mix
+s/effect_node_create_nodraw(300, -1, 7, 0, 0, 6, 0xFF, 0);/effect_node_create_nodraw(300, -1, 7, 0, 0, 5, 0xFF, 0);/ % mix
+s/effect_node_create_nodraw(300, -1, 7,/effect_node_create_nodraw(301, -1, 7,/ % mix
 s/memcpy((u8 \*) fx + 0x28, \&params, 6);/memcpy((u8 *) fx + 0x24, \&params, 6);/ % mix
 s/memcpy((u8 \*) fx + 0x28, \&params, 6);/memcpy((u8 *) fx + 0x28, \&params, 4);/ % mix
 s/if (fx != NULL) {/if (1) {/ % nofx

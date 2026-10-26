@@ -3,10 +3,11 @@
 #include "variables.h"
 
 // powf: Perfect Dark src/lib/mp3/lib_45ed0.c func00045ed0; float compares use 0.0f, loop tests int 0 (s90)
-f32 func_1504A620(f32);
-f32 func_1504A5A0(f32);
+f32 math_logf(f32);
+f32 math_expf(f32);
 
-f32 func_1504A6F0(f32 arg0, f32 arg1)
+/* was func_1504A6F0 */
+f32 math_powf(f32 arg0, f32 arg1)
 {
 	f32 sp30;
 	register s32 s0;
@@ -24,7 +25,7 @@ f32 func_1504A6F0(f32 arg0, f32 arg1)
 	}
 
 	if ((s32)arg1 != arg1) {
-		arg0 = func_1504A5A0(func_1504A620(arg0) * arg1);
+		arg0 = math_expf(math_logf(arg0) * arg1);
 	} else if (arg1 > 0.0f) {
 		arg1--;
 		sp30 = arg0;

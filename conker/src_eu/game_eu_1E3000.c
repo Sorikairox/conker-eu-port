@@ -32,7 +32,7 @@ struct260 *electric_bolt_spawn(s16 arg0, u8 arg1, s32 arg2) {
     tmp.unk594 = 0.0f;
     tmp.unk5A0 = D_800AA7F8;
     tmp.unk59C = 1.0f / tmp.unk598;
-    temp_v0 = func_15149130(arg0, -1, -1, 1, 1, 0x15, 0x5A8, arg1, arg2);
+    temp_v0 = effect_node_create(arg0, -1, -1, 1, 1, 0x15, 0x5A8, arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x5A8);
     }

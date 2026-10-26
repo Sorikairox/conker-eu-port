@@ -6,18 +6,20 @@
 
 void game_gu_mtx_ident_f(float mf[4][4]); // guMtxIdentF
 void guMtxF2L2(float mf[4][4], Mtx *m);
-void func_151EFFC0(float mf[4][4], float l, float r, float b, float t, float n, float f, float scale);
+void game_gu_ortho_f(float mf[4][4], float l, float r, float b, float t, float n, float f, float scale);
 
 // guOrtho
-void func_151F0114(Mtx *m, float l, float r, float b, float t, float n, float f, float scale)
+/* was func_151F0114 */
+void game_gu_ortho(Mtx *m, float l, float r, float b, float t, float n, float f, float scale)
 {
 	float	mf[4][4];
-	func_151EFFC0(mf, l, r, b, t, n, f, scale);
+	game_gu_ortho_f(mf, l, r, b, t, n, f, scale);
 	guMtxF2L2(mf, m);
 }
 
 // guOrthoF
-void func_151EFFC0(float mf[4][4], float l, float r, float b, float t, float n, float f, float scale)
+/* was func_151EFFC0 */
+void game_gu_ortho_f(float mf[4][4], float l, float r, float b, float t, float n, float f, float scale)
 {
 	int	i, j;
 	game_gu_mtx_ident_f(mf);

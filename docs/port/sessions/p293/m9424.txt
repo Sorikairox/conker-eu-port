@@ -7,7 +7,7 @@ s#        sound_play_at(D_80088ADC, 0xFA00, 0, 0, 0, \*(f32 \*) (hit + 0x14), \*
 s#        return 1;#        return 0;# % slow
 s#    if (trigger_point_in_kind3(1, \*(f32 \*) (hit + 0x14), \*(f32 \*) (hit + 0x18), \*(f32 \*) (hit + 0x1C)) == 0) {#    if (trigger_point_in_kind3(2, *(f32 *) (hit + 0x14), *(f32 *) (hit + 0x18), *(f32 *) (hit + 0x1C)) == 0) {# % hit
 s#        d\[1\] = \*(f32 \*) (obj + 0x3C) - y;#        d[1] = *(f32 *) (obj + 0x3C) - x;# % miss
-s#        if (func_150ACEA0(x, y, z, d\[0\], d\[1\], d\[2\], 0, \&surf, \&hp\[0\], \&hp\[1\], \&hp\[2\], 0, \&surfId, 0, 0\.0f) != 0) {#        if (func_150ACEA0(x, y, z, d[0], d[1], d[2], 0, \&surf, \&hp[0], \&hp[1], \&hp[2], 0, \&surfId, 0, 1.0f) != 0) {# % miss
+s#        if (collision_ray_cast(x, y, z, d\[0\], d\[1\], d\[2\], 0, \&surf, \&hp\[0\], \&hp\[1\], \&hp\[2\], 0, \&surfId, 0, 0\.0f) != 0) {#        if (collision_ray_cast(x, y, z, d[0], d[1], d[2], 0, \&surf, \&hp[0], \&hp[1], \&hp[2], 0, \&surfId, 0, 1.0f) != 0) {# % miss
 s#            if (prop_is_flagged(surfId) != 0) {#            if (prop_is_flagged(surfId) == 0) {# % hit hitnosurf
 s#                a\.u02 = 0x3B02;#                a.u02 = 0x3B01;# % hit
 s#                k = (random_float() \* 25\.0f + 25\.0f) \* D_800A018C_c\[0\];#                k = (random_float() * 25.0f + 25.0f) * D_800A0190_c[0];# % hit

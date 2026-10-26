@@ -13,7 +13,7 @@ void sprite2d_emitter_spawn(s32 arg0, u8 arg1, s32 arg2) {
 
     sp38.unk4 = 0;
     sp38.unk0 = arg0;
-    temp_v0 = func_15149130(0x12C, -1, 0x4F, -1, 0, 0x3C, 8, arg1, arg2);
+    temp_v0 = effect_node_create(0x12C, -1, 0x4F, -1, 0, 0x3C, 8, arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &sp38, 8);
     }

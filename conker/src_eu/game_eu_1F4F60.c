@@ -4,11 +4,11 @@
 
 
 #ifdef NON_MATCHING
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 u8 *laser_create(f32 *, u8 *, f32 *, u8 *, u8 *, u8 *, u8, u8, u8, u8, s16, s16, s16, u8, u8, u8, u8, u8, u8, f32, f32, u8, u8, s32);
 
 // record_beam_start: D_80082EA0 entry 8 (level-start record). Unless rec +0x14 is 1: the segment from the record's
-// point (s16 x, y, z) along the length +8 rotated by the angles +0xC / +0x10; two ray casts (func_150ACEA0) from its
+// point (s16 x, y, z) along the length +8 rotated by the angles +0xC / +0x10; two ray casts (collision_ray_cast) from its
 // middle towards both ends give the end points (geometry hits); when both hit, laser_create builds the beam between
 // them with the colour +0x1C (r, g, b bytes) and the option bits / bytes of +0x18 and +0x20. Always returns 1.
 /* was func_151C7750 */
@@ -49,9 +49,9 @@ s32 laser_record_start(u8 *rec) {
     mid[0] = d[0] * 0.5f + p0[0];
     mid[1] = d[1] * 0.5f + p0[1];
     mid[2] = d[2] * 0.5f + p0[2];
-    okA = func_150ACEA0(mid[0], mid[1], mid[2], -d[0], -d[1], -d[2], 0, triA, &hitA[0], &hitA[1], &hitA[2], &distA,
+    okA = collision_ray_cast(mid[0], mid[1], mid[2], -d[0], -d[1], -d[2], 0, triA, &hitA[0], &hitA[1], &hitA[2], &distA,
                         &auxA, 0, 0.0f);
-    okB = func_150ACEA0(mid[0], mid[1], mid[2], d[0], d[1], d[2], 0, triB, &hitB[0], &hitB[1], &hitB[2], &distB,
+    okB = collision_ray_cast(mid[0], mid[1], mid[2], d[0], d[1], d[2], 0, triB, &hitB[0], &hitB[1], &hitB[2], &distB,
                         &auxB, 0, 0.0f);
     if (okA == 0 || okB == 0) {
         return 1;
@@ -481,9 +481,9 @@ s32 laser_update(u8 *arg0) {
         (*(f32 *)((u8 *)temp_s0_2 + 0x1C)) = (f32) ((*(f32 *)((u8 *)temp_s0_2 + 0x1C)) + ((*(f32 *)((u8 *)temp_s0_2 + 0x24)) * D_800BE9A4));
         (*(f32 *)((u8 *)temp_s0_2 + 0x18)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0_2 + 0x18)));
         (*(f32 *)((u8 *)temp_s0_2 + 0x1C)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0_2 + 0x1C)));
-        (*(f32 *)((u8 *)temp_s0_2 + 0)) = (f32) ((func_150AD78C((*(f32 *)((u8 *)temp_s0_2 + 0x18))) * (*(f32 *)((u8 *)temp_s0_2 + 0x10))) + (*(f32 *)((u8 *)temp_s0_2 + 8)));
+        (*(f32 *)((u8 *)temp_s0_2 + 0)) = (f32) ((fast_sinf((*(f32 *)((u8 *)temp_s0_2 + 0x18))) * (*(f32 *)((u8 *)temp_s0_2 + 0x10))) + (*(f32 *)((u8 *)temp_s0_2 + 8)));
         temp_v0 = (*(u8 **)((u8 *)temp_s0_2 + 0x2C));
-        (*(f32 *)((u8 *)temp_s0_2 + 4)) = (f32) ((func_150AD78C((*(f32 *)((u8 *)temp_s0_2 + 0x1C))) * (*(f32 *)((u8 *)temp_s0_2 + 0x14))) + (*(f32 *)((u8 *)temp_s0_2 + 0xC)));
+        (*(f32 *)((u8 *)temp_s0_2 + 4)) = (f32) ((fast_sinf((*(f32 *)((u8 *)temp_s0_2 + 0x1C))) * (*(f32 *)((u8 *)temp_s0_2 + 0x14))) + (*(f32 *)((u8 *)temp_s0_2 + 0xC)));
         if (temp_v0 != NULL) {
             (*(s8 *)((u8 *)((*(u8 **)((u8 *)temp_v0 + 0x14))) + 9)) = 0;
         }
@@ -530,7 +530,7 @@ s32 laser_update(u8 *arg0) {
         (*(s32 *)((u8 *)temp_a1_2 + 0x60)) = (s32) ((*(s32 *)((u8 *)temp_a1_2 + 0x60)) & 0xFFFDFFFF);
     }
     if ((*(u8 *)((u8 *)temp_s0_2 + 0x86)) & 8) {
-        (*(s8 *)((u8 *)arg0 + 0x5C)) = (s8) (u32) ((func_150AD78C((*(f32 *)((u8 *)temp_s0_2 + 0x98))) * 112.5f) + 142.5f);
+        (*(s8 *)((u8 *)arg0 + 0x5C)) = (s8) (u32) ((fast_sinf((*(f32 *)((u8 *)temp_s0_2 + 0x98))) * 112.5f) + 142.5f);
         (*(f32 *)((u8 *)temp_s0_2 + 0x98)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0_2 + 0x98)) + ((*(f32 *)((u8 *)temp_s0_2 + 0x9C)) * D_800BE9A4));
     }
     return 1;

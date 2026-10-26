@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15005B70(s32 arg0) {
+/* was func_15005B70 */
+void camera_level_hook07_send_events(s32 arg0) {
     s32 i;
 
     event_dispatch_alt(0, 0x4014, 0);

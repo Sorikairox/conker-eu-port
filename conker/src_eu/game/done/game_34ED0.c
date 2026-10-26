@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15007A20(void) {
+/* was func_15007A20 */
+void game_bss_clear(void) {
     // zero out bss (?)
     bzero(&D_800B0DC0, (s32)&D_800E9D00 - (s32)&D_800B0DC0);
     // zero out (?)

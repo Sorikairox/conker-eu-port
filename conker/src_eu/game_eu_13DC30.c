@@ -628,8 +628,8 @@ void overlay_mode_set(s32 mode) {
 /* P136 */
 void *allocate_memory(s32, s32, s32, s32);
 s32 random_int(void); /* random */
-f32 func_150AD78C(f32);  /* sinf */
-f32 func_150AD780(f32);  /* cosf */
+f32 fast_sinf(f32);  /* sinf */
+f32 fast_cosf(f32);  /* cosf */
 extern f32 D_800A32F4; /* latitude spread scale */
 extern f32 D_800A32F8; /* longitude: centidegrees -> radians */
 extern f32 D_800A32FC; /* latitude: degrees -> radians */
@@ -667,11 +667,11 @@ void star_field_generate(void) {
         } else {
             lat = sqrtf(-t) + -89.0f;
         }
-        y = (s32) (func_150AD78C(lat * D_800A32FC) * 256.0f);
+        y = (s32) (fast_sinf(lat * D_800A32FC) * 256.0f);
         *(u16 *) (star + 2) = STAR_FLOAT_HI16(c, y);
         r = sqrtf((f32) (s32) (0x10000 - (u32) (y * y)));
-        *(u16 *) (star + 0) = STAR_FLOAT_HI16(c, (s32) (func_150AD78C(lon) * r));
-        *(u16 *) (star + 4) = STAR_FLOAT_HI16(c, (s32) (func_150AD780(lon) * r));
+        *(u16 *) (star + 0) = STAR_FLOAT_HI16(c, (s32) (fast_sinf(lon) * r));
+        *(u16 *) (star + 4) = STAR_FLOAT_HI16(c, (s32) (fast_cosf(lon) * r));
         star[7] = (u32) random_int() % 191U + 0x40;
         star[6] = (u32) random_int() % 5U;
     }
@@ -978,9 +978,9 @@ void world_object_turn_to_player(u8 *arg0) {
         sp30 = temp_f2;
         sp2C = temp_f16;
         sp58 = temp_f18;
-        temp_f20 = func_150484A0(temp_f12, temp_f14);
+        temp_f20 = math_atan2f(temp_f12, temp_f14);
         var_f20_2 = temp_f20 * 57.295776f;
-        temp_f2_2 = func_150484A0(sp58, sqrtf(temp_f2 + temp_f16)) * 57.295776f;
+        temp_f2_2 = math_atan2f(sp58, sqrtf(temp_f2 + temp_f16)) * 57.295776f;
         var_f16_2 = temp_f2_2;
         if (temp_f2_2 < 0.0f) {
             var_f16_2 = temp_f2_2 + 360.0f;
@@ -1418,15 +1418,15 @@ s32 world_mesh_draw(s32 arg0, u8 *obj, s32 mtx, s16 player, s32 unused, s32 pass
     flags = *(u16 *) (obj + 0x6C);
     if (flags != 0) {
         if (flags & 1) {
-            gdl = func_1511FC2C(gdl, (f32) *(s16 *) (obj + 0x10),
+            gdl = debug_gdl_pos_value_nop(gdl, (f32) *(s16 *) (obj + 0x10),
                                 (f32) *(s16 *) (obj + 0x12) + *(f32 *) (obj + 0x18),
                                 (f32) *(s16 *) (obj + 0x14), *(f32 *) (obj + 0x4), player);
         } else if (flags & 0x10) {
-            gdl = func_1511FC2C(gdl, (f32) *(s16 *) (obj + 0x10),
+            gdl = debug_gdl_pos_value_nop(gdl, (f32) *(s16 *) (obj + 0x10),
                                 (f32) *(s16 *) (obj + 0x12) + *(f32 *) (obj + 0x18),
                                 (f32) *(s16 *) (obj + 0x14), (f32) *(s32 *) (obj + 0x7C), player);
         } else if (flags & 0x20) {
-            gdl = func_1511FC44(gdl, (f32) *(s16 *) (obj + 0x10),
+            gdl = debug_gdl_pos_nop(gdl, (f32) *(s16 *) (obj + 0x10),
                                 (f32) *(s16 *) (obj + 0x12) + *(f32 *) (obj + 0x18),
                                 (f32) *(s16 *) (obj + 0x14), player);
         }

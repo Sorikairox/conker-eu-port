@@ -2,7 +2,8 @@
 #include "n_sndp.h"
 
 
-void func_10019B50(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 vol) {
+/* was func_10019B50 */
+void n_csp_cc_volume(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 vol) {
     N_ALSoundState *state;
     s16 tmp;
     seqp->chanState[chan].vol = vol;
@@ -14,35 +15,40 @@ void func_10019B50(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 vol) {
     }
 }
 
-void func_10019C28(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 pan) {
+/* was func_10019C28 */
+void n_csp_cc_pan(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 pan) {
     N_ALSoundState *state;
     u8 tmp;
     seqp->chanState[chan].pan = pan;
     for (state = seqp->vAllocHead; state != NULL; state = state->voice.node.next) {
         if ((state->chan == chan)) {
             tmp = __n_vsPan(state, seqp);
-            func_1001E2A0(&state->voice.node.prev, tmp);
+            n_syn_set_voice_pan(&state->voice.node.prev, tmp);
         }
     }
 }
 
-void func_10019CD0(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 priority) {
+/* was func_10019CD0 */
+void n_csp_cc_priority(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 priority) {
     seqp->chanState[chan].priority = priority;
 }
 
-void func_10019CFC(N_ALCSPlayer *seqp, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_10019CFC */
+void n_csp_cc_send_marker(N_ALCSPlayer *seqp, s32 arg1, s32 arg2, s32 arg3) {
     if (seqp->unk84 != 0) {
         osSendMesg(seqp->unk84, (arg3 & 7) | 0x10 | ((seqp->node.samplesLeft << 5) & -0x100), 0);
     }
 }
 
-void func_10019D6C(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+/* was func_10019D6C */
+void n_csp_cc_bank_select(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     seqp->chanState[chan].unk8 = arg3;
 }
 
-s32 func_1001CA90(u8 *, f32);
-f32 func_1001CEA4(s32);
-void func_10019D98(u8 *arg0, u8 arg1) {
+s32 n_syn_set_voice_cutoff(u8 *, f32);
+f32 audio_semitones_to_ratio(s32);
+/* was func_10019D98 */
+void n_csp_update_chan_filter(u8 *arg0, u8 arg1) {
     u8 *sp2C;
     s16 sp2A;
     s8 sp29;
@@ -55,29 +61,32 @@ void func_10019D98(u8 *arg0, u8 arg1) {
                 sp2A = (s16) (*(u8 *)((u8 *)(((*(s32 *)((u8 *)arg0 + 0x60)) + (arg1 * 0x3C))) + 0x14));
                 n_alSynSetPan(sp2C + 4, (u8) sp2A);
                 if (sp2A != 0) {
-                    func_1001CA90(sp2C + 4, func_1001CEA4(((*(u8 *)((u8 *)sp2C + 0x36)) - (*(u8 *)((u8 *)((*(u8 **)((u8 *)((*(u8 **)((u8 *)sp2C + 0x24))) + 4))) + 4))) + sp29) * 440.0f * sp24);
+                    n_syn_set_voice_cutoff(sp2C + 4, audio_semitones_to_ratio(((*(u8 *)((u8 *)sp2C + 0x36)) - (*(u8 *)((u8 *)((*(u8 **)((u8 *)((*(u8 **)((u8 *)sp2C + 0x24))) + 4))) + 4))) + sp29) * 440.0f * sp24);
                 }
             }
         } while ((sp2C = (*(u8 **)((u8 *)sp2C + 0))) != NULL);
     }
 }
 
-void func_10019ED8(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+/* was func_10019ED8 */
+void n_csp_cc_filter_amount(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     seqp->chanState[chan].unk14 = arg3;
-    func_10019D98(seqp, chan);
+    n_csp_update_chan_filter(seqp, chan);
 }
 
-void func_10019F38(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+/* was func_10019F38 */
+void n_csp_cc_filter_key(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     seqp->chanState[chan].unk15 = arg3;
-    func_10019D98(seqp, chan);
+    n_csp_update_chan_filter(seqp, chan);
 }
 
-void func_10019F98(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+/* was func_10019F98 */
+void n_csp_cc_voice_param17(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     N_ALSoundState *state;
     seqp->chanState[chan].unk16 = arg3;
     for (state = seqp->vAllocHead; state != NULL; state = state->voice.node.next) {
         if (state->chan == chan) {
-            func_1001E350(&state->voice.node.prev, arg3);
+            n_syn_set_voice_param17(&state->voice.node.prev, arg3);
         }
     }
 }
@@ -91,7 +100,8 @@ typedef struct {
     /* 0x29 */ u8 pad29[0x13];
 } ChanState19B50;
 
-void func_1001A030(N_ALCSPlayer *seqp, s32 arg1, s32 chan, u32 byte2) {
+/* was func_1001A030 */
+void n_csp_cc_sustain(N_ALCSPlayer *seqp, s32 arg1, s32 chan, u32 byte2) {
     N_ALVoiceState *vs;
 
     seqp->chanState[chan].sustain = byte2;
@@ -119,7 +129,8 @@ void func_1001A030(N_ALCSPlayer *seqp, s32 arg1, s32 chan, u32 byte2) {
     }
 }
 
-void func_1001A224(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+/* was func_1001A224 */
+void n_csp_cc_fx_enable(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     N_ALSoundState *state;
 
     seqp->chanState[chan].fxmix = (seqp->chanState[chan].fxmix & 0x7F) | (arg3 << 7);
@@ -130,13 +141,15 @@ void func_1001A224(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     }
 }
 
-void func_1001A2F8(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+/* was func_1001A2F8 */
+void n_csp_cc_fx_mix(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     arg3 = arg3 & 0x7F;
     seqp->chanState[chan].fxmix = (seqp->chanState[chan].fxmix & 0x80) | arg3;
-    func_1001A224(seqp, arg1, chan, seqp->chanState[chan].fxmix >> 7);
+    n_csp_cc_fx_enable(seqp, arg1, chan, seqp->chanState[chan].fxmix >> 7);
 }
 
-void func_1001A39C(N_ALCSPlayer *seqp, s32 arg1, s32 chan, u32 arg3) {
+/* was func_1001A39C */
+void n_csp_cc_fx_bus(N_ALCSPlayer *seqp, s32 arg1, s32 chan, u32 arg3) {
     if (arg3 < n_syn->maxAuxBusses) {
         seqp->chanState[chan].unkB = arg3;
     }
@@ -148,15 +161,18 @@ typedef struct {
     u8 unk36;
 } struct24;
 
-void func_1001A3E0(struct24 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_1001A3E0 */
+void n_csp_cc_voice_clip_bank(struct24 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     arg0->unk36 = arg3;
 }
 
-void func_1001A3FC(struct24 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_1001A3FC */
+void n_csp_cc_play_voice_clip(struct24 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     mp3_voice_play(arg0->unk36 * 100 + arg3, 0x7FFF, 0x40);
 }
 
-void func_1001A45C(N_ALCSPlayer *seqp, u8 chan) {
+/* was func_1001A45C */
+void n_csp_update_chan_volume(N_ALCSPlayer *seqp, u8 chan) {
     N_ALSoundState *state;
     s16 tmp;
     for (state = seqp->vAllocHead; state != NULL; state = state->voice.node.next) {
@@ -167,7 +183,7 @@ void func_1001A45C(N_ALCSPlayer *seqp, u8 chan) {
     }
 }
 // s129: Conker controller handler (DK64 has no counterpart): sets up the chanState 0x0D..0x10 ramp
-// and starts it through func_1001A704 with byte1 = 0xFE
+// and starts it through n_csp_cc_fade_step with byte1 = 0xFE
 typedef struct {
     /* 0x00 */ u8 pad0[0xD];
     /* 0x0D */ u8 unkD;
@@ -181,9 +197,10 @@ typedef struct {
 
 float fabsf(float);
 #pragma intrinsic (fabsf)
-void func_1001A704(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3);
+void n_csp_cc_fade_step(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3);
 
-void func_1001A508(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+/* was func_1001A508 */
+void n_csp_cc_fade_target(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     f32 diff;
 
     if (RAMP(chan).unkF == 0) {
@@ -203,10 +220,11 @@ void func_1001A508(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
         return;
     }
     ((N_ALEvent *)arg1)->msg.midi.byte1 = 0xFE;
-    func_1001A704(seqp, arg1, chan, arg3);
+    n_csp_cc_fade_step(seqp, arg1, chan, arg3);
 }
 
-void func_1001A704(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+/* was func_1001A704 */
+void n_csp_cc_fade_step(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     u8 sp2F;
     u8 sp2E;
     s32 sp28;
@@ -255,14 +273,16 @@ void func_1001A704(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     } else {
         seqp->chanMask &= ~(1 << chan);
     }
-    func_1001A45C(seqp, chan);
+    n_csp_update_chan_volume(seqp, chan);
 }
 
-void func_1001A9DC(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+/* was func_1001A9DC */
+void n_csp_cc_fade_rate(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     seqp->chanState[chan].unkF = arg3;
 }
 
-void func_1001AA08(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+/* was func_1001AA08 */
+void n_csp_cc_fade_level(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     seqp->chanState[chan].unkD = arg3;
     seqp->chanState[chan].unkE = arg3;
     if (arg3 == 0) {
@@ -270,5 +290,5 @@ void func_1001AA08(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     } else {
         seqp->chanMask |= 1 << chan;
     }
-    func_1001A45C(seqp, chan);
+    n_csp_update_chan_volume(seqp, chan);
 }

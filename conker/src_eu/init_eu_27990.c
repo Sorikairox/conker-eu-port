@@ -9,7 +9,7 @@ void __osSiGetAccess(void);
 void __osSiRelAccess(void);
 s32 os_si_raw_start_dma(s32, void *); // __osSiRawStartDma
 void __osPfsRequestData(u8 cmd);
-void func_1002560C(u8 *pattern, OSContStatus *data); // __osPfsGetInitData
+void game_os_pfs_get_init_data(u8 *pattern, OSContStatus *data); // __osPfsGetInitData
 s32 __osPfsGetStatus(OSMesgQueue *queue, int channel);
 s32 __osGetId(OSPfs *pfs);
 s32 osPfsChecker(OSPfs *pfs);
@@ -48,7 +48,7 @@ s32 __osPfsGetStatus(OSMesgQueue *queue, int channel) {
     osRecvMesg(queue, &dummy, OS_MESG_BLOCK);
     ret = os_si_raw_start_dma(OS_READ, &__osPfsPifRam);
     osRecvMesg(queue, &dummy, OS_MESG_BLOCK);
-    func_1002560C(&pattern, data);
+    game_os_pfs_get_init_data(&pattern, data);
     if (((data[channel].status & CONT_CARD_ON) != 0) && ((data[channel].status & CONT_CARD_PULL) != 0)) {
         return PFS_ERR_NEW_PACK;
     }

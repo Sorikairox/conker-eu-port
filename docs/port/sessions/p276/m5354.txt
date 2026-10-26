@@ -18,7 +18,7 @@
 \#^    collision_select_area(0);$#s/0/1/
 \#^    blk.sound = zone_tree_find_leaf(src->x, src->z);$#s/src->z/src->y/
 \#^    blk.u70 = 0;$#s/= 0;/= 1;/
-\#^    e = (u8 \*) func_15149130(0x12C, -1, 0x3D#s/0x3D/0x3C/
-\#^    e = (u8 \*) func_15149130(0x12C, -1, 0x3D#s/0x2E/0x2F/
-\#^    e = (u8 \*) func_15149130(0x12C, -1, 0x3D#s/0xFF, 0)/0xFF, 1)/
+\#^    e = (u8 \*) effect_node_create(0x12C, -1, 0x3D#s/0x3D/0x3C/
+\#^    e = (u8 \*) effect_node_create(0x12C, -1, 0x3D#s/0x2E/0x2F/
+\#^    e = (u8 \*) effect_node_create(0x12C, -1, 0x3D#s/0xFF, 0)/0xFF, 1)/
 \#^        memcpy(e + 0x28, &blk, 0x74);$#s/0x28/0x2C/

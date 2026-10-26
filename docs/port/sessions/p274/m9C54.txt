@@ -11,8 +11,8 @@
 \#^                sx += v\[0\];$#s/v\[0\]/v[1]/
 \#^                sz += v\[2\];$#s/+=/-=/
 \#^        if (sx == 0 && sz == 0) {$#s/\&\&/||/
-\#^        a = (s32) (func_150484A0((f32) sx, (f32) sz)#s/(f32) sx, (f32) sz/(f32) sz, (f32) sx/
-\#^        a = (s32) (func_150484A0((f32) sx, (f32) sz)#s/ \& 0xFF;/ \& 0x7F;/
+\#^        a = (s32) (math_atan2f((f32) sx, (f32) sz)#s/(f32) sx, (f32) sz/(f32) sz, (f32) sx/
+\#^        a = (s32) (math_atan2f((f32) sx, (f32) sz)#s/ \& 0xFF;/ \& 0x7F;/
 \#^        if (tag >= a) {$#s/>=/>/
 \#^        s = math_sin_u8(-a \& 0xFF);$#s/-a/a/
 \#^        c = math_cos_u8(-a \& 0xFF);$#s/150489B0/15048A40/

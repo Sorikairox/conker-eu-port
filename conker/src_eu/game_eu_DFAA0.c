@@ -58,7 +58,7 @@ void smoke_emitter_spawn(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
 
     tmp.unk0 = *(Blk12 *)arg1;
     tmp.unkC = 0.0f;
-    temp_v0 = func_15149130((random_int() % 133U) + 69, -1, 0x49, -1, 1, 0, 0x10, arg0[0xC], arg0[0x1]);
+    temp_v0 = effect_node_create((random_int() % 133U) + 69, -1, 0x49, -1, 1, 0, 0x10, arg0[0xC], arg0[0x1]);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
     }

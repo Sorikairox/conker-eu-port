@@ -390,7 +390,7 @@ typedef struct {
 // player owning the trail record rec (t +0x98; rec +0 = the owner object, whose +0x18 is the player): returns 0
 // when the player is gone (no state / model) or the owner id no longer matches. The first frame takes the foot
 // position (foot_trail_get_foot_pos into t +0x10) as the record's last point; later frames re-take it (when that fails the
-// trail is ended, foot_trail_stop, and a new trail effect func_151491F4(300, -1, 11, 0, 6, 8, 0xFF, 0) is started for
+// trail is ended, foot_trail_stop, and a new trail effect effect_node_create_nodraw(300, -1, 11, 0, 6, 8, 0xFF, 0) is started for
 // the side). The distance moved times rec +0x8 accumulates in rec +0xC; while it is above 1 a point is laid every
 // unit: position interpolated from the last point, width rec +0x38 + rec +0x3C * phase, alpha / hold / life /
 // phase from the record (rec +0x28 advances by +0x44 + random [0, +0x45]), a sideways drift (the move direction
@@ -451,7 +451,7 @@ s32 foot_trail_update(u8 *t) {
         key.owner = *(u8 **) rec;
         key.side = *(s32 *) (t + 0x20);
         slots = key.owner + 0x58;
-        e = (u8 *) func_151491F4(300, -1, 11, 0, 6, 8, 0xFF, 0);
+        e = (u8 *) effect_node_create_nodraw(300, -1, 11, 0, 6, 8, 0xFF, 0);
         if (e != NULL) {
             memcpy((s32) (e + 0x28), (u8 **) &key, 8);
         }

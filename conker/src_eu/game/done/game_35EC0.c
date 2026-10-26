@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15008A10(void) {
+/* was func_15008A10 */
+void obj_holder_refs_init(void) {
     D_80088720 = obj_find_by_setup_id(1);
     D_80088724.x = 0.0f;
     D_80088724.y = 0.0f;
@@ -12,7 +13,8 @@ void func_15008A10(void) {
     D_80088730 = obj_find_by_setup_id(1);
 }
 
-void func_15008A60(void) {
+/* was func_15008A60 */
+void view_zoom_state_reset(void) {
     if (0) {}
 
     D_800DDE08 = 0;

@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15006010(struct108 *arg0) {
+/* was func_15006010 */
+void camera_level_hook24_update(struct108 *arg0) {
 
     if (arg0->unk3D0->unk102) {
         if (camera_push_mode(arg0, 8, 0, 0, 0)) {
@@ -36,7 +37,8 @@ void func_15006010(struct108 *arg0) {
     }
 }
 
-void func_15006140(struct108 *arg0) {
+/* was func_15006140 */
+void camera_level_hook25_setup(struct108 *arg0) {
     arg0->unk1E0 = 5;
     arg0->unk1B4 = 2;
     camera_apply_zoom_level(arg0);

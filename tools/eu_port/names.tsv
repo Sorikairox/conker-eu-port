@@ -5427,3 +5427,272 @@ func_10025E40	os_pack_ram_write_data	libultra __osPackRamWriteData: builds the P
 func_10026204	os_pack_ram_read_data	libultra __osPackRamReadData: builds the PIF RAM block for a controller pak read
 func_10027990	os_pfs_init	libultra osPfsInit: checks the controller pak, reads its id and fills the OSPfs
 func_10027B50	os_leo_disk_init	libultra osLeoDiskInit: fills the 64DD PI handle, sets domain 2 timings and links it into the PI table
+func_10012934	n_alBnkfNew	Rare alBnkfNew: relocate the bank array of a bank file and patch every bank (extra table-offset argument)
+func_10012A28	_bnkfPatchBank	Relocate a bank's percussion and instrument pointers once; only instrument 0 is patched fully, the others get the table offset
+func_10012B84	n_bnkf_patch_perc_inst	(med) Patch a bank's percussion instrument once: only its first sound pointer gets the table offset
+func_10012BD0	_bnkfPatchInst	Patch an instrument once: add the table offset to each of its soundCount sound pointers
+func_10012C5C	n_bnkf_patch_sound	Patch a sound once (_bnkfPatchSound): relocate envelope, keymap and wavetable, then patch the wavetable
+func_10012CFC	_bnkfPatchWaveTable	Patch a wavetable: add the table offset to its base and relocate its loop/book pointers for ADPCM or raw types
+func_10012D80	_depth2Cents	Oscillator depth to ratio: 1.0309929^depth by square-and-multiply (libaudio demo _depth2Cents)
+func_10012E04	audio_osc_init	Sequence player oscillator init callback (tremolo type 1 / vibrato type 128) from the free list; returns the update delta
+func_10012F94	audio_osc_update	Sequence player oscillator update callback: advance the sine phase and output tremolo volume or vibrato pitch ratio
+func_100131D8	audio_osc_stop	Sequence player oscillator stop callback: put the oscillator back on the free list D_80042800
+func_100131FC	audio_osc_pool_create	Allocate arg1 0x2C-byte oscillators as a free list and install the init/update/stop callbacks in the seqp config
+func_10015550	n_csp_set_bank	Post AL_SEQP_BANK_EVT (14) with the bank to a compact sequence player's event queue
+func_100155A0	n_sndp_init	(med) Rare sound player init: allocate sound states and events, link the free list, per-group volume table, add the player
+func_10015878	n_sndp_voice_handler	Sound player voice handler: re-post the frame event, handle every due event, return the next delta
+func_10016E90	n_sndp_free_state	Stop and free a sound state's voice if it has one, return the state to the free list and drop its pending events
+func_10016F00	n_sndp_post_pitch_update	(med) Post a sound player pitch event (0x10) for a state, pitch scaled by its keymap detune cents
+func_10016F80	_n_removeEvents	Remove from an event queue every event whose state matches and whose type is in the mask (interrupts off)
+func_10017100	n_sndp_alloc_state	Take a sound state from the free list, link it at the head of the active list and initialise it for bank/sound id
+func_10017298	n_sndp_release_state	Unlink a sound state from the active list back to the free list, update the voice count and clear its owner handle
+func_100173C4	n_sndp_get_handle_state	Return the play state of the sound state a handle points to (0 if none), read with interrupts disabled
+func_10017438	n_sndp_play_sound	Allocate a sound state and post its load/start event (0x4000) with volume, pan, pitch, fx mix/bus; store the handle
+func_10017594	n_sndp_stop_sound	Post a stop event (0x400) for one sound state and clear its keep flag 0x10
+func_10017604	n_sndp_stop_with_flags	Post a stop event (0x400) for every active sound whose flags contain all the given bits
+func_100176C4	n_sndp_stop_all	Stop every active sound (flag mask 1)
+func_100176EC	n_sndp_stop_all_looping	(med) Stop every active sound having flags 1 and 2 (looping / sustained sounds)
+func_10017714	n_sndp_post_event	Post a sound player event of the given type and value for a sound state (no-op for a null state)
+func_10017780	n_sndp_set_group_volume	Set a sound group's volume in D_80042C58 and post a volume refresh (0x800) to the active sounds of that group
+func_10017870	audio_set_output_mode	(med) Set the audio output mode flags (1, 3 or 4 from the sound setting) and refresh the mix type of both buses
+func_10017944	audio_set_bus_mix_type	(med) Set a bus mix type (0 = keep the current one): per-bus flags D_800428C4/D_800428C6 depending on the output mode
+func_10017AA0	n_csp_play	Post AL_SEQP_PLAY_EVT to a compact sequence player
+func_10017AF0	n_csp_set_msg_queue	Set the message queue a compact sequence player sends note and marker messages to (seqp +0x84)
+func_10017B04	n_csp_set_chan_notify	Set a channel's notify flags (chanState +0x17) that make note on/off send messages to the player queue
+func_10017B30	n_csp_reset_chan_levels	Enable all channels in the mask and set every channel's fade level and target to 0xFF
+func_10017BB8	n_csp_mute_chan	Send controller 0xFC with 0 to a channel: set its fade level to 0 (muted)
+func_10017C00	n_csp_unmute_chan	Enable a channel in the mask and send controller 0xFC with 0xFF: full fade level
+func_10017C68	n_csp_fade_chan	Fade a channel: send the fade rate (controller 0xFD) then the target level (controller 0xFF)
+func_10017CE0	n_csp_set_chan_fx_enable	(med) Send controller 0x41 to a channel: sets or clears the fx send bit 0x80 of its fx mix
+func_10017D30	n_csp_set_chan_level	Send controller 0xFC to a channel: set its fade level immediately
+func_10017D80	n_csp_set_chan_pan	Post a pan control change (controller 10) for a channel of a compact sequence player
+func_10017DF0	n_csp_set_fx_mix_offset_scale	(med) Post event 0x19: set the player-wide fx send offset and scale applied to every voice's fx mix
+func_10017E4C	n_csp_set_chan_fx_bus	Post controller 92 for a channel: select its fx (aux) bus
+func_10017F10	n_csp_set_fx_param	(med) Post event 0x1A: set a parameter of an aux bus effect (param < 8) or of its filter
+func_100186DC	n_cseq_set_loc	Restore a compressed sequence's position from a marker (valid tracks, ticks and per-track state)
+func_10018790	n_cseq_find_markers	Scan a compressed sequence for marker events (0x14) and record each marker's location in markers[id - firstId]
+func_10018C60	n_csp_end_track	(med) Post AL_TRACK_END to a sequence player to end the current track
+func_10018CB0	n_csp_set_seq	Post AL_SEQP_SEQ_EVT with the sequence to a compact sequence player
+func_10018D00	n_csp_set_vol	Post AL_SEQP_VOL_EVT with the volume to a compact sequence player
+func_10018D50	n_csp_stop	Post AL_SEQP_STOP_EVT to a compact sequence player
+func_10019B50	n_csp_cc_volume	Controller 7 handler: set the channel volume and update the volume of its playing voices
+func_10019C28	n_csp_cc_pan	Controller 10 handler: set the channel pan and update the pan of its voices
+func_10019CD0	n_csp_cc_priority	Controller 16 handler: set the channel priority
+func_10019CFC	n_csp_cc_send_marker	(med) Controller 30 handler: send a marker message (value and sample position) to the player's message queue
+func_10019D6C	n_csp_cc_bank_select	Controller 32 handler: set the channel bank (program change uses bank << 7 + program)
+func_10019D98	n_csp_update_chan_filter	(med) Re-apply a channel's voice filter: amount (synth param 18) and key-tracked cutoff 440 Hz * ratio (param 19)
+func_10019ED8	n_csp_cc_filter_amount	(med) Controller 33 handler: set the channel filter amount (chanState +0x14) and refresh its voices' filters
+func_10019F38	n_csp_cc_filter_key	(med) Controller 34 handler: set the channel filter key offset (chanState +0x15) and refresh its voices' filters
+func_10019F98	n_csp_cc_voice_param17	(low) Controller 35 handler: set chanState +0x16 and send it as synth voice param 17 to the channel's voices
+func_1001A030	n_csp_cc_sustain	Controller 64 handler: sustain pedal, move voices between note-on/sustain phases and release held voices
+func_1001A224	n_csp_cc_fx_enable	Controller 65 handler: set the fx send bit 0x80 of the channel fx mix and update its voices
+func_1001A2F8	n_csp_cc_fx_mix	Controller 91 handler: set the low 7 bits of the channel fx mix and update its voices
+func_1001A39C	n_csp_cc_fx_bus	Controller 92 handler: select the channel's aux bus if it is below maxAuxBusses
+func_1001A3E0	n_csp_cc_voice_clip_bank	(med) Controller 27 handler: set the voice clip bank (player byte +0x36) used by controller 26
+func_1001A3FC	n_csp_cc_play_voice_clip	(med) Controller 26 handler: play voice clip bank * 100 + value through mp3_voice_play
+func_1001A45C	n_csp_update_chan_volume	Update the volume of every playing voice of a channel
+func_1001A508	n_csp_cc_fade_target	Controller 0xFF handler: set the channel fade target and step size, start the fade ramp (re-posted as 0xFE)
+func_1001A704	n_csp_cc_fade_step	Controller 0xFE handler: step the channel fade level toward its target, re-post itself, update the channel volume
+func_1001A9DC	n_csp_cc_fade_rate	Controller 0xFD handler: set the channel fade rate (bit 0x80 doubles the step)
+func_1001AA08	n_csp_cc_fade_level	Controller 0xFC handler: set the channel fade level and target at once, toggle the channel in the mask
+func_1001CA90	n_syn_set_voice_cutoff	(med) Synth voice update param 19 (float): set the voice filter cutoff frequency
+func_1001CBF0	n_fx_calc_biquad_lowpass	(med) Compute 2nd-order low-pass filter coefficients (b0 b1 b2, a1 a2) for cutoff and Q at the given sample rate
+func_1001CEA4	audio_semitones_to_ratio	Return 2^(n/12) for n semitones (negative n uses the inverse step) by square-and-multiply
+func_1001CF38	n_fx_lowpass_update_coefs	(med) Recompute an aux bus low-pass filter's 16 fixed-point coefficients from its cutoff and resonance
+func_1001D9B0	n_syn_get_aux_fx	(med) Return the effect of aux bus n when the main bus runs the fx pull handler, else NULL
+func_1001DA28	n_syn_get_aux_filter	(low) Return the filter record (+0x40) of aux bus n when the main bus runs the fx pull handler, else NULL
+func_1001DAA0	n_fx_set_param	(med) Set a parameter of an aux bus effect (wrapper of the effect param handler)
+func_1001DAE4	n_fx_filter_set_param	(med) Set an aux filter parameter (8 = cutoff in tenths, 9 = resonance) and recompute its coefficients
+func_1001E2A0	n_syn_set_voice_pan	Synth voice update AL_FILTER_SET_PAN: set a voice's pan (the real pan, unlike the custom n_alSynSetPan)
+func_1001E350	n_syn_set_voice_param17	(low) Synth voice update of custom param type 17 with a byte value (sound player event 0x8000, controller 35)
+func_1001E400	n_csp_send_midi	Post a MIDI event (status, byte1, byte2) to a compact sequence player after the given delta
+func_1002560C	game_os_pfs_get_init_data	libultra pfsisplug.c: read each controller's status from the PIF RAM reply and build the pak bit pattern
+func_15004E00	breakable_slots_clear	Clear the 25 breakable slot records D_800C6660 (words +0/+4/+8 and state byte +0xF)
+func_15004E80	level_matrix_arenas_alloc	Allocate the two (double-buffered) matrix arenas D_800C3E80/84 for the level's matrix count (header +0x1A, 64 bytes each)
+func_15004F00	attachment_list_reset	Empty the attachment record list (head D_800C3EE0 = NULL)
+func_15004F10	joint_chain_reset_mask_init	(med) Mark the joint chains of objects 0-3 for reset (D_800C4000 = 0xF)
+func_15004F30	model_kind_tables_clear	(med) Zero the per-model-kind tables (triangle/vertex range pointers, user counts and related arrays) before a level load
+func_15005270	obj_flagged_select_reset	Reset the flagged-object selection (D_800C67F0 enable and D_800C67F1 current index)
+func_15005A60	camera_level_hook_dispatch	Call the level camera setup hook D_80082B40[level header +0xE] for a camera controller, if the level has one
+func_15005AB0	camera_level_hook01_setup	(med) Level camera hook 1: zoom 1, mode 3, distances 230, far limit 290, flag 0x4000
+func_15005AF0	camera_level_hook02_noop	Level camera hook 2: empty
+func_15005B00	camera_level_hook03_noop	Level camera hook 3: empty
+func_15005B10	camera_level_hook04_setup	(med) Level camera hook 4: mode 8, zoom 3, clear flag 4 and apply the zoom level
+func_15005B50	camera_level_hook05_noop	Level camera hook 5: empty
+func_15005B60	camera_level_hook06_noop	Level camera hook 6: empty
+func_15005B70	camera_level_hook07_send_events	(med) Level camera hook 7: dispatch events 0x4014 and 0x400C-0x400E instead of changing the camera
+func_15005BD0	camera_level_hook08_setup	(med) Level camera hook 8: state 8, flags 0x300000, zoom 1 mode 3, apply the zoom, clear +0x134
+func_15005C30	camera_level_hook09_setup	(med) Level camera hook 9: flag 0x100000, zoom 2 mode 5 and apply the zoom level
+func_15005C80	camera_level_hook10_setup	(med) Level camera hook 10: state 8, flags 0x1300000, zoom 1 mode 2, distances 117, far limit 370
+func_15005CF0	camera_level_hook11_noop	Level camera hook 11: empty
+func_15005D00	camera_level_hook12_setup	(med) Level camera hook 12: state 8, flags 0x300000, zoom 1 mode 3, apply the zoom, clear +0x134 (same as hook 8)
+func_15005D60	camera_level_hook13_setup	(med) Level camera hook 13: zoom 2 mode 5, apply the zoom, clear +0x134, flag 0x4000
+func_15005DA0	camera_level_hook14_noop	Level camera hook 14: empty
+func_15005DB0	camera_level_hook15_setup	(med) Level camera hook 15: push camera mode 8, flag 0x1000000, distances 500, far limit 800
+func_15005E30	camera_level_hook16_setup	(med) Level camera hook 16: on map 50 only, zoom 2 mode 4 and apply the zoom level
+func_15005E70	camera_level_hook17_setup	(med) Level camera hook 17: zoom 2, apply the zoom level, set +0x23C
+func_15005EA0	camera_level_hook18_setup	(med) Level camera hook 18: zoom 1 mode 15, apply the zoom, set +0x134
+func_15005EE0	camera_level_hook19_setup	(med) Level camera hook 19: zoom 2 mode 15, apply the zoom, set +0x134
+func_15005F20	camera_level_hook20_setup	(med) Level camera hook 20: zoom 3 mode 15, apply the zoom, set +0x134
+func_15005F60	camera_level_hook21_setup	(med) Level camera hook 21: zoom 2, apply the zoom level, flag 0x4000
+func_15005FA0	camera_level_hook22_noop	Level camera hook 22: empty
+func_15005FB0	camera_level_hook23_setup	(med) Level camera hook 23: state 8, flags 0x300000, zoom 1 mode 3, apply the zoom, clear +0x134
+func_15006010	camera_level_hook24_update	(med) Level camera hook 24: push mode 8 with close distances when the record flag +0x102 or state 0x3B is set, else pop mode 0
+func_15006140	camera_level_hook25_setup	(med) Level camera hook 25: mode 5 zoom 2 and apply the zoom level
+func_15006170	camera_level_hook26_setup	(med) Level camera hook 26: mode 5 zoom 2, apply the zoom level, flag 0x4000
+func_15007830	game_thread_main	Game thread entry: clear BSS, create the main queue, init scheduler, audio, controllers, settings, then run the main loop
+func_15007A20	game_bss_clear	Zero the game BSS (D_800B0DC0..D_800E9D00) and the 0x3E000-byte block at D_80044B20
+func_15008840	zap_bolt_table_clear	(med) Zero the 32-byte zap bolt slot table D_800D99D0
+func_150089D0	particle_cooldowns_reset	Set the four per-player particle cooldown bytes D_800DD2A0..3 to 0xFF
+func_15008A10	obj_holder_refs_init	(med) Look up the setup-id 1 object for the two holder references (D_80088720, D_80088730) and zero the target offset
+func_15008A60	view_zoom_state_reset	(med) Reset the per-view zoom / sniper scope state (D_800DDDAC..D_800DDE40) for the four views
+func_15008B90	level_timed_queue_init	(low) Create the level timed queue (calls level_timed_queue_create)
+func_15008BB0	level_timed_queue_create	(low) Create the timed queue D_800D98E0 (12 entries, 1000, mode 1)
+func_15008BE0	level_load_stub	(low) Empty function called during level load before the timed queue is created
+func_15008DD0	player_morph_cache_clear	(med) Clear the two player morph cache pointers D_800DD460
+func_15009150	flare_nodes_level_init	(med) Reset the object node list and flare state; add a flare node when the level has a sun position (D_8008CFFC[header +0x10])
+func_1500C1E0	anim_mesh_slots_reset	(med) Reset the animated mesh slots: counters, loaded flags (-2), the 11 0x14-byte slots D_800DDE80 and saved display lists
+func_1500EB20	level_setup_noop_eb20	Level setup hook: empty
+func_1500EB30	level_fx_point_spawn	(low) Spawn a type 1 effect with a random 10-137 frame lifetime at x, y, z with angle and flag parameters
+func_1500EBC4	level_setup_fx_points	(med) Level setup hook: spawn the 17 fixed effect points of this level (level_fx_point_spawn)
+func_1500ED80	level_setup_light_pipe_spray	(med) Level setup hook: create one vertex animation light and initialise the pipe spray points
+func_1500EE18	effect_attach_obj_type45	(low) Create a 300-frame effect of type 0x45 attached to an object (pointer and unique id)
+func_1500EE94	effect_track_obj_type46	(low) Create a 300-frame effect of type 0x46 that follows a record (pointer, 0.0 and its +0x14 value)
+func_1500EF20	level_setup_scroll_fx_points	(med) Level setup hook: texture scroll on both level display lists, four type 5 effects at fixed points, copy a colour
+func_1500F210	level_setup_tex_scroll_neg	(med) Level setup hook: add a texture scroll (step -8) to both level display lists (D_800902B8)
+func_15010240	level_setup_tex_scroll_pos	(med) Level setup hook: add a texture scroll (step 4) to both level display lists (D_800902E4)
+func_150102C0	level_setup_noop_102c0	Level setup hook: empty
+func_150102D0	level_obj_init_scroll_fx59	(low) Level init: scrolls two textures (D_800902E8/EC) in both level display lists and spawns a 300-frame effect node of kind 59
+func_150103E0	level_obj_init_two_vtx_lights	(med) Level init: creates two animated vertex lights (slots 0 and 4) at fixed positions
+func_15010680	level_obj_set_hit_activate_cb	(med) Level init: installs world_obj_hit_activate as the object hit callback D_800E0940
+func_150106A0	level_obj_init_nop_150106a0	(low) Empty level object init hook
+func_150106B0	level_obj_set_target_hit_cb	(med) Level init: installs target_volume_hit_check_offset as the hit-check callback D_800E0930
+func_150106D0	level_obj_spawn_zone_effect	(low) Finds the zone leaf under the record and spawns an effect node of kind 89 holding the record, its region and leaf; returns 1
+func_15010FB0	level_obj_init_scroll_handles	(low) Level init: allocates D_800BE4F0 with four texture scroll/anim handles and caches the zone leaf at (0x1500, 0x700) in D_800D9A40
+func_150110F0	level_obj_init_scroll_xy	(low) Level init: adds two texture scrolls (D_80090318 vertical, D_8009031C horizontal) to the first level display list
+func_15011170	level_obj_init_storm_sounds	(med) Level init: clears the thunder flag, spawns lightning on the player and starts ambient chirp and storm sound emitters
+func_15011330	level_obj_init_storm	(med) Level init: spawns the storm controller and sets D_80041FD8 to 0x10
+func_15011360	level_obj_init_area_points_23	(low) Level init: resets area points, allocates sets 2 and 3 and sets fog colour bytes when flag bit 0 of D_800D2E4C is set
+func_15011B00	level_fx_spawn_random_life	(low) Spawns an effect node of kind 10 with a random 10..137 frame life and stores the four parameters at +0x28..+0x2E
+func_15011B94	level_obj_init_lights_sfx77	(low) Level init: spawns two random-life effects, toggles light groups 1/2 and starts sound emitter 77
+func_15011C40	level_clear_be500	(low) Clears the 5-byte level state block D_800BE500
+func_15011C70	level_reset_d9aa0_sfx	(low) Clears the three words D_800D9AA0 and the sound cooldowns (level 0x2B hook)
+func_15011CA0	level_sfx_cooldown_reset	(low) Level hook: clears the sound cooldowns
+func_15011CC0	level_obj_init_scroll_e4	(low) Level init: adds the D_800902E4 texture scroll to both level display lists
+func_15011F20	ambient_fx_spawn_type3	(med) Ambient effect type 3 (D_80082D60): spawns a 300-frame effect node of kind 71 with a 12-byte (50, 50, 0) spec
+func_15011FA0	ambient_fx_spawn_type5	(med) Ambient effect type 5 (D_80082D60): spawns a 300-frame effect node of kind 72 with a 12-byte (50, 50, 0) spec
+func_15012020	level_ground_emitter_spawn7	(low) Spawns a ground emitter of type 7 with parameter arg0 and the default sizes D_80096530/34
+func_150120B0	ambient_fx_spawn_type4	(med) Ambient effect type 4 (D_80082D60): spawns a 300-frame effect node of kind 30 with a 32-byte spec
+func_1501214C	obj_drip_attach	(med) Attaches a model drip effect (300 frames) to the object unless the current level is 24
+func_15012720	level_get_proj_mode	(low) Returns the per-level projection/camera mode stored in D_800E0A10 (2 for levels 0/44/55, 6 for 40, else 5)
+func_15012770	level_init_nop_15012770	(low) Empty hook called from the level object setup
+func_15012780	level_clear_dd410	(low) Clears D_800DD418 and the two words D_800DD410 at level load
+func_150162B0	records_table_reset	(med) Clears the object record table D_800CC2D0 (20300 bytes) and related globals, setting D_800CC26E from game mode D_800D2138
+func_15016370	records_set_tint_180_60_60	(low) Sets the +0x114/116/118 colour of every object record's model block to (180, 60, 60) at level load
+func_15016670	level_clear_d18c0	(low) Clears D_800D18C0 at level load
+func_15016680	start_points_clear	(low) Clears the start point table pointer D_800D212C
+func_15016690	start_points_load	(med) Loads the level's 24-byte start point table (asset 3/12), or builds one default point from D_800D20FC or fixed coordinates
+func_1501C860	frame_hook_nop_1501c860	(low) Empty per-frame hook called after level_update_frame
+func_1501C870	frame_hook_nop_1501c870	(low) Empty per-frame hook called after objects_update_visibility
+func_15048360	math_acosf_lut	acos(x) in radians via the 16-bit acos table, x clamped to [-1, 1]
+func_15048408	math_asinf_lut	asin(x) in radians via the 16-bit asin table, x clamped to [-1, 1]
+func_150484A0	math_atan2f	Angle in radians (0..2pi) of the vector (x, y) measured from +y, using sqrtf and math_acosf_lut
+func_150485E0	math_acos_table_lookup	Interpolates the three-level acos table (D_80085EC0/F3C/FBC) for a 0..32767 input
+func_15048664	math_acos_s16	Fixed-point acos: s16 input (-1..1) to u16 angle 0..65535 (0..pi)
+func_150486B8	math_asin_s16	Fixed-point asin: s16 input (-1..1) to s16 angle (-pi/2..pi/2)
+func_15048720	math_angle_lerp_deg	(med) Interpolates from angle a toward angle b by t along the shortest way (degrees)
+func_15048758	math_wrap_deg_360	Wraps the angle *p into [0, 360) degrees
+func_15049440	math_mtx_box_in_frustum	(med) Transforms a point by the view matrix and tests it (with half sizes) against near/far and x/y limits; returns the depth or 0
+func_15049C90	math_mtx_affine_inverse	Inverts an affine 4x4 float matrix (3x3 cofactor inverse plus translated origin) into the output matrix
+func_15049F30	quat_align_hemisphere	Negates quaternion q2 when its dot product with q1 is negative (shortest-path interpolation)
+func_15049FA8	quat_from_mtx	Converts the rotation part of a 4x4 float matrix to a quaternion (w, x, y, z)
+func_1504A1CC	quat_slerp	Spherical linear interpolation of two quaternions by t (linear near 0 or 180 degrees)
+func_1504A430	quat_to_mtx	Writes the rotation matrix of a quaternion into a 4x4 float matrix (column 3 cleared)
+func_1504A5A0	math_expf	expf by range reduction with ln 2 and a Taylor series (Rare shared code, as in Perfect Dark)
+func_1504A620	math_logf	logf by halving/doubling to [1, 2) and an atanh series; 0 for x <= 0 (Rare shared code)
+func_1504A6F0	math_powf	powf: integer exponents by repeated multiply/divide, else expf(logf(x) * y) (Rare shared code)
+func_150A86B0	anim_eval_joint_matrices	(med) Skeleton/animation evaluator: decodes key frames (one or two blended animations) and writes the model's joint matrices
+func_150A9B0C	mtx_rotate_scale_3x3	Writes rotation (three angles in degrees) times per-row scale into the 3x3 part of a float matrix
+func_150A9E64	mtx_f_to_l_batch	Converts n float matrices in place to the RSP fixed-point Mtx format
+func_150AB278	collision_tri_box_test	Triangle vs collision box test (outcodes, bevels, edges, plane diagonals): 0 if they intersect, 1 if outside
+func_150AB6D0	collision_walls_slide	Wall engine entry: slides a record's move against nearby collision triangles, pushing it out and writing the result back
+func_150AC8C4	collision_ledge_probe	Wall engine entry for ledges: scans triangles in a box around the record's heading and stores ledge grab data
+func_150ACEA0	collision_ray_cast	Ray cast against level BSP and object triangles: nearest hit point, record, vertices, distance and flags; 1 on hit
+func_150AD780	fast_cosf	Rare float cosine: fast_sinf(x + pi/2)
+func_150AD78C	fast_sinf	Rare float sine: polynomial with range reduction by pi; 0 for huge, inf or NaN input
+func_150C4BF0	camera_hook_events_f20a0	(low) Camera hook: sets flag 0x1000000 on event 0x403F and sends a 0x9000 value (0xA0, 0 or -0x96) depending on events
+func_150CEF10	camera_hook_zoom_reset	(low) Camera hook: sets flag 0x10 and, if the zoom state is 3, switches to state 2 / mode 5 and reapplies the zoom
+func_150DE310	camera_hook_nop_150de310	(low) Empty hook taking one argument
+func_150DEC90	level_hook_rain_stop	(med) Level hook: stops the rain (rain_update(0)) and clears D_800DD444
+func_150E1800	camera_hook_event_403e	(low) Camera hook: sets or clears flag 0x20 depending on event 0x403E
+func_150EC4B0	camera_hook_event_4023	(low) Camera hook: sets/clears flags 0x1010 depending on event 0x4023 and always clears flag 8
+func_150F51A0	storm_thunder_flag_set	(low) Sets the thunder flag D_80088B40
+func_150F51BC	storm_thunder_flag_take	(low) Returns 1 and clears the thunder flag D_80088B40 if it was set, else 0
+func_150F51E8	storm_thunder_sfx_update	(med) While weather state is 3 or 4, counts down a random timer and plays sound 15 at a random pitch when it expires
+func_150F9FA0	camera_hook_event_4025	(low) Camera hook: on event 0x4025 sets flag 0x80, clears 8 and sets +0x190 to 85, else the reverse with 0
+func_150FCA00	camera_set_ranges_500_800	(low) Sets the camera distances +0x348/+0x34C to 500 and +0x374 to 800
+func_15100330	camera_hook_nop_15100330	(low) Empty hook taking one argument
+func_1511FC20	frame_hook_nop_1511fc20	(low) Empty per-frame hook given the current frame buffer index
+func_1511FC2C	debug_gdl_pos_value_nop	(med) Debug-build hook given a display list, a position, a value and a player; returns the display list unchanged
+func_1511FC44	debug_gdl_pos_nop	(med) Debug-build hook given a display list, a position and a player; returns the display list unchanged
+func_1512D380	camera_hook_nop_1512d380	(low) Empty camera hook run when camera flag 0x400000 is set
+func_15149130	effect_node_create	(med) Allocates an effect node with a life in frames, expire/update/draw handler indices, flags and kind; clears its vertex slots
+func_151491F4	effect_node_create_nodraw	(med) effect_node_create without a draw handler (index -1)
+func_15149264	effect_node_update	(med) Per-frame effect node update: ages it, runs its update handler, then the expire handler and destroys it when expired
+func_15149318	effect_node_free_vtx	(med) Frees the effect node's vertex slot buffers
+func_1514933C	effect_node_retire	(med) Frees the node's vertex buffers and retires the node
+func_15149368	effect_node_free	(med) Frees the node's vertex buffers and unlinks and frees the node
+func_15149394	effect_node_kind_call_a	(low) Calls the per-kind handler D_8008A688[kind] (74 kinds, out-of-range uses 0) on the effect node
+func_151493E4	effect_node_kind_call_b	(low) Calls the per-kind handler D_8008A7B0[kind] (74 kinds, out-of-range uses 0) on the effect node
+func_15149434	effect_node_kind_message	(low) Passes a message (arg1, arg2) to the per-kind handler D_8008A8D8[kind] of the effect node, if any
+func_15149490	effect_node_draw	(med) Runs the node's draw handler D_8008A670[index] on the display list and returns it (unchanged when none)
+func_151494E0	effect_nodes_broadcast	(med) Broadcasts a message (arg0, arg1) to all effect nodes (node type 2)
+func_15149514	effect_node_link_message	(low) Wrapper for node_handle_link_message
+func_15165F70	level_frame_hook_nop	(low) Empty hook at the start of level_update_frame
+func_15178E50	level_screen_effect_active	(low) Returns 1 when the level effect mode D_800B0DF0+0x14 is 1 and its threshold +0x16 is below the player's +0x2FC
+func_1519EF70	objfx_nop_1519ef70	(low) Empty object effect hook taking three arguments
+func_151DDA10	game_eeprom_probe	Game copy of osEepromProbe: returns 1 for a 4K EEPROM, 2 for 16K, 0 if none
+func_151EFFC0	game_gu_ortho_f	Game copy of guOrthoF: orthographic projection float matrix scaled by scale
+func_151F0114	game_gu_ortho	Game copy of guOrtho: orthographic projection into a fixed-point Mtx
+func_151F27E0	game_os_cont_address_crc	Game copy of __osContAddressCrc: 5-bit CRC of a Controller Pak address
+func_151F2890	game_os_cont_data_crc	Game copy of __osContDataCrc: 8-bit CRC of a 32-byte Controller Pak block
+func_151F2960	mp3_stream_start	(med) Starts streaming an MP3 from ROM (address, size): allocates buffers, loads decoder tables on first use, enters start-up state
+func_151F2BA8	mp3_stream_stop	(med) Sets the MP3 stream state to 3 (stop) with interrupts masked
+func_151F2BE8	mp3_stream_pause	(med) Pauses the MP3 stream (state 6 while starting, else 2) with interrupts masked
+func_151F2C4C	mp3_stream_resume	(med) Resumes a paused MP3 stream (state 2 -> 7, 6 -> 5) with interrupts masked
+func_151F2CDC	mp3_stream_get_state	(med) Returns the MP3 stream state when playing, starting, paused or resuming, else 0
+func_151F2D6C	mp3_stream_set_volume	(med) Sets the MP3 stream volume (clamped 0..0x7FFF) and its fade length
+func_151F2DFC	mp3_stream_set_pan	(med) Sets the MP3 stream target pan (0..127), optionally applying it at once
+func_151F2E4C	mp3_stream_set_fx	(low) Stores two MP3 stream effect parameters (D_800E0DB2/DB0) and arms D_800E0DD8
+func_151F2E88	mp3_stream_synth_pull	(med) Audio frame callback: advances the MP3 stream state machine, decodes frames and emits the mixing audio commands
+func_151F39E4	mp3_stream_update_vol_pan	(med) Recomputes the stream's left/right volume ramps when volume or pan changed (mono/stereo options)
+func_151F3C1C	mp3_stream_set_text_cb	(med) Sets the MP3 ID3 text callback D_800E0E00
+func_151F3C34	mp3_stream_set_read_cb	(med) Sets the MP3 data read callback D_800E0DFC (also enables streaming)
+func_151F3C4C	mp3_stream_rom_read	(med) MP3 read callback: DMAs up to n bytes of the stream from ROM into the buffer and advances the position
+func_151F3D78	mp3_stream_prefetch	(low) Issues a 0x810-byte DMA at the current MP3 stream position (prefetch)
+func_16000000	debugger_page_title_draw	(low) Debugger start page: draws its title string at cell 278
+func_16000028	debugger_page_title_input	(med) Debugger start page input: A or B opens the main menu (page 1)
+func_16000058	debugger_main_menu_draw	Draws the debugger main menu (items, retry/continue line, version and build date)
+func_16000224	debugger_main_menu_input	Debugger main menu input: up/down selects, A opens the registers or memory page or exits
+func_16000304	debugger_page_nop_draw	(low) Empty debugger page draw handler
+func_1600030C	debugger_page_nop_input	(low) Empty debugger page input handler
+func_16000314	debugger_regs_page_draw	Draws the debugger registers page: exception + GPRs, or FPU registers (two halves)
+func_16000384	debugger_regs_page_input	Debugger registers page input: C buttons cycle the three views, B returns to the menu
+func_16000424	debugger_draw_exception	Draws the crashed thread's PC, cause (and its text), SR, BadVAddr, thread id and lockup marker
+func_16000590	debugger_draw_fpu_regs	Draws FPCSR with its exception flags and 16 FPU registers (first or second half) as floats
+func_160006CC	debugger_draw_gprs	Draws the crashed thread's general registers with their two-letter names
+func_1600078C	debugger_draw_stack	Draws 22 words of the crashed thread's stack from the scroll offset, coloured by address range
+func_16000A5C	debugger_stack_page_input	Debugger stack page input: stick or C up/down scrolls (0..200), B returns to the menu
+func_16000B14	debugger_main	Debugger entry for a crashed thread: checks the fault, then loops drawing pages and reading the pad until exit
+func_16000F8C	debugger_print_float	Prints a float at a text cell ("NaN" for inf/NaN/denormal) via debug_sprintf
+func_16001044	debugger_print_number	Prints a value at a text cell as 8 hex digits, signed decimal or float bits
+func_160012B0	debugger_print_string	Prints a string at a text cell of the debugger screen
+func_16001338	debugger_set_color	Sets the debugger text colour from 8-bit RGB (converted to RGBA5551)
+func_16001390	debugger_fill_rect	Fills a framebuffer rectangle (x0, y0)-(x1, y1) with the debugger colour
+func_160014F0	debugger_draw_char	Draws one 8x8 font character into the framebuffer and returns the next cell position
+func_1600160C	debugger_cell_to_fb	Returns the framebuffer address of a debugger text cell
+func_16001678	debugger_clear_screen	Clears the debugger framebuffer
+func_160016F4	debugger_identity	(low) Returns its argument unchanged
+func_eu_10017D80	audio_csp_stub_eu	(low) Empty EU-only stub next to ptstart in n_cspgetstate.c
+func_eu_1501B640	obj_vertex_colours_blend	Recolours the object's vertex buffer: per colour group interpolates between key colours by a 0..1 value
+func_eu_1507340C	objev_nop_1507340c	(low) Empty object event handler

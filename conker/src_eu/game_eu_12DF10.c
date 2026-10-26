@@ -12,7 +12,7 @@ void obj_timer_link_post_remove(u8 *arg0) {
 
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
-    func_151494E0(&tmp, 0x48);
+    effect_nodes_broadcast(&tmp, 0x48);
 }
 
 /* was func_15100734 */
@@ -27,7 +27,7 @@ void obj_timer_link_spawn(u8 *arg0) {
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
     tmp.unk6 = 0;
-    temp_v0 = func_15149130(300, -1, 0x4E, -1, 0, 0x3B, 8, 255, 1);
+    temp_v0 = effect_node_create(300, -1, 0x4E, -1, 0, 0x3B, 8, 255, 1);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 8);
     }
@@ -36,7 +36,7 @@ void obj_timer_link_spawn(u8 *arg0) {
 #ifdef NON_MATCHING
 // linked_obj_event_48: event handler of an object whose link record sits at +0x28 ({ s32 id, u8 key }): event 0x48 removes the
 // object (node_destroy) when the event's record matches by id or by key; any other event goes to the common
-// handler func_15149514.
+// handler effect_node_link_message.
 /* was func_151007B0 */
 void obj_timer_link_handle_event(struct102 *obj, u8 *ev, u8 type) {
     u8 *link = (u8 *) obj + 0x28;
@@ -46,7 +46,7 @@ void obj_timer_link_handle_event(struct102 *obj, u8 *ev, u8 type) {
             node_destroy(obj);
         }
     } else {
-        func_15149514((s32) ev, type, (s32) link, (s32) (link + 4), (s32) obj);
+        effect_node_link_message((s32) ev, type, (s32) link, (s32) (link + 4), (s32) obj);
     }
 }
 #else

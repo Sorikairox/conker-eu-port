@@ -210,7 +210,7 @@ s32 projectile_bounce_update(u8 *obj, f32 x, f32 y, f32 z, f32 w, u8 *ext) {
 
 #ifdef NON_MATCHING
 s32 trigger_point_in_kind3(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
 s32 prop_is_flagged(s32);
 void emit_sparks_from_surface(u8 *arg0, s32 arg1, s32 arg2);
 
@@ -222,7 +222,7 @@ static const f32 D_800A0198_c[1] = { 0.16100001f }; /* 0x3E24DD30 */
 static const f32 D_800A019C_c[1] = { 0.0053999997f }; /* 0x3BB0F27B */
 static const f32 D_800A01A0_c[1] = { 0.013499999f }; /* 0x3C5D2F1A */
 
-/* func_150ACEA0 surface record (0x12 bytes) */
+/* collision_ray_cast surface record (0x12 bytes) */
 typedef struct {
     s16 v[9];
 } Surf9424;
@@ -271,7 +271,7 @@ typedef struct {
 // projectile_wall_hit: handler of D_80089D14 (`s32 (*)(obj, hit, x, y, z)`, slot 1; 0 = destroyed). Speed = +0x140
 // - |+0x48|. Up to 6: bounces off the wall: stops x / z (+0x44 / +0x4C), keeps +0x48 (scaled by +0x14 if upwards),
 // moves to the hit point (hit +0x14..+0x1C), scales +0x50..+0x58 by +0x14 and plays D_80088ADC (keep). Faster: breaks;
-// unless trigger_point_in_kind3 rejects the hit point, ray casts back from (x, y, z) along the last move (func_150ACEA0) and at
+// unless trigger_point_in_kind3 rejects the hit point, ray casts back from (x, y, z) along the last move (collision_ray_cast) and at
 // the hit spawns a effect3d_spawn_oriented flash (if prop_is_flagged accepts the surface; random 8-byte spin at +0x128) and a
 // emit_sparks_from_surface debris burst against the move; always plays a random break sound D_80088AD4; returns 0.
 /* was func_150B9424 */
@@ -310,7 +310,7 @@ s32 projectile_wall_hit(u8 *obj, u8 *hit, f32 x, f32 y, f32 z) {
         d[0] = *(f32 *) (obj + 0x38) - x;
         d[1] = *(f32 *) (obj + 0x3C) - y;
         d[2] = *(f32 *) (obj + 0x40) - z;
-        if (func_150ACEA0(x, y, z, d[0], d[1], d[2], 0, &surf, &hp[0], &hp[1], &hp[2], 0, &surfId, 0, 0.0f) != 0) {
+        if (collision_ray_cast(x, y, z, d[0], d[1], d[2], 0, &surf, &hp[0], &hp[1], &hp[2], 0, &surfId, 0, 0.0f) != 0) {
             if (prop_is_flagged(surfId) != 0) {
                 a.u54 = 0x19;
                 a.u56 = 0xA;

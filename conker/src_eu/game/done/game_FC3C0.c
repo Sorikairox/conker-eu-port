@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_150CEF10(struct108 *arg0) {
+/* was func_150CEF10 */
+void camera_hook_zoom_reset(struct108 *arg0) {
     arg0->unk84 |= 0x10;
     if (arg0->unk1B4 == 3) {
         arg0->unk1E0 = 5;

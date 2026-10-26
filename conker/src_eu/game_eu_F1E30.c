@@ -74,7 +74,7 @@ s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 #endif
 
 #ifdef NON_MATCHING
-// object_glow_spawn: spawns a type `kind` object (0x12C when kind is -1; func_15149130) linked to obj (record at +0x28:
+// object_glow_spawn: spawns a type `kind` object (0x12C when kind is -1; effect_node_create) linked to obj (record at +0x28:
 // obj, room, the glow at +0xC; field +0x14 = 0x54 / +0x16 = 1 for a type 0x34 owner, else -1 / 0), then a glow
 // (particle_spawn_ex type 1, radius 700, a random colour of D_800A0710, random flag bits 0x40 / 0x80) whose +0xA8 tail
 // gets two random bytes, two counts 5..10 and two scales (0.2 + [0, 0.25)) * 700.
@@ -101,7 +101,7 @@ void damage_smoke_spawn(u8 *obj, s16 kind, u8 flag, s32 arg3) {
         link.u14 = 0x54;
         link.u16 = 1;
     }
-    rec = (u8 *) func_15149130(kind == -1 ? 0x12C : kind, -1, 0x53, -1, kind != -1, 0x40, (struct37 *) 0x1C, flag, arg3);
+    rec = (u8 *) effect_node_create(kind == -1 ? 0x12C : kind, -1, 0x53, -1, kind != -1, 0x40, (struct37 *) 0x1C, flag, arg3);
     if (rec == NULL) {
         return;
     }
@@ -339,13 +339,13 @@ void damage_smoke_destroy_glow(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0x34) 
 /* was func_150C5008 */
 void damage_smoke_retire(struct260 *arg0) {
     damage_smoke_destroy_glow(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_150C5034 */
 void damage_smoke_free(struct260 *arg0) {
     damage_smoke_destroy_glow(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 /* was func_150C5060 */
@@ -358,6 +358,6 @@ void damage_smoke_on_message(u8 *arg0, s32 arg1, u8 arg2) {
         p = *q + 0x28; p[0x16] = p[0x16] | 2;
     } else {
         p = *q + 0x28;
-        func_15149514(arg1, arg2, (s32)p, (s32)(p + 4), (s32)*q);
+        effect_node_link_message(arg1, arg2, (s32)p, (s32)(p + 4), (s32)*q);
     }
 }

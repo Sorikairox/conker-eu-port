@@ -1,5 +1,6 @@
 #include <ultra64.h>
 
 
-void func_15005FA0(s32 arg0) {
+/* was func_15005FA0 */
+void camera_level_hook22_noop(s32 arg0) {
 }

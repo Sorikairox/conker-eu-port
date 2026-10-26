@@ -5,8 +5,8 @@ s/            D_800D154C->unk78 = v;/            D_800D154C->unk76 = v;/
 s/            D_800D154C->unk76 = D_800D154C->unk78;/            ;/
 s/D_800D154C->unk7A = D_800D154C->unk78;/D_800D154C->unk7A = D_800D154C->unk76;/
 s/s16 \*from = (s16 \*)(path + D_800D1890 \* 8 + 8);/s16 *from = (s16 *)(path + D_800D1890 * 8);/
-s/func_150484A0(to\[0\] - from\[0\], to\[2\] - from\[2\])/func_150484A0(to[0] - from[0], to[1] - from[2])/
-s/func_150484A0(to\[0\] - from\[0\], to\[2\] - from\[2\])/func_150484A0(to[2] - from[2], to[0] - from[0])/
+s/math_atan2f(to\[0\] - from\[0\], to\[2\] - from\[2\])/math_atan2f(to[0] - from[0], to[1] - from[2])/
+s/math_atan2f(to\[0\] - from\[0\], to\[2\] - from\[2\])/math_atan2f(to[2] - from[2], to[0] - from[0])/
 s/P210_F2U(ang \* D_8009A5CC) + (D_800D1893 << 8) + 0x4000/(s32)(ang * D_8009A5CC) + (D_800D1893 << 8) + 0x4000/
 s/+ (D_800D1893 << 8) + 0x4000;/+ (D_800D1893 << 8) + 0x8000;/
 s/D_800D154C->unk78 = random_int();/D_800D154C->unk76 = random_int();/

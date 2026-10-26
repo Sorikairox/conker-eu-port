@@ -214,7 +214,8 @@ static s32 nmD5E90_diagonal(TriPt *v, f32 *n, f32 sy, f32 sz) {
 /* Triangle (9 floats, the 3 vertices relative to the box centre) vs the box D_800CC64C/50/54.
  * Returns 0 if they intersect, 1 if the triangle is outside. When the test gets past the vertex-in-box
  * check, the triangle's plane is left in D_800CC630..3C. Used by quadtree_tri_box_test (quadtree culling). */
-s32 func_150AB278(struct_eu_bytes24 arg0) {
+/* was func_150AB278 */
+s32 collision_tri_box_test(struct_eu_bytes24 arg0) {
     TriPt *v = (TriPt *) arg0.unk0;
     f32 n[4];
     s32 o1, o2, o3;
@@ -254,7 +255,7 @@ inside:
     nmD5E90_plane(v, n);
     return 0;
 }
-/* ---- func_150AD780 / func_150AD78C: cosf / sinf (P24) ----
+/* ---- fast_cosf / fast_sinf: cosf / sinf (P24) ----
  * sin: |x| < 2^-12 -> x; |x| < 1.5 -> odd polynomial; |x| < 2^28 -> reduce by n = round(x / pi) with a two-part
  * pi (D_8009FAF8 + D_8009FAFC), polynomial, negate for odd n; else (and inf/NaN) 0. cos(x) = sin(x + pi/2).
  * The asm tests the float bits: (bits >> 22) & 0x1FF is the exponent plus the top mantissa bit. */
@@ -275,7 +276,8 @@ static s32 nmD5E90_rint(f32 f) {
     return -(s32)((-f + 8388608.0f) - 8388608.0f);
 }
 
-f32 func_150AD78C(f32 x) {
+/* was func_150AD78C */
+f32 fast_sinf(f32 x) {
     union {
         f32 f;
         s32 w;
@@ -312,11 +314,12 @@ f32 func_150AD78C(f32 x) {
     return r;
 }
 
-f32 func_150AD780(f32 x) {
-    return func_150AD78C(x + D_8009FAE0);
+/* was func_150AD780 */
+f32 fast_cosf(f32 x) {
+    return fast_sinf(x + D_8009FAE0);
 }
 
-/* ---- P56: wall engine func_150AB6D0 / func_150AC8C4 (-> func_150AB708) and ray cast func_150ACEA0 ----
+/* ---- P56: wall engine collision_walls_slide / collision_ledge_probe (-> func_150AB708) and ray cast collision_ray_cast ----
  * Hand asm with private register conventions: the helpers pass points / boxes / planes in FPRs, the engine keeps
  * its state in s0-s7 / fp / gp / f23-f31 across helpers and jumps through 4 continuation pointers that each entry
  * stub stores at sp+0x1D0..0x1DC (map: docs/port/sessions/P53.md section 5). P56 first translated it register by
@@ -508,7 +511,7 @@ static s32 nmw_box_diagonal_misses(TriPt *v, f32 *n, f32 sy, f32 sz, f32 hx) {
     return nmD5E90_pointInTri(&q, v);
 }
 
-/* triangle_misses_box (func_150AAF00): the wall engine's copy of func_150AB278 with the box half extents in
+/* triangle_misses_box (func_150AAF00): the wall engine's copy of collision_tri_box_test with the box half extents in
  * registers (hx, hy, hz) instead of D_800CC64C..54: 0 if the triangle v (vertices relative to the box centre) meets
  * the box, 1 if not. Same steps: a vertex inside -> hit; all vertices beyond one face / edge bevel / corner bevel ->
  * miss; an edge crossing the box -> hit; else the 4 box diagonals against the triangle's plane (made to face +z).
@@ -553,14 +556,14 @@ hit:
     return 0;
 }
 
-/* ---- P294: the wall engine (func_150AB708 behind the entries func_150AB6D0 / func_150AC8C4), readable ----
+/* ---- P294: the wall engine (func_150AB708 behind the entries collision_walls_slide / collision_ledge_probe), readable ----
  * A sliding move of a record (struct127, 0x32C bytes) from its position (rec+0x14..0x1C) towards a target, against
  * the collision triangles near the swept box (map: docs/port/sessions/P53.md section 5). The asm kept its state in
  * s0-s7 / fp / gp, f29-f31 and a 0x268-byte frame and jumped through 4 continuation pointers the entry stub stored
  * at sp+0x1D0..0x1DC; here the frame is NmwState (asm frame offsets in the comments) and the continuations are the
  * `ledge` flag:
- *   func_150AB6D0 (walls):  box = move + radius, triangles pushed out of (face or nearest edge), result written back;
- *   func_150AC8C4 (ledges): box around the record turned by its heading, triangles only looked at (ledge grab
+ *   collision_walls_slide (walls):  box = move + radius, triangles pushed out of (face or nearest edge), result written back;
+ *   collision_ledge_probe (ledges): box around the record turned by its heading, triangles only looked at (ledge grab
  *                           data in D_800CC214..21C / D_800CC1B0..B8, D_800CC1C0[record] = 1), nothing written back. */
 #define NMW_F32(sym) (*(f32 *) (sym))
 #define NMW_REC_SIZE 812 /* struct127 */
@@ -1118,7 +1121,7 @@ static void nmw_ledge_triangle(NmwState *w) {
     wz = lx * w->si + t * w->co;
     D_800CC21C = wx + *(f32 *) (w->rec + 0x14);
     NMW_F32(D_800CC1B0) = wz + *(f32 *) (w->rec + 0x1C);
-    ang = func_150484A0(1.0f, m) * NMW_F32(D_8009FAD0) - 90.0f;
+    ang = math_atan2f(1.0f, m) * NMW_F32(D_8009FAD0) - 90.0f;
     if (bestIcept.i < 0) {
         D_800CC214 = height;
         NMW_F32(D_800CC1B4) = ang;
@@ -1180,7 +1183,7 @@ static s32 nmw_engine(u8 *rec, f32 x, f32 y, u32 zbits, s32 mark, s32 ledge) {
         w.margin = mg + 10;
         w.ledgeLo = 64.0f;
         w.ledgeHi = 65.0f;
-        w.ledgeBest = 65536.0f; /* func_150AC8C4 sets it before joining the engine */
+        w.ledgeBest = 65536.0f; /* collision_ledge_probe sets it before joining the engine */
         w.yoff = NMW_F32(D_800CC1FC);
         { /* P317: volatile zero: IDO folds `0.0f + x` (the asm adds $f3, taken as 0.0; P310) */
             volatile f32 p317z = 0.0f;
@@ -1232,13 +1235,15 @@ static s32 nmw_engine(u8 *rec, f32 x, f32 y, u32 zbits, s32 mark, s32 ledge) {
     return w.moved;
 }
 
-s32 func_150AB6D0(f32 x, f32 y, s32 zbits, u8 *rec, s32 mark) {
+/* was func_150AB6D0 */
+s32 collision_walls_slide(f32 x, f32 y, s32 zbits, u8 *rec, s32 mark) {
     return nmw_engine(rec, x, y, zbits, mark, 0);
 }
 
 /* ledges: returns at once (v0 = 0 here, the caller's v0 in the asm) if rec+0x20 > 0 (rising), else clears
  * D_800CC1C0[record] and runs the engine in ledge mode */
-s32 func_150AC8C4(f32 x, f32 y, s32 zbits, u8 *rec, s32 mark) {
+/* was func_150AC8C4 */
+s32 collision_ledge_probe(f32 x, f32 y, s32 zbits, u8 *rec, s32 mark) {
     if (*(s32 *) (rec + 0x20) > 0) {
         return 0;
     }
@@ -1451,7 +1456,7 @@ static NmrNode *nmr_find_leaf(f32 x, f32 z, NmrNode *skip) {
 }
 
 /*
- * ray_cast (func_150ACEA0, Rare hand asm): nearest hit of the ray (x0, y0, z0) + t * (dx, dy, dz), t >= 0, with the
+ * ray_cast (collision_ray_cast, Rare hand asm): nearest hit of the ray (x0, y0, z0) + t * (dx, dy, dz), t >= 0, with the
  * level's collision triangles and the collidable objects' triangles, within maxDist (0: unlimited, 2^48).
  * Level: walks the BSP leaves the ray crosses in xz (from the leaf holding the origin, each next leaf found from a
  * point 10 units past the exit side of the current square, until a hit, no leaf, or the exit point is maxDist or
@@ -1463,7 +1468,8 @@ static NmrNode *nmr_find_leaf(f32 x, f32 z, NmrNode *skip) {
  * (level: D_800DBE5C[tri]; object: its table +0x44 [tri - first], or +0x40 for all). Returns 1 on a hit, else 0.
  * collision_select_area(0 / 2) marks the level / object phases (profiler).
  */
-s32 func_150ACEA0(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRec, s32 outVerts, s32 outX, s32 outY,
+/* was func_150ACEA0 */
+s32 collision_ray_cast(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRec, s32 outVerts, s32 outX, s32 outY,
                   s32 outZ, s32 outDist, s32 outObj, s32 outFlags, f32 maxDist) {
     NmrRay ray;
     NmrNode *leaf;

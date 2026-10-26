@@ -520,8 +520,8 @@ s32 bound_cloud_update(u8 *fx) {
     *(f32 *)(st + 0x20) += D_800A2328 * D_800BE9A4;
     *(f32 *)(st + 0x1C) = wrap_angle_rad(*(f32 *)(st + 0x1C));
     *(f32 *)(st + 0x20) = wrap_angle_rad(*(f32 *)(st + 0x20));
-    *(f32 *)(st + 0x14) = func_150AD78C(*(f32 *)(st + 0x1C)) * D_800A232C + D_800A2330;
-    *(f32 *)(st + 0x18) = func_150AD78C(*(f32 *)(st + 0x20)) * 1192.0f + D_800A2334;
+    *(f32 *)(st + 0x14) = fast_sinf(*(f32 *)(st + 0x1C)) * D_800A232C + D_800A2330;
+    *(f32 *)(st + 0x18) = fast_sinf(*(f32 *)(st + 0x20)) * 1192.0f + D_800A2334;
     link = *(u8 **)(st + 0x28);
     if (link != NULL) {
         scale = *(f32 *)(fx + 0x2C) * D_800A2338;

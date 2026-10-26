@@ -85,5 +85,5 @@ float port_cosf(float x) {
 }
 #endif /* P318_PC_GU_OLD */
 
-/* P26: Rare's fast sin/cos (func_150AD78C / func_150AD780, asm/D5E90.s) were PC copies here in P25.
+/* P26: Rare's fast sin/cos (fast_sinf / fast_cosf, asm/D5E90.s) were PC copies here in P25.
  * The port branch now has them as game C (conker/src_eu/nm_asm/D5E90.c, P24), which wins. */

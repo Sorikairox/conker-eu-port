@@ -154,7 +154,7 @@ struct mp3decfourbytes {
 
 s32 mp3main_read_frame(struct asistream *stream, s32 arg1); /* mp3main_read_frame */
 s32 mp3dec_decode_frame(struct asistream *stream); /* mp3dec_decode_frame */
-f32 func_1504A6F0(f32 arg0, f32 arg1); /* func00045ed0 */
+f32 math_powf(f32 arg0, f32 arg1); /* func00045ed0 */
 
 struct mp3decthing {
 	u8 unk00;
@@ -2320,7 +2320,7 @@ s32 mp3dec_dequantize(struct asistream *stream, u32 gr, u32 ch)
 		sp1b8 = var700579b8[sp1bc].unk00[1];
 	}
 
-	sp60 = func_1504A6F0(2, (stream->global_gain[gr][ch] - 210.0f) * 0.25f);
+	sp60 = math_powf(2, (stream->global_gain[gr][ch] - 210.0f) * 0.25f);
 	scale = stream->scalefac_scale[gr][ch];
 
 	for (sfb = 0; sfb < 22; sfb++) {
@@ -2661,7 +2661,7 @@ s32 mp3dec_unpack_scale_fac_lsf(struct asistream *stream, u32 gr, u32 ch)
 	return 1;
 }
 extern struct mp3decfourbytes **D_800E0E20;
-f32 func_1504A6F0(f32 arg0, f32 arg1);
+f32 math_powf(f32 arg0, f32 arg1);
 void func00046650(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3, void *arg4);
 void func00047550(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3);
 s32 mp3_huff_decode_big_values(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 **arg6, u8 **arg7);
@@ -2961,7 +2961,7 @@ s32 mp3dec_set_side_info(struct asistream *stream)
 
 	return 1;
 }
-f32 func_1504A6F0(f32 arg0, f32 arg1);
+f32 math_powf(f32 arg0, f32 arg1);
 void mp3_imdct36_hybrid(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3, void *arg4);
 void mp3_imdct12_short(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3);
 s32 mp3util000462f8(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 **arg6, u8 **arg7);

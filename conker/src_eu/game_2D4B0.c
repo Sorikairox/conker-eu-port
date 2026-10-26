@@ -29,7 +29,7 @@ void music_release_stopped_slots(void);
 void music_song_set_volume(s32 arg0, s32 arg1);
 void music_song_set_fade(s32 arg0, s32 arg1, s32 arg2);
 s32 music_song_set_chans_level(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_10017944(s32 arg0, u32 arg1);
+void audio_set_bus_mix_type(s32 arg0, u32 arg1);
 void music_set_all_paused(s32 arg0);
 s32 music_get_playing_songs(s32 *arg0);
 void music_stop_song(s32 arg0, s32 arg1);
@@ -45,7 +45,7 @@ typedef struct {
     u16 volB;   // +0x8
     u16 fadeB;  // +0xA
     u8  mode;   // +0xC: 0..4, how songs already playing are handled
-    u8  unkD;   // +0xD: func_10017944(1, ...)
+    u8  unkD;   // +0xD: audio_set_bus_mix_type(1, ...)
 } LevelMusic;
 
 // Level start: request the level's songs. Songs already playing that the level wants are kept (volume and
@@ -235,7 +235,7 @@ void level_start_music(void) {
         }
     }
 
-    func_10017944(1, m.unkD);
+    audio_set_bus_mix_type(1, m.unkD);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2D4B0/level_start_music.s")

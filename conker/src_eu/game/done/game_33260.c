@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15005DB0(struct108 *arg0) {
+/* was func_15005DB0 */
+void camera_level_hook15_setup(struct108 *arg0) {
     camera_push_mode(arg0, 8, 0, arg0->unk134, 3);
     arg0->unk84 |= 0x1000000;
     arg0->unk84 &= -5;

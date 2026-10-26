@@ -41,15 +41,15 @@ void level_objects_init(s32 arg0) {
     D_8008D0A0 = 0;
     D_80088F00 = 0;
     D_eu_800BE900 = 0;
-    D_800E0A10 = func_15012720();
+    D_800E0A10 = level_get_proj_mode();
     camera_init_player_projections();
     game_os_pi_set_control(0x40);
     fog_init_from_level(arg0);
     level_load_look_points(arg0);
     level_vertex_colours_backup();
     texscroll_reset();
-    func_15008BE0();
-    func_15008B90();
+    level_load_stub();
+    level_timed_queue_init();
     level_objects_reset_state();
     temp_v0 = D_800B0DF0->unkA;
     if (temp_v0 != 0) {
@@ -81,7 +81,7 @@ void level_objects_init(s32 arg0) {
 //     D_80088B60 = 0;
 //     D_800BE4E0 = 0;
 //     // is this handwritten?
-//     D_800E0A10 = func_15012720();
+//     D_800E0A10 = level_get_proj_mode();
 //     camera_init_player_projections();
 //
 //     func_151EF640(64);
@@ -90,8 +90,8 @@ void level_objects_init(s32 arg0) {
 //     func_150127B0();
 //
 //     func_1519582C();
-//     func_15008BE0();
-//     func_15008B90();
+//     level_load_stub();
+//     level_timed_queue_init();
 //     level_objects_reset_state();
 //
 //     if (0) {};

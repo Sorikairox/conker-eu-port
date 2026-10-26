@@ -569,7 +569,7 @@ s32 impact_debris_spawn(u8 arg0, f32 arg1, u8 arg2, s32 arg3, struct17 *arg4, s1
                 } else {
                     var_v0_5 = 1;
                 }
-                var_v0 = func_15149130((s16) var_v1_4, -1, 0x4A, -1, (u8) var_v0_5, 0U, (struct37 *)0x18, (u8) (s32) arg9, argA);
+                var_v0 = effect_node_create((s16) var_v1_4, -1, 0x4A, -1, (u8) var_v0_5, 0U, (struct37 *)0x18, (u8) (s32) arg9, argA);
                 if (var_v0 != NULL) {
                     var_v0 = memcpy(&var_v0->pad20[8], &sp.u60, 0x18);
                 }

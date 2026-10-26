@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15004F30(void) {
+/* was func_15004F30 */
+void model_kind_tables_clear(void) {
     bzero(&D_800D19A0, 748); // bzero
     bzero(&D_800D1C90, 748);
     bzero(&D_800D1F80, 187);

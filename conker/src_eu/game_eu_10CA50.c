@@ -184,7 +184,7 @@ void big_explosion_spawn(f32 *pos, u8 room, s32 arg2) {
     debris_spray_spawn(&ring, 0, room, arg2);
 
     at = *(Vec240 *) pos;
-    e = (u8 *) func_15149130(0xF, 8, -1, -1, 1, 0, (struct37 *) 0xC, room, arg2);
+    e = (u8 *) effect_node_create(0xF, 8, -1, -1, 1, 0, (struct37 *) 0xC, room, arg2);
     if (e != NULL) {
         memcpy(e + 0x28, &at, 0xC);
     }

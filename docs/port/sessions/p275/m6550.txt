@@ -14,8 +14,8 @@
 \#^    q\.u40 = 1;$#s/1;/0;/
 \#^    r\.u2C = arg10;$#s/arg10/arg8/
 \#^    if (cast != 0$#s/!=/==/
-\#^        && func_150ACEA0(((f32 \*) from)\[0\]#s/to\[0\], to\[1\]/to[1], to[0]/
-\#^        && func_150ACEA0(((f32 \*) from)\[0\]#s/&r\.u10, &r\.u14/\&r.u14, \&r.u10/
+\#^        && collision_ray_cast(((f32 \*) from)\[0\]#s/to\[0\], to\[1\]/to[1], to[0]/
+\#^        && collision_ray_cast(((f32 \*) from)\[0\]#s/&r\.u10, &r\.u14/\&r.u14, \&r.u10/
 \#^                         &r\.pos\[0\], &r\.pos\[1\], &r\.pos\[2\], 0, &hitObj, 0, 0\.0f) != 0$#s/0, 0\.0f/0, 1.0f/
 \#^                         &r\.pos\[0\], &r\.pos\[1\], &r\.pos\[2\], 0, &hitObj, 0, 0\.0f) != 0$#s/!= 0/== 0/
 \#^        && prop_is_flagged(hitObj) != 0) {$#s/!= 0/== 0/

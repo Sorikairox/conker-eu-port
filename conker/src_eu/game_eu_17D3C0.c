@@ -617,10 +617,10 @@ s32 emit_debris_burst(s32 *arg0, s32 *ids, s32 *scales, s32 n, s32 arg4, s32 arg
 void vec3_from_angles_byte(s16, s16, f32, void *);
 #ifdef NON_MATCHING
 /* P59: arg 2 (z) is f32 in the definition (src_eu/nm_asm/D5E90.c); wasm needs the exact signature. */
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 #define RAY_Z0(p) (*(f32 *)(p))
 #else
-s32 func_150ACEA0(f32, f32, s32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
+s32 collision_ray_cast(f32, f32, s32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 #define RAY_Z0(p) (*(s32 *)(p))
 #endif
 s32 prop_is_flagged(s32);
@@ -640,7 +640,7 @@ void emit_debris_on_near_surfaces(u8 *arg0, u8 arg1, s32 arg2) {
         vec3_from_angles_byte(*(s16 *)(arg0 + 0x14) + (random_int() % (u32)(*(s16 *)(arg0 + 0x16) + 1)),
             *(s16 *)(arg0 + 0x18) + (random_int() % (u32)(*(s16 *)(arg0 + 0x1A) + 1)), 100.0f, spC0);
         hit = spAC; // fakematch: named pointer to spAC (permuter), both calls use it
-        if (func_150ACEA0(*(f32 *)(arg0 + 8), *(f32 *)(arg0 + 0xC), RAY_Z0(arg0 + 0x10), spC0[0], spC0[1], spC0[2], 0,
+        if (collision_ray_cast(*(f32 *)(arg0 + 8), *(f32 *)(arg0 + 0xC), RAY_Z0(arg0 + 0x10), spC0[0], spC0[1], spC0[2], 0,
                 hit, &spA0[0], &spA0[1], &spA0[2], &sp9C, &sp98, 0, 0.0f) != 0) {
             if (prop_is_flagged(sp98) != 0) {
                 if (sp9C < *(f32 *)(arg0 + 0x1C)) {

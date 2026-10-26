@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8) {
+/* was func_15149130 */
+struct260 *effect_node_create(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8) {
     struct260 *temp_v0;
     u8 phi_v0;
     s32 sp24;
@@ -36,11 +37,13 @@ struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, 
     return temp_v0;
 }
 
-struct260 *func_151491F4(s16 arg0, s8 arg1, s8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7) {
-    return func_15149130(arg0, arg1, arg2, -1, arg3, arg4, arg5, arg6, arg7);
+/* was func_151491F4 */
+struct260 *effect_node_create_nodraw(s16 arg0, s8 arg1, s8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7) {
+    return effect_node_create(arg0, arg1, arg2, -1, arg3, arg4, arg5, arg6, arg7);
 }
 
-void func_15149264(struct260 *arg0) {
+/* was func_15149264 */
+void effect_node_update(struct260 *arg0) {
 
     if ((arg0->unkD & 1) != 0) {
         arg0->unkE -= D_800BE9E4;
@@ -59,21 +62,25 @@ void func_15149264(struct260 *arg0) {
     }
 }
 
-void func_15149318(struct260 *arg0) {
+/* was func_15149318 */
+void effect_node_free_vtx(struct260 *arg0) {
     vtx_slot_buffers_free(&arg0->unk14);
 }
 
-void func_1514933C(struct260 *arg0) {
-    func_15149318(arg0);
+/* was func_1514933C */
+void effect_node_retire(struct260 *arg0) {
+    effect_node_free_vtx(arg0);
     node_retire(arg0);
 }
 
-void func_15149368(struct260 *arg0) {
-    func_15149318(arg0);
+/* was func_15149368 */
+void effect_node_free(struct260 *arg0) {
+    effect_node_free_vtx(arg0);
     node_unlink_free(arg0);
 }
 
-void func_15149394(struct260 *arg0) {
+/* was func_15149394 */
+void effect_node_kind_call_a(struct260 *arg0) {
     s32 idx = arg0->unk13;
 
     if (idx < 0) {
@@ -86,7 +93,8 @@ void func_15149394(struct260 *arg0) {
     D_8008A688[idx](arg0);
 }
 
-void func_151493E4(struct260 *arg0) {
+/* was func_151493E4 */
+void effect_node_kind_call_b(struct260 *arg0) {
     s32 idx = arg0->unk13;
 
     if (idx < 0) {
@@ -99,7 +107,8 @@ void func_151493E4(struct260 *arg0) {
     D_8008A7B0[idx](arg0);
 }
 
-void func_15149434(struct260 *arg0, s32 arg1, u8 arg2) {
+/* was func_15149434 */
+void effect_node_kind_message(struct260 *arg0, s32 arg1, u8 arg2) {
     s32 idx = arg0->unk13;
 
     if ((idx < 0) || (idx >= 74)) {
@@ -111,7 +120,8 @@ void func_15149434(struct260 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-s32 func_15149490(s32 arg0, struct260 *arg1, s16 arg2) {
+/* was func_15149490 */
+s32 effect_node_draw(s32 arg0, struct260 *arg1, s16 arg2) {
     s32 idx = arg1->unk12;
     if (idx != -1) {
         arg0 = D_8008A670[idx](arg0, arg1, arg2);
@@ -119,10 +129,12 @@ s32 func_15149490(s32 arg0, struct260 *arg1, s16 arg2) {
     return arg0;
 }
 
-void func_151494E0(s32 arg0, u8 arg1) {
+/* was func_151494E0 */
+void effect_nodes_broadcast(s32 arg0, u8 arg1) {
     node_broadcast_types(&D_800A5770, 2, arg0, arg1);
 }
 
-void func_15149514(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* was func_15149514 */
+void effect_node_link_message(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4) {
     node_handle_link_message(arg0, arg1, arg2, arg3, arg4);
 }

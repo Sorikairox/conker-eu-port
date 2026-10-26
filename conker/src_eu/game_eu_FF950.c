@@ -7,12 +7,12 @@ extern u8 D_800A5860[];
 
 
 #ifdef NON_MATCHING
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 extern f32 D_800A0CC0[6][3];  /* beam end points (beam space) */
 
 // beam_rays_update: obj + 0x28 is the source point, +0x34 the beam position (moved by its velocity +0x40 x
 // D_800BE9A4), +0x4C six ray parts. While obj + 0x6C bit 0 is set, each ray's end D_800A0CC0[i] is moved to the
-// beam's position (mtxf_rotate_xyz_deg / mtxf_transform_point) and traced from the source (func_150ACEA0): on a hit the part's
+// beam's position (mtxf_rotate_xyz_deg / mtxf_transform_point) and traced from the source (collision_ray_cast): on a hit the part's
 // sprite (+0x14) is shown at the hit point with alpha +0x64 x hit fraction, otherwise it is hidden. Without the bit
 // every ray sprite is hidden.
 /* was func_150D2140 */
@@ -36,7 +36,7 @@ void beam_rays_update(u8 *obj) {
                 continue;
             }
             mtxf_transform_point(mtx, D_800A0CC0[i][0], D_800A0CC0[i][1], D_800A0CC0[i][2], &end[0], &end[1], &end[2]);
-            if (func_150ACEA0(*(f32 *) (obj + 0x28), *(f32 *) (obj + 0x2C), *(f32 *) (obj + 0x30), end[0], end[1],
+            if (collision_ray_cast(*(f32 *) (obj + 0x28), *(f32 *) (obj + 0x2C), *(f32 *) (obj + 0x30), end[0], end[1],
                               end[2], 0, NULL, &hit[0], &hit[1], &hit[2], &frac, 0, 0, 0.0f) != 0) {
                 (*(u8 **) (part + 0x14))[9] = 0;
                 *(s16 *) (*(u8 **) (part + 0x14) + 0xE) = (s32) hit[0];
@@ -120,11 +120,11 @@ void beam_rays_free_parts(u8 *arg0) {
 /* was func_150D25C0 */
 void beam_rays_delete(struct260 *arg0) {
     beam_rays_free_parts(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 /* was func_150D25EC */
 void beam_rays_retire(struct260 *arg0) {
     beam_rays_free_parts(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }

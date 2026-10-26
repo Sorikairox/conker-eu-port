@@ -46,7 +46,7 @@ s32 mist_puff_spawn(f32 arg0, f32 arg1, f32 arg2) {
 void level_fx_spawn_box_a(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     struct260 *temp_v0;
 
-    temp_v0 = func_151491F4((s16) ((random_int() & 0x7F) + 0xA), 1, -1, 1U, 0U, 0xA, 0xFFU, 0);
+    temp_v0 = effect_node_create_nodraw((s16) ((random_int() & 0x7F) + 0xA), 1, -1, 1U, 0U, 0xA, 0xFFU, 0);
     if (temp_v0 != NULL) {
         (*(s16 *)((u8 *)temp_v0 + 0x28)) = (s16) arg0;
         (*(s16 *)((u8 *)temp_v0 + 0x2A)) = (s16) arg1;
@@ -134,7 +134,7 @@ void level_mist_setup(void) {
         spec.dir[0] = seg[3] - seg[0];
         spec.dir[1] = seg[4] - seg[1];
         spec.dir[2] = seg[5] - seg[2];
-        spec.angle = (s32) (func_150484A0(spec.dir[0], spec.dir[2]) * D_80096634_c[0]) - 0x40;
+        spec.angle = (s32) (math_atan2f(spec.dir[0], spec.dir[2]) * D_80096634_c[0]) - 0x40;
         area_drift_emitter_create(&spec, 1);
     }
 }

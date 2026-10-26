@@ -3,7 +3,8 @@
 #include "variables.h"
 
 // game copy of libultra io/crc.c (pre-J version, -O1); the init copy is init_eu_26370
-u8 func_151F27E0(u16 addr) {
+/* was func_151F27E0 */
+u8 game_os_cont_address_crc(u16 addr) {
     u8 temp = 0;
     u8 temp2;
     int i;
@@ -22,7 +23,8 @@ u8 func_151F27E0(u16 addr) {
     return temp & 0x1F;
 }
 
-u8 func_151F2890(u8 *data) {
+/* was func_151F2890 */
+u8 game_os_cont_data_crc(u8 *data) {
     u8 temp = 0;
     u8 temp2;
     int i;

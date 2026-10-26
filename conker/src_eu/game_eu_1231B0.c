@@ -276,7 +276,7 @@ void obj_bone_glow_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
     tmp.unk8 = 0.0f;
-    temp_v0 = func_15149130(arg1, -1, 0x51, -1, 1, 0x3E, 0xC, arg2, arg3);
+    temp_v0 = effect_node_create(arg1, -1, 0x51, -1, 1, 0x3E, 0xC, arg2, arg3);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0xC);
     }
@@ -445,7 +445,7 @@ void obj_bone_glow_emitter_update(u8 *arg0) {
 #endif
 /* was func_150F66B8 */
 void obj_bone_glow_emitter_on_message(u8 *arg0, s32 arg1, u8 arg2) {
-    func_15149514(arg1, arg2, (s32)(arg0 + 0x28), (s32)(arg0 + 0x2C), (s32)arg0);
+    effect_node_link_message(arg1, arg2, (s32)(arg0 + 0x28), (s32)(arg0 + 0x2C), (s32)arg0);
 }
 
 #ifdef NON_MATCHING
@@ -545,13 +545,13 @@ void obj_bone_fx_pair_destroy_children(u8 *arg0) {
 /* was func_150F68E8 */
 void obj_bone_fx_pair_retire(void *arg0) {
     obj_bone_fx_pair_destroy_children(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_150F6914 */
 void obj_bone_fx_pair_free(void *arg0) {
     obj_bone_fx_pair_destroy_children(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 /* was func_150F6940 */

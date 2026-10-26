@@ -56,7 +56,7 @@ void wake_spray_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
     tmp.unk8 = 0.0f;
-    temp_v0 = func_15149130(300, -1, 0x58, -1, 0, 0x43, 0xC, arg1, arg2);
+    temp_v0 = effect_node_create(300, -1, 0x58, -1, 0, 0x43, 0xC, arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0xC);
     }

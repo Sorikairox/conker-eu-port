@@ -71,7 +71,7 @@ void drip_emitter_spawn(u8 *arg0) {
     tmp.unk5 = 0;
     tmp.unk8 = 0.0f;
     tmp.unkC = 0;
-    temp_v0 = func_15149130(300, -1, 0x5C, -1, 0, 0x44, 0x10, 255, 1);
+    temp_v0 = effect_node_create(300, -1, 0x5C, -1, 0, 0x44, 0x10, 255, 1);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
     }

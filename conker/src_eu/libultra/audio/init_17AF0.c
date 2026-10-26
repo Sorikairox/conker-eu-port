@@ -1,15 +1,18 @@
 #include <n_libaudio.h>
 
 
-void func_10017AF0(N_ALCSPlayer *seqp, s32 arg1) {
+/* was func_10017AF0 */
+void n_csp_set_msg_queue(N_ALCSPlayer *seqp, s32 arg1) {
     seqp->unk84 = arg1;
 }
 
-void func_10017B04(N_ALCSPlayer *seqp, s32 chan, u8 arg2) {
+/* was func_10017B04 */
+void n_csp_set_chan_notify(N_ALCSPlayer *seqp, s32 chan, u8 arg2) {
     seqp->chanState[chan].unk17 = arg2;
 }
 
-void func_10017B30(N_ALCSPlayer *seqp) {
+/* was func_10017B30 */
+void n_csp_reset_chan_levels(N_ALCSPlayer *seqp) {
     s32 chan;
 
     seqp->chanMask = 0xFFFF;
@@ -20,6 +23,7 @@ void func_10017B30(N_ALCSPlayer *seqp) {
     }
 }
 
-void func_10017BB8(N_ALCSPlayer *seqp, s32 arg1) {
-    func_1001E400(seqp, 0, arg1 | 0xB0, 252, 0);
+/* was func_10017BB8 */
+void n_csp_mute_chan(N_ALCSPlayer *seqp, s32 arg1) {
+    n_csp_send_midi(seqp, 0, arg1 | 0xB0, 252, 0);
 }

@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_15049C90(f32 arg0[4][4], f32 arg1[4][4])
+/* was func_15049C90 */
+void math_mtx_affine_inverse(f32 arg0[4][4], f32 arg1[4][4])
 {
 	f32 f0 = 0.0f;
 	f0 += arg0[0][0] * arg0[1][1] * arg0[2][2];

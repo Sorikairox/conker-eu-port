@@ -494,7 +494,7 @@ u8 *text_pager_spawn(u8 arg0, s32 arg1, s16 arg2, s32 arg3, s32 arg4, s32 arg5, 
     sp40.unk20 = NULL;
     n = text_max_line_length((u8 *)arg1);
     sp38 = n + 1;
-    sp3C = (u8 *)func_15149130(arg2, -1, -1, 5, 3, 0x47, (struct37 *)(arg3 + n * 2 + 0x2A), arg6, arg7);
+    sp3C = (u8 *)effect_node_create(arg2, -1, -1, 5, 3, 0x47, (struct37 *)(arg3 + n * 2 + 0x2A), arg6, arg7);
     if (sp3C != NULL) {
         dst = (struct150D0420 *)(sp3C + 0x28);
         memcpy((s32)dst, &sp40, sizeof(struct150D0420));

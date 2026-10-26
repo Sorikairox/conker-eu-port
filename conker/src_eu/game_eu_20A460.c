@@ -97,7 +97,7 @@ void flash_smoke_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s3
     tmp.unk0 = *(Blk12 *)arg0;
     tmp.unkC = 0.0f;
     tmp.unk10 = arg3;
-    temp_v0 = func_15149130(arg1, -1, 0x5B, -1, 1, 0, 0x14, arg4, arg5);
+    temp_v0 = effect_node_create(arg1, -1, 0x5B, -1, 1, 0, 0x14, arg4, arg5);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x14);
     }

@@ -8,7 +8,7 @@ s#        placed = 1;#        placed = 0;# % first1b
 s#    if (!placed \&\& spray_trail_bone_pos(st, (f32 \*) (obj + 0x10), x, \*(f32 \*) (obj + 0x14), z, \*(f32 \*) (st + 0x3C)) == 0) {#    if (!placed \&\& spray_trail_bone_pos(st, (f32 *) (obj + 0x10), x, *(f32 *) (obj + 0x14), z, *(f32 *) (st + 0x38)) == 0) {# % lost
 s#        mark\.id = (\*(u8 \*\*) st)\[0x3B\];#        mark.id = st[4] + 1;# % lost
 s#        mark\.u08 = st\[0x4C\];#        mark.u08 = st[0x4D];# % lost
-s#        marker = func_151491F4(\*(s16 \*) (obj + 0x1C), -1, 8, (\*(u16 \*) (obj + 0x1E) \& 1) ? 1 : 0, 2, 0xC, 0xFF, 0);#        marker = func_151491F4(*(s16 *) (obj + 0x1C), -1, 8, 0, 2, 0xC, 0xFF, 0);# % lost1
+s#        marker = effect_node_create_nodraw(\*(s16 \*) (obj + 0x1C), -1, 8, (\*(u16 \*) (obj + 0x1E) \& 1) ? 1 : 0, 2, 0xC, 0xFF, 0);#        marker = effect_node_create_nodraw(*(s16 *) (obj + 0x1C), -1, 8, 0, 2, 0xC, 0xFF, 0);# % lost1
 s#            if (char_fx_find_effect(\*(struct_eu_link \*\*) (\*(u8 \*\*) st + 0x2F4), obj, 0) != 0) {#            if (char_fx_find_effect(*(struct_eu_link **) (*(u8 **) st + 0x2F4), obj, 0) == 0) {# % lost lostnolink
 s#                char_fx_attach(marker, \*(struct127 \*\*) st, 0x11);#                char_fx_attach(marker, *(struct127 **) st, 0x10);# % lost
 s#    \*(f32 \*) (st + 0x2C) += \*(f32 \*) (st + 0x28) \* D_800BE9A4;#    *(f32 *) (st + 0x2C) += *(f32 *) (st + 0x24) * D_800BE9A4;# % emit follow

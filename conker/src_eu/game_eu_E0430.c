@@ -30,7 +30,7 @@ static const PipeSpot D_8009FCF0[3] = {
 // view `view` ("../Effects/PipeExploded/pipeexploded.c"): camera_shake_start on the current player's state (7, 1), a spray
 // of 3..4 pieces (debris_spray_spawn), 1..2 debris bursts (spawn_arc_emit, radius 31..104, 4..6 pieces), a smoke cloud
 // (emit_line_sparks_by_angles), two spark bursts (emit_sparks_by_angles_b), clears the pipe's two earlier effects of type 0x17
-// (func_151494E0, keys 2 * pipe and 2 * pipe + 1), a water / steam jet 150 units in front of the pipe
+// (effect_nodes_broadcast, keys 2 * pipe and 2 * pipe + 1), a water / steam jet 150 units in front of the pipe
 // (water_jet_spawn, 20) and the sounds 0xE7 / 0x22 at the pipe (sound_play_at).
 /* was func_150B2C20 */
 s32 pipe_explode_effects(s32 pipe, s32 view) {
@@ -243,9 +243,9 @@ s32 pipe_explode_effects(s32 pipe, s32 view) {
     jet.u18 = 0.7f;
     jet.u3C = 0.3f;
     key[0] = (u8) pipe * 2;          /* D_8009FD20 {0, 2, 4} */
-    func_151494E0((s32) key, 0x17);
+    effect_nodes_broadcast((s32) key, 0x17);
     key[0] = (u8) pipe * 2 + 1;      /* D_8009FD2C {1, 3, 5} */
-    func_151494E0((s32) key, 0x17);
+    effect_nodes_broadcast((s32) key, 0x17);
     water_jet_spawn((s32 *) &jet, (u8 *) at, 20);
 
     sound_play_at(0xE7, 0x7FFF, 0, 2, 0, (s32) p->pos[0], (s32) p->pos[1], (s32) p->pos[2], 1000, 3000);

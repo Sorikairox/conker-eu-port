@@ -7,8 +7,8 @@
 \#^        st->u34 = \*(V33AB4 \*) (obj + 0x10);#s/0x10/0x14/
 \#^    if (!started \&\& #s/!started \&\& //
 \#^        ribbon_trail_stop(obj);#s/obj/(u8 *) st/
-\#^        fade = func_151491F4(0x12C, #s/0xA, 0, 5/0xA, 0, 6/
-\#^        fade = func_151491F4(0x12C, #s/obj\[0xC\]/obj[0xD]/
+\#^        fade = effect_node_create_nodraw(0x12C, #s/0xA, 0, 5/0xA, 0, 6/
+\#^        fade = effect_node_create_nodraw(0x12C, #s/obj\[0xC\]/obj[0xD]/
 \#^            memcpy((u8 \*) fade + 0x28, #s/0x28/0x2C/
 \#^    dy = \*(f32 \*) (obj + 0x14) - st->u34\.y;#s/u34\.y/u34.x/
 \#^    if (fabsf(dx) > D_800A9138\[0\] #s/fabsf(dz) > D_800A9138\[0\]/fabsf(dz) > 0.001f/

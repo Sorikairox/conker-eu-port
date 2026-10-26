@@ -22,7 +22,7 @@ struct260 *obj_electrify_fx_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     tmp.unk4 = arg0[0x3B];
     tmp.unk8 = 0.0f;
     tmp.unkC = 0.0f;
-    temp_v0 = func_15149130((arg1 == -1) ? 300 : arg1, -1, 0x24, -1, (arg1 == -1) ? 0 : 1, 0x23, 0x10, arg2, arg3);
+    temp_v0 = effect_node_create((arg1 == -1) ? 300 : arg1, -1, 0x24, -1, (arg1 == -1) ? 0 : 1, 0x23, 0x10, arg2, arg3);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
         attach_fx_asset_acquire(6);
@@ -95,13 +95,13 @@ void obj_electrify_asset_release(void *arg0) {
 /* was func_150B5CC8 */
 void obj_electrify_die_retire(void *arg0) {
     obj_electrify_asset_release(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_150B5CF4 */
 void obj_electrify_die_free(void *arg0) {
     obj_electrify_asset_release(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 /* was func_150B5D20 */

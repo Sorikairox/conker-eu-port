@@ -107,7 +107,7 @@ extern DripCfg D_8008FE10[];
  * owner model e +0x10, config D_8008FE10[e[0x1A]], slots e +0x24, live count e +0x20, accumulator f32 e +0x1C).
  * Kills itself (node_destroy) when its timer s16 e +0x16 runs out (flag e[0x18] & 1), the owner is gone or has
  * another id (e[0x14] vs owner[0x3B]), or the owner has no matrices (+0x1D4; then it first starts the ending
- * effect func_151491F4 with e +0x10..+0x1B copied to its +0x28). Hanging drops follow their point on the owner
+ * effect effect_node_create_nodraw with e +0x10..+0x1B copied to its +0x28). Hanging drops follow their point on the owner
  * (mtx_transform_point_or_origin with the owner matrix), and once their timer is over they fall (velocity from the last move *
  * D_800BEDC8, effect3d_set_handlers, life from D_800AA120). The accumulator gains rate * dt; for every whole unit a free slot
  * is picked at random and, when the point is below the owner's +0x118 height limit, a drop object is created
@@ -170,8 +170,8 @@ void model_drip_update(u8 *e) {
         owner = *(u8 **) (e + 0x10);
         if (*(u8 **) (owner + 0x1D4) == NULL) {
             kill = 1;
-            drop = (e[0x18] & 1) ? (u8 *) func_151491F4(*(s16 *) (e + 0x16), -1, 13, 1, 8, 12, 255, 0)
-                                 : (u8 *) func_151491F4(300, -1, 13, 0, 8, 12, 255, 0);
+            drop = (e[0x18] & 1) ? (u8 *) effect_node_create_nodraw(*(s16 *) (e + 0x16), -1, 13, 1, 8, 12, 255, 0)
+                                 : (u8 *) effect_node_create_nodraw(300, -1, 13, 0, 8, 12, 255, 0);
             if (drop != NULL) {
                 memcpy((s32) (drop + 0x28), (f32 *) (e + 0x10), 12);
             }
@@ -631,6 +631,6 @@ void model_drip_broadcast(s32 arg0, u8 arg1) {
     s32 sp1C;
 
     sp1C = D_800A83F0;
-    func_151494E0(arg0, arg1);
+    effect_nodes_broadcast(arg0, arg1);
     node_broadcast_types(&sp1C, 1, arg0, arg1);
 }

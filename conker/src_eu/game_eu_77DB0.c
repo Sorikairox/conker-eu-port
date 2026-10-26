@@ -6,7 +6,8 @@
 #pragma intrinsic (fabsf)
 f32 fabsf(f32);
 #define MAXFLOAT 3.40282347e+38f
-f32 func_1504A5A0(f32 arg0)
+/* was func_1504A5A0 */
+f32 math_expf(f32 arg0)
 {
 	f32 sp1c;
 	f32 sp18;

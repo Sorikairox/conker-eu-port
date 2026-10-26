@@ -459,7 +459,7 @@ void flyer_update(u8 *arg0) {
             f->flags = (f->flags & 0xFFB3) | 0x200;
             dx = f->x - sFlyerCircleX[0];
             dz = f->z - sFlyerCircleZ[0];
-            f->pitchVel = sFlyerHalfPi[0] - func_150484A0(dx, dz);
+            f->pitchVel = sFlyerHalfPi[0] - math_atan2f(dx, dz);
             f->turnVel = sFlyerCircleTurn[0];
             f->rollVel = sqrtf(dx * dx + dz * dz);
         }
@@ -662,8 +662,8 @@ void flyer_update(u8 *arg0) {
         if (f->rollVel < 60.0f) {
             f->rollVel = 60.0f;
         }
-        s = func_150AD78C(f->pitchVel);
-        c = func_150AD780(f->pitchVel);
+        s = fast_sinf(f->pitchVel);
+        c = fast_cosf(f->pitchVel);
         f->x = f->rollVel * c + sFlyerCircleX[0];
         f->z = f->rollVel * s + sFlyerCircleZ[0];
         f->y -= 100.0f / ((f->rollVel - 60.0f) + 4.0f);
@@ -674,10 +674,10 @@ void flyer_update(u8 *arg0) {
     } else {
         a = f->pitch * sFlyerDegToRad[0];
         h = f->heading * sFlyerDegToRad[0];
-        sa = func_150AD78C(a);
-        sh = func_150AD78C(h);
-        ca = func_150AD780(a);
-        ch = func_150AD780(h);
+        sa = fast_sinf(a);
+        sh = fast_sinf(h);
+        ca = fast_cosf(a);
+        ch = fast_cosf(h);
         dir.unk0 = ca * sh;
         dir.unk4 = -sa;
         dir.unk8 = ca * ch;
@@ -975,12 +975,12 @@ void flyer_wing_flap_animate(u8 arg0) {
     temp_t6 = arg0;
     temp_s0 = ((s32 *)((u8 *)&D_8008D450 + (temp_t6 * 0x38)));
     temp_s1 = D_800DE2B8[temp_t6].x0;
-    temp_f2 = func_150AD78C((*(f32 *)((u8 *)temp_s0 + 0x24)) * 0.017453292f) * (*(f32 *)((u8 *)temp_s0 + 0x28));
+    temp_f2 = fast_sinf((*(f32 *)((u8 *)temp_s0 + 0x24)) * 0.017453292f) * (*(f32 *)((u8 *)temp_s0 + 0x28));
     (*(f32 *)((u8 *)temp_s0 + 0x18)) = temp_f2;
     temp_f20 = temp_f2 * 0.017453292f;
-    sp28 = func_150AD78C(temp_f20);
+    sp28 = fast_sinf(temp_f20);
     temp_f2_2 = (*(f32 *)((u8 *)temp_s0 + 0x30));
-    temp_f18 = (s32) (temp_f2_2 * func_150AD780(temp_f20));
+    temp_f18 = (s32) (temp_f2_2 * fast_cosf(temp_f20));
     temp_f8 = (s32) (temp_f2_2 * sp28);
     temp_a0 = -temp_f18;
     (*(s16 *)((u8 *)temp_s1 + 0xA0)) = (s16) temp_a0;
@@ -991,12 +991,12 @@ void flyer_wing_flap_animate(u8 arg0) {
     (*(s16 *)((u8 *)temp_s1 + 0x122)) = (s16) temp_f8;
     (*(s16 *)((u8 *)temp_s1 + 0xA2)) = (s16) temp_f8;
     (*(s16 *)((u8 *)temp_s1 + 0xB2)) = (s16) temp_f8;
-    temp_f2_3 = func_150AD78C(((*(f32 *)((u8 *)temp_s0 + 0x24)) - 30.0f) * 0.017453292f) * (*(f32 *)((u8 *)temp_s0 + 0x28));
+    temp_f2_3 = fast_sinf(((*(f32 *)((u8 *)temp_s0 + 0x24)) - 30.0f) * 0.017453292f) * (*(f32 *)((u8 *)temp_s0 + 0x28));
     (*(f32 *)((u8 *)temp_s0 + 0x18)) = temp_f2_3;
     temp_f20_2 = temp_f2_3 * 0.017453292f;
-    sp28 = func_150AD78C(temp_f20_2);
+    sp28 = fast_sinf(temp_f20_2);
     temp_f2_4 = (*(f32 *)((u8 *)temp_s0 + 0x34));
-    temp_f16 = (s32) (temp_f2_4 * func_150AD780(temp_f20_2));
+    temp_f16 = (s32) (temp_f2_4 * fast_cosf(temp_f20_2));
     temp_f6 = (s32) (temp_f2_4 * sp28);
     (*(s16 *)((u8 *)temp_s1 + 0xE0)) = (s16) -temp_f16;
     (*(s16 *)((u8 *)temp_s1 + 0x130)) = (s16) temp_f16;

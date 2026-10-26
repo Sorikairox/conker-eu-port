@@ -301,7 +301,7 @@ S4A80="DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=0=804100A0 DIFF
 chkce EQUIV  prop_owner_effects_clear "$S4A80"
 chkce DIFFER prop_owner_effects_clear "$S4A80" 's/parts = D_800A275C;/parts = D_800A2768;/'
 # P259: knob keys that are no jal / j target of the reference are flagged statically ("[knob not a jal target of the
-# reference ...]"), also when no trial reaches the call (P256 keyed ARGMEM on func_151494E0's US address 151494E0; its
+# reference ...]"), also when no trial reaches the call (P256 keyed ARGMEM on effect_nodes_broadcast's US address 151494E0; its
 # EU jal target is 15149A50, and the compare silently did nothing). chkcn: want yes|no, func, env, substring.
 chkcn() {
   local want=$1 f=$2 ev=$3 pat=$4 cf=$C/$2.c out has=no

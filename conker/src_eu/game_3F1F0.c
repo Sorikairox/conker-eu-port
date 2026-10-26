@@ -11,7 +11,7 @@ void level_hook_call_15103800(void) {
 
 // doesnt look like fun
 #ifdef NON_MATCHING
-// marker_effect_spawn: P256: spawns a type 0x12C effect (func_15149130, 0x4C-byte state copied to +0x28) for `obj`
+// marker_effect_spawn: P256: spawns a type 0x12C effect (effect_node_create, 0x4C-byte state copied to +0x28) for `obj`
 // and its slot byte (low byte of the word at obj +0x1C): the state holds obj, the slot, slot >= 4, a life of
 // 300 + rand % 121, eight handles world_record_find(D_800A1FD0[i * 8 + slot]) and the position of the slot's map marker
 // (map_marker_find over D_800D3094 with a key of type 3 / 0x15 / slot, flags 0x11A0: its s16 x, y, z at +0 / +4 / +6),
@@ -70,7 +70,7 @@ s32 marker_effect_spawn(u8 *obj) {
     } else {
         state.pos[2] = 10.0f;
     }
-    e = (u8 *) func_15149130(300, -1, -1, -1, 0, 0x38, (struct37 *) sizeof(state), 0xFF, 1);
+    e = (u8 *) effect_node_create(300, -1, -1, -1, 0, 0x38, (struct37 *) sizeof(state), 0xFF, 1);
     if (e != NULL) {
         memcpy(e + 0x28, &state, sizeof(state));
     }

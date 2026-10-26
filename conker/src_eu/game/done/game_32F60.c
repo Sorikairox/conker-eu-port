@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15005AB0(struct108 *arg0) {
+/* was func_15005AB0 */
+void camera_level_hook01_setup(struct108 *arg0) {
     arg0->unk1B4 = 1;
     arg0->unk1E0 = 3;
     arg0->unk348 = 230.0f;
@@ -13,5 +14,6 @@ void func_15005AB0(struct108 *arg0) {
     arg0->unk374 = 290.0f;
 }
 
-void func_15005AF0(s32 arg0) {
+/* was func_15005AF0 */
+void camera_level_hook02_noop(s32 arg0) {
 }

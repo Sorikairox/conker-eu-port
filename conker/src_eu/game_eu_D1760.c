@@ -471,14 +471,14 @@ s32 world_objects_transform_mesh(s32 count, s32 *idList, s32 force) {
             tz = m[3][2];
         } else {
             r = obj->rot[0] * D_8009FA50;
-            cA = func_150AD780(r);
-            sA = func_150AD78C(r);
+            cA = fast_cosf(r);
+            sA = fast_sinf(r);
             r = obj->rot[1] * D_8009FA50;
-            cB = func_150AD780(r);
-            sB = func_150AD78C(r);
+            cB = fast_cosf(r);
+            sB = fast_sinf(r);
             r = obj->rot[2] * D_8009FA50;
-            cC = func_150AD780(r);
-            sC = func_150AD78C(r);
+            cC = fast_cosf(r);
+            sC = fast_sinf(r);
             m00 = (cC * cB) * obj->scale[0];
             m01 = sC * obj->scale[0];
             m02 = (cC * -sB) * obj->scale[0];

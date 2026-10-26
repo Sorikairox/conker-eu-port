@@ -214,7 +214,7 @@ void char_foot_trails_restart(u8 *arg0) {
     sp1C.unk0 = temp_v0;
     sp1C.unk4 = arg0[0x1C];
     fxrec_broadcast((s32)&sp1C, 0xA);
-    func_151494E0((s32)&sp1C, 0xA);
+    effect_nodes_broadcast((s32)&sp1C, 0xA);
     foot_trails_start(arg0);
 }
 
@@ -240,7 +240,7 @@ void char_foot_trails_restart_b(u8 *arg0) {
     sp1C.unk0 = temp_v0;
     sp1C.unk4 = arg0[0x1C];
     fxrec_broadcast((s32)&sp1C, 0xA);
-    func_151494E0((s32)&sp1C, 0xA);
+    effect_nodes_broadcast((s32)&sp1C, 0xA);
     foot_trails_start(arg0);
 }
 
@@ -1233,7 +1233,7 @@ void char_state_fx_start(u8 *arg0) {
     tmp.unk10 = D_800A93F4;
     tmp.unk14 = 3.0f;
     tmp.unk18 = impact_current_kind();
-    temp_v0 = func_151491F4(0x3C, -1, 0xE, 1, 9, 0x1C, 0xFF, 0);
+    temp_v0 = effect_node_create_nodraw(0x3C, -1, 0xE, 1, 9, 0x1C, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x1C);
     }

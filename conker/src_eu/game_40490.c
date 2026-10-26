@@ -322,7 +322,7 @@ extern f32 D_800969F4;
 
 /*
  * P80: effect spawn from a record (s16 x, y, z at +0 / +2 / +4, s16 +6, s16 radius +8, f32 angles +0xC / +0x10):
- * nothing for radius 0. Else an effect (func_15149130 type 0x19) gets a 0x34-byte block: position, the unit
+ * nothing for radius 0. Else an effect (effect_node_create type 0x19) gets a 0x34-byte block: position, the unit
  * direction (0, 2r, 0) rotated by the angles (mtxf_rotate_xyz_deg / mtxf_transform_point) times 1 / 2r, 2r, (f32) +6, the two
  * angles, 0 and D_800969F0 / D_800969F4; then a sound / particle (sfx_emitter_start 0x67C) at (x, y + r, z).
  */
@@ -363,7 +363,7 @@ s32 effect_spawn_record(s16 *rec) {
     blk.dir[0] *= inv;
     blk.dir[1] *= inv;
     blk.dir[2] *= inv;
-    e = (u8 *) func_15149130(0x12C, -1, 0x19, -1, 0, 0x17, (struct37 *) 0x34, 0xFF, 0);
+    e = (u8 *) effect_node_create(0x12C, -1, 0x19, -1, 0, 0x17, (struct37 *) 0x34, 0xFF, 0);
     if (e != NULL) {
         memcpy(e + 0x28, &blk, 0x34);
     }
@@ -518,7 +518,7 @@ s32 record_ambient_effect_start(Obj150139AC *arg0) {
     } else {
         tmp.unk44 = 0;
     }
-    e = (Ent150139AC *)func_151491F4(300, -1, 6, 0, 10, 0x70, 0xFF, 0);
+    e = (Ent150139AC *)effect_node_create_nodraw(300, -1, 6, 0, 10, 0x70, 0xFF, 0);
     if (e != NULL) {
         memcpy((u8 *)e + 0x28, &tmp, sizeof(tmp));
     }
@@ -714,7 +714,7 @@ s32 record_effect33_start(struct134 *arg0) {
     collision_select_area(0);
     tmp.unkC = zone_tree_find_leaf(arg0->unk0, arg0->unk4);
     tmp.unk2C = 0;
-    temp_v0 = func_15149130(300, -1, 33, -1, 0, 0, 52, 255, 1);
+    temp_v0 = effect_node_create(300, -1, 33, -1, 0, 0, 52, 255, 1);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, sizeof(tmp));
     }
@@ -746,7 +746,7 @@ s32 record_effect38_start(struct134 *arg0) {
     tmp.unk8 = 1;
     tmp.unk4 = arg0;
     tmp.unk0 = 0.0f;
-    temp_v0 = func_15149130(300, -1, 38, -1, 0, 36, 12, 255, 0);
+    temp_v0 = effect_node_create(300, -1, 38, -1, 0, 36, 12, 255, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, 12);
     }
@@ -801,7 +801,7 @@ s32 record_effect29_start(struct134 *arg0) {
     tmp.unkC = c;
     tmp.unk10 = d;
     tmp.unk14 = 0.0f;
-    temp_v0 = func_15149130(300, -1, 0x29, -1, 0, 0, 0x18, 0xFF, 0);
+    temp_v0 = effect_node_create(300, -1, 0x29, -1, 0, 0, 0x18, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x18);
     }
@@ -830,8 +830,8 @@ typedef struct {
 // screen_effect_start: P259: start handler of a level record `rec` (s16 +6 / +8, f32 +0xC / +0x10, flags +0x16,
 // packed bytes +0x18 / +0x1C): sets flag 4; in single player (D_80082FA0 < 2) projects the point 100 above
 // (+0xC, 0, +0x10) to the screen (mtxf_rotate_xyz_deg / mtxf_transform_point / vec3_to_yaw_pitch_deg, scaled by pi/180) and spawns effect
-// 300 / 0x2A (func_15149130) with a parameter block from the packed bytes: count min + rand % (range + 1), two s16,
-// two scales / 64, angle func_150484A0(+6, +8), spin byte / 256 * pi/4, a frame count with its inverse and
+// 300 / 0x2A (effect_node_create) with a parameter block from the packed bytes: count min + rand % (range + 1), two s16,
+// two scales / 64, angle math_atan2f(+6, +8), spin byte / 256 * pi/4, a frame count with its inverse and
 // +8 / frames. Always returns 1.
 /* was func_150144B8 */
 s32 screen_effect_start(u8 *rec) {
@@ -864,9 +864,9 @@ s32 screen_effect_start(u8 *rec) {
     e.frames = (f32) ((*(u32 *) (rec + 0x1C) >> 24) & 0xFF);
     e.inv_frames = 1.0f / e.frames;
     e.step = (f32) *(s16 *) (rec + 8) * e.inv_frames;
-    e.angle = func_150484A0((f32) *(s16 *) (rec + 6), (f32) *(s16 *) (rec + 8));
+    e.angle = math_atan2f((f32) *(s16 *) (rec + 6), (f32) *(s16 *) (rec + 8));
     e.spin = (f32) ((*(u32 *) (rec + 0x1C) >> 16) & 0xFF) * 0.00390625f * 0.7853982f;
-    fx = func_15149130(300, -1, 0x2A, -1, 0, 0, (struct37 *) sizeof(e), 0xFF, 0);
+    fx = effect_node_create(300, -1, 0x2A, -1, 0, 0, (struct37 *) sizeof(e), 0xFF, 0);
     if (fx != NULL) {
         memcpy((u8 *) fx + 0x28, &e, sizeof(e));
     }
@@ -899,7 +899,7 @@ f32 cosf(f32);
 #ifdef NON_MATCHING
 // record_zone_box_start: start handler (s32, returns 1) of a box-zone level record: marks it started (+0x16 |= 4),
 // rotates the rectangle (+-halfX, +-halfZ) by the record's yaw (sinf(angY * D_80096A40), cosf(angY * D_80096A44))
-// around (x, z) and hands a 0x40-byte block to a new func_15149130 object (type 0x12C, 0x2C; +0x28): two opposite
+// around (x, z) and hands a 0x40-byte block to a new effect_node_create object (type 0x12C, 0x2C; +0x28): two opposite
 // corners, the two edge vectors from them, the top (y + height) and bottom y, parameters 0 / 1 as (p / 256) * 0.5,
 // 0, parameters 2 / 3 as (p / 256) * 250, and the colour bytes in reverse order.
 /* was func_1501474C */
@@ -957,7 +957,7 @@ s32 record_zone_box_start(Rec1501474C *rec) {
     blk.colour[1] = rec->colour >> 8;
     blk.colour[2] = rec->colour >> 16;
     blk.colour[3] = rec->colour >> 24;
-    e = (u8 *) func_15149130(0x12C, -1, 0x2C, -1, 0, 0, (struct37 *) 0x40, 0xFF, 0);
+    e = (u8 *) effect_node_create(0x12C, -1, 0x2C, -1, 0, 0, (struct37 *) 0x40, 0xFF, 0);
     if (e != NULL) {
         memcpy(e + 0x28, &blk, 0x40);
     }
@@ -988,7 +988,7 @@ extern u8 D_800A0D08[]; /* 6 rgb triples */
 
 #ifdef NON_MATCHING
 // record_light_ring_start: start handler (s32, returns 1) of a level record: marks it started (+0x16 |= 4) and
-// builds a 0x48-byte block for a new func_15149130 object (type 0x12C, 0x2E, kind 0x29; +0x28): the position, three
+// builds a 0x48-byte block for a new effect_node_create object (type 0x12C, 0x2E, kind 0x29; +0x28): the position, three
 // random angles ((u16) (random_int() * osGetCount()) scaled by D_80096A48 / 4C / 58 and 360), three sizes from the
 // record's u16 halves (* D_80096A50 * D_80096A54), six lights (light_create_with_ctrl at the record position, colour
 // D_800A0D08[i], red in level 0x40), a fourth value (* D_80096A5C * D_80096A60), the record and a 1 byte. When
@@ -1053,7 +1053,7 @@ s32 record_light_ring_start(Rec15014B60 *rec) {
         }
         blk.light[i] = light_create_with_ctrl((Header *) &req, (Header2 *) ipos, 5, r, g, b, 0xFF, 0, 0, 0xFF, 0);
     }
-    e = (u8 *) func_15149130(0x12C, -1, 0x2E, -1, 0, 0x29, (struct37 *) 0x48, 0xFF, 0);
+    e = (u8 *) effect_node_create(0x12C, -1, 0x2E, -1, 0, 0x29, (struct37 *) 0x48, 0xFF, 0);
     if (e != NULL) {
         memcpy(e + 0x28, &blk, 0x48);
         return 1;
@@ -1098,7 +1098,7 @@ s32 record_effect49_start(struct134 *arg0) {
     tmp.unk40 = arg0->unk0;
     tmp.unk44 = (s16)arg0->unk2;
     tmp.unk48 = arg0->unk4;
-    temp_v0 = func_15149130(300, -1, 49, -1, 0, 42, 84, 255, 0);
+    temp_v0 = effect_node_create(300, -1, 49, -1, 0, 42, 84, 255, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, sizeof(tmp));
     }
@@ -1139,7 +1139,7 @@ s32 record_effect44_start(struct134 *arg0) {
     f2 = arg0->unk20 ? 2 : 0;
     tmp.unkC = f2 | f1;
     tmp.unk10 = 0;
-    temp_v0 = func_15149130(300, -1, -1, -1, 0, 44, 20, 255, 0);
+    temp_v0 = effect_node_create(300, -1, -1, -1, 0, 44, 20, 255, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, sizeof(tmp));
     }
@@ -1183,7 +1183,7 @@ s32 record_effect60_start(struct134 *arg0) {
     tmp.unk20 = D_80096A64;
     collision_select_area(0);
     tmp.unk44 = zone_tree_find_leaf(arg0->unk0, arg0->unk4);
-    temp_v0 = func_15149130(300, -1, 60, -1, 0, 45, 72, 255, 0);
+    temp_v0 = effect_node_create(300, -1, 60, -1, 0, 45, 72, 255, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, sizeof(tmp));
     }
@@ -1223,7 +1223,7 @@ typedef struct {
 // record_quad_zone_start: start handler (void, D_80082EA0 entry 0x34) of a rectangular zone record: marks it started
 // (+0x14 = 1), turns the rectangle (+-halfX, 0, +-halfZ) around the record's position by its angles (mtxf_rotate_xyz_deg /
 // mtxf_transform_point) into 4 world corners, stores the 4 edge vectors (next corner - corner) and the sound id of the spot
-// (collision_select_area(0); zone_tree_find_leaf(x, z)), and hands that 0x74-byte block to a new func_15149130 object (+0x28).
+// (collision_select_area(0); zone_tree_find_leaf(x, z)), and hands that 0x74-byte block to a new effect_node_create object (+0x28).
 /* was func_15015354 */
 void record_quad_zone_start(Rec15015354 *src) {
     struct {
@@ -1278,7 +1278,7 @@ void record_quad_zone_start(Rec15015354 *src) {
     collision_select_area(0);
     blk.sound = zone_tree_find_leaf(src->x, src->z);
     blk.u70 = 0;
-    e = (u8 *) func_15149130(0x12C, -1, 0x3D, -1, 0, 0x2E, (struct37 *) 0x74, 0xFF, 0);
+    e = (u8 *) effect_node_create(0x12C, -1, 0x3D, -1, 0, 0x2E, (struct37 *) 0x74, 0xFF, 0);
     if (e != NULL) {
         memcpy(e + 0x28, &blk, 0x74);
     }
@@ -1303,7 +1303,7 @@ s32 record_effect68_start(struct134 *arg0) {
     collision_select_area(0);
     tmp.unk8 = zone_tree_find_leaf(arg0->unk0, arg0->unk4);
     tmp.unkC = 0;
-    temp_v0 = func_15149130(300, -1, 68, -1, 0, 47, 16, 255, 0);
+    temp_v0 = effect_node_create(300, -1, 68, -1, 0, 47, 16, 255, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, 16);
     }

@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_15049F30(f32 q1[4], f32 q2[4])
+/* was func_15049F30 */
+void quat_align_hemisphere(f32 q1[4], f32 q2[4])
 {
 	f32 dot = q1[0] * q2[0] + q1[1] * q2[1] + q1[2] * q2[2] + q1[3] * q2[3];
 
@@ -18,7 +19,8 @@ void func_15049F30(f32 q1[4], f32 q2[4])
 typedef struct { s32 v[3]; } Idx3;
 extern Idx3 D_80086390;
 #pragma function sqrtf
-void func_15049FA8(f32 mtx[4][4], f32 arg1[4])
+/* was func_15049FA8 */
+void quat_from_mtx(f32 mtx[4][4], f32 arg1[4])
 {
 	f32 var1;
 	f32 var2;
@@ -62,9 +64,10 @@ void func_15049FA8(f32 mtx[4][4], f32 arg1[4])
 	}
 }
 
-f32 func_15048360(f32);
+f32 math_acosf_lut(f32);
 #define EPSILON 0.00001001f
-void func_1504A1CC(f32 q1[4], f32 q2[4], f32 t, f32 result[4])
+/* was func_1504A1CC */
+void quat_slerp(f32 q1[4], f32 q2[4], f32 t, f32 result[4])
 {
 	f32 dot = q1[0] * q2[0] + q1[1] * q2[1] + q1[2] * q2[2] + q1[3] * q2[3];
 
@@ -80,7 +83,7 @@ void func_1504A1CC(f32 q1[4], f32 q2[4], f32 t, f32 result[4])
 		f32 sine;
 		f32 coeff_q1;
 		f32 coeff_q2;
-		theta = func_15048360(dot);
+		theta = math_acosf_lut(dot);
 		theta_q1 = (1.0f - t) * theta;
 		theta_q2 = t * theta;
 		sine = sinf(theta);
@@ -98,7 +101,8 @@ void func_1504A1CC(f32 q1[4], f32 q2[4], f32 t, f32 result[4])
 	}
 }
 
-void func_1504A430(f32 quat[4], f32 mtx[4][4])
+/* was func_1504A430 */
+void quat_to_mtx(f32 quat[4], f32 mtx[4][4])
 {
 	f32 mult = 2.0f / (quat[0] * quat[0] + quat[1] * quat[1] + quat[2] * quat[2] + quat[3] * quat[3]);
 	f32 a = quat[1] * mult;

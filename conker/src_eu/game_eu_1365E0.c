@@ -278,7 +278,7 @@ s32 swing_lamp_matrix_build(u8 *arg0, s32 arg1) {
     return 1;
 }
 
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
 typedef struct { f32 x, y, z; } V3_09390;
 
 /* was func_15109390 */
@@ -311,7 +311,7 @@ s32 swing_lamp_light_update(u8 *arg0)
   {
   }
   new_var = out.y - (*((f32 *) (p + 0x10)));
-  if (func_150ACEA0(0.0f, *((f32 *) (p + 0x10)), 0.0f, out.x, new_var, out.z, 0, 0, &hit.x, &hit.y, &hit.z, 0, 0, 0, 0.0f) == 0)
+  if (collision_ray_cast(0.0f, *((f32 *) (p + 0x10)), 0.0f, out.x, new_var, out.z, 0, 0, &hit.x, &hit.y, &hit.z, 0, 0, 0, 0.0f) == 0)
   {
     hit = out;
   }

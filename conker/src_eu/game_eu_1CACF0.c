@@ -256,7 +256,7 @@ typedef struct {
     /* 0x22 */ u8 pad22[2];
 } PointD9C4;
 
-/* 12-byte payload of the lost-track marker (func_151491F4) */
+/* 12-byte payload of the lost-track marker (effect_node_create_nodraw) */
 typedef struct {
     /* 0x00 */ s32 owner;
     /* 0x04 */ u8 id;
@@ -268,7 +268,7 @@ typedef struct {
 // target's +0x3B, frame byte 7, last point +0x14, time +0x20, gravity +0x24, rate +0x28, pending +0x2C, rise +0x34 /
 // base +0x38, +0x3C, s16 +0x42 / +0x44 / +0x48 / +0x4A, target position +0x50}. Returns 0 when the target has gone or
 // changed. First call (flag 4 clear) waits for spray_trail_bone_pos to place the position (+0x10), then starts there. Later
-// calls follow with spray_trail_bone_pos (none: spray_trail_stop_emit and a func_151491F4 type-8 marker {target, id, +0x4C} hooked
+// calls follow with spray_trail_bone_pos (none: spray_trail_stop_emit and a effect_node_create_nodraw type-8 marker {target, id, +0x4C} hooked
 // to the target's link, return 1). Each frame adds rate * frame time to the pending count and emits one point per
 // whole unit, interpolated from the last point to the position: position, velocity (move * D_800BEDC8, y 0),
 // height base + rise * t, frame st[7] (advanced by +0x48 + random % (+0x4A + 1)), then moved by its velocity
@@ -316,7 +316,7 @@ s32 spray_trail_record(u8 *obj) {
         mark.owner = *(s32 *) st;
         mark.id = (*(u8 **) st)[0x3B];
         mark.u08 = st[0x4C];
-        marker = func_151491F4(*(s16 *) (obj + 0x1C), -1, 8, (*(u16 *) (obj + 0x1E) & 1) ? 1 : 0, 2, 0xC, 0xFF, 0);
+        marker = effect_node_create_nodraw(*(s16 *) (obj + 0x1C), -1, 8, (*(u16 *) (obj + 0x1E) & 1) ? 1 : 0, 2, 0xC, 0xFF, 0);
         if (marker != NULL) {
             memcpy((s32) ((u8 *) marker + 0x28), (u8 **) &mark, 0xC);
             if (char_fx_find_effect(*(struct_eu_link **) (*(u8 **) st + 0x2F4), obj, 0) != 0) {
@@ -690,7 +690,7 @@ void buddy_marker_spawn_trails(s32 arg0, s16 arg1, volatile u8 arg2, s32 arg3) {
     buddy_marker_clear_all();
     spray_trail_spawn(arg0, 3, 0x12C, 0, arg2, arg3);
     spray_trail_spawn(arg0, 4, 0x12C, 0, arg2, arg3);
-    func_151491F4(arg1, 6, -1, 1, 3, 0, arg2, arg3);
+    effect_node_create_nodraw(arg1, 6, -1, 1, 3, 0, arg2, arg3);
 }
 
 #ifdef NON_MATCHING
@@ -785,7 +785,7 @@ void buddy_marker_clear_all(void) {
 s32 memcpy(s32, u8 **, s32);
 
 // buddy_marker_create: clears the old markers (buddy_marker_clear_all) and, if none is active (D_800E0D50), creates a
-// marker effect (func_151491F4, type 9) whose 12-byte payload at +0x28 is {owner arg0, owner id arg0[0x3B], 0}.
+// marker effect (effect_node_create_nodraw, type 9) whose 12-byte payload at +0x28 is {owner arg0, owner id arg0[0x3B], 0}.
 // P124: the payload is one struct (m2c had 3 locals and memcpy'd 12 bytes from the first).
 /* was func_1519E6BC */
 void buddy_marker_create(u8 *arg0) {
@@ -801,7 +801,7 @@ void buddy_marker_create(u8 *arg0) {
         t.u8 = 0;
         t.u0 = arg0;
         t.u4 = arg0[0x3B];
-        fx = func_151491F4(0x12C, -1, 9, 0U, 4U, 0xC, 0xFFU, 0);
+        fx = effect_node_create_nodraw(0x12C, -1, 9, 0U, 4U, 0xC, 0xFFU, 0);
         D_800E0D50 = fx;
         if (fx != 0) {
             memcpy(fx + 0x28, (u8 **) &t, 0xC);
@@ -877,23 +877,23 @@ void buddy_marker_handle_msg(u8 *arg0, s32 *arg1, u8 arg2)
 /* was func_1519EE3C */
 void trail_marker_retire(struct260 *arg0) {
     char_fx_detach_effect(arg0, *(s32 *)((u8 *)arg0 + 0x28));
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_1519EE68 */
 void trail_marker_free(struct260 *arg0) {
     char_fx_detach_effect(arg0, *(s32 *)((u8 *)arg0 + 0x28));
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 /* was func_1519EE94 */
 void buddy_marker_retire(struct260 *arg0) {
     D_800E0D50 = 0;
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_1519EEB8 */
 void buddy_marker_free(struct260 *arg0) {
     D_800E0D50 = 0;
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }

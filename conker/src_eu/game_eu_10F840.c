@@ -7,11 +7,11 @@ s32 beam_effect_spawn(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32
 
 #ifdef NON_MATCHING
 float sqrtf(float);
-f32 func_150484A0(f32, f32);
+f32 math_atan2f(f32, f32);
 extern u8 *D_8008CDEC[];
 
 // beam_effect_spawn: allocates a line / beam effect object (node_alloc(0xB, 0, 0x100, 1, 0xFF, 1)) from
-// (x0, y0, z0) to (x1, y1, z1): start +0x94, end +0xB0, yaw +0xA4 / pitch +0xA0 of the direction (func_150484A0),
+// (x0, y0, z0) to (x1, y1, z1): start +0x94, end +0xB0, yaw +0xA4 / pitch +0xA0 of the direction (math_atan2f),
 // widths +0xA8 / +0xAC / +0xBC / +0xC0, texture D_8008CDEC[tex] (+0xD8) with two 4-vertex quads at +0x10 whose
 // s / t span the texture size. mode (+0xD0) 0 = plain (+0xD6 = 1, +0xE0 = -1); otherwise it follows `target`
 // (+0xDC, freed again with node_delete when NULL) with the extra parameters +0xD2 .. +0xF8. Returns the asm's
@@ -37,8 +37,8 @@ s32 beam_effect_spawn(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, 
     *(f32 *) (obj + 0x9C) = z0;
     dx = x1 - x0;
     dz = z1 - z0;
-    *(f32 *) (obj + 0xA4) = func_150484A0(-dx, -dz);
-    *(f32 *) (obj + 0xA0) = func_150484A0(y1 - y0, sqrtf(dx * dx + dz * dz));
+    *(f32 *) (obj + 0xA4) = math_atan2f(-dx, -dz);
+    *(f32 *) (obj + 0xA0) = math_atan2f(y1 - y0, sqrtf(dx * dx + dz * dz));
     *(f32 *) (obj + 0xC4) = 0.0f;
     *(f32 *) (obj + 0xC8) = 0.0f;
     *(f32 *) (obj + 0xCC) = 0.0f;
@@ -105,13 +105,13 @@ s32 beam_effect_spawn(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, 
 
 #ifdef NON_MATCHING
 float sqrtf(float);
-f32 func_150484A0(f32, f32);
+f32 math_atan2f(f32, f32);
 extern s32 D_800DC26C;
 extern u8 D_800D9D80[];
 int game_gu_random(void);
 f32 vec3f_dot(u8 *, u8 *);
 s32 floor_flags_surface_type(s32);
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 s32 object_ray_hit_nearest(struct127 *, f32, f32, f32, f32, f32, f32, s32, s32);
 s32 impact_effect_spawn(f32, f32, f32, s32, s32, s32, s32);
 
@@ -122,7 +122,7 @@ s32 impact_effect_spawn(f32, f32, f32, s32, s32, s32, s32);
 // every 4th frame by the +0xE3 delay) and, each time the +0xD6 timer passes -(+0xD4), restart it (+0xD2) and pick a
 // new target end: the character's aim record D_800D9D80[+0x127] when it still matches (with a chance +3 of a spark
 // beam + sound when D_800BE616 is off), else a point 2000 ahead along its facing; with no aim record (0xFF) every
-// 3rd frame (+0xFD) a ray (func_150ACEA0) 75 * width ahead decides the end. Then (+0xD6 > 0) the head +0x94 moves
+// 3rd frame (+0xFD) a ray (collision_ray_cast) 75 * width ahead decides the end. Then (+0xD6 > 0) the head +0x94 moves
 // toward the end along the yaw / pitch +0xA4 / +0xA0 at speed +0xA8 (clamped to the distance when +0xAC != 0);
 // +0xFE == 1 leaves a trail (object_ray_hit_nearest). With +0xAC != 0 the beam is freed (after a impact_effect_spawn impact when
 // +0xFC != 0) once the head is within +0xAC of the end or past the start distance, otherwise +0xC0 shrinks to it.
@@ -251,7 +251,7 @@ void beam_effect_update(u8 *obj) {
                     hit[1] = *(f32 *) (obj + 0xB4) - *(f32 *) (obj + 0x98);
                     hit[2] = *(f32 *) (obj + 0xB8) - *(f32 *) (obj + 0x9C);
                     step = (75.0f * width) / sqrtf(hit[0] * hit[0] + hit[1] * hit[1] + hit[2] * hit[2]);
-                    if (func_150ACEA0(*(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), *(f32 *) (obj + 0x9C), hit[0] * step,
+                    if (collision_ray_cast(*(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), *(f32 *) (obj + 0x9C), hit[0] * step,
                                       hit[1] * step, hit[2] * step, &rayhit, NULL, &hit[0], &hit[1], &hit[2], NULL, 0, 0,
                                       0.0f) != 0) {
                         *(f32 *) (obj + 0xB0) = hit[0];
@@ -266,11 +266,11 @@ void beam_effect_update(u8 *obj) {
                 }
                 tex = 0x43;
             }
-            *(f32 *) (obj + 0xA4) = func_150484A0(-(*(f32 *) (obj + 0xB0) - *(f32 *) (obj + 0x94)),
+            *(f32 *) (obj + 0xA4) = math_atan2f(-(*(f32 *) (obj + 0xB0) - *(f32 *) (obj + 0x94)),
                                                   -(*(f32 *) (obj + 0xB8) - *(f32 *) (obj + 0x9C)));
             dx = *(f32 *) (obj + 0xB0) - *(f32 *) (obj + 0x94);
             dz = *(f32 *) (obj + 0xB8) - *(f32 *) (obj + 0x9C);
-            *(f32 *) (obj + 0xA0) = func_150484A0(*(f32 *) (obj + 0xB4) - *(f32 *) (obj + 0x98), sqrtf(dx * dx + dz * dz));
+            *(f32 *) (obj + 0xA0) = math_atan2f(*(f32 *) (obj + 0xB4) - *(f32 *) (obj + 0x98), sqrtf(dx * dx + dz * dz));
             *(f32 *) (obj + 0xC4) = 0.0f;
             *(f32 *) (obj + 0xC8) = 0.0f;
             *(f32 *) (obj + 0xCC) = 0.0f;
@@ -285,16 +285,16 @@ void beam_effect_update(u8 *obj) {
     if (*(s16 *) (obj + 0xD6) <= 0) {
         return;
     }
-    c = func_150AD78C(*(f32 *) (obj + 0xA0));
-    s = func_150AD780(*(f32 *) (obj + 0xA0));
+    c = fast_sinf(*(f32 *) (obj + 0xA0));
+    s = fast_cosf(*(f32 *) (obj + 0xA0));
     // the direction: a vector turned by the pitch, then by the yaw. The asm really adds / multiplies its 0.0 terms
     // (0.0 + -0.0 = +0.0, s * 0.0 = -0.0 for s < 0); IDO folds `0.0f + x` to x, so the zero is read from the
     // volatile n[2] (setup mv_vz0: velocity -0.0 vs +0.0)
     n[2] = 0.0f;
     n[1] = n[2] - c * -1.0f;
     n[0] = n[2] + s * -1.0f;
-    c = func_150AD78C(*(f32 *) (obj + 0xA4));
-    s = func_150AD780(*(f32 *) (obj + 0xA4));
+    c = fast_sinf(*(f32 *) (obj + 0xA4));
+    s = fast_cosf(*(f32 *) (obj + 0xA4));
     vx = s * n[2] + c * n[0];
     vy = n[1];
     vz = -c * n[2] + s * n[0];

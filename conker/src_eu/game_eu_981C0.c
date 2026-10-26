@@ -172,7 +172,7 @@ void obj_effect_task_spawn(u8 *arg0, u8 *arg1) {
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
     tmp.unk8 = *(Blk8 *)arg1;
-    temp_v0 = func_15149130(0xA, 7, 0x23, -1, 1, 0x21, 0x10, 0xFF, 1);
+    temp_v0 = effect_node_create(0xA, 7, 0x23, -1, 1, 0x21, 0x10, 0xFF, 1);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
     }

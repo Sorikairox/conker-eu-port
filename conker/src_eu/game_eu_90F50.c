@@ -431,10 +431,10 @@ void obj_spawn_hit_shot(u8 *arg0, s32 arg1) {
         temp_f16 = (*(f32 *)((u8 *)temp_v0 + 0xC0)) - sp.u74;
         sp4C = temp_f2;
         sp44 = temp_f16;
-        temp_f2_2 = func_150484A0((*(f32 *)((u8 *)temp_v0 + 0xBC)) - sp.u70, sqrtf((temp_f2 * temp_f2) + (temp_f16 * temp_f16))) * D_80099B54;
+        temp_f2_2 = math_atan2f((*(f32 *)((u8 *)temp_v0 + 0xBC)) - sp.u70, sqrtf((temp_f2 * temp_f2) + (temp_f16 * temp_f16))) * D_80099B54;
         sp54 = temp_f2_2;
         var_f2_2 = temp_f2_2;
-        var_f12 = func_150484A0(sp4C, sp44) * D_80099B54;
+        var_f12 = math_atan2f(sp4C, sp44) * D_80099B54;
     }
     sp50 = var_f12;
     vec_from_yaw_pitch((s32) (var_f2_2 * D_80099B5C) & 0xFFFF, sp.u78, 0.0f, &sp.u84, &sp.u80, &sp.u7C);
@@ -1101,7 +1101,7 @@ extern u16 D_800BEB30[];
 void hint_box_open(s32);
 void hint_box_close(void);
 s32 hint_box_is_closed(void);
-s32 func_151F2CDC(void);
+s32 mp3_stream_get_state(void);
 extern s32 D_800864A0[2];
 extern u16 D_80099A90[];
 void face_anim_reset_default(struct127 *);
@@ -2564,7 +2564,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
         if (H(obj, 0x84) == 0x12C || !(D_800BEB30[D_800C3E78] & 0x8000)) {
             break;
         }
-        if ((D_800D1958[0] & 0x20) && func_151F2CDC() != 0) {
+        if ((D_800D1958[0] & 0x20) && mp3_stream_get_state() != 0) {
             break;
         }
         anim = 0x142;

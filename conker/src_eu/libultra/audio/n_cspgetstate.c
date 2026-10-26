@@ -9,5 +9,6 @@ s32 n_alCSPGetState(N_ALCSPlayer *seqp) {
 void ptstart(void) {
 }
 
-void func_eu_10017D80(void) {
+/* was func_eu_10017D80 */
+void audio_csp_stub_eu(void) {
 }

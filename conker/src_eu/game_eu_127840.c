@@ -123,7 +123,7 @@ typedef struct {
     /* 0x10 */ u8 *emit[2];
 } GroupF9BB0;
 
-struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
+struct260 *effect_node_create(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
 void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
 s32 rumble_request(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3);
@@ -146,7 +146,7 @@ extern f32 D_800A2158;
 extern f32 D_800A215C;
 extern f32 D_800A2160;
 
-// object_aura_spawn: creates a group object (func_15149130 kind 0x46, 0x18-byte block {obj, obj+0x3B}) and, when it
+// object_aura_spawn: creates a group object (effect_node_create kind 0x46, 0x18-byte block {obj, obj+0x3B}) and, when it
 // exists, two particles (effect3d_spawn_full texture 0x5F, D_800A4AA0 list, random blend 1 / 3) and two emitters
 // (particle_emitter_spawn texture 0x60, 0x2A) around `obj`, each told its index, the object, its room byte and the group
 // (particles at +0x110 also get the mid height (obj +0x14C + +0x150) / 2); the group records them at +0x30 / +0x38.
@@ -172,7 +172,7 @@ void aura_group_spawn(u8 *obj, u8 alpha, s32 owner) {
     init.part[1] = NULL;
     init.emit[0] = NULL;
     init.emit[1] = NULL;
-    group = (u8 *)func_15149130(0x46, -1, 0x4D, -1, 1, 0x33, (struct37 *)0x18, alpha, owner);
+    group = (u8 *)effect_node_create(0x46, -1, 0x4D, -1, 1, 0x33, (struct37 *)0x18, alpha, owner);
     if (group != NULL) {
         g = (GroupF9BB0 *)(group + 0x28);
         memcpy(g, &init, 0x18);
@@ -675,7 +675,7 @@ void arc_bolts_spawn_once(u8 arg0, s32 arg1) {
         tmp.unk0 = D_800D34B8 + 0x71C;
         tmp.unk4 = D_800D34B8 + 0x6E8;
         tmp.unk8 = 0.0f;
-        temp_v0 = func_15149130(300, -1, 0x57, -1, 0, 0x46, 0xC, arg0, arg1);
+        temp_v0 = effect_node_create(300, -1, 0x57, -1, 0, 0x46, 0xC, arg0, arg1);
         if (temp_v0 != NULL) {
             D_80088F00 = 1;
         }
@@ -731,16 +731,16 @@ void arc_bolts_handle_event(struct102 *arg0, s32 arg1, u8 arg2) {
 void level_cue_switch_on(void) {
     light_group_set_disabled(8, 0);
     light_group_set_disabled(0xB, 1);
-    func_151494E0((s32)(D_800D34B8 + 0x514), 0x30);
-    func_151494E0(0, 0x4D);
+    effect_nodes_broadcast((s32)(D_800D34B8 + 0x514), 0x30);
+    effect_nodes_broadcast(0, 0x4D);
 }
 
 /* was func_150FB2F8 */
 void level_cue_switch_off(void) {
     light_group_set_disabled(8, 1);
     light_group_set_disabled(7, 0);
-    func_151494E0((s32)(D_800D34B8 + 0x514), 0x31);
-    func_151494E0(0, 0x4C);
+    effect_nodes_broadcast((s32)(D_800D34B8 + 0x514), 0x31);
+    effect_nodes_broadcast(0, 0x4C);
 }
 
 /* was func_150FB348 */

@@ -300,7 +300,7 @@ void fx_flicker_lights_update(u8 *arg0) {
 #endif
 /* was func_150E0840 */
 void effect_attach_to_obj(u8 *arg0, s32 arg1, u8 arg2) {
-    func_15149514(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
+    effect_node_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
 /* was func_150E0880 */

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""P56: the hand-asm wall engine (func_150AB6D0 / func_150AC8C4 -> func_150AB708) and the ray cast func_150ACEA0
+"""P56: the hand-asm wall engine (collision_walls_slide / collision_ledge_probe -> func_150AB708) and the ray cast collision_ray_cast
 vs their NON_MATCHING C (src_eu/nm_asm/D5E90.c + D5E90_walls.inc (asm2c_hand.py); the ray cast is readable C since P291).
 Reference: VR4300 interpreter (nmasm_vr.Ref) on build/conker.eu.elf; candidate: Unicorn on build_nm/conker.eu.elf.
 Callees (obj_collision_cylinder, quadtree_set_test_box, sinf / cosf, func_150A69A8, world_objects_transform_mesh, collision_select_area) run on both sides.
@@ -105,11 +105,11 @@ def wall_call(ref, cand, m, rng, rec, pos, which):
     mv = rng.choice([0, 5, 30, 80, 200])
     tgt = [pos[0] + rng.uniform(-mv, mv), pos[1] + rng.uniform(-mv / 4, mv / 4), pos[2] + rng.uniform(-mv, mv)]
     fa = {12: b32(tgt[0]), 14: b32(tgt[1])}
-    fn = (0x150AB6D0, 'func_150AB6D0') if which == 'ab6d0' else (0x150AC8C4, 'func_150AC8C4')
+    fn = (0x150AB6D0, 'collision_walls_slide') if which == 'ab6d0' else (0x150AC8C4, 'collision_ledge_probe')
     return run(ref, cand, m, fn, (0, 0, b32(tgt[2]), rec), fa=fa, stack=(rng.choice([0, 1]),))
 
 RAY_PCS = {0x150ADAF8: 'yz', 0x150ADB48: 'zx', 0x150ADB88: 'xy', 0x150ADC10: 'hit',   # func_150AD844 projections
-           0x150AD510: 'obj listed', 0x150AD68C: 'obj hit', 0x150AD32C: 'next leaf'}    # func_150ACEA0 (P291)
+           0x150AD510: 'obj listed', 0x150AD68C: 'obj hit', 0x150AD32C: 'next leaf'}    # collision_ray_cast (P291)
 OBJS, OBJVB, OBJFT = 0x80670000, 0x80674000, 0x80676000
 
 def ray_grid_tree(rng, m, vs, pos, geo=None):
@@ -267,7 +267,7 @@ def ray_call(ref, cand, m, rng, pos, vs=None, far=None):
              rng.choice([0, OUTS + 0x24]) if R(m, DBE5C, 'I')[0] else 0,   # flags out: needs D_800DBE5C
              b32(md))
     fa = {12: b32(p0[0]), 14: b32(p0[1])}
-    return run(ref, cand, m, (0x150ACEA0, 'func_150ACEA0'), (0, 0, b32(p0[2]), b32(d[0])), fa=fa, stack=stack)
+    return run(ref, cand, m, (0x150ACEA0, 'collision_ray_cast'), (0, 0, b32(p0[2]), b32(d[0])), fa=fa, stack=stack)
 
 # P294: engine paths counted per trial (executed reference PCs), walls / ledges
 WALL_PCS = {0x150ABC28: 'rec next', 0x150ABD34: 'obj next', 0x150ABE58: 'visited add', 0x150ABF28: 'obj mark',
@@ -558,9 +558,9 @@ def unit(ref, cand, base, rng, n, which):
                                 'ref', [hex(q) for q in o1], 'cand', [hex(q) for q in o2], [hex(q) for q in d[:4]])
     return bad, hist
 
-def patch_libm(ref, cand, fns=('sinf', 'cosf', 'func_150484A0', 'func_15048360')):
+def patch_libm(ref, cand, fns=('sinf', 'cosf', 'math_atan2f', 'math_acosf_lut')):
     """some NM-build callees read tables / literals at addresses that only exist in the NM data layout, which the
-    candidate does not have (it runs on the reference's data image): sinf / cosf (libultra C) and func_150484A0
+    candidate does not have (it runs on the reference's data image): sinf / cosf (libultra C) and math_atan2f
     (atan2-like) return garbage there. Jump from them to copies of the reference's code (jal targets re-pointed to
     the candidate's symbol of the same name)"""
     scr = 0x153E0000

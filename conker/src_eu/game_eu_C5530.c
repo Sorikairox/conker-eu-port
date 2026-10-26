@@ -918,7 +918,7 @@ f32 rail_wall_hit(f32 x, f32 y, f32 z, f32 dx, f32 dz);
 s32 trigger_find_at_point(s32, s32, s32 x, s32 y, s32 z);
 u8 *attachment_find_by_slot(struct127 *, s32, s32);
 f32 wrap_angle_deg(f32 angle);
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 s32 mp_is_free_for_all(void);
 s32 mp_match_check_over(void);
 extern s32 D_800D3C60;
@@ -1187,7 +1187,7 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
         dy = other->y_position - obj->y_position;
         dz = other->z_position - obj->z_position;
         dist = sqrtf(dx * dx + dy * dy + dz * dz);
-        if (func_150ACEA0(obj->x_position, obj->y_position + 100.0f, obj->z_position, dx, dy, dz, 0, 0,
+        if (collision_ray_cast(obj->x_position, obj->y_position + 100.0f, obj->z_position, dx, dy, dz, 0, 0,
                           &hit[3], &hit[2], &hit[1], &hit[0], 0, 0, 0.0f) == 0) {
             return dist;
         }

@@ -46,7 +46,7 @@ void n_alCSPNew(N_ALCSPlayer *seqp, ALSeqpConfig *c)
     seqp->target        = NULL;
     seqp->drvr          = n_syn;
     seqp->chanMask      = 0xffff;
-    func_10017B30(seqp);
+    n_csp_reset_chan_levels(seqp);
     seqp->uspt          = 488;
     seqp->nextDelta     = 0;
     seqp->state         = AL_STOPPED;
@@ -166,12 +166,12 @@ void  n_seqp_unmap_voice(N_ALSeqPlayer *seqp, N_ALVoice *voice);
 s32   n_seqp_cancel_voice_kill(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime killTime);
 u8    n_seqp_voice_fx_mix(N_ALVoiceState *vs, N_ALCSPlayer *seqp);
 s32   n_evtq_flush_type_first(ALEventQueue *evtq, s16 type);
-void  func_1001CA90(N_ALVoice *v, f32 pitch);
-f32   func_1001CEA4(s32 arg0);
-void *func_1001D9B0(s32 arg0);
-void *func_1001DA28(s32 arg0);
-void  func_1001DAA0(void *fx, s16 paramID, void *param);
-void  func_1001DAE4(void *fx, s16 paramID, void *param);
+void  n_syn_set_voice_cutoff(N_ALVoice *v, f32 pitch);
+f32   audio_semitones_to_ratio(s32 arg0);
+void *n_syn_get_aux_fx(s32 arg0);
+void *n_syn_get_aux_filter(s32 arg0);
+void  n_fx_set_param(void *fx, s16 paramID, void *param);
+void  n_fx_filter_set_param(void *fx, s16 paramID, void *param);
 
 ALMicroTime __n_CSPVoiceHandler(void *node)
 {
@@ -244,9 +244,9 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
             n_alSynSetPitch(&vs->voice, vs->pitch * vs->vibrato * CSP_CHAN(chan).pitchBend);
 
             if (CSP_CHAN(chan).unk14) {
-                func_1001CA90(&vs->voice,
+                n_syn_set_voice_cutoff(&vs->voice,
                         440.0f
-                        * func_1001CEA4(CSP_CHAN(chan).unk15 + (vs->key - vs->sound->keyMap->keyBase) - 64)
+                        * audio_semitones_to_ratio(CSP_CHAN(chan).unk15 + (vs->key - vs->sound->keyMap->keyBase) - 64)
                         * CSP_CHAN(chan).pitchBend
                         * vs->vibrato);
             }
@@ -291,18 +291,18 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
 
         case 0x1A:
             if (seqp->nextEvent.msg.unknown2.unk1 < 8) {
-                void *fx = func_1001D9B0(seqp->nextEvent.msg.unknown2.unk0);
+                void *fx = n_syn_get_aux_fx(seqp->nextEvent.msg.unknown2.unk0);
 
                 if (fx) {
-                    func_1001DAA0(fx,
+                    n_fx_set_param(fx,
                             (seqp->nextEvent.msg.unknown2.unk2 << 3) | (seqp->nextEvent.msg.unknown2.unk1 & 7),
                             &seqp->nextEvent.msg.unknown2.unk4);
                 }
             } else {
-                void *fx = func_1001DA28(seqp->nextEvent.msg.unknown2.unk0);
+                void *fx = n_syn_get_aux_filter(seqp->nextEvent.msg.unknown2.unk0);
 
                 if (fx) {
-                    func_1001DAE4(fx, seqp->nextEvent.msg.unknown2.unk1, &seqp->nextEvent.msg.unknown2.unk4);
+                    n_fx_filter_set_param(fx, seqp->nextEvent.msg.unknown2.unk1, &seqp->nextEvent.msg.unknown2.unk4);
                 }
             }
             break;
@@ -648,7 +648,7 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
             sp76 = chanstate->unk14;
 
             if (sp76) {
-                sp70 = 440 * func_1001CEA4(cents / 100 + chanstate->unk15 - 64) * chanstate->pitchBend;
+                sp70 = 440 * audio_semitones_to_ratio(cents / 100 + chanstate->unk15 - 64) * chanstate->pitchBend;
             } else {
                 sp70 = 127.0f;
             }
@@ -792,7 +792,7 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                 if (vs->channel == chan) {
                     n_alSynSetPitch(&vs->voice, vs->pitch * bendRatio * vs->vibrato);
                     if (CSP_CHAN(chan).unk14) {
-                        func_1001CA90(&vs->voice, 440 * func_1001CEA4(CSP_CHAN(chan).unk15 + (vs->key - vs->sound->keyMap->keyBase) - 64) * bendRatio * vs->vibrato);
+                        n_syn_set_voice_cutoff(&vs->voice, 440 * audio_semitones_to_ratio(CSP_CHAN(chan).unk15 + (vs->key - vs->sound->keyMap->keyBase) - 64) * bendRatio * vs->vibrato);
                     }
                 }
             }

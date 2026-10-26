@@ -30,7 +30,7 @@ void boot_idle_thread_main(s32 arg0) {
 
 #ifdef NON_MATCHING
 /* P281: readable C for boot_game_thread_main (compiled C, 210 insns; EU version of the commented US draft below). It ends
-   in func_15007830, which never returns (difftest stubs it, so the whole body is compared). */
+   in game_thread_main, which never returns (difftest stubs it, so the whole body is compared). */
 extern OSMesgQueue D_8003B578;   /* VI retrace queue (reset path) */
 extern OSMesg D_8003BC10[8];
 extern OSViMode D_8002AF20;
@@ -44,7 +44,7 @@ extern u8 *D_80035858;
 extern u32 *D_8003585C;          /* per-4 KB-page offsets of the compressed game code */
 extern u8 D_151FA920[];          /* end of the game segment's code */
 void game_init_message_queues(void);
-void func_15007830(void);
+void game_thread_main(void);
 void os_create_vi_manager(OSPri pri);
 void heap_init(void);
 void rzip_build_fixed_tables(void);
@@ -56,7 +56,7 @@ void heap_free(s32 arg0);
 // the memory clear; clears memory up to 0x80400000 (after a reset only from the heap), sets up the heap and two
 // frame buffers, reads and decompresses the game code's first part, reads the page offset table of the rest
 // (decrypted: xor 0x8039CCCA, plus the segment's ROM address), sets up the TLB area (tlb_area_init) and enters
-// the game (func_15007830, no return).
+// the game (game_thread_main, no return).
 /* was func_10001194 */
 void boot_game_thread_main(s32 arg0) {
     u32 len;
@@ -114,7 +114,7 @@ void boot_game_thread_main(s32 arg0) {
     tlb_area_init(0xEB);
     boot_clear_low_block();
     tlb_page_bitmap_reset();
-    func_15007830();
+    game_thread_main();
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_1050/boot_game_thread_main.s")
@@ -178,5 +178,5 @@ void boot_game_thread_main(s32 arg0) {
 //     tlb_area_init(0xEB);
 //     boot_clear_low_block();
 //     tlb_page_bitmap_reset();
-//     func_15007830();
+//     game_thread_main();
 // }

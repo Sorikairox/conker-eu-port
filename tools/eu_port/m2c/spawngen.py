@@ -2,10 +2,10 @@
 """Bulk C drafts for the effect-spawner family, read straight from the asm.
 
 usage: spawngen.py <outdir> [func ...]   (default: every asm function under conker/asm/nonmatchings
-       that calls func_15149130/func_151491F4 and then memcpy, and nothing else)
+       that calls effect_node_create/effect_node_create_nodraw and then memcpy, and nothing else)
 
-Shape (session 9): build a parameter struct on the stack, call the spawner (A = func_15149130,
-9 args; B = func_151491F4, 8 args), and if it returned non-NULL memcpy the struct to ret + 0x28.
+Shape (session 9): build a parameter struct on the stack, call the spawner (A = effect_node_create,
+9 args; B = effect_node_create_nodraw, 8 args), and if it returned non-NULL memcpy the struct to ret + 0x28.
 Optional `if (arg0 == NULL) return;` guard and `return ret;`. A small symbolic interpreter of the
 asm recovers the struct fields (stores into [X, X+size) of the memcpy source), the call args
 (a0-a3 at the jal and the 0x10.. stack slots) and the parameter types (lbu/lb/lh/lhu/lw/lwc1 of
@@ -36,7 +36,7 @@ _conker_guard()
 
 ROOT = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker')
 LINE = re.compile(r'/\* [0-9A-F]+ ([0-9A-F]{8}) [0-9A-F]{8} \*/\s+(\S+)\s*(.*)')
-CALLEE = {'func_15149130': 9, 'func_151491F4': 8}
+CALLEE = {'effect_node_create': 9, 'effect_node_create_nodraw': 8}
 PURE = {'random_int': ('$v0', 'u'), 'random_float': ('$f0', 'f')}   # no-arg helpers (random u8 / f32)
 _SYMS = []
 
@@ -626,9 +626,9 @@ class Sim:
         sig = ', '.join(params) or 'void'
         rt = 'struct260 *' if self.ret else 'void '
         a = list(self.call)
-        if self.callee == 'func_15149130' and a[6].k == 'p':
+        if self.callee == 'effect_node_create' and a[6].k == 'p':
             a[6] = E('(struct37 *)(%s)' % a[6].t)
-        if self.callee == 'func_15149130' and a[6].k == 'c' and a[6].v == 0:
+        if self.callee == 'effect_node_create' and a[6].k == 'c' and a[6].v == 0:
             a[6] = E('NULL')
         call = '%s(%s)' % (self.callee, ', '.join(x.t for x in a))
         # statements before the spawner call: (seq, text, is_call_boundary)

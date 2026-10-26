@@ -4,9 +4,9 @@
 \#^    \*(f32 \*) (obj + 0x98) = y0;$#s/y0/z0/
 \#^    dx = x1 - x0;$#s/x1 - x0/x0 - x1/
 \#^    dz = z1 - z0;$#s/z0;/y0;/
-\#^    \*(f32 \*) (obj + 0xA4) = func_150484A0(-dx, -dz);$#s/-dx, -dz/-dz, -dx/
-\#^    \*(f32 \*) (obj + 0xA0) = func_150484A0(y1 - y0, sqrtf#s/y1 - y0/y0 - y1/
-\#^    \*(f32 \*) (obj + 0xA0) = func_150484A0(y1 - y0, sqrtf#s/dx \* dx + dz \* dz/dx * dx + dx * dz/
+\#^    \*(f32 \*) (obj + 0xA4) = math_atan2f(-dx, -dz);$#s/-dx, -dz/-dz, -dx/
+\#^    \*(f32 \*) (obj + 0xA0) = math_atan2f(y1 - y0, sqrtf#s/y1 - y0/y0 - y1/
+\#^    \*(f32 \*) (obj + 0xA0) = math_atan2f(y1 - y0, sqrtf#s/dx \* dx + dz \* dz/dx * dx + dx * dz/
 \#^    \*(f32 \*) (obj + 0xC8) = 0\.0f;$#s/0\.0f/1.0f/
 \#^    \*(f32 \*) (obj + 0xB4) = y1;$#s/y1/x1/
 \#^    \*(f32 \*) (obj + 0xAC) = w1;$#s/w1/w0/

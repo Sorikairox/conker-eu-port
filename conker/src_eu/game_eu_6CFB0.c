@@ -20,11 +20,11 @@ void anim_advance_frame(u8 *, f32, s32, s32); /* P59: void in the NM definition 
 s32 anim_advance_frame(u8 *, f32, s32, s32);
 #endif
 #ifdef NON_MATCHING
-void func_150A86B0(s32 *, s32, u8 *, s32, s32, s16 *, s32, s32);
+void anim_eval_joint_matrices(s32 *, s32, u8 *, s32, s32, s16 *, s32, s32);
 #else
-s32 func_150A86B0(s32 *, s32, u8 *, s32, s32, s16 *, s32, s32);
+s32 anim_eval_joint_matrices(s32 *, s32, u8 *, s32, s32, s16 *, s32, s32);
 #endif
-s32 func_150A9E64(s32, u8);
+s32 mtx_f_to_l_batch(s32, u8);
 
 /* was func_1503F7A0 */
 void animmodel_update_matrices(u8 *arg0)
@@ -48,8 +48,8 @@ void animmodel_update_matrices(u8 *arg0)
     temp_v0_2 = (u8 *) (((u32) arg0) + (D_800BE9C0 * 4));
     temp_v0 = *((s32 *) (((u8 *) temp_v0_2) + 0x3E0));
     sp38 = *((s32 *) (((u8 *) temp_v0_2) + 0x3E8));
-    func_150A86B0(&sp38, temp_v0, arg0, *((s32 *) (((u8 *) arg0) + 0x3F0)), (s32) (*((u8 *) (((u8 *) arg0) + 0x3F4))), sp40, 0, 0);
-    func_150A9E64(*((s32 *) (((u8 *) ((u8 *) (((u32) arg0) + (D_800BE9C0 * 4)))) + 0x3E8)), *((u8 *) (((u8 *) arg0) + 0x3F4)));
+    anim_eval_joint_matrices(&sp38, temp_v0, arg0, *((s32 *) (((u8 *) arg0) + 0x3F0)), (s32) (*((u8 *) (((u8 *) arg0) + 0x3F4))), sp40, 0, 0);
+    mtx_f_to_l_batch(*((s32 *) (((u8 *) ((u8 *) (((u32) arg0) + (D_800BE9C0 * 4)))) + 0x3E8)), *((u8 *) (((u8 *) arg0) + 0x3F4)));
     *((s8 *) (((u8 *) arg0) + 0x3F6)) = 1;
   }
   anim_advance_frame(arg0, D_800BE9A4, 0, 0);

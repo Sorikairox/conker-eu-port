@@ -8,7 +8,8 @@ f32 obj_carry_release(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s
 s32 obj_carry_pickup(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 
 // logf: Perfect Dark src/lib/mp3/lib_47ef0.c func00047ef0; Conker: `*= 0.5f`, `+= self`, `return 0.0f` (s90)
-f32 func_1504A620(f32 arg0)
+/* was func_1504A620 */
+f32 math_logf(f32 arg0)
 {
 	s32 sp14;
 	f32 sp10;
@@ -51,7 +52,7 @@ f32 func_1504A620(f32 arg0)
 	return sp08;
 }
 // NON-MATCHING: work-in-progress...
-// f32 func_1504A620(f32 arg0) {
+// f32 math_logf(f32 arg0) {
 //     f32 temp_f14;
 //     f32 temp_f2;
 //     f32 phi_f2;

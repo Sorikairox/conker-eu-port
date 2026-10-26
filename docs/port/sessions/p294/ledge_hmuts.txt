@@ -22,7 +22,7 @@ s|    cq = bestFoot\[0\] \* bestFoot\[0\] - NMW_F32(D_8009FACC) + |    cq = best
 s|    if (!(disc > 0.0f)) {|    if (!(disc > 1.0f)) {|
 s|    if (bestIcept.f > 0.0f) {|    if (bestIcept.f < 0.0f) {|
 s|    wz = lx \* w->si + t \* w->co;|    wz = lx * w->si - t * w->co;|
-s|    ang = func_150484A0(1.0f, m) \* NMW_F32(D_8009FAD0) - 90.0f;|    ang = func_150484A0(1.0f, m) * NMW_F32(D_8009FAD0);|
+s|    ang = math_atan2f(1.0f, m) \* NMW_F32(D_8009FAD0) - 90.0f;|    ang = math_atan2f(1.0f, m) * NMW_F32(D_8009FAD0);|
 s|    if (bestIcept.i < 0) {|    if (bestIcept.f < 0.0f) {|
 s|        w.margin = mg + 10;|        w.margin = mg + 1;|
 s|        w.ledgeHi = 65.0f;|        w.ledgeHi = 66.0f;|

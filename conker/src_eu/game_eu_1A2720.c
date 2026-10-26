@@ -31,7 +31,7 @@ s32 light_fx_update();
 
 /* was func_15174F68 */
 void level_update_frame(s32 arg0, s32 arg1) {
-    func_15165F70();
+    level_frame_hook_nop();
     texscroll_update(D_800B0E00[0], D_800B0E00[1]);
     tex_scroll_update();
     if (D_800B0DF0->padB[0] != 0) {

@@ -553,11 +553,11 @@ def k0_ptr_sites(text, st):
     return ''.join(out)
 
 
-# P185: PHYS_TO_K0 on an address the PC layer already returns as a wasm pointer. func_151F3C4C (libultra/audio
+# P185: PHYS_TO_K0 on an address the PC layer already returns as a wasm pointer. mp3_stream_rom_read (libultra/audio
 # game_21FC90, the mixer's read callback, installed by audio_fx_mixer_init since port P172) does `p = dma(...); p +=
 # 0x80000000; bcopy(p, ...)`: the dma proc returns osVirtualToPhysical(buf), which is the wasm address on the PC
 # (pc_os.c), so the add is dropped (+0). Without it the first mixer read traps (bcopy out of bounds, boot ~retrace 120).
-K0_ADD_SITES = {'func_151F3C4C': 1}
+K0_ADD_SITES = {'mp3_stream_rom_read': 1}
 
 
 def k0_add_sites(text, st):

@@ -283,7 +283,7 @@ void save_config_write(void);
 void save_options_load(void);
 void save_options_write(void);
 s32 eeprom_async_write_step(s32);
-s32 func_151DDA10(OSMesgQueue *);
+s32 game_eeprom_probe(OSMesgQueue *);
 extern u8 D_800843F4;
 extern s32 D_800BE810;
 
@@ -299,7 +299,7 @@ void save_process_request(void) {
     }
     state = D_800843F4;
     if (state != 2) {
-        D_800843F4 = func_151DDA10(&D_800BE900);
+        D_800843F4 = game_eeprom_probe(&D_800BE900);
         state = D_800843F4;
         mode = (s8)D_80082BB4;
     }

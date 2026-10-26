@@ -4,10 +4,12 @@
 #include "variables.h"
 
 
-void func_15004F00(void) {
+/* was func_15004F00 */
+void attachment_list_reset(void) {
     D_800C3EE0 = 0;
 }
 
-void func_15004F10(void) {
+/* was func_15004F10 */
+void joint_chain_reset_mask_init(void) {
     D_800C4000 = 0xF;
 }

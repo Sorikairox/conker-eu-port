@@ -79,7 +79,7 @@ extern s32 D_800A4AA0;
 // record (effect3d_spawn_full, handlers D_800A4AA0, 0x44 extra bytes at +0x110 holding obj, its index obj +0x3B, the
 // effect object obj_find_by_setup_id(18), kind 18, `arg1`, two random angles 0..2pi), two flame sprites
 // (path_record_create with the 0x50-byte flame definition; their +0x60 blocks get obj / index / effect / sprite number)
-// stored at +0x12C / +0x130, a light (func_15149130, its +0x28 gets effect / 0.0) at +0x134, a smoke emitter
+// stored at +0x12C / +0x130, a light (effect_node_create, its +0x28 gets effect / 0.0) at +0x134, a smoke emitter
 // (tether_smoke_emitter_spawn, colour (255, 217, 160)) at +0x138 and tether_light_spawn(70, 255, 130, 0) at +0x13C; all owned by
 // arg2 / arg3. Returns the effect (NULL when none). Bytes +0x1C..+0x2F of the extra block are not set by the
 // asm (uninitialised stack copied).
@@ -245,7 +245,7 @@ u8 *tether_effect_start(struct127 *arg0, u8 arg1, s32 arg2, s32 arg3) {
     } while (spay.i < 2);
     lpay.eff = e;
     lpay.u4 = 0.0f;
-    s = (u8 *)func_15149130(300, -1, 34, -1, 0, 32, (struct37 *)8, arg2, arg3);
+    s = (u8 *)effect_node_create(300, -1, 34, -1, 0, 32, (struct37 *)8, arg2, arg3);
     *(u8 **)(e + 0x110 + 0x24) = s;
     if (s != NULL) {
         memcpy(s + 0x28, &lpay, 8);
@@ -792,13 +792,13 @@ void tether_flame_clear_slot(void *arg0) {
 /* was func_150F0840 */
 void tether_glow_retire(void *arg0) {
     tether_glow_clear_slot(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_150F086C */
 void tether_glow_free(void *arg0) {
     tether_glow_clear_slot(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 /* was func_150F0898 */
@@ -1293,7 +1293,7 @@ void obj_trail_emitter_spawn(u8 *arg0) {
     tmp.unkC = *(f32 *)(arg0 + 0x14);
     tmp.unk10 = *(f32 *)(arg0 + 0x18);
     tmp.unk14 = *(f32 *)(arg0 + 0x1C);
-    temp_v0 = func_15149130(300, -1, 0x4C, -1, 0, 0x3A, 0x18, 255, 1);
+    temp_v0 = effect_node_create(300, -1, 0x4C, -1, 0, 0x3A, 0x18, 255, 1);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x18);
     }
@@ -1459,10 +1459,10 @@ void obj_trail_emitter_update(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/obj_trail_emitter_update.s")
 #endif
 #ifdef NON_MATCHING
-void func_15149514(s32, u8, s32, s32, s32);
+void effect_node_link_message(s32, u8, s32, s32, s32);
 // fx_hit_handler: P237. Hit handler of an effect (sibling of fx_target_light_on_message; record at +0x28 = target id, +0x2C =
 // target slot byte). Event 0x43: when the hitter `other` is the target (same id, or same byte +4 as +0x2C) the effect
-// ends (node_destroy). Any other event is passed on to func_15149514(other, event, &id, &slot, obj).
+// ends (node_destroy). Any other event is passed on to effect_node_link_message(other, event, &id, &slot, obj).
 /* was func_150F1B78 */
 void fx_target_effect_on_message(u8 *obj, s32 *other, u8 event) {
     u8 *p = obj + 0x28;
@@ -1473,7 +1473,7 @@ void fx_target_effect_on_message(u8 *obj, s32 *other, u8 event) {
         }
         return;
     }
-    func_15149514((s32) other, event, (s32) p, (s32) (p + 4), (s32) obj);
+    effect_node_link_message((s32) other, event, (s32) p, (s32) (p + 4), (s32) obj);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/fx_target_effect_on_message.s")

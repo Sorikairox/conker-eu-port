@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_150120B0(s32 arg0) {
+/* was func_150120B0 */
+void ambient_fx_spawn_type4(s32 arg0) {
     struct37 *temp_v0;
     struct184 tmp;
 
@@ -17,13 +18,14 @@ void func_150120B0(s32 arg0) {
     tmp.unk18 = 0.0f;
     tmp.unk1C = D_80096540;
 
-    temp_v0 = func_15149130(300, -1, 30, -1, 0, 65, 32, 255, 1);
+    temp_v0 = effect_node_create(300, -1, 30, -1, 0, 65, 32, 255, 1);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, 32);
     }
 }
 
-void func_1501214C(struct127 *arg0) {
+/* was func_1501214C */
+void obj_drip_attach(struct127 *arg0) {
     struct185 tmp;
 
     if (D_800BE9F0 != 24) {

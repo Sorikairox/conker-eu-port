@@ -62,7 +62,7 @@ typedef struct {
     s16 pad;
     f32 f4, f8, fC;
 } ImpactTrail;
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, f32 *, ImpactSurface *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, f32 *, ImpactSurface *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 u8 prop_is_flagged(s32 arg0);
 void vec3_to_yaw_pitch_deg(f32 *dir, f32 *yaw, f32 *pitch);
 s32 vec3_normalize_len(f32 *dir, f32 *out, f32 *a, f32 *b);
@@ -75,7 +75,7 @@ extern u8 D_800DCE50;  /* spark count shift (0 = full) */
 extern f32 D_800DCE54; /* spark chance */
 
 // impact_effect_spawn: P203: effects where a shot or blow hits `pos` coming along `dir`. The surface: the caller's
-// hit record (`hit`, 0x12 bytes) at pos, else a ray from pos - dir along dir (func_150ACEA0) gives the hit point,
+// hit record (`hit`, 0x12 bytes) at pos, else a ray from pos - dir along dir (collision_ray_cast) gives the hit point,
 // surface and material id (-1 when nothing is hit). kind (0..5, others do nothing) picks the particle type (0x34,
 // 0x4D, 0x57, 0x58, 0x0C, none). `big` = a random odd number or a surface without material (prop_is_flagged == 0).
 // Kind 1 (bullet) plays a ricochet: a random 0x459..0x45B one-shot (sfx_emitter_start, only in one-player mode, then
@@ -126,7 +126,7 @@ s32 bullet_impact_effects(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 
             break;
     }
     if (hit == NULL) {
-        if (func_150ACEA0(pos[0] - dir[0], pos[1] - dir[1], pos[2] - dir[2], dir[0], dir[1], dir[2], &ray_u, &surf,
+        if (collision_ray_cast(pos[0] - dir[0], pos[1] - dir[1], pos[2] - dir[2], dir[0], dir[1], dir[2], &ray_u, &surf,
                           &hit_pos[0], &hit_pos[1], &hit_pos[2], &ray_t, &surf_id, 0, 0.0f) != 0) {
             found = TRUE;
         } else {
@@ -373,7 +373,7 @@ s32 object_effects_at(f32 *pos, f32 *dir, struct127 *obj, struct127 *model, s32 
     s32 index;
 
     if (dir != NULL) {
-        a = func_150484A0(dir[0], dir[2]) * 10430.378f;
+        a = math_atan2f(dir[0], dir[2]) * 10430.378f;
         /* IDO's f32 -> u32 conversion: below 0 gives 0xFFFFFFFF (undefined in C, wasm traps) */
         angle = (a <= -1.0f) ? 0xFFFFFFFF : (u32)a;
         facing = ((angle - 0x4000) | 1) & 0xFFFF;
@@ -411,7 +411,7 @@ void object_effect_at(f32 *pos, f32 *dir, struct127 *obj, s32 arg3, s32 sound) {
 
     facing = 0;
     if (dir != NULL) {
-        a = func_150484A0(dir[0], dir[2]) * 10430.378f;
+        a = math_atan2f(dir[0], dir[2]) * 10430.378f;
         /* IDO's f32 -> u32 conversion: below 0 gives 0xFFFFFFFF (undefined in C, wasm traps) */
         angle = (a <= -1.0f) ? 0xFFFFFFFF : (u32)a;
         facing = ((angle - 0x4000) | 1) & 0xFFFF;
@@ -524,7 +524,7 @@ void obj_point_fx_broadcast_kill(u8 *arg0) {
 
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
-    func_151494E0(&tmp, 0x3C);
+    effect_nodes_broadcast(&tmp, 0x3C);
 }
 
 #ifdef NON_MATCHING
@@ -544,7 +544,7 @@ typedef struct {
 
 // object_point_effect_spawn: fills a 0x20-byte record (object, kind, the kind's point on the object from the
 // D_80090010 handler when the object has bone matrices and obj[0x74] low nibble != 0xF) and spawns event 0x41 /
-// kind 0x35 through func_15149130 with it. Returns 0 (callers in game_981E0 declare it implicitly as int).
+// kind 0x35 through effect_node_create with it. Returns 0 (callers in game_981E0 declare it implicitly as int).
 /* was func_151D469C */
 s32 object_point_effect_spawn(u8 *obj, u8 kind, s16 arg2, u8 arg3, s32 arg4) {
     ObjEffectRec_151D469C rec;
@@ -563,7 +563,7 @@ s32 object_point_effect_spawn(u8 *obj, u8 kind, s16 arg2, u8 arg3, s32 arg4) {
         D_80090010[kind](obj, rec.sound, rec.point);
         rec.flags |= 1;
     }
-    p = (u8 *)func_15149130(arg2, -1, 0x41, -1, 1, 0x35, (struct37 *)0x20, arg3, arg4);
+    p = (u8 *)effect_node_create(arg2, -1, 0x41, -1, 1, 0x35, (struct37 *)0x20, arg3, arg4);
     if (p != NULL) {
         memcpy(p + 0x28, &rec, 0x20);
     }
@@ -722,7 +722,7 @@ void obj_point_fx_on_message(struct102 *arg0, u8 *arg1, u8 arg2)
       *q &= ~1;
     }
   } else {
-    func_15149514((s32)arg1, arg2, (s32)p, (s32)(p + 4), (s32)arg0);
+    effect_node_link_message((s32)arg1, arg2, (s32)p, (s32)(p + 4), (s32)arg0);
   }
 }
 
@@ -779,7 +779,7 @@ s32 obj_send_hit(struct127 *, s32, u16, s32);
  * loses one, else it is cleared, obj_set_dying_flags / object_hit_effect (obj, 0xFF, 1) run and the message flags become
  * 0x100020 (else `flags` | 0x60000). Then object_impact_effects (obj, pos, pos2, dir, arg7, arg8); and only if the count
  * was non-zero on entry, the message obj_send_hit(obj, flags | 0x80000, (dir angle - 0x4000) | 1, attacker index
- * or -1). The angle is func_150484A0(dir x, dir z) x 65536 / 2pi converted as IDO's float -> unsigned (negative ->
+ * or -1). The angle is math_atan2f(dir x, dir z) x 65536 / 2pi converted as IDO's float -> unsigned (negative ->
  * 0xFFFF). */
 /* was func_151D535C */
 void object_take_hit(u8 *obj, u8 *attacker, u8 *pos, f32 *pos2, u8 *rec, s32 flags, f32 *dir, u8 arg7, s32 arg8) {
@@ -815,7 +815,7 @@ void object_take_hit(u8 *obj, u8 *attacker, u8 *pos, f32 *pos2, u8 *rec, s32 fla
     if (untouched != 0) {
         return;
     }
-    w = (s32) (func_150484A0(dir[0], dir[2]) * 10430.378f);
+    w = (s32) (math_atan2f(dir[0], dir[2]) * 10430.378f);
     angle = (w < 0) ? 0xFFFF : w;
     obj_send_hit((struct127 *) obj, flags | 0x80000, (u16) ((angle - 0x4000) | 1),
                   (attacker != NULL) ? (struct127 *) attacker - D_800CC2D0 : -1);

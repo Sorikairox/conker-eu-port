@@ -473,12 +473,12 @@ void impact_dust_smoke_puff(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f3
 
     bzero(&sp, sizeof(sp));
     if (arg4 != 0.0f) {
-        a = func_150484A0(arg3, arg4) * 57.295776f;
+        a = math_atan2f(arg3, arg4) * 57.295776f;
     } else {
         a = 90.0f;
     }
     if (arg5 != 0.0f) {
-        b = func_150484A0(arg3, arg5) * 57.295776f;
+        b = math_atan2f(arg3, arg5) * 57.295776f;
     } else {
         b = 90.0f;
     }

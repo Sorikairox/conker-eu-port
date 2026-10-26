@@ -30,12 +30,12 @@ void level_obj_init_d34b8_effect(void) {
     sp.u54 = 0;
     sp.u58 = D_800D34B8 + 0xEA0;
     sp.u5C = D_800D34B8 + 0xED4;
-    temp_v0 = func_15149130(0x12C, -1, 0x5E, -1, 0U, 0U, (struct37 *)0xC, 0xFFU, 1);
+    temp_v0 = effect_node_create(0x12C, -1, 0x5E, -1, 0U, 0U, (struct37 *)0xC, 0xFFU, 1);
     if (temp_v0 != NULL) {
         memcpy(((struct260 *)((u8 *)temp_v0 + 0x28)), &sp.u54, 0xC);
     }
     if (D_800D2E4C->unk12 & 0x40) {
-        func_15149130(5, 9, -1, -1, 1U, 0U, NULL, 0xFFU, 1);
+        effect_node_create(5, 9, -1, -1, 1U, 0U, NULL, 0xFFU, 1);
     }
 }
 #else
@@ -53,12 +53,12 @@ void level_obj_init_d34b8_effect(void) {
 //     tmp.unk4 = *((s32*) &D_800D3098) + 0xEA0;
 //     tmp.unk8 = *((s32*) &D_800D3098) + 0xED4;
 
-//     temp_v0 = func_15149130(300, -1, 94, -1, 0, 0, 12, 255, 1);
+//     temp_v0 = effect_node_create(300, -1, 94, -1, 0, 0, 12, 255, 1);
 //     if (temp_v0 != NULL) {
 //         memcpy(&temp_v0->unk28, &tmp, 12); // memcpy
 //     }
 //     if ((D_800D2E4C->unk12 & 0x40) != 0) {
-//         func_15149130(5, 9, -1, -1, 1, 0, 0, 255, 1);
+//         effect_node_create(5, 9, -1, -1, 1, 0, 0, 255, 1);
 //     }
 // }
 

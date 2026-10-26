@@ -922,7 +922,7 @@ u8 *hud_counter_digits_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
  * hud_counter_digits_draw). */
 u8 * hud_health_draw(Gfx *, s32);
 void hud_anim_model_free(u8 *arg0);
-void func_151F0114(void *, float, float, float, float, float, float, float);
+void game_gu_ortho(void *, float, float, float, float, float, float, float);
 s8 mp_is_free_for_all(void);
 void texture_unref_age3(s32);
 u8 *event_get_vars(s32);
@@ -1102,7 +1102,7 @@ u8 *hud_ingame_draw(u8 *arg0) {
                 temp_f0 = (*(f32 *)((u8 *)D_800BE628 + 4)) * 0.5f;
                 temp_f2 = (*(f32 *)((u8 *)D_800BE628 + 8)) * 0.5f;
                 var_s0_2 = hud_health_draw(temp_s0_4 + 1, 1);
-                func_151F0114(&D_800E1068, -temp_f0, temp_f0, -temp_f2, temp_f2, 1.0f, 20000.0f, 1.0f);
+                game_gu_ortho(&D_800E1068, -temp_f0, temp_f0, -temp_f2, temp_f2, 1.0f, 20000.0f, 1.0f);
                 D_800E1060 = D_8009016C;
                 if (D_80090408 != 0) {
                     var_v0_3 = 0xA;

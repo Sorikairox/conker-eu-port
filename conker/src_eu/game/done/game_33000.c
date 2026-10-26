@@ -4,5 +4,6 @@
 #include "variables.h"
 
 
-void func_15005B50(s32 arg0) {
+/* was func_15005B50 */
+void camera_level_hook05_noop(s32 arg0) {
 }

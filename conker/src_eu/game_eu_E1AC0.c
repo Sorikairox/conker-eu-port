@@ -14,17 +14,17 @@ void water_jets_stop_all(void) {
 
     fxrec_broadcast(0, 5);
     sp24[0] = 0;
-    func_151494E0((s32) sp24, 0x18U);
+    effect_nodes_broadcast((s32) sp24, 0x18U);
     sp24[0] = 2;
-    func_151494E0((s32) sp24, 0x18U);
+    effect_nodes_broadcast((s32) sp24, 0x18U);
     sp24[0] = 4;
-    func_151494E0((s32) sp24, 0x18U);
+    effect_nodes_broadcast((s32) sp24, 0x18U);
     sp24[0] = 1;
-    func_151494E0((s32) sp24, 0x18U);
+    effect_nodes_broadcast((s32) sp24, 0x18U);
     sp24[0] = 3;
-    func_151494E0((s32) sp24, 0x18U);
+    effect_nodes_broadcast((s32) sp24, 0x18U);
     sp24[0] = 5;
-    func_151494E0((s32) sp24, 0x18U);
+    effect_nodes_broadcast((s32) sp24, 0x18U);
 }
 
 s32 sfx_emitter_stop_at(u16, s16, s16, s16, s32);

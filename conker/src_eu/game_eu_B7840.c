@@ -949,14 +949,14 @@ s32 rail_cmd_stub(s32 arg0) {
 
 #ifdef NON_MATCHING
 f32 rail_wall_hit(f32 x, f32 y, f32 z, f32 dx, f32 dz);
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 extern s16 D_80087664[];
 
 // rail_pair_sight: P237. Line-of-sight test between rail racers a and b (rail_pair_rivals pairs them). Each racer's
 // record (obj_find_by_spawn(id & 0xFFFF0FFF)) gives an eye point: a racer whose state block (+0x31C) has +0x84 set
 // looks from y + 0.75 * height (+0x114, s16), 50 lower for state kind 9 (+0x75 & 0x7F); a record of kind 0x1F from
 // y + 80; when only the OTHER racer has +0x84 set and the difficulty's D_80087664 entry is not -1, from the s16
-// point +0x1A4 / +0x1A6 / +0x1A8; else from y + 40. The ray a -> b is cast with func_150ACEA0: no hit, or a hit
+// point +0x1A4 / +0x1A6 / +0x1A8; else from y + 40. The ray a -> b is cast with collision_ray_cast: no hit, or a hit
 // farther than the distance, means "seen", then rail_wall_hit (the wall test from a along x / z) > 0 clears it.
 // Rail block +0x16C0 masks: bit b of a's word and bit a of b's word when the pair is clear; bits 16 + b / 16 + a
 // when the ray reached the other racer (whatever the wall test said). Nothing when a record is missing.
@@ -1014,7 +1014,7 @@ void rail_pair_sight(s32 a, s32 b) {
         dz = zb - za;
         dx = xb - xa;
         dist = sqrtf(dx * dx + dy * dy + dz * dz);
-        if (func_150ACEA0(xa, ya, za, dx, dy, dz, 0, 0, &h0, &h1, &h2, &hit, 0, 0, 0.0f) == 0 || dist < hit) {
+        if (collision_ray_cast(xa, ya, za, dx, dy, dz, 0, 0, &h0, &h1, &h2, &hit, 0, 0, 0.0f) == 0 || dist < hit) {
             seen = 1;
             clear = 1;
             if (0.0f < rail_wall_hit(xa, ya, za, dx, dz)) {
@@ -1208,7 +1208,7 @@ void trail_send_aim_msg(u8 *, f32);
 // (rail +0x17A8 / +0x1828 / +0x17E8 per racer, s16 targets +0x1A4 / +0x1A6 / +0x1A8 with `replan`) moves towards the
 // node at rate +0x1868 * frame time (at most 1); ox swings the aim sideways (50 when close). The yaw / pitch errors
 // (math_atan2_u16 angles, wrap_angle_deg normalised) give the stick bytes (+0x85 / +0x86 or the vehicle's control block
-// +0x36C[2] / [3]); kinds that turn by themselves (`turn`) rotate +0x16C / +0x170 directly through func_15048758 instead.
+// +0x36C[2] / [3]); kinds that turn by themselves (`turn`) rotate +0x16C / +0x170 directly through math_wrap_deg_360 instead.
 // Then the button bits (+0x8A / +0x8C / +0x8E) follow the kind (mode 1: boost until D_80087678; 2: `limit` -> 10;
 // kind 0x1B: when the target is close below and paired in +0x16C0; kind 3 flies with trail_send_aim_msg), the height
 // value (+0x90 or the vehicle's +0x1A4) eases by 1/8 towards the pitch-derived height, and the vehicle's +0x1A8 is
@@ -1400,7 +1400,7 @@ s32 rail_racer_steer(s32 i, s32 node, s32 limit, s32 replan, s32 ox, s32 oz) {
         CF34_F(CF34_ST(obj), 0x16C) -= diff;
         CF34_F(CF34_ST(obj), 0x170) = pitch;
         smooth = (f32 *) (CF34_ST(obj) + 0x90);
-        func_15048758((f32 *) (CF34_ST(obj) + 0x16C));
+        math_wrap_deg_360((f32 *) (CF34_ST(obj) + 0x16C));
         CF34_F(CF34_ST(obj), 0x174) = CF34_F(CF34_ST(obj), 0x16C);
         CF34_F(CF34_ST(obj), 0x178) = CF34_F(CF34_ST(obj), 0x170);
         CF34_ST(obj)[0x85] = 0;

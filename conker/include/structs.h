@@ -3252,7 +3252,7 @@ typedef struct {
     s16 unk46;
     s32 unk48;
 } struct_eu_15154488;
-// object created by func_15149130 and attached to a struct127 list (game_16EE20)
+// object created by effect_node_create and attached to a struct127 list (game_16EE20)
 typedef struct {
     u8  pad0[0xE];
     s16 unkE;

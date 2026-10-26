@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15008DD0(void) {
+/* was func_15008DD0 */
+void player_morph_cache_clear(void) {
     s32 i;
 
     for (i = 0; i < 2; i++)

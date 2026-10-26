@@ -13,8 +13,8 @@
 void port_glog(const char *fmt, ...);
 #define port_log port_glog
 float cosf(float);
-float func_150AD78C(float);
-float func_150AD780(float);
+float fast_sinf(float);
+float fast_cosf(float);
 void mtx_set_identity(Mtx *); /* game_D5030.c (P131) */
 
 static int cmp_words(int what, /* 1 F2L, 2 L2F, 3 L2F->F2L, 4 perspF, 5 persp, 6 lookat, 7 ident */ const u32 *got, const unsigned *want, int n) {
@@ -68,7 +68,7 @@ int port_gu_test(void) {
     }
     for (i = -40; i <= 40; i++) {
         f32 x = i * 0.1f;
-        f32 s = func_150AD78C(x), c = func_150AD780(x), rs = sinf(x), rc = cosf(x);
+        f32 s = fast_sinf(x), c = fast_cosf(x), rs = sinf(x), rc = cosf(x);
         if (fabs_(s - rs) > 2e-6f || fabs_(c - rc) > 2e-6f) {
             if (bad < 8) port_log("[gutest] fast sin/cos(%d/10) %d %d, want %d %d (x1e6)\n", i, (int)(s * 1e6f), (int)(c * 1e6f), (int)(rs * 1e6f), (int)(rc * 1e6f));
             bad++;

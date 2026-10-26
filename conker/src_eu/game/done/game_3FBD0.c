@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-u8 func_15012720(void) {
+/* was func_15012720 */
+u8 level_get_proj_mode(void) {
     switch(D_800BE9F0)
     {
         case 0:

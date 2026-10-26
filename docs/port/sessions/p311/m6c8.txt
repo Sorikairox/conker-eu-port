@@ -69,7 +69,7 @@ s#if (\*(u16 \*) PPTR(0x36C) & 0x2000) {#if (*(u16 *) PPTR(0x36C) \& 0x4000) {# 
 s#0x1A2) >> 8) \* 1.0986328125f;$#0x1A2) >> 7) * 1.0986328125f;# % m2ride38
 s#off = PF32(0x8B4) - #off = PF32(0x8B0) - # % m2ride616
 s#            off = 0.0f;#            off = 1.0f;# % m2ride38
-s#func_15048758(&cam->yawTarget);#func_15048758(\&cam->pitchTarget);# % m2base
+s#math_wrap_deg_360(&cam->yawTarget);#math_wrap_deg_360(\&cam->pitchTarget);# % m2base
 s#lim = -5.0f;#lim = -6.0f;# % m2m34
 s#} else if (15.0f < cam->pitchTarget) {#} else if (14.0f < cam->pitchTarget) {# % m2m34c
 s#lim = -40.0f;#lim = -41.0f;# % m2m12b

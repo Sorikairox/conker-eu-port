@@ -9,7 +9,7 @@ void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
 void mtx_look_at_reflect(Mtx *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 argA);
 void vec3_dir_to(struct17 *arg0, struct17 *arg1, struct17 *arg2);
 f32 vec3_heading_deg(struct17 *arg0);
-f32 func_150484A0(f32 arg0, f32 arg1);
+f32 math_atan2f(f32 arg0, f32 arg1);
 void mtxf_rotate_xyz_deg(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
 void camera_calc_pitch(struct108 *arg0);
 void camera_sync_angles(struct108 *arg0);
@@ -189,7 +189,7 @@ void camera_build_view_matrix(struct108 *arg0) {
         obj = CAM_OBJ();
         a = *(f32 *)(obj + 0x130);
         b = *(f32 *)(obj + 0x138);
-        a = func_150484A0(*(f32 *)(obj + 0x134), sqrtf(a * a + b * b));
+        a = math_atan2f(*(f32 *)(obj + 0x134), sqrtf(a * a + b * b));
         mtxf_rotate_xyz_deg(rot, -a * 57.2957764f - CAM_F(0x858) * scale, yaw - CAM_F(0x85C) * scale, 0.0f);
         guMtxXFMF(rot, 0.0f, 0.0f, 1.0f, &ox, &oy, &oz);
         *(f32 *)(CAM_OBJ() + 0x130) = ox;
@@ -285,8 +285,8 @@ void camera_wobble_apply(u8 *arg0) {
         math_spring_approach((f32 *)(arg0 + 0x7DC), k, (f32 *)(arg0 + 0x7D8), 0.2f, 0.4f, *(f32 *)(arg0 + 0x7B4));
     }
     guMtxIdentF(mf);
-    mf[0][0] = 2.0f * *(f32 *)(arg0 + 0x7DC) + 2.0f * (*(f32 *)(arg0 + 0x7DC) * func_150AD78C(*(f32 *)(arg0 + 0x7B0))) + 1.0f;
-    mf[1][1] = *(f32 *)(arg0 + 0x7DC) + *(f32 *)(arg0 + 0x7DC) * func_150AD780(*(f32 *)(arg0 + 0x7B0)) + 1.0f;
+    mf[0][0] = 2.0f * *(f32 *)(arg0 + 0x7DC) + 2.0f * (*(f32 *)(arg0 + 0x7DC) * fast_sinf(*(f32 *)(arg0 + 0x7B0))) + 1.0f;
+    mf[1][1] = *(f32 *)(arg0 + 0x7DC) + *(f32 *)(arg0 + 0x7DC) * fast_cosf(*(f32 *)(arg0 + 0x7B0)) + 1.0f;
     guMtxF2L(mf, &m);
     guMtxCatL(arg0[0x23D] + D_800DC6D0[D_800BE9C0], &m, arg0[0x23D] + D_800DC6D0[D_800BE9C0]);
 }

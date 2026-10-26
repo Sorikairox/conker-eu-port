@@ -2,7 +2,7 @@
  *
  * ?p58model=N  log the first N calls (then every 256th) of
  *   - model_load (P51 C model load): arguments, result, D_800D19A0[id] / D_800C5000[id] after;
- *   - func_150A86B0 (P51 C skeleton evaluator, nm_asm/D5E90_anim.c): object, animation state, joint count, remap
+ *   - anim_eval_joint_matrices (P51 C skeleton evaluator, nm_asm/D5E90_anim.c): object, animation state, joint count, remap
  *     slots and the callback table entries they select, the adjustment buffer (how far the 0x1000 scan runs), the
  *     asm stubs reached inside (the callbacks), and a sanity check of the n joint matrices written: finite, the
  *     row norms (scale), the orthogonality of the 3x3 part, the distance to the parent joint against the skeleton's
@@ -72,7 +72,7 @@ void __wrap_obj_adjust_list_build(void *buf, int rec) {
     __real_obj_adjust_list_build(buf, rec);
 }
 
-/* ---- func_150A86B0 */
+/* ---- anim_eval_joint_matrices */
 #define NSTUB 16
 static const char *st_name[NSTUB];
 static unsigned st_n[NSTUB], st_count;
@@ -154,8 +154,8 @@ static int p58_anim_setup(unsigned char *A, const unsigned char *obj) {
     return 0;
 }
 
-void __real_func_150A86B0(int *arena, float (*m)[4], int anim, int skel, int n, unsigned char *buf, unsigned char *remap, int h);
-void __wrap_func_150A86B0(int *arena, float (*m)[4], int anim, int skel, int n, unsigned char *buf, unsigned char *remap, int h) {
+void __real_anim_eval_joint_matrices(int *arena, float (*m)[4], int anim, int skel, int n, unsigned char *buf, unsigned char *remap, int h);
+void __wrap_anim_eval_joint_matrices(int *arena, float (*m)[4], int anim, int skel, int n, unsigned char *buf, unsigned char *remap, int h) {
     static unsigned calls, rec0calls;
     unsigned char *a0 = (unsigned char *)(uintptr_t)*(unsigned *)arena;
     const unsigned char *sk = (const unsigned char *)(uintptr_t)skel;
@@ -184,7 +184,7 @@ void __wrap_func_150A86B0(int *arena, float (*m)[4], int anim, int skel, int n, 
     st_count = 0;
     { void (*prev_hook)(const char *) = port_stub_trace_hook; /* P88: restore, don't clear (?p88watch) */
     port_stub_trace_hook = p58_hook;
-    __real_func_150A86B0(arena, m, anim, skel, n, buf, remap, h);
+    __real_anim_eval_joint_matrices(arena, m, anim, skel, n, buf, remap, h);
     port_stub_trace_hook = prev_hook; }
     if (!fl_model && !fl_pose) return;
     /* the joint matrices: model space (root matrix undone); column 3 is never written by the evaluator */
@@ -267,7 +267,7 @@ void __wrap_func_150A86B0(int *arena, float (*m)[4], int anim, int skel, int n, 
             char sb[300]; int q = 0;
             for (i = 0; i < (int)st_count && q < 280; i++) q += snprintf(sb + q, sizeof sb - q, " %s x%u", st_name[i], st_n[i]);
             sb[q] = 0;
-            port_log("[p58] func_150A86B0 call %u frame %u: rec %d id %02X anim %08X (cnt %u, time %g, desc b6/7 %02X%02X) "
+            port_log("[p58] anim_eval_joint_matrices call %u frame %u: rec %d id %02X anim %08X (cnt %u, time %g, desc b6/7 %02X%02X) "
                      "skel %08X n %d arena %08X h %d | adjust scan %u (angle %u, scale %u, max off %X)%s | remap%s | "
                      "stubs inside:%s\n", calls, port_frame_count, rec, ob ? vbe_ld8(ob + 4) : 0xFF, anim,
                      anim ? vbe_ld8((unsigned char *)(uintptr_t)anim + 0x41) : 0, anim ? *(float *)(uintptr_t)(anim + 8) : 0,

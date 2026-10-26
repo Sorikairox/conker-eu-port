@@ -35,5 +35,5 @@ s#    ring\.u58 = 50;#    ring.u58 = 5;# % base
 s#    ring\.u20\[12\] = 10\.0f;#    ring.u20[12] = 1.0f;# % base
 s#    ring\.u20\[10\] = D_800A12F4_c\[0\];#    ring.u20[10] = D_800A12F0_c[0];# % base
 s#    debris_spray_spawn(\&ring, 0, room, arg2);#    debris_spray_spawn(\&ring, 1, room, arg2);# % base
-s#    e = (u8 \*) func_15149130(0xF, 8, -1, -1, 1, 0, (struct37 \*) 0xC, room, arg2);#    e = (u8 *) func_15149130(0xF, 8, -1, -1, 1, 1, (struct37 *) 0xC, room, arg2);# % base
+s#    e = (u8 \*) effect_node_create(0xF, 8, -1, -1, 1, 0, (struct37 \*) 0xC, room, arg2);#    e = (u8 *) effect_node_create(0xF, 8, -1, -1, 1, 1, (struct37 *) 0xC, room, arg2);# % base
 s#        memcpy(e + 0x28, \&at, 0xC);#        memcpy(e + 0x2C, \&at, 0xC);# % base

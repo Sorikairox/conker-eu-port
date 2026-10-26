@@ -207,7 +207,7 @@ void obj_carrier_update(struct127 *arg0) {
         if ((s32) temp_t9 < 0) {
             var_f12 += 4294967296.0f;
         }
-        (*(f32 *)((u8 *)temp_s0 + 0xB8)) = (f32) (func_150AD78C(var_f12 * 0.2f) * 6.0f);
+        (*(f32 *)((u8 *)temp_s0 + 0xB8)) = (f32) (fast_sinf(var_f12 * 0.2f) * 6.0f);
         obj_apply_gravity(arg0);
         (*(f32 *)((u8 *)temp_s0 + 0x18)) = (f32) (arg0->y_position - 170.0f);
         (*(s8 *)((u8 *)temp_s0 + 0x13C)) = (s8) (D_800C3E78 + 0x64);

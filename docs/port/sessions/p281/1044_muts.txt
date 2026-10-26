@@ -8,7 +8,7 @@ s/if (c >= 10) {/if (c > 10) {/
 s/c += 7;/c += 6;/
 s/value >>= 4;/value >>= 3;/
 s/pos -= 0x10;/pos -= 0x8;/
-s/pos = func_160014F0((s16 \*) pos, '-');/pos = func_160014F0((s16 *) pos, '+');/
+s/pos = debugger_draw_char((s16 \*) pos, '-');/pos = debugger_draw_char((s16 *) pos, '+');/
 s/value = -value;/value = value;/
 s/if (value < 0) {/if (value <= 0) {/
 s/p >= D_16003B50; p--/p > D_16003B50; p--/
@@ -22,7 +22,7 @@ s/exp >= 0xFF/exp > 0xFF/
 s/(value << 9) != 0/(value << 8) != 0/
 s/exp <= 0 ||/exp < 0 ||/
 s/D_160047E8, D_160047F0, D_160047F4/D_160047E8, D_160047F4, D_160047F0/
-s/func_160012B0(cell, buf);/func_160012B0(cell + 1, buf);/
-s/func_160012B0(cell, D_160047E4);/func_160012B0(cell, D_160047E8);/
+s/debugger_print_string(cell, buf);/debugger_print_string(cell + 1, buf);/
+s/debugger_print_string(cell, D_160047E4);/debugger_print_string(cell, D_160047E8);/
 s/        case 1:/        case 3:/
 s/digit = value \/ \*p;/digit = value \/ p[1];/

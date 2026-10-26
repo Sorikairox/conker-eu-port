@@ -4,13 +4,16 @@
 #include "variables.h"
 
 
-void func_15008B90(void) {
-    func_15008BB0();
+/* was func_15008B90 */
+void level_timed_queue_init(void) {
+    level_timed_queue_create();
 }
 
-void func_15008BB0(void) {
+/* was func_15008BB0 */
+void level_timed_queue_create(void) {
     D_800D98E0 = timed_queue_create(12, 1000, 1);
 }
 
-void func_15008BE0(void) {
+/* was func_15008BE0 */
+void level_load_stub(void) {
 }

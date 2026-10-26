@@ -1,7 +1,7 @@
 /* P58: game tables that live in the code segment, which the PC build does not load (the game code is native wasm).
  *
- * D_150AA11C: the sine table of the skeleton evaluator func_150A86B0 (nm_asm/D5E90_anim.c; in the unsplit
- * asm/D5E90.s right after func_150A9B0C): 513 f32 = sin(k * pi / 1024), k = 0..512, a quarter turn. Before P58 it
+ * D_150AA11C: the sine table of the skeleton evaluator anim_eval_joint_matrices (nm_asm/D5E90_anim.c; in the unsplit
+ * asm/D5E90.s right after mtx_rotate_scale_3x3): 513 f32 = sin(k * pi / 1024), k = 0..512, a quarter turn. Before P58 it
  * was a zero-filled 0x100-byte data stub (port/stubs/data_stubs.c, weak), so every rotation came out 0: all joint
  * matrices had a zero 3x3 part and every joint sat at the root joint's position. The ROM values are sin rounded to
  * 6 decimals, with 12 entries on the other side of the rounding (the original generator's sin was less precise near

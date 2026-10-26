@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32 *, s32 *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32 *, s32 *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
 s32 prop_is_flagged(s32);
 f32 vec3_dot(void *, void *);
 s32 memcpy(s32, s32, s32);
@@ -33,7 +33,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ u8 hit;       /* bit 0: the ray hit an accepted surface */
     /* 0x04 */ f32 pos[3];   /* hit point */
-    /* 0x10 */ s32 u10;      /* func_150ACEA0 outputs */
+    /* 0x10 */ s32 u10;      /* collision_ray_cast outputs */
     /* 0x14 */ s32 u14;
     /* 0x18 */ u8 pad18[0x10];
     /* 0x28 */ f32 side;     /* -1 / 1: sign of vec3_dot(hit - from, hit point) */
@@ -43,7 +43,7 @@ typedef struct {
 
 #ifdef NON_MATCHING
 // beam_ray_spawn: builds a type-0x41 effect3d_spawn_default request (from, to, a2 / a3 / arg4 floats, arg8 / arg9 bytes) and,
-// when `cast` is set, ray casts from -> to (func_150ACEA0): on a hit whose object passes prop_is_flagged the record
+// when `cast` is set, ray casts from -> to (collision_ray_cast): on a hit whose object passes prop_is_flagged the record
 // gets hit bit 0, the hit point and side = sign of vec3_dot(hit - from, hit). Spawns the object (effect3d_spawn_default
 // 0xF / 0x15, flags random bits 2 | 1, size 0x30, room arg5, owner arg6) and copies the record to its +0x110.
 // Returns the object (0 when the spawn fails).
@@ -84,7 +84,7 @@ s32 beam_ray_spawn(u8 *from, f32 *to, f32 a2, f32 a3, f32 arg4, u8 room, s32 own
     r.hit = 0;
     r.u2C = arg10;
     if (cast != 0
-        && func_150ACEA0(((f32 *) from)[0], ((f32 *) from)[1], ((f32 *) from)[2], to[0], to[1], to[2], &r.u10, &r.u14,
+        && collision_ray_cast(((f32 *) from)[0], ((f32 *) from)[1], ((f32 *) from)[2], to[0], to[1], to[2], &r.u10, &r.u14,
                          &r.pos[0], &r.pos[1], &r.pos[2], 0, &hitObj, 0, 0.0f) != 0
         && prop_is_flagged(hitObj) != 0) {
         d[0] = r.pos[0] - q.from[0];

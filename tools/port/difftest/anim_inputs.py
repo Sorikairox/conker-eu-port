@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""P51 research: real ROM inputs for func_150A86B0 (skeleton / animation evaluator, asm/D5E90.s).
+"""P51 research: real ROM inputs for anim_eval_joint_matrices (skeleton / animation evaluator, asm/D5E90.s).
 
 Reproduces, in Python, what the game does before obj_build_model_instance calls
-  func_150A86B0(&D_800C42A8, m, A = obj+0x2D0, S = D_800C5000[id], n = model_joint_mtx_count(id), buf, remap, h)
+  anim_eval_joint_matrices(&D_800C42A8, m, A = obj+0x2D0, S = D_800C5000[id], n = model_joint_mtx_count(id), buf, remap, h)
 for a single (unblended) animation:
   * model_load(id)          model asset (1, id)            -> S (skeleton), D_800C52F0[id] (joint count)
   * anim_bank_load(id)          anim bank asset (0xF, alias)   -> D_800D1588[id] (u16 key, u16 sfx, s32 ptr; 999 end),

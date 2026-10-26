@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15012780(void) {
+/* was func_15012780 */
+void level_clear_dd410(void) {
     s32 i;
 
     D_800DD418 = 0;

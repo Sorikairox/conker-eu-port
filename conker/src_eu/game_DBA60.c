@@ -220,7 +220,7 @@ void owner_child_spark_burst(u8 *arg0) {
 // spawns the objects of D_80088A80[0]; also checksums the code range
 // quadtree_alloc_node_pool..D_15001B08 and, if it was modified, clears object list 35 (anti-tamper)
 #ifdef NON_MATCHING
-// owner_spawn_children: spawns the objects of spawn list D_80088A80[0] (func_151491F4 kind 0x27) for `owner`
+// owner_spawn_children: spawns the objects of spawn list D_80088A80[0] (effect_node_create_nodraw kind 0x27) for `owner`
 // (P151): each new object gets the owner (+0x28), its sub-type (+0x2C = owner +0x3B) and the entry byte (+0x2D);
 // stops when a spawn fails. The N64 code also sums the code words quadtree_alloc_node_pool..D_15001B08 and on a mismatch
 // (anti-tamper) clears the object lists D_800DD280 +0x8C / +0x22C; the port has no MIPS code there, so the
@@ -234,7 +234,7 @@ void owner_spawn_children(u8 *owner) {
         return;
     }
     for (i = 0; i < D_80088A80[0].count; i++) {
-        obj = (u8 *)func_151491F4(D_80088A80[0].entries[i].unk2, 0, -1, 1, 0x27, 8, 0xFF, 0);
+        obj = (u8 *)effect_node_create_nodraw(D_80088A80[0].entries[i].unk2, 0, -1, 1, 0x27, 8, 0xFF, 0);
         if (obj == NULL) {
             return;
         }
@@ -266,7 +266,7 @@ void owner_spawn_children(u8 *owner) {
 //         D_800DD280[1][35] = NULL;
 //     }
 //     for (i = 0; i < D_80088A80[0].count; i++) {
-//         obj = (u8 *)func_151491F4(D_80088A80[0].entries[i].unk2, 0, -1, 1, 0x27, 8, 0xFF, 0);
+//         obj = (u8 *)effect_node_create_nodraw(D_80088A80[0].entries[i].unk2, 0, -1, 1, 0x27, 8, 0xFF, 0);
 //         if (obj == NULL) {
 //             return;
 //         }

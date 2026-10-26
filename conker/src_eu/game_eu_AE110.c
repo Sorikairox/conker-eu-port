@@ -221,7 +221,7 @@ void heap_free(s32);
 s32 heap_free(s32);
 #endif
 void text_box_close_now(s32);
-void func_151F2D6C(s32, s32);
+void mp3_stream_set_volume(s32, s32);
 
 /* was func_15080FE8 */
 void hint_box_close(void) {
@@ -236,7 +236,7 @@ void hint_box_close(void) {
         heap_free(D_800D1998);
         D_800D1948 = 0;
     }
-    func_151F2D6C(0, 0x5622);
+    mp3_stream_set_volume(0, 0x5622);
 }
 
 extern u8 *D_800D1DBC;

@@ -683,22 +683,22 @@ void look_angles_to_point(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s3
 
     switch (arg5) {                                 /* irregular */
     case 0:
-        *arg0 = func_150484A0(arg2, arg4);
-        var_f0 = func_150484A0(arg3, sqrtf((arg2 * arg2) + (arg4 * arg4)));
+        *arg0 = math_atan2f(arg2, arg4);
+        var_f0 = math_atan2f(arg3, sqrtf((arg2 * arg2) + (arg4 * arg4)));
 block_9:
         *arg1 = var_f0;
         break;
     case 1:
-        *arg0 = func_150484A0(-arg4, arg2);
-        var_f0 = func_150484A0(arg3, sqrtf((arg2 * arg2) + (arg4 * arg4)));
+        *arg0 = math_atan2f(-arg4, arg2);
+        var_f0 = math_atan2f(arg3, sqrtf((arg2 * arg2) + (arg4 * arg4)));
         goto block_9;
     case 2:
-        *arg0 = func_150484A0(arg4, -arg2);
-        var_f0 = func_150484A0(arg3, sqrtf((arg2 * arg2) + (arg4 * arg4)));
+        *arg0 = math_atan2f(arg4, -arg2);
+        var_f0 = math_atan2f(arg3, sqrtf((arg2 * arg2) + (arg4 * arg4)));
         goto block_9;
     case 3:
-        *arg0 = func_150484A0(arg4, -arg3);
-        var_f0 = func_150484A0(-arg2, sqrtf((arg3 * arg3) + (arg4 * arg4)));
+        *arg0 = math_atan2f(arg4, -arg3);
+        var_f0 = math_atan2f(-arg2, sqrtf((arg3 * arg3) + (arg4 * arg4)));
         goto block_9;
     }
     *arg0 *= D_800989F8;
@@ -745,10 +745,10 @@ void look_angles_to_point(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s3
 void look_clamp_angles(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7);
 void mtxf_rotate_xyz_deg(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
-void func_15049F30(f32 q1[4], f32 q2[4]);
-void func_15049FA8(f32 mtx[4][4], f32 arg1[4]);
-void func_1504A1CC(f32 q1[4], f32 q2[4], f32 t, f32 result[4]);
-void func_1504A430(f32 quat[4], f32 mtx[4][4]);
+void quat_align_hemisphere(f32 q1[4], f32 q2[4]);
+void quat_from_mtx(f32 mtx[4][4], f32 arg1[4]);
+void quat_slerp(f32 q1[4], f32 q2[4], f32 t, f32 result[4]);
+void quat_to_mtx(f32 quat[4], f32 mtx[4][4]);
 
 /*
  * P76: turn joint `joint` of object id toward target (x, y, z; all -99999 = no target). The angles (yaw, pitch,
@@ -1089,11 +1089,11 @@ void look_turn_joint(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s3
                 rot2[k][i] = res[k][i] * inv;
             }
         }
-        func_15049FA8(rot2, q1);
-        func_15049FA8(rot1, q2);
-        func_15049F30(q1, q2);
-        func_1504A1CC(q1, q2, t, q);
-        func_1504A430(q, res);
+        quat_from_mtx(rot2, q1);
+        quat_from_mtx(rot1, q2);
+        quat_align_hemisphere(q1, q2);
+        quat_slerp(q1, q2, t, q);
+        quat_to_mtx(q, res);
     } else {
         scale[0] = scale[1] = scale[2] = 1.0f;
     }
@@ -1865,8 +1865,8 @@ void look_aim_head_eyes(struct127 *obj) {
             jx = joint[2] * dz + (dx * joint[0] + dy * joint[1]);
             jy = joint[6] * dz + (dx * joint[4] + dy * joint[5]);
             jz = joint[10] * dz + (dx * joint[8] + dy * joint[9]);
-            yaw0 = func_150484A0(jx, jz) * 57.29578f;
-            pitch0 = func_150484A0(jy, sqrtf(jx * jx + jz * jz)) * 57.29578f;
+            yaw0 = math_atan2f(jx, jz) * 57.29578f;
+            pitch0 = math_atan2f(jy, sqrtf(jx * jx + jz * jz)) * 57.29578f;
             if (yaw0 > 180.0f) {
                 yaw0 -= 360.0f;
             }

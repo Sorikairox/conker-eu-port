@@ -78,7 +78,7 @@ void math_spring_approach_angle(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 ar
 block_10:
         *arg0 += *arg2 * arg5;
     }
-    func_15048758(arg0);
+    math_wrap_deg_360(arg0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_770B0/math_spring_approach_angle.s")

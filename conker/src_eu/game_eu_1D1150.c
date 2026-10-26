@@ -195,7 +195,7 @@ s32 ribbon_trail_update_points(TrailObj18 *arg0) {
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 void ribbon_trail_stop(u8 *);
-struct260 *func_151491F4(s16 arg0, s8 arg1, s8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
+struct260 *effect_node_create_nodraw(s16 arg0, s8 arg1, s8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
 /* the .s's late_rodata D_800A9138 is dropped in the NM link */
 static const f32 D_800A9138[1] = { 9.99999975e-05f }; /* 0x38D1B717 (array: IDO puts scalar float statics in .data) */
 #endif
@@ -204,7 +204,7 @@ static const f32 D_800A9138[1] = { 9.99999975e-05f }; /* 0x38D1B717 (array: IDO 
 // trail_emitter_update: object update of a trail emitter made by ribbon_trail_spawn (state SB3AB4 at +0x98, ring of 0x18
 // byte trail points at +0x94, position +0x10). Ends (returns 0) when the owner record is gone or its id (+0x3B)
 // changed. The first time (flag 4 in +0x1E) it fetches the start position (ribbon_trail_bone_pos). When the source can no
-// longer be read, the emitter is released (ribbon_trail_stop) and a fade record (func_151491F4 type 0x12C, the 0x30
+// longer be read, the emitter is released (ribbon_trail_stop) and a fade record (effect_node_create_nodraw type 0x12C, the 0x30
 // spec copied to +0x28) takes over. Otherwise the travelled distance * rate (+0x14) is added to +0x40 and one point
 // is dropped per unit of it, interpolated from the last point to the new position, with the width going from
 // +0x20 + +0x24 * t to +0x20, colour +0x18 / +0x1A and a random-walk shade +0x44; the ring head / count / tail
@@ -242,7 +242,7 @@ s32 ribbon_trail_update(u8 *obj) {
     if (!started && ribbon_trail_bone_pos((u8 *) st, obj + 0x10) == 0) {
         ribbon_trail_stop(obj);
         memcpy(spec, st, 0x30);
-        fade = func_151491F4(0x12C, -1, 0xA, 0, 5, 0x30, obj[0xC], 0);
+        fade = effect_node_create_nodraw(0x12C, -1, 0xA, 0, 5, 0x30, obj[0xC], 0);
         if (fade != NULL) {
             memcpy((u8 *) fade + 0x28, spec, 0x30);
         }
@@ -756,7 +756,7 @@ void owner_smoke_start(u8 *arg0, u8 arg1) {
     tmp.unk14 = 0.0f;
     tmp.unk18 = 0.0f;
     tmp.unk1C = 0.0f;
-    temp_v0 = func_151491F4(300, -1, 5, 0, 1, 0x20, arg1, 0);
+    temp_v0 = effect_node_create_nodraw(300, -1, 5, 0, 1, 0x20, arg1, 0);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x20);
     }

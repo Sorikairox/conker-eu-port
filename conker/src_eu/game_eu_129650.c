@@ -263,7 +263,7 @@ void tracer_draw_masked(u8 *arg0) {
 extern f32 D_800A2280, D_800A2284, D_800A2288, D_800A228C, D_800A2290, D_800A2294, D_800A2298, D_800A229C, D_800A22A0;
 u8 *cam_wobble_spawn(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
 
-// effect27_spawn_with_screen_effect: starts an effect record of kind 0x27 (300 frames, func_15149130) whose 32-byte
+// effect27_spawn_with_screen_effect: starts an effect record of kind 0x27 (300 frames, effect_node_create) whose 32-byte
 // data (rec + 0x28) holds `obj` and its id (+0x3B), the flag `a`, `other`, its id (0xFF without one) and its player
 // (+0x318 -> +0x23D, -1 without one) and the value `b`. When `other` has a player record, a kind-4 screen effect of
 // 300 frames for that player is started too (cam_wobble_spawn, scales 12 / 20 / 19 and the D_800A2280.. table); its record
@@ -310,7 +310,7 @@ void gunfire_burst_spawn(struct127 *obj, struct127 *other, u8 a, u8 b) {
     data.other = other;
     data.otherId = (other != NULL) ? ((u8 *) other)[0x3B] : 0xFF;
 
-    rec = (u8 *) func_15149130(0x12C, -1, 0x27, -1, 0, 0x25, (struct37 *) 0x20, 0xFF, 1);
+    rec = (u8 *) effect_node_create(0x12C, -1, 0x27, -1, 0, 0x25, (struct37 *) 0x20, 0xFF, 1);
     if (rec == NULL) {
         return;
     }
@@ -456,11 +456,11 @@ void gunfire_burst_free(u8 *arg0) {
 /* was func_150FCF24 */
 void gunfire_burst_retire(void *arg0) {
     gunfire_burst_free(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_150FCF50 */
 void gunfire_burst_delete(void *arg0) {
     gunfire_burst_free(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }

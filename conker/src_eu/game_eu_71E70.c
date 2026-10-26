@@ -13,8 +13,8 @@ void collision_reset_counter(void) {
 
 #ifdef NON_MATCHING
 void collision_set_obj_body_heights(u8 *, f32, f32, s32);
-s32 func_150AB6D0(f32, f32, s32, u8 *, s32);
-s32 func_150AC8C4(f32, f32, s32, u8 *, s32);
+s32 collision_walls_slide(f32, f32, s32, u8 *, s32);
+s32 collision_ledge_probe(f32, f32, s32, u8 *, s32);
 extern u8 D_800894C0;
 extern u8 D_800894C3;
 extern u8 D_800CC1F3;
@@ -40,7 +40,7 @@ s32 collision_obj_walls(f32 arg0, f32 arg1, s32 arg2, u8 *arg3, s32 arg4, s32 ar
         if ((*var_s1 == 1) && ((var_s0 != 3) || !((*(s32 *)((u8 *)arg3 + 0xF8)) & 0x200))) {
             collision_select_area(var_s0);
             if (D_800DBE62 != 0) {
-                var_s6 += func_150AB6D0(arg0, arg1, arg2, arg3, arg4);
+                var_s6 += collision_walls_slide(arg0, arg1, arg2, arg3, arg4);
             }
         }
         var_s0 -= 1;
@@ -53,7 +53,7 @@ s32 collision_obj_walls(f32 arg0, f32 arg1, s32 arg2, u8 *arg3, s32 arg4, s32 ar
             if (*var_s1_2 == 1) {
                 collision_select_area(var_s0_2);
                 if (D_800DBE62 != 0) {
-                    func_150AC8C4(arg0, arg1, arg2, arg3, 0);
+                    collision_ledge_probe(arg0, arg1, arg2, arg3, 0);
                 }
             }
             var_s0_2 += 1;

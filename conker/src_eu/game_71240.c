@@ -53,7 +53,7 @@ void mtxf_scale_set_trans(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 arg4, f32 arg5
 
 /* was func_15043F6C */
 void mtxf_build_basis_trans(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9) {
-    func_150A9B0C(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
+    mtx_rotate_scale_3x3(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
     arg0[3][0] = arg7;
     arg0[3][1] = arg8;
     arg0[3][2] = arg9;

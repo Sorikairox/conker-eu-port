@@ -209,7 +209,7 @@ void bubble_zone_retire(struct260 *arg0)
   {
     bubble_zone_sound_stop(*new_var);
   }
-  func_1514933C(p);
+  effect_node_retire(p);
 }
 
 void bubble_zone_sound_stop(u16);
@@ -223,7 +223,7 @@ void bubble_zone_free(struct260 *arg0)
   {
     bubble_zone_sound_stop(*new_var);
   }
-  func_15149368(p);
+  effect_node_free(p);
 }
 
 /* was func_151A62DC */

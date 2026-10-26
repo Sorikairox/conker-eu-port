@@ -31,7 +31,7 @@ void obj_type_tex_scroll_apply(s32, s32, s32, s32, s32, s32, s32);
 void obj_vtx_scroll_uv(u8 *, s32, s32, s32, s32, s32, s32, s32);
 s32 random_int(void);
 f32 math_cos_u8(u8);
-void func_eu_1501B640(struct127 *, f32 *, s32);
+void obj_vertex_colours_blend(struct127 *, f32 *, s32);
 void obj7b_set_anim_ids(u8 *arg0);
 extern s32 D_800997EC[];
 extern s32 D_80086490;
@@ -1118,7 +1118,7 @@ void obj_walk_update(struct127 *arg0) {
                                             sp8C = temp_f4_3;
                                             mtxf_look_at_f(sp98, arg0->x_position, arg0->y_position, arg0->z_position, temp_f10, temp_f4_3, temp_f8_2, 0.0f, 1.0f, 0.0f);
                                             var_t0_2 = (u8) sp4C;
-                                            if (func_15049440(sp98, D_800CC704, *D_800CC2E8, D_800CC70C, 80.0f, 80.0f, 0.0f, 4000.0f, 320.0f, 320.0f) != 0) {
+                                            if (math_mtx_box_in_frustum(sp98, D_800CC704, *D_800CC2E8, D_800CC70C, 80.0f, 80.0f, 0.0f, 4000.0f, 320.0f, 320.0f) != 0) {
                                                 spEB = 1;
                                             }
                                         } else {
@@ -2434,16 +2434,16 @@ void vec_from_yaw_pitch(u16 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, f32 
     temp_f20 = arg1 * 0.5f;
     temp_f12 = arg2 * D_80099880;
     arg2 = temp_f12;
-    *arg5 = func_150AD78C(temp_f12) * -temp_f20;
-    temp_f20_2 = func_150AD780(arg2) * temp_f20;
+    *arg5 = fast_sinf(temp_f12) * -temp_f20;
+    temp_f20_2 = fast_cosf(arg2) * temp_f20;
     var_f18 = (f32) arg0;
     if ((s32) arg0 < 0) {
         var_f18 += 4294967296.0f;
     }
     temp_f12_2 = var_f18 * D_80099884;
     sp20 = temp_f12_2;
-    sp2C = func_150AD780(temp_f12_2);
-    temp_f16 = -func_150AD78C(sp20);
+    sp2C = fast_cosf(temp_f12_2);
+    temp_f16 = -fast_sinf(sp20);
     *arg3 = sp2C * temp_f20_2;
     *arg4 = temp_f16 * temp_f20_2;
 }
@@ -2603,7 +2603,7 @@ f32 pad_stick_speed(struct49 *arg0) {
 
 /* was func_1505A630 */
 u16 math_atan2_u16(f32 arg0, f32 arg1, s32 arg2) {
-    return ((u16) (u32) (func_150484A0(-arg0, arg1) * 10430.378f)) + 16384;
+    return ((u16) (u32) (math_atan2f(-arg0, arg1) * 10430.378f)) + 16384;
 }
 
 /* was func_1505A6F8 */
@@ -3654,7 +3654,7 @@ extern f32 D_800998E4; /* pi / 180 */
 extern struct127 D_800B30F0[];
 s32 obj_receive_hit(struct127 *arg0, struct127 *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 s32 obj_collision_cylinder(struct127 *, s16 *, s16 *, s16 *);
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32); /* P151: args 7 / 8 are out-pointers (obj_find_visible_target) */
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32); /* P151: args 7 / 8 are out-pointers (obj_find_visible_target) */
 f32 vec3_length(f32 *vec);
 
 /* P67: one attack descriptor (0x28 bytes) of the table obj_get_hit_rules returns; rec->unkD0 - 1 is the active one. */
@@ -3739,8 +3739,8 @@ s32 attack_hit_test(struct127 *self, s32 skip) {
                 dz += ofs;
             }
             angle = -((self->unk40 - 90.0f) * D_800998E4);
-            s = func_150AD780(angle);
-            c = func_150AD78C(angle);
+            s = fast_cosf(angle);
+            c = fast_sinf(angle);
             fwd = (dx * s + dz * c) - (s16)((s8)box->radius * 5) * self->xz_scale;
             side = -dx * c + dz * s;
             dy = hitY - (target->y_position + target->unkD6);
@@ -3801,7 +3801,7 @@ s32 attack_hit_test(struct127 *self, s32 skip) {
             ray[0] = target->x_position - eye[0];
             ray[1] = (aim + target->y_position) - eye[1];
             ray[2] = target->z_position - eye[2];
-            if (func_150ACEA0(eye[0], eye[1], eye[2], ray[0], ray[1], ray[2], 0, 0, &hx, &hy, &hz, &t, 0, 0, 0.0f) != 0
+            if (collision_ray_cast(eye[0], eye[1], eye[2], ray[0], ray[1], ray[2], 0, 0, &hx, &hy, &hz, &t, 0, 0, 0.0f) != 0
                 && t < vec3_length(ray)) {
                 continue; /* blocked */
             }
@@ -3977,8 +3977,8 @@ f32 math_rotate_offset_deg(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4) {
         arg2 = arg2 * arg3;
     }
     temp_f12 = (arg0 - 90.0f) * 0.017453292f; // 0.01745329238474369f;
-    sp24 = func_150AD780(temp_f12);
-    temp_f0 = func_150AD78C(temp_f12);
+    sp24 = fast_cosf(temp_f12);
+    temp_f0 = fast_sinf(temp_f12);
     *arg4 = (-arg1 * temp_f0) + (arg2 * sp24);
     return (arg1 * sp24) + arg2 * temp_f0;
 }
@@ -4170,13 +4170,13 @@ void obj_contact_pass(struct127 *rec, s32 idx) {
 #ifdef NON_MATCHING
 u16 math_atan2_u16(f32 arg0, f32 arg1, s32 arg2);
 f32 obj_vec_to_record(u8 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4);
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 
 // player_find_visible_target: picks the player (0..24 of D_800CC2D0) that `rec` can see best (P151). Skips empty or
 // inactive slots (+0x1CA, +0x2FA, flag 0x40 of +0xF8 clear), rec itself and `skip`. A candidate must be closer than
 // the best so far (initially 1e7, 40000 when skip is 0xFE) - or, when the best one is stunned (+0x104) and this one
 // is not, at any distance - lie within the heading cone `cone` (in 1/256 turns, half width) and within 16/256 of the
-// pitch `pitch`, and have a clear ray (func_150ACEA0 from rec's position + 80 up) or a hit beyond it. Writes the
+// pitch `pitch`, and have a clear ray (collision_ray_cast from rec's position + 80 up) or a hit beyond it. Writes the
 // winner's direction to *outDir and returns its number, 0xFF for none. (Like obj_find_seen_player, the asm passes a 6th
 // argument 0 to obj_vec_to_record.)
 /* was func_1505DADC */
@@ -4207,7 +4207,7 @@ s32 obj_find_visible_target(u8 *rec, u16 *outDir, s32 pitch, s32 skip, s32 cone)
         if ((u8)((u8)(math_atan2_u16(sqrtf(h2), -dy, 0) >> 8) - (u8)pitch + 0x10) >= 0x20) {
             continue;
         }
-        if (func_150ACEA0(self->x_position, self->y_position + 80.0f, self->z_position, o->x_position - self->x_position,
+        if (collision_ray_cast(self->x_position, self->y_position + 80.0f, self->z_position, o->x_position - self->x_position,
                           o->y_position - self->y_position, o->z_position - self->z_position, &tri, &nx, &ny, &nz, &hx,
                           &t, 0, 0, 0.0f) != 0) {
             t = t * t;
@@ -6156,7 +6156,7 @@ struct ObjAnimShared {
 #define OBJ_ANIM (*(struct ObjAnimShared *)&D_800CC298)
 
 /* Per-frame texture / colour animation of the live objects (D_800CC2D0[], +0x2FA visible), by kind (+0x04).
- * Effects shared by every object of one kind (gfx_tile_scroll_coords texture scroll, obj_type_tex_scroll_apply, func_eu_1501B640
+ * Effects shared by every object of one kind (gfx_tile_scroll_coords texture scroll, obj_type_tex_scroll_apply, obj_vertex_colours_blend
  * colours) run for the first such object only (done[]). */
 /* was func_15061B4C */
 void objects_animate_textures(void) {
@@ -6238,7 +6238,7 @@ void objects_animate_textures(void) {
                             colours[i] = (math_cos_u8(OBJ_ANIM.phase[i]) + 1.0f) * 0.5f;
                             OBJ_ANIM.phase[i] += steps[i];
                         }
-                        func_eu_1501B640((struct127 *)obj, colours, 1);
+                        obj_vertex_colours_blend((struct127 *)obj, colours, 1);
                         done[4] = 1;
                     }
                 }
@@ -6291,7 +6291,7 @@ void objects_animate_textures(void) {
                     OBJ_ANIM.glow = (OBJ_ANIM.glow <= 20) ? 0 : OBJ_ANIM.glow - 20;
                 }
                 glow = OBJ_ANIM.glow * (1.0f / 255.0f);
-                func_eu_1501B640((struct127 *)obj, &glow, 0);
+                obj_vertex_colours_blend((struct127 *)obj, &glow, 0);
                 break;
             case 0x8A:
                 if (D_800BE9F0 != 0x30) {

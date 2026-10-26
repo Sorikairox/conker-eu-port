@@ -127,7 +127,7 @@ static void sched_test_thread(void *arg) {
     (void)arg;
     osCreateMesgQueue(&st_q, st_buf, 4);
     osCreateMesgQueue(&st_rq, st_rbuf, 2);
-    /* sched_init (scheduler init, inside func_15007830) clears the client list, so register only
+    /* sched_init (scheduler init, inside game_thread_main) clears the client list, so register only
      * once the scheduler thread has started (it sets D_8003A928 = 4); poll with a 1-frame OS timer */
     {
         static OSTimer tm;

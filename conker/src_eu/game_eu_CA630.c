@@ -651,7 +651,7 @@ s32 event_action_effect(s32 arg0, s32 arg1, u8 *arg2) {
     case 0x1E:
         if (arg1 == 2) {
             sp.u34 = (s8) (*(s32 *)((u8 *)arg2 + 8));
-            func_151494E0((s32) &sp.u34, 0x34U);
+            effect_nodes_broadcast((s32) &sp.u34, 0x34U);
             return 0;
         }
         break;
@@ -672,7 +672,7 @@ s32 event_action_effect(s32 arg0, s32 arg1, u8 *arg2) {
             if ((temp_v0 < 0) || (temp_v0 >= 3)) {
                 return 1;
             }
-            func_151494E0((s32) ((u8 *) &D_800A0D30 + temp_v0 * 0x10), 0x32U);
+            effect_nodes_broadcast((s32) ((u8 *) &D_800A0D30 + temp_v0 * 0x10), 0x32U);
             return 0;
         }
         break;

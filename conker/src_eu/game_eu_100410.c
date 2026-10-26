@@ -37,7 +37,7 @@ typedef struct {
     u8 colour[3];
     u8 pad5F;
 } Flake_150D2C9C;
-// flake_particle_spawn: P253. Spawns one particle (func_15149130: lifetime 100..200, 0x60 bytes of state; arg2 /
+// flake_particle_spawn: P253. Spawns one particle (effect_node_create: lifetime 100..200, 0x60 bytes of state; arg2 /
 // arg3 are the owner's +0xC / +1) whose state is: kind, a random angle, scale 0.3..0.7 and its inverse, a spin of
 // 0.3..0.43 with a random sign, the 64-byte matrix mtx and a random colour (white, red or green). Callers:
 // flake_spawner_update (timer) and flake_spawner_handle_msg (message 0x34); both ignore the result (the asm leaves memcpy's result, or
@@ -64,7 +64,7 @@ s32 flake_particle_spawn(s32 kind, u8 *mtx, u8 arg2, u8 arg3) {
     f.colour[0] = colours[c][0];
     f.colour[1] = colours[c][1];
     f.colour[2] = colours[c][2];
-    part = func_15149130((random_int() % 101U) + 100, -1, 0x32, -1, 1, 0, (struct37 *) 0x60, arg2, arg3);
+    part = effect_node_create((random_int() % 101U) + 100, -1, 0x32, -1, 1, 0, (struct37 *) 0x60, arg2, arg3);
     if (part == NULL) {
         return 0;
     }

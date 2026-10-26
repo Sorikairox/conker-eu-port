@@ -573,14 +573,14 @@ void obj_glow_halo_free(struct210 *arg0) {
 
 #ifdef NON_MATCHING
 /* P146 */
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 f32 vec3_length(f32 *);
 // laser_sight_update: update handler (D_8008A058 slot 21) of an aim beam carried by an object (+0x110, valid while
 // its +0 is set and its id +0x3B equals +0x114). The beam starts at a bone point (+0x118 in bone +0x130 space) of
 // the object's skeleton (+0x1D4; skipped in mode D_800C35EA 1 when the object's +0x74 low nibble is 0xF). With flag
 // 2 (+0x133) the end comes from the object's aim block (+0x31C): its locked target (+0x109 = hit kind, position
 // +0xB8, distance +0xB4, surface +0xF4) or, unlocked, 2000 units along the aim direction (+0xE8). Otherwise the end
-// point (+0x124, bone space) is ray cast (func_150ACEA0); a hit stores the end at +0x40 and the length at +0x154.
+// point (+0x124, bone space) is ray cast (collision_ray_cast); a hit stores the end at +0x40 and the length at +0x154.
 // On a hit (+0x133 bit 0 set) the linked effects follow: the impact (+0x138, 20 units before the end, with the
 // surface data), a second marker (+0x144, hit kinds 2 / 3), a sound emitter (+0x13C), the beam (+0x134, scaled by
 // +0x148) and a line (+0x140); without a hit they are all hidden. Returns 0 once the object is gone.
@@ -641,7 +641,7 @@ s32 laser_sight_update(u8 *fx) {
             end[0] -= *(f32 *)(fx + 0x34);
             end[1] -= *(f32 *)(fx + 0x38);
             end[2] -= *(f32 *)(fx + 0x3C);
-            if (func_150ACEA0(*(f32 *)(fx + 0x34), *(f32 *)(fx + 0x38), *(f32 *)(fx + 0x3C), end[0], end[1], end[2],
+            if (collision_ray_cast(*(f32 *)(fx + 0x34), *(f32 *)(fx + 0x38), *(f32 *)(fx + 0x3C), end[0], end[1], end[2],
                               &hitInfo, surf, (f32 *)(fx + 0x40), (f32 *)(fx + 0x44), (f32 *)(fx + 0x48), NULL, 0,
                               0, 0.0f) != 0) {
                 dir[0] = *(f32 *)(fx + 0x40) - *(f32 *)(fx + 0x34);

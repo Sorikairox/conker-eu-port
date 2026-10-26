@@ -4,7 +4,8 @@
 
 
 // set pitch 2 ?
-void func_1001CA90( N_ALVoice *v, f32 pitch) {
+/* was func_1001CA90 */
+void n_syn_set_voice_cutoff( N_ALVoice *v, f32 pitch) {
     ALParam  *update;
 
     if (v->pvoice) {

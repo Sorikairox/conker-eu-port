@@ -8,7 +8,8 @@ s32 event_dispatch(s32, s32, ...);
 #else
 s32 event_dispatch(s32, s32, s32, s32);
 #endif
-void func_150F9FA0(u8 *arg0)
+/* was func_150F9FA0 */
+void camera_hook_event_4025(u8 *arg0)
 {
   if (event_dispatch(1, 0x4025, 6, 0x2000) != 0) {
     *(s32 *)(arg0 + 0x84) |= 0x80;

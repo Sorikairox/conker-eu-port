@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # usage: [VFIRST=1] spawn.py <func> A|B "<params>" "<fields>" "<call args>" <size> [g]
 #   C for the "spawn an effect, then memcpy its parameter struct into ret+0x28" family.
-#   A = func_15149130 (9 args), B = func_151491F4 (8 args); fields "u8 *unk0=arg0;u8 unk4=arg0[0x3B];f32 unk8=0.0f"
+#   A = effect_node_create (9 args), B = effect_node_create_nodraw (8 args); fields "u8 *unk0=arg0;u8 unk4=arg0[0x3B];f32 unk8=0.0f"
 #   (in stack order); g = early `if (arg0 == NULL) return;`; VFIRST=1 declares temp_v0 before the struct.
 import sys
 name, kind, sig, fields, args, size = sys.argv[1:7]
 guard = len(sys.argv) > 7
-callee = {'A': 'func_15149130', 'B': 'func_151491F4'}[kind]
+callee = {'A': 'effect_node_create', 'B': 'effect_node_create_nodraw'}[kind]
 F = [f.strip() for f in fields.split(';') if f.strip()]
 decl = []; asg = []
 for f in F:

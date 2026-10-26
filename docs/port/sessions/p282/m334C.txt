@@ -30,8 +30,8 @@
 /if (collision_obj_walls(old\[0\], old\[1\], \*(s32 \*) &old\[2\], (u8 \*) &req, 0, 0) == 0) {/s/, 0, 0)/, 0, 1)/
 /^    p\[0x148\] |= 4;/s/4;/6;/
 /^            p\[0x148\] |= 0x10;/s/0x10/0x30/
-/p\[0x14A\] = (s32) (func_150484A0(req.pos\[0\]/s/40.743664f/40.0f/
-/p\[0x14A\] = (s32) (func_150484A0(req.pos\[0\]/s/req.pos\[2\]/req.pos[1]/
+/p\[0x14A\] = (s32) (math_atan2f(req.pos\[0\]/s/40.743664f/40.0f/
+/p\[0x14A\] = (s32) (math_atan2f(req.pos\[0\]/s/req.pos\[2\]/req.pos[1]/
 /D_80089D14\[p\[0x75\]\](p, &req, old\[0\], old\[1\], old\[2\])/s/old\[0\], old\[1\]/old[1], old[0]/
 /^    if (p\[0x75\] != 0 && /s/!D_80089D14/D_80089D14/
 /^    req.surf = \*(Surf334C \*) (p + 0x114);/s/0x114/0x116/

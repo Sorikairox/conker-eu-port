@@ -204,17 +204,17 @@ mp3_voice_is_playing                   = 0x10012AC0; // type:func
 alHeapInit                      = 0x10012B10; // type:func
 alHeapDBAlloc                   = 0x10012B34; // type:func
 alSeqFileNew                    = 0x10012BC0; // type:func
-func_10012934                   = 0x10012C24; // type:func
-func_10012A28                   = 0x10012D18; // type:func
-func_10012B84                   = 0x10012E74; // type:func
-func_10012BD0                   = 0x10012EC0; // type:func
-func_10012C5C                   = 0x10012F4C; // type:func
-func_10012CFC                   = 0x10012FEC; // type:func
-func_10012D80                   = 0x10013070; // type:func
-func_10012E04                   = 0x100130F4; // type:func
-func_10012F94                   = 0x10013284; // type:func
-func_100131D8                   = 0x100134C8; // type:func
-func_100131FC                   = 0x100134EC; // type:func
+n_alBnkfNew                   = 0x10012C24; // type:func
+_bnkfPatchBank                   = 0x10012D18; // type:func
+n_bnkf_patch_perc_inst                   = 0x10012E74; // type:func
+_bnkfPatchInst                   = 0x10012EC0; // type:func
+n_bnkf_patch_sound                   = 0x10012F4C; // type:func
+_bnkfPatchWaveTable                   = 0x10012FEC; // type:func
+_depth2Cents                   = 0x10013070; // type:func
+audio_osc_init                   = 0x100130F4; // type:func
+audio_osc_update                   = 0x10013284; // type:func
+audio_osc_stop                   = 0x100134C8; // type:func
+audio_osc_pool_create                   = 0x100134EC; // type:func
 n_alCSPNew                      = 0x10013610; // type:func
 __n_CSPVoiceHandler             = 0x10013888; // type:func
 __n_CSPHandleNextSeqEvent       = 0x10014338; // type:func
@@ -223,50 +223,50 @@ __n_CSPHandleMetaMsg            = 0x10015334; // type:func
 __n_CSPRepostEvent              = 0x10015600; // type:func
 __n_setUsptFromTempo            = 0x10015754; // type:func
 __n_CSPPostNextSeqEvent         = 0x1001579C; // type:func
-func_10015550                   = 0x10015840; // type:func
-func_100155A0                   = 0x10015890; // type:func
-func_10015878                   = 0x10015B68; // type:func
+n_csp_set_bank                   = 0x10015840; // type:func
+n_sndp_init                   = 0x10015890; // type:func
+n_sndp_voice_handler                   = 0x10015B68; // type:func
 _n_handleEvent                  = 0x10015C34; // type:func
-func_10016E90                   = 0x10017180; // type:func
-func_10016F00                   = 0x100171F0; // type:func
-func_10016F80                   = 0x10017270; // type:func
-func_10017100                   = 0x100173F0; // type:func
-func_10017298                   = 0x10017588; // type:func
-func_100173C4                   = 0x100176B4; // type:func
-func_10017438                   = 0x10017728; // type:func
-func_10017594                   = 0x10017884; // type:func
-func_10017604                   = 0x100178F4; // type:func
-func_100176C4                   = 0x100179B4; // type:func
-func_100176EC                   = 0x100179DC; // type:func
-func_10017714                   = 0x10017A04; // type:func
-func_10017780                   = 0x10017A70; // type:func
-func_10017870                   = 0x10017B60; // type:func
-func_10017944                   = 0x10017C34; // type:func
-func_10017AA0                   = 0x10017D90; // type:func
-func_10017AF0                   = 0x10017DE0; // type:func
-func_10017B04                   = 0x10017DF4; // type:func
-func_10017B30                   = 0x10017E20; // type:func
-func_10017BB8                   = 0x10017EA8; // type:func
-func_10017C00                   = 0x10017EF0; // type:func
-func_10017C68                   = 0x10017F58; // type:func
-func_10017CE0                   = 0x10017FD0; // type:func
-func_10017D30                   = 0x10018020; // type:func
-func_10017D80                   = 0x10018070; // type:func
-func_10017DF0                   = 0x100180E0; // type:func
-func_10017E4C                   = 0x1001813C; // type:func
+n_sndp_free_state                   = 0x10017180; // type:func
+n_sndp_post_pitch_update                   = 0x100171F0; // type:func
+_n_removeEvents                   = 0x10017270; // type:func
+n_sndp_alloc_state                   = 0x100173F0; // type:func
+n_sndp_release_state                   = 0x10017588; // type:func
+n_sndp_get_handle_state                   = 0x100176B4; // type:func
+n_sndp_play_sound                   = 0x10017728; // type:func
+n_sndp_stop_sound                   = 0x10017884; // type:func
+n_sndp_stop_with_flags                   = 0x100178F4; // type:func
+n_sndp_stop_all                   = 0x100179B4; // type:func
+n_sndp_stop_all_looping                   = 0x100179DC; // type:func
+n_sndp_post_event                   = 0x10017A04; // type:func
+n_sndp_set_group_volume                   = 0x10017A70; // type:func
+audio_set_output_mode                   = 0x10017B60; // type:func
+audio_set_bus_mix_type                   = 0x10017C34; // type:func
+n_csp_play                   = 0x10017D90; // type:func
+n_csp_set_msg_queue                   = 0x10017DE0; // type:func
+n_csp_set_chan_notify                   = 0x10017DF4; // type:func
+n_csp_reset_chan_levels                   = 0x10017E20; // type:func
+n_csp_mute_chan                   = 0x10017EA8; // type:func
+n_csp_unmute_chan                   = 0x10017EF0; // type:func
+n_csp_fade_chan                   = 0x10017F58; // type:func
+n_csp_set_chan_fx_enable                   = 0x10017FD0; // type:func
+n_csp_set_chan_level                   = 0x10018020; // type:func
+n_csp_set_chan_pan                   = 0x10018070; // type:func
+n_csp_set_fx_mix_offset_scale                   = 0x100180E0; // type:func
+n_csp_set_chan_fx_bus                   = 0x1001813C; // type:func
 n_alCSPGetTempo                 = 0x100181B0; // type:func
-func_10017F10                   = 0x10018200; // type:func
+n_csp_set_fx_param                   = 0x10018200; // type:func
 n_alCSeqNew                     = 0x10018270; // type:func
 n_alCSeqNextEvent               = 0x100183F0; // type:func
 __n_alCSeqGetTrackEvent         = 0x10018598; // type:func
-func_100186DC                   = 0x100189CC; // type:func
-func_10018790                   = 0x10018A80; // type:func
+n_cseq_set_loc                   = 0x100189CC; // type:func
+n_cseq_find_markers                   = 0x10018A80; // type:func
 __getTrackByte                  = 0x10018CC0; // type:func
 __readVarLen                    = 0x10018EB4; // type:func
-func_10018C60                   = 0x10018F50; // type:func
-func_10018CB0                   = 0x10018FA0; // type:func
-func_10018D00                   = 0x10018FF0; // type:func
-func_10018D50                   = 0x10019040; // type:func
+n_csp_end_track                   = 0x10018F50; // type:func
+n_csp_set_seq                   = 0x10018FA0; // type:func
+n_csp_set_vol                   = 0x10018FF0; // type:func
+n_csp_stop                   = 0x10019040; // type:func
 n_alInit                        = 0x10019090; // type:func
 n_alClose                       = 0x100190FC; // type:func
 n_alSynNew                      = 0x10019150; // type:func
@@ -279,26 +279,26 @@ _n_timeToSamplesNoRound         = 0x10019C54; // type:func
 _n_timeToSamples                = 0x10019CB8; // type:func
 __n_nextSampleTime              = 0x10019CF4; // type:func
 alCents2Ratio                   = 0x10019DA0; // type:func
-func_10019B50                   = 0x10019E40; // type:func
-func_10019C28                   = 0x10019F18; // type:func
-func_10019CD0                   = 0x10019FC0; // type:func
-func_10019CFC                   = 0x10019FEC; // type:func
-func_10019D6C                   = 0x1001A05C; // type:func
-func_10019D98                   = 0x1001A088; // type:func
-func_10019ED8                   = 0x1001A1C8; // type:func
-func_10019F38                   = 0x1001A228; // type:func
-func_10019F98                   = 0x1001A288; // type:func
-func_1001A030                   = 0x1001A320; // type:func
-func_1001A224                   = 0x1001A514; // type:func
-func_1001A2F8                   = 0x1001A5E8; // type:func
-func_1001A39C                   = 0x1001A68C; // type:func
-func_1001A3E0                   = 0x1001A6D0; // type:func
-func_1001A3FC                   = 0x1001A6EC; // type:func
-func_1001A45C                   = 0x1001A74C; // type:func
-func_1001A508                   = 0x1001A7F8; // type:func
-func_1001A704                   = 0x1001A9F4; // type:func
-func_1001A9DC                   = 0x1001ACCC; // type:func
-func_1001AA08                   = 0x1001ACF8; // type:func
+n_csp_cc_volume                   = 0x10019E40; // type:func
+n_csp_cc_pan                   = 0x10019F18; // type:func
+n_csp_cc_priority                   = 0x10019FC0; // type:func
+n_csp_cc_send_marker                   = 0x10019FEC; // type:func
+n_csp_cc_bank_select                   = 0x1001A05C; // type:func
+n_csp_update_chan_filter                   = 0x1001A088; // type:func
+n_csp_cc_filter_amount                   = 0x1001A1C8; // type:func
+n_csp_cc_filter_key                   = 0x1001A228; // type:func
+n_csp_cc_voice_param17                   = 0x1001A288; // type:func
+n_csp_cc_sustain                   = 0x1001A320; // type:func
+n_csp_cc_fx_enable                   = 0x1001A514; // type:func
+n_csp_cc_fx_mix                   = 0x1001A5E8; // type:func
+n_csp_cc_fx_bus                   = 0x1001A68C; // type:func
+n_csp_cc_voice_clip_bank                   = 0x1001A6D0; // type:func
+n_csp_cc_play_voice_clip                   = 0x1001A6EC; // type:func
+n_csp_update_chan_volume                   = 0x1001A74C; // type:func
+n_csp_cc_fade_target                   = 0x1001A7F8; // type:func
+n_csp_cc_fade_step                   = 0x1001A9F4; // type:func
+n_csp_cc_fade_rate                   = 0x1001ACCC; // type:func
+n_csp_cc_fade_level                   = 0x1001ACF8; // type:func
 n_seqp_unmap_voice                   = 0x1001ADD0; // type:func
 __n_seqpReleaseVoice            = 0x1001AE90; // type:func
 n_seqp_cancel_voice_kill                   = 0x1001B094; // type:func
@@ -326,26 +326,26 @@ n_alSynStopVoice                = 0x1001CA60; // type:func
 n_alSynFreeVoice                = 0x1001CB00; // type:func
 n_alSynSetVol                   = 0x1001CC00; // type:func
 n_alSynSetPitch                 = 0x1001CCD0; // type:func
-func_1001CA90                   = 0x1001CD80; // type:func
+n_syn_set_voice_cutoff                   = 0x1001CD80; // type:func
 n_alSynSetPan                   = 0x1001CE30; // type:func
-func_1001CBF0                   = 0x1001CEE0; // type:func
+n_fx_calc_biquad_lowpass                   = 0x1001CEE0; // type:func
 init_lpfilter                   = 0x1001D044; // type:func
-func_1001CEA4                   = 0x1001D194; // type:func
-func_1001CF38                   = 0x1001D228; // type:func
+audio_semitones_to_ratio                   = 0x1001D194; // type:func
+n_fx_lowpass_update_coefs                   = 0x1001D228; // type:func
 n_alFxNew                       = 0x1001D414; // type:func
 alN_PVoiceNew                   = 0x1001D9D8; // type:func
 n_alSynSetFXMix                 = 0x1001DBF0; // type:func
-func_1001D9B0                   = 0x1001DCA0; // type:func
-func_1001DA28                   = 0x1001DD18; // type:func
-func_1001DAA0                   = 0x1001DD90; // type:func
-func_1001DAE4                   = 0x1001DDD4; // type:func
+n_syn_get_aux_fx                   = 0x1001DCA0; // type:func
+n_syn_get_aux_filter                   = 0x1001DD18; // type:func
+n_fx_set_param                   = 0x1001DD90; // type:func
+n_fx_filter_set_param                   = 0x1001DDD4; // type:func
 __alCSeqNextDelta               = 0x1001DE90; // type:func
 n_alSynAllocVoice               = 0x1001DF70; // type:func
 _allocatePVoice                 = 0x1001E22C; // type:func
 n_alSynStartVoiceParams         = 0x1001E460; // type:func
-func_1001E2A0                   = 0x1001E590; // type:func
-func_1001E350                   = 0x1001E640; // type:func
-func_1001E400                   = 0x1001E6F0; // type:func
+n_syn_set_voice_pan                   = 0x1001E590; // type:func
+n_syn_set_voice_param17                   = 0x1001E640; // type:func
+n_csp_send_midi                   = 0x1001E6F0; // type:func
 n_alSynDelete                   = 0x1001E770; // type:func
 n_synth_aux_fx_new                   = 0x1001E790; // type:func
 func_1001E530                   = 0x1001E820; // type:func
@@ -418,43 +418,43 @@ world_object_calc_radius                   = 0x15004A5C; // type:func
 world_object_alloc_id                   = 0x15004BA0; // type:func
 gfx_dl_relocate_seg_e                   = 0x15004C90; // type:func
 vertex_anchor_alloc_players                   = 0x15004D00; // type:func
-func_15004E00                   = 0x15004DB0; // type:func
-func_15004E80                   = 0x15004E30; // type:func
-func_15004F00                   = 0x15004EB0; // type:func
-func_15004F10                   = 0x15004EC0; // type:func
-func_15004F30                   = 0x15004EE0; // type:func
+breakable_slots_clear                   = 0x15004DB0; // type:func
+level_matrix_arenas_alloc                   = 0x15004E30; // type:func
+attachment_list_reset                   = 0x15004EB0; // type:func
+joint_chain_reset_mask_init                   = 0x15004EC0; // type:func
+model_kind_tables_clear                   = 0x15004EE0; // type:func
 level_load_look_points                   = 0x15004F90; // type:func
-func_15005270                   = 0x15005220; // type:func
+obj_flagged_select_reset                   = 0x15005220; // type:func
 camera_level_init                   = 0x15005240; // type:func
 camera_controller_init                   = 0x15005474; // type:func
 camera_set_initial_eye                   = 0x150057C8; // type:func
-func_15005A60                   = 0x15005A10; // type:func
-func_15005AB0                   = 0x15005A60; // type:func
-func_15005AF0                   = 0x15005AA0; // type:func
-func_15005B00                   = 0x15005AB0; // type:func
-func_15005B10                   = 0x15005AC0; // type:func
-func_15005B50                   = 0x15005B00; // type:func
-func_15005B60                   = 0x15005B10; // type:func
-func_15005B70                   = 0x15005B20; // type:func
-func_15005BD0                   = 0x15005B80; // type:func
-func_15005C30                   = 0x15005BE0; // type:func
-func_15005C80                   = 0x15005C30; // type:func
-func_15005CF0                   = 0x15005CA0; // type:func
-func_15005D00                   = 0x15005CB0; // type:func
-func_15005D60                   = 0x15005D10; // type:func
-func_15005DA0                   = 0x15005D50; // type:func
-func_15005DB0                   = 0x15005D60; // type:func
-func_15005E30                   = 0x15005DE0; // type:func
-func_15005E70                   = 0x15005E20; // type:func
-func_15005EA0                   = 0x15005E50; // type:func
-func_15005EE0                   = 0x15005E90; // type:func
-func_15005F20                   = 0x15005ED0; // type:func
-func_15005F60                   = 0x15005F10; // type:func
-func_15005FA0                   = 0x15005F50; // type:func
-func_15005FB0                   = 0x15005F60; // type:func
-func_15006010                   = 0x15005FC0; // type:func
-func_15006140                   = 0x150060F0; // type:func
-func_15006170                   = 0x15006120; // type:func
+camera_level_hook_dispatch                   = 0x15005A10; // type:func
+camera_level_hook01_setup                   = 0x15005A60; // type:func
+camera_level_hook02_noop                   = 0x15005AA0; // type:func
+camera_level_hook03_noop                   = 0x15005AB0; // type:func
+camera_level_hook04_setup                   = 0x15005AC0; // type:func
+camera_level_hook05_noop                   = 0x15005B00; // type:func
+camera_level_hook06_noop                   = 0x15005B10; // type:func
+camera_level_hook07_send_events                   = 0x15005B20; // type:func
+camera_level_hook08_setup                   = 0x15005B80; // type:func
+camera_level_hook09_setup                   = 0x15005BE0; // type:func
+camera_level_hook10_setup                   = 0x15005C30; // type:func
+camera_level_hook11_noop                   = 0x15005CA0; // type:func
+camera_level_hook12_setup                   = 0x15005CB0; // type:func
+camera_level_hook13_setup                   = 0x15005D10; // type:func
+camera_level_hook14_noop                   = 0x15005D50; // type:func
+camera_level_hook15_setup                   = 0x15005D60; // type:func
+camera_level_hook16_setup                   = 0x15005DE0; // type:func
+camera_level_hook17_setup                   = 0x15005E20; // type:func
+camera_level_hook18_setup                   = 0x15005E50; // type:func
+camera_level_hook19_setup                   = 0x15005E90; // type:func
+camera_level_hook20_setup                   = 0x15005ED0; // type:func
+camera_level_hook21_setup                   = 0x15005F10; // type:func
+camera_level_hook22_noop                   = 0x15005F50; // type:func
+camera_level_hook23_setup                   = 0x15005F60; // type:func
+camera_level_hook24_update                   = 0x15005FC0; // type:func
+camera_level_hook25_setup                   = 0x150060F0; // type:func
+camera_level_hook26_setup                   = 0x15006120; // type:func
 controller_init_si_queue                   = 0x15006160; // type:func
 controller_init_all                   = 0x150061E4; // type:func
 save_game_defaults                   = 0x15006490; // type:func
@@ -475,8 +475,8 @@ save_request_slot_load                   = 0x1500766C; // type:func
 save_request_slot_write                   = 0x150076C8; // type:func
 save_request_slot_erase                   = 0x15007700; // type:func
 save_slots_reset                   = 0x15007728; // type:func
-func_15007830                   = 0x150077E0; // type:func
-func_15007A20                   = 0x150079D0; // type:func
+game_thread_main                   = 0x150077E0; // type:func
+game_bss_clear                   = 0x150079D0; // type:func
 level_start_game                   = 0x15007A20; // type:func
 level_load                   = 0x15007AEC; // type:func
 level_reset_globals                   = 0x15008194; // type:func
@@ -484,20 +484,20 @@ cutscene_clear_pending                   = 0x150081E0; // type:func
 cutscene_reset_state                   = 0x150081F8; // type:func
 cutscene_start_pending                   = 0x1500827C; // type:func
 spawn_zone_pick_point                   = 0x150082F0; // type:func
-func_15008840                   = 0x150087F0; // type:func
+zap_bolt_table_clear                   = 0x150087F0; // type:func
 effect_lists_clear                   = 0x15008820; // type:func
 effect_run_init_hooks                   = 0x150088E0; // type:func
-func_150089D0                   = 0x15008980; // type:func
-func_15008A10                   = 0x150089C0; // type:func
-func_15008A60                   = 0x15008A10; // type:func
-func_15008B90                   = 0x15008B40; // type:func
-func_15008BB0                   = 0x15008B60; // type:func
-func_15008BE0                   = 0x15008B90; // type:func
+particle_cooldowns_reset                   = 0x15008980; // type:func
+obj_holder_refs_init                   = 0x150089C0; // type:func
+view_zoom_state_reset                   = 0x15008A10; // type:func
+level_timed_queue_init                   = 0x15008B40; // type:func
+level_timed_queue_create                   = 0x15008B60; // type:func
+level_load_stub                   = 0x15008B90; // type:func
 area_drift_emitter_spawn                   = 0x15008BA0; // type:func
-func_15008DD0                   = 0x15008D80; // type:func
+player_morph_cache_clear                   = 0x15008D80; // type:func
 area_points_reset                   = 0x15008DB0; // type:func
 area_points_alloc                   = 0x15008DC0; // type:func
-func_15009150                   = 0x15009100; // type:func
+flare_nodes_level_init                   = 0x15009100; // type:func
 level_lights_reset                   = 0x15009180; // type:func
 level_hotspots_setup_all                   = 0x1500928C; // type:func
 level_hotspot_setup                   = 0x150092E4; // type:func
@@ -580,7 +580,7 @@ ambient_place_points_range21                   = 0x1500BC2C; // type:func
 ambient_timer_reset                   = 0x1500BDF0; // type:func
 ambient_state_reset                   = 0x1500BE18; // type:func
 ambient_emitters_build                   = 0x1500BE70; // type:func
-func_1500C1E0                   = 0x1500C190; // type:func
+anim_mesh_slots_reset                   = 0x1500C190; // type:func
 debris_counts_reset                   = 0x1500C250; // type:func
 record_debris_spawn                   = 0x1500C2A0; // type:func
 record_particle_spawn_a                   = 0x1500C880; // type:func
@@ -595,58 +595,58 @@ level_set_lod_shifts                   = 0x1500E6E8; // type:func
 level_obj_init_area_points                   = 0x1500E840; // type:func
 level_obj_init_drift_scene                   = 0x1500E870; // type:func
 level_obj_init_tex_scroll                   = 0x1500EA50; // type:func
-func_1500EB20                   = 0x1500EAD0; // type:func
-func_1500EB30                   = 0x1500EAE0; // type:func
-func_1500EBC4                   = 0x1500EB74; // type:func
-func_1500ED80                   = 0x1500ED30; // type:func
-func_1500EE18                   = 0x1500EDC8; // type:func
-func_1500EE94                   = 0x1500EE44; // type:func
-func_1500EF20                   = 0x1500EED0; // type:func
-func_1500F210                   = 0x1500F1C0; // type:func
+level_setup_noop_eb20                   = 0x1500EAD0; // type:func
+level_fx_point_spawn                   = 0x1500EAE0; // type:func
+level_setup_fx_points                   = 0x1500EB74; // type:func
+level_setup_light_pipe_spray                   = 0x1500ED30; // type:func
+effect_attach_obj_type45                   = 0x1500EDC8; // type:func
+effect_track_obj_type46                   = 0x1500EE44; // type:func
+level_setup_scroll_fx_points                   = 0x1500EED0; // type:func
+level_setup_tex_scroll_neg                   = 0x1500F1C0; // type:func
 level_obj_init_ropes                   = 0x150100C0; // type:func
-func_15010240                   = 0x150101F0; // type:func
-func_150102C0                   = 0x15010270; // type:func
-func_150102D0                   = 0x15010280; // type:func
-func_150103E0                   = 0x15010390; // type:func
+level_setup_tex_scroll_pos                   = 0x150101F0; // type:func
+level_setup_noop_102c0                   = 0x15010270; // type:func
+level_obj_init_scroll_fx59                   = 0x15010280; // type:func
+level_obj_init_two_vtx_lights                   = 0x15010390; // type:func
 level_obj_init_d9d70                   = 0x150104A0; // type:func
 obj_spawn_effect_80                   = 0x150104E8; // type:func
 level_clear_d9d40_flags                   = 0x150105B0; // type:func
-func_15010680                   = 0x15010630; // type:func
-func_150106A0                   = 0x15010650; // type:func
-func_150106B0                   = 0x15010660; // type:func
-func_150106D0                   = 0x15010680; // type:func
+level_obj_set_hit_activate_cb                   = 0x15010630; // type:func
+level_obj_init_nop_150106a0                   = 0x15010650; // type:func
+level_obj_set_target_hit_cb                   = 0x15010660; // type:func
+level_obj_spawn_zone_effect                   = 0x15010680; // type:func
 level_obj_init_vertex_lights                   = 0x15010730; // type:func
 level_obj_init_d34b8_effect                   = 0x15010830; // type:func
 level_obj_init_rope                   = 0x15010980; // type:func
 level_obj_init_debris_table                   = 0x15010A10; // type:func
-func_15010FB0                   = 0x15010F60; // type:func
-func_150110F0                   = 0x150110A0; // type:func
-func_15011170                   = 0x15011120; // type:func
-func_15011330                   = 0x150112E0; // type:func
-func_15011360                   = 0x15011310; // type:func
+level_obj_init_scroll_handles                   = 0x15010F60; // type:func
+level_obj_init_scroll_xy                   = 0x150110A0; // type:func
+level_obj_init_storm_sounds                   = 0x15011120; // type:func
+level_obj_init_storm                   = 0x150112E0; // type:func
+level_obj_init_area_points_23                   = 0x15011310; // type:func
 level_fire_emitters_create                   = 0x15011390; // type:func
 obj_glow_smoke_attach                   = 0x1501170C; // type:func
 obj_spawn_effect_85                   = 0x15011A28; // type:func
-func_15011B00                   = 0x15011AB0; // type:func
-func_15011B94                   = 0x15011B44; // type:func
-func_15011C40                   = 0x15011BF0; // type:func
-func_15011C70                   = 0x15011C20; // type:func
-func_15011CA0                   = 0x15011C50; // type:func
-func_15011CC0                   = 0x15011C70; // type:func
+level_fx_spawn_random_life                   = 0x15011AB0; // type:func
+level_obj_init_lights_sfx77                   = 0x15011B44; // type:func
+level_clear_be500                   = 0x15011BF0; // type:func
+level_reset_d9aa0_sfx                   = 0x15011C20; // type:func
+level_sfx_cooldown_reset                   = 0x15011C50; // type:func
+level_obj_init_scroll_e4                   = 0x15011C70; // type:func
 level_hook_call_15103800                   = 0x15011CF0; // type:func
 marker_effect_spawn                   = 0x15011D10; // type:func
-func_15011F20                   = 0x15011ED0; // type:func
-func_15011FA0                   = 0x15011F50; // type:func
-func_15012020                   = 0x15011FD0; // type:func
-func_150120B0                   = 0x15012060; // type:func
-func_1501214C                   = 0x150120FC; // type:func
+ambient_fx_spawn_type3                   = 0x15011ED0; // type:func
+ambient_fx_spawn_type5                   = 0x15011F50; // type:func
+level_ground_emitter_spawn7                   = 0x15011FD0; // type:func
+ambient_fx_spawn_type4                   = 0x15012060; // type:func
+obj_drip_attach                   = 0x150120FC; // type:func
 debris_spawn_linked                   = 0x15012170; // type:func
 camera_init_player_projections                   = 0x15012320; // type:func
 fx_alloc_d88750                   = 0x15012420; // type:func
 pipe_spray_points_init                   = 0x15012450; // type:func
-func_15012720                   = 0x150126D0; // type:func
-func_15012770                   = 0x15012720; // type:func
-func_15012780                   = 0x15012730; // type:func
+level_get_proj_mode                   = 0x150126D0; // type:func
+level_init_nop_15012770                   = 0x15012720; // type:func
+level_clear_dd410                   = 0x15012730; // type:func
 level_clear_be570                   = 0x15012F90; // type:func
 hotspots_start_all                   = 0x15012FB0; // type:func
 record_particle_emitter_start                   = 0x15013064; // type:func
@@ -682,13 +682,13 @@ record_rope_zone_start                   = 0x150156A4; // type:func
 mp_set_mode_for_level                   = 0x15015EF0; // type:func
 screen_setup_viewports                   = 0x15015F6C; // type:func
 audio_fx_mixer_init                   = 0x15016120; // type:func
-func_150162B0                   = 0x15016260; // type:func
-func_15016370                   = 0x15016320; // type:func
+records_table_reset                   = 0x15016260; // type:func
+records_set_tint_180_60_60                   = 0x15016320; // type:func
 level_globals_reset                   = 0x150164B0; // type:func
 level_build_flag_bitmask                   = 0x15016538; // type:func
-func_15016670                   = 0x15016620; // type:func
-func_15016680                   = 0x15016630; // type:func
-func_15016690                   = 0x15016640; // type:func
+level_clear_d18c0                   = 0x15016620; // type:func
+start_points_clear                   = 0x15016630; // type:func
+start_points_load                   = 0x15016640; // type:func
 level_lights_init                   = 0x150172B0; // type:func
 level_lights_stub                   = 0x1501743C; // type:func
 level_lights_clear                   = 0x15017448; // type:func
@@ -729,8 +729,8 @@ camera_rect_on_screen                   = 0x1501AE74; // type:func
 screen_clamp_rect                   = 0x1501AF24; // type:func
 camera_setup_perspective                   = 0x1501B080; // type:func
 camera_compute_frustum_planes                   = 0x1501B20C; // type:func
-func_1501C860                   = 0x1501C840; // type:func
-func_1501C870                   = 0x1501C850; // type:func
+frame_hook_nop_1501c860                   = 0x1501C840; // type:func
+frame_hook_nop_1501c870                   = 0x1501C850; // type:func
 asset_system_stub_a                   = 0x1502ADE0; // type:func
 asset_system_stub_b                   = 0x1502ADE8; // type:func
 asset_rec_cache_insert                   = 0x1502ADF4; // type:func
@@ -844,14 +844,14 @@ guPerspectiveF                  = 0x150481F0; // type:func
 guPerspective                   = 0x15048424; // type:func
 guRotateF                       = 0x15048480; // type:func
 guRotate                        = 0x15048600; // type:func
-func_15048360                   = 0x15048650; // type:func
-func_15048408                   = 0x150486F8; // type:func
-func_150484A0                   = 0x15048790; // type:func
-func_150485E0                   = 0x150488D0; // type:func
-func_15048664                   = 0x15048954; // type:func
-func_150486B8                   = 0x150489A8; // type:func
-func_15048720                   = 0x15048A10; // type:func
-func_15048758                   = 0x15048A48; // type:func
+math_acosf_lut                   = 0x15048650; // type:func
+math_asinf_lut                   = 0x150486F8; // type:func
+math_atan2f                   = 0x15048790; // type:func
+math_acos_table_lookup                   = 0x150488D0; // type:func
+math_acos_s16                   = 0x15048954; // type:func
+math_asin_s16                   = 0x150489A8; // type:func
+math_angle_lerp_deg                   = 0x15048A10; // type:func
+math_wrap_deg_360                   = 0x15048A48; // type:func
 math_asin_scaled                   = 0x15048AD0; // type:func
 math_asin_u8                   = 0x15048B54; // type:func
 math_asinf_table                   = 0x15048BB8; // type:func
@@ -872,9 +872,9 @@ vec3_dir_to                   = 0x150494DC; // type:func
 quadtree_tri_box_test                   = 0x15049550; // type:func
 quadtree_set_test_box                   = 0x150495BC; // type:func
 tri_compute_plane                   = 0x15049640; // type:func
-func_15049440                   = 0x15049730; // type:func
+math_mtx_box_in_frustum                   = 0x15049730; // type:func
 tanf                            = 0x1504A8D0; // type:func
-func_1504A620                   = 0x1504A910; // type:func
+math_logf                   = 0x1504A910; // type:func
 objects_run_state_handlers                   = 0x1504AA20; // type:func
 objects_update_tank_views                   = 0x1504B0C8; // type:func
 obj_coll_link_resolve_stub                   = 0x1504B1EC; // type:func
@@ -1342,18 +1342,18 @@ rolling_object_update                   = 0x150C3A74; // type:func
 bouncing_bomb_update                   = 0x150C3E94; // type:func
 checksum_key_offset                   = 0x150C4248; // type:func
 bomb_explode                   = 0x150C425C; // type:func
-func_150C4BF0                   = 0x150C50F0; // type:func
-func_150CEF10                   = 0x150CF420; // type:func
-func_150DE310                   = 0x150DE890; // type:func
-func_150DEC90                   = 0x150DF210; // type:func
-func_150E1800                   = 0x150E1D80; // type:func
-func_150EC4B0                   = 0x150ECA30; // type:func
-func_150F51A0                   = 0x150F5720; // type:func
-func_150F51BC                   = 0x150F573C; // type:func
-func_150F51E8                   = 0x150F5768; // type:func
+camera_hook_events_f20a0                   = 0x150C50F0; // type:func
+camera_hook_zoom_reset                   = 0x150CF420; // type:func
+camera_hook_nop_150de310                   = 0x150DE890; // type:func
+level_hook_rain_stop                   = 0x150DF210; // type:func
+camera_hook_event_403e                   = 0x150E1D80; // type:func
+camera_hook_event_4023                   = 0x150ECA30; // type:func
+storm_thunder_flag_set                   = 0x150F5720; // type:func
+storm_thunder_flag_take                   = 0x150F573C; // type:func
+storm_thunder_sfx_update                   = 0x150F5768; // type:func
 camera_segment_track                   = 0x150F7080; // type:func
-func_150FCA00                   = 0x150FCF80; // type:func
-func_15100330                   = 0x151008B0; // type:func
+camera_set_ranges_500_800                   = 0x150FCF80; // type:func
+camera_hook_nop_15100330                   = 0x151008B0; // type:func
 sfx_cooldown_clear                   = 0x15103D80; // type:func
 sfx_cooldown_tick                   = 0x15103DA8; // type:func
 object_sound_follow_cam                   = 0x15103E90; // type:func
@@ -1370,9 +1370,9 @@ fx_sparks_on_msg                   = 0x15105DC8; // type:func
 fx_sparks_emit                   = 0x15105E34; // type:func
 fx_shake_if_active                   = 0x15106148; // type:func
 scene_node_find_type2e                   = 0x151061A4; // type:func
-func_1511FC20                   = 0x15120190; // type:func
-func_1511FC2C                   = 0x1512019C; // type:func
-func_1511FC44                   = 0x151201B4; // type:func
+frame_hook_nop_1511fc20                   = 0x15120190; // type:func
+debug_gdl_pos_value_nop                   = 0x1512019C; // type:func
+debug_gdl_pos_nop                   = 0x151201B4; // type:func
 camera_update_all                   = 0x15123050; // type:func
 camera_update_controller                   = 0x151231CC; // type:func
 camera_calc_relative_yaw                   = 0x151235E0; // type:func
@@ -1418,7 +1418,7 @@ camera_update_special_modes                   = 0x15128AB0; // type:func
 camera_noop                   = 0x15128BF0; // type:func
 camera_init_controller                   = 0x15128BFC; // type:func
 camera_snap_to_object                   = 0x15128CE4; // type:func
-func_1512D380                   = 0x1512D8F0; // type:func
+camera_hook_nop_1512d380                   = 0x1512D8F0; // type:func
 camera_orbit_point_init                   = 0x1512E2C0; // type:func
 camera_orbit_point_update                   = 0x1512E414; // type:func
 obj_get_hit_kind                   = 0x151345E0; // type:func
@@ -1663,18 +1663,18 @@ obj_broadcast_replace                   = 0x15146A78; // type:func
 model_node_points_to_world                   = 0x15146ABC; // type:func
 pos_in_world_bounds                   = 0x15146C9C; // type:func
 fx_random_flicker_update                   = 0x15146D14; // type:func
-func_15149130                   = 0x151496A0; // type:func
-func_151491F4                   = 0x15149764; // type:func
-func_15149264                   = 0x151497D4; // type:func
-func_15149318                   = 0x15149888; // type:func
-func_1514933C                   = 0x151498AC; // type:func
-func_15149368                   = 0x151498D8; // type:func
-func_15149394                   = 0x15149904; // type:func
-func_151493E4                   = 0x15149954; // type:func
-func_15149434                   = 0x151499A4; // type:func
-func_15149490                   = 0x15149A00; // type:func
-func_151494E0                   = 0x15149A50; // type:func
-func_15149514                   = 0x15149A84; // type:func
+effect_node_create                   = 0x151496A0; // type:func
+effect_node_create_nodraw                   = 0x15149764; // type:func
+effect_node_update                   = 0x151497D4; // type:func
+effect_node_free_vtx                   = 0x15149888; // type:func
+effect_node_retire                   = 0x151498AC; // type:func
+effect_node_free                   = 0x151498D8; // type:func
+effect_node_kind_call_a                   = 0x15149904; // type:func
+effect_node_kind_call_b                   = 0x15149954; // type:func
+effect_node_kind_message                   = 0x151499A4; // type:func
+effect_node_draw                   = 0x15149A00; // type:func
+effect_nodes_broadcast                   = 0x15149A50; // type:func
+effect_node_link_message                   = 0x15149A84; // type:func
 streak_spawn                   = 0x1515C860; // type:func
 streak_update_points                   = 0x1515C8F8; // type:func
 streak_update_fade                   = 0x1515CAA4; // type:func
@@ -1761,7 +1761,7 @@ light_set_transformed_pos                   = 0x1516498C; // type:func
 light_beh_orbit                   = 0x15164A18; // type:func
 light_set_orbit_pos                   = 0x15164A64; // type:func
 level_set_lights_mode                   = 0x15164B34; // type:func
-func_15165F70                   = 0x151664E0; // type:func
+level_frame_hook_nop                   = 0x151664E0; // type:func
 node_types_run_frame_hooks                   = 0x15167580; // type:func
 node_run_global_hooks                   = 0x151675DC; // type:func
 node_lists_run_update                   = 0x15167630; // type:func
@@ -1804,9 +1804,9 @@ node_delete                   = 0x15169D0C; // type:func
 node_retire                   = 0x15169D74; // type:func
 node_unlink_free                   = 0x15169D94; // type:func
 node_handle_link_message                   = 0x15169DC0; // type:func
-func_15178E50                   = 0x151793C0; // type:func
+level_screen_effect_active                   = 0x151793C0; // type:func
 sprite_node_init_fade                   = 0x15192D30; // type:func
-func_1519EF70                   = 0x1519F4E0; // type:func
+objfx_nop_1519ef70                   = 0x1519F4E0; // type:func
 attach_fx_asset_acquire                   = 0x151D3060; // type:func
 attach_fx_asset_release                   = 0x151D30FC; // type:func
 attach_fx_spawn                   = 0x151D3154; // type:func
@@ -1899,29 +1899,29 @@ corrupted2                      = 0x151F22E8; // type:func
 osPfsIsPlug2                    = 0x151F24D0; // type:func
 __osPfsRequestData2             = 0x151F2670; // type:func
 __osPfsGetInitData2             = 0x151F276C; // type:func
-func_16000000                   = 0x16000000; // type:func
-func_16000028                   = 0x16000028; // type:func
-func_16000058                   = 0x16000058; // type:func
-func_16000224                   = 0x16000224; // type:func
-func_16000304                   = 0x16000304; // type:func
-func_1600030C                   = 0x1600030C; // type:func
-func_16000314                   = 0x16000314; // type:func
-func_16000384                   = 0x16000384; // type:func
-func_16000424                   = 0x16000424; // type:func
-func_16000590                   = 0x16000590; // type:func
-func_160006CC                   = 0x160006CC; // type:func
-func_1600078C                   = 0x1600078C; // type:func
-func_16000A5C                   = 0x16000A5C; // type:func
-func_16000B14                   = 0x16000B14; // type:func
-func_16000F8C                   = 0x16000F8C; // type:func
-func_16001044                   = 0x16001044; // type:func
-func_160012B0                   = 0x160012B0; // type:func
-func_16001338                   = 0x16001338; // type:func
-func_16001390                   = 0x16001390; // type:func
-func_160014F0                   = 0x160014F0; // type:func
-func_1600160C                   = 0x1600160C; // type:func
-func_16001678                   = 0x16001678; // type:func
-func_160016F4                   = 0x160016F4; // type:func
+debugger_page_title_draw                   = 0x16000000; // type:func
+debugger_page_title_input                   = 0x16000028; // type:func
+debugger_main_menu_draw                   = 0x16000058; // type:func
+debugger_main_menu_input                   = 0x16000224; // type:func
+debugger_page_nop_draw                   = 0x16000304; // type:func
+debugger_page_nop_input                   = 0x1600030C; // type:func
+debugger_regs_page_draw                   = 0x16000314; // type:func
+debugger_regs_page_input                   = 0x16000384; // type:func
+debugger_draw_exception                   = 0x16000424; // type:func
+debugger_draw_fpu_regs                   = 0x16000590; // type:func
+debugger_draw_gprs                   = 0x160006CC; // type:func
+debugger_draw_stack                   = 0x1600078C; // type:func
+debugger_stack_page_input                   = 0x16000A5C; // type:func
+debugger_main                   = 0x16000B14; // type:func
+debugger_print_float                   = 0x16000F8C; // type:func
+debugger_print_number                   = 0x16001044; // type:func
+debugger_print_string                   = 0x160012B0; // type:func
+debugger_set_color                   = 0x16001338; // type:func
+debugger_fill_rect                   = 0x16001390; // type:func
+debugger_draw_char                   = 0x160014F0; // type:func
+debugger_cell_to_fb                   = 0x1600160C; // type:func
+debugger_clear_screen                   = 0x16001678; // type:func
+debugger_identity                   = 0x160016F4; // type:func
 debug_cont_read                   = 0x16001700; // type:func
 debug_cont_get_read_data                   = 0x16001830; // type:func
 debug_cont_pack_read_data                   = 0x160018BC; // type:func
@@ -2229,9 +2229,9 @@ event_timers_reset                   = 0x150A05D0; // type:func
 triggers_update                   = 0x150A0EB0; // type:func
 trigger_test_player                   = 0x150A2EA8; // type:func
 mtxf_mul                   = 0x150A7F28; // type:func
-func_150A9B0C                   = 0x150A9FEC; // type:func
-func_150AD780                   = 0x150ADC60; // type:func
-func_150AD78C                   = 0x150ADC6C; // type:func
+mtx_rotate_scale_3x3                   = 0x150A9FEC; // type:func
+fast_cosf                   = 0x150ADC60; // type:func
+fast_sinf                   = 0x150ADC6C; // type:func
 vec3f_magnitude                   = 0x150ADE10; // type:func
 obj_trail_burst_spawn                   = 0x150AF390; // type:func
 obj_joint_blast_fx                   = 0x150B3F90; // type:func
@@ -2351,13 +2351,13 @@ vtx_slot_buffers_free                   = 0x151D63E0; // type:func
 hud_overlay_draw_screen                   = 0x151E8DD0; // type:func
 guMtxF2L2                       = 0x151F04C0; // type:func
 guMtxL2F                        = 0x151F0678; // type:func
-func_151F2960                   = 0x151F3120; // type:func
-func_151F2BA8                   = 0x151F3368; // type:func
-func_151F2CDC                   = 0x151F349C; // type:func
-func_151F2D6C                   = 0x151F352C; // type:func
-func_151F2DFC                   = 0x151F35BC; // type:func
-func_151F2E4C                   = 0x151F360C; // type:func
-func_151F3C1C                   = 0x151F4408; // type:func
+mp3_stream_start                   = 0x151F3120; // type:func
+mp3_stream_stop                   = 0x151F3368; // type:func
+mp3_stream_get_state                   = 0x151F349C; // type:func
+mp3_stream_set_volume                   = 0x151F352C; // type:func
+mp3_stream_set_pan                   = 0x151F35BC; // type:func
+mp3_stream_set_fx                   = 0x151F360C; // type:func
+mp3_stream_set_text_cb                   = 0x151F4408; // type:func
 mp3dec_init                   = 0x151F45D0; // type:func
 D_160036F3                      = 0x160036F3; // type:func
 D_16003848                      = 0x16003848; // type:func
@@ -2467,7 +2467,7 @@ __osPfsSelectBank               = 0x1002892C;
 osPfsChecker                    = 0x100289A0;
 corrupted_init                  = 0x10029064;
 corrupted                       = 0x10029218;
-func_eu_1501B640               = 0x1501B640; // type:func
+obj_vertex_colours_blend               = 0x1501B640; // type:func
 gfx_task_submit               = 0x1501C860; // type:func
 obj7b_set_anim_ids               = 0x150F2230; // type:func
 area_sparkle_emitter_update               = 0x15108850; // type:func
@@ -3895,15 +3895,15 @@ obj_type_tex_scroll_apply                   = 0x150631D4; // type:func
 obj_vtx_scroll_uv                   = 0x15063370; // type:func
 obj_hit_react_other_players                   = 0x15063518; // type:func
 obj_model_swap_keep_pose                   = 0x15063604; // type:func
-func_151F27E0                   = 0x151F2FA0; // type:func
-func_151F2890                   = 0x151F3050; // type:func
-func_151F2BE8                   = 0x151F33A8; // type:func
-func_151F2C4C                   = 0x151F340C; // type:func
-func_151F2E88                   = 0x151F3648; // type:func
-func_151F39E4                   = 0x151F41D0; // type:func
-func_151F3C34                   = 0x151F4420; // type:func
-func_151F3C4C                   = 0x151F4438; // type:func
-func_151F3D78                   = 0x151F4564; // type:func
+game_os_cont_address_crc                   = 0x151F2FA0; // type:func
+game_os_cont_data_crc                   = 0x151F3050; // type:func
+mp3_stream_pause                   = 0x151F33A8; // type:func
+mp3_stream_resume                   = 0x151F340C; // type:func
+mp3_stream_synth_pull                   = 0x151F3648; // type:func
+mp3_stream_update_vol_pan                   = 0x151F41D0; // type:func
+mp3_stream_set_read_cb                   = 0x151F4420; // type:func
+mp3_stream_rom_read                   = 0x151F4438; // type:func
+mp3_stream_prefetch                   = 0x151F4564; // type:func
 boot_entry_main                   = 0x10001050; // type:func
 boot_idle_thread_main                   = 0x100010F8; // type:func
 boot_game_thread_main                   = 0x10001184; // type:func
@@ -3913,7 +3913,7 @@ sched_init                   = 0x10005380; // type:func
 prenmi_thread_start                   = 0x100054CC; // type:func
 prenmi_stub_noop                   = 0x1000554C; // type:func
 prenmi_thread_main                   = 0x10005554; // type:func
-func_eu_10017D80                = 0x10017D80; // type:func
+audio_csp_stub_eu                = 0x10017D80; // type:func
 D_eu_8003B9D0                   = 0x8003B9D0;
 mp3dec_dequantize                   = 0x151F4AD8; // type:func
 mp3dec_unpack_scale_fac                   = 0x151F5728; // type:func
@@ -3984,9 +3984,9 @@ fire_smoke_trail_spawn          = 0x150D5950; // type:func
 fire_smoke_trail_update         = 0x150D59D8; // type:func
 // was func_150D5E7C: (med) Message handler of the smoke trail: frees it when its owner is removed (0 / 0x2F / 3), follows the owner on a replace (0x2D)
 fire_smoke_trail_handle_msg     = 0x150D5E7C; // type:func
-// was func_150D5F3C: (low) Wrapper: calls func_1514933C on a particle record
+// was func_150D5F3C: (low) Wrapper: calls effect_node_retire on a particle record
 debris_particle_free_a          = 0x150D5F3C; // type:func
-// was func_150D5F5C: (low) Wrapper: calls func_15149368 on a particle record
+// was func_150D5F5C: (low) Wrapper: calls effect_node_free on a particle record
 debris_particle_free_b          = 0x150D5F5C; // type:func
 // was func_150D5F7C: Debris burst of a destroyed object: sounds, two particle bursts along the hit surface or upward, then dust, scorch, flash
 debris_burst_destroyed_object   = 0x150D5F7C; // type:func
@@ -4156,7 +4156,7 @@ obj_pin_root_height             = 0x150E0324; // type:func
 mat_hit_flash_update            = 0x150E0350; // type:func
 // was func_150E047C: (low) Effect update: on random timers creates short-lived flickering lights and 2..4 spark sprites around the effect
 fx_flicker_lights_update        = 0x150E047C; // type:func
-// was func_150E0840: (low) Wrapper: func_15149514(arg1, arg2, &obj +0x28, &obj +0x2C, obj)
+// was func_150E0840: (low) Wrapper: effect_node_link_message(arg1, arg2, &obj +0x28, &obj +0x2C, obj)
 effect_attach_to_obj            = 0x150E0840; // type:func
 // was func_150E0880: (med) First call only (D_80088D20): light_group_set_disabled(6, 0) and water_effect_spawn, then sets the done flag
 water_effect_start_once         = 0x150E0880; // type:func
@@ -4442,7 +4442,7 @@ obj_glow_follow_pulse           = 0x150F13C8; // type:func
 obj_glow_on_message             = 0x150F15A0; // type:func
 // was func_150F16F0: (low) Emitter update: while its object lives spawns particles along the object-to-point segment
 obj_trail_emitter_update        = 0x150F16F0; // type:func
-// was func_150F1B78: (med) Effect message handler: ends on 0x43 from its target, else forwards to func_15149514
+// was func_150F1B78: (med) Effect message handler: ends on 0x43 from its target, else forwards to effect_node_link_message
 fx_target_effect_on_message     = 0x150F1B78; // type:func
 // was func_150F1C04: (low) Light message handler: ends on 0x43 from its target object
 fx_target_light_on_message      = 0x150F1C04; // type:func
@@ -4530,15 +4530,15 @@ model_tile_fade_cb              = 0x150F5FD4; // type:func
 obj_bone_glow_emitter_spawn     = 0x150F6188; // type:func
 // was func_150F6218: (low) Emitter update: while its object lives spawns glow particles along two points of its bone (+0x140)
 obj_bone_glow_emitter_update    = 0x150F6218; // type:func
-// was func_150F66B8: (low) Emitter message handler: forwards to func_15149514 with its object link at +0x28
+// was func_150F66B8: (low) Emitter message handler: forwards to effect_node_link_message with its object link at +0x28
 obj_bone_glow_emitter_on_message = 0x150F66B8; // type:func
 // was func_150F66F8: (low) Emitter update: keeps its child effect and light on two bone points of its object, hiding them when unavailable
 obj_bone_fx_pair_update         = 0x150F66F8; // type:func
 // was func_150F689C: (med) Destroys the emitter's child effect (+0x30) and light (+0x34) nodes if present
 obj_bone_fx_pair_destroy_children = 0x150F689C; // type:func
-// was func_150F68E8: (low) Destroys the emitter's children and retires it (func_1514933C)
+// was func_150F68E8: (low) Destroys the emitter's children and retires it (effect_node_retire)
 obj_bone_fx_pair_retire         = 0x150F68E8; // type:func
-// was func_150F6914: (low) Destroys the emitter's children and frees it (func_15149368)
+// was func_150F6914: (low) Destroys the emitter's children and frees it (effect_node_free)
 obj_bone_fx_pair_free           = 0x150F6914; // type:func
 // was func_150F6940: (low) Emitter message handler: forwards to node_handle_link_message for its object link at +0x28
 obj_bone_fx_pair_on_message     = 0x150F6940; // type:func
@@ -4572,9 +4572,9 @@ glow_pair_update                = 0x150F75EC; // type:func
 glow_pair_handle_event          = 0x150F7890; // type:func
 // was func_150F791C: (med) Destroys the glow pair's two particle nodes and releases the record's link (char_fx_detach_effect)
 glow_pair_free_particles        = 0x150F791C; // type:func
-// was func_150F798C: (low) Frees the glow pair's particles, then retires the object through func_1514933C
+// was func_150F798C: (low) Frees the glow pair's particles, then retires the object through effect_node_retire
 glow_pair_retire                = 0x150F798C; // type:func
-// was func_150F79B8: (low) Frees the glow pair's particles, then deletes the object through func_15149368
+// was func_150F79B8: (low) Frees the glow pair's particles, then deletes the object through effect_node_free
 glow_pair_delete                = 0x150F79B8; // type:func
 // was func_150F79F0: (med) Spawns a beam/muzzle light effect between a start point and an optional target point, with its 0xB4-byte light block and sound
 beam_light_effect_spawn         = 0x150F79F0; // type:func
@@ -4602,9 +4602,9 @@ fire_burn_update                = 0x150F8EAC; // type:func
 fire_post_finish_events         = 0x150F9CA0; // type:func
 // was func_150F9D08: (low) Empty release callback of the fire object
 fire_free                       = 0x150F9D08; // type:func
-// was func_150F9D14: (low) Fire release (no-op), then retires the object through func_1514933C
+// was func_150F9D14: (low) Fire release (no-op), then retires the object through effect_node_retire
 fire_retire                     = 0x150F9D14; // type:func
-// was func_150F9D40: (low) Fire release (no-op), then deletes the object through func_15149368
+// was func_150F9D40: (low) Fire release (no-op), then deletes the object through effect_node_free
 fire_delete                     = 0x150F9D40; // type:func
 // was func_150F9D6C: (med) Spawns a random spark spray (attached_particle_spawn) attached to the object's bone matrix at model point D_800A2018
 obj_bone_spark_spray            = 0x150F9D6C; // type:func
@@ -4656,9 +4656,9 @@ gunfire_burst_handle_event      = 0x150FCD98; // type:func
 gunfire_target_filter           = 0x150FCEB0; // type:func
 // was func_150FCEF4: (med) Destroys the burst's screen-effect node (+0x38) when set
 gunfire_burst_free              = 0x150FCEF4; // type:func
-// was func_150FCF24: (low) Frees the burst's screen effect, then retires the object through func_1514933C
+// was func_150FCF24: (low) Frees the burst's screen effect, then retires the object through effect_node_retire
 gunfire_burst_retire            = 0x150FCF24; // type:func
-// was func_150FCF50: (low) Frees the burst's screen effect, then deletes the object through func_15149368
+// was func_150FCF50: (low) Frees the burst's screen effect, then deletes the object through effect_node_free
 gunfire_burst_delete            = 0x150FCF50; // type:func
 // was func_150FCFB0: (med) Sparkle bursts at the three view spots, three positional sounds (0x2B6..0x2B8), a kind-4 screen effect for every player and a rumble
 view_spots_flash_event          = 0x150FCFB0; // type:func
@@ -4876,9 +4876,9 @@ bolt_record_update              = 0x1510783C; // type:func
 bolt_arc_unlink_from_bolt       = 0x15107B84; // type:func
 // was func_15107B9C: (med) Destroys the bolt record's current arc (+0x30) when set
 bolt_record_free                = 0x15107B9C; // type:func
-// was func_15107BCC: (low) Frees the bolt's arc, then retires the record through func_1514933C
+// was func_15107BCC: (low) Frees the bolt's arc, then retires the record through effect_node_retire
 bolt_record_retire              = 0x15107BCC; // type:func
-// was func_15107BF8: (low) Frees the bolt's arc, then deletes the record through func_15149368
+// was func_15107BF8: (low) Frees the bolt's arc, then deletes the record through effect_node_free
 bolt_record_delete              = 0x15107BF8; // type:func
 // was func_15107C24: (med) Bolt event handler: dispatches to the kind's handler in D_80088FD8 (kind byte +0x68)
 bolt_record_handle_event        = 0x15107C24; // type:func
@@ -5686,7 +5686,7 @@ char_fx_level14_attach          = 0x1514E0D4; // type:func
 char_fx_bundle_attach_a         = 0x1514E108; // type:func
 // was func_1514E128: (med) Attach handler: adds a white light on joint 2
 char_fx_light_j2                = 0x1514E128; // type:func
-// was func_1514E1A8: (low) Attach handler: calls func_1500EE18 for the object
+// was func_1514E1A8: (low) Attach handler: calls effect_attach_obj_type45 for the object
 char_fx_1500ee18_attach         = 0x1514E1A8; // type:func
 // was func_1514E1CC: (low) Attach handler: calls obj_point_trail_spawn kind 0 for the object
 char_fx_1d1510_attach           = 0x1514E1CC; // type:func
@@ -6028,7 +6028,7 @@ smoke_sway_step_ground          = 0x1515ACFC; // type:func
 move_watch_get_data             = 0x1515AE90; // type:func
 // was func_1515AEE4: (med) For an object with byte +0x1F 0, spawns its attached effect (ground_emitter_spawn, kind 0xF) with data from D_800A674C
 watch_attach_effect_start       = 0x1515AEE4; // type:func
-// was func_1515AFF4: (low) Spawns an effect (func_15149130) of a random kind in the object's range at a point, copying its 0x28-byte block
+// was func_1515AFF4: (low) Spawns an effect (effect_node_create) of a random kind in the object's range at a point, copying its 0x28-byte block
 watch_spawn_random_effect       = 0x1515AFF4; // type:func
 // was func_1515B0F8: (med) Smoke emitter tick: accumulates rate + random and spawns smoke puffs (particle_spawn_ex kind 2) with random sizes, sway and flip flags
 smoke_emitter_update            = 0x1515B0F8; // type:func
@@ -6824,7 +6824,7 @@ model_drip_wait_owner           = 0x15191E2C; // type:func
 model_drip_on_message           = 0x15191EF0; // type:func
 // was func_15191FF4: (med) Pending drip emitter message handler: same stop/destroy rules on its +0x28 owner record
 model_drip_wait_on_message      = 0x15191FF4; // type:func
-// was func_151920FC: (med) Send a message to the drip effects (func_151494E0) and broadcast it to the drip emitter node type
+// was func_151920FC: (med) Send a message to the drip effects (effect_nodes_broadcast) and broadcast it to the drip emitter node type
 model_drip_broadcast            = 0x151920FC; // type:func
 // was func_15192150: Start a type-0x1D dust effect object that follows an object at an offset with the given spawn parameters
 obj_dust_effect_spawn           = 0x15192150; // type:func
@@ -6842,11 +6842,11 @@ dust_drop_wobble_splash         = 0x15192AEC; // type:func
 obj_dust_effect_on_message      = 0x15192CEC; // type:func
 // was func_15192E20: (med) Map an object kind to its surface-handler class: kinds 0..4 -> 0, 0x53 -> 1; returns 0 for others
 obj_surface_handler_class       = 0x15192E20; // type:func
-// was func_15192E90: (low) Start effect type 0x14 (func_151491F4) that sheds dust from an object; the object record is copied to +0x28
+// was func_15192E90: (low) Start effect type 0x14 (effect_node_create_nodraw) that sheds dust from an object; the object record is copied to +0x28
 slide_dust_effect_start         = 0x15192E90; // type:func
 // was func_15192F14: (low) Dust effect tick: at a random rate spawn brown dust particles beside the object, pushed along the surface vector
 slide_dust_effect_update        = 0x15192F14; // type:func
-// was func_151932B8: (low) Start a timed effect type 0x18 (func_151491F4) that sheds dust from an object's body (script event 0x5D)
+// was func_151932B8: (low) Start a timed effect type 0x18 (effect_node_create_nodraw) that sheds dust from an object's body (script event 0x5D)
 body_dust_effect_start          = 0x151932B8; // type:func
 // was func_15193360: (low) Body dust tick: at a random rate spawn brown dust particles from bone 1 of the object, flung sideways
 body_dust_effect_update         = 0x15193360; // type:func
@@ -7078,13 +7078,13 @@ buddy_trail_stop_both           = 0x1519EBCC; // type:func
 buddy_marker_update             = 0x1519ECC4; // type:func
 // was func_1519ED88: (low) Buddy marker message handler: destroys and clears D_800E0D50 on owner death (0), follows an owner swap (0x2D)
 buddy_marker_handle_msg         = 0x1519ED88; // type:func
-// was func_1519EE3C: (low) Marker end handler: releases its link (char_fx_detach_effect) and retires it (func_1514933C)
+// was func_1519EE3C: (low) Marker end handler: releases its link (char_fx_detach_effect) and retires it (effect_node_retire)
 trail_marker_retire             = 0x1519EE3C; // type:func
-// was func_1519EE68: (low) Marker end handler: releases its link (char_fx_detach_effect) and frees it (func_15149368)
+// was func_1519EE68: (low) Marker end handler: releases its link (char_fx_detach_effect) and frees it (effect_node_free)
 trail_marker_free               = 0x1519EE68; // type:func
-// was func_1519EE94: (low) Buddy marker end handler: clears D_800E0D50 and retires it (func_1514933C)
+// was func_1519EE94: (low) Buddy marker end handler: clears D_800E0D50 and retires it (effect_node_retire)
 buddy_marker_retire             = 0x1519EE94; // type:func
-// was func_1519EEB8: (low) Buddy marker end handler: clears D_800E0D50 and frees it (func_15149368)
+// was func_1519EEB8: (low) Buddy marker end handler: clears D_800E0D50 and frees it (effect_node_free)
 buddy_marker_free               = 0x1519EEB8; // type:func
 // was func_1519EEE0: (low) Allocates a type-0x26 timer node with a lifetime, owner pointer and two vectors, used by sequence event 0x34
 seqfx_timer_create              = 0x1519EEE0; // type:func
@@ -7144,13 +7144,13 @@ fx_layers_spawn_stub            = 0x151A177C; // type:func
 spark_burst_emitter_update      = 0x151A1794; // type:func
 // was func_151A1D0C: (low) Sprite node update: runs its fade program (alpha, size and position ramps by age) from the record at +0x50
 spark_sprite_fade_update        = 0x151A1D0C; // type:func
-// was func_151A1E8C: (low) Start handler: spawns a type-3 emitter effect (func_151491F4) and copies the record's 0x20-byte parameters to it
+// was func_151A1E8C: (low) Start handler: spawns a type-3 emitter effect (effect_node_create_nodraw) and copies the record's 0x20-byte parameters to it
 spark_burst_a_start             = 0x151A1E8C; // type:func
 // was func_151A1F48: (low) Emitter update: accumulates rate and spawns random spark sprites with random life and fade from its parameters
 spark_burst_a_update            = 0x151A1F48; // type:func
 // was func_151A23E4: (low) Sprite node update: ramps alpha, size and position by age from the fade program at +0x50
 spark_sprite_a_fade_update      = 0x151A23E4; // type:func
-// was func_151A2498: (low) Start handler: spawns a type-4 emitter effect (func_151491F4) and copies the record's 0x24-byte parameters to it
+// was func_151A2498: (low) Start handler: spawns a type-4 emitter effect (effect_node_create_nodraw) and copies the record's 0x24-byte parameters to it
 spark_burst_b_start             = 0x151A2498; // type:func
 // was func_151A2564: (low) Emitter update: accumulates rate and spawns random coloured spark sprites from its parameters
 spark_burst_b_update            = 0x151A2564; // type:func
@@ -7194,7 +7194,7 @@ spark_burst_particle_spawn      = 0x151A4BE8; // type:func
 spark_burst_update              = 0x151A4DEC; // type:func
 // was func_151A4EB0: (low) Particle update (second stage): alpha and size ramps by life and colour byte = life * step
 spark_burst_update_tail         = 0x151A4EB0; // type:func
-// was func_151A4F4C: (med) Starts a type-5 smoke trail effect (func_151491F4) following an object, with rate 0.722
+// was func_151A4F4C: (med) Starts a type-5 smoke trail effect (effect_node_create_nodraw) following an object, with rate 0.722
 owner_smoke_start               = 0x151A4F4C; // type:func
 // was func_151A4FE8: (med) Smoke trail update: while the owner lives, emits whole-number puff bursts at its bone facing its yaw
 owner_smoke_update              = 0x151A4FE8; // type:func
@@ -7238,9 +7238,9 @@ debris_sprite_fade_update_b     = 0x151A7E2C; // type:func
 debris_piece_free_trail         = 0x151A7EB8; // type:func
 // was func_151A5C10: (low) Zone effect update: while the zone is idle and not switched off, spawns sprites at random ground points in the zone
 bubble_zone_update              = 0x151A5C10; // type:func
-// was func_151A625C: (low) Zone effect end handler: stops its sound (+0x6C) if any, then retires it (func_1514933C)
+// was func_151A625C: (low) Zone effect end handler: stops its sound (+0x6C) if any, then retires it (effect_node_retire)
 bubble_zone_retire              = 0x151A625C; // type:func
-// was func_151A629C: (low) Zone effect end handler: stops its sound (+0x6C) if any, then frees it (func_15149368)
+// was func_151A629C: (low) Zone effect end handler: stops its sound (+0x6C) if any, then frees it (effect_node_free)
 bubble_zone_free                = 0x151A629C; // type:func
 // was func_151A62DC: (low) Wrapper: stops a sound handle (sound_voice_stop)
 bubble_zone_sound_stop          = 0x151A62DC; // type:func
@@ -7476,9 +7476,9 @@ sprite_wobble_update            = 0x151B1DD8; // type:func
 character_sparks_release        = 0x151B1EC8; // type:func
 // was func_151B1F54: (low) Spark set message handler: destroys on owner death (0) or message 0x13; follows an owner swap (0x2D)
 character_sparks_handle_msg     = 0x151B1F54; // type:func
-// was func_151B2008: (low) Spark set end handler: releases the sparks, then retires it (func_1514933C)
+// was func_151B2008: (low) Spark set end handler: releases the sparks, then retires it (effect_node_retire)
 character_sparks_retire         = 0x151B2008; // type:func
-// was func_151B2034: (low) Spark set end handler: releases the sparks, then frees it (func_15149368)
+// was func_151B2034: (low) Spark set end handler: releases the sparks, then frees it (effect_node_free)
 character_sparks_free           = 0x151B2034; // type:func
 // was func_151B2060: (low) Starts a type-0x15 effect on an object (60-frame life) that drips particles between two of its bones
 bone_pair_drip_start            = 0x151B2060; // type:func
@@ -7494,9 +7494,9 @@ cord_rig_update                 = 0x151B26B0; // type:func
 cord_rig_free_ropes_wrap        = 0x151B27BC; // type:func
 // was func_151B27DC: (med) Destroys the rig's three rope nodes (+0x38..+0x40) and its plank object (+0x44)
 cord_rig_free_ropes             = 0x151B27DC; // type:func
-// was func_151B284C: (med) Frees the rig's ropes, then retires the object through func_1514933C
+// was func_151B284C: (med) Frees the rig's ropes, then retires the object through effect_node_retire
 cord_rig_retire                 = 0x151B284C; // type:func
-// was func_151B2878: (med) Frees the rig's ropes, then deletes the object through func_15149368
+// was func_151B2878: (med) Frees the rig's ropes, then deletes the object through effect_node_free
 cord_rig_delete                 = 0x151B2878; // type:func
 // was func_151B28A4: (low) Rig state: 1 when the first linked object is the player held by the second (+0x65 index, +0x5C == 1), else 2
 cord_rig_get_state              = 0x151B28A4; // type:func
@@ -7516,9 +7516,9 @@ cord_rig_on_obj_replaced        = 0x151B34B4; // type:func
 cord_end_handler_bone           = 0x151B3550; // type:func
 // was func_151B3580: (med) Plank free hook: clears the plank pointer (+0x44) of its rig
 cord_plank_unlink               = 0x151B3580; // type:func
-// was func_151B3598: (med) Unlinks the plank from its rig, then retires it through func_1514933C
+// was func_151B3598: (med) Unlinks the plank from its rig, then retires it through effect_node_retire
 cord_plank_retire               = 0x151B3598; // type:func
-// was func_151B35C4: (med) Unlinks the plank from its rig, then deletes it through func_15149368
+// was func_151B35C4: (med) Unlinks the plank from its rig, then deletes it through effect_node_free
 cord_plank_delete               = 0x151B35C4; // type:func
 // was func_151B35F0: (med) Rope message handler: forwards link messages for both attachment records (+0x150 and +0x164) to node_handle_link_message
 cord_handle_link_msg            = 0x151B35F0; // type:func
@@ -7706,7 +7706,7 @@ bone_emitter_particle_emit      = 0x151BD9EC; // type:func
 bone_emitter_timer_step         = 0x151BDD00; // type:func
 // was func_151BDD4C: (med) Particle update: copies its owner's position (+0xB0) when alive, then particle_upd_damp_vel
 particle_follow_owner_update    = 0x151BDD4C; // type:func
-// was func_151BDDA4: (med) Sends message 0x3B with the object and its id (func_151494E0), ending its aura burst group
+// was func_151BDDA4: (med) Sends message 0x3B with the object and its id (effect_nodes_broadcast), ending its aura burst group
 obj_aura_burst_stop             = 0x151BDDA4; // type:func
 // was func_151BDDD8: Creates an aura group object for obj with two particles and two emitters (aura_group_spawn without flash / light)
 aura_burst_group_spawn          = 0x151BDDD8; // type:func
@@ -7716,9 +7716,9 @@ aura_burst_follow_owner         = 0x151BE33C; // type:func
 aura_burst_handle_message       = 0x151BE65C; // type:func
 // was func_151BE6E8: (med) Destroys the group's two particles and two emitters (+0x30..+0x3C)
 aura_burst_free_effects         = 0x151BE6E8; // type:func
-// was func_151BE768: (med) Frees the group's effects, then retires it through func_1514933C
+// was func_151BE768: (med) Frees the group's effects, then retires it through effect_node_retire
 aura_burst_retire               = 0x151BE768; // type:func
-// was func_151BE794: (med) Frees the group's effects, then deletes it through func_15149368
+// was func_151BE794: (med) Frees the group's effects, then deletes it through effect_node_free
 aura_burst_delete               = 0x151BE794; // type:func
 // was func_151BE7C0: (med) Aura particle update: random flicker targets for width, height, alpha (+0x5C) and size, eased each frame
 aura_particle_flicker_update    = 0x151BE7C0; // type:func
@@ -7764,9 +7764,9 @@ lives_popup_spawn               = 0x151BF8F0; // type:func
 lives_popup_update              = 0x151BFDCC; // type:func
 // was func_151C00DC: (med) Destroys the pop-up's sprite and its two digit sprites
 lives_popup_free_sprites        = 0x151C00DC; // type:func
-// was func_151C0154: (med) Frees the pop-up's sprites, then retires it through func_1514933C
+// was func_151C0154: (med) Frees the pop-up's sprites, then retires it through effect_node_retire
 lives_popup_retire              = 0x151C0154; // type:func
-// was func_151C0180: (med) Frees the pop-up's sprites, then deletes it through func_15149368
+// was func_151C0180: (med) Frees the pop-up's sprites, then deletes it through effect_node_free
 lives_popup_delete              = 0x151C0180; // type:func
 // was func_151C01AC: (med) Destroys the pop-up on message 0x57
 lives_popup_on_message          = 0x151C01AC; // type:func
@@ -8044,9 +8044,9 @@ obj_point_trail_update          = 0x151D16E8; // type:func
 obj_point_trail_on_message      = 0x151D18D8; // type:func
 // was func_151D1918: (med) Wrapper: releases the controller's trail effect (obj_point_trail_release)
 obj_point_trail_stop            = 0x151D1918; // type:func
-// was func_151D1938: (med) Death handler: releases the trail effect, then func_1514933C
+// was func_151D1938: (med) Death handler: releases the trail effect, then effect_node_retire
 obj_point_trail_die_retire      = 0x151D1938; // type:func
-// was func_151D1964: (med) Death handler: releases the trail effect, then func_15149368
+// was func_151D1964: (med) Death handler: releases the trail effect, then effect_node_free
 obj_point_trail_die_free        = 0x151D1964; // type:func
 // was func_151D1990: (med) Detaches the controller's trail effect: marks it finished (flags 8 and 1, 40-frame fade) and clears the link
 obj_point_trail_release         = 0x151D1990; // type:func
@@ -8114,7 +8114,7 @@ object_effect_at                = 0x151D4898; // type:func
 bone_streak_fx_start            = 0x151D49B8; // type:func
 // was func_151D4D44: Update of the object point effect: follows the bone point and emits smoke particles along its movement
 object_trail_smoke_update       = 0x151D4D44; // type:func
-// was func_151D51E8: (med) Point effect message handler: 0x3C for its object destroys it, 4 clears its flag 1, others go to func_15149514
+// was func_151D51E8: (med) Point effect message handler: 0x3C for its object destroys it, 4 clears its flag 1, others go to effect_node_link_message
 obj_point_fx_on_message         = 0x151D51E8; // type:func
 // was func_151D52B4: (med) Smoke particle update: wobble offset from its data (+0xA8) and damping of its velocity
 trail_smoke_particle_update     = 0x151D52B4; // type:func
@@ -8172,15 +8172,15 @@ effect_follow_update            = 0x151D7814; // type:func
 fx_carrier_on_message           = 0x151D7958; // type:func
 // was func_151D79B4: (med) Wrapper: releases the carrier's attached trail effect (fx_carrier_release)
 fx_carrier_stop                 = 0x151D79B4; // type:func
-// was func_151D79D4: (med) Death handler: releases the attached trail, then func_1514933C
+// was func_151D79D4: (med) Death handler: releases the attached trail, then effect_node_retire
 fx_carrier_die_retire           = 0x151D79D4; // type:func
-// was func_151D7A00: (med) Death handler: releases the attached trail, then func_15149368
+// was func_151D7A00: (med) Death handler: releases the attached trail, then effect_node_free
 fx_carrier_die_free             = 0x151D7A00; // type:func
 // was func_151D7A2C: (med) Broadcasts message 0x3D with the object and its id byte (removes its glow trails)
 char_glow_broadcast_kill        = 0x151D7A2C; // type:func
 // was func_151D7A60: (med) Spawns an effect carrier on a character bone point (point arg1, check kind arg2) for its glow trail
 char_glow_trail_spawn           = 0x151D7A60; // type:func
-// was func_151D7AE8: Glow carrier message handler: 0x3D for its object (id or key) destroys it; others go to func_15149514
+// was func_151D7AE8: Glow carrier message handler: 0x3D for its object (id or key) destroys it; others go to effect_node_link_message
 char_glow_on_message            = 0x151D7AE8; // type:func
 // was func_151D7B74: (med) Kind update: tracks the character's bone point D_800AB660 and sets the active bit unless hidden/held; runs a check
 char_glow_bone_point_update     = 0x151D7B74; // type:func
@@ -8342,7 +8342,7 @@ text_bank_reset                 = 0x151E73A8; // type:func
 menu_camera_update              = 0x151E73C8; // type:func
 // was func_151E856C: (med) Makes the world objects of the current menu stop visible (+0x80 = 2)
 menu_show_stop_objects          = 0x151E856C; // type:func
-// was func_151E8648: Applies the sound mode setting (D_800E1019: 0 stereo, 2 mono, else headphones) via func_10017870
+// was func_151E8648: Applies the sound mode setting (D_800E1019: 0 stereo, 2 mono, else headphones) via audio_set_output_mode
 settings_apply_sound_mode       = 0x151E8648; // type:func
 // was func_151E86A4: Applies the sound mode (the N64 build also ran an anti-tamper code checksum)
 menu_settings_apply_checked     = 0x151E86A4; // type:func
@@ -8442,11 +8442,11 @@ mp3_imdct36_hybrid              = 0x151F94E0; // type:func
 mp3_imdct12_short               = 0x151FA3E0; // type:func
 // was func_1500F240: (low) Spawns a sprite quad effect (random rotation, yellow tint) at (arg0, arg1, arg2); returns its handle
 mist_puff_spawn                 = 0x1500F240; // type:func
-// was func_1500F328: (low) Spawns effect type 0xA (func_151491F4) with a random lifetime and the four shorts arg0..arg3, flag 1
+// was func_1500F328: (low) Spawns effect type 0xA (effect_node_create_nodraw) with a random lifetime and the four shorts arg0..arg3, flag 1
 level_fx_spawn_box_a            = 0x1500F328; // type:func
 // was func_1500F3BC: (med) Level-object init: two box effects, four puff sprites stored in D_800D9CF0 and nine drifting emitters on a path
 level_mist_setup                = 0x1500F3BC; // type:func
-// was func_1500F980: (low) Spawns effect type 0xA (func_151491F4) with a random lifetime, the four shorts arg0..arg3 and flag arg4
+// was func_1500F980: (low) Spawns effect type 0xA (effect_node_create_nodraw) with a random lifetime, the four shorts arg0..arg3 and flag arg4
 level_fx_spawn_box_b            = 0x1500F980; // type:func
 // was func_1500FA14: (low) Level-object init: creates several ropes from the D_800966D0.. specs and spawns box effects
 level_ropes_setup               = 0x1500FA14; // type:func
@@ -8704,7 +8704,7 @@ model_joint_mtx_count           = 0x1502DE10; // type:func
 obj_build_model_instance        = 0x1502DE74; // type:func
 // was func_1502E228: Builds object arg0's model matrix (parent joint, scale, rotation) unless it is hidden for every player
 obj_build_model_matrix          = 0x1502E228; // type:func
-// was func_1502E764: (med) Flushes the frame's object matrices (func_150A9E64 with the count) and marks the pool done
+// was func_1502E764: (med) Flushes the frame's object matrices (mtx_f_to_l_batch with the count) and marks the pool done
 obj_mtx_buffer_flush            = 0x1502E764; // type:func
 // was func_1502E7B4: Computes object arg0's per-player hidden mask +0x74 from culling, view groups and fade state
 obj_update_visibility           = 0x1502E7B4; // type:func
@@ -9166,7 +9166,7 @@ obj_effect_flash_light          = 0x1506AC24; // type:func
 obj_effect_directed_burst_alt   = 0x1506AD28; // type:func
 // was func_1506ADC8: (med) Effect handler 8: spawns a smoke puff and a ribbon trail on the object
 obj_effect_smoke_ribbon         = 0x1506ADC8; // type:func
-// was func_1506AE08: (low) Effect handler 9: starts a kind-0xA task record (func_15149130) carrying the object, its +0x3B byte and 8 bytes of arg
+// was func_1506AE08: (low) Effect handler 9: starts a kind-0xA task record (effect_node_create) carrying the object, its +0x3B byte and 8 bytes of arg
 obj_effect_task_spawn           = 0x1506AE08; // type:func
 // was func_1506AEA0: Effect handler 10: object impact effects at the effect point for every player whose bit is set in D_800CC680
 obj_effect_players_impact       = 0x1506AEA0; // type:func
@@ -9352,7 +9352,7 @@ player_play_idle_base_anim      = 0x1507F92C; // type:func
 obj_surface_effects_update      = 0x1508000C; // type:func
 // was func_150802A8: (med) Per frame: counts idle frames ctl +0x5A (or resets the idle state), the bored timer ctl +0x66, then surface effects
 player_idle_state_update        = 0x150802A8; // type:func
-// was func_1508039C: (low) Broadcasts message 0xD carrying the object and its id byte +0x3B (model_drip_broadcast / func_151494E0)
+// was func_1508039C: (low) Broadcasts message 0xD carrying the object and its id byte +0x3B (model_drip_broadcast / effect_nodes_broadcast)
 obj_broadcast_bored             = 0x1508039C; // type:func
 // was func_150803E0: Returns 1 when the object is in a zone of kind 5 or 0xB and a node of lists 0x15..0x17 within 1000 units is reachable
 obj_near_reachable_node         = 0x150803E0; // type:func
@@ -9594,7 +9594,7 @@ event_action_rail               = 0x1509E3D4; // type:func
 event_query_rail                = 0x1509E7EC; // type:func
 // was func_1509EB20: (med) Streamed-audio action handler: 0 plays stream arg0 (volume, mp3_voice_play), 1 sets its volume / fade, 2 stops it
 event_action_stream             = 0x1509EB20; // type:func
-// was func_1509EBD0: (med) Streamed-audio query handler: query 3 returns 1 while the stream is playing (func_151F2CDC == 1)
+// was func_1509EBD0: (med) Streamed-audio query handler: query 3 returns 1 while the stream is playing (mp3_stream_get_state == 1)
 event_query_stream              = 0x1509EBD0; // type:func
 // was func_1509EC10: (med) Music-track action handler (init_B1B0 sound tracks): start, volume with fade, pause, fades by command for track id & 0xFFF
 event_action_music              = 0x1509EC10; // type:func
@@ -9994,7 +9994,7 @@ fx_gravity_spin_update          = 0x150BA85C; // type:func
 effect_fade_by_height           = 0x150BA904; // type:func
 // was func_150BAA3C: (med) Node update: while its object lives, spawns tumbling debris pieces around the object's fx point at a random rate
 crumble_emitter_update          = 0x150BAA3C; // type:func
-// was func_150BADD0: (low) Message handler: forwards the message to func_15149514 with the node's object fields
+// was func_150BADD0: (low) Message handler: forwards the message to effect_node_link_message with the node's object fields
 crumble_emitter_on_message      = 0x150BADD0; // type:func
 // was func_150BAE10: (med) Writes the object's position (y from +0x180 when above a threshold) and optionally probes the floor below it
 obj_get_ground_point            = 0x150BAE10; // type:func
@@ -10114,11 +10114,11 @@ damage_smoke_spawn              = 0x150C4620; // type:func
 damage_smoke_update             = 0x150C49A4; // type:func
 // was func_150C4FD8: (med) Destroys the damage smoke node's glow particle (+0x34) if present
 damage_smoke_destroy_glow       = 0x150C4FD8; // type:func
-// was func_150C5008: (med) Destroys the glow, then retires the damage smoke node (func_1514933C)
+// was func_150C5008: (med) Destroys the glow, then retires the damage smoke node (effect_node_retire)
 damage_smoke_retire             = 0x150C5008; // type:func
-// was func_150C5034: (med) Destroys the glow, then frees the damage smoke node (func_15149368)
+// was func_150C5034: (med) Destroys the glow, then frees the damage smoke node (effect_node_free)
 damage_smoke_free               = 0x150C5034; // type:func
-// was func_150C5060: (med) Message handler: 0x55 switches the smoke on, 0x56 off, other messages are forwarded to func_15149514
+// was func_150C5060: (med) Message handler: 0x55 switches the smoke on, 0x56 off, other messages are forwarded to effect_node_link_message
 damage_smoke_on_message         = 0x150C5060; // type:func
 // was func_150C5220: (low) Scenery update: swings angle +0 with a sine wobble and damping, playing sound 0xF once per 256-tick cycle
 scenery_swing_angle_update      = 0x150C5220; // type:func
@@ -10326,7 +10326,7 @@ fb_zoom_fx_handle_event         = 0x150CEBA4; // type:func
 rider_ai_control                = 0x150CEC50; // type:func
 // was func_150CF470: Level update handler: turns light slot 2 around a centre by the angle of world record 4 and ticks the frame counter
 level_light2_orbit              = 0x150CF470; // type:func
-// was func_150CF550: (low) Returns func_150484A0(arg0 + 1, arg1 - 0x2C) times the constant D_800A0C08
+// was func_150CF550: (low) Returns math_atan2f(arg0 + 1, arg1 - 0x2C) times the constant D_800A0C08
 math_angle_offset_scaled        = 0x150CF550; // type:func
 // was func_150CF590: (low) Sets bit 0x4000 of the object's +0x84 flags
 obj_set_flag84_4000             = 0x150CF590; // type:func
@@ -10418,17 +10418,17 @@ beam_rays_update                = 0x150D2140; // type:func
 beam_rays_handle_event          = 0x150D247C; // type:func
 // was func_150D2564: Destroys the beam's six ray part nodes
 beam_rays_free_parts            = 0x150D2564; // type:func
-// was func_150D25C0: Frees the beam's ray parts, then deletes it through func_15149368
+// was func_150D25C0: Frees the beam's ray parts, then deletes it through effect_node_free
 beam_rays_delete                = 0x150D25C0; // type:func
-// was func_150D25EC: Frees the beam's ray parts, then retires it through func_1514933C
+// was func_150D25EC: Frees the beam's ray parts, then retires it through effect_node_retire
 beam_rays_retire                = 0x150D25EC; // type:func
 // was func_150D2620: (med) Spawns a lightning flash node (period, on-time, alphas) and counts it in D_800D9D20
 sky_flash_spawn                 = 0x150D2620; // type:func
 // was func_150D26DC: (med) Advances the flash phase; while in its on-time sets the ambient white and marks it lit
 sky_flash_update                = 0x150D26DC; // type:func
-// was func_150D278C: (med) Uncounts the flash, then retires it through func_1514933C
+// was func_150D278C: (med) Uncounts the flash, then retires it through effect_node_retire
 sky_flash_retire                = 0x150D278C; // type:func
-// was func_150D27B8: (med) Uncounts the flash, then deletes it through func_15149368
+// was func_150D27B8: (med) Uncounts the flash, then deletes it through effect_node_free
 sky_flash_delete                = 0x150D27B8; // type:func
 // was func_150D27E4: (med) Decrements the live lightning flash count D_800D9D20
 sky_flash_uncount               = 0x150D27E4; // type:func
@@ -10492,7 +10492,7 @@ crash_print_string              = 0x10007FB4; // type:func
 crash_draw_glyph                = 0x10008018; // type:func
 // was func_10008090: Executes a syscall instruction (debug stop used by the display-list checker)
 debug_syscall_trap              = 0x10008090; // type:func
-// was func_1000809C: (med) Crash / debugger entry (hand asm): blanks the screen, prints status, DMAs and maps the debugger, calls func_16000B14
+// was func_1000809C: (med) Crash / debugger entry (hand asm): blanks the screen, prints status, DMAs and maps the debugger, calls debugger_main
 debugger_crash_entry            = 0x1000809C; // type:func
 // was func_10008410: libultra __osMapTLBRdb: maps TLB entry 0 to the RDB port at 0xB8000000
 os_map_tlb_rdb                  = 0x10008410; // type:func
@@ -10520,3 +10520,41 @@ os_pack_ram_read_data           = 0x10026204; // type:func
 os_pfs_init                     = 0x10027990; // type:func
 // was func_10027B50: libultra osLeoDiskInit: fills the 64DD PI handle, sets domain 2 timings and links it into the PI table
 os_leo_disk_init                = 0x10027B50; // type:func
+// was func_1002560C: libultra pfsisplug.c: read each controller's status from the PIF RAM reply and build the pak bit pattern
+game_os_pfs_get_init_data       = 0x1002560C; // type:func
+// was func_15049C90: Inverts an affine 4x4 float matrix (3x3 cofactor inverse plus translated origin) into the output matrix
+math_mtx_affine_inverse         = 0x15049C90; // type:func
+// was func_15049F30: Negates quaternion q2 when its dot product with q1 is negative (shortest-path interpolation)
+quat_align_hemisphere           = 0x15049F30; // type:func
+// was func_15049FA8: Converts the rotation part of a 4x4 float matrix to a quaternion (w, x, y, z)
+quat_from_mtx                   = 0x15049FA8; // type:func
+// was func_1504A1CC: Spherical linear interpolation of two quaternions by t (linear near 0 or 180 degrees)
+quat_slerp                      = 0x1504A1CC; // type:func
+// was func_1504A430: Writes the rotation matrix of a quaternion into a 4x4 float matrix (column 3 cleared)
+quat_to_mtx                     = 0x1504A430; // type:func
+// was func_1504A5A0: expf by range reduction with ln 2 and a Taylor series (Rare shared code, as in Perfect Dark)
+math_expf                       = 0x1504A5A0; // type:func
+// was func_1504A6F0: powf: integer exponents by repeated multiply/divide, else expf(logf(x) * y) (Rare shared code)
+math_powf                       = 0x1504A6F0; // type:func
+// was func_150A86B0: (med) Skeleton/animation evaluator: decodes key frames (one or two blended animations) and writes the model's joint matrices
+anim_eval_joint_matrices        = 0x150A86B0; // type:func
+// was func_150A9E64: Converts n float matrices in place to the RSP fixed-point Mtx format
+mtx_f_to_l_batch                = 0x150A9E64; // type:func
+// was func_150AB278: Triangle vs collision box test (outcodes, bevels, edges, plane diagonals): 0 if they intersect, 1 if outside
+collision_tri_box_test          = 0x150AB278; // type:func
+// was func_150AB6D0: Wall engine entry: slides a record's move against nearby collision triangles, pushing it out and writing the result back
+collision_walls_slide           = 0x150AB6D0; // type:func
+// was func_150AC8C4: Wall engine entry for ledges: scans triangles in a box around the record's heading and stores ledge grab data
+collision_ledge_probe           = 0x150AC8C4; // type:func
+// was func_150ACEA0: Ray cast against level BSP and object triangles: nearest hit point, record, vertices, distance and flags; 1 on hit
+collision_ray_cast              = 0x150ACEA0; // type:func
+// was func_150F9FA0: (low) Camera hook: on event 0x4025 sets flag 0x80, clears 8 and sets +0x190 to 85, else the reverse with 0
+camera_hook_event_4025          = 0x150F9FA0; // type:func
+// was func_151DDA10: Game copy of osEepromProbe: returns 1 for a 4K EEPROM, 2 for 16K, 0 if none
+game_eeprom_probe               = 0x151DDA10; // type:func
+// was func_151EFFC0: Game copy of guOrthoF: orthographic projection float matrix scaled by scale
+game_gu_ortho_f                 = 0x151EFFC0; // type:func
+// was func_151F0114: Game copy of guOrtho: orthographic projection into a fixed-point Mtx
+game_gu_ortho                   = 0x151F0114; // type:func
+// was func_eu_1507340C: (low) Empty object event handler
+objev_nop_1507340c              = 0x1507340C; // type:func

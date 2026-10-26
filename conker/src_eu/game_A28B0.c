@@ -1605,7 +1605,7 @@ void aiscript_path_point_from_target(void) {
         s = 0.0f;
         c = 1.0f;
     } else {
-        f32 ang = func_150484A0(D_800D154C->x_position - x, D_800D154C->z_position - z);
+        f32 ang = math_atan2f(D_800D154C->x_position - x, D_800D154C->z_position - z);
 
         s = sinf(ang);
         c = cosf(ang);
@@ -1673,7 +1673,7 @@ void aiscript_copy_target_2d0_pos(void) {
 // requires jump table
 #ifdef NON_MATCHING
 /* P183 */
-f32 func_150484A0(f32, f32);
+f32 math_atan2f(f32, f32);
 extern u8 D_800CC9D4[];
 extern u8 D_800CC9D8[];
 extern u8 D_800CC9DC[];
@@ -1723,7 +1723,7 @@ s32 aiscript_test_object_value(s32 idx) {
         case 6:
             obj = (u8 *) D_800CC2D0 + off;
             heading = (*(u16 *) (obj + 0x7A) >> 8) - 0x40;
-            diff = (u32) (func_150484A0(*(f32 *) (obj + 0x14) - *(f32 *) ((u8 *) D_800D154C + 0x14),
+            diff = (u32) (math_atan2f(*(f32 *) (obj + 0x14) - *(f32 *) ((u8 *) D_800D154C + 0x14),
                                         *(f32 *) (obj + 0x1C) - *(f32 *) ((u8 *) D_800D154C + 0x1C)) *
                           40.743664f) -
                    heading;
@@ -2514,7 +2514,7 @@ void aiscript_set_heading(void) {
             u8 *path = (u8 *)D_800D2104[D_800D154C->unk13F];
             s16 *from = (s16 *)(path + D_800D1890 * 8 + 8);
             s16 *to = (s16 *)(path + D_800D1891 * 8 + 8);
-            f32 ang = func_150484A0(to[0] - from[0], to[2] - from[2]);
+            f32 ang = math_atan2f(to[0] - from[0], to[2] - from[2]);
 
             D_800D154C->unk78 = P210_F2U(ang * D_8009A5CC) + (D_800D1893 << 8) + 0x4000;
             break;

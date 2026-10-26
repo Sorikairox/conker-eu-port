@@ -3,19 +3,21 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-u8 *func_160014F0(s16 *arg0, s32 arg1);
-void func_16001678(void);
+u8 *debugger_draw_char(s16 *arg0, s32 arg1);
+void debugger_clear_screen(void);
 #endif
 
-s32 func_1600160C(s32);
-void func_16001044(s32 arg0, s32 arg1, s32 arg2);
+s32 debugger_cell_to_fb(s32);
+void debugger_print_number(s32 arg0, s32 arg1, s32 arg2);
 
 
-void func_16000000(void) {
-    func_160012B0(278, &D_160046AC);
+/* was func_16000000 */
+void debugger_page_title_draw(void) {
+    debugger_print_string(278, &D_160046AC);
 }
 
-s32 func_16000028(void) {
+/* was func_16000028 */
+s32 debugger_page_title_input(void) {
     if (D_16003890 & 0xC000) {
         D_16003AF4 = 1;
         return 3;
@@ -23,45 +25,47 @@ s32 func_16000028(void) {
     return 0;
 }
 
-void func_16000058(void) {
+/* was func_16000058 */
+void debugger_main_menu_draw(void) {
     s32 i;
     s32 phi_s2;
 
-    func_16001338(255, 255, 255);
-    func_160012B0(44, &D_160046D0); // "MAIN MENU"
+    debugger_set_color(255, 255, 255);
+    debugger_print_string(44, &D_160046D0); // "MAIN MENU"
     phi_s2 = 108;
     for(i = 0; i < 2; i++) {
         if (D_16003B1C == i) {
-            func_16001338(255, 0, 0);     // red
+            debugger_set_color(255, 0, 0);     // red
         } else {
-            func_16001338(255, 255, 255); // white
+            debugger_set_color(255, 255, 255); // white
         }
-        func_160012B0(phi_s2, D_16003B20[i]);
+        debugger_print_string(phi_s2, D_16003B20[i]);
         phi_s2 += 32;
     }
     if (D_16003B1C == 2) {
-        func_16001338(255, 0, 0);     // red
+        debugger_set_color(255, 0, 0);     // red
     } else {
-        func_16001338(255, 255, 255); // white
+        debugger_set_color(255, 255, 255); // white
     }
     if (D_16003AF0 != 0) {
         if ((D_1600389C->unk120 == 32) && (D_160038A4 == 0)) {
-            func_160012B0(phi_s2, &D_160046DC);
+            debugger_print_string(phi_s2, &D_160046DC);
         } else if (D_16003AF0 != 0) {
-            func_160012B0(phi_s2, &D_160046E8);
+            debugger_print_string(phi_s2, &D_160046E8);
         }
     } else {
-        func_160012B0(phi_s2, &D_160046F4); // "RETRY CODE"
+        debugger_print_string(phi_s2, &D_160046F4); // "RETRY CODE"
     }
-    func_16001338(255, 255, 255);
-    func_160012B0(611, &D_16004700); // "Version"
-    func_16001044(619, 1, 19);
-    func_160012B0(643, &D_16004708); // "Built"
-    func_160012B0(651, &D_16004710); // "Dec 19 2000"
-    func_160012B0(663, &D_1600471C); // "09:57:42"
+    debugger_set_color(255, 255, 255);
+    debugger_print_string(611, &D_16004700); // "Version"
+    debugger_print_number(619, 1, 19);
+    debugger_print_string(643, &D_16004708); // "Built"
+    debugger_print_string(651, &D_16004710); // "Dec 19 2000"
+    debugger_print_string(663, &D_1600471C); // "09:57:42"
 }
 
-s32 func_16000224(void) {
+/* was func_16000224 */
+s32 debugger_main_menu_input(void) {
     s32 res = 0;
 
     if (D_16003890 & 0x40000) { // D_JPAD is 0x0400
@@ -96,26 +100,30 @@ s32 func_16000224(void) {
     return res;
 }
 
-void func_16000304(void) {
+/* was func_16000304 */
+void debugger_page_nop_draw(void) {
 }
 
-void func_1600030C(void) {
+/* was func_1600030C */
+void debugger_page_nop_input(void) {
 }
 
-void func_16000314(void) {
+/* was func_16000314 */
+void debugger_regs_page_draw(void) {
     switch(D_16003B28) {
         case 0:
-            func_16000424(D_1600389C);
-            func_160006CC(D_1600389C);
+            debugger_draw_exception(D_1600389C);
+            debugger_draw_gprs(D_1600389C);
             break;
         case 1:
         case 2:
-            func_16000590(D_1600389C);
+            debugger_draw_fpu_regs(D_1600389C);
             break;
     }
 }
 
-s32 func_16000384(void) {
+/* was func_16000384 */
+s32 debugger_regs_page_input(void) {
     s32 res = 0;
 
     if (D_16003890 & (R_CBUTTONS | D_CBUTTONS)) {
@@ -139,39 +147,41 @@ s32 func_16000384(void) {
     return res;
 }
 
-void func_16000424(struct118 *arg0) {
+/* was func_16000424 */
+void debugger_draw_exception(struct118 *arg0) {
     // TODO is this a RGB struct?
     u32 tmp0;
     u32 tmp1;
     s32 pad;
 
-    func_16001338(255, 255, 255);
-    func_160012B0(35, &D_16004728);     // "Pc"
-    func_16001044(43, 0, arg0->unk11C);
-    func_160012B0(67, &D_1600472C);     // "Cause"
-    func_16001044(75, 0, arg0->unk120);
-    func_16001338(128, 128, 255);
+    debugger_set_color(255, 255, 255);
+    debugger_print_string(35, &D_16004728);     // "Pc"
+    debugger_print_number(43, 0, arg0->unk11C);
+    debugger_print_string(67, &D_1600472C);     // "Cause"
+    debugger_print_number(75, 0, arg0->unk120);
+    debugger_set_color(128, 128, 255);
     tmp0 = arg0->unk120;
     tmp1 = (tmp0 >> 2) & 0xF;
 
-    func_160012B0(107, D_16003848[tmp1]);
+    debugger_print_string(107, D_16003848[tmp1]);
     if (tmp1 == 11) {
-        func_16001044(111, 1, (tmp0 >> 28) & 3);
+        debugger_print_number(111, 1, (tmp0 >> 28) & 3);
     }
-    func_16001338(255, 255, 255);
-    func_160012B0(131, &D_16004734);      // "Sr"
-    func_16001044(139, 0, arg0->unk118);
-    func_160012B0(163, &D_16004738);      // "Badvadr"
-    func_16001044(171, 0, arg0->unk124);
-    func_160012B0(195, &D_16004740);      // "Thread"
-    func_16001044(203, 1, arg0->unk14);
+    debugger_set_color(255, 255, 255);
+    debugger_print_string(131, &D_16004734);      // "Sr"
+    debugger_print_number(139, 0, arg0->unk118);
+    debugger_print_string(163, &D_16004738);      // "Badvadr"
+    debugger_print_number(171, 0, arg0->unk124);
+    debugger_print_string(195, &D_16004740);      // "Thread"
+    debugger_print_number(203, 1, arg0->unk14);
     if (D_160038A4 != 0) {
-        func_160012B0(52, &D_16004748);   // "Lockup_Now"
+        debugger_print_string(52, &D_16004748);   // "Lockup_Now"
     }
 }
 
 #ifdef NON_MATCHING
-void func_16000590(struct118 *arg0) {
+/* was func_16000590 */
+void debugger_draw_fpu_regs(struct118 *arg0) {
     s32 temp_s2;
     s32 var_s0;
     s32 var_s0_2;
@@ -185,14 +195,14 @@ void func_16000590(struct118 *arg0) {
 
     var_s4 = 0;
     temp_s2 = (*(s32 *)((u8 *)arg0 + 0x12C));
-    func_160012B0(3, D_160047A4);
-    func_16001044(0xA, 0, temp_s2);
+    debugger_print_string(3, D_160047A4);
+    debugger_print_number(0xA, 0, temp_s2);
     var_s2 = (u32) temp_s2 >> 0xC;
     var_s0 = 0x2C;
     var_s1 = 0;
     do {
         if (var_s2 & 1) {
-            func_160012B0(var_s0, (u8 *) D_16003B30[var_s1]);
+            debugger_print_string(var_s0, (u8 *) D_16003B30[var_s1]);
             var_s0 += 0x20;
         }
         var_s1 += 1;
@@ -209,9 +219,9 @@ void func_16000590(struct118 *arg0) {
     var_s2_2 = var_s4;
     var_s3 = ((struct118 *)((u8 *)arg0 + (var_v0 * 4)));
     do {
-        func_160012B0(var_s0_2, D_160047AC);
-        func_16001044(var_s0_2 + 2, 1, var_s2_2);
-        func_16001044(var_s0_2 + 5, 2, (*(s32 *)((u8 *)var_s3 + 4)));
+        debugger_print_string(var_s0_2, D_160047AC);
+        debugger_print_number(var_s0_2 + 2, 1, var_s2_2);
+        debugger_print_number(var_s0_2 + 5, 2, (*(s32 *)((u8 *)var_s3 + 4)));
         var_s1_2 += 1;
         var_s3 += 8;
         var_s0_2 += 0x20;
@@ -219,7 +229,7 @@ void func_16000590(struct118 *arg0) {
     } while (var_s1_2 < 0x10);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000590.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/debugger_draw_fpu_regs.s")
 #endif
 typedef struct {
     u8 c[4];
@@ -227,7 +237,8 @@ typedef struct {
 extern struct_16003B48 D_16003B48;
 extern u8 D_160037F0[];
 
-void func_160006CC(struct118 *arg0) {
+/* was func_160006CC */
+void debugger_draw_gprs(struct118 *arg0) {
     struct_16003B48 name;
     s32 pad;
     s32 pos = 0x123;
@@ -235,14 +246,14 @@ void func_160006CC(struct118 *arg0) {
     s32 idx;
 
     name = D_16003B48;
-    func_16001338(0xC0, 0xC0, 0xFF);
+    debugger_set_color(0xC0, 0xC0, 0xFF);
     do {
         name.c[0] = p[0];
         name.c[1] = p[1];
-        func_160012B0(pos, name.c);
+        debugger_print_string(pos, name.c);
         pos += 3;
         idx = p[2];
-        func_16001044(pos, 0, ((s32 *)arg0)[idx + 1]);
+        debugger_print_number(pos, 0, ((s32 *)arg0)[idx + 1]);
         pos += 0xD;
         p += 3;
     } while (p[0] != 0);
@@ -250,7 +261,8 @@ void func_160006CC(struct118 *arg0) {
 extern u8 D_8002D810[];
 extern u8 D_8002DC10[];
 
-void func_1600078C(void)
+/* was func_1600078C */
+void debugger_draw_stack(void)
 {
     u32 mask;
   s32 base;
@@ -261,8 +273,8 @@ void func_1600078C(void)
   u32 val;
   u8 prefix;
   base = *((s32 *) (((u8 *) D_1600389C) + 0xF4));
-  func_16001338(0, 255, 0);
-  func_160012B0(11, D_160047B0);
+  debugger_set_color(0, 255, 0);
+  debugger_print_string(11, D_160047B0);
   addr = 4;
   addr = (D_16003B4C * addr) + base;
   i = 3;
@@ -270,7 +282,7 @@ void func_1600078C(void)
   {
     if (D_16003B4C == 0)
     {
-      func_16001338(255, 0, 0);
+      debugger_set_color(255, 0, 0);
       lo = (u32) D_8002D810;
     }
     else
@@ -278,65 +290,65 @@ void func_1600078C(void)
       lo = (u32) D_8002D810;
       if ((addr >= lo) && (addr < (lo + 0x400)))
       {
-        func_16001338(128, 128, 255);
+        debugger_set_color(128, 128, 255);
       }
       else
         if ((addr >= ((u32) D_8002DC10)) && (addr < (((u32) D_8002DC10) + 0x4000)))
       {
-        func_16001338(255, 128, 128);
+        debugger_set_color(255, 128, 128);
       }
       else
       {
-        func_16001338(255, 255, 255);
+        debugger_set_color(255, 255, 255);
       }
     }
     x = 0x61;
     for (i = 0; i < 22; i++)
     {
-      func_16001044(x, 0, addr);
-      func_160012B0(x + 8, D_160047BC);
+      debugger_print_number(x, 0, addr);
+      debugger_print_string(x + 8, D_160047BC);
       val = *((u32 *) addr);
       prefix = val >> 24;
       if (prefix == 0x80)
       {
-        func_16001338(128, 128, 255);
+        debugger_set_color(128, 128, 255);
       }
       else
         if (prefix == 0x15)
       {
-        func_16001338(255, 0, 0);
+        debugger_set_color(255, 0, 0);
       }
       else
         if (prefix == 0x16)
       {
-        func_16001338(128, 255, 128);
+        debugger_set_color(128, 255, 128);
       }
       else
         if (prefix == 0x10)
       {
-        func_16001338(255, 0, 0);
+        debugger_set_color(255, 0, 0);
       }
       else
       {
-        func_16001338(255, 255, 255);
+        debugger_set_color(255, 255, 255);
       }
       mask = 0xFFFFFFFFu; // fakematch: an all-ones mask in a register (permuter)
-      func_16001044(x + 0xC, 0, val);
-      func_160012B0((x + 0x16) & mask, D_160047C0);
-      func_16001338(255, 255, 255);
-      func_16001044(x + 0x16, 1, val);
+      debugger_print_number(x + 0xC, 0, val);
+      debugger_print_string((x + 0x16) & mask, D_160047C0);
+      debugger_set_color(255, 255, 255);
+      debugger_print_number(x + 0x16, 1, val);
       if ((addr >= lo) && (addr < (lo + 0x400)))
       {
-        func_16001338(128, 128, 255);
+        debugger_set_color(128, 128, 255);
       }
       else
         if ((addr >= ((u32) D_8002DC10)) && (addr < (((u32) D_8002DC10) + 0x4000)))
       {
-        func_16001338(255, 128, 128);
+        debugger_set_color(255, 128, 128);
       }
       else
       {
-        func_16001338(255, 255, 255);
+        debugger_set_color(255, 255, 255);
       }
       x += 0x20;
       addr += 4;
@@ -346,7 +358,7 @@ void func_1600078C(void)
   }
 }
 // NON-MATCHING: close but still some stuff to figure out
-// void func_1600078C(void) {
+// void debugger_draw_stack(void) {
 //     s32 temp_s0;
 //     u8 range_prefix;
 //     u32 temp_s2;
@@ -357,53 +369,53 @@ void func_1600078C(void)
 //     s32 i;
 //
 //     temp_s0 = D_1600389C->unkF4;
-//     func_16001338(0, 255, 0); // green
-//     func_160012B0(11, &D_160047B0);
+//     debugger_set_color(0, 255, 0); // green
+//     debugger_print_string(11, &D_160047B0);
 //     temp_s2 = (D_16003B4C * 4) + temp_s0;
 //     if (((temp_s2 & 3) == 0) && (temp_s2 >= 0x80000000U) && (temp_s2 < 0x80800001U)) {
 //         if (D_16003B4C == 0) {
-//             func_16001338(255, 0, 0); // red
+//             debugger_set_color(255, 0, 0); // red
 //             phi_s5 = &D_8002D4B0;
 //         } else {
 //             temp_s5 = &D_8002D4B0 - 0x2B50; // 11088 ?
 //             if ((temp_s2 >= temp_s5) && (temp_s2 < (temp_s5 + 0x400))) {
-//                 func_16001338(128, 128, 255); // purple
+//                 debugger_set_color(128, 128, 255); // purple
 //                 phi_s5 = temp_s5;
 //             } else if ((temp_s2 >= (u32) &D_8002D8B0) && (temp_s2 < ((u32)&D_8002D8B0 + 0x4000))) {
-//                 func_16001338(255, 128, 128); // light red
+//                 debugger_set_color(255, 128, 128); // light red
 //                 phi_s5 = temp_s5;
 //             } else {
-//                 func_16001338(255, 255, 255);
+//                 debugger_set_color(255, 255, 255);
 //                 phi_s5 = temp_s5;
 //             }
 //         }
 //         phi_s1 = 97; // "a"
 //         phi_s2 = temp_s2;
 //         for (i = 0; i < 22; i++) {
-//             func_16001044(phi_s1, 0, phi_s2);
-//             func_160012B0(phi_s1 + 8, &D_160047BC);
+//             debugger_print_number(phi_s1, 0, phi_s2);
+//             debugger_print_string(phi_s1 + 8, &D_160047BC);
 //             range_prefix = (*phi_s2 >> 24);
 //             if (range_prefix == 0x80) {                   // 0x80000000
-//                 func_16001338(128, 128, 255);
+//                 debugger_set_color(128, 128, 255);
 //             } else if (range_prefix == 0x15) {            // 0x15000000
-//                 func_16001338(255, 0, 0);
+//                 debugger_set_color(255, 0, 0);
 //             } else if (range_prefix == 0x16) {            // 0x16000000
-//                 func_16001338(128, 255, 128);
+//                 debugger_set_color(128, 255, 128);
 //             } else if (range_prefix == 0x10) {            // 0x10000000
-//                 func_16001338(255, 0, 0);
+//                 debugger_set_color(255, 0, 0);
 //             } else {
-//                 func_16001338(255, 255, 255);
+//                 debugger_set_color(255, 255, 255);
 //             }
-//             func_16001044(phi_s1 + 0xC, 0, *phi_s2);
-//             func_160012B0(phi_s1 + 0x16, &D_160047C0);
-//             func_16001338(255, 255, 255);
-//             func_16001044(phi_s1 + 0x16, 1, *phi_s2);
+//             debugger_print_number(phi_s1 + 0xC, 0, *phi_s2);
+//             debugger_print_string(phi_s1 + 0x16, &D_160047C0);
+//             debugger_set_color(255, 255, 255);
+//             debugger_print_number(phi_s1 + 0x16, 1, *phi_s2);
 //             if (((u32) phi_s2 >= phi_s5) && ((u32) phi_s2 < (phi_s5 + 0x400))) {
-//                 func_16001338(128, 128, 0xFF);
+//                 debugger_set_color(128, 128, 0xFF);
 //             } else if (((u32) phi_s2 >= (u32) &D_8002D8B0) && ((u32) phi_s2 < ((u32)&D_8002D8B0 + 0x4000))) {
-//                 func_16001338(255, 128, 128);
+//                 debugger_set_color(255, 128, 128);
 //             } else {
-//                 func_16001338(255, 255, 255);
+//                 debugger_set_color(255, 255, 255);
 //             }
 //             phi_s1 += 0x20;
 //             phi_s2 += 4;
@@ -411,7 +423,8 @@ void func_1600078C(void)
 //     }
 // }
 
-s32 func_16000A5C(void) {
+/* was func_16000A5C */
+s32 debugger_stack_page_input(void) {
     s32 res = 0;
 
     if ((D_160036F3 >= 41) || (D_16003890 & U_CBUTTONS)) {
@@ -455,7 +468,8 @@ extern s32 D_8003CC88;
 void func_150ADC50(void); /* code (asm/D5E90.s), compared by address below */
 extern s32 debug_cont_pad_buf;
 
-s32 func_16000B14(OSThread *arg0) {
+/* was func_16000B14 */
+s32 debugger_main(OSThread *arg0) {
     s32 sp40;
     s32 (*temp_v0)();
     s32 *var_a0;
@@ -558,7 +572,7 @@ s32 func_16000B14(OSThread *arg0) {
     }
     do {
         if ((sp40 == 0) && (var_s3 & 2)) {
-            func_16001678();
+            debugger_clear_screen();
         }
         temp_v0 = *(s32 *)((u8 *)&D_16003AF8 + (D_16003AF4 * 4));
         if (temp_v0 != NULL) {
@@ -609,10 +623,11 @@ loop_47:
     return var_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000B14.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/debugger_main.s")
 #endif
 s32 debug_sprintf(u8 *, u8 *, u8 *, u8 *, f64);
-void func_16000F8C(s32 arg0, f32 arg1)
+/* was func_16000F8C */
+void debugger_print_float(s32 arg0, f32 arg1)
 {
   f32 sp54;
   s32 bits;
@@ -627,15 +642,15 @@ void func_16000F8C(s32 arg0, f32 arg1)
     if (((exp == 0) || (exp >= 0xFFU)) && ((bits * 2) != 0))
     {
       if ((!bits) && (!bits)) { } // fakematch: permuter register assignment
-      func_160012B0(arg0, D_160047D0);
+      debugger_print_string(arg0, D_160047D0);
       return;
     }
     debug_sprintf(sp28, D_160047D4, D_160047DC, D_160047E0, (f64) arg1);
-    func_160012B0(arg0, sp28);
+    debugger_print_string(arg0, sp28);
   }
 }
 // NON-MATCHING: lots to figure out
-// void func_16000F8C(s32 arg0, f32 arg1) {
+// void debugger_print_float(s32 arg0, f32 arg1) {
 //     struct165 tmp;
 //     s32 temp_v1;
 //     u32 temp_t9;
@@ -646,17 +661,17 @@ void func_16000F8C(s32 arg0, f32 arg1)
 //         temp_t9 = (u32) (temp_v1 & 0x7F800000) >> 0x17;
 //         if ((temp_t9 == 0) || (temp_t9 >= 0x255U)) {
 //             if ((temp_v1 * 2) != 0) {
-//                 func_160012B0(arg1, &D_160047D0); // arg0,
+//                 debugger_print_string(arg1, &D_160047D0); // arg0,
 //                 return;
 //             }
 //         }
 //         debug_sprintf(&arg0, &tmp.unk0, &D_160047D4, &D_160047DC, &D_160047E0); // , (f64) arg1
-//         func_160012B0(arg0, &tmp.unk0);
+//         debugger_print_string(arg0, &tmp.unk0);
 //     }
 // }
 
 #ifdef NON_MATCHING
-/* P281: readable C for func_16001044 (compiled C, 155 insns). */
+/* P281: readable C for debugger_print_number (compiled C, 155 insns). */
 extern s32 D_16003B50[10]; /* powers of ten 1 .. 1000000000 (the asm copies them to the stack first) */
 extern u8 D_160047E4[]; /* "NaN" */
 extern u8 D_160047E8[]; /* "%s%s%f" */
@@ -665,7 +680,8 @@ extern u8 D_160047F4[]; /* "" */
 // debug_print_value: prints `value` at text cell `cell` (rows from D_160038A0 to 0x340): kind 0 = 8 hex digits
 // (written right to left), kind 1 = signed decimal without leading zeros, kind 2 = the float whose bits are `value`
 // ("NaN" for infinities, NaNs and denormals).
-void func_16001044(s32 cell, s32 kind, s32 value) {
+/* was func_16001044 */
+void debugger_print_number(s32 cell, s32 kind, s32 value) {
     u8 buf[0x24];
     u8 *pos;
     s32 *p;
@@ -678,7 +694,7 @@ void func_16001044(s32 cell, s32 kind, s32 value) {
     if (cell < D_160038A0 * 32 || cell >= 0x341) {
         return;
     }
-    pos = (u8 *) func_1600160C(cell);
+    pos = (u8 *) debugger_cell_to_fb(cell);
     switch (kind) {
         case 0:
             pos += 0x70;
@@ -688,14 +704,14 @@ void func_16001044(s32 cell, s32 kind, s32 value) {
                     c += 7;
                 }
                 c += '0';
-                func_160014F0((s16 *) pos, c);
+                debugger_draw_char((s16 *) pos, c);
                 value >>= 4;
                 pos -= 0x10;
             }
             break;
         case 1:
             if (value < 0) {
-                pos = func_160014F0((s16 *) pos, '-');
+                pos = debugger_draw_char((s16 *) pos, '-');
                 value = -value;
             }
             started = 0;
@@ -703,7 +719,7 @@ void func_16001044(s32 cell, s32 kind, s32 value) {
                 digit = value / *p;
                 value = value % *p;
                 if (digit > 0 || started || p == D_16003B50) {
-                    pos = func_160014F0((s16 *) pos, (u8) (digit + '0'));
+                    pos = debugger_draw_char((s16 *) pos, (u8) (digit + '0'));
                     started = 1;
                 }
             }
@@ -711,33 +727,36 @@ void func_16001044(s32 cell, s32 kind, s32 value) {
         case 2:
             exp = (value & 0x7F800000) >> 23;
             if ((exp <= 0 || exp >= 0xFF) && (exp != 0 || (value << 9) != 0)) {
-                func_160012B0(cell, D_160047E4);
+                debugger_print_string(cell, D_160047E4);
                 return;
             }
             debug_sprintf(buf, D_160047E8, D_160047F0, D_160047F4, *(f32 *) &value); /* sprintf */
-            func_160012B0(cell, buf);
+            debugger_print_string(cell, buf);
             break;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16001044.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/debugger_print_number.s")
 #endif
 
-void func_160012B0(s32 arg0, u8 *arg1) {
+/* was func_160012B0 */
+void debugger_print_string(s32 arg0, u8 *arg1) {
     if (arg1 && (arg0 >= (D_160038A0 << 5)) && (arg0 < 833)) {
-        s32 fb = func_1600160C(arg0);   /* P80: a0 still holds arg0 at the jal (the text cell) */
+        s32 fb = debugger_cell_to_fb(arg0);   /* P80: a0 still holds arg0 at the jal (the text cell) */
         while (*arg1 != 0) {
-            fb = func_160014F0(fb, *arg1 & 0xFF);
+            fb = debugger_draw_char(fb, *arg1 & 0xFF);
             *arg1++;
         }
     }
 }
 // convert rgb to rgba16
-void func_16001338(u8 arg0, u8 arg1, u8 arg2) {
+/* was func_16001338 */
+void debugger_set_color(u8 arg0, u8 arg1, u8 arg2) {
     D_1600388C = ((arg0 & 0xF8) << 8) | ((arg1 & 0xF8) << 3) | ((arg2 & 0xF8) >> 2) | 1;
 }
 
-void func_16001390(s16 x0, s16 y0, s16 x1, s16 y1) {
+/* was func_16001390 */
+void debugger_fill_rect(s16 x0, s16 y0, s16 x1, s16 y1) {
     s32 base;
     u16 *fb;
     s32 i;
@@ -756,7 +775,7 @@ void func_16001390(s16 x0, s16 y0, s16 x1, s16 y1) {
     }
     x1++;
     y1++;
-    base = func_1600160C(0);
+    base = debugger_cell_to_fb(0);
     fb = (u16 *)base + (x0 + y0 * D_160038A8);
     x1 -= x0;
     y1 -= y0;
@@ -771,7 +790,8 @@ void func_16001390(s16 x0, s16 y0, s16 x1, s16 y1) {
 #ifdef NON_MATCHING
 extern s32 D_16003CE0;
 
-u8 *func_160014F0(s16 *arg0, s32 arg1) {
+/* was func_160014F0 */
+u8 *debugger_draw_char(s16 *arg0, s32 arg1) {
     s16 *temp_v0;
     s16 *temp_v0_2;
     s16 *temp_v0_3;
@@ -845,12 +865,12 @@ loop_4:
     return ((s16 *)((u8 *)arg0 + 0x10));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_160014F0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/debugger_draw_char.s")
 #endif
 // NON-MATCHING: only glyph/j registers swapped (t0/a1)
 // extern u8 D_16003CE0[];
 //
-// u16 *func_160014F0(fb, c)
+// u16 *debugger_draw_char(fb, c)
 //     u16 *fb;
 //     u8 c;
 // {
@@ -886,7 +906,8 @@ loop_4:
 // }
 
 // framebuffer address of a text cell
-s32 func_1600160C(s32 arg0) {
+/* was func_1600160C */
+s32 debugger_cell_to_fb(s32 arg0) {
     s32 y = arg0 & 0xFFE0;
     s32 v1 = y;
 
@@ -901,7 +922,8 @@ s32 func_1600160C(s32 arg0) {
 }
 
 // clear the framebuffer
-void func_16001678(void) {
+/* was func_16001678 */
+void debugger_clear_screen(void) {
     u32 *fb = D_8002AAE8[D_16003888];
     s32 h;
     u32 *end;
@@ -921,6 +943,7 @@ void func_16001678(void) {
     }
 }
 
-s32 func_160016F4(s32 arg0) {
+/* was func_160016F4 */
+s32 debugger_identity(s32 arg0) {
     return arg0;
 }

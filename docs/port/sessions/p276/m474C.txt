@@ -21,7 +21,7 @@
 \#^    blk.p3 = ((rec->params >> 24) & 0xFF)#s/0.00390625f/0.0039f/
 \#^    blk.colour\[0\] = rec->colour;$#s/rec->colour/rec->colour >> 8/
 \#^    blk.colour\[3\] = rec->colour >> 24;$#s/24/16/
-\#^    e = (u8 \*) func_15149130(0x12C, -1, 0x2C#s/0x2C/0x2D/
-\#^    e = (u8 \*) func_15149130(0x12C, -1, 0x2C#s/0xFF, 0)/0xFF, 1)/
+\#^    e = (u8 \*) effect_node_create(0x12C, -1, 0x2C#s/0x2C/0x2D/
+\#^    e = (u8 \*) effect_node_create(0x12C, -1, 0x2C#s/0xFF, 0)/0xFF, 1)/
 \#^        memcpy(e + 0x28, &blk, 0x40);$#s/0x28/0x2C/
 \#^    return 1;$#s/1/0/

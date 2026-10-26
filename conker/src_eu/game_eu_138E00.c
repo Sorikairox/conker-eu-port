@@ -15,7 +15,7 @@ extern Mtx D_800D9F48;
 extern s16 D_800DD722;
 extern s16 D_800DD724;
 extern f32 D_800A2FF0;
-void func_151F0114(void *, float, float, float, float, float, float, float);
+void game_gu_ortho(void *, float, float, float, float, float, float, float);
 
 /* screen size from D_800DD722/4, then an orthographic projection (guOrtho) over the current camera extent */
 /* was func_1510B5F0 */
@@ -28,7 +28,7 @@ void camera_set_screen_ortho(s32 arg0) {
     D_800D3A90 = 100.0f - D_800D9F3C;
     h = ((f32 *)((u8 *)D_800BE628 + 0x10))[0];
     w = ((f32 *)((u8 *)D_800BE628 + 0xC))[0];
-    func_151F0114(&D_800D9F48, -w, w, -h, h, 1.0f, D_800A2FF0, 1.0f);
+    game_gu_ortho(&D_800D9F48, -w, w, -h, h, 1.0f, D_800A2FF0, 1.0f);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_set_screen_ortho.s")

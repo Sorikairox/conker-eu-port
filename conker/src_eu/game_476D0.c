@@ -449,9 +449,9 @@ void camera_setup_perspective(s32 arg0, s32 arg1) {
     temp_t8 = arg1 * 4;
     sp38 = (f32) *(((s32 *)((u8 *)&D_800BEA70 + temp_t8))) / (2.0f * (sp2C / cosf(sp48)));
     temp_t4 = arg1 * 0x180;
-    sp34 = (func_150484A0((*(f32 *)((u8 *)((D_800BE628 + sp28)) + 0xC)), (f32) *(((s32 *)((u8 *)&D_800BEA58 + temp_t8))) / (2.0f * sp44)) * D_80096CA8) - (*(f32 *)((u8 *)((D_800BE628 + temp_t4)) + 0x6C));
+    sp34 = (math_atan2f((*(f32 *)((u8 *)((D_800BE628 + sp28)) + 0xC)), (f32) *(((s32 *)((u8 *)&D_800BEA58 + temp_t8))) / (2.0f * sp44)) * D_80096CA8) - (*(f32 *)((u8 *)((D_800BE628 + temp_t4)) + 0x6C));
     sp24 = temp_t4;
-    camera_projection_update(arg0, sp34, (func_150484A0((*(f32 *)((u8 *)((D_800BE628 + sp28)) + 0x10)), sp38) * D_80096CA8) - (*(f32 *)((u8 *)((D_800BE628 + sp24)) + 0x70)), 1.0f, 0.0f);
+    camera_projection_update(arg0, sp34, (math_atan2f((*(f32 *)((u8 *)((D_800BE628 + sp28)) + 0x10)), sp38) * D_80096CA8) - (*(f32 *)((u8 *)((D_800BE628 + sp24)) + 0x70)), 1.0f, 0.0f);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/camera_setup_perspective.s")

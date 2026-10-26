@@ -120,7 +120,7 @@ s32 text_box_open(s32 id, s32 player, s32 arg2, void (*callback)(s32, s32, s32),
 #endif
 
 #ifdef NON_MATCHING
-s32 func_151F2CDC(void);
+s32 mp3_stream_get_state(void);
 void text_box_place(u8 *box);
 extern u16 D_800BEB30[]; /* buttons pressed this frame, per player (0x8000 A, 0x4000 B) */
 extern f32 D_800A7138;   /* 1 / 3: open speed */
@@ -307,7 +307,7 @@ void text_box_update(u8 *box) {
         flags = TB_T(box)->flags;
         if ((flags & 0x10) && box[0x14] == 0) {
             if (flags & 0x20) {
-                if (func_151F2CDC() != 0) {
+                if (mp3_stream_get_state() != 0) {
                     goto request;
                 }
                 flags = TB_T(box)->flags;

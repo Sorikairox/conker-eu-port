@@ -77,8 +77,8 @@ s32 tail_get_mode(s32 arg0, u8 *arg1) {
 f32 sinf(f32);
 f32 cosf(f32);
 f32 math_angle_diff_deg(f32, f32);
-f32 func_150484A0(f32, f32);
-f32 func_15048360(f32);
+f32 math_atan2f(f32, f32);
+f32 math_acosf_lut(f32);
 extern u8 D_800BEE2C;
 extern u8 D_800C40BD;
 extern f32 D_800C4428[3];
@@ -250,7 +250,7 @@ void tail_update_conker(s32 arg0) {
     if (CAMERA_CLOSE(cam)) {
         s32 pushed = 0;
 
-        a = func_150484A0((CAM_F32(cam, 0x2F8) + CAM_F32(cam, 0x74C)) - obj->x_position,
+        a = math_atan2f((CAM_F32(cam, 0x2F8) + CAM_F32(cam, 0x74C)) - obj->x_position,
                           (CAM_F32(cam, 0x300) + CAM_F32(cam, 0x754)) - obj->z_position) * D_80098BF0 + 90.0f;
         if (a >= 360.0f) {
             a -= 360.0f;
@@ -438,7 +438,7 @@ void tail_update_conker(s32 arg0) {
         dir[0] *= mag;
         dir[1] *= mag;
         dir[2] *= mag;
-        ang = fabsf(func_15048360(dir[2] * d[2] + (d[0] * dir[0] + d[1] * dir[1])) * D_80098C0C);
+        ang = fabsf(math_acosf_lut(dir[2] * d[2] + (d[0] * dir[0] + d[1] * dir[1])) * D_80098C0C);
         if (D_800BEAC0 == 0 && D_800BEE2C == 0 && D_80098AE0[i] < ang) {
             f = 1.0f - D_80098AE0[i] / ang;
             if (reset) {
@@ -468,7 +468,7 @@ void tail_update_conker(s32 arg0) {
 #endif
 
 #ifdef NON_MATCHING
-void func_150A9B0C(f32 mtx[4][4], f32, f32, f32, f32, f32, f32);
+void mtx_rotate_scale_3x3(f32 mtx[4][4], f32, f32, f32, f32, f32, f32);
 void mtxf_look_at(f32 mtx[4][4], f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy, f32 upz);
 void mtxf_scale_set_trans(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 arg4, f32 arg5, f32 arg6);
 
@@ -491,7 +491,7 @@ void tail_build_joint_matrices(s32 idx, s32 mode, f32 fade, u8 *rec) {
     f32 ax, ay, az, bx, by, bz, mag;
     s32 i;
 
-    func_150A9B0C(root, OBJ_F32(obj, 0xB8), obj->unk40, OBJ_F32(obj, 0xC4), 1.0f, 1.0f, 1.0f);
+    mtx_rotate_scale_3x3(root, OBJ_F32(obj, 0xB8), obj->unk40, OBJ_F32(obj, 0xC4), 1.0f, 1.0f, 1.0f);
     for (i = 0; i < 4; i++) {
         joint = (f32 (*)[4]) ((u8 *) obj->unk1D4 + (24 + i) * 0x40);
         prev = (i == 0) ? root : (f32 (*)[4]) ((u8 *) obj->unk1D4 + (23 + i) * 0x40);

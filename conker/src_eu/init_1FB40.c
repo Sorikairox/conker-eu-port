@@ -29,8 +29,8 @@ extern N_ALSynth *D_8002BA44;
 extern s32 D_800E0E04;
 extern u8 D_800428C4[];
 extern u8 D_800428C6[];
-s32 func_151F2E88(s32 arg0, Acmd **arg1);
-void func_1001CF38(FB40Fx *fx, f32 rate);
+s32 mp3_stream_synth_pull(s32 arg0, Acmd **arg1);
+void n_fx_lowpass_update_coefs(FB40Fx *fx, f32 rate);
 
 /* was func_1001FB40 */
 Acmd *n_main_bus_pull(s32 sampleOffset, Acmd *cmdList) {
@@ -38,7 +38,7 @@ Acmd *n_main_bus_pull(s32 sampleOffset, Acmd *cmdList) {
     s32 i;
     s32 j;
 
-    if (D_800E0E04 == 0 || func_151F2E88(0xB8, &ptr) == 0) {
+    if (D_800E0E04 == 0 || mp3_stream_synth_pull(0xB8, &ptr) == 0) {
         aClearBuffer(ptr++, 0x4E0, 0x2E0);
         aClearBuffer(ptr++, 0x7C0, 0x2E0);
     }
@@ -76,7 +76,7 @@ Acmd *n_main_bus_pull(s32 sampleOffset, Acmd *cmdList) {
             FB40Fx *fx = ((FB40AuxBus *)D_8002BA44->auxBus)[j].fx;
 
             if (fx->unk28) {
-                func_1001CF38(fx, D_8002BA44->outputRate);
+                n_fx_lowpass_update_coefs(fx, D_8002BA44->outputRate);
             }
             n_aLoadADPCM(ptr++, 0x20, osVirtualToPhysical(fx->unk8));
             n_aPoleFilter(ptr++, 0, 0x4E0, 0, osVirtualToPhysical(fx->unk2C) & 0xFFFFFF);

@@ -1579,7 +1579,7 @@ void timed_emitter_update(u8 *obj) {
     p[14] = e->tail[0];
     p[15] = e->tail[1];
     p[16] = e->tail[2];
-    fx = (u8 *)func_15149130((s16)((u32)random_int() % (u32)(e->effect_range + 1) + e->effect_min), -1, 0x2B, -1, 1,
+    fx = (u8 *)effect_node_create((s16)((u32)random_int() % (u32)(e->effect_range + 1) + e->effect_min), -1, 0x2B, -1, 1,
                              0, (struct37 *)0x44, obj[0xC], obj[1]);
     if (fx != NULL) {
         memcpy((s32)(fx + 0x28), (s32)p, 0x44);
@@ -1665,7 +1665,7 @@ void tracer_on_obj_replaced(u8 *arg0, s32 *arg1, u8 arg2) {
 }
 
 #ifdef NON_MATCHING
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *, f32 *, s32 *, u8 *, f32);
+s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *, f32 *, s32 *, u8 *, f32);
 
 typedef struct {
     u8 *object;         /* +0x00 */
@@ -1675,7 +1675,7 @@ typedef struct {
     f32 exit[3];        /* +0x20 */
     f32 start[3];       /* +0x2C */
     f32 dir[3];         /* +0x38 */
-    u8 surface[0x15];   /* +0x44 level surface (func_150ACEA0) */
+    u8 surface[0x15];   /* +0x44 level surface (collision_ray_cast) */
     u8 kind;            /* +0x59 0 none, 1 level, 2 object bounds, 3 object model */
     u8 pad5A[2];
     u8 *material;       /* +0x5C D_800DBEF4 entry (0xA0 bytes each) */
@@ -1690,7 +1690,7 @@ typedef struct {
 // whether there was one. Otherwise it casts from fromArg along toArg (both given) or from pos along dirArg
 // (ray_cast_world: objects unless !objects, models unless !(models && objects), filter, skipMask). A level hit
 // counts; an object hit is re-cast against the level from the hit point toward pos when from / to were given (the
-// lengths add up), else from pos (func_150ACEA0). On a hit the direction is renormalised from pos if needed, the
+// lengths add up), else from pos (collision_ray_cast). On a hit the direction is renormalised from pos if needed, the
 // impact handled (hit_spark_sound_play) and the material pointer refreshed; on a miss flagMask is cleared in *flags and
 // it returns whether dirArg or toArg was given. The argument types are the callers' (game_eu_1EFE10 /
 // game_eu_125200 prototypes).
@@ -1793,7 +1793,7 @@ s32 tracer_hit_update(s32 srcArg, s32 *hitArg, u8 *posArg, s32 *dirArg, s32 *out
             return 0;
         }
         len = hit->dist;
-        found = func_150ACEA0(hit->point[0], hit->point[1], hit->point[2], hit->dir[0], hit->dir[1], hit->dir[2], NULL,
+        found = collision_ray_cast(hit->point[0], hit->point[1], hit->point[2], hit->dir[0], hit->dir[1], hit->dir[2], NULL,
                               hit->surface, &hit->point[0], &hit->point[1], &hit->point[2], &hit->dist, &matIdx,
                               (u8 *) &hit->extra, 0.0f);
         if (found) {
@@ -1803,7 +1803,7 @@ s32 tracer_hit_update(s32 srcArg, s32 *hitArg, u8 *posArg, s32 *dirArg, s32 *out
             hit->start[2] = pos[2];
         }
     } else {
-        found = func_150ACEA0(pos[0], pos[1], pos[2], hit->dir[0], hit->dir[1], hit->dir[2], NULL, hit->surface,
+        found = collision_ray_cast(pos[0], pos[1], pos[2], hit->dir[0], hit->dir[1], hit->dir[2], NULL, hit->surface,
                               &hit->point[0], &hit->point[1], &hit->point[2], &hit->dist, &matIdx,
                               (u8 *) &hit->extra, 0.0f);
     }

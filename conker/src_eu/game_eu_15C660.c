@@ -356,8 +356,8 @@ void camera_apply_request(struct108 *arg0) {
             EF(0x370) = dist;
             if (dist < EF(0x374)) {
                 push = EF(0x374) - EF(0x370);
-                EF(0x2F8) += push * ST_PUSH * func_150AD78C(EF(0x39C));
-                EF(0x300) += push * ST_PUSH * func_150AD780(EF(0x39C));
+                EF(0x2F8) += push * ST_PUSH * fast_sinf(EF(0x39C));
+                EF(0x300) += push * ST_PUSH * fast_cosf(EF(0x39C));
                 ST_PUSH += 0.005f;
                 if (ST_PUSH > 0.04f) {
                     ST_PUSH = 0.04f;
@@ -388,8 +388,8 @@ void camera_apply_request(struct108 *arg0) {
             RQ_SAVED = RQ_B;
             if (dist < EF(0x374) && RQ_MODE == 1) {
                 push = EF(0x374) - dist;
-                EF(0x2F8) += push * ST_PUSH * func_150AD78C(EF(0x39C));
-                EF(0x300) += push * ST_PUSH * func_150AD780(EF(0x39C));
+                EF(0x2F8) += push * ST_PUSH * fast_sinf(EF(0x39C));
+                EF(0x300) += push * ST_PUSH * fast_cosf(EF(0x39C));
                 ST_PUSH += 0.0025f;
                 if (ST_PUSH > 0.04f) {
                     ST_PUSH = 0.04f;

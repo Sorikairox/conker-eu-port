@@ -37,7 +37,7 @@ void ground_dust_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
                 tmp.unkC = 0;
                 break;
             }
-            temp_v0 = func_151491F4(arg1, -1, 1, 1, 0, 0x14, arg2, arg3);
+            temp_v0 = effect_node_create_nodraw(arg1, -1, 1, 1, 0, 0x14, arg2, arg3);
             if (temp_v0 != NULL) {
                 memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x14);
             }
@@ -448,7 +448,7 @@ void spark_burst_a_start(u8 *arg0) {
     tmp.unk1A = *(s16 *)(arg0 + 0x40);
     tmp.unk1C = *(s16 *)(arg0 + 0x42);
     tmp.unk1E = *(s16 *)(arg0 + 0x44);
-    temp_v0 = func_151491F4(*(s16 *)(arg0 + 0x3C), -1, 3, 1, 0, 0x20, arg0[0xC], arg0[0x1]);
+    temp_v0 = effect_node_create_nodraw(*(s16 *)(arg0 + 0x3C), -1, 3, 1, 0, 0x20, arg0[0xC], arg0[0x1]);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x20);
     }
@@ -660,7 +660,7 @@ void spark_burst_b_start(u8 *arg0) {
     tmp.unk1E = *(s16 *)(arg0 + 0x44);
     tmp.unk20 = *(s16 *)(arg0 + 0x46);
     tmp.unk22 = *(s16 *)(arg0 + 0x48);
-    temp_v0 = func_151491F4(*(s16 *)(arg0 + 0x3C), -1, 4, 1, 0, 0x24, arg0[0xC], arg0[0x1]);
+    temp_v0 = effect_node_create_nodraw(*(s16 *)(arg0 + 0x3C), -1, 4, 1, 0, 0x24, arg0[0xC], arg0[0x1]);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x24);
     }

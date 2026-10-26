@@ -6,12 +6,12 @@
 
 #ifdef NON_MATCHING
 extern s16 D_8002BF60[]; /* EU pan gain table (128 s16, US D_8002BC10): left = [pan], right = [127 - pan] */
-void func_151F3C34(s32 arg0);
+void mp3_stream_set_read_cb(s32 arg0);
 
 // audio_mixer_init: clears the mixer state D_800E0D80 (0xA0 bytes), allocates its buffers from heap `heap` (0x50,
 // 0x440 and 8 bytes at +0x08 / +0x74 / +0x5C), centres the pan (64, +0x0C / +0x94 / +0x96), sets full volume
 // (0x7FFF at +0x0E / +0x88), the left / right gains from the pan table (+0x10 / +0x12) and +0x14 = 0x7FFC, and
-// installs func_151F3C4C as the mixer callback (func_151F3C34; the asm also leaves 0x7FFF / 64 in a1 / a2).
+// installs mp3_stream_rom_read as the mixer callback (mp3_stream_set_read_cb; the asm also leaves 0x7FFF / 64 in a1 / a2).
 /* was func_15016170 */
 void audio_fx_mixer_init(s32 heap) {
     struct186 *m = &D_800E0D80;
@@ -38,7 +38,7 @@ void audio_fx_mixer_init(s32 heap) {
     ((u8 *) m)[0x24] = 1; /* byte store (struct186 declares a u16 here) */
     m->unk14 = 0x7FFC;
     m->unk16 = 0;
-    func_151F3C34((s32) func_151F3C4C);
+    mp3_stream_set_read_cb((s32) mp3_stream_rom_read);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_43620/audio_fx_mixer_init.s")
@@ -67,5 +67,5 @@ void audio_fx_mixer_init(s32 heap) {
 //     D_800E0D80.unk24 = 1;
 //     D_800E0D80.unk14 = 0x7FFC;
 //     D_800E0D80.unk16 = 0;
-//     func_151F3C34(func_151F3C4C, tmp, 64);
+//     mp3_stream_set_read_cb(mp3_stream_rom_read, tmp, 64);
 // }

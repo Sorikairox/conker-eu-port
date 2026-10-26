@@ -928,7 +928,7 @@ void ambient_pulse_spawn(s32 arg0) {
     src[3] = 37.5f;
     src[7] = 0.0761f;
 
-    temp_v0 = func_15149130(300, -1, 30, -1, 0, 0, sizeof(src), 0xFF, 1);
+    temp_v0 = effect_node_create(300, -1, 30, -1, 0, 0, sizeof(src), 0xFF, 1);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &src, sizeof(src));
     }

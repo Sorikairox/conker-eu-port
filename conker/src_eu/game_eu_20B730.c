@@ -746,7 +746,7 @@ struct216 *aiscript_find_by_kind(s32, u8);
 void settings_list_draw(s32, s32, s32, s32, s32);
 void settings_apply_sound_mode(void);
 void music_stop_song(u8, s32);
-s32 func_151F2CDC();
+s32 mp3_stream_get_state();
 
 // title_press_start_page: title menu page 1 (Conker on the title screen, object 9). D_800E0EC6 != -1 runs a fade-out
 // of the page alpha D_800E0EC5 (32 per tick); at 0 it toggles either the "info" screen D_800902A4 (playing Conker's
@@ -832,7 +832,7 @@ void title_press_start_page(void) {
     }
 
     if (obj != NULL) {
-        if (func_151F2CDC() == 1) {
+        if (mp3_stream_get_state() == 1) {
             if (obj->unk1FF == 0) {
                 obj->unk1FF = 1;
             }
@@ -3283,8 +3283,8 @@ void settings_list_draw(s32 mask, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/settings_list_draw.s")
 #endif
-s32 func_151F2CDC();
-void func_151F2D6C(s32, s32);
+s32 mp3_stream_get_state();
+void mp3_stream_set_volume(s32, s32);
 extern s32 *D_800E0EB8;
 void menu_game_start(void);
 
@@ -3296,8 +3296,8 @@ void level_intro_mode_update(void) {
     }
     screen_fade_update();
     if ((D_800E0FCA != 0) || (D_800C35EA != 1)) {
-        if ((D_800C35EA == 1) && (func_151F2CDC() == 1)) {
-            func_151F2D6C(0, 0x370C);
+        if ((D_800C35EA == 1) && (mp3_stream_get_state() == 1)) {
+            mp3_stream_set_volume(0, 0x370C);
         }
         D_800E0B94 = 7;
         D_800E0EB8 = &menu_game_start;
@@ -3473,8 +3473,8 @@ void menu_level_start_page(void) {
         text_printf_at(0xD5, 0xB4, 1, (s32) D_800ABCFC, ((s8) D_800901CC == 1) + 0xE);
         text_printf_at(0x94, 0xB4, 1, (s32) D_800ABD00, 0x1A);
         if ((D_800E0FCA & 0x8000) || D_800E0EC0 > 0x7D0) {
-            if (D_800C35EA == 1 && func_151F2CDC() == 1) {
-                func_151F2D6C(0, 0x370C);
+            if (D_800C35EA == 1 && mp3_stream_get_state() == 1) {
+                mp3_stream_set_volume(0, 0x370C);
             }
             if (D_800E0EC0 > 0x7D0) {
                 D_800901CC = 1;
@@ -4855,14 +4855,14 @@ extern s8 D_800E1019;
 /* was func_151E8648 */
 void settings_apply_sound_mode(void) {
     if (D_800E1019 == 2) {
-        func_10017870(1U);
+        audio_set_output_mode(1U);
         return;
     }
     if (D_800E1019 == 0) {
-        func_10017870(2U);
+        audio_set_output_mode(2U);
         return;
     }
-    func_10017870(4U);
+    audio_set_output_mode(4U);
 }
 
 #ifdef NON_MATCHING

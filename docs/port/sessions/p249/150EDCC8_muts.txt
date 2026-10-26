@@ -78,7 +78,7 @@ s/rad = \*(f32 \*) ((u8 \*) tgt + 0x40) \* 0.017453292f;/rad = *(f32 *) ((u8 *) 
 s/tgt->z_position += sz;/tgt->z_position += sx;/ % auto
 s/ang = tank_yaw_offset_to_obj(ob, (u8 \*) tgt) \* 0.017453292f;/ang = tank_yaw_offset_to_obj((u8 *) tgt, ob) * 0.017453292f;/ % auto
 s/ry = cosf(\*(f32 \*) (ob + 0xC4)/ry = cosf(*(f32 *) (ob + 0xB8)/ % auto
-s/h = func_150484A0(ry \* 1000.0f,/h = func_150484A0(ry * 100.0f,/ % auto
+s/h = math_atan2f(ry \* 1000.0f,/h = math_atan2f(ry * 100.0f,/ % auto
 s/sy = lv \* 400.0f;/sy = lv * 40.0f;/ % auto
 s/h \* 57.295776f + lv \* 10.0f/h * 57.295776f + lv * 1.0f/ % auto
 s/TURRET_YAW(o)) \* 0.125f;/TURRET_YAW(o)) * 0.25f;/ % auto

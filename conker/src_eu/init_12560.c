@@ -20,19 +20,19 @@ void mp3_id3_text_enqueue(s32 arg0) {
 void mp3_voice_init(s32 arg0) {
     audio_fx_mixer_init(arg0);
     ring_buffer_init(&D_800427A0, &D_800427B0, 64);
-    func_151F3C1C(mp3_id3_text_enqueue);
+    mp3_stream_set_text_cb(mp3_id3_text_enqueue);
 }
 
 /* was func_100125CC */
 void mp3_voice_stop(s32 arg0) {
-    s32 res = func_151F2CDC();
+    s32 res = mp3_stream_get_state();
     if ((arg0 != 30) || (D_800BE9F8 != 27)) {
         if (res == 1) {
-            func_151F2D6C(0, 11010);
+            mp3_stream_set_volume(0, 11010);
             return;
         }
         if (res != 0) {
-            func_151F2BA8();
+            mp3_stream_stop();
         }
     }
 }
@@ -46,14 +46,14 @@ void mp3_voice_play(s32 arg0, s32 arg1, s32 arg2) {
     temp_v0 = asset_lookup_rom(&sp18, 2, 22, arg0);
     D_800427F4 = (s16) arg0;
     if ((temp_v0 != 0) && (sp18 != 0)) {
-        func_151F2D6C(arg1, 0);
-        func_151F2DFC(arg2, 1);
+        mp3_stream_set_volume(arg1, 0);
+        mp3_stream_set_pan(arg2, 1);
         if (arg0 != 0xD2) {
-            func_151F2E4C(10, 11000);
+            mp3_stream_set_fx(10, 11000);
         } else {
-            func_151F2E4C(0, 0);
+            mp3_stream_set_fx(0, 0);
         }
-        func_151F2960(temp_v0, sp18);
+        mp3_stream_start(temp_v0, sp18);
     }
 }
 
@@ -81,7 +81,7 @@ s32 mp3_voice_play_at_object(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 
 
 /* was func_100127D0 */
 s32 mp3_voice_is_playing(void) {
-    s32 tmp = func_151F2CDC();
+    s32 tmp = mp3_stream_get_state();
 
     if (tmp == 1 || tmp == 2 || tmp == 5) {
         return 1;

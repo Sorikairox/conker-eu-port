@@ -378,7 +378,7 @@ typedef struct {
 #define CSP_CHAN(c) (((CSPChanState *)seqp->chanState)[c])
 
 s32 n_synth_load_instrument(struct_eu_1AAE0 *arg0, ALInstrument **arg1, s32 arg2);
-void func_10012C5C(ALSound *sound, ALInstrument *inst, s32 arg2);
+void n_bnkf_patch_sound(ALSound *sound, ALInstrument *inst, s32 arg2);
 
 /* was func_1001B7D0 */
 s32 n_cseqp_set_inst_chan_state(N_ALCSPlayer *seqp, s32 id, s32 chan) {
@@ -395,7 +395,7 @@ s32 n_cseqp_set_inst_chan_state(N_ALCSPlayer *seqp, s32 id, s32 chan) {
         for (i = 0; i < inst->soundCount; i++) {
             sound = inst->soundArray[i];
             if ((u32)sound->envelope < 0x100000) {
-                func_10012C5C(sound, inst, ((CSPSynth *)seqp->drvr)->unk38);
+                n_bnkf_patch_sound(sound, inst, ((CSPSynth *)seqp->drvr)->unk38);
             }
         }
         sound = inst->soundArray[0];

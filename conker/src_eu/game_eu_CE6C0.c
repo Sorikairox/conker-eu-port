@@ -147,11 +147,11 @@ void trigger_cache_angles(u8 *arg0)
 {
   f32 temp_f20;
   temp_f20 = (*((f32 *) (((u8 *) arg0) + 0xC))) * D_8009F970;
-  *((f32 *) (((u8 *) arg0) + 0x24)) = func_150AD78C(temp_f20);
-  *((f32 *) (((u8 *) arg0) + 0x28)) = func_150AD780(temp_f20);
+  *((f32 *) (((u8 *) arg0) + 0x24)) = fast_sinf(temp_f20);
+  *((f32 *) (((u8 *) arg0) + 0x28)) = fast_cosf(temp_f20);
   temp_f20 = (*((f32 *) (((u8 *) arg0) + 0x10))) * D_8009F974;
-  *((f32 *) (((u8 *) arg0) + 0x2C)) = func_150AD78C(temp_f20);
-  *((f32 *) (((u8 *) arg0) + 0x30)) = func_150AD780(temp_f20);
+  *((f32 *) (((u8 *) arg0) + 0x2C)) = fast_sinf(temp_f20);
+  *((f32 *) (((u8 *) arg0) + 0x30)) = fast_cosf(temp_f20);
 }
 
 #ifdef NON_MATCHING
@@ -1292,13 +1292,13 @@ s32 trigger_cylinder_segment_hit(u8 *arg0, f32 *p0, f32 *p1, f32 *out) {
     hz = sz * t + z0;
     /* back to world space: undo the X tilt, then the Y turn */
     angle = -(cyl->angleX * D_8009FA44_nm[0]);
-    sn = func_150AD78C(angle);
-    cs = func_150AD780(angle);
+    sn = fast_sinf(angle);
+    cs = fast_cosf(angle);
     out[2] = hz * cs - hy * sn;
     out[1] = hy * cs + hz * sn;
     angle = -(cyl->angleY * D_8009FA48_nm[0]);
-    sn = func_150AD78C(angle);
-    cs = func_150AD780(angle);
+    sn = fast_sinf(angle);
+    cs = fast_cosf(angle);
     out[0] = hx * cs - out[2] * sn;
     out[2] = out[2] * cs + hx * sn;
     out[0] += cyl->x;

@@ -30,7 +30,7 @@ struct260 *fx_carrier_spawn(s16 arg0, u8 arg1, u8 arg2, f32 arg3, u8 *arg4, u8 a
     tmp.unkC = 0.0f;
     tmp.unk10 = 0.0f;
     tmp.unk14 = arg3;
-    temp_v0 = func_15149130(arg0, -1, 0x42, -1, arg1, 0x36, (struct37 *)(arg4 + 0x18), arg5, arg6);
+    temp_v0 = effect_node_create(arg0, -1, 0x42, -1, arg1, 0x36, (struct37 *)(arg4 + 0x18), arg5, arg6);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x18);
     }
@@ -102,13 +102,13 @@ void fx_carrier_stop(void *arg0) {
 /* was func_151D79D4 */
 void fx_carrier_die_retire(void *arg0) {
     fx_carrier_stop(arg0);
-    func_1514933C(arg0);
+    effect_node_retire(arg0);
 }
 
 /* was func_151D7A00 */
 void fx_carrier_die_free(void *arg0) {
     fx_carrier_stop(arg0);
-    func_15149368(arg0);
+    effect_node_free(arg0);
 }
 
 /* was func_151D7A2C */
@@ -120,7 +120,7 @@ void char_glow_broadcast_kill(u8 *arg0) {
 
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
-    func_151494E0(&tmp, 0x3D);
+    effect_nodes_broadcast(&tmp, 0x3D);
 }
 
 /* was func_151D7A60 */
@@ -146,7 +146,7 @@ void char_glow_trail_spawn(u8 *arg0, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
 #ifdef NON_MATCHING
 // linked_obj_event_3d: event handler of an object whose link record sits at +0x40 ({ s32 id, u8 key }): event 0x3D removes the
 // object (node_destroy) when the event's record matches by id or by key; any other event goes to the common
-// handler func_15149514.
+// handler effect_node_link_message.
 /* was func_151D7AE8 */
 void char_glow_on_message(struct102 *obj, u8 *ev, u8 type) {
     u8 *link = (u8 *) obj + 0x40;
@@ -156,7 +156,7 @@ void char_glow_on_message(struct102 *obj, u8 *ev, u8 type) {
             node_destroy(obj);
         }
     } else {
-        func_15149514((s32) ev, type, (s32) link, (s32) (link + 4), (s32) obj);
+        effect_node_link_message((s32) ev, type, (s32) link, (s32) (link + 4), (s32) obj);
     }
 }
 #else

@@ -3,7 +3,8 @@
 #include "n_seqp.h"
 
 
-void func_10018C60(N_ALSeqPlayer *seqp) {
+/* was func_10018C60 */
+void n_csp_end_track(N_ALSeqPlayer *seqp) {
     N_ALEvent evt;
 
     evt.type = AL_TRACK_END;

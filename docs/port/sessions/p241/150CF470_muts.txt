@@ -2,7 +2,7 @@
 s/(world_record_find(4) + 8)/(world_record_find(4) + 4)/ % a30
 s/world_record_find(4)/world_record_find(3)/ % a30
 s/ \* 0.017453292f;/ * 0.0175f;/ % a30
-s/    f32 s = func_150AD78C(angle);/    f32 s = func_150AD780(angle);/ % a30
+s/    f32 s = fast_sinf(angle);/    f32 s = fast_cosf(angle);/ % a30
 s/    f32 dx = 76.0f - -1.0f;/    f32 dx = 76.0f - 1.0f;/ % a30
 s/    f32 dy = 241.0f - 44.0f;/    f32 dy = 241.0f - 45.0f;/ % a30
 s/(s16) (dx \* c - dy \* s + -1.0f)/(s16) (dx * c + dy * s + -1.0f)/ % a30

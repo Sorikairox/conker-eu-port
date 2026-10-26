@@ -103,7 +103,7 @@ void level_setup_load(s32 arg0) {
     u8 *e;
     u8 *obj;
 
-    func_15004F30();
+    model_kind_tables_clear();
     switch (arg0) {
         case 0x1A:
         case 0x24:

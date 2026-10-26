@@ -991,7 +991,7 @@ s32 camera_object_spawn(f32 yaw, f32 dist, f32 rise, f32 height, u8 alpha, s32 m
         dx = (*(f32 *) (rec + 0x14) + orbit[0]) - *(f32 *) (obj + 0x14);
         dz = (*(f32 *) (rec + 0x1C) + orbit[1]) - *(f32 *) (obj + 0x1C);
         dy = ((*(f32 *) (rec + 0x18) + 30.0f) + *(f32 *) (rec + 0x20) * 4.0f) - *(f32 *) (obj + 0x18);
-        pitch = func_150484A0(dy, sqrtf(dx * dx + dz * dz)) * sCamRadToAngle[0];
+        pitch = math_atan2f(dy, sqrtf(dx * dx + dz * dz)) * sCamRadToAngle[0];
         angle = math_atan2_u16(dx, -dz, 0);
         vec_from_yaw_pitch((s32) pitch, dist, 0.0f, &dist, &rise, &unused);
         rise = -rise;
@@ -1122,8 +1122,8 @@ void objev_player_camera_view(void) {
             dir_x -= mtx[3][0];
             dir_y -= mtx[3][1];
             dir_z -= mtx[3][2];
-            a = func_150484A0(dir_x, dir_z);
-            b = func_150484A0(dir_y, sqrtf(dir_x * dir_x + dir_z * dir_z));
+            a = math_atan2f(dir_x, dir_z);
+            b = math_atan2f(dir_y, sqrtf(dir_x * dir_x + dir_z * dir_z));
             a *= 57.295776f;
             b *= 57.295776f;
             if (180.0f < a) {
@@ -1539,7 +1539,7 @@ void objev_nop_1506ddb8(void) {
 
 /* was func_1506DDC0 */
 void objev_level_screen_effect(void) {
-    if (func_15178E50(D_800BE9F0) != 0) {
+    if (level_screen_effect_active(D_800BE9F0) != 0) {
         particle_emitter_preset_cooldown(D_800C3E78, D_800D1580, 0xFF, 0);
     }
 }
@@ -1717,7 +1717,7 @@ void objev_shadow_square_small(void) {
 #ifdef NON_MATCHING
 s32 actor_sound_is_playing(struct127 *arg0);
 s32 actor_sound2_is_playing(struct127 *arg0);
-s32 func_151F2CDC(void);
+s32 mp3_stream_get_state(void);
 s32 sound_pick_variant(s32, s32);
 s32 random_int(void);
 extern s32 *D_800BE9C8[];
@@ -1742,7 +1742,7 @@ s32 sound_word_resolve(struct127 *rec, s32 *slot, s32 mode) {
                 return 0;
             }
         } else if (mode == 2) {
-            if (func_151F2CDC() == 1) {
+            if (mp3_stream_get_state() == 1) {
                 return 0;
             }
         }
@@ -2457,7 +2457,7 @@ void objfx_emitter_d(s32 arg0) {
 
 /* was func_1506F8C0 */
 void objfx_19ef70(s32 arg0) {
-    func_1519EF70(D_800D154C, 0, 0);
+    objfx_nop_1519ef70(D_800D154C, 0, 0);
 }
 
 /* was func_1506F8F0 */
@@ -3203,7 +3203,7 @@ void objfx_kind18_notify_43(s32 arg0) {
         sp20.unk0 = temp_v0;
         sp20.unk4 = temp_v0->unique_id;
         particle_broadcast((s32)&sp20, 0x43);
-        func_151494E0((s32)&sp20, 0x43);
+        effect_nodes_broadcast((s32)&sp20, 0x43);
     }
 }
 // void objfx_kind18_notify_43(s32 arg0) {
@@ -3220,7 +3220,7 @@ void objfx_kind18_notify_43(s32 arg0) {
 //         sp18 = temp_a0;
 //         sp24 = temp_v0->unk3B;
 //         func_15131D4C(temp_a0, 0x43);
-//         func_151494E0(temp_a0, 0x43);
+//         effect_nodes_broadcast(temp_a0, 0x43);
 //     }
 // }
 
@@ -3905,7 +3905,8 @@ void objev_fire_beam_forward(void) {
     object_ray_hit_nearest(D_800D154C, D_800D154C->x_position, D_800D154C->y_position + D_800D154C->unkD6, D_800D154C->z_position, x, y, z, D_800C3E78, 0x12);
 }
 
-void func_eu_1507340C(void) {
+/* was func_eu_1507340C */
+void objev_nop_1507340c(void) {
 }
 
 /* was func_15073054 */
@@ -4031,7 +4032,7 @@ u8 *obj_spawn_child_at_joint(struct127 *parent, s32 joint, s32 kind, f32 x, f32 
  * obj_spawn_child_at_joint (owner, type, model, then offsets and speeds; 100 = lifetime). D_800D1580 picks the kind:
  *   0: type 0x17 model 0x1F, flagged 0x1000000 in unkF8. When the owner's camera (unk318) is within 30
  *      of the owner (look_point_in_joint_range) and a 1-in-5 roll passes, it is aimed at the camera: unk2E4 = 1, no
- *      gravity, heading unk76 / unk7A from func_150484A0 (degrees -> 0x10000 units, -0x4000), vertical
+ *      gravity, heading unk76 / unk7A from math_atan2f (degrees -> 0x10000 units, -0x4000), vertical
  *      speed = xz speed * dy / horizontal distance. Otherwise unk2E4 = 0.
  *   1: type 0xE model 0x42, offsets jittered by +-20 * owner->unk2E4 / 100.
  *   2: type 9 model 0x35, flagged 0x1000000, unkB8 = 180.
@@ -4075,7 +4076,7 @@ void objev_spawn_shot_kind(void) {
         dx = *(f32 *)(cam + 0x2F8) - shot->x_position;
         dy = *(f32 *)(cam + 0x2FC) - shot->y_position;
         dz = *(f32 *)(cam + 0x300) - shot->z_position;
-        angle = func_150484A0(dx, dz) * 57.295776f;
+        angle = math_atan2f(dx, dz) * 57.295776f;
         heading = angle;
         if (180.0f < angle) {
             heading = angle - 360.0f;
@@ -4718,7 +4719,7 @@ void objhit_camera_object(u8 *arg0, u8 *arg1) {
         (*(s8 *)((u8 *)arg0 + 0x1CA)) = 0;
     }
     if ((*(s32 *)((u8 *)arg1 + 0)) == 0x19) {
-        water_ring_spawn_ex((s32) (256.0f - (func_150484A0((*(f32 *)((u8 *)arg0 + 0x20)), (*(f32 *)((u8 *)arg0 + 0x3C))) * 40.743664f)), 0xC0 - ((s32) (*(u16 *)((u8 *)arg0 + 0x76)) >> 8), (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s32) (*(f32 *)((u8 *)arg0 + 0x18)), (s32) (*(f32 *)((u8 *)arg0 + 0x1C)), 0x10, 0x14, 0, 0xFF, 0);
+        water_ring_spawn_ex((s32) (256.0f - (math_atan2f((*(f32 *)((u8 *)arg0 + 0x20)), (*(f32 *)((u8 *)arg0 + 0x3C))) * 40.743664f)), 0xC0 - ((s32) (*(u16 *)((u8 *)arg0 + 0x76)) >> 8), (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s32) (*(f32 *)((u8 *)arg0 + 0x18)), (s32) (*(f32 *)((u8 *)arg0 + 0x1C)), 0x10, 0x14, 0, 0xFF, 0);
     }
 }
 

@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_150162B0(void) {
+/* was func_150162B0 */
+void records_table_reset(void) {
 
     bzero(&D_800CC2D0, 20300);
     D_80086000 = 0;

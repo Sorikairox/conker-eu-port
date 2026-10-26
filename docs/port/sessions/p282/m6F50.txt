@@ -28,7 +28,7 @@
 /if (!splash || !D_800BE616) {/s/!D_800BE616/D_800BE616/
 /for (n = (random_int() & 3) + 3; n != 0; n--) {/s/+ 3/+ 2/
 /vec2_from_angle_byte(x & 0xFF, random_float() \* 140.0f/s/140.0f/141.0f/
-/if (func_150ACEA0(b.x, b.y, b.z, dir.x/s/b.y, b.z/b.z, b.y/
+/if (collision_ray_cast(b.x, b.y, b.z, dir.x/s/b.y, b.z/b.z, b.y/
 /dir.y \* 100.0f + side.y \* sc3\[0\] + up.y \* sc3\[1\],/s/side.y/side.x/
 /dir.z \* 100.0f + side.z \* sc3\[0\] + up.z \* sc3\[1\], 0, surf/s/, 0, surf/, 1, surf/
 /&dist, &obj, 0, 0.0f) != 0/s/0.0f) != 0/1.0f) != 0/

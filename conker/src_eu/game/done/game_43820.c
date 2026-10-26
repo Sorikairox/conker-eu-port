@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_15016370(void) {
+/* was func_15016370 */
+void records_set_tint_180_60_60(void) {
     struct127 *tmp;
     s32 i;
 
