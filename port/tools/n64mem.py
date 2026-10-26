@@ -25,6 +25,37 @@ SEGS = [('init_data', 0x80029400, 0x4410, 0x29400, False),
 CODE = [(0x10001000, 0x10029400), (0x15000000, 0x151FA920), (0x16000000, 0x16003700)]
 RDRAM = (0x80000000, 0x800000)
 SEG16 = (0x16000000, 0x10000)
+def _renamed_from():
+    here = os.path.dirname(os.path.abspath(__file__))
+    out = {}
+    try:
+        for line in open(os.path.join(here, '..', '..', 'tools', 'eu_port', 'names.tsv')):
+            f = line.rstrip('\n').split('\t')
+            if len(f) >= 2 and not line.startswith('#'):
+                out[f[1]] = f[0]
+    except OSError:
+        pass
+    return out
+
+
+RENAMED_FROM = _renamed_from()   # new name -> old name (P322 renames)
+
+
+def native_addr(nm):
+    """address of a VM_NATIVES entry: from its func_ name, or from the old func_ name in tools/eu_port/names.tsv (P322)"""
+    m = re.match(r'func_([0-9A-F]{8})$', nm)
+    if not m:
+        here = os.path.dirname(os.path.abspath(__file__))
+        for line in open(os.path.join(here, '..', '..', 'tools', 'eu_port', 'names.tsv')):
+            f = line.rstrip('\n').split('\t')
+            if len(f) >= 2 and f[1] == nm:
+                m = re.match(r'func_([0-9A-F]{8})$', f[0])
+                break
+    if not m:
+        raise SystemExit('n64mem: no address for VM native %s' % nm)
+    return int(m.group(1), 16)
+
+
 VM_NATIVES = ['func_150AE5D8', 'func_150AE5E8', 'func_150AE5F8', 'func_150AE60C', 'func_150AE674',
               'func_150AE690', 'func_150AE6A0', 'func_150AE6BC', 'func_150AE6D4', 'func_150AE714',
               # P261: empty anim-key handler (jr ra; nop) at the tail of objev_throw_object's asm (game_981E0), entry 16
@@ -61,14 +92,16 @@ def generate(outdir, defined_f, defined_d, stubbed, undef_data, addr):
         if typ == 2 and val and re.match(r'[A-Za-z_]\w*$', nm) and not nm.startswith(('L', 'jtbl')):
             fstart.setdefault(val, nm)  # (.L* code labels are typed FUNC in the ELF too)
     for nm, a in addr.items():
-        if re.match(r'func_[0-9A-F]{8}$', nm):
+        # func_<ADDR> names, and functions renamed from one through tools/eu_port/names.tsv (P322): same set as before
+        # the renames (counting every code-range symbol instead changed the boot path)
+        if re.match(r'func_[0-9A-F]{8}$', nm) or re.match(r'func_[0-9A-F]{8}$', RENAMED_FROM.get(nm, '')):
             fstart.setdefault(a, nm)
     # P110: code entry points inside one asm function that the NM build defines as separate C functions named by their
     # address (port P106: the event VM natives 3..12 inside func_150ADFD0, table D_80088A44). The default ELF has no
     # symbol there, so without this the table words stay N64 addresses (jump-table class 'J').
     for nm in VM_NATIVES:
         if nm in defined_f:
-            fstart.setdefault(int(nm[5:], 16), nm)
+            fstart.setdefault(native_addr(nm), nm)
     # C-defined data objects with their N64 extent (the wasm copy is authoritative)
     cobj = sorted((val, max(size, 1), nm) for nm, val, size, typ, bind, shndx, sec in syms
                   if nm in defined_d and val >= 0x80000000)

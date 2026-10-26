@@ -131,10 +131,25 @@ def symtab():
                     if m: _SYMS.setdefault(m.group(1), int(m.group(2), 16))
     return _SYMS
 
+_RENAMED = None
+def renamed_from(name):
+    """old name of a function renamed through tools/eu_port/names.tsv (P322), or None"""
+    global _RENAMED
+    if _RENAMED is None:
+        _RENAMED = {}
+        try:
+            for line in open(os.path.join(HERE, '..', '..', '..', 'tools/eu_port/names.tsv')):
+                f = line.rstrip('\n').split('\t')
+                if len(f) >= 2 and not line.startswith('#'): _RENAMED[f[1]] = f[0]
+        except OSError: pass
+    return _RENAMED.get(name)
+
 def symaddr(name):
     s = symtab()
     if name in s: return s[name]
     m = re.match(r'(?:D|jtbl|func)_([0-9A-F]{8})$', name)
+    if not m and renamed_from(name):     # renamed NON_MATCHING-only function: its old func_ name carries the address
+        m = re.match(r'func_(?:eu_)?([0-9A-F]{8})$', renamed_from(name))
     return int(m.group(1), 16) if m else None
 
 _ADDR2NAME = None

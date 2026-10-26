@@ -108,12 +108,12 @@ def main():
     # builders: GDL = func_X(GDL, ...)) returns its first argument instead of 0, so the caller's DL
     # pointer stays valid and the frame still reaches gDPFullSync/gSPEndDisplayList and the gfx task.
     import glob, re
-    pt_re = re.compile(r'([A-Za-z_][\w\[\]\.>-]*)\s*=\s*(?:\([^()]*\)\s*)?(func_\w+)\(\s*(?:\([^()]*\)\s*)?([A-Za-z_][\w\[\]\.>-]*)\s*[,)]')
+    pt_re = re.compile(r'([A-Za-z_][\w\[\]\.>-]*)\s*=\s*(?:\([^()]*\)\s*)?([A-Za-z_]\w*)\(\s*(?:\([^()]*\)\s*)?([A-Za-z_][\w\[\]\.>-]*)\s*[,)]')
     # P23: also any function declared (prototype or definition) as `Gfx *f(Gfx *, ...)`, e.g. one only
     # used as `return f(gdl, ...)` (player_view_dl_build in render_player_frame_setup).
-    gfx_re = re.compile(r'\bGfx\s*\*\s*(func_\w+)\s*\(\s*Gfx\s*\*')
+    gfx_re = re.compile(r'\bGfx\s*\*\s*([A-Za-z_]\w*)\s*\(\s*Gfx\s*\*')
     passthru = set(); passthru_k = {}
-    gfx_any_re = re.compile(r'\bGfx\s*\*\s*(func_\w+)\s*\(([^()]*)\)')
+    gfx_any_re = re.compile(r'\bGfx\s*\*\s*([A-Za-z_]\w*)\s*\(([^()]*)\)')
     for src in glob.glob('conker/src_eu/**/*.c', recursive=True):
         text = open(src, errors='replace').read()
         for m in pt_re.finditer(text):
@@ -126,6 +126,11 @@ def main():
             parms = [x.strip() for x in m.group(2).split(',')]
             k = next((i for i, x in enumerate(parms) if re.match(r'Gfx\s*\*', x)), None)
             if k: passthru_k[m.group(1)] = k
+    # address -> the name its C body is defined under (func_<ADDR>, or its new name after a names.tsv rename, P322)
+    by_addr = {}
+    for nm_, a_ in addr.items():
+        if nm_ in defined_f and defined_f[nm_]:
+            by_addr.setdefault(a_, nm_)
     npass = ndl = 0
     # P199: name -> (index of the DL argument, argument count); checked against the asm (returns v0 = that argument)
     # P212: func_151A03DC (foot-trail / ripple draw, D_8008A5A0 table, v0 = a1) removed: C since port P204
@@ -162,7 +167,7 @@ def main():
             ndl += 1
         # an "absolute" name (e.g. a US name in undefined_syms.eu.txt = EU address) whose address is a
         # function with a C body under its EU name: forward to it instead of stubbing
-        real = f'func_{addr[n]:08X}' if what == 'absolute' else None
+        real = by_addr.get(addr[n], f'func_{addr[n]:08X}') if what == 'absolute' else None
         if real and real in defined_f and real != n and defined_f[real]:
             rp, rr = defined_f[real]
             fwd_ret = CT.get(rr[0], 'int') if rr else 'void'
