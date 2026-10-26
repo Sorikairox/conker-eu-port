@@ -4,10 +4,10 @@
 58s/if (\*(s32 \*) b == 0 || st\[0x58C\] != b\[0x3B\]) {/if (st[0x58C] != b[0x3B]) {/ % deadB
 61s/!= NULL \&\& \*(u8 \*\*) (b + 0x1D4) != NULL) {/!= NULL) {/ % nomatB
 61s/if (!dead \&\&/if (/ % deadA deadB
-62s/mtx_transform_point_or_origin(D_800AA7E0, pa,/mtx_transform_point_or_origin(D_800AA7EC, pa,/ % mid
-62s/+ 0x1D4) + D_8008FF20 \* 0x40);/+ 0x1D4) + D_8008FF20 * 0x20);/ % mid
-63s/+ 0x1D4) + D_8008FF24 \* 0x40);/+ 0x1D4) + D_8008FF20 * 0x40);/ % mid close
-64s/v = st + D_800BE9C0 \* 0x2C0;/v = st + D_800BE9C0 * 0x280;/ % mid
+62s/mtx_transform_point_or_origin(g_electric_bolt_end_a, pa,/mtx_transform_point_or_origin(g_electric_bolt_end_b, pa,/ % mid
+62s/+ 0x1D4) + g_electric_bolt_mtx_a \* 0x40);/+ 0x1D4) + g_electric_bolt_mtx_a * 0x20);/ % mid
+63s/+ 0x1D4) + g_electric_bolt_mtx_b \* 0x40);/+ 0x1D4) + g_electric_bolt_mtx_a * 0x40);/ % mid close
+64s/v = st + g_dl_buf_index \* 0x2C0;/v = st + g_dl_buf_index * 0x280;/ % mid
 65s/player \* 0x9A0 + 0x2F8);/player * 0x9A0 + 0x2FC);/ % mid far
 66s/flag = 1;/flag = 0;/ % mid
 67s/gfx_geometry_mode_cached(gfx, 0x200005, 0x60600);/gfx_geometry_mode_cached(gfx, 0x200004, 0x60600);/ % mid

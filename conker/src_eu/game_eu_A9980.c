@@ -10,7 +10,7 @@ extern f32 D_8009B860;
 
 /* Advances an animation (anim: +4 flags (0x8000 = hold the last frame), +8 frame, +0x10 speed, +0x18 end,
  * +0x20 loop start, +0x28 current animation, +0 end-of-animation callback, +0x3A / +0x3C a countdown) by one
- * frame. With a record, the step is scaled by the frame time D_800BE9A4 (x 1.2, at most 2 frames), the record
+ * frame. With a record, the step is scaled by the frame time g_frame_step_f (x 1.2, at most 2 frames), the record
  * becomes the current one (g_cur_obj_index / g_cur_obj), its flags +0xF4 (2 / 4 / 8) change the looping, and
  * anim_events_run (the record's frame hook) may replace the frame. The final frame is copied to rec->unkB4.
  * The callback's arguments are not set up by the asm (it sees anim / player, or scratch after the hook): it is
@@ -29,9 +29,9 @@ void anim_advance_frame(struct197 *anim, f32 step, struct127 *rec, s32 player) {
     }
     if (rec != NULL) {
         if (D_800C35EA == 0) {
-            step = ((D_800BE9A4 < 2.0f) ? D_800BE9A4 * step : step + step) * D_8009B860; /* 1.2 */
+            step = ((g_frame_step_f < 2.0f) ? g_frame_step_f * step : step + step) * D_8009B860; /* 1.2 */
         } else {
-            step = D_800BE9A4;
+            step = g_frame_step_f;
         }
     }
     if (g_slowmo_divisor != 0) {
@@ -129,7 +129,7 @@ void anim_advance_frame(struct197 *anim, f32 step, struct127 *rec, s32 player) {
         anim->unk8 = frame;
     }
     if (*(s16 *)((u8 *)anim + 0x3C) > 0) {
-        *(s16 *)((u8 *)anim + 0x3C) -= *(s16 *)((u8 *)anim + 0x3A) * D_800BE9E4;
+        *(s16 *)((u8 *)anim + 0x3C) -= *(s16 *)((u8 *)anim + 0x3A) * g_frame_ticks;
     }
     if (rec != NULL) {
         if (resync) {

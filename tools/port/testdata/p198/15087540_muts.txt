@@ -28,7 +28,7 @@ s/        rec->pad28\[4\] = start;/        rec->pad28[4] = back;/
 s/        if (i < D_800D27B8) {/        if (i <= D_800D27B8) {/
 s/            rec->unk31 = i;/            rec->unk31 = 0;/
 s/((u8 \*) rec)\[0x26\] = laps;/((u8 *) rec)[0x26] = laps + 1;/
-s/= !(i < D_80090130);/= !(i <= D_80090130);/
-s/= !(i < D_80090130);/= (i < D_80090130);/
+s/= !(i < g_human_player_count);/= !(i <= g_human_player_count);/
+s/= !(i < g_human_player_count);/= (i < g_human_player_count);/
 s/    D_800D27BA = 1;/    D_800D27BA = 0;/
 s/        rail_record_reset((u8 \*) rec);/        rail_record_reset((u8 *) D_80087640);/

@@ -5,7 +5,7 @@ s/+ k->countBase + 1;/+ k->countBase;/
 s/+ k->countBase + 1;/+ k->countRange + 1;/
 s/if (size != 1)/if (size != 2)/
 s/spread = 0x1E;/spread = 0x1F;/
-s/D_800A14EC\[size\] \* count/D_800A14EC[0] * count/
+s/g_impact_debris_scale\[size\] \* count/g_impact_debris_scale[0] * count/
 s/k->debris == 0x13/k->debris == 0x12/
 s/0xF, 0x55, 0, 0xFF, 0)/0xF, 0x56, 0, 0xFF, 0)/
 s/(x, y, z, 0x1E, 0, 0x13,/(x, y, z, 0x1E, 0, 0x12,/
@@ -22,11 +22,11 @@ s/< k->smokePct/<= k->smokePct/
 s/y + 20.0f;/y + 10.0f;/
 s/pos\[2\] = z;/pos[2] = x;/
 s/fire_embers_spawn(pos, 0xFF, 1)/fire_embers_spawn(pos, 0xFF, 0)/
-s/D_800D9D83\[slot \* 28\] = 100;/D_800D9D83[slot * 27] = 100;/
-s/D_800D9D83\[slot \* 28\] = 0;/D_800D9D83[slot * 28] = 1;/
+s/g_aim_record_puff_timer\[slot \* 28\] = 100;/g_aim_record_puff_timer[slot * 27] = 100;/
+s/g_aim_record_puff_timer\[slot \* 28\] = 0;/g_aim_record_puff_timer[slot * 28] = 1;/
 s/} else if (slot != 0xFF) {/} else if (slot != 0xFE) {/
-s/spark.u84 = D_800A14E0\[size\]\[0\]/spark.u84 = D_800A14E0[size][1]/
-s/spark.u86 = D_800A14E0\[size\]\[1\]/spark.u86 = D_800A14E0[size][0]/
+s/spark.u84 = g_impact_spark_sizes\[size\]\[0\]/spark.u84 = g_impact_spark_sizes[size][1]/
+s/spark.u86 = g_impact_spark_sizes\[size\]\[1\]/spark.u86 = g_impact_spark_sizes[size][0]/
 s/spark.y = y;/spark.y = z;/
 s/spark.uA2 = 0xD;/spark.uA2 = 0xC;/
 s/spark.kind = k->sparkKind;/spark.kind = k->debris;/

@@ -1,6 +1,6 @@
 s/emit.type = 5;/emit.type = 4;/ %
 s/emit.pos\[1\] = pos\[1\];/emit.pos[1] = pos[0];/ %
-s/emit.param\[2\] = D_800AAE24\[2\];/emit.param[2] = D_800AAE24[1];/ %
+s/emit.param\[2\] = g_fire_ember_params\[2\];/emit.param[2] = g_fire_ember_params[1];/ %
 s/emit.sizeB = 30.0f;/emit.sizeB = 15.0f;/ %
 s/emit.u30 = -0x40;/emit.u30 = 0x40;/ %
 s/emit.u49\[i\] = 0;/emit.u49[i] = 0xFF;/ %

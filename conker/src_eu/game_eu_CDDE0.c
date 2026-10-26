@@ -21,7 +21,7 @@ void event_timers_reset(void) {
 extern u16 D_800888B0[]; /* timer period per kind */
 extern u16 D_800888BC[]; /* count modulus per kind (0: none) */
 
-/* Per frame: every active, running slot (of the 10) adds D_800BE9E4 to its timer; each time the timer reaches the
+/* Per frame: every active, running slot (of the 10) adds g_frame_ticks to its timer; each time the timer reaches the
  * period of its kind it wraps and the count goes up (modulo the kind's modulus when that is set). */
 /* was func_150A067C */
 void event_timers_update(void) {
@@ -30,7 +30,7 @@ void event_timers_update(void) {
 
     for (v = D_800D3430; v != D_800D3430 + 10; v++) {
         if (v->active && v->flag == 1) {
-            v->timer += D_800BE9E4;
+            v->timer += g_frame_ticks;
             period = D_800888B0[v->kind];
             if (v->timer >= period) {
                 v->timer -= period;

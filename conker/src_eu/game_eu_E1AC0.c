@@ -117,15 +117,15 @@ s32 water_jet_points_update(u8 *arg0) {
             }
             temp_a3 = (0, temp_v1) + (var_a2 * 0x24); // fakematch: comma flips addu operand order
             (*(s16 *)((u8 *)temp_a3 + 0x1C)) = 0xFF;
-            (*(s16 *)((u8 *)temp_a3 + 0x1E)) = (s16) ((*(s16 *)((u8 *)temp_a3 + 0x1E)) - D_800BE9E4);
+            (*(s16 *)((u8 *)temp_a3 + 0x1E)) = (s16) ((*(s16 *)((u8 *)temp_a3 + 0x1E)) - g_frame_ticks);
             if ((*(s16 *)((u8 *)temp_a3 + 0x1E)) < 0) {
                 var_a1 = 1;
             }
-            (*(f32 *)((u8 *)temp_a3 + 0x10)) = (f32) (((*(f32 *)((u8 *)temp_v0 + 0xC)) * D_800BE9A4) + (*(f32 *)((u8 *)temp_a3 + 0x10)));
-            (*(f32 *)((u8 *)temp_a3 + 0)) = (f32) (((*(f32 *)((u8 *)temp_a3 + 0xC)) * D_800BE9A4) + (*(f32 *)((u8 *)temp_a3 + 0)));
-            (*(f32 *)((u8 *)temp_a3 + 4)) = (f32) (((*(f32 *)((u8 *)temp_a3 + 0x10)) * D_800BE9A4) + (*(f32 *)((u8 *)temp_a3 + 4)));
-            (*(f32 *)((u8 *)temp_a3 + 8)) = (f32) (((*(f32 *)((u8 *)temp_a3 + 0x14)) * D_800BE9A4) + (*(f32 *)((u8 *)temp_a3 + 8)));
-            (*(f32 *)((u8 *)temp_a3 + 0x18)) = (f32) (((*(f32 *)((u8 *)temp_v0 + 0x28)) * D_800BE9A4) + (*(f32 *)((u8 *)temp_a3 + 0x18)));
+            (*(f32 *)((u8 *)temp_a3 + 0x10)) = (f32) (((*(f32 *)((u8 *)temp_v0 + 0xC)) * g_frame_step_f) + (*(f32 *)((u8 *)temp_a3 + 0x10)));
+            (*(f32 *)((u8 *)temp_a3 + 0)) = (f32) (((*(f32 *)((u8 *)temp_a3 + 0xC)) * g_frame_step_f) + (*(f32 *)((u8 *)temp_a3 + 0)));
+            (*(f32 *)((u8 *)temp_a3 + 4)) = (f32) (((*(f32 *)((u8 *)temp_a3 + 0x10)) * g_frame_step_f) + (*(f32 *)((u8 *)temp_a3 + 4)));
+            (*(f32 *)((u8 *)temp_a3 + 8)) = (f32) (((*(f32 *)((u8 *)temp_a3 + 0x14)) * g_frame_step_f) + (*(f32 *)((u8 *)temp_a3 + 8)));
+            (*(f32 *)((u8 *)temp_a3 + 0x18)) = (f32) (((*(f32 *)((u8 *)temp_v0 + 0x28)) * g_frame_step_f) + (*(f32 *)((u8 *)temp_a3 + 0x18)));
             if ((var_a1 != 0) && (var_a2 != (*(s8 *)((u8 *)arg0 + 0x2D)))) {
                 do {
                     (*(s8 *)((u8 *)arg0 + 0x2D)) = (s8) ((*(s8 *)((u8 *)arg0 + 0x2D)) + 1);
@@ -180,14 +180,14 @@ s32 water_jet_emit_update(u8 *arg0) {
 
     temp_s2 = (*(u8 **)((u8 *)arg0 + 0x98));
     temp_s3 = (*(s32 *)((u8 *)arg0 + 0x94));
-    temp_a0 = (*(u8 *)((u8 *)temp_s2 + 0x50)) + ((random_int() % (u32) ((*(u8 *)((u8 *)temp_s2 + 0x10)) + 1)) * D_800BE9E4);
+    temp_a0 = (*(u8 *)((u8 *)temp_s2 + 0x50)) + ((random_int() % (u32) ((*(u8 *)((u8 *)temp_s2 + 0x10)) + 1)) * g_frame_ticks);
     (*(u8 *)((u8 *)temp_s2 + 0x50)) = temp_a0;
     (*(f32 *)((u8 *)temp_s2 + 0x4C)) = (f32) ((angle_byte_cos((temp_a0 - 0x40) & 0xFF) * (*(f32 *)((u8 *)temp_s2 + 0x18))) + (*(f32 *)((u8 *)temp_s2 + 0x14)));
-    (*(f32 *)((u8 *)temp_s2 + 0x44)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 0x44)) + ((*(f32 *)((u8 *)temp_s2 + 0x20)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s2 + 0x44)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 0x44)) + ((*(f32 *)((u8 *)temp_s2 + 0x20)) * g_frame_step_f));
     temp_f16 = (*(f32 *)((u8 *)temp_s2 + 0x44));
     if (temp_f16 > 1.0f) {
         temp_f2 = 1.0f / temp_f16;
-        var_f20 = D_800BE9A4;
+        var_f20 = g_frame_step_f;
         (*(f32 *)((u8 *)(&sp.u80) + 0)) = (*(f32 *)((u8 *)temp_s2 + 0));
         temp_s5 = arg0 + 0x10;
         (*(s32 *)((u8 *)(&sp.u80) + 4)) = (s32) (*(s32 *)((u8 *)temp_s2 + 4));
@@ -264,7 +264,7 @@ u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 u8 *gfx_env_color_cached(u8 *, s32, s32, s32, s32, s8 *);
 extern s32 D_800915E8;
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 typedef struct {
     f32 pos[3];         /* +0x00 */
@@ -277,14 +277,14 @@ typedef struct {
 } BeamPoint;            /* 0x24 bytes, trail +0x94 */
 
 // beam_ribbon_draw: draws the trail's points (+0x94, ring of +0x25 entries, newest before +0x2E, oldest +0x2D;
-// nothing below 2 points, +0x2C) as a camera-facing ribbon (camera = D_800DBFF0 view `arg2` + 0x2F8): each point
+// nothing below 2 points, +0x2C) as a camera-facing ribbon (camera = g_player_views view `arg2` + 0x2F8): each point
 // gets two vertices offset by +-width * normalize((prev - next) x (point - camera)), texture s = the point's +0x20
 // << 6, t 0x43C0 / 0x4000, white with alpha (fade * style +0x26) >> 8. Style (+0x98) bits 2 / 4 first rewrite the
 // fade ramps from the oldest (start 0, step +0x33, +0x32 points) / the newest (step +0x35, +0x34 points). When s
 // grows between two points the last pair is repeated with s - 0x4000 (texture wrap). With +0x1E bit 1 the ribbon
 // starts at the trail's own position (+0x10). Vertices from vtx_slot_buffer_get (+0x84 buffer, (count << 5) + 0xA0 bytes;
 // none -> gfx unchanged); render state: texture D_800915E8, combine 0x4D, grey +0x24, geometry 1 / 0x160600,
-// othermode D_800D30BC | 0x82CA0 / 0x5049D8.
+// othermode g_gfx_tlut_mode | 0x82CA0 / 0x5049D8.
 /* was func_150B4BF0 */
 u8 *water_jet_ribbon_draw(u8 *trail, u8 *gfx, s16 arg2) {
     BeamPoint *pts;
@@ -318,7 +318,7 @@ u8 *water_jet_ribbon_draw(u8 *trail, u8 *gfx, s16 arg2) {
     if (v == NULL) {
         return gfx;
     }
-    cam = (f32 *) ((u8 *) D_800DBFF0 + arg2 * 0x9A0 + 0x2F8);
+    cam = (f32 *) ((u8 *) g_player_views + arg2 * 0x9A0 + 0x2F8);
     style = *(u8 **) (trail + 0x98);
     pts = *(BeamPoint **) (trail + 0x94);
     flag = 1;
@@ -359,7 +359,7 @@ u8 *water_jet_ribbon_draw(u8 *trail, u8 *gfx, s16 arg2) {
     gfx = (u8 *) gfx_geometry_mode_cached((s32) gfx, 1, 0x160600);
     gfx = (u8 *) gfx_set_combine_mode((s32) gfx, 0x4D, &flag);
     gfx = gfx_env_color_cached(gfx, style[0x24], style[0x24], style[0x24], 0xFF, &flag);
-    gfx = gfx_other_mode_cached((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, &flag);
+    gfx = gfx_other_mode_cached((s32) gfx, g_gfx_tlut_mode | 0x80000 | 0x2CA0, 0x5049D8, &flag);
 
     if (*(u16 *) (trail + 0x1E) & 2) {
         next = *(s8 *) (trail + 0x2E) - 1;

@@ -7,21 +7,21 @@ s/aimed = (\*((u8 \*)owner->unk31C + 0x197) != 0) ? 1 : 0;/aimed = *((u8 *)owner
 s/aimed = (\*((u8 \*)owner->unk31C + 0x197) != 0) ? 1 : 0;/aimed = *((u8 *)owner->unk31C + 0x197) \& 1;/ % aimbyte
 s/if (\*(u8 \*\*)(obj + 0x1D4) == NULL) {/if (*(u8 **)(obj + 0x1D0) == NULL) {/ % nobones
 s/if (obj\[4\] == 0x23) {/if (obj[4] == 0x24) {/ % noown23 aim23
-s/tbl\[0\] = D_800A2208\[side\];/tbl[0] = D_800A2208[0];/ % aim23s1
-s/tbl\[1\] = aimed ? D_800A2238\[side\] : D_800A2220\[side\];/tbl[1] = D_800A2220[side];/ % aim23
-s/tbl\[1\] = aimed ? D_800A2238\[side\] : D_800A2220\[side\];/tbl[1] = aimed ? D_800A2238[side] : D_800A2238[side];/ % noaim23
-s/tbl\[2\] = D_800A2250\[side\];/tbl[2] = D_800A2238[side];/ % aim23
-s/bone = \*(u8 \*\*)(obj + 0x1D4) + D_800A2204\[side\] \* 64;/bone = *(u8 **)(obj + 0x1D4) + D_800A2204[side] * 16;/ % aim23
-s/+ D_800A2204\[side\] \* 64;/+ D_800A2204[0] * 64;/ % aim23s1
-s/+ D_800A21A0\[side\] \* 64;/+ D_800A21A0[0] * 64;/ % aim1
+s/tbl\[0\] = g_gun_shot_muzzle_pts_c23\[side\];/tbl[0] = g_gun_shot_muzzle_pts_c23[0];/ % aim23s1
+s/tbl\[1\] = aimed ? g_gun_shot_aim_pts_c23\[side\] : g_gun_shot_spark_end_pts_c23\[side\];/tbl[1] = g_gun_shot_spark_end_pts_c23[side];/ % aim23
+s/tbl\[1\] = aimed ? g_gun_shot_aim_pts_c23\[side\] : g_gun_shot_spark_end_pts_c23\[side\];/tbl[1] = aimed ? g_gun_shot_aim_pts_c23[side] : g_gun_shot_aim_pts_c23[side];/ % noaim23
+s/tbl\[2\] = g_gun_shot_third_pts_c23\[side\];/tbl[2] = g_gun_shot_aim_pts_c23[side];/ % aim23
+s/bone = \*(u8 \*\*)(obj + 0x1D4) + g_gun_shot_hand_bones_c23\[side\] \* 64;/bone = *(u8 **)(obj + 0x1D4) + g_gun_shot_hand_bones_c23[side] * 16;/ % aim23
+s/+ g_gun_shot_hand_bones_c23\[side\] \* 64;/+ g_gun_shot_hand_bones_c23[0] * 64;/ % aim23s1
+s/+ g_gun_shot_hand_bones\[side\] \* 64;/+ g_gun_shot_hand_bones[0] * 64;/ % aim1
 s/sgn = side ? -1 : 1;/sgn = side ? 1 : 1;/ % noaim1
 s/alt\[0\] = (f32)sgn \* (13.0f - (1.0f + r1 \* 6.0f));/alt[0] = (f32)sgn * (13.0f - (1.0f + r1 * 5.0f));/ % noaim
 s/alt\[0\] = (f32)sgn \* (13.0f - (1.0f + r1 \* 6.0f));/alt[0] = (f32)sgn * (12.0f - (1.0f + r1 * 6.0f));/ % noaim
-s/alt\[1\] = D_800A21BC\[side\]\[1\];/alt[1] = D_800A21BC[side][0];/ % noaim
-s/alt\[2\] = D_800A21BC\[side\]\[2\];/alt[2] = D_800A21BC[side][1];/ % noaim
-s/tbl\[0\] = D_800A21A4\[side\];/tbl[0] = D_800A21BC[side];/ % aim0
-s/tbl\[1\] = aimed ? D_800A21D4\[side\] : alt;/tbl[1] = aimed ? D_800A21EC[side] : alt;/ % aim0
-s/tbl\[2\] = D_800A21EC\[side\];/tbl[2] = D_800A21EC[0];/ % aim1
+s/alt\[1\] = g_gun_shot_spark_end_pts\[side\]\[1\];/alt[1] = g_gun_shot_spark_end_pts[side][0];/ % noaim
+s/alt\[2\] = g_gun_shot_spark_end_pts\[side\]\[2\];/alt[2] = g_gun_shot_spark_end_pts[side][1];/ % noaim
+s/tbl\[0\] = g_gun_shot_muzzle_pts\[side\];/tbl[0] = g_gun_shot_spark_end_pts[side];/ % aim0
+s/tbl\[1\] = aimed ? g_gun_shot_aim_pts\[side\] : alt;/tbl[1] = aimed ? g_gun_shot_third_pts[side] : alt;/ % aim0
+s/tbl\[2\] = g_gun_shot_third_pts\[side\];/tbl[2] = g_gun_shot_third_pts[0];/ % aim1
 s/out\[1\] = aimed ? side0 : tip;/out[1] = tip;/ % aim0
 s/mtx_transform_points(tbl, out, bone, aimed ? 3 : 2);/mtx_transform_points(tbl, out, bone, aimed ? 3 : 3);/ % noaim
 s/side0\[1\] -= pos\[1\];/side0[1] -= pos[0];/ % aim0
@@ -64,8 +64,8 @@ s/vel\[0\] = random_float() \* gunfire_shell_v0m\[0\] + gunfire_shell_v0a\[0\];/
 s/\(r4 .\) 3 + 4,/\1 3 + 5,/ % aim0
 s/\(r5 .\) 101 + 0x9B,/\1 100 + 0x9B,/ % r2
 s/r1 \* 1012.0f + gunfire_shell_life\[0\], pos, mask, 0, -1,/r1 * 1012.0f + gunfire_shell_life[0], pos, mask, 0, 0,/ % aim0 aim23
-s/attached_particle_spawn(obj, D_800A2204\[side\],/attached_particle_spawn(obj, D_800A21A0[side],/ % aim23
-s/attached_particle_spawn(obj, D_800A21A0\[side\], D_800A21A4\[side\], D_800A21BC\[side\], vel,/attached_particle_spawn(obj, D_800A21A0[side], D_800A21A4[side], D_800A21D4[side], vel,/ % aim0
+s/attached_particle_spawn(obj, g_gun_shot_hand_bones_c23\[side\],/attached_particle_spawn(obj, g_gun_shot_hand_bones[side],/ % aim23
+s/attached_particle_spawn(obj, g_gun_shot_hand_bones\[side\], g_gun_shot_muzzle_pts\[side\], g_gun_shot_spark_end_pts\[side\], vel,/attached_particle_spawn(obj, g_gun_shot_hand_bones[side], g_gun_shot_muzzle_pts[side], g_gun_shot_aim_pts[side], vel,/ % aim0
 s/static const f32 gunfire_shell_life\[1\] = { 1497.0f };/static const f32 gunfire_shell_life[1] = { 1496.0f };/ % aim0
 s/if (!aimed || owner->camera == NULL) {/if (!aimed) {/ % aimnocam
 s/flash.pos\[0\] = side ? -59.0f : 59.0f;/flash.pos[0] = 59.0f;/ % aim1

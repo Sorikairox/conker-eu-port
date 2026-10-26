@@ -27,7 +27,7 @@ s/            \*(s16 \*) (p + 0x12) = low;/            *(s16 *) (p + 0x12) = top
 s/        if (!(p\[0x4F\] \& 4) \&\& !(p\[0x73\] \& 4)) {/        if (!(p[0x4F] \& 4)) {/
 s/        if (!(p\[0x4F\] \& 4) \&\& !(p\[0x73\] \& 4)) {/        if (!(p[0x73] \& 4)) {/
 s/            \*(s16 \*) (p + 0x12) = top;$/            *(s16 *) (p + 0x12) = low;/
-s/        t = \*(s32 \*) (p + 0x80) + D_800BE9E4;/        t = *(s32 *) (p + 0x80) + 1;/
+s/        t = \*(s32 \*) (p + 0x80) + g_frame_ticks;/        t = *(s32 *) (p + 0x80) + 1;/
 s/        \*(s32 \*) (p + 0x80) = t;/        ;/
 s/        if (t < 0) {/        if (t <= 0) {/
 /(p + 0x0) = .*\* 0.125f;/s/- 2.0f)/- 1.0f)/
@@ -59,9 +59,9 @@ s/                mode = 3;/                mode = 0;/
 s/                if (kind == 2) {/                if (kind == 4) {/
 s/                    p\[0x6E\] = 1;/                    p[0x6F] = 1;/
 s/                    p\[0x10E\] = 1;/                    p[0x10E] = 2;/
-s/                    link_group_remove_members(2, (u16) ((p - (u8 \*) D_800DBEF4) \/ 0xA0));/                    link_group_remove_members(2, (u16) ((p - (u8 *) D_800DBEF4) \/ 0x50));/
-s/                    link_group_remove_members(2, (u16) ((p - (u8 \*) D_800DBEF4 + 0xA0) \/ 0xA0));/                    link_group_remove_members(1, (u16) ((p - (u8 *) D_800DBEF4 + 0xA0) \/ 0xA0));/
-s/                    link_group_remove_members(2, (u16) ((p - (u8 \*) D_800DBEF4 + 0xA0) \/ 0xA0));/                    link_group_remove_members(2, (u16) ((p - (u8 *) D_800DBEF4) \/ 0xA0));/
+s/                    link_group_remove_members(2, (u16) ((p - (u8 \*) g_world_objs) \/ 0xA0));/                    link_group_remove_members(2, (u16) ((p - (u8 *) g_world_objs) \/ 0x50));/
+s/                    link_group_remove_members(2, (u16) ((p - (u8 \*) g_world_objs + 0xA0) \/ 0xA0));/                    link_group_remove_members(1, (u16) ((p - (u8 *) g_world_objs + 0xA0) \/ 0xA0));/
+s/                    link_group_remove_members(2, (u16) ((p - (u8 \*) g_world_objs + 0xA0) \/ 0xA0));/                    link_group_remove_members(2, (u16) ((p - (u8 *) g_world_objs) \/ 0xA0));/
 s/        \*(s16 \*) (p + 0x12) += 3;/        *(s16 *) (p + 0x12) += 4;/
 s/        if (\*(s16 \*) (p + 0x12) >= top) {/        if (*(s16 *) (p + 0x12) > top) {/
 s/            mode = 0;/            mode = 2;/

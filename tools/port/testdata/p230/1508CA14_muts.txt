@@ -1,13 +1,13 @@
 s/    s32 \*team = (s32 \*) ((u8 \*) D_800D27D0 + 0xE64);/    s32 *team = (s32 *) ((u8 *) D_800D27D0 + 0xE60);/ % base
 s/    u8 a = \*(u8 \*) ((u8 \*) D_800D27D0 + 0x1700);/    u8 a = *(u8 *) ((u8 *) D_800D27D0 + 0x1701);/ % rr4
 s/    u8 b = \*(u8 \*) ((u8 \*) D_800D27D0 + 0x1701);/    u8 b = *(u8 *) ((u8 *) D_800D27D0 + 0x1700);/ % rr4
-s/    if (refresh != 0 \&\& D_80090130 > 0) {/    if (refresh != 0 \&\& D_80090130 > 1) {/ % nh1_n8
-s/        for (i = 0, p = g_objects; i < D_80090130; i++, p++) {/        for (i = 0, p = g_objects; i <= D_80090130; i++, p++) {/ % base
+s/    if (refresh != 0 \&\& g_human_player_count > 0) {/    if (refresh != 0 \&\& g_human_player_count > 1) {/ % nh1_n8
+s/        for (i = 0, p = g_objects; i < g_human_player_count; i++, p++) {/        for (i = 0, p = g_objects; i <= g_human_player_count; i++, p++) {/ % base
 s/            for (k = 0; k < 3; k++) {/            for (k = 0; k < 2; k++) {/ % base
 s/                idx\[k\] = -1;/                idx[k] = 0;/ % one_ai two_ai
 s/                best\[k\] = D_8009DE38;/                best[k] = 1.0f;/ % base
-s/            for (k = D_80090130; k < n; k++) {/            for (k = D_80090130 + 1; k < n; k++) {/ % base
-s/            for (k = D_80090130; k < n; k++) {/            for (k = D_80090130; k <= n; k++) {/ % base nh1_n8
+s/            for (k = g_human_player_count; k < n; k++) {/            for (k = g_human_player_count + 1; k < n; k++) {/ % base
+s/            for (k = g_human_player_count; k < n; k++) {/            for (k = g_human_player_count; k <= n; k++) {/ % base nh1_n8
 s/                if (team\[i\] == team\[k\]) {/                if (team[i] != team[k]) {/ % base
 s/                if (((s32 \*) ((u8 \*) D_800D27D0 + 0x16C0))\[i\] \& (0x10001 << k)) {/                if (((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[i] \& (0x10000 << k)) {/ % masked_lo
 s/                if (((s32 \*) ((u8 \*) D_800D27D0 + 0x16C0))\[i\] \& (0x10001 << k)) {/                if (((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[i] \& (0x1 << k)) {/ % masked_hi masked
@@ -31,9 +31,9 @@ s/    if (refresh != 0) {/    if (refresh != 1) {/ % base r0
 1,/steps = 0/s/            aTeam = p->unk128;/            aTeam = 0;/ % rr_team rr_team_mix
 s/            steps = 0;/            steps = 0x3F;/ % rr_busy_all rr_team
 s/                b++;/                b += 2;/ % base
-s/                if (b >= D_8008FD8C) {/                if (b > D_8008FD8C) {/ % rr_wrap rr_n2
+s/                if (b >= g_player_count) {/                if (b > g_player_count) {/ % rr_wrap rr_n2
 s/                    a++;/                    a += 2;/ % rr_wrap
-s/                    if (a >= D_8008FD8C - 1) {/                    if (a >= D_8008FD8C) {/ % rr_wrap_a rr_n2
+s/                    if (a >= g_player_count - 1) {/                    if (a >= g_player_count) {/ % rr_wrap_a rr_n2
 s/                        a = 0;/                        a = 1;/ % rr_wrap_a rr_n2
 s/                    b = a + 1;/                    b = a;/ % rr_wrap_m rr_wrap
 s/                    p = \&g_objects\[a\];/                    p = \&g_objects[b];/ % rr_team_ab rr_team_mix

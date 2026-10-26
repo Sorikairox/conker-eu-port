@@ -1,6 +1,6 @@
 # P224 camera_follow_yaw_update (EU 151221F0, game_eu_14FA00) camera_follow_update. ARG 0 cam 80450000 (+0x3D0 player 80460000,
 # +0x3D4 ctl 80470000, +0x36C pad 80480000), ARG 1 = the f32 arg1 bits (a1). D_800BE616 EU 800BEA36 (word 800BEA34),
-# g_slowmo_divisor 800BEE2C, rodata D_800A3810.. (ROMDATA; D_800A3818 = 999.0 = 4479C000).
+# g_slowmo_divisor 800BEE2C, rodata g_camera_follow_yaw_k_a.. (ROMDATA; g_camera_follow_no_snap_yaw = 999.0 = 4479C000).
 # keys: math_wrap_deg_360 15048A48 (ARGMEM 0:4 = the yaw), math_spring_approach / math_spring_approach_angle (same), camera_update_eye_base 1512A900,
 # camera_update_eye_orbit 15123FC4, camera_update_eye_height.
 # knobs: DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=5A5A5A5A DIFFTEST_ARGMEM=15048A48=0:4

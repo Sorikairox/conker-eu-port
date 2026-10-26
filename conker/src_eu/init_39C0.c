@@ -8,13 +8,13 @@ void framebuffer_fill_color(s32 arg0, s32 arg1, s32 arg2);
 
 /* was func_100039C0 */
 void video_init_screen(void) {
-    D_800BE620 = 292; // screen width px
-    D_800BE624 = 216; // screen height px
-    D_800380A0 = (f32) D_800BE620 / 292.0f;
-    D_800380A4 = (f32) D_800BE624 / 216.0f;
-    D_800BE9C4 = allocate_memory(D_800BE620 * D_800BE624 * 2, 255, 3, 0);
+    g_framebuffer_width = 292; // screen width px
+    g_framebuffer_height = 216; // screen height px
+    D_800380A0 = (f32) g_framebuffer_width / 292.0f;
+    D_800380A4 = (f32) g_framebuffer_height / 216.0f;
+    D_800BE9C4 = allocate_memory(g_framebuffer_width * g_framebuffer_height * 2, 255, 3, 0);
     framebuffer_fill_color(0, 0, 0);
-    screen_setup_viewports(D_800BE620, D_800BE624);
+    screen_setup_viewports(g_framebuffer_width, g_framebuffer_height);
     // EU: the VI mode is no longer set here
 }
 
@@ -30,7 +30,7 @@ void framebuffer_fill_color(s32 arg0, s32 arg1, s32 arg2) {
 
     var_v1 = (*(s32 *)((u8 *)g_framebuffers + 0));
     var_t2 = 0;
-    temp_t0 = (s32) (D_800BE620 * D_800BE624 * 2) >> 1;
+    temp_t0 = (s32) (g_framebuffer_width * g_framebuffer_height * 2) >> 1;
     if (var_v1 != 0) {
         if (temp_t0 > 0) {
             do {

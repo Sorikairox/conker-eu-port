@@ -1,4 +1,4 @@
-# P246 fade_slide_update (fade_slide_update): e = 80410000; words: +0x14 = h14:h16, +0x1C (byte 1F level), +0x24 = on:?:max:rise, +0x2C = counter:sx:sy:fall; D_800BE9E4 = EU 800BEE04 (ticks)
+# P246 fade_slide_update (fade_slide_update): e = 80410000; words: +0x14 = h14:h16, +0x1C (byte 1F level), +0x24 = on:?:max:rise, +0x2C = counter:sx:sy:fall; g_frame_ticks = EU 800BEE04 (ticks)
 up ! 0=80410000 ! 80410014=01000050,8041001C=AAAAAA10,80410024=01558004,8041002C=7AFE0305,800BEE04=3 ! ! ! ! !
 upclamp ! 0=80410000 ! 80410014=01000050,8041001C=AAAAAA7E,80410024=01558004,8041002C=7EFE0305,800BEE04=3 ! ! ! ! !
 eq ! 0=80410000 ! 80410014=FF000050,8041001C=AAAAAA80,80410024=01558004,8041002C=10050305,800BEE04=2 ! ! ! ! !

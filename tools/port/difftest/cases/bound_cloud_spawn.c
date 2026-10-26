@@ -166,7 +166,7 @@ void bound_cloud_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u174 = 0xFF;
         sp.u144 = 0.0f;
         sp.u148 = 1500.0f;
-        temp_t1 = ((u8 *)&D_800A5860);
+        temp_t1 = ((u8 *)&g_vec3_zero);
         (*(f32 *)((u8 *)(&sp.u14C) + 0)) = (f32) (*(f32 *)((u8 *)(&sp.u198) + 0));
         (*(s32 *)((u8 *)(&sp.u14C) + 4)) = (s32) (*(s32 *)((u8 *)(&sp.u198) + 4));
         (*(s32 *)((u8 *)(&sp.u14C) + 8)) = (s32) (*(s32 *)((u8 *)(&sp.u198) + 8));
@@ -185,7 +185,7 @@ void bound_cloud_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u186 = 0xFF;
         sp.u164 = 1.0f;
         sp.u16C = 1.0f;
-        temp_v0 = effect3d_spawn_full(&sp.u130, (s32) ((u8 *)&D_800A22BC), 0U, 0x2BU, 0U, 0x24U, 0U, 0, 0, 0x5C, (u8) (s32) arg1, arg2);
+        temp_v0 = effect3d_spawn_full(&sp.u130, (s32) ((u8 *)&g_bound_cloud_fx_tmpl), 0U, 0x2BU, 0U, 0x24U, 0U, 0, 0, 0x5C, (u8) (s32) arg1, arg2);
         temp_s0 = temp_v0 + 0x110;
         if (temp_v0 != NULL) {
             memcpy(temp_s0, &sp.uD4, 0x5C);

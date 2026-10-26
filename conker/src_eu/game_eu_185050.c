@@ -6,8 +6,8 @@ extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 void anim_model_fx_build_mtx(u8 *, u8 *);
 
-extern s32 (*D_8008B130[])(u8 *);
-extern s32 (*D_8008B140[])(u8 *);
+extern s32 (*g_anim_model_fx_fns_a[])(u8 *); /* was D_8008B130 */
+extern s32 (*g_anim_model_fx_fns_b[])(u8 *); /* was D_8008B140 */
 /* was func_15157840 */
 void anim_model_fx_update(u8 *arg0)
 {
@@ -16,7 +16,7 @@ void anim_model_fx_update(u8 *arg0)
   s16 v;
   if (arg0[0x10] & 1)
   {
-    *((s16 *) (arg0 + 0x16)) -= D_800BE9E4;
+    *((s16 *) (arg0 + 0x16)) -= g_frame_ticks;
     if ((*((s16 *) (arg0 + 0x16))) < 0)
     {
       done = 1;
@@ -26,14 +26,14 @@ void anim_model_fx_update(u8 *arg0)
   {
     if ((*((s8 *) (arg0 + 0x11))) != (-1))
     {
-      if (!D_8008B130[*((s8 *) (arg0 + 0x11))](arg0))
+      if (!g_anim_model_fx_fns_a[*((s8 *) (arg0 + 0x11))](arg0))
       {
         done = 1;
       }
     }
     if ((*((s8 *) (arg0 + 0x12))) != (-1))
     {
-      if (!D_8008B140[*((s8 *) (arg0 + 0x12))](arg0))
+      if (!g_anim_model_fx_fns_b[*((s8 *) (arg0 + 0x12))](arg0))
       {
         done = 1;
       }
@@ -71,12 +71,12 @@ u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 void fx_calc_color_mode_a(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
 void fx_calc_color_mode_b(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
 u8 *model_part_emit_lights(u8 *, u8 *, u8, s32, s32, s32, u8 *, s32, s32);
-extern s32 D_80083AD0;
-extern s32 D_80083C50;
-extern s32 D_80083DD0;
-extern s32 D_80083F50;
-extern s32 D_8008B15C;
-extern s32 D_8008B16C;
+extern s32 g_seg8_dl_translucent; /* was D_80083AD0 */
+extern s32 g_seg8_dl_opaque; /* was D_80083C50 */
+extern s32 g_fx_rm_xlu_dl_alt; /* was D_80083DD0 */
+extern s32 g_fx_rm_opa_dl_alt; /* was D_80083F50 */
+extern s32 g_anim_model_fx_mtx_fns; /* was D_8008B15C */
+extern s32 g_anim_model_fx_draw_fns; /* was D_8008B16C */
 
 /* was func_15157990 */
 s32 *anim_model_fx_draw(s32 *arg0, u8 *arg1, s16 arg2) {
@@ -115,7 +115,7 @@ s32 *anim_model_fx_draw(s32 *arg0, u8 *arg1, s16 arg2) {
     sp.u83 = 1;
     temp_v0_2 = (*(s8 *)((u8 *)arg1 + 0x13));
     if (temp_v0_2 != -1) {
-        temp_v0 = (*(s32 (**)())((u8 *)&D_8008B15C + (temp_v0_2 * 4)))(var_s1, arg1, arg2, &sp.u83, &sp.u71);
+        temp_v0 = (*(s32 (**)())((u8 *)&g_anim_model_fx_mtx_fns + (temp_v0_2 * 4)))(var_s1, arg1, arg2, &sp.u83, &sp.u71);
         var_s1 = temp_v0;
         if (sp.u71 == 0) {
             return temp_v0;
@@ -146,7 +146,7 @@ s32 *anim_model_fx_draw(s32 *arg0, u8 *arg1, s16 arg2) {
         temp_s1_3 = temp_s1_2 + 8;
         (*(s32 *)((u8 *)temp_s1_3 + 0)) = 0xDB06000C;
         temp_s1_4 = temp_s1_3 + 8;
-        (*(s32 *)((u8 *)temp_s1_3 + 4)) = (s32) (*(s32 *)((u8 *)(((*(s32 *)((u8 *)arg1 + 0x68)) + (D_800BE9C0 * 4))) + 0x3E8));
+        (*(s32 *)((u8 *)temp_s1_3 + 4)) = (s32) (*(s32 *)((u8 *)(((*(s32 *)((u8 *)arg1 + 0x68)) + (g_dl_buf_index * 4))) + 0x3E8));
         (*(s32 *)((u8 *)temp_s1_4 + 0)) = 0xDB060004;
         temp_s1_5 = temp_s1_4 + 8;
         (*(s32 *)((u8 *)temp_s1_4 + 4)) = (s32) (*(s32 *)((u8 *)arg1 + 0x74));
@@ -155,17 +155,17 @@ s32 *anim_model_fx_draw(s32 *arg0, u8 *arg1, s16 arg2) {
             (*(s32 *)((u8 *)temp_s1_5 + 0)) = 0xDB060020;
             var_s1 = temp_s1_5 + 8;
             if ((*(u8 *)((u8 *)arg1 + 0x10)) & 0x40) {
-                (*(s32 **)((u8 *)temp_s1_5 + 4)) = &D_80083DD0;
+                (*(s32 **)((u8 *)temp_s1_5 + 4)) = &g_fx_rm_xlu_dl_alt;
             } else {
-                (*(s32 **)((u8 *)temp_s1_5 + 4)) = &D_80083AD0;
+                (*(s32 **)((u8 *)temp_s1_5 + 4)) = &g_seg8_dl_translucent;
             }
         } else {
             (*(s32 *)((u8 *)temp_s1_5 + 0)) = 0xDB060020;
             var_s1 = temp_s1_5 + 8;
             if ((*(u8 *)((u8 *)arg1 + 0x10)) & 0x40) {
-                (*(s32 **)((u8 *)temp_s1_5 + 4)) = &D_80083F50;
+                (*(s32 **)((u8 *)temp_s1_5 + 4)) = &g_fx_rm_opa_dl_alt;
             } else {
-                (*(s32 **)((u8 *)temp_s1_5 + 4)) = &D_80083C50;
+                (*(s32 **)((u8 *)temp_s1_5 + 4)) = &g_seg8_dl_opaque;
             }
         }
         var_v1 = 0;
@@ -181,14 +181,14 @@ s32 *anim_model_fx_draw(s32 *arg0, u8 *arg1, s16 arg2) {
         }
         temp_v0_5 = (*(s8 *)((u8 *)arg1 + 0x14));
         if (temp_v0_5 != -1) {
-            var_s1 = (*(s32 (**)())((u8 *)&D_8008B16C + (temp_v0_5 * 4)))(var_s1, arg1, arg2, &sp.u83);
+            var_s1 = (*(s32 (**)())((u8 *)&g_anim_model_fx_draw_fns + (temp_v0_5 * 4)))(var_s1, arg1, arg2, &sp.u83);
         }
     }
     return var_s1;
 }
 /* was func_15157DD0 */
 s32 anim_model_fx_beh_identity(s32 arg0) {
-    guMtxIdentF(&((f32 (*)[16])(arg0 + 0x7C))[D_800BE9C0]);
+    guMtxIdentF(&((f32 (*)[16])(arg0 + 0x7C))[g_dl_buf_index]);
     return 1;
 }
 
@@ -203,7 +203,7 @@ s32 anim_model_fx_spawn_moving(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4,
     return v;
 }
 
-#define MTX_7E88(a) (((f32 (*)[16])((a) + 0x7C))[D_800BE9C0])
+#define MTX_7E88(a) (((f32 (*)[16])((a) + 0x7C))[g_dl_buf_index])
 /* was func_15157E88 */
 s32 anim_model_fx_beh_rotate(u8 *arg0) {
     u8 *p;
@@ -245,27 +245,27 @@ s32 anim_model_fx_beh_move(u8 *arg0) {
     if (p[0x30] & 1) {
         old = *(V3_15158018 *)(p + 0x10);
         if (p[0x30] & 8) {
-            for (i = D_800BE9E4; i != 0; i--) {
+            for (i = g_frame_ticks; i != 0; i--) {
                 *(f32 *)(p + 0x10) *= *(f32 *)(p + 0x2C);
                 *(f32 *)(p + 0x18) *= *(f32 *)(p + 0x2C);
             }
         }
         if (p[0x30] & 4) {
-            *(f32 *)(p + 0x14) += *(f32 *)(p + 0x28) * D_800BE9A4;
+            *(f32 *)(p + 0x14) += *(f32 *)(p + 0x28) * g_frame_step_f;
             g = *(f32 *)(p + 0x28);
         } else {
             g = 0.0f;
         }
         dx = (*(f32 *)(p + 0x10) - old.x) * D_800BEDC8;
         dz = (*(f32 *)(p + 0x18) - old.z) * D_800BEDC8;
-        *(f32 *)(arg0 + 0x54) += (old.x + 0.5f * dx * D_800BE9A4) * D_800BE9A4;
-        *(f32 *)(arg0 + 0x58) += (old.y + 0.5f * g * D_800BE9A4) * D_800BE9A4;
-        *(f32 *)(arg0 + 0x5C) += (old.z + 0.5f * dz * D_800BE9A4) * D_800BE9A4;
+        *(f32 *)(arg0 + 0x54) += (old.x + 0.5f * dx * g_frame_step_f) * g_frame_step_f;
+        *(f32 *)(arg0 + 0x58) += (old.y + 0.5f * g * g_frame_step_f) * g_frame_step_f;
+        *(f32 *)(arg0 + 0x5C) += (old.z + 0.5f * dz * g_frame_step_f) * g_frame_step_f;
     }
     if (p[0x30] & 2) {
-        *(f32 *)(p + 0x0) += *(f32 *)(p + 0x1C) * D_800BE9A4;
-        *(f32 *)(p + 0x4) += *(f32 *)(p + 0x20) * D_800BE9A4;
-        *(f32 *)(p + 0x8) += *(f32 *)(p + 0x24) * D_800BE9A4;
+        *(f32 *)(p + 0x0) += *(f32 *)(p + 0x1C) * g_frame_step_f;
+        *(f32 *)(p + 0x4) += *(f32 *)(p + 0x20) * g_frame_step_f;
+        *(f32 *)(p + 0x8) += *(f32 *)(p + 0x24) * g_frame_step_f;
     }
     return 1;
 }
@@ -281,7 +281,7 @@ s32 anim_model_fx_beh_rotate_scaled(s32 arg0) {
     return 1;
 }
 
-#define MTX_835C(a) (((f32 (*)[16])((a) + 0x7C))[D_800BE9C0])
+#define MTX_835C(a) (((f32 (*)[16])((a) + 0x7C))[g_dl_buf_index])
 /* was func_1515835C */
 void anim_model_fx_build_mtx(u8 *arg0, u8 *arg1) {
     mtxf_rotate_xyz_deg(&MTX_835C(arg0), ((f32 *)arg1)[0], ((f32 *)arg1)[1], ((f32 *)arg1)[2]);
@@ -302,8 +302,8 @@ void anim_model_fx_build_mtx(u8 *arg0, u8 *arg1) {
 
 /* was func_151584F0 */
 Gfx *anim_model_fx_load_screen_mtx(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, u8 *arg4) {
-    gSPMatrix(gdl++, D_80089810, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPMatrix(gdl++, &D_800DD040[arg2 * 64], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(gdl++, g_identity_mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gdl++, &g_player_screen_proj[arg2 * 64], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     *arg4 = 1;
     return gdl;
 }
@@ -312,8 +312,8 @@ extern Mtx *D_800DC6D0[];
 
 /* was func_15158558 */
 Gfx *anim_model_fx_load_view_proj(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
-    gSPMatrix(gdl++, (u8 *)D_800BE628 + arg2 * 0x180 + (D_800BE9C0 << 6) + 0x100, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gSPMatrix(gdl++, (u8 *)D_800DC6D0[D_800BE9C0] + (arg2 << 6), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
+    gSPMatrix(gdl++, (u8 *)g_player_cams + arg2 * 0x180 + (g_dl_buf_index << 6) + 0x100, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(gdl++, (u8 *)D_800DC6D0[g_dl_buf_index] + (arg2 << 6), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
     return gdl;
 }
 

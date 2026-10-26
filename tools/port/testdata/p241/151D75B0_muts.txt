@@ -16,5 +16,5 @@ s/    text_set_box((s32) owner, 0x109);/    text_set_box((s32) owner, 0x108);/ %
 s/    text_set_box((s32) owner, 0x109);/    text_set_box((s32) data, 0x109);/ % fade
 s/    text_set_color(0x32, 0x7D, 0x1C, alpha);/    text_set_color(0x32, 0x7C, 0x1C, alpha);/ % fade
 s/    text_set_flags(0x81);/    text_set_flags(0x80);/ % fade
-s/    text_printf((s32) D_800AB634, \*(s32 \*) (data + 8));/    text_printf((s32) D_800AB634, *(s16 *) (data + 0xA));/ % full
-s/    text_printf((s32) D_800AB634, \*(s32 \*) (data + 8));/    text_printf((s32) D_800AB634 + 1, *(s32 *) (data + 8));/ % fade
+s/    text_printf((s32) g_str_money_popup, \*(s32 \*) (data + 8));/    text_printf((s32) g_str_money_popup, *(s16 *) (data + 0xA));/ % full
+s/    text_printf((s32) g_str_money_popup, \*(s32 \*) (data + 8));/    text_printf((s32) g_str_money_popup + 1, *(s32 *) (data + 8));/ % fade

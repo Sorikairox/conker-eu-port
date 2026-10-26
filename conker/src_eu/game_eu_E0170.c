@@ -24,7 +24,7 @@ void obj_blast_fx_spawn(u8 *arg0, s32 arg1, s32 arg2) {
 }
 
 /* P243: readable C for emit_point_spark (game_eu_E0170, 116 insns). */
-// emit_point_spark: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a,
+// emit_point_spark: g_emit_point_spawn_fns spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a,
 // s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`): queues one line_fx_spawn particle (the S_3f24 record of
 // game_eu_17D3C0) at (x, y, z) flying out along the byte angle a with a random pitch of -30..-10 (rand % 21 - 30):
 // velocity (10 sin(p) sin(a - 0x40), -10 sin(p - 0x40), 10 sin(p) sin(a)) (angle_byte_cos = byte-angle sine), random

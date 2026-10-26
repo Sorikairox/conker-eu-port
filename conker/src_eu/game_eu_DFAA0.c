@@ -116,7 +116,7 @@ void smoke_emitter_update_large(u8 *arg0) {
     u8 *temp_s1;
 
     temp_s1 = arg0 + 0x28;
-    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((0.0786f + (random_float() * 0.0346f)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((0.0786f + (random_float() * 0.0346f)) * g_frame_step_f));
     if ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f) {
         sp.uB9 = 0x6C;
         sp.uA4 = 0x5103;

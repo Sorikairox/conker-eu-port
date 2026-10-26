@@ -104,7 +104,7 @@ s32 beam_ray_spawn(u8 *from, f32 *to, f32 a2, f32 a3, f32 arg4, u8 room, s32 own
 }
 
 f32 vec3_dot(void *, void *);
-extern s32 D_80088DB0;
+extern s32 g_beam_cross_fns; /* was D_80088DB0 */
 
 /* was func_150E67B0 */
 s8 beam_ray_update(u8 *arg0) {
@@ -140,14 +140,14 @@ s8 beam_ray_update(u8 *arg0) {
             temp_v1 = (*(s8 *)((u8 *)sp20 + 0x2C));
             var_a3 = 0;
             if (temp_v1 != -1) {
-                var_a3 = (*(s32 (**)())((u8 *)&D_80088DB0 + (temp_v1 * 4)))(arg0);
+                var_a3 = (*(s32 (**)())((u8 *)&g_beam_cross_fns + (temp_v1 * 4)))(arg0);
             }
         }
     }
     temp_f0 = (*(f32 *)((u8 *)arg0 + 0x50));
-    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((*(f32 *)((u8 *)arg0 + 0x40)) * temp_f0 * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((*(f32 *)((u8 *)arg0 + 0x44)) * temp_f0 * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((*(f32 *)((u8 *)arg0 + 0x48)) * temp_f0 * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((*(f32 *)((u8 *)arg0 + 0x40)) * temp_f0 * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((*(f32 *)((u8 *)arg0 + 0x44)) * temp_f0 * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((*(f32 *)((u8 *)arg0 + 0x48)) * temp_f0 * g_frame_step_f));
     return var_a3;
 }
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
@@ -211,7 +211,7 @@ s16 *beam_ray_build_verts(u8 *arg0, s16 arg1) {
         (*(f32 *)((u8 *)(&sp.u94) + 0)) = (*(f32 *)((u8 *)arg0 + 0x34));
         (*(f32 *)((u8 *)(&sp.u94) + 4)) = (f32) (*(f32 *)((u8 *)arg0 + 0x38));
         (*(f32 *)((u8 *)(&sp.u94) + 8)) = (f32) (*(f32 *)((u8 *)arg0 + 0x3C));
-        temp_v0_2 = &D_800DBFF0[arg1].unk2F8;
+        temp_v0_2 = &g_player_views[arg1].unk2F8;
         sp.u88 = (*(f32 *)((u8 *)arg0 + 0x34)) - ((*(f32 *)((u8 *)arg0 + 0x40)) * temp_f0);
         temp_f10 = (*(f32 *)((u8 *)arg0 + 0x38)) - ((*(f32 *)((u8 *)arg0 + 0x44)) * temp_f0);
         sp.u8C = temp_f10;

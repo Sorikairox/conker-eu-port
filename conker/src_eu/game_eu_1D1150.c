@@ -156,7 +156,7 @@ s32 ribbon_trail_update_points(TrailObj18 *arg0) {
     if (arg0->n < 2 && (def->flags & 1)) {
         return 0;
     }
-    def->unk4C += def->unk2A * D_800BE9E4;
+    def->unk4C += def->unk2A * g_frame_ticks;
     i = arg0->tail;
     while (i != arg0->head) {
         i--;
@@ -166,12 +166,12 @@ s32 ribbon_trail_update_points(TrailObj18 *arg0) {
         t = &trails[i];
         life = t->unk12;
         if (life > 0) {
-            t->unk12 = life - D_800BE9E4;
+            t->unk12 = life - g_frame_ticks;
         } else {
-            t->unk10 -= D_800BE9E4 * def->unk1C;
+            t->unk10 -= g_frame_ticks * def->unk1C;
         }
         t->unk14 = 0xFF;
-        t->unkC += D_800BE9A4 * def->unk24;
+        t->unkC += g_frame_step_f * def->unk24;
         if (t->unk10 < 0) {
             def->flags &= ~2;
             while (i != arg0->head) {
@@ -196,8 +196,8 @@ f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 void ribbon_trail_stop(u8 *);
 struct260 *effect_node_create_nodraw(s16 arg0, s8 arg1, s8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
-/* the .s's late_rodata D_800A9138 is dropped in the NM link */
-static const f32 D_800A9138[1] = { 9.99999975e-05f }; /* 0x38D1B717 (array: IDO puts scalar float statics in .data) */
+/* the .s's late_rodata g_ribbon_trail_epsilon is dropped in the NM link */
+static const f32 g_ribbon_trail_epsilon[1] = { 9.99999975e-05f }; /* 0x38D1B717 (array: IDO puts scalar float statics in .data); was D_800A9138 */
 
 // trail_emitter_update: object update of a trail emitter made by ribbon_trail_spawn (state SB3AB4 at +0x98, ring of 0x18
 // byte trail points at +0x94, position +0x10). Ends (returns 0) when the owner record is gone or its id (+0x3B)
@@ -249,14 +249,14 @@ s32 ribbon_trail_update(u8 *obj) {
     dx = *(f32 *) (obj + 0x10) - st->u34.x;
     dy = *(f32 *) (obj + 0x14) - st->u34.y;
     dz = *(f32 *) (obj + 0x18) - st->u34.z;
-    if (fabsf(dx) > D_800A9138[0] || fabsf(dy) > D_800A9138[0] || fabsf(dz) > D_800A9138[0]) {
+    if (fabsf(dx) > g_ribbon_trail_epsilon[0] || fabsf(dy) > g_ribbon_trail_epsilon[0] || fabsf(dz) > g_ribbon_trail_epsilon[0]) {
         st->u40 += sqrtf(dx * dx + dy * dy + dz * dz) * *(f32 *) (st->raw + 0x14);
     }
     dist = st->u40;
     if (1.0f < dist) {
         inv = 1.0f / dist;
         pos = st->u34;
-        t = st->u48 + D_800BE9A4;
+        t = st->u48 + g_frame_step_f;
         dt = t * inv;
         width = *(f32 *) (st->raw + 0x20) + *(f32 *) (st->raw + 0x24) * t;
         sx = dx * inv;
@@ -304,8 +304,8 @@ s32 gfx_env_color_cached(s32, s32, s32, s32, s32, u8 *);
 s32 gfx_prim_color_cached(s32, s32, s32, s32, s32, s32, s32, u8 *);
 s32 gfx_set_combine_mode(s32, s32, u8 *);
 s32 gfx_other_mode_cached(s32, s32, s32, u8 *);
-extern s32 D_80091084;
-extern s32 D_800D30BC;
+extern s32 g_ribbon_trail_texture; /* was D_80091084 */
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 /* One strip vertex of ribbon_trail_draw: position, s = shade << 6, t = 0x7C0 (outer edge) or 0 (inner), white, alpha. */
 #define TRAIL6_VTX(v, px, py, pz, s, t, a) \
@@ -322,10 +322,10 @@ extern s32 D_800D30BC;
         *(s16 *) ((v) + 0x6) = 0; \
     } while (0)
 
-// trail_ribbon_draw: D_8008A644 draw handler (kind 6) of the trail emitter of ribbon_trail_update (ring of 0x18-byte
+// trail_ribbon_draw: g_fxrec_draw_fns draw handler (kind 6) of the trail emitter of ribbon_trail_update (ring of 0x18-byte
 // points +0x94, def +0x98, ring size +0x25, count +0x2C, tail +0x2D, head +0x2E). With def +0x30 bit 1 it first
 // writes a fade-in ramp into the alpha of the oldest def +0x2B points (step def +0x2C), with bit 2 it scales the
-// newest def +0x2D points by a fade-out ramp (step def +0x2E). Sets texture D_80091084 and fixed render state, then
+// newest def +0x2D points by a fade-out ramp (step def +0x2E). Sets texture g_ribbon_trail_texture and fixed render state, then
 // draws a camera-facing strip from the emitter position (+0x10, when +0x1E bit 1; else from the newest point) back
 // to the tail: each point gets two vertices, +-the normal of (point - camera) x (segment) scaled to the point's
 // width +0xC, s = (point +0x15 + def +0x4C) << 6, alpha = point +0x10 * +0x14 >> 8. Where s grows from one point to
@@ -358,7 +358,7 @@ s32 ribbon_trail_draw(u8 *obj, s32 gfx, s16 player) {
     if (v == NULL) {
         return gfx;
     }
-    cam = (f32 *) ((u8 *) D_800DBFF0 + player * 0x9A0 + 0x2F8);
+    cam = (f32 *) ((u8 *) g_player_views + player * 0x9A0 + 0x2F8);
     def = *(u8 **) (obj + 0x98);
     pts = *(u8 **) (obj + 0x94);
     flag = 1;
@@ -394,12 +394,12 @@ s32 ribbon_trail_draw(u8 *obj, s32 gfx, s16 player) {
             }
         } while (cnt != 0 && i != *(s8 *) (obj + 0x2E));
     }
-    gfx = gfx_load_texture_cached(gfx, &D_80091084, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
+    gfx = gfx_load_texture_cached(gfx, &g_ribbon_trail_texture, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
     gfx = gfx_geometry_mode_cached(gfx, 1, 0x160600);
     gfx = gfx_env_color_cached(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gfx = gfx_prim_color_cached(gfx, 0, 0, 0, 0, 0, 0, &flag);
     gfx = gfx_set_combine_mode(gfx, 6, &flag);
-    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, &flag);
+    gfx = gfx_other_mode_cached(gfx, g_gfx_tlut_mode | 0x80000 | 0x2CA0, 0x5049D8, &flag);
 
     if (*(u16 *) (obj + 0x1E) & 2) {
         cur = *(s8 *) (obj + 0x2E) - 1;
@@ -666,7 +666,7 @@ void spark_burst_particle_spawn(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4
 }
 
 /*
- * spark_burst_update: particle update handler 0 (D_80089B00, called by particle_sprite_update with the old position).
+ * spark_burst_update: particle update handler 0 (g_particle_update_fns, called by particle_sprite_update with the old position).
  * The 12-byte parameter block at +0xA8 (copied by the spawner above) gives three thresholds on the life timer
  * +0x1A: below +0xAC the alpha +0x2B follows timer * +0xAE; below +0xB0 both sizes +0x38 / +0x3C grow by
  * +0xB2 per tick; below +0xA8 it switches to update handler 1 / draw modes 2, sets +0x18 = 0x5203 and the
@@ -681,7 +681,7 @@ s32 spark_burst_update(u8 *arg0, f32 *oldPos) {
         arg0[0x2B] = t * *(s16 *)(arg0 + 0xAE);
     }
     if (t < *(s16 *)(arg0 + 0xB0)) {
-        d = (f32)(*(s16 *)(arg0 + 0xB2) * D_800BE9E4);
+        d = (f32)(*(s16 *)(arg0 + 0xB2) * g_frame_ticks);
         *(f32 *)(arg0 + 0x38) += d;
         *(f32 *)(arg0 + 0x3C) += d;
         t = *(s16 *)(arg0 + 0x1A);
@@ -709,7 +709,7 @@ s32 spark_burst_update_tail(u8 *arg0, s32 arg1)
   if ((*((s16 *) (arg0 + 0x1A))) < (*((s16 *) (((u8 *) temp_v1) + 8))))
   {
     f32 temp_f0;
-    temp_f0 = (f32) ((*((s16 *) (((u8 *) temp_v1) + 0xA))) * D_800BE9E4);
+    temp_f0 = (f32) ((*((s16 *) (((u8 *) temp_v1) + 0xA))) * g_frame_ticks);
     *((f32 *) (((u8 *) arg0) + 0x38)) = (f32) ((*((f32 *) (((u8 *) arg0) + 0x38))) + temp_f0);
     *((f32 *) (((u8 *) arg0) + 0x3C)) = (f32) ((*((f32 *) (((u8 *) arg0) + 0x3C))) + temp_f0);
   }
@@ -795,7 +795,7 @@ typedef struct {
 
 // owner_smoke_update: effect handler (table D_8008A890) for the smoke trail started by owner_smoke_start. Ends the effect
 // (+0xE = -1, +0xD |= 1) when the owner is gone (type 0 / 8, or +0x3B no longer the saved id). Otherwise, while the
-// owner has matrices (+0x1D4) and its +0x74 low nibble is not 0xF, accumulates rate * D_800BE9A4; once over 1 it emits
+// owner has matrices (+0x1D4) and its +0x74 low nibble is not 0xF, accumulates rate * g_frame_step_f; once over 1 it emits
 // the whole number of puffs (emit_particle_burst_req, count = int part) at the bone position (mtx_transform_point_or_origin), facing the
 // owner's yaw (+0x76 high byte), with random flip bits 0x40 / 0x80.
 /* was func_151A4FE8 */
@@ -818,7 +818,7 @@ void owner_smoke_update(u8 *obj) {
     if ((owner[0x74] & 0xF) == 0xF) {
         return;
     }
-    d->accum += d->rate * D_800BE9A4;
+    d->accum += d->rate * g_frame_step_f;
     if (!(1.0f < d->accum)) {
         return;
     }
@@ -1013,7 +1013,7 @@ void screen_tint_update(u8 *arg0) {
 
     v0 = *(s32 *)(arg0 + 0x10);
     if (v0 != 0) {
-        v0 = v0 - D_800BE9E4;
+        v0 = v0 - g_frame_ticks;
         if (v0 <= 0) {
             node_destroy(arg0);
             return;
@@ -1023,7 +1023,7 @@ void screen_tint_update(u8 *arg0) {
     if (*(u8 *)(arg0 + 0x19) == 0) {
         audio_mixer_request_mode(2);
     }
-    v1 = D_800BE9E4 * 2;
+    v1 = g_frame_ticks * 2;
     v0 = *(u8 *)(arg0 + 0x15);
     if (*(u8 *)(arg0 + 0x18) == 0) {
         v0 = v0 - v1;
@@ -1043,5 +1043,5 @@ void screen_tint_update(u8 *arg0) {
 
 /* was func_151A56E0 */
 void screen_tint_draw_dispatch(s32 arg0, u8 *arg1, s16 arg2) {
-    D_8008FCA0[arg1[0x14]](arg0, arg1, arg2);
+    g_screen_tint_fx_draw_fns[arg1[0x14]](arg0, arg1, arg2);
 }

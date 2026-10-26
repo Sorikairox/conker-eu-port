@@ -1,6 +1,6 @@
 s# + g_cur_view_player \* 0x9A0 + 0x380)# + g_cur_view_player * 0x9A0 + 0x384)# % pl3
 s#    fr\.u4 = D_800A12D8_c\[0\];#    fr.u4 = D_800A12E0_c[0];# % base
-s#    \*(Vec240 \*) fr\.org = \*(Vec240 \*) D_800A5860;#    *(Vec240 *) fr.org = *(Vec240 *) (D_800A5860 + 4);# % base
+s#    \*(Vec240 \*) fr\.org = \*(Vec240 \*) g_vec3_zero;#    *(Vec240 *) fr.org = *(Vec240 *) (g_vec3_zero + 4);# % base
 s#    fr\.scale\[1\] = 1\.0f;#    fr.scale[1] = 0.0f;# % base
 s#    fr\.spin\[1\] = 0\.0f;#    fr.spin[1] = 1.0f;# % base
 s#    fr\.u60\[1\] = 0xD;#    fr.u60[1] = 0xE;# % base
@@ -8,11 +8,11 @@ s#    fr\.u6A = 2;#    fr.u6A = 3;# % base
 s#    fr\.u74 = 7;#    fr.u74 = 8;# % base
 s#    fr\.vel\[2\] = 0\.0f;#    fr.vel[2] = 1.0f;# % base
 s#    for (i = 0; i < 15; i++) {#    for (i = 0; i < 14; i++) {# % base
-s#        kind = (u8) (u32) D_800A1298\[i\];#        kind = (u8) (u32) D_800A1298[i] + 1;# % base
-s#        fr\.pos\[1\] = D_800A1130\[i\]\[1\] + pos\[1\];#        fr.pos[1] = D_800A1130[i][2] + pos[1];# % base
-s#        fr\.vel\[1\] = D_80088D0C\[kind\] \* random_float() + D_80088D00\[kind\];#        fr.vel[1] = D_80088D00[kind] * random_float() + D_80088D00[kind];# % base
-s#        fr\.spin\[0\] = D_800A1220\[i\] \* D_800A125C\[i\] \* D_800A12E4_c\[0\];#        fr.spin[0] = D_800A11E4[i] * D_800A125C[i] * D_800A12E4_c[0];# % base
-s#        fr\.spin\[2\] = D_800A11E4\[i\] \* D_800A125C\[i\] \* D_800A12E4_c\[0\];#        fr.spin[2] = D_800A11E4[i] * D_800A1220[i] * D_800A12E4_c[0];# % base
+s#        kind = (u8) (u32) g_explosion_frag_kind\[i\];#        kind = (u8) (u32) g_explosion_frag_kind[i] + 1;# % base
+s#        fr\.pos\[1\] = g_explosion_frag_offsets\[i\]\[1\] + pos\[1\];#        fr.pos[1] = g_explosion_frag_offsets[i][2] + pos[1];# % base
+s#        fr\.vel\[1\] = g_explosion_frag_speed_rand\[kind\] \* random_float() + g_explosion_frag_speed\[kind\];#        fr.vel[1] = g_explosion_frag_speed[kind] * random_float() + g_explosion_frag_speed[kind];# % base
+s#        fr\.spin\[0\] = g_explosion_frag_spin_x\[i\] \* g_explosion_frag_spin_scale\[i\] \* D_800A12E4_c\[0\];#        fr.spin[0] = g_explosion_frag_spin_z[i] * g_explosion_frag_spin_scale[i] * D_800A12E4_c[0];# % base
+s#        fr\.spin\[2\] = g_explosion_frag_spin_z\[i\] \* g_explosion_frag_spin_scale\[i\] \* D_800A12E4_c\[0\];#        fr.spin[2] = g_explosion_frag_spin_z[i] * g_explosion_frag_spin_x[i] * D_800A12E4_c[0];# % base
 s#        fr\.u4C = random_float() \* D_800A12E0_c\[0\] + D_800A12DC_c\[0\];#        fr.u4C = random_float() * D_800A12E0_c[0] - D_800A12DC_c[0];# % base
 s# + 0x82;# + 0x83;# % base
 s#        fr\.tex = (random_int() \& 1) ? 0xC4 : 0xC5;#        fr.tex = (random_int() \& 2) ? 0xC4 : 0xC5;# % base rnd2
@@ -27,7 +27,7 @@ s# + 0xC8), 0\.0f, room, arg2);# + 0xC9), 0.0f, room, arg2);# % base
 s#    ring\.count = (random_int() \& 3) + 3;#    ring.count = (random_int() \& 7) + 3;# % base rnd2
 s#    ring\.u18 = camv - 0x40;#    ring.u18 = camv - 0x41;# % base
 s#    ring\.u1C = -0x3F;#    ring.u1C = 0x3F;# % base
-s#    \*(Vec240 \*) ring\.pos = \*(Vec240 \*) pos;#    *(Vec240 *) ring.pos = *(Vec240 *) D_800A5860;# % base
+s#    \*(Vec240 \*) ring\.pos = \*(Vec240 \*) pos;#    *(Vec240 *) ring.pos = *(Vec240 *) g_vec3_zero;# % base
 s#    ring\.u20\[3\] = 15\.0f;#    ring.u20[3] = 5.0f;# % base
 s#    ring\.u20\[5\] = 0\.0f;#    ring.u20[5] = 1.0f;# % base
 s#    ring\.u55 = 1;#    ring.u55 = 0;# % base

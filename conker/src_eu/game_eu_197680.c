@@ -32,7 +32,7 @@ void image_fx_update(u8 *arg0) {
         ((void (*)(u8 *))g_node_end_handlers[*(s8 *)(arg0 + 0x40)])(arg0);
     }
     v = *(s16 *)(arg0 + 0x26);
-    v += *(s16 *)(arg0 + 0x28) * D_800BE9E4;
+    v += *(s16 *)(arg0 + 0x28) * g_frame_ticks;
     r = arg0[0x41] << 8;
     if (v >= r) {
         v -= r;
@@ -42,7 +42,7 @@ void image_fx_update(u8 *arg0) {
     *(s16 *)(arg0 + 0x26) = v;
     t = *(s16 *)(arg0 + 0x24);
     if (t != 0) {
-        t -= D_800BE9E4;
+        t -= g_frame_ticks;
         if (t <= 0) {
             node_destroy((struct102 *)arg0);
         } else {
@@ -57,7 +57,7 @@ Gfx *gfx_other_mode_cached(Gfx *gfx, s32 modeL, s32 modeH, u8 *needSync);
 Gfx *sprite_load_texture(Gfx *gfx, s32 tex, s32 tmem, s32 tile, s32 cm, s32 age, s32 sfrac, s32 uls, s32 ult);
 u32 *image_draw_tiled(u32 *gfx, void *img, f32 scaleX, f32 scaleY, f32 x, f32 y, s32 w, s32 h, s32 flags, s32 sOff, s32 xAdd, s32 frame);
 extern u32 g_render_mode_pairs[][2]; /* was D_800A4EA8 */
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 /* image_effect_draw: draw callback of the 2D image effect (type 0x5E, image_fx_spawn; e.g. the new-game title
  * cards). Effect data: +0x10 image descriptor, +0x14 second texture (flags & 1; loaded to TMEM 0x100, tile 1,
  * s fraction from +0x34 when flags & 2), +0x26 frame (8.8), +0x2C / +0x30 screen x / y, +0x34 s offset, +0x36 x
@@ -116,7 +116,7 @@ Gfx *image_fx_draw(Gfx *gfx, u8 *fx, s32 arg2) {
         modeL = 0;
     }
     mode = g_render_mode_pairs[fx[0x46]];
-    gfx = gfx_other_mode_cached(gfx, modeL | D_800D30BC | 0x2CA0, (mode[1] | mode[0]) | 4, &needSync);
+    gfx = gfx_other_mode_cached(gfx, modeL | g_gfx_tlut_mode | 0x2CA0, (mode[1] | mode[0]) | 4, &needSync);
     return (Gfx *) image_draw_tiled((u32 *) gfx, *(void **) (fx + 0x10), (f32) *(s16 *) (fx + 0x38),
                                  (f32) *(s16 *) (fx + 0x3A), *(f32 *) (fx + 0x2C), *(f32 *) (fx + 0x30),
                                  *(u16 *) (fx + 0x3C), *(u16 *) (fx + 0x3E), tileFlags, *(s16 *) (fx + 0x34),

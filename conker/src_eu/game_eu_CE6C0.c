@@ -25,8 +25,8 @@ extern u16 D_800D34F0[16];
 extern u8 **g_camera_zone_list; /* was D_800D3690 */
 extern s32 g_camera_zone_count; /* was D_800D3694 */
 extern s32 D_800D3698;
-extern u8 D_800DF510;
-extern u8 D_800DF511;
+extern u8 g_shadow_skip_players; /* was D_800DF510 */
+extern u8 g_shadow_flat_players; /* was D_800DF511 */
 typedef struct { s16 x; s16 y; s16 z; s16 unk6; u8 pad8[8]; f32 unk10; u8 unk14; u8 unk15; u8 unk16; u8 unk17; s32 unk18; s32 unk1C; s32 unk20; f32 unk24; f32 unk28; f32 unk2C; f32 unk30; } Unk34B8; // 0x34 bytes, D_800D34B8[]
 extern u64 D_800D3510[][3];
 
@@ -103,7 +103,7 @@ block_36:
                         (*(u32 *)((u8 *)var_v0 + 0x1C)) = (u32) ((temp_a0_2 & ~0xFF) | var_v1);
                         if (var_v1 == 0) {
                             temp_v0_2 = &D_800D34B8[var_s0];
-                            D_800DDF5C[((u32) (*(u32 *)((u8 *)temp_v0_2 + 0x1C)) >> 8) & 0xFF] = 0;
+                            g_weather_slot_busy[((u32) (*(u32 *)((u8 *)temp_v0_2 + 0x1C)) >> 8) & 0xFF] = 0;
                             (*(u32 *)((u8 *)temp_v0_2 + 0x1C)) = (u32) ((*(u32 *)((u8 *)temp_v0_2 + 0x1C)) & 0xFFFF0000);
                         }
                     }
@@ -114,9 +114,9 @@ block_36:
                 if (((*(u8 *)((u8 *)var_v0 + 0x17)) == 0xC) && ((*(u8 *)((u8 *)var_v0 + 0x14)) == 0)) {
                     var_v1_2 = 0;
                     var_a0 = 0;
-                    if (D_80082FA0 >= 0) {
+                    if (g_last_player_index >= 0) {
                         do {
-                            temp_v0_3 = var_a0 + D_800DBFF0;
+                            temp_v0_3 = var_a0 + g_player_views;
                             (*(f32 *)((u8 *)temp_v0_3 + 0x93C)) = (f32) D_800D34B8[var_s0];
                             (*(f32 *)((u8 *)temp_v0_3 + 0x940)) = (f32) (*(s16 *)((u8 *)(&D_800D34B8[var_s0]) + 2));
                             (*(f32 *)((u8 *)temp_v0_3 + 0x944)) = (f32) (*(s16 *)((u8 *)(&D_800D34B8[var_s0]) + 4));
@@ -125,7 +125,7 @@ block_36:
                             (*(s8 *)((u8 *)temp_v0_3 + 0x949)) = (s8) (*(s32 *)((u8 *)(&D_800D34B8[var_s0]) + 0x18));
                             var_v1_2 += 1;
                             var_a0 += 0x9A0;
-                        } while (D_80082FA0 >= var_v1_2);
+                        } while (g_last_player_index >= var_v1_2);
                     }
                 }
                 goto block_36;
@@ -450,9 +450,9 @@ void trigger_zones_update_object(struct127 *arg0) {
                                 break;
                             case 8:
                                 if (*(s32 *)(e + 0x18) != 0) {
-                                    D_800DF511 |= 1 << player;
+                                    g_shadow_flat_players |= 1 << player;
                                 } else {
-                                    D_800DF510 |= 1 << player;
+                                    g_shadow_skip_players |= 1 << player;
                                 }
                                 break;
                             case 9:
@@ -505,7 +505,7 @@ void trigger_zones_update_object(struct127 *arg0) {
                         trigger_zone_event_fire(D_800D34B8 + off, arg0, spC8, prev);
                         break;
                     case 13:
-                        if (spC8 != 0xFF && !((u32)prev & 1) && D_800E0B94 == 0 && *((u8 *)arg0 + 0x1CA) != 0 &&
+                        if (spC8 != 0xFF && !((u32)prev & 1) && g_game_mode == 0 && *((u8 *)arg0 + 0x1CA) != 0 &&
                             D_800C35EA == 0) {
                             if (e[0x17] == 0) {
                                 e[0x14] = 1;
@@ -786,7 +786,7 @@ void trigger_ambfx_start(Unk34B8 *arg0, s32 arg1) {
 void arc_spark_spawn(struct127 *, s32, u8 *, u8);
 void spout_check_obj_hit(struct127 *, u8 *);
 extern u8 D_800D34B0;
-extern s32 D_800DA2D8;
+extern s32 g_tint_request_level; /* was D_800DA2D8 */
 
 /* was func_150A2AB4 */
 void trigger_zone_event_fire(u8 *arg0, struct127 *arg1, s32 arg2, u64 arg4) { // P45: was `s32 arg5` (read a3); the asm reads the low word of a u64 at sp+0x14
@@ -806,7 +806,7 @@ void trigger_zone_event_fire(u8 *arg0, struct127 *arg1, s32 arg2, u64 arg4) { //
         return;
     case 2:
         if (arg2 != 0xFF) {
-            temp_v0 = ((s32 *)((u8 *)&D_800DA2D8 + (arg2 * 3)));
+            temp_v0 = ((s32 *)((u8 *)&g_tint_request_level + (arg2 * 3)));
             (*(s8 *)((u8 *)temp_v0 + 0)) = (s8) (*(s32 *)((u8 *)arg0 + 0x18));
             (*(s8 *)((u8 *)temp_v0 + 1)) = (s8) (*(s32 *)((u8 *)arg0 + 0x1C));
             (*(s8 *)((u8 *)temp_v0 + 2)) = (s8) (*(s32 *)((u8 *)arg0 + 0x20));
@@ -824,7 +824,7 @@ void trigger_zone_event_fire(u8 *arg0, struct127 *arg1, s32 arg2, u64 arg4) { //
             D_800D34B0 = 0x19;
             actor_sound_play2(0x66FU, arg1, 0x5DC0, 0x190, 0x1F4U);
         }
-        temp_t1 = (D_800D34B0 + D_800BE9E4) & 0xFF;
+        temp_t1 = (D_800D34B0 + g_frame_ticks) & 0xFF;
         D_800D34B0 = temp_t1;
         if ((s32) temp_t1 >= 0x1A) {
             temp_v0_2 = arg1->unkB2;
@@ -990,7 +990,7 @@ s32 trigger_test_camera(s32 arg0, u32 arg1) {
     struct108 *e;
     struct127 sp;
 
-    e = &D_800DBFF0[arg0];
+    e = &g_player_views[arg0];
     arg1 &= 0xFFF;
     if ((u32)D_800D3094 < arg1) {
         return 1;
@@ -1032,7 +1032,7 @@ s32 trigger_plane_side_object(s32 arg0, s32 arg1) {
 s32 trigger_plane_side(Unk34B8 *, f32, f32, f32);
 /* was func_150A3484 */
 s32 trigger_plane_side_camera(s32 arg0, s32 arg1) {
-    struct108 *v = &D_800DBFF0[arg0];
+    struct108 *v = &g_player_views[arg0];
 
     arg1 &= 0xFFF;
     if ((u32) D_800D3094 < arg1) {

@@ -362,14 +362,14 @@ extern u8 D_80098CC4[];
 
 /*
  * P74: advances the free pieces of slot i's breakable (D_800C6660[i].unk0: D_80098CC4[kind] pieces of 0x68 bytes,
- * kind = record byte 0xE) by one frame of D_800BE9E4 ticks: a piece that is active (+0x64) and not attached
+ * kind = record byte 0xE) by one frame of g_frame_ticks ticks: a piece that is active (+0x64) and not attached
  * (D_800847E4[kind][piece] == -1) moves its 6 floats +0x24..+0x38 by the rates +0x48..+0x5C; the rate +0x4C
  * itself changes by +0x60 (gravity) after it is used.
  */
 /* was func_1503ED44 */
 void breakable_move_free_pieces(s32 i) {
     struct106 *rec = &D_800C6660[i];
-    f32 dt = D_800BE9E4;
+    f32 dt = g_frame_ticks;
     s32 n = D_80098CC4[(u8) rec->pad[2]];
     s32 k;
     u8 *pc;
@@ -504,7 +504,7 @@ void breakable_cb_fall_then_remove(s32 arg0) {
     breakable_pieces_ground_collide(arg0);
     temp_v1 = &D_800C6660[arg0];
     temp_v0 = *(s16 *)((u8 *)temp_v1 + 0xC);
-    temp_v0 = temp_v0 - D_800BE9E4; // fakematch: split load/subtract (permuter) gives the ref register order
+    temp_v0 = temp_v0 - g_frame_ticks; // fakematch: split load/subtract (permuter) gives the ref register order
     (*(s16 *)((u8 *)temp_v1 + 0xC)) = temp_v0;
     if (temp_v0 <= 0) {
         obj_remove(&g_objects[arg0], 1);
@@ -609,7 +609,7 @@ void breakable_cb_settle(s32 arg0) {
 
     breakable_pieces_ground_collide(arg0);
     temp_v0 = &D_800C6660[arg0];
-    (*(s16 *)((u8 *)temp_v0 + 0xC)) = (s16) ((*(s16 *)((u8 *)temp_v0 + 0xC)) - D_800BE9E4);
+    (*(s16 *)((u8 *)temp_v0 + 0xC)) = (s16) ((*(s16 *)((u8 *)temp_v0 + 0xC)) - g_frame_ticks);
     if ((*(s16 *)((u8 *)temp_v0 + 0xC)) <= 0) {
         breakable_release(arg0);
         if (breakable_flag_entry_matches(2, 0, arg0) != 0) {

@@ -1,22 +1,22 @@
 s/player = attacker->unk124 - 1;/player = attacker->unk124;/ % own own4
 s/if (player >= 0) {/if (player > 0) {/ % s80m2d
 s/src = &g_objects\[player\];/src = \&g_objects[player + 1];/ % own s80m2d
-s/if (player < 0 || player >= D_8008FD8C) {/if (player < 0 || player > D_8008FD8C) {/ % own5
+s/if (player < 0 || player >= g_player_count) {/if (player < 0 || player > g_player_count) {/ % own5
 s/if (player < 0 || player/if (player < -1 || player/ % own0
-s/D_800E0FE8\[vi\] = player | 0x80;/D_800E0FE8[vi] = player;/ % hit
-s/if (player < D_80090130) {/if (player <= D_80090130) {/ % ah2
+s/g_mp_last_hitter\[vi\] = player | 0x80;/g_mp_last_hitter[vi] = player;/ % hit
+s/if (player < g_human_player_count) {/if (player <= g_human_player_count) {/ % ah2
 s/MP_ROW(player, 0x66)++;/MP_ROW(player, 0x68)++;/ % hit
 s/^            if (kind == 0x2E) {$/            if (kind == 0x2F) {/ % hit hitk2f
 s/MP_ROW(player, 0x6A)++;/MP_ROW(player, 0x66)++;/ % hit
 s/\&\& kind != 0x2D) {/\&\& kind != 0x2C) {/ % teamkill teamkill2d
 s/MP_ROW(player, 0x70)++;/MP_ROW(player, 0x6E)++;/ % teamkill
-s/if (victim->health == 0 \&\& D_800E1030/if (victim->health != 0 \&\& D_800E1030/ % teamkill same
+s/if (victim->health == 0 \&\& g_mp_player_team/if (victim->health != 0 \&\& g_mp_player_team/ % teamkill same
 s/MP_KILLS(player) < 9999/MP_KILLS(player) < 9998/ % kill9998
 s/MP_KILLS(player)++;/MP_KILLS(vi)++;/ % kill
 s/\& 0x200) {/\& 0x400) {/ % kill killnoflag
-s/player_stat_modify(D_800E1030\[player\] != 0, 10, 1);/player_stat_modify(D_800E1030[vi] != 0, 10, 1);/ % killt0
-s/player_stat_modify(D_800E1030\[player\] != 0, 10, 1);/player_stat_modify(D_800E1030[player], 10, 1);/ % killt0
-s/if (vi < D_80090130) {/if (vi <= D_80090130) {/ % s80v80bot
+s/player_stat_modify(g_mp_player_team\[player\] != 0, 10, 1);/player_stat_modify(g_mp_player_team[vi] != 0, 10, 1);/ % killt0
+s/player_stat_modify(g_mp_player_team\[player\] != 0, 10, 1);/player_stat_modify(g_mp_player_team[player], 10, 1);/ % killt0
+s/if (vi < g_human_player_count) {/if (vi <= g_human_player_count) {/ % s80v80bot
 s/MP_ROW(vi, 0x6E)++;/MP_ROW(vi, 0x70)++;/ % hit
 s/if (src == victim || /if (/ % selfhit
 s/|| victim->unk31C == NULL ||/||/ % nochar
@@ -78,8 +78,8 @@ s/0x6D60, 0x320, 0xBB8, arg5)/0x6D60, 0x320, 0xBB8, 0)/ % s88
 s/sound = sound_pick_variant(sound, n);/sound = n;/ % s75 hit s3Bk2e s88
 s/if (n != 0) {/if (n != 1) {/ % s3Bk21
 s/if (sound == 0) {/if (sound == 1) {/ % s80k40
-s/\&\& D_800E1030\[player\] != D_800E1030\[vi\]) {/\&\& 1) {/ % teamkill
-s/^        if (D_800E1030\[player\] != D_800E1030\[vi\]) {$/        if (1) {/ % same
+s/\&\& g_mp_player_team\[player\] != g_mp_player_team\[vi\]) {/\&\& 1) {/ % teamkill
+s/^        if (g_mp_player_team\[player\] != g_mp_player_team\[vi\]) {$/        if (1) {/ % same
 s/vi = (s32)((u8 \*)victim - (u8 \*)g_objects) \/ 0x32C;/vi = (s32)((u8 *)victim - (u8 *)g_objects) \/ 0x32C + 1;/ % hit
 s/mode = -1;/mode = 2;/ % s80k2c s3Bk2e
 s/mode = (u16)attacker->unk278;/mode = 2;/ % s80m3

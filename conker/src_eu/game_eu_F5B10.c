@@ -8,7 +8,7 @@ void camera_set_followed_obj(struct108 *, s32);
 void camera_calc_relative_yaw(struct108 *arg0);
 extern s32 D_80088BA0;
 
-// player_flight_mode_update: player state handler (D_80089A10 table) for a flag-driven mode with two variants.
+// player_flight_mode_update: player state handler (g_level_player_state_fns table) for a flag-driven mode with two variants.
 // Event flags: b = 0x2010/0xB7 -> 0xBC, c = 0x2000/0xBB, e = 0x2010/0xB7 -> 0xBB.
 // Without 0x5071/0x1A: c set and b clear enters state +0x2C (camera_push_mode(+0x2C, 0, +0x134, 3); success sets +0x84
 // bit 0x1000000, anim D_800CC335 - 1, +0x674 = 0); c and b set: camera_pop_mode(.., 2), then state 8 (success: anim,

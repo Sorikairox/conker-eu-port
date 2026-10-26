@@ -25,7 +25,7 @@ void twin_particle_emitters_spawn(s32 arg0) {
     } while (var_s1 != 2);
 }
 /* fade_slide_update: per-frame update of a fading, sliding element (no direct caller; reached through a table, returns
- * a done flag). The level +0x1F rises by +0x27 per tick (D_800BE9E4) up to +0x26 while +0x24 is set, else falls by
+ * a done flag). The level +0x1F rises by +0x27 per tick (g_frame_ticks) up to +0x26 while +0x24 is set, else falls by
  * +0x2F per tick down to 0; when it is 0 and +0x24 clear the element is done (1). Otherwise the s16 position +0x14 /
  * +0x16 moves by the s8 speeds +0x2D / +0x2E per tick: once +0x14 is <= 0 both are zeroed and it is done (1), else
  * the counter +0x2C advances by the ticks (capped at 0x7F) and it goes on (0). */
@@ -37,7 +37,7 @@ s32 fade_slide_update(u8 *e) {
 
     if (on != 0) {
         if (level != max) {
-            level += D_800BE9E4 * e[0x27];
+            level += g_frame_ticks * e[0x27];
             if (max < level) {
                 level = max;
             }
@@ -45,7 +45,7 @@ s32 fade_slide_update(u8 *e) {
         }
         on = e[0x24];
     } else if (level != 0) {
-        level -= D_800BE9E4 * e[0x2F];
+        level -= g_frame_ticks * e[0x2F];
         if (level < 0) {
             level = 0;
         }
@@ -55,14 +55,14 @@ s32 fade_slide_update(u8 *e) {
     if (on == 0 && level == 0) {
         return 1;
     }
-    *(s16 *) (e + 0x14) += (s8) e[0x2D] * D_800BE9E4;
-    *(s16 *) (e + 0x16) += (s8) e[0x2E] * D_800BE9E4;
+    *(s16 *) (e + 0x14) += (s8) e[0x2D] * g_frame_ticks;
+    *(s16 *) (e + 0x16) += (s8) e[0x2E] * g_frame_ticks;
     if (*(s16 *) (e + 0x14) <= 0) {
         *(s16 *) (e + 0x16) = 0;
         *(s16 *) (e + 0x14) = *(s16 *) (e + 0x16);
         return 1;
     }
-    level = e[0x2C] + D_800BE9E4;
+    level = e[0x2C] + g_frame_ticks;
     if (level >= 0x80) {
         level = 0x7F;
     }
@@ -78,16 +78,16 @@ void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 
 // lift_platform_update: world-object callback (D_80089030[9][0], obj +0x38) of a lift that moves its model up to the
 // target height +0x3C (s32). The current height is +0x7C, the speed +0x84; while D_800C35EA is set and D_800C3A08 is
-// not 1 nothing moves (height 0 in the matrix, the bob is left alone). D_800BE9B4 snaps the height to the target.
-// At the target: the bob phase +0x80 advances by 0.05, the bob amplitude is (height / 1500 + 1) * D_800BE9A4 (not
+// not 1 nothing moves (height 0 in the matrix, the bob is left alone). g_level_first_frame snaps the height to the target.
+// At the target: the bob phase +0x80 advances by 0.05, the bob amplitude is (height / 1500 + 1) * g_frame_step_f (not
 // below 0) and the move sound stops (world_object_sound_play -1). Moving: the phase is reset, the speed accelerates by -5
 // (down to -60) or +0.5 (up to 6, with the move sound 0xB9 looping); while the step is shorter than the remaining
-// distance the height moves by speed * D_800BE9A4, +0x124 = speed * 0.4 (-10 below -25), +0xDC = 0x7D00, mode
+// distance the height moves by speed * g_frame_step_f, +0x124 = speed * 0.4 (-10 below -25), +0xDC = 0x7D00, mode
 // (+0x73 & 3) 2, the start sound when +0x74 is 0, and object_sound_set_volume_pitch with the speed * 500; else it lands on the
 // target (+0xDC = 0x80 when going down, +0x124 = 0, mode 3, sound stop). The offsets +0/+4/+8 ease (0.05, 0.2 while
 // moving) toward the bob (amp * 3 sin(ph), amp * 4 sin(1.1 ph), amp * 3 cos(ph)); then the vertex list +0x28
 // (+0x16 entries of 16 bytes) is transformed by translate(0, height, 0) * model(pos, scale +0x2C, angles +0x10)
-// into the current buffer +0x20[D_800BE9C0].
+// into the current buffer +0x20[g_dl_buf_index].
 /* was func_150BF71C */
 void lift_platform_update(u8 *p) {
     f32 ease = 0.05f;
@@ -111,7 +111,7 @@ void lift_platform_update(u8 *p) {
     } else {
         frozen = 0;
     }
-    if (D_800BE9B4 != 0) {
+    if (g_level_first_frame != 0) {
         height = *(s32 *) (p + 0x3C);
         *(f32 *) (p + 0x7C) = height;
     }
@@ -122,7 +122,7 @@ void lift_platform_update(u8 *p) {
         if (dist == 0.0f) {
             *(f32 *) (p + 0x84) = 0.0f;
             *(f32 *) (p + 0x80) += 0.05f;
-            amp = (height / 1500.0f + 1.0f) * D_800BE9A4;
+            amp = (height / 1500.0f + 1.0f) * g_frame_step_f;
             if (amp < 0.0f) {
                 amp = 0.0f;
             }
@@ -143,7 +143,7 @@ void lift_platform_update(u8 *p) {
             }
             *(f32 *) (p + 0x84) = speed;
             if (fabsf(speed) < fabsf(dist)) {
-                height += speed * D_800BE9A4;
+                height += speed * g_frame_step_f;
                 if (speed < -25.0f) {
                     *(f32 *) (p + 0x124) = -10.0f;
                 } else {
@@ -179,7 +179,7 @@ void lift_platform_update(u8 *p) {
                   *(f32 *) (p + 0x30), *(f32 *) (p + 0x34), *(s16 *) (p + 0x10), *(s16 *) (p + 0x12),
                   *(s16 *) (p + 0x14));
     mtxf_mul(trans, model, trans);
-    dst = *(s16 **) (p + 0x20 + D_800BE9C0 * 4);
+    dst = *(s16 **) (p + 0x20 + g_dl_buf_index * 4);
     src = *(s16 **) (p + 0x28);
     for (i = 0; i < *(u16 *) (p + 0x16); i++) {
         mtxf_transform_point(trans, src[i * 8 + 0], src[i * 8 + 1], src[i * 8 + 2], &x, &y, &z);
@@ -279,7 +279,7 @@ extern u8 D_800BEE0B;
 // height (s16 +0x12 the first time) is kept in +0x7C with bit 31 set; the platform rests 0x50 below it. Mode
 // (+0x73 & 3): 0 at rest (height = rest), stepping on it (+0x4F bit 4 with player g_objects's +0x31C->0x57 == 1)
 // shakes the camera and rumbles (only in mode 0); 2 shakes (+0 / +8 random offsets) for the -(+0x80) ticks of
-// D_800BE9E4, then sinks (offsets random / 12 for 40 ticks) to the bottom, where the rest height and +0x11C move
+// g_frame_ticks, then sinks (offsets random / 12 for 40 ticks) to the bottom, where the rest height and +0x11C move
 // down by the drop, mode 3; 3 sits at the low height until it is no longer stood on (+0x4F / +0x73 bit 4), then
 // mode 1 rises by 3 per tick back to the rest height and mode 0.
 /* was func_150BFF7C */
@@ -338,7 +338,7 @@ void sinking_platform_update(u8 *p) {
             *(s16 *) (p + 0x12) = top;
         }
     } else if (mode == 2) {
-        t = *(s32 *) (p + 0x80) + D_800BE9E4;
+        t = *(s32 *) (p + 0x80) + g_frame_ticks;
         *(s32 *) (p + 0x80) = t;
         if (t < 0) {
             *(f32 *) (p + 0x0) = ((f32) (game_gu_random() % 5) - 2.0f) * 0.125f;
@@ -381,8 +381,8 @@ void sinking_platform_update(u8 *p) {
                 if (kind == 2) {
                     p[0x6E] = 1;
                     p[0x10E] = 1;
-                    link_group_remove_members(2, (u16) ((p - (u8 *) D_800DBEF4) / 0xA0));
-                    link_group_remove_members(2, (u16) ((p - (u8 *) D_800DBEF4 + 0xA0) / 0xA0));
+                    link_group_remove_members(2, (u16) ((p - (u8 *) g_world_objs) / 0xA0));
+                    link_group_remove_members(2, (u16) ((p - (u8 *) g_world_objs + 0xA0) / 0xA0));
                 }
             }
         }
@@ -501,7 +501,7 @@ void object_land_puff(u8 *obj) {
 void emit_particle_burst_req(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 D_800A04D4;
 
-/* P317: NM signature = D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 unused */
+/* P317: NM signature = g_mdl_particle_land_fns's dispatcher type (wasm call_indirect); args 1..3 / 5 unused */
 /* was func_150C06DC */
 s32 particle_land_shatter(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     struct {
@@ -733,7 +733,7 @@ s32 mdl_particle_land_bounce_settle(u8 *, f32, f32, f32, f32, s32); /* P95: f32 
 void emit_particle_burst_req(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 D_800A04DC;
 
-/* P317: args 1..3 f32 = D_80089CD4's dispatcher type (wasm call_indirect) */
+/* P317: args 1..3 f32 = g_mdl_particle_land_fns's dispatcher type (wasm call_indirect) */
 /* was func_150C0B48 */
 s32 particle_land_maybe_shatter(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
     struct {

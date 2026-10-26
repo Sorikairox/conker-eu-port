@@ -17,26 +17,26 @@ void light_cycle_level_colour(s32 arg0, s32 arg1) {
     f32 g;
     f32 b;
     u8 c[3];
-    c[0] = ((u8 *)&D_800DCD20)[0];
-    c[1] = ((u8 *)&D_800DCD20)[1];
-    c[2] = ((u8 *)&D_800DCD20)[2];
-    s = sinf(D_800DCDA0);
+    c[0] = ((u8 *)&g_level_light_colour)[0];
+    c[1] = ((u8 *)&g_level_light_colour)[1];
+    c[2] = ((u8 *)&g_level_light_colour)[2];
+    s = sinf(g_level_colour_cycle);
     r = (s * 29.5f) + 127.5f;
     g = (s * 71.0f) + 109.0f;
     b = (s * 26.0f) + 26.0f;
-    D_800DCDA0 += 0.071f * D_800BE9A4;
-    D_800DCDA0 = wrap_angle_rad(D_800DCDA0);
-    if (r != D_800DCD94) {
-        D_800DCD94 += (r - D_800DCD94) * 0.5f;
-        c[0] = D_800DCD94;
+    g_level_colour_cycle += 0.071f * g_frame_step_f;
+    g_level_colour_cycle = wrap_angle_rad(g_level_colour_cycle);
+    if (r != g_level_colour_ease_r) {
+        g_level_colour_ease_r += (r - g_level_colour_ease_r) * 0.5f;
+        c[0] = g_level_colour_ease_r;
     }
-    if (g != D_800DCD98) {
-        D_800DCD98 += (g - D_800DCD98) * 0.5f;
-        c[1] = D_800DCD98;
+    if (g != g_level_colour_ease_g) {
+        g_level_colour_ease_g += (g - g_level_colour_ease_g) * 0.5f;
+        c[1] = g_level_colour_ease_g;
     }
-    if (b != D_800DCD9C) {
-        D_800DCD9C += (b - D_800DCD9C) * 0.5f;
-        c[2] = D_800DCD9C;
+    if (b != g_level_colour_ease_b) {
+        g_level_colour_ease_b += (b - g_level_colour_ease_b) * 0.5f;
+        c[2] = g_level_colour_ease_b;
     }
     light_set_level_colour(c[0], c[1], c[2], 0U);
 }

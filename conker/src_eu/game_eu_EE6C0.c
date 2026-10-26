@@ -94,8 +94,8 @@ block_5:
     return temp_v0;
 }
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-extern f32 D_800BE9A4;
-extern s32 D_800BE9E4;
+extern f32 g_frame_step_f; /* was D_800BE9A4 */
+extern s32 g_frame_ticks; /* was D_800BE9E4 */
 
 typedef struct {
     /* 0x00 */ u8 *rec; /* the smoke puff (particle_spawn_ex record) */
@@ -161,7 +161,7 @@ typedef struct {
 // the point obj->src (65 lower), and dies (node_destroy) when the target is gone (word 0 == 0) or became another
 // object (id +0x3B != targetId), or with flag 1 when the timer runs out. The puffs on the used slot list are moved to
 // the current position. When the position changed, and (flag 4) the target is in state 0x1D / 0x1E, and its +0x3C
-// speed is not below 3, the trail adds rate * D_800BE9A4 to accum and spawns one blue-grey smoke puff (sprite 0x6C,
+// speed is not below 3, the trail adds rate * g_frame_step_f to accum and spawns one blue-grey smoke puff (sprite 0x6C,
 // size 67..84, alpha 80..200, life 70..91, random flips, drifting 40..73 in a random direction) per whole unit from
 // the free slot list; each puff gets the trail pointer at +0xA8 and its slot moves to the used list.
 /* was func_150C1138 */
@@ -211,7 +211,7 @@ void smoke_trail_update(Trail1138 *obj) {
             emit = 0;
         }
         if (!(*(f32 *) &pos[0] == obj->lastX && *(f32 *) &pos[2] == obj->lastZ) && emit) {
-            obj->accum = obj->accum + obj->rate * D_800BE9A4;
+            obj->accum = obj->accum + obj->rate * g_frame_step_f;
             if (1.0f < obj->accum) {
                 t.u0 = 0x00200005;
                 t.u4 = 0x001F0600;
@@ -277,7 +277,7 @@ void smoke_trail_update(Trail1138 *obj) {
         obj->lastZ = *(f32 *) &pos[2];
     }
     if (obj->flags & 1) {
-        obj->timer -= D_800BE9E4;
+        obj->timer -= g_frame_ticks;
         if (obj->timer < 0) {
             kill = 1;
         }
@@ -288,7 +288,7 @@ void smoke_trail_update(Trail1138 *obj) {
 }
 
 /*
- * pool_slot_release: particle death handler 0 (D_80089BA0, called by particle_sprite_update before the free). The owner
+ * pool_slot_release: particle death handler 0 (g_particle_death_fns, called by particle_sprite_update before the free). The owner
  * at +0xA8 keeps 8-byte slots at +0x40 (object pointer, s16 next) in a used list (head +0x44) and a free list
  * (head +0x46); the slot holding this particle is unlinked from the used list and pushed on the free list.
  */

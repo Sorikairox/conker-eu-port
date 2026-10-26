@@ -16,7 +16,7 @@ s/n = (s16) rec\[0x42\];/n = (s16) rec[0x43];/
 s/p->fade = (p->fade \* step) >> 8;/p->fade = (p->fade * step) >> 7;/
 s/step += rec\[0x43\];/step += rec[0x42];/
 1,/i = \*(s8 \*) (t + 0x2E) - 1;/s/i = \*(s8 \*) (t + 0x2E) - 1;/i = *(s8 *) (t + 0x2E);/
-s/(s32) D_800911BC, 0, 0, 0, 0, 0x39/(s32) D_800911BC, 0, 0, 0, 0, 0x38/
+s/(s32) g_foot_trail_tex, 0, 0, 0, 0, 0x39/(s32) g_foot_trail_tex, 0, 0, 0, 0, 0x38/
 s/\&flag, 0x3E);/\&flag, 0x3F);/
 s/gfx_geometry_mode_cached(gfx, 1, 0x160600)/gfx_geometry_mode_cached(gfx, 1, 0x160601)/
 s/rec\[0x2A\], rec\[0x2B\], rec\[0x2C\]/rec[0x2B], rec[0x2A], rec[0x2C]/

@@ -1,4 +1,4 @@
-s/    alpha = (s32) ((((BarrelMenu174 \*) D_80090174)->slide - 0.5f) \* 512.0f);/    alpha = (s32) ((((BarrelMenu174 *) D_80090174)->slide - 0.5f) * 500.0f);/ % page2 slide_half page2_pg0
+s/    alpha = (s32) ((((BarrelMenu174 \*) g_menu_state)->slide - 0.5f) \* 512.0f);/    alpha = (s32) ((((BarrelMenu174 *) g_menu_state)->slide - 0.5f) * 500.0f);/ % page2 slide_half page2_pg0
 s/        alpha = -alpha;/        alpha = 0;/ % page2_pg0
 s/    if (alpha >= 0x100) {/    if (alpha > 0x100) {/ % page_banner4
 s/    if (m->fade == 0.0f \&\& m->vel == 0.0f) {/    if (m->fade == 0.0f || m->vel == 0.0f) {/ % m0_ring m4_4
@@ -25,50 +25,50 @@ s/            D_800E10B8\[3\] = 0xFF;/            D_800E10B8[3] = 0xFE;/ % m0_ri
 s/            if (!(m->fade >= 0.5f) || m->page != 4) {/            if (!(m->fade > 0.5f) || m->page != 4) {/ % m0_fade_half
 s/            if (!(m->fade >= 0.5f) || m->page != 4) {/            if (!(m->fade >= 0.5f)) {/ % m0_page3
 s/            if (alpha >= 0xFE) {/            if (alpha > 0xFE) {/ % m0_ring_bedcc
-s/            ang = 0.62831855f + (0.62831855f + 0.62831855f \* D_80090188);/            ang = 0.62831855f + (0.62831855f + 0.62831855f * 0.0f);/ % m0_ring_rot
+s/            ang = 0.62831855f + (0.62831855f + 0.62831855f \* g_menu_slide_phase);/            ang = 0.62831855f + (0.62831855f + 0.62831855f * 0.0f);/ % m0_ring_rot
 s/            prev = 0x7E - (s32) (cosf(ang) \* 52.0f);/            prev = 0x7E - (s32) (cosf(ang) * 50.0f);/ % m0_ring
-s/            i = ((BarrelMenu174 \*) D_80090174)->sel - 4;/            i = ((BarrelMenu174 *) D_80090174)->sel - 3;/ % m0_ring
+s/            i = ((BarrelMenu174 \*) g_menu_state)->sel - 4;/            i = ((BarrelMenu174 *) g_menu_state)->sel - 3;/ % m0_ring
 s/                i += 5;/                i += 4;/ % m0_ring_rot
 s/            for (j = 1; j != 8; j++) {/            for (j = 1; j != 7; j++) {/ % m0_ring
 s/                if (prev < cur) {/                if (prev <= cur) {/ % m0_ring_eq
 s/                    mid = ((cur - prev) >> 1) + prev;/                    mid = ((cur - prev) >> 2) + prev;/ % m0_ring
 s/                    sizef = (f32) (cur - prev) \* 0.03125f;/                    sizef = (f32) (cur - prev) * 0.0625f;/ % m0_ring
-s/                    if (D_80090188 == 0.0f \&\& j == 5 \&\& D_800901CC == 0) {/                    if (D_80090188 == 0.0f \&\& j == 4 \&\& D_800901CC == 0) {/ % m0_ring
-s/                    if (D_80090188 == 0.0f \&\& j == 5 \&\& D_800901CC == 0) {/                    if (j == 5 \&\& D_800901CC == 0) {/ % m0_ring_rot
-s/                    if (D_80090188 == 0.0f \&\& j == 5 \&\& D_800901CC == 0) {/                    if (D_80090188 == 0.0f \&\& j == 5) {/ % m0_ring_cc
+s/                    if (g_menu_slide_phase == 0.0f \&\& j == 5 \&\& g_menu_cursor == 0) {/                    if (g_menu_slide_phase == 0.0f \&\& j == 4 \&\& g_menu_cursor == 0) {/ % m0_ring
+s/                    if (g_menu_slide_phase == 0.0f \&\& j == 5 \&\& g_menu_cursor == 0) {/                    if (j == 5 \&\& g_menu_cursor == 0) {/ % m0_ring_rot
+s/                    if (g_menu_slide_phase == 0.0f \&\& j == 5 \&\& g_menu_cursor == 0) {/                    if (g_menu_slide_phase == 0.0f \&\& j == 5) {/ % m0_ring_cc
 s/                        if (v >= 0x40) {/                        if (v > 0x40) {/ % m0_ring_b20
 s/                            v = 0x7F - v;/                            v = 0x80 - v;/ % m0_ring_bedcc
 s/                        v = (alpha \* (v \* 3 + 0x3F)) >> 8;/                        v = (alpha * (v * 3 + 0x40)) >> 8;/ % m0_ring_bedcc
 s/                        D_80090410 = D_800904AC\[i\] + 2;/                        D_80090410 = D_800904AC[i];/ % m0_ring
 s/                if (i >= 5) {/                if (i > 5) {/ % m0_ring
 s/                prev = cur;/                ;/ % m0_ring
-s/            pulse = (s32) (D_800E0EC5 \* (s32) ((sinf((f32) (D_800BEDCC \& 0x3F) \* 0.09817469f + 0.7853975f) + 1.0f) \* 127.0f)) >> 8;/            pulse = (s32) (D_800E0EC5 * (s32) ((sinf((f32) (D_800BEDCC \& 0x3F) * 0.09817469f + 0.7853975f) + 1.0f) * 126.0f)) >> 8;/ % m4_4
-s/            if (((BarrelMenu174 \*) D_80090174)->page == 7) {/            if (((BarrelMenu174 *) D_80090174)->page == 6) {/ % m4_2
+s/            pulse = (s32) (g_menu_page_alpha \* (s32) ((sinf((f32) (D_800BEDCC \& 0x3F) \* 0.09817469f + 0.7853975f) + 1.0f) \* 127.0f)) >> 8;/            pulse = (s32) (g_menu_page_alpha * (s32) ((sinf((f32) (D_800BEDCC \& 0x3F) * 0.09817469f + 0.7853975f) + 1.0f) * 126.0f)) >> 8;/ % m4_4
+s/            if (((BarrelMenu174 \*) g_menu_state)->page == 7) {/            if (((BarrelMenu174 *) g_menu_state)->page == 6) {/ % m4_2
 s/                x = 0x70;/                x = 0x28;/ % m4_2
 s/                nslots = 4;/                nslots = 3;/ % m4_4
 s/                si = 0;/                si = 1;/ % m4_4
-s/                for (i = 0; i < D_800901E0; i++) {/                for (i = 1; i < D_800901E0; i++) {/ % m4_4
+s/                for (i = 0; i < g_menu_joined_count; i++) {/                for (i = 1; i < g_menu_joined_count; i++) {/ % m4_4
 s/                        dir = -1;/                        dir = 1;/ % m4_4
 s/                        break;/                        ;/ % m4_dup
-s/                if (slot != 0 \&\& D_800E0FD0\[0\] != NULL) {/                if (D_800E0FD0[0] != NULL) {/ % m4_slot0
-s/                if (slot != 0 \&\& D_800E0FD0\[0\] != NULL) {/                if (slot != 0) {/ % m4_fd0null
-s/                        if (D_800E0FD0\[slot\] == NULL \&\& j != -1) {/                        if (D_800E0FD0[slot] == NULL) {/ % m4_4
-s/                            menu_spawn_character(slot, D_800E0FC0\[j\]);/                            menu_spawn_character(slot, D_800E0FC0[0]);/ % m4_4
-s/                        obj_remove(D_800E0FD0\[slot\], 1);/                        obj_remove(D_800E0FD0[slot], 0);/ % m4_4
-s/                        D_800E0FD0\[slot\] = NULL;/                        ;/ % m4_4
-s/                v = \*fill + dir \* (D_800BE9E4 \* 8);/                v = *fill + dir * (D_800BE9E4 * 4);/ % m4_4
+s/                if (slot != 0 \&\& g_menu_char_objs\[0\] != NULL) {/                if (g_menu_char_objs[0] != NULL) {/ % m4_slot0
+s/                if (slot != 0 \&\& g_menu_char_objs\[0\] != NULL) {/                if (slot != 0) {/ % m4_fd0null
+s/                        if (g_menu_char_objs\[slot\] == NULL \&\& j != -1) {/                        if (g_menu_char_objs[slot] == NULL) {/ % m4_4
+s/                            menu_spawn_character(slot, g_menu_player_chars\[j\]);/                            menu_spawn_character(slot, g_menu_player_chars[0]);/ % m4_4
+s/                        obj_remove(g_menu_char_objs\[slot\], 1);/                        obj_remove(g_menu_char_objs[slot], 0);/ % m4_4
+s/                        g_menu_char_objs\[slot\] = NULL;/                        ;/ % m4_4
+s/                v = \*fill + dir \* (g_frame_ticks \* 8);/                v = *fill + dir * (g_frame_ticks * 4);/ % m4_4
 s/^                    v = 0xFF;/                    v = 0xFE;/ % m4_clamp
 s/                    v = 0;/                    v = 1;/ % m4_clamp
-s/                gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, D_800E0EC5);/                gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0xFF);/ % m4_4
+s/                gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, g_menu_page_alpha);/                gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0xFF);/ % m4_4
 s/                D_80090410 = (s32) (D_89C + 2);/                D_80090410 = (s32) (D_89C + 1);/ % m4_4
 s/                y = 0x8C - (s32) ((f32) v \* 0.14285715f);/                y = 0x8C - (s32) ((f32) v * 0.125f);/ % m4_4
 s/                if (v > 0) {/                if (v >= 0) {/ % m4_empty m4_clamp
 s/                    gdl = hud_image_draw(gdl, \&D_80090410, x, y, 1, 1, 1.0f, 1);/                    gdl = hud_image_draw(gdl, \&D_80090410, x, y, 1, 1, 1.0f, 0);/ % m4_4
 s/                    if (step >= 0xFE) {/                    if (step > 0xFE) {/ % m4_full
 s/                    D_80090410 = (s32) D_87B;/                    D_80090410 = (s32) D_88C;/ % m4_4
-s/                text_set_color(0xFF, 0xFF, 0xFF, D_800E0EC5);/                text_set_color(0xFF, 0xFF, 0xFF, 0xFF);/ % m4_4
+s/                text_set_color(0xFF, 0xFF, 0xFF, g_menu_page_alpha);/                text_set_color(0xFF, 0xFF, 0xFF, 0xFF);/ % m4_4
 s/                text_printf_at(x, 0x41, 0x80, D_800ABED8, slot + 1);/                text_printf_at(x, 0x41, 0x80, D_800ABED8, slot);/ % m4_4
-s/                if (nscores != 0 \&\& j >= 0 \&\& D_800901E4\[j\] >= 0) {/                if (nscores != 0) {/ % m4_4
+s/                if (nscores != 0 \&\& j >= 0 \&\& g_menu_player_queue\[j\] >= 0) {/                if (nscores != 0) {/ % m4_4
 s/                    nscores--;/                    ;/ % m4_1score
 s/                    text_printf_at(x, 0xA2, 0x81, D_800ABEE0, scores\[si\] + 1);/                    text_printf_at(x, 0xA2, 0x81, D_800ABEE0, scores[si]);/ % m4_4
 s/                    si++;/                    ;/ % m4_4

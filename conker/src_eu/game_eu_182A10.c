@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 (*D_8008B068[])(u8 *);
+extern s32 (*g_sprite2d_update_fns[])(u8 *); /* was D_8008B068 */
 
 /* was func_15155200 */
 void sprite2d_update(u8 *arg0)
@@ -15,7 +15,7 @@ void sprite2d_update(u8 *arg0)
   p = arg0;
   if ((*((u16 *) (p + 0x24))) & 1)
   {
-    *((s16 *) (p + 0x22)) -= D_800BE9E4;
+    *((s16 *) (p + 0x22)) -= g_frame_ticks;
     if ((*((s16 *) (p + 0x22))) < 0)
     {
       done = 1;
@@ -23,7 +23,7 @@ void sprite2d_update(u8 *arg0)
   }
   if ((p[0x68] & 0xF) && (!done))
   {
-    if (D_8008B068[p[0x68] & 0xF](p) == 0)
+    if (g_sprite2d_update_fns[p[0x68] & 0xF](p) == 0)
     {
       done = 1;
     }
@@ -53,7 +53,7 @@ typedef struct {
     f32 y;              /* 0x14 */
     f32 halfW;          /* 0x18 */
     f32 halfH;          /* 0x1C */
-    u8  tex;            /* 0x20 D_80090F10 index, 0xFF: no texture load */
+    u8  tex;            /* 0x20 g_sprite_textures index, 0xFF: no texture load */
     u8  pad21[3];
     u16 flags;          /* 0x24 SPRITE2D_* */
     u8  pad26[0x2B - 0x26];
@@ -91,9 +91,9 @@ typedef struct {
 
 #define SPRITE_VIEW_F(v, off) (*(f32 *) ((v) + (off)))
 
-extern struct_eu_80090F10 D_80090F10[];
+extern struct_eu_80090F10 g_sprite_textures[]; /* was D_80090F10 */
 extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 s32 hud_lens_is_off(s32);
 s32 screen_fade_alpha(s32);
 Gfx *gfx_load_texture_cached(Gfx *, struct_eu_80090F10 *, s32, s32, s32, s32, s32, s32, s32, u8 *, s32);
@@ -121,7 +121,7 @@ Gfx *sprite2d_draw(Gfx *gdl, Sprite2D *spr, s16 view) {
     s32 xh, yh, xl, yl;
 
     ok = 1;
-    rec = (u8 *) D_800BE628 + g_cur_view_player * 0x180;
+    rec = (u8 *) g_player_cams + g_cur_view_player * 0x180;
     if ((spr->flags & SPRITE2D_ONE_PLAYER) && spr->player != view) {
         return gdl;
     }
@@ -134,7 +134,7 @@ Gfx *sprite2d_draw(Gfx *gdl, Sprite2D *spr, s16 view) {
         }
     }
     if (spr->tex != 0xFF) {
-        gdl = gfx_load_texture_cached(gdl, &D_80090F10[spr->tex], 0, (spr->flags & SPRITE2D_TEX_MODE0) ? 0 : 2, 0, 0,
+        gdl = gfx_load_texture_cached(gdl, &g_sprite_textures[spr->tex], 0, (spr->flags & SPRITE2D_TEX_MODE0) ? 0 : 2, 0, 0,
                             spr->tex, 0, 0, &ok, (spr->flags & SPRITE2D_TEX_3E) ? 0x3E : 3);
     }
     gdl = gfx_geometry_mode_cached(gdl, spr->geomSet, spr->geomClear);
@@ -146,14 +146,14 @@ Gfx *sprite2d_draw(Gfx *gdl, Sprite2D *spr, s16 view) {
     gdl = gfx_prim_color_cached(gdl, 0, 0, envR, envG, envB, envA, &ok);
     gdl = gfx_set_combine_mode(gdl, spr->combine, &ok);
     mode = (u32 *) (g_render_mode_pairs + spr->renderMode * 8);
-    gdl = gfx_other_mode_cached(gdl, spr->otherMode | D_800D30BC | 0x2C00 | spr->otherMode2 | spr->otherMode3,
+    gdl = gfx_other_mode_cached(gdl, spr->otherMode | g_gfx_tlut_mode | 0x2C00 | spr->otherMode2 | spr->otherMode3,
                         mode[1] | mode[0], &ok);
 
     cx = SPRITE_VIEW_F(rec, 0x34) + spr->x * SPRITE_VIEW_F(rec, 0x14);
     cy = SPRITE_VIEW_F(rec, 0x38) + spr->y * SPRITE_VIEW_F(rec, 0x18);
     halfW = spr->halfW * SPRITE_VIEW_F(rec, 0x14);
     halfH = spr->halfH * SPRITE_VIEW_F(rec, 0x18);
-    tex = &D_80090F10[spr->tex];
+    tex = &g_sprite_textures[spr->tex];
     texW = tex->unk6;
     texH = tex->unk8;
     /* 10.2 fixed point corners */
@@ -229,7 +229,7 @@ u8 *sprite2d_spawn(u8 *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32
 }
 /* was func_15155AD4 */
 void sprite2d_handle_message(u8 *arg0, s32 arg1, u8 arg2) {
-    void (*fp)(void *, s32, u8) = D_8008B0A4[arg0[0x2A]];
+    void (*fp)(void *, s32, u8) = g_sprite2d_msg_fns[arg0[0x2A]];
     if (fp != NULL) {
         fp(arg0, arg1, arg2);
     }

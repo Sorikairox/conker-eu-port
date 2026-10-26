@@ -379,9 +379,9 @@ s32 look_get_fixed_target(s32 arg0, u8 *arg1) {
     temp_v0 = &g_objects[arg0];
     temp_t8 = temp_v0->unk2F8 & 7;
     if (temp_t8 == 1) {
-        (*(f32 *)arg1) = (f32) D_800DBFF0->unk2F8;
-        (*(f32 *)((u8 *)arg1 + 4)) = (f32) D_800DBFF0->unk2FC;
-        (*(f32 *)((u8 *)arg1 + 8)) = (f32) D_800DBFF0->unk300;
+        (*(f32 *)arg1) = (f32) g_player_views->unk2F8;
+        (*(f32 *)((u8 *)arg1 + 4)) = (f32) g_player_views->unk2FC;
+        (*(f32 *)((u8 *)arg1 + 8)) = (f32) g_player_views->unk300;
         return 1;
     }
     if (temp_t8 == 2) {
@@ -428,7 +428,7 @@ s32 look_point_in_joint_range(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32
  * P76: look target of object id (out = point, -99999 when there is none; D_800C43F0 is reset to -99999 too).
  * Nothing during cutscenes (D_800C35EA / D_800C35EB). Fixed targets first: a sub-object +0x318 with +0x2C == 0x100
  * and a +0x73C flag gives its point +0x740; look_get_fixed_target (look modes 1..3). Object 0 in state 0x81 (+0x84) aims at
- * the object of its attachment 0x1F (+0x48 matrices +0x3E8[D_800BE9C0], enabled by +0x3F6): its position for kind
+ * the object of its attachment 0x1F (+0x48 matrices +0x3E8[g_dl_buf_index], enabled by +0x3F6): its position for kind
  * 5, else that matrix's point. Otherwise the nearest candidate that passes the joint range test look_point_in_joint_range wins
  * (squared distance from the object, with x truncated to s16): the object search look_search_nearest_object (from 1.6e9), the
  * look points of g_look_points (round robin from D_80084790, within each point's x window and reach) and the nodes of
@@ -475,7 +475,7 @@ void look_find_target(f32 *out, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32
     if (id == 0 && *(u16 *) (self + 0x84) == 0x81) {
         sub = attachment_find_by_slot_any(0x1F, self);
         if (sub != NULL && (mtxs = *(u8 **) (sub + 0x48)) != NULL && mtxs[0x3F6] != 0
-            && (mtx = ((s32 *) (mtxs + 0x3E8))[D_800BE9C0]) != 0) {
+            && (mtx = ((s32 *) (mtxs + 0x3E8))[g_dl_buf_index]) != 0) {
             other = (u8 *) obj_find_by_setup_id(sub[0]);
             if (other != NULL) {
                 if (other[5] == 5) {
@@ -702,15 +702,15 @@ typedef struct {
     u8 fade[3];       /* 0x33: blend frames (10 = start of a blend toward / away from the target) */
     u8 flag4[3];      /* 0x36: the object's +0x2FB & 4 of the previous call */
     u8 pad39;
-    s16 yawOfs[3];    /* 0x3A: extra angles, decay by D_800BE9E4 * 10 per call */
+    s16 yawOfs[3];    /* 0x3A: extra angles, decay by g_frame_ticks * 10 per call */
     s16 pitchOfs[3];  /* 0x40 */
     u8 pad46[2];
 } LookTrack;
 extern s32 D_800C43F0;      /* f32 x, y, z: default aim point */
 extern u8 g_slowmo_divisor; /* was D_800BEE2C */
 extern u8 g_game_paused; /* was D_800BEAC0 */
-extern u8 D_800BE9B4;
-extern s32 D_800BE9E4;
+extern u8 g_level_first_frame; /* was D_800BE9B4 */
+extern s32 g_frame_ticks; /* was D_800BE9E4 */
 extern u8 D_800C43FC;
 extern f32 D_800C4400;
 extern f32 D_800C4404;
@@ -890,7 +890,7 @@ void look_turn_joint(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s3
     }
     rawYaw = yaw;
     rawPitch = pitch;
-    if ((expired && !fixed) || D_800BE9B4 != 0) {
+    if ((expired && !fixed) || g_level_first_frame != 0) {
         look_clamp_angles(lookArg, &yaw, &pitch, &lim1, &lim0, rawYaw, rawPitch, id);
         lt->yawVel[slot] = 0.0f;
         lt->pitchVel[slot] = 0.0f;
@@ -1095,7 +1095,7 @@ void look_turn_joint(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s3
     if (!noTarget) {
         lt->hold[slot] = 40;
     }
-    step = D_800BE9E4 * 10;
+    step = g_frame_ticks * 10;
     v = lt->yawOfs[slot];
     if (step < ((v < 0) ? -v : v)) {
         lt->yawOfs[slot] = v - step * ((v < 0) ? -1 : 1);
@@ -1167,14 +1167,14 @@ void look_clamp_default(f32 *yaw, f32 *pitch, f32 *outYaw, f32 *outPitch, f32 re
     }
 }
 
-extern u8 D_800BE9B4;
+extern u8 g_level_first_frame; /* was D_800BE9B4 */
 extern u8 D_8009822C[];
 extern u8 D_80098400[];
 extern u16 *D_80084710[];
 
 /*
  * P70: look-at record setup and the "no look" flag (bit 2 of +0x2FB), after obj_set_kind_look_flags.
- * With a look record (+0x324): object 0x53 in animation 0x15, or D_800BE9B4 set, resets the three look slots
+ * With a look record (+0x324): object 0x53 in animation 0x15, or g_level_first_frame set, resets the three look slots
  * (+0x30.. = 40, +0x33.. = 0, +0x36.. = 4). Then, for object ids with a list (D_8009822C[id] = list number + 1;
  * D_80098400 = list lengths, D_80084710 = u16 lists of +0x84 values), a listed +0x84 sets the flag.
  * Otherwise the flag is set in state 1 when the health is 0, or (in water and xz speed < 5) or +0x31C[0x197] != 0
@@ -1191,7 +1191,7 @@ void look_record_setup(struct127 *obj) {
     if (rec == NULL) {
         return;
     }
-    if ((obj->id == 0x53 && obj->unk84.uh == 0x15) || D_800BE9B4 != 0) {
+    if ((obj->id == 0x53 && obj->unk84.uh == 0x15) || g_level_first_frame != 0) {
         for (i = 0; i < 3; i++) {
             rec[0x30 + i] = 40;
             rec[0x33 + i] = 0;
@@ -1687,8 +1687,8 @@ void look_aim_head_eyes(struct127 *obj) {
                 LOOK_ANGLE(obj, 1) -= LOOK_OFS(obj, 2);
                 LOOK_ANGLE(obj, 3) -= LOOK_OFS(obj, 3);
                 phase = LOOK_PHASE(obj);
-                b = (phase >> 8) - D_800BE9E4 * 4;
-                a = (phase & 0xFF) + D_800BE9E4 * 3;
+                b = (phase >> 8) - g_frame_ticks * 4;
+                a = (phase & 0xFF) + g_frame_ticks * 3;
                 LOOK_PHASE(obj) = (b << 8) | a;
                 k = (LOOK_TIMER(obj) < 30) ? LOOK_TIMER(obj) / 30.0f : 1.0f;
                 k = 11.0f * k;
@@ -1722,9 +1722,9 @@ void look_aim_head_eyes(struct127 *obj) {
                 sub = attachment_find_by_slot((u8 *) obj, 0x2B, 0);
                 if (sub != NULL) {
                     mtxs = *(u8 **) (sub + 0x48);
-                    if (mtxs != NULL && ((s32 *) (mtxs + 0x3E8))[D_800BE9C0] != 0) {
+                    if (mtxs != NULL && ((s32 *) (mtxs + 0x3E8))[g_dl_buf_index] != 0) {
                         vec_from_fixed_pos((vertex *) D_800C4408,
-                                      (struct113 *) (((s32 *) (mtxs + 0x3E8))[D_800BE9C0] + 0x80));
+                                      (struct113 *) (((s32 *) (mtxs + 0x3E8))[g_dl_buf_index] + 0x80));
                         aimAllowed = FALSE;
                     }
                 }
@@ -1743,13 +1743,13 @@ void look_aim_head_eyes(struct127 *obj) {
                 if (*(u16 *) ((u8 *) obj + 0x84) == 0x26) {
                     /* nod between -20 and 20 */
                     if (LOOK_PHASE(obj) == 0) {
-                        LOOK_OFS(obj, 0) -= D_800BE9E4;
+                        LOOK_OFS(obj, 0) -= g_frame_ticks;
                         if (LOOK_OFS(obj, 0) < -20) {
                             LOOK_OFS(obj, 0) = -20;
                             LOOK_PHASE(obj) = 1;
                         }
                     } else {
-                        LOOK_OFS(obj, 0) += D_800BE9E4 * 3;
+                        LOOK_OFS(obj, 0) += g_frame_ticks * 3;
                         if (LOOK_OFS(obj, 0) >= 21) {
                             LOOK_OFS(obj, 0) = 20;
                             LOOK_PHASE(obj) = 0;
@@ -1790,10 +1790,10 @@ void look_aim_head_eyes(struct127 *obj) {
                 break;
         }
         if (LOOK_TIMER(obj) != 0xFFFF) {
-            if (LOOK_TIMER(obj) < D_800BE9E4) {
+            if (LOOK_TIMER(obj) < g_frame_ticks) {
                 LOOK_TIMER(obj) = 0;
             } else {
-                LOOK_TIMER(obj) = LOOK_TIMER(obj) - D_800BE9E4;
+                LOOK_TIMER(obj) = LOOK_TIMER(obj) - g_frame_ticks;
             }
         }
     }

@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-extern f32 D_800A8590;
+extern f32 g_ceiling_drip_k_8590; /* was D_800A8590 */
 s32 sprite_vtx_quads_init(s32 *, s32, s32, s32, s32);
 
 /* was func_15193900 */
@@ -33,7 +33,7 @@ void ceiling_drip_spawn(u8 *arg0) {
     bzero(&sp.u28, 0xA8);
     temp_v1 = (*(s16 *)((u8 *)arg0 + 0x2E));
     temp_v0 = arg0 + 0x28;
-    if ((f32) temp_v1 != D_800A8590) {
+    if ((f32) temp_v1 != g_ceiling_drip_k_8590) {
     s32 pad;
         sp.uBE = temp_v1;
     } else {
@@ -64,14 +64,14 @@ void ceiling_drip_fall_update(u8 *arg0) {
         temp_v0 = (*(s16 *)((u8 *)arg0 + 0xAA));
         (*(s16 *)((u8 *)arg0 + 0xA4)) = (s16) ((s32) ((temp_v0 >> 2) * 0x18) / 3);
         (*(s16 *)((u8 *)arg0 + 0xA2)) = (s16) ((s32) ((temp_v0 >> 2) * 6) / 3);
-        (*(s16 *)((u8 *)arg0 + 0xAA)) = (s16) (temp_v0 + D_800BE9E4);
+        (*(s16 *)((u8 *)arg0 + 0xAA)) = (s16) (temp_v0 + g_frame_ticks);
         return;
     }
     (*(s16 *)((u8 *)arg0 + 0x94)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x94)) + 1);
     if ((*(s16 *)((u8 *)arg0 + 0x94)) >= 0x15) {
         (*(s16 *)((u8 *)arg0 + 0x94)) = 0x14;
     }
-    (*(s16 *)((u8 *)arg0 + 0x9E)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x9E)) - ((s32) ((*(s16 *)((u8 *)arg0 + 0x94)) * D_800BE9E4) >> 1));
+    (*(s16 *)((u8 *)arg0 + 0x9E)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x9E)) - ((s32) ((*(s16 *)((u8 *)arg0 + 0x94)) * g_frame_ticks) >> 1));
     if ((*(s16 *)((u8 *)arg0 + 0x9E)) < (*(s16 *)((u8 *)arg0 + 0xA6))) {
         if ((*(s8 *)((u8 *)arg0 + 0xB3)) == 1) {
             sp38[0] = (f32) (*(s16 *)((u8 *)arg0 + 0x9C));

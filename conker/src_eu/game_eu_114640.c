@@ -7,13 +7,13 @@ void vec3_from_angles_rad(f32, f32, f32, f32 *);
 s32 memcpy(s32, f32 *, s32);
 
 
-extern f32 D_800A16C8;
-extern f32 D_800A16CC;
-extern f32 D_800A16D0;
-extern s32 D_80088DC0;
-extern s32 D_80088DCC;
-extern s32 D_80088DD4;
-extern s32 D_800A1560;
+extern f32 g_arc_spark_u60_rand; /* was D_800A16C8 */
+extern f32 g_arc_spark_u60_base; /* was D_800A16CC */
+extern f32 g_arc_spark_u74_scale; /* was D_800A16D0 */
+extern s32 g_arc_start_point_fns; /* was D_80088DC0 */
+extern s32 g_arc_end_point_fns; /* was D_80088DCC */
+extern s32 g_arc_path_fns; /* was D_80088DD4 */
+extern s32 g_arc_spark_presets; /* was D_800A1560 */
 
 /* was func_150E6E30 */
 void arc_spark_spawn(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
@@ -56,12 +56,12 @@ void arc_spark_spawn(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
     u8 *var_v0;
 
     if ((arg0 != 0) && ((D_800C35EA != 1) || (D_800C3A08 != 9))) {
-        var_v0 = ((s32 *)((u8 *)&D_800A1560 + (arg3 * 0x10)));
+        var_v0 = ((s32 *)((u8 *)&g_arc_spark_presets + (arg3 * 0x10)));
         if ((random_float() < (*(f32 *)((u8 *)var_v0 + 0))) && ((*(s8 *)((u8 *)var_v0 + 4)) != -1)) {
             temp_v1 = (*(s8 *)((u8 *)var_v0 + 5));
             if (temp_v1 != -1) {
                 sp30 = var_v0;
-                (*(s32 (**)())((u8 *)&D_80088DCC + (temp_v1 * 4)))(&sp.u98, arg0, -1);
+                (*(s32 (**)())((u8 *)&g_arc_end_point_fns + (temp_v1 * 4)))(&sp.u98, arg0, -1);
                 var_v0 = sp30;
             } else {
                 sp.u98 = 0.0f;
@@ -71,7 +71,7 @@ void arc_spark_spawn(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
             temp_v1_2 = (*(s8 *)((u8 *)var_v0 + 4));
             if (temp_v1_2 != -1) {
                 sp30 = var_v0;
-                (*(s32 (**)())((u8 *)&D_80088DC0 + (temp_v1_2 * 4)))(&sp.u8C);
+                (*(s32 (**)())((u8 *)&g_arc_start_point_fns + (temp_v1_2 * 4)))(&sp.u8C);
                 var_v0 = sp30;
             } else {
                 sp.u8C = 0.0f;
@@ -87,7 +87,7 @@ void arc_spark_spawn(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
                 temp_v1_3 = (*(s8 *)((u8 *)var_v0 + 6));
                 if (temp_v1_3 != -1) {
                     sp30 = var_v0;
-                    (*(s32 (**)())((u8 *)&D_80088DD4 + (temp_v1_3 * 4)))(0, &sp.u8C, &sp.u98, &sp.u80, &sp.u3C);
+                    (*(s32 (**)())((u8 *)&g_arc_path_fns + (temp_v1_3 * 4)))(0, &sp.u8C, &sp.u98, &sp.u80, &sp.u3C);
                     var_v0 = sp30;
                 } else {
                     sp.u3C = 0.0f;
@@ -98,14 +98,14 @@ void arc_spark_spawn(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
                     sp.u50 = 0.0f;
                 }
                 sp30 = var_v0;
-                temp_f16 = random_float() * D_800A16C8;
+                temp_f16 = random_float() * g_arc_spark_u60_rand;
                 sp.u64 = 0.0f;
-                sp.u60 = temp_f16 + D_800A16CC;
+                sp.u60 = temp_f16 + g_arc_spark_u60_base;
                 (*(f32 *)((u8 *)(&sp.u68) + 0)) = (f32) (*(f32 *)((u8 *)(&sp.u8C) + 0));
                 (*(s32 *)((u8 *)(&sp.u68) + 4)) = (s32) (*(s32 *)((u8 *)(&sp.u8C) + 4));
                 (*(s32 *)((u8 *)(&sp.u68) + 8)) = (s32) (*(s32 *)((u8 *)(&sp.u8C) + 8));
                 sp.u5C = 0.0f;
-                sp.u74 = ((random_float() * 100.0f) + 150.0f) * D_800A16D0;
+                sp.u74 = ((random_float() * 100.0f) + 150.0f) * g_arc_spark_u74_scale;
                 sp.u78 = (*(s16 *)((u8 *)var_v0 + 8));
                 sp.u7A = (*(s16 *)((u8 *)var_v0 + 0xA));
                 sp.u7C = (*(u8 *)((u8 *)var_v0 + 0xC));
@@ -141,16 +141,16 @@ void arc_spark_update(u8 *arg0) {
     u8 *temp_s0;
 
     temp_s0 = arg0 + 0x28;
-    (*(f32 *)((u8 *)arg0 + 0x50)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x50)) + ((*(f32 *)((u8 *)arg0 + 0x4C)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x50)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x50)) + ((*(f32 *)((u8 *)arg0 + 0x4C)) * g_frame_step_f));
     if ((*(f32 *)((u8 *)arg0 + 0x50)) > 1.0f) {
         temp_f2 = 1.0f / (*(f32 *)((u8 *)temp_s0 + 0x28));
-        temp_f16 = (*(f32 *)((u8 *)temp_s0 + 0x20)) + D_800BE9A4;
+        temp_f16 = (*(f32 *)((u8 *)temp_s0 + 0x20)) + g_frame_step_f;
         sp.uD8 = temp_f16 * temp_f2;
         var_f24 = (*(f32 *)((u8 *)temp_s0 + 0x10));
         var_f26 = (*(f32 *)((u8 *)temp_s0 + 0x14));
         sp.uDC = temp_f16;
-        sp8C = (*(f32 *)((u8 *)temp_s0 + 0x18)) * D_800BE9A4 * temp_f2;
-        sp88 = (*(f32 *)((u8 *)temp_s0 + 0x1C)) * D_800BE9A4 * temp_f2;
+        sp8C = (*(f32 *)((u8 *)temp_s0 + 0x18)) * g_frame_step_f * temp_f2;
+        sp88 = (*(f32 *)((u8 *)temp_s0 + 0x1C)) * g_frame_step_f * temp_f2;
         do {
             temp_f20 = sinf(var_f24);
             vec3_from_angles_rad((*(f32 *)((u8 *)temp_s0 + 0)) + (temp_f20 * (*(f32 *)((u8 *)temp_s0 + 8))), (*(f32 *)((u8 *)temp_s0 + 4)) + (sinf(var_f26) * (*(f32 *)((u8 *)temp_s0 + 0xC))), 5.0f, &sp.uB4);
@@ -168,17 +168,17 @@ void arc_spark_update(u8 *arg0) {
         (*(f32 *)((u8 *)temp_s0 + 0x20)) = sp.uDC;
     }
 }
-extern f32 *D_80088DDC;
-extern f32 *D_80088DE0;
+extern f32 *g_arc_box_a; /* was D_80088DDC */
+extern f32 *g_arc_box_b; /* was D_80088DE0 */
 /* was func_150E73B4 */
 void arc_point_random_box2(f32 *arg0) {
     f32 *var_v0;
     f32 temp_f0;
 
     if (random_float() < 0.56322235f) {
-        var_v0 = D_80088DDC;
+        var_v0 = g_arc_box_a;
     } else {
-        var_v0 = D_80088DE0;
+        var_v0 = g_arc_box_b;
     }
     temp_f0 = random_float();
     arg0[0] = var_v0[0] + ((var_v0[3] - var_v0[0]) * temp_f0);
@@ -188,10 +188,10 @@ void arc_point_random_box2(f32 *arg0) {
 
 /* was func_150E7458 */
 void arc_point_random_marker(s32 arg0) {
-    spawn_region_random_point_3d((&D_800D9A20)[random_int() & 1], arg0);
+    spawn_region_random_point_3d((&g_spawn_region_pair)[random_int() & 1], arg0);
 }
 
-extern s32 D_80088DE4;
+extern s32 g_arc_boxes6; /* was D_80088DE4 */
 /* was func_150E7498 */
 void arc_point_random_box6(f32 *arg0) {
     f32 *v;
@@ -199,7 +199,7 @@ void arc_point_random_box6(f32 *arg0) {
     f32 a;
     f32 b;
     f32 c;
-    v = ((f32 **)&D_80088DE4)[random_int() % 6U];
+    v = ((f32 **)&g_arc_boxes6)[random_int() % 6U];
     t = random_float();
     a = v[0];
     arg0[0] = (v[3] - a) * t + a;
@@ -277,7 +277,7 @@ s32 cam_wobble_start_preset(s32, s32, s32, s32, s32);
 void storm_spawn_spark_emitter(void);
 void storm_spawn_debris_emitter(void);
 typedef struct { s32 w[2]; } E7810_V;
-extern E7810_V D_80088DFC;
+extern E7810_V g_lightning_flash_sprites; /* was D_80088DFC */
 
 /* was func_150E7810 */
 void screen_lightning_random_flash(u8 arg0, u8 arg1, s32 arg2) {
@@ -286,7 +286,7 @@ void screen_lightning_random_flash(u8 arg0, u8 arg1, s32 arg2) {
     structEU_151D8E18 s;
 
     if (random_float() < 0.0042f) {
-        v = D_80088DFC;
+        v = g_lightning_flash_sprites;
         if (random_float() < 0.75000006f) {
             pos[0] = (random_float() * 300.0f) + -150.0f;
             pos[1] = (random_float() * 200.0f) + -100.0f;
@@ -310,7 +310,7 @@ typedef struct {
     f32 y;      // 0x04
     f32 scaleA; // 0x08
     f32 scaleB; // 0x0C
-    u8 kind;    // 0x10 (D_80088E04)
+    u8 kind;    // 0x10 (g_screen_sprite_kind)
     s16 life;   // 0x12
     u16 flags;  // 0x14
     s16 u16;    // 0x16
@@ -335,10 +335,10 @@ typedef struct {
     u8 u40;
     u8 u41;
 } SpawnSpecE7B20;
-extern u8 D_80088E04;
+extern u8 g_screen_sprite_kind; /* was D_80088E04 */
 s32 sprite2d_spawn(void *, s32, s32, s32, s32, s32, s32);
 
-// particle_spawn_simple: fills a particle spec (position x / y from `pos`, both scales `scale`, kind D_80088E04,
+// particle_spawn_simple: fills a particle spec (position x / y from `pos`, both scales `scale`, kind g_screen_sprite_kind,
 // lifetime `life`, flags `flags` | 0x40, the colour / fade bytes and fixed defaults) and spawns it with sprite2d_spawn
 // (`arg8`, `arg9`, `arg10`, `arg11`). Returns the spawned record.
 /* was func_150E7B20 */
@@ -350,7 +350,7 @@ s32 screen_sprite_spawn(f32 *pos, f32 scale, s16 life, u8 flags, u8 arg4, u8 arg
     spec.y = pos[1];
     spec.scaleA = scale;
     spec.scaleB = scale;
-    spec.kind = D_80088E04;
+    spec.kind = g_screen_sprite_kind;
     spec.life = life;
     spec.flags = flags | 0x40;
     spec.u16 = arg6;
@@ -381,8 +381,8 @@ s32 random_int(void);
 f32 random_float(void);
 s32 sprite2d_spawn(void *, s32, s32, s32, s32, s32, s32);
 typedef struct { s32 w[3]; } Vec3E7C50;
-extern Vec3E7C50 D_80088E08;
-extern Vec3E7C50 D_80088E14;
+extern Vec3E7C50 g_edge_sprites_side; /* was D_80088E08 */
+extern Vec3E7C50 g_edge_sprites_topbot; /* was D_80088E14 */
 
 /* was func_150E7C50 */
 void screen_sprite_spawn_edge(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16 arg5, s16 arg6, s32 arg7, s32 arg8, u8 arg9, s32 argA) {
@@ -450,7 +450,7 @@ void screen_sprite_spawn_edge(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16
     switch (r) {
     case 0:
     case 1:
-        a = D_80088E08;
+        a = g_edge_sprites_side;
         sp.u10 = a.w[random_int() % 3U];
         sp.u4 = (random_float() * 160.0f) + -80.0f;
         switch (r) {
@@ -466,7 +466,7 @@ void screen_sprite_spawn_edge(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16
         break;
     case 2:
     case 3:
-        b = D_80088E14;
+        b = g_edge_sprites_topbot;
         sp.u10 = b.w[random_int() % 3U];
         sp.u0 = (random_float() * 260.0f) + -130.0f;
         switch (r) {
@@ -487,10 +487,10 @@ f32 lagrange_cubic_w0(f32);
 f32 lagrange_cubic_w1(f32);
 f32 lagrange_cubic_w2(f32);
 f32 lagrange_cubic_w3(f32);
-extern s32 D_800BEE08;
+extern s32 g_view_count_minus1; /* was D_800BEE08 */
 
 // spawn_random_curve_object: spawns a kind-0x12C object holding a random curve of `count` points (P151). Plays
-// sound +0x9A0 * D_800BEE08 of D_800DBFF0 and a 30..40 tick rumble/effect (rumble_request), then effect_node_create_nodraw
+// sound +0x9A0 * g_view_count_minus1 of g_player_views and a 30..40 tick rumble/effect (rumble_request), then effect_node_create_nodraw
 // (group 0xC, count * 8 + 0x10 bytes, arg2 / arg3 passed on). The object gets {scale, 0, count, 0} at +0x28 and,
 // from +0x38, `count` (x, y) points of the cubic spline through four control points x = -146 / -50 / 50 / 146 with
 // random y in -80..80, sampled at t = -1 .. 2 (basis lagrange_cubic_w0 / AC0 / B04 / B44). Returns the object or
@@ -514,7 +514,7 @@ u8 *screen_lightning_curve_spawn(s16 count, f32 scale, u8 arg2, s32 arg3) {
     if (count < 2) {
         return NULL;
     }
-    camera_shake_start((struct108 *)((u8 *)D_800DBFF0 + D_800BEE08 * 0x9A0), 0, 1);
+    camera_shake_start((struct108 *)((u8 *)g_player_views + g_view_count_minus1 * 0x9A0), 0, 1);
     fx.unk0 = 1;
     fx.unk2 = (u32)random_int() % 11 + 30;
     fx.unk4 = 8;
@@ -569,7 +569,7 @@ void screen_lightning_curve_update(u8 *arg0) {
     u8 *temp_s0;
 
     temp_s0 = arg0 + 0x28;
-    (*(f32 *)((u8 *)arg0 + 0x2C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x2C)) + ((*(f32 *)((u8 *)arg0 + 0x28)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x2C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x2C)) + ((*(f32 *)((u8 *)arg0 + 0x28)) * g_frame_step_f));
     if (((*(f32 *)((u8 *)arg0 + 0x2C)) > 1.0f) && ((*(s16 *)((u8 *)temp_s0 + 8)) != (*(s16 *)((u8 *)temp_s0 + 0xA)))) {
 loop_3:
         sp.u98 = (*(f32 *)((u8 *)((temp_s0 + ((*(s16 *)((u8 *)temp_s0 + 0xA)) * 8))) + 0x10));
@@ -673,7 +673,7 @@ void fx_scorch_decal_spawn(f32 arg0, u8 arg1, s32 arg2, u8 *arg3, s16 arg4, u8 a
 }
 void emit_random_sprites(u8 *, u8, s32);
 void explosion_light_spawn(u8 *, u8, s32);
-extern s32 D_800A1660;
+extern s32 g_fx_blast_positions; /* was D_800A1660 */
 
 /* was func_150E8728 */
 void fx_scripted_blast(s32 arg0, u8 arg1, s32 arg2) {
@@ -721,7 +721,7 @@ void fx_scripted_blast(s32 arg0, u8 arg1, s32 arg2) {
 
     temp_a3 = arg0 & 0xFF;
     if ((temp_a3 == 4) || (temp_a3 == 5) || (temp_a3 == 6) || (temp_a3 == 7)) {
-        temp_t8 = (u8 *) &D_800A1660 + temp_a3 * 0xC;
+        temp_t8 = (u8 *) &g_fx_blast_positions + temp_a3 * 0xC;
         (*(s32 *)((u8 *)(&sp.u84) + 0)) = (s32) (*(s32 *)((u8 *)temp_t8 + 0));
         (*(s32 *)((u8 *)(&sp.u84) + 4)) = (s32) (*(s32 *)((u8 *)temp_t8 + 4));
         (*(s32 *)((u8 *)(&sp.u84) + 8)) = (s32) (*(s32 *)((u8 *)temp_t8 + 8));
@@ -840,7 +840,7 @@ void fx_debris_emitter_update(u8 *arg0) {
     u8 *temp_s1;
 
     temp_s1 = arg0 + 0x28;
-    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((0.099999994f + (random_float() * 0.0879f)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((0.099999994f + (random_float() * 0.0879f)) * g_frame_step_f));
     if ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f) {
         sp.uB9 = 0x6C;
         sp.uA4 = 0x5103;
@@ -930,7 +930,7 @@ void storm_controller_spawn(void) {
 void storm_lightning_strike();
 /* was func_150E8E40 */
 void storm_controller_update(u8 *arg0) {
-    (*(f32 *)((u8 *)arg0 + 0x28)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x28)) - D_800BE9A4);
+    (*(f32 *)((u8 *)arg0 + 0x28)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x28)) - g_frame_step_f);
     if ((*(f32 *)((u8 *)arg0 + 0x28)) < 0.0f) {
         (*(f32 *)((u8 *)arg0 + 0x28)) = (f32) ((random_float() * 337.0f) + 201.0f);
         storm_lightning_strike(arg0);
@@ -939,14 +939,14 @@ void storm_controller_update(u8 *arg0) {
 
 typedef struct { s32 a, b; } E8EB0_V;
 typedef struct { u8 a; u8 p1; s16 b; u8 c; u8 d; s8 e; } E8EB0_S;
-extern E8EB0_V D_80088E20;
+extern E8EB0_V g_storm_strike_node_types; /* was D_80088E20 */
 extern u8 D_800BEE0B;
 /* was func_150E8EB0 */
 void storm_lightning_strike() {
     E8EB0_V v;
     E8EB0_S s;
 
-    v = D_80088E20;
+    v = g_storm_strike_node_types;
     node_broadcast_types(&v, 2, 0, 0x1B);
     cam_wobble_start_preset(0, D_800BEE0B, 0, 0xFF, 1);
     s.a = 1;
@@ -955,10 +955,10 @@ void storm_lightning_strike() {
     s.c = random_int() % 6U + 3;
     s.e = -1;
     rumble_request((structEU_151D8E18 *)&s, 0, 0xFF, 1);
-    if (D_800DCDC4 != 0) {
+    if (g_light_record_list != 0) {
         storm_spawn_spark_emitter();
     }
-    if (D_800DCDC4 != 0) {
+    if (g_light_record_list != 0) {
         storm_spawn_debris_emitter();
     }
     sound_play_2d(0x4C8, 0x7FFF, 0x40, 0x200 - (random_int() & 0x400), 0);
@@ -981,7 +981,7 @@ void storm_spawn_spark_emitter(void) {
 
 typedef struct E909C_N { s32 id; s32 pad; f32 w; struct E909C_N *next; } E909C_N;
 typedef struct { f32 pos[3]; f32 v[3]; s32 pad[2]; } E909C_S;
-extern s32 D_800BEE08;
+extern s32 g_view_count_minus1; /* was D_800BEE08 */
 
 /* was func_150E909C */
 void storm_spark_emitter_update(u8 *arg0)
@@ -995,13 +995,13 @@ void storm_spark_emitter_update(u8 *arg0)
   f32 dy;
   f32 dz;
   u8 *o;
-  cam = camera_get_pos(D_800BEE08);
+  cam = camera_get_pos(g_view_count_minus1);
   p = (f32 *) (arg0 + 0x28);
-  p[2] += ((p[0] + (random_float() * p[1])) * D_800BE9A4) * D_800DCD90;
+  p[2] += ((p[0] + (random_float() * p[1])) * g_frame_step_f) * g_light_list_weight;
   while (p[2] > 1.0f)
   {
-    r = random_float() * D_800DCD90;
-    n = (E909C_N *) D_800DCDC4;
+    r = random_float() * g_light_list_weight;
+    n = (E909C_N *) g_light_record_list;
     while (n->w < r)
     {
       r -= n->w;
@@ -1032,7 +1032,7 @@ void storm_spark_emitter_update(u8 *arg0)
 
 }
 
-extern f32 D_800BE9A4;
+extern f32 g_frame_step_f; /* was D_800BE9A4 */
 s32 particle_spawn_basic(void *, s32, s32, u8, s32);
 void vec3_from_angles_rad(f32, f32, f32, f32 *);
 /* was func_150E92DC */
@@ -1086,7 +1086,7 @@ void storm_spark_burst_update(u8 *arg0) {
     f32 r1;
 
     p = arg0 + 0x28;
-    *(f32 *)(p + 0x14) += (*(f32 *)(p + 0xC) + random_float() * *(f32 *)(p + 0x10)) * D_800BE9A4;
+    *(f32 *)(p + 0x14) += (*(f32 *)(p + 0xC) + random_float() * *(f32 *)(p + 0x10)) * g_frame_step_f;
     if (*(f32 *)(p + 0x14) > 1.0f) {
         s32 a;
 
@@ -1166,7 +1166,7 @@ void storm_spawn_debris_emitter(void) {
 }
 
 typedef struct E96F8_N { s32 id; s32 pad; f32 w; struct E96F8_N *next; } E96F8_N;
-extern s32 D_800BEE08;
+extern s32 g_view_count_minus1; /* was D_800BEE08 */
 typedef struct { f32 pos[3]; f32 v[4]; u8 pad1C[0x14]; s32 u30; u8 u34; u8 u35; s32 u38; } E96F8_S;
 
 /* was func_150E96F8 */
@@ -1181,13 +1181,13 @@ void storm_debris_emitter_update(u8 *arg0)
   f32 dy;
   f32 dz;
   u8 *o;
-  cam = camera_get_pos(D_800BEE08);
+  cam = camera_get_pos(g_view_count_minus1);
   p = (f32 *) (arg0 + 0x28);
-  p[2] += ((p[0] + (random_float() * p[1])) * D_800BE9A4) * D_800DCD90;
+  p[2] += ((p[0] + (random_float() * p[1])) * g_frame_step_f) * g_light_list_weight;
   while (p[2] > 1.0f)
   {
-    r = random_float() * D_800DCD90;
-    n = (E96F8_N *) D_800DCDC4;
+    r = random_float() * g_light_list_weight;
+    n = (E96F8_N *) g_light_record_list;
     while (n->w < r)
     {
       r -= n->w;
@@ -1223,8 +1223,8 @@ void storm_debris_emitter_update(u8 *arg0)
 
 }
 
-extern u8 D_800A16C0;
-extern s32 D_800A16C4;
+extern u8 g_storm_debris_sprite; /* was D_800A16C0 */
+extern s32 g_storm_debris_size; /* was D_800A16C4 */
 
 /* was func_150E995C */
 void storm_debris_burst_update(u8 *arg0) {
@@ -1282,7 +1282,7 @@ void storm_debris_burst_update(u8 *arg0) {
     u8 *temp_s0;
 
     temp_s0 = arg0 + 0x28;
-    (*(f32 *)((u8 *)temp_s0 + 0x14)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x14)) + (((*(f32 *)((u8 *)temp_s0 + 0xC)) + (random_float() * (*(f32 *)((u8 *)temp_s0 + 0x10)))) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s0 + 0x14)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x14)) + (((*(f32 *)((u8 *)temp_s0 + 0xC)) + (random_float() * (*(f32 *)((u8 *)temp_s0 + 0x10)))) * g_frame_step_f));
     if ((*(f32 *)((u8 *)temp_s0 + 0x14)) > 1.0f) {
         sp.uA8 = 0.0f;
         sp.uAC = 1.0f;
@@ -1311,8 +1311,8 @@ void storm_debris_burst_update(u8 *arg0) {
         sp.u11C = 0xFF;
         do {
             random_int();
-            sp.uFE = (s16) D_800A16C0;
-            temp_f2 = ((random_float() * 351.0f) + 400.0f) * *(s32 *)((u8 *)&D_800A16C4 + (0 * 4)) * 0.001f;
+            sp.uFE = (s16) g_storm_debris_sprite;
+            temp_f2 = ((random_float() * 351.0f) + 400.0f) * *(s32 *)((u8 *)&g_storm_debris_size + (0 * 4)) * 0.001f;
             sp.uB0 = temp_f2;
             sp.uB4 = temp_f2;
             sp.uB8 = random_float() * 360.0f;

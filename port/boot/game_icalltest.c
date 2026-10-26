@@ -1,7 +1,7 @@
 /* Indirect-call self-test (docs/port/MEMORY.md, "Indirect calls"). Compiled like a game TU (vbe
  * pass + icall rewrite), so every call below goes through the generated trampolines.
  *
- * Calls real entries of a function-pointer table from the ROM's game_data, D_8008FC10 (the
+ * Calls real entries of a function-pointer table from the ROM's game_data, g_emitter_speed_fns (the
  * characterflamethrower effect handlers, relocated to wasm table indices at load), through
  * pointer types that do *not* match the targets. Without the icall pass each mismatched call is a
  * wasm `call_indirect` signature trap.
@@ -34,7 +34,7 @@ static void ict_check(const char *what, u32 got, u32 want) {
 static u32 fbits(f32 f) { union { f32 f; u32 u; } x; x.f = f; return x.u; }
 
 /* P29: view_background_draw's camera callback site (port P28, game_eu_13DC30.c:104):
- *   gdl = D_80089578[D_800B0DF0->unk8](gdl, x, y, z, yaw, pitch, roll, handle);
+ *   gdl = g_view_bg_fns[g_level_header->unk8](gdl, x, y, z, yaw, pitch, roll, handle);
  * typed Gfx *(*)(Gfx *, f32 x6, s32), i.e. the wasm site i:iffffffi. o32 (int first argument): the 3 first
  * floats travel as bits in a1..a3, the rest on the stack, so a C callee written with int parameters must
  * see the float bit patterns. Both an exact-typed and an int-typed callee are called through that site. */
@@ -81,7 +81,7 @@ int port_icalltest(void) {
     ict_check("[2] as f64(s32,s32,s32): fpext", d.d == 0.0, 1);
     cam_site_check("cam cb exact i:iffffffi", (void *)cam_exact, 3);
     cam_site_check("cam cb as s32 x8 (slow path)", (void *)cam_ints, 5);
-    { void **ct = (void **)port_n64_to_wasm(0x80089578); /* the ROM table D_80089578 */
+    { void **ct = (void **)port_n64_to_wasm(0x80089578); /* the ROM table g_view_bg_fns */
       extern const char *port_fsig_of(void *fp);
       int i;
       for (i = 0; i < 4; i++)

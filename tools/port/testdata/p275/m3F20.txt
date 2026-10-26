@@ -9,11 +9,11 @@
 \#^        if (group >= g_level_model_colour_counts\[mesh\]) {$#s/>=/>/ % g2
 \#^        end = group + 1;$#s/+ 1/+ 2/ % g0m1
 \#^    if (mode == 0) {$#s/== 0/== 1/ % m1all
-\#^        vtxBuf = \*(u8 \*\*) ((u8 \*) D_800DBEF4 + slot \* 0xA0 + 0x20 + D_800BE9C0 \* 4);$#s/0x20/0x24/ % m1all
-\#^        vtxBuf = \*(u8 \*\*)#s/D_800BE9C0 \* 4/D_800BE9C0 * 8/ % m1all
+\#^        vtxBuf = \*(u8 \*\*) ((u8 \*) g_world_objs + slot \* 0xA0 + 0x20 + g_dl_buf_index \* 4);$#s/0x20/0x24/ % m1all
+\#^        vtxBuf = \*(u8 \*\*)#s/g_dl_buf_index \* 4/g_dl_buf_index * 8/ % m1all
 \#^    grp = &g_level_model_colour_groups\[mesh\]\[first\];$#s/\[first\]/[0]/ % g1
 \#^        for (j = 0; j < grp->count; j++, to += 3) {$#s/to += 3/to += 4/ % m0all
-\#^            if (((u8 \*) D_800B0DF0)\[0x21\] & 4) {$#s/0x21/0x20/ % b4m0
+\#^            if (((u8 \*) g_level_header)\[0x21\] & 4) {$#s/0x21/0x20/ % b4m0
 \#^                from = (\*(u8 \*\*\*\*) D_800BE940)\[mesh\]\[g\] + j \* 3;$#s/\[g\]/[0]/ % b4m1
 \#^                from = (\*(u8 \*\*\*\*) D_800BE940)\[mesh\]\[g\] + j \* 3;$#s/j \* 3/j/ % b4m0
 \#^            } else if (mode == 0) {$#s/== 0/!= 0/ % m0all

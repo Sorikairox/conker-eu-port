@@ -1,6 +1,6 @@
 # P301 mutants for zap_bolt_update (zap_bolt_update)
 /if (\*(s16 \*) (obj + 0x7C) != -0x63) {/s/-0x63/-0x62/
-/\*(s16 \*) (obj + 0x7C) -= D_800BE9E4;/d
+/\*(s16 \*) (obj + 0x7C) -= g_frame_ticks;/d
 /if (\*(s16 \*) (obj + 0x7C) < 0) {/s/< 0/<= 0/
 /^    old\[1\] = pos\[1\];/s/pos\[1\]/pos[0]/
 /if (\*(s32 \*) follow == 0) {/s/== 0/!= 0/
@@ -9,7 +9,7 @@
 /^            target\[1\] = path\[1\];/s/path\[1\]/path[2]/
 /delta\[2\] = target\[2\] - pos\[2\];/s/- pos\[2\]/- pos[1]/
 /dist = sqrtf(/s/+ delta\[2\] \* delta\[2\]//
-/step = \*(f32 \*) (obj + 0x34) \* (f32) D_800BE9E4;/s/ \* (f32) D_800BE9E4//
+/step = \*(f32 \*) (obj + 0x34) \* (f32) g_frame_ticks;/s/ \* (f32) g_frame_ticks//
 /^    if (\*(s32 \*) (obj + 0x78) == 0) {/s/== 0/!= 0/
 /if (\*(s32 \*) (obj + 0x44) == 0) {/s/== 0/!= 0/
 /if (dist <= step) {/s/<=/</
@@ -17,7 +17,7 @@
 /\*(s32 \*) (obj + 0x44) = 25;/s/25/24/
 /\*(s32 \*) (obj + 0x3C) = 0;/d
 /target\[1\] += delta\[1\] \* 500.0f;/s/500.0f/400.0f/
-/\*(s32 \*) (obj + 0x44) -= D_800BE9E4;/s/D_800BE9E4/1/
+/\*(s32 \*) (obj + 0x44) -= g_frame_ticks;/s/g_frame_ticks/1/
 /if (\*(s32 \*) (obj + 0x44) <= 0) {/s/<= 0/< 0/
 /if (dist == 0.0f) {/s/== 0.0f/< 0.0f/
 /newPos\[1\] = target\[1\];/s/target\[1\]/old[1]/
@@ -26,8 +26,8 @@
 /vel\[1\] = k \* delta\[1\];/s/delta\[1\]/delta[0]/
 /newPos\[2\] = old\[2\] + vel\[2\];/s/old\[2\]/pos[2]/
 /^    pos\[0\] = newPos\[0\];/d
-/(D_800A1404 + random_float() \* D_800A1408) \* D_800A140C \* D_800BE9A4;/s/D_800A1404 +/D_800A1408 +/
-/(D_800A1404 + random_float() \* D_800A1408) \* D_800A140C \* D_800BE9A4;/s/ \* D_800BE9A4;/;/
+/(g_zap_bolt_speed_base + random_float() \* g_zap_bolt_speed_rand) \* g_zap_bolt_speed_scale \* g_frame_step_f;/s/g_zap_bolt_speed_base +/g_zap_bolt_speed_rand +/
+/(g_zap_bolt_speed_base + random_float() \* g_zap_bolt_speed_rand) \* g_zap_bolt_speed_scale \* g_frame_step_f;/s/ \* g_frame_step_f;/;/
 /while (1.0f < \*(f32 \*) (obj + 0x4C)) {/s/1.0f </1.0f <=/
 /start\[2\] = anchor\[2\];/s/anchor\[2\]/anchor[1]/
 /vec2_from_angle_byte((u8) r, /s/(u8) r/(s8) r/
@@ -42,7 +42,7 @@
 /dir\[0\] = end\[0\] - start\[0\];/s/end\[0\]/tip[0]/
 /dir\[1\] = end\[1\] - start\[1\];/s/end\[1\]/tip[1]/
 /if (vec3_normalize_len(dir, dir, &len, &unused)) {/s/if (/if (!/
-/k = 190.0f \* (random_float() \* D_800BE9A4);/s/190.0f/180.0f/
+/k = 190.0f \* (random_float() \* g_frame_step_f);/s/190.0f/180.0f/
 /start\[1\] += dir\[1\] \* k;/s/dir\[1\]/dir[0]/
 /^            len -= k;/d
 /seg.u00 = 0;/s/0;/1;/
@@ -60,9 +60,9 @@
 /mode = (hit != 0 || /s/? 2 : 1/? 2 : 0/
 /mode = (hit != 0 || /s/hit != 0 || //
 /mode = (hit != 0 || /s/ || \*(s32 \*) (obj + 0x78) != 0//
-/if (tracer_spawn(start, 0, 0, 0, 0, &seg, 190.0f, D_800A1410/s/190.0f, D_800A1410/D_800A1410, 190.0f/
-/if (tracer_spawn(start, 0, 0, 0, 0, &seg, 190.0f, D_800A1410/s/a \* 50.0f + 10.0f/a * 50.0f + 11.0f/
-/if (tracer_spawn(start, 0, 0, 0, 0, &seg, 190.0f, D_800A1410/s/b \* 191.0f/b * 192.0f/
+/if (tracer_spawn(start, 0, 0, 0, 0, &seg, 190.0f, g_zap_bolt_tracer_param/s/190.0f, g_zap_bolt_tracer_param/g_zap_bolt_tracer_param, 190.0f/
+/if (tracer_spawn(start, 0, 0, 0, 0, &seg, 190.0f, g_zap_bolt_tracer_param/s/a \* 50.0f + 10.0f/a * 50.0f + 11.0f/
+/if (tracer_spawn(start, 0, 0, 0, 0, &seg, 190.0f, g_zap_bolt_tracer_param/s/b \* 191.0f/b * 192.0f/
 / 0, 0, 0, 0, 0, 0, 1, mode, /s/0, 1, mode/0, 0, mode/
 / 0, 0, 0, 0, 0, 0, 1, mode, /s/(obj + 0x40), 0.0f/(obj + 0x40), 1.0f/
 / 0, 0, 0, 0, 0, 0, 1, mode, /s/0xFF, -1/0xFF, 1/
@@ -70,11 +70,11 @@
 /\*(f32 \*) (obj + 0x4C) -= 1.0f;/s/1.0f/0.5f/
 /^    if (\*(s32 \*) (obj + 0x78) != 0) {/s/!= 0/== 0/
 /(56.0f + random_float() \* 235.0f)/s/56.0f/57.0f/
-/(56.0f + random_float() \* 235.0f)/s/D_800A1414/D_800A1418/
+/(56.0f + random_float() \* 235.0f)/s/g_zap_bolt_spin_scale/g_zap_bolt_sprite_base/
 /while (1.0f < \*(f32 \*) (obj + 0x50)) {/s/1.0f </2.0f </
 /flip_sprite_particle_spawn((count & 3) + 6/s/+ 6/+ 7/
 /flip_sprite_particle_spawn((count & 3) + 6/s/+ 100/+ 101/
-/flip_sprite_particle_spawn((count & 3) + 6/s/D_800A141C + D_800A1418/D_800A1418 + D_800A141C/
+/flip_sprite_particle_spawn((count & 3) + 6/s/g_zap_bolt_sprite_rand + g_zap_bolt_sprite_base/g_zap_bolt_sprite_base + g_zap_bolt_sprite_rand/
 /flip_sprite_particle_spawn((count & 3) + 6/s/anchor/pos/
 /\*(f32 \*) (obj + 0x50) -= 1.0f;/s/1.0f/0.5f/
 / 0, 0, 0, 0, 0, 0, 1, mode, /s/176U/177U/

@@ -37,11 +37,11 @@ struct260 *fx_carrier_spawn(s16 arg0, u8 arg1, u8 arg2, f32 arg3, u8 *arg4, u8 a
 }
 
 /* P204 (from the s163 draft 7814_b.c) */
-extern s32 (*D_80090040[])(u8 *);
+extern s32 (*g_fx_carrier_update_fns[])(u8 *); /* was D_80090040 */
 f32 vec3_length(struct17 *);
 void fx_carrier_attach_trail(u8 *);
 // effect_follow_update: per-frame handler (D_8008A980 table, void (u8 *)) of an effect-carrier object: remembers its
-// position (+0x30) and flag +0x2D bit 0, then runs the kind's update D_80090040[+0x2C]; when that returns 0 the object
+// position (+0x30) and flag +0x2D bit 0, then runs the kind's update g_fx_carrier_update_fns[+0x2C]; when that returns 0 the object
 // is retired (+0xE = -1, +0xD bit 0). Otherwise, when bit 0 of +0x2D was set before and is still set and the object
 // moved less than +0x3C this frame, an effect is attached by fx_carrier_attach_trail if there is none yet (+0x28 == NULL);
 // in every other case fx_carrier_release releases the attached effect.
@@ -55,7 +55,7 @@ void effect_follow_update(u8 *obj) {
     pos[1] = *(f32 *) (obj + 0x34);
     pos[2] = *(f32 *) (obj + 0x38);
     active = obj[0x2D] & 1;
-    if (D_80090040[obj[0x2C]](obj) == 0) {
+    if (g_fx_carrier_update_fns[obj[0x2C]](obj) == 0) {
         *(s16 *) (obj + 0xE) = -1;
         obj[0xD] |= 1;
         return;
@@ -74,18 +74,18 @@ void effect_follow_update(u8 *obj) {
     fx_carrier_release(obj);
 }
 
-extern void (*D_80090044[])(u8 *, s32, u8);
+extern void (*g_fx_carrier_msg_fns[])(u8 *, s32, u8); /* was D_80090044 */
 /* was func_151D7958 */
 void fx_carrier_on_message(u8 *arg0, s32 arg1, u8 arg2)
 {
   u8 *new_var;
-  if (D_80090044[arg0[0x2C]] != 0)
+  if (g_fx_carrier_msg_fns[arg0[0x2C]] != 0)
   {
     new_var = &arg0[0x2C]; // fakematch: second index read must not be CSEd
     if (arg1)
     {
     }
-    D_80090044[*new_var](arg0, arg1, arg2);
+    g_fx_carrier_msg_fns[*new_var](arg0, arg1, arg2);
   }
 }
 
@@ -154,9 +154,9 @@ void char_glow_on_message(struct102 *obj, u8 *ev, u8 type) {
     }
 }
 
-extern u8 D_800AB660[];
-extern u8 D_800AB6B4[];
-extern s32 (*D_80090048[])(u8 *);
+extern u8 g_char_glow_bone_pts[]; /* was D_800AB660 */
+extern u8 g_char_glow_bones[]; /* was D_800AB6B4 */
+extern s32 (*g_char_glow_point_fns[])(u8 *); /* was D_80090048 */
 
 /* was func_151D7B74 */
 s32 char_glow_bone_point_update(u8 *arg0) {
@@ -182,10 +182,10 @@ s32 char_glow_bone_point_update(u8 *arg0) {
         f[5] &= ~1;
         return 1;
     }
-    mtx_transform_point_or_origin(&D_800AB660[s[5] * 12], f + 8, *(u8 **)(obj + 0x1D4) + (D_800AB6B4[s[5]] << 6));
+    mtx_transform_point_or_origin(&g_char_glow_bone_pts[s[5] * 12], f + 8, *(u8 **)(obj + 0x1D4) + (g_char_glow_bones[s[5]] << 6));
     f[5] |= 1;
     if ((s8)s[6] != -1) {
-        return D_80090048[(s8)s[6]](arg0);
+        return g_char_glow_point_fns[(s8)s[6]](arg0);
     }
     return 1;
 }
@@ -274,7 +274,7 @@ void fx_carrier_attach_trail(u8 *arg0) {
 // trail_points_update: P232. Particle-object callback (s32 handler, returns 1 = keep / 0 = done) for a ring of
 // points: the ring holds +0x25 entries of 0x1C bytes at +0x94 (position at +0, velocity at +0xC), +0x2E is the
 // write cursor and +0x2D the oldest entry. Each frame every entry from the one before the cursor back to the oldest
-// (wrapping) is advanced by trail_point_apply_gravity with the frame step D_800BE9A4. While there are points (+0x2C > 0) the
+// (wrapping) is advanced by trail_point_apply_gravity with the frame step g_frame_step_f. While there are points (+0x2C > 0) the
 // head position +0x54 is the oldest entry's position, else it is zeroed. With fewer than 2 points and flag 8 of
 // +0x1E the object ends (returns 0).
 /* was func_151D7EDC */
@@ -293,7 +293,7 @@ s32 glow_trail_points_update(u8 *arg0) {
             i = arg0[0x25] - 1;
         }
         e = ring + i * 0x1C;
-        trail_point_apply_gravity((f32 *) e, (f32 *) (e + 0xC), D_800BE9A4);
+        trail_point_apply_gravity((f32 *) e, (f32 *) (e + 0xC), g_frame_step_f);
     }
     if ((s8) arg0[0x2C] > 0) {
         e = ring + (s8) arg0[0x2D] * 0x1C;
@@ -347,13 +347,13 @@ s32 glow_trail_emit_points(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x10)) = (f32) (*(f32 *)((u8 *)(&sp.uB4) + 0));
     (*(s32 *)((u8 *)arg0 + 0x14)) = (s32) (*(s32 *)((u8 *)(&sp.uB4) + 4));
     (*(s32 *)((u8 *)arg0 + 0x18)) = (s32) (*(s32 *)((u8 *)(&sp.uB4) + 8));
-    (*(f32 *)((u8 *)temp_s1 + 0x14)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x14)) + (0.25f * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 0x14)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x14)) + (0.25f * g_frame_step_f));
     temp_f18 = (*(f32 *)((u8 *)temp_s1 + 0x14));
     if (temp_f18 > 1.0f) {
         temp_f0 = 1.0f / temp_f18;
         temp_v0_2 = temp_s1 + 4;
         (*(f32 *)((u8 *)(&sp.u88) + 0)) = (*(f32 *)((u8 *)temp_v0_2 + 0));
-        var_f22 = (*(f32 *)((u8 *)temp_s1 + 0x10)) + D_800BE9A4;
+        var_f22 = (*(f32 *)((u8 *)temp_s1 + 0x10)) + g_frame_step_f;
         (*(s32 *)((u8 *)(&sp.u88) + 4)) = (s32) (*(s32 *)((u8 *)temp_v0_2 + 4));
         (*(s32 *)((u8 *)(&sp.u88) + 8)) = (s32) (*(s32 *)((u8 *)temp_v0_2 + 8));
         temp_f26 = var_f22 * temp_f0;
@@ -406,7 +406,7 @@ f32 wrap_float_range(f32, f32, f32);
  *    +0x10 instead and skip one more) back to the oldest, store each segment length at entry +0x10 and sum them;
  *    once the sum passes 80 the entry is pulled back along its segment so the trail is exactly 80 long (+0x10
  *    shortened to match) and every older entry is dropped (oldest moves up to it, count decreases).
- * 2. state (+0x98) f32 +0x18 += -41 * frame step D_800BE9A4, wrapped by wrap_float_range(x, 16383, -16384); each
+ * 2. state (+0x98) f32 +0x18 += -41 * frame step g_frame_step_f, wrapped by wrap_float_range(x, 16383, -16384); each
  *    entry's +0x18 = wrap_float_range(that + sum of lengths so far * 46.88, 16383, -16384).
  * 3. entry byte +0x14 (alpha): 60 while the running length is <= 0.299 * total, then fading linearly to 0 at the
  *    end ((u32) conversion as in the asm).
@@ -479,7 +479,7 @@ s32 glow_trail_limit_length(u8 *obj) {
         }
 
         if ((s8) obj[0x2C] >= 2) {
-            *(f32 *) (state + 0x18) += -41.0f * D_800BE9A4;
+            *(f32 *) (state + 0x18) += -41.0f * g_frame_step_f;
             *(f32 *) (state + 0x18) = wrap_float_range(*(f32 *) (state + 0x18), 16383.0f, -16384.0f);
             acc = 0.0f;
             i = (s8) obj[0x2E] - 1;
@@ -533,10 +533,10 @@ s32 gfx_geometry_mode_cached(s32, s32, s32);
 s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
 u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
-extern s32 D_80091084;
-extern s32 D_800D30BC;
-extern s32 D_800DD608;
-extern s32 D_800DD618;
+extern s32 g_ribbon_trail_texture; /* was D_80091084 */
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
+extern s32 g_view_yaw_sin; /* was D_800DD608 */
+extern s32 g_view_yaw_cos; /* was D_800DD618 */
 
 /* was func_151D8674 */
 u8 *char_glow_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
@@ -593,7 +593,7 @@ u8 *char_glow_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
             sp.uA7 = 1;
             temp_v1 = ((u8 *)&g_render_mode_pairs);
             var_t0 = sp.uA8;
-            var_s2 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached(var_s2, &D_80091084, 0, 0, 0, 0, 0x1F, 0, 0, &sp.uA7, 0x3E), 0x200005, 0x1F0600), 0x4C, &sp.uA7), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0xC)) | (*(s32 *)((u8 *)temp_v1 + 8)), &sp.uA7);
+            var_s2 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached(var_s2, &g_ribbon_trail_texture, 0, 0, 0, 0, 0x1F, 0, 0, &sp.uA7, 0x3E), 0x200005, 0x1F0600), 0x4C, &sp.uA7), g_gfx_tlut_mode | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0xC)) | (*(s32 *)((u8 *)temp_v1 + 8)), &sp.uA7);
             if ((*(u16 *)((u8 *)arg0 + 0x1E)) & 2) {
                 var_s3 = (*(s8 *)((u8 *)arg0 + 0x2E)) - 1;
                 if (var_s3 < 0) {
@@ -625,9 +625,9 @@ u8 *char_glow_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
             (*(f32 *)((u8 *)(&sp.uC0) + 0)) = (*(f32 *)((u8 *)var_s1 + 0));
             (*(s32 *)((u8 *)(&sp.uC0) + 4)) = (s32) (*(s32 *)((u8 *)var_s1 + 4));
             (*(s32 *)((u8 *)(&sp.uC0) + 8)) = (s32) (*(s32 *)((u8 *)var_s1 + 8));
-            temp_f20 = *(&D_800DD618 + temp_v1_2) * 5.5f;
+            temp_f20 = *(&g_view_yaw_cos + temp_v1_2) * 5.5f;
             var_v0 = (*(u8 *)((u8 *)var_s1 + 0x14));
-            temp_f22 = *(&D_800DD608 + temp_v1_2) * 5.5f;
+            temp_f22 = *(&g_view_yaw_sin + temp_v1_2) * 5.5f;
             var_f0 = (*(f32 *)((u8 *)var_s1 + 0x18));
             if ((*(u16 *)((u8 *)arg0 + 0x1E)) & 8) {
                 var_v1_2 = ((*(s16 *)((u8 *)arg0 + 0x1C)) * 0xC) & 0xFF;
@@ -725,8 +725,8 @@ u8 *char_glow_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
 void trail_point_apply_gravity(f32 *arg0, f32 *arg1, f32 arg2) {
     f32 temp_f2 = *arg1;
 
-    *arg1 += D_800AB6CC * arg2;
-    arg0[1] += (temp_f2 * arg2) + (D_800AB6D0 * (arg2 * arg2));
+    *arg1 += g_trail_point_gravity * arg2;
+    arg0[1] += (temp_f2 * arg2) + (g_trail_point_gravity_half * (arg2 * arg2));
 }
 
 /* was func_151D8D14 */

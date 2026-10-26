@@ -7,15 +7,15 @@
 void zone_stub(s32 arg0) {
 }
 
-extern u8 D_80088CF0[8];
-extern u8 D_80088CF8[8];
+extern u8 g_trigger_zone_ids[8]; /* was D_80088CF0 */
+extern u8 g_trigger_zone_objs[8]; /* was D_80088CF8 */
 s32 trigger_contains_point(u8 *, s32, s32, s32);
 u8 *world_record_find(u8);
 void trigger_set_disabled(s32, s32);
 
-// trigger_zones_check: hit callback (D_800E0D64, set in game_3DC30) for the point (x, y, z): for each of
-// the 8 zones D_80088CF0 (D_800D34B8 records of 0x34 bytes) that contains it (trigger_contains_point), the matching
-// D_80088CF8 object id gets state 3 in its +0x73 low bits (world_record_find), or the zone itself is triggered
+// trigger_zones_check: hit callback (g_level_point_hit_cb, set in game_3DC30) for the point (x, y, z): for each of
+// the 8 zones g_trigger_zone_ids (D_800D34B8 records of 0x34 bytes) that contains it (trigger_contains_point), the matching
+// g_trigger_zone_objs object id gets state 3 in its +0x73 low bits (world_record_find), or the zone itself is triggered
 // (trigger_set_disabled(zone, 1)) when the id is 0. Returns 0 (the asm leaves the last helper's v0; the caller
 // ignores it).
 /* was func_150DE8AC */
@@ -24,12 +24,12 @@ s32 trigger_zones_check(s32 x, s32 y, s32 z) {
     s32 i;
 
     for (i = 0; i < 8; i++) {
-        if (trigger_contains_point(D_800D34B8 + D_80088CF0[i] * 0x34, x, y, z) != 0) {
-            if (D_80088CF8[i] != 0) {
-                obj = world_record_find(D_80088CF8[i]);
+        if (trigger_contains_point(D_800D34B8 + g_trigger_zone_ids[i] * 0x34, x, y, z) != 0) {
+            if (g_trigger_zone_objs[i] != 0) {
+                obj = world_record_find(g_trigger_zone_objs[i]);
                 obj[0x73] = (obj[0x73] & ~3) | 3;
             } else {
-                trigger_set_disabled(D_80088CF0[i], 1);
+                trigger_set_disabled(g_trigger_zone_ids[i], 1);
             }
         }
     }
@@ -38,7 +38,7 @@ s32 trigger_zones_check(s32 x, s32 y, s32 z) {
 
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 void segment_override_add(s32, s32, s32, s32, s32);
-extern s32 D_800905B4;
+extern s32 g_zone_debris_tex_sets; /* was D_800905B4 */
 
 /* was func_150DE9D8 */
 void zone_debris_fall_update(u8 *arg0) {
@@ -56,7 +56,7 @@ void zone_debris_fall_update(u8 *arg0) {
     s32 var_s2;
 
     if (((*(u8 *)((u8 *)arg0 + 0x73)) & 3) == 3) {
-        temp_f12 = (f32) D_800BE9E4;
+        temp_f12 = (f32) g_frame_ticks;
         (*(f32 *)((u8 *)arg0 + 0)) = (f32) ((*(f32 *)((u8 *)arg0 + 0)) + ((*(f32 *)((u8 *)arg0 + 0x60)) * temp_f12));
         temp_f0 = (*(f32 *)((u8 *)arg0 + 0));
         if (temp_f0 < 0.0f) {
@@ -78,11 +78,11 @@ void zone_debris_fall_update(u8 *arg0) {
         } else if (temp_f0_3 >= 360.0f) {
             (*(f32 *)((u8 *)arg0 + 8)) = (f32) (temp_f0_3 - 360.0f);
         }
-        (*(s16 *)((u8 *)arg0 + 0x5C)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x5C)) - ((*(s32 *)((u8 *)arg0 + 0x3C)) * D_800BE9E4));
-        (*(s16 *)((u8 *)arg0 + 0x10)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x10)) + ((*(s16 *)((u8 *)arg0 + 0x5A)) * D_800BE9E4));
-        (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x12)) + ((*(s16 *)((u8 *)arg0 + 0x5C)) * D_800BE9E4));
-        (*(s16 *)((u8 *)arg0 + 0x14)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x14)) + ((*(s16 *)((u8 *)arg0 + 0x5E)) * D_800BE9E4));
-        temp_v0 = (*(u8 *)((u8 *)arg0 + 0x8A)) - D_800BE9E4;
+        (*(s16 *)((u8 *)arg0 + 0x5C)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x5C)) - ((*(s32 *)((u8 *)arg0 + 0x3C)) * g_frame_ticks));
+        (*(s16 *)((u8 *)arg0 + 0x10)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x10)) + ((*(s16 *)((u8 *)arg0 + 0x5A)) * g_frame_ticks));
+        (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x12)) + ((*(s16 *)((u8 *)arg0 + 0x5C)) * g_frame_ticks));
+        (*(s16 *)((u8 *)arg0 + 0x14)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x14)) + ((*(s16 *)((u8 *)arg0 + 0x5E)) * g_frame_ticks));
+        temp_v0 = (*(u8 *)((u8 *)arg0 + 0x8A)) - g_frame_ticks;
         if (temp_v0 > 0) {
             (*(u8 *)((u8 *)arg0 + 0x8A)) = (u8) temp_v0;
         } else {
@@ -91,7 +91,7 @@ void zone_debris_fall_update(u8 *arg0) {
     }
     if (((*(u16 *)((u8 *)arg0 + 0x54)) & 0xFFFF7FFF) == 0xC) {
         var_s2 = 4;
-        var_s1 = (s32 *) ((u8 *) &D_800905B4 + (*(s32 *)((u8 *)arg0 + 0x7C)) * 8);
+        var_s1 = (s32 *) ((u8 *) &g_zone_debris_tex_sets + (*(s32 *)((u8 *)arg0 + 0x7C)) * 8);
         var_s0 = 5;
         do {
             temp_v0_2 = texture_cache_lookup(*var_s1, &sp.u54, 3, 0);
@@ -107,16 +107,16 @@ void obj_sine_wobble_update(u8 *arg0) {
     (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) (s32) ((math_sin_u8(((s32) (*(s32 *)((u8 *)arg0 + 0x7C)) >> 3) & 0xFF) * 10.2f) + 1130.0f);
     (*(f32 *)((u8 *)arg0 + 0)) = (f32) (math_sin_u8(((s32) (*(s32 *)((u8 *)arg0 + 0x80)) >> 3) & 0xFF) * 1.1f);
     (*(f32 *)((u8 *)arg0 + 8)) = (f32) (math_sin_u8(((s32) (*(s32 *)((u8 *)arg0 + 0x84)) >> 3) & 0xFF) * 1.1f);
-    (*(s32 *)((u8 *)arg0 + 0x7C)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x7C)) + (D_800BE9E4 * 0xC));
-    (*(s32 *)((u8 *)arg0 + 0x80)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x80)) + (D_800BE9E4 * 0x10));
-    (*(s32 *)((u8 *)arg0 + 0x84)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x84)) + (D_800BE9E4 * 0x18));
+    (*(s32 *)((u8 *)arg0 + 0x7C)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x7C)) + (g_frame_ticks * 0xC));
+    (*(s32 *)((u8 *)arg0 + 0x80)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x80)) + (g_frame_ticks * 0x10));
+    (*(s32 *)((u8 *)arg0 + 0x84)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x84)) + (g_frame_ticks * 0x18));
 }
 void spawn_region_random_point_3d(u8 *, f32 *);
 s32 vec3_normalize_len(f32 *, f32 *, f32 *, f32 *);
 s32 memcpy(u8 *, void *, s32);
 
 // beam_link_fire: timer handler of a link effect p (timer s16 at p+0x28, two objects at p+0x2C / p+0x30). When the
-// timer runs out (minus D_800BE9E4) it fires a bolt (effect3d_spawn_full template, kind 0xBE or 0xBF at random, size 706,
+// timer runs out (minus g_frame_ticks) it fires a bolt (effect3d_spawn_full template, kind 0xBE or 0xBF at random, size 706,
 // at the first object's position) towards the second object at speed 25..55 (x0.18 for kind 0xBF); the bolt's +0x110
 // gets {velocity, travel time = distance / speed, the flat side vector (-z, 0, x) and flat direction (x, 0, z) of the
 // normalised horizontal offset}. The timer restarts at 200..400.
@@ -160,7 +160,7 @@ void beam_link_fire(u8 *p) {
     s16 *timer;
     u8 *e;
 
-    *(s16 *) (p + 0x28) -= D_800BE9E4;
+    *(s16 *) (p + 0x28) -= g_frame_ticks;
     if (*(s16 *) (p + 0x28) >= 0) {
         return;
     }
@@ -190,9 +190,9 @@ void beam_link_fire(u8 *p) {
     rec.side[0] = -rec.flat[2];
     rec.side[1] = 0.0f;
     rec.side[2] = rec.flat[0];
-    t.u28[0] = ((f32 *) D_800A5860)[0];
-    t.u28[1] = ((f32 *) D_800A5860)[1];
-    t.u28[2] = ((f32 *) D_800A5860)[2];
+    t.u28[0] = ((f32 *) g_vec3_zero)[0];
+    t.u28[1] = ((f32 *) g_vec3_zero)[1];
+    t.u28[2] = ((f32 *) g_vec3_zero)[2];
     t.u1 = 0;
     t.u2 = 0x3B03;
     t.u4 = 300;
@@ -205,9 +205,9 @@ void beam_link_fire(u8 *p) {
     random_float(); /* result unused */
     t.size[1] = 706.0f;
     t.size[0] = 706.0f;
-    t.u28[0] = ((f32 *) D_800A5860)[0];
-    t.u28[1] = ((f32 *) D_800A5860)[1];
-    t.u28[2] = ((f32 *) D_800A5860)[2];
+    t.u28[0] = ((f32 *) g_vec3_zero)[0];
+    t.u28[1] = ((f32 *) g_vec3_zero)[1];
+    t.u28[2] = ((f32 *) g_vec3_zero)[2];
     t.mode = 0x65C0000;
     t.u44[0] = 0xFF;
     t.u44[1] = 0xFF;
@@ -230,10 +230,10 @@ void beam_link_fire(u8 *p) {
 
 /* was func_150DF04C */
 s32 bolt_move_step(u8 *arg0) {
-    (*(f32 *)((u8 *)arg0 + 0x34)) += ((*(f32 *)((u8 *)arg0 + 0x110)) * D_800BE9A4);
-    (*(f32 *)((u8 *)arg0 + 0x38)) += ((*(f32 *)((u8 *)arg0 + 0x114)) * D_800BE9A4);
-    (*(f32 *)((u8 *)arg0 + 0x3C)) += ((*(f32 *)((u8 *)arg0 + 0x118)) * D_800BE9A4);
-    (*(f32 *)((u8 *)arg0 + 0x11C)) -= D_800BE9A4;
+    (*(f32 *)((u8 *)arg0 + 0x34)) += ((*(f32 *)((u8 *)arg0 + 0x110)) * g_frame_step_f);
+    (*(f32 *)((u8 *)arg0 + 0x38)) += ((*(f32 *)((u8 *)arg0 + 0x114)) * g_frame_step_f);
+    (*(f32 *)((u8 *)arg0 + 0x3C)) += ((*(f32 *)((u8 *)arg0 + 0x118)) * g_frame_step_f);
+    (*(f32 *)((u8 *)arg0 + 0x11C)) -= g_frame_step_f;
     if ((*(f32 *)((u8 *)arg0 + 0x11C)) < 0.0f) {
         return 0;
     }
@@ -243,7 +243,7 @@ s32 bolt_move_step(u8 *arg0) {
 s32 sprite_quad_build_axes(s32, s32, s32, s16);
 /* was func_150DF0D8 */
 s32 bolt_build_quad(s32 arg0, s16 arg1) {
-    if (D_800DBFF0[D_80082FA0].unk388 < 5.0f) {
+    if (g_player_views[g_last_player_index].unk388 < 5.0f) {
         return 0;
     }
     return sprite_quad_build_axes(arg0, arg0 + 0x120, arg0 + 0x12C, arg1);
@@ -260,11 +260,11 @@ void light_groups_send_msg22_all(s32 arg0) {
     }
 }
 
-extern u8 D_800A10DB[];
-extern u8 D_800A10FB[];
+extern u8 g_light_group_ctrl_ids[]; /* was D_800A10DB */
+extern u8 g_light_group_fx_ids[]; /* was D_800A10FB */
 /* was func_150DF1A8 */
 void light_group_send_msg22(u8 arg0, s32 arg1) {
     s32 i = arg0 * 4;
-    light_ctrl_broadcast(D_800A10DB[i], 0x22, 0);
-    effect_broadcast_message(D_800A10FB[i], 0x22);
+    light_ctrl_broadcast(g_light_group_ctrl_ids[i], 0x22, 0);
+    effect_broadcast_message(g_light_group_fx_ids[i], 0x22);
 }

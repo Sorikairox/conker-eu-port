@@ -20,7 +20,7 @@
 \#^        sy = (s32) (fy \* c - fx \* s) + dy#s/+ dy/+ dx/
 \#^        sx = (s32) (fy \* s + fx \* c)#s/fy \* s + fx \* c/fx * s + fy * c/
 \#^        sx = (s32) (fy \* s + fx \* c) + dx + \*(s16 \*) (obj + 0x10);$#s/(obj + 0x10)/(obj + 0x14)/
-\#+ 0) = sx;$#s/D_800BE9C0 \* 4/0/
+\#+ 0) = sx;$#s/g_dl_buf_index \* 4/0/
 \#+ 2) = sy;$#s/+ 2) = sy/+ 6) = sy/
 \#+ 4) = sz;$#s/= sz/= sx/
 \#^        pair += 2;$#s/2/1/

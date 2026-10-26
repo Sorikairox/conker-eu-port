@@ -6,7 +6,7 @@
 /* s32 slots as in game_eu_EF6D0: the caller masks the tag itself (andi), IDO would skip the mask for a u8 parameter */
 s32 spawn_ring_emit(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
 
-/* spawn_ring_kind2_small: P238: emits 25 points of spawn handler kind 2 (D_8008ADA0) on a radius-80 ring around
+/* spawn_ring_kind2_small: P238: emits 25 points of spawn handler kind 2 (g_emit_point_spawn_fns) on a radius-80 ring around
  * (x, y, z), starting at byte angle 0 and stepping by 3, with arg8 / arg9 / argA 0 and the byte `tag` as argB
  * (spawn_ring_emit, spawn_ring_emit). Its only caller (bouncing_bomb_update, asm) passes 0xFF and ignores v0; the asm leaves
  * spawn_ring_emit's v0 in place, so it is returned. */
@@ -19,7 +19,7 @@ f32 angle_byte_cos(u8);
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
                   s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 
-/* emit_point_debris: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0,
+/* emit_point_debris: g_emit_point_spawn_fns spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0,
  * s32 a, s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`, as the game_eu_EF6D0 emitters): spawns one
  * kind-5 particle (trail_spawn) at (x, y, z) flying out along the byte angle a with a random pitch of -63..-51
  * (rand % 13 - 63) and speed 25.5..42.9 (17.4 * rand + 25.5): velocity (v sin(p) sin(a - 0x40), -v sin(p - 0x40),

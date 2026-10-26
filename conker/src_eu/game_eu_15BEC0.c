@@ -4,12 +4,12 @@
 
 
 void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
-extern f32 D_800DC434;
+extern f32 g_camera_orbit_height; /* was D_800DC434 */
 
 /* P43: camera eye height. dy = eye.y (+0x2FC) - base (+0x354) eases (math_spring_approach) towards the target height h:
  * +0x348 (95.0 with flag 0x10 of +0x5F0 and of *+0x36C), x1.5 with flag 0x400, cut below a ceiling of the followed
  * object (+0x3D0: +0x17C - 40, then the fast rate 5 / 9 is used), clamped to [+0x6F0, +0x6F4] when both are set,
- * D_800DC434 when +0x7F4; 0 with flag 0x40 outside mode 0x100 or with mode bit 0x01000000. +0x23C: dy = h at once
+ * g_camera_orbit_height when +0x7F4; 0 with flag 0x40 outside mode 0x100 or with mode bit 0x01000000. +0x23C: dy = h at once
  * (+0x25C = 0). No update (early return) when the object is more than 600 above +0x180 and idle (the 0x400 / 0xAD /
  * 0x102 / +0x3D4 / 0x137 / 0x84 == 0x194 / 0x80 tests all clear). Then eye.y = base + dy, +0x344 = eye.y - base,
  * and with object +0xAD == 1 and +0x73C, eye.y >= +0x360 + 5 (unless +0x360 == -10000).
@@ -72,7 +72,7 @@ void camera_update_eye_height(u8 *arg0) {
         }
     }
     if (*(u16 *)(arg0 + 0x7F4) != 0) {
-        h = D_800DC434;
+        h = g_camera_orbit_height;
     }
     if (arg0[0x23C] != 0) {
         *(f32 *)(arg0 + 0x25C) = 0.0f;

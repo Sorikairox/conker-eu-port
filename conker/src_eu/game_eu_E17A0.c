@@ -5,7 +5,7 @@
 
 void spawn_arc_emit(f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, f32, s32, s32);
 void explosion_light_spawn(f32 *, u8, s32);
-extern s32 D_800BEE08;
+extern s32 g_view_count_minus1; /* was D_800BEE08 */
 extern u8 D_8009FF90[];
 /* was func_150B3AB0 */
 void obj_joint_blast_fx(struct127 *arg0, u8 arg1) {
@@ -14,7 +14,7 @@ void obj_joint_blast_fx(struct127 *arg0, u8 arg1) {
     structEU_151D8E18 blk;
 
     if (arg0 != NULL && arg0->unk1D4 != NULL) {
-        camera_shake_start(&D_800DBFF0[D_800BEE08], 6, 1);
+        camera_shake_start(&g_player_views[g_view_count_minus1], 6, 1);
         angle = (*(u16 *)((u8 *)arg0 + 0x7A) >> 8) + 0x40;
         mtx_transform_point_or_origin(D_8009FF90, &pos, (u8 *)arg0->unk1D4 + 0x640);
         spawn_arc_emit(pos.unk0, pos.unk4, pos.unk8, 10.0f, angle, 0, 0xFF, (u32)random_int() % 31 + 0x28, 8, 0, 0.0f, 0, arg1);
@@ -29,7 +29,7 @@ void obj_joint_blast_fx(struct127 *arg0, u8 arg1) {
 }
 
 /* P243: readable C for emit_point_spark_ring (game_eu_E17A0, 113 insns). */
-// emit_point_spark_ring: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0,
+// emit_point_spark_ring: g_emit_point_spawn_fns spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0,
 // s32 a, s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`), the sibling of emit_point_spark (game_eu_E0170):
 // one line_fx_spawn particle (S_3f24 record) at (x, y, z) heading along the byte angle angle0 and tilted by the point
 // angle a: velocity (10 sin(a) sin(angle0 - 0x40), -10 sin(a - 0x40), 10 sin(a) sin(angle0)) (angle_byte_cos =

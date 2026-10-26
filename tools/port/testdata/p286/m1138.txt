@@ -14,7 +14,7 @@
 /obj->target + 0x3C) < 3.0f/s/</<=/
 /== obj->lastX && \*(f32 \*) &pos\[2\] == obj->lastZ) && emit) {/s/ && \*(f32 \*) &pos\[2\] == obj->lastZ//
 /== obj->lastX && \*(f32 \*) &pos\[2\] == obj->lastZ) && emit) {/s/ && emit//
-/obj->accum = obj->accum + obj->rate \* D_800BE9A4;/s/obj->rate \* //
+/obj->accum = obj->accum + obj->rate \* g_frame_step_f;/s/obj->rate \* //
 /^            if (1.0f < obj->accum) {/s/1.0f </1.0f <=/
 /t.u0 = 0x00200005;/s/5;/4;/
 /t.flags = 0x5103;/s/0x5103/0x5101/
@@ -47,6 +47,6 @@
 /^                while (1.0f < obj->accum) {/,/}/s/1.0f;/0.5f;/
 /obj->lastZ = \*(f32 \*) &pos\[2\];/s/pos\[2\]/pos[1]/
 /if (obj->flags & 1) {/s/& 1/\& 2/
-/obj->timer -= D_800BE9E4;/s/D_800BE9E4/D_800BE9E4 + 1/
+/obj->timer -= g_frame_ticks;/s/g_frame_ticks/g_frame_ticks + 1/
 /if (obj->timer < 0) {/s/< 0/<= 0/
 /^        emit = 1;/s/1/0/

@@ -32,7 +32,7 @@ s32 water_entry_effect_id(s32 arg0, s32 arg1) {
 }
 
 /* P296 */
-extern s32 D_800BEE08;
+extern s32 g_view_count_minus1; /* was D_800BEE08 */
 extern u8 *D_800D9D00;
 void ground_colour_by_depth(f32, f32 *, f32 *, f32 *);
 void spawn_circle_random_emit(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9, s32 argA, u8 argB);
@@ -93,7 +93,7 @@ void object_water_entry_splash(u8 *obj, s32 arg1, s32 arg2) {
     if (obj_fx_point_water_entry(pos, obj, (s32) ground, (u8) arg1) == 0) {
         return;
     }
-    camera_shake_start((struct108 *) ((u8 *) D_800DBFF0 + D_800BEE08 * 0x9A0), 7, 1);
+    camera_shake_start((struct108 *) ((u8 *) g_player_views + g_view_count_minus1 * 0x9A0), 7, 1);
     if (!(*(s32 *) (obj + 0xF4) & 0x2000)) {
         rumble_all_players_at((struct17 *) pos, 1502.0f, 3000.0f, 0.00033333333f, 0xC, 0xF, 0xFF, 0);
     }
@@ -250,9 +250,9 @@ s32 splash_grow_fade_update(u8 *arg0) {
     s16 temp_v0;
     s32 temp_v1;
 
-    (*(s16 *)((u8 *)arg0 + 0x128)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x128)) - D_800BE9E4);
+    (*(s16 *)((u8 *)arg0 + 0x128)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x128)) - g_frame_ticks);
     if ((*(s16 *)((u8 *)arg0 + 0x128)) > 0) {
-        temp_f0 = (*(f32 *)((u8 *)arg0 + 0x12C)) * D_800BE9A4;
+        temp_f0 = (*(f32 *)((u8 *)arg0 + 0x12C)) * g_frame_step_f;
         (*(f32 *)((u8 *)arg0 + 0x2C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x2C)) + temp_f0);
         (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x30)) + temp_f0);
     }
@@ -361,7 +361,7 @@ s32 splash_puff_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 
 s32 particle_shrink_update_c(u8 *arg0, s32 arg1) {
     s32 i;
     f32 *p = (f32 *)(arg0 + 0xA8);
-    for (i = D_800BE9E4; i != 0; i--) {
+    for (i = g_frame_ticks; i != 0; i--) {
         *(f32 *)(arg0 + 0x58) *= *p;
         *(f32 *)(arg0 + 0x60) *= *p;
     }
@@ -370,13 +370,13 @@ s32 particle_shrink_update_c(u8 *arg0, s32 arg1) {
 
 /* was func_150CC398 */
 s32 particle_ballistic_update_c(u8 *arg0) {
-    *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x3C) += (*(f32 *)(arg0 + 0x48) * D_800BE9A4) + (*(f32 *)(arg0 + 0x5C) * D_800BE9A4 * D_800BE9A4 * 0.5f);
-    *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x5C) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x20) += *(f32 *)(arg0 + 0x50) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x24) += *(f32 *)(arg0 + 0x54) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x58) * D_800BE9A4;
+    *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x3C) += (*(f32 *)(arg0 + 0x48) * g_frame_step_f) + (*(f32 *)(arg0 + 0x5C) * g_frame_step_f * g_frame_step_f * 0.5f);
+    *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x5C) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x20) += *(f32 *)(arg0 + 0x50) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x24) += *(f32 *)(arg0 + 0x54) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x58) * g_frame_step_f;
     return 1;
 }
 

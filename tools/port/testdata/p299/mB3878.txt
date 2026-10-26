@@ -7,8 +7,8 @@
 \#^    cam = (f32 \*)#s/0x9A0/0x9A4/
 \#^    cam = (f32 \*)#s/0x2F8/0x2FC/
 \#^    flag = 1;#s/= 1;/= 0;/
-\#if (!D_8008FEB0#s/if (!D_8008FEB0/if (D_8008FEB0/
-\#if (!D_8008FEB0#s/obj\[0x2E\]/obj[0x2D]/
+\#if (!g_cord_style_fns#s/if (!g_cord_style_fns/if (g_cord_style_fns/
+\#if (!g_cord_style_fns#s/obj\[0x2E\]/obj[0x2D]/
 \#gfx = gfx_geometry_mode_cached(gfx, geoSet, geoClr)#s/geoSet, geoClr/geoClr, geoSet/
 \#gfx = gfx_env_color_cached(gfx#s/primG, primB/primB, primG/
 \#gfx = gfx_prim_color_cached(gfx#s/0, 0, envR/0, 1, envR/

@@ -19,7 +19,7 @@ s#            dst\[2\] = src\[2\] + \*(s16 \*) (obj + 0x14);#            dst[2] 
 s#        st->glowTimer = 0;#        st->glowTimer = 1;# % l4init
 s#        if (g_level_id == 4 \&\& obj\[0x72\] != 0xF2) {#        if (g_level_id == 4 \&\& obj[0x72] != 0xF3) {# % l4initf2
 s#            st->glowPhase = (obj\[0x72\] == 0xF1) ? 0 : 0x80;#            st->glowPhase = (obj[0x72] == 0xF0) ? 0 : 0x80;# % l4initf1
-s#            st->sound = texture_anim_start_for(obj, D_80090688, 0, 0, 0, 0, 8);#            st->sound = texture_anim_start_for(obj, D_80090688, 0, 0, 0, 0, 9);# % l13init
+s#            st->sound = texture_anim_start_for(obj, g_tex_anim_id_ripple_wall, 0, 0, 0, 0, 8);#            st->sound = texture_anim_start_for(obj, g_tex_anim_id_ripple_wall, 0, 0, 0, 0, 9);# % l13init
 s#    t = (st->time >> 8) \& 0xFF;#    t = (st->time >> 7) \& 0xFF;# % l4run
 s#        y = (f32) (src\[1\] + \*(s16 \*) (obj + 0x12)) + c \* st->height;#        y = (f32) (src[1] + *(s16 *) (obj + 0x12)) - c * st->height;# % l4run l13run
 s#            if (z < D_800A35D4_c\[0\]) {#            if (z <= D_800A35D4_c[0]) {# % l4run l4z12k l4z12ki
@@ -31,10 +31,10 @@ s#            ((u8 \*) dst)\[0xD\] = shade;#            ((u8 *) dst)[0xD] = shad
 s#        half = (u16) (st->speed >> 1);#        half = (u16) (st->speed >> 2);# % l4run
 s#        c = math_cos_u8(((st->time >> 8) + st->speedPhase) \& 0xFF);#        c = math_cos_u8(((st->time >> 8) - st->speedPhase) \& 0xFF);# % l4run
 s#        speed = (u16) (u32) ((f32) half + (c + 1\.0f) \* 0\.5f \* (f32) half);#        speed = (u16) (u32) ((f32) half + (c + 1.0f) * 0.25f * (f32) half);# % l4run l4spd
-s#    st->time -= speed \* D_800BE9E4;#    st->time += speed * D_800BE9E4;# % l4run l13run
-s#        st->glowTimer += D_800BE9E4 \* 2;#        st->glowTimer += D_800BE9E4;# % l4glow
+s#    st->time -= speed \* g_frame_ticks;#    st->time += speed * g_frame_ticks;# % l4run l13run
+s#        st->glowTimer += g_frame_ticks \* 2;#        st->glowTimer += g_frame_ticks;# % l4glow
 s#        obj\[0x8A\] = (u32) ((c + 1\.0f) \* 0\.5f \* 205\.0f + 50\.0f);#        obj[0x8A] = (u32) ((c + 1.0f) * 0.5f * 205.0f + 51.0f);# % l4glow
-s#        uv_rotate(\*(u8 \*\*) (obj + 0x20 + D_800BE9C0 \* 4), (s32 \*) st->uv, \*(u16 \*) (obj + 0x16), st->rot, uh, uw);#        uv_rotate(*(u8 **) (obj + 0x20), (s32 *) st->uv, *(u16 *) (obj + 0x16), st->rot, uh, uw);# % l13feb
+s#        uv_rotate(\*(u8 \*\*) (obj + 0x20 + g_dl_buf_index \* 4), (s32 \*) st->uv, \*(u16 \*) (obj + 0x16), st->rot, uh, uw);#        uv_rotate(*(u8 **) (obj + 0x20), (s32 *) st->uv, *(u16 *) (obj + 0x16), st->rot, uh, uw);# % l13feb
 s#        if (st->rot >= 360\.0f) {#        if (st->rot > 360.0f) {# % l13spinw l13rot360
 s#            st->rot -= 360\.0f;#            st->rot -= 359.0f;# % l13spinw
 s#        } else if (st->rot < 0\.0f) {#        } else if (st->rot < -1.0f) {# % l13spinn

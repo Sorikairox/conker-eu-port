@@ -6,8 +6,8 @@
 void scenery_platform_drift_update(s32, s32, s32, f32);
 /* was func_150C7D70 */
 void scenery_drift_by_level_flag(s32 arg0) {
-    if (!((*(u8 *)((u8 *)D_800D2E4C + 0xA)) & 8)) {
-        if (!(D_800DBEF4->pad70[3] & 4)) {
+    if (!((*(u8 *)((u8 *)g_save_progress_bits + 0xA)) & 8)) {
+        if (!(g_world_objs->pad70[3] & 4)) {
             scenery_platform_drift_update(arg0, 1, 0x353, 1000.0f);
             return;
         }
@@ -20,7 +20,7 @@ void scenery_spin_z_update(u8 *);
 void scenery_spin_z_level_neg(u8 *arg0) {
     u8 *p;
     if (!(arg0[0x73] & 4)) {
-        p = (u8 *)D_800DBEF4;
+        p = (u8 *)g_world_objs;
         p += 0x1E1;  // fakematch: keeps the dead addiu (p += K+1; p--;)
         p--;  // fakematch: pairs with p += K+1
         *(s32 *)(arg0 + 0x3C) = -(*(s32 *)(p + 0x3C) & 0xFFFF0000) & 0xFFFF0000;
@@ -31,7 +31,7 @@ void scenery_spin_z_level_neg(u8 *arg0) {
 /* was func_150C7E30 */
 void scenery_spin_z_level(u8 *arg0) {
     u8 *p;
-    p = (u8 *)D_800DBEF4;
+    p = (u8 *)g_world_objs;
     p += 0x1E1;  // fakematch: keeps the dead addiu (p += K+1; p--;)
     p--;  // fakematch: pairs with p += K+1
     *(s32 *)(arg0 + 0x3C) = *(s32 *)(p + 0x3C) & 0xFFFF0000;
@@ -41,7 +41,7 @@ void scenery_spin_z_level(u8 *arg0) {
 void scenery_start_pending_anim(u8 *obj);
 // obj_shade_from_level: P237. Object callback (same family as scenery_spin_z_level_neg / scenery_spin_z_level): runs scenery_start_pending_anim(obj),
 // then, unless the object's +0x73 bit 2 is set, gives its model record (+0x7C, when there is one) the shade byte
-// +0x13 = the level block's (D_800DBEF4) s16 +0x21C / 16.
+// +0x13 = the level block's (g_world_objs) s16 +0x21C / 16.
 /* was func_150C7E68 */
 void obj_shade_from_level(u8 *obj) {
     u8 *rec;
@@ -50,7 +50,7 @@ void obj_shade_from_level(u8 *obj) {
     if (!(obj[0x73] & 4)) {
         rec = *(u8 **) (obj + 0x7C);
         if (rec != NULL) {
-            rec[0x13] = *(s16 *) ((u8 *) D_800DBEF4 + 0x21C) >> 4;
+            rec[0x13] = *(s16 *) ((u8 *) g_world_objs + 0x21C) >> 4;
         }
     }
 }
@@ -76,7 +76,7 @@ void zone_ambience_update(s32 arg0) {
     u8 temp_v0_2;
 
     sp44 = arg0 * 0x9A0;
-    temp_v0 = &D_800DBFF0[arg0];
+    temp_v0 = &g_player_views[arg0];
     var_a1 = (s32) temp_v0->unk2FC;
     temp_s0 = (s32) temp_v0->unk2F8 + 0x972;
     temp_s1 = (s32) temp_v0->unk300 - 0x6EF;
@@ -85,13 +85,13 @@ void zone_ambience_update(s32 arg0) {
             music_play_song(0x5F, 0xF, 6);
             music_stop_song(0x10, 4);
             D_80088B94 = 1;
-            var_a1 = (s32) (*(f32 *)((u8 *)((D_800DBFF0 + sp44)) + 0x2FC));
+            var_a1 = (s32) (*(f32 *)((u8 *)((g_player_views + sp44)) + 0x2FC));
         }
     } else if (D_80088B94 != 0) {
         music_play_song(0xF, 0x5F, 4);
         music_play_song(0x10, 0, 3);
         D_80088B94 = 0;
-        var_a1 = (s32) (*(f32 *)((u8 *)((D_800DBFF0 + sp44)) + 0x2FC));
+        var_a1 = (s32) (*(f32 *)((u8 *)((g_player_views + sp44)) + 0x2FC));
     }
     if (((var_a1 - 0x62F) < 0) && (((temp_s0 * temp_s0) + (temp_s1 * temp_s1)) < 0xC5C10) && ((u32) (random_int() & 0xFFFF) < 0x2000U)) {
         temp_s1_2 = random_int() % 900U;

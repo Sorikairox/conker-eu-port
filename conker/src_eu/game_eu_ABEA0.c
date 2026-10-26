@@ -11,7 +11,7 @@ s32 *face_anim_body_table(s32 arg0, s32 *arg1);
 void face_anim_start(struct127 *obj, u8 anim, u8 prio, u16 time, s32 arg4);
 
 
-/* P48: eye blink of object obj (+0x6A / +0x6B eyelid states, +0x6E countdown in frames of D_800BE9E4). Id 0x2B
+/* P48: eye blink of object obj (+0x6A / +0x6B eyelid states, +0x6E countdown in frames of g_frame_ticks). Id 0x2B
  * and D_800C35EA == 1: nothing. A player-controlled object whose controller +0x120 is set keeps both eyes at 1.
  * When the countdown runs out (and +0x6C != 1) both states toggle; reopened eyes wait 10 + random % 140. */
 /* was func_1507E690 */
@@ -30,8 +30,8 @@ void face_eye_blink_update(u8 *obj) {
     if (obj[0x6B] >= 3) {
         obj[0x6B] = 0;
     }
-    if (obj[0x6E] >= D_800BE9E4) {
-        obj[0x6E] -= D_800BE9E4;
+    if (obj[0x6E] >= g_frame_ticks) {
+        obj[0x6E] -= g_frame_ticks;
         return;
     }
     obj[0x6E] = 0;
@@ -188,7 +188,7 @@ s32 face_blink_allowed(u8 *arg0)
 
 }
 
-// P45: per-record animation / interaction timer step (after the state handler). +0x72 counts down by D_800BE9E4
+// P45: per-record animation / interaction timer step (after the state handler). +0x72 counts down by g_frame_ticks
 // (0xFFFE = frozen: return; 0xFFFF = forever); when face_blink_allowed says so, face_eye_blink_update; once +0x72 is 0 and
 // +0x70 != +0x6F, face_anim_reset_default. Records of type +5 == 2 are skipped.
 /* was func_1507EB1C */
@@ -205,7 +205,7 @@ void face_anim_timer_step(u8 *arg0) {
             return;
         }
         if (v != 0xFFFF) {
-            t = D_800BE9E4;
+            t = g_frame_ticks;
             if (t < (s32)v) {
                 *(u16 *)(arg0 + 0x72) = v - t;
             } else {

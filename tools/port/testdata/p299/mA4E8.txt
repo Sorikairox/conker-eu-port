@@ -26,7 +26,7 @@
 \#^    blk.range = sBarRange\[0\];#s/sBarRange\[0\]/0.0f/
 \#^    blk.layoutY = sBarLayoutY\[k\]\[alt\];#s/\[alt\]/[0]/
 \#^    blk.layoutScale = sBarLayoutScale\[k\]\[alt\];#s/\[alt\]/[1]/
-\#^    s32 alt = (D_80082FA0 == 1);#s/== 1/!= 0/
+\#^    s32 alt = (g_last_player_index == 1);#s/== 1/!= 0/
 \#^        spec.rgba\[i\] = BAR_F2U(sBarColour\[k\]\[i\]);#s/\[k\]\[i\]/[k][0]/
 \#sprite2d_spawn(&spec, 8, 0#s/8, 0, 0/5, 0, 0/
 \#sprite2d_spawn(&spec, 8, 0#s/group, 1)/group, 0)/

@@ -5,7 +5,7 @@
 
 // need to figure out the structs
 s32 rope_create(s8 *, s32);
-extern s32 D_80090648;
+extern s32 g_tile_anim_tex_ids; /* was D_80090648 */
 extern s32 g_level_rope_list; /* was D_80096750 */
 
 /* was func_15010110 */
@@ -25,8 +25,8 @@ void level_obj_init_ropes(void) {
     s8 temp_s2;
     s8 var_s0;
 
-    level_dl_add_texture_scroll((*(s32 *)((u8 *)g_level_part_dls + 0)), (*(s32 *)((u8 *)(&D_80090648) + 0x50)), 0, -1, 0, 0, 0, -8);
-    level_dl_add_texture_scroll((*(s32 *)((u8 *)g_level_part_dls + 4)), (*(s32 *)((u8 *)(&D_80090648) + 0x50)), 0, -1, 0, 1, 0, -8);
+    level_dl_add_texture_scroll((*(s32 *)((u8 *)g_level_part_dls + 0)), (*(s32 *)((u8 *)(&g_tile_anim_tex_ids) + 0x50)), 0, -1, 0, 0, 0, -8);
+    level_dl_add_texture_scroll((*(s32 *)((u8 *)g_level_part_dls + 4)), (*(s32 *)((u8 *)(&g_tile_anim_tex_ids) + 0x50)), 0, -1, 0, 1, 0, -8);
     sp.u6C = 0;
     var_s1 = &g_level_rope_list;
     var_s0 = 0;

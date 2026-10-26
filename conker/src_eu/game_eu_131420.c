@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A2720[];
+extern u8 g_pos_debris_burst_tex[]; /* was D_800A2720 */
 
 
 /* was func_15103C10 */
@@ -10,7 +10,7 @@ void level_update_sfx_tick_b(s32 arg0) {
     sfx_cooldown_tick();
 }
 
-extern s32 D_800A2724;
+extern s32 g_pos_debris_burst_scale; /* was D_800A2724 */
 
 /* was func_15103C34 */
 void pos_debris_burst_spawn(u8 *arg0, u8 arg1, s32 arg2) {
@@ -36,8 +36,8 @@ void pos_debris_burst_spawn(u8 *arg0, u8 arg1, s32 arg2) {
         f32 u6C;
     } sp;
 
-    sp.u30 = *((u8 *)&D_800A2720);
-    sp.u2C = D_800A2724;
+    sp.u30 = *((u8 *)&g_pos_debris_burst_tex);
+    sp.u2C = g_pos_debris_burst_scale;
     sp.u34 = 8;
     sp.u38 = 4;
     (*(s32 *)((u8 *)(&sp.u3C) + 0)) = (s32) (*(s32 *)((u8 *)arg0 + 0));

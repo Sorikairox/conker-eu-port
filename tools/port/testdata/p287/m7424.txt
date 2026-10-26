@@ -1,4 +1,4 @@
-s#    Morph15117424 \*m = \&D_800896C0\[info \& 0xFFFF\];#    Morph15117424 *m = \&D_800896C0[(info \& 0xFFFF) + 1];#
+s#    Morph15117424 \*m = \&g_scenery_morphs\[info \& 0xFFFF\];#    Morph15117424 *m = \&g_scenery_morphs[(info \& 0xFFFF) + 1];#
 s#    s32 size = block\[1\] - block\[0\];#    s32 size = block[1] - block[0] + 4;#
 s#    s32 speed = info >> 16;#    s32 speed = (info >> 16) + 1;#
 s#    if (\*(u8 \*\*) (obj + 0x80) == NULL) {#    if (*(u8 **) (obj + 0x80) != NULL) {#

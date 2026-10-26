@@ -5,7 +5,7 @@
 
 /* 0x38-byte particle template copied to rec +0x10 (swarm_spawn) */
 typedef struct {
-    s32 u0;         /* 0x00 D_8008CE04 */
+    s32 u0;         /* 0x00 g_swarm_member_tpl_word0 */
     u8 *owner;      /* 0x04 the 0x3A emitter record */
     u8 pad8[4];     /* 0x08 not set */
     s16 u0C;        /* 0x0C */
@@ -28,7 +28,7 @@ typedef struct {
     u8 pad36[2];    /* 0x36 not set */
 } Puff7F90;
 
-extern s32 D_8008CE04;
+extern s32 g_swarm_member_tpl_word0; /* was D_8008CE04 */
 f32 math_cos_u8(u8 arg0);
 
 // debris_burst_spawn: makes a type 0x3A emitter record (attached to `pos` when given, else at the packed point x, y, z)
@@ -70,7 +70,7 @@ void swarm_spawn(u8 count, u8 *pos, s32 arg2, s32 x, s32 y, s32 z, s32 arg6, s32
     rec[0x37] = (u8) arg9;
     *(s16 *) (rec + 0x2E) = 0;
 
-    t.u0 = D_8008CE04;
+    t.u0 = g_swarm_member_tpl_word0;
     t.owner = rec;
     t.u16 = 0;
     t.u18 = 0;
@@ -112,7 +112,7 @@ void swarm_spawn(u8 count, u8 *pos, s32 arg2, s32 x, s32 y, s32 z, s32 arg6, s32
 
 s32 vec3_heading_u8(struct17 *arg0);
 float sqrtf(float);
-extern u8 *D_8008CDEC[];
+extern u8 *g_sprite_tex_descs[]; /* was D_8008CDEC */
 
 // bird_follow_update: steering of a flying follower sprite (leader *+0x14: position s32 +0x18 / +0x1C / +0x20, height
 // offset s16 +0x30, speed s16 +0x32; fast when the speed is above 0x3C0). Every 10 frames (2 when fast; counter in
@@ -120,8 +120,8 @@ extern u8 *D_8008CDEC[];
 // x / z position +0x20 / +0x24, plus a random -15..16). The heading +0x2A (0..0xFF) turns towards the target by
 // +0x3B (doubled when fast) the short way round; the velocity +0x26 / +0x28 = (cos, -sin)(heading) * leader speed.
 // The climb +0x32 is 100..227, negated when the leader is lower than own +0x22 - 50 - random 0..63; +0x30 is
-// clamped to +-0x400. The sprite frame +0x10 (D_8008CDEC[6..9]) and mirror flag +0x44 come from the velocity seen
-// from the camera angle (D_800DBFF0 +0x380 in degrees); +0x1C bit 8 toggles every frame.
+// clamped to +-0x400. The sprite frame +0x10 (g_sprite_tex_descs[6..9]) and mirror flag +0x44 come from the velocity seen
+// from the camera angle (g_player_views +0x380 in degrees); +0x1C bit 8 toggles every frame.
 /* was func_151787D8 */
 void swarm_follower_update(u8 *obj) {
     u8 *lead = *(u8 **) (obj + 0x14);
@@ -212,7 +212,7 @@ void swarm_follower_update(u8 *obj) {
     } else if (*(s16 *) (obj + 0x30) < -0x400) {
         *(s16 *) (obj + 0x30) = -0x400;
     }
-    view = (u32) (*(f32 *) ((u8 *) D_800DBFF0 + 0x380) * 0.7111111f); /* D_800A75C0 = 256 / 360 */
+    view = (u32) (*(f32 *) ((u8 *) g_player_views + 0x380) * 0.7111111f); /* D_800A75C0 = 256 / 360 */
     c = math_sin_u8(view);
     s = math_cos_u8(view);
     v = (s32) ((f32) *(s16 *) (obj + 0x26) * s - (f32) *(s16 *) (obj + 0x28) * c);
@@ -232,7 +232,7 @@ void swarm_follower_update(u8 *obj) {
         frame = 9;
     }
     *(s16 *) (obj + 0x1C) ^= 0x100;
-    *(u8 **) (obj + 0x10) = D_8008CDEC[frame];
+    *(u8 **) (obj + 0x10) = g_sprite_tex_descs[frame];
 }
 
 s32 node_billboard_draw(s32 gdl, u8 *obj, s16 player);
@@ -251,14 +251,14 @@ s32 swarm_follower_draw(s32 arg0, u8 *arg1, s16 arg2) {
 /* was func_eu_15178D14 */
 void swarm_empty_stub(void) {}
 
-extern s32 D_80082FA0;
-extern u8 D_800DA030[];
+extern s32 g_last_player_index; /* was D_80082FA0 */
+extern u8 g_view_mtxf[]; /* was D_800DA030 */
 s32 camera_view_test_sphere(s32, s32 *, f32, f32, f32, f32, f32, f32);
 
 // debris_emitter_update: per-frame update of a swarm_spawn emitter record. Saves the position (+0x18..+0x20, s32)
 // as the previous one (s16 +0x28..+0x2C) and moves it at most 16 units towards the target: the f32 point that +0x10
 // points to when s16 +0x14 is -0x8000, else the s16 point at +0x10. Sets the per-view visibility mask +0x36
-// (camera_view_test_sphere for views 0..D_80082FA0, radius 100, range 2500), keeps the rumble sound 0x4A2 (handle +0x2E)
+// (camera_view_test_sphere for views 0..g_last_player_index, radius 100, range 2500), keeps the rumble sound 0x4A2 (handle +0x2E)
 // playing when +0x37 is set, and moves the s16 +0x32 by (frame step + 40) towards 0x780 while the target (raised by
 // s16 +0x30) is more than 100 units away, else towards 0x3C0.
 /* was func_15178D1C */
@@ -309,8 +309,8 @@ void swarm_leader_update(u8 *rec) {
         *(s32 *) (rec + 0x20) = z + dz * k;
     }
     mask = 0;
-    for (i = 0; i <= D_80082FA0; i++) {
-        if (camera_view_test_sphere(D_800BE628 + i * 0x180, (s32 *) (D_800DA030 + i * 0x40), *(s32 *) (rec + 0x18),
+    for (i = 0; i <= g_last_player_index; i++) {
+        if (camera_view_test_sphere(g_player_cams + i * 0x180, (s32 *) (g_view_mtxf + i * 0x40), *(s32 *) (rec + 0x18),
                           *(s32 *) (rec + 0x1C), *(s32 *) (rec + 0x20), 100.0f, 100.0f, 2500.0f) != 0) {
             mask |= 1 << i;
         }
@@ -341,13 +341,13 @@ void swarm_leader_update(u8 *rec) {
     d2 = ix * ix + iy * iy + iz * iz;
     if (d2 > 10000) {
         if (*(s16 *) (rec + 0x32) != 0x780) {
-            *(s16 *) (rec + 0x32) += D_800BE9E4 + 0x28;
+            *(s16 *) (rec + 0x32) += g_frame_ticks + 0x28;
             if (*(s16 *) (rec + 0x32) > 0x780) {
                 *(s16 *) (rec + 0x32) = 0x780;
             }
         }
     } else if (*(s16 *) (rec + 0x32) != 0x3C0) {
-        *(s16 *) (rec + 0x32) -= D_800BE9E4 + 0x28;
+        *(s16 *) (rec + 0x32) -= g_frame_ticks + 0x28;
         if (*(s16 *) (rec + 0x32) < 0x3C0) {
             *(s16 *) (rec + 0x32) = 0x3C0;
         }
@@ -356,7 +356,7 @@ void swarm_leader_update(u8 *rec) {
 
 /* was func_15179108 */
 u8 *swarm_find_by_id(u8 arg0) {
-    u8 *var_v1 = D_800DD368;
+    u8 *var_v1 = g_node_list_swarms;
 
     while (var_v1 != NULL) {
         if (arg0 == var_v1[0x34]) {
@@ -408,11 +408,11 @@ s32 swarm_distance_to_obj(s32 arg0, s32 arg1) {
     }
     return 1;
 }
-extern s32 D_800DD36C;
+extern s32 g_node_list_swarm_members; /* was D_800DD36C */
 /* was func_15179314 */
 s32 swarm_destroy(u8 *arg0) {
     u8 *next; // fakematch: declared before p to move the spill slot to 0x20
-    u8 *p = (u8 *)D_800DD36C;
+    u8 *p = (u8 *)g_node_list_swarm_members;
 
     sound_voice_stop(*(u16 *)(arg0 + 0x2E));
     while (p != NULL) {

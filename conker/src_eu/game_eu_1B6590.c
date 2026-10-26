@@ -10,7 +10,7 @@ s32 model_joint_mtx_count(u8);
 void afterimage_list_append();
 
 // object_trail_start: starts (or extends) the trail effect of obj (scene event 5 / 0x2D): an existing node of the
-// D_800DF7C8 list for obj gets the longer duration and the new style; else a 0x18-byte node (type 3, 0x14) with a
+// g_afterimage_lists list for obj gets the longer duration and the new style; else a 0x18-byte node (type 3, 0x14) with a
 // zeroed buffer of 0x180 bytes per trail point of the object's kind (model_joint_mtx_count(kind), 0 = no trail) is appended.
 /* was func_15188D80 */
 void afterimage_start(struct127 *obj, s32 frames, s32 style) {
@@ -18,7 +18,7 @@ void afterimage_start(struct127 *obj, s32 frames, s32 style) {
     void *buf;
     s32 count;
 
-    for (n = *(Node8D80 **) D_800DF7C8; n != NULL; n = n->uC) {
+    for (n = *(Node8D80 **) g_afterimage_lists; n != NULL; n = n->uC) {
         if (obj == n->u10) {
             if (n->u6 < frames) {
                 n->u6 = frames;
@@ -51,11 +51,11 @@ void afterimage_start(struct127 *obj, s32 frames, s32 style) {
     n->u14 = 0;
     n->u6 = frames;
     bzero(buf, count * 0x180);
-    afterimage_list_append(n, D_800DF7C8);
+    afterimage_list_append(n, g_afterimage_lists);
 }
 
 typedef struct Node8EBC { u8 u0; u8 u1; u8 u2; u8 u3; u8 u4; s16 u6; void *u8_; struct Node8EBC *uC; s32 u10; } Node8EBC;
-extern Node8EBC *D_800DFBFC;
+extern Node8EBC *g_afterimage_world_list; /* was D_800DFBFC */
 void *allocate_memory(s32, s32, s32, s32);
 // the definition is void; one signature for wasm
 void heap_free(u8 *);
@@ -65,7 +65,7 @@ void afterimage_start_world(s32 arg0, s32 arg1, s32 arg2) {
     Node8EBC *n;
     void *buf;
 
-    for (n = D_800DFBFC; n != NULL; n = n->uC) {
+    for (n = g_afterimage_world_list; n != NULL; n = n->uC) {
         if (arg0 == n->u10) {
             if (n->u6 < arg1) {
                 n->u6 = arg1;
@@ -92,7 +92,7 @@ void afterimage_start_world(s32 arg0, s32 arg1, s32 arg2) {
     n->u8_ = buf;
     n->u10 = arg0;
     bzero(buf, 0x180);
-    afterimage_list_append(n, &D_800DFBFC);
+    afterimage_list_append(n, &g_afterimage_world_list);
 }
 
 typedef struct struct_15188FC8 {
@@ -116,7 +116,7 @@ void afterimage_list_append(struct_15188FC8 *arg0, struct_15188FC8 **arg1) {
 
 /* was func_1518900C */
 void afterimage_stop(s32 arg0) {
-    struct_eu_1B6590 *var_v0 = (struct_eu_1B6590 *)D_800DF7C8[0];
+    struct_eu_1B6590 *var_v0 = (struct_eu_1B6590 *)g_afterimage_lists[0];
     while (var_v0 != NULL) {
         if (arg0 == var_v0->unk10) {
             var_v0->unk6 = 0;
@@ -134,14 +134,14 @@ void afterimage_remove_object(s32 arg0) {
     s32 var_s1;
     u8 *var_s2;
 
-    var_s1 = *D_800DF7C8;
+    var_s1 = *g_afterimage_lists;
     var_s2 = NULL;
     if (var_s1 != 0) {
         do {
             temp_s0 = (*(s32 *)((u8 *)var_s1 + 0xC));
             if (arg0 == (*(s32 *)((u8 *)var_s1 + 0x10))) {
                 if (var_s2 == NULL) {
-                    *D_800DF7C8 = temp_s0;
+                    *g_afterimage_lists = temp_s0;
                 } else {
                     (*(s32 *)((u8 *)var_s2 + 0xC)) = temp_s0;
                 }
@@ -155,8 +155,8 @@ void afterimage_remove_object(s32 arg0) {
     }
 }
 
-extern void (*D_8008D920[])(struct_eu_1B6590 *);
-extern void (*D_8008D928[])(struct_eu_1B6590 *);
+extern void (*g_afterimage_update_fns[])(struct_eu_1B6590 *); /* was D_8008D920 */
+extern void (*g_afterimage_free_fns[])(struct_eu_1B6590 *); /* was D_8008D928 */
 // the definition is void; one signature for wasm
 void heap_free(u8 *);
 /* was func_151890E4 */
@@ -167,21 +167,21 @@ void afterimage_list_update(s32 arg0) {
     struct_eu_1B6590 *prev;
     s32 v;
 
-    head = (struct_eu_1B6590 **)&D_800DF7C8[arg0];
+    head = (struct_eu_1B6590 **)&g_afterimage_lists[arg0];
     prev = NULL;
     for (n = *head; n != NULL; n = next) {
         next = n->unkC;
         if (n->unk6 != 0) {
-            n->unk6 -= D_800BE9E4;
+            n->unk6 -= g_frame_ticks;
         }
         if (n->unk6 < 0) {
             n->unk6 = 0;
         }
-        D_8008D920[n->pad0[0]](n);
+        g_afterimage_update_fns[n->pad0[0]](n);
         v = n->pad0[3];
         if (n->unk6 != 0) {
             if (v != 0xFF) {
-                v += D_800BE9E4 * 16;
+                v += g_frame_ticks * 16;
                 if (v >= 0x100) {
                     v = 0xFF;
                 }
@@ -189,7 +189,7 @@ void afterimage_list_update(s32 arg0) {
             }
             prev = n;
         } else if (v != 0) {
-            v -= D_800BE9E4 * 8;
+            v -= g_frame_ticks * 8;
             if (v < 0) {
                 v = 0;
             }
@@ -199,7 +199,7 @@ void afterimage_list_update(s32 arg0) {
                 } else {
                     prev->unkC = next;
                 }
-                D_8008D928[n->pad0[0]](n);
+                g_afterimage_free_fns[n->pad0[0]](n);
                 heap_free((u8 *)n);
             } else {
                 n->pad0[3] = v;
@@ -209,23 +209,23 @@ void afterimage_list_update(s32 arg0) {
     }
 }
 
-extern Gfx *(*D_8008D930[])(Gfx *, struct_eu_1B6590 *, s16);
+extern Gfx *(*g_afterimage_draw_fns[])(Gfx *, struct_eu_1B6590 *, s16); /* was D_8008D930 */
 /* was func_15189270 */
 Gfx *afterimage_list_draw(Gfx *gfx, s32 arg1, s16 arg2) {
     struct_eu_1B6590 *n;
 
-    n = (struct_eu_1B6590 *)D_800DF7C8[arg1];
+    n = (struct_eu_1B6590 *)g_afterimage_lists[arg1];
     if (n == NULL) {
         return gfx;
     }
-    gSPMatrix(gfx++, D_80089810, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, g_identity_mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPGeometryMode(gfx++, 0, 0x200004);
     gSPGeometryMode(gfx++, 0x110000, 0);
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPSetConvert(gfx++, 0, 0, 0, 0, 0, 0xFF);
     while (n != NULL) {
-        gfx = D_8008D930[n->pad0[0]](gfx, n, arg2);
+        gfx = g_afterimage_draw_fns[n->pad0[0]](gfx, n, arg2);
         n = n->unkC;
     }
     return gfx;
@@ -233,7 +233,7 @@ Gfx *afterimage_list_draw(Gfx *gfx, s32 arg1, s16 arg2) {
 
 /* P249: readable C for afterimage_history_push (game_eu_1B6590, 79 insns). */
 // trail_matrix_history_push: advances an object's motion-trail matrix history. The record holds rec[1] steps of
-// `per` matrices (model_joint_mtx_count(object kind), 64 bytes each) in two halves of the buffer +8 (half D_800BE9C0 is
+// `per` matrices (model_joint_mtx_count(object kind), 64 bytes each) in two halves of the buffer +8 (half g_dl_buf_index is
 // written, the other half read): step j of this half = step j + 1 of the other half, and the last step = the
 // object's current bone matrices (object +0x10, its +0x1D4); without matrices the filled count rec[2] is reset to 0
 // and nothing else happens. Otherwise rec[2] counts up to rec[1].
@@ -246,8 +246,8 @@ void afterimage_history_push(u8 *rec) {
     n = rec[1];
     per = model_joint_mtx_count((*(u8 **) (rec + 0x10))[4]);
     total = per * n;
-    cur = D_800BE9C0 * total;
-    prev = (D_800BE9C0 ^ 1) * total;
+    cur = g_dl_buf_index * total;
+    prev = (g_dl_buf_index ^ 1) * total;
     j = 0;
     for (i = 1; i <= n; i++) {
         if (i == n) {
@@ -267,34 +267,34 @@ void afterimage_history_push(u8 *rec) {
     }
 }
 
-extern u16 **D_800895E0[];   /* per group: -> the group's entry list (4-byte entries, u16 record id first) */
-extern Mtx **D_800895F0[2];  /* per DL buffer: -> the world-object matrix array (one Mtx per record id) */
-extern u16 D_800DC318[];     /* per group: entry count */
+extern u16 **g_world_vis_lists[];   /* per group: -> the group's entry list (4-byte entries, u16 record id first); was D_800895E0 */
+extern Mtx **g_world_obj_mtx_bufs[2];  /* per DL buffer: -> the world-object matrix array (one Mtx per record id); was D_800895F0 */
+extern u16 g_world_vis_counts[];     /* per group: entry count; was D_800DC318 */
 // trail_matrix_history_push_world: P253. Like afterimage_history_push (same handler table), for an object with one matrix: the
-// record holds rec[1] matrices (64 bytes each) in two halves of the buffer +8 (half D_800BE9C0 is written, the other
+// record holds rec[1] matrices (64 bytes each) in two halves of the buffer +8 (half g_dl_buf_index is written, the other
 // half read): matrix j of this half = matrix j + 1 of the other half, and the last one = the object's world matrix
-// (the object +0x10 is looked up in group 0's entry list by its record id, 0xA0-byte records at D_800DBEF4; matrix
+// (the object +0x10 is looked up in group 0's entry list by its record id, 0xA0-byte records at g_world_objs; matrix
 // array of the current DL buffer). When the object is not in the list, the filled count rec[2] is reset to 0 and
 // nothing else happens. Otherwise rec[2] counts up to rec[1].
 /* was func_151894F4 */
 void afterimage_history_push_world(u8 *rec) {
     s32 n = rec[1];
-    s32 cur = D_800BE9C0 * n;
-    s32 prev = (D_800BE9C0 ^ 1) * n;
+    s32 cur = g_dl_buf_index * n;
+    s32 prev = (g_dl_buf_index ^ 1) * n;
     s32 k, i, j;
     Mtx *mtx;
     u8 *src;
 
-    for (k = 0; k < D_800DC318[0]; k++) {
-        if (*(u8 **) (rec + 0x10) == (u8 *) D_800DBEF4 + (*D_800895E0[0])[k * 2] * 0xA0) {
+    for (k = 0; k < g_world_vis_counts[0]; k++) {
+        if (*(u8 **) (rec + 0x10) == (u8 *) g_world_objs + (*g_world_vis_lists[0])[k * 2] * 0xA0) {
             break;
         }
     }
-    if (k == D_800DC318[0]) {
+    if (k == g_world_vis_counts[0]) {
         rec[2] = 0;
         return;
     }
-    mtx = *D_800895F0[D_800BE9C0] + (*D_800895E0[0])[k * 2];
+    mtx = *g_world_obj_mtx_bufs[g_dl_buf_index] + (*g_world_vis_lists[0])[k * 2];
     j = 0;
     for (i = 1; i <= n; i++) {
         if (i == n) {
@@ -351,7 +351,7 @@ void afterimage_clamp_spacing(s32 arg0) {
     u8 *var_a0;
     u8 *var_v1;
 
-    var_s0 = D_800DF7C8[arg0];
+    var_s0 = g_afterimage_lists[arg0];
     if (var_s0 != 0) {
         do {
             if ((*(u8 *)((u8 *)var_s0 + 4)) != 0) {
@@ -360,7 +360,7 @@ void afterimage_clamp_spacing(s32 arg0) {
                 temp_t4 = (*(u8 *)((u8 *)var_s0 + 4));
                 temp_a2 = temp_v0;
                 var_f30 = (f32) temp_t4;
-                temp_t1 = D_800BE9C0 * temp_v0 * temp_s1;
+                temp_t1 = g_dl_buf_index * temp_v0 * temp_s1;
                 if ((s32) temp_t4 < 0) {
                     var_f30 += 4294967296.0f;
                 }
@@ -458,7 +458,7 @@ extern u8 D_800DFBF4;  /* alpha obj_draw_part draws the object with */
 // trail_draw: P253. Draw handler (u8 *(u8 *gfx, u8 *rec, s16 arg2), same table as afterimage_history_push) of an object's
 // motion trail: with filled steps (rec[2] != 0) it prepares the object +0x10 (obj_current_part_model_idx / model_make_ready), swaps
 // the object's +0x94 for the record's +0x14 and draws the object (obj_draw_part, g_objects slot index, mode 4) once
-// per filled step, each time with that step's matrices from the history buffer +8 (this half, D_800BE9C0) and alpha
+// per filled step, each time with that step's matrices from the history buffer +8 (this half, g_dl_buf_index) and alpha
 // rec[3] * (3 + step) * 32 / 256, then restores +0x94. Objects outside the 25 first g_objects slots are skipped.
 /* was func_15189B64 */
 u8 *afterimage_draw(u8 *gfx, u8 *rec, s16 arg2) {
@@ -477,7 +477,7 @@ u8 *afterimage_draw(u8 *gfx, u8 *rec, s16 arg2) {
     alpha0 = rec[3];
     per = model_joint_mtx_count(((u8 *) *(struct127 **) (rec + 0x10))[4]);
     obj = *(struct127 **) (rec + 0x10);
-    m = D_800BE9C0 * per * n;
+    m = g_dl_buf_index * per * n;
     count = rec[2];
     slot = ((u8 *) obj - (u8 *) g_objects) / 0x32C;
     if (slot < 0 || slot >= 25) {
@@ -519,7 +519,7 @@ s32 afterimage_world_draw(s32 arg0, u8 *arg1, s16 arg2) {
     var_s1 = temp_a0 * 0x60;
     var_s0 = 0;
     sp44 = (s32) (*(u8 *)((u8 *)((*(u8 **)((u8 *)arg1 + 0x10))) + 0x8A));
-    var_s2 = D_800BE9C0 * (*(u8 *)((u8 *)arg1 + 1));
+    var_s2 = g_dl_buf_index * (*(u8 *)((u8 *)arg1 + 1));
     if ((s32) temp_a3 > 0) {
         do {
             (*(u8 *)((u8 *)((*(u8 **)((u8 *)arg1 + 0x10))) + 0x8A)) = (u8) (var_s1 >> 8);
@@ -537,7 +537,7 @@ s32 afterimage_world_draw(s32 arg0, u8 *arg1, s16 arg2) {
 void afterimage_set_skin(s32 arg0, s32 arg1) {
     s32 var_v0;
 
-    var_v0 = *D_800DF7C8;
+    var_v0 = *g_afterimage_lists;
     if (var_v0 != 0) {
 loop_1:
         if (arg0 == (*(s32 *)((u8 *)var_v0 + 0x10))) {

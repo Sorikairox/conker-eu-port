@@ -5,8 +5,8 @@
 
 s32 dl_fx_spawn(u8 *, s32, s32, s32, s32, s32, s32);
 s32 memcpy(s32, s16 *, s32);
-extern s32 D_8008D950;
-extern s32 D_8008D958;
+extern s32 g_tumble_debris_kinds_a; /* was D_8008D950 */
+extern s32 g_tumble_debris_kinds_b; /* was D_8008D958 */
 
 /* was func_1518A930 */
 s32 tumble_debris_spawn(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, u8 *arg4, f32 arg5, f32 arg6, u8 arg7, s16 arg8, u8 arg9, s32 argA, u8 argB, s32 argC) {
@@ -75,9 +75,9 @@ s32 tumble_debris_spawn(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, u8 *arg4, f32 ar
     sp.u68 = arg7;
     sp.u6C = arg8;
     if (arg9 != 0) {
-        sp.u6E = (s8) *(s32 *) ((u8 *) &D_8008D958 + (random_int() & 1) * 4);
+        sp.u6E = (s8) *(s32 *) ((u8 *) &g_tumble_debris_kinds_b + (random_int() & 1) * 4);
     } else {
-        sp.u6E = (s8) *(s32 *) ((u8 *) &D_8008D950 + (random_int() & 1) * 4);
+        sp.u6E = (s8) *(s32 *) ((u8 *) &g_tumble_debris_kinds_a + (random_int() & 1) * 4);
     }
     sp.u90 = 0xFF;
     sp.u74 = 0x220205;
@@ -136,8 +136,8 @@ s32 tumble_debris_update(u8 *arg0) {
     (*(f32 *)((u8 *)(&sp.u38) + 0)) = (*(f32 *)((u8 *)temp_v1 + 0x10));
     (*(f32 *)((u8 *)(&sp.u38) + 4)) = (f32) (*(f32 *)((u8 *)temp_v1 + 0x14));
     (*(f32 *)((u8 *)(&sp.u38) + 8)) = (f32) (*(f32 *)((u8 *)temp_v1 + 0x18));
-    (*(f32 *)((u8 *)temp_v1 + 0x14)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 0x14)) + ((*(f32 *)((u8 *)temp_v1 + 0x28)) * D_800BE9A4));
-    var_v0 = D_800BE9E4;
+    (*(f32 *)((u8 *)temp_v1 + 0x14)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 0x14)) + ((*(f32 *)((u8 *)temp_v1 + 0x28)) * g_frame_step_f));
+    var_v0 = g_frame_ticks;
     if (var_v0 != 0) {
         temp_a2 = -(var_v0 & 3);
         temp_a0 = temp_a2 + var_v0;
@@ -197,12 +197,12 @@ block_5:
             (*(f32 *)((u8 *)temp_v1 + 0x18)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 0x18)) * temp_f0_2);
         }
     }
-    (*(f32 *)((u8 *)arg0 + 0x48)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x48)) + ((sp.u38 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 0x10)) - sp.u38) * D_800BEDC8) * D_800BE9A4)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x4C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x4C)) + ((sp.u3C + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 0x14)) - sp.u3C) * D_800BEDC8) * D_800BE9A4)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x50)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x50)) + ((sp.u40 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 0x18)) - sp.u40) * D_800BEDC8) * D_800BE9A4)) * D_800BE9A4));
-    (*(f32 *)((u8 *)temp_v1 + 0)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 0)) + ((*(f32 *)((u8 *)temp_v1 + 0x1C)) * D_800BE9A4));
-    (*(f32 *)((u8 *)temp_v1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 4)) + ((*(f32 *)((u8 *)temp_v1 + 0x20)) * D_800BE9A4));
-    (*(f32 *)((u8 *)temp_v1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 8)) + ((*(f32 *)((u8 *)temp_v1 + 0x24)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x48)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x48)) + ((sp.u38 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 0x10)) - sp.u38) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x4C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x4C)) + ((sp.u3C + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 0x14)) - sp.u3C) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x50)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x50)) + ((sp.u40 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 0x18)) - sp.u40) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)temp_v1 + 0)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 0)) + ((*(f32 *)((u8 *)temp_v1 + 0x1C)) * g_frame_step_f));
+    (*(f32 *)((u8 *)temp_v1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 4)) + ((*(f32 *)((u8 *)temp_v1 + 0x20)) * g_frame_step_f));
+    (*(f32 *)((u8 *)temp_v1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 8)) + ((*(f32 *)((u8 *)temp_v1 + 0x24)) * g_frame_step_f));
     return 1;
 }
 /* was func_1518AE84 */

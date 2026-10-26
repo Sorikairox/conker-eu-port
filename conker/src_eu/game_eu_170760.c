@@ -9,7 +9,7 @@ void mtx_get_translation(Mtx *, s32, f32 *);
 
 /* was func_151429E0 */
 void fx_pick_random_color(u8 arg0, u8 *arg1, u8 *arg2, u8 *arg3) {
-    u8 *temp_v1 = &D_8008A500[(random_int() & 3) * 3 + arg0 * 12];
+    u8 *temp_v1 = &g_fx_random_colours[(random_int() & 3) * 3 + arg0 * 12];
 
     *arg1 = temp_v1[0];
     *arg2 = temp_v1[1];
@@ -41,25 +41,25 @@ f32 lagrange_cubic_w3(f32 arg0) {
 }
 /* was func_15142B7C */
 Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear) {
-    if (~D_800DD630 & clear) {
+    if (~g_gfx_geom_clear_cached & clear) {
         gSPClearGeometryMode(gfx++, clear);
-        D_800DD630 |= clear;
+        g_gfx_geom_clear_cached |= clear;
     }
-    if (~D_800DD62C & set) {
+    if (~g_gfx_geom_set_cached & set) {
         gSPSetGeometryMode(gfx++, set);
-        D_800DD62C |= set;
+        g_gfx_geom_set_cached |= set;
     }
     return gfx;
 }
 /* was func_15142C10 */
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5) {
-    if ((r != D_800DD5F8) || (g != g_gfx_env_g_cached) || (b != g_gfx_env_b_cached) || (a != g_gfx_env_a_cached)) {
+    if ((r != g_gfx_env_r_cached) || (g != g_gfx_env_g_cached) || (b != g_gfx_env_b_cached) || (a != g_gfx_env_a_cached)) {
         if (*arg5 == 1) {
             gDPPipeSync(gfx++);
             *arg5 = 0;
         }
         gDPSetEnvColor(gfx++, r, g, b, a);
-        D_800DD5F8 = r;
+        g_gfx_env_r_cached = r;
         g_gfx_env_g_cached = g;
         g_gfx_env_b_cached = b;
         g_gfx_env_a_cached = a;
@@ -68,14 +68,14 @@ Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5) {
 }
 /* was func_15142CF0 */
 Gfx *gfx_prim_color_cached(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *arg7) {
-    if ((m != D_800DD634) || (l != D_800DD636) || (r != g_gfx_prim_r_cached) || (g != g_gfx_prim_g_cached) || (b != g_gfx_prim_b_cached) || (a != g_gfx_prim_a_cached)) {
+    if ((m != g_gfx_prim_m_cached) || (l != g_gfx_prim_l_cached) || (r != g_gfx_prim_r_cached) || (g != g_gfx_prim_g_cached) || (b != g_gfx_prim_b_cached) || (a != g_gfx_prim_a_cached)) {
         if (*arg7 == 1) {
             gDPPipeSync(gfx++);
             *arg7 = 0;
         }
         gDPSetPrimColor(gfx++, m, l, r, g, b, a);
-        D_800DD634 = m;
-        D_800DD636 = l;
+        g_gfx_prim_m_cached = m;
+        g_gfx_prim_l_cached = l;
         g_gfx_prim_r_cached = r;
         g_gfx_prim_g_cached = g;
         g_gfx_prim_b_cached = b;
@@ -85,10 +85,10 @@ Gfx *gfx_prim_color_cached(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u
 }
 s32 sprite_load_texture_at(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 fx_material_tex_addr(s32, s32, s32, u8);
-extern s32 D_800DD638;
-extern s32 D_800DD63C;
-extern s32 D_800DD640;
-extern s32 D_800DD644;
+extern s32 g_gfx_tex_parm_a_cached; /* was D_800DD638 */
+extern s32 g_gfx_tex_parm_b_cached; /* was D_800DD63C */
+extern s32 g_gfx_tex_parm_c_cached; /* was D_800DD640 */
+extern s32 g_gfx_tex_parm_d_cached; /* was D_800DD644 */
 
 /* was func_15142E24 */
 s32 gfx_load_texture_cached(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA) {
@@ -96,7 +96,7 @@ s32 gfx_load_texture_cached(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s3
     s32 temp_v0_2;
 
     temp_v0 = fx_material_tex_addr(arg1, arg6, arg2 >> 0x10, arg7);
-    if ((temp_v0 != D_800DD5E0) || (arg3 != D_800DD638) || (arg4 != D_800DD63C) || (arg5 != D_800DD640) || (arg8 != D_800DD644)) {
+    if ((temp_v0 != g_tex_cache_last_addr) || (arg3 != g_gfx_tex_parm_a_cached) || (arg4 != g_gfx_tex_parm_b_cached) || (arg5 != g_gfx_tex_parm_c_cached) || (arg8 != g_gfx_tex_parm_d_cached)) {
         if (*arg9 == 1) {
             *arg9 = 0;
         }
@@ -104,25 +104,25 @@ s32 gfx_load_texture_cached(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s3
             argA = 3;
         }
         temp_v0_2 = sprite_load_texture_at(arg0, arg1, arg2 >> 8, arg8, 0, 0, 0, arg3, arg4, arg5, argA);
-        D_800DD5E0 = temp_v0;
-        D_800DD638 = arg3;
-        D_800DD63C = arg4;
-        D_800DD640 = arg5;
+        g_tex_cache_last_addr = temp_v0;
+        g_gfx_tex_parm_a_cached = arg3;
+        g_gfx_tex_parm_b_cached = arg4;
+        g_gfx_tex_parm_c_cached = arg5;
         arg0 = temp_v0_2;
-        D_800DD644 = D_800DD644;
+        g_gfx_tex_parm_d_cached = g_gfx_tex_parm_d_cached;
     }
     return arg0;
 }
 /* was func_15142FBC */
 Gfx *gfx_other_mode_cached(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3) {
-    if ((arg1 != D_800DD648) || (arg2 != D_800DD64C)) {
+    if ((arg1 != g_gfx_othermode_hi_cached) || (arg2 != g_gfx_othermode_lo_cached)) {
         if (*arg3 == 1) {
             gDPPipeSync(gfx++);
             *arg3 = 0;
         }
         gDPSetOtherMode(gfx++, arg1 | 0xF, arg2);
-        D_800DD648 = arg1;
-        D_800DD64C = arg2;
+        g_gfx_othermode_hi_cached = arg1;
+        g_gfx_othermode_lo_cached = arg2;
     }
     return gfx;
 }
@@ -130,9 +130,9 @@ Gfx *gfx_other_mode_cached(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3) {
 s16 fx_layer_to_prim_depth(u8 arg0, s32 arg1) {
     return 0x7FFF - arg0;
 }
-extern s32 D_80091914[];
-extern s32 D_800918C4;
-extern s32 D_80091960;
+extern s32 g_fx_tex_addrs[]; /* was D_80091914 */
+extern s32 g_fx_material_tex_3; /* was D_800918C4 */
+extern s32 g_emitter_ribbon_texdef; /* was D_80091960 */
 /* Texture address of a material: kind (arg3) selects the source table. */
 /* was func_1514306C */
 s32 fx_material_tex_addr(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
@@ -143,13 +143,13 @@ s32 fx_material_tex_addr(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
         v = 0;
         break;
     case 2:
-        v = D_80091914[arg1];
+        v = g_fx_tex_addrs[arg1];
         break;
     case 3:
-        v = D_800918C4;
+        v = g_fx_material_tex_3;
         break;
     case 4:
-        v = D_80091960;
+        v = g_emitter_ribbon_texdef;
         break;
     case 5:
         v = arg1;
@@ -161,41 +161,41 @@ s32 fx_material_tex_addr(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
         }
         break;
     default:
-        v = (*(s32 **)&D_80090F10[arg1])[arg2];
+        v = (*(s32 **)&g_sprite_textures[arg1])[arg2];
         break;
     }
     return v;
 }
 /* was func_15143134 */
 void mtx_transform_point_or_origin(void *arg0, void *arg1, void *arg2) {
-    D_800DCE30 = 1;
+    g_mtx_xform_dbg_step = 1;
     if ((arg0 != NULL) && ((((struct17 *)arg0)->unk0 != 0.0f) || (((struct17 *)arg0)->unk4 != 0.0f) || (((struct17 *)arg0)->unk8 != 0.0f))) {
-        D_800DCE30 = 2;
-        D_800DCE38 = ((struct17 *)arg0)->unk0;
-        D_800DCE3C = ((struct17 *)arg0)->unk4;
-        D_800DCE40 = ((struct17 *)arg0)->unk8;
+        g_mtx_xform_dbg_step = 2;
+        g_mtx_xform_dbg_x = ((struct17 *)arg0)->unk0;
+        g_mtx_xform_dbg_y = ((struct17 *)arg0)->unk4;
+        g_mtx_xform_dbg_z = ((struct17 *)arg0)->unk8;
         if (D_800C42B0 != 0) {
             f32 mf[4][4];
 
-            D_800DCE30 = 3;
-            D_800DCE34 = arg2;
+            g_mtx_xform_dbg_step = 3;
+            g_mtx_xform_dbg_mtx = arg2;
             guMtxL2F(mf, arg2);
             mtxf_transform_point(mf, ((struct17 *)arg0)->unk0, ((struct17 *)arg0)->unk4, ((struct17 *)arg0)->unk8,
                           &((struct17 *)arg1)->unk0, &((struct17 *)arg1)->unk4, &((struct17 *)arg1)->unk8);
-            D_800DCE30 = 4;
+            g_mtx_xform_dbg_step = 4;
         } else {
-            D_800DCE30 = 5;
-            D_800DCE34 = arg2;
+            g_mtx_xform_dbg_step = 5;
+            g_mtx_xform_dbg_mtx = arg2;
             mtxf_transform_point(arg2, ((struct17 *)arg0)->unk0, ((struct17 *)arg0)->unk4, ((struct17 *)arg0)->unk8,
                           &((struct17 *)arg1)->unk0, &((struct17 *)arg1)->unk4, &((struct17 *)arg1)->unk8);
-            D_800DCE30 = 6;
+            g_mtx_xform_dbg_step = 6;
         }
     } else {
-        D_800DCE30 = 7;
+        g_mtx_xform_dbg_step = 7;
         mtx_get_translation(arg2, 0, arg1);
-        D_800DCE30 = 8;
+        g_mtx_xform_dbg_step = 8;
     }
-    D_800DCE30 = 0;
+    g_mtx_xform_dbg_step = 0;
 }
 
 /* P139 */
@@ -558,7 +558,7 @@ s16 obj_get_local_yaw_byte(struct127 *arg0) {
 f32 vec3_length(struct17 *arg0) {
     return sqrtf((arg0->unk0 * arg0->unk0) + (arg0->unk4 * arg0->unk4) + (arg0->unk8 * arg0->unk8));
 }
-extern s32 D_800BEE08;
+extern s32 g_view_count_minus1; /* was D_800BEE08 */
 /* was func_15143E94 */
 u8 fx_try_camera_shake(s32 arg0, s32 arg1)
 {
@@ -572,7 +572,7 @@ u8 fx_try_camera_shake(s32 arg0, s32 arg1)
   if (((!found2) && (!found2)) && (!found2)) // fakematch: dummy test of the uninitialised found2 (permuter)
   {
   }
-  n = D_80082FA0 + 1;
+  n = g_last_player_index + 1;
   i = 0;
   found = 0;
   while ((!found) && (i < n))
@@ -605,7 +605,7 @@ u8 fx_try_camera_shake(s32 arg0, s32 arg1)
 
     if (found2)
     {
-      camera_shake_start(&D_800DBFF0[D_800BEE08], arg0, 1);
+      camera_shake_start(&g_player_views[g_view_count_minus1], arg0, 1);
       sp28.unk0 = 1;
       sp28.unk2 = (random_int() & 0xF) + 20;
       sp28.unk4 = (random_int() & 3) + 4;
@@ -630,7 +630,7 @@ s32 sprite_anim_advance(s32 arg0, s32 *arg1, s32 *arg2, s32 arg3) {
     temp_t7 = arg3 & 0xFF;
     var_v1 = 0;
     temp_t0 = (*g_sprite_anim_table[arg0 & 0xFF] << 0x10) - 1;
-    temp_t5 = *arg2 + (*arg1 * D_800BE9E4);
+    temp_t5 = *arg2 + (*arg1 * g_frame_ticks);
     *arg2 = temp_t5;
     var_t1 = temp_t5;
     if (temp_t0 < temp_t5) {
@@ -674,7 +674,7 @@ s32 sprite_anim_advance(s32 arg0, s32 *arg1, s32 *arg2, s32 arg3) {
 //
 //     ret = 0;
 //     max = (g_sprite_anim_table[arg0][0] << 16) - 1;
-//     *arg2 += *arg1 * D_800BE9E4;
+//     *arg2 += *arg1 * g_frame_ticks;
 //     pos = *arg2;
 //     if (max < pos) {
 //         if (arg3 & 1) {
@@ -1008,7 +1008,7 @@ f32 vec3_dot(struct17 *arg0, struct17 *arg1) {
 }
 /* was func_15144AA8 */
 f32 camera_get_yaw_deg(s32 arg0) {
-    f32 var_f2 = D_800DBFF0[arg0].unk380;
+    f32 var_f2 = g_player_views[arg0].unk380;
 
     while (var_f2 > 360.0f) {
         var_f2 -= 360.0f;
@@ -1020,7 +1020,7 @@ f32 camera_get_yaw_deg(s32 arg0) {
 }
 /* was func_15144B34 */
 f32 *camera_get_pos(s32 arg0) {
-    return &D_800DBFF0[arg0].unk2F8;
+    return &g_player_views[arg0].unk2F8;
 }
 /* was func_15144B68 */
 f32 wrap_angle_rad(f32 arg0) {
@@ -1082,15 +1082,15 @@ f32 angle_diff_rad(f32 arg0, f32 arg1) {
 
 /* P136 */
 void mtxf_transform_point_w(u8 *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
-extern u8 D_800DA130[]; /* per view: 4x4 f32 projection matrix (0x40 bytes) */
-extern f32 D_800D9F40;
+extern u8 g_cam_view_proj_mtx[]; /* per view: 4x4 f32 projection matrix (0x40 bytes); was D_800DA130 */
+extern f32 g_cam_near_plane; /* was D_800D9F40 */
 
 /*
- * world_to_screen: projects the world point pos (3 f32) with view `view`'s matrix (D_800DA130 + view * 0x40,
+ * world_to_screen: projects the world point pos (3 f32) with view `view`'s matrix (g_cam_view_proj_mtx + view * 0x40,
  * mtxf_transform_point_w) into scr[0..1], *oz and *ow (each out pointer may be NULL: a local is used). Fails (0) when
- * w >= 6000, w <= D_800D9F40 or w == 0; else *oinv = 1 / w and scr becomes the viewport position: x = inv * x *
+ * w >= 6000, w <= g_cam_near_plane or w == 0; else *oinv = 1 / w and scr becomes the viewport position: x = inv * x *
  * (half width +0x0C + 5) + centre x +0x34, y = centre y +0x38 - inv * y * (half height +0x10 + 5) of
- * D_800BE628 + view * 0x180. Returns 1.
+ * g_player_cams + view * 0x180. Returns 1.
  */
 /* was func_15144CEC */
 s32 world_to_screen(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view) {
@@ -1106,17 +1106,17 @@ s32 world_to_screen(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view) {
     if (oinv == NULL) {
         oinv = &inv;
     }
-    mtxf_transform_point_w(D_800DA130 + (view << 6), pos[0], pos[1], pos[2], &scr[0], &scr[1], oz, ow);
-    if (*ow >= 6000.0f || *ow <= D_800D9F40) {
+    mtxf_transform_point_w(g_cam_view_proj_mtx + (view << 6), pos[0], pos[1], pos[2], &scr[0], &scr[1], oz, ow);
+    if (*ow >= 6000.0f || *ow <= g_cam_near_plane) {
         return 0;
     }
     if (*ow == 0.0f) {
         return 0;
     }
     *oinv = 1.0f / *ow;
-    vp = (u8 *) D_800BE628 + view * 0x180;
+    vp = (u8 *) g_player_cams + view * 0x180;
     scr[0] = *oinv * (scr[0] * (*(f32 *) (vp + 0x0C) + 5.0f)) + *(f32 *) (vp + 0x34);
-    vp = (u8 *) D_800BE628 + view * 0x180;
+    vp = (u8 *) g_player_cams + view * 0x180;
     scr[1] = *(f32 *) (vp + 0x38) - *oinv * (scr[1] * (*(f32 *) (vp + 0x10) + 5.0f));
     return 1;
 }
@@ -1476,7 +1476,7 @@ void vec3_to_yaw_pitch_deg(struct17 *arg0, f32 *arg1, f32 *arg2) {
 
 /* was func_15145A0C */
 f32 curve_table_lookup(f32 arg0, f32 arg1, f32 arg2) {
-    return D_800A548C[(s32)(arg0 * arg2 * 100.0f)] * arg1;
+    return g_curve_table[(s32)(arg0 * arg2 * 100.0f)] * arg1;
 }
 
 
@@ -1569,7 +1569,7 @@ u8 prop_is_flagged(s32 arg0) {
     if (arg0 < 0) {
         return 1;
     } else {
-        return (D_800DBEF4[arg0].unk6F & 0x80) == 0x80;
+        return (g_world_objs[arg0].unk6F & 0x80) == 0x80;
     }
 }
 
@@ -1732,9 +1732,9 @@ s32 vec3_make_basis(f32 *n, f32 *a, f32 *b) {
 }
 u8 *light_write_light_cmds(u8 *, s32, u8, u8, u8 *);
 u8 *light_apply_object_lights(u8 *, s16, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, s32, s32, s32);
-extern s32 D_800DA230[];
-extern u8 D_800DA240;
-extern u8 D_800DA241;
+extern s32 g_player_light_bufs[]; /* was D_800DA230 */
+extern u8 g_light_buf_size; /* was D_800DA240 */
+extern u8 g_light_count; /* was D_800DA241 */
 extern u8 g_player_ambient_lights[]; /* was D_800D9FF0 */
 /* Lights of a model part (arg1: +0x00 count, +0x04 out list, +0x08 per-player light buffers, +0x18 lookat,
  * +0x1C mask). kind (arg2) 1: the object's own light set (arg3 +0x301 / +0x302 / +0x304 / +0x314) when it is
@@ -1767,7 +1767,7 @@ u8 *model_part_emit_lights(u8 *gfx, u8 *arg1, u8 arg2, u8 *arg3, u8 arg4, s16 ar
         return light_write_light_cmds(gfx, *(s32 *)(arg3 + 0x304 + arg5 * 4), arg3[0x301], arg3[0x302], *(u8 **)(arg3 + 0x314));
     }
     if (kind == 2) {
-        return light_write_light_cmds(gfx, D_800DA230[arg5], D_800DA240, D_800DA241, g_player_ambient_lights + arg5 * 16 + D_800BE9C0 * 8);
+        return light_write_light_cmds(gfx, g_player_light_bufs[arg5], g_light_buf_size, g_light_count, g_player_ambient_lights + arg5 * 16 + g_dl_buf_index * 8);
     }
     flags = ((arg7 & 2) ? 0x10 : 0) | 8 | ((arg7 & 1) ? 2 : 0);
     return light_apply_object_lights(gfx, arg5, (s32)arg6[0], (s32)arg6[1], (s32)arg6[2], arg8, buf, *(s32 *)arg1, (u8 *)lookat,
@@ -1778,7 +1778,7 @@ u8 player_mask_hides_all(s16 *arg0) {
     s32 i;
     s16 mask;
 
-    for (i = 0, mask = 0; i <= D_80082FA0; i++) {
+    for (i = 0, mask = 0; i <= g_last_player_index; i++) {
         mask |= 1 << i;
     }
     return !(arg0[1] & mask);
@@ -1802,9 +1802,9 @@ s32 attachment_get_matrices(u8 *, u8 *, Mtx **, s32 *);
 /*
  * model_node_points_to_world: transforms n local points (in[i] -> out[i], 3 f32 each) by the matrix of node `node`
  * of a model instance obj (obj +0x1D4 = its matrix array, required). The matrix comes from, in order: the node's
- * attached instance (+0x48: its frame matrix array +0x3E8[D_800BE9C0] + idx * 0x40, 0 when that instance is not
+ * attached instance (+0x48: its frame matrix array +0x3E8[g_dl_buf_index] + idx * 0x40, 0 when that instance is not
  * ready (+0x3F6)); a sub-model (+0x1E id, attachment_find_by_slot / attachment_get_matrices, entry +0x20 when that model is
- * skinned (+0x48)); the node's own frame matrices (+0x34 + D_800BE9C0 * 0x40); else mtx_transform_points with obj's
+ * skinned (+0x48)); the node's own frame matrices (+0x34 + g_dl_buf_index * 0x40); else mtx_transform_points with obj's
  * matrix + node byte +2 * 0x40. Mtx (s15.16) -> float with guMtxL2F, points with mtxf_transform_point.
  * Returns 1, or 0 when something is missing.
  */
@@ -1825,7 +1825,7 @@ s32 model_node_points_to_world(u8 *obj, u8 *node, s32 idx, f32 **in, f32 **out, 
         if (att[0x3F6] == 0) {
             return 0;
         }
-        mtx = (Mtx *) (((u8 **) (att + 0x3E8))[D_800BE9C0] + (idx << 6));
+        mtx = (Mtx *) (((u8 **) (att + 0x3E8))[g_dl_buf_index] + (idx << 6));
     } else if (*(u16 *) (node + 0x1E) != 0) {
         sub = attachment_find_by_slot(obj, *(u16 *) (node + 0x1E), 0);
         if (sub == NULL) {
@@ -1838,7 +1838,7 @@ s32 model_node_points_to_world(u8 *obj, u8 *node, s32 idx, f32 **in, f32 **out, 
             mtx = (Mtx *) ((u8 *) mtx + (*(u16 *) (node + 0x20) << 6));
         }
     } else if (*(u8 **) (node + 0x34) != NULL) {
-        mtx = (Mtx *) (*(u8 **) (node + 0x34) + (D_800BE9C0 << 6));
+        mtx = (Mtx *) (*(u8 **) (node + 0x34) + (g_dl_buf_index << 6));
     } else {
         mtx_transform_points(in, out, (Mtx *) (*(u8 **) (obj + 0x1D4) + (node[2] << 6)), n);
         return 1;
@@ -1873,7 +1873,7 @@ s32 pos_in_world_bounds(u8 *arg0) {
 
 /* was func_151467A4 */
 void fx_random_flicker_update(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 *arg7) {
-    *arg0 = *arg0 - D_800BE9A4;
+    *arg0 = *arg0 - g_frame_step_f;
     if (*arg0 < 0.0f) {
         *arg0 = random_float() * arg1;
         if ((random_int() & 3) != 0) {

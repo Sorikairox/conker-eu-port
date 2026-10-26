@@ -622,7 +622,7 @@ void objev_sound_if_above_water(void) {
  * Modes (volume 0x7D00, 500 / 2500 = the distance / time arguments of the sound calls):
  *   0x0000 actor_sound_play, 0x1000 actor_sound_play2, 0x3000 actor_sound_play_untracked,
  *   0x3800 actor_sound_play unless sound_voice_get_id(obj->unk8E) already returns that sound,
- *   0x2000 footstep (at most 1 player, D_80082FA0 < 2): the sound comes from the floor surface
+ *   0x2000 footstep (at most 1 player, g_last_player_index < 2): the sound comes from the floor surface
  *          (floor_flags_surface_type(obj->unk184) -> sound_surface_footstep, which may also lower the volume; in the air: surface 8;
  *          surface 12 = water while obj->unkCC > -17: sound_pick_variant(0x9C, 2)); the volume scales with the
  *          fall speed (obj->unk31C's first float, else y_velocity), 0.5 .. 1.0 over 0 .. 10 (water) or 30.
@@ -689,7 +689,7 @@ void objev_play_sound(void) {
     }
 
     /* footstep */
-    if (D_80082FA0 >= 2) {
+    if (g_last_player_index >= 2) {
         return;
     }
     surface = floor_flags_surface_type(obj->unk184);
@@ -892,7 +892,7 @@ s32 camera_object_spawn(f32 yaw, f32 dist, f32 rise, f32 height, u8 alpha, s32 m
         obj[0x103] = 1;
     } else {
         obj[5] = 5;
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= g_last_player_index; i++) {
             *(u8 **) (obj + 0x304 + i * 4) = light_alloc_light_buf(1);
         }
         if (*(s32 *) (obj + 0x300 + i * 4) != 0) {
@@ -1200,9 +1200,9 @@ void objev_throw_object(void) {
         temp_v0->unk7A = temp_v0_2;
         temp_v0->unk76 = temp_v0_2;
         vec_from_yaw_pitch(temp_v0_2 & 0xFFFF, 5000.0f, var_f0, &sp.u40, &sp.u3C, &sp.u38);
-        (*(s16 *)((u8 *)(D_800D2104[temp_v0->unk13F]) + 8)) = (s16) (s32) (g_cur_obj->x_position + sp.u40);
-        (*(s16 *)((u8 *)(D_800D2104[temp_v0->unk13F]) + 0xC)) = (s16) (s32) (g_cur_obj->z_position + sp.u3C);
-        (*(s16 *)((u8 *)(D_800D2104[temp_v0->unk13F]) + 0xA)) = (s16) (s32) (g_cur_obj->y_position + sp.u38);
+        (*(s16 *)((u8 *)(g_path_points[temp_v0->unk13F]) + 8)) = (s16) (s32) (g_cur_obj->x_position + sp.u40);
+        (*(s16 *)((u8 *)(g_path_points[temp_v0->unk13F]) + 0xC)) = (s16) (s32) (g_cur_obj->z_position + sp.u3C);
+        (*(s16 *)((u8 *)(g_path_points[temp_v0->unk13F]) + 0xA)) = (s16) (s32) (g_cur_obj->y_position + sp.u38);
         temp_v0->unk65 = 0;
         temp_v0->unk218 = NULL;
         if (g_cur_obj_cmd & 0xFF00) {
@@ -1249,9 +1249,9 @@ void objev_nop_1506d4ec(void) {
 //         temp_s0->unk7A = temp_v0_2;
 //         temp_s0->unk76 = temp_v0_2;
 //         vec_from_yaw_pitch(temp_v0_2, 5000.0f, phi_f0, &sp40, &sp3C, &sp38);
-//         D_800D2104[temp_s0->unk13F]->unk8 = (s16) (s32) (g_cur_obj->x_position + sp40);
-//         D_800D2104[temp_s0->unk13F]->unkC = (s16) (s32) (g_cur_obj->z_position + sp3C);
-//         D_800D2104[temp_s0->unk13F]->unkA = (s16) (s32) (g_cur_obj->y_position + sp38);
+//         g_path_points[temp_s0->unk13F]->unk8 = (s16) (s32) (g_cur_obj->x_position + sp40);
+//         g_path_points[temp_s0->unk13F]->unkC = (s16) (s32) (g_cur_obj->z_position + sp3C);
+//         g_path_points[temp_s0->unk13F]->unkA = (s16) (s32) (g_cur_obj->y_position + sp38);
 //         temp_s0->unk65 = (u8)0;
 //         temp_s0->unk218 = 0;
 //         if ((g_cur_obj_cmd & 0xFF00) != 0) {
@@ -1401,7 +1401,7 @@ void objev_screen_effect_stop(void) {
 
 /* was func_1506DB30 */
 void objev_set_1890_update(void) {
-    D_800D1890 = (s8) g_cur_obj_cmd;
+    g_aiscript_arg0 = (s8) g_cur_obj_cmd;
     aiscript_nop_b();
 }
 
@@ -2597,7 +2597,7 @@ void objev_player_camera_view(void); // P259: reads g_cur_obj itself (the asm ig
 struct127 *player_find_owned_object(struct127 *, struct127 *, s32);
 void mtx_transform_points(f32 **, f32 **, void *, s32);
 void muzzle_flash_light_spawn(u8 *, u8, s32);
-extern s32 D_800E0FFE;
+extern s32 g_mp_pad_share_slot; /* was D_800E0FFE */
 
 /* was func_15070300 */
 void objfx_gun_fire(s32 arg0) {
@@ -2644,7 +2644,7 @@ void objfx_gun_fire(s32 arg0) {
     if (temp_v0 == 0x77) {
         temp_t7 = ((s32) (g_cur_obj - g_objects) / 812) & 0xFF;
         sp.uA8 = g_cur_obj;
-        if ((temp_t7 < 2) && (temp_v1 = *((s8 *)&D_800E0FFE + temp_t7), var_a1 = 1, (temp_v1 != 0))) {
+        if ((temp_t7 < 2) && (temp_v1 = *((s8 *)&g_mp_pad_share_slot + temp_t7), var_a1 = 1, (temp_v1 != 0))) {
             sp.uA0 = &g_objects[temp_v1];
         } else {
             var_a1 = 0;
@@ -3039,7 +3039,7 @@ void objfx_ff840_0_1(s32 arg0) {
 
 /* was func_150714E8 */
 void objfx_1d5714_a(s32 arg0) {
-    bone_beam_spawn(g_cur_obj, &g_bone_beam_a_start, &g_bone_beam_a_end, D_80088BB0, 1.0f, 0xFF, 1);
+    bone_beam_spawn(g_cur_obj, &g_bone_beam_a_start, &g_bone_beam_a_end, g_weapon_c_bone, 1.0f, 0xFF, 1);
 }
 
 /* was func_15071544 */
@@ -3166,7 +3166,7 @@ void objfx_1c384c_random_joint(s32 arg0) {
 
     sp20 = g_random_joint_ids;
     if ((g_cur_obj->unk1D4 != NULL) || ((g_cur_obj->unk74 & 0xF) == 0xF)) {
-        mtx_transform_point_or_origin(D_800A5860, sp24, (u8 *)g_cur_obj->unk1D4 + (((u8 *)&sp20)[random_int() & 3] << 6));
+        mtx_transform_point_or_origin(g_vec3_zero, sp24, (u8 *)g_cur_obj->unk1D4 + (((u8 *)&sp20)[random_int() & 3] << 6));
         sp24[1] = g_cur_obj->unk180 + 20.0f;
         fire_embers_spawn(sp24, 0xFF, 1);
     }
@@ -3276,7 +3276,7 @@ void objfx_f2230(s32 arg0) {
 void objev_run_action(void) {
     void (*func)(s32);
 
-    func = D_80086150[g_cur_obj_cmd];
+    func = g_objev_action_fns[g_cur_obj_cmd];
     if (func != 0) {
         func(g_cur_obj_cmd);
     }
@@ -3408,7 +3408,7 @@ block_13:
         g_obj0_y_velocity = (*(f32 *)((u8 *)g_cur_obj + 0x2D8));
         g_obj0_gravity = (*(f32 *)((u8 *)g_cur_obj + 0x2DC));
         sp2C = var_t1;
-        *D_800CC30C = (*(f32 *)((u8 *)g_cur_obj + 0x2E0));
+        *g_obj_tab_xz_velocity = (*(f32 *)((u8 *)g_cur_obj + 0x2E0));
         g_obj0_81 = 1;
         obj_start_anim(g_objects, var_t0 & 0xFFFF, 1.0f, 2.0f, 6.0f, 0.0f, 0);
         (*(s8 *)((u8 *)g_obj0_state + 0x31)) = (s8) sp2C;
@@ -3921,7 +3921,7 @@ u8 *obj_spawn_child_at_joint(struct127 *parent, s32 joint, s32 kind, f32 x, f32 
     O_U8(o, 0x5) = 5;
     O_U8(o, 0x3B) = 0xFF - (s32) ((u8 *) o - (u8 *) g_objects) / 0x32C;
     obj_setup_run(o, kind, 1.0f, 0);
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= g_last_player_index; i++) {
         O_S32(o, 0x304 + i * 4) = (s32) light_alloc_light_buf(1);
     }
     if (O_S32(o, 0x300 + i * 4) != 0) {   /* the last slot written (i == 0: the word at 0x300) */
@@ -4187,8 +4187,8 @@ s32 attachment_sound_cb();
 /* struct126 (the owner's control block, me->unk31C) fields past the declared ones */
 #define CTL_F32(c, off) (*(f32 *) ((u8 *) (c) + (off)))
 #define CTL_U16(c, off) (*(u16 *) ((u8 *) (c) + (off)))
-/* D_800D2104[obj->unk13F]: the object's model / anim block (s16 x/y/z offsets at +8/+A/+C) */
-#define OBJ_MODEL_S16(o, off) (*(s16 *) ((u8 *) (D_800D2104[(o)->unk13F]) + (off)))
+/* g_path_points[obj->unk13F]: the object's model / anim block (s16 x/y/z offsets at +8/+A/+C) */
+#define OBJ_MODEL_S16(o, off) (*(s16 *) ((u8 *) (g_path_points[(o)->unk13F]) + (off)))
 
 // event_spawn_helper_object: event-script command: spawns the helper object of record (arg & 0xFF) next to the
 // current object g_cur_obj (on its marker point 0x13 / 4 / arg byte 2 or 100 units above it), gives it the owner's
@@ -4457,7 +4457,7 @@ void objev_alert_players_near(void) {
     s32 i;
     f32 dist = g_cur_obj_cmd * 8;
 
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < g_player_count; i++) {
         if (obj_dist_3d(g_cur_obj, &g_objects[i]) < dist) {
             if (g_objects[i].unk31C != NULL) {
                 g_objects[i].unk31C->chasing = 20;
@@ -4558,9 +4558,9 @@ void objhit_burst_state5(s32 arg0, struct127 *arg1, s32 arg2) {
 
     if (((u8)arg1->unk239 & 0x7F) == 5) {
         hitinfo_from_obj_floor(&tmp, arg1);   /* P80: a1 still holds arg1 at the jal; the callee reads the object */
-        tmp.unk24 = D_800CC2C0;
-        tmp.unk28 = D_800CC2C4;
-        tmp.unk2C = D_800CC2C8;
+        tmp.unk24 = g_hit_point_x;
+        tmp.unk28 = g_hit_point_y;
+        tmp.unk2C = g_hit_point_z;
         spark_burst_at(&tmp.unk24, &tmp, 0x16, 1, 0xFF, 0);
     }
 }

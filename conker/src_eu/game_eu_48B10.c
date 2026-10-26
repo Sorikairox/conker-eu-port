@@ -3,11 +3,11 @@
 #include "variables.h"
 
 
-/* Smoothed view direction of camera `player` (D_800DBFF0 cameras, 0x9A0 bytes each), skipped while
+/* Smoothed view direction of camera `player` (g_player_views cameras, 0x9A0 bytes each), skipped while
  * g_game_paused is set. The pitch (+0x388, folded into -180..180) and the heading (+0x380) are followed by
  * D_800BEAE0[player] / D_800BEAF0[player] at rate 0.1 (camera +0x698 set), 1.0 (g_camera_timers set) or 0.03;
  * the smoothed heading stays within 90 degrees of the real one. The direction vector, scaled to 127, is
- * stored as three s8 in D_800DCD30[player * 3]. */
+ * stored as three s8 in g_level_light_dirs[player * 3]. */
 extern f32 D_800BEAE0[];
 extern f32 D_800BEAF0[];
 #define DEG_TO_RAD 0.017453292f
@@ -31,7 +31,7 @@ void camera_update_dir_vector(s32 player) {
     if (g_game_paused != 0) {
         return;
     }
-    cam = (u8 *)D_800DBFF0 + player * 0x9A0;
+    cam = (u8 *)g_player_views + player * 0x9A0;
     if (*(s32 *)(cam + 0x698) != 0) {
         rate = 0.1f;
     } else if (*(s32 *)g_camera_timers != 0) {
@@ -76,7 +76,7 @@ void camera_update_dir_vector(s32 player) {
     a = *smoothHeading * DEG_TO_RAD;
     x = sinf(a) * cosPitch;
     z = cosf(a) * cosPitch;
-    out = (s8 *)&D_800DCD30 + player * 3;
+    out = (s8 *)&g_level_light_dirs + player * 3;
     out[0] = x * 127.0f;
     out[1] = negSinPitch * 127.0f;
     out[2] = z * 127.0f;

@@ -15,9 +15,9 @@ s/                if (r < NMR_OBJ_U16(obj, NMR_OBJ_RADIUS2)) {/                i
 s/ + ray.dir\[2\] \* ray.dir\[2\]) \* 4.0f;/ + ray.dir[2] * ray.dir[2]) * 2.0f;/
 s/                    if (-b + sq >= 0.0f || /                    if (-b - sq >= 0.0f || /
 s/                        hitObj = \*idx;/                        hitObj = *idx + 1;/
-s/                v = (s16 \*) (D_800DC328\[hitObj\] + rec\[i\]);/                v = (s16 *) rec[i];/
+s/                v = (s16 \*) (g_world_obj_blocks\[hitObj\] + rec\[i\]);/                v = (s16 *) rec[i];/
 s/                flags = triFlags\[ray.hitTri - NMR_OBJ_U16(obj, NMR_OBJ_TRI0)\];/                flags = triFlags[ray.hitTri];/
-s/                ray.lastRec = (u32) D_800DBEF4 + hitObj \* NMR_OBJ_SIZE;//
+s/                ray.lastRec = (u32) g_world_objs + hitObj \* NMR_OBJ_SIZE;//
 s/        slope = ((z0 + ray.dir\[2\]) - z0) \/ t;/        slope = ray.dir[2] \/ t;/
 s/    len = 65536.0f \/ len;/    len = 65535.0f \/ len;/
 s/                tri += prev;/                tri += prev + 1;/

@@ -9,13 +9,13 @@ extern u8 g_level_colour_set_indices[]; /* was D_800A30A0 */
 extern s32 g_level_colour_table_a; /* was D_800A30B8 */
 extern s32 g_level_colour_table_b; /* was D_800A30BC */
 extern s32 g_level_colour_table_c; /* was D_800A30D4 */
-extern s32 D_800DA290;
-extern s32 D_800DA2A8;
-extern s32 D_800DA2B8;
-extern s32 D_800DA2C8;
-extern s32 D_800DA2D4;
+extern s32 g_tint_wobble_phase; /* was D_800DA290 */
+extern s32 g_tint_wobble_speed; /* was D_800DA2A8 */
+extern s32 g_tint_wobble_amp; /* was D_800DA2B8 */
+extern s32 g_tint_level; /* was D_800DA2C8 */
+extern s32 g_tint_default_level; /* was D_800DA2D4 */
 extern s32 g_level_colour_dst_inner_end; /* was D_800DA2D7 */
-extern s32 D_800DA2D8;
+extern s32 g_tint_request_level; /* was D_800DA2D8 */
 extern s32 g_level_colour_dst_end; /* was D_800DA2E4 */
 
 /* was func_15000940 */
@@ -39,14 +39,14 @@ void level_init_color_tables(s32 arg0) {
     u8 temp_t9;
     u8 *temp_t4;
 
-    temp_t4 = (D_800B0DF0->unk29 * 3) + ((u8 *)&g_level_colour_set_indices);
-    var_v0 = &D_800DA2D8;
-    var_a2 = &D_800DA2C8;
-    var_a1 = &D_800DA2B8;
-    var_a0 = &D_800DA2A8;
-    var_v1 = &D_800DA290;
+    temp_t4 = (g_level_header->unk29 * 3) + ((u8 *)&g_level_colour_set_indices);
+    var_v0 = &g_tint_request_level;
+    var_a2 = &g_tint_level;
+    var_a1 = &g_tint_wobble_amp;
+    var_a0 = &g_tint_wobble_speed;
+    var_v1 = &g_tint_wobble_phase;
     do {
-        var_s2 = &D_800DA2D4;
+        var_s2 = &g_tint_default_level;
         var_t3 = var_v1;
         var_t4 = var_a0;
         var_t5 = ((s32 *)((u8 *)&g_level_colour_table_a + ((*(u8 *)((u8 *)temp_t4 + 0)) * 3)));

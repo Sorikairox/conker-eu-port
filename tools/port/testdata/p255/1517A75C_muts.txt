@@ -14,9 +14,9 @@ s/(obj + 0xA4) = v + -sign \* r;/(obj + 0xA4) = v - sign;/ % drag
 1,/(obj + 0xAE);/s/(obj + 0xAE);/(obj + 0xAC);/ % drag
 1,/(u32) random_int()/s/(u32) random_int()/(s32) random_int()/ % dragbig
 s/        life = \*(u16 \*) (obj + 0xA6);/        life = 0;/ % drag
-s/v = life - D_800BE9E4;/v = life - 1;/ % fade
+s/v = life - g_frame_ticks;/v = life - 1;/ % fade
 s/if (v < 0) {/if (v <= 0) {/ % lifeedge
-s/D_800BE9E4 \* 4;/D_800BE9E4 * 2;/ % fade
+s/g_frame_ticks \* 4;/g_frame_ticks * 2;/ % fade
 s/        v = 0;/        v = 1;/ % fade
 s/if (a < 0) {/if (a < -1) {/ % fadem1
 s/            a = 0;/            a = 1;/ % fadeout

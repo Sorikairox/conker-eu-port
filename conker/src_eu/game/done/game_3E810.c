@@ -9,9 +9,9 @@ void level_obj_init_area_points_23(void) {
     area_points_reset();
     area_points_alloc(2);
     area_points_alloc(3);
-    if ((D_800D2E4C->unk14 & 1) != 0) {
-        D_800B0DF0->unk5 = (u8)0x30;
-        D_800B0DF0->unk6 = (u8)0x38;
-        D_800B0DF0->unk7 = (u8)0x5F;
+    if ((g_save_progress_bits->unk14 & 1) != 0) {
+        g_level_header->unk5 = (u8)0x30;
+        g_level_header->unk6 = (u8)0x38;
+        g_level_header->unk7 = (u8)0x5F;
     }
 }

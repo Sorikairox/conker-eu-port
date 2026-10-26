@@ -27,10 +27,10 @@ s|        obj\[0x4F\] \|= 0x80;|        obj[0x4F] \|= 0x40;|
 s|        w->rec\[0x275\] = w->recNo;|        w->rec[0x275] = w->recNo - 1;|
 s|        len2 = 1.0f;|        len2 = 2.0f;|
 s|            n\[2\] \* (w->tv\[0\].z - a \* w->si + c \* w->co) >= 0.0f) {|            n[2] * (w->tv[0].z - a * w->si + c * w->co) > 0.0f) {|
-s|    if (w->noSlope == 0 \&\& \*D_800CC1F2 == 0 \&\& n\[1\] / len >= 0.5f) {|    if (w->noSlope == 0 \&\& n[1] / len >= 0.5f) {|
+s|    if (w->noSlope == 0 \&\& \*g_wall_coll_no_floor_skip == 0 \&\& n\[1\] / len >= 0.5f) {|    if (w->noSlope == 0 \&\& n[1] / len >= 0.5f) {|
 s|        if (dist != 0.0f \&\& !(dist <= 60.0f)) {|        if (dist != 0.0f \&\& !(dist <= 50.0f)) {|
 s|        oz = w->mid\[2\]; /\* the asm|        oz = w->pos[2]; /* the asm|
-s|    if (!(\*D_800CC1F3 != 0 \&\& side <= 0.8f) \&\& |    if (|
+s|    if (!(\*g_wall_coll_soft_edges != 0 \&\& side <= 0.8f) \&\& |    if (|
 s|    h = n\[3\] + w->radiusF \* len - |    h = n[3] + w->radiusF - |
 s|    if (!(n\[1\] / len >= -0.2f) \&\& !(w->dy.f <= 0.0f)) {|    if (!(n[1] / len >= -0.2f)) {|
 s|    h = h / len2;|    h = h / len;|

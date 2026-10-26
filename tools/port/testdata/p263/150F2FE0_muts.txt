@@ -3,12 +3,12 @@ s/if (g_obj0_state == NULL || g_obj0_state\[0x120\] != 0) {/if (g_obj0_state == 
 s/if (g_obj0_state == NULL || g_obj0_state\[0x120\] != 0) {/if (g_obj0_state[0x120] != 0) {/ % nullp
 s/for (i = 0; i < 2; i++) {/for (i = 0; i < 1; i++) {/ % hit1
 s/item = world_record_find(0xFA - i);/item = world_record_find(0xFA + i);/ % hit1
-s/(item - (s32) D_800DBEF4) \/ 160\]/(item - (s32) D_800DBEF4) \/ 128]/ % hit0
-s/(item - (s32) D_800DBEF4) \/ 160\]/((u32) item - (u32) D_800DBEF4) \/ 160]/ % neg
+s/(item - (s32) g_world_objs) \/ 160\]/(item - (s32) g_world_objs) \/ 128]/ % hit0
+s/(item - (s32) g_world_objs) \/ 160\]/((u32) item - (u32) g_world_objs) \/ 160]/ % neg
 s/\] \& 1) {/] \& 2) {/ % hit1
-s/            if (D_800CC82C != 0) {/            if (D_800CC82C == 0) {/ % hit0 hit1
-s/(D_800CC82C - 100) \* 0x32C)/(D_800CC82C - 101) * 0x32C)/ % hit0
-s/            D_800CC8BA = 0;/            ;/ % hit0
+s/            if (g_held_item_obj_id != 0) {/            if (g_held_item_obj_id == 0) {/ % hit0 hit1
+s/(g_held_item_obj_id - 100) \* 0x32C)/(g_held_item_obj_id - 101) * 0x32C)/ % hit0
+s/            g_player_health = 0;/            ;/ % hit0
 s/object_hit_effects(g_objects, 0, 0, 1, 1, 0, 0xFF, 1);/object_hit_effects(g_objects, 0, 1, 1, 1, 0, 0xFF, 1);/ % hit0
 s/actor_sound_play_untracked(0x627, g_objects, 0x6D60, 0x1F4, 0x3E8);/actor_sound_play_untracked(0x627, g_objects, 0x6D60, 0x3E8, 0x1F4);/ % hit0
 s/obj_set_destroyed(g_objects);/;/ % hit0

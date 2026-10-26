@@ -77,21 +77,21 @@ s32 object_get_beam_ends(u8 *arg0, u8 *arg1, struct127 *arg2, s32 arg3);
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
 s32 memcpy(u8 *, u8 *, s32);
 extern s32 rocket_sound_update;
-extern u8 D_800A0D90[]; /* 4 s32 texture ids (0x60..0x63) */
-extern f32 D_800A0DB8;
-extern f32 D_800A0DBC;
-extern f32 D_800A0DC0;
-extern f32 D_800A0DC4;
-extern f32 D_800A0DC8;
-extern f32 D_800A0DCC;
-extern f32 D_800A0DD0;
+extern u8 g_fire_sprites[]; /* 4 s32 texture ids (0x60..0x63); was D_800A0D90 */
+extern f32 g_fire_emit1_scale; /* was D_800A0DB8 */
+extern f32 g_fire_emit1_u18; /* was D_800A0DBC */
+extern f32 g_fire_emit1_u1c; /* was D_800A0DC0 */
+extern f32 g_fire_emit1_u20; /* was D_800A0DC4 */
+extern f32 g_fire_emit2_scale; /* was D_800A0DC8 */
+extern f32 g_fire_emit2_u1c; /* was D_800A0DCC */
+extern f32 g_fire_emit2_u20; /* was D_800A0DD0 */
 
 // object_fire_spawn: creates the burning-effect object for `obj` (attachment_apply_kind_effects): takes effect handle 0x79 (0x7A when
 // obj->id is 0x48) with attachment_find_by_slot (none: return); the effect position and direction come from object_get_beam_ends (flag 4
 // set when it found them; else (0, 0, 0) and (0, 500, 0)); fxrec_spawn (0x20, 0x14) creates the object, whose data
 // (+0x98) gets {obj, room, 1, handle, emitters, 20, 20}. Starts the looping sounds 0x5B3 (sound level < 5), 0x5B4 and
 // 0x5BC (level < 7 or obj +0x318 set) at the object's position with callback rocket_sound_update, and two emitters
-// (particle_emitter_spawn: texture 0x15 set 0x5503, and a random texture of D_800A0D90 set 0x2203 with +0x170 = {0, 1.0}),
+// (particle_emitter_spawn: texture 0x15 set 0x5503, and a random texture of g_fire_sprites set 0x2203 with +0x170 = {0, 1.0}),
 // stored in the data. kind (u8) and owner go to every spawn. Returns 0 (the asm leaves a leftover v0; the callers,
 // attachment_apply_kind_effects (asm) and game_eu_5D910's C, do not read it).
 void object_fire_spawn(struct127 *obj, u8 kind, s32 owner) {
@@ -142,13 +142,13 @@ void object_fire_spawn(struct127 *obj, u8 kind, s32 owner) {
     }
     data = *(Data3870 **) (newobj + 0x98);
     memcpy((u8 *) data, (u8 *) &blk, sizeof(Data3870));
-    if (D_8008FD8C < 5) {
+    if (g_player_count < 5) {
         sfx_emitter_start(0x5B3, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
                       (s32) &rocket_sound_update, data, 0x5B3, 12, 0);
     }
     sfx_emitter_start(0x5B4, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
                   (s32) &rocket_sound_update, data, 0x5B4, 12, 0);
-    if (D_8008FD8C < 7 || *(s32 *) ((u8 *) obj + 0x318) != 0) {
+    if (g_player_count < 7 || *(s32 *) ((u8 *) obj + 0x318) != 0) {
         sfx_emitter_start(0x5BC, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
                       (s32) &rocket_sound_update, data, 0x5BC, 12, 0);
     }
@@ -157,11 +157,11 @@ void object_fire_spawn(struct127 *obj, u8 kind, s32 owner) {
     emit1.u04 = 40.0f;
     emit1.u08 = 40.0f;
     emit1.u0C = 40.0f;
-    emit1.u10 = D_800A0DB8;
-    emit1.u14 = D_800A0DB8;
-    emit1.u18 = D_800A0DBC;
-    emit1.u1C = D_800A0DC0;
-    emit1.u20 = D_800A0DC4;
+    emit1.u10 = g_fire_emit1_scale;
+    emit1.u14 = g_fire_emit1_scale;
+    emit1.u18 = g_fire_emit1_u18;
+    emit1.u1C = g_fire_emit1_u1c;
+    emit1.u20 = g_fire_emit1_u20;
     emit1.u24[0] = -1;
     emit1.u24[4] = -1;
     emit1.u24[1] = -1;
@@ -218,11 +218,11 @@ void object_fire_spawn(struct127 *obj, u8 kind, s32 owner) {
     emit2.u04 = 45.0f;
     emit2.u08 = 25.5f;
     emit2.u0C = 25.5f;
-    emit2.u10 = D_800A0DC8;
-    emit2.u14 = D_800A0DC8;
+    emit2.u10 = g_fire_emit2_scale;
+    emit2.u14 = g_fire_emit2_scale;
     emit2.u18 = 1.0f;
-    emit2.u1C = D_800A0DCC;
-    emit2.u20 = D_800A0DD0;
+    emit2.u1C = g_fire_emit2_u1c;
+    emit2.u20 = g_fire_emit2_u20;
     emit2.u24[0] = -1;
     emit2.u24[4] = -1;
     emit2.u24[1] = -1;
@@ -243,7 +243,7 @@ void object_fire_spawn(struct127 *obj, u8 kind, s32 owner) {
     emit2.u54[3] = 0;
     emit2.u58 = 0;
     emit2.u59 = -1;
-    spec2.texture = ((s32 *) D_800A0D90)[random_int() & 3];
+    spec2.texture = ((s32 *) g_fire_sprites)[random_int() & 3];
     spec2.u01 = 3;
     spec2.texSet = 0x2203;
     spec2.life = 300;

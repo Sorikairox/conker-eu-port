@@ -159,7 +159,7 @@ void drip_effect_update(u8 *arg0) {
     var_s3 = 0;
     do {
         temp_s2 = arg0 + (var_s3 * 4);
-        temp_t9 = (*(s32 *)((u8 *)temp_s2 + 0x2C)) - D_800BE9E4;
+        temp_t9 = (*(s32 *)((u8 *)temp_s2 + 0x2C)) - g_frame_ticks;
         (*(s32 *)((u8 *)temp_s2 + 0x2C)) = temp_t9;
         temp_v1 = (*(u8 **)((u8 *)arg0 + 0x24));
         if ((temp_v1 != NULL) && ((*(s32 *)((u8 *)temp_v1 + 0)) != 0) && ((*(s32 *)((u8 *)temp_v1 + 0x1D4)) != 0) && ((*(u8 *)((u8 *)arg0 + 0x28)) == (*(u8 *)((u8 *)temp_v1 + 0x3B)))) {
@@ -279,11 +279,11 @@ s32 drip_stream_update(u8 *arg0) {
             temp_f8_2 = (*(f32 *)((u8 *)temp_t0_3 + 0xC));
             temp_lo = var_a3 * 0xC;
             var_a3 += 1;
-            (*(f32 *)((u8 *)temp_t0_3 + 0xC)) = (f32) (temp_f8_2 - ((*(f32 *)((u8 *)temp_v1 + 0x10)) * D_800BE9A4));
+            (*(f32 *)((u8 *)temp_t0_3 + 0xC)) = (f32) (temp_f8_2 - ((*(f32 *)((u8 *)temp_v1 + 0x10)) * g_frame_step_f));
             temp_t1 = temp_v1 + 0x50 + temp_lo;
-            (*(f32 *)((u8 *)temp_t1 + 0)) = (f32) ((*(f32 *)((u8 *)temp_t1 + 0)) + ((*(f32 *)((u8 *)temp_v1 + 4)) * D_800BE9A4));
+            (*(f32 *)((u8 *)temp_t1 + 0)) = (f32) ((*(f32 *)((u8 *)temp_t1 + 0)) + ((*(f32 *)((u8 *)temp_v1 + 4)) * g_frame_step_f));
             (*(f32 *)((u8 *)temp_t1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_t1 + 4)) + (*(f32 *)((u8 *)temp_t0_3 + 0xC)));
-            (*(f32 *)((u8 *)temp_t1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_t1 + 8)) + ((*(f32 *)((u8 *)temp_v1 + 0xC)) * D_800BE9A4));
+            (*(f32 *)((u8 *)temp_t1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_t1 + 8)) + ((*(f32 *)((u8 *)temp_v1 + 0xC)) * g_frame_step_f));
             (*(f32 *)((u8 *)temp_t0_3 + 0)) = (f32) (((*(f32 *)((u8 *)temp_t1 + 8)) * var_f2) + (sp.u40 + ((*(f32 *)((u8 *)temp_t1 + 0)) * var_f12)));
             (*(f32 *)((u8 *)temp_t0_3 + 4)) = (f32) ((*(f32 *)((u8 *)temp_t1 + 4)) + sp.u44);
             (*(f32 *)((u8 *)temp_t0_3 + 8)) = (f32) ((sp.u48 + ((*(f32 *)((u8 *)temp_t1 + 8)) * var_f12)) - ((*(f32 *)((u8 *)temp_t1 + 0)) * var_f2));
@@ -328,7 +328,7 @@ s32 drip_stream_update(u8 *arg0) {
     } else {
         temp_f0 = (*(f32 *)((u8 *)temp_v1 + 4));
         temp_f14_2 = (*(f32 *)((u8 *)temp_v1 + 0xC));
-        temp_f16_2 = 1.0f / D_800BE9A4;
+        temp_f16_2 = 1.0f / g_frame_step_f;
         sp10 = (temp_f14_2 * var_f12) - (temp_f0 * var_f2);
         temp_v0_2 = (*(u8 **)((u8 *)temp_a1 + 0)) + ((*(s8 *)((u8 *)temp_a1 + 4)) * 4);
         temp_f10 = (sp.u40 - (*(f32 *)((u8 *)temp_v0_2 + 0x34))) * temp_f16_2;

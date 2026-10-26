@@ -382,7 +382,7 @@ s32 sprite_fade_in_alpha_b(struct_eu_sprite *arg0) {
     return 1;
 }
 /* P243: readable C for emit_point_smoke (game_EF410, 106 insns). */
-// emit_point_smoke: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a,
+// emit_point_smoke: g_emit_point_spawn_fns spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a,
 // s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`): queues one emit_sparks_by_angles smoke puff (owner byte argB,
 // arg 1) at (x, y, z + 15 - rand * 30), sizes 22 / 44, 200 / 150, the byte angle (s32) (pz * 0.07012195f) - 0x40 and
 // the fixed puff constants of the asm (the 0x84-byte request of object_break_effects; the last word stays unwritten, as in
@@ -465,7 +465,7 @@ s32 emit_point_smoke(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z
 
 /* was func_150C2700 */
 s32 fx_blast_spawn_preset(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
-    extern f32 D_800A064C;
+    extern f32 g_fx_blast_u30;
     S2700 s;
 
     s.u10 = arg4;
@@ -491,20 +491,20 @@ s32 fx_blast_spawn_preset(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 
     s.u1C = 35.0f;
     s.u24 = -2.328f;
     s.u28 = 1.6630001f;
-    s.u30 = D_800A064C;
+    s.u30 = g_fx_blast_u30;
     emit_dust_by_angles(&s, &s.u8, 0, argE, 1);
     return 1;
 }
-extern f32 D_800A0650, D_800A0654; // s105: 0x64C-0x664 stay externs (1655.0f is loaded from .rodata, not lui)
+extern f32 g_fx_point_emitter_uc, g_fx_point_emitter_u10; /* was D_800A0654 */ /* was D_800A0650 */ // s105: 0x64C-0x664 stay externs (1655.0f is loaded from .rodata, not lui)
 /* was func_150C2804 */
 void fx_point_emitter_spawn(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5) {
     struct_eu_EF410 sp1C;
 
-    sp1C.unkC = D_800A0650;
+    sp1C.unkC = g_fx_point_emitter_uc;
     sp1C.unk0 = arg0;
     sp1C.unk4 = arg1;
     sp1C.unk8 = arg2;
-    sp1C.unk10 = D_800A0654;
+    sp1C.unk10 = g_fx_point_emitter_u10;
     sp1C.unk14 = arg3;
     sp1C.unk16 = 5;
     sp1C.unk17 = 6;
@@ -512,7 +512,7 @@ void fx_point_emitter_spawn(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4, s32
     sp1C.unk19 = -1;
     point_emitter_spawn(&sp1C, 0, arg4, arg5);
 }
-extern f32 D_800A0658, D_800A065C, D_800A0660; // C2898 keeps these as externs: literals add 8 frame bytes (s105)
+extern f32 g_fx_debris_spray_scale, g_fx_debris_dust_size_mul, g_fx_debris_dust_size_add; /* was D_800A0660 */ /* was D_800A065C */ /* was D_800A0658 */ // C2898 keeps these as externs: literals add 8 frame bytes (s105)
 /* was func_150C2898 */
 void fx_debris_spray(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, struct_eu_2062D0_c *arg6) {
     f32 sp6C[3];
@@ -526,16 +526,16 @@ void fx_debris_spray(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5,
     sp6C[0] = arg0;
     sp6C[1] = arg1;
     sp6C[2] = arg2;
-    temp_f2 = ((random_float() * 112.0f) + 247.0f) * D_800A0658;
+    temp_f2 = ((random_float() * 112.0f) + 247.0f) * g_fx_debris_spray_scale;
     sp60[0] = -arg3 * temp_f2;
     sp60[1] = -arg4 * temp_f2;
     sp60[2] = -arg5 * temp_f2;
     sp4C = random_float();
     sp50 = random_int();
     sp54 = random_int();
-    impact_dust_cloud_spawn(sp6C, sp60, 6, (sp4C * D_800A065C) + D_800A0660, (sp50 & 0xF) + 0x19, (sp54 % 101) + 0x9B, (random_float() * 119.0f) + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6->unkC, arg6->unk1);
+    impact_dust_cloud_spawn(sp6C, sp60, 6, (sp4C * g_fx_debris_dust_size_mul) + g_fx_debris_dust_size_add, (sp50 & 0xF) + 0x19, (sp54 % 101) + 0x9B, (random_float() * 119.0f) + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6->unkC, arg6->unk1);
 }
-extern f32 D_800A0670, D_800A0674, D_800A0678, D_800A067C, D_800A0680, D_800A0684, D_800A0688, D_800A068C;
+extern f32 g_fx_ring_u7c, g_fx_ring_u80, g_fx_ring_u78, g_fx_ring_u48, g_fx_ring_u50, g_fx_ring_u4c, g_fx_ring_u54, g_fx_ring_u58; /* was D_800A0670; was D_800A0674; was D_800A0678; was D_800A067C; was D_800A0680; was D_800A0684; was D_800A0688; was D_800A068C */
 s32 spark_spawn_from_desc(f32 *, s32, s32, s32, s32, s32);
 /* was func_150C29F0 */
 void fx_ring_particle_spawn(u8 *arg0)
@@ -593,19 +593,19 @@ void fx_ring_particle_spawn(u8 *arg0)
   sp.u60 = (random_int() % 201U) + 100;
   sp.u70 = 0xF;
   sp.u74 = 0.0f;
-  sp.u7C = D_800A0670;
-  sp.u80 = D_800A0674;
+  sp.u7C = g_fx_ring_u7c;
+  sp.u80 = g_fx_ring_u80;
   sp.u3C = p[0] + (m * c);
   sp.u40 = p[3];
   sp.u44 = p[1] + (m * s);
-  sp.u78 = D_800A0678;
+  sp.u78 = g_fx_ring_u78;
   scale = (random_float() * 0.5f) + 1.0f;
   t = (random_float() * 0.5f) + 1.0f;
-  sp.u48 = D_800A067C * scale;
-  sp.u50 = D_800A0680 * scale;
-  sp.u4C = D_800A0684 * t;
-  sp.u54 = D_800A0688 * t;
-  sp.u58 = D_800A068C * t;
+  sp.u48 = g_fx_ring_u48 * scale;
+  sp.u50 = g_fx_ring_u50 * scale;
+  sp.u4C = g_fx_ring_u4c * t;
+  sp.u54 = g_fx_ring_u54 * t;
+  sp.u58 = g_fx_ring_u58 * t;
   spark_spawn_from_desc(&sp.u3C, 0xA, 1, 0, arg0[0xC], arg0[1]);
   *((s16 *) (arg0 + 0xE)) = (random_int() % 51U) + 0x19;
 }
@@ -655,7 +655,7 @@ void fx_distant_burst_update(u8 *arg0) {
     s32 temp_v0_2;
 
     temp_s0 = arg0 + 0x28;
-    *temp_s0 += random_float() * 20.0f * 1e-9f * D_800BE9A4 * 3.6447764e7f;
+    *temp_s0 += random_float() * 20.0f * 1e-9f * g_frame_step_f * 3.6447764e7f;
     if (*temp_s0 > 1.0f) {
         temp_v0 = camera_get_pos(g_cur_view_player);
         temp_f0 = (*(f32 *)((u8 *)temp_v0 + 0));
@@ -710,8 +710,8 @@ void fx_distant_burst_update(u8 *arg0) {
 s32 smoke_puff_shrink_rise(struct_eu_EF410_b *arg0) {
     arg0->unk2C -= arg0->unk2C * arg0->unk150;
     arg0->unk30 -= arg0->unk30 * arg0->unk150;
-    arg0->unk38 += arg0->unk50 * D_800BE9A4 + 0.5f * arg0->unk4C * D_800BE9A4 * D_800BE9A4;
-    arg0->unk50 += arg0->unk4C * D_800BE9A4;
+    arg0->unk38 += arg0->unk50 * g_frame_step_f + 0.5f * arg0->unk4C * g_frame_step_f * g_frame_step_f;
+    arg0->unk50 += arg0->unk4C * g_frame_step_f;
     if (arg0->unk2C < 10.0f || arg0->unk30 < 10.0f) {
         return 0;
     }
@@ -800,7 +800,7 @@ void obj_effect_run_handler(struct127 *, s32, void *);
 // (unk124); then the usual movement steps (obj_update_ground_tilt / obj_apply_gravity / obj_update_floor / obj_land_on_floor), half the
 // speed when unk28 is 0, the animation (obj_start_anim mode 0, or 2 / 3 / 1 by the carrier's unk84 0x1F9 / 0x1FB /
 // other) and the carrier link (obj_sync_anim_frame). With a timer (unk2E4): a carrier in state 5 drops it; the timer stops
-// when nothing (D_800BE616 / D_800C35EA / carrier) holds it; while running it counts down by D_800BE9E4 (sound
+// when nothing (D_800BE616 / D_800C35EA / carrier) holds it; while running it counts down by g_frame_ticks (sound
 // rail_event_add when D_800BE616); when it runs out the carrier is released (stunned / immune cleared, health 1) and
 // the object sends event 0xB (D_800BE616) or 0xE (obj_effect_run_handler, its owner, position, carrier) and goes to state 1.
 /* was func_150C3230 */
@@ -861,8 +861,8 @@ void carried_object_update(struct127 *obj) {
     if (D_800BE616 == 0 && D_800C35EA == 0 && obj->unk65 == 0) {
         obj->unk2E4 = 0;
     }
-    if (D_800BE9E4 < obj->unk2E4) {
-        obj->unk2E4 -= D_800BE9E4;
+    if (g_frame_ticks < obj->unk2E4) {
+        obj->unk2E4 -= g_frame_ticks;
         if (D_800BE616 != 0) {
             rail_event_add(obj->x_position, obj->y_position, obj->z_position, 900.0f);
         }

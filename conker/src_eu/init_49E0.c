@@ -305,7 +305,7 @@ void sched_start_gfx_task(void) {
             ((D_8003B238 >= 11) && ((D_8003B238 >= 21) || (D_800C35EA != 1)))) {
             D_8003B238 = 2;
         }
-        D_800BE9E4 = D_8003B238;
+        g_frame_ticks = D_8003B238;
         D_8003B238 = 0 ;
         D_8003A582 = 1;
         osSendMesg(D_8003B230, &D_8003B240, 0);

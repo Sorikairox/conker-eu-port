@@ -1,6 +1,6 @@
 # P246 fx_drifting_sprite_update (drifting_sprite_update) mutants: sed % setup names
-s/(o + 0x20) \* D_800BE9A4/(o + 0x24) * D_800BE9A4/ % hit
-s/(o + 0x24) \* D_800BE9A4/(o + 0x20) * D_800BE9A4/ % hit
+s/(o + 0x20) \* g_frame_step_f/(o + 0x24) * g_frame_step_f/ % hit
+s/(o + 0x24) \* g_frame_step_f/(o + 0x20) * g_frame_step_f/ % hit
 s/pt\[1\] = \*(f32 \*) (o + 0x28)/pt[1] = *(f32 *) (o + 0x2C)/ % hit
 s/pt\[2\] = \*(f32 \*) (o + 0x1C)/pt[2] = *(f32 *) (o + 0x18)/ % hit
 s/+ 0xE) = (s32)/+ 0xC) = (s32)/ % hit
@@ -11,7 +11,7 @@ s/(s32 \*) (o + 0x34)) != 0/(s32 *) (o + 0x30)) != 0/ % hit
 s/(s32 \*) (o + 0x34)) != 0/(s32 *) (o + 0x34)) == 0/ % hit miss
 s/+ 0x10) = (s32) \*(f32 \*) (o + 0x34)/+ 0x10) = (s32) *(f32 *) (o + 0x28)/ % hit
 s/+ 0x10) = (s32) \*(f32 \*) (o + 0x28)/+ 0x10) = (s32) *(f32 *) (o + 0x34)/ % miss
-s/(o + 0x30) -= D_800BE9A4/(o + 0x30) -= 1.0f/ % hit alive
+s/(o + 0x30) -= g_frame_step_f/(o + 0x30) -= 1.0f/ % hit alive
 s/(o + 0x30) <= 0.0f/(o + 0x30) < 0.0f/ % miss
 s/        return 0;/        return 2;/ % miss
 s/    return 1;/    return 2;/ % hit

@@ -14,10 +14,10 @@ s/tip\[1\] = dir\[1\] \* sEmit2TipStep\[0\] + pos\[1\];/tip[1] = dir[1] * sEmit2
 s/tip\[0\] = dir\[0\] \* sEmit2TipStep\[0\]/tip[0] = dir[0] * 0.03f/ % nomtx
 s/        rec->flags |= 1;/        rec->flags |= 2;/ % nomtx
 s/\*(f32 \*) (e + 0x14) = pos\[1\];/*(f32 *) (e + 0x14) = pos[2];/ % base
-s/rec->u12C += E2F(0x24) \* D_800BE9A4;/rec->u12C += E2F(0x28) * D_800BE9A4;/ % base
+s/rec->u12C += E2F(0x24) \* g_frame_step_f;/rec->u12C += E2F(0x28) * g_frame_step_f;/ % base
 s/    if (1.0f < rec->u12C) {/    if (1.0f <= rec->u12C) {/ % emit1
 s/inv = 1.0f \/ rec->u12C;/inv = 0.5f \/ rec->u12C;/ % base
-s/time = rec->u128 + D_800BE9A4;/time = rec->u128;/ % base
+s/time = rec->u128 + g_frame_step_f;/time = rec->u128;/ % base
 s/timeStep = time \* inv;/timeStep = inv;/ % base
 s/b\[1\] = rec->pos2\[1\];/b[1] = rec->pos[1];/ % base
 s/stepA\[2\] = (pos\[2\] - rec->pos\[2\]) \* inv;/stepA[2] = (pos[2] - rec->pos[1]) * inv;/ % base
@@ -88,13 +88,13 @@ s/particle_spawn_ex((s32) &sprite, 1, 0, 0, e\[0xC\], e\[1\]);/particle_spawn_ex
 s/rec->u13C -= 1.0f;/rec->u13C -= 2.0f;/ % spray3
 /second spray/,/r = random_float/s/(obj\[0x74\] & 0xF) != 0xF/(obj[0x74] \& 0xF) != 0xE/ % hidden
 s/if (1.0f < rec->u13C) {/if (1.5f < rec->u13C) {/ % base spray2one
-s/rec->u151 += D_800BE9E4;/rec->u151 += D_800BE9E4 * 2;/ % base
+s/rec->u151 += g_frame_ticks;/rec->u151 += g_frame_ticks * 2;/ % base
 s/if (\*(s8 \*) &rec->u151 >= 0x33) {/if (*(s8 *) \&rec->u151 > 0x33) {/ % tick50
 s/(\*(s16 \*) (\*(u8 \*\*) (o + 0x31C) + 0x1AA))++;/(*(s16 *) (*(u8 **) (o + 0x31C) + 0x1A8))++;/ % tick51
 s/        rec->u151 = 0;/        rec->u151 = 1;/ % tick51
 s/if (o != NULL && \*(u8 \*\*) (o + 0x31C) != NULL) {/if (o != NULL) {/ % tick51n
 s/if ((rec->flags & 8) && \*(u8 \*\*) (obj + 0x318) != NULL) {/if ((rec->flags \& 8)) {/ % flag8n318
-s/rec->u152 -= D_800BE9E4;/rec->u152 -= D_800BE9E4 + 1;/ % flag8
+s/rec->u152 -= g_frame_ticks;/rec->u152 -= g_frame_ticks + 1;/ % flag8
 s/if (rec->u152 < 0) {/if (rec->u152 <= 0) {/ % flag8eq
 s/burst.unk0 = 1;/burst.unk0 = 2;/ % flag8fire
 s/ 21 + 20;/ 20 + 20;/ % flag8fire

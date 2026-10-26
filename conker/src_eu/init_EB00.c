@@ -45,7 +45,7 @@ s32 sfx_cb_ambient_random_chirp(struct04 *arg0, s32 arg1, s32 *arg2, s32 *arg3, 
         *arg8 = 0;
         return 0;
     }
-    arg0->unk18 -= D_800BE9E4;
+    arg0->unk18 -= g_frame_ticks;
     if (arg0->unk18 > 0) {
         *arg2 = 0;
         *arg8 = 0;
@@ -60,10 +60,10 @@ s32 sfx_cb_ambient_random_chirp(struct04 *arg0, s32 arg1, s32 *arg2, s32 *arg3, 
 s32 sfx_cb_fade_out(struct00 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     s32 temp_v0 = arg0->unkC;
     s32 temp_v1 = arg0->unk18;
-    temp_v1 -= D_800BE9E4;
+    temp_v1 -= g_frame_ticks;
 
     if (temp_v1 <= 0) {
-        temp_v0 = temp_v0 - D_800BE9E4 * 1000;
+        temp_v0 = temp_v0 - g_frame_ticks * 1000;
         if (temp_v0 < 0) {
             return 1;
         }
@@ -83,7 +83,7 @@ s32 sfx_cb_delayed_play_2d(struct251 *arg0, s32 arg1, s32 *arg2, struct11 *arg3,
         *arg6 = 0;
     }
 
-    temp_v1 -= D_800BE9E4;
+    temp_v1 -= g_frame_ticks;
 
     if (temp_v1 <= 0) {
         if (*arg2 != 0) {
@@ -105,7 +105,7 @@ s32 sfx_cb_delayed_object_sound2(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 a
         sfx->unk0 = 0;
         *arg6 = 0;
     }
-    timer -= D_800BE9E4;
+    timer -= g_frame_ticks;
     if (timer <= 0) {
         *arg6 = sfx->unk18 >> 16;
         sfx->unk0 = *arg6;
@@ -154,7 +154,7 @@ s32 sfx_cb_delayed_object_sound(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 ar
         sfx->unk0 = 0;
         *arg6 = 0;
     }
-    timer -= D_800BE9E4;
+    timer -= g_frame_ticks;
     if (timer <= 0) {
         sfx->unk0 = *arg6 = sfx->unk18 >> 16;
         actor_sound_play_untracked(*arg6, (struct127 *)sfx->unk1C, sfx->unkC, sfx->unkA, sfx->unk8);
@@ -398,9 +398,9 @@ s32 sound_listener_volume_pan(s32 arg0, s16 x, s16 y, s16 z, s32 arg4, s16 arg5,
     s32 dx, dy, dz;
     s32 tx, ty, tz;
 
-    if (D_80082FA0 != 0) {
+    if (g_last_player_index != 0) {
         min = -1;
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= g_last_player_index; i++) {
             tx = x - D_80042308[i].ex;
             ty = y - D_80042308[i].ey;
             tz = z - D_80042308[i].ez;
@@ -1216,7 +1216,7 @@ s32 sound_voice_get_id(u16 arg0) {
 }
 
 // sound_source_mix: volume / pan / distance of a sound at (x, y, z) for the nearest listener (P151). With more than
-// one listener (D_80082FA0 = last index) it picks the one whose ear position (ex, ey, ez) is closest; then
+// one listener (g_last_player_index = last index) it picks the one whose ear position (ex, ey, ez) is closest; then
 // sound_calc_pan_volume with the source relative to the ear, the listener's heading and the source relative to the listener
 // (x, y, z) for the distance falloff between `outer` and `inner`. *outVol = that volume scaled by gain / 0x8000.
 // Returns the distance.
@@ -1231,9 +1231,9 @@ s32 sound_source_mix(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *o
     s32 vol;
     s32 dist;
 
-    if (D_80082FA0 != 0) {
+    if (g_last_player_index != 0) {
         min = -1;
-        for (i = 0, l = D_80042308; i <= D_80082FA0; i++, l++) {
+        for (i = 0, l = D_80042308; i <= g_last_player_index; i++, l++) {
             dx = x - l->ex;
             dy = y - l->ey;
             dz = z - l->ez;
@@ -1404,7 +1404,7 @@ void sfx_emitters_update(struct15 *arg0, s32 *count, s32 first, s32 end) {
                 sound_voice_set_param(voice, 0x100, hi);
             }
             if (flags & SFX_SMOOTH) {
-                d = (s32) ((e->unk28 - dist) * D_800BE9E4) / 3;
+                d = (s32) ((e->unk28 - dist) * g_frame_ticks) / 3;
                 if (d >= 367) {
                     k = 2.0f;
                 } else {
@@ -1438,10 +1438,10 @@ void sound_update_frame(void) {
     s32 step;
 
     if (D_80041F60 == 0 && D_80041F61 == 0) {
-        for (i = 0; i <= D_80082FA0; i++) {
-            u8 *obj = (u8 *)&D_800DBFF0[i];
+        for (i = 0; i <= g_last_player_index; i++) {
+            u8 *obj = (u8 *)&g_player_views[i];
 
-            if (D_80082FA0 != 0 || (*(s32 *)(obj + 0x2C) & 0x80000)) {
+            if (g_last_player_index != 0 || (*(s32 *)(obj + 0x2C) & 0x80000)) {
                 D_80042308[i].x = *(f32 *)(obj + 0x2F8);
                 D_80042308[i].y = *(f32 *)(obj + 0x2FC);
                 D_80042308[i].z = *(f32 *)(obj + 0x300);
@@ -1533,9 +1533,9 @@ u16 sound_surface_footstep(s32 arg0, s16 *arg1, s32 arg2)
   arg0 = floor_flags_surface_type(arg0);
   if (arg1 != 0)
   {
-    if (D_80082FA0 != 0)
+    if (g_last_player_index != 0)
     {
-      *arg1 = 0x7FFF / (D_80082FA0 + 1);
+      *arg1 = 0x7FFF / (g_last_player_index + 1);
     }
     else
     {
@@ -1560,8 +1560,8 @@ u16 sound_surface_footstep(s32 arg0, s16 *arg1, s32 arg2)
 //
 //     temp_v0 = func_1510F8CC(arg0);
 //     if (arg1 != NULL) {
-//         if (D_80082FA0 != 0) {
-//             *arg1 = 0x7FFF / (D_80082FA0 + 1);
+//         if (g_last_player_index != 0) {
+//             *arg1 = 0x7FFF / (g_last_player_index + 1);
 //         } else {
 //             *arg1 = 0x7FFF;
 //         }

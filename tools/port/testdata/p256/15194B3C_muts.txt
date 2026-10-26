@@ -3,7 +3,7 @@ s/class == 0x63/class == 0x62/ % c63none
 s/mode == 2) {/mode == 1) {/ % c16none c2single
 s/(mode == 1) ? 1 : 0/(mode != 0) ? 1 : 0/ % c27
 s/(mode == 1) ? 1 : 0/0/ % c2single
-s/D_800A43C6\[class \* 16\]/D_800A43C6[class * 8]/ % c2single c10single c16none
+s/g_hit_kind_info_mode\[class \* 16\]/g_hit_kind_info_mode[class * 8]/ % c2single c10single c16none
 s/>> 8) - 0x40/>> 7) - 0x40/ % c0
 s/s.unk0 = yaw - 0x40/s.unk0 = yaw + 0x40/ % c0
 s/(obj + 0x18) + 270.0/(obj + 0x18) + 207.0/ % c0

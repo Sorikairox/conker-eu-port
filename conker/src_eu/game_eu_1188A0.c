@@ -23,7 +23,7 @@ typedef struct {
     u8 u3E;
     u8 u3F;
 } P_EB090;
-extern f32 D_800BE9A4;
+extern f32 g_frame_step_f; /* was D_800BE9A4 */
 /* was func_150EB090 */
 void fx_light_sweep_emitter_update(u8 *arg0) {
     P_EB090 *p;
@@ -58,7 +58,7 @@ void fx_light_sweep_emitter_update(u8 *arg0) {
     f32 g;
 
     p = (P_EB090 *)(arg0 + 0x28);
-    p->acc += (p->rate + random_float() * p->rrate) * D_800BE9A4;
+    p->acc += (p->rate + random_float() * p->rrate) * g_frame_step_f;
     if (p->acc > 1.0f) {
         h.t.uF0 = 0;
         h.t.uF4 = 0;
@@ -114,7 +114,7 @@ void fx_light_sweep_emitter_update(u8 *arg0) {
 s32 collision_floor_probe(f32 *, s32, f32, s32 *);
 
 /* drifting_sprite_update: moves an effect over the ground: x +0x18 / z +0x1C advance by the velocities +0x20 / +0x24
- * times the frame time D_800BE9A4 and go to the sprite (+0x14) s16 x / z (+0xE / +0x12); the sprite's s16 y (+0x10)
+ * times the frame time g_frame_step_f and go to the sprite (+0x14) s16 x / z (+0xE / +0x12); the sprite's s16 y (+0x10)
  * is the ground height collision_floor_probe finds at (x, +0x28, z) (range +0x2C, result in +0x34), or +0x28 when there is
  * none. The lifetime +0x30 counts down by the frame time; returns 0 once it is <= 0 (done), else 1. Table word
  * 0x8008B4AC (dispatcher not identified; neighbours bone_sparks_light_update / fx_pendulum_sprite_update take one u8 *). */
@@ -122,8 +122,8 @@ s32 collision_floor_probe(f32 *, s32, f32, s32 *);
 s32 fx_drifting_sprite_update(u8 *o) {
     f32 pt[3];
 
-    *(f32 *) (o + 0x18) += *(f32 *) (o + 0x20) * D_800BE9A4;
-    *(f32 *) (o + 0x1C) += *(f32 *) (o + 0x24) * D_800BE9A4;
+    *(f32 *) (o + 0x18) += *(f32 *) (o + 0x20) * g_frame_step_f;
+    *(f32 *) (o + 0x1C) += *(f32 *) (o + 0x24) * g_frame_step_f;
     pt[0] = *(f32 *) (o + 0x18);
     pt[1] = *(f32 *) (o + 0x28);
     pt[2] = *(f32 *) (o + 0x1C);
@@ -134,7 +134,7 @@ s32 fx_drifting_sprite_update(u8 *o) {
     } else {
         *(s16 *) (*(u8 **) (o + 0x14) + 0x10) = (s32) *(f32 *) (o + 0x28);
     }
-    *(f32 *) (o + 0x30) -= D_800BE9A4;
+    *(f32 *) (o + 0x30) -= g_frame_step_f;
     if (*(f32 *) (o + 0x30) <= 0.0f) {
         return 0;
     }

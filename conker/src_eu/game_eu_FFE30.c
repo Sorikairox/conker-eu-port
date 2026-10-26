@@ -36,7 +36,7 @@ void sky_flash_update(u8 *arg0)
   u8 *temp_v0;
   u8 *temp_v0_2;
   temp_v0 = (temp_v0_2 = arg0 + 0x28); // fakematch: two pointers to the same address (permuter)
-  *((f32 *) (((u8 *) arg0) + 0x2C)) = (f32) ((*((f32 *) (((u8 *) arg0) + 0x2C))) + D_800BE9A4);
+  *((f32 *) (((u8 *) arg0) + 0x2C)) = (f32) ((*((f32 *) (((u8 *) arg0) + 0x2C))) + g_frame_step_f);
   if ((*((f32 *) (((u8 *) arg0) + 0x38))) < (*((f32 *) (((u8 *) arg0) + 0x2C))))
   {
     do
@@ -86,7 +86,7 @@ u8 *sky_flash_draw(u8 *arg0, u8 *arg1, s16 arg2) {
 void sky_flash_spawner_update(u8 *arg0)
 {
   u8 *temp_v1;
-  *((s32 *) (arg0 + 0x30)) -= D_800BE9E4;
+  *((s32 *) (arg0 + 0x30)) -= g_frame_ticks;
   if ((*((s32 *) (arg0 + 0x30))) < 0)
   {
     temp_v1 = arg0 + 0x28;

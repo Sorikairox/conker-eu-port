@@ -3,9 +3,9 @@
 #include "variables.h"
 // hoisted forward declaration(s) for char_fx_beam_light_j5
 typedef struct { s32 w[3]; } V3_1514F878;
-extern V3_1514F878 D_800A5D50;
-extern V3_1514F878 D_800A5D5C;
-extern f32 D_800A6238;
+extern V3_1514F878 g_char_fx_beam_j5_from; /* was D_800A5D50 */
+extern V3_1514F878 g_char_fx_beam_j5_to; /* was D_800A5D5C */
+extern f32 g_char_fx_beam_j5_radius; /* was D_800A6238 */
 
 s32 char_fx_detach(u8 *, u8 *);
 
@@ -21,7 +21,7 @@ void *bone_effect_spawn(void *, void *, void *, s32, s32, s32, s32);
 // character_handler_indices: picks the handler-table indices for a character (P151). By the character type
 // (+0x4) it sets *outType (index into D_800A62B8, flag 4); by the game mode g_level_id it sets *outMode (index
 // into D_800A62A0, flag 2) and, when the character's sub-type (+0x3B) matches the mode, *outSub (column of
-// D_8008AF30[*outMode], flag 1). Returns the flags; outputs whose flag is clear are left unwritten.
+// g_char_fx_mode_tables[*outMode], flag 1). Returns the flags; outputs whose flag is clear are left unwritten.
 /* was func_1514CFF0 */
 s32 char_fx_handler_indices(struct127 *arg0, s32 *outSub, s32 *outMode, s32 *outType) {
     u8 *obj = (u8 *)arg0;
@@ -120,9 +120,9 @@ s32 char_fx_handler_indices(struct127 *arg0, s32 *outSub, s32 *outMode, s32 *out
 s32 char_fx_handler_indices(struct127 *, s32 *, s32 *, s32 *);
 void head_icon_create(s32, s32);
 struct102 *head_icon_find(s32);
-extern void (*D_8008AE10[])(struct127 *);
-extern void (*D_8008AE6C)(struct127 *);
-extern u8 *D_8008AF30[];
+extern void (*g_char_fx_init_fns[])(struct127 *); /* was D_8008AE10 */
+extern void (*g_char_fx_common_init_fn)(struct127 *); /* was D_8008AE6C */
+extern u8 *g_char_fx_mode_tables[]; /* was D_8008AF30 */
 extern u8 D_800A62A0[];
 extern u8 D_800A62B8[];
 
@@ -150,7 +150,7 @@ s32 char_fx_init(struct127 *arg0) {
     if (idx == 0 && D_800BE616 == 0) {
         head_icon_create(idx, 0xFF);
     }
-    D_8008AE6C(arg0);
+    g_char_fx_common_init_fn(arg0);
     ret = char_fx_handler_indices(arg0, &sp44, &sp40, &sp3C);
     r = ret;
     if (ret == 0) {
@@ -159,25 +159,25 @@ s32 char_fx_init(struct127 *arg0) {
     if (r & 4) {
         v = D_800A62B8[sp3C];
         if (v != 0) {
-            D_8008AE10[v](arg0);
+            g_char_fx_init_fns[v](arg0);
         }
     }
     if (r & 2) {
         v = D_800A62A0[sp40];
         if (v != 0) {
-            D_8008AE10[v](arg0);
+            g_char_fx_init_fns[v](arg0);
         }
     }
     if ((r & 2) && (r & 1)) {
-        if (D_8008AE10[D_8008AF30[sp40][sp44]] != NULL) {
-            D_8008AE10[D_8008AF30[sp40][sp44]](arg0);
+        if (g_char_fx_init_fns[g_char_fx_mode_tables[sp40][sp44]] != NULL) {
+            g_char_fx_init_fns[g_char_fx_mode_tables[sp40][sp44]](arg0);
         }
     }
     return 1;
 }
 
-extern u8 *D_8008AF88[];
-extern void (*D_8008AEF8[])(s32);
+extern u8 *g_char_fx_states[]; /* was D_8008AF88 */
+extern void (*g_char_fx_attach_fns[])(s32); /* was D_8008AEF8 */
 
 /* was func_1514D880 */
 s32 char_fx_clear_all(u8 *arg0) {
@@ -189,8 +189,8 @@ s32 char_fx_clear_all(u8 *arg0) {
         do {
             next = *(struct102 **)((u8 *)p + 0x14);
             // fakematch: the s16 index is re-read for the call (no local) and compared as -1 != x; keeps the register order of the original
-            if (-1 != *(s16 *)(D_8008AF88[*(s16 *)((u8 *)p + 0x1C)] + 2)) {
-                D_8008AEF8[*(s16 *)(D_8008AF88[*(s16 *)((u8 *)p + 0x1C)] + 2)](*(s32 *)((u8 *)p + 0x10));
+            if (-1 != *(s16 *)(g_char_fx_states[*(s16 *)((u8 *)p + 0x1C)] + 2)) {
+                g_char_fx_attach_fns[*(s16 *)(g_char_fx_states[*(s16 *)((u8 *)p + 0x1C)] + 2)](*(s32 *)((u8 *)p + 0x10));
             }
             node_destroy(p);
             p = next;
@@ -200,10 +200,10 @@ s32 char_fx_clear_all(u8 *arg0) {
 }
 
 s32 char_fx_slot_derives();   /* K&R definition below (s16 state, s16 base) */
-extern s32 (*D_8008AF04[])(u8 *, s32, s32);   /* state event handlers: char_fx_evt_visibility .. char_fx_evt_accept (8) */
+extern s32 (*g_char_fx_event_fns[])(u8 *, s32, s32);   /* state event handlers: char_fx_evt_visibility .. char_fx_evt_accept (8); was D_8008AF04 */
 // obj_state_event_dispatch: sends an event (arg2, arg3) to every state node of obj (list at +0x2F4, linked through
-// +0x14) whose state (+0x1C) is `state` or derives from it (char_fx_slot_derives on the state table D_8008AF88); each
-// matching node's state record names its handler (s16 at +0, -1 = none) in D_8008AF04, called with the node's data
+// +0x14) whose state (+0x1C) is `state` or derives from it (char_fx_slot_derives on the state table g_char_fx_states); each
+// matching node's state record names its handler (s16 at +0, -1 = none) in g_char_fx_event_fns, called with the node's data
 // (+0x10). Returns whether the last handler called accepted the event (0 when none was called).
 // The event values are full words (P218: the asm passes a2 / a3 to the handler unmasked).
 // Callers: aiscript_send_event (game_A28B0), scene_event_run_a (game_eu_51190, state 0xD with an animation), tank_update.
@@ -216,12 +216,12 @@ s32 char_fx_send_event(s32 obj, s16 state, s32 arg2, s32 arg3) {
     handled = 0;
     for (node = *(u8 **) ((u8 *) obj + 0x2F4); node != NULL; node = *(u8 **) (node + 0x14)) {
         if (state != *(s16 *) (node + 0x1C)
-            && char_fx_slot_derives(*(s16 *) (D_8008AF88[state] + 4), *(s16 *) (node + 0x1C)) == 0) {
+            && char_fx_slot_derives(*(s16 *) (g_char_fx_states[state] + 4), *(s16 *) (node + 0x1C)) == 0) {
             continue;
         }
-        idx = *(s16 *) D_8008AF88[*(s16 *) (node + 0x1C)];
+        idx = *(s16 *) g_char_fx_states[*(s16 *) (node + 0x1C)];
         if (idx != -1) {
-            handled = D_8008AF04[idx](*(u8 **) (node + 0x10), arg2, arg3) != 0;
+            handled = g_char_fx_event_fns[idx](*(u8 **) (node + 0x10), arg2, arg3) != 0;
         }
     }
     return handled;
@@ -238,17 +238,17 @@ s16 arg1;
     if (arg0 == arg1) {
         return 1;
     }
-    if (char_fx_slot_derives(*(s16 *)(D_8008AF88[arg0] + 6), arg1, arg0) != 0) {
+    if (char_fx_slot_derives(*(s16 *)(g_char_fx_states[arg0] + 6), arg1, arg0) != 0) {
         return 1;
     }
-    if (char_fx_slot_derives(*(s16 *)(D_8008AF88[arg0] + 4), arg1) != 0) {
+    if (char_fx_slot_derives(*(s16 *)(g_char_fx_states[arg0] + 4), arg1) != 0) {
         return 1;
     }
     return 0;
 }
 
 /* P241: readable C for char_fx_fixed_beam (game_eu_17A800, 58 insns). */
-// object_fixed_beam_spawn: entry 16 of D_8008AE10 (`void (struct127 *)`): spawns a beam effect (beam_spawn,
+// object_fixed_beam_spawn: entry 16 of g_char_fx_init_fns (`void (struct127 *)`): spawns a beam effect (beam_spawn,
 // kind 0x46) from the fixed point (-477, -2015, 2244) to the object's position +0x14, width 0.32, gives it the
 // record {object, its id byte +0x3B, 6, 0, -180, 77} at +0xC8 and attaches it to the object (char_fx_attach, slot
 // 0x15). Constants: the ELF's D_800A61C4..D_800A61D0 (0xC3EE8000, 0xC4FBE000, 0x450C4000, 0x3EA3D70A).
@@ -533,7 +533,7 @@ void char_fx_bundle_attach_a(struct127 *arg0) {   /* P76: callback; a0 passes th
 
 /* was func_1514E128 */
 void char_fx_light_j2(struct127 *arg0) {
-    light_create_obj_joint(arg0, 2, (s32 *)D_800A5C80, 2, 0x12C, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    light_create_obj_joint(arg0, 2, (s32 *)g_char_fx_light_ofs_j2, 2, 0x12C, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
 /* was func_1514E1A8 */
@@ -626,7 +626,7 @@ void char_fx_nop_e(s32 arg0) {
 
 /* was func_1514E3C0 */
 void char_fx_setup_attachments_if(struct127 *arg0) {
-    if (((u8 *)D_800D2E4C)[0x11] & 8) {
+    if (((u8 *)g_save_progress_bits)[0x11] & 8) {
         char_fx_setup_attachments(arg0);
     }
 }
@@ -635,22 +635,22 @@ void char_fx_setup_attachments_if(struct127 *arg0) {
 void char_fx_nop_f(s32 arg0) {
 }
 
-extern u8 D_800A5C8C[];
-extern u8 D_800A5C98[];
-extern u8 D_800A5CA4[];
-extern f32 D_800A61E4;
+extern u8 g_char_fx_beam_from[]; /* was D_800A5C8C */
+extern u8 g_char_fx_beam_to[]; /* was D_800A5C98 */
+extern u8 g_char_fx_beam_glow_ofs[]; /* was D_800A5CA4 */
+extern f32 g_char_fx_beam_radius; /* was D_800A61E4 */
 s32 light_create_obj_beam(struct127 *, s32, s32 *, s32 *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* was func_1514E404 */
 void char_fx_beam_light_setup(struct127 *arg0) {
     s32 temp_v0;
 
-    light_create_obj_beam(arg0, 0xC, D_800A5C8C, D_800A5C98, D_800A61E4, 2, 0x12C, 0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);
+    light_create_obj_beam(arg0, 0xC, g_char_fx_beam_from, g_char_fx_beam_to, g_char_fx_beam_radius, 2, 0x12C, 0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);
     temp_v0 = obj_setup_run(arg0, 0x3C, 1.0f, 0);
-    if (D_800BE9B4 == 0) {
+    if (g_level_first_frame == 0) {
         (*(s32 *)((u8 *)temp_v0 + 0x38)) = 0x7D0;
     }
-    char_fx_attach(light_create_obj_joint(arg0, 0, D_800A5CA4, 2, 0x12C, 0xB, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), arg0, 0x19);
+    char_fx_attach(light_create_obj_joint(arg0, 0, g_char_fx_beam_glow_ofs, 2, 0x12C, 0xB, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), arg0, 0x19);
 }
 
 /* was func_1514E540 */
@@ -659,8 +659,8 @@ void char_fx_set_variant(u8 *arg0) {
     arg0[0x101] |= 0x34;
 }
 
-extern f32 D_800A61E8;
-extern f32 D_800A61EC;
+extern f32 g_char_fx_glow_a_k_c4; /* was D_800A61E8 */
+extern f32 g_char_fx_glow_a_k_40; /* was D_800A61EC */
 /* was func_1514E57C */
 void char_fx_glow_attach_a(struct127 *arg0) {
     s32 pad; // fakematch: unused slot at the top of the frame
@@ -746,7 +746,7 @@ void char_fx_glow_attach_a(struct127 *arg0) {
     b.uB8 = 0.0f;
     b.uBC = 0.5f;
     b.uC0 = 0.5f;
-    b.uC4 = D_800A61E8;
+    b.uC4 = g_char_fx_glow_a_k_c4;
     c.u49 = arg0->unique_id;
     c.u2C = 35.0f;
     c.u44 = arg0;
@@ -760,14 +760,14 @@ void char_fx_glow_attach_a(struct127 *arg0) {
     b.uFB = 0;
     c.u4A = -1;
     c.u34 = 59.0f;
-    c.u40 = D_800A61EC;
+    c.u40 = g_char_fx_glow_a_k_40;
     b.uEC = 1.0f;
     char_fx_attach(bone_effect_spawn(&a, &b, &c, 2, 0, 0, 0), arg0, 6);
     char_glow_trail_spawn(arg0, 5, -1, 0xFF, 1);
 }
 
-extern f32 D_800A61F0;
-extern f32 D_800A61F4;
+extern f32 g_char_fx_glow_b_k_c4; /* was D_800A61F0 */
+extern f32 g_char_fx_glow_b_k_40; /* was D_800A61F4 */
 /* was func_1514E704 */
 void char_fx_glow_attach_b(struct127 *arg0) {
     s32 pad; // fakematch: unused slot at the top of the frame
@@ -853,7 +853,7 @@ void char_fx_glow_attach_b(struct127 *arg0) {
     b.uB8 = 0.0f;
     b.uBC = 0.5f;
     b.uC0 = 0.5f;
-    b.uC4 = D_800A61F0;
+    b.uC4 = g_char_fx_glow_b_k_c4;
     c.u49 = arg0->unique_id;
     c.u2C = 35.0f;
     c.u44 = arg0;
@@ -867,7 +867,7 @@ void char_fx_glow_attach_b(struct127 *arg0) {
     b.uFB = 0;
     c.u4A = -1;
     c.u34 = 59.0f;
-    c.u40 = D_800A61F4;
+    c.u40 = g_char_fx_glow_b_k_40;
     b.uEC = 1.0f;
     char_fx_attach(bone_effect_spawn(&a, &b, &c, 2, 0, 0, 0), arg0, 6);
     char_glow_trail_spawn(arg0, 5, -1, 0xFF, 1);
@@ -992,7 +992,7 @@ u8 * character_effect_attach(struct127 *, s16, s32, u8, u8, s32, u8 *);
 void char_fx_effect_a5cb0(struct127 *arg0) {
     f32 *temp_v1;
 
-    char_fx_attach(character_effect_attach(arg0, 5, 0, 1, 0xFF, 1, D_800A5CB0), arg0, 0xD);
+    char_fx_attach(character_effect_attach(arg0, 5, 0, 1, 0xFF, 1, g_char_fx_effect_5cb0), arg0, 0xD);
     temp_v1 = &arg0->x_position;
     char_fx_attach(light_add_point(-0x8000, (s32) temp_v1 >> 0x10, (s32) temp_v1 & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0), arg0, 0x18);
 }
@@ -1002,7 +1002,7 @@ void char_fx_effect_a5cb0(struct127 *arg0) {
 void char_fx_effect_a5cc4(struct127 *arg0) {
     f32 *temp_v1;
 
-    char_fx_attach(character_effect_attach(arg0, 5, 0, 1, 0xFF, 1, D_800A5CC4), arg0, 0xD);
+    char_fx_attach(character_effect_attach(arg0, 5, 0, 1, 0xFF, 1, g_char_fx_effect_5cc4), arg0, 0xD);
     temp_v1 = &arg0->x_position;
     char_fx_attach(light_add_point(-0x8000, (s32) temp_v1 >> 0x10, (s32) temp_v1 & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0), arg0, 0x18);
 }
@@ -1012,7 +1012,7 @@ void char_fx_effect_a5cc4(struct127 *arg0) {
 void char_fx_effect_a5cd8(struct127 *arg0) {
     f32 *temp_v1;
 
-    char_fx_attach(character_effect_attach(arg0, 5, 0, 1, 0xFF, 1, D_800A5CD8), arg0, 0xD);
+    char_fx_attach(character_effect_attach(arg0, 5, 0, 1, 0xFF, 1, g_char_fx_effect_5cd8), arg0, 0xD);
     temp_v1 = &arg0->x_position;
     char_fx_attach(light_add_point(-0x8000, (s32) temp_v1 >> 0x10, (s32) temp_v1 & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0), arg0, 0x18);
 }
@@ -1022,14 +1022,14 @@ void char_fx_effect_a5cd8(struct127 *arg0) {
 void char_fx_effect_a5cec(struct127 *arg0) {
     f32 *temp_v1;
 
-    char_fx_attach(character_effect_attach(arg0, 5, 0, 1, 0xFF, 1, D_800A5CEC), arg0, 0xE);
+    char_fx_attach(character_effect_attach(arg0, 5, 0, 1, 0xFF, 1, g_char_fx_effect_5cec), arg0, 0xE);
     temp_v1 = &arg0->x_position;
     char_fx_attach(light_add_point(-0x8000, (s32) temp_v1 >> 0x10, (s32) temp_v1 & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0), arg0, 0x18);
 }
 
 /* was func_1514ED38 */
 void char_fx_effect_a5d00(struct127 *arg0) {
-    char_fx_attach(character_effect_attach(arg0, 7, 0, 1, 0xFF, 1, D_800A5D00), arg0, 0xF);
+    char_fx_attach(character_effect_attach(arg0, 7, 0, 1, 0xFF, 1, g_char_fx_effect_5d00), arg0, 0xF);
 }
 
 /* was func_1514ED94 */
@@ -1229,9 +1229,9 @@ s32 char_fx_attach(void *arg0, struct127 *arg1, s16 arg2) {
                 *(u8 **)((u8 *)next + 0x18) = node;
             }
         } else {
-            idx = *(s16 *)(D_8008AF88[arg2] + 2);
+            idx = *(s16 *)(g_char_fx_states[arg2] + 2);
             if (idx != -1) {
-                D_8008AEF8[idx](arg0);
+                g_char_fx_attach_fns[idx](arg0);
             } else {
                 node_destroy((struct102 *)arg0);
             }
@@ -1483,8 +1483,8 @@ s32 char_fx_evt_link_flag(u8 *arg0, s32 arg1, s32 arg2) {
     return 1;
 }
 
-extern u8 D_800A5D38[];
-extern u8 D_800A5D44[];
+extern u8 g_char_fx_bundle_light_a[]; /* was D_800A5D38 */
+extern u8 g_char_fx_bundle_light_b[]; /* was D_800A5D44 */
 
 /* was func_1514F704 */
 int char_fx_bundle_attach(struct127 *arg0) { // int: callers use the implicit declaration
@@ -1498,8 +1498,8 @@ int char_fx_bundle_attach(struct127 *arg0) { // int: callers use the implicit de
     }
     obj_twin_bone_emitters_spawn(arg0, 0xFF, 1);
     player_screen_uv_mesh_spawn(arg0, 0xFF, 1);
-    light_create_obj_joint(arg0, 1, (s32 *)D_800A5D38, 2, 0x12C, 0xC, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1);
-    r = light_create_obj_joint(arg0, 1, (s32 *)D_800A5D44, 2, 0x12C, 0xF, 0xFF, 0, 0, 0xFF, 1, -1, 0, 0, 0xFF, 1);
+    light_create_obj_joint(arg0, 1, (s32 *)g_char_fx_bundle_light_a, 2, 0x12C, 0xC, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1);
+    r = light_create_obj_joint(arg0, 1, (s32 *)g_char_fx_bundle_light_b, 2, 0x12C, 0xF, 0xFF, 0, 0, 0xFF, 1, -1, 0, 0, 0xFF, 1);
     if (r != NULL) {
         char_fx_attach(r, arg0, 0x19);
     }
@@ -1509,9 +1509,9 @@ int char_fx_bundle_attach(struct127 *arg0) { // int: callers use the implicit de
 void char_fx_beam_light_j5(struct127 *arg0) {
     V3_1514F878 sp54;
     V3_1514F878 sp48;
-    sp54 = D_800A5D50;
-    sp48 = D_800A5D5C;
-    light_create_obj_beam(arg0, 5, &sp54, &sp48, D_800A6238, 2, 0x12C, 0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
+    sp54 = g_char_fx_beam_j5_from;
+    sp48 = g_char_fx_beam_j5_to;
+    light_create_obj_beam(arg0, 5, &sp54, &sp48, g_char_fx_beam_j5_radius, 2, 0x12C, 0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
 }
 
 /* was func_1514F93C */
@@ -1534,7 +1534,7 @@ void char_fx_spawn_linked_3a(u8 *arg0) {
 
 /* was func_1514F9BC */
 void char_fx_effect_a5d68(struct127 *arg0) {
-    char_fx_attach(character_effect_attach(arg0, 5, 0, 1, 0xFF, 1, D_800A5D68), arg0, 0xD);
+    char_fx_attach(character_effect_attach(arg0, 5, 0, 1, 0xFF, 1, g_char_fx_effect_5d68), arg0, 0xD);
 }
 
 /* was func_1514FA18 */

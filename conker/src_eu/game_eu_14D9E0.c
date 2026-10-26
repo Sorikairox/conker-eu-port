@@ -252,7 +252,7 @@ void camera_look_update(u8 *arg0) {
     if (PS16(0x73C) == 1) {
         // moving into place
         if (PS16(0x84A) != 0) {
-            PS16(0x84A) = PS16(0x84A) - D_800BE9E4;
+            PS16(0x84A) = PS16(0x84A) - g_frame_ticks;
             if (PS16(0x84A) <= 0) {
                 *(s8 *) (PPTR(0x3D4) + 0x198) = 1;
                 PS16(0x73C) = 2;
@@ -363,13 +363,13 @@ void camera_look_update(u8 *arg0) {
                                        (f32) *(s16 *) (PPTR(0x3D4) + 0x12) * 0.35f) + 49152.0f) * 0.0054931640625f;
                 } else {
                     if (mode == 0x34) {
-                        cam->yawTarget = cam->yawTarget - (f32) (s8) PPTR(0x36C)[2] * rate * (f32) D_800BE9E4;
+                        cam->yawTarget = cam->yawTarget - (f32) (s8) PPTR(0x36C)[2] * rate * (f32) g_frame_ticks;
                     }
-                    cam->yawTarget = cam->yawTarget - (f32) (s8) PPTR(0x36C)[2] * rate * (f32) D_800BE9E4;
+                    cam->yawTarget = cam->yawTarget - (f32) (s8) PPTR(0x36C)[2] * rate * (f32) g_frame_ticks;
                 }
             }
             if (mode != 3 && mode != 0x1A && !special && mode != 0xF) {
-                cam->pitchTarget = cam->pitchTarget + (f32) (s8) PPTR(0x36C)[3] * rate * (f32) D_800BE9E4;
+                cam->pitchTarget = cam->pitchTarget + (f32) (s8) PPTR(0x36C)[3] * rate * (f32) g_frame_ticks;
             }
             if (mode == 0x38) {
                 // follow the vehicle's pitch change since the last frame (+0x8B4)
@@ -473,7 +473,7 @@ void camera_look_update(u8 *arg0) {
         angle = fabsf(math_angle_diff_deg(PF32(0x37C), cam->yawGoal));
         PS32(0x134) = PS32(0x13C);
         if (PS16(0x84A) != 0) {
-            PS16(0x84A) = PS16(0x84A) - D_800BE9E4;
+            PS16(0x84A) = PS16(0x84A) - g_frame_ticks;
             if (PS16(0x84A) <= 0) {
                 *(s8 *) (PPTR(0x3D4) + 0x198) = 0;
                 PS16(0x73C) = 0;

@@ -1,10 +1,10 @@
-s/+ 0x40) + 90.0f) \* D_800A3850;/+ 0x40) + 80.0f) * D_800A3850;/
-s/+ 0x40) + 90.0f) \* D_800A3850;/+ 0x44) + 90.0f) * D_800A3850;/
+s/+ 0x40) + 90.0f) \* g_camera_orbit_pitch_d2r;/+ 0x40) + 80.0f) * g_camera_orbit_pitch_d2r;/
+s/+ 0x40) + 90.0f) \* g_camera_orbit_pitch_d2r;/+ 0x44) + 90.0f) * g_camera_orbit_pitch_d2r;/
 s/    camera_update_eye_base(cam);/    ;/
 s/if (!(\*(s32 \*) (cam + 0x5F0) & 1) &&/if (!(*(s32 *) (cam + 0x5F0) \& 2) \&\&/
 s/+ 0x3D0) + 0x102) == 0) {/+ 0x3D0) + 0x102) != 0) {/
-s/pitch = CAMF(0x39C) - D_800A3854;/pitch = CAMF(0x39C) + D_800A3854;/
-s/if (D_800A3858 == CAMF(0x86C)) {/if (D_800A3858 != CAMF(0x86C)) {/
+s/pitch = CAMF(0x39C) - g_camera_orbit_half_pi;/pitch = CAMF(0x39C) + g_camera_orbit_half_pi;/
+s/if (g_camera_orbit_no_override == CAMF(0x86C)) {/if (g_camera_orbit_no_override != CAMF(0x86C)) {/
 s/if (tgt\[0x1CA\] == 0) {/if (tgt[0x1CA] != 0) {/
 s/yaw = (tgt\[0x102\] != 0 ? 10.0f : 0.0f)/yaw = (tgt[0x102] != 0 ? 20.0f : 0.0f)/
 s/: 0.0f) + \*(f32 \*) (tgt + 0xB8);/: 0.0f) + *(f32 *) (tgt + 0xB4);/
@@ -14,8 +14,8 @@ s/    } else if (88.0f < yaw) {/    } else if (80.0f < yaw) {/
 s/        yaw = 88.0f;/        yaw = 80.0f;/
 s/if (fabsf(prev - yaw) < 10.0f) {/if (fabsf(prev - yaw) < 5.0f) {/
 s/        yaw = prev;/        ;/
-s/        D_80089860 = yaw;/        ;/
-s/    yaw \*= D_800A385C;/    yaw *= D_800A3850 * 2;/
+s/        g_camera_orbit_last_yaw = yaw;/        ;/
+s/    yaw \*= g_camera_orbit_yaw_d2r;/    yaw *= g_camera_orbit_pitch_d2r * 2;/
 s/    camera_calc_relative_yaw(cam);/    ;/
 s/(cam + 0x36C) & 0x10) {/(cam + 0x36C) \& 0x20) {/
 s/dist = 150.0f;/dist = 160.0f;/
@@ -37,7 +37,7 @@ s/if (cam\[0x23C\] != 0) {/if (cam[0x23C] == 0) {/
 s/CAMF(0x300) = v\[2\];/CAMF(0x300) = v[1];/
 s/CAMF(0x3C4) = 0.0f;/CAMF(0x3C4) = 1.0f;/
 s/speed = 1.0f + 1.0f;/speed = 1.0f;/
-s/rate = D_800A3860 + D_800A3864;/rate = D_800A3860;/
+s/rate = g_camera_orbit_rate_a + g_camera_orbit_rate_b;/rate = g_camera_orbit_rate_a;/
 s/            speed += speed;/            ;/
 s/            rate += rate;/            rate += speed;/
 s/math_spring_approach(&CAMF(0x2F8), v\[0\], &CAMF(0x3C0), speed, rate, CAMF(0x7B4));/math_spring_approach(\&CAMF(0x2F8), v[0], \&CAMF(0x3C0), rate, speed, CAMF(0x7B4));/
@@ -50,6 +50,6 @@ s/(struct17 \*) &CAMF(0x2BC), (struct17 \*) &CAMF(0x2F8),/(struct17 *) \&CAMF(0x
 s/CAMF(0x2F8) = CAMF(0x2BC) + 120.0f \* dir\[0\];/CAMF(0x2F8) = CAMF(0x2BC) + 100.0f * dir[0];/
 s/CAMF(0x300) = CAMF(0x2C4) + 120.0f \* dir\[2\];/CAMF(0x300) = CAMF(0x2C4) + 120.0f * dir[1];/
 s/if (CAMF(0x2FC) < CAMF(0x35C) + 30.0f) {/if (CAMF(0x2FC) < CAMF(0x35C) + 20.0f) {/
-s/CAMF(0x5E8) += (CAMF(0x5EC) - CAMF(0x5E8)) \* D_800A3868;/CAMF(0x5E8) += (CAMF(0x5EC) - CAMF(0x5E8)) * D_800A3860;/
+s/CAMF(0x5E8) += (CAMF(0x5EC) - CAMF(0x5E8)) \* g_camera_orbit_roll_ease;/CAMF(0x5E8) += (CAMF(0x5EC) - CAMF(0x5E8)) * g_camera_orbit_rate_a;/
 s/CAMF(0x344) = CAMF(0x348) = CAMF(0x2FC) - CAMF(0x354);/CAMF(0x344) = CAMF(0x2FC) - CAMF(0x354);/
 s/CAMF(0x370) = sqrtf(dx \* dx + dz \* dz);/CAMF(0x370) = sqrtf(dx * dx + dx * dz);/

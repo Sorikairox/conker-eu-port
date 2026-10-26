@@ -91,14 +91,14 @@ void head_icon_update(u8 *arg0) {
         }
         return;
     case 1:
-        var_v0_2 = (*(s16 *)((u8 *)arg0 + 0xE)) - D_800BE9E4;
+        var_v0_2 = (*(s16 *)((u8 *)arg0 + 0xE)) - g_frame_ticks;
         if ((var_v0_2 <= 0) || (g_objects[temp_a2].unk31C->unk75 == 0)) {
             (*(u8 *)((u8 *)arg0 + 0x11)) = 2U;
             var_v0_2 = 0;
         }
         (*(s16 *)((u8 *)arg0 + 0xE)) = var_v0_2;
         temp_a1_2 = (*(u8 **)((u8 *)arg0 + 0x14));
-        (*(u8 *)((u8 *)arg0 + 0x12)) = (u8) ((*(u8 *)((u8 *)arg0 + 0x12)) + (D_800BE9E4 * 2));
+        (*(u8 *)((u8 *)arg0 + 0x12)) = (u8) ((*(u8 *)((u8 *)arg0 + 0x12)) + (g_frame_ticks * 2));
         if (temp_a1_2 != NULL) {
             if (g_objects[temp_a2].unk31C->unk75 == 5) {
                 var_f2 = 85.0f;
@@ -128,7 +128,7 @@ block_38:
         }
         break;
     case 3:
-        temp_v0 = (*(s16 *)((u8 *)arg0 + 0xE)) - D_800BE9E4;
+        temp_v0 = (*(s16 *)((u8 *)arg0 + 0xE)) - g_frame_ticks;
         if (temp_v0 <= 0) {
             (*(u8 *)((u8 *)arg0 + 0x11)) = 2U;
             (*(s16 *)((u8 *)arg0 + 0xE)) = 0;
@@ -136,7 +136,7 @@ block_38:
         }
         (*(s16 *)((u8 *)arg0 + 0xE)) = temp_v0;
         temp_a1_4 = (*(u8 **)((u8 *)arg0 + 0x14));
-        (*(u8 *)((u8 *)arg0 + 0x12)) = (u8) ((*(u8 *)((u8 *)arg0 + 0x12)) + (D_800BE9E4 * 2));
+        (*(u8 *)((u8 *)arg0 + 0x12)) = (u8) ((*(u8 *)((u8 *)arg0 + 0x12)) + (g_frame_ticks * 2));
         if (temp_a1_4 != NULL) {
             (*(s16 *)((u8 *)temp_a1_4 + 0xE)) = (s16) (s32) temp_t0->x_position;
             sp48 = temp_t0;
@@ -148,7 +148,7 @@ block_38:
         goto block_38;
     }
 }
-extern Gfx **D_800E0810;
+extern Gfx **g_head_icon_dl; /* was D_800E0810 */
 typedef struct {
     /* 0x00 */ u8 pad0[0x10];
     /* 0x10 */ u8 obj;
@@ -179,13 +179,13 @@ Gfx *head_icon_draw(Gfx *gdl, Unk1515626C *arg1, s16 arg2) {
         } else {
             h = 0.0f;
         }
-        rot = D_800DBFF0[arg2].unk380;
+        rot = g_player_views[arg2].unk380;
         gdl = sprite_gfx_begin_alt(gdl);
-        mtx_build_rot_scale_trans(&arg1->mtx[D_800BE9C0], 0.0f, rot, 0.0f, 2.25f, 2.25f, 2.25f, p->x_position,
+        mtx_build_rot_scale_trans(&arg1->mtx[g_dl_buf_index], 0.0f, rot, 0.0f, 2.25f, 2.25f, 2.25f, p->x_position,
                       math_sin_u8(arg1->ang) * 15.0f + (p->y_position + 160.0f + h + arg1->yoff), p->z_position);
-        gSPMatrix(gdl++, &arg1->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPMatrix(gdl++, &arg1->mtx[g_dl_buf_index], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         gSPClearGeometryMode(gdl++, G_ZBUFFER);
-        gSPDisplayList(gdl++, *D_800E0810);
+        gSPDisplayList(gdl++, *g_head_icon_dl);
         gSPSetGeometryMode(gdl++, G_ZBUFFER);
     }
     return gdl;

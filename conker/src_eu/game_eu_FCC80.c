@@ -4,9 +4,9 @@
 
 
 /* P241: readable C for level_light2_orbit (game_eu_FCC80, 56 insns). */
-// level_light2_orbit: level update handler (D_8008D0A4 entry 6, `void (s32)`, argument unused): turns the point
+// level_light2_orbit: level update handler (g_level_update_fns entry 6, `void (s32)`, argument unused): turns the point
 // (76, 241) around (-1, 44) by the angle (degrees) at +8 of world_record_find(4) and stores it, with z = -1805, as the
-// position of light slot 2 (trigger_set_position); then steps the D_800DD835 frame counter (level_anim_frame_counter_tick(5, 3)). The
+// position of light slot 2 (trigger_set_position); then steps the g_level_anim_frame frame counter (level_anim_frame_counter_tick(5, 3)). The
 // constants are the ELF's D_800A0C00 (pi / 180, 0x3C8EFA35) and D_800A0C04 (-1805.0, 0xC4E1A000).
 s32 world_record_find(u8);
 void trigger_set_position(s32, s16, s16, s16);

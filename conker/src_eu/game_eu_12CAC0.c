@@ -71,7 +71,7 @@ void object_bolt_fire(struct127 *obj, u8 arg1, s32 arg2) {
     beam_impact_sparks((u8 *) start14C, (s32) hit, arg1, arg2);
 }
 
-extern s32 D_800A2420;
+extern s32 g_beam_joint_name_a; /* was D_800A2420 */
 /* was func_150FF550 */
 void obj_joint_point_get(u8 *arg0, s16 arg1, u8 *arg2) {
     s32 *sp34;
@@ -90,7 +90,7 @@ void obj_joint_point_get(u8 *arg0, s16 arg1, u8 *arg2) {
         *(f32 *)(arg2 + 8) = *(f32 *)(arg0 + 0x1C);
         return;
     }
-    sp34 = &D_800A2420;
+    sp34 = &g_beam_joint_name_a;
     sp30 = arg2;
     model_node_points_to_world(arg0, temp_v0, 0, &sp34, &sp30, 1);
 }
@@ -287,15 +287,15 @@ s32 beam_target_filter(u8 *arg0, s32 arg1, s32 arg2) {
     return 1;
 }
 
-extern char D_800A242C[]; /* joint names, 12 bytes each (D_800A2420 is declared s32 above) */
-extern char D_800A2438[];
-extern char D_800A2444[];
-extern char D_800A2450[2][6][12]; /* two sets of 6 point joint names */
+extern char g_beam_joint_name_b[]; /* joint names, 12 bytes each (g_beam_joint_name_a is declared s32 above); was D_800A2420; was D_800A242C */
+extern char g_beam_joint_name_ref[]; /* was D_800A2438 */
+extern char g_beam_joint_name_out[]; /* was D_800A2444 */
+extern char g_beam_joint_name_sets[2][6][12]; /* two sets of 6 point joint names; was D_800A2450 */
 /* model_node_points_to_world (model, s32, 0, names, outs, n): implicitly declared by the matched object_beam_fire above */
 s32 random_int(void);
 
-// model_points_find: looks up 10 joints of `model` by name in one model_node_points_to_world call: D_800A2420 -> a,
-// D_800A2438 -> ref, D_800A2444 -> out, D_800A242C -> b, and one of the two D_800A2450 sets (random) -> the 6
+// model_points_find: looks up 10 joints of `model` by name in one model_node_points_to_world call: g_beam_joint_name_a -> a,
+// g_beam_joint_name_ref -> ref, g_beam_joint_name_out -> out, g_beam_joint_name_b -> b, and one of the two g_beam_joint_name_sets sets (random) -> the 6
 // vectors of `points`. On success `out` is made relative to `ref` and the result is 1, else 0.
 /* was func_150FFC60 */
 s32 model_points_find(f32 *points, f32 *a, f32 *ref, f32 *out, f32 *b, u8 *model, s32 arg6) {
@@ -307,12 +307,12 @@ s32 model_points_find(f32 *points, f32 *a, f32 *ref, f32 *out, f32 *b, u8 *model
     s32 i;
 
     set = random_int() & 1;
-    q.names[0] = (char *) &D_800A2420;
-    q.names[1] = D_800A2438;
-    q.names[2] = D_800A2444;
-    q.names[3] = D_800A242C;
+    q.names[0] = (char *) &g_beam_joint_name_a;
+    q.names[1] = g_beam_joint_name_ref;
+    q.names[2] = g_beam_joint_name_out;
+    q.names[3] = g_beam_joint_name_b;
     for (i = 0; i < 6; i++) {
-        q.names[4 + i] = D_800A2450[set][i];
+        q.names[4 + i] = g_beam_joint_name_sets[set][i];
         q.outs[4 + i] = points + i * 3;
     }
     q.outs[0] = a;

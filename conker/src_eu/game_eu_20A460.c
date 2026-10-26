@@ -100,8 +100,8 @@ void flash_smoke_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s3
 }
 
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-extern s32 D_800AB8E0;
-extern s32 D_800AB8EC;
+extern s32 g_flash_smoke_colours_a; /* was D_800AB8E0 */
+extern s32 g_flash_smoke_colours_b; /* was D_800AB8EC */
 
 /* was func_151DCF2C */
 void flash_smoke_emitter_update(u8 *arg0) {
@@ -168,7 +168,7 @@ void flash_smoke_emitter_update(u8 *arg0) {
     u8 *temp_v1;
 
     temp_s1 = arg0 + 0x28;
-    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((0.136f + (random_float() * 0.12100001f)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((0.136f + (random_float() * 0.12100001f)) * g_frame_step_f));
     if ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f) {
         sp.uD9 = 0x6C;
         sp.uC4 = 0x5103;
@@ -233,12 +233,12 @@ void flash_smoke_emitter_update(u8 *arg0) {
             sp.uE8 = temp_f16;
             sp.uE4 = temp_f16;
             if ((*(u8 *)((u8 *)temp_s1 + 0x10)) != 0) {
-                (*(s32 *)((u8 *)(&sp.u9C) + 0)) = (s32) (*(s32 *)((u8 *)(&D_800AB8E0) + 0));
-                (*(s32 *)((u8 *)(&sp.u9C) + 4)) = (s32) (*(s32 *)((u8 *)(&D_800AB8E0) + 4));
-                (*(u8 *)((u8 *)(&sp.u9C) + 8)) = (u8) (*(u8 *)((u8 *)(&D_800AB8E0) + 8));
-                (*(s32 *)((u8 *)(&sp.u90) + 0)) = (s32) (*(s32 *)((u8 *)(&D_800AB8EC) + 0));
-                (*(s32 *)((u8 *)(&sp.u90) + 4)) = (s32) (*(s32 *)((u8 *)(&D_800AB8EC) + 4));
-                (*(u8 *)((u8 *)(&sp.u90) + 8)) = (u8) (*(u8 *)((u8 *)(&D_800AB8EC) + 8));
+                (*(s32 *)((u8 *)(&sp.u9C) + 0)) = (s32) (*(s32 *)((u8 *)(&g_flash_smoke_colours_a) + 0));
+                (*(s32 *)((u8 *)(&sp.u9C) + 4)) = (s32) (*(s32 *)((u8 *)(&g_flash_smoke_colours_a) + 4));
+                (*(u8 *)((u8 *)(&sp.u9C) + 8)) = (u8) (*(u8 *)((u8 *)(&g_flash_smoke_colours_a) + 8));
+                (*(s32 *)((u8 *)(&sp.u90) + 0)) = (s32) (*(s32 *)((u8 *)(&g_flash_smoke_colours_b) + 0));
+                (*(s32 *)((u8 *)(&sp.u90) + 4)) = (s32) (*(s32 *)((u8 *)(&g_flash_smoke_colours_b) + 4));
+                (*(u8 *)((u8 *)(&sp.u90) + 8)) = (u8) (*(u8 *)((u8 *)(&g_flash_smoke_colours_b) + 8));
                 temp_lo = ((random_int() % 3U) & 0xFF) * 3;
                 temp_v1 = &sp.u9C + temp_lo;
                 temp_a0 = &sp.u90 + temp_lo;

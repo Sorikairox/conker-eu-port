@@ -162,7 +162,7 @@ void tail_update_conker();
 
 /* was func_1503482C */
 void obj_update_tail_for_conker(s32 arg0) {
-    switch (D_800CC2D4[arg0 * 0x32C]) {
+    switch (g_obj_tab_id[arg0 * 0x32C]) {
     case 0:
     case 1:
     case 2:

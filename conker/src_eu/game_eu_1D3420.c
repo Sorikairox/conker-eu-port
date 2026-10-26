@@ -89,7 +89,7 @@ void bubble_zone_update(u8 *arg0) {
         return;
     }
     if (((*(u8 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 0))) + 0x14)) != 1) && ((temp_a0 = (*(s32 *)((u8 *)temp_s0 + 0x6C)), (temp_a0 == 0)) || (player_mask_hides_all(temp_a0) == 0))) {
-        (*(f32 *)((u8 *)temp_s0 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0xC)) + ((*(f32 *)((u8 *)temp_s0 + 8)) * (*(f32 *)((u8 *)temp_s0 + 4)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s0 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0xC)) + ((*(f32 *)((u8 *)temp_s0 + 8)) * (*(f32 *)((u8 *)temp_s0 + 4)) * g_frame_step_f));
         if ((*(f32 *)((u8 *)temp_s0 + 0xC)) > 1.0f) {
             sp.uDC = 0x6231;
             sp.uDE = 0x1A4D;
@@ -360,8 +360,8 @@ loop_3:
 }
 s32 light_create_flicker_preset(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void *memcpy(void *, const void *, s32);
-extern f32 D_800A9178;
-extern f32 D_800A917C;
+extern f32 g_bubble_spawn_uc_range; /* was D_800A9178 */
+extern f32 g_bubble_spawn_uc_min; /* was D_800A917C */
 typedef struct { f32 x, y, z; } V3_6618;
 typedef struct {
     u8 u0;
@@ -412,7 +412,7 @@ void bubble_emitter_spawn(u8 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg
     tmp.p = arg0;
     tmp.u4 = 0.0f;
     tmp.u8 = (random_float() * 80.0f) + -380.0f;
-    tmp.uC = (random_float() * D_800A9178) + D_800A917C;
+    tmp.uC = (random_float() * g_bubble_spawn_uc_range) + g_bubble_spawn_uc_min;
     tmp.u10 = 0;
     tmp.u14 = random_int() & 0xFF;
     tmp.u15 = (random_int() & 3) + 4;
@@ -471,8 +471,8 @@ void bubble_emitter_spawn(u8 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg
 }
 
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
-extern s32 D_800DD608;
-extern s32 D_800DD618;
+extern s32 g_view_yaw_sin; /* was D_800DD608 */
+extern s32 g_view_yaw_cos; /* was D_800DD618 */
 
 /* was func_151A6900 */
 u8 *bubble_emitter_draw(u8 *arg0, s16 arg1) {
@@ -511,8 +511,8 @@ u8 *bubble_emitter_draw(u8 *arg0, s16 arg1) {
         temp_t0 = arg1 * 4;
         temp_f2 = (*(f32 *)((u8 *)arg0 + 0x2C));
         temp_f0 = (*(f32 *)((u8 *)arg0 + 0x114));
-        temp_f12 = *(&D_800DD608 + temp_t0) * temp_f2;
-        temp_f14 = *(&D_800DD618 + temp_t0) * temp_f2;
+        temp_f12 = *(&g_view_yaw_sin + temp_t0) * temp_f2;
+        temp_f14 = *(&g_view_yaw_cos + temp_t0) * temp_f2;
         temp_f4 = (s32) temp_f0;
         temp_f10 = (s32) (temp_f0 + (*(f32 *)((u8 *)arg0 + 0x11C)));
         (*(s16 *)((u8 *)sp.u4C + 0)) = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x34)) + temp_f14);
@@ -558,15 +558,15 @@ f32 wrap_float_range(f32, f32, f32);
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 void vec3_from_angles_byte(s16, s16, f32, void *);
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-extern f32 D_800A9180;
-extern f32 D_800A9184;
-extern f32 D_800A9188;
-extern f32 D_800A918C;
+extern f32 g_bubble_emit_rate_min; /* was D_800A9180 */
+extern f32 g_bubble_emit_rate_range; /* was D_800A9184 */
+extern f32 g_bubble_fade_min; /* was D_800A9188 */
+extern f32 g_bubble_fade_range; /* was D_800A918C */
 // bubble_emitter_update: update handler (g_effect3d_update2_fns slot 40) of a particle emitter effect. Optional sound / light
 // probe (rail_event_add, radius 500) when +0x127 is set; +0x114 angle advances by +0x118 * dt (wrapped by
 // wrap_float_range to 2048); the pulse phase byte +0x124 advances by +0x125 per tick and sets the brightness +0x126
 // (192 + 63 * sin). Unless player_mask_hides_all(+0x60) says the emitter is off, the spawn accumulator +0x128 grows by
-// (D_800A9180 + rand * D_800A9184) * dt and each whole unit spawns one particle (particle_spawn_ex) at a random point of
+// (g_bubble_emit_rate_min + rand * g_bubble_emit_rate_range) * dt and each whole unit spawns one particle (particle_spawn_ex) at a random point of
 // the disc in the s16 {x, y, z, radius} at *(+0x110), with random size, life, velocity (vec3_from_angles_byte) and fade.
 // Always returns 1.
 /* was func_151A6BB0 */
@@ -603,14 +603,14 @@ s32 bubble_emitter_update(u8 *fx) {
     if (fx[0x127] != 0) {
         rail_event_add(*(f32 *)(fx + 0x34), *(f32 *)(fx + 0x38), *(f32 *)(fx + 0x3C), 500.0f);
     }
-    mv[1] += mv[2] * D_800BE9A4;
+    mv[1] += mv[2] * g_frame_step_f;
     mv[1] = wrap_float_range(mv[1], 2048.0f, 0.0f);
-    fx[0x124] += fx[0x125] * D_800BE9E4;
+    fx[0x124] += fx[0x125] * g_frame_ticks;
     fx[0x126] = (u32)(angle_byte_cos(fx[0x124] - 0x40) * 63.0f + 192.0f);
     if (player_mask_hides_all(*(s32 *)(fx + 0x60)) != 0) {
         return 1;
     }
-    mv[6] += (D_800A9180 + random_float() * D_800A9184) * D_800BE9A4;
+    mv[6] += (g_bubble_emit_rate_min + random_float() * g_bubble_emit_rate_range) * g_frame_step_f;
     if (mv[6] > 1.0f) {
         req.u1D = 0x28;
         req.u8 = 0x2203;
@@ -654,7 +654,7 @@ s32 bubble_emitter_update(u8 *fx) {
             r1 = random_int();
             rf = random_float();
             vec3_from_angles_byte(r0 & 0xFF, ((u32)r1 % 35U) - 0x40, rf * 10.0f + 10.0f, req.vel);
-            req.fade = random_float() * D_800A918C + D_800A9188;
+            req.fade = random_float() * g_bubble_fade_range + g_bubble_fade_min;
             particle_spawn_ex((s32)&req, 1, 0, 0, fx[0xC], fx[1]);
             mv[6] -= 1.0f;
         } while (mv[6] > 1.0f);
@@ -716,7 +716,7 @@ u8 *zone_node_find_by_key(s32 arg0) {
 
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            for (p = g_node_lists[j][(&D_800A5770)[i]]; p != NULL; p = p->next) {
+            for (p = g_node_lists[j][(&g_effect_bcast_types)[i]]; p != NULL; p = p->next) {
                 if ((*(u8 *)((u8 *)p + 0x13) == 0x2C) && (arg0 == *(s32 *)((u8 *)p + 0x28))) {
                     return (u8 *)p;
                 }

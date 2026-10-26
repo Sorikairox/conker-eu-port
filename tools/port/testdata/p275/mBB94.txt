@@ -18,7 +18,7 @@
 \#^        target = dist \* 0\.010810811f#s/0\.010810811f/0.0108f/
 \#^        target = -40\.0f;$#s/-40/-41/
 \#^    if (angle == target && vel == 0\.0f) {$#s/&&/||/
-\#^    angle += vel \* D_800BE9E4;$#s/+=/-=/
+\#^    angle += vel \* g_frame_ticks;$#s/+=/-=/
 \#^    diff = math_angle_diff_deg(angle, target);$#s/angle, target/target, angle/
 \#^    if (0\.0f < diff) {$#s/</<=/ % zero
 \#^        vel += fabsf(diff) \* stiffness;$#s/stiffness/damping/

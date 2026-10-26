@@ -306,10 +306,10 @@ void quadtree_write_leaf_list(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list) {
 /* Quadtree build helper of quadtree_build_node: keeps the entries of the u16 index list `in` (in[0] = count)
  * whose triangle (relative to the box centre) passes the box test quadtree_tri_box_test (0 = inside), writes
  * them to a new list *out (in[0] layout; the caller frees it) and returns their count. *xmin / *zmax get
- * the grid-snapped x minimum / z maximum of the kept entries (grid step 2 << D_80082FA0). */
+ * the grid-snapped x minimum / z maximum of the kept entries (grid step 2 << g_last_player_index). */
 /* was func_15002248 */
 s32 quadtree_filter_box_tris(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in, u16 **out) {
-    s32 step = 1 << (D_80082FA0 + 1);
+    s32 step = 1 << (g_last_player_index + 1);
     s32 lo = step - 1;
     s32 mask = -step;
     s32 n;
@@ -687,24 +687,24 @@ void level_load_header(s32 arg0) {
 
     sp3C = asset_load_with_subfiles(&sp34, 0, &sp38, 2, 21, arg0);
     if ((sp38 != 0) && ((sp3C->unk4 << 8) != 0)) {
-        D_800B0DF0 = sp3C->unk0;
+        g_level_header = sp3C->unk0;
         if (sp34 == 0) {
-            D_8003C8E0 = 0xC000037;
+            g_dbg_crash_marker = 0xC000037;
             func_150AD770();
         }
-        if (D_800B0DF0 == 0) {
-            D_8003C8E0 = 0xC000037;
+        if (g_level_header == 0) {
+            g_dbg_crash_marker = 0xC000037;
             func_150AD770();
         }
     }
     func_151EF040(xor_f0f0f0f0(0x40F0FAAC), &sp2C);
     sp2C = xor_f0f0f0f0(sp2C);
     if (sp2C != 0xE7B00F09) {
-        temp_v0 = D_800B0DF0;
+        temp_v0 = g_level_header;
         temp_v0->unk12 >>= 1;
     }
 
-    temp_v0 = D_800B0DF0;
+    temp_v0 = g_level_header;
     if (temp_v0->unk12 != 0) {
         D_800D2F3C = temp_v0->unk12;
         D_800D2F40 = sp3C->unk8;

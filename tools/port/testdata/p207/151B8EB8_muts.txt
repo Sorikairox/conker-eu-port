@@ -6,8 +6,8 @@ s/req.u18\[2\] = 0xFF/req.u18[2] = 0/ %
 s/\* 500.0f + 900.0f/* 500.0f + 800.0f/ %
 s/req.halfH = s/req.halfH = 0.0f/ %
 s/(obj + 0x3C)/(obj + 0x40)/ %
-s/req.angle\[1\] = ((s32 \*) D_800A5860)\[1\]/req.angle[1] = 1/ %
-s/req.vel\[2\] = ((s32 \*) D_800A5860)\[2\]/req.vel[2] = 2/ %
+s/req.angle\[1\] = ((s32 \*) g_vec3_zero)\[1\]/req.angle[1] = 1/ %
+s/req.vel\[2\] = ((s32 \*) g_vec3_zero)\[2\]/req.vel[2] = 2/ %
 s/req.fadeStart = 1/req.fadeStart = 2/ %
 s/req.fadeRate = 0xFF/req.fadeRate = 0xFE/ %
 s/req.u22 = 1/req.u22 = 0/ %

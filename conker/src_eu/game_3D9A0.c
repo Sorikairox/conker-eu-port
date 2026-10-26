@@ -13,7 +13,7 @@ void level_obj_init_d9d70(void) {
     (*(s8 *)((u8 *)(&g_level_part_fades) + 0)) = 0;
     (*(s8 *)((u8 *)(&g_level_part_fades) + 2)) = 0;
     (*(f32 *)((u8 *)(world_record_find(0xF6)) + 0x7C)) = 2.0f;
-    D_80088D20 = 0;
+    g_water_effect_started = 0;
 }
 /* was func_15010538 */
 void obj_spawn_effect_80(struct127 *arg0) {

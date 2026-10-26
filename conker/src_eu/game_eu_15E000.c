@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A5860[];
+extern u8 g_vec3_zero[]; /* was D_800A5860 */
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x58];
@@ -61,18 +61,18 @@ s32 particle_spawn_default(s32 arg0, u8 arg1, s32 arg2) {
     return particle_spawn_basic(arg0, arg1, arg2, 0xFF, 0);
 }
 
-extern s32 (*D_80089B00[])(u8 *, f32 *);
-extern void (*D_80089BA0[])(u8 *);
+extern s32 (*g_particle_update_fns[])(u8 *, f32 *); /* was D_80089B00 */
+extern void (*g_particle_death_fns[])(u8 *); /* was D_80089BA0 */
 
 /*
  * particle_update: per-tick update of a 0x2B / 0x52 / 0x47 particle (record from particle_spawn_ex). Flag word +0x68:
- * 1 life timer +0x1A counts down by the frame ticks (D_800BE9E4), dead below 0; 2 vertical speed +0x5C gains
- * gravity +0x64; 4 position +0x40 moves by the velocity +0x58 (scaled by D_800BE9A4); 0x200 alpha +0x2B fades
+ * 1 life timer +0x1A counts down by the frame ticks (g_frame_ticks), dead below 0; 2 vertical speed +0x5C gains
+ * gravity +0x64; 4 position +0x40 moves by the velocity +0x58 (scaled by g_frame_step_f); 0x200 alpha +0x2B fades
  * as timer * +0x30 below timer +0x2E; 0x400 size +0x38 / +0x3C changes by +0x34 below timer +0x32 (0x800 =
  * multiply once per tick, else add per tick; 0x80000 = only +0x38, 0x100000 = only +0x3C). Frame counter +0x1C
  * advances by speed +0x20 over the animation length of g_sprite_anim_table[+0x2D] (x 0x10000): 0x10 / 0x20 = die at the
- * end / start, 8 = bounce, else wrap. Then update handler D_80089B00[+0x72] (with the old position; 0 = die);
- * a dead particle runs death handler D_80089BA0[+0x73] and is freed.
+ * end / start, 8 = bounce, else wrap. Then update handler g_particle_update_fns[+0x72] (with the old position; 0 = die);
+ * a dead particle runs death handler g_particle_death_fns[+0x73] and is freed.
  */
 /* was func_1513095C */
 void particle_sprite_update(u8 *arg0) {
@@ -84,22 +84,22 @@ void particle_sprite_update(u8 *arg0) {
     s8 h;
 
     if (*(u32 *)(arg0 + 0x68) & 1) {
-        *(s16 *)(arg0 + 0x1A) -= D_800BE9E4;
+        *(s16 *)(arg0 + 0x1A) -= g_frame_ticks;
         if (*(s16 *)(arg0 + 0x1A) < 0) {
             dead = TRUE;
         }
     }
     if (*(u32 *)(arg0 + 0x68) & 2) {
-        *(f32 *)(arg0 + 0x5C) += *(f32 *)(arg0 + 0x64) * D_800BE9A4;
+        *(f32 *)(arg0 + 0x5C) += *(f32 *)(arg0 + 0x64) * g_frame_step_f;
     }
     old[0] = *(f32 *)(arg0 + 0x40);
     old[1] = *(f32 *)(arg0 + 0x44);
     old[2] = *(f32 *)(arg0 + 0x48);
     flags = *(u32 *)(arg0 + 0x68);
     if (flags & 4) {
-        *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x58) * D_800BE9A4;
-        *(f32 *)(arg0 + 0x44) += *(f32 *)(arg0 + 0x5C) * D_800BE9A4;
-        *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x60) * D_800BE9A4;
+        *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x58) * g_frame_step_f;
+        *(f32 *)(arg0 + 0x44) += *(f32 *)(arg0 + 0x5C) * g_frame_step_f;
+        *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x60) * g_frame_step_f;
         flags = *(u32 *)(arg0 + 0x68);
     }
     if ((flags & 0x200) && *(s16 *)(arg0 + 0x1A) < *(s16 *)(arg0 + 0x2E)) {
@@ -112,31 +112,31 @@ void particle_sprite_update(u8 *arg0) {
     if ((flags & 0x400) && *(s16 *)(arg0 + 0x1A) < *(s16 *)(arg0 + 0x32)) {
         if (flags & 0x800) {
             if (flags & 0x80000) {
-                for (n = D_800BE9E4; n != 0; n--) {
+                for (n = g_frame_ticks; n != 0; n--) {
                     *(f32 *)(arg0 + 0x38) *= *(f32 *)(arg0 + 0x34);
                 }
             } else if (flags & 0x100000) {
-                for (n = D_800BE9E4; n != 0; n--) {
+                for (n = g_frame_ticks; n != 0; n--) {
                     *(f32 *)(arg0 + 0x3C) *= *(f32 *)(arg0 + 0x34);
                 }
             } else {
-                for (n = D_800BE9E4; n != 0; n--) {
+                for (n = g_frame_ticks; n != 0; n--) {
                     *(f32 *)(arg0 + 0x38) *= *(f32 *)(arg0 + 0x34);
                     *(f32 *)(arg0 + 0x3C) *= *(f32 *)(arg0 + 0x34);
                 }
             }
         } else {
             if (!(flags & 0x80000)) {
-                *(f32 *)(arg0 + 0x3C) += *(f32 *)(arg0 + 0x34) * (f32)D_800BE9E4;
+                *(f32 *)(arg0 + 0x3C) += *(f32 *)(arg0 + 0x34) * (f32)g_frame_ticks;
             }
             if (!(flags & 0x100000)) {
-                *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x34) * (f32)D_800BE9E4;
+                *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x34) * (f32)g_frame_ticks;
             }
         }
     }
     if (!dead && (spd = *(s32 *)(arg0 + 0x20)) != 0) {
         len = (g_sprite_anim_table[arg0[0x2D]][0] << 16) - 1;
-        fr = *(s32 *)(arg0 + 0x1C) + spd * D_800BE9E4;
+        fr = *(s32 *)(arg0 + 0x1C) + spd * g_frame_ticks;
         *(s32 *)(arg0 + 0x1C) = fr;
         if (len < fr) {
             flags = *(u32 *)(arg0 + 0x68);
@@ -168,23 +168,23 @@ void particle_sprite_update(u8 *arg0) {
     }
     h = *(s8 *)(arg0 + 0x72);
     if (h != -1 && !dead) {
-        if (D_80089B00[h](arg0, old) == 0) {
+        if (g_particle_update_fns[h](arg0, old) == 0) {
             dead = TRUE;
         }
     }
     if (dead) {
         h = *(s8 *)(arg0 + 0x73);
         if (h != -1) {
-            D_80089BA0[h](arg0);
+            g_particle_death_fns[h](arg0);
         }
         node_destroy((struct102 *)arg0);
     }
 }
 
-extern s32 (*D_80089BA4[])(u8 *, s32);
-extern f32 D_800A3BDC;
+extern s32 (*g_particle_visible_fns[])(u8 *, s32); /* was D_80089BA4 */
+extern f32 g_particle_sprite_size_k; /* was D_800A3BDC */
 extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 s32 world_to_screen(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view);
 void particle_calc_prim_color(s32 arg0_, s32 arg1_, s32 arg2_, s32 arg3_, s32 arg4_);
 void particle_calc_colors(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
@@ -199,11 +199,11 @@ u8 *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 /*
  * particle_draw_sprite: draw handler of the sprite particles (draw tables at 0x8008C10C / 0x8008C6BC / 0x8008C8F8):
  * one textured rectangle for particle `p` in view `view`. Skipped when flag 0x40000 hides it in this view (+0x76
- * view mask), when the visibility handler D_80089BA4[+0x74] (0x8000) says no, or when flag 0x20000's owner +0x6C
+ * view mask), when the visibility handler g_particle_visible_fns[+0x74] (0x8000) says no, or when flag 0x20000's owner +0x6C
  * is not in this view. Projects the position (+0x40, plus +0x4C when 0x1000) with world_to_screen, sizes the
  * half-extents from +0x38 / +0x3C (clamped to at most +0x7C with 0x200000, at least +0x78 with 0x400000), culls
  * against the view's screen box, then emits pipe sync (once), prim depth, combine / colour (particle_calc_prim_color +
- * light_compute_point_colour lighting with 0x10000, else particle_calc_colors), texture D_80090F10[+0x2D] and the rectangle with
+ * light_compute_point_colour lighting with 0x10000, else particle_calc_colors), texture g_sprite_textures[+0x2D] and the rectangle with
  * flipped S (0x40) / T (0x80) and clipped texture start at the left / top screen edge. Returns the new DL end.
  */
 /* was func_1513100C */
@@ -256,7 +256,7 @@ Gfx *particle_draw_sprite(Gfx *gfx, u8 *p, s16 view) {
     blend = *(u16 *)(p + 0x18) >> 8;
     combine = *(u16 *)(p + 0x18);
     if ((*(u32 *)(p + 0x68) & 0x8000) && (s8)p[0x74] != -1) {
-        if (!D_80089BA4[(s8)p[0x74]](p, view)) {
+        if (!g_particle_visible_fns[(s8)p[0x74]](p, view)) {
             return gfx;
         }
     }
@@ -276,9 +276,9 @@ Gfx *particle_draw_sprite(Gfx *gfx, u8 *p, s16 view) {
     if (!world_to_screen(pos, scr, &oz, &ow, &inv, view)) {
         return gfx;
     }
-    cam = (u8 *)D_800BE628 + view * 0x180;
-    hw = *(f32 *)(p + 0x38) * inv * *(f32 *)(cam + 0x1C) * D_800A3BDC;
-    hh = *(f32 *)(p + 0x3C) * inv * *(f32 *)(cam + 0x20) * D_800A3BDC;
+    cam = (u8 *)g_player_cams + view * 0x180;
+    hw = *(f32 *)(p + 0x38) * inv * *(f32 *)(cam + 0x1C) * g_particle_sprite_size_k;
+    hh = *(f32 *)(p + 0x3C) * inv * *(f32 *)(cam + 0x20) * g_particle_sprite_size_k;
     flags = *(u32 *)(p + 0x68);
     if (flags & 0x200000) {
         m = *(f32 *)(p + 0x7C);
@@ -325,15 +325,15 @@ Gfx *particle_draw_sprite(Gfx *gfx, u8 *p, s16 view) {
         gfx++;
         sync = 0;
     }
-    /* prim depth from the view's z-buffer scale / offset (s16 at +0x44 / +0x4C of the D_800BE9C0 entry) */
-    zv = (u8 *)D_800BE628 + view * 0x180 + D_800BE9C0 * 16;
+    /* prim depth from the view's z-buffer scale / offset (s16 at +0x44 / +0x4C of the g_dl_buf_index entry) */
+    zv = (u8 *)g_player_cams + view * 0x180 + g_dl_buf_index * 16;
     gfx->words.w0 = 0xEE000000;
     gfx->words.w1 = (s32)((*(s16 *)(zv + 0x4C) + oz * inv * *(s16 *)(zv + 0x44)) * 32.0f) << 16;
     gfx++;
 
-    spr = (u8 *)&D_80090F10[p[0x2D]];
-    w = D_80090F10[p[0x2D]].unk6;
-    h = D_80090F10[p[0x2D]].unk8;
+    spr = (u8 *)&g_sprite_textures[p[0x2D]];
+    w = g_sprite_textures[p[0x2D]].unk6;
+    h = g_sprite_textures[p[0x2D]].unk8;
     if (left4 < right4) {
         dsdx = (s32)(4096.0f * w / (right4 - left4));
     } else {
@@ -348,11 +348,11 @@ Gfx *particle_draw_sprite(Gfx *gfx, u8 *p, s16 view) {
     t0 = 0;
     flags = *(u32 *)(p + 0x68);
     if (flags & 0x40) { /* flip S */
-        s0 = (D_80090F10[p[0x2D]].unk6 - 1) << 5;
+        s0 = (g_sprite_textures[p[0x2D]].unk6 - 1) << 5;
         dsdx = -dsdx & 0xFFFF;
     }
     if (flags & 0x80) { /* flip T */
-        t0 = (D_80090F10[p[0x2D]].unk8 - 1) << 5;
+        t0 = (g_sprite_textures[p[0x2D]].unk8 - 1) << 5;
         dtdy = -dtdy & 0xFFFF;
     }
     if (flags & 0x10000) {
@@ -372,7 +372,7 @@ Gfx *particle_draw_sprite(Gfx *gfx, u8 *p, s16 view) {
     gfx = gfx_env_color_cached(gfx, env[0], env[1], env[2], env[3], &sync);
     gfx = (Gfx *)gfx_load_texture_cached((s32)gfx, (s32)spr, *(s32 *)(p + 0x1C), 2, 0, 0, p[0x2D], 0, 0, &sync,
                                (*(u32 *)(p + 0x68) & 0x800000) ? 0x3E : 3);
-    g = (Gfx *)gfx_other_mode_cached(gfx, ((*(u32 *)(p + 0x68) & 0x100) ? 0x100000 : 0) | D_800D30BC | 0x2CA0,
+    g = (Gfx *)gfx_other_mode_cached(gfx, ((*(u32 *)(p + 0x68) & 0x100) ? 0x100000 : 0) | g_gfx_tlut_mode | 0x2CA0,
                              *(s32 *)(g_render_mode_pairs + combine * 8 + 4) | *(s32 *)(g_render_mode_pairs + combine * 8) | 4, &sync);
 
     /* texture rectangle: lower right, upper left (10.2 screen coordinates clamped at 0) */
@@ -571,13 +571,13 @@ void particle_die_free(struct102 *arg0) {
 /* was func_15131CEC */
 void particle_run_hook_bb4(u8 *arg0) {
     s32 idx = (*(s32 *)(arg0 + 0x68) & 0x4000) ? arg0[0x75] : 0;
-    D_80089BB4[idx](arg0);
+    g_particle_hook_fns_bb4[idx](arg0);
 }
 
 /* was func_15131D38 */
 void particle_run_hook_be4(u8 *arg0) {
     s32 idx = (*(s32 *)(arg0 + 0x68) & 0x4000) ? arg0[0x75] : 0;
-    D_80089BE4[idx](arg0);
+    g_particle_hook_fns_be4[idx](arg0);
 }
 
 /* was func_15131D84 */
@@ -589,13 +589,13 @@ s32 particle_upd_kill(s32 arg0, s32 arg1) {
 void particle_update_wobble_offset(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3) {
     (*(f32 *)((u8 *)arg0 + 0x4C)) = (f32) ((*(f32 *)((u8 *)arg1 + 0)) * angle_byte_cos((*(u8 *)((u8 *)arg2 + 0)) - 0x40));
     (*(f32 *)((u8 *)arg0 + 0x54)) = (f32) ((*(f32 *)((u8 *)arg1 + 4)) * angle_byte_cos((*(u8 *)((u8 *)arg2 + 1)) - 0x40));
-    (*(u8 *)((u8 *)arg2 + 0)) = (u8) (((*(u8 *)((u8 *)arg3 + 0)) * D_800BE9E4) + (*(u8 *)((u8 *)arg2 + 0)));
-    (*(u8 *)((u8 *)arg2 + 1)) = (u8) (((*(u8 *)((u8 *)arg3 + 1)) * D_800BE9E4) + (*(u8 *)((u8 *)arg2 + 1)));
+    (*(u8 *)((u8 *)arg2 + 0)) = (u8) (((*(u8 *)((u8 *)arg3 + 0)) * g_frame_ticks) + (*(u8 *)((u8 *)arg2 + 0)));
+    (*(u8 *)((u8 *)arg2 + 1)) = (u8) (((*(u8 *)((u8 *)arg3 + 1)) * g_frame_ticks) + (*(u8 *)((u8 *)arg2 + 1)));
 }
 
 /* was func_15131E58 */
 void vec_damp_y_per_tick(f32 *arg0, f32 arg1) {
-    s32 i = D_800BE9E4;
+    s32 i = g_frame_ticks;
 
     while (i > 0) {
         i--;
@@ -605,7 +605,7 @@ void vec_damp_y_per_tick(f32 *arg0, f32 arg1) {
 
 /* was func_15131E88 */
 void vec_damp_xz_per_tick(f32 *arg0, f32 arg1) {
-    s32 i = D_800BE9E4;
+    s32 i = g_frame_ticks;
 
     while (i > 0) {
         i--;
@@ -616,7 +616,7 @@ void vec_damp_xz_per_tick(f32 *arg0, f32 arg1) {
 
 /* was func_15131EC8 */
 void vec_damp_xyz_per_tick(f32 *arg0, f32 arg1) {
-    s32 i = D_800BE9E4;
+    s32 i = g_frame_ticks;
 
     while (i > 0) {
         i--;
@@ -633,11 +633,11 @@ void particle_check_surface_hit(s32 arg0, s32 arg1) {
     particle_surface_hit_dispatch(arg0, arg1, arg0 + 0xA8);
 }
 
-extern s32 (*D_80089C14[])(u8 *, s32, u8 *, u8 *); // only entry 0: particle_hit_bounce (reads cfg as arg3)
+extern s32 (*g_particle_hit_fns[])(u8 *, s32, u8 *, u8 *); /* was D_80089C14 */ // only entry 0: particle_hit_bounce (reads cfg as arg3)
 s32 pos_in_world_bounds(f32 *);
 s32 collision_floor_probe(f32 *, s32, f32, f32 *);
 
-// surface_hit_dispatch: when the hit config `cfg` is on (bit 0 of cfg[0]) with a handler (D_80089C14[(s8) cfg[1]],
+// surface_hit_dispatch: when the hit config `cfg` is on (bit 0 of cfg[0]) with a handler (g_particle_hit_fns[(s8) cfg[1]],
 // -1 = none) and the object (+0x40 / 0x44 / 0x48 x / y / z) is below `other`'s y (+4): probes the point (obj x,
 // other y, obj z) (pos_in_world_bounds; 0 = outside: returns 0) and the floor down to obj y - 0.06 * obj +0x3C
 // (collision_floor_probe, height into obj + 0x80); on a hit calls the handler with (obj, other, {x, floor height, z}, cfg)
@@ -647,7 +647,7 @@ s32 particle_surface_hit_dispatch(u8 *obj, u8 *other, u8 *cfg) {
     f32 p[3];
     f32 q[3];
 
-    if (!(cfg[0] & 1) || (s8) cfg[1] == -1 || D_80089C14[(s8) cfg[1]] == NULL) {
+    if (!(cfg[0] & 1) || (s8) cfg[1] == -1 || g_particle_hit_fns[(s8) cfg[1]] == NULL) {
         return 1;
     }
     if (!(*(f32 *) (obj + 0x44) < *(f32 *) (other + 4))) {
@@ -665,7 +665,7 @@ s32 particle_surface_hit_dispatch(u8 *obj, u8 *other, u8 *cfg) {
     q[0] = p[0];
     q[1] = *(f32 *) (obj + 0x80);
     q[2] = p[2];
-    return D_80089C14[(s8) cfg[1]](obj, (s32) other, (u8 *) q, cfg) & 0xFF;
+    return g_particle_hit_fns[(s8) cfg[1]](obj, (s32) other, (u8 *) q, cfg) & 0xFF;
 }
 
 /* was func_1513206C */
@@ -697,12 +697,12 @@ s32 particle_hit_bounce(u8 *arg0, s32 arg1, u8 *arg2, u8 *arg3) {
     return 1;
 }
 
-extern void (*D_80089C18[])(u8 *, u8 *, u8);
+extern void (*g_particle_msg_fns[])(u8 *, u8 *, u8); /* was D_80089C18 */
 /* was func_1513219C */
 void particle_run_msg_hook(u8 *arg0, u8 *arg1, u8 arg2) {
     void (*f)(u8 *, u8 *, u8);
     if (*(s32 *)(arg0 + 0x68) & 0x4000) {
-        f = D_80089C18[arg0[0x75]];
+        f = g_particle_msg_fns[arg0[0x75]];
         if (f != NULL) {
             f(arg0, arg1, arg2);
         }
@@ -714,9 +714,9 @@ void particle_calc_wobble(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, f32 *arg4, f32
 {
   u8 temp_a0;
   f32 r;
-  temp_a0 = ((*((s8 *) (((u8 *) arg1) + 0))) * D_800BE9E4) + (*((u8 *) (((u8 *) arg0) + 0)));
+  temp_a0 = ((*((s8 *) (((u8 *) arg1) + 0))) * g_frame_ticks) + (*((u8 *) (((u8 *) arg0) + 0)));
   temp_a0 = (*((u8 *) (((u8 *) arg0) + 0)) = temp_a0);  // fakematch: chained store assignment pins temp_a0 to a0
-  *((u8 *) (((u8 *) arg0) + 1)) = (u8) (((*((s8 *) (((u8 *) arg1) + 1))) * D_800BE9E4) + (*((u8 *) (((u8 *) arg0) + 1))));
+  *((u8 *) (((u8 *) arg0) + 1)) = (u8) (((*((s8 *) (((u8 *) arg1) + 1))) * g_frame_ticks) + (*((u8 *) (((u8 *) arg0) + 1))));
   temp_a0 = temp_a0 - 0x40;
   r = angle_byte_cos(temp_a0);
   *arg4 = ((*((f32 *) (((u8 *) arg3) + 0))) * (0, r)) + arg2;  // fakematch: comma flips mul.s operand order
@@ -747,7 +747,7 @@ s32 particle_upd_expand_fade(u8 *arg0, s32 arg1) {
     (*(f32 *)((u8 *)arg0 + 0x3C)) = temp_f12;
     (*(f32 *)((u8 *)arg0 + 0x38)) = temp_f12;
     (*(s8 *)((u8 *)arg0 + 0x2B)) = (s8) (u32) ((*(f32 *)((u8 *)arg0 + 0xB4)) - ((*(f32 *)((u8 *)arg0 + 0xB8)) * temp_f2 * temp_f2));
-    (*(f32 *)((u8 *)arg0 + 0xA8)) = (f32) (temp_f2 + D_800BE9A4);
+    (*(f32 *)((u8 *)arg0 + 0xA8)) = (f32) (temp_f2 + g_frame_step_f);
     if ((*(f32 *)((u8 *)arg0 + 0xAC)) < (*(f32 *)((u8 *)arg0 + 0xA8))) {
         return 0;
     }
@@ -832,7 +832,7 @@ s32 particle_spawn_smoke_puff(u8 *arg0, f32 arg1, u8 arg2, s32 arg3) {
     sp.u55 = 0xFF;
     sp.u56 = 0xFF;
     sp.u5C = 0xFF;
-    temp_t6 = ((u8 *)&D_800A5860);
+    temp_t6 = ((u8 *)&g_vec3_zero);
     (*(s32 *)((u8 *)(&sp.u70) + 0)) = (s32) (*(s32 *)((u8 *)arg0 + 0));
     (*(s32 *)((u8 *)(&sp.u70) + 4)) = (s32) (*(s32 *)((u8 *)arg0 + 4));
     (*(s32 *)((u8 *)(&sp.u70) + 8)) = (s32) (*(s32 *)((u8 *)arg0 + 8));
@@ -853,7 +853,7 @@ s32 particle_spawn_smoke_puff(u8 *arg0, f32 arg1, u8 arg2, s32 arg3) {
     } else {
         var_v0 = 0;
     }
-    temp_t4 = ((u8 *)&D_800A5860);
+    temp_t4 = ((u8 *)&g_vec3_zero);
     sp.u98 = var_v0 | 0x4C000 | var_v1_2;
     sp.uA0 = 6;
     sp.uA1 = 6;

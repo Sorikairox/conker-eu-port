@@ -1,20 +1,20 @@
 s/    if (\*(s32 \*) obj == 0 || d->objId != obj\[0x3B\]) {/    if (*(s32 *) obj == 0) {/ % other_id
 s/    if (\*(s32 \*) obj == 0 || d->objId != obj\[0x3B\]) {/    if (d->objId != obj[0x3B]) {/ % dead
 s/        \*(s16 \*) (fx + 0xE) = -1;/        *(s16 *) (fx + 0xE) = 0;/ % dead
-s/    d->u18 += (d->u1C + random_float() \* d->u20) \* D_800BE9A4;/    d->u18 += (d->u1C + random_float() * d->u20);/ % accum
-s/    d->u18 += (d->u1C + random_float() \* d->u20) \* D_800BE9A4;/    d->u18 += (d->u20 + random_float() * d->u1C) * D_800BE9A4;/ % accum below1
+s/    d->u18 += (d->u1C + random_float() \* d->u20) \* g_frame_step_f;/    d->u18 += (d->u1C + random_float() * d->u20);/ % accum
+s/    d->u18 += (d->u1C + random_float() \* d->u20) \* g_frame_step_f;/    d->u18 += (d->u20 + random_float() * d->u1C) * g_frame_step_f;/ % accum below1
 s/    if (!(d->u18 > 1.0f)) {/    if (!(d->u18 >= 1.0f)) {/ % exact1
 s/    if (\*(u8 \*\*) (obj + 0x1D4) == NULL) {/    if (*(u8 **) (obj + 0x1D4) != NULL) {/ % one nomodel
 s/            d->u18 -= 1.0f;/            d->u18 -= 2.0f;/ % nomodel
 s/    mtx_transform_point_or_origin(d->offset, \&pos, \*(u8 \*\*) (obj + 0x1D4) + d->kind);/    mtx_transform_point_or_origin(d->offset, \&pos, *(u8 **) (obj + 0x1D4));/ % one
 s/    if (0.0f < d->u60) {/    if (0.0f <= d->u60) {/ % u60_0
 s/        if (pos_in_world_bounds(\&pos.x) == 0) {/        if (pos_in_world_bounds(\&pos.x) != 0) {/ % one outside
-s/            height = D_800A84C8;/            height = D_800A84D0;/ % outside
-s/            depth = D_800A84CC;/            depth = D_800A84C8;/ % one nofloor
+s/            height = g_dust_out_of_level_height;/            height = g_dust_no_ground_height;/ % outside
+s/            depth = g_dust_floor_search_depth;/            depth = g_dust_out_of_level_height;/ % one nofloor
 s/            if (collision_floor_probe_alt(\&pos.x, 0, depth, d->ground) != 0) {/            if (collision_floor_probe_alt(\&pos.x, 0, depth, d->ground) == 0) {/ % one nofloor
 s/                height = \*(f32 \*) \&d->ground\[0\];/                height = *(f32 *) \&d->ground[1];/ % one
 s/                height = depth;/                height = 0.0f;/ % nofloor
-s/        height = D_800A84D0;/        height = D_800A84CC;/ % u60_0
+s/        height = g_dust_no_ground_height;/        height = g_dust_floor_search_depth;/ % u60_0
 s/        onGround = (random_float() < d->u60) ? 1 : 0;/        onGround = (random_float() <= d->u60) ? 1 : 0;/ % ground_eq
 s/        onGround = (random_float() < d->u60) ? 1 : 0;/        onGround = (random_float() < d->u60) ? 0 : 1;/ % one
 s/        vel.y = 0.0f;/        vel.y = 1.0f;/ % one

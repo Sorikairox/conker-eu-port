@@ -213,7 +213,7 @@ s32 ground_puff_grow_fade_update(u8 *arg0)
     temp_f0 = temp_f0;
     if ((*((s16 *) p)) < temp_v1)
     {
-      temp_f0 = (*((f32 *) (p + 4))) * D_800BE9A4;
+      temp_f0 = (*((f32 *) (p + 4))) * g_frame_step_f;
       *((f32 *) (((u8 *) arg0) + 0x2C)) = (f32) ((*((f32 *) (((u8 *) arg0) + 0x2C))) + temp_f0);
       *((f32 *) (((u8 *) arg0) + 0x30)) = (f32) ((*((f32 *) (((u8 *) arg0) + 0x30))) + temp_f0);
     }
@@ -314,7 +314,7 @@ s32 ground_puff_particle_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 a
 s32 particle_shrink_update_d(u8 *arg0, s32 arg1) {
     s32 i;
     f32 *p = (f32 *)(arg0 + 0xA8);
-    for (i = D_800BE9E4; i != 0; i--) {
+    for (i = g_frame_ticks; i != 0; i--) {
         *(f32 *)(arg0 + 0x58) *= *p;
         *(f32 *)(arg0 + 0x60) *= *p;
     }
@@ -402,12 +402,12 @@ s32 ground_puff_chunk_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4
 
 /* was func_150CD1C4 */
 s32 particle_ballistic_update_d(u8 *arg0) {
-    *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x3C) += (*(f32 *)(arg0 + 0x48) * D_800BE9A4) + (*(f32 *)(arg0 + 0x5C) * D_800BE9A4 * D_800BE9A4 * 0.5f);
-    *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x5C) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x20) += *(f32 *)(arg0 + 0x50) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x24) += *(f32 *)(arg0 + 0x54) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x58) * D_800BE9A4;
+    *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x3C) += (*(f32 *)(arg0 + 0x48) * g_frame_step_f) + (*(f32 *)(arg0 + 0x5C) * g_frame_step_f * g_frame_step_f * 0.5f);
+    *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x5C) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x20) += *(f32 *)(arg0 + 0x50) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x24) += *(f32 *)(arg0 + 0x54) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x58) * g_frame_step_f;
     return 1;
 }

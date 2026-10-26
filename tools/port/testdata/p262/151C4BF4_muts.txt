@@ -1,5 +1,5 @@
 # P262 timed_emitter_update (timed_emitter_update) mutants: sed % setup names
-s/e->timer -= D_800BE9E4;/e->timer += D_800BE9E4;/ % fire
+s/e->timer -= g_frame_ticks;/e->timer += g_frame_ticks;/ % fire
 s/if (e->timer >= 0) {/if (e->timer > 0) {/ % zero
 s/if (e->timer >= 0) {/if (e->timer >= 1) {/ % zero
 s/p\[0\] = e->param0;/p[0] = e->param1;/ % fire

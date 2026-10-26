@@ -17,7 +17,7 @@ s/3U + 6/3U + 5/ % c0
 s/3U + 6/4U + 6/ % c1
 s/451U + 0xFA/451U + 0xFB/ % c0
 s/451U + 0xFA/450U + 0xFA/ % c2 frac
-s/g = D_8008FC70\[arg8\]/g = D_8008FC70[arg8 + 1]/ % c0 c1
+s/g = g_ground_dust_greys\[arg8\]/g = g_ground_dust_greys[arg8 + 1]/ % c0 c1
 s/x \* 256.0f/x * 255.0f/ % c1 frac
 s/rec.size1 = size;/rec.size1 = size + 1;/ % c0
 s/rec.alpha = 0xFF;/rec.alpha = 0xFE;/ % c0
@@ -30,7 +30,7 @@ s/rec.grey\[2\] = g;/rec.grey[2] = 0;/ % c0
 s/rec.pos\[1\] = (s32) y;/rec.pos[1] = (s32) x;/ % c0
 s/rec.pos\[2\] = (s32) z;/rec.pos[2] = (s32) y;/ % c0
 s/rec.b1C\[1\] = xb;/rec.b1C[1] = 0;/ % c1
-s/rec.sprites = D_80091C50;/rec.sprites = D_80091C2C;/ % c0
+s/rec.sprites = g_dust_sprites_c0;/rec.sprites = g_dust_sprite_set;/ % c0
 s/arg8 == 1/arg8 == 2/ % c1
 s/rec.h28 = 0xC8;/rec.h28 = 0xC9;/ % c0
 s/0, 0, -1, argB \& 0xFF, 1)/0, 0, -1, argA \& 0xFF, 1)/ % c0

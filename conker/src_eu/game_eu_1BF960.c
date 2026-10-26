@@ -67,9 +67,9 @@ struct260 *obj_dust_effect_spawn(u8 *obj, f32 *offset, u8 kind, f32 a3, f32 arg4
 
 typedef struct { f32 x, y, z; } V3_25AC;      /* P232: moved up for obj_dust_effect_update (used by dust_drop_particle_spawn) */
 typedef struct { s16 h[9]; } H12_25AC;
-extern f32 D_800A84C8;          /* height used when the point is outside the level (pos_in_world_bounds == 0) */
-extern f32 D_800A84CC;          /* floor search depth / default height */
-extern f32 D_800A84D0;          /* height used without a ground chance (+0x60 <= 0) */
+extern f32 g_dust_out_of_level_height;          /* height used when the point is outside the level (pos_in_world_bounds == 0); was D_800A84C8 */
+extern f32 g_dust_floor_search_depth;          /* floor search depth / default height; was D_800A84CC */
+extern f32 g_dust_no_ground_height;          /* height used without a ground chance (+0x60 <= 0); was D_800A84D0 */
 s32 pos_in_world_bounds(f32 *);
 s32 collision_floor_probe_alt(f32 *, s32, f32, s32 *);
 f32 random_float(void);
@@ -82,8 +82,8 @@ u8 *dust_drop_particle_spawn(V3_25AC *arg0, V3_25AC *arg1, f32 arg2, s16 arg3, u
 // (u1C + rand * u20) * frame step; for every whole unit, when the object has a model (+0x1D4), one dust particle
 // is spawned (dust_drop_particle_spawn) at the object's `offset` point (mtx_transform_point_or_origin): size u48 + rand * u4C, life
 // u50 + rand % (u52 + 1), frames u54 + rand % (u55 + 1), scale u58 + rand * u5C, landing on the ground with
-// chance u60 (height from the floor query collision_floor_probe_alt into ground[], D_800A84CC if none, D_800A84C8 outside the
-// level, D_800A84D0 when u60 <= 0). Without a model the units are dropped.
+// chance u60 (height from the floor query collision_floor_probe_alt into ground[], g_dust_floor_search_depth if none, g_dust_out_of_level_height outside the
+// level, g_dust_no_ground_height when u60 <= 0). Without a model the units are dropped.
 /* was func_151922C4 */
 void obj_dust_effect_update(u8 *fx) {
     ObjDustData *d = (ObjDustData *) (fx + 0x28);
@@ -104,7 +104,7 @@ void obj_dust_effect_update(u8 *fx) {
         *(s16 *) (fx + 0xE) = -1;
         return;
     }
-    d->u18 += (d->u1C + random_float() * d->u20) * D_800BE9A4;
+    d->u18 += (d->u1C + random_float() * d->u20) * g_frame_step_f;
     if (!(d->u18 > 1.0f)) {
         return;
     }
@@ -117,9 +117,9 @@ void obj_dust_effect_update(u8 *fx) {
     mtx_transform_point_or_origin(d->offset, &pos, *(u8 **) (obj + 0x1D4) + d->kind);
     if (0.0f < d->u60) {
         if (pos_in_world_bounds(&pos.x) == 0) {
-            height = D_800A84C8;
+            height = g_dust_out_of_level_height;
         } else {
-            depth = D_800A84CC;
+            depth = g_dust_floor_search_depth;
             if (collision_floor_probe_alt(&pos.x, 0, depth, d->ground) != 0) {
                 height = *(f32 *) &d->ground[0];
             } else {
@@ -127,7 +127,7 @@ void obj_dust_effect_update(u8 *fx) {
             }
         }
     } else {
-        height = D_800A84D0;
+        height = g_dust_no_ground_height;
     }
     do {
         onGround = (random_float() < d->u60) ? 1 : 0;
@@ -148,8 +148,8 @@ void obj_dust_effect_update(u8 *fx) {
 
 u8 *particle_spawn_basic(void *, s32, s32, u8, s32);
 extern u8 (*g_impact_dust_tex_fns[])(void); /* was D_80090070 */
-extern f32 D_800A84D4;
-extern f32 D_800A84D8;
+extern f32 g_dust_drop_k_84d4; /* was D_800A84D4 */
+extern f32 g_dust_drop_k_84d8; /* was D_800A84D8 */
 typedef struct {
     s32 u0;
     s32 u4;
@@ -252,8 +252,8 @@ u8 *dust_drop_particle_spawn(V3_25AC *arg0, V3_25AC *arg1, f32 arg2, s16 arg3, u
     tmp.u0 = arg6;
     tmp.u6 = (random_int() % 6U) + 5;
     tmp.u7 = (random_int() % 6U) + 5;
-    tmp.u8 = ((random_float() * 0.25f) + D_800A84D4) * tmp.u0;
-    tmp.uC = ((random_float() * 0.25f) + D_800A84D8) * tmp.u0;
+    tmp.u8 = ((random_float() * 0.25f) + g_dust_drop_k_84d4) * tmp.u0;
+    tmp.uC = ((random_float() * 0.25f) + g_dust_drop_k_84d8) * tmp.u0;
     tmp.u10 = arg8;
     tmp.u14 = *arg9;
     tmp.u26 = argA;
@@ -272,14 +272,14 @@ s32 dust_drop_wobble(u8 *arg0, s32 arg1) {
     return 1;
 }
 
-extern f32 D_800A84DC;
-extern f32 D_800A84E0;
-extern f32 D_800A84E4;
-extern f32 D_800A84E8;
-extern f32 D_800A84EC;
-extern f32 D_800A84F0;
-extern f32 D_800A84F4;
-extern f32 D_800A84F8;
+extern f32 g_water_splash_k_84dc; /* was D_800A84DC */
+extern f32 g_water_splash_k_84e0; /* was D_800A84E0 */
+extern f32 g_water_splash_k_84e4; /* was D_800A84E4 */
+extern f32 g_water_splash_k_84e8; /* was D_800A84E8 */
+extern f32 g_water_splash_k_84ec; /* was D_800A84EC */
+extern f32 g_water_splash_k_84f0; /* was D_800A84F0 */
+extern f32 g_water_splash_k_84f4; /* was D_800A84F4 */
+extern f32 g_water_splash_k_84f8; /* was D_800A84F8 */
 void vec3_from_angles_rad(f32, f32, f32, struct17 *);
 u8 *impact_spark_spawn(u8 *, u8 *, f32, s16, u8, f32, s32, u8, f32, f32, u8, u8, s32, s16, s16, s32, u8, s32);
 
@@ -306,18 +306,18 @@ s32 water_drop_splash_update(u8 *arg0, s32 arg1) {
         pos.unk0 = *(f32 *)(arg0 + 0x40);
         pos.unk4 = *(f32 *)(ext + 0x10) + 2.0f;
         pos.unk8 = *(f32 *)(arg0 + 0x48);
-        impact_debris_spawn(ext[0x26], *(f32 *)ext * D_800A84DC, arg0[0x2B], (s32)(ext + 0x14), &pos, 0x64, 0, 1, 0,
+        impact_debris_spawn(ext[0x26], *(f32 *)ext * g_water_splash_k_84dc, arg0[0x2B], (s32)(ext + 0x14), &pos, 0x64, 0, 1, 0,
                       arg0[0xC], arg0[0x1]);
         r0 = random_float();
         r1 = random_float();
         r2 = random_float();
-        vec3_from_angles_rad(r0 * D_800A84E4, (r1 * 1000.0f + D_800A84E8) * D_800A84E0, (r2 * D_800A84EC + D_800A84F0) * D_800A84E0,
+        vec3_from_angles_rad(r0 * g_water_splash_k_84e4, (r1 * 1000.0f + g_water_splash_k_84e8) * g_water_splash_k_84e0, (r2 * g_water_splash_k_84ec + g_water_splash_k_84f0) * g_water_splash_k_84e0,
                       &vel);
         r3 = random_float();
         sprite = random_int();
         tint = random_int();
-        impact_spark_spawn((u8 *)&pos, (u8 *)&vel, r3 * D_800A84F4 + D_800A84F4, (s16)(sprite % 21 + 0x23), arg0[0x2B],
-                      *(f32 *)ext * D_800A84F8, tint % 7 + 5, 0, 1.0f, 1.0f, 1, ext[0x26], 0, 0x10, 0xF, 0, arg0[0xC],
+        impact_spark_spawn((u8 *)&pos, (u8 *)&vel, r3 * g_water_splash_k_84f4 + g_water_splash_k_84f4, (s16)(sprite % 21 + 0x23), arg0[0x2B],
+                      *(f32 *)ext * g_water_splash_k_84f8, tint % 7 + 5, 0, 1.0f, 1.0f, 1, ext[0x26], 0, 0x10, 0xF, 0, arg0[0xC],
                       arg0[0x1]);
     }
     return alive;
@@ -340,20 +340,20 @@ s32 dust_drop_wobble_splash(u8 *arg0, s32 arg1) {
 
 struct260 *obj_dust_effect_spawn(u8 *obj, f32 *offset, u8 kind, f32 a3, f32 arg4, s16 life, f32 arg6, f32 arg7, s16 arg8, s16 arg9, u8 arg10, u8 arg11, f32 arg12, f32 arg13, f32 arg14, u8 arg15, u8 arg16, s32 arg17);
 /* per-dust-type parameters for obj_dust_effect_spawn (rodata), indexed by obj_dust_effect's type */
-extern f32 D_800A8410[4][3];
-extern u8 D_800A8440[4];
-extern f32 D_800A8444[4];
-extern f32 D_800A8454[4];
-extern f32 D_800A8464[4];
-extern f32 D_800A8474[4];
-extern s16 D_800A8484[4];
-extern s16 D_800A848C[4];
-extern f32 D_800A8494[4];
-extern f32 D_800A84A4[4];
-extern f32 D_800A84B4[4];
-extern u8 D_800A84C4[4];
+extern f32 g_dust_fx_offsets[4][3]; /* was D_800A8410 */
+extern u8 g_dust_fx_kinds[4]; /* was D_800A8440 */
+extern f32 g_dust_fx_rate_base[4]; /* was D_800A8444 */
+extern f32 g_dust_fx_rate_rand[4]; /* was D_800A8454 */
+extern f32 g_dust_fx_size_base[4]; /* was D_800A8464 */
+extern f32 g_dust_fx_size_rand[4]; /* was D_800A8474 */
+extern s16 g_dust_fx_life_base[4]; /* was D_800A8484 */
+extern s16 g_dust_fx_life_rand[4]; /* was D_800A848C */
+extern f32 g_dust_fx_scale_base[4]; /* was D_800A8494 */
+extern f32 g_dust_fx_scale_rand[4]; /* was D_800A84A4 */
+extern f32 g_dust_fx_ground_chance[4]; /* was D_800A84B4 */
+extern u8 g_dust_fx_param_64[4]; /* was D_800A84C4 */
 // obj_dust_effect: the dust / splash effect for obj's kind (obj +4): kinds 0..4 -> type 0, 0x10 -> 1, 0x58 -> 2,
-// 0x79 -> 3, others none; spawns it through obj_dust_effect_spawn with that type's parameters (D_800A8410 ..). life -1 =
+// 0x79 -> 3, others none; spawns it through obj_dust_effect_spawn with that type's parameters (g_dust_fx_offsets ..). life -1 =
 // untimed. Returns the effect object (NULL for none / NULL obj). Callers scene_event_run_b (game_eu_51190, twice),
 // objfx_dust_50 (game_981E0).
 /* was func_151925C4 */
@@ -387,9 +387,9 @@ struct260 *obj_dust_effect(u8 *obj, s16 life, u8 arg2, s32 arg3) {
     if (type == -1) {
         return NULL;
     }
-    return obj_dust_effect_spawn(obj, D_800A8410[type], D_800A8440[type], D_800A8444[type], D_800A8454[type], life,
-                         D_800A8464[type], D_800A8474[type], D_800A8484[type], D_800A848C[type], 100, 155,
-                         D_800A8494[type], D_800A84A4[type], D_800A84B4[type], D_800A84C4[type], arg2, arg3);
+    return obj_dust_effect_spawn(obj, g_dust_fx_offsets[type], g_dust_fx_kinds[type], g_dust_fx_rate_base[type], g_dust_fx_rate_rand[type], life,
+                         g_dust_fx_size_base[type], g_dust_fx_size_rand[type], g_dust_fx_life_base[type], g_dust_fx_life_rand[type], 100, 155,
+                         g_dust_fx_scale_base[type], g_dust_fx_scale_rand[type], g_dust_fx_ground_chance[type], g_dust_fx_param_64[type], arg2, arg3);
 }
 
 /* was func_15192CEC */

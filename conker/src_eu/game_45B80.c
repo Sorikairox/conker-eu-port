@@ -45,15 +45,15 @@ extern u8 g_dl_buffers_reinit_req; /* was D_800BEA34 */
 extern u8 D_800BEA35;
 extern s16 g_gfx_tasks_pending; /* was D_800BEEC8 */
 extern u8 g_view_player_order[]; /* was D_800BEA50 */
-extern u8 D_800BEFC0;
-extern u8 D_800D9F38;
-extern u8 D_800D9F10;
+extern u8 g_gfx_alt_ucode_active; /* was D_800BEFC0 */
+extern u8 g_cam_viewport_pending; /* was D_800D9F38 */
+extern u8 g_cam_fov_pending; /* was D_800D9F10 */
 extern void *D_800BEFBC;
 extern u8 D_800C1480[];
-extern u8 D_80089810[];
-extern s32 D_800BEFC4;
+extern u8 g_identity_mtx[]; /* was D_80089810 */
+extern s32 g_dl_capacity; /* was D_800BEFC4 */
 extern u8 g_unpause_settle_frames; /* was D_800BEEE2 */
-extern Vp D_800D9FB0[][2];
+extern Vp g_cam_lookat_bufs[][2]; /* was D_800D9FB0 */
 void heap_free(s32);
 void effect_sample_zbuffer_cells(void);
 void camera_projection_apply_pending_fov(void);
@@ -122,10 +122,10 @@ s32 game_frame_step(void) {
         render_dl_buffers_init();
         g_dl_buffers_reinit_req = 0;
     }
-    if (D_800D9F10 != 0) {
+    if (g_cam_fov_pending != 0) {
         camera_projection_apply_pending_fov();
     }
-    if (D_800D9F38 != 0) {
+    if (g_cam_viewport_pending != 0) {
         camera_projection_apply_pending_viewport();
     }
     game_frame_begin();
@@ -136,29 +136,29 @@ s32 game_frame_step(void) {
     GDL = render_set_color_image(GDL);
     light_list_clear_frame_flags();
     node_lists_run_view_update();
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= g_last_player_index; i++) {
         g_cur_view_player = g_view_player_order[i];
         camera_player_update(g_cur_view_player);
         GDL = render_player_frame_setup(GDL, g_cur_view_player);
     }
 
-    if (D_800BEFC0 == 0) {
+    if (g_gfx_alt_ucode_active == 0) {
         /* Back to the main microcode (text D_800C1480, data D_800BEFBC), then the base render state. */
         gSPLoadUcodeEx(GDL++, D_800C1480, D_800BEFBC, 0x800);
         gSPGeometryMode(GDL++, 0x3D0605, 0);
         gSPSetGeometryMode(GDL++, 0x220005);
-        gSPMatrix(GDL++, D_80089810, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-        gDma2p(GDL++, G_MOVEMEM, &D_800D9FB0[D_800BE9C0][0], sizeof(Vp), G_MV_LIGHT, 0);
-        gDma2p(GDL++, G_MOVEMEM, &D_800D9FB0[D_800BE9C0][1], sizeof(Vp), G_MV_LIGHT, 48);
+        gSPMatrix(GDL++, g_identity_mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        gDma2p(GDL++, G_MOVEMEM, &g_cam_lookat_bufs[g_dl_buf_index][0], sizeof(Vp), G_MV_LIGHT, 0);
+        gDma2p(GDL++, G_MOVEMEM, &g_cam_lookat_bufs[g_dl_buf_index][1], sizeof(Vp), G_MV_LIGHT, 48);
     }
 
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= g_last_player_index; i++) {
         saved = GDL;
         g_cur_view_player = g_view_player_order[i];
         GDL = light_setup_view(GDL, g_cur_view_player);
         GDL = render_player_scene(GDL, g_cur_view_player);
         /* Out of DL space: drop this player's view. */
-        if (D_800BEFC4 < GDL - D_800BEDE8[D_800BE9C0]) {
+        if (g_dl_capacity < GDL - D_800BEDE8[g_dl_buf_index]) {
             GDL = saved;
         }
     }
@@ -166,17 +166,17 @@ s32 game_frame_step(void) {
     game_frame_end_update();
     GDL = render_overlay_pass((u8 *)GDL);
 
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= g_last_player_index; i++) {
         g_cur_view_player = g_view_player_order[i];
         GDL = light_setup_view(GDL, g_cur_view_player);
         GDL = render_player_3d_setup(GDL, g_cur_view_player);
-        if (g_game_paused == 0 && D_80082FA0 > 0) {
+        if (g_game_paused == 0 && g_last_player_index > 0) {
             GDL = render_player_hud(GDL, g_cur_view_player);
         }
     }
     GDL = render_final_overlay(GDL);
-    if (g_game_paused == 0 && D_80082FA0 == 0) {
-        for (i = 0; i <= D_80082FA0; i++) {
+    if (g_game_paused == 0 && g_last_player_index == 0) {
+        for (i = 0; i <= g_last_player_index; i++) {
             g_cur_view_player = g_view_player_order[i];
             GDL = render_player_hud(GDL, g_cur_view_player);
         }
@@ -195,15 +195,15 @@ s32 game_frame_step(void) {
     world_records_release_blocks();
     ambient_slots_free_all();
     gfx_task_submit(0, 1);
-    D_800BE9B4 = 0;
+    g_level_first_frame = 0;
 
     if (g_game_paused != 0) {
         g_unpause_settle_frames = 2;
     } else if (g_unpause_settle_frames > 0) {
         g_unpause_settle_frames--;
     }
-    if (D_800BEAC1 != g_game_paused) {
-        g_game_paused = D_800BEAC1;
+    if (g_pause_open != g_game_paused) {
+        g_game_paused = g_pause_open;
         if (g_game_paused != 0) {
             music_set_all_paused(1);
             sound_set_pause_mute(1);
@@ -223,7 +223,7 @@ s32 game_frame_step(void) {
 #undef GDL
 /* was func_15018DFC */
 void world_update_objects(void) {
-    triggers_update(D_800BE9E4);
+    triggers_update(g_frame_ticks);
     objects_update_visibility();
     frame_hook_nop_1501c870();
     if (g_game_paused == 0) {
@@ -263,32 +263,32 @@ void *render_scene_layers_post(void *arg0, s16 arg1) {
 
 /* was func_15018F80 */
 void camera_player_update(s16 arg0) {
-    struct108 *sp24 = &D_800DBFF0[arg0];
-    D_8003C8E0 = 0xA000000;
+    struct108 *sp24 = &g_player_views[arg0];
+    g_dbg_crash_marker = 0xA000000;
     if ((screen_fade_is_done(arg0) == 0) && (g_game_paused == 0)) {
         screen_fade_tick(arg0);
     }
     camera_update_dir_vector_thunk(arg0);
     g_camera_dir_y_bound = (sp24->unk388 < 0.0f) ? -1000 : 5000;
     warp_request_update(arg0);
-    D_8003C8E0 = 0;
+    g_dbg_crash_marker = 0;
 }
 
 /* was func_1501905C */
 void game_frame_begin(void) {
-    D_800BE9D0 = D_800BE9D8[D_800BE9C0];
+    D_800BE9D0 = D_800BE9D8[g_dl_buf_index];
     *D_800BE728 = cont_read_frame();
     game_update_frame_timing();
-    if ((D_800BEAC1 != 0) && (g_game_paused == 0)) {
+    if ((g_pause_open != 0) && (g_game_paused == 0)) {
         node_broadcast_all(0, 0x47);
     }
     rumble_update();
     cont_arm_read_timer();
     obj_mtx_buffer_reset();
     if (0) {};
-    music_update_all(D_800DBFF0->unk2A4, D_800DBFF0->unk2A8, D_800DBFF0->unk2AC);
+    music_update_all(g_player_views->unk2A4, g_player_views->unk2A8, g_player_views->unk2AC);
     sound_update_frame();
-    if (D_800E0B94 == 2) {
+    if (g_game_mode == 2) {
         random_seed(0x81280783); // 2166884227
     }
     audio_mixer_update_frame();
@@ -354,7 +354,7 @@ s32 world_update(void) {
     segment_override_clear();
     event_list_unload(0);
     event_list_run_phase(2);
-    D_800DD157 = 0;
+    g_level_colour_priority = 0;
     heap_age_tagged_blocks();
     cutscene_advance_position(0);
     reflect_queue_reset();
@@ -380,17 +380,17 @@ s32 world_update(void) {
     camera_update_all();
     objects_update_tank_views();
     collision_select_area(0);
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= g_last_player_index; i++) {
         player_zone_update(i);
     }
     camera_matrices_refresh_all();
-    for (j = 0; j <= D_80082FA0; j++) {
+    for (j = 0; j <= g_last_player_index; j++) {
         camera_build_view_proj(j);
     }
     world_records_build_visible(0);
     level_update_frame(g_level_id, 0);
     frame_hook_nop_1501c860();
-    frame_hook_nop_1511fc20(D_800BE9C0);
+    frame_hook_nop_1511fc20(g_dl_buf_index);
     afterimage_list_update(0);
     if (g_game_paused == 0) {
         node_run_global_hooks();
@@ -452,7 +452,7 @@ Gfx *player_view_dl_build(Gfx *gdl, s16 player);
 /* was func_15019464 */
 Gfx *render_player_frame_setup(Gfx *gdl, s16 player) {
     camera_zoom_factors_calc(player);
-    gSPViewport(gdl++, (u8 *)D_800BE628 + player * 0x180 + D_800BE9C0 * 16 + 0x40);
+    gSPViewport(gdl++, (u8 *)g_player_cams + player * 0x180 + g_dl_buf_index * 16 + 0x40);
     gdl = (Gfx *)render_set_scissor((s32)gdl, player, 0, 0, 0, 0);
     if (g_game_paused != 0) {
         return gdl;
@@ -473,9 +473,9 @@ Gfx *render_player_frame_setup(Gfx *gdl, s16 player) {
 //     s32 ret;
 //
 //     func_1510B958(arg1);
-//     gSPViewport(arg0++, (D_800BE628 + (arg1 * 0x180) + (D_800BE9C0 * 0x10) + 0x40));
+//     gSPViewport(arg0++, (g_player_cams + (arg1 * 0x180) + (g_dl_buf_index * 0x10) + 0x40));
 //     // arg0->unk0 = 0xDC080008;
-//     // arg0->unk4 = (s32) (D_800BE628 + (temp_t6 * 0x180) + (D_800BE9C0 * 0x10) + 0x40);
+//     // arg0->unk4 = (s32) (g_player_cams + (temp_t6 * 0x180) + (g_dl_buf_index * 0x10) + 0x40);
 //     temp_s0 = render_set_scissor(arg0, arg1, 0, 0, 0, 0);
 //     if ((g_game_paused != 0) || (D_80084480 != 0)) {
 //         return temp_s0;
@@ -494,7 +494,7 @@ Gfx *render_player_frame_setup(Gfx *gdl, s16 player) {
 
 /* Per-player scene pass (P13, hand C). Skipped (returns gdl) while paused (g_game_paused), during g_scene_render_suspend, when
  * screen_fade_is_opaque(player) says so or the player's bit in D_800D18A0 is set. In split screen it first sets the
- * player's viewport/projection; then the layers in order: sky (world_meshes_draw_player 1), the D_800BE575 == 2 pass,
+ * player's viewport/projection; then the layers in order: sky (world_meshes_draw_player 1), the g_fb_ghost_pass == 2 pass,
  * model group 6, shadow_draw_all, the projection again, objects_draw_pass 1, reflect_draw_queue, the fixed matrix, the
  * world (render_scene_layers_pre / world_meshes_draw_player 0 / render_scene_layers_post, order by player flag 0x5F0 bit 0), afterimage_list_draw 0/1,
  * objects_draw_pass 2 and model group 2. */
@@ -510,7 +510,7 @@ u8 *fb_ghost_render(u8 *);
 /* was func_150195A0 */
 Gfx *render_player_scene(Gfx *arg0, s16 arg1) {
     s32 player = arg1;
-    u8 *pl = (u8 *)D_800DBFF0 + player * 0x9A0;
+    u8 *pl = (u8 *)g_player_views + player * 0x9A0;
     Gfx *gdl = arg0;
 
     if (g_game_paused != 0) {
@@ -522,16 +522,16 @@ Gfx *render_player_scene(Gfx *arg0, s16 arg1) {
     if (screen_fade_is_opaque(player) != 0 || (D_800D18A0 & (1 << player))) {
         return gdl;
     }
-    if (D_80082FA0 > 0) {
+    if (g_last_player_index > 0) {
         gdl = view_dl_begin(gdl, player);
         gdl = light_setup_view(gdl, player);
         camera_zoom_factors_calc(player);
         gdl->words.w0 = 0xDC080008;
-        gdl->words.w1 = D_800BE628 + player * 0x180 + D_800BE9C0 * 16 + 0x40;
+        gdl->words.w1 = g_player_cams + player * 0x180 + g_dl_buf_index * 16 + 0x40;
         gdl = (Gfx *)render_set_scissor((s32)(gdl + 1), player, 0, 0, 0, 0);
     }
     gdl = world_meshes_draw_player(gdl, 1, player);
-    if (D_800BE575 == 2) {
+    if (g_fb_ghost_pass == 2) {
         gdl = (Gfx *)fb_ghost_render((u8 *)gdl);
     }
     gdl = node_render_layers_draw(gdl, 6, player, 0);
@@ -541,7 +541,7 @@ Gfx *render_player_scene(Gfx *arg0, s16 arg1) {
     gdl = objects_draw_pass(gdl, 1, player);
     gdl = reflect_draw_queue(gdl, player);
     gdl->words.w0 = 0xDA380003;
-    gdl->words.w1 = (u32)D_80089810;
+    gdl->words.w1 = (u32)g_identity_mtx;
     gdl++;
     if (*(s32 *)(pl + 0x5F0) & 1) {
         gdl = render_scene_layers_pre(gdl, player);
@@ -580,28 +580,28 @@ Gfx *render_overlay_pass(u8 *arg0) {
     u8 *var_s0_4;
 
     var_s0 = arg0;
-    if (D_800BE575 == 1) {
+    if (g_fb_ghost_pass == 1) {
         var_s0 = fb_ghost_render(var_s0);
     }
-    if (D_80082FA0 != 0) {
-        g_cur_view_player = D_80082FA0 + 1;
+    if (g_last_player_index != 0) {
+        g_cur_view_player = g_last_player_index + 1;
         (*(s32 *)((u8 *)var_s0 + 0)) = 0xDC080008;
-        (*(s32 *)((u8 *)var_s0 + 4)) = (s32) ((g_cur_view_player * 0x180) + D_800BE628 + 0x40);
+        (*(s32 *)((u8 *)var_s0 + 4)) = (s32) ((g_cur_view_player * 0x180) + g_player_cams + 0x40);
         var_s0_2 = var_s0 + 8;
     } else {
         (*(s32 *)((u8 *)var_s0 + 0)) = 0xDC080008;
         var_s0_2 = var_s0 + 8;
-        (*(s32 *)((u8 *)var_s0 + 4)) = (s32) (D_800BE628 + 0x40);
+        (*(s32 *)((u8 *)var_s0 + 4)) = (s32) (g_player_cams + 0x40);
     }
     var_s0_3 = render_set_scissor((s32) var_s0_2, 0xFF, 0, 0, 0, 0);
     if (g_game_paused != 0) {
         if (g_pause_blur_step == 0) {
-            (*(s32 *)((u8 *)var_s0_3 + 0)) = (s32) (((D_800BE620 - 1) & 0xFFF) | 0xFF100000);
+            (*(s32 *)((u8 *)var_s0_3 + 0)) = (s32) (((g_framebuffer_width - 1) & 0xFFF) | 0xFF100000);
             temp_s0 = var_s0_3 + 8;
             (*(s32 *)((u8 *)var_s0_3 + 4)) = (s32) g_zbuffer;
             (*(s32 *)((u8 *)temp_s0 + 0)) = 0xED000000;
-            (*(s32 *)((u8 *)temp_s0 + 4)) = (s32) ((((s32) ((f32) D_800BE620 * 4.0f) & 0xFFF) << 0xC) | ((s32) ((f32) D_800BE624 * 4.0f) & 0xFFF));
-            var_s0_3 = render_set_color_image(fb_ghost_copy_draw(temp_s0 + 8, *(((s32 *)((u8 *)&g_framebuffers_1 + -(D_800BE9C0 * 4)))), 0, 1));
+            (*(s32 *)((u8 *)temp_s0 + 4)) = (s32) ((((s32) ((f32) g_framebuffer_width * 4.0f) & 0xFFF) << 0xC) | ((s32) ((f32) g_framebuffer_height * 4.0f) & 0xFFF));
+            var_s0_3 = render_set_color_image(fb_ghost_copy_draw(temp_s0 + 8, *(((s32 *)((u8 *)&g_framebuffers_1 + -(g_dl_buf_index * 4)))), 0, 1));
             g_pause_blur_step = 1;
         } else if (g_pause_blur_step < 5) {
             g_pause_blur_step += 1;
@@ -616,21 +616,21 @@ Gfx *render_overlay_pass(u8 *arg0) {
     }
     temp_v0 = screen_pulse_overlay_draw(var_s0_3);
     var_s0_4 = temp_v0;
-    if ((g_game_paused == 0) && (D_800BEAC1 == 0)) {
+    if ((g_game_paused == 0) && (g_pause_open == 0)) {
         var_s0_4 = hud_draw(temp_v0);
     }
     return (Gfx *)sprite_gfx_begin_alt(node_render_layers_draw(node_render_layers_draw(var_s0_4, 3, 0, 0), 3, 0, 1));
 }
-extern u16 D_800D1CC2;
+extern u16 g_player_out_mask; /* was D_800D1CC2 */
 void emit_sparks_by_angles(u8 *arg0, s32 arg1, s32 arg2);
 /* was func_15019BB8 */
 Gfx *render_player_hud(Gfx *gdl, s32 arg1) {
-    gSPViewport(gdl++, (u8 *)D_800BE628 + arg1 * 0x180 + 0x40 + D_800BE9C0 * 0x10);
+    gSPViewport(gdl++, (u8 *)g_player_cams + arg1 * 0x180 + 0x40 + g_dl_buf_index * 0x10);
     gdl = render_set_scissor(gdl, (s16)arg1, 0, 0, 0, 0);
     gdl = screen_tint_draw(gdl, arg1);
     gdl = screen_fade_draw(gdl, arg1);
     gdl = hud_sniper_scope_draw(gdl, arg1);
-    if ((D_800D18A0 & (1 << arg1)) || (D_800D1CC2 & (1 << arg1))) {
+    if ((D_800D18A0 & (1 << arg1)) || (g_player_out_mask & (1 << arg1))) {
         gdl = player_draw_out_overlay(gdl, arg1);
     }
     gdl = node_render_layers_draw(gdl, 4, (s16)arg1, 0);
@@ -643,7 +643,7 @@ Gfx *render_player_hud(Gfx *gdl, s32 arg1) {
 //     s16 sp28;
 //
 //     arg0->unk0 = 0xDC080008;
-//     arg0->unk4 = &D_800BE628[arg1].unk40[D_800BE9C0];
+//     arg0->unk4 = &g_player_cams[arg1].unk40[g_dl_buf_index];
 //     sp28 = arg1;
 //
 //     temp_v0 = render_set_scissor(&arg0->unk8, &sp28, 0, 0, 0, 0);
@@ -658,8 +658,8 @@ Gfx *render_player_hud(Gfx *gdl, s32 arg1) {
 //     node_render_layers_draw(temp_v0, 4, sp2A, 1);
 // }
 
-/* Per-player 3D setup (P13, hand C): viewport and projection of camera record D_800BE628 + player * 0x180
- * (double-buffered by the DL buffer index D_800BE9C0), the fixed matrix D_80089810, level 0x1D's extra pass
+/* Per-player 3D setup (P13, hand C): viewport and projection of camera record g_player_cams + player * 0x180
+ * (double-buffered by the DL buffer index g_dl_buf_index), the fixed matrix g_identity_mtx, level 0x1D's extra pass
  * (objects_draw_pass), the two model layers of group 5, then the view matrix and the player's model matrix from
  * D_800DC6D0[idx] (0x40 per player). */
 extern s32 D_800DC6D0[];
@@ -671,12 +671,12 @@ Gfx *render_player_3d_setup(Gfx *arg0, s32 arg1) {
     s16 player = arg1;
 
     arg0->words.w0 = 0xDC080008;
-    arg0->words.w1 = D_800BE628 + arg1 * 0x180 + D_800BE9C0 * 16 + 0x40;
+    arg0->words.w1 = g_player_cams + arg1 * 0x180 + g_dl_buf_index * 16 + 0x40;
     gdl = (Gfx *)render_set_scissor((s32)(arg0 + 1), player, 0, 0, 0, 0);
     gdl[0].words.w0 = 0xDA380003;
-    gdl[0].words.w1 = (u32)D_80089810;
+    gdl[0].words.w1 = (u32)g_identity_mtx;
     gdl[1].words.w0 = 0xDA380007;
-    gdl[1].words.w1 = D_800BE628 + arg1 * 0x180 + D_800BE9C0 * 64 + 0x100;
+    gdl[1].words.w1 = g_player_cams + arg1 * 0x180 + g_dl_buf_index * 64 + 0x100;
     gdl += 2;
     if (g_level_id == 0x1D) {
         gdl = objects_draw_pass(gdl, 6, player);
@@ -684,18 +684,18 @@ Gfx *render_player_3d_setup(Gfx *arg0, s32 arg1) {
     gdl = node_render_layers_draw(gdl, 5, 0, 0);
     gdl = node_render_layers_draw(gdl, 5, 0, 1);
     gdl[0].words.w0 = 0xDA380007;
-    gdl[0].words.w1 = D_800BE628 + arg1 * 0x180 + D_800BE9C0 * 64 + 0x100;
+    gdl[0].words.w1 = g_player_cams + arg1 * 0x180 + g_dl_buf_index * 64 + 0x100;
     gdl[1].words.w0 = 0xDA380005;
-    gdl[1].words.w1 = D_800DC6D0[D_800BE9C0] + arg1 * 64;
+    gdl[1].words.w1 = D_800DC6D0[g_dl_buf_index] + arg1 * 64;
     return gdl + 2;
 }
 /* was func_15019E60 */
 Gfx *render_final_overlay(Gfx *arg0) {
-    if (D_80082FA0 != 0) {
-        g_cur_view_player = D_80082FA0 + 1;
-        gSPViewport(arg0++, (g_cur_view_player * 0x180) + D_800BE628 + 64);
+    if (g_last_player_index != 0) {
+        g_cur_view_player = g_last_player_index + 1;
+        gSPViewport(arg0++, (g_cur_view_player * 0x180) + g_player_cams + 64);
     } else {
-        gSPViewport(arg0++, D_800BE628 + 64);
+        gSPViewport(arg0++, g_player_cams + 64);
     }
     return (Gfx *)text_queue_draw(hud_overlay_draw_screen(render_set_scissor(arg0, 0xFF, 0, 0, 0, 0)));
 }
@@ -729,50 +729,50 @@ void game_update_frame_timing(void) {
     u8 temp_t4;
     u8 var_a3;
 
-    var_v1 = D_800BE9E4;
-    D_800BEA08 = var_v1;
+    var_v1 = g_frame_ticks;
+    g_frame_ticks_raw = var_v1;
     if (g_slowmo_divisor != 0) {
         if (g_slowmo_divisor == 1) {
-            D_800BE9E4 = 0;
+            g_frame_ticks = 0;
             *(u16 *)g_frame_phase_accum = 0;
             var_v1 = 0;
-            D_800BE9A4 = 0.0f;
+            g_frame_step_f = 0.0f;
         } else {
             temp_a0 = g_slowmo_tick_remainder + var_v1;
             (void)g_slowmo_divisor;
-            D_800BE9A4 = (f32) var_v1 / (f32) g_slowmo_divisor;
-            temp_t7 = (s32) D_800BE9A4;
-            D_800BE9A4 *= 0.5f;
-            D_800BE9E4 = temp_t7;
+            g_frame_step_f = (f32) var_v1 / (f32) g_slowmo_divisor;
+            temp_t7 = (s32) g_frame_step_f;
+            g_frame_step_f *= 0.5f;
+            g_frame_ticks = temp_t7;
             if (temp_a0 >= (u8) g_slowmo_divisor) {
                 temp_lo = temp_a0 / (u8) g_slowmo_divisor;
-                D_800BE9E4 = (s32) temp_lo;
+                g_frame_ticks = (s32) temp_lo;
                 var_v1 = (s32) temp_lo;
                 g_slowmo_tick_remainder = temp_a0 - (temp_lo * temp_a0);
             } else {
                 g_slowmo_tick_remainder = temp_a0;
-                D_800BE9E4 = 0;
+                g_frame_ticks = 0;
                 var_v1 = 0;
             }
         }
     } else {
-        D_800BE9A4 = (f32) var_v1 * 0.5f;
+        g_frame_step_f = (f32) var_v1 * 0.5f;
     }
     temp_t3 = *(u16 *)g_frame_phase_accum & 0x3FF;
     temp_t5 = temp_t3 + (var_v1 * 0x266);
     *(u16 *)g_frame_phase_accum = temp_t3;
     *(u16 *)g_frame_phase_accum = temp_t5;
     D_800BE9A0 = (u8) ((s32) (temp_t5 & 0xFFFF) >> 0xA);
-    if (D_800BE9A4 != 0.0f) {
-        D_800BEDC8 = (1.0f / D_800BE9A4) / 1.2f;
+    if (g_frame_step_f != 0.0f) {
+        D_800BEDC8 = (1.0f / g_frame_step_f) / 1.2f;
     } else {
-        D_800BE9A4 = 0.0f;
+        g_frame_step_f = 0.0f;
         D_800BEDC8 = 0.0f;
     }
     temp_t9 = D_800BEDCC + var_v1;
     D_800BEDCC = temp_t9;
     g_tick_count_mod30 = temp_t9 % 30;
-    (&D_eu_800BEA08)[g_frame_dt_history_idx] = D_800BE9A4;
+    (&D_eu_800BEA08)[g_frame_dt_history_idx] = g_frame_step_f;
     temp_t4 = g_frame_dt_history_idx + 1;
     g_frame_dt_history_idx = temp_t4;
     if ((temp_t4 & 0xFF) == 0xA) {
@@ -780,7 +780,7 @@ void game_update_frame_timing(void) {
     }
     if ((s32) g_frame_dt_history_count < 0xA) {
         g_frame_dt_history_count += 1;
-        g_frame_dt_avg = D_800BE9A4;
+        g_frame_dt_avg = g_frame_step_f;
         g_frame_dt_avg_inv = D_800BEDC8;
     } else {
         {

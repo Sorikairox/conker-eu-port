@@ -7,13 +7,13 @@
 
 /* was func_15000AC0 */
 void texture_scroll_clear(void) {
-    D_800D9E64 = (u8)0;
+    g_tex_scroll_count = (u8)0;
 }
 
 // jump table
-extern u8 D_800DC2D8[];       /* camera / sky settings copied from the level header +5..+7 */
-extern u8 D_800DC2DB;         /* 1 on level 0x3C (mode 4) */
-extern u8 D_800DC2DC;         /* bit 0 of D_800D2E4C->unk14 */
+extern u8 g_level_bg_colour[];       /* camera / sky settings copied from the level header +5..+7; was D_800DC2D8 */
+extern u8 g_sky_load_all_tiles;         /* 1 on level 0x3C (mode 4); was D_800DC2DB */
+extern u8 D_800DC2DC;         /* bit 0 of g_save_progress_bits->unk14; was D_800D2E4C */
 extern s32 D_800DC2E0;        /* per player: two Mtx (one per frame buffer) */
 extern Vtx *g_sky_backdrop_vtx[][2];  /* per player: two vertex buffers (one per frame buffer); was D_800DC2B8 */
 extern s32 *D_8008955C[];
@@ -46,15 +46,15 @@ static const SkyGradient sSkyGradients[] = {
 
 /*
  * P74: per-level setup of the sky / backdrop buffers (called by level_load with g_level_id; the argument is
- * unused). D_800DC2D8[0..2] = level header +5..+7. Backdrop mode = header +8 (4 becomes 2 when D_800BE616 is set):
- *  - 4: per player (0..D_80082FA0) a vertex buffer of 2 x n vertices (n = 0x1C0 with D_80082FA0 == 1, else 0x130),
- *       D_800DC2B0 loaded as asset (0xD, header +9) by asset_load_ptr, 0x168 entries of D_8008955C[+9] requested
- *       when D_80038080 is set, two Mtx per player in D_800DC2E0, D_800DC2DB = (level == 0x3C).
- *  - 2: D_800DC2B0 = 256-row sky gradient texture (4 RGBA32 texels per row, sSkyGradients), two Mtx per player in
+ * unused). g_level_bg_colour[0..2] = level header +5..+7. Backdrop mode = header +8 (4 becomes 2 when D_800BE616 is set):
+ *  - 4: per player (0..g_last_player_index) a vertex buffer of 2 x n vertices (n = 0x1C0 with g_last_player_index == 1, else 0x130),
+ *       g_sky_asset loaded as asset (0xD, header +9) by asset_load_ptr, 0x168 entries of D_8008955C[+9] requested
+ *       when D_80038080 is set, two Mtx per player in D_800DC2E0, g_sky_load_all_tiles = (level == 0x3C).
+ *  - 2: g_sky_asset = 256-row sky gradient texture (4 RGBA32 texels per row, sSkyGradients), two Mtx per player in
  *       D_800DC2E0, and per player two 4-vertex quads (+-0x6D6, z -1000, s 0x2000) in g_sky_backdrop_vtx (read by
  *       func_1510FD50 / game_eu_FF530.c).
  *  - 1: star_field_generate.
- * Always: D_800DC2DC = bit 0 of D_800D2E4C->unk14.
+ * Always: D_800DC2DC = bit 0 of g_save_progress_bits->unk14.
  */
 /* was func_15000AD0 */
 void level_setup_sky_backdrop(s32 level) {
@@ -73,31 +73,31 @@ void level_setup_sky_backdrop(s32 level) {
     s32 row;
     u32 rgba;
 
-    D_800DC2D8[0] = D_800B0DF0->unk5;
-    D_800DC2D8[1] = D_800B0DF0->unk6;
-    D_800DC2D8[2] = D_800B0DF0->unk7;
-    if (D_800BE616 != 0 && D_800B0DF0->unk8 == 4) {
-        D_800B0DF0->unk8 = 2;
+    g_level_bg_colour[0] = g_level_header->unk5;
+    g_level_bg_colour[1] = g_level_header->unk6;
+    g_level_bg_colour[2] = g_level_header->unk7;
+    if (D_800BE616 != 0 && g_level_header->unk8 == 4) {
+        g_level_header->unk8 = 2;
     }
 
-    if (D_800B0DF0->unk8 == 4) {
-        n = (D_80082FA0 == 1) ? 0x1C0 : 0x130;
-        for (p = 0; p <= D_80082FA0; p++) {
+    if (g_level_header->unk8 == 4) {
+        n = (g_last_player_index == 1) ? 0x1C0 : 0x130;
+        for (p = 0; p <= g_last_player_index; p++) {
             buf = allocate_memory(n * 2 * sizeof(Vtx), 1, 2, 0);
             g_sky_backdrop_vtx[p][0] = buf;
             g_sky_backdrop_vtx[p][1] = buf + n;
         }
-        asset_load_ptr(&D_800DC2B0, 2, 0xD, D_800B0DF0->unk9);
+        asset_load_ptr(&g_sky_asset, 2, 0xD, g_level_header->unk9);
         if (D_80038080 != 0) {
             for (i = 0; i < 0x168; i++) {
-                texture_cache_lookup(*D_8008955C[D_800B0DF0->unk9] + i, NULL, 0x3F, 0);
+                texture_cache_lookup(*D_8008955C[g_level_header->unk9] + i, NULL, 0x3F, 0);
             }
         }
-        D_800DC2E0 = (s32) allocate_memory((D_80082FA0 + 1) * 2 * sizeof(Mtx), 1, 2, 0);
-        D_800DC2DB = (g_level_id == 0x3C) ? 1 : 0;
-    } else if (D_800B0DF0->unk8 == 2) {
+        D_800DC2E0 = (s32) allocate_memory((g_last_player_index + 1) * 2 * sizeof(Mtx), 1, 2, 0);
+        g_sky_load_all_tiles = (g_level_id == 0x3C) ? 1 : 0;
+    } else if (g_level_header->unk8 == 2) {
         tex = allocate_memory(0x100 * 4 * sizeof(u32), 1, 1, 0);
-        D_800DC2B0 = (s32) tex;
+        g_sky_asset = (s32) tex;
         switch (g_level_id) {
             case 0x24:
                 g = &sSkyGradients[0];
@@ -145,8 +145,8 @@ void level_setup_sky_backdrop(s32 level) {
             tex[i * 4 + 3] = rgba;
         }
 
-        D_800DC2E0 = (s32) allocate_memory((D_80082FA0 + 1) * 2 * sizeof(Mtx), 1, 1, 0);
-        for (p = 0; p <= D_80082FA0; p++) {
+        D_800DC2E0 = (s32) allocate_memory((g_last_player_index + 1) * 2 * sizeof(Mtx), 1, 1, 0);
+        for (p = 0; p <= g_last_player_index; p++) {
             buf = allocate_memory(2 * 4 * sizeof(Vtx), 1, 1, 0);
             g_sky_backdrop_vtx[p][0] = buf;
             g_sky_backdrop_vtx[p][1] = buf + 4;
@@ -161,11 +161,11 @@ void level_setup_sky_backdrop(s32 level) {
                 }
             }
         }
-    } else if (D_800B0DF0->unk8 == 1) {
+    } else if (g_level_header->unk8 == 1) {
         star_field_generate();
     }
 
-    D_800DC2DC = (D_800D2E4C->unk14 & 1) ? 1 : 0;
+    D_800DC2DC = (g_save_progress_bits->unk14 & 1) ? 1 : 0;
 }
 // loops!
 extern s32 D_800DC26C;    /* triangle table: 3 vertex pointers per triangle (12 bytes) */

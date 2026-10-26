@@ -5,18 +5,18 @@ s/(e + 0x84, slot, e/(e + 0x84, 0, e/ % slot1
 s/slot \* 0x9A0 + 0x2F8/slot * 0x9A0 + 0x2FC/ % base bigneg
 s/slot \* 0x9A0 + /slot * 0x9A4 + / % slot1
 \#^    flag = 1;#s/1/2/ % base bigneg
-s/texId = D_80091960.texId;/texId = D_80091960.w;/ % base bigneg
-s/tex.fmt = D_80091960.fmt;/tex.fmt = D_80091960.u9;/ % base bigneg
-s/tex.w = D_80091960.w;/tex.w = D_80091960.w + 1;/ % base bigneg
-s/tex.h = D_80091960.h;/tex.h = D_80091960.w + 1;/ % base bigneg
-s/tex.u8_ = D_80091960.u8_;/tex.u8_ = D_80091960.u9;/ % base bigneg
-s/tex.u9 = D_80091960.u9;/tex.u9 = D_80091960.u8_;/ % base bigneg
+s/texId = g_emitter_ribbon_texdef.texId;/texId = g_emitter_ribbon_texdef.w;/ % base bigneg
+s/tex.fmt = g_emitter_ribbon_texdef.fmt;/tex.fmt = g_emitter_ribbon_texdef.u9;/ % base bigneg
+s/tex.w = g_emitter_ribbon_texdef.w;/tex.w = g_emitter_ribbon_texdef.w + 1;/ % base bigneg
+s/tex.h = g_emitter_ribbon_texdef.h;/tex.h = g_emitter_ribbon_texdef.w + 1;/ % base bigneg
+s/tex.u8_ = g_emitter_ribbon_texdef.u8_;/tex.u8_ = g_emitter_ribbon_texdef.u9;/ % base bigneg
+s/tex.u9 = g_emitter_ribbon_texdef.u9;/tex.u9 = g_emitter_ribbon_texdef.u8_;/ % base bigneg
 s/0, 4, 0, &flag, 3);/0, 4, 0, \&flag, 2);/ % base bigneg
 s/0x100, 0x100, 0, 4,/0x100, 0x80, 0, 4,/ % base bigneg
 s/rec->u51, rec->u51, rec->u51, 0xFF/rec->u51, rec->u51, rec->u50, 0xFF/ % base bigneg
 s/0x160600/0x160601/ % base bigneg
 s/gfx_set_combine_mode(gfx, 0xB/gfx_set_combine_mode(gfx, 0xA/ % base bigneg
-s/D_800D30BC | 0x80000 | 0x2CA0/D_800D30BC | 0x2CA0/ % base bigneg
+s/g_gfx_tlut_mode | 0x80000 | 0x2CA0/g_gfx_tlut_mode | 0x2CA0/ % base bigneg
 s/0x5049D8/0x5049D9/ % base bigneg
 s/gfx = gfx_env_color_cached(gfx,/gfx = gfx_env_color_cached((Gfx *) gfxArg,/ % base bigneg
 \#^    if (\*(u16 \*) (e + 0x1E) & 2) {#s/& 2/\& 4/ % base live

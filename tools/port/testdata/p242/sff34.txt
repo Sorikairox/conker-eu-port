@@ -1,4 +1,4 @@
-# P242 setups for particle_fade_shrink_tick (sprite_fade_scale_tick). p 0x80450000: +0x1F alpha (low byte of word 0x8045001C), +0x24 fade-in flag (high byte of 0x80450024); D_800BE9E4 = EU 0x800BEE04 (frames). Knobs: DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5
+# P242 setups for particle_fade_shrink_tick (sprite_fade_scale_tick). p 0x80450000: +0x1F alpha (low byte of word 0x8045001C), +0x24 fade-in flag (high byte of 0x80450024); g_frame_ticks = EU 0x800BEE04 (frames). Knobs: DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5
 in1 ! 0=80450000 ! 8045001C=00000080,80450024=01000000,80450014=11112222,800BEE04=2 ! ! ! ! !
 in2 ! 0=80450000 ! 8045001C=000000F8,80450024=01000000,80450014=11112222,800BEE04=1 ! ! ! ! !
 inb ! 0=80450000 ! 8045001C=000000F0,80450024=01000000,80450014=11112222,800BEE04=1 ! ! ! ! !

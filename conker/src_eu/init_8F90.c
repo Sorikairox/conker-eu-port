@@ -818,7 +818,7 @@ void snd_cache_entry_free(struct54 *arg0) {
     struct54 *temp_v0_2;
 
     if ((s32) arg0 & 1) {
-        D_8003C8E0 = 0x0F000004;
+        g_dbg_crash_marker = 0x0F000004;
         func_150ADC50(&D_800406A0);
         return;
     }
@@ -854,7 +854,7 @@ void snd_cache_entry_free(struct54 *arg0) {
 //     struct00 *temp_v1;
 //
 //     if (((s32)arg0 & 1) != 0) {
-//         D_8003C8E0 = 0x0F000004;
+//         g_dbg_crash_marker = 0x0F000004;
 //         func_150AD770(); // 0x80040000
 //         return;
 //     }

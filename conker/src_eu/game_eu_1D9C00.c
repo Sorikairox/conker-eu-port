@@ -20,15 +20,15 @@ typedef struct {
     s16 u4;           /* 0x4 */
     f32 u8;           /* 0x8 */
 } FlashDefAC3F0;
-extern s8 D_800A9400[][5];          /* per kind: chunk def, dust def, flash def (-1 = none) */
-extern DebrisDefAC3F0 D_800A9420[]; /* chunks (type 0xB) */
-extern DebrisDefAC3F0 D_800A9538[]; /* dust (type 0xC) */
-extern FlashDefAC3F0 D_800A963C[];  /* flash */
+extern s8 g_debris_kind_defs[][5];          /* per kind: chunk def, dust def, flash def (-1 = none); was D_800A9400 */
+extern DebrisDefAC3F0 g_debris_chunk_burst_defs[]; /* chunks (type 0xB); was D_800A9420 */
+extern DebrisDefAC3F0 g_debris_dust_burst_defs[]; /* dust (type 0xC); was D_800A9538 */
+extern FlashDefAC3F0 g_debris_flash_defs[];  /* flash; was D_800A963C */
 
-// debris_burst_spawn: P153: the debris of a broken object of `kind` at pos (src = the owner): per D_800A9400[kind]
-// a chunk burst (spawn_circle_random_emit type 0xB, def D_800A9420) and a dust burst (type 0xC, D_800A9538) with count
+// debris_burst_spawn: P153: the debris of a broken object of `kind` at pos (src = the owner): per g_debris_kind_defs[kind]
+// a chunk burst (spawn_circle_random_emit type 0xB, def g_debris_chunk_burst_defs) and a dust burst (type 0xC, g_debris_dust_burst_defs) with count
 // +4 + random [0, +6], each with the owner block {src, arg4, light} (light = impact_current_kind()), and when src +0x1C
-// bit 0 is set a flash (impact_flat_fx_spawn, D_800A963C, 150) at pos, src + 4.
+// bit 0 is set a flash (impact_flat_fx_spawn, g_debris_flash_defs, 150) at pos, src + 4.
 /* was func_151AC3F0 */
 void debris_burst_spawn(f32 *pos, u8 *src, s32 kind, u8 arg3, s32 arg4) {
     struct {
@@ -45,12 +45,12 @@ void debris_burst_spawn(f32 *pos, u8 *src, s32 kind, u8 arg3, s32 arg4) {
     if (src == NULL) {
         return;
     }
-    def = D_800A9400[kind];
+    def = g_debris_kind_defs[kind];
     if (def[0] != -1) {
         chunkOwner.src = src;
         chunkOwner.light = light;
         chunkOwner.arg = arg4;
-        d = &D_800A9420[def[0]];
+        d = &g_debris_chunk_burst_defs[def[0]];
         spawn_circle_random_emit(pos[0], pos[1], pos[2], d->size, 0, 0xFF, (u32) random_int() % (u32) (d->countRange + 1) + d->count,
                       0xB, kind, 0.0f, (s32) &chunkOwner, arg3);
     }
@@ -58,28 +58,28 @@ void debris_burst_spawn(f32 *pos, u8 *src, s32 kind, u8 arg3, s32 arg4) {
         dustOwner.src = src;
         dustOwner.arg = arg4;
         dustOwner.light = light;
-        d = &D_800A9538[def[2]];
+        d = &g_debris_dust_burst_defs[def[2]];
         spawn_circle_random_emit(pos[0], pos[1], pos[2], d->size, 0, 0xFF, (u32) random_int() % (u32) (d->countRange + 1) + d->count,
                       0xC, kind, 0.0f, (s32) &dustOwner, arg3);
     }
     if (def[4] != -1 && (src[0x1C] & 1)) {
-        fl = &D_800A963C[def[4]];
+        fl = &g_debris_flash_defs[def[4]];
         impact_flat_fx_spawn(light, fl->u0, fl->u8, fl->u4, (u8 *) pos, (s32) (src + 4), 0x96, 0, arg3, arg4);
     }
 }
 
 /* P191 */
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
-extern s8 D_800A9400[][5];
-extern u8 D_800AB7D4[];
-extern u8 D_800AB7E4[];
-/* owner block the debris spawner debris_burst_spawn passes through the burst emitter (argA of the D_8008ADA0 handlers) */
+extern s8 g_debris_kind_defs[][5]; /* was D_800A9400 */
+extern u8 g_impact_kind_motion_byte[]; /* was D_800AB7D4 */
+extern u8 g_impact_kind_flag20[]; /* was D_800AB7E4 */
+/* owner block the debris spawner debris_burst_spawn passes through the burst emitter (argA of the g_emit_point_spawn_fns handlers) */
 typedef struct {
     s32 src;   /* 0x0 */
     s32 arg;   /* 0x4 */
     u8 light;  /* 0x8 */
 } SpawnOwnerAC628;
-/* chunk particle definition (D_800A9448, 0x30 bytes, index D_800A9400[kind][1]) */
+/* chunk particle definition (g_debris_chunk_particle_defs, 0x30 bytes, index g_debris_kind_defs[kind][1]) */
 typedef struct {
     u8 colBase;        /* 0x00: colour byte 2 = colBase + random [0, colRange] */
     u8 colRange;       /* 0x01 */
@@ -97,19 +97,19 @@ typedef struct {
     f32 v10Range;      /* 0x28 */
     f32 trailChance;   /* 0x2C */
 } ChunkDefAC628;
-extern ChunkDefAC628 D_800A9448[];
+extern ChunkDefAC628 g_debris_chunk_particle_defs[]; /* was D_800A9448 */
 
-// debris_chunk_emit: P191: D_8008ADA0 handler 0xB (the chunk bursts of debris_burst_spawn debris_burst_spawn, emitted by
+// debris_chunk_emit: P191: g_emit_point_spawn_fns handler 0xB (the chunk bursts of debris_burst_spawn debris_burst_spawn, emitted by
 // spawn_circle_random_emit / the ring, line and arc emitters): spawns one chunk particle (trail_spawn, update kind 8) at
-// (x, y, z) with the definition D_800A9448[D_800A9400[kind][1]]: speed (random in the def range) along the byte angle
-// a (x / z) tilted by a random pitch (y = -speed * cos(pitch)); colour bytes D_800AB7D4[light], 0xFF, random; flag
-// 0x20 when D_800AB7E4[light]; with probability trailChance flags 3 and the trail args (6, 2). y is also stored in
+// (x, y, z) with the definition g_debris_chunk_particle_defs[g_debris_kind_defs[kind][1]]: speed (random in the def range) along the byte angle
+// a (x / z) tilted by a random pitch (y = -speed * cos(pitch)); colour bytes g_impact_kind_motion_byte[light], 0xFF, random; flag
+// 0x20 when g_impact_kind_flag20[light]; with probability trailChance flags 3 and the trail args (6, 2). y is also stored in
 // the shape (+0x14). The owner block argA gives the owner (src, arg) and the light. Returns 1 (keep emitting).
 /* was func_151AC628 */
 s32 debris_chunk_emit(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a, s32 angle0, f32 r, s32 kind,
                   f32 arg9, s32 argA, s32 argB) {
     SpawnOwnerAC628 *owner = (SpawnOwnerAC628 *) argA;
-    ChunkDefAC628 *def = &D_800A9448[D_800A9400[kind][1]];
+    ChunkDefAC628 *def = &g_debris_chunk_particle_defs[g_debris_kind_defs[kind][1]];
     struct {
         s32 w[7];   /* 0x00 */
         u8 b1C;
@@ -154,9 +154,9 @@ s32 debris_chunk_emit(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 
     shape.y = y;
     at.x = x;
     at.z = z;
-    shape.col[0] = D_800AB7D4[owner->light];
+    shape.col[0] = g_impact_kind_motion_byte[owner->light];
     shape.col[1] = 0xFF;
-    shape.flags = (D_800AB7E4[owner->light] ? 0x20 : 0) | 8;
+    shape.flags = (g_impact_kind_flag20[owner->light] ? 0x20 : 0) | 8;
     if (random_float() < def->trailChance) {
         shape.flags |= 3;
         trailA = 6;
@@ -240,14 +240,14 @@ s32 debris_chunk_ground_dust(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s
 
 /* P191 */
 void vec3_from_angles_byte(s16, s16, f32, void *);
-extern s8 D_800A9400[][5];
-/* owner block the debris spawner debris_burst_spawn passes through the burst emitter (argA of the D_8008ADA0 handlers) */
+extern s8 g_debris_kind_defs[][5]; /* was D_800A9400 */
+/* owner block the debris spawner debris_burst_spawn passes through the burst emitter (argA of the g_emit_point_spawn_fns handlers) */
 typedef struct {
     s32 src;   /* 0x0 */
     s32 arg;   /* 0x4 */
     u8 light;  /* 0x8 */
 } SpawnOwnerACBCC;
-/* dust particle definition (D_800A9560, 0x2C bytes, index D_800A9400[kind][3]) */
+/* dust particle definition (g_debris_dust_particle_defs, 0x2C bytes, index g_debris_kind_defs[kind][3]) */
 typedef struct {
     s16 u0;              /* 0x00: not read here */
     s16 u2;              /* 0x02 */
@@ -265,18 +265,18 @@ typedef struct {
     f32 valRange;        /* 0x24 */
     f32 additiveChance;  /* 0x28 */
 } DustDefACBCC;
-extern DustDefACBCC D_800A9560[];
+extern DustDefACBCC g_debris_dust_particle_defs[]; /* was D_800A9560 */
 
-// debris_dust_emit: P191: D_8008ADA0 handler 0xC (the dust bursts of debris_burst_spawn debris_burst_spawn): spawns one
+// debris_dust_emit: P191: g_emit_point_spawn_fns handler 0xC (the dust bursts of debris_burst_spawn debris_burst_spawn): spawns one
 // dust particle (particle_spawn impact_dust_cloud_spawn, kind = the owner's light) at (x, y, z) with the definition
-// D_800A9560[D_800A9400[kind][3]]: velocity from vec3_from_angles_byte(yaw = a, random pitch, random speed); random value,
+// g_debris_dust_particle_defs[g_debris_kind_defs[kind][3]]: velocity from vec3_from_angles_byte(yaw = a, random pitch, random speed); random value,
 // life, alpha and size from the def ranges; additive with probability additiveChance; grow 1.0 / 1.0, lit, group =
 // the owner's src word, no fade, room argB, owner = the owner's arg. Returns 1 (keep emitting).
 /* was func_151ACBCC */
 s32 debris_dust_emit(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a, s32 angle0, f32 r, s32 kind,
                   f32 arg9, s32 argA, s32 argB) {
     SpawnOwnerACBCC *owner = (SpawnOwnerACBCC *) argA;
-    DustDefACBCC *def = &D_800A9560[D_800A9400[kind][3]];
+    DustDefACBCC *def = &g_debris_dust_particle_defs[g_debris_kind_defs[kind][3]];
     f32 pos[3];
     f32 vel[3];
     f32 speed;
@@ -302,8 +302,8 @@ s32 debris_dust_emit(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z
 }
 
 s32 vtx_slot_buffer_get(s32, s16, s32, u8 **, u8 *);
-extern f32 D_800DD608[];
-extern f32 D_800DD618[];
+extern f32 g_view_yaw_sin[]; /* was D_800DD608 */
+extern f32 g_view_yaw_cos[]; /* was D_800DD618 */
 
 /* was func_151ACDC0 */
 u8 *flat_flash_draw(u8 *arg0, s16 arg1) {
@@ -327,8 +327,8 @@ u8 *flat_flash_draw(u8 *arg0, s16 arg1) {
     }
     temp_f0 = (*(f32 *)((u8 *)arg0 + 0x4C)) * (*(f32 *)((u8 *)arg0 + 0x2C));
     temp_f14 = (*(f32 *)((u8 *)arg0 + 0x50)) * (*(f32 *)((u8 *)arg0 + 0x30));
-    temp_f2 = D_800DD608[arg1] * temp_f0;
-    temp_f12 = D_800DD618[arg1] * temp_f0;
+    temp_f2 = g_view_yaw_sin[arg1] * temp_f0;
+    temp_f12 = g_view_yaw_cos[arg1] * temp_f0;
     *(s16 *)(sp4C + 6) = 0;
     *(s16 *)(sp4C + 0x16) = 0;
     *(s16 *)(sp4C + 0x26) = 0;
@@ -344,7 +344,7 @@ u8 *flat_flash_draw(u8 *arg0, s16 arg1) {
 
 /* was func_151ACF9C */
 s32 flat_flash_grow(f32 *arg0) {
-    f32 temp_f0 = arg0[0x4C / 4] * D_800BE9A4;
+    f32 temp_f0 = arg0[0x4C / 4] * g_frame_step_f;
 
     arg0[0x2C / 4] += temp_f0;
     arg0[0x30 / 4] += temp_f0;
@@ -482,7 +482,7 @@ s32 rope_create(s8 *arg0, s32 arg1) {
         g = 0xFF;
         b = 0xFF;
     }
-    tex = &D_80090F10[*(u16 *) (e + 0x40)];
+    tex = &g_sprite_textures[*(u16 *) (e + 0x40)];
     tw = tex->unk6 >> 2;
     th = tex->unk8 - 1;
     s1 = (tw + 0x100) << 5;
@@ -555,7 +555,7 @@ void rope_update(u8 *e) {
 
     total = 0.0f;
     if (*(s16 *) (e + 0x52) != 0) {
-        *(s16 *) (e + 0x52) -= D_800BE9E4;
+        *(s16 *) (e + 0x52) -= g_frame_ticks;
         if (*(s16 *) (e + 0x52) < 0) {
             *(s16 *) (e + 0x52) = 0;
         }
@@ -667,10 +667,10 @@ void rope_update(u8 *e) {
 }
 
 s32 sprite_load_texture_at(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 // rope_draw: render-layer draw callback of the rope (layers 0x2F / 0x4E): writes 4 vertices per point into vertex
-// buffer D_800BE9C0 of +0x48 (a cross of two 4-unit offsets perpendicular to the segment to the next point; the
+// buffer g_dl_buf_index of +0x48 (a cross of two 4-unit offsets perpendicular to the segment to the next point; the
 // last point uses an upward segment), loads texture +0x40 (sprite_load_texture_at) and draws each segment as 8 triangles
 // from 8 vertices, setting the t coordinates of vertices 0 / 4 (0x100 + k * (height - 1), << 5 for texture 0x36
 // else << 4); the first segment also closes the top end.
@@ -682,7 +682,7 @@ Gfx *rope_draw(Gfx *gfx, u8 *e, s16 player) {
     f32 x, y, z, dx, dy, ndy, dz, len, inv, ox, oy, oz;
     s32 n, th, tw, shift, i, s, tTop, tBot;
 
-    tex = &D_80090F10[*(u16 *) (e + 0x40)];
+    tex = &g_sprite_textures[*(u16 *) (e + 0x40)];
     n = e[0x42];
     th = tex->unk8 - 1;
     tw = tex->unk6;
@@ -720,7 +720,7 @@ Gfx *rope_draw(Gfx *gfx, u8 *e, s16 player) {
         ox *= 4.0f;
         oy *= 4.0f;
         oz *= 4.0f;
-        v = *(Vtx **) (e + 0x48) + (D_800BE9C0 * n + i) * 4;
+        v = *(Vtx **) (e + 0x48) + (g_dl_buf_index * n + i) * 4;
         v[0].v.ob[0] = (s32) (x + ox);
         v[0].v.ob[1] = (s32) (y + oy);
         v[0].v.ob[2] = (s32) (z + oz);
@@ -752,17 +752,17 @@ Gfx *rope_draw(Gfx *gfx, u8 *e, s16 player) {
     gSPClearGeometryMode(gfx++, G_CULL_FRONT);
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
-    gfx = (Gfx *) sprite_load_texture_at((s32) gfx, (s32) &D_80090F10[*(u16 *) (e + 0x40)], 0, 0, 0, 0, 0, 0, 0x100, 0x100,
+    gfx = (Gfx *) sprite_load_texture_at((s32) gfx, (s32) &g_sprite_textures[*(u16 *) (e + 0x40)], 0, 0, 0, 0, 0, 0, 0x100, 0x100,
                                 0x3E);
     gfx->words.w0 = 0xFC121824; /* combine mode */
     gfx->words.w1 = 0xFF33FFFF;
     gfx++;
-    gDPSetOtherMode(gfx++, D_800D30BC | 0x80000 | 0x2C0F, 0x552078);
+    gDPSetOtherMode(gfx++, g_gfx_tlut_mode | 0x80000 | 0x2C0F, 0x552078);
     s = ((tw + 0x100) << 5) << 16;
     tTop = 0x100;
     tBot = th + 0x100;
     for (i = 1; i < n; i++) {
-        gSPVertex(gfx++, *(Vtx **) (e + 0x48) + (D_800BE9C0 * n + (i - 1)) * 4, 8, 0);
+        gSPVertex(gfx++, *(Vtx **) (e + 0x48) + (g_dl_buf_index * n + (i - 1)) * 4, 8, 0);
         gSP1Triangle(gfx++, 0, 1, 4, 0);
         gSP1Triangle(gfx++, 1, 5, 4, 0);
         gSP1Triangle(gfx++, 1, 2, 5, 0);
@@ -958,7 +958,7 @@ void rope_ride_place(u8 *arg0) {
     *(f32 *) (obj + 0x1C) = (z - oldZ) + oldZ;
 }
 
-extern s32 D_800A9650;
+extern s32 g_rope_node_types; /* was D_800A9650 */
 
 /* was func_151AEB40 */
 struct_eu_node *rope_find_by_id(s32 arg0) {
@@ -973,7 +973,7 @@ struct_eu_node *rope_find_by_id(s32 arg0) {
 loop_1:
     var_v1 = 0;
 loop_2:
-    var_a0 = g_node_lists[var_v1][*(s32 *)((u8 *)&D_800A9650 + (var_v0 * 4))];
+    var_a0 = g_node_lists[var_v1][*(s32 *)((u8 *)&g_rope_node_types + (var_v0 * 4))];
     temp_t4 = (var_v1 + 1) & 0xFF;
     if (var_a0 != NULL) {
 loop_3:

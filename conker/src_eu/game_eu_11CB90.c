@@ -21,9 +21,9 @@ void light_ctrl_retire(void *arg0);
 void light_ctrl_free(void *arg0);
 
 
-extern u8 D_800A1A0C[];
-extern u8 D_800A1A08[];
-extern struct17 D_800A19C0[];
+extern u8 g_tether_stop_masks[]; /* was D_800A1A0C */
+extern u8 g_tether_bones[]; /* was D_800A1A08 */
+extern struct17 g_tether_bone_points[]; /* was D_800A19C0 */
 u8 *tether_effect_start(struct127 *, u8, s32, s32);
 void fx_spark_burst_at(u8 *);
 
@@ -33,14 +33,14 @@ void tether_start_with_flash(struct127 *arg0, u8 arg1) {
     Header header;
     Header2 header2;
 
-    if (D_800A1A0C[arg1] & arg0->unk94) {
+    if (g_tether_stop_masks[arg1] & arg0->unk94) {
         return;
     }
     tether_effect_start(arg0, arg1, 0xFF, 1);
     if (arg0->unk1D4 == NULL) {
         return;
     }
-    mtx_transform_point_or_origin(&D_800A19C0[arg1], &pos, (u8 *)(0, arg0->unk1D4) + (D_800A1A08[arg1] << 6)); // fakematch: comma from the permuter (register choice)
+    mtx_transform_point_or_origin(&g_tether_bone_points[arg1], &pos, (u8 *)(0, arg0->unk1D4) + (g_tether_bones[arg1] << 6)); // fakematch: comma from the permuter (register choice)
     header.unk0 = 3;
     header.unk1 = -1;
     header.unk2 = (u32)random_int() % 3 + 4;
@@ -71,7 +71,7 @@ void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 ar
 u8 *path_record_create(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
 u8 *tether_smoke_emitter_spawn(u8 *obj, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
 struct225 *tether_light_spawn(u8 arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6);
-extern u8 D_800A5860[];
+extern u8 g_vec3_zero[]; /* was D_800A5860 */
 extern s32 D_800A4AA0;
 
 // fire_effect_start: P181: starts the burning effect on object `arg0` (side `arg1` < 2, else nothing): an effect
@@ -95,7 +95,7 @@ u8 *tether_effect_start(struct127 *arg0, u8 arg1, s32 arg2, s32 arg3) {
         f32 angB;      /* +0x14 */
         u8 u18;        /* +0x18 */
         u8 u19[0x17];
-        s32 color[3];  /* +0x30: D_800A5860 */
+        s32 color[3];  /* +0x30: g_vec3_zero */
         f32 u3C;       /* +0x3C */
         f32 u40;       /* +0x40 */
     } pay;
@@ -109,8 +109,8 @@ u8 *tether_effect_start(struct127 *arg0, u8 arg1, s32 arg2, s32 arg3) {
         u8 color[4];   /* +0x10 */
         f32 size;      /* +0x14 */
         f32 u18;
-        s32 color1[3]; /* +0x1C: D_800A5860 */
-        s32 color2[3]; /* +0x28: D_800A5860 */
+        s32 color1[3]; /* +0x1C: g_vec3_zero */
+        s32 color2[3]; /* +0x28: g_vec3_zero */
         f32 u34[3];
         s32 u40;
         u8 u44[4];
@@ -162,9 +162,9 @@ u8 *tether_effect_start(struct127 *arg0, u8 arg1, s32 arg2, s32 arg3) {
     pay.effObj = (u8 *)obj_find_by_setup_id(18);
     pay.kind = 18;
     pay.side = arg1;
-    pay.color[0] = ((s32 *)D_800A5860)[0];
-    pay.color[1] = ((s32 *)D_800A5860)[1];
-    pay.color[2] = ((s32 *)D_800A5860)[2];
+    pay.color[0] = ((s32 *)g_vec3_zero)[0];
+    pay.color[1] = ((s32 *)g_vec3_zero)[1];
+    pay.color[2] = ((s32 *)g_vec3_zero)[2];
     pay.u18 = 0;
     def.u00 = 0x94;
     def.u01 = 7;
@@ -183,12 +183,12 @@ u8 *tether_effect_start(struct127 *arg0, u8 arg1, s32 arg2, s32 arg3) {
     def.u34[1] = 0.0f;
     def.u34[2] = 0.0f;
     def.size = 100.0f;
-    def.color1[0] = ((s32 *)D_800A5860)[0];
-    def.color1[1] = ((s32 *)D_800A5860)[1];
-    def.color1[2] = ((s32 *)D_800A5860)[2];
-    def.color2[0] = ((s32 *)D_800A5860)[0];
-    def.color2[1] = ((s32 *)D_800A5860)[1];
-    def.color2[2] = ((s32 *)D_800A5860)[2];
+    def.color1[0] = ((s32 *)g_vec3_zero)[0];
+    def.color1[1] = ((s32 *)g_vec3_zero)[1];
+    def.color1[2] = ((s32 *)g_vec3_zero)[2];
+    def.color2[0] = ((s32 *)g_vec3_zero)[0];
+    def.color2[1] = ((s32 *)g_vec3_zero)[1];
+    def.color2[2] = ((s32 *)g_vec3_zero)[2];
     def.u40 = 0x046C0008;
     def.u44[0] = 0xFF;
     def.u44[1] = 0xFF;
@@ -261,8 +261,8 @@ void obj_tint_set_flash(u8 *, s32, s32, s32, s32, s32, s32);
 s32 obj_send_hit(struct127 *, s32, u16, s32);
 // tether_beam_update: update handler (g_effect3d_update_fns slot 29) of a beam from a bone of a source object (+0x110, id
 // +0x114; gone when +0x3B differs, +0 is clear or +4 is 0xFF) to a target object (+0x118, id +0x11C). Ends (0)
-// when either object is gone or the source's +0x94 flags hit the beam kind's mask D_800A1A0C[+0x11D]. The start
-// is the kind's bone point (D_800A19C0 / bone D_800A1A08) of the source skeleton, the end the target position;
+// when either object is gone or the source's +0x94 flags hit the beam kind's mask g_tether_stop_masks[+0x11D]. The start
+// is the kind's bone point (g_tether_bone_points / bone g_tether_bones) of the source skeleton, the end the target position;
 // +0x140 / +0x14C / +0x150 get the normalised direction, its length and the second vec3_normalize_len output, and bit 0
 // of +0x128 says whether that worked. Width (+0x2C) and alpha (+0x5C) pulse with two phases (+0x120, +0x124). A
 // valid beam moves its sound / light (+0x13C) to the start and is ray cast (ray_cast_world, bounds only, filter 4);
@@ -284,14 +284,14 @@ s32 tether_beam_update(u8 *fx) {
     if (st[0xC] != dst[0x3B] || *(s32 *)dst == 0) {
         return 0;
     }
-    if (D_800A1A0C[st[0xD]] & *(s32 *)(src + 0x94)) {
+    if (g_tether_stop_masks[st[0xD]] & *(s32 *)(src + 0x94)) {
         return 0;
     }
     st[0x18] &= ~1;
     bones = *(u8 **)(src + 0x1D4);
     if (bones != NULL) {
         kind = st[0xD];
-        mtx_transform_point_or_origin(&D_800A19C0[kind], fx + 0x34, bones + (D_800A1A08[kind] << 6));
+        mtx_transform_point_or_origin(&g_tether_bone_points[kind], fx + 0x34, bones + (g_tether_bones[kind] << 6));
         *(f32 *)(fx + 0x40) = *(f32 *)(dst + 0x14);
         *(f32 *)(fx + 0x44) = *(f32 *)(dst + 0x18);
         *(f32 *)(fx + 0x48) = *(f32 *)(dst + 0x1C);
@@ -302,10 +302,10 @@ s32 tether_beam_update(u8 *fx) {
             st[0x18] |= 1;
         }
     }
-    *(f32 *)(st + 0x10) += 0.16000001f * D_800BE9A4;
+    *(f32 *)(st + 0x10) += 0.16000001f * g_frame_step_f;
     *(f32 *)(st + 0x10) = wrap_angle_rad(*(f32 *)(st + 0x10));
     *(f32 *)(fx + 0x2C) = sinf(*(f32 *)(st + 0x10)) * 5.0f + 16.0f;
-    *(f32 *)(st + 0x14) += 0.16000001f * D_800BE9A4;
+    *(f32 *)(st + 0x14) += 0.16000001f * g_frame_step_f;
     *(f32 *)(st + 0x14) = wrap_angle_rad(*(f32 *)(st + 0x14));
     fx[0x5C] = (u32)(sinf(*(f32 *)(st + 0x14)) * 25.0f + 230.0f);
     if (st[0x18] & 1) {
@@ -448,11 +448,11 @@ void tether_effect_on_message(struct102 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-extern f32 D_800A19F0[][3];      /* bone-local points per kind (D_800A19C0 + 0x30) */
+extern f32 g_tether_flame_points[][3];      /* bone-local points per kind (g_tether_bone_points + 0x30); was D_800A19C0; was D_800A19F0 */
 
 /* rider_anchor_update: follows the mount ((+0x60)->+8): when its flag +0x128 bit 0 is set and its skeleton
  * (+0x110)->+0x1D4 exists, copies its six words +0x34..+0x48 to +0x30..+0x44 and +0x14C / +0x150 to +0x54 / +0x58,
- * transforms the point D_800A19F0[k] (k = mount +0x11D) by bone D_800A1A08[k] (mtx_transform_point_or_origin) into +0x48, makes it
+ * transforms the point g_tether_flame_points[k] (k = mount +0x11D) by bone g_tether_bones[k] (mtx_transform_point_or_origin) into +0x48, makes it
  * relative to +0x30 and sets flag 2 of +0x1C; otherwise clears flag 2. Always returns 1. */
 /* was func_150EFFCC */
 s32 tether_flame_anchor_update(u8 *o) {
@@ -472,7 +472,7 @@ s32 tether_flame_anchor_update(u8 *o) {
             *(s32 *) (o + 0x44) = *(s32 *) (m + 0x48);
             *(f32 *) (o + 0x54) = *(f32 *) (m + 0x14C);
             *(f32 *) (o + 0x58) = *(f32 *) (m + 0x150);
-            mtx_transform_point_or_origin(D_800A19F0[k], o + 0x48, *(u8 **) (sk + 0x1D4) + (D_800A1A08[k] << 6));
+            mtx_transform_point_or_origin(g_tether_flame_points[k], o + 0x48, *(u8 **) (sk + 0x1D4) + (g_tether_bones[k] << 6));
             *(f32 *) (o + 0x48) -= *(f32 *) (o + 0x30);
             *(f32 *) (o + 0x4C) -= *(f32 *) (o + 0x34);
             *(f32 *) (o + 0x50) -= *(f32 *) (o + 0x38);
@@ -587,10 +587,10 @@ void tether_spark_emitter_update(u8 *arg0) {
 /* P181 */
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
                   s32 arg9);
-extern u8 (*D_800900A0)(void); /* kind-0 particle texture picker (impact_puff_tex_kind11 in ROM) */
+extern u8 (*g_particle_tex_picker_fn)(void); /* kind-0 particle texture picker (impact_puff_tex_kind11 in ROM); was D_800900A0 */
 
 // smoke_emitter_spawn: P181: starts a 30-tick particle emitter (particle_emitter_spawn, 0x6C-byte emitter block, owner
-// arg6 / arg7) of texture D_800900A0() (life 300, flags 0x2203, kind 3), colour (r, g, b) = (arg2, arg3, arg4)
+// arg6 / arg7) of texture g_particle_tex_picker_fn() (life 300, flags 0x2203, kind 3), colour (r, g, b) = (arg2, arg3, arg4)
 // alpha 0xFF, size 100 x 100, emit flags 0xCD2002; emitter ranges 160 / 80, rates 0.5, 1, fade 0.7, 1e-6,
 // slots -1. The emitter's extra bytes (+0x170) keep obj, its index obj +0x3B, `arg1` and `arg5`. Returns the
 // emitter (NULL when none).
@@ -637,7 +637,7 @@ u8 *tether_smoke_emitter_spawn(u8 *obj, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s32 
     pay.index = obj[0x3B];
     pay.arg1 = arg1;
     pay.arg5 = arg5;
-    spawn.texture = D_800900A0();
+    spawn.texture = g_particle_tex_picker_fn();
     spawn.color[3] = 0xFF;
     spawn.emitFlags = 0xCD2002;
     spawn.kind = 3;
@@ -822,9 +822,9 @@ void tether_light_clear_slot(void *arg0) {
 s32 attached_particle_spawn(u8 *, u8, u8 *, u8 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
 void mtx_transform_points(f32 **, f32 **, void *, s32);
 s32 tracer_spawn(f32 *, f32 *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, u8 *, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
-extern s32 D_800A1A10;
-extern s32 D_800A1A28;
-extern s32 D_800A1A40;
+extern s32 g_arm_tracer_start_pts; /* was D_800A1A10 */
+extern s32 g_arm_tracer_end_pts; /* was D_800A1A28 */
+extern s32 g_arm_tracer_bones; /* was D_800A1A40 */
 
 /* was func_150F03F8 */
 s32 obj_arm_tracer_fire(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
@@ -873,9 +873,9 @@ s32 obj_arm_tracer_fire(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
         return 0;
     }
     temp_t0 = arg1 * 0xC;
-    temp_v0 = arg1 + (u8 *)&D_800A1A40;
-    sp.uBC = temp_t0 + (u8 *)&D_800A1A10;
-    sp.uC0 = temp_t0 + (u8 *)&D_800A1A28;
+    temp_v0 = arg1 + (u8 *)&g_arm_tracer_bones;
+    sp.uBC = temp_t0 + (u8 *)&g_arm_tracer_start_pts;
+    sp.uC0 = temp_t0 + (u8 *)&g_arm_tracer_end_pts;
     sp.uB4 = &sp.uD0;
     sp.uB8 = &sp.uC4;
     sp84 = temp_v0;
@@ -900,7 +900,7 @@ s32 obj_arm_tracer_fire(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     sp88 = random_int();
     sp94 = random_int();
     temp_v0_2 = arg1 * 0xC;
-    attached_particle_spawn(arg0, *sp84, temp_v0_2 + (u8 *)&D_800A1A10, temp_v0_2 + (u8 *)&D_800A1A28, &sp.u98, ((u32) sp88 % 3U) + 8, 0xFF, (random_float() * 2000.0f) + 2000.0f, &sp.uD0, 0xFF, 0, -1, (s32) arg2, arg3);
+    attached_particle_spawn(arg0, *sp84, temp_v0_2 + (u8 *)&g_arm_tracer_start_pts, temp_v0_2 + (u8 *)&g_arm_tracer_end_pts, &sp.u98, ((u32) sp88 % 3U) + 8, 0xFF, (random_float() * 2000.0f) + 2000.0f, &sp.uD0, 0xFF, 0, -1, (s32) arg2, arg3);
     return sp.uDC;
 }
 /* was func_150F0D64 */
@@ -945,13 +945,13 @@ void tether_smoke_on_message(struct102 *arg0, u8 *arg1, u8 arg2) {
 }
 
 s32 light_create_obj_joint(s32, u8, s32 *, u8, s16, s32, s32, s32, s32, s32, s32, s8, s32, u8, u8, s32);
-extern s32 D_800A1A44;
-extern s32 D_800A1A50;
+extern s32 g_twin_light_offset_a; /* was D_800A1A44 */
+extern s32 g_twin_light_offset_b; /* was D_800A1A50 */
 
 /* was func_150F0EB8 */
 void obj_attach_twin_lights(s32 arg0) {
-    light_create_obj_joint(arg0, 0x25, &D_800A1A44, 2, 0x12C, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
-    light_create_obj_joint(arg0, 2, &D_800A1A50, 2, 0x12C, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    light_create_obj_joint(arg0, 0x25, &g_twin_light_offset_a, 2, 0x12C, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    light_create_obj_joint(arg0, 2, &g_twin_light_offset_b, 2, 0x12C, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
 typedef struct { s32 x, y, z; } V3i;
@@ -1076,9 +1076,9 @@ void fx_spark_burst_at(u8 *arg0) {
 s32 random_int(void);
 f32 random_float(void);
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-extern u8 D_800A5860[];
+extern u8 g_vec3_zero[]; /* was D_800A5860 */
 // object_glow_spawn: spawns effect 0x2B (particle_spawn_ex, 0x14 extra bytes at +0xA8) at obj's position: size 250,
-// the colour of D_800A5860, life 300, random flip flags 0x40 / 0x80; the extra bytes keep obj, its index (+0x3B)
+// the colour of g_vec3_zero, life 300, random flip flags 0x40 / 0x80; the extra bytes keep obj, its index (+0x3B)
 // and three random angles 0..2pi.
 /* was func_150F0BEC */
 void obj_glow_spawn(u8 *obj) {
@@ -1140,12 +1140,12 @@ void obj_glow_spawn(u8 *obj) {
     sp.pos[0] = *(f32 *)(obj + 0x14);
     sp.pos[1] = *(f32 *)(obj + 0x18);
     sp.pos[2] = *(f32 *)(obj + 0x1C);
-    sp.color1[0] = ((s32 *)D_800A5860)[0];
-    sp.color1[1] = ((s32 *)D_800A5860)[1];
-    sp.color1[2] = ((s32 *)D_800A5860)[2];
-    sp.color2[0] = ((s32 *)D_800A5860)[0];
-    sp.color2[1] = ((s32 *)D_800A5860)[1];
-    sp.color2[2] = ((s32 *)D_800A5860)[2];
+    sp.color1[0] = ((s32 *)g_vec3_zero)[0];
+    sp.color1[1] = ((s32 *)g_vec3_zero)[1];
+    sp.color1[2] = ((s32 *)g_vec3_zero)[2];
+    sp.color2[0] = ((s32 *)g_vec3_zero)[0];
+    sp.color2[1] = ((s32 *)g_vec3_zero)[1];
+    sp.color2[2] = ((s32 *)g_vec3_zero)[2];
     sp.u1E = 1;
     sp.u20 = 0xFF;
     sp.u22 = 1;
@@ -1196,9 +1196,9 @@ s32 obj_glow_follow_pulse(u8 *arg0, s32 arg1)
   {
   }
   *((f32 *) (((u8 *) arg0) + 0x48)) = (f32) (*((f32 *) (((u8 *) temp_v0) + 0x1C)));
-  *((f32 *) (((u8 *) temp_s0) + 8)) = (f32) ((*((f32 *) (((u8 *) temp_s0) + 8))) + (0.263f * D_800BE9A4));
-  *((f32 *) (((u8 *) temp_s0) + 0xC)) = (f32) ((*((f32 *) (((u8 *) temp_s0) + 0xC))) + (0.303f * D_800BE9A4));
-  *((f32 *) (((u8 *) temp_s0) + 0x10)) = (f32) ((*((f32 *) (((u8 *) temp_s0) + 0x10))) + (0.25f * D_800BE9A4));
+  *((f32 *) (((u8 *) temp_s0) + 8)) = (f32) ((*((f32 *) (((u8 *) temp_s0) + 8))) + (0.263f * g_frame_step_f));
+  *((f32 *) (((u8 *) temp_s0) + 0xC)) = (f32) ((*((f32 *) (((u8 *) temp_s0) + 0xC))) + (0.303f * g_frame_step_f));
+  *((f32 *) (((u8 *) temp_s0) + 0x10)) = (f32) ((*((f32 *) (((u8 *) temp_s0) + 0x10))) + (0.25f * g_frame_step_f));
   *((f32 *) (((u8 *) temp_s0) + 8)) = wrap_angle_rad(*((f32 *) (((u8 *) temp_s0) + 8)));
   *((f32 *) (((u8 *) temp_s0) + 0xC)) = wrap_angle_rad(*((f32 *) (((u8 *) temp_s0) + 0xC)));
   *((f32 *) (((u8 *) temp_s0) + 0x10)) = wrap_angle_rad(*((f32 *) (((u8 *) temp_s0) + 0x10)));
@@ -1343,7 +1343,7 @@ void obj_trail_emitter_update(u8 *arg0) {
     temp_f24 = (*(f32 *)((u8 *)temp_s1 + 0xC)) - sp.u124;
     temp_f26 = (*(f32 *)((u8 *)temp_s1 + 0x10)) - sp.u128;
     temp_f28 = (*(f32 *)((u8 *)temp_s1 + 0x14)) - sp.u12C;
-    (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((0.109000005f + (random_float() * 0.284f)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((0.109000005f + (random_float() * 0.284f)) * g_frame_step_f));
     if ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f) {
         sp.uC5 = 0x6C;
         sp.uB0 = 0x5103;
@@ -1443,13 +1443,13 @@ void fx_target_light_on_message(u8 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
-extern u8 D_800A1A5C[];    /* [2 variant][4 slot][2 side] f32[3] points */
-extern u8 D_800A1B1C[];    /* same layout, second point set */
-extern u8 D_800A1BDC[];    /* [2 variant][2 side] bone index */
-extern u8 D_800A1BE0[];    /* [2 side] obj + 0x94 flag mask (variant 0) */
+extern u8 g_limb_muzzle_pts_a[];    /* [2 variant][4 slot][2 side] f32[3] points; was D_800A1A5C */
+extern u8 g_limb_muzzle_pts_b[];    /* same layout, second point set; was D_800A1B1C */
+extern u8 g_limb_muzzle_bones[];    /* [2 variant][2 side] bone index; was D_800A1BDC */
+extern u8 g_limb_muzzle_side_masks[];    /* [2 side] obj + 0x94 flag mask (variant 0); was D_800A1BE0 */
 
 // limb_burst_spawn: for side (0 / 1) and slot (0..3) of obj, takes the attachment point of the obj's variant
-// (1 when obj[4] == 0x23, else 0 unless the side's flag D_800A1BE0 is set in obj + 0x94: then nothing), moves it to
+// (1 when obj[4] == 0x23, else 0 unless the side's flag g_limb_muzzle_side_masks is set in obj + 0x94: then nothing), moves it to
 // world space by the bone matrix, and spawns a flash there (light_create_with_ctrl) plus a spray (attached_particle_spawn) along the
 // second point set
 /* was func_150F1C5C */
@@ -1476,7 +1476,7 @@ void obj_limb_muzzle_burst(u8 *obj, u8 side, u8 slot, u8 flag, s32 arg4) {
     if (obj[4] == 0x23) {
         variant = 1;
     } else {
-        if (D_800A1BE0[side] & *(s32 *)(obj + 0x94)) {
+        if (g_limb_muzzle_side_masks[side] & *(s32 *)(obj + 0x94)) {
             return;
         }
         variant = 0;
@@ -1484,8 +1484,8 @@ void obj_limb_muzzle_burst(u8 *obj, u8 side, u8 slot, u8 flag, s32 arg4) {
     if (*(void **)(obj + 0x1D4) == NULL) {
         return;
     }
-    points = D_800A1A5C + variant * 0x60 + slot * 0x18;
-    bone = &D_800A1BDC[variant * 2 + side];
+    points = g_limb_muzzle_pts_a + variant * 0x60 + slot * 0x18;
+    bone = &g_limb_muzzle_bones[variant * 2 + side];
     src = (f32 *)(points + side * 0xC);
     dst = world;
     mtx_transform_points(&src, &dst, *(u8 **)(obj + 0x1D4) + (*bone << 6), 1);
@@ -1503,6 +1503,6 @@ void obj_limb_muzzle_burst(u8 *obj, u8 side, u8 slot, u8 flag, s32 arg4) {
     r = random_int();
     random_int();
     attached_particle_spawn(obj, *bone, points + side * 0xC,
-                  D_800A1B1C + variant * 0x60 + slot * 0x18 + side * 0xC, speed, (u32)r % 6 + 8, 0xFF,
+                  g_limb_muzzle_pts_b + variant * 0x60 + slot * 0x18 + side * 0xC, speed, (u32)r % 6 + 8, 0xFF,
                   random_float() * 1877.0f + 2414.0f, world, 0xFF, 0, -1, flag, arg4);
 }

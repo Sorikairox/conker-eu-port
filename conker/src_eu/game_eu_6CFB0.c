@@ -22,7 +22,7 @@ void animmodel_update_matrices(u8 *arg0)
   s32 temp_v0;
   u8 *temp_v0_2;
   sp44 = 0;
-  if ((*((s32 *) (((u8 *) ((u8 *) (((u32) arg0) + (D_800BE9C0 * 4)))) + 0x3E0))) != 0)
+  if ((*((s32 *) (((u8 *) ((u8 *) (((u32) arg0) + (g_dl_buf_index * 4)))) + 0x3E0))) != 0)
   {
     temp_v0 = allocate_memory(0x320, 1, 2, 2);
     sp44 = temp_v0;
@@ -31,14 +31,14 @@ void animmodel_update_matrices(u8 *arg0)
     if (arg0) // fakematch: empty if from the permuter
     {
     }
-    temp_v0_2 = (u8 *) (((u32) arg0) + (D_800BE9C0 * 4));
+    temp_v0_2 = (u8 *) (((u32) arg0) + (g_dl_buf_index * 4));
     temp_v0 = *((s32 *) (((u8 *) temp_v0_2) + 0x3E0));
     sp38 = *((s32 *) (((u8 *) temp_v0_2) + 0x3E8));
     anim_eval_joint_matrices(&sp38, temp_v0, arg0, *((s32 *) (((u8 *) arg0) + 0x3F0)), (s32) (*((u8 *) (((u8 *) arg0) + 0x3F4))), sp40, 0, 0);
-    mtx_f_to_l_batch(*((s32 *) (((u8 *) ((u8 *) (((u32) arg0) + (D_800BE9C0 * 4)))) + 0x3E8)), *((u8 *) (((u8 *) arg0) + 0x3F4)));
+    mtx_f_to_l_batch(*((s32 *) (((u8 *) ((u8 *) (((u32) arg0) + (g_dl_buf_index * 4)))) + 0x3E8)), *((u8 *) (((u8 *) arg0) + 0x3F4)));
     *((s8 *) (((u8 *) arg0) + 0x3F6)) = 1;
   }
-  anim_advance_frame(arg0, D_800BE9A4, 0, 0);
+  anim_advance_frame(arg0, g_frame_step_f, 0, 0);
   if (sp44 != 0)
   {
     heap_free(sp44);

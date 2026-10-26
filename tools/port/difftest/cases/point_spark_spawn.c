@@ -1,12 +1,12 @@
 //DROP s32 random_int(void);
 //DROP f32 random_float(void);
-extern f32 D_800A2A04;
-extern f32 D_800A2A08;
-extern f32 D_800A2A0C;
-extern f32 D_800A2A10;
-extern f32 D_800A2A14;
-extern f32 D_800A2A18;
-extern f32 D_800A2A1C;
+extern f32 g_point_spark_scale_range; /* was D_800A2A04 */
+extern f32 g_point_spark_scale_base; /* was D_800A2A08 */
+extern f32 g_point_spark_scale_mul; /* was D_800A2A0C */
+extern f32 g_point_spark_k_2a10; /* was D_800A2A10 */
+extern f32 g_point_spark_k_2a14; /* was D_800A2A14 */
+extern f32 g_point_spark_k_2a18; /* was D_800A2A18 */
+extern f32 g_point_spark_k_2a1c; /* was D_800A2A1C */
 s32 particle_spawn_basic(void *, s32, s32, u8, s32);
 s32 emit_streaks_from_spec(void *, u8, s32);
 
@@ -65,7 +65,7 @@ typedef struct {
     s8 u70[4];        /* 0x70 */
 } EmitBlk9DC8;
 
-// spark_burst_spawn: P232. Handler 0 of the D_80089004 point-effect table (called by obj_point_effect_emitter_update with the
+// spark_burst_spawn: P232. Handler 0 of the g_seg_effect_point_fns point-effect table (called by obj_point_effect_emitter_update with the
 // object, the point `pos` and three more points; `dir` = the unit direction): spawns one spark particle (kind 0x2B,
 // random life 10..25, random size 35..60, velocity dir * a random scale, random flip bits 0x40 / 0x80) through
 // particle_spawn_basic and a small emitter (emit_streaks_from_spec) at the same point. b / c / d are not used.
@@ -78,7 +78,7 @@ void point_spark_spawn(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     s32 flipY;
     s32 i;
 
-    scale = (random_float() * D_800A2A04 + D_800A2A08) * D_800A2A0C;
+    scale = (random_float() * g_point_spark_scale_range + g_point_spark_scale_base) * g_point_spark_scale_mul;
     t.kind = 0x2B;
     t.flags = 0x4401;
     t.u0 = 0x200005;
@@ -122,10 +122,10 @@ void point_spark_spawn(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     e.pos[0] = pos[0];
     e.pos[1] = pos[1];
     e.pos[2] = pos[2];
-    e.u14[0] = D_800A2A10;
-    e.u14[1] = D_800A2A14;
-    e.u14[2] = D_800A2A18;
-    e.u14[3] = D_800A2A1C;
+    e.u14[0] = g_point_spark_k_2a10;
+    e.u14[1] = g_point_spark_k_2a14;
+    e.u14[2] = g_point_spark_k_2a18;
+    e.u14[3] = g_point_spark_k_2a1c;
     e.u24 = 2.0f;
     e.u28 = 6.0f;
     e.u2C = 0;

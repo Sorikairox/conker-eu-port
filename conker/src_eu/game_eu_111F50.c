@@ -17,22 +17,22 @@ void camera_calc_point_ahead(void) {
     f32 vx;
     s16 *p;
 
-    x = D_800DBFF0->unk2F8;
-    y = D_800DBFF0->unk2FC;
-    z = D_800DBFF0->unk300;
-    a = D_800DBFF0->unk398;
+    x = g_player_views->unk2F8;
+    y = g_player_views->unk2FC;
+    z = g_player_views->unk300;
+    a = g_player_views->unk398;
     s = sinf(a);
     c = cosf(a);
     vy = 500.0f * s;
     vz = -500.0f * c;
     vx = 0.0f;
-    a = D_800DBFF0->unk3A0;
+    a = g_player_views->unk3A0;
     s = sinf(a);
     c = cosf(a);
     x += (vx + (vz * s));
     z += ((vz * c) - vx);
     y += vy;
-    p = (s16 *)D_800D9E10;
+    p = (s16 *)g_cam_point_ahead;
     p[0] = x;
     p[2] = z;
     p[1] = y;
@@ -61,8 +61,8 @@ void impact_scatter_random(s32 arg0) {
 
     sp.u58 = 0;
     var_s3 = 0;
-    sp.u70 = (s32) (*(s16 *)((u8 *)D_800D9E10 + 0));
-    sp.u68 = (s32) (*(s16 *)((u8 *)D_800D9E10 + 4));
+    sp.u70 = (s32) (*(s16 *)((u8 *)g_cam_point_ahead + 0));
+    sp.u68 = (s32) (*(s16 *)((u8 *)g_cam_point_ahead + 4));
     if (arg0 > 0) {
         do {
             temp_s0 = (random_int() % 500) + sp.u70;

@@ -113,7 +113,7 @@ s32 asset_load_with_subfiles(s32, s32, s32, s32, s32, s32, s32);
 s32 text_box_open(s32, s32, s32, void (*)(s32, s32, s32), s32 *, s32);
 s32 strlen(u8 *);
 extern u8 D_800BEECB;
-extern u8 D_800D3260;
+extern u8 g_chapter_replay; /* was D_800D3260 */
 
 /* was func_15080C28 */
 void hint_box_open(s32 arg0) {
@@ -181,7 +181,7 @@ block_10:
                 var_t3 = (s32) (*(u8 **)((u8 *)D_800D1944 + 0));
             }
             (*(s32 *)((u8 *)D_800D1958 + 0)) = 0x38013;
-            if (((sp40 != 0) || (arg0 != 0) || !(D_800D2E60[(s32) D_800D1940 >> 3] & (1 << (D_800D1940 & 7)))) && (D_800D3260 == 0)) {
+            if (((sp40 != 0) || (arg0 != 0) || !(D_800D2E60[(s32) D_800D1940 >> 3] & (1 << (D_800D1940 & 7)))) && (g_chapter_replay == 0)) {
                 (*(s32 *)((u8 *)D_800D1958 + 0)) |= 0x60;
             }
             if ((arg0 != 0) || (D_800D1940 == 0x42)) {

@@ -51,7 +51,7 @@ Gfx *objects_draw_pass(Gfx *gdl, s32 arg1, s16 arg2) {
     var_s0 = g_objects;
     var_s1 = 0;
     do {
-        D_8003C8E0 = (var_s1 & 0xFFFFFF) | 0x01000000;
+        g_dbg_crash_marker = (var_s1 & 0xFFFFFF) | 0x01000000;
         if (var_s0->interaction_state != 0) {
             temp_v0 = var_s0->unk5;
             if ((temp_v0 != 3) && (temp_v0 != 5)) {
@@ -103,7 +103,7 @@ block_31:
         var_s1 += 1;
         var_s0 = (struct127 *)((u8 *)var_s0 + (0x32C));
     } while (var_s1 != 0x19);
-    D_8003C8E0 = 0x01FFFFFF;
+    g_dbg_crash_marker = 0x01FFFFFF;
     if (arg1 == 1) {
         var_v0_2 = attachment_draw_all_for_player(var_s2, arg2, 0);
         goto block_39;
@@ -120,7 +120,7 @@ block_39:
     }
     (*(s32 *)((u8 *)var_s2 + 0)) = 0xDE000000;
     (*(s32 **)((u8 *)var_s2 + 4)) = &D_80084520;
-    D_8003C8E0 = 0;
+    g_dbg_crash_marker = 0;
     return (Gfx *) (var_s2 + 8);
 }
 /* P41: per-object update of object arg1 (record arg0): clears +0x1D4 (the shadow / model pointer), type +5 == 5 →
@@ -267,13 +267,13 @@ void objects_update_blob_shadows(void) {
             var_s2 = 0;
             if ((var_s1->unk5 != 3) && (var_s1->id != 0xFF) && (var_s1->unk123 == 0) && ((var_s1->unk66 & 0x10) != 0x10) && (var_s1->unk160 != 0) && (var_s1->unk65 == 0) && ((D_800C3638 == 0) || (D_800C3A7A != 0) || (cutscene_obj_takes_part(var_s1) != 0)) && ((var_s1->unk88 == 0) || (var_s1->unkCC >= -0x96))) {
                 var_s0 = 0;
-                if (D_80082FA0 >= 0) {
+                if (g_last_player_index >= 0) {
                     do {
                         if (obj_get_player_alpha(var_s1, var_s0) != 0) {
                             var_s2 = 1;
                         }
                         var_s0 += 1;
-                    } while (D_80082FA0 >= var_s0);
+                    } while (g_last_player_index >= var_s0);
                 }
             }
             if (var_s2 != 0) {
@@ -299,7 +299,7 @@ void objects_update_blob_shadows(void) {
 }
 /* was func_1502C380 */
 void obj_mtx_buffer_reset(void) {
-    D_800C42AC = D_800C42A8 = (&D_800C3E80)[D_800BE9C0];
+    D_800C42AC = D_800C42A8 = (&D_800C3E80)[g_dl_buf_index];
     D_800C429A = 0;
 }
 
@@ -315,12 +315,12 @@ s32 obj_shadow_kind(s32 arg0) {
 
 u8 *sprite_load_texture(u8 *, u8 *, s32, void *, s32, s32, s32, s32, s32);
 u8 *sprite_draw_at_world_depth(u8 *arg0, u8 *arg1);
-extern u8 *D_8008CDEC[];
+extern u8 *g_sprite_tex_descs[]; /* was D_8008CDEC */
 
 /*
  * P71: ground shadow of object idx (none while g_game_paused is set or when the alpha +7 is 0). Shadow quad: position
  * (x, y + half the size +0x122, z), extent 19 * size (15 * size for state +0 == 3), alpha +7; texture
- * D_8008CDEC[obj_shadow_kind(idx)] with +0x60 (sprite_load_texture, which also fills the quad), drawn by sprite_draw_at_world_depth
+ * g_sprite_tex_descs[obj_shadow_kind(idx)] with +0x60 (sprite_load_texture, which also fills the quad), drawn by sprite_draw_at_world_depth
  * between the D_80087770 / D_800877A8 display lists.
  */
 /* was func_1502C6F8 */
@@ -354,7 +354,7 @@ u8 *obj_draw_ground_shadow(u8 *gdl, s32 idx, s16 unused) {
     ((s32 *) gdl)[1] = (s32) D_80087770;
     ((s32 *) gdl)[2] = 0xE7000000;
     ((s32 *) gdl)[3] = 0;
-    gdl = sprite_load_texture(gdl + 16, D_8008CDEC[tex], *(s16 *) (obj + 0x60), &quad, 0, 0, 0, 2, 3);
+    gdl = sprite_load_texture(gdl + 16, g_sprite_tex_descs[tex], *(s16 *) (obj + 0x60), &quad, 0, 0, 0, 2, 3);
     quad.flag = 0;
     quad.alpha = obj[7];
     quad.sizeX = ext;
@@ -368,7 +368,7 @@ u8 *obj_draw_ground_shadow(u8 *gdl, s32 idx, s16 unused) {
     return gdl + 8;
 }
 
-extern u8 *D_8008CDEC[];
+extern u8 *g_sprite_tex_descs[]; /* was D_8008CDEC */
 
 /* was func_1502C8F8 */
 void obj_shadow_anim_step(s32 arg0) {
@@ -380,7 +380,7 @@ void obj_shadow_anim_step(s32 arg0) {
         a = *(s16 *)((u8 *)&g_objects[arg0] + 0x60);
         b = *(s16 *)((u8 *)&g_objects[arg0] + 0x62);
         if (g_objects[arg0].unk7 != 0) {
-            lim = D_8008CDEC[obj_shadow_kind(arg0)][4] << 8;
+            lim = g_sprite_tex_descs[obj_shadow_kind(arg0)][4] << 8;
             a = a + b;
             if (a >= lim) {
                 a = a - lim;
@@ -397,7 +397,7 @@ u8 obj_current_part_model(struct127 *);
 
 /*
  * P62: model level of detail. For object i (not hidden by +0x1C9, not state 7) with +0x2C8 levels: pick a level from
- * the squared distance to the camera record D_800DBFF0[cam] (a pointer; +0x2F8 / +0x2FC / +0x300): < 500 -> 0, < 730 -> 1,
+ * the squared distance to the camera record g_player_views[cam] (a pointer; +0x2F8 / +0x2FC / +0x300): < 500 -> 0, < 730 -> 1,
  * < 1500 -> 2, < 2000 -> 3, else 4; one level finer when slow (xz_velocity < 3). Overrides: obj_current_part_model's
  * code 0x5A at level 0, or no code while D_800BE616 is set, -> 1; D_800C35EA == 1 -> 0. Clamped to the last level.
  * A new level loads model ((u8 *)+0x2C4)[level] through obj_set_type and is stored in +0x1C8.
@@ -405,7 +405,7 @@ u8 obj_current_part_model(struct127 *);
 /* was func_1502C9D8 */
 void obj_select_lod(s32 i, s16 cam, s32 unused) {
     struct127 *obj = &g_objects[i];
-    struct108 *view = &D_800DBFF0[cam];
+    struct108 *view = &g_player_views[cam];
     f32 near0 = 500.0f;
     f32 near1 = 730.0f;
     f32 near2 = 1500.0f;
@@ -467,17 +467,17 @@ u8 obj_current_part_model_idx(struct127 *, s32 *);
 Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *color, s32 arg6, s32 arg7);
 void obj_ambient_colour(s32 arg0, u8 *arg1);
 extern u8 D_800C3A7A;
-extern s32 D_800BEFC4;
+extern s32 g_dl_capacity; /* was D_800BEFC4 */
 extern s32 D_800DFBF0;
 extern u8 D_800DFBF4;
 
 /* P43: one object of the frame DL (object arg1, part arg2, mode arg3). Skipped (returns gdl) when the object is
  * culled, part bit arg2 of +0x74 is set, obj_get_player_alpha(obj, part) == 0 or +0x1D4 == NULL. Colour block col[6]
- * (sp40): obj_ambient_colour fills it, obj_fog_alpha adjusts it when D_800B0DF0->+0x3E != 0 (else col[3] = 0xFF);
+ * (sp40): obj_ambient_colour fills it, obj_fog_alpha adjusts it when g_level_header->+0x3E != 0 (else col[3] = 0xFF);
  * col[5] = +0x1C8 (obj_select_lod path) or from obj_current_part_model_idx (modes 3 / 4 / 5). Alpha = obj_get_player_alpha, 0xFF when the
  * object's camera record is in mode 0x100 and the part is not +0x127; mode 4 scales it by D_800DFBF4 and draws
  * D_800DFBF0 instead of +0x1D4. The DL from obj_draw_model_dl is dropped (gdl returned) when it overflows
- * D_800BEFC4 commands of the frame buffer D_800BEDE8[D_800BE9C0]. */
+ * g_dl_capacity commands of the frame buffer D_800BEDE8[g_dl_buf_index]. */
 /* was func_1502CC64 */
 u8 *obj_draw_part(u8 *gdl, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
     s32 col[6];   /* sp40 */
@@ -507,7 +507,7 @@ u8 *obj_draw_part(u8 *gdl, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
         obj_current_part_model_idx((struct127 *)rec, &col[5]);
     }
     obj_ambient_colour(arg1, (u8 *)col);
-    if (*(s16 *)((u8 *)D_800B0DF0 + 0x3E) != 0) {
+    if (*(s16 *)((u8 *)g_level_header + 0x3E) != 0) {
         obj_fog_alpha(rec, col, arg2);
     } else {
         col[3] = 0xFF;
@@ -526,7 +526,7 @@ u8 *obj_draw_part(u8 *gdl, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
         model = *(s32 *)(rec + 0x1D4);
     }
     r = (u8 *)obj_draw_model_dl((Gfx *)gdl, arg1, arg2, model, alpha, col, arg3, arg4);
-    if (D_800BEFC4 < (s32)((u32)r - (u32)D_800BEDE8[D_800BE9C0]) >> 3) {
+    if (g_dl_capacity < (s32)((u32)r - (u32)D_800BEDE8[g_dl_buf_index]) >> 3) {
         return gdl;
     }
     return r;
@@ -541,9 +541,9 @@ void obj_unpack_light_colours(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3, s32 *arg4,
     u8 *temp_v1;
 
     temp_a2 = arg1 * 3;
-    temp_v0 = temp_a2 + D_800D9F88;
+    temp_v0 = temp_a2 + g_tint_prim_rgb;
     *arg4 = (s32) (*(u8 *)((u8 *)temp_v0 + 0));
-    temp_v1 = temp_a2 + D_800D9F98;
+    temp_v1 = temp_a2 + g_tint_env_rgb;
     *arg5 = (s32) (*(u8 *)((u8 *)temp_v0 + 1));
     *arg6 = (s32) (*(u8 *)((u8 *)temp_v0 + 2));
     *arg7 = (s32) (*(u8 *)((u8 *)temp_v1 + 0));
@@ -576,7 +576,7 @@ extern u16 D_800C4B98[];
 extern u8 **D_800C48A8[];
 extern u8 **D_800C4D10[];
 extern u8 D_800DA248[];
-extern u8 D_800DD714[];
+extern u8 g_fog_state[]; /* was D_800DD714 */
 
 /* obj_draw_model_dl (P57): the model display list of object arg1, part arg2. arg3 = model (segment 6 base, from
  * +0x1D4 or D_800DFBF0), arg4 = alpha, color = colour block (obj_unpack_light_colours unpacks it), arg6 = mode (0 normal,
@@ -606,7 +606,7 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
     if (model_make_ready((struct127 *)o, model, var, (arg6 == 3) ? 0 : 1) != 0) {
         return (Gfx *)g;
     }
-    if (*(s32 *)(o + var * 8 + D_800BE9C0 * 4 + 0x28C) == 0) {
+    if (*(s32 *)(o + var * 8 + g_dl_buf_index * 4 + 0x28C) == 0) {
         return (Gfx *)g;
     }
     if (arg7 != 0) {
@@ -621,7 +621,7 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
     g[0] = 0xDB06000C;
     g[1] = arg3;
     g[2] = 0xDB060004;
-    g[3] = *(s32 *)(o + var * 8 + D_800BE9C0 * 4 + 0x28C) - 0x38;
+    g[3] = *(s32 *)(o + var * 8 + g_dl_buf_index * 4 + 0x28C) - 0x38;
     g += 4;
     obj_unpack_light_colours(o, arg2, arg4, (u8 *)color, &c0, &c1, &c2, &c3, &c4, &c5, &c6, &c7, &c8, &c9);
     g[0] = 0xDB060020;
@@ -637,7 +637,7 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
     g[0] = 0xD9FFFFFF;
     g += 2;
     lit = 1;
-    fog = *(s16 *)((u8 *)D_800B0DF0 + 0x3E);
+    fog = *(s16 *)((u8 *)g_level_header + 0x3E);
     fl = o[0x66] & 0xC;
     if (fl == 0xC) {
         g[0] = 0xD9FFFFFF;
@@ -667,7 +667,7 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
         if (D_800D9D20 != 0) v |= 8;
         g = (u32 *)light_apply_object_lights((Gfx *)g, arg2, (s32)*(f32 *)(o + 0x14), (s32)*(f32 *)(o + 0x18),
                                  (s32)*(f32 *)(o + 0x1C), *(s32 *)(o + 0x184), *(s32 *)(o + arg2 * 4 + 0x304),
-                                 o[0x301], *(u8 **)(o + 0x314) + D_800BE9C0 * 8, o + 0x302, 2, o + 0x1DD, v,
+                                 o[0x301], *(u8 **)(o + 0x314) + g_dl_buf_index * 8, o + 0x302, 2, o + 0x1DD, v,
                                  D_800DA248);
     }
     cnt = &D_800C4B98[model];
@@ -686,7 +686,7 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
                 if (fog == 0) {
                     g[1] = (c6 << 24) | ((c7 & 0xFF) << 16) | ((c8 & 0xFF) << 8) | (c9 & 0xFF);
                 } else {
-                    g[1] = (D_800DD714[0] << 24) | (D_800DD714[1] << 16) | (D_800DD714[2] << 8) | (c9 & 0xFF);
+                    g[1] = (g_fog_state[0] << 24) | (g_fog_state[1] << 16) | (g_fog_state[2] << 8) | (c9 & 0xFF);
                 }
                 g += 2;
                 g[0] = 0xFA00F200;
@@ -763,15 +763,15 @@ void obj_ambient_colour(s32 arg0, u8 *arg1) {
     (*(s32 *)((u8 *)arg1 + 0)) = 0xFF;
 }
 void mtxf_transform_point_w(f32 *mtx, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz, f32 *ow);
-extern f32 D_800D9F3C;
-extern f32 D_800D9F40;
+extern f32 g_cam_far_plane; /* was D_800D9F3C */
+extern f32 g_cam_near_plane; /* was D_800D9F40 */
 extern u16 D_800DD718;
 extern u16 D_800DD71C;
 extern f32 D_800D30C8[][4][4];
 
 /*
  * P71: fog alpha col[3] of object rec for view matrix view (D_800D30C8[view]). In 1 / depth units (0.001 instead
- * of 1 / 0): a = 1 / D_800D9F3C, b = 1 / D_800D9F40, the fog range from b + (a - b) * 0.001 * D_800DD718 (full
+ * of 1 / 0): a = 1 / g_cam_far_plane, b = 1 / g_cam_near_plane, the fog range from b + (a - b) * 0.001 * D_800DD718 (full
  * fog colour) to b + (a - b) * 0.001 * D_800DD71C (none). The object position (+0x14) is transformed
  * (mtxf_transform_point_w, w); 1 / w in that range interpolates, outside it the alpha is 0xFF (behind / closer) or 0.
  */
@@ -785,8 +785,8 @@ void obj_fog_alpha(u8 *rec, s32 *col, s32 view) {
     f32 sx, sy, sz, w;
     f32 t;
 
-    near = (D_800D9F3C == 0.0f) ? 0.001f : 1.0f / D_800D9F3C;
-    far = (D_800D9F40 == 0.0f) ? 0.001f : 1.0f / D_800D9F40;
+    near = (g_cam_far_plane == 0.0f) ? 0.001f : 1.0f / g_cam_far_plane;
+    far = (g_cam_near_plane == 0.0f) ? 0.001f : 1.0f / g_cam_near_plane;
     step = (near - far) * 0.001f;
     fogMin = D_800DD718 * step + far;
     fogMax = D_800DD71C * step + far;
@@ -1141,7 +1141,7 @@ void obj_build_model_matrix(s32 arg0, s32 arg1) {
 /* was func_1502E764 */
 void obj_mtx_buffer_flush(void) {
     if ((u16)D_800C429A != 0) {
-        mtx_f_to_l_batch((&D_800C3E80)[D_800BE9C0], (u16)D_800C429A);
+        mtx_f_to_l_batch((&D_800C3E80)[g_dl_buf_index], (u16)D_800C429A);
     }
     D_800C42B0 = 1;
 }
@@ -1153,14 +1153,14 @@ s32 obj_get_player_alpha(struct127 *, s32);
 s32 camera_view_test_sphere(s32, s32 *, f32, f32, f32, f32, f32, f32);
 extern u8 D_800C3A7A;
 extern u8 D_800C3A84;
-extern s32 D_800DA030;
+extern s32 g_view_mtxf; /* was D_800DA030 */
 
 /* P48: visibility mask +0x74 of object arg0 (bit i set = hidden for player i). Type 7: low nibble cleared. Otherwise
  * all four bits are set, and when the object is not culled and in an active view group (+0x127 bit of D_800D2340):
  * a child (+0x65 = parent index + 1) copies its parent's mask; else each player's view test camera_view_test_sphere
  * (radius from the model header D_800D1C90[id] +0xE / +0x10 and the scales) and the fade distance (+0x10, or
  * 100000 for player-controlled cameras) choose obj_fade_command events 8 / 9 / 10 and clear the player's bit.
- * The m2c draft stepped D_800DA030 by 0x100 and D_800DBFF0 by sizeof(struct108) * 0x9A0: both are byte offsets. */
+ * The m2c draft stepped g_view_mtxf by 0x100 and g_player_views by sizeof(struct108) * 0x9A0: both are byte offsets. */
 /* was func_1502E7B4 */
 void obj_update_visibility(s32 arg0) {
     f32 sp7C;
@@ -1238,19 +1238,19 @@ void obj_update_visibility(s32 arg0) {
             }
         }
         var_s2 = 0;
-        if (D_80082FA0 >= 0) {
-            var_s5 = (u8 *)&D_800DA030;
+        if (g_last_player_index >= 0) {
+            var_s5 = (u8 *)&g_view_mtxf;
             var_s4 = 0;
             var_s6 = 0;
             sp7C = temp_f14;
             do {
                 var_s3 = 0;
-                if ((*(u8 *)((u8 *)((*(u8 **)((u8 *)D_800DBFF0 + var_s6 + 0x3D4))) + 0x197)) != 0) {
+                if ((*(u8 *)((u8 *)((*(u8 **)((u8 *)g_player_views + var_s6 + 0x3D4))) + 0x197)) != 0) {
                     var_s0 = 0x186A0;
                 } else {
                     var_s0 = sp5C;
                 }
-                temp_v0_6 = camera_view_test_sphere(var_s4 + D_800BE628, (s32 *)var_s5, temp_s1->x_position, temp_s1->y_position + sp74, temp_s1->z_position, sp7C, sp78, 20000.0f);
+                temp_v0_6 = camera_view_test_sphere(var_s4 + g_player_cams, (s32 *)var_s5, temp_s1->x_position, temp_s1->y_position + sp74, temp_s1->z_position, sp7C, sp78, 20000.0f);
                 var_v1 = temp_v0_6;
                 if (temp_v0_6 == 0) {
                     goto block_37;
@@ -1298,7 +1298,7 @@ block_37:
                 var_s4 += 0x180;
                 var_s5 += 0x40;
                 var_s6 += 0x9A0;
-            } while (D_80082FA0 >= var_s2);
+            } while (g_last_player_index >= var_s2);
         }
         obj_visibility_stub((s32) temp_s1, var_fp);
         temp_v0_7 = temp_s1->camera;
@@ -1380,7 +1380,7 @@ void obj_tint_update(struct127 *arg0) {
     case 2:
     case 3:
         temp_v1 = arg0->unkA5;
-        temp_lo = arg0->unkA6 * D_800BE9E4;
+        temp_lo = arg0->unkA6 * g_frame_ticks;
         if (temp_lo < (s32) temp_v1) {
             arg0->unkA5 = temp_v1 - temp_lo;
             return;
@@ -1389,7 +1389,7 @@ void obj_tint_update(struct127 *arg0) {
         return;
     case 5:
         temp_v1_2 = arg0->unkA7;
-        temp_t1 = D_800BE9E4 * 0xA;
+        temp_t1 = g_frame_ticks * 0xA;
         if (temp_t1 < (s32) temp_v1_2) {
             arg0->unkA7 = temp_v1_2 - temp_t1;
         } else {
@@ -1397,11 +1397,11 @@ void obj_tint_update(struct127 *arg0) {
         }
         /* fallthrough */
     case 4:
-        arg0->unkA5 += arg0->unkA6 * D_800BE9E4;
+        arg0->unkA5 += arg0->unkA6 * g_frame_ticks;
         return;
     case 6:
         temp_v1_3 = arg0->unkA5;
-        temp_lo_2 = arg0->unkA6 * D_800BE9E4;
+        temp_lo_2 = arg0->unkA6 * g_frame_ticks;
         if ((s32) temp_v1_3 < (0xFF - temp_lo_2)) {
             arg0->unkA5 = temp_v1_3 + temp_lo_2;
         } else {
@@ -1411,7 +1411,7 @@ void obj_tint_update(struct127 *arg0) {
         return;
     case 7:
         temp_v1_4 = arg0->unkA5;
-        temp_lo_3 = arg0->unkA6 * D_800BE9E4;
+        temp_lo_3 = arg0->unkA6 * g_frame_ticks;
         if (temp_lo_3 < (s32) temp_v1_4) {
             arg0->unkA5 = temp_v1_4 - temp_lo_3;
             return;
@@ -1622,7 +1622,7 @@ void obj_follow_parent(s32 arg0) {
     o[9] = p[9];
     o[0xA] = p[0xA];
     o[0xF] = p[0xF];
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= g_last_player_index; i++) {
         o[0xB + i] = p[0xB + i];
     }
 }

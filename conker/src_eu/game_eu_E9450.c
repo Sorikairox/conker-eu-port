@@ -753,7 +753,7 @@ loop_6:
         }
     }
 }
-/* P317: D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 are unused, the code is unchanged */
+/* P317: g_mdl_particle_land_fns's dispatcher type (wasm call_indirect); args 1..3 / 5 are unused, the code is unchanged */
 /* was func_150BD498 */
 s32 debris_floor_settle_bounce(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     *(f32 *)(arg0 + 0x3C) = *(f32 *)(arg0 + 0x10) * 1.1f + arg4;
@@ -844,7 +844,7 @@ void blast_debris_and_smoke(u8 arg0, s32 owner) {
         f32 u24;            /* 0x24 */
         f32 size[2];        /* 0x28 */
         f32 pos[3];         /* 0x30 */
-        s32 dir[3];         /* 0x3C: D_800A5860 */
+        s32 dir[3];         /* 0x3C: g_vec3_zero */
         f32 vel[3];         /* 0x48 */
         f32 u54;            /* 0x54 */
         s32 flags;          /* 0x58 */
@@ -929,9 +929,9 @@ void blast_debris_and_smoke(u8 arg0, s32 owner) {
     smoke.u1E = 0x23;
     smoke.u20 = 7;
     smoke.u24 = sSmokeU24[0];
-    smoke.dir[0] = ((s32 *) D_800A5860)[0];
-    smoke.dir[1] = ((s32 *) D_800A5860)[1];
-    smoke.dir[2] = ((s32 *) D_800A5860)[2];
+    smoke.dir[0] = ((s32 *) g_vec3_zero)[0];
+    smoke.dir[1] = ((s32 *) g_vec3_zero)[1];
+    smoke.dir[2] = ((s32 *) g_vec3_zero)[2];
     bitA = (random_int() & 1) ? 0x40 : 0;
     bitB = (random_int() & 1) ? 0x80 : 0;
     smoke.flags = bitB | 7 | bitA | 0xCE00 | 0x20000 | 0x800000;

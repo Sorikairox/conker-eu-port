@@ -40,7 +40,7 @@ void obj_ribbon_trail_spawn(u8 *arg0, u8 arg1, s32 arg2) {
 // trail_ring_age_update: update handler (s32 (u8 *obj), the ribbon_trail_follow_update table) of the trail objects: the ring +0x94
 // holds 28-byte points {pos, life +0xC, alpha +0x10, distance +0x18}; write index +0x2E, read index +0x2D, count
 // +0x2C, capacity +0x25. Returns 0 (done) when fewer than 2 points are left and flag 8 of +0x1E is set. Walking back
-// from the newest point, each life runs down by the frame time D_800BE9A4; at a dead point all older points are
+// from the newest point, each life runs down by the frame time g_frame_step_f; at a dead point all older points are
 // dropped (read index moves up to it). Then each point's alpha is its distance from the oldest point * 0.494
 // (at most 0x9B), and +0x54 gets the oldest point (0, 0, 0 when empty). Returns 1.
 /* was func_151B69D0 */
@@ -63,7 +63,7 @@ s32 trail_ring_age_update(u8 *obj) {
             if (i < 0) {
                 i = obj[0x25] - 1;
             }
-            *(f32 *) (ring + i * 0x1C + 0xC) -= D_800BE9A4;
+            *(f32 *) (ring + i * 0x1C + 0xC) -= g_frame_step_f;
             if (*(f32 *) (ring + i * 0x1C + 0xC) < 0.0f) {
                 rd = (s8) obj[0x2D];
                 while (i != rd) {
@@ -160,7 +160,7 @@ s32 ribbon_trail_follow_update(u8 *arg0) {
     sp.uB4 = temp_a2;
     sp.uA8 = (*(f32 *)((u8 *)arg0 + 0x18)) - (*(f32 *)((u8 *)temp_a2 + 0x10));
     temp_f0 = vec3_length(&sp.uA0);
-    (*(f32 *)((u8 *)sp.uB4 + 0x14)) = (f32) ((*(f32 *)((u8 *)sp.uB4 + 0x14)) + (temp_f0 * 0.003722f * D_800BE9A4));
+    (*(f32 *)((u8 *)sp.uB4 + 0x14)) = (f32) ((*(f32 *)((u8 *)sp.uB4 + 0x14)) + (temp_f0 * 0.003722f * g_frame_step_f));
     temp_f2 = (*(f32 *)((u8 *)sp.uB4 + 0x14));
     (*(f32 *)((u8 *)sp.uB4 + 0x1C)) = (f32) ((*(f32 *)((u8 *)sp.uB4 + 0x1C)) + (temp_f0 * 4.409548f));
     sp58 = temp_f2;
@@ -169,7 +169,7 @@ s32 ribbon_trail_follow_update(u8 *arg0) {
         temp_f2_2 = 1.0f / sp58;
         (*(f32 *)((u8 *)(&sp.u84) + 0)) = (*(f32 *)((u8 *)temp_t2 + 0));
         (*(s32 *)((u8 *)(&sp.u84) + 4)) = (s32) (*(s32 *)((u8 *)temp_t2 + 4));
-        var_f18 = (*(f32 *)((u8 *)sp.uB4 + 0x18)) + D_800BE9A4;
+        var_f18 = (*(f32 *)((u8 *)sp.uB4 + 0x18)) + g_frame_step_f;
         (*(s32 *)((u8 *)(&sp.u84) + 8)) = (s32) (*(s32 *)((u8 *)temp_t2 + 8));
         temp_f12 = (*(f32 *)((u8 *)sp.uB4 + 0x20));
         var_f20 = (*(f32 *)((u8 *)sp.uB4 + 0x24));
@@ -228,8 +228,8 @@ s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *
 u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 u8 *gfx_env_color_cached(u8 *, s32, s32, s32, s32, s8 *);
-extern s32 D_80091084;
-extern s32 D_800D30BC;
+extern s32 g_ribbon_trail_texture; /* was D_80091084 */
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 typedef struct {
     f32 pos[3];         /* +0x00 */
@@ -245,8 +245,8 @@ typedef struct {
 // +-10 * normalize((prev - next) x (point - camera)) (no offset when that is 0), texture s = the point's width
 // value, t 0 / 0x7FF, white with the point's alpha; one G_VTX of 4 + two triangles per segment. With +0x1E bit 1
 // the ribbon starts at the trail's own position (+0x10, alpha 0x80, s 0). Vertices come from vtx_slot_buffer_get (the
-// trail's +0x84 buffer, (count << 5) + 0xA0 bytes; none -> gfx unchanged); render state: texture D_80091084,
-// combine 0x4E, geometry 0x200005 / 0x1F0600, othermode D_800D30BC | 0x82CA0 / g_render_mode_pairs words 6 | 7.
+// trail's +0x84 buffer, (count << 5) + 0xA0 bytes; none -> gfx unchanged); render state: texture g_ribbon_trail_texture,
+// combine 0x4E, geometry 0x200005 / 0x1F0600, othermode g_gfx_tlut_mode | 0x82CA0 / g_render_mode_pairs words 6 | 7.
 /* was func_151B6ED8 */
 u8 *ribbon_trail_w10_draw(u8 *trail, u8 *gfx, s16 arg2) {
     RibbonPoint *pts;
@@ -279,11 +279,11 @@ u8 *ribbon_trail_w10_draw(u8 *trail, u8 *gfx, s16 arg2) {
     pts = *(RibbonPoint **) (trail + 0x94);
     cam = camera_get_pos(arg2);
     flag = 1;
-    gfx = (u8 *) gfx_load_texture_cached(gfx, &D_80091084, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
+    gfx = (u8 *) gfx_load_texture_cached(gfx, &g_ribbon_trail_texture, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
     gfx = gfx_env_color_cached(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gfx = (u8 *) gfx_set_combine_mode((s32) gfx, 0x4E, &flag);
     gfx = (u8 *) gfx_geometry_mode_cached((s32) gfx, 0x200005, 0x1F0600);
-    gfx = gfx_other_mode_cached((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, ((s32 *) g_render_mode_pairs)[7] | ((s32 *) g_render_mode_pairs)[6],
+    gfx = gfx_other_mode_cached((s32) gfx, g_gfx_tlut_mode | 0x80000 | 0x2CA0, ((s32 *) g_render_mode_pairs)[7] | ((s32 *) g_render_mode_pairs)[6],
                         &flag);
 
     if (*(u16 *) (trail + 0x1E) & 2) {
@@ -469,7 +469,7 @@ void ribbon_trail_handle_message(u8 *arg0, s32 *arg1, u8 arg2)
 s32 random_int(void);
 f32 random_float(void);
 s32 particle_spawn_ex(void *spec, s32 count, s32 arg2, s32 arg3, s32 alpha, s32 arg5);
-extern f32 D_800AA85C;
+extern f32 g_smoke_puff_k_a85c; /* was D_800AA85C */
 /* particle spec read by particle_spawn_ex (offsets from its start) */
 typedef struct {
     /* 0x00 */ s32 type;
@@ -531,7 +531,7 @@ void obj_smoke_puff_spawn(u8 *obj, s32 alpha, s32 arg2) {
     p.color[6] = 0x5A;
     p.unk1C = 0xFF;
     p.unk54 = 0.0f;
-    p.unk24 = D_800AA85C;
+    p.unk24 = g_smoke_puff_k_a85c;
     p.pos[0] = *(f32 *) (obj + 0x14);
     p.pos[1] = *(f32 *) (obj + 0x18);
     p.pos[2] = *(f32 *) (obj + 0x1C);
@@ -549,9 +549,9 @@ void obj_smoke_puff_spawn(u8 *obj, s32 alpha, s32 arg2) {
     particle_spawn_ex(&p, 1, 0, 0, alpha & 0xFF, arg2);
 }
 
-extern s32 (*D_8008FF30[])(u8 *, void *);   /* attach handlers: 0 glow_attach_follow_obj, 1 glow_attach_follow_model_point */
-extern s32 D_800AA840[4];                    /* glow particle variants (low byte used) */
-extern f32 D_800AA860;
+extern s32 (*g_glow_attach_fns[])(u8 *, void *);   /* attach handlers: 0 glow_attach_follow_obj, 1 glow_attach_follow_model_point; was D_8008FF30 */
+extern s32 g_attached_glow_variants[4];                    /* glow particle variants (low byte used); was D_800AA840 */
+extern f32 g_attached_glow_size_min; /* was D_800AA860 */
 /* glow particle spec read by particle_spawn_ex (same layout as SmokePuffSpec, one more byte at 0x66) */
 typedef struct {
     /* 0x00 */ s32 type;
@@ -592,9 +592,9 @@ typedef struct {
     u8 type;
 } AttachData;
 // obj_attached_glow_spawn: spawns a helper object (fxrec_spawn, extra size + 0x10) that follows something:
-// its data block gets a copy of `size` bytes of `src` and the attach type; the type's handler (D_8008FF30[type],
+// its data block gets a copy of `size` bytes of `src` and the attach type; the type's handler (g_glow_attach_fns[type],
 // 0 = follow an object, 1 = follow a model point) places it, and if it fails the object is freed (returns NULL).
-// Then a big glow particle (particle_spawn_ex; variant D_800AA840[rand & 3], size rand * 800 + D_800AA860, life 300,
+// Then a big glow particle (particle_spawn_ex; variant g_attached_glow_variants[rand & 3], size rand * 800 + g_attached_glow_size_min, life 300,
 // random mirror flags) is started and its handle kept in the data block. Returns the object.
 // Callers: obj_effect_attached_glow (effect handler 12 of obj_effect_run_handler, type 0), beam_trail_spawn (type 1).
 /* was func_151B78D8 */
@@ -612,7 +612,7 @@ u8 *obj_attached_glow_spawn(void *src, u8 type, s32 size, u8 alpha, s32 arg4) {
     d.data = NULL;
     d.type = type;
     a.u89 = 0x14;
-    *(V368D0 *) a.pos = *(V368D0 *) D_800A5860;
+    *(V368D0 *) a.pos = *(V368D0 *) g_vec3_zero;
     a.u80 = 300;
     a.u82 = 0x14;
     a.u84 = 0x10;
@@ -623,13 +623,13 @@ u8 *obj_attached_glow_spawn(void *src, u8 type, s32 size, u8 alpha, s32 arg4) {
         memcpy(data, &d, sizeof(d));
         data->data = (u8 *) data + 0x10;
         memcpy(data->data, src, size);
-        if (D_8008FF30[type](obj, obj + 0x10) == 0) {
+        if (g_glow_attach_fns[type](obj, obj + 0x10) == 0) {
             node_destroy((struct102 *) obj);
             return NULL;
         }
         p.unk8 = 0x1303;
         p.type = 0x200005;
-        p.unk1D = D_800AA840[random_int() & 3];
+        p.unk1D = g_attached_glow_variants[random_int() & 3];
         p.unk4 = 0;
         p.life = 300;
         p.unkC = 0;
@@ -643,14 +643,14 @@ u8 *obj_attached_glow_spawn(void *src, u8 type, s32 size, u8 alpha, s32 arg4) {
         p.color[6] = 0xFF;
         p.color[7] = 0xFF;
         p.unk1C = 0xFF;
-        glowSize = random_float() * 800.0f + D_800AA860;
+        glowSize = random_float() * 800.0f + g_attached_glow_size_min;
         p.size[1] = glowSize;
         p.size[0] = glowSize;
         p.pos[0] = a.pos[0];
         p.pos[1] = a.pos[1];
         p.pos[2] = a.pos[2];
-        *(V368D0 *) p.vel = *(V368D0 *) D_800A5860;
-        *(V368D0 *) p.accel = *(V368D0 *) D_800A5860;
+        *(V368D0 *) p.vel = *(V368D0 *) g_vec3_zero;
+        *(V368D0 *) p.accel = *(V368D0 *) g_vec3_zero;
         p.unk1E = 1;
         p.unk20 = 0xFF;
         p.unk22 = 1;
@@ -715,7 +715,7 @@ s32 glow_attach_follow_model_point(u8 *arg0, f32 *arg1) {
 }
 
 // obj_attached_glow_update: update handler of the obj_attached_glow_spawn helper objects. Each frame with a time step
-// (D_800BE9E4 > 0): the attach type's handler (D_8008FF30) moves the object (pos +0x10) - on failure returns 0 (the
+// (g_frame_ticks > 0): the attach type's handler (g_glow_attach_fns) moves the object (pos +0x10) - on failure returns 0 (the
 // caller frees it); the glow particle (data->glow, pos +0x40) follows. The move is logged in the trail ring +0x94
 // (20-byte entries {pos, step length (vec3_length), alpha 0xFF}; write index +0x2E, read index +0x2D, count +0x2C,
 // capacity +0x25): when the write index catches the read index, the oldest entry is dropped. Returns 1.
@@ -728,11 +728,11 @@ s32 obj_attached_glow_update(u8 *obj) {
     f32 len;
     u8 *e;
 
-    if (D_800BE9E4 > 0) {
+    if (g_frame_ticks > 0) {
         old[0] = *(f32 *) (obj + 0x10);
         old[1] = *(f32 *) (obj + 0x14);
         old[2] = *(f32 *) (obj + 0x18);
-        if (D_8008FF30[data->type](obj, obj + 0x10) == 0) {
+        if (g_glow_attach_fns[data->type](obj, obj + 0x10) == 0) {
             return 0;
         }
         if (data->glow != 0) {
@@ -851,8 +851,8 @@ s32 gfx_geometry_mode_cached(s32, s32, s32);
 s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
 u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
-extern s32 D_800914B0;
-extern s32 D_800D30BC;
+extern s32 g_glow_trail_texture; /* was D_800914B0 */
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 /* was func_151B81E8 */
 u8 *glow_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
@@ -932,7 +932,7 @@ u8 *glow_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
             sp.uC4 = temp_v0;
             temp_v1 = ((u8 *)&g_render_mode_pairs);
             var_a0 = (*(s8 *)((u8 *)arg0 + 0x2E)) - 1;
-            var_s0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached(var_s0, &D_800914B0, 0, 0, 0, 0, 0x78, 0, 0, &sp.u97, 3), 0x200005, 0x1F0600), 0x56, &sp.u97), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.u97);
+            var_s0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached(var_s0, &g_glow_trail_texture, 0, 0, 0, 0, 0x78, 0, 0, &sp.u97, 3), 0x200005, 0x1F0600), 0x56, &sp.u97), g_gfx_tlut_mode | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.u97);
             if (var_a0 < 0) {
                 var_a0 = (*(u8 *)((u8 *)arg0 + 0x25)) - 1;
             }
@@ -1060,7 +1060,7 @@ u8 *glow_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
 /* was func_151B887C */
 void glow_handle_message(u8 *arg0, s32 arg1, u8 arg2) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);
-    void (*temp_v1)(u8 *, s32, u8) = D_8008FF38[temp_v0[8]];
+    void (*temp_v1)(u8 *, s32, u8) = g_glow_msg_fns[temp_v0[8]];
 
     if (temp_v1 != NULL) {
         temp_v1(arg0, arg1, arg2);

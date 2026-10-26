@@ -9,8 +9,8 @@ extern u64 D_8002C060;          /* osClockRate */
 extern u8 D_80042DE0;           /* __osContLastCmd */
 extern u8 D_80042DE1;           /* __osMaxControllers */
 extern OSPifRam D_80042DA0;     /* __osContPifRam */
-extern OSMesgQueue D_80042E08;  /* __osEepromTimerQ */
-extern OSMesg D_80042E20;       /* __osEepromTimerMsg */
+extern OSMesgQueue g_eep_timer_queue;  /* __osEepromTimerQ; was D_80042E08 */
+extern OSMesg g_eep_timer_msg;       /* __osEepromTimerMsg; was D_80042E20 */
 s32 os_si_raw_start_dma(s32, void *); /* __osSiRawStartDma */
 void __osPackRequestData(u8);
 void __osContGetInitData(u8 *, OSContStatus *);
@@ -43,7 +43,7 @@ s32 game_os_cont_init(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *data) {
     __osContGetInitData(bitpattern, data);
     D_80042DE0 = 0;
     __osSiCreateAccessQueue();
-    osCreateMesgQueue(&D_80042E08, &D_80042E20, 1);
+    osCreateMesgQueue(&g_eep_timer_queue, &g_eep_timer_msg, 1);
     return ret;
 }
 

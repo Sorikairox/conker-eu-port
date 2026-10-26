@@ -1,9 +1,9 @@
 s/hud_lens_start_zoom_in(0)/hud_lens_start_zoom_in(1)/ % c0
 s/(a\[2\] + 59) \/ 60/(a[2] + 60) \/ 60/ % c1 c1_neg c1_exact
-s/D_8009015C |= 0x80/D_8009015C |= 0x40/ % c1
+s/g_mp_game_flags |= 0x80/g_mp_game_flags |= 0x40/ % c1
 s/0x96, 0x56/0x96, 0x57/ % c1
-s/(s32) D_8009F6D0/(s32) D_800D2870/ % c1
-s/D_800D2870 = a\[2\]/D_800D2870 = a[3]/ % c2
+s/(s32) D_8009F6D0/(s32) g_hud_clock_frames/ % c1
+s/g_hud_clock_frames = a\[2\]/g_hud_clock_frames = a[3]/ % c2
 s/return rail_rank_rivals();/return rail_racers_update();/ % c5
 s/return rail_cmd_stub(a\[2\])/return rail_cmd_stub(a[3])/ % c8
 s/a\[5\], 0, 0)/a[5], 0, 1)/ % c9

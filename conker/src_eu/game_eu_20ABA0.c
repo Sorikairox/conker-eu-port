@@ -2,10 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800AB930[];
+extern u8 g_bounce_dust_params_a[]; /* was D_800AB930 */
 
 
-extern s32 D_800AB934;
+extern s32 g_bounce_dust_params_b; /* was D_800AB934 */
 
 /* was func_151DD390 */
 void bounce_dust_spawn(u8 *arg0, u8 arg1, s32 arg2) {
@@ -47,5 +47,5 @@ void bounce_dust_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u50 = -0.693f;
     sp.u54 = 0.30400002f;
     sp.u64 = 25.714f;
-    emit_textured_burst(&sp.u2C, ((u8 *)&D_800AB930), &D_800AB934, 1, 26.0f, 0U, (u8) (s32) arg1, arg2);
+    emit_textured_burst(&sp.u2C, ((u8 *)&g_bounce_dust_params_a), &g_bounce_dust_params_b, 1, 26.0f, 0U, (u8) (s32) arg1, arg2);
 }

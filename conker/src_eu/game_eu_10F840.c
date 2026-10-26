@@ -7,11 +7,11 @@ s32 beam_effect_spawn(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32
 
 float sqrtf(float);
 f32 math_atan2f(f32, f32);
-extern u8 *D_8008CDEC[];
+extern u8 *g_sprite_tex_descs[]; /* was D_8008CDEC */
 
 // beam_effect_spawn: allocates a line / beam effect object (node_alloc(0xB, 0, 0x100, 1, 0xFF, 1)) from
 // (x0, y0, z0) to (x1, y1, z1): start +0x94, end +0xB0, yaw +0xA4 / pitch +0xA0 of the direction (math_atan2f),
-// widths +0xA8 / +0xAC / +0xBC / +0xC0, texture D_8008CDEC[tex] (+0xD8) with two 4-vertex quads at +0x10 whose
+// widths +0xA8 / +0xAC / +0xBC / +0xC0, texture g_sprite_tex_descs[tex] (+0xD8) with two 4-vertex quads at +0x10 whose
 // s / t span the texture size. mode (+0xD0) 0 = plain (+0xD6 = 1, +0xE0 = -1); otherwise it follows `target`
 // (+0xDC, freed again with node_delete when NULL) with the extra parameters +0xD2 .. +0xF8. Returns the asm's
 // leftover v0: 0 when the allocation fails, else obj + 0x80 (the quad loop pointer; no caller uses it); 0 on the
@@ -78,7 +78,7 @@ s32 beam_effect_spawn(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, 
     /* vertices 1..8 (16 bytes each from obj): flag 0, s / t = 0x2000 or 0x2000 + (size - 1) * 32 */
     vt = (s16 *) obj;
     for (i = 0; i < 2; i++) {
-        img = D_8008CDEC[*(s16 *) (obj + 0xD8)];
+        img = g_sprite_tex_descs[*(s16 *) (obj + 0xD8)];
         s = (*(u16 *) (img + 6) - 1) * 32 + 0x2000;
         t = (*(u16 *) (img + 8) - 1) * 32 + 0x2000;
         vt += 32; /* 4 vertices */
@@ -102,7 +102,7 @@ s32 beam_effect_spawn(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, 
 float sqrtf(float);
 f32 math_atan2f(f32, f32);
 extern s32 D_800DC26C;
-extern u8 D_800D9D80[];
+extern u8 g_aim_records[]; /* was D_800D9D80 */
 int game_gu_random(void);
 f32 vec3f_dot(u8 *, u8 *);
 s32 floor_flags_surface_type(s32);
@@ -111,11 +111,11 @@ s32 object_ray_hit_nearest(struct127 *, f32, f32, f32, f32, f32, f32, s32, s32);
 s32 impact_effect_spawn(f32, f32, f32, s32, s32, s32, s32);
 
 // beam_effect_update: P310: update handler of the beam objects of beam_effect_spawn (object type 0xB descriptor at
-// ROM 0x230D00, same layout as zap_bolt_update's; void (u8 *obj)). The life +0x90 counts down by D_800BE9E4 frames;
+// ROM 0x230D00, same layout as zap_bolt_update's; void (u8 *obj)). The life +0x90 counts down by g_frame_ticks frames;
 // the beam is freed when it runs out or its followed object +0xDC changed (+0xE0 vs the object's +0x84 serial).
 // Mode beams (+0xD0 != 0) re-attach both ends to the followed character's matrix +0xE2 (offsets +0xE4 / +0xF0,
 // every 4th frame by the +0xE3 delay) and, each time the +0xD6 timer passes -(+0xD4), restart it (+0xD2) and pick a
-// new target end: the character's aim record D_800D9D80[+0x127] when it still matches (with a chance +3 of a spark
+// new target end: the character's aim record g_aim_records[+0x127] when it still matches (with a chance +3 of a spark
 // beam + sound when D_800BE616 is off), else a point 2000 ahead along its facing; with no aim record (0xFF) every
 // 3rd frame (+0xFD) a ray (collision_ray_cast) 75 * width ahead decides the end. Then (+0xD6 > 0) the head +0x94 moves
 // toward the end along the yaw / pitch +0xA4 / +0xA0 at speed +0xA8 (clamped to the distance when +0xAC != 0);
@@ -157,7 +157,7 @@ void beam_effect_update(u8 *obj) {
 
     tex = 0x23;
     dist0 = 0.0f;
-    *(s16 *) (obj + 0x90) -= D_800BE9E4;
+    *(s16 *) (obj + 0x90) -= g_frame_ticks;
     target = *(u8 **) (obj + 0xDC);
     if (*(s16 *) (obj + 0x90) < 0 || (target != NULL && *(s16 *) (obj + 0xE0) != -1 &&
                                       *(s16 *) (obj + 0xE0) != *(u16 *) (target + 0x84))) {
@@ -179,7 +179,7 @@ void beam_effect_update(u8 *obj) {
                 obj[0xE3] = 3;
             }
         }
-        *(s16 *) (obj + 0xD6) -= D_800BE9E4;
+        *(s16 *) (obj + 0xD6) -= g_frame_ticks;
         if (*(s16 *) (obj + 0xD6) < -*(s16 *) (obj + 0xD4)) {
             target = *(u8 **) (obj + 0xDC);
             *(s16 *) (obj + 0xD6) = *(s16 *) (obj + 0xD2);
@@ -208,7 +208,7 @@ void beam_effect_update(u8 *obj) {
             hitobj = 0;
             if (aim != 0xFF) {
                 target = *(u8 **) (obj + 0xDC);
-                aimrec = D_800D9D80 + aim * 0x1C;
+                aimrec = g_aim_records + aim * 0x1C;
                 heading = *(u16 *) (target + 0x76) - *(s16 *) (*(u8 **) (target + 0x31C) + 0x12);
                 if (heading == *(s16 *) aimrec && *(s8 *) (target + 0x1D1) == *(s8 *) (aimrec + 2)) {
                     *(f32 *) (obj + 0xB0) = *(f32 *) (aimrec + 4);
@@ -307,7 +307,7 @@ void beam_effect_update(u8 *obj) {
     *(f32 *) (obj + 0xC4) = vx;
     *(f32 *) (obj + 0xCC) = vz;
     *(f32 *) (obj + 0xC8) = vy;
-    step = *(f32 *) (obj + 0xA8) * (f32) D_800BE9E4;
+    step = *(f32 *) (obj + 0xA8) * (f32) g_frame_ticks;
     if (dist0 < step && *(f32 *) (obj + 0xAC) != 0.0f) {
         vx *= dist0;
         *(f32 *) (obj + 0xC0) = dist0;
@@ -348,15 +348,15 @@ void beam_effect_update(u8 *obj) {
     }
 }
 
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 Gfx *sprite_load_texture(Gfx *gfx, u8 *header, s32 tmem, void *spr, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
 Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 
 // beam_effect_draw: draw handler of the beam objects of beam_effect_spawn (Gfx *(Gfx *, u8 *obj, s16 viewer)). With a
 // texture (+0xD6 > 0) the beam from +0x94 along the direction +0xC4 times the length +0xC0 is drawn as one quad
-// facing character `viewer` (D_800DBFF0 entry, position +0x2F8): at each end the offset cross(end - eye, dir) scaled
+// facing character `viewer` (g_player_views entry, position +0x2F8): at each end the offset cross(end - eye, dir) scaled
 // to the half width +0xBC gives the two corners end +- offset (far end first). The corners go to this frame's 4
-// vertices (obj + 0x10 + D_800BE9C0 * 0x40, s16 x / y / z), then texture D_8008CDEC[+0xD8] is loaded
+// vertices (obj + 0x10 + g_dl_buf_index * 0x40, s16 x / y / z), then texture g_sprite_tex_descs[+0xD8] is loaded
 // (sprite_load_texture; its sprite-parameter pointer is an unset local, as in the asm), the render mode is set
 // (gfx_other_mode_cached) and gSPVertex + 2 triangles are emitted; +0xDB = 1. Returns gfx unchanged without setting +0xDB
 // when an end lies on the eye line (zero offset). The asm also computes the squared eye distances of both ends and
@@ -390,7 +390,7 @@ Gfx *beam_effect_draw(Gfx *gfx, u8 *obj, s16 viewer) {
     ends[1][0] = *(f32 *) (obj + 0x94);
     ends[1][1] = *(f32 *) (obj + 0x98);
     ends[1][2] = *(f32 *) (obj + 0x9C);
-    eye = (f32 *) ((u8 *) D_800DBFF0 + viewer * 0x9A0 + 0x2F8);
+    eye = (f32 *) ((u8 *) g_player_views + viewer * 0x9A0 + 0x2F8);
     for (i = 0; i < 2; i++) {
         p = ends[i];
         e[0] = p[0] - eye[0];
@@ -416,15 +416,15 @@ Gfx *beam_effect_draw(Gfx *gfx, u8 *obj, s16 viewer) {
     }
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
-            *(s16 *) (obj + D_800BE9C0 * 0x40 + i * 0x10 + 0x10 + j * 2) = (s32) verts[i][j];
+            *(s16 *) (obj + g_dl_buf_index * 0x40 + i * 0x10 + 0x10 + j * 2) = (s32) verts[i][j];
         }
     }
-    gfx = sprite_load_texture(gfx, D_8008CDEC[*(s16 *) (obj + 0xD8)], 0, spr, 0, 0, 0, 2, 3);
+    gfx = sprite_load_texture(gfx, g_sprite_tex_descs[*(s16 *) (obj + 0xD8)], 0, spr, 0, 0, 0, 2, 3);
     flag = 0;
-    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x82CA0, 0x504A50, &flag);
+    gfx = gfx_other_mode_cached(gfx, g_gfx_tlut_mode | 0x82CA0, 0x504A50, &flag);
     cmd = (u32 *) gfx;
     cmd[0] = 0x01004008; /* gSPVertex(this frame's 4 vertices) */
-    cmd[1] = (u32) (obj + D_800BE9C0 * 0x40 + 0x10);
+    cmd[1] = (u32) (obj + g_dl_buf_index * 0x40 + 0x10);
     cmd[2] = 0x05000206; /* triangle 0 1 3 */
     cmd[3] = 0;
     cmd[4] = 0x05000604; /* triangle 0 3 2 */

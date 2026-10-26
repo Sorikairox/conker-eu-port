@@ -9,16 +9,16 @@ s32 tracer_spawn(f32 *, f32 *, f32 *, f32 *, s32, s32, f32, f32, f32, f32, f32, 
                   s32, s32, s32, f32, s32, s32, s32, s32, s32);
 void attached_particle_spawn(u8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
 void sprite2d_spawn(void *, s32, s32, s32, s32, s32, s32);
-extern f32 D_800A21A4[2][3];   /* per side: muzzle offsets (non-0x23 characters) */
-extern f32 D_800A21BC[2][3];
-extern f32 D_800A21D4[2][3];
-extern f32 D_800A21EC[2][3];
-extern f32 D_800A2208[2][3];   /* the same for character 0x23 */
-extern f32 D_800A2220[2][3];
-extern f32 D_800A2238[2][3];
-extern f32 D_800A2250[2][3];
-extern u8 D_800A21A0[2];       /* per side: hand bone index ({ 5, 7 }) */
-extern u8 D_800A2204[2];       /* the same for character 0x23 ({ 3, 2 }) */
+extern f32 g_gun_shot_muzzle_pts[2][3];   /* per side: muzzle offsets (non-0x23 characters); was D_800A21A4 */
+extern f32 g_gun_shot_spark_end_pts[2][3]; /* was D_800A21BC */
+extern f32 g_gun_shot_aim_pts[2][3]; /* was D_800A21D4 */
+extern f32 g_gun_shot_third_pts[2][3]; /* was D_800A21EC */
+extern f32 g_gun_shot_muzzle_pts_c23[2][3];   /* the same for character 0x23; was D_800A2208 */
+extern f32 g_gun_shot_spark_end_pts_c23[2][3]; /* was D_800A2220 */
+extern f32 g_gun_shot_aim_pts_c23[2][3]; /* was D_800A2238 */
+extern f32 g_gun_shot_third_pts_c23[2][3]; /* was D_800A2250 */
+extern u8 g_gun_shot_hand_bones[2];       /* per side: hand bone index ({ 5, 7 }); was D_800A21A0 */
+extern u8 g_gun_shot_hand_bones_c23[2];       /* the same for character 0x23 ({ 3, 2 }); was D_800A2204 */
 static const f32 gunfire_tracer_k[1] = { 0.003968254f };   /* D_800A2268 */
 static const f32 gunfire_shell_v1m[1] = { 2.4350002f };    /* D_800A226C */
 static const f32 gunfire_shell_v1a[1] = { 3.5340002f };    /* D_800A2270 */
@@ -108,20 +108,20 @@ void gun_shot_effects(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxow
         return;
     }
     if (obj[4] == 0x23) {
-        tbl[0] = D_800A2208[side];
-        tbl[1] = aimed ? D_800A2238[side] : D_800A2220[side];
-        tbl[2] = D_800A2250[side];
-        bone = *(u8 **)(obj + 0x1D4) + D_800A2204[side] * 64;
+        tbl[0] = g_gun_shot_muzzle_pts_c23[side];
+        tbl[1] = aimed ? g_gun_shot_aim_pts_c23[side] : g_gun_shot_spark_end_pts_c23[side];
+        tbl[2] = g_gun_shot_third_pts_c23[side];
+        bone = *(u8 **)(obj + 0x1D4) + g_gun_shot_hand_bones_c23[side] * 64;
     } else {
         r1 = random_float();
         sgn = side ? -1 : 1;
         alt[0] = (f32)sgn * (13.0f - (1.0f + r1 * 6.0f));
-        alt[1] = D_800A21BC[side][1];
-        alt[2] = D_800A21BC[side][2];
-        tbl[0] = D_800A21A4[side];
-        tbl[1] = aimed ? D_800A21D4[side] : alt;
-        tbl[2] = D_800A21EC[side];
-        bone = *(u8 **)(obj + 0x1D4) + D_800A21A0[side] * 64;
+        alt[1] = g_gun_shot_spark_end_pts[side][1];
+        alt[2] = g_gun_shot_spark_end_pts[side][2];
+        tbl[0] = g_gun_shot_muzzle_pts[side];
+        tbl[1] = aimed ? g_gun_shot_aim_pts[side] : alt;
+        tbl[2] = g_gun_shot_third_pts[side];
+        bone = *(u8 **)(obj + 0x1D4) + g_gun_shot_hand_bones[side] * 64;
     }
     out[0] = pos;
     out[1] = aimed ? side0 : tip;
@@ -188,11 +188,11 @@ void gun_shot_effects(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxow
             r5 = random_int();
             r1 = random_float();
             if (obj[4] == 0x23) {
-                attached_particle_spawn(obj, D_800A2204[side], D_800A2208[side], D_800A2220[side], vel, r4 % 3 + 4,
+                attached_particle_spawn(obj, g_gun_shot_hand_bones_c23[side], g_gun_shot_muzzle_pts_c23[side], g_gun_shot_spark_end_pts_c23[side], vel, r4 % 3 + 4,
                               r5 % 101 + 0x9B, r1 * 1012.0f + gunfire_shell_life[0], pos, mask, 0, -1,
                               (u8)fxflag, fxowner);
             } else {
-                attached_particle_spawn(obj, D_800A21A0[side], D_800A21A4[side], D_800A21BC[side], vel, r4 % 3 + 4,
+                attached_particle_spawn(obj, g_gun_shot_hand_bones[side], g_gun_shot_muzzle_pts[side], g_gun_shot_spark_end_pts[side], vel, r4 % 3 + 4,
                               r5 % 101 + 0x9B, r1 * 1012.0f + gunfire_shell_life[0], pos, mask, 0, -1,
                               (u8)fxflag, fxowner);
             }
@@ -251,13 +251,13 @@ void tracer_draw_masked(u8 *arg0) {
     }
     surface_impact_effects((s32) arg0, 1.0f, 1.0f, 0.6f, 0.0f, 0xFFU, 0xFFU, (u8) var_v0);
 }
-extern f32 D_800A2280, D_800A2284, D_800A2288, D_800A228C, D_800A2290, D_800A2294, D_800A2298, D_800A229C, D_800A22A0;
+extern f32 g_gunfire_burst_k_2280, g_gunfire_burst_k_2284, g_gunfire_burst_k_2288, g_gunfire_burst_k_228c, g_gunfire_burst_k_2290, g_gunfire_burst_k_2294, g_gunfire_burst_k_2298, g_gunfire_burst_k_229c, g_gunfire_burst_k_22a0; /* was D_800A2280; was D_800A2284; was D_800A2288; was D_800A228C; was D_800A2290; was D_800A2294; was D_800A2298; was D_800A229C; was D_800A22A0 */
 u8 *cam_wobble_spawn(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
 
 // effect27_spawn_with_screen_effect: starts an effect record of kind 0x27 (300 frames, effect_node_create) whose 32-byte
 // data (rec + 0x28) holds `obj` and its id (+0x3B), the flag `a`, `other`, its id (0xFF without one) and its player
 // (+0x318 -> +0x23D, -1 without one) and the value `b`. When `other` has a player record, a kind-4 screen effect of
-// 300 frames for that player is started too (cam_wobble_spawn, scales 12 / 20 / 19 and the D_800A2280.. table); its record
+// 300 frames for that player is started too (cam_wobble_spawn, scales 12 / 20 / 19 and the g_gunfire_burst_k_2280.. table); its record
 // goes to data + 0x10. Called by the B-pad item action player_item_action and by objfx_fc438 (game_981E0).
 /* was func_150FC438 */
 void gunfire_burst_spawn(struct127 *obj, struct127 *other, u8 a, u8 b) {
@@ -317,15 +317,15 @@ void gunfire_burst_spawn(struct127 *obj, struct127 *other, u8 a, u8 b) {
     fx.f[0] = 12.0f;
     fx.f[1] = 20.0f;
     fx.f[2] = 19.0f;
-    fx.f[3] = D_800A2280;
-    fx.f[4] = D_800A2284;
-    fx.f[5] = D_800A2288;
-    fx.f[6] = D_800A228C;
-    fx.f[7] = D_800A2290;
-    fx.f[8] = D_800A2294;
-    fx.f[9] = D_800A2298;
-    fx.f[10] = D_800A229C;
-    fx.f[11] = D_800A22A0;
+    fx.f[3] = g_gunfire_burst_k_2280;
+    fx.f[4] = g_gunfire_burst_k_2284;
+    fx.f[5] = g_gunfire_burst_k_2288;
+    fx.f[6] = g_gunfire_burst_k_228c;
+    fx.f[7] = g_gunfire_burst_k_2290;
+    fx.f[8] = g_gunfire_burst_k_2294;
+    fx.f[9] = g_gunfire_burst_k_2298;
+    fx.f[10] = g_gunfire_burst_k_229c;
+    fx.f[11] = g_gunfire_burst_k_22a0;
     *(u8 **) (rec + 0x28 + 0x10) = cam_wobble_spawn((u8 *) &fx, 0, 0xFF, 1);
 }
 
@@ -355,7 +355,7 @@ void gunfire_burst_update(u8 *arg0) {
         (*(s16 *)((u8 *)arg0 + 0xE)) = -1;
         return;
     }
-    (*(f32 *)((u8 *)temp_s0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 8)) - D_800BE9A4);
+    (*(f32 *)((u8 *)temp_s0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 8)) - g_frame_step_f);
     if ((*(f32 *)((u8 *)temp_s0 + 8)) < 0.0f) {
         do {
             gun_shot_effects(temp_s1, (*(u8 *)((u8 *)temp_s0 + 0xC)), -(*(f32 *)((u8 *)temp_s0 + 8)), (*(u8 *)((u8 *)temp_s0 + 0xD)), (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
@@ -371,7 +371,7 @@ void gunfire_burst_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s0 + 8)) < 0.0f);
     }
     if ((*(s8 *)((u8 *)temp_s0 + 0x16)) != -1) {
-        (*(s16 *)((u8 *)temp_s0 + 0x14)) = (s16) ((*(s16 *)((u8 *)temp_s0 + 0x14)) - D_800BE9E4);
+        (*(s16 *)((u8 *)temp_s0 + 0x14)) = (s16) ((*(s16 *)((u8 *)temp_s0 + 0x14)) - g_frame_ticks);
         if ((*(s16 *)((u8 *)temp_s0 + 0x14)) < 0) {
             sp.u50 = 1;
             random_int();

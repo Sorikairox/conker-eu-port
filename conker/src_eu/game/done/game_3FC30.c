@@ -8,9 +8,9 @@
 void level_clear_dd410(void) {
     s32 i;
 
-    D_800DD418 = 0;
+    g_vtx_anim_light_count = 0;
     for (i = 0; i < 2; i++)
     {
-        D_800DD410[i] = 0;
+        g_vtx_anim_lights[i] = 0;
     }
 }

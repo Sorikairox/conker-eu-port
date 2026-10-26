@@ -104,7 +104,7 @@ void light_ctrl_update(struct225 *arg0) {
     u8 ret = 0;
 
     if ((arg0->unkE & 1) != 0) {
-        arg0->unk10 -= D_800BE9E4;
+        arg0->unk10 -= g_frame_ticks;
         if (arg0->unk10 < 0) {
             ret = 1;
         }
@@ -208,7 +208,7 @@ s32 light_beh_lightning(struct225 *arg0) {
     struct227 *temp_a1 = &arg0->unk18;
     if (arg0->unk28 != 0) {
         if (temp_a1->unkC < 0.0f) {
-            temp_a1->unk4 = (temp_a1->unk4 + (temp_a1->unk8 * D_800BE9A4));
+            temp_a1->unk4 = (temp_a1->unk4 + (temp_a1->unk8 * g_frame_step_f));
             if (temp_a1->unk0 < temp_a1->unk4) {
                 temp_a1->unk4 = temp_a1->unk0;
                 temp_a1->unk10 -= 1;
@@ -217,7 +217,7 @@ s32 light_beh_lightning(struct225 *arg0) {
                 }
             }
         } else {
-            temp_a1->unkC -= D_800BE9A4;
+            temp_a1->unkC -= g_frame_step_f;
         }
     } else if (random_float() < 0.0050000004f) {
         temp_a1->unk10 = (random_int() % 5U) + 1;
@@ -901,7 +901,7 @@ void ambient_pulse_update(u8 *volatile arg0) { // fakematch: volatile gives the 
     s = sinf(*(f32 *)(arg0 + 0x40));
     p = (f32 *)(arg0 + 0x28);
     light_set_level_colour((u8)(s * p[3] + p[0]), (u8)(s * p[4] + p[1]), (u8)(s * p[5] + p[2]), 0);
-    p[6] = p[7] * D_800BE9A4 + p[6];
+    p[6] = p[7] * g_frame_step_f + p[6];
     p[6] = wrap_angle_rad(p[6]);
 }
 // NON-MATCHING: not quite right here
@@ -921,7 +921,7 @@ void ambient_pulse_update(u8 *volatile arg0) { // fakematch: volatile gives the 
 //
 //
 //     light_set_level_colour(temp_a0, temp_a1, temp_a2, 0);
-//     temp_v0->unk18 += temp_v0->unk1C * D_800BE9A4;
+//     temp_v0->unk18 += temp_v0->unk1C * g_frame_step_f;
 //     temp_v0->unk18 = wrap_angle_rad(temp_v0->unk18);
 //
 //     return temp_v0;
@@ -966,7 +966,7 @@ s32 light_beh_colour_pulse(u8 *arg0) {
     (*(u8 **)(arg0 + 0x14))[5] = s * p[3] + p[0];
     (*(u8 **)(arg0 + 0x14))[6] = s * p[4] + p[1];
     (*(u8 **)(arg0 + 0x14))[7] = s * p[5] + p[2];
-    p[6] = p[7] * D_800BE9A4 + p[6];
+    p[6] = p[7] * g_frame_step_f + p[6];
     p[6] = wrap_angle_rad(p[6]);
     return 1;
 }
@@ -981,7 +981,7 @@ s32 light_beh_colour_pulse(u8 *arg0) {
 //     arg0->unk14->unk6 = temp_v1->unk4 + (temp_f0 * temp_v1->unk10);
 //     arg0->unk14->unk7 = temp_v1->unk8 + (temp_f0 * temp_v1->unk14);
 //
-//     temp_v1->unk18 += temp_v1->unk1C * D_800BE9A4;
+//     temp_v1->unk18 += temp_v1->unk1C * g_frame_step_f;
 //     temp_v1->unk18 = wrap_angle_rad(temp_v1->unk18);
 //     return 1;
 // }
@@ -1251,7 +1251,7 @@ s32 light_beh_envelope(u8 *obj) {
             g_light_env_phase_fns[id](obj, obj[0x3C]);
         }
     }
-    *(f32 *) (obj + 0x24) += D_800BE9A4;
+    *(f32 *) (obj + 0x24) += g_frame_step_f;
     while (*(f32 *) (obj + 0x34) < *(f32 *) (obj + 0x24)) {
         *(f32 *) (obj + 0x24) -= *(f32 *) (obj + 0x34);
     }
@@ -1325,8 +1325,8 @@ struct225 *light_spawn_burst_flash(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4
 // big one
 // lightning_flash_update: weather record handler (table entry at ROM 0x230744; returns 1 = keep). Drives the sky flash
 // of the area object +0x14 (skipped when its +0x9 is 1): its +0x2F gets the flash level +0x18, which decays by the
-// factor +0x1C once per tick (D_800BE9E4). While a burst is running (+0x2C flashes left) +0x38 counts down by
-// D_800BE9A4; at zero a new flash of level rand * +0x48 + +0x44 starts, the next one is due after rand * +0x40 + +0x3C,
+// factor +0x1C once per tick (g_frame_ticks). While a burst is running (+0x2C flashes left) +0x38 counts down by
+// g_frame_step_f; at zero a new flash of level rand * +0x48 + +0x44 starts, the next one is due after rand * +0x40 + +0x3C,
 // and a flash counter is used up (music_get_event_request is called with two NULL pointers; the asm also computes a thunder
 // delay from game_gu_random that EU's two-pointer music_get_event_request never reads). Between bursts +0x20 counts down; at zero
 // a burst of rand % (+0x34 + 1) + +0x30 flashes is queued and the next pause is rand * +0x28 + +0x24.
@@ -1344,11 +1344,11 @@ s32 light_beh_burst_flash(u8 *rec) {
         return 1;
     }
     obj[0x2F] = (u32) *level;
-    for (n = D_800BE9E4; n != 0; n--) {
+    for (n = g_frame_ticks; n != 0; n--) {
         *level -= *level * *(f32 *) (rec + 0x1C);
     }
     if (*(s32 *) (rec + 0x2C) > 0) {
-        *(f32 *) (rec + 0x38) -= D_800BE9A4;
+        *(f32 *) (rec + 0x38) -= g_frame_step_f;
         if (*(f32 *) (rec + 0x38) < 0.0f) {
             *level = random_float() * *(f32 *) (rec + 0x48) + *(f32 *) (rec + 0x44);
             *(f32 *) (rec + 0x38) = random_float() * *(f32 *) (rec + 0x40) + *(f32 *) (rec + 0x3C);
@@ -1357,7 +1357,7 @@ s32 light_beh_burst_flash(u8 *rec) {
             *(s32 *) (rec + 0x2C) -= 1;
         }
     } else {
-        *(f32 *) (rec + 0x20) -= D_800BE9A4;
+        *(f32 *) (rec + 0x20) -= g_frame_step_f;
         if (*(f32 *) (rec + 0x20) < 0.0f) {
             *(s32 *) (rec + 0x2C) = (u32) random_int() % (u32) (*(s32 *) (rec + 0x34) + 1) + *(s32 *) (rec + 0x30);
             *(f32 *) (rec + 0x38) = 0.0f;
@@ -1425,7 +1425,7 @@ void light_track_handle_message(u8 *arg0, s32 arg1, u8 arg2)
 }
 // NON-MATCHING: similar issue to light_beh_track_ptrs
 // void light_track_handle_message(struct225 *arg0, s32 arg1, u8 arg2) {
-//     s32 (*func)(s32) = D_8008B370[arg0->unk25];
+//     s32 (*func)(s32) = g_move_watch_fns[arg0->unk25];
 //     if (func != NULL) {
 //         func(arg2);
 //     }
@@ -1471,7 +1471,7 @@ s32 light_beh_pulse_once(struct225 *arg0) {
     tmp = sinf(temp_v0->unk8);
     arg0->unk14->unk2F = temp_v0->unk0 + (temp_v0->unk4 * tmp);
 
-    temp_v0->unk8 += temp_v0->unkC * D_800BE9A4;
+    temp_v0->unk8 += temp_v0->unkC * g_frame_step_f;
     temp_v0->unk8 = wrap_angle_rad(temp_v0->unk8);
 
     if (temp_v0->unk8 > 3.1415927f) {
@@ -1613,13 +1613,13 @@ s32 light_beh_joint_pulse(struct225 *arg0) {
 void light_sine_intensity_step(struct227 *arg0, struct225 *arg1) {
     f32 tmp = sinf(arg0->unk8);
     arg1->unk14->unk2F = arg0->unk0 + (arg0->unk4 * tmp);
-    arg0->unk8 = arg0->unk8 + (arg0->unkC * D_800BE9A4);
+    arg0->unk8 = arg0->unk8 + (arg0->unkC * g_frame_step_f);
     arg0->unk8 = wrap_angle_rad(arg0->unk8);
 }
 
 /* was func_15163DEC */
 void light_flicker_intensity_step(struct225 *arg0, struct228 *arg1) {
-    arg1->unk10 = arg1->unk10 - D_800BE9A4;
+    arg1->unk10 = arg1->unk10 - g_frame_step_f;
     if (arg1->unk10 < 0.0f) {
         arg1->unk10 = random_float() * arg1->unk14;
         if ((random_int() & 3) != 0) {
@@ -1940,7 +1940,7 @@ void light_group_set_disabled(s32, s32);
 
 /* was func_151645C4 */
 void level_set_lights_mode(u8 arg0) {
-    D_800DCDD0 = arg0;
+    g_level_lights_mode = arg0;
     if (arg0) {
         switch (g_level_id) {
         case 0xB:
@@ -1950,12 +1950,12 @@ void level_set_lights_mode(u8 arg0) {
             light_group_set_disabled(0xA, 1);
             overlay_mode_set(4);
         case 0x39:
-            ((u8 *)&D_800DCD20)[0] = g_level_lights_on_colour[0];
-            ((u8 *)&D_800DCD20)[1] = g_level_lights_on_colour[1];
-            ((u8 *)&D_800DCD20)[2] = g_level_lights_on_colour[2];
-            D_800B0DF0->unk5 = g_level_lights_on_tint[0];
-            D_800B0DF0->unk6 = g_level_lights_on_tint[1];
-            D_800B0DF0->unk7 = g_level_lights_on_tint[2];
+            ((u8 *)&g_level_light_colour)[0] = g_level_lights_on_colour[0];
+            ((u8 *)&g_level_light_colour)[1] = g_level_lights_on_colour[1];
+            ((u8 *)&g_level_light_colour)[2] = g_level_lights_on_colour[2];
+            g_level_header->unk5 = g_level_lights_on_tint[0];
+            g_level_header->unk6 = g_level_lights_on_tint[1];
+            g_level_header->unk7 = g_level_lights_on_tint[2];
             break;
         case 0x7:
         case 0xC:
@@ -1969,12 +1969,12 @@ void level_set_lights_mode(u8 arg0) {
         case 0xC:
         case 0x39:
             overlay_mode_set(6);
-            ((u8 *)&D_800DCD20)[0] = g_level_lights_off_colour[0];
-            ((u8 *)&D_800DCD20)[1] = g_level_lights_off_colour[1];
-            ((u8 *)&D_800DCD20)[2] = g_level_lights_off_colour[2];
-            D_800B0DF0->unk5 = 0xFF;
-            D_800B0DF0->unk6 = 0xFF;
-            D_800B0DF0->unk7 = 0xFF;
+            ((u8 *)&g_level_light_colour)[0] = g_level_lights_off_colour[0];
+            ((u8 *)&g_level_light_colour)[1] = g_level_lights_off_colour[1];
+            ((u8 *)&g_level_light_colour)[2] = g_level_lights_off_colour[2];
+            g_level_header->unk5 = 0xFF;
+            g_level_header->unk6 = 0xFF;
+            g_level_header->unk7 = 0xFF;
             break;
         case 0xB:
             overlay_mode_set(6);

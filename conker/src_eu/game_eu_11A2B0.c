@@ -3,8 +3,8 @@
 #include "variables.h"
 
 
-extern f32 D_800A1940;
-extern f32 D_800A1944;
+extern f32 g_area_emitter_rate_base; /* was D_800A1940 */
+extern f32 g_area_emitter_rate_range; /* was D_800A1944 */
 u8 player_mask_hides_all(s32);
 s32 spawn_region_random_point(s32, f32 *, f32 *, f32 *, f32 *);
 
@@ -24,7 +24,7 @@ void fx_area_emitter_update(u8 *arg0) {
         return;
     }
     v = (f32 *)(arg0 + 0x28);
-    v[3] += (D_800A1940 + random_float() * D_800A1944) * v[1] * D_800BE9A4;
+    v[3] += (g_area_emitter_rate_base + random_float() * g_area_emitter_rate_range) * v[1] * g_frame_step_f;
     if (v[3] > 1.0f) {
         tmp.w = 0.0f;
         do {
@@ -98,7 +98,7 @@ void fx_point_particle_emitter_update(u8 *arg0) {
     u8 *temp_s1;
 
     temp_s1 = arg0 + 0x28;
-    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((1352.0f + (random_float() * 1698.0f)) * 0.0001f * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((1352.0f + (random_float() * 1698.0f)) * 0.0001f * g_frame_step_f));
     if ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f) {
         sp.uB9 = 0x6C;
         sp.uA4 = 0x5103;
@@ -229,15 +229,15 @@ void obj_hit_green_tint(s32 arg0, u8 arg1, s32 arg2) {
 
 s32 event_dispatch(s32, s32, ...);
 void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
-extern f32 D_80088E70; /* current tint r, g, b */
-extern f32 D_80088E74;
-extern f32 D_80088E78;
-extern f32 D_80088E7C; /* target tint r, g, b */
-extern f32 D_80088E80;
-extern f32 D_80088E84;
-extern f32 D_80088E88; /* approach speeds */
-extern f32 D_80088E8C;
-extern f32 D_80088E90;
+extern f32 g_map_tint_r; /* current tint r, g, b; was D_80088E70 */
+extern f32 g_map_tint_g; /* was D_80088E74 */
+extern f32 g_map_tint_b; /* was D_80088E78 */
+extern f32 g_map_tint_target_r; /* target tint r, g, b; was D_80088E7C */
+extern f32 g_map_tint_target_g; /* was D_80088E80 */
+extern f32 g_map_tint_target_b; /* was D_80088E84 */
+extern f32 g_map_tint_vel_r; /* approach speeds; was D_80088E88 */
+extern f32 g_map_tint_vel_g; /* was D_80088E8C */
+extern f32 g_map_tint_vel_b; /* was D_80088E90 */
 
 /* IDO's f32 -> u32 conversion: <= -1, >= 2^32 and NaN give 0xFFFFFFFF (undefined in C, wasm traps) */
 #define TINT_F2U(f) ((!((f) > -1.0f) || (f) >= 4294967296.0f) ? 0xFFFFFFFFU : (u32) (f))
@@ -253,9 +253,9 @@ void camera_update_map_tint(u8 *obj) {
     s32 lo;
 
     if (event_dispatch(1, 0x403B, 6, 0x2000) == 0) {
-        D_80088E7C = 255.0f;
-        D_80088E80 = 255.0f;
-        D_80088E84 = 255.0f;
+        g_map_tint_target_r = 255.0f;
+        g_map_tint_target_g = 255.0f;
+        g_map_tint_target_b = 255.0f;
         event_dispatch_alt(0, 0x4031, 0);
         event_dispatch_alt(0, 0x4032, 0);
         event_dispatch_alt(0, 0x4033, 0);
@@ -267,21 +267,21 @@ void camera_update_map_tint(u8 *obj) {
         event_dispatch_alt(0, 0x4033, 1);
         *(u32 *) (obj + 0x84) |= 0x80021200;
         if (event_dispatch(1, 0x4038, 6, 0x2000) != 0) {
-            D_80088E7C = 128.0f;
-            D_80088E80 = 255.0f;
-            D_80088E84 = 255.0f;
+            g_map_tint_target_r = 128.0f;
+            g_map_tint_target_g = 255.0f;
+            g_map_tint_target_b = 255.0f;
         } else if (event_dispatch(1, 0x4039, 6, 0x2000) != 0) {
-            D_80088E7C = 255.0f;
-            D_80088E80 = 128.0f;
-            D_80088E84 = 255.0f;
+            g_map_tint_target_r = 255.0f;
+            g_map_tint_target_g = 128.0f;
+            g_map_tint_target_b = 255.0f;
         } else if (event_dispatch(1, 0x403A, 6, 0x2000) != 0) {
-            D_80088E7C = 255.0f;
-            D_80088E80 = 255.0f;
-            D_80088E84 = 128.0f;
+            g_map_tint_target_r = 255.0f;
+            g_map_tint_target_g = 255.0f;
+            g_map_tint_target_b = 128.0f;
         } else {
-            D_80088E7C = 255.0f;
-            D_80088E80 = 255.0f;
-            D_80088E84 = 255.0f;
+            g_map_tint_target_r = 255.0f;
+            g_map_tint_target_g = 255.0f;
+            g_map_tint_target_b = 255.0f;
         }
         block = event_dispatch(0, 0x2007, 0xB7) | 0x2000;
         if (event_dispatch(1, 0x4010, 6, 0x2000) == 0) {
@@ -310,10 +310,10 @@ void camera_update_map_tint(u8 *obj) {
         event_dispatch_alt(2, 0x9000, 8, hi, lo);
         *(f32 *) (obj + 0x190) = 220.0f;
     }
-    math_spring_approach(&D_80088E70, D_80088E7C, &D_80088E88, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
-    math_spring_approach(&D_80088E74, D_80088E80, &D_80088E8C, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
-    math_spring_approach(&D_80088E78, D_80088E84, &D_80088E90, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
-    event_dispatch_alt(1, 0x30F3, 0x12, (u8) TINT_F2U(D_80088E70));
-    event_dispatch_alt(1, 0x30F4, 0x12, (u8) TINT_F2U(D_80088E74));
-    event_dispatch_alt(1, 0x30F5, 0x12, (u8) TINT_F2U(D_80088E78));
+    math_spring_approach(&g_map_tint_r, g_map_tint_target_r, &g_map_tint_vel_r, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    math_spring_approach(&g_map_tint_g, g_map_tint_target_g, &g_map_tint_vel_g, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    math_spring_approach(&g_map_tint_b, g_map_tint_target_b, &g_map_tint_vel_b, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    event_dispatch_alt(1, 0x30F3, 0x12, (u8) TINT_F2U(g_map_tint_r));
+    event_dispatch_alt(1, 0x30F4, 0x12, (u8) TINT_F2U(g_map_tint_g));
+    event_dispatch_alt(1, 0x30F5, 0x12, (u8) TINT_F2U(g_map_tint_b));
 }

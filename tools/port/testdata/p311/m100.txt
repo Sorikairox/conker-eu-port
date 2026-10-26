@@ -1,5 +1,5 @@
 s/notKind11 = (e->kind == 0x11) ? 0 : 1;/notKind11 = (e->kind == 0x12) ? 0 : 1;/ % kind11
-s/n = e->countdown - D_800BE9E4;/n = e->countdown - D_800BE9E4 - 1;/ % idle base
+s/n = e->countdown - g_frame_ticks;/n = e->countdown - g_frame_ticks - 1;/ % idle base
 s/n += e->period;/n += e->period + 1;/ % multi
 s/^            n = 0;/            n = 1;/ % base
 s/for (i = 0; i < e->count; i++)/for (i = 1; i < e->count; i++)/ % multi
@@ -20,10 +20,10 @@ s#y = e->posY;#y = e->posZ;# % base
 s#x = e->posX;#x = e->posY;# % base
 s#z = e->posZ;#z = e->posX;# % base
 s#if (\*(u8 \*\*) (obj + 0x1D4) == NULL) {#if (*(u8 **) (obj + 0x1D8) == NULL) {# % objnull obj
-s#bz = D_800A7210\[e->posX\]\[5\];#bz = D_800A7210[e->posX][4];# % obj
-s#ay = D_800A7210\[e->posX\]\[1\];#ay = D_800A7210[e->posX][2];# % obj
-s#if (D_800A7210\[e->posX\]\[6\] != 0) {#if (D_800A7210[e->posX][5] != 0) {# % objmask obj
-s#bz += (f32) (u32) (random_int() & D_800A7210\[e->posX\]\[6\]);#bz += (f32) (u32) (random_int() \& 0x7F);# % objmask
+s#bz = g_particle_emitter_points\[e->posX\]\[5\];#bz = g_particle_emitter_points[e->posX][4];# % obj
+s#ay = g_particle_emitter_points\[e->posX\]\[1\];#ay = g_particle_emitter_points[e->posX][2];# % obj
+s#if (g_particle_emitter_points\[e->posX\]\[6\] != 0) {#if (g_particle_emitter_points[e->posX][5] != 0) {# % objmask obj
+s#bz += (f32) (u32) (random_int() & g_particle_emitter_points\[e->posX\]\[6\]);#bz += (f32) (u32) (random_int() \& 0x7F);# % objmask
 s#e->mtx \* 64), ax#e->mtx * 16), ax# % obj
 s#e->mtx \* 64), bx#e->mtx * 64 + 4), bx# % obj
 s#vx = (bx - ax) \* 8.0f;#vx = (bx - ax) * 4.0f;# % obj

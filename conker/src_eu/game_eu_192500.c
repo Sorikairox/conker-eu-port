@@ -9,7 +9,7 @@ u8 *cam_wobble_spawn(u8 *arg0, s32 arg1, u8 arg2, s32 arg3) {
     struct127 *obj;
     struct108 *e;
 
-    e = &D_800DBFF0[arg0[6]];
+    e = &g_player_views[arg0[6]];
     obj = e->unk3D0;
     if (obj != NULL && obj->unk31C != NULL && obj->unk31C->unk198 != 0) {
         return NULL;
@@ -39,16 +39,16 @@ void cam_wobble_stop_at_half_cycle(u8 *arg0) {
     arg0[0x10] |= 2;
 }
 
-extern s32 (*D_8008B730[])(u8 *);
-extern f32 (*D_8008B734[])(u8 *);
-extern f32 D_800A6F00; // 6 consecutive limits (all pi)
+extern s32 (*g_camera_wobble_end_fns[])(u8 *); /* was D_8008B730 */
+extern f32 (*g_camera_wobble_scale_fns[])(u8 *); /* was D_8008B734 */
+extern f32 g_camera_wobble_phase_limits; /* was D_800A6F00 */ // 6 consecutive limits (all pi)
 
 // object_wobble_update: per-frame update of a 6-channel wobble / fade record (g_node_type_delete_fns handler). Optional life
-// timer (+0x10 & 1: +0x14 -= frames) and end check (+0x11: D_8008B730 callback, 0 = done) end it via cam_wobble_stop_at_half_cycle.
-// The amplitude scale is 1 or the +0x12 callback of D_8008B734 (+0x10 & 4). Each channel i with a speed (+0x30 + 4i)
+// timer (+0x10 & 1: +0x14 -= frames) and end check (+0x11: g_camera_wobble_end_fns callback, 0 = done) end it via cam_wobble_stop_at_half_cycle.
+// The amplitude scale is 1 or the +0x12 callback of g_camera_wobble_scale_fns (+0x10 & 4). Each channel i with a speed (+0x30 + 4i)
 // advances its phase (+0x48 + 4i, wrapped by wrap_angle_rad), records the half-cycle in +0x60 + i (phase < pi), stops
 // itself at a half-cycle change when +0x10 & 2, and adds sin(phase) * amplitude (+0x18 + 4i) * scale to float i of
-// target record +0x16 of D_800DD210 (0x18 bytes each). When every speed is 0 the record is freed (node_destroy).
+// target record +0x16 of g_camera_view_offsets (0x18 bytes each). When every speed is 0 the record is freed (node_destroy).
 /* was func_15164E0C */
 void cam_wobble_update(u8 *arg0) {
     u8 prev[6];
@@ -59,13 +59,13 @@ void cam_wobble_update(u8 *arg0) {
     s32 i;
 
     if (arg0[0x10] & 1) {
-        *(s16 *) (arg0 + 0x14) -= D_800BE9E4;
+        *(s16 *) (arg0 + 0x14) -= g_frame_ticks;
         if (*(s16 *) (arg0 + 0x14) < 0) {
             done = 1;
         }
     }
     if (!done && (s8) arg0[0x11] != -1) {
-        if (D_8008B730[(s8) arg0[0x11]](arg0) == 0) {
+        if (g_camera_wobble_end_fns[(s8) arg0[0x11]](arg0) == 0) {
             done = 1;
         }
     }
@@ -77,18 +77,18 @@ void cam_wobble_update(u8 *arg0) {
     }
     scale = 1.0f;
     if ((arg0[0x10] & 4) && (s8) arg0[0x12] != -1) {
-        scale = D_8008B734[(s8) arg0[0x12]](arg0);
+        scale = g_camera_wobble_scale_fns[(s8) arg0[0x12]](arg0);
     }
     for (i = 0; i < 6; i++) {
         if (*(f32 *) (arg0 + 0x30 + i * 4) != 0.0f) {
-            phase = wrap_angle_rad(*(f32 *) (arg0 + 0x48 + i * 4) + *(f32 *) (arg0 + 0x30 + i * 4) * D_800BE9A4);
+            phase = wrap_angle_rad(*(f32 *) (arg0 + 0x48 + i * 4) + *(f32 *) (arg0 + 0x30 + i * 4) * g_frame_step_f);
             *(f32 *) (arg0 + 0x48 + i * 4) = phase;
-            arg0[0x60 + i] = (phase < (&D_800A6F00)[i]);
+            arg0[0x60 + i] = (phase < (&g_camera_wobble_phase_limits)[i]);
             if ((arg0[0x10] & 2) && prev[i] != arg0[0x60 + i]) {
                 *(f32 *) (arg0 + 0x30 + i * 4) = 0.0f;
                 *(f32 *) (arg0 + 0x48 + i * 4) = 0.0f;
             }
-            dst = (f32 *) (D_800DD210 + arg0[0x16] * 0x18) + i;
+            dst = (f32 *) (g_camera_view_offsets + arg0[0x16] * 0x18) + i;
             *dst += sinf(*(f32 *) (arg0 + 0x48 + i * 4)) * *(f32 *) (arg0 + 0x18 + i * 4) * scale;
         }
     }
@@ -100,7 +100,7 @@ void cam_wobble_update(u8 *arg0) {
 
 /* was func_15165454 */
 void cam_wobble_clear_offsets(void) {
-    bzero(D_800DD210, 0x60);
+    bzero(g_camera_view_offsets, 0x60);
 }
 
 /* P177 */
@@ -409,7 +409,7 @@ s32 cam_wobble_beh_envelope(u8 *arg0) {
 
     var_v1 = 1;
     temp_v0 = arg0 + 0x68;
-    (*(f32 *)((u8 *)arg0 + 0x104)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x104)) + D_800BE9A4);
+    (*(f32 *)((u8 *)arg0 + 0x104)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x104)) + g_frame_step_f);
     if ((*(f32 *)((u8 *)arg0 + 0x104)) < (*(f32 *)((u8 *)arg0 + 0xF8))) {
         temp_v0_2 = arg0 + 0x68;
         (*(f32 *)((u8 *)arg0 + 0x18)) = (f32) ((*(f32 *)((u8 *)temp_v0_2 + 0)) * (*(f32 *)((u8 *)temp_v0_2 + 0x9C)));
@@ -462,7 +462,7 @@ s32 cam_wobble_beh_envelope(u8 *arg0) {
 }
 f32 cam_wobble_fade_by_distance(void *arg0, void *arg1, s32 arg2, s32 arg3, f32 arg4);
 
-/* P162: entry 1 of D_8008B734; cam_wobble_update (asm) stores the entry's f0 result, so this returns cam_wobble_fade_by_distance's
+/* P162: entry 1 of g_camera_wobble_scale_fns; cam_wobble_update (asm) stores the entry's f0 result, so this returns cam_wobble_fade_by_distance's
    f32 instead of void. */
 // object_distance_fade: fade factor of the object at obj + 0x108 (near / range / scale at +0x114 / +0x118 / +0x11C)
 /* was func_151660F0 */

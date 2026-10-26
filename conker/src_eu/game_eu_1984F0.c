@@ -18,15 +18,15 @@ s32 text_split_lines(u8 *arg0) {
 }
 
 typedef struct { u8 *str; s32 pad; } StrEnt_1516CDE8;
-extern StrEnt_1516CDE8 *D_800DD684;
-extern StrEnt_1516CDE8 *D_800DD688;
+extern StrEnt_1516CDE8 *g_text_str_table; /* was D_800DD684 */
+extern StrEnt_1516CDE8 *g_text_str_table_ext; /* was D_800DD688 */
 
 /* P155 */
 u8 *text_box_get_line(s32 *arg0, s32 arg1, s16 arg2);
 void text_measure_string(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3);
-extern f32 D_800A70B0; /* text box width scale */
-extern f32 D_800A70B4; /* text box height scale */
-extern u8 D_800CC8D3[]; /* per-player records, 0x32C bytes each */
+extern f32 g_text_box_w_scale; /* text box width scale; was D_800A70B0 */
+extern f32 g_text_box_h_scale; /* text box height scale; was D_800A70B4 */
+extern u8 g_objects_text_box_open[]; /* per-player records, 0x32C bytes each; was D_800CC8D3 */
 typedef struct {
     s32 flags;  /* low 4 bits: box style; 2: large font; 0x7000 cleared on open */
     s32 str;    /* string table index, or the text itself for a caller-owned descriptor */
@@ -39,10 +39,10 @@ typedef struct {
     void (*callback)(s32, s32, s32); /* +0x2C */
 } TextAD20;
 // text_box_open: opens a text box (node_alloc kind 0x51, 0x74 bytes) for descriptor `text`, or, without it, for
-// string id `id` (< 0x100: table D_800DD684, else D_800DD688[id - 0x100]); +0xD = source 0 / 1 / 2 (2 = caller
+// string id `id` (< 0x100: table g_text_str_table, else g_text_str_table_ext[id - 0x100]); +0xD = source 0 / 1 / 2 (2 = caller
 // descriptor, whose lines are then counted). Stores player / arg2 / callback in the descriptor, measures every line
 // (text_measure_string) for the box size +0x38 / +0x3C (plus half / one line height of 18, 25 for the large font, scaled by
-// D_800A70B0 / D_800A70B4), points +0x24 at the first line, clears the descriptor's 0x7000 bits and flags the
+// g_text_box_w_scale / g_text_box_h_scale), points +0x24 at the first line, clears the descriptor's 0x7000 bits and flags the
 // player's record (+0xD3 of the 0x32C-byte entry). Returns the box record or NULL.
 /* was func_1516AD20 */
 s32 text_box_open(s32 id, s32 player, s32 arg2, void (*callback)(s32, s32, s32), s32 *text, s32 arg5) {
@@ -61,9 +61,9 @@ s32 text_box_open(s32 id, s32 player, s32 arg2, void (*callback)(s32, s32, s32),
     t = (TextAD20 *)text;
     if (text == NULL) {
         if ((u32)id >= 0x100) {
-            t = (TextAD20 *)D_800DD688[id - 0x100].str;
+            t = (TextAD20 *)g_text_str_table_ext[id - 0x100].str;
         } else {
-            t = (TextAD20 *)D_800DD684[id].str;
+            t = (TextAD20 *)g_text_str_table[id].str;
         }
     }
     if (text != NULL) {
@@ -105,12 +105,12 @@ s32 text_box_open(s32 id, s32 player, s32 arg2, void (*callback)(s32, s32, s32),
         }
     }
     line = (t->flags & 2) ? 25.0f : 18.0f;
-    *(f32 *)(box + 0x38) = (*(f32 *)(box + 0x38) + line * 0.5f) * D_800A70B0;
-    *(f32 *)(box + 0x3C) = (*(f32 *)(box + 0x3C) + line) * D_800A70B4;
+    *(f32 *)(box + 0x38) = (*(f32 *)(box + 0x38) + line * 0.5f) * g_text_box_w_scale;
+    *(f32 *)(box + 0x3C) = (*(f32 *)(box + 0x3C) + line) * g_text_box_h_scale;
     *(u8 **)(box + 0x24) = text_box_get_line((s32 *)t, 0, box[0xD]);
     box[0x20] = 0;
     t->flags &= ~0x7000;
-    D_800CC8D3[t->player * 0x32C] = 1;
+    g_objects_text_box_open[t->player * 0x32C] = 1;
     box[0xE] = 0;
     return (s32)box;
 }
@@ -118,7 +118,7 @@ s32 text_box_open(s32 id, s32 player, s32 arg2, void (*callback)(s32, s32, s32),
 s32 mp3_stream_get_state(void);
 void text_box_place(u8 *box);
 extern u16 D_800BEB30[]; /* buttons pressed this frame, per player (0x8000 A, 0x4000 B) */
-extern f32 D_800A7138;   /* 1 / 3: open speed */
+extern f32 g_text_box_open_speed;   /* 1 / 3: open speed; was D_800A7138 */
 
 #define TB_T(box) (*(TextAD20 **)((box) + 0x10))
 #define TB_S16(box, o) (*(s16 *)((box) + (o)))
@@ -144,7 +144,7 @@ void text_box_update(u8 *box) {
     u16 pad;
 
     t = TB_T(box);
-    pl = (u8 *) D_800DBFF0;
+    pl = (u8 *) g_player_views;
     skip = t->flags & 0x400;
     if (((u8 *) t)[0x2B] != 0 && D_800C35EA != 1) {
         ((u8 *) t)[8] = 0;
@@ -157,7 +157,7 @@ void text_box_update(u8 *box) {
     case 1:
         TB_S16(box, 0x16) = 0;
         TB_S16(box, 0x18) = 0;
-        TB_F32(box, 0x2C) = skip ? 1.0f : D_800A7138;
+        TB_F32(box, 0x2C) = skip ? 1.0f : g_text_box_open_speed;
         if (TB_T(box)->flags & 2) {
             box[0x1D] = 0;
             box[0x1C] = 0;
@@ -181,7 +181,7 @@ void text_box_update(u8 *box) {
         text_measure_string(*(u8 **) (box + 0x24), &w, &h, &unused);
         TB_F32(box, 0x30) = w >> 1;
         TB_F32(box, 0x34) = h >> 1;
-        TB_F32(box, 0x28) = TB_F32(box, 0x28) + TB_F32(box, 0x2C) * D_800BE9A4;
+        TB_F32(box, 0x28) = TB_F32(box, 0x28) + TB_F32(box, 0x2C) * g_frame_step_f;
         if (skip) {
             TB_S16(box, 0x18) = 0;
         }
@@ -346,7 +346,7 @@ void text_box_update(u8 *box) {
             }
             box[0x1B] = box[0x1C] = box[0x1D] = (u32) (TB_S16(box, 0x18) / 5.0f * 85.0f);
         } else {
-            TB_F32(box, 0x28) = TB_F32(box, 0x28) - TB_F32(box, 0x2C) * D_800BE9A4;
+            TB_F32(box, 0x28) = TB_F32(box, 0x28) - TB_F32(box, 0x2C) * g_frame_step_f;
         }
         if (TB_F32(box, 0x28) < 0.0f || TB_S16(box, 0x18) == 0) {
             TB_F32(box, 0x28) = 0.0f;
@@ -357,7 +357,7 @@ void text_box_update(u8 *box) {
                 TB_T(box)->callback((s32) TB_T(box), ((s8 *) box)[0x20], box[0x15]);
             }
             TB_T(box)->flags &= ~0x1000;
-            D_800CC8D3[TB_T(box)->player * 0x32C] = 0;
+            g_objects_text_box_open[TB_T(box)->player * 0x32C] = 0;
             *(s16 *) (pl + 0x6CC) = 0;
             ((u8 *) TB_T(box))[8] = 0;
             node_destroy((struct102 *) box); /* the box is freed; text_box_place below still runs on it, as on N64 */
@@ -371,17 +371,17 @@ void text_box_update(u8 *box) {
 Gfx *sprite_load_texture(Gfx *gfx, u8 *header, s32 tmem, void *spr, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
 Gfx *sprite_draw_at_screen(Gfx *gfx, void *spr, f32 x, f32 y);
 Gfx *text_box_draw_text(Gfx *gfx, u8 *box, u8 r, u8 g, u8 b, u8 a);
-extern u8 D_800E100C;     /* text box fade, 0 = hidden */
-extern u8 D_800D31C8;     /* sprite primitive colour r, g, b */
-extern u8 D_800D31C9;
-extern u8 D_800D31CA;
-extern s32 D_800BEFC4;    /* display list capacity, in Gfx commands */
+extern u8 g_text_box_fade;     /* text box fade, 0 = hidden; was D_800E100C */
+extern u8 g_sprite_prim_r;     /* sprite primitive colour r, g, b; was D_800D31C8 */
+extern u8 g_sprite_prim_g; /* was D_800D31C9 */
+extern u8 g_sprite_prim_b; /* was D_800D31CA */
+extern s32 g_dl_capacity;    /* display list capacity, in Gfx commands; was D_800BEFC4 */
 extern u8 g_render_mode_pairs[];   /* render mode pairs, 8 bytes each; was D_800A4EA8 */
-extern u8 D_8009090C[];   /* box sprite header: u16 width +6, height +8 */
-extern u8 D_8009091C[];   /* box sprite, "thought" variant (descriptor flag 2) */
-extern u8 D_8009092C[];   /* pointer sprite header */
-extern u8 D_8009093C[];   /* thought dot sprite */
-extern u8 D_8009094C[];   /* pointer sprite, descriptor flag 8 */
+extern u8 g_text_box_sprite[];   /* box sprite header: u16 width +6, height +8; was D_8009090C */
+extern u8 g_text_thought_sprite[];   /* box sprite, "thought" variant (descriptor flag 2); was D_8009091C */
+extern u8 g_text_ptr_sprite[];   /* pointer sprite header; was D_8009092C */
+extern u8 g_text_thought_dot_sprite[];   /* thought dot sprite; was D_8009093C */
+extern u8 g_text_ptr_sprite_alt[];   /* pointer sprite, descriptor flag 8; was D_8009094C */
 
 /* sprite parameters for sprite_load_texture / sprite_draw_at_screen */
 typedef struct {
@@ -396,15 +396,15 @@ typedef struct {
 
 #define TB_F(off) (*(f32 *) (box + (off)))
 #define TB_FLAGS (**(s32 **) (box + 0x10))
-#define TB_DL_FULL(g) ((g) - D_800BEDE8[D_800BE9C0] > D_800BEFC4)
+#define TB_DL_FULL(g) ((g) - D_800BEDE8[g_dl_buf_index] > g_dl_capacity)
 
 // text_box_draw: draws a text box (record of text_box_open; +0x28 scale, +0x38 / +0x3C size, +0x40 / +0x44 pointer
 // tip, +0x58 pointer angle from text_box_place). First the shadow pass in black at a quarter alpha: the box sprite
-// (D_8009090C, or D_8009091C with descriptor flag 2) 5 pixels right / up unless descriptor flag 4, then the pointer
-// or, with flag 2, the two "thought" dots (D_8009093C; the first eases towards the tip in +0x70) - this pass also
+// (g_text_box_sprite, or g_text_thought_sprite with descriptor flag 2) 5 pixels right / up unless descriptor flag 4, then the pointer
+// or, with flag 2, the two "thought" dots (g_text_thought_dot_sprite; the first eases towards the tip in +0x70) - this pass also
 // sets the box corner +0x48 / +0x4C. Then the colour pass in the descriptor's colour (+0x28..+0x2A into
-// D_800D31C8..CA; black at alpha 0x55 with flag 4): pointer / dots (flag 8: the D_8009094C pointer), the box, and
-// the text (text_box_draw_text). Alphas scale with the global fade D_800E100C (+1, / 256); the box's fade bytes are +0x1A
+// g_sprite_prim_r..CA; black at alpha 0x55 with flag 4): pointer / dots (flag 8: the g_text_ptr_sprite_alt pointer), the box, and
+// the text (text_box_draw_text). Alphas scale with the global fade g_text_box_fade (+1, / 256); the box's fade bytes are +0x1A
 // (text), +0x1B (box), +0x1C / +0x1D (dots). Returns gfx unchanged when the box is hidden (+0xE == 0) or the fade is 0,
 // and the original gfx (drops the box) when the frame display list fills up.
 /* was func_1516BC2C */
@@ -423,23 +423,23 @@ Gfx *text_box_draw(Gfx *gfx, u8 *box, s16 arg2) {
     if (box[0xE] == 0) {
         return gfx;
     }
-    if (D_800E100C == 0) {
+    if (g_text_box_fade == 0) {
         return gfx;
     }
-    D_800D31CA = 0;
-    D_800D31C9 = 0;
-    D_800D31C8 = 0;
-    fade = D_800E100C + 1;
+    g_sprite_prim_b = 0;
+    g_sprite_prim_g = 0;
+    g_sprite_prim_r = 0;
+    fade = g_text_box_fade + 1;
     spr.flip = 0;
     spr.alpha = (fade * 64) >> 8;
 
     /* shadow pass: box sprite scale, pointer offset, box corner */
-    bw = *(u16 *) (D_8009090C + 6);
+    bw = *(u16 *) (g_text_box_sprite + 6);
     spr.w = (s32) ((TB_F(0x38) + TB_F(0x38) + 1.0f) / bw * 2355.2f * TB_F(0x28));
-    bh = *(u16 *) (D_8009090C + 8);
+    bh = *(u16 *) (g_text_box_sprite + 8);
     spr.h = (s32) ((TB_F(0x3C) + 1.0f) / bh * 4259.84f * TB_F(0x28));
-    px = TB_F(0x38) / bw * *(u16 *) (D_8009092C + 6) * 0.25f * TB_F(0x28);
-    py = TB_F(0x3C) / bh * *(u16 *) (D_8009092C + 8) * 0.5f * TB_F(0x28);
+    px = TB_F(0x38) / bw * *(u16 *) (g_text_ptr_sprite + 6) * 0.25f * TB_F(0x28);
+    py = TB_F(0x3C) / bh * *(u16 *) (g_text_ptr_sprite + 8) * 0.5f * TB_F(0x28);
     TB_F(0x48) =
         cosf(TB_F(0x58) + 3.14159274f) * (TB_F(0x38) * 0.5f) * 1.15f * TB_F(0x28) + TB_F(0x40) - px;
     TB_F(0x4C) =
@@ -456,9 +456,9 @@ Gfx *text_box_draw(Gfx *gfx, u8 *box, s16 arg2) {
     if (TB_FLAGS & 2) {
         spr.alpha = (u32) ((f32) box[0x1B] * 64.0f / 255.0f);
         spr.alpha = (spr.alpha * fade) >> 8;
-        gfx = sprite_load_texture(gfx, D_8009091C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, g_text_thought_sprite, 0, &spr, 0, 0, 0, 2, 3);
     } else {
-        gfx = sprite_load_texture(gfx, D_8009090C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, g_text_box_sprite, 0, &spr, 0, 0, 0, 2, 3);
     }
     if (!plain) {
         gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x48) + 5.0f, TB_F(0x4C) + -5.0f);
@@ -482,7 +482,7 @@ Gfx *text_box_draw(Gfx *gfx, u8 *box, s16 arg2) {
         if (box[0x15] == 1) {
             TB_F(0x70) = TB_F(0x5C);
         }
-        gfx = sprite_load_texture(gfx, D_8009093C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, g_text_thought_dot_sprite, 0, &spr, 0, 0, 0, 2, 3);
         spr.alpha = (u32) ((f32) box[0x1C] * 64.0f / 255.0f);
         spr.alpha = (spr.alpha * fade) >> 8;
         if (1.57079637f < TB_F(0x58)) {
@@ -496,14 +496,14 @@ Gfx *text_box_draw(Gfx *gfx, u8 *box, s16 arg2) {
         spr.h /= 2;
         spr.alpha = (u32) ((f32) box[0x1D] * 64.0f / 255.0f);
         spr.alpha = (spr.alpha * fade) >> 8;
-        gfx = sprite_load_texture(gfx, D_8009093C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, g_text_thought_dot_sprite, 0, &spr, 0, 0, 0, 2, 3);
         if (1.57079637f < TB_F(0x58)) {
             gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x40) - 2.5f, TB_F(0x44) + -2.5f);
         } else {
             gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x40) + 2.5f, TB_F(0x44) + -2.5f);
         }
     } else {
-        gfx = sprite_load_texture(gfx, D_8009092C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, g_text_ptr_sprite, 0, &spr, 0, 0, 0, 2, 3);
         if (!plain) {
             if (1.57079637f < TB_F(0x58)) {
                 gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x40) + px - 2.5f, TB_F(0x44) - py + -2.5f);
@@ -518,13 +518,13 @@ Gfx *text_box_draw(Gfx *gfx, u8 *box, s16 arg2) {
 
     /* colour pass */
     if (plain) {
-        D_800D31CA = 0;
-        D_800D31C9 = 0;
-        D_800D31C8 = 0;
+        g_sprite_prim_b = 0;
+        g_sprite_prim_g = 0;
+        g_sprite_prim_r = 0;
     } else {
-        D_800D31C8 = (*(u8 **) (box + 0x10))[0x28];
-        D_800D31C9 = (*(u8 **) (box + 0x10))[0x29];
-        D_800D31CA = (*(u8 **) (box + 0x10))[0x2A];
+        g_sprite_prim_r = (*(u8 **) (box + 0x10))[0x28];
+        g_sprite_prim_g = (*(u8 **) (box + 0x10))[0x29];
+        g_sprite_prim_b = (*(u8 **) (box + 0x10))[0x2A];
     }
     spr.flip = 0;
     if (plain) {
@@ -551,23 +551,23 @@ Gfx *text_box_draw(Gfx *gfx, u8 *box, s16 arg2) {
     } else {
         spr.flip &= ~1;
     }
-    spr.w = (s32) (TB_F(0x38) / (f32) *(u16 *) (D_8009090C + 6) * 2355.2f * TB_F(0x28));
-    spr.h = (s32) (TB_F(0x3C) / (f32) *(u16 *) (D_8009090C + 8) * 4259.84f * TB_F(0x28));
+    spr.w = (s32) (TB_F(0x38) / (f32) *(u16 *) (g_text_box_sprite + 6) * 2355.2f * TB_F(0x28));
+    spr.h = (s32) (TB_F(0x3C) / (f32) *(u16 *) (g_text_box_sprite + 8) * 4259.84f * TB_F(0x28));
     if (TB_FLAGS & 2) {
-        gfx = sprite_load_texture(gfx, D_8009093C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, g_text_thought_dot_sprite, 0, &spr, 0, 0, 0, 2, 3);
         spr.alpha = (box[0x1C] * fade) >> 8;
         gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x70), TB_F(0x44) - py);
         spr.w /= 2;
         spr.h /= 2;
-        gfx = sprite_load_texture(gfx, D_8009093C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, g_text_thought_dot_sprite, 0, &spr, 0, 0, 0, 2, 3);
         spr.alpha = (box[0x1D] * fade) >> 8;
         /* both sides draw the small dot at the tip */
         gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x40), TB_F(0x44));
     } else {
         if (TB_FLAGS & 8) {
-            gfx = sprite_load_texture(gfx, D_8009094C, 0, &spr, 0, 0, 0, 2, 3);
+            gfx = sprite_load_texture(gfx, g_text_ptr_sprite_alt, 0, &spr, 0, 0, 0, 2, 3);
         } else {
-            gfx = sprite_load_texture(gfx, D_8009092C, 0, &spr, 0, 0, 0, 2, 3);
+            gfx = sprite_load_texture(gfx, g_text_ptr_sprite, 0, &spr, 0, 0, 0, 2, 3);
         }
         if (1.57079637f < TB_F(0x58)) {
             gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x40) + px, TB_F(0x44) - py);
@@ -577,13 +577,13 @@ Gfx *text_box_draw(Gfx *gfx, u8 *box, s16 arg2) {
     }
 
     /* colour pass: the box */
-    spr.w = (s32) ((TB_F(0x38) + TB_F(0x38)) / (f32) *(u16 *) (D_8009090C + 6) * 2355.2f * TB_F(0x28));
-    spr.h = (s32) (TB_F(0x3C) / (f32) *(u16 *) (D_8009090C + 8) * 4259.84f * TB_F(0x28));
+    spr.w = (s32) ((TB_F(0x38) + TB_F(0x38)) / (f32) *(u16 *) (g_text_box_sprite + 6) * 2355.2f * TB_F(0x28));
+    spr.h = (s32) (TB_F(0x3C) / (f32) *(u16 *) (g_text_box_sprite + 8) * 4259.84f * TB_F(0x28));
     if (TB_FLAGS & 2) {
         spr.alpha = (box[0x1B] * fade) >> 8;
-        gfx = sprite_load_texture(gfx, D_8009091C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, g_text_thought_sprite, 0, &spr, 0, 0, 0, 2, 3);
     } else {
-        gfx = sprite_load_texture(gfx, D_8009090C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, g_text_box_sprite, 0, &spr, 0, 0, 0, 2, 3);
     }
     gfx = sprite_draw_at_screen(gfx, &spr, (s32) TB_F(0x48), (s32) TB_F(0x4C));
     if (TB_DL_FULL(gfx)) {
@@ -599,10 +599,10 @@ u8 *text_box_get_line(s32 *arg0, s32 arg1, s16 arg2) {
 
     switch (arg2) {
     case 0:
-        p = D_800DD684[arg0[1]].str;
+        p = g_text_str_table[arg0[1]].str;
         break;
     case 1:
-        p = D_800DD688[arg0[1]].str;
+        p = g_text_str_table_ext[arg0[1]].str;
         break;
     case 2:
         p = (u8 *)arg0[1];
@@ -654,7 +654,7 @@ Gfx *text_box_draw_text(Gfx *gfx, u8 *box, u8 r, u8 g, u8 b, u8 a) {
         } while ((*(u8 **) (box + 0x24))[i] == '\n');
     }
     do {
-        if (gfx - D_800BEDE8[D_800BE9C0] > D_800BEFC4) {
+        if (gfx - D_800BEDE8[g_dl_buf_index] > g_dl_capacity) {
             return start;
         }
         c = (*(u8 **) (box + 0x24))[i];
@@ -694,16 +694,16 @@ Gfx *text_box_draw_text(Gfx *gfx, u8 *box, u8 r, u8 g, u8 b, u8 a) {
 
 void camera_world_to_screen(s32 arg0, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz);
 void text_box_clamp_to_screen(u8 *, f32 *, f32 *, s32);
-extern u8 D_8009090C[]; /* box sprite header: u16 width +6, height +8 */
-extern u8 D_8009092C[]; /* pointer sprite header: u16 width +6, height +8 */
-extern u8 D_800CC730[]; /* per-player records (0x32C bytes): f32 heading at +0 */
+extern u8 g_text_box_sprite[]; /* box sprite header: u16 width +6, height +8; was D_8009090C */
+extern u8 g_text_ptr_sprite[]; /* pointer sprite header: u16 width +6, height +8; was D_8009092C */
+extern u8 g_objects_heading[]; /* per-player records (0x32C bytes): f32 heading at +0; was D_800CC730 */
 
 // text_box_place: screen position of a text box (+0x5C / +0x60, copied to +0x40 / +0x44) and the angle +0x58 of
 // its pointer (towards the speaker). Descriptor flag 0x8000: position from the descriptor's percentages (+0x18 /
 // +0x1C words point at f32 x / y in %, +0x20 at the pointer angle in %, 55..125 degrees) scaled to the viewport
-// (D_800BE628 +4 / +8), kept on screen by text_box_clamp_to_screen when flag 0x10000 is set. Otherwise the speaker's world
+// (g_player_cams +4 / +8), kept on screen by text_box_clamp_to_screen when flag 0x10000 is set. Otherwise the speaker's world
 // point (descriptor +0xC..+0x14) projected once (camera_world_to_screen) and the angle from the player's heading relative to
-// the camera (D_800DBFF0 +0x37C), always kept on screen. +0x50 / +0x54: the pointer's corner.
+// the camera (g_player_views +0x37C), always kept on screen. +0x50 / +0x54: the pointer's corner.
 /* was func_1516D1C8 */
 void text_box_place(u8 *box) {
     u8 *t;
@@ -717,9 +717,9 @@ void text_box_place(u8 *box) {
 
     t = *(u8 **) (box + 0x10);
     if (*(s32 *) t & 0x8000) {
-        vp = (u8 *) D_800BE628;
+        vp = (u8 *) g_player_cams;
         *(f32 *) (box + 0x5C) = *(f32 *) (vp + 4) * ((*(f32 **) (t + 0x18))[0] * 0.01f);
-        vp = (u8 *) D_800BE628;
+        vp = (u8 *) g_player_cams;
         *(f32 *) (box + 0x60) = *(f32 *) (vp + 8) * (1.0f - (*(f32 **) (t + 0x1C))[0] * 0.01f);
         a = (*(f32 **) (t + 0x20))[0] * 0.01f;
         if (a < 0.0f) {
@@ -738,7 +738,7 @@ void text_box_place(u8 *box) {
             *(f32 *) (box + 0x68) = sy;
             box[0x1F] = 1;
             *(f32 *) (box + 0x6C) =
-                *(f32 *) (D_800CC730 + t[9] * 0x32C) - *(f32 *) ((u8 *) D_800DBFF0 + 0x37C) - 180.0f;
+                *(f32 *) (g_objects_heading + t[9] * 0x32C) - *(f32 *) ((u8 *) g_player_views + 0x37C) - 180.0f;
         }
         a = *(f32 *) (box + 0x6C);
         *(f32 *) (box + 0x5C) = *(f32 *) (box + 0x64);
@@ -759,8 +759,8 @@ void text_box_place(u8 *box) {
     }
     *(f32 *) (box + 0x40) = *(f32 *) (box + 0x5C);
     *(f32 *) (box + 0x44) = *(f32 *) (box + 0x60);
-    ox = *(f32 *) (box + 0x38) / (f32) *(u16 *) (D_8009090C + 6) * (f32) *(u16 *) (D_8009092C + 6) * 0.25f;
-    oy = *(f32 *) (box + 0x3C) / (f32) *(u16 *) (D_8009090C + 8) * (f32) *(u16 *) (D_8009092C + 8) * 0.5f;
+    ox = *(f32 *) (box + 0x38) / (f32) *(u16 *) (g_text_box_sprite + 6) * (f32) *(u16 *) (g_text_ptr_sprite + 6) * 0.25f;
+    oy = *(f32 *) (box + 0x3C) / (f32) *(u16 *) (g_text_box_sprite + 8) * (f32) *(u16 *) (g_text_ptr_sprite + 8) * 0.5f;
     *(f32 *) (box + 0x50) =
         (s32) (cosf(*(f32 *) (box + 0x58) + 3.14159274f) * (*(f32 *) (box + 0x38) * 0.5f) * 1.15f
                + *(f32 *) (box + 0x5C) - (f32) ox);
@@ -769,8 +769,8 @@ void text_box_place(u8 *box) {
         - (f32) oy;
 }
 
-extern u16 D_80090912;
-extern u16 D_80090932;
+extern u16 g_text_box_sprite_w; /* was D_80090912 */
+extern u16 g_text_ptr_sprite_w; /* was D_80090932 */
 
 /* was func_1516D63C */
 void text_box_clamp_to_screen(u8 *arg0, f32 *arg1, f32 *arg2, s32 arg3) {
@@ -791,12 +791,12 @@ void text_box_clamp_to_screen(u8 *arg0, f32 *arg1, f32 *arg2, s32 arg3) {
     f32 var_f4;
     f32 var_f8;
 
-    var_f8 = (f32) D_80090912;
-    if ((s32) D_80090912 < 0) {
+    var_f8 = (f32) g_text_box_sprite_w;
+    if ((s32) g_text_box_sprite_w < 0) {
         var_f8 += 4294967296.0f;
     }
-    var_f4 = (f32) D_80090932;
-    if ((s32) D_80090932 < 0) {
+    var_f4 = (f32) g_text_ptr_sprite_w;
+    if ((s32) g_text_ptr_sprite_w < 0) {
         var_f4 += 4294967296.0f;
     }
     sp1C = ((*(f32 *)((u8 *)arg0 + 0x38)) / var_f8) * var_f4 * 0.25f * (*(f32 *)((u8 *)arg0 + 0x28));
@@ -810,20 +810,20 @@ void text_box_clamp_to_screen(u8 *arg0, f32 *arg1, f32 *arg2, s32 arg3) {
     sp24 = temp_f12 - temp_f2;
     sp20 = temp_f2 + temp_f12;
     if (arg0 != NULL) {
-        temp_f0 = (*(f32 *)((u8 *)D_800BE628 + 0x24));
+        temp_f0 = (*(f32 *)((u8 *)g_player_cams + 0x24));
         if (sp2C < temp_f0) {
             *arg2 = temp_f0 + temp_f18;
         } else {
-            temp_f0_2 = (*(f32 *)((u8 *)D_800BE628 + 0x28));
+            temp_f0_2 = (*(f32 *)((u8 *)g_player_cams + 0x28));
             if (temp_f0_2 < sp28) {
                 *arg2 = temp_f0_2;
             }
         }
-        temp_f0_3 = (*(f32 *)((u8 *)D_800BE628 + 0x2C));
+        temp_f0_3 = (*(f32 *)((u8 *)g_player_cams + 0x2C));
         if (sp24 < temp_f0_3) {
             *arg1 -= sp24 - temp_f0_3;
         } else {
-            temp_f0_4 = (*(f32 *)((u8 *)D_800BE628 + 0x30));
+            temp_f0_4 = (*(f32 *)((u8 *)g_player_cams + 0x30));
             if (temp_f0_4 < sp20) {
                 *arg1 += temp_f0_4 - sp20;
             }

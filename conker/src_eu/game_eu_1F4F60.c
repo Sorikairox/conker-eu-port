@@ -450,7 +450,7 @@ s32 laser_update(u8 *arg0) {
     temp_s0 = arg0 + 0x110;
     if ((*(u8 *)((u8 *)arg0 + 0x196)) & 1) {
         temp_v1 = (*(s16 *)((u8 *)temp_s0 + 0x84));
-        (*(s16 *)((u8 *)temp_s0 + 0x82)) = (s16) ((*(s16 *)((u8 *)temp_s0 + 0x82)) + D_800BE9E4);
+        (*(s16 *)((u8 *)temp_s0 + 0x82)) = (s16) ((*(s16 *)((u8 *)temp_s0 + 0x82)) + g_frame_ticks);
         if ((*(s16 *)((u8 *)temp_s0 + 0x82)) >= temp_v1) {
             do {
                 (*(s16 *)((u8 *)temp_s0 + 0x82)) = (s16) ((*(s16 *)((u8 *)temp_s0 + 0x82)) - temp_v1);
@@ -464,8 +464,8 @@ s32 laser_update(u8 *arg0) {
     }
     temp_s0_2 = arg0 + 0x110;
     if ((*(u8 *)((u8 *)arg0 + 0x196)) & 2) {
-        (*(f32 *)((u8 *)temp_s0_2 + 0x18)) = (f32) ((*(f32 *)((u8 *)temp_s0_2 + 0x18)) + ((*(f32 *)((u8 *)temp_s0_2 + 0x20)) * D_800BE9A4));
-        (*(f32 *)((u8 *)temp_s0_2 + 0x1C)) = (f32) ((*(f32 *)((u8 *)temp_s0_2 + 0x1C)) + ((*(f32 *)((u8 *)temp_s0_2 + 0x24)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s0_2 + 0x18)) = (f32) ((*(f32 *)((u8 *)temp_s0_2 + 0x18)) + ((*(f32 *)((u8 *)temp_s0_2 + 0x20)) * g_frame_step_f));
+        (*(f32 *)((u8 *)temp_s0_2 + 0x1C)) = (f32) ((*(f32 *)((u8 *)temp_s0_2 + 0x1C)) + ((*(f32 *)((u8 *)temp_s0_2 + 0x24)) * g_frame_step_f));
         (*(f32 *)((u8 *)temp_s0_2 + 0x18)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0_2 + 0x18)));
         (*(f32 *)((u8 *)temp_s0_2 + 0x1C)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0_2 + 0x1C)));
         (*(f32 *)((u8 *)temp_s0_2 + 0)) = (f32) ((fast_sinf((*(f32 *)((u8 *)temp_s0_2 + 0x18))) * (*(f32 *)((u8 *)temp_s0_2 + 0x10))) + (*(f32 *)((u8 *)temp_s0_2 + 8)));
@@ -488,7 +488,7 @@ s32 laser_update(u8 *arg0) {
             (*(s8 *)((u8 *)temp_v0_4 + 0x14)) = 1;
         }
     }
-    (*(f32 *)((u8 *)temp_s0_2 + 0x54)) = (f32) ((*(f32 *)((u8 *)temp_s0_2 + 0x54)) + (0.080000006f * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s0_2 + 0x54)) = (f32) ((*(f32 *)((u8 *)temp_s0_2 + 0x54)) + (0.080000006f * g_frame_step_f));
     if ((*(f32 *)((u8 *)temp_s0_2 + 0x54)) > 1.0f) {
         do {
             if ((*(u8 *)((u8 *)temp_s0_2 + 0x86)) & 2) {
@@ -518,7 +518,7 @@ s32 laser_update(u8 *arg0) {
     }
     if ((*(u8 *)((u8 *)temp_s0_2 + 0x86)) & 8) {
         (*(s8 *)((u8 *)arg0 + 0x5C)) = (s8) (u32) ((fast_sinf((*(f32 *)((u8 *)temp_s0_2 + 0x98))) * 112.5f) + 142.5f);
-        (*(f32 *)((u8 *)temp_s0_2 + 0x98)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0_2 + 0x98)) + ((*(f32 *)((u8 *)temp_s0_2 + 0x9C)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s0_2 + 0x98)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0_2 + 0x98)) + ((*(f32 *)((u8 *)temp_s0_2 + 0x9C)) * g_frame_step_f));
     }
     return 1;
 }
@@ -638,13 +638,13 @@ void emit_spray_from_surface(u8 *arg0, u8 arg1, s32 arg2);
 u8 *cam_wobble_start_preset(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4);
 s32 obj_send_hit(struct127 *obj, s32 flags, u16 val, s32 arg3);
 s32 sfx_cb_delayed_play_2d();
-extern s32 D_800AB010[]; /* hit-sound flags by beam piece kind: 0x17, 0x18 */
+extern s32 g_laser_hit_flags[]; /* hit-sound flags by beam piece kind: 0x17, 0x18; was D_800AB010 */
 
 // beam_hit_effects: the effects when the beam `rec` is broken (by obj, from the 0x20 / 0x3A messages of
 /* laser_handle_message; obj NULL for the scripted break). At each end (+0x34 with the surface record +0x16A and the
  * direction +0x4C; +0x40 with +0x17C and the reversed direction): a spark spray (emit_spray_from_surface, the block below),
  * a flash (light_create_with_ctrl kind 3) and a scorch mark (fx_scorch_decal_spawn). With obj: the screen effect preset 2 for obj's
- * view (cam_wobble_start_preset), a rumble (rumble_request) and obj's hit reaction (obj_send_hit, flags D_800AB010 by the
+ * view (cam_wobble_start_preset), a rumble (rumble_request) and obj's hit reaction (obj_send_hit, flags g_laser_hit_flags by the
  * piece kind at +0x1A4). Then the two sounds (0x2F5 at end A, 0x2F6 at end B) and node_destroy(rec).
  * (The mark positions are the end points: the asm saves v0 = rec + 0x34 / + 0x40 in the delay slot of the
  * emit_spray_from_surface calls, before the call.) */
@@ -768,7 +768,7 @@ void laser_break_effects(u8 *obj, u8 *rec) {
         rumble_request(&rumble, 0, 0xFF, 0);
     }
     if (obj != NULL) {
-        obj_send_hit((struct127 *)obj, D_800AB010[beam[0x94]], 0, -1);
+        obj_send_hit((struct127 *)obj, g_laser_hit_flags[beam[0x94]], 0, -1);
     }
     sound_play_at(0x2F5, 0x7FFF, random_int() % 500U, 0, 0, *(f32 *)(rec + 0x34), *(f32 *)(rec + 0x38),
                   *(f32 *)(rec + 0x3C), 0x7D0, 0x898);

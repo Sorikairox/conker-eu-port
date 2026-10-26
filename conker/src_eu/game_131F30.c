@@ -6,8 +6,8 @@ void fx_sparks_emit(u8 *arg0);
 void sfx_emitter_stop_by_callback(s32, s32, s32);
 
 
-// prop_owner_effects_clear: P256: for the prop `obj` (a 0xA0-byte record of D_800DBEF4), finds its owner, the first
-// live object (interaction_state != 0) of g_objects[0..24] whose bit is set in the prop's mask D_800DC3C4[index],
+// prop_owner_effects_clear: P256: for the prop `obj` (a 0xA0-byte record of g_world_objs), finds its owner, the first
+// live object (interaction_state != 0) of g_objects[0..24] whose bit is set in the prop's mask g_world_obj_rider_masks[index],
 // or NULL, then clears effects keyed on it (effect_nodes_broadcast): kinds 0xF9 / 0xF8 / 0xF7 (obj +0x72) clear the type
 // 0x35 effects of {9, part list, owner} with the 9-entry part lists g_prop_owner_parts_a / g_prop_owner_parts_b / g_prop_owner_parts_c (copied to
 // the stack), kind 0xF6 the type 0x38 effects of {owner}; other kinds do nothing.
@@ -17,7 +17,7 @@ typedef struct {
 extern PartList9 g_prop_owner_parts_a; /* was D_800A2750 */
 extern PartList9 g_prop_owner_parts_b; /* was D_800A275C */
 extern PartList9 g_prop_owner_parts_c; /* was D_800A2768 */
-extern s32 *D_800DC3C4;
+extern s32 *g_world_obj_rider_masks; /* was D_800DC3C4 */
 /* was func_15104A80 */
 void prop_owner_effects_clear(u8 *obj) {
     struct {
@@ -35,7 +35,7 @@ void prop_owner_effects_clear(u8 *obj) {
     s32 i;
 
     owner = NULL;
-    mask = D_800DC3C4[(struct131 *) obj - D_800DBEF4];
+    mask = g_world_obj_rider_masks[(struct131 *) obj - g_world_objs];
     if (mask != 0) {
         p = g_objects;
         for (i = 0; i < 25 && owner == NULL; i++, p++) {
@@ -118,12 +118,12 @@ void fx_ground_arcs_update(u8 *arg0) {
 
     temp_s1 = arg0 + 0x28;
     if ((*(s16 *)((u8 *)arg0 + 0x30)) >= 0) {
-        (*(s16 *)((u8 *)temp_s1 + 8)) = (s16) ((*(s16 *)((u8 *)temp_s1 + 8)) - D_800BE9E4);
+        (*(s16 *)((u8 *)temp_s1 + 8)) = (s16) ((*(s16 *)((u8 *)temp_s1 + 8)) - g_frame_ticks);
         if ((*(s16 *)((u8 *)temp_s1 + 8)) < 0) {
             sfx_emitter_stop_by_callback(sfx_cb_keep_until_silent, (*(s32 *)((u8 *)temp_s1 + 0)), 0);
         }
         if (player_mask_hides_all((*(s32 *)((u8 *)temp_s1 + 0x44))) == 0) {
-            (*(f32 *)((u8 *)temp_s1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 4)) + ((0.19700001f + (random_float() * 0.3f)) * D_800BE9A4));
+            (*(f32 *)((u8 *)temp_s1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 4)) + ((0.19700001f + (random_float() * 0.3f)) * g_frame_step_f));
             if ((*(f32 *)((u8 *)temp_s1 + 4)) > 1.0f) {
                 sp.u8E = 1;
                 sp.uC0 = -1;
@@ -242,13 +242,13 @@ void fx_quad_bolts_update(u8 *arg0) {
         return;
     }
     (*(s8 *)((u8 *)((*(u8 **)((u8 *)temp_s2 + 0))) + 0x14)) = 0;
-    (*(s16 *)((u8 *)temp_s2 + 4)) = (s16) ((*(s16 *)((u8 *)temp_s2 + 4)) - D_800BE9E4);
+    (*(s16 *)((u8 *)temp_s2 + 4)) = (s16) ((*(s16 *)((u8 *)temp_s2 + 4)) - g_frame_ticks);
     if ((*(s16 *)((u8 *)temp_s2 + 4)) < 0) {
         effect_nodes_broadcast(0, 0x39U);
         effect_nodes_broadcast(0, 0x4BU);
     }
     if (player_mask_hides_all((*(s32 *)((u8 *)temp_s2 + 0x6C))) == 0) {
-        (*(f32 *)((u8 *)temp_s2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 8)) + ((0.040000003f + (random_float() * 0.07f)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 8)) + ((0.040000003f + (random_float() * 0.07f)) * g_frame_step_f));
         if ((*(f32 *)((u8 *)temp_s2 + 8)) > 1.0f) {
             sp.uB0 = 0x64;
             sp.uB2 = 0;
@@ -621,7 +621,7 @@ struct_eu_node *scene_node_find_type2e(s32 arg0) {
 
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            for (p = g_node_lists[j][(&D_800A5770)[i]]; p != NULL; p = p->next) {
+            for (p = g_node_lists[j][(&g_effect_bcast_types)[i]]; p != NULL; p = p->next) {
                 if ((*(u8 *)((u8 *)p + 0x13) == 0x2E) && (arg0 == *(s32 *)((u8 *)p + 0x28))) {
                     return p;
                 }

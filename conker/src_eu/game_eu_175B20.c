@@ -37,13 +37,13 @@ u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 
     (*(s32 *)((u8 *)temp_a0 + 0x44)) = (s32) (*(s32 *)((u8 *)argB + 0x1C));
     return sp3C;
 }
-extern s32 (*D_8008A780[])(u8 *);
-extern s32 (*D_8008A798[])(u8 *);
-extern s32 (*D_8008A7CC[])(u8 *, s32, s32, s32, f32, s32); /* = D_8008A7D0 - 4: the hit handlers */
+extern s32 (*g_trail_motion_fns[])(u8 *); /* was D_8008A780 */
+extern s32 (*g_trail_motion2_fns[])(u8 *); /* was D_8008A798 */
+extern s32 (*g_trail_end_fns[])(u8 *, s32, s32, s32, f32, s32); /* = g_trail_hit_fns - 4: the hit handlers; was D_8008A7CC; was D_8008A7D0 */
 
-// trail_step: per-frame step of a trail particle (type table D_8008A5A0 entry 1).
-/* obj +0x98 is the trail record (trail_spawn): +0x20 / +0x21 select the motion handlers (D_8008A780 / D_8008A798,
- * 0 = none), +0x22 the end handler (D_8008A7CC, the hit handler table D_8008A7D0 shifted by one); +0x18 flag 0x40 fades the alpha +0x1B in with the timer (obj +0x1C
+// trail_step: per-frame step of a trail particle (type table g_fxrec_step_fns entry 1).
+/* obj +0x98 is the trail record (trail_spawn): +0x20 / +0x21 select the motion handlers (g_trail_motion_fns / g_trail_motion2_fns,
+ * 0 = none), +0x22 the end handler (g_trail_end_fns, the hit handler table g_trail_hit_fns shifted by one); +0x18 flag 0x40 fades the alpha +0x1B in with the timer (obj +0x1C
  * times rate +0x1E, while the timer is below +0x1C). Stores the oldest point (index +0x2D of the +0x94 point list,
  * 0x14 bytes each) in obj +0x54, or 0 when the list is empty. Returns 0 when a handler ends the trail, else 1. */
 /* was func_15148428 */
@@ -53,12 +53,12 @@ s32 trail_step(u8 *obj) {
     s32 a;
 
     if (rec[0x20] != 0) {
-        if (!D_8008A780[rec[0x20]](obj)) {
+        if (!g_trail_motion_fns[rec[0x20]](obj)) {
             done = 1;
         }
     }
     if (rec[0x21] != 0 && !done) {
-        if (!D_8008A798[rec[0x21]](obj)) {
+        if (!g_trail_motion2_fns[rec[0x21]](obj)) {
             done = 1;
         }
     }
@@ -70,7 +70,7 @@ s32 trail_step(u8 *obj) {
     }
     if (done && rec[0x22] != 0) {
         /* the asm leaves a1 = 0 (the return value) and a2 = 1 (done) in the argument registers */
-        D_8008A7CC[rec[0x22]](obj, 0, 1, 0, 0.0f, 0);
+        g_trail_end_fns[rec[0x22]](obj, 0, 1, 0, 0.0f, 0);
     }
     if (*(s8 *)(obj + 0x2C) > 0) {
         u8 *p = *(u8 **)(obj + 0x94) + *(s8 *)(obj + 0x2D) * 0x14;
@@ -97,9 +97,9 @@ s32 gfx_prim_color_cached(s32, s32, s32, s16, s32, s32, s32, s8 *);
 s32 gfx_set_combine_mode(s32, u8, s8 *);
 u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 f32 sqrtf(f32);
-extern s32 D_80091914[];
-extern s32 D_80091954[];
-extern s32 D_800D30BC;
+extern s32 g_fx_tex_addrs[]; /* was D_80091914 */
+extern s32 g_trail_tex_tile[]; /* was D_80091954 */
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 extern s32 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 /* One strip vertex: position, flag 0, s = 0x43C0 (outer edge) or 0x4000 (inner edge), t = point +0x10 + 0x4000,
@@ -118,12 +118,12 @@ extern s32 g_render_mode_pairs[]; /* was D_800A4EA8 */
         *(s16 *)((v) + 0x6) = 0; \
     } while (0)
 
-// trail_draw: draws a trail particle as a camera-facing strip (type table D_8008A644 entry 1).
+// trail_draw: draws a trail particle as a camera-facing strip (type table g_fxrec_draw_fns entry 1).
 /* The points (obj +0x94, 0x14 bytes: x, y, z, vy, s16 texture t at +0x10) run from the newest (+0x2E - 1) back to
  * the oldest (+0x2D), ring of +0x25 entries. Each point gets two vertices, offset by +-n where n is the normal of
  * (point - camera) x (segment) scaled to the half width rec +0; each segment emits one 4-vertex load and two
- * triangles. Vertices come from vtx_slot_buffer_get (2 per point but the last, double-buffered on D_800BE9C0). Sets the
- * texture (gfx_load_texture_tile, only when it changed: D_800DD5E0), the colours rec +0x44 / +0x45 at alpha rec +0x1B,
+ * triangles. Vertices come from vtx_slot_buffer_get (2 per point but the last, double-buffered on g_dl_buf_index). Sets the
+ * texture (gfx_load_texture_tile, only when it changed: g_tex_cache_last_addr), the colours rec +0x44 / +0x45 at alpha rec +0x1B,
  * the geometry mode rec +0x2C / +0x30, combine rec +0x3B and render mode rec +0x28 | +0x3C | +0x40 with the
  * g_render_mode_pairs entry rec +0x34. Returns the display list end; draws nothing with fewer than 2 points. */
 /* was func_151485AC */
@@ -156,17 +156,17 @@ s32 trail_draw(u8 *obj, s32 gfx, s16 arg2) {
     if (v == NULL) {
         return gfx;
     }
-    if (D_800BE9C0 != 0) {
+    if (g_dl_buf_index != 0) {
         v += (obj[0x25] * 2 - 2) * 0x10;
     }
     flag = 1;
     cam = camera_get_pos(arg2);
     pts = *(u8 **)(obj + 0x94);
     tex = fx_material_tex_addr(0, rec[0x19], 0, 2);
-    if (tex != D_800DD5E0) {
-        D_80091954[0] = D_80091914[rec[0x19]];
-        gfx = gfx_load_texture_tile(gfx, D_80091954, 0, 0, 0, 0, 2, 0x100, 0x100, (rec[0x18] & 0x80) ? 0x3E : 3);
-        D_800DD5E0 = tex;
+    if (tex != g_tex_cache_last_addr) {
+        g_trail_tex_tile[0] = g_fx_tex_addrs[rec[0x19]];
+        gfx = gfx_load_texture_tile(gfx, g_trail_tex_tile, 0, 0, 0, 0, 2, 0x100, 0x100, (rec[0x18] & 0x80) ? 0x3E : 3);
+        g_tex_cache_last_addr = tex;
     }
     fx_calc_color_mode_a(&r0, &g0, &b0, &a0, 0, 0, 0, 0, 0, 0, 0, rec[0x1B], rec[0x1A], *(s8 *)(rec + 0x44));
     fx_calc_color_mode_b(&r1, &g1, &b1, &a1, 0, 0, 0, 0, 0, 0, 0, rec[0x1B], rec[0x1A], *(s8 *)(rec + 0x45));
@@ -174,7 +174,7 @@ s32 trail_draw(u8 *obj, s32 gfx, s16 arg2) {
     gfx = gfx_env_color_cached(gfx, r1, g1, b1, a1, &flag);
     gfx = gfx_prim_color_cached(gfx, 0, 0, r0, g0, b0, a0, &flag);
     gfx = gfx_set_combine_mode(gfx, rec[0x3B], &flag);
-    gfx = (s32)gfx_other_mode_cached(gfx, *(s32 *)(rec + 0x28) | 0x80000 | D_800D30BC | 0x2C00 | *(s32 *)(rec + 0x3C) | *(s32 *)(rec + 0x40),
+    gfx = (s32)gfx_other_mode_cached(gfx, *(s32 *)(rec + 0x28) | 0x80000 | g_gfx_tlut_mode | 0x2C00 | *(s32 *)(rec + 0x3C) | *(s32 *)(rec + 0x40),
                              g_render_mode_pairs[*(s32 *)(rec + 0x34) * 2 + 1] | g_render_mode_pairs[*(s32 *)(rec + 0x34) * 2], &flag);
 
     i = *(s8 *)(obj + 0x2E) - 1;
@@ -269,10 +269,10 @@ s32 trail_draw(u8 *obj, s32 gfx, s16 arg2) {
     return gfx;
 }
 #undef TRAIL_VTX
-// trail_grow: motion handler 1 of a trail (D_8008A780): moves the points and adds one per frame until full.
+// trail_grow: motion handler 1 of a trail (g_trail_motion_fns): moves the points and adds one per frame until full.
 /* Points obj +0x94 (0x14 bytes: x, y, z, vy, u16 t at +0x10) in a ring of +0x25 from the oldest +0x2D to the head
  * +0x2E (exclusive), count +0x2C. Each point falls by gravity rec +0x10 (rec = obj +0x98) into its vy and moves by
- * (rec +4, vy, rec +0xC) times the frame time D_800BE9A4. While the ring has room, the obj position (+0x10) is added
+ * (rec +4, vy, rec +0xC) times the frame time g_frame_step_f. While the ring has room, the obj position (+0x10) is added
  * at the head with vy = rec +8 and the texture t of all points is ramped 0..0x1000 (0x1000..0 with rec +0x18 flag
  * 0x20); once full, rec +0x20 becomes 3 (trail_fall, if rec +0x18 & 0x17) or 2 (trail_move_points). Returns 1. */
 /* was func_15148E34 */
@@ -289,10 +289,10 @@ s32 trail_grow(u8 *obj) {
     while (i != *(s8 *)(obj + 0x2E)) {
         p = pts + i * 0x14;
         i++;
-        *(f32 *)(p + 0xC) -= *(f32 *)(rec + 0x10) * D_800BE9A4;
-        *(f32 *)(p + 0x0) += *(f32 *)(rec + 0x4) * D_800BE9A4;
-        *(f32 *)(p + 0x4) += *(f32 *)(p + 0xC) * D_800BE9A4;
-        *(f32 *)(p + 0x8) += *(f32 *)(rec + 0xC) * D_800BE9A4;
+        *(f32 *)(p + 0xC) -= *(f32 *)(rec + 0x10) * g_frame_step_f;
+        *(f32 *)(p + 0x0) += *(f32 *)(rec + 0x4) * g_frame_step_f;
+        *(f32 *)(p + 0x4) += *(f32 *)(p + 0xC) * g_frame_step_f;
+        *(f32 *)(p + 0x8) += *(f32 *)(rec + 0xC) * g_frame_step_f;
         if (i == obj[0x25]) {
             i = 0;
         }
@@ -350,10 +350,10 @@ s32 trail_move_points(u8 *arg0) {
         if (i < 0) {
             i = *(u8 *)(arg0 + 0x25) - 1;
         }
-            base[i].vy -= v[4] * D_800BE9A4;
-        base[i].x += v[1] * D_800BE9A4;
-        base[i].y += base[i].vy * D_800BE9A4;
-        base[i].z += v[3] * D_800BE9A4;
+            base[i].vy -= v[4] * g_frame_step_f;
+        base[i].x += v[1] * g_frame_step_f;
+        base[i].y += base[i].vy * g_frame_step_f;
+        base[i].z += v[3] * g_frame_step_f;
     } while (i != *(s8 *)(arg0 + 0x2D));
     return 1;
 }
@@ -363,14 +363,14 @@ s32 drip_stream_splash(u8 *, s32, s32, s32, f32);
 s32 drip_stream_splash_dust(u8 *, s32, s32, s32, f32, s32);
 s32 streak_on_land_debris(u8 *, s32, s32, s32, f32, s32);
 s32 streak_on_land_burst(void *, s32, s32, s32, f32, s32);
-extern s32 (*D_8008A7D0[])(u8 *, s32, s32, s32, f32, s32);
-extern s32 (*D_8008A7F0[])(u8 *, s32, s32, s32, f32, s32);
+extern s32 (*g_trail_hit_fns[])(u8 *, s32, s32, s32, f32, s32); /* was D_8008A7D0 */
+extern s32 (*g_trail_floor_hit_fns[])(u8 *, s32, s32, s32, f32, s32); /* was D_8008A7F0 */
 
-// trail_fall: motion handler 3 of a full trail (D_8008A780): moves the points and checks the oldest for a hit.
+// trail_fall: motion handler 3 of a full trail (g_trail_motion_fns): moves the points and checks the oldest for a hit.
 /* Points as trail_grow (all of them, from the head +0x2E back to the oldest +0x2D). With rec +0x18 & 0x17 (rec =
  * obj +0x98) and the oldest point moving down, the segment from its old height to the new one is tested against
- * the collision (collision_floor_probe, result in obj +0x60..); on a hit the handler rec +0x24 (D_8008A7F0, when the hit
- * kind obj +0x7D is 3) or rec +0x23 (D_8008A7D0) gets the old position, the hit height +0x60 and obj +0x64.
+ * the collision (collision_floor_probe, result in obj +0x60..); on a hit the handler rec +0x24 (g_trail_floor_hit_fns, when the hit
+ * kind obj +0x7D is 3) or rec +0x23 (g_trail_hit_fns) gets the old position, the hit height +0x60 and obj +0x64.
  * Returns 0 when that handler does, else 1. */
 /* was func_15149114 */
 s32 trail_fall(u8 *obj) {
@@ -397,10 +397,10 @@ s32 trail_fall(u8 *obj) {
             i = obj[0x25] - 1;
         }
         p = pts + i * 0x14;
-        *(f32 *)(p + 0xC) -= *(f32 *)(rec + 0x10) * D_800BE9A4;
-        *(f32 *)(p + 0x0) += *(f32 *)(rec + 0x4) * D_800BE9A4;
-        *(f32 *)(p + 0x4) += *(f32 *)(p + 0xC) * D_800BE9A4;
-        *(f32 *)(p + 0x8) += *(f32 *)(rec + 0xC) * D_800BE9A4;
+        *(f32 *)(p + 0xC) -= *(f32 *)(rec + 0x10) * g_frame_step_f;
+        *(f32 *)(p + 0x0) += *(f32 *)(rec + 0x4) * g_frame_step_f;
+        *(f32 *)(p + 0x4) += *(f32 *)(p + 0xC) * g_frame_step_f;
+        *(f32 *)(p + 0x8) += *(f32 *)(rec + 0xC) * g_frame_step_f;
     } while (i != *(s8 *)(obj + 0x2D));
 
     if (!(rec[0x18] & 0x17)) {
@@ -421,15 +421,15 @@ s32 trail_fall(u8 *obj) {
         if (k == 0) {
             return 1;
         }
-        return D_8008A7F0[k](obj, old[0], old[1], old[2], *(f32 *)(obj + 0x60), (s32)(obj + 0x64)) != 0;
+        return g_trail_floor_hit_fns[k](obj, old[0], old[1], old[2], *(f32 *)(obj + 0x60), (s32)(obj + 0x64)) != 0;
     }
     k = rec[0x23];
     if (k == 0) {
         return 1;
     }
-    return D_8008A7D0[k](obj, old[0], old[1], old[2], *(f32 *)(obj + 0x60), (s32)(obj + 0x64)) != 0;
+    return g_trail_hit_fns[k](obj, old[0], old[1], old[2], *(f32 *)(obj + 0x60), (s32)(obj + 0x64)) != 0;
 }
-// trail_shrink: motion handler 4 of a trail (D_8008A780): drops the newest point each frame and re-ramps the rest.
+// trail_shrink: motion handler 4 of a trail (g_trail_motion_fns): drops the newest point each frame and re-ramps the rest.
 /* Count obj +0x2C, ring of +0x25 points obj +0x94 (0x14 bytes, u16 texture t at +0x10) from the oldest +0x2D to the
  * head +0x2E. Returns 0 (the trail ends) when fewer than 3 points are left; else removes the head point and sets
  * the texture t of the others to a 0..0x1000 ramp (0x1000..0 with rec +0x18 flag 0x20, rec = obj +0x98), returns 1. */

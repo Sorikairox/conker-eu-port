@@ -88,8 +88,8 @@ void node_lists_run_update2(void) {
     }
 }
 extern f32 D_800DD600[2];
-extern f32 D_800DD608[4];
-extern f32 D_800DD618[4];
+extern f32 g_view_yaw_sin[4]; /* was D_800DD608 */
+extern f32 g_view_yaw_cos[4]; /* was D_800DD618 */
 /* was func_15167310 */
 void node_lists_run_view_update(void) {
     s32 i;
@@ -98,12 +98,12 @@ void node_lists_run_view_update(void) {
     struct_eu_node *node;
     s32 k;
 
-    for (k = 0; k < D_80082FA0 + 1; k++) {
-        a = *(f32 *)((u8 *)D_800DBFF0 + k * 0x9A0 + 0x3A0);
-        D_800DD608[k] = sinf(a);
-        D_800DD618[k] = cosf(a);
+    for (k = 0; k < g_last_player_index + 1; k++) {
+        a = *(f32 *)((u8 *)g_player_views + k * 0x9A0 + 0x3A0);
+        g_view_yaw_sin[k] = sinf(a);
+        g_view_yaw_cos[k] = cosf(a);
     }
-    a = D_800DBFF0->unk3A0;
+    a = g_player_views->unk3A0;
     D_800DD600[0] = sinf(a);
     D_800DD600[1] = cosf(a);
 dummy: ; // fakematch: label splits the block (permuter)
@@ -140,38 +140,38 @@ extern struct_eu_node *g_node_iter_next[]; /* was D_800DD5C8 */
 extern s8 g_node_iter_depth; /* was D_800DD5C0 */
 extern struct_eu_node *g_node_lists[][104]; /* was D_800DD280 */
 extern u8 g_sprite_keep_prim_colour; /* was D_800D31CB */
-extern s32 D_800DD5E0;
+extern s32 g_tex_cache_last_addr; /* was D_800DD5E0 */
 extern s32 D_800DD5E4;
 extern s32 D_800DD5E8;
-extern s16 D_800DD5EC;
+extern s16 g_sprite_last_other_mode; /* was D_800DD5EC */
 extern s16 D_800DD5EE;
 extern s16 g_gfx_prim_r_cached; /* was D_800DD5F0 */
 extern s16 g_gfx_prim_g_cached; /* was D_800DD5F2 */
 extern s16 g_gfx_prim_b_cached; /* was D_800DD5F4 */
 extern s16 g_gfx_prim_a_cached; /* was D_800DD5F6 */
-extern s16 D_800DD5F8;
+extern s16 g_gfx_env_r_cached; /* was D_800DD5F8 */
 extern s16 g_gfx_env_g_cached; /* was D_800DD5FA */
 extern s16 g_gfx_env_b_cached; /* was D_800DD5FC */
 extern s16 g_gfx_env_a_cached; /* was D_800DD5FE */
 extern s16 g_gfx_cached_state_628; /* was D_800DD628 */
-extern s32 D_800DD62C;
-extern s32 D_800DD630;
-extern s16 D_800DD634;
-extern s16 D_800DD636;
-extern s32 D_800DD638;
-extern s32 D_800DD63C;
-extern s32 D_800DD640;
-extern s32 D_800DD644;
-extern s32 D_800DD648;
-extern s32 D_800DD64C;
-extern s32 D_800DD650;
-extern s32 D_800DD654;
-extern s32 D_800DD658;
+extern s32 g_gfx_geom_set_cached; /* was D_800DD62C */
+extern s32 g_gfx_geom_clear_cached; /* was D_800DD630 */
+extern s16 g_gfx_prim_m_cached; /* was D_800DD634 */
+extern s16 g_gfx_prim_l_cached; /* was D_800DD636 */
+extern s32 g_gfx_tex_parm_a_cached; /* was D_800DD638 */
+extern s32 g_gfx_tex_parm_b_cached; /* was D_800DD63C */
+extern s32 g_gfx_tex_parm_c_cached; /* was D_800DD640 */
+extern s32 g_gfx_tex_parm_d_cached; /* was D_800DD644 */
+extern s32 g_gfx_othermode_hi_cached; /* was D_800DD648 */
+extern s32 g_gfx_othermode_lo_cached; /* was D_800DD64C */
+extern s32 g_layer_tex_scroll; /* was D_800DD650 */
+extern s32 g_layer_tex_mode; /* was D_800DD654 */
+extern s32 g_layer_tex; /* was D_800DD658 */
 extern Gfx *D_800BEDE8[];
-extern s32 D_800BEFC4;
-extern u8 D_80089810[];
+extern s32 g_dl_capacity; /* was D_800BEFC4 */
+extern u8 g_identity_mtx[]; /* was D_80089810 */
 
-#define DL_FULL(g) (D_800BEFC4 < (g) - D_800BEDE8[D_800BE9C0])
+#define DL_FULL(g) (g_dl_capacity < (g) - D_800BEDE8[g_dl_buf_index])
 
 /* Draw the render layers of `group` (render_group_layer_range gives the index range) from node list `list`:
  * per layer the pre DL / callback, every node's draw callback, then the post DL / callback.
@@ -193,7 +193,7 @@ void *node_render_layers_draw(void *arg0, s32 group, s16 arg2, s32 list) {
     s32 dropped;
     Gfx *(*draw)(Gfx *, struct_eu_node *, s16);
 
-    gSPMatrix(gdl++, D_80089810, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gdl++, g_identity_mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     render_group_layer_range(group, &first, &last);
     layer = &((RenderLayer *)g_node_type_table)[first];
     for (i = first; i < last; i++, layer++) {
@@ -204,7 +204,7 @@ void *node_render_layers_draw(void *arg0, s32 group, s16 arg2, s32 list) {
         if (*head == NULL) {
             continue;
         }
-        D_8003C8E0 = (i & 0xFFFFFF) | 0x07000000;
+        g_dbg_crash_marker = (i & 0xFFFFFF) | 0x07000000;
         dropped = 0;
         if (layer->type == 0) {
             start0 = gdl;
@@ -213,13 +213,13 @@ void *node_render_layers_draw(void *arg0, s32 group, s16 arg2, s32 list) {
             start1 = gdl;
         }
         g_sprite_keep_prim_colour = 0;
-        D_800DD658 = 0;
-        D_800DD650 = 0;
-        D_800DD654 = 2;
-        D_800DD5E0 = -1;
+        g_layer_tex = 0;
+        g_layer_tex_scroll = 0;
+        g_layer_tex_mode = 2;
+        g_tex_cache_last_addr = -1;
         D_800DD5E4 = -1;
         D_800DD5E8 = -1;
-        D_800DD5EC = 0;
+        g_sprite_last_other_mode = 0;
         D_800DD5EE = 0;
         g_gfx_prim_a_cached = -1;
         g_gfx_prim_b_cached = g_gfx_prim_a_cached;
@@ -228,18 +228,18 @@ void *node_render_layers_draw(void *arg0, s32 group, s16 arg2, s32 list) {
         g_gfx_env_a_cached = -1;
         g_gfx_env_b_cached = g_gfx_env_a_cached;
         g_gfx_env_g_cached = g_gfx_env_b_cached;
-        D_800DD5F8 = g_gfx_env_g_cached;
+        g_gfx_env_r_cached = g_gfx_env_g_cached;
         g_gfx_cached_state_628 = 0;
-        D_800DD62C = 0;
-        D_800DD630 = 0;
-        D_800DD634 = -1;
-        D_800DD636 = -1;
-        D_800DD638 = -1;
-        D_800DD63C = -1;
-        D_800DD640 = -1;
-        D_800DD644 = 0;
-        D_800DD648 = 0;
-        D_800DD64C = 0;
+        g_gfx_geom_set_cached = 0;
+        g_gfx_geom_clear_cached = 0;
+        g_gfx_prim_m_cached = -1;
+        g_gfx_prim_l_cached = -1;
+        g_gfx_tex_parm_a_cached = -1;
+        g_gfx_tex_parm_b_cached = -1;
+        g_gfx_tex_parm_c_cached = -1;
+        g_gfx_tex_parm_d_cached = 0;
+        g_gfx_othermode_hi_cached = 0;
+        g_gfx_othermode_lo_cached = 0;
         if (layer->dlPre != NULL) {
             gdl->words.w0 = 0xDE000000; /* G_DL */
             gdl->words.w1 = (u32)layer->dlPre;
@@ -290,7 +290,7 @@ void *node_render_layers_draw(void *arg0, s32 group, s16 arg2, s32 list) {
             gSPSetGeometryMode(gdl, 1);
             return start0;
         }
-        D_8003C8E0 = 0;
+        g_dbg_crash_marker = 0;
     }
     gSPSetGeometryMode(gdl++, 1);
     return gdl;
@@ -422,7 +422,7 @@ extern void (*g_node_sprite_behaviours[])(u8 *);  /* node behaviours, by s8 node
 /* g_node_end_handlers (variables.h: void (*[])(void)): node end handlers void (u8 *), by s8 node +0x48 */
 
 // sprite_node_update: P210: per-node update of render layers 5 / 59 / 66 (field 0 of their g_node_type_table records):
-/* counts down the lifetime s16 +0x38 by the frame time D_800BE9E4 (0x7FFF = forever) and fades the alpha +0x3F
+/* counts down the lifetime s16 +0x38 by the frame time g_frame_ticks (0x7FFF = forever) and fades the alpha +0x3F
  * by s8 +0x3A per frame; runs the behaviour g_node_sprite_behaviours[+0x2F]; while alive moves the 8.8 fixed-point position
  * (s16 +0x20 / +0x22 / +0x24 with fraction bytes +0x2C / +0x2E / +0x2D) by the velocity +0x26 / +0x30 / +0x28 (+0x30
  * accelerated by +0x32), and advances the animation frame +0x1C by speed +0x1E over the texture's (+0x10) byte 4
@@ -441,7 +441,7 @@ void node_sprite_update(u8 *n) {
     u16 flags;
 
     if (t != 0x7FFF) {
-        *(s16 *)(n + 0x38) = t - D_800BE9E4;
+        *(s16 *)(n + 0x38) = t - g_frame_ticks;
         if (*(s16 *)(n + 0x38) < 0) {
             *(s16 *)(n + 0x38) = 0;
             done = TRUE;
@@ -465,18 +465,18 @@ void node_sprite_update(u8 *n) {
     } else {
         *(s16 *)(n + 0x30) += *(s16 *)(n + 0x32);
         speed = *(s16 *)(n + 0x1E);
-        v = ((*(s16 *)(n + 0x22) << 8) | n[0x2E]) + *(s16 *)(n + 0x30) * D_800BE9E4;
+        v = ((*(s16 *)(n + 0x22) << 8) | n[0x2E]) + *(s16 *)(n + 0x30) * g_frame_ticks;
         *(s16 *)(n + 0x22) = v >> 8;
         n[0x2E] = v;
-        v = ((*(s16 *)(n + 0x20) << 8) | n[0x2C]) + *(s16 *)(n + 0x26) * D_800BE9E4;
+        v = ((*(s16 *)(n + 0x20) << 8) | n[0x2C]) + *(s16 *)(n + 0x26) * g_frame_ticks;
         *(s16 *)(n + 0x20) = v >> 8;
         n[0x2C] = v;
-        v = ((*(s16 *)(n + 0x24) << 8) | n[0x2D]) + *(s16 *)(n + 0x28) * D_800BE9E4;
+        v = ((*(s16 *)(n + 0x24) << 8) | n[0x2D]) + *(s16 *)(n + 0x28) * g_frame_ticks;
         *(s16 *)(n + 0x24) = v >> 8;
         n[0x2D] = v;
         if (speed != 0) {
             last = ((*(u8 **)(n + 0x10))[4] << 8) - 1;
-            *(s16 *)(n + 0x1C) += speed * D_800BE9E4;
+            *(s16 *)(n + 0x1C) += speed * g_frame_ticks;
             frame = *(s16 *)(n + 0x1C);
             if (last < frame) {
                 flags = *(u16 *)(n + 0x44);
@@ -525,7 +525,7 @@ Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 Gfx *gfx_prim_color_cached(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *flag);
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *flag);
 Gfx *sprite_draw_at_world_depth(Gfx *gfx, u8 *quad);
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 extern s32 g_render_mode_pairs[]; /* render mode pairs (2 words each); was D_800A4EA8 */
 extern u8 g_tex_billboard_blue_env[]; /* was D_80090BAC */
 extern u8 g_tex_billboard_white_env[]; /* was D_800908EC */
@@ -549,7 +549,7 @@ s32 node_billboard_draw(s32 gdl, u8 *obj, s16 player) {
     u8 flag;
     Gfx *gfx = (Gfx *) gdl;
     u8 *tex = *(u8 **) (obj + 0x10);
-    u8 *view = (u8 *) D_800DBFF0 + player * 0x9A0;
+    u8 *view = (u8 *) g_player_views + player * 0x9A0;
     u16 flags;
     s32 img;
     s32 w, h;
@@ -605,18 +605,18 @@ s32 node_billboard_draw(s32 gdl, u8 *obj, s16 player) {
         gfx = gfx_geometry_mode_cached(gfx, 5, 0);
         gfx = gfx_set_combine_mode(gfx, combine, &flag);
         mode = &g_render_mode_pairs[entry * 2];
-        gfx = gfx_other_mode_cached(gfx, ((flags & 0x200) ? 0x100000 : 0) | D_800D30BC | 0x2CA0,
+        gfx = gfx_other_mode_cached(gfx, ((flags & 0x200) ? 0x100000 : 0) | g_gfx_tlut_mode | 0x2CA0,
                             (mode[1] | mode[0]) | 4, &flag);
     } else if (tex[0xA] != 5) {
         gfx = gfx_set_combine_mode(gfx, 13, &flag);
-        gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x2CA0, (g_render_mode_pairs[3 * 2 + 1] | g_render_mode_pairs[3 * 2]) | 4, &flag);
+        gfx = gfx_other_mode_cached(gfx, g_gfx_tlut_mode | 0x2CA0, (g_render_mode_pairs[3 * 2 + 1] | g_render_mode_pairs[3 * 2]) | 4, &flag);
     } else if (flags & 0x10) {
         /* (the asm also holds an unreachable kind 3 branch here: combiner 14 / entry 3) */
         gfx = gfx_set_combine_mode(gfx, 13, &flag);
-        gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x2CA0, (g_render_mode_pairs[18 * 2 + 1] | g_render_mode_pairs[18 * 2]) | 4, &flag);
+        gfx = gfx_other_mode_cached(gfx, g_gfx_tlut_mode | 0x2CA0, (g_render_mode_pairs[18 * 2 + 1] | g_render_mode_pairs[18 * 2]) | 4, &flag);
     } else {
         gfx = gfx_set_combine_mode(gfx, 15, &flag);
-        gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x100000 | 0x2CA0, (g_render_mode_pairs[17 * 2 + 1] | g_render_mode_pairs[17 * 2]) | 4,
+        gfx = gfx_other_mode_cached(gfx, g_gfx_tlut_mode | 0x100000 | 0x2CA0, (g_render_mode_pairs[17 * 2 + 1] | g_render_mode_pairs[17 * 2]) | 4,
                             &flag);
     }
 
@@ -640,10 +640,10 @@ s32 node_billboard_draw(s32 gdl, u8 *obj, s16 player) {
     return (s32) sprite_draw_at_world_depth(gfx, (u8 *) &quad);
 }
 /* P125 */
-extern u8 *D_8008CDEC[];
+extern u8 *g_sprite_tex_descs[]; /* was D_8008CDEC */
 
 /* sprite_quad_init: fills the two 4-vertex quads at the start of a sprite spawn record (8 Vtx, 0x80 bytes) with
- * colour (r, g, b, a) and flag 0, and their texture coordinates from the texture D_8008CDEC[rec[0xA0]] (u16 width
+ * colour (r, g, b, a) and flag 0, and their texture coordinates from the texture g_sprite_tex_descs[rec[0xA0]] (u16 width
  * +6, height +8; S10.5 coordinates (size + 256) << 5, the other edge 256 << 5). Record flags u16 +0x98: 0x80 flips
  * t, 0x100 flips s. Also clears the s16 at +0x88, +0x9C and +0x9E. The colour parameters are bytes. Returns the
  * last t value (what the asm leaves in v0; the callers, declared s32, ignore it). */
@@ -655,7 +655,7 @@ s32 sprite_vtx_quads_init(u8 *rec, s32 r, s32 g, s32 b, s32 a) {
     s16 s0, s1, t0, t1;
     s32 i;
 
-    tex = D_8008CDEC[rec[0xA0]];
+    tex = g_sprite_tex_descs[rec[0xA0]];
     s0 = 0x2000;
     t0 = 0x2000;
     s1 = (*(u16 *) (tex + 6) + 0x100) << 5;
@@ -670,11 +670,11 @@ s32 sprite_vtx_quads_init(u8 *rec, s32 r, s32 g, s32 b, s32 a) {
     flags = *(u16 *) (rec + 0x98);
     if (flags & 0x80) {
         t1 = 0x2000;
-        t0 = (*(u16 *) (D_8008CDEC[rec[0xA0]] + 8) + 0x100) << 5;
+        t0 = (*(u16 *) (g_sprite_tex_descs[rec[0xA0]] + 8) + 0x100) << 5;
     }
     if (flags & 0x100) {
         s1 = 0x2000;
-        s0 = (*(u16 *) (D_8008CDEC[rec[0xA0]] + 6) + 0x100) << 5;
+        s0 = (*(u16 *) (g_sprite_tex_descs[rec[0xA0]] + 6) + 0x100) << 5;
     }
     v[6].v.tc[0] = s0;
     v[7].v.tc[1] = t0;
@@ -699,7 +699,7 @@ void *node_spawn_vtx_sprite(void *arg0, u8 arg1, s32 arg2) {
     bcopy(arg0, temp_v0 + 0x10, 0xA8);
     return temp_v0;
 }
-extern u8 *D_8008CDEC[];
+extern u8 *g_sprite_tex_descs[]; /* was D_8008CDEC */
 extern void (*g_node_sprite_behaviours[])(u8 *); /* was D_8008CD68 */
 
 /* was func_15168870 */
@@ -710,9 +710,9 @@ void node_vtx_sprite_update(u8 *arg0) {
     s32 t;
 
     if (speed != 0) {
-        t = D_8008CDEC[arg0[0xB0]][4];
+        t = g_sprite_tex_descs[arg0[0xB0]][4];
         len = (t << 8) - 1;
-        *(s16 *)(arg0 + 0x98) += speed * D_800BE9E4;
+        *(s16 *)(arg0 + 0x98) += speed * g_frame_ticks;
         if (*(s16 *)(arg0 + 0x98) > len) {
             if (*(u16 *)(arg0 + 0xA8) & 0x40) {
                 *(s16 *)(arg0 + 0x98) = len - *(s16 *)(arg0 + 0x98) % len;
@@ -842,7 +842,7 @@ Gfx *node_model_fx_draw(Gfx *gfx, u8 *arg1, s32 arg2) {
     u8 flag;
     s32 pad2; // fakematch: frame
 
-    mtx_build_rot_scale_trans(&((Mtx *)(arg1 + 0x10))[D_800BE9C0], *(f32 *)(arg1 + 0x9C), *(f32 *)(arg1 + 0xA0), *(f32 *)(arg1 + 0xA4), *(f32 *)(arg1 + 0xC0), *(f32 *)(arg1 + 0xC4), *(f32 *)(arg1 + 0xC8), *(f32 *)(arg1 + 0x90), *(f32 *)(arg1 + 0x94), *(f32 *)(arg1 + 0x98));
+    mtx_build_rot_scale_trans(&((Mtx *)(arg1 + 0x10))[g_dl_buf_index], *(f32 *)(arg1 + 0x9C), *(f32 *)(arg1 + 0xA0), *(f32 *)(arg1 + 0xA4), *(f32 *)(arg1 + 0xC0), *(f32 *)(arg1 + 0xC4), *(f32 *)(arg1 + 0xC8), *(f32 *)(arg1 + 0x90), *(f32 *)(arg1 + 0x94), *(f32 *)(arg1 + 0x98));
     gDPPipeSync(gfx++);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, arg1[0xE5]);
     g_gfx_prim_a_cached = arg1[0xE5];
@@ -862,7 +862,7 @@ Gfx *node_model_fx_draw(Gfx *gfx, u8 *arg1, s32 arg2) {
     if (arg1[0xED] == 1) {
         gDPSetCombineLERP(gfx++, TEXEL0, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0, TEXEL0, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0);
     }
-    gSPMatrix(gfx++, &((Mtx *)(arg1 + 0x10))[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, &((Mtx *)(arg1 + 0x10))[g_dl_buf_index], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPDisplayList(gfx++, *(Gfx **)(arg1 + 0xD0));
     return gfx;
 }

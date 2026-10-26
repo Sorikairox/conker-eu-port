@@ -140,11 +140,11 @@ s32 spark_record_update_motion(u8 *arg0) {
 
     temp_f2 = (*(f32 *)((u8 *)arg0 + 0x114));
     temp_f12 = (*(f32 *)((u8 *)arg0 + 0x11C));
-    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((*(f32 *)((u8 *)arg0 + 0x110)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((temp_f2 * D_800BE9A4) + (0.5f * temp_f12 * D_800BE9A4 * D_800BE9A4)));
-    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((*(f32 *)((u8 *)arg0 + 0x118)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x114)) = (f32) (temp_f2 + (temp_f12 * D_800BE9A4));
-    var_v0 = D_800BE9E4;
+    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((*(f32 *)((u8 *)arg0 + 0x110)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((temp_f2 * g_frame_step_f) + (0.5f * temp_f12 * g_frame_step_f * g_frame_step_f)));
+    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((*(f32 *)((u8 *)arg0 + 0x118)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x114)) = (f32) (temp_f2 + (temp_f12 * g_frame_step_f));
+    var_v0 = g_frame_ticks;
     if (var_v0 != 0) {
         temp_a1 = -(var_v0 & 3);
         temp_a0 = temp_a1 + var_v0;
@@ -200,7 +200,7 @@ block_5:
     }
     temp_v1_3 = arg0 + 0x110;
     if ((*(f32 *)((u8 *)temp_v1_3 + 4)) > 0.0f) {
-        var_v0_3 = D_800BE9E4;
+        var_v0_3 = g_frame_ticks;
         if (var_v0_3 != 0) {
             temp_a1_2 = -(var_v0_3 & 3);
             temp_f0_3 = (*(f32 *)((u8 *)temp_v1_3 + 0x10));
@@ -247,8 +247,8 @@ block_14:
     if ((*(f32 *)((u8 *)temp_v1_3 + 4)) < 0.0f) {
         sp20 = temp_v1_3;
         vec3_from_angles_rad((*(f32 *)((u8 *)temp_v1_3 + 0x2C)), ((*(f32 *)((u8 *)temp_v1_3 + 0x38)) * sinf((*(f32 *)((u8 *)temp_v1_3 + 0x30)))) + 1.5707964f, (*(f32 *)((u8 *)temp_v1_3 + 0x24)), arg0 + 0x4C);
-        (*(f32 *)((u8 *)temp_v1_3 + 0x24)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 0x24)) + ((*(f32 *)((u8 *)temp_v1_3 + 0x28)) * D_800BE9A4));
-        (*(f32 *)((u8 *)temp_v1_3 + 0x30)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 0x30)) + ((*(f32 *)((u8 *)temp_v1_3 + 0x34)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_v1_3 + 0x24)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 0x24)) + ((*(f32 *)((u8 *)temp_v1_3 + 0x28)) * g_frame_step_f));
+        (*(f32 *)((u8 *)temp_v1_3 + 0x30)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 0x30)) + ((*(f32 *)((u8 *)temp_v1_3 + 0x34)) * g_frame_step_f));
         if ((*(f32 *)((u8 *)temp_v1_3 + 0x30)) > 6.2831855f) {
             do {
                 (*(f32 *)((u8 *)temp_v1_3 + 0x30)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 0x30)) - 6.2831855f);
@@ -363,7 +363,7 @@ void shooting_star_sky_update(u8 *obj) {
     f32 ang, h, r;
     u8 k;
 
-    *(f32 *) (obj + 0x28) += D_800A0B24 * D_800BE9A4 * *(f32 *) (obj + 0x2C);
+    *(f32 *) (obj + 0x28) += D_800A0B24 * g_frame_step_f * *(f32 *) (obj + 0x2C);
     if (!(1.0f < *(f32 *) (obj + 0x28))) {
         return;
     }
@@ -380,7 +380,7 @@ void shooting_star_sky_update(u8 *obj) {
         lanes[4] = D_80088C14[4];
         k = (u32) random_int() % 5;
         ang = random_float() * D_800A0B40 + lanes[k];
-        h = *(f32 *) ((u8 *) D_800DBFF0 + g_cur_view_player * 0x9A0 + 0x380) - 180.0f;
+        h = *(f32 *) ((u8 *) g_player_views + g_cur_view_player * 0x9A0 + 0x380) - 180.0f;
         while (360.0f < h) {
             h -= 360.0f;
         }

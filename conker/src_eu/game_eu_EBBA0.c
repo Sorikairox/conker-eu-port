@@ -73,7 +73,7 @@ void sprite2d_emitter_update(u8 *arg0) {
     s32 temp_v0;
     u8 **temp_v1;
 
-    (*(s16 *)((u8 *)arg0 + 0x2C)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x2C)) - D_800BE9E4);
+    (*(s16 *)((u8 *)arg0 + 0x2C)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x2C)) - g_frame_ticks);
     if ((*(s16 *)((u8 *)arg0 + 0x2C)) < 0) {
         temp_f6 = random_float() * 270.0f;
         sp.u98 = -120.0f;
@@ -138,7 +138,7 @@ void sprite2d_emitter_on_message(struct102 *arg0, u8 **arg1, u8 arg2) {
 
 /* was func_150BE6C4 */
 s32 sprite_rise_update(f32 *arg0) {
-    arg0[5] += arg0[0x20] * D_800BE9A4;
+    arg0[5] += arg0[0x20] * g_frame_step_f;
     if (arg0[5] > 120.0f) {
         return 0;
     }

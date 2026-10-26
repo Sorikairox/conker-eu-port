@@ -56,7 +56,7 @@ void scenery_ease_pos_update(u8 *arg0) {
     temp_f0 = (f32) (*(s16 *)((u8 *)arg0 + 0x7C));
     temp_f20 = (f32) (*(s16 *)((u8 *)arg0 + 0x3C)) * 0.000061035156f;
     temp_f20_2 = temp_f20 - (temp_f20 * 0.128f);
-    var_f22 = ((f32) (*(s16 *)((u8 *)arg0 + 0x3E)) * 0.000061035156f) + (temp_f20_2 * (f32) D_800BE9E4);
+    var_f22 = ((f32) (*(s16 *)((u8 *)arg0 + 0x3E)) * 0.000061035156f) + (temp_f20_2 * (f32) g_frame_ticks);
     (*(s16 *)((u8 *)arg0 + 0x10)) = (s16) (s32) ((((f32) (*(s16 *)((u8 *)arg0 + 0x82)) - temp_f0) * var_f22) + temp_f0);
     (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) (s32) ((((f32) (*(s16 *)((u8 *)arg0 + 0x84)) - temp_f2) * var_f22) + temp_f2);
     (*(s16 *)((u8 *)arg0 + 0x14)) = (s16) (s32) ((((f32) (*(s16 *)((u8 *)arg0 + 0x86)) - temp_f12) * var_f22) + temp_f12);

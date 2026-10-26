@@ -6,8 +6,8 @@
 \#^        \*(s16 \*) (arg0 + 0xE) = -1;$#s/-1/-2/
 \#^    if (\*(u8 \*\*) (owner + 0x1D4) != NULL && (owner\[0x74\] & 0xF) != 0xF) {$#s/!= NULL/== NULL/
 \#^    if (\*(u8 \*\*) (owner + 0x1D4) != NULL && (owner\[0x74\] & 0xF) != 0xF) {$#s/0xF) !=/0x7) !=/
-\#^        src\[0\] = D_800AAB58;$#s/D_800AAB58/D_800AAB64/
-\#^        src\[3\] = D_800AAB7C;$#s/D_800AAB7C/D_800AAB70/
+\#^        src\[0\] = g_aura_burst_emit_pt0;$#s/g_aura_burst_emit_pt0/g_aura_burst_emit_pt1/
+\#^        src\[3\] = g_aura_burst_dir_pt1;$#s/g_aura_burst_dir_pt1/g_aura_burst_dir_pt0/
 \#^        dst\[1\] = pos\[1\];$#s/pos\[1\]/pos[0]/
 \#^        dst\[2\] = dir\[0\];$#s/dir\[0\]/dir[1]/
 \#^        mtx_transform_points(src, dst, \*(u8 \*\*) (owner + 0x1D4) + 0x40, 4);$#s/0x40/0x80/

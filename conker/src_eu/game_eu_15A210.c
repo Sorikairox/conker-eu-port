@@ -17,24 +17,24 @@ void camera_wobble_apply(u8 *arg0);
 void camera_track_noop(s32 arg0);
 void camera_track_update(u8 *arg0);
 extern Mtx *D_800DC6D0[];         /* per DL buffer: the per-player view matrices (0x40 each) */
-extern u8 D_800BE9C0;             /* current DL buffer */
-extern u8 D_800D9FB0[];           /* per DL buffer: LookAt (0x20) */
-extern s32 D_800DC6B0[];         /* camera shake tables (camera_shake_tracks_load): 6 floats (0x18) per step */
-/* D_800DD210 (u8[]): per player 6 floats (0x18): extra translation (0..2) and rotation (3..5) */
-/* D_800DC6F0 (u8[][0x68]): per player, +0x54 translation, +0x60 roll (the asm reads it as D_800DC750) */
+extern u8 g_dl_buf_index;             /* current DL buffer; was D_800BE9C0 */
+extern u8 g_cam_lookat_bufs[];           /* per DL buffer: LookAt (0x20); was D_800D9FB0 */
+extern s32 g_camera_track_data[];         /* camera shake tables (camera_shake_tracks_load): 6 floats (0x18) per step; was D_800DC6B0 */
+/* g_camera_view_offsets (u8[]): per player 6 floats (0x18): extra translation (0..2) and rotation (3..5) */
+/* g_camera_shake_states (u8[][0x68]): per player, +0x54 translation, +0x60 roll (the asm reads it as D_800DC750) */
 
 #define CAM_W(o) (*(s32 *)(p + (o)))
 #define CAM_H(o) (*(s16 *)(p + (o)))
 #define CAM_F(o) (*(f32 *)(p + (o)))
 #define CAM_OBJ() (*(u8 **)(p + 0x3D4))
 #define CAM_REC() (*(u8 **)(p + 0x3D0))
-#define CAM_MTX() ((Mtx *)((u8 *)D_800DC6D0[D_800BE9C0] + p[0x23D] * 0x40))
+#define CAM_MTX() ((Mtx *)((u8 *)D_800DC6D0[g_dl_buf_index] + p[0x23D] * 0x40))
 
 /* Gameplay view matrix of one camera controller (camera_update_all's in-game branch): ease the orbit distances
  * (0x194 / 0x18C toward 0x198 / 0x190), pick eye (0x2F8) / target (0x2BC) (offset by the orbit around the
  * yaw 0x3A0 unless the object (0x3D4) has its own view, +0x197), look-at matrix into D_800DC6D0[buffer][player]
- * with the LookAt D_800D9FB0[buffer], then post-rotations: shake (0x854..0x868, decayed by 0.08 or driven by
- * D_800DC6B0), roll 0x5EC, per-player D_800DD210 rotation / translation. */
+ * with the LookAt g_cam_lookat_bufs[buffer], then post-rotations: shake (0x854..0x868, decayed by 0.08 or driven by
+ * g_camera_track_data), roll 0x5EC, per-player g_camera_view_offsets rotation / translation. */
 /* was func_1512C490 */
 void camera_build_view_matrix(struct108 *arg0) {
     u8 *p = (u8 *)arg0;
@@ -54,7 +54,7 @@ void camera_build_view_matrix(struct108 *arg0) {
     f32 *d;
     s32 fl;
 
-    scale = *(f32 *)((u8 *)D_800BE628 + p[0x23D] * 0x180 + 0x84);
+    scale = *(f32 *)((u8 *)g_player_cams + p[0x23D] * 0x180 + 0x84);
     scale = (1.0f - scale) * 0.5f + scale;
     if (CAM_OBJ()[0x120] != 0) {
         CAM_F(0x198) = 0.0f;
@@ -132,7 +132,7 @@ void camera_build_view_matrix(struct108 *arg0) {
     *(f32 *)(obj + 0x130) = dir[0];
     *(f32 *)(obj + 0x134) = dir[1];
     *(f32 *)(obj + 0x138) = dir[2];
-    mtx_look_at_reflect(CAM_MTX(), (s32)(D_800D9FB0 + D_800BE9C0 * 0x20), eye[0], eye[1], eye[2], at[0], at[1], at[2],
+    mtx_look_at_reflect(CAM_MTX(), (s32)(g_cam_lookat_bufs + g_dl_buf_index * 0x20), eye[0], eye[1], eye[2], at[0], at[1], at[2],
                   0.0f, 1.0f, 0.0f);
 
     fl = CAM_W(0x2C);
@@ -151,7 +151,7 @@ void camera_build_view_matrix(struct108 *arg0) {
     /* shake */
     if (CAM_OBJ()[0x197] != 0) {
         if (p[0x84D] == 2) {
-            d = (f32 *)(D_800DC6B0[CAM_W(0x850)] + p[0x84E] * 0x18);
+            d = (f32 *)(g_camera_track_data[CAM_W(0x850)] + p[0x84E] * 0x18);
             CAM_F(0x854) += d[3];
             CAM_F(0x858) += d[4];
             CAM_F(0x85C) += d[5];
@@ -196,9 +196,9 @@ void camera_build_view_matrix(struct108 *arg0) {
         *(f32 *)(CAM_OBJ() + 0x138) = oz;
     }
     if (CAM_OBJ()[0x197] != 0) {
-        d = (f32 *)(D_800DD210 + p[0x23D] * 0x18);
+        d = (f32 *)(g_camera_view_offsets + p[0x23D] * 0x18);
         mtx_rotate_xyz_deg_fixed(&m158, d[3], d[4], d[5]);
-        d = (f32 *)(D_800DD210 + p[0x23D] * 0x18);
+        d = (f32 *)(g_camera_view_offsets + p[0x23D] * 0x18);
         mtx_translate_fixed(&m118, d[0], d[1], d[2]);
         guMtxCatL(&m158, &m118, &m158);
         guMtxCatL(CAM_MTX(), &m158, CAM_MTX());
@@ -228,9 +228,9 @@ void camera_build_view_matrix(struct108 *arg0) {
             CAM_F(0x388) = CAM_F(0x388) - CAM_F(0x5D0);
             CAM_F(0x398) = CAM_F(0x388) * 0.017453292f; /* D_800A3A9C */
         }
-        d = (f32 *)(D_800DD210 + p[0x23D] * 0x18);
+        d = (f32 *)(g_camera_view_offsets + p[0x23D] * 0x18);
         mtx_rotate_xyz_deg_fixed(&m158, d[3] + (CAM_F(0x5D0) + CAM_F(0x3A8) + CAM_F(0x38C)), d[4] + CAM_F(0x5E8),
-                      d[5] + (CAM_F(0x5EC) + *(f32 *)&D_800DC6F0[p[0x23D]][0x60] * 0.5f));
+                      d[5] + (CAM_F(0x5EC) + *(f32 *)&g_camera_shake_states[p[0x23D]][0x60] * 0.5f));
         if (CAM_W(0x2C) == 0x40000) {
             mtx_rotate_xyz_deg_fixed(&m158, 0.0f, 0.0f, CAM_F(0x5EC));
         }
@@ -240,8 +240,8 @@ void camera_build_view_matrix(struct108 *arg0) {
     if (CAM_W(0x2C) & 0x40000) {
         return;
     }
-    d = (f32 *)(D_800DD210 + p[0x23D] * 0x18);
-    v = D_800DC6F0[p[0x23D]];
+    d = (f32 *)(g_camera_view_offsets + p[0x23D] * 0x18);
+    v = g_camera_shake_states[p[0x23D]];
     mtx_translate_fixed(&m118, d[0] + *(f32 *)(v + 0x54), d[1] + *(f32 *)(v + 0x58), d[2] + *(f32 *)(v + 0x5C));
     guMtxCatL(CAM_MTX(), &m118, CAM_MTX());
 }
@@ -268,7 +268,7 @@ void camera_wobble_apply(u8 *arg0) {
         k = 0.03f;
     }
     if ((*(s32 *)(arg0 + 0x2C) & 0x80000) || (*(s32 *)(arg0 + 0x5F0) & 1) || (*(s32 *)(arg0 + 0x2C) != 0x40000 && (*(s32 *)(arg0 + 0x5F0) & 8))) {
-        *(f32 *)(arg0 + 0x7B0) += 0.04363323f * D_800BE9E4;
+        *(f32 *)(arg0 + 0x7B0) += 0.04363323f * g_frame_ticks;
         if (*(f32 *)(arg0 + 0x7B0) > 3.1415927f) {
             *(f32 *)(arg0 + 0x7B0) -= 6.2831855f;
         }
@@ -284,20 +284,20 @@ void camera_wobble_apply(u8 *arg0) {
     mf[0][0] = 2.0f * *(f32 *)(arg0 + 0x7DC) + 2.0f * (*(f32 *)(arg0 + 0x7DC) * fast_sinf(*(f32 *)(arg0 + 0x7B0))) + 1.0f;
     mf[1][1] = *(f32 *)(arg0 + 0x7DC) + *(f32 *)(arg0 + 0x7DC) * fast_cosf(*(f32 *)(arg0 + 0x7B0)) + 1.0f;
     guMtxF2L(mf, &m);
-    guMtxCatL(arg0[0x23D] + D_800DC6D0[D_800BE9C0], &m, arg0[0x23D] + D_800DC6D0[D_800BE9C0]);
+    guMtxCatL(arg0[0x23D] + D_800DC6D0[g_dl_buf_index], &m, arg0[0x23D] + D_800DC6D0[g_dl_buf_index]);
 }
 
 s32 asset_load(u32 *, s32, s32, s32);
-extern s32 D_800DC6B0[];
-extern s32 D_800DC6C0[];
+extern s32 g_camera_track_data[]; /* was D_800DC6B0 */
+extern s32 g_camera_track_lengths[]; /* was D_800DC6C0 */
 /* was func_1512D7A8 */
 void camera_shake_tracks_load(void) {
     u32 sp3C;
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        D_800DC6B0[i] = asset_load(&sp3C, 2, 0x1B, i);
-        D_800DC6C0[i] = sp3C / 24;
+        g_camera_track_data[i] = asset_load(&sp3C, 2, 0x1B, i);
+        g_camera_track_lengths[i] = sp3C / 24;
     }
 }
 
@@ -307,7 +307,7 @@ void camera_track_start(u8 *arg0, s32 arg1) {
     arg0[0x84D] = 1;
 }
 
-extern s32 D_800DC6C0[];
+extern s32 g_camera_track_lengths[]; /* was D_800DC6C0 */
 /* was func_1512D868 */
 void camera_track_update(u8 *arg0) {
     switch (arg0[0x84D]) {
@@ -316,8 +316,8 @@ void camera_track_update(u8 *arg0) {
         arg0[0x84D] = 2;
         break;
     case 2:
-        arg0[0x84E] += D_800BE9E4;
-        if (arg0[0x84E] >= D_800DC6C0[*(s32 *)(arg0 + 0x850)]) {
+        arg0[0x84E] += g_frame_ticks;
+        if (arg0[0x84E] >= g_camera_track_lengths[*(s32 *)(arg0 + 0x850)]) {
             arg0[0x84D] = 0;
         }
         break;

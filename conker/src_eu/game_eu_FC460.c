@@ -29,7 +29,7 @@ static const f32 D_800A0BF8_c[1] = { 0.15f };       /* 0x3E19999A */
 // camera yaw, pad_stick_speed speed), single player follows player 0 (its speed * 1.75, yaw from +0x31C +0x4C).
 // Type 0x21 riders wander (random yaw within +-5000, speed 20..80 when slow) and turn (state 0x10) when the target
 // is behind; plain riders stop below speed 5 or turn (+0x223 == 1: states 3 / 4 / 5 by +0x3C vs 35). Then
-// obj_state_common_update (unless a multiplayer +0x31C[0x120] player beyond D_8008FD8C), the attack (D_800A0BE8 state:
+// obj_state_common_update (unless a multiplayer +0x31C[0x120] player beyond g_player_count), the attack (D_800A0BE8 state:
 // obj_carry_release, or obj_carry_pickup on a 0x400 hit), a lean +0xC4 easing to the clamped yaw error * 0.005 and, for
 // 0x21, the body sway +0x2E4 / +0x2E8; finally obj_hit_react_other_players for multiplayer human riders.
 /* was func_150CEC50 */
@@ -90,7 +90,7 @@ void rider_ai_control(struct127 *self) {
         obj[0x124] = 0;
         if (obj[0x89] == 0 && !(D_800BE616 != 0 && (*(u8 **) (obj + 0x31C))[0x84] != 0)) {
             if (D_800BE616 != 0) {
-                D_800CC6A0 = (s32) (*(f32 *) ((u8 *) D_800DBFF0 + g_cur_obj_index * 0x9A0 + 0x37C) * D_800A0BF0_c[0]);
+                D_800CC6A0 = (s32) (*(f32 *) ((u8 *) g_player_views + g_cur_obj_index * 0x9A0 + 0x37C) * D_800A0BF0_c[0]);
                 yaw = math_atan2_u16((s8) D_800CC6A4[2], (s8) D_800CC6A4[3], 0) + D_800CC6A0;
                 P(0x44, f32) = pad_stick_speed((struct49 *) D_800CC6A4);
             } else {
@@ -136,7 +136,7 @@ void rider_ai_control(struct127 *self) {
         }
     }
 
-    if (D_800BE616 == 0 || g_cur_obj_index >= D_8008FD8C || (*(u8 **) (obj + 0x31C))[0x120] == 0) {
+    if (D_800BE616 == 0 || g_cur_obj_index >= g_player_count || (*(u8 **) (obj + 0x31C))[0x120] == 0) {
         obj_state_common_update(self);
     }
     pl = *(u8 **) ((u8 *) g_objects + 0x31C);

@@ -17,9 +17,9 @@ void target_volume_hit_check_offset(void *arg0, void *arg1, s32 arg2) {
 
 s32 trigger_set_disabled(s32, s32);
 s32 target_volume_explode(u8 *, s32, s32);
-extern s32 D_80088E40[];
-extern s32 D_80088E50[];
-extern s32 D_80088E70;
+extern s32 g_target_hit_trigger_ids[]; /* was D_80088E40 */
+extern s32 g_target_block_trigger_ids[]; /* was D_80088E50 */
+extern s32 g_map_tint_r; /* was D_80088E70 */
 
 /* was func_150EBA04 */
 s32 target_volume_hit_check(u8 *arg0, f32 *arg1, s32 arg2) {
@@ -33,7 +33,7 @@ s32 target_volume_hit_check(u8 *arg0, f32 *arg1, s32 arg2) {
     sp44 = obj_find_by_setup_id(9U);
     if (sp44 != NULL) {
         for (var_s1 = 0; var_s1 < 4; var_s1++) {
-            temp_s2 = D_80088E40[var_s1];
+            temp_s2 = g_target_hit_trigger_ids[var_s1];
             temp_lo = temp_s2 * 0x34;
             if (trigger_segment_hit(temp_lo + D_800D34B8, arg0, arg1, arg2) != 0) {
                 trigger_set_disabled(temp_s2, 1);
@@ -43,7 +43,7 @@ s32 target_volume_hit_check(u8 *arg0, f32 *arg1, s32 arg2) {
             }
         }
         for (var_s1 = 0; var_s1 < 8; var_s1++) {
-            if (trigger_segment_hit((D_80088E50[var_s1] * 0x34) + D_800D34B8, arg0, arg1, arg2) != 0) {
+            if (trigger_segment_hit((g_target_block_trigger_ids[var_s1] * 0x34) + D_800D34B8, arg0, arg1, arg2) != 0) {
                 return 1;
             }
         }
@@ -63,7 +63,7 @@ float sqrtf(float);
 // becomes 3 and the angle 0. States 0 / 1: the target is -40, or, for objects with +0x4F bit 2, -40 plus 0.0108 *
 // the distance to the player (g_objects[0] position +0x14..+0x1C, at most 740); when the player's +0x31C
 // record has +0x57 set, the state becomes 2 with damping 0.5, stiffness 0.3, velocity 0 and +0x3C = 0. The angle
-// moves by velocity * D_800BE9E4, the velocity by +-|diff| * stiffness (diff = math_angle_diff_deg(angle, target)) and is
+// moves by velocity * g_frame_ticks, the velocity by +-|diff| * stiffness (diff = math_angle_diff_deg(angle, target)) and is
 // damped; it snaps to the target when both |diff| and |velocity| are below 0.01, else wraps into [0, 360).
 /* was func_150EBB94 */
 void world_obj_tilt_spring_update(u8 *obj) {
@@ -116,7 +116,7 @@ void world_obj_tilt_spring_update(u8 *obj) {
     if (angle == target && vel == 0.0f) {
         return;
     }
-    angle += vel * D_800BE9E4;
+    angle += vel * g_frame_ticks;
     diff = math_angle_diff_deg(angle, target);
     if (0.0f < diff) {
         vel += fabsf(diff) * stiffness;
@@ -142,9 +142,9 @@ typedef struct {
     f32 u4;         /* 0x04 D_800A18B8 (0.435) */
     f32 u8;         /* 0x08 */
     f32 uC;         /* 0x0C */
-    f32 pos[3];     /* 0x10 D_800A5860 */
+    f32 pos[3];     /* 0x10 g_vec3_zero */
     f32 scale[3];   /* 0x1C */
-    f32 dir[3];     /* 0x28 D_800A1878[i] */
+    f32 dir[3];     /* 0x28 g_fireworks_spark_dirs[i] */
     f32 vel[3];     /* 0x34 vec3_from_angles_byte */
     f32 u40;        /* 0x40 */
     f32 u44;        /* 0x44 */
@@ -152,7 +152,7 @@ typedef struct {
     f32 u4C;        /* 0x4C */
     s32 u50;        /* 0x50 0x29E9 */
     s16 life;       /* 0x54 */
-    s16 u56;        /* 0x56 D_800A18A8[i] */
+    s16 u56;        /* 0x56 g_fireworks_spark_u56[i] */
     u8 u58;         /* 0x58 */
     u8 pad59[3];
     s32 u5C;        /* 0x5C */
@@ -175,10 +175,10 @@ typedef struct {
 } VecBE44;
 
 extern u8 D_800BEE0B;
-extern f32 D_800A1860[];
-extern f32 D_800A186C[];
-extern VecBE44 D_800A1878[];
-extern u8 D_800A18A8[];
+extern f32 g_fireworks_burst_pos[]; /* was D_800A1860 */
+extern f32 g_fireworks_flash_pos[]; /* was D_800A186C */
+extern VecBE44 g_fireworks_spark_dirs[]; /* was D_800A1878 */
+extern u8 g_fireworks_spark_u56[]; /* was D_800A18A8 */
 
 void fx_debris_emitter_spawn(void *, s16, u8, s32);
 s32 spark_shower_spawn(f32 *, f32, f32, f32, f32, s32, s32);
@@ -188,9 +188,9 @@ s32 smoke_cloud_spawn(f32 *, s32, s32);
 s32 mdl_particle_spawn_ex(f32 *, s32, s32, s32, s32, s32, s32);
 void vec3_from_angles_byte(s16, s16, f32, void *);
 
-// fireworks_burst: sound (cam_wobble_start_preset 2), a flash at D_800A186C (fx_debris_emitter_spawn, size 120..181) and the effects at
-// D_800A1860 (smoke_cloud_spawn / explosion_light_spawn / spark_shower_spawn radius 12..16), then four spark showers (mdl_particle_spawn_ex
-// type 3), one per D_800A1878 direction, each with a random launch velocity (vec3_from_angles_byte: angle 45..70, yaw
+// fireworks_burst: sound (cam_wobble_start_preset 2), a flash at g_fireworks_flash_pos (fx_debris_emitter_spawn, size 120..181) and the effects at
+// g_fireworks_burst_pos (smoke_cloud_spawn / explosion_light_spawn / spark_shower_spawn radius 12..16), then four spark showers (mdl_particle_spawn_ex
+// type 3), one per g_fireworks_spark_dirs direction, each with a random launch velocity (vec3_from_angles_byte: angle 45..70, yaw
 // -25..-10, speed 15..45), sizes and a life of 50..100 frames. Returns the last mdl_particle_spawn_ex result; `arg0` (the
 // event id the dispatcher event_effect_stop passes) is unused.
 /* was func_150EBE44 */
@@ -203,16 +203,16 @@ s32 fx_fireworks_burst(s32 arg0) {
     s32 ret;
 
     cam_wobble_start_preset(2, D_800BEE0B, 0, 0xFF, 1);
-    fx_debris_emitter_spawn(D_800A186C, (u32) random_int() % 62 + 120, 0xFF, 1);
-    smoke_cloud_spawn(D_800A1860, 0xFF, 1);
-    explosion_light_spawn((u8 *) D_800A1860, 0xFF, 1);
+    fx_debris_emitter_spawn(g_fireworks_flash_pos, (u32) random_int() % 62 + 120, 0xFF, 1);
+    smoke_cloud_spawn(g_fireworks_burst_pos, 0xFF, 1);
+    explosion_light_spawn((u8 *) g_fireworks_burst_pos, 0xFF, 1);
     f = random_float();
-    spark_shower_spawn(D_800A1860, f * 4.0f + 12.0f, 1.64099991f, (u32) random_int() % 56 + 200, 0.0f, 0xFF, 1);
+    spark_shower_spawn(g_fireworks_burst_pos, f * 4.0f + 12.0f, 1.64099991f, (u32) random_int() % 56 + 200, 0.0f, 0xFF, 1);
     t.u8 = 1.0f;
     t.uC = 1.0f;
     t.u0 = 9.0f;
     t.u4 = 0.435000032f;  /* D_800A18B8 */
-    *(VecBE44 *) t.pos = *(VecBE44 *) D_800A5860;
+    *(VecBE44 *) t.pos = *(VecBE44 *) g_vec3_zero;
     t.u44 = 0.0f;
     t.scale[0] = 1.0f;
     t.scale[1] = 1.0f;
@@ -236,7 +236,7 @@ s32 fx_fireworks_burst(s32 arg0) {
     t.u74 = 0xA;
     t.u78 = 0;
     for (i = 0; i < 4; i++) {
-        *(VecBE44 *) t.dir = D_800A1878[i];
+        *(VecBE44 *) t.dir = g_fireworks_spark_dirs[i];
         a = random_int();
         b = random_int();
         f = random_float();
@@ -245,7 +245,7 @@ s32 fx_fireworks_burst(s32 arg0) {
         t.u48 = random_float() * 15.1080008f + -7.55400038f;
         t.u4C = random_float() * 0.617000043f + -1.62100005f; /* D_800A18C0, D_800A18BC */
         t.life = (u32) random_int() % 51 + 50;
-        t.u56 = D_800A18A8[i];
+        t.u56 = g_fireworks_spark_u56[i];
         ret = mdl_particle_spawn_ex((f32 *) &t, 3, 0xFF, 0, 0, 0xFF, 1);
     }
     return ret;

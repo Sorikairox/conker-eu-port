@@ -11,10 +11,10 @@ s/    D_800BEECA = 1;/    D_800BEECA = 0;/
 s/            case 5:/            case 6:/
 s/            case 1:/            case 4:/
 s/                \/\* fallthrough \*\/$/                break;/
-s/if (D_800E0B94 == 2) {/if (D_800E0B94 != 3) {/
+s/if (g_game_mode == 2) {/if (g_game_mode != 3) {/
 s/random_seed(0x81280783);/random_seed(0x81280782);/
 s/level_start_game((s16) D_800BEE24, (s16) D_800BEE20/level_start_game((s16) D_800BEE20, (s16) D_800BEE24/
 s/((s16 \*) \&g_level_load_id)\[1\]/((s16 *) \&g_level_load_id)[0]/
 s/                D_800BEA35 = 0;/                D_800BEA35 = 1;/
-s/        D_800BEE08 = 0;/        D_800BEE08 = 1;/
+s/        g_view_count_minus1 = 0;/        g_view_count_minus1 = 1;/
 s/        sched_send_retrace_msg();//

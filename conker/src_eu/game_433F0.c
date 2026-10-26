@@ -4,7 +4,7 @@
 
 
 s8 mp_human_player_count(s16);
-extern s32 D_800BEE08;
+extern s32 g_view_count_minus1; /* was D_800BEE08 */
 
 /* was func_15015F40 */
 void mp_set_mode_for_level(s16 arg0, s32 arg1) {
@@ -18,11 +18,11 @@ void mp_set_mode_for_level(s16 arg0, s32 arg1) {
     case 0x34:
     case 0x3F:
         D_800BE616 = 1;
-        D_800BEE08 = mp_human_player_count(arg0) - 1;
+        g_view_count_minus1 = mp_human_player_count(arg0) - 1;
         return;
     default:
         D_800BE616 = 0;
-        D_800BEE08 = arg0 - 1;
+        g_view_count_minus1 = arg0 - 1;
         return;
     }
 }

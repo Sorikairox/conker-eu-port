@@ -46,11 +46,11 @@ struct260 *event_object_effect_spawn(u8 *obj, s16 span, s8 arg2, s8 arg3, f32 ar
     return fx;
 }
 
-extern s32 D_80089000;
-extern s32 D_80089004;
-extern s32 D_800A28D4;
-extern u8 D_800A2880[];         /* 12-byte points, read as the segment start / end */
-extern u8 D_800A28F0[];
+extern s32 g_seg_effect_end_fns; /* was D_80089000 */
+extern s32 g_seg_effect_point_fns; /* was D_80089004 */
+extern s32 g_seg_effect_weights; /* was D_800A28D4 */
+extern u8 g_pt_effect_segments[];         /* 12-byte points, read as the segment start / end; was D_800A2880 */
+extern u8 g_pt_effect_targets[]; /* was D_800A28F0 */
 s32 vec3_normalize_len(f32 *, f32 *, s32 *, s32 *);
 
 /* was func_15109A7C */
@@ -97,16 +97,16 @@ void obj_point_effect_emitter_update(u8 *arg0) {
         (*(s16 *)((u8 *)arg0 + 0xE)) = -1;
         return;
     }
-    (*(f32 *)((u8 *)temp_s4 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s4 + 8)) + ((*(f32 *)((u8 *)temp_s4 + 0xC)) * 351.8639f * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s4 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s4 + 8)) + ((*(f32 *)((u8 *)temp_s4 + 0xC)) * 351.8639f * g_frame_step_f));
     if (((*(s8 *)((u8 *)temp_s4 + 0x11)) != -1) && ((*(s32 *)((u8 *)temp_v0 + 0x1D4)) != 0)) {
         if ((*(f32 *)((u8 *)temp_s4 + 8)) > 1.0f) {
             sp.uC0 = temp_v0;
             do {
                 var_s0 = 0;
-                var_f2 = (*(f32 *)((u8 *)(&D_800A28D4) + 0x18)) * random_float();
-                var_v0 = &D_800A28D4;
-                if ((*(f32 *)((u8 *)(&D_800A28D4) + 0)) < var_f2) {
-                    var_f0 = (*(f32 *)((u8 *)(&D_800A28D4) + 0));
+                var_f2 = (*(f32 *)((u8 *)(&g_seg_effect_weights) + 0x18)) * random_float();
+                var_v0 = &g_seg_effect_weights;
+                if ((*(f32 *)((u8 *)(&g_seg_effect_weights) + 0)) < var_f2) {
+                    var_f0 = (*(f32 *)((u8 *)(&g_seg_effect_weights) + 0));
                     do {
                         var_f2 -= var_f0;
                         var_f0 = (*(f32 *)((u8 *)var_v0 + 4));
@@ -116,7 +116,7 @@ void obj_point_effect_emitter_update(u8 *arg0) {
                 }
                 temp_f0 = random_float();
                 temp_s3 = var_s0 * 0xC;
-                temp_s1 = D_800A2880 + temp_s3;
+                temp_s1 = g_pt_effect_segments + temp_s3;
                 temp_f2 = (*(f32 *)((u8 *)temp_s1 + 0));
                 temp_f12 = (*(f32 *)((u8 *)temp_s1 + 4));
                 temp_f14 = (*(f32 *)((u8 *)temp_s1 + 8));
@@ -127,13 +127,13 @@ void obj_point_effect_emitter_update(u8 *arg0) {
                 mtx_transform_point_or_origin(&sp.u78, &sp.uB4, temp_s2);
                 mtx_transform_point_or_origin(temp_s1, &sp.uA8, temp_s2);
                 mtx_transform_point_or_origin(temp_s1 + 0xC, &sp.u9C, temp_s2);
-                mtx_transform_point_or_origin(D_800A28F0 + temp_s3, &sp.u90, temp_s2);
+                mtx_transform_point_or_origin(g_pt_effect_targets + temp_s3, &sp.u90, temp_s2);
                 temp_f0_2 = random_float();
                 sp.u84 = (((sp.u90 - sp.u9C) * temp_f0_2) + sp.u9C) - sp.uA8;
                 sp.u88 = (((sp.u94 - sp.uA0) * temp_f0_2) + sp.uA0) - sp.uAC;
                 sp.u8C = (((sp.u98 - sp.uA4) * temp_f0_2) + sp.uA4) - sp.uB0;
                 vec3_normalize_len(&sp.u84, &sp.u84, 0, 0);
-                ((s32 (*)()) *(s32 *)((u8 *)&D_80089004 + ((*(s8 *)((u8 *)temp_s4 + 0x11)) * 4)))(arg0, &sp.uB4, &sp.uA8, &sp.u9C, &sp.u90, &sp.u84);
+                ((s32 (*)()) *(s32 *)((u8 *)&g_seg_effect_point_fns + ((*(s8 *)((u8 *)temp_s4 + 0x11)) * 4)))(arg0, &sp.uB4, &sp.uA8, &sp.u9C, &sp.u90, &sp.u84);
                 (*(f32 *)((u8 *)temp_s4 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s4 + 8)) - 1.0f);
             } while ((*(f32 *)((u8 *)temp_s4 + 8)) > 1.0f);
         }
@@ -144,16 +144,16 @@ void obj_point_effect_emitter_update(u8 *arg0) {
     }
     temp_v0_2 = (*(s8 *)((u8 *)temp_s4 + 0x10));
     if (temp_v0_2 != -1) {
-        (*(s32 (**)())((u8 *)&D_80089000 + (temp_v0_2 * 4)))(arg0);
+        (*(s32 (**)())((u8 *)&g_seg_effect_end_fns + (temp_v0_2 * 4)))(arg0);
     }
 }
-extern f32 D_800A2A04;
-extern f32 D_800A2A08;
-extern f32 D_800A2A0C;
-extern f32 D_800A2A10;
-extern f32 D_800A2A14;
-extern f32 D_800A2A18;
-extern f32 D_800A2A1C;
+extern f32 g_point_spark_scale_range; /* was D_800A2A04 */
+extern f32 g_point_spark_scale_base; /* was D_800A2A08 */
+extern f32 g_point_spark_scale_mul; /* was D_800A2A0C */
+extern f32 g_point_spark_k_2a10; /* was D_800A2A10 */
+extern f32 g_point_spark_k_2a14; /* was D_800A2A14 */
+extern f32 g_point_spark_k_2a18; /* was D_800A2A18 */
+extern f32 g_point_spark_k_2a1c; /* was D_800A2A1C */
 s32 particle_spawn_basic(void *, s32, s32, u8, s32);
 s32 emit_streaks_from_spec(void *, u8, s32);
 s32 random_int(void);
@@ -214,7 +214,7 @@ typedef struct {
     s8 u70[4];        /* 0x70 */
 } EmitBlk9DC8;
 
-// spark_burst_spawn: P232. Handler 0 of the D_80089004 point-effect table (called by obj_point_effect_emitter_update with the
+// spark_burst_spawn: P232. Handler 0 of the g_seg_effect_point_fns point-effect table (called by obj_point_effect_emitter_update with the
 // object, the point `pos` and three more points; `dir` = the unit direction): spawns one spark particle (kind 0x2B,
 // random life 10..25, random size 35..60, velocity dir * a random scale, random flip bits 0x40 / 0x80) through
 // particle_spawn_basic and a small emitter (emit_streaks_from_spec) at the same point. b / c / d are not used.
@@ -228,7 +228,7 @@ void point_spark_spawn(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     s32 flipY;
     s32 i;
 
-    scale = (random_float() * D_800A2A04 + D_800A2A08) * D_800A2A0C;
+    scale = (random_float() * g_point_spark_scale_range + g_point_spark_scale_base) * g_point_spark_scale_mul;
     t.kind = 0x2B;
     t.flags = 0x4401;
     t.u0 = 0x200005;
@@ -272,10 +272,10 @@ void point_spark_spawn(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     e.pos[0] = pos[0];
     e.pos[1] = pos[1];
     e.pos[2] = pos[2];
-    e.u14[0] = D_800A2A10;
-    e.u14[1] = D_800A2A14;
-    e.u14[2] = D_800A2A18;
-    e.u14[3] = D_800A2A1C;
+    e.u14[0] = g_point_spark_k_2a10;
+    e.u14[1] = g_point_spark_k_2a14;
+    e.u14[2] = g_point_spark_k_2a18;
+    e.u14[3] = g_point_spark_k_2a1c;
     e.u24 = 2.0f;
     e.u28 = 6.0f;
     e.u2C = 0;

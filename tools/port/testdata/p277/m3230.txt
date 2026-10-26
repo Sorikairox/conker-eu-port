@@ -17,8 +17,8 @@
 \#^        if (carrier->interaction_state == 5) {$#s/5/4/
 \#^            obj->unk65 = 0;$#d
 \#^    if (D_800BE616 == 0 && D_800C35EA == 0 && obj->unk65 == 0) {$#s/ && D_800C35EA == 0//
-\#^    if (D_800BE9E4 < obj->unk2E4) {$#s/</<=/
-\#^        obj->unk2E4 -= D_800BE9E4;$#s/-=/+=/
+\#^    if (g_frame_ticks < obj->unk2E4) {$#s/</<=/
+\#^        obj->unk2E4 -= g_frame_ticks;$#s/-=/+=/
 \#^            rail_event_add(obj->x_position, obj->y_position, obj->z_position, 900.0f);$#s/900.0f/800.0f/
 \#^    msg.pos\[1\] = obj->y_position;$#s/y_position/z_position/
 \#^    msg.owner = &g_objects\[obj->unk124 - 1\];$#s/unk124/unk65/

@@ -18,7 +18,7 @@
 \#^    gDPLoadTLUTCmd(gdl++, 6, 15);$#s/6, 15/6, 16/ %
 \#^    gSPTexture(gdl++, 0xFFFF, 0xFFFF, 4, G_TX_RENDERTILE, G_ON);$#s/, 4, G_TX/, 3, G_TX/ %
 \#^    gSPTexture(gdl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);$#s/, 0, G_TX/, 1, G_TX/ %
-\#^    buf = ((Vtx \*\*) (node + 0x54))\[D_800BE9C0\];$#s/D_800BE9C0\]/D_800BE9C0 ^ 1]/ %
+\#^    buf = ((Vtx \*\*) (node + 0x54))\[g_dl_buf_index\];$#s/g_dl_buf_index\]/g_dl_buf_index ^ 1]/ %
 \#^    for (col = 0; col == 0 || col <= \*(s32 \*) (node + 0x24); col++) {$#s/col <= \*/col < */ %
 \#^    for (col = 0; col == 0 || col <= \*(s32 \*) (node + 0x24); col++) {$#s/col == 0 || // %
 \#^        dir = \*(f32 \*\*) (node + 0x360) + (col == \*(s32 \*) (node + 0x24) ? 0 : col) \* 2;$#s/? 0 : col/? col : col/ %
@@ -47,8 +47,8 @@
 \#^            v->v\.cn\[3\] = near ? 0xFF : 0;$#s/0xFF : 0/0xFF : 1/ %
 \#^            v->v\.cn\[3\] = near ? 0xFF : 0;$#s/near ?/!near ?/ %
 \#^        n = D_80088BC0\.n;$#s/= D_80088BC0.n/= D_80088BC0.n - 1/ %
-\#^        gSPVertex(gdl++, ((Vtx \*\*) (node + 0x54))\[D_800BE9C0\] + (nv - n \* 2), n \* 2, 0);$#s/(nv - n \* 2)/(nv - n)/ %
-\#^        gSPVertex(gdl++, ((Vtx \*\*) (node + 0x54))\[D_800BE9C0\] + (nv - n \* 2), n \* 2, 0);$#s/n \* 2, 0)/n * 2, 1)/ %
+\#^        gSPVertex(gdl++, ((Vtx \*\*) (node + 0x54))\[g_dl_buf_index\] + (nv - n \* 2), n \* 2, 0);$#s/(nv - n \* 2)/(nv - n)/ %
+\#^        gSPVertex(gdl++, ((Vtx \*\*) (node + 0x54))\[g_dl_buf_index\] + (nv - n \* 2), n \* 2, 0);$#s/n \* 2, 0)/n * 2, 1)/ %
 \#^        for (i = 0; i < D_80088BC0\.n - 1; i++) {$#s/n - 1;/n;/ %
 \#^        for (i = 0; i < D_80088BC0\.n - 1; i++) {$#s/i = 0;/i = 1;/ %
 \#^            gSP1Triangle(gdl++, i, i + 1, i + D_80088BC0\.n + 1, 0);$#s/i + 1, i/i + 2, i/ %

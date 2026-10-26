@@ -5,8 +5,8 @@
 
 void water_waves_update(void);
 s32 random_int(void);
-// level_ambient_cue_update: level update handler (D_8008D0A4[14]): runs water_waves_update, then counts the cue timer
-// (byte at D_800D9D10) down by the frame delta D_800BE9E4; when it has run out, the first of the objects 0x15 /
+// level_ambient_cue_update: level update handler (g_level_update_fns[14]): runs water_waves_update, then counts the cue timer
+// (byte at D_800D9D10) down by the frame delta g_frame_ticks; when it has run out, the first of the objects 0x15 /
 // 0x1A / 0x1B / 0x1C / 0x1D / 0x20 that trigger_test_player reports absent (0) gets a random sound 0x6C..0x6E played at
 // its point in D_800D34B8 (0x34-byte records), and the timer restarts at 0x80..0xFF.
 /* was func_150D0C40 */
@@ -18,8 +18,8 @@ void level_ambient_cue_update(s32 arg0) {
     id = 0;
     water_waves_update();
     if (*timer != 0) {
-        if (D_800BE9E4 < *timer) {
-            *timer -= D_800BE9E4;
+        if (g_frame_ticks < *timer) {
+            *timer -= g_frame_ticks;
         } else {
             *timer = 0;
         }

@@ -1,5 +1,5 @@
 25s/if (\*(s16 \*) (e + 0x52) != 0) {/if (*(s16 *) (e + 0x52) > 1) {/ % timer1
-26s/\*(s16 \*) (e + 0x52) -= D_800BE9E4;/*(s16 *) (e + 0x52) -= 1;/ % timer5
+26s/\*(s16 \*) (e + 0x52) -= g_frame_ticks;/*(s16 *) (e + 0x52) -= 1;/ % timer5
 27s/if (\*(s16 \*) (e + 0x52) < 0) {/if (*(s16 *) (e + 0x52) < -1) {/ % timer1
 31s/last = e\[0x42\] - 1;/last = e[0x42] - 2;/ % n2
 35s/i = ctl\[0xAE\];/i = ctl[0xAD];/ % obj5

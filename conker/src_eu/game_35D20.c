@@ -39,5 +39,5 @@ void effect_run_init_hooks(s32 arg0) {
     for (i = 0; i < count; i++) {
         funcs[i]();
     }
-    D_800DD5E0 = -1;
+    g_tex_cache_last_addr = -1;
 }

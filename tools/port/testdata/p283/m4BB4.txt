@@ -12,7 +12,7 @@
 \#^        if (0\.0f < side) {#s/</<=/
 \#^            list\[cnt++\] = i;#s/= i/= k/
 \#^    if (cnt == 0) {#s/cnt == 0/cnt < 0/
-\#^    bestd = D_800A2740;#s/D_800A2740/0.0f/
+\#^    bestd = g_floor_search_max_dist;#s/g_floor_search_max_dist/0.0f/
 \#^        d = D_800D3720\[list\[i\]\]\.h#s/list\[i\]/i/
 \#^        d = D_800D3720\[list\[i\]\]\.h#s/0\.00390625f/0.0078125f/
 \#^        if (d < 0\.0f) {#s/</>/

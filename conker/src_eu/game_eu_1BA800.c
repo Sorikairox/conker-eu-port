@@ -4,7 +4,7 @@
 
 
 s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
-extern s32 D_8008CDEC;
+extern s32 g_sprite_tex_descs; /* was D_8008CDEC */
 
 /* was func_1518CFF0 */
 void puff_sprite_spawn(u8 *arg0, s32 arg1) {
@@ -55,7 +55,7 @@ void puff_sprite_spawn(u8 *arg0, s32 arg1) {
     sp.u5F = (*(u8 *)((u8 *)arg0 + 0x2F));
     sp.u3C = 0;
     sp.u3E = 0x100;
-    sp.u30 = D_8008CDEC;
+    sp.u30 = g_sprite_tex_descs;
     sp.u5A = (*(s8 *)((u8 *)arg0 + 0x30));
     if ((arg1 & 0xFF) == 1) {
         sp.u40 = (s16) (s32) (*(f32 *)((u8 *)arg0 + 0));
@@ -88,7 +88,7 @@ void puff_sprite_spawn(u8 *arg0, s32 arg1) {
     sp.u5B = (*(u8 *)((u8 *)arg0 + 0x31));
     node_spawn_sprite(&sp.u30, 0, 0, -1, 0xFF, 1);
 }
-extern void (*D_8008D970[])();
+extern void (*g_sprite_uv_scroll_fns[])(); /* was D_8008D970 */
 
 /* was func_1518D218 */
 void sprite_uv_scroll_update(u8 *arg0) {
@@ -103,7 +103,7 @@ void sprite_uv_scroll_update(u8 *arg0) {
     if (*(s16 *)(arg0 + 0x38) == 0) {
         idx = arg0[0x3B] & 0xF;
         if (idx != 0) {
-            D_8008D970[idx]();
+            g_sprite_uv_scroll_fns[idx]();
         }
     }
 }

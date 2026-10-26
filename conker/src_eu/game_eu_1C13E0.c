@@ -120,7 +120,7 @@ typedef struct {
     s8 u39;
 } SpA3C;
 s32 bone_emitter_spawn(SpA3C *, s32, ...);
-extern f32 D_800A85C4;
+extern f32 g_bone_debris_k_85c4; /* was D_800A85C4 */
 
 /* was func_151937F4 */
 void obj_bone_debris_emitter_attach(u8 *arg0, s32 arg1, s32 arg2) {
@@ -143,7 +143,7 @@ void obj_bone_debris_emitter_attach(u8 *arg0, s32 arg1, s32 arg2) {
         s.u2E = 3;
         s.u2F = 3;
         s.u30 = -1;
-        s.u34 = D_800A85C4;
+        s.u34 = g_bone_debris_k_85c4;
         s.u38 = 4;
         s.u39 = -1;
         bone_emitter_spawn(&s, 0, arg0);
@@ -152,7 +152,7 @@ void obj_bone_debris_emitter_attach(u8 *arg0, s32 arg1, s32 arg2) {
 
 /* was func_15193E54 */
 s32 bone_debris_emitter_init(struct102 *arg0) {
-    *(f32 *)((u8 *)arg0 + 0x74) = D_800A85C8;
+    *(f32 *)((u8 *)arg0 + 0x74) = g_bone_debris_k_85c8;
     return 1;
 }
 

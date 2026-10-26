@@ -7,12 +7,12 @@ void sfx_cooldown_tick(void) {
     for (i = 0; i < 4; i++)
     {
         if (g_sfx_cooldowns[i]) {
-            if (g_sfx_cooldowns[i] > D_800BE9E4)
+            if (g_sfx_cooldowns[i] > g_frame_ticks)
             {
 #ifdef PORT
-                g_sfx_cooldowns[i] -= D_800BE9E4 + 1;
+                g_sfx_cooldowns[i] -= g_frame_ticks + 1;
 #else
-                g_sfx_cooldowns[i] -= D_800BE9E4;
+                g_sfx_cooldowns[i] -= g_frame_ticks;
 #endif
             } else {
                 g_sfx_cooldowns[i] = 0;

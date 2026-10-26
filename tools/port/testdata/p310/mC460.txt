@@ -24,7 +24,7 @@
 /if (mode == 0 || mode == 1) {/s/mode == 1/mode == 2/ % mode1 mode2
 /obj\[5\] = 2;/s/2/3/ % mode0
 /obj\[5\] = 5;/s/5/4/ % mode4
-/for (i = 0; i <= D_80082FA0; i++) {/s/<=/</ % mode4 fa0m1 fa00
+/for (i = 0; i <= g_last_player_index; i++) {/s/<=/</ % mode4 fa0m1 fa00
 /\*(u8 \*\*) (obj + 0x304 + i \* 4) = light_alloc_light_buf(1);/s/0x304/0x300/ % mode4 fa02
 /if (\*(s32 \*) (obj + 0x300 + i \* 4) != 0) {/s/!= 0/== 0/ % mode4 fa01z fa0m1 fa0m1w
 /if (\*(s32 \*) (obj + 0x300 + i \* 4) != 0) {/s/0x300/0x304/ % fa01z fa0m1w fa02

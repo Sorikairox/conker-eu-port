@@ -1,7 +1,7 @@
-s/    d->u0C += ((u32) random_int() .*/    d->u0C += (random_int() \& (d->u0E + 1)) * D_800BE9E4;/ % idle big
+s/    d->u0C += ((u32) random_int() .*/    d->u0C += (random_int() \& (d->u0E + 1)) * g_frame_ticks;/ % idle big
 s/    d->u04 += ((u32) /    d->u04 += ((s32) / % big
-s/    d->u20 += d->u1C \* D_800BE9A4;/    d->u20 += d->u1C;/ % one two
-s/    if (D_800A10C4 < d->u20) {/    if (1.0f < d->u20) {/ % edge
+s/    d->u20 += d->u1C \* g_frame_step_f;/    d->u20 += d->u1C;/ % one two
+s/    if (g_fountain_emit_threshold < d->u20) {/    if (1.0f < d->u20) {/ % edge
 s/        step = dt \* inv;/        step = inv;/ % two
 s/        dx = angle_byte_cos(d->u04 - 0x40) \* d->u00 + \*(f32 \*) (obj + 0x10) - d->pos\[0\];/        dx = angle_byte_cos(d->u04) * d->u00 + *(f32 *) (obj + 0x10) - d->pos[0];/ % one two
 s/        dz = angle_byte_cos(d->u0C - 0x40) \* d->u08 + \*(f32 \*) (obj + 0x18) - d->pos\[1\];/        dz = angle_byte_cos(d->u0C - 0x40) * d->u00 + *(f32 *) (obj + 0x18) - d->pos[1];/ % one two
@@ -44,7 +44,7 @@ s/                    (\*(s8 \*) (obj + 0x2C))--;/                    (*(s8 *) (
 s/                dt -= step;/                dt += step;/ % two
 s/            } while (1.0f < d->u20);/            } while (2.0f < d->u20);/ % two
 s/        d->pos\[1\] = z;/        d->pos[1] = x;/ % one idle edge
-s/    d->u118 -= D_800BE9E4;/    d->u118 -= 1;/ % fade1 one
+s/    d->u118 -= g_frame_ticks;/    d->u118 -= 1;/ % fade1 one
 s/    if (d->u118 < 0) {/    if (d->u118 <= 0) {/ % fade1
 s/        i = \*(s8 \*) (obj + 0x2E) - 1;/        i = *(s8 *) (obj + 0x2E);/ % fade
 s/        \*(s16 \*) (pt + 0x14) = 0x3F;/        *(s16 *) (pt + 0x14) = 0x40;/ % fade

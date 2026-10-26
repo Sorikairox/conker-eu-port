@@ -10,6 +10,6 @@ void player_morph_cache_clear(void) {
 
     for (i = 0; i < 2; i++)
     {
-        D_800DD460[i] = 0;
+        g_player_morph_caches[i] = 0;
     }
 }

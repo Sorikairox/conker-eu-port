@@ -158,8 +158,8 @@ extern u8  *D_800C3D80[4][30];      /* per player and track: byte table written 
 extern s16 *D_eu_800C3C88[4][30];   /* per player and track: s16 x, y, z */
 extern s32 *D_800C3A00[4];          /* per player: word table indexed by w6 */
 extern s32 D_8008CDF0;
-extern u8 *D_8008AF88[];
-extern f32 D_800AAE70[];
+extern u8 *g_char_fx_states[]; /* was D_8008AF88 */
+extern f32 g_gun_smoke_start_pt[]; /* was D_800AAE70 */
 extern char D_80096DEC[];          /* "Cutscene 2" */
 
 extern u8 D_800844D8[3][6];         /* sub 0x11 colour sets (.data) */
@@ -666,7 +666,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
                 idx = 13;
             }
             for (node = O_PTR(obj, 0x2F4); node != NULL; node = O_PTR(node, 0x14)) {
-                if (idx == O_S16(node, 0x1C) || char_fx_slot_derives(O_S16(D_8008AF88[idx], 4), O_S16(node, 0x1C)) != 0) {
+                if (idx == O_S16(node, 0x1C) || char_fx_slot_derives(O_S16(g_char_fx_states[idx], 4), O_S16(node, 0x1C)) != 0) {
                     r = REC(player, track);
                     O_S32(O_PTR(node, 0x10), 0x30) =
                         (s32) seqfx_timer_create(span, (s32) O_PTR(node, 0x10), 0, (s32) (r + 0x30), (s32) (r + 0x20), flag, 0);
@@ -733,7 +733,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
                     u8 *att = attachment_find_by_slot((u8 *) obj, 0x46, 0);
                     if (att != NULL) {
                         u8 buf[16];
-                        f32 *src = D_800AAE70;
+                        f32 *src = g_gun_smoke_start_pt;
                         u8 *dst = buf;
                         if (model_node_points_to_world((u8 *) obj, att, 0, &src, &dst, 1) != 0) {
                             gun_muzzle_sparks_spawn((s32) obj, (s32) buf, 0x46, (u8) flag, 1);
@@ -828,7 +828,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             break;
         }
         case 13:
-            aim_hud_send_flash((s32) D_800DBFF0);
+            aim_hud_send_flash((s32) g_player_views);
             break;
         case 14: {
             f32 p[3];

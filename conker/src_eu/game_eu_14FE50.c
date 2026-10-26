@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-extern f32 D_800A3830;
+extern f32 g_camera_keep_offset_yaw_k; /* was D_800A3830 */
 void camera_follow_mode_update(u8 *);
 /* was func_151220D0 */
 void camera_follow_keep_offset(u8 *arg0) {
@@ -14,7 +14,7 @@ void camera_follow_keep_offset(u8 *arg0) {
         tmp.unk0 += *(f32 *)(arg0 + 0x2C8) - *(f32 *)(arg0 + 0x2BC);
         tmp.unk8 += *(f32 *)(arg0 + 0x2D0) - *(f32 *)(arg0 + 0x2C4);
         *(f32 *)(arg0 + 0x37C) = vec3_heading_deg(&tmp);
-        *(f32 *)(arg0 + 0x39C) = *(f32 *)(arg0 + 0x37C) * D_800A3830;
+        *(f32 *)(arg0 + 0x39C) = *(f32 *)(arg0 + 0x37C) * g_camera_keep_offset_yaw_k;
     }
     camera_follow_mode_update(arg0);
 }

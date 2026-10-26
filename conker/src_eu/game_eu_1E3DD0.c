@@ -116,7 +116,7 @@ void ripple_alt_update(u8 *arg0) {
     u8 *temp_v0_2;
 
     temp_v0 = arg0 + 0x170;
-    (*(f32 *)((u8 *)arg0 + 0x170)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x170)) + (0.55600005f * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x170)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x170)) + (0.55600005f * g_frame_step_f));
     if ((*(f32 *)((u8 *)arg0 + 0x170)) > 6.2831855f) {
         do {
             *temp_v0 -= 6.2831855f;

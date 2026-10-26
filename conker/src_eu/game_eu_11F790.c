@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A1C90[];
-extern u8 D_800A1CA8[];
+extern u8 g_big_explosion_debris_tex[]; /* was D_800A1C90 */
+extern u8 g_big_explosion_burst_tex[]; /* was D_800A1CA8 */
 
 typedef struct {
     u8  pad0[0x8];
@@ -23,12 +23,12 @@ void tether_light_clear_slot(void *arg0);
 void light_ctrl_retire(void *arg0);
 void light_ctrl_free(void *arg0);
 
-extern u16 D_80088EA0[3];
+extern u16 g_obj7b_pulse_speeds[3]; /* was D_80088EA0 */
 
 /*
  * object_7B_pulse_scale: per-frame "breathing" of object type 0x7B (obj_postprocess_joints's case 0x7B; obj7b_joint_swing_entries below
- * builds the same object's joint entries). A shared phase (the s16 at D_800CC298 + 0x14) advances by
- * D_80088EA0[sel] * D_800BE9E4 (speeds 720 / 2000 / 3000: sel 1 when the object's +0x2E4 flags have both bits 0-1
+ * builds the same object's joint entries). A shared phase (the s16 at g_obj_anim_shared + 0x14) advances by
+ * g_obj7b_pulse_speeds[sel] * g_frame_ticks (speeds 720 / 2000 / 3000: sel 1 when the object's +0x2E4 flags have both bits 0-1
  * set, sel 2 when both bits 2-3 are set, else 0); the scale 0.9 + 0.35 * (cos(phase) + 1) / 2 (0.9 .. 1.25, the
  * phase in 1/65536 turns) multiplies the 3x3 part of the 4x4 float matrix at the model's (+0x1D4) +0xF80.
  * The asm leaves a pointer in v0; no caller reads it (void).
@@ -36,7 +36,7 @@ extern u16 D_80088EA0[3];
 /* was func_150F1F80 */
 void obj7b_update_pulse_scale(struct127 *object) {
     u8 *obj = (u8 *) object;
-    s16 *phase = (s16 *)((u8 *)&D_800CC298 + 0x14);
+    s16 *phase = (s16 *)((u8 *)&g_obj_anim_shared + 0x14);
     u16 speeds[3];
     s32 flags;
     s32 sel;
@@ -45,9 +45,9 @@ void obj7b_update_pulse_scale(struct127 *object) {
     s32 r;
     s32 c;
 
-    speeds[0] = D_80088EA0[0];
-    speeds[1] = D_80088EA0[1];
-    speeds[2] = D_80088EA0[2];
+    speeds[0] = g_obj7b_pulse_speeds[0];
+    speeds[1] = g_obj7b_pulse_speeds[1];
+    speeds[2] = g_obj7b_pulse_speeds[2];
     flags = *(s32 *)(obj + 0x2E4);
     sel = 0;
     if ((flags & 3) == 3) {
@@ -56,7 +56,7 @@ void obj7b_update_pulse_scale(struct127 *object) {
     if ((flags & 0xC) == 0xC) {
         sel = 2;
     }
-    *phase += speeds[sel] * D_800BE9E4;
+    *phase += speeds[sel] * g_frame_ticks;
     /* 0.35000002f: the ROM constant is 0x3EB33334, one ulp above 0.35f */
     scale = (cosf(*phase * (6.2831855f / 65536.0f)) + 1.0f) * 0.5f * 0.35000002f + 0.9f;
     m = (f32 *)(*(u8 **)(obj + 0x1D4) + 0xF80);
@@ -69,14 +69,14 @@ void obj7b_update_pulse_scale(struct127 *object) {
 
 /*
  * P62: adjustment entries of object type 0x7B for obj_adjust_list_build (object i, buffer p): a shared angle (the s16 at
- * D_800CC298 + 0x12) swings down by D_800BE9E4 * 0x222 per call while object i's +0x84 is 0x21 (to at least
+ * g_obj_anim_shared + 0x12) swings down by g_frame_ticks * 0x222 per call while object i's +0x84 is 0x21 (to at least
  * -0x1999, -6553.6 as a float) and back up otherwise (below 0x1555, 5461.33); the sum is compared as an int, not
  * an s16. Then six entries {joint * 6 + 4, angle} for joints 29..34; returns the end of the entries.
  */
 /* was func_150F20C8 */
 s16 *obj7b_joint_swing_entries(s16 *p, s32 i) {
-    s16 *angle = (s16 *)((u8 *)&D_800CC298 + 0x12);
-    s32 step = D_800BE9E4 * 0x222;
+    s16 *angle = (s16 *)((u8 *)&g_obj_anim_shared + 0x12);
+    s32 step = g_frame_ticks * 0x222;
     s32 v;
     s32 k;
 
@@ -121,8 +121,8 @@ void obj7b_set_anim_ids(u8 *arg0) {
 s32 emit_debris_burst(s32 *, s32 *, s32 *, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32);
 s32 spark_shower_spawn(f32 *, f32, f32, f32, f32, s32, s32); /* P95: f32 (was the bit pattern as an int) */
 s32 smoke_cloud_spawn(f32 *, s32, s32);
-extern s32 D_800A1C9C;
-extern s32 D_800A1CB0;
+extern s32 g_big_explosion_debris_scales; /* was D_800A1C9C */
+extern s32 g_big_explosion_burst_scales; /* was D_800A1CB0 */
 
 void cam_shake_all_players(void *, f32, f32, f32, u8, u8, s32); /* P95 */
 /* was func_150F2290 */
@@ -213,7 +213,7 @@ void fx_big_explosion_at_obj(u8 *arg0, s32 arg1, s32 arg2) {
         sp.uDC = 0xC;
         sp.uC4 = 0.698f;
         sp.uD4 = 8.990001f;
-        emit_debris_burst(&sp.u9C, ((u8 *)&D_800A1C90), &D_800A1C9C, 3, 0, 0, 0, 1, -1, 0, 0.0f, 0, 0, temp_s1, arg2);
+        emit_debris_burst(&sp.u9C, ((u8 *)&g_big_explosion_debris_tex), &g_big_explosion_debris_scales, 3, 0, 0, 0, 1, -1, 0, 0.0f, 0, 0, temp_s1, arg2);
         sp.u60 = 5;
         sp.u64 = 3;
         (*(f32 *)((u8 *)(&sp.u68) + 0)) = (f32) (*(f32 *)((u8 *)(&sp.uE4) + 0));
@@ -232,12 +232,12 @@ void fx_big_explosion_at_obj(u8 *arg0, s32 arg1, s32 arg2) {
         sp.u90 = 0.503f;
         sp.u94 = 0.256f;
         sp.u98 = 13.933001f;
-        emit_textured_burst(&sp.u60, ((u8 *)&D_800A1CA8), &D_800A1CB0, 2, 0.0f, 0U, (u8) temp_s1, arg2);
+        emit_textured_burst(&sp.u60, ((u8 *)&g_big_explosion_burst_tex), &g_big_explosion_burst_scales, 2, 0.0f, 0U, (u8) temp_s1, arg2);
     }
 }
 /* P249: readable C for ambient_far_sound_update (game_eu_11F790, 80 insns). */
 // ambient_far_sound_update: random ambient sound while object `slot` is far out. A cooldown D_800D9D10 (u8) counts
-// down by D_800BE9E4 per frame (to 0); when it is 0 and x^4 + z^4 of g_objects[slot] exceeds 6760000, plays sound
+// down by g_frame_ticks per frame (to 0); when it is 0 and x^4 + z^4 of g_objects[slot] exceeds 6760000, plays sound
 // 0x6C..0x6E (random_int() % 3) at volume 0x5DC0 with the pan of sound_source_mix(0, y, 0, 0x7FFF, 20000, 19000)
 // (+0x80, low byte) and restarts the cooldown at 0x80..0xFF frames.
 s32 sound_source_mix(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *outPan, s32 *outVol, s32 *outDist);
@@ -252,8 +252,8 @@ void ambient_far_sound_update(s32 slot) {
     x2 = obj->x_position * obj->x_position;
     z2 = obj->z_position * obj->z_position;
     if (*timer != 0) {
-        if (D_800BE9E4 < *timer) {
-            *timer -= D_800BE9E4;
+        if (g_frame_ticks < *timer) {
+            *timer -= g_frame_ticks;
         } else {
             *timer = 0;
         }

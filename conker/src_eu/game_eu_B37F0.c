@@ -590,7 +590,7 @@ s32 rail_link_pick(u8, u8, s32);
 // link with the highest band (the lowest when D_800D27C8 mirrors the track), the nodes after it and before the start
 // (rail_link_pick), and counts the nodes of one lap. Then D_800D27B8 = `humans`, D_800D27B9 = `cpus`, D_800D27B4 = 0,
 // and D_80087640 gets humans + cpus records (0x84 bytes, rail_record_reset) with nodes +0x2B..+0x2E = back, start, next,
-// after next, +0x26 = lap length, +0x31 = player index (human records), +0x30 = 1 from D_80090130 on; D_800D27BA = 1.
+// after next, +0x26 = lap length, +0x31 = player index (human records), +0x30 = 1 from g_human_player_count on; D_800D27BA = 1.
 // Nothing (D_80087640 stays NULL) when the start node or one of its neighbours is missing.
 /* was func_15087540 */
 void rail_records_init(s32 tag, s32 humans, s32 cpus) {
@@ -673,7 +673,7 @@ void rail_records_init(s32 tag, s32 humans, s32 cpus) {
             rec->unk31 = i;
         }
         ((u8 *) rec)[0x26] = laps;
-        ((u8 *) rec)[0x30] = !(i < D_80090130);
+        ((u8 *) rec)[0x30] = !(i < g_human_player_count);
     }
     D_800D27BA = 1;
 }
@@ -696,7 +696,7 @@ void text_set_flags(u8);
 // (normal = the tangent, stored at +0xC / +0x10) is turned into a parameter step for rail_param_step (halved when it
 // grows). +0x14 gets the speed along the track ((previous - current distance) * 4 / frames). With +0x30 set it
 // computes the camera point D_800D27BC / C0 / C4 on a copy moved 2 * `speed` ahead (human players: or 300 units
-// behind player 0's yaw when `mode` is 0, written to the player's camera D_800D2104[obj[0x13F]] +8 / +A / +C, mode
+// behind player 0's yaw when `mode` is 0, written to the player's camera g_path_points[obj[0x13F]] +8 / +A / +C, mode
 // to obj +0x44, fov +0x20 by D_800D27B0); otherwise +0 becomes the step to the next point. Sets D_800D27C9 (rail
 // cameras on), counts frames off-track in +0x1C, records state 2+ via rail_record_start_script (0xD) and, for player 0, ranks
 // all D_800D27B8 records (score = t + segment, + 30000 - 1000 * place while +0x2A != 0x7F, - 10000 for the D_800D18A0
@@ -805,7 +805,7 @@ void rail_track_update(s32 player, s32 mode, f32 speed) {
 
     text_set_flags(0x80);
     r[0x32] = r[0x33];
-    r[0x33] = D_800BE9E4;
+    r[0x33] = g_frame_ticks;
     rec->unk14 = ((*(f32 *) (obj + 0x2C) * dx + *(f32 *) (obj + 0x34) * dz + c) - d) * 4.0f / (s8) r[0x32];
     if ((s8) r[0x30] != 0) {
         bcopy(rec, copy, 0x84);
@@ -823,9 +823,9 @@ void rail_track_update(s32 player, s32 mode, f32 speed) {
                 D_800D27C0 = *(f32 *) (obj + 0x18);
                 D_800D27C4 = cosf(ang) * 300.0f + *(f32 *) (obj + 0x1C);
             }
-            *(s16 *) ((u8 *) D_800D2104[obj[0x13F]] + 8) = D_800D27BC;
-            *(s16 *) ((u8 *) D_800D2104[obj[0x13F]] + 0xA) = D_800D27C0;
-            *(s16 *) ((u8 *) D_800D2104[obj[0x13F]] + 0xC) = D_800D27C4;
+            *(s16 *) ((u8 *) g_path_points[obj[0x13F]] + 8) = D_800D27BC;
+            *(s16 *) ((u8 *) g_path_points[obj[0x13F]] + 0xA) = D_800D27C0;
+            *(s16 *) ((u8 *) g_path_points[obj[0x13F]] + 0xC) = D_800D27C4;
             *(f32 *) (obj + 0x44) = mode;
             if (D_800D27B0 == 1) {
                 *(f32 *) (obj + 0x20) = 75.0f;
@@ -858,7 +858,7 @@ void rail_track_update(s32 player, s32 mode, f32 speed) {
     r[0x48] = mode;
     D_800D27C9 = 1;
     if ((s8) r[0x30] == 0 && r[0x48] != 0 && !(D_800D18A0 & (1 << (s8) r[0x31]))) {
-        *(s32 *) (r + 0x1C) += D_800BE9E4;
+        *(s32 *) (r + 0x1C) += g_frame_ticks;
     }
     if ((s8) r[0x30] >= 2 && (*(u8 **) (obj + 0x31C))[0x84] == 0) {
         rail_record_start_script(rec, (struct127 *) obj, 0xD);
@@ -1391,11 +1391,11 @@ s32 rail_link_pick(u8, u8, s32);
 // nodes +0x2B..+0x2E shift one node back (new first node from rail_link_pick, alt = +0x2F); from 1 on it wraps (-1) and
 // they shift forward (new last node), and the new second node's camera type (+0xF) picks the camera mode D_800D27B0
 // (5 -> 1, 6 -> 2; on the mirrored track D_800D27C8: 7 -> 1, 8 -> 2, 9 -> 3). On a shift the node counter +0x24 moves
-// by the direction and gives the lap +0x27 (/ lap length +0x26; capped at the lap count D_800E1010[7] + 1 when
-// D_800BE616 is set). A new highest lap +0x28 of a human player's (+0x31 < D_80090130) record that is not on the rail
+// by the direction and gives the lap +0x27 (/ lap length +0x26; capped at the lap count g_settings[7] + 1 when
+// D_800BE616 is set). A new highest lap +0x28 of a human player's (+0x31 < g_human_player_count) record that is not on the rail
 // (+0x30 = 0) with time +0x1C > 0 records the lap time (+0x1C - lap start +0x18, max 0x7D00) in +0x20 and as the
-// player's best lap (s16 at D_800E1010 + 0x30) when better, and on the last lap the total time (max 0x57E40) at
-// D_800E1010 + 0x38; the lap start becomes the time (-time after the last lap). Returns the direction (-1, 0, 1).
+// player's best lap (s16 at g_settings + 0x30) when better, and on the last lap the total time (max 0x57E40) at
+// g_settings + 0x38; the lap start becomes the time (-time after the last lap). Returns the direction (-1, 0, 1).
 /* was func_15088E84 */
 s32 rail_param_step(struct_eu_80087640 *rec, f32 dt) {
     u8 *r = (u8 *) rec;
@@ -1449,7 +1449,7 @@ s32 rail_param_step(struct_eu_80087640 *rec, f32 dt) {
         return dir;
     }
 
-    laps = D_800E1010[7];
+    laps = g_settings[7];
     rec->unk24 += dir;
     rec->unk27 = rec->unk24 / (s8) r[0x26];
     player = (s8) r[0x31];
@@ -1460,9 +1460,9 @@ s32 rail_param_step(struct_eu_80087640 *rec, f32 dt) {
         return dir;
     }
     r[0x28] = rec->unk27;
-    if (player < D_80090130 && (s8) r[0x30] == 0 && *(s32 *) (r + 0x1C) > 0) {
+    if (player < g_human_player_count && (s8) r[0x30] == 0 && *(s32 *) (r + 0x1C) > 0) {
         if ((s8) r[0x28] <= laps) {
-            best = (s16 *) ((u8 *) D_800E1010 + 0x30);
+            best = (s16 *) ((u8 *) g_settings + 0x30);
             t = *(s32 *) (r + 0x1C) - *(s32 *) (r + 0x18);
             if (t > 0x7D00) {
                 t = 0x7D00;
@@ -1477,7 +1477,7 @@ s32 rail_param_step(struct_eu_80087640 *rec, f32 dt) {
             if (t > 0x57E40) {
                 t = 0x57E40;
             }
-            ((s32 *) ((u8 *) D_800E1010 + 0x38))[player] = t;
+            ((s32 *) ((u8 *) g_settings + 0x38))[player] = t;
         }
     }
     if (laps == (s8) r[0x28]) {
@@ -1633,12 +1633,12 @@ u8 rail_node_next(u8 node, u8 type, u8 prev, u8 band) {
     return last;
 }
 
-extern u16 D_8009015C;
+extern u16 g_mp_game_flags; /* was D_8009015C */
 void camera_queue_event(u8 *, s32, void *);
 u8 rail_node_next(u8 node, u8 type, u8 prev, u8 band);
 
 // rail_camera_follow: rail camera of one player record (D_80087640 + i * 0x84, player = g_objects + rec[0x31],
-// camera = player + 0x318) on the rail nodes of D_800D2778 (band 1 when D_8009015C bit 6 is set, else 0). State 2
+// camera = player + 0x318) on the rail nodes of D_800D2778 (band 1 when g_mp_game_flags bit 6 is set, else 0). State 2
 // (rec[0x30]) sets it up: the first type-5 band-2 node starts the segment rec[0x4A] -> rec[0x4B] (rec[0x4B] = its
 // band-3 link, or its non-band-3 link when D_800D27C8 is set), then the whole rail loop is walked from there and the
 // segment whose end node is nearest the player (x / z) is kept; camera mode 5, state 3. Every call: the segment moves
@@ -1669,7 +1669,7 @@ void rail_camera_follow(u8 *rec, u8 *player) {
     if (cam == NULL) {
         return;
     }
-    band = (D_8009015C & 0x40) ? 1 : 0;
+    band = (g_mp_game_flags & 0x40) ? 1 : 0;
     if ((s8) rec[0x30] == 2) {
         for (i = 0; i < D_80087630; i++) {
             node = (u8 *) &D_800D2778[i];
@@ -1766,7 +1766,7 @@ u8 rail_node_next(u8 node, u8 type, u8 prev, u8 band);
 // `release` != 0: camera mode 10 (rec + 0x4C params: +0x58 = 999, +0x5C = 120), then mode 6 with the camera's +0x23D,
 // rec[0x49] = 0. Else, on the first call (rec[0x49] == 0): the first type-6 node of band D_800D27C8 + 1 and the next
 // three type-6 nodes after it fill rec[0x44..0x47], the player position is kept at rec + 0x38, t (rec + 0x34) = 0,
-// camera mode 5, rec[0x49] = 1. Each call t += 0.017 * D_800BE9E4; past 1 the four nodes shift on by one (t stays at
+// camera mode 5, rec[0x49] = 1. Each call t += 0.017 * g_frame_ticks; past 1 the four nodes shift on by one (t stays at
 // 1 at the rail end). The eye points are the nodes rec[0x44 + k] (from rec + 0x38 behind the player's yaw +0x40 for
 // the first missing one, then extrapolated), the targets their type-4 links; catmull_rom_eval interpolates both at t
 // into rec + 0x60 / + 0x6C and camera mode 7 takes rec + 0x4C.
@@ -1813,7 +1813,7 @@ void rail_camera_spline(u8 *rec, u8 *player, s32 release) {
         camera_queue_event(*(u8 **) (player + 0x318), 5, (void *) (s32) cam[0x23D]);
         rec[0x49] = 1;
     }
-    *(f32 *) (rec + 0x34) += 0.017f * (f32) D_800BE9E4;
+    *(f32 *) (rec + 0x34) += 0.017f * (f32) g_frame_ticks;
     t = *(f32 *) (rec + 0x34);
     if (1.0f <= t) {
         node = rec[0x46];

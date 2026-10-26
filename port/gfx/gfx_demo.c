@@ -92,8 +92,8 @@ static int load(Asset *a) {
 
 /* ---- texture ids (P8; docs/port/design/P8.md "Texture ids")
  * The texture bank: texture id i (0 <= i < 0x1E54) is an rzip file at ROM
- *   D_1A3B40 (0x1A3B40) + sum of D_800920D0[0..i)       (u16 compressed sizes, game_data)
- * which is texture_rom_offset (C) + texture_cache_lookup (asm: cache D_800B1268[id], DMA, inflate). */
+ *   D_1A3B40 (0x1A3B40) + sum of g_texture_rom_sizes[0..i)       (u16 compressed sizes, game_data)
+ * which is texture_rom_offset (C) + texture_cache_lookup (asm: cache g_texture_cache_data[id], DMA, inflate). */
 #define TEX_IDS 0x1E54
 #define TEX_ROM 0x1A3B40u
 static unsigned char *tex_buf[TEX_IDS];
@@ -102,7 +102,7 @@ static unsigned tex_size[TEX_IDS], *tex_rom, tex_loaded, tex_missing;
 static unsigned char *tex_get(unsigned id, unsigned *size) {
     if (id >= TEX_IDS) return 0;
     if (!tex_rom) {
-        /* prefix sums of D_800920D0, read from a private inflate of game_data (ROM 0x188688, vram
+        /* prefix sums of g_texture_rom_sizes, read from a private inflate of game_data (ROM 0x188688, vram
          * 0x80082EB0; same constants as pc_mem.c SEGS) so that the viewer also works before
          * port_mem_load() and whatever state the game is in */
         unsigned gsz;

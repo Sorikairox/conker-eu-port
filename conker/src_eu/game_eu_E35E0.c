@@ -461,7 +461,7 @@ void bolt_ring_update(u8 *arg0) {
         }
     } else {
         temp_s2 = arg0 + 0x28;
-        (*(f32 *)((u8 *)temp_s2 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 4)) + ((0.15f + (random_float() * 0.155f)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s2 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 4)) + ((0.15f + (random_float() * 0.155f)) * g_frame_step_f));
         if ((*(f32 *)((u8 *)temp_s2 + 4)) > 1.0f) {
             sp.uA0 = 0x28;
             sp.u8C = 35.0f;

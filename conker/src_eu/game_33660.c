@@ -8,7 +8,7 @@
 void controller_init_si_queue(void) {
     osCreateMesgQueue(&g_si_mesg_queue, &g_si_mesg_buf, 8);
     osSetEventMesg(OS_EVENT_SI, &g_si_mesg_queue, g_si_event_mesg);
-    g_cont_pad_ptrs.unk0 = &D_800BE748;
+    g_cont_pad_ptrs.unk0 = &g_pad_states;
     g_cont_pad_ptrs.unk4 = &g_cont_pad1;
     g_cont_pad_ptrs.unk8 = &g_cont_pad2;
     g_cont_pad_ptrs.unkC = &g_cont_pad3;

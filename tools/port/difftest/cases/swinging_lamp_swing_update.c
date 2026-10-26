@@ -6,7 +6,7 @@ s32 swinging_lamp_swing_update(u8 *arg0) {
     f32 temp_f0;
     u8 *sp18;
 
-    (*(f32 *)((u8 *)arg0 + 0x178)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x178)) + ((*(f32 *)((u8 *)arg0 + 0x17C)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x178)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x178)) + ((*(f32 *)((u8 *)arg0 + 0x17C)) * g_frame_step_f));
     temp_f0 = wrap_angle_rad((*(f32 *)((u8 *)arg0 + 0x178)));
     temp_v0 = arg0 + 0x170;
     (*(f32 *)((u8 *)temp_v0 + 8)) = temp_f0;
@@ -15,9 +15,9 @@ s32 swinging_lamp_swing_update(u8 *arg0) {
     temp_f12 = (*(f32 *)((u8 *)sp18 + 0x18));
     (*(f32 *)((u8 *)sp18 + 0)) = (f32) (sinf(temp_f0) * temp_f2);
     if (temp_f12 > 0.0f) {
-        (*(f32 *)((u8 *)sp18 + 0x18)) = (f32) (temp_f12 - D_800BE9A4);
-        (*(f32 *)((u8 *)sp18 + 0xC)) = (f32) ((*(f32 *)((u8 *)sp18 + 0xC)) + ((*(f32 *)((u8 *)sp18 + 0x20)) * D_800BE9A4));
-        (*(f32 *)((u8 *)sp18 + 4)) = (f32) (temp_f2 + ((*(f32 *)((u8 *)sp18 + 0x1C)) * D_800BE9A4));
+        (*(f32 *)((u8 *)sp18 + 0x18)) = (f32) (temp_f12 - g_frame_step_f);
+        (*(f32 *)((u8 *)sp18 + 0xC)) = (f32) ((*(f32 *)((u8 *)sp18 + 0xC)) + ((*(f32 *)((u8 *)sp18 + 0x20)) * g_frame_step_f));
+        (*(f32 *)((u8 *)sp18 + 4)) = (f32) (temp_f2 + ((*(f32 *)((u8 *)sp18 + 0x1C)) * g_frame_step_f));
     } else {
         temp_f0_2 = (*(f32 *)((u8 *)sp18 + 0xC));
         (*(f32 *)((u8 *)sp18 + 0xC)) = (f32) (temp_f0_2 + (((*(f32 *)((u8 *)sp18 + 0x14)) - temp_f0_2) * 0.0234f));

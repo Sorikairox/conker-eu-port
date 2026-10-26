@@ -19,7 +19,7 @@
 \#^            angle += 360\.0f;$#s/360/361/ % wrapneg
 \#^        } else if (360\.0f <= angle) {$#s/<=/>=/
 \#^        obj\[0x73\] = (obj\[0x73\] & ~3) | state;$#s/~3/~1/
-\#^    if (D_800BE9B4 == 0 && angle == \*(f32 \*) (obj + 0x8)) {$#s/== 0 &&/!= 0 \&\&/
+\#^    if (g_level_first_frame == 0 && angle == \*(f32 \*) (obj + 0x8)) {$#s/== 0 &&/!= 0 \&\&/
 \#^    slot = obj\[0x3C\];$#s/0x3C/0x3D/
 \#^    if (slot == 0 || open == 0) {$#s/|| open == 0//
 \#^    frac = fabsf((angle - openAngle) / openAngle);$#s/fabsf//

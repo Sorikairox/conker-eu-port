@@ -1,7 +1,7 @@
 /* P103 DIAGNOSTICS (off by default): the boot sequence and the level-start event list.
  *
- * ?p103boot=1 : one line per change of the game mode D_800E0B94 or the level g_level_id (called from the
- *               game_mode_frame_step wrap in p84_checks.c): mode, previous mode D_800E0FC5, mode timer D_800E0EC0,
+ * ?p103boot=1 : one line per change of the game mode g_game_mode or the level g_level_id (called from the
+ *               game_mode_frame_step wrap in p84_checks.c): mode, previous mode g_game_mode_prev, mode timer g_game_mode_timer,
  *               osTvType D_80000300, world objects g_world_obj_count, level events D_800D2F3C, scene slot 0 D_800C35EA.
  *               Also logs every event_start_level_events call (level-start event pass: the event ids D_800D2F40[0..n-1], their
  *               D_800877D0 record, and what the asm event_prereqs_met would answer, computed here from its asm), every
@@ -10,7 +10,7 @@
  *               event_start_level_events goes on to event_start (also an asm stub). Shows which events the stub suppresses.
  *
  * event_prereqs_met(id) from the asm: the u16 list D_800877D0[id] + 0xC (0xFFFF-terminated) holds prerequisite event ids;
- * for each one p, recurse on p, then require save flag bit p (D_800D2E4C byte p >> 3, bit p & 7) and the recursion's
+ * for each one p, recurse on p, then require save flag bit p (g_save_progress_bits byte p >> 3, bit p & 7) and the recursion's
  * result; an empty list answers 1. */
 #include <stdint.h>
 #include <stdio.h>
@@ -21,10 +21,10 @@ int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
 
-extern unsigned char D_800E0B94, D_800E0FC5, D_800D2F3C, D_800C35EA;
-extern int g_level_id, D_800E0EC0, D_80000300, g_world_obj_count; /* was D_800DC320; was D_800BE9F0 */
+extern unsigned char g_game_mode, g_game_mode_prev, D_800D2F3C, D_800C35EA; /* was D_800E0B94; was D_800E0FC5 */
+extern int g_level_id, g_game_mode_timer, D_80000300, g_world_obj_count; /* was D_800DC320; was D_800BE9F0; was D_800E0EC0 */
 extern unsigned char *D_800D2F40;  /* u16 ids */
-extern unsigned char *D_800D2E4C;  /* save flags (pointer) */
+extern unsigned char *g_save_progress_bits;  /* save flags (pointer); was D_800D2E4C */
 extern unsigned char D_800877D0[]; /* 0x14-byte records */
 
 static int fboot = -1, fev = -1;
@@ -43,7 +43,7 @@ static int memok(const void *p) {
 static int p103_prereq(int id, int depth) {
     const unsigned char *rec = D_800877D0 + id * 0x14;
     const unsigned char *p = (const unsigned char *)(uintptr_t)*(const unsigned *)(rec + 0xC);
-    const unsigned char *save = D_800D2E4C;
+    const unsigned char *save = g_save_progress_bits;
     unsigned e;
     if (depth > 16 || !memok(p) || !memok(save)) return -1;
     e = vbe_ld16(p);
@@ -61,15 +61,15 @@ void p123_gates(void);
 void p103_frame(void) {
     static int lmode = -1, llevel = -1;
     p123_gates();
-    int m = vbe_ld8(&D_800E0B94), l = g_level_id;
-    if (flag(&fboot, "p103boot") && m == 3) { /* P121: menu record D_80090174 (P117 map): +8 page fade f32, +0x2C titlePage,
+    int m = vbe_ld8(&g_game_mode), l = g_level_id;
+    if (flag(&fboot, "p103boot") && m == 3) { /* P121: menu record g_menu_state (P117 map): +8 page fade f32, +0x2C titlePage,
                                                 * +0x3E menu, +0x3F mainPage; on change of the bytes, else every 240 frames */
-        extern unsigned char *D_80090174; extern unsigned char D_800E0FC6, D_80090114, D_800E0EC4;
+        extern unsigned char *g_menu_state; extern unsigned char g_screen_fade_alpha, g_menu_fade_speed, g_menu_alpha;
         static unsigned lastkey = ~0u, nl, next;
-        const unsigned char *r = D_80090174;
+        const unsigned char *r = g_menu_state;
         if (memok(r) && nl < 60) {
             unsigned fw = *(const unsigned *)(r + 8), key = vbe_ld8(r + 0x2C) | vbe_ld8(r + 0x3E) << 8 | vbe_ld8(r + 0x3F) << 16 |
-                (unsigned)vbe_ld8(&D_80090114) << 24;
+                (unsigned)vbe_ld8(&g_menu_fade_speed) << 24;
             float fade; memcpy(&fade, &fw, 4);
             static unsigned lastfw;
             if (key != lastkey || fw != lastfw || port_frame_count >= next) {
@@ -77,9 +77,9 @@ void p103_frame(void) {
                 port_log("[p121] menu frame %u: rec %08X fade %g titlePage %d menu %d mainPage %d input %04X | overlay D_800E0FC6 %u speed D_80090114 %u page alpha D_800E0EC4 %u\n", port_frame_count,
                          (unsigned)(uintptr_t)r, fade, (signed char)vbe_ld8(r + 0x2C), (signed char)vbe_ld8(r + 0x3E),
                          (signed char)vbe_ld8(r + 0x3F), vbe_ld16(r + 0x20),
-                         vbe_ld8(&D_800E0FC6), vbe_ld8(&D_80090114), vbe_ld8(&D_800E0EC4));
+                         vbe_ld8(&g_screen_fade_alpha), vbe_ld8(&g_menu_fade_speed), vbe_ld8(&g_menu_alpha));
                 { /* camera 0: non-finite floats, target */
-                    extern unsigned char *D_800DBFF0; const unsigned *c = (const unsigned *)D_800DBFF0; int o, bad = 0, first = -1;
+                    extern unsigned char *g_player_views; const unsigned *c = (const unsigned *)g_player_views; int o, bad = 0, first = -1;
                     if (memok(c))
                     for (o = 0; o < 0x9A0 / 4; o++) if (((c[o] >> 23) & 0xFF) == 0xFF) { bad++; if (first < 0) first = o * 4; }
                     port_log("[p121]   camera 0: %d non-finite words (first +%X) target +3D4 %08X +5F0 %08X +18C %08X %08X %08X\n",
@@ -91,7 +91,7 @@ void p103_frame(void) {
     }
     if (!flag(&fboot, "p103boot") || (m == lmode && l == llevel)) return;
     port_log("[p103] frame %u: mode %d (prev %d) level %X timer %d tv %d | objects %d events %u scene0 %u\n",
-             port_frame_count, m, vbe_ld8(&D_800E0FC5), l, D_800E0EC0, D_80000300, g_world_obj_count, vbe_ld8(&D_800D2F3C),
+             port_frame_count, m, vbe_ld8(&g_game_mode_prev), l, g_game_mode_timer, D_80000300, g_world_obj_count, vbe_ld8(&D_800D2F3C),
              vbe_ld8(&D_800C35EA));
     lmode = m; llevel = l;
 }
@@ -110,7 +110,7 @@ void __wrap_event_start_level_events(int a0, int a1) {
     if (flag(&fboot, "p103boot")) {
         int n = vbe_ld8(&D_800D2F3C), i;
         port_log("[p103] event_start_level_events(%d, %d) frame %u level %X mode %d: %d level events, save flags %08X\n", a0, a1,
-                 port_frame_count, g_level_id, vbe_ld8(&D_800E0B94), n, (unsigned)(uintptr_t)D_800D2E4C);
+                 port_frame_count, g_level_id, vbe_ld8(&g_game_mode), n, (unsigned)(uintptr_t)g_save_progress_bits);
         for (i = 0; i < n && i < 32 && memok(D_800D2F40); i++) {
             int id = (short)vbe_ld16(D_800D2F40 + 2 * i);
             const unsigned *r = (const unsigned *)(D_800877D0 + id * 0x14);
@@ -152,22 +152,22 @@ void __real_cutscene_scene_load(int level, int scene, int slot, int cb, int cbar
 void __wrap_cutscene_scene_load(int level, int scene, int slot, int cb, int cbarg) {
     if (flag(&fboot, "p103boot"))
         port_log("[p103] cutscene_scene_load(level %X, scene %d, slot %d, cb %d, %d) frame %u mode %d\n", level, scene, slot, cb,
-                 cbarg, port_frame_count, vbe_ld8(&D_800E0B94));
+                 cbarg, port_frame_count, vbe_ld8(&g_game_mode));
     { /* P123 TEST ONLY ?p123noscene=1: do not start the menu level's scene (mode 3), as when menu_mode_update was a stub */
         static int fns = -1;
-        if (flag(&fns, "p123noscene") && vbe_ld8(&D_800E0B94) == 3) { port_log("[p123] menu scene start skipped\n"); return; }
+        if (flag(&fns, "p123noscene") && vbe_ld8(&g_game_mode) == 3) { port_log("[p123] menu scene start skipped\n"); return; }
     }
     __real_cutscene_scene_load(level, scene, slot, cb, cbarg);
 }
 
-/* P113 DIAGNOSTIC: on a ?p113watch hit, list the words of the camera records D_800DBFF0 (struct108 *, 2 x 0x800+)
+/* P113 DIAGNOSTIC: on a ?p113watch hit, list the words of the camera records g_player_views (struct108 *, 2 x 0x800+)
  * that point within +-0x400 of the watched address (a stale camera target into a freed block). */
-extern unsigned char *D_800DBFF0;
+extern unsigned char *g_player_views; /* was D_800DBFF0 */
 extern void (*p113_watch_hook)(unsigned addr);
 static void p113_cam_scan(unsigned a) {
     unsigned o;
     for (o = 0; o < 0x1000; o += 4) {
-        unsigned v = *(const unsigned *)(D_800DBFF0 + o);
+        unsigned v = *(const unsigned *)(g_player_views + o);
         if (v + 0x400 - a < 0x800) port_log("[p113w]   D_800DBFF0+%03X = %08X (ADDR%+d)\n", o, v, (int)(v - a));
     }
 }
@@ -291,12 +291,12 @@ P113W0(world_records_update_shadows)
 P113W1(fog_apply_level_default)
 
 /* P113 guard REMOVED in P137: after the LogoScreen scene on level 0x21 (frame 2133) and the menu scene end (3053) the
- * object removal obj_remove used to leave camera record D_800DBFF0[i] (struct108, 0x9A0 bytes) with the freed +0x31C
+ * object removal obj_remove used to leave camera record g_player_views[i] (struct108, 0x9A0 bytes) with the freed +0x31C
  * record as its target unk3D4, and the guard re-pointed it at a zeroed parking record. Since the scene VM / walker
  * fixes (P117) and the P127..P133 conversions the case no longer occurs: P137 runs (4 new-game Chrome runs incl.
  * ?p113noguard=1, node new game, noev walks) had 0 guard / NO GUARD lines. Kept as a check only: a stale target is
  * logged ("[p113] STALE camera target"), never patched. */
-extern int D_80082FA0;
+extern int g_last_player_index; /* was D_80082FA0 */
 void __real_obj_remove(unsigned char *obj, int mode);
 void __wrap_obj_remove(unsigned char *obj, int mode) {
     static int n;
@@ -304,8 +304,8 @@ void __wrap_obj_remove(unsigned char *obj, int mode) {
     int i;
     __real_obj_remove(obj, mode);
     if (rec == 0) return;
-    for (i = 0; i <= D_80082FA0 && i < 4; i++) {
-        unsigned *t = (unsigned *)(D_800DBFF0 + i * 0x9A0 + 0x3D4);
+    for (i = 0; i <= g_last_player_index && i < 4; i++) {
+        unsigned *t = (unsigned *)(g_player_views + i * 0x9A0 + 0x3D4);
         if (*t == rec && n++ < 16)
             port_log("[p113] STALE camera target: camera %d target %08X freed with object %08X (mode %d) frame %u\n", i, rec,
                      (unsigned)(uintptr_t)obj, mode, port_frame_count);
@@ -380,20 +380,20 @@ void __wrap_screen_fade_start(int r, int g, int b, int n, int dir, int pl) {
     if (flag(&ff, "p123fade") && nl++ < 80) {
         void port_js_stack(int skip, int n);
         port_log("[p123] screen_fade_start(rgb %d %d %d, frames %d, dir %d, player %d) frame %u mode %d\n", r, g, b, n,
-                 (signed char)dir, pl, port_frame_count, vbe_ld8(&D_800E0B94));
+                 (signed char)dir, pl, port_frame_count, vbe_ld8(&g_game_mode));
         port_js_stack(1, 4);
     }
     __real_screen_fade_start(r, g, b, n, dir, pl);
 }
 void p123_gates(void) {
     static int ff = -1; static unsigned next;
-    extern unsigned char g_game_paused, D_800DDDAC, D_800DE1F0[]; extern int g_scene_render_suspend; extern unsigned short D_800D18A0;
-    extern int D_800DDDB0, D_800DDE28; int screen_fade_alpha(int);
+    extern unsigned char g_game_paused, g_screen_fade_dir, g_screen_fade_alpha_override[]; extern int g_scene_render_suspend; extern unsigned short D_800D18A0;
+    extern int g_screen_fade_timer, g_screen_fade_duration; int screen_fade_alpha(int);
     if (!flag(&ff, "p123fade") || port_frame_count < next) return;
     next = port_frame_count + 120;
     port_log("[p123] gates frame %u mode %d level %X: D_800BEAC0 %u D_80084810 %d D_800D18A0 %X | fade level %d (dir %d timer %d/%d forced %u)\n",
-             port_frame_count, vbe_ld8(&D_800E0B94), g_level_id, vbe_ld8(&g_game_paused), g_scene_render_suspend, vbe_ld16(&D_800D18A0),
-             screen_fade_alpha(0), (signed char)vbe_ld8(&D_800DDDAC), D_800DDDB0, D_800DDE28, vbe_ld8(&D_800DE1F0[0]));
+             port_frame_count, vbe_ld8(&g_game_mode), g_level_id, vbe_ld8(&g_game_paused), g_scene_render_suspend, vbe_ld16(&D_800D18A0),
+             screen_fade_alpha(0), (signed char)vbe_ld8(&g_screen_fade_dir), g_screen_fade_timer, g_screen_fade_duration, vbe_ld8(&g_screen_fade_alpha_override[0]));
 }
 
 
@@ -406,7 +406,7 @@ void p123_gates(void) {
 int __real_texture_resolve_dl_ids(void *dl, int skip, int addRef, int age, void *outList);
 int __wrap_texture_resolve_dl_ids(void *dl, int skip, int addRef, int age, void *outList) {
     static int f = -1; static unsigned n;
-    extern unsigned char D_800DFDE8[];
+    extern unsigned char g_shared_dl_tex_lists[];
     if (f < 0) f = port_flag("p131mdl");
     if (f > 0 && port_frame_count >= (f > 1 ? (unsigned)f : 4400u) && n < 200) {
         unsigned lim = (unsigned)__builtin_wasm_memory_size(0) * 65536u, a = (unsigned)(uintptr_t)dl, k = 0, end = 0;
@@ -417,7 +417,7 @@ int __wrap_texture_resolve_dl_ids(void *dl, int skip, int addRef, int age, void 
         }
         port_log("[p131] texture_resolve_dl_ids #%u frame %u: dl %08X (mem %08X) out %08X (idx %ld) age %X | w %08X %08X | %s after %u cmds\n",
                  n, port_frame_count, a, lim, (unsigned)(uintptr_t)outList,
-                 outList ? (long)(((unsigned char *)outList - D_800DFDE8) / 4) : -1L, age,
+                 outList ? (long)(((unsigned char *)outList - g_shared_dl_tex_lists) / 4) : -1L, age,
                  (a >= 0x1000 && a + 8 <= lim) ? ((uint32_t *)dl)[0] : 0, (a >= 0x1000 && a + 8 <= lim) ? ((uint32_t *)dl)[1] : 0,
                  end ? "ENDDL" : "NO-END/OUT", k);
     }

@@ -7,10 +7,10 @@ f32 sinf(f32);
 f32 cosf(f32);
 f32 sqrtf(f32);
 void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
-extern f32 D_80089900[];  /* per player: up / down speed */
-extern f32 D_80089910[];  /* per player: roll / strafe speed */
-extern f32 D_80089920[];  /* per player: pitch speed */
-extern s32 D_800BEA08;    /* frame time step */
+extern f32 g_freecam_up_speed[];  /* per player: up / down speed; was D_80089900 */
+extern f32 g_freecam_roll_speed[];  /* per player: roll / strafe speed; was D_80089910 */
+extern f32 g_freecam_pitch_speed[];  /* per player: pitch speed; was D_80089920 */
+extern s32 g_frame_ticks_raw;    /* frame time step; was D_800BEA08 */
 static const f32 freecam_deg2rad[1] = { 0.017453292f };  /* D_800A3A00, D_800A3A28 */
 static const f32 freecam_rise_acc[1] = { 0.2f };          /* D_800A3A04 */
 static const f32 freecam_fall_acc[1] = { 0.2f };          /* D_800A3A08 */
@@ -22,10 +22,10 @@ static const f32 freecam_far[1] = { -10000.0f };          /* D_800A3A2C */
 
 // freecam_update: debug free-fly camera driven by the controller record at cam+0x36C (buttons +0, stick x / y +2 / +3,
 // dead zone -4..4). Flag 0x400 in cam+0x36A toggles bit 31 of cam+0x5F0 (frozen): frozen, only the yaw (cam+0x37C) is
-// kept and copied to +0x394. Otherwise the stick x turns (yaw +0x37C, quadratic, scaled by the time step D_800BEA08)
-// and the stick y moves forward / back (quadratic * 7); C-up / C-down (4 / 8) accelerate up / down (D_80089900[player],
-// height +0x2FC), A / B (0x8000 / 0x4000) pitch (D_80089920, +0x388 clamped to +-89.5 degrees), C-right / C-left
-// (2 / 1) strafe, or with Z (0x2000) roll (D_80089910, +0x5EC clamped to +-45). The speeds are capped (40 / 100 / 8).
+// kept and copied to +0x394. Otherwise the stick x turns (yaw +0x37C, quadratic, scaled by the time step g_frame_ticks_raw)
+// and the stick y moves forward / back (quadratic * 7); C-up / C-down (4 / 8) accelerate up / down (g_freecam_up_speed[player],
+// height +0x2FC), A / B (0x8000 / 0x4000) pitch (g_freecam_pitch_speed, +0x388 clamped to +-89.5 degrees), C-right / C-left
+// (2 / 1) strafe, or with Z (0x2000) roll (g_freecam_roll_speed, +0x5EC clamped to +-45). The speeds are capped (40 / 100 / 8).
 // The position +0x2F8..+0x300 moves along the yaw, the look-at point (+0x2A4 / +0x2BC) is 600 units ahead along yaw
 // and pitch; then the view is rebuilt with collision_find_floor (far -10000).
 /* was func_1512A1A0 */
@@ -37,9 +37,9 @@ void camera_freecam_update(u8 *cam) {
     f32 fwd;
     f32 sx, sy, t;
     f32 acc;
-    f32 *up = &D_80089900[player];
-    f32 *roll = &D_80089910[player];
-    f32 *pitch = &D_80089920[player];
+    f32 *up = &g_freecam_up_speed[player];
+    f32 *roll = &g_freecam_roll_speed[player];
+    f32 *pitch = &g_freecam_pitch_speed[player];
     f32 s, c, dx, dz, r, rs, rc;
     f32 ax, ay, az;
     f32 buf[5];
@@ -58,36 +58,36 @@ void camera_freecam_update(u8 *cam) {
         sy = (*(s8 *)(pad + 3) < -4 || *(s8 *)(pad + 3) > 4) ? (f32)*(s8 *)(pad + 3) : 0.0f;
         t = sx / 80.0f;
         if (0.0f < t) {
-            *(f32 *)(cam + 0x37C) -= t * t * (f32)D_800BEA08;
+            *(f32 *)(cam + 0x37C) -= t * t * (f32)g_frame_ticks_raw;
         } else {
-            *(f32 *)(cam + 0x37C) += t * t * (f32)D_800BEA08;
+            *(f32 *)(cam + 0x37C) += t * t * (f32)g_frame_ticks_raw;
         }
         *(f32 *)(cam + 0x39C) = *(f32 *)(cam + 0x37C) * freecam_deg2rad[0];
         t = sy / 80.0f * 7.0f;
         if (0.0f < t) {
-            fwd = t * t * (f32)D_800BEA08;
+            fwd = t * t * (f32)g_frame_ticks_raw;
         } else {
-            fwd = -t * t * (f32)D_800BEA08;
+            fwd = -t * t * (f32)g_frame_ticks_raw;
         }
 
         if (buttons & 4) {
             acc = freecam_rise_acc[0];
             *up += acc;
-            *(f32 *)(cam + 0x2FC) -= *up * (f32)D_800BEA08;
+            *(f32 *)(cam + 0x2FC) -= *up * (f32)g_frame_ticks_raw;
         } else if (buttons & 8) {
             acc = freecam_fall_acc[0];
             *up += acc;
-            *(f32 *)(cam + 0x2FC) += *up * (f32)D_800BEA08;
+            *(f32 *)(cam + 0x2FC) += *up * (f32)g_frame_ticks_raw;
         } else {
             *up = 0.0f;
             acc = freecam_no_acc[0];
         }
         if (buttons & 0x8000) {
             *pitch += freecam_pitch_acc[0];
-            *(f32 *)(cam + 0x388) -= *pitch * (f32)D_800BEA08;
+            *(f32 *)(cam + 0x388) -= *pitch * (f32)g_frame_ticks_raw;
         } else if (buttons & 0x4000) {
             *pitch += freecam_pitch_acc[0];
-            *(f32 *)(cam + 0x388) += *pitch * (f32)D_800BEA08;
+            *(f32 *)(cam + 0x388) += *pitch * (f32)g_frame_ticks_raw;
         } else {
             *pitch = 0.0f;
         }

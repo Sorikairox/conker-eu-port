@@ -60,8 +60,8 @@ typedef struct {
  * speed base / range, +0x38 / +0x3C rate base / range, +0x40 / +0x44, +0x48 / +0x4A, +0x4C / +0x50, +0x54 / +0x56,
  * +0x58 / +0x5C random bases / ranges, +0x10 / +0x12 yaw centre / spread, +0x14 / +0x16 pitch base / range).
  * Nothing while the trigger +0x6C is set and player_mask_hides_all says so. Every 50 frames (+0x60 countdown) it checks that
- * a player (g_view_player_order[0 .. D_80082FA0], records D_800DBFF0 0x9A0 bytes, position +0x2F8) is within 1581 units
- * (squared 2500000), else does nothing; then accumulates rate * D_800BE9A4 in +0x64 and spawns one particle per
+ * a player (g_view_player_order[0 .. g_last_player_index], records g_player_views 0x9A0 bytes, position +0x2F8) is within 1581 units
+ * (squared 2500000), else does nothing; then accumulates rate * g_frame_step_f in +0x64 and spawns one particle per
  * whole unit above 1 (random point in the box, random direction from two byte angles, random sizes / colours).
  */
 /* was func_15189F70 */
@@ -76,13 +76,13 @@ void area_drift_emitter_update(u8 *p) {
     if (*(s32 *)(p + 0x6C) != 0 && player_mask_hides_all(*(s32 *)(p + 0x6C)) != 0) {
         return;
     }
-    *(s16 *)(p + 0x60) -= D_800BE9E4;
+    *(s16 *)(p + 0x60) -= g_frame_ticks;
     if (*(s16 *)(p + 0x60) < 0) {
         *(s16 *)(p + 0x60) += 50;
-        last = D_80082FA0;
+        last = g_last_player_index;
         found = FALSE;
         for (i = 0; i <= last && !found; i++) {
-            pl = (u8 *)D_800DBFF0 + g_view_player_order[i] * 0x9A0 + 0x2F8;
+            pl = (u8 *)g_player_views + g_view_player_order[i] * 0x9A0 + 0x2F8;
             dx = *(f32 *)(pl + 0) - *(f32 *)(p + 0x18);
             dy = *(f32 *)(pl + 4) - *(f32 *)(p + 0x1C);
             dz = *(f32 *)(pl + 8) - *(f32 *)(p + 0x20);
@@ -95,7 +95,7 @@ void area_drift_emitter_update(u8 *p) {
         }
     }
     f = random_float();
-    *(f32 *)(p + 0x64) += (*(f32 *)(p + 0x38) + f * *(f32 *)(p + 0x3C)) * D_800BE9A4;
+    *(f32 *)(p + 0x64) += (*(f32 *)(p + 0x38) + f * *(f32 *)(p + 0x3C)) * g_frame_step_f;
     if (!(1.0f < *(f32 *)(p + 0x64))) {
         return;
     }
@@ -149,8 +149,8 @@ void area_drift_emitter_update(u8 *p) {
 
 typedef struct { f32 x, y, z; s32 a, b; } Node14;
 u8 impact_current_kind(void);
-extern f64 D_800A7788;
-extern f32 D_800A7790;
+extern f64 g_drift_dust_chance; /* was D_800A7788 */
+extern f32 g_drift_particle_k_7790; /* was D_800A7790 */
 
 /* was func_1518A42C */
 s32 drift_particle_hit_floor(u8 *arg0) {
@@ -162,14 +162,14 @@ s32 drift_particle_hit_floor(u8 *arg0) {
     tbl = *(u8 **)(arg0 + 0x94);
     obj = *(u8 **)(arg0 + 0x98);
     if (*(f32 *)(tbl + *(s8 *)(arg0 + 0x2D) * 0x14 + 4) < *(f32 *)(obj + 0x48)) {
-        if (random_float() < D_800A7788) {
+        if (random_float() < g_drift_dust_chance) {
             pos[0] = ((Node14 *)tbl)[*(s8 *)(arg0 + 0x2D)].x;
             pos[1] = *(f32 *)(obj + 0x48);
             pos[2] = ((Node14 *)tbl)[*(s8 *)(arg0 + 0x2D)].z;
             impact_dust_particle_spawn(impact_current_kind(), *(f32 *)(obj + 0) * 6.0f, *(u8 *)(obj + 0x1B), 0, pos, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
         }
         *(s8 *)(obj + 0x20) = 4;
-        *(f32 *)(obj + 0x48) = D_800A7790;
+        *(f32 *)(obj + 0x48) = g_drift_particle_k_7790;
     }
     return 1;
 }

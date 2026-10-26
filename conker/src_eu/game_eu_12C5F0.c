@@ -3,13 +3,13 @@
 #include "variables.h"
 
 
-/* local copies of character_smoke_puff's rodata D_800A23D0 / DC / E8 / F4 (its .s carries it) */
+/* local copies of character_smoke_puff's rodata g_char_smoke_puff_pt / DC / E8 / F4 (its .s carries it) */
 static const f32 sPuffPoint[3] = { 10.0f, -102.0f, 75.0f };
 static const f32 sSparkEnd[3] = { 10.0f, -151.0f, 105.0f };
 static const f32 sSegStart[3] = { -1.0f, -38.0f, 38.0f };
 static const f32 sSegEnd[3] = { -26.0f, -23.0f, 51.0f };
 s32 mtx_transform_points(s32 **, s32 *, s32, s32);
-extern u8 D_80088F40;
+extern u8 g_char_smoke_bone; /* was D_80088F40 */
 void bone_point_spark_spray(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 s32 tracer_spawn(f32 *, f32 *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, struct127 *, s32, s32, s32, s32, s32,
                   s32, s32, s32, f32, s32, s32, s32, s32, s32);
@@ -18,7 +18,7 @@ void muzzle_light_small_spawn(f32 *, u8, s32);
 void bone_streak_fx_start(f32 *, f32 *, s32, struct127 *, f32, u8, s32);
 
 // character_smoke_puff: smoke from a character obj (owner byte room / owner passed on). Takes its facing (obj_get_aim_vectors,
-// 0.811) and either, with a bone matrix table (obj+0x1D4, entry D_80088F40), the transformed local points
+// 0.811) and either, with a bone matrix table (obj+0x1D4, entry g_char_smoke_bone), the transformed local points
 // sPuffPoint (puff position), sSegStart / sSegEnd (a segment, stored as start + direction), or else a point 34 in
 // front of the object (perpendicular of the flat facing, (0, 0, 1) when it has no flat part) and 49 up. Spawns the
 // puff (tracer_spawn: 300, 1/300, 25..35, 400..600, 50, life 100..255, kind 0x35); with the bone table and unless
@@ -47,7 +47,7 @@ void character_smoke_puff(struct127 *obj, u8 room, s32 owner) {
     weapon_count_shot(obj);
     obj_get_aim_vectors(obj, (s32) dir, (s32) tmp1, (s32) tmp2, 0.81100005f);
     if (*(s32 *) (o + 0x1D4) != 0) {
-        tbl = *(s32 *) (o + 0x1D4) + (D_80088F40 << 6);
+        tbl = *(s32 *) (o + 0x1D4) + (g_char_smoke_bone << 6);
         src[0] = sPuffPoint;
         src[1] = sSegStart;
         src[2] = sSegEnd;
@@ -87,18 +87,18 @@ void character_smoke_puff(struct127 *obj, u8 room, s32 owner) {
     muzzle_light_small_spawn(pos, room, owner);
     bone_streak_fx_start(seg0, seg1, tbl, obj, 1.0f, room, owner);
     if (random_int() & 1) {
-        bone_point_spark_spray((s32) obj, D_80088F40, (s32) sPuffPoint, (s32) sSparkEnd, (s32) pos, room, owner);
+        bone_point_spark_spray((s32) obj, g_char_smoke_bone, (s32) sPuffPoint, (s32) sSparkEnd, (s32) pos, room, owner);
     }
 }
-#define D_800A23D0 sPuffPoint[0] /* character_smoke_point_get's reference */
+#define g_char_smoke_puff_pt sPuffPoint[0] /* character_smoke_point_get's reference */
 /* was func_150FF148 */
 void character_smoke_point_get(u8 *arg0, s32 arg1, s32 arg2) {
     s32 pad;
     s32 *sp20;
     s32 sp1C;
     s32 v;
-    v = *(s32 *)(arg0 + 0x1D4) + (D_80088F40 << 6);
-    sp20 = (s32 *) &D_800A23D0;
+    v = *(s32 *)(arg0 + 0x1D4) + (g_char_smoke_bone << 6);
+    sp20 = (s32 *) &g_char_smoke_puff_pt;
     sp1C = arg2;
     mtx_transform_points(&sp20, &sp1C, v, 1);
 }

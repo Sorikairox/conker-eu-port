@@ -4,12 +4,12 @@
 
 
 /* gun_muzzle_smoke_spawn's .s owned this rodata (bone-space muzzle points); the NM link drops it, so NM gets copies.
-   D_800AAE7C is the second point of D_800AAE70 (read by gun_muzzle_sparks_spawn); game_eu_51190 has its own copy. */
-static const f32 D_800AAE70[6] = { -113.828796f, -14.0823936f, 14.5422001f, -124.648605f, -14.0823936f, 14.5422001f };
-static const f32 D_800AAE7C[3] = { -124.648605f, -14.0823936f, 14.5422001f };
-static const f32 D_800AAE88[3] = { 7.31999874f, -14.0823936f, 4.54220057f };
-static const f32 D_800AAE94[1] = { 0.00100000005f }; /* 0x3A83126F (arrays: IDO puts scalar float statics in .data) */
-static const f32 D_800AAE98[1] = { 0.00333333341f }; /* 0x3B5A740E */
+   g_gun_sparks_end_pt is the second point of g_gun_smoke_start_pt (read by gun_muzzle_sparks_spawn); game_eu_51190 has its own copy. */
+static const f32 g_gun_smoke_start_pt[6] = { -113.828796f, -14.0823936f, 14.5422001f, -124.648605f, -14.0823936f, 14.5422001f }; /* was D_800AAE70 */
+static const f32 g_gun_sparks_end_pt[3] = { -124.648605f, -14.0823936f, 14.5422001f }; /* was D_800AAE7C */
+static const f32 g_gun_smoke_end_pt[3] = { 7.31999874f, -14.0823936f, 4.54220057f }; /* was D_800AAE88 */
+static const f32 g_gun_smoke_dir_scale[1] = { 0.00100000005f }; /* 0x3A83126F (arrays: IDO puts scalar float statics in .data); was D_800AAE94 */
+static const f32 g_gun_smoke_tracer_k[1] = { 0.00333333341f }; /* 0x3B5A740E; was D_800AAE98 */
 
 void obj_get_aim_vectors(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4);
 u8 *attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
@@ -21,7 +21,7 @@ u8 *tracer_spawn(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, u8 arg4, s32 arg5, f32 
                   s32 arg14, f32 arg15, u8 arg16, s8 arg17, s32 arg18, u8 arg19, s32 arg1A);
 
 // gun_muzzle_smoke_spawn: smoke trail from object `obj`'s gun. Direction = the object's facing vector
-// (obj_get_aim_vectors) * 0.001. With a model (+0x1D4) the two muzzle points D_800AAE70 / D_800AAE88 are taken through
+// (obj_get_aim_vectors) * 0.001. With a model (+0x1D4) the two muzzle points g_gun_smoke_start_pt / g_gun_smoke_end_pt are taken through
 // attachment 0x46 (attachment_find_by_slot / model_node_points_to_world; bail out when either fails), then sparks (gun_muzzle_flash_light) and, on a
 // random odd value, a flash (gun_muzzle_sparks_spawn); without a model the start is the object position (+0x14) raised by 106
 // and pushed 120 along the direction, the end 82 back. Then the smoke stream tracer_spawn (alpha 0xFF with a model,
@@ -42,12 +42,12 @@ void gun_muzzle_smoke_spawn(u8 *obj, u8 flag, s32 arg2) {
         return;
     }
     obj_get_aim_vectors((struct127 *) obj, (s32) dir, (s32) side, 0, 0.0f);
-    dir[0] *= D_800AAE94[0];
-    dir[1] *= D_800AAE94[0];
-    dir[2] *= D_800AAE94[0];
+    dir[0] *= g_gun_smoke_dir_scale[0];
+    dir[1] *= g_gun_smoke_dir_scale[0];
+    dir[2] *= g_gun_smoke_dir_scale[0];
     if (*(u8 **) (obj + 0x1D4) != NULL) {
-        in[0] = (f32 *) D_800AAE70;
-        in[1] = (f32 *) D_800AAE88;
+        in[0] = (f32 *) g_gun_smoke_start_pt;
+        in[1] = (f32 *) g_gun_smoke_end_pt;
         out[0] = start;
         out[1] = end;
         att = attachment_find_by_slot(obj, 0x46, 0);
@@ -75,7 +75,7 @@ void gun_muzzle_smoke_spawn(u8 *obj, u8 flag, s32 arg2) {
     a = random_float();
     b = random_float();
     r = random_int();
-    tracer_spawn((u8 *) start, NULL, (u8 *) end, (u8 *) dir, 1, 0, 300.0f, D_800AAE98[0], a * 10.0f + 25.0f,
+    tracer_spawn((u8 *) start, NULL, (u8 *) end, (u8 *) dir, 1, 0, 300.0f, g_gun_smoke_tracer_k[0], a * 10.0f + 25.0f,
                   b * 150.0f + 400.0f, 80.0f, r % 56 + 200, obj, 1, 1, 0, *(u8 **) (obj + 0x1D4) != NULL ? 0xFF : 0x80,
                   0, 1, 0, 0x1A, 0.0f, 0xFF, D_800BE616 ? -1 : 2, 0, flag, arg2);
 }
@@ -88,7 +88,7 @@ void gun_muzzle_sparks_spawn(s32 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
 
     s[1] = ((random_float() * 1001.0f) + 604.0f) * 0.01f;
     s[0] = ((random_float() * 59.0f) + 141.0f) * 0.1f;
-    attached_particle_spawn(arg0, 0, D_800AAE70, D_800AAE7C, s, (random_int() & 3) + 6, (random_int() % 1U) + 0xFF /* fakematch: rand % 1 range-0 rand (folded, call + spill kept) */, (random_float() * 270.0f) + 359.0f, arg1, 0xFF, 0, arg2, arg3, arg4);
+    attached_particle_spawn(arg0, 0, g_gun_smoke_start_pt, g_gun_sparks_end_pt, s, (random_int() & 3) + 6, (random_int() % 1U) + 0xFF /* fakematch: rand % 1 range-0 rand (folded, call + spill kept) */, (random_float() * 270.0f) + 359.0f, arg1, 0xFF, 0, arg2, arg3, arg4);
 }
 
 /* was func_151C5C54 */

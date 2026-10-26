@@ -1,4 +1,4 @@
-# P238 layer_pre_scroll_texture (layer_pre_scroll_texture): D_800DD270 s16 scroll (EU 800DD270, high half of the word). sprite_load_texture = jal 15095380 (RET: the new gdl), gfx_other_mode_cached = jal 1514352C
+# P238 layer_pre_scroll_texture (layer_pre_scroll_texture): g_layer_tex_scroll_pos s16 scroll (EU 800DD270, high half of the word). sprite_load_texture = jal 15095380 (RET: the new gdl), gfx_other_mode_cached = jal 1514352C
 mid ! 0=80450000,1=4,2=1,3=0 ! 800DD270=01000000,800DD650=11111111,800DD654=22222222,800DD658=33333333 ! 15095380=80450100 ! ! ! ! !
 wrap ! 0=80450000,1=4,2=0,3=0 ! 800DD270=04800000,800DD650=11111111,800DD654=22222222,800DD658=33333333 ! 15095380=80450200 ! ! ! ! !
 neg ! 0=80450000,1=4,2=0,3=0 ! 800DD270=7FC00000,800DD650=11111111,800DD654=22222222,800DD658=33333333 ! 15095380=80450300 ! ! ! ! !

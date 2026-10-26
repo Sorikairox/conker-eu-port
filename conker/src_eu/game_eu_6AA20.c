@@ -20,7 +20,7 @@ extern s32 D_800C48A8[];
 extern s32 D_800C4D10[];
 extern s32 D_800C5000[];
 extern s32 D_800C5468[];
-extern u16 D_800C4730[];
+extern u16 g_model_part_counts[]; /* was D_800C4730 */
 extern u16 D_800C5BC0[];
 extern u16 D_800C4B98[];
 extern s32 D_800C4440;
@@ -32,7 +32,7 @@ extern s32 D_800C6070[187];
 /* P51: model load of id arg0 (< 0xBB, not 0xFF; nothing to do when D_800D19A0[id] is set). Model asset (1, id)
  * through asset_load_with_subfiles (7 relocated {offset, size} pairs): D_800D19A0[id] = base + 0x38, D_800C4440 (+0),
  * D_800C48A8 (+8, display lists), D_800C4D10 (+0x28), D_800C5000 (+0x10, skeleton), D_800C5758 (+0x18),
- * D_800C5468 (+0x20), the counts D_800C4730 (+4 / 4), D_800C5BC0, D_800C4B98 (+0xC / 4), D_800C5A48 (+0x1C / 12),
+ * D_800C5468 (+0x20), the counts g_model_part_counts (+4 / 4), D_800C5BC0, D_800C4B98 (+0xC / 4), D_800C5A48 (+0x1C / 12),
  * D_800C52F0 (+0x14 / 16, joints). The display lists of +8 and +0x28 are relocated (model_relocate_word / model_dl_relocate).
  * Then (arg3) model_textures_acquire and texture_resolve_dl_ids per display list, model_count_triangles / model_alloc_vertex_table, (arg2 +0x18 & 0x4000
  * or arg4 & 1) model_build_collision_tables, model_header_load, anim_bank_load (animation bank); any error frees everything again.
@@ -67,7 +67,7 @@ s32 model_load(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     D_800C5000[id] = *(s32 *)(m + 0x10);
     ((s32 *)&D_800C5758)[id] = *(s32 *)(m + 0x18);
     D_800C5468[id] = *(s32 *)(m + 0x20);
-    D_800C4730[id] = *(u32 *)(m + 4) >> 2;
+    g_model_part_counts[id] = *(u32 *)(m + 4) >> 2;
     base = ((s32 *)&D_800C4440)[id];
     if (base == 0) {
         base = D_800C48A8[id];

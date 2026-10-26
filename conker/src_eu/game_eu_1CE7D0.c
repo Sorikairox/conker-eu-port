@@ -50,7 +50,7 @@ void spawn_circle_random_emit(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s
 void ground_dust_update(u8 *arg0) {
     u8 *temp_s0;
 
-    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + (0.17500001f * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + (0.17500001f * g_frame_step_f));
     if ((*(f32 *)((u8 *)arg0 + 0x38)) > 1.0f) {
         temp_s0 = arg0 + 0x28;
         do {
@@ -62,16 +62,16 @@ void ground_dust_update(u8 *arg0) {
 
 f32 angle_byte_cos(u8);
 s32 node_spawn_sprite(s32 **, s32, s32, s32, s32, s32);
-extern u8 D_8008FC70[];          /* grey level per colour index (arg8) */
-extern u8 D_80091C2C[];          /* sprite set of colour index 1 */
-extern u8 D_80091C50[];          /* sprite set of colour index 0 */
+extern u8 g_ground_dust_greys[];          /* grey level per colour index (arg8); was D_8008FC70 */
+extern u8 g_dust_sprite_set[];          /* sprite set of colour index 1; was D_80091C2C */
+extern u8 g_dust_sprites_c0[];          /* sprite set of colour index 0; was D_80091C50 */
 
-/* emit_point_blob: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0,
+/* emit_point_blob: g_emit_point_spawn_fns spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0,
  * s32 a, s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`, as the game_eu_EF6D0 emitters): queues one
  * node_spawn_sprite sprite particle at (x, y, z) (s16) flying out along the byte angle a with a random pitch of -63..-49
  * (rand % 15 - 63) and speed 801..1304 (503 * rand + 801): s16 velocity (v sin(p) sin(a - 0x40), -v sin(p - 0x40),
  * v sin(p) sin(a)) (angle_byte_cos = byte-angle sine); -130..-90 (rand % 41 - 130), two sizes 250..700 (rand % 451 +
- * 250), 200, 6..8 (rand % 3 + 6), grey D_8008FC70[arg8] with alpha 0xFF, sprite set D_80091C50 / D_80091C2C for
+ * 250), 200, 6..8 (rand % 3 + 6), grey g_ground_dust_greys[arg8] with alpha 0xFF, sprite set g_dust_sprites_c0 / g_dust_sprite_set for
  * arg8 0 / 1 (other values leave the word unset, as the asm), owner byte argB. The three bytes at +0x1C take the
  * low byte of (s32) (x * 256) as in the asm. Words the asm never writes stay unset. Always returns 1 (go on). */
 /* was func_151A11BC */
@@ -119,7 +119,7 @@ s32 spawn_emit_sprite_blob(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0,
     rec.h22 = (u32) random_int() % 41U - 0x82;
     rec.b2A = (u32) random_int() % 3U + 6;
     size = (u32) random_int() % 451U + 0xFA;
-    g = D_8008FC70[arg8];
+    g = g_ground_dust_greys[arg8];
     xb = (s32) (x * 256.0f);
     rec.size0 = size;
     rec.b30[0] = 0;
@@ -141,9 +141,9 @@ s32 spawn_emit_sprite_blob(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0,
     rec.b1C[1] = xb;
     rec.b1C[2] = xb;
     if (arg8 == 0) {
-        rec.sprites = D_80091C50;
+        rec.sprites = g_dust_sprites_c0;
     } else if (arg8 == 1) {
-        rec.sprites = D_80091C2C;
+        rec.sprites = g_dust_sprite_set;
     }
     rec.h28 = 0xC8;
     node_spawn_sprite((s32 **) &rec, 0, 0, -1, argB & 0xFF, 1);
@@ -185,7 +185,7 @@ void fx_layers_spawn_stub(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 
 }
 
 s32 node_spawn_sprite(s32 **, s32, s32, s32, s32, s32);
-extern s32 D_800910E4;
+extern s32 g_spark_burst_sprites; /* was D_800910E4 */
 
 /* spark emitter parameters at +0x28 of the object */
 typedef struct {
@@ -242,8 +242,8 @@ typedef struct {
     /* 0x20 */ s16 endStep;   /* fade / half */
 } Fade1794;
 
-// spark_burst_emitter_update: adds rate * D_800BE9A4 to the emitter's accum and spawns one spark sprite
-// (node_spawn_sprite, sprites D_800910E4, room / owner from +0xC / +0x1) per whole unit. Each spark starts at the
+// spark_burst_emitter_update: adds rate * g_frame_step_f to the emitter's accum and spawns one spark sprite
+// (node_spawn_sprite, sprites g_spark_burst_sprites, room / owner from +0xC / +0x1) per whole unit. Each spark starts at the
 // emitter position and flies in half its fade time to a random point of the sphere of radius spread (two random
 // angles through angle_byte_cos); life lifeMin + 0..lifeRange, fade value fadeMin + 0..fadeRange, random flags 4 / 8
 // (they accumulate over the batch). The fade program (Fade1794) is copied to the record's +0x50.
@@ -272,7 +272,7 @@ void spark_burst_emitter_update(u8 *obj) {
     s16 rest;
     u8 *rec;
 
-    e->accum = e->accum + e->rate * D_800BE9A4;
+    e->accum = e->accum + e->rate * g_frame_step_f;
     if (!(1.0f < e->accum)) {
         return;
     }
@@ -286,7 +286,7 @@ void spark_burst_emitter_update(u8 *obj) {
     t.flags = 0x120;
     t.mode = 0x000C0001;
     t.uC = 0;
-    t.sprites = &D_800910E4;
+    t.sprites = &g_spark_burst_sprites;
     t.u16 = 0;
     t.u20 = 0;
     t.u18 = 0;
@@ -315,7 +315,7 @@ void spark_burst_emitter_update(u8 *obj) {
         }
         t.life = (u32) random_int() % (u32) (e->lifeRange + 1) + e->lifeMin;
         fade = (u32) random_int() % (u32) (e->fadeRange + 1) + e->fadeMin;
-        t.total = ((u8 *) D_80090F10)[0x1D8] * (0x100 / t.life);
+        t.total = ((u8 *) g_sprite_textures)[0x1D8] * (0x100 / t.life);
 
         n = t.total;
         q = n >> 2;
@@ -382,13 +382,13 @@ void spark_sprite_fade_update(u8 *arg0) {
         (*(s16 *)((u8 *)arg0 + 0x34)) = temp_lo;
     }
     if ((*(s16 *)((u8 *)temp_v0_2 + 0xC)) < temp_v1) {
-        temp_t7 = (((*(s16 *)((u8 *)arg0 + 0x20)) << 8) | (*(u8 *)((u8 *)arg0 + 0x2C))) + ((((*(s16 *)((u8 *)temp_v0_2 + 0xE)) << 8) | (*(s16 *)((u8 *)temp_v0_2 + 0x14))) * D_800BE9E4);
+        temp_t7 = (((*(s16 *)((u8 *)arg0 + 0x20)) << 8) | (*(u8 *)((u8 *)arg0 + 0x2C))) + ((((*(s16 *)((u8 *)temp_v0_2 + 0xE)) << 8) | (*(s16 *)((u8 *)temp_v0_2 + 0x14))) * g_frame_ticks);
         (*(s16 *)((u8 *)arg0 + 0x20)) = (s16) (temp_t7 >> 8);
         (*(u8 *)((u8 *)arg0 + 0x2C)) = (u8) temp_t7;
-        temp_t6 = (((*(s16 *)((u8 *)arg0 + 0x22)) << 8) | (*(u8 *)((u8 *)arg0 + 0x2E))) + ((((*(s16 *)((u8 *)temp_v0_2 + 0x10)) << 8) | (*(s16 *)((u8 *)temp_v0_2 + 0x16))) * D_800BE9E4);
+        temp_t6 = (((*(s16 *)((u8 *)arg0 + 0x22)) << 8) | (*(u8 *)((u8 *)arg0 + 0x2E))) + ((((*(s16 *)((u8 *)temp_v0_2 + 0x10)) << 8) | (*(s16 *)((u8 *)temp_v0_2 + 0x16))) * g_frame_ticks);
         (*(s16 *)((u8 *)arg0 + 0x22)) = (s16) (temp_t6 >> 8);
         (*(u8 *)((u8 *)arg0 + 0x2E)) = (u8) temp_t6;
-        temp_t5 = (((*(s16 *)((u8 *)arg0 + 0x24)) << 8) | (*(u8 *)((u8 *)arg0 + 0x2D))) + ((((*(s16 *)((u8 *)temp_v0_2 + 0x12)) << 8) | (*(s16 *)((u8 *)temp_v0_2 + 0x18))) * D_800BE9E4);
+        temp_t5 = (((*(s16 *)((u8 *)arg0 + 0x24)) << 8) | (*(u8 *)((u8 *)arg0 + 0x2D))) + ((((*(s16 *)((u8 *)temp_v0_2 + 0x12)) << 8) | (*(s16 *)((u8 *)temp_v0_2 + 0x18))) * g_frame_ticks);
         (*(s16 *)((u8 *)arg0 + 0x24)) = (s16) (temp_t5 >> 8);
         (*(u8 *)((u8 *)arg0 + 0x2D)) = (u8) temp_t5;
     }
@@ -431,7 +431,7 @@ void spark_burst_a_start(u8 *arg0) {
 }
 
 s32 node_spawn_sprite(s32 **, s32, s32, s32, s32, s32);
-extern s32 D_800910E4;
+extern s32 g_spark_burst_sprites; /* was D_800910E4 */
 
 /* was func_151A1F48 */
 void spark_burst_a_update(u8 *arg0) {
@@ -497,7 +497,7 @@ void spark_burst_a_update(u8 *arg0) {
     s32 temp_v1;
     u8 *temp_s0;
 
-    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((*(f32 *)((u8 *)arg0 + 0x3C)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((*(f32 *)((u8 *)arg0 + 0x3C)) * g_frame_step_f));
     temp_s0 = arg0 + 0x28;
     if ((*(f32 *)((u8 *)arg0 + 0x38)) > 1.0f) {
         sp.uE0 = 0xFF;
@@ -510,7 +510,7 @@ void spark_burst_a_update(u8 *arg0) {
         sp.uE8 = 0x120;
         sp.uB8 = 0xC0001;
         sp.uC0 = 0;
-        sp.uB4 = &D_800910E4;
+        sp.uB4 = &g_spark_burst_sprites;
         sp.uCA = 0;
         sp.uD4 = 0;
         sp.uCC = 0;
@@ -540,7 +540,7 @@ void spark_burst_a_update(u8 *arg0) {
             temp_t5 = (random_int() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1A)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x18));
             sp.uC2 = temp_t5;
             temp_t1 = (random_int() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1E)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x1C));
-            sp.uDC = (*(u8 *)((u8 *)D_80090F10 + 0x1D8)) * (0x100 / temp_t5);
+            sp.uDC = (*(u8 *)((u8 *)g_sprite_textures + 0x1D8)) * (0x100 / temp_t5);
             temp_v1 = sp.uDC >> 2;
             temp_t2 = sp.uDC - temp_v1;
             temp_t0 = sp.uDC >> 1;
@@ -639,7 +639,7 @@ void spark_burst_b_start(u8 *arg0) {
 }
 
 s32 node_spawn_sprite(s32 **, s32, s32, s32, s32, s32);
-extern s32 D_800910E4;
+extern s32 g_spark_burst_sprites; /* was D_800910E4 */
 
 /* was func_151A2564 */
 void spark_burst_b_update(u8 *arg0) {
@@ -708,7 +708,7 @@ void spark_burst_b_update(u8 *arg0) {
     s32 temp_v1;
     u8 *temp_s0;
 
-    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((*(f32 *)((u8 *)arg0 + 0x3C)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((*(f32 *)((u8 *)arg0 + 0x3C)) * g_frame_step_f));
     temp_s0 = arg0 + 0x28;
     if ((*(f32 *)((u8 *)arg0 + 0x38)) > 1.0f) {
         sp.uF0 = 5;
@@ -721,7 +721,7 @@ void spark_burst_b_update(u8 *arg0) {
         sp.uF8 = 0x120;
         sp.uC8 = 0xC0001;
         sp.uD0 = 0;
-        sp.uC4 = &D_800910E4;
+        sp.uC4 = &g_spark_burst_sprites;
         sp.uDA = 0;
         sp.uE4 = 0;
         sp.uDC = 0;
@@ -750,7 +750,7 @@ void spark_burst_b_update(u8 *arg0) {
             }
             sp.uD2 = (random_int() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1A)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x18));
             temp_a1 = (random_int() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x1E)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x1C));
-            sp.uEC = (*(u8 *)((u8 *)D_80090F10 + 0x1D8)) * (0x100 / sp.uD2);
+            sp.uEC = (*(u8 *)((u8 *)g_sprite_textures + 0x1D8)) * (0x100 / sp.uD2);
             temp_a0 = sp.uEC >> 2;
             temp_t0 = sp.uEC - temp_a0;
             temp_v1 = sp.uEC >> 1;
@@ -806,7 +806,7 @@ void spark_sprite_b_fade_update(u8 *arg0) {
         (*(s8 *)((u8 *)arg0 + 0x3F)) = (s8) (temp_v1 * (*(s16 *)((u8 *)temp_v0_2 + 0x12)));
     }
     if (temp_v1 < (*(s16 *)((u8 *)temp_v0_2 + 0x14))) {
-        temp_lo_2 = (*(s16 *)((u8 *)temp_v0_2 + 0x16)) * D_800BE9E4;
+        temp_lo_2 = (*(s16 *)((u8 *)temp_v0_2 + 0x16)) * g_frame_ticks;
         (*(s16 *)((u8 *)arg0 + 0x34)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x34)) + temp_lo_2);
         (*(s16 *)((u8 *)arg0 + 0x36)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x36)) + temp_lo_2);
     }
@@ -848,7 +848,7 @@ void spark_sprite_c_fade_update(u8 *arg0) {
         (*(s8 *)((u8 *)arg0 + 0x3F)) = (s8) (temp_v1 * (*(s16 *)((u8 *)temp_v0_2 + 0x12)));
     }
     if (temp_v1 < (*(s16 *)((u8 *)temp_v0_2 + 0x14))) {
-        temp_lo_2 = (*(s16 *)((u8 *)temp_v0_2 + 0x16)) * D_800BE9E4;
+        temp_lo_2 = (*(s16 *)((u8 *)temp_v0_2 + 0x16)) * g_frame_ticks;
         (*(s16 *)((u8 *)arg0 + 0x34)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x34)) + temp_lo_2);
         (*(s16 *)((u8 *)arg0 + 0x36)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x36)) + temp_lo_2);
     }
@@ -968,11 +968,11 @@ s32 particle_puff_spawn(f32 *pos, f32 *vel, f32 *acc, f32 arg3, f32 arg4, f32 sc
     return 0;
 }
 /* P146 */
-extern void (*D_8008FC80[])(u8 *, s32, s32, s32);
+extern void (*g_particle_event_fns[])(u8 *, s32, s32, s32); /* was D_8008FC80 */
 s32 particle_upd_damp_vel(u8 *, s32);
 // particle_timed_event_update: particle update handler 17 (particle_sprite_update). While the age (+0x1A) is below +0xB0
 // the alpha +0x2C ramps as age * +0xB2. While the age (+0x1A, counting down) is <= the trigger time +0xB4 (-1 = none) the event
-// D_8008FC80[+0xB6] (-1 = none) is called once with (particle, trigger time, age, -1) and the trigger cleared;
+// g_particle_event_fns[+0xB6] (-1 = none) is called once with (particle, trigger time, age, -1) and the trigger cleared;
 // events are suppressed while D_800BE616 is set. Then the common update particle_upd_damp_vel(particle, arg) runs and its
 // result is returned.
 /* was func_151A2F10 */
@@ -988,7 +988,7 @@ s32 particle_timed_event_update(u8 *part, s32 arg) {
         when = *(s16 *)(part + 0xB4);
         event = *(s8 *)(part + 0xB6);
         if (when != -1 && event != -1 && when >= age) {
-            D_8008FC80[event](part, when, age, -1);
+            g_particle_event_fns[event](part, when, age, -1);
             *(s16 *)(part + 0xB4) = -1;
         }
     }
@@ -1024,7 +1024,7 @@ void accel_from_angles(s32 arg0, s16 arg1, s16 arg2, f32 arg3, f32 arg4, s32 arg
 }
 
 /* P160 */
-extern u8 D_8008FC88[]; /* 4 colours, 3 bytes each */
+extern u8 g_particle_burst_colours[]; /* 4 colours, 3 bytes each; was D_8008FC88 */
 typedef struct { u8 b[12]; } Blk12_151A31D4;
 s32 particle_puff_spawn(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void accel_scaled_copy(f32 *arg0, s16 arg1, s16 arg2, f32 arg3, f32 arg4, f32 *arg5);
@@ -1033,7 +1033,7 @@ void accel_from_angles(s32 arg0, s16 arg1, s16 arg2, f32 arg3, f32 arg4, s32 arg
 // particle_burst_spawn: spawns `count` particles (particle_puff_spawn) at pos. For particle i (t = i / count) the
 // velocity is a random direction (vec3_from_angles_byte) of random speed up to speedMax, the acceleration comes from
 // `accel` (scaled by 1 - t) through accel_from_angles (useDir) or accel_scaled_copy, the colour is one of the 4
-// D_8008FC88 colours, about 8% of the particles get 0x19 as extra value (else -1), and the lives / periods are
+// g_particle_burst_colours colours, about 8% of the particles get 0x19 as extra value (else -1), and the lives / periods are
 // random within the given ranges. Returns 0 (the N64 code leaves particle_puff_spawn's 0 in v0).
 /* was func_151A31D4 */
 s32 particle_burst_spawn(s32 pos, s32 accel, s16 dirA, s16 dirB, f32 accelSpeed, f32 scaleBase, f32 scaleSlope, s32 count,
@@ -1067,7 +1067,7 @@ s32 particle_burst_spawn(s32 pos, s32 accel, s16 dirA, s16 dirB, f32 accelSpeed,
         b = random_int();
         vec3_from_angles_byte((u8)a, (u8)b, random_float() * speedMax, (s32)vel);
         accelFn((f32 *)accel, dirA, dirB, accelSpeed, t, acc);
-        *(Blk12_151A31D4 *)colors = *(Blk12_151A31D4 *)D_8008FC88;
+        *(Blk12_151A31D4 *)colors = *(Blk12_151A31D4 *)g_particle_burst_colours;
         c = random_int() & 3;
         lifeRand = random_float();
         b = random_int();

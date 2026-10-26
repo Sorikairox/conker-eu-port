@@ -4,7 +4,7 @@
 
 
 void *memcpy(void *, const void *, s32);
-extern u8 D_800AA870[];
+extern u8 g_bullet_glow_sprite[]; /* was D_800AA870 */
 typedef struct { f32 x, y, z; } V3_151B89B0;
 
 typedef struct {
@@ -70,7 +70,7 @@ u8 *bullet_glow_spawn(u8 *arg0) {
     blk.u50 = 0;
     blk.u54 = 0x32;
     blk.u56 = 5;
-    temp_v0 = effect3d_spawn_full(&blk, (s32)D_800AA870, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, arg0[0xC], arg0[1]);
+    temp_v0 = effect3d_spawn_full(&blk, (s32)g_bullet_glow_sprite, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, arg0[0xC], arg0[1]);
     if (temp_v0 != NULL) {
         memcpy(temp_v0 + 0x110, &tmp, 4);
     }
@@ -83,9 +83,9 @@ s32 bullet_glow_follow_update(u8 *arg0)
     u8 *p = *(u8 **)(arg0 + 0x110);
     if (p != NULL) {
         *(vertex *)(arg0 + 0x34) = *(vertex *)(p + 0x38);
-        *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * D_800BE9A4;
-        *(f32 *)(arg0 + 0x44) += *(f32 *)(arg0 + 0x50) * D_800BE9A4;
-        *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x54) * D_800BE9A4;
+        *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * g_frame_step_f;
+        *(f32 *)(arg0 + 0x44) += *(f32 *)(arg0 + 0x50) * g_frame_step_f;
+        *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x54) * g_frame_step_f;
     } else {
         *(s32 *)(arg0 + 0x58) |= 1;
     }
@@ -142,13 +142,13 @@ void bullet_debris_spray_emit(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, 
     particle_puff_spawn(&sp6C[6], sp6C, &sp6C[3], 1.0f, ((random_float() * 157.0f) + -151.0f) * 0.001f, (random_float() * 55.0f) + 75.0f, (random_int() % 26U) + 0x19, (random_int() % 101U) + 0x64, 0xA, 0x19, 0, -1, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
 }
 
-extern u8 D_800AA898[]; /* s32[4]: the 4 smoke textures */
-extern u8 D_800A5860[]; /* zero vector */
+extern u8 g_bullet_smoke_textures[]; /* s32[4]: the 4 smoke textures; was D_800AA898 */
+extern u8 g_vec3_zero[]; /* zero vector; was D_800A5860 */
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 s32 random_int(void);
 f32 random_float(void);
 
-// smoke_puff_spawn: spawns one big smoke puff particle (random texture of the 4 in D_800AA898, half size
+// smoke_puff_spawn: spawns one big smoke puff particle (random texture of the 4 in g_bullet_smoke_textures, half size
 // 900..1400, white, alpha 0xFF, 300 frames, fade from 1 at rate 0xFF, draw 6 / update 5, random flip flags 0x40 /
 // 0x80) at the object's position +0x38, in its room (+0xC) for its owner (+0x1) through particle_spawn_ex.
 // Returns particle_spawn_ex's result (the new particle): P215, the asm returns it and port-b's asm caller projectile_fire
@@ -192,10 +192,10 @@ s32 bullet_smoke_puff_spawn(u8 *obj) {
     s32 flipB;
     f32 s;
 
-    textures[0] = ((s32 *) D_800AA898)[0];
-    textures[1] = ((s32 *) D_800AA898)[1];
-    textures[2] = ((s32 *) D_800AA898)[2];
-    textures[3] = ((s32 *) D_800AA898)[3];
+    textures[0] = ((s32 *) g_bullet_smoke_textures)[0];
+    textures[1] = ((s32 *) g_bullet_smoke_textures)[1];
+    textures[2] = ((s32 *) g_bullet_smoke_textures)[2];
+    textures[3] = ((s32 *) g_bullet_smoke_textures)[3];
     req.texture = textures[random_int() & 3];
     req.texSet = 0x1303;
     req.handlers = 0x200005;
@@ -218,12 +218,12 @@ s32 bullet_smoke_puff_spawn(u8 *obj) {
     req.pos[0] = *(s32 *) (obj + 0x38);
     req.pos[1] = *(s32 *) (obj + 0x3C);
     req.pos[2] = *(s32 *) (obj + 0x40);
-    req.angle[0] = ((s32 *) D_800A5860)[0];
-    req.angle[1] = ((s32 *) D_800A5860)[1];
-    req.angle[2] = ((s32 *) D_800A5860)[2];
-    req.vel[0] = ((s32 *) D_800A5860)[0];
-    req.vel[1] = ((s32 *) D_800A5860)[1];
-    req.vel[2] = ((s32 *) D_800A5860)[2];
+    req.angle[0] = ((s32 *) g_vec3_zero)[0];
+    req.angle[1] = ((s32 *) g_vec3_zero)[1];
+    req.angle[2] = ((s32 *) g_vec3_zero)[2];
+    req.vel[0] = ((s32 *) g_vec3_zero)[0];
+    req.vel[1] = ((s32 *) g_vec3_zero)[1];
+    req.vel[2] = ((s32 *) g_vec3_zero)[2];
     req.fadeStart = 1;
     req.fadeRate = 0xFF;
     req.u22 = 1;

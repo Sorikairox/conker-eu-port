@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A5860[];
+extern u8 g_vec3_zero[]; /* was D_800A5860 */
 void obj_get_center_point(f32 *arg0, f32 *arg1);
 void debris_smoke_ring_spawn(s32 arg0, u8 arg1, s32 arg2);
 void debris_dust_cloud_spawn(s32 arg0, u8 arg1, s32 arg2);
@@ -107,10 +107,10 @@ void fire_smoke_trail_update(u8 *arg0) {
         return;
     }
     if (((*(f32 *)((u8 *)temp_s2 + 0x28)) < 8.0f) && (((*(s32 *)((u8 *)temp_s2 + 0x184)) & 0x1F) == 0xE)) {
-        (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((3.0000002f + (random_float() * 1.0f)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((3.0000002f + (random_float() * 1.0f)) * g_frame_step_f));
         if ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f) {
             if (motion_track_get_delta(temp_s2, &sp.u84) == 0) {
-                sp.u84 = ((u8 *)&D_800A5860);
+                sp.u84 = ((u8 *)&g_vec3_zero);
             }
             vec2_from_angle_rad((*(f32 *)((u8 *)temp_s2 + 0x40)) * 0.017453292f, 1.0f, &sp.u90, &sp.u94); /* P95: was 0x3F800000 as an int */
             sp.uB5 = 0x28;
@@ -237,7 +237,7 @@ s32 vec3_make_basis(f32 *, f32 *, f32 *);
 void impact_scorch_decal_spawn(s16 *, f32 *, s32, s32);
 void impact_rumble_spawn(f32 *, s32, s32);
 void impact_cam_shake_spawn(f32 *, s32, s32);
-extern s32 D_800A0E00[3];   /* sprites of the first burst */
+extern s32 g_debris_burst1_sprites[3];   /* sprites of the first burst; was D_800A0E00 */
 extern s32 g_debris_list_counts[];    /* per type: entry count of the g_debris_model_lists list; was D_80089DC0; was D_800A42F4 */
 extern s32 *g_debris_model_lists[];   /* per type: sprite list (entries 2.. are used); was D_80089DC0 */
 
@@ -387,7 +387,7 @@ void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
     p.u72 = 0xC;
     p.u74 = 0x15;
 
-    /* burst 1: one particle per D_800A0E00 sprite, thrown in a random direction around the normal */
+    /* burst 1: one particle per g_debris_burst1_sprites sprite, thrown in a random direction around the normal */
     for (i = 0; i < 3; i++) {
         f32 speed = random_float() * 0.0132f + 0.0298f;
         s32 ang = random_int();
@@ -404,7 +404,7 @@ void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
         p.spinZ = random_float() * 38.444f + -19.222f;
         p.gravity = random_float() * 0.648f + -1.3970001f;
         p.life = (u32)random_int() % 21 + 30;
-        p.sprite = D_800A0E00[i];
+        p.sprite = g_debris_burst1_sprites[i];
         mdl_particle_spawn(&p, 0, 0, 0, id, arg2);
     }
 
@@ -431,7 +431,7 @@ void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
         mdl_particle_spawn(&p, 0, 0, 0, id, arg2);
     }
 
-    if (arg0->camera != NULL && D_80082FA0 <= 0) {
+    if (arg0->camera != NULL && g_last_player_index <= 0) {
         debris_screen_flash(arg0->camera->unk23D, id, arg2);
     }
     if (hitWall && arg0->camera != NULL) {
@@ -460,8 +460,8 @@ void debris_smoke_ring_spawn(s32 arg0, u8 arg1, s32 arg2) {
 }
 
 s32 glow_pulse_spawn(s32, f32, f32, f32, u8, s32);
-extern f32 D_800A0E80;
-extern f32 D_800A0E84;
+extern f32 g_debris_dust_glow_mul; /* was D_800A0E80 */
+extern f32 g_debris_dust_glow_add; /* was D_800A0E84 */
 
 /* was func_150D6944 */
 void debris_dust_cloud_spawn(s32 arg0, u8 arg1, s32 arg2) {
@@ -471,29 +471,29 @@ void debris_dust_cloud_spawn(s32 arg0, u8 arg1, s32 arg2) {
 
     sp24 = random_float();
     sp28 = random_float();
-    glow_pulse_spawn(arg0, (sp24 * 3.0f) + 8.0f, (sp28 * D_800A0E80) + D_800A0E84, (random_float() * 50.0f) + 100.0f, (s32) arg1, arg2);
+    glow_pulse_spawn(arg0, (sp24 * 3.0f) + 8.0f, (sp28 * g_debris_dust_glow_mul) + g_debris_dust_glow_add, (random_float() * 50.0f) + 100.0f, (s32) arg1, arg2);
 }
 
-extern f32 D_800A0E88;
-extern f32 D_800A0E8C;
-extern f32 D_800A0E90;
-extern f32 D_800A0E94;
-extern f32 D_800A0E98;
+extern f32 g_debris_preset_a1; /* was D_800A0E88 */
+extern f32 g_debris_preset_u14; /* was D_800A0E8C */
+extern f32 g_debris_preset_u18; /* was D_800A0E90 */
+extern f32 g_debris_preset_u38; /* was D_800A0E94 */
+extern f32 g_debris_preset_u40; /* was D_800A0E98 */
 /* was func_150D69F8 */
 void debris_spec_fill_preset(u8 *arg0, f32 *arg1) {
     (*(s32 *)((u8 *)arg0 + 0)) = 6;
     (*(s32 *)((u8 *)arg0 + 4)) = 3;
-    *arg1 = D_800A0E88;
-    (*(f32 *)((u8 *)arg0 + 0x14)) = D_800A0E8C;
+    *arg1 = g_debris_preset_a1;
+    (*(f32 *)((u8 *)arg0 + 0x14)) = g_debris_preset_u14;
     (*(s32 *)((u8 *)arg0 + 0x2C)) = 4;
     (*(s32 *)((u8 *)arg0 + 0x30)) = 3;
-    (*(f32 *)((u8 *)arg0 + 0x18)) = D_800A0E90;
+    (*(f32 *)((u8 *)arg0 + 0x18)) = g_debris_preset_u18;
     (*(f32 *)((u8 *)arg0 + 0x1C)) = 150.0f;
     (*(f32 *)((u8 *)arg0 + 0x20)) = 105.0f;
     (*(f32 *)((u8 *)arg0 + 0x24)) = 396.0f;
     (*(f32 *)((u8 *)arg0 + 0x28)) = 612.0f;
     (*(f32 *)((u8 *)arg0 + 0x34)) = 25.0f;
-    (*(f32 *)((u8 *)arg0 + 0x38)) = D_800A0E94;
+    (*(f32 *)((u8 *)arg0 + 0x38)) = g_debris_preset_u38;
     (*(f32 *)((u8 *)arg0 + 0x3C)) = -2.0f;
     (*(s16 *)((u8 *)arg0 + 0x44)) = 0x14;
     (*(s16 *)((u8 *)arg0 + 0x46)) = 0x1E;
@@ -501,8 +501,8 @@ void debris_spec_fill_preset(u8 *arg0, f32 *arg1) {
     (*(s16 *)((u8 *)arg0 + 0x4A)) = 0x64;
     (*(s16 *)((u8 *)arg0 + 0x4C)) = 0xC;
     (*(s16 *)((u8 *)arg0 + 0x4E)) = 0x14;
-    (*(f32 *)((u8 *)arg0 + 0x40)) = D_800A0E98;
-    if ((D_80082FA0 >= 2) || (D_8008FD8C >= 8)) {
+    (*(f32 *)((u8 *)arg0 + 0x40)) = g_debris_preset_u40;
+    if ((g_last_player_index >= 2) || (g_player_count >= 8)) {
     s32 pad;
         (*(s8 *)((u8 *)arg0 + 0x50)) = -1;
         return;
@@ -738,7 +738,7 @@ void obj_sprite_burst_spawn(f32 *arg0, s32 arg1, s32 arg2) {
     sp.u80 = 0xFF;
     sp.u5C = temp_f2_2;
     obj_get_center_point(arg0, &sp.u94);
-    temp_s2 = ((u8 *)&D_800A5860);
+    temp_s2 = ((u8 *)&g_vec3_zero);
     (*(s32 *)((u8 *)(&sp.uA0) + 0)) = (s32) (*(s32 *)((u8 *)temp_s2 + 0));
     (*(s32 *)((u8 *)(&sp.uA0) + 4)) = (s32) (*(s32 *)((u8 *)temp_s2 + 4));
     (*(s32 *)((u8 *)(&sp.uA0) + 8)) = (s32) (*(s32 *)((u8 *)temp_s2 + 8));
@@ -788,7 +788,7 @@ void vec_damp_xyz_per_tick(f32 *, f32);
 /* P67: update of a debris piece that follows its owner (obj +0xA8 = owner record, +0xAC = the owner's unique_id when
  * spawned). Returns 0 when the owner is gone or reused; else follows it (obj_get_center_point into obj +0x40), adds gravity
  * (obj +0x64) to the velocity (obj +0x58), lets vec_damp_xyz_per_tick adjust it and moves obj +0x4C by the average of the
- * old and new velocity over the frame (D_800BE9A4; D_800BEDC8 scales the change). Returns 1. */
+ * old and new velocity over the frame (g_frame_step_f; D_800BEDC8 scales the change). Returns 1. */
 /* was func_150D71D4 */
 s32 debris_follow_owner_update(u8 *arg0, s32 arg1) {
     struct127 *owner = *(struct127 **)(arg0 + 0xA8);
@@ -803,11 +803,11 @@ s32 debris_follow_owner_update(u8 *arg0, s32 arg1) {
     old[0] = vel[0];
     old[1] = vel[1];
     old[2] = vel[2];
-    vel[1] += *(f32 *)(arg0 + 0x64) * D_800BE9A4;
+    vel[1] += *(f32 *)(arg0 + 0x64) * g_frame_step_f;
     vec_damp_xyz_per_tick(vel, *(f32 *)(arg0 + 0xB0));
-    pos[0] += old[0] * D_800BE9A4 + (vel[0] - old[0]) * D_800BEDC8 * D_800BE9A4 * D_800BE9A4 * 0.5f;
-    pos[1] += old[1] * D_800BE9A4 + (vel[1] - old[1]) * D_800BEDC8 * D_800BE9A4 * D_800BE9A4 * 0.5f;
-    pos[2] += old[2] * D_800BE9A4 + (vel[2] - old[2]) * D_800BEDC8 * D_800BE9A4 * D_800BE9A4 * 0.5f;
+    pos[0] += old[0] * g_frame_step_f + (vel[0] - old[0]) * D_800BEDC8 * g_frame_step_f * g_frame_step_f * 0.5f;
+    pos[1] += old[1] * g_frame_step_f + (vel[1] - old[1]) * D_800BEDC8 * g_frame_step_f * g_frame_step_f * 0.5f;
+    pos[2] += old[2] * g_frame_step_f + (vel[2] - old[2]) * D_800BEDC8 * g_frame_step_f * g_frame_step_f * 0.5f;
     return 1;
 }
 /* was func_150D7370 */
@@ -858,7 +858,7 @@ s32 glow_follow_owner_update(u8 *arg0, s32 arg1) {
     (*(f32 *)((u8 *)arg0 + 0x38)) = temp_f2;
     temp_f12 = (*(f32 *)((u8 *)temp_v0 + 8));
     (*(s8 *)((u8 *)arg0 + 0x2B)) = (s8) (u32) ((*(f32 *)((u8 *)temp_v0 + 0x14)) - ((*(f32 *)((u8 *)temp_v0 + 0x18)) * temp_f12 * temp_f12));
-    (*(f32 *)((u8 *)temp_v0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_v0 + 8)) + D_800BE9A4);
+    (*(f32 *)((u8 *)temp_v0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_v0 + 8)) + g_frame_step_f);
     var_v0 = 1;
     if ((*(f32 *)((u8 *)temp_v0 + 0xC)) < (*(f32 *)((u8 *)temp_v0 + 8))) {
         var_v0 = 0;

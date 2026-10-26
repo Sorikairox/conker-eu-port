@@ -13,12 +13,12 @@
 s32 sprite_load_texture(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 f32 math_sin_u8(u8);
 f32 math_cos_u8(u8);
-extern u8 *D_8008CDEC[];
+extern u8 *g_sprite_tex_descs[]; /* was D_8008CDEC */
 extern f32 D_800DD600[2]; /* camera yaw: [0] sin, [1] cos (node_billboard_draw's caller in game_1944C0.c) */
 extern s32 D_800DD5E4;    /* last sprite texture: the hand asm keeps it in the upper half (lh / sh) */
 extern s32 D_800DD5E8;    /* last sprite frame: upper half, as D_800DD5E4 */
-extern s16 D_800DD5EC;    /* last sprite other-mode (1 / 2 / 3) */
-extern s32 D_800D30BC;    /* TLUT bit of the last loaded texture (gfx_load_texture_tile) */
+extern s16 g_sprite_last_other_mode;    /* last sprite other-mode (1 / 2 / 3); was D_800DD5EC */
+extern s32 g_gfx_tlut_mode;    /* TLUT bit of the last loaded texture (gfx_load_texture_tile); was D_800D30BC */
 
 /* cvt.w.s with the default FCSR mode: round to nearest, ties to even (|f| < 2^31) */
 #define SPRITE_RINT(f)                                                                                     \
@@ -31,12 +31,12 @@ extern s32 D_800D30BC;    /* TLUT bit of the last loaded texture (gfx_load_textu
  * sprite_billboard_draw: draws a camera-facing sprite quad (hand asm). rec + 0x10 is the sprite: s16 frame
  * (+0x98, frame index = the value >> 8), s16 x/y/z (+0x9C/+0x9E/+0xA0), s16 half width (+0xA2) and half height
  * (+0xA4), u16 flags (+0xA8), u16 roll / pitch angles (+0xAC/+0xAE, byte angle in the upper byte), u8 sprite
- * index into D_8008CDEC (+0xB0), u8 prim alpha (+0xB4); four Vtx per frame buffer at rec + 0x10 + D_800BE9C0 * 0x40.
+ * index into g_sprite_tex_descs (+0xB0), u8 prim alpha (+0xB4); four Vtx per frame buffer at rec + 0x10 + g_dl_buf_index * 0x40.
  * Flags: 0x8000 hidden while bit 0 of word +0x5F0 of the 0x9A0 record idx is set (Rare's asm takes that record
- * from the address of D_800DBFF0, not from the pointer it holds), 0x200 / 0x4000 quad above / below the origin,
+ * from the address of g_player_views, not from the pointer it holds), 0x200 / 0x4000 quad above / below the origin,
  * 0x8 / 0x10 / 0x400 / 0x1000 / 0x2000 combine modes, 0x800 prim alpha, 0x20 / 0x2000 other modes.
  * Loads the texture (sprite_load_texture) when the texture or frame changed; the combine / other mode / alpha commands
- * only when they differ from the last sprite's (D_800DD5EE, D_800DD5EC, g_gfx_prim_a_cached); a pipe sync precedes the
+ * only when they differ from the last sprite's (D_800DD5EE, g_sprite_last_other_mode, g_gfx_prim_a_cached); a pipe sync precedes the
  * first mode change when no texture load did. Then the 4 vertices (camera yaw D_800DD600, optional roll and
  * pitch rotations, rounded, plus the position) and the triangles (0, 2, 1), (0, 3, 2).
  */
@@ -56,12 +56,12 @@ Gfx *sprite_billboard_draw(Gfx *gfx, u8 *rec, s32 idx) {
     s32 px, py, pz;
     s32 i, mode;
 
-    if ((flags & 0x8000) && (*(s32 *) ((u8 *) &D_800DBFF0 + idx * 0x9A0 + 0x5F0) & 1)) {
+    if ((flags & 0x8000) && (*(s32 *) ((u8 *) &g_player_views + idx * 0x9A0 + 0x5F0) & 1)) {
         return gfx;
     }
 
     /* texture: the descriptor's first word is a texture, or (>= 0x10000000) a table of one per frame */
-    desc = (s32 *) D_8008CDEC[spr[0xA0]];
+    desc = (s32 *) g_sprite_tex_descs[spr[0xA0]];
     frame = (u32) (s32) *(s16 *) (spr + 0x88) >> 8;
     tex = desc[0];
     if (tex >= 0x10000000) {
@@ -125,7 +125,7 @@ Gfx *sprite_billboard_draw(Gfx *gfx, u8 *rec, s32 idx) {
     px = *(s16 *) (spr + 0x8C);
     py = *(s16 *) (spr + 0x8E);
     pz = *(s16 *) (spr + 0x90);
-    vtx = (s16 *) (spr + (s8) D_800BE9C0 * 0x40);
+    vtx = (s16 *) (spr + (s8) g_dl_buf_index * 0x40);
     vtxAddr = SPRITE_UNCACHED(vtx);
     vtx = (s16 *) vtxAddr;
     for (i = 0; i < 4; i++) {
@@ -186,16 +186,16 @@ Gfx *sprite_billboard_draw(Gfx *gfx, u8 *rec, s32 idx) {
     } else {
         mode = 2;
     }
-    if (D_800DD5EC != mode) {
-        D_800DD5EC = mode;
+    if (g_sprite_last_other_mode != mode) {
+        g_sprite_last_other_mode = mode;
         if (mode != 3) {
             if (noLoad) {
                 SPRITE_GFX(gfx, 0xE7000000, 0); /* gDPPipeSync */
             }
             if (mode == 1) {
-                SPRITE_GFX(gfx, 0xEF082C0F | D_800D30BC, 0x0F0A3238);
+                SPRITE_GFX(gfx, 0xEF082C0F | g_gfx_tlut_mode, 0x0F0A3238);
             } else {
-                SPRITE_GFX(gfx, 0xEF082C0F | D_800D30BC, 0x00504B50);
+                SPRITE_GFX(gfx, 0xEF082C0F | g_gfx_tlut_mode, 0x00504B50);
             }
         }
     }

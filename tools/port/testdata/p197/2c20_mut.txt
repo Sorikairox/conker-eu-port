@@ -1,5 +1,5 @@
 # P197 mutants of pipe_explode_effects
-s/D_800BEE08 \* 0x9A0), 7, 1);/D_800BEE08 * 0x9A0), 7, 0);/
+s/g_view_count_minus1 \* 0x9A0), 7, 1);/g_view_count_minus1 * 0x9A0), 7, 0);/
 s/spray.count = (random_int() \& 1) + 3;/spray.count = (random_int() \& 1) + 2;/
 s/spray.u10 = 300;/spray.u10 = 301;/
 s/spray.u18\[0\] = p->angle - 0x20;/spray.u18[0] = p->angle - 0x21;/

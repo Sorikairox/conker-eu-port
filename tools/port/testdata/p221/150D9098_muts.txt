@@ -6,7 +6,7 @@ s/data.id = obj\[0x3B\];/data.id = obj[0x3A];/
 s/data.pos0\[1\] = spec.pos\[1\];/data.pos0[1] = spec.pos[0];/
 s/data.pos1\[2\] = spec.pos\[2\];/data.pos1[2] = spec.pos[1];/
 s/trail_get_aim((s32) obj, (s32) data.aim);/trail_get_aim((s32) obj, (s32) data.pos1);/
-s/data.u3C = D_800A0F18;/data.u3C = 0.0f;/
+s/data.u3C = g_effect50_u3c;/data.u3C = 0.0f;/
 s/if (g_level_id == 0x34) {/if (g_level_id != 0x34) {/
 s/game_gu_random() . 2, 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 1500)/(game_gu_random() \& 1), 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 1500)/
 s/0, 0, 500, 5000)/0, 0, 500, 5001)/

@@ -5,27 +5,27 @@
 
 /* P130: shadow triangle projection (hand asm shadow_level_triangles, shadow_object_triangles and their private vertex
  * transform shadow_project_vertex_entry) */
-extern f32 D_800D3AA0;  /* [2] f32: shadow u / v scale */
-extern f32 D_800D3AA8;  /* shadow far clip depth: w <= this -> outcode 0x10 */
-extern f32 D_800D3AAC;  /* shadow near clip depth: w >= this -> outcode 0x20 */
-extern s32 D_800D3AB0;  /* triangle table: 3 vertex pointers (offsets for world objects) per triangle */
+extern f32 g_shadow_proj_scale;  /* [2] f32: shadow u / v scale; was D_800D3AA0 */
+extern f32 g_shadow_far_depth;  /* shadow far clip depth: w <= this -> outcode 0x10; was D_800D3AA8 */
+extern f32 g_shadow_near_depth;  /* shadow near clip depth: w >= this -> outcode 0x20; was D_800D3AAC */
+extern s32 g_shadow_tri_table;  /* triangle table: 3 vertex pointers (offsets for world objects) per triangle; was D_800D3AB0 */
 extern s32 D_800D3AB4;  /* end of the level triangle bit mask (u32 *) */
 extern s32 D_800DC270;  /* per triangle: s16 x min, z min, x max, z max */
 extern s32 D_800DF514;  /* number of world object ids */
-extern s32 D_800DF518;  /* shadow box: x min */
-extern s32 D_800DF51C;  /* x max */
-extern s32 D_800DF520;  /* z min */
-extern s32 D_800DF524;  /* z max */
+extern s32 g_shadow_box_x_min;  /* shadow box: x min; was D_800DF518 */
+extern s32 g_shadow_box_x_max;  /* x max; was D_800DF51C */
+extern s32 g_shadow_box_z_min;  /* z min; was D_800DF520 */
+extern s32 g_shadow_box_z_max;  /* z max; was D_800DF524 */
 
 /* one projected shadow vertex (20 bytes, 3 per triangle) */
 typedef struct {
-    f32 u, v, w;  /* light space: u, v scaled by D_800D3AA0[0] / [1], w = depth */
+    f32 u, v, w;  /* light space: u, v scaled by g_shadow_proj_scale[0] / [1], w = depth */
     s32 vtx;      /* source vertex (s16 x, y, z) */
     s32 clip;     /* outcode: 1 / 4 v out (+ / -), 8 / 2 u out (+ / -), 0x10 beyond far, 0x20 before near */
 } ShadowVtx;
 
 typedef struct {
-    f32 su, sv, farW, nearW;  /* D_800D3AA8, D_800D3AAC */
+    f32 su, sv, farW, nearW;  /* g_shadow_far_depth, g_shadow_near_depth */
     f32 *m;
 } ShadowProj;
 
@@ -67,16 +67,16 @@ static s32 shadow_project_vertex(ShadowProj *p, s16 *v, ShadowVtx *o) {
 }
 
 // shadow_emit_triangle: (part of shadow_level_triangles / shadow_object_triangles) projects triangle tri, whose vertex pointers are
-// the table entries + base, into out[0..2] when its x / z bounds touch the shadow box D_800DF518..D_800DF524, its
+// the table entries + base, into out[0..2] when its x / z bounds touch the shadow box g_shadow_box_x_min..g_shadow_box_z_max, its
 // three outcodes share no bit and it faces the light ((v0 - v2)(u0 - u1) > (u0 - u2)(v0 - v1), NaN counts as facing).
 // Returns 1 when written.
 static s32 shadow_emit_triangle(ShadowProj *p, s32 tri, s32 base, ShadowVtx *out) {
     s16 *box = (s16 *) (D_800DC270 + tri * 8);
-    s32 *vtx = (s32 *) (D_800D3AB0 + tri * 12);
+    s32 *vtx = (s32 *) (g_shadow_tri_table + tri * 12);
     ShadowVtx t[3];
     s32 all;
 
-    if (D_800DF51C < box[0] || D_800DF524 < box[1] || box[2] < D_800DF518 || box[3] < D_800DF520) {
+    if (g_shadow_box_x_max < box[0] || g_shadow_box_z_max < box[1] || box[2] < g_shadow_box_x_min || box[3] < g_shadow_box_z_min) {
         return 0;
     }
     all = shadow_project_vertex(p, (s16 *) (vtx[0] + base), &t[0]);
@@ -95,10 +95,10 @@ static s32 shadow_emit_triangle(ShadowProj *p, s32 tri, s32 base, ShadowVtx *out
 }
 
 static void shadow_proj_init(ShadowProj *p, f32 *m) {
-    p->su = (&D_800D3AA0)[0];
-    p->sv = (&D_800D3AA0)[1];
-    p->farW = D_800D3AA8;
-    p->nearW = D_800D3AAC;
+    p->su = (&g_shadow_proj_scale)[0];
+    p->sv = (&g_shadow_proj_scale)[1];
+    p->farW = g_shadow_far_depth;
+    p->nearW = g_shadow_near_depth;
     p->m = m;
 }
 
@@ -134,8 +134,8 @@ s32 shadow_level_triangles(u32 *mask, s32 out, f32 *m, s32 end) {
 }
 
 // shadow_object_triangles: (hand asm) as shadow_level_triangles for D_800DF514 (>= 1) world objects: ids[i] selects the
-// 0xA0-byte record D_800DBEF4 + id * 0xA0 (u16 triangle count +0x56, first triangle +0x58, >= 1 triangle) whose
-// vertex offsets are relative to D_800DC328[id].
+// 0xA0-byte record g_world_objs + id * 0xA0 (u16 triangle count +0x56, first triangle +0x58, >= 1 triangle) whose
+// vertex offsets are relative to g_world_obj_blocks[id].
 /* was func_150A6324 */
 s32 shadow_object_triangles(u16 *ids, s32 out, f32 *m, s32 end) {
     ShadowProj p;
@@ -147,8 +147,8 @@ s32 shadow_object_triangles(u16 *ids, s32 out, f32 *m, s32 end) {
 
     shadow_proj_init(&p, m);
     do {
-        base = D_800DC328[*ids];
-        obj = (u8 *) D_800DBEF4 + *ids * 0xA0;
+        base = g_world_obj_blocks[*ids];
+        obj = (u8 *) g_world_objs + *ids * 0xA0;
         ids++;
         tri = *(u16 *) (obj + 0x58);
         stop = tri + *(u16 *) (obj + 0x56);
@@ -166,7 +166,7 @@ s32 shadow_object_triangles(u16 *ids, s32 out, f32 *m, s32 end) {
 }
 
 /* P197 */
-extern f32 D_800D9F40; /* screen width (also the near-depth bound here) */
+extern f32 g_cam_near_plane; /* screen width (also the near-depth bound here); was D_800D9F40 */
 extern f32 D_800D3A00[2];
 
 /* cvt.w.s with the default FCSR mode: round to nearest, ties to even */
@@ -178,7 +178,7 @@ extern f32 D_800D3A00[2];
 /*
  * view_sphere_depth: P197: view test of a box around (x, y, z) (hand asm, FR=1 odd FPRs as singles, epilogue
  * view_test_epilogue), the frustum variant of camera_view_test_sphere without a camera record: m (4x4 floats) maps the point to
- * (u, v, w); outside when w - r > -D_800D9F40 (in front of the near bound) or w + r < -far, or when u / v scaled by
+ * (u, v, w); outside when w - r > -g_cam_near_plane (in front of the near bound) or w + r < -far, or when u / v scaled by
  * D_800D3A00[0] / [1] leave +-(depth + half size) with the half sizes r / ry scaled by 0.70710677 (sqrt(1/2)),
  * depth = -w (the asm's c.ule / c.olt: a NaN passes every test). Returns 0 when outside, else round(-w) (0 stays 0).
  */
@@ -187,7 +187,7 @@ s32 view_sphere_depth(f32 *m, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far) {
     f32 u, v, w, depth, lim, rs, rys;
 
     w = (m[2] * x + m[6] * y) + (m[10] * z + m[14]);
-    if (w - r > -D_800D9F40) {
+    if (w - r > -g_cam_near_plane) {
         return 0;
     }
     if (w + r < -far) {
@@ -218,7 +218,7 @@ s32 view_sphere_depth(f32 *m, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far) {
 void view_test_epilogue(void) {
 
 }
-extern f32 D_800D9F40; /* screen width (also the near-depth bound here) */
+extern f32 g_cam_near_plane; /* screen width (also the near-depth bound here); was D_800D9F40 */
 s32 world_objects_in_box(s32, s32, s32 *, s32, s32, s32, s32, s32);
 
 /* cvt.w.s with the default FCSR mode: round to nearest, ties to even */
@@ -228,9 +228,9 @@ s32 world_objects_in_box(s32, s32, s32 *, s32, s32, s32, s32, s32);
                      : -(s32)((-(f) + 8388608.0f) - 8388608.0f))
 
 /*
- * P38: view test of a sphere / box (hand asm, FR=1 odd FPRs as singles). cam: camera record (D_800BE628 + i * 0x180,
+ * P38: view test of a sphere / box (hand asm, FR=1 odd FPRs as singles). cam: camera record (g_player_cams + i * 0x180,
  * side planes at +0x88..+0xB4), m: view matrix (4x4 floats). (x, y, z) is transformed by m into (u, v, w):
- * outside when w - r > -D_800D9F40 (in front of the near bound), w + r < -far, or a side plane test
+ * outside when w - r > -g_cam_near_plane (in front of the near bound), w + r < -far, or a side plane test
  * u * p0 + w * p2 < -r (planes +0x88/+0x90, +0x94/+0x9C) or v * p0 + w * p2 < -ry (+0xA4/+0xA8, +0xB0/+0xB4)
  * (NaN counts as outside). Returns 0 when outside, else round(w), or 1 when that is 0.
  */
@@ -242,7 +242,7 @@ s32 camera_view_test_sphere(s32 cam, s32 *mtx, f32 x, f32 y, f32 z, f32 r, f32 r
     s32 ret;
 
     w = (m[2] * x + m[6] * y) + (m[10] * z + m[14]);
-    if (!(w - r <= -D_800D9F40)) {
+    if (!(w - r <= -g_cam_near_plane)) {
         return 0;
     }
     if (w + r < -far) {
@@ -287,7 +287,7 @@ s32 world_objects_at_point(s32 x, s32 z, s32 *outCount, s32 n) {
 }
 
 /*
- * P54: world_objects_in_box (hand asm): the world objects (D_800DBEF4, g_world_obj_count of them, 0xA0 bytes) whose box
+ * P54: world_objects_in_box (hand asm): the world objects (g_world_objs, g_world_obj_count of them, 0xA0 bytes) whose box
  * (+0x10 / +0x12 / +0x14 centre, +0x50 x/z half size, +0x52 y half size) overlaps (x .. x2, z .. z2) and, unless
  * +0x4F & 0x40, (y .. y2), all bounds strict; skipped: +0x6E != 0, +0x4F & 0x60 == 0x20, index n - 1.
  * Indices with +0x4F & 0x60 == 0 go to the u16 list D_800D3C00 (the count is returned), the others (0x40 / 0x60)
@@ -306,7 +306,7 @@ s32 world_objects_in_box(s32 x, s32 z, s32 *outCount, s32 n, s32 x2, s32 z2, s32
 
     *outCount = 0;
     if (g_world_obj_count == 0) return 0;
-    obj = (u8 *)D_800DBEF4;
+    obj = (u8 *)g_world_objs;
     end = obj + (s32)((u32)g_world_obj_count * 0xA0u);
     do {
         if (obj[0x6E] != 0) goto next;

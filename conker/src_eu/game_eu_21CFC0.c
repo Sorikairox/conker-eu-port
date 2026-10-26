@@ -5,5 +5,5 @@
 
 /* was func_151EF7B0 */
 void game_clear_e9d00_flag(void) {
-    D_800E9D00 = 0;
+    g_cheat_flags = 0;
 }

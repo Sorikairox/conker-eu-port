@@ -94,18 +94,18 @@ extern s32 D_800D3720;
 extern s32 D_800D3C00;
 extern s32 D_800D3C50;
 extern s32 D_800DC26C;
-extern f32 D_800DC284;
-extern f32 D_800DC288;
-extern u16 D_800DC290;
+extern f32 g_coll_floor_best_h; /* was D_800DC284 */
+extern f32 g_coll_ceiling_h; /* was D_800DC288 */
+extern u16 g_coll_floor_world_obj; /* was D_800DC290 */
 extern f32 D_800DC298;
 extern f32 D_800DC29C;
-extern s32 D_800DC3C4;
+extern s32 g_world_obj_rider_masks; /* was D_800DC3C4 */
 extern u8 D_800894C0[];
 #define EED0_E(i) ((u8 *)&D_800D3720 + (i) * 0x10)
 #define EED0_H(i) ((f32)*(s32 *)EED0_E(i) * (1.0f / 256.0f))
-#define EED0_OBJ(i) ((u8 *)D_800DBEF4 + (i) * 0xA0)
+#define EED0_OBJ(i) ((u8 *)g_world_objs + (i) * 0xA0)
 
-/* per-triangle floor flags of world object o (D_800DBEF4 record: +0x44 table or +0x40 default, +0x58 first tri) */
+/* per-triangle floor flags of world object o (g_world_objs record: +0x44 table or +0x40 default, +0x58 first tri) */
 #define EED0_OBJFLAGS(o, tri)                                                                                         \
     ((*(s32 *)((o) + 0x44) != 0) ? *(s32 *)(*(s32 *)((o) + 0x44) + (tri) * 4 - *(u16 *)((o) + 0x58) * 4)             \
                                  : *(s32 *)((o) + 0x40))
@@ -158,9 +158,9 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
         arg5 = (s32)&flagsBuf;
     }
     ceil = 20000.0f;
-    D_800DC284 = -10000.0f;
+    g_coll_floor_best_h = -10000.0f;
     onRec = 0;
-    D_800DC290 = 0;
+    g_coll_floor_world_obj = 0;
     if (argC != 0) {
         *(s16 *)(argC + 0x19E) = 0;
     }
@@ -233,8 +233,8 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
                 fbIdx = i;
                 fbArea = area;
             }
-            if (D_800DC284 < h) {
-                D_800DC284 = h;
+            if (g_coll_floor_best_h < h) {
+                g_coll_floor_best_h = h;
             }
             if (arg8 < argA) {
                 if (h < argA + step && floorY < h) hit = 1;
@@ -297,8 +297,8 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
             if (area == 0 && arg5 != 0) {
                 *(s32 *)arg5 = (D_800DBE5C != 0) ? ((s32 *)D_800DBE5C)[ti] : 0;
             } else if (area == 2 && arg5 != 0) {
-                D_800DC290 = *(s32 *)(EED0_E(best) + 0xC) + 1;
-                *(s32 *)arg5 = EED0_OBJFLAGS(EED0_OBJ(D_800DC290) - 0xA0, ti);
+                g_coll_floor_world_obj = *(s32 *)(EED0_E(best) + 0xC) + 1;
+                *(s32 *)arg5 = EED0_OBJFLAGS(EED0_OBJ(g_coll_floor_world_obj) - 0xA0, ti);
             } else if (arg5 != 0) {
                 *(s32 *)arg5 = 0;
             }
@@ -346,11 +346,11 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
         }
     }
     if (argC != 0) {
-        *(u16 *)(argC + 0x1A0) = D_800DC290;
-        if (D_800DC290 != 0 && arg8 - *(f32 *)arg3 < 10.0f) {
-            o = EED0_OBJ(D_800DC290) - 0xA0;
+        *(u16 *)(argC + 0x1A0) = g_coll_floor_world_obj;
+        if (g_coll_floor_world_obj != 0 && arg8 - *(f32 *)arg3 < 10.0f) {
+            o = EED0_OBJ(g_coll_floor_world_obj) - 0xA0;
             o[0x4F] |= 0x84;
-            ((s32 *)D_800DC3C4)[D_800DC290 - 1] |= 1 << ((struct127 *)argC - g_objects);
+            ((s32 *)g_world_obj_rider_masks)[g_coll_floor_world_obj - 1] |= 1 << ((struct127 *)argC - g_objects);
         }
         if (onRec != 0 && arg8 - *(f32 *)arg3 < 10.0f) {
             *(u8 *)(argC + 0x274) = onRec;
@@ -367,7 +367,7 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
     if (argC != 0) {
         *(f32 *)(argC + 0x17C) = ceil;
     }
-    D_800DC288 = ceil;
+    g_coll_ceiling_h = ceil;
     return argC;
 }
 
@@ -564,11 +564,11 @@ block_13:
 }
 void pvs_row_apply(s32);
 void camera_zone_flag_update(s32);
-extern s32 D_800DC1F0;
-extern s32 D_800DC1F4;
-extern s32 D_800DC1F8;
-extern f32 D_800DC1FC;
-extern f32 D_800DC200;
+extern s32 g_zone_player; /* was D_800DC1F0 */
+extern s32 g_zone_leaf_index; /* was D_800DC1F4 */
+extern s32 g_zone_leaf; /* was D_800DC1F8 */
+extern f32 g_zone_player_x; /* was D_800DC1FC */
+extern f32 g_zone_player_z; /* was D_800DC200 */
 extern s32 D_800DC260;
 
 /* was func_151101B4 */
@@ -580,16 +580,16 @@ void player_zone_update(s32 arg0) {
     s32 temp_v0_3;
     struct108 *temp_v0;
 
-    D_800DC1F0 = arg0;
-    temp_v0 = &D_800DBFF0[arg0];
+    g_zone_player = arg0;
+    temp_v0 = &g_player_views[arg0];
     temp_f6 = (s32) temp_v0->unk2F8;
     temp_f10 = (s32) temp_v0->unk300;
-    D_800DC1FC = (f32) temp_f6;
-    D_800DC200 = (f32) temp_f10;
+    g_zone_player_x = (f32) temp_f6;
+    g_zone_player_z = (f32) temp_f10;
     temp_v0_2 = zone_tree_find_leaf(temp_f6, temp_f10);
-    D_800DC1F8 = temp_v0_2;
+    g_zone_leaf = temp_v0_2;
     temp_v0_3 = zone_tree_leaf_index((u8 *) temp_v0_2);
-    D_800DC1F4 = temp_v0_3;
+    g_zone_leaf_index = temp_v0_3;
     temp_v1 = ((s32 *)((u8 *)&D_800DC260 + (arg0 * 2)));
     if (temp_v0_3 != *temp_v1) {
         *temp_v1 = (s16) temp_v0_3;

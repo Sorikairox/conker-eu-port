@@ -1,7 +1,7 @@
-s/D_8009015C \&= ~0x10;/D_8009015C \&= ~0x20;/ % base
+s/g_mp_game_flags \&= ~0x10;/g_mp_game_flags \&= ~0x20;/ % base
 s/gDPSetCombine(gdl++, 0x12FE25, 0xFFFFF3F9);/gDPSetCombine(gdl++, 0x12FE25, 0xFFFFF3F8);/ % base
 s/? 0x320 : 0x198/? 0x320 : 0x199/ % fa0
-s/pitch = 0x124 \/ D_800E0FE0;/pitch = 0x120 \/ D_800E0FE0;/ % nt3
+s/pitch = 0x124 \/ g_mp_team_count;/pitch = 0x120 \/ g_mp_team_count;/ % nt3
 s/if (p->unk13C != 0 ||/if (p->unk13C == 0 ||/ % act_team1
 s/+ 0x128) \& 0x20))/+ 0x128) \& 0x40))/ % ctlflag
 s/sel = p->unk128;/sel = p->unk128 + 1;/ % f1sel f1only
@@ -15,7 +15,7 @@ s/+ 0x75) \& 0x7F) == 0x25/+ 0x75) \& 0xFF) == 0x25/ % near_far
 s/rail_node_find_by_tag(0x49)/rail_node_find_by_tag(0x48)/ % near
 s/ddz = pz - p->z_position;/ddz = py - p->z_position;/ % near
 s/< 6250000.0f/< 6000000.0f/ % near_edge
-s/                D_8009015C |= 0x10;/                D_8009015C |= 0x18;/ % near
+s/                g_mp_game_flags |= 0x10;/                g_mp_game_flags |= 0x18;/ % near
 1,/D_800E0FFC |= 1 << i;/s/D_800E0FFC |= 1 << i;/D_800E0FFC |= 2 << i;/ % act_team1
 /0x25) {/,/D_800E0FFC/s/D_800E0FFC |= 1 << i;/D_800E0FFC |= 1;/ % near
 s/(D_800BEDCC \& 0x1F) < 11/(D_800BEDCC \& 0x1F) < 10/ % blink
@@ -65,5 +65,5 @@ s/if (sel != -1) {$/if (sel == -1) {/ % near_sel
 s/if (near) {$/if (!near) {/ % near
 1,/if (D_80090160 \& 1) {/s/if (D_80090160 \& 1) {/if (D_80090160 \& 2) {/ % f1only
 s/p = \&g_objects\[i\];/p = \&g_objects[i + 1];/ % act_team1
-s/for (i = 0; i < D_8008FD8C; i++)/for (i = 1; i < D_8008FD8C; i++)/ % arrow_t0
-s/for (team = 0; team < D_800E0FE0; team++)/for (team = 1; team < D_800E0FE0; team++)/ % base
+s/for (i = 0; i < g_player_count; i++)/for (i = 1; i < g_player_count; i++)/ % arrow_t0
+s/for (team = 0; team < g_mp_team_count; team++)/for (team = 1; team < g_mp_team_count; team++)/ % base

@@ -1,7 +1,7 @@
 \#^    t.u1F = 6;$#s/6/7/ % c3
 \#^    t.u34 = 0;$#s/0/1/ % c3
 \#^    t.rgba\[2\] = 0xFF;$#s/0xFF/0xFE/ % c3
-\#^    t.u0 = D_8008CE04;$#s/D_8008CE04/0/ % c3
+\#^    t.u0 = g_swarm_member_tpl_word0;$#s/g_swarm_member_tpl_word0/0/ % c3
 \#^    t.owner = rec;$#d % c3
 \#^    t.span = span;$#s/span;/arg9;/ % c3
 \#^    t.size\[1\] = size;$#s/size;/0x118;/ % pos2

@@ -17,9 +17,9 @@ s/\*(s16 \*)(\*(u8 \*\*)(obj + 0x20) + off + 4) = \*(s16 \*)(\*(u8 \*\*)(obj + 0
 s/(f32)((f32)(s16)packed \* 0.01)/(f32)((f32)(s16)packed * 0.010000001)/ % alloc
 s/(f32)((f32)(s16)packed \* 0.01)/((f32)(s16)packed * 0.01f)/ % alloc neg
 s/(f32)(s16)packed \* 0.01/(f32)(u16)packed * 0.01/ % neg
-s/\* (f32)D_800BE9E4;/+ (f32)D_800BE9E4;/ % alloc
+s/\* (f32)g_frame_ticks;/+ (f32)g_frame_ticks;/ % alloc
 s/\*(f32 \*)(obj + 0x80) += /*(f32 *)(obj + 0x80) = / % alloc
-s/(obj + 0x20 + D_800BE9C0 \* 4)/(obj + 0x24 - D_800BE9C0 * 4)/ % alloc
+s/(obj + 0x20 + g_dl_buf_index \* 4)/(obj + 0x24 - g_dl_buf_index * 4)/ % alloc
 s/(s32 \*)uv, \*(u16 \*)(obj + 0x16)/(s32 *)uv, *(u8 *)(obj + 0x16)/ % alloc
 s/packed >> 24, (packed >> 16) \& 0xFF);/(u32)packed >> 24, (packed >> 16) \& 0xFF);/ % alloc
 s/packed >> 24, (packed >> 16) \& 0xFF);/packed >> 24, (packed >> 16) \& 0x7F);/ % neg

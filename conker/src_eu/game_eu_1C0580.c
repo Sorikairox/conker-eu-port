@@ -5,7 +5,7 @@
 
 s32 floor_flags_surface_type(s32);
 s32 obj_surface_handler_class(u8 *, s32 *);
-extern void (**D_8008FC00[])(u8 *);
+extern void (**g_obj_surface_handlers[])(u8 *); /* was D_8008FC00 */
 /* was func_15192800 */
 void obj_surface_handler_dispatch(u8 *arg0, s32 arg1) {
     s32 sp2C;
@@ -29,7 +29,7 @@ void obj_surface_handler_dispatch(u8 *arg0, s32 arg1) {
             idx = 1;
             break;
         }
-        fn = D_8008FC00[sp2C][idx];
+        fn = g_obj_surface_handlers[sp2C][idx];
         if (fn != NULL) {
             fn(arg0);
         }

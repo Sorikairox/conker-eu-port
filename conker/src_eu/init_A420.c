@@ -154,9 +154,9 @@ s32 sound_calc_pan_volume(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 o
 f32 vec3f_dot(f32 *a, f32 *b);
 f32 vec3f_magnitude(f32 *);
 void vec3_scale(struct17 *v, f32 len, struct17 *out);
-typedef struct { s16 x, y, z, pad; } PathSoundPoint; /* D_800D2104[path] points */
+typedef struct { s16 x, y, z, pad; } PathSoundPoint; /* g_path_points[path] points; was D_800D2104 */
 // path_sound_pan_volume: sound_calc_pan_volume (pan / volume / distance) for a sound that runs along path `path`
-// (D_800D2104 points, D_800D2528 counts) instead of sitting at one spot: the sound position is the path point
+// (g_path_points points, D_800D2528 counts) instead of sitting at one spot: the sound position is the path point
 // nearest to (x, y, z); when that is 168 units or more away (squared >= 0x6D61) and the path has two or more points,
 // the position slides along the neighbouring segment (the one towards the nearer neighbour, stepping once to the
 // other side when the projection falls outside it) to the foot of the perpendicular. (ex, ey, ez) is the listener,
@@ -187,7 +187,7 @@ s32 sound_path_calc_pan_volume(s32 path, s32 ex, s32 ey, s32 ez, f32 yaw, s32 x,
     if (count == 0) {
         return 0;
     }
-    pts = (PathSoundPoint *) D_800D2104[path];
+    pts = (PathSoundPoint *) g_path_points[path];
     best = 0x7FFFFFFF;
     lastD = 0x7FFFFFFF;
     nearest = -2;

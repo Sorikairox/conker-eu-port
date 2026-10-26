@@ -20,7 +20,7 @@ void scenery_swing_angle_update(u8 *arg0) {
     if (var_f0 > 180.0f) {
         var_f0 -= 360.0f;
     }
-    var_v0 = (*(s32 *)((u8 *)arg0 + 0x7C)) + D_800BE9E4;
+    var_v0 = (*(s32 *)((u8 *)arg0 + 0x7C)) + g_frame_ticks;
     temp_f12 = (f32) var_v0;
     temp_f2 = (*(f32 *)((u8 *)arg0 + 0x60)) - (var_f0 * 0.009f);
     if (temp_f12 >= 256.0f) {
@@ -115,17 +115,17 @@ void scenery_vtx_scroll_update(u8 *arg0) {
     } else if (var_v1 == 2) {
         temp_f0 = (*(f32 *)((u8 *)var_t0 + 8));
         if (temp_f0 < 300.0f) {
-            (*(f32 *)((u8 *)var_t0 + 8)) = (f32) (temp_f0 + (25.0f * (f32) D_800BE9E4));
+            (*(f32 *)((u8 *)var_t0 + 8)) = (f32) (temp_f0 + (25.0f * (f32) g_frame_ticks));
         } else {
             (*(f32 *)((u8 *)var_t0 + 8)) = 300.0f;
         }
     } else if (var_v1 == 1) {
         temp_f0_2 = (*(f32 *)((u8 *)var_t0 + 8));
         if (temp_f0_2 > 100.0f) {
-            (*(f32 *)((u8 *)var_t0 + 8)) = (f32) (temp_f0_2 - (25.0f * (f32) D_800BE9E4));
+            (*(f32 *)((u8 *)var_t0 + 8)) = (f32) (temp_f0_2 - (25.0f * (f32) g_frame_ticks));
         } else {
             (*(f32 *)((u8 *)var_t0 + 8)) = 100.0f;
-            temp_t8 = (s16) (*(s16 *)((u8 *)((*(u8 **)((u8 *)((arg0 + (D_800BE9C0 * 4))) + 0x20))) + 0xA)) % 1024;
+            temp_t8 = (s16) (*(s16 *)((u8 *)((*(u8 **)((u8 *)((arg0 + (g_dl_buf_index * 4))) + 0x20))) + 0xA)) % 1024;
             var_v1_2 = temp_t8;
             if (temp_t8 < 0) {
                 do {
@@ -153,20 +153,20 @@ void scenery_vtx_scroll_update(u8 *arg0) {
         if ((s32) (*(u16 *)((u8 *)arg0 + 0x16)) > 0) {
             do {
                 var_a0 += 1;
-                temp_v1 = (*(s32 *)((u8 *)((arg0 + (D_800BE9C0 * 4))) + 0x20)) + var_v0_2;
+                temp_v1 = (*(s32 *)((u8 *)((arg0 + (g_dl_buf_index * 4))) + 0x20)) + var_v0_2;
                 temp_t2 = (*(s16 *)((u8 *)temp_v1 + 0xA));
                 var_v0_2 += 0x10;
                 (*(s16 *)((u8 *)temp_v1 + 0xA)) = (s16) (s32) ((f32) temp_t2 - (*(f32 *)((u8 *)var_t0 + 8)));
             } while (var_a0 < (s32) (*(u16 *)((u8 *)arg0 + 0x16)));
         }
     }
-    if ((*(s16 *)((u8 *)((*(u8 **)((u8 *)((arg0 + (D_800BE9C0 * 4))) + 0x20))) + 0xA)) < -0x2800) {
+    if ((*(s16 *)((u8 *)((*(u8 **)((u8 *)((arg0 + (g_dl_buf_index * 4))) + 0x20))) + 0xA)) < -0x2800) {
         var_a0_2 = 0;
         var_v0_3 = 0;
         if ((s32) (*(u16 *)((u8 *)arg0 + 0x16)) > 0) {
             do {
                 var_a0_2 += 1;
-                temp_v1_2 = (*(s32 *)((u8 *)((arg0 + (D_800BE9C0 * 4))) + 0x20)) + var_v0_3;
+                temp_v1_2 = (*(s32 *)((u8 *)((arg0 + (g_dl_buf_index * 4))) + 0x20)) + var_v0_3;
                 temp_t7 = (*(s16 *)((u8 *)temp_v1_2 + 0xA));
                 var_v0_3 += 0x10;
                 (*(s16 *)((u8 *)temp_v1_2 + 0xA)) = (s16) (temp_t7 + 0x2800);

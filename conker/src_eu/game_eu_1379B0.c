@@ -134,24 +134,24 @@ struct260 *segment_effect_spawn(u8 *volatile arg0, s16 arg1, s8 arg2, s8 arg3, f
     return temp_v0;
 }
 
-extern f32 D_800A28EC;          /* emission rate scale */
-extern f32 D_800A28D4[];        /* segment weights; [6] = total */
-extern f32 D_800A2938[];        /* segment start / end points (12-byte points, read as start = [i], end = [i + 1]) */
-extern f32 D_800A298C[];        /* per-segment target points */
-extern void *D_80089000[];      /* end handlers (s8 +0x34) */
-extern void *D_80089004[];      /* point handlers (s8 +0x35) */
+extern f32 g_seg_effect_rate_scale;          /* emission rate scale; was D_800A28EC */
+extern f32 g_seg_effect_weights[];        /* segment weights; [6] = total; was D_800A28D4 */
+extern f32 g_seg_effect_segments[];        /* segment start / end points (12-byte points, read as start = [i], end = [i + 1]); was D_800A2938 */
+extern f32 g_seg_effect_targets[];        /* per-segment target points; was D_800A298C */
+extern void *g_seg_effect_end_fns[];      /* end handlers (s8 +0x34); was D_80089000 */
+extern void *g_seg_effect_point_fns[];      /* point handlers (s8 +0x35); was D_80089004 */
 f32 random_float(void);
 void world_record_build_matrix(f32 (*)[4], u8 *);
 void mtxf_transform_point(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
 s32 vec3_normalize_len(f32 *, f32 *, s32 *, s32 *);
 
 // segment_effect_update: P232. Update callback of effect type 0x1B (segment_effect_spawn fills its +0x28 data: owner object,
-// accumulator, rate, end handler +0x34, point handler +0x35). The accumulator grows by rate * D_800A28EC * frame step;
+// accumulator, rate, end handler +0x34, point handler +0x35). The accumulator grows by rate * g_seg_effect_rate_scale * frame step;
 // for every whole unit, when there is a point handler: picks a segment of the owner's model by the weights
-// D_800A28D4, a random point on it, and transforms it, the segment ends and the segment's target point by the
+// g_seg_effect_weights, a random point on it, and transforms it, the segment ends and the segment's target point by the
 // owner's matrix (world_record_build_matrix); the direction from the start to a random point between the end and the target is
-// normalised (vec3_normalize_len), then D_80089004[handler](fx, point, start, end, target, dir) runs. Without a point
-// handler the units are dropped. Finally the end handler D_80089000[+0x34](fx) runs unless it is -1. Sibling of
+// normalised (vec3_normalize_len), then g_seg_effect_point_fns[handler](fx, point, start, end, target, dir) runs. Without a point
+// handler the units are dropped. Finally the end handler g_seg_effect_end_fns[+0x34](fx) runs unless it is -1. Sibling of
 // obj_point_effect_emitter_update (game_eu_1371A0, effect 0x1A).
 /* was func_1510A538 */
 void segment_effect_update(u8 *fx) {
@@ -169,15 +169,15 @@ void segment_effect_update(u8 *fx) {
     f32 wt;
     s32 i;
 
-    *(f32 *) (rec + 4) += *(f32 *) (rec + 8) * D_800A28EC * D_800BE9A4;
+    *(f32 *) (rec + 4) += *(f32 *) (rec + 8) * g_seg_effect_rate_scale * g_frame_step_f;
     if ((s8) rec[0xD] != -1) {
         while (*(f32 *) (rec + 4) > 1.0f) {
             world_record_build_matrix(mtx, *(u8 **) rec);
             i = 0;
-            sel = D_800A28D4[6] * random_float();
-            w = D_800A28D4;
-            if (D_800A28D4[0] < sel) {
-                wt = D_800A28D4[0];
+            sel = g_seg_effect_weights[6] * random_float();
+            w = g_seg_effect_weights;
+            if (g_seg_effect_weights[0] < sel) {
+                wt = g_seg_effect_weights[0];
                 do {
                     sel -= wt;
                     wt = w[1];
@@ -186,19 +186,19 @@ void segment_effect_update(u8 *fx) {
                 } while (wt < sel);
             }
             r = random_float();
-            seg = &D_800A2938[i * 3];
+            seg = &g_seg_effect_segments[i * 3];
             mtxf_transform_point(mtx, (seg[3] - seg[0]) * r + seg[0], (seg[4] - seg[1]) * r + seg[1],
                           (seg[5] - seg[2]) * r + seg[2], &pt[0], &pt[1], &pt[2]);
             mtxf_transform_point(mtx, seg[0], seg[1], seg[2], &start[0], &start[1], &start[2]);
             mtxf_transform_point(mtx, seg[3], seg[4], seg[5], &end[0], &end[1], &end[2]);
-            mtxf_transform_point(mtx, D_800A298C[i * 3], D_800A298C[i * 3 + 1], D_800A298C[i * 3 + 2], &target[0],
+            mtxf_transform_point(mtx, g_seg_effect_targets[i * 3], g_seg_effect_targets[i * 3 + 1], g_seg_effect_targets[i * 3 + 2], &target[0],
                           &target[1], &target[2]);
             r = random_float();
             dir[0] = ((target[0] - end[0]) * r + end[0]) - start[0];
             dir[1] = ((target[1] - end[1]) * r + end[1]) - start[1];
             dir[2] = ((target[2] - end[2]) * r + end[2]) - start[2];
             vec3_normalize_len(dir, dir, NULL, NULL);
-            ((void (*)(u8 *, f32 *, f32 *, f32 *, f32 *, f32 *)) D_80089004[(s8) rec[0xD]])(fx, pt, start, end,
+            ((void (*)(u8 *, f32 *, f32 *, f32 *, f32 *, f32 *)) g_seg_effect_point_fns[(s8) rec[0xD]])(fx, pt, start, end,
                                                                                           target, dir);
             *(f32 *) (rec + 4) -= 1.0f;
         }
@@ -208,7 +208,7 @@ void segment_effect_update(u8 *fx) {
         }
     }
     if ((s8) rec[0xC] != -1) {
-        ((void (*)(u8 *)) D_80089000[(s8) rec[0xC]])(fx);
+        ((void (*)(u8 *)) g_seg_effect_end_fns[(s8) rec[0xC]])(fx);
     }
 }
 
@@ -274,7 +274,7 @@ typedef struct {
 
 // vent_smoke_emitter_update: update handler of the emitter made by vent_smoke_emitter_spawn (data at +0x28: owner object,
 // its unique id, an accumulator, base rate, random rate). Kills the emitter (+0xE = -1) when the owner is gone or
-// was replaced; otherwise adds (base + random * rand) * D_800BE9A4 to the accumulator and, while it is above 1,
+// was replaced; otherwise adds (base + random * rand) * g_frame_step_f to the accumulator and, while it is above 1,
 // spawns one puff from one of the two vents of the owner's model (bone matrix +0x240), blowing outward at
 // 0.096..0.299 with a random size 60..120 and life 20..35 and random flip flags. Without a model the
 // accumulator is just drained (P156).
@@ -300,7 +300,7 @@ void vent_smoke_emitter_update(u8 *arg0) {
         *(s16 *)(arg0 + 0xE) = -1;
         return;
     }
-    rec->accum += (rec->rate + random_float() * rec->rateRand) * D_800BE9A4;
+    rec->accum += (rec->rate + random_float() * rec->rateRand) * g_frame_step_f;
     if (1.0f < rec->accum && *(u8 **)(rec->obj + 0x1D4) != NULL) {
         model = *(u8 **)(rec->obj + 0x1D4) + 0x240;
         mtx_transform_point_or_origin((void *)sVentPoints[0], pts[0], model);

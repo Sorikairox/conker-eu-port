@@ -84,11 +84,11 @@ void cs_overlay_update(s32 arg0) {
     }
 }
 
-extern s32 D_800BEE08;
+extern s32 g_view_count_minus1; /* was D_800BEE08 */
 void *screen_tint_create(s32, s32, s32, s32, s32, s32, u8, s32);
 
 // hud_box_reset: removes the old box object D_800D9CB4 (node_destroy), creates a new one (screen_tint_create(0, 0, 0xFF,
-// 0, 0, D_800BEE08, 0, 0)), sets state D_800D9CB0 = 3 and clears the 10 words D_800D9CB8.
+// 0, 0, g_view_count_minus1, 0, 0)), sets state D_800D9CB0 = 3 and clears the 10 words D_800D9CB8.
 /* was func_150B7170 */
 void cs_overlay_reset(void) {
     s32 i;
@@ -96,7 +96,7 @@ void cs_overlay_reset(void) {
     if (D_800D9CB4 != 0) {
         node_destroy((struct102 *) D_800D9CB4);
     }
-    D_800D9CB4 = (s32) screen_tint_create(0, 0, 0xFF, 0, 0, D_800BEE08, 0, 0);
+    D_800D9CB4 = (s32) screen_tint_create(0, 0, 0xFF, 0, 0, g_view_count_minus1, 0, 0);
     D_800D9CB0 = 3;
     for (i = 0; i < 10; i++) {
         D_800D9CB8[i] = 0;
@@ -141,7 +141,7 @@ s32 cs_overlay_destroy_all(void) {
 
 /* was func_150B72DC */
 void overlay_fx_scroll_update(u8 *arg0) {
-    *(s16 *)(arg0 + 0x34) += D_800BE9E4 * 0x30;
+    *(s16 *)(arg0 + 0x34) += g_frame_ticks * 0x30;
     if (*(s16 *)(arg0 + 0x34) > 0x800) {
         *(s16 *)(arg0 + 0x34) = -0xC00;
     }
@@ -172,12 +172,12 @@ void overlay_fx_pulse_update(u8 *arg0) {
         } else {
             var_f0 = temp_f2 - temp_f12;
         }
-        if ((f32) (D_800BE9E4 * 3) < var_f0) {
+        if ((f32) (g_frame_ticks * 3) < var_f0) {
             goto block_6;
         }
         (*(f32 *)((u8 *)arg0 + 0x30)) = temp_f12;
         if (temp_v0 == 0xAA) {
-            var_v1 = (*(u8 *)((u8 *)arg0 + 0x45)) + (D_800BE9E4 * 8);
+            var_v1 = (*(u8 *)((u8 *)arg0 + 0x45)) + (g_frame_ticks * 8);
             if (var_v1 >= 0x100) {
                 var_v1 = 0;
                 temp_t6 = (*(s32 *)((u8 *)arg0 + 0x20)) + 1;
@@ -210,7 +210,7 @@ void overlay_fx_pulse_update(u8 *arg0) {
         return;
     }
 block_6:
-    (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x30)) - (f32) (D_800BE9E4 * 3));
+    (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x30)) - (f32) (g_frame_ticks * 3));
     if ((*(f32 *)((u8 *)arg0 + 0x30)) <= 140.0f) {
         (*(s16 *)((u8 *)arg0 + 0x26)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x26)) + 0x100);
         if ((*(s16 *)((u8 *)arg0 + 0x26)) >= ((*(u8 *)((u8 *)arg0 + 0x41)) << 8)) {
@@ -237,13 +237,13 @@ void overlay_fx_slide_in_update(u8 *arg0) {
 
     temp_v0 = (*(s32 *)((u8 *)arg0 + 0x18));
     if (temp_v0 == 0x1E) {
-        var_v1 = (*(u8 *)((u8 *)arg0 + 0x45)) + (D_800BE9E4 * 8);
+        var_v1 = (*(u8 *)((u8 *)arg0 + 0x45)) + (g_frame_ticks * 8);
         if (var_v1 >= 0x100) {
             var_v1 = 0;
         }
         (*(u8 *)((u8 *)arg0 + 0x45)) = (u8) var_v1;
     }
-    var_v0 = temp_v0 + (D_800BE9E4 * 2);
+    var_v0 = temp_v0 + (g_frame_ticks * 2);
     if (var_v0 >= 0x1F) {
         var_v0 = 0x1E;
     }
@@ -254,12 +254,12 @@ void overlay_fx_slide_in_update(u8 *arg0) {
 /* was func_150B7688 */
 void overlay_fx_scale_grow_update(u8 *arg0) {
     if (*(s16 *)(arg0 + 0x38) != 0x1000) {
-        *(s16 *)(arg0 + 0x38) += D_800BE9E4 << 8;
+        *(s16 *)(arg0 + 0x38) += g_frame_ticks << 8;
         if (*(s16 *)(arg0 + 0x38) > 0x1000) {
             *(s16 *)(arg0 + 0x38) = 0x1000;
         }
     } else if (*(s16 *)(arg0 + 0x3A) != 0x1000) {
-        *(s16 *)(arg0 + 0x3A) += D_800BE9E4 << 8;
+        *(s16 *)(arg0 + 0x3A) += g_frame_ticks << 8;
         if (*(s16 *)(arg0 + 0x3A) > 0x1000) {
             *(s16 *)(arg0 + 0x3A) = 0x1000;
         }

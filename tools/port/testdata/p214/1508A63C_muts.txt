@@ -13,7 +13,7 @@ s/if (node\[me\] != node\[k\]) {/if (node[me] == node[k]) {/
 s/if (flags \& (0x10000 << k)) {/if (flags \& (0x8000 << k)) {/
 s/if (d > 3000 \&\& obj->unk65 != 0) {/if (d >= 3000 \&\& obj->unk65 != 0) {/
 s/if (d > 3000 \&\& obj->unk65 != 0) {/if (d > 3000) {/
-1,/if (k >= D_80090130) {/s/if (k >= D_80090130) {/if (k > D_80090130) {/
+1,/if (k >= g_human_player_count) {/s/if (k >= g_human_player_count) {/if (k > g_human_player_count) {/
 s/if (mode != 0xB8 \&\& (kind\[k\] == 2 || kind\[k\] == 3)) {/if (kind[k] == 2 || kind[k] == 3) {/
 s/kind\[k\] == 3)) {/kind[k] == 4)) {/
 s/if (mode == 0xB7) {/if (mode == 0xB8) {/
@@ -21,8 +21,8 @@ s/                d = dist;/                d = d;/
 s/if (obj->unk13C != 0) {/if (obj->unk13C == 0) {/
 s/d \/= player_stat_get(k, 6) + 2;/d \/= player_stat_get(k, 6) + 1;/
 s/player_stat_get(k, 6)/player_stat_get(me, 6)/
-s/if (k < D_80090130 \&\& d != -1) {/if (k < D_80090130) {/
-s/if (k < D_80090130 \&\& d != -1) {/if (k <= D_80090130 \&\& d != -1) {/
+s/if (k < g_human_player_count \&\& d != -1) {/if (k < g_human_player_count) {/
+s/if (k < g_human_player_count \&\& d != -1) {/if (k <= g_human_player_count \&\& d != -1) {/
 s/if (d >= 0) {/if (d > 0) {/
 s/j < count \&\& weights\[row + j\] < d; j++/j < count \&\& weights[row + j] <= d; j++/
 s/links\[row + m\] = links\[row + m - 1\];/;/

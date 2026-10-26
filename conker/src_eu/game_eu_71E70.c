@@ -15,7 +15,7 @@ s32 collision_walls_slide(f32, f32, s32, u8 *, s32);
 s32 collision_ledge_probe(f32, f32, s32, u8 *, s32);
 extern u8 D_800894C0;
 extern u8 D_800894C3;
-extern u8 D_800CC1F3;
+extern u8 g_wall_coll_soft_edges; /* was D_800CC1F3 */
 
 /* was func_15044670 */
 s32 collision_obj_walls(f32 arg0, f32 arg1, s32 arg2, u8 *arg3, s32 arg4, s32 arg5) {
@@ -33,7 +33,7 @@ s32 collision_obj_walls(f32 arg0, f32 arg1, s32 arg2, u8 *arg3, s32 arg4, s32 ar
     collision_set_obj_body_heights(arg3, arg0, arg1, arg2);
     var_s1 = &D_800894C3;
     var_s0 = 3;
-    sp5C = (s32) D_800CC1F3;
+    sp5C = (s32) g_wall_coll_soft_edges;
     do {
         if ((*var_s1 == 1) && ((var_s0 != 3) || !((*(s32 *)((u8 *)arg3 + 0xF8)) & 0x200))) {
             collision_select_area(var_s0);
@@ -59,7 +59,7 @@ s32 collision_obj_walls(f32 arg0, f32 arg1, s32 arg2, u8 *arg3, s32 arg4, s32 ar
         } while (var_s0_2 != 3);
     }
     collision_select_area(0);
-    D_800CC1F3 = (u8) sp5C;
+    g_wall_coll_soft_edges = (u8) sp5C;
     return var_s6;
 }
 /* was func_1504481C */
@@ -117,7 +117,7 @@ void collision_nop(void) {
 s32 obj_collision_cylinder(u8 *, s16 *, s16 *, s16 *);
 extern f32 D_800CC1F8;
 extern f32 D_800CC1FC;
-extern s8 D_8008FD8C;
+extern s8 g_player_count; /* was D_8008FD8C */
 
 /* was func_15044950 */
 void collision_set_obj_body_heights(u8 *arg0, f32 arg1, f32 arg2, s32 arg3) {
@@ -158,7 +158,7 @@ void collision_set_obj_body_heights(u8 *arg0, f32 arg1, f32 arg2, s32 arg3) {
         D_800CC1FC = 20.0f + D_800CC1F8 * 0.5f;
         return;
     }
-    if (idx >= 0 && idx < D_8008FD8C && *(f32 *)(arg0 + 0x28) != 0.0f) {
+    if (idx >= 0 && idx < g_player_count && *(f32 *)(arg0 + 0x28) != 0.0f) {
         D_800CC1F8 = (f32)h;
         D_800CC1FC = (f32)(h >> 1);
         return;
@@ -228,7 +228,7 @@ u8 *timedfx_alloc(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
 
 /* Timed effect list (entries made by timedfx_alloc, head D_800CBE00): per frame each entry with no start delay
  * (+0xE) runs its update hook D_80086220[+0xC](entry) and, when that returns non-zero, the hook D_8008622C[+0xD]
- * (called with no argument set: a0 is whatever the first hook left). The delay counts down by D_800BE9E4
+ * (called with no argument set: a0 is whatever the first hook left). The delay counts down by g_frame_ticks
  * (clamped at 0). The lifetime (+4, -1 = forever) counts down too; at <= 0 the entry is unlinked and freed
  * (heap_set_block_tag(entry, 2)). The next pointer is read before the hooks run. */
 typedef struct TimedFx {
@@ -256,7 +256,7 @@ void timedfx_update_all(void) {
                 D_8008622C[e->done]();
             }
         } else {
-            t = e->delay - D_800BE9E4;
+            t = e->delay - g_frame_ticks;
             if (t < 0) {
                 t = 0;
             }
@@ -265,7 +265,7 @@ void timedfx_update_all(void) {
         if (e->life == -1) {
             prev = e;
         } else {
-            t = e->life - D_800BE9E4;
+            t = e->life - g_frame_ticks;
             if (t > 0) {
                 e->life = t;
                 prev = e;
@@ -741,7 +741,7 @@ u8 collision_ceiling_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
             var_v1_2->pos.v[2] = (*(s16 *)((u8 *)temp_v0_2 + 4));
             var_v1_2 = (HitInfo *)((u8 *)var_v1_2 + (6));
         } while (var_a0 != 3);
-        temp_t5 = &D_800DBEF4[temp_t1->unkC];
+        temp_t5 = &g_world_objs[temp_t1->unkC];
         arg3->unk20 = (s32) temp_t5;
         temp_a0 = (*(s32 *)((u8 *)temp_t5 + 0x44));
         if (temp_a0 != 0) {
@@ -750,7 +750,7 @@ u8 collision_ceiling_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
             arg3->unk18 = (*(s32 *)((u8 *)temp_t5 + 0x40));
         }
         arg3->flags |= 6;
-        if ((D_800DBEF4[temp_t1->unkC].unk6F & 0x80) == 0x80) {
+        if ((g_world_objs[temp_t1->unkC].unk6F & 0x80) == 0x80) {
             arg3->flags |= 1;
         }
         arg3->unk1D = 2;
@@ -821,7 +821,7 @@ u8 collision_floor_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
             var_v1_2->pos.v[2] = (*(s16 *)((u8 *)temp_v0_2 + 4));
             var_v1_2 = (HitInfo *)((u8 *)var_v1_2 + (6));
         } while (var_a0 != 3);
-        temp_t5 = &D_800DBEF4[temp_t1->unkC];
+        temp_t5 = &g_world_objs[temp_t1->unkC];
         arg3->unk20 = (s32) temp_t5;
         temp_a0 = (*(s32 *)((u8 *)temp_t5 + 0x44));
         if (temp_a0 != 0) {
@@ -830,7 +830,7 @@ u8 collision_floor_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
             arg3->unk18 = (*(s32 *)((u8 *)temp_t5 + 0x40));
         }
         arg3->flags |= 6;
-        if ((D_800DBEF4[temp_t1->unkC].unk6F & 0x80) == 0x80) {
+        if ((g_world_objs[temp_t1->unkC].unk6F & 0x80) == 0x80) {
             arg3->flags |= 1;
         }
         arg3->unk1D = 2;
@@ -902,7 +902,7 @@ u8 collision_ceiling_dynamic_b(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
             var_v1_2->pos.v[2] = (*(s16 *)((u8 *)temp_v0_2 + 4));
             var_v1_2 = (HitInfo *)((u8 *)var_v1_2 + (6));
         } while (var_a0 != 3);
-        temp_v0_3 = &D_800DBEF4[temp_t1->unkC];
+        temp_v0_3 = &g_world_objs[temp_t1->unkC];
         arg3->unk20 = (s32) temp_v0_3;
         temp_a0 = (*(s32 *)((u8 *)temp_v0_3 + 0x44));
         if (temp_a0 != 0) {
@@ -983,7 +983,7 @@ s32 collision_floor_dynamic_b(u8 *arg0, f32 arg1, s32 *arg2, u8 *arg3) {
             (*(s16 *)((u8 *)var_v1_2 + 8)) = (s16) (*(s16 *)((u8 *)temp_v0_2 + 4));
             var_v1_2 += 6;
         } while (var_a0 != 3);
-        temp_v0_3 = &D_800DBEF4[temp_t1->unkC];
+        temp_v0_3 = &g_world_objs[temp_t1->unkC];
         (*(struct131 **)((u8 *)arg3 + 0x20)) = temp_v0_3;
         temp_a0 = (*(s32 *)((u8 *)temp_v0_3 + 0x44));
         if (temp_a0 != 0) {
@@ -1322,7 +1322,7 @@ void hitinfo_from_obj_floor(HitInfo *out, u8 *obj) {
         s32 idx = *(u16 *)(obj + 0x1A0) - 1;
 
         out->unk1D = 2;
-        out->unk20 = (s32)&D_800DBEF4[idx];
+        out->unk20 = (s32)&g_world_objs[idx];
         out->flags |= prop_is_flagged(idx) ? 1 : 0;
     } else {
         out->unk1D = 1;

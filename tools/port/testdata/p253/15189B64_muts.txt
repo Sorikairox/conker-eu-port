@@ -2,7 +2,7 @@
 s/if (rec\[2\] == 0)/if (rec[2] == 1)/ % h0 none
 s/sp64, 1);/sp64, 0);/ % h
 s/n = rec\[1\];/n = rec[3];/ % h
-s/m = D_800BE9C0 \* per \* n;/m = D_800BE9C0 * per;/ % h
+s/m = g_dl_buf_index \* per \* n;/m = g_dl_buf_index * per;/ % h
 s/\/ 0x32C;/\/ 0x330;/ % h
 s/slot >= 25/slot >= 26/ % s25
 s/slot < 0 || // % neg

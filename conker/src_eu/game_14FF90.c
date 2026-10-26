@@ -8,7 +8,7 @@ void vec_rotate_xz_about_point(u8 *, u8 *, f32, u8 *);
 s32 camera_target_deep_in_water(struct108 *arg0);
 void camera_look_enter(u8 *arg0);
 void camera_update_target_height(struct108 *, f32 *);
-extern f32 D_800DC434;
+extern f32 g_camera_orbit_height; /* was D_800DC434 */
 void camera_update_eye_base(u8 *); // P47: one argument (a0 = arg0 is still live at the call)
 void camera_update_controller(struct108 *arg0);
 void math_spring_approach(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
@@ -28,7 +28,7 @@ void vec3_normalize(struct17 *arg0, struct17 *arg1);
 void vec3_diff(struct17 *arg0, struct17 *arg1, struct17 *arg2);
 extern u8 g_slowmo_divisor; /* was D_800BEE2C */
 extern f32 g_camera_orbit_distance; /* was D_800DC430 */
-extern f32 D_80089950;
+extern f32 g_camera_cylinder_dist; /* was D_80089950 */
 
 extern f32 g_camera_zoom_levels[4][2]; /* was D_800A34B0 */
 extern f32 g_camera_k_34d4; /* was D_800A34D4 */
@@ -59,10 +59,10 @@ extern f32 g_camera_k_3548; /* was D_800A3548 */
 extern f32 g_camera_k_354c; /* was D_800A354C */
 extern f32 g_camera_deg_to_rad_3550; /* was D_800A3550 */
 extern f32 g_camera_deg_to_rad_3554; /* was D_800A3554 */
-extern f32 D_800A3558;
-extern f32 D_800A355C;
+extern f32 g_scenery_jitter_k_3558; /* was D_800A3558 */
+extern f32 g_scenery_jitter_deg_to_rad; /* was D_800A355C */
 extern f32 g_camera_k_3560; /* was D_800A3560 */
-extern f32 D_800A3564;
+extern f32 g_scenery_jitter_k_3564; /* was D_800A3564 */
 extern f32 g_camera_k_3568; /* was D_800A3568 */
 extern f32 g_camera_neg_deg_to_rad_356c; /* was D_800A356C */
 extern f32 g_camera_neg_deg_to_rad_3570; /* was D_800A3570 */
@@ -77,9 +77,9 @@ extern f32 g_camera_k_3590; /* was D_800A3590 */
 extern f32 g_camera_k_3594; /* was D_800A3594 */
 extern f32 g_camera_k_3598; /* was D_800A3598 */
 extern f32 g_camera_k_359c; /* was D_800A359C */
-extern f32 D_800A35A0;
-extern f32 D_800A35A4;
-extern f32 D_800A35A8;
+extern f32 g_scenery_texproj_k_35a0; /* was D_800A35A0 */
+extern f32 g_scenery_texproj_k_35a4; /* was D_800A35A4 */
+extern f32 g_scenery_texproj_k_35a8; /* was D_800A35A8 */
 #if 0
 f32 g_camera_zoom_levels[4][2] = { /* was D_800A34B0 */
     { 267.0f, 100.0f },
@@ -122,10 +122,10 @@ f32 g_camera_k_3548 = 0.03999999910593033f; /* was D_800A3548 */
 f32 g_camera_k_354c = 0.05000000074505806f; /* was D_800A354C */
 f32 g_camera_deg_to_rad_3550 = 0.01745329238474369f; /* was D_800A3550 */
 f32 g_camera_deg_to_rad_3554 = 0.01745329238474369f; /* was D_800A3554 */
-f32 D_800A3558 = 0.019999999552965164f;
-f32 D_800A355C = 0.01745329238474369f;
+f32 g_scenery_jitter_k_3558 = 0.019999999552965164f; /* was D_800A3558 */
+f32 g_scenery_jitter_deg_to_rad = 0.01745329238474369f; /* was D_800A355C */
 f32 g_camera_k_3560 = 0.6000000238418579f; /* was D_800A3560 */
-f32 D_800A3564 = 10000.0f;
+f32 g_scenery_jitter_k_3564 = 10000.0f; /* was D_800A3564 */
 f32 g_camera_k_3568 = 10000.0f; /* was D_800A3568 */
 f32 g_camera_neg_deg_to_rad_356c = -0.01745329238474369f; /* was D_800A356C */
 f32 g_camera_neg_deg_to_rad_3570 = -0.01745329238474369f; /* was D_800A3570 */
@@ -140,9 +140,9 @@ f32 g_camera_k_3590 = -0.01745329238474369f; /* was D_800A3590 */
 f32 g_camera_k_3594 = -0.01745329238474369f; /* was D_800A3594 */
 f32 g_camera_k_3598 = -0.01745329238474369f; /* was D_800A3598 */
 f32 g_camera_k_359c = -0.01745329238474369f; /* was D_800A359C */
-f32 D_800A35A0 = 999.0f;
-f32 D_800A35A4 = 0.01745329238474369f;
-f32 D_800A35A8 = 999.0f;
+f32 g_scenery_texproj_k_35a0 = 999.0f; /* was D_800A35A0 */
+f32 g_scenery_texproj_k_35a4 = 0.01745329238474369f; /* was D_800A35A4 */
+f32 g_scenery_texproj_k_35a8 = 999.0f; /* was D_800A35A8 */
 f32 999.0f = 999.0f;
 #endif
 
@@ -152,10 +152,10 @@ void camera_update_all(void) {
     s16 i;
     f32 temp_f20;
 
-    temp_f20 = D_800BEA08 * 0.02f;
+    temp_f20 = g_frame_ticks_raw * 0.02f;
 
-    for (i = 0; i <= D_80082FA0; i++) {
-        temp_s0 = &D_800DBFF0[i]; // ???
+    for (i = 0; i <= g_last_player_index; i++) {
+        temp_s0 = &g_player_views[i]; // ???
         if (player_stat_get(i, 0) || (i == 0)) {
             temp_s0->unk7B4 = temp_f20;
             if ((g_game_paused == 0) || (D_800C35EA != 0) || (D_800D2DB4 != 0)) {
@@ -272,7 +272,7 @@ void camera_update_controller(struct108 *arg0) {
         w = 0.0f;
     }
     pl = p[0x23D];
-    camera_projection_update(pl, CAM_F(0x19C), CAM_F(0x1A0), *(f32 *)((u8 *)D_800BE628 + pl * 0x180 + 0x84), w);
+    camera_projection_update(pl, CAM_F(0x19C), CAM_F(0x1A0), *(f32 *)((u8 *)g_player_cams + pl * 0x180 + 0x84), w);
     camera_timed_push_back(p[0x23D]);
     camera_update_side_view_mode(p);
     camera_process_events(arg0);
@@ -394,7 +394,7 @@ void camera_update_controller(struct108 *arg0) {
 //         phi_f12 = g_camera_k_34d4;
 //     }
 //
-//     func_1510B128(phi_f12, temp_v0_2, arg0->unk19C, arg0->unk1A0, D_800BE628[temp_v0_2].unk84, (arg0->unk2C & 0x100) ? 16.0f : 0.0f);
+//     func_1510B128(phi_f12, temp_v0_2, arg0->unk19C, arg0->unk1A0, g_player_cams[temp_v0_2].unk84, (arg0->unk2C & 0x100) ? 16.0f : 0.0f);
 //     func_15097798(arg0->unk23D);
 //     camera_update_side_view_mode(arg0);
 //     func_15128CB0(arg0);
@@ -589,7 +589,7 @@ void camera_cycle_zoom_level(struct108 *arg0) {
     }
     temp_v0 = arg0->unk7B8;
     if ((*(s32 *)&(temp_v0)) > 0) {
-        temp_t1 = (*(s32 *)&(temp_v0)) - D_800BE9E4;
+        temp_t1 = (*(s32 *)&(temp_v0)) - g_frame_ticks;
         arg0->unk7B8 = (*(f32 *)&(temp_t1));
         if (temp_t1 < 0) {
             arg0->unk7B8 = 0.0f;
@@ -788,7 +788,7 @@ void camera_update_eye_orbit(struct108 *arg0) {
                 if (v1 != 0 || p[0x8E4] != 0) {
                     v0 = p[0x8E4];
                     if (v0 != 0 && v1 != 0) {
-                        v1 = (u8)(v0 + D_800BEA08);
+                        v1 = (u8)(v0 + g_frame_ticks_raw);
                         if (v1 < 0x10) {
                             p[0x8E4] = v1;
                             v0 = v1;
@@ -817,7 +817,7 @@ void camera_update_eye_orbit(struct108 *arg0) {
                         if (*(s16 *)(p + 0x298) != 0) {
                             p[0x8E4] = 0;
                         } else {
-                            *(s32 *)(p + 0x8E8) = *(s32 *)(p + 0x8E8) - D_800BEA08;
+                            *(s32 *)(p + 0x8E8) = *(s32 *)(p + 0x8E8) - g_frame_ticks_raw;
                             if (*(s32 *)(p + 0x8E8) <= 0) {
                                 p[0x8E4] = 0;
                             } else {
@@ -842,7 +842,7 @@ void camera_update_eye_orbit(struct108 *arg0) {
     }
     yaw = *(f32 *)(p + 0x39C);
     if (g_slowmo_divisor != 0) {
-        *(f32 *)(p + 0x37C) = *(f32 *)(p + 0x37C) + 1.20000005f * *(f32 *)(p + 0x7E0) * (f32)D_800BEA08;
+        *(f32 *)(p + 0x37C) = *(f32 *)(p + 0x37C) + 1.20000005f * *(f32 *)(p + 0x7E0) * (f32)g_frame_ticks_raw;
         yaw = *(f32 *)(p + 0x39C) = *(f32 *)(p + 0x37C) * 0.0174532924f;
     } else {
         *(f32 *)(p + 0x7E0) = (random_int() & 1) ? -1.0f : 1.0f;
@@ -968,7 +968,7 @@ void camera_update_eye_orbit(struct108 *arg0) {
             } else {
                 math_spring_approach((f32 *)(p + 0x370), *(f32 *)(p + 0x374), (f32 *)(p + 0x258), *(f32 *)(p + 0x3B4), *(f32 *)(p + 0x3B8), *(f32 *)(p + 0x7B4));
             }
-        } else if (0.0f == D_80089950 && (p[0x3E8] != 0 || rec[0x102] != 0)) {
+        } else if (0.0f == g_camera_cylinder_dist && (p[0x3E8] != 0 || rec[0x102] != 0)) {
             math_spring_approach((f32 *)(p + 0x370), 200.0f, (f32 *)(p + 0x258), 4.0f, 8.0f, *(f32 *)(p + 0x7B4));
         } else {
             math_spring_approach((f32 *)(p + 0x370), 200.0f, (f32 *)(p + 0x258), 0.5f, 1.0f, *(f32 *)(p + 0x7B4));
@@ -1437,7 +1437,7 @@ void camera_update_shake(struct108 *arg0) {
     f32 targetK;
 
     if ((CAM_W(0x2C) & 0x80000) || ((CAM_W(0x5F0) & 8) && !(CAM_W(0x2C) & 0x40000))) {
-        CAM_F(0x29C) += (f32)((u32)random_int() % 3) * 2 * 0.017453292f * D_800BE9A4;
+        CAM_F(0x29C) += (f32)((u32)random_int() % 3) * 2 * 0.017453292f * g_frame_step_f;
         while (6.2831855f < CAM_F(0x29C)) {
             CAM_F(0x29C) -= 6.2831855f;
         }
@@ -1717,7 +1717,7 @@ void camera_update_allowed_controls(struct108 *arg0) {
         CTL &= ~0x10;
     }
     if ((CAM_W(0x2C) & 0x40) && CAM_H(0x84A) != 0) {
-        CAM_H(0x84A) -= D_800BE9E4;
+        CAM_H(0x84A) -= g_frame_ticks;
         MASK &= ~0x10;
         CTL &= ~0x10;
         if (CAM_H(0x84A) <= 0) {
@@ -1869,7 +1869,7 @@ s32 camera_update_aim_mode(struct108 *arg0) {
     s32 st;
     u16 flags;
 
-    e = (u8 *)D_800BE628 + p[0x23D] * 0x180;
+    e = (u8 *)g_player_cams + p[0x23D] * 0x180;
     aspect = A_F_OF(e, 0x70) / A_F_OF(e, 0x6C);
     pl = A_PL;
     fov0 = -(A_F_OF(e, 0x6C) - 5.0f);
@@ -1970,7 +1970,7 @@ s32 camera_update_aim_mode(struct108 *arg0) {
     A_F(0x1A4) = A_F_OF(pl, 0x184);
     A_F(0x1A8) = A_F_OF(pl, 0x188);
     camera_projection_set_fov(p[0x23D], A_F(0x19C), A_F(0x1A0), 1.0f);
-    A_F_OF((u8 *)D_800BE628 + p[0x23D] * 0x180, 0x84) = 1.0f;
+    A_F_OF((u8 *)g_player_cams + p[0x23D] * 0x180, 0x84) = 1.0f;
     obj_model_reset((struct127 *)A_HOLD);
     g_camera_timers[p[0x23D]] = 2;
     if (type == 0x24 || type == 0x23 || type == 0x1B || is1F || type == 0x29) {
@@ -2128,8 +2128,8 @@ done_start:
     A_F_OF(pl, 0x134) = v[1];
     A_F_OF(pl, 0x138) = v[2];
     vec3_diff((struct17 *)(pl + 0x13C), (struct17 *)(pl + 0x148), (struct17 *)(pl + 0x130));
-    A_F_OF((u8 *)D_800BE628 + p[0x23D] * 0x180, 0x84) = -0.94f * zoom + 1.0f;
-    camera_projection_update(p[0x23D], A_F(0x19C), A_F(0x1A0), A_F_OF((u8 *)D_800BE628 + p[0x23D] * 0x180, 0x84),
+    A_F_OF((u8 *)g_player_cams + p[0x23D] * 0x180, 0x84) = -0.94f * zoom + 1.0f;
+    camera_projection_update(p[0x23D], A_F(0x19C), A_F(0x1A0), A_F_OF((u8 *)g_player_cams + p[0x23D] * 0x180, 0x84),
                   71.0f * zoom + 54.0f);
     return 1;
 leave:
@@ -2225,7 +2225,7 @@ s32 scope_motion_sound_update(u8 *voice, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
  * A pending id 0x622 is cleared to 0 first, then the voice position (+2/+4/+6) follows the holder's position
  * (holder +0x3D0, floats +0x14..+0x1C, truncated). While the holder's player (+0x3D4) is in state 2 (+0x197):
  * the zoom product (+0x174 * +0x178, its low 24 float bits) is compared with the last one: equal -> count 0;
- * changed by more than 100 (unsigned difference) -> the count grows by the frame time D_800BE9E4; a count of 10
+ * changed by more than 100 (unsigned difference) -> the count grows by the frame time g_frame_ticks; a count of 10
  * or more means the zoom has stopped: the voice's sound (+0x24) is stopped (sound_voice_stop), flag 0x80 of +0x10
  * cleared and the id set to 0x61C (end sound) once. When it moves again after 0x61C, the sound is stopped and
  * the id becomes 0x61D (restart). Without a sound and id the flag 0x80 is cleared. Returns 0 (keep the voice);
@@ -2263,7 +2263,7 @@ s32 scope_zoom_sound_update(u8 *voice, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s
     if (last != cur) {
         if (count < 10) {
             if (last - cur > 100) {
-                count += D_800BE9E4;
+                count += g_frame_ticks;
             }
         } else {
             stopped = 1;
@@ -2322,7 +2322,7 @@ s32 player_aim_look(struct127 *arg0, struct49 *arg1) {
     s32 type;
     s32 st;
 
-    zoom = (f32) D_800BE9E4 * 0.02f;
+    zoom = (f32) g_frame_ticks * 0.02f;
     type = pl[0x78];
     if (type == 0xC || type == 0x1B) {
         *(u16 *) in |= 0x10;
@@ -2423,7 +2423,7 @@ void camera_exit_aim_mode(struct108 *arg0) {
     arg0->unk1A4 = 0.0f;
     arg0->unk1A8 = 0.0f;
     camera_projection_set_fov(arg0->unk23D, 0.0f, 0.0f, 1.0f);
-    (*(f32 *)((u8 *)((D_800BE628 + (arg0->unk23D * 0x180))) + 0x84)) = 1.0f;
+    (*(f32 *)((u8 *)((g_player_cams + (arg0->unk23D * 0x180))) + 0x84)) = 1.0f;
     obj_model_reset(arg0->unk3D0);
     g_camera_timers[arg0->unk23D] = 2;
     temp_v1 = arg0->unk3D0;
@@ -2448,7 +2448,7 @@ void camera_exit_aim_mode(struct108 *arg0) {
 //     arg0->unk1A4 = 0.0f;
 //     arg0->unk1A8 = 0.0f;
 //     func_1510B32C(arg0->unk23D, 0.0f, 0.0f, 1.0f);
-//     D_800BE628[arg0->unk23D].unk84 = 1.0f;
+//     g_player_cams[arg0->unk23D].unk84 = 1.0f;
 //     obj_model_reset(arg0->unk3D0);
 //     g_camera_timers[arg0->unk23D] = (u8)2;
 //
@@ -2473,7 +2473,7 @@ void camera_start_transition(struct108 *arg0, s32 arg1, s32 arg2) {
 
 /* Camera transition (+0x7F4 state: 0 idle, 1 start, 2 running): moves the eye +0x2BC from the start point +0x7F8
  * to the end point +0x804 (end x / z follow the player, y from camera_update_target_height) over +0x834 ticks (countdown
- * +0x840, progress t = +0x830), blending yaw +0x37C, distance g_camera_orbit_distance, height D_800DC434 and the extra
+ * +0x840, progress t = +0x830), blending yaw +0x37C, distance g_camera_orbit_distance, height g_camera_orbit_height and the extra
  * angles +0x5E8 / +0x3A8 (math_angle_lerp_deg = angle lerp). The camera mode +0x23C cancels it. Returns 0 when idle,
  * nonzero while it runs (on the last tick the asm returns the +0x3D0 pointer left in v0; math_angle_lerp_deg does
  * not touch v0), the state itself for an unknown state. */
@@ -2555,7 +2555,7 @@ s32 camera_update_transition(struct108 *arg0) {
         PF(0x39C) = yaw * 0.017453292f;
     }
     g_camera_orbit_distance = TF(0x1C) + (TF(0x28) - TF(0x1C)) * TF(0x3C);
-    D_800DC434 = PF(0x83C) + (PF(0x838) - PF(0x83C)) * TF(0x3C);
+    g_camera_orbit_height = PF(0x83C) + (PF(0x838) - PF(0x83C)) * TF(0x3C);
     PF(0x5E8) = math_angle_lerp_deg(TF(0x3C), 0.0f, TF(0x34));
     PF(0x3A8) = math_angle_lerp_deg(TF(0x3C), 0.0f, TF(0x38));
     if (last) {
@@ -2565,7 +2565,7 @@ s32 camera_update_transition(struct108 *arg0) {
         TF(0x2C) = 999.0f;
         return 1;
     }
-    *(s16 *)(p + 0x840) -= D_800BE9E4;
+    *(s16 *)(p + 0x840) -= g_frame_ticks;
     if (*(s16 *)(p + 0x840) < 0) {
         *(s16 *)(p + 0x840) = 0;
     }

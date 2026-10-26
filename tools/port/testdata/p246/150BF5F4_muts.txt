@@ -1,9 +1,9 @@
 # P246 fade_slide_update (fade_slide_update) mutants: sed % setup names
-s/level += D_800BE9E4 \* e\[0x27\]/level += D_800BE9E4 * e[0x26]/ % up
+s/level += g_frame_ticks \* e\[0x27\]/level += g_frame_ticks * e[0x26]/ % up
 s/if (max < level)/if (max + 1 < level)/ % up1
 s/level = max;/level = max - 1;/ % upclamp
 s/if (level != max)/if (level != 0)/ % eq
-s/level -= D_800BE9E4 \* e\[0x2F\]/level -= D_800BE9E4 * e[0x27]/ % down
+s/level -= g_frame_ticks \* e\[0x2F\]/level -= g_frame_ticks * e[0x27]/ % down
 s/if (level < 0)/if (level < -1)/ % down1
 s/level = 0;/level = 1;/ % downzero
 s/if (on == 0 \&\& level == 0)/if (on == 0 || level == 0)/ % downzero up
@@ -11,7 +11,7 @@ s/(s8) e\[0x2D\]/(u8) e[0x2D]/ % up
 s/(s8) e\[0x2E\]/(s8) e[0x2D]/ % up
 s/if (\*(s16 \*) (e + 0x14) <= 0)/if (*(s16 *) (e + 0x14) < 0)/ % exact0
 s/\*(s16 \*) (e + 0x16) = 0;/*(s16 *) (e + 0x16) = 1;/ % hit0
-s/level = e\[0x2C\] + D_800BE9E4;/level = e[0x2C] + 1;/ % up
+s/level = e\[0x2C\] + g_frame_ticks;/level = e[0x2C] + 1;/ % up
 s/if (level >= 0x80)/if (level > 0x80)/ % upclamp
 s/level = 0x7F;/level = 0x80;/ % upclamp
 s/    return 0;/    return 2;/ % up

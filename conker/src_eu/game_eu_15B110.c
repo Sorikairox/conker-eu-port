@@ -7,9 +7,9 @@ void vec_rotate_xz_about_point(u8 *, u8 *, f32, u8 *);
 
 /* Player sideways tilt: while button bit 0 or 1 of the pad word (*unk36C) is held (and flag 0x200000 of unk84 is
  * clear, and unk698 is 0), the direction +1 / -1 goes to unk6B0, a hold counter (+0x6C0) counts up and the tilt
- * angle (+0x6C4) moves by dir * 0.5 * D_800BE9A4 (frame scale), clamped to [-10, 10]. With unk2C bit 0x400 the
- * counter is set to 20 and nothing is rotated. Released, the angle decays by 0.2 * angle * D_800BE9A4 (D_800A3AC0)
- * until it is 0. Each step rotates the +0x2F8 vector about +0x2A4 by angle * D_800BE9A4 / 2.5 (vec_rotate_xz_about_point).
+ * angle (+0x6C4) moves by dir * 0.5 * g_frame_step_f (frame scale), clamped to [-10, 10]. With unk2C bit 0x400 the
+ * counter is set to 20 and nothing is rotated. Released, the angle decays by 0.2 * angle * g_frame_step_f (D_800A3AC0)
+ * until it is 0. Each step rotates the +0x2F8 vector about +0x2A4 by angle * g_frame_step_f / 2.5 (vec_rotate_xz_about_point).
  * Returns 0: game_14FF90 declares it s32 but ignores the result (the asm leaves v0 undefined). */
 /* was func_1512D900 */
 s32 camera_sideways_tilt(struct108 *p) {
@@ -28,7 +28,7 @@ s32 camera_sideways_tilt(struct108 *p) {
             p->unk6B0 = -1;
         }
         *count += 1;
-        *angle += (f32) p->unk6B0 * 0.5f * D_800BE9A4;
+        *angle += (f32) p->unk6B0 * 0.5f * g_frame_step_f;
         a = *angle;
         if (a < -10.0f) {
             *angle = -10.0f;
@@ -44,8 +44,8 @@ s32 camera_sideways_tilt(struct108 *p) {
         if (a == 0.0f) {
             return 0;
         }
-        *angle = a - a * 0.2f * D_800BE9A4;
+        *angle = a - a * 0.2f * g_frame_step_f;
     }
-    vec_rotate_xz_about_point((u8 *) &p->unk2F8, (u8 *) &p->unk2A4, *angle * D_800BE9A4 / 2.5f, (u8 *) &p->unk2F8);
+    vec_rotate_xz_about_point((u8 *) &p->unk2F8, (u8 *) &p->unk2A4, *angle * g_frame_step_f / 2.5f, (u8 *) &p->unk2F8);
     return 0;
 }

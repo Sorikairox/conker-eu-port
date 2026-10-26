@@ -118,7 +118,7 @@ def main():
             by_addr.setdefault(a_, nm_)
     npass = ndl = 0
     # P199: name -> (index of the DL argument, argument count); checked against the asm (returns v0 = that argument)
-    # P212: foot_trail_draw (foot-trail / ripple draw, D_8008A5A0 table, v0 = a1) removed: C since port P204
+    # P212: foot_trail_draw (foot-trail / ripple draw, g_fxrec_step_fns table, v0 = a1) removed: C since port P204
     DL_INDIRECT = {}
     for n in funcs:
         sigs = undef_f[n]

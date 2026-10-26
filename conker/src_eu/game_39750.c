@@ -9,12 +9,12 @@ void debris_counts_reset(void) {
     s32 i;
 
     for (i = 0; i < 233; i++) {
-        D_800DC468[i] = 0;
+        g_mdl_particle_model_users[i] = 0;
     }
 
-    D_800DC460 = 0;
-    D_800DC464 = 0;
-    D_800DC63C = 0;
+    g_mdl_particle_list_head = 0;
+    g_mdl_particle_list_tail = 0;
+    g_mdl_particle_live_count = 0;
 }
 
 

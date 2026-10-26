@@ -34,15 +34,15 @@ struct210 *particle_emitter_spawn(void *emit, s32 emitSize, u8 *spawn, u8 arg3, 
 s32 world_to_screen(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 extern s32 (*g_effect_kind_check_fns[])(u8 *, s16); /* was D_8008A330 */
-extern s32 D_800899D0[8][2];   /* z-buffer decode per exponent (code >> 13): {shift, add} */
+extern s32 g_zbuf_decode_table[8][2];   /* z-buffer decode per exponent (code >> 13): {shift, add}; was D_800899D0 */
 // particle_glow_update: per-player update of a light-flare particle (record from particle_emitter_spawn, emitter block at
 // +0x110). Runs the kind check g_effect_kind_check_fns[+0x169] (-1 = none), clears the player's screen cell (+0x134 / +0x144),
 // needs flag 2 (+0x58), projects the source (+0x34) with world_to_screen and drops it outside the player's viewport
-// (D_800BE628[player] +0x24..+0x30). Gets 4 vertices from vtx_slot_buffer_get (copying the 0x40-byte template at +0xC0
+// (g_player_cams[player] +0x24..+0x30). Gets 4 vertices from vtx_slot_buffer_get (copying the 0x40-byte template at +0xC0
 // into a fresh buffer), normalises the axis (+0x40 = source + 500 * dir, once, flag 4), takes the facing term
 // dot(axis, camera - source) (0 = drop unless flag 0x10000), fades with distance (1 - e[0x20] * dist), and with
 // flag 0x10 tests occlusion: the projected depth (viewport scale 0x44 / 0x4C, x32) against the z-buffer code at
-// e[0x4C + 2 * player] decoded through D_800899D0 (visible if depth - zbuf < 0x1F); the per-player intensity
+// e[0x4C + 2 * player] decoded through g_zbuf_decode_table (visible if depth - zbuf < 0x1F); the per-player intensity
 // e[0x54 + player] eases towards 0xFF or 0 by 1/8 per frame (0xFF without flag 0x10). The quad is centred between
 // the source and the camera (lerp e[0x14]..e[0x10]), sized lerp e[8]..e[0] / e[0xC]..e[4] times e[0x48], laid
 // out perpendicular to the view direction; alpha +0x5C = intensity * lerp(e[0x1C]..e[0x18]) * 255 >> 8, copied
@@ -87,7 +87,7 @@ u8 *effect_flare_update(u8 *obj, s16 player) {
     if (vis == 0) {
         return NULL;
     }
-    view = (f32 *) ((u8 *) D_800BE628 + player * 0x180);
+    view = (f32 *) ((u8 *) g_player_cams + player * 0x180);
     if (scr[0] < view[0x2C / 4] || view[0x30 / 4] < scr[0] || scr[1] < view[0x24 / 4] || view[0x28 / 4] < scr[1]) {
         return NULL;
     }
@@ -137,13 +137,13 @@ u8 *effect_flare_update(u8 *obj, s16 player) {
         return NULL;
     }
     code = *(u16 *) (e + player * 2 + 0x4C);
-    zbuf = (u32) (D_800899D0[code >> 13][1] + (((code >> 2) & 0x7FF) << D_800899D0[code >> 13][0])) >> 3;
+    zbuf = (u32) (g_zbuf_decode_table[code >> 13][1] + (((code >> 2) & 0x7FF) << g_zbuf_decode_table[code >> 13][0])) >> 3;
     if (*(s32 *) (obj + 0x58) & 0x10) {
         visible = 1;
         if (vis != 0) {
             *(s32 *) (e + player * 4 + 0x24) = (s32) scr[0];
             *(s32 *) (e + player * 4 + 0x34) = (s32) scr[1];
-            view = (f32 *) ((u8 *) D_800BE628 + player * 0x180 + D_800BE9C0 * 0x10);
+            view = (f32 *) ((u8 *) g_player_cams + player * 0x180 + g_dl_buf_index * 0x10);
             depth = (s32) (((f32) *(s16 *) ((u8 *) view + 0x4C) + oz * oinv * (f32) *(s16 *) ((u8 *) view + 0x44)) *
                            32.0f);
         } else {
@@ -235,7 +235,7 @@ void effect_destroy_delete(structEU_16DC80 *arg0) {
 /* Per-frame grid-cell lookup for the scene nodes (P13, hand C). For the two node tables g_node_lists[2][104]
  * and the four list heads named by the index table g_fx_broadcast_types_a[0..3], walk each list (next at 0x08). A node with
  * flag 0x2000 (word 0x58) clears its four per-player cell values (u16 at 0x15C); with flag 0x10 too, each
- * player's (x, y) cell (s32 at 0x134 / 0x144) inside the D_800BE620 x D_800BE624 grid looks up the u16 grid
+ * player's (x, y) cell (s32 at 0x134 / 0x144) inside the g_framebuffer_width x g_framebuffer_height grid looks up the u16 grid
  * g_zbuffer[y][x]; out of range gives 0x7FFF. */
 /* was func_151412BC */
 void effect_sample_zbuffer_cells(void) {
@@ -262,14 +262,14 @@ void effect_sample_zbuffer_cells(void) {
                 if (!(flags & 0x10)) {
                     continue;
                 }
-                for (i = 0; i <= D_80082FA0; i++) {
+                for (i = 0; i <= g_last_player_index; i++) {
                     x = *(s32 *)(node + 0x134 + i * 4);
                     y = *(s32 *)(node + 0x144 + i * 4);
-                    if (x < 0 || x >= D_800BE620 || y < 0 || y >= D_800BE624) {
+                    if (x < 0 || x >= g_framebuffer_width || y < 0 || y >= g_framebuffer_height) {
                         *(u16 *)(node + 0x15C + i * 2) = 0x7FFF;
                     } else {
                         *(u16 *)(node + 0x15C + i * 2) =
-                            *(u16 *)((u8 *)g_zbuffer + (y * D_800BE620) * 2 + x * 2);
+                            *(u16 *)((u8 *)g_zbuffer + (y * g_framebuffer_width) * 2 + x * 2);
                     }
                 }
             }
@@ -301,7 +301,7 @@ s32 effect_flicker_update(u8 *arg0) {
     u8 *temp_v1;
     u8 *temp_v1_2;
 
-    (*(f32 *)((u8 *)arg0 + 0x180)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x180)) - D_800BE9A4);
+    (*(f32 *)((u8 *)arg0 + 0x180)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x180)) - g_frame_step_f);
     if ((*(f32 *)((u8 *)arg0 + 0x180)) < 0.0f) {
         temp_v1 = arg0 + 0x170;
         (*(f32 *)((u8 *)temp_v1 + 0x10)) = (f32) (random_float() * (*(f32 *)((u8 *)temp_v1 + 0x14)));
@@ -330,7 +330,7 @@ s32 effect_pulse_sine_update(structEU_16DC80 *arg0) {
 
     s = sinf(temp->unk8);
     arg0->unk158 = temp->unk0 + (temp->unk4 * s);
-    temp->unk8 += temp->unkC * D_800BE9A4;
+    temp->unk8 += temp->unkC * g_frame_step_f;
     temp->unk8 = wrap_angle_rad(temp->unk8);
     return 1;
 }
@@ -367,7 +367,7 @@ s32 effect_pulse_envelope_update(u8 *arg0) {
         *(f32 *)(arg0 + 0x158) = e->base + e->amp * f;
     }
     period = e->period;
-    e->t += D_800BE9A4;
+    e->t += g_frame_step_f;
     while (period < e->t) {
         e->t -= period;
     }

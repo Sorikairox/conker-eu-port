@@ -1,8 +1,8 @@
 \#^    if ((s8) obj\[0x30\] != -1) {$#s/-1/0/
-\#^        if (D_80088ED8\[(s8) obj\[0x30\]\](obj) == 0) {$#s/== 0/!= 0/
-\#^    em->acc += (0.0510000028f + random_float() \* 0.153000012f) \* D_800BE9A4;$#s/0.0510000028f/0.05f/
-\#^    em->acc += (0.0510000028f + random_float() \* 0.153000012f) \* D_800BE9A4;$#s/0.153000012f/0.15f/
-\#^    em->acc += (0.0510000028f + random_float() \* 0.153000012f) \* D_800BE9A4;$#s/ \* D_800BE9A4//
+\#^        if (g_lightning_cond_fns\[(s8) obj\[0x30\]\](obj) == 0) {$#s/== 0/!= 0/
+\#^    em->acc += (0.0510000028f + random_float() \* 0.153000012f) \* g_frame_step_f;$#s/0.0510000028f/0.05f/
+\#^    em->acc += (0.0510000028f + random_float() \* 0.153000012f) \* g_frame_step_f;$#s/0.153000012f/0.15f/
+\#^    em->acc += (0.0510000028f + random_float() \* 0.153000012f) \* g_frame_step_f;$#s/ \* g_frame_step_f//
 \#^    if (!(1.0f < em->acc)) {$#s/1.0f/2.0f/
 \#^    cam = camera_get_pos(em->owner\[0x23D\]);$#s/0x23D/0x23C/
 \#^    angle = (s32) ((\*(f32 \*) (em->owner + 0x380) + 180.0f) \* 0.7111111283f);$#s/0x380/0x384/
@@ -22,7 +22,7 @@
 \#^        b.v\[1\] = random_float() \* 212.0f + -133.0f;$#s/b.v\[1\] =/b.v[1] +=/
 \#^        if (random_int() & 1) {$#s/& 1/\& 2/
 \#^            a = b;$#s/a = b;//
-\#^        set = &D_80088EC0\[em->set\];$#s/em->set/em->cond/
+\#^        set = &g_lightning_bolt_sets\[em->set\];$#s/em->set/em->cond/
 \#^        k = (u32) random_int() . set->count;$#s/(u32) //
 \#^        width = random_float() \* 10.0f + 5.0f;$#s/5.0f;/6.0f;/
 \#^        lightning_bolt_spawn((u8 \*) &a, (u8 \*) &b, set->pairs\[k \* 2 + 1\], width, 1.0f / width,$#s/k \* 2 + 1/k * 2/

@@ -41,7 +41,7 @@ void obj_dust_emitter_update(u8 *arg0) {
         return;
     }
     if ((*(s32 *)((u8 *)temp_s0 + 0x1D4)) != 0) {
-        (*(f32 *)((u8 *)temp_s2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 8)) + ((0.06f + (random_float() * 0.0704f)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 8)) + ((0.06f + (random_float() * 0.0704f)) * g_frame_step_f));
         obj_get_fx_point_b(temp_s0, &sp.u104, &sp.uD8, &sp.uD4);
         sp.u100 = (sp.uD8 + sp.uD4) * 0.5f;
         hitinfo_from_obj_floor(&sp.uDC, temp_s0);
@@ -95,8 +95,8 @@ extern s32 D_80088C38;
 /* was func_150CFA88 */
 void tex_scroll_step_offsets(s32 arg0) {
     s32 temp_v1;
-    D_80088C30 += D_800BE9E4 * 0x1A;
-    temp_v1 = D_800BE9E4 * 0x1C;
+    D_80088C30 += g_frame_ticks * 0x1A;
+    temp_v1 = g_frame_ticks * 0x1C;
     D_80088C34 -= temp_v1;
     D_80088C38 -= temp_v1;
 }
@@ -155,7 +155,7 @@ typedef struct {
 } SpawnExtraCFB90; // copied to the record's +0x70
 
 // screen_bar_spawn: spawns effect kind 0xC1 at (-300, 72), scale 7.5, with `span` at +0x12 (+0x14 = 0x31, white
-// colour bytes, flags 0x200004 / 0x9F0601 and fixed defaults, current player D_80082FA0) through sprite2d_spawn (list
+// colour bytes, flags 0x200004 / 0x9F0601 and fixed defaults, current player g_last_player_index) through sprite2d_spawn (list
 // 0xC, `flag`, `arg2`) and copies the extra block (0, 0, -300, 0) to the new record's +0x70.
 /* was func_150CFB90 */
 void screen_bar_spawn(s16 span, u8 flag, s32 arg2) {
@@ -190,7 +190,7 @@ void screen_bar_spawn(s16 span, u8 flag, s32 arg2) {
     spec.u3C = 0x20;
     spec.u40 = 0;
     spec.u41 = 0xA;
-    spec.player = D_80082FA0;
+    spec.player = g_last_player_index;
     spec.u48 = 1.0f;
     spec.u4C = 1.0f;
     spec.u50 = 0.0f;
@@ -263,7 +263,7 @@ s32 screen_bar_update_burst(u8 *arg0) {
 
     if ((*(u8 *)((u8 *)arg0 + 0x70)) & 1) {
         var_v0 = arg0 + 0x70;
-        (*(f32 *)((u8 *)var_v0 + 4)) = (f32) ((*(f32 *)((u8 *)var_v0 + 4)) + (0.19000001f * D_800BE9A4));
+        (*(f32 *)((u8 *)var_v0 + 4)) = (f32) ((*(f32 *)((u8 *)var_v0 + 4)) + (0.19000001f * g_frame_step_f));
         var_f0 = (*(f32 *)((u8 *)var_v0 + 4));
         if (var_f0 >= 1.0f) {
             (*(f32 *)((u8 *)var_v0 + 4)) = 1.0f;
@@ -299,7 +299,7 @@ s32 screen_bar_update_burst(u8 *arg0) {
             sp.uF8 = 1.0f;
             sp.u100 = 0.0f;
             sp.uFC = 0.0f;
-            sp.uF0 = (s8) D_80082FA0;
+            sp.uF0 = (s8) g_last_player_index;
             if (temp_v1 > 0) {
                 do {
                     sp.uCA = (random_int() % 101U) + 0x9B;
@@ -357,9 +357,9 @@ void bouncing_sprites_broadcast_drop(f32 arg0) {
 s32 bouncing_sprite_update(u8 *arg0) {
     f32 *v = (f32 *)(arg0 + 0x70);
 
-    *(f32 *)(arg0 + 0x10) += v[0] * D_800BE9A4;
-    *(f32 *)(arg0 + 0x14) += v[1] * D_800BE9A4 + 0.5f * v[2] * D_800BE9A4 * D_800BE9A4;
-    v[1] += v[2] * D_800BE9A4;
+    *(f32 *)(arg0 + 0x10) += v[0] * g_frame_step_f;
+    *(f32 *)(arg0 + 0x14) += v[1] * g_frame_step_f + 0.5f * v[2] * g_frame_step_f * g_frame_step_f;
+    v[1] += v[2] * g_frame_step_f;
     if (v[3] < *(f32 *)(arg0 + 0x14)) {
         *(f32 *)(arg0 + 0x14) = v[3];
         v[0] *= 0.3f;

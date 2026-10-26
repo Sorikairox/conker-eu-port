@@ -4,7 +4,7 @@
 
 
 s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
-extern s32 D_8008CDEC;
+extern s32 g_sprite_tex_descs; /* was D_8008CDEC */
 
 /* was func_15174690 */
 void fx_dust_puff_behind_obj(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8) {
@@ -74,7 +74,7 @@ void fx_dust_puff_behind_obj(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s
         sp.u44 = arg2;
         sp.u52 = (s16) (s32) sp.u84;
         sp.u4E = 0x100;
-        sp.u40 = D_8008CDEC;
+        sp.u40 = g_sprite_tex_descs;
         sp.u48 = arg5;
         sp.u50 = (s16) (s32) var_f20;
         sp.u4C = 0;
@@ -108,7 +108,7 @@ void fx_puff_fade_grow_tick(u8 *arg0)
   {
     v = 0xC8;
   }
-  v -= D_800BE9E4 * (*((s32 *) (arg0 + 0x18)));
+  v -= g_frame_ticks * (*((s32 *) (arg0 + 0x18)));
   if (v < 0)
   {
     *((s16 *) (arg0 + 0x38)) = 0;

@@ -1,5 +1,5 @@
 # P263 event_action_camera (camera_script_set) mutants: sed % setup names
-s/if (D_80082FA0 < id) {/if (D_80082FA0 <= id) {/ % lim3
+s/if (g_last_player_index < id) {/if (g_last_player_index <= id) {/ % lim3
 s/id \* 0x9A0)/id * 0x9A4)/ % op2
 /case 2:/,/case 3:/s/cam->unk358 = cam->unk2FC;/;/ % op2
 /case 2:/,/case 3:/s/cam->unk2FC = (f32) a\[3\];/cam->unk2FC = (f32) a[4];/ % op2
@@ -39,6 +39,6 @@ s/cam->unk23C = 1;/cam->unk23C = 2;/ % op22
 s/CAM_F(cam, 0x7C0) = /CAM_F(cam, 0x7C4) = / % op23
 s/CAM_F(cam, 0x790) = (f32) a\[3\];/CAM_F(cam, 0x790) = (f32) a[4];/ % op24m5
 s/CAM_B(cam, 0x78C) = 0;/;/ % op24m4
-s/D_800D2DB0 = cam->pad3A4;/D_800D2DB0 = cam->unk1A4;/ % op25
+s/g_camera_event_heading = cam->pad3A4;/g_camera_event_heading = cam->unk1A4;/ % op25
 s/camera_init_controller(cam);/;/ % op26
-s/D_800898C0 = a\[2\] - 1;/D_800898C0 = a[2];/ % op27
+s/g_camera_restore_skip = a\[2\] - 1;/g_camera_restore_skip = a[2];/ % op27

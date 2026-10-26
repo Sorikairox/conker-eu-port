@@ -24,7 +24,7 @@
 \#^    smoke.u14\[9\] = 0x6C;#s/0x6C/0x6D/
 \#^    smoke.u20 = 7;#s/7;/8;/
 \#^    smoke.u24 = sSmokeU24\[0\];#s/sSmokeU24/sSmokeTail/
-\#^    smoke.dir\[1\] = ((s32 \*) D_800A5860)\[1\];#s/\[1\];/[0];/
+\#^    smoke.dir\[1\] = ((s32 \*) g_vec3_zero)\[1\];#s/\[1\];/[0];/
 \#^    bitA = (random_int() & 1) ? 0x40 : 0;#s/0x40 : 0/0 : 0x40/
 \#^    smoke.flags = bitB | 7 | bitA | 0xCE00 | 0x20000 | 0x800000;#s/ | 0x800000//
 \#^    smoke.u60\[2\] = 0x10;#s/0x10/0x11/

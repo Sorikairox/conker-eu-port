@@ -42,10 +42,10 @@ s32 light_flicker_update(u8 *arg0, u8 *arg1) {
         } else {
             var_f0 = temp_f0 + ((1.0f - temp_f0) * D_800A0884);
         }
-        if (D_800BE9E4 >= (*(s32 *)((u8 *)arg0 + 0x38))) {
+        if (g_frame_ticks >= (*(s32 *)((u8 *)arg0 + 0x38))) {
             (*(s32 *)((u8 *)arg0 + 0x38)) = 0;
         } else {
-            (*(s32 *)((u8 *)arg0 + 0x38)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x38)) - D_800BE9E4);
+            (*(s32 *)((u8 *)arg0 + 0x38)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x38)) - g_frame_ticks);
         }
         (*(s32 *)((u8 *)arg0 + 0x3C)) = (s32) (var_f0 * 255.0f);
         if (var_f0 != 0.0f) {

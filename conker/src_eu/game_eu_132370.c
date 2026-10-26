@@ -31,7 +31,7 @@ typedef struct {
     s32 pad;
 } FloorHit4BB4;
 extern FloorHit4BB4 D_800D3720[];
-extern f32 D_800A2740; /* 10000.0 */
+extern f32 g_floor_search_max_dist; /* 10000.0; was D_800A2740 */
 
 // floor_height_below: floor height at (x, z) closest to `y`. floor_collect_level_tris lists the floor triangles under the
 // point in D_800D3720; those whose third vertex lies on the positive side of the edge from vertex 0 to 1 (x / z
@@ -72,7 +72,7 @@ s32 floor_height_below(f32 x, f32 z, f32 y, f32 *out) {
         return 0;
     }
     best = -1;
-    bestd = D_800A2740;
+    bestd = g_floor_search_max_dist;
     for (i = 0; i < cnt; i++) {
         d = D_800D3720[list[i]].h * 0.00390625f - y;
         if (d < 0.0f) {

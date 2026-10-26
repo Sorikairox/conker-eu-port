@@ -4,8 +4,8 @@
 \#^    if (\*(s32 \*) owner == 0 || arg0\[0x2C\] != owner\[0x3B\]) {$#s/0x3B/0x3A/
 \#^        \*(s16 \*) (arg0 + 0xE) = -1;$#s/-1/0/
 \#^    if (\*(u8 \*\*) (owner + 0x1D4) != NULL) {$#s/!= NULL/== NULL/
-\#^        src\[1\] = D_800A20A8;$#s/D_800A20A8/D_800A209C/
-\#^        src\[3\] = D_800A20C0;$#s/D_800A20C0/D_800A20B4/
+\#^        src\[1\] = g_aura_emitter_pt_b;$#s/g_aura_emitter_pt_b/g_aura_emitter_pt_a/
+\#^        src\[3\] = g_aura_dir_pt_b;$#s/g_aura_dir_pt_b/g_aura_dir_pt_a/
 \#^        dst\[1\] = pos\[1\];$#s/pos\[1\]/pos[0]/
 \#^        dst\[2\] = dir\[0\];$#s/dir\[0\]/dir[1]/
 \#^        mtx_transform_points(src, dst, \*(u8 \*\*) (owner + 0x1D4) + 0x40, 4);$#s/+ 0x40/+ 0x0/
@@ -17,7 +17,7 @@
 \#^                \*(s32 \*) (b\[i\] + 0x58) &= ~2;$#s/~2/~4/
 \#^                \*(f32 \*) (p + 0x15C) = 15\.0f;$#s/15\.0f/6.0f/
 \#^                \*(f32 \*) (p + 0x158) = 6\.0f;$#s/6\.0f/15.0f/
-\#^                \*(f32 \*) (p + 0x174) = D_800A2164;$#s/D_800A2164/1.306f/
+\#^                \*(f32 \*) (p + 0x174) = g_aura_kind2_k_174;$#s/g_aura_kind2_k_174/1.306f/
 \#^                \*(f32 \*) (p + 0x174) = 0\.0f;$#s/0\.0f/1.0f/
 1,/((f32 \*) (p + 0x34))\[1\] = pos\[i\]\[1\];/s/pos\[i\]\[1\]/pos[i][0]/
 1,/((f32 \*) (p + 0x40))\[2\] = dir\[i\]\[2\];/s/dir\[i\]\[2\]/pos[i][2]/

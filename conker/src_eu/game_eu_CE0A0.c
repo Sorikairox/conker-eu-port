@@ -120,7 +120,7 @@ s32 event_query_trigger(s32 slot, s32 cmd, s32 *args) {
         if (trigger_find_touching_player(slot) != -1) {
             return 1;
         }
-        for (i = 0; i < D_80090130; i++) {
+        for (i = 0; i < g_human_player_count; i++) {
             if (trigger_test_camera(i, slot) != 0) {
                 continue;
             }

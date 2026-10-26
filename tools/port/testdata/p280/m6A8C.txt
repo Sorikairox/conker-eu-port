@@ -17,7 +17,7 @@
 \#^                    speed = 0;$#s/0;/1;/ % dposstop
 \#^        if (speed > 0) {$#s/>/>=/ % tzero
 \#^            speed++;$#s/++/--/ % tpos
-\#^        \*(s32 \*) (obj + 0x80) = timer - D_800BE9E4;$#s/-/+/ % tpos
+\#^        \*(s32 \*) (obj + 0x80) = timer - g_frame_ticks;$#s/-/+/ % tpos
 \#^        if (\*(s32 \*) (obj + 0x80) <= 0) {$#s/<=/</ % bigtimer
 \#^            \*(s32 \*) (obj + 0x80) = -1;$#s/-1/0/ % tneg
 \#^    \*(s16 \*) (obj + 0x3C) = speed;$#d % dpos

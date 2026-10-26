@@ -7,5 +7,5 @@
 /* was func_150DEC90 */
 void level_hook_rain_stop(s32 arg0) {
     rain_update(0);
-    D_800DD444 = 0;
+    g_rain_state_timer = 0;
 }

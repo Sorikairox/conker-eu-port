@@ -77,7 +77,7 @@ s32 heap_alloc_tagged(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
         if (block == NULL) {
             osSetIntMask(mask);
             if (arg4 == 0) {
-                D_8003C8E0 = 0x0C000042;
+                g_dbg_crash_marker = 0x0C000042;
                 func_150ADC50();
             }
             return 0;

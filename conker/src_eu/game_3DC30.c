@@ -11,7 +11,7 @@ void level_obj_init_vertex_lights(void) {
 }
 
 s32 memcpy(s32, s16 *, s32);
-extern s32 *D_800E0D64;
+extern s32 *g_level_point_hit_cb; /* was D_800E0D64 */
 s32 trigger_zones_check(s32, s32, s32); // hit callback (C since P196; was declared as data)
 
 /* was func_15010880 */
@@ -25,7 +25,7 @@ void level_obj_init_d34b8_effect(void) {
     struct260 *temp_v0;
 
     vtx_anim_light_create(0x10U, 0xE9U, -0x1B5, 0x463, -0xCBF, 90.0f, 0x3A98U, 36.0f, 0x4D, 0xF, 0x7FU, 0x7FU, 0x7FU, 0x7FU, 0x7FU, 0x7FU);
-    D_800E0D64 = (s32 *) trigger_zones_check;
+    g_level_point_hit_cb = (s32 *) trigger_zones_check;
     sp.u54 = 0;
     sp.u58 = D_800D34B8 + 0xEA0;
     sp.u5C = D_800D34B8 + 0xED4;
@@ -33,7 +33,7 @@ void level_obj_init_d34b8_effect(void) {
     if (temp_v0 != NULL) {
         memcpy(((struct260 *)((u8 *)temp_v0 + 0x28)), &sp.u54, 0xC);
     }
-    if (D_800D2E4C->unk12 & 0x40) {
+    if (g_save_progress_bits->unk12 & 0x40) {
         effect_node_create(5, 9, -1, -1, 1U, 0U, NULL, 0xFFU, 1);
     }
 }
@@ -53,7 +53,7 @@ void level_obj_init_d34b8_effect(void) {
 //     if (temp_v0 != NULL) {
 //         memcpy(&temp_v0->unk28, &tmp, 12); // memcpy
 //     }
-//     if ((D_800D2E4C->unk12 & 0x40) != 0) {
+//     if ((g_save_progress_bits->unk12 & 0x40) != 0) {
 //         effect_node_create(5, 9, -1, -1, 1, 0, 0, 255, 1);
 //     }
 // }

@@ -135,7 +135,7 @@ typedef struct {
 // attached_particle_spawn: P259: spawns particle emitter 0x29 of D_800A4AA0 (effect3d_spawn_full, render layer 1 or 3
 // at random) attached to `owner`'s matrix `matrix` (joint `joint`, -1 = none): kind 0x5F / 5, flags 0x2203,
 // `count` particles at `pos` toward `dir`, range from `range`, alpha `alpha`; copies the attachment block (owner,
-// its unique id, matrix offset, joint, zero points D_800A5860) to the emitter's +0x110, then starts the matching
+// its unique id, matrix offset, joint, zero points g_vec3_zero) to the emitter's +0x110, then starts the matching
 // trail / sound (flip_sprite_particle_spawn). Returns the emitter, or NULL (also when `owner` is NULL).
 /* was func_151030B8 */
 void *attached_particle_spawn(u8 *owner, u8 matrix, f32 *pos, f32 *dir, f32 *range, s16 count, u8 alpha, f32 speed,
@@ -148,7 +148,7 @@ void *attached_particle_spawn(u8 *owner, u8 matrix, f32 *pos, f32 *dir, f32 *ran
     if (owner == NULL) {
         return NULL;
     }
-    zero = (f32 *) D_800A5860;
+    zero = (f32 *) g_vec3_zero;
     att.flags = 0;
     att.point0[0] = zero[0];
     att.point0[1] = zero[1];
@@ -377,7 +377,7 @@ s16 *attached_strip_draw(u8 *arg0, s16 arg1) {
     return NULL;
 }
 s32 particle_spawn_basic(s32 *, s32, s32, u8, s32);
-extern s32 D_80088F70;
+extern s32 g_flip_sprite_tex_ids; /* was D_80088F70 */
 
 /* was func_151037D4 */
 void flip_sprite_particle_spawn(s16 arg0, u8 arg1, f32 arg2, u8 *arg3, u8 arg4, u8 arg5, s32 arg6) {
@@ -428,7 +428,7 @@ void flip_sprite_particle_spawn(s16 arg0, u8 arg1, f32 arg2, u8 *arg3, u8 arg4, 
     s32 var_v0;
     s32 var_v1;
 
-    temp_t8 = *(((s32 *)((u8 *)&D_80088F70 + ((random_int() & 3) * 4))));
+    temp_t8 = *(((s32 *)((u8 *)&g_flip_sprite_tex_ids + ((random_int() & 3) * 4))));
     sp.u30 = 0x20000;
     sp.u40 = 0xFF;
     sp.u34 = 0x2203;

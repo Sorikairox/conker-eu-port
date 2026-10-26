@@ -703,7 +703,7 @@ def lookup_proto(p, tu, pn):
             # P134: the arity and the a-register slots of the leading float parameters come from the same
             # header declaration: before P134 a TU without its own `cosf` declaration (declared only in
             # gu.h / math.h) had an unknown arity, so a0 was compared whenever the call site wrote it
-            # (obj7b_update_pulse_scale: a0 = &D_800CC298 before `jal cosf` -> false DIFFER). DIFFTEST_HDRSLOT_OLD=1 = old.
+            # (obj7b_update_pulse_scale: a0 = &g_obj_anim_shared before `jal cosf` -> false DIFFER). DIFFTEST_HDRSLOT_OLD=1 = old.
             if new[pn][0] is None and os.environ.get('DIFFTEST_HDRSLOT_OLD') != '1':
                 new[pn] = (proto_arity(all_hdr_protos(), pn), proto_fslots(all_hdr_protos(), pn), hf)
     return new[pn]
@@ -1167,7 +1167,7 @@ class Run:
                 mu.hook_add(UC_HOOK_MEM_READ, self.on_pread)
             else:
                 # P132: Unicorn 2.0.1 also skips some reads in the global hook (game_pause_update: `lbu D_800BE616`
-                # at 151DE340 and `lb D_800E1013` were never reported, so [POKE unread] listed words the reference
+                # at 151DE340 and `lb g_settings_time_limit` were never reported, so [POKE unread] listed words the reference
                 # had read). Decode the function's own loads in a code hook instead (stubs read nothing).
                 mu.hook_add(UC_HOOK_CODE, self.on_pload, begin=vram, end=self.end - 1)
         if trace:
@@ -1279,7 +1279,7 @@ class Run:
         if buf is None: buf = self.rand_page(pp)
         elif POKES and not POKE_OLD:
             # P132: a DIFFTEST_POKE word wins over the ROM image (.data in odd trials / always with DIFFTEST_ROMDATA=1,
-            # .rodata in every trial): before P132 the image was copied over the poke, so a poke of e.g. D_80082FA0
+            # .rodata in every trial): before P132 the image was copied over the poke, so a poke of e.g. g_last_player_index
             # (.game_data, 0x80083330) held only in even trials, and a poke into rodata never. Code is never poked.
             # Precedence now: forced (learned) pointers > DIFFTEST_POKE > ROM image > random. DIFFTEST_POKE_OLD=1 = old rule.
             buf = bytearray(buf)

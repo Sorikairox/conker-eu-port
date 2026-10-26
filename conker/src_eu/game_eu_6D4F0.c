@@ -86,7 +86,7 @@ extern u8 D_8008482C[];    /* empty text */
 
 // menu_list_update_draw: scrolling text menu of event_table_count() entries (19 rows shown, the selected entry
 // D_80084828 in the middle). `select` buttons pick the selected entry when it is unlocked (bit event_table_find_by_word4(i + 1) of
-// D_800D2E4C) and return its id; `cancel` or B (0x4000) return -1. Up (4) / down (8) or the stick (select_menu_read_stick)
+// g_save_progress_bits) and return its id; `cancel` or B (0x4000) return -1. Up (4) / down (8) or the stick (select_menu_read_stick)
 // start a scroll (D_80084818 = -1 / 1) that moves the offset D_800C6C70 by 1.25 per tick up to +-11, then steps the
 // selection by 1 (3 with Z held). Pressing 0x30 together locks the menu for 60 ticks (level_state_clear /
 // level_state_init, D_8008481C) and shows D_80098CE0 on every row. Rows fade in / out at the edges (alpha 64 per
@@ -138,7 +138,7 @@ s32 select_menu_update_draw(Gfx **gfxp, u16 cancel, u16 select) {
     }
     if (D_8008481C != 0) {
         buttons = 0;
-        D_8008481C -= D_800BE9E4;
+        D_8008481C -= g_frame_ticks;
         if (D_8008481C <= 0) {
             D_8008481C = 0;
         }
@@ -147,7 +147,7 @@ s32 select_menu_update_draw(Gfx **gfxp, u16 cancel, u16 select) {
     if (buttons & select) {
         a = event_table_find_by_word4(D_80084828 + 1);
         b = event_table_find_by_word4(D_80084828 + 1);
-        if (!(((u8 *) D_800D2E4C)[a >> 3] & (1 << (b & 7)))) {
+        if (!(((u8 *) g_save_progress_bits)[a >> 3] & (1 << (b & 7)))) {
             return event_table_find_by_word4(D_80084828 + 1);
         }
     }
@@ -157,7 +157,7 @@ s32 select_menu_update_draw(Gfx **gfxp, u16 cancel, u16 select) {
 
     select_menu_read_stick(0, &stickX, &stickY);
     if (D_80084818 != 0) {
-        D_800C6C70 += 1.25f * (s32) (D_80084818 * D_800BE9E4);
+        D_800C6C70 += 1.25f * (s32) (D_80084818 * g_frame_ticks);
         if (D_800C6C70 < -11.0f) {
             D_800C6C70 = -11.0f;
         } else {
@@ -195,7 +195,7 @@ s32 select_menu_update_draw(Gfx **gfxp, u16 cancel, u16 select) {
     if (count < idx) {
         idx += count;
     }
-    *(s8 *) &D_80084820 -= D_800BE9E4;
+    *(s8 *) &D_80084820 -= g_frame_ticks;
     if (*(s8 *) &D_80084820 <= 0) {
         *(s8 *) &D_80084820 = 30;
         D_80084824 ^= 1;
@@ -208,7 +208,7 @@ s32 select_menu_update_draw(Gfx **gfxp, u16 cancel, u16 select) {
             text_measure_string(text, &w, &h, &d);
         } else {
             text_measure_string(event_table_get_block(id), &w, &h, &d);
-            if (((u8 *) D_800D2E4C)[id >> 3] & (1 << (id & 7))) {
+            if (((u8 *) g_save_progress_bits)[id >> 3] & (1 << (id & 7))) {
                 if (D_80084828 == idx) {
                     text = D_80084824 ? D_80098CF8 : event_table_get_block(id);
                     text_measure_string(text, &w, &hSel, &d);
@@ -219,13 +219,13 @@ s32 select_menu_update_draw(Gfx **gfxp, u16 cancel, u16 select) {
                 text = event_table_get_block(id);
             }
         }
-        x = D_800BE620 * 0.5f - (w >> 1);
+        x = g_framebuffer_width * 0.5f - (w >> 1);
         top = y + 1.0f;
         yy = top + D_800C6C70;
         if (event_table_get_word4(id) < 0) {
             text_measure_string(D_80098CF4, &w2, &h2, &d);
             off = D_800C6C70;
-            *gfxp = text_draw_string(*gfxp, D_800BE620 * 0.5f - (w2 >> 1), top + off, D_80098CF4, 0xFF, 0xFF, 0xFF, alpha,
+            *gfxp = text_draw_string(*gfxp, g_framebuffer_width * 0.5f - (w2 >> 1), top + off, D_80098CF4, 0xFF, 0xFF, 0xFF, alpha,
                                   4096.0f, 4096.0f, strlen((char *) D_80098CF4));
             y += h2;
             yy += h2;

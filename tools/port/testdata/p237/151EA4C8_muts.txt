@@ -1,6 +1,6 @@
 # P237 mp_team_score_draw (mp_team_score_draw) mutants: sed % setup names
 s/    top = y - 0x10;/    top = y - 0x20;/ % big_rows
-s/    if (!(D_80090160 \& 0x4000) \&\& \*(s8 \*) (D_80090174 + 0x42) != 8) {/    if (!(D_80090160 \& 0x4000)) {/ % mode8
+s/    if (!(D_80090160 \& 0x4000) \&\& \*(s8 \*) (g_menu_state + 0x42) != 8) {/    if (!(D_80090160 \& 0x4000)) {/ % mode8
 s/        tex = 0xD12;/        tex = 0xD13;/ % big_rows
 s/        size = 0x20;/        size = 0x10;/ % big_rows
 s/        ls = 0x200;/        ls = 0x100;/ % big_rows
@@ -22,8 +22,8 @@ s/        } else if (D_80090160 \& 0x100) {/        } else if (D_80090160 \& 0x8
 s/                v = player_stat_get((s16) i, 3);/                v = player_stat_get((s16) i, 6);/ % pl100
 s/                if (g_objects\[i\].unk128 != 0) {/                if (g_objects[i].unk128 == 1) {/ % pl100_t2
 s/            row = 0x200;/            row = 0x100;/ % big_rows
-s/                v = \*(s16 \*) (D_80090174 + 0x46 + i \* 2);/                v = *(u16 *) (D_80090174 + 0x46 + i * 2);/ % big_rows
-s/                if (D_800E1030\[i\] != 0) {/                if (D_800E1030[i] == 0) {/ % big_rows
+s/                v = \*(s16 \*) (g_menu_state + 0x46 + i \* 2);/                v = *(u16 *) (g_menu_state + 0x46 + i * 2);/ % big_rows
+s/                if (g_mp_player_team\[i\] != 0) {/                if (g_mp_player_team[i] == 0) {/ % big_rows
 s/        D_800E0ED0\[1\] = score1;/        D_800E0ED0[1] = score0;/ % big_rows
 s/        score0 = D_800E0ED0\[0\];/        score0 = D_800E0ED0[1];/ % stored
 s/    gdl = (Gfx \*) hud_tex_rect_scaled((u8 \*) gdl, 0x108, top, 0x148, top + 0x40, 0, ls, row, 0x400, 0x400);/    gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x108, top, 0x148, top + 0x40, 0, ls, 0, 0x400, 0x400);/ % big_rows

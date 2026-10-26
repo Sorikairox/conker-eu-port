@@ -1,7 +1,7 @@
 \#^    \*(f32 \*) (owner + 0x70) += \*(f32 \*) (owner + 0x6C);$#s/0x6C/0x68/
 \#^    cur = points + idx \* 0x24;$#s/0x24/0x20/
 \#^    cur\[0x21\] = 1;$#s/0x21/0x20/
-\#^    kind = &D_800A8AF0\[owner\[0x69\]\];$#s/0x69/0x68/
+\#^    kind = &g_trail_smoke_kinds\[owner\[0x69\]\];$#s/0x69/0x68/
 \#^    if (n == obj\[0x25\]) {$#s/0x25/0x24/
 \#^    if (!(1.0f < \*(f32 \*) (owner + 0x70)) || n == (s8) obj\[0x2E\]) {$#s/1.0f </1.5f </
 \#^    if (!(1.0f < \*(f32 \*) (owner + 0x70)) || n == (s8) obj\[0x2E\]) {$#s/ || n == (s8) obj\[0x2E\]//

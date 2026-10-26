@@ -5,11 +5,11 @@
 \#^            arg0\[0x24\] = (u32) random_int() . 25 + 200;$#s/25 +/26 +/
 \#^            arg0\[0x24\] = (u32) random_int() . 25 + 200;$#s/+ 200/+ 201/
 \#^        if (alpha != 0xFE) {$#s/0xFE/0xFF/
-\#^            alpha += D_800BE9E4 << 6;$#s/<< 6/<< 5/
+\#^            alpha += g_frame_ticks << 6;$#s/<< 6/<< 5/
 \#^            if (alpha >= 0xFF) {$#s/>=/>/
 \#^                alpha = 0xFE;$#s/0xFE/0xFF/
 \#^    } else if (alpha != 0) {$#s/!= 0/> 1/
-\#^        alpha -= D_800BE9E4 << 4;$#s/<< 4/<< 3/
+\#^        alpha -= g_frame_ticks << 4;$#s/<< 4/<< 3/
 \#^        if (alpha < 0) {$#s/< 0/< 1/
 \#^    if (arg0\[0x24\] == 0 && alpha == 0) {$#s/&&/||/
 \#^    if (arg0\[0x24\] == 0 && alpha == 0) {$#s/0x24/0x25/

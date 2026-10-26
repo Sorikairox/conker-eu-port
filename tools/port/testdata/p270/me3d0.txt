@@ -1,4 +1,4 @@
 s|(s16 \*) ((u8 \*) sp.uBC - 0x40)|sp.uBC - 0x40|
 s|memcpy(sp.uBC, (u8 \*) sp.uBC - 0x20, 0x20)|memcpy(sp.uBC, (u8 *) sp.uBC - 0x20, 0x10)|
 s|memcpy(sp.uBC, (u8 \*) sp.uBC - 0x20, 0x20)|memcpy(sp.uBC, sp.uBC - 0x20, 0x20)|
-s|var_a3 = (f32 \*) ((u8 \*) &D_800DD608 + temp_v0_2);|var_a3 = temp_v0_2 + \&D_800DD608;|
+s|var_a3 = (f32 \*) ((u8 \*) &g_view_yaw_sin + temp_v0_2);|var_a3 = temp_v0_2 + \&g_view_yaw_sin;|

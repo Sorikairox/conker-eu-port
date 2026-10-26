@@ -14,8 +14,8 @@ typedef struct {
     u8 n;
     u8 pad[6];
 } DescABB0;
-extern DescABB0 D_800A7610[];
-extern u16 D_800C4730[];
+extern DescABB0 g_player_morph_descs[]; /* was D_800A7610 */
+extern u16 g_model_part_counts[]; /* was D_800C4730 */
 /* was func_1517ABB0 */
 void player_morph_cache_age(void) {
     s32 i;
@@ -23,15 +23,15 @@ void player_morph_cache_age(void) {
     s32 k;
 
     for (i = 0; i < 2; i++) {
-        if (((EntABB0 ***)D_800DD460)[i] != NULL) {
-            for (j = 0; j < D_800C4730[D_800A7610[i].type]; j++) {
-                for (k = 0; k < D_800A7610[i].n; k++) {
-                    if (((EntABB0 ***)D_800DD460)[i][j][k].h != 0) {
-                        if (((EntABB0 ***)D_800DD460)[i][j][k].t != 0) {
-                            ((EntABB0 ***)D_800DD460)[i][j][k].t--;
+        if (((EntABB0 ***)g_player_morph_caches)[i] != NULL) {
+            for (j = 0; j < g_model_part_counts[g_player_morph_descs[i].type]; j++) {
+                for (k = 0; k < g_player_morph_descs[i].n; k++) {
+                    if (((EntABB0 ***)g_player_morph_caches)[i][j][k].h != 0) {
+                        if (((EntABB0 ***)g_player_morph_caches)[i][j][k].t != 0) {
+                            ((EntABB0 ***)g_player_morph_caches)[i][j][k].t--;
                         } else {
-                            heap_free(((EntABB0 ***)D_800DD460)[i][j][k].h);
-                            ((EntABB0 ***)D_800DD460)[i][j][k].h = 0;
+                            heap_free(((EntABB0 ***)g_player_morph_caches)[i][j][k].h);
+                            ((EntABB0 ***)g_player_morph_caches)[i][j][k].h = 0;
                         }
                     }
                 }
@@ -57,10 +57,10 @@ typedef struct {
 
 /*
  * player_morph_blend: blends player `idx`'s (g_objects) morph target from the previous shape to shape `target`
- * over `frames` ticks. The shape set D_800A7610[i] is picked by the player's type (obj_current_part_model); a player with
- * +0x1C8 set and no vertex buffer (+0x28C[D_800BE9C0]) or no D_800D19A0 entry only advances the blend factor. On
+ * over `frames` ticks. The shape set g_player_morph_descs[i] is picked by the player's type (obj_current_part_model); a player with
+ * +0x1C8 set and no vertex buffer (+0x28C[g_dl_buf_index]) or no D_800D19A0 entry only advances the blend factor. On
  * a new target the old one becomes `prev` and t restarts at 0. Shape vertex sets (one per part j, loaded on demand
- * with asset_load and cached in D_800DD460[i][j][shape]) are lerped s16 x / y / z by t into the player's vertex
+ * with asset_load and cached in g_player_morph_caches[i][j][shape]) are lerped s16 x / y / z by t into the player's vertex
  * buffer at the part's index D_800C4440[type][j] (16-byte vertices), then written back from the cache. The finished
  * blend (t == 1) counts +0xA down; returns 0, or -1 when nothing was written.
  */
@@ -88,8 +88,8 @@ s32 player_morph_blend(s32 target, s32 frames, s32 idx) {
     found = obj_current_part_model((struct127 *)ply);
     desc = NULL;
     for (i = 0; i < 2; i++) {
-        if (found == D_800A7610[i].type) {
-            desc = &D_800A7610[i];
+        if (found == g_player_morph_descs[i].type) {
+            desc = &g_player_morph_descs[i];
             break;
         }
     }
@@ -99,11 +99,11 @@ s32 player_morph_blend(s32 target, s32 frames, s32 idx) {
     b = *(Blend1A8930 **)(ply + 0x260);
     if (ply[0x1C8] != 0) {
         type = found;
-        if (*(s32 *)(ply + 0x28C + D_800BE9C0 * 4) == 0 || (&D_800D19A0)[found] == 0) {
+        if (*(s32 *)(ply + 0x28C + g_dl_buf_index * 4) == 0 || (&D_800D19A0)[found] == 0) {
             /* nothing to draw into: only advance the blend */
             if (target == b->cur) {
                 if (!g_game_paused) {
-                    b->t += b->rate * D_800BE9E4;
+                    b->t += b->rate * g_frame_ticks;
                 }
                 if (1.0f < b->t) {
                     b->t = 1.0f;
@@ -126,7 +126,7 @@ s32 player_morph_blend(s32 target, s32 frames, s32 idx) {
     if ((&D_800D19A0)[type] == 0) {
         return -1;
     }
-    if (*(s32 *)(ply + 0x28C + D_800BE9C0 * 4) == 0) {
+    if (*(s32 *)(ply + 0x28C + g_dl_buf_index * 4) == 0) {
         return -1;
     }
     if (target == b->cur && b->hold == 0) {
@@ -146,14 +146,14 @@ s32 player_morph_blend(s32 target, s32 frames, s32 idx) {
         b->rate = 1.0f / frames;
     }
 
-    cache = &((EntABB0 ***)D_800DD460)[i];
+    cache = &((EntABB0 ***)g_player_morph_caches)[i];
     if (*cache == NULL) {
-        *cache = (EntABB0 **)allocate_memory(D_800C4730[desc->type] * 4, 1, 0, 2);
+        *cache = (EntABB0 **)allocate_memory(g_model_part_counts[desc->type] * 4, 1, 0, 2);
         if (*cache == NULL) {
             return -1;
         }
         fail = 0;
-        for (j = 0; j < D_800C4730[desc->type]; j++) {
+        for (j = 0; j < g_model_part_counts[desc->type]; j++) {
             (*cache)[j] = (EntABB0 *)allocate_memory(desc->n * 8, 1, 0, 2);
             if ((*cache)[j] != NULL) {
                 bzero((*cache)[j], desc->n * 8);
@@ -162,7 +162,7 @@ s32 player_morph_blend(s32 target, s32 frames, s32 idx) {
             }
         }
         if (fail) {
-            for (j = 0; j < D_800C4730[desc->type]; j++) {
+            for (j = 0; j < g_model_part_counts[desc->type]; j++) {
                 if ((*cache)[j] != NULL) {
                     heap_free((s32)(*cache)[j]);
                 }
@@ -172,13 +172,13 @@ s32 player_morph_blend(s32 target, s32 frames, s32 idx) {
     }
 
     if (!g_game_paused) {
-        b->t += b->rate * D_800BE9E4;
+        b->t += b->rate * g_frame_ticks;
     }
     if (1.0f < b->t) {
         b->t = 1.0f;
     }
-    vtx = *(u8 **)(ply + 0x28C + D_800BE9C0 * 4);
-    for (j = 0; j < D_800C4730[desc->type]; j++) {
+    vtx = *(u8 **)(ply + 0x28C + g_dl_buf_index * 4);
+    for (j = 0; j < g_model_part_counts[desc->type]; j++) {
         ents = (*cache)[j];
         if (ents[b->cur].h == 0) {
             ents[b->cur].h = asset_load(args, 4, 0x13, i, j, b->cur);

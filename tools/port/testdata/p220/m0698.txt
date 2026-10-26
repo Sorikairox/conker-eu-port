@@ -22,8 +22,8 @@
 203s/0x28, 0xFF/0x29, 0xFF/ % mp0
 204s/W(p, 0x84)/W(p, 0x88)/ % mp0
 206s/0x2EE/0x2EF/ % mp0
-209s/D_80082FA0 < 2/D_80082FA0 < 3/ % fa2
-209s/D_8008FD8C < 4/D_8008FD8C < 5/ % fd4
+209s/g_last_player_index < 2/g_last_player_index < 3/ % fa2
+209s/g_player_count < 4/g_player_count < 5/ % fd4
 225s/== 0xF ||/== 0xE ||/ % flF fl0
 225s/== 0x77/== 0x76/ % fl76
 239s/10.0f/11.0f/ % mp1 tgt1d4

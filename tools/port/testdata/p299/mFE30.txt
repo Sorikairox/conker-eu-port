@@ -6,12 +6,12 @@
 \#^        D_8008481C = 60;#s/60/61/
 \#^        level_state_init();#s/level_state_init();//
 \#^        buttons = 0;#s/= 0/= buttons/
-\#^        D_8008481C -= D_800BE9E4;#s/D_800BE9E4/1/
+\#^        D_8008481C -= g_frame_ticks;#s/g_frame_ticks/1/
 \#^        if (D_8008481C <= 0) {#s/<= 0/< 0/
 \#^    if (buttons & select) {#s/& select/\& cancel/
 \#^        b = event_table_find_by_word4(D_80084828 + 1);#s/+ 1/+ 2/
-\#(((u8 \*) D_800D2E4C)\[a >> 3\] & (1 << (b & 7)))#s/a >> 3/a >> 2/
-\#(((u8 \*) D_800D2E4C)\[a >> 3\] & (1 << (b & 7)))#s/b & 7/b \& 3/
+\#(((u8 \*) g_save_progress_bits)\[a >> 3\] & (1 << (b & 7)))#s/a >> 3/a >> 2/
+\#(((u8 \*) g_save_progress_bits)\[a >> 3\] & (1 << (b & 7)))#s/b & 7/b \& 3/
 \#^            return event_table_find_by_word4(D_80084828 + 1);#s/+ 1/+ 0/
 \#if ((buttons & cancel) || (buttons & 0x4000))#s/0x4000/0x8000/
 \#^    select_menu_read_stick(0, &stickX, &stickY);#s/&stickX, &stickY/\&stickY, \&stickX/
@@ -34,16 +34,16 @@
 \#^    } else if ((buttons & 8) || stickY == 1) {#s/stickY == 1/stickX == 1/
 \#idx = D_80084828 - ((visible - 1) >> 1);#s/>> 1/>> 2/
 \#^    if (count < idx) {#s/count < idx/count <= idx/
-\#^    \*(s8 \*) &D_80084820 -= D_800BE9E4;#s/(s8 \*)/(u8 *)/
+\#^    \*(s8 \*) &D_80084820 -= g_frame_ticks;#s/(s8 \*)/(u8 *)/
 \#^        \*(s8 \*) &D_80084820 = 30;#s/30/31/
 \#^        D_80084824 ^= 1;#s/\^= 1/= 1/
 \#^        id = event_table_find_by_word4(idx + 1);#s/idx + 1/idx/
 \#^            text = D_80098CE0;#s/D_80098CE0/D_80098CF4/
-\#^            if (((u8 \*) D_800D2E4C)\[id >> 3\] & (1 << (id & 7))) {#s/id >> 3/id >> 4/
+\#^            if (((u8 \*) g_save_progress_bits)\[id >> 3\] & (1 << (id & 7))) {#s/id >> 3/id >> 4/
 \#^                if (D_80084828 == idx) {#s/==/!=/
 \#text = D_80084824 ? D_80098CF8 : event_table_get_block(id);#s/D_80084824 ?/!D_80084824 ?/
 \#text_measure_string(text, &w, &hSel, &d);#s/&hSel/\&h/
-\#^        x = D_800BE620 \* 0.5f - (w >> 1);#s/w >> 1/w/
+\#^        x = g_framebuffer_width \* 0.5f - (w >> 1);#s/w >> 1/w/
 \#^        top = y + 1.0f;#s/1.0f/2.0f/
 \#^        yy = top + D_800C6C70;#s/top + D_800C6C70/top/
 \#^        if (event_table_get_word4(id) < 0) {#s/< 0/<= 0/

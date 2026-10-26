@@ -29,8 +29,8 @@ s/music_chan_set_pan(ch, 4, pan \& 0x7F);/music_chan_set_pan(ch, 3, pan \& 0x7F)
 s/music_chan_set_cc41(ch, 4, (pan >> 7) \& 0xFF);/music_chan_set_cc41(ch, 4, pan \& 0xFF);/
 s/if (mode != D_80041F08) {/if (1) {/
 s/if (state \& 0x7C) {/if (state \& 0x7E) {/
-s/(D_800BE9E4 >> 1) \* 4/(D_800BE9E4 >> 1) * 2/
-s/(D_800BE9E4 >> 1) \* 4/D_800BE9E4 * 2/
+s/(g_frame_ticks >> 1) \* 4/(g_frame_ticks >> 1) * 2/
+s/(g_frame_ticks >> 1) \* 4/g_frame_ticks * 2/
 s/if (n > 0) {/if (n >= 0) {/
 s/state = n | 0x80;/state = n;/
 s/music_song_set_chans_cc92(0x22, 0, 0xFFFF);/music_song_set_chans_cc92(0x22, 0, 0xFFFE);/

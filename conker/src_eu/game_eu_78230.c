@@ -22,8 +22,8 @@ void trigger_zones_update_object(struct127 *);
 s32 trigger_warp_check(struct127 *);
 extern s32 D_800863A4;
 extern s32 D_800863AC;
-extern u16 D_8009015C;
-extern s8 D_800BEE0C;
+extern u16 g_mp_game_flags; /* was D_8009015C */
+extern s8 g_aiscript_cheat_value; /* was D_800BEE0C */
 extern s32 D_800CC1C0;
 extern s32 D_800CC670;
 extern u8 D_800CC69C;
@@ -31,7 +31,7 @@ extern s32 D_800CC6A0;
 extern s32 D_800CC6DC;
 extern s32 g_obj_update_counter; /* was D_800D1968 */
 extern u8 D_800D39FC;
-extern s32 D_800DC3C4;
+extern s32 g_world_obj_rider_masks; /* was D_800DC3C4 */
 
 /* was func_1504A730 */
 void objects_run_state_handlers(void) {
@@ -60,7 +60,7 @@ void objects_run_state_handlers(void) {
     void (*temp_v0_6)(struct127 *);
     u8 *temp_v1;
 
-    D_800BEE0C = 0;
+    g_aiscript_cheat_value = 0;
     g_obj_update_counter += 1;
     D_800CC670 += D_800BE9A0;
     g_cur_obj_index = 0;
@@ -100,9 +100,9 @@ block_8:
                     var_s3 = 0;
                     if ((D_800BE616 == 0) || (temp_v0 = obj_half_rate_tick(var_s0), var_s3 = temp_v0, (temp_v0 != 0))) {
                         var_f20 = 2.0f;
-                        if ((s32) var_s1 < D_8008FD8C) {
+                        if ((s32) var_s1 < g_player_count) {
                             temp_v0_2 = var_s0->unk31C;
-                            temp_v0_2->unk195 = (s8) temp_v0_2->unk195 - D_800BE9E4;
+                            temp_v0_2->unk195 = (s8) temp_v0_2->unk195 - g_frame_ticks;
                             temp_v0_3 = var_s0->unk31C;
                             if ((s8) temp_v0_3->unk195 < 0) {
                                 temp_v0_3->unk195 = 0;
@@ -135,8 +135,8 @@ block_8:
                         var_s0->old_y_position = var_s0->y_position;
                         var_s0->old_z_position = var_s0->z_position;
                         D_800CC69C = ((u32) var_s0->unk184 >> 0x1C) & 7;
-                        var_f0 = D_800BE9A4;
-                        if ((D_800BE616 != 0) && (D_8009015C & 0x100)) {
+                        var_f0 = g_frame_step_f;
+                        if ((D_800BE616 != 0) && (g_mp_game_flags & 0x100)) {
                             var_f20 = 5.0f;
                         }
                         if (var_f20 < var_f0) {
@@ -148,7 +148,7 @@ block_8:
                         if ((s32) D_800CC69C >= 6) {
                             D_800CC69C = 0;
                         }
-                        temp_v0_5 = D_800B0DF0->unk49;
+                        temp_v0_5 = g_level_header->unk49;
                         if (temp_v0_5 != 0) {
                             ((void (**)(struct127 *)) &D_800863A4)[temp_v0_5](var_s0);
                         }
@@ -161,16 +161,16 @@ block_8:
                         if (var_s0->interaction_state != 0) {
                             face_anim_timer_step(var_s0);
                             obj_sync_collision_link(var_s0, 0, 0);
-                            if (((s32) var_s1 < D_8008FD8C) && (D_800D18A8 == 0)) {
+                            if (((s32) var_s1 < g_player_count) && (g_mp_respawning == 0)) {
                                 player_stat_modify((s16) var_s0->unk127, 5, (s32) var_s0->health);
                             }
                         }
                         var_s0->unk2FF = 1;
                         if (var_s3 == 2) {
-                            D_800BE9E4 = (s32) (u16) D_800CC6DA;
-                            D_800BE9A4 = (f32) (u16) D_800CC6DA * 0.5f;
-                            if (D_800BE9A4 != 0.0f) {
-                                D_800BEDC8 = 1.0f / D_800BE9A4;
+                            g_frame_ticks = (s32) (u16) D_800CC6DA;
+                            g_frame_step_f = (f32) (u16) D_800CC6DA * 0.5f;
+                            if (g_frame_step_f != 0.0f) {
+                                D_800BEDC8 = 1.0f / g_frame_step_f;
                             } else {
                                 D_800BEDC8 = 0.0f;
                             }
@@ -178,7 +178,7 @@ block_8:
                         if ((var_s0->x_position != var_s0->old_x_position) || (var_s0->y_position != var_s0->old_y_position) || (var_s0->z_position != var_s0->old_z_position)) {
                             var_s0->unk300 = 1;
                         }
-                        temp_v0_7 = D_800B0DF0->unk4A;
+                        temp_v0_7 = g_level_header->unk4A;
                         if (temp_v0_7 != 0) {
                             ((void (**)(struct127 *)) &D_800863AC)[temp_v0_7](var_s0);
                         }
@@ -189,7 +189,7 @@ block_8:
         var_s1 = var_s2;
         var_s0++;
     } while (var_s2 != 0x19);
-    var_v1 = D_8008FD8C;
+    var_v1 = g_player_count;
     var_a1 = g_objects;
     var_t0 = 0;
     if (var_v1 > 0) {
@@ -201,9 +201,9 @@ block_8:
                     if (var_a1->unk137 != 0) {
                         temp_a3 = *temp_a2;
                         if (temp_a3 != 0) {
-                            temp_v1 = (u8 *) D_800DBEF4 + temp_a3 * 0xA0;
+                            temp_v1 = (u8 *) g_world_objs + temp_a3 * 0xA0;
                             temp_v1[-0x51] |= 0x84;
-                            ((s32 *) D_800DC3C4)[*temp_a2 - 1] |= 1 << var_t0;
+                            ((s32 *) g_world_obj_rider_masks)[*temp_a2 - 1] |= 1 << var_t0;
                         }
                         var_a1->unk31C->pad56 = 5;
                         goto block_64;
@@ -212,7 +212,7 @@ block_8:
                     if (temp_v0_9 != 0) {
                         temp_a0->pad56 = temp_v0_9 - 1;
 block_64:
-                        var_v1 = D_8008FD8C;
+                        var_v1 = g_player_count;
                     }
                 }
             }
@@ -295,9 +295,9 @@ block_64:
 //                         D_800CC2BA = (u16)0;
 //                         phi_s3 = 0;
 //                         if ((D_800BE616 == 0) || (temp_v0 = obj_half_rate_tick(phi_s0), phi_s3 = temp_v0, phi_s2 = temp_s2, (temp_v0 != 0))) {
-//                             if ((s32) phi_s1 < (s32) D_8008FD8C) {
+//                             if ((s32) phi_s1 < (s32) g_player_count) {
 //                                 temp_v0_2 = phi_s0->unk31C;
-//                                 temp_v0_2->unk195 = (s8) (temp_v0_2->unk195 - D_800BE9E4);
+//                                 temp_v0_2->unk195 = (s8) (temp_v0_2->unk195 - g_frame_ticks);
 //                                 temp_v0_3 = phi_s0->unk31C;
 //                                 if ((s32) temp_v0_3->unk195 < 0) {
 //                                     temp_v0_3->unk195 = (u8)0;
@@ -330,7 +330,7 @@ block_64:
 //                             phi_s0->unk30 = (f32) phi_s0->y_position;
 //                             phi_s0->unk34 = (f32) phi_s0->unk1C;
 //                             D_800CC27C = (s8) (((u32) phi_s0->unk184 >> 0x1C) & 7);
-//                             temp_f0_2 = D_800BE9A4;
+//                             temp_f0_2 = g_frame_step_f;
 //                             phi_f20 = 2.0f;
 //                             if (D_800BE616 != 0) {
 //                                 phi_f20 = 2.0f;
@@ -347,7 +347,7 @@ block_64:
 //                             if ((s32) D_800CC27C >= 6) {
 //                                 D_800CC27C = (u8)0;
 //                             }
-//                             temp_v0_5 = (D_800B0DF0)->unk49;
+//                             temp_v0_5 = (g_level_header)->unk49;
 //                             if (temp_v0_5 != 0) {
 //                                 D_80086004[temp_v0_5](phi_s0);
 //                             }
@@ -360,16 +360,16 @@ block_64:
 //                             if (phi_s0->unk0 != 0) {
 //                                 func_1507E73C(phi_s0);
 //                                 obj_sync_collision_link(phi_s0, 0, 0);
-//                                 if (((s32) phi_s1 < (s32) D_8008FD8C) && (D_800D18A8 == 0)) {
+//                                 if (((s32) phi_s1 < (s32) g_player_count) && (g_mp_respawning == 0)) {
 //                                     player_stat_modify(phi_s0->unk127, 5, phi_s0->health);
 //                                 }
 //                             }
 //                             phi_s0->unk2FF = (u8)1;
 //                             if (phi_s3 == 2) {
 //                                 temp_t8 = D_800CC2BA;
-//                                 D_800BE9E4 = (s32) temp_t8;
-//                                 D_800BE9A4 = (f32) ((f32) temp_t8 * 0.5f);
-//                                 temp_f0_3 = D_800BE9A4;
+//                                 g_frame_ticks = (s32) temp_t8;
+//                                 g_frame_step_f = (f32) ((f32) temp_t8 * 0.5f);
+//                                 temp_f0_3 = g_frame_step_f;
 //                                 if (temp_f0_3 != 0.0f) {
 //                                     D_800BE9A8 = (f32) (1.0f / temp_f0_3);
 //                                 } else {
@@ -379,7 +379,7 @@ block_64:
 //                             if ((phi_s0->unk14 != phi_s0->unk2C) || (phi_s0->unk18 != phi_s0->unk30) || (phi_s0->unk1C != phi_s0->unk34)) {
 //                                 phi_s0->unk300 = (u8)1;
 //                             }
-//                             temp_v0_7 = (D_800B0DF0)->unk4A;
+//                             temp_v0_7 = (g_level_header)->unk4A;
 //                             phi_s2 = temp_s2;
 //                             if (temp_v0_7 != 0) {
 //                                 D_8008600C[temp_v0_7](phi_s0);
@@ -393,7 +393,7 @@ block_64:
 //             }
 //         }
 //     }
-// //     temp_v1 = D_8008FD8C;
+// //     temp_v1 = g_player_count;
 // //     if ((s32) temp_v1 > 0) {
 // //         phi_a1 = &g_objects;
 // //         phi_t0 = 0;
@@ -406,14 +406,14 @@ block_64:
 // //                 if (phi_a1->unk137 != 0) {
 // //                     temp_a3 = *temp_a2;
 // //                     if (temp_a3 != 0) {
-// //                         temp_v0_8 = D_800DBEF4 + (temp_a3 * 0xA0);
+// //                         temp_v0_8 = g_world_objs + (temp_a3 * 0xA0);
 // //                         temp_v0_8->unk-51 = (u8) (temp_v0_8->unk-51 | 0x84);
 // //                         temp_v1_2 = D_800DBF94 + (*temp_a2 * 4);
 // //                         temp_v1_2->unk-4 = (s32) (temp_v1_2->unk-4 | (1 << phi_t0));
 // //                     }
 // //                     phi_a1->unk31C->unk56 = (u8)5;
 // // block_64:
-// //                     phi_v1 = (s32) D_8008FD8C;
+// //                     phi_v1 = (s32) g_player_count;
 // //                 } else {
 // //                     temp_v0_9 = temp_a0->unk56;
 // //                     if (temp_v0_9 != 0) {
@@ -439,7 +439,7 @@ block_64:
 
 /* Per-frame pass over the 25 object records outside cutscenes (D_800C35EA != 1): sets the current object
  * (g_cur_obj_index index, g_cur_obj pointer), its controller (D_800CC6A4: pad i of D_800BE728 for the first four
- * players, a zeroed 6-byte pad otherwise; only for i < D_8008FD8C) and runs tank_mark_driver_view for objects 0x28 / 0x77.
+ * players, a zeroed 6-byte pad otherwise; only for i < g_player_count) and runs tank_mark_driver_view for objects 0x28 / 0x77.
  * As in the asm, the zeroed pad is a local of this function (D_800CC6A4 keeps pointing at it afterwards). */
 /* was func_1504ADD0 */
 void objects_update_tank_views(void) {
@@ -457,7 +457,7 @@ void objects_update_tank_views(void) {
         }
         g_cur_obj_index = i;
         g_cur_obj = obj;
-        if (i < D_8008FD8C) {
+        if (i < g_player_count) {
             if (i < 4) {
                 D_800CC6A4 = (u8 *)((s32 *)D_800BE728[0])[i];
             } else {
@@ -483,7 +483,7 @@ void objects_update_tank_views(void) {
 //             if (tmp->unk0 != 0) {
 //                 g_cur_obj_index = i;
 //                 g_cur_obj = tmp;
-//                 if (i < D_8008FD8C) {
+//                 if (i < g_player_count) {
 //                     if (i < 4) {
 //                         D_800CC284 = D_800BE728[i];
 //                     } else {
@@ -509,7 +509,7 @@ s32 obj_coll_link_resolve_stub(s32 arg0, s32 arg1) {
 
 // bleurgh
 // P45: carried-object link of a record. +0x92 = (kind << 12) | index (bit 15 = only with arg1). Kind 0: resolve
-// through obj_coll_link_resolve_stub. Kind 3 (an entry of D_800DBEF4, 0xA0 bytes each): arg2 releases it (+0x4E = 0, link
+// through obj_coll_link_resolve_stub. Kind 3 (an entry of g_world_objs, 0xA0 bytes each): arg2 releases it (+0x4E = 0, link
 // cleared); else +0x4E = record index + 100 (arg1: 0 instead) and, without arg1, the entry follows the record
 // (+0x4F bits 5..6 = 1, +0x10/+0x12/+0x14 = position, y + s16 +0x90).
 /* was func_1504AF10 */
@@ -541,22 +541,22 @@ void obj_sync_collision_link(struct127 *rec, s32 arg1, s32 arg2) {
         return;
     }
     if (arg2 != 0) {
-        ((u8 *)D_800DBEF4)[(u32)sp28 * 0xA0 + 0x4E] = 0;
+        ((u8 *)g_world_objs)[(u32)sp28 * 0xA0 + 0x4E] = 0;
         *(u16 *)(arg0 + 0x92) = 0;
         return;
     }
-    ((u8 *)D_800DBEF4)[(u32)sp28 * 0xA0 + 0x4E] = (s32)(rec - g_objects) + 100;
+    ((u8 *)g_world_objs)[(u32)sp28 * 0xA0 + 0x4E] = (s32)(rec - g_objects) + 100;
     if (arg1 != 0) {
-        ((u8 *)D_800DBEF4)[(u32)sp28 * 0xA0 + 0x4E] = 0;
+        ((u8 *)g_world_objs)[(u32)sp28 * 0xA0 + 0x4E] = 0;
         return;
     }
-    e = (u8 *)D_800DBEF4 + (u32)sp28 * 0xA0;
+    e = (u8 *)g_world_objs + (u32)sp28 * 0xA0;
     e[0x4F] &= 0xFF9F;
-    e = (u8 *)D_800DBEF4 + (u32)sp28 * 0xA0;
+    e = (u8 *)g_world_objs + (u32)sp28 * 0xA0;
     e[0x4F] |= 0x20;
-    *(s16 *)((u8 *)D_800DBEF4 + (u32)sp28 * 0xA0 + 0x10) = (s32)*(f32 *)(arg0 + 0x14);
-    *(s16 *)((u8 *)D_800DBEF4 + (u32)sp28 * 0xA0 + 0x12) = (s32)(*(f32 *)(arg0 + 0x18) + (f32)*(s16 *)(arg0 + 0x90));
-    *(s16 *)((u8 *)D_800DBEF4 + (u32)sp28 * 0xA0 + 0x14) = (s32)*(f32 *)(arg0 + 0x1C);
+    *(s16 *)((u8 *)g_world_objs + (u32)sp28 * 0xA0 + 0x10) = (s32)*(f32 *)(arg0 + 0x14);
+    *(s16 *)((u8 *)g_world_objs + (u32)sp28 * 0xA0 + 0x12) = (s32)(*(f32 *)(arg0 + 0x18) + (f32)*(s16 *)(arg0 + 0x90));
+    *(s16 *)((u8 *)g_world_objs + (u32)sp28 * 0xA0 + 0x14) = (s32)*(f32 *)(arg0 + 0x1C);
 }
 /* P191 */
 void obj_sfx_play(s32, struct127 *);
@@ -696,14 +696,14 @@ f32 swim_water_physics(struct127 *p, f32 dt) {
                 }
                 SWIM_AIR(p) = 0;
             } else {
-                air = SWIM_AIR(p) + D_800BE9E4;
+                air = SWIM_AIR(p) + g_frame_ticks;
 #ifdef PORT
                 /* P326 option "Longer breath": before the warning point 0x5A1 the counter grows by half the frame
                  * step (the odd tick is carried to the next frame), so the safe time under water doubles. The
                  * warning, the drowning damage and the HUD (air meter = counter / 720, bubbles) keep the N64 rules. */
                 if (port_option(PORT_OPT_LONG_BREATH) && SWIM_AIR(p) < 0x5A1) {
                     static s32 carry; /* 0 or 1 */
-                    s32 ticks = D_800BE9E4 + carry;
+                    s32 ticks = g_frame_ticks + carry;
                     carry = ticks & 1;
                     air = SWIM_AIR(p) + (ticks >> 1);
                 }
@@ -957,15 +957,15 @@ void ctl_tick_timers(struct127 *arg0) {
     arg0->unk31C->unk52 >>= 1;
 
     if (arg0->unk31C->unk19E != 0) {
-        if (arg0->unk31C->unk19E > D_800BE9E4) {
-            arg0->unk31C->unk19E -= D_800BE9E4;
+        if (arg0->unk31C->unk19E > g_frame_ticks) {
+            arg0->unk31C->unk19E -= g_frame_ticks;
         } else {
             arg0->unk31C->unk19E = 0U;
         }
     }
     if (arg0->unk31C->unk1A0 != 0) {
-        if (arg0->unk31C->unk1A0 > D_800BE9E4) {
-            arg0->unk31C->unk1A0 -= D_800BE9E4;
+        if (arg0->unk31C->unk1A0 > g_frame_ticks) {
+            arg0->unk31C->unk1A0 -= g_frame_ticks;
         } else {
             arg0->unk31C->unk1A0 = 0U;
         }
@@ -1253,11 +1253,11 @@ s32 obj_half_rate_tick(struct127 *arg0) {
     }
     if ((arg0->unk127 & 1) == D_800CC6D8) {
         if (temp_v1->unk1A8 != 0) {
-            D_800CC6DA = D_800BE9E4;
-            D_800BE9E4 += arg0->unk31C->unk1A8;
-            D_800BE9A4 = D_800BE9E4 * 0.5f;
-            if (D_800BE9A4 != 0.0f) {
-                D_800BEDC8 = 1.0f / D_800BE9A4;
+            D_800CC6DA = g_frame_ticks;
+            g_frame_ticks += arg0->unk31C->unk1A8;
+            g_frame_step_f = g_frame_ticks * 0.5f;
+            if (g_frame_step_f != 0.0f) {
+                D_800BEDC8 = 1.0f / g_frame_step_f;
             } else {
                 D_800BEDC8 = 0.0f;
             }
@@ -1266,7 +1266,7 @@ s32 obj_half_rate_tick(struct127 *arg0) {
         }
         return 1;
     }
-    temp_v1->unk1A8 += D_800BE9E4;
+    temp_v1->unk1A8 += g_frame_ticks;
     return 0;
 }
 
@@ -1374,8 +1374,8 @@ extern u8 g_slowmo_divisor; /* was D_800BEE2C */
 extern f32 D_800CC1B0;
 extern f32 D_800CC1B4;
 extern f32 D_800CC1B8;
-extern s8 D_800CC1F3;
-extern s8 D_800CC1F4;
+extern s8 g_wall_coll_soft_edges; /* was D_800CC1F3 */
+extern s8 g_wall_coll_no_clamp; /* was D_800CC1F4 */
 extern u8 D_800CC68C;
 extern f32 D_800CC690;
 extern f32 D_800CC694;
@@ -1680,7 +1680,7 @@ void obj_state_walk(struct127 *arg0) {
         D_800CC288 = (s32) D_800BEB30[g_cur_obj_index];
         sp190 = (s32) (u16) arg0->unk31C->unk8A;
     }
-    if ((D_80082FA0 >= (s32) g_cur_obj_index) && ((&D_800DDE3C)[(s32) g_cur_obj_index] != 0) && ((&D_800DDDC8)[(s32) g_cur_obj_index] > 0.75f) && (D_800E0B94 != 2)) {
+    if ((g_last_player_index >= (s32) g_cur_obj_index) && ((&g_hud_lens_state)[(s32) g_cur_obj_index] != 0) && ((&g_hud_lens_zoom)[(s32) g_cur_obj_index] > 0.75f) && (g_game_mode != 2)) {
         ((struct49 *)D_800CC6A4)->unk2 = 0;
         ((struct49 *)D_800CC6A4)->unk3 = 0;
         ((struct49 *)D_800CC6A4)->unk0 = 0;
@@ -1859,8 +1859,8 @@ void obj_state_walk(struct127 *arg0) {
                 temp_t0_8 = arg0->unk31C;
                 temp_v1_3 = temp_t0_8->padAE[1];
                 if (temp_v1_3 != 0) {
-                    if (D_800BE9E4 < (s32) temp_v1_3) {
-                        temp_t0_8->padAE[1] = temp_v1_3 - D_800BE9E4;
+                    if (g_frame_ticks < (s32) temp_v1_3) {
+                        temp_t0_8->padAE[1] = temp_v1_3 - g_frame_ticks;
                     } else {
                         temp_t0_8->padAE[1] = 0;
                     }
@@ -2671,7 +2671,7 @@ block_197:
                     if (var_v1_7 != 0x34) {
                         temp_f2_7 = var_v0_7->xz_velocity;
                         if (temp_f2_7 < spE0) {
-                            var_v0_7->xz_velocity = temp_f2_7 + (var_f18 * D_800BE9A4);
+                            var_v0_7->xz_velocity = temp_f2_7 + (var_f18 * g_frame_step_f);
                         }
                     } else {
                         arg0->xz_velocity = var_v0_7->xz_velocity;
@@ -2713,15 +2713,15 @@ block_197:
         temp_v0_35 = arg0->unkF8;
         if ((temp_v0_35 & 4) && (temp_t0_29 = arg0->unk31C, (temp_t0_29->unk54 <= 0)) && (temp_t0_29->unk6B == 0) && (arg0->unk137 == 0) && (arg0->unk65 == 0) && ((temp_t0_29->unk84 == 0) || (arg0->old_x_position != arg0->x_position) || (arg0->old_y_position != temp_f0_12) || (arg0->old_z_position != arg0->z_position))) {
             if (temp_v0_35 & 0x08000000) {
-                D_800CC1F3 = 1;
+                g_wall_coll_soft_edges = 1;
             }
             if (arg0->unk31C->unk4E == 2) {
-                D_800CC1F4 = 1;
+                g_wall_coll_no_clamp = 1;
             }
             spBC = arg0->y_velocity;
             collision_obj_walls(arg0->old_x_position, arg0->old_y_position, *(s32 *)&arg0->old_z_position, arg0, 1, 1);
-            D_800CC1F4 = 0;
-            D_800CC1F3 = 0;
+            g_wall_coll_no_clamp = 0;
+            g_wall_coll_soft_edges = 0;
             if ((arg0->stunned != 0) && (arg0->y_velocity == 0.0f) && (spBC < 0.0f) && (spBC > -20.0f)) {
                 arg0->y_velocity = spBC;
             }
@@ -2836,8 +2836,8 @@ block_593:
             arg0->unkCC = 0x1E;
             arg0->unkCE = arg0->unkCC;
             temp_v1_7 = (*(u16 *)((u8 *)(arg0->unk31C) + 0x12C));
-            if ((D_800BE9E4 < (s32) temp_v1_7) && (arg0->health != 0)) {
-                (*(u16 *)((u8 *)(arg0->unk31C) + 0x12C)) = (u16) (temp_v1_7 - D_800BE9E4);
+            if ((g_frame_ticks < (s32) temp_v1_7) && (arg0->health != 0)) {
+                (*(u16 *)((u8 *)(arg0->unk31C) + 0x12C)) = (u16) (temp_v1_7 - g_frame_ticks);
                 arg0->xz_velocity = 254.0f;
             } else {
                 (*(u16 *)((u8 *)(arg0->unk31C) + 0x12C)) = 0U;
@@ -2996,7 +2996,7 @@ block_593:
                 arg0->xz_velocity *= 0.5f;
                 arg0->unk76 = arg0->unk7A;
                 arg0->unk31C->pad17[0xB] = 0;
-                if (D_800BE9B4 == 0) {
+                if (g_level_first_frame == 0) {
                     arg0->unk31C->pad17[0xA] = 1;
                     arg0->unkB2 = 0;
                 }
@@ -3713,15 +3713,15 @@ extern struct127 g_objects[]; /* was D_800CC2D0 */
 
 // obj_hover_height_update: per-frame height / tilt update of an object riding at a target height (board / hover
 // states; state +0x80 set to 10, flag +0xF8 |= 0x10000). Target height: the y of player +0x222 + 80 (kind 10) or the
-// track point +0x21E of track D_800D2104[+0x13F] (+0xA), overridden by +0x224, by player +0x222's y - 40 (mode +0x223
+// track point +0x21E of track g_path_points[+0x13F] (+0xA), overridden by +0x224, by player +0x222's y - 40 (mode +0x223
 // 14 / 3, or kind 8), and capped by the track's floor (+2). Kinds 0x4F / 0x83: +0x251 == 1 takes the tilt +0xB8 from
 // the heading to (+0x3C, +0x20) (math_atan2_u16) and skips the settle; otherwise the object snaps to the target when
-// within radius (+0x22B) * D_800BE9A4 (y += d * 0.15, velocity 0). +0x226 == 0xFF: the character record's +0x12C
+// within radius (+0x22B) * g_frame_step_f (y += d * 0.15, velocity 0). +0x226 == 0xFF: the character record's +0x12C
 // timer runs down (keeping +0x3C at 254 while alive), an effect (obj_fire_weapon_kind) when ctl +0x8C & 0x2000, then
 // obj_float_bob_setup and tilt toward -vy; else a bob (obj_set_gravity_band, amplitude +0x226 * 0.1) and tilt toward -2.5 vy.
 // Then the movement step (obj_stun_update with +0x104, else obj_walk_update), the facing +0x40 from +0x7A,
 // obj_physics_step, the settle (obj_lean_into_turn with +0x76), and cutscene_actor_apply_track(obj, 0, -1) when the object leaves the
-// play area (obj_check_death) or, in multiplayer, g_cur_obj_index < D_80090130.
+// play area (obj_check_death) or, in multiplayer, g_cur_obj_index < g_human_player_count.
 /* was func_150528C8 */
 void obj_state_float_on_water(struct127 *arg0) {
     u8 *o = (u8 *) arg0;
@@ -3730,7 +3730,7 @@ void obj_state_float_on_water(struct127 *arg0) {
     f32 radius = (f32) (s8) o[0x22B];
     s32 settle = 1;
     u8 kind = o[4];
-    f32 floor = (f32) *(s16 *) (((u8 **) D_800D2104)[o[0x13F]] + 2);
+    f32 floor = (f32) *(s16 *) (((u8 **) g_path_points)[o[0x13F]] + 2);
     f32 target;
     f32 band;
     f32 d;
@@ -3750,7 +3750,7 @@ void obj_state_float_on_water(struct127 *arg0) {
     if (kind == 10) {
         target = OBJ_F32(PLAYER(o[0x222]), 0x18) + 80.0f;
     } else {
-        target = (f32) *(s16 *) (((u8 **) D_800D2104)[o[0x13F]] + o[0x21E] * 8 + 0xA);
+        target = (f32) *(s16 *) (((u8 **) g_path_points)[o[0x13F]] + o[0x21E] * 8 + 0xA);
     }
     if (*(s16 *) (o + 0x224) != 0) {
         target = (f32) *(s16 *) (o + 0x224);
@@ -3787,7 +3787,7 @@ void obj_state_float_on_water(struct127 *arg0) {
         target = floor;
     }
     if (snap != 0) {
-        band = radius * D_800BE9A4;
+        band = radius * g_frame_step_f;
         y = OBJ_F32(o, 0x18);
         d = target - y;
         if (d < band && -band < d) {
@@ -3802,8 +3802,8 @@ void obj_state_float_on_water(struct127 *arg0) {
         ctl = *(u8 **) (o + 0x31C);
         if (ctl != NULL) {
             timer = *(u16 *) (ctl + 0x12C);
-            if (D_800BE9E4 < timer) {
-                *(u16 *) (ctl + 0x12C) = timer - D_800BE9E4;
+            if (g_frame_ticks < timer) {
+                *(u16 *) (ctl + 0x12C) = timer - g_frame_ticks;
                 if (o[0x1CA] != 0) {
                     OBJ_F32(o, 0x3C) = 254.0f;
                 }
@@ -3843,7 +3843,7 @@ void obj_state_float_on_water(struct127 *arg0) {
     if (o[4] == 0x9E) {
         *(s32 *) (o + 0x2E4) = 0;
     }
-    if ((D_800BE616 != 0 && g_cur_obj_index < D_80090130) || obj_check_death(arg0) == 0) {
+    if ((D_800BE616 != 0 && g_cur_obj_index < g_human_player_count) || obj_check_death(arg0) == 0) {
         cutscene_actor_apply_track(arg0, 0, -1);
     }
 }
@@ -4304,7 +4304,7 @@ void bullet_impact_effect(s32, f32 *, f32 *, u8, s32);
 extern f32 D_800D27BC;
 extern f32 D_800D27C0;
 extern f32 D_800D27C4;
-extern s8 D_800E1050;
+extern s8 g_mp_match_over; /* was D_800E1050 */
 extern f32 D_800CC674[3];
 extern s32 D_800CC680;
 
@@ -4356,8 +4356,8 @@ void obj_state_rail_follow(struct127 *obj) {
     u8 *rec;
 
     if ((kind == 2 || kind == 18) && P38_U16(0x282) != 0) {
-        if (D_800BE9E4 < P38_U16(0x282)) {
-            P38_U16(0x282) -= D_800BE9E4;
+        if (g_frame_ticks < P38_U16(0x282)) {
+            P38_U16(0x282) -= g_frame_ticks;
         } else {
             P38_U16(0x282) = 0;
             P38_F32(0x24) = 1.0f;
@@ -4398,7 +4398,7 @@ void obj_state_rail_follow(struct127 *obj) {
                 dz = *(f32 *) (target + 0x1C) - P38_F32(0x1C);
                 dist = dx * dx + dz * dz;
             } else {
-                alt = (D_8009015C & 0x40) != 0;
+                alt = (g_mp_game_flags & 0x40) != 0;
                 t = 0.5f;
             }
             if (P38_U8(0x81) < 10) {
@@ -4440,7 +4440,7 @@ void obj_state_rail_follow(struct127 *obj) {
         if (P38_U16(0xB2) != 0) {
             P38_U8(0x83)++;
         }
-        if (D_800E1050 != 0 || D_800E0B94 != 0) {
+        if (g_mp_match_over != 0 || g_game_mode != 0) {
             P38_U8(0x83) = 1;
             done = TRUE;
         }
@@ -4484,7 +4484,7 @@ void obj_state_rail_follow(struct127 *obj) {
     case 12:
     case 18:
         if (P38_F32(0x3C) != 0.0f) {
-            P38_F32(0xB8) += 15.0f * (f32) D_800BE9E4;
+            P38_F32(0xB8) += 15.0f * (f32) g_frame_ticks;
             if (actor_sound_is_playing(obj) == 0) {
                 actor_sound_play(game_gu_random() % 2 + 0x22F, obj, 0x7530, 0x1F4, 0x3E8);
             }
@@ -4508,7 +4508,7 @@ void obj_state_rail_follow(struct127 *obj) {
         case 10:
         case 13:
             if (P38_U8(0xA8) < 25) {
-                P38_U8(0xA8) += D_800BE9E4;
+                P38_U8(0xA8) += g_frame_ticks;
             } else if (actor_sound_is_playing(obj) == 0) {
                 actor_sound_play((u32) random_int() % 3 + 0x2EE, obj, 0x7530, 0x1F4, 0x3E8);
             }
@@ -4691,7 +4691,7 @@ void obj_state_linked_sound(struct127 *arg0) {
 
     temp_s0 = &g_objects[arg0->unk65 - 1];
 
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < g_player_count; i++) {
         phi_s2 = &g_objects[i];
 
         if ((phi_s2->unk274 == (((s32) ((s32)arg0 - (s32)g_objects) / (s32)sizeof(struct127)) + 1)) && (temp_s0->unk232 == 1)) {
@@ -4882,7 +4882,7 @@ void rail_event_add(f32, f32, f32, f32);
  * 0x4B: point unk2EC (packed s16 x << 16 | s16 z) 500 units behind its facing, turn a third of the way towards
  *   object 0 (or 0x800 off its facing when unk84 is 0xF), scale 2 and unk40 90.
  * 0x1B / 0x7E with a timer unk2E4: optional rail_event_add at its position; the timer counts down by the frame
- *   step D_800BE9E4 (sound 0x3A1 when it passes 100); when it runs out, state 6 and unk218 = NULL. */
+ *   step g_frame_ticks (sound 0x3A1 when it passes 100); when it runs out, state 6 and unk218 = NULL. */
 /* was func_15054F74 */
 void menu_object_update(struct127 *arg0) {
     f32 dx, dz, dy;
@@ -4917,7 +4917,7 @@ void menu_object_update(struct127 *arg0) {
         if (D_800BE616 != 0) {
             rail_event_add(arg0->x_position, arg0->y_position, arg0->z_position, 900.0f);
         }
-        step = D_800BE9E4;
+        step = g_frame_ticks;
         if (step < arg0->unk2E4) {
             if (arg0->unk2E4 >= 100 && arg0->unk2E4 < step + 100) {
                 actor_sound_play(0x3A1, arg0, 0x7D00, 500, 1000);
@@ -4969,9 +4969,9 @@ void menu_object_update(struct127 *arg0) {
 //             if (D_800BE616 != 0) {
 //                 rail_event_add(arg0->unk14, arg0->unk18, 500.0f, 900.0f);
 //             }
-//             if ((arg0->unk2E4 > D_800BE9E4) && (arg0->unk2E4 >= 0x78) && (arg0->unk2E4 < (D_800BE9E4 + 0x78))) {
+//             if ((arg0->unk2E4 > g_frame_ticks) && (arg0->unk2E4 >= 0x78) && (arg0->unk2E4 < (g_frame_ticks + 0x78))) {
 //                 actor_sound_play(0x3A1, arg0, 0x7D00, 0x1F4, 0x3E8);
-//                 arg0->unk2E4 -= D_800BE9E4;
+//                 arg0->unk2E4 -= g_frame_ticks;
 //             } else {
 //                 arg0->unk232 = 6U;
 //                 arg0->unk218 = 0;
@@ -4991,13 +4991,13 @@ void spark_spawn_random(f32 *arg0, u8 arg1, s32 arg2);
 void bounce_dust_spawn(u8 *arg0, u8 arg1, s32 arg2);
 void attachment_set_alpha_by_slot(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 // thrown_object_update: per-frame update of a thrown / falling object (kind obj->unk278: 0x1F rolling, spins with
-// the frame time D_800BE9E4 and plays its sounds; 0x42 flies along its velocity, faces it, sticks into the ground
+// the frame time g_frame_ticks and plays its sounds; 0x42 flies along its velocity, faces it, sticks into the ground
 // at +25 and hits targets in range (obj_find_reach_hit -> obj_attach_stuck_projectile); 0x4E spins once above 25; 0x35 spins fast and
 // breaks on the first move; 0x88 faces its velocity and may be caught (attack_hit_test)). Common part: physics
 // (obj_update_ground_tilt / obj_apply_gravity / obj_update_floor collision), water entry at unk118 (slows down), ground contact
 // (unk28 <= floor offset: bounce count unk7F, a 0xE ground type destroys it), facing unk40 from unk76, fade-out
 // over the last 10 frames of the lifetime unk83 (or after 21..30 bounces), and the rolling kind hits Conker
-// (D_800DBFF0) within 30 units.
+// (g_player_views) within 30 units.
 /* was func_1505528C */
 void obj_state_projectile(struct127 *obj) {
     f32 x, y, z;
@@ -5018,7 +5018,7 @@ void obj_state_projectile(struct127 *obj) {
     floor = 0.0f;
     switch (kind) {
     case 0x1F:
-        obj->unkB8 += obj->xz_velocity * (f32)D_800BE9E4;
+        obj->unkB8 += obj->xz_velocity * (f32)g_frame_ticks;
         if (obj->unk2E4 == 1) {
             actor_sound_play2(0x230, obj, 0x7D00, 0x1F4, 0x9C4);
             obj->unk2E4 = 0;
@@ -5039,11 +5039,11 @@ void obj_state_projectile(struct127 *obj) {
     case 0x4E:
         floor = 25.0f;
         if (obj->unk28 > 25.0f) {
-            obj->unkB8 += (f32)(D_800BE9E4 * 3);
+            obj->unkB8 += (f32)(g_frame_ticks * 3);
         }
         break;
     case 0x35:
-        obj->unkB8 += (f32)(D_800BE9E4 * 16);
+        obj->unkB8 += (f32)(g_frame_ticks * 16);
         break;
     case 0x88:
         obj->unkB8 = -math_atan2f(obj->y_velocity, obj->xz_velocity) * 57.295776f;
@@ -5137,11 +5137,11 @@ void obj_state_projectile(struct127 *obj) {
     }
     attachment_set_alpha_by_slot((s32)obj, kind, alpha, 0);
     if (kind == 0x1F) {
-        dx = D_800DBFF0->unk2F8 - obj->x_position;
-        dy = D_800DBFF0->unk2FC - obj->y_position;
-        dz = D_800DBFF0->unk300 - obj->z_position;
+        dx = g_player_views->unk2F8 - obj->x_position;
+        dy = g_player_views->unk2FC - obj->y_position;
+        dz = g_player_views->unk300 - obj->z_position;
         if (dx * dx + dy * dy + dz * dz < 900.0f) {
-            camera_shake_start(D_800DBFF0, 8, 0);
+            camera_shake_start(g_player_views, 8, 0);
             sound_play_at(0x2E1, 0x6D60, 0, 0, 0, obj->x_position, obj->y_position, obj->z_position, 0x1F4, 0x3E8);
             actor_sound2_stop(obj);
             obj_remove(obj, 1);
@@ -5180,14 +5180,14 @@ void obj_state_projectile(struct127 *obj) {
 //
 //     switch (sp74) {
 //         case 0x1F:
-//             arg0->unkB8 = (arg0->unkB8 + (arg0->xz_velocity * (f32) D_800BE9E4));
+//             arg0->unkB8 = (arg0->unkB8 + (arg0->xz_velocity * (f32) g_frame_ticks));
 //             if (arg0->unk2E4 == 1) {
 //                 actor_sound_play2(0x230, arg0, 0x7D00, 0x1F4, 0x9C4);
 //                 arg0->unk2E4 = 0;
 //             }
 //             break;
 //         case 0x35:
-//             arg0->unkB8 = (arg0->unkB8 + (f32) (D_800BE9E4 * 0x10));
+//             arg0->unkB8 = (arg0->unkB8 + (f32) (g_frame_ticks * 0x10));
 //             break;
 //         case 0x42:
 //             sp70 = 25.0f;
@@ -5207,7 +5207,7 @@ void obj_state_projectile(struct127 *obj) {
 //         case 0x4E:
 //             sp70 = 25.0f;
 //             if (arg0->unk28 > 25.0f) {
-//                 arg0->unkB8 = (arg0->unkB8 + (f32) (D_800BE9E4 * 3));
+//                 arg0->unkB8 = (arg0->unkB8 + (f32) (g_frame_ticks * 3));
 //             }
 //             break;
 //         case 0x88:
@@ -5308,7 +5308,7 @@ void obj_state_projectile(struct127 *obj) {
 //     }
 //     func_1503192C(arg0, sp74, phi_a2, 0);
 //     if (sp74 == 0x1F) {
-//         temp_a0_2 = D_800DBFF0;
+//         temp_a0_2 = g_player_views;
 //         temp_f0 = temp_a0_2->unk2F8 - arg0->unk14;
 //         temp_f2 = temp_a0_2->unk2FC - arg0->unk18;
 //         temp_f12 = temp_a0_2->unk300 - arg0->unk1C;
@@ -5351,7 +5351,7 @@ void obj_state_timed_remove(struct127 *arg0) {
     arg0->unkF8 |= 0x1000000;
 
     if (D_800BE9A0 < arg0->unk21C) {
-        arg0->unk21C -= D_800BE9E4;
+        arg0->unk21C -= g_frame_ticks;
     } else {
         arg0->unk21C = 0;
         if (arg0->unk1D4 == 0) {
@@ -5364,7 +5364,7 @@ void obj_state_timed_remove(struct127 *arg0) {
 void obj_state_sink_remove(struct127 *arg0) {
     arg0->unk40 = (s16)(arg0->unk7A + 16384) * 0.005493164f;
     arg0->unkF8 |= 0x1000000;
-    arg0->y_position -= D_800BE9A4;
+    arg0->y_position -= g_frame_step_f;
 
     if (arg0->y_position < (arg0->unk180 - 100.0f)) {
         obj_remove(arg0, 0);

@@ -1,12 +1,12 @@
 \#^    if (obj\[0x1C\] & 1) {$#s/& 1/\& 4/ % die
-\#^        \*(s16 \*) (obj + 0x10) -= D_800BE9E4;$#s/-=/+=/ % die
+\#^        \*(s16 \*) (obj + 0x10) -= g_frame_ticks;$#s/-=/+=/ % die
 \#^        if (\*(s16 \*) (obj + 0x10) < 0) {$#s/< 0/<= 0/ % live1
 \#^    if ((s8) obj\[0x2C\] != -1 && !done) {$#s/ \&\& !done// % dead2c
-\#^        done = D_8008FCE0\[(s8) obj\[0x2C\]\](obj) == 0;$#s/== 0/!= 0/ % hook0 hook1
-\#^        done = D_8008FCE8\[(s8) obj\[0x2D\]\](obj) == 0;$#s/== 0/!= 0/ % hook1 hookd
-\#^        done = D_8008FCE8\[(s8) obj\[0x2D\]\](obj) == 0;$#s/FCE8/FCE0/ % hook1 hookd
+\#^        done = g_bolt_path_end_fns_a\[(s8) obj\[0x2C\]\](obj) == 0;$#s/== 0/!= 0/ % hook0 hook1
+\#^        done = g_bolt_path_end_fns_b\[(s8) obj\[0x2D\]\](obj) == 0;$#s/== 0/!= 0/ % hook1 hookd
+\#^        done = g_bolt_path_end_fns_b\[(s8) obj\[0x2D\]\](obj) == 0;$#s/FCE8/FCE0/ % hook1 hookd
 \#^    if ((s8) obj\[0x2D\] != -1 && !done) {$#s/0x2D/0x2C/ % hookd
-\#^        \*(f32 \*) (obj + 0x68) -= D_800BE9A4;$#s/-=/+=/ % all
+\#^        \*(f32 \*) (obj + 0x68) -= g_frame_step_f;$#s/-=/+=/ % all
 \#^        if (\*(f32 \*) (obj + 0x68) < 0.0f) {$#s/</>/ % all
 \#^            bolt_subdivide(obj, 0, #s/- 1/- 2/ % all
 \#^            bolt_subdivide(obj, 0, #s/100/99/ % all

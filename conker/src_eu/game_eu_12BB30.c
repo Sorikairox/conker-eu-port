@@ -19,13 +19,13 @@ s32 weapon_a_fire(s32 arg0, u8 arg1, s32 arg2) {
     return tracer_spawn(sp8C, 0, sp8C, sp98, 0, 0, 300.0f, 0.0033333334f, (random_float() * 10.0f) + 25.0f, (random_float() * 201.0f) + 601.0f, 50.0f, (random_int() % 56U) + 0xC8, arg0, 1, 1, 0, 0xFF, 1, 1, 0, (g_level_id == 0x2B) ? 0x27 : 0x1A, 0.0f, 0xFF, -1, 0, (s32) arg1, arg2);
 }
 
-const u32 rodata_12BB30_FDF38[] = { 0x40E00000, 0xC3080000, 0x42340000, 0x40E00000, 0xC3290000, 0x424C0000, 0x40E00000, 0x42200000, 0x41500000 }; // D_800A2340 = [0], D_800A234C = [3], D_800A2358 = [6]
+const u32 rodata_12BB30_FDF38[] = { 0x40E00000, 0xC3080000, 0x42340000, 0x40E00000, 0xC3290000, 0x424C0000, 0x40E00000, 0x42200000, 0x41500000 }; /* was D_800A234C */ /* was D_800A2340 */ // g_weapon_a_muzzle_pts = [0], g_weapon_a_spark_end_pt = [3], D_800A2358 = [6]
 void weapon_a_shell_sparks(struct127 *, s32, u8, s32);
 s32 mtx_transform_points(u8 **, struct17 **, s32, s32);
 void object_effect_between(struct127 *, struct17 *, struct17 *, s32);
 void muzzle_light_small_spawn(struct17 *, u8, s32);
 void weapon_a_rumble(u8 *);
-extern u8 D_80088F20;
+extern u8 g_weapon_a_bone; /* was D_80088F20 */
 
 /* was func_150FDF38 */
 s32 weapon_a_muzzle_effects(struct127 *arg0, u8 arg1, s32 arg2, s32 *arg3, s32 *arg4) {
@@ -36,11 +36,11 @@ s32 weapon_a_muzzle_effects(struct127 *arg0, u8 arg1, s32 arg2, s32 *arg3, s32 *
 
     if (arg0 != NULL) {
         if (arg0->unk1D4 != 0) {
-            tbl[0] = D_800A2340;
-            tbl[1] = D_800A2340 + 0x18;
+            tbl[0] = g_weapon_a_muzzle_pts;
+            tbl[1] = g_weapon_a_muzzle_pts + 0x18;
             out[0] = &pos;
             out[1] = &pos2;
-            mtx_transform_points(tbl, out, (s32) arg0->unk1D4 + (D_80088F20 << 6), 2);
+            mtx_transform_points(tbl, out, (s32) arg0->unk1D4 + (g_weapon_a_bone << 6), 2);
         } else {
             pos.unk0 = *(f32 *)((u8 *)arg0 + 0x14);
             pos.unk4 = *(f32 *)((u8 *)arg0 + 0x18) + 56.0f;
@@ -61,7 +61,7 @@ s32 weapon_a_muzzle_effects(struct127 *arg0, u8 arg1, s32 arg2, s32 *arg3, s32 *
 }
 
 s32 attached_particle_spawn(struct127 *, u8, u8 *, s32 *, f32 *, s32, s32, f32, s32, s32, s32, s32, s32, s32);
-extern s32 D_800A234C;
+extern s32 g_weapon_a_spark_end_pt; /* was D_800A234C */
 
 /* was func_150FE638 */
 void weapon_a_shell_sparks(struct127 *arg0, s32 arg1, u8 arg2, s32 arg3)
@@ -81,13 +81,13 @@ void weapon_a_shell_sparks(struct127 *arg0, s32 arg1, u8 arg2, s32 arg3)
       sp5F = 0xFF;
     }
 
-    attached_particle_spawn(arg0, D_80088F20, D_800A2340, &D_800A234C, sp60, (random_int() % 5U) + 6, (((u32) random_int()) % 101U) + 0x9B, (random_float() * 199.0f) + 501.0f, arg1, (s32) sp5F, 0, -1, (s32) arg2, arg3);
+    attached_particle_spawn(arg0, g_weapon_a_bone, g_weapon_a_muzzle_pts, &g_weapon_a_spark_end_pt, sp60, (random_int() % 5U) + 6, (((u32) random_int()) % 101U) + 0x9B, (random_float() * 199.0f) + 501.0f, arg1, (s32) sp5F, 0, -1, (s32) arg2, arg3);
   }
 }
 
 /* was func_150FE7C8 */
 void weapon_a_bone_effect(s32 arg0, s32 arg1, s32 arg2) {
-    obj_bone_point_or_pos(arg0, arg2, &D_800A2340, D_80088F20, 0.0f);
+    obj_bone_point_or_pos(arg0, arg2, &g_weapon_a_muzzle_pts, g_weapon_a_bone, 0.0f);
 }
 
 /* was func_150FE808 */

@@ -163,7 +163,7 @@ void foot_step_ring_effect(u8 *arg0, s32 arg1, s32 arg2) {
     }
 }
 /* P243: readable C for emit_point_puff (game_eu_EF6D0, 75 insns). */
-// emit_point_puff: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a,
+// emit_point_puff: g_emit_point_spawn_fns spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a,
 // s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`, emitters spawn_ring_emit / spawn_line_emit / spawn_circle_random_emit):
 // queues one puff_sprite_spawn particle at (x, y, z): drift (x - x0, z - z0) * 10, size (s32) arg9 and (s32) (arg9 *
 // 0.1757) (double, the ROM's D_800A05F8), constants 150 / 20 / 600, two fx_pick_random_color colour triples of palette 0,

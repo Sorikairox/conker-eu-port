@@ -3,8 +3,8 @@
 \#^    if (vtx == NULL) {#s/==/!=/
 \#^    cam = camera_get_pos(id);#s/(id)/(0)/
 \#^    flag = 1;#s/1;/0;/
-\#^    gfx = gfx_load_texture_cached(gfx, D_80091120#s/0x2C/0x2D/
-\#^    gfx = gfx_load_texture_cached(gfx, D_80091120#s/&flag, 3/\&flag, 2/
+\#^    gfx = gfx_load_texture_cached(gfx, g_bolt_ribbon_texture#s/0x2C/0x2D/
+\#^    gfx = gfx_load_texture_cached(gfx, g_bolt_ribbon_texture#s/&flag, 3/\&flag, 2/
 \#^    gfx = gfx_env_color_cached(gfx, obj\[0x58\], obj\[0x59\]#s/obj\[0x59\]/obj[0x58]/
 \#^    gfx = gfx_env_color_cached(gfx, obj\[0x58\], obj\[0x59\]#s/obj\[0x5B\]/obj[0x5A]/
 \#^    gfx = gfx_geometry_mode_cached(gfx, 0x200005, 0x1F0600);#s/0x1F0600/0x1F0601/

@@ -1,5 +1,5 @@
-s/D_8009002C\[which\], \*D_80090034\[which\]/D_8009002C[0], *D_80090034[which]/
-s/D_8009002C\[which\], \*D_80090034\[which\]/D_8009002C[which], *D_80090034[0]/
+s/g_mouth_points\[which\], \*g_mouth_bones\[which\]/g_mouth_points[0], *g_mouth_bones[which]/
+s/g_mouth_points\[which\], \*g_mouth_bones\[which\]/g_mouth_points[which], *g_mouth_bones[0]/
 s/(s32)sp94, (s32)sp88, D_8009/(s32)sp88, (s32)sp94, D_8009/
 s/(u8 \*)sp7C,$/(u8 *)sp70,/
 s/(u8 \*\*)&hitB, NULL);/(u8 **)\&hitA, NULL);/

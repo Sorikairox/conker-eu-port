@@ -1,6 +1,6 @@
-s/D_800DBEF4) \/ 0xA0;/D_800DBEF4) \/ 0x50;/
+s/g_world_objs) \/ 0xA0;/g_world_objs) \/ 0x50;/
 s/s32 tries = 5;/s32 tries = 4;/
-s/f32 height = D_800A14F8\[0\];/f32 height = 0.0f;/
+s/f32 height = g_impact_no_height\[0\];/f32 height = 0.0f;/
 s/if (idx >= g_world_obj_count || idx < 0)/if (idx > g_world_obj_count || idx < 0)/
 s/if (idx >= g_world_obj_count || idx < 0)/if (idx >= g_world_obj_count || idx < -1)/
 s/collision_select_area(2);/collision_select_area(1);/
@@ -28,9 +28,9 @@ s/material = \*(s32 \*) (obj + 0x40);/material = *(s32 *) (obj + 0x44);/
 s/if (\*(s32 \*\*) (obj + 0x44) != NULL)/if (*(s32 **) (obj + 0x40) != NULL)/
 s/world_record_build_matrix(mtx, obj);/world_record_build_matrix(mtx, obj + 4);/
 s/if (tri != NULL) {/if (tri == NULL) {/
-s/world\[0\] = tri\[0\] + \*(s32 \*) (obj + 0x20 + D_800BE9C0 \* 4)/world[0] = tri[0] + *(s32 *) (obj + 0x20)/
+s/world\[0\] = tri\[0\] + \*(s32 \*) (obj + 0x20 + g_dl_buf_index \* 4)/world[0] = tri[0] + *(s32 *) (obj + 0x20)/
 s/world\[1\] = tri\[1\]/world[1] = tri[2]/
-s/world\[2\] = tri\[2\] + \*(s32 \*) (obj + 0x20 + D_800BE9C0 \* 4)/world[2] = tri[2] + *(s32 *) (obj + 0x24 + D_800BE9C0 * 4)/
+s/world\[2\] = tri\[2\] + \*(s32 \*) (obj + 0x20 + g_dl_buf_index \* 4)/world[2] = tri[2] + *(s32 *) (obj + 0x24 + g_dl_buf_index * 4)/
 s/mtxf_transform_point(mtx, v\[0\], v\[1\], v\[2\]/mtxf_transform_point(mtx, v[0], v[2], v[1]/
 s/verts\[i\]\[0\] = ox;/verts[i][0] = oy;/
 s/verts\[i\]\[2\] = oz;/verts[i][3] = oz;/

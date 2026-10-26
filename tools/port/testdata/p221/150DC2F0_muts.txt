@@ -3,28 +3,28 @@ s/    d.u40 = 0;/    d.u40 = 1;/
 s/    spec.flags = 0;//
 s/    d.u34 = 0;/    d.u34 = 2;/
 s/            spec.y = 115.0f;/            spec.y = 116.0f;/
-s/            d.u24 = D_800A102C;/            d.u24 = D_800A1028;/
-s/            spec.z = D_800A1038;/            spec.z = D_800A1034;/
+s/            d.u24 = g_itemfx_k0_u24;/            d.u24 = g_itemfx_k0_z;/
+s/            spec.z = g_itemfx_k5_z;/            spec.z = g_itemfx_k5_y;/
 s/        d.pos\[1\] = spec.z;/        d.pos[1] = spec.y;/
 s/        d.u80 = -185.0f;/        d.u80 = 185.0f;/
 s/        d.uF0 = 173.0f;/        d.uF0 = 172.0f;/
 s/        d.u88 = 0x181;/        d.u88 = 0x180;/
 s/        d.uEE = 0x135;/        d.uEE = 0x136;/
-s/        d.anim2 = D_80090778;/        d.anim2 = D_800907C4;/
+s/        d.anim2 = g_itemfx_anim_a;/        d.anim2 = g_itemfx_anim_b;/
 s/        d.uFC = -1;/        d.uFC = 1;/
 s/        d.u00 = 6.0f;/        d.u00 = 7.0f;/
 s/        d.u10C = 100.0f;/        d.u10C = 101.0f;/
 s/        obj = obj_find_by_setup_id(6);/        obj = obj_find_by_setup_id(5);/
 s/== 6) ? 498.0f : -37.0f;/== 7) ? 498.0f : -37.0f;/
 s/        spec.y = 736.0f;/        spec.y = 737.0f;/
-s/            spec.z = D_800A1070;/            spec.z = D_800A106C;/
+s/            spec.z = g_itemfx_k1_z;/            spec.z = g_itemfx_k1_x;/
 s/        } else if (kind == 3) {/        } else if (kind == 4) {/
-s/            spec.x = D_800A107C;/            spec.x = D_800A1078;/
-s/        d.u38 = D_800A108C;/        d.u38 = D_800A1088;/
+s/            spec.x = g_itemfx_k3_x;/            spec.x = g_itemfx_k3_z;/
+s/        d.u38 = g_itemfx_b_u38;/        d.u38 = g_itemfx_b_u30;/
 s/        d.uBC = 2.75f;/        d.uBC = 2.5f;/
 s/        spec.u15 = 0x1E;/        spec.u15 = 0x1F;/
 s/        spec.flags |= 1;/        spec.flags = 3;/
-s/        d.u104 = D_800A10BC;/        d.u104 = D_800A10B8;/
+s/        d.u104 = g_itemfx_b_u104;/        d.u104 = g_itemfx_b_ue0;/
 s/        d.uF8 = 0xAB;/        d.uF8 = 0xAC;/
 s/        d.uFC = 0xC;/        d.uFC = 0xD;/
 s/        d.u8C = 500.0f;/        d.u8C = 501.0f;/

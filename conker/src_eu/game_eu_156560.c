@@ -5,10 +5,10 @@
 
 void math_spring_approach(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 extern s32 D_800D2DB4;
-extern f32 D_80089890[][5]; /* camera lean presets: {k0, k1, k2, k3, base} per +0x134 index */
+extern f32 g_camera_lean_presets[][5]; /* camera lean presets: {k0, k1, k2, k3, base} per +0x134 index; was D_80089890 */
 
 /* camera_lean_from_heading: computes the camera's two lean offsets from its heading +0x390 (degrees) and the
- * lean preset D_80089890[+0x134] (+0x134 is forced to 0 for this call when +0x2C & 0x40, then restored).
+ * lean preset g_camera_lean_presets[+0x134] (+0x134 is forced to 0 for this call when +0x2C & 0x40, then restored).
  * The second offset scales with the speed term s = (+0x3D0)->+0x3C capped at 30 (0 when +0x23C is set or k0 == k2).
  *  - With D_800D2DB4 set, or when mode +0x73C is 0 / 3 and (+0x3D4)->+0x120 is set, both offsets ease back to 0
  *    (+0x5E8 / +0x660 at 6 / 9, +0x3A8 / +0x65C at 1.5 / 2.5) and the function returns (+0x134 not restored).
@@ -39,7 +39,7 @@ void camera_lean_from_heading(struct108 *arg0, f32 *outB, f32 *outA) {
         math_spring_approach((f32 *)(p + 0x3A8), 0.0f, (f32 *)(p + 0x65C), 1.5f, 2.5f, *(f32 *)(p + 0x7B4));
         return;
     }
-    e = D_80089890[*(s32 *)(p + 0x134)];
+    e = g_camera_lean_presets[*(s32 *)(p + 0x134)];
     k0 = e[0];
     if (p[0x23C] != 0 || k0 == e[2]) {
         speed = 0.0f;

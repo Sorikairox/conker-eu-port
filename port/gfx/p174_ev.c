@@ -105,12 +105,12 @@ s32 __wrap_event_native_query(s32 *args) {
 }
 /* native 6: game-state actions D_80088874[n - 1](id & 0xFFFF0FFF, args[1], args) */
 s32 __real_event_native_action(s32 *args);
-extern u8 D_800877B0[]; extern s32 D_800D3268; extern u8 *D_800D2E4C; void *event_find(s32);
+extern u8 D_800877B0[]; extern s32 D_800D3268; extern u8 *g_save_progress_bits; void *event_find(s32); /* was D_800D2E4C */
 static void p178fin(const char *w, s32 id) {   /* P178: state around action 1 (finish event) */
     u8 *e = (u8 *)event_find(id);
     port_log("[p178bf] frame %u %s 5%03X(1): 877B0[1] %u running %X save[%X] %02x bit %u ev %08x flags %04x\n", port_frame_count, w,
              (unsigned)id, vbe_ld8(D_800877B0 + 1), (unsigned)D_800D3268, (unsigned)(id >> 3),
-             D_800D2E4C ? vbe_ld8(D_800D2E4C + (id >> 3)) : 0xFFu, (unsigned)(id & 7), (unsigned)(uintptr_t)e, e ? vbe_ld16(e) : 0);
+             g_save_progress_bits ? vbe_ld8(g_save_progress_bits + (id >> 3)) : 0xFFu, (unsigned)(id & 7), (unsigned)(uintptr_t)e, e ? vbe_ld16(e) : 0);
 }
 s32 __wrap_event_native_action(s32 *args) {
     static unsigned nf;
@@ -132,14 +132,14 @@ s32 __wrap_event_native_action(s32 *args) {
 }
 
 /* P174 ?p174ev: pointer probe before objects_update_visibility (game_83300.c; it calls obj_check_visible per active object): the
- * pointers obj_check_visible dereferences (obj +0x144, D_800D2104[obj +0x13F] if D_800D2528[obj +0x13F], D_800D1C90[id]),
+ * pointers obj_check_visible dereferences (obj +0x144, g_path_points[obj +0x13F] if D_800D2528[obj +0x13F], D_800D1C90[id]),
  * logged when outside the wasm memory (raw N64 addresses / garbage) - the trap at 10732 with ?p174fix (scene 3 of
  * level 0x18). Up to 40 lines. */
 extern u8 g_objects[]; /* was D_800CC2D0 */
-extern s32 *D_800D2104;
+extern s32 *g_path_points; /* was D_800D2104 */
 extern u8 *D_800D2528;
 extern u8 *D_800D1C90[];
-extern s32 D_80082FA0;
+extern s32 g_last_player_index; /* was D_80082FA0 */
 static int badp(unsigned p) { return p != 0 && (p < 0x1000 || p >= 0x16000000u); }
 void __real_objects_update_visibility(void);
 void __wrap_objects_update_visibility(void) {
@@ -147,21 +147,21 @@ void __wrap_objects_update_visibility(void) {
         static unsigned nlog, nfr;
         if (port_frame_count >= 10731 && nfr < 16) {
             char b[1600]; int k = 0;
-            for (int i = 0; i < 0x19; i++) { u8 *o = g_objects + 0x32C * i; if (*(s32 *)o) k += snprintf(b + k, sizeof b - k, " %d:id%u/74=%x/13F=%u/on%u/p%08x", i, vbe_ld8(o + 4), vbe_ld8(o + 0x74), vbe_ld8(o + 0x13F), D_800D2528 ? vbe_ld8(D_800D2528 + vbe_ld8(o + 0x13F)) : 99, D_800D2104 ? (unsigned)D_800D2104[vbe_ld8(o + 0x13F)] : 0); }
-            k += snprintf(b + k, sizeof b - k, " | D2528 %08x D2104 %08x", (unsigned)(uintptr_t)D_800D2528, (unsigned)(uintptr_t)D_800D2104);
-            nfr++; port_log("[p174ptr] frame %u D_80082FA0 %d objs%s\n", port_frame_count, D_80082FA0, b);
+            for (int i = 0; i < 0x19; i++) { u8 *o = g_objects + 0x32C * i; if (*(s32 *)o) k += snprintf(b + k, sizeof b - k, " %d:id%u/74=%x/13F=%u/on%u/p%08x", i, vbe_ld8(o + 4), vbe_ld8(o + 0x74), vbe_ld8(o + 0x13F), D_800D2528 ? vbe_ld8(D_800D2528 + vbe_ld8(o + 0x13F)) : 99, g_path_points ? (unsigned)g_path_points[vbe_ld8(o + 0x13F)] : 0); }
+            k += snprintf(b + k, sizeof b - k, " | D2528 %08x D2104 %08x", (unsigned)(uintptr_t)D_800D2528, (unsigned)(uintptr_t)g_path_points);
+            nfr++; port_log("[p174ptr] frame %u D_80082FA0 %d objs%s\n", port_frame_count, g_last_player_index, b);
         }
         for (int i = 0; i < 0x19 && nlog < 40; i++) {
             u8 *o = g_objects + 0x32C * i;
             if (*(s32 *)o == 0) continue;
             unsigned id = vbe_ld8(o + 4), k = vbe_ld8(o + 0x13F), p144 = *(unsigned *)(o + 0x144);
-            unsigned on2528 = D_800D2528 ? vbe_ld8(D_800D2528 + k) : 0xFFFF, p2104 = D_800D2104 ? (unsigned)D_800D2104[k] : 0;
+            unsigned on2528 = D_800D2528 ? vbe_ld8(D_800D2528 + k) : 0xFFFF, p2104 = g_path_points ? (unsigned)g_path_points[k] : 0;
             unsigned p1c90 = (unsigned)(uintptr_t)D_800D1C90[id];
-            if (badp(p144) || badp(p1c90) || badp((unsigned)(uintptr_t)D_800D2528) || badp((unsigned)(uintptr_t)D_800D2104) ||
+            if (badp(p144) || badp(p1c90) || badp((unsigned)(uintptr_t)D_800D2528) || badp((unsigned)(uintptr_t)g_path_points) ||
                 (on2528 && on2528 != 0xFFFF && badp(p2104)))
                 nlog++, port_log("[p174ptr] frame %u obj %d state %d id %u +144 %08x 13F %u D2528 %08x [%u] D2104 %08x [%08x] D1C90[id] %08x\n",
                                  port_frame_count, i, *(s32 *)o, id, p144, k, (unsigned)(uintptr_t)D_800D2528, on2528,
-                                 (unsigned)(uintptr_t)D_800D2104, p2104, p1c90);
+                                 (unsigned)(uintptr_t)g_path_points, p2104, p1c90);
         }
     }
     __real_objects_update_visibility();

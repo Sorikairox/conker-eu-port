@@ -1,12 +1,12 @@
-s/                s = D_80087764\[k & 3\] << 5;/                s = D_80087764[k \& 3] << 4;/
-s/                t = D_80087768\[k >> 2\] << 5;/                t = D_80087768[k >> 1] << 5;/
+s/                s = g_mp_hud_place_digit_s\[k & 3\] << 5;/                s = g_mp_hud_place_digit_s[k \& 3] << 4;/
+s/                t = g_mp_hud_place_digit_t\[k >> 2\] << 5;/                t = g_mp_hud_place_digit_t[k >> 1] << 5;/
 s/(table\[5\] + ix) \* 4, (table\[7\] + y) \* 4,/(table[5] + ix) * 4, (table[8] + y) * 4,/
 s/                ix = (width >> 1) + x - 8;/                ix = (width >> 1) + x - 9;/
 s/                    ix -= 8;/                    ix -= 7;/
-s/(s32)D_8009E0B8, \*(s16 \*)(D_80090174 + 0x46 + p \* 2));/(s32)D_8009E0B8, *(s16 *)(D_80090174 + 0x44 + p * 2));/
+s/(s32)g_str_mp_hud_score, \*(s16 \*)(g_menu_state + 0x46 + p \* 2));/(s32)g_str_mp_hud_score, *(s16 *)(g_menu_state + 0x44 + p * 2));/
 s/                ix = (width >> 1) + x + 16;/                ix = (width >> 1) + x + 15;/
 s/                    ix += 16;/                    ix += 17;/
-s/(s32)D_8009E0BC, ((u8 \*\*)D_800E1008)\[8 + D_800E0EF0\[p\]\]);/(s32)D_8009E0BC, ((u8 **)D_800E1008)[9 + D_800E0EF0[p]]);/
+s/(s32)g_str_mp_hud_paren_name, ((u8 \*\*)g_text_strings)\[8 + g_mp_placings\[p\]\]);/(s32)g_str_mp_hud_paren_name, ((u8 **)g_text_strings)[9 + g_mp_placings[p]]);/
 s/    if (D_80090160 & 0x14) {/    if (D_80090160 \& 0x04) {/
 s/            right = view->unk30 - f;/            right = view->unk30 + f;/
 s/            y = f + view->unk24;/            y = f + view->unk28;/
@@ -27,8 +27,8 @@ s/                    if (g_level_id == 0x1A) {/                    if (g_level_
 s/                        toff = 4;/                        toff = 5;/
 s/                if (obj->unk13C) {/                if (0) {/
 s/                    ix = (right - table\[25\]) \* 4;/                    ix = (right - table[24]) * 4;/
-s/                    h = table\[D_8008775C\[row\]\] \* 4;/                    h = table[D_8008775C[row] + 1] * 4;/
-s/                    t = D_80087754\[row\] << 5;/                    t = D_80087754[row + 1] << 5;/
+s/                    h = table\[g_mp_hud_icon_row_h_idx\[row\]\] \* 4;/                    h = table[g_mp_hud_icon_row_h_idx[row] + 1] * 4;/
+s/                    t = g_mp_hud_icon_row_t\[row\] << 5;/                    t = g_mp_hud_icon_row_t[row + 1] << 5;/
 s/                        dy = 4;/                        dy = 0;/
 s/                        h -= 8;/                        h -= 4;/
 s/                        h -= 4;/                        h -= 0;/

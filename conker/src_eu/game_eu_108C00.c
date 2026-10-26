@@ -4,7 +4,7 @@
 
 
 // limb_trail_effect_spawn: spawns a type 0x17 effect record (effect3d_spawn_default) along the limb `idx` of obj's skeleton
-// (obj + 0x1D4, 0x40-byte matrices): the two limb points D_80088CB0[idx] / D_80088CBC[idx] are transformed by the
+// (obj + 0x1D4, 0x40-byte matrices): the two limb points g_joint_beam_start_pts[idx] / g_joint_beam_end_pts[idx] are transformed by the
 // limb's matrix (mtx_transform_point_or_origin), their scaled difference gives the direction; nothing is spawned when its XZ length
 // is below D_800A0FB0. The record gets the start point and the normalised XZ direction, and its fields 0x110..0x138
 // come from the per-limb tables (direction, speeds, scales, mode byte).
@@ -27,17 +27,17 @@ typedef struct {
     /* 0x46 */ u8 pad46[2];
 } EffSpawn150DB3F0;
 
-extern f32 D_80088CB0[][3];  // limb start point (limb space)
-extern f32 D_80088CBC[][3];  // limb end point (limb space)
-extern s32 D_80088CC8[];     // limb matrix index
-extern f32 D_80088CCC[];     // direction scale
-extern s16 D_80088CD0[];     // record lifetime
-extern f32 D_80088CD4[];     // record +0x11C
-extern f32 D_80088CD8[];     // record +0x120
-extern f32 D_80088CDC[];     // record +0x134
-extern u8 D_80088CE0[];      // record +0x138
-extern f32 D_80088CE4[];     // record +0x12C
-extern f32 D_80088CE8[];     // record +0x130
+extern f32 g_joint_beam_start_pts[][3]; /* was D_80088CB0 */ // limb start point (limb space)
+extern f32 g_joint_beam_end_pts[][3]; /* was D_80088CBC */ // limb end point (limb space)
+extern s32 g_joint_beam_bone[]; /* was D_80088CC8 */ // limb matrix index
+extern f32 g_joint_beam_dir_scale[]; /* was D_80088CCC */ // direction scale
+extern s16 g_joint_beam_lifetime[]; /* was D_80088CD0 */ // record lifetime
+extern f32 g_joint_beam_f11c[]; /* was D_80088CD4 */ // record +0x11C
+extern f32 g_joint_beam_f120[]; /* was D_80088CD8 */ // record +0x120
+extern f32 g_joint_beam_f134[]; /* was D_80088CDC */ // record +0x134
+extern u8 g_joint_beam_b138[]; /* was D_80088CE0 */ // record +0x138
+extern f32 g_joint_beam_f12c[]; /* was D_80088CE4 */ // record +0x12C
+extern f32 g_joint_beam_f130[]; /* was D_80088CE8 */ // record +0x130
 
 /* was func_150DB3F0 */
 void joint_beam_spawn(u8 *obj, s32 idx, u8 group, s32 arg3) {
@@ -59,10 +59,10 @@ void joint_beam_spawn(u8 *obj, s32 idx, u8 group, s32 arg3) {
     if (bones == NULL) {
         return;
     }
-    mtx = bones + (D_80088CC8[idx] << 6);
-    mtx_transform_point_or_origin(D_80088CB0[idx], a, mtx);
-    mtx_transform_point_or_origin(D_80088CBC[idx], b, mtx);
-    scale = D_80088CCC[idx];
+    mtx = bones + (g_joint_beam_bone[idx] << 6);
+    mtx_transform_point_or_origin(g_joint_beam_start_pts[idx], a, mtx);
+    mtx_transform_point_or_origin(g_joint_beam_end_pts[idx], b, mtx);
+    scale = g_joint_beam_dir_scale[idx];
     dir[0] = scale * (b[0] - a[0]);
     dir[1] = scale * (b[1] - a[1]);
     dir[2] = scale * (b[2] - a[2]);
@@ -82,7 +82,7 @@ void joint_beam_spawn(u8 *obj, s32 idx, u8 group, s32 arg3) {
     spec.rgba[0] = 0xC8;
     spec.rgba[3] = 0xC8;
     spec.flags = 0x401;
-    spec.span = D_80088CD0[idx];
+    spec.span = g_joint_beam_lifetime[idx];
     spec.pos[0] = a[0];
     spec.pos[1] = a[1];
     spec.pos[2] = a[2];
@@ -97,19 +97,19 @@ void joint_beam_spawn(u8 *obj, s32 idx, u8 group, s32 arg3) {
         *(f32 *) (rec + 0x110) = dir[0];
         *(f32 *) (rec + 0x114) = dir[1];
         *(f32 *) (rec + 0x118) = dir[2];
-        *(f32 *) (rec + 0x11C) = D_80088CD4[idx];
-        *(f32 *) (rec + 0x120) = D_80088CD8[idx];
-        *(f32 *) (rec + 0x12C) = D_80088CE4[idx];
+        *(f32 *) (rec + 0x11C) = g_joint_beam_f11c[idx];
+        *(f32 *) (rec + 0x120) = g_joint_beam_f120[idx];
+        *(f32 *) (rec + 0x12C) = g_joint_beam_f12c[idx];
         *(f32 *) (rec + 0x124) = 1.0f;
         *(f32 *) (rec + 0x128) = 1.0f;
-        *(f32 *) (rec + 0x130) = D_80088CE8[idx];
-        *(f32 *) (rec + 0x134) = D_80088CDC[idx];
-        rec[0x138] = D_80088CE0[idx];
+        *(f32 *) (rec + 0x130) = g_joint_beam_f130[idx];
+        *(f32 *) (rec + 0x134) = g_joint_beam_f134[idx];
+        rec[0x138] = g_joint_beam_b138[idx];
     }
 }
 
-extern f32 D_800A0FB4;
-extern f32 D_800A0FB8;
+extern f32 g_beam_motion_max; /* was D_800A0FB4 */
+extern f32 g_beam_motion_min; /* was D_800A0FB8 */
 /* was func_150DB694 */
 s32 beam_motion_step(u8 *arg0) {
     f32 temp_f0;
@@ -123,29 +123,29 @@ s32 beam_motion_step(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x110)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x110)) * temp_f0);
     (*(f32 *)((u8 *)arg0 + 0x114)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x114)) * temp_f0);
     (*(f32 *)((u8 *)arg0 + 0x118)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x118)) * temp_f0);
-    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((*(f32 *)((u8 *)arg0 + 0x110)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((*(f32 *)((u8 *)arg0 + 0x114)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((*(f32 *)((u8 *)arg0 + 0x118)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x124)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x124)) + ((*(f32 *)((u8 *)arg0 + 0x12C)) * D_800BE9A4));
-    if ((*(f32 *)((u8 *)arg0 + 0x124)) > D_800A0FB4) {
+    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((*(f32 *)((u8 *)arg0 + 0x110)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((*(f32 *)((u8 *)arg0 + 0x114)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((*(f32 *)((u8 *)arg0 + 0x118)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x124)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x124)) + ((*(f32 *)((u8 *)arg0 + 0x12C)) * g_frame_step_f));
+    if ((*(f32 *)((u8 *)arg0 + 0x124)) > g_beam_motion_max) {
         var_v0 = arg0 + 0x110;
-        (*(f32 *)((u8 *)var_v0 + 0x14)) = D_800A0FB4;
+        (*(f32 *)((u8 *)var_v0 + 0x14)) = g_beam_motion_max;
         (*(f32 *)((u8 *)var_v0 + 0x1C)) = (f32) -(*(f32 *)((u8 *)var_v0 + 0x1C));
-    } else if ((*(f32 *)((u8 *)var_v0 + 0x14)) < D_800A0FB8) {
-        (*(f32 *)((u8 *)var_v0 + 0x14)) = D_800A0FB8;
+    } else if ((*(f32 *)((u8 *)var_v0 + 0x14)) < g_beam_motion_min) {
+        (*(f32 *)((u8 *)var_v0 + 0x14)) = g_beam_motion_min;
         (*(f32 *)((u8 *)var_v0 + 0x1C)) = (f32) -(*(f32 *)((u8 *)var_v0 + 0x1C));
     }
     temp_f0_2 = (*(f32 *)((u8 *)var_v0 + 0x20));
-    (*(f32 *)((u8 *)var_v0 + 0x18)) = (f32) ((*(f32 *)((u8 *)var_v0 + 0x18)) + (temp_f0_2 * D_800BE9A4));
+    (*(f32 *)((u8 *)var_v0 + 0x18)) = (f32) ((*(f32 *)((u8 *)var_v0 + 0x18)) + (temp_f0_2 * g_frame_step_f));
     temp_f2 = (*(f32 *)((u8 *)var_v0 + 0x18));
-    if (temp_f2 > D_800A0FB4) {
-        (*(f32 *)((u8 *)var_v0 + 0x18)) = D_800A0FB4;
+    if (temp_f2 > g_beam_motion_max) {
+        (*(f32 *)((u8 *)var_v0 + 0x18)) = g_beam_motion_max;
         (*(f32 *)((u8 *)var_v0 + 0x20)) = (f32) -temp_f0_2;
-    } else if (temp_f2 < D_800A0FB8) {
-        (*(f32 *)((u8 *)var_v0 + 0x18)) = D_800A0FB8;
+    } else if (temp_f2 < g_beam_motion_min) {
+        (*(f32 *)((u8 *)var_v0 + 0x18)) = g_beam_motion_min;
         (*(f32 *)((u8 *)var_v0 + 0x20)) = (f32) -temp_f0_2;
     }
-    (*(f32 *)((u8 *)var_v0 + 0xC)) = (f32) ((*(f32 *)((u8 *)var_v0 + 0xC)) + ((*(f32 *)((u8 *)var_v0 + 0x10)) * D_800BE9A4));
+    (*(f32 *)((u8 *)var_v0 + 0xC)) = (f32) ((*(f32 *)((u8 *)var_v0 + 0xC)) + ((*(f32 *)((u8 *)var_v0 + 0x10)) * g_frame_step_f));
     (*(f32 *)((u8 *)arg0 + 0x2C)) = (f32) ((*(f32 *)((u8 *)var_v0 + 0xC)) * (*(f32 *)((u8 *)var_v0 + 0x14)));
     (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) ((*(f32 *)((u8 *)var_v0 + 0xC)) * (*(f32 *)((u8 *)var_v0 + 0x18)));
     temp_v1 = (*(u8 *)((u8 *)arg0 + 0x5C)) - (*(u8 *)((u8 *)var_v0 + 0x28));

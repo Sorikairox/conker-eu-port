@@ -14,4 +14,4 @@ s/        object_hit_effects(g_objects, 1, 1, 1, 1, 0, 0xFF, 1);/        object_
 s/        obj_set_destroyed(g_objects);/        ;/ % last
 s/        player_hit_reaction(g_objects, 6);/        player_hit_reaction(g_objects, 5);/ % last
 s/        actor_sound_play(0x627, g_objects, 0x7FFF, 0xC8, 0x2BC);/        actor_sound_play(0x628, g_objects, 0x7FFF, 0xC8, 0x2BC);/ % last
-s/(item - (s32) D_800DBEF4) \/ 160\] \& 1) {/((u32) item - (u32) D_800DBEF4) \/ 160] \& 1) {/ % neg
+s/(item - (s32) g_world_objs) \/ 160\] \& 1) {/((u32) item - (u32) g_world_objs) \/ 160] \& 1) {/ % neg

@@ -38,12 +38,12 @@ u8 *path_record_create(u8 *def, s32 extra, u8 arg2, s32 arg3) {
     return rec;
 }
 
-extern s32 (*D_8008FCE0[])(u8 *);
-extern s32 (*D_8008FCE8[])(u8 *);
+extern s32 (*g_bolt_path_end_fns_a[])(u8 *); /* was D_8008FCE0 */
+extern s32 (*g_bolt_path_end_fns_b[])(u8 *); /* was D_8008FCE8 */
 void bolt_subdivide(u8 *obj, s16 lo, s16 hi, f32 amp, s16 depth);
 
 // bolt_path_update: per-frame update of a lightning bolt path record (path_record_create). Flag 1 counts the lifetime at
-// +0x10 down (done below 0); the hooks D_8008FCE0[+0x2C] / D_8008FCE8[+0x2D] (-1 = none) end it by returning 0.
+// +0x10 down (done below 0); the hooks g_bolt_path_end_fns_a[+0x2C] / g_bolt_path_end_fns_b[+0x2D] (-1 = none) end it by returning 0.
 // While alive, the +0x68 timer counts down; at 0 the points are re-jittered (bolt_subdivide over [0, count - 1],
 // amplitude +0x20, depth 100) and the timer restarts at +0x14 + rand * +0x18. Flag 2 then maps every point (stride
 // 0x18: local x, y, z at +0, world at +0xC) from the local frame (x: side axis from vec3_cross * +0x58 scale, y: +0x48 up, z: end +0x3C - start +0x30)
@@ -61,19 +61,19 @@ void bolt_path_update(u8 *obj) {
     s32 done = 0;
 
     if (obj[0x1C] & 1) {
-        *(s16 *) (obj + 0x10) -= D_800BE9E4;
+        *(s16 *) (obj + 0x10) -= g_frame_ticks;
         if (*(s16 *) (obj + 0x10) < 0) {
             done = 1;
         }
     }
     if ((s8) obj[0x2C] != -1 && !done) {
-        done = D_8008FCE0[(s8) obj[0x2C]](obj) == 0;
+        done = g_bolt_path_end_fns_a[(s8) obj[0x2C]](obj) == 0;
     }
     if ((s8) obj[0x2D] != -1 && !done) {
-        done = D_8008FCE8[(s8) obj[0x2D]](obj) == 0;
+        done = g_bolt_path_end_fns_b[(s8) obj[0x2D]](obj) == 0;
     }
     if (!done) {
-        *(f32 *) (obj + 0x68) -= D_800BE9A4;
+        *(f32 *) (obj + 0x68) -= g_frame_step_f;
         if (*(f32 *) (obj + 0x68) < 0.0f) {
             bolt_subdivide(obj, 0, *(s16 *) (obj + 0x12) - 1, *(f32 *) (obj + 0x20), 100);
             *(f32 *) (obj + 0x68) = random_float() * *(f32 *) (obj + 0x18) + *(f32 *) (obj + 0x14);
@@ -111,8 +111,8 @@ s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *
 u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 void segment_closest_point(void *, void *, void *, void *, f32 *);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
-extern s32 D_80091120;
-extern s32 D_800D30BC;
+extern s32 g_bolt_ribbon_texture; /* was D_80091120 */
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 /* was func_151A831C */
 u8 *bolt_path_draw(u8 *arg0, u8 *arg1, s16 arg2) {
@@ -176,7 +176,7 @@ u8 *bolt_path_draw(u8 *arg0, u8 *arg1, s16 arg2) {
             temp_v1 = ((u8 *)&g_render_mode_pairs);
             temp_t0 = (*(u8 **)((u8 *)arg1 + 0x64));
             temp_lo = sp.u84 * 0x18;
-            var_s0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_env_color_cached(gfx_geometry_mode_cached(gfx_load_texture_cached(var_s0, &D_80091120, 0, 0, 0, 0, 0x2C, 0, 0, &sp.u87, 3), 0x200005, 0x1F0600), (*(u8 *)((u8 *)arg1 + 0x24)), (*(u8 *)((u8 *)arg1 + 0x25)), (*(u8 *)((u8 *)arg1 + 0x26)), (s32) (*(u8 *)((u8 *)arg1 + 0x27)), &sp.u87), 0x19, &sp.u87), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.u87);
+            var_s0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_env_color_cached(gfx_geometry_mode_cached(gfx_load_texture_cached(var_s0, &g_bolt_ribbon_texture, 0, 0, 0, 0, 0x2C, 0, 0, &sp.u87, 3), 0x200005, 0x1F0600), (*(u8 *)((u8 *)arg1 + 0x24)), (*(u8 *)((u8 *)arg1 + 0x25)), (*(u8 *)((u8 *)arg1 + 0x26)), (s32) (*(u8 *)((u8 *)arg1 + 0x27)), &sp.u87), 0x19, &sp.u87), g_gfx_tlut_mode | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.u87);
             sp.uB4 = (*(f32 *)((u8 *)temp_t0 + 0xC)) - (*(f32 *)((u8 *)((temp_t0 + temp_lo)) + 0xC));
             temp_t0_2 = (*(u8 **)((u8 *)arg1 + 0x64));
             sp.uB8 = (*(f32 *)((u8 *)temp_t0_2 + 0x10)) - (*(f32 *)((u8 *)((temp_t0_2 + temp_lo)) + 0x10));
@@ -312,7 +312,7 @@ void bolt_path_release_buffers(u8 *arg0) {
 /* was func_151A8B34 */
 void bolt_path_retire(u8 *arg0) {
     u8 *new_var; // fakematch: permuter temp
-    void (*fn)(void *) = D_8008FCEC[arg0[0x5C]];
+    void (*fn)(void *) = g_bolt_path_retire_fns[arg0[0x5C]];
     new_var = arg0;
     if (fn != NULL) {
         if (!arg0) { // fakematch: permuter empty branch
@@ -326,7 +326,7 @@ void bolt_path_retire(u8 *arg0) {
 /* was func_151A8B84 */
 void bolt_path_free(u8 *arg0) {
     u8 *new_var; // fakematch: permuter temp
-    void (*fn)(void *) = D_8008FCF8[arg0[0x5C]];
+    void (*fn)(void *) = g_bolt_path_free_fns[arg0[0x5C]];
     new_var = arg0;
     if (fn != NULL) {
         if (!arg0) { // fakematch: permuter empty branch
@@ -339,7 +339,7 @@ void bolt_path_free(u8 *arg0) {
 
 // File-scope .rodata table (0x170 bytes); bolt_attach_create reads its first word (79.75f).
 // rodata_inject: cdefined 0x24E440 0x24E5B0
-const u32 D_800A91C0[92] = {
+const u32 g_bolt_attach_rodata[92] = { /* was D_800A91C0 */
     0x429F8000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x3F800000,
     0x00000000, 0x00000000, 0x00320000, 0x00320000, 0x00FF0000, 0x000100FF,
     0x3F800000, 0x00000000, 0x00000000, 0x3F4D0E57, 0x3F66A7F0, 0x3F67EF9E,
@@ -428,7 +428,7 @@ u8 *bolt_attach_create(u8 *obj, V3BD4 *pos, u8 idx, s16 kind, f32 f4, f32 f8, C4
         t = 1;
     }
     s.uC = t;
-    s.f10 = *(f32 *)D_800A91C0;
+    s.f10 = *(f32 *)g_bolt_attach_rodata;
     s.c14 = *c;
     s.f18 = f18;
     if (k != 0 && k == 1) {
@@ -533,7 +533,7 @@ void bolt_path_handle_msg(u8 *arg0, s32 arg1, u8 arg2) {
     if (idx >= 3) {
         idx = 0;
     }
-    fn = (void (*)(u8 *, s32, u8))D_8008FD04[idx];
+    fn = (void (*)(u8 *, s32, u8))g_bolt_path_msg_fns[idx];
     if (fn != NULL) {
         fn(arg0, arg1, arg2);
     }
@@ -649,9 +649,9 @@ s32 player_mask_hides_all(s32);
 void ground_emitter_point_bone(u8 *arg0, u8 *arg1, f32 *arg2, s32 arg3);
 void ground_emitter_point_disc(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 typedef s32 (*Fn929C)(u8 *);
-extern Fn929C D_8008FD20[];
+extern Fn929C g_ground_emitter_end_fns[]; /* was D_8008FD20 */
 typedef void (*Fn929C2)(u8 *, f32 *, f32, u8);
-extern Fn929C2 D_8008FD10[];
+extern Fn929C2 g_ground_emitter_point_fns[]; /* was D_8008FD10 */
 
 typedef struct {
     u8 flags;
@@ -674,7 +674,7 @@ void ground_emitter_update(u8 *arg0) {
     void (*fn)(u8 *, f32 *, f32 *, f32 *);
 
     p = (P929C *)(arg0 + 0x28);
-    if (*(s8 *)(arg0 + 0x4D) != -1 && !D_8008FD20[(s8)arg0[0x4D]](arg0)) {
+    if (*(s8 *)(arg0 + 0x4D) != -1 && !g_ground_emitter_end_fns[(s8)arg0[0x4D]](arg0)) {
         *(s16 *)(arg0 + 0xE) = -1;
         return;
     }
@@ -684,7 +684,7 @@ void ground_emitter_update(u8 *arg0) {
     if (!(p->flags & 1)) {
         return;
     }
-    p->acc += (p->f8 + random_float() * p->fC) * D_800BE9A4 * p->f54;
+    p->acc += (p->f8 + random_float() * p->fC) * g_frame_step_f * p->f54;
     if (p->acc > 1.0f) {
         f32 pos[3];
         f32 y;
@@ -708,7 +708,7 @@ void ground_emitter_update(u8 *arg0) {
                 flag = 1;
             }
             if (p->s26 != -1) {
-                D_8008FD10[p->s26](arg0, pos, w, flag);
+                g_ground_emitter_point_fns[p->s26](arg0, pos, w, flag);
             }
             p->acc -= 1.0f;
         } while (p->acc > 1.0f);
@@ -744,7 +744,7 @@ void ground_emitter_handle_msg(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-extern s32 (*D_8008FD24[])(u8 *, s32);
+extern s32 (*g_obj_effect_dispatch_fns[])(u8 *, s32); /* was D_8008FD24 */
 
 /* was func_151A9610 */
 s32 obj_effect_dispatch(u8 *arg0) {
@@ -756,7 +756,7 @@ s32 obj_effect_dispatch(u8 *arg0) {
     if (i < 0 || i >= 8) {
         return 1;
     }
-    fn = D_8008FD24[i];
+    fn = g_obj_effect_dispatch_fns[i];
     if (fn != NULL) {
         fn(arg0, i);
     }
@@ -764,7 +764,7 @@ s32 obj_effect_dispatch(u8 *arg0) {
 }
 
 /* P241: readable C for object_effect_kind2_start (game_eu_1D5710, 59 insns). */
-// object_effect_kind2_start: handler of D_8008FD24 entries 0..5 (`(u8 *, s32)`, dispatcher obj_effect_dispatch ignores the
+// object_effect_kind2_start: handler of g_obj_effect_dispatch_fns entries 0..5 (`(u8 *, s32)`, dispatcher obj_effect_dispatch ignores the
 // result): spawns a kind-2 effect owned by obj through ground_emitter_spawn (1 byte of extra data) with the two values
 // 1.4e-6 / 8e-7 for an odd table index or 4e-7 / 6e-7 for an even one (the ELF's D_800A9338 / D_800A9340 and
 // D_800A933C / D_800A9344), and stores the index byte in the new record at +0x80. The asm leaves the spawn block's
@@ -811,7 +811,7 @@ typedef struct {
     s16 u24;
 } Spawn975C;
 typedef struct { s16 v[3]; } Tbl975C;
-extern Tbl975C D_8008FD44;
+extern Tbl975C g_ground_emitter_sprites; /* was D_8008FD44 */
 
 /* was func_151A975C */
 void ground_emitter_spawn_sprite(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
@@ -820,7 +820,7 @@ void ground_emitter_spawn_sprite(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
     f32 f;
     Tbl975C t;
 
-    t = D_8008FD44;
+    t = g_ground_emitter_sprites;
     f = random_float() * 50.0f + 50.0f;
     sp.u6 = t.v[random_int() % 3U];
     sp.u7 = 0;
@@ -869,8 +869,8 @@ typedef struct {
     u8 padD[3];
     void *extra; /* 0x2C bytes copied behind the record (+0x80) */
 } Kind9940;
-extern Kind9940 D_8008FD4C[];
-// kind_effect_spawn: spawns effect kind `kind` (< 9, table D_8008FD4C, 0x14 bytes each) through ground_emitter_spawn (life
+extern Kind9940 g_kind_effect_defs[]; /* was D_8008FD4C */
+// kind_effect_spawn: spawns effect kind `kind` (< 9, table g_kind_effect_defs, 0x14 bytes each) through ground_emitter_spawn (life
 // `life`, -1 = untimed 300) at `pos` (f32[3]) or, without pos, attached to `owner` (s16 position at +0); the
 // 0x2C-byte kind data goes behind the record (+0x80), with flag bits 0x08 / 0x10 of `flags` as its +0x28 bits 1 / 2.
 // flags bit 1 marks the record (bit 4), bit 2 (bit 8); bit 4 also starts the kind's sound / emitter
@@ -906,7 +906,7 @@ void kind_effect_spawn(u8 flags, u8 kind, void *owner, s32 pos, f32 arg4, f32 ar
     if (kind >= 9) {
         return;
     }
-    k = &D_8008FD4C[kind];
+    k = &g_kind_effect_defs[kind];
     spawn.flags = ((flags & 2) ? 8 : 0) | 1 | ((owner != NULL) ? 2 : 0) | ((flags & 1) ? 4 : 0);
     spawn.owner = owner;
     spawn.f8 = k->f0;
@@ -1003,7 +1003,7 @@ void ground_emitter_spawn_particle(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
 }
 void vec2_from_angle_rad(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 typedef void (*Fn9DE4)(f32 *, Obj9DE4 *, s32, u8, s32);
-extern Fn9DE4 D_8008FE00[];
+extern Fn9DE4 g_ground_scatter_fns[]; /* was D_8008FE00 */
 
 /* was func_151A9DE4 */
 void ground_scatter_spawn(f32 *arg0, f32 arg1, f32 arg2, Obj9DE4 *arg3, s32 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
@@ -1030,7 +1030,7 @@ void ground_scatter_spawn(f32 *arg0, f32 arg1, f32 arg2, Obj9DE4 *arg3, s32 arg4
             v[0] = pos[0];
             v[1] = arg3->x;
             v[2] = pos[2];
-            D_8008FE00[arg5](v, arg3, arg6, arg7, arg8);
+            g_ground_scatter_fns[arg5](v, arg3, arg6, arg7, arg8);
         }
     }
 }

@@ -11,7 +11,7 @@ void emit_line_sparks_by_angles(u8 *arg0, u8 arg1);
 void emit_sparks_by_angles_b(u8 *arg0, s32 arg1);
 u8 *water_jet_spawn(s32 *arg0, u8 *arg1, s16 arg2);
 
-extern s32 D_800BEE08;
+extern s32 g_view_count_minus1; /* was D_800BEE08 */
 
 /* the three pipes (position, facing angle) */
 typedef struct {
@@ -98,7 +98,7 @@ s32 pipe_explode_effects(s32 pipe, s32 view) {
     s16 n;
     f32 r, s, c;
 
-    camera_shake_start((struct108 *) ((u8 *) D_800DBFF0 + D_800BEE08 * 0x9A0), 7, 1);
+    camera_shake_start((struct108 *) ((u8 *) g_player_views + g_view_count_minus1 * 0x9A0), 7, 1);
 
     /* spray of pieces */
     spray.count = (random_int() & 1) + 3;
@@ -287,7 +287,7 @@ s32 mdl_particle_spawn(void *req, s32, s32, s32, s32, s32);
 f32 random_float(void);
 f32 angle_byte_cos(u8);
 /*
- * pipe_explode_spawn_chunk: D_8008ADA0 spawn handler 9 (called per ring point by spawn_ring_emit with (mode, index,
+ * pipe_explode_spawn_chunk: g_emit_point_spawn_fns spawn handler 9 (called per ring point by spawn_ring_emit with (mode, index,
  * px, py, pz, cx, cy, cz, a, angle0, r, arg8, arg9, argA, argB)). Spawns one particle (mdl_particle_spawn, request
  * (3, 0xFF, 0, argB, 0)) at the point (px, py, pz): sprite 0x1C, life 100, flags 0x9E8, scale (1, 0.2, s, s) with
  * s random in 29.8..102.3, random x / z spin in -40..40 and gravity -0.837..-2.589. It flies outwards at a random
@@ -384,7 +384,7 @@ extern char D_8009FEE8[];
 s32 debug_tweak_int(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
 /*
- * pipe_explode_spawn_debris: D_8008ADA0 spawn handler 10 (pipeexplode.c; called per ring point by spawn_ring_emit
+ * pipe_explode_spawn_debris: g_emit_point_spawn_fns spawn handler 10 (pipeexplode.c; called per ring point by spawn_ring_emit
  * with (mode, index, px, py, pz, cx, cy, cz, a, angle0, r, arg8, arg9, argA, argB)). Reads its tunables through
  * debug_tweak_int (id, name, min, max, default, file, line): life (300), min grav / grav range (/1000), min speed /
  * speed range, min scale / scale range (/10), xz angle, yz angle. Spawns one particle (mdl_particle_spawn, request
@@ -486,7 +486,7 @@ s32 pipe_explode_spawn_debris(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 c
     return 1;
 }
 
-/* P317: NM signature = D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 unused */
+/* P317: NM signature = g_mdl_particle_land_fns's dispatcher type (wasm call_indirect); args 1..3 / 5 unused */
 /* was func_150B3B8C */
 s32 debris_ground_stop_update(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     f32 temp_f0;
@@ -542,7 +542,7 @@ struct210 *sprite_fx_spawn_cam(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 extern s16 D_80088AA0[3];   /* splash colours (15, 16, 17) */
 
-/* trail_hit_splash: trail hit handler (D_8008A7D0 [5]) of particle `obj` hitting the ground at height `y`: the trail
+/* trail_hit_splash: trail hit handler (g_trail_hit_fns [5]) of particle `obj` hitting the ground at height `y`: the trail
  * record (obj +0x98) goes to state 4 (shrink); a splash sprite (sprite_fx_spawn_cam kind 0x11, life 150, a random colour
  * of D_80088AA0, size 50..100, the record's alpha bytes +0x1A / +0x1B) at the trail's current point (obj +0x94,
  * 20-byte points, index +0x2D) and a falling child trail (trail_spawn: 3/4 of the record's +0 width, +4, random

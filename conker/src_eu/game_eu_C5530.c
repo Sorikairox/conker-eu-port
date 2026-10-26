@@ -113,7 +113,7 @@ extern s32 D_800D3C60;
 extern s32 g_save_stat9; /* was D_800BE804 */
 extern u16 D_800BEB30[];
 extern s16 D_800C4414[];
-extern u16 D_8009015C;
+extern u16 g_mp_game_flags; /* was D_8009015C */
 
 #define E9C_U8(p, o) (*(u8 *)((u8 *)(p) + (o)))
 #define E9C_S8(p, o) (*(s8 *)((u8 *)(p) + (o)))
@@ -124,7 +124,7 @@ extern u16 D_8009015C;
 #define E9C_REC(p) (*(u8 **)((u8 *)(p) + 0x31C))
 #define E9C_INDEX(p) (((u8 *)(p) - (u8 *)g_objects) / 0x32C)   /* index in g_objects (0x32C each) */
 #define E9C_FIX(v) ((f32)(v) * (1.0f / 65536.0f))                 /* 16.16 fixed point argument */
-#define E9C_PATH(p, n) ((s16 *)((s32 **)D_800D2104)[E9C_U8(p, 0x13F)] + (n) * 4)  /* point n of path +0x13F */
+#define E9C_PATH(p, n) ((s16 *)((s32 **)g_path_points)[E9C_U8(p, 0x13F)] + (n) * 4)  /* point n of path +0x13F */
 /* f32 -> u32 as IDO converts it (truncation; negative or NaN give 0xFFFFFFFF) */
 #define E9C_TOU32(f) ((f) >= 2147483648.0f ? (((f) - 2147483648.0f < 2147483648.0f) \
                           ? ((u32)(s32)((f) - 2147483648.0f) | 0x80000000) : 0xFFFFFFFF) \
@@ -307,8 +307,8 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
     case 0x20:
         E9C_U8(o, 0x1CA) = args[2];
         if (D_800D3C60 == 4) {
-            D_800D2456 = args[2];
-            D_800D2457 = D_800D2456;
+            g_hud_health_max_pieces = args[2];
+            g_hud_health_shown_pieces = g_hud_health_max_pieces;
         }
         return 1;
     case 0x21:
@@ -404,12 +404,12 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
     case 0x33:
         D_800D1898[args[2]] = E9C_FIX(args[3]);
         return 1;
-    case 0x34: /* place 1800 in front of the camera D_800DBFF0 (+-400 random), mirrored into the box
+    case 0x34: /* place 1800 in front of the camera g_player_views (+-400 random), mirrored into the box
                 * args[2..5] (x lo / hi, z lo / hi), on the floor + args[6] */
-        x = E9C_F32(D_800DBFF0, 0x2F8);
-        z = E9C_F32(D_800DBFF0, 0x300);
-        x = x - sinf(E9C_F32(D_800DBFF0, 0x3A0)) * 1800.0f;
-        z = z - cosf(E9C_F32(D_800DBFF0, 0x3A0)) * 1800.0f;
+        x = E9C_F32(g_player_views, 0x2F8);
+        z = E9C_F32(g_player_views, 0x300);
+        x = x - sinf(E9C_F32(g_player_views, 0x3A0)) * 1800.0f;
+        z = z - cosf(E9C_F32(g_player_views, 0x3A0)) * 1800.0f;
         x += (u32)random_int() % 800 - 400;
         z += (u32)random_int() % 800 - 400;
         if (x < args[2]) {
@@ -424,7 +424,7 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         }
         px = x;
         pz = z;
-        py = E9C_F32(D_800DBFF0, 0x2FC);
+        py = E9C_F32(g_player_views, 0x2FC);
         collision_find_floor(0, 0, &py, 0, 0, 0, px, py, pz, py, 0, 0, -10000.0f, 20000.0f);
         obj->x_position = px;
         obj->z_position = pz;
@@ -636,33 +636,33 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
             E9C_U8(E9C_REC(o), 0x8E) = 2;
         }
         return 1;
-    case 0x62: /* the first D_8008FD8C objects: player_stat_modify(index, 10, args[2]); g_save_stat9 = player_stat_get */
+    case 0x62: /* the first g_player_count objects: player_stat_modify(index, 10, args[2]); g_save_stat9 = player_stat_get */
         n = E9C_INDEX(o);
-        if (n >= 0 && n < D_8008FD8C) {
+        if (n >= 0 && n < g_player_count) {
             player_stat_modify(E9C_INDEX(o), 10, args[2]);
         }
         g_save_stat9 = player_stat_get(E9C_INDEX(o), 6);
         return 1;
     case 0x63:
         n = E9C_INDEX(o);
-        if (n >= 0 && n < D_8008FD8C) {
+        if (n >= 0 && n < g_player_count) {
             player_stat_modify(E9C_INDEX(o), 9, args[2]);
         }
         g_save_stat9 = player_stat_get(E9C_INDEX(o), 6);
         return 1;
     case 0x64:
         i = args[2];
-        if (D_800BE616 == 0 && (D_800E9D00 & 0x200)) {
+        if (D_800BE616 == 0 && (g_cheat_flags & 0x200)) {
             i = 0x33;
         }
         n = E9C_INDEX(o);
-        if (n >= 0 && n < D_8008FD8C) {
+        if (n >= 0 && n < g_player_count) {
             player_stat_modify(E9C_INDEX(o), 2, i);
         }
         return 1;
     case 0x65:
         n = E9C_INDEX(o);
-        if (n >= 0 && n < D_8008FD8C) {
+        if (n >= 0 && n < g_player_count) {
             player_stat_modify(E9C_INDEX(o), 3, args[2]);
         }
         return 1;
@@ -672,7 +672,7 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
     case 0x67: /* screen position of player args[2] (bit 0: column, >> 1: row) in 2 / 3 player modes */
         n = args[2];
         text_set_flags(0);
-        if (D_80082FA0 == 2 || D_80082FA0 == 3) {
+        if (g_last_player_index == 2 || g_last_player_index == 3) {
             text_set_pos((n & 1) * 150 + 10, (n >> 1) * 115);
         }
         return 1;
@@ -769,7 +769,7 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         switch ((u32)args[2]) {
         case 0:
             obj_setup_run(obj, 0x79, 0.0f, 0);
-            if (E9C_INDEX(o) < D_80090130) {
+            if (E9C_INDEX(o) < g_human_player_count) {
                 E9C_U8(E9C_REC(o), 0x4E) = 2;
                 obj_start_anim(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
             }
@@ -831,11 +831,11 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
     case 0x81:
         E9C_U8(o, 0x275) = args[2];
         return 1;
-    case 0x82: /* mp_player_respawn with D_8009015C cleared */
-        n = D_8009015C;
-        D_8009015C = 0;
+    case 0x82: /* mp_player_respawn with g_mp_game_flags cleared */
+        n = g_mp_game_flags;
+        g_mp_game_flags = 0;
         mp_player_respawn(obj);
-        D_8009015C = n;
+        g_mp_game_flags = n;
         return 1;
     case 0x83:
         E9C_U8(o, 0x238) = args[2];
@@ -865,8 +865,8 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         E9C_S32(o, 0xA0) = args[5];
         E9C_U8(o, 0xA7) = args[6];
         return 1;
-    case 0x8B: /* players up to D_80082FA0 */
-        if (E9C_INDEX(o) <= D_80082FA0) {
+    case 0x8B: /* players up to g_last_player_index */
+        if (E9C_INDEX(o) <= g_last_player_index) {
             screen_fade_start(args[2], args[3], args[4], args[5], args[6], E9C_INDEX(o));
         }
         return 1;
@@ -888,7 +888,7 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
     return 0;
 }
 /* Object query handler: entry 1 of event_dispatch's handler table D_80088838 (event ids 0x2xxx), called as
- * handler(id & 0xFFF, cmd, args) with args = D_800D3380 = {id, cmd, x1, x2, ...} (args[2] is the first extra
+ * handler(id & 0xFFF, cmd, args) with args = g_event_dispatch_args = {id, cmd, x1, x2, ...} (args[2] is the first extra
  * argument; D_800D3C60 = the number of words). `id` names an object (obj_find_by_spawn). 0xB7 asks setup_entry_find_by_id,
  * 0xB0 / 0xB1 test whether the object is missing (0xB1: or of kind 8 / 0x27); every other query returns 0 for a
  * missing object and otherwise a field or a derived value (positions packed as x << 16 | z, distances, angles in
@@ -909,11 +909,11 @@ s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32
 s32 mp_is_free_for_all(void);
 s32 mp_match_check_over(void);
 extern s32 D_800D3C60;
-extern u8 D_800E0FE8[];
-extern s8 D_800E0EF0[];
+extern u8 g_mp_last_hitter[]; /* was D_800E0FE8 */
+extern s8 g_mp_placings[]; /* was D_800E0EF0 */
 extern u8 D_80087638;
 extern u8 D_8008763C;
-extern u8 D_800D1CC9;
+extern u8 g_player_hit_reaction_mode; /* was D_800D1CC9 */
 extern u16 D_800BEB30[];
 extern f32 D_8009E80C;
 
@@ -1077,18 +1077,18 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
             return A024_S32(&g_objects[n & 0x7F], 0);
         }
         return 0xFFFF;
-    case 0xB6: /* read and clear bit 7 of D_800E0FE8[index] */
-        p = &D_800E0FE8[A024_INDEX(obj)];
+    case 0xB6: /* read and clear bit 7 of g_mp_last_hitter[index] */
+        p = &g_mp_last_hitter[A024_INDEX(obj)];
         n = *p;
         *p = n & 0x7F;
         return n;
     case 0xB8:
         return A024_S8(obj, 0x2CA);
     case 0xB9: /* path point args[2] of path +0x13F: x << 16 | z */
-        list = (s16 *)D_800D2104[A024_U8(obj, 0x13F)] + args[2] * 4;
+        list = (s16 *)g_path_points[A024_U8(obj, 0x13F)] + args[2] * 4;
         return (list[0] << 16) | (list[2] & 0xFFFF);
     case 0xBA:
-        list = (s16 *)D_800D2104[A024_U8(obj, 0x13F)] + args[2] * 4;
+        list = (s16 *)g_path_points[A024_U8(obj, 0x13F)] + args[2] * 4;
         return list[1];
     case 0xBB:
         if (A024_U8(obj, 0x65) == 0) {
@@ -1118,9 +1118,9 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
         return A024_S32(obj, 0x25C);
     case 0xC5:
         return A024_U8(obj, 0x89);
-    case 0xC6: /* player_stat_get(index, 6) for the first D_8008FD8C objects */
+    case 0xC6: /* player_stat_get(index, 6) for the first g_player_count objects */
         n = A024_INDEX(obj);
-        if (n < 0 || n >= D_8008FD8C) {
+        if (n < 0 || n >= g_player_count) {
             return 0;
         }
         return player_stat_get(A024_INDEX(obj), 6);
@@ -1333,9 +1333,9 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
     case 0xE2:
         return A024_U8(A024_REC(obj), 0x7D);
     case 0xE3:
-        return D_800D1CC9;
+        return g_player_hit_reaction_mode;
     case 0xE4:
-        return D_800D18A8;
+        return g_mp_respawning;
     case 0xE5:
         return A024_U8(obj, 0x275);
     case 0xE6: /* read and clear +0x275 (object number + 1): is that object's +4 byte args[2]? */
@@ -1347,7 +1347,7 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
         return (A024_U8(&g_objects[n - 1], 4) == args[2]) ? 1 : 0;
     case 0xE7: /* nearest point of path +0x13F to object args[2], squared xz distance in (args[3]^2, args[4]^2) */
         n = A024_U8(obj, 0x13F);
-        list = (s16 *)D_800D2104[n];
+        list = (s16 *)g_path_points[n];
         i = D_800D2528[n];
         best = -1;
         if (list == NULL || i == 0) {
@@ -1405,7 +1405,7 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
     case 0xEF:
         return A024_S32(obj, 0);
     case 0xF0:
-        return D_800E0EF0[A024_U8(obj, 0x128)];
+        return g_mp_placings[A024_U8(obj, 0x128)];
     case 0xF1:
         return ((A024_U8(obj, 0x74) & 0xF) == 0xF) ? 1 : 0;
     case 0xF2:

@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A5860[];
-extern u8 D_800A22BC[];
+extern u8 g_vec3_zero[]; /* was D_800A5860 */
+extern u8 g_bound_cloud_fx_tmpl[]; /* was D_800A22BC */
 
 
 void view_sparkle_burst(u8);
@@ -22,11 +22,11 @@ void view_spots_flash_event(void) {
     sfx_emitter_start(0x2B7U, -0x13F, -0x111, -0xD5B, 0x6D60, 0x2328U, 0x1B58, (s32) &sfx_cb_delayed_play_2d, NULL, 0, 0, 0);
     sfx_emitter_start(0x2B6U, 0x5EF, 0x3B3, -0xA49, 0x6D60, 0x2328U, 0x1B58, (s32) &sfx_cb_delayed_play_2d, (u8 *)0x5A, 0, 0, 0);
     var_s0 = 0;
-    if ((D_80082FA0 + 1) > 0) {
+    if ((g_last_player_index + 1) > 0) {
         do {
             cam_wobble_start_preset(4, var_s0 & 0xFF, 0, 0xFF, 1);
             var_s0 += 1;
-        } while (D_80082FA0 >= var_s0);
+        } while (g_last_player_index >= var_s0);
     }
     sp.u44 = 1;
     sp.u46 = 0x64;
@@ -37,7 +37,7 @@ void view_spots_flash_event(void) {
 }
 
 /* P179 */
-extern s16 D_800A22B0[];
+extern s16 g_view_sparkle_arcs[]; /* was D_800A22B0 */
 s32 spark_shower_spawn(f32 *, f32, f32, f32, f32, s32, s32);
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 void emit_random_sprites(u8 *, u8, s32);
@@ -45,7 +45,7 @@ void emit_random_sprites(u8 *, u8, s32);
 // view_sparkle_burst: P179: one flash plus 3..4 spark sprays at view `view`'s spot (g_view_sparkle_spots[view], 0..2: s16 x, y,
 /* z, radius +6, height +8; nothing when the slot is NULL). The flash (spark_shower_spawn) sits at the middle of the
  * height: size random * 4 + 12, brightness 200..255. Each spray (emit_random_sprites block, layout of emit_random_sprites in
- * game_eu_17D3C0) starts on the circle of the spot's radius at angle base + random [0, range] (D_800A22B0[view]:
+ * game_eu_17D3C0) starts on the circle of the spot's radius at angle base + random [0, range] (g_view_sparkle_arcs[view]:
  * s16 base, range; angle byte), at a random height in [y, y + height], and fans out from that angle - 40 over 80. */
 /* was func_150FD140 */
 void view_sparkle_burst(u8 view) {
@@ -126,7 +126,7 @@ void view_sparkle_burst(u8 view) {
     spray.h54 = 0xC;
     spray.h56 = 0xC;
     spray.b58 = -1;
-    arc = &D_800A22B0[view * 2];
+    arc = &g_view_sparkle_arcs[view * 2];
     do {
         a = random_int() % (u32) (arc[1] + 1) + arc[0];
         spray.angle = a - 0x28;
@@ -141,7 +141,7 @@ void view_sparkle_burst(u8 view) {
 
 f32 cam_wobble_fade_by_distance(void *, void *, s32, s32, f32);
 
-/* view_spot_distance_fade: P238: entry 0 of D_8008B734 (cam_wobble_update, asm, passes the object in a0 and stores f0).
+/* view_spot_distance_fade: P238: entry 0 of g_camera_wobble_scale_fns (cam_wobble_update, asm, passes the object in a0 and stores f0).
  * Fade factor of `obj` against view 0's spot (g_view_sparkle_spots[0], s16 x / y / z as floats): cam_wobble_fade_by_distance with near
  * distance 2007, range 9005 and scale 1 / 9005 (D_800A22FC, 0x38E8E334). 1.0 when there is no spot. The near /
  * range parameters are f32 bit patterns in cam_wobble_fade_by_distance's s32 slots (it reads them as floats). */
@@ -335,7 +335,7 @@ void bound_cloud_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u174 = 0xFF;
         sp.u144 = 0.0f;
         sp.u148 = 1500.0f;
-        temp_t1 = ((u8 *)&D_800A5860);
+        temp_t1 = ((u8 *)&g_vec3_zero);
         (*(f32 *)((u8 *)(&sp.u14C) + 0)) = (f32) (*(f32 *)((u8 *)(&sp.u198) + 0));
         (*(s32 *)((u8 *)(&sp.u14C) + 4)) = (s32) (*(s32 *)((u8 *)(&sp.u198) + 4));
         (*(s32 *)((u8 *)(&sp.u14C) + 8)) = (s32) (*(s32 *)((u8 *)(&sp.u198) + 8));
@@ -354,7 +354,7 @@ void bound_cloud_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u186 = 0xFF;
         sp.u164 = 1.0f;
         sp.u16C = 1.0f;
-        temp_v0 = effect3d_spawn_full(&sp.u130, (s32) ((u8 *)&D_800A22BC), 0U, 0x2BU, 0U, 0x24U, 0U, 0, 0, 0x5C, (u8) (s32) arg1, arg2);
+        temp_v0 = effect3d_spawn_full(&sp.u130, (s32) ((u8 *)&g_bound_cloud_fx_tmpl), 0U, 0x2BU, 0U, 0x24U, 0U, 0, 0, 0x5C, (u8) (s32) arg1, arg2);
         temp_s0 = temp_v0 + 0x110;
         if (temp_v0 != NULL) {
             memcpy(temp_s0, &sp.uD4, 0x5C);
@@ -405,17 +405,17 @@ void bound_cloud_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
     }
 }
 /* P146 */
-extern f32 D_800A2310;
-extern f32 D_800A2314;
-extern f32 D_800A2318;
-extern f32 D_800A231C;
-extern f32 D_800A2320;
-extern f32 D_800A2324;
-extern f32 D_800A2328;
-extern f32 D_800A232C;
-extern f32 D_800A2330;
-extern f32 D_800A2334;
-extern f32 D_800A2338;
+extern f32 g_bound_cloud_k_2310; /* was D_800A2310 */
+extern f32 g_bound_cloud_k_2314; /* was D_800A2314 */
+extern f32 g_bound_cloud_fade_in_k; /* was D_800A2318 */
+extern f32 g_bound_cloud_fade_out_k; /* was D_800A231C */
+extern f32 g_bound_cloud_k_2320; /* was D_800A2320 */
+extern f32 g_bound_cloud_phase_x_rate; /* was D_800A2324 */
+extern f32 g_bound_cloud_phase_y_rate; /* was D_800A2328 */
+extern f32 g_bound_cloud_wave_x_amp; /* was D_800A232C */
+extern f32 g_bound_cloud_wave_x_base; /* was D_800A2330 */
+extern f32 g_bound_cloud_wave_y_base; /* was D_800A2334 */
+extern f32 g_bound_cloud_scale_k; /* was D_800A2338 */
 void obj_tint_set_flash(u8 *, s32, s32, s32, s32, s32, s32);
 void obj_angle_point_effect(u8 *, s16, s16, u8, s32);
 void cam_shake_all_players(u8 *, f32, f32, f32, u8, u8, s32);
@@ -458,7 +458,7 @@ s32 bound_cloud_update(u8 *fx) {
     }
     if (obj != NULL) {
         obj_tint_set_flash(obj, 0xFF, 0, 0, 0xFF, 0, 4);
-        *(f32 *)(st + 0x2C) += (D_800A2310 + random_float() * D_800A2314) * D_800BE9A4;
+        *(f32 *)(st + 0x2C) += (g_bound_cloud_k_2310 + random_float() * g_bound_cloud_k_2314) * g_frame_step_f;
         while (*(f32 *)(st + 0x2C) > 1.0f) {
             r0 = random_int();
             r1 = random_int();
@@ -468,11 +468,11 @@ s32 bound_cloud_update(u8 *fx) {
     }
     life = *(f32 *)(st + 0xC);
     if (life > 20.0f) {
-        *(f32 *)(fx + 0x2C) = (50.0f - life) * D_800A2318 * *(f32 *)(st + 0x8);
+        *(f32 *)(fx + 0x2C) = (50.0f - life) * g_bound_cloud_fade_in_k * *(f32 *)(st + 0x8);
     } else if (life > 10.0f) {
         *(f32 *)(fx + 0x2C) = *(f32 *)(st + 0x8);
     } else {
-        *(f32 *)(fx + 0x2C) = life * D_800A231C * *(f32 *)(st + 0x8);
+        *(f32 *)(fx + 0x2C) = life * g_bound_cloud_fade_out_k * *(f32 *)(st + 0x8);
         if (st[0x58] == 0) {
             if (obj != NULL) {
                 obj_send_hit((struct127 *)obj, 0x16, *(u16 *)(obj + 0x7A), -1);
@@ -496,17 +496,17 @@ s32 bound_cloud_update(u8 *fx) {
         }
     }
     fx[0x5C] = (u32)(sinf(*(f32 *)(st + 0x10)) * 57.0f + 198.0f);
-    *(f32 *)(st + 0x10) += D_800A2320 * D_800BE9A4;
+    *(f32 *)(st + 0x10) += g_bound_cloud_k_2320 * g_frame_step_f;
     *(f32 *)(st + 0x10) = wrap_angle_rad(*(f32 *)(st + 0x10));
-    *(f32 *)(st + 0x1C) += D_800A2324 * D_800BE9A4;
-    *(f32 *)(st + 0x20) += D_800A2328 * D_800BE9A4;
+    *(f32 *)(st + 0x1C) += g_bound_cloud_phase_x_rate * g_frame_step_f;
+    *(f32 *)(st + 0x20) += g_bound_cloud_phase_y_rate * g_frame_step_f;
     *(f32 *)(st + 0x1C) = wrap_angle_rad(*(f32 *)(st + 0x1C));
     *(f32 *)(st + 0x20) = wrap_angle_rad(*(f32 *)(st + 0x20));
-    *(f32 *)(st + 0x14) = fast_sinf(*(f32 *)(st + 0x1C)) * D_800A232C + D_800A2330;
-    *(f32 *)(st + 0x18) = fast_sinf(*(f32 *)(st + 0x20)) * 1192.0f + D_800A2334;
+    *(f32 *)(st + 0x14) = fast_sinf(*(f32 *)(st + 0x1C)) * g_bound_cloud_wave_x_amp + g_bound_cloud_wave_x_base;
+    *(f32 *)(st + 0x18) = fast_sinf(*(f32 *)(st + 0x20)) * 1192.0f + g_bound_cloud_wave_y_base;
     link = *(u8 **)(st + 0x28);
     if (link != NULL) {
-        scale = *(f32 *)(fx + 0x2C) * D_800A2338;
+        scale = *(f32 *)(fx + 0x2C) * g_bound_cloud_scale_k;
         *(f32 *)(link + 0x30) = scale;
         *(f32 *)(*(u8 **)(st + 0x28) + 0x2C) = scale;
         (*(u8 **)(st + 0x28))[0x5C] = fx[0x5C];
@@ -515,7 +515,7 @@ s32 bound_cloud_update(u8 *fx) {
     }
     *(f32 *)(fx + 0x34) = x;
     *(f32 *)(fx + 0x3C) = z;
-    *(f32 *)(st + 0xC) -= D_800BE9A4;
+    *(f32 *)(st + 0xC) -= g_frame_step_f;
     if (*(f32 *)(st + 0xC) < 0.0f) {
         return 0;
     }

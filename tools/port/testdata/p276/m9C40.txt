@@ -13,7 +13,7 @@
 \#^        green = 0x38;$#s/0x38/0x39/
 \#^        blue = 0x10;$#s/0x10/0x11/
 \#^        blue = 0xFF;$#s/0xFF/0xFE/
-\#^    rec.tex = D_8008CDEC\[tex\];$#s/\[tex\]/[tex + 1]/
+\#^    rec.tex = g_sprite_tex_descs\[tex\];$#s/\[tex\]/[tex + 1]/
 \#^    rec.u4 = (hi << 16) | (y0 & 0xFFFF);$#s/y0 & 0xFFFF/y \& 0xFFFF/
 \#^    rec.u4 = (hi << 16) | (y0 & 0xFFFF);$#s/hi << 16/hi << 15/
 \#^    rec.uE = 0x100;$#s/0x100/0x101/

@@ -3,14 +3,14 @@
 int aiscript_find_by_kind(s32, s32);
 
 // find_visible_target: P210: script command: looks for the nearest object the current one can see: live (state,
-// health), targetable (unkF8 bit 0x20), not itself, of another id unless D_800D1891 is set, within 50 in height,
-// closer than D_800D1890 * 8 (obj_dist_3d), and inside its view cone (width byte 0x17 of its type record
+// health), targetable (unkF8 bit 0x20), not itself, of another id unless g_aiscript_arg1 is set, within 50 in height,
+// closer than g_aiscript_arg0 * 8 (obj_dist_3d), and inside its view cone (width byte 0x17 of its type record
 // D_800D1C90[id], in 1/256 turns around heading unk76 >> 8 + unk2CA). The nearest one is stored as unkA8 =
-// 0x80 + its number; then the object's script jumps to D_800D1893 and, when D_800D1892 is set, the target's
-// script to D_800D1892 with unk222 = the current object's number.
+// 0x80 + its number; then the object's script jumps to g_aiscript_arg3 and, when g_aiscript_arg2 is set, the target's
+// script to g_aiscript_arg2 with unk222 = the current object's number.
 void aiscript_find_visible_target(void) {
     s32 self = ((s32)g_cur_obj - (s32)g_objects) / 0x32C;
-    f32 best = D_800D1890 * 8;
+    f32 best = g_aiscript_arg0 * 8;
     struct127 *o = g_objects;
     struct127 *t;
     s32 i;
@@ -24,7 +24,7 @@ void aiscript_find_visible_target(void) {
         if (o->interaction_state == 0 || o->health == 0 || !(o->unkF8 & 0x20) || i == self) {
             continue;
         }
-        if (D_800D1891 == 0 && g_cur_obj->id == o->id) {
+        if (g_aiscript_arg1 == 0 && g_cur_obj->id == o->id) {
             continue;
         }
         if (50.0f < fabsf(g_cur_obj->y_position - o->y_position)) {
@@ -46,12 +46,12 @@ void aiscript_find_visible_target(void) {
         }
     }
     if (g_cur_obj->unkA8 != 0) {
-        g_cur_obj->unk218 = (struct216 *)aiscript_find_by_kind(0, D_800D1893);
+        g_cur_obj->unk218 = (struct216 *)aiscript_find_by_kind(0, g_aiscript_arg3);
         g_cur_obj->unk218--;
-        if (D_800D1892 != 0) {
+        if (g_aiscript_arg2 != 0) {
             t = &g_objects[g_cur_obj->unkA8 & 0x7F];
             t->unk218 = NULL;
-            t->unk232 = D_800D1892;
+            t->unk232 = g_aiscript_arg2;
             t->unk222 = self;
         }
     }

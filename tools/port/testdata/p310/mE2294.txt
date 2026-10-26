@@ -1,6 +1,6 @@
 # P310 mutants for beam_effect_update (beam_effect_update)
 /    tex = 0x23;/s/0x23/0x24/ % base aim_pass
-/\*(s16 \*) (obj + 0x90) -= D_800BE9E4;/s/-= D_800BE9E4/-= 1/ % lifeout life0
+/\*(s16 \*) (obj + 0x90) -= g_frame_ticks;/s/-= g_frame_ticks/-= 1/ % lifeout life0
 /if (\*(s16 \*) (obj + 0x90) < 0 || (target != NULL && \*(s16 \*) (obj + 0xE0) != -1 &&/s/< 0/<= 0/ % life0
 /if (\*(s16 \*) (obj + 0x90) < 0 || (target != NULL && \*(s16 \*) (obj + 0xE0) != -1 &&/s/!= -1/!= 0/ % ser_m1
 /if (\*(s16 \*) (obj + 0x90) < 0 || (target != NULL && \*(s16 \*) (obj + 0xE0) != -1 &&/s/target != NULL/target == NULL/ % base nofollow
@@ -13,7 +13,7 @@
 /if (target != NULL && \*(u8 \*\*) (target + 0x1D4) != NULL && obj\[0xDA\] == target\[0x3B\] &&/s/target != NULL \&\& //  % att_nof
 /                target\[0x127\] != 0xFF) {/s/!= 0xFF/!= 0xFE/ % att_ff
 /                obj\[0xE3\] = 3;/s/3/2/ % att
-/\*(s16 \*) (obj + 0xD6) -= D_800BE9E4;/s/D_800BE9E4/1/ % base teq tlt
+/\*(s16 \*) (obj + 0xD6) -= g_frame_ticks;/s/g_frame_ticks/1/ % base teq tlt
 /if (\*(s16 \*) (obj + 0xD6) < -\*(s16 \*) (obj + 0xD4)) {/s/</<=/ % teq
 /if (\*(s16 \*) (obj + 0xD6) < -\*(s16 \*) (obj + 0xD4)) {/s/0xD4/0xD2/ % tlt base
 /\*(s16 \*) (obj + 0xD6) = \*(s16 \*) (obj + 0xD2);/s/0xD2)/0xD4)/ % base
@@ -28,7 +28,7 @@
 /width = (f32) (game_gu_random() .* 70) + 40.0f;/s/40.0f/41.0f/ % w0 w0r
 /width = (f32) (game_gu_random() .* 70) + 40.0f;/s/70)/71)/ % w0r
 /            hitobj = 0;/d % ff_ray
-/aimrec = D_800D9D80 + aim \* 0x1C;/s/0x1C/0x18/ % base aim_pass
+/aimrec = g_aim_records + aim \* 0x1C;/s/0x1C/0x18/ % base aim_pass
 /heading = \*(u16 \*) (target + 0x76) - \*(s16 \*) (\*(u8 \*\*) (target + 0x31C) + 0x12);/s/\*(s16 \*) (\*(u8/*(u16 *) (*(u8/ % aim_negh aimmis_t2
 /heading = \*(u16 \*) (target + 0x76) - \*(s16 \*) (\*(u8 \*\*) (target + 0x31C) + 0x12);/s/\*(u16 \*) (target/*(s16 *) (target/ % aimmis_t2
 /if (heading == \*(s16 \*) aimrec && \*(s8 \*) (target + 0x1D1) == \*(s8 \*) (aimrec + 2)) {/s/\*(s16 \*) aimrec/*(u16 *) aimrec/ % aim_negh
@@ -89,7 +89,7 @@
 /        vy = n\[1\] \* 0.5f;/s/0.5f/0.25f/ % mv_db0 mv_lim_db0
 /        vz \*= 0.5f;/d % mv_db0
 /    \*(f32 \*) (obj + 0xCC) = vz;/s/vz/vy/ % m0
-/    step = \*(f32 \*) (obj + 0xA8) \* (f32) D_800BE9E4;/s/(f32) D_800BE9E4/2.0f/ % mv_frames
+/    step = \*(f32 \*) (obj + 0xA8) \* (f32) g_frame_ticks;/s/(f32) g_frame_ticks/2.0f/ % mv_frames
 /    if (dist0 < step && \*(f32 \*) (obj + 0xAC) != 0.0f) {/s/dist0 < step/dist0 <= step/ % mv_lim_c0 mv_step mv_near
 /    if (dist0 < step && \*(f32 \*) (obj + 0xAC) != 0.0f) {/s/ \&\& \*(f32 \*) (obj + 0xAC) != 0.0f// % m0 mv_db0 mv_step
 /        \*(f32 \*) (obj + 0xC0) = dist0;/d % mv_near mv_step

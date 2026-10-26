@@ -3,7 +3,7 @@ s/if (count < 2 \&\& (\*(u16/if (count < 1 \&\& (*(u16/ % done
 s/(obj + 0x1E) \& 8)) {/(obj + 0x1E) \& 4)) {/ % done one
 s/        return 0;/        return 2;/ % done
 s/                i = obj\[0x25\] - 1;/                i = obj[0x25];/ % wrapw
-s/ + 0xC) -= D_800BE9A4;/ + 0xC) -= 1.0f;/ % step2
+s/ + 0xC) -= g_frame_step_f;/ + 0xC) -= 1.0f;/ % step2
 s/ + 0xC) < 0.0f) {/ + 0xC) <= 0.0f) {/ % dieedge
 s/                    obj\[0x2D\] = rd + 1;/                    obj[0x2D] = rd + 2;/ % die
 s/                    if (obj\[0x25\] == rd) {/                    if (obj[0x25] < rd) {/ % dierdwrap

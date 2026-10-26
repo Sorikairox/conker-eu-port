@@ -15,7 +15,7 @@ extern f32 D_80088C78; // tint speed
 extern f32 D_80088C7C;
 extern f32 D_80088C80;
 
-// player_tint_update: player state handler (D_80089A10 table). While event flag 0x9000/6/0x403D is set the player
+// player_tint_update: player state handler (g_level_player_state_fns table). While event flag 0x9000/6/0x403D is set the player
 // gets +0x84 bits 0x80021000 and the screen tint target becomes red-less (0x4043: 64, 255, 255), green-less (0x4044:
 // 255, 64, 255), blue-less (0x4045: 255, 255, 64) or white; otherwise the target is white and +0x84 loses
 // 0x80021000 and gains 8. The tint D_80088C60..68 eases toward the target (math_spring_approach, rate 4, max 6, the
@@ -63,7 +63,7 @@ extern s32 D_80088C30;
 extern s32 D_80088C34;
 extern s32 D_80088C38;
 extern s32 D_80088C3C;
-extern s32 *D_800DC3C4;
+extern s32 *g_world_obj_rider_masks; /* was D_800DC3C4 */
 s32 world_record_find(u8);
 void obj_hit_split_halves(struct127 *);
 s32 object_hit_effects(void *, s32, s32, s32, s32, s32, s32, s32);
@@ -71,11 +71,11 @@ s32 player_hit_reaction(struct127 *, s32);
 
 // level_item_flags_update: advances the four scroll counters D_80088C30..3C by the frame step (x40, x-66, x-8, x92);
 // unless the player's held object (object 0 +0x31C, byte 0x120) is busy: for items 0xFA..0xF8 with flag bit 0
-// (world_record_find entry index = (item - D_800DBEF4) / 160 into D_800DC3C4) calls obj_hit_split_halves on the player and plays
+// (world_record_find entry index = (item - g_world_objs) / 160 into g_world_obj_rider_masks) calls obj_hit_split_halves on the player and plays
 // sound 0x627; for item 0xFB plays it and resets the player (object_hit_effects, obj_set_destroyed, mode 6 via player_hit_reaction).
 /* was func_150D13A0 */
 void level_item_flags_update(s32 arg0) {
-    s32 step = D_800BE9E4;
+    s32 step = g_frame_ticks;
     s32 i;
     s32 item;
 
@@ -88,13 +88,13 @@ void level_item_flags_update(s32 arg0) {
     }
     for (i = 0; i < 3; i++) {
         item = world_record_find(0xFA - i);
-        if (D_800DC3C4[(item - (s32) D_800DBEF4) / 160] & 1) {
+        if (g_world_obj_rider_masks[(item - (s32) g_world_objs) / 160] & 1) {
             obj_hit_split_halves(g_objects);
             actor_sound_play(0x627, g_objects, 0x7FFF, 0xC8, 0x2BC);
         }
     }
     item = world_record_find(0xFB);
-    if (D_800DC3C4[(item - (s32) D_800DBEF4) / 160] & 1) {
+    if (g_world_obj_rider_masks[(item - (s32) g_world_objs) / 160] & 1) {
         actor_sound_play(0x627, g_objects, 0x7FFF, 0xC8, 0x2BC);
         object_hit_effects(g_objects, 1, 1, 1, 1, 0, 0xFF, 1);
         obj_set_destroyed(g_objects);

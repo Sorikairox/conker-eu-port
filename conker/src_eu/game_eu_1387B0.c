@@ -45,7 +45,7 @@ void clock_hands_update(u8 *arg0) {
     if (var_v1 < 0) {
         var_v1 += 0x3C;
     }
-    temp_t9 = var_v0 + D_800BE9E4;
+    temp_t9 = var_v0 + g_frame_ticks;
     (*(s32 *)((u8 *)arg0 + 0x3C)) = temp_t9;
     var_v0_2 = temp_t9;
     if (temp_t9 >= 0x20F580) {
@@ -96,7 +96,7 @@ s32 world_object_sound_play(u8 *, s32, s32, s16, s16, s32);
 void clock_pendulum_update(u8 *arg0) {
     f32 x;
 
-    *(f32 *)(arg0 + 0x80) += (3.1415927f * D_800BE9E4) / 50.0f;
+    *(f32 *)(arg0 + 0x80) += (3.1415927f * g_frame_ticks) / 50.0f;
     x = cosf(*(f32 *)(arg0 + 0x80)) * 10.0f;
     *(f32 *)(arg0 + 0x60) = *(f32 *)(arg0 + 0) - x;
     *(f32 *)(arg0 + 0) = x;

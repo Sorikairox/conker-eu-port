@@ -1010,10 +1010,10 @@ s32 obj_glow_spin_flicker(u8 *arg0) {
     u8 *temp_v0_4;
     u8 *temp_v0_5;
 
-    (*(f32 *)((u8 *)arg0 + 0x160)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x160)) + ((*(f32 *)((u8 *)arg0 + 0x164)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x160)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x160)) + ((*(f32 *)((u8 *)arg0 + 0x164)) * g_frame_step_f));
     temp_s0 = arg0 + 0x110;
     (*(f32 *)((u8 *)temp_s0 + 0x50)) = wrap_angle_rad((*(f32 *)((u8 *)arg0 + 0x160)));
-    (*(f32 *)((u8 *)temp_s0 + 0x58)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x58)) + ((*(f32 *)((u8 *)temp_s0 + 0x5C)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s0 + 0x58)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x58)) + ((*(f32 *)((u8 *)temp_s0 + 0x5C)) * g_frame_step_f));
     if ((*(f32 *)((u8 *)temp_s0 + 0x58)) > 32767.0f) {
         do {
             (*(f32 *)((u8 *)temp_s0 + 0x58)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x58)) - 65536.0f);
@@ -1024,7 +1024,7 @@ s32 obj_glow_spin_flicker(u8 *arg0) {
             (*(f32 *)((u8 *)temp_s0 + 0x58)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x58)) + 65536.0f);
         } while ((*(f32 *)((u8 *)temp_s0 + 0x58)) < -32768.0f);
     }
-    (*(f32 *)((u8 *)temp_s0 + 0x68)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x68)) - D_800BE9A4);
+    (*(f32 *)((u8 *)temp_s0 + 0x68)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x68)) - g_frame_step_f);
     if ((*(f32 *)((u8 *)temp_s0 + 0x68)) < 0.0f) {
         (*(f32 *)((u8 *)temp_s0 + 0x68)) = (f32) (random_float() * (*(f32 *)((u8 *)temp_s0 + 0x6C)));
         temp_f2 = (*(f32 *)((u8 *)temp_s0 + 0x64));
@@ -1041,7 +1041,7 @@ s32 obj_glow_spin_flicker(u8 *arg0) {
         (*(f32 *)((u8 *)sp28 + 0x30)) = temp_f2_3;
         (*(f32 *)((u8 *)sp28 + 0x2C)) = temp_f2_3;
     }
-    (*(f32 *)((u8 *)temp_s0 + 0x84)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x84)) - D_800BE9A4);
+    (*(f32 *)((u8 *)temp_s0 + 0x84)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x84)) - g_frame_step_f);
     if ((*(f32 *)((u8 *)temp_s0 + 0x84)) < 0.0f) {
         (*(f32 *)((u8 *)temp_s0 + 0x84)) = (f32) (random_float() * (*(f32 *)((u8 *)temp_s0 + 0x88)));
         (*(f32 *)((u8 *)temp_s0 + 0x78)) = (f32) ((random_float() * (*(f32 *)((u8 *)temp_s0 + 0x80))) + (*(f32 *)((u8 *)temp_s0 + 0x7C)));
@@ -1082,18 +1082,18 @@ s32 obj_glow_halo_update(u8 *arg0, s32 arg1) {
     temp_f10 = (*(f32 *)((u8 *)temp_s0 + 0xC)) + ((*(f32 *)((u8 *)temp_s0 + 0x14)) * sinf((*(f32 *)((u8 *)arg0 + 0xC4))));
     (*(f32 *)((u8 *)temp_s0 + 0)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 8)) + ((*(f32 *)((u8 *)temp_s0 + 0x10)) * sp24));
     (*(f32 *)((u8 *)temp_s0 + 4)) = temp_f10;
-    (*(f32 *)((u8 *)temp_s0 + 0x18)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x18)) + ((*(f32 *)((u8 *)temp_s0 + 0x20)) * D_800BE9A4));
-    (*(f32 *)((u8 *)temp_s0 + 0x1C)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x1C)) + ((*(f32 *)((u8 *)temp_s0 + 0x24)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s0 + 0x18)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x18)) + ((*(f32 *)((u8 *)temp_s0 + 0x20)) * g_frame_step_f));
+    (*(f32 *)((u8 *)temp_s0 + 0x1C)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x1C)) + ((*(f32 *)((u8 *)temp_s0 + 0x24)) * g_frame_step_f));
     (*(f32 *)((u8 *)temp_s0 + 0x18)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0 + 0x18)));
     (*(f32 *)((u8 *)temp_s0 + 0x1C)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0 + 0x1C)));
     return 1;
 }
 /* P150 */
 s32 obj_glow_effect_spawn(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, u8 g, u8 b, f32 arg8, f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE);
-extern f32 D_800A2570[][3];
-extern f32 D_800A25C4[][3];
-extern u8 D_800A2618[];
-// object_effect_start: starts effect kind (D_800A2570 / D_800A25C4 / D_800A2618 entries) on obj through
+extern f32 g_obj_glow_kind_pts[][3]; /* was D_800A2570 */
+extern f32 g_obj_glow_kind_pts_b[][3]; /* was D_800A25C4 */
+extern u8 g_obj_glow_kind_bones[]; /* was D_800A2618 */
+// object_effect_start: starts effect kind (g_obj_glow_kind_pts / g_obj_glow_kind_pts_b / g_obj_glow_kind_bones entries) on obj through
 // obj_glow_effect_spawn with sizes 20, 20, 4 and rate 0.08. Object types 0x58, 0x5B and 0x80 use the pair (0x32, 0xFF),
 // types 0x5A, 0x5F, 0x74, 0x75 and 0x7A (0xFF, 0); other types (0xFF, 0) when their record (+0x31C) byte +0x78 is
 // 0x3B, else (0x32, 0xFF). Returns obj_glow_effect_spawn's result (0 without an object).
@@ -1130,7 +1130,7 @@ s32 object_effect_start(u8 *obj, s32 arg1, s32 kind, s32 arg3, s32 arg4, s32 arg
             }
             break;
     }
-    return obj_glow_effect_spawn(obj, D_800A2570[kind & 0xFF], D_800A25C4[kind & 0xFF], D_800A2618[kind & 0xFF], (s16)arg1,
+    return obj_glow_effect_spawn(obj, g_obj_glow_kind_pts[kind & 0xFF], g_obj_glow_kind_pts_b[kind & 0xFF], g_obj_glow_kind_bones[kind & 0xFF], (s16)arg1,
                          a, b, 0, 20.0f, 20.0f, 4.0f, 0.08f, arg3 & 0xFF, arg4 & 0xFF, arg5);
 }
 

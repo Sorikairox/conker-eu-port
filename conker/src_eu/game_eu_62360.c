@@ -53,8 +53,8 @@ s16 *obj_adjust_entries_face(s16 *buf, u8 *obj, s32 a2, s32 a3) {
         else if (v >= 0x100) v = 0xFF;
         obj[0x1FE] = v;
         if (obj[0x1FF] == 3) {
-            if ((s32)obj[0x200] < D_800BE9E4) { obj[0x200] = 0; obj[0x1FF] = 0; }
-            else obj[0x200] = obj[0x200] - D_800BE9E4;
+            if ((s32)obj[0x200] < g_frame_ticks) { obj[0x200] = 0; obj[0x1FF] = 0; }
+            else obj[0x200] = obj[0x200] - g_frame_ticks;
         }
     }
     if (a3 == 0xFF) return buf;
@@ -106,8 +106,8 @@ s16 *obj_adjust_entries_face(s16 *buf, u8 *obj, s32 a2, s32 a3) {
         }
     }
     if (obj[0x206] == 3) {
-        if ((s32)obj[0x207] < D_800BE9E4) { obj[0x207] = 0; obj[0x206] = 0; }
-        else obj[0x207] = obj[0x207] - D_800BE9E4;
+        if ((s32)obj[0x207] < g_frame_ticks) { obj[0x207] = 0; obj[0x206] = 0; }
+        else obj[0x207] = obj[0x207] - g_frame_ticks;
     }
     return buf;
 }
@@ -266,12 +266,12 @@ struct_eu_size0C *reflect_queue_alloc(void) {
 }
 
 s32 camera_view_test_sphere(s32, s32 *, f32, f32, f32, f32, f32, f32);
-extern s32 D_800DA030;
+extern s32 g_view_mtxf; /* was D_800DA030 */
 extern f32 D_80098120;
 
 /* was func_15035A04 */
 s32 reflect_is_culled(s32 arg0, u8 *arg1, u8 *arg2, f32 arg3) {
-    s32 sp28 = D_800BE628;
+    s32 sp28 = g_player_cams;
     struct124 *e = D_800D1C90[arg1[4]];
     f32 w = (f32)(u16)e->unkE;
     f32 h = (f32)*(s16 *)((u8 *)e + 0x10) * *(f32 *)(arg1 + 0x150);
@@ -282,7 +282,7 @@ s32 reflect_is_culled(s32 arg0, u8 *arg1, u8 *arg2, f32 arg3) {
     } else {
         y = *(f32 *)(arg1 + 0x18) + h;
     }
-    return camera_view_test_sphere(sp28, &D_800DA030, *(f32 *)(arg2 + 0x30), y, *(f32 *)(arg2 + 0x38),
+    return camera_view_test_sphere(sp28, &g_view_mtxf, *(f32 *)(arg2 + 0x30), y, *(f32 *)(arg2 + 0x38),
                          w * *(f32 *)(arg1 + 0x14C), w * *(f32 *)(arg1 + 0x150), D_80098120) == 0;
 }
 void reflect_build_joint_matrices(struct127 *obj, struct_eu_size0C *e, s32 mode, s32 model, s32 mtx, s32 nmtx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 x, f32 y, f32 z, f32 g, f32 h, f32 alpha, s32 shadow, s32 sub);
@@ -336,8 +336,8 @@ void reflect_queue_object(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, 
     if (D_800C35EA == 1) {
         max = 10000;
     }
-    dist = approx_dist3_int((s32) (D_800DBFF0->unk2F8 - obj->x_position), (s32) (D_800DBFF0->unk2FC - obj->y_position),
-                         (s32) (D_800DBFF0->unk300 - obj->z_position));
+    dist = approx_dist3_int((s32) (g_player_views->unk2F8 - obj->x_position), (s32) (g_player_views->unk2FC - obj->y_position),
+                         (s32) (g_player_views->unk300 - obj->z_position));
     if ((f32) max < (f32) dist) {
         return;
     }
@@ -396,10 +396,10 @@ void reflect_queue_object(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, 
         if (*(u8 **) (att + 0x48) != NULL) {
             nmtx = (*(u8 **) (att + 0x48))[0x3F4];
         }
-        mtx = ((s32 *) (att + 0x4C))[D_800BE9C0];
+        mtx = ((s32 *) (att + 0x4C))[g_dl_buf_index];
         if (mtx == 0) {
-            ((s32 *) (att + 0x4C))[D_800BE9C0] = (s32) allocate_memory(nmtx << 6, 1, 2, 0);
-            mtx = ((s32 *) (att + 0x4C))[D_800BE9C0];
+            ((s32 *) (att + 0x4C))[g_dl_buf_index] = (s32) allocate_memory(nmtx << 6, 1, 2, 0);
+            mtx = ((s32 *) (att + 0x4C))[g_dl_buf_index];
         }
         *(s32 *) &e->unk0[0] = mtx;
         shadow = *(s32 *) (att + 0x34) != 0 || *(s32 *) (att + 0x48) != 0;
@@ -534,7 +534,7 @@ void reflect_queue_objects_over_water(void) {
 
     var_s0 = g_objects;
     var_s1 = 0;
-    if (!(D_800DBFF0->unk5F0 & 1)) {
+    if (!(g_player_views->unk5F0 & 1)) {
         do {
             if ((var_s0->interaction_state != 0) && ((temp_v0 = var_s0->unk5, (temp_v0 == 0)) || (temp_v0 == 1))) {
                 temp_f0 = var_s0->unk118;

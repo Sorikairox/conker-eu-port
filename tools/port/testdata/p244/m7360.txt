@@ -1,7 +1,7 @@
 # P244: p225/m7360.txt without the line-24 rot / mf swap (the same mutant is in m7360b with the OUTA_PERCALL setups upb / downb that kill it)
 19s/x0 == 0 ||/x0 != 0 ||/ %
-19s/D_800DDF78\[obj\[0xED\]\] == 0/D_800DDF78[obj[0xED]] != 0/ %
-19s/D_800DDF78\[obj\[0xED\]\]/D_800DDF78[obj[0xEC]]/ %
+19s/g_anim_mesh_dls\[obj\[0xED\]\] == 0/g_anim_mesh_dls[obj[0xED]] != 0/ %
+19s/g_anim_mesh_dls\[obj\[0xED\]\]/g_anim_mesh_dls[obj[0xEC]]/ %
 20s/return gdl/return gdl + 1/ %
 22s/0xAC/0xA8/ %
 22s/0.0f);/1.0f);/ %
@@ -45,5 +45,5 @@
 60s/v, v, v,/v, v, 0,/ %
 60s/(gdl++, v,/(gdl++, 0,/ %
 60s/obj\[0xF0\]/obj[0xF1]/ %
-61s/D_800DE2BC\[obj\[0xED\]\]/D_800DE2BC[obj[0xEC]]/ %
+61s/g_anim_mesh_slot_dl\[obj\[0xED\]\]/g_anim_mesh_slot_dl[obj[0xEC]]/ %
 62s/return gdl/return gdl - 1/ %

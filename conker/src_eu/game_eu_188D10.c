@@ -19,7 +19,7 @@ typedef struct {
 } Probe1515B500;
 
 // character_dust_drop_spawn: one call in 16 (random_int() & 0xF == 0) spawns a falling dust object near character
-// idx (D_800DBFF0 entries of 0x9A0 bytes: position +0x2F8, yaw +0x380). The spot is 107..2010 units away at the yaw
+// idx (g_player_views entries of 0x9A0 bytes: position +0x2F8, yaw +0x380). The spot is 107..2010 units away at the yaw
 // (in 256ths of a turn, 256 / 360 per degree) +-20; it needs ground under it: a probe from y 19500 down to the
 // character's y gives the ground height, a second probe from the character's y down 250 more gives the start height
 // (else y - 250). The effect_node_create_nodraw object (5..65, -1, 0xC, 1, 7, 0x18 bytes, 0xFF, 0) gets the record
@@ -43,8 +43,8 @@ void dust_drop_spawn_near_char(s16 idx) {
         return;
     }
     ok = 1;
-    pos = (f32 *) ((u8 *) D_800DBFF0 + idx * 0x9A0 + 0x2F8);
-    yaw = *(f32 *) ((u8 *) D_800DBFF0 + idx * 0x9A0 + 0x380) * 0.7111111f;
+    pos = (f32 *) ((u8 *) g_player_views + idx * 0x9A0 + 0x2F8);
+    yaw = *(f32 *) ((u8 *) g_player_views + idx * 0x9A0 + 0x380) * 0.7111111f;
     angle = (u32) random_int() % 41 + yaw - 20;
     dist = random_float() * 1903.0f + 107.0f;
     c = angle_byte_cos((u8) angle);
@@ -155,7 +155,7 @@ void dust_drop_update(u8 *arg0) {
     s32 temp_v0;
     u8 *temp_s0;
 
-    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((*(f32 *)((u8 *)arg0 + 0x34)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((*(f32 *)((u8 *)arg0 + 0x34)) * g_frame_step_f));
     temp_s0 = arg0 + 0x28;
     if ((*(f32 *)((u8 *)arg0 + 0x38)) > 1.0f) {
         sp.uB1 = 0x2F;
@@ -351,8 +351,8 @@ s32 screen_smoke_beh_rise(u8 *arg0) {
 
     temp_f2 = (*(f32 *)((u8 *)arg0 + 0x78));
     temp_f14 = (*(f32 *)((u8 *)arg0 + 0x74));
-    (*(f32 *)((u8 *)arg0 + 0x14)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x14)) + ((temp_f2 * D_800BE9A4) + (0.5f * temp_f14 * D_800BE9A4)));
-    (*(f32 *)((u8 *)arg0 + 0x78)) = (f32) (temp_f2 + (temp_f14 * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x14)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x14)) + ((temp_f2 * g_frame_step_f) + (0.5f * temp_f14 * g_frame_step_f)));
+    (*(f32 *)((u8 *)arg0 + 0x78)) = (f32) (temp_f2 + (temp_f14 * g_frame_step_f));
     (*(f32 *)((u8 *)arg0 + 0x1C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x7C)) + ((*(f32 *)((u8 *)arg0 + 0x80)) * ((*(f32 *)((u8 *)arg0 + 0x78)) + temp_f2) * 0.5f));
     return 1;
 }

@@ -43,7 +43,7 @@ typedef struct {
     u8 unk0[4];
 } struct_eu_bytes4b;
 
-extern struct_eu_bytes4b D_800A78B4;
+extern struct_eu_bytes4b g_fx_bytes4_78b4; /* was D_800A78B4 */
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x84];
@@ -71,7 +71,7 @@ void model_drip_unlink_free(void *arg0) {
 
 /* P188: moved up from model_drip_drop_all (also used by the NON_MATCHING model_drip_update) */
 typedef struct { s16 base; s16 range; u8 pad4[0x10]; } Rng14;
-extern Rng14 D_800AA120[];
+extern Rng14 g_drip_drop_ranges[]; /* was D_800AA120 */
 
 /* P188 */
 /* P188: the 3-argument prototype (functions.h) again here, so that difftest takes its arity from it: the asm leaves
@@ -80,9 +80,9 @@ void mtx_transform_point_or_origin(void *arg0, void *arg1, void *arg2);
 void effect3d_set_handlers(u8 *, s32, s32, s32, s32);
 s32 memcpy(s32, f32 *, s32);
 void hitinfo_from_obj_floor(void *, u8 *);
-extern f32 D_800A83F4;
-extern u8 D_800AB6F0[];
-extern u8 D_800AB7E4[];
+extern f32 g_drip_k_83f4; /* was D_800A83F4 */
+extern u8 g_spark_kind_sprites[]; /* was D_800AB6F0 */
+extern u8 g_impact_kind_flag20[]; /* was D_800AB7E4 */
 
 typedef struct DripSlot {
     u8 *obj;               /* the falling drop object, NULL when free */
@@ -91,7 +91,7 @@ typedef struct DripSlot {
 } DripSlot;
 
 typedef struct {
-    u8 kind;     /* +0x00 drop type (D_800AA120 entry) */
+    u8 kind;     /* +0x00 drop type (g_drip_drop_ranges entry) */
     u8 pad1[3];
     s32 count;   /* +0x04 number of drip points / slots */
     u8 *points;  /* +0x08 0x10 bytes per point, +0xC = owner matrix index */
@@ -100,15 +100,15 @@ typedef struct {
     s16 base;    /* +0x14 hang time base */
     s16 range;   /* +0x16 hang time random range */
 } DripCfg;
-extern DripCfg D_8008FE10[];
+extern DripCfg g_model_drip_cfgs[]; /* was D_8008FE10 */
 
 /* drip_emitter_update: P186: update handler (g_node_type_table entry +0) of a drip emitter e (rain drops hanging off an
- * owner model e +0x10, config D_8008FE10[e[0x1A]], slots e +0x24, live count e +0x20, accumulator f32 e +0x1C).
+ * owner model e +0x10, config g_model_drip_cfgs[e[0x1A]], slots e +0x24, live count e +0x20, accumulator f32 e +0x1C).
  * Kills itself (node_destroy) when its timer s16 e +0x16 runs out (flag e[0x18] & 1), the owner is gone or has
  * another id (e[0x14] vs owner[0x3B]), or the owner has no matrices (+0x1D4; then it first starts the ending
  * effect effect_node_create_nodraw with e +0x10..+0x1B copied to its +0x28). Hanging drops follow their point on the owner
  * (mtx_transform_point_or_origin with the owner matrix), and once their timer is over they fall (velocity from the last move *
- * D_800BEDC8, effect3d_set_handlers, life from D_800AA120). The accumulator gains rate * dt; for every whole unit a free slot
+ * D_800BEDC8, effect3d_set_handlers, life from g_drip_drop_ranges). The accumulator gains rate * dt; for every whole unit a free slot
  * is picked at random and, when the point is below the owner's +0x118 height limit, a drop object is created
  * (effect3d_spawn_default with a 0x60-byte motion block at +0x110) and given a hang time. */
 /* was func_15190E08 */
@@ -116,14 +116,14 @@ void model_drip_update(u8 *e) {
     struct {
         f32 vel[3];     /* +0x00 */
         f32 gravity;    /* +0x0C -1 */
-        f32 f10;        /* +0x10 D_800A83F4 */
+        f32 f10;        /* +0x10 g_drip_k_83f4 */
         s16 s14, s16;   /* +0x14 15, 17 */
         f32 f18;        /* +0x18 0 */
-        f32 f1C;        /* +0x1C D_800A83F4 */
+        f32 f1C;        /* +0x1C g_drip_k_83f4 */
         u8 kind;        /* +0x20 */
         u8 b21, b22, b23, b24;
         u8 pad25[3];
-        s32 rng[4];     /* +0x28 D_800AA120[kind] +4..+0x13 (+0x2C, +0x34 read as f32) */
+        s32 rng[4];     /* +0x28 g_drip_drop_ranges[kind] +4..+0x13 (+0x2C, +0x34 read as f32) */
         u8 owner[0x24]; /* +0x38 hitinfo_from_obj_floor */
         u8 b5C;         /* +0x5C e[0x2C] */
         u8 pad5D[3];
@@ -154,7 +154,7 @@ void model_drip_update(u8 *e) {
     u8 *drop;
 
     if (e[0x18] & 1) {
-        *(s16 *) (e + 0x16) -= D_800BE9E4;
+        *(s16 *) (e + 0x16) -= g_frame_ticks;
         if (*(s16 *) (e + 0x16) < 0) {
             kill = 1;
         }
@@ -175,7 +175,7 @@ void model_drip_update(u8 *e) {
                 memcpy((s32) (drop + 0x28), (f32 *) (e + 0x10), 12);
             }
         } else {
-            cfg = &D_8008FE10[e[0x1A]];
+            cfg = &g_model_drip_cfgs[e[0x1A]];
             head = NULL;
             tail = NULL;
             n = 0;
@@ -189,13 +189,13 @@ void model_drip_update(u8 *e) {
                     *(f32 *) (obj + 0x48) = *(f32 *) (obj + 0x3C);
                     mtx_transform_point_or_origin(cfg->points + i * 0x10, obj + 0x34,
                                   *(u8 **) (*(u8 **) (e + 0x10) + 0x1D4) + cfg->points[i * 0x10 + 0xC] * 0x40);
-                    slot->timer -= D_800BE9E4;
+                    slot->timer -= g_frame_ticks;
                     if (slot->timer < 0) {
                         obj = slot->obj;
                         *(f32 *) (obj + 0x114) = 0.0f;
                         *(f32 *) (obj + 0x110) = (*(f32 *) (obj + 0x34) - *(f32 *) (obj + 0x40)) * D_800BEDC8;
                         *(f32 *) (obj + 0x118) = (*(f32 *) (obj + 0x3C) - *(f32 *) (obj + 0x48)) * D_800BEDC8;
-                        r = &D_800AA120[obj[0x130]];
+                        r = &g_drip_drop_ranges[obj[0x130]];
                         effect3d_set_handlers(obj, 13, 18, 0, 13);
                         *(s16 *) (obj + 0x1C) = (u32) random_int() % (u32) (r->range + 1) + r->base;
                         *(s32 *) (obj + 0x58) |= 1;
@@ -216,23 +216,23 @@ void model_drip_update(u8 *e) {
                 }
             }
             if (n != 0) {
-                *(f32 *) (e + 0x1C) += cfg->rate * D_800BE9A4;
+                *(f32 *) (e + 0x1C) += cfg->rate * g_frame_step_f;
                 if (1.0f < *(f32 *) (e + 0x1C)) {
                     tail->next = head; /* circular */
                     blk.vel[0] = 0.0f;
                     blk.vel[1] = 0.0f;
                     blk.vel[2] = 0.0f;
-                    blk.f10 = D_800A83F4;
+                    blk.f10 = g_drip_k_83f4;
                     blk.s14 = 15;
                     blk.s16 = 17;
                     blk.f18 = 0.0f;
-                    blk.f1C = D_800A83F4;
+                    blk.f1C = g_drip_k_83f4;
                     blk.gravity = -1.0f;
                     blk.kind = cfg->kind;
-                    r = &D_800AA120[cfg->kind];
+                    r = &g_drip_drop_ranges[cfg->kind];
                     hitinfo_from_obj_floor(blk.owner, *(u8 **) (e + 0x10));
                     blk.b5C = e[0x2C];
-                    spawn.type = D_800AB6F0[e[0x2C]];
+                    spawn.type = g_spark_kind_sprites[e[0x2C]];
                     spawn.flags = 0x1001;
                     spawn.life = 300;
                     spawn.w8 = 0;
@@ -274,7 +274,7 @@ void model_drip_update(u8 *e) {
                         if (*(f32 *) (*(u8 **) (e + 0x10) + 0x118) <
                             spawn.pos[1] - *(f32 *) &blk.rng[1] - *(f32 *) &blk.rng[3]) {
                             random_int();
-                            drop = (u8 *) effect3d_spawn_default((s32) &spawn, 12, 0, 0, 13, D_800AB7E4[e[0x2C]] ? 0 : 2, 96, 255, 0);
+                            drop = (u8 *) effect3d_spawn_default((s32) &spawn, 12, 0, 0, 13, g_impact_kind_flag20[e[0x2C]] ? 0 : 2, 96, 255, 0);
                             head->obj = drop;
                             if (drop != NULL) {
                                 memcpy((s32) (drop + 0x110), (f32 *) &blk, 0x60);
@@ -303,8 +303,8 @@ s32 drop_wobble_update(u8 *arg0) {
     f32 s;
     f32 c;
 
-    arg0[0x131] += (s8)arg0[0x133] * D_800BE9E4;
-    arg0[0x132] += (s8)arg0[0x134] * D_800BE9E4;
+    arg0[0x131] += (s8)arg0[0x133] * g_frame_ticks;
+    arg0[0x132] += (s8)arg0[0x134] * g_frame_ticks;
     p = arg0 + 0x110;
     s = angle_byte_cos((u8)(arg0[0x131] - 0x40));
     c = angle_byte_cos((u8)(p[0x22] - 0x40));
@@ -315,8 +315,8 @@ s32 drop_wobble_update(u8 *arg0) {
 
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, f32 *, s32);
-extern s32 D_800DD608;
-extern s32 D_800DD618;
+extern s32 g_view_yaw_sin; /* was D_800DD608 */
+extern s32 g_view_yaw_cos; /* was D_800DD618 */
 
 /* was func_151915FC */
 u8 *drop_quad_velocity_build(u8 *arg0, s16 arg1) {
@@ -365,8 +365,8 @@ u8 *drop_quad_velocity_build(u8 *arg0, s16 arg1) {
             memcpy((*(s32 *)((u8 *)temp_v0 + 0x100)) + 0x40, temp_a1, 0x40);
         }
         temp_t0 = arg1 * 4;
-        temp_v1 = temp_t0 + &D_800DD618;
-        temp_a0 = temp_t0 + &D_800DD608;
+        temp_v1 = temp_t0 + &g_view_yaw_cos;
+        temp_a0 = temp_t0 + &g_view_yaw_sin;
         var_f14 = -1.0f;
         var_f2 = ((*temp_v1 * ((*(f32 *)((u8 *)arg0 + 0x40)) - (*(f32 *)((u8 *)arg0 + 0x34)))) - (*temp_a0 * ((*(f32 *)((u8 *)arg0 + 0x48)) - (*(f32 *)((u8 *)arg0 + 0x3C))))) * D_800BEDC8;
         if (var_f2 < 0.0f) {
@@ -429,7 +429,7 @@ void model_drip_drop_all(u8 *arg0) {
             *(f32 *)(q + 0) = 0.0f;
             *(f32 *)(q + 4) = 0.0f;
             *(f32 *)(q + 8) = 0.0f;
-            r = &D_800AA120[*(u8 *)(q + 0x20)];
+            r = &g_drip_drop_ranges[*(u8 *)(q + 0x20)];
             effect3d_set_handlers(*p, 0xD, 0x12, 0, 0xD);
             *(s16 *)(*p + 0x1C) = random_int() % (u32)(r->range + 1) + r->base;
             *(s32 *)(*p + 0x58) |= 1;
@@ -443,14 +443,14 @@ s32 pos_in_world_bounds(u8 *);
 s32 collision_floor_probe(f32 *, s32, f32, f32 *);
 void impact_splash_ring_spawn(u8, f32, u8, f32 *, u8, u8, s32);
 void impact_dust_particle_spawn(u8, f32, s16, s32, void *, u8, s32);
-extern f32 D_800A83FC;
-extern f32 D_800A8400;
+extern f32 g_drip_debris_scale; /* was D_800A83FC */
+extern f32 g_drip_splash_scale; /* was D_800A8400 */
 // drop_fall_update: update handler (g_effect3d_update_fns slot 13) of a falling drop / debris sprite. Motion block at +0x110:
 // velocity x/y/z, gravity +0x11C, drag +0x120 (x / z speeds times drag * dt each frame), trail easing +0x128 (the
 // trail point +0x40 follows the position +0x34). Ends (0) when pos_in_world_bounds rejects the new position (out of the
 // level); a floor probe (collision_floor_probe, floor y to +0x148) that hits also ends it and spawns a splash at the floor,
 // sized by width +0x2C * height +0x30: kind +0x165 == 3 -> impact_dust_particle_spawn (0.25), else randomly impact_debris_spawn
-// (D_800A83FC, life 80..120) or the ring impact_splash_ring_spawn (D_800A8400), of type +0x16C, owner data +0x14C.
+// (g_drip_debris_scale, life 80..120) or the ring impact_splash_ring_spawn (g_drip_splash_scale), of type +0x16C, owner data +0x14C.
 /* was func_15191A90 */
 s32 drop_fall_update(u8 *fx) {
     f32 *mv = (f32 *)(fx + 0x110);
@@ -464,13 +464,13 @@ s32 drop_fall_update(u8 *fx) {
     vx0 = mv[0];
     vz0 = mv[2];
     ret = 1;
-    mv[0] = vx0 * (mv[4] * D_800BE9A4);
-    mv[2] = vz0 * (mv[4] * D_800BE9A4);
-    dx = (mv[0] + vx0) * 0.5f * D_800BE9A4;
+    mv[0] = vx0 * (mv[4] * g_frame_step_f);
+    mv[2] = vz0 * (mv[4] * g_frame_step_f);
+    dx = (mv[0] + vx0) * 0.5f * g_frame_step_f;
     vy = mv[1];
-    dvy = mv[3] * D_800BE9A4;
-    dy = vy * D_800BE9A4 + dvy * D_800BE9A4 * 0.5f;
-    dz = (mv[2] + vz0) * 0.5f * D_800BE9A4;
+    dvy = mv[3] * g_frame_step_f;
+    dy = vy * g_frame_step_f + dvy * g_frame_step_f * 0.5f;
+    dz = (mv[2] + vz0) * 0.5f * g_frame_step_f;
     mv[1] = vy + dvy;
     *(f32 *)(fx + 0x34) += dx;
     *(f32 *)(fx + 0x38) = y0 + dy;
@@ -496,11 +496,11 @@ s32 drop_fall_update(u8 *fx) {
             impact_dust_particle_spawn(fx[0x16C], *(f32 *)(fx + 0x2C) * *(f32 *)(fx + 0x30) * 0.25f, fx[0x5C], (s32)(fx + 0x14C),
                           probe, fx[0xC], fx[1]);
         } else if (random_int() & 1) {
-            impact_debris_spawn(fx[0x16C], *(f32 *)(fx + 0x2C) * *(f32 *)(fx + 0x30) * D_800A83FC, fx[0x5C],
+            impact_debris_spawn(fx[0x16C], *(f32 *)(fx + 0x2C) * *(f32 *)(fx + 0x30) * g_drip_debris_scale, fx[0x5C],
                           (s32)(fx + 0x14C), (struct17 *)probe, (random_int() % 41U) + 0x50, 1, 1, 0, fx[0xC],
                           fx[1]);
         } else {
-            impact_splash_ring_spawn(fx[0x16C], *(f32 *)(fx + 0x2C) * *(f32 *)(fx + 0x30) * D_800A8400, fx[0x5C], probe, 1,
+            impact_splash_ring_spawn(fx[0x16C], *(f32 *)(fx + 0x2C) * *(f32 *)(fx + 0x30) * g_drip_splash_scale, fx[0x5C], probe, 1,
                           fx[0xC], fx[1]);
         }
         ret = 0;
@@ -600,13 +600,13 @@ void model_drip_wait_on_message(struct102 *arg0, u8 *arg1, u8 arg2) {
         }
     }
 }
-extern s32 D_800A83F0;
+extern s32 g_drip_node_type; /* was D_800A83F0 */
 
 /* was func_151920FC */
 void model_drip_broadcast(s32 arg0, u8 arg1) {
     s32 sp1C;
 
-    sp1C = D_800A83F0;
+    sp1C = g_drip_node_type;
     effect_nodes_broadcast(arg0, arg1);
     node_broadcast_types(&sp1C, 1, arg0, arg1);
 }

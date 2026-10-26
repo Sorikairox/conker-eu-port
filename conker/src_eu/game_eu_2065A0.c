@@ -11,7 +11,7 @@ s32 rumble_mask_has_pak(u8 arg0) {
     u8 t;
     for (i = 0; i < 4; i++) {
         if (arg0 & (1 << i)) {
-            t = D_800843F0[i];
+            t = g_player_pad_map[i];
             if (t >= 4) {
                 return 0;
             }
@@ -38,25 +38,25 @@ s32 rumble_request(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3) {
     s32 var_v1;
     u8 *temp_v0;
 
-    if (D_800E0B94 != 0) {
+    if (g_game_mode != 0) {
         return 0;
     }
     if (rumble_mask_has_pak(arg0->unk5) == 0) {
         return 0;
     }
-    if ((g_game_paused != 0) || (D_800BEAC1 != 0) || (g_unpause_settle_frames != 0) || (D_800BEEE3 != 0)) {
+    if ((g_game_paused != 0) || (g_pause_open != 0) || (g_unpause_settle_frames != 0) || (D_800BEEE3 != 0)) {
         return 0;
     }
     var_s1 = 0;
     var_s0 = 0;
-    if (D_80082FA0 >= 0) {
+    if (g_last_player_index >= 0) {
 loop_10:
         if ((arg0->unk5 & (1 << var_s0)) && ((hud_lens_is_off(var_s0) == 0) || (screen_fade_alpha(var_s0) != 0))) {
             return 0;
         }
         var_s0 = (var_s1 + 1) & 0xFF;
         var_s1 = var_s0;
-        if (D_80082FA0 < var_s0) {
+        if (g_last_player_index < var_s0) {
             goto block_15;
         }
         goto loop_10;
@@ -81,11 +81,11 @@ block_15:
 }
 /* P241: readable C for rumble_record_update (game_eu_2065A0, 64 insns). */
 // rumble_effect_update: update of the kind-0x3F effect made by rumble_request (rumble for the players in the mask
-// +0x13, strength +0x12 0..8). With flag +0xE bit 0 the s16 life +0x10 counts down by D_800BE9E4 and the effect ends
-// (node_destroy, after the rest) once it is negative. Runs the D_80090060 handler of index +0x14 (-1 = none); when
+// +0x13, strength +0x12 0..8). With flag +0xE bit 0 the s16 life +0x10 counts down by g_frame_ticks and the effect ends
+// (node_destroy, after the rest) once it is negative. Runs the g_rumble_rec_update_fns handler of index +0x14 (-1 = none); when
 // the strength changed since the last frame (+0x16), restarts the rumble of every player in the mask
 // (rumble_stop, rumble_start_strength) and remembers the new strength. rumble_start_strength is declared in the rumble_request block above.
-extern void (*D_80090060[])(u8 *);
+extern void (*g_rumble_rec_update_fns[])(u8 *); /* was D_80090060 */
 void rumble_stop(u8);
 /* was func_eu_151D8FD4 */
 void rumble_record_update(u8 *fx) {
@@ -93,13 +93,13 @@ void rumble_record_update(u8 *fx) {
     u8 i;
 
     if (fx[0xE] & 1) {
-        *(s16 *) (fx + 0x10) -= D_800BE9E4;
+        *(s16 *) (fx + 0x10) -= g_frame_ticks;
         if (*(s16 *) (fx + 0x10) < 0) {
             done = TRUE;
         }
     }
     if ((s8) fx[0x14] != -1) {
-        D_80090060[(s8) fx[0x14]](fx);
+        g_rumble_rec_update_fns[(s8) fx[0x14]](fx);
     }
     if (fx[0x12] != fx[0x16]) {
         for (i = 0; i < 4; i++) {
@@ -180,7 +180,7 @@ void rumble_on_message(struct102 *arg0, s32 arg1, u8 arg2) {
 
 /* was func_151D9364 */
 void rumble_broadcast(s32 arg0, u8 arg1) {
-    node_broadcast_types(&D_800AB6E0, 1, arg0, arg1);
+    node_broadcast_types(&g_rumble_bcast_types, 1, arg0, arg1);
 }
 
 extern s8 D_eu_800E0E30;

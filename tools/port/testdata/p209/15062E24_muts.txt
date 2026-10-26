@@ -7,7 +7,7 @@ s/tex \* 12;/tex * 8;/ %
 s/w = \*(u16 \*) (entry + 8);/w = *(u16 *) (entry + 0xA);/ %
 s/h \*= 2;/h *= 4;/ %
 s/if (twice) {/if (!twice) {/ %
-s/\[D_800BE9C0\];/[0];/ %
+s/\[g_dl_buf_index\];/[0];/ %
 s/if (list != NULL) {/if (1) {/ %
 s/list + dl \* 16/list + dl * 8/ %
 s/\&table\[cmd\]/\&table[arg2]/ %

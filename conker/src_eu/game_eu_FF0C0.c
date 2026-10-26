@@ -49,5 +49,5 @@ void ambient_red_flicker_dim_update(s32 arg0) {
     f32 *sp28;
     sp28 = (f32 *)((arg0 ^ 0) + 0x28); sp28 = sp28;
     fx_random_flicker_update(arg0 + 0x30, 10.0f, arg0 + 0x2C, 50.0f, 100.0f, 123.0f, D_800A0C90, sp28);
-    light_set_level_colour(*sp28, ((u8 *)&D_800DCD20)[1], ((u8 *)&D_800DCD20)[2], 0);
+    light_set_level_colour(*sp28, ((u8 *)&g_level_light_colour)[1], ((u8 *)&g_level_light_colour)[2], 0);
 }

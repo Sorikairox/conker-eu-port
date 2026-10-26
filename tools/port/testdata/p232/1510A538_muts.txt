@@ -1,17 +1,17 @@
-s/    \*(f32 \*) (rec + 4) += \*(f32 \*) (rec + 8) \* D_800A28EC \* D_800BE9A4;/    *(f32 *) (rec + 4) += *(f32 *) (rec + 8) * D_800A28EC;/ % rate
-s/    \*(f32 \*) (rec + 4) += \*(f32 \*) (rec + 8) \* D_800A28EC \* D_800BE9A4;/    *(f32 *) (rec + 4) = *(f32 *) (rec + 8) * D_800A28EC * D_800BE9A4;/ % none
+s/    \*(f32 \*) (rec + 4) += \*(f32 \*) (rec + 8) \* g_seg_effect_rate_scale \* g_frame_step_f;/    *(f32 *) (rec + 4) += *(f32 *) (rec + 8) * g_seg_effect_rate_scale;/ % rate
+s/    \*(f32 \*) (rec + 4) += \*(f32 \*) (rec + 8) \* g_seg_effect_rate_scale \* g_frame_step_f;/    *(f32 *) (rec + 4) = *(f32 *) (rec + 8) * g_seg_effect_rate_scale * g_frame_step_f;/ % none
 s/    if ((s8) rec\[0xD\] != -1) {/    if ((s8) rec[0xD] > 0) {/ % one_h0
 s/        while (\*(f32 \*) (rec + 4) > 1.0f) {/        while (*(f32 *) (rec + 4) >= 1.0f) {/ % exact1
 s/            world_record_build_matrix(mtx, \*(u8 \*\*) rec);/            world_record_build_matrix(mtx, rec);/ % one_h0
-s/            sel = D_800A28D4\[6\] \* random_float();/            sel = D_800A28D4[5] * random_float();/ % pick2 pick5
-s/            if (D_800A28D4\[0\] < sel) {/            if (D_800A28D4[0] <= sel) {/ % pick_eq
+s/            sel = g_seg_effect_weights\[6\] \* random_float();/            sel = g_seg_effect_weights[5] * random_float();/ % pick2 pick5
+s/            if (g_seg_effect_weights\[0\] < sel) {/            if (g_seg_effect_weights[0] <= sel) {/ % pick_eq
 s/                    sel -= wt;/                    sel += wt;/ % pick2
 s/                } while (wt < sel);/                } while (wt <= sel);/ % pick_tie pick2 pick5 pick1
-s/            seg = \&D_800A2938\[i \* 3\];/            seg = \&D_800A2938[i * 4];/ % pick2
+s/            seg = \&g_seg_effect_segments\[i \* 3\];/            seg = \&g_seg_effect_segments[i * 4];/ % pick2
 s/            mtxf_transform_point(mtx, (seg\[3\] - seg\[0\]) \* r + seg\[0\], (seg\[4\] - seg\[1\]) \* r + seg\[1\],/            mtxf_transform_point(mtx, (seg[3] - seg[0]) * r + seg[1], (seg[4] - seg[1]) * r + seg[1],/ % one_h0
 s/            mtxf_transform_point(mtx, seg\[0\], seg\[1\], seg\[2\], \&start\[0\], \&start\[1\], \&start\[2\]);/            mtxf_transform_point(mtx, seg[0], seg[1], seg[3], \&start[0], \&start[1], \&start[2]);/ % one_h0
 s/            mtxf_transform_point(mtx, seg\[3\], seg\[4\], seg\[5\], \&end\[0\], \&end\[1\], \&end\[2\]);/            mtxf_transform_point(mtx, seg[3], seg[4], seg[5], \&end[0], \&end[2], \&end[1]);/ % one_h0
-s/            mtxf_transform_point(mtx, D_800A298C\[i \* 3\], D_800A298C\[i \* 3 + 1\], D_800A298C\[i \* 3 + 2\], \&target\[0\],/            mtxf_transform_point(mtx, D_800A298C[i * 3], D_800A298C[i * 3], D_800A298C[i * 3 + 2], \&target[0],/ % one_h0
+s/            mtxf_transform_point(mtx, g_seg_effect_targets\[i \* 3\], g_seg_effect_targets\[i \* 3 + 1\], g_seg_effect_targets\[i \* 3 + 2\], \&target\[0\],/            mtxf_transform_point(mtx, g_seg_effect_targets[i * 3], g_seg_effect_targets[i * 3], g_seg_effect_targets[i * 3 + 2], \&target[0],/ % one_h0
 s/            dir\[0\] = ((target\[0\] - end\[0\]) \* r + end\[0\]) - start\[0\];/            dir[0] = ((target[0] - end[0]) * r + end[0]) + start[0];/ % one_h0
 s/            dir\[1\] = ((target\[1\] - end\[1\]) \* r + end\[1\]) - start\[1\];/            dir[1] = ((target[1] - end[1]) * r + start[1]) - start[1];/ % one_h0
 s/            dir\[2\] = ((target\[2\] - end\[2\]) \* r + end\[2\]) - start\[2\];/            dir[2] = ((target[2] - end[2]) + end[2]) - start[2];/ % one_h0

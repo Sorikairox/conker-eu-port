@@ -1,9 +1,9 @@
 \#^    if (obj\[0\] != 0xC && obj\[0\] != 0x59) {$#s/0x59/0x58/
 \#^    if (obj\[0\] != 0xC && obj\[0\] != 0x59) {$#s/obj\[0\] != 0xC && //
-\#^        if (view_point_cull_test((u8 \*) D_800DA030\[player\], \*(s16 \*) (obj + 0x90), \*(s16 \*) (obj + 0x92),$#s/D_800DA030\[player\]/D_800DA030[0]/
-\#^        if (view_point_cull_test((u8 \*) D_800DA030\[player\], \*(s16 \*) (obj + 0x90), \*(s16 \*) (obj + 0x92),$#s/0x92/0x94/
-\#^                          \*(s16 \*) (obj + 0x94), D_800D9F40, D_800D9F3C, D_800D3A00\[0\], D_800D3A00\[1\], NULL,$#s/D_800D9F40, D_800D9F3C/D_800D9F3C, D_800D9F40/
-\#^                          \*(s16 \*) (obj + 0x94), D_800D9F40, D_800D9F3C, D_800D3A00\[0\], D_800D3A00\[1\], NULL,$#s/D_800D3A00\[1\]/D_800D3A00[0]/
+\#^        if (view_point_cull_test((u8 \*) g_view_mtxf\[player\], \*(s16 \*) (obj + 0x90), \*(s16 \*) (obj + 0x92),$#s/g_view_mtxf\[player\]/g_view_mtxf[0]/
+\#^        if (view_point_cull_test((u8 \*) g_view_mtxf\[player\], \*(s16 \*) (obj + 0x90), \*(s16 \*) (obj + 0x92),$#s/0x92/0x94/
+\#^                          \*(s16 \*) (obj + 0x94), g_cam_near_plane, g_cam_far_plane, D_800D3A00\[0\], D_800D3A00\[1\], NULL,$#s/g_cam_near_plane, g_cam_far_plane/g_cam_far_plane, g_cam_near_plane/
+\#^                          \*(s16 \*) (obj + 0x94), g_cam_near_plane, g_cam_far_plane, D_800D3A00\[0\], D_800D3A00\[1\], NULL,$#s/D_800D3A00\[1\]/D_800D3A00[0]/
 \#^            if (obj\[0\] == 8 && (obj\[0xB2\] & (1 << player))) {$#s/(1 << player)/(2 << player)/
 \#^            if (obj\[0\] == 8 && (obj\[0xB2\] & (1 << player))) {$#s/obj\[0\] == 8 && //
 \#^                obj\[0xB2\] |= 0x10 << player;$#s/0x10/0x20/
@@ -12,18 +12,18 @@
 \#^        obj\[0xB2\] |= 1 << player;$#s/|=/=/
 \#^    gfx = (Gfx \*) puff_texture_set(gfxArg, obj\[0x9F\]);$#s/0x9F/0x9E/
 \#^    scale = \*(f32 \*) (obj + 0xA8);$#s/0xA8/0xAC/
-\#^    mtx = &((Mtx \*) (obj + 0x10))\[D_800BE9C0\];$#s/0x10/0x14/
+\#^    mtx = &((Mtx \*) (obj + 0x10))\[g_dl_buf_index\];$#s/0x10/0x14/
 \#^    mtx_build_rot_scale_trans(mtx, \*(s16 \*) (obj + 0x96), \*(s16 \*) (obj + 0x98), \*(s16 \*) (obj + 0x9A), scale, scale, scale,$#s/0x98/0x9A/
 \#^    mtx_build_rot_scale_trans(mtx, \*(s16 \*) (obj + 0x96), \*(s16 \*) (obj + 0x98), \*(s16 \*) (obj + 0x9A), scale, scale, scale,$#s/scale, scale, scale/scale, scale, 1.0f/
 \#^                  \*(s16 \*) (obj + 0x90), \*(s16 \*) (obj + 0x92), \*(s16 \*) (obj + 0x94));$#s/0x92/0x93/
-\#^    gSPMatrix(gfx++, &((Mtx \*) (obj + 0x10))\[D_800BE9C0\], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);$#s/G_MTX_LOAD/G_MTX_MUL/
-\#^    gSPMatrix(gfx++, &((Mtx \*) (obj + 0x10))\[D_800BE9C0\], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);$#s/\[D_800BE9C0\]/[0]/
-\#^    if (obj\[0xB3\] != D_800DD880) {$#s/!=/==/
+\#^    gSPMatrix(gfx++, &((Mtx \*) (obj + 0x10))\[g_dl_buf_index\], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);$#s/G_MTX_LOAD/G_MTX_MUL/
+\#^    gSPMatrix(gfx++, &((Mtx \*) (obj + 0x10))\[g_dl_buf_index\], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);$#s/\[g_dl_buf_index\]/[0]/
+\#^    if (obj\[0xB3\] != g_puff_last_alpha) {$#s/!=/==/
 \#^        gDPPipeSync(gfx++);$#d
 \#^        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, obj\[0xB3\]);$#s/0, 0, 0, 0, 0,/0, 0, 0, 0, 1,/
-\#^        D_800DD880 = obj\[0xB3\];$#d
+\#^        g_puff_last_alpha = obj\[0xB3\];$#d
 \#^    flag = 0;$#s/0/1/
 \#^    if (obj\[0\] == 8 || obj\[0\] == 9) {$#s/obj\[0\] == 8 || //
 \#^        mode = 0x5049D8;$#s/0x5049D8/0x504240/
-\#^    gfx = (Gfx \*) gfx_other_mode_cached((s32) gfx, D_800D30BC | 0x82CA0, mode, &flag);$#s/0x82CA0/0x80CA0/
-\#^    gSPDisplayList(gfx++, D_8008D190);$#s/gfx++/gfx/
+\#^    gfx = (Gfx \*) gfx_other_mode_cached((s32) gfx, g_gfx_tlut_mode | 0x82CA0, mode, &flag);$#s/0x82CA0/0x80CA0/
+\#^    gSPDisplayList(gfx++, g_puff_sprite_dl);$#s/gfx++/gfx/

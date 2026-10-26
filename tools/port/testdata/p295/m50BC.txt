@@ -24,7 +24,7 @@
 /hit->dir\[2\], (u8 \*) hit, 0.0f, 0, !(u8) objects/s/0, !(u8) objects/1, !(u8) objects/
 /!((u8) models && (u8) objects), (s8) filter, 0,/s/(u8) models \&\& (u8) objects/(u8) models/
 /!((u8) models && (u8) objects), (s8) filter, 0,/s/(s8) filter/filter/
-/matIdx = (hit->material - (u8 \*) D_800DBEF4) \/ 0xA0;/s/0xA0/0x50/
+/matIdx = (hit->material - (u8 \*) g_world_objs) \/ 0xA0;/s/0xA0/0x50/
 /^    if (hit->kind == 0) {/s/== 0/== 2/
 /^    } else if (hit->kind == 1) {/s/== 1/== 3/
 /^    } else if (from != NULL && to != NULL) {/s/from != NULL \&\& to != NULL/from != NULL/
@@ -39,4 +39,4 @@
 /hit_spark_sound_play(caster, (u8 \*) hit->point/s/hit->extra, hit->dist/hit->extra, lenScale/
 /hit_spark_sound_play(caster, (u8 \*) hit->point/s/(u8 \*) hit->dir/(u8 *) hit->start/
 /^    if (matIdx == -1) {/s/-1/0/
-/hit->material = (u8 \*) D_800DBEF4 + matIdx \* 0xA0;/s/0xA0/0x9C/
+/hit->material = (u8 \*) g_world_objs + matIdx \* 0xA0;/s/0xA0/0x9C/

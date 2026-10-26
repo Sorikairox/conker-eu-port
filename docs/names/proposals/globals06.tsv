@@ -1,0 +1,299 @@
+old	new	confidence	description
+D_8002AE00	g_morph_rom_blocks	med	ROM {start, end} pair of each mesh morph data block (scenery_mesh_morph_update)
+D_80089600	g_scenery_mover_sfx	high	MoverSfx per scenery mover kind: stop / near / move sound ids (scenery_mover_step)
+D_800896C0	g_scenery_morphs	med	Mesh morph settings (ROM block index, keyframe count) indexed by object +0x3C & 0xFFFF (scenery_mesh_morph_update)
+D_800896C4	g_scenery_tex_anims	high	24 TexAnim entries scanned by scenery_texture_anim_step for the animated texture of a scenery object
+D_800897E4	g_scenery_water_waves	med	Water wave parameter records indexed by (object +0x3C >> 8) & 0xFF (scenery_water_wave_update)
+D_80090688	g_tex_anim_id_ripple_wall	med	Texture animation id started on rippling walls in level 13 (scenery_rippling_wall_update)
+D_800A3558	g_scenery_jitter_k_3558	low	f32 scale constant of scenery_jitter_tilt_update
+D_800A355C	g_scenery_jitter_deg_to_rad	med	f32 degrees-to-radians factor of the tilt in scenery_jitter_tilt_update
+D_800A3564	g_scenery_jitter_k_3564	low	f32 blend factor of the tilt +0x80 toward +0x84 in scenery_jitter_tilt_update
+D_800A35A0	g_scenery_texproj_k_35a0	low	f32 constant of the projected texture coordinate maths in scenery_tex_project_follow
+D_800A35A4	g_scenery_texproj_k_35a4	low	f32 offset constant of the projected texture coordinates in scenery_tex_project_follow
+D_800A35A8	g_scenery_texproj_k_35a8	low	f32 scale constant of the projected texture coordinates in scenery_tex_project_follow
+D_800BE9B4	g_level_first_frame	med	Level start flag: 2 on game start, 1 on level load, cleared by game_frame_step; makes eased things snap
+D_800BE9E4	g_frame_ticks	high	Frame ticks (retraces) elapsed this frame, divided under slow motion (game_update_frame_timing)
+D_800CC774	g_obj0_anim	med	u16 animation id (+0x84) of object 0 (the player); 0x4B tested by scenery_float_on_floor_update
+D_800DC3F0	g_scenery_door_group_count	med	Number of entries used in the door group table D_800DC3F8 (scenery_door_group_sync)
+D_800DC3F8	g_scenery_door_groups	med	Door group table, 8 bytes per group (scenery_door_group_sync, reset by scenery_door_groups_reset)
+D_800A37F0	g_camera_side_view_min_init	low	f32 initial minimum of the player x range in camera_group_side_view
+D_800A37F4	g_camera_side_view_max_init	low	f32 initial maximum of the player x range in camera_group_side_view
+D_800A3810	g_camera_follow_yaw_k_a	low	f32 factor turning the yaw +0x37C into +0x39C on the riding path of camera_follow_yaw_update
+D_800A3814	g_camera_follow_tilt_scale	low	f32 scale of the locked-camera tilt (+0x2E4 >> 16) subtracted from the yaw (camera_follow_yaw_update)
+D_800A3818	g_camera_follow_no_snap_yaw	med	f32 sentinel of ctl +0x18C meaning no saved yaw to snap to (camera_follow_yaw_update)
+D_800A381C	g_camera_follow_rate_flag	low	f32 yaw ease rate when camera +0x84 bit 0x200000 is set (camera_follow_yaw_update)
+D_800A3820	g_camera_follow_rate_default	low	f32 default yaw ease rate (gain 0.75) in camera_follow_yaw_update
+D_800A3824	g_camera_follow_yaw_k_b	low	f32 factor turning the yaw +0x37C into +0x39C in camera_follow_yaw_update
+D_800A3830	g_camera_keep_offset_yaw_k	low	f32 factor turning the yaw +0x37C into +0x39C in camera_follow_keep_offset
+D_80089860	g_camera_orbit_last_yaw	high	Last orbit camera yaw in degrees, kept when the new one is within 10 degrees (camera_orbit_update)
+D_800A3850	g_camera_orbit_pitch_d2r	med	f32 pi / 180 for the orbit pitch (camera_orbit_update)
+D_800A3854	g_camera_orbit_half_pi	med	f32 pi / 2 subtracted from the orbit pitch (camera_orbit_update)
+D_800A3858	g_camera_orbit_no_override	med	f32 999: value of +0x86C meaning no yaw override (camera_orbit_update)
+D_800A385C	g_camera_orbit_yaw_d2r	med	f32 pi / 180 for the orbit yaw (camera_orbit_update)
+D_800A3860	g_camera_orbit_rate_a	low	f32 2.2, first term of the orbit ease rate (camera_orbit_update)
+D_800A3864	g_camera_orbit_rate_b	low	f32 2.2, second term of the orbit ease rate (camera_orbit_update)
+D_800A3868	g_camera_orbit_roll_ease	med	f32 0.15 easing factor of +0x5E8 toward +0x5EC (camera_orbit_update)
+D_80089890	g_camera_lean_presets	high	Camera lean presets {k0, k1, k2, k3, base} per camera +0x134 index (camera_lean_from_heading)
+D_800898C0	g_camera_restore_skip	high	Frames to skip the restore saved camera event (set by event_action_camera, counted down)
+D_800898C4	g_camera_saved_tgt_197	high	Per player: target controller byte 0x197 saved with the camera (camera_process_events event 5)
+D_800898D4	g_camera_saved_tgt_198	high	Per player: target controller byte 0x198 saved with the camera (camera_process_events event 5)
+D_800898E4	g_camera_event7_offset	high	f32[3] orbit offset {0, 0, -400} used by camera event 7 (camera_process_events)
+D_800898F0	g_camera_pivot_count	med	s16 number of 0x18-byte camera pivot records of the level (camera_level_init)
+D_800A39F0	g_camera_pivot_k_39f0	low	f32 initial value of pivot slot +8 (camera_pivot_slot_reset)
+D_800A39F4	g_camera_pivot_y_scale	med	f32 scale of the y part of the pivot direction (camera_pivot_follow_update)
+D_800A39F8	g_camera_pivot_k_39f8	low	f32 constant argument in camera_pivot_follow_update
+D_800A39FC	g_camera_pivot_k_39fc	low	f32 value compared with camera +0x364 in camera_pivot_follow_update
+D_800D2DB0	g_camera_event_heading	med	f32 heading requested by event_action_camera for camera_process_events; 999 = none
+D_800DC440	g_camera_saved_slots	high	Saved camera states, 0x9A0 bytes each (camera events 5 / 6, allocated by camera_level_init)
+D_800DC458	g_camera_pivot_slots	med	Per player 0x24-byte camera pivot state (camera_pivot_slot_reset / camera_pivot_follow_update)
+D_80089900	g_freecam_up_speed	high	Per player free camera up / down speed (camera_freecam_update)
+D_80089910	g_freecam_roll_speed	high	Per player free camera roll / strafe speed (camera_freecam_update)
+D_80089920	g_freecam_pitch_speed	high	Per player free camera pitch speed (camera_freecam_update)
+D_800BEA08	g_frame_ticks_raw	med	Frame ticks of this frame before the slow-motion division (game_update_frame_timing); camera time step
+D_80089930	g_camera_viewport_defaults	high	Default viewport rects (x, y, w, h) for slots 0..3 (camera_viewport_tables_reset)
+D_80089950	g_camera_cylinder_dist	med	f32 horizontal distance to the target set by camera_cylinder_push (0 when nothing was done)
+D_800899D0	g_zbuf_decode_table	high	Z-buffer decode table per exponent (code >> 13): {shift, add}
+D_800CC1F2	g_wall_coll_no_floor_skip	med	Wall collision flag: also push out of floor-like faces (set by camera_eye_collision)
+D_800CC1F3	g_wall_coll_soft_edges	low	Wall collision flag: relaxes the triangle edge side test (nmw_wall_triangle), set for some objects
+D_800CC1F4	g_wall_coll_no_clamp	med	Wall collision flag: skip clamping the position to 60 units from the target (nmw_wall_triangle)
+D_800DC4F0	g_freecam_axis_records	med	Per player 0x4C-byte free camera depth scan axis records (freecam_scan_depth), cleared on reset
+D_800DC620	g_freecam_eye_screen_x	high	Screen x of the projected eye (camera_world_to_screen in freecam_auto_step)
+D_800DC624	g_freecam_eye_screen_y	high	Screen y of the projected eye (freecam_auto_step)
+D_800DC628	g_freecam_eye_depth	high	Depth of the projected eye (freecam_auto_step)
+D_800DC62C	g_freecam_turn_drop	med	f32 height drop output of freecam_turn, subtracted from camera +0x2FC
+D_800DC630	g_camera_viewport_rects	high	s16 viewport rects [player][slot][x, y, w, h] (camera_viewport_tables_reset)
+D_800DC634	g_camera_viewport_rect_w	med	Width field view into D_800DC630 rects (freecam_axis_threshold_test)
+D_800DC636	g_camera_viewport_rect_h	med	Height field view into D_800DC630 rects (freecam_axis_threshold_test)
+D_800DC6B0	g_camera_track_data	high	Loaded camera shake / track tables, 6 floats per step (camera_shake_tracks_load)
+D_800DC6C0	g_camera_track_lengths	high	Step count of each camera track (camera_shake_tracks_load, camera_track_update)
+D_800DD210	g_camera_view_offsets	high	Per player 6 floats: extra view translation (0..2) and rotation (3..5) (camera_build_view_matrix, wobble)
+D_800DC6E0	g_camera_event_queues	high	Per camera event queues, 0xB0 bytes each (camera_queue_event / camera_dequeue_event)
+D_80089970	g_camera_shake_presets	med	Camera shake presets, 10 bytes each (camera_shake_start)
+D_800DC6F0	g_camera_shake_states	high	Per player 0x68-byte camera shake state: +0x54 translation, +0x60 roll (camera_shake_start)
+D_800DC434	g_camera_orbit_height	med	Camera eye orbit height, blended during camera transitions (camera_update_eye_height)
+D_800DC454	g_camera_fixed_pos_cur	high	Record (0x18 bytes) of the current fixed camera position (camera_apply_request)
+D_80089A10	g_level_player_state_fns	high	Per-level player state handlers, indexed by level header +0xF (player_state_handler_dispatch)
+D_80089B00	g_particle_update_fns	high	Particle update handlers indexed by +0x72, called with the old position; 0 = die (particle_sprite_update)
+D_80089BA0	g_particle_death_fns	high	Particle death handlers indexed by +0x73, run before the particle is freed (particle_sprite_update)
+D_80089BA4	g_particle_visible_fns	high	Particle visibility handlers indexed by +0x74 (particle_draw_sprite)
+D_80089BB4	g_particle_hook_fns_bb4	low	Particle handler table called by particle_run_hook_bb4
+D_80089BE4	g_particle_hook_fns_be4	low	Particle handler table called by particle_run_hook_be4
+D_80089C14	g_particle_hit_fns	high	Particle surface hit handlers indexed by hit config byte 1 (particle_surface_hit_dispatch)
+D_80089C18	g_particle_msg_fns	high	Particle message handlers indexed by +0x75 (particle_run_msg_hook)
+D_80090F10	g_sprite_textures	high	Sprite texture table, 12 bytes each: data pointer, frame info, u16 width / height at +6 / +8
+D_800A3BDC	g_particle_sprite_size_k	med	f32 scale of the particle sprite half width / height (particle_draw_sprite)
+D_80089C50	g_mdl_particle_fns_71	med	Model particle check handlers indexed by +0x71, 0 ends it (mdl_particle_update)
+D_80089CB4	g_mdl_particle_fns_72	med	Model particle check handlers indexed by +0x72, 0 ends it (mdl_particle_update)
+D_80089CD4	g_mdl_particle_land_fns	high	Model particle landing / ground handlers indexed by +0x73 (mdl_particle_collide_update)
+D_80089D10	g_mdl_particle_fns_74	med	Model particle collision handlers indexed by +0x74, 0 ends it (mdl_particle_collide_update)
+D_80089D14	g_mdl_particle_wall_fns	high	Model particle wall hit handlers indexed by +0x75 (mdl_particle_collide_update)
+D_80089D1C	g_mdl_particle_fns_76	med	Model particle per-frame handlers indexed by +0x76 (mdl_particle_update)
+D_80089D28	g_mdl_particle_fns_77	med	Model particle check handlers indexed by +0x77, 0 ends it (mdl_particle_update)
+D_80089D2C	g_mdl_particle_mtx_fns	high	Model particle matrix handlers indexed by +0x78: -1 ends, 0 hides, 1 shows (mdl_particle_update_matrix)
+D_80089D44	g_mdl_particle_draw_fns	med	Model particle extra draw handlers indexed by s8 +0x79 (mdl_particle_draw)
+D_80089D50	g_mdl_particle_hook_fns_d50	low	Model particle handler table called by mdl_particle_run_hook_d50
+D_80089D74	g_mdl_particle_hook_fns_d74	low	Model particle handler table called by mdl_particle_run_hook_d74
+D_80089D98	g_mdl_particle_msg_fns	high	Model particle message handlers (may be NULL) (mdl_particle_handle_msg)
+D_800A3C40	g_mdl_particle_bcast_types	med	The two node types broadcast to by mdl_particle_broadcast
+D_800A3C60	g_mdl_particle_model_files	high	Model file id per particle model id (mdl_particle_model_load)
+D_800DC460	g_mdl_particle_list_head	high	Head of the model particle model reference list (mdl_particle_release)
+D_800DC464	g_mdl_particle_list_tail	high	Tail of the model particle model reference list
+D_800DC468	g_mdl_particle_model_users	high	s16 user count per particle model id (mdl_particle_release)
+D_800DC63C	g_mdl_particle_live_count	high	Number of live model particles (spawn refused above 300)
+D_800DCA70	g_mdl_particle_model_segs	med	Per particle model id: resolved texture segment list (mdl_particle_model_load / release)
+D_8008A500	g_fx_random_colours	med	Effect colour sets, 4 RGB colours (12 bytes) per set, one picked at random (fx_pick_random_color)
+D_800918C4	g_fx_material_tex_3	low	Texture address used for material mode 3 (fx_material_tex_addr)
+D_800A548C	g_curve_table	med	f32 curve lookup table indexed by t * 100 (curve_table_lookup)
+D_800DA230	g_player_light_bufs	high	Per player light buffer handle (light_alloc_light_buf), written by light_write_light_cmds
+D_800DCE30	g_mtx_xform_dbg_step	med	Progress marker 1..6 written by mtx_transform_point_or_origin (crash debugging aid)
+D_800DCE34	g_mtx_xform_dbg_mtx	med	Matrix pointer last used by mtx_transform_point_or_origin (debug)
+D_800DCE38	g_mtx_xform_dbg_x	med	x of the point last transformed by mtx_transform_point_or_origin (debug)
+D_800DCE3C	g_mtx_xform_dbg_y	med	y of the point last transformed by mtx_transform_point_or_origin (debug)
+D_800DCE40	g_mtx_xform_dbg_z	med	z of the point last transformed by mtx_transform_point_or_origin (debug)
+D_800DD62C	g_gfx_geom_set_cached	high	Geometry mode bits already set this pass (gfx_geometry_mode_cached), reset per layer draw
+D_800DD630	g_gfx_geom_clear_cached	high	Geometry mode bits already cleared this pass (gfx_geometry_mode_cached)
+D_800DD634	g_gfx_prim_m_cached	high	Cached primitive colour min level m (gfx_prim_color_cached), -1 = unknown
+D_800DD636	g_gfx_prim_l_cached	high	Cached primitive colour LOD fraction l (gfx_prim_color_cached), -1 = unknown
+D_800DD638	g_gfx_tex_parm_a_cached	med	Cached texture load parameter (arg3) of gfx_load_texture_cached, -1 = unknown
+D_800DD63C	g_gfx_tex_parm_b_cached	med	Cached texture load parameter (arg4) of gfx_load_texture_cached, -1 = unknown
+D_800DD640	g_gfx_tex_parm_c_cached	med	Cached texture load parameter (arg5) of gfx_load_texture_cached, -1 = unknown
+D_800DD644	g_gfx_tex_parm_d_cached	med	Cached texture load parameter (arg8) of gfx_load_texture_cached
+D_800DD648	g_gfx_othermode_hi_cached	high	Cached other mode high word (gfx_other_mode_cached)
+D_800DD64C	g_gfx_othermode_lo_cached	high	Cached other mode low word (gfx_other_mode_cached)
+D_800900BC	g_fx_impact_id_fn_bc	low	Function returning the impact particle effect id used by obj_fx_point_impact_bc
+D_800900D0	g_fx_impact_id_fn_d0	low	Function returning the impact particle effect id used by obj_fx_point_impact_d0
+D_800A5B2C	g_fx_impact_level_scale	med	f32 scale of the hit level into the impact particle strength (obj_fx_point_impact_d0)
+D_800A5B30	g_fx_impact_size_scale	med	f32 scale of the object size +0x40 into the impact particle size byte
+D_8008A5A0	g_fxrec_step_fns	high	Effect record step handlers indexed by +0x2F, 0 ends it (fxrec_update)
+D_8008A5DC	g_fxrec_emit_fns	high	Effect record emitter handlers indexed by +0x30, 0 ends it (fxrec_update)
+D_8008A624	g_fxrec_update_fns	med	Effect record object update handlers, 0 ends it (fxrec_update)
+D_8008A644	g_fxrec_draw_fns	high	Effect record draw handlers indexed by +0x31 (fxrec_draw)
+D_8008A690	g_fxrec_free_fns	high	Effect record free handlers per kind (+0x20, 0..19) (fxrec_dispatch_free)
+D_8008A6E0	g_fxrec_kind_fns_b	low	Effect record per-kind handlers (+0x20, 0..19) called by fxrec_dispatch_b
+D_8008A730	g_fxrec_msg_fns	high	Effect record message handlers per kind +0x20 (fxrec_handle_msg)
+D_8008A780	g_trail_motion_fns	high	Trail motion handlers indexed by record +0x20 (grow / fall / shrink ...) (trail_step)
+D_8008A798	g_trail_motion2_fns	med	Second trail motion handlers indexed by record +0x21 (trail_step)
+D_8008A7CC	g_trail_end_fns	med	Trail end handlers indexed by record +0x22 (= D_8008A7D0 shifted by one) (trail_step)
+D_8008A7D0	g_trail_hit_fns	high	Trail hit handlers indexed by record +0x23 (trail_fall)
+D_8008A7F0	g_trail_floor_hit_fns	med	Trail floor hit handlers indexed by record +0x24 (trail_fall)
+D_80091914	g_fx_tex_addrs	med	Effect texture addresses indexed by id (fx_material_tex_addr mode 2, trail_draw)
+D_80091954	g_trail_tex_tile	med	Texture tile descriptor of trail_draw; its first word is set to the trail texture
+D_8008ADA0	g_emit_point_spawn_fns	high	Point spawn handlers by kind used by spawn_ring_emit / spawn_line_emit
+D_800A5BAC	g_spark_rand_k_5bac	low	f32 constant of spark_spawn_random (spawn field +0x70)
+D_800A5BB0	g_spark_rand_k_5bb0	low	f32 constant of spark_spawn_random (spawn field +0x74)
+D_800A5BB4	g_spark_rand_k_5bb4	low	f32 random range of the first spark angle (spark_spawn_random)
+D_800A5BB8	g_spark_rand_k_5bb8	low	f32 base of the first spark angle (spark_spawn_random)
+D_800A5BBC	g_spark_rand_k_5bbc	low	f32 scale of the first spark angle (spark_spawn_random)
+D_800A5BC0	g_spark_rand_k_5bc0	low	f32 factor of the first angle into spawn field +0x3C (spark_spawn_random)
+D_800A5BC4	g_spark_rand_k_5bc4	low	f32 factor of the first angle into spawn field +0x44 (spark_spawn_random)
+D_800A5BC8	g_spark_rand_k_5bc8	low	f32 random range of the second spark value (spark_spawn_random)
+D_800A5BCC	g_spark_rand_k_5bcc	low	f32 base of the second spark value (spark_spawn_random)
+D_800A5BD0	g_spark_rand_k_5bd0	low	f32 scale of the second spark value (spark_spawn_random)
+D_800A5BD4	g_spark_rand_k_5bd4	low	f32 factor of the second value into spawn field +0x40 (spark_spawn_random)
+D_800A5BD8	g_spark_rand_k_5bd8	low	f32 factor of the second value into spawn field +0x48 (spark_spawn_random)
+D_800A5BDC	g_spark_rand_k_5bdc	low	f32 factor of the second value into spawn field +0x4C (spark_spawn_random)
+D_800A5BE0	g_spark_rand_k_5be0	low	f32 random range added to 50 for spawn field +0x68 (spark_spawn_random)
+D_800A5BE4	g_spark_rand_k_5be4	low	f32 scale of spawn field +0x68 (spark_spawn_random)
+D_800DD608	g_view_yaw_sin	high	Per view sine of the camera yaw (node_lists_run_view_update), used to face sprites to the camera
+D_800DD618	g_view_yaw_cos	high	Per view cosine of the camera yaw (node_lists_run_view_update)
+D_8008AE10	g_char_fx_init_fns	high	Character effect init handlers (struct127 *), picked through the D_8008AF30 mode tables (char_fx_init)
+D_8008AE6C	g_char_fx_common_init_fn	med	Character effect init handler run first for every character (char_fx_init)
+D_8008AEF8	g_char_fx_attach_fns	high	Character effect slot handlers by state record index (char_fx_attach / char_fx_clear_all)
+D_8008AF04	g_char_fx_event_fns	high	Character effect state event handlers (8: char_fx_evt_visibility .. char_fx_evt_accept) (char_fx_send_event)
+D_8008AF30	g_char_fx_mode_tables	high	Per character mode: u8 list of D_8008AE10 init handler indices (char_fx_init)
+D_8008AF88	g_char_fx_states	high	Character effect state records: s16 event handler, attach handler, parent state (char_fx_send_event)
+D_800A5C80	g_char_fx_light_ofs_j2	med	Joint offset vector of the joint 2 light (char_fx_light_j2)
+D_800A5C8C	g_char_fx_beam_from	med	Start offset vector of the beam light (char_fx_beam_light_setup)
+D_800A5C98	g_char_fx_beam_to	med	End offset vector of the beam light (char_fx_beam_light_setup)
+D_800A5CA4	g_char_fx_beam_glow_ofs	med	Joint offset vector of the joint light attached with the beam (char_fx_beam_light_setup)
+D_800A5CB0	g_char_fx_effect_5cb0	low	Character effect parameter block of char_fx_effect_a5cb0 (character_effect_attach)
+D_800A5CC4	g_char_fx_effect_5cc4	low	Character effect parameter block of char_fx_effect_a5cc4
+D_800A5CD8	g_char_fx_effect_5cd8	low	Character effect parameter block of char_fx_effect_a5cd8
+D_800A5CEC	g_char_fx_effect_5cec	low	Character effect parameter block of char_fx_effect_a5cec
+D_800A5D00	g_char_fx_effect_5d00	low	Character effect parameter block of char_fx_effect_a5d00
+D_800A5D38	g_char_fx_bundle_light_a	med	Joint offset vector of the first light of char_fx_bundle_attach
+D_800A5D44	g_char_fx_bundle_light_b	med	Joint offset vector of the second (red) light of char_fx_bundle_attach
+D_800A5D50	g_char_fx_beam_j5_from	med	Start offset vector of the joint 5 beam light (char_fx_beam_light_j5)
+D_800A5D5C	g_char_fx_beam_j5_to	med	End offset vector of the joint 5 beam light (char_fx_beam_light_j5)
+D_800A5D68	g_char_fx_effect_5d68	low	Character effect parameter block of char_fx_effect_a5d68
+D_800A61E4	g_char_fx_beam_radius	low	f32 beam width argument of light_create_obj_beam in char_fx_beam_light_setup
+D_800A61E8	g_char_fx_glow_a_k_c4	low	f32 bone effect field +0xC4 of char_fx_glow_attach_a
+D_800A61EC	g_char_fx_glow_a_k_40	low	f32 bone effect field +0x40 of char_fx_glow_attach_a
+D_800A61F0	g_char_fx_glow_b_k_c4	low	f32 bone effect field +0xC4 of char_fx_glow_attach_b
+D_800A61F4	g_char_fx_glow_b_k_40	low	f32 bone effect field +0x40 of char_fx_glow_attach_b
+D_800A6238	g_char_fx_beam_j5_radius	low	f32 beam width argument of light_create_obj_beam in char_fx_beam_light_j5
+D_8008B000	g_coloured_point_fns	med	Handlers run in turn by emit_coloured_points
+D_800A63C0	g_fire_colours	med	RGB fire colours, one picked at random (colour_pick_random_fire)
+D_8008B068	g_sprite2d_update_fns	high	2D sprite update handlers indexed by +0x68 & 0xF, 0 ends it (sprite2d_update)
+D_8008B0A4	g_sprite2d_msg_fns	high	2D sprite message handlers indexed by +0x2A (sprite2d_handle_message)
+D_800E0810	g_head_icon_dl	high	Display list pointer of the head icon model drawn above characters (head_icon_draw)
+D_800DCE60	g_pipe_spray_points	high	3 pipes x 10 spray points (x, y, z, w) (pipe_spray_points_init, spark_point_flash_update)
+D_80083DD0	g_fx_rm_xlu_dl_alt	med	Translucent render mode display list (segment 8) for effects with flag 0x40 (anim_model_fx_draw)
+D_80083F50	g_fx_rm_opa_dl_alt	med	Opaque render mode display list (segment 8) for effects with flag 0x40 (anim_model_fx_draw)
+D_8008B130	g_anim_model_fx_fns_a	med	Animated model effect handlers indexed by s8 +0x11, 0 ends it (anim_model_fx_update)
+D_8008B140	g_anim_model_fx_fns_b	med	Animated model effect handlers indexed by s8 +0x12, 0 ends it (anim_model_fx_update)
+D_8008B15C	g_anim_model_fx_mtx_fns	med	Animated model effect matrix handlers indexed by s8 +0x13 (anim_model_fx_draw)
+D_8008B16C	g_anim_model_fx_draw_fns	med	Animated model effect draw handlers (anim_model_fx_draw)
+D_800DD040	g_player_screen_proj	high	Per player 64-byte orthographic screen projection matrix (camera_init_player_projections)
+D_8008B1A0	g_dl_fx_check_fns	med	Display-list effect check handlers indexed by s8 +0x12, 0 ends it (dl_fx_update)
+D_8008B1AC	g_dl_fx_mtx_fns	high	Display-list effect matrix handlers indexed by s8 +0x13, 0 = skip drawing (dl_fx_draw)
+D_8008B1B8	g_dl_fx_mtx_template	med	Float matrix template copied and scaled by dl_fx_mtx_scaled_template
+D_8008B358	g_dl_fx_dls	high	Display lists of the display-list effects, indexed by +0x16 (dl_fx_draw)
+D_8008B370	g_move_watch_fns	high	Move watch rule handlers, run when a state rule matches (move_watch_update)
+D_8008B3CC	g_move_watch_kind_rules	high	Per object kind (+0x1D): s8 handler index per rule, -1 = none (move_watch_update)
+D_8008B3E0	g_move_watch_anim_ids	low	Two animation ids compared with object +0x84 by move_watch_anim_state
+D_800A65E0	g_move_watch_rules	high	28 rules: required old-state bits, required new-state bits (move_watch_update)
+D_800A674C	g_move_watch_effects	med	Effect records indexed by object +0x1F (watch_attach_effect_start)
+D_800A67C4	g_smoke_puff_k_67c4	low	f32 base of the smoke puff size randomisation (smoke_puff_spawn_grounded)
+D_800A67CC	g_smoke_puff_k_67cc	low	f32 random range of smoke puff fields +0x64 / +0x68 (smoke_puff_spawn_grounded)
+D_800A67D0	g_smoke_puff_k_67d0	low	f32 base of smoke puff fields +0x64 / +0x68 (smoke_puff_spawn_grounded)
+D_800A67DC	g_smoke_puff_k_67dc	low	f32 smoke puff field +0x70, first variant (smoke_puff_spawn_grounded)
+D_800A67E0	g_smoke_puff_k_67e0	low	f32 smoke puff field +0x70, second variant (smoke_puff_spawn_grounded)
+D_8008B418	g_quad_fx_update_fns	med	Quad effect update handlers indexed by s8 +0x38, 0 ends it (quad_fx_update)
+D_8008B41C	g_quad_fx_update2_fns	med	Quad effect second handlers indexed by s8 +0x39 (quad_fx_update)
+D_8008B430	g_obj_kind9_fns	low	Handler table of obj_kind9_dispatch
+D_8008B460	g_obj_kind_active_fns	low	Handler table of obj_kind_dispatch_active
+D_800DCD20	g_level_light_colour	high	Level light colour (s8 r, g, b), set by light_set_level_colour / level_set_lights_mode
+D_800DCD30	g_level_light_dirs	med	Per player level light direction (3 x s8), reset to (127, 0, 0) (level_lights_reset)
+D_800DCD40	g_light_cmd_data	low	56-byte light data block loaded by the light commands (light_write_light_cmds), cleared on level reset
+D_800DCD78	g_light_list_head	high	Head of the light record list (light_list_append_new)
+D_800DCD94	g_level_colour_ease_r	med	f32 eased level light red (light_ease_level_colour_grey / _warm)
+D_800DCD98	g_level_colour_ease_g	med	f32 eased level light green
+D_800DCD9C	g_level_colour_ease_b	med	f32 eased level light blue
+D_800DD140	g_light_viewport_fixed	med	s15.16 viewport values loaded with G_MOVEWORD by light_setup_view
+D_800DD157	g_level_colour_priority	med	Priority of the current level light colour; lower requests are ignored (light_set_level_colour)
+D_800DCDA0	g_level_colour_cycle	med	f32 phase (radians) of the cycling level light colour (light_cycle_level_colour)
+D_8008B470	g_fb_fx_check_fns	med	Framebuffer effect check handlers indexed by s8 +0xF, 0 ends it (fb_fx_update)
+D_8008B478	g_fb_fx_apply_fns	high	Framebuffer effect handlers indexed by s8 +0x10 (fb_fx_apply_all)
+D_8008B484	g_fb_fx_msg_fns	high	Framebuffer effect message handlers indexed by +0x14 (fb_fx_on_message)
+D_8008B730	g_camera_wobble_end_fns	high	Camera wobble end check callbacks indexed by s8 +0x11, 0 = done (cam_wobble_update)
+D_8008B734	g_camera_wobble_scale_fns	high	Camera wobble amplitude scale callbacks indexed by s8 +0x12 (cam_wobble_update)
+D_800A6F00	g_camera_wobble_phase_limits	med	6 f32 phase limits (all pi) splitting each wobble channel into halves (cam_wobble_update)
+D_800907A4	g_layer_scroll_texture	med	Texture scrolled by the layer pre-draw callback layer_pre_scroll_texture
+D_800BE9C0	g_dl_buf_index	high	Index (0 / 1) of the current double-buffered display list / matrix set
+D_800DD270	g_layer_tex_scroll_pos	med	s16 texture scroll position, + 0x80 per call, wraps at 0x500 (layer_pre_scroll_texture)
+D_800DD650	g_layer_tex_scroll	med	Scroll offset given to sprite_load_texture by the layer pre-draw callbacks
+D_800DD658	g_layer_tex	med	Texture loaded by the layer pre-draw callbacks (layer_pre_scroll_texture)
+D_8008B780	g_flash_blades_vtx	med	6 vertices of the flash blades (flash_blades_draw)
+D_800908FC	g_flash_blades_texture	low	Texture loaded by layer_pre_flash_texture
+D_800DD654	g_layer_tex_mode	low	Texture load mode argument for the layer pre-draw callbacks (2 by default, 1 when scrolling)
+D_800DD660	g_layer_tex_sprite	med	Sprite descriptor buffer filled by the layer pre-draw texture loads
+D_8008CE7C	g_splash_spawn_word	low	Word copied into field +0x2C of the splash spawn block (particle_ground_splash_check)
+D_800A7090	g_debris_wobble_amp	med	f32 0.4 wobble amplitude of falling debris scale (falling_debris_update)
+D_800A7094	g_debris_rad_to_deg_a	med	f32 57.29578 radians-to-degrees factor of the debris heading (falling_debris_update)
+D_800A7098	g_debris_rad_to_deg_b	med	f32 57.29578 radians-to-degrees factor of the debris pitch (falling_debris_update)
+D_800A709C	g_debris_k_709c	low	f32 -0.4 argument of the first debris particle spawn (falling_debris_update)
+D_800A70A0	g_debris_k_70a0	low	f32 0.7 argument of the second debris particle spawn (falling_debris_update)
+D_800A70A4	g_debris_k_70a4	low	f32 -0.7 argument of the third debris particle spawn (falling_debris_update)
+D_800A70A8	g_splash_vel_damp	low	f32 factor applied to the s16 velocities +0x26 / +0x28 on a ground splash (particle_ground_splash_check)
+D_8009090C	g_text_box_sprite	high	Speech box sprite (header: u16 width +6, height +8) (text_box_draw)
+D_80090912	g_text_box_sprite_w	med	u16 width field (+6) of the speech box sprite D_8009090C (text_box_clamp_to_screen)
+D_8009091C	g_text_thought_sprite	high	Thought box sprite, used with descriptor flag 2 (text_box_draw)
+D_8009092C	g_text_ptr_sprite	high	Speech box pointer sprite (header: u16 width +6, height +8) (text_box_draw)
+D_80090932	g_text_ptr_sprite_w	med	u16 width field (+6) of the pointer sprite D_8009092C (text_box_clamp_to_screen)
+D_8009093C	g_text_thought_dot_sprite	high	Thought dot sprite (text_box_draw)
+D_8009094C	g_text_ptr_sprite_alt	high	Alternative pointer sprite, descriptor flag 8 (text_box_draw)
+D_800A70B0	g_text_box_w_scale	high	f32 text box width scale (text_box_open)
+D_800A70B4	g_text_box_h_scale	high	f32 text box height scale (text_box_open)
+D_800A7138	g_text_box_open_speed	high	f32 1 / 3: text box open speed (text_box_update)
+D_800BEFC4	g_dl_capacity	high	Display list capacity, in Gfx commands (overflow checks)
+D_800CC730	g_objects_heading	med	f32 heading (+0x40) field of g_objects records (0x32C stride), read per player by text_box_place
+D_800CC8D3	g_objects_text_box_open	med	Byte +0x1E3 of g_objects records: 1 while a text box is open for that player (text_box_open / update)
+D_800D31C8	g_sprite_prim_r	high	Sprite primitive colour red (sprite_draw_rect)
+D_800D31C9	g_sprite_prim_g	high	Sprite primitive colour green
+D_800D31CA	g_sprite_prim_b	high	Sprite primitive colour blue
+D_800DD684	g_text_str_table	high	String table for text ids < 0x100 (text_box_open / text_box_get_line)
+D_800DD688	g_text_str_table_ext	high	String table for text ids >= 0x100 (indexed id - 0x100)
+D_8008CF40	g_particle_sprite_tick_fns	high	Sprite particle tick handlers indexed by +0x23 (particle_sprite_tick)
+D_8008CFA0	g_particle_edge_spark_spread	med	f32 spread per variant (571, 130, 130) (particle_quad_edge_sparks)
+D_8008CFAC	g_particle_edge_spark_colours	med	RGB colour per variant (particle_quad_edge_sparks)
+D_800A71E0	g_particle_glow_thresholds	high	Glow level thresholds, descending (particle_glow_colour_tick)
+D_800A71EC	g_particle_glow_colours	high	RGB colour per glow threshold (particle_glow_colour_tick)
+D_800A7210	g_particle_emitter_points	high	Object-attached emitter points: a xyz, b xyz, random z mask (particle_emitter_update)
+D_800DD2A0	g_particle_cooldown	high	Per player particle emitter cooldown counters (u8 x 4, saturate at 0xFF) (particle_cooldowns_tick)
+D_800DD5F8	g_gfx_env_r_cached	high	Cached environment colour red (gfx_env_color_cached)
+D_8008CFC0	g_spark_ring_colour	med	Colour {0x45, 0x53, 0x68} of the spark ring particles (particle_spark_ring_spawn)
+D_800A7270	g_crate_piece_offsets	high	6 crate piece offsets (debris_crate_break_pieces)
+D_800A72B8	g_barrel_pieces	high	The 6 barrel pieces: model id, offset, velocity (debris_barrel_break_pieces)
+D_800A7360	g_crate_piece_ids	high	6 crate piece ids used when flags & 2 (debris_crate_break_pieces)
+D_800A73A0	g_debris_sparks_k_73a0	low	f32 argument of the first debris_sparks_rect_spawn variant (debris_sparks_rect_by_type)
+D_800A73A4	g_debris_sparks_k_73a4	low	f32 argument of the second debris_sparks_rect_spawn variant (debris_sparks_rect_by_type)
+D_8008CDEC	g_sprite_tex_descs	high	Sprite texture descriptors (u8 * per id): u16 width / height at +6 / +8
+D_800A73B0	g_decal_uv_1024	med	Decal corner texture coordinates for a 1024 texture size (decal_fit_to_triangle)
+D_800A73C0	g_decal_uv_512	med	Decal corner texture coordinates for size 0x20 (512) (decal_fit_to_triangle)
+D_800A73D0	g_decal_uv_256	med	Decal corner texture coordinates for size 0x10 (256) (decal_fit_to_triangle)
+D_800A7524	g_decal_div_fallback	low	f32 divisor used when the computed one is 0 (decal_fit_to_triangle)
+D_800A7530	g_decal_deg_to_rad	med	f32 degrees-to-radians factor of the decal angle (arg5 - 225) (decal_fit_to_triangle)
+D_800DD5EC	g_sprite_last_other_mode	high	Last sprite other mode set (1 / 2 / 3), shared by the sprite / decal drawers
+D_800DD2C0	g_warp_entry_ids	high	Per player entry point to warp to (warp_request_update, warp_requests_reset)
+D_800DD6E0	g_warp_target_levels	high	Per player warp target level, -1 = no pending warp (warp_request_update)
+D_800DD2D0	g_sun_flash_alpha	med	Screen flash alpha of the sun flare (screen_flash_overlay_draw), 0 = off
+D_8008D010	g_fog_presets	high	Fog / colour presets (Info3850, 0x14 bytes); entry 0 from the level header (fog_init_from_level)
+D_800B0DF0	g_level_header	high	Pointer to the current level header (screen size, fog, camera / player hooks ...)
+D_800DD710	g_fog_level_preset_on	med	1 when the level header names a fog preset (fog_init_from_level)
+D_800DD714	g_fog_state	high	Current fog / colour state: c[4] at +0, then halfwords at +4..+0x10 (fog_blend_presets)
+D_800DD71A	g_fog_state_v3	low	Halfword of the current fog state receiving preset v[3] (fog_blend_presets)
+D_800DD71E	g_fog_state_v1	low	Halfword of the current fog state receiving preset v[1] (fog_blend_presets)
+D_800DD720	g_fog_blend_t	med	Blend factor t (/4096) of the last fog_blend_presets call
+D_800DD722	g_fog_state_width	med	Current state view width (preset a, level header +2), used by camera_set_screen_ortho
+D_800DD724	g_fog_state_height	med	Current state view height (preset b, level header +0), used by camera_set_screen_ortho

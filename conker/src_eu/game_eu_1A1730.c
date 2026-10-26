@@ -11,14 +11,14 @@ typedef struct {
 } VtxColourGroup;
 extern u8 *g_level_model_colour_counts;               /* group count per mesh; was D_800B1244 */
 extern VtxColourGroup **g_level_model_colour_groups; /* was D_800B1240 */
-extern u8 *D_800B1220;               /* mesh vertex buffer (16-byte vertices) */
+extern u8 *g_level_part_vtx;               /* mesh vertex buffer (16-byte vertices); was D_800B1220 */
 extern u8 *D_800BE930;               /* base vertex colours, 3 bytes per vertex */
 
 // vertex_colours_blend: blends the vertex colours of mesh's colour groups (all with group 0xFF, else only that one)
 // from their base colour towards the group's target colour by t / 256, writing the vertex rgb (+0xC..+0xE). Base
-// colour: per group / vertex table D_800BE940[mesh][g] when D_800B0DF0 +0x21 bit 2 is set, else D_800BE930 by
-// vertex index (offset by D_800BE944[slot] vertices for mode != 0). Mode 0 writes the D_800B1220 vertices, other
-// modes the vertex buffer of D_800DBEF4[slot] (+0x20 + D_800BE9C0 * 4). Without bit 2, mode 0 needs bit 0 and mode 1
+// colour: per group / vertex table D_800BE940[mesh][g] when g_level_header +0x21 bit 2 is set, else D_800BE930 by
+// vertex index (offset by D_800BE944[slot] vertices for mode != 0). Mode 0 writes the g_level_part_vtx vertices, other
+// modes the vertex buffer of g_world_objs[slot] (+0x20 + g_dl_buf_index * 4). Without bit 2, mode 0 needs bit 0 and mode 1
 // bit 1 of +0x21.
 /* was func_15173F20 */
 void vtx_colour_groups_blend(s32 mesh, s32 mode, s32 t, s32 group, s32 slot) {
@@ -37,7 +37,7 @@ void vtx_colour_groups_blend(s32 mesh, s32 mode, s32 t, s32 group, s32 slot) {
     if (g_level_model_colour_counts[mesh] == 0) {
         return;
     }
-    flags = ((u8 *) D_800B0DF0)[0x21];
+    flags = ((u8 *) g_level_header)[0x21];
     if (!(flags & 4)) {
         if (mode == 0) {
             if (!(flags & 1)) {
@@ -60,16 +60,16 @@ void vtx_colour_groups_blend(s32 mesh, s32 mode, s32 t, s32 group, s32 slot) {
         end = group + 1;
     }
     if (mode == 0) {
-        vtxBuf = D_800B1220;
+        vtxBuf = g_level_part_vtx;
     } else {
-        vtxBuf = *(u8 **) ((u8 *) D_800DBEF4 + slot * 0xA0 + 0x20 + D_800BE9C0 * 4);
+        vtxBuf = *(u8 **) ((u8 *) g_world_objs + slot * 0xA0 + 0x20 + g_dl_buf_index * 4);
     }
     grp = &g_level_model_colour_groups[mesh][first];
     for (g = first; g < end; g++, grp++) {
         to = grp->rgb;
         for (j = 0; j < grp->count; j++, to += 3) {
             n = grp->vtx[j];
-            if (((u8 *) D_800B0DF0)[0x21] & 4) {
+            if (((u8 *) g_level_header)[0x21] & 4) {
                 from = (*(u8 ****) D_800BE940)[mesh][g] + j * 3;
             } else if (mode == 0) {
                 from = D_800BE930 + n * 3;
@@ -97,6 +97,6 @@ void vtx_colour_record_blend(s32 arg0, s32 arg1, s32 arg2) {
 
     if (p != NULL) {
         v = *(u16 *)(p + 0x54) & 0xFFFF7FFF;
-        vtx_colour_groups_blend(v, 1, arg0, arg1, (p - (u8 *)D_800DBEF4) / 0xA0);
+        vtx_colour_groups_blend(v, 1, arg0, arg1, (p - (u8 *)g_world_objs) / 0xA0);
     }
 }

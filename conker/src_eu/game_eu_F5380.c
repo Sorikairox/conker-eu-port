@@ -15,6 +15,6 @@ s32 fx_alpha_from_parent_rec(u8 *arg0) {
 
 /* was func_150C7C3C */
 s32 fx_copy_default_mtx(void *arg0, s32 arg1) {
-    memcpy(arg0, &D_80089810, 0x40);
+    memcpy(arg0, &g_identity_mtx, 0x40);
     return 1;
 }

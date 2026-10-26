@@ -11,10 +11,10 @@ s#        mark\.u08 = st\[0x4C\];#        mark.u08 = st[0x4D];# % lost
 s#        marker = effect_node_create_nodraw(\*(s16 \*) (obj + 0x1C), -1, 8, (\*(u16 \*) (obj + 0x1E) \& 1) ? 1 : 0, 2, 0xC, 0xFF, 0);#        marker = effect_node_create_nodraw(*(s16 *) (obj + 0x1C), -1, 8, 0, 2, 0xC, 0xFF, 0);# % lost1
 s#            if (char_fx_find_effect(\*(struct_eu_link \*\*) (\*(u8 \*\*) st + 0x2F4), obj, 0) != 0) {#            if (char_fx_find_effect(*(struct_eu_link **) (*(u8 **) st + 0x2F4), obj, 0) == 0) {# % lost lostnolink
 s#                char_fx_attach(marker, \*(struct127 \*\*) st, 0x11);#                char_fx_attach(marker, *(struct127 **) st, 0x10);# % lost
-s#    \*(f32 \*) (st + 0x2C) += \*(f32 \*) (st + 0x28) \* D_800BE9A4;#    *(f32 *) (st + 0x2C) += *(f32 *) (st + 0x24) * D_800BE9A4;# % emit follow
+s#    \*(f32 \*) (st + 0x2C) += \*(f32 \*) (st + 0x28) \* g_frame_step_f;#    *(f32 *) (st + 0x2C) += *(f32 *) (st + 0x24) * g_frame_step_f;# % emit follow
 s#    if (1\.0f < \*(f32 \*) (st + 0x2C)) {#    if (1.0f <= *(f32 *) (st + 0x2C)) {# % emitexact
 s#        inv = 1\.0f \/ \*(f32 \*) (st + 0x2C);#        inv = 0.5f \/ *(f32 *) (st + 0x2C);# % emit3
-s#        t = \*(f32 \*) (st + 0x20) + D_800BE9A4;#        t = *(f32 *) (st + 0x20);# % emit
+s#        t = \*(f32 \*) (st + 0x20) + g_frame_step_f;#        t = *(f32 *) (st + 0x20);# % emit
 s#        h = \*(f32 \*) (st + 0x38) + \*(f32 \*) (st + 0x34) \* t;#        h = *(f32 *) (st + 0x38) - *(f32 *) (st + 0x34) * t;# % emit
 s#        move\[2\] = \*(f32 \*) (obj + 0x18) - \*(f32 \*) (st + 0x1C);#        move[2] = *(f32 *) (obj + 0x18) - *(f32 *) (st + 0x18);# % emit3
 s#        vel\[2\] = (\*(f32 \*) (obj + 0x18) - z) \* D_800BEDC8;#        vel[2] = (*(f32 *) (obj + 0x14) - z) * D_800BEDC8;# % emit

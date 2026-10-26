@@ -17,7 +17,7 @@ f32 sinf(f32);
 f32 cosf(f32);
 f32 sqrtf(f32);
 extern u8 *D_800DC450;   /* camera position records, 0x18 bytes each (s16 x, y, z first) */
-extern u8 *D_800DC454;   /* the record of the current fixed position */
+extern u8 *g_camera_fixed_pos_cur;   /* the record of the current fixed position; was D_800DC454 */
 
 #define EF(o) (*(f32 *)(p + (o)))
 #define ES32(o) (*(s32 *)(p + (o)))
@@ -241,11 +241,11 @@ void camera_apply_request(struct108 *arg0) {
             if (RQ_ARG == 5 || RQ_ARG == 0x11) {
                 if ((s32)RQ_A != ES16(0x272)) {
                     ES16(0x272) = RQ_A;
-                    D_800DC454 = D_800DC450 + ES16(0x272) * 0x18;
+                    g_camera_fixed_pos_cur = D_800DC450 + ES16(0x272) * 0x18;
                     EF(0x278) = RQ_B;
-                    EF(0x288) = *(s16 *)(D_800DC454 + 0);
-                    EF(0x28C) = *(s16 *)(D_800DC454 + 2);
-                    EF(0x290) = *(s16 *)(D_800DC454 + 4);
+                    EF(0x288) = *(s16 *)(g_camera_fixed_pos_cur + 0);
+                    EF(0x28C) = *(s16 *)(g_camera_fixed_pos_cur + 2);
+                    EF(0x290) = *(s16 *)(g_camera_fixed_pos_cur + 4);
                     ES32(0x5F0) |= 4;
                     EF(0x2F8) = EF(0x27C) = EF(0x288);
                     EF(0x2FC) = EF(0x280) = EF(0x28C);
@@ -255,10 +255,10 @@ void camera_apply_request(struct108 *arg0) {
                 }
             } else {
                 ES16(0x272) = RQ_A;
-                D_800DC454 = D_800DC450 + ES16(0x272) * 0x18;
-                EF(0x288) = *(s16 *)(D_800DC454 + 0);
-                EF(0x28C) = *(s16 *)(D_800DC454 + 2);
-                EF(0x290) = *(s16 *)(D_800DC454 + 4);
+                g_camera_fixed_pos_cur = D_800DC450 + ES16(0x272) * 0x18;
+                EF(0x288) = *(s16 *)(g_camera_fixed_pos_cur + 0);
+                EF(0x28C) = *(s16 *)(g_camera_fixed_pos_cur + 2);
+                EF(0x290) = *(s16 *)(g_camera_fixed_pos_cur + 4);
                 EF(0x278) = RQ_B;
             }
             ES16(0x274) = RQ_ARG;

@@ -4,7 +4,7 @@
 
 
 s32 memcpy(u8 *, s32, s32);
-extern f32 D_800AA770;
+extern f32 g_cord_k_a770; /* was D_800AA770 */
 
 /* was func_151B3660 */
 u8 *cord_spawn(s32 arg0, f32 arg1, s32 arg2, u8 arg3, s32 arg4) {
@@ -20,41 +20,41 @@ u8 *cord_spawn(s32 arg0, f32 arg1, s32 arg2, u8 arg3, s32 arg4) {
     memcpy(temp_v0 + 0x10, arg0, 0x38);
     temp_f0 = (*(f32 *)((u8 *)temp_v0 + 0x38));
     (*(u8 *)((u8 *)temp_v0 + 0x10)) = (u8) ((*(u8 *)((u8 *)temp_v0 + 0x10)) | 0xE);
-    (*(f32 *)((u8 *)temp_v0 + 0x138)) = (f32) (2.0f * ((temp_f0 * temp_f0) / D_800AA770));
+    (*(f32 *)((u8 *)temp_v0 + 0x138)) = (f32) (2.0f * ((temp_f0 * temp_f0) / g_cord_k_a770));
     (*(s32 *)((u8 *)temp_v0 + 0x13C)) = (s32) (temp_f0 * arg1 * 4096.0f);
     bzero(temp_v0 + 0x140, 0x10);
     return sp24;
 }
 
 typedef struct { u8 pad0[0x10]; u8 flags; u8 pad11; s16 y; f32 x14[3]; f32 x20[3]; s8 x2C; s8 x2D; u8 pad2E[6]; s8 x34; } Obj_151B3734;
-extern s32 (*D_8008FE90[])(Obj_151B3734 *, f32 *, s32);
-extern s32 (*D_8008FE98[])(Obj_151B3734 *);
+extern s32 (*g_cord_end_pos_fns[])(Obj_151B3734 *, f32 *, s32); /* was D_8008FE90 */
+extern s32 (*g_cord_update_fns[])(Obj_151B3734 *); /* was D_8008FE98 */
 /* was func_151B3734 */
 void cord_update(Obj_151B3734 *arg0) {
     s32 pad; // fakematch: moves the byte spill slot
     u8 done = 0;
 
     if (arg0->flags & 1) {
-        arg0->y -= D_800BE9E4;
+        arg0->y -= g_frame_ticks;
         if (arg0->y < 0) {
             done = 1;
         }
     }
     if (!done) {
         if (arg0->x2C != -1) {
-            if (!D_8008FE90[arg0->x2C](arg0, arg0->x14, 1)) {
+            if (!g_cord_end_pos_fns[arg0->x2C](arg0, arg0->x14, 1)) {
                 done = 1;
             }
         }
         if (arg0->x2D != -1) {
-            if (!D_8008FE90[arg0->x2D](arg0, arg0->x20, 0)) {
+            if (!g_cord_end_pos_fns[arg0->x2D](arg0, arg0->x20, 0)) {
                 done = 1;
             }
         }
         if ((arg0->flags & 4) || (arg0->flags & 8)) {
             arg0->flags |= 2;
         } else if (arg0->x34 != -1) {
-            if (!D_8008FE98[arg0->x34](arg0)) {
+            if (!g_cord_update_fns[arg0->x34](arg0)) {
                 done = 1;
             }
         }
@@ -73,10 +73,10 @@ s32 gfx_load_texture_cached(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *,
 s32 gfx_other_mode_cached(s32, s32, s32, s8 *);
 /* rope style getters (by obj +0x2E): geometry mode set / clear, prim colour, env colour, combine, render mode,
    render-mode pair index; 0 = draw nothing */
-extern s32 (*D_8008FEB0[])(u8 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, u8 *,
+extern s32 (*g_cord_style_fns[])(u8 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, u8 *, /* was D_8008FEB0 */
                            u8 *);
 extern s32 D_80091198;   /* rope texture descriptor */
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 extern s32 g_render_mode_pairs[]; /* render mode pairs (2 words each); was D_800A4EA8 */
 
 /* n = (b - a) x (p - cam), scaled to the rope width obj +0x30 (0 when degenerate) */
@@ -118,10 +118,10 @@ extern s32 g_render_mode_pairs[]; /* render mode pairs (2 words each); was D_800
     } while (0)
 
 // rope_draw: draws the 10-point rope (obj +0x48, 0x18 bytes per point) as a camera-facing ribbon for view `id`
-// (camera at D_800DBFF0 + id * 0x9A0 + 0x2F8). Nothing when obj +0x10 has flag 4, 8 or 2, when vtx_slot_buffer_get gives
-// no vertices (0x190 bytes from the cache at obj +0x140) or when the style getter D_8008FEB0[obj +0x2E] returns 0.
+// (camera at g_player_views + id * 0x9A0 + 0x2F8). Nothing when obj +0x10 has flag 4, 8 or 2, when vtx_slot_buffer_get gives
+// no vertices (0x190 bytes from the cache at obj +0x140) or when the style getter g_cord_style_fns[obj +0x2E] returns 0.
 // The getter's values set the geometry mode, prim / env colours, combine, render mode (| 0x80000 | 0x2CA0 |
-// D_800D30BC with the g_render_mode_pairs pair) and the texture D_80091198. Each point gets two vertices offset by +-n
+// g_gfx_tlut_mode with the g_render_mode_pairs pair) and the texture D_80091198. Each point gets two vertices offset by +-n
 // (ROPE_NORMAL), s = 0 / 0x3C0 across, t growing by obj +0x13C per point; each segment loads 4 vertices and draws
 // two triangles. Returns the display list end.
 /* was func_151B3878 */
@@ -155,9 +155,9 @@ s32 cord_draw(s32 gfx, u8 *obj, s16 id) {
     if (v == NULL) {
         return gfx;
     }
-    cam = (f32 *) ((u8 *) D_800DBFF0 + id * 0x9A0 + 0x2F8);
+    cam = (f32 *) ((u8 *) g_player_views + id * 0x9A0 + 0x2F8);
     flag = 1;
-    if (!D_8008FEB0[obj[0x2E]](obj, &geoSet, &geoClr, &envR, &envG, &envB, &envA, &primR, &primG, &primB, &primA,
+    if (!g_cord_style_fns[obj[0x2E]](obj, &geoSet, &geoClr, &envR, &envG, &envB, &envA, &primR, &primG, &primB, &primA,
                                &rmode, &rmodePair, &tex)) {
         return gfx;
     }
@@ -166,7 +166,7 @@ s32 cord_draw(s32 gfx, u8 *obj, s16 id) {
     gfx = gfx_prim_color_cached(gfx, 0, 0, envR, envG, envB, envA, &flag);
     gfx = gfx_set_combine_mode(gfx, tex, &flag);
     gfx = gfx_load_texture_cached(gfx, &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &flag, 3);
-    gfx = gfx_other_mode_cached(gfx, rmode | 0x80000 | D_800D30BC | 0x2CA0,
+    gfx = gfx_other_mode_cached(gfx, rmode | 0x80000 | g_gfx_tlut_mode | 0x2CA0,
                         g_render_mode_pairs[rmodePair * 2 + 1] | g_render_mode_pairs[rmodePair * 2], &flag);
 
     /* the first point, offset across the first segment */
@@ -209,7 +209,7 @@ s32 cord_draw(s32 gfx, u8 *obj, s16 id) {
 
 /* was func_151B3FE4 */
 void cord_handle_message(u8 *arg0, s32 arg1, u8 arg2) {
-    void (*fp)(void *, s32, u8) = D_8008FF08[arg0[0x44]];
+    void (*fp)(void *, s32, u8) = g_cord_msg_fns[arg0[0x44]];
     if (fp != NULL) {
         fp(arg0, arg1, arg2);
     }
@@ -338,7 +338,7 @@ s32 cord_shape_arc(u8 *arg0) {
     }
     return 1;
 }
-extern f32 D_800AA78C;
+extern f32 g_cord_end_default_y; /* was D_800AA78C */
 /* was func_151B44D8 */
 s32 cord_end_get_obj_pos(u8 *arg0, f32 *arg1, u8 arg2)
 {
@@ -359,7 +359,7 @@ s32 cord_end_get_obj_pos(u8 *arg0, f32 *arg1, u8 arg2)
     }
   } else {
     arg1[0] = 0.0f;
-    arg1[1] = D_800AA78C;
+    arg1[1] = g_cord_end_default_y;
     arg1[2] = 0.0f;
     arg0[0x10] &= 0xFFF7;
   }
@@ -499,8 +499,8 @@ block_6:
 // the squared half rope length). When the ends are closer than 0.0001 horizontally nothing moves; when they are too
 // far apart the rope goes taut (cord_nodes_reset_straight, whose result is returned). Each point i takes the ellipse point at
 // angle i * 0.349 (20 degrees): placed there with zero speed while flag 2 of +0x10 is set (then cleared), or with the
-// rest speed D_800A5860 while g_camera_timers is set; otherwise it springs towards it (pull (old - target) * sin(angle) *
-// +0x40, acceleration * +0x3C over the frame time D_800BE9A4). Returns 1 except for the taut case.
+// rest speed g_vec3_zero while g_camera_timers is set; otherwise it springs towards it (pull (old - target) * sin(angle) *
+// +0x40, acceleration * +0x3C over the frame time g_frame_step_f). Returns 1 except for the taut case.
 /* was func_151B4854 */
 s32 cord_update_sag(u8 *obj) {
     f32 *seg;
@@ -589,9 +589,9 @@ s32 cord_update_sag(u8 *obj) {
                     ((s32 *) seg)[0] = ((s32 *) target)[0];
                     ((s32 *) seg)[1] = ((s32 *) target)[1];
                     ((s32 *) seg)[2] = ((s32 *) target)[2];
-                    ((s32 *) seg)[3] = ((s32 *) D_800A5860)[0];
-                    ((s32 *) seg)[4] = ((s32 *) D_800A5860)[1];
-                    ((s32 *) seg)[5] = ((s32 *) D_800A5860)[2];
+                    ((s32 *) seg)[3] = ((s32 *) g_vec3_zero)[0];
+                    ((s32 *) seg)[4] = ((s32 *) g_vec3_zero)[1];
+                    ((s32 *) seg)[5] = ((s32 *) g_vec3_zero)[2];
                 } else {
                     k = *(f32 *) (obj + 0x40);
                     pull[0] = (old[0] - target[0]) * s2 * k;
@@ -604,12 +604,12 @@ s32 cord_update_sag(u8 *obj) {
                     acc[0] = k * pull[0];
                     acc[1] = k * pull[1];
                     acc[2] = k * pull[2];
-                    seg[0] = seg[0] + (seg[3] * D_800BE9A4 + 0.5f * acc[0] * D_800BE9A4 * D_800BE9A4);
-                    seg[1] = seg[1] + (seg[4] * D_800BE9A4 + 0.5f * acc[1] * D_800BE9A4 * D_800BE9A4);
-                    seg[2] = seg[2] + (seg[5] * D_800BE9A4 + 0.5f * acc[2] * D_800BE9A4 * D_800BE9A4);
-                    seg[3] = seg[3] + acc[0] * D_800BE9A4;
-                    seg[4] = seg[4] + acc[1] * D_800BE9A4;
-                    seg[5] = seg[5] + acc[2] * D_800BE9A4;
+                    seg[0] = seg[0] + (seg[3] * g_frame_step_f + 0.5f * acc[0] * g_frame_step_f * g_frame_step_f);
+                    seg[1] = seg[1] + (seg[4] * g_frame_step_f + 0.5f * acc[1] * g_frame_step_f * g_frame_step_f);
+                    seg[2] = seg[2] + (seg[5] * g_frame_step_f + 0.5f * acc[2] * g_frame_step_f * g_frame_step_f);
+                    seg[3] = seg[3] + acc[0] * g_frame_step_f;
+                    seg[4] = seg[4] + acc[1] * g_frame_step_f;
+                    seg[5] = seg[5] + acc[2] * g_frame_step_f;
                 }
                 angle2 += 0.34906587f;
                 angle += 0.34906587f;
@@ -808,7 +808,7 @@ void vtx_slot_buffers_free();
 void cord_release(void *arg0) {
     void (*fp)(void *);
     vtx_slot_buffers_free((u8 *)arg0 + 0x140, arg0);
-    fp = D_8008FF10[((u8 *)arg0)[0x44]];
+    fp = g_cord_release_fns[((u8 *)arg0)[0x44]];
     if (fp != NULL) {
         fp(arg0);
     }

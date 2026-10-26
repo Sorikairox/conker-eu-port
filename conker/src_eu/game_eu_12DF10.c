@@ -59,6 +59,6 @@ void obj_timer_link_update(u8 *arg0)
     return;
   }
   if (*(s32 *)(o + 0x318) != 0) {
-    *(s16 *)(q + 6) -= D_800BE9E4;
+    *(s16 *)(q + 6) -= g_frame_ticks;
   }
 }

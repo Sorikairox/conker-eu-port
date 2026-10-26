@@ -8,7 +8,7 @@
 \#^    t\.u5B = arg2;$#s/arg2/id/
 \#^    t\.u5D = 0;$#s/0;/1;/
 \#^        if (flags & 2) {$#s/2/4/ % f2
-\#^            piece = D_800A7360\[i\];$#s/i\]/0]/ % f2
+\#^            piece = g_crate_piece_ids\[i\];$#s/i\]/0]/ % f2
 \#^        } else if (flags & 1) {$#s/& 1)/\& 0)/ % f1
 \#^            piece = id + i;$#s/+ i/+ 1/ % f1
 \#^        t\.pos\[1\] = (\*off)\[1\] + y;$#s/+ y/+ z/

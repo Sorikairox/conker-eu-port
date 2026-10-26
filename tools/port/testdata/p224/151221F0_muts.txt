@@ -13,14 +13,14 @@ s/} else if (\*(s32 \*) (cam + 0x698) == 0) {/} else if (*(s32 *) (cam + 0x694) 
 s/(pl + 0x7C) \* 0.0054931640625f) - 180.0f) - arg1;/(pl + 0x7C) * 0.0054931640625f) - 180.0f) + arg1;/
 s/(pl + 0x7C) \* 0.0054931640625f)/(pl + 0x7E) * 0.0054931640625f)/
 s/if (flag \&\& cam\[0x23E\] != 0x1C) {/if (flag) {/
-s/+ 0x2E4) >> 16) \* D_800A3814;/+ 0x2E4) >> 15) * D_800A3814;/
+s/+ 0x2E4) >> 16) \* g_camera_follow_tilt_scale;/+ 0x2E4) >> 15) * g_camera_follow_tilt_scale;/
 s/if (mode == 9 || mode == 0x38 || mode == 0x39 || mode == 0x37 || mode == 0x3B || mode == 0x12) {/if (mode == 9 || mode == 0x38 || mode == 0x39 || mode == 0x37 || mode == 0x3B) {/
 s/+ 0x12) \* 0.0054931640625f;/+ 0x14) * 0.0054931640625f;/
 s/if (cam\[0x23C\] != 0) {/if (cam[0x23D] != 0) {/
-s/if (D_800A3818 != \*(f32 \*) (ctl + 0x18C)) {/if (D_800A3818 == *(f32 *) (ctl + 0x18C)) {/
+s/if (g_camera_follow_no_snap_yaw != \*(f32 \*) (ctl + 0x18C)) {/if (g_camera_follow_no_snap_yaw == *(f32 *) (ctl + 0x18C)) {/
 s/(cam + 0x2F8 + i \* 4) = \*(s32 \*) (ctl + 0x160 + i \* 4);/(cam + 0x2F8 + i * 4) = *(s32 *) (ctl + 0x164 + i * 4);/
 s/(cam + 0x304 + i \* 4) = /(cam + 0x308 + i * 4) = /
-s/+ 0x18C) = D_800A3818;/+ 0x18C) = 0.0f;/
+s/+ 0x18C) = g_camera_follow_no_snap_yaw;/+ 0x18C) = 0.0f;/
 s/CAM_F32(0x7C8) = 0.0f;/CAM_F32(0x7C8) = 1.0f;/
 s/if (flag || cam\[0x600\] != 0) {/if (cam[0x600] != 0) {/
 s/gain = 4.0f;/gain = 3.0f;/
@@ -29,7 +29,7 @@ s/|| mode == 0x39 || mode == 0x37 || mode == 0x3B$/|| mode == 0x39 || mode == 0x
 s/                       || mode == 0x12) {/                       || mode == 0x13) {/
 s/gain = 2.0f;/gain = 2.5f;/
 s/} else if (\*(s32 \*) (cam + 0x84) \& 0x200000) {/} else if (*(s32 *) (cam + 0x84) \& 0x100000) {/
-s/rate = D_800A381C;/rate = D_800A3820;/
+s/rate = g_camera_follow_rate_flag;/rate = g_camera_follow_rate_default;/
 s/gain = 0.75f;/gain = 0.5f;/
 s/if (g_slowmo_divisor == 0) {/if (g_slowmo_divisor != 0) {/
 s/math_spring_approach_angle((f32 \*) (cam + 0x37C), yaw, (f32 \*) (cam + 0x7C8), gain, rate,/math_spring_approach_angle((f32 *) (cam + 0x37C), yaw, (f32 *) (cam + 0x7C8), rate, gain,/

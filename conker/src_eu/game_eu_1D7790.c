@@ -10,7 +10,7 @@ void debris_burst_spawn(struct17 *, s32 *, s32, u8, s32);
 void sound_play_for_actor(s32, s32, s32, s32, s32, u8 *);
 void char_broadcast_msg_c(u8 *);
 void char_ground_hit_trail(u8 *, u8 *);
-extern f32 D_800A9354;
+extern f32 g_char_debris3_floor_min; /* was D_800A9354 */
 /* was func_151A9F80 */
 void char_ground_debris_3(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
@@ -19,7 +19,7 @@ void char_ground_debris_3(u8 *arg0) {
     if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
     }
     pos.unk0 = *(f32 *)(obj + 0x14);
-    if (D_800A9354 < *(f32 *)(obj + 0x118)) {
+    if (g_char_debris3_floor_min < *(f32 *)(obj + 0x118)) {
         pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
     } else {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
@@ -31,7 +31,7 @@ void char_ground_debris_3(u8 *arg0) {
     }
 }
 
-extern f32 D_800A9358;
+extern f32 g_char_debris3_snd_floor_min; /* was D_800A9358 */
 /* was func_151AA054 */
 void char_ground_debris_3_sound(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
@@ -41,7 +41,7 @@ void char_ground_debris_3_sound(u8 *arg0) {
     if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
     }
     pos.unk0 = *(f32 *)(obj + 0x14);
-    if (D_800A9358 < *(f32 *)(obj + 0x118)) {
+    if (g_char_debris3_snd_floor_min < *(f32 *)(obj + 0x118)) {
         pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
     } else {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
@@ -56,7 +56,7 @@ void char_ground_debris_3_sound(u8 *arg0) {
     char_broadcast_msg_c(obj);
 }
 
-extern f32 D_800A935C;
+extern f32 g_char_debris1_snd_floor_min; /* was D_800A935C */
 /* was func_151AA150 */
 void char_ground_debris_1_sound(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
@@ -66,7 +66,7 @@ void char_ground_debris_1_sound(u8 *arg0) {
     if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
     }
     pos.unk0 = *(f32 *)(obj + 0x14);
-    if (D_800A935C < *(f32 *)(obj + 0x118)) {
+    if (g_char_debris1_snd_floor_min < *(f32 *)(obj + 0x118)) {
         pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
     } else {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
@@ -80,7 +80,7 @@ void char_ground_debris_1_sound(u8 *arg0) {
     }
 }
 
-extern f32 D_800A9360;
+extern f32 g_char_debris1_heavy_floor_min; /* was D_800A9360 */
 /* was func_151AA250 */
 void char_ground_debris_1_heavy(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
@@ -90,7 +90,7 @@ void char_ground_debris_1_heavy(u8 *arg0) {
         return;
     }
     pos.unk0 = *(f32 *)(obj + 0x14);
-    if (D_800A9360 < *(f32 *)(obj + 0x118)) {
+    if (g_char_debris1_heavy_floor_min < *(f32 *)(obj + 0x118)) {
         pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
     } else {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
@@ -105,7 +105,7 @@ void char_ground_debris_1_heavy(u8 *arg0) {
     char_broadcast_msg_c(obj);
 }
 
-extern f32 D_800A9364;
+extern f32 g_char_debris2_snd_floor_min; /* was D_800A9364 */
 /* was func_151AA370 */
 void char_ground_debris_2_sound(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
@@ -115,7 +115,7 @@ void char_ground_debris_2_sound(u8 *arg0) {
     if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
     }
     pos.unk0 = *(f32 *)(obj + 0x14);
-    if (D_800A9364 < *(f32 *)(obj + 0x118)) {
+    if (g_char_debris2_snd_floor_min < *(f32 *)(obj + 0x118)) {
         pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
     } else {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
@@ -129,7 +129,7 @@ void char_ground_debris_2_sound(u8 *arg0) {
     }
 }
 
-extern f32 D_800A9368;
+extern f32 g_char_debris2_heavy_floor_min; /* was D_800A9368 */
 /* was func_151AA470 */
 void char_ground_debris_2_heavy(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
@@ -139,7 +139,7 @@ void char_ground_debris_2_heavy(u8 *arg0) {
     if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
     }
     pos.unk0 = *(f32 *)(obj + 0x14);
-    if (D_800A9368 < *(f32 *)(obj + 0x118)) {
+    if (g_char_debris2_heavy_floor_min < *(f32 *)(obj + 0x118)) {
         pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
     } else {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
@@ -155,7 +155,7 @@ void char_ground_debris_2_heavy(u8 *arg0) {
     char_broadcast_msg_c(obj);
 }
 
-extern f32 D_800A936C;
+extern f32 g_char_debris4_floor_min; /* was D_800A936C */
 /* was func_151AA578 */
 void char_ground_debris_4(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
@@ -164,7 +164,7 @@ void char_ground_debris_4(u8 *arg0) {
     if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
     }
     pos.unk0 = *(f32 *)(obj + 0x14);
-    if (D_800A936C < *(f32 *)(obj + 0x118)) {
+    if (g_char_debris4_floor_min < *(f32 *)(obj + 0x118)) {
         pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
     } else {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
@@ -176,7 +176,7 @@ void char_ground_debris_4(u8 *arg0) {
     }
 }
 
-extern f32 D_800A9370;
+extern f32 g_char_debris4b_floor_min; /* was D_800A9370 */
 /* was func_151AA64C */
 void char_ground_debris_4_b(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
@@ -185,7 +185,7 @@ void char_ground_debris_4_b(u8 *arg0) {
     if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
     }
     pos.unk0 = *(f32 *)(obj + 0x14);
-    if (D_800A9370 < *(f32 *)(obj + 0x118)) {
+    if (g_char_debris4b_floor_min < *(f32 *)(obj + 0x118)) {
         pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
     } else {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
@@ -286,9 +286,9 @@ void char_ground_hit_trail(u8 *arg0, u8 *arg1) {
         emitter_trail_spawn(&sp.u18, 0, 0xFF, 0);
     }
 }
-extern f32 D_800A9378;
-extern f32 D_800A937C;
-extern f32 D_800A9380;
+extern f32 g_ground_drip_vel_scale; /* was D_800A9378 */
+extern f32 g_ground_drip_size_range; /* was D_800A937C */
+extern f32 g_ground_drip_size_scale; /* was D_800A9380 */
 s32 smoke_puff_spawn_grounded(f32 *arg0, u8 *arg1, f32 arg2, f32 arg3, u8 *arg4, f32 arg5, s16 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA);
 s32 move_watch_get_data(u8 *, s32 *);
 /* was func_151AA8BC */
@@ -304,12 +304,12 @@ void ground_drip_particle_emit(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4,
             sp48 = 0;
         }
         vel[0] = 0.0f;
-        vel[1] = -((random_float() * 196.0f + 199.0f) * D_800A9378 * arg4);
+        vel[1] = -((random_float() * 196.0f + 199.0f) * g_ground_drip_vel_scale * arg4);
         vel[2] = 0.0f;
         pos[0] = arg0;
         pos[1] = arg1;
         pos[2] = arg2;
-        smoke_puff_spawn_grounded(pos, vel, (random_float() * D_800A937C + 454.0f) * D_800A9380, 0.972683f /* 0x3F7901C1 */, (u8 *) sp48,
+        smoke_puff_spawn_grounded(pos, vel, (random_float() * g_ground_drip_size_range + 454.0f) * g_ground_drip_size_scale, 0.972683f /* 0x3F7901C1 */, (u8 *) sp48,
             random_float() * 101.0f + 101.0f, random_int() % 31U + 0x32, random_int() % 101U + 0x64, 1, arg6[0xC], arg6[1]);
     }
 }
@@ -345,8 +345,8 @@ typedef struct {
     f32 f;
 } SpB3C;
 s32 bone_emitter_spawn(SpA3C *, s32, ...);
-extern f32 D_800A9384;
-extern f32 D_800A9388;
+extern f32 g_char_bone_emitter_k_9384; /* was D_800A9384 */
+extern f32 g_char_bone_emitter_k_9388; /* was D_800A9388 */
 
 /* was func_151AAA3C */
 s32 char_bone_emitter_spawn(u8 *arg0, s32 arg1) {
@@ -377,8 +377,8 @@ s32 char_bone_emitter_spawn(u8 *arg0, s32 arg1) {
     s.u39 = 0;
     b.c = 0;
     b.d = 0x11111;
-    b.e = D_800A9384;
-    b.f = D_800A9388;
+    b.e = g_char_bone_emitter_k_9384;
+    b.f = g_char_bone_emitter_k_9388;
     v = bone_emitter_spawn(&s, 0x18);
     if (v != 0) {
         memcpy((void *)(v + 0x80), &b, 0x18);
@@ -540,7 +540,7 @@ f32 char_emitter_wobble(u8 *arg0) {
     p = *q;
     r = (*(f32 *)((u8 *)p + 0x90)) + ((*(f32 *)((u8 *)p + 0x94)) * (0, r)); // fakematch: (0, x) comma flips commutative operand order
     p += 0x80;
-    *(s32 *)(p + 8) = (*(s32 *)((u8 *)p + 0xC)) * D_800BE9E4 + (*(u32 *)((u8 *)p + 8));
+    *(s32 *)(p + 8) = (*(s32 *)((u8 *)p + 0xC)) * g_frame_ticks + (*(u32 *)((u8 *)p + 8));
     return r;
 }
 
@@ -599,8 +599,8 @@ s32 fx_alive_flag_check(u8 *arg0) {
 void mtx_get_translation(Mtx *arg0, s32 arg1, struct17 *arg2);
 s32 collision_floor_all(f32 *, s32, f32, f32 *);
 void hitinfo_from_obj_floor(void *, u8 *);
-extern u8 D_800A9350[];   /* bone of each foot: 5, 10, 19, 23 */
-extern f32 D_800A93AC[5]; /* splash ring parameters (unk18..unk28 of the emit_sparks_in_angle_range block) */
+extern u8 g_footstep_bones[];   /* bone of each foot: 5, 10, 19, 23; was D_800A9350 */
+extern f32 g_footstep_ring_params[5]; /* splash ring parameters (unk18..unk28 of the emit_sparks_in_angle_range block); was D_800A93AC */
 /* ground probe result of hitinfo_from_obj_floor / collision_floor_all (HitInfo in game_eu_71E70.c) */
 typedef struct {
     f32 y;          /* 0x00: ground height */
@@ -614,9 +614,9 @@ typedef struct {
 
 // footstep_splash: P191: footstep effect of the player p for foot `foot` (0..3, animation event callbacks
 // objfx_1aabc4_0 ... in game_981E0): when p has a model (+0x1D4), takes the foot bone's position (mtx_get_translation, bone
-// D_800A9350[foot]), probes the ground from 50 above to 50 below it (hitinfo_from_obj_floor / collision_floor_all) and, on a hit,
+// g_footstep_bones[foot]), probes the ground from 50 above to 50 below it (hitinfo_from_obj_floor / collision_floor_all) and, on a hit,
 // spawns a splash sprite at (bone x, ground y, bone z) (impact_dust_particle_spawn: light, size 40, 150, the hit's surface) and a
-// ring burst there (emit_sparks_in_angle_range with D_800A93AC's five parameters). s32 although the asm leaves no defined result:
+// ring burst there (emit_sparks_in_angle_range with g_footstep_ring_params's five parameters). s32 although the asm leaves no defined result:
 // game_981E0 calls it without a prototype (implicitly int), so the port needs the int signature; it returns 0.
 /* was func_151AABC4 */
 s32 footstep_splash(struct127 *p, s32 foot) {
@@ -631,7 +631,7 @@ s32 footstep_splash(struct127 *p, s32 foot) {
         return 0;
     }
     light = impact_current_kind();
-    mtx_get_translation(*(Mtx **) ((u8 *) p + 0x1D4), D_800A9350[foot & 0xFF], (struct17 *) bone);
+    mtx_get_translation(*(Mtx **) ((u8 *) p + 0x1D4), g_footstep_bones[foot & 0xFF], (struct17 *) bone);
     hitinfo_from_obj_floor(&hit, (u8 *) p);
     probe[0] = bone[0];
     probe[1] = bone[1] + 50.0f;
@@ -660,11 +660,11 @@ s32 footstep_splash(struct127 *p, s32 foot) {
     ring.unk44 = 0x10;
     ring.unk46 = 0xF;
     ring.unk48 = 0;
-    ring.unk18 = D_800A93AC[0];
-    ring.unk1C = D_800A93AC[1];
-    ring.unk20 = D_800A93AC[2];
-    ring.unk24 = D_800A93AC[3];
-    ring.unk28 = D_800A93AC[4];
+    ring.unk18 = g_footstep_ring_params[0];
+    ring.unk1C = g_footstep_ring_params[1];
+    ring.unk20 = g_footstep_ring_params[2];
+    ring.unk24 = g_footstep_ring_params[3];
+    ring.unk28 = g_footstep_ring_params[4];
     ring.unk3C = light;
     ring.unk40 = 0.0f;
     emit_sparks_in_angle_range(&ring, &ring.unk8, (s32) &hit, 0xFF, 1);
@@ -808,7 +808,7 @@ s8 char_ground_glow_update(u8 *arg0) {
         ret = 0;
     }
     p->unk4 = 0;
-    p->unk14 -= D_800BE9E4;
+    p->unk14 -= g_frame_ticks;
     if (p->unk14 < 0) {
         p->unk14 = ((u32)random_int() % (u32)(p->unk18 + 1)) + p->unk16;
         p->unk10 = (random_float() * p->unkC) + p->unk8;
@@ -832,7 +832,7 @@ s32 char_ground_glow_free(u8 *arg0)
   return 0;
 }
 
-extern f32 D_800A93CC;
+extern f32 g_char_debris3_heavy_floor_min; /* was D_800A93CC */
 /* was func_151AB774 */
 void char_ground_debris_3_heavy(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
@@ -842,7 +842,7 @@ void char_ground_debris_3_heavy(u8 *arg0) {
     if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
     }
     pos.unk0 = *(f32 *)(obj + 0x14);
-    if (D_800A93CC < *(f32 *)(obj + 0x118)) {
+    if (g_char_debris3_heavy_floor_min < *(f32 *)(obj + 0x118)) {
         pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
     } else {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
@@ -1054,10 +1054,10 @@ u8 char_loop_sound_update(u8 *arg0) {
 
     ret = 1;
     s = (SndC68 *)(arg0 + 0x58);
-    if (s->unk6 != 0 && !(D_800DBFF0->unk5F0 & 1)) {
+    if (s->unk6 != 0 && !(g_player_views->unk5F0 & 1)) {
         sound_voice_stop(*(s16 *)&s->unk6);
         s->unk6 = 0;
-    } else if (s->unk6 == 0 && (D_800DBFF0->unk5F0 & 1)) {
+    } else if (s->unk6 == 0 && (g_player_views->unk5F0 & 1)) {
         s->unk6 = sound_play_2d(0x355, 0x7D00, 0x40, 0, 0);
     }
     if (s->unk4 == 0) {
@@ -1143,7 +1143,7 @@ void char_handler_nop_b(s32 arg0, s32 arg1) {
 }
 
 u8 impact_current_kind(void);
-extern f32 D_800A93F4;
+extern f32 g_char_state_fx_k_93f4; /* was D_800A93F4 */
 
 /* was func_151AB930 */
 void char_state_fx_start(u8 *arg0) {
@@ -1162,7 +1162,7 @@ void char_state_fx_start(u8 *arg0) {
     tmp.unk4 = arg0[0x3B];
     tmp.unk8 = *(u16 *)(arg0 + 0x84);
     tmp.unkC = 0.0f;
-    tmp.unk10 = D_800A93F4;
+    tmp.unk10 = g_char_state_fx_k_93f4;
     tmp.unk14 = 3.0f;
     tmp.unk18 = impact_current_kind();
     temp_v0 = effect_node_create_nodraw(0x3C, -1, 0xE, 1, 9, 0x1C, 0xFF, 0);
@@ -1221,7 +1221,7 @@ block_5:
     if (var_v1 == 0) {
         temp_s1_2 = arg0 + 0x28;
         sp.u113 = var_v1;
-        (*(f32 *)((u8 *)temp_s1_2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1_2 + 0xC)) + (((*(f32 *)((u8 *)temp_s1_2 + 0x10)) + (random_float() * (*(f32 *)((u8 *)temp_s1_2 + 0x14)))) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s1_2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1_2 + 0xC)) + (((*(f32 *)((u8 *)temp_s1_2 + 0x10)) + (random_float() * (*(f32 *)((u8 *)temp_s1_2 + 0x14)))) * g_frame_step_f));
         if ((*(f32 *)((u8 *)temp_s1_2 + 0xC)) > 1.0f) {
             hitinfo_from_obj_floor(&sp.uEC, (*(u8 **)((u8 *)temp_s1_2 + 0)));
             do {

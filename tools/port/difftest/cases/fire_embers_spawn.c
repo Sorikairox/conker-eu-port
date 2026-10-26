@@ -1,11 +1,11 @@
-extern f32 D_800AAE24[4]; /* the ember emitter's 4 float parameters (D_800AAE24..D_800AAE30) */
+extern f32 g_fire_ember_params[4]; /* the ember emitter's 4 float parameters (g_fire_ember_params..D_800AAE30); was D_800AAE24 */
 s32 emit_streaks_from_spec(s32 *, u8, s32);
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 s32 random_int(void);
 f32 random_float(void);
 
 // fire_embers_spawn: the ember burst of a fire at `pos` (room `room`, owner `owner`): an ember emitter
-// (emit_streaks_from_spec, type 5 / 7, 4 parameters from D_800AAE24, sizes 15 / 30, colour block, handlers 0x200005 /
+// (emit_streaks_from_spec, type 5 / 7, 4 parameters from g_fire_ember_params, sizes 15 / 30, colour block, handlers 0x200005 /
 // 0x60600), one glow sprite (particle_spawn_ex: texture 0x2B of set 0x4403, 6..12 frames, half size 106..302, fade from
 // 3 at rate 0x55, random flip flags 0x40 / 0x80) and a light flash (light_create_with_ctrl: 6..12 frames, type 5 or 6) at the
 // truncated position.
@@ -15,7 +15,7 @@ void fire_embers_spawn(void *arg0, u8 room, s32 owner) {
         s32 type;       /* +0x00: 5 */
         s32 subtype;    /* +0x04: 7 */
         f32 pos[3];     /* +0x08 */
-        f32 param[4];   /* +0x14: D_800AAE24..30 */
+        f32 param[4];   /* +0x14: g_fire_ember_params..30 */
         f32 sizeA;      /* +0x24: 15 */
         f32 sizeB;      /* +0x28: 30 */
         s16 u2C;
@@ -95,10 +95,10 @@ void fire_embers_spawn(void *arg0, u8 room, s32 owner) {
     emit.pos[0] = pos[0];
     emit.pos[1] = pos[1];
     emit.pos[2] = pos[2];
-    emit.param[0] = D_800AAE24[0];
-    emit.param[1] = D_800AAE24[1];
-    emit.param[2] = D_800AAE24[2];
-    emit.param[3] = D_800AAE24[3];
+    emit.param[0] = g_fire_ember_params[0];
+    emit.param[1] = g_fire_ember_params[1];
+    emit.param[2] = g_fire_ember_params[2];
+    emit.param[3] = g_fire_ember_params[3];
     emit.sizeA = 15.0f;
     emit.sizeB = 30.0f;
     emit.u2C = 0;

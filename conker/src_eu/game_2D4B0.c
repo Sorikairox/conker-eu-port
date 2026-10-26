@@ -35,7 +35,7 @@ void music_stop_song(s32 arg0, s32 arg1);
 void music_play_song(s32 arg0, s32 arg1, s32 arg2);
 extern s8 D_800422A0;
 
-// Level music block, level header (D_800B0DF0) +0x2C..+0x39.
+// Level music block, level header (g_level_header) +0x2C..+0x39.
 typedef struct {
     s16 songA;  // +0x0: first song (< 0: none, 0: silence)
     u16 volA;   // +0x2: music_song_set_volume
@@ -65,8 +65,8 @@ void level_start_music(void) {
     needed = 0;
     restart = FALSE;
     D_800422A0 = 0;
-    if (D_800B0DF0 != NULL) {
-        m = *(LevelMusic *) ((u8 *) D_800B0DF0 + 0x2C);
+    if (g_level_header != NULL) {
+        m = *(LevelMusic *) ((u8 *) g_level_header + 0x2C);
     } else {
         m.mode = 1;
         m.volA = 0;
@@ -79,7 +79,7 @@ void level_start_music(void) {
     D_80041F08 = 0;
     D_80041F0C = 0;
 
-    if (m.songA == 1 && (D_800D2E4C->unk4 & 0x80)) {
+    if (m.songA == 1 && (g_save_progress_bits->unk4 & 0x80)) {
         m.fadeA = 0x10;
         m.songA = 0x46;
     }
@@ -97,7 +97,7 @@ void level_start_music(void) {
         restart = TRUE;
         /* fallthrough */
     case 1:
-        if (D_800BE9B4 == 2) {
+        if (g_level_first_frame == 2) {
             music_release_stopped_slots();
         } else if (D_800BE9F8 != 0x22) {
             restart = FALSE;
@@ -237,39 +237,39 @@ void level_start_music(void) {
     audio_set_bus_mix_type(1, m.unkD);
 }
 
-extern f32 D_800D9F3C;            /* screen height (D_800B0DF0->unk0) */
-extern f32 D_800D9F40;            /* screen width (D_800B0DF0->unk2) */
+extern f32 g_cam_far_plane;            /* screen height (g_level_header->unk0); was D_800D9F3C; was D_800B0DF0 */
+extern f32 g_cam_near_plane;            /* screen width (g_level_header->unk2); was D_800D9F40; was D_800B0DF0 */
 extern f32 D_800D3A90;
 extern u8 g_screen_tint_extra_a[3]; /* was D_800D9FA4 */
 extern u8 g_screen_tint_extra_b[3]; /* was D_800D9FA8 */
 extern u8 g_screen_tint_extra_ab; /* was D_800D9FAB */
 extern u8 g_screen_tint_extra_ac; /* was D_800D9FAC */
-extern u8 D_800DA240;
-extern s32 D_800DA230[];
+extern u8 g_light_buf_size; /* was D_800DA240 */
+extern s32 g_player_light_bufs[]; /* was D_800DA230 */
 extern u8 g_player_ambient_lights[][2][8]; /* was D_800D9FF0 */
-extern f32 D_800D9EE0[][3];       /* per player, 0xC each: first float = -1 (no request) */
-extern u8 D_800D9F10;
-extern f32 D_800D9F18[][2];       /* per player projection request: first float = -1 (none) */
-extern u8 D_800D9F38;             /* projection request count / pending flag */
+extern f32 g_cam_pending_fov[][3];       /* per player, 0xC each: first float = -1 (no request); was D_800D9EE0 */
+extern u8 g_cam_fov_pending; /* was D_800D9F10 */
+extern f32 g_cam_pending_viewport[][2];       /* per player projection request: first float = -1 (none); was D_800D9F18 */
+extern u8 g_cam_viewport_pending;             /* projection request count / pending flag; was D_800D9F38 */
 void level_init_color_tables(s32 arg0);
 s32 light_alloc_light_buf(s32 arg0);
 
 /* Per-level setup of the screen / projection-request state: screen size floats, level_init_color_tables, clear the
- * D_800D9F88 / D_800D9F98 4x3 tables and the small flags, then per player (0..D_80082FA0): D_800DA230 handle,
- * g_player_ambient_lights colour slots = 0xFF, D_800D9EE0 / D_800D9F18 requests = -1, and the request counters to 0.
+ * g_tint_prim_rgb / g_tint_env_rgb 4x3 tables and the small flags, then per player (0..g_last_player_index): g_player_light_bufs handle,
+ * g_player_ambient_lights colour slots = 0xFF, g_cam_pending_fov / g_cam_pending_viewport requests = -1, and the request counters to 0.
  * arg0 (the level, g_level_id) is passed through to level_init_color_tables in a0. The asm returns a stale v0 (callers ignore it). */
 /* was func_150006E0 */
 s32 level_setup_screen_projection(s32 arg0) {
     s32 i, j;
 
-    D_800D9F40 = (f32)D_800B0DF0->unk2;
-    D_800D9F3C = (f32)D_800B0DF0->unk0;
-    D_800D3A90 = 100.0f - D_800D9F3C;
+    g_cam_near_plane = (f32)g_level_header->unk2;
+    g_cam_far_plane = (f32)g_level_header->unk0;
+    D_800D3A90 = 100.0f - g_cam_far_plane;
     level_init_color_tables(arg0);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
-            D_800D9F88[i * 3 + j] = 0;
-            D_800D9F98[i * 3 + j] = 0;
+            g_tint_prim_rgb[i * 3 + j] = 0;
+            g_tint_env_rgb[i * 3 + j] = 0;
         }
     }
     for (i = 0; i < 3; i++) {
@@ -278,11 +278,11 @@ s32 level_setup_screen_projection(s32 arg0) {
     }
     g_screen_tint_extra_ab = 0xFF;
     g_screen_tint_extra_ac = 0xFF;
-    D_800DA240 = 0xB;
-    for (i = 0; i <= D_80082FA0; i++) {
-        D_800DA230[i] = light_alloc_light_buf(D_800DA240);
+    g_light_buf_size = 0xB;
+    for (i = 0; i <= g_last_player_index; i++) {
+        g_player_light_bufs[i] = light_alloc_light_buf(g_light_buf_size);
     }
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= g_last_player_index; i++) {
         for (j = 0; j < 2; j++) {
             g_player_ambient_lights[i][j][4] = 0xFF;
             g_player_ambient_lights[i][j][0] = 0xFF;
@@ -292,14 +292,14 @@ s32 level_setup_screen_projection(s32 arg0) {
             g_player_ambient_lights[i][j][2] = 0xFF;
         }
     }
-    for (i = 0; i <= D_80082FA0; i++) {
-        D_800D9EE0[i][0] = -1.0f;
+    for (i = 0; i <= g_last_player_index; i++) {
+        g_cam_pending_fov[i][0] = -1.0f;
     }
-    D_800D9F10 = 0;
-    for (i = 0; i <= D_80082FA0; i++) {
-        D_800D9F18[i][0] = -1.0f;
+    g_cam_fov_pending = 0;
+    for (i = 0; i <= g_last_player_index; i++) {
+        g_cam_pending_viewport[i][0] = -1.0f;
     }
-    D_800D9F38 = 0;
+    g_cam_viewport_pending = 0;
     return 0;
 }
 // NON-MATCHING: almost only reg remaining
@@ -307,8 +307,8 @@ s32 level_setup_screen_projection(s32 arg0) {
 //     s32 i;
 //     s32 j;
 //
-//     D_800D9B20 = D_800B0DF0->unk2;
-//     D_800D9B1C = D_800B0DF0->unk0;
+//     D_800D9B20 = g_level_header->unk2;
+//     D_800D9B1C = g_level_header->unk0;
 //     D_800D3670 = 100.0f - D_800D9B1C;
 //
 //     level_init_color_tables();
@@ -330,11 +330,11 @@ s32 level_setup_screen_projection(s32 arg0) {
 //     D_800D9B8C = 0xFF;
 //     D_800D9E20 = 0xBU;
 //
-//     for (i = 0; i <= D_80082FA0; i++) {
-//         D_800D9E10[i] = func_1515D480(D_800D9E20);
+//     for (i = 0; i <= g_last_player_index; i++) {
+//         g_cam_point_ahead[i] = func_1515D480(D_800D9E20);
 //     }
 //
-//     for (i = 0; i <= D_80082FA0; i++) {
+//     for (i = 0; i <= g_last_player_index; i++) {
 //         for (j = 0; j < 2; j++) {
 //             D_800D9BD0[i][j][4] = 0xff;
 //             D_800D9BD0[i][j][0] = 0xff;
@@ -345,12 +345,12 @@ s32 level_setup_screen_projection(s32 arg0) {
 //         }
 //     }
 //
-//     for (i = 0; i <= D_80082FA0; i++) {
+//     for (i = 0; i <= g_last_player_index; i++) {
 //         D_800D9AC0[i].unk0 = -1.0f;
 //     }
 //
 //     D_800D9AF0 = 0;
-//     for (i = 0; i <= D_80082FA0; i++) {
+//     for (i = 0; i <= g_last_player_index; i++) {
 //         D_800D9AF8[i].unk0 = -1.0f;
 //     }
 //     D_800D9B18 = 0;

@@ -5,8 +5,8 @@
 extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 
-extern s32 (*D_8008B418[])(u8 *);
-extern s32 (*D_8008B41C[])(u8 *);
+extern s32 (*g_quad_fx_update_fns[])(u8 *); /* was D_8008B418 */
+extern s32 (*g_quad_fx_update2_fns[])(u8 *); /* was D_8008B41C */
 u8 sprite_anim_advance(u8, u8 *, u8 *, u8);
 /* was func_1515C050 */
 void quad_fx_update(u8 *arg0) {
@@ -15,14 +15,14 @@ void quad_fx_update(u8 *arg0) {
 
     flag = 0;
     if (arg0[0x11] & 1) {
-        *(s16 *)(arg0 + 0x14) -= D_800BE9E4;
+        *(s16 *)(arg0 + 0x14) -= g_frame_ticks;
         if (*(s16 *)(arg0 + 0x14) < 0) {
             flag = 1;
         }
     }
     if (flag == 0) {
         if (((s8 *)arg0)[0x38] != -1) {
-            if (D_8008B418[((s8 *)arg0)[0x38]](arg0) == 0) {
+            if (g_quad_fx_update_fns[((s8 *)arg0)[0x38]](arg0) == 0) {
                 flag = 1;
             }
         }
@@ -32,7 +32,7 @@ void quad_fx_update(u8 *arg0) {
     }
     if (flag != 0) {
         if (((s8 *)arg0)[0x39] != -1) {
-            if (D_8008B41C[((s8 *)arg0)[0x39]](arg0) != 0) {
+            if (g_quad_fx_update2_fns[((s8 *)arg0)[0x39]](arg0) != 0) {
                 node_destroy((struct102 *)arg0);
             }
         } else {
@@ -49,7 +49,7 @@ s32 gfx_load_texture_cached(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s3
 u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 void fx_calc_color_mode_a(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
 void fx_calc_color_mode_b(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 /* was func_1515C160 */
 u8 *quad_fx_draw(s32 arg0, u8 *arg1, s32 arg2) {
@@ -75,14 +75,14 @@ u8 *quad_fx_draw(s32 arg0, u8 *arg1, s32 arg2) {
     fx_calc_color_mode_a(&sp.u70, &sp.u6E, &sp.u6C, &sp.u6A, (s32) (*(u8 *)((u8 *)arg1 + 0x20)), (s32) (*(u8 *)((u8 *)arg1 + 0x21)), (s32) (*(u8 *)((u8 *)arg1 + 0x22)), (s32) (*(u8 *)((u8 *)arg1 + 0x23)), (s32) (*(u8 *)((u8 *)arg1 + 0x24)), (s32) (*(u8 *)((u8 *)arg1 + 0x25)), (s32) (*(u8 *)((u8 *)arg1 + 0x26)), (s32) (*(u8 *)((u8 *)arg1 + 0x27)), (s32) (*(u8 *)((u8 *)arg1 + 0x28)), (s32) (*(u8 *)((u8 *)arg1 + 0x29)));
     fx_calc_color_mode_b(&sp.u68, &sp.u66, &sp.u64, &sp.u62, (s32) (*(u8 *)((u8 *)arg1 + 0x20)), (s32) (*(u8 *)((u8 *)arg1 + 0x21)), (s32) (*(u8 *)((u8 *)arg1 + 0x22)), (s32) (*(u8 *)((u8 *)arg1 + 0x23)), (s32) (*(u8 *)((u8 *)arg1 + 0x24)), (s32) (*(u8 *)((u8 *)arg1 + 0x25)), (s32) (*(u8 *)((u8 *)arg1 + 0x26)), (s32) (*(u8 *)((u8 *)arg1 + 0x27)), (s32) (*(u8 *)((u8 *)arg1 + 0x28)), (s32) (*(u8 *)((u8 *)arg1 + 0x2A)));
     temp_v1 = (*(u8 *)((u8 *)arg1 + 0x10));
-    temp_a0 = gfx_set_combine_mode(gfx_load_texture_cached(gfx_prim_color_cached(gfx_env_color_cached(gfx_geometry_mode_cached(arg0, (*(s32 *)((u8 *)arg1 + 0x30)), (*(s32 *)((u8 *)arg1 + 0x34))), sp.u68, sp.u66, sp.u64, (s32) sp.u62, &sp.u73), 0, 0, sp.u70, (s32) sp.u6E, (s32) sp.u6C, (s32) sp.u6A, &sp.u73), &D_80090F10[temp_v1], (*(s32 *)((u8 *)arg1 + 0x18)), 0, 0, 0, (s32) temp_v1, 0, 0, &sp.u73, 3), (*(u8 *)((u8 *)arg1 + 0x2C)), &sp.u73);
+    temp_a0 = gfx_set_combine_mode(gfx_load_texture_cached(gfx_prim_color_cached(gfx_env_color_cached(gfx_geometry_mode_cached(arg0, (*(s32 *)((u8 *)arg1 + 0x30)), (*(s32 *)((u8 *)arg1 + 0x34))), sp.u68, sp.u66, sp.u64, (s32) sp.u62, &sp.u73), 0, 0, sp.u70, (s32) sp.u6E, (s32) sp.u6C, (s32) sp.u6A, &sp.u73), &g_sprite_textures[temp_v1], (*(s32 *)((u8 *)arg1 + 0x18)), 0, 0, 0, (s32) temp_v1, 0, 0, &sp.u73, 3), (*(u8 *)((u8 *)arg1 + 0x2C)), &sp.u73);
     if ((*(u8 *)((u8 *)arg1 + 0x11)) & 2) {
         var_v1 = 0x100000;
     } else {
         var_v1 = 0;
     }
     temp_v0_2 = ((*(u8 *)((u8 *)arg1 + 0x2B)) * 8) + ((u8 *)&g_render_mode_pairs);
-    temp_v0 = gfx_other_mode_cached(temp_a0, var_v1 | 0x80000 | D_800D30BC | 0x2CA0, (*(s32 *)((u8 *)temp_v0_2 + 4)) | (*(s32 *)((u8 *)temp_v0_2 + 0)), &sp.u73);
+    temp_v0 = gfx_other_mode_cached(temp_a0, var_v1 | 0x80000 | g_gfx_tlut_mode | 0x2CA0, (*(s32 *)((u8 *)temp_v0_2 + 4)) | (*(s32 *)((u8 *)temp_v0_2 + 0)), &sp.u73);
     (*(u8 **)((u8 *)temp_v0 + 4)) = (u8 *) (arg1 + 0x50);
     (*(s32 *)((u8 *)temp_v0 + 0)) = 0x01004008;
     (*(s32 *)((u8 *)temp_v0 + 8)) = 0x05000204;
@@ -148,7 +148,7 @@ void motion_track_update(u8 *arg0) {
 
     flag = 0;
     if (arg0[0x1D] & 1) {
-        *(s16 *)(arg0 + 0x1E) -= D_800BE9E4;
+        *(s16 *)(arg0 + 0x1E) -= g_frame_ticks;
         if (*(s16 *)(arg0 + 0x1E) < 0) {
             flag = 1;
         }

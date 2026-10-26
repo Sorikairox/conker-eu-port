@@ -27,7 +27,7 @@ typedef struct {
     /* 0x3C */ u32 pifstatus;
 } OSPifRam_s86;
 
-extern OSPifRam_s86 D_800E0E60; /* __osEepPifRam (game copy) */
+extern OSPifRam_s86 g_eep_pif_ram; /* __osEepPifRam (game copy); was D_800E0E60 */
 extern u8 D_80042DE0;           /* __osContLastCmd */
 void __osSiGetAccess(void);
 void __osSiRelAccess(void);
@@ -45,7 +45,7 @@ s32 game_eeprom_read(OSMesgQueue *mq, u8 address, u8 *buffer) {
     OSContStatus sdata;
     __OSContEepromFormat_s86 eepromformat;
 
-    ptr = (u8 *)&D_800E0E60.ramarray;
+    ptr = (u8 *)&g_eep_pif_ram.ramarray;
     __osSiGetAccess();
     ret = game_eep_status(mq, &sdata);
     type = sdata.type & (CONT_EEPROM | CONT_EEP16K);
@@ -73,9 +73,9 @@ s32 game_eeprom_read(OSMesgQueue *mq, u8 address, u8 *buffer) {
         game_eep_status(mq, &sdata);
     }
     game_eep_pack_read_data(address);
-    ret = os_si_raw_start_dma(OS_WRITE, &D_800E0E60);
+    ret = os_si_raw_start_dma(OS_WRITE, &g_eep_pif_ram);
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
-    ret = os_si_raw_start_dma(OS_READ, &D_800E0E60);
+    ret = os_si_raw_start_dma(OS_READ, &g_eep_pif_ram);
     D_80042DE0 = 4;
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     for (i = 0; i < 4; i++) {
@@ -94,11 +94,11 @@ s32 game_eeprom_read(OSMesgQueue *mq, u8 address, u8 *buffer) {
 
 /* was func_151DD8B4 */
 void game_eep_pack_read_data(u8 address) {
-    u8 *ptr = (u8 *)&D_800E0E60.ramarray;
+    u8 *ptr = (u8 *)&g_eep_pif_ram.ramarray;
     __OSContEepromFormat_s86 eepromformat;
     int i;
 
-    D_800E0E60.pifstatus = 1;
+    g_eep_pif_ram.pifstatus = 1;
     eepromformat.txsize = 2;
     eepromformat.rxsize = 8;
     eepromformat.cmd = 4;

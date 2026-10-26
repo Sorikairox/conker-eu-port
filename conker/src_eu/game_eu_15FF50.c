@@ -7,10 +7,10 @@ s32 *gfx_emit_sprite_tex_segment(u8 *arg0, u16 arg1, u8 arg2, s32 arg3);
 s32 mdl_particle_land_bounce_settle(u8 *, f32, f32, f32, f32, s32);
 
 
-extern s32 (*D_80089C50[])(u8 *);
-extern s32 (*D_80089CB4[])(u8 *);
-extern void (*D_80089D1C[])(u8 *);
-extern s32 (*D_80089D28[])(u8 *);
+extern s32 (*g_mdl_particle_fns_71[])(u8 *); /* was D_80089C50 */
+extern s32 (*g_mdl_particle_fns_72[])(u8 *); /* was D_80089CB4 */
+extern void (*g_mdl_particle_fns_76[])(u8 *); /* was D_80089D1C */
+extern s32 (*g_mdl_particle_fns_77[])(u8 *); /* was D_80089D28 */
 s32 pos_in_world_bounds(u8 *);
 
 /* was func_15132740 */
@@ -21,21 +21,21 @@ void mdl_particle_update(u8 *arg0) {
 
     *(s32 *)(arg0 + 0x60) &= ~0x200000;
     if ((*(s32 *)(arg0 + 0x60) & 0x10) && (arg0[0x148] & 0x18)) {
-        if (!D_80089D28[arg0[0x77]](arg0)) {
+        if (!g_mdl_particle_fns_77[arg0[0x77]](arg0)) {
             done = 1;
         }
     } else if (arg0[0x71] != 0) {
-        if (!D_80089C50[arg0[0x71]](arg0)) {
+        if (!g_mdl_particle_fns_71[arg0[0x71]](arg0)) {
             done = 1;
         }
     }
     if (arg0[0x72] != 0 && !done) {
-        if (!D_80089CB4[arg0[0x72]](arg0)) {
+        if (!g_mdl_particle_fns_72[arg0[0x72]](arg0)) {
             done = 1;
         }
     }
     if ((*(s32 *)(arg0 + 0x60) & 0x80) && !done) {
-        *(s16 *)(arg0 + 0x64) -= D_800BE9E4;
+        *(s16 *)(arg0 + 0x64) -= g_frame_ticks;
         if (*(s16 *)(arg0 + 0x64) < 0) {
             done = 1;
         }
@@ -55,7 +55,7 @@ void mdl_particle_update(u8 *arg0) {
     }
     if (done) {
         if (arg0[0x76] != 0) {
-            D_80089D1C[arg0[0x76]](arg0);
+            g_mdl_particle_fns_76[arg0[0x76]](arg0);
         }
         node_destroy((struct102 *)arg0);
     }
@@ -65,19 +65,19 @@ void mdl_particle_update(u8 *arg0) {
 void mdl_particle_run_hook_d50(u8 *arg0) {
     u8 var_v0 = (*(s32 *)(arg0 + 0x60) & 0x100) ? arg0[0x68] : 0;
 
-    D_80089D50[var_v0](arg0);
+    g_mdl_particle_hook_fns_d50[var_v0](arg0);
 }
 
 /* was func_15132968 */
 void mdl_particle_run_hook_d74(u8 *arg0) {
     u8 var_v0 = (*(s32 *)(arg0 + 0x60) & 0x100) ? arg0[0x68] : 0;
 
-    D_80089D74[var_v0](arg0);
+    g_mdl_particle_hook_fns_d74[var_v0](arg0);
 }
 
 void mdl_particle_free_lights(u8 *arg0);
 s32 texture_id_list_release(s32, s32 *, u16 *);
-extern s32 D_800DCA70[];
+extern s32 g_mdl_particle_model_segs[]; /* was D_800DCA70 */
 typedef struct Node29B4 {
     s32 *data;
     struct Node29B4 *next;
@@ -93,26 +93,26 @@ typedef struct {
 } Obj29B4;
 /* was func_151329B4 */
 void mdl_particle_release(Obj29B4 *arg0) {
-    D_800DC63C--;
-    ((s16 *)D_800DC468)[arg0->idx]--;
-    if (((s16 *)D_800DC468)[arg0->idx] == 0) {
+    g_mdl_particle_live_count--;
+    ((s16 *)g_mdl_particle_model_users)[arg0->idx]--;
+    if (((s16 *)g_mdl_particle_model_users)[arg0->idx] == 0) {
         if (arg0->node->flag != 0) {
-            D_800DC468[arg0->idx] = 1;
+            g_mdl_particle_model_users[arg0->idx] = 1;
         } else {
-            texture_id_list_release(D_800DCA70[arg0->idx], &D_800DC63C, D_800DC468);
+            texture_id_list_release(g_mdl_particle_model_segs[arg0->idx], &g_mdl_particle_live_count, g_mdl_particle_model_users);
             if (arg0->node->prev == NULL) {
-                D_800DC460 = (s32)arg0->node->next;
-                if (D_800DC460 != 0) {
-                    ((Node29B4 *)D_800DC460)->prev = NULL;
+                g_mdl_particle_list_head = (s32)arg0->node->next;
+                if (g_mdl_particle_list_head != 0) {
+                    ((Node29B4 *)g_mdl_particle_list_head)->prev = NULL;
                 } else {
-                    D_800DC464 = 0;
+                    g_mdl_particle_list_tail = 0;
                 }
             } else {
                 arg0->node->prev->next = arg0->node->next;
                 if (arg0->node->next != NULL) {
                     arg0->node->next->prev = arg0->node->prev;
                 } else {
-                    D_800DC464 = (s32)arg0->node->prev;
+                    g_mdl_particle_list_tail = (s32)arg0->node->prev;
                 }
             }
             heap_set_block_tag(arg0->node->data, 4);
@@ -138,7 +138,7 @@ void mdl_particle_die_free(struct102 * arg0) {
 void mdl_particle_free_lights(u8 *arg0) {
     s32 i;
 
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= g_last_player_index; i++) {
         if (((s32 *)(arg0 + 0x154))[i]) {
             heap_set_block_tag(((s32 *)(arg0 + 0x154))[i], 4);
         }
@@ -148,7 +148,7 @@ void mdl_particle_free_lights(u8 *arg0) {
     }
 }
 
-/* one shared model per particle model id (D_800DC468 counts the users, D_800DC460 / D_800DC464 = list head / tail) */
+/* one shared model per particle model id (g_mdl_particle_model_users counts the users, g_mdl_particle_list_head / g_mdl_particle_list_tail = list head / tail) */
 typedef struct ParticleModelRef {
     s32 *model;                      /* loaded model file (asset_load_with_subfiles) */
     struct ParticleModelRef *next;
@@ -156,8 +156,8 @@ typedef struct ParticleModelRef {
     u16 modelId;
     u8 keep;                         /* 1: not freed when the last user dies (mdl_particle_release) */
 } ParticleModelRef;
-/* D_800DC460 / D_800DC464: list head / tail (ParticleModelRef *), D_800DC468: s16 users per model id,
-   D_800DC63C: live particles */
+/* g_mdl_particle_list_head / g_mdl_particle_list_tail: list head / tail (ParticleModelRef *), g_mdl_particle_model_users: s16 users per model id,
+   g_mdl_particle_live_count: live particles */
 
 void heap_free(void *);
 u8 *light_alloc_light_buf(s32);
@@ -180,7 +180,7 @@ u8 *mdl_particle_spawn_ex(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extra
     u16 id;
     f32 x, y, z;
 
-    if (D_800DC63C > 300) {
+    if (g_mdl_particle_live_count > 300) {
         return 0;
     }
     kind = (*(s32 *)(req + 0x50) & 0x4000) ? 0x48 : 0x19;
@@ -190,7 +190,7 @@ u8 *mdl_particle_spawn_ex(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extra
         return 0;
     }
     id = *(u16 *)(req + 0x56);
-    users = &((s16 *)D_800DC468)[id];
+    users = &((s16 *)g_mdl_particle_model_users)[id];
     if (*users == 0) {
         ref = (ParticleModelRef *)allocate_memory(0x10, 1, 2, (*(s32 *)(req + 0x50) & 0x400000) ? 2 : 1);
         if (ref == NULL) {
@@ -205,13 +205,13 @@ u8 *mdl_particle_spawn_ex(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extra
             return 0;
         }
         /* push at the head of the model list */
-        ref->next = (ParticleModelRef *)D_800DC460;
-        if (D_800DC460 != 0) {
-            ((ParticleModelRef *)D_800DC460)->prev = ref;
+        ref->next = (ParticleModelRef *)g_mdl_particle_list_head;
+        if (g_mdl_particle_list_head != 0) {
+            ((ParticleModelRef *)g_mdl_particle_list_head)->prev = ref;
         } else {
-            D_800DC464 = (s32)ref;
+            g_mdl_particle_list_tail = (s32)ref;
         }
-        D_800DC460 = (s32)ref;
+        g_mdl_particle_list_head = (s32)ref;
         ref->prev = NULL;
         ref->modelId = *(u16 *)(req + 0x56);
         if ((*(s32 *)(req + 0x50) & 0x100000) && g_level_id != 0x3B && g_level_id != 6 && g_level_id != 0x13 &&
@@ -220,10 +220,10 @@ u8 *mdl_particle_spawn_ex(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extra
         } else {
             ref->keep = 0;
         }
-        users = &((s16 *)D_800DC468)[*(u16 *)(req + 0x56)];
+        users = &((s16 *)g_mdl_particle_model_users)[*(u16 *)(req + 0x56)];
     } else {
         /* find the loaded model (at most 100 entries) */
-        ref = (ParticleModelRef *)D_800DC460;
+        ref = (ParticleModelRef *)g_mdl_particle_list_head;
         n = 100;
         while (ref->modelId != id) {
             n--;
@@ -262,7 +262,7 @@ u8 *mdl_particle_spawn_ex(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extra
         *(s32 *)(p + 0x128) = 0;
         *(f32 *)(p + 0x110) = -10000.0f; /* D_800A3C48 */
     }
-    D_800DC63C++;
+    g_mdl_particle_live_count++;
     p[0x150] = 0;
     *(s32 *)(p + 0x14C) = nTrails;
     *(s32 *)(p + 0x168) = arg2;
@@ -271,7 +271,7 @@ u8 *mdl_particle_spawn_ex(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extra
     }
     *(s32 *)(p + 0x164) = 0;
     if (nTrails != 0) {
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= g_last_player_index; i++) {
             ((u8 **)(p + 0x154))[i] = light_alloc_light_buf(nTrails);
         }
         *(void **)(p + 0x164) = light_alloc_lookat_buf();
@@ -300,7 +300,7 @@ typedef struct {
 /* P241: every entry (mdl_particle_mtx_rot_scale, fx_build_look_matrix, mdl_particle_mtx_rot_scale3, fx_copy_default_mtx, swinging_lamp_get_matrix, mdl_particle_mtx_attach_bone) takes
  * the object as its second argument: the asm leaves it in a1 at the jalr (`move a1, a0` on entry). The table was
  * declared with one parameter, so the port passed nothing there (wasm: signature mismatch). */
-extern s32 (*D_80089D2C[])(Mtx *, Unk15132FF8 *);
+extern s32 (*g_mdl_particle_mtx_fns[])(Mtx *, Unk15132FF8 *); /* was D_80089D2C */
 
 /* was func_15132FF8 */
 void mdl_particle_update_matrix(Unk15132FF8 *arg0) {
@@ -317,7 +317,7 @@ void mdl_particle_update_matrix(Unk15132FF8 *arg0) {
         arg0->flags |= 0x200000;
         return;
     }
-    r = D_80089D2C[arg0->unk78](&arg0->mtx[D_800BE9C0], arg0);
+    r = g_mdl_particle_mtx_fns[arg0->unk78](&arg0->mtx[g_dl_buf_index], arg0);
     if (r == -1) {
         node_destroy((struct102 *)arg0);
         return;
@@ -332,9 +332,9 @@ void mdl_particle_update_matrix(Unk15132FF8 *arg0) {
 Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 u8 *model_part_emit_lights(u8 *, u8 *, u8, s32, s32, s32, u8 *, s32, s32);
-extern s32 D_80083AD0;
-extern s32 D_80083C50;
-extern s32 D_80089D44;
+extern s32 g_seg8_dl_translucent; /* was D_80083AD0 */
+extern s32 g_seg8_dl_opaque; /* was D_80083C50 */
+extern s32 g_mdl_particle_draw_fns; /* was D_80089D44 */
 
 /* was func_151330F0 */
 u8 *mdl_particle_draw(u8 *arg0, u8 *arg1, s16 arg2) {
@@ -370,17 +370,17 @@ u8 *mdl_particle_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     sp.u6B = 1;
     if ((s32) (*(u8 *)((u8 *)arg1 + 0x70)) < 0xFF) {
         (*(s32 *)((u8 *)arg0 + 0)) = 0xDB060020;
-        (*(s32 **)((u8 *)arg0 + 4)) = &D_80083AD0;
+        (*(s32 **)((u8 *)arg0 + 4)) = &g_seg8_dl_translucent;
         var_s1 = arg0 + 8;
     } else {
         (*(s32 *)((u8 *)arg0 + 0)) = 0xDB060020;
-        (*(s32 **)((u8 *)arg0 + 4)) = &D_80083C50;
+        (*(s32 **)((u8 *)arg0 + 4)) = &g_seg8_dl_opaque;
         var_s1 = arg0 + 8;
     }
     if ((*(s32 *)((u8 *)arg1 + 0x60)) & 0x10000) {
         temp_v0 = (*(s8 *)((u8 *)arg1 + 0x79));
         if (temp_v0 != -1) {
-            var_s1 = (*(s32 (**)())((u8 *)&D_80089D44 + (temp_v0 * 4)))(var_s1, arg1, arg2);
+            var_s1 = (*(s32 (**)())((u8 *)&g_mdl_particle_draw_fns + (temp_v0 * 4)))(var_s1, arg1, arg2);
         }
     }
     temp_v1_2 = (*(s32 *)((u8 *)arg1 + 0x60));
@@ -418,7 +418,7 @@ u8 *mdl_particle_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     }
     (*(s32 *)((u8 *)var_s1_2 + 0)) = 0xDA380003;
     temp_s1 = var_s1_2 + 8;
-    (*(u8 **)((u8 *)var_s1_2 + 4)) = (u8 *) (arg1 + (D_800BE9C0 << 6) + 0x90);
+    (*(u8 **)((u8 *)var_s1_2 + 4)) = (u8 *) (arg1 + (g_dl_buf_index << 6) + 0x90);
     (*(s32 *)((u8 *)temp_s1 + 0)) = 0xDE000000;
     (*(s32 *)((u8 *)temp_s1 + 4)) = (s32) **(*(s32 ***)((u8 *)arg1 + 0x8C));
     return temp_s1 + 8;
@@ -450,20 +450,20 @@ typedef struct {
 } WallProbe334C;
 s32 collision_floor_probe(f32 *, s32, f32, u8 *);
 s32 collision_obj_walls(f32, f32, s32, u8 *, s32, s32);
-extern s32 (*D_80089CD4[])(u8 *, f32, f32, f32, f32, u8 *); /* landing handlers by +0x73 */
+extern s32 (*g_mdl_particle_land_fns[])(u8 *, f32, f32, f32, f32, u8 *); /* landing handlers by +0x73; was D_80089CD4 */
 /* floor-hit handlers by +0x74 and wall-hit handlers by +0x75 (entry 0 unused) */
-extern s32 (*D_80089D10[])(u8 *, f32, f32, f32, f32);
-extern s32 (*D_80089D14[])(u8 *, WallProbe334C *, f32, f32, f32);
+extern s32 (*g_mdl_particle_fns_74[])(u8 *, f32, f32, f32, f32); /* was D_80089D10 */
+extern s32 (*g_mdl_particle_wall_fns[])(u8 *, WallProbe334C *, f32, f32, f32); /* was D_80089D14 */
 
-// particle_collide_update: integrates the particle's motion by D_800BE9A4 (+0x60 flags: 8 = gravity +0x5C on the y
+// particle_collide_update: integrates the particle's motion by g_frame_step_f (+0x60 flags: 8 = gravity +0x5C on the y
 // velocity, 0x20 = position +0x38 += velocity +0x44, 0x40 = rotation +0x20 += spin +0x50) and, when any of the
 // collision bits 7 is set, checks the move from the old position: a floor probe (collision_floor_probe from the old height
 // down to the new one less the +0x10 offset; floor height +0x110, info +0x114). On a floor of type (+0x12D) 1, or 2
 // with +0x12C bit 0: flag 1 of +0x148, the speed (+0x140) / its inverse (+0x144, flag 8) when +0x60 bit 0x10 and
-// faster than 1, the landing handler D_80089CD4[+0x73] and, with bit 0x10, the position saved at +0x134; type 3:
-// flag 2 and the D_80089D10[+0x74] handler. With bit 4 a wall probe (collision_obj_walls, request kind 4 from the old to
+// faster than 1, the landing handler g_mdl_particle_land_fns[+0x73] and, with bit 0x10, the position saved at +0x134; type 3:
+// flag 2 and the g_mdl_particle_fns_74[+0x74] handler. With bit 4 a wall probe (collision_obj_walls, request kind 4 from the old to
 // the new position): flag 4, speed and yaw (+0x14A, math_atan2f of the probe's hit point, 256 steps) with 0x10,
-// the D_80089D14[+0x75] handler and the saved position. A handler returning 0 ends the particle: returns 0, else 1.
+// the g_mdl_particle_wall_fns[+0x75] handler and the saved position. A handler returning 0 ends the particle: returns 0, else 1.
 /* was func_1513334C */
 s32 mdl_particle_collide_update(u8 *p) {
     WallProbe334C req;
@@ -476,17 +476,17 @@ s32 mdl_particle_collide_update(u8 *p) {
         memcpy((u8 *) old, p + 0x38, 12);
     }
     if (*(s32 *) (p + 0x60) & 8) {
-        *(f32 *) (p + 0x48) += *(f32 *) (p + 0x5C) * D_800BE9A4;
+        *(f32 *) (p + 0x48) += *(f32 *) (p + 0x5C) * g_frame_step_f;
     }
     if (*(s32 *) (p + 0x60) & 0x20) {
-        *(f32 *) (p + 0x38) += *(f32 *) (p + 0x44) * D_800BE9A4;
-        *(f32 *) (p + 0x3C) += *(f32 *) (p + 0x48) * D_800BE9A4;
-        *(f32 *) (p + 0x40) += *(f32 *) (p + 0x4C) * D_800BE9A4;
+        *(f32 *) (p + 0x38) += *(f32 *) (p + 0x44) * g_frame_step_f;
+        *(f32 *) (p + 0x3C) += *(f32 *) (p + 0x48) * g_frame_step_f;
+        *(f32 *) (p + 0x40) += *(f32 *) (p + 0x4C) * g_frame_step_f;
     }
     if (*(s32 *) (p + 0x60) & 0x40) {
-        *(f32 *) (p + 0x20) += *(f32 *) (p + 0x50) * D_800BE9A4;
-        *(f32 *) (p + 0x24) += *(f32 *) (p + 0x54) * D_800BE9A4;
-        *(f32 *) (p + 0x28) += *(f32 *) (p + 0x58) * D_800BE9A4;
+        *(f32 *) (p + 0x20) += *(f32 *) (p + 0x50) * g_frame_step_f;
+        *(f32 *) (p + 0x24) += *(f32 *) (p + 0x54) * g_frame_step_f;
+        *(f32 *) (p + 0x28) += *(f32 *) (p + 0x58) * g_frame_step_f;
     }
     if (!(*(s32 *) (p + 0x60) & 7)) {
         return 1;
@@ -509,7 +509,7 @@ s32 mdl_particle_collide_update(u8 *p) {
                 }
             }
             if (p[0x73] != 0
-                && !D_80089CD4[p[0x73]](p, old[0], old[1], old[2], *(f32 *) (p + 0x110), p + 0x114)) {
+                && !g_mdl_particle_land_fns[p[0x73]](p, old[0], old[1], old[2], *(f32 *) (p + 0x110), p + 0x114)) {
                 return 0;
             }
             if (*(s32 *) (p + 0x60) & 0x10) {
@@ -518,7 +518,7 @@ s32 mdl_particle_collide_update(u8 *p) {
         }
         if (p[0x12D] == 3) {
             p[0x148] |= 2;
-            if (p[0x74] != 0 && !D_80089D10[p[0x74]](p, old[0], old[1], old[2], *(f32 *) (p + 0x110))) {
+            if (p[0x74] != 0 && !g_mdl_particle_fns_74[p[0x74]](p, old[0], old[1], old[2], *(f32 *) (p + 0x110))) {
                 return 0;
             }
         }
@@ -558,7 +558,7 @@ s32 mdl_particle_collide_update(u8 *p) {
             p[0x14A] = (s32) (math_atan2f(req.pos[0] - *(f32 *) (p + 0x38), req.pos[2] - *(f32 *) (p + 0x40)) * 40.743664f);
         }
     }
-    if (p[0x75] != 0 && !D_80089D14[p[0x75]](p, &req, old[0], old[1], old[2])) {
+    if (p[0x75] != 0 && !g_mdl_particle_wall_fns[p[0x75]](p, &req, old[0], old[1], old[2])) {
         return 0;
     }
     if (*(s32 *) (p + 0x60) & 0x10) {
@@ -576,11 +576,11 @@ s32 mdl_particle_squash_update(u8 *arg0)
   *((f32 *) (arg0 + 0x34)) = 1.0f;
   if ((*((s32 *) (arg0 + 0x60))) & 0x40)
   {
-    *((f32 *) (arg0 + 0x20)) += (*((f32 *) (arg0 + 0x50))) * D_800BE9A4;
-    *((f32 *) (arg0 + 0x24)) += (*((f32 *) (arg0 + 0x54))) * D_800BE9A4;
-    *((f32 *) (arg0 + 0x28)) += (*((f32 *) (arg0 + 0x58))) * D_800BE9A4;
+    *((f32 *) (arg0 + 0x20)) += (*((f32 *) (arg0 + 0x50))) * g_frame_step_f;
+    *((f32 *) (arg0 + 0x24)) += (*((f32 *) (arg0 + 0x54))) * g_frame_step_f;
+    *((f32 *) (arg0 + 0x28)) += (*((f32 *) (arg0 + 0x58))) * g_frame_step_f;
   }
-  arg0[0x149] += ((s32) (576.0f * (*((f32 *) (arg0 + 0x144))))) * D_800BE9E4;
+  arg0[0x149] += ((s32) (576.0f * (*((f32 *) (arg0 + 0x144))))) * g_frame_ticks;
   if (arg0[0x149] < 0x80)
   {
     f32 s;
@@ -624,7 +624,7 @@ s32 mdl_particle_mtx_rot_scale(s32 arg0, u8 *arg1) {
 }
 
 void swinging_lamp_kick(void *);
-extern void (*D_80089D98[])(u8 *, u8 *, u8);
+extern void (*g_mdl_particle_msg_fns[])(u8 *, u8 *, u8); /* was D_80089D98 */
 /* was func_15133AF8 */
 void mdl_particle_handle_msg(u8 *arg0, u8 *arg1, u8 arg2)
 {
@@ -649,26 +649,26 @@ void mdl_particle_handle_msg(u8 *arg0, u8 *arg1, u8 arg2)
     if ((t == *(s32 *)(arg0 + 0x7C)) || (arg0[0x80] == arg1[4])) { *(s32 *)(arg0 + 0x7C) = 0; arg0[0x80] = 0; }
   }
   if (*(s32 *)(arg0 + 0x60) & 0x100) { idx = arg0[0x68]; } else { idx = 0; }
-  if (D_80089D98[idx] != NULL) { D_80089D98[idx](arg0, arg1, arg2); }
+  if (g_mdl_particle_msg_fns[idx] != NULL) { g_mdl_particle_msg_fns[idx](arg0, arg1, arg2); }
 }
 
-extern s32 D_800A3C60[];             /* model file per particle model id (ROM table) */
+extern s32 g_mdl_particle_model_files[];             /* model file per particle model id (ROM table); was D_800A3C60 */
 s32 asset_load_with_subfiles(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, ...);
 s32 texture_resolve_dl_ids(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList);
 void gfx_dl_relocate(s8 *arg0, s32 arg1);
 
 // particle_model_load: loads the model file of particle model id modelId into ref->model, resolves its display
-// list (D_800DCA70[modelId]) and registers it; returns 0 when the file is missing. The particle is unused.
+// list (g_mdl_particle_model_segs[modelId]) and registers it; returns 0 when the file is missing. The particle is unused.
 /* was func_15133C18 */
 s32 mdl_particle_model_load(s32 modelId, ParticleModelRef *ref, void *particle) {
     s32 found;
     s32 size;
 
-    ref->model = (s32 *)asset_load_with_subfiles(&found, 0, &size, 2, 9, D_800A3C60[modelId]);
+    ref->model = (s32 *)asset_load_with_subfiles(&found, 0, &size, 2, 9, g_mdl_particle_model_files[modelId]);
     if (ref->model == NULL) {
         return 0;
     }
-    texture_resolve_dl_ids((Gfx *)*ref->model, 0, 1, 0x3E, (s16 **)&D_800DCA70[modelId] /* resolved segment list per model id */);
+    texture_resolve_dl_ids((Gfx *)*ref->model, 0, 1, 0x3E, (s16 **)&g_mdl_particle_model_segs[modelId] /* resolved segment list per model id */);
     gfx_dl_relocate((s8 *)*ref->model, (s32)ref->model);
     return 1;
 }
@@ -682,20 +682,20 @@ s32 mdl_particle_mtx_rot_scale3(s32 arg0, u8 *arg1) {
 
 /* was func_15133D30 */
 s32 mdl_particle_integrate(u8 *arg0) {
-    *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x3C) += (*(f32 *)(arg0 + 0x48) * D_800BE9A4) + (*(f32 *)(arg0 + 0x5C) * D_800BE9A4 * D_800BE9A4 * 0.5f);
-    *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x5C) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x20) += *(f32 *)(arg0 + 0x50) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x24) += *(f32 *)(arg0 + 0x54) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x58) * D_800BE9A4;
+    *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x3C) += (*(f32 *)(arg0 + 0x48) * g_frame_step_f) + (*(f32 *)(arg0 + 0x5C) * g_frame_step_f * g_frame_step_f * 0.5f);
+    *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x5C) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x20) += *(f32 *)(arg0 + 0x50) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x24) += *(f32 *)(arg0 + 0x54) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x58) * g_frame_step_f;
     return 1;
 }
 
 s32 collision_floor_probe(f32 *, s32, f32, u8 *);
 /* landing handlers by +0x73 (entry 0 is NULL); they take (particle, old x, old y, old z, floor height, floor info),
    several are declared with s32 / fewer parameters (o32 passes them alike; the port's icall layer converts) */
-extern s32 (*D_80089CD4[])(u8 *, f32, f32, f32, f32, u8 *);
+extern s32 (*g_mdl_particle_land_fns[])(u8 *, f32, f32, f32, f32, u8 *); /* was D_80089CD4 */
 
 // particle_fall_update: moves the particle (mdl_particle_integrate). When it has gravity (+0x60 bit 0), a landing kind (+0x73)
 // and moved down, it probes the floor from the old height (+0x10 offset) down to the new one (collision_floor_probe, floor
@@ -725,14 +725,14 @@ s32 mdl_particle_fall_update(u8 *p) {
                 skip = TRUE;
             }
             if (!skip) {
-                keep = D_80089CD4[p[0x73]](p, old[0], old[1], old[2], *(f32 *) (p + 0x110), p + 0x114);
+                keep = g_mdl_particle_land_fns[p[0x73]](p, old[0], old[1], old[2], *(f32 *) (p + 0x110), p + 0x114);
             }
         }
     }
     return keep;
 }
 
-/* P317: D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 are unused, the code is unchanged */
+/* P317: g_mdl_particle_land_fns's dispatcher type (wasm call_indirect); args 1..3 / 5 are unused, the code is unchanged */
 /* was func_15133F44 */
 s32 mdl_particle_land_bounce(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     f32 temp_f0;
@@ -747,7 +747,7 @@ s32 mdl_particle_land_bounce(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u
     return 1;
 }
 
-/* P317: D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 are unused, the code is unchanged */
+/* P317: g_mdl_particle_land_fns's dispatcher type (wasm call_indirect); args 1..3 / 5 are unused, the code is unchanged */
 /* was func_15133FC0 */
 s32 mdl_particle_land_stop(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     *(f32 *)(arg0 + 0x3C) = *(f32 *)(arg0 + 0x10) + arg4;
@@ -761,7 +761,7 @@ s32 mdl_particle_land_stop(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 
 }
 
 /* P241: readable C for mdl_particle_mtx_attach_bone (game_eu_15FF50, 65 insns). */
-// attached_bone_matrix: entry 5 of D_80089D2C (dispatcher mdl_particle_update_matrix: -1 ends the object, 0 hides it, 1 shows
+// attached_bone_matrix: entry 5 of g_mdl_particle_mtx_fns (dispatcher mdl_particle_update_matrix: -1 ends the object, 0 hides it, 1 shows
 // it): copies bone obj[0x170] of the target object (+0x7C) into mtx. -1 when the target is gone (NULL, word +0 is 0,
 // byte +4 is 0xFF or its id +0x3B no longer matches obj +0x80); 0 when the target has no bone matrices (+0x1D4) or
 // its +0x74 low nibble is 0xF. The bone list holds Mtx (D_800C42B0 set: copied as is) or float matrices (made affine:
@@ -853,7 +853,7 @@ void mdl_particle_kill_on_target_msg(struct102 *arg0, s32 *arg1, u8 arg2) {
 
 /* was func_151343AC */
 void mdl_particle_broadcast(s32 arg0, u8 arg1) {
-    struct_eu_s32x2 sp18 = D_800A3C40;
+    struct_eu_s32x2 sp18 = g_mdl_particle_bcast_types;
     node_broadcast_types(&sp18, 2, arg0, arg1);
 }
 
@@ -884,7 +884,7 @@ s32 *gfx_emit_sprite_tex_segment(u8 *arg0, u16 arg1, u8 arg2, s32 arg3) {
     s32 var_a0;
     struct_eu_80090F10 *temp_v0;
 
-    temp_v0 = &D_80090F10[arg1];
+    temp_v0 = &g_sprite_textures[arg1];
     sp.u3B = temp_v0->padA[0];
     sp.u3A = temp_v0->padA[1];
     temp_v0_2 = texture_cache_lookup(*(*(s32 **)((u8 *)temp_v0 + 0)), &sp.u30, arg3, 0);

@@ -3,22 +3,22 @@ s/obj\[0x25\] \* 0x20 + 0xA0, (s32 \*) \&v, NULL);/obj[0x25] * 0x20 + 0x80, (s32
 s/    if (v == NULL) {/    if (v == (u8 *) 1) {/ % nov
 s/    mode = d->u42 \& 0xF;/    mode = d->u42 \& 0x7;/ % plain
 s/    comb = (d->u42 \& 0xF0) >> 4;/    comb = d->u42 \& 0xF0;/ % plain
-s/    sinV = D_800DD608\[view\];/    sinV = D_800DD608[0];/ % view1
-s/    cosV = D_800DD618\[view\];/    cosV = D_800DD608[view];/ % plain
+s/    sinV = g_view_yaw_sin\[view\];/    sinV = g_view_yaw_sin[0];/ % view1
+s/    cosV = g_view_yaw_cos\[view\];/    cosV = g_view_yaw_sin[view];/ % plain
 s/    if (d->u60 == 2) {/    if (d->u60 != 2) {/ % plain swap
-s/    gfx = gfx_load_texture_cached(gfx, \&D_80090F10\[d->u41\], 0, 0, 0, 0, d->u41, 0, 0, \&flag, 3);/    gfx = gfx_load_texture_cached(gfx, \&D_80090F10[d->u41], 0, 0, 0, 0, d->u41, 0, 0, \&flag, 2);/ % plain
+s/    gfx = gfx_load_texture_cached(gfx, \&g_sprite_textures\[d->u41\], 0, 0, 0, 0, d->u41, 0, 0, \&flag, 3);/    gfx = gfx_load_texture_cached(gfx, \&g_sprite_textures[d->u41], 0, 0, 0, 0, d->u41, 0, 0, \&flag, 2);/ % plain
 s/    gfx = gfx_env_color_cached(gfx, d->u28, d->u28, d->u28, 0xFF, \&flag);/    gfx = gfx_env_color_cached(gfx, d->u28, d->u28, d->u41, 0xFF, \&flag);/ % plain
 s/    gfx = gfx_geometry_mode_cached(gfx, 1, 0x160600);/    gfx = gfx_geometry_mode_cached(gfx, 1, 0x160601);/ % plain
-s/    gfx = (s32) gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, g_render_mode_pairs\[mode \* 2 + 1\] | g_render_mode_pairs\[mode \* 2\],/    gfx = (s32) gfx_other_mode_cached(gfx, D_800D30BC | 0x2CA0, g_render_mode_pairs[mode * 2 + 1] | g_render_mode_pairs[mode * 2],/ % plain
+s/    gfx = (s32) gfx_other_mode_cached(gfx, g_gfx_tlut_mode | 0x80000 | 0x2CA0, g_render_mode_pairs\[mode \* 2 + 1\] | g_render_mode_pairs\[mode \* 2\],/    gfx = (s32) gfx_other_mode_cached(gfx, g_gfx_tlut_mode | 0x2CA0, g_render_mode_pairs[mode * 2 + 1] | g_render_mode_pairs[mode * 2],/ % plain
 s/    if (\*(u16 \*) (obj + 0x1E) \& 2) {/    if (*(u16 *) (obj + 0x1E) \& 4) {/ % emit0
 s/        hy = \*(f32 \*) (obj + 0x14);/        hy = *(f32 *) (obj + 0x10);/ % emit
 s/        sPrev = sCur;$/        sPrev = 0;/ % emit
 s/        i = k - 1;/        i = k - 2;/ % plain
 s/        sPrev = head\[0x16\];/        sPrev = p[0x16];/ % plain
 s/    FOUNTAIN_VTX(w \* cosV + hx, hy, hz - w \* sinV, sPrev << 6, 0, \*(s16 \*) (head + 0x14));/    FOUNTAIN_VTX(w * cosV + hx, hy, hz + w * sinV, sPrev << 6, 0, *(s16 *) (head + 0x14));/ % plain
-s/    FOUNTAIN_VTX(hx - w \* cosV, hy, w \* sinV + hz, sPrev << 6, (D_80090F10\[d->u41\].unk6 - 1) << 6,/    FOUNTAIN_VTX(hx - w * cosV, hy, w * sinV + hz, sPrev << 6, (D_80090F10[d->u41].unk8 - 1) << 6,/ % plain
+s/    FOUNTAIN_VTX(hx - w \* cosV, hy, w \* sinV + hz, sPrev << 6, (g_sprite_textures\[d->u41\].unk6 - 1) << 6,/    FOUNTAIN_VTX(hx - w * cosV, hy, w * sinV + hz, sPrev << 6, (g_sprite_textures[d->u41].unk8 - 1) << 6,/ % plain
 s/        FOUNTAIN_VTX(w \* cosV + px, py, pz - w \* sinV, sCur << 6, 0, \*(s16 \*) (p + 0x14));/        FOUNTAIN_VTX(w * cosV + px, py, pz - w * sinV, sCur << 5, 0, *(s16 *) (p + 0x14));/ % plain
-s/        FOUNTAIN_VTX(px - w \* cosV, py, w \* sinV + pz, sCur << 6, (D_80090F10\[d->u41\].unk6 - 1) << 6,/        FOUNTAIN_VTX(px - w * sinV, py, w * sinV + pz, sCur << 6, (D_80090F10[d->u41].unk6 - 1) << 6,/ % plain
+s/        FOUNTAIN_VTX(px - w \* cosV, py, w \* sinV + pz, sCur << 6, (g_sprite_textures\[d->u41\].unk6 - 1) << 6,/        FOUNTAIN_VTX(px - w * sinV, py, w * sinV + pz, sCur << 6, (g_sprite_textures[d->u41].unk6 - 1) << 6,/ % plain
 s/                     \*(s16 \*) (p + 0x14));/                     *(s16 *) (head + 0x14));/ % plain
 s/        ((s32 \*) gfx)\[1\] = (s32) (v - 0x40);/        ((s32 *) gfx)[1] = (s32) (v - 0x20);/ % plain
 s/        ((s32 \*) gfx)\[0\] = 0x05020604; \/\* gSP1Triangle(1, 3, 2) \*\//        ((s32 *) gfx)[0] = 0x05020406;/ % plain

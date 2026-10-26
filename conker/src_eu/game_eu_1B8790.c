@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-extern s32 D_8008D960;
+extern s32 g_timed_queue_fns; /* was D_8008D960 */
 /* was func_1518AF80 */
 void timed_queue_tick(u8 *arg0) {
     struct102 *n;
@@ -25,14 +25,14 @@ void timed_queue_tick(u8 *arg0) {
             }
             k = *(u8 *)((u8 *)a2 + 0x1C);
             if (k != 0) {
-                ((void (**)(s32))&D_8008D960)[k](*(s32 *)((u8 *)a2 + 0x10));
+                ((void (**)(s32))&g_timed_queue_fns)[k](*(s32 *)((u8 *)a2 + 0x10));
             }
             node_destroy(a2);
             *(s32 *)(arg0 + 0x1C) = *(s32 *)(arg0 + 0x1C) - 1;
             return;
         }
         if (*(u8 *)(arg0 + 0x24) & 1) {
-            *(s16 *)(arg0 + 0x22) = h - D_800BE9E4;
+            *(s16 *)(arg0 + 0x22) = h - g_frame_ticks;
         }
     }
 }
@@ -79,12 +79,12 @@ s32 timed_queue_push(u8 *arg0, s32 arg1, u8 arg2) {
     u8 *nx;
     u8 k;
     if (arg0 == NULL) {
-        if (arg2 != 0) { ((void (**)(s32))&D_8008D960)[arg2](arg1); }
+        if (arg2 != 0) { ((void (**)(s32))&g_timed_queue_fns)[arg2](arg1); }
         return 0;
     }
     n = timed_queue_item_alloc(arg1, arg2);
     if (n == NULL) {
-        if (arg2 != 0) { ((void (**)(s32))&D_8008D960)[arg2](arg1); }
+        if (arg2 != 0) { ((void (**)(s32))&g_timed_queue_fns)[arg2](arg1); }
         return 0;
     }
     *(u8 **)(n + 0x14) = *(u8 **)(arg0 + 0x10);
@@ -110,7 +110,7 @@ s32 timed_queue_push(u8 *arg0, s32 arg1, u8 arg2) {
         }
         k = *(u8 *)(a1 + 0x1C);
         if (k != 0) {
-            ((void (**)(s32))&D_8008D960)[k](*(s32 *)(a1 + 0x10));
+            ((void (**)(s32))&g_timed_queue_fns)[k](*(s32 *)(a1 + 0x10));
         }
         node_destroy(a1);
     }

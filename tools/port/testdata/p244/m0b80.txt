@@ -4,7 +4,7 @@
 /^Gfx \*view_border_clear(Gfx \*gdl,/,/^}/s/0x78) == 3/0x78) != 3/ % l31y l31n
 /^Gfx \*view_border_clear(Gfx \*gdl,/,/^}/s/+ 0x78)/+ 0x79)/ % l31y
 /^Gfx \*view_border_clear(Gfx \*gdl,/,/^}/s/gdl, 2, 0,/gdl, 0, 0,/ % l1B
-/^Gfx \*view_border_clear(Gfx \*gdl,/,/^}/s/D_800BE620 - 2/D_800BE620 - 1/ % l1B
-/^Gfx \*view_border_clear(Gfx \*gdl,/,/^}/s/D_800DC2D8\[1\], D_800DC2D8\[2\]/D_800DC2D8[2], D_800DC2D8[1]/ % l1B
+/^Gfx \*view_border_clear(Gfx \*gdl,/,/^}/s/g_framebuffer_width - 2/g_framebuffer_width - 1/ % l1B
+/^Gfx \*view_border_clear(Gfx \*gdl,/,/^}/s/g_level_bg_colour\[1\], g_level_bg_colour\[2\]/g_level_bg_colour[2], g_level_bg_colour[1]/ % l1B
 /^Gfx \*view_border_clear(Gfx \*gdl,/,/^}/s/    return gdl;/    return 0;/ % l1B
 /^Gfx \*view_border_clear(Gfx \*gdl,/,/^}/s/|| g_level_id == 0x1E/\&\& g_level_id == 0x1E/ % l1B

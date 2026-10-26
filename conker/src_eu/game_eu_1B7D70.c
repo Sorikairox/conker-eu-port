@@ -21,10 +21,10 @@ s32 bone_effect_spawn(s32 arg0, u8 *arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5, 
     return 0;
 }
 /* P143 */
-extern s32 (*D_8008D940[])(u8 *, u8 *, s32);
+extern s32 (*g_bone_fx_visibility_fns[])(u8 *, u8 *, s32); /* was D_8008D940 */
 // effect_follow_bone: update handler (g_effect3d_update_fns slot 2) that keeps an effect attached to a model bone. The
 // attachment at +0x170 holds two local points (+0x170, +0x17C), the model (+0x188, looked up once from the id
-// +0x18D with obj_find_by_setup_id), the bone (+0x18C) and an optional visibility check (+0x18E, index into D_8008D940,
+// +0x18D with obj_find_by_setup_id), the bone (+0x18C) and an optional visibility check (+0x18E, index into g_bone_fx_visibility_fns,
 // -1 = none). Ends (0) when the model is missing, gone (+0) or reused for another id (+0x3B); a failing check also
 // ends it, a hidden one (*visible == 0) skips the update. With bone matrices (+0x1D4) both points are transformed
 // to +0x34 and +0x40 and flag 2 set (flag 4 cleared); without them flag 2 is cleared.
@@ -50,7 +50,7 @@ s32 effect_follow_bone(u8 *fx) {
     }
     check = *(s8 *)(att + 0x1E);
     if (check != -1) {
-        if (D_8008D940[check](fx, &visible, check) == 0) {
+        if (g_bone_fx_visibility_fns[check](fx, &visible, check) == 0) {
             return 0;
         }
         if (!visible) {
@@ -73,9 +73,9 @@ s32 effect_follow_bone(u8 *fx) {
     return 1;
 }
 
-extern f32 D_800A77A0;
-extern f32 D_800A77A4;
-extern f32 D_800A77A8;
+extern f32 g_bone_fx_scale_default; /* was D_800A77A0 */
+extern f32 g_bone_fx_scale_state1; /* was D_800A77A4 */
+extern f32 g_bone_fx_scale_state2; /* was D_800A77A8 */
 /* was func_1518A784 */
 s32 bone_effect_check_model_state(u8 *arg0, u8 *arg1) {
     s32 off; // fakematch: offset in a variable keeps v = arg0 + 0x110 in a register
@@ -85,7 +85,7 @@ s32 bone_effect_check_model_state(u8 *arg0, u8 *arg1) {
     off = 0x110;
     switch (*(u8 *)(*(u8 **)(arg0 + 0x188) + 0x68) - 0xF) {
     default:
-        f = D_800A77A0;
+        f = g_bone_fx_scale_default;
         v = arg0 + off;
         *(f32 *)(v + 0x18) = f;
         *(f32 *)(v + 0x1C) = f;
@@ -99,7 +99,7 @@ s32 bone_effect_check_model_state(u8 *arg0, u8 *arg1) {
         *arg1 = 0;
         break;
     case 1:
-        f = D_800A77A4;
+        f = g_bone_fx_scale_state1;
         v = arg0 + off;
         *(f32 *)(v + 0x18) = f;
         *(f32 *)(v + 0x1C) = f;
@@ -109,7 +109,7 @@ s32 bone_effect_check_model_state(u8 *arg0, u8 *arg1) {
         *arg1 = 1;
         break;
     case 2:
-        f = D_800A77A8;
+        f = g_bone_fx_scale_state2;
         v = arg0 + off;
         *(f32 *)(v + 0x18) = f;
         *(f32 *)(v + 0x1C) = f;

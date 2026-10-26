@@ -51,7 +51,7 @@ void lipsync_update_mouth(u8 *arg0) {
             }
         } else if (D_80042B90 >= 0x3E9) {
             var_v1 = D_800D1D4C + 1;
-            if (((*(u8 *)((u8 *)arg0 + 0x135)) - D_800BE9E4) < 0) {
+            if (((*(u8 *)((u8 *)arg0 + 0x135)) - g_frame_ticks) < 0) {
                 if (var_v1 >= 5) {
                     var_v1 = 0;
                 }

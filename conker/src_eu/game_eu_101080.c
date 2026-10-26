@@ -84,21 +84,21 @@ s32 object_get_beam_ends(u8 *arg0, u8 *arg1, struct127 *arg2, s32 arg3);
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
 s32 memcpy(u8 *, u8 *, s32);
 s32 rocket_sound_update(u8 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *slot, u16 *sound);
-extern u8 D_800A0D90[]; /* 4 s32 texture ids (0x60..0x63) */
-extern f32 D_800A0DB8;
-extern f32 D_800A0DBC;
-extern f32 D_800A0DC0;
-extern f32 D_800A0DC4;
-extern f32 D_800A0DC8;
-extern f32 D_800A0DCC;
-extern f32 D_800A0DD0;
+extern u8 g_fire_sprites[]; /* 4 s32 texture ids (0x60..0x63); was D_800A0D90 */
+extern f32 g_fire_emit1_scale; /* was D_800A0DB8 */
+extern f32 g_fire_emit1_u18; /* was D_800A0DBC */
+extern f32 g_fire_emit1_u1c; /* was D_800A0DC0 */
+extern f32 g_fire_emit1_u20; /* was D_800A0DC4 */
+extern f32 g_fire_emit2_scale; /* was D_800A0DC8 */
+extern f32 g_fire_emit2_u1c; /* was D_800A0DCC */
+extern f32 g_fire_emit2_u20; /* was D_800A0DD0 */
 
 // object_fire_spawn: creates the burning-effect object for `obj` (attachment_apply_kind_effects): takes effect handle 0x79 (0x7A when
 // obj->id is 0x48) with attachment_find_by_slot (none: return); the effect position and direction come from object_get_beam_ends (flag 4
 // set when it found them; else (0, 0, 0) and (0, 500, 0)); fxrec_spawn (0x20, 0x14) creates the object, whose data
 // (+0x98) gets {obj, room, 1, handle, emitters, 20, 20}. Starts the looping sounds 0x5B3 (sound level < 5), 0x5B4 and
 // 0x5BC (level < 7 or obj +0x318 set) at the object's position with callback rocket_sound_update, and two emitters
-// (particle_emitter_spawn: texture 0x15 set 0x5503, and a random texture of D_800A0D90 set 0x2203 with +0x170 = {0, 1.0}),
+// (particle_emitter_spawn: texture 0x15 set 0x5503, and a random texture of g_fire_sprites set 0x2203 with +0x170 = {0, 1.0}),
 // stored in the data. kind (u8) and owner go to every spawn. Returns 0 (the asm leaves a leftover v0; the callers,
 // attachment_apply_kind_effects (asm) and game_eu_5D910's C, do not read it).
 /* was func_150D3870 */
@@ -150,13 +150,13 @@ s32 object_fire_spawn(struct127 *obj, u8 kind, s32 owner) {
     }
     data = *(Data3870 **) (newobj + 0x98);
     memcpy((u8 *) data, (u8 *) &blk, sizeof(Data3870));
-    if (D_8008FD8C < 5) {
+    if (g_player_count < 5) {
         sfx_emitter_start(0x5B3, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
                       (s32) &rocket_sound_update, data, 0x5B3, 12, 0);
     }
     sfx_emitter_start(0x5B4, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
                   (s32) &rocket_sound_update, data, 0x5B4, 12, 0);
-    if (D_8008FD8C < 7 || *(s32 *) ((u8 *) obj + 0x318) != 0) {
+    if (g_player_count < 7 || *(s32 *) ((u8 *) obj + 0x318) != 0) {
         sfx_emitter_start(0x5BC, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
                       (s32) &rocket_sound_update, data, 0x5BC, 12, 0);
     }
@@ -165,11 +165,11 @@ s32 object_fire_spawn(struct127 *obj, u8 kind, s32 owner) {
     emit1.u04 = 40.0f;
     emit1.u08 = 40.0f;
     emit1.u0C = 40.0f;
-    emit1.u10 = D_800A0DB8;
-    emit1.u14 = D_800A0DB8;
-    emit1.u18 = D_800A0DBC;
-    emit1.u1C = D_800A0DC0;
-    emit1.u20 = D_800A0DC4;
+    emit1.u10 = g_fire_emit1_scale;
+    emit1.u14 = g_fire_emit1_scale;
+    emit1.u18 = g_fire_emit1_u18;
+    emit1.u1C = g_fire_emit1_u1c;
+    emit1.u20 = g_fire_emit1_u20;
     emit1.u24[0] = -1;
     emit1.u24[4] = -1;
     emit1.u24[1] = -1;
@@ -226,11 +226,11 @@ s32 object_fire_spawn(struct127 *obj, u8 kind, s32 owner) {
     emit2.u04 = 45.0f;
     emit2.u08 = 25.5f;
     emit2.u0C = 25.5f;
-    emit2.u10 = D_800A0DC8;
-    emit2.u14 = D_800A0DC8;
+    emit2.u10 = g_fire_emit2_scale;
+    emit2.u14 = g_fire_emit2_scale;
     emit2.u18 = 1.0f;
-    emit2.u1C = D_800A0DCC;
-    emit2.u20 = D_800A0DD0;
+    emit2.u1C = g_fire_emit2_u1c;
+    emit2.u20 = g_fire_emit2_u20;
     emit2.u24[0] = -1;
     emit2.u24[4] = -1;
     emit2.u24[1] = -1;
@@ -251,7 +251,7 @@ s32 object_fire_spawn(struct127 *obj, u8 kind, s32 owner) {
     emit2.u54[3] = 0;
     emit2.u58 = 0;
     emit2.u59 = -1;
-    spec2.texture = ((s32 *) D_800A0D90)[random_int() & 3];
+    spec2.texture = ((s32 *) g_fire_sprites)[random_int() & 3];
     spec2.u01 = 3;
     spec2.texSet = 0x2203;
     spec2.life = 300;
@@ -302,16 +302,16 @@ typedef struct {
     /* 0x10 */ f32 u10;
 } Point3F78;
 
-// track_follow_record: entry 13 of D_8008A5DC (`s32 (*)(u8 *)`, 0 = drop). State = +0x98 {target, byte 4 = the
+// track_follow_record: entry 13 of g_fxrec_emit_fns (`s32 (*)(u8 *)`, 0 = drop). State = +0x98 {target, byte 4 = the
 // target's +0x3B, byte 5 = speed class, word 8, links +0xC / +0x10, f32 +0x14 eased towards +0x18}. Returns 0 when
-// the target has gone (no word 0) or changed (+0x3B). With D_800BE9E4 > 0: moves the position (+0x10) with
+// the target has gone (no word 0) or changed (+0x3B). With g_frame_ticks > 0: moves the position (+0x10) with
 // object_get_beam_ends (result 0: clears link flag 2 and own flag 4, returns 1; 1: on first contact (flag 4) restarts the
 // step from here, copies the position and object_get_beam_ends's direction to both links (+0x34 / +0x40) and sets their flag
 // 2, clears 4; 2: first contact as 1, links lose flag 2), records position + step length + 100 in the +0x94 ring
 // (write index +0x2E, count +0x2C, read index +0x2D, size +0x25), then picks the speed class from the target's
 // +0x31C (record byte 0x84: target speed +0x44 > 6 / > 3; else the player slot's lean (*D_800BE728)[i] byte 3 > 20 /
 // < -20) and sets the goal +0x18 (50 / 10 / 20) and link +0x10's +0x174 (2.1 / 0.2 / 1); class 0 newly reached
-// spawns smoke_puff_burst dust (surface from motion_track_get_delta or D_800A5860). Always eases +0x14 by 0.35.
+// spawns smoke_puff_burst dust (surface from motion_track_get_delta or g_vec3_zero). Always eases +0x14 by 0.35.
 /* was func_150D3F78 */
 s32 track_follow_record(u8 *obj) {
     Point3F78 *ring = *(Point3F78 **) (obj + 0x94);
@@ -333,7 +333,7 @@ s32 track_follow_record(u8 *obj) {
     if (*(s32 *) tgt == 0 || st[4] != tgt[0x3B]) {
         return 0;
     }
-    if (D_800BE9E4 > 0) {
+    if (g_frame_ticks > 0) {
         pos = (f32 *) (obj + 0x10);
         old[0] = pos[0];
         old[1] = pos[1];
@@ -448,7 +448,7 @@ s32 track_follow_record(u8 *obj) {
                 *(f32 *) (st + 0x18) = 50.0f;
                 if (st[5] != prev) {
                     if (motion_track_get_delta((s32) tgt, (s32 *) &surface, tgt) == 0) {
-                        surface = (f32 *) D_800A5860;
+                        surface = (f32 *) g_vec3_zero;
                     }
                     smoke_puff_burst(pos, surface, *(f32 *) (tgt + 0x40), obj[0xC], obj[1]);
                 }
@@ -511,7 +511,7 @@ s32 track_trail_update(u8 *arg0) {
         } else {
             var_f2 = 0.0f;
         }
-    } else if (D_800DBFF0->unk5F0 & 4) {
+    } else if (g_player_views->unk5F0 & 4) {
         var_f2 = 0.0f;
     } else {
         var_f2 = 128.0f;
@@ -593,8 +593,8 @@ s32 gfx_env_color_cached(s32, s32, s32, s32, s32, s8 *);
 s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
 u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
-extern s32 D_800914B0;
-extern s32 D_800D30BC;
+extern s32 g_glow_trail_texture; /* was D_800914B0 */
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 /* was func_150D4810 */
 u8 *track_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
@@ -712,7 +712,7 @@ u8 *track_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
             sp.uEB = 1;
             sp.u118 = temp_v0;
             temp_v1_2 = ((u8 *)&g_render_mode_pairs);
-            var_s0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_env_color_cached(gfx_load_texture_cached(var_s0, &D_800914B0, 0, 0, 0, 0, 0x78, 0, 0, &sp.uEB, 0x3E), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uEB), 0x200005, 0x1F0600), 0x55, &sp.uEB), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1_2 + 0x1C)) | (*(s32 *)((u8 *)temp_v1_2 + 0x18)), &sp.uEB);
+            var_s0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_env_color_cached(gfx_load_texture_cached(var_s0, &g_glow_trail_texture, 0, 0, 0, 0, 0x78, 0, 0, &sp.uEB, 0x3E), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uEB), 0x200005, 0x1F0600), 0x55, &sp.uEB), g_gfx_tlut_mode | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1_2 + 0x1C)) | (*(s32 *)((u8 *)temp_v1_2 + 0x18)), &sp.uEB);
             var_a0 = (*(s8 *)((u8 *)arg0 + 0x2E)) - 1;
             if (var_a0 < 0) {
                 var_a0 = (*(u8 *)((u8 *)arg0 + 0x25)) - 1;
@@ -880,11 +880,11 @@ void object_fire_message(u8 *obj, u8 *msg, u8 event) {
 }
 
 s32 model_node_points_to_world(struct127 *, s32, s32, void **, void **, s32);
-extern s32 D_800A0DA0;
-extern s32 D_800A0DAC;
+extern s32 g_fire_beam_pt_a; /* was D_800A0DA0 */
+extern s32 g_fire_beam_pt_b; /* was D_800A0DAC */
 
 // object_get_beam_ends: the two end points of the object's beam: with a model (arg2->unk1D4) the positions of the
-// two named joints D_800A0DA0 / D_800A0DAC (model_node_points_to_world, 2 lookups, result 1 on success, else 0); without one,
+// two named joints g_fire_beam_pt_a / g_fire_beam_pt_b (model_node_points_to_world, 2 lookups, result 1 on success, else 0); without one,
 // the object position + 100 and + 600 in y (result 2). P124: the joint name / output lists are 2-element arrays
 // (m2c had 4 separate locals and passed the address of the first of each pair).
 /* was func_150D4FF0 */
@@ -893,8 +893,8 @@ s32 object_get_beam_ends(u8 *arg0, u8 *arg1, struct127 *arg2, s32 arg3) {
     void *outs[2];
 
     if (arg2->unk1D4 != NULL) {
-        names[0] = &D_800A0DA0;
-        names[1] = &D_800A0DAC;
+        names[0] = &g_fire_beam_pt_a;
+        names[1] = &g_fire_beam_pt_b;
         outs[0] = arg0;
         outs[1] = arg1;
         if (model_node_points_to_world(arg2, arg3, 0, names, outs, 2) != 0) {
@@ -933,7 +933,7 @@ void object_fire_cleanup(u8 *arg0) {
     u8 *temp_s0;
 
     temp_s0 = (*(u8 **)((u8 *)arg0 + 0x98));
-    if (D_8008FD8C < 5) {
+    if (g_player_count < 5) {
         sfx_emitter_stop_by_callback((s32) &rocket_sound_update, (s32) temp_s0, 0x5B3);
     }
     sp20 = (s32 *) &rocket_sound_update;
@@ -948,29 +948,29 @@ void object_fire_cleanup(u8 *arg0) {
         node_destroy(temp_a0_2);
     }
 }
-extern f32 D_800A0DE4;
-extern u8 D_800A0D90[];
+extern f32 g_fire_flicker_smooth; /* was D_800A0DE4 */
+extern u8 g_fire_sprites[]; /* was D_800A0D90 */
 /* was func_150D51D4 */
 s32 fire_emitter_flicker(u8 *arg0)
 {
   u8 *temp_v1;
-  *(s16 *)(arg0 + 0x170) -= D_800BE9E4;
+  *(s16 *)(arg0 + 0x170) -= g_frame_ticks;
   temp_v1 = arg0 + 0x110;
   if (*(s16 *)(arg0 + 0x170) < 0) {
-    arg0[0x18] = *(s32 *)&D_800A0D90[(random_int() & 3) * 4];
+    arg0[0x18] = *(s32 *)&g_fire_sprites[(random_int() & 3) * 4];
     *(s16 *)(arg0 + 0x170) = (random_int() & 7) + 3;
   }
-  *(f32 *)(temp_v1 + 0x48) += (*(f32 *)(arg0 + 0x174) - *(f32 *)(temp_v1 + 0x48)) * D_800A0DE4;
+  *(f32 *)(temp_v1 + 0x48) += (*(f32 *)(arg0 + 0x174) - *(f32 *)(temp_v1 + 0x48)) * g_fire_flicker_smooth;
   return 1;
 }
 
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 void vec3_from_angles_byte(s16, s16, f32, void *);
-extern f32 D_800A0DE8;
-extern f32 D_800A0DEC;
-extern f32 D_800A0DF0;
-extern f32 D_800A0DF4;
-extern f32 D_800A0DF8;
+extern f32 g_smoke_deg_to_binang; /* was D_800A0DE8 */
+extern f32 g_smoke_puff_drag_base; /* was D_800A0DEC */
+extern f32 g_smoke_puff_drag_rand; /* was D_800A0DF0 */
+extern f32 g_smoke_puff_u54_rand; /* was D_800A0DF4 */
+extern f32 g_smoke_puff_u54_base; /* was D_800A0DF8 */
 
 /* particle_spawn_ex's sprite particle template (the emit_particle_burst_req layout; +0x68.. is not filled here) */
 typedef struct {
@@ -1002,8 +1002,8 @@ typedef struct {
 } SprTmpl5268;
 
 // smoke_puff_burst: spawns 10..20 smoke sprites (particle_spawn_ex, room / owner from arg3 / arg4) at pos. Each gets a
-// random sprite of D_800A0D90, life 27..44, alpha 100..255, size 199..432 and a velocity from vec3_from_angles_byte (yaw
-// around the scaled heading byte (s16) (scale * D_800A0DE8) >> 8 + 0x40 plus 0..129, pitch -64..16, speed 5..15)
+// random sprite of g_fire_sprites, life 27..44, alpha 100..255, size 199..432 and a velocity from vec3_from_angles_byte (yaw
+// around the scaled heading byte (s16) (scale * g_smoke_deg_to_binang) >> 8 + 0x40 plus 0..129, pitch -64..16, speed 5..15)
 // minus the source's horizontal velocity (vel x / z) times a random drag; random flip flags 0x40 / 0x80.
 /* was func_150D5268 */
 void smoke_puff_burst(f32 *pos, f32 *vel, f32 scale, u8 room, s32 owner) {
@@ -1033,9 +1033,9 @@ void smoke_puff_burst(f32 *pos, f32 *vel, f32 scale, u8 room, s32 owner) {
     t.pos[0] = pos[0];
     t.pos[1] = pos[1];
     t.pos[2] = pos[2];
-    t.u3C[0] = ((f32 *) D_800A5860)[0];
-    t.u3C[1] = ((f32 *) D_800A5860)[1];
-    t.u3C[2] = ((f32 *) D_800A5860)[2];
+    t.u3C[0] = ((f32 *) g_vec3_zero)[0];
+    t.u3C[1] = ((f32 *) g_vec3_zero)[1];
+    t.u3C[2] = ((f32 *) g_vec3_zero)[2];
     t.u1E = 10;
     t.u20 = 0x19;
     t.u60[1] = 7;
@@ -1049,10 +1049,10 @@ void smoke_puff_burst(f32 *pos, f32 *vel, f32 scale, u8 room, s32 owner) {
     t.u5C = 0;
     t.u60[6] = 0xFF;
     t.u24 = 1.0f;
-    yaw = ((s16) (s32) (scale * D_800A0DE8) >> 8) + 0x40;
+    yaw = ((s16) (s32) (scale * g_smoke_deg_to_binang) >> 8) + 0x40;
     do {
-        drag = random_float() * D_800A0DF0 + D_800A0DEC;
-        t.sprite = ((s32 *) D_800A0D90)[random_int() & 3];
+        drag = random_float() * g_smoke_puff_drag_rand + g_smoke_puff_drag_base;
+        t.sprite = ((s32 *) g_fire_sprites)[random_int() & 3];
         t.life = (u32) random_int() % 18 + 27;
         t.colour[7] = (u32) random_int() % 156 + 100;
         t.size[0] = t.size[1] = random_float() * 233.0f + 199.0f;
@@ -1061,7 +1061,7 @@ void smoke_puff_burst(f32 *pos, f32 *vel, f32 scale, u8 room, s32 owner) {
         vec3_from_angles_byte(r1 % 130 + yaw, r2 % 81 - 0x40, random_float() * 10.0f + 5.0f, t.vel);
         t.vel[0] -= vel[0] * drag;
         t.vel[2] -= vel[2] * drag;
-        t.u54 = random_float() * D_800A0DF4 + D_800A0DF8;
+        t.u54 = random_float() * g_smoke_puff_u54_rand + g_smoke_puff_u54_base;
         t.mode &= ~0xC0;
         bit80 = (random_int() & 1) ? 0x80 : 0;
         bit40 = (random_int() & 1) ? 0x40 : 0;
@@ -1075,8 +1075,8 @@ void smoke_puff_burst(f32 *pos, f32 *vel, f32 scale, u8 room, s32 owner) {
 // and pitch per id: 0x5B3 follows the speed of data->obj (f32 +0x28): volume speed*25 (0 below 500, capped at 5000),
 // pitch speed*5 (capped at 1000); state (data +5) 1 or 2 adds 7000 to the volume (1 also sets pitch 400); another
 // state sets pitch 400 and jumps the volume to its target. 0x5BC: state 0 -> 24000 at once, else 400. 0x5B4: state
-// 0 -> 16000 at once with pitch 400; 1 (or D_8008FD8C >= 5) -> 12000; else 0 with pitch 400. Volume (+0xC) and pitch
-// (*pitch) move towards their targets by D_800BE9E4 * 256 a frame (pitch down by * 8). Below 500 the volume is 0;
+// 0 -> 16000 at once with pitch 400; 1 (or g_player_count >= 5) -> 12000; else 0 with pitch 400. Volume (+0xC) and pitch
+// (*pitch) move towards their targets by g_frame_ticks * 256 a frame (pitch down by * 8). Below 500 the volume is 0;
 // otherwise a voice without a sound restarts its id (+0 and *sound). Follows data->obj's position (+2/+4/+6), halves
 // the volume (and *vol) in mode D_800C35EA == 1, stores the pitch (+0x20). When *vol is 0 it stops the playing sound
 // (+0x24) and clears *sound. Returns 0.
@@ -1129,7 +1129,7 @@ s32 rocket_sound_update(u8 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *sl
             target = 16000;
             targetPitch = 400;
             cur = 16000;
-        } else if (data->u05 == 1 || D_8008FD8C >= 5) {
+        } else if (data->u05 == 1 || g_player_count >= 5) {
             target = 12000;
         } else {
             targetPitch = 400;
@@ -1138,12 +1138,12 @@ s32 rocket_sound_update(u8 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *sl
 
     if (cur != target) {
         if (cur < target) {
-            cur += D_800BE9E4 << 8;
+            cur += g_frame_ticks << 8;
             if (cur > target) {
                 cur = target;
             }
         } else {
-            cur -= D_800BE9E4 << 8;
+            cur -= g_frame_ticks << 8;
             if (cur < target) {
                 cur = target;
             }
@@ -1151,12 +1151,12 @@ s32 rocket_sound_update(u8 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *sl
     }
     if (curPitch != targetPitch) {
         if (curPitch < targetPitch) {
-            curPitch += D_800BE9E4 << 8;
+            curPitch += g_frame_ticks << 8;
             if (curPitch > targetPitch) {
                 curPitch = targetPitch;
             }
         } else {
-            curPitch -= D_800BE9E4 << 3;
+            curPitch -= g_frame_ticks << 3;
             if (curPitch < targetPitch) {
                 curPitch = targetPitch;
             }

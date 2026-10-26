@@ -45,8 +45,8 @@ s32 footstep_surface_override(s32 arg0, s32 arg1) {
     return -1;
 }
 
-extern f32 D_800A1840;
-extern f32 D_800A1844;
+extern f32 g_footstep_dust_scale; /* was D_800A1840 */
+extern f32 g_footstep_deg_to_byte; /* was D_800A1844 */
 
 /* was func_150EB610 */
 void footstep_dust_spawn(u8 *arg0, u8 arg1, s32 arg2) {
@@ -60,8 +60,8 @@ void footstep_dust_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     if (*(s32 *)(arg0 + 0x1D4) != 0) {
         id = arg1;
         if (obj_foot_pos_probe_ground(&sp.u4C, arg0, (s32) &sp.u28, arg1) != 0) {
-            fx_spawn_impact_particle(0xA, &sp.u28, (f32)arg2 * D_800A1840,
-                          (u8)(u32)(*(f32 *)(arg0 + 0x40) * D_800A1844), &sp.u4C, id);
+            fx_spawn_impact_particle(0xA, &sp.u28, (f32)arg2 * g_footstep_dust_scale,
+                          (u8)(u32)(*(f32 *)(arg0 + 0x40) * g_footstep_deg_to_byte), &sp.u4C, id);
         }
     }
 }

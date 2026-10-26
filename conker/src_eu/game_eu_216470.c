@@ -26,15 +26,15 @@ Gfx *hud_overlay_draw_post(Gfx *gdl) {
     s32 msg;
     Gfx *(*fn)(Gfx *);
 
-    D_8003C8E0 = 0x09000001;
+    g_dbg_crash_marker = 0x09000001;
     msg = 0;
     gdl = screen_fade_rect_draw(gdl);
-    fn = D_800903A4[D_800E0B94];
+    fn = D_800903A4[g_game_mode];
     if (fn != NULL) {
         gdl = fn(gdl);
     }
     if (D_80000300 == 0) {
-        if (D_800BE616 != 0 && D_80090130 >= 2) {
+        if (D_800BE616 != 0 && g_human_player_count >= 2) {
             if ((D_800BEB60 & 0xF) == 0) {
                 if (D_800E1003 == 1) {
                     msg = 0x33;
@@ -52,15 +52,15 @@ Gfx *hud_overlay_draw_post(Gfx *gdl) {
     }
     if (msg != 0) {
         text_set_color(0xFF, 0xFF, 0xFF, 0xFF);
-        text_printf_at(0x94, 0xC8, 0x81, ((void **)D_800E1008)[msg]);
+        text_printf_at(0x94, 0xC8, 0x81, ((void **)g_text_strings)[msg]);
     }
-    D_8003C8E0 = 0;
+    g_dbg_crash_marker = 0;
     return gdl;
 }
 
 extern Gfx *(*D_80090370[])(Gfx *);
 extern s32 D_80090408;
-extern s32 D_800BEFC4;
+extern s32 g_dl_capacity; /* was D_800BEFC4 */
 extern s16 D_800E10A8;
 /* was func_151E8620 */
 Gfx *hud_overlay_draw_screen(Gfx *arg0) {
@@ -68,19 +68,19 @@ Gfx *hud_overlay_draw_screen(Gfx *arg0) {
     Gfx *temp_a2;
     s32 var_v0;
     u8 temp_v1;
-    temp_v1 = D_800E0B94;
+    temp_v1 = g_game_mode;
     temp_a2 = arg0;
-    D_8003C8E0 = 0x09000000;
+    g_dbg_crash_marker = 0x09000000;
     temp_a1 = D_80090370[temp_v1];
     if (temp_a1 != NULL) {
         arg0 = temp_a1(arg0);
     }
-    if (D_800E0B94 != 0) {
+    if (g_game_mode != 0) {
         D_80090408 = 0;
         D_800E10A8 = 0;
     }
-    D_8003C8E0 = 0;
-    if (D_800BEFC4 < (arg0 - D_800BEDE8[D_800BE9C0])) {
+    g_dbg_crash_marker = 0;
+    if (g_dl_capacity < (arg0 - D_800BEDE8[g_dl_buf_index])) {
         var_v0 = 1;
     } else {
         var_v0 = 0;
@@ -189,9 +189,9 @@ u8 *hud_tex_rect_scaled(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 ar
     (*(s32 *)((u8 *)temp_a0 + 4)) = (s32) ((arg8 << 0x10) | (arg9 & 0xFFFF));
     return temp_a0 + 8;
 }
-extern u16 D_8009015C;           /* HUD state: 0x10 = a player is near the target point */
+extern u16 g_mp_game_flags;           /* HUD state: 0x10 = a player is near the target point; was D_8009015C */
 extern u16 D_80090160;           /* HUD elements: 1 / 8 team scores, 0x4000 / 0x8000 carried item, 0x6340 timer */
-extern s8 D_800E0FE0;            /* team count */
+extern s8 g_mp_team_count;            /* team count; was D_800E0FE0 */
 extern u16 D_800E0FFC;           /* players marked on the HUD (bit per player) */
 extern u8 D_800ABEA0[][4];       /* team colours (r, g, b) */
 extern u8 D_8009041C[4];         /* digit -> sheet column */
@@ -205,7 +205,7 @@ u8 *mp_team_score_draw(u8 *, s32, s32);
 #define HUD_W(g, a, b) ((g)->words.w0 = (a), (g)->words.w1 = (b), (g)++)
 /* mp_hud_draw: the multiplayer HUD overlay; returns the new DL end. `alpha` is the overlay alpha (low byte), the
  * second argument is unused. Marks the players to show in D_800E0FFC (active or flagged players, players of kind
- * 0x25 near rail point 0x49: within 2500 units also sets D_8009015C 0x10 and the "near" icon), remembers the last
+ * 0x25 near rail point 0x49: within 2500 units also sets g_mp_game_flags 0x10 and the "near" icon), remembers the last
  * flagged player's team (+0x128) as the carrier (with D_80090160 0x8000 it becomes the left / right arrow flag
  * instead), and the bonus flag 4 for team 1 with +0x2E4. Every 32 frames the first 11 clear all of that (blink).
  * Then: the team score row (D_80090160 8; texture 0xD16, per team its colour bar and the score in digits from the
@@ -221,18 +221,18 @@ u8 *mp_hud_markers_draw(u8 *buf, s32 unused, s32 alpha) {
     f32 px, py, pz, ddx, ddz;
 
     flags = 0;
-    D_8009015C &= ~0x10;
+    g_mp_game_flags &= ~0x10;
     gSPDisplayList(gdl++, D_800903D8);
     gDPSetCombine(gdl++, 0x12FE25, 0xFFFFF3F9);
-    y = (D_80082FA0 == 0) ? 0x320 : 0x198;
+    y = (g_last_player_index == 0) ? 0x320 : 0x198;
     pitch = 0x124;
-    if (D_800E0FE0 > 0) {
-        pitch = 0x124 / D_800E0FE0;
+    if (g_mp_team_count > 0) {
+        pitch = 0x124 / g_mp_team_count;
     }
     D_800E0FFC = 0;
     near = 0;
     sel = -1;
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < g_player_count; i++) {
         p = &g_objects[i];
         if (p->unk13C != 0 || (*(u8 *) ((u8 *) p->unk31C + 0x128) & 0x20)) {
             D_800E0FFC |= 1 << i;
@@ -255,7 +255,7 @@ u8 *mp_hud_markers_draw(u8 *buf, s32 unused, s32 alpha) {
             ddz = pz - p->z_position;
             if (ddx * ddx + ddz * ddz < 6250000.0f) {
                 near = 1;
-                D_8009015C |= 0x10;
+                g_mp_game_flags |= 0x10;
             }
             D_800E0FFC |= 1 << i;
         }
@@ -284,7 +284,7 @@ u8 *mp_hud_markers_draw(u8 *buf, s32 unused, s32 alpha) {
     }
     if ((D_80090160 & 8) && tex != 0) {
         x = pitch >> 1;
-        for (team = 0; team < D_800E0FE0; team++) {
+        for (team = 0; team < g_mp_team_count; team++) {
             started = 0;
             done = 0;
             score = player_stat_get((s16) team, 6);
@@ -396,9 +396,9 @@ u8 *hud_tex_rect_scaled(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 player_stat_get(s16, s32);
 #define TM_W(g, a, b) ((g)->words.w0 = (a), (g)->words.w1 = (b), (g)++)
 /* mp_team_marks_draw: the team panel of the multiplayer HUD at row `y`; returns the new DL end (the end so far when
- * a texture is missing). D_800E0FE0 teams share 0x124 pixels. With `loadTex` (s8) it loads texture 0xD16 (32 x 32
- * RGBA32); with `refresh` (u8) it finds the teams out of the game (bit per team: 0xF minus the teams D_800E1030[i] of
- * the D_8008FD8C players for which player_stat_get(i, 3) is set) and re-reads the scores (player_stat_get(team, 6)) into
+ * a texture is missing). g_mp_team_count teams share 0x124 pixels. With `loadTex` (s8) it loads texture 0xD16 (32 x 32
+ * RGBA32); with `refresh` (u8) it finds the teams out of the game (bit per team: 0xF minus the teams g_mp_player_team[i] of
+ * the g_player_count players for which player_stat_get(i, 3) is set) and re-reads the scores (player_stat_get(team, 6)) into
  * D_800E0ED0. Each live team draws D_80087608 marks in its colour (D_800ABEA0), 8 pixels apart around its column,
  * the marks from its score on (one more for `sel`) greyed (0x40404040). With any team out, texture 0xD19 (64 x 64
  * colour-indexed sheet + TLUT) draws a 16 x 0x40 cross in that team's colour over each team out. Ends with a pipe
@@ -432,19 +432,19 @@ u8 *mp_team_marks_draw(u8 *buf, s32 y, s32 sel, s32 loadTex, s32 refresh) {
         gDPSetOtherMode(gdl++, 0x002C3F, 0x504244);
     }
     pitch = 0x124;
-    if (D_800E0FE0 > 0) {
-        pitch = 0x124 / D_800E0FE0;
+    if (g_mp_team_count > 0) {
+        pitch = 0x124 / g_mp_team_count;
     }
     if ((u8) refresh != 0) {
         out = 0xF;
-        for (i = 0; i < D_8008FD8C; i++) {
+        for (i = 0; i < g_player_count; i++) {
             if (player_stat_get((s16) i, 3) != 0) {
-                out &= ~(1 << D_800E1030[i]);
+                out &= ~(1 << g_mp_player_team[i]);
             }
         }
     }
     x = pitch >> 1;
-    for (i = 0; i < D_800E0FE0; i++, x += pitch) {
+    for (i = 0; i < g_mp_team_count; i++, x += pitch) {
         if ((u8) refresh != 0) {
             score = player_stat_get((s16) i, 6);
             D_800E0ED0[i] = score;
@@ -486,7 +486,7 @@ u8 *mp_team_marks_draw(u8 *buf, s32 y, s32 sel, s32 loadTex, s32 refresh) {
         TM_W(gdl, 0xF0000000, 0x0603C000); /* LoadTLUT */
         gDPSetOtherMode(gdl++, 0x00AC3F, 0x504244);
         x = pitch >> 1;
-        for (i = 0; i < D_800E0FE0; i++, x += pitch) {
+        for (i = 0; i < g_mp_team_count; i++, x += pitch) {
             if (out & (1 << i)) {
                 gDPPipeSync(gdl++);
                 gDPSetEnvColor(gdl++, D_800ABEA0[i][0], D_800ABEA0[i][1], D_800ABEA0[i][2], 0xFF);
@@ -507,10 +507,10 @@ u8 *hud_tex_rect_scaled(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 /* mp_team_score_draw: P237. The two-team score panel (Total War and the other team modes; mp_hud_markers_draw /
  * mp_scoreboard_draw call it with D_80090160 0x6340) at screen row `y` - 16; returns the new DL end (`buf` unchanged
  * when the texture is not loaded). Texture: 0xD12 (32 x 32) normally, 16 x 16 0xD13 with D_80090160 0x4000 or 0xD14
- * in barrel mode 8 (D_80090174 + 0x42); loaded as RGBA32 with an env colour of white. With `update` the scores are
+ * in barrel mode 8 (g_menu_state + 0x42); loaded as RGBA32 with an env colour of white. With `update` the scores are
  * recomputed and stored in D_800E0ED0[0] / [1]: with 0x6040 the team totals player_stat_get(team, 6); with 0x100 the
  * sum of player_stat_get(player, 3) (negative = 0) per team (+0x128 of g_objects[player]); else the barrel rows'
- * s16 +0x46 (negative = 0) by D_800E1030 team, and the icons use the lower half of the sheet (t + 0x200). Without
+ * s16 +0x46 (negative = 0) by g_mp_player_team team, and the icons use the lower half of the sheet (t + 0x200). Without
  * `update` the stored scores are drawn. Two icons (x 0x108 and 0x318, 0x40 high; 32 x 32: the right half of the sheet
  * then the left; 16 x 16: the upper then the lower), then the scores in grey (D_800ABEB0 team 1 at x 0x4F,
  * D_800ABEB4 team 0 at x 0xD3, text row y / 4 - 3). */
@@ -520,7 +520,7 @@ u8 *mp_team_score_draw(u8 *buf, s32 y, s32 update) {
     s32 top, size, tex, ls, lt, score0, score1, i, n, v, lrs, row;
 
     top = y - 0x10;
-    if (!(D_80090160 & 0x4000) && *(s8 *) (D_80090174 + 0x42) != 8) {
+    if (!(D_80090160 & 0x4000) && *(s8 *) (g_menu_state + 0x42) != 8) {
         tex = 0xD12;
         size = 0x20;
         ls = 0x200;
@@ -528,7 +528,7 @@ u8 *mp_team_score_draw(u8 *buf, s32 y, s32 update) {
     } else {
         tex = 0xD13;
         size = 0x10;
-        if (*(s8 *) (D_80090174 + 0x42) == 8) {
+        if (*(s8 *) (g_menu_state + 0x42) == 8) {
             tex = 0xD14;
         }
         ls = 0;
@@ -561,7 +561,7 @@ u8 *mp_team_score_draw(u8 *buf, s32 y, s32 update) {
             score0 = player_stat_get(0, 6);
             score1 = player_stat_get(1, 6);
         } else if (D_80090160 & 0x100) {
-            for (i = 0; i < D_8008FD8C; i++) {
+            for (i = 0; i < g_player_count; i++) {
                 v = player_stat_get((s16) i, 3);
                 if (v < 0) {
                     v = 0;
@@ -574,13 +574,13 @@ u8 *mp_team_score_draw(u8 *buf, s32 y, s32 update) {
             }
         } else {
             row = 0x200;
-            n = D_8008FD8C;
+            n = g_player_count;
             for (i = 0; i < n; i++) {
-                v = *(s16 *) (D_80090174 + 0x46 + i * 2);
+                v = *(s16 *) (g_menu_state + 0x46 + i * 2);
                 if (v < 0) {
                     v = 0;
                 }
-                if (D_800E1030[i] != 0) {
+                if (g_mp_player_team[i] != 0) {
                     score1 += v;
                 } else {
                     score0 += v;
@@ -602,27 +602,27 @@ u8 *mp_team_score_draw(u8 *buf, s32 y, s32 update) {
 }
 #undef TW_W
 
-extern s8 D_800901E4[4];         /* player queue (controller numbers, -1 empty) */
-extern s8 D_800E0EF0[];          /* placing per team / player (1 = first) */
+extern s8 g_menu_player_queue[4];         /* player queue (controller numbers, -1 empty); was D_800901E4 */
+extern s8 g_mp_placings[];          /* placing per team / player (1 = first); was D_800E0EF0 */
 extern s16 D_800E0ED0[];         /* team score */
-extern s16 D_800E0F00[];         /* per player value (last column) */
+extern s16 g_mp_hits_taken[];         /* per player value (last column); was D_800E0F00 */
 extern s8 D_8009011C;
 extern char D_800ABEB8[], D_800ABEBC[], D_800ABEC0[], D_800ABEC8[], D_800ABECC[], D_800ABED0[], D_800ABED4[];
 s32 texture_cache_lookup(s32, s32, s32, s32);
 u8 *mp_team_marks_draw(u8 *, s32, s32, s32, s32);
 u8 *mp_team_score_draw(u8 *, s32, s32);
 #define BAR_W(g, a, b) ((g)->words.w0 = (a), (g)->words.w1 = (b), (g)++)
-#define BAR_MODE() (*(s8 *) (D_80090174 + 0x42))
-#define BAR_ROW(i, off) (*(s16 *) (D_80090174 + (i) * 12 + (off)))
+#define BAR_MODE() (*(s8 *) (g_menu_state + 0x42))
+#define BAR_ROW(i, off) (*(s16 *) (g_menu_state + (i) * 12 + (off)))
 /* mp_scoreboard_draw: the multiplayer score table (barrel menu mode 3 bar of barrel_menu_draw, and the in-match HUD
  * with `hud` set); returns the new DL end. Menu modes 11 / 12: only the controller icons of the player queue
- * D_800901E4 (texture 0x843; nothing in the HUD). Otherwise one row per queued player that is not a spectator
- * (D_80087270 != 10) and has a team (D_800E1030; team 0 too in mode 8): the header (textures 0x887 / 0x888:
+ * g_menu_player_queue (texture 0x843; nothing in the HUD). Otherwise one row per queued player that is not a spectator
+ * (g_player_start_state != 10) and has a team (g_mp_player_team; team 0 too in mode 8): the header (textures 0x887 / 0x888:
  * columns, team column with D_80090160 1, no kills column in mode 1) before the first row, then the controller icon
- * in the team colour D_800ABEA0, the placing name (D_800E1008 strings from D_800E0EF0, the second table with
+ * in the team colour D_800ABEA0, the placing name (g_text_strings strings from g_mp_placings, the second table with
  * D_800E1003 == 2), the team score D_800E0ED0, the hit percentage (+0x66 * 100 / shots, shots from the player's
  * +0x1AA in the HUD, else +0x6C; at most 9999), the score +0x46, the lives +0x6A (or the D_800ABECC mark for
- * player state 9) unless mode 1, and D_800E0F00. Rows start at `y` (40 higher with D_800E0B94 and D_80090168) and
+ * player state 9) unless mode 1, and g_mp_hits_taken. Rows start at `y` (40 higher with g_game_mode and g_mp_free_for_all) and
  * are 15 apart. Ends with the timer mp_team_score_draw (D_80090160 0x6340) and, in the HUD, the team panel. */
 /* was func_151EA90C */
 u8 *mp_scoreboard_draw(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
@@ -650,7 +650,7 @@ u8 *mp_scoreboard_draw(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
         BAR_W(gdl, 0xF2000000, 0x0007C07C); /* SetTileSize 32x32 */
         gDPSetOtherMode(gdl++, 0x002C3F, 0x504244);
         yy = 0x48;
-        for (q = D_800901E4; q != D_800901E4 + 4; q++) {
+        for (q = g_menu_player_queue; q != g_menu_player_queue + 4; q++) {
             if (*q >= 0) {
                 k = *q & 3;
                 gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x120, (yy - 2) * 4, 0x160, (yy + 0xE) * 4, 0, (k & 1) << 9,
@@ -661,7 +661,7 @@ u8 *mp_scoreboard_draw(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
         return (u8 *) gdl;
     }
     base = (D_80090160 & 1) ? 0x1A : 0x34;
-    if (D_800E0B94 != 0 && D_80090168 != 0) {
+    if (g_game_mode != 0 && g_mp_free_for_all != 0) {
         y -= 0x28;
     }
     text_set_color(0xFF, 0xFF, 0xFF, alpha & 0xFF);
@@ -678,10 +678,10 @@ u8 *mp_scoreboard_draw(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
     gDPSetCombine(gdl++, 0x12D225, 0xFFA7FFFF);
     hdr = 0;
     for (i = 0; i < 4; i++) {
-        if (D_800901E4[i] < 0 || D_80087270[i] == 10) {
+        if (g_menu_player_queue[i] < 0 || g_player_start_state[i] == 10) {
             continue;
         }
-        team = D_800E1030[i];
+        team = g_mp_player_team[i];
         if (team == 0 && !all) {
             continue;
         }
@@ -746,7 +746,7 @@ u8 *mp_scoreboard_draw(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
             gDPSetOtherMode(gdl++, 0x002C3F, 0x504244);
         }
         text_set_color(D_800ABEA0[team][0], D_800ABEA0[team][1], D_800ABEA0[team][2], alpha & 0xFF);
-        k = D_800901E4[i] & 3;
+        k = g_menu_player_queue[i] & 3;
         gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, (base + 8) * 4, (y - 2) * 4, (base + 0x18) * 4, (y + 0xE) * 4, 0,
                                     (k & 1) << 9, (k >> 1) << 9, 0x400, 0x400);
         pct = 0;
@@ -761,14 +761,14 @@ u8 *mp_scoreboard_draw(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
         if (pct >= 10000) {
             pct = 9999;
         }
-        if (D_80090168 != 0) {
+        if (g_mp_free_for_all != 0) {
             team = i;
         }
-        r = (s8) (D_800E0EF0[team] - 1);
+        r = (s8) (g_mp_placings[team] - 1);
         if (r < 0) {
             r = 0;
         }
-        text_printf_at(base + 0x3C, y, 0x81, D_800ABEB8, ((s32 *) D_800E1008)[r + fmt]);
+        text_printf_at(base + 0x3C, y, 0x81, D_800ABEB8, ((s32 *) g_text_strings)[r + fmt]);
         x = base;
         if (D_80090160 & 1) {
             text_printf_at(base + 0x54, y, 0x81, D_800ABEBC, D_800E0ED0[team]);
@@ -777,17 +777,17 @@ u8 *mp_scoreboard_draw(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
         x += 0x58;
         text_printf_at(x, y, 0x81, D_800ABEC0, pct);
         x += 0x1A;
-        text_printf_at(x, y, 0x81, D_800ABEC8, *(s16 *) (D_80090174 + i * 2 + 0x46));
+        text_printf_at(x, y, 0x81, D_800ABEC8, *(s16 *) (g_menu_state + i * 2 + 0x46));
         x += 0x1E;
         if (BAR_MODE() != 1) {
-            if (D_80087270[i] == 9 || (i == 0 && D_8009011C == 9)) {
+            if (g_player_start_state[i] == 9 || (i == 0 && D_8009011C == 9)) {
                 text_printf_at(x, y, 0x81, D_800ABECC);
             } else {
                 text_printf_at(x, y, 0x81, D_800ABED0, BAR_ROW(i, 0x6A));
             }
             x += 0x1E;
         }
-        text_printf_at(x, y, 0x81, D_800ABED4, D_800E0F00[i]);
+        text_printf_at(x, y, 0x81, D_800ABED4, g_mp_hits_taken[i]);
         y += 0xF;
     }
     if (D_80090160 & 0x6340) {
@@ -903,7 +903,7 @@ u8 * mp_scoreboard_draw(Gfx *, s32, s16, s32);
 s32 hud_anim_model_load(s32, s32, s32, f32);
 u8 * hud_anim_model_draw(u8 *, s32, f32, f32, f32);
 extern s32 D_8008955C;
-extern s8 D_8009029C;
+extern s8 g_pause_unpause_timer; /* was D_8009029C */
 extern s32 D_8009040C;
 extern s8 D_80090468;
 extern s16 D_800C40BE;
@@ -951,19 +951,19 @@ u8 *hud_ingame_draw(u8 *arg0) {
     s32 sp3C;
 
     var_s0 = arg0;
-    temp_t9 = (D_800D2E4C->unk19 & 4) != 0;
+    temp_t9 = (g_save_progress_bits->unk19 & 4) != 0;
     sp3C = temp_t9;
     if (temp_t9 == 0) {
-        sp3C = D_8008FDA8 < 0;
+        sp3C = g_save_cur_slot < 0;
     }
-    if ((D_800BE616 != 0) && (g_game_paused == 0) && (D_800BEAC1 == 0)) {
-        if ((mp_is_free_for_all() == 0) || ((*(s8 *)((u8 *)D_80090174 + 0x42)) == 1)) {
+    if ((D_800BE616 != 0) && (g_game_paused == 0) && (g_pause_open == 0)) {
+        if ((mp_is_free_for_all() == 0) || ((*(s8 *)((u8 *)g_menu_state + 0x42)) == 1)) {
             var_s0 = mp_hud_markers_draw(var_s0, 0, 0xFF);
         }
     } else {
         D_800E10A8 = 0;
     }
-    if ((g_game_paused == 0) || (D_8009029C != 0)) {
+    if ((g_game_paused == 0) || (g_pause_unpause_timer != 0)) {
         if (D_80090408 != 0) {
             hud_anim_model_free((u8 *) D_80090408);
             hud_anim_model_free((u8 *) D_8009040C);
@@ -972,10 +972,10 @@ u8 *hud_ingame_draw(u8 *arg0) {
         D_8009016C = 0;
         D_80090468 = 0;
     } else {
-        if ((D_800B0DF0->unk8 == 4) && (D_80090468 == 0)) {
+        if ((g_level_header->unk8 == 4) && (D_80090468 == 0)) {
             var_v1 = 0;
             if (g_level_id == 0x13) {
-                var_a0 = (*(s32 *)((u8 *)(*(s32 *)((u8 *)&D_8008955C + (D_800B0DF0->unk9 * 4))) + 8));
+                var_a0 = (*(s32 *)((u8 *)(*(s32 *)((u8 *)&D_8008955C + (g_level_header->unk9 * 4))) + 8));
                 /* texture ids 0x1649-0x164B and 0x1655-0x1657 stay loaded */
                 for (var_v0 = 0; var_v0 != 0x48; var_v0++, var_a0++) {
                     if (var_a0 != 0x1649 && var_a0 != 0x164A && var_a0 != 0x164B && var_a0 != 0x1655 &&
@@ -989,7 +989,7 @@ u8 *hud_ingame_draw(u8 *arg0) {
             if (var_v1 < 0x168) {
                 do {
                     sp.u84 = var_v0_2;
-                    texture_unref_age3((*(s32 *)((u8 *)(*(s32 *)((u8 *)&D_8008955C + (D_800B0DF0->unk9 * 4))) + 8)) + var_v0_2);
+                    texture_unref_age3((*(s32 *)((u8 *)(*(s32 *)((u8 *)&D_8008955C + (g_level_header->unk9 * 4))) + 8)) + var_v0_2);
                     var_v0_2 = sp.u84 + 1;
                 } while (var_v0_2 != 0x168);
             }
@@ -1069,8 +1069,8 @@ u8 *hud_ingame_draw(u8 *arg0) {
                 temp_s0_4 = temp_s0_3 + 1;
                 temp_s0_4->words.w1 = -1U;
                 temp_s0_4->words.w0 = 0xFB000000;
-                temp_f0 = (*(f32 *)((u8 *)D_800BE628 + 4)) * 0.5f;
-                temp_f2 = (*(f32 *)((u8 *)D_800BE628 + 8)) * 0.5f;
+                temp_f0 = (*(f32 *)((u8 *)g_player_cams + 4)) * 0.5f;
+                temp_f2 = (*(f32 *)((u8 *)g_player_cams + 8)) * 0.5f;
                 var_s0_2 = hud_health_draw(temp_s0_4 + 1, 1);
                 game_gu_ortho(&D_800E1068, -temp_f0, temp_f0, -temp_f2, temp_f2, 1.0f, 20000.0f, 1.0f);
                 D_800E1060 = D_8009016C;
@@ -1134,10 +1134,10 @@ s32 mp_scoreboard_draw_fading(s32 arg0) {
     return arg0;
 }
 
-extern s16 D_800E0EB0;
+extern s16 g_credits_line; /* was D_800E0EB0 */
 
-/* Table D_80090370 slot 21: centred text screen. Lines D_800E1008[D_800E0EB0...] up to a "*" line;
- * the first line is red, an extra 12 px gap follows it. Fades in over D_800E0EC0 0..63, out at 287..350. */
+/* Table D_80090370 slot 21: centred text screen. Lines g_text_strings[g_credits_line...] up to a "*" line;
+ * the first line is red, an extra 12 px gap follows it. Fades in over g_game_mode_timer 0..63, out at 287..350. */
 /* was func_151EC11C */
 Gfx *screen_centred_text_draw(Gfx *gdl) {
     s32 pad[2];
@@ -1149,16 +1149,16 @@ Gfx *screen_centred_text_draw(Gfx *gdl) {
     s32 y0;
     u8 *s;
 
-    if (D_800E0EB0 < 0) {
+    if (g_credits_line < 0) {
         return gdl;
     }
-    if (D_800E0EC0 < 300) {
-        a = D_800E0EC0 << 2;
+    if (g_game_mode_timer < 300) {
+        a = g_game_mode_timer << 2;
         if (a >= 0x100) {
             a = 0xFF;
         }
     } else {
-        a = (350 - D_800E0EC0) << 2;
+        a = (350 - g_game_mode_timer) << 2;
         if (a < 0) {
             a = 0;
         }
@@ -1167,7 +1167,7 @@ Gfx *screen_centred_text_draw(Gfx *gdl) {
         }
     }
     n = 0;
-    for (i = D_800E0EB0; ((u8 **)D_800E1008)[i][0] != '*'; i++) {
+    for (i = g_credits_line; ((u8 **)g_text_strings)[i][0] != '*'; i++) {
         n++;
     }
     if (n < 14) {
@@ -1176,9 +1176,9 @@ Gfx *screen_centred_text_draw(Gfx *gdl) {
         step = 0xB;
     }
     text_set_color(0xFF, 0, 0, a);
-    i = D_800E0EB0;
+    i = g_credits_line;
     y0 = y = (0xD0 - n * step) >> 1;
-    while ((s = ((u8 **)D_800E1008)[i])[0] != '*') {
+    while ((s = ((u8 **)g_text_strings)[i])[0] != '*') {
         text_printf_at(0x94, y, 1, s);
         text_set_color(0xFF, 0xFF, 0xFF, a);
         if (y == y0) {
@@ -1196,7 +1196,7 @@ extern u8 D_89C[];
 
 
 /* Table D_80090370 slot 11: three-phase intro/credits screen on a black background, driven by the timer
- * D_800E0EC0. t < 200: one red text line (D_800E1008 + 0x238), zooming from scale 0.75 to 1.5.
+ * g_game_mode_timer. t < 200: one red text line (g_text_strings + 0x238), zooming from scale 0.75 to 1.5.
  * 200 <= t < 450: two sprites (D_80091BA8 at 1/4 alpha, D_80091B9C), 14 text lines, the 16x16 D_89C icon.
  * t >= 450: the 64x64 D_85D image. D_80090410 is a shared sprite descriptor (texture, size, format)
  * that is reset to its 32x32 default afterwards. Skipped (after the clear) when D_80000300 != 0. */
@@ -1213,12 +1213,12 @@ Gfx *screen_intro_credits_draw(Gfx *gdl) {
     gDPSetOtherMode(gdl++, 0x082C3F, 0x504340);
     gDPSetCombine(gdl++, 0xFFFFFF, 0xFFFEFB7D);
     gDPSetEnvColor(gdl++, 0, 0, 0, 0xFF);
-    gdl = (Gfx *) render_fill_rect_clamped((u8 *) gdl, 0, 0, D_800BE620, D_800BE624);
+    gdl = (Gfx *) render_fill_rect_clamped((u8 *) gdl, 0, 0, g_framebuffer_width, g_framebuffer_height);
     if (D_80000300 != 0) {
         return gdl;
     }
     gSPDisplayList(gdl++, D_800903D8);
-    t = D_800E0EC0;
+    t = g_game_mode_timer;
     if (t < 200) {
         a = 0xFF - (t - 150) * 8;
         if (a < 0) {
@@ -1233,7 +1233,7 @@ Gfx *screen_intro_credits_draw(Gfx *gdl) {
         }
         text_set_scale(scale);
         text_set_color(0xFF, 0, 0, a & 0xFF);
-        text_printf_at(0x94, 0x69, 1, *(u8 **) ((u8 *) D_800E1008 + 0x238));
+        text_printf_at(0x94, 0x69, 1, *(u8 **) ((u8 *) g_text_strings + 0x238));
         text_set_scale(1.0f);
     } else if (t < 450) {
         if (t < 250) {
@@ -1260,12 +1260,12 @@ Gfx *screen_intro_credits_draw(Gfx *gdl) {
         gdl++;
         gdl = hud_image_draw(gdl, &D_80091B9C, 0x92, 0x1C, 2, 1, 1.0f, 0);
         text_set_color(0xFF, 0xFF, 0xFF, a & 0xFF);
-        text_printf_at(0x94, 0x9D, 1, *(u8 **) ((u8 *) D_800E1008 + 0x204));
-        text_printf_at(0x94, 0xAA, 1, *(u8 **) ((u8 *) D_800E1008 + 0x208));
-        text_printf_at(0x94, 0xBC, 1, *(u8 **) ((u8 *) D_800E1008 + 0x20C));
+        text_printf_at(0x94, 0x9D, 1, *(u8 **) ((u8 *) g_text_strings + 0x204));
+        text_printf_at(0x94, 0xAA, 1, *(u8 **) ((u8 *) g_text_strings + 0x208));
+        text_printf_at(0x94, 0xBC, 1, *(u8 **) ((u8 *) g_text_strings + 0x20C));
         text_set_scale(D_800ABEF8);
         for (i = 0; i < 10; i++) {
-            text_printf_at(0x94, 0x2D + i * 10, 1, *(u8 **) ((u8 *) D_800E1008 + 0x210 + i * 4));
+            text_printf_at(0x94, 0x2D + i * 10, 1, *(u8 **) ((u8 *) g_text_strings + 0x210 + i * 4));
         }
         text_set_scale(1.0f);
         gDPPipeSync(gdl++);
@@ -1314,21 +1314,21 @@ s32 screen_late_caption_draw(s32 arg0) {
     s32 temp_t6;
     s32 var_v0;
 
-    if (D_800E0EC0 >= 0x5DD) {
-        temp_t6 = (D_800E0EC0 - 0x5DC) * 8;
+    if (g_game_mode_timer >= 0x5DD) {
+        temp_t6 = (g_game_mode_timer - 0x5DC) * 8;
         var_v0 = temp_t6;
         if (temp_t6 >= 0x100) {
             var_v0 = 0xFF;
         }
         text_set_color(0xFFU, 0xFFU, 0xFFU, var_v0 & 0xFF);
-        text_printf_at(0xDC, 0x130, 1, (*(u8 **)((u8 *)D_800E1008 + 0x1D0)));
+        text_printf_at(0xDC, 0x130, 1, (*(u8 **)((u8 *)g_text_strings + 0x1D0)));
     }
     return arg0;
 }
 extern s32 D_80091BA8;
 extern s32 D_80091BB4;
 extern s32 D_80091BC0;
-extern s32 D_800E0EA4;
+extern s32 g_demo_input_index; /* was D_800E0EA4 */
 #define MW(g, a, b) { Gfx *_g = (g); _g->words.w0 = (a); _g->words.w1 = (b); }
 
 /* was func_151EC9A0 */
@@ -1343,15 +1343,15 @@ Gfx *screen_sprite_fade_draw(Gfx *gdl) {
         return gdl;
     }
     gSPDisplayList(gdl++, D_800903D8);
-    if (D_800E0EC0 >= 0x12D) {
-        temp_v1 = 0x1AC - D_800E0EC0;
+    if (g_game_mode_timer >= 0x12D) {
+        temp_v1 = 0x1AC - g_game_mode_timer;
         temp_a = temp_v1 * 2;
         var_v1 = temp_a;
         if (temp_a < 0) {
             var_v1 = 0;
         }
     } else {
-        var_v1 = D_800E0EC0 * 8;
+        var_v1 = g_game_mode_timer * 8;
         if (var_v1 >= 0x100) {
             var_v1 = 0xFF;
         }
@@ -1363,10 +1363,10 @@ Gfx *screen_sprite_fade_draw(Gfx *gdl) {
     gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0xFF);
     gdl = hud_image_draw(gdl, &D_80091BB4, 0x92, 0xCB, 5, 2, 1.0f, 0);
     MW(gdl++, 0xFCFFD3FF, 0xFFA6FF7F);
-    MW(gdl++, 0xFB000000, (u8) D_800E0FC7 | 0x20FF2000);
+    MW(gdl++, 0xFB000000, (u8) g_menu_blink_alpha | 0x20FF2000);
     gdl = hud_image_draw(gdl, &D_80091BC0, 0x92, 0xCB, 5, 2, 1.0f, 0);
     gdl = sprite_gfx_begin_alt(gdl);
-    temp_v1 = 0x1EA - D_800E0EA4;
+    temp_v1 = 0x1EA - g_demo_input_index;
     if (temp_v1 < 0) {
         var_v1_2 = 0;
     } else {
@@ -1376,7 +1376,7 @@ Gfx *screen_sprite_fade_draw(Gfx *gdl) {
             var_v1_2 = 0xFF;
         }
     }
-    D_800E0FC6 = 0xFF - var_v1_2;
+    g_screen_fade_alpha = 0xFF - var_v1_2;
         return gdl;
 }
 Gfx *hud_image_draw(Gfx *, void *, s32, s32, s32, s32, f32, s32);
@@ -1385,9 +1385,9 @@ Gfx *cheat_entry_draw(Gfx *);
 Gfx *save_screen_frame_draw(Gfx *, s32);
 extern Gfx D_800903D8[];
 extern u8 D_80090484;
-extern s8 D_800902A4;
-extern s8 D_800902A8;
-extern u8 D_800E0EC5;
+extern s8 g_title_info_screen; /* was D_800902A4 */
+extern s8 g_title_screen_adjust; /* was D_800902A8 */
+extern u8 g_menu_page_alpha; /* was D_800E0EC5 */
 extern s32 D_80090410;
 extern s32 D_8009046C[];
 
@@ -1414,13 +1414,13 @@ Gfx *frontend_menu_draw(Gfx *gdl) {
         D_80090484 = 0;
         return gdl;
     }
-    a = D_80090484 + D_800BE9E4 * 4;
+    a = D_80090484 + g_frame_ticks * 4;
     if (a >= 0x100) {
         a = 0xFF;
     }
     D_80090484 = a;
     gSPDisplayList(gdl++, D_800903D8);
-    p = (Ent174 *)D_80090174;
+    p = (Ent174 *)g_menu_state;
     k = p->x3E;
     if (k == 1) {
         return barrel_menu_draw(gdl);
@@ -1429,9 +1429,9 @@ Gfx *frontend_menu_draw(Gfx *gdl) {
         return gdl;
     }
     t = p->x2C;
-    if (t == 1 && D_800902A4 != 0) {
+    if (t == 1 && g_title_info_screen != 0) {
         gdl = cheat_entry_draw(gdl);
-    } else if (t != 1 || D_800902A8 == 0) {
+    } else if (t != 1 || g_title_screen_adjust == 0) {
         v = (p->x0 - 0.5f) * 512.0f;
         if (v < 0) {
             v = -v;
@@ -1443,17 +1443,17 @@ Gfx *frontend_menu_draw(Gfx *gdl) {
             v = D_80090484;
         }
         if (t == 1) {
-            v = (D_800E0EC5 * v) >> 8;
+            v = (g_menu_page_alpha * v) >> 8;
             if (v >= 0xFE) {
                 v = 0xFF;
             }
         }
         gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, v);
         gDPSetOtherMode(gdl++, 0x002C3F, 0x504244);
-        D_80090410 = D_8009046C[((Ent174 *)D_80090174)->x2C];
+        D_80090410 = D_8009046C[((Ent174 *)g_menu_state)->x2C];
         gdl = hud_image_draw(gdl, &D_80090410, 0x94, 0x1E, 3, 1, 1.0f, 0);
     }
-    p = (Ent174 *)D_80090174;
+    p = (Ent174 *)g_menu_state;
     if (0.5f <= p->x8) {
         if (p->x2C >= 3) {
             e = &g_save_slot_summaries[p->x2C - 3];
@@ -1479,14 +1479,14 @@ extern s8 D_800904A8;            /* page whose banner is shown */
 extern s32 D_80090488[];         /* banner sprite per page */
 extern s32 D_800904AC[];         /* barrel sprite per item (5) */
 extern u8 D_800E10B8[4];         /* player slot fill (0..255) */
-extern u8 D_800E0EC4;
-extern f32 D_80090188;           /* barrel rotation phase */
-extern s8 D_800901CC;
+extern u8 g_menu_alpha; /* was D_800E0EC4 */
+extern f32 g_menu_slide_phase;           /* barrel rotation phase; was D_80090188 */
+extern s8 g_menu_cursor; /* was D_800901CC */
 extern s32 D_800BEDCC;           /* frame counter */
-extern s8 D_800901E0;            /* joined players */
-extern s8 D_800901E4[];          /* player queue (controller numbers) */
-extern s8 D_800E0FC0[];          /* character per joined player */
-extern struct127 *D_800E0FD0[4]; /* character object per controller */
+extern s8 g_menu_joined_count;            /* joined players; was D_800901E0 */
+extern s8 g_menu_player_queue[];          /* player queue (controller numbers); was D_800901E4 */
+extern s8 g_menu_player_chars[];          /* character per joined player; was D_800E0FC0 */
+extern struct127 *g_menu_char_objs[4]; /* character object per controller; was D_800E0FD0 */
 extern u8 D_87B[];
 extern u8 D_88C[];
 extern char D_800ABED8[];         /* "#" */
@@ -1494,10 +1494,10 @@ extern char D_800ABEDC[];         /* "#" */
 extern char D_800ABEE0[];         /* "%d" */
 s8 mp_slot_query(s32);
 void menu_spawn_character(s32 slot, s32 character);
-/* barrel_menu_draw: draws the multiplayer barrel menu (D_80090174 mode 1 of frontend_menu_draw) into gdl and returns
+/* barrel_menu_draw: draws the multiplayer barrel menu (g_menu_state mode 1 of frontend_menu_draw) into gdl and returns
  * the new end. A pipe sync, then (unless mode 3) the page banner D_80090488[D_800904A8] faded by the slide offset
  * and the title D_88C faded by +0x08. Mode 0: once faded in on page 4, the ring of five item barrels (D_800904AC,
- * cos ring from the selection +0x41 and the rotation D_80090188), the front one pulsing when at rest; mode 3: the
+ * cos ring from the selection +0x41 and the rotation g_menu_slide_phase), the front one pulsing when at rest; mode 3: the
  * single bar mp_scoreboard_draw; mode 4: two or four player slots (page 7: two) that fill while the controller is
  * joined (spawning its character with menu_spawn_character) and empty otherwise (removing the object), each with its
  * frame D_89C, a pulsing highlight, the fill bar D_87B, the slot number and the player's score from
@@ -1510,7 +1510,7 @@ Gfx *barrel_menu_draw(Gfx *gdl) {
     f32 ang, sc, sizef;
     u8 *fill;
 
-    alpha = (s32) ((((BarrelMenu174 *) D_80090174)->slide - 0.5f) * 512.0f);
+    alpha = (s32) ((((BarrelMenu174 *) g_menu_state)->slide - 0.5f) * 512.0f);
     if (alpha < 0) {
         alpha = -alpha;
     }
@@ -1518,7 +1518,7 @@ Gfx *barrel_menu_draw(Gfx *gdl) {
         alpha = 0xFF;
     }
     gDPPipeSync(gdl++);
-    m = (BarrelMenu174 *) D_80090174;
+    m = (BarrelMenu174 *) g_menu_state;
     if (m->fade == 0.0f && m->vel == 0.0f) {
         D_800904A8 = m->page;
     } else if (m->page == 0 && m->vel < 0.0f) {
@@ -1548,7 +1548,7 @@ Gfx *barrel_menu_draw(Gfx *gdl) {
             }
             D_80090410 = D_80090488[D_800904A8];
             gdl = hud_image_draw(gdl, &D_80090410, 0x94, y, k, mul, sc, 0);
-            m = (BarrelMenu174 *) D_80090174;
+            m = (BarrelMenu174 *) g_menu_state;
         }
         a = 0xFF - (s32) (m->fade * 300.0f);
         if (a > 0) {
@@ -1556,7 +1556,7 @@ Gfx *barrel_menu_draw(Gfx *gdl) {
             gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, a);
             D_80090410 = (s32) D_88C;
             gdl = hud_image_draw(gdl, &D_80090410, 0x94, 0x1E, 3, 1, 1.0f, 0);
-            m = (BarrelMenu174 *) D_80090174;
+            m = (BarrelMenu174 *) g_menu_state;
         }
     }
     switch (m->mode) {
@@ -1568,13 +1568,13 @@ Gfx *barrel_menu_draw(Gfx *gdl) {
             if (!(m->fade >= 0.5f) || m->page != 4) {
                 break;
             }
-            alpha = (D_800E0EC4 * D_800E0EC5) >> 8;
+            alpha = (g_menu_alpha * g_menu_page_alpha) >> 8;
             if (alpha >= 0xFE) {
                 alpha = 0xFF;
             }
-            ang = 0.62831855f + (0.62831855f + 0.62831855f * D_80090188);
+            ang = 0.62831855f + (0.62831855f + 0.62831855f * g_menu_slide_phase);
             prev = 0x7E - (s32) (cosf(ang) * 52.0f);
-            i = ((BarrelMenu174 *) D_80090174)->sel - 4;
+            i = ((BarrelMenu174 *) g_menu_state)->sel - 4;
             if (i < 0) {
                 i += 5;
             }
@@ -1588,7 +1588,7 @@ Gfx *barrel_menu_draw(Gfx *gdl) {
                     sizef = (f32) (cur - prev) * 0.03125f;
                     D_80090410 = D_800904AC[i];
                     gdl = hud_image_draw(gdl, &D_80090410, 0x53, mid, 2, 1, sizef, -1);
-                    if (D_80090188 == 0.0f && j == 5 && D_800901CC == 0) {
+                    if (g_menu_slide_phase == 0.0f && j == 5 && g_menu_cursor == 0) {
                         v = (D_800BEDCC * 2) & 0x7F;
                         if (v >= 0x40) {
                             v = 0x7F - v;
@@ -1611,8 +1611,8 @@ Gfx *barrel_menu_draw(Gfx *gdl) {
             break;
         case 4:
             x = 0x28;
-            pulse = (s32) (D_800E0EC5 * (s32) ((sinf((f32) (D_800BEDCC & 0x3F) * 0.09817469f + 0.7853975f) + 1.0f) * 127.0f)) >> 8;
-            if (((BarrelMenu174 *) D_80090174)->page == 7) {
+            pulse = (s32) (g_menu_page_alpha * (s32) ((sinf((f32) (D_800BEDCC & 0x3F) * 0.09817469f + 0.7853975f) + 1.0f) * 127.0f)) >> 8;
+            if (((BarrelMenu174 *) g_menu_state)->page == 7) {
                 x = 0x70;
                 nslots = 2;
             } else {
@@ -1626,24 +1626,24 @@ Gfx *barrel_menu_draw(Gfx *gdl) {
             for (slot = 0; slot != nslots; slot++, fill++, x += 0x48) {
                 j = -1;
                 dir = 1;
-                for (i = 0; i < D_800901E0; i++) {
-                    if (slot == D_800901E4[i]) {
+                for (i = 0; i < g_menu_joined_count; i++) {
+                    if (slot == g_menu_player_queue[i]) {
                         j = i;
                         dir = -1;
                         break;
                     }
                 }
-                if (slot != 0 && D_800E0FD0[0] != NULL) {
+                if (slot != 0 && g_menu_char_objs[0] != NULL) {
                     if (*fill != 0xFF) {
-                        if (D_800E0FD0[slot] == NULL && j != -1) {
-                            menu_spawn_character(slot, D_800E0FC0[j]);
+                        if (g_menu_char_objs[slot] == NULL && j != -1) {
+                            menu_spawn_character(slot, g_menu_player_chars[j]);
                         }
-                    } else if (D_800E0FD0[slot] != NULL) {
-                        obj_remove(D_800E0FD0[slot], 1);
-                        D_800E0FD0[slot] = NULL;
+                    } else if (g_menu_char_objs[slot] != NULL) {
+                        obj_remove(g_menu_char_objs[slot], 1);
+                        g_menu_char_objs[slot] = NULL;
                     }
                 }
-                v = *fill + dir * (D_800BE9E4 * 8);
+                v = *fill + dir * (g_frame_ticks * 8);
                 if (v >= 0x100) {
                     v = 0xFF;
                 } else if (v < 0) {
@@ -1651,7 +1651,7 @@ Gfx *barrel_menu_draw(Gfx *gdl) {
                 }
                 *fill = v;
                 gDPPipeSync(gdl++);
-                gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, D_800E0EC5);
+                gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, g_menu_page_alpha);
                 D_80090410 = (s32) (D_89C + 2);
                 y = 0x8C - (s32) ((f32) v * 0.14285715f);
                 gdl = hud_image_draw(gdl, &D_80090410, x, y, 1, 1, 1.0f, 0);
@@ -1660,7 +1660,7 @@ Gfx *barrel_menu_draw(Gfx *gdl) {
                     gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, pulse);
                     gdl = hud_image_draw(gdl, &D_80090410, x, y, 1, 1, 1.0f, 1);
                     gDPPipeSync(gdl++);
-                    step = (D_800E0EC5 * v) >> 8;
+                    step = (g_menu_page_alpha * v) >> 8;
                     if (step >= 0xFE) {
                         step = 0xFF;
                     }
@@ -1668,9 +1668,9 @@ Gfx *barrel_menu_draw(Gfx *gdl) {
                     D_80090410 = (s32) D_87B;
                     gdl = hud_image_draw(gdl, &D_80090410, x, 0x82, 1, 1, 1.0f, 0);
                 }
-                text_set_color(0xFF, 0xFF, 0xFF, D_800E0EC5);
+                text_set_color(0xFF, 0xFF, 0xFF, g_menu_page_alpha);
                 text_printf_at(x, 0x41, 0x80, D_800ABED8, slot + 1);
-                if (nscores != 0 && j >= 0 && D_800901E4[j] >= 0) {
+                if (nscores != 0 && j >= 0 && g_menu_player_queue[j] >= 0) {
                     nscores--;
                     text_printf_at(x, 0xA8, 0, D_800ABEDC, 0x38);
                     text_printf_at(x, 0xA2, 0x81, D_800ABEE0, scores[si] + 1);
@@ -1697,7 +1697,7 @@ Gfx *screen_logo_glow_draw(Gfx *gdl) {
     s32 a;
 
     gSPDisplayList(gdl++, D_800903D8);
-    a = D_800E0EC0 * 4;
+    a = g_game_mode_timer * 4;
     if (a >= 0x100) {
         a = 0xFF;
     }
@@ -1705,21 +1705,21 @@ Gfx *screen_logo_glow_draw(Gfx *gdl) {
     gdl = hud_image_draw(gdl, D_80091BCC, 0x92, 0x6C, 8, 3, 1.0f, 0);
     gDPPipeSync(gdl++);
     gDPSetCombine(gdl++, 0xFFD3FF, 0xFFA6FF7F);
-    gDPSetEnvColor(gdl++, 0xFF, 0x80, 0x20, ((u8)D_800E0FC7 * (a + 1)) >> 8);
+    gDPSetEnvColor(gdl++, 0xFF, 0x80, 0x20, ((u8)g_menu_blink_alpha * (a + 1)) >> 8);
     return sprite_gfx_begin_alt(hud_image_draw(gdl, D_80091BD8, 0x92, 0x6C, 8, 3, 1.0f, 0));
 }
 
 u8 *render_fill_rect_clamped(u8 *, s32, s32, s32, s32);
 /* was func_151ED998 */
 Gfx *screen_fade_rect_draw(Gfx *gdl) {
-    if ((u8)D_800E0FC6 == 0) {
+    if ((u8)g_screen_fade_alpha == 0) {
         return gdl;
     }
     gDPPipeSync(gdl++);
     gDPSetOtherMode(gdl++, 0x082C3F, 0x504340);
     gDPSetCombine(gdl++, 0xFFFFFF, 0xFFFEFB7D);
-    gDPSetEnvColor(gdl++, 0, 0, 0, (u8)D_800E0FC6);
-    return (Gfx *)render_fill_rect_clamped((u8 *)gdl, 0, 0, D_800BE620, D_800BE624);
+    gDPSetEnvColor(gdl++, 0, 0, 0, (u8)g_screen_fade_alpha);
+    return (Gfx *)render_fill_rect_clamped((u8 *)gdl, 0, 0, g_framebuffer_width, g_framebuffer_height);
 }
 
 /* Tile setup for hud_image_draw: LoadBlock word count (*outBlock, from the D_8009E280/84 size tables), then
@@ -1878,7 +1878,7 @@ typedef struct {
     s32 seg6;           /* 0x1C segment 6 base of the model data */
     s32 u20;
     u8 *inst;           /* 0x24 animated model instance (0x3F8 bytes) */
-    f32 mtx[2][4][4];   /* 0x28 model matrix, one per frame buffer (D_800BE9C0) */
+    f32 mtx[2][4][4];   /* 0x28 model matrix, one per frame buffer (g_dl_buf_index) */
 } HudModel;
 
 s32 animmodel_create(s32, s32, void *, void *, void *, void *, void *);
@@ -1991,17 +1991,17 @@ u8 *hud_anim_model_draw(u8 *gdl, s32 model, f32 x, f32 y, f32 scale) {
         y *= D_800901C0;
         scale *= D_800901BC;
     }
-    guMtxIdentF(m->mtx[D_800BE9C0]);
-    m->mtx[D_800BE9C0][3][0] = x;
-    m->mtx[D_800BE9C0][3][1] = y;
-    m->mtx[D_800BE9C0][3][2] = -100.0f;
-    m->mtx[D_800BE9C0][0][0] = scale;
-    m->mtx[D_800BE9C0][1][1] = scale;
-    m->mtx[D_800BE9C0][2][2] = scale;
+    guMtxIdentF(m->mtx[g_dl_buf_index]);
+    m->mtx[g_dl_buf_index][3][0] = x;
+    m->mtx[g_dl_buf_index][3][1] = y;
+    m->mtx[g_dl_buf_index][3][2] = -100.0f;
+    m->mtx[g_dl_buf_index][0][0] = scale;
+    m->mtx[g_dl_buf_index][1][1] = scale;
+    m->mtx[g_dl_buf_index][2][2] = scale;
     animmodel_update_matrices(m->inst);
 
     g->words.w0 = 0xDA380003; /* gSPMatrix: load modelview */
-    g->words.w1 = (u32) D_80089810;
+    g->words.w1 = (u32) g_identity_mtx;
     g++;
     g->words.w0 = 0xDA380007; /* gSPMatrix: load projection */
     g->words.w1 = (u32) &D_800E1068;
@@ -2028,7 +2028,7 @@ u8 *hud_anim_model_draw(u8 *gdl, s32 model, f32 x, f32 y, f32 scale) {
     g->words.w1 = 0xFF;
     g++;
     g->words.w0 = 0xDB06000C; /* segment 3 */
-    g->words.w1 = *(u32 *) (m->inst + 0x3E8 + D_800BE9C0 * 4);
+    g->words.w1 = *(u32 *) (m->inst + 0x3E8 + g_dl_buf_index * 4);
     g++;
     g->words.w0 = 0xDB060004; /* segment 1 */
     g->words.w1 = m->seg6;
@@ -2138,14 +2138,14 @@ extern u8 D_800ABEE4[];          /* "-": the blinking text cursor */
 void mtx_translate_fixed(Mtx *, f32, f32, f32);
 s32 aiscript_find_by_kind(s32, s32);
 void text_measure_string(u8 *, s32 *, s32 *, s32 *);
-// cheat_entry_draw: the cheat-code entry screen (barrel menu page 1 while D_800902A4 is set, from frontend_menu_draw).
-// Pad bits at D_80090174 + 0x20 (1 up, 2 down, 4 left, 8 right, 0x10 select) move the cursor over the letter wheel
+// cheat_entry_draw: the cheat-code entry screen (barrel menu page 1 while g_title_info_screen is set, from frontend_menu_draw).
+// Pad bits at g_menu_state + 0x20 (1 up, 2 down, 4 left, 8 right, 0x10 select) move the cursor over the letter wheel
 // (row D_800E10B1 0..5 wrapping, column D_800E10B0 clamped to 0 / last: rows 0-3 'A'..'X', row 4 delete / '.' / 'Y' /
 // 'Z' / enter, row 5 space) with sound 0x62D; D_800E10B2 tilts the selected letter (+8 / -8 a frame within 0..12
-// while D_800BE748[0] bit 0x8000 is set / clear). Select (sound 0x500) appends to the typed text D_800E10AC (19 chars
-// max, length D_800E10B3) or deletes / enters. Enter: column k of the 19 strings D_800E1008[0x90..0xA2] holds char k
-// (space padded) of 32 cheat codes; the highest code equal to the text sets its D_800E9D00 bit (0x400 / 0x800 clear
-// each other), sound 0xC3 / 0xC4, message kind 0x10. Else (kind 0x11) the whole-word phrases D_800E1008[0xA3..0xC7]
+// while g_pad_states[0] bit 0x8000 is set / clear). Select (sound 0x500) appends to the typed text D_800E10AC (19 chars
+// max, length D_800E10B3) or deletes / enters. Enter: column k of the 19 strings g_text_strings[0x90..0xA2] holds char k
+// (space padded) of 32 cheat codes; the highest code equal to the text sets its g_cheat_flags bit (0x400 / 0x800 clear
+// each other), sound 0xC3 / 0xC4, message kind 0x10. Else (kind 0x11) the whole-word phrases g_text_strings[0xA3..0xC7]
 // are searched in the text (sound 0xC1 / 0xC2); else 0xC5 / 0xC6, or 0xC7 when the same text is entered a second
 // time in a row (D_800E10B4 counts repeats). The text is kept at D_800E10AC + 0x20, an object of type 9
 // (obj_find_by_setup_id) gets the kind at +0x232 and becomes g_cur_obj, and the text is cleared. Then the wheel is drawn:
@@ -2189,11 +2189,11 @@ Gfx *cheat_entry_draw(Gfx *gdl) {
 
     /* cursor movement over the wheel */
     moved = FALSE;
-    if (*(u16 *) (D_80090174 + 0x20) & 1) {
+    if (*(u16 *) (g_menu_state + 0x20) & 1) {
         D_800E10B1--;
         moved = TRUE;
     }
-    if (*(u16 *) (D_80090174 + 0x20) & 2) {
+    if (*(u16 *) (g_menu_state + 0x20) & 2) {
         D_800E10B1++;
         moved = TRUE;
         if (D_800E10B1 == 4 && D_800E10B0 >= 5) {
@@ -2210,12 +2210,12 @@ Gfx *cheat_entry_draw(Gfx *gdl) {
         D_800E10B1 = 0;
         row = D_800E10B1;
     }
-    if (*(u16 *) (D_80090174 + 0x20) & 8) {
+    if (*(u16 *) (g_menu_state + 0x20) & 8) {
         D_800E10B0 = col + 1;
         col = D_800E10B0;
         moved = TRUE;
     }
-    if (*(u16 *) (D_80090174 + 0x20) & 4) {
+    if (*(u16 *) (g_menu_state + 0x20) & 4) {
         D_800E10B0 = col - 1;
         col = D_800E10B0;
         moved = TRUE;
@@ -2243,7 +2243,7 @@ Gfx *cheat_entry_draw(Gfx *gdl) {
     }
 
     mtx = (Mtx *) allocate_memory(0x80, 4, 2, 0);
-    if (D_800BE748[0] & 0x8000) {
+    if (g_pad_states[0] & 0x8000) {
         D_800E10B2 += 8;
     } else {
         D_800E10B2 -= 8;
@@ -2255,7 +2255,7 @@ Gfx *cheat_entry_draw(Gfx *gdl) {
         D_800E10B2 = 12;
     }
 
-    if (*(u16 *) (D_80090174 + 0x20) & 0x10) {
+    if (*(u16 *) (g_menu_state + 0x20) & 0x10) {
         sound_play_2d(0x500, 0x7D00, 0x40, 0, 0);
         ch = sel + 'A';
         if (D_800E10B1 == 5) {
@@ -2277,7 +2277,7 @@ Gfx *cheat_entry_draw(Gfx *gdl) {
                 match = 0xFFC3FFFE;
                 len = D_800E10B3;
                 for (i = 0x90; i < 0xA3; i++) {
-                    str = ((u8 **) D_800E1008)[i];
+                    str = ((u8 **) g_text_strings)[i];
                     if (i - 0x90 < len) {
                         c = D_800E10AC[i - 0x90];
                     } else {
@@ -2298,11 +2298,11 @@ Gfx *cheat_entry_draw(Gfx *gdl) {
                 }
                 if (cheat >= 0) {
                     bit = 1 << cheat;
-                    D_800E9D00 |= bit;
+                    g_cheat_flags |= bit;
                     if (bit == 0x400) {
-                        D_800E9D00 &= ~0x800;
+                        g_cheat_flags &= ~0x800;
                     } else if (bit == 0x800) {
-                        D_800E9D00 &= ~0x400;
+                        g_cheat_flags &= ~0x400;
                     }
                     kind = 0x10;
                     sfx = (random_int() & 1) + 0xC3;
@@ -2314,7 +2314,7 @@ Gfx *cheat_entry_draw(Gfx *gdl) {
                         if (in == NULL) {
                             continue;
                         }
-                        while ((pat = ((u8 **) D_800E1008)[i]) != NULL) {
+                        while ((pat = ((u8 **) g_text_strings)[i]) != NULL) {
                             n = 0;
                             while (pat[n] == *in && *in != '\0' && pat[n] != '\0') {
                                 in++;
@@ -2399,10 +2399,10 @@ Gfx *cheat_entry_draw(Gfx *gdl) {
     for (off = 0; off < 30 * 12; off += 12) {
         gDPPipeSync(gdl++);
         if (off == sel * 12) {
-            gDPSetEnvColor(gdl++, 0xFF, 0x00, 0xFF, D_800E0EC5);
+            gDPSetEnvColor(gdl++, 0xFF, 0x00, 0xFF, g_menu_page_alpha);
             gSPMatrix(gdl++, mtx + 1, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
         } else {
-            gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, D_800E0EC5);
+            gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, g_menu_page_alpha);
         }
         gSPDisplayList(gdl++, *(Gfx **) (D_800904E8 + off));
         if (off == sel * 12) {
@@ -2411,7 +2411,7 @@ Gfx *cheat_entry_draw(Gfx *gdl) {
     }
 
     /* the text and its cursor */
-    text_set_color(0xFF, 0xB1, 0x1E, D_800E0EC5);
+    text_set_color(0xFF, 0xB1, 0x1E, g_menu_page_alpha);
     text_measure_string(D_800E10AC, &w, &h, &d);
     x = 75 - (w >> 1);
     if (x < 10) {
@@ -2426,11 +2426,11 @@ Gfx *cheat_entry_draw(Gfx *gdl) {
     return gdl;
 }
 
-/* save_screen_frame_draw: draws the save / load screen frame (D_80090174 mode of frontend_menu_draw, padC[0] = selected
- * entry): environment alpha D_800E0EC4, two halves of texture 0x7FB (RGBA16, second half mirrored in S), two pieces of
+/* save_screen_frame_draw: draws the save / load screen frame (g_menu_state mode of frontend_menu_draw, padC[0] = selected
+ * entry): environment alpha g_menu_alpha, two halves of texture 0x7FB (RGBA16, second half mirrored in S), two pieces of
  * texture 0x887 (RGBA32), then the caption string. The caption id comes from asset table 0x1D (u16 per entry), reloaded
  * only when the entry changes (D_800E10B5 = entry + 1) and cached in D_800904EC (0 = no caption). Returns the DL end. */
-extern u8 D_800E0EC4;
+extern u8 g_menu_alpha; /* was D_800E0EC4 */
 extern u8 D_800E10B5;
 extern s32 D_800904EC;
 s32 asset_load_ptr(s32 *, s32, ...);
@@ -2447,7 +2447,7 @@ Gfx *save_screen_frame_draw(Gfx *gdl, s32 entry) {
     u32 size;
 
     gDPPipeSync(gdl++);
-    SAVE_W(gdl, 0xFB000000, D_800E0EC4 | 0xFFFFFF00); /* SetEnvColor 255, 255, 255, alpha */
+    SAVE_W(gdl, 0xFB000000, g_menu_alpha | 0xFFFFFF00); /* SetEnvColor 255, 255, 255, alpha */
     tex = texture_cache_lookup(0x7FB, 0, 3, 0);
     if (tex != (s32) 0x80000000) {
         SAVE_W(gdl, 0xFD100000, tex);        /* SetTImg RGBA16 */

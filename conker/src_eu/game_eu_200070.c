@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800AB490[];
+extern u8 g_destroy_burst_debris_ids[]; /* was D_800AB490 */
 
 void hitinfo_from_obj_floor(void *, u8 *);
 s32 emit_debris_burst(s32 *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32 *, f32, s32, s32, s32, s32);
@@ -130,7 +130,7 @@ void destroy_burst_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u158 = 0xB;
         sp.u150 = 20.248001f;
         sp.u154 = 1.0f;
-        emit_debris_burst(&sp.u118, ((u8 *)&D_800AB490), &D_800AB4C0, 0xC, 0, 0, 0, 1, -1, &sp.u15C, 20.0f, 0, 0, (s32) arg1, arg2);
+        emit_debris_burst(&sp.u118, ((u8 *)&g_destroy_burst_debris_ids), &g_destroy_burst_debris_scales, 0xC, 0, 0, 0, 1, -1, &sp.u15C, 20.0f, 0, 0, (s32) arg1, arg2);
         sp.uDC = 0xF;
         sp.uE0 = 7;
         (*(s32 *)((u8 *)(&sp.uE4) + 0)) = (s32) (*(s32 *)((u8 *)(&sp.u18C) + 0));
@@ -149,7 +149,7 @@ void destroy_burst_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u10C = 0.10700001f;
         sp.u110 = 0.3f;
         sp.u114 = 19.238f;
-        emit_textured_burst(&sp.uDC, ((u8 *)&D_800AB4F0), &D_800AB4F4, 1, 0.0f, 0U, (u8) (s32) arg1, arg2);
+        emit_textured_burst(&sp.uDC, ((u8 *)&g_destroy_burst_tex_params_a), &g_destroy_burst_tex_params_b, 1, 0.0f, 0U, (u8) (s32) arg1, arg2);
         (*(s32 *)((u8 *)(&sp.u54) + 0)) = (s32) (*(s32 *)((u8 *)(&sp.u18C) + 0));
         (*(s32 *)((u8 *)(&sp.u54) + 4)) = (s32) (*(s32 *)((u8 *)(&sp.u18C) + 4));
         (*(s32 *)((u8 *)(&sp.u54) + 8)) = (s32) (*(s32 *)((u8 *)(&sp.u18C) + 8));

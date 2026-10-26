@@ -186,7 +186,7 @@ extern Gfx g_text_render_dl[]; /* was D_80085D30 */
 extern Gfx D_80087770[];
 extern Gfx D_800877A8[];
 extern u8 g_render_mode_pairs[];        /* render mode pairs (8 bytes each); was D_800A4EA8 */
-extern s32 D_800BEFC4;         /* display list capacity (commands) */
+extern s32 g_dl_capacity;         /* display list capacity (commands); was D_800BEFC4 */
 extern u16 D_800CC16E;         /* controller layout bits: picks the icon of the B1 / B2-B5 / BB codes */
 extern u8 D_800CC170;          /* current control code (0xFF: none) */
 extern u8 D_800CC177;          /* primitive colour last sent: r */
@@ -204,7 +204,7 @@ Gfx *sprite_load_texture(Gfx *, s32 *, s32, void *, s32, s32, s32, s32, s32);
 Gfx *sprite_draw_at_screen(Gfx *, void *, f32, f32);
 
 /* the view of the current player (0x180-byte records): +0x14 / +0x18 scale, +0x24..+0x30 clip top / bottom / left / right */
-#define TEXT_VIEW() ((u8 *) D_800BE628 + g_cur_view_player * 0x180)
+#define TEXT_VIEW() ((u8 *) g_player_cams + g_cur_view_player * 0x180)
 #define VIEW_F(v, off) (*(f32 *) ((v) + (off)))
 
 /*
@@ -286,7 +286,7 @@ Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f
     D_800CC178[2] = a;
     D_800CC178[3] = 0;
     D_800CC17D = 0;
-    D_800CC17E += D_800BE9E4 * 6;
+    D_800CC17E += g_frame_ticks * 6;
     curR = r;
     curG = g;
     curB = b;
@@ -354,7 +354,7 @@ Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f
                 break;
             case 0xA6: /* flashing */
                 D_800CC178[3] = 1;
-                D_800CC17C += D_800BE9E4 * 8;
+                D_800CC17C += g_frame_ticks * 8;
                 flash = (cosf(D_800CC17C * (3.1415927f / 128.0f)) + 1.0f) * 0.5f;
                 break;
             case 0xA7: /* wave */
@@ -466,7 +466,7 @@ Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f
 
         prevW = w;
         prevH = h;
-        if (gdl != NULL && gdl - D_800BEDE8[D_800BE9C0] > D_800BEFC4) {
+        if (gdl != NULL && gdl - D_800BEDE8[g_dl_buf_index] > g_dl_capacity) {
             gDPPipeSync(gdl);
             return start;
         }

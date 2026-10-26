@@ -11,13 +11,13 @@
 \#^        obj_tint_set_flash((u8 \*) g_objects #s/0x50, 0, 0xF/0x50, 0, 0xE/
 \#^    if (\*(u8 \*\*) (owner + 0x1D4) == NULL) {#s/==/!=/
 \#^    if (\*(s8 \*) (st + 0xC) <= 0) {#s/<= 0/< 0/
-\#^    \*(f32 \*) (st + 8) += #s/D_800A1D38 \* D_800BE9A4/D_800A1D38/
+\#^    \*(f32 \*) (st + 8) += #s/g_drip_rate \* g_frame_step_f/g_drip_rate/
 \#^        trail\.id = owner\[0x3B\];#s/0x3B/0x3A/
 \#^        trail\.size = random_float() \* 6\.0f + 13\.0f;#s/13/12/
-\#^        trail\.unk10 = D_800A1D3C;#s/D_800A1D3C/D_800A1D38/
+\#^        trail\.unk10 = g_drip_trail_k_1d3c;#s/g_drip_trail_k_1d3c/g_drip_rate/
 \#^        trail\.speed = random_float() \* 40\.0f + 60\.0f;#s/40/50/
 \#^        trail\.accel = #s/trail\.size \* trail\.size/trail.size/
-\#^        in\[1\] = (f32 \*) D_800A1D2C;#s/D_800A1D2C/D_800A1D20/
+\#^        in\[1\] = (f32 \*) g_drip_bone_pt_b;#s/g_drip_bone_pt_b/g_drip_bone_pt_a/
 \#^        mtx_transform_points(in, out, #s/0x3C0/0x380/
 \#^        mtx_transform_points(in, out, #s/, 2)/, 1)/
 \#^        dir\[1\] -= spr\.pos\[1\];#s/-=/+=/

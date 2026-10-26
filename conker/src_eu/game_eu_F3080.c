@@ -123,15 +123,15 @@ s32 gfx_set_combine_mode(s32, s32, s8 *);
 u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 extern s32 D_80091198[];
 float sqrtf(float);
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 // beam_quad_draw: draws a camera-facing beam quad from +0x18 (start) to +0x24 (end) for player view `view` when
 // flag 1 of +0x10 is set. The quad's half-width vector is (end - start) x (end - camera) normalised to 8.4
-// (camera = view record +0x2F8 of D_800DBFF0, 0x9A0 bytes per view); the texture runs 0..0x3C0 across and
+// (camera = view record +0x2F8 of g_player_views, 0x9A0 bytes per view); the texture runs 0..0x3C0 across and
 // 0..+0xC0 * +0x34 * 64 along. Render state: texture D_80091198 (gfx_load_texture_cached); with flag 1 of the view's
-// +0x5F0 the view's colours D_800D9F98 / D_800D9F88 (3 bytes per view) and mode 0x1E, else black and mode 0x13.
-// The 4 vertices go to the obj's buffer for D_800BE9C0 (+0x40, 0x40 bytes each) and two triangles are added.
+// +0x5F0 the view's colours g_tint_env_rgb / g_tint_prim_rgb (3 bytes per view) and mode 0x1E, else black and mode 0x13.
+// The 4 vertices go to the obj's buffer for g_dl_buf_index (+0x40, 0x40 bytes each) and two triangles are added.
 /* was func_150C5BA4 */
 u8 *beam_quad_draw(u8 *gdl, u8 *obj, s16 view) {
     u8 flag;
@@ -154,23 +154,23 @@ u8 *beam_quad_draw(u8 *gdl, u8 *obj, s16 view) {
     if (!(*(s32 *) (obj + 0x10) & 1)) {
         return gdl;
     }
-    cam = (f32 *) ((u8 *) D_800DBFF0 + view * 0x9A0 + 0x2F8);
-    v = (s16 *) (obj + D_800BE9C0 * 0x40 + 0x40);
+    cam = (f32 *) ((u8 *) g_player_views + view * 0x9A0 + 0x2F8);
+    v = (s16 *) (obj + g_dl_buf_index * 0x40 + 0x40);
     flag = 1;
     gdl = (u8 *) gfx_geometry_mode_cached((s32) gdl, 1, 0x600);
     gdl = (u8 *) gfx_load_texture_cached(gdl, D_80091198, 0, 0, 0, 0, 0x36, 0, 0, (s8 *) &flag, 3);
-    if (*(s32 *) ((u8 *) D_800DBFF0 + view * 0x9A0 + 0x5F0) & 1) {
-        gdl = (u8 *) gfx_env_color_cached((Gfx *) gdl, D_800D9F98[view * 3], D_800D9F98[view * 3 + 1],
-                                   D_800D9F98[view * 3 + 2], 0xFF, &flag);
-        gdl = (u8 *) gfx_prim_color_cached((s32) gdl, 0xF2, 0, D_800D9F88[view * 3], D_800D9F88[view * 3 + 1],
-                                   D_800D9F88[view * 3 + 2], 0xFF, (s8 *) &flag);
+    if (*(s32 *) ((u8 *) g_player_views + view * 0x9A0 + 0x5F0) & 1) {
+        gdl = (u8 *) gfx_env_color_cached((Gfx *) gdl, g_tint_env_rgb[view * 3], g_tint_env_rgb[view * 3 + 1],
+                                   g_tint_env_rgb[view * 3 + 2], 0xFF, &flag);
+        gdl = (u8 *) gfx_prim_color_cached((s32) gdl, 0xF2, 0, g_tint_prim_rgb[view * 3], g_tint_prim_rgb[view * 3 + 1],
+                                   g_tint_prim_rgb[view * 3 + 2], 0xFF, (s8 *) &flag);
         gdl = (u8 *) gfx_set_combine_mode((s32) gdl, 0x1E, (s8 *) &flag);
     } else {
         gdl = (u8 *) gfx_env_color_cached((Gfx *) gdl, 0, 0, 0, 0, &flag);
         gdl = (u8 *) gfx_prim_color_cached((s32) gdl, 0, 0, 0, 0, 0, 0, (s8 *) &flag);
         gdl = (u8 *) gfx_set_combine_mode((s32) gdl, 0x13, (s8 *) &flag);
     }
-    gdl = gfx_other_mode_cached((s32) gdl, D_800D30BC | 0x80000 | 0x2CA0,
+    gdl = gfx_other_mode_cached((s32) gdl, g_gfx_tlut_mode | 0x80000 | 0x2CA0,
                         *(s32 *) (g_render_mode_pairs + 0xC) | *(s32 *) (g_render_mode_pairs + 0x8), (s8 *) &flag);
     dx = *(f32 *) (obj + 0x24) - *(f32 *) (obj + 0x18);
     dy = *(f32 *) (obj + 0x28) - *(f32 *) (obj + 0x1C);

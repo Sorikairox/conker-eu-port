@@ -1,6 +1,6 @@
 # P256 spark_point_flash_update (spark_point_flash_update) mutants: sed % setup names
 s/(obj + 0x2C) >= 0)/(obj + 0x2C) > 0)/ % zero
-s/-= D_800BE9E4/-= 1/ % fire0 zero
+s/-= g_frame_ticks/-= 1/ % fire0 zero
 s/group = random_int() . 3U;/group = random_int() \& 1;/ % fire2
 s/\[random_int() . 10U\]/[random_int() \& 7]/ % fire0 fire2
 s/pt\[0\] != 0.0f \&\& //  % x0

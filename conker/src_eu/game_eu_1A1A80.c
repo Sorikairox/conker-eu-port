@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-extern s16 D_80083336;
+extern s16 g_render_scissor_mode; /* was D_80083336 */
 
 /* was func_15174270 */
 u8 *occlusion_probe_readback_emit(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 arg6) {
@@ -81,7 +81,7 @@ u8 *occlusion_probe_readback_emit(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 ar
     temp_a0_9 = temp_a0_8 + 8;
     temp_a0_10 = temp_a0_9 + 8;
     temp_a0_11 = temp_a0_10 + 8;
-    (*(s32 *)((u8 *)temp_a0_8 + 4)) = (s32) ((arg2 * D_800BE620 * 2) + g_zbuffer);
+    (*(s32 *)((u8 *)temp_a0_8 + 4)) = (s32) ((arg2 * g_framebuffer_width * 2) + g_zbuffer);
     (*(s32 *)((u8 *)temp_a0_9 + 0)) = 0xF5100000;
     (*(s32 *)((u8 *)temp_a0_9 + 4)) = 0x07000000;
     (*(s32 *)((u8 *)temp_a0_10 + 0)) = 0xE6000000;
@@ -89,7 +89,7 @@ u8 *occlusion_probe_readback_emit(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 ar
     (*(s32 *)((u8 *)temp_a0_11 + 0)) = 0xF3000000;
     temp_a0_12 = temp_a0_11 + 8;
     temp_t2 = arg6 * 0x180;
-    temp_f6 = (s32) (*(f32 *)((u8 *)((D_800BE628 + temp_t2)) + 4));
+    temp_f6 = (s32) (*(f32 *)((u8 *)((g_player_cams + temp_t2)) + 4));
     temp_v1 = temp_f6 - 1;
     if (temp_v1 < 0x7FF) {
         var_t1 = temp_v1;
@@ -113,17 +113,17 @@ u8 *occlusion_probe_readback_emit(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 ar
     temp_a0_13 = temp_a0_12 + 8;
     temp_a0_14 = temp_a0_13 + 8;
     (*(s32 *)((u8 *)temp_a0_13 + 4)) = 0;
-    (*(s32 *)((u8 *)temp_a0_13 + 0)) = (s32) (((((s32) (((s32) (*(f32 *)((u8 *)((D_800BE628 + temp_t2)) + 4)) * 2) + 7) >> 3) & 0x1FF) << 9) | 0xF5100000);
+    (*(s32 *)((u8 *)temp_a0_13 + 0)) = (s32) (((((s32) (((s32) (*(f32 *)((u8 *)((g_player_cams + temp_t2)) + 4)) * 2) + 7) >> 3) & 0x1FF) << 9) | 0xF5100000);
     (*(s32 *)((u8 *)temp_a0_14 + 0)) = 0xF2000000;
     temp_a0_15 = temp_a0_14 + 8;
-    (*(s32 *)((u8 *)temp_a0_14 + 4)) = (s32) (((((s32) (*(f32 *)((u8 *)((D_800BE628 + temp_t2)) + 4)) - 1) * 4) & 0xFFF) << 0xC);
+    (*(s32 *)((u8 *)temp_a0_14 + 4)) = (s32) (((((s32) (*(f32 *)((u8 *)((g_player_cams + temp_t2)) + 4)) - 1) * 4) & 0xFFF) << 0xC);
     (*(s32 *)((u8 *)temp_a0_15 + 0)) = 0xFF100003;
     temp_a0_16 = temp_a0_15 + 8;
     (*(s32 *)((u8 *)temp_a0_15 + 4)) = arg4;
     (*(s32 *)((u8 *)temp_a0_16 + 0)) = 0xED000000;
     temp_a0_17 = temp_a0_16 + 8;
     temp_a0_18 = temp_a0_17 + 8;
-    (*(s32 *)((u8 *)temp_a0_16 + 4)) = (s32) ((((s32) ((f32) (s32) (*(f32 *)((u8 *)((D_800BE628 + temp_t2)) + 4)) * 4.0f) & 0xFFF) << 0xC) | 4);
+    (*(s32 *)((u8 *)temp_a0_16 + 4)) = (s32) ((((s32) ((f32) (s32) (*(f32 *)((u8 *)((g_player_cams + temp_t2)) + 4)) * 4.0f) & 0xFFF) << 0xC) | 4);
     (*(s32 *)((u8 *)temp_a0_17 + 0)) = 0xE400C004;
     (*(s32 *)((u8 *)temp_a0_17 + 4)) = 0;
     (*(s32 *)((u8 *)temp_a0_18 + 0)) = 0xE1000000;
@@ -137,14 +137,14 @@ u8 *occlusion_probe_readback_emit(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 ar
     temp_a0_21 = temp_a0_20 + 8;
     temp_a0_22 = temp_a0_21 + 8;
     temp_a0_23 = temp_a0_22 + 8;
-    (*(s32 *)((u8 *)temp_a0_20 + 4)) = (s32) (g_framebuffers[D_800BE9C0] + (arg2 * D_800BE620 * 2));
+    (*(s32 *)((u8 *)temp_a0_20 + 4)) = (s32) (g_framebuffers[g_dl_buf_index] + (arg2 * g_framebuffer_width * 2));
     (*(s32 *)((u8 *)temp_a0_21 + 0)) = 0xF5100000;
     (*(s32 *)((u8 *)temp_a0_21 + 4)) = 0x07000000;
     (*(s32 *)((u8 *)temp_a0_22 + 0)) = 0xE6000000;
     (*(s32 *)((u8 *)temp_a0_22 + 4)) = 0;
     (*(s32 *)((u8 *)temp_a0_23 + 0)) = 0xF3000000;
     temp_a0_24 = temp_a0_23 + 8;
-    temp_f8 = (s32) (*(f32 *)((u8 *)((D_800BE628 + temp_t2)) + 4));
+    temp_f8 = (s32) (*(f32 *)((u8 *)((g_player_cams + temp_t2)) + 4));
     temp_v1_2 = temp_f8 - 1;
     if (temp_v1_2 < 0x7FF) {
         var_t1_2 = temp_v1_2;
@@ -168,10 +168,10 @@ u8 *occlusion_probe_readback_emit(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 ar
     temp_a0_25 = temp_a0_24 + 8;
     temp_a0_26 = temp_a0_25 + 8;
     (*(s32 *)((u8 *)temp_a0_25 + 4)) = 0;
-    (*(s32 *)((u8 *)temp_a0_25 + 0)) = (s32) (((((s32) (((s32) (*(f32 *)((u8 *)((D_800BE628 + temp_t2)) + 4)) * 2) + 7) >> 3) & 0x1FF) << 9) | 0xF5100000);
+    (*(s32 *)((u8 *)temp_a0_25 + 0)) = (s32) (((((s32) (((s32) (*(f32 *)((u8 *)((g_player_cams + temp_t2)) + 4)) * 2) + 7) >> 3) & 0x1FF) << 9) | 0xF5100000);
     (*(s32 *)((u8 *)temp_a0_26 + 0)) = 0xF2000000;
     temp_a0_27 = temp_a0_26 + 8;
-    (*(s32 *)((u8 *)temp_a0_26 + 4)) = (s32) (((((s32) (*(f32 *)((u8 *)((D_800BE628 + temp_t2)) + 4)) - 1) * 4) & 0xFFF) << 0xC);
+    (*(s32 *)((u8 *)temp_a0_26 + 4)) = (s32) (((((s32) (*(f32 *)((u8 *)((g_player_cams + temp_t2)) + 4)) - 1) * 4) & 0xFFF) << 0xC);
     (*(s32 *)((u8 *)temp_a0_27 + 0)) = 0xFF100003;
     temp_a0_28 = temp_a0_27 + 8;
     (*(s32 *)((u8 *)temp_a0_27 + 4)) = arg5;
@@ -183,7 +183,7 @@ u8 *occlusion_probe_readback_emit(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 ar
     temp_a0_30 = temp_a0_29 + 8;
     (*(s32 *)((u8 *)temp_a0_30 + 0)) = 0xF1000000;
     (*(s32 *)((u8 *)temp_a0_30 + 4)) = 0x10000400;
-    temp_v0 = render_set_scissor(render_set_color_image(temp_a0_30 + 8, temp_a0_30, var_a2_2, var_a3_2), D_80083336, 0, 0, 0, 0);
+    temp_v0 = render_set_scissor(render_set_color_image(temp_a0_30 + 8, temp_a0_30, var_a2_2, var_a3_2), g_render_scissor_mode, 0, 0, 0, 0);
     (*(s32 *)((u8 *)temp_v0 + 4)) = 0x80000;
     (*(s32 *)((u8 *)temp_v0 + 0)) = 0xE3000C00;
     return temp_v0 + 8;
@@ -196,17 +196,17 @@ typedef struct {
     s8 b34;
     s32 v38;
 } Ent_DD778_nm; /* = Ent_DD778 below, size 0x3C */
-extern Ent_DD778_nm D_800DD778[];
-extern u16 D_800DD740[][4];       /* per entry: z-buffer word read back (0xFFFF = pending) */
-extern u16 D_800DD758[][4];       /* per entry: colour-buffer word read back (RGBA5551) */
-extern s32 D_800DD730[];          /* per entry: projected depth */
-extern s32 D_800DD770;
-extern s32 D_800899D0[][2];       /* z-buffer decode table: (shift, add) per exponent */
-extern void (*D_8008A420[])(Ent_DD778_nm *, s32, s32, s32);
+extern Ent_DD778_nm g_occl_probes[]; /* was D_800DD778 */
+extern u16 g_occl_probe_zbuf[][4];       /* per entry: z-buffer word read back (0xFFFF = pending); was D_800DD740 */
+extern u16 g_occl_probe_colour[][4];       /* per entry: colour-buffer word read back (RGBA5551); was D_800DD758 */
+extern s32 g_occl_probe_depth[];          /* per entry: projected depth; was D_800DD730 */
+extern s32 g_occl_probe_last_colour; /* was D_800DD770 */
+extern s32 g_zbuf_decode_table[][2];       /* z-buffer decode table: (shift, add) per exponent; was D_800899D0 */
+extern void (*g_occl_probe_fns[])(Ent_DD778_nm *, s32, s32, s32); /* was D_8008A420 */
 void camera_world_to_screen(s32 arg0, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz);
 
 /* Occlusion probes (3 entries, e.g. lens flares): first, for entries read back in the current DL buffer
- * (state == D_800BE9C0 + 1), decode the z-buffer word and, when within 300 of the projected depth, call the entry's
+ * (state == g_dl_buf_index + 1), decode the z-buffer word and, when within 300 of the projected depth, call the entry's
  * callback with the pixel colour; then for new requests (state 3) project the point for player 0 and, when it lands
  * inside the viewport, queue the readback (occlusion_probe_readback_emit). Only runs when player == 0. */
 /* was func_1517485C */
@@ -221,33 +221,33 @@ Gfx *occlusion_probes_update(Gfx *gdl, s16 player) {
     if (player != 0) {
         return gdl;
     }
-    for (i = 0, e = D_800DD778; i < 3; i++, e++) {
-        if (e->state == D_800BE9C0 + 1) {
-            z = D_800DD740[i][0];
-            d = (u32)(D_800899D0[z >> 13][1] + (((z >> 2) & 0x7FF) << D_800899D0[z >> 13][0])) >> 3;
-            d -= D_800DD730[i];
+    for (i = 0, e = g_occl_probes; i < 3; i++, e++) {
+        if (e->state == g_dl_buf_index + 1) {
+            z = g_occl_probe_zbuf[i][0];
+            d = (u32)(g_zbuf_decode_table[z >> 13][1] + (((z >> 2) & 0x7FF) << g_zbuf_decode_table[z >> 13][0])) >> 3;
+            d -= g_occl_probe_depth[i];
             if (d < 0) {
                 d = -d;
             }
             if (d < 300) {
-                c = D_800DD758[i][0];
-                D_800DD770 = c;
+                c = g_occl_probe_colour[i][0];
+                g_occl_probe_last_colour = c;
                 if (e->b34 != -1) {
-                    D_8008A420[e->b34](e, (c >> 8) & 0xF8, (c >> 3) & 0xF8, (c << 2) & 0xF8);
+                    g_occl_probe_fns[e->b34](e, (c >> 8) & 0xF8, (c >> 3) & 0xF8, (c << 2) & 0xF8);
                 }
             }
             e->state = 0;
         }
     }
-    for (i = 0, e = D_800DD778; i != 3; i++, e++) {
+    for (i = 0, e = g_occl_probes; i != 3; i++, e++) {
         if (e->state != 3) {
             continue;
         }
-        D_800DD740[i][0] = 0xFFFF;
-        e->state = D_800BE9C0 + 1;
+        g_occl_probe_zbuf[i][0] = 0xFFFF;
+        e->state = g_dl_buf_index + 1;
         camera_world_to_screen(player, e->x, e->y, e->z, &sx, &sy, &sz);
-        D_800DD730[i] = (s32)sz;
-        cam = (u8 *)D_800BE628 + player * 0x180;
+        g_occl_probe_depth[i] = (s32)sz;
+        cam = (u8 *)g_player_cams + player * 0x180;
         x = (s32)sx;
         y = (s32)sy;
         if (x < (s32)*(f32 *)(cam + 0x2C) || !(x < (s32)*(f32 *)(cam + 0x30))) {
@@ -256,7 +256,7 @@ Gfx *occlusion_probes_update(Gfx *gdl, s16 player) {
         if (y < (s32)*(f32 *)(cam + 0x24) || !(y < (s32)*(f32 *)(cam + 0x28))) {
             continue;
         }
-        gdl = (Gfx *)occlusion_probe_readback_emit((u8 *)gdl, x, y, 1, (s32)D_800DD740[i], (s32)D_800DD758[i], player);
+        gdl = (Gfx *)occlusion_probe_readback_emit((u8 *)gdl, x, y, 1, (s32)g_occl_probe_zbuf[i], (s32)g_occl_probe_colour[i], player);
     }
     return gdl;
 }
@@ -274,15 +274,15 @@ s32 occlusion_probe_request(f32 arg0, f32 arg1, f32 arg2, struct_eu_bytes24 *arg
     s32 i;
 
     for (i = 0; i < 3; i++) {
-        if (D_800DD778[i].state == 0) {
-            D_800DD778[i].x = arg0;
-            D_800DD778[i].y = arg1;
-            D_800DD778[i].state = 3;
-            D_800DD778[i].z = arg2;
-            D_800DD778[i].b34 = arg4;
-            D_800DD778[i].v38 = arg5;
+        if (g_occl_probes[i].state == 0) {
+            g_occl_probes[i].x = arg0;
+            g_occl_probes[i].y = arg1;
+            g_occl_probes[i].state = 3;
+            g_occl_probes[i].z = arg2;
+            g_occl_probes[i].b34 = arg4;
+            g_occl_probes[i].v38 = arg5;
             if (arg3 != NULL) {
-                D_800DD778[i].info = *arg3;
+                g_occl_probes[i].info = *arg3;
             }
             return 0;
         }

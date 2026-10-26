@@ -1,8 +1,8 @@
-s/D_800D1CC4\[i\] < 0x33/D_800D1CC4[i] < 0x34/
-s/D_800D1CC4\[i\] < 0x33/D_800D1CC4[j] < 0x33/
-s/if (D_800D1CC2 \& mask) {/if (D_800D1CC2 \& jbit) {/
+s/g_player_out_fade\[i\] < 0x33/g_player_out_fade[i] < 0x34/
+s/g_player_out_fade\[i\] < 0x33/g_player_out_fade[j] < 0x33/
+s/if (g_player_out_mask \& mask) {/if (g_player_out_mask \& jbit) {/
 s/    D_800D18A0 \&= ~mask;/    ;/
-s/    D_800D1CC2 |= mask;/    D_800D1CC2 |= jbit;/
+s/    g_player_out_mask |= mask;/    g_player_out_mask |= jbit;/
 s/    D_800D18A0 |= jbit;/    D_800D18A0 |= mask;/
 s/player_stat_modify(i, 2, player_stat_get(j, 3));/player_stat_modify(i, 2, player_stat_get(i, 3));/
 s/player_stat_get(j, 3)/player_stat_get(j, 2)/
@@ -29,4 +29,4 @@ s/obj->immune = 0x5A;/obj->immune = 0x5B;/
 s/obj->unk31C->unk1AA = saved1AA;/;/
 s/+ 0x1AF) = 0x40;/+ 0x1AF) = 0x41;/
 s/camera_snap_to_object(obj->camera, obj);/camera_snap_to_object(obj->camera, \&g_objects[j]);/
-s/    D_80090134++;/    ;/
+s/    g_humans_alive++;/    ;/

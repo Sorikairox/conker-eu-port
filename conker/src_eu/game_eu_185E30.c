@@ -29,7 +29,7 @@ s32 dl_fx_spawn(s32 src, s32 arg1, s32 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg
     }
     *(s32 *)(p + 0xF0) = 0;
     if (arg1 != 0) {
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= g_last_player_index; i++) {
             ((s32 *)(p + 0xE0))[i] = light_alloc_light_buf(arg1);
         }
         *(s32 *)(p + 0xF0) = light_alloc_lookat_buf();
@@ -44,19 +44,19 @@ void dl_fx_spawn_unlit(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     dl_fx_spawn(arg0, 0, 0, arg1, arg2, arg3, arg4);
 }
 
-extern s32 (*D_8008B1A0[])(void);
+extern s32 (*g_dl_fx_check_fns[])(void); /* was D_8008B1A0 */
 /* was func_15158794 */
 void dl_fx_update(u8 *arg0) {
     s32 pad;
     u8 ret = 0;
 
     if ((arg0[0x10] & 1) != 0) {
-        *(s16 *)(arg0 + 0x14) -= D_800BE9E4;
+        *(s16 *)(arg0 + 0x14) -= g_frame_ticks;
         if (*(s16 *)(arg0 + 0x14) < 0) {
             ret = 1;
         }
     }
-    if ((ret == 0) && (*(s8 *)(arg0 + 0x12) != -1) && (D_8008B1A0[*(s8 *)(arg0 + 0x12)]() == 0)) {
+    if ((ret == 0) && (*(s8 *)(arg0 + 0x12) != -1) && (g_dl_fx_check_fns[*(s8 *)(arg0 + 0x12)]() == 0)) {
         ret = 1;
     }
     if (ret) {
@@ -72,8 +72,8 @@ u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 void fx_calc_color_mode_a(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
 void fx_calc_color_mode_b(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
 u8 *model_part_emit_lights(u8 *, u8 *, u8, s32, s32, s32, u8 *, s32, s32);
-extern s32 D_8008B1AC;
-extern s32 D_8008B358;
+extern s32 g_dl_fx_mtx_fns; /* was D_8008B1AC */
+extern s32 g_dl_fx_dls; /* was D_8008B358 */
 
 /* was func_15158838 */
 u8 *dl_fx_draw(u8 *arg0, u8 *arg1, s16 arg2) {
@@ -99,7 +99,7 @@ u8 *dl_fx_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     sp.u5B = 1;
     temp_v0 = (*(s8 *)((u8 *)arg1 + 0x13));
     if (temp_v0 != -1) {
-        if ((*(s32 (**)())((u8 *)&D_8008B1AC + (temp_v0 * 4)))(arg1 + (D_800BE9C0 << 6) + 0x58, arg1) == 0) {
+        if ((*(s32 (**)())((u8 *)&g_dl_fx_mtx_fns + (temp_v0 * 4)))(arg1 + (g_dl_buf_index << 6) + 0x58, arg1) == 0) {
             return arg0;
         }
         goto block_3;
@@ -121,9 +121,9 @@ block_3:
     }
     (*(s32 *)((u8 *)var_s1 + 0)) = 0xDA380003;
     temp_s1 = var_s1 + 8;
-    (*(u8 **)((u8 *)var_s1 + 4)) = (u8 *) (arg1 + (D_800BE9C0 << 6) + 0x58);
+    (*(u8 **)((u8 *)var_s1 + 4)) = (u8 *) (arg1 + (g_dl_buf_index << 6) + 0x58);
     (*(s32 *)((u8 *)temp_s1 + 0)) = 0xDE000000;
-    (*(s32 *)((u8 *)temp_s1 + 4)) = (s32) *(((s32 *)((u8 *)&D_8008B358 + ((*(u8 *)((u8 *)arg1 + 0x16)) * 4))));
+    (*(s32 *)((u8 *)temp_s1 + 4)) = (s32) *(((s32 *)((u8 *)&g_dl_fx_dls + ((*(u8 *)((u8 *)arg1 + 0x16)) * 4))));
     return temp_s1 + 8;
 }
 /* was func_15158AFC */
@@ -174,7 +174,7 @@ s32 dl_fx_beh_move(u8 *arg0) {
     (*(f32 *)((u8 *)(&sp.u20) + 0)) = (*(f32 *)((u8 *)arg0 + 0x108));
     (*(s32 *)((u8 *)(&sp.u20) + 4)) = (s32) (*(s32 *)((u8 *)arg0 + 0x10C));
     (*(s32 *)((u8 *)(&sp.u20) + 8)) = (s32) (*(s32 *)((u8 *)arg0 + 0x110));
-    var_v0 = D_800BE9E4;
+    var_v0 = g_frame_ticks;
     if (var_v0 != 0) {
         temp_a2 = -(var_v0 & 3);
         temp_a1 = temp_a2 + var_v0;
@@ -230,17 +230,17 @@ block_5:
     }
     temp_v1_3 = arg0 + 0xF8;
     temp_f18 = (*(f32 *)((u8 *)temp_v1_3 + 0x28));
-    (*(f32 *)((u8 *)temp_v1_3 + 0x14)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 0x14)) + (temp_f18 * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x48)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x48)) + ((sp.u20 + (0.5f * (((*(f32 *)((u8 *)temp_v1_3 + 0x10)) - sp.u20) * D_800BEDC8) * D_800BE9A4)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x4C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x4C)) + ((sp.u24 + (0.5f * temp_f18 * D_800BE9A4)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x50)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x50)) + ((sp.u28 + (0.5f * (((*(f32 *)((u8 *)temp_v1_3 + 0x18)) - sp.u28) * D_800BEDC8) * D_800BE9A4)) * D_800BE9A4));
-    (*(f32 *)((u8 *)temp_v1_3 + 0)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 0)) + ((*(f32 *)((u8 *)temp_v1_3 + 0x1C)) * D_800BE9A4));
-    (*(f32 *)((u8 *)temp_v1_3 + 4)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 4)) + ((*(f32 *)((u8 *)temp_v1_3 + 0x20)) * D_800BE9A4));
-    (*(f32 *)((u8 *)temp_v1_3 + 8)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 8)) + ((*(f32 *)((u8 *)temp_v1_3 + 0x24)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_v1_3 + 0x14)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 0x14)) + (temp_f18 * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x48)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x48)) + ((sp.u20 + (0.5f * (((*(f32 *)((u8 *)temp_v1_3 + 0x10)) - sp.u20) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x4C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x4C)) + ((sp.u24 + (0.5f * temp_f18 * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x50)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x50)) + ((sp.u28 + (0.5f * (((*(f32 *)((u8 *)temp_v1_3 + 0x18)) - sp.u28) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)temp_v1_3 + 0)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 0)) + ((*(f32 *)((u8 *)temp_v1_3 + 0x1C)) * g_frame_step_f));
+    (*(f32 *)((u8 *)temp_v1_3 + 4)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 4)) + ((*(f32 *)((u8 *)temp_v1_3 + 0x20)) * g_frame_step_f));
+    (*(f32 *)((u8 *)temp_v1_3 + 8)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 8)) + ((*(f32 *)((u8 *)temp_v1_3 + 0x24)) * g_frame_step_f));
     return 1;
 }
 typedef struct { f32 m[4][4]; } MtxF_s82;
-extern MtxF_s82 D_8008B1B8;
+extern MtxF_s82 g_dl_fx_mtx_template; /* was D_8008B1B8 */
 
 /* was func_15158E90 */
 s32 dl_fx_mtx_scaled_template(Mtx *arg0, u8 *arg1) {
@@ -249,7 +249,7 @@ s32 dl_fx_mtx_scaled_template(Mtx *arg0, u8 *arg1) {
     MtxF_s82 mf;
 
     p = arg1;
-    mf = D_8008B1B8;
+    mf = g_dl_fx_mtx_template;
     s = *(f32 *)(p + 0xF8) * 0.003921569f;
     mf.m[3][0] = *(f32 *)(p + 0x48);
     mf.m[3][1] = *(f32 *)(p + 0x4C);
@@ -271,7 +271,7 @@ s32 dl_fx_mtx_scaled_template(Mtx *arg0, u8 *arg1) {
 void dl_fx_free_lights(u8 *arg0) {
     s32 i;
 
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= g_last_player_index; i++) {
         if (((s32 *)(arg0 + 0xE0))[i]) {
             heap_set_block_tag(((s32 *)(arg0 + 0xE0))[i], 4);
         }

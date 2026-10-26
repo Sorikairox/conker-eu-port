@@ -21,13 +21,13 @@ s32 face_anim_reset_default(struct127 *);
 
 /* End of frame (P13, hand C): closes the display list (rolled back to the per-buffer reserve D_800BE9D8 when it
  * overflowed, cut at 0x190 commands before the end otherwise), fills the gfx OSScTask D_800BEEF8[idx] (0x60
- * bytes), sends it to the scheduler's gfx queue and, when arg1 != 0, flips the DL buffer index D_800BE9C0.
+ * bytes), sends it to the scheduler's gfx queue and, when arg1 != 0, flips the DL buffer index g_dl_buf_index.
  * Names are the asm's (several are US names remapped by undefined_syms.eu.txt). */
 extern s32 *D_800BEEF4;           /* the task being filled */
 extern u8 D_800BEEF8[];           /* OSScTask[2], 0x60 each */
 extern u8 D_10029400[];           /* rspboot */
 extern u8 D_100294D0[];
-extern u8 D_800BEFC0;
+extern u8 g_gfx_alt_ucode_active; /* was D_800BEFC0 */
 extern u8 D_800BEA37;
 extern u8 D_8003A948[];           /* yield buffer */
 extern OSMesgQueue D_800BEE30;    /* main-loop queue */
@@ -49,34 +49,34 @@ void gfx_task_submit(s32 arg0, s32 arg1) {
     s32 base;
     s32 *g;
 
-    task = (s32 *)(D_800BEEF8 + D_800BE9C0 * 0x60);
+    task = (s32 *)(D_800BEEF8 + g_dl_buf_index * 0x60);
     D_800BEEF4 = task;
     task[0] = 0;
     cap = ((s32)D_800BEDE8[1] - (s32)D_800BEDE8[0]) >> 3;
-    base = (s32)D_800BEDE8[D_800BE9C0];
+    base = (s32)D_800BEDE8[g_dl_buf_index];
     n = (D_800BE9D0 - base) >> 3;
     if (n < 0 || cap < n) {
         render_dl_buffers_init();
-        D_800BE9D0 = D_800BE9D8[D_800BE9C0];
+        D_800BE9D0 = D_800BE9D8[g_dl_buf_index];
         g = (s32 *)D_800BE9D0; D_800BE9D0 += 8; g[1] = 0; g[0] = 0xE9000000;
         g = (s32 *)D_800BE9D0; D_800BE9D0 += 8; g[1] = 0; g[0] = 0xDF000000;
-        base = (s32)D_800BEDE8[D_800BE9C0];
+        base = (s32)D_800BEDE8[g_dl_buf_index];
         n = (D_800BE9D0 - base) >> 3;
     }
     if (n < 0 || cap - 0x190 < n) {
         D_800BE9D0 = base + (cap - 0x190) * 8;
         g = (s32 *)D_800BE9D0; D_800BE9D0 += 8; g[1] = 0; g[0] = 0xE9000000;
         g = (s32 *)D_800BE9D0; D_800BE9D0 += 8; g[1] = 0; g[0] = 0xDF000000;
-        base = (s32)D_800BEDE8[D_800BE9C0];
+        base = (s32)D_800BEDE8[g_dl_buf_index];
     }
     D_800BEEF4[0x48 / 4] = base;
-    D_800BEEF4[0x4C / 4] = ((D_800BE9D0 - (s32)D_800BEDE8[D_800BE9C0]) >> 3) << 3;
+    D_800BEEF4[0x4C / 4] = ((D_800BE9D0 - (s32)D_800BEDE8[g_dl_buf_index]) >> 3) << 3;
     gfx_load_ucode();
     D_800BEEF4[0x18 / 4] = 1;                                  /* M_GFXTASK */
     D_800BEEF4[0x1C / 4] = 4;                                  /* OS_TASK_LOADABLE */
     D_800BEEF4[0x20 / 4] = (s32)D_10029400;
     D_800BEEF4[0x24 / 4] = D_100294D0 - D_10029400;
-    if (D_800BEFC0 != 0) {
+    if (g_gfx_alt_ucode_active != 0) {
         D_800BEEF4[0x28 / 4] = (s32)&D_800C1480;
         D_800BEEF4[0x30 / 4] = (s32)D_800BEFBC;
     } else {
@@ -95,16 +95,16 @@ void gfx_task_submit(s32 arg0, s32 arg1) {
         D_800BEEF4[0x0C / 4] |= 0x40;
     }
     if (D_800BEA37 != 0) {
-        D_800BEEF4[0x0C / 4] |= (D_80082FA0 + 1) << 16;
+        D_800BEEF4[0x0C / 4] |= (g_last_player_index + 1) << 16;
         D_800BEA37 = 0;
     }
     D_800BEEF4[0x58 / 4] = (s32)&D_800BEE30;
-    D_800BEEF4[0x5C / 4] = (s32)(D_800BEE88 + D_800BE9C0 * 0x20);
-    D_800BEEF4[0x10 / 4] = g_framebuffers[D_800BE9C0];
+    D_800BEEF4[0x5C / 4] = (s32)(D_800BEE88 + g_dl_buf_index * 0x20);
+    D_800BEEF4[0x10 / 4] = g_framebuffers[g_dl_buf_index];
     osWritebackDCacheAll();
     osSendMesg(&D_8003B548, (OSMesg)D_800BEEF4, OS_MESG_BLOCK);
     if (arg1 != 0) {
-        D_800BE9C0 ^= 1;
+        g_dl_buf_index ^= 1;
     }
     g_gfx_tasks_pending++;
 }
@@ -135,7 +135,7 @@ void gfx_load_ucode(void) {
     u8 *temp_v0_2;
 
     var_t1 = 4;
-    var_t0 = D_800B0DF0->pad2A[1];
+    var_t0 = g_level_header->pad2A[1];
     if ((s32) var_t0 >= 2) {
         var_t0 -= 2;
         var_t1 = 0;
@@ -271,7 +271,7 @@ extern f32 D_800C3A94;
 extern f32 D_800C3A98;
 extern u8 D_800C3A78;
 extern u8 D_800C3A7A;
-extern u8 D_800C3A7C;
+extern u8 g_cutscene_show_all; /* was D_800C3A7C */
 extern u8 D_800C3A7E;
 extern u8 D_800C3A80;
 extern u8 D_800C3A82;
@@ -325,7 +325,7 @@ void cutscene_slot_reset(s32 slot) {
     D_800C3A74 = 0.0f;
     (&D_800C3A78)[slot] = 0;
     (&D_800C3A7A)[slot] = 0;
-    (&D_800C3A7C)[slot] = 1;
+    (&g_cutscene_show_all)[slot] = 1;
     (&D_800C3A7E)[slot] = 0;
     (&D_800C3A80)[slot] = 0;
     (&D_800C3A82)[slot] = 0;
@@ -645,7 +645,7 @@ void cutscene_scan_start_events(s32 slot) {
     (&D_800C39D0)[slot] = D_800C40AE;
 }
 
-/* Starts cutscene slot `slot`: script position D_800C39D0[slot] = start D_eu_800C3A60[slot] + D_800BEA08, runs the
+/* Starts cutscene slot `slot`: script position D_800C39D0[slot] = start D_eu_800C3A60[slot] + g_frame_ticks_raw, runs the
  * camera / actor tracks once (cutscene_camera_track_pass, cutscene_apply_cameras, with scene_event_track_pass around them), then gives every
  * live object that takes part (cutscene_obj_takes_part, current object index in g_cur_obj_index) its first actor frame
  * (cutscene_actor_apply_track(obj, slot, -1)) and ends with cutscene_end(1, slot). */
@@ -654,7 +654,7 @@ void cutscene_start(s32 slot) {
     struct127 *obj;
     s32 i;
 
-    (&D_800C39D0)[slot] = (&D_eu_800C3A60)[slot] + D_800BEA08;
+    (&D_800C39D0)[slot] = (&D_eu_800C3A60)[slot] + g_frame_ticks_raw;
     scene_event_track_pass(1, 0);
     cutscene_camera_track_pass(0);
     scene_event_track_pass(0, 0);
@@ -715,13 +715,13 @@ void cutscene_end_skip(s32 slot) {
 }
 /* P96: cutscene_can_skip */
 extern u16 D_800BEB30;  /* buttons held */
-extern u8 D_800D3260;
+extern u8 g_chapter_replay; /* was D_800D3260 */
 extern u8 D_800C3A08;
 extern s32 g_level_id; /* was D_800BE9F0 */
 /* May cutscene slot `slot` be skipped (called by cutscene_update_skip for a playing slot)? Level 0x1D: once after a
  * pending request (D_80090124, cleared here), else only when slot 0's scene is 5 (then as below). Level 0x21:
  * button 0x1000 held (D_800BEB30) with D_8000030C == 1 and slot 0 past frame 250. Other levels: button 0x20,
- * no D_800C40BC, and either D_800D3260 or a skippable scene (cutscene_was_seen with the slot's scene number) that is
+ * no D_800C40BC, and either g_chapter_replay or a skippable scene (cutscene_was_seen with the slot's scene number) that is
  * forced (D_800C40B9) or still has more than 25 frames to run (D_800C39D0 + 25 < D_eu_800C3A60). The second
  * argument is not read. */
 /* DELIBERATE PORT CHANGE (P321, user request): L skips a cutscene only after it is held for 3 s straight.
@@ -773,7 +773,7 @@ s32 cutscene_can_skip(s32 slot, u8 *unused) {
             return 0;
         }
     }
-    if (D_800D3260 != 0) {
+    if (g_chapter_replay != 0) {
         return SKIP_YES;
     }
     if (cutscene_was_seen(level, (&D_800C3A08)[slot]) == 0) {
@@ -814,8 +814,8 @@ void cutscene_update_skip(s32 arg0) {
             }
         }
     } else if (D_800C3C88 == 1) {
-        if (D_800BEA08 < (s32) D_800C40A9) {
-            D_800C40A9 -= D_800BEA08;
+        if (g_frame_ticks_raw < (s32) D_800C40A9) {
+            D_800C40A9 -= g_frame_ticks_raw;
             return;
         }
         D_800C40A9 = 0;
@@ -864,7 +864,7 @@ extern u16 D_800C40AE;
 extern u8 D_eu_800C3E78;
 
 /* Per-player counter step (P15, hand C from the asm): remembers the previous value D_800C39D8[i] of
- * D_800C39D0[i], and for an active player (D_800C35EA[i] == 1) advances it by D_800BEA08 (player 0
+ * D_800C39D0[i], and for an active player (D_800C35EA[i] == 1) advances it by g_frame_ticks_raw (player 0
  * only when g_game_paused == 0), clamped to D_eu_800C3A60[i]. */
 /* was func_1501E46C */
 void cutscene_advance_position(s32 i) {
@@ -880,7 +880,7 @@ void cutscene_advance_position(s32 i) {
     }
     cutscene_update_skip(i);
     if (i != 0 || g_game_paused == 0) {
-        *cur += D_800BEA08;
+        *cur += g_frame_ticks_raw;
     }
     if (D_800C39E0[i] == 0 && D_800C40AE == D_800C39D8[i] && D_800C40AE != *cur) {
         D_800C39D8[i] = -1;
@@ -1006,7 +1006,7 @@ void cutscene_end(s32 skipped, s32 slot) {
     s32 savedLevel;
 
     loaded = &D_800C35EA + slot;
-    gameCam = D_800DBFF0;
+    gameCam = g_player_views;
     if (*loaded == 0) {
         return;
     }
@@ -1075,7 +1075,7 @@ void cutscene_end_camera_objs(s32 slot) {
     u8 *obj;
 
     ev = &D_800C3A20;
-    cam = D_800DBFF0;
+    cam = g_player_views;
     ev[0] = 1;
     ev[1] = slot;
     ((f32 *)ev)[5] = *(f32 *)((u8 *)cam + 0x2F8);
@@ -1865,7 +1865,7 @@ extern f32 D_800C3A48;
  *   type 1 (camera, only actor D_800C3A18): clamps cam[13] / cam[15] / cam[16] to -20 .. 40, fills the camera
  *     event block D_800C3A20 (eye cam[0..2]; target by a: 1 = actor b's position raised by c (+ cam[14]),
  *     2 = object obj_find_by_setup_id(b), 3 = entity world_record_find(b) raised by c, 0 = angle mode) and sends it to the
- *     game camera D_800DBFF0 (camera_queue_event event 7; event 5 + camera_process_events first unless flag 0x40000).
+ *     game camera g_player_views (camera_queue_event event 7; event 5 + camera_process_events first unless flag 0x40000).
  *   type 3: entity world_record_find(a) gets position / angles / scale (* 0.01) / alpha from the record.
  *   type 2: object obj_find_by_setup_id(a) takes its actor frame (cutscene_actor_apply_track(obj, slot, i)).
  *   type 5: when cam[13] >= 1, ambient_extra_flame_queue_cam at the record position with cam[6] / cam[7].
@@ -1909,7 +1909,7 @@ void cutscene_apply_cameras(s32 slot) {
             }
             switch (*(u16 *)ent) {
                 case 1:
-                    gameCam = D_800DBFF0;
+                    gameCam = g_player_views;
                     if (i != D_800C3A18) {
                         break;
                     }
@@ -2175,7 +2175,7 @@ extern f32 D_80096DC0;
  * the first live actor (D_800C39E8 id != 0) whose record (D_800C3A10, kind 2) names the player's room.
  * Its look step (D_800C3D80 +2) gives a point next to entity r[5] (D_800C3958 0x44-byte records) raised by r[6]:
  * written to pos, returns 0. Without one, look step +1: entity 0 = fixed angles (record i +0x24 / +0x28 / +0x2C
- * to outB / outA / outC, returns 1), else the camera point (D_800DBFF0 +0x2F8) raised by r[6]. No step: pos =
+ * to outB / outA / outC, returns 1), else the camera point (g_player_views +0x2F8) raised by r[6]. No step: pos =
  * D_80096DC0 x3. */
 /* was func_15021E60 */
 s32 cutscene_player_look_target(f32 *outA, f32 *outB, f32 *outC, f32 *pos, s32 player, s32 slot) {
@@ -2221,9 +2221,9 @@ s32 cutscene_player_look_target(f32 *outA, f32 *outB, f32 *outC, f32 *pos, s32 p
                 *outC = q[11];
                 return 1;
             }
-            pos[0] = *(f32 *)((u8 *)D_800DBFF0 + 0x2F8);
-            pos[1] = *(f32 *)((u8 *)D_800DBFF0 + 0x2FC) + (f32)*(s16 *)(r + 6);
-            pos[2] = *(f32 *)((u8 *)D_800DBFF0 + 0x300);
+            pos[0] = *(f32 *)((u8 *)g_player_views + 0x2F8);
+            pos[1] = *(f32 *)((u8 *)g_player_views + 0x2FC) + (f32)*(s16 *)(r + 6);
+            pos[2] = *(f32 *)((u8 *)g_player_views + 0x300);
             return 0;
         }
         pos[0] = D_80096DC0;
@@ -2618,7 +2618,7 @@ s32 cutscene_room_has_actor(s32 arg0, s32 arg1) {
     if ((s32) temp_v1 > 0) {
         var_a2 = D_800C39E8[arg1];
 loop_2:
-        if ((*var_a2 != 0) && ((*(u8 *)((u8 *)((D_800C3A10[arg1] + (var_v0 * 8))) + 2)) == D_800DBEF4[arg0].pad70[2])) {
+        if ((*var_a2 != 0) && ((*(u8 *)((u8 *)((D_800C3A10[arg1] + (var_v0 * 8))) + 2)) == g_world_objs[arg0].pad70[2])) {
             return 1;
         }
         var_v0 += 1;

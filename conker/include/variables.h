@@ -246,7 +246,7 @@ extern s8   D_8003BE7C;
 extern s32  D_8003BE94;
 
 extern s32  D_8003C858;
-extern s32  D_8003C8E0;
+extern s32  g_dbg_crash_marker; /* was D_8003C8E0 */
 extern struct26 *D_8003C900[];
 extern struct14 *D_8003CD40;
 extern struct247  D_8003CD48[];
@@ -368,7 +368,7 @@ extern void (*g_record_start_handlers[])(void); /* was D_80082EA0 */
 extern void (*g_record_dispatch_82ecc_tbl[])(void); /* was D_80082ECC */
 extern void (*g_record_dispatch_82f40_tbl[])(void); /* was D_80082F40 */
 extern void (*g_record_dispatch_82f70_tbl[])(void); /* was D_80082F70 */
-extern s32  D_80082FA0;
+extern s32  g_last_player_index; /* was D_80082FA0 */
 extern s32  g_cur_view_player; /* was D_80082FA4 */
 extern u8   D_80084064;
 extern s32  g_vertex_anchor_template; /* was D_80084300 */
@@ -399,12 +399,12 @@ extern void (*D_80086014[])(s32);
 extern s16 g_carry_anim_ids[]; /* was D_800860C0 */
 extern f32 g_carry_anim_speeds[]; /* was D_800860CC */
 extern u16 g_carry_reaction_rows[]; /* was D_800860E4 */
-extern void (*D_80086150[])(s32);
-extern void (*D_80086730[])(void);
-extern s8  D_80087260;
-extern s8  D_80087264;
-extern s8  D_8008726C;
-extern s8  D_80087270[];
+extern void (*g_objev_action_fns[])(s32); /* was D_80086150 */
+extern void (*g_aiscript_cmd_fns[])(void); /* was D_80086730 */
+extern s8  g_player_start_lives; /* was D_80087260 */
+extern s8  g_player_start_stat9; /* was D_80087264 */
+extern s8  g_player_start_health; /* was D_8008726C */
+extern s8  g_player_start_state[]; /* was D_80087270 */
 extern u8  g_mp_level_mode_ids[]; /* was D_80087280 */
 extern u32 D_80087380;
 
@@ -417,7 +417,7 @@ extern u8  D_80088980;
 extern u8  g_storm_thunder_flag; /* was D_80088B40 */
 extern void (*D_80088B60[2])(void);
 extern u8  g_bone_beam_style_b; /* was D_80088B90 */
-extern u8  D_80088BB0;
+extern u8  g_weapon_c_bone; /* was D_80088BB0 */
 extern s32 g_camera_frame_count; /* was D_800894B0 */
 extern s32 D_80089520;
 extern s32 D_80089524[]; // struct arrays?
@@ -448,7 +448,7 @@ extern u8   (*D_8008B1F8[])(struct225*);
 extern void (*g_light_destroy_fns[])(struct225*); /* was D_8008B208 */
 extern void (*g_light_delete_fns[])(struct225*); /* was D_8008B2B0 */
 extern s32 (*D_8008B36C[])(void);
-extern s32 (*D_8008B370[])(s32);
+extern s32 (*g_move_watch_fns[])(s32); /* was D_8008B370 */
 extern void (*D_8008B374[])(s32);
 
 extern struct115 g_node_type_update_fns[]; /* was D_8008B4A8 */
@@ -456,14 +456,14 @@ extern struct115 g_node_type_destroy_fns[]; /* was D_8008B4D0 */
 extern struct115 g_node_type_delete_fns[]; /* was D_8008B4D4 */
 
 
-extern u8   D_8008CEB0;
+extern u8   g_ambient_flame_queue_count; /* was D_8008CEB0 */
 extern u8   D_8008CD00;
-extern s32  D_8008CFFC[];
+extern s32  g_flare_level_points[]; /* was D_8008CFFC */
 
-extern s8   D_8008FD8C;
+extern s8   g_player_count; /* was D_8008FD8C */
 extern s8   D_8008FD90;
 extern s32  D_8008FD94;
-extern s8   D_8008FDA8;
+extern s8   g_save_cur_slot; /* was D_8008FDA8 */
 extern u16  D_8008FDBC;
 
 /* 8009 */
@@ -643,10 +643,10 @@ extern f32 D_8009A0F8;
 extern f32 D_8009A0FC;
 extern f32 D_8009A100;
 // code_75400.c
-extern f32 D_8009A13C; // 1.399999976158142
+extern f32 g_aiscript_speed_boost; /* was D_8009A13C */ // 1.399999976158142
 extern f32 D_8009A140;
 extern f32 D_8009A144;
-extern f32 D_8009A148;
+extern f32 g_aiscript_find_max_dist; /* was D_8009A148 */
 extern f32 D_8009A1E4;
 
 extern f32 D_8009A220[];
@@ -699,7 +699,7 @@ extern f32 D_800A56BC; // 57.2957763671875
 extern f32 D_800A56C0;
 extern f32 D_800A56C4;
 extern f32 D_800A56C8;
-extern s32 D_800A5770;
+extern s32 g_effect_bcast_types; /* was D_800A5770 */
 
 // in game_18D770.c
 extern u8  g_str_light_scale[5];  // "scale" /* was D_800A6690 */
@@ -768,24 +768,24 @@ extern s32 g_impact_debris_tex_kind8[3]; // 160, 161, 162 /* was D_800AB3BC */
 extern s32 g_impact_debris_tex_kind9[1]; // 179 /* was D_800AB3C8 */
 extern s32 g_impact_debris_tex_kind10[3]; // 185, 186, 187 /* was D_800AB3CC */
 extern s32 g_impact_debris_tex_kind11[4]; // 96, 97, 98, 99 /* was D_800AB3D8 */
-extern f32 D_800AB3E8; // 0.0f;
+extern f32 g_obj_ribbon_k_b3e8; /* was D_800AB3E8 */ // 0.0f;
 extern f32 D_800AB3EC; //-1.0f
 
 extern f32 D_800AB464;
 extern f32 D_800AB468;
 extern f32 g_impact_puff_size_factor; // 0.0003000000142492354f /* was D_800AB46C */
-extern f32 D_800AB4C0;
+extern f32 g_destroy_burst_debris_scales; /* was D_800AB4C0 */
 extern f32 D_800AB4C4;
 extern f32 D_800AB4C8;
 extern f32 D_800AB4CC;
 extern f32 D_800AB4E4;
 extern f32 D_800AB4E8;
 extern f32 D_800AB4EC;
-extern f32 D_800AB4F0;
-extern f32 D_800AB4F4;
+extern f32 g_destroy_burst_tex_params_a; /* was D_800AB4F0 */
+extern f32 g_destroy_burst_tex_params_b; /* was D_800AB4F4 */
 
 extern f32 D_800A5480;
-extern f32 D_800A548C[];
+extern f32 g_curve_table[]; /* was D_800A548C */
 
 // end of data D_800B0DBC
 
@@ -801,7 +801,7 @@ extern u16  D_800B0DD8;
 extern s32  D_800B0DDC;
 extern u8  *D_800B0DE0;
 extern s32  D_800B0DE4;
-extern struct104 *D_800B0DF0;
+extern struct104 *g_level_header; /* was D_800B0DF0 */
 // extern struct00 *g_level_part_dls;
 extern s32 g_level_part_dls[]; /* was D_800B0E00 */
 extern s32  D_800B0E04;
@@ -818,14 +818,14 @@ extern u8  g_texture_table_flags[]; /* was D_800BC448 */
 extern s32 D_800BE4A0; // struct/array of size 0x3c
 extern struct14 *g_level_scroll_handles; /* was D_800BE4F0 */
 extern s32 D_800BE4E0;
-extern u8  D_800BE500[5]; // might be a struct?
-extern s32 D_800BE570;
-extern u8  D_800BE574;
-extern u8  D_800BE575;
+extern u8  g_sky_segment_on[5]; /* was D_800BE500 */ // might be a struct?
+extern s32 g_fb_ghost_image; /* was D_800BE570 */
+extern u8  g_fb_ghost_alpha; /* was D_800BE574 */
+extern u8  g_fb_ghost_pass; /* was D_800BE575 */
 extern s32 D_800BE5D0;
 extern u8  g_game_loop_flag_5e0; /* was D_800BE5E0 */
 extern u8  D_800BE9A0;
-extern f32 D_800BE9A4;
+extern f32 g_frame_step_f; /* was D_800BE9A4 */
 extern f32 D_800BE9A8;
 extern s32 g_level_id; /* was D_800BE9F0 */
 
@@ -850,9 +850,9 @@ extern u8   D_800BE615;
 extern u8   D_800BE616;
 extern u8   D_800BE617;
 extern s8   D_800BE618;
-extern s32  D_800BE620;
-extern s32  D_800BE624;
-extern s32  D_800BE628; //[]; // contains structs size 0x180
+extern s32  g_framebuffer_width; /* was D_800BE620 */
+extern s32  g_framebuffer_height; /* was D_800BE624 */
+extern s32  g_player_cams; /* was D_800BE628 */ //[]; // contains structs size 0x180
 extern s32  D_800BE62C;
 extern u8   D_800BE635;
 extern s32  D_800BE638;
@@ -880,11 +880,11 @@ extern f32  D_800BE970[];
 extern f32  D_800BE980[];
 
 extern OSMesg      D_800BE990;
-extern u8   D_800BE9B4;
-extern u8   D_800BE9C0;
+extern u8   g_level_first_frame; /* was D_800BE9B4 */
+extern u8   g_dl_buf_index; /* was D_800BE9C0 */
 extern s32  D_800BE9C4;
 extern s32  g_si_event_mesg; // OSMesg /* was D_800BE9E0 */
-extern s32  D_800BE9E4;
+extern s32  g_frame_ticks; /* was D_800BE9E4 */
 extern s32  D_800BE9E8;
 extern u8   D_800BE9EC;
 extern u8   g_level_load_white_fill; /* was D_800BE9ED */
@@ -892,14 +892,14 @@ extern u16  *g_level_load_id; // was u16 /* was D_800BE9F4 */
 extern s32  D_800BE9F8;
 
 extern struct14 g_cont_pad_ptrs; /* was D_800BE730 */
-extern u16 D_800BE748[];
+extern u16 g_pad_states[]; /* was D_800BE748 */
 extern s32 g_cont_pad1; /* was D_800BE74E */
 extern s32 g_cont_pad2; /* was D_800BE754 */
 extern s32 g_cont_pad3; /* was D_800BE75A */
 
 extern s32 g_frame_phase_accum[]; // struct04 /* was D_800BEA00 */
 extern s32 D_800BEA04[]; // struct04
-extern s32 D_800BEA08;
+extern s32 g_frame_ticks_raw; /* was D_800BEA08 */
 extern OSMesgQueue g_frame_dt_history_2; /* was D_800BEA10 */
 extern OSMesg      D_800BEA28;
 extern struct195  *D_800BEA68;
@@ -907,7 +907,7 @@ extern u16 D_800BEAA8;
 extern u8  D_800BEAAA;
 extern u8  D_800BEAAB;
 extern u8  g_game_paused; /* was D_800BEAC0 */
-extern u8  D_800BEAC1;
+extern u8  g_pause_open; /* was D_800BEAC1 */
 
 /* 800C0000 */
 
@@ -989,30 +989,30 @@ extern u8  D_800CC27C;
 extern s32 D_800CC280;
 extern s32 D_800CC284; //pointer to 6 u8s
 extern s32 D_800CC288;
-extern s32 D_800CC298; // 0x18 length
+extern s32 g_obj_anim_shared; /* was D_800CC298 */ // 0x18 length
 extern u8  g_records_flag_2a2; /* was D_800CC2A2 */
 
-extern f32 D_800CC2C0;
-extern f32 D_800CC2C4;
-extern f32 D_800CC2C8;
+extern f32 g_hit_point_x; /* was D_800CC2C0 */
+extern f32 g_hit_point_y; /* was D_800CC2C4 */
+extern f32 g_hit_point_z; /* was D_800CC2C8 */
 
 extern u8  D_800CC2B0;
 extern u8  D_800CC2B8;
 extern s32 D_800CC2BA;
 extern s32 D_800CC2BC;
 extern struct127 g_objects[26]; // objects /* was D_800CC2D0 */
-extern u8  D_800CC2D4[];
+extern u8  g_obj_tab_id[]; /* was D_800CC2D4 */
 extern f32 g_obj0_y[]; /* was D_800CC2E8 */
-extern f32 D_800CC30C[];
+extern f32 g_obj_tab_xz_velocity[]; /* was D_800CC30C */
 extern u8  D_800CC335;
 extern u16 D_800CC34A[];
 extern u8  D_800CC37D;
-extern u8  D_800CC3D4[];
+extern u8  g_obj_tab_stunned[]; /* was D_800CC3D4 */
 extern s8  g_obj0_107; /* was D_800CC3D7 */
-extern u8  D_800CC3F5[] ; // ??
+extern u8  g_obj_tab_immune[] ; /* was D_800CC3F5 */ // ??
 
-extern struct127  D_800CC5A0[];
-extern u8  D_800CC521[]; // ??
+extern struct127  g_obj_tab_2d0[]; /* was D_800CC5A0 */
+extern u8  g_obj_tab_counter_251[]; /* was D_800CC521 */ // ??
 
 extern struct127 *D_800CE370;
 
@@ -1043,15 +1043,15 @@ extern struct127 *g_cur_obj; /* was D_800D154C */
 extern f32 g_anim_event_fparam; /* was D_800D1874 */
 extern f32 g_anim_event_result; /* was D_800D1878 */
 extern s32 g_anim_event_continue; /* was D_800D1880 */
-extern u8  D_800D1890;
-extern u8  D_800D1891;
-extern u8  D_800D1892;
-extern u8  D_800D1893;
+extern u8  g_aiscript_arg0; /* was D_800D1890 */
+extern u8  g_aiscript_arg1; /* was D_800D1891 */
+extern u8  g_aiscript_arg2; /* was D_800D1892 */
+extern u8  g_aiscript_arg3; /* was D_800D1893 */
 extern f32 D_800D1898[];
 extern u16 D_800D18A0;
 extern u16 g_player_mask_18a2; /* was D_800D18A2 */
 extern s32 g_player_state_18a4; /* was D_800D18A4 */
-extern u8  D_800D18A8;
+extern u8  g_mp_respawning; /* was D_800D18A8 */
 extern u8  D_800D18C0;
 extern u8  D_800D18D0;
 
@@ -1075,7 +1075,7 @@ extern s32 D_800D1F80[187]; // 187 bytes long
 extern s32 D_800D2040[187]; // 187 bytes long
 extern struct258 *D_800D20FC;
 
-extern s32 *D_800D2104;
+extern s32 *g_path_points; /* was D_800D2104 */
 extern u8  D_800D2108[];
 extern s16 D_800D2110[];
 extern s32 D_800D2120;
@@ -1090,27 +1090,27 @@ extern u8  g_game_state_u8_23a9; /* was D_800D23A9 */
 extern s32 D_800D23C0;
 extern s32 D_800D23D0;
 
-extern f32 D_800D2410[];
+extern f32 g_hud_health_piece_scales[]; /* was D_800D2410 */
 extern f32 D_800D2428[3];
 extern f32 D_800D2438[3];
 extern s32 D_800D2444;
-extern s32 D_800D2448;
-extern s32 D_800D244C;
+extern s32 g_hud_clock_dl; /* was D_800D2448 */
+extern s32 g_hud_clock_mtx; /* was D_800D244C */
 extern u8  D_800D2454;
-extern u8  D_800D2456;
-extern u8  D_800D2457;
-extern u8  D_800D2458;
-extern struct256 *D_800D245C;
+extern u8  g_hud_health_max_pieces; /* was D_800D2456 */
+extern u8  g_hud_health_shown_pieces; /* was D_800D2457 */
+extern u8  g_hud_clock_enabled; /* was D_800D2458 */
+extern struct256 *g_hud_health_drop_list; /* was D_800D245C */
 extern u8  D_800D2460[][16];
 extern u8  D_800D246D;
 extern u8  D_800D247D;
 extern s32 g_level_reset_2548; /* was D_800D2548 */
 extern s32 D_800D2588;
-extern u8  D_800D2590;
+extern u8  g_hud_health_piece_mtx; /* was D_800D2590 */
 extern s32 D_800D24C0;
 extern s32 D_800D24C8;
 
-extern struct17 D_800D2890;
+extern struct17 g_hud_health_rot_vel; /* was D_800D2890 */
 
 extern u8  D_800D2C68;
 extern s32 D_800D2C28;
@@ -1119,18 +1119,18 @@ extern s32 D_800D2C2C;
 extern s32 g_level_state_blk_2e50; /* was D_800D2E50 */
 extern u8  D_800D2E60[];
 extern u8  D_800D2E68;
-extern s32 D_800D2E70; // struct/array of size 0xF0
+extern s32 g_event_states; /* was D_800D2E70 */ // struct/array of size 0xF0
 extern u8  g_level_state_u8_2e41; /* was D_800D2E41 */
 extern u8  g_level_state_u8_2e42; /* was D_800D2E42 */
 extern u8  D_800D2E43;
-extern u8  D_800D2E44;
+extern u8  g_game_over_disabled; /* was D_800D2E44 */
 extern u8  g_save_default_flag_2e45; /* was D_800D2E45 */
-extern struct102 *D_800D2E4C;
+extern struct102 *g_save_progress_bits; /* was D_800D2E4C */
 
 extern u8  D_800D2F3C;
 extern u16 *D_800D2F40;
-extern struct250 D_800D2F48; // bzero'd 0xC
-extern f32 D_800D2DB0;
+extern struct250 g_event_list; /* was D_800D2F48 */ // bzero'd 0xC
+extern f32 g_camera_event_heading; /* was D_800D2DB0 */
 extern s32 D_800D2DB4;
 
 extern s32 D_800D3094;
@@ -1157,10 +1157,10 @@ extern u8  D_800D9939;
 extern u8  D_800D992A[];
 extern u8  D_800D993A[];
 
-extern s32 D_800D99D0[8];
-extern struct134 *D_800D9A20;
+extern s32 g_zap_bolts[8]; /* was D_800D99D0 */
+extern struct134 *g_spawn_region_pair; /* was D_800D9A20 */
 extern struct134 *g_spawn_region_record_1; /* was D_800D9A24 */
-extern s32 D_800D9A40;
+extern s32 g_cam_zone_leaf; /* was D_800D9A40 */
 extern s32 D_800D9A50;
 extern struct134 *g_view_sparkle_spots[]; // length 3? /* was D_800D9AA0 */
 extern u16 g_sfx_cooldowns[4]; /* was D_800D9AB0 */
@@ -1178,10 +1178,10 @@ extern u8  D_800D9B88[];
 extern u8  D_800D9B8B;
 extern u8  D_800D9B8C;
 extern u8  D_800D9BD0[][2][8];
-extern s32 D_800D9E10[];
+extern s32 g_cam_point_ahead[]; /* was D_800D9E10 */
 extern u8  D_800D9E20;
 
-// extern u16 D_800D9E70[][3];
+// extern u16 g_aim_vec_scratch[][3];
 // extern u8 D_800D9E88[][3];
 // extern u8 D_800D9E98[][3];
 // extern u8 D_800D9EA8[][3];
@@ -1193,7 +1193,7 @@ extern u8  D_800D9E20;
 // extern u8 D_800A2CEC[][3];
 
 extern s32 D_800D9D10[];
-extern u8  D_800D9E64;
+extern u8  g_tex_scroll_count; /* was D_800D9E64 */
 extern s32 g_texture_last_id_a; /* was D_800D9F58 */
 extern s32 g_texture_last_id_b; /* was D_800D9F5C */
 extern u8  g_texture_level_mode; /* was D_800D9F60 */
@@ -1223,14 +1223,14 @@ extern u8  D_800DBE62;
 extern u8  D_800DBE63;
 extern f32 D_800DBE64;
 extern s32 D_800DBEF0;
-extern struct131 *D_800DBEF4; // ???
+extern struct131 *g_world_objs; /* was D_800DBEF4 */ // ???
 extern s32 D_800DBEF8[];
 extern s8  D_800DBEFC[];
 extern u8  g_world_obj_level_count; /* was D_800DBF00 */
 extern u8  g_world_obj_selected; /* was D_800DBF88 */
 extern s32 g_world_obj_selected_1c; /* was D_800DBF8C */
 extern s32 g_world_obj_selected_28; /* was D_800DBF90 */
-extern struct108 *D_800DBFF0;
+extern struct108 *g_player_views; /* was D_800DBFF0 */
 extern u8  g_camera_timers[]; /* was D_800DBFF4 */
 extern u8  D_800DBFF5;
 extern u8  D_800DBFF6;
@@ -1239,13 +1239,13 @@ extern u8  D_800DBFF7;
 extern s32  D_800DC010;
 extern s32 D_800DC020;
 extern struct10 *D_800DC2A0; // TODO: find correct struct
-extern s32 D_800DC2B0;
+extern s32 g_sky_asset; /* was D_800DC2B0 */
 extern f32 *D_800DCC10[][4];
-extern s32 D_800DC460;
-extern s32 D_800DC464;
-extern u16 D_800DC468[];
-extern s32 D_800DC63C;
-extern u8  D_800DCD30;
+extern s32 g_mdl_particle_list_head; /* was D_800DC460 */
+extern s32 g_mdl_particle_list_tail; /* was D_800DC464 */
+extern u16 g_mdl_particle_model_users[]; /* was D_800DC468 */
+extern s32 g_mdl_particle_live_count; /* was D_800DC63C */
+extern u8  g_level_light_dirs; /* was D_800DCD30 */
 extern u8  g_level_light_dirs_0y; /* was D_800DCD31 */
 extern u8  g_level_light_dirs_0z; /* was D_800DCD32 */
 extern u8  g_level_light_dirs_1x; /* was D_800DCD33 */
@@ -1259,34 +1259,34 @@ extern u8  g_level_light_dirs_3y; /* was D_800DCD3A */
 extern u8  g_level_light_dirs_3z; /* was D_800DCD3B */
 extern u8  D_800DCD3C;
 extern u8  D_800DCD3D;
-extern s32 D_800DCD40;
-extern s32 D_800DCD78;
+extern s32 g_light_cmd_data; /* was D_800DCD40 */
+extern s32 g_light_list_head; /* was D_800DCD78 */
 extern s32 D_800DCD7C;
 extern s32 g_light_colour_zones; /* was D_800DCD80 */
 extern s32 g_light_tint_zones; /* was D_800DCD84 */
-extern f32 D_800DCD90;
-extern f32 D_800DCD94;
-extern f32 D_800DCD98;
-extern f32 D_800DCD9C;
-extern f32 D_800DCDA0;
+extern f32 g_light_list_weight; /* was D_800DCD90 */
+extern f32 g_level_colour_ease_r; /* was D_800DCD94 */
+extern f32 g_level_colour_ease_g; /* was D_800DCD98 */
+extern f32 g_level_colour_ease_b; /* was D_800DCD9C */
+extern f32 g_level_colour_cycle; /* was D_800DCDA0 */
 
-extern struct100 *D_800DCD20;
+extern struct100 *g_level_light_colour; /* was D_800DCD20 */
 // extern struct100 *g_level_light_dir;
 // extern struct100 *D_800DCD28;
 
 extern s8 g_level_light_dir[3]; /* was D_800DCD24 */
 extern u8 D_800DCD28[3];
 
-extern s32  D_800DCDC4; // probably wrong type
-extern u8   D_800DCDD0;
+extern s32  g_light_record_list; /* was D_800DCDC4 */ // probably wrong type
+extern u8   g_level_lights_mode; /* was D_800DCDD0 */
 extern s8   D_800DD190;
 extern u8   D_800DD198[]; // 24 bytes
 extern f32  D_800DD1D8[];
 extern f32  D_800DD1E8[];
 
-extern u8   D_800DD2C0;
-extern u8   D_800DD2D0;
-extern u8   D_800DD2A0;
+extern u8   g_warp_entry_ids; /* was D_800DD2C0 */
+extern u8   g_sun_flash_alpha; /* was D_800DD2D0 */
+extern u8   g_particle_cooldown; /* was D_800DD2A0 */
 extern u8   g_particle_cooldown_p1; /* was D_800DD2A1 */
 extern u8   g_particle_cooldown_p2; /* was D_800DD2A2 */
 extern u8   g_particle_cooldown_p3; /* was D_800DD2A3 */
@@ -1294,86 +1294,86 @@ extern u8   g_particle_cooldown_p3; /* was D_800DD2A3 */
 extern u8   D_800DD404;
 extern u8   D_800DD405;
 extern u8   D_800DD406;
-extern s32  D_800DD410[2];
-extern u8   D_800DD418;
-extern u16  D_800DD444;
-extern s32  D_800DD460[2];
-extern s32  D_800DD478; // struct/array of size 0x618 (1560)
+extern s32  g_vtx_anim_lights[2]; /* was D_800DD410 */
+extern u8   g_vtx_anim_light_count; /* was D_800DD418 */
+extern u16  g_rain_state_timer; /* was D_800DD444 */
+extern s32  g_player_morph_caches[2]; /* was D_800DD460 */
+extern s32  g_ambient_slots; /* was D_800DD478 */ // struct/array of size 0x618 (1560)
 
-extern s32  D_800DDA90; // struct/array of size 0xf0
+extern s32  g_ambient_voices; /* was D_800DDA90 */ // struct/array of size 0xf0
 extern s32  D_800DDC00;
 extern s32  D_800DDC08;
 extern s32  D_800DDC04;
-extern s32  D_800DDD10[];
-extern s32  D_800DDD0C;
-extern u8   D_800DDD1C;
-extern s32  D_800DDD20;
+extern s32  g_ambient_quad_bufs[]; /* was D_800DDD10 */
+extern s32  g_ambient_quad_max; /* was D_800DDD0C */
+extern u8   g_ambient_flame_phase; /* was D_800DDD1C */
+extern s32  g_ambient_emitter_count; /* was D_800DDD20 */
 extern u8   g_flare_state_byte; /* was D_800DDD61 */
-extern s32  D_800DDD64;
+extern s32  g_flare_nodes; /* was D_800DDD64 */
 
-extern u8   D_800DDDAC;
+extern u8   g_screen_fade_dir; /* was D_800DDDAC */
 extern u8   g_screen_fade_dir_p1; /* was D_800DDDAD */
 extern u8   g_screen_fade_dir_p2; /* was D_800DDDAE */
 extern u8   g_screen_fade_dir_p3; /* was D_800DDDAF */
-extern s32  D_800DDDB0;
+extern s32  g_screen_fade_timer; /* was D_800DDDB0 */
 extern s32  g_screen_fade_timer_p1; /* was D_800DDDB4 */
 extern s32  g_screen_fade_timer_p2; /* was D_800DDDB8 */
 extern s32  g_screen_fade_timer_p3; /* was D_800DDDBC */
-extern f32  D_800DDDC8;
+extern f32  g_hud_lens_zoom; /* was D_800DDDC8 */
 extern f32  g_hud_lens_zoom_p1; /* was D_800DDDCC */
 extern f32  g_hud_lens_zoom_p2; /* was D_800DDDD0 */
 extern f32  g_hud_lens_zoom_p3; /* was D_800DDDD4 */
-extern f32  D_800DDDD8;
+extern f32  g_hud_lens_zoom_rate; /* was D_800DDDD8 */
 extern f32  g_hud_lens_zoom_rate_p1; /* was D_800DDDDC */
 extern f32  g_hud_lens_zoom_rate_p2; /* was D_800DDDE0 */
 extern f32  g_hud_lens_zoom_rate_p3; /* was D_800DDDE4 */
-extern u16  D_800DDE08;
-extern s32  D_800DDE18;
-extern u8   D_800DDE1C;
+extern u16  g_screen_pulse_timer; /* was D_800DDE08 */
+extern s32  g_letterbox_track; /* was D_800DDE18 */
+extern u8   g_hud_lens_mode; /* was D_800DDE1C */
 extern u8   g_hud_lens_mode_p1; /* was D_800DDE1D */
 extern u8   g_hud_lens_mode_p2; /* was D_800DDE1E */
 extern u8   g_hud_lens_mode_p3; /* was D_800DDE1F */
-extern u8   D_800DDE20;
+extern u8   g_hud_lens_scripted; /* was D_800DDE20 */
 extern u8   g_hud_lens_scripted_p1; /* was D_800DDE21 */
 extern u8   g_hud_lens_scripted_p2; /* was D_800DDE22 */
 extern u8   g_hud_lens_scripted_p3; /* was D_800DDE23 */
 extern s32  g_screen_fade_duration_p1; /* was D_800DDE2C */
-extern s32  D_800DDE28;
+extern s32  g_screen_fade_duration; /* was D_800DDE28 */
 extern s32  g_screen_fade_duration_p2; /* was D_800DDE30 */
 extern s32  g_screen_fade_duration_p3; /* was D_800DDE34 */
 extern u8   g_level_entry_zoom_mode; /* was D_800DDE38 */
-extern u8   D_800DDE3C;
+extern u8   g_hud_lens_state; /* was D_800DDE3C */
 extern u8   g_hud_lens_state_p1; /* was D_800DDE3D */
 extern u8   g_hud_lens_state_p2; /* was D_800DDE3E */
 extern u8   g_hud_lens_state_p3; /* was D_800DDE3F */
 extern u8   D_800DDE40;
 extern u8   g_area_points_count; /* was D_800DDE50 */
-extern s32  D_800DDE80[55]; // 220 bytes?
+extern s32  g_anim_mesh_slots[55]; /* was D_800DDE80 */ // 220 bytes?
 
-extern s32  D_800DF7C8[];
-extern u8   D_800DDF5C[];
-extern u8   D_800DDF60[];
-extern s8   D_800DDF68[];
-extern s32  D_800DDF78[];
+extern s32  g_afterimage_lists[]; /* was D_800DF7C8 */
+extern u8   g_weather_slot_busy[]; /* was D_800DDF5C */
+extern u8   g_weather_slot_timers[]; /* was D_800DDF60 */
+extern s8   g_anim_mesh_state[]; /* was D_800DDF68 */
+extern s32  g_anim_mesh_dls[]; /* was D_800DDF78 */
 
 /* 800E0000 */
-extern u8   D_800E0B94;
+extern u8   g_game_mode; /* was D_800E0B94 */
 extern s32  D_800E0C20;
 extern s32  D_800E0E04;
-extern struct134 *D_800E0900[]; // probably not struct134
-extern void *D_800E0930;
+extern struct134 *g_emitter_owner_records[]; /* was D_800E0900 */ // probably not struct134
+extern void *g_level_bullet_hit_cb; /* was D_800E0930 */
 extern s32  D_800E0934;
-extern void *D_800E0940;
+extern void *g_world_obj_hit_cb; /* was D_800E0940 */
 extern u8   g_attach_fx_asset_refs; /* was D_800E0950 */
 extern s32  D_800E0964;
-extern s16  D_800E0968[];
+extern s16  g_attach_fx_point_counts[]; /* was D_800E0968 */
 extern s32  g_attach_fx_assets[]; /* was D_800E0990 */
 extern u8   g_level_proj_mode; /* was D_800E0A10 */
 extern struct186 D_800E0D80; // libaudio struct?
 
 // end of zero'd out section
 
-extern s32  D_800E9D00;
+extern s32  g_cheat_flags; /* was D_800E9D00 */
 extern s32  *D_800E9D10; // probably not struct54
 
 /* debugger variables */
@@ -1442,8 +1442,8 @@ extern s32  g_particle_emitter_count; /* was D_800DCE20 */
 extern void (*D_8008CF10[])(void);
 extern u16  D_800C52F0[];
 extern s32  g_world_obj_count; /* was D_800DC320 */
-extern s32 *D_800DC328;
-extern u8  *D_800DC32C;
+extern s32 *g_world_obj_blocks; /* was D_800DC328 */
+extern u8  *g_world_obj_block_timers; /* was D_800DC32C */
 extern f32  g_quadtree_box_x; /* was D_800CC640 */
 extern f32  g_quadtree_box_y; /* was D_800CC644 */
 extern f32  g_quadtree_box_z; /* was D_800CC648 */
@@ -1453,50 +1453,50 @@ extern f32  D_800CC654;
 extern f32  D_800CC658;
 extern f32  D_800CC65C;
 extern f32  g_quadtree_box_min_x; /* was D_80099430 */
-extern s32  D_800DD648;
-extern s32  D_800DD64C;
-extern u8   D_8008A500[];
+extern s32  g_gfx_othermode_hi_cached; /* was D_800DD648 */
+extern s32  g_gfx_othermode_lo_cached; /* was D_800DD64C */
+extern u8   g_fx_random_colours[]; /* was D_8008A500 */
 extern u8   g_dbg_str_fpcsr[]; /* was D_160047A4 */
 extern u8   g_dbg_str_fpr_prefix[]; /* was D_160047AC */
 extern s32  g_dbg_fpcsr_flag_names[]; /* was D_16003B30 */
 extern u8   D_800CC82F[];
 extern u8   D_AB2240[]; // asset offsets table (EU address of US D_00AB1950)
 extern struct_eu_words6 g_trigger_query_words6; /* was D_800A55E0 */
-extern s32  D_800DD62C;
-extern s32  D_800DD630;
+extern s32  g_gfx_geom_set_cached; /* was D_800DD62C */
+extern s32  g_gfx_geom_clear_cached; /* was D_800DD630 */
 extern f32  D_800A5A74;
 extern u8   D_800C42B0;
 extern f32  D_8009A10C;
-extern f32  D_8009A504;
+extern f32  g_aiscript_hundredth; /* was D_8009A504 */
 extern struct54 D_800EA140; // start of the heap managed by init_3C40
 extern f32  D_8009A260;
 extern u8  *D_800D2528;
 extern u8  *D_800D34B8;
 extern void (*g_effect_init_hooks_a[])(void); /* was D_80082F60 */
 extern void (*g_effect_init_hooks_b[])(void); /* was D_80082F64 */
-extern s32  D_800DD5E0;
-extern s16  D_800DD5F8;
+extern s32  g_tex_cache_last_addr; /* was D_800DD5E0 */
+extern s16  g_gfx_env_r_cached; /* was D_800DD5F8 */
 extern s16  g_gfx_env_g_cached; /* was D_800DD5FA */
 extern s16  g_gfx_env_b_cached; /* was D_800DD5FC */
 extern s16  g_gfx_env_a_cached; /* was D_800DD5FE */
 extern s32 (*g_light_track_ptr_fns[])(void);           // EU address of US D_8008B36C /* was D_8008B70C */
-extern void (*g_light_track_message_fns[])(struct225 *, s32, u8); // EU address of US D_8008B370 /* was D_8008B710 */
+extern void (*g_light_track_message_fns[])(struct225 *, s32, u8); /* was D_8008B370 */ // EU address of US g_move_watch_fns /* was D_8008B710 */
 extern f32  D_800A5A78;
 extern f32  D_800A5A7C;
 extern f32  g_impact_ring_height_base; /* was D_800AB890 */
 extern void (*g_light_obj_message_fns_a[])(struct225 *, void *, u8); /* was D_8008B714 */
 extern void (*g_light_obj_message_fns_b[])(struct225 *, void *, u8); /* was D_8008B71C */
-extern f32  D_800A0650;
-extern f32  D_800A0654;
+extern f32  g_fx_point_emitter_uc; /* was D_800A0650 */
+extern f32  g_fx_point_emitter_u10; /* was D_800A0654 */
 extern s32  g_random_joint_ids; /* was D_80099F78 */
 extern u8   g_vs_player_fx_point[]; /* was D_80099F7C */
-extern u8   D_800A5860[];
+extern u8   g_vec3_zero[]; /* was D_800A5860 */
 extern s16  g_gfx_prim_r_cached; /* was D_800DD5F0 */
 extern s16  g_gfx_prim_g_cached; /* was D_800DD5F2 */
 extern s16  g_gfx_prim_b_cached; /* was D_800DD5F4 */
 extern s16  g_gfx_prim_a_cached; /* was D_800DD5F6 */
-extern s16  D_800DD634;
-extern s16  D_800DD636;
+extern s16  g_gfx_prim_m_cached; /* was D_800DD634 */
+extern s16  g_gfx_prim_l_cached; /* was D_800DD636 */
 extern u8   g_hit_reaction_anims[][10]; /* was D_80099DFC */
 extern f32  D_800A5850;
 extern f32  D_800A5854;
@@ -1528,11 +1528,11 @@ extern f32  g_rec_kind_effect_param; /* was D_80096A2C */
 extern f32  D_800BEDC8;
 extern u8   D_800CC6D8;
 extern s16  D_800CC6DA;
-extern s32  D_800DCE30;
-extern void *D_800DCE34;
-extern f32  D_800DCE38;
-extern f32  D_800DCE3C;
-extern f32  D_800DCE40;
+extern s32  g_mtx_xform_dbg_step; /* was D_800DCE30 */
+extern void *g_mtx_xform_dbg_mtx; /* was D_800DCE34 */
+extern f32  g_mtx_xform_dbg_x; /* was D_800DCE38 */
+extern f32  g_mtx_xform_dbg_y; /* was D_800DCE3C */
+extern f32  g_mtx_xform_dbg_z; /* was D_800DCE40 */
 extern f32  D_8009A110;
 extern f32  g_effect60_const_20; /* was D_80096A64 */
 extern f32  D_800A49FC;
@@ -1540,11 +1540,11 @@ extern f32  D_800A4A00;
 extern f32  g_anim_cmd_default_speed; /* was D_8009A108 */
 extern u8   D_800C3A08;
 extern f32  g_rec_scripted_param_scale; /* was D_80096A00 */
-extern u8   D_800BE800;
+extern u8   g_save_restart_entry; /* was D_800BE800 */
 extern void (*g_attach_ctrl_release_fns[])(struct_eu_1FFF60 *); /* was D_8008FFFC */
 /* P241 (port-b P239): the NM dispatchers use the s32 results */
 extern s32 (*g_attach_child_end_fns[])(struct_eu_1FFF60_child *, void *); /* was D_8008FFE8 */
-extern struct_eu_80090F10 D_80090F10[];
+extern struct_eu_80090F10 g_sprite_textures[]; /* was D_80090F10 */
 extern f32  D_8009A4C8;
 extern f32  D_8009A4CC;
 extern f32  D_8009A4D0;
@@ -1585,49 +1585,49 @@ extern f32  D_800A063C;
 extern f32  g_impact_cloud_size_range; /* was D_800AB844 */
 extern f32  g_impact_cloud_size_min; /* was D_800AB848 */
 extern s32 (*g_attach_child_update_fns[])(struct_eu_1FFF60_child *, void *); /* was D_8008FFE0 */
-extern struct_eu_spawnlist D_80088A80[];
+extern struct_eu_spawnlist g_owner_spawn_lists[]; /* was D_80088A80 */
 extern u32  D_15001B08[];
-extern f32  D_800A0658;
-extern f32  D_800A065C;
-extern f32  D_800A0660;
+extern f32  g_fx_debris_spray_scale; /* was D_800A0658 */
+extern f32  g_fx_debris_dust_size_mul; /* was D_800A065C */
+extern f32  g_fx_debris_dust_size_add; /* was D_800A0660 */
 extern struct_eu_BE818 g_save_slot_summaries[3]; /* was D_800BE818 */
 extern s16  g_save_best_slot_score; /* was D_800BE7FC */
-extern u8   D_800BE7FE;
+extern u8   g_save_final_scene_unlock; /* was D_800BE7FE */
 extern u8   g_save_slot_refresh; /* was D_80082F50 */
 extern s8   D_800BE7F9;
 extern s8   D_800BE7FA;
 extern s8   D_800BE7FB;
-extern u8   D_800D3289;
+extern u8   g_game_flags_dirty; /* was D_800D3289 */
 extern u8   D_800CC16C;
 extern s32  D_800CC1BC;
 extern s8  *D_800D27D0;
 extern f32  D_800A8E84;
 extern f32  D_800A8E8C;
-extern s32  D_800DC3F0;
+extern s32  g_scenery_door_group_count; /* was D_800DC3F0 */
 extern f32  D_800A35C4;
 extern u8   D_800C3930[];
 extern u8   D_800C396A[];
 extern u8   D_800D9D20;
-extern s16  D_800DD8A0[3];
+extern s16  g_ambient_flare_point[3]; /* was D_800DD8A0 */
 extern u8   D_800C4320;
 extern struct_eu_800877D0 D_800877D0[];
-extern s8   D_80090168;
-extern u8   D_800E0EBC;
-extern s32  D_80090178;
+extern s8   g_mp_free_for_all; /* was D_80090168 */
+extern u8   g_menu_flag_ebc; /* was D_800E0EBC */
+extern s32  g_text_bank1_extra; /* was D_80090178 */
 extern s8   D_800E1003;
-extern s32  D_800E1004;
-extern f32  D_800A85C8;
-extern u8   D_800DD210[];
-extern s16  D_800E0FCA;
+extern s32  g_text_bank_data; /* was D_800E1004 */
+extern f32  g_bone_debris_k_85c8; /* was D_800A85C8 */
+extern u8   g_camera_view_offsets[]; /* was D_800DD210 */
+extern s16  g_menu_pressed; /* was D_800E0FCA */
 extern struct_eu_80087640 *D_80087640;
 extern u8   D_80098418[][0x18];
 extern f32  D_800A1380;
-extern u16  D_800D9D30;
-extern s32  D_800E0D50;
+extern u16  g_anim_segment_clock; /* was D_800D9D30 */
+extern s32  g_buddy_marker; /* was D_800E0D50 */
 extern s32  D_800D1D48;
 extern s32  D_800D1D4C;
 extern s32  D_800D1D50;
-extern s8   D_800BC860[];
+extern s8   g_texture_cache_ages[]; /* was D_800BC860 */
 extern u8   D_800D9CB0;
 extern f32  D_800A24EC;
 extern u8   D_800A0000[];
@@ -1636,25 +1636,25 @@ extern Gfx  D_80087770[];
 extern s32  D_800D30C0;
 extern u8  *g_obj0_state; /* was D_800CCA0C */
 extern u8   D_800D31E0[];
-extern u8   D_800843F0[];
+extern u8   g_player_pad_map[]; /* was D_800843F0 */
 extern u8   D_800BED5C[];
 extern s32  D_800C42A8;
 extern s32  D_800C42AC;
 extern s16  D_800C429A;
 extern OSMesgQueue D_80042E38;
-extern f32  D_800AA94C;
-extern f32  D_800AA950;
-extern u8   D_80089810[];
-extern u8   D_800AB6E0[];
-extern s8   D_80090130;
-extern u8  *D_80090174;
+extern f32  g_lamp_kick_k_18c; /* was D_800AA94C */
+extern f32  g_lamp_kick_k_190; /* was D_800AA950 */
+extern u8   g_identity_mtx[]; /* was D_80089810 */
+extern u8   g_rumble_bcast_types[]; /* was D_800AB6E0 */
+extern s8   g_human_player_count; /* was D_80090130 */
+extern u8  *g_menu_state; /* was D_80090174 */
 extern s16  D_8009016C;
-extern void (*D_8008FCA0[])(s32, void *, s16);
-extern void (*D_8008FCA4[])(s32, void *, u8);
+extern void (*g_screen_tint_fx_draw_fns[])(s32, void *, s16); /* was D_8008FCA0 */
+extern void (*g_screen_tint_fx_msg_fns[])(s32, void *, u8); /* was D_8008FCA4 */
 extern s32  D_800A9150;
 extern s32  D_80088FF8[2];
-extern u8   D_800A2398[];
-extern u8   D_80088F34;
+extern u8   g_weapon_b_muzzle_pts[]; /* was D_800A2398 */
+extern u8   g_weapon_b_bone; /* was D_80088F34 */
 extern u8   D_800A6440[];
 extern s32  D_80084818;
 extern f32  D_800C6C70;
@@ -1663,27 +1663,27 @@ extern u8   D_80084820;
 extern u8   D_80084824;
 extern Gfx  D_800877A8[];
 extern struct_eu_words3 D_800D3434[];
-extern f32  D_800D3AA8;
-extern f32  D_800D3AAC;
-extern struct_eu_800DFB30 D_800DFB30[];
-extern s32  D_800DFBE4;
+extern f32  g_shadow_far_depth; /* was D_800D3AA8 */
+extern f32  g_shadow_near_depth; /* was D_800D3AAC */
+extern struct_eu_800DFB30 g_light_fx[]; /* was D_800DFB30 */
+extern s32  g_light_fx_count; /* was D_800DFBE4 */
 extern s32  D_800D33D0;
-extern s8   D_80090120;
+extern s8   g_menu_scene_start_state; /* was D_80090120 */
 extern u8   D_800D1980[];
 extern u8   D_eu_800D1990[];
-extern u8   D_800A2340[];
-extern u8   D_80088F20;
-extern s8   D_8008D0A0;
-extern u8   D_800A5D00[];
-extern u8   D_800A5D68[];
+extern u8   g_weapon_a_muzzle_pts[]; /* was D_800A2340 */
+extern u8   g_weapon_a_bone; /* was D_80088F20 */
+extern s8   g_aim_hud_active; /* was D_8008D0A0 */
+extern u8   g_char_fx_effect_5d00[]; /* was D_800A5D00 */
+extern u8   g_char_fx_effect_5d68[]; /* was D_800A5D68 */
 extern s32  D_80088FF0[2];
-extern s32  D_800E0EC0;
-extern struct127 *D_800E1008;
-extern u8   D_800A5B40[];
-extern u8   D_800DE1B8;
-extern u8   D_800DE1B9;
-extern u8   D_800DE1BA;
-extern u8   D_800DE1BB;
+extern s32  g_game_mode_timer; /* was D_800E0EC0 */
+extern struct127 *g_text_strings; /* was D_800E1008 */
+extern u8   g_fxrec_bcast_types[]; /* was D_800A5B40 */
+extern u8   g_screen_pulse_speed; /* was D_800DE1B8 */
+extern u8   g_screen_pulse_phase; /* was D_800DE1B9 */
+extern u8   g_screen_pulse_colour; /* was D_800DE1BA */
+extern u8   g_screen_pulse_alpha; /* was D_800DE1BB */
 extern u8   D_800DE1BC;
 extern f32  D_800A0C08;
 /* P241 (port-b P239): the NM dispatchers use the s32 results */
@@ -1696,93 +1696,93 @@ extern u16 *D_800C39F8[];
 extern s16  D_800C39B8[3];
 extern f32  D_800C39C0;
 extern void (*D_800863B4[])(void);
-extern void (*D_80089A10[])(s32);
+extern void (*g_level_player_state_fns[])(s32); /* was D_80089A10 */
 extern s32  D_800D9CB4;
 extern s32  D_800D9CB8[10];
-extern s32  D_800DA378;
-extern s32  D_800DA37C;
-extern u8   D_800DA388[];
-extern u8   D_800A5C80[];
+extern s32  g_texture_cache_dirty_lo; /* was D_800DA378 */
+extern s32  g_texture_cache_dirty_hi; /* was D_800DA37C */
+extern u8   g_texture_cache_refs[]; /* was D_800DA388 */
+extern u8   g_char_fx_light_ofs_j2[]; /* was D_800A5C80 */
 extern struct_eu_800D2778 *D_800D2778;
 extern s16  D_80087630;
 extern f32  D_8009DDD0;
 extern f32  D_800D2788[];
 extern u8   D_800D2770[];
-extern s16  D_800DD880;
-extern void (*D_8008FCEC[])(void *);
-extern void (*D_8008FCF8[])(void *);
+extern s16  g_puff_last_alpha; /* was D_800DD880 */
+extern void (*g_bolt_path_retire_fns[])(void *); /* was D_8008FCEC */
+extern void (*g_bolt_path_free_fns[])(void *); /* was D_8008FCF8 */
 extern s32  D_800D9CE0[];
-extern s8   D_800901D0;
-extern s8   D_80090114;
-extern s8   D_800E0FC6;
-extern s8   D_800E0FC7;
-extern s8   D_800E0FC8;
-extern s8   D_800901C8;
-extern s8   D_800E1030[];
-extern s8   D_800E101B;
-extern u8   D_800DD157;
-extern void (*D_8008B0A4[])(void *, s32, u8);
-extern void (*D_8008B430[])(void *, void *);
-extern void (*D_8008FF08[])(void *, s32, u8);
-extern u8   D_800A5CB0[];
-extern u8   D_800A5CC4[];
-extern u8   D_800A5CD8[];
-extern u8   D_800A5CEC[];
+extern s8   g_save_options_loaded; /* was D_800901D0 */
+extern s8   g_menu_fade_speed; /* was D_80090114 */
+extern s8   g_screen_fade_alpha; /* was D_800E0FC6 */
+extern s8   g_menu_blink_alpha; /* was D_800E0FC7 */
+extern s8   g_menu_blink_dir; /* was D_800E0FC8 */
+extern s8   g_menu_input_lock_frames; /* was D_800901C8 */
+extern s8   g_mp_player_team[]; /* was D_800E1030 */
+extern s8   g_settings_cpu_views; /* was D_800E101B */
+extern u8   g_level_colour_priority; /* was D_800DD157 */
+extern void (*g_sprite2d_msg_fns[])(void *, s32, u8); /* was D_8008B0A4 */
+extern void (*g_obj_kind9_fns[])(void *, void *); /* was D_8008B430 */
+extern void (*g_cord_msg_fns[])(void *, s32, u8); /* was D_8008FF08 */
+extern u8   g_char_fx_effect_5cb0[]; /* was D_800A5CB0 */
+extern u8   g_char_fx_effect_5cc4[]; /* was D_800A5CC4 */
+extern u8   g_char_fx_effect_5cd8[]; /* was D_800A5CD8 */
+extern u8   g_char_fx_effect_5cec[]; /* was D_800A5CEC */
 extern f32  D_800A01FC;
-extern void (*D_8008FFB0[])(void *, u8 **, u8);
+extern void (*g_aim_hud_sprite_msg_fns[])(void *, u8 **, u8); /* was D_8008FFB0 */
 extern void (*D_80088B68[])(u8 *, s32, u8);
-extern void (*D_80088FC8[])(u8 *, s32, u8);
-extern void (*D_8008B484[])(u8 *, s32, u8);
-extern void (*D_8008FF38[])(u8 *, s32, u8);
-extern void (*D_80089D50[])(u8 *);
-extern void (*D_80089D74[])(u8 *);
-extern struct_eu_s32x2 D_800A3C40;
+extern void (*g_bolt_arc_event_fns[])(u8 *, s32, u8); /* was D_80088FC8 */
+extern void (*g_fb_fx_msg_fns[])(u8 *, s32, u8); /* was D_8008B484 */
+extern void (*g_glow_msg_fns[])(u8 *, s32, u8); /* was D_8008FF38 */
+extern void (*g_mdl_particle_hook_fns_d50[])(u8 *); /* was D_80089D50 */
+extern void (*g_mdl_particle_hook_fns_d74[])(u8 *); /* was D_80089D74 */
+extern struct_eu_s32x2 g_mdl_particle_bcast_types; /* was D_800A3C40 */
 extern struct_eu_s32x1 D_800A6A50;
 extern u8   D_eu_800BE9A0[];
-extern f32  D_800A0F10;
-extern f32  D_800A0F14;
-extern u8  *D_800DD368;
-extern f32  D_800AAC40;
-extern f32  D_800AAC44;
-extern void (*D_8008A690[20])(void);
-extern void (*D_8008A6E0[20])(void);
-extern void (*D_8008A730[])(void *, s32, u8);
-extern void (*D_80089BB4[])(void *);
-extern void (*D_80089BE4[])(void *);
-extern u8   D_800DE1C0[][3];
-extern u8   D_800DE1CC[];
-extern s16  D_800DE240[];
-extern f32  D_800DE218[][2];
+extern f32  g_trail_aim_scale_mp; /* was D_800A0F10 */
+extern f32  g_trail_aim_scale_sp; /* was D_800A0F14 */
+extern u8  *g_node_list_swarms; /* was D_800DD368 */
+extern f32  g_bone_emitter_timer_scale; /* was D_800AAC40 */
+extern f32  g_bone_emitter_timer_base; /* was D_800AAC44 */
+extern void (*g_fxrec_free_fns[20])(void); /* was D_8008A690 */
+extern void (*g_fxrec_kind_fns_b[20])(void); /* was D_8008A6E0 */
+extern void (*g_fxrec_msg_fns[])(void *, s32, u8); /* was D_8008A730 */
+extern void (*g_particle_hook_fns_bb4[])(void *); /* was D_80089BB4 */
+extern void (*g_particle_hook_fns_be4[])(void *); /* was D_80089BE4 */
+extern u8   g_screen_tint_rgb[][3]; /* was D_800DE1C0 */
+extern u8   g_screen_tint_alpha[]; /* was D_800DE1CC */
+extern s16  g_screen_tint_timer[]; /* was D_800DE240 */
+extern f32  g_hud_lens_centre[][2]; /* was D_800DE218 */
 extern u8   D_800CC826;
-extern u8  *D_800DD510;
-extern u8   D_80088D20;
+extern u8  *g_scroll_banner_nodes; /* was D_800DD510 */
+extern u8   g_water_effect_started; /* was D_80088D20 */
 extern struct_eu_size0C D_800C4328[];
-extern u8   D_800DD864;
-extern u8   D_800DD876;
-extern u8   D_800DD862;
-extern u8   D_800DD863;
-extern s16  D_800DD866;
-extern s32  D_800DD870;
-extern f32  D_800AB6CC;
-extern f32  D_800AB6D0;
+extern u8   g_rain_level; /* was D_800DD864 */
+extern u8   g_rain_state; /* was D_800DD876 */
+extern u8   g_rain_gust_timer; /* was D_800DD862 */
+extern u8   g_rain_gust_strength; /* was D_800DD863 */
+extern s16  g_rain_drop_count; /* was D_800DD866 */
+extern s32  g_rain_drops; /* was D_800DD870 */
+extern f32  g_trail_point_gravity; /* was D_800AB6CC */
+extern f32  g_trail_point_gravity_half; /* was D_800AB6D0 */
 extern s32  D_8009066C[];
 extern s32  D_800906AC[];
-extern s8   D_800901F4[];
-extern s8   D_800E1010[];
-extern u8   D_800DFC00[];
+extern s8   g_settings_defaults[]; /* was D_800901F4 */
+extern s8   g_settings[]; /* was D_800E1010 */
+extern u8   g_shared_dl_refcounts[]; /* was D_800DFC00 */
 extern u8   D_800DFC01;
 extern u8   D_800DFC02;
 extern u8   D_800DFC03[];
-extern void (*D_8008FF10[])(void *);
-extern u8   D_800DC6F0[][0x68];
-extern void (*D_8008FD04[])(void);
+extern void (*g_cord_release_fns[])(void *); /* was D_8008FF10 */
+extern u8   g_camera_shake_states[][0x68]; /* was D_800DC6F0 */
+extern void (*g_bolt_path_msg_fns[])(void); /* was D_8008FD04 */
 extern f32  D_800C39B4;
 extern s16  D_800C39AC[3];
 extern u8   D_800C3663;
 extern f32  D_800A35B0;
-extern u8   D_800DD040[];
-extern u8   D_800D9F88[];
-extern u8   D_800D9F98[];
+extern u8   g_player_screen_proj[]; /* was D_800DD040 */
+extern u8   g_tint_prim_rgb[]; /* was D_800D9F88 */
+extern u8   g_tint_env_rgb[]; /* was D_800D9F98 */
 /* EU: end new */
 
 /* other */

@@ -553,7 +553,7 @@ s32 debugger_main(OSThread *arg0) {
             var_v1 += 0x10;
         } while (var_a0 != &g_dbg_tlb_pagemask);
     }
-    if ((((u32) D_8003C8E0 >> 0x18) & 0xFF) == 0xC) {
+    if ((((u32) g_dbg_crash_marker >> 0x18) & 0xFF) == 0xC) {
         arg0 = &D_80031AE0;
     }
     if ((*(s32 *)((u8 *)D_8002C130 + 4)) == g_framebuffers[1]) {

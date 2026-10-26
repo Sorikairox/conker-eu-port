@@ -7,23 +7,23 @@
 void ambient_sounds_reset(s32 arg0) {
     bzero(&D_800BE4A0, 60);
     asset_load_into(&D_800BE4A0, 60, 3, 12, arg0, 10);
-    bzero(&D_800DDA90, 240);
-    bzero(&D_800DD478, 1560);
+    bzero(&g_ambient_voices, 240);
+    bzero(&g_ambient_slots, 1560);
 }
 
 extern u16 D_800BE898[];  /* per ambient sound: loaded even when it is not id 0x3B */
-extern s16 D_800DDFB0[];  /* per ambient sound: 2 x s16 */
+extern s16 g_ambient_slot_tc[];  /* per ambient sound: 2 x s16; was D_800DDFB0 */
 extern u8 D_80096090[];   /* per sound id, 10 bytes: +2 u16 length, +8 u8 rate (asm rodata_inject block; ROM) */
 u8 *asset_lookup_rom(s32 *arg0, s32 arg1, ...);
 
 // ambient_sounds_load: for each of the 15 ambient sound slots (ids at D_800BE4A0, 4-byte stride; 0xFF = empty)
-// clears its voice record (D_800DDA90, 16 bytes) and, when D_800BE898[slot] is set or the id is 0x3B, loads the
+// clears its voice record (g_ambient_voices, 16 bytes) and, when D_800BE898[slot] is set or the id is 0x3B, loads the
 // sample (asset_lookup_rom kind 2) into +0 with the 16-byte rounded size in +4 (+0 = NULL when the size or the id's
-// length is 0), and sets D_800DDFB0[slot] = { rate * 32 - 1, (length / rate) * 64 / 5 - 1 } (unsigned divisions;
+// length is 0), and sets g_ambient_slot_tc[slot] = { rate * 32 - 1, (length / rate) * 64 / 5 - 1 } (unsigned divisions;
 // rate 0 traps like the asm's divu check).
 /* was func_1500AC14 */
 void ambient_sounds_load(void) {
-    u8 *voice = (u8 *) &D_800DDA90;
+    u8 *voice = (u8 *) &g_ambient_voices;
     u16 *ids = (u16 *) &D_800BE4A0;
     s16 *timing;
     u8 *info;
@@ -46,7 +46,7 @@ void ambient_sounds_load(void) {
         if (D_800BE898[slot] == 0 && id != 0x3B) {
             continue;
         }
-        timing = &D_800DDFB0[slot * 2];
+        timing = &g_ambient_slot_tc[slot * 2];
         data = asset_lookup_rom(&size, 2, 0, id);
         info = &D_80096090[id * 10];
         *(u8 **) (voice + 0) = data;
@@ -83,7 +83,7 @@ extern u8 D_800DE040[];      /* per slot: random byte */
 extern u8 D_800DE050[];      /* per slot: 2 bytes (D_80096074[slot]) */
 extern u8 D_800DE0B0[];      /* per slot: placement row (flags & 0x7F) */
 extern u16 D_800DE0C0[];     /* 60 = 15 slots x 4: random start offsets << 8 */
-extern u8 D_800DDFF0[];      /* per slot: sound id */
+extern u8 g_ambient_slot_sound_ids[];      /* per slot: sound id; was D_800DDFF0 */
 extern s16 D_800BE858[];     /* per slot: 2 x s16 (sound info +4 / +6) */
 extern u16 D_800BE850;       /* per slot alternating bit (shape placer) */
 extern u8 D_80096074[];      /* per slot (ROM) */
@@ -93,7 +93,7 @@ extern f32 D_800CC630;       /* plane of the last tri_compute_plane triangle: a 
 extern f32 D_800CC634;
 extern f32 D_800CC638;
 extern f32 D_800CC63C;
-extern s32 D_8008D254;       /* ambient_emitters_sort sort key: 0 = x, else z */
+extern s32 g_ambient_sort_by_z;       /* ambient_emitters_sort sort key: 0 = x, else z; was D_8008D254 */
 extern struct { AmbientPlacer place; void *update; s32 unk8; } D_8008D258[];  /* placers by type (.game_data) */
 extern s16 D_8008D2A0[][8][2];  /* per placement row and kind: { placer type, placer param } (.game_data) */
 extern s32 D_800DC26C;       /* level triangle table: 3 vertex pointers per triangle */
@@ -132,7 +132,7 @@ void ambient_slot_setup(s32 slot, s32 id, s32 flags) {
         }
         D_800BE858[slot * 2 + 0] = *(s16 *) (info + 4);
         D_800BE858[slot * 2 + 1] = *(s16 *) (info + 6);
-        D_800DDFF0[slot] = id;
+        g_ambient_slot_sound_ids[slot] = id;
         D_800DE0B0[slot] = flags & 0xFF7F;
         if (flags & 0x80) {
             D_800DDC00 |= 1 << slot;
@@ -153,14 +153,14 @@ void ambient_slot_setup(s32 slot, s32 id, s32 flags) {
 }
 
 // ambient_emitter_add: writes emitter `index` (D_800DE148, 14 bytes) of slot `slot` at (x, y, z) and returns
-// index + 1; when index is not below the level's emitter capacity - 1 (D_800B0DF0 +0x18) nothing is written and
+// index + 1; when index is not below the level's emitter capacity - 1 (g_level_header +0x18) nothing is written and
 // the capacity - 1 is returned. Phase byte: 0x3C for slots with a range below 2, else slot * 4 + (phase & 1) for
 // D_800DDC00 slots or slot * 4 + (index & 3). +0xC / +0xD = the slot parameters scaled by a random factor
 // (0x100 + rand % spread, the second one + 4 * (rand % spread) more when the sound info has flag 4) >> 10, or
 // the parameters >> 2 when spread is 0.
 /* was func_1500AF08 */
 s32 ambient_emitter_add(u32 index, s32 slot, s32 mode, s16 x, s16 y, s16 z, s32 spread, u8 kind, s32 phase) {
-    s32 limit = *(u16 *) ((u8 *) D_800B0DF0 + 0x18) - 1;
+    s32 limit = *(u16 *) ((u8 *) g_level_header + 0x18) - 1;
     AmbientEmitter *e;
     s16 scale;
     s16 *param;
@@ -182,12 +182,12 @@ s32 ambient_emitter_add(u32 index, s32 slot, s32 mode, s16 x, s16 y, s16 z, s32 
     }
     D_800DE148[index].slotMode = (mode << 5) | slot;
     D_800DE148[index].kind = kind;
-    D_800DE148[index].id = D_800DDFF0[slot];
+    D_800DE148[index].id = g_ambient_slot_sound_ids[slot];
     param = &D_800BE858[slot * 2];
     if (spread != 0) {
         scale = game_gu_random() % spread + 0x100;
         D_800DE148[index].unkC = (param[0] * scale) >> 10;
-        if (D_80096090[D_800DDFF0[slot] * 10] & 4) {
+        if (D_80096090[g_ambient_slot_sound_ids[slot] * 10] & 4) {
             scale = (game_gu_random() % spread) * 4 + scale;
         }
         D_800DE148[index].unkD = (param[1] * scale) >> 10;
@@ -350,23 +350,23 @@ s32 ambient_place_points_range21(s16 count, u8 kind, s32 slot, s32 mode, s32 ind
 
 /* was func_1500BE40 */
 void ambient_timer_reset(s32 arg0) {
-    D_800DDD10[0] = 0;
-    D_800DDD10[1] = 0;
-    D_800DDD0C = 110;
+    g_ambient_quad_bufs[0] = 0;
+    g_ambient_quad_bufs[1] = 0;
+    g_ambient_quad_max = 110;
 }
 
 /* was func_1500BE68 */
 void ambient_state_reset(void) {
-    D_800DDD1C = 0;
-    D_8008CEB0 = 0;
+    g_ambient_flame_phase = 0;
+    g_ambient_flame_queue_count = 0;
     D_800DDC04 = D_800DDC00 = D_800DDC08 = 0;
-    D_800DDD20 = 0;
+    g_ambient_emitter_count = 0;
     ambient_timer_reset(0);
 }
 
 
 // ambient_emitters_build: level start: sets up the 15 ambient sound slots (ids / flags at D_800BE4A0), allocates
-// the emitter records (capacity D_800B0DF0 +0x18, 14 bytes each) and, for every level triangle whose flag word
+// the emitter records (capacity g_level_header +0x18, 14 bytes each) and, for every level triangle whose flag word
 // (D_800DBE5C) has a slot (bits 16-19, 1-based), runs the placer of the slot's row and the triangle's kind (bits
 // 20-22) from D_8008D2A0 / D_8008D258 with mode ((flags >> 5) & 3) ^ 3, counting emitters per slot in D_800BE898;
 // then clears +0xB of every emitter, sorts them by x (ambient_emitters_sort) and seeds the per-slot random offsets
@@ -383,7 +383,7 @@ void ambient_emitters_build(void) {
     s32 q;
 
     ambient_state_reset();
-    if (*(u16 *) ((u8 *) D_800B0DF0 + 0x18) == 0) {
+    if (*(u16 *) ((u8 *) g_level_header + 0x18) == 0) {
         return;
     }
     if ((g_level_id == 6 && D_80038080 == 0) || g_level_id == 0x1D) {
@@ -393,7 +393,7 @@ void ambient_emitters_build(void) {
     for (i = 0; i < 15; i++) {
         ambient_slot_setup(i, slots[i * 2], slots[i * 2 + 1]);
     }
-    D_800DE148 = allocate_memory(*(u16 *) ((u8 *) D_800B0DF0 + 0x18) * 14, 1, 2, 0);
+    D_800DE148 = allocate_memory(*(u16 *) ((u8 *) g_level_header + 0x18) * 14, 1, 2, 0);
     collision_select_area(0);
     if (D_800DBE5C != 0) {
         for (i = 0; i < D_800DBE4C; i++) {
@@ -402,17 +402,17 @@ void ambient_emitters_build(void) {
                 slot = ((flags >> 16) & 0xF) - 1;
                 kind = (flags >> 20) & 7;
                 placer = D_8008D2A0[D_800DE0B0[slot]][kind];
-                D_800DDD20 = D_8008D258[placer[0]].place(placer[1], kind, slot, ((flags >> 5) & 3) ^ 3, D_800DDD20,
+                g_ambient_emitter_count = D_8008D258[placer[0]].place(placer[1], kind, slot, ((flags >> 5) & 3) ^ 3, g_ambient_emitter_count,
                                                          (s16 **) (D_800DC26C + i * 12));
                 D_800BE898[slot]++;
             }
         }
     }
-    for (i = 0; i < D_800DDD20; i++) {
+    for (i = 0; i < g_ambient_emitter_count; i++) {
         D_800DE148[i].unkB = 0;
     }
-    D_8008D254 = 0;
-    ambient_emitters_sort(0, D_800DDD20 - 1);
+    g_ambient_sort_by_z = 0;
+    ambient_emitters_sort(0, g_ambient_emitter_count - 1);
     for (i = 0; i < 60; i++) {
         q = i >> 2;
         if (D_800DE000[q] != 0) {

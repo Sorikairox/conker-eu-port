@@ -1,9 +1,9 @@
 \#^    if (obj == NULL) {$#s/== NULL/!= NULL/
 \#^    bones = \*(u8 \*\*) (obj + 0x1D4);$#s/0x1D4/0x1D8/
-\#^    mtx = bones + (D_80088CC8\[idx\] << 6);$#s/<< 6/<< 5/
-\#^    mtx_transform_point_or_origin(D_80088CB0\[idx\], a, mtx);$#s/D_80088CB0/D_80088CBC/
-\#^    mtx_transform_point_or_origin(D_80088CBC\[idx\], b, mtx);$#s/mtx/bones/
-\#^    scale = D_80088CCC\[idx\];$#s/idx/0/ % idx1 idx2
+\#^    mtx = bones + (g_joint_beam_bone\[idx\] << 6);$#s/<< 6/<< 5/
+\#^    mtx_transform_point_or_origin(g_joint_beam_start_pts\[idx\], a, mtx);$#s/g_joint_beam_start_pts/g_joint_beam_end_pts/
+\#^    mtx_transform_point_or_origin(g_joint_beam_end_pts\[idx\], b, mtx);$#s/mtx/bones/
+\#^    scale = g_joint_beam_dir_scale\[idx\];$#s/idx/0/ % idx1 idx2
 \#^    dir\[0\] = scale \* (b\[0\] - a\[0\]);$#s/b\[0\] - a\[0\]/a[0] - b[0]/
 \#^    dir\[1\] = scale \* (b\[1\] - a\[1\]);$#s/scale \* //
 \#^    dir\[2\] = scale \* (b\[2\] - a\[2\]);$#s/a\[2\]/a[1]/
@@ -18,7 +18,7 @@
 \#^    spec.b45 = 0xFF;$#d
 \#^    spec.rgba\[2\] = 0xC8;$#s/0xC8/0xC9/
 \#^    spec.flags = 0x401;$#d
-\#^    spec.span = D_80088CD0\[idx\];$#s/idx/idx + 1/
+\#^    spec.span = g_joint_beam_lifetime\[idx\];$#s/idx/idx + 1/
 \#^    spec.pos\[1\] = a\[1\];$#s/a\[1\]/b[1]/
 \#^    spec.scale\[2\] = 1.0f;$#d
 \#^    spec.dir\[1\] = 0.0f;$#d
@@ -29,11 +29,11 @@
 \#^    rec = (u8 \*) effect3d_spawn_default((s32) &spec, 9, 0, 0, 7, 0, 0x2C, group, arg3);$#s/group, arg3/arg3, group/
 \#^    if (rec != NULL) {$#s/!= NULL/== NULL/
 \#^        \*(f32 \*) (rec + 0x114) = dir\[1\];$#s/dir\[1\]/dir[2]/
-\#^        \*(f32 \*) (rec + 0x11C) = D_80088CD4\[idx\];$#s/D_80088CD4/D_80088CD8/
-\#^        \*(f32 \*) (rec + 0x12C) = D_80088CE4\[idx\];$#s/0x12C/0x12E/
+\#^        \*(f32 \*) (rec + 0x11C) = g_joint_beam_f11c\[idx\];$#s/g_joint_beam_f11c/g_joint_beam_f120/
+\#^        \*(f32 \*) (rec + 0x12C) = g_joint_beam_f12c\[idx\];$#s/0x12C/0x12E/
 \#^        \*(f32 \*) (rec + 0x128) = 1.0f;$#d
-\#^        \*(f32 \*) (rec + 0x130) = D_80088CE8\[idx\];$#s/D_80088CE8/D_80088CE4/
-\#^        \*(f32 \*) (rec + 0x134) = D_80088CDC\[idx\];$#s/idx/0/ % idx1 idx2
-\#^        rec\[0x138\] = D_80088CE0\[idx\];$#s/rec\[0x138\]/rec[0x139]/
-\#^        rec\[0x138\] = D_80088CE0\[idx\];$#s/D_80088CE0\[idx\]/D_80088CE0[idx * 4]/ % idx1 idx2
+\#^        \*(f32 \*) (rec + 0x130) = g_joint_beam_f130\[idx\];$#s/g_joint_beam_f130/g_joint_beam_f12c/
+\#^        \*(f32 \*) (rec + 0x134) = g_joint_beam_f134\[idx\];$#s/idx/0/ % idx1 idx2
+\#^        rec\[0x138\] = g_joint_beam_b138\[idx\];$#s/rec\[0x138\]/rec[0x139]/
+\#^        rec\[0x138\] = g_joint_beam_b138\[idx\];$#s/g_joint_beam_b138\[idx\]/g_joint_beam_b138[idx * 4]/ % idx1 idx2
 \#^    if (fabsf(lenSq) < 0.0001f) {$#s/0.0001f/0.001f/

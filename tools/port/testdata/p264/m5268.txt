@@ -7,7 +7,7 @@
 \#^    t\.colour\[3\] = 0xFF;$#s/0xFF/0xFE/
 \#^    t\.u1C = 0xFF;$#s/0xFF/0xFE/
 \#^    t\.pos\[1\] = pos\[1\];$#s/pos\[1\]/pos[2]/2
-\#^    t\.u3C\[2\] = ((f32 \*) D_800A5860)\[2\];$#s/\[2\];/[1];/
+\#^    t\.u3C\[2\] = ((f32 \*) g_vec3_zero)\[2\];$#s/\[2\];/[1];/
 \#^    t\.u1E = 10;$#s/10/11/
 \#^    t\.u20 = 0x19;$#s/0x19/0x18/
 \#^    t\.u60\[1\] = 7;$#s/7/6/
@@ -19,11 +19,11 @@
 \#^    t\.u5C = 0;$#s/0/1/
 \#^    t\.u60\[6\] = 0xFF;$#s/0xFF/0xFE/
 \#^    t\.u24 = 1\.0f;$#s/1\.0f/2.0f/
-\#^    yaw = ((s16) (s32) (scale \* D_800A0DE8) >> 8) + 0x40;$#s/(s16) (s32)/(s32)/
-\#^    yaw = ((s16) (s32) (scale \* D_800A0DE8) >> 8) + 0x40;$#s/>> 8/>> 7/
-\#^    yaw = ((s16) (s32) (scale \* D_800A0DE8) >> 8) + 0x40;$#s/0x40/0x41/
-\#^        drag = random_float() \* D_800A0DF0 + D_800A0DEC;$#s/D_800A0DF0 + D_800A0DEC/D_800A0DEC + D_800A0DF0/
-\#^        t\.sprite = ((s32 \*) D_800A0D90)\[random_int() & 3\];$#s/& 3/\& 1/
+\#^    yaw = ((s16) (s32) (scale \* g_smoke_deg_to_binang) >> 8) + 0x40;$#s/(s16) (s32)/(s32)/
+\#^    yaw = ((s16) (s32) (scale \* g_smoke_deg_to_binang) >> 8) + 0x40;$#s/>> 8/>> 7/
+\#^    yaw = ((s16) (s32) (scale \* g_smoke_deg_to_binang) >> 8) + 0x40;$#s/0x40/0x41/
+\#^        drag = random_float() \* g_smoke_puff_drag_rand + g_smoke_puff_drag_base;$#s/g_smoke_puff_drag_rand + g_smoke_puff_drag_base/g_smoke_puff_drag_base + g_smoke_puff_drag_rand/
+\#^        t\.sprite = ((s32 \*) g_fire_sprites)\[random_int() & 3\];$#s/& 3/\& 1/
 \#^        t\.life = (u32) random_int() . 18 + 27;$#s/+ 27/+ 28/
 \#^        t\.colour\[7\] = (u32) random_int() . 156 + 100;$#s/+ 100/+ 101/
 \#^        t\.size\[0\] = t\.size\[1\] = random_float() \* 233\.0f + 199\.0f;$#s/233\.0f/234.0f/
@@ -34,7 +34,7 @@
 \#^        vec3_from_angles_byte(r1 . 130 + yaw, r2 . 81 - 0x40, random_float() \* 10\.0f + 5\.0f, t\.vel);$#s/5\.0f/6.0f/
 \#^        t\.vel\[0\] -= vel\[0\] \* drag;$#s/vel\[0\]/vel[1]/
 \#^        t\.vel\[2\] -= vel\[2\] \* drag;$#s/-=/+=/
-\#^        t\.u54 = random_float() \* D_800A0DF4 + D_800A0DF8;$#s/D_800A0DF4 + D_800A0DF8/D_800A0DF8 + D_800A0DF4/
+\#^        t\.u54 = random_float() \* g_smoke_puff_u54_rand + g_smoke_puff_u54_base;$#s/g_smoke_puff_u54_rand + g_smoke_puff_u54_base/g_smoke_puff_u54_base + g_smoke_puff_u54_rand/
 \#^        t\.mode &= ~0xC0;$#s/~0xC0/~0x80/
 \#^        bit80 = (random_int() & 1) ? 0x80 : 0;$#s/0x80/0x40/
 \#^        bit40 = (random_int() & 1) ? 0x40 : 0;$#s/& 1/\& 2/

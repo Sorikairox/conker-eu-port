@@ -13,7 +13,7 @@ void *memcpy(void *, const void *, size_t);
 // `life` + 0x100 >> shift with flag 0x80), flag 1 for `additive`) and spawns it through mdl_particle_spawn (kind 3, alpha
 // 0xFF, 8 bytes of user data = the request's first 8 bytes, copied to the object's +0x170). Returns the object (0 if
 // none). The N64 code also sums the code words of level_load_header..level_stub_noop (anti-tamper) and on a mismatch writes
-// -1 to D_8008FDA8 + 0x148; the port has no MIPS code there, so the NON_MATCHING build skips that check (as P127 did in
+// -1 to g_save_cur_slot + 0x148; the port has no MIPS code there, so the NON_MATCHING build skips that check (as P127 did in
 // menu_settings_apply_checked). arg8 is not used.
 /* was func_151B61A0 */
 s32 ripple_spawn_flat(V3_61A0 *pos, V3_61A0 *vel, f32 scale, V3_61A0 *dir, V3_61A0 *acc, f32 speed, s16 life, u8 alpha,
@@ -130,7 +130,7 @@ void ripple_flat_update(u8 *arg0) {
     f32 var_f12;
     u8 *temp_v0;
 
-    (*(f32 *)((u8 *)arg0 + 0x170)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x170)) + (1.0020001f * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x170)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x170)) + (1.0020001f * g_frame_step_f));
     if ((*(f32 *)((u8 *)arg0 + 0x170)) > 29.9f) {
         (*(f32 *)((u8 *)arg0 + 0x170)) = 0.0f;
         sound_play_at(0x502, 0x5DC0U, 0, 0U, -1, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x38)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x3C)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x40)), 0x64, 0x1F4);

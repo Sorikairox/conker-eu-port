@@ -1,7 +1,7 @@
 # P286 mutants for ambient_billboard_quad_draw (sprite_billboard_quad_draw)
-/if (slot >= (u32) D_800DDD0C) {/s/(u32) D_800DDD0C/D_800DDD0C - 1/
-/if (slot >= (u32) D_800DDD0C) {/s/slot >= (u32) D_800DDD0C/(s32) slot >= D_800DDD0C/
-/g\[1\] = (u32) &D_8008D340;/s/&D_8008D340/\&D_8008D340 + 1/
+/if (slot >= (u32) g_ambient_quad_max) {/s/(u32) g_ambient_quad_max/g_ambient_quad_max - 1/
+/if (slot >= (u32) g_ambient_quad_max) {/s/slot >= (u32) g_ambient_quad_max/(s32) slot >= g_ambient_quad_max/
+/g\[1\] = (u32) &g_ambient_quad_setup_dl;/s/&g_ambient_quad_setup_dl/\&g_ambient_quad_setup_dl + 1/
 /g\[3\] = 0xFFFCF438;/s/0xFFFCF438/0xFFFCF439/
 /g\[7\] = 0x0C184B50;/s/0x0C184B50/0x0C184B51/
 /^    g += 8;/s/8/6/
@@ -22,7 +22,7 @@
 /words = (tw \* 2) \/ 8;/s/\/ 8/\/ 4/
 /^        words = 1;/s/1/2/
 /dxt = (words + 0x7FF) \/ words;/s/0x7FF/0x800/
-/g\[1\] = D_800DDD10\[D_800BE9C0\] + slot \* 64;/s/slot \* 64/slot * 32/
+/g\[1\] = g_ambient_quad_bufs\[g_dl_buf_index\] + slot \* 64;/s/slot \* 64/slot * 32/
 /^    g\[3\] = tex;/s/tex/tex + 2/
 /g\[9\] = 0x07000000/s/(lrs \& 0xFFF) << 12/(lrs \& 0x7FF) << 11/
 /g\[12\] = 0xF5100000/s/tw \* 2 + 7/tw * 2 + 8/
@@ -33,6 +33,6 @@
 /quad\[0\].v.flag = quad\[1\].v.flag/s/= 0;/= 1;/
 /g\[20\] = 0x05000402;/s/0x05000402/0x05000204/
 /g\[25\] = 0x00200000;/s/0x00200000/0/
-/^    D_800DE188++;/s/++/ += 2/
+/^    g_ambient_quad_count++;/s/++/ += 2/
 /return (s32) (g + 26);/s/26/24/
 /^    u8 th = h;/s/u8/s32/

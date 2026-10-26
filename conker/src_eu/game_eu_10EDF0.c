@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-extern u8 D_800A13B0[];
+extern u8 g_fx_model_emitter_recs[]; /* was D_800A13B0 */
 u8 *world_record_find(u8);
 
 /* was func_150E15E0 */
@@ -24,7 +24,7 @@ struct260 *fx_model_emitter_spawn(u8 arg0, u8 arg1, s32 arg2) {
         return NULL;
     }
     tmp.unk0 = arg0;
-    tmp.unk4 = world_record_find(D_800A13B0[arg0]);
+    tmp.unk4 = world_record_find(g_fx_model_emitter_recs[arg0]);
     if (tmp.unk4 == NULL) {
         return NULL;
     }
@@ -40,8 +40,8 @@ struct260 *fx_model_emitter_spawn(u8 arg0, u8 arg1, s32 arg2) {
 
 s32 particle_spawn_basic(s32 *, s32, s32, u8, s32);
 void xform_points_ptrs(void *, void *, void *, s32);
-extern s32 D_800A13B4;
-extern s32 D_800A13CC;
+extern s32 g_fx_model_emitter_pts_a; /* was D_800A13B4 */
+extern s32 g_fx_model_emitter_pts_b; /* was D_800A13CC */
 
 /* was func_150E16CC */
 void fx_model_emitter_update(u8 *arg0) {
@@ -106,16 +106,16 @@ void fx_model_emitter_update(u8 *arg0) {
     u8 *temp_s1;
 
     temp_s1 = arg0 + 0x28;
-    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((204.0f + (random_float() * 159.0f)) * 0.001f * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((204.0f + (random_float() * 159.0f)) * 0.001f * g_frame_step_f));
     if ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f) {
         var_v0 = 0;
         var_v1 = 0;
-        if (D_80082FA0 >= 0) {
+        if (g_last_player_index >= 0) {
             do {
                 temp_t7 = 1 << var_v0;
                 var_v0 += 1;
                 var_v1 |= temp_t7;
-            } while (D_80082FA0 >= var_v0);
+            } while (g_last_player_index >= var_v0);
         }
         if (!((*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 8))) + 2)) & var_v1)) {
             do {
@@ -150,8 +150,8 @@ void fx_model_emitter_update(u8 *arg0) {
         sp.uD0 = 0xFF;
         sp.uB0 = 0.962339f;
         sp.uD8 = 1.011462f;
-        sp.u9C = (u8 *) &D_800A13B4 + (*(u8 *)((u8 *)temp_s1 + 0)) * 0xC;
-        sp.uA0 = (u8 *) &D_800A13CC + (*(u8 *)((u8 *)temp_s1 + 0)) * 0xC;
+        sp.u9C = (u8 *) &g_fx_model_emitter_pts_a + (*(u8 *)((u8 *)temp_s1 + 0)) * 0xC;
+        sp.uA0 = (u8 *) &g_fx_model_emitter_pts_b + (*(u8 *)((u8 *)temp_s1 + 0)) * 0xC;
         sp.u94 = &sp.uE4;
         sp.u98 = &sp.uA4;
         xform_points_ptrs((*(s32 *)((u8 *)temp_s1 + 4)), &sp.u9C, &sp.u94, 2);

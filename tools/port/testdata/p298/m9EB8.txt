@@ -1,13 +1,13 @@
-s#    dst = \*(s16 \*\*) (obj + 0x20 + D_800BE9C0 \* 4);#    dst = *(s16 **) (obj + 0x24 - D_800BE9C0 * 4);# % flapb1
+s#    dst = \*(s16 \*\*) (obj + 0x20 + g_dl_buf_index \* 4);#    dst = *(s16 **) (obj + 0x24 - g_dl_buf_index * 4);# % flapb1
 s#    oy = \*(s16 \*) (obj + 0x12);#    oy = *(s16 *) (obj + 0x10);# % flap
 s#    kz = \*(f32 \*) (obj + 0x34);#    kz = *(f32 *) (obj + 0x30);# % flap
 s#    heading = (s32) (\*(f32 \*) (obj + 4) \* D_eu_800A3530_c\[0\]);#    heading = (s32) (*(f32 *) (obj + 4) * D_800A3534_c[0]);# % flap
 s#    if (\*(s32 \*) (obj + 0x84) == 0) {#    if (*(s32 *) (obj + 0x84) != 0) {# % flap flapinit
-s#        \*(f32 \*) (obj + 0x80) = t + ((f32) (state - 0x400) - t) \* D_800A3534_c\[0\] \* D_800BE9A4;#        *(f32 *) (obj + 0x80) = t + ((f32) (state - 0x401) - t) * D_800A3534_c[0] * D_800BE9A4;# % s420 s41F s410
+s#        \*(f32 \*) (obj + 0x80) = t + ((f32) (state - 0x400) - t) \* D_800A3534_c\[0\] \* g_frame_step_f;#        *(f32 *) (obj + 0x80) = t + ((f32) (state - 0x401) - t) * D_800A3534_c[0] * g_frame_step_f;# % s420 s41F s410
 s#        if (state != 0x420) {#        if (state != 0x41F) {# % s420 s41F
 s#            if (state - 1 == 0x400) {#            if (state - 1 == 0x401) {# % s401
 s#                \*(f32 \*) (obj + 0x80) = 0\.0f;#                *(f32 *) (obj + 0x80) = 1.0f;# % s401
-s#        \*(f32 \*) (obj + 0x80) += (0\.01953125f + 0\.00390625f \* (f32) i) \* D_800BE9A4;#        *(f32 *) (obj + 0x80) += (0.01953125f + 0.0078125f * (f32) i) * D_800BE9A4;# % flap
+s#        \*(f32 \*) (obj + 0x80) += (0\.01953125f + 0\.00390625f \* (f32) i) \* g_frame_step_f;#        *(f32 *) (obj + 0x80) += (0.01953125f + 0.0078125f * (f32) i) * g_frame_step_f;# % flap
 s#        if (\*(s32 \*) (obj + 0x7C) < 0x14) {#        if (*(s32 *) (obj + 0x7C) <= 0x14) {# % wrap
 s#            \*(s32 \*) (obj + 0x7C) = 0xEC;#            *(s32 *) (obj + 0x7C) = 0xED;# % wrap
 s#            sc\[i\]\[1\] = math_cos_u8((u32) \*(f32 \*) (obj + 0x80) \& 0xFF);#            sc[i][1] = math_sin_u8((u32) *(f32 *) (obj + 0x80) \& 0xFF);# % s420 s410

@@ -57,7 +57,7 @@ void audio_mixer_update_frame(void) {
     vol = *(F2_11FA0 *)&D_8002BD60;
     freq = *(F2_11FA0 *)&D_8002BD68;
     mode = D_80042770;
-    if ((*(s32 *)((u8 *)D_800DBFF0 + 0x5F0) & 1) && !(((u8 *)D_800B0DF0)[0x2A] & 1)) {
+    if ((*(s32 *)((u8 *)g_player_views + 0x5F0) & 1) && !(((u8 *)g_level_header)[0x2A] & 1)) {
         mode = 1;
     }
     if (D_80042774 != 0) {
@@ -91,7 +91,7 @@ void audio_mixer_update_frame(void) {
         case 4:
             D_8004277C = 4;
             vol.v[1] = 127.0f;
-            if (D_800BE9B4) {
+            if (g_level_first_frame) {
                 freq.v[1] = 400.0f;
             } else {
                 freq.v[1] = D_80042B20[1] + (400.0f - D_80042B20[1]);
@@ -115,7 +115,7 @@ void audio_mixer_update_frame(void) {
             }
             break;
     }
-    D_80042B38 += D_800BE9A4;
+    D_80042B38 += g_frame_step_f;
     if (master != D_80042B30 || D_80042B34 != 1.0f) {
         scale = master / 127.0f;
         for (i = 0; i < 3; i++) {

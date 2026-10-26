@@ -40,7 +40,7 @@ s/                    total += \*(f32 \*)(nxt + 0x18);/                    total
 s/                    if (\*(u16 \*)(data + 0x30) != 0) {/                    if (*(u16 *)(data + 0x32) != 0) {/
 s/(s16)(s32)\*(f32 \*)(nxt + 4), (s16)(s32)\*(f32 \*)(nxt + 8), 500, 5000);/(s16)(s32)*(f32 *)(nxt + 4), (s16)(s32)*(f32 *)(nxt + 8), 500, 5001);/
 s/            cur = nxt;/            cur = cur;/
-s/        \*(f32 \*)(data + 0x38) += trail_s_speed\[0\] \* D_800BE9A4;/        *(f32 *)(data + 0x38) += trail_s_speed[0];/
+s/        \*(f32 \*)(data + 0x38) += trail_s_speed\[0\] \* g_frame_step_f;/        *(f32 *)(data + 0x38) += trail_s_speed[0];/
 s/trail_s_range\[0\], -16384.0f);$/trail_s_range[0], -16383.0f);/
 s/sum \* trail_s_k\[0\], trail_s_range\[0\]/sum * trail_s_range[0], trail_s_range[0]/
 1,/sum += \*(f32 \*)(nxt + 0x18);/s/sum += \*(f32 \*)(nxt + 0x18);/sum += *(f32 *)(nxt + 0x20);/

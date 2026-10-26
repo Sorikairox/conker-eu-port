@@ -2,8 +2,8 @@
 s/n = rec\[1\];/n = rec[2];/ % n3c0
 s/(rec + 0x10))\[4\]);/(rec + 0x10))[5]);/ % n3c0
 s/total = per \* n;/total = per * (n + 1);/ % n3c1
-s/cur = D_800BE9C0 \* total;/cur = D_800BE9C0 * per;/ % n3c1
-s/prev = (D_800BE9C0 ^ 1) \* total;/prev = D_800BE9C0 * total;/ % n3c0
+s/cur = g_dl_buf_index \* total;/cur = g_dl_buf_index * per;/ % n3c1
+s/prev = (g_dl_buf_index ^ 1) \* total;/prev = g_dl_buf_index * total;/ % n3c0
 s/    j = 0;/    j = 1;/ % n3c0
 s/for (i = 1; i <= n; i++) {/for (i = 1; i < n; i++) {/ % n3c0
 s/if (i == n) {/if (i == n - 1) {/ % n3c0

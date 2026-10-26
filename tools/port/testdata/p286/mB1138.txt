@@ -6,14 +6,14 @@
 /^            if (s->count != 0) {/s/!= 0/== 0/
 /for (i = 0; i < 11; i++) {/s/11/10/
 /((s32 \*) (rec + 0x40))\[1\] = ((s32 \*) (rec + 0x34))\[1\];/s/\[1\];/[2];/
-/pt = (tgt\[4\] == 0x36) ? &D_800AA5BC\[i\] : &D_800AA50C\[i\];/s/0x36/0x35/
-/pt = (tgt\[4\] == 0x36) ? &D_800AA5BC\[i\] : &D_800AA50C\[i\];/s/&D_800AA50C\[i\]/\&D_800AA50C[i + 1]/
+/pt = (tgt\[4\] == 0x36) ? &g_char36_spark_bone_pts\[i\] : &g_char_spark_bone_pts\[i\];/s/0x36/0x35/
+/pt = (tgt\[4\] == 0x36) ? &g_char36_spark_bone_pts\[i\] : &g_char_spark_bone_pts\[i\];/s/&g_char_spark_bone_pts\[i\]/\&g_char_spark_bone_pts[i + 1]/
 /mtx_transform_point_or_origin(pt->ofs, slot->rec + 0x34,/s/pt->bone \* 64/pt->bone * 32/
-/slot->timer -= D_800BE9E4;/s/-=/+=/
+/slot->timer -= g_frame_ticks;/s/-=/+=/
 /if (slot->timer < 0) {/s/< 0/<= 0/
 /\*(f32 \*) (rec + 0x114) = 0.0f;/s/0.0f/1.0f/
 /\*(f32 \*) (rec + 0x110) = /s/- \*(f32 \*) (rec + 0x40)/- *(f32 *) (rec + 0x44)/
-/\*(f32 \*) (rec + 0x118) = /s/D_800BEDC8/D_800BE9A4/
+/\*(f32 \*) (rec + 0x118) = /s/D_800BEDC8/g_frame_step_f/
 /effect3d_set_handlers(slot->rec, 0x10, 0x1B, 0, 0x10);/s/0x1B/0x1C/
 /\*(s32 \*) (slot->rec + 0x58) |= 1;/s/|= 1/|= 2/
 /^                        s->count--;/s/--/++/
@@ -21,10 +21,10 @@
 /^                        last = slot;/s/slot/free/
 /^                    slot->next = free;/s/free/NULL/
 /s->accum = s->accum + random_float()/s/307.0f/308.0f/
-/s->accum = s->accum + random_float()/s/ \* D_800BE9A4//
+/s->accum = s->accum + random_float()/s/ \* g_frame_step_f//
 /^                if (1.0f < s->accum) {/s/1.0f/2.0f/
 /last->next = free; \/\* the free list/s/free;/NULL;/
-/t.sprite = D_800AB6F0\[s->kind\];/s/s->kind/s->kind + 1/
+/t.sprite = g_spark_kind_sprites\[s->kind\];/s/s->kind/s->kind + 1/
 /t.flags = 0x1001;/s/0x1001/0x1002/
 /t.life = (u32) random_int()/s/+ 52/+ 53/
 /t.colour\[3\] = 0xFF;/s/0xFF/0xFE/
@@ -38,7 +38,7 @@
 /m.u20 = 8.0f;/s/8.0f/7.0f/
 /^                            last = free;/d
 /for (k = (u32) random_int()/,/free = free->next;/s/free = free->next;/free = free;/
-/pt = &D_800AA50C\[free - s->slots\];/s/D_800AA50C/D_800AA5BC/
+/pt = &g_char_spark_bone_pts\[free - s->slots\];/s/g_char_spark_bone_pts/g_char36_spark_bone_pts/
 /t.u45 = (u32) random_int()/s/+ 100/+ 101/
 /t.u44 = (u32) random_int()/s/+ 155/+ 154/
 /m.u12 = (u32) random_int()/s/+ 4/+ 3/

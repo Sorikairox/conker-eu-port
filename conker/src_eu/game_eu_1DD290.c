@@ -8,7 +8,7 @@ typedef struct {
     f32 b[3];
 } Unk800AA1D0;
 
-const Unk800AA1D0 D_800AA1D0[27] = {
+const Unk800AA1D0 g_bone_beam_impact_pts[27] = { /* was D_800AA1D0 */
     { 8, { 0.0f, 11.0f, -25.0f }, { 0.0f, 11.0f, -60.0f } },
     { 8, { 37.0f, 0.0f, 0.0f }, { 70.0f, 0.0f, 0.0f } },
     { 8, { -37.0f, 0.0f, 0.0f }, { -70.0f, 0.0f, 0.0f } },
@@ -49,7 +49,7 @@ void obj_bone_beam_impact(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     u8 *base;
 
     if (arg0 != NULL && (base = *(u8 **)(arg0 + 0x1D4)) != NULL && (arg0[0x74] & 0xF) != 0xF) {
-        e = &((u8 *)D_800AA1D0)[arg1 * 0x1C];
+        e = &((u8 *)g_bone_beam_impact_pts)[arg1 * 0x1C];
         m = base; m += e[0] << 6;
         mtx_transform_point_or_origin(e + 4, &a, m);
         mtx_transform_point_or_origin(e + 0x10, &b, m);

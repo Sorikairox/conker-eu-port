@@ -1,7 +1,7 @@
 /* P84 runtime checks after merging port-b P68 / P73 / P77 / P82.
  *  ?p84text=N      game_mode_frame_step (per game mode text bank choice, game_eu_20B730.c, called from game_45B80.c) ->
- *                  text_bank_load (text bank loader, P68 C): language D_800E101A / D_800BEECB, loaded bank D_800E1003,
- *                  bank D_800E1004, string table D_800E1008, bank-1 extras D_80090178 / D_800E0FB8 when they change
+ *                  text_bank_load (text bank loader, P68 C): language g_settings_language / D_800BEECB, loaded bank D_800E1003,
+ *                  bank g_text_bank_data, string table g_text_strings, bank-1 extras g_text_bank1_extra / g_text_scene_names when they change
  *                  (first N changes).
  *  DIAGNOSTIC ?p84notext=1  game_mode_frame_step does nothing (the pre-merge asm stub behaviour): bisects the text bank load. */
 #include <stdint.h>
@@ -10,13 +10,13 @@
 int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
-extern unsigned char D_800E101A_[] __asm__("D_800E101A");
+extern unsigned char D_800E101A_[] __asm__("g_settings_language"); /* was D_800E101A */
 extern unsigned char D_800BEECB_[] __asm__("D_800BEECB");
 extern unsigned char D_800E1003_[] __asm__("D_800E1003");
-extern unsigned char D_800E1004_[] __asm__("D_800E1004");
-extern unsigned char D_800E1008_[] __asm__("D_800E1008");
-extern unsigned char D_80090178_[] __asm__("D_80090178");
-extern unsigned char D_800E0FB8_[] __asm__("D_800E0FB8");
+extern unsigned char D_800E1004_[] __asm__("g_text_bank_data"); /* was D_800E1004 */
+extern unsigned char D_800E1008_[] __asm__("g_text_strings"); /* was D_800E1008 */
+extern unsigned char D_80090178_[] __asm__("g_text_bank1_extra"); /* was D_80090178 */
+extern unsigned char D_800E0FB8_[] __asm__("g_text_scene_names"); /* was D_800E0FB8 */
 
 extern unsigned char p88_D_800C35EA[] __asm__("D_800C35EA");
 extern unsigned char p88_D_800C39D0[] __asm__("D_800C39D0");
@@ -60,7 +60,7 @@ void __wrap_game_mode_frame_step(void) {
     }
 }
 
-/* ?p84lang=N: watch the language byte D_800E101A at every asm-stub hit (port_stub_trace_hook; don't combine with
+/* ?p84lang=N: watch the language byte g_settings_language at every asm-stub hit (port_stub_trace_hook; don't combine with
  * ?p69watch / ?p49walk) and at each game_mode_frame_step call; log the first N changes with the last stub and the JS stack. */
 extern void (*port_stub_trace_hook)(const char *name);
 void port_js_stack(int skip, int n);

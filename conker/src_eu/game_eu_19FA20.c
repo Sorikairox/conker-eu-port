@@ -29,7 +29,7 @@ u8 *decal_alloc(s16 arg0, u16 arg1, u8 arg2, s32 arg3, s32 arg4, s32 arg5, u8 ar
     return t;
 }
 
-extern s32 D_8008CDEC; /* sprite texture descriptors (u8 * per id): u16 width / height at +6 / +8 */
+extern s32 g_sprite_tex_descs; /* sprite texture descriptors (u8 * per id): u16 width / height at +6 / +8; was D_8008CDEC */
 s32 decal_place_on_floor(u8 *, f32, f32, f32, f32, s32, s32, s32);
 
 // sprite_spawn_at: allocates a sprite (decal_alloc: kind `kind`, texture `tex`, flags ...) and places it at
@@ -50,7 +50,7 @@ void decal_spawn_at(f32 x, f32 y, f32 z, s16 kind, u16 arg4, u8 tex, f32 size, s
     }
     if (!(flags & 2)) {
         if (decal_place_on_floor(v + 0x10, x, y, z, size, arg7, radius,
-                          *(u16 *) (((u8 **) &D_8008CDEC)[v[0x58]] + 6)) == 0) {
+                          *(u16 *) (((u8 **) &g_sprite_tex_descs)[v[0x58]] + 6)) == 0) {
             node_destroy((struct102 *) v);
         }
         return;
@@ -71,7 +71,7 @@ void decal_spawn_at(f32 x, f32 y, f32 z, s16 kind, u16 arg4, u8 tex, f32 size, s
     *(s16 *) (v + 0x14) = (s32) (z - r);
     *(s16 *) (v + 0x44) = (s32) (r + z);
     *(s16 *) (v + 0x34) = (s32) (r + z);
-    t = ((u8 **) &D_8008CDEC)[tex];
+    t = ((u8 **) &g_sprite_tex_descs)[tex];
     *(s16 *) (v + 0x2A) = 0x2000;
     *(s16 *) (v + 0x38) = (*(u16 *) (t + 6) + 0x100) << 5;
     *(s16 *) (v + 0x28) = (*(u16 *) (t + 6) + 0x100) << 5;
@@ -81,7 +81,7 @@ void decal_spawn_at(f32 x, f32 y, f32 z, s16 kind, u16 arg4, u8 tex, f32 size, s
 }
 
 s32 decal_fit_to_triangle(s32, s32, f32, f32, f32, f32, s32, s32);
-extern s32 D_8008CDEC;
+extern s32 g_sprite_tex_descs; /* was D_8008CDEC */
 
 /* was func_15172474 */
 void decal_spawn_on_triangle(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s16 arg4, u16 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC) {
@@ -91,7 +91,7 @@ void decal_spawn_on_triangle(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s16 arg4, u
     temp_v0 = decal_alloc(arg4, arg5, arg6, arg8, arg9, argA, (s32) argB, argC);
     if (temp_v0 != NULL) {
         sp2C = temp_v0;
-        if (decal_fit_to_triangle((s32)((u8 *)temp_v0 + 0x10), arg3, arg0, arg1, arg2, 0.0f, arg7, *(u16 *)((u8 *)((s32 *)&D_8008CDEC)[*((u8 *)temp_v0 + 0x58)] + 6)) == 0) {
+        if (decal_fit_to_triangle((s32)((u8 *)temp_v0 + 0x10), arg3, arg0, arg1, arg2, 0.0f, arg7, *(u16 *)((u8 *)((s32 *)&g_sprite_tex_descs)[*((u8 *)temp_v0 + 0x58)] + 6)) == 0) {
             node_destroy((struct102 *)sp2C);
         }
     }
@@ -115,14 +115,14 @@ void decal_tick(struct102 *arg0) {
         }
         if (temp_v0 != -1) {
             if (!((*(u8 *)((u8 *)arg0 + 0x59)) & 4)) {
-                if (D_800BE9E4 < temp_v0) {
-                    (*(s16 *)((u8 *)arg0 + 0x50)) = (s16) (temp_v0 - D_800BE9E4);
+                if (g_frame_ticks < temp_v0) {
+                    (*(s16 *)((u8 *)arg0 + 0x50)) = (s16) (temp_v0 - g_frame_ticks);
                 } else {
                     (*(s16 *)((u8 *)arg0 + 0x50)) = 0;
                 }
             }
             (*(s16 *)((u8 *)arg0 + 0x52)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x54)) + (*(s16 *)((u8 *)arg0 + 0x52)));
-            temp_v0_2 = (*(u8 *)((u8 *)((&D_8008CDEC)[(*(u8 *)((u8 *)arg0 + 0x58))]) + 4));
+            temp_v0_2 = (*(u8 *)((u8 *)((&g_sprite_tex_descs)[(*(u8 *)((u8 *)arg0 + 0x58))]) + 4));
             if (((s16) (*(s16 *)((u8 *)arg0 + 0x52)) / 256) >= temp_v0_2) {
                 if ((*(u8 *)((u8 *)arg0 + 0x59)) & 4) {
                     (*(s16 *)((u8 *)arg0 + 0x50)) = -3;
@@ -134,10 +134,10 @@ void decal_tick(struct102 *arg0) {
     }
 }
 
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 extern u32 D_800DD5E4;
 extern s32 D_800DD5E8;
-extern s16 D_800DD5EC;
+extern s16 g_sprite_last_other_mode; /* was D_800DD5EC */
 
 /* was func_15172634 */
 u8 *decal_draw(u8 *arg0, u8 *arg1, s32 arg2) {
@@ -180,7 +180,7 @@ u8 *decal_draw(u8 *arg0, u8 *arg1, s32 arg2) {
     var_s0 = arg0;
     sp.u8C = 1;
     if ((*(s16 *)((u8 *)arg1 + 0x50)) >= 2) {
-        temp_t4 = (&D_8008CDEC)[(*(u8 *)((u8 *)arg1 + 0x58))];
+        temp_t4 = (&g_sprite_tex_descs)[(*(u8 *)((u8 *)arg1 + 0x58))];
         sp88 = temp_t4;
         temp_v0 = *(s32 *)temp_t4;
         temp_a2 = (*(s16 *)((u8 *)arg1 + 0x52));
@@ -198,7 +198,7 @@ u8 *decal_draw(u8 *arg0, u8 *arg1, s32 arg2) {
             var_s0 = temp_v0_2;
             D_800DD5E8 = sp.u90;
         }
-        var_t0_2 = D_800DD5EC & 0xF;
+        var_t0_2 = g_sprite_last_other_mode & 0xF;
         if (!((*(u8 *)((u8 *)arg1 + 0x59)) & 1)) {
             var_v1_2 = 1;
         } else {
@@ -241,8 +241,8 @@ u8 *decal_draw(u8 *arg0, u8 *arg1, s32 arg2) {
             var_s0 = temp_s0 + 8;
         }
         sp.uB8 = var_t0_2;
-        sp.uB4 = D_800DD5EC & 0xF0;
-        temp_v0_3 = gfx_other_mode_cached(var_s0, sp84 | 0x80000 | D_800D30BC | 0x2CB0, sp80, &sp.u8C);
+        sp.uB4 = g_sprite_last_other_mode & 0xF0;
+        temp_v0_3 = gfx_other_mode_cached(var_s0, sp84 | 0x80000 | g_gfx_tlut_mode | 0x2CB0, sp80, &sp.u8C);
         var_t2 = sp.uB4;
         var_s0_2 = temp_v0_3;
         var_a0 = 0x40;
@@ -304,7 +304,7 @@ u8 *decal_draw(u8 *arg0, u8 *arg1, s32 arg2) {
                 break;
             }
         }
-        D_800DD5EC = sp.uB8 | var_t2;
+        g_sprite_last_other_mode = sp.uB8 | var_t2;
         temp_v0_4 = (*(u16 *)((u8 *)arg1 + 0x56));
         temp_v1_2 = (*(s16 *)((u8 *)arg1 + 0x50));
         temp_t5 = ((s32) temp_v0_4 >> 8) & 0xF8;
@@ -341,12 +341,12 @@ u8 *decal_draw(u8 *arg0, u8 *arg1, s32 arg2) {
     }
     return var_s0;
 }
-extern f32 D_800A7524;
-extern f32 D_800A7530;
+extern f32 g_decal_div_fallback; /* was D_800A7524 */
+extern f32 g_decal_deg_to_rad; /* was D_800A7530 */
 s32 floor_triangle_slope(s32, s32, f32 *, f32 *);
-extern s32 D_800A73B0;
-extern s32 D_800A73C0;
-extern s32 D_800A73D0;
+extern s32 g_decal_uv_1024; /* was D_800A73B0 */
+extern s32 g_decal_uv_512; /* was D_800A73C0 */
+extern s32 g_decal_uv_256; /* was D_800A73D0 */
 
 /* was func_15172B6C */
 s32 decal_fit_to_triangle(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7) {
@@ -409,7 +409,7 @@ s32 decal_fit_to_triangle(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
     sp.u78 = temp_f4;
     var_f2 = (2.0f * temp_f12) + (2.0f * sp.u68 * (-temp_f4 - temp_f4));
     if (var_f2 == 0.0f) {
-        var_f2 = D_800A7524;
+        var_f2 = g_decal_div_fallback;
     }
     sp.u80 = temp_f18;
     temp_f14 = sp.u64 * sp.u80;
@@ -455,20 +455,20 @@ s32 decal_fit_to_triangle(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
         (*(s16 *)((u8 *)var_v1_2 + 0x1E)) = (s16) (s32) -(*(f32 *)((u8 *)var_v0 + -4));
         (*(s16 *)((u8 *)var_v1_2 + 0x2E)) = (s16) (s32) -(*(f32 *)((u8 *)var_v0 + 8));
     } while (var_a0 < 6);
-    temp_f12_2 = (arg5 - 225.0f) * D_800A7530;
+    temp_f12_2 = (arg5 - 225.0f) * g_decal_deg_to_rad;
     sp40 = temp_f12_2;
     sp58 = cosf(temp_f12_2);
     temp_f0_3 = sinf(temp_f12_2);
     var_a0_2 = 0;
     if ((u8) arg7 == 0x10) {
         var_f12_2 = 256.0f;
-        var_a1 = &D_800A73D0;
+        var_a1 = &g_decal_uv_256;
     } else if ((u8) arg7 == 0x20) {
         var_f12_2 = 512.0f;
-        var_a1 = &D_800A73C0;
+        var_a1 = &g_decal_uv_512;
     } else {
         var_f12_2 = 1024.0f;
-        var_a1 = &D_800A73B0;
+        var_a1 = &g_decal_uv_1024;
     }
     var_v1_3 = arg0;
     var_v0_2 = var_a1;

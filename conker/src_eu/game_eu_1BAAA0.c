@@ -41,7 +41,7 @@ typedef struct {
     u8 unk0[4];
 } struct_eu_bytes4b;
 
-extern struct_eu_bytes4b D_800A78B4;
+extern struct_eu_bytes4b g_fx_bytes4_78b4; /* was D_800A78B4 */
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x84];

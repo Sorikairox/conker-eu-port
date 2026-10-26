@@ -184,7 +184,7 @@ s32 asset_dma_into(u8 *arg0, s32 arg1, s32 arg2, s32 arg3)
     var_s1 = rzip_inflate(temp_v0, arg1, D_8003809C);
     if (sp24 != ((0, var_s1))) // fakematch: comma expression flips beq operand order
     {
-      D_8003C8E0 = 0x0C000036;
+      g_dbg_crash_marker = 0x0C000036;
       func_150ADC50();
     }
     heap_free(temp_v0);

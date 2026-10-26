@@ -217,7 +217,7 @@ s32 debris_piece_update(u8 *arg0) {
 }
 
 void spark_spawn_burst(f32, f32, f32, f32, s16, f32, f32, f32, f32, s16, s16, u8);
-/* P317: NM signature = D_80089CD4's dispatcher type (wasm call_indirect); arg3 is the f32 the asm passes on */
+/* P317: NM signature = g_mdl_particle_land_fns's dispatcher type (wasm call_indirect); arg3 is the f32 the asm passes on */
 /* was func_151A79EC */
 s32 debris_piece_on_ground(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5)
 {
@@ -307,7 +307,7 @@ void debris_sprite_fade_update(u8 *arg0)
   if ((*((s16 *) (arg0 + 0x38))) < (*((s16 *) (p + 8))))
   {
     short d;
-    d = (*((s16 *) (p + 0xA))) * D_800BE9E4;
+    d = (*((s16 *) (p + 0xA))) * g_frame_ticks;
     *((s16 *) (arg0 + 0x34)) += d;
     *((s16 *) (arg0 + 0x36)) += d;
   }
@@ -337,7 +337,7 @@ void debris_sprite_fade_update_b(u8 *arg0)
   if ((*((s16 *) (arg0 + 0x38))) < (*((s16 *) (p + 8))))
   {
     short d;
-    d = (*((s16 *) (p + 0xA))) * D_800BE9E4;
+    d = (*((s16 *) (p + 0xA))) * g_frame_ticks;
     *((s16 *) (arg0 + 0x34)) += d;
     *((s16 *) (arg0 + 0x36)) += d;
   }

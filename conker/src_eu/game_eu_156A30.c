@@ -27,12 +27,12 @@ void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
 void camera_update_state_flags(struct108 *arg0);
 f32 sinf(f32);
 f32 cosf(f32);
-extern u8 *D_800DC440;       /* saved camera states, 0x9A0 bytes each */
+extern u8 *g_camera_saved_slots;       /* saved camera states, 0x9A0 bytes each; was D_800DC440 */
 extern u16 D_800BEB30[];     /* per player: view flags (camera +0x36A) */
-extern s32 D_800898C0;       /* frames to skip the "restore saved camera" event */
-extern s32 D_800898C4[];     /* per player: saved +0x3D4 byte 0x197 */
-extern s32 D_800898D4[];     /* per player: saved +0x3D4 byte 0x198 */
-extern f32 D_800898E4[3];    /* event 7 orbit offset {0, 0, -400} */
+extern s32 g_camera_restore_skip;       /* frames to skip the "restore saved camera" event; was D_800898C0 */
+extern s32 g_camera_saved_tgt_197[];     /* per player: saved +0x3D4 byte 0x197; was D_800898C4 */
+extern s32 g_camera_saved_tgt_198[];     /* per player: saved +0x3D4 byte 0x198; was D_800898D4 */
+extern f32 g_camera_event7_offset[3];    /* event 7 orbit offset {0, 0, -400}; was D_800898E4 */
 extern u8 D_800C3A92;
 extern s32 D_800C3A98;
 extern s32 D_800C3A9C;
@@ -44,10 +44,10 @@ extern f32 D_800C3A6C;
  * else cleared. If the queue (camera_event_queue_empty) is busy, only flag 1 of +0x2C sets mode 0xC; otherwise every queued
  * event (camera_dequeue_event: {type, data}) is handled until the queue is empty:
  *  1: copy a camera request (mode, values, point, ...) from the data into +0x6FC..+0x72C, +0x6CC = 1;
- *  5: save the camera: D_800DC440[data] = D_800DBFF0[player], keeping the target's +0x197 / +0x198 bytes in
- *     D_800898C4 / D_800898D4 (or resetting them, mode 1, when the target's +0x78 is 0); then mode 0xA;
- *  6: restore it (unless D_800898C0 counts down, only in camera mode 0x40000): with +0x834 set only the view flags
- *     and camera_start_transition; else D_800DBFF0[player] = D_800DC440[data], re-applies the request and the target bytes,
+ *  5: save the camera: g_camera_saved_slots[data] = g_player_views[player], keeping the target's +0x197 / +0x198 bytes in
+ *     g_camera_saved_tgt_197 / g_camera_saved_tgt_198 (or resetting them, mode 1, when the target's +0x78 is 0); then mode 0xA;
+ *  6: restore it (unless g_camera_restore_skip counts down, only in camera mode 0x40000): with +0x834 set only the view flags
+ *     and camera_start_transition; else g_player_views[player] = g_camera_saved_slots[data], re-applies the request and the target bytes,
  *     resets eye / target history, and reruns the per-frame camera steps;
  *  7: place the camera at a fixed eye (+0x2F8) and target (data kind 0 / 2: given; else orbiting the eye at
  *     -400 by the data angles), then optional FOV (camera_projection_update) and the camera collision probe collision_find_floor;
@@ -99,19 +99,19 @@ void camera_process_events(struct108 *arg0) {
                 (*(u8 **)(p + 0x3D4))[0x198] = 0;
                 *(s16 *)(p + 0x73C) = 0;
                 camera_exit_aim_mode(arg0);
-                D_800898C4[p[0x23D]] = 0;
-                D_800898D4[p[0x23D]] = 0;
+                g_camera_saved_tgt_197[p[0x23D]] = 0;
+                g_camera_saved_tgt_198[p[0x23D]] = 0;
             } else {
-                D_800898C4[p[0x23D]] = tgt[0x197];
-                D_800898D4[p[0x23D]] = (*(u8 **)(p + 0x3D4))[0x198];
+                g_camera_saved_tgt_197[p[0x23D]] = tgt[0x197];
+                g_camera_saved_tgt_198[p[0x23D]] = (*(u8 **)(p + 0x3D4))[0x198];
             }
             camera_shake_reset(arg0);
             if (p[0x84C] != 0) {
                 aim_hud_clear(p);
                 p[0x84C] = 0;
             }
-            src = (s32 *)((u8 *)D_800DBFF0 + p[0x23D] * 0x9A0);
-            dst = (s32 *)(D_800DC440 + ev[1] * 0x9A0);
+            src = (s32 *)((u8 *)g_player_views + p[0x23D] * 0x9A0);
+            dst = (s32 *)(g_camera_saved_slots + ev[1] * 0x9A0);
             for (i = 0; i < 0x9A0 / 4; i++) {
                 dst[i] = src[i];
             }
@@ -122,17 +122,17 @@ void camera_process_events(struct108 *arg0) {
 
         case 6: /* restore the saved camera state */
             p[0x23E] = (*(u8 **)(p + 0x3D4))[0x78];
-            if (D_800898C0 != 0) {
-                D_800898C0--;
+            if (g_camera_restore_skip != 0) {
+                g_camera_restore_skip--;
                 break;
             }
             if (*(s32 *)(p + 0x2C) != 0x40000) {
                 break;
             }
             heading = *(f32 *)(p + 0x3A4);
-            if (D_800D2DB0 != 999.0f) {
-                heading = D_800D2DB0;
-                D_800D2DB0 = 999.0f;
+            if (g_camera_event_heading != 999.0f) {
+                heading = g_camera_event_heading;
+                g_camera_event_heading = 999.0f;
             }
             camera_pop_mode(arg0, 0xA);
             if (D_800C3A92 != 0) {
@@ -148,8 +148,8 @@ void camera_process_events(struct108 *arg0) {
                 p[0x23C] = 0;
                 break;
             }
-            src = (s32 *)(D_800DC440 + ev[1] * 0x9A0);
-            dst = (s32 *)((u8 *)D_800DBFF0 + p[0x23D] * 0x9A0);
+            src = (s32 *)(g_camera_saved_slots + ev[1] * 0x9A0);
+            dst = (s32 *)((u8 *)g_player_views + p[0x23D] * 0x9A0);
             for (i = 0; i < 0x9A0 / 4; i++) {
                 dst[i] = src[i];
             }
@@ -160,23 +160,23 @@ void camera_process_events(struct108 *arg0) {
             p[0x23C] = 1;
             p[0x23E] = tgt[0x78];
             camera_apply_request(arg0);
-            if (D_800898D4[p[0x23D]] != 0) {
+            if (g_camera_saved_tgt_198[p[0x23D]] != 0) {
                 *(u16 *)(p + 0x36A) |= 0x10;
                 **(u16 **)(p + 0x36C) |= 0x10;
                 heading = *(f32 *)(p + 0x774);
-            } else if (D_800898C4[p[0x23D]] != 0) {
+            } else if (g_camera_saved_tgt_197[p[0x23D]] != 0) {
                 if ((p[0x23E] == 0xC && *(u16 *)(*(u8 **)(p + 0x3D0) + 0x84) != 0x76) || p[0x23E] == 0x1B
                     || (**(u16 **)(p + 0x36C) & 0x10)) {
                     *(u16 *)(p + 0x36A) |= 0x10;
                     **(u16 **)(p + 0x36C) |= 0x10;
-                    (*(u8 **)(p + 0x3D4))[0x197] = D_800898C4[p[0x23D]];
+                    (*(u8 **)(p + 0x3D4))[0x197] = g_camera_saved_tgt_197[p[0x23D]];
                     aim_hud_spawn_for_mode(p, p[0x23E]);
                     heading = *(f32 *)(p + 0x774);
                 } else {
                     (*(u8 **)(p + 0x3D4))[0x198] = 0;
                     *(s16 *)(p + 0x73C) = 0;
-                    D_800898C4[p[0x23D]] = 0;
-                    D_800898D4[p[0x23D]] = 0;
+                    g_camera_saved_tgt_197[p[0x23D]] = 0;
+                    g_camera_saved_tgt_198[p[0x23D]] = 0;
                     camera_exit_aim_mode(arg0);
                 }
             } else {
@@ -202,7 +202,7 @@ void camera_process_events(struct108 *arg0) {
             for (i = 0; i < 3; i++) {
                 ((f32 *)(p + 0x304))[i] = ((f32 *)(p + 0x2F8))[i];
             }
-            triggers_update(D_800BE9E4);
+            triggers_update(g_frame_ticks);
             trigger_zones_update_object((struct127 *)((u8 *)g_objects + p[0x23D] * 0x32C));
             camera_apply_request(arg0);
             camera_lean_from_heading(arg0, NULL, NULL);
@@ -255,9 +255,9 @@ void camera_process_events(struct108 *arg0) {
                 *(f32 *)(p + 0x38C) = 0.0f;
                 *(f32 *)(p + 0x5EC) = *(f32 *)(d + 0x2C);
             } else {
-                pos[0] = D_800898E4[0];
-                pos[1] = D_800898E4[1];
-                pos[2] = D_800898E4[2];
+                pos[0] = g_camera_event7_offset[0];
+                pos[1] = g_camera_event7_offset[1];
+                pos[2] = g_camera_event7_offset[2];
                 while (*(f32 *)(d + 0x20) > 180.0f) {
                     *(f32 *)(d + 0x20) -= 360.0f;
                 }
@@ -337,18 +337,18 @@ void camera_process_events(struct108 *arg0) {
     }
 }
 
-extern s16 D_800898F0;
-extern u8 D_800DC458[];
-extern f32 D_800A39F0;
+extern s16 g_camera_pivot_count; /* was D_800898F0 */
+extern u8 g_camera_pivot_slots[]; /* was D_800DC458 */
+extern f32 g_camera_pivot_k_39f0; /* was D_800A39F0 */
 
 /* was func_15129E30 */
 void camera_pivot_slot_reset(u8 *arg0, s32 arg1)
 {
-  if (D_800898F0 != 0)
+  if (g_camera_pivot_count != 0)
   {
-    *((s16 *) (D_800DC458 + arg0[0x23D] * 0x24 + 2)) = 0;
-    *((f32 *) (D_800DC458 + arg0[0x23D] * 0x24 + 4)) = -1.0f;
-    *((f32 *) (D_800DC458 + arg0[0x23D] * 0x24 + 8)) = D_800A39F0;
+    *((s16 *) (g_camera_pivot_slots + arg0[0x23D] * 0x24 + 2)) = 0;
+    *((f32 *) (g_camera_pivot_slots + arg0[0x23D] * 0x24 + 4)) = -1.0f;
+    *((f32 *) (g_camera_pivot_slots + arg0[0x23D] * 0x24 + 8)) = g_camera_pivot_k_39f0;
   }
 }
 
@@ -361,17 +361,17 @@ s32 floor_tri_height(f32 x, f32 z, s32 tri, u8 *packed, f32 *out);
 void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
 s32 camera_yaw_fade_in(struct108 *);
 void camera_update_state_flags(struct108 *);
-extern s16 D_800898F0;
-extern f32 D_800A39F4;
-extern f32 D_800A39F8;
-extern f32 D_800A39FC;
-/* camera_follow_update: camera mode 0x40 (camera_dispatch_mode). Unless D_800898F0 is 0 or +0x73C is set: the pivot
+extern s16 g_camera_pivot_count; /* was D_800898F0 */
+extern f32 g_camera_pivot_y_scale; /* was D_800A39F4 */
+extern f32 g_camera_pivot_k_39f8; /* was D_800A39F8 */
+extern f32 g_camera_pivot_k_39fc; /* was D_800A39FC */
+/* camera_follow_update: camera mode 0x40 (camera_dispatch_mode). Unless g_camera_pivot_count is 0 or +0x73C is set: the pivot
  * +0x27C = +0x288; the camera target is the pivot plus the direction pivot -> eye (+0x2BC) scaled to the eye
- * distance minus +0x278 (at least 0), its y part scaled by D_800A39F4 unless +0x704 & 0xF. The camera position
+ * distance minus +0x278 (at least 0), its y part scaled by g_camera_pivot_y_scale unless +0x704 & 0xF. The camera position
  * +0x2F8 eases towards it (math_spring_approach with velocity +0x3C0, rates 3 / 2 / 3, +0x7B4), or snaps there (also
  * +0x304, velocity 0) when +0x23C. Then camera_yaw_fade_in; when snapped, flag 0x400000 of +0x84, or no floor under
  * the camera (floor_tri_height into +0x35C), the collision probe collision_find_floor runs (+0x360 kept unless the result
- * +0x364 equals D_800A39FC) and camera_update_state_flags. Finally the four zoom pairs +0x964..+0x980 = 1 / 2. */
+ * +0x364 equals g_camera_pivot_k_39fc) and camera_update_state_flags. Finally the four zoom pairs +0x964..+0x980 = 1 / 2. */
 /* was func_15129EA4 */
 void camera_pivot_follow_update(struct108 *cam) {
     u8 *c = (u8 *) cam;
@@ -385,7 +385,7 @@ void camera_pivot_follow_update(struct108 *cam) {
     f32 ty;
     f32 tz;
 
-    if (D_800898F0 == 0 || *(s16 *) (c + 0x73C) != 0) {
+    if (g_camera_pivot_count == 0 || *(s16 *) (c + 0x73C) != 0) {
         return;
     }
     *(f32 *) (c + 0x27C) = *(f32 *) (c + 0x288);
@@ -405,7 +405,7 @@ void camera_pivot_follow_update(struct108 *cam) {
     if (*(s32 *) (c + 0x704) & 0xF) {
         ty = *(f32 *) (c + 0x280);
     } else {
-        ty = *(f32 *) (c + 0x280) + dir[1] * D_800A39F4;
+        ty = *(f32 *) (c + 0x280) + dir[1] * g_camera_pivot_y_scale;
     }
     tz = *(f32 *) (c + 0x284) + dir[2];
     if (c[0x23C] != 0) {
@@ -434,9 +434,9 @@ void camera_pivot_follow_update(struct108 *cam) {
         floor_tri_height(*(f32 *) (c + 0x2F8), *(f32 *) (c + 0x300), *(s32 *) (c + 0x644), c + 0x648,
                       (f32 *) (c + 0x35C)) == 0) {
         collision_find_floor(0, 0, (s32) probe, (s32) (c + 0x360), (s32) (c + 0x640), 0, *(f32 *) (c + 0x2F8),
-                      *(f32 *) (c + 0x2FC), *(f32 *) (c + 0x300), *(f32 *) (c + 0x2FC), 0, 0, D_800A39F8,
+                      *(f32 *) (c + 0x2FC), *(f32 *) (c + 0x300), *(f32 *) (c + 0x2FC), 0, 0, g_camera_pivot_k_39f8,
                       *(f32 *) (c + 0x2FC));
-        if (D_800A39FC != *(f32 *) (c + 0x364)) {
+        if (g_camera_pivot_k_39fc != *(f32 *) (c + 0x364)) {
             *(f32 *) (c + 0x360) = *(f32 *) (c + 0x364);
         }
         camera_update_state_flags(cam);

@@ -1496,7 +1496,7 @@ void gfx_run_dl(const void *dl) {
             const unsigned char *t = gfx_addr(w1);
             if (!t) { gfx_stats.bad_addr++; break; }
             if (w1 == 0) { /* P55: G_DL 0 only comes from an asm stub that returned a NULL DL (hud_health_draw draws
-                            * D_800D29A8 = stub shared_dl_acquire(0xB8)); RDRAM 0 is code, running it crashed the renderer */
+                            * g_hud_health_piece_dl = stub shared_dl_acquire(0xB8)); RDRAM 0 is code, running it crashed the renderer */
                 static int logged;
                 gfx_stats.bad_addr++;
                 if (!logged++) port_log("[gfx] G_DL to address 0 at %p skipped (a stub returned a NULL display list)\n", (const void *)(pc - 8));
@@ -1829,7 +1829,7 @@ uint32_t *__wrap_level_dl_visibility_filter(int dl, uint32_t *gdl, unsigned char
             const uint32_t *c = (const uint32_t *)(uintptr_t)dl;
             int k;
             for (k = 0; k < 400 && (c[0] >> 24) != 0x01; k++) c += 2;
-            { const uint32_t *L = (const uint32_t *)port_n64_to_wasm(0x800D9FB0u);   /* light / Vp records D_800D9FB0 */
+            { const uint32_t *L = (const uint32_t *)port_n64_to_wasm(0x800D9FB0u);   /* light / Vp records g_cam_lookat_bufs */
               port_log("[vis] D_800D9FB0: %08X %08X %08X %08X | %08X %08X %08X %08X | %08X %08X %08X %08X | %08X %08X %08X %08X\n",
                        L[0], L[1], L[2], L[3], L[4], L[5], L[6], L[7], L[8], L[9], L[10], L[11], L[12], L[13], L[14], L[15]); }
             if (k < 400) {
@@ -1869,7 +1869,7 @@ uint32_t *__wrap_level_dl_visibility_filter(int dl, uint32_t *gdl, unsigned char
 }
 
 /* P39: ?camwatch=N: write watch on the camera chain, checked at every asm-stub entry (port_stub_hit) and around
- * every camera_build_view_matrix call (-Wl,--wrap). Watched: the camera target D_800DBFF0[0]+0x3D4 (= g_objects[0]+0x31C)
+ * every camera_build_view_matrix call (-Wl,--wrap). Watched: the camera target g_player_views[0]+0x3D4 (= g_objects[0]+0x31C)
  * +0x130..+0x154 (dir / eye / at), the controller's smoothed target 0x2A4..0x2AC, at 0x2BC..0x2C4, eye
  * 0x2F8..0x300, orbit 0x18C..0x198 and yaw 0x3A0, and the followed record (+0x3D0) position +0x14..+0x1C.
  * The first N changes are logged with the stub (or wrapper point) that saw them and a JS stack; camera_build_view_matrix
@@ -1877,11 +1877,11 @@ uint32_t *__wrap_level_dl_visibility_filter(int dl, uint32_t *gdl, unsigned char
 #define CW_N 36
 extern unsigned port_frame_count;
 void port_js_stack(int skip, int n);
-extern unsigned D_800DBFF0;
+extern unsigned g_player_views; /* was D_800DBFF0 */
 static unsigned cw_prev[CW_N], cw_have, cw_logged, cw_calls;
 static int cw_flag = -1;
 static int cw_snap(unsigned *v) {
-    const unsigned char *p = (const unsigned char *)D_800DBFF0, *o, *r;
+    const unsigned char *p = (const unsigned char *)g_player_views, *o, *r;
     int i, n = 0;
     if (!p) return 0;
     o = *(const unsigned char *const *)(p + 0x3D4);
@@ -1964,8 +1964,8 @@ void __wrap_camera_build_view_matrix(void *arg0) {
                       *(float *)&v[12], *(float *)&v[13], *(float *)&v[14], *(float *)&v[15], *(float *)&v[16], *(float *)&v[17],
                       *(float *)&v[18], *(float *)&v[19], *(float *)&v[20], *(float *)&v[21], *(float *)&v[22], *(float *)&v[23],
                       v[27], *(float *)&v[3], *(float *)&v[4], *(float *)&v[5], *(float *)&v[6], *(float *)&v[7], *(float *)&v[8]);
-        if (cw_calls % (unsigned)every == 0 && D_800DBFF0) { /* P46: the eye-height state of P43's camera_update_eye_height / camera_update_eye_base */
-            const unsigned char *c = (const unsigned char *)D_800DBFF0;
+        if (cw_calls % (unsigned)every == 0 && g_player_views) { /* P46: the eye-height state of P43's camera_update_eye_height / camera_update_eye_base */
+            const unsigned char *c = (const unsigned char *)g_player_views;
 #define CWF(o) (*(const float *)(c + (o)))
             port_log("[camwatch]   height: 344 dy %g 348 h %g 354 base %g 360 water %g 364 %g 6F0 %g 6F4 %g | 84 %08X 5F0 %08X "
                      "920 %08X 92C %08X 23C %02X 7F4 %08X 5CC %g 384 %g\n", CWF(0x344), CWF(0x348), CWF(0x354), CWF(0x360),
@@ -1997,7 +1997,7 @@ void __wrap_camera_build_view_matrix(void *arg0) {
 static int p38_flag = -1;
 static int p38_on(void) { if (p38_flag < 0) p38_flag = port_flag("p38check"); return p38_flag; }
 uint8_t *__real_shadow_draw_all(uint8_t *gdl, int arg1);
-/* P158 DIAGNOSTIC ?p158null=1: character_spawn_handlers char_fx_init (game_eu_17A800) dispatches D_8008AE10 handlers by
+/* P158 DIAGNOSTIC ?p158null=1: character_spawn_handlers char_fx_init (game_eu_17A800) dispatches g_char_fx_init_fns handlers by
  * the indices of character_handler_indices char_fx_handler_indices (C, side-effect free). Logs the call when the null zone word
  * null+0x14 changes across it (the 0x400 written at the new-game scene start, frame 4560), with the indices / handlers. */
 /* P161 ?p161fix=1 test wrap of record_start_dispatch removed in P171: port-b P164 passes the record in the game C. */
@@ -2012,19 +2012,19 @@ int __wrap_char_fx_init(void *arg0) {
     int r = __real_char_fx_init(arg0);
     unsigned after = *(volatile unsigned *)(uintptr_t)0x14;
     if ((before != after || logged < 6) && logged < 40) {
-        extern unsigned char D_800A62B8[], D_800A62A0[], g_objects[]; extern unsigned D_8008AE10[]; extern unsigned char D_8008AF30[];
+        extern unsigned char D_800A62B8[], D_800A62A0[], g_objects[]; extern unsigned g_char_fx_init_fns[]; extern unsigned char g_char_fx_mode_tables[];
         int vt = (fl & 4) ? vbe_ld8(D_800A62B8 + type) : -1, vm = (fl & 2) ? vbe_ld8(D_800A62A0 + mode) : -1;
         logged++;
         port_log("[p158null] frame %u obj %d ret %d flags %d sub %d mode %d type %d -> handler idx type %d (%08X) mode %d (%08X) | null+0x14 %08X -> %08X\n",
                  port_frame_count, (int)(((unsigned char *)arg0 - g_objects) / 0x32C), r, fl, sub, mode, type,
-                 vt, vt >= 0 ? D_8008AE10[vt] : 0, vm, vm >= 0 ? D_8008AE10[vm] : 0, before, after);
-        (void)D_8008AF30;
+                 vt, vt >= 0 ? g_char_fx_init_fns[vt] : 0, vm, vm >= 0 ? g_char_fx_init_fns[vm] : 0, before, after);
+        (void)g_char_fx_mode_tables;
     }
     return r;
 }
 /* P158 DIAGNOSTIC ?p158light=N: every Nth call of shadow_light_projection shadow_light_projection (game_eu_1B1ED0): object, slot,
  * the returned light distance, the slot's smoothed light position D_800DE3E0[slot], the object position and the default
- * light direction D_800DE440 (why the shadow streak is long). */
+ * light direction g_shadow_light_dir (why the shadow streak is long). */
 float __real_shadow_light_projection(int obj, int slot, float sx, float sy, float sz, float prev);
 float __wrap_shadow_light_projection(int obj, int slot, float sx, float sy, float sz, float prev) {
     static int n = -1; static unsigned calls, logged;
@@ -2032,15 +2032,15 @@ float __wrap_shadow_light_projection(int obj, int slot, float sx, float sy, floa
     if (n < 0) n = port_flag("p158light");
     static int from = -1; if (from < 0) from = port_flag("p158f");
     if (n > 0 && port_frame_count >= (unsigned)from && calls++ % (unsigned)n == 0 && logged < 400) {
-        extern float D_800DE3E0[][3], D_800DE440[3], D_800D3AA0[2], D_800D3AA8, D_800D3AAC, D_800DE46C; extern int D_800DE464;
+        extern float D_800DE3E0[][3], g_shadow_light_dir[3], g_shadow_proj_scale[2], g_shadow_far_depth, g_shadow_near_depth, g_shadow_world_scale; extern int g_shadow_no_point_lights;
         extern unsigned char g_objects[];
         const float *o = (const float *)(g_objects + obj * 0x32C + 0x14);
         logged++;
         port_log("[p158light] frame %u obj %d slot %d box %.1f %.1f %.1f prev %.1f -> dist %.1f | light %.1f %.1f %.1f obj %.1f %.1f %.1f "
                  "| default %.1f %.1f %.1f nolights %d scale %.3f | proj %.3f %.3f far %.1f near %.1f\n",
                  port_frame_count, obj, slot, sx, sy, sz, prev, r, D_800DE3E0[slot & 7][0], D_800DE3E0[slot & 7][1], D_800DE3E0[slot & 7][2],
-                 o[0], o[1], o[2], D_800DE440[0], D_800DE440[1], D_800DE440[2], D_800DE464, D_800DE46C, D_800D3AA0[0], D_800D3AA0[1],
-                 D_800D3AA8, D_800D3AAC);
+                 o[0], o[1], o[2], g_shadow_light_dir[0], g_shadow_light_dir[1], g_shadow_light_dir[2], g_shadow_no_point_lights, g_shadow_world_scale, g_shadow_proj_scale[0], g_shadow_proj_scale[1],
+                 g_shadow_far_depth, g_shadow_near_depth);
     }
     return r;
 }
@@ -2066,7 +2066,7 @@ uint8_t *__wrap_shadow_draw_all(uint8_t *gdl, int arg1) {
         }
         if (slots && sl < 140) sl += snprintf(seq + sl, sizeof seq - sl, "%u", slots);
         if (calls % 128 == 0) { /* why objects are skipped: the filter fields of objects 0..1 (vbe bytes: address ^ 3) */
-            extern unsigned char g_objects[]; extern unsigned D_800DF510;
+            extern unsigned char g_objects[]; extern unsigned g_shadow_skip_players;
             int k;
             for (k = 0; k < 2; k++) {
                 const unsigned char *o = g_objects + k * 0x32C;
@@ -2076,7 +2076,7 @@ uint8_t *__wrap_shadow_draw_all(uint8_t *gdl, int arg1) {
                          k, *(const int *)o, *(const unsigned *)(o + 0x1D4), VB(0x74), VB(5), VB(0x66),
                          *(const unsigned short *)((uintptr_t)(o + 0x84) ^ 2), VB(0x65), VB(4), t31c,
                          t31c ? *(const unsigned char *)((uintptr_t)(t31c + 0x95) ^ 3) : 0,
-                         t31c ? *(const unsigned char *)((uintptr_t)(t31c + 0x98) ^ 3) : 0, D_800DF510);
+                         t31c ? *(const unsigned char *)((uintptr_t)(t31c + 0x98) ^ 3) : 0, g_shadow_skip_players);
                 #undef VB
             }
         }
@@ -2107,14 +2107,14 @@ void __wrap_objects_run_state_handlers(void) {
                      calls, port_frame_count, before, after, sp, in_stack ? " DEAD STACK" : "", stack_left, calls);
     }
 }
-extern float D_800D9F40;
+extern float g_cam_near_plane; /* was D_800D9F40 */
 int __real_camera_view_test_sphere(int cam, int *mtx, float x, float y, float z, float r, float ry, float far);
 static int v6840_ref(int cam, const float *m, float x, float y, float z, float r, float ry, float far, int *exitno) {
     /* the asm order and grouping, in float (every product / sum rounded to f32 as on the FPU) */
     const float *c = (const float *)(uintptr_t)cam;
     float u, v, w, t;
     w = (float)((float)(m[2] * x) + (float)(m[6] * y)) + (float)((float)(m[10] * z) + m[14]);
-    if (!(w - r <= -D_800D9F40)) { *exitno = 0; return 0; }
+    if (!(w - r <= -g_cam_near_plane)) { *exitno = 0; return 0; }
     if (w + r < -far) { *exitno = 1; return 0; }
     u = (float)((float)(m[0] * x) + (float)(m[4] * y)) + (float)((float)(m[8] * z) + m[12]);
     t = (float)(u * c[0x88 / 4]) + (float)(w * c[0x90 / 4]); if (!(t >= -r)) { *exitno = 2; return 0; }
@@ -2148,7 +2148,7 @@ int __wrap_camera_view_test_sphere(int cam, int *mtx, float x, float y, float z,
 
 /* P46: ?p46check=N runtime checks of P43's frame-DL C (link-time wraps; N = how many calls to log in detail).
  *  - objects_draw_pass (object list draw; calls the now-C obj_draw_part per object part): commands it appends per mode.
- *  - texscroll_update (texture scrolling): the D_800E0D18 list, scroll position (+0xE / +0x10) and speed (+0x12 / +0x13). */
+ *  - texscroll_update (texture scrolling): the g_texscroll_tail list, scroll position (+0xE / +0x10) and speed (+0x12 / +0x13). */
 static int p46_flag = -1;
 extern unsigned char g_objects[], D_800C3638, D_800C3A7A; /* was D_800CC2D0 */
 int obj_get_player_alpha(void *rec, int part);
@@ -2177,14 +2177,14 @@ void *__wrap_objects_draw_pass(void *gdl, int mode, short player) {
     p46_bdc0_calls++;
     return r;
 }
-extern unsigned D_800E0D18;
+extern unsigned g_texscroll_tail; /* was D_800E0D18 */
 int __real_texscroll_update(int a0, int a1);
 int __wrap_texscroll_update(int a0, int a1) {
     int r;
     if (p46_flag < 0) p46_flag = port_flag("p46check");
     r = __real_texscroll_update(a0, a1);
     if (p46_flag && (p46_6560_calls < (unsigned)p46_flag || (p46_6560_calls & 255) == 0)) {
-        const unsigned char *e = (const unsigned char *)D_800E0D18;
+        const unsigned char *e = (const unsigned char *)g_texscroll_tail;
         int n = 0;
         port_log("[p46] texscroll_update #%u frame %u (DLs %08X %08X):\n", p46_6560_calls, port_frame_count, a0, a1);
         while (e && n < 6) {

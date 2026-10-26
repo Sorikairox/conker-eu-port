@@ -5,19 +5,19 @@ s/        \*(f32 \*)(cam + 0x394) = \*(f32 \*)(cam + 0x37C);/        *(f32 *)(ca
 s/        sx = (\*(s8 \*)(pad + 2) < -4 ||/        sx = (*(s8 *)(pad + 2) < -5 ||/
 s/        sy = (\*(s8 \*)(pad + 3) < -4 || \*(s8 \*)(pad + 3) > 4)/        sy = (*(s8 *)(pad + 3) < -4 || *(s8 *)(pad + 3) > 5)/
 s/        t = sx \/ 80.0f;/        t = sx \/ 64.0f;/
-s/            \*(f32 \*)(cam + 0x37C) -= t \* t \* (f32)D_800BEA08;/            *(f32 *)(cam + 0x37C) -= t * (f32)D_800BEA08;/
-s/            \*(f32 \*)(cam + 0x37C) += t \* t \* (f32)D_800BEA08;/            *(f32 *)(cam + 0x37C) -= t * t * (f32)D_800BEA08;/
+s/            \*(f32 \*)(cam + 0x37C) -= t \* t \* (f32)g_frame_ticks_raw;/            *(f32 *)(cam + 0x37C) -= t * (f32)g_frame_ticks_raw;/
+s/            \*(f32 \*)(cam + 0x37C) += t \* t \* (f32)g_frame_ticks_raw;/            *(f32 *)(cam + 0x37C) -= t * t * (f32)g_frame_ticks_raw;/
 1,/= \*(f32 \*)(cam + 0x37C) \* freecam_deg2rad\[0\];/s/\*(f32 \*)(cam + 0x39C) = \*(f32 \*)(cam + 0x37C) \* freecam_deg2rad\[0\];/*(f32 *)(cam + 0x39C) = *(f32 *)(cam + 0x37C);/
 s/        t = sy \/ 80.0f \* 7.0f;/        t = sy \/ 80.0f * 6.0f;/
-s/            fwd = -t \* t \* (f32)D_800BEA08;/            fwd = t * t * (f32)D_800BEA08;/
+s/            fwd = -t \* t \* (f32)g_frame_ticks_raw;/            fwd = t * t * (f32)g_frame_ticks_raw;/
 s/        if (buttons & 4) {/        if (buttons \& 0x10) {/
-s/            \*(f32 \*)(cam + 0x2FC) -= \*up \* (f32)D_800BEA08;/            *(f32 *)(cam + 0x2FC) -= *up;/
+s/            \*(f32 \*)(cam + 0x2FC) -= \*up \* (f32)g_frame_ticks_raw;/            *(f32 *)(cam + 0x2FC) -= *up;/
 s/        } else if (buttons & 8) {/        } else if (buttons \& 0x20) {/
-s/            \*(f32 \*)(cam + 0x2FC) += \*up \* (f32)D_800BEA08;/            *(f32 *)(cam + 0x300) += *up * (f32)D_800BEA08;/
+s/            \*(f32 \*)(cam + 0x2FC) += \*up \* (f32)g_frame_ticks_raw;/            *(f32 *)(cam + 0x300) += *up * (f32)g_frame_ticks_raw;/
 s/static const f32 freecam_no_acc\[1\] = { 0.2f };/static const f32 freecam_no_acc[1] = { 0.3f };/
 s/static const f32 freecam_rise_acc\[1\] = { 0.2f };/static const f32 freecam_rise_acc[1] = { 0.25f };/
 s/        if (buttons & 0x8000) {/        if (buttons \& 0x800) {/
-s/            \*(f32 \*)(cam + 0x388) -= \*pitch \* (f32)D_800BEA08;/            *(f32 *)(cam + 0x388) += *pitch * (f32)D_800BEA08;/
+s/            \*(f32 \*)(cam + 0x388) -= \*pitch \* (f32)g_frame_ticks_raw;/            *(f32 *)(cam + 0x388) += *pitch * (f32)g_frame_ticks_raw;/
 s/            \*pitch = 0.0f;/            *pitch = 1.0f;/
 s/        if (\*(f32 \*)(cam + 0x388) < -89.5f) {/        if (*(f32 *)(cam + 0x388) < -90.5f) {/
 s/(89.5f < \*(f32 \*)(cam + 0x388)) ? 89.5f/(89.5f < *(f32 *)(cam + 0x388)) ? 89.0f/

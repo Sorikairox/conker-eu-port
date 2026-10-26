@@ -55,7 +55,7 @@ void screen_tint_draw_fill(u8 *arg0, u8 *arg1, s16 arg2) {
     render_set_scissor((s32) temp_a0_3, arg2, 0, 0, 0, 3);
     sp.uAB = 0;
     var_a0 = gfx_other_mode_cached(arg0, 0xC00, 0x0F0A4004, &sp.uAB);
-    var_a2 = D_800BE628 + ((*(u8 *)((u8 *)arg1 + 0x1A)) * 0x180);
+    var_a2 = g_player_cams + ((*(u8 *)((u8 *)arg1 + 0x1A)) * 0x180);
     var_a3 = 0;
     var_v1 = (s32) (*(f32 *)((u8 *)var_a2 + 4));
     var_t0 = (s32) (*(f32 *)((u8 *)var_a2 + 8));
@@ -99,9 +99,9 @@ block_7:
                 (*(s32 *)((u8 *)var_a0 + 0)) = 0xE7000000;
                 (*(s32 *)((u8 *)var_a0 + 4)) = 0;
                 temp_a0_5 = temp_a0_4 + 8;
-                (*(s32 *)((u8 *)temp_a0_4 + 0)) = (s32) (((D_800BE620 - 1) & 0xFFF) | 0xFD100000);
+                (*(s32 *)((u8 *)temp_a0_4 + 0)) = (s32) (((g_framebuffer_width - 1) & 0xFFF) | 0xFD100000);
                 temp_a0_6 = temp_a0_5 + 8;
-                (*(s32 *)((u8 *)temp_a0_4 + 4)) = (s32) g_framebuffers[D_800BE9C0];
+                (*(s32 *)((u8 *)temp_a0_4 + 4)) = (s32) g_framebuffers[g_dl_buf_index];
                 (*(s32 *)((u8 *)temp_a0_5 + 0)) = temp_t4;
                 (*(s32 *)((u8 *)temp_a0_5 + 4)) = 0x07080200;
                 temp_t7 = (var_t1 * 4) & 0xFFF;
@@ -125,7 +125,7 @@ block_7:
                 var_a0 = temp_a0_11 + 8;
                 var_t1 = var_v0_2;
                 var_f0 = (f32) var_t1;
-                var_a2 = D_800BE628 + ((*(u8 *)((u8 *)arg1 + 0x1A)) * 0x180);
+                var_a2 = g_player_cams + ((*(u8 *)((u8 *)arg1 + 0x1A)) * 0x180);
                 var_f2 = (*(f32 *)((u8 *)var_a2 + 0x24)) + var_f12;
             } while (var_f0 < var_f2);
             var_t0 = sp.uAC;
@@ -143,7 +143,7 @@ block_7:
 }
 /* was func_151A5B84 */
 void screen_tint_handle_msg(u8 *arg0, s32 arg1, u8 arg2) {
-    void (*f)(s32, void *, u8) = D_8008FCA4[arg0[0x19]];
+    void (*f)(s32, void *, u8) = g_screen_tint_fx_msg_fns[arg0[0x19]];
     if (f != NULL) {
         f(arg0, arg1, arg2);
     }

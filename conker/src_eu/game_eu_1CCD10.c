@@ -5,8 +5,8 @@
 s32 foot_trail_get_foot_pos(u8 *arg0, u8 arg1, u8 *arg2);
 
 
-extern f32 D_800A90C0;
-extern f32 D_800A90C4;
+extern f32 g_foot_trail_k_90c0; /* was D_800A90C0 */
+extern f32 g_foot_trail_k_90c4; /* was D_800A90C4 */
 /* was func_1519F500 */
 s32 foot_trail_get_foot_pos(u8 *arg0, u8 arg1, u8 *arg2) {
     u8 *temp_v0;
@@ -34,7 +34,7 @@ s32 foot_trail_get_foot_pos(u8 *arg0, u8 arg1, u8 *arg2) {
     var_f16 = var_a3->x_position;
     temp_f12 = var_f16 - (*(f32 *)((u8 *)arg0 + 0x20));
     temp_f14 = var_a3->z_position - (*(f32 *)((u8 *)arg0 + 0x24));
-    if ((fabsf(temp_f12) > D_800A90C0) || (fabsf(temp_f14) > D_800A90C0)) {
+    if ((fabsf(temp_f12) > g_foot_trail_k_90c0) || (fabsf(temp_f14) > g_foot_trail_k_90c0)) {
         temp_f2 = 1.0f / sqrtf((temp_f12 * temp_f12) + (temp_f14 * temp_f14));
         var_f18 = temp_f14 * temp_f2;
         sp28 = temp_f12 * temp_f2;
@@ -56,7 +56,7 @@ s32 foot_trail_get_foot_pos(u8 *arg0, u8 arg1, u8 *arg2) {
     (*(f32 *)((u8 *)arg2 + 0)) = (f32) (var_f16 + (var_f0 * var_f18));
     (*(f32 *)((u8 *)arg2 + 8)) = (f32) (var_a3->z_position - (var_f0 * sp28));
     temp_f2_2 = var_a3->unk118;
-    if (temp_f2_2 < D_800A90C4) {
+    if (temp_f2_2 < g_foot_trail_k_90c4) {
         (*(f32 *)((u8 *)arg2 + 4)) = (f32) var_a3->y_position;
         return 1;
     }
@@ -260,7 +260,7 @@ void foot_trail_stop(u8 *arg0) {
     (*(u16 *)((u8 *)arg0 + 0x1E)) = (u16) ((*(u16 *)((u8 *)arg0 + 0x1E)) & 0xFFFD);
     (*(u8 *)((u8 *)temp_v0 + 4)) = (u8) ((*(u8 *)((u8 *)temp_v0 + 4)) | 1);
 }
-extern f32 D_800A90D0;
+extern f32 g_foot_trail_k_90d0; /* was D_800A90D0 */
 s32 collision_floor_dynamic_b_full(f32 *, s32, f32, u8 *);
 
 /* was func_1519FA60 */
@@ -293,25 +293,25 @@ s32 foot_trail_update_points(u8 *arg0) {
                 var_s2 = (*(u8 *)((u8 *)arg0 + 0x25)) - 1;
             }
             temp_s1 = (var_s2 * 0x24) + temp_fp;
-            (*(s16 *)((u8 *)temp_s1 + 0x18)) = (s16) ((*(s16 *)((u8 *)temp_s1 + 0x18)) - D_800BE9E4);
+            (*(s16 *)((u8 *)temp_s1 + 0x18)) = (s16) ((*(s16 *)((u8 *)temp_s1 + 0x18)) - g_frame_ticks);
             if ((*(s16 *)((u8 *)temp_s1 + 0x18)) < 0) {
                 var_s3 = 1;
             }
             temp_v0 = (*(s16 *)((u8 *)temp_s1 + 0x12));
             (*(s16 *)((u8 *)temp_s1 + 0x14)) = 0xFF;
             if (temp_v0 > 0) {
-                (*(s16 *)((u8 *)temp_s1 + 0x12)) = (s16) (temp_v0 - D_800BE9E4);
+                (*(s16 *)((u8 *)temp_s1 + 0x12)) = (s16) (temp_v0 - g_frame_ticks);
             } else {
-                (*(s16 *)((u8 *)temp_s1 + 0x10)) = (s16) ((*(s16 *)((u8 *)temp_s1 + 0x10)) - ((*(s16 *)((u8 *)temp_s6 + 0x34)) * D_800BE9E4));
+                (*(s16 *)((u8 *)temp_s1 + 0x10)) = (s16) ((*(s16 *)((u8 *)temp_s1 + 0x10)) - ((*(s16 *)((u8 *)temp_s6 + 0x34)) * g_frame_ticks));
             }
-            (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((*(f32 *)((u8 *)temp_s6 + 0x3C)) * D_800BE9A4));
-            (*(f32 *)((u8 *)temp_s1 + 0)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0)) + ((*(f32 *)((u8 *)temp_s1 + 0x1C)) * D_800BE9A4));
-            (*(f32 *)((u8 *)temp_s1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 4)) + ((*(f32 *)((u8 *)temp_s1 + 0x20)) * D_800BE9A4));
+            (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((*(f32 *)((u8 *)temp_s6 + 0x3C)) * g_frame_step_f));
+            (*(f32 *)((u8 *)temp_s1 + 0)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0)) + ((*(f32 *)((u8 *)temp_s1 + 0x1C)) * g_frame_step_f));
+            (*(f32 *)((u8 *)temp_s1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 4)) + ((*(f32 *)((u8 *)temp_s1 + 0x20)) * g_frame_step_f));
             sp.u58 = (*(f32 *)((u8 *)temp_s1 + 0));
             temp_f0 = fabsf(sp.u58);
             sp.u5C = (*(f32 *)((u8 *)temp_s1 + 8)) + 30.0f;
             sp.u60 = (*(f32 *)((u8 *)temp_s1 + 4));
-            if ((temp_f0 > D_800A90D0) || (fabsf(sp.u60) > D_800A90D0)) {
+            if ((temp_f0 > g_foot_trail_k_90d0) || (fabsf(sp.u60) > g_foot_trail_k_90d0)) {
                 goto block_17;
             }
             if (collision_floor_dynamic_b_full(&sp.u58, 0, (*(f32 *)((u8 *)temp_s1 + 8)) - 30.0f, arg0 + 0x60) != 0) {
@@ -337,7 +337,7 @@ block_17:
             }
         } while (var_s2 != (*(s8 *)((u8 *)arg0 + 0x2D)));
     }
-    (*(s16 *)((u8 *)temp_s6 + 0x46)) = (s16) ((*(s16 *)((u8 *)temp_s6 + 0x46)) + ((*(s16 *)((u8 *)temp_s6 + 0x48)) * D_800BE9E4));
+    (*(s16 *)((u8 *)temp_s6 + 0x46)) = (s16) ((*(s16 *)((u8 *)temp_s6 + 0x46)) + ((*(s16 *)((u8 *)temp_s6 + 0x48)) * g_frame_ticks));
     if ((*(s8 *)((u8 *)arg0 + 0x2C)) > 0) {
         temp_v0_2 = temp_fp + ((*(s8 *)((u8 *)arg0 + 0x2D)) * 0x24);
         (*(f32 *)((u8 *)arg0 + 0x54)) = (f32) (*(f32 *)((u8 *)temp_v0_2 + 0));
@@ -459,7 +459,7 @@ s32 foot_trail_update(u8 *t) {
         return 1;
     }
     n = 1.0f / *(f32 *) (rec + 0xC);
-    phase = *(f32 *) (rec + 0x1C) + D_800BE9A4;
+    phase = *(f32 *) (rec + 0x1C) + g_frame_step_f;
     phaseStep = phase * n;
     pos[0] = *(f32 *) (rec + 0x10);
     pos[1] = *(f32 *) (rec + 0x14);
@@ -557,8 +557,8 @@ Gfx *gfx_env_color_cached(Gfx *, s32, s32, s32, s32, u8 *);
 Gfx *gfx_prim_color_cached(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
 Gfx *gfx_set_combine_mode(Gfx *, u8, u8 *);
 Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
-extern u8 D_800911BC[];
-extern s32 D_800D30BC;
+extern u8 g_foot_trail_tex[]; /* was D_800911BC */
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 /* trail point (0x24 bytes): the same layout as port-b's TrailPointFD60 (foot_trail_update writes them) */
 typedef struct {
     f32 x;        /* 0x00 */
@@ -575,12 +575,12 @@ typedef struct {
     f32 vz;       /* 0x20 */
 } TrailPoint03DC;
 
-// foot_trail_draw: D_8008A644 draw handler (kind 5) of a foot trail / water ripple effect t (ring of t[0x25] points
+// foot_trail_draw: g_fxrec_draw_fns draw handler (kind 5) of a foot trail / water ripple effect t (ring of t[0x25] points
 // at t +0x94, tail t +0x2D, head t +0x2E, count t +0x2C; record rec = t +0x98). Returns gfx unchanged when there are
 // fewer than 2 points or no vertex buffer (vtx_slot_buffer_get slot `slot` in t +0x84, 0x30 bytes per point + 0x120).
 // Otherwise: rec flag 2 sets the points' fade (+0x14) from the tail on, 0, +rec[0x41], ... for rec[0x40] points;
 // rec flag 4 scales the fade from the head back by 0, rec[0x43], ... / 256 for rec[0x42] points. Then the render
-// state (texture D_800911BC, colour rec +0x2A..0x2C, combine) and a strip from the newest point back to the tail:
+// state (texture g_foot_trail_tex, colour rec +0x2A..0x2C, combine) and a strip from the newest point back to the tail:
 // three vertices per point (left edge, centre, right edge across the trail direction, half width = point width;
 // edges alpha 0, centre alpha = alpha * fade / 256, texture v from rec +0x46 (wrapped to +-1024 when +0x46 + +0x4A
 // overflows) / middle / +0x46 + +0x4A, mirrored for the right foot (t +0x20 != 6)), four triangles per segment.
@@ -667,12 +667,12 @@ s32 foot_trail_draw(u8 *t, s32 gfxArg, s16 slot) {
         } while (i != *(s8 *) (t + 0x2E));
     }
 
-    gfx = (Gfx *) gfx_load_texture_cached((s32) gfx, (s32) D_800911BC, 0, 0, 0, 0, 0x39, 0, 0, &flag, 0x3E);
+    gfx = (Gfx *) gfx_load_texture_cached((s32) gfx, (s32) g_foot_trail_tex, 0, 0, 0, 0, 0x39, 0, 0, &flag, 0x3E);
     gfx = gfx_geometry_mode_cached(gfx, 1, 0x160600);
     gfx = gfx_env_color_cached(gfx, rec[0x2A], rec[0x2B], rec[0x2C], 0xFF, &flag);
     gfx = gfx_prim_color_cached(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0, &flag);
     gfx = gfx_set_combine_mode(gfx, 7, &flag);
-    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, &flag);
+    gfx = gfx_other_mode_cached(gfx, g_gfx_tlut_mode | 0x80000 | 0x2CA0, 0x5049D8, &flag);
 
     /* first cross-section: the live foot position or the newest point; q = the next point towards the tail */
     if (*(u16 *) (t + 0x1E) & 2) {

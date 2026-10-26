@@ -8,15 +8,15 @@ void anim_mesh_slots_reset(void) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        D_800DDF5C[i] = D_800DDF60[i] = 0;
+        g_weather_slot_busy[i] = g_weather_slot_timers[i] = 0;
     }
     for (i = 0; i < 11; i++) {
-        D_800DDF68[i] = -2;
+        g_anim_mesh_state[i] = -2;
     }
 
-    bzero(D_800DDE80, 220); // bzero 220 bytes
+    bzero(g_anim_mesh_slots, 220); // bzero 220 bytes
 
     for (i = 0; i < 11; i++) {
-        D_800DDF78[i] = 0;
+        g_anim_mesh_dls[i] = 0;
     }
 }

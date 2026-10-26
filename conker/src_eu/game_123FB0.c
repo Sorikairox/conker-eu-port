@@ -8,13 +8,13 @@ f32 vec3f_dot(struct17 *, struct17 *);
 void math_spring_approach_angle(f32 *, f32, s32 *, f32, f32, f32);
 extern struct17 g_camera_segment_start;  /* (0, 98, -5530); was D_800A1F50 */
 extern struct17 g_camera_segment_end;  /* (0, 98, 1198); was D_800A1F5C */
-extern struct17 D_800D9E70;
+extern struct17 g_aim_vec_scratch; /* was D_800D9E70 */
 
 // camera_segment_track: while button state (event_dispatch(1, 0x4003, 6, 0x2000)) holds and the target object
 // (+0x3D0) is alive, sets flags 0xC0001000 in +0x84 and steers the camera: t = the projection of +0x2A4 on the
 // segment g_camera_segment_start -> g_camera_segment_end (0.75 x, clamped to 0..1); the two button groups pick a side offset of -900 / +900
 // (distance 220) or none (294); event_dispatch_alt gets (offset, -20, 6728 t - 5530); the angle +0x37C eases towards the
-// D_800D9E70 heading - 180 (math_spring_approach_angle) and +0x39C is it in radians. Otherwise the flags are cleared.
+// g_aim_vec_scratch heading - 180 (math_spring_approach_angle) and +0x39C is it in radians. Otherwise the flags are cleared.
 /* was func_150F6B00 */
 void camera_segment_track(struct108 *arg0) {
     struct17 toObj;
@@ -47,7 +47,7 @@ void camera_segment_track(struct108 *arg0) {
             arg0->unk374 = 294.0f;
         }
         event_dispatch_alt(3, 0x4003, 3, (s32) offset, (s32) -20.0f, (s32) (6728.0f * t + -5530.0f));
-        math_spring_approach_angle(&arg0->unk37C, vec3_heading_deg(&D_800D9E70) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,
+        math_spring_approach_angle(&arg0->unk37C, vec3_heading_deg(&g_aim_vec_scratch) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,
                       arg0->unk7B4);
         arg0->unk39C = arg0->unk37C * 0.017453292f;
     } else {

@@ -19,7 +19,7 @@ void records_table_reset(void) {
         g_records_game_mode = 0;
     }
     D_800CC2B0 = 0;
-    bzero(&D_800CC298, 24);
+    bzero(&g_obj_anim_shared, 24);
     g_records_flag_2a2 = 1;
     D_800D18D0 = 0;
 }

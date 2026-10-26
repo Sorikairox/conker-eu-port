@@ -19,9 +19,9 @@ s/    p\[1\] = stamp >> 24;/    p[1] = stamp >> 16;/ % s0 stamp_wrap stamp_big
 s/    p\[3\] = stamp >> 8;/    p[3] = stamp;/ % s0 stamp_neg
 s/    p\[4\] = stamp;/    p[4] = stamp >> 8;/ % s0 stamp_neg
 s/    for (i = 0; i < 27; i++) {/    for (i = 0; i < 26; i++) {/ % s0
-s/        \*p++ = ((u8 \*) D_800D2E4C)\[i\];/        *p++ = ((u8 *) D_800D2E4C)[i + 1];/ % s0
+s/        \*p++ = ((u8 \*) g_save_progress_bits)\[i\];/        *p++ = ((u8 *) g_save_progress_bits)[i + 1];/ % s0
 s/    for (i = 0; i < 9; i++) {   /    for (i = 0; i < 8; i++) {   / % s0
-s/    p\[0\] = g_save_resume_level;/    p[0] = D_800BE800;/ % s0
+s/    p\[0\] = g_save_resume_level;/    p[0] = g_save_restart_entry;/ % s0
 s/    g_save_stat9 = player_stat_get(0, 6);/    g_save_stat9 = player_stat_get(0, 5);/ % s0
 s/    p\[0\] = (u32) g_save_stat9 >> 8;/    p[0] = (u32) g_save_stat9 >> 16;/ % s0
 s/    p\[1\] = g_save_stat9;/    p[1] = 0;/ % s0

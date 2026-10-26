@@ -1,28 +1,28 @@
-s#    dx = \*(f32 \*) (node + 0xC) - D_800BE620 \* 0\.5f;#    dx = *(f32 *) (node + 0xC) - D_800BE624 * 0.5f;# % centre
+s#    dx = \*(f32 \*) (node + 0xC) - g_framebuffer_width \* 0\.5f;#    dx = *(f32 *) (node + 0xC) - g_framebuffer_height * 0.5f;# % centre
 s#        if (bright == -1) {#        if (bright == 0) {# % hidden
 s#            d = (ix \* ix + iy \* iy) \* falloff \/ 10;#            d = (ix * ix + iy * iy) * falloff \/ 8;# % mid edge
 s#            if (d < 120) {#            if (d <= 120) {# % edge mid centre
 s#                target = (120 - d) \* 176 \/ 120;#                target = (120 - d) * 176 \/ 128;# % centre
-s#        step = D_800BE9E4 \* 5;#        step = D_800BE9E4 * 4;# % fadeup fadedn
+s#        step = g_frame_ticks \* 5;#        step = g_frame_ticks * 4;# % fadeup fadedn
 s#            cur = target;#            cur = target + 1;# % fadeclose
 s#            cur += step;#            cur -= step;# % fadeup
 s#        \*fade = cur;#        *fade = target;# % fadeup
-s#    if (\*(f32 \*) (node + 0xC) < 2\.0f || (f32) (D_800BE620 - 2) <= \*(f32 \*) (node + 0xC) ||#    if (*(f32 *) (node + 0xC) < 1.0f || (f32) (D_800BE620 - 2) < *(f32 *) (node + 0xC) ||# % left right
-s#        \*(f32 \*) (node + 0x10) < 0\.0f || (f32) D_800BE624 <= \*(f32 \*) (node + 0x10)) {#        *(f32 *) (node + 0x10) <= 0.0f || (f32) D_800BE624 < *(f32 *) (node + 0x10)) {# % top bottom bottom2
+s#    if (\*(f32 \*) (node + 0xC) < 2\.0f || (f32) (g_framebuffer_width - 2) <= \*(f32 \*) (node + 0xC) ||#    if (*(f32 *) (node + 0xC) < 1.0f || (f32) (g_framebuffer_width - 2) < *(f32 *) (node + 0xC) ||# % left right
+s#        \*(f32 \*) (node + 0x10) < 0\.0f || (f32) g_framebuffer_height <= \*(f32 \*) (node + 0x10)) {#        *(f32 *) (node + 0x10) <= 0.0f || (f32) g_framebuffer_height < *(f32 *) (node + 0x10)) {# % top bottom bottom2
 s#        target = 0x1ADB00 \/ (d + 10000) \* bright \/ 256;#        target = 0x1ADB00 \/ (d + 10000) * bright \/ 255;# % centre above
-s#    step = D_800BE9E4 \* 10;#    step = D_800BE9E4 * 8;# % centre below above
+s#    step = g_frame_ticks \* 10;#    step = g_frame_ticks * 8;# % centre below above
 s#        \*(s16 \*) (node + 0x28) = target;#        *(s16 *) (node + 0x28) = cur;# % close
 s#        \*(s16 \*) (node + 0x28) = cur - step;#        *(s16 *) (node + 0x28) = cur + step;# % above
 s#        \*(s16 \*) (node + 0x28) = cur + step;#        *(s16 *) (node + 0x28) = cur - step;# % below centre
 s#    if (d >= 200000 || \*(s16 \*) (node + 0x28) <= 0 || !(fabsf(\*(f32 \*) (node + 0xC)) < 2000\.0f) ||#    if (d > 200000 || *(s16 *) (node + 0x28) < 0 || !(fabsf(*(f32 *) (node + 0xC)) < 2000.0f) ||# % strneg far
 s#        !(fabsf(\*(f32 \*) (node + 0x10)) < 2000\.0f)) {#        0) {# % fary
-s#    D_800D31C9 = 0xFF;#    D_800D31C9 = 0xFE;# % centre
+s#    g_sprite_prim_g = 0xFF;#    g_sprite_prim_g = 0xFE;# % centre
 s#    spr\.u0C = 0;#    spr.u0C = 1;# % centre
-s#    if (D_800DE190 == 0) {#    if (D_800DE190 != 1) {# % centre modeset
-s#        gdl = gfx_load_texture_tile(flare_render_mode_set(gdl), D_8009075C, 0, 0, 0, 0, 2, 0x100, 0x100, 3);#        gdl = gfx_load_texture_tile(flare_render_mode_set(gdl), D_8009075C, 0, 0, 0, 0, 2, 0x100, 0x100, 2);# % centre
-s#        D_800DE190 = 1;#        D_800DE190 = 2;# % centre
+s#    if (g_flare_sprite_mode_set == 0) {#    if (g_flare_sprite_mode_set != 1) {# % centre modeset
+s#        gdl = gfx_load_texture_tile(flare_render_mode_set(gdl), g_flare_sprite, 0, 0, 0, 0, 2, 0x100, 0x100, 3);#        gdl = gfx_load_texture_tile(flare_render_mode_set(gdl), g_flare_sprite, 0, 0, 0, 0, 2, 0x100, 0x100, 2);# % centre
+s#        g_flare_sprite_mode_set = 1;#        g_flare_sprite_mode_set = 2;# % centre
 s#    alpha = (\*(s16 \*) (node + 0x28) \* node\[0x30\]) >> 8;#    alpha = (*(s16 *) (node + 0x28) * node[0x30]) >> 7;# % centre
-s#    sizes = \&D_800A7630\[row \* 7\];#    sizes = \&D_800A7630[row * 8];# % centre rowedge
+s#    sizes = \&g_flare_ring_sizes\[row \* 7\];#    sizes = \&g_flare_ring_sizes[row * 8];# % centre rowedge
 s#    for (i = 0, j = 2; i < count; i++, j += 2) {#    for (i = 0, j = 1; i < count; i++, j += 2) {# % centre
 s#        size = sizes\[i\] << 12;#        size = sizes[i] << 11;# % centre
 s#        g_sprite_keep_prim_colour = 0;#        g_sprite_keep_prim_colour = 1;# % centre

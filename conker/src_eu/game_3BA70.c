@@ -62,11 +62,11 @@ void level_objects_reset_state(void) {
     (*(s32 *)((u8 *)(&D_800D9CF0) + 8)) = 0;
     (*(s32 *)((u8 *)(&D_800D9CF0) + 0xC)) = 0;
     D_80088C10 = NULL;
-    bzero(D_800BE500, 5);
+    bzero(g_sky_segment_on, 5);
     (*(s8 *)((u8 *)(&g_level_part_fades) + 2)) = 0;
     (*(s8 *)((u8 *)(&g_level_part_fades) + 1)) = 0;
     (*(s8 *)((u8 *)(&g_level_part_fades) + 0)) = 0;
-    D_80088D20 = 0;
+    g_water_effect_started = 0;
     (*(struct134 **)((u8 *)g_view_sparkle_spots + 0)) = NULL;
     (*(s32 *)((u8 *)g_view_sparkle_spots + 4)) = 0;
     (*(s32 *)((u8 *)g_view_sparkle_spots + 8)) = 0;
@@ -87,7 +87,7 @@ extern f32 g_fx_lod_scale_chars; /* was D_800DCE5C */
 
 /* was func_1500E738 */
 void level_set_lod_shifts(void) {
-    switch (D_80082FA0) {
+    switch (g_last_player_index) {
     case 0:
         g_fx_lod_shift_players = 0;
         g_fx_lod_scale_players = 1.0f;
@@ -102,7 +102,7 @@ void level_set_lod_shifts(void) {
         g_fx_lod_scale_players = 0.25f;
         break;
     }
-    switch (D_8008FD8C) {
+    switch (g_player_count) {
     case 2:
         g_fx_lod_shift_chars = 1;
         g_fx_lod_scale_chars = 0.5f;
@@ -146,7 +146,7 @@ void level_obj_init_area_points(void) {
 }
 
 void area_drift_emitter_create(void *arg0, u8 arg1);
-extern s32 D_800B1214;
+extern s32 g_level_dl_tinted_extra; /* was D_800B1214 */
 
 /* was func_1500E8C0 */
 void level_obj_init_drift_scene(void) {
@@ -179,7 +179,7 @@ void level_obj_init_drift_scene(void) {
     s16 var_v0;
 
     level_dl_add_texture_scroll(*g_level_part_dls, g_level_scroll_tex_a, 0, -1, 0, 0, 0, -6);
-    level_dl_add_texture_scroll(D_800B1214, g_level_scroll_tex_a, 0, -1, 0, 1, 0, -6);
+    level_dl_add_texture_scroll(g_level_dl_tinted_extra, g_level_scroll_tex_a, 0, -1, 0, 1, 0, -6);
     sp.u68 = 0.21428572f;
     sp.u70 = 5.0f;
     sp.u74 = 6.0f;

@@ -4,7 +4,7 @@ s/ == 0x1EB \&\&/ == 0x1EA \&\&/
 s/            \*((u8 \*)\&g_objects\[i\] + 0x222) == 0) {/            *((u8 *)\&g_objects[i] + 0x221) == 0) {/
 s/    if (count == 0) {/    if (count < 0) {/
 s/    if (st->stage < 7) {/    if (st->stage < 6) {/
-s/        st->timer -= D_800BE9E4 \* count;/        st->timer -= D_800BE9E4;/
+s/        st->timer -= g_frame_ticks \* count;/        st->timer -= g_frame_ticks;/
 s/        if (st->timer < 0) {/        if (st->timer <= 0) {/
 s/            sound_play_at((random_int() \(.\) 3U) + 0x2B3, 0x5DC0/            sound_play_at((random_int() \1 3U) + 0x2B3, 0x5DC1/
 s/            st->parts\[st->stage\]\[0x6E\] = 1;/            st->parts[st->stage][0x6E] = 2;/
@@ -16,7 +16,7 @@ s/            burst.unk4 = 8;/            burst.unk4 = 9;/
 s/            burst.unk6 = -1;/            burst.unk6 = 0;/
 s/            rumble_request(\&burst, 0, arg0\[0xC\], arg0\[1\]);/            rumble_request(\&burst, 0, arg0[0xC], arg0[0]);/
 s/            st->timer = (random_int() \(.\) 31U) + 70;/            st->timer = (random_int() \1 31U) + 71;/
-s/    st->crackle -= D_800BE9E4 \* count;/    st->crackle -= count;/
+s/    st->crackle -= g_frame_ticks \* count;/    st->crackle -= count;/
 s/        crackle.unk2 = (random_int() \(.\) 21U) + 10;/        crackle.unk2 = (random_int() \1 20U) + 10;/
 s/        crackle.unk4 = (random_int() \& 3) + 1;/        crackle.unk4 = (random_int() \& 7) + 1;/
 s/        crackle.unk5 = 1;/        crackle.unk5 = 0;/
@@ -24,7 +24,7 @@ s/        sound_play_at((random_int() \& 3) + 0x6D6/        sound_play_at((rando
 s/        st->crackle = (random_int() \(.\) 151U) + 150;/        st->crackle = (random_int() \1 150U) + 150;/
 s/    countf = count;/    countf = count + 1;/
 s/    st->emberAcc += (0.020000001f + random_float() \* 0.025f)/    st->emberAcc += (0.02f + random_float() * 0.025f)/
-s/    st->emberAcc += (0.020000001f + random_float() \* 0.025f) \* (D_800BE9A4 \* countf);/    st->emberAcc += (0.020000001f + random_float() * 0.025f) * D_800BE9A4;/
+s/    st->emberAcc += (0.020000001f + random_float() \* 0.025f) \* (g_frame_step_f \* countf);/    st->emberAcc += (0.020000001f + random_float() * 0.025f) * g_frame_step_f;/
 s/    if (1.0f < st->emberAcc) {/    if (1.0f <= st->emberAcc) {/
 s/            angle = ((s32)(random_int() \(.\) 126U) - 0xDC) \* dir;/            angle = ((s32)(random_int() \1 126U) - 0xDB) * dir;/
 s/            vec2_from_angle_byte(angle, st->radius, \&ember\[0\], \&ember\[2\]);/            vec2_from_angle_byte(angle, st->x, \&ember[0], \&ember[2]);/
@@ -59,7 +59,7 @@ s/        smoke.u04 = 0x9F0600;/        smoke.u04 = 0x9F0601;/
 s/        smoke.texSet = 0x4404;/        smoke.texSet = 0x4403;/
 s/        smoke.color\[3\] = 0xFF;/        smoke.color[3] = 0xFE;/
 s/        smoke.u18\[2\] = 0xFF;/        smoke.u18[2] = 0;/
-s/        smoke.angle\[1\] = ((s32 \*)D_800A5860)\[1\];/        smoke.angle[1] = 1;/
+s/        smoke.angle\[1\] = ((s32 \*)g_vec3_zero)\[1\];/        smoke.angle[1] = 1;/
 s/        smoke.fadeRate = 0x1F;/        smoke.fadeRate = 0x1E;/
 s/        smoke.flags = 0x1C207;/        smoke.flags = 0x1C2C7;/
 s/        smoke.update = 5;/        smoke.update = 6;/

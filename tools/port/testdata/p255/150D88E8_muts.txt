@@ -6,14 +6,14 @@ s/== 0x18D \&\&/== 0x18C \&\&/ % s0hit
 s/>= 46.0f/> 46.0f/ % s0edge
 s/>= 46.0f/>= 44.0f/ % s0miss
 s/\*state = 1;/*state = 2;/ % s0hit
-s/v = \*level + D_800BE9E4;/v = *level + D_800BE9E4 * 2;/ % s1
+s/v = \*level + g_frame_ticks;/v = *level + g_frame_ticks * 2;/ % s1
 s/if (v >= 100)/if (v > 100)/ % s1edge
 s/v = 100;/v = 99;/ % s1cap
 s/\*state = 2;/*state = 3;/ % s1cap
 s/== 0x18E \&\&/== 0x18D \&\&/ % s2hit s2anim
 s/>= 34.0f/> 34.0f/ % s2hit
 s/\*state = 3;/*state = 4;/ % s2hit
-s/D_800BE9E4 \* 4;/D_800BE9E4 * 2;/ % s3
+s/g_frame_ticks \* 4;/g_frame_ticks * 2;/ % s3
 s/if (v <= 0)/if (v < 0)/ % s3edge
 s/\*state = 4;/*state = 0;/ % s3neg
 s/v = 0;$/v = 1;/ % s3neg

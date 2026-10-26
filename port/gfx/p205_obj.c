@@ -63,9 +63,9 @@ void p205_obj_hook(void) {
     {   /* P236 DIAGNOSTIC ?p236race=1 (with ?p205obj): the race / rail records D_80087640[humans + cpus] (0x84 bytes,
          * rail_param_step rail_param_step): f32 param +8, s32 lap start +0x18 / time +0x1C / lap time +0x20, s16 node
          * counter +0x24, s8 lap length +0x26, lap +0x27, highest lap +0x28, nodes +0x2B..+0x2E, on rail +0x30, player
-         * +0x31; laps D_800E1017, D_800BE616, humans D_80090130. */
+         * +0x31; laps D_800E1017, D_800BE616, humans g_human_player_count. */
         static int fr = -1;
-        extern unsigned char *D_80087640; extern signed char D_800D27B8, D_800D27B9, D_800E1017, D_80090130;
+        extern unsigned char *D_80087640; extern signed char D_800D27B8, D_800D27B9, D_800E1017, g_human_player_count;
         extern unsigned char D_800BE616;
         int k, n;
         if (fr < 0) fr = port_flag("p236race");
@@ -88,7 +88,7 @@ void p205_obj_hook(void) {
             }
             n = vbe_ld8(&D_800D27B8) + vbe_ld8(&D_800D27B9);
             port_log("[p236race] frame %u: %d records, laps %d, BE616 %d, humans %d\n", port_frame_count, n,
-                     (signed char)vbe_ld8(&D_800E1017), vbe_ld8(&D_800BE616), (signed char)vbe_ld8(&D_80090130));
+                     (signed char)vbe_ld8(&D_800E1017), vbe_ld8(&D_800BE616), (signed char)vbe_ld8(&g_human_player_count));
             for (k = 0; k < n && k < 8; k++) {
                 const unsigned char *q = D_80087640 + k * 0x84;
                 port_log("[p236race]   %d: t %.3f start %d time %d lapt %d cnt %d len %d lap %d max %d nodes %d %d %d %d rail %d pl %d\n",

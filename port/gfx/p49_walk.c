@@ -336,11 +336,11 @@ static void p55_synth(void) {
 }
 /* P101 DIAGNOSTIC ?p101col=N: on the first N floor -> void changes of record 0's floor query: the 4 collision areas
  * (enable D_800894C0, triangle count D_800DBE18, x / y / z extent of the table D_800DC208), the level DLs
- * g_level_part_dls[0..3], and the world objects (g_world_obj_count records of 0xA0 at D_800DBEF4: DL +0x1C, flags +0x4F, first tri
+ * g_level_part_dls[0..3], and the world objects (g_world_obj_count records of 0xA0 at g_world_objs: DL +0x1C, flags +0x4F, first tri
  * +0x58, count +0x56, +0x10..+0x14). */
 extern int D_800DC208[], D_800DBE18[], g_world_obj_count, g_level_part_dls[]; /* was D_800B0E00; was D_800DC320 */
-extern unsigned char *D_800DBEF4;
-extern unsigned char D_800E0B94;
+extern unsigned char *g_world_objs; /* was D_800DBEF4 */
+extern unsigned char g_game_mode; /* was D_800E0B94 */
 extern unsigned D_8009018C[];
 static void p101_col(float h, float x, float y, float z) {
     static int f = -1, n, last = 2;
@@ -350,7 +350,7 @@ static void p101_col(float h, float x, float y, float z) {
     if (!f || isfloor || was != 1 || n >= f) return;
     n++;
     port_log("[p101] game mode D_800E0B94 %u, handlers D_8009018C[0..9] %08X %08X %08X %08X %08X %08X %08X %08X %08X %08X\n",
-             vbe_ld8(&D_800E0B94), D_8009018C[0], D_8009018C[1], D_8009018C[2], D_8009018C[3], D_8009018C[4],
+             vbe_ld8(&g_game_mode), D_8009018C[0], D_8009018C[1], D_8009018C[2], D_8009018C[3], D_8009018C[4],
              D_8009018C[5], D_8009018C[6], D_8009018C[7], D_8009018C[8], D_8009018C[9]);
     port_log("[p101] void at frame %u: x %g y %g z %g; enable %u %u %u %u; level DLs %08X %08X %08X %08X; objects %d\n",
              port_frame_count, x, y, z, vbe_ld8(&D_800894C0[0]), vbe_ld8(&D_800894C0[1]), vbe_ld8(&D_800894C0[2]),
@@ -368,8 +368,8 @@ static void p101_col(float h, float x, float y, float z) {
         port_log("[p101]   area %d: table %08X, %d tris, x %g..%g y %g..%g z %g..%g\n", a, (unsigned)(uintptr_t)vo, cnt,
                  mn[0], mx[0], mn[1], mx[1], mn[2], mx[2]);
     }
-    for (i = 0; D_800DBEF4 && i < g_world_obj_count && i < 64; i++) {
-        const unsigned char *o = D_800DBEF4 + i * 0xA0;
+    for (i = 0; g_world_objs && i < g_world_obj_count && i < 64; i++) {
+        const unsigned char *o = g_world_objs + i * 0xA0;
         port_log("[p101]   obj %d: DL %08X +4F %02X tri %u +%u | +10 %d %d %d\n", i, *(const unsigned *)(o + 0x1C),
                  vbe_ld8(o + 0x4F), vbe_ld16(o + 0x58), vbe_ld16(o + 0x56), (short)vbe_ld16(o + 0x10),
                  (short)vbe_ld16(o + 0x12), (short)vbe_ld16(o + 0x14));
@@ -401,7 +401,7 @@ void p245_coldump(float x, float y, float z) {
     port_log("[p245col] done\n");
 }
 /* P248 DIAGNOSTIC ?p248mesh=F (needs ?p205obj; called from p205_obj_hook): once at retrace >= F, dump the world objects
- * (g_world_obj_count records of 0xA0 at D_800DBEF4): angle +0x0, yaw +0x4, pos +0x10..+0x14, scale +0x2C..+0x34, update
+ * (g_world_obj_count records of 0xA0 at g_world_objs): angle +0x0, yaw +0x4, pos +0x10..+0x14, scale +0x2C..+0x34, update
  * +0x38 (compared with gate_swing_update scenery_gate_swing_update), +0x4F, tri +0x58 / count +0x56, +0x5A pos, +0x6E busy,
  * +0x6F flags, +0x73 state; and every triangle of collision areas 2 and 3 ("[p248tri] area idx x0 .. z2").
  * Then every retrace: a "[p248gate]" line whenever a world object's +0x0 angle (rounded) or +0x73 changes, with
@@ -413,14 +413,14 @@ void p248_mesh(void) {
     int i, k, a, n = g_world_obj_count;
     const unsigned char *pl = g_objects, *q;
     if (f == -2) f = port_flag("p248mesh");
-    if (f <= 0 || port_frame_count < (unsigned)f || !D_800DBEF4) return;
+    if (f <= 0 || port_frame_count < (unsigned)f || !g_world_objs) return;
     if (n > 256) n = 256;
     if (!done) {
         done = 1; n0 = n;
         port_log("[p248mesh] frame %u: %d world objects, gate fn %08X, area counts %d %d %d %d\n", port_frame_count, n,
                  (unsigned)(uintptr_t)scenery_gate_swing_update, D_800DBE18[0], D_800DBE18[1], D_800DBE18[2], D_800DBE18[3]);
         for (i = 0; i < n; i++) {
-            const unsigned char *o = D_800DBEF4 + i * 0xA0;
+            const unsigned char *o = g_world_objs + i * 0xA0;
             port_log("[p248mesh] %d ang %.1f yaw %.1f pos %d %d %d scale %.2f %.2f %.2f upd %08X%s 4F %02X tri %u +%u pos5A %d %d %d busy %u fl %02X 73 %02X DL %08X\n",
                      i, *(const float *)o, *(const float *)(o + 4), (short)vbe_ld16(o + 0x10), (short)vbe_ld16(o + 0x12),
                      (short)vbe_ld16(o + 0x14), *(const float *)(o + 0x2C), *(const float *)(o + 0x30),
@@ -455,7 +455,7 @@ void p248_mesh(void) {
     }
     q = *(const unsigned char *const *)(pl + 0x31C);
     for (i = 0; i < n && i < n0; i++) {
-        const unsigned char *o = D_800DBEF4 + i * 0xA0;
+        const unsigned char *o = g_world_objs + i * 0xA0;
         int ang = (int)*(const float *)o, s = vbe_ld8(o + 0x73), b6 = q ? vbe_ld8(q + 0x6B) : -1;
         if (ang != lastang[i] || s != last73[i] || (*(const unsigned *)(o + 0x38) == (unsigned)(uintptr_t)scenery_gate_swing_update && b6 != last6b)) {
             port_log("[p248gate] frame %u obj %d ang %d (was %d) 73 %02X (was %02X) 7C %08X | player %.1f %.1f %.1f ctx6B %d\n",
@@ -489,7 +489,7 @@ void p248_mesh(void) {
         }
         static unsigned lc; if (lf > 0 && (lc++ % 4) == 0 && q) {
             for (i = 0; i < n && i < n0; i++) {
-                const unsigned char *o = D_800DBEF4 + i * 0xA0;
+                const unsigned char *o = g_world_objs + i * 0xA0;
                 float a, b, sx, sy, sz, hx, hy, hz, t0, t1, t2, px, py, pz, hd, dx, dy, dz;
                 if (*(const unsigned *)(o + 0x38) != (unsigned)(uintptr_t)scenery_gate_swing_update) continue;
                 sx = *(const float *)(o + 0x2C); sy = *(const float *)(o + 0x30); sz = *(const float *)(o + 0x34);
@@ -564,9 +564,9 @@ void __wrap_obj_ctrl_floor_contact(void *rec, float a1) {
 }
 
 /* P101 DIAGNOSTIC ?p101mus=1: at each call of the level-start music function level_start_music (game_2D4B0.c, still an
- * asm stub = does nothing; its m2c draft starts the level songs from the level header D_800B0DF0 +0x2C..+0x39 through
+ * asm stub = does nothing; its m2c draft starts the level songs from the level header g_level_header +0x2C..+0x39 through
  * music_play_song): the level g_level_id, the header bytes +0x2C..+0x39, and the level model count D_800B1248. */
-extern unsigned char *D_800B0DF0;
+extern unsigned char *g_level_header; /* was D_800B0DF0 */
 extern int g_level_id, D_800B1248; /* was D_800BE9F0 */
 int port_p110_inmus;
 void __real_level_start_music(void);
@@ -574,7 +574,7 @@ void __wrap_level_start_music(void) {
     static int f = -1;
     if (f < 0) f = port_flag("p101mus");
     if (f) {
-        const unsigned char *h = D_800B0DF0;
+        const unsigned char *h = g_level_header;
         char b[64]; int i, o = 0;
         for (i = 0x2C; h && i < 0x3A; i++) o += snprintf(b + o, sizeof b - o, "%02X%s", vbe_ld8(h + i), (i & 3) == 3 ? " " : "");
         port_log("[p101] level_start_music (level music start, asm stub) frame %u: level %X header %08X +2C: %s| models %d\n",

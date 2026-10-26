@@ -142,7 +142,7 @@ typedef struct {
 } Zoom150CE960;
 
 /* Nearest-neighbour zoom of the rectangle (x0, y0) .. (x1, y1) of the 16-bit frame buffer `fb` (rows of
- * D_800BE620 pixels) in place, when arg0[0x2C] bit 0 is set. Rows are done bottom-up and right to left so a source
+ * g_framebuffer_width pixels) in place, when arg0[0x2C] bit 0 is set. Rows are done bottom-up and right to left so a source
  * pixel is read before it is overwritten; a row with the same source as the row below is a copy of it. */
 /* was func_150CE960 */
 void fb_zoom_fx_apply(u8 *arg0, u16 *fb) {
@@ -178,11 +178,11 @@ void fb_zoom_fx_apply(u8 *arg0, u16 *fb) {
     }
     for (y = z->y1; y >= (s32) z->y0; y--) {
         if (y != (s32) z->y1 && z->rowMap[y + 1] == z->rowMap[y]) {
-            memcpy((s32) &fb[y * D_800BE620 + z->x0], (u8 **) &fb[(y + 1) * D_800BE620 + z->x0],
+            memcpy((s32) &fb[y * g_framebuffer_width + z->x0], (u8 **) &fb[(y + 1) * g_framebuffer_width + z->x0],
                    (z->x1 - z->x0) * 2 + 2);
         } else {
             for (x = z->x1; x >= (s32) z->x0; x--) {
-                fb[y * D_800BE620 + x] = fb[z->rowMap[y] * D_800BE620 + z->colMap[x]];
+                fb[y * g_framebuffer_width + x] = fb[z->rowMap[y] * g_framebuffer_width + z->colMap[x]];
             }
         }
     }

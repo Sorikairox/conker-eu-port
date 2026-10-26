@@ -11,8 +11,8 @@ void weapon_c_trail_attack_spawn(u8 *arg0, s32 arg1, struct127 *arg2, s32 arg3);
 s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
 s32 shot_hit_apply(u8 *obj, u8 *hit, s32 arg2); /* P197: s32 like its C (0 / 1 / 2; nobody reads it) */
 void weapon_c_rumble(u8 *arg0);
-extern s32 D_800A2500;      /* f32[3] spray point (rodata; s32 as in weapon_c_muzzle_point_get below) */
-extern f32 D_800A250C[9];
+extern s32 g_weapon_c_spray_pt;      /* f32[3] spray point (rodata; s32 as in weapon_c_muzzle_point_get below); was D_800A2500 */
+extern f32 g_weapon_c_spray_end_pts[9]; /* was D_800A250C */
 
 // gun_fire_effects: muzzle effects of obj's weapon: muzzle point / direction from weapon_c_muzzle_frame_get; with a visible
 // model a flash, a spark spray (attached_particle_spawn) and the shot effect (gun_shot_sparks); if `trail` three trail puffs
@@ -41,7 +41,7 @@ s32 weapon_c_fire(u8 *obj, u8 trail, u8 ray, u8 flag, s32 arg4) {
         speed[0] = (random_float() * 220.0f + 320.0f) * 0.1f;
         r1 = random_int();
         r2 = random_int();
-        attached_particle_spawn(obj, D_80088BB0, (f32 *)&D_800A2500, D_800A250C, speed, (u32)r1 % 3 + 4, (r2 & 0x7F) + 0x80,
+        attached_particle_spawn(obj, g_weapon_c_bone, (f32 *)&g_weapon_c_spray_pt, g_weapon_c_spray_end_pts, speed, (u32)r1 % 3 + 4, (r2 & 0x7F) + 0x80,
                       random_float() * 450.0f + 780.0f, pos, 0xFF, 0, -1, flag, arg4);
         gun_shot_sparks(pos, dir, flag, arg4);
     }
@@ -77,16 +77,16 @@ void weapon_c_trail_attack_spawn(u8 *arg0, s32 arg1, struct127 *arg2, s32 arg3) 
 }
 
 s32 mtx_transform_points(s32 **, s32 *, s32, s32);
-extern s32 D_800A2500;
+extern s32 g_weapon_c_spray_pt; /* was D_800A2500 */
 
 /* was func_1510015C */
 void weapon_c_muzzle_point_get(u8 *arg0, s32 arg1, s32 arg2) {
     s32 *sp1C;
     s32 sp18;
 
-    sp1C = &D_800A2500;
+    sp1C = &g_weapon_c_spray_pt;
     sp18 = arg2;
-    mtx_transform_points(&sp1C, &sp18, (*(s32 *)((u8 *)arg0 + 0x1D4)) + (D_80088BB0 << 6), 1);
+    mtx_transform_points(&sp1C, &sp18, (*(s32 *)((u8 *)arg0 + 0x1D4)) + (g_weapon_c_bone << 6), 1);
 }
 
 /* was func_151001BC */
@@ -104,12 +104,12 @@ void weapon_c_rumble(u8 *arg0) {
 
 s32 object_mouth_point(struct127 *, s32, s32, s32, s32, s32, s32);
 void object_effect_between(s32, s32, s32, s32);
-extern s32 D_8009002C;
-extern u8 *D_80090034;
+extern s32 g_mouth_points; /* was D_8009002C */
+extern u8 *g_mouth_bones; /* was D_80090034 */
 /* was func_15100248 */
 void weapon_c_muzzle_frame_get(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
 {
-  object_mouth_point(arg0, arg1, arg2, arg3, arg4, D_8009002C, *D_80090034);
+  object_mouth_point(arg0, arg1, arg2, arg3, arg4, g_mouth_points, *g_mouth_bones);
   object_effect_between(arg0, arg1, arg1, 0x8003A);
 }
 
@@ -122,14 +122,14 @@ void weapon_c_hit_callback(s32 arg0, u8 *arg1, s32 arg2) {
 }
 
 /* P179 */
-extern u32 D_800A2530[4];
+extern u32 g_gun_shot_spark_colours[4]; /* was D_800A2530 */
 void vec3_to_yaw_pitch_deg(f32 *, f32 *, f32 *);
 void vec3_from_angles_byte(s16, s16, f32, void *);
 s32 particle_spawn_ex(s32 *, s32, s32, s32, s32, s32);
 
 // gun_shot_sparks: P179: 10..18 kind-1 spark particles (particle_spawn_ex block, 0x67 bytes) at `pos`, sprayed around
 /* the shot direction `dir` (its yaw from vec3_to_yaw_pitch_deg; the pitch is forced to 0) within 21 / 256 turns: colour
- * D_800A2530[random 0..3], life 10..22, alpha 155..255, size 75 + random x 155, speed 20 + random x 20,
+ * g_gun_shot_spark_colours[random 0..3], life 10..22, alpha 155..255, size 75 + random x 155, speed 20 + random x 20,
  * gravity -0.657 + random x 0.621, random mirror flags 0x80 / 0x40 on flags 0x4C207; owner / owner arg `flag` /
  * `arg3`. */
 /* was func_15100304 */
@@ -194,9 +194,9 @@ void gun_shot_sparks(f32 *pos, f32 *dir, u8 flag, s32 arg3) {
     p.pos[0] = pos[0];
     p.pos[1] = pos[1];
     p.pos[2] = pos[2];
-    p.u3C[0] = ((f32 *) D_800A5860)[0];
-    p.u3C[1] = ((f32 *) D_800A5860)[1];
-    p.u3C[2] = ((f32 *) D_800A5860)[2];
+    p.u3C[0] = ((f32 *) g_vec3_zero)[0];
+    p.u3C[1] = ((f32 *) g_vec3_zero)[1];
+    p.u3C[2] = ((f32 *) g_vec3_zero)[2];
     p.u1E = 7;
     p.u20 = 0x24;
     p.u22 = 1;
@@ -215,10 +215,10 @@ void gun_shot_sparks(f32 *pos, f32 *dir, u8 flag, s32 arg3) {
     yawBase = ((s16) (yaw * 182.04445f) >> 8) - 0x8A;
     pitchBase = ((s16) (pitch * 182.04445f) >> 8) - 0x8A;
     do {
-        colours[0] = D_800A2530[0];
-        colours[1] = D_800A2530[1];
-        colours[2] = D_800A2530[2];
-        colours[3] = D_800A2530[3];
+        colours[0] = g_gun_shot_spark_colours[0];
+        colours[1] = g_gun_shot_spark_colours[1];
+        colours[2] = g_gun_shot_spark_colours[2];
+        colours[3] = g_gun_shot_spark_colours[3];
         p.colour = colours[random_int() & 3];
         p.life = (u32) random_int() % 13 + 10;
         p.alpha = (u32) random_int() % 101 + 0x9B;

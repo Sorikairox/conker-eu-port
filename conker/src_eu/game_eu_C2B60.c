@@ -59,11 +59,11 @@ void sprite_tex_desc_set(s32 arg0, s32 arg1, s32 arg2) {
  * 5 = RGBA texels followed by an I4 plane that goes to tile + 1), +9 texel size (G_IM_SIZ_*), +0xA animated flag
  * (`frame` selects one of several equal textures stored after each other; 0 when not animated). The address used
  * is kept in D_800D30C0. Clamp / mirror `cm` applies to s and t; the tile rectangle starts at (uls, ult) with the
- * s fraction `sfrac` (10.2). For CI textures the palette after the texels is loaded too (D_800D30BC = 0x8000,
+ * s fraction `sfrac` (10.2). For CI textures the palette after the texels is loaded too (g_gfx_tlut_mode = 0x8000,
  * the CI flag for the caller's render mode; 0 otherwise). Note the I4 tile's ult is not shifted by 2 (as the
  * original). */
 s32 texture_cache_lookup(s32 id, s32 *outSize, s32 age, s32 addRef);
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 static const u8 s954E4_incr[4] = { G_IM_SIZ_4b_INCR, G_IM_SIZ_8b_INCR, G_IM_SIZ_16b_INCR, G_IM_SIZ_32b_INCR };
 static const u8 s954E4_shift[4] = { G_IM_SIZ_4b_SHIFT, G_IM_SIZ_8b_SHIFT, G_IM_SIZ_16b_SHIFT, G_IM_SIZ_32b_SHIFT };
@@ -145,19 +145,19 @@ s32 gfx_load_texture_tile(s32 gfxAddr, s32 *tex, s32 tmem, s32 tile, s32 frame, 
                            D_800D30C0 + *(u16 *)(t + 4) * *(u16 *)(t + 6) * palBits / 8);
         gDPLoadSync(gfx++);
         gDPLoadTLUTCmd(gfx++, 6, palCount);
-        D_800D30BC = 0x8000;
+        g_gfx_tlut_mode = 0x8000;
     } else {
-        D_800D30BC = 0;
+        g_gfx_tlut_mode = 0;
     }
     return (s32)gfx;
 }
 
 void mtxf_transform_point_w(u8 *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 extern u8 D_800D30C8[][0x40];   /* view matrices per player */
-extern f32 D_800D9F40;
+extern f32 g_cam_near_plane; /* was D_800D9F40 */
 /* Projects the world point (x, y, z) with the current player's view matrix D_800D30C8[g_cur_view_player]
- * (mtxf_transform_point_w -> *sx, *sy, *sz, *w). Behind / too far (w >= far) or too near (w <= D_800D9F40): returns 0.
- * Else *sx / *sy become screen coordinates of that player's viewport (D_800BE628 + player * 0x180: half
+ * (mtxf_transform_point_w -> *sx, *sy, *sz, *w). Behind / too far (w >= far) or too near (w <= g_cam_near_plane): returns 0.
+ * Else *sx / *sy become screen coordinates of that player's viewport (g_player_cams + player * 0x180: half
  * sizes +0x0C / +0x10 (+ 5), centre +0x34 / +0x38; y points down) and it returns 1. */
 /* was func_15095A4C */
 s32 sprite_project_point(f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz, f32 *w, f32 far) {
@@ -167,11 +167,11 @@ s32 sprite_project_point(f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz, f32 *w,
     f32 py;
 
     mtxf_transform_point_w(D_800D30C8[g_cur_view_player], x, y, z, sx, sy, sz, w);
-    if (far <= *w || *w <= D_800D9F40) {
+    if (far <= *w || *w <= g_cam_near_plane) {
         return 0;
     }
     inv = 1.0f / *w;
-    vp = (u8 *)D_800BE628 + g_cur_view_player * 0x180;
+    vp = (u8 *)g_player_cams + g_cur_view_player * 0x180;
     px = *sx;
     py = *sy;
     *sx = (*(f32 *)(vp + 0xC) + 5.0f) * px * inv + *(f32 *)(vp + 0x34);
@@ -199,7 +199,7 @@ u8 *sprite_draw_at_world_depth(u8 *arg0, u8 *arg1) {
     (*(s32 *)((u8 *)arg0 + 4)) = 0;
     temp_a0 = arg0 + 8;
     (*(s32 *)((u8 *)temp_a0 + 0)) = 0xEE000000;
-    temp_t0 = D_800BE628 + (g_cur_view_player * 0x180) + (D_800BE9C0 * 0x10);
+    temp_t0 = g_player_cams + (g_cur_view_player * 0x180) + (g_dl_buf_index * 0x10);
     (*(s32 *)((u8 *)temp_a0 + 4)) = (s32) ((s32) (((f32) (*(s16 *)((u8 *)temp_t0 + 0x4C)) + ((sp.u3C / sp.u38) * (f32) (*(s16 *)((u8 *)temp_t0 + 0x44)))) * 32.0f) << 0x10);
     return sprite_draw_if_visible((s32) (temp_a0 + 8), (s32) arg1, sp.u44, sp.u40, sp.u38, 1, 0, 0, 0);
 }
@@ -263,7 +263,7 @@ extern f32 D_800D30A8;     /* height */
 
 /*
  * sprite_screen_rect: screen rectangle of the sprite `spr` (s16 scale +6 / +8, texture +0x10 with u16 size +4 / +6)
- * centred on the screen point (sx, sy) at depth w, in the current player's viewport (D_800BE628 + g_cur_view_player *
+ * centred on the screen point (sx, sy) at depth w, in the current player's viewport (g_player_cams + g_cur_view_player *
  * 0x180; scales +0x14 / +0x18, or +0x1C / +0x20 when alt): width = tex w * (scale x * D_80038400 * vp scale) / w,
  * height likewise. *visible = 1 when the rectangle overlaps the viewport's clip box (x: +0x2C..+0x30, y:
  * +0x24..+0x28), else 0. The scales, corner, depth and size are left in D_800D3090..D_800D30A8 for the sprite
@@ -289,11 +289,11 @@ void sprite_screen_rect(s32 sprArg, f32 sx, f32 sy, f32 w, s32 alt, s32 *visible
     scaleX = (f32) *(s16 *) (spr + 6) * D_80038400;
     scaleY = (f32) *(s16 *) (spr + 8) * D_80038404;
     if (alt != 0) {
-        vp = (u8 *) D_800BE628 + g_cur_view_player * 0x180;
+        vp = (u8 *) g_player_cams + g_cur_view_player * 0x180;
         scaleX *= *(f32 *) (vp + 0x1C);
         scaleY *= *(f32 *) (vp + 0x20);
     } else {
-        vp = (u8 *) D_800BE628 + g_cur_view_player * 0x180;
+        vp = (u8 *) g_player_cams + g_cur_view_player * 0x180;
         scaleX *= *(f32 *) (vp + 0x14);
         scaleY *= *(f32 *) (vp + 0x18);
     }
@@ -324,9 +324,9 @@ s32 sprite_draw_rect_plain(s32 arg0, s32 arg1) {
 }
 
 /* P142 */
-extern u8 D_800D31C8;   /* sprite primitive colour r, g, b (alpha from the sprite) */
-extern u8 D_800D31C9;
-extern u8 D_800D31CA;
+extern u8 g_sprite_prim_r;   /* sprite primitive colour r, g, b (alpha from the sprite); was D_800D31C8 */
+extern u8 g_sprite_prim_g; /* was D_800D31C9 */
+extern u8 g_sprite_prim_b; /* was D_800D31CA */
 /* sprite_draw_rect: draws the sprite spr (+0xA alpha, +0xB animation speed, +0xC animation frame, +0xD flip x / y
  * bits 1 / 2, +0x10 texture descriptor: u16 width +4 / height +6, u8 frame count +0xA, bit 7 = ping-pong) as one
  * textured rectangle at the screen rectangle sprite_screen_rect left in D_800D3090..D_800D30A8 (x / y scale, left,
@@ -391,7 +391,7 @@ s32 sprite_draw_rect(s32 gfxAddr, s32 sprAddr, s32 sOff, s32 tOff, s32 xAdd) {
     if (g_sprite_keep_prim_colour == 0) {
         // gDPSetPrimColor(0, 1, r, g, b, sprite alpha)
         gfx[0] = 0xFA000100;
-        gfx[1] = (D_800D31C8 << 24) | (D_800D31C9 << 16) | (D_800D31CA << 8) | spr[0xA];
+        gfx[1] = (g_sprite_prim_r << 24) | (g_sprite_prim_g << 16) | (g_sprite_prim_b << 8) | spr[0xA];
         gfx += 2;
     }
     lefti = (s32) left;

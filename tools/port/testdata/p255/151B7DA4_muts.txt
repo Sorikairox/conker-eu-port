@@ -1,5 +1,5 @@
 # P255 obj_attached_glow_update (obj_attached_glow_update) mutants: sed % setup names
-s/if (D_800BE9E4 > 0) {/if (D_800BE9E4 >= 0) {/ % step0
+s/if (g_frame_ticks > 0) {/if (g_frame_ticks >= 0) {/ % step0
 s/obj + 0x10) == 0) {/obj + 0x10) != 0) {/ % ok fail
 s/            return 0;/            return 2;/ % fail
 s/if (data->glow != 0) {/if (data->glow == 0) {/ % ok noglow

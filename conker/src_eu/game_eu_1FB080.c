@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800AB364[];
-extern u8 D_800AB370[];
+extern u8 g_joint_flash_params_a[]; /* was D_800AB364 */
+extern u8 g_joint_flash_params_b[]; /* was D_800AB370 */
 extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 void obj_point_trail_release(u8 *);
@@ -172,8 +172,8 @@ s32 spout_update_fall(u8 *arg0) {
             i = *(u8 *)(arg0 + 0x25) - 1;
         }
         e = &base[i];
-                e->unk4 += (e->unkC * D_800BE9A4) + (-0.12750001f * (D_800BE9A4 * D_800BE9A4));
-        e->unkC += -0.25500003f * D_800BE9A4;
+                e->unk4 += (e->unkC * g_frame_step_f) + (-0.12750001f * (g_frame_step_f * g_frame_step_f));
+        e->unkC += -0.25500003f * g_frame_step_f;
         if (e->unk4 < *(f32 *)(p + 0x44)) {
             while (i != *(s8 *)(arg0 + 0x2D)) {
                 *(s8 *)(arg0 + 0x2D) += 1;
@@ -218,14 +218,14 @@ s32 spout_emit_swirl(u8 *arg0) {
 
     temp_s1 = (*(u8 **)((u8 *)arg0 + 0x98));
     temp_s3 = (*(s32 *)((u8 *)arg0 + 0x94));
-    (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((*(f32 *)((u8 *)temp_s1 + 0x10)) * D_800BE9A4));
-    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((*(f32 *)((u8 *)temp_s1 + 0x14)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((*(f32 *)((u8 *)temp_s1 + 0x10)) * g_frame_step_f));
+    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((*(f32 *)((u8 *)temp_s1 + 0x14)) * g_frame_step_f));
     (*(f32 *)((u8 *)temp_s1 + 8)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s1 + 8)));
     (*(f32 *)((u8 *)temp_s1 + 0xC)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s1 + 0xC)));
-    (*(f32 *)((u8 *)temp_s1 + 0x2C)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x2C)) + ((*(f32 *)((u8 *)temp_s1 + 0x30)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 0x2C)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x2C)) + ((*(f32 *)((u8 *)temp_s1 + 0x30)) * g_frame_step_f));
     (*(f32 *)((u8 *)temp_s1 + 0x2C)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s1 + 0x2C)));
-    (*(f32 *)((u8 *)temp_s1 + 0x40)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x40)) + (0.273013f * D_800BE9A4));
-    (*(f32 *)((u8 *)temp_s1 + 0x3C)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x3C)) + ((10220.0f + (random_float() * 9434.0f)) * 0.01f * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 0x40)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x40)) + (0.273013f * g_frame_step_f));
+    (*(f32 *)((u8 *)temp_s1 + 0x3C)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x3C)) + ((10220.0f + (random_float() * 9434.0f)) * 0.01f * g_frame_step_f));
     if ((*(f32 *)((u8 *)temp_s1 + 0x3C)) >= 16384.0f) {
         do {
             (*(f32 *)((u8 *)temp_s1 + 0x3C)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x3C)) - 16384.0f);
@@ -235,7 +235,7 @@ s32 spout_emit_swirl(u8 *arg0) {
     if (temp_f0 > 1.0f) {
         temp_f28 = 1.0f / temp_f0;
         temp_v0 = temp_s1 + 0x18;
-        temp_f16 = (*(f32 *)((u8 *)temp_s1 + 0x20)) + D_800BE9A4;
+        temp_f16 = (*(f32 *)((u8 *)temp_s1 + 0x20)) + g_frame_step_f;
         sp.uAC = -(temp_f16 * temp_f28);
         (*(f32 *)((u8 *)(&sp.u9C) + 0)) = (*(f32 *)((u8 *)temp_v0 + 0));
         (*(s32 *)((u8 *)(&sp.u9C) + 4)) = (s32) (*(s32 *)((u8 *)temp_v0 + 4));
@@ -261,8 +261,8 @@ s32 spout_emit_swirl(u8 *arg0) {
                 (*(f32 *)((u8 *)temp_v0_2 + 8)) = sp.uA0;
                 var_f12 += temp_f8 * temp_f28;
                 var_f14 += sp84 * temp_f28;
-                (*(f32 *)((u8 *)temp_v0_2 + 4)) = (f32) ((*(f32 *)((u8 *)temp_v0_2 + 4)) + ((-3.772f * D_800BE9A4) + (-0.12750001f * (D_800BE9A4 * D_800BE9A4))));
-                (*(f32 *)((u8 *)temp_v0_2 + 0xC)) = (f32) (-3.772f + (-0.25500003f * D_800BE9A4));
+                (*(f32 *)((u8 *)temp_v0_2 + 4)) = (f32) ((*(f32 *)((u8 *)temp_v0_2 + 4)) + ((-3.772f * g_frame_step_f) + (-0.12750001f * (g_frame_step_f * g_frame_step_f))));
+                (*(f32 *)((u8 *)temp_v0_2 + 0xC)) = (f32) (-3.772f + (-0.25500003f * g_frame_step_f));
                 (*(s8 *)((u8 *)arg0 + 0x2E)) = (s8) ((*(s8 *)((u8 *)arg0 + 0x2E)) + 1);
                 if ((*(u8 *)((u8 *)arg0 + 0x25)) == (*(s8 *)((u8 *)arg0 + 0x2E))) {
                     (*(s8 *)((u8 *)arg0 + 0x2E)) = 0;
@@ -352,10 +352,10 @@ s32 gfx_geometry_mode_cached(s32, s32, s32);
 s32 gfx_load_texture_cached(u8 *, struct_eu_80090F10 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
 u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
-extern s32 D_800AB2C0;
-extern s32 D_800D30BC;
-extern s32 D_800DD608;
-extern s32 D_800DD618;
+extern s32 g_spout_tex_ids; /* was D_800AB2C0 */
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
+extern s32 g_view_yaw_sin; /* was D_800DD608 */
+extern s32 g_view_yaw_cos; /* was D_800DD618 */
 
 /* was func_151CE3D0 */
 u8 *spout_draw(u8 *arg0, u8 *arg1, s16 arg2) {
@@ -404,9 +404,9 @@ u8 *spout_draw(u8 *arg0, u8 *arg1, s16 arg2) {
         if (sp.uBC != NULL) {
             temp_s6 = (*(s32 *)((u8 *)arg0 + 0x94));
             sp.uB3 = 1;
-            temp_v0 = *(s32 *) ((u8 *) &D_800AB2C0 + (*(u8 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x98))) + 0x4C)) * 4);
+            temp_v0 = *(s32 *) ((u8 *) &g_spout_tex_ids + (*(u8 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x98))) + 0x4C)) * 4);
             temp_v1 = ((u8 *)&g_render_mode_pairs);
-            var_s3 = gfx_other_mode_cached(gfx_geometry_mode_cached(gfx_set_combine_mode(gfx_load_texture_cached(var_s3, &D_80090F10[temp_v0], 0, 0, 0, 0, temp_v0, 0, 0, &sp.uB3, 3), 0x4E, &sp.uB3), 0x200005, 0x1F0600), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.uB3);
+            var_s3 = gfx_other_mode_cached(gfx_geometry_mode_cached(gfx_set_combine_mode(gfx_load_texture_cached(var_s3, &g_sprite_textures[temp_v0], 0, 0, 0, 0, temp_v0, 0, 0, &sp.uB3, 3), 0x4E, &sp.uB3), 0x200005, 0x1F0600), g_gfx_tlut_mode | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.uB3);
             if ((*(u16 *)((u8 *)arg0 + 0x1E)) & 2) {
                 var_s2 = (*(s8 *)((u8 *)arg0 + 0x2E)) - 1;
                 if (var_s2 < 0) {
@@ -433,11 +433,11 @@ u8 *spout_draw(u8 *arg0, u8 *arg1, s16 arg2) {
             var_s0 = temp_s6 + (var_s2 * 0x1C);
             (*(f32 *)((u8 *)(&sp.u9C) + 0)) = (*(f32 *)((u8 *)var_s0 + 0));
             temp_v0_2 = arg2 * 4;
-            var_a3 = (f32 *) ((u8 *) &D_800DD608 + temp_v0_2);  /* P270: was temp_v0_2 + &D_800DD608 (s32 * stride: arg2 * 16 bytes; asm adds arg2 * 4) */
+            var_a3 = (f32 *) ((u8 *) &g_view_yaw_sin + temp_v0_2);  /* P270: was temp_v0_2 + &g_view_yaw_sin (s32 * stride: arg2 * 16 bytes; asm adds arg2 * 4) */
             (*(s32 *)((u8 *)(&sp.u9C) + 4)) = (s32) (*(s32 *)((u8 *)var_s0 + 4));
             (*(s32 *)((u8 *)(&sp.u9C) + 8)) = (s32) (*(s32 *)((u8 *)var_s0 + 8));
             temp_f0 = (*(f32 *)((u8 *)var_a2 + 0x10));
-            var_t0 = (f32 *) ((u8 *) &D_800DD618 + temp_v0_2);  /* P270: same (asm adds arg2 * 4) */
+            var_t0 = (f32 *) ((u8 *) &g_view_yaw_cos + temp_v0_2);  /* P270: same (asm adds arg2 * 4) */
             temp_f2 = temp_f0 * *var_a3;
             temp_f12 = temp_f0 * *var_t0;
             (*(s16 *)((u8 *)sp.uBC + 0)) = (s16) (s32) (sp.u90 + temp_f12);
@@ -592,7 +592,7 @@ void spout_check_obj_hit(s32 arg0, u8 *arg1) {
         }
     }
 }
-// node_find_kind11_by_id: searches the node lists g_node_lists[0..1][list] for the two lists named in D_800A5B40
+// node_find_kind11_by_id: searches the node lists g_node_lists[0..1][list] for the two lists named in g_fxrec_bcast_types
 // (s32 words 0x4D, 0x22) for a node of kind 11 (+0x20) whose sub-object (+0x98) has id (+0x48) == id; NULL if none
 /* was func_151CEBE4 */
 u8 *spout_find_by_id(s32 id) {
@@ -602,7 +602,7 @@ u8 *spout_find_by_id(s32 id) {
 
     for (i = 0; i < 2; i++) {
         for (group = 0; group < 2; group++) {
-            for (node = (u8 *)g_node_lists[group][((s32 *)D_800A5B40)[i]]; node != NULL; node = *(u8 **)(node + 8)) {
+            for (node = (u8 *)g_node_lists[group][((s32 *)g_fxrec_bcast_types)[i]]; node != NULL; node = *(u8 **)(node + 8)) {
                 if (*(s32 *)(node + 0x20) == 11 && *(s32 *)(*(u8 **)(node + 0x98) + 0x48) == id) {
                     return node;
                 }
@@ -654,16 +654,16 @@ void drip_fx_update(u8 *arg0) {
     u8 *temp_s0;
 
     temp_s0 = arg0 + 0x28;
-    (*(f32 *)((u8 *)temp_s0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 8)) + ((5624.0f + (random_float() * 3973.0f)) * 1e-10f * D_800BE9A4 * (*(f32 *)((u8 *)temp_s0 + 4))));
+    (*(f32 *)((u8 *)temp_s0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 8)) + ((5624.0f + (random_float() * 3973.0f)) * 1e-10f * g_frame_step_f * (*(f32 *)((u8 *)temp_s0 + 4))));
     if ((*(f32 *)((u8 *)temp_s0 + 8)) > 1.0f) {
         var_v0 = 0;
         var_v1 = 0;
-        if (D_80082FA0 >= 0) {
+        if (g_last_player_index >= 0) {
             do {
                 temp_t7 = 1 << var_v0;
                 var_v0 += 1;
                 var_v1 |= temp_t7;
-            } while (D_80082FA0 >= var_v0);
+            } while (g_last_player_index >= var_v0);
         }
         if (!((*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 0xC))) + 2)) & var_v1)) {
             do {
@@ -712,9 +712,9 @@ s32 fx_rise_fade_update(u8 *arg0) {
 
     temp_f12 = (*(f32 *)((u8 *)arg0 + 0x40));
     temp_f2 = (*(f32 *)((u8 *)arg0 + 0x44));
-    (*(f32 *)((u8 *)arg0 + 0x44)) = (f32) (temp_f2 + (temp_f12 * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((temp_f2 + (0.5f * temp_f12 * D_800BE9A4)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x50)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x50)) + ((*(f32 *)((u8 *)arg0 + 0x4C)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x44)) = (f32) (temp_f2 + (temp_f12 * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((temp_f2 + (0.5f * temp_f12 * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x50)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x50)) + ((*(f32 *)((u8 *)arg0 + 0x4C)) * g_frame_step_f));
     if ((*(f32 *)((u8 *)arg0 + 0x50)) > 1.0f) {
         (*(f32 *)((u8 *)arg0 + 0x50)) = 1.0f;
     }
@@ -727,7 +727,7 @@ typedef struct {
 } struct_151CF1C0;
 
 s32 obj_ribbon_anchor_pos(struct_151CF1C0 *arg0, u8 *arg1, u8 *arg2);
-extern f32 D_800AB3E8;
+extern f32 g_obj_ribbon_k_b3e8; /* was D_800AB3E8 */
 typedef struct {
     u8 *obj;
     u8 b48;
@@ -777,7 +777,7 @@ u8 *obj_ribbon_spawn(u8 *arg0, u8 *arg1, u8 arg2, u8 arg3, s32 arg4) {
     }
     sp.f60 = fl;
     sp.f64 = random_float() * 400.0f + 400.0f;
-    sp.f68 = 2.0f * random_float() * D_800AB3E8;
+    sp.f68 = 2.0f * random_float() * g_obj_ribbon_k_b3e8;
     if (obj_ribbon_anchor_pos(&sp.pos, arg0, arg1) == 0) {
         sp.pos.x = 0.0f;
         sp.pos.y = 0.0f;
@@ -867,7 +867,7 @@ s32 obj_ribbon_record(u8 *arg0) {
         return 0;
     }
     temp_a0 = arg0 + 0x10;
-    if (D_800BE9E4 > 0) {
+    if (g_frame_ticks > 0) {
         (*(f32 *)((u8 *)(&sp.u94) + 0)) = temp_a0->x;
         (*(f32 *)((u8 *)(&sp.u94) + 4)) = (f32) temp_a0->y;
         (*(f32 *)((u8 *)(&sp.u94) + 8)) = (f32) temp_a0->z;
@@ -1069,7 +1069,7 @@ s32 obj_ribbon_wave_update(u8 *arg0) {
             var_f22 += temp_f2_2 * 0.0122f;
         } while (var_s1 != (*(s8 *)((u8 *)arg0 + 0x2D)));
     }
-    (*(f32 *)((u8 *)temp_s4 + 0x24)) = (f32) ((*(f32 *)((u8 *)temp_s4 + 0x24)) + (-0.70900005f * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s4 + 0x24)) = (f32) ((*(f32 *)((u8 *)temp_s4 + 0x24)) + (-0.70900005f * g_frame_step_f));
     return 1;
 }
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
@@ -1114,7 +1114,7 @@ u8 *obj_ribbon_draw(u8 *rope, u8 *gdl, s16 slot) {
     gdl = (u8 *) gfx_env_color_cached((Gfx *) gdl, 0xED, 0xD2, 0x85, 200, &flag);
     gdl = (u8 *) gfx_geometry_mode_cached((s32) gdl, 0x200005, 0x1F0600);
     gdl = (u8 *) gfx_set_combine_mode((s32) gdl, 0x54, (s8 *) &flag);
-    gdl = gfx_other_mode_cached((s32) gdl, D_800D30BC | 0x80000 | 0x2CA0,
+    gdl = gfx_other_mode_cached((s32) gdl, g_gfx_tlut_mode | 0x80000 | 0x2CA0,
                         *(s32 *) (g_render_mode_pairs + 0xC) | *(s32 *) (g_render_mode_pairs + 0x8), (s8 *) &flag);
     cur = (s8) rope[0x2E] - 1;
     if (cur < 0) {
@@ -1201,7 +1201,7 @@ void obj_ribbon_on_message(u8 *arg0, s32 arg1, u8 arg2) {
 typedef struct { f32 x, y, z; } Vec3CFE48;
 f32 camera_get_yaw_deg(s32 arg0);
 s32 collision_floor_probe(Vec3CFE48 *, u16, f32, f32 *);
-extern f32 D_800D9C80;
+extern f32 g_ground_fx_floor_hit; /* was D_800D9C80 */
 
 /* was func_151CFE48 */
 void ground_fx_spawn_random(s32 arg0, f32 arg1, f32 arg2) {
@@ -1226,8 +1226,8 @@ void ground_fx_spawn_random(s32 arg0, f32 arg1, f32 arg2) {
         pos.x = base[0] - sinf(angle) * dist;
         pos.y = arg1;
         pos.z = base[2] - cosf(angle) * dist;
-        if (collision_floor_probe(&pos, 0, arg2, &D_800D9C80) != 0) {
-            pos.y = D_800D9C80;
+        if (collision_floor_probe(&pos, 0, arg2, &g_ground_fx_floor_hit) != 0) {
+            pos.y = g_ground_fx_floor_hit;
             tmp.unk0 = pos;
             tmp.unkC = 0.0f;
             temp_v0 = effect_node_create(random_int() % 131U + 51, -1, 0x20, -1, 1, 0, 0x10, 0xFF, 1);
@@ -1246,8 +1246,8 @@ void emit_sparks_by_angles(u8 *, u8, s32);
 void emit_debris_on_near_surfaces(u8 *, u8, s32);
 void hitinfo_from_obj_floor(void *, u8 *);
 void ground_scatter_spawn(f32 *, f32, f32, void *, s32, u8, s32, u8, s32);
-extern f32 D_800AB2CC[7][3]; /* spark offsets in the model's space */
-extern s32 D_800AB320[7];    /* spark kinds 0x6F..0x75 (the asm copies it to the stack: a local initializer) */
+extern f32 g_shatter_spark_offsets[7][3]; /* spark offsets in the model's space; was D_800AB2CC */
+extern s32 g_shatter_spark_kinds[7];    /* spark kinds 0x6F..0x75 (the asm copies it to the stack: a local initializer); was D_800AB320 */
 
 /* mdl_particle_spawn spark block */
 typedef struct {
@@ -1302,7 +1302,7 @@ typedef struct {
 } RingBlockFFFC;
 
 // object_shatter_effects: the break-up effects of an object with a model (+0x1D4; nothing without one): 7 sparks
-// (mdl_particle_spawn, kinds 0x6F..0x75) from the model's root point (mtx_decompose) at the D_800AB2CC offsets
+// (mdl_particle_spawn, kinds 0x6F..0x75) from the model's root point (mtx_decompose) at the g_shatter_spark_offsets offsets
 // (mtx_transform_point_or_origin) with random directions (vec3_from_angles_byte), sizes from +0x14C / +0x150; then a flash (emit_sparks_by_angles)
 // and a ring (emit_debris_on_near_surfaces) 200 units above the object's position, and 7..10 debris pieces (ground_scatter_spawn, kind
 // 2) dropped from there onto the floor up to 2000 units below.
@@ -1357,8 +1357,8 @@ void object_shatter_effects(u8 *obj, u8 arg1, s32 arg2) {
     s.u74 = 0x15;
     s.u50 = 0x39E9;
     for (i = 0; i < 7; i++) {
-        s.kind = D_800AB320[i];
-        mtx_transform_point_or_origin(D_800AB2CC[i], s.offset, *(void **) (obj + 0x1D4));
+        s.kind = g_shatter_spark_kinds[i];
+        mtx_transform_point_or_origin(g_shatter_spark_offsets[i], s.offset, *(void **) (obj + 0x1D4));
         a = random_int();
         b = random_int();
         vec3_from_angles_byte((u8) a, b % 25 - 64, random_float() * 11.45f + 16.93f, s.dir);
@@ -1484,14 +1484,14 @@ void limb_band_check_anim(u8 *arg0) {
 }
 
 /* file-scope prototypes above: gfx_load_texture_cached / gfx_set_combine_mode / gfx_geometry_mode_cached / gfx_other_mode_cached (s32 display lists),
-   vtx_slot_buffer_get, vec3_length, D_800D30BC, g_render_mode_pairs (u8[]) */
+   vtx_slot_buffer_get, vec3_length, g_gfx_tlut_mode, g_render_mode_pairs (u8[]) */
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 f32 sqrtf(f32);
 f32 sinf(f32);
-extern u8 D_80091504[];
-extern f32 D_800AB33C[2][3];  /* hand points (bone matrix +0x80), left / right */
-extern f32 D_800AB354[3];     /* far point */
-extern u8 D_800AB360[2];      /* bone of the far point, left / right */
+extern u8 g_limb_band_texture[]; /* was D_80091504 */
+extern f32 g_limb_band_hand_pts[2][3];  /* hand points (bone matrix +0x80), left / right; was D_800AB33C */
+extern f32 g_limb_band_far_pt[3];     /* far point; was D_800AB354 */
+extern u8 g_limb_band_far_bones[2];      /* bone of the far point, left / right; was D_800AB360 */
 
 /* rodata copies (NM link drops the asm rodata) */
 static const f32 D_800AB430_c[1] = { 0.16666667f };  /* 0x3E2AAAAB */
@@ -1515,12 +1515,12 @@ static const f32 D_800AB444_c[1] = { 341.33334f };   /* 0x43AAAAAB */
     } while (0)
 
 // limb_band_draw: draw handler (gfx, effect, slot) of a stretchy band between two points of the owner (effect +0x28)
-// skeleton: a hand point D_800AB33C[side] in bone matrix +0x80 and D_800AB354 in bone D_800AB360[side] (side =
+// skeleton: a hand point g_limb_band_hand_pts[side] in bone matrix +0x80 and g_limb_band_far_pt in bone g_limb_band_far_bones[side] (side =
 // effect +0x35, matrices at owner +0x1D4). Ends the effect (+0xE = -1) once the owner is gone or its id byte +0x3B
 // no longer matches +0x2C; draws nothing without matrices or vertices (vtx_slot_buffer_get, 0x1C0 bytes). The band is 6
 // quads along the line, 35 * (+0x30) wide across (line x (centre - camera)), pinched by 1 - sin(phase) * amp with
 // phase stepping pi / 6 per quad and amp 0 below length 20, (length - 20) * 0.02 * 0.6 up to 70, 0.6 beyond.
-// Texture D_80091504, alpha +0x34, texture t steps 341.33 per quad (s 0 / 0x7C0 across).
+// Texture g_limb_band_texture, alpha +0x34, texture t steps 341.33 per quad (s 0 / 0x7C0 across).
 /* was func_151D06FC */
 Gfx *limb_band_draw(Gfx *gfx, u8 *obj, s16 slot) {
     Vtx_t *vtx;
@@ -1560,14 +1560,14 @@ Gfx *limb_band_draw(Gfx *gfx, u8 *obj, s16 slot) {
         return gfx;
     }
     flag = 1;
-    mtx_transform_point_or_origin(D_800AB33C[obj[0x35]], a, *(u8 **) (owner + 0x1D4) + 0x80);
-    mtx_transform_point_or_origin(D_800AB354, b, *(u8 **) (owner + 0x1D4) + (D_800AB360[obj[0x35]] << 6));
+    mtx_transform_point_or_origin(g_limb_band_hand_pts[obj[0x35]], a, *(u8 **) (owner + 0x1D4) + 0x80);
+    mtx_transform_point_or_origin(g_limb_band_far_pt, b, *(u8 **) (owner + 0x1D4) + (g_limb_band_far_bones[obj[0x35]] << 6));
     cam = camera_get_pos(slot);
     gfx = (Gfx *) gfx_geometry_mode_cached((s32) gfx, 0x200005, 0x60600);
-    gfx = (Gfx *) gfx_load_texture_cached((u8 *) gfx, (struct_eu_80090F10 *) D_80091504, 0, 0, 0, 0, 0x7F, 0, 0, (s8 *) &flag, 3);
+    gfx = (Gfx *) gfx_load_texture_cached((u8 *) gfx, (struct_eu_80090F10 *) g_limb_band_texture, 0, 0, 0, 0, 0x7F, 0, 0, (s8 *) &flag, 3);
     gfx = (Gfx *) gfx_set_combine_mode((s32) gfx, 0x3B, (s8 *) &flag);
     gfx = gfx_env_color_cached(gfx, 0xFF, 0xFF, 0xFF, obj[0x34], &flag);
-    gfx = (Gfx *) gfx_other_mode_cached((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, ((s32 *) g_render_mode_pairs)[7] | ((s32 *) g_render_mode_pairs)[6],
+    gfx = (Gfx *) gfx_other_mode_cached((s32) gfx, g_gfx_tlut_mode | 0x80000 | 0x2CA0, ((s32 *) g_render_mode_pairs)[7] | ((s32 *) g_render_mode_pairs)[6],
                                 (s8 *) &flag);
 
     dir[0] = b[0] - a[0];
@@ -1794,8 +1794,8 @@ void objfx_joint_flash_burst(u8 *arg0, s32 arg1, s32 arg2) {
 
     temp_s2 = arg1 & 0xFF;
     if ((*(s32 *)((u8 *)arg0 + 0x1D4)) != 0) {
-        sp.u178 = ((u8 *)&D_800AB364);
-        sp.u17C = ((u8 *)&D_800AB370);
+        sp.u178 = ((u8 *)&g_joint_flash_params_a);
+        sp.u17C = ((u8 *)&g_joint_flash_params_b);
         sp.u170 = &sp.u1DC;
         sp.u174 = &sp.u1D0;
         mtx_transform_points(&sp.u178, &sp.u170, (*(s32 *)((u8 *)arg0 + 0x1D4)) + 0x80, 2);
@@ -1804,7 +1804,7 @@ void objfx_joint_flash_burst(u8 *arg0, s32 arg1, s32 arg2) {
         sp.u1D8 -= sp.u1E4;
         hitinfo_from_obj_floor(&sp.u1AC, arg0);
         sp.u180 = 0;
-        temp_s0 = ((u8 *)&D_800A5860);
+        temp_s0 = ((u8 *)&g_vec3_zero);
         (*(f32 *)((u8 *)(&sp.u184) + 0)) = (f32) (*(f32 *)((u8 *)(&sp.u1D0) + 0));
         (*(s32 *)((u8 *)(&sp.u184) + 4)) = (s32) (*(s32 *)((u8 *)(&sp.u1D0) + 4));
         (*(s32 *)((u8 *)(&sp.u184) + 8)) = (s32) (*(s32 *)((u8 *)(&sp.u1D0) + 8));
@@ -1938,7 +1938,7 @@ void fx_linked_die_free(void *arg0) {
 typedef struct {
     f32 x, y, z;
 } Vec3_151D1510;
-extern s32 (*D_8008FFD0[])(u8 *, Vec3_151D1510 *);
+extern s32 (*g_obj_point_query_fns[])(u8 *, Vec3_151D1510 *); /* was D_8008FFD0 */
 
 /* was func_151D1510 */
 void obj_point_trail_spawn(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
@@ -1957,11 +1957,11 @@ void obj_point_trail_spawn(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
     tmp.unk8 = 0;
-    if (D_8008FFD0[arg1](arg0, &tmp.unk18) == 0) {
-        tmp.unk18 = *(Vec3_151D1510 *)D_800A5860;
+    if (g_obj_point_query_fns[arg1](arg0, &tmp.unk18) == 0) {
+        tmp.unk18 = *(Vec3_151D1510 *)g_vec3_zero;
     }
     tmp.unkC = tmp.unk18;
-    tmp.unk24 = *(Vec3_151D1510 *)D_800A5860;
+    tmp.unk24 = *(Vec3_151D1510 *)g_vec3_zero;
     tmp.unk30 = 0.0f;
     tmp.unk34 = arg1;
     temp_v0 = effect_node_create(300, -1, 0x5F, -1, 0, 0x48, 0x38, arg2, arg3);
@@ -1980,23 +1980,23 @@ s32 object_point_above_pos(f32 *arg0, f32 *arg1) {
 
 s32 object_offset_point(u8 *obj, f32 *out, u8 which);
 
-/* P162: D_8008FFD0 entries 1 / 2. obj_point_trail_update (asm) and obj_point_trail_spawn test the result ("point found"), so these
+/* P162: g_obj_point_query_fns entries 1 / 2. obj_point_trail_update (asm) and obj_point_trail_spawn test the result ("point found"), so these
    return object_offset_point's s32 like entry 0 (object_point_above_pos) instead of void. */
-// object_offset_point_0: entry 1 of D_8008FFD0: object's matrix applied to offset 0 (100, 8, -20)
+// object_offset_point_0: entry 1 of g_obj_point_query_fns: object's matrix applied to offset 0 (100, 8, -20)
 /* was func_151D1654 */
 s32 object_offset_point_0(u8 *obj, f32 *out) {
     return object_offset_point(obj, out, 0);
 }
 
-// object_offset_point_1: entry 2 of D_8008FFD0: object's matrix applied to offset 1 (-100, 8, -20)
+// object_offset_point_1: entry 2 of g_obj_point_query_fns: object's matrix applied to offset 1 (-100, 8, -20)
 /* was func_151D1674 */
 s32 object_offset_point_1(u8 *obj, f32 *out) {
     return object_offset_point(obj, out, 1);
 }
 
-extern f32 D_800AB37C[2][3];
+extern f32 g_obj_offset_points[2][3]; /* was D_800AB37C */
 
-// object_offset_point: transforms the fixed offset D_800AB37C[which] by the object's matrix (obj + 0x1D4) into
+// object_offset_point: transforms the fixed offset g_obj_offset_points[which] by the object's matrix (obj + 0x1D4) into
 // out; returns 0 (out untouched) when the object has no matrix, 1 otherwise
 /* was func_151D1694 */
 s32 object_offset_point(u8 *obj, f32 *out, u8 which) {
@@ -2005,7 +2005,7 @@ s32 object_offset_point(u8 *obj, f32 *out, u8 which) {
     if (mtx == NULL) {
         return 0;
     }
-    mtx_transform_point_or_origin(D_800AB37C[which], out, mtx);
+    mtx_transform_point_or_origin(g_obj_offset_points[which], out, mtx);
     return 1;
 }
 
@@ -2018,7 +2018,7 @@ typedef struct {
     Vec3_151D1510 cur;      /* 0x18 this frame's point */
     Vec3_151D1510 delta;    /* 0x24 cur - prev */
     f32 dist;               /* 0x30 |delta| */
-    u8 point;               /* 0x34 D_8008FFD0 index (which point of the object) */
+    u8 point;               /* 0x34 g_obj_point_query_fns index (which point of the object) */
 } ObjPointTrail;
 
 s32 floor_flags_surface_type(s32);
@@ -2026,7 +2026,7 @@ void obj_point_trail_create(u8 *);
 
 // object_point_trail_update: per-frame handler (D_8008A980[0x21], void (u8 *)) of an effect that follows a
 // point of an object: kills itself (+0xE = -1) when the object is gone or was replaced (id byte changed);
-// else moves the point (D_8008FFD0[point]; keeps the old one when the query fails), stores the step and its
+// else moves the point (g_obj_point_query_fns[point]; keeps the old one when the query fails), stores the step and its
 // length, and releases the effect (obj_point_trail_release) when the query failed, the step is longer than 300 or zero,
 // the object's +0x28 is non-zero, its +0xAD is set, or its state (floor_flags_surface_type of +0x184) is 5, 6, 9, 13 or
 // 14; otherwise it (re)creates the effect when there is none (obj_point_trail_create).
@@ -2042,7 +2042,7 @@ void obj_point_trail_update(u8 *self) {
         return;
     }
     t->prev = t->cur;
-    if (D_8008FFD0[t->point](obj, &t->cur) == 0) {
+    if (g_obj_point_query_fns[t->point](obj, &t->cur) == 0) {
         t->cur = t->prev;
         stop = 1;
     }
@@ -2137,7 +2137,7 @@ void obj_point_trail_create(u8 *arg0) {
         sp.u80 = 50.0f;
         sp.u84 = 200.0f;
     } else {
-        if (D_80082FA0 > 0) {
+        if (g_last_player_index > 0) {
             sp.u78 = 260.0f;
         } else {
             sp.u78 = 500.0f;
@@ -2164,8 +2164,8 @@ void obj_point_trail_create(u8 *arg0) {
     }
 }
 f32 wrap_float_range(f32 value, f32 range, f32 base);
-// tank_track_record: entry 17 of D_8008A5DC (`s32 (*)(u8 *)`, result tested by the path updater). Once per frame
-// (D_800BE9E4 > 0) records the owner object's (**(arg0 + 0x98)) position (+0x40..+0x48) as the path's new head
+// tank_track_record: entry 17 of g_fxrec_emit_fns (`s32 (*)(u8 *)`, result tested by the path updater). Once per frame
+// (g_frame_ticks > 0) records the owner object's (**(arg0 + 0x98)) position (+0x40..+0x48) as the path's new head
 // point (also copied to +0x10, flag 4 of +0x1E set): ring of +0x25 points of 0x28 bytes at +0x94 with +0x0C speed
 // (object +0x58), +0x10 = 1 / |velocity xz| (object +0x4C / +0x54; 1 when 0), +0x14 alpha 255, +0x18 texture t
 // (owner +0x04, which then advances by speed * 21.85 wrapped at 8192 by wrap_float_range), +0x1C width 100,
@@ -2192,7 +2192,7 @@ s32 tank_track_record(u8 *arg0) {
     s16 i;
     s16 j;
 
-    if (D_800BE9E4 <= 0) {
+    if (g_frame_ticks <= 0) {
         return 1;
     }
     owner = *(u8 **) (arg0 + 0x98);
@@ -2379,10 +2379,10 @@ s32 obj_point_trail_fade(u8 *arg0) {
     }
     return 1;
 }
-// trail_ribbon_draw: entry 18 of D_8008A644 (`s32 (u8 *, s32 dl, s16 slot)`, dispatcher fxrec_draw: returns the
+// trail_ribbon_draw: entry 18 of g_fxrec_draw_fns (`s32 (u8 *, s32 dl, s16 slot)`, dispatcher fxrec_draw: returns the
 // advanced display list). Draws a path as a textured ribbon: needs 2+ points (+0x2C); gets the slot's vertex buffer
 // (vtx_slot_buffer_get on +0x84, (+0x25 * 32 + 0xA0) bytes; returns `dl` unchanged without one), sets up texture 0xBC of
-// D_80090F10, render mode and combine 0x4C. Then from the point before the head +0x2E back to the current point
+// g_sprite_textures, render mode and combine 0x4C. Then from the point before the head +0x2E back to the current point
 // +0x2D (ring of +0x25 points of 0x28 bytes at +0x94: xyz, +0x14 alpha, +0x18 texture t, +0x1C half width,
 // +0x20 / +0x24 side direction) it emits two vertices per point (+/- side * width, alpha scaled by the owner's
 // +0x08) and one quad (4-vertex load + 2 triangles) per segment. When t grows along a segment, the last pair is
@@ -2420,10 +2420,10 @@ s32 tank_track_draw(u8 *arg0, s32 dl, s16 slot) {
     }
     flag = 1;
     gfx = (u32 *) gfx_other_mode_cached(
-        gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached((u8 *) dl, &D_80090F10[0xBC], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),
+        gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached((u8 *) dl, &g_sprite_textures[0xBC], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),
                                     0x220005, 0x1D0600),
                       0x4C, &flag),
-        D_800D30BC | 0x80000 | 0x2CA0, *(s32 *) (g_render_mode_pairs + 0xC) | *(s32 *) (g_render_mode_pairs + 8), &flag);
+        g_gfx_tlut_mode | 0x80000 | 0x2CA0, *(s32 *) (g_render_mode_pairs + 0xC) | *(s32 *) (g_render_mode_pairs + 8), &flag);
 
     cur = *(s8 *) (arg0 + 0x2E) - 1;
     if (cur < 0) {

@@ -37,7 +37,7 @@ void flash_blades_spawn(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg
     }
 }
 
-extern s32 D_8008CDEC;
+extern s32 g_sprite_tex_descs; /* was D_8008CDEC */
 void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 
 // spark_burst_tick: per-frame countdown of a spark burst object (obj+0xD0). At 5 it emits one particle record per
@@ -80,7 +80,7 @@ void flash_blades_update(u8 *obj) {
 
     obj[0xD0]--;
     if (obj[0xD0] == 5) {
-        rec.u00 = D_8008CDEC;
+        rec.u00 = g_sprite_tex_descs;
         rec.u04 = 0;
         rec.u08 = 4;
         rec.u0C = 0;
@@ -114,7 +114,7 @@ void flash_blades_update(u8 *obj) {
     }
 }
 
-extern Vtx D_8008B780[];
+extern Vtx g_flash_blades_vtx[]; /* was D_8008B780 */
 
 /* was func_151672D8 */
 Gfx *flash_blades_draw(Gfx *gdl, u8 *arg1, s32 arg2) {
@@ -123,7 +123,7 @@ Gfx *flash_blades_draw(Gfx *gdl, u8 *arg1, s32 arg2) {
 
     for (i = 0; i < 3; i++) {
         gSPMatrix(gdl++, arg1 + 0x10 + i * 0x40, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-        gSPVertex(gdl++, D_8008B780, 6, 0);
+        gSPVertex(gdl++, g_flash_blades_vtx, 6, 0);
         t = 0x2800 - (arg1[0xD0] << 12) / 10;
         gSPModifyVertex(gdl++, 0, G_MWO_POINT_ST, (t << 16) + 0x2000);
         gSPModifyVertex(gdl++, 1, G_MWO_POINT_ST, (t << 16) + 0x2000);
@@ -139,21 +139,21 @@ Gfx *flash_blades_draw(Gfx *gdl, u8 *arg1, s32 arg2) {
     return gdl;
 }
 
-extern u8 D_800908FC[];
-extern u8 *D_800DD658;
-extern s32 D_800DD650;
-extern s32 D_800DD654;
-extern u8 D_800DD660[];
+extern u8 g_flash_blades_texture[]; /* was D_800908FC */
+extern u8 *g_layer_tex; /* was D_800DD658 */
+extern s32 g_layer_tex_scroll; /* was D_800DD650 */
+extern s32 g_layer_tex_mode; /* was D_800DD654 */
+extern u8 g_layer_tex_sprite[]; /* was D_800DD660 */
 /* was func_151674DC */
 void layer_pre_flash_texture(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    u8 **p = &D_800DD658;
+    u8 **p = &g_layer_tex;
 
-    *p = D_800908FC;
-    sprite_load_texture(arg0, *p, D_800DD650, D_800DD660, 0, 0, 0, D_800DD654, 3);
+    *p = g_flash_blades_texture;
+    sprite_load_texture(arg0, *p, g_layer_tex_scroll, g_layer_tex_sprite, 0, 0, 0, g_layer_tex_mode, 3);
 }
 
 /* was func_15167548 */
 Gfx *layer_pre_identity_mtx(Gfx *arg0, s32 arg1, s32 arg2) {
-    gSPMatrix(arg0++, D_80089810, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(arg0++, g_identity_mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     return arg0;
 }

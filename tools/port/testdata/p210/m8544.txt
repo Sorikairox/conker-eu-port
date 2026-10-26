@@ -1,8 +1,8 @@
-s/D_800D1890 = cmd \& 0x3F;/D_800D1890 = cmd \& 0x7F;/
+s/g_aiscript_arg0 = cmd \& 0x3F;/g_aiscript_arg0 = cmd \& 0x7F;/
 s/o = \&g_objects\[g_cur_obj->unk222\];/o = \&g_objects[g_cur_obj->unk222 + 1];/
-s/((s8)D_800D1891 << 4) | (D_800D1893 >> 4)/(D_800D1891 << 4) | (D_800D1893 >> 4)/
-s/(D_800D1893 >> 4)) << 3;/(D_800D1893 >> 4)) << 2;/
-s/((s8)D_800D1892 << 4) | (D_800D1893 \& 0xF)/((s8)D_800D1892 << 4) | (D_800D1893 \& 0x7)/
+s/((s8)g_aiscript_arg1 << 4) | (g_aiscript_arg3 >> 4)/(g_aiscript_arg1 << 4) | (g_aiscript_arg3 >> 4)/
+s/(g_aiscript_arg3 >> 4)) << 3;/(g_aiscript_arg3 >> 4)) << 2;/
+s/((s8)g_aiscript_arg2 << 4) | (g_aiscript_arg3 \& 0xF)/((s8)g_aiscript_arg2 << 4) | (g_aiscript_arg3 \& 0x7)/
 s/mode = cmd >> 6;/mode = cmd >> 7;/
 s/y = o->y_position;/y = o->z_position;/
 s/u8 a = (o->unk7A >> 8) - 0x40;/u8 a = (o->unk7A >> 8);/

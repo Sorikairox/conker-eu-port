@@ -60,7 +60,7 @@ void obj_electrify_fx_update(u8 *arg0) {
         return;
     }
     obj_tint_set_flash(temp_s6, 0xFF, 0xFF, 0xFF, 0x1E, 0, 0xA);
-    (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((D_8009FFF0 + (random_float() * D_8009FFF4)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((D_8009FFF0 + (random_float() * D_8009FFF4)) * g_frame_step_f));
     if ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f) {
         do {
             sp.u94 = 0xBA;
@@ -74,7 +74,7 @@ void obj_electrify_fx_update(u8 *arg0) {
             (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) - 1.0f);
         } while ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f);
     }
-    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((D_8009FFF8 + (random_float() * D_8009FFFC)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((D_8009FFF8 + (random_float() * D_8009FFFC)) * g_frame_step_f));
     if ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f) {
         do {
             temp_s0_2 = random_int();

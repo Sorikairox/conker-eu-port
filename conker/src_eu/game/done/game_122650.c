@@ -24,9 +24,9 @@ s32 storm_thunder_flag_take(void) {
 /* was func_150F51E8 */
 void storm_thunder_sfx_update(s32 arg0) {
     if (((g_player1_floor_flags & 0X1F) == 3) || ((g_player1_floor_flags & 0x1F) == 4)) {
-        if (D_800BE9E4 < g_storm_thunder_sfx_timer){
+        if (g_frame_ticks < g_storm_thunder_sfx_timer){
             if(D_800C35EA != 1) {
-                g_storm_thunder_sfx_timer = (g_storm_thunder_sfx_timer - D_800BE9E4);
+                g_storm_thunder_sfx_timer = (g_storm_thunder_sfx_timer - g_frame_ticks);
             }
         } else {
             g_storm_thunder_sfx_timer = ((random_int() & 0x3F) + 0xC0);

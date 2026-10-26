@@ -20,7 +20,7 @@ void attach_fx_asset_acquire(s32 arg0) {
 
     if ((&g_attach_fx_asset_refs)[arg0] < 2) {
         g_attach_fx_assets[arg0] = asset_load(&tmp, 2, 9, g_attach_fx_asset_ids[arg0]);
-        D_800E0968[arg0] = tmp >> 4;
+        g_attach_fx_point_counts[arg0] = tmp >> 4;
     }
 }
 
@@ -49,7 +49,7 @@ struct224 *attach_fx_spawn(void *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 ar
 
 // effect_child_update: one effect child per frame. Freed (node_destroy) when its parent object is gone / hidden /
 // re-used (id +0x3B != child +0x14) or has no bone matrices. Otherwise its position is its offset +0x18 through the
-// parent's bone matrix (+0x1D4, bone +0x24); a timed child (+0x28 bit 0) counts +0x26 down by D_800BE9E4 and at
+// parent's bone matrix (+0x1D4, bone +0x24); a timed child (+0x28 bit 0) counts +0x26 down by g_frame_ticks and at
 // expiry runs its end handler g_attach_child_end_fns[+0x2A] (node, &pos) and is freed; the update handler g_attach_child_update_fns[+0x29]
 // (node, &pos) returning 0 frees it; else the position is stored at +0x34.
 // NON_MATCHING copy: the handler table at 0x8008FFE0 (g_attach_child_update_fns [0..6], g_attach_child_end_fns = [2..6]) is called through one
@@ -68,7 +68,7 @@ void attach_fx_update(struct_eu_1FFF60_child *arg0) {
     }
     mtx_transform_point_or_origin(&arg0->unk18, &pos, parent->unk1D4 + (arg0->unk24 << 6));
     if (arg0->unk28 & 1) {
-        arg0->unk26 -= D_800BE9E4;
+        arg0->unk26 -= g_frame_ticks;
         if (arg0->unk26 < 0) {
             if (arg0->unk2A != -1) {
                 ((s32 (*)(struct_eu_1FFF60_child *, void *))g_attach_child_end_fns[arg0->unk2A])(arg0, &pos);
@@ -210,7 +210,7 @@ void attach_ctrl_update(u8 *arg0) {
         arg0[0x18] &= ~2;
     }
     if (arg0[0x18] & 1) {
-        *(s16 *)(arg0 + 0x16) -= D_800BE9E4;
+        *(s16 *)(arg0 + 0x16) -= g_frame_ticks;
         if (*(s16 *)(arg0 + 0x16) < 0) {
             w = arg0[0x1C];
             if (w != -1) {

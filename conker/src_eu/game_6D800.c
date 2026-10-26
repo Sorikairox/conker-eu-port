@@ -24,11 +24,11 @@ void debug_syscall_trap(void);
 void dl_dump_around(u8 *arg0);
 s32 dlcheck_vtx_invalid(struct148 *arg0);
 
-/* debug trap: error code 0x0C00005B in D_8003C8E0, then the break handler */
-#define DL_TRAP() (D_8003C8E0 = 0x0C00005B, func_150ADC50())
-/* trap, dump the command (dl_dump_around) and stop in debug_syscall_trap with the frame index D_800BE9C0 flipped */
-#define DL_STOP(c) (dl_dump_around((u8 *) (c)), DL_TRAP(), D_800BE9C0 = 1 - D_800BE9C0, debug_syscall_trap(), \
-                    D_800BE9C0 = 1 - D_800BE9C0)
+/* debug trap: error code 0x0C00005B in g_dbg_crash_marker, then the break handler */
+#define DL_TRAP() (g_dbg_crash_marker = 0x0C00005B, func_150ADC50())
+/* trap, dump the command (dl_dump_around) and stop in debug_syscall_trap with the frame index g_dl_buf_index flipped */
+#define DL_STOP(c) (dl_dump_around((u8 *) (c)), DL_TRAP(), g_dl_buf_index = 1 - g_dl_buf_index, debug_syscall_trap(), \
+                    g_dl_buf_index = 1 - g_dl_buf_index)
 
 // dl_validate: debug walk over a display list of 8-byte commands until `end` (or, with end 0, until G_ENDDL 0xDF),
 // following G_DL (0xDE) branches through the segment table g_dl_check_segments (at most 20 deep, target must be a cached
@@ -64,9 +64,9 @@ void dl_validate_list(void *list, u32 end, s32 parent) {
                     g_dl_check_depth--;
                 } else {
                     DL_TRAP();
-                    D_800BE9C0 = 1 - D_800BE9C0;
+                    g_dl_buf_index = 1 - g_dl_buf_index;
                     debug_syscall_trap();
-                    D_800BE9C0 = 1 - D_800BE9C0;
+                    g_dl_buf_index = 1 - g_dl_buf_index;
                 }
                 break;
             case 0xE7:
@@ -128,9 +128,9 @@ void dl_validate_list(void *list, u32 end, s32 parent) {
             dl_dump_around((u8 *) dl);
             g_dl_check_drawn_flag = 0;
             DL_TRAP();
-            D_800BE9C0 = 1 - D_800BE9C0;
+            g_dl_buf_index = 1 - g_dl_buf_index;
             debug_syscall_trap();
-            D_800BE9C0 = 1 - D_800BE9C0;
+            g_dl_buf_index = 1 - g_dl_buf_index;
         }
         if (bad) {
             bad = 0;

@@ -6,9 +6,9 @@
 
 /* was func_15012FE0 */
 void level_clear_be570(void) {
-    D_800BE570 = 0;
-    D_800BE574 = 0;
-    D_800BE575 = 0;
+    g_fb_ghost_image = 0;
+    g_fb_ghost_alpha = 0;
+    g_fb_ghost_pass = 0;
 }
 
 typedef struct {
@@ -25,8 +25,8 @@ void hotspots_start_all(void) {
     u32 var_s1;
     void (*temp_a1)(u8 *, s32);
 
-    D_800DCDC4 = 0;
-    D_800DCD90 = 0.0f;
+    g_light_record_list = 0;
+    g_light_list_weight = 0.0f;
     var_s1 = 0;
     var_s0 = 0;
     if (D_800D3094 != 0) {
@@ -46,8 +46,8 @@ void hotspots_start_all(void) {
 //     void (*func)();
 //     struct_eu_40490_obj *obj;
 //
-//     D_800DCDC4 = 0;
-//     D_800DCD90 = 0.0f;
+//     g_light_record_list = 0;
+//     g_light_list_weight = 0.0f;
 //     for (i = 0; i < D_800D3094; i++) {
 //         obj = &((struct_eu_40490_obj *)D_800D34B8)[i];
 //         func = g_hotspot_start_handlers[(u8)(obj->unk15 >> 2)];
@@ -513,7 +513,7 @@ s32 record_scripted_dispatch(struct134 *arg0) {
     void (*func)(struct134 *, f32);
 
     arg0->unk16 |= 4;
-    if ((((u8 *)D_800D2E4C)[0x11] & 4) && (g_level_id == 19)) {
+    if ((((u8 *)g_save_progress_bits)[0x11] & 4) && (g_level_id == 19)) {
         return 1;
     }
     if ((D_800C35EA == 1) && ((D_800C3A08 == 15) || (D_800C3A08 == 16) || (D_800C3A08 == 17))) {
@@ -648,7 +648,7 @@ s32 record_register_e0900(struct134 *arg0) {
     if (temp_v1 >= 6) {
         return 1;
     }
-    D_800E0900[temp_v1] = arg0;
+    g_emitter_owner_records[temp_v1] = arg0;
     return 1;
 }
 
@@ -657,7 +657,7 @@ s32 record_register_d9a20(struct134 *arg0) {
     s32 temp_v0 = arg0->unk18;
     arg0->unk16 |= 4;
     if (temp_v0 == 0) {
-        D_800D9A20 = arg0;
+        g_spawn_region_pair = arg0;
     } else if (temp_v0 == 1) {
         g_spawn_region_record_1 = arg0;
     }
@@ -760,10 +760,10 @@ s32 record_effect29_start(struct134 *arg0) {
     f32 r;
 
     arg0->unk16 |= 4;
-    if (D_80082FA0 >= 2) {
+    if (g_last_player_index >= 2) {
         return 1;
     }
-    if ((((u8 *)D_800D2E4C)[0x11] & 4) && (g_level_id == 19)) {
+    if ((((u8 *)g_save_progress_bits)[0x11] & 4) && (g_level_id == 19)) {
         return 1;
     }
     a = ((u32)arg0->unk1C & 0xFFFF) * g_effect29_size_scale;
@@ -803,7 +803,7 @@ typedef struct {
     f32 step;         /* 0x34 */
 } Effect150144B8;
 // screen_effect_start: P259: start handler of a level record `rec` (s16 +6 / +8, f32 +0xC / +0x10, flags +0x16,
-// packed bytes +0x18 / +0x1C): sets flag 4; in single player (D_80082FA0 < 2) projects the point 100 above
+// packed bytes +0x18 / +0x1C): sets flag 4; in single player (g_last_player_index < 2) projects the point 100 above
 // (+0xC, 0, +0x10) to the screen (mtxf_rotate_xyz_deg / mtxf_transform_point / vec3_to_yaw_pitch_deg, scaled by pi/180) and spawns effect
 // 300 / 0x2A (effect_node_create) with a parameter block from the packed bytes: count min + rand % (range + 1), two s16,
 // two scales / 64, angle math_atan2f(+6, +8), spin byte / 256 * pi/4, a frame count with its inverse and
@@ -818,7 +818,7 @@ s32 screen_effect_start(u8 *rec) {
     u32 hi;
 
     rec[0x16] |= 4;
-    if (D_80082FA0 >= 2) {
+    if (g_last_player_index >= 2) {
         return 1;
     }
     mtxf_rotate_xyz_deg(mtx, *(f32 *) (rec + 0xC), *(f32 *) (rec + 0x10), 0.0f);
@@ -1072,8 +1072,8 @@ s32 record_light_list_add(s32 arg0) {   /* P76: a0 passes through to spawn_regio
         return 1;
     }
 
-    spawn_region_list_push(&D_800DCDC4, temp_v0);
-    D_800DCD90 += temp_v0->unk8;
+    spawn_region_list_push(&g_light_record_list, temp_v0);
+    g_light_list_weight += temp_v0->unk8;
     return 1;
 }
 

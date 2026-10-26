@@ -27,7 +27,7 @@ void slide_dust_effect_start(u8 *arg0) {
 s32 particle_spawn_basic(void *, s32, s32, u8, s32);
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 s32 motion_track_get_delta(void *, f32 **);
-extern f32 D_800BE9A4;
+extern f32 g_frame_step_f; /* was D_800BE9A4 */
 /* was func_15192F14 */
 void slide_dust_effect_update(u8 *arg0) {
     u8 *p;
@@ -75,7 +75,7 @@ void slide_dust_effect_update(u8 *arg0) {
     u8 a;
 
     p = arg0 + 0x28;
-    *(f32 *)(p + 8) += (312.0f + random_float() * 599.0f) * 0.001f * D_800BE9A4;
+    *(f32 *)(p + 8) += (312.0f + random_float() * 599.0f) * 0.001f * g_frame_step_f;
     if (*(f32 *)(p + 8) > 1.0f) {
         if (motion_track_get_delta(*(u8 **)p, &out) != 0) {
             sp.u51 = 0x29;
@@ -204,7 +204,7 @@ void body_dust_effect_update(u8 *arg0) {
     s16 ang;
 
     p = arg0 + 0x28;
-    *(f32 *)(p + 8) += (792.0f + random_float() * 1202.0f) * 0.001f * D_800BE9A4;
+    *(f32 *)(p + 8) += (792.0f + random_float() * 1202.0f) * 0.001f * g_frame_step_f;
     if (*(f32 *)(p + 8) > 1.0f) {
         if (*(s32 *)(*(u8 **)p + 0x1D4) == 0) {
             while (*(f32 *)(p + 8) > 1.0f) {

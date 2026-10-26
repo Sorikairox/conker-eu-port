@@ -6,11 +6,11 @@
 void emit_sparks_by_angles_b(u8 *arg0, s32 arg1);
 void emit_sprite_nodes_by_angles(u8 *arg0, s32 arg1, s32 arg2);
 u8 *object_emitter_spawn(u8 *, s32, u8, s32);
-extern u8 D_800908C4[];
+extern u8 g_spark_burst_anim[]; /* was D_800908C4 */
 
 // spark_effect_on_event: event effect for obj. mode 0: starts emitter kind 1 on obj (object_emitter_spawn), a spark burst
 // (emit_sparks_by_angles_b spec at x 177.9 / z -1708), sound effect 0x1E (effect_node_create_nodraw) and a sprite burst (emit_sprite_nodes_by_angles spec,
-// D_800908C4 animation); mode 1: emitter kind 2 only; other modes and a NULL obj do nothing. flag goes to every call.
+// g_spark_burst_anim animation); mode 1: emitter kind 2 only; other modes and a NULL obj do nothing. flag goes to every call.
 /* was func_150DBF60 */
 void spark_effect_on_event(u8 *obj, s32 mode, u8 flag) {
     struct {
@@ -95,7 +95,7 @@ void spark_effect_on_event(u8 *obj, s32 mode, u8 flag) {
         burst.u32 = 0x73;
         burst.u34 = 0x73;
         burst.u36 = 0x87;
-        burst.anim = D_800908C4;
+        burst.anim = g_spark_burst_anim;
         burst.u3C = 0xFF;
         burst.u3D = 0xFF;
         emit_sprite_nodes_by_angles((u8 *) &burst, flag, 1);
@@ -172,17 +172,17 @@ void spark_burst_handler(u8 *arg0) {
     sp.u30 = 0.0f;
     emit_sparks_by_angles_b((u8 *) &sp.u18, (*(u8 *)((u8 *)arg0 + 0xC)));   /* the callee never reads a2 */
 }
-extern f32 D_800A1028, D_800A102C, D_800A1030, D_800A1034, D_800A1038, D_800A103C, D_800A1040, D_800A1044, D_800A1048,
-    D_800A104C, D_800A1050, D_800A1054, D_800A1058, D_800A105C, D_800A1060, D_800A1064, D_800A1068, D_800A106C,
-    D_800A1070, D_800A1074, D_800A1078, D_800A107C, D_800A1080, D_800A1084, D_800A1088, D_800A108C, D_800A1090,
-    D_800A1094, D_800A1098, D_800A109C, D_800A10A0, D_800A10A4, D_800A10A8, D_800A10AC, D_800A10B0, D_800A10B4,
-    D_800A10B8, D_800A10BC;
-extern u8 D_80090778[], D_800907C4[];
+extern f32 g_itemfx_k0_z, g_itemfx_k0_u24, g_itemfx_k5_x, g_itemfx_k5_y, g_itemfx_k5_z, g_itemfx_a_u18, g_itemfx_a_u1c, g_itemfx_a_u08, g_itemfx_a_u6c, /* was D_800A1028; was D_800A102C; was D_800A1030; was D_800A1034; was D_800A1038; was D_800A103C; was D_800A1040; was D_800A1044; was D_800A1048 */
+    g_itemfx_a_u8c, g_itemfx_a_u9c, g_itemfx_a_uac, g_itemfx_a_ub0, g_itemfx_a_ubc, g_itemfx_a_uc0, g_itemfx_a_ucc, g_itemfx_a_ud4, g_itemfx_k1_x,
+    g_itemfx_k1_z, g_itemfx_k2_xz, g_itemfx_k3_z, g_itemfx_k3_x, g_itemfx_k4_xz, g_itemfx_b_u1c, g_itemfx_b_u30, g_itemfx_b_u38, g_itemfx_b_u64,
+    g_itemfx_b_u6c, g_itemfx_b_u74, g_itemfx_b_u78, g_itemfx_b_u9c, g_itemfx_b_ua4, g_itemfx_b_uac, g_itemfx_b_uc0, g_itemfx_b_ucc, g_itemfx_b_udc,
+    g_itemfx_b_ue0, g_itemfx_b_u104;
+extern u8 g_itemfx_anim_a[], g_itemfx_anim_b[]; /* was D_80090778; was D_800907C4 */
 struct127 *obj_find_by_setup_id(u8 arg0);
 
 // item_effect_spawn: starts the effect record of preset `kind` (fxrec_spawn: kind 0x120, 300 frames... spec below)
-// and fills its 0x11C-byte data (rec + 0x98). Presets 0 / 5 use the D_80090778 animation and positions of their own;
-// presets 1..4 the D_800907C4 one, placed by the object obj_find_by_setup_id(6) (y 736; z depends on kind, the x / z pair
+// and fills its 0x11C-byte data (rec + 0x98). Presets 0 / 5 use the g_itemfx_anim_a animation and positions of their own;
+// presets 1..4 the g_itemfx_anim_b one, placed by the object obj_find_by_setup_id(6) (y 736; z depends on kind, the x / z pair
 // and +0x24 on whether that object's +0x84 is 6). Returns the record, NULL for an unknown preset, a missing
 // object or a full pool. arg1 is unused (fountain_start_preset passes its record).
 /* was func_150DC2F0 */
@@ -220,33 +220,33 @@ u8 *item_effect_spawn(u8 kind, s32 arg1) {
         if (kind == 0) {
             spec.x = 5.0f;
             spec.y = 115.0f;
-            spec.z = D_800A1028;
-            d.u24 = D_800A102C;
+            spec.z = g_itemfx_k0_z;
+            d.u24 = g_itemfx_k0_u24;
         } else {
-            spec.x = D_800A1030;
-            spec.y = D_800A1034;
-            spec.z = D_800A1038;
+            spec.x = g_itemfx_k5_x;
+            spec.y = g_itemfx_k5_y;
+            spec.z = g_itemfx_k5_z;
             d.u24 = 90.0f;
         }
         d.pos[0] = spec.x;
         d.pos[1] = spec.z;
-        d.u18 = D_800A103C;
-        d.u1C = D_800A1040;
+        d.u18 = g_itemfx_a_u18;
+        d.u1C = g_itemfx_a_u1c;
         d.u2C = 14.0f;
         d.u30 = 4.0f;
-        d.u08 = D_800A1044;
-        d.u6C = D_800A1048;
+        d.u08 = g_itemfx_a_u08;
+        d.u6C = g_itemfx_a_u6c;
         d.u74 = 40.0f;
         d.u80 = -185.0f;
-        d.u8C = D_800A104C;
-        d.u9C = D_800A1050;
-        d.uAC = D_800A1054;
-        d.uB0 = D_800A1058;
+        d.u8C = g_itemfx_a_u8c;
+        d.u9C = g_itemfx_a_u9c;
+        d.uAC = g_itemfx_a_uac;
+        d.uB0 = g_itemfx_a_ub0;
         d.uB4 = 5.0f;
-        d.uBC = D_800A105C;
-        d.uC0 = D_800A1060;
-        d.uCC = D_800A1064;
-        d.uD4 = D_800A1068;
+        d.uBC = g_itemfx_a_ubc;
+        d.uC0 = g_itemfx_a_uc0;
+        d.uCC = g_itemfx_a_ucc;
+        d.uD4 = g_itemfx_a_ud4;
         d.uDC = 270.0f;
         d.uE0 = 154.0f;
         d.uF0 = 173.0f;
@@ -299,11 +299,11 @@ u8 *item_effect_spawn(u8 kind, s32 arg1) {
         d.u64 = 0.0f;
         d.u68 = 0.0f;
         d.u72 = 0;
-        d.anim = D_80090778;
+        d.anim = g_itemfx_anim_a;
         d.u94 = 0;
         d.uA0 = 0.0f;
         d.uD0 = 0.0f;
-        d.anim2 = D_80090778;
+        d.anim2 = g_itemfx_anim_a;
         d.uF8 = 0;
         d.uFC = -1;
         d.u104 = 0.0f;
@@ -326,43 +326,43 @@ u8 *item_effect_spawn(u8 kind, s32 arg1) {
         d.u24 = (*(u16 *) ((u8 *) obj + 0x84) == 6) ? 498.0f : -37.0f;
         spec.y = 736.0f;
         if (kind == 1) {
-            spec.x = D_800A106C;
-            spec.z = D_800A1070;
+            spec.x = g_itemfx_k1_x;
+            spec.z = g_itemfx_k1_z;
         } else if (kind == 2) {
-            spec.x = D_800A1074;
-            spec.z = D_800A1074;
+            spec.x = g_itemfx_k2_xz;
+            spec.z = g_itemfx_k2_xz;
         } else if (kind == 3) {
-            spec.z = D_800A1078;
-            spec.x = D_800A107C;
+            spec.z = g_itemfx_k3_z;
+            spec.x = g_itemfx_k3_x;
         } else {
-            spec.x = D_800A1080;
-            spec.z = D_800A1080;
+            spec.x = g_itemfx_k4_xz;
+            spec.z = g_itemfx_k4_xz;
         }
         d.pos[0] = spec.x;
         d.pos[1] = spec.z;
         d.u18 = -2.0f;
-        d.u1C = D_800A1084;
+        d.u1C = g_itemfx_b_u1c;
         d.u2C = 132.0f;
-        d.u30 = D_800A1088;
-        d.u38 = D_800A108C;
-        d.u64 = D_800A1090;
-        d.u6C = D_800A1094;
-        d.u74 = D_800A1098;
-        d.u78 = D_800A109C;
+        d.u30 = g_itemfx_b_u30;
+        d.u38 = g_itemfx_b_u38;
+        d.u64 = g_itemfx_b_u64;
+        d.u6C = g_itemfx_b_u6c;
+        d.u74 = g_itemfx_b_u74;
+        d.u78 = g_itemfx_b_u78;
         d.u80 = -51.0f;
-        d.u9C = D_800A10A0;
-        d.uA4 = D_800A10A4;
-        d.uAC = D_800A10A8;
+        d.u9C = g_itemfx_b_u9c;
+        d.uA4 = g_itemfx_b_ua4;
+        d.uAC = g_itemfx_b_uac;
         d.uB4 = 15.0f;
         d.uB8 = 12.0f;
         d.uBC = 2.75f;
         spec.u15 = 0x1E;
-        d.uC0 = D_800A10AC;
+        d.uC0 = g_itemfx_b_uc0;
         spec.u0C = 0xA0;
-        d.uCC = D_800A10B0;
+        d.uCC = g_itemfx_b_ucc;
         d.uD4 = 131.0f;
-        d.uDC = D_800A10B4;
-        d.uE0 = D_800A10B8;
+        d.uDC = g_itemfx_b_udc;
+        d.uE0 = g_itemfx_b_ue0;
         d.u118 = 0x6E;
         d.u28 = 0xFF;
         d.u29 = 0xFF;
@@ -383,7 +383,7 @@ u8 *item_effect_spawn(u8 kind, s32 arg1) {
         d.u7C = 0x258;
         d.u7E = -0x48;
         d.u84 = 6;
-        d.u104 = D_800A10BC;
+        d.u104 = g_itemfx_b_u104;
         d.u86 = 3;
         d.u88 = 0x514;
         d.u94 = 0xAB;
@@ -402,7 +402,7 @@ u8 *item_effect_spawn(u8 kind, s32 arg1) {
         d.u58 = 0;
         d.u5C = 0;
         d.u68 = 0.0f;
-        d.anim = D_800907C4;
+        d.anim = g_itemfx_anim_b;
         d.uA0 = 0.0f;
         d.uD0 = 0.0f;
         d.uD8 = -0x38;
@@ -413,7 +413,7 @@ u8 *item_effect_spawn(u8 kind, s32 arg1) {
         d.uEA = 6;
         d.uEC = 4;
         d.uEE = 0x514;
-        d.anim2 = D_800907C4;
+        d.anim2 = g_itemfx_anim_b;
         d.uF8 = 0xAB;
         d.uFC = 0xC;
         d.u108 = 0.0f;
@@ -485,11 +485,11 @@ typedef struct {
     u8 pad16[2];
     s32 u18;                /* 0x18 0x30001 */
 } FountainSplash;
-extern f32 D_800A10C0;
+extern f32 g_fountain_particle_scale; /* was D_800A10C0 */
 void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 u8 *impact_spark_spawn(f32 *, f32 *, f32, s16, u8, f32, s32, u8, f32, f32, u8, u8, s32, s16, s16, s32, u8, s32);
 
-// fountain_step: step handler 4 of D_8008A5A0 (`s32 (u8 *)`, fxrec_spawn's per-frame step) for the effect of
+// fountain_step: step handler 4 of g_fxrec_step_fns (`s32 (u8 *)`, fxrec_spawn's per-frame step) for the effect of
 // item_effect_spawn. Moves the water points of the ring obj +0x94 (see fountain_emit) from the newest back to the oldest:
 // vy (+0xC) gains d +0x18 per second, y follows. A point that drops below the water level d +0x24 lands: it makes
 // sprites (impact_spark_spawn, counter d +0xA0 / rate +0x9C; half alpha and tint 7 when d +0x41 is 0x18), drops
@@ -519,8 +519,8 @@ s32 fountain_step(u8 *obj) {
                 i = obj[0x25] - 1;
             }
             pt = pts + i * 0x18;
-            *(f32 *) (pt + 0xC) += d->u18 * D_800BE9A4;
-            *(f32 *) (pt + 0x4) += *(f32 *) (pt + 0xC) * D_800BE9A4;
+            *(f32 *) (pt + 0xC) += d->u18 * g_frame_step_f;
+            *(f32 *) (pt + 0x4) += *(f32 *) (pt + 0xC) * g_frame_step_f;
             if (*(f32 *) (pt + 0x4) < d->u24) {
                 /* landed: sprites */
                 d->uA0 += d->u9C;
@@ -546,7 +546,7 @@ s32 fountain_step(u8 *obj) {
                     t = random_int();
                     tint = (d->u41 == 0x18) ? 7 : 2;
                     impact_spark_spawn(pos, vel, scale * d->uC0 + d->uBC, d->uC4, alpha, speed2 * d->uB8 + d->uB4,
-                                  (u32) t % (d->uC8 + 1) + d->uC6, 1, D_800A10C0, D_800A10C0, 1, tint, 0, 0x10, 0xF,
+                                  (u32) t % (d->uC8 + 1) + d->uC6, 1, g_fountain_particle_scale, g_fountain_particle_scale, 1, tint, 0, 0x10, 0xF,
                                   0, obj[0xC], obj[1]);
                     d->uA0 -= 1.0f;
                 }
@@ -668,7 +668,7 @@ s32 fountain_step(u8 *obj) {
     }
     *(s16 *) (pt + 0x14) = 0xBE;
     if (d->u116 != 0) {
-        t = d->u114 - D_800BE9E4;
+        t = d->u114 - g_frame_ticks;
         if (t > 0) {
             d->u114 = t;
         } else {
@@ -689,10 +689,10 @@ s32 fountain_step(u8 *obj) {
     return 1;
 }
 
-extern f32 D_800A10C4;
+extern f32 g_fountain_emit_threshold; /* was D_800A10C4 */
 void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 
-// fountain_emit: emitter handler 4 of D_8008A5DC (`s32 (u8 *)`, fxrec_spawn's per-frame step) for the effect of
+// fountain_emit: emitter handler 4 of g_fxrec_emit_fns (`s32 (u8 *)`, fxrec_spawn's per-frame step) for the effect of
 // item_effect_spawn. The data d = obj +0x98 swings the emitter around obj +0x10 / +0x18 (angles +0x04 / +0x0C advance
 // by a random step per frame, radii +0x00 / +0x08) and moves it there in +0x20 steps (+0x20 grows by rate +0x1C;
 // nothing happens until it passes 0.99999). Each step adds a point to the ring obj +0x94 (0x18 bytes: x, y, z, vy,
@@ -711,12 +711,12 @@ s32 fountain_emit(u8 *obj) {
     s32 more, i;
     u8 *pt;
 
-    d->u04 += ((u32) random_int() % (d->u06 + 1)) * D_800BE9E4;
-    d->u0C += ((u32) random_int() % (d->u0E + 1)) * D_800BE9E4;
-    d->u20 += d->u1C * D_800BE9A4;
-    if (D_800A10C4 < d->u20) {
+    d->u04 += ((u32) random_int() % (d->u06 + 1)) * g_frame_ticks;
+    d->u0C += ((u32) random_int() % (d->u0E + 1)) * g_frame_ticks;
+    d->u20 += d->u1C * g_frame_step_f;
+    if (g_fountain_emit_threshold < d->u20) {
         inv = 1.0f / d->u20;
-        dt = D_800BE9A4;
+        dt = g_frame_step_f;
         step = dt * inv;
         x = d->pos[0];
         z = d->pos[1];
@@ -805,7 +805,7 @@ s32 fountain_emit(u8 *obj) {
         d->pos[0] = x;
         d->pos[1] = z;
     }
-    d->u118 -= D_800BE9E4;
+    d->u118 -= g_frame_ticks;
     if (d->u118 < 0) {
         /* fade the newest four points, walking back around the ring */
         i = *(s8 *) (obj + 0x2E) - 1;
@@ -841,8 +841,8 @@ s32 fountain_emit(u8 *obj) {
     return 1;
 }
 
-extern f32 D_800DD608[], D_800DD618[]; /* per view: camera yaw sine / cosine */
-extern s32 D_800D30BC;
+extern f32 g_view_yaw_sin[], g_view_yaw_cos[]; /* per view: camera yaw sine / cosine; was D_800DD608; was D_800DD618 */
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 extern s32 g_render_mode_pairs[]; /* was D_800A4EA8 */
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 gfx_load_texture_cached(s32, struct_eu_80090F10 *, s32, s32, s32, s32, s32, u8, s32, s8 *, s32);
@@ -867,10 +867,10 @@ u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
         v += 0x10; \
     } while (0)
 
-// fountain_draw: draw handler 4 of D_8008A644 (`s32 (u8 *, s32 gfx, s16 view)`, fxrec_draw) for the effect of
+// fountain_draw: draw handler 4 of g_fxrec_draw_fns (`s32 (u8 *, s32 gfx, s16 view)`, fxrec_draw) for the effect of
 // item_effect_spawn: the water points (obj +0x94, see fountain_emit) as one strip from the newest to the oldest, each
-// point widened by its +0x10 sideways to the camera (D_800DD608 / D_800DD618[view]); while the effect still emits
-// (obj +0x1E flag 2) the strip starts at the object itself. Texture D_80090F10[d +0x41] (s from the point byte
+// point widened by its +0x10 sideways to the camera (g_view_yaw_sin / g_view_yaw_cos[view]); while the effect still emits
+// (obj +0x1E flag 2) the strip starts at the object itself. Texture g_sprite_textures[d +0x41] (s from the point byte
 // +0x16; where s grows backwards the last pair is repeated with s - 0x4000 so the texture wraps), colour d +0x28,
 // combine / render mode from the nibbles of d +0x42. Vertices come from vtx_slot_buffer_get. Returns the display list
 // end; draws nothing with fewer than 2 points. The asm takes the head's alpha (emitting case) through an index it
@@ -901,8 +901,8 @@ s32 fountain_draw(u8 *obj, s32 gfx, s16 view) {
     flag = 1;
     mode = d->u42 & 0xF;
     comb = (d->u42 & 0xF0) >> 4;
-    sinV = D_800DD608[view];
-    cosV = D_800DD618[view];
+    sinV = g_view_yaw_sin[view];
+    cosV = g_view_yaw_cos[view];
     if (d->u60 == 2) {
         sIdx = 1;
         tIdx = 0;
@@ -910,11 +910,11 @@ s32 fountain_draw(u8 *obj, s32 gfx, s16 view) {
         sIdx = 0;
         tIdx = 1;
     }
-    gfx = gfx_load_texture_cached(gfx, &D_80090F10[d->u41], 0, 0, 0, 0, d->u41, 0, 0, &flag, 3);
+    gfx = gfx_load_texture_cached(gfx, &g_sprite_textures[d->u41], 0, 0, 0, 0, d->u41, 0, 0, &flag, 3);
     gfx = gfx_env_color_cached(gfx, d->u28, d->u28, d->u28, 0xFF, &flag);
     gfx = gfx_set_combine_mode(gfx, comb, &flag);
     gfx = gfx_geometry_mode_cached(gfx, 1, 0x160600);
-    gfx = (s32) gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, g_render_mode_pairs[mode * 2 + 1] | g_render_mode_pairs[mode * 2],
+    gfx = (s32) gfx_other_mode_cached(gfx, g_gfx_tlut_mode | 0x80000 | 0x2CA0, g_render_mode_pairs[mode * 2 + 1] | g_render_mode_pairs[mode * 2],
                               &flag);
     if (*(u16 *) (obj + 0x1E) & 2) {
         /* still emitting: the strip starts at the object */
@@ -951,12 +951,12 @@ s32 fountain_draw(u8 *obj, s32 gfx, s16 view) {
     pz = *(f32 *) (p + 0x8);
     w = *(f32 *) (p + 0x10);
     FOUNTAIN_VTX(w * cosV + hx, hy, hz - w * sinV, sPrev << 6, 0, *(s16 *) (head + 0x14));
-    FOUNTAIN_VTX(hx - w * cosV, hy, w * sinV + hz, sPrev << 6, (D_80090F10[d->u41].unk6 - 1) << 6,
+    FOUNTAIN_VTX(hx - w * cosV, hy, w * sinV + hz, sPrev << 6, (g_sprite_textures[d->u41].unk6 - 1) << 6,
                  *(s16 *) (head + 0x14));
     for (;;) {
         w = *(f32 *) (p + 0x10);
         FOUNTAIN_VTX(w * cosV + px, py, pz - w * sinV, sCur << 6, 0, *(s16 *) (p + 0x14));
-        FOUNTAIN_VTX(px - w * cosV, py, w * sinV + pz, sCur << 6, (D_80090F10[d->u41].unk6 - 1) << 6,
+        FOUNTAIN_VTX(px - w * cosV, py, w * sinV + pz, sCur << 6, (g_sprite_textures[d->u41].unk6 - 1) << 6,
                      *(s16 *) (p + 0x14));
         ((s32 *) gfx)[0] = 0x01004008; /* gSPVertex(v - 4, 4, 0) */
         ((s32 *) gfx)[1] = (s32) (v - 0x40);

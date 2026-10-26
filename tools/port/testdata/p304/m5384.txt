@@ -5,16 +5,16 @@ s/        if (len < 0.0001f) {/        if (len < 0.00001f) {/ % deg deg2
 s/        dz = nz \/ len;/        dz = nz \/ ny;/ % tilt flat
 s/        if (slot != 0xFF \&\& fabsf(dy) < 0.9f) {/        if (slot != 0xFF \&\& dy < 0.9f) {/ % flat tilt flatdn
 s/            mtxf_look_at(mtx, 0.0f, 0.0f, 0.0f, dx, dy, dz, 0.0f, 1.0f, 0.0f);/            mtxf_look_at(mtx, 0.0f, 0.0f, 0.0f, dx, dz, dy, 0.0f, 1.0f, 0.0f);/ % tilt
-s/            mtxf_transform_point(mtx, 0.0f, 0.0f, 1.0f, (f32 \*) (D_800D9D80 + slot \* 28 + 0x10),/            mtxf_transform_point(mtx, 0.0f, 1.0f, 0.0f, (f32 *) (D_800D9D80 + slot * 28 + 0x10),/ % tilt
-s/        D_800D9D80\[slot \* 28 + 3\] = 0;/        D_800D9D80[slot * 28 + 2] = 0;/ % k11s1 flat deg
+s/            mtxf_transform_point(mtx, 0.0f, 0.0f, 1.0f, (f32 \*) (g_aim_records + slot \* 28 + 0x10),/            mtxf_transform_point(mtx, 0.0f, 1.0f, 0.0f, (f32 *) (g_aim_records + slot * 28 + 0x10),/ % tilt
+s/        g_aim_records\[slot \* 28 + 3\] = 0;/        g_aim_records[slot * 28 + 2] = 0;/ % k11s1 flat deg
 s/    if (slot != 0xFF \&\& flat) {/    if (flat) {/ % k10s0 tiltFF
 s/    rec.y = (s32) y;/    rec.y = (s32) z;/ % k11s1
 s/    rec.g = 0xB4;/    rec.g = 0xB5;/ % k11s1
 s/    rec.u1F = 0xFF;/    rec.u1F = 0xFE;/ % k11s1
-s/    sizeF = D_800A14E0\[size\]\[1\];/    sizeF = D_800A14E0[size][0];/ % k11s1 k10s0
+s/    sizeF = g_impact_spark_sizes\[size\]\[1\];/    sizeF = g_impact_spark_sizes[size][0];/ % k11s1 k10s0
 s/    sizeBase = sizeF \* 95.0f \* 0.00390625f;/    sizeBase = sizeF * 96.0f * 0.00390625f;/ % k11s1
 s/    sizeRange = sizeF \* 130.0f \* 0.00390625f;/    sizeRange = sizeF * 130.0f * 0.0039f;/ % k11s1 k11one
-s/        rec.tex = D_80091C2C;/        rec.tex = D_80091C5C;/ % k11s1
+s/        rec.tex = g_dust_sprite_set;/        rec.tex = g_impact_dust_sprites_def;/ % k11s1
 s/    } else if (kind == 10) {/    } else if (kind == 11) {/ % k10s0
 s/    } else if (kind == 4 || kind == 9) {/    } else if (kind == 4) {/ % k9s2
 s/        sizeBase = 180.0f;/        sizeBase = 181.0f;/ % k8s1

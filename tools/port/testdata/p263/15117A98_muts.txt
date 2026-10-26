@@ -2,10 +2,10 @@
 s/    if (angle == rest \&\& speed == 0.0f) {/    if (angle == rest) {/ % restmove
 s/    f32 rest = (f32) ((params << 22) >> 22);/    f32 rest = (f32) (params \& 0x3FF);/ % crosspos
 s/    kind = params >> 10;/    kind = params >> 11;/ % startsnd
-s/    if (speed == 0.0f \&\& kind != 0 \&\& D_80089600\[kind\].move_sfx != 0) {/    if (kind != 0 \&\& D_80089600[kind].move_sfx != 0) {/ % normpos
-s/D_80089600\[kind\].move_sfx, 0x5DC0, 0xC8, 0x9C4, 0);/D_80089600[kind].stop_sfx, 0x5DC0, 0xC8, 0x9C4, 0);/ % startsnd
+s/    if (speed == 0.0f \&\& kind != 0 \&\& g_scenery_mover_sfx\[kind\].move_sfx != 0) {/    if (kind != 0 \&\& g_scenery_mover_sfx[kind].move_sfx != 0) {/ % normpos
+s/g_scenery_mover_sfx\[kind\].move_sfx, 0x5DC0, 0xC8, 0x9C4, 0);/g_scenery_mover_sfx[kind].stop_sfx, 0x5DC0, 0xC8, 0x9C4, 0);/ % startsnd
 s/    before = math_angle_diff_deg(angle, rest);/    before = math_angle_diff_deg(rest, angle);/ % normpos
-s/    angle += speed \* (f32) D_800BE9E4;/    angle += speed;/ % normpos
+s/    angle += speed \* (f32) g_frame_ticks;/    angle += speed;/ % normpos
 s/    if ((diff <= 0.0f \&\& 0.0f < before) ||/    if ((diff < 0.0f \&\& 0.0f < before) ||/ % crosszero
 s/ || (0.0f <= diff \&\& before < 0.0f)) {/ || (0.0f < diff \&\& before < 0.0f)) {/ % crossneg normneg crosszn
 s/ || (0.0f <= diff \&\& before < 0.0f)) {/) {/ % crossneg
@@ -15,7 +15,7 @@ s/        speed = -bounce \* speed;/        speed = bounce * speed;/ % crosspos
 s/    } else if (0.0f < diff) {/    } else if (0.0f <= diff) {/ % normpos zero0
 s/        speed += accel;/        speed += accel * 2.0f;/ % normpos
 s/        speed -= accel;/        speed += accel;/ % normneg
-s/    f32 accel = \*(f32 \*) (obj + 0x80) \* (f32) D_800BE9E4;/    f32 accel = *(f32 *) (obj + 0x80);/ % normpos
+s/    f32 accel = \*(f32 \*) (obj + 0x80) \* (f32) g_frame_ticks;/    f32 accel = *(f32 *) (obj + 0x80);/ % normpos
 s/    if (fabsf(diff) < 2.0f \&\& fabsf(speed) < 1.0f) {/    if (fabsf(diff) < 2.0f) {/ % normpos crossbig
 s/    if (fabsf(diff) < 2.0f \&\& fabsf(speed) < 1.0f) {/    if (diff < 2.0f \&\& fabsf(speed) < 1.0f) {/ % normneg
 s/        angle += 360.0f;/        angle += 180.0f;/ % wrapneg

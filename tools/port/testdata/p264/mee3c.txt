@@ -2,26 +2,26 @@
 \#^    s32 fade = arg0\[0x1F\];$#s/0x1F/0x1E/
 \#^    if (on != 0) {$#s/!= 0/== 0/
 \#^        if (fade != 0xFF) {$#s/0xFF/0xFE/
-\#^            fade += D_800BE9E4 << 5;$#s/<< 5/<< 4/
+\#^            fade += g_frame_ticks << 5;$#s/<< 5/<< 4/
 \#^            if (fade >= 0x100) {$#s/>= 0x100/> 0x100/
 \#^                fade = 0xFF;$#s/0xFF/0xFE/
 \#^    } else if (fade != 0) {$#s/!= 0/!= 1/
-\#^        fade -= D_800BE9E4 << 4;$#s/<< 4/<< 5/
+\#^        fade -= g_frame_ticks << 4;$#s/<< 4/<< 5/
 \#^        if (fade < 0) {$#s/< 0/<= 0/
 \#^            fade = 0;$#s/0/1/
 \#^    if (on == 0 && fade == 0) {$#s/&&/||/
 \#^        return 1;$#s/1/2/
-\#^    \*(s16 \*) (arg0 + 0x14) += D_800BE9E4 \* 10;$#s/\* 10/* 9/
+\#^    \*(s16 \*) (arg0 + 0x14) += g_frame_ticks \* 10;$#s/\* 10/* 9/
 \#^    \*(s16 \*) (arg0 + 0x16) = \*(s16 \*) (arg0 + 0x14);$#s/0x16/0x18/
 \#^        level = arg0\[0x1F\] >> 5;$#s/>> 5/>> 4/
 \#^        level = on + 8;$#s/+ 8/+ 7/
 \#^    for (i = arg0\[0x26\]; i < arg0\[0x26\] + 8; i++) {$#s/+ 8/+ 7/
 \#^    for (i = arg0\[0x26\]; i < arg0\[0x26\] + 8; i++) {$#s/i = arg0\[0x26\]/i = arg0[0x26] + 1/
-\#^        if (level >= D_800A71E0\[i\]) {$#s/>=/>/
-\#^            t = (f32) (level - D_800A71E0\[i\]) / (f32) (D_800A71E0\[i - 1\] - D_800A71E0\[i\]);$#s/\[i - 1\]/[i + 1]/
-\#^            t = (f32) (level - D_800A71E0\[i\]) / (f32) (D_800A71E0\[i - 1\] - D_800A71E0\[i\]);$#s/(level -/(level + 1 -/
+\#^        if (level >= g_particle_glow_thresholds\[i\]) {$#s/>=/>/
+\#^            t = (f32) (level - g_particle_glow_thresholds\[i\]) / (f32) (g_particle_glow_thresholds\[i - 1\] - g_particle_glow_thresholds\[i\]);$#s/\[i - 1\]/[i + 1]/
+\#^            t = (f32) (level - g_particle_glow_thresholds\[i\]) / (f32) (g_particle_glow_thresholds\[i - 1\] - g_particle_glow_thresholds\[i\]);$#s/(level -/(level + 1 -/
 \#^            u = 1\.0f - t;$#s/1\.0f/2.0f/
-\#^            rgb = &D_800A71EC\[i \* 3\];$#s/i \* 3/i * 3 + 3/
+\#^            rgb = &g_particle_glow_colours\[i \* 3\];$#s/i \* 3/i * 3 + 3/
 \#^            arg0\[0x1C\] = (u32) (rgb\[-3\] \* t + rgb\[0\] \* u);$#s/rgb\[-3\]/rgb[-2]/
 \#^            arg0\[0x1C\] = (u32) (rgb\[-3\] \* t + rgb\[0\] \* u);$#s/\* u/* t/
 \#^            arg0\[0x1D\] = (u32) (rgb\[-2\] \* t + rgb\[1\] \* u);$#s/rgb\[1\]/rgb[2]/

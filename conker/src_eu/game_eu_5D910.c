@@ -12,8 +12,8 @@ void heap_free(s32);
 void attachment_undo_kind_effects(u8 *);
 void animmodel_free(s32);
 void shared_dl_release(s32);
-extern s32 D_800DFDE8[];
-extern s32 *D_800E0578[];
+extern s32 g_shared_dl_tex_lists[]; /* was D_800DFDE8 */
+extern s32 *g_shared_dl_headers[]; /* was D_800E0578 */
 /* P71: a word of an attachment record (the list D_800C3EE0, see attachment_update_all) */
 #define ATT_W(rec, off) (*(s32 *) ((rec) + (off)))
 s32 attachment_sound_cb();   /* P71: C under NON_MATCHING (else an extern s32 below, as the matching code uses it) */
@@ -31,12 +31,12 @@ s32 attachment_remove_by_slot_n(u8 *, s32, s32);
  * shared_dl_acquire; shared_dl_release releases both). Header words: +0 the display-list offset table (+4 >> 2 entries),
  * +8, +0xC (>> 4), +0x10, the data from +0x18. First use: asset_load_with_subfiles(0, 0, 0, 2, 9, idx) (none: return 1),
  * each table entry is relocated by the header address, texture_resolve_dl_ids resolves its segments
- * (&D_800DFDE8[idx] keeps the list), gfx_dl_relocate patches its addresses; the header is kept in D_800E0578[idx].
- * The count D_800DFC00[idx] is not saturated here. Returns 0 once loaded.
+ * (&g_shared_dl_tex_lists[idx] keeps the list), gfx_dl_relocate patches its addresses; the header is kept in g_shared_dl_headers[idx].
+ * The count g_shared_dl_refcounts[idx] is not saturated here. Returns 0 once loaded.
  */
 /* was func_15030100 */
 s32 model_asset9_load_refcounted(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out8, s32 *outC) {
-    u8 *refs = &D_800DFC00[idx];
+    u8 *refs = &g_shared_dl_refcounts[idx];
     s32 *hdr;
     s32 i;
 
@@ -49,12 +49,12 @@ s32 model_asset9_load_refcounted(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *
         *count = (u32) hdr[1] >> 2;
         for (i = 0; i < *count; i++) {
             (*dls)[i] += (s32) hdr;
-            texture_resolve_dl_ids((*dls)[i], 0, 1, 0x3E, &D_800DFDE8[idx]);
+            texture_resolve_dl_ids((*dls)[i], 0, 1, 0x3E, &g_shared_dl_tex_lists[idx]);
             gfx_dl_relocate((*dls)[i], hdr);
         }
-        D_800E0578[idx] = hdr;
+        g_shared_dl_headers[idx] = hdr;
     } else {
-        hdr = D_800E0578[idx];
+        hdr = g_shared_dl_headers[idx];
         *dls = (s32 *) hdr[0];
         *count = (u32) hdr[1] >> 2;
     }
@@ -272,16 +272,16 @@ typedef struct Attach {
     /* 0x10 */ u8 pad10[6];
     /* 0x16 */ u8 mode;             /* 4: scale the joint rotation by +0x40 */
     /* 0x17 */ u8 pad17[5];
-    /* 0x1C */ u16 timer;           /* 0xFFFF = forever, else frames left (D_800BE9E4 per call) */
+    /* 0x1C */ u16 timer;           /* 0xFFFF = forever, else frames left (g_frame_ticks per call) */
     /* 0x1E */ u16 subModel;        /* != 0: attached through attachment_find_by_slot / attachment_get_matrices (second pass) */
     /* 0x20 */ u16 subMtx;
     /* 0x22 */ s16 spin;            /* extra rotation (65536 = 360 degrees) */
     /* 0x24 */ u8 pad24[0x10];
-    /* 0x34 */ Mtx *mtx;            /* two Mtx, one per DL buffer D_800BE9C0 */
+    /* 0x34 */ Mtx *mtx;            /* two Mtx, one per DL buffer g_dl_buf_index */
     /* 0x38 */ u8 pad38[8];
     /* 0x40 */ f32 scale;
     /* 0x44 */ f32 *transform;      /* x, y, z, then rotation angles at +0xC / +0x10 / +0x14 */
-    /* 0x48 */ u8 *target;          /* gets the matrix pointer at +0x3E0[D_800BE9C0], then animmodel_update_matrices */
+    /* 0x48 */ u8 *target;          /* gets the matrix pointer at +0x3E0[g_dl_buf_index], then animmodel_update_matrices */
     /* 0x4C */ u8 pad4C[8];
     /* 0x54 */ struct Attach *next;
 } Attach;
@@ -377,7 +377,7 @@ void attachment_update_all(void) {
                     }
 
                     if (rec->mtx != NULL) {
-                        out = &rec->mtx[D_800BE9C0];
+                        out = &rec->mtx[g_dl_buf_index];
                         if (rec->transform != NULL || rec->mode == 4) {
                             /* rotation rows scaled to length 1 (transform) or +0x40 (mode 4), column 3 cleared,
                              * translation row kept */
@@ -426,7 +426,7 @@ void attachment_update_all(void) {
             }
 
             if (rec->target != NULL) {
-                ((void **) (rec->target + 0x3E0))[D_800BE9C0] = (rec->mtx != NULL) ? (void *) out : (void *) src;
+                ((void **) (rec->target + 0x3E0))[g_dl_buf_index] = (rec->mtx != NULL) ? (void *) out : (void *) src;
                 animmodel_update_matrices(rec->target);
             }
 
@@ -448,8 +448,8 @@ void attachment_update_all(void) {
             if (t != 0xFFFF) {
                 if (t == 0) {
                     attachment_free((struct127 *) rec, 0);
-                } else if (D_800BE9E4 < t) {
-                    rec->timer = t - D_800BE9E4;
+                } else if (g_frame_ticks < t) {
+                    rec->timer = t - g_frame_ticks;
                 } else {
                     rec->timer = 0;
                 }
@@ -672,13 +672,13 @@ s32 attachment_get_matrices(u8 *arg0, u8 *arg1, s32 *arg2, s32 *arg3) {
         if ((*(u8 *)((u8 *)temp_v0 + 0x3F6)) == 0) {
             return 0;
         }
-        *arg2 = (*(s32 *)((u8 *)((temp_v0 + (D_800BE9C0 * 4))) + 0x3E8));
-        *arg3 = (*(s32 *)((u8 *)(((*(u8 **)((u8 *)arg0 + 0x48)) + (D_800BE9C0 * 4))) + 0x3E0));
+        *arg2 = (*(s32 *)((u8 *)((temp_v0 + (g_dl_buf_index * 4))) + 0x3E8));
+        *arg3 = (*(s32 *)((u8 *)(((*(u8 **)((u8 *)arg0 + 0x48)) + (g_dl_buf_index * 4))) + 0x3E0));
         goto block_14;
     }
     temp_v0_2 = (*(s32 *)((u8 *)arg0 + 0x34));
     if (temp_v0_2 != 0) {
-        *arg2 = temp_v0_2 + (D_800BE9C0 << 6);
+        *arg2 = temp_v0_2 + (g_dl_buf_index << 6);
         var_t3 = (*(s32 *)((u8 *)arg1 + 0x1D4)) + ((*(u8 *)((u8 *)arg0 + 2)) << 6);
         goto block_13;
     }
@@ -705,9 +705,9 @@ block_14:
 }
 extern u8 D_80083350[];     /* segment 8: blended (alpha < 0xFF) material set */
 extern u8 D_800834D0[];     /* segment 8: opaque material set */
-extern u8 D_800DD714[];     /* fog colour r, g, b when the level fogs (header +0x3E) */
+extern u8 g_fog_state[];     /* fog colour r, g, b when the level fogs (header +0x3E); was D_800DD714 */
 extern u8 D_800DA248[];
-extern s32 D_800BEFC4;      /* display list capacity (commands) */
+extern s32 g_dl_capacity;      /* display list capacity (commands); was D_800BEFC4 */
 s32 attachment_get_matrices(u8 *, u8 *, s32 *, s32 *);
 void obj_ambient_colour(s32 arg0, u8 *arg1);
 void obj_fog_alpha(u8 *rec, s32 *col, s32 view);
@@ -734,7 +734,7 @@ u8 *reflect_emit_entries_dl(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4);
  * attachment_get_matrices (nothing drawn without one), fog / tint colours from obj_ambient_colour / obj_fog_alpha / obj_unpack_light_colours,
  * lighting by the object's +0x66 mode (lights +0x304[player] built by obj_alloc_light_bufs on demand, light_write_light_cmds /
  * light_apply_object_lights), then the parts (or reflect_emit_entries_dl when special != 0). When the display list would overflow
- * (D_800BEFC4 commands from D_800BEDE8[D_800BE9C0]) the commands are dropped (the start pointer is returned).
+ * (g_dl_capacity commands from D_800BEDE8[g_dl_buf_index]) the commands are dropped (the start pointer is returned).
  */
 /* was func_150314B4 */
 s32 attachment_draw(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special) {
@@ -773,14 +773,14 @@ s32 attachment_draw(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special)
     }
     i = (obj - (u8 *) g_objects) / (s32) sizeof(struct127);
     obj_ambient_colour(i, (u8 *) col);
-    if (*(s16 *) ((u8 *) D_800B0DF0 + 0x3E) != 0) {
+    if (*(s16 *) ((u8 *) g_level_header + 0x3E) != 0) {
         obj_fog_alpha((u8 *) &g_objects[i], col, player);
     } else {
         col[3] = 0xFF;
     }
     obj_unpack_light_colours(obj, player, alpha, (u8 *) col, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
                   &fogA);
-    fogs = *(s16 *) ((u8 *) D_800B0DF0 + 0x3E);
+    fogs = *(s16 *) ((u8 *) g_level_header + 0x3E);
 
     lit = TRUE;
     if ((obj[0x66] & 0xC) == 0xC) {
@@ -807,11 +807,11 @@ s32 attachment_draw(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special)
             size = (obj[0x2FD] != 0 || created) ? 10 : 2;
             if (obj[5] != 5 && obj[0x302] != 0 && (obj[0x66] & 0xC) != 0 && !created) {
                 gfx = (Gfx *) light_write_light_cmds((u8 *) gfx, lights, obj[0x301], obj[0x302],
-                                            *(s32 *) (obj + 0x314) + D_800BE9C0 * 8);
+                                            *(s32 *) (obj + 0x314) + g_dl_buf_index * 8);
             } else {
                 gfx = light_apply_object_lights(gfx, player, *(f32 *) (obj + 0x14), *(f32 *) (obj + 0x18), *(f32 *) (obj + 0x1C),
                                     *(s32 *) (obj + 0x184), lights, obj[0x301],
-                                    (u8 *) (*(s32 *) (obj + 0x314) + D_800BE9C0 * 8), obj + 0x302, 2, obj + 0x1DD,
+                                    (u8 *) (*(s32 *) (obj + 0x314) + g_dl_buf_index * 8), obj + 0x302, 2, obj + 0x1DD,
                                     size, D_800DA248);
             }
         }
@@ -819,13 +819,13 @@ s32 attachment_draw(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special)
     if (fogs == 0) {
         ATT_DL(gfx, 0xF8000000, (fogR << 24) | ((fogG & 0xFF) << 16) | ((fogB & 0xFF) << 8) | (fogA & 0xFF));
     } else {
-        ATT_DL(gfx, 0xF8000000, (D_800DD714[0] << 24) | (D_800DD714[1] << 16) | (D_800DD714[2] << 8) | (fogA & 0xFF));
+        ATT_DL(gfx, 0xF8000000, (g_fog_state[0] << 24) | (g_fog_state[1] << 16) | (g_fog_state[2] << 8) | (fogA & 0xFF));
     }
     ATT_DL(gfx, 0xF8000000, (fogR << 24) | ((fogG & 0xFF) << 16) | ((fogB & 0xFF) << 8) | (fogA & 0xFF));
     ATT_DL(gfx, 0xFA00F200, (primR << 24) | ((primG & 0xFF) << 16) | ((primB & 0xFF) << 8));
     ATT_DL(gfx, 0xFB000000, (envR << 24) | ((envG & 0xFF) << 16) | ((envB & 0xFF) << 8) | (alpha & 0xFF));
     ATT_DL(gfx, 0xDB06000C, mtx);
-    ATT_DL(gfx, 0xDB060004, *(s32 *) (att + 0x28 + D_800BE9C0 * 4));
+    ATT_DL(gfx, 0xDB060004, *(s32 *) (att + 0x28 + g_dl_buf_index * 4));
     if (*(u16 *) (att + 0x18) != 0) {
         v = texture_cache_lookup(*(u16 *) (att + 0x18), &size, 0x3E, 0);
         ATT_DL(gfx, 0xDB060018, v);
@@ -845,7 +845,7 @@ s32 attachment_draw(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special)
         ATT_DL(gfx, 0xD9FFFFFF, 0x200);
         gfx = (Gfx *) reflect_emit_entries_dl((u8 *) gfx, att, envR, envG, envB);
     }
-    if (gfx - D_800BEDE8[D_800BE9C0] > D_800BEFC4) {
+    if (gfx - D_800BEDE8[g_dl_buf_index] > g_dl_capacity) {
         return (s32) start;
     }
     return (s32) gfx;
@@ -1529,9 +1529,9 @@ s32 attachment_cb_expire_timer(u8 *arg0, u8 *arg1)
   if (((*((u8 *) (((u8 *) arg1) + 0xAD))) == 0) && ((*((f32 *) (((u8 *) arg1) + 0x118))) < (*((f32 *) (((u8 *) arg1) + 0x180)))))
   {
     ;
-    if (D_800BE9E4 < (*((s32 *) (((u8 *) arg0) + 0x38))))
+    if (g_frame_ticks < (*((s32 *) (((u8 *) arg0) + 0x38))))
     {
-      *((s32 *) (((u8 *) arg0) + 0x38)) = (s32) ((*((s32 *) (((u8 *) arg0) + 0x38))) - D_800BE9E4);
+      *((s32 *) (((u8 *) arg0) + 0x38)) = (s32) ((*((s32 *) (((u8 *) arg0) + 0x38))) - g_frame_ticks);
       return 0;
     }
     return 1;
@@ -1573,7 +1573,7 @@ s32 attachment_cb_spin_in_state5(u8 *arg0, u8 *arg1)
   case 0x35:
     if (arg1[5] == 5) {
       arg0[2] = 0;
-      *(s16 *)(arg0 + 0x22) += D_800BE9E4 * 0xAAA;
+      *(s16 *)(arg0 + 0x22) += g_frame_ticks * 0xAAA;
     }
     break;
   case 0x29:
@@ -1717,7 +1717,7 @@ s32 attachment_cb_keep_during_anims(u8 *arg0, u8 *arg1) {
 
 /* was func_15033AD4 */
 s32 attachment_cb_blink_texture(u8 *arg0, s32 arg1) {
-    *(s32 *)(arg0 + 0x38) += D_800BE9E4;
+    *(s32 *)(arg0 + 0x38) += g_frame_ticks;
     if (*(s32 *)(arg0 + 0x38) >= 16) {
         *(s32 *)(arg0 + 0x38) = 0;
         *(s32 *)(arg0 + 0x3C) ^= 1;
@@ -1799,7 +1799,7 @@ s32 attachment_cb_delayed_sound(u8 *arg0, u8 *arg1) {
     if ((*(s32 *)((u8 *)arg0 + 0x38)) == 0) {
         temp_v0 = (*(s32 *)((u8 *)arg0 + 0x3C));
         if (temp_v0 < 0x19) {
-            (*(s32 *)((u8 *)arg0 + 0x3C)) = (s32) (temp_v0 + D_800BE9E4);
+            (*(s32 *)((u8 *)arg0 + 0x3C)) = (s32) (temp_v0 + g_frame_ticks);
         } else {
             (*(s32 *)((u8 *)arg0 + 0x3C)) = sfx_emitter_start(0x513U, (s16) (s32) (*(f32 *)((u8 *)arg1 + 0x14)), (s16) (s32) (*(f32 *)((u8 *)arg1 + 0x18)), (s16) (s32) (*(f32 *)((u8 *)arg1 + 0x1C)), 0x7D00, 0x3E8U, 0x1F4, (s32) &attachment_sound_cb, arg0, (s32) arg1, 0, 0);
             (*(s32 *)((u8 *)arg0 + 0x38)) = 0x513;

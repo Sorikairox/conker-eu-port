@@ -8,8 +8,8 @@ s/(o + 0x40) = \*(s32 \*) (m + 0x44)/(o + 0x40) = *(s32 *) (m + 0x48)/ % on1
 s/(o + 0x44) = \*(s32 \*) (m + 0x48)/(o + 0x44) = *(s32 *) (m + 0x44)/ % on1
 s/(o + 0x54) = \*(f32 \*) (m + 0x14C)/(o + 0x54) = *(f32 *) (m + 0x150)/ % on1
 s/(o + 0x58) = \*(f32 \*) (m + 0x150)/(o + 0x58) = *(f32 *) (m + 0x14C)/ % on1
-s/D_800A19F0\[k\], o + 0x48/D_800A19F0[k + 1], o + 0x48/ % on1 on0
-s/(D_800A1A08\[k\] << 6)/(D_800A1A08[k] << 5)/ % on1 on4
+s/g_tether_flame_points\[k\], o + 0x48/g_tether_flame_points[k + 1], o + 0x48/ % on1 on0
+s/(g_tether_bones\[k\] << 6)/(g_tether_bones[k] << 5)/ % on1 on4
 s/(o + 0x48) -= \*(f32 \*) (o + 0x30)/(o + 0x48) -= *(f32 *) (o + 0x34)/ % on1
 s/(o + 0x50) -= \*(f32 \*) (o + 0x38)/(o + 0x50) += *(f32 *) (o + 0x38)/ % on1
 s/o\[0x1C\] |= 2;/o[0x1C] |= 3;/ % on1 on0

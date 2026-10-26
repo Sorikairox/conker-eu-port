@@ -3,9 +3,9 @@ s/if (level >= 0x73) {/if (level > 0x73) {/ % high
 s/hit\[6\], 1.0f, 1.0f/hit[5], 1.0f, 1.0f/ % high
 s/fx_spawn_impact_burst(0xB, pos,/fx_spawn_impact_burst(0xA, pos,/ % high
 s/hit\[6\], 1.0f, 1.0f/hit[6], 1.0f, 2.0f/ % high
-s/(f32) level \* D_800A5B2C/(f32) (level + 1) * D_800A5B2C/ % low
-s/(obj + 0x40) \* D_800A5B30/(obj + 0x40) * D_800A5B2C/ % low
-s/fx_spawn_impact_particle(D_800900D0(), hit,/fx_spawn_impact_particle(0, hit,/ % low
+s/(f32) level \* g_fx_impact_level_scale/(f32) (level + 1) * g_fx_impact_level_scale/ % low
+s/(obj + 0x40) \* g_fx_impact_size_scale/(obj + 0x40) * g_fx_impact_level_scale/ % low
+s/fx_spawn_impact_particle(g_fx_impact_id_fn_d0(), hit,/fx_spawn_impact_particle(0, hit,/ % low
 s/(obj + 0x1D4) != 0 \&\&/(obj + 0x1D4) == 0 \&\&/ % low nomodel
 s/(u8) kind) != 0) {/(u8) kind) == 0) {/ % low miss
 s/^                      pos, (u8) kind);/                      hit, (u8) kind);/ % low

@@ -167,8 +167,8 @@ s32 swing_lamp_update(u8 *arg0) {
     temp_s0 = arg0;
     temp_s0 += *(s32 *)temp_s0_2;
     temp_s0_2 = temp_s0 + 0xF8;
-    *(f32 *)(temp_s0_2 + 8) = *(f32 *)(temp_s0 + 0x100) + (0.0857f * D_800BE9A4);
-    *(f32 *)(temp_s0_2 + 0xC) = *(f32 *)(temp_s0_2 + 0xC) + (0.0783f * D_800BE9A4);
+    *(f32 *)(temp_s0_2 + 8) = *(f32 *)(temp_s0 + 0x100) + (0.0857f * g_frame_step_f);
+    *(f32 *)(temp_s0_2 + 0xC) = *(f32 *)(temp_s0_2 + 0xC) + (0.0783f * g_frame_step_f);
     temp_s0 = temp_s0_2;
     *(f32 *)(temp_s0 + 8) = wrap_angle_rad(*(f32 *)(temp_s0 + 8));
     *(f32 *)(temp_s0 + 0xC) = wrap_angle_rad(*(f32 *)(temp_s0 + 0xC));
@@ -187,7 +187,7 @@ s32 swing_lamp_target_timer_tick(u8 *arg0) {
 
     temp_v0 = &arg0[(*(s32 *)((u8 *)arg0 + 0x50))];
     if ((*(s32 *)((u8 *)temp_v0 + 0x10C)) != 0x3E7) {
-        temp_t0 = (*(s32 *)((u8 *)(&temp_v0[0xF8]) + 0x1C)) - D_800BE9E4;
+        temp_t0 = (*(s32 *)((u8 *)(&temp_v0[0xF8]) + 0x1C)) - g_frame_ticks;
         (*(s32 *)((u8 *)(&temp_v0[0xF8]) + 0x1C)) = temp_t0;
         if (temp_t0 < 0) {
             (*(s32 *)((u8 *)(&temp_v0[0xF8]) + 0x14)) = 0x3E7;
@@ -215,9 +215,9 @@ s32 swing_lamp_height_update(u8 *arg0) {
     (*(f32 *)((u8 *)(&temp_v0_2[0xF8]) + 0x10)) = 226.0f;
     return (s32) temp_v0;
 }
-extern f32 D_800A2850;
-extern f32 D_800A2854;
-extern f32 D_800A2858;
+extern f32 g_swing_lamp_phase_x_rate; /* was D_800A2850 */
+extern f32 g_swing_lamp_phase_z_rate; /* was D_800A2854 */
+extern f32 g_swing_lamp_amplitude; /* was D_800A2858 */
 /* was func_151091B8 */
 s32 swing_lamp_update_b(u8 *arg0) {
     u8 *temp_s0;
@@ -225,12 +225,12 @@ s32 swing_lamp_update_b(u8 *arg0) {
 
     temp_s0 = arg0 + (*(s32 *)((u8 *)arg0 + 0x50));
     temp_s0_2 = temp_s0 + 0xF8;
-    (*(f32 *)((u8 *)temp_s0_2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x100)) + (D_800A2850 * D_800BE9A4));
-    (*(f32 *)((u8 *)temp_s0_2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s0_2 + 0xC)) + (D_800A2854 * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s0_2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x100)) + (g_swing_lamp_phase_x_rate * g_frame_step_f));
+    (*(f32 *)((u8 *)temp_s0_2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s0_2 + 0xC)) + (g_swing_lamp_phase_z_rate * g_frame_step_f));
     (*(f32 *)((u8 *)temp_s0_2 + 8)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0_2 + 8)));
     (*(f32 *)((u8 *)temp_s0_2 + 0xC)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0_2 + 0xC)));
-    (*(f32 *)((u8 *)temp_s0_2 + 0)) = (f32) (sinf((*(f32 *)((u8 *)temp_s0_2 + 8))) * D_800A2858);
-    (*(f32 *)((u8 *)temp_s0_2 + 4)) = (f32) (sinf((*(f32 *)((u8 *)temp_s0_2 + 0xC))) * D_800A2858);
+    (*(f32 *)((u8 *)temp_s0_2 + 0)) = (f32) (sinf((*(f32 *)((u8 *)temp_s0_2 + 8))) * g_swing_lamp_amplitude);
+    (*(f32 *)((u8 *)temp_s0_2 + 4)) = (f32) (sinf((*(f32 *)((u8 *)temp_s0_2 + 0xC))) * g_swing_lamp_amplitude);
     swing_lamp_target_timer_tick(arg0);
     swing_lamp_height_update(arg0);
     if ((*(u8 *)((u8 *)temp_s0_2 + 0x20)) != 0) {
@@ -258,7 +258,7 @@ s32 swing_lamp_matrix_build(u8 *arg0, s32 arg1) {
     mf[2][0] *= 0.157f;
     mf[2][1] *= 0.157f;
     mf[2][2] *= 0.157f;
-    guMtxF2L(mf, &((Mtx *)(arg0 + 0x78))[D_800BE9C0]);
+    guMtxF2L(mf, &((Mtx *)(arg0 + 0x78))[g_dl_buf_index]);
     return 1;
 }
 
@@ -362,9 +362,9 @@ void swing_lamp_post_toggle(void) {
 
 /* P204 */
 // sky_dome_project_uv: g_mesh_effect_draw_fns kind-4 handler (s32 (u8 *, s32), called by mesh_effect_draw) of a double-buffered
-// vertex record rec for player slot `slot`: builds this frame's matrix (rec +0x78 + D_800BE9C0 * 0x40) as a
+// vertex record rec for player slot `slot`: builds this frame's matrix (rec +0x78 + g_dl_buf_index * 0x40) as a
 // translation to (p[0], p[4], p[1]) with p = rec + +0x50 + 0xF8, scaled by 0.157, and maps the 16 vertices of the
-// slot's copy (rec +0x58[D_800BE9C0 * 4 + slot]) to texture coordinates: each vertex goes through the matrix; s
+// slot's copy (rec +0x58[g_dl_buf_index * 4 + slot]) to texture coordinates: each vertex goes through the matrix; s
 // follows its position across the camera direction (camera_get_pos(slot), x / z normalised; straight ahead when its
 // x and y are both tiny) as 32 * (26 + 0.213 * side), t its height as 32 * (81 + 0.358 * y). Returns 1.
 /* was func_151096A0 */
@@ -393,7 +393,7 @@ s32 sky_dome_project_uv(u8 *rec, s32 slot) {
     mtx[2][0] *= 0.157f;
     mtx[2][1] *= 0.157f;
     mtx[2][2] *= 0.157f;
-    guMtxF2L(mtx, (Mtx *) (rec + 0x78 + D_800BE9C0 * 0x40));
+    guMtxF2L(mtx, (Mtx *) (rec + 0x78 + g_dl_buf_index * 0x40));
     cam = camera_get_pos((s16) slot);
     if (fabsf(cam[0]) > 0.0001f || fabsf(cam[1]) > 0.0001f) {
         inv = 1.0f / sqrtf(cam[0] * cam[0] + cam[2] * cam[2]);
@@ -404,7 +404,7 @@ s32 sky_dome_project_uv(u8 *rec, s32 slot) {
         cz = 0.0f;
     }
     for (i = 0; i < 16; i++) {
-        v = *(Vtx **) (rec + D_800BE9C0 * 0x10 + (s16) slot * 4 + 0x58) + i;
+        v = *(Vtx **) (rec + g_dl_buf_index * 0x10 + (s16) slot * 4 + 0x58) + i;
         mtxf_transform_point(mtx, v->v.ob[0], v->v.ob[1], v->v.ob[2], &ox, &oy, &oz);
         v->v.tc[0] = (s32) (((ox * cx + oz * cz) * 0.21300001f + 26.0f) * 32.0f);
         v->v.tc[1] = (s32) ((oy * 0.358f + 81.0f) * 32.0f);

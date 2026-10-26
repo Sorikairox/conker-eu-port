@@ -1,9 +1,9 @@
 s/rail_pickup_slot_release(i, 1);/rail_pickup_slot_release(i, 0);/ % newrace
 s/if (!(seen \& bit)) {/if (!(mask \& bit)) {/ % gone newrace
-s/        cooldown\[i\] -= D_800BE9E4;/        cooldown[i] -= 1;/ %
+s/        cooldown\[i\] -= g_frame_ticks;/        cooldown[i] -= 1;/ %
 s/        if (counter\[i\] < 0) {/        if (counter[i] <= 0) {/ %
 s/(cooldown\[i\] \& 0x1F) >= 0x1D/(cooldown[i] \& 0x1F) >= 0x1C/ % st3
-s/        D_800E0FE8\[i\] \&= 0x7F;// % flags newrace
+s/        g_mp_last_hitter\[i\] \&= 0x7F;// % flags newrace
 s/!isNew \&\& obj\[0x2FD\] == 0/obj[0x2FD] == 0/ % newrace
 s/                teamCount\[team\[k\]\]++;/                teamCount[k]++;/ % newrace
 s/            result |= bit;/            result |= 1;/ % newrace

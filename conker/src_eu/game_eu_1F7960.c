@@ -52,7 +52,7 @@ void aim_hud_spawn_for_mode(u8 *arg0, s32 arg1)
       aim_hud_spawn_track_mode(arg0, 1, -1, 0xFF, 1);
       return;
     }
-      if (D_80082FA0 == 0)
+      if (g_last_player_index == 0)
     {
       aim_hud_gauge_spawn(arg0, 0xFF, 0, 0, 1, 0xFF);
       aim_hud_gauge_marks_spawn(arg0, 0xFF, 0, 0, 1, 0xFF);
@@ -106,7 +106,7 @@ void aim_hud_spawn_track_mode(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) 
     sprite2d_emitter_spawn(arg0, temp_s1 & 0xFF, arg4);
     aim_hud_side_bars_spawn(arg0, 2U, temp_s2 & 0xFF, (s8) arg2, (u8) temp_s1);
     if (g_level_id == 0x27) {
-        D_8008D0A0 = 1;
+        g_aim_hud_active = 1;
     }
 }
 void fb_fx_broadcast(s32, u8);
@@ -123,9 +123,9 @@ void aim_hud_clear(u8 *arg0) {
     sprite2d_broadcast(&sp.u24, 0x21U);
     screen_tint_broadcast(&sp.u24, 0x21);
     effect_nodes_broadcast((s32) &sp.u24, 0x21U);
-    D_8008D0A0 = 0;
+    g_aim_hud_active = 0;
 }
-/* rodata of aim_hud_bar_spawn.s (D_800AB060..D_800AB268); D_800AB164 / 16C / 18C / 194 are also read by
+/* rodata of aim_hud_bar_spawn.s (D_800AB060..D_800AB268); g_aim_hud_bars_u18 / 16C / 18C / 194 are also read by
    aim_hud_side_bars_spawn and the hud_slot_row spawner below, so they stay exported. */
 static const f32 sBarColourInit[4] = { 255.0f, 0.0f, 0.0f, 255.0f };            /* D_800AB060 */
 static const f32 sBarColour[5][4] = {                                           /* D_800AB070 */
@@ -147,10 +147,10 @@ static const f32 sBarLayoutScale[5][2] = {                                      
     { 0.04f, 0.032258064f }, { 0.04f, 0.032258064f },
 };
 static const f32 sBarRange[1] = { 99999.0f };                                   /* D_800AB268 */
-const f32 D_800AB164[2] = { -25.0f, -31.0f };
-const f32 D_800AB16C[2] = { -25.0f, -31.0f };
-const f32 D_800AB18C[2] = { 0.04f, 0.032258064f };
-const f32 D_800AB194[2] = { 0.04f, 0.032258064f };
+const f32 g_aim_hud_bars_u18[2] = { -25.0f, -31.0f }; /* was D_800AB164 */
+const f32 g_aim_hud_rows_u18[2] = { -25.0f, -31.0f }; /* was D_800AB16C */
+const f32 g_aim_hud_bars_u20[2] = { 0.04f, 0.032258064f }; /* was D_800AB18C */
+const f32 g_aim_hud_rows_u20[2] = { 0.04f, 0.032258064f }; /* was D_800AB194 */
 
 /* IDO's f32 -> u32 conversion: <= -1, >= 2^32 and NaN give 0xFFFFFFFF (undefined in C, wasm traps) */
 #define BAR_F2U(f) ((!((f) > -1.0f) || (f) >= 4294967296.0f) ? 0xFFFFFFFFU : (u32) (f))
@@ -209,7 +209,7 @@ typedef struct {
 // hud_bar_spawn: spawns a two-part HUD bar of kind `kind` (0..4) for player obj + 0x23D (list 0x58): first the
 // front sprite (colour sBarColour[kind], height sBarHeight, width sBarWidth at x sBarX, part 3), then the back
 // sprite (colour sBarBackColour[kind], both sizes + 2, part 0). Each sprite gets the 0x58-byte handler block at
-// +0x70: owner, mode (0 when `arg3` is -1, else 4), layout constants (second entry when D_80082FA0 == 1), the
+// +0x70: owner, mode (0 when `arg3` is -1, else 4), layout constants (second entry when g_last_player_index == 1), the
 // colour and `arg3`. `wide` adds flag 0x40. The asm leaves memcpy's / sprite2d_spawn's v0; no caller reads it.
 /* was func_151CA4E8 */
 void aim_hud_bar_spawn(u8 *obj, s32 kind, s32 wide, s32 arg3, s32 group) {
@@ -217,7 +217,7 @@ void aim_hud_bar_spawn(u8 *obj, s32 kind, s32 wide, s32 arg3, s32 group) {
     BarSpecCA4E8 spec;
     u8 *spr;
     s32 k = (u8) kind;
-    s32 alt = (D_80082FA0 == 1);
+    s32 alt = (g_last_player_index == 1);
     s32 i;
 
     arg3 = (s8) arg3;
@@ -352,7 +352,7 @@ s32 aim_hud_quad_reticle_spawn(u8 *arg0, s32 arg1) {
     sp.u44 = arg0;
     sp.u48 = 0.0f;
     sp.u4C = 130.0f;
-    if (D_80082FA0 > 0) {
+    if (g_last_player_index > 0) {
         sp.uB0 = 0x73;
     } else {
         sp.uB0 = 0x5D;
@@ -441,13 +441,13 @@ s32 aim_hud_quad_reticle_spawn(u8 *arg0, s32 arg1) {
     sp.uD0 = 8;
     sp.uD4 = 0x44;
     sp.u6C = 99999.0f;
-    if (D_80082FA0 == 1) {
+    if (g_last_player_index == 1) {
         sp.u5C = -62.0f;
     } else {
         sp.u5C = -50.0f;
     }
     sp.u60 = 0.0f;
-    if (D_80082FA0 == 1) {
+    if (g_last_player_index == 1) {
         sp.u64 = 0.016129032f;
     } else {
         sp.u64 = 0.02f;
@@ -480,7 +480,7 @@ void aim_hud_sprite_on_message(struct102 *arg0, u8 **arg1, u8 arg2) {
             node_destroy(arg0);
         }
     }
-    f = D_8008FFB0[*(u8 *)((u8 *)arg0 + 0x7D)];
+    f = g_aim_hud_sprite_msg_fns[*(u8 *)((u8 *)arg0 + 0x7D)];
     if (f != NULL) {
         f(arg0, arg1, arg2);
     }
@@ -556,7 +556,7 @@ void aim_hud_crosshair_spawn(u8 *arg0, u8 arg1) {
     b.u8 = 130.0f;
     b.uD = 0;
     b.uC = 0;
-    if (D_80082FA0 > 0) {
+    if (g_last_player_index > 0) {
         f = 2.0f;
     } else {
         f = 1.0f;
@@ -670,7 +670,7 @@ s32 aim_hud_lens_reticle_spawn(u8 *arg0, u8 arg1) {
     sp.u4C = arg0;
     sp.u50 = 0.0f;
     sp.u54 = 130.0f;
-    if (D_80082FA0 > 0) {
+    if (g_last_player_index > 0) {
         sp.uB8 = 0x72;
     } else {
         sp.uB8 = 0x65;
@@ -752,7 +752,7 @@ s32 aim_hud_lens_reticle_spawn(u8 *arg0, u8 arg1) {
     }
     if (D_800BE616 == 0) {
         sp.u30 = arg0;
-        temp_t5 = ((*(u8 *)((u8 *)arg0 + 0x23D)) * 0x180) + D_800BE628;
+        temp_t5 = ((*(u8 *)((u8 *)arg0 + 0x23D)) * 0x180) + g_player_cams;
         sp.u34 = temp_t5;
         sp.u3C = (s32) ((*(f32 *)((u8 *)temp_t5 + 0x34)) - 12.0f);
         sp.u44 = 0xE;
@@ -760,7 +760,7 @@ s32 aim_hud_lens_reticle_spawn(u8 *arg0, u8 arg1) {
         sp.u46 = 1;
         sp.u48 = 0x12C;
         sp.u4A = 1;
-        sp.u40 = (s32) ((*(f32 *)((u8 *)temp_t5 + 0x38)) - 12.0f) * D_800BE620;
+        sp.u40 = (s32) ((*(f32 *)((u8 *)temp_t5 + 0x38)) - 12.0f) * g_framebuffer_width;
         var_v0 = fb_fx_spawn(&sp.u44, 0x498, 0xFF, 1);
         if (var_v0 != 0) {
             sp.u38 = var_v0 + 0x30;
@@ -770,18 +770,18 @@ s32 aim_hud_lens_reticle_spawn(u8 *arg0, u8 arg1) {
     return var_v0;
 }
 extern u8 g_game_paused; /* was D_800BEAC0 */
-extern u8 D_800BEAC1;
+extern u8 g_pause_open; /* was D_800BEAC1 */
 extern u8 g_unpause_settle_frames; /* was D_800BEEE2 */
-extern s32 D_800BE620;
+extern s32 g_framebuffer_width; /* was D_800BE620 */
 f32 curve_table_lookup(f32, f32, f32);
 
 /*
- * fb_lens_warp_draw: framebuffer handler 1 of the type-0x34 effect list (called through D_8008B478 by
+ * fb_lens_warp_draw: framebuffer handler 1 of the type-0x34 effect list (called through g_fb_fx_apply_fns by
  * fb_fx_apply_all just before the buffer swap, args (effect, framebuffer)). Saves the 24x24 pixel block at
  * effect+0x24 + effect+0x28 into the effect's buffer (effect+0x20), then writes it back mirrored in the four
  * quadrants around the target's screen point (target = effect+0x1C, x / y floats at +0x34 / +0x38) with a
  * radial lens falloff from curve_table_lookup, sampling the saved block at 12 + offset * scale.
- * Skipped while g_game_paused / D_800BEAC1 / g_unpause_settle_frames are set.
+ * Skipped while g_game_paused / g_pause_open / g_unpause_settle_frames are set.
  */
 /* was func_151CB6C0 */
 void fb_lens_warp_draw(u8 *arg0, u16 *fb) {
@@ -796,14 +796,14 @@ void fb_lens_warp_draw(u8 *arg0, u16 *fb) {
     s32 rowA, rowB, colA, colB;
     s32 u0, u1, v0, v1;
 
-    if (g_game_paused != 0 || D_800BEAC1 != 0 || g_unpause_settle_frames != 0) {
+    if (g_game_paused != 0 || g_pause_open != 0 || g_unpause_settle_frames != 0) {
         return;
     }
     target = *(u8 **)(arg0 + 0x1C);
     src = *(s32 *)(arg0 + 0x24) + *(s32 *)(arg0 + 0x28);
     for (i = 0; i < 24; i++) {
         memcpy(*(u16 **)(arg0 + 0x20) + i * 24, fb + src, 48);
-        src += D_800BE620;
+        src += g_framebuffer_width;
     }
     for (y = -1.0f; y < 0.0f; y += 0.083333336f) {
         ry = curve_table_lookup(fabsf(y), 1.0f, 1.0f);
@@ -811,8 +811,8 @@ void fb_lens_warp_draw(u8 *arg0, u16 *fb) {
             continue;
         }
         dy = y * 12.0f;
-        rowA = (s32)(*(f32 *)(target + 0x38) + dy) * D_800BE620;
-        rowB = (s32)(*(f32 *)(target + 0x38) - dy) * D_800BE620;
+        rowA = (s32)(*(f32 *)(target + 0x38) + dy) * g_framebuffer_width;
+        rowB = (s32)(*(f32 *)(target + 0x38) - dy) * g_framebuffer_width;
         x = -ry;
         if (!(x < 0.0f)) {
             continue;
@@ -920,13 +920,13 @@ typedef struct {
     /* 0x55 */ u8 pad55[3];
 } HudBlockCBBAC;
 
-extern const f32 D_800AB164[2];
-extern const f32 D_800AB18C[2];
+extern const f32 g_aim_hud_bars_u18[2]; /* was D_800AB164 */
+extern const f32 g_aim_hud_bars_u20[2]; /* was D_800AB18C */
 
 // hud_side_bars_spawn: spawns four HUD sprites for player obj + 0x23D (list 5, span 300, scale 49 x 18): kind 0x7B
 // (colour byte 0xFF) and 0x7C (0) at (88, 91), then the same pair mirrored at (-88, 91) without flag 2. Each gets the
 // handler block above: owner, alpha 255, mode (0 when `arg3` is -1, else 4), `type`, side (0 right / 1 left), the
-// layout constants of D_800AB164 / D_800AB18C (second entry when D_80082FA0 == 1) and `arg3`. `wide` adds flag 0x40.
+// layout constants of g_aim_hud_bars_u18 / g_aim_hud_bars_u20 (second entry when g_last_player_index == 1) and `arg3`. `wide` adds flag 0x40.
 /* was func_151CBBAC */
 void aim_hud_side_bars_spawn(u8 *obj, u8 type, u8 wide, s8 arg3, u8 group) {
     HudBlockCBBAC blk;
@@ -972,8 +972,8 @@ void aim_hud_side_bars_spawn(u8 *obj, u8 type, u8 wide, s8 arg3, u8 group) {
     blk.u1C = 0.0f;
     spec.x = 88.0f;
     spec.y = 91.0f;
-    blk.u18 = D_800AB164[D_80082FA0 == 1];
-    blk.u20 = D_800AB18C[D_80082FA0 == 1];
+    blk.u18 = g_aim_hud_bars_u18[g_last_player_index == 1];
+    blk.u20 = g_aim_hud_bars_u20[g_last_player_index == 1];
     rec = (u8 *) sprite2d_spawn(&spec, 5, 0, 0, 0x58, group, 0);
     if (rec != NULL) {
         memcpy(rec + 0x70, &blk, 0x58);
@@ -1028,7 +1028,7 @@ s32 aim_hud_side_bar_update(u8 *arg0) {
     if (v->unkC & 1) {
         lo = 91.0f + k;
         *(f32 *)(arg0 + 0x14) = (sinf(v->unk10) * ((112.0f + k) - lo)) + lo;
-        v->unk10 += 0.505f * D_800BE9A4;
+        v->unk10 += 0.505f * g_frame_step_f;
         if (v->unk10 >= 3.1415927f) {
             *(f32 *)(arg0 + 0x14) = lo;
             v->unkC &= 0xFFFE;
@@ -1108,7 +1108,7 @@ s32 aim_hud_gauge_scale_update(u8 *arg0) {
         (*(f32 *)((u8 *)arg0 + 0x1C)) = (f32) ((temp_f2 - ((temp_f0 - (*(f32 *)((u8 *)(&arg0[0x70]) + 0x18))) * (*(f32 *)((u8 *)(&arg0[0x70]) + 0x20)) * temp_f2)) + 1.0f);
     }
     if ((*(u8 *)((u8 *)(&arg0[0x70]) + 0xC)) & 2) {
-        (*(f32 *)((u8 *)(&arg0[0x70]) + 0x50)) = (f32) ((*(f32 *)((u8 *)(&arg0[0x70]) + 0x50)) - D_800BE9A4);
+        (*(f32 *)((u8 *)(&arg0[0x70]) + 0x50)) = (f32) ((*(f32 *)((u8 *)(&arg0[0x70]) + 0x50)) - g_frame_step_f);
         temp_f18 = (*(f32 *)((u8 *)(&arg0[0x70]) + 0x50));
         if (temp_f18 <= 0.0f) {
             (*(s8 *)((u8 *)arg0 + 0x2B)) = (s8) (u32) (*(f32 *)((u8 *)(&arg0[0x70]) + 0x3C));
@@ -1542,14 +1542,14 @@ void aim_hud_tint_spawn(u8 *arg0) {
     }
 }
 
-extern u8 D_8008FFC8[4];
-extern const f32 D_800AB16C[2];
-extern const f32 D_800AB194[2];
+extern u8 g_aim_hud_slot_kinds[4]; /* was D_8008FFC8 */
+extern const f32 g_aim_hud_rows_u18[2]; /* was D_800AB16C */
+extern const f32 g_aim_hud_rows_u20[2]; /* was D_800AB194 */
 
 // hud_slot_row_spawn: spawns two rows of four HUD sprites for player obj + 0x23D (list 0xB, span 300, scale
-// 35.75 x 16, kinds D_8008FFC8[0..3]) at x = 71.5 i - 107.25, y = -90 (row 0) and 92 (row 1, flag 4 added). Each
+// 35.75 x 16, kinds g_aim_hud_slot_kinds[0..3]) at x = 71.5 i - 107.25, y = -90 (row 0) and 92 (row 1, flag 4 added). Each
 // gets the 0x58-byte handler block: owner, 0, 130, mode (0 when `arg2` is -1, else 4), 4 / 5 for the row, the layout
-// constants of D_800AB16C / D_800AB194 (second entry when D_80082FA0 == 1) and `arg2`. `wide` adds flag 0x40.
+// constants of g_aim_hud_rows_u18 / g_aim_hud_rows_u20 (second entry when g_last_player_index == 1) and `arg2`. `wide` adds flag 0x40.
 /* was func_151CD4B8 */
 void aim_hud_slot_rows_spawn(u8 *obj, u8 wide, s8 arg2, u8 group) {
     HudBlockCBBAC blk;
@@ -1563,8 +1563,8 @@ void aim_hud_slot_rows_spawn(u8 *obj, u8 wide, s8 arg2, u8 group) {
     u8 *rec;
 
     blk.u1C = 0.0f;
-    blk.u18 = D_800AB16C[D_80082FA0 == 1];
-    blk.u20 = D_800AB194[D_80082FA0 == 1];
+    blk.u18 = g_aim_hud_rows_u18[g_last_player_index == 1];
+    blk.u20 = g_aim_hud_rows_u20[g_last_player_index == 1];
     blk.owner = obj;
     blk.alphaA = 0.0f;
     blk.alphaB = 130.0f;
@@ -1601,7 +1601,7 @@ void aim_hud_slot_rows_spawn(u8 *obj, u8 wide, s8 arg2, u8 group) {
     spec.scaleB = 16.0f;
     spec.player = obj[0x23D];
     for (row = 0; row < 2; row++) {
-        kinds.w = *(s32 *) D_8008FFC8;
+        kinds.w = *(s32 *) g_aim_hud_slot_kinds;
         spec.y = row ? 92.0f : -90.0f;
         spec.flags |= row ? 4 : 0;
         blk.type = row ? 5 : 4;

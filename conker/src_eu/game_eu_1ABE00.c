@@ -15,7 +15,7 @@ u8 *flare_node_add(s32 arg0, s32 arg1) {
     s32 var_v1;
     u8 *temp_v0;
 
-    var_v1 = D_800DDD64;
+    var_v1 = g_flare_nodes;
     if (var_v1 != 0) {
         var_v0 = (*(s32 *)((u8 *)var_v1 + 0x24));
         if (var_v0 != 0) {
@@ -26,7 +26,7 @@ u8 *flare_node_add(s32 arg0, s32 arg1) {
         }
         var_t0 = var_v1 + 0x24;
     } else {
-        var_t0 = &D_800DDD64;
+        var_t0 = &g_flare_nodes;
     }
     sp18 = var_t0;
     temp_v0 = allocate_memory(0x34, 1, 0, 1);
@@ -46,7 +46,7 @@ u8 *flare_node_add(s32 arg0, s32 arg1) {
 
 void heap_free(void *);
 
-// object_node_remove: unlinks node arg0 (an object's +0x154) from the list D_800DDD64 (next at +0x24, appended
+// object_node_remove: unlinks node arg0 (an object's +0x154) from the list g_flare_nodes (next at +0x24, appended
 // by flare_node_add) and frees it (heap_free); a node that is not in the list is left alone (not freed).
 // arg1 (the owner) is not read.
 /* was func_1517E6A4 */
@@ -54,10 +54,10 @@ void flare_node_remove(f32 *arg0, structEU_16DC80 *arg1) {
     u8 *node = (u8 *) arg0;
     u8 *prev;
 
-    if (node == (u8 *) D_800DDD64) {
-        D_800DDD64 = *(s32 *) (node + 0x24);
+    if (node == (u8 *) g_flare_nodes) {
+        g_flare_nodes = *(s32 *) (node + 0x24);
     } else {
-        prev = (u8 *) D_800DDD64;
+        prev = (u8 *) g_flare_nodes;
         while (prev != NULL && *(u8 **) (prev + 0x24) != node) {
             prev = *(u8 **) (prev + 0x24);
         }
@@ -75,14 +75,14 @@ void flare_nodes_read_zbuffer(void) {
     f32 temp_f2;
     s32 var_v0;
 
-    var_v0 = D_800DDD64;
+    var_v0 = g_flare_nodes;
     if (var_v0 != 0) {
         do {
             temp_f0 = *(f32 *)(var_v0 + 0xC);
-            if ((temp_f0 >= 0.0f) && (temp_f0 < (f32) D_800BE620)) {
+            if ((temp_f0 >= 0.0f) && (temp_f0 < (f32) g_framebuffer_width)) {
                 temp_f2 = *(f32 *)(var_v0 + 0x10);
-                if ((temp_f2 >= 0.0f) && (temp_f2 < (f32) D_800BE624)) {
-                    *(u16 *)(var_v0 + 0x2A) = *(u16 *)(*(u8 **)&g_zbuffer + ((s32) temp_f0 * 2) + ((u32) (s32) temp_f2 * (u32) D_800BE620 * 2));
+                if ((temp_f2 >= 0.0f) && (temp_f2 < (f32) g_framebuffer_height)) {
+                    *(u16 *)(var_v0 + 0x2A) = *(u16 *)(*(u8 **)&g_zbuffer + ((s32) temp_f0 * 2) + ((u32) (s32) temp_f2 * (u32) g_framebuffer_width * 2));
                 }
             }
             var_v0 = *(s32 *)(var_v0 + 0x24);
@@ -92,13 +92,13 @@ void flare_nodes_read_zbuffer(void) {
 
 s32 flare_world_to_screen(f32 x, f32 y, f32 z, f32 *outX, f32 *outY);
 Gfx *flare_lens_draw(Gfx *gdl, u8 *node, s32 r, s32 g, s32 b, s32 alpha, u8 *flag);
-extern u8 D_8008D3A4[2];
-extern u8 D_8008D3A8[2];
-extern u8 D_8008D3AC[2];
-extern u8 D_800DE190;
+extern u8 g_flare_ring_red[2]; /* was D_8008D3A4 */
+extern u8 g_flare_ring_green[2]; /* was D_8008D3A8 */
+extern u8 g_flare_ring_blue[2]; /* was D_8008D3AC */
+extern u8 g_flare_sprite_mode_set; /* was D_800DE190 */
 
-/* Node list D_800DDD64 (0x34-byte nodes, see flare_node_add): +0xC/+0x10 screen x/y, +0x24 next,
- * +0x2A/+0x2C u16, +0x2E flags (1 = world-projected, 2 = clears D_800DD2D0 when hidden), +0x2F colour index,
+/* Node list g_flare_nodes (0x34-byte nodes, see flare_node_add): +0xC/+0x10 screen x/y, +0x24 next,
+ * +0x2A/+0x2C u16, +0x2E flags (1 = world-projected, 2 = clears g_sun_flash_alpha when hidden), +0x2F colour index,
  * +0x30 enabled. Each visible node is drawn by flare_lens_draw. */
 #define NM_E7FC_U8(n, o) (*((u8 *)(n) + (o)))
 #define NM_E7FC_U16(n, o) (*(u16 *)((u8 *)(n) + (o)))
@@ -113,24 +113,24 @@ Gfx *flare_nodes_draw(Gfx *gdl, s32 arg1) {
     s32 alpha = -1; /* the asm starts from a stale stack word; every drawn node sets it first */
     u8 fl;
 
-    rr[0] = D_8008D3A4[0];
-    rr[1] = D_8008D3A4[1];
-    gg[0] = D_8008D3A8[0];
-    gg[1] = D_8008D3A8[1];
-    bb[0] = D_8008D3AC[0];
-    bb[1] = D_8008D3AC[1];
-    D_800DE190 = 0;
-    for (node = (u8 *)D_800DDD64; node != NULL; node = *(u8 **)(node + 0x24)) {
+    rr[0] = g_flare_ring_red[0];
+    rr[1] = g_flare_ring_red[1];
+    gg[0] = g_flare_ring_green[0];
+    gg[1] = g_flare_ring_green[1];
+    bb[0] = g_flare_ring_blue[0];
+    bb[1] = g_flare_ring_blue[1];
+    g_flare_sprite_mode_set = 0;
+    for (node = (u8 *)g_flare_nodes; node != NULL; node = *(u8 **)(node + 0x24)) {
         if (NM_E7FC_U8(node, 0x30) == 0) {
             continue;
         }
         hide = 0;
         fl = NM_E7FC_U8(node, 0x2E);
         if (fl & 1) {
-            if (D_800DCDD0 == 0) {
+            if (g_level_lights_mode == 0) {
                 hide = 1;
             } else {
-                pos = (f32 *)D_8008CFFC[*((u8 *)D_800B0DF0 + 0x10)];
+                pos = (f32 *)g_flare_level_points[*((u8 *)g_level_header + 0x10)];
                 if (flare_world_to_screen(pos[0], pos[1], pos[2], (f32 *)(node + 0xC), (f32 *)(node + 0x10)) != 1) {
                     hide = 1;
                 }
@@ -144,7 +144,7 @@ Gfx *flare_nodes_draw(Gfx *gdl, s32 arg1) {
             alpha = ((s32)(NM_E7FC_U16(node, 0x2C) - t) < 0x1E) ? 0x100 : -1;
             fl = NM_E7FC_U8(node, 0x2E);
         }
-        flag = (fl & 2) ? &D_800DD2D0 : NULL;
+        flag = (fl & 2) ? &g_sun_flash_alpha : NULL;
         if (!hide) {
             fl = NM_E7FC_U8(node, 0x2F);
             gdl = flare_lens_draw(gdl, node, rr[fl], gg[fl], bb[fl], alpha, flag);
@@ -157,14 +157,14 @@ Gfx *flare_nodes_draw(Gfx *gdl, s32 arg1) {
 Gfx *flare_render_mode_set(Gfx *arg0);
 Gfx *gfx_load_texture_tile(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 Gfx *sprite_draw_at_screen(Gfx *gfx, void *spr, f32 x, f32 y);
-extern u8 D_800D31C8; /* sprite primitive colour r, g, b, a */
-extern u8 D_800D31C9;
-extern u8 D_800D31CA;
-extern u8 D_8009075C[]; /* flare sprite */
-extern u8 D_800A7630[]; /* flare ring sizes, 7 per row */
+extern u8 g_sprite_prim_r; /* sprite primitive colour r, g, b, a; was D_800D31C8 */
+extern u8 g_sprite_prim_g; /* was D_800D31C9 */
+extern u8 g_sprite_prim_b; /* was D_800D31CA */
+extern u8 g_flare_sprite[]; /* flare sprite; was D_8009075C */
+extern u8 g_flare_ring_sizes[]; /* flare ring sizes, 7 per row; was D_800A7630 */
 extern f32 D_80038400;
 extern f32 D_80038404;
-extern u8 D_800DE190; /* flare sprite mode set this frame */
+extern u8 g_flare_sprite_mode_set; /* flare sprite mode set this frame; was D_800DE190 */
 
 /* sprite_draw_at_screen sprite request */
 typedef struct {
@@ -179,12 +179,12 @@ typedef struct {
     /* 0x10 */ void *tex;
 } SprEA18;
 
-// lens_flare_draw: draws the lens flare of a sun node (screen position +0xC / +0x10). With fade (D_800DD2D0) it moves
-// *fade (by 5 * D_800BE9E4) towards (120 - d) * 176 / 120 for distances d = (dx^2 + dy^2) * falloff / 10 from the
-// screen centre under 120 (0 when hidden: brightness -1). The flare strength +0x28 moves (by 10 * D_800BE9E4)
+// lens_flare_draw: draws the lens flare of a sun node (screen position +0xC / +0x10). With fade (g_sun_flash_alpha) it moves
+// *fade (by 5 * g_frame_ticks) towards (120 - d) * 176 / 120 for distances d = (dx^2 + dy^2) * falloff / 10 from the
+// screen centre under 120 (0 when hidden: brightness -1). The flare strength +0x28 moves (by 10 * g_frame_ticks)
 // towards 0x1ADB00 / (d + 10000) * brightness / 256 (0 off screen or hidden). If d < 200000, +0x28 > 0 and the node
-// is within 2000 of the screen, draws `count` rings (sprite D_8009075C, mode set once a frame) along the line from
-// the node through the centre (k * 2 / 5 of the offset), alpha +0x28 * +0x30 / 256, sizes D_800A7630[row * 7 + k].
+// is within 2000 of the screen, draws `count` rings (sprite g_flare_sprite, mode set once a frame) along the line from
+// the node through the centre (k * 2 / 5 of the offset), alpha +0x28 * +0x30 / 256, sizes g_flare_ring_sizes[row * 7 + k].
 /* was func_1517EA18 */
 Gfx *flare_lens_draw(Gfx *gdl, u8 *node, s32 row, s32 count, s32 falloff, s32 bright, u8 *fade) {
     SprEA18 spr;
@@ -201,8 +201,8 @@ Gfx *flare_lens_draw(Gfx *gdl, u8 *node, s32 row, s32 count, s32 falloff, s32 br
     s32 j;
     u8 *sizes;
 
-    dx = *(f32 *) (node + 0xC) - D_800BE620 * 0.5f;
-    dy = *(f32 *) (node + 0x10) - D_800BE624 * 0.5f;
+    dx = *(f32 *) (node + 0xC) - g_framebuffer_width * 0.5f;
+    dy = *(f32 *) (node + 0x10) - g_framebuffer_height * 0.5f;
     if (fade != NULL) {
         if (bright == -1) {
             target = 0;
@@ -217,7 +217,7 @@ Gfx *flare_lens_draw(Gfx *gdl, u8 *node, s32 row, s32 count, s32 falloff, s32 br
             }
         }
         cur = *fade;
-        step = D_800BE9E4 * 5;
+        step = g_frame_ticks * 5;
         if (((target - cur) < 0 ? -(target - cur) : (target - cur)) < step) {
             cur = target;
         } else if (cur < target) {
@@ -230,15 +230,15 @@ Gfx *flare_lens_draw(Gfx *gdl, u8 *node, s32 row, s32 count, s32 falloff, s32 br
     ix = dx;
     iy = dy;
     d = (ix * ix + iy * iy) * falloff / 10;
-    if (*(f32 *) (node + 0xC) < 2.0f || (f32) (D_800BE620 - 2) <= *(f32 *) (node + 0xC) ||
-        *(f32 *) (node + 0x10) < 0.0f || (f32) D_800BE624 <= *(f32 *) (node + 0x10)) {
+    if (*(f32 *) (node + 0xC) < 2.0f || (f32) (g_framebuffer_width - 2) <= *(f32 *) (node + 0xC) ||
+        *(f32 *) (node + 0x10) < 0.0f || (f32) g_framebuffer_height <= *(f32 *) (node + 0x10)) {
         target = 0;
     } else if (bright == -1) {
         target = 0;
     } else {
         target = 0x1ADB00 / (d + 10000) * bright / 256;
     }
-    step = D_800BE9E4 * 10;
+    step = g_frame_ticks * 10;
     cur = *(s16 *) (node + 0x28);
     if (((target - cur) < 0 ? -(target - cur) : (target - cur)) < step) {
         *(s16 *) (node + 0x28) = target;
@@ -251,19 +251,19 @@ Gfx *flare_lens_draw(Gfx *gdl, u8 *node, s32 row, s32 count, s32 falloff, s32 br
         !(fabsf(*(f32 *) (node + 0x10)) < 2000.0f)) {
         return gdl;
     }
-    D_800D31C8 = 0xFF;
-    D_800D31C9 = 0xFF;
-    D_800D31CA = 0xFF;
-    spr.tex = D_8009075C;
+    g_sprite_prim_r = 0xFF;
+    g_sprite_prim_g = 0xFF;
+    g_sprite_prim_b = 0xFF;
+    spr.tex = g_flare_sprite;
     spr.u0B = 0;
     spr.u0C = 0;
     spr.u0D = 0;
-    if (D_800DE190 == 0) {
-        gdl = gfx_load_texture_tile(flare_render_mode_set(gdl), D_8009075C, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
-        D_800DE190 = 1;
+    if (g_flare_sprite_mode_set == 0) {
+        gdl = gfx_load_texture_tile(flare_render_mode_set(gdl), g_flare_sprite, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
+        g_flare_sprite_mode_set = 1;
     }
     alpha = (*(s16 *) (node + 0x28) * node[0x30]) >> 8;
-    sizes = &D_800A7630[row * 7];
+    sizes = &g_flare_ring_sizes[row * 7];
     for (i = 0, j = 2; i < count; i++, j += 2) {
         f = j;
         spr.alpha = alpha;
@@ -289,8 +289,8 @@ Gfx *flare_render_mode_set(Gfx *arg0) {
 void camera_view_rotation_matrix(s32, f32 (*)[4], f32, f32, f32);
 void mtxf_transform_point_w(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 
-// world_to_screen: projects (x, y, z) with the current player's camera (D_800DBFF0[g_cur_view_player]: view matrix from
-// camera_view_rotation_matrix with -pitch +0x388, -yaw +0x380 and +0x5EC) into its viewport (D_800BE628 + player * 0x180: half
+// world_to_screen: projects (x, y, z) with the current player's camera (g_player_views[g_cur_view_player]: view matrix from
+// camera_view_rotation_matrix with -pitch +0x388, -yaw +0x380 and +0x5EC) into its viewport (g_player_cams + player * 0x180: half
 // width +0xC, half height +0x10). In front (w > 10): *outX / *outY = viewport centre + projected x / - projected y,
 // returns 1; else both 0 and returns 0.
 /* was func_1517F01C */
@@ -306,9 +306,9 @@ s32 flare_world_to_screen(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     f32 sz;
     f32 w;
 
-    cam = (u8 *) D_800DBFF0 + g_cur_view_player * 0x9A0;
+    cam = (u8 *) g_player_views + g_cur_view_player * 0x9A0;
     camera_view_rotation_matrix(g_cur_view_player, mtx, -*(f32 *) (cam + 0x388), -*(f32 *) (cam + 0x380), *(f32 *) (cam + 0x5EC));
-    vp = (u8 *) D_800BE628 + g_cur_view_player * 0x180;
+    vp = (u8 *) g_player_cams + g_cur_view_player * 0x180;
     hw = *(f32 *) (vp + 0xC);
     hh = *(f32 *) (vp + 0x10);
     mtxf_transform_point_w(mtx, x, y, z, &sx, &sy, &sz, &w);
@@ -326,7 +326,7 @@ s32 flare_world_to_screen(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
 }
 
 s32 sprite_project_point(f32, f32, f32, u8 *, u8 *, f32 *, f32 *, f32);
-extern s32 D_800899D0;
+extern s32 g_zbuf_decode_table; /* was D_800899D0 */
 
 /* was func_1517F18C */
 s32 flare_node_depth_test(u8 *arg0, u32 *arg1) {
@@ -343,17 +343,17 @@ s32 flare_node_depth_test(u8 *arg0, u32 *arg1) {
 
     if (sprite_project_point((*(f32 *)((u8 *)arg0 + 0)), (*(f32 *)((u8 *)arg0 + 4)), (*(f32 *)((u8 *)arg0 + 8)), arg0 + 0xC, arg0 + 0x10, &sp.u2C, &sp.u28, 4000.0f) == 1) {
         if ((*(u8 *)((u8 *)arg0 + 0x2E)) & 4) {
-            temp_f2 = (*(f32 *)((u8 *)arg0 + 0)) - D_800DBFF0->unk2F8;
-            temp_f12 = (*(f32 *)((u8 *)arg0 + 4)) - D_800DBFF0->unk2FC;
-            temp_f14 = (*(f32 *)((u8 *)arg0 + 8)) - D_800DBFF0->unk300;
+            temp_f2 = (*(f32 *)((u8 *)arg0 + 0)) - g_player_views->unk2F8;
+            temp_f12 = (*(f32 *)((u8 *)arg0 + 4)) - g_player_views->unk2FC;
+            temp_f14 = (*(f32 *)((u8 *)arg0 + 8)) - g_player_views->unk300;
             if ((((temp_f2 * (*(f32 *)((u8 *)arg0 + 0x14))) + (temp_f12 * (*(f32 *)((u8 *)arg0 + 0x18))) + (temp_f14 * (*(f32 *)((u8 *)arg0 + 0x1C)))) / sqrtf((temp_f2 * temp_f2) + (temp_f12 * temp_f12) + (temp_f14 * temp_f14))) < (*(f32 *)((u8 *)arg0 + 0x20))) {
                 return 1;
             }
         }
         temp_a3 = (*(u16 *)((u8 *)arg0 + 0x2A));
-        temp_a1 = ((s32 *)((u8 *)&D_800899D0 + (((s32) temp_a3 >> 0xD) * 8)));
+        temp_a1 = ((s32 *)((u8 *)&g_zbuf_decode_table + (((s32) temp_a3 >> 0xD) * 8)));
         *arg1 = (u32) ((*(s32 *)((u8 *)temp_a1 + 4)) + ((((s32) temp_a3 >> 2) & 0x7FF) << (*(s32 *)((u8 *)temp_a1 + 0)))) >> 3;
-        temp_a2 = D_800BE628 + (D_800BE9C0 * 0x10);
+        temp_a2 = g_player_cams + (g_dl_buf_index * 0x10);
         (*(s16 *)((u8 *)arg0 + 0x2C)) = (s16) (u32) (((f32) (*(s16 *)((u8 *)temp_a2 + 0x4C)) + ((sp.u2C / sp.u28) * (f32) (*(s16 *)((u8 *)temp_a2 + 0x44)))) * 32.0f);
         return 1;
     }

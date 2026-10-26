@@ -88,18 +88,18 @@ void line_fx_update(struct102 *arg0p) {
 
     done = 0;
     if (arg0[0x40] & 1) {
-        *(s16 *)(arg0 + 0x42) -= D_800BE9E4;
+        *(s16 *)(arg0 + 0x42) -= g_frame_ticks;
         if (*(s16 *)(arg0 + 0x42) < 0) {
             done = 1;
         }
     }
     if (!done) {
-        *(f32 *)(arg0 + 0x10) += *(f32 *)(arg0 + 0x1C) * D_800BE9A4;
-        *(f32 *)(arg0 + 0x14) += *(f32 *)(arg0 + 0x20) * D_800BE9A4;
-        *(f32 *)(arg0 + 0x18) += *(f32 *)(arg0 + 0x24) * D_800BE9A4;
-        *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x34) * D_800BE9A4;
-        *(f32 *)(arg0 + 0x2C) += *(f32 *)(arg0 + 0x38) * D_800BE9A4;
-        *(f32 *)(arg0 + 0x30) += *(f32 *)(arg0 + 0x3C) * D_800BE9A4;
+        *(f32 *)(arg0 + 0x10) += *(f32 *)(arg0 + 0x1C) * g_frame_step_f;
+        *(f32 *)(arg0 + 0x14) += *(f32 *)(arg0 + 0x20) * g_frame_step_f;
+        *(f32 *)(arg0 + 0x18) += *(f32 *)(arg0 + 0x24) * g_frame_step_f;
+        *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x34) * g_frame_step_f;
+        *(f32 *)(arg0 + 0x2C) += *(f32 *)(arg0 + 0x38) * g_frame_step_f;
+        *(f32 *)(arg0 + 0x30) += *(f32 *)(arg0 + 0x3C) * g_frame_step_f;
         if (arg0[0x40] & 8) {
             if (*(s16 *)(arg0 + 0x42) < *(s16 *)(arg0 + 0x4E)) {
                 t = *(s16 *)(arg0 + 0x50) * *(s16 *)(arg0 + 0x42);
@@ -181,7 +181,7 @@ u8 *line_fx_draw(s32 arg0, u8 *arg1, s16 arg2) {
         memcpy((*(s32 *)((u8 *)temp_v1 + 0x88)), temp_a1, 0x30);
         memcpy((*(s32 *)((u8 *)temp_v1 + 0x88)) + 0x30, temp_a1, 0x30);
     }
-    sp.u6C = &D_800DBFF0[arg2].unk2F8;
+    sp.u6C = &g_player_views[arg2].unk2F8;
     sp.u67 = 1;
     temp_t6 = (*(u16 *)((u8 *)arg1 + 0x44));
     var_v1 = 0;
@@ -385,12 +385,12 @@ void line_spark_burst_at(u8 *arg0, u8 arg1) {
     particle_spawn_basic(&sp, arg0[0x88], 0, arg1, 0);
 }
 
-// spark_point_flash_update: P256: counts the emitter `obj`'s timer (s16 +0x2C) down by the frame step D_800BE9E4;
-// when it runs out, picks a random point of the table D_800DCE60 (3 groups x 10 points of x, y, z, w); a point with
+// spark_point_flash_update: P256: counts the emitter `obj`'s timer (s16 +0x2C) down by the frame step g_frame_ticks;
+// when it runs out, picks a random point of the table g_pipe_spray_points (3 groups x 10 points of x, y, z, w); a point with
 // a zero coordinate spawns nothing, else line_spark_burst_random_flip(point, room obj[0xC]) and a light flash (light_create_with_ctrl:
 // type 3, 5..15 frames, at the truncated point, radius 100..255, white, room obj[0xC], owner obj[1]). The timer then
 // restarts at min +0x28 + rand % (range +0x2A + 1) (unsigned).
-extern f32 D_800DCE60[][10][4];
+extern f32 g_pipe_spray_points[][10][4]; /* was D_800DCE60 */
 void line_spark_burst_random_flip(u8 *, u8);
 /* was func_151570C4 */
 void spark_point_flash_update(u8 *obj) {
@@ -400,12 +400,12 @@ void spark_point_flash_update(u8 *obj) {
     f32 *pt;
     s32 group;
 
-    *(s16 *)(obj + 0x2C) -= D_800BE9E4;
+    *(s16 *)(obj + 0x2C) -= g_frame_ticks;
     if (*(s16 *)(obj + 0x2C) >= 0) {
         return;
     }
     group = random_int() % 3U;
-    pt = D_800DCE60[group][random_int() % 10U];
+    pt = g_pipe_spray_points[group][random_int() % 10U];
     if (pt[0] != 0.0f && pt[1] != 0.0f && pt[2] != 0.0f) {
         line_spark_burst_random_flip((u8 *) pt, obj[0xC]);
         flash.unk0 = 3;
@@ -604,7 +604,7 @@ u8 *anim_model_fx_spawn(u8 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 ar
     }
     *(s32 *)(obj + 0x114) = 0;
     if (arg3 != 0) {
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= g_last_player_index; i++) {
             ((s32 *)(obj + 0x104))[i] = light_alloc_light_buf(arg3);
         }
         *(s32 *)(obj + 0x114) = light_alloc_lookat_buf();
@@ -616,7 +616,7 @@ u8 *anim_model_fx_spawn(u8 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 ar
 void anim_model_fx_free_lights(u8 *arg0) {
     s32 i;
 
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= g_last_player_index; i++) {
         if (((s32 *)(arg0 + 0x104))[i]) {
             heap_set_block_tag(((s32 *)(arg0 + 0x104))[i], 4);
         }

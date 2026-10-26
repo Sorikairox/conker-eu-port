@@ -208,10 +208,10 @@ typedef struct {
 } FireState;
 
 // fire_burn_update: P206: a fire that burns while any object of id 0x98 with model 0x1EB is still unlit
-// (unk222 == 0; `count` of them scales the rates; none = nothing). Every D_800BE9E4 * count frames the next stage
+// (unk222 == 0; `count` of them scales the rates; none = nothing). Every g_frame_ticks * count frames the next stage
 // object takes over (the old one hidden through +0x6E, sound 0x2B3..0x2B5 at its position, event 7 and a
 // rumble_request burst; up to stage 7); a crackle every 150..300 frames (burst, sound 0x6D6..0x6D9). Four
-// accumulators grow by (base + randf * spread) * D_800BE9A4 * count and spawn one batch per whole unit at a random
+// accumulators grow by (base + randf * spread) * g_frame_step_f * count and spawn one batch per whole unit at a random
 // point on the ring (angle (rng % 126 - 220) mirrored by flags bit 0, `radius`, around x / z, height 30..180):
 // embers (fire_embers_spawn), 5..11 flame particles (mdl_particle_spawn_ex), 7..19 smoke sprites (particle_spawn_ex, random
 // flips) and sparks (impact_tinted_particle_spawn).
@@ -302,7 +302,7 @@ void fire_burn_update(u8 *arg0) {
 
     /* next stage */
     if (st->stage < 7) {
-        st->timer -= D_800BE9E4 * count;
+        st->timer -= g_frame_ticks * count;
         if (st->timer < 0) {
             part = st->parts[st->stage];
             sound_play_at((random_int() % 3U) + 0x2B3, 0x5DC0, 0, 0, -1, *(s16 *)(part + 0x10),
@@ -322,7 +322,7 @@ void fire_burn_update(u8 *arg0) {
     }
 
     /* crackle */
-    st->crackle -= D_800BE9E4 * count;
+    st->crackle -= g_frame_ticks * count;
     if (st->crackle < 0) {
         crackle.unk0 = 1;
         crackle.unk2 = (random_int() % 21U) + 10;
@@ -338,7 +338,7 @@ void fire_burn_update(u8 *arg0) {
 
     /* embers */
     countf = count;
-    st->emberAcc += (0.020000001f + random_float() * 0.025f) * (D_800BE9A4 * countf);
+    st->emberAcc += (0.020000001f + random_float() * 0.025f) * (g_frame_step_f * countf);
     if (1.0f < st->emberAcc) {
         dir = (st->flags & 1) ? -1 : 1;
         do {
@@ -353,7 +353,7 @@ void fire_burn_update(u8 *arg0) {
     }
 
     /* flames */
-    st->flameAcc += (0.020000001f + random_float() * 0.060000002f) * (D_800BE9A4 * countf);
+    st->flameAcc += (0.020000001f + random_float() * 0.060000002f) * (g_frame_step_f * countf);
     if (1.0f < st->flameAcc) {
         dir = (st->flags & 1) ? -1 : 1;
         flame.scale[0] = 1.0f;
@@ -412,7 +412,7 @@ void fire_burn_update(u8 *arg0) {
     }
 
     /* smoke */
-    st->smokeAcc += (0.055000003f + random_float() * 0.05f) * (D_800BE9A4 * countf);
+    st->smokeAcc += (0.055000003f + random_float() * 0.05f) * (g_frame_step_f * countf);
     if (1.0f < st->smokeAcc) {
         dir = (st->flags & 1) ? -1 : 1;
         smoke.texture = 0x86;
@@ -428,9 +428,9 @@ void fire_burn_update(u8 *arg0) {
         smoke.u18[0] = 0xFF;
         smoke.u18[1] = 0xFF;
         smoke.u18[2] = 0xFF;
-        smoke.angle[0] = ((s32 *)D_800A5860)[0];
-        smoke.angle[1] = ((s32 *)D_800A5860)[1];
-        smoke.angle[2] = ((s32 *)D_800A5860)[2];
+        smoke.angle[0] = ((s32 *)g_vec3_zero)[0];
+        smoke.angle[1] = ((s32 *)g_vec3_zero)[1];
+        smoke.angle[2] = ((s32 *)g_vec3_zero)[2];
         smoke.fadeStart = 8;
         smoke.fadeRate = 0x1F;
         smoke.u22 = 1;
@@ -477,7 +477,7 @@ void fire_burn_update(u8 *arg0) {
     }
 
     /* sparks */
-    st->sparkAcc += (0.33600003f + random_float() * 0.126f) * (D_800BE9A4 * countf);
+    st->sparkAcc += (0.33600003f + random_float() * 0.126f) * (g_frame_step_f * countf);
     if (1.0f < st->sparkAcc) {
         dir = (st->flags & 1) ? -1 : 1;
         do {
@@ -502,7 +502,7 @@ void fire_burn_update(u8 *arg0) {
     }
 }
 
-extern u8 D_800A2010[][2];
+extern u8 g_fire_finish_event_ids[][2]; /* was D_800A2010 */
 
 /* was func_150F9CA0 */
 void fire_post_finish_events(u8 arg0) {
@@ -512,9 +512,9 @@ void fire_post_finish_events(u8 arg0) {
     } tmp;
 
     tmp.unk0 = 0;
-    tmp.unk4 = D_800A2010[arg0][0];
+    tmp.unk4 = g_fire_finish_event_ids[arg0][0];
     effect_nodes_broadcast(&tmp, 0x42);
-    tmp.unk4 = D_800A2010[arg0][1];
+    tmp.unk4 = g_fire_finish_event_ids[arg0][1];
     effect_nodes_broadcast(&tmp, 0x42);
 }
 
@@ -536,9 +536,9 @@ void fire_delete(struct260 *arg0) {
 
 s32 attached_particle_spawn(u8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, s32 *, s32, s32, s32, s32, s32);
 s32 mtx_transform_points(f32 **, s32 **, s32, s32);
-extern u8 D_80088EF0;
-extern f32 D_800A2018[];
-extern f32 D_800A2024[];
+extern u8 g_spark_spray_bone; /* was D_80088EF0 */
+extern f32 g_spark_spray_start_pt[]; /* was D_800A2018 */
+extern f32 g_spark_spray_end_pt[]; /* was D_800A2024 */
 
 /* was func_150F9D6C */
 void obj_bone_spark_spray(u8 *arg0, u8 arg1, s32 arg2)
@@ -552,13 +552,13 @@ void obj_bone_spark_spray(u8 *arg0, u8 arg1, s32 arg2)
   {
     return;
   }
-  sp54 = D_800A2018;
+  sp54 = g_spark_spray_start_pt;
   sp50 = sp64;
-  m = *(s32 *)(arg0 + 0x1D4) + (D_80088EF0 << 6);
+  m = *(s32 *)(arg0 + 0x1D4) + (g_spark_spray_bone << 6);
   mtx_transform_points((0, &sp54), &sp50, (0, m), 1); // fakematch: permuter comma operands fix the 0x48/0x4C spill slot
   sp58[1] = (random_float() * 1) + 2.0f; // fakematch: int * 1 keeps the result scheduling
   sp58[0] = (random_float() * 14.0f) + 28.0f;
-  attached_particle_spawn(arg0, D_80088EF0, D_800A2018, D_800A2024, sp58, (random_int() % 3U) + 4, (random_int() % 156U) + 0x64, (random_float() * 300.0f) + 400.0f, sp64, 0xFF, 0, -1, arg1, arg2);
+  attached_particle_spawn(arg0, g_spark_spray_bone, g_spark_spray_start_pt, g_spark_spray_end_pt, sp58, (random_int() % 3U) + 4, (random_int() % 156U) + 0x64, (random_float() * 300.0f) + 400.0f, sp64, 0xFF, 0, -1, arg1, arg2);
 }
 
 u8 *obj_muzzle_node_get(u8 *);

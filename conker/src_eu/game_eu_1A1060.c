@@ -9,29 +9,29 @@ typedef struct {
     u16 a;
     u16 b;
 } Info3850;
-extern Info3850 D_8008D010;
-extern s8 D_800DD710;
+extern Info3850 g_fog_presets; /* was D_8008D010 */
+extern s8 g_fog_level_preset_on; /* was D_800DD710 */
 s32 fog_blend_presets(s32, s32, s32, s32, s32);
 /* was func_15173850 */
 void fog_init_from_level(s32 arg0) {
-    if (*(s16 *)((u8 *)D_800B0DF0 + 0x40) == *(s16 *)((u8 *)D_800B0DF0 + 0x3C) && *(s16 *)((u8 *)D_800B0DF0 + 0x3C) == 0) {
-        *(s16 *)((u8 *)D_800B0DF0 + 0x40) = 100;
+    if (*(s16 *)((u8 *)g_level_header + 0x40) == *(s16 *)((u8 *)g_level_header + 0x3C) && *(s16 *)((u8 *)g_level_header + 0x3C) == 0) {
+        *(s16 *)((u8 *)g_level_header + 0x40) = 100;
     }
-    D_8008D010.c[0] = D_800B0DF0->pad2A[0x18];
-    D_8008D010.c[1] = D_800B0DF0->pad2A[0x19];
-    D_8008D010.c[2] = D_800B0DF0->pad2A[0x1A];
-    D_8008D010.c[3] = D_800B0DF0->pad2A[0x1B];
-    D_8008D010.v[0] = *(s16 *)((u8 *)D_800B0DF0 + 0x3A);
-    D_8008D010.v[1] = *(s16 *)((u8 *)D_800B0DF0 + 0x3C);
-    D_8008D010.v[2] = *(s16 *)((u8 *)D_800B0DF0 + 0x3E);
-    D_8008D010.v[3] = *(s16 *)((u8 *)D_800B0DF0 + 0x40);
-    D_8008D010.a = *(u16 *)((u8 *)D_800B0DF0 + 2);
-    D_8008D010.b = *(u16 *)((u8 *)D_800B0DF0 + 0);
-    if ((s8)D_800B0DF0->pad2A[0x1C] != -1) {
-        D_800DD710 = 1;
-        fog_blend_presets((s8)D_800B0DF0->pad2A[0x1C], (s8)D_800B0DF0->pad2A[0x1C], arg0, 0, -1);
+    g_fog_presets.c[0] = g_level_header->pad2A[0x18];
+    g_fog_presets.c[1] = g_level_header->pad2A[0x19];
+    g_fog_presets.c[2] = g_level_header->pad2A[0x1A];
+    g_fog_presets.c[3] = g_level_header->pad2A[0x1B];
+    g_fog_presets.v[0] = *(s16 *)((u8 *)g_level_header + 0x3A);
+    g_fog_presets.v[1] = *(s16 *)((u8 *)g_level_header + 0x3C);
+    g_fog_presets.v[2] = *(s16 *)((u8 *)g_level_header + 0x3E);
+    g_fog_presets.v[3] = *(s16 *)((u8 *)g_level_header + 0x40);
+    g_fog_presets.a = *(u16 *)((u8 *)g_level_header + 2);
+    g_fog_presets.b = *(u16 *)((u8 *)g_level_header + 0);
+    if ((s8)g_level_header->pad2A[0x1C] != -1) {
+        g_fog_level_preset_on = 1;
+        fog_blend_presets((s8)g_level_header->pad2A[0x1C], (s8)g_level_header->pad2A[0x1C], arg0, 0, -1);
     } else {
-        D_800DD710 = 0;
+        g_fog_level_preset_on = 0;
         fog_blend_presets(0, 0, arg0, 0, -1);
     }
 }
@@ -46,15 +46,15 @@ s32 fog_identity_stub(s32 arg0, s32 arg1)
 }
 
 s8 fog_level_preset_get(s32 arg0);
-extern s32 D_800DD714;          /* current fog/colour state: c[4] at +0, then halfwords at +4..+0x10 */
-extern s16 D_800DD718, D_800DD71A, D_800DD71C, D_800DD71E, D_800DD720;
-extern u16 D_800DD722, D_800DD724;
+extern s32 g_fog_state;          /* current fog/colour state: c[4] at +0, then halfwords at +4..+0x10; was D_800DD714 */
+extern s16 D_800DD718, g_fog_state_v3, D_800DD71C, g_fog_state_v1, g_fog_blend_t; /* was D_800DD71A; was D_800DD71E; was D_800DD720 */
+extern u16 g_fog_state_width, g_fog_state_height; /* was D_800DD722; was D_800DD724 */
 
-/* Blend fog/colour preset `from` toward `to` by t/4096 into slot `dest` of D_8008D010 (or, for -1, the current
- * state D_800DD714; note its halfword order differs from a table entry). Presets 0x7C..0x7F are aliases. */
+/* Blend fog/colour preset `from` toward `to` by t/4096 into slot `dest` of g_fog_presets (or, for -1, the current
+ * state g_fog_state; note its halfword order differs from a table entry). Presets 0x7C..0x7F are aliases. */
 /* was func_15173954 */
 s32 fog_blend_presets(s32 from, s32 to, s32 arg2, s32 t, s32 dest) {
-    Info3850 *table = &D_8008D010;
+    Info3850 *table = &g_fog_presets;
     u8 *out;
     s16 *v0;
     s16 *v1;
@@ -69,15 +69,15 @@ s32 fog_blend_presets(s32 from, s32 to, s32 arg2, s32 t, s32 dest) {
     s32 a2;
     s32 b2;
 
-    D_800DD720 = t;
+    g_fog_blend_t = t;
     if (dest == -1) {
-        out = (u8 *)&D_800DD714;
+        out = (u8 *)&g_fog_state;
         v0 = &D_800DD71C;
-        v1 = &D_800DD71E;
+        v1 = &g_fog_state_v1;
         v2 = &D_800DD718;
-        v3 = &D_800DD71A;
-        pa = (s16 *)&D_800DD722;
-        pb = (s16 *)&D_800DD724;
+        v3 = &g_fog_state_v3;
+        pa = (s16 *)&g_fog_state_width;
+        pb = (s16 *)&g_fog_state_height;
     } else {
         out = (u8 *)&table[dest];
         v0 = (s16 *)(out + 4);
@@ -115,49 +115,49 @@ s32 fog_blend_presets(s32 from, s32 to, s32 arg2, s32 t, s32 dest) {
     a = (u16)table[from].v[3];
     *v3 = a + ((s32)(((u16)table[to].v[3] - a) * t) / 4096);
 
-    /* -1 means "the level default" (D_800B0DF0) */
+    /* -1 means "the level default" (g_level_header) */
     a = (s16)table[from].a;
     if (a == -1) {
-        a = D_800B0DF0->unk2;
+        a = g_level_header->unk2;
     }
     b = (s16)table[to].a;
     if (b == -1) {
-        b = D_800B0DF0->unk2;
+        b = g_level_header->unk2;
     }
     *pa = ((s32)((b - a) * t) / 4096) + a;
     a2 = (s16)table[from].b;
     if (a2 == -1) {
-        a2 = D_800B0DF0->unk0;
+        a2 = g_level_header->unk0;
     }
     b2 = (s16)table[to].b;
     if (b2 == -1) {
-        b2 = D_800B0DF0->unk0;
+        b2 = g_level_header->unk0;
     }
     *pb = ((s32)((b2 - a2) * t) / 4096) + a2;
     return a2;
 }
 s32 fog_blend_presets(s32, s32, s32, s32, s32);
-extern s32 D_800DC2D8;
-extern s32 D_800DD714;
+extern s32 g_level_bg_colour; /* was D_800DC2D8 */
+extern s32 g_fog_state; /* was D_800DD714 */
 
 /* was func_15173E34 */
 void fog_apply_level_default(s32 arg0) {
-    if ((s8) D_800B0DF0->pad2A[0x1C] == -1) {
-        if (D_800DBFF0->unk5F0 & 1) {
+    if ((s8) g_level_header->pad2A[0x1C] == -1) {
+        if (g_player_views->unk5F0 & 1) {
             fog_blend_presets(6, 6, arg0, 0, -1);
-            (*(u8 *)((u8 *)(&D_800DC2D8) + 0)) = (u8) (*(u8 *)((u8 *)(&D_800DD714) + 0));
-            (*(u8 *)((u8 *)(&D_800DC2D8) + 1)) = (u8) (*(u8 *)((u8 *)(&D_800DD714) + 1));
-            (*(u8 *)((u8 *)(&D_800DC2D8) + 2)) = (u8) (*(u8 *)((u8 *)(&D_800DD714) + 2));
+            (*(u8 *)((u8 *)(&g_level_bg_colour) + 0)) = (u8) (*(u8 *)((u8 *)(&g_fog_state) + 0));
+            (*(u8 *)((u8 *)(&g_level_bg_colour) + 1)) = (u8) (*(u8 *)((u8 *)(&g_fog_state) + 1));
+            (*(u8 *)((u8 *)(&g_level_bg_colour) + 2)) = (u8) (*(u8 *)((u8 *)(&g_fog_state) + 2));
             return;
         }
         fog_blend_presets(0, 0, arg0, 0, -1);
-        (*(u8 *)((u8 *)(&D_800DC2D8) + 0)) = (u8) D_800B0DF0->unk5;
-        (*(u8 *)((u8 *)(&D_800DC2D8) + 1)) = (u8) D_800B0DF0->unk6;
-        (*(u8 *)((u8 *)(&D_800DC2D8) + 2)) = (u8) D_800B0DF0->unk7;
+        (*(u8 *)((u8 *)(&g_level_bg_colour) + 0)) = (u8) g_level_header->unk5;
+        (*(u8 *)((u8 *)(&g_level_bg_colour) + 1)) = (u8) g_level_header->unk6;
+        (*(u8 *)((u8 *)(&g_level_bg_colour) + 2)) = (u8) g_level_header->unk7;
     }
 }
 
 /* was func_15173F04 */
 s8 fog_level_preset_get(s32 arg0) {
-    return (s8) D_800B0DF0->pad2A[0x1C];
+    return (s8) g_level_header->pad2A[0x1C];
 }

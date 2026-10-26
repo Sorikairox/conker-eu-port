@@ -10,18 +10,18 @@ u8 *world_record_find(u8);
 void ground_fx_spawn_random(s32 arg0, f32 arg1, f32 arg2, s16 *arg3);
 
 
-extern s32 * D_800DC3C4;
+extern s32 * g_world_obj_rider_masks; /* was D_800DC3C4 */
 /* was func_150AF6E0 */
 void world_pair_hit_player(s32 arg0, u8 arg1) {
     s32 i;
-    if (D_800CC3D4[0] == 0) {
-        i = (struct131 *)world_record_find(arg0) - D_800DBEF4;
-        if (D_800DC3C4[i] & 1) {
+    if (g_obj_tab_stunned[0] == 0) {
+        i = (struct131 *)world_record_find(arg0) - g_world_objs;
+        if (g_world_obj_rider_masks[i] & 1) {
             obj_send_hit(g_objects, 0x3F, 0x6E00, -1);
             return;
         }
-        i = (struct131 *)world_record_find(arg1) - D_800DBEF4;
-        if (D_800DC3C4[i] & 1) {
+        i = (struct131 *)world_record_find(arg1) - g_world_objs;
+        if (g_world_obj_rider_masks[i] & 1) {
             obj_send_hit(g_objects, 0x3F, 0xEE00, -1);
         }
     }
@@ -93,7 +93,7 @@ void smoke_emitter_update_small(u8 *arg0) {
     u8 *temp_s1;
 
     temp_s1 = arg0 + 0x28;
-    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((1352.0f + (random_float() * 1698.0f)) * 0.0001f * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((1352.0f + (random_float() * 1698.0f)) * 0.0001f * g_frame_step_f));
     if ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f) {
         sp.uB9 = 0x6C;
         sp.uA4 = 0x5103;
@@ -290,7 +290,7 @@ void sprite_emitter_update(u8 *arg0) {
     s32 var_v1;
     u8 *temp_v0_2;
 
-    (*(s16 *)((u8 *)arg0 + 0x28)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x28)) - D_800BE9E4);
+    (*(s16 *)((u8 *)arg0 + 0x28)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x28)) - g_frame_ticks);
     if ((*(s16 *)((u8 *)arg0 + 0x28)) < 0) {
         sp.u9C = (random_float() * 280.0f) + -140.0f;
         sp.uA0 = random_float() * 50.0f;
@@ -339,7 +339,7 @@ void sprite_emitter_update(u8 *arg0) {
         (*(s16 *)((u8 *)arg0 + 0x28)) = (s16) ((random_int() % 41U) + 0x2D);
     }
     temp_v0_2 = arg0 + 0x28;
-    (*(s16 *)((u8 *)temp_v0_2 + 2)) = (s16) ((*(s16 *)((u8 *)temp_v0_2 + 2)) - D_800BE9E4);
+    (*(s16 *)((u8 *)temp_v0_2 + 2)) = (s16) ((*(s16 *)((u8 *)temp_v0_2 + 2)) - g_frame_ticks);
     if ((*(s16 *)((u8 *)temp_v0_2 + 2)) < 0) {
         sp34 = temp_v0_2;
         sp.u40 = (random_float() * 280.0f) + -140.0f;
@@ -394,7 +394,7 @@ void sprite_emitter_update(u8 *arg0) {
 /* was func_150B00D4 */
 s32 fx_bob_update(u8 *arg0) {
     u8 *v = arg0 + 0x70;
-    *(f32 *)(arg0 + 0x78) = *(f32 *)(arg0 + 0x7C) * D_800BE9A4 + *(f32 *)(arg0 + 0x78);
+    *(f32 *)(arg0 + 0x78) = *(f32 *)(arg0 + 0x7C) * g_frame_step_f + *(f32 *)(arg0 + 0x78);
     *(f32 *)(v + 8) = wrap_angle_rad(*(f32 *)(arg0 + 0x78));
     *(f32 *)(arg0 + 0x10) = *(f32 *)v + *(f32 *)(v + 4) * sinf(*(f32 *)(v + 8));
     return 1;
@@ -555,9 +555,9 @@ void beam_trail_spawn(f32 *from, f32 *to, u8 alpha, s32 arg3) {
     req.u20 = 1.0f;
     req.u24 = 1.0f;
     req.u18 = 0.0f;
-    req.u40[0] = ((f32 *)D_800A5860)[0];
-    req.u40[1] = ((f32 *)D_800A5860)[1];
-    req.u40[2] = ((f32 *)D_800A5860)[2];
+    req.u40[0] = ((f32 *)g_vec3_zero)[0];
+    req.u40[1] = ((f32 *)g_vec3_zero)[1];
+    req.u40[2] = ((f32 *)g_vec3_zero)[2];
     req.u50 = 0x19A0;
     req.u54 = 0x12C;
     req.u56 = 0xD2;

@@ -7,7 +7,7 @@
 void mat_handler_stub(s32 arg0) {
 }
 
-extern s32 D_80090648;
+extern s32 g_tile_anim_tex_ids; /* was D_80090648 */
 
 /* was func_150D87CC */
 s32 mat_tile_slide_anim_d(u8 *arg0, u8 *arg1) {
@@ -23,11 +23,11 @@ s32 mat_tile_slide_anim_d(u8 *arg0, u8 *arg1) {
     if (temp_v0 == NULL) {
         return 0;
     }
-    (*(s16 *)((u8 *)arg0 + 0x18)) = (s16) (*(s32 *)((u8 *)(&D_80090648) + 0x18));
+    (*(s16 *)((u8 *)arg0 + 0x18)) = (s16) (*(s32 *)((u8 *)(&g_tile_anim_tex_ids) + 0x18));
     if ((*(u16 *)((u8 *)arg1 + 0x84)) == 0xD) {
         temp_f0 = (*(f32 *)((u8 *)temp_v0 + 8));
         if ((temp_f0 >= 23.0f) && (temp_f0 <= 40.0f)) {
-            (*(s16 *)((u8 *)arg0 + 0x18)) = (s16) (*(s32 *)((u8 *)(&D_80090648) + 0x1C));
+            (*(s16 *)((u8 *)arg0 + 0x18)) = (s16) (*(s32 *)((u8 *)(&g_tile_anim_tex_ids) + 0x1C));
             temp_v1 = *(*(s8 ***)((u8 *)arg0 + 0x24));
             var_a1 = 0;
             if (*temp_v1 != -0xE) {
@@ -46,14 +46,14 @@ s32 mat_tile_slide_anim_d(u8 *arg0, u8 *arg1) {
     }
     return 0;
 }
-extern s32 D_80090648;
-extern s32 D_800BE9E4;
+extern s32 g_tile_anim_tex_ids; /* was D_80090648 */
+extern s32 g_frame_ticks; /* was D_800BE9E4 */
 
 // tile_slide_by_anim_update: material handler (s32 (u8 *mat, u8 *actor) table, as mat_tile_slide_anim_d): a 4-state
 // open / close level 0..100 in mat +0x3C driven by the actor's animation (+0x84) and its frame (+0x2D0 -> +8):
-// state 0 waits for anim 0x18D past frame 46, state 1 opens by the frame step D_800BE9E4, state 2 waits for anim 0x18E
+// state 0 waits for anim 0x18D past frame 46, state 1 opens by the frame step g_frame_ticks, state 2 waits for anim 0x18E
 // past frame 34, state 3 closes 4x as fast, state 4 stays shut. The level sets the ult field of the material display
-// list's G_SETTILESIZE (first 8-byte command whose opcode byte is 0xF2). mat +0x18 takes texture ids from D_80090648.
+// list's G_SETTILESIZE (first 8-byte command whose opcode byte is 0xF2). mat +0x18 takes texture ids from g_tile_anim_tex_ids.
 /* was func_150D88E8 */
 s32 tile_slide_by_anim_update(u8 *mat, u8 *actor) {
     s32 *state = (s32 *) (mat + 0x38);
@@ -66,15 +66,15 @@ s32 tile_slide_by_anim_update(u8 *mat, u8 *actor) {
     switch (*state) {
         case 0:
             *level = 50;
-            *(s16 *) (mat + 0x18) = *(s32 *) ((u8 *) &D_80090648 + 0x6C);
+            *(s16 *) (mat + 0x18) = *(s32 *) ((u8 *) &g_tile_anim_tex_ids + 0x6C);
             if (*(u16 *) (actor + 0x84) == 0x18D && *(f32 *) (*(u8 **) (actor + 0x2D0) + 8) >= 46.0f) {
                 *state = 1;
-                *(s16 *) (mat + 0x18) = *(s32 *) ((u8 *) &D_80090648 + 0x70);
+                *(s16 *) (mat + 0x18) = *(s32 *) ((u8 *) &g_tile_anim_tex_ids + 0x70);
             }
             v = *level;
             break;
         case 1:
-            v = *level + D_800BE9E4;
+            v = *level + g_frame_ticks;
             *level = v;
             if (v >= 100) {
                 v = 100;
@@ -89,7 +89,7 @@ s32 tile_slide_by_anim_update(u8 *mat, u8 *actor) {
             v = *level;
             break;
         case 3:
-            v = *level - D_800BE9E4 * 4;
+            v = *level - g_frame_ticks * 4;
             *level = v;
             if (v <= 0) {
                 *level = 0;

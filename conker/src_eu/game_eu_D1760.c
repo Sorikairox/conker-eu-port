@@ -15,8 +15,8 @@
  *   +8 / +0xA centre x / z, +0xC child offset, leaf byte list at +0xE: b < 0x80 = previous index + b, else 15-bit
  *   index ((b & 0x7F) << 8 | next byte), 0 = end): only the first leaf reached is tested, tag 0. The first delta
  *   adds to the caller's $v1 (0 here; level data starts each leaf with an absolute index).
- * - floor_collect_world_obj_tris: area 2, the world objects in the u16 list ids[0 .. count - 1] (D_800DBEF4 + id * 0xA0: +0x56
- *   triangle count, +0x58 first triangle; vertex base D_800DC328[id], skipped when 0), tag = id.
+ * - floor_collect_world_obj_tris: area 2, the world objects in the u16 list ids[0 .. count - 1] (g_world_objs + id * 0xA0: +0x56
+ *   triangle count, +0x58 first triangle; vertex base g_world_obj_blocks[id], skipped when 0), tag = id.
  * - floor_collect_record_tris: area 3, the 25 records g_objects except D_800D39FC - 1, with +0 != 0, +0xF8 & 0x4000,
  *   +0x264 (vertex base) and +0x268 (bounds) set; byte +4 = model: D_800C5D38[m] triangles, offsets D_800C6070[m].
  */
@@ -181,10 +181,10 @@ s32 floor_collect_world_obj_tris(s32 x, s32 z, s32 count, s32 *idList) {
     end = ids + count;
     while (ids != end) {
         id = *ids++;
-        obj = (u8 *)D_800DBEF4 + id * 0xA0;
+        obj = (u8 *)g_world_objs + id * 0xA0;
         bnd = (u8 *)D_800DC270 + *(u16 *)(obj + 0x58) * 8;
         vofs = (u8 *)D_800DC26C + *(u16 *)(obj + 0x58) * 12;
-        base = D_800DC328[id];
+        base = g_world_obj_blocks[id];
         if (base == 0) continue;
         cnt = *(u16 *)(obj + 0x56);
         for (i = 0; i != cnt; i++) {
@@ -416,17 +416,17 @@ s32 world_objects_transform_mesh(s32 count, s32 *idList, s32 force) {
     if (count == 0) {
         return 0;
     }
-    buf = D_800BE9C0;
+    buf = g_dl_buf_index;
     last = ids + count - 1;
     for (;; ids++) {
         tmp = 0;
         id = *ids;
-        D_800DC32C[id] = 3;
-        slot = &D_800DC328[id];
+        g_world_obj_block_timers[id] = 3;
+        slot = &g_world_obj_blocks[id];
         if (*slot != 0) {
             goto next;
         }
-        obj = (WorldObj *)((u8 *)D_800DBEF4 + id * 0xA0);
+        obj = (WorldObj *)((u8 *)g_world_objs + id * 0xA0);
         if (!force) {
             if (obj->flags70 & 1) {
                 out = obj->cachedVerts[buf];

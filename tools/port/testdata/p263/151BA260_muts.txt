@@ -14,6 +14,6 @@ s/\*(s16 \*) (obj + 0x22), 0xF, \*(s16 \*) (obj + 0x24)/*(s16 *) (obj + 0x22), 0
 s/                      obj\[0xC\], obj\[1\]);/                      obj[1], obj[0xC]);/ % anchor
 s/spark_sprite_launch(obj\[0x14\], obj\[0x15\], x, y, z, -0x50/spark_sprite_launch(obj[0x15], obj[0x14], x, y, z, -0x50/ % anchor
 s/    if (t < 0) {/    if (t <= 0) {/ % die
-s/    t = \*(s16 \*) (obj + 0x2A) - D_800BE9E4;/    t = (s16) (*(s16 *) (obj + 0x2A) - D_800BE9E4);/ % bigstep negstep
+s/    t = \*(s16 \*) (obj + 0x2A) - g_frame_ticks;/    t = (s16) (*(s16 *) (obj + 0x2A) - g_frame_ticks);/ % bigstep negstep
 s/        \*(s16 \*) (obj + 0x2A) = t;/        ;/ % noanchor
 s/        node_destroy((struct102 \*) obj);/        ;/ % die

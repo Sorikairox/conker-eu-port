@@ -9,12 +9,12 @@ void particle_cooldowns_tick(void) {
     s32 v;
 
     for (i = 0; i < 4; i++) {
-        if ((&D_800DD2A0)[i] < 0xFF) {
-            v = (&D_800DD2A0)[i] + D_800BE9A0;
+        if ((&g_particle_cooldown)[i] < 0xFF) {
+            v = (&g_particle_cooldown)[i] + D_800BE9A0;
             if (v >= 0x100) {
                 v = 0xFF;
             }
-            (&D_800DD2A0)[i] = v;
+            (&g_particle_cooldown)[i] = v;
         }
     }
 }
@@ -71,7 +71,7 @@ void particle_sprite_spawn(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 ar
     }
 }
 
-extern s32 (*D_8008CF40[])(u8 *);
+extern s32 (*g_particle_sprite_tick_fns[])(u8 *); /* was D_8008CF40 */
 
 /* was func_1516DBE8 */
 void particle_sprite_tick(u8 *arg0) {
@@ -79,13 +79,13 @@ void particle_sprite_tick(u8 *arg0) {
 
     v = arg0[0x24];
     if (v != 0) {
-        v -= D_800BE9E4;
+        v -= g_frame_ticks;
         if (v < 0) {
             v = 0;
         }
         arg0[0x24] = v;
     }
-    if (D_8008CF40[arg0[0x23]](arg0) == 1) {
+    if (g_particle_sprite_tick_fns[arg0[0x23]](arg0) == 1) {
         if (*(u8 **)(arg0 + 0x30) != NULL) {
             *(s16 *)(*(u8 **)(arg0 + 0x30) + 4) = 0;
         }
@@ -95,7 +95,7 @@ void particle_sprite_tick(u8 *arg0) {
         v = *(s16 *)(arg0 + 0x10) << 8;
         v += arg0[0x25];
         t = v;
-        t += *(s16 *)(arg0 + 0x18) * D_800BE9E4;
+        t += *(s16 *)(arg0 + 0x18) * g_frame_ticks;
         *(s16 *)(arg0 + 0x10) = t >> 8;
         arg0[0x25] = t & 0xFF;
     }
@@ -104,17 +104,17 @@ void particle_sprite_tick(u8 *arg0) {
 s32 gfx_load_texture_cached(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
 Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 u8 *sprite_draw_at_world_depth(u8 *, u8 *);
-extern u8 *D_8008CDEC[];
-extern s16 D_800DD5EC; /* last sprite other-mode (1 / 2 / 3), shared with sprite_billboard_draw */
-extern s32 D_800D30BC; /* TLUT bit of the last loaded texture */
-extern u8 D_800D31C8;
-extern u8 D_800D31C9;
-extern u8 D_800D31CA;
+extern u8 *g_sprite_tex_descs[]; /* was D_8008CDEC */
+extern s16 g_sprite_last_other_mode; /* last sprite other-mode (1 / 2 / 3), shared with sprite_billboard_draw; was D_800DD5EC */
+extern s32 g_gfx_tlut_mode; /* TLUT bit of the last loaded texture; was D_800D30BC */
+extern u8 g_sprite_prim_r; /* was D_800D31C8 */
+extern u8 g_sprite_prim_g; /* was D_800D31C9 */
+extern u8 g_sprite_prim_b; /* was D_800D31CA */
 // tinted_sprite_draw: draw handler of the particle type whose tick is particle_sprite_tick (D_8008BBF8 / D_8008CD3C, same
-// slot as sprite_billboard_draw). Loads the texture D_8008CDEC[+0x1A] frame +0x1B (gfx_load_texture_cached), picks the combine mode
-// (2 for a texture of format 5 at +0xA, else 1; set only when it differs from D_800DD5EC, after a pipe sync), sets the
-// other mode 0x2C00 | TLUT | (0x100000 for mode 2), the colour D_800D31C8..CA from +0x1C..+0x1E and the env colour
-// +0x20..+0x22 (only when it differs from D_800DD5F8..FC; alpha 0), and draws the quad (+0xE..+0x16, alpha +0x1F)
+// slot as sprite_billboard_draw). Loads the texture g_sprite_tex_descs[+0x1A] frame +0x1B (gfx_load_texture_cached), picks the combine mode
+// (2 for a texture of format 5 at +0xA, else 1; set only when it differs from g_sprite_last_other_mode, after a pipe sync), sets the
+// other mode 0x2C00 | TLUT | (0x100000 for mode 2), the colour g_sprite_prim_r..CA from +0x1C..+0x1E and the env colour
+// +0x20..+0x22 (only when it differs from g_gfx_env_r_cached..FC; alpha 0), and draws the quad (+0xE..+0x16, alpha +0x1F)
 // with sprite_draw_at_world_depth. Returns the advanced display list.
 // The asm leaves its other-mode word (sp+0x5C) uninitialised when the combine mode is unchanged (a stale stack
 // word); the C uses the word that belongs to the mode, i.e. what the previous draw of this mode set.
@@ -137,7 +137,7 @@ u8 *particle_tinted_sprite_draw(u8 *gfx, u8 *obj, s32 arg2) {
 
     synced = 0;
     g_sprite_keep_prim_colour = 0;
-    tex = (s32 *) D_8008CDEC[obj[0x1A]];
+    tex = (s32 *) g_sprite_tex_descs[obj[0x1A]];
     gfx = (u8 *) gfx_load_texture_cached((s32) gfx, (s32) tex, obj[0x1B] << 8, 2, 0x100, 0x100, 0, 6, (s32) &quad,
                                (u8 *) &synced, 3);
     if (((u8 *) tex)[0xA] == 5) {
@@ -146,14 +146,14 @@ u8 *particle_tinted_sprite_draw(u8 *gfx, u8 *obj, s32 arg2) {
         mode = 1;
     }
     other = (mode == 1) ? 0 : 0x100000;
-    if (mode != D_800DD5EC) {
+    if (mode != g_sprite_last_other_mode) {
         if (synced == 0) {
             ((s32 *) gfx)[0] = 0xE7000000; /* gDPPipeSync */
             ((s32 *) gfx)[1] = 0;
             gfx += 8;
             synced = 1;
         }
-        D_800DD5EC = mode;
+        g_sprite_last_other_mode = mode;
         if (mode == 1) {
             ((s32 *) gfx)[0] = 0xFC30B261; /* gDPSetCombine */
             ((s32 *) gfx)[1] = 0x5566FF7F;
@@ -163,7 +163,7 @@ u8 *particle_tinted_sprite_draw(u8 *gfx, u8 *obj, s32 arg2) {
         }
         gfx += 8;
     }
-    gfx = (u8 *) gfx_other_mode_cached((Gfx *) gfx, other | D_800D30BC | 0x2C00, 0x5049DC, (u8 *) &synced);
+    gfx = (u8 *) gfx_other_mode_cached((Gfx *) gfx, other | g_gfx_tlut_mode | 0x2C00, 0x5049DC, (u8 *) &synced);
 
     quad.x = *(s16 *) (obj + 0xE);
     quad.y = *(s16 *) (obj + 0x10);
@@ -172,14 +172,14 @@ u8 *particle_tinted_sprite_draw(u8 *gfx, u8 *obj, s32 arg2) {
     quad.sizeZ = *(s16 *) (obj + 0x16);
     quad.flag = 0;
     quad.alpha = obj[0x1F];
-    D_800D31C8 = obj[0x1C];
-    D_800D31C9 = obj[0x1D];
-    D_800D31CA = obj[0x1E];
+    g_sprite_prim_r = obj[0x1C];
+    g_sprite_prim_g = obj[0x1D];
+    g_sprite_prim_b = obj[0x1E];
     r = obj[0x20];
     g = obj[0x21];
     b = obj[0x22];
-    if (r != D_800DD5F8 || g != g_gfx_env_g_cached || b != g_gfx_env_b_cached) {
-        D_800DD5F8 = r;
+    if (r != g_gfx_env_r_cached || g != g_gfx_env_g_cached || b != g_gfx_env_b_cached) {
+        g_gfx_env_r_cached = r;
         g_gfx_env_g_cached = g;
         g_gfx_env_b_cached = b;
         if (synced == 0) {
@@ -297,14 +297,14 @@ typedef struct {
     u8 parm48;        // 0x48: arg 0x1C
 } ParticleEmitter;
 
-extern s16 D_800A7210[][7]; /* object-attached emitter points: a xyz, b xyz, random z mask */
+extern s16 g_particle_emitter_points[][7]; /* object-attached emitter points: a xyz, b xyz, random z mask; was D_800A7210 */
 f32 math_cos_u8(s32 angle); // defined (u8); the file's unprototyped declaration rules out u8 here
 s32 particle_random_direction(s32 flags, f32 *vx, f32 *vy, f32 *vz);
 
-// particle_emitter_update: emitter tick. The countdown +0x42 runs down by D_800BE9E4 frames; each time it passes 0
+// particle_emitter_update: emitter tick. The countdown +0x42 runs down by g_frame_ticks frames; each time it passes 0
 // it is re-armed with +0x41 (0 = once) and a burst of +0x44 particles is rolled (+0x43 = chance out of 256, scaled
 // by timer / +0x3C with flag 4). A particle starts at the emitter's xyz, at a s16 / f32 position behind a pointer
-// (flags 0x10 / 0x20), or (object +0x3F) at two points of D_800A7210 moved by the object's matrix +0x1D4[+0x47],
+// (flags 0x10 / 0x20), or (object +0x3F) at two points of g_particle_emitter_points moved by the object's matrix +0x1D4[+0x47],
 // whose difference (minus the object's movement) is its velocity. Flag 8 gives a random direction
 // (particle_random_direction), +0x3D / +0x3E scatter the start, then particle_sprite_spawn spawns it. Velocities are passed as
 // hi / lo bytes in the colour args. Finally the timer +0x20 runs down and the emitter is freed (node_destroy).
@@ -331,7 +331,7 @@ void particle_emitter_update(u8 *arg0) {
     s32 left;
 
     notKind11 = (e->kind == 0x11) ? 0 : 1;
-    n = e->countdown - D_800BE9E4;
+    n = e->countdown - g_frame_ticks;
     while (n < 0) {
         if (e->period != 0) {
             n += e->period;
@@ -371,14 +371,14 @@ void particle_emitter_update(u8 *arg0) {
                 if (*(u8 **) (obj + 0x1D4) == NULL) {
                     continue;
                 }
-                ax = D_800A7210[e->posX][0];
-                ay = D_800A7210[e->posX][1];
-                az = D_800A7210[e->posX][2];
-                bx = D_800A7210[e->posX][3];
-                by = D_800A7210[e->posX][4];
-                bz = D_800A7210[e->posX][5];
-                if (D_800A7210[e->posX][6] != 0) {
-                    bz += (f32) (u32) (random_int() & D_800A7210[e->posX][6]);
+                ax = g_particle_emitter_points[e->posX][0];
+                ay = g_particle_emitter_points[e->posX][1];
+                az = g_particle_emitter_points[e->posX][2];
+                bx = g_particle_emitter_points[e->posX][3];
+                by = g_particle_emitter_points[e->posX][4];
+                bz = g_particle_emitter_points[e->posX][5];
+                if (g_particle_emitter_points[e->posX][6] != 0) {
+                    bz += (f32) (u32) (random_int() & g_particle_emitter_points[e->posX][6]);
                 }
                 obj = (u8 *) g_objects + e->obj * 0x32C;
                 mtxf_transform_point((f32 (*)[4]) (*(u8 **) (obj + 0x1D4) + e->mtx * 64), ax, ay, az, &ax, &ay, &az);
@@ -493,7 +493,7 @@ void particle_emitter_update(u8 *arg0) {
     }
     e->countdown = n;
     if (e->timer != 0xFFFF) {
-        left = e->timer - D_800BE9E4;
+        left = e->timer - g_frame_ticks;
         if (left > 0) {
             e->timer = left;
         } else {
@@ -509,13 +509,13 @@ void particle_emitter_preset_packed_pos(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s3
     particle_emitter_node_spawn(arg0 >> 0x10, arg0 & 0xFFFF, 0, arg2, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0, 8, 8, 1, 0, 0, 0, 0, 0x155, 0x155, 0x155, 0x155, arg1, 0x1E, 0, 0xFF, 0x28, 0x168, 0x18, 0x21, 4, 0, 1, 0, 0, 0, 0, 0, arg3, arg4);
 }
 
-extern u8 D_800A71E0[]; /* glow level thresholds (descending) */
-extern u8 D_800A71EC[]; /* rgb per threshold */
-// glow_colour_update: handler 0 of D_8008CF40 (`s32 (u8 *)`). While +0x24 (the glow level) is set the fade +0x1F
-// rises by D_800BE9E4 * 32 up to 0xFF, else it falls by D_800BE9E4 * 16 down to 0; returns 1 (done) when both are 0.
-// The phase +0x14 advances by D_800BE9E4 * 10 (copied to +0x16). The level (+0x24 + 8, or fade >> 5 while fading
-// out) picks, from index +0x26 for 8 entries, the first threshold of D_800A71E0 at or below it, and the colour
-// +0x1C..+0x1E is that entry's rgb (D_800A71EC) blended with the previous entry's by the level's position between
+extern u8 g_particle_glow_thresholds[]; /* glow level thresholds (descending); was D_800A71E0 */
+extern u8 g_particle_glow_colours[]; /* rgb per threshold; was D_800A71EC */
+// glow_colour_update: handler 0 of g_particle_sprite_tick_fns (`s32 (u8 *)`). While +0x24 (the glow level) is set the fade +0x1F
+// rises by g_frame_ticks * 32 up to 0xFF, else it falls by g_frame_ticks * 16 down to 0; returns 1 (done) when both are 0.
+// The phase +0x14 advances by g_frame_ticks * 10 (copied to +0x16). The level (+0x24 + 8, or fade >> 5 while fading
+// out) picks, from index +0x26 for 8 entries, the first threshold of g_particle_glow_thresholds at or below it, and the colour
+// +0x1C..+0x1E is that entry's rgb (g_particle_glow_colours) blended with the previous entry's by the level's position between
 // the two thresholds. Returns 0.
 /* was func_1516EE3C */
 s32 particle_glow_colour_tick(u8 *arg0) {
@@ -529,7 +529,7 @@ s32 particle_glow_colour_tick(u8 *arg0) {
 
     if (on != 0) {
         if (fade != 0xFF) {
-            fade += D_800BE9E4 << 5;
+            fade += g_frame_ticks << 5;
             if (fade >= 0x100) {
                 fade = 0xFF;
             }
@@ -537,7 +537,7 @@ s32 particle_glow_colour_tick(u8 *arg0) {
             on = arg0[0x24];
         }
     } else if (fade != 0) {
-        fade -= D_800BE9E4 << 4;
+        fade -= g_frame_ticks << 4;
         if (fade < 0) {
             fade = 0;
         }
@@ -547,7 +547,7 @@ s32 particle_glow_colour_tick(u8 *arg0) {
     if (on == 0 && fade == 0) {
         return 1;
     }
-    *(s16 *) (arg0 + 0x14) += D_800BE9E4 * 10;
+    *(s16 *) (arg0 + 0x14) += g_frame_ticks * 10;
     *(s16 *) (arg0 + 0x16) = *(s16 *) (arg0 + 0x14);
     if (on == 0) {
         level = arg0[0x1F] >> 5;
@@ -555,10 +555,10 @@ s32 particle_glow_colour_tick(u8 *arg0) {
         level = on + 8;
     }
     for (i = arg0[0x26]; i < arg0[0x26] + 8; i++) {
-        if (level >= D_800A71E0[i]) {
-            t = (f32) (level - D_800A71E0[i]) / (f32) (D_800A71E0[i - 1] - D_800A71E0[i]);
+        if (level >= g_particle_glow_thresholds[i]) {
+            t = (f32) (level - g_particle_glow_thresholds[i]) / (f32) (g_particle_glow_thresholds[i - 1] - g_particle_glow_thresholds[i]);
             u = 1.0f - t;
-            rgb = &D_800A71EC[i * 3];
+            rgb = &g_particle_glow_colours[i * 3];
             arg0[0x1C] = (u32) (rgb[-3] * t + rgb[0] * u);
             arg0[0x1D] = (u32) (rgb[-2] * t + rgb[1] * u);
             arg0[0x1E] = (u32) (rgb[-1] * t + rgb[2] * u);
@@ -578,14 +578,14 @@ s32 particle_fade_scale_tick(u8 *arg0) {
     v = arg0[0x1F];
     if (arg0[0x24] != 0) {
         if (v != 0xFF) {
-            v += D_800BE9E4 << 7;
+            v += g_frame_ticks << 7;
             if (v >= 0x100) {
                 v = 0xFF;
             }
             arg0[0x1F] = v;
         }
     } else if (v != 0) {
-        v -= D_800BE9E4 * arg0[0x26];
+        v -= g_frame_ticks * arg0[0x26];
         if (v < 0) {
             v = 0;
         }
@@ -606,7 +606,7 @@ s32 particle_fade_scale_tick(u8 *arg0) {
 void particle_emitter_preset_obj3a(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     u8 t;
 
-    t = D_800CC2D4[arg0 * 0x32C];
+    t = g_obj_tab_id[arg0 * 0x32C];
     if (t == 0x3A) {
         particle_emitter_node_spawn(5, 0, 0, 4, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0x124, 0x124, 0, 0, arg1, 0, 0, arg0, 0xC, 0, 0, 0x81, 2, 0, 1, 0, 0, 0, 5, 0, arg2, arg3);
     }
@@ -614,8 +614,8 @@ void particle_emitter_preset_obj3a(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
 
 /* was func_1516EED4 */
 void particle_emitter_preset_cooldown(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
-    if ((arg0 < 4) && ((&D_800DD2A0)[arg0 ^ 0] >= arg1)) { // fakematch: ^ 0 (permuter), keeps one arg0 reload
-        (&D_800DD2A0)[arg0 ^ 0] = 0;
+    if ((arg0 < 4) && ((&g_particle_cooldown)[arg0 ^ 0] >= arg1)) { // fakematch: ^ 0 (permuter), keeps one arg0 reload
+        (&g_particle_cooldown)[arg0 ^ 0] = 0;
         particle_emitter_node_spawn(0, 0, 0, 4, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x200, 0x200, 0, 0, 0x1E, 0, 0, arg0, 0x14, 0, 0, 0x81, 8, 0, 1, 0, 0, 0, 0xC, 0, arg2, arg3);
     }
 }
@@ -625,7 +625,7 @@ void particle_scale_vel_xz(s32 arg0, s32 arg1);
 
 // sprite_fade_grow_kind_tick: particle tick (handler at 0x8008CF48, sibling of particle_fade_shrink_tick) with per-kind
 // parameters (+0x2C = kind 0..10, tables copied from D_8008CF64 / CF70 / CF7C / CF88). While +0x24 (fading in) is
-// set, alpha +0x1F rises by 16 per frame (D_800BE9E4) up to the kind's maximum; otherwise it falls by the kind's
+// set, alpha +0x1F rises by 16 per frame (g_frame_ticks) up to the kind's maximum; otherwise it falls by the kind's
 // rate per frame down to 0. Returns 1 (done) once fading out reached 0. Else moves the particle
 // (particle_move_xz), grows the size +0x14 / +0x16 by the kind's step per frame (kind 3 also sets +0x18 = 100),
 // scales its velocity by the kind's factor / 256 (particle_scale_vel_xz) and returns 0.
@@ -641,14 +641,14 @@ s32 particle_fade_grow_kind_tick(u8 *arg0) {
 
     if (arg0[0x24] != 0) {
         if (v != maxAlpha[kind]) {
-            v += D_800BE9E4 << 4;
+            v += g_frame_ticks << 4;
             if (v > maxAlpha[kind]) {
                 v = maxAlpha[kind];
             }
             arg0[0x1F] = v;
         }
     } else if (v != 0) {
-        v -= D_800BE9E4 * fadeRate[kind];
+        v -= g_frame_ticks * fadeRate[kind];
         if (v < 0) {
             v = 0;
         }
@@ -658,7 +658,7 @@ s32 particle_fade_grow_kind_tick(u8 *arg0) {
         return 1;
     }
     particle_move_xz(arg0);
-    size = *(s16 *) (arg0 + 0x14) + D_800BE9E4 * grow[kind];
+    size = *(s16 *) (arg0 + 0x14) + g_frame_ticks * grow[kind];
     *(s16 *) (arg0 + 0x16) = size;
     *(s16 *) (arg0 + 0x14) = size;
     if (kind == 3) {
@@ -703,10 +703,10 @@ void particle_move_xz(u8 *arg0) {
     s32 temp_t1;
     s32 temp_t3;
 
-    temp_t3 = ((*(s16 *)((u8 *)arg0 + 0xE)) << 8) + (*(u8 *)((u8 *)arg0 + 0x2A)) + ((((*(s8 *)((u8 *)arg0 + 0x26)) << 8) + (*(u8 *)((u8 *)arg0 + 0x27))) * D_800BE9E4);
+    temp_t3 = ((*(s16 *)((u8 *)arg0 + 0xE)) << 8) + (*(u8 *)((u8 *)arg0 + 0x2A)) + ((((*(s8 *)((u8 *)arg0 + 0x26)) << 8) + (*(u8 *)((u8 *)arg0 + 0x27))) * g_frame_ticks);
     (*(s16 *)((u8 *)arg0 + 0xE)) = (s16) (temp_t3 >> 8);
     (*(u8 *)((u8 *)arg0 + 0x2A)) = (u8) temp_t3;
-    temp_t1 = ((*(s16 *)((u8 *)arg0 + 0x12)) << 8) + (*(u8 *)((u8 *)arg0 + 0x2B)) + ((((*(s8 *)((u8 *)arg0 + 0x28)) << 8) + (*(u8 *)((u8 *)arg0 + 0x29))) * D_800BE9E4);
+    temp_t1 = ((*(s16 *)((u8 *)arg0 + 0x12)) << 8) + (*(u8 *)((u8 *)arg0 + 0x2B)) + ((((*(s8 *)((u8 *)arg0 + 0x28)) << 8) + (*(u8 *)((u8 *)arg0 + 0x29))) * g_frame_ticks);
     (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) (temp_t1 >> 8);
     (*(u8 *)((u8 *)arg0 + 0x2B)) = (u8) temp_t1;
 }
@@ -755,7 +755,7 @@ void particle_scale_vel_xyz(s32 arg0, s32 arg1) {
 }
 
 // sprite_fade_scale_tick: particle tick (same scheme as particle_fade_rise_tick): while +0x24 (fading in) is set, alpha +0x1F
-// rises by 16 per frame (D_800BE9E4) up to 255; otherwise it falls by 8 per frame down to 0 and the size
+// rises by 16 per frame (g_frame_ticks) up to 255; otherwise it falls by 8 per frame down to 0 and the size
 // (+0x14 / +0x16) follows it (2 * alpha). Returns 1 (done) once fading out reached 0; else moves the particle
 // (particle_move_xz), scales its velocity by 0xF0 / 256 (particle_scale_vel_xyz) and returns 0.
 /* was func_1516FF34 */
@@ -766,7 +766,7 @@ s32 particle_fade_shrink_tick(u8 *arg0) {
     v = arg0[0x1F];
     if (arg0[0x24] != 0) {
         if (v != 0xFF) {
-            v += D_800BE9E4 * 0x10;
+            v += g_frame_ticks * 0x10;
             if (v >= 0x100) {
                 v = 0xFF;
             }
@@ -774,7 +774,7 @@ s32 particle_fade_shrink_tick(u8 *arg0) {
         }
     } else {
         if (v != 0) {
-            v -= D_800BE9E4 * 8;
+            v -= g_frame_ticks * 8;
             if (v < 0) {
                 v = 0;
             }
@@ -798,10 +798,10 @@ void particle_emitter_preset_at_pos(s16 arg0, s16 arg1, s16 arg2, s32 arg3, u8 a
 }
 
 // sprite_fade_drift_tint_tick: particle tick (handler at 0x8008CF50, same scheme as particle_fade_shrink_tick): while +0x24
-// (fading in) is set, alpha +0x1F rises by 16 per frame (D_800BE9E4) up to 255; otherwise it falls by
-// D_800BE9E4 << +0x2F down to 0. Returns 1 (done) once fading out reached 0. Else the size +0x14 / +0x16 grows by
+// (fading in) is set, alpha +0x1F rises by 16 per frame (g_frame_ticks) up to 255; otherwise it falls by
+// g_frame_ticks << +0x2F down to 0. Returns 1 (done) once fading out reached 0. Else the size +0x14 / +0x16 grows by
 // the signed rates +0x2D / +0x2E per frame; when the width reaches 0 or below both are cleared and it returns 1.
-// Else the tint step +0x2C advances by D_800BE9E4 (up to 0x7F) and the colour +0x1C..+0x1E blends from
+// Else the tint step +0x2C advances by g_frame_ticks (up to 0x7F) and the colour +0x1C..+0x1E blends from
 // +0x26..+0x28 towards +0x29..+0x2B by 2 * step / 256; returns 0.
 /* was func_1517013C */
 s32 particle_fade_drift_tint_tick(u8 *arg0) {
@@ -810,14 +810,14 @@ s32 particle_fade_drift_tint_tick(u8 *arg0) {
 
     if (arg0[0x24] != 0) {
         if (v != 0xFF) {
-            v += D_800BE9E4 << 4;
+            v += g_frame_ticks << 4;
             if (v >= 0x100) {
                 v = 0xFF;
             }
             arg0[0x1F] = v;
         }
     } else if (v != 0) {
-        v -= D_800BE9E4 << arg0[0x2F];
+        v -= g_frame_ticks << arg0[0x2F];
         if (v < 0) {
             v = 0;
         }
@@ -826,14 +826,14 @@ s32 particle_fade_drift_tint_tick(u8 *arg0) {
     if (arg0[0x24] == 0 && v == 0) {
         return 1;
     }
-    *(s16 *) (arg0 + 0x14) += (s8) arg0[0x2D] * D_800BE9E4;
-    *(s16 *) (arg0 + 0x16) += (s8) arg0[0x2E] * D_800BE9E4;
+    *(s16 *) (arg0 + 0x14) += (s8) arg0[0x2D] * g_frame_ticks;
+    *(s16 *) (arg0 + 0x16) += (s8) arg0[0x2E] * g_frame_ticks;
     if (*(s16 *) (arg0 + 0x14) <= 0) {
         *(s16 *) (arg0 + 0x16) = 0;
         *(s16 *) (arg0 + 0x14) = *(s16 *) (arg0 + 0x16);
         return 1;
     }
-    v = arg0[0x2C] + D_800BE9E4;
+    v = arg0[0x2C] + g_frame_ticks;
     if (v >= 0x80) {
         v = 0x7F;
     }
@@ -855,7 +855,7 @@ s32 particle_fade_rise_tick(u8 *arg0) {
     v = arg0[0x1F];
     if (arg0[0x24] != 0) {
         if (v != 0xFF) {
-            v += D_800BE9E4 * 0x10;
+            v += g_frame_ticks * 0x10;
             if (v >= 0x100) {
                 v = 0xFF;
             }
@@ -863,7 +863,7 @@ s32 particle_fade_rise_tick(u8 *arg0) {
         }
     } else {
         if (v != 0) {
-            v -= D_800BE9E4 * 8;
+            v -= g_frame_ticks * 8;
             if (v < 0) {
                 v = 0;
             }
@@ -944,13 +944,13 @@ s32 particle_random_direction(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
 }
 
 s32 random_int(void);
-extern f32 D_8008CFA0[3]; /* spread per variant: 571, 130, 130 */
-extern u8 D_8008CFAC[9];  /* colour per variant (3 bytes) */
+extern f32 g_particle_edge_spark_spread[3]; /* spread per variant: 571, 130, 130; was D_8008CFA0 */
+extern u8 g_particle_edge_spark_colours[9];  /* colour per variant (3 bytes); was D_8008CFAC */
 
 // quad_edge_sparks_spawn: walks the 4 edges of `quad` (4 points of 3 floats) and spawns `countA` (edges 0 / 2) or
 // `countB` (edges 1 / 3) sparks evenly along each edge (particle_sprite_spawn type 0xD, variant `variant`'s colour): the
 // spark's push is the edge midpoint relative to (x, z) (doubled, as hi / lo bytes), its speed 731 * size + rand
-// modulo 836 * size, life 15..46, spread 143 * size + rand modulo D_8008CFA0[variant] * size. The caller's D_8008CF94 copy is unused.
+// modulo 836 * size, life 15..46, spread 143 * size + rand modulo g_particle_edge_spark_spread[variant] * size. The caller's D_8008CF94 copy is unused.
 /* was func_15170648 */
 void particle_quad_edge_sparks(f32 *quad, f32 x, f32 z, s32 kind, f32 size, s32 variant, s32 countA, s32 countB, s32 alpha,
                    s32 owner) {
@@ -971,13 +971,13 @@ void particle_quad_edge_sparks(f32 *quad, f32 x, f32 z, s32 kind, f32 size, s32 
     f32 t;
     f32 px, py, pz;
 
-    range = (s32)(D_8008CFA0[variant] * size);
+    range = (s32)(g_particle_edge_spark_spread[variant] * size);
     p = quad;
     for (edge = 0; edge < 4; edge++, p += 3) {
         next = (edge == 3) ? 0 : edge + 1;
         n = (edge == 0 || edge == 2) ? countA : countB;
         q = &quad[next * 3];
-        col = &D_8008CFAC[variant * 3];
+        col = &g_particle_edge_spark_colours[variant * 3];
         mx = (q[0] + p[0]) * 0.5f - x;
         mz = (q[2] + p[2]) * 0.5f - z;
         vx = (s32)(mx + mx);
@@ -1050,8 +1050,8 @@ void particle_spark_spawn(s32 x, s32 y, s32 z, s32 angle, s32 flare, s32 alpha, 
 }
 
 s32 game_gu_random(void);
-// sprite_flicker_drift_tick: particle tick (handler at 0x8008CF58 of D_8008CF40, same scheme as particle_fade_shrink_tick).
-// While +0x24 (life) is set, the alpha +0x1F rises by 64 per frame (D_800BE9E4) up to 254; a particle whose alpha is
+// sprite_flicker_drift_tick: particle tick (handler at 0x8008CF58 of g_particle_sprite_tick_fns, same scheme as particle_fade_shrink_tick).
+// While +0x24 (life) is set, the alpha +0x1F rises by 64 per frame (g_frame_ticks) up to 254; a particle whose alpha is
 // still 0 first gets a life of 200..224 (random_int). Otherwise the alpha falls by 16 per frame down to 0, and
 // the particle is done (returns 1) once it reached 0. Else it moves (particle_move_xz) and its velocity +0x26 / +0x28
 // is scaled by a random (230 + -31..31) / 256 when +0x2F is set, or by (220 + -31..31) / 256 when the 8.8
@@ -1066,14 +1066,14 @@ s32 particle_flicker_drift_tick(u8 *arg0) {
             arg0[0x24] = (u32) random_int() % 25 + 200;
         }
         if (alpha != 0xFE) {
-            alpha += D_800BE9E4 << 6;
+            alpha += g_frame_ticks << 6;
             if (alpha >= 0xFF) {
                 alpha = 0xFE;
             }
             arg0[0x1F] = alpha;
         }
     } else if (alpha != 0) {
-        alpha -= D_800BE9E4 << 4;
+        alpha -= g_frame_ticks << 4;
         if (alpha < 0) {
             alpha = 0;
         }

@@ -7,7 +7,7 @@ typedef struct { u8 u0; u8 pad1[3]; s16 u4; u8 pad6[4]; } E10;
 extern E10 *D_eu_800BE900;
 
 // wobblers_update: the 10 records at D_eu_800BE900 (s8 dir +2, s16 pos +4, s16 speed +6, s16 target speed +8):
-// speed moves toward the target (sign follows the current speed) by at most D_800BE9E4 * 16, then pos advances by
+// speed moves toward the target (sign follows the current speed) by at most g_frame_ticks * 16, then pos advances by
 // speed * dir * D_800BE9A0 and bounces inside 0 .. 0x4FF (dir flips)
 /* was func_150C8850 */
 void wobblers_update(void) {
@@ -28,7 +28,7 @@ void wobblers_update(void) {
                 target = -target;
             }
             diff = target - speed;
-            step = D_800BE9E4 * 16;
+            step = g_frame_ticks * 16;
             if ((diff < 0 ? -diff : diff) < step) {
                 *(s16 *)(r + 6) = target;
             } else {
@@ -137,7 +137,7 @@ s32 obj_spawn_part_at_mtx(u8 *arg0, struct127 *arg1) {
         return 0;
     }
     if ((*(u16 *)((u8 *)arg1 + 0x84) == 0x14 && 10.0f < *(f32 *)(v + 8)) || *(u16 *)((u8 *)arg1 + 0x84) == 0x23) {
-        i = D_800BE9C0;
+        i = g_dl_buf_index;
         p = *(u8 **)(arg0 + 0x34);
         p += (i == 0) << 6;
         guMtxL2F(m, (Mtx *)p);
@@ -220,7 +220,7 @@ void ring_effect_update(u8 *node) {
     u8 dead = 0;
 
     if (node[0x1C] & 1) {
-        *(s16 *)(node + 0x28) -= D_800BE9E4;
+        *(s16 *)(node + 0x28) -= g_frame_ticks;
         if (*(s16 *)(node + 0x28) < 0) {
             dead = 1;
         }
@@ -228,7 +228,7 @@ void ring_effect_update(u8 *node) {
     if (!dead) {
         f32 oldRadius = *(f32 *)(node + 0x44);
         s16 t;
-        *(f32 *)(node + 0x44) = oldRadius + *(f32 *)(node + 0x20) * D_800BE9A4;
+        *(f32 *)(node + 0x44) = oldRadius + *(f32 *)(node + 0x20) * g_frame_step_f;
         t = *(s16 *)(node + 0x28);
         if (*(s16 *)(node + 0x2A) < t) {
             *(f32 *)(node + 0x40) = (f32)(s16)(*(s16 *)(node + 0x4C) - t) * *(f32 *)(node + 0x2C);
@@ -237,9 +237,9 @@ void ring_effect_update(u8 *node) {
             *(f32 *)(node + 0x40) = (f32)t * *(f32 *)(node + 0x34);
         }
         if ((s8)node[0x3C] != -1) {
-            *(f32 *)(node + 0x50) += *(f32 *)(node + 0x38) * D_800BE9A4 * (D_800A08FC * *(f32 *)(node + 0x44));
+            *(f32 *)(node + 0x50) += *(f32 *)(node + 0x38) * g_frame_step_f * (D_800A08FC * *(f32 *)(node + 0x44));
             while (1.0f < *(f32 *)(node + 0x50)) {
-                s32 view = (s32)(*(f32 *)((u8 *)D_800DBFF0 + g_cur_view_player * 0x9A0 + 0x380) * D_800A0904);
+                s32 view = (s32)(*(f32 *)((u8 *)g_player_views + g_cur_view_player * 0x9A0 + 0x380) * D_800A0904);
                 s32 a = (u32)random_int() % 81 + view - 0x28;
                 f32 s = angle_byte_cos((u8)(a - 0x40));
                 f32 c = angle_byte_cos((u8)a);
@@ -293,7 +293,7 @@ void ground_colour_by_depth(f32, f32 *, f32 *, f32 *);
 // +0x40) swept around the centre +0x10 / +0x14 / +0x18 at radius +0x44, one vertex column per direction (+0x360:
 // cos / sin pairs, +0x24 of them, the last column repeats the first). Columns farther than 3300.6 from the world
 // origin (x / z) are flat and transparent. Vertex colours: ground_colour_by_depth(z); texture coordinates from x / z. The
-// vertices go to the node's buffer for this frame (+0x54[D_800BE9C0]); after each new column, gSPVertex of it and
+// vertices go to the node's buffer for this frame (+0x54[g_dl_buf_index]); after each new column, gSPVertex of it and
 // the previous one and two triangles per cross-section edge. arg2 (the layer's argument) is unused. Returns the DL end.
 /* was func_150C92B8 */
 Gfx *ring_effect_draw(Gfx *gdl, u8 *node, s16 arg2) {
@@ -336,7 +336,7 @@ Gfx *ring_effect_draw(Gfx *gdl, u8 *node, s16 arg2) {
     gDPLoadTLUTCmd(gdl++, 6, 15);
     gSPTexture(gdl++, 0xFFFF, 0xFFFF, 4, G_TX_RENDERTILE, G_ON);
 
-    buf = ((Vtx **) (node + 0x54))[D_800BE9C0];
+    buf = ((Vtx **) (node + 0x54))[g_dl_buf_index];
     /* column 0 is direction 0; column col > 0 is direction col (the last one, col == +0x24, wraps to 0) */
     for (col = 0; col == 0 || col <= *(s32 *) (node + 0x24); col++) {
         dir = *(f32 **) (node + 0x360) + (col == *(s32 *) (node + 0x24) ? 0 : col) * 2;
@@ -365,7 +365,7 @@ Gfx *ring_effect_draw(Gfx *gdl, u8 *node, s16 arg2) {
             continue;
         }
         n = D_80088BC0.n;
-        gSPVertex(gdl++, ((Vtx **) (node + 0x54))[D_800BE9C0] + (nv - n * 2), n * 2, 0);
+        gSPVertex(gdl++, ((Vtx **) (node + 0x54))[g_dl_buf_index] + (nv - n * 2), n * 2, 0);
         for (i = 0; i < D_80088BC0.n - 1; i++) {
             gSP1Triangle(gdl++, i, i + 1, i + D_80088BC0.n + 1, 0);
             gSP1Triangle(gdl++, i, i + D_80088BC0.n + 1, i + D_80088BC0.n, 0);
@@ -632,13 +632,13 @@ void ring_spawn_debris(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P22
 }
 /* was func_150CA57C */
 s32 particle_ballistic_update(u8 *arg0) {
-    *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x3C) += (*(f32 *)(arg0 + 0x48) * D_800BE9A4) + (*(f32 *)(arg0 + 0x5C) * D_800BE9A4 * D_800BE9A4 * 0.5f);
-    *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x5C) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x20) += *(f32 *)(arg0 + 0x50) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x24) += *(f32 *)(arg0 + 0x54) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x58) * D_800BE9A4;
+    *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x3C) += (*(f32 *)(arg0 + 0x48) * g_frame_step_f) + (*(f32 *)(arg0 + 0x5C) * g_frame_step_f * g_frame_step_f * 0.5f);
+    *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x5C) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x20) += *(f32 *)(arg0 + 0x50) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x24) += *(f32 *)(arg0 + 0x54) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x58) * g_frame_step_f;
     return 1;
 }
 
@@ -658,7 +658,7 @@ void hitinfo_from_obj_floor(void *, u8 *);
 u8 *ring_effect_create(u8 *spec, s32 extra, s32 view, s32 arg3);
 void landing_dust_spray(u8 *arg0);
 void spawn_circle_random_emit(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
-extern s32 D_800BEE08;
+extern s32 g_view_count_minus1; /* was D_800BEE08 */
 
 typedef struct {
     s16 rgb[3];
@@ -713,7 +713,7 @@ s32 landing_dust_burst(u8 *obj) {
         return 0;
     }
     hitinfo_from_obj_floor(hit, obj);
-    camera_shake_start((struct108 *) ((u8 *) D_800DBFF0 + D_800BEE08 * 0x9A0), 7, 1);
+    camera_shake_start((struct108 *) ((u8 *) g_player_views + g_view_count_minus1 * 0x9A0), 7, 1);
     pos[0] = *(f32 *) (obj + 0x14);
     pos[1] = *(f32 *) (obj + 0x18) + 100.0f;
     pos[2] = *(f32 *) (obj + 0x1C);
@@ -917,7 +917,7 @@ s32 dust_puff_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 ar
 s32 particle_shrink_update_b(u8 *arg0, s32 arg1) {
     s32 i;
     f32 *p = (f32 *)(arg0 + 0xA8);
-    for (i = D_800BE9E4; i != 0; i--) {
+    for (i = g_frame_ticks; i != 0; i--) {
         *(f32 *)(arg0 + 0x58) *= *p;
         *(f32 *)(arg0 + 0x60) *= *p;
     }
@@ -1005,12 +1005,12 @@ s32 dust_chunk_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 a
 
 /* was func_150CB508 */
 s32 particle_ballistic_update_b(u8 *arg0) {
-    *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x3C) += (*(f32 *)(arg0 + 0x48) * D_800BE9A4) + (*(f32 *)(arg0 + 0x5C) * D_800BE9A4 * D_800BE9A4 * 0.5f);
-    *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x5C) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x20) += *(f32 *)(arg0 + 0x50) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x24) += *(f32 *)(arg0 + 0x54) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x58) * D_800BE9A4;
+    *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x3C) += (*(f32 *)(arg0 + 0x48) * g_frame_step_f) + (*(f32 *)(arg0 + 0x5C) * g_frame_step_f * g_frame_step_f * 0.5f);
+    *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x5C) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x20) += *(f32 *)(arg0 + 0x50) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x24) += *(f32 *)(arg0 + 0x54) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x58) * g_frame_step_f;
     return 1;
 }

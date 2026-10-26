@@ -5,7 +5,7 @@
 s32 zap_bolt_spawn(s32, s32, s32, s32, s32, s32, s32, f32, s32, f32, f32, f32, s32, s16);
 
 
-extern f32 D_800A1400;
+extern f32 g_zap_bolt_no_height; /* was D_800A1400 */
 /* was func_150E35A0 */
 s32 zap_bolt_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, f32 arg7, s32 arg8, f32 arg9, f32 argA, f32 argB, s32 argC, s16 argD) {
     f32 temp_f0;
@@ -23,8 +23,8 @@ s32 zap_bolt_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
     (*(s8 *)((u8 *)temp_v0 + 0x70)) = 0;
     (*(s8 *)((u8 *)temp_v0 + 0x71)) = 0;
     (*(s32 *)((u8 *)temp_v0 + 0x74)) = 0;
-    (*(f32 *)((u8 *)temp_v0 + 0x54)) = D_800A1400;
-    var_v1 = D_800D99D0;
+    (*(f32 *)((u8 *)temp_v0 + 0x54)) = g_zap_bolt_no_height;
+    var_v1 = g_zap_bolts;
     var_a1 = 0;
     (*(s16 *)((u8 *)temp_v0 + 0x7C)) = argD;
     (*(s32 *)((u8 *)temp_v0 + 0x78)) = argC;
@@ -140,7 +140,7 @@ void zap_bolt_free(struct102 *arg0) {
 
     idx = *(u8 *)((u8 *)arg0 + 0x48);
     if (idx >= 0) {
-        p = &D_800D99D0[idx];
+        p = &g_zap_bolts[idx];
         if ((s32)arg0 == *p) {
             *p = 0;
         }
@@ -176,7 +176,7 @@ void zap_bolt_get_pos(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
     s32 temp_v0;
     arg0 = arg0 - 1;
     if ((arg0 >= 0) && (arg0 < 8)) {
-        temp_v0 = D_800D99D0[arg0];
+        temp_v0 = g_zap_bolts[arg0];
         if ((temp_v0 != 0) && ((*(u8 *)((u8 *)temp_v0 + 0)) == 0x27)) {
             *arg1 = (s32) (*(f32 *)((u8 *)temp_v0 + 0x10));
             *arg2 = (s32) (*(f32 *)((u8 *)temp_v0 + 0x14));
@@ -185,13 +185,13 @@ void zap_bolt_get_pos(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
     }
 }
 
-extern f32 D_800A1404;
-extern f32 D_800A1408;
-extern f32 D_800A140C;
-extern f32 D_800A1410;
-extern f32 D_800A1414;
-extern f32 D_800A1418;
-extern f32 D_800A141C;
+extern f32 g_zap_bolt_speed_base; /* was D_800A1404 */
+extern f32 g_zap_bolt_speed_rand; /* was D_800A1408 */
+extern f32 g_zap_bolt_speed_scale; /* was D_800A140C */
+extern f32 g_zap_bolt_tracer_param; /* was D_800A1410 */
+extern f32 g_zap_bolt_spin_scale; /* was D_800A1414 */
+extern f32 g_zap_bolt_sprite_base; /* was D_800A1418 */
+extern f32 g_zap_bolt_sprite_rand; /* was D_800A141C */
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 s32 collision_floor_probe(f32 *, s32, f32, f32 *);
 s32 vec3_normalize_len(f32 *, f32 *, f32 *, f32 *);
@@ -206,7 +206,7 @@ typedef struct {
 // zap_bolt_update: per-frame update of a type-0x27 lightning bolt object `obj` (made by zap_bolt_spawn). Counts down
 // its life (+0x7C, -0x63 = forever; zap_bolt_free frees it at < 0 but the update goes on), aims at the followed object
 // (+0x3C, its +0x14 position; freed when that object's first word is 0) or the path point (+0x78), and moves its head
-// (+0x10) by speed (+0x34) * D_800BE9E4 frames toward the target (+0x1C). When it arrives (no path), a followed
+// (+0x10) by speed (+0x34) * g_frame_ticks frames toward the target (+0x1C). When it arrives (no path), a followed
 // target makes it shoot 500 lengths further for 25 frames (+0x44); otherwise it is freed. The +0x4C accumulator then
 // spawns beam segments from the anchor (+0x28) to a random point near the head (tracer_spawn, ground snapped with
 // collision_floor_probe and shortened by a random amount), and without a path the +0x50 accumulator spawns sparks
@@ -257,7 +257,7 @@ void zap_bolt_update(u8 *obj) {
     s32 mode;
 
     if (*(s16 *) (obj + 0x7C) != -0x63) {
-        *(s16 *) (obj + 0x7C) -= D_800BE9E4;
+        *(s16 *) (obj + 0x7C) -= g_frame_ticks;
         if (*(s16 *) (obj + 0x7C) < 0) {
             zap_bolt_free((struct102 *) obj);
         }
@@ -287,7 +287,7 @@ void zap_bolt_update(u8 *obj) {
     delta[1] = target[1] - pos[1];
     delta[2] = target[2] - pos[2];
     dist = sqrtf(delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2]);
-    step = *(f32 *) (obj + 0x34) * (f32) D_800BE9E4;
+    step = *(f32 *) (obj + 0x34) * (f32) g_frame_ticks;
 
     if (*(s32 *) (obj + 0x78) == 0) {
         if (*(s32 *) (obj + 0x44) == 0) {
@@ -303,7 +303,7 @@ void zap_bolt_update(u8 *obj) {
                 target[2] += delta[2] * 500.0f;
             }
         } else {
-            *(s32 *) (obj + 0x44) -= D_800BE9E4;
+            *(s32 *) (obj + 0x44) -= g_frame_ticks;
             if (*(s32 *) (obj + 0x44) <= 0) {
                 zap_bolt_free((struct102 *) obj);
                 return;
@@ -331,7 +331,7 @@ void zap_bolt_update(u8 *obj) {
     pos[1] = newPos[1];
     pos[2] = newPos[2];
 
-    *(f32 *) (obj + 0x4C) += (D_800A1404 + random_float() * D_800A1408) * D_800A140C * D_800BE9A4;
+    *(f32 *) (obj + 0x4C) += (g_zap_bolt_speed_base + random_float() * g_zap_bolt_speed_rand) * g_zap_bolt_speed_scale * g_frame_step_f;
     while (1.0f < *(f32 *) (obj + 0x4C)) {
         start[0] = anchor[0];
         start[1] = anchor[1];
@@ -352,7 +352,7 @@ void zap_bolt_update(u8 *obj) {
         dir[1] = end[1] - start[1];
         dir[2] = end[2] - start[2];
         if (vec3_normalize_len(dir, dir, &len, &unused)) {
-            k = 190.0f * (random_float() * D_800BE9A4);
+            k = 190.0f * (random_float() * g_frame_step_f);
             start[0] += dir[0] * k;
             start[1] += dir[1] * k;
             start[2] += dir[2] * k;
@@ -390,7 +390,7 @@ void zap_bolt_update(u8 *obj) {
         b = random_float();
         r = random_int();
         mode = (hit != 0 || *(s32 *) (obj + 0x78) != 0) ? 2 : 1;
-        if (tracer_spawn(start, 0, 0, 0, 0, &seg, 190.0f, D_800A1410, a * 50.0f + 10.0f, b * 191.0f + 160.0f, 80.0f,
+        if (tracer_spawn(start, 0, 0, 0, 0, &seg, 190.0f, g_zap_bolt_tracer_param, a * 50.0f + 10.0f, b * 191.0f + 160.0f, 80.0f,
                           r % 176U + 80, 0, 0, 0, 0, 0, 0, 1, mode, *(s32 *) (obj + 0x40), 0.0f, 0xFF, -1, 0, obj[0xC],
                           obj[1]) != 0) {
             hit = 1;
@@ -401,17 +401,17 @@ void zap_bolt_update(u8 *obj) {
     if (*(s32 *) (obj + 0x78) != 0) {
         return;
     }
-    *(f32 *) (obj + 0x50) += (56.0f + random_float() * 235.0f) * D_800A1414 * D_800BE9A4;
+    *(f32 *) (obj + 0x50) += (56.0f + random_float() * 235.0f) * g_zap_bolt_spin_scale * g_frame_step_f;
     while (1.0f < *(f32 *) (obj + 0x50)) {
         u32 count = random_int();
         u32 alpha = random_int();
-        flip_sprite_particle_spawn((count & 3) + 6, alpha % 156U + 100, random_float() * D_800A141C + D_800A1418, anchor, 0xFF,
+        flip_sprite_particle_spawn((count & 3) + 6, alpha % 156U + 100, random_float() * g_zap_bolt_sprite_rand + g_zap_bolt_sprite_base, anchor, 0xFF,
                       obj[0xC], obj[1]);
         *(f32 *) (obj + 0x50) -= 1.0f;
     }
 }
 
-extern f32 D_800A1420;
+extern f32 g_linked_fx_rad_to_binang; /* was D_800A1420 */
 
 /* was func_150E4590 */
 void obj_spawn_linked_effect(u8 *arg0) {
@@ -419,20 +419,20 @@ void obj_spawn_linked_effect(u8 *arg0) {
 
     temp_v0 = arg0 + 0x110;
     if ((*(s32 *)((u8 *)arg0 + 0x1B4)) != 0) {
-        attack_spawn_at_point((*(f32 *)((u8 *)temp_v0 + 0x30)), (*(f32 *)((u8 *)temp_v0 + 0x34)), (*(f32 *)((u8 *)temp_v0 + 0x38)), (*(s32 *)((u8 *)temp_v0 + 0xA4)) | 0x60000, -1, (u16) ((((u32) (math_atan2f((*(f32 *)((u8 *)temp_v0 + 0x60)), (*(f32 *)((u8 *)temp_v0 + 0x64))) * D_800A1420) & 0xFFFF) - 0x4000) | 1), 0, 0);
+        attack_spawn_at_point((*(f32 *)((u8 *)temp_v0 + 0x30)), (*(f32 *)((u8 *)temp_v0 + 0x34)), (*(f32 *)((u8 *)temp_v0 + 0x38)), (*(s32 *)((u8 *)temp_v0 + 0xA4)) | 0x60000, -1, (u16) ((((u32) (math_atan2f((*(f32 *)((u8 *)temp_v0 + 0x60)), (*(f32 *)((u8 *)temp_v0 + 0x64))) * g_linked_fx_rad_to_binang) & 0xFFFF) - 0x4000) | 1), 0, 0);
     }
 }
 
-extern f32 D_800A1424;
+extern f32 g_fx_tint_preset_param; /* was D_800A1424 */
 
 /* was func_150E469C */
 void fx_set_tint_preset(s32 arg0) {
-    surface_impact_effects(arg0, 0.35200003f, 0.70100003f, 0.56600004f, D_800A1424, 0xFF, 0xFF, 0xFF);
+    surface_impact_effects(arg0, 0.35200003f, 0.70100003f, 0.56600004f, g_fx_tint_preset_param, 0xFF, 0xFF, 0xFF);
 }
 
 /* was func_150E46F4 */
 s32 fx_scroll_step(f32 *arg0) {
-    arg0[0x2C / 4] += arg0[0x4C / 4] * D_800BE9A4;
-    arg0[0x30 / 4] += arg0[0x54 / 4] * D_800BE9A4;
+    arg0[0x2C / 4] += arg0[0x4C / 4] * g_frame_step_f;
+    arg0[0x30 / 4] += arg0[0x54 / 4] * g_frame_step_f;
     return 1;
 }

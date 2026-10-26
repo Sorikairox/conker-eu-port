@@ -149,7 +149,7 @@ s32 bullet_impact_effects(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 
     if (kind == 1) {
         if (big) {
             snd = (u32) random_int() % 3 + 0x459;
-            if (D_80082FA0 == 0) {
+            if (g_last_player_index == 0) {
                 sfx_emitter_start(snd, (s32) pos[0], (s32) pos[1], (s32) pos[2], 0x4000, 0x4B0, 0x320, (s32) sfx_cb_delayed_play_2d,
                               (void *) 0x28, 0, 0, 0);
                 snd = 0x106;
@@ -205,7 +205,7 @@ s32 bullet_impact_effects(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 
         sparks.b73 = 0xFF;
         emit_streaks_from_spec(&sparks, arg4, arg5);
     }
-    if (type != 0 && D_80082FA0 < 2) {
+    if (type != 0 && g_last_player_index < 2) {
         part.pos[0] = pos[0];
         part.pos[1] = pos[1];
         part.pos[2] = pos[2];
@@ -277,10 +277,10 @@ s32 impact_puff_wobble_update(u8 *arg0) {
 
     v = arg0 + 0x170;
     if (*(s16 *)(arg0 + 0x170) > 0) {
-        *(f32 *)(v + 4) = (*(f32 *)(v + 8) * D_800BE9A4) + *(f32 *)(v + 4);
+        *(f32 *)(v + 4) = (*(f32 *)(v + 8) * g_frame_step_f) + *(f32 *)(v + 4);
         *(f32 *)(v + 4) = wrap_angle_rad(*(f32 *)(v + 4));
         *(f32 *)(arg0 + 0x24) = *(f32 *)(arg0 + 0x54) + (*(f32 *)(v + 0xC) * sinf(*(f32 *)(v + 4)));
-        *(s16 *)(v + 0) = *(s16 *)(v + 0) - D_800BE9E4;
+        *(s16 *)(v + 0) = *(s16 *)(v + 0) - g_frame_ticks;
     } else {
         *(vertex *)(arg0 + 0x20) = *(vertex *)(arg0 + 0x50);
     }
@@ -513,7 +513,7 @@ void obj_point_fx_broadcast_kill(u8 *arg0) {
 
 /* P160 */
 void *memcpy(void *, const void *, s32);
-extern void (*D_80090010[])(u8 *obj, s32 sound, f32 *point);
+extern void (*g_obj_point_fx_fns[])(u8 *obj, s32 sound, f32 *point); /* was D_80090010 */
 
 typedef struct {
     u8 *obj;     /* 0x00 */
@@ -526,7 +526,7 @@ typedef struct {
 } ObjEffectRec_151D469C; /* 0x20 bytes, copied to the record at +0x28 */
 
 // object_point_effect_spawn: fills a 0x20-byte record (object, kind, the kind's point on the object from the
-// D_80090010 handler when the object has bone matrices and obj[0x74] low nibble != 0xF) and spawns event 0x41 /
+// g_obj_point_fx_fns handler when the object has bone matrices and obj[0x74] low nibble != 0xF) and spawns event 0x41 /
 // kind 0x35 through effect_node_create with it. Returns 0 (callers in game_981E0 declare it implicitly as int).
 /* was func_151D469C */
 s32 object_point_effect_spawn(u8 *obj, u8 kind, s16 arg2, u8 arg3, s32 arg4) {
@@ -543,7 +543,7 @@ s32 object_point_effect_spawn(u8 *obj, u8 kind, s16 arg2, u8 arg3, s32 arg4) {
         rec.sound = 0x82;
     }
     if (*(u8 **)(obj + 0x1D4) != NULL && (obj[0x74] & 0xF) != 0xF) {
-        D_80090010[kind](obj, rec.sound, rec.point);
+        g_obj_point_fx_fns[kind](obj, rec.sound, rec.point);
         rec.flags |= 1;
     }
     p = (u8 *)effect_node_create(arg2, -1, 0x41, -1, 1, 0x35, (struct37 *)0x20, arg3, arg4);
@@ -587,7 +587,7 @@ typedef struct {
 // object_trail_smoke_update: update handler (table D_8008A980) of the event record that object_point_effect_spawn spawns (kind
 // 0x35, its 0x20-byte object record at +0x28: object, id, sound, point kind, accumulator +0x34, flags +0x38, point
 // +0x3C). Ends the event (+0xE = -1) when the object is gone or reused (id +0x2C != obj[0x3B]). Re-reads the point from
-// the object's D_80090010 handler (bone matrices present and obj[0x74] low nibble != 0xF). When the old point was
+// the object's g_obj_point_fx_fns handler (bone matrices present and obj[0x74] low nibble != 0xF). When the old point was
 // valid and the point moved at most 5 units, the accumulator grows by (0.2 + rand * 0.209) per second and each whole
 // unit emits one smoke particle (particle_spawn_ex, layer ev[0xC] / ev[1]) at a random spot on the move segment, with
 // random size / alpha / life and its 16-byte data at +0xA8.
@@ -612,7 +612,7 @@ void object_trail_smoke_update(u8 *ev) {
         return;
     }
     if (*(u8 **) (obj + 0x1D4) != NULL && (obj[0x74] & 0xF) != 0xF) {
-        D_80090010[rec->kind](obj, rec->sound, rec->point);
+        g_obj_point_fx_fns[rec->kind](obj, rec->sound, rec->point);
         rec->flags |= 1;
     }
     if (!valid) {
@@ -624,7 +624,7 @@ void object_trail_smoke_update(u8 *ev) {
     if (vec3_length(&d) > 5.0f) {
         return;
     }
-    rec->unkC += (0.2f + random_float() * 0.209f) * D_800BE9A4;
+    rec->unkC += (0.2f + random_float() * 0.209f) * g_frame_step_f;
     if (!(rec->unkC > 1.0f)) {
         return;
     }
@@ -854,11 +854,11 @@ void cam_shake_all_players(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 a
     sp.u48 = arg1;
     sp.u4C = arg2;
     sp.u50 = arg3;
-    if ((D_80082FA0 + 1) > 0) {
+    if ((g_last_player_index + 1) > 0) {
         do {
             cam_wobble_start_preset(arg4 & 0xFF, var_s0 & 0xFF, &sp.u3C, arg5 & 0xFF, arg6);
             var_s0 += 1;
-        } while (D_80082FA0 >= var_s0);
+        } while (g_last_player_index >= var_s0);
     }
 }
 typedef struct {
@@ -883,7 +883,7 @@ void rumble_all_players_at(struct17 *arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg
     sp30.unk2 = (random_int() % (u32) (arg5 + 1)) + arg4;
     sp30.unk4 = 0;
     sp30.unk6 = 0;
-    for (i = 0; i < D_80082FA0 + 1; i++) {
+    for (i = 0; i < g_last_player_index + 1; i++) {
         sp30.unk5 = 1 << i;
         sp38.unk18 = i;
         p = rumble_request(&sp30, 0x1C, 0xFF, 0);
@@ -1001,12 +1001,12 @@ void bone_beam_spawn(struct127 *obj, f32 *a, f32 *b, u8 bone, f32 scale, u8 alph
     bone_streak_fx_start((u8 *)at, (u8 *)dir, (s32)mtx, (u8 *)obj, scale, alpha, flags);
 }
 
-extern f32 *D_8009002C[]; /* P216: per-mouth point (2 entries) */
-extern u8 *D_80090034[];  /* P216: per-mouth bone index (2 entries) */
+extern f32 *g_mouth_points[]; /* P216: per-mouth point (2 entries); was D_8009002C */
+extern u8 *g_mouth_bones[];  /* P216: per-mouth bone index (2 entries); was D_80090034 */
 s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
 void obj_notify_hit_target(struct127 *);
 s32 object_mouth_point(struct127 *obj, f32 *out, f32 *dir, s32 arg3, s32 arg4, f32 *point, u8 bone);
-// mouth_aim_ray: P216: for mouth `which` (0 / 1, table D_8009002C point + D_80090034 bone): the mouth point and
+// mouth_aim_ray: P216: for mouth `which` (0 / 1, table g_mouth_points point + g_mouth_bones bone): the mouth point and
 // aim direction (object_mouth_point), the impact / target search (weapon_find_aim_target, two result pointers, NULL = use the
 // mouth point / the direction), then the control block (obj +0x31C) gets flag +0x109 = 1 and the far point
 // +0xB8 = hitA + hitB * 9999. The segment from the mouth to that point is normalised (vec3_normalize_len) and, when it has
@@ -1026,7 +1026,7 @@ void mouth_aim_ray(struct127 *obj, u8 which) {
     f32 len;
     u8 *ctl;
 
-    object_mouth_point(obj, mouth, dir, (s32)sp94, (s32)sp88, D_8009002C[which], *D_80090034[which]);
+    object_mouth_point(obj, mouth, dir, (s32)sp94, (s32)sp88, g_mouth_points[which], *g_mouth_bones[which]);
     weapon_find_aim_target((u8 *)obj, (u8 *)mouth, (struct17 *)dir, (struct17 *)sp94, (struct17 *)sp88, (u8 *)sp7C,
                   (u8 *)sp70, (u8 **)&hitA, (u8 **)&hitB, NULL);
     ((u8 *)obj->unk31C)[0x109] = 1;
@@ -1158,7 +1158,7 @@ void vtx_slot_buffer_get(s32 *arg0, s16 arg1, s32 arg2, s32 *arg3, u8 *arg4) {
         }
         *arg4 = 1;
     }
-    *arg3 = arg0[arg1] + (D_800BE9C0 ? 0 : arg2);
+    *arg3 = arg0[arg1] + (g_dl_buf_index ? 0 : arg2);
 }
 
 /* was func_151D5E30 */

@@ -603,9 +603,9 @@ void player_context_action(struct127 *player, s32 buttons, f32 height, s32 arg3,
                     P_U8(0x83) = 0xFF;
                     if (D_800BE616 == 0) {
                         anim = 0x1DC;
-                    } else if (D_800E9D00 & 0x400) {
+                    } else if (g_cheat_flags & 0x400) {
                         anim = 0x355;
-                    } else if (D_800E9D00 & 0x800) {
+                    } else if (g_cheat_flags & 0x800) {
                         anim = 0x1DC;
                     } else {
                         anim = 0x354;
@@ -1058,8 +1058,8 @@ s32 sfx_cb_delayed_play_2d();
 void objev_spawn_helper_object(void);
 struct127 *obj_find_held(struct127 *, s32);
 void char_fx_glow_spawn(s32);
-extern s32 D_800BE9E4;
-extern u8 D_800BE9B4;
+extern s32 g_frame_ticks; /* was D_800BE9E4 */
+extern u8 g_level_first_frame; /* was D_800BE9B4 */
 extern u16 D_80099A80[];
 extern u16 D_80099A88[];
 struct127 *obj_find_by_setup_id(u8);
@@ -1654,11 +1654,11 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
                     sfx_emitter_start(v, POSARGS(obj), 0x7FFF, 1000, 0x1F4, (s32)sfx_cb_follow_object_anim, obj, (s32)D_80099A88, 0, 0);
                 }
             }
-            H(CTL, 0x1A4) += D_800BE9E4 * 10;
+            H(CTL, 0x1A4) += g_frame_ticks * 10;
             if (H(CTL, 0x1A2) >= 0xB0) {
                 H(CTL, 0x1A2) = 0xAF;
             }
-            H(CTL, 0x1A2) += H(CTL, 0x1A4) * D_800BE9E4;
+            H(CTL, 0x1A2) += H(CTL, 0x1A4) * g_frame_ticks;
             if (H(CTL, 0x1A2) > 0x1E00) {
                 H(CTL, 0x1A2) = 0x1E00;
             }
@@ -2057,7 +2057,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             if (200.0f < mag) anim = 0x286;
             if (2000.0f < mag) anim = 0x27E;
             blend = 16.0f;
-            if (D_800BE9B4 != 0) {
+            if (g_level_first_frame != 0) {
                 blend = 0.0f;
             }
             if (held & 0x4000) {
@@ -2555,7 +2555,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             shouts[1] = D_800864A0[1];
             H(obj, 0x282) = 100;
             if (((s8 *)obj)[0x284] == 0) {
-                H(obj, 0x278) += D_800BE9E4;
+                H(obj, 0x278) += g_frame_ticks;
                 if ((u32)random_int() % 100 + 150 < H(obj, 0x278)) {
                     s32 r = random_int();
                     face_anim_start(obj, shouts[r & 1], 1, (u32)random_int() % 150 + 0x15E, 0);
@@ -2610,8 +2610,8 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
                                   (s32)D_80099A90, 0, 0);
                 }
             }
-            if (D_800BE9E4 < SH(CTL, 0x24)) {
-                SH(CTL, 0x24) -= D_800BE9E4;
+            if (g_frame_ticks < SH(CTL, 0x24)) {
+                SH(CTL, 0x24) -= g_frame_ticks;
             } else {
                 grab = grabAnim;
                 actor_sound_stop((struct127 *)other);
@@ -2683,8 +2683,8 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
             if (!(D_800CC6B0 & 4) && !(H(obj, 0x2F8) & 0x10)) {
                 B(CTL, 0x19B) = 3;
             }
-            if (D_800BE9E4 < H(CTL, 0x19C)) {
-                H(CTL, 0x19C) -= D_800BE9E4;
+            if (g_frame_ticks < H(CTL, 0x19C)) {
+                H(CTL, 0x19C) -= g_frame_ticks;
                 break;
             }
             B(CTL, 0x19B) = 0;
@@ -2800,11 +2800,11 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
         if (B(obj, 0x83) == 0) {
             B(obj, 0x83) = 1;
         }
-        if (H(CTL, 0x12C) < D_800BE9E4) {
+        if (H(CTL, 0x12C) < g_frame_ticks) {
             B(obj, 0xAA) = 0x4B;
             H(CTL, 0x12C) = 0;
         } else {
-            H(CTL, 0x12C) -= D_800BE9E4;
+            H(CTL, 0x12C) -= g_frame_ticks;
             B(obj, 0xAA) = 0x96;
         }
         break;

@@ -17,14 +17,14 @@ void obj_apply_setup_variant(struct127 *, s32);
 s32 level_list_index_of(s32);
 s32 char_fx_init(struct127 *);
 void obj_randomize_anim_frame(u8 *);
-extern s8 D_8008FD8C;
+extern s8 g_player_count; /* was D_8008FD8C */
 extern u8 *g_setup_entry_flags; /* was D_800D252C */
-extern s8 D_800901E4[];
+extern s8 g_menu_player_queue[]; /* was D_800901E4 */
 extern s8 D_800D2550;
 extern u16 D_800D2132;
 extern u8 D_800C67F0;
 extern u8 D_80038080;
-extern u8 D_800A7610[];
+extern u8 g_player_morph_descs[]; /* was D_800A7610 */
 extern u8 D_800A7620[];
 u8 obj_type_model_group(u8 *arg0);
 u8 *asset_lookup_rom(s32 *arg0, s32 arg1, ...);
@@ -50,7 +50,7 @@ s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, 
 // of g_objects (unless noObjects) and keeps the nearest hit closer than maxDist (0 = 9999999) in hit:
 // +0 object, +4 distance (-1 = none), +0x8 point, +0x14 normal (model hits), +0x20 exit point, +0x2C start,
 // +0x38 direction, +0x44 level surface, +0x56 / +0x58 / +0x5A model hit data, +0x59 kind (0 none, 1 level,
-// 2 object bounds, 3 object model), +0x5C level material (D_800DBEF4 entry), +0x60 level hit extra. Objects are
+// 2 object bounds, 3 object model), +0x5C level material (g_world_objs entry), +0x60 level hit extra. Objects are
 // skipped when in skipMask, the caster's own slot (+0x124 - 1) or the caster itself, inactive, of type 3
 // (+0x5), not hittable (+0xF8 bit 0x40), or rejected by filter D_80087030[filter](obj, caster, filterArg)
 // (-1 = none). Without boundsOnly the object model is tested (obj_ray_hit_model) and its bounds only when that
@@ -129,7 +129,7 @@ s32 ray_cast_world(struct127 *caster, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 d
         *(f32 *)(hit + 0x24) = *(f32 *)(hit + 0xC);
         *(f32 *)(hit + 0x28) = *(f32 *)(hit + 0x10);
         if (material != -1) {
-            *(u8 **)(hit + 0x5C) = (u8 *)D_800DBEF4 + material * 0xA0;
+            *(u8 **)(hit + 0x5C) = (u8 *)g_world_objs + material * 0xA0;
         } else {
             *(u8 **)(hit + 0x5C) = NULL;
         }
@@ -470,15 +470,15 @@ s32 shot_hit_apply(u8 *obj, u8 *hit, s32 kind) {
 
 s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
 s32 camera_view_test_sphere(s32, s32 *, f32, f32, f32, f32, f32, f32);
-extern s32 D_800DA030[];
+extern s32 g_view_mtxf[]; /* was D_800DA030 */
 
 /* P36: level-setup entry idx (0x30 bytes at D_800D20FC): spawn it with setup_entry_spawn(e, idx, 0, 0, 0) and return
  * that, or return 0 when: already spawned (g_setup_entry_flags[idx] != 0); a placeholder (e[2] == 1); no position
  * (x == 0x7FFF); its respawn timer D_800D2530[idx] is running (lowered by D_800BE9A0 this frame); idx >= 5 with a
- * range class e[1] & 6 (2: 650, 4: 1300, else 2750 units) and no player object g_objects[0 .. D_8008FD8C)
+ * range class e[1] & 6 (2: 650, 4: 1300, else 2750 units) and no player object g_objects[0 .. g_player_count)
  * (+0 != 0, +0x127 != 0xFF and enabled in the u16 mask at g_session_game_mode + 0x208) within that XZ distance; or
- * e[1] & 8 and the spot (x, y + 150, z), radius 150, is in view of one of the cameras 0 .. D_80082FA0
- * (camera_view_test_sphere on D_800BE628 + i * 0x180, D_800DA030 + i * 0x10). Player slots (idx < 5) skip the range test.
+ * e[1] & 8 and the spot (x, y + 150, z), radius 150, is in view of one of the cameras 0 .. g_last_player_index
+ * (camera_view_test_sphere on g_player_cams + i * 0x180, g_view_mtxf + i * 0x10). Player slots (idx < 5) skip the range test.
  * arg1 is unused. */
 /* was func_150829C0 */
 s32 setup_entry_try_spawn(s32 idx, s32 arg1) {
@@ -518,7 +518,7 @@ s32 setup_entry_try_spawn(s32 idx, s32 arg1) {
         } else {
             r2 = 7562500.0f;
         }
-        n = D_8008FD8C;
+        n = g_player_count;
         ok = 1;
         if (n > 0) {
             obj = (u8 *) g_objects;
@@ -544,9 +544,9 @@ s32 setup_entry_try_spawn(s32 idx, s32 arg1) {
     }
     if (flags & 8) {
         ok = 1;
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= g_last_player_index; i++) {
             e = (u8 *) D_800D20FC + idx * 0x30;
-            if (camera_view_test_sphere(D_800BE628 + i * 0x180, D_800DA030 + i * 0x10, (f32) *(s16 *) (e + 6),
+            if (camera_view_test_sphere(g_player_cams + i * 0x180, g_view_mtxf + i * 0x10, (f32) *(s16 *) (e + 6),
                               (f32) (*(s16 *) (e + 8) + 150), (f32) *(s16 *) (e + 0xA), 150.0f, 150.0f, 20000.0f) != 0) {
                 ok = 0;
             }
@@ -613,7 +613,7 @@ void obj_set_spawn_flags(u8 *arg0) {
 }
 
 /* Spawns the level-setup object e (0x30-byte entry of D_800D20FC) into an object slot of g_objects (0x32C each):
- * slot = reuse+reset (obj_reset) of slot reuse - 1 when reuse != 0, of slot idx when idx < D_8008FD8C (the
+ * slot = reuse+reset (obj_reset) of slot reuse - 1 when reuse != 0, of slot idx when idx < g_player_count (the
  * player / character slots), else a new one (obj_alloc_slot). Returns slot + 1, or 0 when g_setup_entry_flags[idx] & 0x7F
  * (already spawned) or no slot is free (25). Fills position (+0x14.., from e+6/8/A), angle (e+0xC << 8), the setup
  * flags e+0x18 (+0xF8), model / type (e+4) via obj_copy_type_params / obj_set_type / obj_anim_state_alloc, the player record
@@ -645,7 +645,7 @@ s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
     if (reuse != 0) {
         obj = (u8 *)g_objects + reuse * 0x32C - 0x32C;
         obj_reset((struct127 *)obj);
-    } else if (idx != -1 && idx < D_8008FD8C) {
+    } else if (idx != -1 && idx < g_player_count) {
         obj = (u8 *)g_objects + idx * 0x32C;
         obj_reset((struct127 *)obj);
     } else {
@@ -662,7 +662,7 @@ s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
             g_setup_entry_flags[idx] = slot + 0x81;
         }
         O8(0x13F) = idx;
-        if (idx < D_8008FD8C) {
+        if (idx < g_player_count) {
             O8(0x127) = idx;
         } else {
             O8(0x127) = 0xFF;
@@ -670,7 +670,7 @@ s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
     }
     *(u8 **)(obj + 0x144) = e;
     obj_load_part_models(e, O8(0x13F), arg3);
-    if (slot < D_8008FD8C || type == 0x98 || type == 0x28) {
+    if (slot < g_player_count || type == 0x98 || type == 0x28) {
         *(struct197 **)(obj + 0x31C) = allocate_memory(0x1C0, 1, 0, 0);
         bzero(*(void **)(obj + 0x31C), 0x1C0);
         *(f32 *)(*(u8 **)(obj + 0x31C) + 0x1B8) = 5.0f;
@@ -698,7 +698,7 @@ s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
         obj_fade_command((struct127 *)obj, 4, 0, 0, 0);
     }
     O8(0x232) = e[0xD];
-    if (idx < D_8008FD8C && D_800901E4[idx] == -2) {
+    if (idx < g_player_count && g_menu_player_queue[idx] == -2) {
         REC(0x84) = 1;
         O8(0x232) = 1;
     }
@@ -798,7 +798,7 @@ s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
     char_fx_init((struct127 *)obj);
     v = obj_current_part_model((struct_eu_AF2A0 *)obj);
     found = 0;
-    for (t = D_800A7610; t != D_800A7620; t += 8) {
+    for (t = g_player_morph_descs; t != D_800A7620; t += 8) {
         if (v == t[0]) {
             found = 1;
             break;
@@ -846,7 +846,7 @@ void obj_alloc_light_bufs(S836AC *arg0)
     if (arg0->unk144 != NULL) {
         tmp = arg0->unk144[0x2F];
         if (tmp == 0) { if (arg0->unk127 == 0) sel = 5; else sel = 3; } else { sel = tmp; }
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= g_last_player_index; i++) {
             arg0->unk304[i] = light_alloc_light_buf(sel);
         }
         if (arg0->unk304[i - 1] != 0) {
@@ -1181,7 +1181,7 @@ s32 obj_spawn_attached(struct127 *owner, u8 mode, u8 kind, s32 arg3, s32 arg4, s
     }
     flag2 = (flags & 2) ? 1 : 0;
     slot = (s32 *) (o + 0x304);
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= g_last_player_index; i++) {
         slot[i] = light_alloc_light_buf(1);
     }
     if (slot[i - 1] != 0) {

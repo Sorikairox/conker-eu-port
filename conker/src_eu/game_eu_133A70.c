@@ -27,8 +27,8 @@ typedef struct {
     f32 f24;            /* 0x24 1.0 */
     f32 size[2];        /* 0x28 width * (1 / 13) * 200 (both) */
     f32 pos[3];         /* 0x30 the arc end */
-    f32 f3C[3];         /* 0x3C D_800A5860 */
-    f32 f48[3];         /* 0x48 D_800A5860 */
+    f32 f3C[3];         /* 0x3C g_vec3_zero */
+    f32 f48[3];         /* 0x48 g_vec3_zero */
     f32 f54;            /* 0x54 0 */
     s32 flags;          /* 0x58 bits 0x40 / 0x80 random */
     s32 w5C;            /* 0x5C 0 */
@@ -89,12 +89,12 @@ u8 *bolt_arc_spawn(s16 *spec, s32 extra, u8 layer, s32 arg3) {
     ps.h20 = 0xFF;
     ps.h22 = 1;
     ps.f24 = 1.0f;
-    ps.f3C[0] = ((f32 *) D_800A5860)[0];
-    ps.f3C[1] = ((f32 *) D_800A5860)[1];
-    ps.f3C[2] = ((f32 *) D_800A5860)[2];
-    ps.f48[0] = ((f32 *) D_800A5860)[0];
-    ps.f48[1] = ((f32 *) D_800A5860)[1];
-    ps.f48[2] = ((f32 *) D_800A5860)[2];
+    ps.f3C[0] = ((f32 *) g_vec3_zero)[0];
+    ps.f3C[1] = ((f32 *) g_vec3_zero)[1];
+    ps.f3C[2] = ((f32 *) g_vec3_zero)[2];
+    ps.f48[0] = ((f32 *) g_vec3_zero)[0];
+    ps.f48[1] = ((f32 *) g_vec3_zero)[1];
+    ps.f48[2] = ((f32 *) g_vec3_zero)[2];
     ps.f54 = 0.0f;
     ps.w5C = 0;
     ps.b60 = 6;
@@ -125,7 +125,7 @@ u8 *bolt_arc_spawn(s16 *spec, s32 extra, u8 layer, s32 arg3) {
 typedef struct { f32 x, y, z; } V3_133A70;
 void bolt_arc_sample_curve(struct102 *);
 void bolt_arc_jitter_points(struct102 *);
-extern s32 D_80088FB0;
+extern s32 g_bolt_arc_update_fns; /* was D_80088FB0 */
 
 /* was func_1510660C */
 void bolt_arc_update(struct102 *arg0) {
@@ -137,13 +137,13 @@ void bolt_arc_update(struct102 *arg0) {
     sp2B = 0;
     temp_v0 = (*(s8 *)((u8 *)arg0 + 0x44));
     if (temp_v0 != -1) {
-        temp_v1 = *(s32 *)((u8 *)&D_80088FB0 + (temp_v0 * 4));
+        temp_v1 = *(s32 *)((u8 *)&g_bolt_arc_update_fns + (temp_v0 * 4));
         if ((temp_v1 != NULL) && (temp_v1(arg0, &sp2B) == 0)) {
             node_destroy(arg0);
         }
     }
     if (arg0->unk12 & 1) {
-        arg0->unk10 -= D_800BE9E4;
+        arg0->unk10 -= g_frame_ticks;
         if (arg0->unk10 < 0) {
             node_destroy(arg0);
         }
@@ -151,7 +151,7 @@ void bolt_arc_update(struct102 *arg0) {
     if (sp2B != 0) {
         bolt_arc_sample_curve(arg0);
     }
-    (*(s16 *)((u8 *)arg0 + 0x68)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x68)) - D_800BE9E4);
+    (*(s16 *)((u8 *)arg0 + 0x68)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x68)) - g_frame_ticks);
     if ((*(s16 *)((u8 *)arg0 + 0x68)) < 0) {
         bolt_arc_jitter_points(arg0);
         (*(s16 *)((u8 *)arg0 + 0x68)) = (s16) (((*(s16 *)((u8 *)arg0 + 0x54)) + (random_int() % (u32) ((*(s16 *)((u8 *)arg0 + 0x56)) + 1))));
@@ -331,8 +331,8 @@ s32 gfx_set_combine_mode(s32, u8, s8 *);
 s32 gfx_geometry_mode_cached(s32, s32, s32);
 s32 gfx_env_color_cached(s32, s32, s32, s32, s32, s8 *);
 s32 gfx_other_mode_cached(s32, s32, s32, s8 *);
-extern s32 D_80091120[];  /* ribbon texture descriptor */
-extern s32 D_800D30BC;
+extern s32 g_bolt_ribbon_texture[];  /* ribbon texture descriptor; was D_80091120 */
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 extern s32 g_render_mode_pairs[];  /* render mode pairs (2 words each); was D_800A4EA8 */
 
 /* rodata D_800A27E8 / D_800A27EC (bit-exact copies: the NM link drops this file's .late_rodata) */
@@ -352,8 +352,8 @@ static const f32 sRibbonMinLen2B[1] = { 0.0001f };  /* 0x38D1B717 */
 // ribbon_draw: draws the object's point chain (bolt_arc_points_get: obj +0x48 + 2 points) as a camera-facing ribbon of
 // half width obj +0x50: each point gets 3 vertices (p + n, p, p - n with s = 0 / 0x200 / 0x400, n = the side normal of
 // the segment and the camera of view id, camera_get_pos), each segment one 6-vertex load and 4 triangles. Vertices
-// from vtx_slot_buffer_get (obj +0x74 pool, obj +0x84 count; nothing drawn without). Texture D_80091120 (combine 3), prim
-// colour obj +0x58..+0x5B, geometry 0x200005 / 0x1F0600, combine 0x44, render mode 0x80000 | 0x2CA0 | D_800D30BC
+// from vtx_slot_buffer_get (obj +0x74 pool, obj +0x84 count; nothing drawn without). Texture g_bolt_ribbon_texture (combine 3), prim
+// colour obj +0x58..+0x5B, geometry 0x200005 / 0x1F0600, combine 0x44, render mode 0x80000 | 0x2CA0 | g_gfx_tlut_mode
 // with the second g_render_mode_pairs pair. Returns the display list end.
 /* was func_15106D38 */
 s32 bolt_arc_ribbon_draw(s32 gfx, u8 *obj, s16 id) {
@@ -378,11 +378,11 @@ s32 bolt_arc_ribbon_draw(s32 gfx, u8 *obj, s16 id) {
     cam = camera_get_pos(id);
     flag = 1;
     pts = (f32 *) bolt_arc_points_get((struct_eu_133A70 *) obj);
-    gfx = gfx_load_texture_cached(gfx, D_80091120, 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
+    gfx = gfx_load_texture_cached(gfx, g_bolt_ribbon_texture, 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
     gfx = gfx_env_color_cached(gfx, obj[0x58], obj[0x59], obj[0x5A], obj[0x5B], &flag);
     gfx = gfx_geometry_mode_cached(gfx, 0x200005, 0x1F0600);
     gfx = gfx_set_combine_mode(gfx, 0x44, &flag);
-    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, g_render_mode_pairs[3] | g_render_mode_pairs[2], &flag);
+    gfx = gfx_other_mode_cached(gfx, g_gfx_tlut_mode | 0x80000 | 0x2CA0, g_render_mode_pairs[3] | g_render_mode_pairs[2], &flag);
 
     /* first point: side normal of the first segment */
     dx = pts[3] - pts[0];
@@ -456,11 +456,11 @@ s32 bolt_arc_ribbon_draw(s32 gfx, u8 *obj, s16 id) {
     return gfx;
 }
 
-extern void (*D_80088FB8[])(u8 *);
+extern void (*g_bolt_arc_free_fns[])(u8 *); /* was D_80088FB8 */
 /* was func_151073F8 */
 void bolt_arc_free(u8 *arg0)
 {
-  void (*fn)(u8 *) = D_80088FB8[arg0[0x5C]];
+  void (*fn)(u8 *) = g_bolt_arc_free_fns[arg0[0x5C]];
   struct102 *a;
   struct102 *b;
   if (fn != NULL) {
@@ -491,7 +491,7 @@ void bolt_arc_delete(struct102 * arg0) {
 
 /* was func_151074D0 */
 void bolt_arc_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
-    void (*temp_v0)(u8 *, s32, u8) = D_80088FC8[arg0[0x5C]];
+    void (*temp_v0)(u8 *, s32, u8) = g_bolt_arc_event_fns[arg0[0x5C]];
 
     if (temp_v0 != NULL) {
         temp_v0(arg0, arg1, arg2);
@@ -701,12 +701,12 @@ void bolt_record_delete(struct260 * arg0) {
     effect_node_free(arg0);
 }
 
-extern void (*D_80088FD8[])(u8 *, s32, u8);
+extern void (*g_bolt_record_event_fns[])(u8 *, s32, u8); /* was D_80088FD8 */
 /* was func_15107C24 */
 void bolt_record_handle_event(u8 *arg0, s32 arg1, u8 arg2)
 {
   int new_var;
-  void (**tab)(u8 *, s32, u8) = D_80088FD8;
+  void (**tab)(u8 *, s32, u8) = g_bolt_record_event_fns;
   new_var = 0x68; // fakematch: constant index in a variable stops the CSE of the table index load
   if (tab[arg0[new_var]] != 0)
   {

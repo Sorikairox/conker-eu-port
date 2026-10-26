@@ -66,7 +66,7 @@ typedef struct {
 // (x, z) (collision_ray_cast); on a hit whose surface passes prop_is_flagged it spawns a drop record (sprite_fx_spawn_cam_at,
 // random life 100..150, alpha 155..255, random size 40..60 and flips) and always a ring (emit_effect3d_from_surface) at the hit
 // point. The original first checksums the code range menu_settings_apply_checked..menu_spawn_character (anti-tamper: sets
-// D_800843F0[0] = 0xFF unless the sum of ~words is 0x38424614); the port's code is not N64 code, so that check
+// g_player_pad_map[0] = 0xFF unless the sum of ~words is 0x38424614); the port's code is not N64 code, so that check
 // is left out (it passes on an unmodified cartridge).
 /* was func_150BA3B0 */
 void water_splash_spawn(u8 *obj, f32 x, f32 z, u8 arg3, s32 arg4) {
@@ -176,12 +176,12 @@ s32 fx_fade_in_byte28_update(u8 *arg0) {
 
 /* was func_150BA85C */
 s32 fx_gravity_spin_update(f32 *arg0) {
-    arg0[0x114 / 4] += D_800A01FC * D_800BE9A4;
-    arg0[0x34 / 4] += arg0[0x110 / 4] * D_800BE9A4;
-    arg0[0x38 / 4] += arg0[0x114 / 4] * D_800BE9A4;
-    arg0[0x3C / 4] += arg0[0x118 / 4] * D_800BE9A4;
-    arg0[0x40 / 4] += arg0[0x11C / 4] * D_800BE9A4;
-    arg0[0x44 / 4] += arg0[0x120 / 4] * D_800BE9A4;
+    arg0[0x114 / 4] += D_800A01FC * g_frame_step_f;
+    arg0[0x34 / 4] += arg0[0x110 / 4] * g_frame_step_f;
+    arg0[0x38 / 4] += arg0[0x114 / 4] * g_frame_step_f;
+    arg0[0x3C / 4] += arg0[0x118 / 4] * g_frame_step_f;
+    arg0[0x40 / 4] += arg0[0x11C / 4] * g_frame_step_f;
+    arg0[0x44 / 4] += arg0[0x120 / 4] * g_frame_step_f;
     return 1;
 }
 

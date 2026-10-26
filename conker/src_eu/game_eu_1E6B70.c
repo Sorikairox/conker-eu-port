@@ -185,7 +185,7 @@ void swinging_lamp_spawn(s32 arg0, u8 which, u8 arg2, u8 arg3) {
     ((DripLink *)(obj + 0x18))->emitter = particle_emitter_spawn(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, arg2, arg3);
 }
 
-extern f32 D_800AA944;   /* ~0.0234f (rodata) */
+extern f32 g_lamp_swing_damp;   /* ~0.0234f (rodata); was D_800AA944 */
 /* was func_151B97C4 */
 s32 swinging_lamp_swing_update(u8 *arg0) {
     u8 *temp_v0;
@@ -195,7 +195,7 @@ s32 swinging_lamp_swing_update(u8 *arg0) {
     f32 temp_f0;
     u8 *sp18;
 
-    (*(f32 *)((u8 *)arg0 + 0x178)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x178)) + ((*(f32 *)((u8 *)arg0 + 0x17C)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x178)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x178)) + ((*(f32 *)((u8 *)arg0 + 0x17C)) * g_frame_step_f));
     temp_f0 = wrap_angle_rad((*(f32 *)((u8 *)arg0 + 0x178)));
     temp_v0 = arg0 + 0x170;
     (*(f32 *)((u8 *)temp_v0 + 8)) = temp_f0;
@@ -204,13 +204,13 @@ s32 swinging_lamp_swing_update(u8 *arg0) {
     temp_f12 = (*(f32 *)((u8 *)sp18 + 0x18));
     (*(f32 *)((u8 *)sp18 + 0)) = (f32) (sinf(temp_f0) * temp_f2);
     if (temp_f12 > 0.0f) {
-        (*(f32 *)((u8 *)sp18 + 0x18)) = (f32) (temp_f12 - D_800BE9A4);
-        (*(f32 *)((u8 *)sp18 + 0xC)) = (f32) ((*(f32 *)((u8 *)sp18 + 0xC)) + ((*(f32 *)((u8 *)sp18 + 0x20)) * D_800BE9A4));
-        (*(f32 *)((u8 *)sp18 + 4)) = (f32) (temp_f2 + ((*(f32 *)((u8 *)sp18 + 0x1C)) * D_800BE9A4));
+        (*(f32 *)((u8 *)sp18 + 0x18)) = (f32) (temp_f12 - g_frame_step_f);
+        (*(f32 *)((u8 *)sp18 + 0xC)) = (f32) ((*(f32 *)((u8 *)sp18 + 0xC)) + ((*(f32 *)((u8 *)sp18 + 0x20)) * g_frame_step_f));
+        (*(f32 *)((u8 *)sp18 + 4)) = (f32) (temp_f2 + ((*(f32 *)((u8 *)sp18 + 0x1C)) * g_frame_step_f));
     } else {
         temp_f0_2 = (*(f32 *)((u8 *)sp18 + 0xC));
-        (*(f32 *)((u8 *)sp18 + 0xC)) = (f32) (temp_f0_2 + (((*(f32 *)((u8 *)sp18 + 0x14)) - temp_f0_2) * D_800AA944));
-        (*(f32 *)((u8 *)sp18 + 4)) = (f32) (temp_f2 + (((*(f32 *)((u8 *)sp18 + 0x10)) - temp_f2) * D_800AA944));
+        (*(f32 *)((u8 *)sp18 + 0xC)) = (f32) (temp_f0_2 + (((*(f32 *)((u8 *)sp18 + 0x14)) - temp_f0_2) * g_lamp_swing_damp));
+        (*(f32 *)((u8 *)sp18 + 4)) = (f32) (temp_f2 + (((*(f32 *)((u8 *)sp18 + 0x10)) - temp_f2) * g_lamp_swing_damp));
     }
     return 1;
 }
@@ -291,6 +291,6 @@ s32 swinging_lamp_light_update(struct225 *arg0) {
 /* was func_151B9C10 */
 void swinging_lamp_kick(f32 *arg0) {
     arg0[0x188 / 4] = 5.0f;
-    arg0[0x18C / 4] = D_800AA94C;
-    arg0[0x190 / 4] = D_800AA950;
+    arg0[0x18C / 4] = g_lamp_kick_k_18c;
+    arg0[0x190 / 4] = g_lamp_kick_k_190;
 }

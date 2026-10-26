@@ -44,7 +44,7 @@ typedef struct {
     f32 u24;        /* 0x24 */
     f32 u28;        /* 0x28 */
     f32 u2C;        /* 0x2C */
-    f32 pos[3];     /* 0x30 D_800A5860 */
+    f32 pos[3];     /* 0x30 g_vec3_zero */
     f32 pos2[3];    /* 0x3C */
     f32 pos3[3];    /* 0x48 */
     f32 u54;        /* 0x54 */
@@ -128,9 +128,9 @@ void damage_smoke_spawn(u8 *obj, s16 kind, u8 flag, s32 arg3) {
     g.rgba2[2] = 0;
     g.rgba2[3] = 0xFF;
     g.u1C = 0xFF;
-    *(Vec4620 *) g.pos = *(Vec4620 *) D_800A5860;
-    *(Vec4620 *) g.pos2 = *(Vec4620 *) D_800A5860;
-    *(Vec4620 *) g.pos3 = *(Vec4620 *) D_800A5860;
+    *(Vec4620 *) g.pos = *(Vec4620 *) g_vec3_zero;
+    *(Vec4620 *) g.pos2 = *(Vec4620 *) g_vec3_zero;
+    *(Vec4620 *) g.pos3 = *(Vec4620 *) g_vec3_zero;
     g.u22 = 1;
     g.u54 = 0.0f;
     g.u24 = 1.0f;
@@ -205,8 +205,8 @@ typedef struct {
 // Otherwise starts the 0x96 loop sound once, places the emitter on the owner (mode bit 0: attachment point
 // attachment_find_by_slot / model_node_points_to_world by the +0x2DC * +0x2D8 quarter, fallback owner + (0, 800, 0); else bone
 // D_800A0744[third] of +0x1D4 by the +0x2E4 / +0x2E8 third), moves the glow there, then emits smoke puffs
-// (fire_embers_spawn_b, (0.129 + 0.117 * random) * D_800BE9A4 per frame, skipped in mode 2 when trigger_test_player says no) and
-// sparks (impact_dust_cloud_spawn, (0.13 + 0.2 * random) * D_800BE9A4 per frame, blown against the owner's motion_track_get_delta vector).
+// (fire_embers_spawn_b, (0.129 + 0.117 * random) * g_frame_step_f per frame, skipped in mode 2 when trigger_test_player says no) and
+// sparks (impact_dust_cloud_spawn, (0.13 + 0.2 * random) * g_frame_step_f per frame, blown against the owner's motion_track_get_delta vector).
 /* was func_150C49A4 */
 void damage_smoke_update(u8 *self) {
     f32 basis[12];
@@ -290,19 +290,19 @@ void damage_smoke_update(u8 *self) {
         enabled = FALSE;
     }
     if (enabled) {
-        rec->smoke += (D_800A078C_c[0] + random_float() * D_800A0790_c[0]) * D_800BE9A4;
+        rec->smoke += (D_800A078C_c[0] + random_float() * D_800A0790_c[0]) * g_frame_step_f;
         while (1.0f < rec->smoke) {
             fire_embers_spawn_b((u8 *) pos, self[0xC], self[1]);
             rec->smoke -= 1.0f;
         }
     }
 
-    rec->sparks += (D_800A0794_c[0] + random_float() * D_800A0798_c[0]) * D_800BE9A4;
+    rec->sparks += (D_800A0794_c[0] + random_float() * D_800A0798_c[0]) * g_frame_step_f;
     if (!(1.0f < rec->sparks)) {
         return;
     }
     if (motion_track_get_delta(obj, &up) == 0) {
-        up = (f32 *) D_800A5860;
+        up = (f32 *) g_vec3_zero;
     }
     do {
         r1 = random_int();

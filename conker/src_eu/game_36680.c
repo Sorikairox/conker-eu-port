@@ -10,7 +10,7 @@ void level_hotspot_setup(s32 arg0);
 void level_lights_reset(void) {
     int tmp0 = 127;
 
-    D_800DCD78 = 0;
+    g_light_list_head = 0;
     D_800DCD7C = 1;
     g_light_colour_zones = 0;
     g_light_tint_zones = 0;
@@ -27,7 +27,7 @@ void level_lights_reset(void) {
 
     if (0) {};
 
-    D_800DCD30 = tmp0;
+    g_level_light_dirs = tmp0;
     g_level_light_dirs_0y = 0;
     g_level_light_dirs_0z = 0;
 
@@ -44,7 +44,7 @@ void level_lights_reset(void) {
     g_level_light_dirs_3z = 0;
     D_800DCD3C = 0;
     D_800DCD3D = 0;
-    bzero(&D_800DCD40, 56);
+    bzero(&g_light_cmd_data, 56);
 }
 
 /* was func_150092DC */

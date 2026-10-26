@@ -1,0 +1,297 @@
+old	new	confidence	description
+D_80086150	g_objev_action_fns	high	Action hook table void(*)(s32), indexed by the command byte (objev_run_action) or script arg 0 (aiscript_call_hook); NULL = none
+D_80086730	g_aiscript_cmd_fns	high	Object AI script command handlers, indexed by the opcode byte of the current 5-byte command (aiscript_run)
+D_80086E28	g_aiscript_default_list	high	Default script list, 8-byte entries {script pointer, kind byte at +4}, NULL-terminated (aiscript_find_by_kind)
+D_8009A13C	g_aiscript_speed_boost	med	1.4: speed multiplier applied by aiscript_move_setup to object id 40 with flag 1 in multiplayer
+D_8009A148	g_aiscript_find_max_dist	med	1e7: initial best distance of the target search (aiscript_find_target)
+D_8009A4E0	g_aiscript_empty	high	Empty AI script returned by aiscript_find_by_kind when no entry matches
+D_8009A500	g_aiscript_one_twelfth	high	1 / 12: scales the jump speed by the time in aiscript_jump_to_point
+D_8009A504	g_aiscript_hundredth	high	0.01: converts the hundredths scale arguments of aiscript_set_scale
+D_8009A5A4	g_aiscript_follow_speed_scale	high	0.7: factor applied to the player's speed by aiscript_follow_player_speed
+D_8009A5CC	g_aiscript_rad_to_binang	high	65536 / (2 pi): radians to 16-bit angle units (aiscript_set_heading)
+D_800CC2D4	g_obj_tab_id	high	Byte view of the object table at D_800CC2D0 + 4: [n * 0x32C] is the type id of object n
+D_800CC30C	g_obj_tab_xz_velocity	high	f32 view of the object table at D_800CC2D0 + 0x3C: [0] is the player's xz velocity, per object at n * 0x32C bytes
+D_800CC3D4	g_obj_tab_stunned	high	Byte view of the object table at D_800CC2D0 + 0x104 (stunned), [n * 0x32C] for object n
+D_800CC3F5	g_obj_tab_immune	high	Byte view of the object table at D_800CC2D0 + 0x125 (immune), set by aiscript_set_immune
+D_800CC521	g_obj_tab_counter_251	low	Byte view of the object table at D_800CC2D0 + 0x251, compared by aiscript_if_target_counter251
+D_800CC5A0	g_obj_tab_2d0	low	Object table view at D_800CC2D0 + 0x2D0 (the unk2D0 pointer word), read by aiscript_copy_target_2d0_pos
+D_800CC718	g_obj1_unk11c	low	Object table view at D_800CC2D0 + 0x448 (object 1 +0x11C); script test value 10 reads an f32 at [idx * 0x32C]
+D_800CC734	g_obj1_unk138	low	Object table view at D_800CC2D0 + 0x464 (object 1 +0x138); script test value 5 reads an f32 at [idx * 0x32C]
+D_800CC779	g_obj1_unk17d	low	Object table view at D_800CC2D0 + 0x4A9 (object 1 +0x17D); script test value 18 reads a byte at [idx * 0x32C]
+D_800CC7F2	g_obj1_unk1f6	low	Byte at D_800CC2D0 + 0x522 (object 1 +0x1F6); script test value 13
+D_800CC922	g_obj1_unk326	low	Object table view at D_800CC2D0 + 0x652 (object 1 +0x326); script test value 17, indexed by the player's +0x222 object
+D_800CC9D8	g_obj2_unkb0	low	Object table view at D_800CC2D0 + 0x708 (object 2 +0xB0); script test value 2 reads an s32 at [idx * 0x32C]
+D_800CC9DC	g_obj2_unkb4	low	Object table view at D_800CC2D0 + 0x70C (object 2 +0xB4); script test value 3 reads an s32 at [idx * 0x32C]
+D_800D1890	g_aiscript_arg0	high	Argument byte 0 of the current AI script command (command byte +1), set by aiscript_run
+D_800D1891	g_aiscript_arg1	high	Argument byte 1 of the current AI script command (command byte +2)
+D_800D1892	g_aiscript_arg2	high	Argument byte 2 of the current AI script command (command byte +3)
+D_800D1893	g_aiscript_arg3	high	Argument byte 3 of the current AI script command (command byte +4)
+D_800D2104	g_path_points	high	Per-path point lists (8-byte points with s16 x / z at +8 / +0xC), indexed by object +0x13F (path walking, leash)
+D_80086F20	g_player_out_overlay_dl	med	Display list called first by player_draw_out_overlay (pipe sync / texture setup)
+D_8008726C	g_player_start_health	high	Starting / respawn health of a player (6), given by player_lose_life, mp_player_respawn and level_lights_init
+D_800BE800	g_save_restart_entry	med	Saved restart entry point (start point) of the save level; saved in the slot, passed to game_request_transition on game over
+D_800D18A8	g_mp_respawning	med	Set to 1 while mp_player_respawn re-spawns a player, cleared after; also cleared by level_start_game / level_load
+D_800D1CC2	g_player_out_mask	med	Bit mask of the players whose "out" overlay is shown (player_draw_out_overlay, rail_racer_take_over, HUD)
+D_800D1CC4	g_player_out_fade	med	Per-player byte: fade level of the "out" overlay (steps of 4, max 0x3C)
+D_800D1CC9	g_player_hit_reaction_mode	med	Reaction animation / camera mode (0..3) picked by player_hit_reaction
+D_800837D0	g_air_meter_seg6_dl_xlu	med	Display list bound to segment 6 by hud_air_meter_draw while the meter alpha is below 0xFF
+D_80083950	g_air_meter_seg6_dl_opa	med	Display list bound to segment 6 by hud_air_meter_draw when the meter is fully opaque
+D_80087730	g_mp_hud_setup_dl	high	2D HUD setup display list called by mp_hud_draw_views
+D_80087750	g_mp_hud_bar_init	high	Initial bar lengths (4 bytes, all 0) of mp_hud_draw_views
+D_80087754	g_mp_hud_icon_row_t	high	Icon sheet: texture t of each icon row, in 32nds (mp_hud_draw_views)
+D_8008775C	g_mp_hud_icon_row_h_idx	high	Icon sheet: layout table index of each icon row's height (mp_hud_draw_views)
+D_80087764	g_mp_hud_place_digit_s	high	Placing digits: s column (k & 3), in 32nds (mp_hud_draw_views)
+D_80087768	g_mp_hud_place_digit_t	high	Placing digits: t row (k >> 2), in 32nds (mp_hud_draw_views)
+D_8009060A	g_air_meter_tex_l_full	med	Texture id of the air meter's left images while air is high (underwater_air_meter_update)
+D_80090612	g_air_meter_tex_l_low	med	Texture id of the air meter's left images when nearly out of air (used >= 1200)
+D_80090616	g_air_meter_tex_l_mid	med	Texture id of the air meter's left images for used air 960..1200
+D_8009061E	g_air_meter_tex_r_full	med	Texture id of the air meter's right images while used air < 480
+D_80090622	g_air_meter_tex_r_low	med	Texture id of the air meter's right images once used air >= 480
+D_80090784	g_hud_bubble_sprite	med	Sprite of the rising air bubbles (states 1 / 2) drawn by hud_bubbles_draw
+D_80091BF0	g_hud_bubble_pop_sprite	med	Sprite (and texture id) of the bursting air bubbles (state 3) drawn by hud_bubbles_draw
+D_8009E060	g_hud_health_piece_pos	high	s16 positions of the HUD health pieces (hud_health_draw)
+D_8009E084	g_hud_health_pos_hidden	high	s16 x, y, z of the HUD health block when hidden; it slides back there when the show timer ends
+D_8009E08A	g_hud_health_pos_shown	high	s16 x, y, z of the HUD health block when shown; pieces are added / dropped only at this position
+D_8009E090	g_str_hud_time_min	high	String "%d": minutes of the HUD time (hud_time_draw)
+D_8009E094	g_str_hud_time_sec	high	String ":%02d": seconds of the HUD time (hud_time_draw)
+D_8009E09C	g_str_hud_time_hund	high	String ":%02d": hundredths of the HUD time (hud_time_draw)
+D_8009E0A4	g_str_hud_time_no_min	high	String "--": minutes shown when there is no time (hud_time_draw)
+D_8009E0A8	g_str_hud_time_no_sec	high	String ": --": seconds shown when there is no time (hud_time_draw)
+D_8009E0B0	g_str_hud_time_no_hund	high	String ": --": hundredths shown when there is no time (hud_time_draw)
+D_8009E0B8	g_str_mp_hud_score	high	String "%d": player score in mp_hud_draw_views
+D_8009E0BC	g_str_mp_hud_paren_name	high	String "(%s)": player name in brackets in mp_hud_draw_views
+D_8009E0C4	g_str_mp_hud_name	high	String "%s": player name in mp_hud_draw_views
+D_8009E0C8	g_str_mp_hud_lap	high	String "lap %d/%d" (race lap counter, mp_hud_draw_views)
+D_8009E0F8	g_air_meter_blend_vel0	high	0.02: initial blend speed of the air meter
+D_8009E0FC	g_air_meter_drop_vel0	high	3.2: initial drop speed of the air meter
+D_8009E100	g_air_meter_blend_below	high	0.2: blend bounce range below the air level
+D_8009E104	g_air_meter_blend_above	high	0.2: blend bounce range above the air level
+D_8009E108	g_air_meter_wobble_min	high	0.6: minimum wobble speed of the air meter
+D_8009E10C	g_air_meter_wobble_kick	high	0.2: wobble speed kick of the air meter
+D_8009E23C	g_mp_map_scale	high	0.013: map world -> screen scale (mp_hud_draw_views)
+D_8009E240	g_mp_map_hires_factor	high	1.56: map scale factor in hi-res
+D_8009E244	g_mp_map_center_dy	high	3.4: map centre y offset
+D_8009E248	g_mp_map_center_dx	high	3.6: map centre x offset
+D_8009E24C	g_radar_scale_multi	high	0.0135: radar world -> screen scale with 2-4 players
+D_8009E250	g_radar_big_zoom	high	1.329: radar zoom of the big radar
+D_8009E254	g_radar_scale_single	high	0.02025: radar world -> screen scale with 1 player
+D_8009E258	g_radar_big_disc_factor	high	0.858: big radar disc size factor
+D_8009E25C	g_radar_big_tex_step	high	1.1655: big radar texture step factor
+D_8009E260	g_radar_deg_to_rad	high	pi / 180: degrees to radians for the radar arrow angles (radar_draw)
+D_800CC8BA	g_player_health	med	Player health compared with the HUD health pieces (hud_health_update); 0 when the player is killed by an item drop
+D_800D2410	g_hud_health_piece_scales	high	f32 scale of each of the 6 HUD health pieces (1.0 at rest, grows back by 0.03 per frame)
+D_800D2448	g_hud_clock_dl	high	Shared display list 0xBA of the HUD clock (hud_clock_load / hud_clock_draw)
+D_800D244C	g_hud_clock_mtx	high	Two 0x40-byte matrices of the HUD clock (double-buffered by D_800BE9C0)
+D_800D2456	g_hud_health_max_pieces	med	Number of HUD health pieces / max health shown (3 or 6, set by render_set_detail_level / level_load)
+D_800D2457	g_hud_health_shown_pieces	high	Health pieces currently shown by the HUD; steps one by one towards the player's health
+D_800D245C	g_hud_health_drop_list	high	Linked list (via +0x80) of the dropped HUD health pieces (hud_health_drop_piece)
+D_800D2590	g_hud_health_piece_mtx	high	HUD health piece matrices, 0x80 per piece (two 0x40 double-buffered matrices)
+D_800D27F0	g_hud_persp_mtx	high	Default perspective matrix built by camera_view_state_init, used by the HUD (hud_draw)
+D_800D2834	g_hud_health_piece_scale1	high	Scale of HUD health piece 1 (element [1] of D_800D2410)
+D_800D2848	g_hud_health_pos	high	f32 x, y, z of the HUD health block; slides between the hidden and shown positions
+D_800D2858	g_hud_health_rot	high	f32 rotation (degrees) of the HUD health block, sprung back to 0
+D_800D2864	g_hud_health_show_timer	high	Frames the HUD health stays shown (240 after a health change)
+D_800D2870	g_hud_clock_frames	high	HUD clock time in frames (25 per second), set by scene / event actions
+D_800D2874	g_hud_persp_norm	high	perspNorm of the default perspective matrix D_800D27F0
+D_800D2880	g_hud_bubbles	high	Six 16-byte air bubble records (state at +0xD) up to D_800D28E0
+D_800D288D	g_hud_bubble0_state	high	State byte (+0xD) of air bubble record 0
+D_800D2890	g_hud_health_rot_vel	med	Rotation velocity of the HUD health block (spring of D_800D2858); kicked randomly by hud_health_drop_piece
+D_800D289D	g_hud_bubble1_state	high	State byte (+0xD) of air bubble record 1
+D_800D28E0	g_hud_bubble_spawn_timer	high	Frames until the next air bubble may spawn
+D_800D28E8	g_hud_air_meter_block	high	Air meter block: two 0x40-byte matrices then the AirMeter state at +0x80 (0xC0 bytes)
+D_800D29A8	g_hud_health_piece_dl	high	Shared display list 0xB8 of a HUD health piece (acquired by hud_health_draw)
+D_8003C8E0	g_dbg_crash_marker	med	Progress / trap code word written at many points (0x0C00005B ...); the debugger shows it, type = top byte
+D_800BEE12	g_level_start_mode	low	s16 passed as the camera mode to camera_controller_init and to event_start_level_events
+D_800D2E44	g_game_over_disabled	high	Set by event action 23: no game-over save handling in this level (level_is_game_over_level returns 0)
+D_800D2E4C	g_save_progress_bits	high	Pointer to the 27-byte progress bit field of the current save (event save bits, level flags)
+D_800D2E70	g_event_states	high	Per-event state byte (1..3) indexed by event id (event_list_run_phase / event_list_unload)
+D_800D2F48	g_event_list	high	Loaded event list: length, head and tail (event_find / event_unlink_free)
+D_800D3289	g_game_flags_dirty	med	Set when event action 9 changes a D_800D2E60 flag bit; event_list_unload then sends command 36 and clears it
+D_800D3380	g_event_dispatch_args	high	Argument words {id & 0xFFF, arg, x1 .. xn} of the event being dispatched (event_dispatch)
+D_8009FA90	g_mtxf_deg_to_rad	high	pi / 180: degrees to radians (mtxf_rotate_xyz_deg)
+D_80088950	g_random_seed	high	64-bit shift-register state of random_int / random_float
+D_80088A80	g_owner_spawn_lists	med	Spawn lists {count, entries}; [0] holds the children spawned by owner_spawn_children
+D_8008CEB4	g_owner_spark_sprite	low	Sprite pointer word given to the sparks of owner_child_spark_burst (+0xB4)
+D_800A064C	g_fx_blast_u30	low	1655.0: value of field +0x30 of the fx_blast_spawn_preset spec
+D_800A0650	g_fx_point_emitter_uc	low	10.3: field +0xC of the fx_point_emitter_spawn spec
+D_800A0654	g_fx_point_emitter_u10	low	0.5009: field +0x10 of the fx_point_emitter_spawn spec
+D_800A0658	g_fx_debris_spray_scale	med	0.001: scale of the random debris speed in fx_debris_spray
+D_800A065C	g_fx_debris_dust_size_mul	med	0.27: dust cloud size factor in fx_debris_spray
+D_800A0660	g_fx_debris_dust_size_add	med	-0.31: dust cloud size offset in fx_debris_spray
+D_800A0670	g_fx_ring_u7c	low	0.045: field +0x7C of the fx_ring_particle_spawn spec
+D_800A0674	g_fx_ring_u80	low	0.7: field +0x80 of the fx_ring_particle_spawn spec
+D_800A0678	g_fx_ring_u78	low	10000.0: field +0x78 of the fx_ring_particle_spawn spec
+D_800A067C	g_fx_ring_u48	low	22.6: field +0x48 of the ring particle spec, times the scale
+D_800A0680	g_fx_ring_u50	low	13.786: field +0x50 of the ring particle spec, times the scale
+D_800A0684	g_fx_ring_u4c	low	57.969: field +0x4C of the ring particle spec, times t
+D_800A0688	g_fx_ring_u54	low	42.714: field +0x54 of the ring particle spec, times t
+D_800A068C	g_fx_ring_u58	low	118.763: field +0x58 of the ring particle spec, times t
+D_800A0D90	g_fire_sprites	high	Four s32 texture ids (0x60..0x63) picked at random for fire and smoke particles
+D_800A0DA0	g_fire_beam_pt_a	low	Vec3 (-151.8, -23.3, -20.9) passed as the first point to model_node_points_to_world by object_get_beam_ends
+D_800A0DAC	g_fire_beam_pt_b	low	Vec3 (-283.4, -23.3, -20.9) passed as the second point by object_get_beam_ends
+D_800A0DB8	g_fire_emit1_scale	low	0.05: fields +0x10 / +0x14 of the first object_fire_spawn emitter
+D_800A0DBC	g_fire_emit1_u18	low	0.45: field +0x18 of the first object_fire_spawn emitter
+D_800A0DC0	g_fire_emit1_u1c	low	0.3: field +0x1C of the first object_fire_spawn emitter
+D_800A0DC4	g_fire_emit1_u20	low	1e-6: field +0x20 of the first object_fire_spawn emitter
+D_800A0DC8	g_fire_emit2_scale	low	0.1: fields +0x10 / +0x14 of the second object_fire_spawn emitter
+D_800A0DCC	g_fire_emit2_u1c	low	0.8: field +0x1C of the second object_fire_spawn emitter
+D_800A0DD0	g_fire_emit2_u20	low	1e-6: field +0x20 of the second object_fire_spawn emitter
+D_800A0DE4	g_fire_flicker_smooth	med	0.65: smoothing factor of the fire emitter flicker (fire_emitter_flicker)
+D_800A0DE8	g_smoke_deg_to_binang	med	65536 / 360: scale to 16-bit angle of the smoke puff heading (smoke_puff_burst)
+D_800A0DEC	g_smoke_puff_drag_base	med	0.805: base drag of smoke puffs
+D_800A0DF0	g_smoke_puff_drag_rand	med	0.223: random drag range of smoke puffs
+D_800A0DF4	g_smoke_puff_u54_rand	low	0.646: random range of smoke puff field +0x54
+D_800A0DF8	g_smoke_puff_u54_base	low	-0.794: base of smoke puff field +0x54
+D_800A0E00	g_debris_burst1_sprites	high	Three sprites of the first debris burst of a destroyed object (one particle each)
+D_800A0E80	g_debris_dust_glow_mul	low	0.403: glow pulse size factor in debris_dust_cloud_spawn
+D_800A0E84	g_debris_dust_glow_add	low	1.305: glow pulse size offset in debris_dust_cloud_spawn
+D_800A0E88	g_debris_preset_a1	low	1263.0: value written to *arg1 by debris_spec_fill_preset
+D_800A0E8C	g_debris_preset_u14	low	0.09: field +0x14 of the debris_spec_fill_preset spec
+D_800A0E90	g_debris_preset_u18	low	0.0303: field +0x18 of the debris_spec_fill_preset spec
+D_800A0E94	g_debris_preset_u38	low	0.812: field +0x38 of the debris_spec_fill_preset spec
+D_800A0E98	g_debris_preset_u40	low	1.618: field +0x40 of the debris_spec_fill_preset spec
+D_80088CA0	g_anim_segment_tables	med	Two display list frame tables (segments 2..5 from the first, 6 / 7 from the second) of anim_segments_set
+D_800D9D30	g_anim_segment_clock	high	u16 clock of the animated segments: += frames << 6, frame = clock >> 8 (anim_segments_clock_tick)
+D_80090648	g_tile_anim_tex_ids	low	s32 texture id table for the tile slide animations and the level rope texture scroll
+D_800A0F10	g_trail_aim_scale_mp	low	0.84: aim vector parameter of trail_get_aim in multiplayer
+D_800A0F14	g_trail_aim_scale_sp	low	1.152: aim vector parameter of trail_get_aim in single player
+D_800A0F18	g_effect50_u3c	low	0.017241: field +0x3C of the effect spawned by obj_spawn_effect50_with_sound
+D_800A0F1C	g_trail_gravity	med	-1.912: vertical acceleration of a trail point (trail_point_integrate)
+D_800A0F20	g_trail_half_gravity	med	-0.956: half the trail gravity, for the position term (trail_point_integrate)
+D_800A0F24	g_trail_3c_max	low	0.042931: upper limit of the trail emitter's +0x3C value (trail_emit_update)
+D_800A0F28	g_trail_3c_step	low	0.001379: per-frame step of the trail emitter's +0x3C value
+D_800A0F2C	g_trail_3c_min	low	0.017241: lower limit of the trail emitter's +0x3C value
+D_800A0F34	g_trail_34_rate	low	0.38: per-frame increase of the trail emitter's +0x34 value
+D_80088CB0	g_joint_beam_start_pts	high	Limb start points (limb space, vec3 per index) of joint_beam_spawn
+D_80088CBC	g_joint_beam_end_pts	high	Limb end points (limb space, vec3 per index) of joint_beam_spawn
+D_80088CC8	g_joint_beam_bone	high	Limb matrix index per beam (joint_beam_spawn)
+D_80088CCC	g_joint_beam_dir_scale	high	Direction scale per beam (joint_beam_spawn)
+D_80088CD0	g_joint_beam_lifetime	high	Record lifetime per beam (joint_beam_spawn)
+D_80088CD4	g_joint_beam_f11c	low	Value of record +0x11C per beam (joint_beam_spawn)
+D_80088CD8	g_joint_beam_f120	low	Value of record +0x120 per beam (joint_beam_spawn)
+D_80088CDC	g_joint_beam_f134	low	Value of record +0x134 per beam (joint_beam_spawn)
+D_80088CE0	g_joint_beam_b138	low	Byte of record +0x138 per beam (joint_beam_spawn)
+D_80088CE4	g_joint_beam_f12c	low	Value of record +0x12C per beam (joint_beam_spawn)
+D_80088CE8	g_joint_beam_f130	low	Value of record +0x130 per beam (joint_beam_spawn)
+D_800A0FB4	g_beam_motion_max	med	1.2: upper clamp of the beam's +0x14 / +0x18 factors (beam_motion_step)
+D_800A0FB8	g_beam_motion_min	med	0.8: lower clamp of the beam's +0x14 / +0x18 factors (beam_motion_step)
+D_80090778	g_itemfx_anim_a	med	Sprite animation of item effect presets 0 / 5 (item_effect_spawn)
+D_800907C4	g_itemfx_anim_b	med	Sprite animation of item effect presets 1..4 (item_effect_spawn)
+D_800A1028	g_itemfx_k0_z	med	-1938.0: spawn z of item effect preset 0
+D_800A102C	g_itemfx_k0_u24	low	40.4: field +0x24 of item effect preset 0
+D_800A1030	g_itemfx_k5_x	med	-693.79: spawn x of item effect preset 5
+D_800A1034	g_itemfx_k5_y	med	205.64: spawn y of item effect preset 5
+D_800A1038	g_itemfx_k5_z	med	-1944.81: spawn z of item effect preset 5
+D_800A103C	g_itemfx_a_u18	low	-1.6: field +0x18 of item effect presets 0 / 5
+D_800A1040	g_itemfx_a_u1c	low	1.67: field +0x1C of item effect presets 0 / 5
+D_800A1044	g_itemfx_a_u08	low	3.6: field +0x08 of item effect presets 0 / 5
+D_800A1048	g_itemfx_a_u6c	low	45.19: field +0x6C of item effect presets 0 / 5
+D_800A104C	g_itemfx_a_u8c	low	385.0: field +0x8C of item effect presets 0 / 5
+D_800A1050	g_itemfx_a_u9c	low	0.225: field +0x9C of item effect presets 0 / 5
+D_800A1054	g_itemfx_a_uac	low	5.95: field +0xAC of item effect presets 0 / 5
+D_800A1058	g_itemfx_a_ub0	low	5.63: field +0xB0 of item effect presets 0 / 5
+D_800A105C	g_itemfx_a_ubc	low	1.1: field +0xBC of item effect presets 0 / 5
+D_800A1060	g_itemfx_a_uc0	low	0.42: field +0xC0 of item effect presets 0 / 5
+D_800A1064	g_itemfx_a_ucc	low	1.48: field +0xCC of item effect presets 0 / 5
+D_800A1068	g_itemfx_a_ud4	low	17.19: field +0xD4 of item effect presets 0 / 5
+D_800A106C	g_itemfx_k1_x	med	650.0: spawn x of item effect preset 1
+D_800A1070	g_itemfx_k1_z	med	-650.0: spawn z of item effect preset 1
+D_800A1074	g_itemfx_k2_xz	med	-650.0: spawn x and z of item effect preset 2
+D_800A1078	g_itemfx_k3_z	med	650.0: spawn z of item effect preset 3
+D_800A107C	g_itemfx_k3_x	med	-650.0: spawn x of item effect preset 3
+D_800A1080	g_itemfx_k4_xz	med	650.0: spawn x and z of item effect preset 4
+D_800A1084	g_itemfx_b_u1c	low	1.26: field +0x1C of item effect presets 1..4
+D_800A1088	g_itemfx_b_u30	low	17.6: field +0x30 of item effect presets 1..4
+D_800A108C	g_itemfx_b_u38	low	-9.1: field +0x38 of item effect presets 1..4
+D_800A1090	g_itemfx_b_u64	low	0.32: field +0x64 of item effect presets 1..4
+D_800A1094	g_itemfx_b_u6c	low	114.9: field +0x6C of item effect presets 1..4
+D_800A1098	g_itemfx_b_u74	low	1039.0: field +0x74 of item effect presets 1..4
+D_800A109C	g_itemfx_b_u78	low	769.0: field +0x78 of item effect presets 1..4
+D_800A10A0	g_itemfx_b_u9c	low	0.31: field +0x9C of item effect presets 1..4
+D_800A10A4	g_itemfx_b_ua4	low	139.53: field +0xA4 of item effect presets 1..4
+D_800A10A8	g_itemfx_b_uac	low	18.8: field +0xAC of item effect presets 1..4
+D_800A10AC	g_itemfx_b_uc0	low	1.19: field +0xC0 of item effect presets 1..4
+D_800A10B0	g_itemfx_b_ucc	low	0.72: field +0xCC of item effect presets 1..4
+D_800A10B4	g_itemfx_b_udc	low	2366.0: field +0xDC of item effect presets 1..4
+D_800A10B8	g_itemfx_b_ue0	low	1231.0: field +0xE0 of item effect presets 1..4
+D_800A10BC	g_itemfx_b_u104	low	0.078: field +0x104 of item effect presets 1..4
+D_800A10C0	g_fountain_particle_scale	med	1.7: both scales of the particles spawned by fountain_step
+D_800A10C4	g_fountain_emit_threshold	low	0.99999: fountain_emit acts once its +0x20 value exceeds this
+D_80088CF0	g_trigger_zone_ids	high	Eight trigger zone ids (D_800D34B8 records) tested by trigger_zones_check
+D_80088CF8	g_trigger_zone_objs	high	Object id of each of the eight trigger zones (0 = trigger the zone itself), trigger_zones_check
+D_800905B4	g_zone_debris_tex_sets	low	Texture id sets (8 bytes per variant, by +0x7C) applied as segment overrides by zone_debris_fall_update
+D_800A10DB	g_light_group_ctrl_ids	med	Light controller id of each light group (stride 4), sent message 0x22 by light_group_send_msg22
+D_800A10FB	g_light_group_fx_ids	med	Effect id of each light group (stride 4), sent message 0x22 by light_group_send_msg22
+D_80088D00	g_explosion_frag_speed	high	Fragment base speed by kind (big_explosion_spawn)
+D_80088D0C	g_explosion_frag_speed_rand	high	Fragment random speed by kind (big_explosion_spawn)
+D_800A1130	g_explosion_frag_offsets	high	Offsets (vec3) of the 15 fragments of big_explosion_spawn
+D_800A11E4	g_explosion_frag_spin_z	med	Spin z factor of each of the 15 explosion fragments
+D_800A1220	g_explosion_frag_spin_x	med	Spin x factor of each of the 15 explosion fragments
+D_800A125C	g_explosion_frag_spin_scale	med	Spin magnitude of each of the 15 explosion fragments
+D_800A1298	g_explosion_frag_kind	high	Kind of each of the 15 explosion fragments (float, read as an unsigned byte)
+D_80088D20	g_water_effect_started	high	Set once water_effect_start_once has run; cleared on level reset
+D_80088D24	g_level_part_triggers	med	Three trigger ids (D_800D34B8 records) of the level parts tested by level_part_is_active
+D_80088D28	g_joint_spark_bone	med	Bone / matrix index (2) where obj_joint_spark_spray spawns its sparks
+D_800A1340	g_joint_spark_start_pts	high	Spark start points {+-17, 0, 90} of obj_joint_spark_spray
+D_800A1358	g_joint_spark_end_pts	high	Spark end points {+-17, 0, 150} of obj_joint_spark_spray
+D_800A13B0	g_fx_model_emitter_recs	med	World record id of each of the two model emitters (fx_model_emitter_spawn)
+D_800A13B4	g_fx_model_emitter_pts_a	low	Vec3 per model emitter passed as +0x9C of the spawn spec (fx_model_emitter_update)
+D_800A13CC	g_fx_model_emitter_pts_b	low	Vec3 per model emitter passed as +0xA0 of the spawn spec (fx_model_emitter_update)
+D_80088D30	g_door_light_level	med	Current brightness of the four map door lights (spring towards the target)
+D_80088D40	g_door_light_target	med	Target brightness of the four map door lights (192 or 255)
+D_80088D50	g_door_light_vel	med	Spring velocity of the four map door lights
+D_80088D60	g_door_light_query_events	med	Event ids (0x4039..) queried for the four map door lights
+D_80088D70	g_door_light_set_events	med	Event ids (0x30E4..) sent the brightness of the four map door lights
+D_800A1400	g_zap_bolt_no_height	med	-10000.0: initial ground height (+0x54) of a new zap bolt
+D_800A1404	g_zap_bolt_speed_base	low	526.0: base speed of a zap bolt's +0x4C (zap_bolt_update)
+D_800A1408	g_zap_bolt_speed_rand	low	1228.0: random speed range of a zap bolt's +0x4C
+D_800A140C	g_zap_bolt_speed_scale	low	0.001: speed scale of a zap bolt's +0x4C
+D_800A1410	g_zap_bolt_tracer_param	low	0.005263: tracer_spawn parameter of a zap bolt
+D_800A1414	g_zap_bolt_spin_scale	low	0.001: scale of a zap bolt's +0x50 rate
+D_800A1418	g_zap_bolt_sprite_base	low	1093.0: base size of the zap bolt flip sprites
+D_800A141C	g_zap_bolt_sprite_rand	low	1548.0: random size range of the zap bolt flip sprites
+D_800A1420	g_linked_fx_rad_to_binang	med	65536 / (2 pi): radians to 16-bit angle in obj_spawn_linked_effect
+D_800A1424	g_fx_tint_preset_param	low	0.228: fourth parameter of surface_impact_effects in fx_set_tint_preset
+D_800D99D0	g_zap_bolts	high	Eight zap bolt slots (zap_bolt_spawn / zap_bolt_free / zap_bolt_get_pos)
+D_800D9E10	g_cam_point_ahead	med	s16 x, y, z of the point 500 units ahead of the camera (camera_calc_point_ahead)
+D_800908D0	g_impact_dust_sprites_k8	med	Sprite set of impact dust kind 8 (impact_dust_spawn)
+D_80091C50	g_dust_sprites_c0	med	Dust sprite set of impact kinds 4 / 9 / 10 and of ground dust colour 0
+D_80091C5C	g_impact_dust_sprites_def	med	Default sprite set of impact dust (impact_dust_spawn)
+D_800A1440	g_impact_kinds	high	Table of 20 impact kinds (ImpactKind) used by impact_effect_spawn
+D_800A14E0	g_impact_spark_sizes	high	Spark size per impact size (3 pairs of u16)
+D_800A14EC	g_impact_debris_scale	high	Debris count scale per impact size {0.33, 1, 2}
+D_800A14F8	g_impact_no_height	med	-10000.0: initial height of impact_effect_at_world_object (no floor)
+D_800D9D80	g_aim_records	low	28-byte aim / impact records (direction at +0x10, puff timer at +3), indexed by slot
+D_800D9D83	g_aim_record_puff_timer	low	Byte +3 of the D_800D9D80 records: puff timer set to 100 by impact_effect_spawn
+D_80088DA4	g_storm_active	med	Lightning storm on (1); cleared when its intensity falls back to 0
+D_800D9E24	g_storm_center	low	Centre of the random lightning storm scatter coordinates
+D_800D9E28	g_storm_spread	low	Half range of the random lightning storm scatter coordinates
+D_800D9E2C	g_storm_intensity_max	low	Maximum intensity of the lightning storm
+D_800D9E30	g_storm_phase_timer	low	Lightning storm phase timer (wraps above 0x82 to a random negative value)
+D_800D9E34	g_storm_intensity	low	Current lightning storm intensity (rises while the phase timer is >= 0x1F)
+D_80088DB0	g_beam_cross_fns	low	Handlers called by beam_ray_update when the beam crosses a plane, indexed by its +0x2C byte
+D_80088DC0	g_arc_start_point_fns	med	Arc spark start point generators, indexed by preset byte +4 (arc_spark_spawn)
+D_80088DCC	g_arc_end_point_fns	med	Arc spark end point generators, indexed by preset byte +5 (arc_spark_spawn)
+D_80088DD4	g_arc_path_fns	med	Arc spark path functions, indexed by preset byte +6 (arc_spark_spawn)
+D_80088DDC	g_arc_box_a	med	First box (min / max vec3) of arc_point_random_box2
+D_80088DE0	g_arc_box_b	med	Second box (min / max vec3) of arc_point_random_box2
+D_80088DE4	g_arc_boxes6	med	Six box pointers picked at random by arc_point_random_box6
+D_80088DFC	g_lightning_flash_sprites	low	Two words copied and passed to screen_sprite_spawn by screen_lightning_random_flash
+D_80088E04	g_screen_sprite_kind	med	Kind byte of the particle specs filled by screen_sprite_spawn
+D_80088E08	g_edge_sprites_side	low	Three sprite ids picked for left / right edge sprites (screen_sprite_spawn_edge)
+D_80088E14	g_edge_sprites_topbot	low	Three sprite ids picked for top / bottom edge sprites (screen_sprite_spawn_edge)
+D_80088E20	g_storm_strike_node_types	low	Two node types broadcast to by storm_lightning_strike
+D_800A1560	g_arc_spark_presets	med	16-byte arc spark presets {chance, start / end / path fn indices, s16s} indexed by arg3 (arc_spark_spawn)
+D_800A1660	g_fx_blast_positions	med	Vec3 positions (12 bytes) per kind 4..7 of fx_scripted_blast
+D_800A16C0	g_storm_debris_sprite	low	Byte given as sprite / kind (+0xFE) of the storm debris burst particles
+D_800A16C4	g_storm_debris_size	low	Word read as an int size factor of the storm debris burst particles
+D_800A16C8	g_arc_spark_u60_rand	low	0.15: random range of arc spark field +0x60
+D_800A16CC	g_arc_spark_u60_base	low	0.2: base of arc spark field +0x60
+D_800A16D0	g_arc_spark_u74_scale	low	0.1: scale of arc spark field +0x74
+D_800BEE08	g_view_count_minus1	high	Number of viewports minus 1 (human players in multiplayer), set by mp_set_mode_for_level
+D_800D9A20	g_spawn_region_pair	med	Registered spawn region records (kind 0, then D_800D9A24 kind 1), one picked at random by arc_point_random_marker
+D_800DCD90	g_light_list_weight	med	Sum of the +8 weights of the records in the light record list (weighted random pick)
+D_800DCDC4	g_light_record_list	med	Head of the light record list (record_light_list_add), used by the storm emitters
+D_800A1840	g_footstep_dust_scale	low	1 / 85: scale of the footstep dust size argument
+D_800A1844	g_footstep_deg_to_byte	med	256 / 360: degrees to byte angle for the footstep dust heading
+D_80088E30	g_camera_event_locked	high	Set while camera_update_event_lock holds the camera in its event mode, cleared when released

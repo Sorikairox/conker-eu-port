@@ -142,11 +142,11 @@ s32 cord_rig_get_state(u8 *arg0) {
     return ret;
 }
 
-extern s32 D_800AA700;
-extern s32 D_800AA70C;
-extern s32 D_800AA718;
-extern s32 D_800AA724;
-extern s32 D_800AA730;
+extern s32 g_cord_rig_off_a_r; /* was D_800AA700 */
+extern s32 g_cord_rig_off_a_l; /* was D_800AA70C */
+extern s32 g_cord_rig_rope1_off_b; /* was D_800AA718 */
+extern s32 g_cord_rig_rope2_off_b; /* was D_800AA724 */
+extern s32 g_cord_rig_rope0_off_a; /* was D_800AA730 */
 
 u8 *cord_spawn(void *, f32, s32, u8, s32); /* P95 */
 /* was func_151B28F8 */
@@ -202,9 +202,9 @@ void cord_rig_spawn_three_ropes(u8 *arg0) {
     sp.u34 = temp_s0;
     sp.u39 = 5;
     sp.u38 = (*(u8 *)((u8 *)temp_s0 + 0x3B));
-    (*(s32 *)((u8 *)(&sp.u3C) + 0)) = (s32) (*(s32 *)((u8 *)(&D_800AA730) + 0));
-    (*(s32 *)((u8 *)(&sp.u3C) + 4)) = (s32) (*(s32 *)((u8 *)(&D_800AA730) + 4));
-    (*(s32 *)((u8 *)(&sp.u3C) + 8)) = (s32) (*(s32 *)((u8 *)(&D_800AA730) + 8));
+    (*(s32 *)((u8 *)(&sp.u3C) + 0)) = (s32) (*(s32 *)((u8 *)(&g_cord_rig_rope0_off_a) + 0));
+    (*(s32 *)((u8 *)(&sp.u3C) + 4)) = (s32) (*(s32 *)((u8 *)(&g_cord_rig_rope0_off_a) + 4));
+    (*(s32 *)((u8 *)(&sp.u3C) + 8)) = (s32) (*(s32 *)((u8 *)(&g_cord_rig_rope0_off_a) + 8));
     sp.u48 = temp_s0;
     temp_t8 = "A@";
     sp.u4D = 0xA;
@@ -238,15 +238,15 @@ void cord_rig_spawn_three_ropes(u8 *arg0) {
     sp.u34 = temp_s1;
     sp.u39 = 5;
     sp.u38 = (*(u8 *)((u8 *)temp_s1 + 0x3B));
-    (*(s32 *)((u8 *)(&sp.u3C) + 0)) = (s32) (*(s32 *)((u8 *)(&D_800AA700) + 0));
-    (*(s32 *)((u8 *)(&sp.u3C) + 4)) = (s32) (*(s32 *)((u8 *)(&D_800AA700) + 4));
-    (*(s32 *)((u8 *)(&sp.u3C) + 8)) = (s32) (*(s32 *)((u8 *)(&D_800AA700) + 8));
+    (*(s32 *)((u8 *)(&sp.u3C) + 0)) = (s32) (*(s32 *)((u8 *)(&g_cord_rig_off_a_r) + 0));
+    (*(s32 *)((u8 *)(&sp.u3C) + 4)) = (s32) (*(s32 *)((u8 *)(&g_cord_rig_off_a_r) + 4));
+    (*(s32 *)((u8 *)(&sp.u3C) + 8)) = (s32) (*(s32 *)((u8 *)(&g_cord_rig_off_a_r) + 8));
     sp.u48 = temp_s0;
     sp.u4D = 5;
     sp.u4C = (*(u8 *)((u8 *)temp_s0 + 0x3B));
-    (*(s32 *)((u8 *)(&sp.u50) + 0)) = (s32) (*(s32 *)((u8 *)(&D_800AA718) + 0));
-    (*(s32 *)((u8 *)(&sp.u50) + 4)) = (s32) (*(s32 *)((u8 *)(&D_800AA718) + 4));
-    (*(s32 *)((u8 *)(&sp.u50) + 8)) = (s32) (*(s32 *)((u8 *)(&D_800AA718) + 8));
+    (*(s32 *)((u8 *)(&sp.u50) + 0)) = (s32) (*(s32 *)((u8 *)(&g_cord_rig_rope1_off_b) + 0));
+    (*(s32 *)((u8 *)(&sp.u50) + 4)) = (s32) (*(s32 *)((u8 *)(&g_cord_rig_rope1_off_b) + 4));
+    (*(s32 *)((u8 *)(&sp.u50) + 8)) = (s32) (*(s32 *)((u8 *)(&g_cord_rig_rope1_off_b) + 8));
     sp.u68 = (*(f32 *)((u8 *)temp_s1 + 0x14));
     sp.u6C = (*(f32 *)((u8 *)temp_s1 + 0x18));
     sp.u70 = (*(f32 *)((u8 *)temp_s1 + 0x1C));
@@ -264,15 +264,15 @@ void cord_rig_spawn_three_ropes(u8 *arg0) {
     sp.u34 = temp_s1;
     sp.u39 = 5;
     sp.u38 = (*(u8 *)((u8 *)temp_s1 + 0x3B));
-    (*(s32 *)((u8 *)(&sp.u3C) + 0)) = (s32) (*(s32 *)((u8 *)(&D_800AA70C) + 0));
-    (*(s32 *)((u8 *)(&sp.u3C) + 4)) = (s32) (*(s32 *)((u8 *)(&D_800AA70C) + 4));
-    (*(s32 *)((u8 *)(&sp.u3C) + 8)) = (s32) (*(s32 *)((u8 *)(&D_800AA70C) + 8));
+    (*(s32 *)((u8 *)(&sp.u3C) + 0)) = (s32) (*(s32 *)((u8 *)(&g_cord_rig_off_a_l) + 0));
+    (*(s32 *)((u8 *)(&sp.u3C) + 4)) = (s32) (*(s32 *)((u8 *)(&g_cord_rig_off_a_l) + 4));
+    (*(s32 *)((u8 *)(&sp.u3C) + 8)) = (s32) (*(s32 *)((u8 *)(&g_cord_rig_off_a_l) + 8));
     sp.u48 = temp_s0;
     sp.u4D = 0xA;
     sp.u4C = (*(u8 *)((u8 *)temp_s0 + 0x3B));
-    (*(s32 *)((u8 *)(&sp.u50) + 0)) = (s32) (*(s32 *)((u8 *)(&D_800AA724) + 0));
-    (*(s32 *)((u8 *)(&sp.u50) + 4)) = (s32) (*(s32 *)((u8 *)(&D_800AA724) + 4));
-    (*(s32 *)((u8 *)(&sp.u50) + 8)) = (s32) (*(s32 *)((u8 *)(&D_800AA724) + 8));
+    (*(s32 *)((u8 *)(&sp.u50) + 0)) = (s32) (*(s32 *)((u8 *)(&g_cord_rig_rope2_off_b) + 0));
+    (*(s32 *)((u8 *)(&sp.u50) + 4)) = (s32) (*(s32 *)((u8 *)(&g_cord_rig_rope2_off_b) + 4));
+    (*(s32 *)((u8 *)(&sp.u50) + 8)) = (s32) (*(s32 *)((u8 *)(&g_cord_rig_rope2_off_b) + 8));
     sp.u68 = (*(f32 *)((u8 *)temp_s1 + 0x14));
     sp.u6C = (*(f32 *)((u8 *)temp_s1 + 0x18));
     sp.u70 = (*(f32 *)((u8 *)temp_s1 + 0x1C));
@@ -334,9 +334,9 @@ typedef struct {
 typedef struct {
     f32 v[3];
 } Vec3f2C40;
-/* D_800AA700 (77, 20, 67) / D_800AA70C (-77, 20, 67): declared s32 above */
-extern f32 D_800AA748[3]; /* (27, 42, 0) */
-extern f32 D_800AA754[3]; /* (-27, 42, 0) */
+/* g_cord_rig_off_a_r (77, 20, 67) / g_cord_rig_off_a_l (-77, 20, 67): declared s32 above */
+extern f32 g_cord_rig_off_b_r[3]; /* (27, 42, 0); was D_800AA748 */
+extern f32 g_cord_rig_off_b_l[3]; /* (-27, 42, 0); was D_800AA754 */
 
 // twin_lights_spawn: obj +0x28 holds the owner. Spawns two lights (cord_spawn: template at the owner position,
 // rate 0.0015) whose records attach them to the owner at (+-77, 20, 67) (mode 5) and (+-27, 42, 0) (mode 2), the
@@ -356,11 +356,11 @@ void cord_rig_spawn_twin_ropes(u8 *obj) {
     rec.a.owner = owner;
     rec.a.mode = 5;
     rec.a.room = owner[0x3B];
-    *(Vec3f2C40 *) rec.a.offset = *(Vec3f2C40 *) &D_800AA700;
+    *(Vec3f2C40 *) rec.a.offset = *(Vec3f2C40 *) &g_cord_rig_off_a_r;
     rec.b.owner = owner;
     rec.b.mode = 2;
     rec.b.room = owner[0x3B];
-    *(Vec3f2C40 *) rec.b.offset = *(Vec3f2C40 *) D_800AA748;
+    *(Vec3f2C40 *) rec.b.offset = *(Vec3f2C40 *) g_cord_rig_off_b_r;
     t.u34 = 0;
     t.u0 = 0;
     t.u2 = 100;
@@ -384,8 +384,8 @@ void cord_rig_spawn_twin_ropes(u8 *obj) {
         memcpy(o + 0x150, &rec, 0x30);
     }
     rec.first = 0;
-    *(Vec3f2C40 *) rec.a.offset = *(Vec3f2C40 *) &D_800AA70C;
-    *(Vec3f2C40 *) rec.b.offset = *(Vec3f2C40 *) D_800AA754;
+    *(Vec3f2C40 *) rec.a.offset = *(Vec3f2C40 *) &g_cord_rig_off_a_l;
+    *(Vec3f2C40 *) rec.b.offset = *(Vec3f2C40 *) g_cord_rig_off_b_l;
     t.u1C[2] = 1;
     o = cord_spawn(&t, 0.0015f, 0x30, 0xFF, 0);
     *(u8 **) (obj + 0x38) = o;
@@ -395,8 +395,8 @@ void cord_rig_spawn_twin_ropes(u8 *obj) {
     beam.owner = owner;
     beam.room = owner[0x3B];
     beam.mode = 2;
-    *(Vec3f2C40 *) beam.left = *(Vec3f2C40 *) D_800AA748;
-    *(Vec3f2C40 *) beam.right = *(Vec3f2C40 *) D_800AA754;
+    *(Vec3f2C40 *) beam.left = *(Vec3f2C40 *) g_cord_rig_off_b_r;
+    *(Vec3f2C40 *) beam.right = *(Vec3f2C40 *) g_cord_rig_off_b_l;
     beam.u20 = 5.0f;
     beam.obj = obj;
     b = effect_node_create(0x12C, -1, -1, 0, 0, 0x13, (struct37 *) 0x28, 0xFF, 1);
@@ -423,7 +423,7 @@ s32 gfx_load_texture_cached(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *,
 u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 extern s32 D_80091198;
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 /* was func_151B2F24 */
 u8 *cord_plank_draw(u8 *arg0, u8 *arg1, s16 arg2) {
@@ -489,9 +489,9 @@ u8 *cord_plank_draw(u8 *arg0, u8 *arg1, s16 arg2) {
         mtx_transform_point_or_origin(temp_s1_2 + 8, &sp.u80, temp_a2);
         mtx_transform_point_or_origin(temp_s1_2 + 0x14, &sp.u74, sp64);
         sp.uB2 = 1;
-        sp.uA8 = &D_800DBFF0[arg2].unk2F8;
+        sp.uA8 = &g_player_views[arg2].unk2F8;
         temp_v1 = ((u8 *)&g_render_mode_pairs);
-        temp_v0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_prim_color_cached(gfx_env_color_cached(gfx_load_texture_cached(gfx_geometry_mode_cached(var_s0, 0x200005, 0x60600), &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &sp.uB2, 3), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0x2B, &sp.uB2), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x2C)) | (*(s32 *)((u8 *)temp_v1 + 0x28)), &sp.uB2);
+        temp_v0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_prim_color_cached(gfx_env_color_cached(gfx_load_texture_cached(gfx_geometry_mode_cached(var_s0, 0x200005, 0x60600), &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &sp.uB2, 3), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0x2B, &sp.uB2), g_gfx_tlut_mode | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x2C)) | (*(s32 *)((u8 *)temp_v1 + 0x28)), &sp.uB2);
         temp_f0 = sp.u74 - sp.u80;
         temp_f14 = ((temp_f0 * 0.5f) + sp.u80) - (*(f32 *)((u8 *)sp.uA8 + 0));
         temp_f2 = sp.u78 - sp.u84;
@@ -600,7 +600,7 @@ void cord_rig_on_obj_replaced(u8 *arg0, s32 *arg1, u8 arg2)
 
 s32 cord_end_get_bone_pos(void *arg0, void *arg1, s32 arg2, u8 arg3);
 
-/* P274: s32 (D_8008FE90 entry; cord_end_get_obj_pos and the C dispatchers test the result: the asm passes on
+/* P274: s32 (g_cord_end_pos_fns entry; cord_end_get_obj_pos and the C dispatchers test the result: the asm passes on
    cord_end_get_bone_pos's v0) */
 /* was func_151B3550 */
 s32 cord_end_handler_bone(u8 *arg0, s32 arg1, u8 arg2) {

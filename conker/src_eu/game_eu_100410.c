@@ -13,7 +13,7 @@ void flake_spawner_update(u8 *arg0)
   if ((*q)[0x78] & 1)
   {
     s32 *v = (s32 *) ((*q) + 0x28);
-    v[3] -= D_800BE9E4;
+    v[3] -= g_frame_ticks;
     if (v[3] < 0)
     {
       flake_particle_spawn(v[0], (u8 *) (&v[4]), (*q)[0xC], (*q)[1]);
@@ -128,8 +128,8 @@ void fx_sprite_shower_update(u8 *arg0) {
     u8 *temp_v0;
 
     temp_s0 = arg0 + 0x28;
-    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((*(f32 *)((u8 *)arg0 + 0x30)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x40)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x40)) + D_800BE9A4);
+    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((*(f32 *)((u8 *)arg0 + 0x30)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x40)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x40)) + g_frame_step_f);
     if ((*(f32 *)((u8 *)arg0 + 0x3C)) > 1.0f) {
         temp_s2 = (*(u8 **)((u8 *)temp_s0 + 0));
         sp.uC0 = 0.0f;
@@ -308,14 +308,14 @@ u8 *beam_build_quad_vtx(u8 *arg0, s16 arg1) {
 s32 beam_scroll_fade_step(u8 *arg0) {
     u8 *temp_s0;
 
-    *(f32 *)(arg0 + 0x128) = (*(f32 *)(arg0 + 0x130) * D_800BE9A4) + *(f32 *)(arg0 + 0x128);
-    *(f32 *)(arg0 + 0x12C) = (*(f32 *)(arg0 + 0x134) * D_800BE9A4) + *(f32 *)(arg0 + 0x12C);
+    *(f32 *)(arg0 + 0x128) = (*(f32 *)(arg0 + 0x130) * g_frame_step_f) + *(f32 *)(arg0 + 0x128);
+    *(f32 *)(arg0 + 0x12C) = (*(f32 *)(arg0 + 0x134) * g_frame_step_f) + *(f32 *)(arg0 + 0x12C);
     temp_s0 = arg0 + 0x110;
     (*(f32 *)((u8 *)temp_s0 + 0x18)) = wrap_angle_rad((*(f32 *)((u8 *)arg0 + 0x128)));
     (*(f32 *)((u8 *)temp_s0 + 0x1C)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0 + 0x1C)));
     *(f32 *)(temp_s0 + 0) = *(f32 *)(temp_s0 + 8) + (*(f32 *)(temp_s0 + 0x10) * sinf(*(f32 *)(temp_s0 + 0x18)));
     *(f32 *)(temp_s0 + 4) = *(f32 *)(temp_s0 + 0xC) + (*(f32 *)(temp_s0 + 0x14) * sinf(*(f32 *)(temp_s0 + 0x1C)));
-    (*(f32 *)((u8 *)temp_s0 + 0x28)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x28)) - D_800BE9A4);
+    (*(f32 *)((u8 *)temp_s0 + 0x28)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x28)) - g_frame_step_f);
     (*(s8 *)((u8 *)arg0 + 0x5C)) = (s8) (u32) ((*(f32 *)((u8 *)temp_s0 + 0x28)) * (*(f32 *)((u8 *)temp_s0 + 0x2C)));
     if ((*(f32 *)((u8 *)temp_s0 + 0x28)) > 0.0f) {
         return 1;

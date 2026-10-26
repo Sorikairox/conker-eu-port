@@ -2,8 +2,8 @@
 /if (\*(s8 \*) (trail + 0x2C) < 2) {/s/< 2/< 3/
 /vtx_slot_buffer_get((s32 \*) (trail + 0x84)/s/<< 5) + 0xA0/<< 5) + 0xA4/
 /vtx_slot_buffer_get((s32 \*) (trail + 0x84)/s/trail + 0x84/trail + 0x88/
-/cam = (f32 \*) ((u8 \*) D_800DBFF0/s/0x9A0/0x9A4/
-/cam = (f32 \*) ((u8 \*) D_800DBFF0/s/0x2F8/0x2FC/
+/cam = (f32 \*) ((u8 \*) g_player_views/s/0x9A0/0x9A4/
+/cam = (f32 \*) ((u8 \*) g_player_views/s/0x2F8/0x2FC/
 /if (style\[0x1C\] & 2) {/s/& 2/\& 1/
 /n = style\[0x32\];/s/0x32/0x34/
 /i = \*(s8 \*) (trail + 0x2D);/s/0x2D/0x2E/
@@ -22,8 +22,8 @@
 /gfx = (u8 \*) gfx_set_combine_mode((s32) gfx, 0x4D, &flag);/s/0x4D/0x4E/
 /gfx = gfx_env_color_cached(gfx, style\[0x24\]/s/style\[0x24\], 0xFF/style[0x24], 0xFE/
 /gfx = gfx_env_color_cached(gfx, style\[0x24\]/s/style\[0x24\], style\[0x24\], style\[0x24\]/style[0x24], style[0x25], style[0x24]/
-/gfx = gfx_other_mode_cached((s32) gfx, D_800D30BC/s/0x2CA0/0x2CA1/
-/gfx = gfx_other_mode_cached((s32) gfx, D_800D30BC/s/0x5049D8/0x5049D9/
+/gfx = gfx_other_mode_cached((s32) gfx, g_gfx_tlut_mode/s/0x2CA0/0x2CA1/
+/gfx = gfx_other_mode_cached((s32) gfx, g_gfx_tlut_mode/s/0x5049D8/0x5049D9/
 /flag = 1;/s/1/0/
 /if (\*(u16 \*) (trail + 0x1E) & 2) {/s/& 2/\& 1/
 /a\[1\] = \*(f32 \*) (trail + 0x14);/s/0x14/0x18/

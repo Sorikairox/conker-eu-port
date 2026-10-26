@@ -6,10 +6,10 @@
 s32 screen_fade_alpha(s32);
 s32 hud_lens_is_off(s32);
 extern u8 D_800C35EA;
-extern void (*D_8008B478[])(u8 *, u16 *);
+extern void (*g_fb_fx_apply_fns[])(u8 *, u16 *); /* was D_8008B478 */
 
 /*
- * framebuffer_effects_apply: runs the framebuffer handlers (D_8008B478, index effect+0x10, -1 = none) of the
+ * framebuffer_effects_apply: runs the framebuffer handlers (g_fb_fx_apply_fns, index effect+0x10, -1 = none) of the
  * type-0x34 effects of both list groups on the frame about to be swapped (called by sched_swap_framebuffer).
  * Flag bits at effect+0xE: 4 = skip this frame once (cleared here), 2 = not while D_800C35EA == 1,
  * 8 = only while hud_lens_is_off(0) is set and screen_fade_alpha(0) is 0. Walks with the g_node_iter_next safe-next
@@ -43,7 +43,7 @@ void fb_fx_apply_all(u16 *fb) {
                     }
                 }
                 if (run) {
-                    D_8008B478[*(s8 *)(node + 0x10)](node, fb);
+                    g_fb_fx_apply_fns[*(s8 *)(node + 0x10)](node, fb);
                 }
             }
             node = (u8 *)g_node_iter_next[g_node_iter_depth];
@@ -64,19 +64,19 @@ u8 *fb_fx_spawn(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     return temp_v0;
 }
 
-extern s32 (*D_8008B470[])(void);
+extern s32 (*g_fb_fx_check_fns[])(void); /* was D_8008B470 */
 /* was func_1516055C */
 void fb_fx_update(u8 *arg0) {
     s32 pad;
     u8 ret = 0;
 
     if ((arg0[0xE] & 1) != 0) {
-        *(s16 *)(arg0 + 0x12) -= D_800BE9E4;
+        *(s16 *)(arg0 + 0x12) -= g_frame_ticks;
         if (*(s16 *)(arg0 + 0x12) < 0) {
             ret = 1;
         }
     }
-    if ((ret == 0) && (*(s8 *)(arg0 + 0xF) != -1) && (D_8008B470[*(s8 *)(arg0 + 0xF)]() == 0)) {
+    if ((ret == 0) && (*(s8 *)(arg0 + 0xF) != -1) && (g_fb_fx_check_fns[*(s8 *)(arg0 + 0xF)]() == 0)) {
         ret = 1;
     }
     if (ret) {
@@ -86,7 +86,7 @@ void fb_fx_update(u8 *arg0) {
 
 /* was func_eu_15160600 */
 void fb_fx_on_message(u8 *arg0, s32 arg1, u8 arg2) {
-    void (*temp_v0)(u8 *, s32, u8) = D_8008B484[arg0[0x14]];
+    void (*temp_v0)(u8 *, s32, u8) = g_fb_fx_msg_fns[arg0[0x14]];
 
     if (temp_v0 != NULL) {
         temp_v0(arg0, arg1, arg2);

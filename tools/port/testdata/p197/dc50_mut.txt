@@ -8,7 +8,7 @@ s/\* 0.01f;/* 0.02f;/
 s/if (e->timed \& 1) {/if (e->timed \& 2) {/
 s/if (e->time < 0) {/if (e->time <= 0) {/
 s/if (e->onEnd == -1) {/if (e->onEnd == 0) {/
-s/kill = D_8008D9C8\[e->onEnd\](arg0);/kill = D_8008D9C8[e->onEnd](arg0) != 0;/
+s/kill = g_char_effect_end_fns\[e->onEnd\](arg0);/kill = g_char_effect_end_fns[e->onEnd](arg0) != 0;/
 s/if (vis \& (1 << g_cur_view_player)) {/if (vis \& (2 << g_cur_view_player)) {/
 s/                e->mode |= 1;/                e->mode |= 2;/
 s/(vis \& 0xF) != 0xF/(vis \& 0x7) != 0x7/
@@ -28,7 +28,7 @@ s/cfg->local\[0\],/cfg->local[1],/
 s/if (cfg->attach == 2 || mode == 2) {/if (cfg->attach == 2) {/
 s/e->pos\[1\] + slot->off\[1\];/e->pos[1] + slot->off[2];/
 s/\*(s16 \*) (pt + 0xC) \* 0x40);/*(u8 *) (pt + 0xC) * 0x40);/
-s/slot->timer -= D_800BE9E4;/slot->timer -= 1;/
+s/slot->timer -= g_frame_ticks;/slot->timer -= 1;/
 s/if (slot->timer < 0) {/if (slot->timer <= 0) {/
 s/if (10.0f < m->vel\[0\]) {/if (11.0f < m->vel[0]) {/
 s/} else if (m->vel\[2\] < -10.0f) {/} else if (m->vel[2] < -9.0f) {/
@@ -50,7 +50,7 @@ s/spawn.f40 = 2.0f;/spawn.f40 = 1.0f;/
 s/spawn.b45 = 255;/spawn.b45 = 0;/
 s/\&\& e->live < cfg->max) {/\&\& e->live <= cfg->max) {/
 s/(u32) (nfree + 1);/(u32) (nfree + 2);/
-s/D_8008D9C0\[tpl->init\]/D_8008D9C0[tpl->kind]/
+s/g_char_effect_spawn_init_fns\[tpl->init\]/g_char_effect_spawn_init_fns[tpl->kind]/
 s/tpl->kind, tpl->b39, 0, tpl->b3A, b, 0x58/tpl->kind, tpl->b3A, 0, tpl->b3A, b, 0x58/
 s/memcpy(rec + 0x110, (u8 \*\*) \&blk, 0x58);/memcpy(rec + 0x110, (u8 **) \&blk, 0x54);/
 s/|= 0x40000000;/|= 0x20000000;/

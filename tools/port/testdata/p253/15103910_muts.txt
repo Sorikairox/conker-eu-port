@@ -3,7 +3,7 @@ s/e->y = (s32) \*(f32 \*) (obj + 0x18);/e->y = (s32) *(f32 *) (obj + 0x1C);/ % q
 s/(\*sound << 16) | (state & 0xFFFF);/(*sound << 16) | (state \& 0xFFF);/ % q
 s/actor_sound_play2(0x5B0, (struct127 \*) obj, 25000, 100, 0x78);/actor_sound_play2(0x5B0, (struct127 *) obj, 25000, 100, 0x77);/ % q
 s/^            \*sound = 0;$/            ;/ % q
-s/timer -= D_800BE9E4;/timer -= 1;/ % cnt
+s/timer -= g_frame_ticks;/timer -= 1;/ % cnt
 s/if (timer <= 0) {/if (timer < 0) {/ % fire exact
 s/s16 timer = state;/s32 timer = state \& 0xFFFF;/ % neg
 s/^            \*vol = e->vol;$/            ;/ % fire

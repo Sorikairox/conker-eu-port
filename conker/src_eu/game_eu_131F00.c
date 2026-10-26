@@ -45,8 +45,8 @@ void camera_cut_fade_update(struct102 *arg0) {
             }
         } else if (temp_v1 == 1) {
             temp_v0_2 = (*(u16 *)((u8 *)arg0 + 0x18));
-            if (D_800BE9E4 < (s32) temp_v0_2) {
-                (*(u16 *)((u8 *)arg0 + 0x18)) = (u16) (temp_v0_2 - D_800BE9E4);
+            if (g_frame_ticks < (s32) temp_v0_2) {
+                (*(u16 *)((u8 *)arg0 + 0x18)) = (u16) (temp_v0_2 - g_frame_ticks);
             } else {
 block_11:
                 var_a0 = 1;
@@ -69,7 +69,7 @@ block_11:
         }
         return;
     case 1:
-        temp_v0_3 = arg0->pad1A[1] + (D_800BEA08 * 0xA);
+        temp_v0_3 = arg0->pad1A[1] + (g_frame_ticks_raw * 0xA);
         if (temp_v0_3 >= 0xFF) {
             arg0->pad1A[1] = 0xFF;
             arg0->pad1A[0] = 2;
@@ -80,8 +80,8 @@ block_11:
         return;
     case 2:
         temp_v0_4 = (*(u16 *)((u8 *)arg0 + 0x18));
-        if (D_800BEA08 < (s32) temp_v0_4) {
-            (*(u16 *)((u8 *)arg0 + 0x18)) = (u16) (temp_v0_4 - D_800BEA08);
+        if (g_frame_ticks_raw < (s32) temp_v0_4) {
+            (*(u16 *)((u8 *)arg0 + 0x18)) = (u16) (temp_v0_4 - g_frame_ticks_raw);
             return;
         }
         g_slowmo_divisor = 0;
@@ -92,7 +92,7 @@ block_11:
         arg0->pad1A[0] = 3;
         return;
     case 3:
-        temp_v0_5 = arg0->pad1A[1] - (D_800BEA08 * 0xA);
+        temp_v0_5 = arg0->pad1A[1] - (g_frame_ticks_raw * 0xA);
         if (temp_v0_5 <= 0) {
             node_destroy(arg0);
             fb_ghost_set_mode(0, 0);

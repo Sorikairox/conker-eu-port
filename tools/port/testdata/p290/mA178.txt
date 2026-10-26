@@ -2,7 +2,7 @@ s/DustEmitter \*e = (DustEmitter \*) (obj + 0x28);/DustEmitter *e = (DustEmitter
 s/D_800BEE0B, 3000.0f,/D_800BEE0B, 2000.0f,/
 s/(struct17 \*) e) == 0)/(struct17 *) e) != 0)/
 s/e->acc += (e->rate + random_float() \* e->rateRand)/e->acc += (e->rate + random_float() * e->rate)/
-s/\* e->rateRand) \* D_800BE9A4;/* e->rateRand);/
+s/\* e->rateRand) \* g_frame_step_f;/* e->rateRand);/
 s/if (!(1.0f < e->acc)) {/if (!(2.0f < e->acc)) {/
 s/t.u1D = 0x2F;/t.u1D = 0x2E;/
 s/t.u08 = 0xC01;/t.u08 = 0xC00;/

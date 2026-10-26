@@ -76,7 +76,7 @@ f32 random_float(void);
 // wake_spray_update: update handler of the effect wake_spray_spawn creates (+0x28 = the object, +0x2C its id, +0x30
 // the spray accumulator). Ends the effect (+0xE = -1) when the object is gone or reused. While the owner rides in
 // mode 2 (+0x31C +0x4F) faster than 26 (max of the object's +0x3C and owner +0x44 x 1.35), the accumulator grows
-// by (1.259 + rand x 1.079) x D_800BE9A4 per frame (Rare indexes {1, 1.259} / {0, 1.079} by the flag, always 1
+// by (1.259 + rand x 1.079) x g_frame_step_f per frame (Rare indexes {1, 1.259} / {0, 1.079} by the flag, always 1
 // here) and every whole unit spawns one spray particle (kind 5) at a point beside the object (wake_spray_point_pick) thrown up / out (vec3_from_angles_byte) against the owner's ground velocity
 // (motion_track_get_delta, else zero) x 0.925.
 /* was func_150B1200 */
@@ -118,12 +118,12 @@ void wake_spray_update(u8 *fx) {
         return;
     }
     r = random_float();
-    *(f32 *) (fx + 0x30) += (1.2590001f + r * 1.079f) * D_800BE9A4;
+    *(f32 *) (fx + 0x30) += (1.2590001f + r * 1.079f) * g_frame_step_f;
     if (!(*(f32 *) (fx + 0x30) > 1.0f)) {
         return;
     }
     if (motion_track_get_delta(obj, &ground) == 0) {
-        ground = D_800A5860;
+        ground = g_vec3_zero;
     }
     vec2_from_angle_rad(*(f32 *) (obj + 0x40) * 0.017453292f, 1.0f, side, &side[1]);
     fwd[1] = -side[0];

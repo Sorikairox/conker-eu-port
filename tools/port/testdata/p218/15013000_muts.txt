@@ -5,6 +5,6 @@ s/>> 2) \& 0xFF\]/>> 3) \& 0xFF]/
 s/var_s0 += 0x34;/var_s0 += 0x30;/
 s/var_s1 < (u32) D_800D3094/var_s1 <= (u32) D_800D3094/
 s/if (temp_a1 != NULL) {/if (1) {/
-s/D_800DCDC4 = 0;/D_800DCDC4 = 1;/
-s/D_800DCD90 = 0.0f;/D_800DCD90 = 1.0f;/
+s/g_light_record_list = 0;/g_light_record_list = 1;/
+s/g_light_list_weight = 0.0f;/g_light_list_weight = 1.0f;/
 s/if (D_800D3094 != 0) {/if (D_800D3094 > 1) {/

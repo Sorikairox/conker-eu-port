@@ -5,8 +5,8 @@
 
 s32 collision_floor_probe(f32 *, s32, f32, s32);
 s32 hitinfo_from_obj_floor(s32, struct127 *);
-extern u8 D_800AA4D0[];
-extern u8 D_800AA4DC[];
+extern u8 g_bone_probe_pt_a[]; /* was D_800AA4D0 */
+extern u8 g_bone_probe_pt_b[]; /* was D_800AA4DC */
 /* was func_151AFB70 */
 s32 obj_bone_ground_probe(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
     f32 sp2C[3];
@@ -14,7 +14,7 @@ s32 obj_bone_ground_probe(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
     if ((arg3 != 1) && (arg3 != 2)) {
         return 0;
     }
-    mtx_transform_point_or_origin((arg3 == 1) ? D_800AA4DC : D_800AA4D0, arg0, (arg3 == 1) ? *(u8 **)(arg1 + 0x1D4) + 0x800 : *(u8 **)(arg1 + 0x1D4) + 0x640);
+    mtx_transform_point_or_origin((arg3 == 1) ? g_bone_probe_pt_b : g_bone_probe_pt_a, arg0, (arg3 == 1) ? *(u8 **)(arg1 + 0x1D4) + 0x800 : *(u8 **)(arg1 + 0x1D4) + 0x640);
     if (arg2 == 0) {
         return 1;
     }
@@ -174,7 +174,7 @@ s32 splash_sprite_update(u8 *arg0)
     temp_f0 = temp_f0;
     if ((*((s16 *) p)) < temp_v1)
     {
-      temp_f0 = (*((f32 *) (p + 4))) * D_800BE9A4;
+      temp_f0 = (*((f32 *) (p + 4))) * g_frame_step_f;
       *((f32 *) (((u8 *) arg0) + 0x2C)) = (f32) ((*((f32 *) (((u8 *) arg0) + 0x2C))) + temp_f0);
       *((f32 *) (((u8 *) arg0) + 0x30)) = (f32) ((*((f32 *) (((u8 *) arg0) + 0x30))) + temp_f0);
     }
@@ -275,7 +275,7 @@ s32 spawn_emit_mud_particle(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s3
 s32 particle_damp_velocity(u8 *arg0, s32 arg1) {
     s32 i;
     f32 *p = (f32 *)(arg0 + 0xA8);
-    for (i = D_800BE9E4; i != 0; i--) {
+    for (i = g_frame_ticks; i != 0; i--) {
         *(f32 *)(arg0 + 0x58) *= *p;
         *(f32 *)(arg0 + 0x60) *= *p;
     }

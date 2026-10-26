@@ -374,8 +374,8 @@ void event_vm_abort(void) {
 s32 object_sway_update(u8 *obj) {
     f32 *phase = (f32 *) (obj + 0x178);
 
-    phase[0] += 0.065f * D_800BE9A4;
-    phase[1] += 0.0484f * D_800BE9A4;
+    phase[0] += 0.065f * g_frame_step_f;
+    phase[1] += 0.0484f * g_frame_step_f;
     phase[0] = wrap_angle_rad(phase[0]);
     phase[1] = wrap_angle_rad(phase[1]);
     *(f32 *) (obj + 0x20) = sinf(phase[0]) * 3.0860002f;
@@ -391,8 +391,8 @@ s32 object_handler_true(s32 arg0) {
 void mtxf_rot_scale2_trans(s32, f32, f32, f32, f32, f32, f32, f32, f32);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
-extern s32 D_800DD608;
-extern s32 D_800DD618;
+extern s32 g_view_yaw_sin; /* was D_800DD608 */
+extern s32 g_view_yaw_cos; /* was D_800DD618 */
 
 /* was func_150AE84C */
 u8 *object_quad_vtx_build(u8 *arg0, s16 arg1) {
@@ -439,9 +439,9 @@ u8 *object_quad_vtx_build(u8 *arg0, s16 arg1) {
         mtxf_transform_point((f32 (*)[4]) &sp.u44[0], (*(f32 *)((u8 *)arg0 + 0x34)), (*(f32 *)((u8 *)arg0 + 0x38)), (*(f32 *)((u8 *)arg0 + 0x3C)), &sp.u8C, &sp.u90, &sp.u94);
         temp_f0 = (*(f32 *)((u8 *)arg0 + 0x2C));
         (*(s16 *)((u8 *)sp.uA4 + 6)) = 0;
-        temp_f2 = *(s32 *)((s32)&D_800DD618 + (s32)sp3C) * (s32)temp_f0;
+        temp_f2 = *(s32 *)((s32)&g_view_yaw_cos + (s32)sp3C) * (s32)temp_f0;
         (*(s16 *)((u8 *)sp.uA4 + 0x16)) = 0;
-        temp_f12 = *(s32 *)((s32)&D_800DD608 + (s32)sp3C) * (s32)temp_f0;
+        temp_f12 = *(s32 *)((s32)&g_view_yaw_sin + (s32)sp3C) * (s32)temp_f0;
         (*(s16 *)((u8 *)sp.uA4 + 0x26)) = 0;
         (*(s16 *)((u8 *)sp.uA4 + 0x36)) = 0;
         temp_f10 = (s32) (sp.u8C + temp_f2);

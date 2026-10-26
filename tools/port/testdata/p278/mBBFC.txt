@@ -17,7 +17,7 @@
 \#^            dirX = dz \* inv;#s/dz/dx/
 \#^            dirZ = -dx \* inv;#s/-dx/dx/
 \#^        for (n = g_water_proj_vtx_ranges#s/n < g_water_proj_vtx_ranges\[k\]\[0\] + /n < /
-\#^            v = (Vtx_t \*) #s/D_800BE9C0 \* 16/D_800BE9C0 * 8/
+\#^            v = (Vtx_t \*) #s/g_dl_buf_index \* 16/g_dl_buf_index * 8/
 \#^            v = (Vtx_t \*) #s/part \* 4/part * 8/
 \#^            v = (Vtx_t \*) #s/n \* 16/n * 12/
 \#^            v->tc\[0\] = #s/v->ob\[0\]/v->ob[1]/

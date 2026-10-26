@@ -1,6 +1,6 @@
 /* P75 runtime checks of port P70 / P74 C (link-time wraps; only cross-TU calls are seen).
  *  ?p75sky=1     level_setup_sky_backdrop (game_2DF70.c, sky / backdrop buffers; called by level_load per level): level,
- *                header +5..+8 (mode), D_80082FA0, the buffers D_800DC2E0 / g_sky_backdrop_vtx[p][0..1] / D_800DC2B0, and in
+ *                header +5..+8 (mode), g_last_player_index, the buffers D_800DC2E0 / g_sky_backdrop_vtx[p][0..1] / g_sky_asset, and in
  *                mode 2 the gradient texture (rows 0 / 32 / ... / 255) and the first quad's vertices. Also, every
  *                256 frames (from the tail wrap), the quad vertex t coordinates and the first Mtx word that view_scroll_overlay_draw writes (it is
  *                no longer wrapped: P72's TEMPORARY NULL guard is gone).
@@ -23,10 +23,10 @@ extern unsigned port_frame_count;
 extern unsigned char g_objects[]; /* was D_800CC2D0 */
 extern unsigned char D_800DC2E0_[] __asm__("D_800DC2E0");
 extern unsigned char D_800DC2B8_[] __asm__("g_sky_backdrop_vtx"); /* was D_800DC2B8 */
-extern unsigned char D_800DC2B0_[] __asm__("D_800DC2B0");
-extern unsigned char D_800DC2D8_[] __asm__("D_800DC2D8");
-extern unsigned char D_80082FA0_[] __asm__("D_80082FA0");
-extern unsigned char D_800B0DF0_[] __asm__("D_800B0DF0");
+extern unsigned char D_800DC2B0_[] __asm__("g_sky_asset"); /* was D_800DC2B0 */
+extern unsigned char D_800DC2D8_[] __asm__("g_level_bg_colour"); /* was D_800DC2D8 */
+extern unsigned char D_80082FA0_[] __asm__("g_last_player_index"); /* was D_80082FA0 */
+extern unsigned char D_800B0DF0_[] __asm__("g_level_header"); /* was D_800B0DF0 */
 extern unsigned char D_800C6660_[] __asm__("D_800C6660");
 
 #define REC 0x32C
@@ -87,11 +87,11 @@ void __wrap_tail_update_conker(int arg0) {
         static unsigned next = 256;
         if (flag(&fsky, "p75sky") && port_frame_count >= next) { next = port_frame_count + 256; quad_dump("frame"); }
         { /* P78: ?p78sky=N: every N frames the inputs of view_background_draw's backdrop dispatch (game_eu_13DC30.c):
-           * D_800C3682 (viewport-clear path instead), mode = header +8 (index into D_80089578: 2 = view_scroll_overlay_draw),
+           * D_800C3682 (viewport-clear path instead), mode = header +8 (index into g_view_bg_fns: 2 = view_scroll_overlay_draw),
            * and sky_level_distance's level-0 case: handle 0 (no backdrop call) when player y < 1600 and yaw > 26 */
             static int f78 = -1; static unsigned n78;
             extern unsigned char D_800C3682_[] __asm__("D_800C3682"), D_800BE9F0_[] __asm__("g_level_id"),
-                D_800DBFF0_[] __asm__("D_800DBFF0"), D_800DD210_[] __asm__("D_800DD210"), D_80082FA4_[] __asm__("g_cur_view_player");
+                D_800DBFF0_[] __asm__("g_player_views"), D_800DD210_[] __asm__("g_camera_view_offsets"), D_80082FA4_[] __asm__("g_cur_view_player");
             if (flag(&f78, "p78sky") && port_frame_count >= n78) {
                 n78 = port_frame_count + (unsigned)f78;
                 const unsigned char *h = (const unsigned char *)(uintptr_t)W(D_800B0DF0_, 0);

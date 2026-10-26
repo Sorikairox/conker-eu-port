@@ -11,7 +11,7 @@ static const f32 sAxisY[3] = { 0.0f, 1.0f, 0.0f };
 
 #define OBJ_F32(obj, off) (*(f32 *) ((u8 *) (obj) + (off)))
 
-/* Turns joint `joint` of object `index` towards the D_800DBFF0 position (+0x2F8, a look-at from the joint's own
+/* Turns joint `joint` of object `index` towards the g_player_views position (+0x2F8, a look-at from the joint's own
  * translation, up = d x (d x Y)), then applies the object's scale: x / z columns by +0x14C, y column by +0x150.
  * `turn` swaps the look direction a quarter turn about Y: (dx, dy, dz) -> (dz, dy, -dx). arg0 is unused. */
 /* was func_15036600 */
@@ -31,9 +31,9 @@ void obj_joint_look_at_camera(s32 arg0, s32 index, s32 joint, s32 turn) {
     pos[0] = mtx[3][0];
     pos[1] = mtx[3][1];
     pos[2] = mtx[3][2];
-    d[0] = OBJ_F32(D_800DBFF0, 0x2F8) - pos[0];
-    d[1] = OBJ_F32(D_800DBFF0, 0x2FC) - pos[1];
-    d[2] = OBJ_F32(D_800DBFF0, 0x300) - pos[2];
+    d[0] = OBJ_F32(g_player_views, 0x2F8) - pos[0];
+    d[1] = OBJ_F32(g_player_views, 0x2FC) - pos[1];
+    d[2] = OBJ_F32(g_player_views, 0x300) - pos[2];
     if (turn) {
         t = d[0];
         d[0] = d[2];

@@ -7,11 +7,11 @@ s/        item = 0x17;/        item = 0x16;/ % k54_has
 s/if (g_level_id == 0x2D) {/if (g_level_id == 0x2C) {/ % k54_l2d_off
 s/o = event_get_vars(0xBA);/o = event_get_vars(0xBB);/ % k54_l2d_off
 s/\*(s32 \*) (o + 0x1FE4) <= 0/*(s32 *) (o + 0x1FE4) < 0/ % k54_l2d_off
-s/PK_F32(obj, 4) += (f32) D_800BE9E4 \* 1.52f;/PK_F32(obj, 4) += (f32) D_800BE9E4 * 1.5f;/ % base
+s/PK_F32(obj, 4) += (f32) g_frame_ticks \* 1.52f;/PK_F32(obj, 4) += (f32) g_frame_ticks * 1.5f;/ % base
 s/PK_F32(obj, 0) = 8.0f \* cosf/PK_F32(obj, 0) = 9.0f * cosf/ % base
 s/PK_F32(obj, 0x18) = 12.0f \* cosf((f32) s->phase1/PK_F32(obj, 0x18) = 12.0f * cosf((f32) s->phase0/ % base
-s/D_800BE9E4 \* 507.0f/D_800BE9E4 * 500.0f/ % base
-s/D_800BE9E4 \* 419.0f/D_800BE9E4 * 409.0f/ % base
+s/g_frame_ticks \* 507.0f/g_frame_ticks * 500.0f/ % base
+s/g_frame_ticks \* 419.0f/g_frame_ticks * 409.0f/ % base
 s/if ((s32) s->state < 3 \&\& !off) {/if ((s32) s->state < 4 \&\& !off) {/ % st3
 s/\&\& !off) {/) {/ % k54_l2d_off
 s/if (\*(s32 \*) p == 0 ||/if (*(s32 *) p == 1 ||/ % inactive
@@ -44,10 +44,10 @@ s/s->amp -= 0.02f \* s->scale;/s->amp -= 0.03f * s->scale;/ % st1
 s/if (s->amp <= 0.0f) {/if (s->amp < -0.1f) {/ % st1_end
 s/            s->amp = 0.0f;/            s->amp = 0.1f;/ % st1_end
 s/PK_F32(obj, 0x34) = cosf((f32) s->wob \* PK_ANG) \* s->amp + s->scale;/PK_F32(obj, 0x34) = cosf((f32) s->wob * PK_ANG) * s->amp;/ % st1
-s/s->wob += D_800BE9E4 \* 0x1613;/s->wob += D_800BE9E4 * 0x1612;/ % st1
+s/s->wob += g_frame_ticks \* 0x1613;/s->wob += g_frame_ticks * 0x1612;/ % st1
 s/} else if (s->state == 3) {/} else if (s->state >= 2) {/ % st2
 s/PK_F32(obj, 0x34) -= 0.26f \* s->scale;/PK_F32(obj, 0x34) -= 0.2f * s->scale;/ % st3
 s/if (PK_F32(obj, 0x34) <= 0.0f) {/if (PK_F32(obj, 0x34) < -1.0f) {/ % st3_end
 s/PK_U8(obj, 0x6E) = 1;/PK_U8(obj, 0x6E) = 2;/ % st3_end
 s/            s->state = 0;/            s->state = 1;/ % st3_end
-s/for (p = g_objects; p < \&g_objects\[D_8008FD8C\]; p++)/for (p = g_objects; p < \&g_objects[D_8008FD8C - 1]; p++)/ % three take
+s/for (p = g_objects; p < \&g_objects\[g_player_count\]; p++)/for (p = g_objects; p < \&g_objects[g_player_count - 1]; p++)/ % three take

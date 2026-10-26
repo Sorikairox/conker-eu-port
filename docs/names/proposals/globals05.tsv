@@ -1,0 +1,299 @@
+old	new	confidence	description
+D_80088E40	g_target_hit_trigger_ids	high	4 trigger ids of the target volumes: a hit disables the trigger, explodes it and stores target 1..4 in the setup-9 object +0x2E8
+D_80088E50	g_target_block_trigger_ids	med	8 trigger ids whose segments also stop a shot in target_volume_hit_check (hit counts, no effect)
+D_800A1860	g_fireworks_burst_pos	high	Fireworks burst: position of the smoke cloud / explosion light / spark shower
+D_800A186C	g_fireworks_flash_pos	high	Fireworks burst: position of the debris-emitter flash
+D_800A1878	g_fireworks_spark_dirs	high	Fireworks burst: 4 direction vectors, one per spark shower particle
+D_800A18A8	g_fireworks_spark_u56	med	Fireworks burst: per spark (4) byte copied into the particle record +0x56
+D_800A18D0	g_gun_barrel_aim_start	high	Twin gun barrel: aim ray start (-40, 0, 57) in model space
+D_800A18DC	g_gun_barrel_aim_end	high	Twin gun barrel: aim ray end (-40, 0, 160) in model space
+D_800A18E8	g_gun_barrel_muzzle_pts	high	Twin gun barrel: muzzle points of the two barrels (+-17, 0, 570)
+D_800A1900	g_gun_barrel_tip_pts	high	Twin gun barrel: barrel tip points (+-17, 0, 700), particle end points
+D_800A1918	g_gun_barrel_bones	high	Twin gun barrel: bone index per barrel ({2, 4})
+D_800A191C	g_gun_barrel_tracer_inv_len	high	Twin gun barrel: tracer 1 / length (1 / 130)
+D_800A1920	g_gun_barrel_smoke_y_range	med	Twin gun barrel: smoke velocity y random range (2586, scaled by 0.001)
+D_800A1924	g_gun_barrel_smoke_y_base	med	Twin gun barrel: smoke velocity y base (1758, scaled by 0.001)
+D_800A1928	g_gun_barrel_smoke_y_scale	med	Twin gun barrel: smoke velocity y scale (0.001)
+D_800A192C	g_gun_barrel_smoke_x_range	med	Twin gun barrel: smoke velocity x random range (1357, + 968, scaled by 0.1)
+D_800A1930	g_gun_barrel_smoke_x_scale	med	Twin gun barrel: smoke velocity x scale (0.1)
+D_800A1934	g_gun_barrel_smoke_speed_range	med	Twin gun barrel: smoke particle speed random range (1077, + 4000)
+D_80088E70	g_map_tint_r	high	Map colour tint: current red (springs toward g_map_tint_target_r), sent as event 0x30F3
+D_80088E74	g_map_tint_g	high	Map colour tint: current green, sent as event 0x30F4
+D_80088E78	g_map_tint_b	high	Map colour tint: current blue, sent as event 0x30F5
+D_80088E7C	g_map_tint_target_r	high	Map colour tint: target red (128 or 255 by state)
+D_80088E80	g_map_tint_target_g	high	Map colour tint: target green
+D_80088E84	g_map_tint_target_b	high	Map colour tint: target blue
+D_80088E88	g_map_tint_vel_r	high	Map colour tint: spring velocity of the red channel (math_spring_approach)
+D_80088E8C	g_map_tint_vel_g	high	Map colour tint: spring velocity of the green channel
+D_80088E90	g_map_tint_vel_b	high	Map colour tint: spring velocity of the blue channel
+D_800A1940	g_area_emitter_rate_base	med	fx_area_emitter_update: emission rate base added per frame (times v[1] and frame step)
+D_800A1944	g_area_emitter_rate_range	med	fx_area_emitter_update: emission rate random range
+D_800E0FFE	g_mp_pad_share_slot	low	MP: per human player (0..1) slot index whose pad/view it drives (0 = none); set by mp_slot_query, read by tank/turret code
+D_800900A0	g_particle_tex_picker_fn	high	Function pointer: picks the kind-0 particle texture (impact_puff_tex_kind11 in ROM)
+D_800A19C0	g_tether_bone_points	high	Tether beam: bone-local start point per kind (12 bytes each), transformed by bone g_tether_bones[kind]
+D_800A19F0	g_tether_flame_points	med	Tether flame anchor: bone-local point per kind (D_800A19C0 + 0x30)
+D_800A1A08	g_tether_bones	high	Tether beam: source skeleton bone index per kind
+D_800A1A0C	g_tether_stop_masks	high	Tether beam: per kind mask of source +0x94 flags that stop the beam
+D_800A1A10	g_arm_tracer_start_pts	med	obj_arm_tracer_fire: per side (2) bone-local tracer start point (f32[3])
+D_800A1A28	g_arm_tracer_end_pts	med	obj_arm_tracer_fire: per side (2) bone-local tracer end point (f32[3])
+D_800A1A40	g_arm_tracer_bones	med	obj_arm_tracer_fire: per side (2) bone index
+D_800A1A44	g_twin_light_offset_a	med	obj_attach_twin_lights: joint-local offset of the first light (joint 0x25)
+D_800A1A50	g_twin_light_offset_b	med	obj_attach_twin_lights: joint-local offset of the second light (joint 2)
+D_800A1A5C	g_limb_muzzle_pts_a	med	obj_limb_muzzle_burst: [2 variant][4 slot][2 side] f32[3] start points
+D_800A1B1C	g_limb_muzzle_pts_b	med	obj_limb_muzzle_burst: second point set, same layout (particle end points)
+D_800A1BDC	g_limb_muzzle_bones	med	obj_limb_muzzle_burst: [2 variant][2 side] bone index
+D_800A1BE0	g_limb_muzzle_side_masks	med	obj_limb_muzzle_burst: per side obj +0x94 flag mask that suppresses the burst
+D_80088EA0	g_obj7b_pulse_speeds	high	obj7b_update_pulse_scale: the three pulse speeds (720 / 2000 / 3000)
+D_800A1C90	g_big_explosion_debris_tex	med	fx_big_explosion_at_obj: 3 debris texture ids for emit_debris_burst
+D_800A1C9C	g_big_explosion_debris_scales	med	fx_big_explosion_at_obj: 3 debris size scales for emit_debris_burst
+D_800A1CA8	g_big_explosion_burst_tex	med	fx_big_explosion_at_obj: 2 texture ids for emit_textured_burst
+D_800A1CB0	g_big_explosion_burst_scales	med	fx_big_explosion_at_obj: 2 size scales for emit_textured_burst
+D_800CC298	g_obj_anim_shared	med	Shared animation state of some object kinds (0x18 bytes; s16 swing angle at +0x12, s16 pulse phase at +0x14)
+D_800A1D20	g_drip_bone_pt_a	high	Drip emitter: first bone-space point of the drop line
+D_800A1D2C	g_drip_bone_pt_b	high	Drip emitter: second bone-space point of the drop line
+D_800A1D38	g_drip_rate	high	Drip emitter: drops per frame unit (accumulator rate)
+D_800A1D3C	g_drip_trail_k_1d3c	low	Drip emitter: constant stored in each drop's trail record +0x10
+D_800A1D40	g_cam_zone_y_limit	med	camera_zone_flag_update: player y (+0x300) below which the zone bit is updated
+D_800A1D50	g_swim_anim_speed_slope	med	player_swim_anim_speed: slope applied to the vertical speed below -5
+D_800A1D54	g_swim_anim_speed_base	med	player_swim_anim_speed: offset added to the scaled vertical speed
+D_800CC68D	g_contact_grab_obj_id	low	Object id + 100 found by obj_contact_resolve (0 = none) that the swimming player may grab; = g_objects + 0x3BD
+D_800CC82C	g_held_item_obj_id	low	Object id + 100 of the carried item removed by player_item_drop_check (0 = none); = g_objects + 0x55C
+D_800D9A40	g_cam_zone_leaf	med	Pointer to the zone tree leaf at (0x1500, 0x700); its s16 holds a bit per player set by camera_zone_flag_update
+D_80088EC0	g_lightning_bolt_sets	high	Lightning emitter: bolt sets (BoltSet536C), style / scale choices, indexed by emitter +0x31
+D_80088ED8	g_lightning_cond_fns	high	Lightning emitter: condition functions indexed by +0x30 (-1 = none); 0 return stops the bolt
+D_80090624	g_anim_tex_frame_ids	med	model_anim_texture_frame_cb: texture frame value per computed frame index (s32 each)
+D_80091CE0	g_overlay_img_tmpl_1	med	screen_overlay_show_timed: image template used for mode 1
+D_80091CEC	g_overlay_img_tmpl_0	med	screen_overlay_show_timed: image template used for mode 3+ (not 1 / 2)
+D_80091CF8	g_overlay_img_tmpl_2	med	screen_overlay_show_timed: image template used for mode 2
+D_800A1ED0	g_bone_glow_pt_a	med	obj_bone_glow_emitter_update: first bone-local point (transformed by bone +0x140)
+D_800A1EDC	g_bone_glow_pt_b	med	obj_bone_glow_emitter_update: second bone-local point
+D_800A1EE8	g_bone_fx_pair_pt_a	med	obj_bone_fx_pair_update: first bone-local point
+D_800A1EF4	g_bone_fx_pair_pt_b	med	obj_bone_fx_pair_update: second bone-local point
+D_800A1F00	g_electric_zap_point	med	obj_electric_zap_emitter_update: model-space origin point of the zap arcs
+D_800A1F40	g_bone_spark_k_1f40	low	obj_bone_spark_emitter_spawn: constant stored in the emitter record +0x48
+D_800A1F84	g_glow_pair_aim_scale	med	glow_pair_update: scale applied to the aim vector before the world ray cast
+D_800A1F88	g_glow_pair_k_1f88	low	glow_pair_update: float constant passed to ray_cast_world
+D_800D9E70	g_aim_vec_scratch	med	Vec3 scratch: aim vector filled by obj_get_aim_vectors (glow_pair_update), heading used by camera_segment_track
+D_800A1FA8	g_pulse_sprite_alpha_scale	med	pulse_sprite_update: scale from the +0x128 value to the sprite byte +0x5C
+D_80088EF0	g_spark_spray_bone	med	obj_bone_spark_spray: bone index of the spray
+D_800A2010	g_fire_finish_event_ids	med	fire_post_finish_events: per fire two ids broadcast with message 0x42
+D_800A2018	g_spark_spray_start_pt	med	obj_bone_spark_spray: bone-local start point
+D_800A2024	g_spark_spray_end_pt	med	obj_bone_spark_spray: bone-local end point
+D_80088ECC	g_arc_bolt_style_count	high	Arc bolts: number of bolt styles
+D_80088ED0	g_arc_bolt_styles	high	Arc bolts: per style 2 bytes, [1] = colour index
+D_80088ED4	g_arc_bolt_widths	high	Arc bolts: per style width
+D_80088F00	g_arc_bolts_spawned	high	Arc bolts: set once arc_bolts_spawn_once ran; cleared by level_objects_init
+D_800A2090	g_aura_light_offset	med	aura_group_spawn: joint-local offset of the light (light_create_obj_joint, joint 1)
+D_800A209C	g_aura_emitter_pt_a	med	Aura group: first emitter offset (bone space)
+D_800A20A8	g_aura_emitter_pt_b	med	Aura group: second emitter offset (bone space)
+D_800A20B4	g_aura_dir_pt_a	med	Aura group: first direction point (bone space)
+D_800A20C0	g_aura_dir_pt_b	med	Aura group: second direction point (bone space)
+D_800A20CC	g_point_burst_model_pts	high	obj_point_burst_spawn: model-space points indexed by `point` (transformed by matrix +0x140)
+D_800A20F0	g_score_banner_sprite_kinds	high	score_banner_spawn: 8 sprite kinds (0xCE, 0xC5, then 0xC4)
+D_800A2100	g_bone14_spark_pt_a	med	obj_bone14_spark_burst: first point (bone 14 local), particle start
+D_800A210C	g_bone14_spark_pt_b	low	obj_bone14_spark_burst: second point, copied but not transformed
+D_800A2118	g_bone14_spark_pt_c	med	obj_bone14_spark_burst: third point (bone 14 local)
+D_800A2124	g_bone14_spark_pt_d	med	obj_bone14_spark_burst: fourth point (bone 14 local), direction end
+D_800A2130	g_aura_k_2130	low	aura_group_spawn: float constant (frame extra +0x08)
+D_800A2134	g_aura_k_2134	low	aura_group_spawn: float constant (frame extra +0x10)
+D_800A2138	g_aura_k_2138	low	aura_group_spawn: float constant (frame extra +0x18)
+D_800A213C	g_aura_k_213c	low	aura_group_spawn: float constant (frame extra +0x0C)
+D_800A2140	g_aura_k_2140	low	aura_group_spawn: float constant (frame extra +0x14)
+D_800A2144	g_aura_k_2144	low	aura_group_spawn: float constant (frame extra +0x20)
+D_800A214C	g_aura_k_214c	low	aura_group_spawn: float constant (frame extra +0x34)
+D_800A2150	g_aura_k_2150	low	aura_group_spawn: float constant (emitter +0x00 and +0x04)
+D_800A2158	g_aura_k_2158	low	aura_group_spawn: float constant (emitter +0x10 and +0x14)
+D_800A215C	g_aura_k_215c	low	aura_group_spawn: float constant (emitter +0x1C)
+D_800A2160	g_aura_k_2160	low	aura_group_spawn: float constant (emitter +0x20)
+D_800A2164	g_aura_kind2_k_174	med	aura_group_follow_owner: value (1.306) written to the second kind's +0x174
+D_800A2168	g_point_burst_k_2168	low	obj_point_burst_spawn: float constant (burst +0x18)
+D_800A216C	g_point_burst_k_216c	low	obj_point_burst_spawn: float constant (burst +0x1C)
+D_800A2170	g_point_burst_k_2170	low	obj_point_burst_spawn: float constant (burst +0x20)
+D_800A2174	g_point_burst_k_2174	low	obj_point_burst_spawn: float constant (burst +0x28)
+D_800A2178	g_point_burst_k_2178	low	obj_point_burst_spawn: float constant (ring +0x24)
+D_800A217C	g_point_burst_k_217c	low	obj_point_burst_spawn: float constant (ring +0x28)
+D_800A2180	g_point_burst_k_2180	low	obj_point_burst_spawn: float constant (ring +0x44)
+D_800A2184	g_point_burst_k_2184	low	obj_point_burst_spawn: float constant of the growth block (extra +0x08)
+D_800A5860	g_vec3_zero	high	Zero vector (3 x 0.0f / 0), used as zero angles / velocity / position by many effects
+D_800A21A0	g_gun_shot_hand_bones	high	gun_shot_effects: per side hand bone index ({5, 7}) for non-0x23 characters
+D_800A21A4	g_gun_shot_muzzle_pts	high	gun_shot_effects: per side muzzle offsets (non-0x23 characters)
+D_800A21BC	g_gun_shot_spark_end_pts	med	gun_shot_effects: per side second points (particle end / unaimed direction), non-0x23 characters
+D_800A21D4	g_gun_shot_aim_pts	med	gun_shot_effects: per side aimed direction points, non-0x23 characters
+D_800A21EC	g_gun_shot_third_pts	low	gun_shot_effects: per side third transformed points, non-0x23 characters
+D_800A2204	g_gun_shot_hand_bones_c23	high	gun_shot_effects: per side hand bone index ({3, 2}) for character 0x23
+D_800A2208	g_gun_shot_muzzle_pts_c23	high	gun_shot_effects: per side muzzle offsets for character 0x23
+D_800A2220	g_gun_shot_spark_end_pts_c23	med	gun_shot_effects: per side second points (particle end / unaimed), character 0x23
+D_800A2238	g_gun_shot_aim_pts_c23	med	gun_shot_effects: per side aimed direction points, character 0x23
+D_800A2250	g_gun_shot_third_pts_c23	low	gun_shot_effects: per side third transformed points, character 0x23
+D_800A2280	g_gunfire_burst_k_2280	low	gunfire_burst_spawn: float constant fx.f[3]
+D_800A2284	g_gunfire_burst_k_2284	low	gunfire_burst_spawn: float constant fx.f[4]
+D_800A2288	g_gunfire_burst_k_2288	low	gunfire_burst_spawn: float constant fx.f[5]
+D_800A228C	g_gunfire_burst_k_228c	low	gunfire_burst_spawn: float constant fx.f[6]
+D_800A2290	g_gunfire_burst_k_2290	low	gunfire_burst_spawn: float constant fx.f[7]
+D_800A2294	g_gunfire_burst_k_2294	low	gunfire_burst_spawn: float constant fx.f[8]
+D_800A2298	g_gunfire_burst_k_2298	low	gunfire_burst_spawn: float constant fx.f[9]
+D_800A229C	g_gunfire_burst_k_229c	low	gunfire_burst_spawn: float constant fx.f[10]
+D_800A22A0	g_gunfire_burst_k_22a0	low	gunfire_burst_spawn: float constant fx.f[11]
+D_800A22B0	g_view_sparkle_arcs	high	view_sparkle_burst: per view s16 pair (base angle, random range) of the spawn arc
+D_800A22BC	g_bound_cloud_fx_tmpl	med	bound_cloud_spawn: effect3d template passed to effect3d_spawn_full
+D_800A2310	g_bound_cloud_k_2310	low	bound_cloud_update: base of the per-frame +0x2C increment
+D_800A2314	g_bound_cloud_k_2314	low	bound_cloud_update: random range of the per-frame +0x2C increment
+D_800A2318	g_bound_cloud_fade_in_k	low	bound_cloud_update: scale of (50 - life) for the fade-in size
+D_800A231C	g_bound_cloud_fade_out_k	low	bound_cloud_update: scale of life for the fade-out size
+D_800A2320	g_bound_cloud_k_2320	low	bound_cloud_update: per-frame rate added to state +0x10
+D_800A2324	g_bound_cloud_phase_x_rate	low	bound_cloud_update: per-frame rate of the first sine phase (+0x1C)
+D_800A2328	g_bound_cloud_phase_y_rate	low	bound_cloud_update: per-frame rate of the second sine phase (+0x20)
+D_800A232C	g_bound_cloud_wave_x_amp	low	bound_cloud_update: amplitude of the first sine wave (+0x14)
+D_800A2330	g_bound_cloud_wave_x_base	low	bound_cloud_update: offset of the first sine wave (+0x14)
+D_800A2334	g_bound_cloud_wave_y_base	low	bound_cloud_update: offset of the second sine wave (+0x18, amplitude 1192)
+D_800A2338	g_bound_cloud_scale_k	low	bound_cloud_update: scale from the effect +0x2C size to the drawn scale
+D_80088F20	g_weapon_a_bone	high	Weapon A: bone index of the muzzle (muzzle effects, shell sparks, bone effect)
+D_800A2340	g_weapon_a_muzzle_pts	high	Weapon A: bone-local muzzle points (start of the rodata point table)
+D_800A234C	g_weapon_a_spark_end_pt	med	Weapon A: bone-local end point of the shell sparks (second entry of the point table)
+D_80088F34	g_weapon_b_bone	high	Weapon B: bone index of the muzzle (muzzle effects, shell sparks, bone effect)
+D_800A2398	g_weapon_b_muzzle_pts	high	Weapon B: bone-local muzzle points
+D_800A23B0	g_weapon_b_spark_end_pt	med	Weapon B: bone-local end point of the shell sparks
+D_80088F40	g_char_smoke_bone	high	Character smoke puff: bone index of the puff point
+D_800A23D0	g_char_smoke_puff_pt	med	Character smoke puff: bone-local puff point (local copy sPuffPoint in C)
+D_800A2420	g_beam_joint_name_a	med	model_points_find: joint name (12 bytes) looked up for point a
+D_800A242C	g_beam_joint_name_b	med	model_points_find: joint name for point b
+D_800A2438	g_beam_joint_name_ref	med	model_points_find: joint name for the reference point
+D_800A2444	g_beam_joint_name_out	med	model_points_find: joint name for the out point
+D_800A2450	g_beam_joint_name_sets	med	model_points_find: two sets of 6 point joint names (12 bytes each), one picked at random
+D_80088BB0	g_weapon_c_bone	med	Weapon C: bone index of the spray / muzzle point (also used by objfx_1d5714_a)
+D_800A2500	g_weapon_c_spray_pt	high	Weapon C: bone-local spray / muzzle point (f32[3])
+D_800A250C	g_weapon_c_spray_end_pts	med	Weapon C: f32[9] points after the spray point (particle end)
+D_800A2530	g_gun_shot_spark_colours	high	gun_shot_sparks: 4 spark colours, one picked at random
+D_80088F60	g_sky_segment_light_ids	med	sky_segments_flicker: light ids of the segments (9..13) for light_ctrl_broadcast
+D_800906D4	g_sky_segment_tex_ids	high	Sky / level part segment texture asset ids: 3 animated frames, then on/off variants of the 5 segments
+D_800BE500	g_sky_segment_on	high	sky_segments_flicker: on flag per sky segment (5), toggled at random
+D_800A2570	g_obj_glow_kind_pts	med	object_effect_start: per effect kind first point (f32[3])
+D_800A25C4	g_obj_glow_kind_pts_b	med	object_effect_start: per effect kind second point (f32[3])
+D_800A2618	g_obj_glow_kind_bones	med	object_effect_start: per effect kind byte (bone index)
+D_80088F70	g_flip_sprite_tex_ids	med	flip_sprite_particle_spawn: 4 texture ids, one picked at random
+D_800A2720	g_pos_debris_burst_tex	low	pos_debris_burst_spawn: burst texture id byte table
+D_800A2724	g_pos_debris_burst_scale	low	pos_debris_burst_spawn: burst size scale
+D_800A2740	g_floor_search_max_dist	high	floor_height_below: initial best distance (10000.0)
+D_80088FB0	g_bolt_arc_update_fns	high	bolt_arc_update: per kind (+0x44) update callbacks; a 0 return destroys the arc
+D_80088FB8	g_bolt_arc_free_fns	high	bolt_arc_free: per kind (+0x5C) free callbacks
+D_80088FC8	g_bolt_arc_event_fns	high	bolt_arc_handle_event: per kind (+0x5C) event handlers
+D_80088FD8	g_bolt_record_event_fns	high	bolt_record_handle_event: event handler table
+D_800A2800	g_impact_burst_tex	med	obj_impact_burst: texture id for emit_textured_burst
+D_800A2804	g_impact_burst_scale	med	obj_impact_burst: size scale for emit_textured_burst
+D_800A2830	g_area_sparkle_edge_k	low	area_sparkle_update: distance from the ends (0 / 11) below which the sparkle is handled specially
+D_800A2834	g_area_sparkle_chance	low	area_sparkle_update: per-frame random chance threshold
+D_800A2850	g_swing_lamp_phase_x_rate	med	swing_lamp_update_b: per-frame rate of the first swing phase
+D_800A2854	g_swing_lamp_phase_z_rate	med	swing_lamp_update_b: per-frame rate of the second swing phase
+D_800A2858	g_swing_lamp_amplitude	med	swing_lamp_update_b: swing amplitude (times sin of each phase)
+D_800A2880	g_pt_effect_segments	med	obj_point_effect_emitter_update: 12-byte segment points (start = [i], end = [i + 1])
+D_800A28F0	g_pt_effect_targets	med	obj_point_effect_emitter_update: per-segment target points
+D_800A2A04	g_point_spark_scale_range	low	point_spark_spawn: random range of the scale
+D_800A2A08	g_point_spark_scale_base	low	point_spark_spawn: base of the scale
+D_800A2A0C	g_point_spark_scale_mul	low	point_spark_spawn: multiplier of the scale
+D_800A2A10	g_point_spark_k_2a10	low	point_spark_spawn: emitter constant e.u14[0]
+D_800A2A14	g_point_spark_k_2a14	low	point_spark_spawn: emitter constant e.u14[1]
+D_800A2A18	g_point_spark_k_2a18	low	point_spark_spawn: emitter constant e.u14[2]
+D_800A2A1C	g_point_spark_k_2a1c	low	point_spark_spawn: emitter constant e.u14[3]
+D_80089000	g_seg_effect_end_fns	high	Segment / point effects: end handlers indexed by s8 +0x34 (-1 = none)
+D_80089004	g_seg_effect_point_fns	high	Segment / point effects: point handlers indexed by s8 +0x35 (handler 0 = spark_burst_spawn)
+D_800A28D4	g_seg_effect_weights	high	Segment effects: segment selection weights; [6] = total
+D_800A28EC	g_seg_effect_rate_scale	med	segment_effect_update: emission rate scale
+D_800A2938	g_seg_effect_segments	high	segment_effect_update: segment start / end points (12 bytes, start = [i], end = [i + 1])
+D_800A298C	g_seg_effect_targets	high	segment_effect_update: per-segment target points
+D_800A2FF0	g_screen_ortho_far	med	camera_set_screen_ortho: far plane of the screen orthographic projection
+D_800B1214	g_level_dl_tinted_extra	med	Optional level display list drawn after the world DL with the tint colours; scanned by tex_scroll_create
+D_800B1218	g_level_dl_lit_extra	med	Optional level display list drawn after the light commands
+D_800B1220	g_level_part_vtx	high	Level model parts: vertex arrays (header + 0x28), patched by the texture scrollers
+D_800BE628	g_player_cams	high	Per-player camera / projection records (0x180 bytes each: extents, fov +0x74/0x78, zoom +0x84, Mtx +0x100)
+D_800BEFC0	g_gfx_alt_ucode_active	med	1 while a player view DL runs on the alternate microcode; selects the task ucode, cleared after the world DL
+D_800D9E64	g_tex_scroll_count	high	Number of texture scroller records in g_tex_scrolls
+D_800D9EE0	g_cam_pending_fov	high	Per player pending FOV request (scale, fovX, fovY); scale -1 = none
+D_800D9F10	g_cam_fov_pending	high	Flag: a per-player FOV request is pending (g_cam_pending_fov)
+D_800D9F18	g_cam_pending_viewport	high	Per player pending viewport size (width, height); width -1 = none
+D_800D9F38	g_cam_viewport_pending	high	Flag: a per-player viewport request is pending (g_cam_pending_viewport)
+D_800D9F3C	g_cam_far_plane	high	Projection far plane distance (guPerspective far; from level header +0); also the default draw distance
+D_800D9F40	g_cam_near_plane	high	Projection near plane distance (guPerspective near; from level header +2)
+D_800D9F48	g_screen_ortho_mtx	high	Orthographic projection matrix built by camera_set_screen_ortho
+D_800D9FB0	g_cam_lookat_bufs	med	Per DL buffer LookAt / viewport block (0x20 bytes), loaded by view DL and camera_build_view_matrix
+D_800DA240	g_light_buf_size	med	Light buffer size (0xB): light_alloc_light_buf count and light_write_light_cmds argument
+D_800DA241	g_light_count	med	Light count byte passed to light_write_light_cmds ((count & 0x7F) - 1 = last light)
+D_800DA280	g_tex_scrolls	high	Texture scroller records (g_tex_scroll_count of them)
+D_800920D0	g_texture_rom_sizes	high	Per texture id: compressed size in ROM (u16); prefix sums give the ROM offset
+D_800B1268	g_texture_cache_data	high	Texture cache: expanded data per texture id (-1 = not loaded)
+D_800BC860	g_texture_cache_ages	high	Texture cache: s8 age per texture id (1..3 count down to free, 0x40 = refresh)
+D_800D9F88	g_tint_prim_rgb	high	Per player (4) prim colour tint r, g, b (the up part of the tint wobble)
+D_800D9F98	g_tint_env_rgb	high	Per player (4) env colour tint r, g, b (the down part of the tint wobble)
+D_800DA290	g_tint_wobble_phase	high	Per player channel (player * 3 + i): wobble phase (12 bits)
+D_800DA2A8	g_tint_wobble_speed	high	Per player channel: wobble phase speed
+D_800DA2B8	g_tint_wobble_amp	high	Per player channel: wobble amplitude
+D_800DA2C8	g_tint_level	high	Per player channel: current tint level
+D_800DA2D4	g_tint_default_level	high	Per channel (3): default tint level
+D_800DA2D8	g_tint_request_level	high	Per player channel: requested tint level; element 0 != 0 = request pending
+D_800DA2F0	g_segment_override_count	high	Number of segment override entries (max 8)
+D_800DA2F8	g_segment_overrides	high	Segment override entries (8 x 16 bytes)
+D_800DA378	g_texture_cache_dirty_lo	high	Texture cache: lowest slot id pending ageing (0xFFFF = none)
+D_800DA37C	g_texture_cache_dirty_hi	high	Texture cache: highest slot id pending ageing (-1 = none)
+D_800DA380	g_texture_cache_age_hold	low	Texture cache: when set, ageing waits until the load cooldown runs out
+D_800DA388	g_texture_cache_refs	high	Texture cache: reference count per texture id
+D_800DC1DC	g_texture_load_cooldown	med	Texture cache: frames since a load (set to 5 on a load, counts down in texture_cache_age_tick)
+D_800DC1E0	g_texture_cache_freeing_id	low	Texture cache: slot being freed by the age tick (-1 during the tick, -2 after)
+D_80091B20	g_blob_shadow_tex_ids	high	Blob shadow texture ids, indexed by the record byte +0x121
+D_800DC1F0	g_zone_player	med	player_zone_update: player whose zone was last looked up
+D_800DC1F4	g_zone_leaf_index	med	player_zone_update: index of the player's zone tree leaf
+D_800DC1F8	g_zone_leaf	med	player_zone_update: pointer to the player's zone tree leaf
+D_800DC1FC	g_zone_player_x	med	player_zone_update: player x used for the lookup
+D_800DC200	g_zone_player_z	med	player_zone_update: player z used for the lookup
+D_800DC284	g_coll_floor_best_h	med	collision_find_floor_ceiling: highest floor height found (-10000 at start)
+D_800DC288	g_coll_ceiling_h	med	collision_find_floor_ceiling: ceiling height found
+D_800DC290	g_coll_floor_world_obj	med	collision_find_floor_ceiling: world object index + 1 of the floor found (0 = level geometry)
+D_80083336	g_render_scissor_mode	low	Scissor mode passed to render_set_scissor by view / depth passes (0xFF = full screen)
+D_800840D0	g_world_mesh_rm_xlu	high	Combiner / othermode block for translucent world meshes (segment 6 + 0x20)
+D_80084250	g_world_mesh_rm_opa	high	Combiner / othermode block for opaque world meshes
+D_80089578	g_view_bg_fns	high	Camera background callbacks indexed by level header +8 (clear colour, sky box, border ...)
+D_800895D4	g_turn_sound_cooldown	med	world_object_turn_to_player: turning sound state (-1 = turning, >0 frames until the next sound)
+D_800895E0	g_world_vis_lists	high	Per player / group: pointer to the visible-list pointer (4-byte entries: record index, depth)
+D_800895F0	g_world_obj_mtx_bufs	high	Per DL buffer: pointer to the world-object matrix array (one Mtx per record id)
+D_800A3170	g_sky_box_faces	high	Sky box faces (16 bytes each): texture size and two opposite corners
+D_800A32F0	g_sky_tile_far	high	Sky box: far distance of the tile view test
+D_800A32F4	g_star_lat_spread	high	Star field: latitude spread scale
+D_800A32F8	g_star_lon_to_rad	high	Star field: longitude centidegrees to radians
+D_800A32FC	g_star_lat_to_rad	high	Star field: latitude degrees to radians
+D_800A3330	g_world_obj_timer_scale	high	World-object timer scale (record +0x64 times this, added to obj +0x76)
+D_800BE624	g_framebuffer_height	high	Framebuffer height in pixels (with D_800BE620 width): scissor, full-screen fills, camera setup
+D_800BEA55	g_view_clear_black	med	view_background_draw: when set, fills the whole screen black first; cleared by viewports_init
+D_800C3A7C	g_cutscene_show_all	low	Per view: cutscene event flag; 0 hides world records without an actor in the cutscene room
+D_800D9F89	g_tint_prim_rgb_g	high	g_tint_prim_rgb[1]: player 0 prim tint green
+D_800D9F8A	g_tint_prim_rgb_b	high	g_tint_prim_rgb[2]: player 0 prim tint blue
+D_800D9F8B	g_tint_prim_rgb_p1	high	g_tint_prim_rgb[3]: player 1 prim tint red
+D_800D9F8C	g_tint_prim_rgb_p1_g	high	g_tint_prim_rgb[4]: player 1 prim tint green
+D_800D9F8D	g_tint_prim_rgb_p1_b	high	g_tint_prim_rgb[5]: player 1 prim tint blue
+D_800D9F8E	g_tint_prim_rgb_p2	high	g_tint_prim_rgb[6]: player 2 prim tint red
+D_800D9F8F	g_tint_prim_rgb_p2_g	high	g_tint_prim_rgb[7]: player 2 prim tint green
+D_800D9F90	g_tint_prim_rgb_p2_b	high	g_tint_prim_rgb[8]: player 2 prim tint blue
+D_800D9F91	g_tint_prim_rgb_p3	high	g_tint_prim_rgb[9]: player 3 prim tint red
+D_800D9F92	g_tint_prim_rgb_p3_g	high	g_tint_prim_rgb[10]: player 3 prim tint green
+D_800D9F93	g_tint_prim_rgb_p3_b	high	g_tint_prim_rgb[11]: player 3 prim tint blue
+D_800D9F99	g_tint_env_rgb_g	high	g_tint_env_rgb[1]: player 0 env tint green
+D_800D9F9A	g_tint_env_rgb_b	high	g_tint_env_rgb[2]: player 0 env tint blue
+D_800D9F9B	g_tint_env_rgb_p1	high	g_tint_env_rgb[3]: player 1 env tint red
+D_800D9F9C	g_tint_env_rgb_p1_g	high	g_tint_env_rgb[4]: player 1 env tint green
+D_800D9F9D	g_tint_env_rgb_p1_b	high	g_tint_env_rgb[5]: player 1 env tint blue
+D_800D9F9E	g_tint_env_rgb_p2	high	g_tint_env_rgb[6]: player 2 env tint red
+D_800D9F9F	g_tint_env_rgb_p2_g	high	g_tint_env_rgb[7]: player 2 env tint green
+D_800D9FA0	g_tint_env_rgb_p2_b	high	g_tint_env_rgb[8]: player 2 env tint blue
+D_800D9FA1	g_tint_env_rgb_p3	high	g_tint_env_rgb[9]: player 3 env tint red
+D_800D9FA2	g_tint_env_rgb_p3_g	high	g_tint_env_rgb[10]: player 3 env tint green
+D_800D9FA3	g_tint_env_rgb_p3_b	high	g_tint_env_rgb[11]: player 3 env tint blue
+D_800DBEF4	g_world_objs	high	World object records (0xA0 bytes each, g_world_obj_count of them)
+D_800DC2B0	g_sky_asset	med	Sky / backdrop asset: tile format bytes for the sky box, gradient texture or the star field points by mode
+D_800DC2D8	g_level_bg_colour	high	Level backdrop clear colour r, g, b (level header +5..+7)
+D_800DC2DB	g_sky_load_all_tiles	high	1 on level 0x3C: load every visible sky tile's texture, even beyond the distance limit
+D_800DC2F0	g_turn_obj_dist	low	world_object_turn_to_player: distance value that mutes the turning sound when >= 320000
+D_800DC318	g_world_vis_counts	high	Per player / group: visible-list length (entries in g_world_vis_lists)
+D_800DC328	g_world_obj_blocks	high	Per world object: heap block pointer, released per frame by world_records_release_blocks
+D_800DC32C	g_world_obj_block_timers	high	Per world object: frame countdown before its heap block is released
+D_800DC3C4	g_world_obj_rider_masks	high	Per world object: bit mask of g_objects standing on it (set by the floor search)
+D_800DC3C8	g_world_obj_mp_count	high	Number of multiplayer world objects at the end of the world object table
+D_800DC3CC	g_tri_check_arg0	low	level_tri_tables_check: first argument stored after the check (debug)
+D_800DC3D0	g_tri_check_arg1	low	level_tri_tables_check: second argument stored after the check (debug)
+D_800DC3D4	g_tri_check_arg2	low	level_tri_tables_check: third argument stored after the check (debug)

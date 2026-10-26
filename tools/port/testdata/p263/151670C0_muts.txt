@@ -1,7 +1,7 @@
 # P263 flash_blades_update (spark_burst_tick) mutants: sed % setup names
 s/    obj\[0xD0\]--;/    obj[0xD0] -= 2;/ % emit
 s/    if (obj\[0xD0\] == 5) {/    if (obj[0xD0] == 6) {/ % emit
-s/        rec.u00 = D_8008CDEC;/        rec.u00 = 0;/ % emit
+s/        rec.u00 = g_sprite_tex_descs;/        rec.u00 = 0;/ % emit
 s/        rec.u08 = 4;/        rec.u08 = 3;/ % emit
 s/        rec.u1F = 5;/        rec.u1F = 4;/ % emit
 s/        rec.u24 = (s32) (\*(f32 \*) (obj + 0xD8) \* 4000.0f);/        rec.u24 = (s32) (*(f32 *) (obj + 0xD8) * 400.0f);/ % emit

@@ -30,7 +30,7 @@ s#            angle += 360\.0f;#            angle += 359.0f;# % wraplo
 s#        } else if (360\.0f <= angle) {#        } else if (361.0f <= angle) {# % wrapedge
 s#            angle -= 360\.0f;#            angle -= 359.0f;# % wraphi
 s#        obj\[0x73\] = (obj\[0x73\] \& 0xFC) | mode;#        obj[0x73] = (obj[0x73] \& 0xF8) | mode;#
-s#    if (D_800BE9B4 == 0 \&\& angle == \*(f32 \*) (obj + 0x8)) {#    if (angle == *(f32 *) (obj + 0x8)) {# % rest0b4
+s#    if (g_level_first_frame == 0 \&\& angle == \*(f32 \*) (obj + 0x8)) {#    if (angle == *(f32 *) (obj + 0x8)) {# % rest0b4
 s#    slot = (\*(s32 \*) (obj + 0x3C) >> 24) \& 0xFF;#    slot = (*(s32 *) (obj + 0x3C) >> 16) \& 0xFF;# % noslot m2kick
 s#    if (restInt != 0) {#    if (restInt == 0) {#
 s#        level = 1\.0f - fabsf((angle - restF) \/ restF);#        level = 1.0f - (angle - restF) \/ restF;#

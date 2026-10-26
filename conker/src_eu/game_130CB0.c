@@ -17,9 +17,9 @@ void sfx_cooldown_tick(void) {
     for (i = 0; i < 4; i++)
     {
         if (g_sfx_cooldowns[i]) {
-            if (g_sfx_cooldowns[i] > D_800BE9E4)
+            if (g_sfx_cooldowns[i] > g_frame_ticks)
             {
-                g_sfx_cooldowns[i] -= D_800BE9E4;
+                g_sfx_cooldowns[i] -= g_frame_ticks;
             } else {
               g_sfx_cooldowns[i] = 0;
             }
@@ -54,7 +54,7 @@ typedef struct {
 // s32 *slot, u16 *sound), called from the sound update in init_EB00.c; non-zero = free the slot) of the sounds
 // object_sound_play_cooldown starts for an object with a camera. The slot follows the object's position. With a timer (low half of
 // state, signed): a sound the update is about to start is queued instead (high half) and sound 0x5B0 is started
-// (volume 25000, 100, 0x78); otherwise the timer counts down by D_800BE9E4 and at 0 the queued sound is handed back
+// (volume 25000, 100, 0x78); otherwise the timer counts down by g_frame_ticks and at 0 the queued sound is handed back
 // (*sound, slot sound, *vol = slot volume, *pos = 1, state cleared). Without a timer: *vol = slot volume, *pos = 1;
 // with no voice yet the slot ends (sound 0x5B1 started, returns 1); else the object's voice (+0x8C) is replaced by
 // this slot's voice (the old one stopped with sound_voice_stop) and flag 0x80 is cleared.
@@ -75,7 +75,7 @@ s32 object_sound_follow_cam(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 
             actor_sound_play2(0x5B0, (struct127 *) obj, 25000, 100, 0x78);
             return 0;
         }
-        timer -= D_800BE9E4;
+        timer -= g_frame_ticks;
         if (timer <= 0) {
             *sound = state >> 16;
             e->sound = state >> 16;
@@ -106,7 +106,7 @@ s32 object_sound_follow_cam(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 
 // object_sound_delayed: P253. sfx_emitter_start callback (same signature as object_sound_follow_cam) of the sounds object_sound_play_cooldown
 // starts for an object without a camera (state = flag 0x8000 from its arg4 | 0x10). The slot follows the object's
 // position. With a timer (state & 0x7FFF): a sound the update is about to start is queued (high half) and sound 0x5B0
-// is started (volume -25000); otherwise the timer counts down by D_800BE9E4 and once it would reach 0 the queued
+// is started (volume -25000); otherwise the timer counts down by g_frame_ticks and once it would reach 0 the queued
 // sound is handed back (*sound, slot sound; the timer bits cleared). Without a timer: with no voice yet the slot ends
 // (sound 0x5B1, returns 1); else, unless flag 0x8000 is set, sound_voice_set_param(voice, -0x8000, 2) once, the state is
 // cleared and flag 0x80 of the slot is cleared.
@@ -127,13 +127,13 @@ s32 object_sound_delayed(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pi
             actor_sound_play2(0x5B0, (struct127 *) obj, -25000, e->unkA, e->unk8);
             return 0;
         }
-        if ((u32) timer <= (u32) D_800BE9E4) {
+        if ((u32) timer <= (u32) g_frame_ticks) {
             *sound = state >> 16;
             e->sound = state >> 16;
             e->state &= ~0x7FFF;
             return 0;
         }
-        timer -= D_800BE9E4;
+        timer -= g_frame_ticks;
     } else {
         if (e->voice == 0) {
             actor_sound_play2(0x5B1, (struct127 *) obj, -25000, e->unkA, e->unk8);

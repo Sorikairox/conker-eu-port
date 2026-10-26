@@ -46,7 +46,7 @@ s32 anim_model_fx_spawn(void *sprite, s32, f32 alpha, s32, s32, s32 depth, s32, 
 s32 life_pickup_ring_spawn(f32 yaw, s32 posArg, s32 arg2, u8 arg3, s32 colour, s32 flag, s32 arg6, s32 arg7, s32 arg8);
 s32 memcpy(void *, void *, s32);
 /* marker_sprite_spawn: spawns a marker at pos facing `angle` (degrees). size 0..2 (3 or more: nothing,
- * returns 0). In the level types with D_800D2E4C->unk19 & 4, or for size 2, it is a HUD-style sprite (texture
+ * returns 0). In the level types with g_save_progress_bits->unk19 & 4, or for size 2, it is a HUD-style sprite (texture
  * 0xA2, anim_model_fx_spawn) placed 39 units out along the angle and 40 lower, with sprite size {3, 1, 2}[size], flag
  * 0x10 set when `flag`; the angle, that position and `kind` go to the sprite object + 0x120 (life_pickup_spin_matrix
  * turns it). Otherwise the 3D ring particle life_pickup_ring_spawn. Returns the object (0 when none). arg5 / arg6 unused. */
@@ -70,7 +70,7 @@ s32 life_pickup_spawn(f32 *pos, f32 angle, u8 kind, u8 flag, u8 size, s32 arg5, 
     if (size >= 3) {
         return 0;
     }
-    if ((D_800D2E4C->unk19 & 4) || size == 2) {
+    if ((g_save_progress_bits->unk19 & 4) || size == 2) {
         sp.angle = angle;
         sp.spr.u3C = 0;
         sp.spr.u40 = 0;
@@ -125,19 +125,19 @@ s32 life_pickup_spawn(f32 *pos, f32 angle, u8 kind, u8 flag, u8 size, s32 arg5, 
 
 /* was func_151BF0D0 */
 s32 life_pickup_spin_matrix(u8 *arg0) {
-    mtxf_rotate_xyz_deg(((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0], 0.0f, *(f32 *)(arg0 + 0x120), 0.0f);
-    ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][3][0] = *(f32 *)(arg0 + 0x54);
-    ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][3][1] = *(f32 *)(arg0 + 0x58);
-    ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][3][2] = *(f32 *)(arg0 + 0x5C);
-    ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][0][0] *= 0.92300004f;
-    ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][0][1] *= 0.92300004f;
-    ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][0][2] *= 0.92300004f;
-    ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][1][0] *= 0.92300004f;
-    ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][1][1] *= 0.92300004f;
-    ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][1][2] *= 0.92300004f;
-    ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][2][0] *= 0.92300004f;
-    ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][2][1] *= 0.92300004f;
-    ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][2][2] *= 0.92300004f;
+    mtxf_rotate_xyz_deg(((f32 (*)[4][4])(arg0 + 0x7C))[g_dl_buf_index], 0.0f, *(f32 *)(arg0 + 0x120), 0.0f);
+    ((f32 (*)[4][4])(arg0 + 0x7C))[g_dl_buf_index][3][0] = *(f32 *)(arg0 + 0x54);
+    ((f32 (*)[4][4])(arg0 + 0x7C))[g_dl_buf_index][3][1] = *(f32 *)(arg0 + 0x58);
+    ((f32 (*)[4][4])(arg0 + 0x7C))[g_dl_buf_index][3][2] = *(f32 *)(arg0 + 0x5C);
+    ((f32 (*)[4][4])(arg0 + 0x7C))[g_dl_buf_index][0][0] *= 0.92300004f;
+    ((f32 (*)[4][4])(arg0 + 0x7C))[g_dl_buf_index][0][1] *= 0.92300004f;
+    ((f32 (*)[4][4])(arg0 + 0x7C))[g_dl_buf_index][0][2] *= 0.92300004f;
+    ((f32 (*)[4][4])(arg0 + 0x7C))[g_dl_buf_index][1][0] *= 0.92300004f;
+    ((f32 (*)[4][4])(arg0 + 0x7C))[g_dl_buf_index][1][1] *= 0.92300004f;
+    ((f32 (*)[4][4])(arg0 + 0x7C))[g_dl_buf_index][1][2] *= 0.92300004f;
+    ((f32 (*)[4][4])(arg0 + 0x7C))[g_dl_buf_index][2][0] *= 0.92300004f;
+    ((f32 (*)[4][4])(arg0 + 0x7C))[g_dl_buf_index][2][1] *= 0.92300004f;
+    ((f32 (*)[4][4])(arg0 + 0x7C))[g_dl_buf_index][2][2] *= 0.92300004f;
     return 1;
 }
 
@@ -254,13 +254,13 @@ typedef struct {
     /* 0x78 */ s32 u78;
 } ParticleReq1EC;
 
-extern u8 D_8008FF60[3];   /* colours per index 0..2: 4, 2, 3 */
+extern u8 g_life_ring_colours[3];   /* colours per index 0..2: 4, 2, 3; was D_8008FF60 */
 s32 mdl_particle_spawn(void *req, s32, s32, s32, s32, s32);
 s32 mdl_particle_mtx_rot_scale3(s32 arg0, u8 *arg1);
 
 /*
  * ring_particle_spawn: spawns one ring particle (sprite 0x26, life 300, scale (1, 1, 0.923, 0.923; 0x3F6C49BB), rotated by
- * yaw about y, no motion) at the 3 words at pos (copied as they are), colour D_8008FF60[colour] (only colours 0..2;
+ * yaw about y, no motion) at the 3 words at pos (copied as they are), colour g_life_ring_colours[colour] (only colours 0..2;
  * else nothing and 0), flags 0xC1D00 | 0x4000 when flag (u8) is set, +0x5C = arg6, +0x61 = 0x18 in game mode 7
  * (g_level_id). Request (arg2, (u8) arg3, 0, (u8) arg7, arg8). On success mdl_particle_mtx_rot_scale3(p + 0x90 + 0x40 * k, p)
  * for k = 0, 1. Returns the particle (0 on failure).
@@ -299,7 +299,7 @@ s32 life_pickup_ring_spawn(f32 yaw, s32 posArg, s32 arg2, u8 arg3, s32 colour, s
     req.life = 300;
     req.sprite = 0x26;
     req.alpha = 0xFF;
-    req.colour = D_8008FF60[(u8) colour];
+    req.colour = g_life_ring_colours[(u8) colour];
     req.u5C = arg6;
     req.u61 = (g_level_id == 7) ? 0x18 : 0;
     req.u62[0] = 0;
@@ -470,12 +470,12 @@ void pickup_burst_spawn(f32 *pos) {
 
 /* Lives pop-up (called when a life pickup is collected, after sound 0x511): a HUD object (effect_node_create, type
  * 0x60, 0x18 bytes of state) holding a sprite (texture 0xA3) and the number of lives left, one or two digit
- * sprites from the glyph table D_800AAC94. Lives = player_stat_get(0, 3) minus the current one, at most 99.
- * D_800D2458 (set by the 4:3 / wide screen code) moves the sprite and the digits. `arg0` / `arg1` are passed
+ * sprites from the glyph table g_lives_popup_glyphs. Lives = player_stat_get(0, 3) minus the current one, at most 99.
+ * g_hud_clock_enabled (set by the 4:3 / wide screen code) moves the sprite and the digits. `arg0` / `arg1` are passed
  * through as the last two arguments of every HUD call (0xFF / 1 at the level start). */
 s32 anim_model_fx_spawn(void *sprite, s32, f32 alpha, s32, s32, s32 depth, s32, s32); /* P97: f32 like the P95 definition */
 s32 sprite2d_spawn(void *digit, s32, s32, s32, s32, s32, s32);
-extern s32 D_800AAC94[10];
+extern s32 g_lives_popup_glyphs[10]; /* was D_800AAC94 */
 
 typedef struct {
     s32 sprite;     /* anim_model_fx_spawn handle */
@@ -592,11 +592,11 @@ void lives_popup_spawn(u8 arg0, s32 arg1) {
     spr.u54 = 1;
     spr.u56 = 0xFF;
     spr.x = 300.0f;
-    spr.y = (D_800D2458 != 0) ? 32.0f : 79.0f;
+    spr.y = (g_hud_clock_enabled != 0) ? 32.0f : 79.0f;
     spr.z = 0.0f;
-    pos.pos[0] = ((f32 *)D_800A5860)[0];
-    pos.pos[1] = ((f32 *)D_800A5860)[1];
-    pos.pos[2] = ((f32 *)D_800A5860)[2];
+    pos.pos[0] = ((f32 *)g_vec3_zero)[0];
+    pos.pos[1] = ((f32 *)g_vec3_zero)[1];
+    pos.pos[2] = ((f32 *)g_vec3_zero)[2];
     pos.scaleX = 0.30100003f;
     pos.scaleY = 0.30100003f;
     popup->sprite = anim_model_fx_spawn(&spr, 0, 1.0f /* P96: f32 parameter (was its float bits) */, 0, 0, 0x14, arg0, arg1);
@@ -606,10 +606,10 @@ void lives_popup_spawn(u8 arg0, s32 arg1) {
 
     /* the digits */
     for (i = 0; i < 10; i++) {
-        glyphs[i] = D_800AAC94[i];
+        glyphs[i] = g_lives_popup_glyphs[i];
     }
     dig.x = -500.0f;
-    dig.y = (D_800D2458 != 0) ? -15.0f : -62.0f;
+    dig.y = (g_hud_clock_enabled != 0) ? -15.0f : -62.0f;
     dig.color[8] = 0xFF;
     dig.u18 = 0xFF;
     dig.u12 = 300;
@@ -665,7 +665,7 @@ void lives_popup_update(u8 *arg0) {
     u8 *temp_v0_3;
     u8 *var_v1;
 
-    if ((D_800BEAC1 != 0) || (var_v1 = arg0 + 0x28, (g_game_paused != 0))) {
+    if ((g_pause_open != 0) || (var_v1 = arg0 + 0x28, (g_game_paused != 0))) {
         (*(s16 *)((u8 *)arg0 + 0xE)) = -1;
         (*(u8 *)((u8 *)arg0 + 0xD)) = (u8) ((*(u8 *)((u8 *)arg0 + 0xD)) | 1);
         return;
@@ -675,7 +675,7 @@ void lives_popup_update(u8 *arg0) {
             sp1C = var_v1;
             if (hud_lens_is_off(0) != 0) {
                 sp1C = var_v1;
-                if ((screen_fade_alpha(0, arg0) == 0) && (D_800BE9B4 == 0)) {
+                if ((screen_fade_alpha(0, arg0) == 0) && (g_level_first_frame == 0)) {
                     (*(u8 *)((u8 *)var_v1 + 0x14)) = (u8) ((*(u8 *)((u8 *)var_v1 + 0x14)) | 1);
                     goto block_9;
                 }
@@ -696,7 +696,7 @@ block_9:
         temp_v0 = (*(u8 **)((u8 *)var_v1 + 0));
         if (temp_v0 != NULL) {
             (*(f32 *)((u8 *)temp_v0 + 0x54)) = (f32) ((var_f2 * -85.0f) + 150.0f);
-            if (D_800D2458 != 0) {
+            if (g_hud_clock_enabled != 0) {
                 (*(f32 *)((u8 *)((*(u8 **)((u8 *)var_v1 + 0))) + 0x58)) = 32.0f;
             } else {
                 (*(f32 *)((u8 *)((*(u8 **)((u8 *)var_v1 + 0))) + 0x58)) = 79.0f;
@@ -705,7 +705,7 @@ block_9:
         temp_v0_2 = (*(u8 **)((u8 *)var_v1 + 4));
         if (temp_v0_2 != NULL) {
             (*(f32 *)((u8 *)temp_v0_2 + 0x10)) = (f32) (((((var_f2 * -85.0f) + 150.0f) * 1.0f) + 48.0f) - 12.0f);
-            if (D_800D2458 != 0) {
+            if (g_hud_clock_enabled != 0) {
                 (*(f32 *)((u8 *)((*(u8 **)((u8 *)var_v1 + 4))) + 0x14)) = -15.0f;
             } else {
                 (*(f32 *)((u8 *)((*(u8 **)((u8 *)var_v1 + 4))) + 0x14)) = -62.0f;
@@ -714,13 +714,13 @@ block_9:
         temp_v0_3 = (*(u8 **)((u8 *)var_v1 + 8));
         if (temp_v0_3 != NULL) {
             (*(f32 *)((u8 *)temp_v0_3 + 0x10)) = (f32) ((((var_f2 * -85.0f) + 150.0f) * 1.0f) + 48.0f + 12.0f);
-            if (D_800D2458 != 0) {
+            if (g_hud_clock_enabled != 0) {
                 (*(f32 *)((u8 *)((*(u8 **)((u8 *)var_v1 + 8))) + 0x14)) = -15.0f;
             } else {
                 (*(f32 *)((u8 *)((*(u8 **)((u8 *)var_v1 + 8))) + 0x14)) = -62.0f;
             }
         }
-        (*(f32 *)((u8 *)var_v1 + 0xC)) = (f32) ((*(f32 *)((u8 *)var_v1 + 0xC)) - D_800BE9A4);
+        (*(f32 *)((u8 *)var_v1 + 0xC)) = (f32) ((*(f32 *)((u8 *)var_v1 + 0xC)) - g_frame_step_f);
         if ((*(f32 *)((u8 *)var_v1 + 0xC)) < 0.0f) {
             (*(s16 *)((u8 *)arg0 + 0xE)) = -1;
             (*(u8 *)((u8 *)arg0 + 0xD)) = (u8) ((*(u8 *)((u8 *)arg0 + 0xD)) | 1);

@@ -1,15 +1,15 @@
 s/struct127 \*player = \&g_objects\[0\];/struct127 *player = \&g_objects[1];/
 s/if (player->unk65 == 0 || player->unk44 < 5.0f) {/if (player->unk65 == 0 \&\& player->unk44 < 5.0f) {/
 s/player->unk44 < 5.0f) {/player->unk44 <= 5.0f) {/
-s/g_cur_obj->unk232 = D_800D1891;/g_cur_obj->unk232 = D_800D1890;/
+s/g_cur_obj->unk232 = g_aiscript_arg1;/g_cur_obj->unk232 = g_aiscript_arg0;/
 s/aiscript_find_by_kind(0, g_cur_obj->unk232)/aiscript_find_by_kind(1, g_cur_obj->unk232)/
 s/        g_cur_obj->unk218--;/        ;/
 s/        return;/        ;/
 s/g_cur_obj->unk78 = player->unk31C->unk4C;/g_cur_obj->unk78 = player->unk7A;/
 s/if (player->unk31C->chased != 0) {/if (player->unk31C->chased == 0) {/
-s/speed = player->unk44 \* D_8009A5A4;/speed = player->unk44 * 0.75f;/
+s/speed = player->unk44 \* g_aiscript_follow_speed_scale;/speed = player->unk44 * 0.75f;/
 s/if (speed < 17) {/if (speed <= 17) {/
-s/        D_800D1893++;/        ;/
-s/D_800D1890 = 8;/D_800D1890 = 9;/
-s/D_800D1892 = speed;/D_800D1892 = speed + 1;/
+s/        g_aiscript_arg3++;/        ;/
+s/g_aiscript_arg0 = 8;/g_aiscript_arg0 = 9;/
+s/g_aiscript_arg2 = speed;/g_aiscript_arg2 = speed + 1;/
 s/g_cur_obj->unkF4 |= 0x40;/g_cur_obj->unkF4 |= 0x80;/

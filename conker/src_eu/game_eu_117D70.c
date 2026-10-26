@@ -209,7 +209,7 @@ f32 anim_fx_emitter_pulse_scale(u8 *arg0) {
     p = *q;
     r = (*(f32 *)((u8 *)p + 0x88)) + ((*(f32 *)((u8 *)p + 0x8C)) * (0, r)); // fakematch: (0, x) comma flips commutative operand order
     p += 0x80;
-    *(s32 *)(p + 0) = (*(s32 *)((u8 *)p + 4)) * D_800BE9E4 + (*(u32 *)((u8 *)p + 0));
+    *(s32 *)(p + 0) = (*(s32 *)((u8 *)p + 4)) * g_frame_ticks + (*(u32 *)((u8 *)p + 0));
     return r;
 }
 
@@ -399,7 +399,7 @@ void weather_lightning_storm_tick(s32 arg0) {
 void world_obj_hit_activate(s32 arg0, s32 arg1)
 {
   u8 *p;
-  p = ((u8 *) D_800DBEF4) + (arg1 * 0xA0);
+  p = ((u8 *) g_world_objs) + (arg1 * 0xA0);
   if (p[0x72] == 224)
   {
     p[0x73] = (p[0x73] & 0xFFFF) | 3;
@@ -434,7 +434,7 @@ void world_obj_tumble_update(S_EAEC4 *arg0) {
     s32 v;
 
     if ((arg0->u73 & 3) == 3) {
-        f = D_800BE9E4;
+        f = g_frame_ticks;
         arg0->rot[0] += arg0->vel[0] * f;
         if (arg0->rot[0] < 0.0f) {
             arg0->rot[0] += 360.0f;
@@ -453,13 +453,13 @@ void world_obj_tumble_update(S_EAEC4 *arg0) {
         } else if (arg0->rot[2] >= 360.0f) {
             arg0->rot[2] -= 360.0f;
         }
-        arg0->u5C -= arg0->u3C * D_800BE9E4;
-        arg0->u10 += arg0->u5A * D_800BE9E4;
-        arg0->u7C += arg0->u5C * D_800BE9E4;
+        arg0->u5C -= arg0->u3C * g_frame_ticks;
+        arg0->u10 += arg0->u5A * g_frame_ticks;
+        arg0->u7C += arg0->u5C * g_frame_ticks;
         arg0->u12 = arg0->u7C >> 3;
-        arg0->u14 += arg0->u5E * D_800BE9E4;
+        arg0->u14 += arg0->u5E * g_frame_ticks;
         v = arg0->u8A;
-        v -= D_800BE9E4 * 4;
+        v -= g_frame_ticks * 4;
         if (v > 0) {
             arg0->u8A = v;
             return;

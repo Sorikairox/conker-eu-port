@@ -24,7 +24,7 @@ s#        \*(s16 \*) (obj + 0x32) = -climb;#        *(s16 *) (obj + 0x32) = clim
 # equivalent (stores the 0x400 it already holds): s#    if (\*(s16 \*) (obj + 0x30) > 0x400) {#    if (*(s16 *) (obj + 0x30) >= 0x400) {# % clampeq
 s#        \*(s16 \*) (obj + 0x30) = -0x400;#        *(s16 *) (obj + 0x30) = -0x3FF;# % clamplo
 s#        \*(s16 \*) (obj + 0x30) = 0x400;#        *(s16 *) (obj + 0x30) = 0x3FF;# % clamphi
-s#    view = (u32) (\*(f32 \*) ((u8 \*) D_800DBFF0 + 0x380) \* 0\.7111111f); \/\* D_800A75C0 = 256 \/ 360 \*\/#    view = (u32) (*(f32 *) ((u8 *) D_800DBFF0 + 0x380) * 0.7f);#
+s#    view = (u32) (\*(f32 \*) ((u8 \*) g_player_views + 0x380) \* 0\.7111111f); \/\* D_800A75C0 = 256 \/ 360 \*\/#    view = (u32) (*(f32 *) ((u8 *) g_player_views + 0x380) * 0.7f);#
 s#    v = (s32) ((f32) \*(s16 \*) (obj + 0x26) \* s - (f32) \*(s16 \*) (obj + 0x28) \* c);#    v = (s32) ((f32) *(s16 *) (obj + 0x26) * c - (f32) *(s16 *) (obj + 0x28) * s);#
 s#        \*(s16 \*) (obj + 0x44) = 4;#        *(s16 *) (obj + 0x44) = 2;# % negv
 s#    if (v > 0x200) {#    if (v >= 0x200) {# % edge200
@@ -32,4 +32,4 @@ s#    } else if (v > 0x100) {#    } else if (v >= 0x100) {# % edge100
 s#    } else if ((s32) ((f32) \*(s16 \*) (obj + 0x26) \* c + (f32) \*(s16 \*) (obj + 0x28) \* s) >= 0) {#    } else if ((s32) ((f32) *(s16 *) (obj + 0x26) * c + (f32) *(s16 *) (obj + 0x28) * s) > 0) {#
 s#        frame = 9;#        frame = 8;# % frame9
 s#    \*(s16 \*) (obj + 0x1C) \^= 0x100;#    *(s16 *) (obj + 0x1C) ^= 0x200;#
-s#    \*(u8 \*\*) (obj + 0x10) = D_8008CDEC\[frame\];#    *(u8 **) (obj + 0x10) = D_8008CDEC[frame + 1];#
+s#    \*(u8 \*\*) (obj + 0x10) = g_sprite_tex_descs\[frame\];#    *(u8 **) (obj + 0x10) = g_sprite_tex_descs[frame + 1];#

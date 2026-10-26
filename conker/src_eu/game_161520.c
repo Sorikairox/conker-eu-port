@@ -240,7 +240,7 @@ struct102 *emitter_trail_spawn(u8 *arg0, s32 arg1, u8 arg2, s32 arg3) {
 // }
 
 /* trail_emitter_update: per-frame update of a trail / particle emitter object (list type 0x28, made by
- * emitter_trail_spawn). Lifetime +0x38 counts down by D_800BE9E4 when flag 4 is set (dies below 0). Position: the
+ * emitter_trail_spawn). Lifetime +0x38 counts down by g_frame_ticks when flag 4 is set (dies below 0). Position: the
  * parent's position (+0x1C, flag 1), the parent model's bone matrix obj[0x20] (flag 2; the emitter dies when the
  * parent is gone or its slot id changed), or its own double-buffered matrix +0x10/+0x14 (no flag 0x10); the point
  * +0x24 is transformed by mtx_transform_point_or_origin. The accumulator +0x50 grows with the distance moved since the last frame
@@ -267,7 +267,7 @@ void emitter_trail_update(u8 *obj) {
     dead = FALSE;
     prev = (f32 *) (obj + 0x40);
     if (obj[0x3A] & 4) {
-        *(s16 *) (obj + 0x38) -= D_800BE9E4;
+        *(s16 *) (obj + 0x38) -= g_frame_ticks;
         if (*(s16 *) (obj + 0x38) < 0) {
             dead = TRUE;
         }
@@ -297,14 +297,14 @@ void emitter_trail_update(u8 *obj) {
         if (flags & 0x10) {
             return;
         }
-        mtx_transform_point_or_origin(obj + 0x24, pos, *(u8 **) (obj + 0x10 + (D_800BE9C0 ? 0 : 1) * 4));
+        mtx_transform_point_or_origin(obj + 0x24, pos, *(u8 **) (obj + 0x10 + (g_dl_buf_index ? 0 : 1) * 4));
     }
 
     dx = prev[0] - pos[0];
     dy = prev[1] - pos[1];
     dz = prev[2] - pos[2];
     dist = sqrtf(dx * dx + dy * dy + dz * dz);
-    *(f32 *) (obj + 0x50) += (*(f32 *) (obj + 0x4C) * dist + 1.0f) * D_800BE9A4 * *(f32 *) (obj + 0x34);
+    *(f32 *) (obj + 0x50) += (*(f32 *) (obj + 0x4C) * dist + 1.0f) * g_frame_step_f * *(f32 *) (obj + 0x34);
     if (*(f32 *) (obj + 0x50) > 7.0f) {
         *(f32 *) (obj + 0x50) = 7.0f;
     }
@@ -439,9 +439,9 @@ s32 point_emitter_spawn(struct_eu_EF410 *arg0, s32 arg1, u8 arg2, s32 arg3) {
  * With flag 4 (+0x26) and a handler g_point_emitter_type_fns[(s8) +0x29] (-1 = none), a 0 handler result frees it
  * (node_destroy) at once. Flag 2 = no previous position this frame (cleared, nothing spawned). Otherwise the
  * accumulator +0x3C grows with the distance moved since the last frame (+0x2C) times +0x38 (= 1 / (2 * size)) plus
- * 1, scaled by D_800BE9A4 and the rate +0x20 (capped at 7); one g_point_emitter_spawn_fns[+0x27] spawn per whole unit, spread
+ * 1, scaled by g_frame_step_f and the rate +0x20 (capped at 7); one g_point_emitter_spawn_fns[+0x27] spawn per whole unit, spread
  * along the movement and jittered by the size +0x1C. Then the position is kept for the next frame; with flag 1 the
- * lifetime +0x24 counts down by D_800BE9E4 and the emitter is freed below 0. */
+ * lifetime +0x24 counts down by g_frame_ticks and the emitter is freed below 0. */
 typedef void (*PointEmitterSpawnFn)(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, u8 *obj);
 typedef s32 (*PointEmitterTypeFn)(u8 *obj);
 extern PointEmitterSpawnFn g_point_emitter_spawn_fns[]; /* was D_80089E9C */
@@ -471,7 +471,7 @@ void point_emitter_update(u8 *obj) {
         dy = *(f32 *) (obj + 0x30) - pos[1];
         dz = *(f32 *) (obj + 0x34) - pos[2];
         dist = sqrtf(dx * dx + dy * dy + dz * dz);
-        *(f32 *) (obj + 0x3C) += (*(f32 *) (obj + 0x38) * dist + 1.0f) * D_800BE9A4 * *(f32 *) (obj + 0x20);
+        *(f32 *) (obj + 0x3C) += (*(f32 *) (obj + 0x38) * dist + 1.0f) * g_frame_step_f * *(f32 *) (obj + 0x20);
         if (*(f32 *) (obj + 0x3C) > 7.0f) {
             *(f32 *) (obj + 0x3C) = 7.0f;
         }
@@ -493,7 +493,7 @@ void point_emitter_update(u8 *obj) {
     *(f32 *) (obj + 0x30) = pos[1];
     *(f32 *) (obj + 0x34) = pos[2];
     if (obj[0x26] & 1) {
-        *(s16 *) (obj + 0x24) -= D_800BE9E4;
+        *(s16 *) (obj + 0x24) -= g_frame_ticks;
         if (*(s16 *) (obj + 0x24) < 0) {
             node_destroy((struct102 *) obj);
         }
@@ -515,14 +515,14 @@ void emitter_stub(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 s32 fx_rising_particle_update(struct161520_c *arg0) {
     s32 temp_v1 = arg0->unk2E;
 
-    arg0->unk70 += 0.125f * D_800BE9A4;
-    arg0->unk74 += 0.08f * D_800BE9A4;
-    arg0->unk14 += arg0->unk70 * D_800BE9A4;
-    arg0->unk1C += arg0->unk74 * D_800BE9A4;
+    arg0->unk70 += 0.125f * g_frame_step_f;
+    arg0->unk74 += 0.08f * g_frame_step_f;
+    arg0->unk14 += arg0->unk70 * g_frame_step_f;
+    arg0->unk1C += arg0->unk74 * g_frame_step_f;
     if (arg0->unk14 > 130.0f) {
         return 0;
     }
-    temp_v1 -= D_800BE9E4 * 2;
+    temp_v1 -= g_frame_ticks * 2;
     if (temp_v1 < 0) {
         return 0;
     }
@@ -596,12 +596,12 @@ void bone_emitter_send_pair(s32, s32, s32, s32, s32);
 // bone_emitter_update: per-frame update (pointer at 0x8008C09C, next to EU 0x15134C9C / 0x15134CEC) of a
 // particle emitter attached to a bone of an object (made by bone_emitter_spawn). While emitting
 // (+0x10 bit 0) and the object is alive, unchanged (id byte), has a model and is not hidden: counts the timer down
-// by D_800BE9E4; when it passes -period it restarts at `restart`, re-reads the two emission points from the bone
+// by g_frame_ticks; when it passes -period it restarts at `restart`, re-reads the two emission points from the bone
 // matrix (bone_emitter_send_pair) and calls the start callback (0 stops the emitter). While the timer is positive it adds
-// rate * D_800BE9A4 to the owed count (the rate callback only stores rateScale for the emit callbacks) and, when more
+// rate * g_frame_step_f to the owed count (the rate callback only stores rateScale for the emit callbacks) and, when more
 // than one particle is owed, emits them evenly spaced along the path both points moved since the last emission:
 // each call gets the interpolated points, the points' velocities (step * D_800BEDC8) and a phase that runs from
-// phase + D_800BE9A4 down by equal steps; the points and phase are kept for the next frame. Then the tick callback
+// phase + g_frame_step_f down by equal steps; the points and phase are kept for the next frame. Then the tick callback
 // and the lifetime (+0x42, flag 2) can stop it. A stopped emitter, or one whose object is gone, is freed
 // (node_destroy).
 /* was func_15134E48 */
@@ -629,7 +629,7 @@ void bone_emitter_update(BoneEmitter *e) {
     }
     if (e->active & 1) {
         if (!stop && (mtx = *(u8 **) (obj + 0x1D4)) != NULL && (obj[0x74] & 0xF) != 0xF) {
-            e->timer -= D_800BE9E4;
+            e->timer -= g_frame_ticks;
             bone = mtx + e->bone * 0x40;
             if (e->timer < -e->period) {
                 e->timer = e->restart;
@@ -643,10 +643,10 @@ void bone_emitter_update(BoneEmitter *e) {
                 if (e->rateFn != -1) {
                     e->rateScale = g_bone_emitter_rate_fns[e->rateFn](e);
                 }
-                e->count += e->rate * D_800BE9A4;
+                e->count += e->rate * g_frame_step_f;
                 if (e->count > 1.0f) {
                     inv = 1.0f / e->count;
-                    phase = e->phase + D_800BE9A4;
+                    phase = e->phase + g_frame_step_f;
                     phaseStep = phase * inv;
                     curA[0] = e->posA[0];
                     curA[1] = e->posA[1];
@@ -700,7 +700,7 @@ void bone_emitter_update(BoneEmitter *e) {
             stop = 1;
         }
         if (e->flags & 2) {
-            e->life -= D_800BE9E4;
+            e->life -= g_frame_ticks;
             if (e->life < 0) {
                 stop = 1;
             }
@@ -1034,17 +1034,17 @@ s32 blood_drop_update(u8 *arg0) {
     var_v1 = 1;
     if ((*(s16 *)((u8 *)arg0 + 0x70)) > 0) {
         temp_v0 = arg0 + 0x70;
-        (*(s16 *)((u8 *)temp_v0 + 0)) = (s16) ((*(s16 *)((u8 *)temp_v0 + 0)) - D_800BE9E4);
-        (*(f32 *)((u8 *)arg0 + 0x10)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x10)) + ((*(f32 *)((u8 *)temp_v0 + 8)) * D_800BE9A4));
-        (*(f32 *)((u8 *)arg0 + 0x14)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x14)) + ((*(f32 *)((u8 *)temp_v0 + 0xC)) * D_800BE9A4));
-        (*(f32 *)((u8 *)arg0 + 0x18)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x18)) + ((*(f32 *)((u8 *)temp_v0 + 4)) * D_800BE9A4));
-        var_f4 = (*(f32 *)((u8 *)arg0 + 0x1C)) + ((*(f32 *)((u8 *)temp_v0 + 4)) * D_800BE9A4);
+        (*(s16 *)((u8 *)temp_v0 + 0)) = (s16) ((*(s16 *)((u8 *)temp_v0 + 0)) - g_frame_ticks);
+        (*(f32 *)((u8 *)arg0 + 0x10)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x10)) + ((*(f32 *)((u8 *)temp_v0 + 8)) * g_frame_step_f));
+        (*(f32 *)((u8 *)arg0 + 0x14)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x14)) + ((*(f32 *)((u8 *)temp_v0 + 0xC)) * g_frame_step_f));
+        (*(f32 *)((u8 *)arg0 + 0x18)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x18)) + ((*(f32 *)((u8 *)temp_v0 + 4)) * g_frame_step_f));
+        var_f4 = (*(f32 *)((u8 *)arg0 + 0x1C)) + ((*(f32 *)((u8 *)temp_v0 + 4)) * g_frame_step_f);
     } else {
         temp_v0_2 = arg0 + 0x70;
         (*(f32 *)((u8 *)(&sp.u8) + 0)) = (*(f32 *)((u8 *)temp_v0_2 + 8));
         (*(f32 *)((u8 *)(&sp.u8) + 4)) = (f32) (*(f32 *)((u8 *)temp_v0_2 + 0xC));
-        (*(f32 *)((u8 *)arg0 + 0x14)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x14)) + (((*(f32 *)((u8 *)temp_v0_2 + 0xC)) * D_800BE9A4) + ((*(f32 *)((u8 *)temp_v0_2 + 0x10)) * D_800BE9A4 * D_800BE9A4 * 0.5f)));
-        (*(f32 *)((u8 *)temp_v0_2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_v0_2 + 0xC)) + ((*(f32 *)((u8 *)temp_v0_2 + 0x10)) * D_800BE9A4));
+        (*(f32 *)((u8 *)arg0 + 0x14)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x14)) + (((*(f32 *)((u8 *)temp_v0_2 + 0xC)) * g_frame_step_f) + ((*(f32 *)((u8 *)temp_v0_2 + 0x10)) * g_frame_step_f * g_frame_step_f * 0.5f)));
+        (*(f32 *)((u8 *)temp_v0_2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_v0_2 + 0xC)) + ((*(f32 *)((u8 *)temp_v0_2 + 0x10)) * g_frame_step_f));
         temp_f8 = sp.u8 + (*(f32 *)((u8 *)temp_v0_2 + 8));
         sp.u8 = temp_f8;
         temp_f10 = temp_f8 * 0.5f;
@@ -1053,8 +1053,8 @@ s32 blood_drop_update(u8 *arg0) {
         sp.u8 = temp_f10;
         sp.uC = temp_f6 * 0.5f;
         temp_f12 = fabsf(temp_f10) * (*(f32 *)((u8 *)temp_v0_2 + 0x14));
-        (*(f32 *)((u8 *)arg0 + 0x18)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x18)) + (temp_f12 * D_800BE9A4));
-        var_f4 = (*(f32 *)((u8 *)arg0 + 0x1C)) + (temp_f12 * D_800BE9A4);
+        (*(f32 *)((u8 *)arg0 + 0x18)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x18)) + (temp_f12 * g_frame_step_f));
+        var_f4 = (*(f32 *)((u8 *)arg0 + 0x1C)) + (temp_f12 * g_frame_step_f);
     }
     (*(f32 *)((u8 *)arg0 + 0x1C)) = var_f4;
     temp_f0 = (*(f32 *)((u8 *)arg0 + 0x10));
@@ -1304,8 +1304,8 @@ s32 fx_splash_update(struct161520_b *arg0) {
             arg0->unk5C = temp_v0 * 8;
         }
     }
-    arg0->unk2C += *temp_v1 * D_800BE9A4;
-    arg0->unk30 += *temp_v1 * D_800BE9A4;
+    arg0->unk2C += *temp_v1 * g_frame_step_f;
+    arg0->unk30 += *temp_v1 * g_frame_step_f;
     return 1;
 }
 
@@ -1991,13 +1991,13 @@ s32 object_hit_kind_effect_spawn(struct127 *arg0, s32 kind, u8 flag) {
     return (s32)bone_emitter_spawn((u8 *)&spec, 0);
 }
 
-extern u8 D_800A43C6[];
+extern u8 g_hit_kind_info_mode[]; /* was D_800A43C6 */
 /* was func_151382E0 */
 void object_hit_kind_sparks(void *arg0, s32 arg1, void *arg2, u8 arg3, s32 arg4) {
     struct_eu_15154488 sp24;
     s32 kind;
 
-    kind = D_800A43C6[arg1 * 16];
+    kind = g_hit_kind_info_mode[arg1 * 16];
     if (kind == 2) {
         return;
     }
@@ -2175,7 +2175,7 @@ void object_hit_smoke_puff(struct127 *obj, f32 *pos, s32 hit, void *arg3, u8 kin
     }
 }
 
-// bone_bounce_splash_b: handler 8 of D_80089CD4 (`s32 (u8 *, f32, f32, f32, f32, u8 *)`), twin of bone_bounce_splash:
+// bone_bounce_splash_b: handler 8 of g_mdl_particle_land_fns (`s32 (u8 *, f32, f32, f32, f32, u8 *)`), twin of bone_bounce_splash:
 // bounces the object on the ground (y velocity +0x48 flipped, velocities +0x44..+0x58 scaled by +0x14, y +0x3C =
 // +0x10 + ground; under a bounce speed of 4 velocities +0x44..+0x5C cleared and flags 0x69 of +0x60 dropped). Unless
 // +0x30 is 2.0 it spawns a splash (impact_debris_spawn) at (+0x38, ground, +0x40): kind 1 when +0x30 != 0, size (39.8 +
@@ -2474,7 +2474,7 @@ void object_hit_sparks_flash(struct127 *obj, s32 *pos, u8 big, s32 *arg3, u8 kin
     mdl_particle_spawn_ex(&flash, 3, 0xFF, (s32) arg3, 0, kind, owner);
 }
 
-// bone_bounce_splash: handler 9 of D_80089CD4 (`s32 (u8 *, f32, f32, f32, f32, u8 *)`, mdl_particle_spawn_ex's dispatcher;
+// bone_bounce_splash: handler 9 of g_mdl_particle_land_fns (`s32 (u8 *, f32, f32, f32, f32, u8 *)`, mdl_particle_spawn_ex's dispatcher;
 // only `ground` (the 5th argument) and `bone` are used). Bounces the object on the ground: the y velocity +0x48
 // flips and every velocity +0x44..+0x58 is scaled by the restitution +0x14, y +0x3C = +0x10 + ground; under a
 // bounce speed of 4 the velocities +0x44..+0x5C are cleared and flags 0x69 of +0x60 dropped. Unless +0x30 is 2.0,

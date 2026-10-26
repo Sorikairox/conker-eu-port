@@ -1,0 +1,237 @@
+old	new	confidence	description
+D_80038C40	g_pause_pi_io_mesg	med	OSIoMesg of the pause menu's PI DMA check (osPiStartDma of 16 ROM bytes, then a random junk DMA on mismatch)
+D_80082F4C	g_save_config_recs_ptr	med	Pointer to the ten 10-byte settings-set records of the save config (settings_load_from_save / settings_save)
+D_800843F0	g_player_pad_map	med	Controller index per player slot (player_order_reset; read by cont_read_frame and rumble)
+D_80087260	g_player_start_lives	med	Lives each player starts with (player stat 2): 3, 0x33 with cheat 0x200, 99 or a setting in multiplayer
+D_80087264	g_player_start_stat9	low	Start value of player stat 9 for every player (level_lights_init); 0 from menu_game_start
+D_80087270	g_player_start_state	med	Per player slot start value of player stat 0 (0, 8, character byte 6; 10 = slot unused / spectator)
+D_8008FD8C	g_player_count	high	Number of player slots (humans and computer players), the first g_objects entries
+D_8008FDA8	g_save_cur_slot	high	Save slot being played (-1 = none): written back by save_request_slot_write on quit / game over
+D_80090110	g_menu_queue_drop_count	med	Number of player queue entries to drop at the next game start / menu update
+D_80090114	g_menu_fade_speed	med	Fade step speed of the menu fade (3, 4 or 8; 0xFF = lens zoom fade) used by fade_mode_update
+D_80090118	g_mp_time_left	high	Multiplayer time limit left in frames (settings byte 3 * 3000, 0 = none), counted down in game_pause_update
+D_80090120	g_menu_scene_start_state	med	Pending menu scene / level start state (1 = start the scene now; 2..4 level start prompt states)
+D_80090128	g_menu_queue_count	med	Number of entries in the player queue counted by menu_game_start
+D_80090130	g_human_player_count	high	Number of human players (views); the first player slots
+D_80090134	g_humans_alive	med	Human players still in the game (decremented by player_lose_life, incremented by rail_racer_take_over)
+D_80090138	g_pause_quit_yes	high	Pause quit confirmation choice: 1 = yes, 0 = no
+D_8009013C	g_pause_drop_queue	med	Set by the pause restart: drop the first g_menu_queue_drop_count queue entries at the next menu_game_start
+D_80090140	g_menu_extra_slots	med	Extra player slots / team size added with up / down on the players and team pages
+D_80090144	g_menu_setup_step	med	Menu setup step 0..5: loads sprites and the save slots / config one per frame; 0 re-runs the setup
+D_8009014C	g_chapter_start_event	low	Event chain id used by chapter_scene_start instead of the save route when g_chapter_start_override is set
+D_80090150	g_chapter_scene_sel	med	Selected row in the chapter menu's unlocked scene list
+D_80090154	g_chapter_start_override	low	chapter_scene_start override: nonzero uses g_chapter_start_event, 2 also uses the start point D_800E1001
+D_80090158	g_pause_simple	med	Simple pause menu (continue only, no quit / restart items); forced on level 0x22
+D_8009015C	g_mp_game_flags	med	u16 game rule flags of the multiplayer settings set (bit 0 = lives, 0x10 near target, 0x40 rail band ...)
+D_80090164	g_menu_team_size_shift	med	Team size shift between team 0 and team 1 on the two-team page (C-left / C-right)
+D_80090168	g_mp_free_for_all	high	Free-for-all match (mode row byte 5 < 0): placings per player, not per team
+D_8009016D	g_menu_prompt_alpha_lo	med	Low byte of the s16 prompt fade alpha D_8009016C; used as text alpha of the pause menu
+D_80090170	g_menu_fade_amount	med	1 - screen fade alpha / 255, scales the menu camera's per-page zoom damping (1 = no fade)
+D_80090174	g_menu_state	high	Pointer to the MenuState record (D_800E0F20, set by menu_init)
+D_80090178	g_text_bank1_extra	med	Extra text data block loaded with text bank 1 (heap, freed by text_bank_load)
+D_8009017C	g_menu_stick_x_held	high	Bit i: controller i's stick x is held (no auto-repeat)
+D_80090180	g_settings_changed	high	Settings were changed on the settings page (saved on leaving it)
+D_80090184	g_settings_arrow_row	med	Settings list row the cursor arrows sit on (slides to the selected row)
+D_80090188	g_menu_slide_phase	med	f32 0..1 slide phase: barrel menu rotation and the settings cursor arrow slide
+D_800901C4	g_menu_attract_unk_1c4	low	s32 cleared by menu_mode_update in attract mode; no other use in C
+D_800901C8	g_menu_input_lock_frames	med	Frames left during which the menu input snapshot is ignored (set to 2 on mode change)
+D_800901CC	g_menu_cursor	high	Menu cursor shared by the pause menu and the yes / no choices of several menu pages (read signed)
+D_800901D0	g_save_options_loaded	high	Save options block has loaded (set by save_options_load; the menu requests it until then)
+D_800901D4	g_settings_sel	high	Selected item of the settings list
+D_800901D8	g_settings_scroll	med	f32 scroll animation of the settings list (1 -> 0)
+D_800901DC	g_settings_scroll_speed	med	f32 settings list scroll speed (+-0.075)
+D_800901E0	g_menu_joined_count	high	Number of controllers joined on the multiplayer menu pages
+D_800901E4	g_menu_player_queue	high	16-byte player queue: controller number per slot (sorted, -1 empty, -2 computer player)
+D_800901E8	g_menu_player_queue_4	low	Entry 4 of the player queue g_menu_player_queue; its address ends the loop over the first four
+D_800901F4	g_settings_defaults	high	Default value of each of the 0x1C settings bytes
+D_80090210	g_settings_min	high	Minimum value of each settings byte
+D_8009022C	g_settings_max	high	Maximum value of each settings byte
+D_80090248	g_menu_group_mode_counts	med	Main menu: number of mode rows per page group (titlePage 1..)
+D_80090250	g_menu_mode_char_masks	med	Character mask per negative mode code (-1 - code)
+D_80090270	g_menu_mode_fixed_chars	med	Fixed character per controller (4 bytes) for each negative mode code
+D_8009028F	g_menu_mode_slot_rows	low	s8 table indexed backwards by the mode code: row of the max-slots table D_800ABB30
+D_80090298	g_pause_input_delay	high	Frames until the pause menu accepts input / START again
+D_8009029C	g_pause_unpause_timer	high	Unpause countdown; the pause flag clears when it drops below 2
+D_800902A0	g_pause_last_stick_x	high	Pause menu: stick x of the previous frame (edge detection)
+D_800902A4	g_title_info_screen	med	Title page: the info screen is shown
+D_800902A8	g_title_screen_adjust	med	Title page: the screen position / size adjust screen is shown
+D_800902AC	g_menu_prompt_timer	low	s16 timer of the blinking prompt fade in menu_mode_update
+D_800902B0	g_chapter_sel	high	Selected chapter (0..8) of the chapter select page
+D_800902B4	g_chapter_route_sel	high	Chosen scene (route id) of the chapter select page, 0xFF = none
+D_800902D4	g_chapter_list_scroll	high	Chapter scene list scroll offset (animates by 2 towards 0)
+D_800902D8	g_chapter_prev_sel	high	Previous scene list selection of the chapter page
+D_800902DC	g_chapter_step_dir	high	Chapter step direction (-1 / 1)
+D_800902E0	g_chapter_blink_phase	high	Blink phase of the selected scene in the chapter list
+D_800902E7	g_mp_transition_arg	med	Player count -> argument of game_request_transition at game start
+D_800902F0	g_menu0_stop_points	high	Menu 0: carousel stop -> path point id (6 stops)
+D_800902F8	g_menu0_zoom_speeds	high	Menu 0: f32 zoom speed per carousel stop
+D_80090328	g_menu0_show_zoom_pct	high	Menu 0: per page zoom percent above which the page objects are shown
+D_80090330	g_menu0_hide_zoom_pct	high	Menu 0: per page zoom percent at which the page objects are hidden again
+D_80090338	g_menu1_stop_points	high	Menu 1: carousel stop -> path point id (8 stops)
+D_80090340	g_menu1_zoom_speeds	high	Menu 1: f32 zoom speed per carousel stop
+D_80090360	g_menu0_page_objects	high	Menu 0: 2 world object ids per title page (0xFF = none) shown at the stop
+D_800AB950	g_menu1_stop_pages	high	Menu 1: carousel stop -> main menu page
+D_800AB95C	g_menu_characters	high	8-byte record per character: f32 scale, s8 y offset, object type, start state
+D_800ABA0C	g_mp_team_colors	high	RGB colour per team (team select page, radar dots)
+D_800ABA2C	g_settings_items	high	Settings item table: label text, type, then max + 1 choice texts per item
+D_800ABA70	g_menu_modes	high	Menu mode rows of 10 bytes (by MenuState x42): text id, settings set, code, intro, next level, slot type
+D_800ABA74	g_menu_modes_settings_set	high	Byte 4 of g_menu_modes rows (row 0 address): settings set of the mode
+D_800ABA75	g_menu_modes_code	med	Byte 5 of g_menu_modes rows: mode code (< 0 = character-mask / free-for-all modes)
+D_800ABA76	g_menu_modes_intro	med	Byte 6 of g_menu_modes rows: index into the intro scene table D_800ABB88 (-1 none)
+D_800ABA77	g_menu_modes_next_level	med	Byte 7 of g_menu_modes rows: index into the level start table D_800ABBA0 (-1 none, -2 back to menu)
+D_800ABA78	g_menu_modes_slot_type	med	Byte 8 of g_menu_modes rows: slot type (8 = barrel mode)
+D_800ABAF4	g_mp_team_layouts	high	12-byte team layout per mode: team count, min / max / per-team sizes, team colours
+D_800ABB30	g_menu_max_slots	med	Rows of 4 bytes: max player slots per joined player count
+D_800ABB38	g_settings_set_item_masks	high	Settings set -> item mask of the shown settings_list_draw items
+D_800ABB60	g_mp_set_hud_flags	med	Settings set -> D_80090160 HUD / game flags
+D_800ABB74	g_mp_set_game_flags	high	Settings set -> g_mp_game_flags (D_8009015C) flags
+D_800ABB88	g_mp_intro_scenes	med	Intro scene per mode: s16 scene, s8 alt / s8 player-0 variants passed to cutscene_scene_load
+D_800ABBA0	g_menu_level_starts	high	MenuLevelStart records: level and scenes started by the level start prompt
+D_800ABBB8	g_str_pause_time_fmt	high	"%d:%02d" format of the multiplayer time limit
+D_800ABBC0	g_str_pause_simple_item	med	"#" text id format of the only item of the simple pause menu (text 0xD)
+D_800ABBC4	g_str_pause_title	low	"#" text id format of the centred text 0x1A of the pause menu
+D_800ABBC8	g_str_pause_continue	med	"#" text id format of the pause menu's first item (text 0xC / 0xD highlighted)
+D_800ABBCC	g_str_pause_restart_ask	low	"#" text id format of the restart question (text 0x32) of the pause menu
+D_800ABBD0	g_str_pause_quit_ask	med	"#" text id format of the quit question (text 0x33) of the pause menu
+D_800ABBD4	g_str_pause_restart	low	"#" text id format of the middle multiplayer pause item (text 0x21 / 0x22)
+D_800ABBD8	g_str_pause_quit	med	"#" text id format of the last pause item (text 0xE / 0xF highlighted)
+D_800ABBDC	g_str_pause_yes	med	"#" text id format of the "yes" choice of the pause quit question (text 0x1F / 0x20)
+D_800ABBE0	g_str_pause_no	med	"#" text id format of the "no" choice of the pause quit question (text 0x1D / 0x1E)
+D_800ABBE4	g_str_title_info	med	"#" text id format of the title info screen text (0x10)
+D_800ABBE8	g_str_title_adjust_head	low	"#" text id format of the screen adjust heading (text 0x3E)
+D_800ABBEC	g_str_title_adjust_mid	low	"#" text id format of the centred text 0x1A of the screen adjust screen
+D_800ABBF0	g_str_title_adjust_left	low	"#" text id format of the left label (text 0x3B) of the screen adjust screen
+D_800ABBF4	g_str_title_adjust_right	low	"#" text id format of the right label (text 0x3C) of the screen adjust screen
+D_800ABBF8	g_str_title_adjust_up	low	"#" text id format of the upper label (text 0x5D) of the screen adjust screen
+D_800ABBFC	g_str_title_adjust_down	low	"#" text id format of the lower label (text 0x5E) of the screen adjust screen
+D_800ABC00	g_chapter_scene_counts	high	Number of scenes per chapter (9 chapters)
+D_800ABC0C	g_str_chapter_title	high	"#" text id format of the chapter title (text 0x42 + chapter)
+D_800ABC10	g_str_slot_score_fmt	high	"%d" format of the save slot score
+D_800ABC14	g_str_slot_time_fmt	high	"%d:%02d:%02d" format of the save slot play time
+D_800ABC24	g_str_slot_title	low	"#" text id format of the centred text 0x1A between the save slot options
+D_800ABC28	g_str_slot_continue	med	"#" text id format of the save slot "continue" option (text 0x16 / 0x17)
+D_800ABC2C	g_str_slot_erase_ask	med	"#" text id format of the save slot erase question (text 0x19)
+D_800ABC30	g_str_slot_start	high	"#" text id format of the empty save slot "start" option (text 0x31)
+D_800ABC34	g_str_slot_erase	med	"#" text id format of the save slot "erase" option (text 0x18 / 0x19)
+D_800ABC38	g_str_slot_yes	med	"#" text id format of the "yes" choice of the erase question (text 0x1F / 0x20)
+D_800ABC3C	g_str_slot_no	med	"#" text id format of the "no" choice of the erase question (text 0x1D / 0x1E)
+D_800ABC40	g_str_modes_title	low	"#" text id format of the centred text 0x1A of the mode select page
+D_800ABC44	g_str_modes_choice	low	"#" text id format of the right yes / no choice of the mode select page (text 0x1B / 0x1C)
+D_800ABC48	g_str_modes_row	med	"#" text id format of each mode row of the mode select page
+D_800ABC4C	g_str_settings_title	low	"#" text id format of the settings page title (text 0x1A)
+D_800ABC50	g_str_join_title	low	"#" text id format of the character join page label (text 0x1A)
+D_800ABC54	g_str_players_title	low	"#" text id format of the players page title (text 0x1A)
+D_800ABC58	g_str_players_slot	med	"#" text id format of a joined slot of the players page (text controller + 1)
+D_800ABC5C	g_str_players_open	med	"#" text id format of an open slot of the players page (text 5)
+D_800ABC60	g_str_team_title	low	"#" text id format of the team page title (text 0x1A)
+D_800ABC64	g_str_team_name_4	low	"#" text id format of team colour 4's name (text 9)
+D_800ABC68	g_str_team_name_5	low	"#" text id format of team colour 5's name (text 8)
+D_800ABC6C	g_str_team_name_7	low	"#" text id format of team colour 7's name (text 0xA)
+D_800ABC70	g_str_team_name_8	low	"#" text id format of team colour 8's name (text 0xB)
+D_800ABC74	g_str_team_name_9	low	"#" text id format of team colour 9's name (text 0x34)
+D_800ABC78	g_str_team_name_other	low	"#" text id format of the other team colours' names (text 0x59.. / 0x4C..)
+D_800ABC7C	g_str_team_player	med	"#" text id format of a player line of the team page (text controller + 1)
+D_800ABC80	g_str_team_score	low	"#" text id format of a player's score from mp_slot_query on the team page (text score + 1)
+D_800ABC88	g_str_team_cpu	med	"#" text id format of a computer player line of the team page (text 5)
+D_800ABC8C	g_str_team_shift_mid	low	"#" text id format of the two-team size shift hint, centre (text 0x3A)
+D_800ABC90	g_str_team_shift_left	low	"#" text id format of the two-team size shift hint, left (text 0x3B)
+D_800ABC94	g_str_team_shift_right	low	"#" text id format of the two-team size shift hint, right (text 0x3C)
+D_800ABC98	g_str_settings_label	med	"#" text id format of a settings item label (text -item[0])
+D_800ABC9C	g_str_settings_choice	med	"#" text id format of a settings item's choice text
+D_800ABCA0	g_str_settings_int_a	low	"%d" format of a numeric settings value
+D_800ABCA4	g_str_settings_text_a	low	"%s" format of a settings value with text string 0x73
+D_800ABCA8	g_str_settings_int_b	low	"%d" format of a numeric settings value (second case)
+D_800ABCAC	g_str_settings_text_b	low	"%s" format of a settings value with text string 0x2D
+D_800ABCB0	g_str_settings_int_c	low	"%d" format of a numeric settings value (third case)
+D_800ABCB4	g_str_settings_thousands	med	"%d" format of a settings value shown times 1000
+D_800ABCB8	g_str_settings_int_unit	med	"%d %s" format of a settings value with its unit text string 0x72
+D_800ABCC0	g_str_settings_arrow_r	med	"#" text id format of the right cursor arrow of the settings list (text 0x1A)
+D_800ABCC4	g_str_settings_arrow_l	med	"#" text id format of the left cursor arrow of the settings list (text 0x1A)
+D_800ABCC8	g_str_lvstart_title	med	"#" text id format of the level start prompt title (text 0x4B)
+D_800ABCCC	g_str_lvstart_title2	low	Format string printed right after the level start prompt title (no arguments)
+D_800ABCD0	g_str_lvstart_player	med	Format of a player line of the level start prompt (character name string)
+D_800ABCDC	g_str_lvstart_sep_a	low	Separator string after the first time of a level start player line
+D_800ABCE0	g_str_lvstart_sep_b	low	Separator string after the second time of a level start player line
+D_800ABCE4	g_str_lvstart_tie	low	"#" text id format of the level start line when several players placed first (text 0x58)
+D_800ABCE8	g_str_lvstart_who	low	"#" text id format of the single player's "who" label (text 0x52)
+D_800ABCEC	g_str_lvstart_result	low	"#" text id format of the single player's result (text 0x56 / 0x57)
+D_800ABCF0	g_str_lvstart_team	low	"#" text id format of the first-placed team's name (text 0x4C + colour)
+D_800ABCF4	g_str_lvstart_team_won	low	"#" text id format after the first-placed team's name (text 0x56)
+D_800ABCF8	g_str_lvstart_yes	low	"#" text id format of the left choice of the level start prompt (text 0x21 / 0x22)
+D_800ABCFC	g_str_lvstart_no	low	"#" text id format of the right choice of the level start prompt (text 0xE / 0xF)
+D_800ABD00	g_str_lvstart_sep	low	"#" text id format of the centred text 0x1A between the level start choices
+D_800ABD04	g_menu0_stop_sounds	high	Menu 0: sound per carousel stop: [0] accept, [1] back
+D_800ABD1C	g_menu1_stop_sounds	high	Menu 1: sound per carousel stop: [0] accept, [1] back
+D_800ABD3C	g_menu_char_places	high	Menu character slot placement: s16 x, y, z and a byte per slot
+D_800ABE30	g_fade_lens_zoom_k_be30	low	f32 lens zoom threshold above which fade_mode_update advances the screen fade
+D_800ABE34	g_fade_lens_rate_early	low	f32 lens zoom rate set while the fade alpha is below 0x55 (fade_mode_update)
+D_800ABE38	g_fade_lens_rate_late	low	f32 lens zoom rate set once the fade alpha reaches 0x55 (fade_mode_update)
+D_800ABE3C	g_vi_window_scale_step	med	f32 screen scale per step of the settings bytes 0x1A / 0x1B (vi_mode_set_window)
+D_800ABE94	g_menu_k_be94	low	f32 page fade threshold of menu_show_stop_objects
+D_800BE7FE	g_save_final_scene_unlock	med	Unlocks chapter 8's fourth scene in the chapter select (set by save_slot_load)
+D_800BEA38	g_players_alive	med	Players still in the game (all slots; decremented by player_lose_life)
+D_800BEAC1	g_pause_open	high	Pause menu requested / open; g_game_paused follows it in game_frame_step
+D_800BED38	g_cont_pads	high	Dead-zoned controller state per controller (OSContPad, 6 bytes each), from cont_read_frame
+D_800BED3A	g_cont_pads_stick_x	med	Stick x byte of controller 0 in g_cont_pads (read by the level start prompt)
+D_800BED50	g_cont_pressed	high	New button presses per controller (u16 each), from cont_read_frame
+D_800BEE0C	g_aiscript_cheat_value	low	Value 0..2 from cheat flags 0x400000 / 0x800000 on the title info screen; test 14 of aiscript_test_object_value
+D_800D3260	g_chapter_replay	med	Level started from the chapter select: allows cutscene skip, suppresses hint boxes
+D_800E0B94	g_game_mode	high	Game mode (0 game, 1 intro, 2 demo, 3 menu, 7 fade, 8 credits ...): picks the mode handler
+D_800E0EB0	g_credits_line	high	Current first line index of the credits / centred text screen in g_text_strings (-1 / -2 = none)
+D_800E0EB2	g_settings_value_fade	high	Settings value fade: 0xFF = steady, -0xFF.. while fading in a changed value
+D_800E0EB4	g_settings_old_value	high	Settings value before the change (shown while g_settings_value_fade runs)
+D_800E0EB5	g_pause_last_stick_y	high	Pause menu: stick y of the previous frame (edge detection)
+D_800E0EB6	g_mp_match_quit	high	Set by mp_match_end: nonzero = the match was quit, not finished
+D_800E0EB8	g_menu_fade_callback	high	Callback run when the menu fade-out ends (menu_game_start, slot_game_start ...)
+D_800E0EBC	g_menu_flag_ebc	low	Flag cleared by menu_reset_and_enter and menu_clear_flag_ebc (at level load); never set in C
+D_800E0EC0	g_game_mode_timer	high	Ticks since the game mode changed (logo pages, prompts, credits timing)
+D_800E0EC4	g_menu_alpha	med	Overall menu alpha (scales the page alphas)
+D_800E0EC5	g_menu_page_alpha	high	Alpha of the current menu page (fades in / out by 32 per tick)
+D_800E0EC6	g_menu_pending_page	high	Pending menu page change (read signed, -1 = none)
+D_800E0EC7	g_menu_song	high	Menu song / sound currently playing
+D_800E0EC8	g_pause_pad	high	Controller that opened the pause menu
+D_800E0EC9	g_play_time_frames	high	Frame counter for the seconds of play time (g_save_play_time)
+D_800E0ED8	g_mp_human_teams	med	Bit mask of the teams with a human player (menu_game_start)
+D_800E0ED9	g_mp_next_placing	high	Down counter giving the next placing to eliminated players / teams
+D_800E0EDA	g_mp_match_eda	low	s8 set to -1 at game start and by mp_match_check_over; never read in C
+D_800E0EE0	g_mp_fixed_placings	high	Fixed placing per player / team (-1 = none), wins over the score placing
+D_800E0EF0	g_mp_placings	high	Placing per player / team (1 = first)
+D_800E0F00	g_mp_hits_taken	med	s16 hits taken per player, subtracted from the score for the placings
+D_800E0F20	g_menu_state_rec	high	Storage of the MenuState record pointed to by g_menu_state
+D_800E0FB8	g_text_scene_names	med	Text table of 80 entries (scene names) loaded with text bank 1
+D_800E0FBC	g_menu_chars_changeable	high	Characters can be changed this frame (character join page)
+D_800E0FC0	g_menu_player_chars	high	Character per joined player
+D_800E0FC5	g_game_mode_prev	high	Previous game mode (kept when the mode changes)
+D_800E0FC6	g_screen_fade_alpha	high	Screen fade overlay alpha (0 = clear)
+D_800E0FC7	g_menu_blink_alpha	high	Blink alpha 0..255 bounced by menu_blink_update
+D_800E0FC8	g_menu_blink_dir	high	Blink direction of menu_blink_update (0 up, 1 down)
+D_800E0FC9	g_level_zoom_in_request	med	Start the lens zoom-in for the human views at the next level load (1 / 2)
+D_800E0FCA	g_menu_pressed	high	Menu input: new button presses of the controlling pad this frame (0 while locked)
+D_800E0FD0	g_menu_char_objs	high	struct127 *[4]: the menu's character object per slot
+D_800E0FD4	g_menu_char_objs_p1	high	Menu character object of slot 1 (element 1 of g_menu_char_objs)
+D_800E0FD8	g_menu_char_objs_p2	high	Menu character object of slot 2 (element 2 of g_menu_char_objs)
+D_800E0FDC	g_menu_char_objs_p3	high	Menu character object of slot 3 (element 3 of g_menu_char_objs)
+D_800E0FE0	g_mp_team_count	high	Number of teams
+D_800E0FE1	g_mp_team_size	high	Team size (largest team + extra slots)
+D_800E0FE8	g_mp_last_hitter	med	Per racer / player byte: last hitter player with bit 7 set (new hit), consumed by rail_racers_update
+D_800E0FF8	g_mp_team_color_ids	high	Team colour index per team
+D_800E1001	g_level_start_point_override	low	Start point used by level_load in game mode 2 and by chapter_scene_start override 2
+D_800E1004	g_text_bank_data	high	Loaded text bank data block (heap)
+D_800E1008	g_text_strings	high	String pointer table of the loaded text bank
+D_800E100C	g_text_box_fade	high	Global text box fade, 0 = hidden
+D_800E1010	g_settings	high	The 0x1C settings bytes (saved options block)
+D_800E1013	g_settings_time_limit	med	Settings byte 3: multiplayer time limit (>= 3 = timed)
+D_800E1016	g_settings_score_limit	high	Settings byte 6: score limit of the scored game modes (0 = none)
+D_800E1019	g_settings_sound_mode	med	Settings byte 9: sound mode (settings_apply_sound_mode, menu song)
+D_800E101A	g_settings_language	high	Settings byte 10: language
+D_800E101B	g_settings_cpu_views	low	Settings byte 11: nonzero makes mp_human_player_count count all players (under 5); cleared on load
+D_800E101E	g_settings_byte_e	low	Settings byte 14: tested by mp_slot_query in barrel mode
+D_800E1027	g_settings_screen_x	high	Settings byte 0x17: screen x offset
+D_800E1028	g_settings_screen_y	high	Settings byte 0x18: screen y offset
+D_800E102A	g_settings_screen_scale_x	high	Settings byte 0x1A: screen x scale
+D_800E102B	g_settings_screen_scale_y	high	Settings byte 0x1B: screen y scale
+D_800E1030	g_mp_player_team	high	Team per player queue entry
+D_800E1040	g_mp_result_time_b	low	s16 [2]: second time per player shown by the level start prompt (reset to -1 at game start)
+D_800E1048	g_mp_result_time_a	low	s32 [2]: first time per player shown by the level start prompt (reset to -1 at game start)
+D_800E1050	g_mp_match_over	high	Multiplayer match-over flag (1 = over)
+D_800E9D00	g_cheat_flags	high	Cheat / unlock flags (cheat codes, event actions)

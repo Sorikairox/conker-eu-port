@@ -1,7 +1,7 @@
 s/set = random_int() & 1;/set = random_int() \& 2;/ %
-s/q.names\[1\] = D_800A2438;/q.names[1] = D_800A2444;/ %
-s/q.names\[3\] = D_800A242C;/q.names[3] = (char *) \&D_800A2420;/ %
-s/D_800A2450\[set\]\[i\];/D_800A2450[0][i];/ %
+s/q.names\[1\] = g_beam_joint_name_ref;/q.names[1] = g_beam_joint_name_out;/ %
+s/q.names\[3\] = g_beam_joint_name_b;/q.names[3] = (char *) \&g_beam_joint_name_a;/ %
+s/g_beam_joint_name_sets\[set\]\[i\];/g_beam_joint_name_sets[0][i];/ %
 s/q.outs\[4 + i\] = points + i \* 3;/q.outs[4 + i] = points + i * 4;/ %
 s/i < 6; i++/i < 5; i++/ %
 s/q.outs\[0\] = a;/q.outs[0] = b;/ %

@@ -17,19 +17,19 @@ f32 sinf(f32);
 f32 cosf(f32);
 void camera_calc_relative_yaw(u8 *arg0);
 void vec3_dir_to(struct17 *arg0, struct17 *arg1, struct17 *arg2);
-extern f32 D_80089860;  /* last yaw (degrees) */
-extern f32 D_800A3850;  /* pi / 180 */
-extern f32 D_800A3854;  /* pi / 2 */
-extern f32 D_800A3858;  /* 999: "no yaw override" in +0x86C */
-extern f32 D_800A385C;  /* pi / 180 */
-extern f32 D_800A3860, D_800A3864; /* 2.2, 2.2 */
-extern f32 D_800A3868;  /* 0.15 */
+extern f32 g_camera_orbit_last_yaw;  /* last yaw (degrees); was D_80089860 */
+extern f32 g_camera_orbit_pitch_d2r;  /* pi / 180; was D_800A3850 */
+extern f32 g_camera_orbit_half_pi;  /* pi / 2; was D_800A3854 */
+extern f32 g_camera_orbit_no_override;  /* 999: "no yaw override" in +0x86C; was D_800A3858 */
+extern f32 g_camera_orbit_yaw_d2r;  /* pi / 180; was D_800A385C */
+extern f32 g_camera_orbit_rate_a, g_camera_orbit_rate_b; /* 2.2, 2.2; was D_800A3860; was D_800A3864 */
+extern f32 g_camera_orbit_roll_ease;  /* 0.15; was D_800A3868 */
 #define CAMF(off) (*(f32 *) (cam + (off)))
 
 // camera_orbit_update: third-person camera placement around the target cam+0x2BC. Pitch from the target's
 // +0x40 (+90 deg) or, when flag 1 of +0x5F0 and the target's +0x102 are clear, +0x39C - pi/2; yaw from +0x86C unless
 // it is 999 (then the target's +0xB8, +10 when +0x102, 0 when its +0x1CA is clear), halved when +0x102, clamped to
-// +-88 deg and kept at the previous value D_80089860 within 10 deg. Distance 150 when flag 0x10 of *(+0x36C), else
+// +-88 deg and kept at the previous value g_camera_orbit_last_yaw within 10 deg. Distance 150 when flag 0x10 of *(+0x36C), else
 // +0x374 (the shorter +0x370 when +0x102 and not +0x3E8). The new eye (height clamped to +-200 around the target) is set at
 // once (+0x23C) or eased per axis by math_spring_approach (speeds +0x3C0.., rate 2 / 2.2+2.2, doubled when +0x102), kept
 // at least 120 away from the target, at least 30 above the floor +0x35C. Also eases +0x5E8 to +0x5EC, sets
@@ -45,13 +45,13 @@ void camera_orbit_update(u8 *cam) {
     f32 dx, dy, dz;
     f32 dir[3];
 
-    pitch = (*(f32 *) (*(u8 **) (cam + 0x3D0) + 0x40) + 90.0f) * D_800A3850;
+    pitch = (*(f32 *) (*(u8 **) (cam + 0x3D0) + 0x40) + 90.0f) * g_camera_orbit_pitch_d2r;
     camera_update_eye_base(cam);
     if (!(*(s32 *) (cam + 0x5F0) & 1) && *(*(u8 **) (cam + 0x3D0) + 0x102) == 0) {
-        pitch = CAMF(0x39C) - D_800A3854;
+        pitch = CAMF(0x39C) - g_camera_orbit_half_pi;
     }
     tgt = *(u8 **) (cam + 0x3D0);
-    if (D_800A3858 == CAMF(0x86C)) {
+    if (g_camera_orbit_no_override == CAMF(0x86C)) {
         if (tgt[0x1CA] == 0) {
             yaw = 0.0f;
         } else {
@@ -68,13 +68,13 @@ void camera_orbit_update(u8 *cam) {
     } else if (88.0f < yaw) {
         yaw = 88.0f;
     }
-    prev = D_80089860;
+    prev = g_camera_orbit_last_yaw;
     if (fabsf(prev - yaw) < 10.0f) {
         yaw = prev;
     } else {
-        D_80089860 = yaw;
+        g_camera_orbit_last_yaw = yaw;
     }
-    yaw *= D_800A385C;
+    yaw *= g_camera_orbit_yaw_d2r;
     camera_calc_relative_yaw(cam);
     if (**(u16 **) (cam + 0x36C) & 0x10) {
         dist = 150.0f;
@@ -108,7 +108,7 @@ void camera_orbit_update(u8 *cam) {
         CAMF(0x3C8) = 0.0f;
     } else {
         speed = 1.0f + 1.0f;
-        rate = D_800A3860 + D_800A3864;
+        rate = g_camera_orbit_rate_a + g_camera_orbit_rate_b;
         if ((*(u8 **) (cam + 0x3D0))[0x102] != 0) {
             speed += speed;
             rate += rate;
@@ -131,7 +131,7 @@ void camera_orbit_update(u8 *cam) {
     if (CAMF(0x2FC) < CAMF(0x35C) + 30.0f) {
         CAMF(0x2FC) = CAMF(0x35C) + 30.0f;
     }
-    CAMF(0x5E8) += (CAMF(0x5EC) - CAMF(0x5E8)) * D_800A3868;
+    CAMF(0x5E8) += (CAMF(0x5EC) - CAMF(0x5E8)) * g_camera_orbit_roll_ease;
     dx = CAMF(0x2F8) - CAMF(0x2BC);
     dz = CAMF(0x300) - CAMF(0x2C4);
     CAMF(0x344) = CAMF(0x348) = CAMF(0x2FC) - CAMF(0x354);

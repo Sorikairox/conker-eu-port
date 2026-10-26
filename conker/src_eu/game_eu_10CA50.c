@@ -12,13 +12,13 @@ s32 spark_shower_spawn(f32 *, f32, f32, f32, f32, u8, s32);
 s32 debris_spray_spawn(void *, s32, u8, s32);
 s32 memcpy(void *, void *, s32);
 
-extern f32 D_80088D00[];        /* fragment base speed by kind */
-extern f32 D_80088D0C[];        /* fragment random speed by kind */
-extern f32 D_800A1130[15][3];   /* fragment offsets */
-extern f32 D_800A11E4[15];
-extern f32 D_800A1220[15];
-extern f32 D_800A125C[15];
-extern f32 D_800A1298[15];      /* fragment kind (float, read as an unsigned byte) */
+extern f32 g_explosion_frag_speed[];        /* fragment base speed by kind; was D_80088D00 */
+extern f32 g_explosion_frag_speed_rand[];        /* fragment random speed by kind; was D_80088D0C */
+extern f32 g_explosion_frag_offsets[15][3];   /* fragment offsets; was D_800A1130 */
+extern f32 g_explosion_frag_spin_z[15]; /* was D_800A11E4 */
+extern f32 g_explosion_frag_spin_x[15]; /* was D_800A1220 */
+extern f32 g_explosion_frag_spin_scale[15]; /* was D_800A125C */
+extern f32 g_explosion_frag_kind[15];      /* fragment kind (float, read as an unsigned byte); was D_800A1298 */
 
 /* rodata copies (NM link drops the asm rodata) */
 static const f32 D_800A12D4_c[1] = { 0.7111111f };     /* 0x3F360B61 */
@@ -37,7 +37,7 @@ typedef struct {
     f32 u4;         /* 0x04 0.2 */
     f32 u8;         /* 0x08 1 */
     f32 uC;         /* 0x0C 1 */
-    f32 org[3];     /* 0x10 D_800A5860 */
+    f32 org[3];     /* 0x10 g_vec3_zero */
     f32 scale[3];   /* 0x1C 1, 1, 1 */
     f32 pos[3];     /* 0x28 */
     f32 vel[3];     /* 0x34 */
@@ -88,8 +88,8 @@ typedef struct {
     f32 v[3];
 } Vec240;
 
-// big_explosion_spawn: explosion at pos: 15 fragments (mdl_particle_spawn_ex; offsets D_800A1130, kind D_800A1298 picks the
-// speed D_80088D00 + D_80088D0C * random, spin from D_800A1220 / D_800A11E4 * D_800A125C * 0.019), then the light
+// big_explosion_spawn: explosion at pos: 15 fragments (mdl_particle_spawn_ex; offsets g_explosion_frag_offsets, kind g_explosion_frag_kind picks the
+// speed g_explosion_frag_speed + g_explosion_frag_speed_rand * random, spin from g_explosion_frag_spin_x / g_explosion_frag_spin_z * g_explosion_frag_spin_scale * 0.019), then the light
 // (water_ring_spawn), two shock waves (rumble_all_players_at / cam_shake_all_players), smoke_cloud_spawn, explosion_light_spawn, the sound
 // (spark_shower_spawn), a 3..6 piece shock ring (debris_spray_spawn, scaled by the current camera's +0x380) and a type 0xF
 // object whose +0x28 gets the position. Callers: event_effect_command (asm) and game_eu_CA630's C, both (pos, 0xFF, 1).
@@ -104,12 +104,12 @@ void big_explosion_spawn(f32 *pos, u8 room, s32 arg2) {
     f32 f;
     u8 *e;
 
-    camv = (s32) (*(f32 *) ((u8 *) D_800DBFF0 + g_cur_view_player * 0x9A0 + 0x380) * D_800A12D4_c[0]);
+    camv = (s32) (*(f32 *) ((u8 *) g_player_views + g_cur_view_player * 0x9A0 + 0x380) * D_800A12D4_c[0]);
     fr.u0 = 15.0f;
     fr.u4 = D_800A12D8_c[0];
     fr.u8 = 1.0f;
     fr.uC = 1.0f;
-    *(Vec240 *) fr.org = *(Vec240 *) D_800A5860;
+    *(Vec240 *) fr.org = *(Vec240 *) g_vec3_zero;
     fr.scale[0] = 1.0f;
     fr.scale[1] = 1.0f;
     fr.scale[2] = 1.0f;
@@ -135,13 +135,13 @@ void big_explosion_spawn(f32 *pos, u8 room, s32 arg2) {
     fr.vel[0] = 0.0f;
     fr.vel[2] = 0.0f;
     for (i = 0; i < 15; i++) {
-        kind = (u8) (u32) D_800A1298[i];
-        fr.pos[0] = D_800A1130[i][0] + pos[0];
-        fr.pos[1] = D_800A1130[i][1] + pos[1];
-        fr.pos[2] = D_800A1130[i][2] + pos[2];
-        fr.vel[1] = D_80088D0C[kind] * random_float() + D_80088D00[kind];
-        fr.spin[0] = D_800A1220[i] * D_800A125C[i] * D_800A12E4_c[0];
-        fr.spin[2] = D_800A11E4[i] * D_800A125C[i] * D_800A12E4_c[0];
+        kind = (u8) (u32) g_explosion_frag_kind[i];
+        fr.pos[0] = g_explosion_frag_offsets[i][0] + pos[0];
+        fr.pos[1] = g_explosion_frag_offsets[i][1] + pos[1];
+        fr.pos[2] = g_explosion_frag_offsets[i][2] + pos[2];
+        fr.vel[1] = g_explosion_frag_speed_rand[kind] * random_float() + g_explosion_frag_speed[kind];
+        fr.spin[0] = g_explosion_frag_spin_x[i] * g_explosion_frag_spin_scale[i] * D_800A12E4_c[0];
+        fr.spin[2] = g_explosion_frag_spin_z[i] * g_explosion_frag_spin_scale[i] * D_800A12E4_c[0];
         fr.u4C = random_float() * D_800A12E0_c[0] + D_800A12DC_c[0];
         fr.life = (u32) random_int() % 111 + 0x82;
         fr.tex = (random_int() & 1) ? 0xC4 : 0xC5;

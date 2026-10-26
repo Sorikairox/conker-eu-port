@@ -195,7 +195,7 @@ s32 music_song_cb_mute_layers(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
 
 /* was func_1000B830 */
 s32 music_song_cb_duck_song16(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    s32 tmp = D_800DBFF0->unk5F0 & 1;
+    s32 tmp = g_player_views->unk5F0 & 1;
     if ((tmp != 0) && (arg0 == 0)) {
         arg0 = 1;
         music_song_set_volume(16, 1000);
@@ -366,7 +366,7 @@ s32 music_song_cb_level19_ambience(s32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 ar
 // (-351, 0, 407), (-64, 0, 543), (-294, 0, 656) are mixed (sound_source_mix): when the first point's volume (0x40 below
 // 0x4000, else / 256) or pan differ from the stored ones, the volume of controller 6 / 1 / 0x18 (at least 0x40) and
 // the pans of the parts 1..4 (0 centred) are re-sent. When mode differs from D_80041F08: mode 1 fades the counter
-// down by D_800BE9E4 / 2 per frame (stopping sound 0x22 at 0, state 0x81) and sets the volume 0xFE0; mode 2 sets the
+// down by g_frame_ticks / 2 per frame (stopping sound 0x22 at 0, state 0x81) and sets the volume 0xFE0; mode 2 sets the
 // state 0xF8, selects music set 4 (audio_mixer_request_mode), restarts sound 0x22 and sets the volume 0xFE0. Returns
 // the state with the new pan / volume in bits 8..23.
 /* was func_1000BF60 */
@@ -444,7 +444,7 @@ s32 music_song_cb_level1d_voices(s32 state, u8 ch, s32 arg2, s32 arg3) {
         switch (D_80041F08) {
             case 1:
                 if (state & 0x7C) {
-                    n = (state & 0x7C) - (D_800BE9E4 >> 1) * 4;
+                    n = (state & 0x7C) - (g_frame_ticks >> 1) * 4;
                     if (n > 0) {
                         state = n | 0x80;
                     } else {
@@ -506,11 +506,11 @@ s32 music_song_cb_level1d_mode(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
  * bits 0-1 effect mode, 2-7 hold timer, 8-15 parameter A, 16-23 parameter B (bit 7 = flag, bits 0-6 = level),
  * 24-31 fade level. A pending request D_80041F08 (mode; parameters in D_80041F0C: A = bits 0-7, B = bits 8..)
  * replaces the state and restarts the timer at 30 frames, unless mode 2 is still holding and the request is not
- * mode 2. The timer counts down by D_800BE9E4 and clears the mode at 0. On a mode change the old effect stops
+ * mode 2. The timer counts down by g_frame_ticks and clears the mode at 0. On a mode change the old effect stops
  * (music_chan_mute(ch, old + 9)) and the new one is set up (music_chan_set_volume A, music_chan_set_cc41 flag, music_chan_set_pan
  * level); a repeated request with new parameters updates only what changed. D_80041F04 bit 4 (cleared here)
  * restarts the fade at 0xFF (with music_chans_set_volume(ch, 0xC0, 0x80) when no fade was running); the fade drops by
- * D_800BE9E4 << 23 per frame and calls music_chans_fade_volume(ch, 0xC0, 0, 0x5A) when it runs out. The request is
+ * g_frame_ticks << 23 per frame and calls music_chans_fade_volume(ch, 0xC0, 0, 0x5A) when it runs out. The request is
  * consumed; returns the new packed state. The float arguments are not used.
  */
 /* was func_1000C530 */
@@ -533,7 +533,7 @@ s32 music_song_cb_channel_effect(s32 state, u8 ch, f32 arg2, f32 arg3, f32 arg4)
         timer = 30;
     }
     if (timer != 0) {
-        timer -= D_800BE9E4;
+        timer -= g_frame_ticks;
         if (timer <= 0) {
             timer = 0;
             mode = 0;
@@ -567,7 +567,7 @@ s32 music_song_cb_channel_effect(s32 state, u8 ch, f32 arg2, f32 arg3, f32 arg4)
         fade = 0xFF000000;
     }
     if (fade != 0) {
-        d = (D_800BE9E4 << 23) & 0xFF000000;
+        d = (g_frame_ticks << 23) & 0xFF000000;
         if (d < fade) {
             fade -= d;
         } else {
@@ -625,7 +625,7 @@ s32 music_song_cb_level37_song54(s32 arg0, u8 arg1, f32 arg2, f32 arg3) {
     s32 flag;
 
     vol = 0;
-    flag = D_800DBFF0->unk5F0 & 1;
+    flag = g_player_views->unk5F0 & 1;
     if (flag) {
         max = 0x7FFF;
     } else {
@@ -649,7 +649,7 @@ s32 music_song_cb_level37_song54(s32 arg0, u8 arg1, f32 arg2, f32 arg3) {
 //     s32 temp_t7;
 //
 //     sp3C = 0;
-//     temp_t7 = D_800DBFF0->unk5F0 & 1;
+//     temp_t7 = g_player_views->unk5F0 & 1;
 //     if (temp_t7 != 0) {
 //         sp38 = 0x7FFF;
 //     } else {
@@ -672,7 +672,7 @@ s32 music_song_cb_level37_song54_b(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     s32 tmp;
 
     if (g_level_id == 55) {
-        if ((D_800DBFF0->unk5F0 & 1) != 0) {
+        if ((g_player_views->unk5F0 & 1) != 0) {
             tmp = 0;
         } else {
             sound_source_mix(2200, 1066, -1600, 24000, 3000, 1500, 0, &tmp, 0);
@@ -765,7 +765,7 @@ void music_player_apply_volume(s32 arg0) {
 /* was func_1000CD40 */
 s32 music_step_toward(s32 arg0, s32 arg1, s32 arg2) {
     if (arg1 != arg0) {
-        arg2 = arg2 * D_800BE9E4;
+        arg2 = arg2 * g_frame_ticks;
         if (arg0 < arg1) {
             arg0 = arg0 + arg2;
             if (arg1 < arg0) {
@@ -869,7 +869,7 @@ void music_player_process_messages(s32 arg0) {
                             D_80041D10[arg0][i] ^= 1;
                             len >>= 1;
                             if (D_80041D10[arg0][i] == 0) {
-                                D_80041C50[arg0][i] = len * D_800BE9E4 + 0x8000;
+                                D_80041C50[arg0][i] = len * g_frame_ticks + 0x8000;
                             }
                             D_80041B60[arg0][i] = len;
                             break;
@@ -882,7 +882,7 @@ void music_player_process_messages(s32 arg0) {
                             break;
                         default:
                             D_80041D10[arg0][i] |= 1;
-                            D_80041C50[arg0][i] = len * D_800BE9E4;
+                            D_80041C50[arg0][i] = len * g_frame_ticks;
                             D_80041B60[arg0][i] = len;
                             break;
                     }
@@ -906,7 +906,7 @@ void music_player_process_messages(s32 arg0) {
     }
     for (i = 0; i < 16; i++) {
         if (D_80041C50[arg0][i] != 0) {
-            t = D_80041C50[arg0][i] - D_80041B60[arg0][i] * D_800BE9E4;
+            t = D_80041C50[arg0][i] - D_80041B60[arg0][i] * g_frame_ticks;
             D_80041C50[arg0][i] = (t < 0) ? 0 : t;
         }
     }

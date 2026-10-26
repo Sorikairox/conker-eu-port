@@ -327,8 +327,8 @@ f32 fast_cosf(f32 x) {
 #include <libc/math.h>
 
 extern u8 D_8009FAC0[], D_8009FAC8[], D_8009FACC[], D_8009FAD0[], D_800C5D38[], D_800CC1B0[], D_800CC1B4[];
-extern u8 D_800CC1B8[], D_800CC1C0[], D_800CC1F2[], D_800CC1F3[], D_800CC1F4[], D_800CC1F8[], D_800CC1FC[];
-extern u8 D_800D3C00[], D_800DC26C[], D_800DC270[], D_800DC274[], D_800DC278[], D_800DC3C4[];
+extern u8 D_800CC1B8[], D_800CC1C0[], g_wall_coll_no_floor_skip[], g_wall_coll_soft_edges[], g_wall_coll_no_clamp[], D_800CC1F8[], D_800CC1FC[]; /* was D_800CC1F2; was D_800CC1F3; was D_800CC1F4 */
+extern u8 D_800D3C00[], D_800DC26C[], D_800DC270[], D_800DC274[], D_800DC278[], g_world_obj_rider_masks[]; /* was D_800DC3C4 */
 s32 obj_collision_cylinder(struct127 *, s16 *, s16 *, s16 *);
 s32 func_150A69A8(s32, s32, s32 *, s32);
 s32 world_objects_transform_mesh(s32, s32 *, s32);
@@ -346,7 +346,7 @@ typedef struct {
     /* 0x0E */ u8 list[1]; /* leaf: triangle indices, 0-terminated: 0x80 | hi, lo = absolute; 1..0x7F = previous + n */
 } NmrNode;
 
-/* collidable object (D_800DBEF4[g_world_obj_count], 0xA0 bytes): the fields the ray cast reads */
+/* collidable object (g_world_objs[g_world_obj_count], 0xA0 bytes): the fields the ray cast reads */
 #define NMR_OBJ_SIZE 0xA0
 #define NMR_OBJ_S16(o, off) (*(s16 *) ((u8 *) (o) + (off)))
 #define NMR_OBJ_U16(o, off) (*(u16 *) ((u8 *) (o) + (off)))
@@ -741,7 +741,7 @@ static s32 nmw_next_triangle(NmwState *w) {
                 t = (t << 8) | *w->cursor++;
             }
             if (w->nObjs != 0) {
-                obj = (u8 *) D_800DBEF4 + w->cur * NMR_OBJ_SIZE;
+                obj = (u8 *) g_world_objs + w->cur * NMR_OBJ_SIZE;
                 first = w->curFirst;
                 n = NMR_OBJ_U16(obj, NMR_OBJ_NTRIS);
                 if (t >= n + first) {
@@ -749,9 +749,9 @@ static s32 nmw_next_triangle(NmwState *w) {
                         return 0;
                     }
                     w->cur = ((u16 *) D_800D3C00)[w->listPos];
-                    obj = (u8 *) D_800DBEF4 + w->cur * NMR_OBJ_SIZE;
+                    obj = (u8 *) g_world_objs + w->cur * NMR_OBJ_SIZE;
                     t = w->curFirst = NMR_OBJ_U16(obj, NMR_OBJ_TRI0);
-                    w->vbase = D_800DC328[w->cur];
+                    w->vbase = g_world_obj_blocks[w->cur];
                     w->cursor += t - first - n;
                     flags = *(u32 *) (obj + NMR_OBJ_FLAGS);
                     goto test_flags;
@@ -886,9 +886,9 @@ static s32 nmw_edge_push(NmwState *w, f32 *p) {
 
 /* wall_triangle (func_150ABE68 .. AC694, walls): test the current triangle against the box at the middle of the
  * move; on contact mark it (kind 2 objects / kind 3 records), skip it when the move's first vertex test says it
- * faces away or (without the noSlope flag / D_800CC1F2) it is floor-like (normal y / |n| >= 0.5), clamp the
- * position to 60 units from the target (unless D_800CC1F4), then push the position out of the face (when the
- * target or the position projects inside the triangle, or D_800CC1F3 and the second edge's sign component <= 0.8)
+ * faces away or (without the noSlope flag / g_wall_coll_no_floor_skip) it is floor-like (normal y / |n| >= 0.5), clamp the
+ * position to 60 units from the target (unless g_wall_coll_no_clamp), then push the position out of the face (when the
+ * target or the position projects inside the triangle, or g_wall_coll_soft_edges and the second edge's sign component <= 0.8)
  * or away from the nearest edge. 1 if the position moved. */
 static s32 nmw_wall_triangle(NmwState *w) {
     u32 *tri = (u32 *) (*(u32 *) D_800DC26C + w->tri * 12);
@@ -906,9 +906,9 @@ static s32 nmw_wall_triangle(NmwState *w) {
         return 0;
     }
     if (w->nObjs != 0 && w->mark != 0) {
-        obj = (u8 *) D_800DBEF4 + w->cur * NMR_OBJ_SIZE;
+        obj = (u8 *) g_world_objs + w->cur * NMR_OBJ_SIZE;
         obj[0x4F] |= 0x80;
-        (*(u32 **) D_800DC3C4)[w->cur] |= 1 << ((s32) (w->rec - (u8 *) g_objects) / NMW_REC_SIZE & 31);
+        (*(u32 **) g_world_obj_rider_masks)[w->cur] |= 1 << ((s32) (w->rec - (u8 *) g_objects) / NMW_REC_SIZE & 31);
     } else if (w->cur != 0) {
         w->rec[0x275] = w->recNo;
     }
@@ -928,17 +928,17 @@ static s32 nmw_wall_triangle(NmwState *w) {
             n[2] * (w->tv[0].z - a * w->si + c * w->co) >= 0.0f) {
         return 0;
     }
-    if (w->noSlope == 0 && *D_800CC1F2 == 0 && n[1] / len >= 0.5f) {
+    if (w->noSlope == 0 && *g_wall_coll_no_floor_skip == 0 && n[1] / len >= 0.5f) {
         return 0;
     }
     ox = w->pos[0];
     oy = w->pos[1];
-    if (*D_800CC1F4 == 0) {
+    if (*g_wall_coll_no_clamp == 0) {
         oz = w->pos[2];
         a = ox - w->tgt[0];
         b = oy - w->tgt[1];
         c = oz - w->tgt[2];
-        *D_800CC1F4 = 0;
+        *g_wall_coll_no_clamp = 0;
         dist = sqrtf(a * a + b * b + c * c);
         if (dist != 0.0f && !(dist <= 60.0f)) {
             k = 60.0f / dist;
@@ -965,7 +965,7 @@ static s32 nmw_wall_triangle(NmwState *w) {
     sz = w->pos[2] - w->mid[2];
     p[0] = sx * w->co + sz * w->si;
     p[2] = sz * w->co - sx * w->si;
-    if (!(*D_800CC1F3 != 0 && side <= 0.8f) && in != 1 && nmw_projects_inside(w, n, p, &side) != 1) {
+    if (!(*g_wall_coll_soft_edges != 0 && side <= 0.8f) && in != 1 && nmw_projects_inside(w, n, p, &side) != 1) {
         return nmw_edge_push(w, p);
     }
     /* face push (func_150AC5D8): out along the normal until the plane is radius away */
@@ -1163,8 +1163,8 @@ static s32 nmw_engine(u8 *rec, f32 x, f32 y, u32 zbits, s32 mark, s32 ledge) {
         }
         world_objects_transform_mesh(w.nObjs, (s32 *) D_800D3C00, 0);
         w.cur = *(u16 *) D_800D3C00;
-        w.curFirst = NMR_OBJ_U16((u8 *) D_800DBEF4 + w.cur * NMR_OBJ_SIZE, NMR_OBJ_TRI0);
-        w.vbase = D_800DC328[w.cur];
+        w.curFirst = NMR_OBJ_U16((u8 *) g_world_objs + w.cur * NMR_OBJ_SIZE, NMR_OBJ_TRI0);
+        w.vbase = g_world_obj_blocks[w.cur];
         if (w.vbase == 0) {
             return 0;
         }
@@ -1582,7 +1582,7 @@ s32 collision_ray_cast(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRe
 
     /* objects */
     collision_select_area(2);
-    obj = (u8 *) D_800DBEF4;
+    obj = (u8 *) g_world_objs;
     objEnd = obj + g_world_obj_count * NMR_OBJ_SIZE;
     if (obj != objEnd) {
         dd = (ray.dir[0] * ray.dir[0] + ray.dir[1] * ray.dir[1] + ray.dir[2] * ray.dir[2]) * 4.0f;
@@ -1626,8 +1626,8 @@ s32 collision_ray_cast(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRe
             idx = (u16 *) D_800D3C00;
             idxEnd = idx + n;
             do {
-                vbase = D_800DC328[*idx];
-                obj = (u8 *) D_800DBEF4 + *idx * NMR_OBJ_SIZE;
+                vbase = g_world_obj_blocks[*idx];
+                obj = (u8 *) g_world_objs + *idx * NMR_OBJ_SIZE;
                 tri = NMR_OBJ_U16(obj, NMR_OBJ_TRI0);
                 triEnd = NMR_OBJ_U16(obj, NMR_OBJ_NTRIS) + tri;
                 do {
@@ -1664,8 +1664,8 @@ s32 collision_ray_cast(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRe
             if (hitObj == -1) {
                 v = (s16 *) rec[i];
             } else {
-                ray.lastRec = (u32) D_800DBEF4 + hitObj * NMR_OBJ_SIZE;
-                v = (s16 *) (D_800DC328[hitObj] + rec[i]);
+                ray.lastRec = (u32) g_world_objs + hitObj * NMR_OBJ_SIZE;
+                v = (s16 *) (g_world_obj_blocks[hitObj] + rec[i]);
             }
             ((s16 *) outVerts)[3 * i + 0] = v[0];
             ((s16 *) outVerts)[3 * i + 1] = v[1];

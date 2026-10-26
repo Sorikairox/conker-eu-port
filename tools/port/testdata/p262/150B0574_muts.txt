@@ -12,7 +12,7 @@ s/req.vel\[1\] = dir\[1\] \* 80.0f;/req.vel[1] = dir[1];/ % base
 s/vec3_to_yaw_pitch_deg(req.vel, \&req.yaw, \&req.pitch);/vec3_to_yaw_pitch_deg(req.vel, \&req.pitch, \&req.yaw);/ % base
 s/req.u20 = 1.0f;/req.u20 = 0.0f;/ % base
 s/req.u18 = 0.0f;/req.u18 = 1.0f;/ % base
-s/req.u40\[1\] = ((f32 \*)D_800A5860)\[1\];/req.u40[1] = 1.0f;/ % base
+s/req.u40\[1\] = ((f32 \*)g_vec3_zero)\[1\];/req.u40[1] = 1.0f;/ % base
 s/req.u50 = 0x19A0;/req.u50 = 0x1990;/ % base
 s/req.u54 = 0x12C;/req.u54 = 0xD2;/ % base
 s/req.u56 = 0xD2;/req.u56 = 0x12C;/ % base

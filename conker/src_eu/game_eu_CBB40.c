@@ -46,8 +46,8 @@ void text_printf_at(s32, s32, u8, s32, ...);
 void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
 void math_spring_approach_angle(f32 *, f32, f32 *, f32, f32, f32);
 extern char D_8009F6D0[]; /* "%d" */
-extern s32 D_800D2870;
-extern u16 D_8009015C;
+extern s32 g_hud_clock_frames; /* was D_800D2870 */
+extern u16 g_mp_game_flags; /* was D_8009015C */
 
 // rail_script_command: script command handler (pointer table at ROM 0x22DB2C, next to event_query_rail) for the rail
 // race / camera commands. cmd selects the action; args is the command record (s32 words, parameters from +0x8).
@@ -68,10 +68,10 @@ s32 event_action_rail(s32 arg0, u32 cmd, u8 *args) {
     case 1:
         text_set_color(0xFF, 0xFF, 0xFF, 0xFF);
         text_printf_at(0x96, 0x56, 1, (s32) D_8009F6D0, (a[2] + 59) / 60);
-        D_8009015C |= 0x80;
+        g_mp_game_flags |= 0x80;
         break;
     case 2:
-        D_800D2870 = a[2];
+        g_hud_clock_frames = a[2];
         break;
     case 3:
         hud_clock_set_enabled(a[2]);
@@ -136,11 +136,11 @@ s32 event_action_rail(s32 arg0, u32 cmd, u8 *args) {
         break;
     case 25:
         math_spring_approach(&D_800D33F8[a[2]], a[3] * (1.0f / 65536.0f), &D_800D33E0[a[2]], a[4] * (1.0f / 65536.0f),
-                      a[5] * (1.0f / 65536.0f), *(f32 *) ((u8 *) D_800DBFF0 + 0x7B4));
+                      a[5] * (1.0f / 65536.0f), *(f32 *) ((u8 *) g_player_views + 0x7B4));
         return (s32) (D_800D33F8[a[2]] * 65536.0f);
     case 26:
         math_spring_approach_angle(&D_800D33F8[a[2]], a[3] * (1.0f / 65536.0f), &D_800D33E0[a[2]], a[4] * (1.0f / 65536.0f),
-                      a[5] * (1.0f / 65536.0f), *(f32 *) ((u8 *) D_800DBFF0 + 0x7B4));
+                      a[5] * (1.0f / 65536.0f), *(f32 *) ((u8 *) g_player_views + 0x7B4));
         return (s32) (D_800D33F8[a[2]] * 65536.0f);
     }
     return 0;
@@ -159,7 +159,7 @@ s32 player_next_active();
 s32 rail_human_cursor_next(void);
 s32 rail_weapon_range(s32);
 f32 math_angle_offset_scaled(s32, s32);
-extern u16 D_8009015C;
+extern u16 g_mp_game_flags; /* was D_8009015C */
 extern s32 D_800CCA1C;
 extern s8 D_800E1000;
 
@@ -207,9 +207,9 @@ block_45:
     case 14:
         return rail_first_record_idle();
     case 15:
-        return D_8009015C & 0x40;
+        return g_mp_game_flags & 0x40;
     case 16:
-        return (s32) D_800E1010[(*(s32 *)((u8 *)arg2 + 8))];
+        return (s32) g_settings[(*(s32 *)((u8 *)arg2 + 8))];
     case 17:
         return mp_human_counter_get((*(s32 *)((u8 *)arg2 + 8)));
     case 21:
@@ -230,7 +230,7 @@ block_45:
     case 20:
         var_v1 = 0;
         var_v0 = &D_800CCA1C;
-        if ((g_objects->interaction_state != 0) && (*D_800CC2D4 == (*(s32 *)((u8 *)arg2 + 8)))) {
+        if ((g_objects->interaction_state != 0) && (*g_obj_tab_id == (*(s32 *)((u8 *)arg2 + 8)))) {
             var_v1 = 1;
         }
         do {

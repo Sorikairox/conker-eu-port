@@ -13,7 +13,7 @@ void obj_collision_sizes_update(void) {
 
     p = g_objects;
     i = 0;
-    if (D_8008FD8C > 0) {
+    if (g_player_count > 0) {
         do {
             t = p->unk31C;
             if (t != NULL) {
@@ -21,7 +21,7 @@ void obj_collision_sizes_update(void) {
             }
             i++;
             p++;
-        } while (i < D_8008FD8C);
+        } while (i < g_player_count);
     }
 }
 

@@ -4,12 +4,12 @@
 // hoisted declarations of the NON_MATCHING bodies
 void rain_update(s32);
 void screen_overlay_update_alpha(u8 *arg0);
-extern u8 D_800A1EE8[];
-extern u8 D_800A1EF4[];
+extern u8 g_bone_fx_pair_pt_a[]; /* was D_800A1EE8 */
+extern u8 g_bone_fx_pair_pt_b[]; /* was D_800A1EF4 */
 void mtx_transform_points(f32 **, f32 **, void *, s32);
-extern u8 D_800A1ED0[];
-extern u8 D_800A1EDC[];
-extern u8 D_800A5860[];
+extern u8 g_bone_glow_pt_a[]; /* was D_800A1ED0 */
+extern u8 g_bone_glow_pt_b[]; /* was D_800A1EDC */
+extern u8 g_vec3_zero[]; /* was D_800A5860 */
 
 
 typedef struct {
@@ -42,9 +42,9 @@ typedef struct {
     u8 u39;
     u8 pad3A[2];
 } S59A0;
-extern u8 D_80091CF8[];
-extern u8 D_80091CE0[];
-extern u8 D_80091CEC[];
+extern u8 g_overlay_img_tmpl_2[]; /* was D_80091CF8 */
+extern u8 g_overlay_img_tmpl_1[]; /* was D_80091CE0 */
+extern u8 g_overlay_img_tmpl_0[]; /* was D_80091CEC */
 extern u8 D_80091BA8[];
 s32 image_fx_spawn_template(S59A0 *);
 /* was func_150F59A0 */
@@ -56,14 +56,14 @@ void screen_overlay_show_timed(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
         if (arg3 == 2) {
             s.u2C = 0xF0;
             s.u2E = 0xBA;
-            s.u0 = D_80091CF8;
+            s.u0 = g_overlay_img_tmpl_2;
         } else {
             s.u2C = 0x10E;
             s.u2E = 0x7C;
             if (arg3 == 1) {
-                s.u0 = D_80091CE0;
+                s.u0 = g_overlay_img_tmpl_1;
             } else {
-                s.u0 = D_80091CEC;
+                s.u0 = g_overlay_img_tmpl_0;
             }
         }
         s.u30 = 9;
@@ -140,7 +140,7 @@ void screen_overlay_on_end(s32 arg0) {
     rain_update(0);
 }
 
-extern s32 D_80090624;
+extern s32 g_anim_tex_frame_ids; /* was D_80090624 */
 
 /* was func_150F5C30 */
 s32 model_anim_texture_frame_cb(u8 *arg0, u8 *arg1) {
@@ -188,7 +188,7 @@ block_30:
             }
         }
     }
-    (*(s16 *)((u8 *)arg0 + 0x18)) = (s16) *(s32 *)((u8 *)&D_80090624 + (var_v1 * 4));
+    (*(s16 *)((u8 *)arg0 + 0x18)) = (s16) *(s32 *)((u8 *)&g_anim_tex_frame_ids + (var_v1 * 4));
     return 0;
 }
 /* P204 */
@@ -349,7 +349,7 @@ void obj_bone_glow_emitter_update(u8 *arg0) {
         return;
     }
     if ((*(s32 *)((u8 *)temp_s0 + 0x1D4)) != 0) {
-        (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((0.26000002f + (random_float() * 0.19500001f)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((0.26000002f + (random_float() * 0.19500001f)) * g_frame_step_f));
         if ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f) {
             sp.uE4 = 0xFF;
             sp.uE5 = 0xFF;
@@ -357,12 +357,12 @@ void obj_bone_glow_emitter_update(u8 *arg0) {
             sp.uE8 = 0xB4;
             sp.uE9 = 0xB4;
             sp.uEA = 0xB4;
-            sp.uA0 = ((u8 *)&D_800A1ED0);
-            sp.uA4 = ((u8 *)&D_800A1EDC);
+            sp.uA0 = ((u8 *)&g_bone_glow_pt_a);
+            sp.uA4 = ((u8 *)&g_bone_glow_pt_b);
             sp.u98 = &sp.uC0;
             sp.u9C = &sp.uB4;
             mtx_transform_points(&sp.uA0, &sp.u98, (*(s32 *)((u8 *)temp_s0 + 0x1D4)) + 0x140, 2);
-            temp_t8 = ((u8 *)&D_800A5860);
+            temp_t8 = ((u8 *)&g_vec3_zero);
             sp.uED = 0x6C;
             sp.uD8 = 0x5103;
             sp.uD0 = 0x200005;
@@ -402,7 +402,7 @@ void obj_bone_glow_emitter_update(u8 *arg0) {
                 sp.u118 = (sp.uB4 - sp.uC0) * temp_f2_2;
                 sp.u11C = (sp.uB8 - sp.uC4) * temp_f2_2;
                 sp.u120 = (sp.uBC - sp.uC8) * temp_f2_2;
-                temp_f2_3 = random_float() * D_800BE9A4;
+                temp_f2_3 = random_float() * g_frame_step_f;
                 sp.u128 &= ~0xC0;
                 sp.u100 = (sp.u118 * temp_f2_3) + sp.uC0;
                 sp.u104 = (sp.u11C * temp_f2_3) + sp.uC4;
@@ -465,8 +465,8 @@ void obj_bone_fx_pair_update(u8 *arg0) {
         return;
     }
     if (((*(s32 *)((u8 *)temp_v0 + 0x1D4)) != 0) && !((*(s32 *)((u8 *)temp_v0 + 0x94)) & 2)) {
-        sp.u40 = ((u8 *)&D_800A1EE8);
-        sp.u44 = ((u8 *)&D_800A1EF4);
+        sp.u40 = ((u8 *)&g_bone_fx_pair_pt_a);
+        sp.u44 = ((u8 *)&g_bone_fx_pair_pt_b);
         sp.u38 = &sp.u54;
         sp.u3C = &sp.u48;
         sp1C = var_t0;
@@ -581,7 +581,7 @@ void obj_bone_fx_light_free(void *arg0) {
 }
 
 s32 object_arc_from_point_spawn(u8 *, s32, f32 *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, u8, u8);
-extern f32 D_800A1F00[];
+extern f32 g_electric_zap_point[]; /* was D_800A1F00 */
 
 typedef struct {
     u8 *o;
@@ -607,13 +607,13 @@ void obj_electric_zap_emitter_update(u8 *arg0) {
         return;
     }
     if ((*(s32 *)(obj + 0x1D4) != 0) && !(*(s32 *)(obj + 0x94) & 2)) {
-        s->t6 -= D_800BE9E4;
+        s->t6 -= g_frame_ticks;
         if (s->t6 < 0) {
             sound_play_at(0x679, 0x18CE, 0, 0, 0, *(f32 *)(obj + 0x14), *(f32 *)(obj + 0x18), *(f32 *)(obj + 0x1C), 0x7918, 0x7D00);
             n = (random_int() & 1) + 2;
             goto lbl; // fakematch: scheduling barrier (permuter)
             lbl:
-            mtx_transform_point_or_origin(D_800A1F00, pos, *(u8 **)(obj + 0x1D4));
+            mtx_transform_point_or_origin(g_electric_zap_point, pos, *(u8 **)(obj + 0x1D4));
             header.unk0 = 3;
             header.unk1 = -1;
             header.unk2 = (random_int() % 9U) + 0xA;
@@ -627,7 +627,7 @@ void obj_electric_zap_emitter_update(u8 *arg0) {
                 col[1] = 0xA0;
                 col[2] = 0xFF;
                 col[3] = (random_int() % 101U) + 0x9B;
-                object_arc_from_point_spawn(obj, 0, D_800A1F00, random_int() & 0xFF, (random_int() % 43U) - 0x32, (random_int() % 18U) + 5, 4, 27.0f, (random_float() * 16.0f) + 20.0f, 0, 2, col, arg0[0xC], arg0[1]);
+                object_arc_from_point_spawn(obj, 0, g_electric_zap_point, random_int() & 0xFF, (random_int() % 43U) - 0x32, (random_int() % 18U) + 5, 4, 27.0f, (random_float() * 16.0f) + 20.0f, 0, 2, col, arg0[0xC], arg0[1]);
                 n--;
             } while (n > 0);
             s->t6 = (random_int() % 91U) + 0x5A;
@@ -640,7 +640,7 @@ void obj_electric_zap_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, (s32)(arg0 + 0x28), (s32)(arg0 + 0x2C), (s32)arg0);
 }
 
-extern f32 D_800A1F40;
+extern f32 g_bone_spark_k_1f40; /* was D_800A1F40 */
 s32 bone_emitter_spawn(void *, s32, u8 *, s16);
 
 /* was func_150F6E10 */
@@ -685,7 +685,7 @@ void obj_bone_spark_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     sp.u64 = 0;
     sp.u65 = -1;
     sp.u58 = 0;
-    sp.u48 = D_800A1F40;
+    sp.u48 = g_bone_spark_k_1f40;
     sp.u4C = 8.5f;
     sp.u60 = 1.0f;
     bone_emitter_spawn(&sp, 0, arg0, arg1);

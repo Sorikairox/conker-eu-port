@@ -1,8 +1,8 @@
 \#^    cam_wobble_start_preset(2, D_800BEE0B#s/(2,/(1,/ % a
-\#^    fx_debris_emitter_spawn(D_800A186C#s/\(.\) 62 + 120/\1 61 + 120/ % a
-\#^    fx_debris_emitter_spawn(D_800A186C#s/(u32) func/(s32) func/ % a
-\#^    smoke_cloud_spawn(D_800A1860#s/0xFF/0xFE/ % a
-\#^    explosion_light_spawn(#s/D_800A1860/D_800A186C/ % a
+\#^    fx_debris_emitter_spawn(g_fireworks_flash_pos#s/\(.\) 62 + 120/\1 61 + 120/ % a
+\#^    fx_debris_emitter_spawn(g_fireworks_flash_pos#s/(u32) func/(s32) func/ % a
+\#^    smoke_cloud_spawn(g_fireworks_burst_pos#s/0xFF/0xFE/ % a
+\#^    explosion_light_spawn(#s/g_fireworks_burst_pos/g_fireworks_flash_pos/ % a
 \#^    spark_shower_spawn(#s/f \* 4.0f/f * 3.0f/ % a
 \#^    spark_shower_spawn(#s/\(.\) 56 + 200/\1 56 + 201/ % a
 \#^    spark_shower_spawn(#s/1.64099991f/1.641f/ % a
@@ -21,7 +21,7 @@
 \#^    t.u74 = 0xA;$#s/A/B/ % a
 \#^    t.u78 = 0;$#d % a
 \#^    for (i = 0; i < 4; i++) {$#s/< 4/< 3/ % a
-\#^        \*(VecBE44 \*) t.dir = D_800A1878\[i\];$#s/\[i\]/[0]/ % a
+\#^        \*(VecBE44 \*) t.dir = g_fireworks_spark_dirs\[i\];$#s/\[i\]/[0]/ % a
 \#^        vec3_from_angles_byte(a#s/a \(.\) 26/b \1 26/ % a
 \#^        vec3_from_angles_byte(a#s/(b \& 0xF) - 25/(b \& 0x7) - 25/ % a
 \#^        vec3_from_angles_byte(a#s/f \* 30.0f + 15.0f/f * 30.0f + 16.0f/ % a
@@ -30,6 +30,6 @@
 \#^        t.u4C = #s/-1.62100005f/-1.6211f/ % a
 \#^        t.u4C = #s/0.617000043f/0.617f/ % a
 \#^        t.life = #s/\(.\) 51 + 50/\1 51 + 51/ % a
-\#^        t.u56 = D_800A18A8\[i\];$#s/\[i\]/[i + 1]/ % a
+\#^        t.u56 = g_fireworks_spark_u56\[i\];$#s/\[i\]/[i + 1]/ % a
 \#^        ret = mdl_particle_spawn_ex((f32 \*) &t, 3#s/, 3,/, 2,/ % a
 \#^    return ret;$#s/ ret;/ 0;/ % a

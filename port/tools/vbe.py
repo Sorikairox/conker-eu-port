@@ -429,7 +429,7 @@ def port_owned(text, st, src=''):
 ROM_ABS = {'D_11AF': 0x11AF, 'D_2D810': 0x2D810, 'D_1A3B40': 0x1A3B40, 'D_AB2240': 0xAB2240,
            # P37: more absolute symbols used as numbers (undefined_syms_auto.txt): texture ids passed as &D_D11 /
            # &D_A4A to texture_cache_lookup (game_A9D90.c, game_eu_200480.c) and values &D_2C1 / &D_1C0 (game_eu_F2A30.c).
-           # As data stubs they were wasm addresses: texture_cache_lookup stored the id in D_800DA37C (before its range
+           # As data stubs they were wasm addresses: texture_cache_lookup stored the id in g_texture_cache_dirty_hi (before its range
            # check), so texture_cache_age_tick walked its cache tables up to 0x10xxxxxx and fed garbage to the inflater.
            'D_D11': 0xD11, 'D_A4A': 0xA4A, 'D_2C1': 0x2C1, 'D_1C0': 0x1C0,
            # P37: texture ids stored as D_89C / D_85D (boot screen screen_intro_credits_draw, game_eu_216470.c), and the ROM range of
@@ -442,10 +442,10 @@ ROM_ABS = {'D_11AF': 0x11AF, 'D_2D810': 0x2D810, 'D_1A3B40': 0x1A3B40, 'D_AB2240
            # P318: ROM offsets of the compressed game segment used by boot_game_thread_main's NM C (init_1050.c, P281/P288).
            'D_427B0': 0x427B0, 'D_19EDE8': 0x19EDE8}
 # P233: link symbols whose value is the PHYSICAL / segment address of real RAM data (KSEG0 | value = that symbol).
-# The C hands them to the RSP as pointers (gSPMatrix(&D_89810) = the identity matrix D_80089810 in the shadow pass of
+# The C hands them to the RSP as pointers (gSPMatrix(&D_89810) = the identity matrix g_identity_mtx in the shadow pass of
 # game_eu_1B1ED0.c); as zero data stubs the port drew with an all-zero view matrix. Every reference is renamed to the
 # RAM symbol (n64mem.py mirrors it like any other D_800xxxxx). port/tools/romabs_check.py checks both tables.
-RAM_ALIAS = {'D_89810': 'D_80089810'}
+RAM_ALIAS = {'D_89810': 'g_identity_mtx'}
 # Functions declared `extern s32 func_X;` and passed as callbacks (&func_X). Declaring them as
 # functions makes &func_X a function-table index (registered by icall.py, stubbed by gen_stubs.py)
 # instead of a zero-filled data stub. (game_pause_update used to be a data stub, read as code bytes by menu_settings_apply_checked's
@@ -453,7 +453,7 @@ RAM_ALIAS = {'D_89810': 'D_80089810'}
 # plain function and n64mem.py relocates D_8009018C[0] to its table slot - P131.)
 FUNC_AS_DATA = ['attachment_sound_cb', 'rocket_sound_update', 'zap_sound_release_cb', 'tank_engine_sound_update',
                 'func_150ADC50',  # P23: debugger.c compares a thread pc with &func_150ADC50
-                # P26: callbacks handed to sfx_emitter_start / stored in D_800E0D64 / debug_cont_get_read_data.
+                # P26: callbacks handed to sfx_emitter_start / stored in g_level_point_hit_cb / debug_cont_get_read_data.
                 # sfx_cb_delayed_play_2d (P26) dropped in P29: port P28 declares it as a function under NON_MATCHING.
                 'object_sound_delayed', 'object_sound_follow_cam', 'trigger_zones_check', 'debug_cont_pad_buf']
 ABS_REF = re.compile(r'@(' + '|'.join(ROM_ABS) + r')\b(?![.\w])')

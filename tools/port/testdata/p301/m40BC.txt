@@ -16,7 +16,7 @@
 /if (random_float() < sparkChance) {/s/</<=/
 /s = random_float() \* 15.0f + 15.0f;/s/+ 15.0f/+ 16.0f/
 /s = random_float() \* 15.0f + 15.0f;/s/\* 15.0f/* 16.0f/
-/spark.texture = D_800AADB0\[type\];/s/\[type\]/[type + 1]/
+/spark.texture = g_surface_spark_tex\[type\];/s/\[type\]/[type + 1]/
 /spark.flags = /s/0x20000/0x10000/
 /spark.flags = /s/0xBF01/0xBF00/
 /spark.life = /s/61U/62U/
@@ -34,15 +34,15 @@
 /sprite_fx_spawn_cam_at((s32) &spark/s/pos\[1\], pos\[2\], s, s/pos[1], pos[2], s, 1.0f/
 /0, 0, 0, 0, obj\[0xC\], obj\[1\]);/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
 /if (random_float() < smokeChance) {/s/</<=/
-/smoke.texture = D_800AADC8\[type\];/s/D_800AADC8/D_800AADB0/
+/smoke.texture = g_surface_smoke_tex\[type\];/s/g_surface_smoke_tex/g_surface_spark_tex/
 /smoke.texSet = 0x3B03;/s/0x3B03/0x3B02/
 /smoke.life = /s/+ 13;/+ 14;/
 /smoke.grow = /s/5.0f + 7.0f/5.0f + 8.0f/
 /smoke.size = /s/40.0f/41.0f/
 /smoke.vel\[1\] = /s/prev\[1\]/prev[0]/
 /smoke.pos\[2\] = /s/pos\[2\];/pos[1];/
-/smoke.u34 = D_800AAE44;/s/D_800AAE44/D_800AAE48/
-/smoke.u3C = D_800AAE48;/s/D_800AAE48/D_800AAE44/
+/smoke.u34 = g_surface_smoke_k_34;/s/g_surface_smoke_k_34/g_surface_smoke_k_3c/
+/smoke.u3C = g_surface_smoke_k_3c;/s/g_surface_smoke_k_3c/g_surface_smoke_k_34/
 /smoke.flags = /s/0x08DC0009/0x08DC0008/
 /smoke.flags = /s/0x40000000/0x20000000/
 /smoke.alpha = /s/76U/75U/
@@ -55,18 +55,18 @@
 /effect3d_spawn_full(&smoke/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
 /if (random_float() < debrisChance) {/s/</<=/
 /debris.colorA\[1\] = /s/\[type\]\[1\]/[type][2]/
-/debris.colorB\[0\] = /s/D_800AADF4/D_800AADE0/
+/debris.colorB\[0\] = /s/g_surface_debris_col_b/g_surface_debris_col_a/
 /debris.colorB\[3\] = 0xE6;/s/0xE6/0xE7/
 /debris.texSet = 0x5103;/s/0x5103/0x5102/
 /debris.handlers = 0x200005;/s/0x200005/0x200004/
-/debris.u2C = D_800AAE4C;/s/D_800AAE4C/D_800AAE50/
+/debris.u2C = g_surface_debris_k_2c;/s/g_surface_debris_k_2c/g_surface_debris_k_54/
 /debris.u34 = 65.0f;/s/65.0f/64.0f/
 /debris.u46 = -0x28;/s/-0x28/0x28/
-/debris.u58 = D_800AAE54;/s/D_800AAE54/D_800AAE50/
+/debris.u58 = g_surface_debris_k_58;/s/g_surface_debris_k_58/g_surface_debris_k_54/
 /debris.flags = /s/0x800000/0x400000/
 /debris.flags = /s/0x40E07/0x40E06/
 /debris.u64 = 1;/s/1/0/
-/debris.u68 = D_800AAE58;/s/D_800AAE58/D_800AAE54/
+/debris.u68 = g_surface_debris_k_68;/s/g_surface_debris_k_68/g_surface_debris_k_58/
 /debris.pos\[2\] = pos\[2\];/s/pos\[2\];/pos[1];/
 /debris.u26 = 0x19;/s/0x19/0x18/
 /debris.u61 = -1;/s/-1/1/
@@ -78,6 +78,6 @@
 /at.unk4 = pos\[1\];/s/pos\[1\]/pos[0]/
 /i = random_int() & 1;/s/& 1/\& 0/
 /light_create_with_ctrl(&flash/s/+ 10,/+ 11,/
-/light_create_with_ctrl(&flash/s/D_800AAE08\[i\]\[0\]/D_800AAE08[i][1]/
+/light_create_with_ctrl(&flash/s/g_surface_flash_colours\[i\]\[0\]/g_surface_flash_colours[i][1]/
 /0xFF, 0, 0, obj\[0xC\], obj\[1\]);/s/0xFF, 0, 0/0xFE, 0, 0/
 /0xFF, 0, 0, obj\[0xC\], obj\[1\]);/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/

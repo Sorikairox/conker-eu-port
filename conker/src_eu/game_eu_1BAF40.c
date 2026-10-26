@@ -142,7 +142,7 @@ typedef struct {
     s16 life, range;    /* +0x34 life after release: life + rand % (range + 1) */
     u8 kind, b39, b3A;  /* +0x38 effect3d_spawn_default arguments */
     u8 end[4];          /* +0x3B effect3d_set_handlers arguments at release */
-    u8 init;            /* +0x3F D_8008D9C0 index (spawn record initialiser) */
+    u8 init;            /* +0x3F g_char_effect_spawn_init_fns index (spawn record initialiser) */
 } CharFxTpl;
 
 typedef struct {
@@ -215,8 +215,8 @@ typedef struct {
     u8 pad1D;
     s16 time;           /* +0x1E */
     u8 timed;           /* +0x20 bit 0: time runs out */
-    s8 onEnd;           /* +0x21 D_8008D9C8 handler at the end of the time, -1 = remove */
-    u8 effect;          /* +0x22 D_8008D980 index */
+    s8 onEnd;           /* +0x21 g_char_effect_end_fns handler at the end of the time, -1 = remove */
+    u8 effect;          /* +0x22 g_char_effect_sets index */
     u8 pad23;
     f32 accum;          /* +0x24 particles owed */
     s32 live;           /* +0x28 */
@@ -230,22 +230,22 @@ typedef struct {
     CharFxSlot slots[100]; /* +0x48 */
 } CharFx;
 
-extern CharFxSet *D_8008D980[];
-extern void (*D_8008D9C0[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, s16 *);
-extern s32 (*D_8008D9C8[])(u8 *);
+extern CharFxSet *g_char_effect_sets[]; /* was D_8008D980 */
+extern void (*g_char_effect_spawn_init_fns[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, s16 *); /* was D_8008D9C0 */
+extern s32 (*g_char_effect_end_fns[])(u8 *); /* was D_8008D9C8 */
 
 /* character_effect_update: per-frame handler (object type entry at D_8008BEFC) of a kind-0x21 character effect e
  * (character_effect_attach / character_effect_create), a particle emitter tied to the owner model e->owner. When e is not running it only
  * frees its particles (character_effect_free_particles, mode 1). It removes itself (node_destroy) when the owner is gone or has
- * another id, or when its time (e +0x1E, bit 0 of e +0x20) runs out (then the D_8008D9C8[onEnd] handler decides).
+ * another id, or when its time (e +0x1E, bit 0 of e +0x20) runs out (then the g_char_effect_end_fns[onEnd] handler decides).
  * When the owner is hidden for this view (owner +0x74 bit g_cur_view_player) the particles are freed. Otherwise the row of
- * D_8008D980[effect] for the owner's variant (+0x1C8) is picked: with matrices (+0x1D4) and a visible model
+ * g_char_effect_sets[effect] for the owner's variant (+0x1C8) is picked: with matrices (+0x1D4) and a visible model
  * (+0x74 & 0xF != 0xF) the row whose id list holds owner +0x84 (else the default row), mode 4; without, the hidden
  * row (mode 2) at the owner position + yoff. A row / mode change restarts the effect (accumulator = max).
  * Live particles follow their model point (mtx_transform_point_or_origin) or the effect position + their offset; when their hold
  * time is over they are let go: velocity from the last move * D_800BEDC8 (x / z clamped to +-10), effect3d_set_handlers
  * with the template's end arguments, a life time. The accumulator gains rate per frame; for every whole unit a free
- * slot is picked at random and a particle record is spawned (D_8008D9C0[tpl->init] fills the spawn block,
+ * slot is picked at random and a particle record is spawned (g_char_effect_spawn_init_fns[tpl->init] fills the spawn block,
  * effect3d_spawn_default, the 0x58-byte motion block to +0x110) at a model point or at the effect position + a random
  * sphere (shape 1) / ring (shape 2) offset. */
 /* was func_1518DC50 */
@@ -280,12 +280,12 @@ void character_effect_update(u8 *arg0) {
             e->scale = **(f32 **) (e->scaleSrc + 0x18) * 0.01f;
         }
         if (e->timed & 1) {
-            e->time -= D_800BE9E4;
+            e->time -= g_frame_ticks;
             if (e->time < 0) {
                 if (e->onEnd == -1) {
                     kill = 1;
                 } else {
-                    kill = D_8008D9C8[e->onEnd](arg0);
+                    kill = g_char_effect_end_fns[e->onEnd](arg0);
                 }
             }
         }
@@ -299,7 +299,7 @@ void character_effect_update(u8 *arg0) {
             }
         } else {
             fresh = 0;
-            set = D_8008D980[e->effect];
+            set = g_char_effect_sets[e->effect];
             nfree = 0;
             tail = NULL;
             head = NULL;
@@ -355,7 +355,7 @@ void character_effect_update(u8 *arg0) {
                         mtx_transform_point_or_origin(pt, slot->obj + 0x34,
                                       *(u8 **) (e->owner + 0x1D4) + *(s16 *) (pt + 0xC) * 0x40);
                     }
-                    slot->timer -= D_800BE9E4;
+                    slot->timer -= g_frame_ticks;
                     if (slot->timer < 0) {
                         obj = slot->obj;
                         m = (CharFxMotion *) (obj + 0x110);
@@ -447,7 +447,7 @@ void character_effect_update(u8 *arg0) {
                                 tail = head;
                                 head = head->next;
                             }
-                            D_8008D9C0[tpl->init]((u8 *) &spawn, &b, &spawn.b10, &spawn.b11, &spawn.b12, &spawn.b13,
+                            g_char_effect_spawn_init_fns[tpl->init]((u8 *) &spawn, &b, &spawn.b10, &spawn.b11, &spawn.b12, &spawn.b13,
                                                   &spawn.flags);
                             rec = (u8 *) effect3d_spawn_default((s32) &spawn, tpl->kind, tpl->b39, 0, tpl->b3A, b, 0x58, 255, 0);
                             head->obj = rec;
@@ -647,21 +647,21 @@ void character_effect_init_smoke(s8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg
 }
 
 u8 *character_effect_attach(u8 *, s16, s16, u8, u8, s32, char *);
-extern s32 D_800A7840;
+extern s32 g_char_effect_name_chain3; /* was D_800A7840 */
 
 /* was func_1518EBDC */
 s32 character_effect_end_chain3(u8 *arg0) {
-    character_effect_attach(*(u8 **)(arg0 + 0x18), 3, 0, 0, arg0[0xC], arg0[1], (char *)&D_800A7840);
+    character_effect_attach(*(u8 **)(arg0 + 0x18), 3, 0, 0, arg0[0xC], arg0[1], (char *)&g_char_effect_name_chain3);
     (*(s16 *)((u8 *)arg0 + 0x1E)) = 0x80;
     (*(s8 *)((u8 *)arg0 + 0x21)) = -1;
     return 0;
 }
 
-extern s32 D_800A787C;
+extern s32 g_char_effect_name_chain4; /* was D_800A787C */
 
 /* was func_1518EC44 */
 s32 character_effect_end_chain4(u8 *arg0) {
-    character_effect_attach(*(u8 **)(arg0 + 0x18), 4, 0, 0, arg0[0xC], arg0[1], (char *)&D_800A787C);
+    character_effect_attach(*(u8 **)(arg0 + 0x18), 4, 0, 0, arg0[0xC], arg0[1], (char *)&g_char_effect_name_chain4);
     (*(s16 *)((u8 *)arg0 + 0x1E)) = 0x80;
     (*(s8 *)((u8 *)arg0 + 0x21)) = -1;
     return 0;
@@ -671,14 +671,14 @@ s32 character_effect_end_chain4(u8 *arg0) {
 void vtx_slot_buffer_get(s32, s16, s32, u8 **, u8 *);
 f32 math_sin_u8(u8);
 f32 math_cos_u8(u8);
-extern f32 D_800DD608[]; /* per view: sin of the camera yaw */
-extern f32 D_800DD618[]; /* per view: cos of the camera yaw */
+extern f32 g_view_yaw_sin[]; /* per view: sin of the camera yaw; was D_800DD608 */
+extern f32 g_view_yaw_cos[]; /* per view: cos of the camera yaw; was D_800DD618 */
 
 // particle_quad_velocity_build: P203: entry 5 of the particle draw table g_effect3d_draw_fns (game_169510): builds the 4
 // vertices of the particle `p` for view `view` (a quad stretched along its screen-space motion, e.g. the
 // character-effect flames). vtx_slot_buffer_get gives the view's vertex block (p +0x100[view], 0x40 bytes); when it is
 // new, both of its halves get the template vertices p +0xC0. Lean: the motion since the last frame (+0x40 - +0x34,
-// +0x48 - +0x3C) across the view (cos / sin of the view, D_800DD618 / D_800DD608) times D_800BEDC8, then
+// +0x48 - +0x3C) across the view (cos / sin of the view, g_view_yaw_cos / g_view_yaw_sin) times D_800BEDC8, then
 // sqrt(|t|) * p +0x160, at most pi / 2, negative for a forward motion; byte angle = lean * 256 / (2 pi) (Rare's
 // unsigned conversion makes every negative angle 0xFF). Half width p +0x2C, half height p +0x30 rotated by the
 // angle (math_sin_u8 sin, math_cos_u8 cos) around the position p +0x34; the s16 corners go to +0x00, +0x10,
@@ -701,8 +701,8 @@ u8 *particle_quad_velocity_build(u8 *p, s16 view) {
         memcpy(*(u8 **) (p + 0x100 + view * 4), (u8 **) (p + 0xC0), 0x40);
         memcpy(*(u8 **) (p + 0x100 + view * 4) + 0x40, (u8 **) (p + 0xC0), 0x40);
     }
-    s = D_800DD608[view];
-    c = D_800DD618[view];
+    s = g_view_yaw_sin[view];
+    c = g_view_yaw_cos[view];
     t = ((*(f32 *) (p + 0x40) - *(f32 *) (p + 0x34)) * c - s * (*(f32 *) (p + 0x48) - *(f32 *) (p + 0x3C))) *
         D_800BEDC8;
     neg = TRUE;
@@ -750,7 +750,7 @@ u8 *particle_quad_velocity_build(u8 *p, s16 view) {
 // line_quad_build: builds the camera-facing quad of a line effect for display list slot `slot`: the line runs from
 // A = +0x34/+0x38/+0x3C towards B = +0x40/+0x44/+0x48, cut at P = A + (B - A) * +0x30. Each end gets two vertices,
 // offset by +-(half width +0x2C) along the normal of the plane through the end, the line and the slot's camera
-// (D_800DBFF0[slot] +0x2F8): A + n, A - n, P + n, P - n (a zero normal gives offset 0). vtx_slot_buffer_get hands out the
+// (g_player_views[slot] +0x2F8): A + n, A - n, P + n, P - n (a zero normal gives offset 0). vtx_slot_buffer_get hands out the
 // slot's vertex buffer (pointer table at +0x100); when it is new, both halves (0x40 bytes each) are first filled from
 // the template at +0xC0. Returns the written vertices, or NULL when no buffer is available. (Draw-table entry.)
 /* was func_1518F080 */
@@ -777,7 +777,7 @@ u8 *line_quad_build(u8 *fx, s16 slot) {
     px = *(f32 *) (fx + 0x34) + (*(f32 *) (fx + 0x40) - *(f32 *) (fx + 0x34)) * *(f32 *) (fx + 0x30);
     py = *(f32 *) (fx + 0x38) + (*(f32 *) (fx + 0x44) - *(f32 *) (fx + 0x38)) * *(f32 *) (fx + 0x30);
     pz = *(f32 *) (fx + 0x3C) + (*(f32 *) (fx + 0x48) - *(f32 *) (fx + 0x3C)) * *(f32 *) (fx + 0x30);
-    cam = (f32 *) ((u8 *) D_800DBFF0 + slot * 0x9A0 + 0x2F8);
+    cam = (f32 *) ((u8 *) g_player_views + slot * 0x9A0 + 0x2F8);
 
     /* end A: normal = (P - A) x (A - camera) */
     dx = px - *(f32 *) (fx + 0x34);
@@ -851,12 +851,12 @@ s32 line_particle_move_damped(u8 *arg0)
   u8 *q;
   f = *((f32 *) (arg0 + 0x150));
   *((f32 *) (arg0 + 0x140)) *= f;
-  q = arg0; // fakematch: second name moves the D_800BE9A4 address to v1 (s114 recipe 4)
-  *((f32 *) (q + 0x144)) += (*((f32 *) (q + 0x14C))) * D_800BE9A4;
+  q = arg0; // fakematch: second name moves the g_frame_step_f address to v1 (s114 recipe 4)
+  *((f32 *) (q + 0x144)) += (*((f32 *) (q + 0x14C))) * g_frame_step_f;
   *((f32 *) (q + 0x148)) *= f;
-  x = (*((f32 *) (arg0 + 0x140))) * D_800BE9A4;
-  y = (*((f32 *) (arg0 + 0x144))) * D_800BE9A4;
-  z = (*((f32 *) (arg0 + 0x148))) * D_800BE9A4;
+  x = (*((f32 *) (arg0 + 0x140))) * g_frame_step_f;
+  y = (*((f32 *) (arg0 + 0x144))) * g_frame_step_f;
+  z = (*((f32 *) (arg0 + 0x148))) * g_frame_step_f;
   *((f32 *) (arg0 + 0x34)) += x;
   *((f32 *) (q + 0x38)) += y;
   *((f32 *) (q + 0x3C)) += z;
@@ -878,13 +878,13 @@ s32 line_particle_move(u8 *arg0) {
     u8 *q;
 
     f = *(f32 *)(arg0 + 0x150);
-    q = arg0; // fakematch: second name for arg0 puts the D_800BE9A4 address in v1
+    q = arg0; // fakematch: second name for arg0 puts the g_frame_step_f address in v1
     *(f32 *)(q + 0x140) *= f;
-    *(f32 *)(q + 0x144) += *(f32 *)(q + 0x14C) * D_800BE9A4;
+    *(f32 *)(q + 0x144) += *(f32 *)(q + 0x14C) * g_frame_step_f;
     *(f32 *)(q + 0x148) *= f;
-    x = *(f32 *)(arg0 + 0x140) * D_800BE9A4;
-    y = *(f32 *)(arg0 + 0x144) * D_800BE9A4;
-    z = *(f32 *)(arg0 + 0x148) * D_800BE9A4;
+    x = *(f32 *)(arg0 + 0x140) * g_frame_step_f;
+    y = *(f32 *)(arg0 + 0x144) * g_frame_step_f;
+    z = *(f32 *)(arg0 + 0x148) * g_frame_step_f;
     *(f32 *)(q + 0x34) += x;
     *(f32 *)(q + 0x38) += y;
     *(f32 *)(q + 0x3C) += z;
@@ -918,7 +918,7 @@ s32 flame_particle_flicker(u8 *arg0) {
     u8 *p = arg0 + 0x110;
     s32 v;
 
-    *(s16 *)(p + 0x1E) -= D_800BE9E4;
+    *(s16 *)(p + 0x1E) -= g_frame_ticks;
     if (*(s16 *)(p + 0x1E) < 0) {
         *(s16 *)(p + 0x1E) = random_int() % 6U;
         if (random_int() & 3) {
@@ -928,13 +928,13 @@ s32 flame_particle_flicker(u8 *arg0) {
         }
     }
     *(f32 *)(arg0 + 0x30) += (*(f32 *)(p + 0x18) - *(f32 *)(arg0 + 0x30)) * 0.359f;
-    *(s16 *)(p + 0x1C) -= D_800BE9E4;
+    *(s16 *)(p + 0x1C) -= g_frame_ticks;
     if (*(s16 *)(p + 0x1C) < 0) {
         *(s16 *)(p + 0x1C) = random_int() % 17U;
         *(f32 *)(p + 0x8) = *(f32 *)(p + 0x4) + (*(f32 *)(p + 0x0) - *(f32 *)(p + 0x4)) * random_float();
     }
     *(f32 *)(arg0 + 0x2C) += (*(f32 *)(p + 0x8) - *(f32 *)(arg0 + 0x2C)) * 0.186f;
-    *(s16 *)(p + 0x2C) -= D_800BE9E4;
+    *(s16 *)(p + 0x2C) -= g_frame_ticks;
     if (*(s16 *)(p + 0x2C) < 0) {
         *(s16 *)(p + 0x2C) = random_int() % 15U;
         *(f32 *)(p + 0x28) = *(f32 *)(p + 0x24) + (*(f32 *)(p + 0x20) - *(f32 *)(p + 0x24)) * random_float();
@@ -991,7 +991,7 @@ void character_effect_on_message(u8 *arg0, u8 *arg1, u8 arg2) {
 
 s32 bone_sparks_attach(s32, u8 *, s16, s8, s8, s8, u8, s32, u8, s32);
 s32 bone_sparks_table_for_kind(s32, u8 *, u8);
-extern u8 *D_8008D9D0[];
+extern u8 *g_bone_sparks_preset_tables[]; /* was D_8008D9D0 */
 /* was func_1518FA8C */
 s32 bone_sparks_attach_preset(s32 arg0, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
     s32 sfpad; // fakematch: unused local shifts sp33 to the ref slot
@@ -1003,7 +1003,7 @@ s32 bone_sparks_attach_preset(s32 arg0, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 
     if (bone_sparks_table_for_kind(arg0, &sp33, arg1) == 0) {
         return 0;
     }
-    return bone_sparks_attach(arg0, D_8008D9D0[sp33] + arg1 * 0x50, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+    return bone_sparks_attach(arg0, g_bone_sparks_preset_tables[sp33] + arg1 * 0x50, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 
 void *attach_ctrl_spawn(void *arg0, s32 arg1, u8 arg2, s32 arg3);
@@ -1084,14 +1084,14 @@ s32 bone_sparks_attach(s32 arg0, u8 *arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, 
 }
 
 void bone_sparks_emit(s32);
-// D_8008DA1C: the bone-spark emitter's tick handler table (0x8008DA1C: bone_sparks_tick_hurt, bone_sparks_owner_release). bone_sparks_tick
-// indexes it with self +0x88 and returns the handler's result; bone_sparks_release indexes D_8008DA20 (= D_8008DA1C + 1)
+// g_bone_sparks_tick_fns: the bone-spark emitter's tick handler table (0x8008DA1C: bone_sparks_tick_hurt, bone_sparks_owner_release). bone_sparks_tick
+// indexes it with self +0x88 and returns the handler's result; bone_sparks_release indexes D_8008DA20 (= g_bone_sparks_tick_fns + 1)
 // with self +0x89. One signature for both views (wasm call_indirect): s32 (u8 *).
-extern s32 (*D_8008DA1C[])(u8 *);
+extern s32 (*g_bone_sparks_tick_fns[])(u8 *); /* was D_8008DA1C */
 
 // bone_sparks_tick: effect-child handler (g_attach_child_update_fns [3] / g_attach_child_end_fns [1]). Advances the emitter's spark counter
-// (self +0x30) by (rate +0x34 + random f32 * spread +0x38) * D_800BE9A4 (frame time), emits the sparks
-// (bone_sparks_emit), then runs the tick handler D_8008DA1C[self +0x88] (none: -1) and returns its result (1 without).
+// (self +0x30) by (rate +0x34 + random f32 * spread +0x38) * g_frame_step_f (frame time), emits the sparks
+// (bone_sparks_emit), then runs the tick handler g_bone_sparks_tick_fns[self +0x88] (none: -1) and returns its result (1 without).
 // The second argument (the position the effect-node dispatchers pass) is not used; it is there for the table's
 // common signature s32 (node, pos).
 /* was func_1518FD34 */
@@ -1099,24 +1099,24 @@ s32 bone_sparks_tick(u8 *self, void *pos) {
     f32 *count = (f32 *)(self + 0x30);
     s8 tick;
 
-    count[0] += (count[1] + random_float() * count[2]) * D_800BE9A4;
+    count[0] += (count[1] + random_float() * count[2]) * g_frame_step_f;
     bone_sparks_emit((s32)self);
     tick = (s8)self[0x88];
     if (tick != -1) {
-        return D_8008DA1C[tick](self);
+        return g_bone_sparks_tick_fns[tick](self);
     }
     return 1;
 }
 
 // bone_sparks_release: effect-child handler (g_attach_child_update_fns [6] / g_attach_child_end_fns [4]): runs the release handler
-// D_8008DA20[self +0x89] (= D_8008DA1C[self +0x89 + 1]; none: -1). The second argument is unused (table signature
+// D_8008DA20[self +0x89] (= g_bone_sparks_tick_fns[self +0x89 + 1]; none: -1). The second argument is unused (table signature
 // s32 (node, pos)); returns the handler's result (0 without; the dispatchers that reach it ignore v0).
 /* was func_1518FDC8 */
 s32 bone_sparks_release(u8 *self, void *pos) {
     s8 release = (s8)self[0x89];
 
     if (release != -1) {
-        return D_8008DA1C[release + 1](self);
+        return g_bone_sparks_tick_fns[release + 1](self);
     }
     return 0;
 }
@@ -1139,7 +1139,7 @@ u8 *flame_spawn(u8 *arg0, u8 *arg1, s16 arg2, u8 arg3, u8 *arg4, f32 arg5, f32 a
 void *attach_fx_spawn(void *arg0, void *arg1, s32 arg2, u8 arg3, s32 arg4);
 
 // bone_sparks_emit: while the emitter's counter (self + 0x30) is above 1, emits one spark per unit (if the live
-// count +0x20 is below the limit +0x5C): a random attachment point of set +0x78 (g_attach_fx_assets / D_800E0968: 16-byte
+// count +0x20 is below the limit +0x5C): a random attachment point of set +0x78 (g_attach_fx_assets / g_attach_fx_point_counts: 16-byte
 // entries, bone index + offset) is transformed by the owner's (+0x10) bone matrix, a particle (kind 0x13 / 0x14) is
 // spawned there and a follower (attach_fx_spawn) ties it to the bone. Owners without matrices or hidden (nibble 0xF)
 // only drain the counter.
@@ -1180,13 +1180,13 @@ void bone_sparks_emit(s32 arg0) {
     do {
         if (*(s16 *)(self + 0x20) < *(s32 *)(self + 0x5C)) {
             set = *(s32 *)(self + 0x78);
-            point = (u8 *)g_attach_fx_assets[set] + ((u32)random_int() % (u16)D_800E0968[set]) * 16;
+            point = (u8 *)g_attach_fx_assets[set] + ((u32)random_int() % (u16)g_attach_fx_point_counts[set]) * 16;
             speed[0] = random_float() * *(f32 *)(self + 0x4C) + *(f32 *)(self + 0x44);
             speed[1] = random_float() * *(f32 *)(self + 0x50) + *(f32 *)(self + 0x48);
             mtx_transform_point_or_origin(point + 4, at, *(u8 **)(owner + 0x1D4) + (point[0] << 6));
             size = random_int();
             kind = (random_int() & 1) ? 0x13 : 0x14;
-            part = flame_spawn((u8 *)at, (u8 *)speed, -1, (u32)size % (self[0x55] + 1) + self[0x54], D_800A5860,
+            part = flame_spawn((u8 *)at, (u8 *)speed, -1, (u32)size % (self[0x55] + 1) + self[0x54], g_vec3_zero,
                                  0.0f, 1.0f, *(f32 *)(self + 0x80), 0, 0x23, 0, kind, 1, 1, 0xFF, 0, self[0xC],
                                  self[1]);
             if (part != NULL) {
@@ -1233,7 +1233,7 @@ s32 bone_spark_follow_look_up(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *arg1) {
 // +0x154 = random f32 * cfg +0x68 + cfg +0x64, +0x158 = cfg +0x6C, +0x6C / +0x6E = cfg s16 +0x70 / +0x72,
 // +0x1C = random % (cfg s16 +0x76 + 1) + cfg s16 +0x74, +0x70 = 0x21 when cfg +0x7C bit 0 else 0x20, +0x71 = 0x24,
 // +0x58 |= 0x08000001.
-// target (a1): P231: a real vec3. P215 / P219 took the table for D_8008FC48 (emitter2_trail_update's, whose three entries
+// target (a1): P231: a real vec3. P215 / P219 took the table for g_emitter2_path_fx_fns (emitter2_trail_update's, whose three entries
 // emitter2_path_fx_quarter / CEE0 / CF08 take one argument) and added a PORT-only "aim at the node itself" fallback; the real
 // callers pass the position, so the fallback is gone and both builds use the target.
 // Returns s32 only for the table signature (the siblings bone_spark_follow_look / bone_spark_follow_look_up return s32); the dispatcher
@@ -1400,25 +1400,25 @@ s32 bone_sparks_table_for_kind(s32 arg0, u8 *arg1, u8 arg2) {
     return 0;
 }
 
-extern s32 D_800A7EDC;
-extern s32 D_800A7EE0;
-extern s32 D_800A7EE4;
-extern s32 D_800A7EE8;
-extern s32 D_800A7EEC;
-extern s32 D_800A7EF0;
-extern s32 D_800A7EA8;
-extern s32 D_800A7EAC;
-extern s32 D_800A7EB0;
-extern s32 D_800A7EB4;
-extern s32 D_800A7EB8;
-extern s32 D_800A7EBC;
-extern s32 D_800A7EC0;
-extern s32 D_800A7EC4;
-extern s32 D_800A7EC8;
-extern s32 D_800A7ECC;
-extern s32 D_800A7ED0;
-extern s32 D_800A7ED4;
-extern s32 D_800A7ED8;
+extern s32 g_bone_sparks_kind_87; /* was D_800A7EDC */
+extern s32 g_bone_sparks_kind_b1; /* was D_800A7EE0 */
+extern s32 g_bone_sparks_kind_b4; /* was D_800A7EE4 */
+extern s32 g_bone_sparks_kind_70; /* was D_800A7EE8 */
+extern s32 g_bone_sparks_kind_53; /* was D_800A7EEC */
+extern s32 g_bone_sparks_kind_96; /* was D_800A7EF0 */
+extern s32 g_bone_sparks_kind_00; /* was D_800A7EA8 */
+extern s32 g_bone_sparks_kind_49; /* was D_800A7EAC */
+extern s32 g_bone_sparks_kind_58; /* was D_800A7EB0 */
+extern s32 g_bone_sparks_kind_50; /* was D_800A7EB4 */
+extern s32 g_bone_sparks_kind_75; /* was D_800A7EB8 */
+extern s32 g_bone_sparks_kind_80; /* was D_800A7EBC */
+extern s32 g_bone_sparks_kind_11; /* was D_800A7EC0 */
+extern s32 g_bone_sparks_kind_16; /* was D_800A7EC4 */
+extern s32 g_bone_sparks_kind_88; /* was D_800A7EC8 */
+extern s32 g_bone_sparks_kind_9c; /* was D_800A7ECC */
+extern s32 g_bone_sparks_kind_9d; /* was D_800A7ED0 */
+extern s32 g_bone_sparks_kind_9f; /* was D_800A7ED4 */
+extern s32 g_bone_sparks_kind_a0; /* was D_800A7ED8 */
 
 /* was func_151905AC */
 s32 *bone_sparks_presets_for_kind(u8 *arg0, s32 *arg1) {
@@ -1427,28 +1427,28 @@ s32 *bone_sparks_presets_for_kind(u8 *arg0, s32 *arg1) {
     switch (arg0[4]) {
     case 0x87:
     case 0xB0:
-        p = &D_800A7EDC;
+        p = &g_bone_sparks_kind_87;
         *arg1 = 1;
         break;
     case 0xB1:
-        p = &D_800A7EE0;
+        p = &g_bone_sparks_kind_b1;
         *arg1 = 1;
         break;
     case 0xB4:
-        p = &D_800A7EE4;
+        p = &g_bone_sparks_kind_b4;
         *arg1 = 1;
         break;
     case 0x70:
     case 0xB2:
-        p = &D_800A7EE8;
+        p = &g_bone_sparks_kind_70;
         *arg1 = 1;
         break;
     case 0x53:
-        p = &D_800A7EEC;
+        p = &g_bone_sparks_kind_53;
         *arg1 = 1;
         break;
     case 0x96:
-        p = &D_800A7EF0;
+        p = &g_bone_sparks_kind_96;
         *arg1 = 1;
         break;
     case 0x0:
@@ -1456,27 +1456,27 @@ s32 *bone_sparks_presets_for_kind(u8 *arg0, s32 *arg1) {
     case 0x2:
     case 0x3:
     case 0x4:
-        p = &D_800A7EA8;
+        p = &g_bone_sparks_kind_00;
         *arg1 = 1;
         break;
     case 0x49:
-        p = &D_800A7EAC;
+        p = &g_bone_sparks_kind_49;
         *arg1 = 1;
         break;
     case 0x58:
-        p = &D_800A7EB0;
+        p = &g_bone_sparks_kind_58;
         *arg1 = 1;
         break;
     case 0x50:
-        p = &D_800A7EB4;
+        p = &g_bone_sparks_kind_50;
         *arg1 = 1;
         break;
     case 0x75:
-        p = &D_800A7EB8;
+        p = &g_bone_sparks_kind_75;
         *arg1 = 1;
         break;
     case 0x80:
-        p = &D_800A7EBC;
+        p = &g_bone_sparks_kind_80;
         *arg1 = 1;
         break;
     case 0x11:
@@ -1484,32 +1484,32 @@ s32 *bone_sparks_presets_for_kind(u8 *arg0, s32 *arg1) {
     case 0x3B:
     case 0x98:
     case 0x99:
-        p = &D_800A7EC0;
+        p = &g_bone_sparks_kind_11;
         *arg1 = 1;
         break;
     case 0x16:
-        p = &D_800A7EC4;
+        p = &g_bone_sparks_kind_16;
         *arg1 = 1;
         break;
     case 0x88:
     case 0x90:
-        p = &D_800A7EC8;
+        p = &g_bone_sparks_kind_88;
         *arg1 = 1;
         break;
     case 0x9C:
-        p = &D_800A7ECC;
+        p = &g_bone_sparks_kind_9c;
         *arg1 = 1;
         break;
     case 0x9D:
-        p = &D_800A7ED0;
+        p = &g_bone_sparks_kind_9d;
         *arg1 = 1;
         break;
     case 0x9F:
-        p = &D_800A7ED4;
+        p = &g_bone_sparks_kind_9f;
         *arg1 = 1;
         break;
     case 0xA0:
-        p = &D_800A7ED8;
+        p = &g_bone_sparks_kind_a0;
         *arg1 = 1;
         break;
     default:
@@ -1615,7 +1615,7 @@ void bone_sparks_light_free(void *arg0) {
     light_ctrl_free(arg0);
 }
 
-// effect_node_release: P213: release handler of an effect node (entry of the D_8008FC60 handler table, void (u8 *),
+// effect_node_release: P213: release handler of an effect node (entry of the g_emitter2_release_fns handler table, void (u8 *),
 /* dispatched by spec_emitter_cleanup): frees the attached record +0x84 (node_destroy), then sfx_emitter_stop_by_callback(effect_sound_follow_owner,
  * node, word +0x10) (effect_sound_follow_owner is the node's sfx_emitter_start callback) and attach_fx_asset_release(word +0x78). */
 void sfx_emitter_stop_by_callback(s32, s32, s32);
@@ -1641,14 +1641,14 @@ void bone_sparks_detach_owner(u8 *arg0) {
 }
 
 void attach_ctrl_free_if_owner(u8 *, s32, u8);
-extern void (*D_8008DA24[])(u8 *, s32, u8);
+extern void (*g_bone_sparks_msg_fns[])(u8 *, s32, u8); /* was D_8008DA24 */
 /* was func_15190AC0 */
 void bone_sparks_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     void (*f)(u8 *, s32, u8);
     if (arg2 == 0x2A) {
         attach_ctrl_free_if_owner(arg0, arg1, arg2);
     }
-    f = D_8008DA24[arg0[0x8A]];
+    f = g_bone_sparks_msg_fns[arg0[0x8A]];
     if (f != NULL) {
         f(arg0, arg1, arg2);
     }
@@ -1674,7 +1674,7 @@ s32 bone_sparks_tick_hurt(Obj0B2C *arg0) {
     Tick0B2C *t = &arg0->t;
     u8 *v;
 
-    arg0->t.acc += D_800BE9E4;
+    arg0->t.acc += g_frame_ticks;
     while (t->acc >= t->step) {
         obj_send_hit(arg0->unk10, 0x60021, 0, t->obj - g_objects);
         t->acc -= t->step;
@@ -1686,7 +1686,7 @@ s32 bone_sparks_tick_hurt(Obj0B2C *arg0) {
     return 1;
 }
 
-// bone_sparks_owner_release: D_8008DA1C [1] (bone_sparks_release's release handler, also reachable as a tick handler from
+// bone_sparks_owner_release: g_bone_sparks_tick_fns [1] (bone_sparks_release's release handler, also reachable as a tick handler from
 // bone_sparks_tick): clears byte +0x1AC of the owner's (+0x10) attachment +0x31C, if any. Returns that pointer (the asm
 // leaves it in v0, and bone_sparks_tick returns a tick handler's v0), so the table has one signature s32 (u8 *).
 /* was func_15190C34 */

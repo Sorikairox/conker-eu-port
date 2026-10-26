@@ -19,7 +19,7 @@ void scroll_banner_spawn(s16 arg0) {
 void scroll_banner_stop(s16 arg0) {
     u8 *var_v0;
 
-    for (var_v0 = D_800DD510; var_v0 != NULL; var_v0 = *(u8 **)(var_v0 + 8)) {
+    for (var_v0 = g_scroll_banner_nodes; var_v0 != NULL; var_v0 = *(u8 **)(var_v0 + 8)) {
         if (arg0 == *(s16 *)(var_v0 + 0x10)) {
             *(s8 *)(var_v0 + 0x16) = -2;
         }
@@ -37,7 +37,7 @@ typedef struct {
 
 /* was func_151D2D0C */
 void scroll_banner_update(Obj2D0C *arg0) {
-    arg0->xE += D_800BE9E4 * arg0->x16;
+    arg0->xE += g_frame_ticks * arg0->x16;
     if (arg0->x16 > 0 && arg0->xE >= 0xED) {
         arg0->x14 = (0x128 - arg0->xE) << 2;
         if (arg0->x14 < 0) {

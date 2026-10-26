@@ -1,7 +1,7 @@
 /* selftest case: calls whose delay slot is an FPU instruction (Unicorn 2.1.x jumped to 0 after the stub) */
 s32 memcpy(s32, s32, s32);
-extern s32 D_800DD608;
-extern s32 D_800DD618;
+extern s32 g_view_yaw_sin; /* was D_800DD608 */
+extern s32 g_view_yaw_cos; /* was D_800DD618 */
 
 u8 *impact_splash_ring_verts(u8 *arg0, s16 arg1) {
     u8 *temp_v0;
@@ -37,9 +37,9 @@ u8 *impact_splash_ring_verts(u8 *arg0, s16 arg1) {
         temp_f0 = (*(f32 *)((u8 *)arg0 + 0x2C)) * (*(f32 *)((u8 *)arg0 + 0x4C));
         (*(s16 *)((u8 *)sp4C + 6)) = 0;
         (*(s16 *)((u8 *)sp4C + 0x16)) = 0;
-        temp_f2 = *(&D_800DD608 + temp_t0) * temp_f0;
+        temp_f2 = *(&g_view_yaw_sin + temp_t0) * temp_f0;
         (*(s16 *)((u8 *)sp4C + 0x26)) = 0;
-        temp_f12 = *(&D_800DD618 + temp_t0) * temp_f0;
+        temp_f12 = *(&g_view_yaw_cos + temp_t0) * temp_f0;
         (*(s16 *)((u8 *)sp4C + 0x36)) = 0;
         temp_f8 = (s32) ((*(f32 *)((u8 *)arg0 + 0x34)) + temp_f12);
         (*(s16 *)((u8 *)sp4C + 0x30)) = (s16) temp_f8;

@@ -5,14 +5,14 @@ s/bcopy(a, b, sizeof(struct127));/bcopy(b, a, sizeof(struct127));/ % base
 s/b->unk127 = ib;/b->unk127 = ia;/ % base
 s/b->unique_id = ib + 1;/b->unique_id = ib;/ % base
 s/b->unk13F = ib;/b->unk13F = ib + 1;/ % base
-s/b->camera = \&D_800DBFF0\[ib\];/b->camera = \&D_800DBFF0[ia];/ % base
+s/b->camera = \&g_player_views\[ib\];/b->camera = \&g_player_views[ia];/ % base
 s/a->unk127 = ia;/a->unk127 = ib;/ % base
 s/a->unique_id = ia + 1;/a->unique_id = ia;/ % base
 s/a->unk13F = ia;/a->unk13F = 0;/ % base
 s/a->camera = NULL;/;/ % base
 s/b->unk144 = a->unk144;/b->unk144 = p144;/ % base
 s/a->unk144 = p144;/;/ % base
-s/(u8 \*) \&D_800DBFF0\[ib\] + 0x3D4)/(u8 *) \&D_800DBFF0[ib] + 0x3D0)/ % base
+s/(u8 \*) \&g_player_views\[ib\] + 0x3D4)/(u8 *) \&g_player_views[ib] + 0x3D0)/ % base
 s/= b->unk31C;/= a->unk31C;/ % base
 s/b->unk31C + 0x197) = 0;/a->unk31C + 0x197) = 0;/ % base
 s/attachment_swap_owner_ids(b->unique_id, a->unique_id);/attachment_swap_owner_ids(a->unique_id, b->unique_id);/ % base

@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A5860[];
+extern u8 g_vec3_zero[]; /* was D_800A5860 */
 
 
 /* was func_151D6F20 */
@@ -105,7 +105,7 @@ u8 *event_get_vars(s32);
 u8 *text_pager_spawn(s32, s32 *, s32, s32, s32, s32, s32, s32);
 s32 anim_model_fx_spawn(s8 *, s32, f32, s32, s32, s32, s32, s32); /* P95: f32 (float bits were passed as an int) */
 s32 memcpy(s32, u8 **, s32);
-extern s32 D_800AB630;
+extern s32 g_money_popup_pager_arg; /* was D_800AB630 */
 
 /* was func_151D71AC */
 void money_collect_popup_spawn(u8 *arg0, u8 arg1, s32 arg2) {
@@ -188,7 +188,7 @@ void money_collect_popup_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u86 = 0xFF;
     sp.u87 = 0xFF;
     sp.u8C = arg0;
-    temp_t4 = ((u8 *)&D_800A5860);
+    temp_t4 = ((u8 *)&g_vec3_zero);
     sp.u91 = 1;
     sp.u90 = (*(u8 *)((u8 *)arg0 + 0x3B));
     (*(s32 *)((u8 *)(&sp.u94) + 0)) = (s32) (*(s32 *)((u8 *)temp_t4 + 0));
@@ -198,7 +198,7 @@ void money_collect_popup_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     sp.uA6 = 0x1F;
     anim_model_fx_spawn(&sp.u50, 0, 1.0f, 0, 0, 0, (s32) arg1, arg2); /* P95: f32 (float bits were passed as an int) */
     sp.u3C = arg0;
-    sp.u38 = D_800AB630;
+    sp.u38 = g_money_popup_pager_arg;
     sp.u48 = 8;
     sp.u4A = 0x1F;
     sp.u40 = (*(u8 *)((u8 *)arg0 + 0x3B));
@@ -226,7 +226,7 @@ block_7:
     }
 }
 f32 camera_get_yaw_deg(s32);
-#define MTX_7410(a) (((f32 (*)[16])((a) + 0x7C))[D_800BE9C0])
+#define MTX_7410(a) (((f32 (*)[16])((a) + 0x7C))[g_dl_buf_index])
 /* was func_151D7410 */
 s32 money_popup_mtx_update(u8 *arg0) {
     mtxf_rotate_xyz_deg(&MTX_7410(arg0), 0.0f, camera_get_yaw_deg(0) + 25.0f, 0.0f);
@@ -249,11 +249,11 @@ s32 money_popup_mtx_update(u8 *arg0) {
 /* P241: readable C for money_popup_draw (game_eu_204730, 51 insns). */
 // money_popup_draw: entry 3 of the record table D_80088C40 (dispatcher text_pager_update ends the record, timer +0xE = -1,
 // when the result is 0). Returns 0 once the owner object (data +0) is gone or its id byte +0x3B no longer matches
-// data +4; otherwise prints "$ %d" (D_800AB634, the amount at data +8) above the owner in colour (0x32, 0x7D, 0x1C)
+// data +4; otherwise prints "$ %d" (g_str_money_popup, the amount at data +8) above the owner in colour (0x32, 0x7D, 0x1C)
 // with alpha fading in over the first data +0xC frames (timer * step data +0xE, clamped at 0; 0xFF after) and keeps
 // the record. The asm returns text_printf's leftover v0 there (the last text node, non-zero unless the text pool
 // is full), like its siblings' explicit 1.
-extern u8 D_800AB634[];
+extern u8 g_str_money_popup[]; /* was D_800AB634 */
 void text_printf(s32, ...); /* varargs, as its definition (game_70200) */
 /* was func_151D75B0 */
 s32 money_popup_draw(u8 *rec) {
@@ -276,7 +276,7 @@ s32 money_popup_draw(u8 *rec) {
     text_set_box((s32) owner, 0x109);
     text_set_color(0x32, 0x7D, 0x1C, alpha);
     text_set_flags(0x81);
-    text_printf((s32) D_800AB634, *(s32 *) (data + 8));
+    text_printf((s32) g_str_money_popup, *(s32 *) (data + 8));
     return 1;
 }
 
@@ -286,15 +286,15 @@ void money_popup_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, temp, temp + 4, arg0);
 }
 
-extern s32 D_80083AD0;
-extern s32 D_80083C50;
+extern s32 g_seg8_dl_translucent; /* was D_80083AD0 */
+extern s32 g_seg8_dl_opaque; /* was D_80083C50 */
 u8 *gfx_emit_sprite_tex_segment(u8 *, s32, s32, s32);
 /* was func_151D76BC */
 Gfx *banner_sprite_set_segment(Gfx *gdl, u8 *arg1, s32 arg2, s32 arg3, s8 *arg4) {
     if (arg1[0x43] < 0xFF) {
-        gSPSegment(gdl++, 8, &D_80083AD0);
+        gSPSegment(gdl++, 8, &g_seg8_dl_translucent);
     } else {
-        gSPSegment(gdl++, 8, &D_80083C50);
+        gSPSegment(gdl++, 8, &g_seg8_dl_opaque);
     }
     gdl = (Gfx *)gfx_emit_sprite_tex_segment((u8 *)gdl, 0xC3, 6, 3);
     gdl = (Gfx *)gfx_emit_sprite_tex_segment((u8 *)gdl, 0xC3, 7, 3);

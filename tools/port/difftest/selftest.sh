@@ -45,11 +45,11 @@ chk EQUIV  effect_pulse_sine_update src_eu/game_16DC80.c
 chk EQUIV  effect_orbit_update src_eu/game_16DC80.c
 chk EQUIV  camera_push_mode src_eu/game_14FF90.c
 chk DIFFER sfx_cooldown_clear src_eu/game_130CB0.c 's/g_sfx_cooldowns, 8/g_sfx_cooldowns, 6/'
-# note: 's/> D_800BE9E4/>= D_800BE9E4/' is a semantically equivalent mutation (x-=x gives 0 too); difftest says EQUIV
-chk EQUIV  sfx_cooldown_tick src_eu/game_130CB0.c 's/g_sfx_cooldowns\[i\] > D_800BE9E4/g_sfx_cooldowns[i] >= D_800BE9E4/'
+# note: 's/> g_frame_ticks/>= g_frame_ticks/' is a semantically equivalent mutation (x-=x gives 0 too); difftest says EQUIV
+chk EQUIV  sfx_cooldown_tick src_eu/game_130CB0.c 's/g_sfx_cooldowns\[i\] > g_frame_ticks/g_sfx_cooldowns[i] >= g_frame_ticks/'
 chk DIFFER sfx_cooldown_tick src_eu/game_130CB0.c 's/g_sfx_cooldowns\[i\] = 0;/g_sfx_cooldowns[i] = 1;/'
 chk DIFFER sfx_cooldown_tick src_eu/game_130CB0.c 's/i < 4;/i < 3;/'
-chk DIFFER effect_pulse_sine_update src_eu/game_16DC80.c 's/temp->unkC \* D_800BE9A4/temp->unk4 * D_800BE9A4/'
+chk DIFFER effect_pulse_sine_update src_eu/game_16DC80.c 's/temp->unkC \* g_frame_step_f/temp->unk4 * g_frame_step_f/'
 chk DIFFER effect_pulse_sine_update src_eu/game_16DC80.c 's/return 1;/return 2;/'
 chk DIFFER effect_orbit_update src_eu/game_16DC80.c 's/temp_v0\[0\], temp_v0\[2\]/temp_v0[2], temp_v0[0]/'
 chk DIFFER camera_push_mode src_eu/game_14FF90.c 's/STK->unk2C\[0\] = arg1;/STK->unk2C[0] = arg2;/'
@@ -144,23 +144,23 @@ chk DIFFER effect_pulse_sine_update src_eu/game_16DC80.c 's/sinf(temp->unk8)/sin
 AE60C="DIFFTEST_ROMDATA=1 DIFFTEST_EXACT=* DIFFTEST_REFLEN=104 DIFFTEST_SIGNORE=7 DIFFTEST_ARG=0=80490000,1=6,2=80491000 DIFFTEST_POKE=80490000=1001,80490004=1234"
 chkce EQUIV  event_native_action "$AE60C"
 chkce DIFFER event_native_action "$AE60C" 's/args\[1\], args)/args[0], args)/'
-# P132: game_pause_update time limit (game_pause_update). DE: D_80082FA0 (.game_data 80083330) = 1, D_800BE616 = 1,
-# D_800E1013 = 3, D_80090118 = 3000, D_800BEA08 = 0x20, g_game_paused / AC1 = 0, D_8009029C = 0.
+# P132: game_pause_update time limit (game_pause_update). DE: g_last_player_index (.game_data 80083330) = 1, D_800BE616 = 1,
+# g_settings_time_limit = 3, g_mp_time_left = 3000, g_frame_ticks_raw = 0x20, g_game_paused / AC1 = 0, g_pause_unpause_timer = 0.
 DE="DIFFTEST_EXACT=* DIFFTEST_POKE=80083330=1,800BEA34=100,800E1010=3,800BEEE0=0,80090118=BB8,8009029C=0,800BEE28=20"
 chkce EQUIV  game_pause_update "$DE"
 # varargs stack args behind IDO's division trap checks (secs / 60, secs % 60 stored before the `bnez; break 7`
 # guard): the call-site scan goes through the guards since P132; DIFFTEST_TRAPSCAN_OLD=1 (old scan) misses it.
-chkce DIFFER game_pause_update "$DE" 's/secs = D_80090118 \/ 50;/secs = D_80090118 \/ 60;/'
-chkce EQUIV  game_pause_update "$DE DIFFTEST_TRAPSCAN_OLD=1" 's/secs = D_80090118 \/ 50;/secs = D_80090118 \/ 60;/'
-# a POKE wins over the ROM .data image (ROM D_80082FA0 = 0): with DIFFTEST_ROMDATA=1 every trial loads the image;
-# y = 100 needs D_80082FA0 > 0, so the mutant dies only if the poke holds. DIFFTEST_POKE_OLD=1 = pre-P132 order.
+chkce DIFFER game_pause_update "$DE" 's/secs = g_mp_time_left \/ 50;/secs = g_mp_time_left \/ 60;/'
+chkce EQUIV  game_pause_update "$DE DIFFTEST_TRAPSCAN_OLD=1" 's/secs = g_mp_time_left \/ 50;/secs = g_mp_time_left \/ 60;/'
+# a POKE wins over the ROM .data image (ROM g_last_player_index = 0): with DIFFTEST_ROMDATA=1 every trial loads the image;
+# y = 100 needs g_last_player_index > 0, so the mutant dies only if the poke holds. DIFFTEST_POKE_OLD=1 = pre-P132 order.
 chkce DIFFER game_pause_update "$DE DIFFTEST_ROMDATA=1" 's/y = 100;/y = 101;/'
 chkce EQUIV  game_pause_update "$DE DIFFTEST_ROMDATA=1 DIFFTEST_POKE_OLD=1" 's/y = 100;/y = 101;/'
 # [POKE unread] comes from decoded loads since P132 (Unicorn's read hook missed `lbu D_800BE616` at 800BEA36)
 out=$(set -f; env $DE $R/tools/port/difftest.sh game_pause_update $C/game_pause_update.c --trials 4)
 case "$out" in *POKE\ unread*) fail=$((fail+1)); echo "FAIL [want no POKE unread] $out";; EQUIV*) pass=$((pass+1)); echo "ok   [no POKE unread] $out";; *) fail=$((fail+1)); echo "FAIL $out";; esac
 # P134: a callee declared only in a header (cosf in gu.h) takes its arity / float slots from there: a0 (written at the
-# call site, &D_800CC298) is not an argument of cosf(float). DIFFTEST_HDRSLOT_OLD=1 = pre-P134 (false DIFFER on a0).
+# call site, &g_obj_anim_shared) is not an argument of cosf(float). DIFFTEST_HDRSLOT_OLD=1 = pre-P134 (false DIFFER on a0).
 chkce EQUIV  obj7b_update_pulse_scale "DIFFTEST_TRIALS_UNUSED=1"
 # P234: the included-header prototypes (gu.h `cosf`) now come first, so HDRSLOT_OLD alone has no effect: the P134
 # false DIFFER needs DIFFTEST_INCHDR_OLD=1 too
@@ -248,7 +248,7 @@ S9DC8="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_AR
 TRIALS=4 chkce EQUIV  point_spark_spawn "$S9DC8"
 TRIALS=4 chkce DIFFER point_spark_spawn "$S9DC8 DIFFTEST_INCHDR_OLD=1"
 TRIALS=4 chkce DIFFER point_spark_spawn "$S9DC8" 's/t.life = (random_int() \& 0xF) + 10;/t.life = (random_int() \& 0xF) + 11;/'
-TRIALS=4 chkce DIFFER point_spark_spawn "$S9DC8" 's/scale = (random_float() \* D_800A2A04/scale = (random_float() * D_800A2A08/'
+TRIALS=4 chkce DIFFER point_spark_spawn "$S9DC8" 's/scale = (random_float() \* g_point_spark_scale_range/scale = (random_float() * g_point_spark_scale_base/'
 # P238: DIFFTEST_OUTP writes through a pointer read from an argument array (mtx_transform_points's dst[i] points). Without
 # it the transformed start / end points stay stack fill (start == dir) and a swapped subtraction is EQUIV (the hole).
 S60E30="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=15146414=0:8,15145698=0:12 DIFFTEST_ARG=0=80450000 DIFFTEST_POKE=80450014=80460000,80450018=80470000,8045001C=07030000,80450038=42C80000,8045003C=03000000,80470000=00000001,80470014=42F73333,80470038=00000007,80470074=03000000,804701D4=80480000 DIFFTEST_RET=15145698=1 DIFFTEST_OUTA=15081A90=7:80490000;3F000000;C29B6666;4284CCCD;44BB8666;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;10000"
@@ -263,8 +263,8 @@ TRIALS=4 chkce EQUIV  light_beh_beam_raycast "$S60E30" "$M60E30"
 # no result line, P222).
 TRIALS=8 chkce EQUIV  sfx_cooldown_tick ""
 TRIALS=8 chkce CERR   sfx_cooldown_tick "DIFFTEST_NMNEST_OLD=1"
-TRIALS=8 chkce DIFFER sfx_cooldown_tick "" 's/g_sfx_cooldowns\[i\] -= D_800BE9E4;/g_sfx_cooldowns[i] -= D_800BE9E4 + 2;/'
-TRIALS=8 chkce EQUIV  sfx_cooldown_tick "" 's/D_800BE9E4 + 1;/D_800BE9E4 + 3;/'
+TRIALS=8 chkce DIFFER sfx_cooldown_tick "" 's/g_sfx_cooldowns\[i\] -= g_frame_ticks;/g_sfx_cooldowns[i] -= g_frame_ticks + 2;/'
+TRIALS=8 chkce EQUIV  sfx_cooldown_tick "" 's/g_frame_ticks + 1;/g_frame_ticks + 3;/'
 TRIALS=8 chkce ERROR  sfx_cooldown_tick "DIFFTEST_STKFILL=WORD"
 TRIALS=8 chkce EQUIV  sfx_cooldown_tick "DIFFTEST_STKFILL=A5A5A5A5"
 # P229: a DIFFTEST_ARG item with a non-decimal index (`A=7`) is an ERROR line (was a traceback, empty result, P225);
@@ -356,8 +356,8 @@ TRIALS=1 chkce DIFFER object_ring_burst_particles "$SD290" 's/(random_float() \*
 # selftest's 5 re-used mutant paths compiled truncated (CERR). difftest.sh now refreshes the parent dir and compares
 # md5s (ERROR "stale container view" if it still differs). The rewritten file must be the DIFFER mutant, not CERR.
 F28=$T/sfx_cooldown_tick.mut.c
-sed -e 's/D_800BE9E4 + 1;/D_800BE9E4 + 3;/' $C/sfx_cooldown_tick.c > $F28; docker exec ${CONKERDEV:-conkerdev} cat ${F28/#$R//conker} > /dev/null
-TRIALS=8 chkce DIFFER sfx_cooldown_tick "" 's/g_sfx_cooldowns\[i\] -= D_800BE9E4;/g_sfx_cooldowns[i] -= D_800BE9E4 + 2;/'
+sed -e 's/g_frame_ticks + 1;/g_frame_ticks + 3;/' $C/sfx_cooldown_tick.c > $F28; docker exec ${CONKERDEV:-conkerdev} cat ${F28/#$R//conker} > /dev/null
+TRIALS=8 chkce DIFFER sfx_cooldown_tick "" 's/g_sfx_cooldowns\[i\] -= g_frame_ticks;/g_sfx_cooldowns[i] -= g_frame_ticks + 2;/'
 # P280: DIFFTEST_ARGMEM "N:LEN@K" compares only at the K-th call to ADDR. obj_glow_smoke_attach memcpys a 0x10 link record,
 # then a 0x5C tail: LEN 92 on every call compares stack bytes past the link record (layout-dependent, DIFFER as is);
 # with @0 / @1 the case is EQUIV and a one-ulp change of a tail constant DIFFERs.

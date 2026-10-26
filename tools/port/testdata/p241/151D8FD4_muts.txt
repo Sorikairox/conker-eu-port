@@ -1,11 +1,11 @@
 # P241 rumble_record_update (rumble_effect_update) mutants: sed % setup names
 s/    if (fx\[0xE\] \& 1) {/    if (fx[0xE] \& 2) {/ % expire
-s/        \*(s16 \*) (fx + 0x10) -= D_800BE9E4;/        *(s16 *) (fx + 0x10) -= 1;/ % tick
+s/        \*(s16 \*) (fx + 0x10) -= g_frame_ticks;/        *(s16 *) (fx + 0x10) -= 1;/ % tick
 s/        if (\*(s16 \*) (fx + 0x10) < 0) {/        if (*(s16 *) (fx + 0x10) <= 0) {/ % edge
 s/            done = TRUE;/            done = FALSE;/ % expire
 s/    u8 done = FALSE;/    u8 done = TRUE;/ % tick
 s/    if ((s8) fx\[0x14\] != -1) {/    if ((s8) fx[0x14] == -1) {/ % expire
-s/        D_80090060\[(s8) fx\[0x14\]\](fx);/        D_80090060[(s8) fx[0x14]](fx + 4);/ % expire
+s/        g_rumble_rec_update_fns\[(s8) fx\[0x14\]\](fx);/        g_rumble_rec_update_fns[(s8) fx[0x14]](fx + 4);/ % expire
 s/    if (fx\[0x12\] != fx\[0x16\]) {/    if (fx[0x12] == fx[0x16]) {/ % tick
 s/        for (i = 0; i < 4; i++) {/        for (i = 0; i < 3; i++) {/ % change
 s/        for (i = 0; i < 4; i++) {/        for (i = 1; i < 4; i++) {/ % change

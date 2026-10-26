@@ -14,11 +14,11 @@ void port_glog(const char *fmt, ...);
 const char *port_gstr(const char *gamestr);
 
 /* data (EU addresses; all live in the n64_rdram mirror) */
-extern s32 D_800D3048, D_800BEE24, D_800BEE20, g_level_load_id, D_800BEE08; /* was D_800BE9F4 */
+extern s32 D_800D3048, D_800BEE24, D_800BEE20, g_level_load_id, g_view_count_minus1; /* was D_800BE9F4; was D_800BEE08 */
 extern OSMesgQueue D_800BEE30;
 extern OSMesg D_800BEE48[16];
 extern s16 D_800BEE88[];
-extern u8 D_800BEA37, D_800BEECB, D_800BEA35, D_800BEECA, D_800E0B94;
+extern u8 D_800BEA37, D_800BEECB, D_800BEA35, D_800BEECA, g_game_mode; /* was D_800E0B94 */
 extern s16 g_gfx_tasks_pending; /* was D_800BEEC8 */
 
 /* callees: prototypes must match the wasm signature of the definition (C body or stub) */
@@ -97,7 +97,7 @@ void game_thread_main(void) {
                 /* fallthrough */
             case 0x15007944:
                 level_lights_clear();
-                if (D_800E0B94 == 2) random_seed(0x81280783);
+                if (g_game_mode == 2) random_seed(0x81280783);
                 /* lh 0x2(...): the low halves of three s32 globals (mixed-width access) */
                 level_start_game(((s16 *)&D_800BEE24)[1], ((s16 *)&D_800BEE20)[1], ((s16 *)&g_level_load_id)[1]);
                 /* fallthrough */
@@ -112,7 +112,7 @@ void game_thread_main(void) {
                 return;
         }
         sched_send_retrace_msg();
-        D_800BEE08 = 0;
+        g_view_count_minus1 = 0;
         game_main_loop();
         port_wait_frame(); /* PC: the frame wait happens inside asm stubs today; pace one pass per frame */
     }

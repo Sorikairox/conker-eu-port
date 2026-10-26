@@ -1,6 +1,6 @@
 \#^    if (obj == NULL) {$#s/obj == NULL/obj != NULL/ %
 \#^    if (\*(u8 \*\*)(obj + 0x1D4) == NULL) {$#s/== NULL/!= NULL/ %
-\#^    k = &D_800A8B80\[kind\];$#s/\[kind\]/[kind + 1]/ %
+\#^    k = &g_emitter_kinds\[kind\];$#s/\[kind\]/[kind + 1]/ %
 \#^    rec\.objId = obj\[0x3B\];$#s/0x3B/0x3A/ %
 \#^    rec\.node = k->node;$#s/k->node/k->u0C/ %
 \#^    rec\.flags = 2;$#s/= 2;/= 3;/ %
@@ -54,7 +54,7 @@
 \#^    if (e != NULL) {$#s/!= NULL/== NULL/ %
 \#^        dst = \*(EmitterRecord \*\*)(e + 0x98);$#s/0x98/0x94/ %
 \#^        if (dst->speedFn != -1) {$#s/!= -1/!= 0/ %
-\#^            dst->speed = D_8008FC10\[dst->speedFn\](e);$#s/(e)/(dst)/ %
+\#^            dst->speed = g_emitter_speed_fns\[dst->speedFn\](e);$#s/(e)/(dst)/ %
 \#^            dst->speed = 0\.0f;$#s/0.0f/1.0f/ %
 \#^        if (rec\.initFn != -1) {$#s/!= -1/!= 0/ %
-\#^            D_8008FC1C\[rec\.initFn\](e);$#s/(e)/(obj)/ %
+\#^            g_emitter_init_fns\[rec\.initFn\](e);$#s/(e)/(obj)/ %

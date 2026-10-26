@@ -12,7 +12,7 @@ u8 *world_record_find(u8 id);
 /*
  * model_light_create: P188: creates a light record (44 bytes, allocate_memory) for the model `id`
  * (world_record_find: origin s16 +0x10..+0x14, vertex count u16 +0x16, vertices +0x28, 16 bytes each, s16 x / y / z) and
- * appends it to the list D_800DD410 (count D_800DD418). Record: +0 id, +1 flags, +2 another light of the same model
+ * appends it to the list g_vtx_anim_lights (count g_vtx_anim_light_count). Record: +0 id, +1 flags, +2 another light of the same model
  * was there before, +4 1 / (range * 0.01)^2 (0 for range 0), +8 intensity, +0xC range, +0xE..+0x12 light position
  * relative to the model origin, +0x14 0, +0x16 / +0x17 the two s8 factors, +0x18..+0x1D six colour bytes (kind 1).
  * Per vertex, with d = the vertex distance to the light * 0.01 (flag 0x10: the signed distance along the direction
@@ -41,15 +41,15 @@ void vtx_anim_light_create(u8 flags, u8 id, s16 x, s16 y, s16 z, f32 angle, u16 
     if (light == NULL) {
         return;
     }
-    ((u8 **) D_800DD410)[D_800DD418] = light;
-    D_800DD418++;
+    ((u8 **) g_vtx_anim_lights)[g_vtx_anim_light_count] = light;
+    g_vtx_anim_light_count++;
     model = world_record_find(id);
     light[1] = flags;
     light[0] = id;
     found = 0;
-    n = D_800DD418 - 1;
+    n = g_vtx_anim_light_count - 1;
     for (i = 0; i < n; i++) {
-        if (((u8 **) D_800DD410)[i][0] == id) {
+        if (((u8 **) g_vtx_anim_lights)[i][0] == id) {
             found = 1;
             break;
         }
@@ -143,15 +143,15 @@ void vtx_wave_y_colour_per_vertex(Vtx *out, s32 count, u8 *state, u8 *colour, u8
 void vtx_wave_y_normal_colour(Vtx *out, s32 count, u8 *state, u8 *hue, u8 *phase, f32 *amp, Vtx *base);
 
 /* Model record (world_record_find(id)): f32 position +0x0..+0x8, s16 integer offset +0x10..+0x14, u16 vertex count
- * +0x16, Vtx *frame[2] +0x20 (the buffer drawn in frame D_800BE9C0), Vtx *base +0x28, f32 scale +0x2C..+0x34,
+ * +0x16, Vtx *frame[2] +0x20 (the buffer drawn in frame g_dl_buf_index), Vtx *base +0x28, f32 scale +0x2C..+0x34,
  * u8 flags +0x6F (low nibble: visible). */
 #define VTXANIM_COUNT(m) (*(u16 *) ((m) + 0x16))
-#define VTXANIM_FRAME(m) (((Vtx **) ((m) + 0x20))[D_800BE9C0])
+#define VTXANIM_FRAME(m) (((Vtx **) ((m) + 0x20))[g_dl_buf_index])
 #define VTXANIM_BASE(m) (*(Vtx **) ((m) + 0x28))
 #define VTXANIM_F32(m, o) (*(f32 *) ((m) + (o)))
 #define VTXANIM_S16(m, o) (*(s16 *) ((m) + (o)))
 
-/* vtx_anims_update: per frame, for the D_800DD418 vertex animations D_800DD410[i] (u8 model id +0, u8 mode +1,
+/* vtx_anims_update: per frame, for the g_vtx_anim_light_count vertex animations g_vtx_anim_lights[i] (u8 model id +0, u8 mode +1,
  * u8 +2 != 0: wave on top of the current frame buffer instead of the base vertices, wave state +4, colour bytes
  * +0x18, f32 *amp +0x20, u8 *phase +0x24, u8 *hue +0x28) of visible models: the wave animator of mode & 3
  * (0: height, 1: height + colour, 2: height + direction colour; bit 2: per-vertex amplitudes, required for 2)
@@ -171,8 +171,8 @@ void vtx_anims_update(void) {
     s32 i;
     s32 j;
 
-    for (i = 0; i < D_800DD418; i++) {
-        anim = ((u8 **) D_800DD410)[i];
+    for (i = 0; i < g_vtx_anim_light_count; i++) {
+        anim = ((u8 **) g_vtx_anim_lights)[i];
         model = world_record_find(anim[0]);
         if (!(model[0x6F] & 0xF)) {
             continue;
@@ -206,8 +206,8 @@ void vtx_anims_update(void) {
         }
     }
 
-    for (i = 0; i < D_800DD418; i++) {
-        anim = ((u8 **) D_800DD410)[i];
+    for (i = 0; i < g_vtx_anim_light_count; i++) {
+        anim = ((u8 **) g_vtx_anim_lights)[i];
         if (!(world_record_find(anim[0])[0x6F] & 0xF) || anim[2] != 0) {
             continue;
         }

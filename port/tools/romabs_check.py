@@ -6,7 +6,7 @@ N64 value (P37 D_D11 / D_A4A, P228 D_88C / D_87B barrel-menu trap, P228 D_89810 
 
 Two kinds:
   absolute  the value is used as a number (texture id, ROM offset): needs a vbe.py ROM_ABS entry {name: value}.
-  alias     KSEG0 | value is exactly the address of a known RAM data symbol (D_89810 -> D_80089810, the identity
+  alias     KSEG0 | value is exactly the address of a known RAM data symbol (D_89810 -> g_identity_mtx, the identity
             matrix used through its physical address in a gSPMatrix): needs a vbe.py RAM_ALIAS entry {name: target}.
 
 Sources of "referenced from NM C":

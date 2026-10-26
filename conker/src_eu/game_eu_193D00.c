@@ -99,9 +99,9 @@ void water_ring_spawn_ex(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
 void water_ring_update(struct102 *arg0) {
     s32 temp_v0;
 
-    *(s16 *)((u8 *)arg0 + 0x9E) += *(s16 *)((u8 *)arg0 + 0x96) * D_800BE9E4;
+    *(s16 *)((u8 *)arg0 + 0x9E) += *(s16 *)((u8 *)arg0 + 0x96) * g_frame_ticks;
     temp_v0 = *(u8 *)((u8 *)arg0 + 0x92);
-    temp_v0 -= D_800BE9E4;
+    temp_v0 -= g_frame_ticks;
     if (temp_v0 <= 0) {
         node_destroy(arg0);
         return;
@@ -207,37 +207,37 @@ u8 *water_ring_draw(u8 *arg0, u8 *arg1, s32 arg2) {
         if (temp_v0_3 == 0) {
             temp_v0_4 = temp_t4 - temp_a2;
             temp_v1_2 = temp_t5 - temp_a2;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x10)) = temp_v0_4;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x10)) = temp_v0_4;
             temp_a1 = temp_t4 + temp_a2;
             temp_t0 = temp_t5 + temp_a2;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x14)) = temp_v1_2;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x20)) = temp_a1;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x24)) = temp_v1_2;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x30)) = temp_a1;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x34)) = temp_t0;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x40)) = temp_v0_4;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x44)) = temp_t0;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x14)) = temp_v1_2;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x20)) = temp_a1;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x24)) = temp_v1_2;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x30)) = temp_a1;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x34)) = temp_t0;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x40)) = temp_v0_4;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x44)) = temp_t0;
         } else if (temp_v0_3 == 1) {
             temp_lo = (s32) ((*(s8 *)((u8 *)arg1 + 0x90)) * temp_a2) / 127;
             temp_t0_2 = temp_t4 - temp_lo;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x10)) = temp_t0_2;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x10)) = temp_t0_2;
             temp_t2 = temp_t4 + temp_lo;
             temp_lo_2 = (s32) ((*(s8 *)((u8 *)arg1 + 0x91)) * temp_a2) / 127;
             temp_t1 = temp_t5 - temp_lo_2;
             temp_a1_2 = sp.uD4 + temp_a2;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x12)) = temp_a1_2;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x12)) = temp_a1_2;
             temp_t3 = temp_t5 + temp_lo_2;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x14)) = temp_t1;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x20)) = temp_t2;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x22)) = temp_a1_2;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x24)) = temp_t3;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x30)) = temp_t2;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x14)) = temp_t1;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x20)) = temp_t2;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x22)) = temp_a1_2;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x24)) = temp_t3;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x30)) = temp_t2;
             temp_v0_5 = sp.uD4 - temp_a2;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x32)) = temp_v0_5;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x34)) = temp_t3;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x40)) = temp_t0_2;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x42)) = temp_v0_5;
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6))) + 0x44)) = temp_t1;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x32)) = temp_v0_5;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x34)) = temp_t3;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x40)) = temp_t0_2;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x42)) = temp_v0_5;
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6))) + 0x44)) = temp_t1;
         } else {
             sp.u8C = 0.0f;
             temp_f0 = (f32) -temp_a2;
@@ -277,9 +277,9 @@ u8 *water_ring_draw(u8 *arg0, u8 *arg1, s32 arg2) {
                     (*(f32 *)((u8 *)var_v0 + -8)) = (f32) (var_f10 - (temp_f20 * var_f14));
                     (*(f32 *)((u8 *)var_v0 + -0xC)) = (f32) ((temp_f0_2 * temp_f2_2) - (sp78 * temp_f4_2));
                     (*(f32 *)((u8 *)var_v0 + -4)) = (f32) ((temp_f0_2 * temp_f4_2) + (sp78 * temp_f2_2));
-                    (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6) + var_v1)) + 0x10)) = (s16) (s32) ((*(f32 *)((u8 *)var_v0 + -0xC)) + temp_f22);
-                    (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6) + var_v1)) + 0x12)) = (s16) (s32) ((*(f32 *)((u8 *)var_v0 + -8)) + temp_f24);
-                    temp_t8 = arg1 + (D_800BE9C0 << 6) + var_v1;
+                    (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6) + var_v1)) + 0x10)) = (s16) (s32) ((*(f32 *)((u8 *)var_v0 + -0xC)) + temp_f22);
+                    (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6) + var_v1)) + 0x12)) = (s16) (s32) ((*(f32 *)((u8 *)var_v0 + -8)) + temp_f24);
+                    temp_t8 = arg1 + (g_dl_buf_index << 6) + var_v1;
                     var_v1 += 0x10;
                     (*(s16 *)((u8 *)temp_t8 + 0x14)) = (s16) (s32) ((*(f32 *)((u8 *)var_v0 + -4)) + temp_f26);
                     temp_f4_3 = (*(f32 *)((u8 *)var_v0 + 4));
@@ -295,9 +295,9 @@ u8 *water_ring_draw(u8 *arg0, u8 *arg1, s32 arg2) {
             (*(f32 *)((u8 *)temp_v0_6 + -8)) = (f32) (var_f10 - (temp_f20 * var_f14));
             (*(f32 *)((u8 *)temp_v0_6 + -0xC)) = (f32) ((temp_f0_2 * temp_f2_3) - (sp78 * temp_f4_4));
             (*(f32 *)((u8 *)temp_v0_6 + -4)) = (f32) ((temp_f0_2 * temp_f4_4) + (sp78 * temp_f2_3));
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6) + var_v1)) + 0x10)) = (s16) (s32) ((*(f32 *)((u8 *)temp_v0_6 + -0xC)) + temp_f22);
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6) + var_v1)) + 0x12)) = (s16) (s32) ((*(f32 *)((u8 *)temp_v0_6 + -8)) + temp_f24);
-            (*(s16 *)((u8 *)((arg1 + (D_800BE9C0 << 6) + var_v1)) + 0x14)) = (s16) (s32) ((*(f32 *)((u8 *)temp_v0_6 + -4)) + temp_f26);
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6) + var_v1)) + 0x10)) = (s16) (s32) ((*(f32 *)((u8 *)temp_v0_6 + -0xC)) + temp_f22);
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6) + var_v1)) + 0x12)) = (s16) (s32) ((*(f32 *)((u8 *)temp_v0_6 + -8)) + temp_f24);
+            (*(s16 *)((u8 *)((arg1 + (g_dl_buf_index << 6) + var_v1)) + 0x14)) = (s16) (s32) ((*(f32 *)((u8 *)temp_v0_6 + -4)) + temp_f26);
         }
         (*(s32 *)((u8 *)var_a3 + 0)) = 0xE7000000;
         (*(s32 *)((u8 *)var_a3 + 4)) = 0;
@@ -307,7 +307,7 @@ u8 *water_ring_draw(u8 *arg0, u8 *arg1, s32 arg2) {
         (*(s32 *)((u8 *)temp_a3 + 4)) = (s32) ((sp.uC8 & 0xFF) | ~0xFF);
         (*(s32 *)((u8 *)temp_a3_2 + 0)) = 0x01004008;
         temp_a3_3 = temp_a3_2 + 8;
-        (*(u8 **)((u8 *)temp_a3_2 + 4)) = (u8 *) (arg1 + (D_800BE9C0 << 6) + 0x10);
+        (*(u8 **)((u8 *)temp_a3_2 + 4)) = (u8 *) (arg1 + (g_dl_buf_index << 6) + 0x10);
         (*(s32 *)((u8 *)temp_a3_3 + 0)) = 0x05000204;
         temp_a3_4 = temp_a3_3 + 8;
         (*(s32 *)((u8 *)temp_a3_3 + 4)) = 0;
@@ -317,34 +317,34 @@ u8 *water_ring_draw(u8 *arg0, u8 *arg1, s32 arg2) {
     }
     return var_a3;
 }
-extern s16 D_800DD270;
-extern s32 D_800DD650;
-extern s32 D_800DD654;
-extern s32 D_800DD658;
-extern u8 D_800DD660[];
-extern u8 D_800907A4[];
-extern s32 D_800D30BC;
+extern s16 g_layer_tex_scroll_pos; /* was D_800DD270 */
+extern s32 g_layer_tex_scroll; /* was D_800DD650 */
+extern s32 g_layer_tex_mode; /* was D_800DD654 */
+extern s32 g_layer_tex; /* was D_800DD658 */
+extern u8 g_layer_tex_sprite[]; /* was D_800DD660 */
+extern u8 g_layer_scroll_texture[]; /* was D_800907A4 */
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 extern s32 g_render_mode_pairs[]; /* render mode pairs (2 words each); was D_800A4EA8 */
 u8 *sprite_load_texture(u8 *, s32 *, s32, s32 *, s32, s32, s32, s32, s32);
 Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 
 /* layer_pre_scroll_texture: P238: `pre` callback of render layer 4 (g_node_type_table + 0xE4, RenderLayer +0x14; called as
- * pre(gdl, layer, list, arg2) by node_render_layers_draw, the other arguments are unused). Advances the s16 scroll D_800DD270 by
- * 0x80 (back to 0 once it reaches 0x500), records texture D_800907A4 / the old scroll / 1 in D_800DD658 / 650 / 654,
- * emits the texture through sprite_load_texture(gdl, D_800DD658, D_800DD650, D_800DD660, 0, 0, 0, 1, 3) and returns the
- * render mode set by gfx_other_mode_cached(gdl, D_800D30BC | 0x82CA0, render modes 3 (g_render_mode_pairs words 7 | 6), &1). */
+ * pre(gdl, layer, list, arg2) by node_render_layers_draw, the other arguments are unused). Advances the s16 scroll g_layer_tex_scroll_pos by
+ * 0x80 (back to 0 once it reaches 0x500), records texture g_layer_scroll_texture / the old scroll / 1 in g_layer_tex / 650 / 654,
+ * emits the texture through sprite_load_texture(gdl, g_layer_tex, g_layer_tex_scroll, g_layer_tex_sprite, 0, 0, 0, 1, 3) and returns the
+ * render mode set by gfx_other_mode_cached(gdl, g_gfx_tlut_mode | 0x82CA0, render modes 3 (g_render_mode_pairs words 7 | 6), &1). */
 /* was func_15166E28 */
 Gfx *layer_pre_scroll_texture(Gfx *gdl, s32 layer, s32 list, s16 arg3) {
     u8 one = 1;
-    s16 prev = D_800DD270;
+    s16 prev = g_layer_tex_scroll_pos;
 
-    D_800DD270 = prev + 0x80;
-    D_800DD658 = (s32) D_800907A4;
-    D_800DD650 = prev;
-    if (D_800DD270 >= 0x500) {
-        D_800DD270 = 0;
+    g_layer_tex_scroll_pos = prev + 0x80;
+    g_layer_tex = (s32) g_layer_scroll_texture;
+    g_layer_tex_scroll = prev;
+    if (g_layer_tex_scroll_pos >= 0x500) {
+        g_layer_tex_scroll_pos = 0;
     }
-    D_800DD654 = 1;
-    gdl = (Gfx *) sprite_load_texture((u8 *) gdl, (s32 *) D_800DD658, D_800DD650, (s32 *) D_800DD660, 0, 0, 0, 1, 3);
-    return gfx_other_mode_cached(gdl, D_800D30BC | 0x82CA0, g_render_mode_pairs[7] | g_render_mode_pairs[6], &one);
+    g_layer_tex_mode = 1;
+    gdl = (Gfx *) sprite_load_texture((u8 *) gdl, (s32 *) g_layer_tex, g_layer_tex_scroll, (s32 *) g_layer_tex_sprite, 0, 0, 0, 1, 3);
+    return gfx_other_mode_cached(gdl, g_gfx_tlut_mode | 0x82CA0, g_render_mode_pairs[7] | g_render_mode_pairs[6], &one);
 }

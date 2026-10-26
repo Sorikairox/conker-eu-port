@@ -12,5 +12,5 @@ void level_obj_init_scroll_handles(void) {
     g_level_scroll_handles->unk8 = texture_anim_start_for(world_record_find(250), g_tex_scroll_id_0310, 1, -1, 0, 0, 0);
     g_level_scroll_handles->unkC = texture_anim_start_for(world_record_find(249), g_tex_scroll_id_0310, 1, -1, 0, 0, 0);
     collision_select_area(0);
-    D_800D9A40 = zone_tree_find_leaf(0x1500, 0x700);
+    g_cam_zone_leaf = zone_tree_find_leaf(0x1500, 0x700);
 }

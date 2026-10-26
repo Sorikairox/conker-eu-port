@@ -68,7 +68,7 @@ s32 event_table_count(void) {
 }
 
 /* event_prereqs_met: D_800877D0[id] +0xC is a 0xFFFF-terminated list of event ids. The event may start when every
- * prerequisite has its save bit set (bit field at D_800D2E4C) and its own prerequisites hold. Empty list: 1. */
+ * prerequisite has its save bit set (bit field at g_save_progress_bits) and its own prerequisites hold. Empty list: 1. */
 /* was func_1509CBD4 */
 s32 event_prereqs_met(s32 id) {
     u16 *p = *(u16 **) ((u8 *) D_800877D0 + id * 0x14 + 0xC);
@@ -79,7 +79,7 @@ s32 event_prereqs_met(s32 id) {
     while (e != 0xFFFF) {
         ok = event_prereqs_met(e);
         e = *p;
-        if (!(((u8 *) D_800D2E4C)[e >> 3] & (1 << (e & 7))) || ok == 0) {
+        if (!(((u8 *) g_save_progress_bits)[e >> 3] & (1 << (e & 7))) || ok == 0) {
             return 0;
         }
         p++;
@@ -117,10 +117,10 @@ s32 save_unlocks_apply(s32 arg0) {
     cnt = 0;
     if (*p != 0xFFFF) {
         do {
-            ((u8 *)D_800D2E4C)[*p >> 3] |= 1 << (*p & 7);
+            ((u8 *)g_save_progress_bits)[*p >> 3] |= 1 << (*p & 7);
             new_var = p;
-            q = *new_var + (u8 *)(new_var2 = &D_800D2E70);
-            if (*((u8 *)&D_800D2E70 + *new_var) != 3) {
+            q = *new_var + (u8 *)(new_var2 = &g_event_states);
+            if (*((u8 *)&g_event_states + *new_var) != 3) {
                 *((u8 *)new_var2 + *new_var) = 3;
                 event_unlock_chain_rec(*new_var);
                 cnt++;
@@ -132,7 +132,7 @@ s32 save_unlocks_apply(s32 arg0) {
 }
 
 // save_unlocks_propagate: unlocks arg0's list (save_unlocks_apply), then keeps expanding every entry of the state bytes
-// D_800D2E70 (0xCC of them) that is in state 3 until a whole pass unlocks nothing new. The asm returns no value.
+// g_event_states (0xCC of them) that is in state 3 until a whole pass unlocks nothing new. The asm returns no value.
 /* was func_1509D1EC */
 void save_unlocks_propagate(s32 arg0) {
     s32 added;
@@ -142,7 +142,7 @@ void save_unlocks_propagate(s32 arg0) {
     do {
         added = 0;
         for (i = 0; i < 0xCC; i++) {
-            if (((u8 *) &D_800D2E70)[i] == 3) {
+            if (((u8 *) &g_event_states)[i] == 3) {
                 added += save_unlocks_apply(i);
             }
         }
@@ -150,7 +150,7 @@ void save_unlocks_propagate(s32 arg0) {
 }
 
 // event_list_unlock: for each id of the 0xFFFF-terminated u16 list: calls cb(id) (event_unlock_chain_rec recurses into the
-// event's own list), sets its state byte D_800D2E70[id] to 3 and its save bit in D_800D2E4C. arg2 is unused; the
+// event's own list), sets its state byte g_event_states[id] to 3 and its save bit in g_save_progress_bits. arg2 is unused; the
 // asm returns no value.
 /* was func_1509D274 */
 void event_list_unlock(s32 listp, void (*cb)(s32), s32 arg2) {
@@ -158,8 +158,8 @@ void event_list_unlock(s32 listp, void (*cb)(s32), s32 arg2) {
 
     while (*list != 0xFFFF) {
         cb(*list);
-        ((u8 *)&D_800D2E70)[*list] = 3;
-        ((u8 *)D_800D2E4C)[*list >> 3] |= 1 << (*list & 7);
+        ((u8 *)&g_event_states)[*list] = 3;
+        ((u8 *)g_save_progress_bits)[*list >> 3] |= 1 << (*list & 7);
         list++;
     }
 }
@@ -225,7 +225,7 @@ void save_route_table_free(void) {
 // save_route_check: route arg1 of the table D_800D33D0 (record arg1 + 1, relocated by save_route_table_load): writes the
 // first id of its requirement list through outA and the id its word 0 points at through outB (0xBF / 0 when there
 // is no table or no route; NULL out-pointers are skipped) and returns 1 when every id of the list (word 2, count
-// word 3, s16 each) has its bit set in D_800D2E4C, else 0. arg0 is unused.
+// word 3, s16 each) has its bit set in g_save_progress_bits, else 0. arg0 is unused.
 /* was func_1509D49C */
 s32 save_route_check(s8 arg0, u8 arg1, s32 *outA, s32 *outB) {
     SaveRouteRec *rec;
@@ -259,7 +259,7 @@ s32 save_route_check(s8 arg0, u8 arg1, s32 *outA, s32 *outB) {
     ids = (s16 *) route[2];
     for (i = 0; i < n; i++) {
         id = ids[i];
-        if (!(((u8 *) D_800D2E4C)[id >> 3] & (1 << (id & 7)))) {
+        if (!(((u8 *) g_save_progress_bits)[id >> 3] & (1 << (id & 7)))) {
             return 0;
         }
     }

@@ -8,9 +8,9 @@ s/speed > 26.0f/speed >= 26.0f/ % eq26 boost_eq
 s/(obj + 0x3C)/(obj + 0x40)/ % boost
 s/1.2590001f + r \* 1.079f/1.259f + r * 1.079f/ % exact1 one
 s/1.2590001f + r \* 1.079f/1.2590001f + r * 1.0f/ % one multi
-s/\* D_800BE9A4;/* 2.0f;/ % one
+s/\* g_frame_step_f;/* 2.0f;/ % one
 s/(fx + 0x30) > 1.0f)) {/(fx + 0x30) >= 1.0f)) {/ % exact1
-s/ground = D_800A5860;/ground = (u8 *) g_objects;/ % noground
+s/ground = g_vec3_zero;/ground = (u8 *) g_objects;/ % noground
 s/\* 0.017453292f, 1.0f/* 0.017453292f, 2.0f/ % one
 s/(obj + 0x40) \* 0.017453292f/(obj + 0x3C) * 0.017453292f/ % one
 s/fwd\[1\] = -side\[0\];/fwd[1] = side[0];/ % one

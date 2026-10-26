@@ -4,7 +4,7 @@ s/mtx\[3\]\[1\] = p\[4\];/mtx[3][1] = p[3];/
 s/mtx\[0\]\[1\] \*= 0.157f;/;/
 s/mtx\[1\]\[2\] \*= 0.157f;/;/
 s/mtx\[2\]\[2\] \*= 0.157f;/mtx[2][3] *= 0.157f;/
-s/(rec + 0x78 + D_800BE9C0 \* 0x40)/(rec + 0x78)/
+s/(rec + 0x78 + g_dl_buf_index \* 0x40)/(rec + 0x78)/
 s/camera_get_pos((s16) slot)/camera_get_pos(0)/
 s/fabsf(cam\[1\]) > 0.0001f/fabsf(cam[2]) > 0.0001f/
 s/fabsf(cam\[0\]) > 0.0001f ||/fabsf(cam[0]) >= 0.0001f ||/
@@ -14,7 +14,7 @@ s/cz = -cam\[0\] \* inv;/cz = cam[0] * inv;/
 s/cx = 1.0f;/cx = 0.0f;/
 s/cz = 0.0f;/cz = 1.0f;/
 s/i < 16;/i < 15;/
-s/(rec + D_800BE9C0 \* 0x10 + (s16) slot \* 4 + 0x58)/(rec + (s16) slot * 4 + 0x58)/
+s/(rec + g_dl_buf_index \* 0x10 + (s16) slot \* 4 + 0x58)/(rec + (s16) slot * 4 + 0x58)/
 s/v->v.ob\[1\], v->v.ob\[2\]/v->v.ob[2], v->v.ob[1]/
 s/(ox \* cx + oz \* cz)/(ox * cz + oz * cx)/
 s/\* 0.21300001f + 26.0f/* 0.213f + 26.0f/

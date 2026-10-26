@@ -19,7 +19,7 @@ s32 obj_receive_hit(struct127 *arg0, struct127 *arg1, void *arg2, s32 arg3, s32 
 void attachment_swap_owner_ids(s32, s32);
 // object_slots_swap: P259: swaps the objects `a` and `b` of g_objects (after obj_broadcast_replace(a, b)), then fixes up
 // what is tied to the slot rather than the object: each object's index fields (+0x127 / +0x13F = index, unique_id =
-// index + 1) and its +0x144 pointer (kept in the slot); `b` gets the camera record D_800DBFF0[index of b] (whose
+// index + 1) and its +0x144 pointer (kept in the slot); `b` gets the camera record g_player_views[index of b] (whose
 // +0x3D4 takes b's +0x31C, and that record's byte +0x197 is cleared), `a` none; attachment_swap_owner_ids swaps the unique ids;
 // both objects' +0x2D4 handles are released (node_destroy); other live objects' +0x65 links (unique id) to either
 // slot are swapped; when b's +0x13C names a carrier (>= 100), that object's +0x13D = 100 + b's index; then
@@ -43,7 +43,7 @@ void obj_slots_swap(struct127 *a, struct127 *b) {
     b->unk127 = ib;
     b->unique_id = ib + 1;
     b->unk13F = ib;
-    b->camera = &D_800DBFF0[ib];
+    b->camera = &g_player_views[ib];
     a->unk127 = ia;
     a->unique_id = ia + 1;
     a->unk13F = ia;
@@ -51,7 +51,7 @@ void obj_slots_swap(struct127 *a, struct127 *b) {
     p144 = b->unk144;
     b->unk144 = a->unk144;
     a->unk144 = p144;
-    *(struct126 **) ((u8 *) &D_800DBFF0[ib] + 0x3D4) = b->unk31C;
+    *(struct126 **) ((u8 *) &g_player_views[ib] + 0x3D4) = b->unk31C;
     *((u8 *) b->unk31C + 0x197) = 0;
     attachment_swap_owner_ids(b->unique_id, a->unique_id);
     if (b->unk2D4 != NULL) {
@@ -187,7 +187,7 @@ extern u8 *D_800C5758[]; /* per object type: 12-byte texture entries, u16 size a
 void uv_rotate(u8 *, s32 *, s32, f32, s32, s32);
 
 // type_texture_scroll_apply: for every live object (+0x0) of `type` (+0x4) with +0x2FA set and a display list
-// for the current screen (+0x28C[D_800BE9C0]), calls uv_rotate on entry `dl` (16-byte steps) of it with the
+// for the current screen (+0x28C[g_dl_buf_index]), calls uv_rotate on entry `dl` (16-byte steps) of it with the
 // type's texture-command table D_800C6360[type] at `cmd`, `arg2`, the amount `amount`, and the size of texture
 // `tex` of D_800C5758[type] (doubled when `twice`).
 /* was func_15062E24 */
@@ -214,7 +214,7 @@ void obj_type_tex_scroll_apply(s32 type, s32 dl, s32 arg2, s32 cmd, s32 amount, 
             w *= 2;
             h *= 2;
         }
-        list = ((u8 **) &g_objects[i].unk28C)[D_800BE9C0];
+        list = ((u8 **) &g_objects[i].unk28C)[g_dl_buf_index];
         if (list != NULL) {
             table = (s32 *) D_800C6360[type];
             uv_rotate(list + dl * 16, &table[cmd], arg2, (f32) amount, h, w);
@@ -245,8 +245,8 @@ void obj_vtx_scroll_uv(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg
     u8 *var_v0;
 
     temp_a2 = arg0 + ((*(u8 *)((u8 *)arg0 + 0x1C8)) * 8);
-    var_v0 = (*(u8 **)((u8 *)((temp_a2 + (D_800BE9C0 * 4))) + 0x28C));
-    var_v1 = (*(s32 *)((u8 *)((temp_a2 + ((D_800BE9C0 == 0) * 4))) + 0x28C));
+    var_v0 = (*(u8 **)((u8 *)((temp_a2 + (g_dl_buf_index * 4))) + 0x28C));
+    var_v1 = (*(s32 *)((u8 *)((temp_a2 + ((g_dl_buf_index == 0) * 4))) + 0x28C));
     if (var_v0 != NULL) {
         if (arg1 != -1) {
             temp_t7 = *(s32 *)(*(s32 *)(((s32 *)((u8 *)&D_800C4440 + ((*(u8 *)((u8 *)arg0 + 4)) * 4)))) + (arg1 * 4)) * 0x10;
@@ -316,7 +316,7 @@ block_18:
 void obj_hit_react_other_players(struct127 *arg0) {
     s32 i;
 
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < g_player_count; i++) {
         if ((i != (arg0 - g_objects)) && ((1 << i) & g_obj_contact_mask)) {
             if ((g_objects[i].unk31C != NULL) && (((u8 *)g_objects[i].unk31C)[0x1AC] == 0)) {
                 character_hit_react(arg0, &g_objects[i], 1);

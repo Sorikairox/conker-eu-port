@@ -27,7 +27,7 @@ typedef struct {
     /* 0x3C */ u32 pifstatus;
 } OSPifRam_s86;
 
-extern OSPifRam_s86 D_800E0E60; /* __osEepPifRam (game copy) */
+extern OSPifRam_s86 g_eep_pif_ram; /* __osEepPifRam (game copy); was D_800E0E60 */
 extern u8 D_80042DE0;           /* __osContLastCmd */
 void __osSiGetAccess(void);
 void __osSiRelAccess(void);
@@ -38,7 +38,7 @@ void game_eep_pack_write_data(u8 address, u8 *buffer); /* __osPackEepWriteData *
 s32 game_eeprom_write(OSMesgQueue *mq, u8 address, u8 *buffer) {
     s32 ret = 0;
     u16 type;
-    u8 *ptr = (u8 *)&D_800E0E60.ramarray;
+    u8 *ptr = (u8 *)&g_eep_pif_ram.ramarray;
     __OSContEepromFormat_s86 eepromformat;
     OSContStatus sdata;
 
@@ -69,9 +69,9 @@ s32 game_eeprom_write(OSMesgQueue *mq, u8 address, u8 *buffer) {
         game_eep_status(mq, &sdata);
     }
     game_eep_pack_write_data(address, buffer);
-    ret = os_si_raw_start_dma(OS_WRITE, &D_800E0E60);
+    ret = os_si_raw_start_dma(OS_WRITE, &g_eep_pif_ram);
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
-    ret = os_si_raw_start_dma(OS_READ, &D_800E0E60);
+    ret = os_si_raw_start_dma(OS_READ, &g_eep_pif_ram);
     D_80042DE0 = 5;
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     ptr += 4;
@@ -83,11 +83,11 @@ s32 game_eeprom_write(OSMesgQueue *mq, u8 address, u8 *buffer) {
 
 /* was func_151DDC0C */
 void game_eep_pack_write_data(u8 address, u8 *buffer) {
-    u8 *ptr = (u8 *)&D_800E0E60.ramarray;
+    u8 *ptr = (u8 *)&g_eep_pif_ram.ramarray;
     __OSContEepromFormat_s86 eepromformat;
     int i;
 
-    D_800E0E60.pifstatus = 1;
+    g_eep_pif_ram.pifstatus = 1;
     eepromformat.txsize = 10;
     eepromformat.rxsize = 1;
     eepromformat.cmd = 5;
@@ -107,14 +107,14 @@ void game_eep_pack_write_data(u8 address, u8 *buffer) {
 s32 game_eep_status(OSMesgQueue *mq, OSContStatus *data) {
     s32 ret = 0;
     int i;
-    u8 *ptr = (u8 *)D_800E0E60.ramarray;
+    u8 *ptr = (u8 *)g_eep_pif_ram.ramarray;
     __OSContRequesFormat_s86 requestformat;
 
     for (i = 0; i < 16; i++) {
-        D_800E0E60.ramarray[i] = 0;
+        g_eep_pif_ram.ramarray[i] = 0;
     }
-    D_800E0E60.pifstatus = 1;
-    ptr = (u8 *)D_800E0E60.ramarray;
+    g_eep_pif_ram.pifstatus = 1;
+    ptr = (u8 *)g_eep_pif_ram.ramarray;
     for (i = 0; i < 4; i++) {
         *ptr++ = 0;
     }
@@ -129,18 +129,18 @@ s32 game_eep_status(OSMesgQueue *mq, OSContStatus *data) {
     *(__OSContRequesFormat_s86 *)ptr = requestformat;
     ptr += sizeof(__OSContRequesFormat_s86);
     *ptr = 0xFE;
-    ret = os_si_raw_start_dma(OS_WRITE, &D_800E0E60);
+    ret = os_si_raw_start_dma(OS_WRITE, &g_eep_pif_ram);
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     D_80042DE0 = 0xFE;
     if (ret != 0) {
         return ret;
     }
-    ret = os_si_raw_start_dma(OS_READ, &D_800E0E60);
+    ret = os_si_raw_start_dma(OS_READ, &g_eep_pif_ram);
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     if (ret != 0) {
         return ret;
     }
-    ptr = (u8 *)&D_800E0E60;
+    ptr = (u8 *)&g_eep_pif_ram;
     for (i = 0; i < 4; i++) {
         *ptr++ = 0;
     }
@@ -151,9 +151,9 @@ s32 game_eep_status(OSMesgQueue *mq, OSContStatus *data) {
     return data->errno;
 }
 
-extern s32 D_800E0EA0;
-extern s32 D_800E0EA4;
-extern s8 D_800E1002;
+extern s32 g_demo_input_buf; /* was D_800E0EA0 */
+extern s32 g_demo_input_index; /* was D_800E0EA4 */
+extern s8 g_demo_frame_wait; /* was D_800E1002 */
 
 /* was func_151DDE70 */
 void demo_input_play_next(void) {
@@ -161,21 +161,21 @@ void demo_input_play_next(void) {
     u16 temp_v0;
     u8 *temp_a0;
 
-    temp_a0 = D_800E0EA0 + (D_800E0EA4 * 6);
-    (*(s8 *)((u8 *)D_800BE748 + 2)) = (s8) (*(s8 *)((u8 *)temp_a0 + 0));
-    (*(s8 *)((u8 *)D_800BE748 + 3)) = (s8) (*(s8 *)((u8 *)temp_a0 + 1));
-    D_800E1002 = 0;
-    (*(u16 *)((u8 *)D_800BE748 + 0)) = (*(u16 *)((u8 *)temp_a0 + 4)) | ((*(u16 *)((u8 *)D_800BE748 + 0)) & 0x1000);
-    if (D_800E0EA4 < 0x1F3) {
+    temp_a0 = g_demo_input_buf + (g_demo_input_index * 6);
+    (*(s8 *)((u8 *)g_pad_states + 2)) = (s8) (*(s8 *)((u8 *)temp_a0 + 0));
+    (*(s8 *)((u8 *)g_pad_states + 3)) = (s8) (*(s8 *)((u8 *)temp_a0 + 1));
+    g_demo_frame_wait = 0;
+    (*(u16 *)((u8 *)g_pad_states + 0)) = (*(u16 *)((u8 *)temp_a0 + 4)) | ((*(u16 *)((u8 *)g_pad_states + 0)) & 0x1000);
+    if (g_demo_input_index < 0x1F3) {
         temp_v0 = (*(u16 *)((u8 *)temp_a0 + 8));
-        if (D_800BE9E4 < (s32) temp_v0) {
-            D_800E1002 = temp_v0 - D_800BE9E4;
+        if (g_frame_ticks < (s32) temp_v0) {
+            g_demo_frame_wait = temp_v0 - g_frame_ticks;
         }
     }
-    temp_t5 = D_800E0EA4 + 1;
-    D_800BE9E4 = (s32) (*(u16 *)((u8 *)temp_a0 + 2));
-    D_800E0EA4 = temp_t5;
+    temp_t5 = g_demo_input_index + 1;
+    g_frame_ticks = (s32) (*(u16 *)((u8 *)temp_a0 + 2));
+    g_demo_input_index = temp_t5;
     if (temp_t5 >= 0x1F3) {
-        D_800E0EA4 = 0x1F3;
+        g_demo_input_index = 0x1F3;
     }
 }

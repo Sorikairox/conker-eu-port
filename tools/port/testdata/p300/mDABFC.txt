@@ -1,7 +1,7 @@
 s/    if (hit->count == 0) {/    if (hit->count == 1) {/
 s/    if (hit->count >= 2 && (\*(u8 \*)(hit->obj + 4) == 0x33/    if (hit->count >= 3 \&\& (*(u8 *)(hit->obj + 4) == 0x33/
 s/|| \*(u8 \*)(hit->obj + 4) == 0x3A)) {/|| *(u8 *)(hit->obj + 4) == 0x3B)) {/
-s/(hitfx_spark_rate\[0\] + random_float() \* hitfx_spark_rand\[0\]) \* D_800BE9A4;/(hitfx_spark_rate[0] + random_float() * hitfx_spark_rand[0]);/
+s/(hitfx_spark_rate\[0\] + random_float() \* hitfx_spark_rand\[0\]) \* g_frame_step_f;/(hitfx_spark_rate[0] + random_float() * hitfx_spark_rand[0]);/
 s/static const f32 hitfx_spark_rand\[1\] = { 0.15400001f };/static const f32 hitfx_spark_rand[1] = { 0.15f };/
 s/        if (1.0f < \*(f32 \*)(data + 0x48)) {/        if (2.0f < *(f32 *)(data + 0x48)) {/
 s/            spark.u08 = 0x5103;/            spark.u08 = 0x5104;/
@@ -16,7 +16,7 @@ s/            spark.col0\[1\] = 0xD3;/            spark.col0[1] = 0xD4;/
 s/            spark.vel\[0\] = spark.vel\[1\] = spark.vel\[2\] = 0.0f;/            spark.vel[0] = spark.vel[1] = 0.0f;/
 s/            tail.k = hitfx_spark_k\[0\];/            tail.k = hitfx_spark_size[0];/
 s/            spark.pos\[1\] = hit->pos\[1\];/            spark.pos[1] = hit->pos[2];/
-s/            spark.acc\[2\] = ((f32 \*)D_800A5860)\[2\];/            spark.acc[2] = ((f32 *)D_800A5860)[1];/
+s/            spark.acc\[2\] = ((f32 \*)g_vec3_zero)\[2\];/            spark.acc[2] = ((f32 *)g_vec3_zero)[1];/
 /tail.b\[2\] = (u32)random_int()/s/ + 4;/ + 5;/
 s/                tail.spin\[1\] = random_float() \* 10.0f;/                tail.spin[1] = random_float() * 11.0f;/
 s/                spark.u54 = random_float() \* hitfx_spark_life_k\[0\] + hitfx_spark_life\[0\];/                spark.u54 = random_float() * hitfx_spark_life_k[0];/
@@ -29,7 +29,7 @@ s/= random_float() \* 116.0f + 131.0f;/= random_float() * 116.0f + 130.0f;/
 s/                k = particle_spawn_ex((s32)&spark, 1, 0, 16,/                k = particle_spawn_ex((s32)\&spark, 1, 0, 15,/
 s/                    memcpy((u8 \*)k + 0xA8, &tail, 16);/                    memcpy((u8 *)k + 0xA4, \&tail, 16);/
 s/                \*(f32 \*)(data + 0x48) -= 1.0f;/                *(f32 *)(data + 0x48) -= 0.5f;/
-s/        \*(f32 \*)(data + 0x44) += (f + random_float() \* f) \* D_800BE9A4;/        *(f32 *)(data + 0x44) += (f + random_float()) * D_800BE9A4;/
+s/        \*(f32 \*)(data + 0x44) += (f + random_float() \* f) \* g_frame_step_f;/        *(f32 *)(data + 0x44) += (f + random_float()) * g_frame_step_f;/
 s/            hitinfo_from_record((f32 \*)frame, hit);/            hitinfo_from_record((f32 *)frame, (TrailHit *)hit->pos);/
 s/            debris.pos\[2\] = hit->pos\[2\];/            debris.pos[2] = hit->pos[1];/
 s/            debris.f\[3\] = hitfx_dust_q\[3\];/            debris.f[3] = hitfx_dust_q[2];/

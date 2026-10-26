@@ -71,7 +71,7 @@ typedef struct {
     /* 0x84 */ s32 u84;
 } Burst8EC0B;
 
-// projectile_bounce_update: handler (D_80089CD4 table: obj, x, y, z, w, ext; returns keep). +0x3C = +0x10 + w.
+// projectile_bounce_update: handler (g_mdl_particle_land_fns table: obj, x, y, z, w, ext; returns keep). +0x3C = +0x10 + w.
 // Speed +0x140 <= 15: stops (+0x72 / +0x78 = 1, low byte of +0x60 cleared), turns the velocity (0, 0, 200) by
 // mtxf_rotate_xyz_deg(+0x20, +0x24, +0x28) into +0x20..+0x28 and adds +0x38..+0x40 (keep). Speed > 30: breaks: a
 // effect3d_spawn_oriented flash record at (x, w, z) (random size, gets an 8-byte random spin at +0x128 of the new record), a
@@ -263,7 +263,7 @@ typedef struct {
     /* 0xA0 */ s32 uA0;
 } Burst9424;
 
-// projectile_wall_hit: handler of D_80089D14 (`s32 (*)(obj, hit, x, y, z)`, slot 1; 0 = destroyed). Speed = +0x140
+// projectile_wall_hit: handler of g_mdl_particle_wall_fns (`s32 (*)(obj, hit, x, y, z)`, slot 1; 0 = destroyed). Speed = +0x140
 // - |+0x48|. Up to 6: bounces off the wall: stops x / z (+0x44 / +0x4C), keeps +0x48 (scaled by +0x14 if upwards),
 // moves to the hit point (hit +0x14..+0x1C), scales +0x50..+0x58 by +0x14 and plays D_80088ADC (keep). Faster: breaks;
 // unless trigger_point_in_kind3 rejects the hit point, ray casts back from (x, y, z) along the last move (collision_ray_cast) and at
@@ -408,7 +408,7 @@ s32 fx_rise_grow_update(u8 *arg0) {
 
     if ((*(s16 *)((u8 *)arg0 + 0x1C)) < 0x50) {
         temp_v0 = arg0 + 0x110;
-        *temp_v0 += 0.3f * D_800BE9A4;
+        *temp_v0 += 0.3f * g_frame_step_f;
         (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) - *temp_v0);
     }
     if ((*(s16 *)((u8 *)arg0 + 0x1C)) >= 0x73) {

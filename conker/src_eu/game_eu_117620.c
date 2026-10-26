@@ -182,7 +182,7 @@ void fx_marker_spark_emitter_update(u8 *arg0)
   u8 *temp_s0;
   temp_s0 = arg0 + 0x28;
   ;
-  *((f32 *) (((u8 *) temp_s0) + 0x14)) = (f32) ((((*((f32 *) (((u8 *) temp_s0) + 4))) + (random_float() * (*((f32 *) (((u8 *) temp_s0) + 8))))) * D_800BE9A4) + (*((f32 *) (((u8 *) temp_s0) + 0x14))));
+  *((f32 *) (((u8 *) temp_s0) + 0x14)) = (f32) ((((*((f32 *) (((u8 *) temp_s0) + 4))) + (random_float() * (*((f32 *) (((u8 *) temp_s0) + 8))))) * g_frame_step_f) + (*((f32 *) (((u8 *) temp_s0) + 0x14))));
   if ((*((f32 *) (((u8 *) temp_s0) + 0x14))) > 1.0f)
   {
     do

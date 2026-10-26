@@ -1,26 +1,26 @@
-s/if (D_800D1891 == 0 || D_800D1891 == 1) {/if (D_800D1891 == 0) {/
-s/idx = obj_slot_by_setup_id(D_800D1891 - 2);/idx = obj_slot_by_setup_id(D_800D1891 - 1);/
+s/if (g_aiscript_arg1 == 0 || g_aiscript_arg1 == 1) {/if (g_aiscript_arg1 == 0) {/
+s/idx = obj_slot_by_setup_id(g_aiscript_arg1 - 2);/idx = obj_slot_by_setup_id(g_aiscript_arg1 - 1);/
 s/        if (idx == -1) {/        if (idx == -2) {/
 s/var = \&g_objects\[idx\].unk2E4;/var = \&g_objects[idx].unk2E8;/
 s/var = \&g_objects\[idx\].unk2E8;/var = \&g_objects[idx].unk2EC;/
 s/var = \&g_objects\[idx\].unk2EC;/var = \&g_objects[idx].unk2E4;/
 s/            g_cur_obj_index = idx;/            ;/
-s/if (D_800D1890 != g_cur_obj->unk232) {/if (D_800D1890 == g_cur_obj->unk232) {/
-s/g_cur_obj->unk232 = D_800D1890;/g_cur_obj->unk232 = D_800D1891;/
+s/if (g_aiscript_arg0 != g_cur_obj->unk232) {/if (g_aiscript_arg0 == g_cur_obj->unk232) {/
+s/g_cur_obj->unk232 = g_aiscript_arg0;/g_cur_obj->unk232 = g_aiscript_arg1;/
 s/                g_cur_obj->unk21C = 0;/                ;/
 s/            g_cur_obj_index = savedNum;/            ;/
-s/g_objects\[idx\].unkC8 = D_800D1890;/g_objects[idx].unkC8 = D_800D1891;/
+s/g_objects\[idx\].unkC8 = g_aiscript_arg0;/g_objects[idx].unkC8 = g_aiscript_arg1;/
 s/g_objects\[idx\].unkB8 = 0.0f;/g_objects[idx].unkB8 = 1.0f;/
 s/a = aiscript_path_point_angle(g_cur_obj->unk222);/a = aiscript_path_point_angle(idx);/
 s/if ((aiscript_path_point_angle(g_cur_obj_index) - a) \& 0x8000) {/if ((a - aiscript_path_point_angle(g_cur_obj_index)) \& 0x8000) {/
-s/g_cur_obj->unk221 = D_800D1890;/g_cur_obj->unk221 = D_800D1891;/
-s/g_cur_obj->unk244 = (D_800D1893 << 8) | D_800D1890;/g_cur_obj->unk244 = (D_800D1890 << 8) | D_800D1893;/
-s/g_cur_obj->unk23D + (s8)D_800D1890;/g_cur_obj->unk23D + D_800D1890;/
-s/g_cur_obj->unk22A = D_800D1890;/g_cur_obj->unk22A = D_800D1893;/
-s/            \*var = D_800D1890;/            *var = D_800D1891;/
+s/g_cur_obj->unk221 = g_aiscript_arg0;/g_cur_obj->unk221 = g_aiscript_arg1;/
+s/g_cur_obj->unk244 = (g_aiscript_arg3 << 8) | g_aiscript_arg0;/g_cur_obj->unk244 = (g_aiscript_arg0 << 8) | g_aiscript_arg3;/
+s/g_cur_obj->unk23D + (s8)g_aiscript_arg0;/g_cur_obj->unk23D + g_aiscript_arg0;/
+s/g_cur_obj->unk22A = g_aiscript_arg0;/g_cur_obj->unk22A = g_aiscript_arg3;/
+s/            \*var = g_aiscript_arg0;/            *var = g_aiscript_arg1;/
 s/            \*var -= 1;/            *var -= 2;/
-s/            \*var += D_800BE9E4;/            *var += D_800CC264;/
+s/            \*var += g_frame_ticks;/            *var += D_800CC264;/
 s/            \*var += 1;/            ;/
-s/            \*var -= D_800BE9E4;/            *var += D_800BE9E4;/
+s/            \*var -= g_frame_ticks;/            *var += g_frame_ticks;/
 s/            \*var -= D_800CC264;/            *var += D_800CC264;/
 s/        case 4:$/        case 44:/

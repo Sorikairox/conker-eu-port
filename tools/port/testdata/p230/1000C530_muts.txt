@@ -12,7 +12,7 @@ s/        a = D_80041F0C \& 0xFF;/        a = D_80041F0C \& 0x7F;/ % req1 req2 r
 s/        b = D_80041F0C >> 8;/        b = (D_80041F0C >> 8) \& 0xFF;/ % same_mode_hi req_neg req2
 s/        timer = 30;/        timer = 31;/ % req1 req_timer_30
 s/    if (timer != 0) {/    if (timer > 1) {/ % timer1
-s/        timer -= D_800BE9E4;/        timer -= 1;/ % timer_end timer_neg_dt
+s/        timer -= g_frame_ticks;/        timer -= 1;/ % timer_end timer_neg_dt
 s/        if (timer <= 0) {/        if (timer < 0) {/ % req_timer_30 timer_end
 s/            timer = 0;/            timer = 1;/ % timer_end2 req_timer_end
 s/            mode = 0;/            mode = 1;/ % timer_end2 req_timer_end
@@ -36,8 +36,8 @@ s/        D_80041F04 \&= ~0x10;/        D_80041F04 \&= ~0x11;/ % flag10_nofade
 s/        if (fade == 0) {/        if (fade != 0) {/ % flag10_nofade flag10_fade
 s/            music_chans_set_volume(ch, 0xC0, 0x80);/            music_chans_set_volume(ch, 0xC0, 0x81);/ % flag10_nofade
 s/        fade = 0xFF000000;/        fade = 0xFE000000;/ % flag10_nofade flag10_fade
-s/        d = (D_800BE9E4 << 23) \& 0xFF000000;/        d = (D_800BE9E4 << 24) \& 0xFF000000;/ % fade_dec fade_end
-s/        d = (D_800BE9E4 << 23) \& 0xFF000000;/        d = (D_800BE9E4 << 23);/ % fade_odd
+s/        d = (g_frame_ticks << 23) \& 0xFF000000;/        d = (g_frame_ticks << 24) \& 0xFF000000;/ % fade_dec fade_end
+s/        d = (g_frame_ticks << 23) \& 0xFF000000;/        d = (g_frame_ticks << 23);/ % fade_odd
 s/        if (d < fade) {/        if (d <= fade) {/ % fade_eq1
 s/            music_chans_fade_volume(ch, 0xC0, 0, 0x5A);/            music_chans_fade_volume(ch, 0xC0, 0, 0x5B);/ % fade_eq1 fade_big_dt
 s/            fade = 0;/            fade = 0x1000000;/ % fade_eq1 fade_big_dt

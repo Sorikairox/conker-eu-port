@@ -67,7 +67,7 @@ void *glow_pair_spawn(struct127 *obj) {
     Tmpl7364 t;
     struct260 *o;
     Rec7364 *r;
-    f32 *still = (f32 *) D_800A5860; /* zero vector */
+    f32 *still = (f32 *) g_vec3_zero; /* zero vector */
     u8 i;
 
     rec.owner = obj;
@@ -134,12 +134,12 @@ void *glow_pair_spawn(struct127 *obj) {
     return o;
 }
 
-extern f32 D_800A1F84;
-extern f32 D_800A1F88;
+extern f32 g_glow_pair_aim_scale; /* was D_800A1F84 */
+extern f32 g_glow_pair_k_1f88; /* was D_800A1F88 */
 void obj_tint_set_flash(u8 *, s32, s32, s32, s32, s32, s32);
 s32 obj_get_player_alpha(s32, s32);
 s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
-extern s32 D_800D9E70;
+extern s32 g_aim_vec_scratch; /* was D_800D9E70 */
 
 /* was func_150F75EC */
 void glow_pair_update(u8 *arg0) {
@@ -175,11 +175,11 @@ void glow_pair_update(u8 *arg0) {
         sp.u6C = temp_s2->x_position;
         sp.u70 = temp_s2->y_position + 46.0f;
         sp.u74 = temp_s2->z_position;
-        obj_get_aim_vectors(temp_s2, (s32) &D_800D9E70, 0, 0, 0.0f);
-        (*(f32 *)((u8 *)(&D_800D9E70) + 0)) = (f32) ((*(f32 *)((u8 *)(&D_800D9E70) + 0)) * D_800A1F84);
-        (*(f32 *)((u8 *)(&D_800D9E70) + 4)) = (f32) ((*(f32 *)((u8 *)(&D_800D9E70) + 4)) * D_800A1F84);
-        (*(f32 *)((u8 *)(&D_800D9E70) + 8)) = (f32) ((*(f32 *)((u8 *)(&D_800D9E70) + 8)) * D_800A1F84);
-        ray_cast_world(temp_s2, sp.u6C, sp.u70, sp.u74, (*(f32 *)((u8 *)(&D_800D9E70) + 0)), (*(f32 *)((u8 *)(&D_800D9E70) + 4)), (*(f32 *)((u8 *)(&D_800D9E70) + 8)), temp_s1 + 0x10, D_800A1F88, 0, 0, 1, -1, 0, 0);
+        obj_get_aim_vectors(temp_s2, (s32) &g_aim_vec_scratch, 0, 0, 0.0f);
+        (*(f32 *)((u8 *)(&g_aim_vec_scratch) + 0)) = (f32) ((*(f32 *)((u8 *)(&g_aim_vec_scratch) + 0)) * g_glow_pair_aim_scale);
+        (*(f32 *)((u8 *)(&g_aim_vec_scratch) + 4)) = (f32) ((*(f32 *)((u8 *)(&g_aim_vec_scratch) + 4)) * g_glow_pair_aim_scale);
+        (*(f32 *)((u8 *)(&g_aim_vec_scratch) + 8)) = (f32) ((*(f32 *)((u8 *)(&g_aim_vec_scratch) + 8)) * g_glow_pair_aim_scale);
+        ray_cast_world(temp_s2, sp.u6C, sp.u70, sp.u74, (*(f32 *)((u8 *)(&g_aim_vec_scratch) + 0)), (*(f32 *)((u8 *)(&g_aim_vec_scratch) + 4)), (*(f32 *)((u8 *)(&g_aim_vec_scratch) + 8)), temp_s1 + 0x10, g_glow_pair_k_1f88, 0, 0, 1, -1, 0, 0);
         (*(u8 *)((u8 *)temp_s1 + 0x74)) = (u8) ((*(u8 *)((u8 *)temp_s1 + 0x74)) | 1);
         if (((*(u8 **)((u8 *)temp_s1 + 8)) != NULL) && (temp_v0_2 = (*(u8 **)((u8 *)temp_s1 + 0xC)), (temp_v0_2 != NULL))) {
             if ((*(u8 *)((u8 *)temp_s1 + 0x69)) == 0) {

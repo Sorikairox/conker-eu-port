@@ -2,10 +2,10 @@ s/^    self->unkAB = 1;/    self->unkAB = 2;/ % m
 s/^    self->unk80 = 1;/    self->unk80 = 2;/ % m
 s/^    self->unk222 = 0;/    self->unk222 = 1;/ % mFar
 s/^    D_800CC288 = D_800BEB30\[0\];/    D_800CC288 = D_800BEB30[1];/ % eC000 mSpawn
-s/^    if (who <= D_80082FA0 \&\& /    if (who < D_80082FA0 \&\& / % gate
-s/(\&D_800DDE3C)\[who\] != 0 \&\& /(\&D_800DDE3C)[who] == 0 \&\& / % gate gateZ
-s/0.75f < (\&D_800DDDC8)\[who\]/0.75f <= (\&D_800DDDC8)[who]/ % gateF
-s/ \&\& D_800E0B94 != 2) {/ \&\& D_800E0B94 != 3) {/ % gateE
+s/^    if (who <= g_last_player_index \&\& /    if (who < g_last_player_index \&\& / % gate
+s/(\&g_hud_lens_state)\[who\] != 0 \&\& /(\&g_hud_lens_state)[who] == 0 \&\& / % gate gateZ
+s/0.75f < (\&g_hud_lens_zoom)\[who\]/0.75f <= (\&g_hud_lens_zoom)[who]/ % gateF
+s/ \&\& g_game_mode != 2) {/ \&\& g_game_mode != 3) {/ % gateE
 s/^        D_800CC6A4\[2\] = 0;/        D_800CC6A4[2] = 1;/ % gate
 s/^        D_800CC6A4\[3\] = 0;/        D_800CC6A4[3] = 1;/ % gate
 s/^        \*(u16 \*) D_800CC6A4 = 0;/        *(u16 *) D_800CC6A4 = 1;/ % gate
@@ -38,8 +38,8 @@ s/^            self->unk232 = 8;/            self->unk232 = 9;/ % e100
 /self->unk232 = 8;/,/}/s/^            self->unk102 = 1;/            self->unk102 = 2;/ % e100
 s/^        obj_state_common_update(self);/        ;/ % e0
 s/^            if (self->unk28 > 30.0f) {/            if (self->unk28 > 60.0f) {/ % eGrab
-s/^                obj_attach_to_carrier(\&g_objects\[D_800CC68D - 100\], g_cur_obj_index);/                obj_attach_to_carrier(\&g_objects[D_800CC68D - 100], 1);/ % eGrab
-s/^                self->unk13C = D_800CC68D;/                self->unk13C = 1;/ % eGrab
+s/^                obj_attach_to_carrier(\&g_objects\[g_contact_grab_obj_id - 100\], g_cur_obj_index);/                obj_attach_to_carrier(\&g_objects[g_contact_grab_obj_id - 100], 1);/ % eGrab
+s/^                self->unk13C = g_contact_grab_obj_id;/                self->unk13C = 1;/ % eGrab
 s/^            self->y_velocity = 23.0f;/            self->y_velocity = 24.0f;/ % eGrab0
 s/^        if (self->y_position < self->unk118) {/        if (self->y_position > self->unk118) {/ % eDive e0
 /^        if (self->y_position < self->unk118) {/,/return;/s/self->unk86 = 1;/self->unk86 = 2;/ % eDive
@@ -115,15 +115,15 @@ s/^            self->unkB8 = 40.0f;/            self->unkB8 = 45.0f;/ % mB8hi
 s/^        } else if (self->unkB8 < -55.0f) {/        } else if (self->unkB8 < -65.0f) {/ % mB8lo
 s/^            self->unkB8 = -55.0f;/            self->unkB8 = -50.0f;/ % mB8lo
 s/^    speed = self->y_velocity;/    speed = self->gravity;/ % fB
-s/^    D_800CC1F3 = 1;/    D_800CC1F3 = 2;/ % m
-s/^    D_800CC1F3 = 0;/    D_800CC1F3 = 3;/ % m
+s/^    g_wall_coll_soft_edges = 1;/    g_wall_coll_soft_edges = 2;/ % m
+s/^    g_wall_coll_soft_edges = 0;/    g_wall_coll_soft_edges = 3;/ % m
 s/^    if (self->unk13C != 0 \&\& self->unk28 < 50.0f) {/    if (self->unk13C != 0 \&\& self->unk28 < 20.0f) {/ % fC
 s/^        floor_h = 50.0f;/        floor_h = 25.0f;/ % fC
-s/^        if (D_800CC68D != 0 \&\& self->unk13C == 0 \&\& g_objects\[D_800CC68D - 100\].unk28 == 0.0f) {/        if (D_800CC68D != 0 \&\& self->unk13C == 0 \&\& g_objects[D_800CC68D - 100].unk28 == 5.0f) {/ % mPick mPick2
+s/^        if (g_contact_grab_obj_id != 0 \&\& self->unk13C == 0 \&\& g_objects\[g_contact_grab_obj_id - 100\].unk28 == 0.0f) {/        if (g_contact_grab_obj_id != 0 \&\& self->unk13C == 0 \&\& g_objects[g_contact_grab_obj_id - 100].unk28 == 5.0f) {/ % mPick mPick2
 s/^            self->y_velocity = 20.0f;/            self->y_velocity = 21.0f;/ % mPick
-s/^            self->y_position = g_objects\[D_800CC68D - 100\].y_position + 70.0f;/            self->y_position = g_objects[D_800CC68D - 100].y_position + 60.0f;/ % mPick
-s/^            obj_attach_to_carrier(\&g_objects\[D_800CC68D - 100\], g_cur_obj_index);/            obj_attach_to_carrier(\&g_objects[D_800CC68D - 101], g_cur_obj_index);/ % mPick
-s/^            self->unk13C = D_800CC68D;/            self->unk13C = 101;/ % mPickD
+s/^            self->y_position = g_objects\[g_contact_grab_obj_id - 100\].y_position + 70.0f;/            self->y_position = g_objects[g_contact_grab_obj_id - 100].y_position + 60.0f;/ % mPick
+s/^            obj_attach_to_carrier(\&g_objects\[g_contact_grab_obj_id - 100\], g_cur_obj_index);/            obj_attach_to_carrier(\&g_objects[g_contact_grab_obj_id - 101], g_cur_obj_index);/ % mPick
+s/^            self->unk13C = g_contact_grab_obj_id;/            self->unk13C = 101;/ % mPickD
 s/^            g_cur_obj_cmd = 0xFF010074;/            g_cur_obj_cmd = 0xFF010075;/ % mPick
 s/^            if (self->unk25C \& 2) {/            if (self->unk25C \& 4) {/ % mDrop
 s/^                self->unk25C \&= ~2;/                self->unk25C \&= ~3;/ % mDrop

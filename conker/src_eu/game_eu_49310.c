@@ -18,13 +18,13 @@ void cont_arm_read_timer(void) {
 extern u8 D_8002AE18;
 extern OSMesg D_800BEDB0;
 extern u8 D_800BEB60;
-extern u8 D_800E0FC5;
+extern u8 g_game_mode_prev; /* was D_800E0FC5 */
 extern u16 D_800BEB20[4];
 extern u16 D_800BEB28[4];
 extern u16 D_800BEB30[4];
 extern u16 D_800BEB38[4];
-extern OSContPad D_800BED38[4];
-extern u16 D_800BED50[4];
+extern OSContPad g_cont_pads[4]; /* was D_800BED38 */
+extern u16 g_cont_pressed[4]; /* was D_800BED50 */
 void demo_input_play_next(void);
 void save_process_request(void);
 
@@ -36,7 +36,7 @@ void save_process_request(void);
 /* was func_1501BBB8 */
 struct14 *cont_read_frame(void) {
     OSContPad pads[4];
-    OSContPad *player = (OSContPad *)D_800BE748;
+    OSContPad *player = (OSContPad *)g_pad_states;
     s32 i;
     s32 nplayers;
     s32 replay;
@@ -62,10 +62,10 @@ struct14 *cont_read_frame(void) {
 
     nplayers = 4;
     if (g_level_id != 0x1D) {
-        nplayers = D_80090130;
+        nplayers = g_human_player_count;
     }
     for (i = 0; i < 4; i++) {
-        idx = D_800843F0[i];
+        idx = g_player_pad_map[i];
         if (idx < 4 && i < nplayers) {
             player[i].stick_x = pads[idx].stick_x;
             player[i].stick_y = pads[idx].stick_y;
@@ -79,14 +79,14 @@ struct14 *cont_read_frame(void) {
     }
 
     for (i = 0; i < 4; i++) {
-        D_800BED50[i] = ~D_800BEB28[i] & player[i].button;
-        D_800BED38[i].button = player[i].button;
+        g_cont_pressed[i] = ~D_800BEB28[i] & player[i].button;
+        g_cont_pads[i].button = player[i].button;
         D_800BEB28[i] = player[i].button;
-        D_800BED38[i].stick_x = DEADZONE(player[i].stick_x);
-        D_800BED38[i].stick_y = DEADZONE(player[i].stick_y);
+        g_cont_pads[i].stick_x = DEADZONE(player[i].stick_x);
+        g_cont_pads[i].stick_y = DEADZONE(player[i].stick_y);
     }
 
-    if (D_800E0B94 == 2 || D_800E0FC5 == 2) {
+    if (g_game_mode == 2 || g_game_mode_prev == 2) {
         replay = 1;
         demo_input_play_next();
     } else {
@@ -137,7 +137,7 @@ extern f32 D_800BEDA0[];
 /* was func_1501C0D0 */
 void rumble_start(u8 arg0, f32 arg1, f32 arg2) {
     s32 idx;
-    idx = D_800843F0[arg0];
+    idx = g_player_pad_map[arg0];
     if (idx < 4 && D_800BED64[idx] != 0) {
         D_800BED5C[idx] = 1;
         D_800BED70[idx] = 0.0f;
@@ -149,7 +149,7 @@ void rumble_start(u8 arg0, f32 arg1, f32 arg2) {
 
 /* was func_1501C15C */
 void rumble_stop(u8 arg0) {
-    s32 temp_v0 = D_800843F0[arg0];
+    s32 temp_v0 = g_player_pad_map[arg0];
 
     if (temp_v0 < 4) {
         D_800BED5C[temp_v0] = 0;
@@ -209,7 +209,7 @@ void rumble_update(void) {
                 ((u8 *)&D_800BED68)[var_s1] = 0;
                 *temp_s4 = 0;
             }
-            if ((D_800BEAC1 == 0) && (g_game_paused == 0) && (g_unpause_settle_frames == 0) && (D_800BEEE3 == 0) && (D_eu_800E0E30 == 0)) {
+            if ((g_pause_open == 0) && (g_game_paused == 0) && (g_unpause_settle_frames == 0) && (D_800BEEE3 == 0) && (D_eu_800E0E30 == 0)) {
                 temp_v0 = *temp_s4;
                 switch (temp_v0) {                  /* irregular */
                 case 0:
@@ -222,7 +222,7 @@ void rumble_update(void) {
                     break;
                 case 1:
                     temp_v0_2 = &D_800BED70[var_s1];
-                    *temp_v0_2 += D_800BE9A4;
+                    *temp_v0_2 += g_frame_step_f;
                     temp_f2 = D_800BEDA0[var_s1];
                     temp_s2 = ((u8 *)&D_800BED68 + var_s1);
                     var_s0 = 1;

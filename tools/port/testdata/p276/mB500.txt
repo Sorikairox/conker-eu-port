@@ -1,5 +1,5 @@
 \#^    if (random_int() & 0xF) {$#s/0xF/0x7/
-\#^    pos = (f32 \*) ((u8 \*) D_800DBFF0 + idx \* 0x9A0 + 0x2F8);$#s/0x2F8/0x2FC/
+\#^    pos = (f32 \*) ((u8 \*) g_player_views + idx \* 0x9A0 + 0x2F8);$#s/0x2F8/0x2FC/
 \#^    yaw = \*(f32 \*)#s/0x380/0x384/
 \#^    yaw = \*(f32 \*)#s/0.7111111f/0.75f/
 \#^    dist = random_float() \* 1903.0f + 107.0f;$#s/1903/1904/

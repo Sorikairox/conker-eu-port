@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A5860[];
+extern u8 g_vec3_zero[]; /* was D_800A5860 */
 
 
 s32 vec3_normalize_len(f32 *, f32 *, f32 *, s32 *);
@@ -17,7 +17,7 @@ s32 memcpy(s32, s32 *, s32); /* as declared later in this file */
 // returns. tracer_hit_update fills the 0xB4-byte light block (from arg5, the position a0, the points, arg7 / arg8 /
 // arg9 / arg10 / arg12 / arg13 / arg15 / arg17 and the option byte: arg11 -> 1, arg12 -> 2, arg13 -> 4,
 // | 1 when the block's +4 exceeds 150); vec3_make_basis gives its direction. The effect (mdl_particle_spawn_ex, 0xB4 extra
-// bytes, arg18 / arg19) moves from a0 along the direction x arg6, angles from vec3_to_yaw_pitch_deg, colour D_800A5860,
+// bytes, arg18 / arg19) moves from a0 along the direction x arg6, angles from vec3_to_yaw_pitch_deg, colour g_vec3_zero,
 // owner arg9 (kind byte +0x3B) and, when arg16 is set, sound 0x4650 at a0 (sound_play_at = sound_voice_play_at(0, ...),
 // called directly because the C sound_play_at is void and drops the handle); the light block goes to +0x170.
 /* was func_150F79F0 */
@@ -33,7 +33,7 @@ void beam_light_effect_spawn(f32 *a0, void *a1, void *a2, void *a3, u8 arg4, u8 
         f32 u1C[3];         /* 0x1C = 1 */
         f32 pos[3];         /* 0x28 */
         f32 vel[3];         /* 0x34 */
-        f32 colour[3];      /* 0x40, D_800A5860 */
+        f32 colour[3];      /* 0x40, g_vec3_zero */
         f32 u4C;            /* 0x4C = 0 */
         s32 u50;            /* 0x50 = 0x120 */
         s16 u54;            /* 0x54 = 300 */
@@ -130,9 +130,9 @@ void beam_light_effect_spawn(f32 *a0, void *a1, void *a2, void *a3, u8 arg4, u8 
     fx.vel[0] = lt.dir[0] * arg6;
     fx.vel[1] = lt.dir[1] * arg6;
     fx.vel[2] = lt.dir[2] * arg6;
-    ((s32 *) fx.colour)[0] = ((s32 *) D_800A5860)[0];
-    ((s32 *) fx.colour)[1] = ((s32 *) D_800A5860)[1];
-    ((s32 *) fx.colour)[2] = ((s32 *) D_800A5860)[2];
+    ((s32 *) fx.colour)[0] = ((s32 *) g_vec3_zero)[0];
+    ((s32 *) fx.colour)[1] = ((s32 *) g_vec3_zero)[1];
+    ((s32 *) fx.colour)[2] = ((s32 *) g_vec3_zero)[2];
     fx.u50 = 0x120;
     fx.u54 = 300;
     fx.u56 = 0x2F;
@@ -218,7 +218,7 @@ typedef struct {
 } PuffExtra7E34;
 
 // rocket_update: handler of the D_80089C80 table (`s32 (*)(u8 *)`, returns 1 while alive). Block d = +0x170. Step
-// dt = frame time D_800BE9A4, capped at the remaining life d +0x68. Moves its sound (+0x88) to the position; with d
+// dt = frame time g_frame_step_f, capped at the remaining life d +0x68. Moves its sound (+0x88) to the position; with d
 // +0x70 & 2 ray casts the move (ray_cast_world from the position along d +0x38 for d +0x6C * dt, filter
 // !(d +0x70 & 4), d +0xB0): on 2+ hits applies object_take_hit (flags 0x1A, d +0x38) and, with d +0x70 & 1, explodes
 // (rocket_explode) and dies. Then moves by the velocity +0x44 * dt; when not dead counts the life down (at 0 dies,
@@ -238,7 +238,7 @@ s32 rocket_update(u8 *obj) {
     f32 n;
     u8 *puff;
 
-    dt = D_800BE9A4;
+    dt = g_frame_step_f;
     if (*(f32 *) (d + 0x68) < dt) {
         dt = *(f32 *) (d + 0x68);
     }
@@ -263,7 +263,7 @@ s32 rocket_update(u8 *obj) {
     *(f32 *) (obj + 0x3C) += *(f32 *) (obj + 0x48) * dt;
     *(f32 *) (obj + 0x40) += *(f32 *) (obj + 0x4C) * dt;
     if (alive == 1) {
-        *(f32 *) (d + 0x68) -= D_800BE9A4;
+        *(f32 *) (d + 0x68) -= g_frame_step_f;
         if (*(f32 *) (d + 0x68) <= 0.0f) {
             alive = 0;
             if (d[0x70] & 1) {
@@ -296,9 +296,9 @@ s32 rocket_update(u8 *obj) {
         rec.u14[0] = 0.0f;
         rec.u14[1] = 0.0f;
         extra.u20 = D_800A1F9C_c[0];
-        rec.u28[0] = ((f32 *) D_800A5860)[0];
-        rec.u28[1] = ((f32 *) D_800A5860)[1];
-        rec.u28[2] = ((f32 *) D_800A5860)[2];
+        rec.u28[0] = ((f32 *) g_vec3_zero)[0];
+        rec.u28[1] = ((f32 *) g_vec3_zero)[1];
+        rec.u28[2] = ((f32 *) g_vec3_zero)[2];
         rec.scale[0] = 1.0f;
         rec.scale[1] = 1.0f;
         rec.scale[2] = 1.0f;
@@ -331,18 +331,18 @@ s32 rocket_update(u8 *obj) {
     return alive;
 }
 
-extern f32 D_800A1FA8;
+extern f32 g_pulse_sprite_alpha_scale; /* was D_800A1FA8 */
 /* was func_150F83A0 */
 s32 pulse_sprite_update(u8 *arg0)
 {
   u8 *v = arg0 + 0x110;
   f32 f;
-  *((s8 *) (arg0 + 0x5C)) = (s8) ((u32) ((*((f32 *) (arg0 + 0x128))) * D_800A1FA8));
+  *((s8 *) (arg0 + 0x5C)) = (s8) ((u32) ((*((f32 *) (arg0 + 0x128))) * g_pulse_sprite_alpha_scale));
   f = (*((f32 *) (v + 0x24))) + ((*((f32 *) (v + 0x28))) * sinf(*((f32 *) (arg0 + 0x12C))));
   *((f32 *) (arg0 + 0x30)) = f;
   *((f32 *) (arg0 + 0x2C)) = f;
-  *((f32 *) (v + 0x1C)) = wrap_angle_rad(((*((f32 *) (v + 0x20))) * D_800BE9A4) + (*((f32 *) (v + 0x1C))));
-  *((f32 *) (v + 0x18)) = (*((f32 *) (v + 0x18))) - D_800BE9A4;
+  *((f32 *) (v + 0x1C)) = wrap_angle_rad(((*((f32 *) (v + 0x20))) * g_frame_step_f) + (*((f32 *) (v + 0x1C))));
+  *((f32 *) (v + 0x18)) = (*((f32 *) (v + 0x18))) - g_frame_step_f;
   if ((*((f32 *) (v + 0x18))) < 0.0f)
   {
     return 0;
@@ -368,10 +368,10 @@ void rocket_explode(u8 *arg0, u8 arg1, s32 arg2) {
 
 /* P159 */
 s32 mdl_particle_spawn_ex(void *, s32, s32, s32, s32, s32, s32);
-extern u8 D_800A5860[];
+extern u8 g_vec3_zero[]; /* was D_800A5860 */
 s32 memcpy(s32, s32 *, s32);
 // record_particle_spawn: spawns particle type 0x2F (mdl_particle_spawn_ex) lasting `life` at the record's point rec[0..2]
-// with the angles rec[3..5], scale 1 / 0.02 and the colour of D_800A5860; the 0x14 extra bytes at +0x170 keep
+// with the angles rec[3..5], scale 1 / 0.02 and the colour of g_vec3_zero; the 0x14 extra bytes at +0x170 keep
 // the record pointer, its point and 0.0.
 /* was func_150F85AC */
 void trail_follower_spawn(f32 *rec, s16 life, u8 flag, s32 arg3) {
@@ -432,9 +432,9 @@ void trail_follower_spawn(f32 *rec, s16 life, u8 flag, s32 arg3) {
     sp.vel[0] = 0.0f;
     sp.vel[1] = 0.0f;
     sp.vel[2] = 0.0f;
-    sp.color[0] = ((s32 *)D_800A5860)[0];
-    sp.color[1] = ((s32 *)D_800A5860)[1];
-    sp.color[2] = ((s32 *)D_800A5860)[2];
+    sp.color[0] = ((s32 *)g_vec3_zero)[0];
+    sp.color[1] = ((s32 *)g_vec3_zero)[1];
+    sp.color[2] = ((s32 *)g_vec3_zero)[2];
     sp.u4C = 0.0f;
     sp.flags50 = 0x980;
     sp.life = life;
@@ -534,7 +534,7 @@ s32 trail_follower_update(u8 *arg0) {
     sp.u140 = (*(f32 *)((u8 *)arg0 + 0x38)) - (*(f32 *)((u8 *)arg0 + 0x174));
     sp.u144 = (*(f32 *)((u8 *)arg0 + 0x3C)) - (*(f32 *)((u8 *)arg0 + 0x178));
     sp.u148 = (*(f32 *)((u8 *)arg0 + 0x40)) - (*(f32 *)((u8 *)arg0 + 0x17C));
-    (*(f32 *)((u8 *)arg0 + 0x180)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x180)) + D_800BE9A4);
+    (*(f32 *)((u8 *)arg0 + 0x180)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x180)) + g_frame_step_f);
     if (vec3_normalize_len(&sp.u140, &sp.u12C, &sp.u13C, &sp.u138) != 0) {
         temp_s0 = arg0 + 0x170;
         var_f20 = sp.u13C * 0.05f;
@@ -543,7 +543,7 @@ s32 trail_follower_update(u8 *arg0) {
         if (var_f20 > 1.0f) {
             sp94 = (*(f32 *)((u8 *)temp_s0 + 0x10)) / var_f20;
             vec3_make_basis(&sp.u140, &sp.u98, &sp.uA4);
-            temp_t4 = ((u8 *)&D_800A5860);
+            temp_t4 = ((u8 *)&g_vec3_zero);
             sp.uC4 = 0x7A;
             sp.uC5 = 0;
             sp.uC6 = 0x4404;

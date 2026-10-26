@@ -17,46 +17,46 @@ void impact_spray_params_init(f32 *, f32 *);
 void impact_spark_flash_spawn(u8 *, u8, s32);
 
 
-extern f32 D_800AAD5C;
-extern f32 D_800AAD60;
-extern f32 D_800AAD64;
-extern f32 D_800AAD68;
-extern f32 D_800AAD6C;
+extern f32 g_impact_spray_param_14; /* was D_800AAD5C */
+extern f32 g_impact_spray_param_18; /* was D_800AAD60 */
+extern f32 g_impact_spray_param_38; /* was D_800AAD64 */
+extern f32 g_impact_spray_param_3c; /* was D_800AAD68 */
+extern f32 g_impact_spray_param_40; /* was D_800AAD6C */
 /* was func_151C01F0 */
 void impact_spray_params_init(f32 *arg0, f32 *arg1) {
     s32 var_v0;
     s32 var_v0_2;
 
     (*(f32 *)((u8 *)arg0 + 0)) = 4e-45f;
-    if (D_80082FA0 >= 2) {
+    if (g_last_player_index >= 2) {
         var_v0 = 1;
     } else {
         var_v0 = 0;
     }
     (*(s32 *)((u8 *)arg0 + 4)) = (s32) (4 >> var_v0);
     *arg1 = 494.0f;
-    (*(f32 *)((u8 *)arg0 + 0x14)) = D_800AAD5C;
+    (*(f32 *)((u8 *)arg0 + 0x14)) = g_impact_spray_param_14;
     (*(s32 *)((u8 *)arg0 + 0x2C)) = 7;
-    (*(f32 *)((u8 *)arg0 + 0x18)) = D_800AAD60;
+    (*(f32 *)((u8 *)arg0 + 0x18)) = g_impact_spray_param_18;
     (*(f32 *)((u8 *)arg0 + 0x1C)) = 45.0f;
     (*(f32 *)((u8 *)arg0 + 0x20)) = 53.0f;
     (*(f32 *)((u8 *)arg0 + 0x24)) = 203.0f;
     (*(f32 *)((u8 *)arg0 + 0x28)) = 414.0f;
-    if ((D_80082FA0 >= 2) || (var_v0_2 = 0, ((D_8008FD8C < 8) == 0))) {
+    if ((g_last_player_index >= 2) || (var_v0_2 = 0, ((g_player_count < 8) == 0))) {
         var_v0_2 = 1;
     }
     (*(s32 *)((u8 *)arg0 + 0x30)) = (s32) (3 >> var_v0_2);
     (*(f32 *)((u8 *)arg0 + 0x34)) = 15.0f;
-    (*(f32 *)((u8 *)arg0 + 0x38)) = D_800AAD64;
-    (*(f32 *)((u8 *)arg0 + 0x3C)) = D_800AAD68;
+    (*(f32 *)((u8 *)arg0 + 0x38)) = g_impact_spray_param_38;
+    (*(f32 *)((u8 *)arg0 + 0x3C)) = g_impact_spray_param_3c;
     (*(s16 *)((u8 *)arg0 + 0x44)) = 0x19;
     (*(s16 *)((u8 *)arg0 + 0x46)) = 0xF;
     (*(s16 *)((u8 *)arg0 + 0x48)) = 0x64;
     (*(s16 *)((u8 *)arg0 + 0x4A)) = 0x64;
     (*(s16 *)((u8 *)arg0 + 0x4C)) = 0xC;
     (*(s16 *)((u8 *)arg0 + 0x4E)) = 0x14;
-    (*(f32 *)((u8 *)arg0 + 0x40)) = D_800AAD6C;
-    if ((D_80082FA0 >= 2) || (D_8008FD8C >= 8)) {
+    (*(f32 *)((u8 *)arg0 + 0x40)) = g_impact_spray_param_40;
+    if ((g_last_player_index >= 2) || (g_player_count >= 8)) {
     s32 pad;
         (*(s8 *)((u8 *)arg0 + 0x50)) = -1;
         return;
@@ -349,9 +349,9 @@ f32 random_float(void);
 s32 random_int(void);
 f32 sinf(f32);
 f32 cosf(f32);
-extern f32 D_800AAD10[3]; /* muzzle flash points in the gun model's space: {3, 125, 35} */
-extern f32 D_800AAD1C[3]; /* {6, -50, 35} */
-extern f32 D_800AAD28[3]; /* {3, 200, 35} */
+extern f32 g_proj_muzzle_pt1[3]; /* muzzle flash points in the gun model's space: {3, 125, 35}; was D_800AAD10 */
+extern f32 g_proj_muzzle_pt2[3]; /* {6, -50, 35}; was D_800AAD1C */
+extern f32 g_proj_muzzle_pt3[3]; /* {3, 200, 35}; was D_800AAD28 */
 
 #define B(p, o) (*(u8 *)((u8 *)(p) + (o)))
 #define H(p, o) (*(u16 *)((u8 *)(p) + (o)))
@@ -537,7 +537,7 @@ s32 projectile_fire(struct127 *obj, struct127 *target, s32 *arg2, u8 arg3, u8 ar
         H(p, 0x90) = sfx_emitter_start((u32)r % 3 + 0x2EE, (s16)(s32)pos[0], (s16)(s32)pos[1], (s16)(s32)pos[2], 0x7530,
                                    0x3E8, 0x1F4, (s32)bullet_sound_pos_update, particle, 0, 4, 0);
         W(p, 0x88) = (s32)bullet_glow_spawn(particle);
-        if (D_80082FA0 < 2 && D_8008FD8C < 4) {
+        if (g_last_player_index < 2 && g_player_count < 4) {
             W(p, 0x8C) = bullet_smoke_emitter_spawn(particle, arg4, arg5);
         } else {
             W(p, 0x8C) = 0;
@@ -564,9 +564,9 @@ s32 projectile_fire(struct127 *obj, struct127 *target, s32 *arg2, u8 arg3, u8 ar
         f32 *out[2];             /* sp5C */
         s32 r1, r2;
         f32 rf;
-        c1[0] = D_800AAD10[0]; c1[1] = D_800AAD10[1]; c1[2] = D_800AAD10[2];
-        c2[0] = D_800AAD1C[0]; c2[1] = D_800AAD1C[1]; c2[2] = D_800AAD1C[2];
-        c3[0] = D_800AAD28[0]; c3[1] = D_800AAD28[1]; c3[2] = D_800AAD28[2];
+        c1[0] = g_proj_muzzle_pt1[0]; c1[1] = g_proj_muzzle_pt1[1]; c1[2] = g_proj_muzzle_pt1[2];
+        c2[0] = g_proj_muzzle_pt2[0]; c2[1] = g_proj_muzzle_pt2[1]; c2[2] = g_proj_muzzle_pt2[2];
+        c3[0] = g_proj_muzzle_pt3[0]; c3[1] = g_proj_muzzle_pt3[1]; c3[2] = g_proj_muzzle_pt3[2];
         size[0] = random_float() * 10.0f + 25.0f;
         size[1] = random_float() * 1.0090001f + 2.013f; /* D_800AAD90 (0x3F8126EA), D_800AAD94 */
         in[0] = c1;
@@ -645,19 +645,19 @@ s32 bullet_update(u8 *arg0) {
     u8 *var_s0;
 
     var_s0 = arg0 + 0x170;
-    if ((*(f32 *)((u8 *)arg0 + 0x1D4)) < D_800BE9A4) {
+    if ((*(f32 *)((u8 *)arg0 + 0x1D4)) < g_frame_step_f) {
         var_s0 = arg0 + 0x170;
         var_f0 = (*(f32 *)((u8 *)var_s0 + 0x68)) * (*(f32 *)((u8 *)var_s0 + 0x64));
     } else {
-        var_f0 = (*(f32 *)((u8 *)var_s0 + 0x68)) * D_800BE9A4;
+        var_f0 = (*(f32 *)((u8 *)var_s0 + 0x68)) * g_frame_step_f;
     }
     sp.uD4 = (*(f32 *)((u8 *)var_s0 + 0x38)) * var_f0;
     sp.uD8 = (*(f32 *)((u8 *)var_s0 + 0x3C)) * var_f0;
     sp.uDC = (*(f32 *)((u8 *)var_s0 + 0x40)) * var_f0;
-    if (D_800E0930 != NULL) {
+    if (g_level_bullet_hit_cb != NULL) {
         sp.uE0 = var_f0;
         var_f0 = sp.uE0;
-        if (((s32 (*)(u8 *, f32 *, s32 *)) D_800E0930)(arg0 + 0x38, &sp.uD4, &sp.uC8) != 0) {
+        if (((s32 (*)(u8 *, f32 *, s32 *)) g_level_bullet_hit_cb)(arg0 + 0x38, &sp.uD4, &sp.uC8) != 0) {
             explosion_sfx_play(0, sp.uC8, sp.uCC, sp.uD0, 0);
             temp_a1 = var_s0 + 0x38;
             sp54 = temp_a1;
@@ -675,19 +675,19 @@ s32 bullet_update(u8 *arg0) {
             return 0;
         }
     }
-    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((*(f32 *)((u8 *)arg0 + 0x44)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((*(f32 *)((u8 *)arg0 + 0x48)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x40)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x40)) + ((*(f32 *)((u8 *)arg0 + 0x4C)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((*(f32 *)((u8 *)arg0 + 0x44)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((*(f32 *)((u8 *)arg0 + 0x48)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x40)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x40)) + ((*(f32 *)((u8 *)arg0 + 0x4C)) * g_frame_step_f));
     if ((*(u8 *)((u8 *)var_s0 + 0xC8)) & 1) {
         temp_f0 = (*(f32 *)((u8 *)var_s0 + 0x94));
         if (temp_f0 > 0.0f) {
-            (*(f32 *)((u8 *)var_s0 + 0x94)) = (f32) (temp_f0 - D_800BE9A4);
+            (*(f32 *)((u8 *)var_s0 + 0x94)) = (f32) (temp_f0 - g_frame_step_f);
             if ((*(f32 *)((u8 *)var_s0 + 0x94)) <= 0.0f) {
                 debris_burst_spawn(var_s0 + 0x98, var_s0 + 0xA4, 2, (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             }
         }
     }
-    (*(f32 *)((u8 *)var_s0 + 0x64)) = (f32) ((*(f32 *)((u8 *)var_s0 + 0x64)) - D_800BE9A4);
+    (*(f32 *)((u8 *)var_s0 + 0x64)) = (f32) ((*(f32 *)((u8 *)var_s0 + 0x64)) - g_frame_step_f);
     if ((*(f32 *)((u8 *)var_s0 + 0x64)) <= 0.0f) {
         if ((*(u8 *)((u8 *)var_s0 + 0x59)) == 1) {
             explosion_sfx_play(0, (*(s32 *)((u8 *)var_s0 + 8)), (*(s32 *)((u8 *)var_s0 + 0xC)), (*(s32 *)((u8 *)var_s0 + 0x10)), 0);
@@ -764,12 +764,12 @@ void bullet_delete(void *arg0) {
 
 s32 object_effects_at(u8 *, s32, s32, s32, s32, s32, s32, s32);
 void object_effect_at(u8 *, s32, s32, s32, s32);
-extern s32 (*D_800E0D64)(s32, s32, s32);
+extern s32 (*g_level_point_hit_cb)(s32, s32, s32); /* was D_800E0D64 */
 
 /* was func_151C1C04 */
 void bullet_hit_mark_spawn(u8 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
-    if (D_800E0D64 != NULL) {
-        D_800E0D64((s32) (*(f32 *)((u8 *)arg0 + 0)), (s32) (*(f32 *)((u8 *)arg0 + 4)), (s32) (*(f32 *)((u8 *)arg0 + 8)));
+    if (g_level_point_hit_cb != NULL) {
+        g_level_point_hit_cb((s32) (*(f32 *)((u8 *)arg0 + 0)), (s32) (*(f32 *)((u8 *)arg0 + 4)), (s32) (*(f32 *)((u8 *)arg0 + 8)));
     }
     switch (arg3) {                                 /* irregular */
     case 1:
@@ -788,8 +788,8 @@ void bullet_hit_mark_spawn(u8 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
     }
 }
 
-extern u8 D_800AAD34[];
-extern u8 D_800AAD38[][12];
+extern u8 g_gun_muzzle_bones[]; /* was D_800AAD34 */
+extern u8 g_gun_muzzle_offsets[][12]; /* was D_800AAD38 */
 /* was func_151C1D48 */
 void gun_muzzle_point_get(u8 *arg0, u8 *arg1) {
     s32 var_v0;
@@ -805,7 +805,7 @@ void gun_muzzle_point_get(u8 *arg0, u8 *arg1) {
     } else {
         var_v0 = 2;
     }
-    mtx_transform_point_or_origin(D_800AAD38[var_v0], arg1, *(s32 *)(p + 0x1D4) + (D_800AAD34[var_v0] << 6));
+    mtx_transform_point_or_origin(g_gun_muzzle_offsets[var_v0], arg1, *(s32 *)(p + 0x1D4) + (g_gun_muzzle_bones[var_v0] << 6));
 }
 
 /* was func_151C1DC4 */
@@ -953,7 +953,7 @@ block_15:
 }
 /* P160 */
 s32 ray_cast_world(s32, f32, f32, f32, f32, f32, f32, s32 *, f32, s32, s32, s32, s32, u8 *, s32);
-extern f32 D_800AADA4;
+extern f32 g_ray_pass_step; /* was D_800AADA4 */
 
 typedef struct { f32 x, y, z; } V3_151C230C;
 typedef struct { u16 h[9]; } Blk12_151C230C; /* 0x12 bytes, 2-byte aligned */
@@ -961,7 +961,7 @@ typedef struct { u16 h[9]; } Blk12_151C230C; /* 0x12 bytes, 2-byte aligned */
 // ray_cast_through_passable: casts the ray `dir` from `start` (ray_cast_world, hit record `hit`) and, while the hit
 // object has (obj[0x4F] & 0x60) == 0x40 (a see-through object), records that object (its hit point in passPos,
 // the distance so far in passDist, and a 0x24-byte pass record) and casts again from just behind it
-// (D_800AADA4 along the hit normal). Finally restores the record's start (hit+0x2C) and stores the total distance
+// (g_ray_pass_step along the hit normal). Finally restores the record's start (hit+0x2C) and stores the total distance
 // in hit+4. Always returns 0.
 /* was func_151C230C */
 s32 ray_cast_through_passable(s32 arg0, u8 *start, f32 *dir, u8 *hit, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s8 arg8,
@@ -975,7 +975,7 @@ s32 ray_cast_through_passable(s32 arg0, u8 *start, f32 *dir, u8 *hit, f32 arg4, 
     dist = 0.0f;
     *passDist = 0.0f;
     pos = *(V3_151C230C *)start;
-    step = D_800AADA4;
+    step = g_ray_pass_step;
     do {
         ray_cast_world(arg0, pos.x, pos.y, pos.z, dir[0], dir[1], dir[2], (s32 *)hit, arg4, arg5, arg6, arg7, arg8,
                       arg9, argD);

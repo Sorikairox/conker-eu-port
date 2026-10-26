@@ -20,7 +20,7 @@ typedef struct {
     s8 u50;
     s8 u51;
 } Spawn5280;
-extern u8 D_800A43C6[];
+extern u8 g_hit_kind_info_mode[]; /* was D_800A43C6 */
 s32 obj_get_hit_kind(u8 *);
 void node_broadcast_obj_type(s32, u8 *, u8);
 u8 *emitter_trail_spawn(void *, s32, u8, s32);
@@ -39,7 +39,7 @@ u8 *hit_dust_trail_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     if (id == 0x63) {
         return 0;
     }
-    if (D_800A43C6[id * 16] == 2) {
+    if (g_hit_kind_info_mode[id * 16] == 2) {
         return 0;
     }
     node_broadcast_obj_type(0x28, arg0, 0x16);
@@ -58,7 +58,7 @@ u8 *hit_dust_trail_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u4F = 8;
     sp.u50 = -1;
     sp.u51 = 7;
-    if (D_800A43C6[id * 16] == 1) {
+    if (g_hit_kind_info_mode[id * 16] == 1) {
         flag[0] = 1;
     } else {
         flag[0] = 0;

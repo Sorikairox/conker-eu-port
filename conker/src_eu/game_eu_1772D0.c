@@ -167,7 +167,7 @@ s32 spark_wave_update(u8 *arg0) {
     u8 *temp_s0;
     u8 *temp_s0_2;
 
-    (*(s16 *)((u8 *)arg0 + 0x11C)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x11C)) - D_800BE9E4);
+    (*(s16 *)((u8 *)arg0 + 0x11C)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x11C)) - g_frame_ticks);
     if ((*(s16 *)((u8 *)arg0 + 0x11C)) < 0) {
         temp_s0 = arg0 + 0x110;
         (*(s16 *)((u8 *)temp_s0 + 0xC)) = (s16) (random_int() % (u32) (*(s16 *)((u8 *)temp_s0 + 0xE)));
@@ -177,7 +177,7 @@ s32 spark_wave_update(u8 *arg0) {
     temp_s0_2 = arg0 + 0x110;
     temp_f0 = (*(f32 *)((u8 *)arg0 + 0x2C));
     (*(f32 *)((u8 *)arg0 + 0x2C)) = (f32) (temp_f0 + (((*(f32 *)((u8 *)temp_s0_2 + 8)) - temp_f0) * (*(f32 *)((u8 *)temp_s0_2 + 0x10))));
-    (*(s16 *)((u8 *)temp_s0_2 + 0x24)) = (s16) ((*(s16 *)((u8 *)temp_s0_2 + 0x24)) - D_800BE9E4);
+    (*(s16 *)((u8 *)temp_s0_2 + 0x24)) = (s16) ((*(s16 *)((u8 *)temp_s0_2 + 0x24)) - g_frame_ticks);
     if ((*(s16 *)((u8 *)temp_s0_2 + 0x24)) < 0) {
         (*(s16 *)((u8 *)temp_s0_2 + 0x24)) = (s16) (random_int() % (u32) (*(s16 *)((u8 *)temp_s0_2 + 0x26)));
         if (random_int() & 3) {
@@ -190,7 +190,7 @@ s32 spark_wave_update(u8 *arg0) {
     }
     temp_f0_2 = (*(f32 *)((u8 *)arg0 + 0x30));
     (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) (temp_f0_2 + (((*(f32 *)((u8 *)temp_s0_2 + 0x20)) - temp_f0_2) * (*(f32 *)((u8 *)temp_s0_2 + 0x28))));
-    (*(s16 *)((u8 *)temp_s0_2 + 0x38)) = (s16) ((*(s16 *)((u8 *)temp_s0_2 + 0x38)) - D_800BE9E4);
+    (*(s16 *)((u8 *)temp_s0_2 + 0x38)) = (s16) ((*(s16 *)((u8 *)temp_s0_2 + 0x38)) - g_frame_ticks);
     if ((*(s16 *)((u8 *)temp_s0_2 + 0x38)) < 0) {
         (*(s16 *)((u8 *)temp_s0_2 + 0x38)) = (s16) (random_int() % (u32) (*(s16 *)((u8 *)temp_s0_2 + 0x3A)));
         temp_v1 = (*(s32 *)((u8 *)temp_s0_2 + 0x30));
@@ -271,8 +271,8 @@ s32 spark_shrink_rise(u8 *arg0) {
     temp_f12 = (*(f32 *)((u8 *)arg0 + 0x30));
     (*(f32 *)((u8 *)arg0 + 0x2C)) = (f32) (temp_f0 - (temp_f0 * temp_f2));
     (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) (temp_f12 - (temp_f12 * temp_f2));
-    (*(f32 *)((u8 *)arg0 + 0x50)) += ((*(f32 *)((u8 *)arg0 + 0x4C)) * D_800BE9A4);
-    (*(f32 *)((u8 *)arg0 + 0x38)) += ((*(f32 *)((u8 *)arg0 + 0x50)) * D_800BE9A4);
+    (*(f32 *)((u8 *)arg0 + 0x50)) += ((*(f32 *)((u8 *)arg0 + 0x4C)) * g_frame_step_f);
+    (*(f32 *)((u8 *)arg0 + 0x38)) += ((*(f32 *)((u8 *)arg0 + 0x50)) * g_frame_step_f);
     if ((*(f32 *)((u8 *)arg0 + 0x15C)) < (*(f32 *)((u8 *)arg0 + 0x38))) {
         return 0;
     }
@@ -283,8 +283,8 @@ s32 spark_shrink_rise(u8 *arg0) {
 }
 
 s32 vtx_slot_buffer_get(s32, s16, s32, u8 **, u8 *);
-extern f32 D_800DD608[];
-extern f32 D_800DD618[];
+extern f32 g_view_yaw_sin[]; /* was D_800DD608 */
+extern f32 g_view_yaw_cos[]; /* was D_800DD618 */
 
 /* was func_1514A288 */
 u8 *spark_build_quad_vtx_a(u8 *arg0, s16 arg1) {
@@ -304,8 +304,8 @@ u8 *spark_build_quad_vtx_a(u8 *arg0, s16 arg1) {
     } else {
         return NULL;
     }
-    temp_f2 = *(f32 *)(arg0 + 0x2C) * D_800DD608[arg1];
-    temp_f12 = *(f32 *)(arg0 + 0x2C) * D_800DD618[arg1];
+    temp_f2 = *(f32 *)(arg0 + 0x2C) * g_view_yaw_sin[arg1];
+    temp_f12 = *(f32 *)(arg0 + 0x2C) * g_view_yaw_cos[arg1];
     *(s16 *)(sp44 + 0) = *(s16 *)(sp44 + 0x30) = (s32) ((*(f32 *)((u8 *)arg0 + 0x34)) + temp_f12);
     *(s16 *)(sp44 + 2) = *(s16 *)(sp44 + 0x12) = (s32) (*(f32 *)((u8 *)arg0 + 0x38));
     *(s16 *)(sp44 + 4) = *(s16 *)(sp44 + 0x34) = (s32) ((*(f32 *)((u8 *)arg0 + 0x3C)) - temp_f2);
@@ -361,8 +361,8 @@ s32 spark_die_spawn_burst(u8 *arg0) {
 }
 
 s32 vtx_slot_buffer_get(s32, s16, s32, u8 **, u8 *);
-extern f32 D_800DD608[];
-extern f32 D_800DD618[];
+extern f32 g_view_yaw_sin[]; /* was D_800DD608 */
+extern f32 g_view_yaw_cos[]; /* was D_800DD618 */
 
 /* was func_1514A540 */
 u8 *spark_build_quad_vtx_b(u8 *arg0, s16 arg1) {
@@ -382,8 +382,8 @@ u8 *spark_build_quad_vtx_b(u8 *arg0, s16 arg1) {
     } else {
         return NULL;
     }
-    temp_f2 = *(f32 *)(arg0 + 0x2C) * D_800DD608[arg1];
-    temp_f12 = *(f32 *)(arg0 + 0x2C) * D_800DD618[arg1];
+    temp_f2 = *(f32 *)(arg0 + 0x2C) * g_view_yaw_sin[arg1];
+    temp_f12 = *(f32 *)(arg0 + 0x2C) * g_view_yaw_cos[arg1];
     *(s16 *)(sp44 + 6) = 0;
     *(s16 *)(sp44 + 0x16) = 0;
     *(s16 *)(sp44 + 0x26) = 0;
@@ -402,7 +402,7 @@ s32 spark_flicker_update(u8 *arg0) {
     u8 *p;
 
     p = arg0 + 0x110;
-    *(s16 *)(arg0 + 0x12E) -= D_800BE9E4;
+    *(s16 *)(arg0 + 0x12E) -= g_frame_ticks;
     if (*(s16 *)(arg0 + 0x12E) < 0) {
         *(s16 *)(p + 0x1E) = random_int() % 6U;
         if (random_int() & 3) {
@@ -412,13 +412,13 @@ s32 spark_flicker_update(u8 *arg0) {
         }
     }
     *(f32 *)(arg0 + 0x30) += (*(f32 *)(p + 0x18) - *(f32 *)(arg0 + 0x30)) * 0.359f;
-    *(s16 *)(p + 0x1C) -= D_800BE9E4;
+    *(s16 *)(p + 0x1C) -= g_frame_ticks;
     if (*(s16 *)(p + 0x1C) < 0) {
         *(s16 *)(p + 0x1C) = random_int() % 17U;
         *(f32 *)(p + 8) = *(f32 *)(p + 4) + ((*(f32 *)(p + 0) - *(f32 *)(p + 4)) * random_float());
     }
     *(f32 *)(arg0 + 0x2C) += (*(f32 *)(p + 8) - *(f32 *)(arg0 + 0x2C)) * 0.186f;
-    *(s16 *)(p + 0x44) -= D_800BE9E4;
+    *(s16 *)(p + 0x44) -= g_frame_ticks;
     if (*(s16 *)(p + 0x44) < 0) {
         *(s16 *)(p + 0x44) = random_int() % 15U;
         *(f32 *)(p + 0x40) = *(f32 *)(p + 0x3C) + ((*(f32 *)(p + 0x38) - *(f32 *)(p + 0x3C)) * random_float());
@@ -492,10 +492,10 @@ s32 streak_move(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x48)) = (f32) (*(f32 *)((u8 *)arg0 + 0x3C));
     (*(f32 *)((u8 *)arg0 + 0x130)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x130)) * temp_f0);
     (*(f32 *)((u8 *)arg0 + 0x138)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x138)) * temp_f0);
-    (*(f32 *)((u8 *)arg0 + 0x134)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x134)) + ((*(f32 *)((u8 *)arg0 + 0x13C)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((*(f32 *)((u8 *)arg0 + 0x130)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((*(f32 *)((u8 *)arg0 + 0x134)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((*(f32 *)((u8 *)arg0 + 0x138)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x134)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x134)) + ((*(f32 *)((u8 *)arg0 + 0x13C)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((*(f32 *)((u8 *)arg0 + 0x130)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((*(f32 *)((u8 *)arg0 + 0x134)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((*(f32 *)((u8 *)arg0 + 0x138)) * g_frame_step_f));
     return 1;
 }
 /* was func_1514AB04 */
@@ -512,11 +512,11 @@ s32 streak_move_lag_tail(u8 *arg0) {
 
     temp_f0 = (*(f32 *)((u8 *)arg0 + 0x140));
     (*(f32 *)((u8 *)arg0 + 0x130)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x130)) * temp_f0);
-    (*(f32 *)((u8 *)arg0 + 0x134)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x134)) + ((*(f32 *)((u8 *)arg0 + 0x13C)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x134)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x134)) + ((*(f32 *)((u8 *)arg0 + 0x13C)) * g_frame_step_f));
     (*(f32 *)((u8 *)arg0 + 0x138)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x138)) * temp_f0);
-    temp_f12 = (*(f32 *)((u8 *)arg0 + 0x130)) * D_800BE9A4;
-    temp_f14 = (*(f32 *)((u8 *)arg0 + 0x134)) * D_800BE9A4;
-    temp_f16 = (*(f32 *)((u8 *)arg0 + 0x138)) * D_800BE9A4;
+    temp_f12 = (*(f32 *)((u8 *)arg0 + 0x130)) * g_frame_step_f;
+    temp_f14 = (*(f32 *)((u8 *)arg0 + 0x134)) * g_frame_step_f;
+    temp_f16 = (*(f32 *)((u8 *)arg0 + 0x138)) * g_frame_step_f;
     (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + temp_f12);
     (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + temp_f14);
     (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + temp_f16);
@@ -613,7 +613,7 @@ u8 *streak_build_vtx(u8 *arg0, s16 arg1) {
         var_f12 = temp_f28 - temp_f20;
         temp_f18 = (*(f32 *)((u8 *)arg0 + 0x4C));
         var_f14 = sp.uB8 - temp_f22;
-        temp_v0_2 = &D_800DBFF0[arg1].unk2F8;
+        temp_v0_2 = &g_player_views[arg1].unk2F8;
         sp.uB4 = temp_f28;
         sp.uB0 = temp_f26;
         sp68 = temp_f20;
@@ -770,21 +770,21 @@ void spark_spawn_burst(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, f32 arg
     }
 }
 s32 spark_spawn_from_desc(f32 *, s32, s32, s32, s32, s32);
-extern f32 D_800A5BAC;
-extern f32 D_800A5BB0;
-extern f32 D_800A5BB4;
-extern f32 D_800A5BB8;
-extern f32 D_800A5BBC;
-extern f32 D_800A5BC0;
-extern f32 D_800A5BC4;
-extern f32 D_800A5BC8;
-extern f32 D_800A5BCC;
-extern f32 D_800A5BD0;
-extern f32 D_800A5BD4;
-extern f32 D_800A5BD8;
-extern f32 D_800A5BDC;
-extern f32 D_800A5BE0;
-extern f32 D_800A5BE4;
+extern f32 g_spark_rand_k_5bac; /* was D_800A5BAC */
+extern f32 g_spark_rand_k_5bb0; /* was D_800A5BB0 */
+extern f32 g_spark_rand_k_5bb4; /* was D_800A5BB4 */
+extern f32 g_spark_rand_k_5bb8; /* was D_800A5BB8 */
+extern f32 g_spark_rand_k_5bbc; /* was D_800A5BBC */
+extern f32 g_spark_rand_k_5bc0; /* was D_800A5BC0 */
+extern f32 g_spark_rand_k_5bc4; /* was D_800A5BC4 */
+extern f32 g_spark_rand_k_5bc8; /* was D_800A5BC8 */
+extern f32 g_spark_rand_k_5bcc; /* was D_800A5BCC */
+extern f32 g_spark_rand_k_5bd0; /* was D_800A5BD0 */
+extern f32 g_spark_rand_k_5bd4; /* was D_800A5BD4 */
+extern f32 g_spark_rand_k_5bd8; /* was D_800A5BD8 */
+extern f32 g_spark_rand_k_5bdc; /* was D_800A5BDC */
+extern f32 g_spark_rand_k_5be0; /* was D_800A5BE0 */
+extern f32 g_spark_rand_k_5be4; /* was D_800A5BE4 */
 
 /* was func_1514B30C */
 void spark_spawn_random(f32 *arg0, u8 arg1, s32 arg2) {
@@ -834,18 +834,18 @@ void spark_spawn_random(f32 *arg0, u8 arg1, s32 arg2) {
     sp.u5A = 1;
     sp.u64 = 0x1C;
     sp.u6C = 0.0f;
-    sp.u70 = D_800A5BAC;
-    sp.u74 = D_800A5BB0;
-    a = (random_float() * D_800A5BB4 + D_800A5BB8) * D_800A5BBC;
+    sp.u70 = g_spark_rand_k_5bac;
+    sp.u74 = g_spark_rand_k_5bb0;
+    a = (random_float() * g_spark_rand_k_5bb4 + g_spark_rand_k_5bb8) * g_spark_rand_k_5bbc;
     b = random_float();
-    sp.u3C = D_800A5BC0 * a;
-    sp.u44 = D_800A5BC4 * a;
-    b = (b * D_800A5BC8 + D_800A5BCC) * D_800A5BD0;
-    sp.u40 = D_800A5BD4 * b;
-    sp.u48 = D_800A5BD8 * b;
-    sp.u4C = D_800A5BDC * b;
+    sp.u3C = g_spark_rand_k_5bc0 * a;
+    sp.u44 = g_spark_rand_k_5bc4 * a;
+    b = (b * g_spark_rand_k_5bc8 + g_spark_rand_k_5bcc) * g_spark_rand_k_5bd0;
+    sp.u40 = g_spark_rand_k_5bd4 * b;
+    sp.u48 = g_spark_rand_k_5bd8 * b;
+    sp.u4C = g_spark_rand_k_5bdc * b;
     sp.u54 = random_int() % 17U + 16;
-    sp.u68 = (random_float() * D_800A5BE0 + 50.0f) * D_800A5BE4;
+    sp.u68 = (random_float() * g_spark_rand_k_5be0 + 50.0f) * g_spark_rand_k_5be4;
     sp.u5C = random_int() % 156U + 100;
     spark_spawn_from_desc(&sp.u30, 0xA, 0, 0, arg1, arg2);
 }
@@ -854,8 +854,8 @@ void spark_spawn_random(f32 *arg0, u8 arg1, s32 arg2) {
 s32 spark_shrink_fall(struct_eu_EF410_b *arg0) {
     arg0->unk2C -= arg0->unk2C * arg0->unk150;
     arg0->unk30 -= arg0->unk30 * arg0->unk150;
-    arg0->unk38 += arg0->unk50 * D_800BE9A4 + 0.5f * arg0->unk4C * D_800BE9A4 * D_800BE9A4;
-    arg0->unk50 += arg0->unk4C * D_800BE9A4;
+    arg0->unk38 += arg0->unk50 * g_frame_step_f + 0.5f * arg0->unk4C * g_frame_step_f * g_frame_step_f;
+    arg0->unk50 += arg0->unk4C * g_frame_step_f;
     if (arg0->unk2C < 10.0f || arg0->unk30 < 10.0f) {
         return 0;
     }
@@ -1168,7 +1168,7 @@ s32 trail_fade_out(u8 *arg0) {
 
 /* was func_1514BDEC */
 s32 effect3d_grow_size(f32 *arg0) {
-    f32 temp_f0 = arg0[0x4C / 4] * D_800BE9A4;
+    f32 temp_f0 = arg0[0x4C / 4] * g_frame_step_f;
     arg0[0x2C / 4] += temp_f0;
     arg0[0x30 / 4] += temp_f0;
     return 1;
@@ -1336,13 +1336,13 @@ u8 *flame_spawn(u8 *arg0, u8 *arg1, s16 arg2, u8 arg3, u8 *arg4, f32 arg5, f32 a
 /* was func_1514C178 */
 s32 flame_flicker_update(u8 *arg0, u8 *arg1) {
 
-    (*(f32 *)((u8 *)arg1 + 0x1C)) = (f32) ((*(f32 *)((u8 *)arg1 + 0x1C)) - D_800BE9A4);
+    (*(f32 *)((u8 *)arg1 + 0x1C)) = (f32) ((*(f32 *)((u8 *)arg1 + 0x1C)) - g_frame_step_f);
     if ((*(f32 *)((u8 *)arg1 + 0x1C)) < 0.0f) {
         (*(f32 *)((u8 *)arg1 + 0x1C)) = (f32) (random_float() * 4.0f);
         (*(f32 *)((u8 *)arg1 + 0x10)) = (f32) ((*(f32 *)((u8 *)arg1 + 0)) + ((*(f32 *)((u8 *)arg1 + 8)) * random_float()));
     }
     (*(f32 *)((u8 *)arg0 + 0x2C)) += ((*(f32 *)((u8 *)arg1 + 0x10)) - (*(f32 *)((u8 *)arg0 + 0x2C))) * 0.35f;
-    (*(f32 *)((u8 *)arg1 + 0x20)) = (f32) ((*(f32 *)((u8 *)arg1 + 0x20)) - D_800BE9A4);
+    (*(f32 *)((u8 *)arg1 + 0x20)) = (f32) ((*(f32 *)((u8 *)arg1 + 0x20)) - g_frame_step_f);
     if ((*(f32 *)((u8 *)arg1 + 0x20)) < 0.0f) {
         (*(f32 *)((u8 *)arg1 + 0x20)) = (f32) (random_float() * 9.0f);
         if (random_int() & 1) {
@@ -1352,7 +1352,7 @@ s32 flame_flicker_update(u8 *arg0, u8 *arg1) {
         }
     }
     (*(f32 *)((u8 *)arg0 + 0x30)) += ((*(f32 *)((u8 *)arg1 + 0x14)) - (*(f32 *)((u8 *)arg0 + 0x30))) * 0.4f;
-    (*(f32 *)((u8 *)arg1 + 0x30)) = (f32) ((*(f32 *)((u8 *)arg1 + 0x30)) - D_800BE9A4);
+    (*(f32 *)((u8 *)arg1 + 0x30)) = (f32) ((*(f32 *)((u8 *)arg1 + 0x30)) - g_frame_step_f);
     if ((*(f32 *)((u8 *)arg1 + 0x30)) < 0.0f) {
         (*(f32 *)((u8 *)arg1 + 0x30)) = (f32) (random_float() * 7.0f);
         (*(f32 *)((u8 *)arg1 + 0x2C)) = (f32) ((*(f32 *)((u8 *)arg1 + 0x24)) + ((*(f32 *)((u8 *)arg1 + 0x28)) * random_float()));
@@ -1440,7 +1440,7 @@ void flame_drift_update(u8 *arg0) {
     (*(f32 *)((u8 *)(&sp.u20) + 0)) = (*(f32 *)((u8 *)arg0 + 0x148));
     (*(s32 *)((u8 *)(&sp.u20) + 4)) = (s32) (*(s32 *)((u8 *)arg0 + 0x14C));
     (*(s32 *)((u8 *)(&sp.u20) + 8)) = (s32) (*(s32 *)((u8 *)arg0 + 0x150));
-    var_v1 = D_800BE9E4;
+    var_v1 = g_frame_ticks;
     if (var_v1 != 0) {
         temp_a2 = -(var_v1 & 3);
         temp_a1 = temp_a2 + var_v1;
@@ -1503,10 +1503,10 @@ block_5:
         }
     }
     temp_v0_3 = arg0 + 0x110;
-    (*(f32 *)((u8 *)temp_v0_3 + 0x3C)) = (f32) ((*(f32 *)((u8 *)temp_v0_3 + 0x3C)) + ((*(f32 *)((u8 *)temp_v0_3 + 0x44)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((sp.u20 + (0.5f * (((*(f32 *)((u8 *)temp_v0_3 + 0x38)) - sp.u20) * D_800BEDC8) * D_800BE9A4)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((sp.u24 + (0.5f * (((*(f32 *)((u8 *)temp_v0_3 + 0x3C)) - sp.u24) * D_800BEDC8) * D_800BE9A4)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((sp.u28 + (0.5f * (((*(f32 *)((u8 *)temp_v0_3 + 0x40)) - sp.u28) * D_800BEDC8) * D_800BE9A4)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_v0_3 + 0x3C)) = (f32) ((*(f32 *)((u8 *)temp_v0_3 + 0x3C)) + ((*(f32 *)((u8 *)temp_v0_3 + 0x44)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((sp.u20 + (0.5f * (((*(f32 *)((u8 *)temp_v0_3 + 0x38)) - sp.u20) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((sp.u24 + (0.5f * (((*(f32 *)((u8 *)temp_v0_3 + 0x3C)) - sp.u24) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((sp.u28 + (0.5f * (((*(f32 *)((u8 *)temp_v0_3 + 0x40)) - sp.u28) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
 }
 /* was func_1514C7C8 */
 s32 flame_drift_look_follow(void *arg0) {
@@ -1533,12 +1533,12 @@ s32 flame_start_end(u8 *arg0) {
 }
 
 /* P136 */
-extern s32 D_8008ADA0;
+extern s32 g_emit_point_spawn_fns; /* was D_8008ADA0 */
 
 /*
  * spawn_ring_emit: emits count (s16) points on a circle of radius r around (x, y, z) in the x/z plane, starting at
  * the byte angle angle0 and stepping by the signed byte step (wrapping at 256). Each point goes to the spawn
- * handler kind of D_8008ADA0 as (1, i, x + r * sin(a - 0x40), y, z + r * sin(a), x, y, z, a, angle0, r, arg8,
+ * handler kind of g_emit_point_spawn_fns as (1, i, x + r * sin(a - 0x40), y, z + r * sin(a), x, y, z, a, angle0, r, arg8,
  * arg9, argA, argB) (angle_byte_cos = byte-angle sine); the walk stops early when a handler returns 0, a missing
  * handler skips the point. Returns 0 (callers declare s32 and ignore it; the asm leaves no defined value).
  */
@@ -1553,7 +1553,7 @@ s32 spawn_ring_emit(f32 x, f32 y, f32 z, f32 r, u8 angle0, s8 step, s16 count, u
     for (i = 0; i < count; i++) {
         c = angle_byte_cos((a - 0x40) & 0xFF);
         s = angle_byte_cos(a & 0xFF);
-        handler = ((void **) &D_8008ADA0)[kind];
+        handler = ((void **) &g_emit_point_spawn_fns)[kind];
         if (handler != NULL && handler(1, i, x + r * c, y, z + r * s, x, y, z, a, angle0, r, arg8, arg9, argA, argB) == 0) {
             break;
         }
@@ -1563,12 +1563,12 @@ s32 spawn_ring_emit(f32 x, f32 y, f32 z, f32 r, u8 angle0, s8 step, s16 count, u
 }
 
 /* P139 */
-extern s32 D_8008ADA0;
+extern s32 g_emit_point_spawn_fns; /* was D_8008ADA0 */
 
 /*
  * spawn_line_emit: emits count (a float, at least 2) evenly spaced points on the segment from (x0, y0, z0) to
  * (x1, y1, z1), step = (end - start) * (1 / (count - 1)) per axis. Each point goes to the spawn handler kind of
- * D_8008ADA0 as (0, i, x, y, z, x0, y0, z0, 0, 0, 0.0f, arg8, arg9, argA, argB) (mode 0 = line; the ring emitter
+ * g_emit_point_spawn_fns as (0, i, x, y, z, x0, y0, z0, 0, 0, 0.0f, arg8, arg9, argA, argB) (mode 0 = line; the ring emitter
  * spawn_ring_emit uses mode 1); the walk stops early when a handler returns 0, a missing handler skips the point.
  * The loop counts count down by 1 while it stays > 0. (The asm tests the parity of (s32) count and computes the
  * same step in both branches.)
@@ -1593,7 +1593,7 @@ void spawn_line_emit(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 count, 
     y = y0;
     z = z0;
     do {
-        handler = ((void **) &D_8008ADA0)[kind];
+        handler = ((void **) &g_emit_point_spawn_fns)[kind];
         if (handler != NULL && handler(0, i, x, y, z, x0, y0, z0, 0, 0, 0.0f, arg8, arg9, argA, argB) == 0) {
             break;
         }
@@ -1605,7 +1605,7 @@ void spawn_line_emit(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 count, 
     } while (count > 0.0f);
 }
 
-extern s32 D_8008ADA0;
+extern s32 g_emit_point_spawn_fns; /* was D_8008ADA0 */
 
 /* was func_1514CBE8 */
 void spawn_circle_random_emit(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9, s32 argA, u8 argB) {
@@ -1631,7 +1631,7 @@ loop_5:
         temp_a0 = (random_int() % (u32) var_v0) + var_v1;
         temp_s0 = temp_a0 & 0xFF;
         temp_f20 = angle_byte_cos((temp_a0 - 0x40) & 0xFF);
-        temp_v0 = *(((s32 *)((u8 *)&D_8008ADA0 + (arg7 * 4))));
+        temp_v0 = *(((s32 *)((u8 *)&g_emit_point_spawn_fns + (arg7 * 4))));
         temp_f2 = (arg3 * angle_byte_cos(temp_s0 & 0xFF)) + arg2;
         if (temp_v0 != NULL) {
             if (temp_v0(2, var_s1, (arg3 * temp_f20) + arg0, arg1, temp_f2, arg0, arg1, arg2, temp_s0, (s32) arg4, arg3, arg8, arg9, argA, (s32) argB) != 0) {
@@ -1649,12 +1649,12 @@ block_9:
     }
 }
 /* P139 */
-extern s32 D_8008ADA0;
+extern s32 g_emit_point_spawn_fns; /* was D_8008ADA0 */
 
 /*
  * spawn_arc_emit: emits count random points on a vertical circle of radius r around (x, y, z) whose plane faces
  * the byte angle yaw: each point takes a random byte angle a in [min(a0, a1), max(a0, a1)] and goes to the spawn
- * handler kind of D_8008ADA0 as (3, i, x + r * sin(yaw - 0x40) * sin(a), y - r * sin(a - 0x40),
+ * handler kind of g_emit_point_spawn_fns as (3, i, x + r * sin(yaw - 0x40) * sin(a), y - r * sin(a - 0x40),
  * z + r * sin(yaw) * sin(a), x, y, z, a & 0xFF, yaw, r, arg9, argA, argB, argC) (mode 3 = arc; angle_byte_cos =
  * byte-angle sine). The walk stops when a handler returns 0; a missing handler skips the point.
  */
@@ -1692,7 +1692,7 @@ void spawn_arc_emit(f32 x, f32 y, f32 z, f32 r, s16 yaw, s16 a0, s16 a1, s16 cou
         b = a & 0xFF;
         c = angle_byte_cos((a - 0x40) & 0xFF);
         s = angle_byte_cos(b);
-        handler = ((void **) &D_8008ADA0)[kind];
+        handler = ((void **) &g_emit_point_spawn_fns)[kind];
         px = rc * s + x;
         pz = rs * s + z;
         if (handler != NULL && handler(3, i, px, y - r * c, pz, x, y, z, b, yaw, r, arg9, argA, argB, argC) == 0) {

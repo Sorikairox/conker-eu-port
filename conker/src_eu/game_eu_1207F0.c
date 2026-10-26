@@ -2,20 +2,20 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A1D20[];
+extern u8 g_drip_bone_pt_a[]; /* was D_800A1D20 */
 
 
-extern u8 D_800CC82C;
-extern u8 D_800CC8BA;
-extern s32 *D_800DC3C4;
+extern u8 g_held_item_obj_id; /* was D_800CC82C */
+extern u8 g_player_health; /* was D_800CC8BA */
+extern s32 *g_world_obj_rider_masks; /* was D_800DC3C4 */
 s32 world_record_find(u8);
 s32 object_hit_effects(void *, s32, s32, s32, s32, s32, s32, s32);
 s32 player_hit_reaction(struct127 *, s32);
 void texscroll_set_speed(u8 *, s32, s32);
 
 // player_item_drop_check: unless the player's held object (g_obj0_state, byte 0x120) is busy, checks items 0xFA and
-// 0xF9 (world_record_find; entry index = (item - D_800DBEF4) / 160 into the flag words at D_800DC3C4). The first one
-// with bit 0 set: releases the player's current carried object (obj_remove), clears D_800CC8BA and resets the
+// 0xF9 (world_record_find; entry index = (item - g_world_objs) / 160 into the flag words at g_world_obj_rider_masks). The first one
+// with bit 0 set: releases the player's current carried object (obj_remove), clears g_player_health and resets the
 // player (object_hit_effects, sound 0x627 via actor_sound_play_untracked, obj_set_destroyed, mode 6 via player_hit_reaction). Then the four
 // g_level_scroll_handles nodes are offset by +-object 0xE's +0x2E4 value (texscroll_set_speed).
 /* was func_150F2FE0 */
@@ -30,11 +30,11 @@ void player_item_drop_check(s32 arg0) {
     }
     for (i = 0; i < 2; i++) {
         item = world_record_find(0xFA - i);
-        if (D_800DC3C4[(item - (s32) D_800DBEF4) / 160] & 1) {
-            if (D_800CC82C != 0) {
-                obj_remove((struct127 *) ((u8 *) g_objects + (D_800CC82C - 100) * 0x32C), 0);
+        if (g_world_obj_rider_masks[(item - (s32) g_world_objs) / 160] & 1) {
+            if (g_held_item_obj_id != 0) {
+                obj_remove((struct127 *) ((u8 *) g_objects + (g_held_item_obj_id - 100) * 0x32C), 0);
             }
-            D_800CC8BA = 0;
+            g_player_health = 0;
             object_hit_effects(g_objects, 0, 0, 1, 1, 0, 0xFF, 1);
             actor_sound_play_untracked(0x627, g_objects, 0x6D60, 0x1F4, 0x3E8);
             obj_set_destroyed(g_objects);
@@ -77,15 +77,15 @@ void mtx_transform_points(f32 **, f32 **, void *, s32);
 s32 vec3_make_basis(f32 *, s32 *, s32 *);
 void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9,
                     u8 argA, s32 argB);
-extern u8 D_800A1D2C[];  /* second bone-space point (after D_800A1D20) */
-extern f32 D_800A1D38;   /* drops per frame unit */
-extern f32 D_800A1D3C;
+extern u8 g_drip_bone_pt_b[];  /* second bone-space point (after g_drip_bone_pt_a); was D_800A1D20; was D_800A1D2C */
+extern f32 g_drip_rate;   /* drops per frame unit; was D_800A1D38 */
+extern f32 g_drip_trail_k_1d3c; /* was D_800A1D3C */
 
 // drip_emitter_update: object update of a drip emitter (record at +0x28: owner, +4 owner id, +5 last owner
 // state, +8 f32 accumulator, +0xC s8 drops left). Stops when the cutscene flag D_800C35EA is 1; ends the object
 // (+0xE = -1) when the owner is gone or its id changed. A new non-zero owner state (+0x222) refills 3 drops; while
 // the state is set, obj_tint_set_flash runs on object g_objects[state]. With a model, the accumulator grows by
-// D_800A1D38 * frame time and every whole unit drops one: the line between the bone points D_800A1D20 / D_800A1D2C
+// g_drip_rate * frame time and every whole unit drops one: the line between the bone points g_drip_bone_pt_a / g_drip_bone_pt_b
 // (bone matrix +0x3C0) is probed (vec3_make_basis) and a drop sprite (effect3d_spawn_full, template D_800A4AA0, size
 // 60..100, alpha 0x34-byte trail record copied to +0x110) is spawned at the first point.
 /* was func_150F3294 */
@@ -160,7 +160,7 @@ void drip_emitter_update(u8 *obj) {
     if (*(s8 *) (st + 0xC) <= 0) {
         return;
     }
-    *(f32 *) (st + 8) += D_800A1D38 * D_800BE9A4;
+    *(f32 *) (st + 8) += g_drip_rate * g_frame_step_f;
     if (!(1.0f < *(f32 *) (st + 8))) {
         return;
     }
@@ -169,11 +169,11 @@ void drip_emitter_update(u8 *obj) {
         trail.id = owner[0x3B];
         trail.t = 0.0f;
         trail.size = random_float() * 6.0f + 13.0f;
-        trail.unk10 = D_800A1D3C;
+        trail.unk10 = g_drip_trail_k_1d3c;
         trail.speed = random_float() * 40.0f + 60.0f;
         trail.accel = trail.speed / (trail.size * trail.size);
-        in[0] = (f32 *) D_800A1D20;
-        in[1] = (f32 *) D_800A1D2C;
+        in[0] = (f32 *) g_drip_bone_pt_a;
+        in[1] = (f32 *) g_drip_bone_pt_b;
         out[0] = spr.pos;
         out[1] = dir;
         mtx_transform_points(in, out, *(u8 **) (owner + 0x1D4) + 0x3C0, 2);
@@ -196,9 +196,9 @@ void drip_emitter_update(u8 *obj) {
         spr.col[3] = 0xFF;
         spr.unk18 = 0.0f;
         spr.unk14 = 0.0f;
-        spr.unk28[0] = ((s32 *) D_800A5860)[0];
-        spr.unk28[1] = ((s32 *) D_800A5860)[1];
-        spr.unk28[2] = ((s32 *) D_800A5860)[2];
+        spr.unk28[0] = ((s32 *) g_vec3_zero)[0];
+        spr.unk28[1] = ((s32 *) g_vec3_zero)[1];
+        spr.unk28[2] = ((s32 *) g_vec3_zero)[2];
         spr.scale[0] = 1.0f;
         spr.scale[1] = 1.0f;
         spr.scale[2] = 1.0f;
@@ -249,13 +249,13 @@ s32 drip_sprite_update(u8 *arg0) {
         return 0;
     }
     sp18 = temp_v0;
-    mtx_transform_point_or_origin(((u8 *)&D_800A1D20), arg0 + 0x34, temp_t0 + 0x3C0);
+    mtx_transform_point_or_origin(((u8 *)&g_drip_bone_pt_a), arg0 + 0x34, temp_t0 + 0x3C0);
     temp_f2 = sqrtf((*(f32 *)((u8 *)temp_v0 + 8))) * (*(f32 *)((u8 *)temp_v0 + 0x10));
     (*(f32 *)((u8 *)arg0 + 0x30)) = temp_f2;
     (*(f32 *)((u8 *)arg0 + 0x2C)) = temp_f2;
     temp_f12 = (*(f32 *)((u8 *)temp_v0 + 8));
     (*(s8 *)((u8 *)arg0 + 0x5C)) = (s8) (u32) ((*(f32 *)((u8 *)temp_v0 + 0x14)) - ((*(f32 *)((u8 *)temp_v0 + 0x18)) * temp_f12 * temp_f12));
-    (*(f32 *)((u8 *)temp_v0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_v0 + 8)) + D_800BE9A4);
+    (*(f32 *)((u8 *)temp_v0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_v0 + 8)) + g_frame_step_f);
     var_v0 = 1;
     if ((*(f32 *)((u8 *)temp_v0 + 0xC)) < (*(f32 *)((u8 *)temp_v0 + 8))) {
         var_v0 = 0;
@@ -278,37 +278,37 @@ typedef struct {
 
 /* was func_150F3930 */
 void map_obj_vis_by_cam_depth(struct_eu_150F3930 *arg0) {
-    if (*(f32 *)((u8 *)D_800DBFF0 + 0x300) < -2000.0f) {
+    if (*(f32 *)((u8 *)g_player_views + 0x300) < -2000.0f) {
         arg0->unk4F_0 = 0;
         return;
     }
     arg0->unk4F_0 = 1;
 }
 
-extern f32 D_800A1D40;
+extern f32 g_cam_zone_y_limit; /* was D_800A1D40 */
 
 /* was func_150F3978 */
 void camera_zone_flag_update(s32 arg0) {
-    u8 *e = (u8 *)D_800DBFF0 + arg0 * 0x9A0;
+    u8 *e = (u8 *)g_player_views + arg0 * 0x9A0;
 
-    if (*(f32 *)(e + 0x300) < D_800A1D40) {
+    if (*(f32 *)(e + 0x300) < g_cam_zone_y_limit) {
         if (*(f32 *)(e + 0x2FC) > 840.0f) {
-            **(s16 **)&D_800D9A40 = **(s16 **)&D_800D9A40 | (1 << arg0); // fakematch: D_800D9A40 is declared s32 but holds a pointer; inline casts, no local
+            **(s16 **)&g_cam_zone_leaf = **(s16 **)&g_cam_zone_leaf | (1 << arg0); // fakematch: g_cam_zone_leaf is declared s32 but holds a pointer; inline casts, no local
             return;
         }
-        **(s16 **)&D_800D9A40 = **(s16 **)&D_800D9A40 & ~(1 << arg0);
+        **(s16 **)&g_cam_zone_leaf = **(s16 **)&g_cam_zone_leaf & ~(1 << arg0);
     }
 }
 
-extern f32 D_800A1D50;
-extern f32 D_800A1D54;
+extern f32 g_swim_anim_speed_slope; /* was D_800A1D50 */
+extern f32 g_swim_anim_speed_base; /* was D_800A1D54 */
 
 /* was func_150F3A20 */
 f32 player_swim_anim_speed(s32 arg0, f32 arg1) {
     f32 var_f2;
 
     if (arg1 < -5.0f) {
-        var_f2 = (arg1 * D_800A1D50) + D_800A1D54;
+        var_f2 = (arg1 * g_swim_anim_speed_slope) + g_swim_anim_speed_base;
     } else {
         var_f2 = 0.75f;
     }
@@ -318,8 +318,8 @@ f32 player_swim_anim_speed(s32 arg0, f32 arg1) {
 extern u16 D_800BEB30[];
 extern u8 *D_800CC6A4; /* controller: +0 buttons (u16), +2 stick x, +3 stick y (s8) */
 extern s32 D_800CC6A0;
-extern u8 D_800CC68D;
-extern u8 D_800CC1F3;
+extern u8 g_contact_grab_obj_id; /* was D_800CC68D */
+extern u8 g_wall_coll_soft_edges; /* was D_800CC1F3 */
 void obj_stun_update(struct127 *); /* P209: the asm reads only a0 (this caller leaves 0.25f in a1) */
 u8 obj_turn_towards(struct127 *arg0, u8 arg1, u16 arg2);
 f32 obj_approach_speed(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
@@ -327,9 +327,9 @@ void obj_state_common_update(struct127 *);
 void objev_spawn_helper_object(void);
 
 // player_swim_update: player interaction state 0x15 handler (entry 21 of D_800863B4, called as `(obj)` by
-// objects_run_state_handlers / cutscene_event_dispatch). Reads the controller (D_800CC6A4, cleared when the D_800DDE3C / D_800DDDC8 gate
+// objects_run_state_handlers / cutscene_event_dispatch). Reads the controller (D_800CC6A4, cleared when the g_hud_lens_state / g_hud_lens_zoom gate
 // of player g_cur_obj_index holds). Stunned: drops the carried object (unk13C = 100 + index). Entry (unk102 == 0): heading
-// from the stick (math_atan2_u16 / pad_stick_speed), may grab object D_800CC68D, dives below unk118. Then each frame:
+// from the stick (math_atan2_u16 / pad_stick_speed), may grab object g_contact_grab_obj_id, dives below unk118. Then each frame:
 // stick y / buttons 0x8000 / 0x4000 / 0x10 steer pitch (unkB8), turn (unkC4 -> unk76) and speed (obj_approach_speed),
 // gravity damping and clamps, the closest grabbable object (ids 0x9C / 0x9D) to g_cur_obj (unk222), carry / drop
 // sounds, the 0x2000 spawn (id 0x25, fewer than 5), surfacing near the floor, and the animation (obj_start_anim).
@@ -362,7 +362,7 @@ void player_swim_update(struct127 *self) {
     D_800CC288 = D_800BEB30[0];
     D_800CC6A4 = *(u8 **) D_800BE728[0];
     who = g_cur_obj_index;
-    if (who <= D_80082FA0 && (&D_800DDE3C)[who] != 0 && 0.75f < (&D_800DDDC8)[who] && D_800E0B94 != 2) {
+    if (who <= g_last_player_index && (&g_hud_lens_state)[who] != 0 && 0.75f < (&g_hud_lens_zoom)[who] && g_game_mode != 2) {
         /* input blocked */
         D_800CC6A4[2] = 0;
         D_800CC6A4[3] = 0;
@@ -411,14 +411,14 @@ void player_swim_update(struct127 *self) {
             self->unk102 = 1;
         }
         obj_state_common_update(self);
-        if (D_800CC68D != 0) {
+        if (g_contact_grab_obj_id != 0) {
             if (self->unk28 > 30.0f) {
-                /* grab object D_800CC68D - 100 */
+                /* grab object g_contact_grab_obj_id - 100 */
                 g_cur_obj_cmd = 0xFF010074;
                 objev_sound_alt_300_1800();
-                obj_attach_to_carrier(&g_objects[D_800CC68D - 100], g_cur_obj_index);
+                obj_attach_to_carrier(&g_objects[g_contact_grab_obj_id - 100], g_cur_obj_index);
                 self->unk102 = 1;
-                self->unk13C = D_800CC68D;
+                self->unk13C = g_contact_grab_obj_id;
             }
             self->y_velocity = 23.0f;
         }
@@ -548,19 +548,19 @@ void player_swim_update(struct127 *self) {
         }
     }
     speed = self->y_velocity;
-    D_800CC1F3 = 1;
+    g_wall_coll_soft_edges = 1;
     obj_physics_step(self);
-    D_800CC1F3 = 0;
+    g_wall_coll_soft_edges = 0;
     if (self->unk13C != 0 && self->unk28 < 50.0f) {
         floor_h = 50.0f;
     }
     if (!(*(u16 *) D_800CC6A4 & 0x10)) {
-        if (D_800CC68D != 0 && self->unk13C == 0 && g_objects[D_800CC68D - 100].unk28 == 0.0f) {
-            /* pick up object D_800CC68D - 100 from the ground */
+        if (g_contact_grab_obj_id != 0 && self->unk13C == 0 && g_objects[g_contact_grab_obj_id - 100].unk28 == 0.0f) {
+            /* pick up object g_contact_grab_obj_id - 100 from the ground */
             self->y_velocity = 20.0f;
-            self->y_position = g_objects[D_800CC68D - 100].y_position + 70.0f;
-            obj_attach_to_carrier(&g_objects[D_800CC68D - 100], g_cur_obj_index);
-            self->unk13C = D_800CC68D;
+            self->y_position = g_objects[g_contact_grab_obj_id - 100].y_position + 70.0f;
+            obj_attach_to_carrier(&g_objects[g_contact_grab_obj_id - 100], g_cur_obj_index);
+            self->unk13C = g_contact_grab_obj_id;
             g_cur_obj_cmd = 0xFF010074;
             objev_sound_alt_300_1800();
         }

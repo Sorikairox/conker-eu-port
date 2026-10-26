@@ -46,7 +46,7 @@ struct260 *effect_node_create_nodraw(s16 arg0, s8 arg1, s8 arg2, u8 arg3, u8 arg
 void effect_node_update(struct260 *arg0) {
 
     if ((arg0->unkD & 1) != 0) {
-        arg0->unkE -= D_800BE9E4;
+        arg0->unkE -= g_frame_ticks;
     }
     if (arg0->unk11 != -1) {
         g_effect_node_update_fns_b[arg0->unk11](arg0);
@@ -131,7 +131,7 @@ s32 effect_node_draw(s32 arg0, struct260 *arg1, s16 arg2) {
 
 /* was func_151494E0 */
 void effect_nodes_broadcast(s32 arg0, u8 arg1) {
-    node_broadcast_types(&D_800A5770, 2, arg0, arg1);
+    node_broadcast_types(&g_effect_bcast_types, 2, arg0, arg1);
 }
 
 /* was func_15149514 */

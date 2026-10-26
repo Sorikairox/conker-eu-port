@@ -145,7 +145,7 @@ void text_queue_vprintf(s32 fmtArg, s32 *args) {
             if (g_text_anchor_obj != 0) {
                 node[0xC] = g_text_flags | 1;
                 *(s16 *)(node + 0xA) = g_text_anchor_yoff;
-                if (D_80090130 >= 2) {
+                if (g_human_player_count >= 2) {
                     *(f32 *)(node + 4) = g_text_scale + g_text_scale;
                 } else {
                     *(f32 *)(node + 4) = g_text_scale;

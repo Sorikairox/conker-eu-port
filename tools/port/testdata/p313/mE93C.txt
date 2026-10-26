@@ -1,8 +1,8 @@
 49s/if (D_800904E8 == NULL) {/if (D_800904E8 != NULL) {/ % idle nobuf
-55s/if (\*(u16 \*) (D_80090174 + 0x20) \& 1) {/if (*(u16 *) (D_80090174 + 0x20) \& 0x20) {/ % up0 up1
+55s/if (\*(u16 \*) (g_menu_state + 0x20) \& 1) {/if (*(u16 *) (g_menu_state + 0x20) \& 0x20) {/ % up0 up1
 56s/D_800E10B1--;/D_800E10B1++;/ % up0 up1
 57s/moved = TRUE;/moved = FALSE;/ % up1
-59s/if (\*(u16 \*) (D_80090174 + 0x20) \& 2) {/if (*(u16 *) (D_80090174 + 0x20) \& 1) {/ % down34 down5
+59s/if (\*(u16 \*) (g_menu_state + 0x20) \& 2) {/if (*(u16 *) (g_menu_state + 0x20) \& 1) {/ % down34 down5
 60s/D_800E10B1++;/D_800E10B1 += 2;/ % down34 down5
 61s/moved = TRUE;/moved = FALSE;/ % down34b
 62s/if (D_800E10B1 == 4 \&\& D_800E10B0 >= 5) {/if (D_800E10B1 == 4 \&\& D_800E10B0 >= 6) {/ % down34
@@ -12,7 +12,7 @@
 69s/D_800E10B1 = 5;/D_800E10B1 = 4;/ % up0
 72s/if (row >= 6) {/if (row > 6) {/ % down5
 73s/D_800E10B1 = 0;/D_800E10B1 = 1;/ % down5
-76s/if (\*(u16 \*) (D_80090174 + 0x20) \& 8) {/if (*(u16 *) (D_80090174 + 0x20) \& 4) {/ % right left
+76s/if (\*(u16 \*) (g_menu_state + 0x20) \& 8) {/if (*(u16 *) (g_menu_state + 0x20) \& 4) {/ % right left
 77s/D_800E10B0 = col + 1;/D_800E10B0 = col + 2;/ % right4 lr
 79s/moved = TRUE;/moved = FALSE;/ % right4
 82s/D_800E10B0 = col - 1;/D_800E10B0 = col - 2;/ % lr
@@ -38,14 +38,14 @@
 105s/sel--;/sel++;/ % row5
 108s/mtx = (Mtx \*) allocate_memory(0x80, 4, 2, 0);/mtx = (Mtx *) allocate_memory(0x40, 4, 2, 0);/ % idle
 108s/mtx = (Mtx \*) allocate_memory(0x80, 4, 2, 0);/mtx = (Mtx *) allocate_memory(0x80, 4, 1, 0);/ % idle
-109s/if (D_800BE748\[0\] \& 0x8000) {/if (D_800BE748[0] \& 0x4000) {/ % idle blink
+109s/if (g_pad_states\[0\] \& 0x8000) {/if (g_pad_states[0] \& 0x4000) {/ % idle blink
 110s/D_800E10B2 += 8;/D_800E10B2 += 4;/ % idle
 112s/D_800E10B2 -= 8;/D_800E10B2 -= 2;/ % blink
 114s/if (D_800E10B2 < 0) {/if (D_800E10B2 < -1) {/ % tiltm1
 115s/D_800E10B2 = 0;/D_800E10B2 = 1;/ % blink tilt0
 117s/if (D_800E10B2 >= 13) {/if (D_800E10B2 >= 14) {/ % tilt13
 118s/D_800E10B2 = 12;/D_800E10B2 = 13;/ % tiltmax
-121s/if (\*(u16 \*) (D_80090174 + 0x20) \& 0x10) {/if (*(u16 *) (D_80090174 + 0x20) \& 0x8) {/ % selP right
+121s/if (\*(u16 \*) (g_menu_state + 0x20) \& 0x10) {/if (*(u16 *) (g_menu_state + 0x20) \& 0x8) {/ % selP right
 122s/sound_play_2d(0x500, 0x7D00, 0x40, 0, 0);/sound_play_2d(0x500, 0x7D01, 0x40, 0, 0);/ % selP
 123s/ch = sel + 'A';/ch = sel + 'B';/ % selP selA
 124s/if (D_800E10B1 == 5) {/if (D_800E10B1 == 3) {/ % space selX
@@ -68,7 +68,7 @@
 141s/len = D_800E10B3;/len = D_800E10B3 - 1;/ % ch10 chpre
 142s/for (i = 0x90; i < 0xA3; i++) {/for (i = 0x90; i < 0xA2; i++) {/ % ch19 ch10
 142s/for (i = 0x90; i < 0xA3; i++) {/for (i = 0x91; i < 0xA3; i++) {/ % ch10
-143s/str = ((u8 \*\*) D_800E1008)\[i\];/str = ((u8 **) D_800E1008)[i + 1];/ % ch10
+143s/str = ((u8 \*\*) g_text_strings)\[i\];/str = ((u8 **) g_text_strings)[i + 1];/ % ch10
 144s/if (i - 0x90 < len) {/if (i - 0x90 <= len) {/ % ch10 chpre
 145s/c = D_800E10AC\[i - 0x90\];/c = D_800E10AC[i - 0x8F];/ % ch10
 147s/c = ' ';/c = 0;/ % ch10
@@ -83,11 +83,11 @@
 160s/match >>= 1;/match >>= 2;/ % ch10
 162s/if (cheat >= 0) {/if (cheat != 0) {/ % rep0
 163s/bit = 1 << cheat;/bit = 2 << cheat;/ % ch10
-164s/D_800E9D00 |= bit;/D_800E9D00 ^= bit;/ % ch3
+164s/g_cheat_flags |= bit;/g_cheat_flags ^= bit;/ % ch3
 165s/if (bit == 0x400) {/if (bit == 0x200) {/ % ch10
-166s/D_800E9D00 \&= ~0x800;/D_800E9D00 \&= ~0x1800;/ % ch10
+166s/g_cheat_flags \&= ~0x800;/g_cheat_flags \&= ~0x1800;/ % ch10
 167s/} else if (bit == 0x800) {/} else if (bit == 0x1000) {/ % ch11
-168s/D_800E9D00 \&= ~0x400;/D_800E9D00 \&= ~0x600;/ % ch11
+168s/g_cheat_flags \&= ~0x400;/g_cheat_flags \&= ~0x600;/ % ch11
 170s/kind = 0x10;/kind = 0x11;/ % ch10
 171s/sfx = (random_int() \& 1) + 0xC3;/sfx = (random_int() \& 3) + 0xC3;/ % ch3
 171s/sfx = (random_int() \& 1) + 0xC3;/sfx = (random_int() \& 1) + 0xC4;/ % ch10
@@ -95,7 +95,7 @@
 175s/for (i = 0xA3; i < 0xC8 \&\& sfx == 0; i++) {/for (i = 0xA3; i < 0xC7 \&\& sfx == 0; i++) {/ % phlast phmulti
 175s/for (i = 0xA3; i < 0xC8 \&\& sfx == 0; i++) {/for (i = 0xA4; i < 0xC8 \&\& sfx == 0; i++) {/ % pha3
 175s/for (i = 0xA3; i < 0xC8 \&\& sfx == 0; i++) {/for (i = 0xA3; i < 0xC8; i++) {/ % phend phsp
-180s/while ((pat = ((u8 \*\*) D_800E1008)\[i\]) != NULL) {/while ((pat = ((u8 **) D_800E1008)[i + 1]) != NULL) {/ % pha3 phend
+180s/while ((pat = ((u8 \*\*) g_text_strings)\[i\]) != NULL) {/while ((pat = ((u8 **) g_text_strings)[i + 1]) != NULL) {/ % pha3 phend
 182s/while (pat\[n\] == \*in \&\& \*in != '\\0' \&\& pat\[n\] != '\\0') {/while (pat[n] == *in \&\& *in != ' ' \&\& pat[n] != '\\0') {/ % phmulti
 182s/while (pat\[n\] == \*in \&\& \*in != '\\0' \&\& pat\[n\] != '\\0') {/while (pat[n + 1] == *in \&\& *in != '\\0' \&\& pat[n] != '\\0') {/ % phend
 183s/in++;/in += 2;/ % phend
@@ -169,13 +169,13 @@
 262s/for (off = 0; off < 30 \* 12; off += 12) {/for (off = 12; off < 30 * 12; off += 12) {/ % idle
 263s/gDPPipeSync(gdl++);/gDPFullSync(gdl++);/ % idle
 264s/if (off == sel \* 12) {/if (off == sel * 12 + 12) {/ % idle
-265s/gDPSetEnvColor(gdl++, 0xFF, 0x00, 0xFF, D_800E0EC5);/gDPSetEnvColor(gdl++, 0xFF, 0x00, 0xFE, D_800E0EC5);/ % idle
+265s/gDPSetEnvColor(gdl++, 0xFF, 0x00, 0xFF, g_menu_page_alpha);/gDPSetEnvColor(gdl++, 0xFF, 0x00, 0xFE, g_menu_page_alpha);/ % idle
 266s/gSPMatrix(gdl++, mtx + 1, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);/gSPMatrix(gdl++, mtx + 1, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);/ % idle
-268s/gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, D_800E0EC5);/gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0xFF);/ % idle
+268s/gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, g_menu_page_alpha);/gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0xFF);/ % idle
 270s/gSPDisplayList(gdl++, \*(Gfx \*\*) (D_800904E8 + off));/gSPDisplayList(gdl++, *(Gfx **) (D_800904E8 + off + 4));/ % idle
 271s/if (off == sel \* 12) {/if (off != sel * 12) {/ % idle
 272s/gSPMatrix(gdl++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);/gSPMatrix(gdl++, mtx, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);/ % idle
-277s/text_set_color(0xFF, 0xB1, 0x1E, D_800E0EC5);/text_set_color(0xFF, 0xB1, 0x1F, D_800E0EC5);/ % idle
+277s/text_set_color(0xFF, 0xB1, 0x1E, g_menu_page_alpha);/text_set_color(0xFF, 0xB1, 0x1F, g_menu_page_alpha);/ % idle
 278s/text_measure_string(D_800E10AC, \&w, \&h, \&d);/text_measure_string(D_800E10AC, \&h, \&w, \&d);/ % idle
 279s/x = 75 - (w >> 1);/x = 76 - (w >> 1);/ % idle
 279s/x = 75 - (w >> 1);/x = 75 - (w >> 2);/ % idle

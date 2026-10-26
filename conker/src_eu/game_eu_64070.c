@@ -95,7 +95,7 @@ u8 *player_draw_slot8_strip(u8 *arg0, s32 arg1, s32 arg2) {
     if (arg1 > 0) {
         return arg0;
     }
-    temp_v1 = (*(u8 **)((u8 *)((temp_v0_3 + (D_800BE9C0 * 4))) + 0x28));
+    temp_v1 = (*(u8 **)((u8 *)((temp_v0_3 + (g_dl_buf_index * 4))) + 0x28));
     temp_t0 = &(&g_vertex_anchor_blocks)[arg1];
     temp_v0_4 = 1 * 0x10;
     (*(u8 *)((u8 *)(*temp_t0) + 0xC)) = (u8) (*(u8 *)((u8 *)temp_v1 + 0x30C));
@@ -124,7 +124,7 @@ u8 *player_draw_slot8_strip(u8 *arg0, s32 arg1, s32 arg2) {
     player_strip_update_vertices(arg1, (f32 (*)[4]) &temp_v0_5->unk240, (f32 (*)[4]) temp_a2);
     (*(s32 *)((u8 *)arg0 + 0)) = 0xDE000000;
     (*(s32 **)((u8 *)arg0 + 4)) = &D_800846E0;
-    temp_v0_6 = light_write_light_cmds(arg0 + 8, (*(s32 *)((u8 *) temp_s0 + arg2 * 4 + 0x304)), temp_s0->unk301, temp_s0->unk302, temp_s0->unk314 + (D_800BE9C0 * 8));
+    temp_v0_6 = light_write_light_cmds(arg0 + 8, (*(s32 *)((u8 *) temp_s0 + arg2 * 4 + 0x304)), temp_s0->unk301, temp_s0->unk302, temp_s0->unk314 + (g_dl_buf_index * 8));
     temp_t2 = temp_s0->unk66 & 0xC;
     if (temp_t2 == 0xC) {
         (*(s32 *)((u8 *)temp_v0_6 + 0)) = 0xD9FDFFFF;
@@ -146,7 +146,7 @@ u8 *player_draw_slot8_strip(u8 *arg0, s32 arg1, s32 arg2) {
     }
     sp3C = temp_t0;
     temp_v0 = sprite_load_texture(var_s1, &D_8009076C, 0, 0, 0, 0, 0, 2, 3);
-    (*(u8 **)((u8 *)temp_v0 + 4)) = D_80089810;
+    (*(u8 **)((u8 *)temp_v0 + 4)) = g_identity_mtx;
     (*(s32 *)((u8 *)temp_v0 + 0)) = 0xDA380003;
     (*(s32 *)((u8 *)temp_v0 + 8)) = 0x01001002;
     (*(struct222 **)((u8 *)temp_v0 + 0xC)) = (struct222 *) *temp_t0;

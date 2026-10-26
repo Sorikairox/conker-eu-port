@@ -183,9 +183,9 @@ void tail_update_conker(s32 arg0) {
 
     /* hidden: count down the fade-in instead */
     if (mode == 0) {
-        if ((s32) rec->fade > D_800BE9E4) {
+        if ((s32) rec->fade > g_frame_ticks) {
             if (g_game_paused == 0) {
-                rec->fade -= D_800BE9E4;
+                rec->fade -= g_frame_ticks;
             }
             mode = 2;
         } else {
@@ -331,7 +331,7 @@ void tail_update_conker(s32 arg0) {
         if (speed == 0.0f) {
             if (rec->timer != 0 && !camLook) {
                 /* idle: wait, then pick a new random sway */
-                rec->timer -= D_800BE9E4;
+                rec->timer -= g_frame_ticks;
                 if (rec->timer <= 0) {
                     rec->sway = 0.0f;
                     rec->swayAmp = (f32) (u32) (random_int() % 100U);

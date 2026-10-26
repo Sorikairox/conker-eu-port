@@ -160,10 +160,10 @@ void cutscene_focus_on_object(s32 arg0, s32 arg1) {
 
     temp_v0 = obj_find_by_spawn(arg0 & 0xFFF);
     if (temp_v0 != NULL) {
-        if (D_800DBFF0->unk2C & 0x100) {
-            var_f0 = (*(f32 *)((u8 *)D_800DBFF0 + 0x760));
+        if (g_player_views->unk2C & 0x100) {
+            var_f0 = (*(f32 *)((u8 *)g_player_views + 0x760));
         } else {
-            var_f0 = D_800DBFF0->unk37C;
+            var_f0 = g_player_views->unk37C;
         }
         if (arg1 != 0) {
             cutscene_set_focus_point2((s16) (s32) temp_v0->x_position, (s16) (s32) temp_v0->y_position, (s16) (s32) temp_v0->z_position, var_f0 + 180.0f);

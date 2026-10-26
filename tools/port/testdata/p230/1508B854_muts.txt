@@ -9,8 +9,8 @@ s/        zone.radius = \*(f32 \*) ev;/        zone.radius = 400.0f;/ % dist rad
 s/        ex = \*(s16 \*) (ev + 4);/        ex = *(s16 *) (ev + 8);/ % asym two_ev
 s/        ey = \*(s16 \*) (ev + 6);/        ey = 0.0f;/ % two_ev
 s/        ez = \*(s16 \*) (ev + 8);/        ez = *(s16 *) (ev + 4);/ % asym two_ev
-s/        for (k = D_80090130, p = \&g_objects\[k\]; k < D_8008FD8C; k++, p++) {/        for (k = 0, p = \&g_objects[k]; k < D_8008FD8C; k++, p++) {/ % base mixed
-s/        for (k = D_80090130, p = \&g_objects\[k\]; k < D_8008FD8C; k++, p++) {/        for (k = D_80090130, p = \&g_objects[k]; k < D_8008FD8C - 1; k++, p++) {/ % base mixed
+s/        for (k = g_human_player_count, p = \&g_objects\[k\]; k < g_player_count; k++, p++) {/        for (k = 0, p = \&g_objects[k]; k < g_player_count; k++, p++) {/ % base mixed
+s/        for (k = g_human_player_count, p = \&g_objects\[k\]; k < g_player_count; k++, p++) {/        for (k = g_human_player_count, p = \&g_objects[k]; k < g_player_count - 1; k++, p++) {/ % base mixed
 s/            dy = p->y_position - ey;/            dy = p->y_position + ey;/ % ey_hi
 s/            if (!(dy < 200.0f) || !(-100.0f < dy)) {/            if (!(dy <= 200.0f) || !(-100.0f < dy)) {/ % dy_hi
 s/            if (!(dy < 200.0f) || !(-100.0f < dy)) {/            if (!(dy < 200.0f) || !(-100.0f <= dy)) {/ % dy_lo

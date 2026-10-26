@@ -21,10 +21,10 @@ extern void *g_world_obj_view_words[4]; /* was D_800DC300 */
 extern void *g_world_obj_mtx_a; /* was D_800DC310 */
 extern void *g_world_obj_mtx_b; /* was D_800DC314 */
 extern u8 g_world_obj_state_3b8; /* was D_800DC3B8 */
-extern s32 *D_800DC3C4;
-extern s32 D_800DC3C8;
+extern s32 *g_world_obj_rider_masks; /* was D_800DC3C4 */
+extern s32 g_world_obj_mp_count; /* was D_800DC3C8 */
 
-#define WOBJ(i) ((u8 *) D_800DBEF4 + (i) * 0xA0)
+#define WOBJ(i) ((u8 *) g_world_objs + (i) * 0xA0)
 #define W8(p, o) (*(u8 *) ((u8 *) (p) + (o)))
 #define W16(p, o) (*(u16 *) ((u8 *) (p) + (o)))
 #define S16(p, o) (*(s16 *) ((u8 *) (p) + (o)))
@@ -32,9 +32,9 @@ extern s32 D_800DC3C8;
 #define WPTR(p, o) (*(u8 **) ((u8 *) (p) + (o)))
 #define WF32(p, o) (*(f32 *) ((u8 *) (p) + (o)))
 
-/* world_objects_load: builds the level's world objects (0xA0-byte records at D_800DBEF4, count g_world_obj_count) from
+/* world_objects_load: builds the level's world objects (0xA0-byte records at g_world_objs, count g_world_obj_count) from
  * the level's two 0x44-byte placement lists (asset 2/0xB/level: g_world_obj_level_count level objects, asset 3/0xC/level/2:
- * D_800DC3C8 multiplayer objects). Per object: position (s16 +0x10..), origin floats, scale, the type's callback
+ * g_world_obj_mp_count multiplayer objects). Per object: position (s16 +0x10..), origin floats, scale, the type's callback
  * table D_80089030 (types < 0xFFFF; 0x28 / 0x42 set the +0x70 bit 2 and keep it for the next multiplayer ones, type
  * 0x16 = "has a callback"), its model: an earlier object with the same key (+0xC / +0x10) shares its vertices /
  * display list, else the model is loaded (asset_load_with_subfiles 3/id, kind 0 in +0x1C) or taken from the level segments
@@ -76,12 +76,12 @@ void world_objects_load(s32 arg0, s32 arg1) {
     g_world_obj_level_count = nA;
     g_world_obj_count = g_world_obj_level_count;
     nB = (u32) asset_load_ptr(&bufB, 3, 0xC, arg0, 2) / 0x44;
-    D_800DC3C8 = nB;
+    g_world_obj_mp_count = nB;
     g_world_obj_count = g_world_obj_count + nB;
-    D_800DBEF4 = allocate_memory(g_world_obj_count * 0xA0, 1, 2, 0);
-    if (D_800DBEF4 == NULL) {
+    g_world_objs = allocate_memory(g_world_obj_count * 0xA0, 1, 2, 0);
+    if (g_world_objs == NULL) {
         g_world_obj_count = 0;
-        D_800DC3C8 = 0;
+        g_world_obj_mp_count = 0;
         g_world_obj_level_count = 0;
         return;
     }
@@ -307,14 +307,14 @@ void world_objects_load(s32 arg0, s32 arg1) {
 
     g_world_obj_mtx_a = allocate_memory(g_world_obj_count << 6, 1, 2, 0);
     g_world_obj_mtx_b = allocate_memory(g_world_obj_count << 6, 1, 2, 0);
-    D_800DC328 = allocate_memory(g_world_obj_count * 4, 1, 0, 0);
-    D_800DC32C = allocate_memory(g_world_obj_count, 1, 0, 0);
+    g_world_obj_blocks = allocate_memory(g_world_obj_count * 4, 1, 0, 0);
+    g_world_obj_block_timers = allocate_memory(g_world_obj_count, 1, 0, 0);
     for (k = 0; k < 4; k++) {
         g_world_obj_view_words[k] = allocate_memory(g_world_obj_count * 4, 1, 0, 0);
     }
-    D_800DC3C4 = allocate_memory(g_world_obj_count * 4, 1, 0, 0);
+    g_world_obj_rider_masks = allocate_memory(g_world_obj_count * 4, 1, 0, 0);
     for (k = 0; k < g_world_obj_count; k++) {
-        D_800DC3C4[k] = 0;
+        g_world_obj_rider_masks[k] = 0;
     }
     for (k = g_world_obj_level_count; k < g_world_obj_count; k++) {
         if (W8(WOBJ(k), 0x72) == 0) {
@@ -334,8 +334,8 @@ void world_objects_load(s32 arg0, s32 arg1) {
 /* was func_15004574 */
 void world_object_cache_selected(void) {
     if (g_world_obj_selected != 0xFF) {
-        g_world_obj_selected_1c = D_800DBEF4[g_world_obj_selected].unk1C;
-        g_world_obj_selected_28 = D_800DBEF4[g_world_obj_selected].unk28;
+        g_world_obj_selected_1c = g_world_objs[g_world_obj_selected].unk1C;
+        g_world_obj_selected_28 = g_world_objs[g_world_obj_selected].unk28;
     }
 }
 
@@ -354,11 +354,11 @@ void scenery_uv_scroll_update();
 void scenery_start_pending_anim();
 extern f32 D_800DC338[4][4];
 extern f32 g_world_obj_identity_mtx[4][4]; /* was D_800DC378 */
-extern Mtx **D_800895F0[2];       /* per DL buffer: -> the world-object matrix array (0x40 each) */
+extern Mtx **g_world_obj_mtx_bufs[2];       /* per DL buffer: -> the world-object matrix array (0x40 each); was D_800895F0 */
 extern u16 D_800D3C00;
 
-/* Level start for the g_world_obj_count world objects (0xA0-byte records at D_800DBEF4): reset, identity camera matrices,
- * then per object: kind 3 for no/known callbacks, its matrix (world_record_build_matrix) into both DL buffers' D_800895F0
+/* Level start for the g_world_obj_count world objects (0xA0-byte records at g_world_objs): reset, identity camera matrices,
+ * then per object: kind 3 for no/known callbacks, its matrix (world_record_build_matrix) into both DL buffers' g_world_obj_mtx_bufs
  * arrays unless static (+0x70 bit 0); static objects get their vertices (+0x28, 0x10 stride) transformed once into
  * +0x20 and copied to +0x24; world_objects_transform_mesh for flagged ones. Second pass: collision_find_floor per visible object
  * (bounds from +0x10/+0x12/+0x14, range -10000..20000) into +0x80/+0x84. arg0 (the level) is unused. */
@@ -380,16 +380,16 @@ void world_objects_level_start(s32 arg0) {
     guMtxIdentF(D_800DC338);
     guMtxIdentF(g_world_obj_identity_mtx);
     for (i = 0; i < g_world_obj_count; i++) {
-        r = (u8 *)D_800DBEF4 + i * 0xA0;
+        r = (u8 *)g_world_objs + i * 0xA0;
         cb = *(void **)(r + 0x38);
         if (cb == NULL || cb == (void *)scenery_uv_scroll_update || cb == (void *)scenery_start_pending_anim) {
             r[0x4E] = 3;
         }
         if (!(r[0x70] & 1)) {
             world_record_build_matrix(mf, r);
-            guMtxF2L(mf, *D_800895F0[D_800BE9C0] + i);
-            b = D_800BE9C0;
-            bcopy(*D_800895F0[b] + i, *D_800895F0[b == 0] + i, 0x40);
+            guMtxF2L(mf, *g_world_obj_mtx_bufs[g_dl_buf_index] + i);
+            b = g_dl_buf_index;
+            bcopy(*g_world_obj_mtx_bufs[b] + i, *g_world_obj_mtx_bufs[b == 0] + i, 0x40);
         }
         if (*(void **)(r + 0x38) == (void *)scenery_handler_noop) {
             *(void **)(r + 0x38) = NULL;
@@ -415,7 +415,7 @@ void world_objects_level_start(s32 arg0) {
         }
     }
     for (i = 0; i < g_world_obj_count; i++) {
-        r = (u8 *)D_800DBEF4 + i * 0xA0;
+        r = (u8 *)g_world_objs + i * 0xA0;
         if (r[0x6E] == 1) {
             continue;
         }
@@ -453,8 +453,8 @@ void world_objects_clear_arrays(void) {
     s32 i;
 
     for (i = 0; i < g_world_obj_count; i++) {
-        D_800DC328[i] = 0;
-        D_800DC32C[i] = 0;
+        g_world_obj_blocks[i] = 0;
+        g_world_obj_block_timers[i] = 0;
     }
 }
 
@@ -521,7 +521,7 @@ s32 world_object_alloc_id(s32 arg0) {
     if (arg0 == 0) {
         id = 1;
         for (i = g_world_obj_level_count; i < g_world_obj_count; i++) {
-            if (id == D_800DBEF4[i].pad70[2]) {
+            if (id == g_world_objs[i].pad70[2]) {
                 id++;
                 i = g_world_obj_level_count - 1;
             }
@@ -534,7 +534,7 @@ s32 world_object_alloc_id(s32 arg0) {
         first = 0xFF - g_world_obj_level_count;
         id = first;
         for (i = 0; i < g_world_obj_count; i++) {
-            if (id == D_800DBEF4[i].pad70[2]) {
+            if (id == g_world_objs[i].pad70[2]) {
                 id--;
                 i = -1;
             }

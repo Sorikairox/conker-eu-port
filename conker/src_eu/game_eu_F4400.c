@@ -38,7 +38,7 @@ s8 ground_glow_b_flicker_update(u8 *arg0) {
         ret = 0;
     }
     p->unk4 = 0;
-    p->unk14 -= D_800BE9E4;
+    p->unk14 -= g_frame_ticks;
     if (p->unk14 < 0) {
         p->unk14 = ((u32)random_int() % (u32)(p->unk18 + 1)) + p->unk16;
         p->unk10 = (random_float() * p->unkC) + p->unk8;

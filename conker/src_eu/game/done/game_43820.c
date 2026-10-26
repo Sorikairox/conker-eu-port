@@ -9,7 +9,7 @@ void records_set_tint_180_60_60(void) {
     struct127 *tmp;
     s32 i;
 
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < g_player_count; i++) {
         tmp = &g_objects[i];
         tmp->unk31C->unk114 = 180;
         tmp->unk31C->unk116 = 60;

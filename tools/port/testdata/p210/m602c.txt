@@ -1,12 +1,12 @@
-s/g_cur_obj->unk21E = D_800D1891;/g_cur_obj->unk21E = D_800D1890;/
-s/D_800D1891 \* 8 + 8)/D_800D1891 * 8)/
-s/D_800D2104\[g_cur_obj->unk13F\]/D_800D2104[g_cur_obj->unk13F + 1]/
+s/g_cur_obj->unk21E = g_aiscript_arg1;/g_cur_obj->unk21E = g_aiscript_arg0;/
+s/g_aiscript_arg1 \* 8 + 8)/g_aiscript_arg1 * 8)/
+s/g_path_points\[g_cur_obj->unk13F\]/g_path_points[g_cur_obj->unk13F + 1]/
 s/dx = pt\[0\] - g_cur_obj->x_position;/dx = pt[1] - g_cur_obj->x_position;/
 s/dz = pt\[2\] - g_cur_obj->z_position;/dz = pt[2] - g_cur_obj->y_position;/
 s/sqrtf(dx \* dx + dz \* dz)/sqrtf(dx * dx + dx * dz)/
 s/    t = t + t;/    ;/
 s/if (t < 12.0f) {/if (t <= 12.0f) {/
-s/g_cur_obj->unk44 \* (t \* D_8009A500);/g_cur_obj->unk44 * (t * 0.08f);/
+s/g_cur_obj->unk44 \* (t \* g_aiscript_one_twelfth);/g_cur_obj->unk44 * (t * 0.08f);/
 s/        t = 12.0f;/        ;/
 s/g_cur_obj->unk21C = t \* 100.0f;/g_cur_obj->unk21C = t * 10.0f;/
 s/g_cur_obj->gravity \* t \* 0.5f;/g_cur_obj->gravity * t;/

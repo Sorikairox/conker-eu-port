@@ -2,7 +2,7 @@
  * docs/port/design/P5.md, "PC-replacement needed"). They stay GLOBAL_ASM in conker/src_eu; the
  * port's definitions here replace the weak asm stubs (port/tools/gen_stubs.py). This TU goes through
  * the vbe IR pass like the game TUs (port/Makefile BOOT_SRC), so game memory is accessed with N64
- * semantics: D_80088950 below is a big-endian u64 in virtual big-endian memory.
+ * semantics: g_random_seed below is a big-endian u64 in virtual big-endian memory.
  *
  *   tlb_clear_entries  handwritten TLB loop (init_eu_5DA0.c)
  *   (random_int guRandom: game C since port P106, removed here in P110)
@@ -24,7 +24,7 @@ s32 tlb_clear_entries(s32 lo, s32 hi) {
 
 /* P110: random_int (guRandom on a u64 seed) was removed here: port P106 wrote the same formula as C in
  * game_DAE50.c (NM), which caused a duplicate symbol. The self-test below now checks the game C. */
-extern u64 D_80088950;
+extern u64 g_random_seed; /* was D_80088950 */
 s32 random_int(void);
 
 /* self-test: three guRandom steps from a known seed (expected values from the u64 formula in
@@ -33,15 +33,15 @@ void port_glog(const char *fmt, ...);
 #define port_log port_glog /* format strings live in vbe game memory */
 int port_overrides_test(void) {
     static const u32 want[3] = {0x780B1177, 0x0D12F86A, 0xA90FD6A5};
-    u64 saved = D_80088950;
+    u64 saved = g_random_seed;
     int bad = 0, i;
-    D_80088950 = 0x0123456789ABCDEFULL;
+    g_random_seed = 0x0123456789ABCDEFULL;
     for (i = 0; i < 3; i++) {
         u32 got = (u32)random_int();
         if (got != want[i]) { port_log("[overrides] guRandom step %d: %08X, want %08X\n", i, got, want[i]); bad++; }
     }
-    if (D_80088950 != 0xA90FD6A5ULL) { port_log("[overrides] seed after 3 steps wrong\n"); bad++; }
-    D_80088950 = saved;
+    if (g_random_seed != 0xA90FD6A5ULL) { port_log("[overrides] seed after 3 steps wrong\n"); bad++; }
+    g_random_seed = saved;
     if (bad) port_log("[overrides] guRandom FAIL (%d failures)\n", bad);
     else port_log("[overrides] guRandom PASS (0 failures)\n");
     return bad;
@@ -77,51 +77,51 @@ int port_romsym_test(void) {
  * the port branch converted them in P20 (game_57FA0.c, game_eu_2F180.c). */
 
 /* P23: ?dlstat=N probe of the frame builder's state (logged with the gfx frame statistics). */
-extern unsigned char D_800BEA35, g_game_paused, D_800E0B94; /* was D_800BEAC0 */
+extern unsigned char D_800BEA35, g_game_paused, g_game_mode; /* was D_800BEAC0; was D_800E0B94 */
 extern unsigned D_800BE9D0, D_800BE9D8[2], D_800BEDE8[2];
-extern unsigned char D_800BE9C0; /* u8 (P31: was short, read the wrong byte) */
+extern unsigned char g_dl_buf_index; /* u8 (P31: was short, read the wrong byte); was D_800BE9C0 */
 void port_cam_probe(unsigned task);
 void port_frame_probe(unsigned task) {
     port_glog("[probe] task %u: BEA35 %u BEAC0 %u E0B94 %u GDL %08X BE9D8 %08X %08X BEDE8 %08X %08X BE9C0 %d\n", task,
-              D_800BEA35, g_game_paused, D_800E0B94, D_800BE9D0, D_800BE9D8[0], D_800BE9D8[1],
-              D_800BEDE8[0], D_800BEDE8[1], (int)D_800BE9C0); /* vbe TU: plain accesses are game memory */
+              D_800BEA35, g_game_paused, g_game_mode, D_800BE9D0, D_800BE9D8[0], D_800BE9D8[1],
+              D_800BEDE8[0], D_800BEDE8[1], (int)g_dl_buf_index); /* vbe TU: plain accesses are game memory */
     port_cam_probe(task);
 }
 
 /* P26: camera / view-matrix state and the P24 / P22 runtime checks (logged with ?dlstat=N).
  *   VIEW  D_800DC6D0[2]: per DL buffer, player view matrices (allocated by asm camera_level_init, filled by
  *         asm camera_build_view_matrix via mtx_look_at_reflect + guMtxCatL); the frame DL multiplies them onto the projection.
- *   CAMREC D_800BE628: camera records (0x180 per player); +0x100 + buf * 0x40 = projection Mtx, written by
+ *   CAMREC g_player_cams: camera records (0x180 per player); +0x100 + buf * 0x40 = projection Mtx, written by
  *         camera_perspective_build (guPerspectiveF + guMtxF2L) from asm camera_projection_update / camera_projection_set_viewport or the request
- *         queue D_800D9F18 drained by camera_projection_apply_pending_viewport.
- *   CAM   D_800DBFF0: struct108 camera-controller records (0x9A0 each, camera_update_all / camera_update_controller). */
+ *         queue g_cam_pending_viewport drained by camera_projection_apply_pending_viewport.
+ *   CAM   g_player_views: struct108 camera-controller records (0x9A0 each, camera_update_all / camera_update_controller). */
 struct PendingF2_ { float x, y; };
-extern unsigned D_800DC6D0[2], D_800DBFF0, D_800DDD64;
-extern int D_800BE628, D_80082FA0, D_800D2DB4, D_80041C30[3];
+extern unsigned D_800DC6D0[2], g_player_views, g_flare_nodes; /* was D_800DBFF0; was D_800DDD64 */
+extern int g_player_cams, g_last_player_index, D_800D2DB4, D_80041C30[3]; /* was D_800BE628; was D_80082FA0 */
 extern unsigned D_800417B0[3];
-extern unsigned char D_800DE1BB, D_800DE1BC, D_800C35EA;
-extern struct PendingF2_ D_800D9F18[];
+extern unsigned char g_screen_pulse_alpha, D_800DE1BC, D_800C35EA; /* was D_800DE1BB */
+extern struct PendingF2_ g_cam_pending_viewport[]; /* was D_800D9F18 */
 extern int g_level_id; extern unsigned g_objects[]; /* was D_800BE9F0; was D_800CC2D0 */
-extern float D_800D9F40, D_800D9F3C, D_800C3A70, D_800C3A74, D_800C3A6C;
+extern float g_cam_near_plane, g_cam_far_plane, D_800C3A70, D_800C3A74, D_800C3A6C; /* was D_800D9F3C; was D_800D9F40 */
 void port_cam_probe(unsigned task) {
-    int buf = D_800BE9C0 & 1;
-    unsigned *proj = D_800BE628 ? (unsigned *)(D_800BE628 + 0x100 + buf * 0x40) : 0;
+    int buf = g_dl_buf_index & 1;
+    unsigned *proj = g_player_cams ? (unsigned *)(g_player_cams + 0x100 + buf * 0x40) : 0;
     unsigned *view = D_800DC6D0[buf] ? (unsigned *)D_800DC6D0[buf] : 0;
     port_glog("[cam] task %u: players %d VIEW %08X %08X CAM %08X CAMREC %08X proj w0,w2,w5,w13 %08X %08X %08X %08X "
-              "view w0,w2 %08X %08X req0 %08X BEAC0 %u C35EA %u D2DB4 %d\n", task, D_80082FA0, D_800DC6D0[0], D_800DC6D0[1],
-              D_800DBFF0, D_800BE628, proj ? proj[0] : 0, proj ? proj[2] : 0, proj ? proj[5] : 0, proj ? proj[5 + 8] : 0,
-              view ? view[0] : 0, view ? view[2] : 0, *(unsigned *)&D_800D9F18[0].x, g_game_paused, D_800C35EA, D_800D2DB4);
+              "view w0,w2 %08X %08X req0 %08X BEAC0 %u C35EA %u D2DB4 %d\n", task, g_last_player_index, D_800DC6D0[0], D_800DC6D0[1],
+              g_player_views, g_player_cams, proj ? proj[0] : 0, proj ? proj[2] : 0, proj ? proj[5] : 0, proj ? proj[5 + 8] : 0,
+              view ? view[0] : 0, view ? view[2] : 0, *(unsigned *)&g_cam_pending_viewport[0].x, g_game_paused, D_800C35EA, D_800D2DB4);
     port_glog("[chk] task %u: music players %08X %08X %08X beat C30 %d %d %d | FAD4 DE1BB %u DE1BC %u | E7FC DDD64 %08X\n",
               task, D_800417B0[0], D_800417B0[1], D_800417B0[2], D_80041C30[0], D_80041C30[1], D_80041C30[2],
-              D_800DE1BB, D_800DE1BC, D_800DDD64);
-    if (D_800BE628) { /* P31: camera record 0 as floats, 0x00..0xB4 (fov 0x6C..0x78, scale 0x84) */
-        const float *f = (const float *)D_800BE628;
+              g_screen_pulse_alpha, D_800DE1BC, g_flare_nodes);
+    if (g_player_cams) { /* P31: camera record 0 as floats, 0x00..0xB4 (fov 0x6C..0x78, scale 0x84) */
+        const float *f = (const float *)g_player_cams;
         int k;
         for (k = 0; k < 0xB8 / 4; k += 8)
             port_glog("[camrec] +%02X: %g %g %g %g %g %g %g %g\n", k * 4, f[k], f[k + 1], f[k + 2], f[k + 3],
                       f[k + 4], f[k + 5], f[k + 6], f[k + 7]);
-        if (D_800DBFF0) {
-            const unsigned char *cp = (const unsigned char *)D_800DBFF0;
+        if (g_player_views) {
+            const unsigned char *cp = (const unsigned char *)g_player_views;
             const float *ob = *(float *const *)(cp + 0x3D4);
             const int *vw = D_800DC6D0[buf] ? (const int *)D_800DC6D0[buf] : 0;
             port_glog("[camobj] 2C %08X 23C %u 23D %u obj %08X eye %g %g %g at %g %g %g | 2F8 %g %g %g 2BC %g %g %g"
@@ -135,18 +135,18 @@ void port_cam_probe(unsigned task) {
         }
         port_glog("[camlvl] level D_800BE9F0 %d D_800CC2D0 %08X %08X\n", g_level_id, g_objects[0], g_objects[1]);
         { /* P37: camera target = the character record at player object 0 + 0x31C (setup_entry_spawn sets it for character
-           * slots), the enabled-player mask D_800D2340, the character player_stat_get(0, 1), the slot count D_8008FD8C,
+           * slots), the enabled-player mask D_800D2340, the character player_stat_get(0, 1), the slot count g_player_count,
            * the setup entry count D_800D2520 and the spawned flag of entry 0 (g_setup_entry_flags[0]). */
-            extern s16 D_800D2340; extern s8 D_8008FD8C; extern u8 D_800D2520; extern u8 *g_setup_entry_flags;
+            extern s16 D_800D2340; extern s8 g_player_count; extern u8 D_800D2520; extern u8 *g_setup_entry_flags;
             extern u8 *D_800D20FC;
             s32 player_stat_get(s16, s32);
             u8 *e = D_800D20FC;
             port_glog("[camtgt] level %d: D_800CC2D0[0]+0x31C = %08X, mask D_800D2340 %04X, slots %d, char(0) %d, setup entries %d, "
                       "entry0 type %02X placeholder %d spawned %d\n", g_level_id, *(unsigned *)((u8 *)g_objects + 0x31C),
-                      (u16)D_800D2340, D_8008FD8C, player_stat_get(0, 1), D_800D2520, e ? e[4] : 0, e ? e[2] : 0,
+                      (u16)D_800D2340, g_player_count, player_stat_get(0, 1), D_800D2520, e ? e[4] : 0, e ? e[2] : 0,
                       g_setup_entry_flags ? g_setup_entry_flags[0] : -1);
         }
-        port_glog("[camrec] screen D_800D9F40 %g D_800D9F3C %g C3A70 %g C3A74 %g C3A6C %g\n", D_800D9F40, D_800D9F3C,
+        port_glog("[camrec] screen D_800D9F40 %g D_800D9F3C %g C3A70 %g C3A74 %g C3A6C %g\n", g_cam_near_plane, g_cam_far_plane,
                   D_800C3A70, D_800C3A74, D_800C3A6C);
     }
 }

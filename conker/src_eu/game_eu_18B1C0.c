@@ -39,12 +39,12 @@ void light_set_level_colour(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
     s32 temp_t6;
 
     temp_t6 = arg3 & 0xFF;
-    if (temp_t6 >= (s32) D_800DD157) {
-        (*(s8 *)((u8 *)(&D_800DCD20) + 0)) = (s8) arg0;
-        (*(s8 *)((u8 *)(&D_800DCD20) + 1)) = (s8) arg1;
-        (*(s8 *)((u8 *)(&D_800DCD20) + 2)) = (s8) arg2;
+    if (temp_t6 >= (s32) g_level_colour_priority) {
+        (*(s8 *)((u8 *)(&g_level_light_colour) + 0)) = (s8) arg0;
+        (*(s8 *)((u8 *)(&g_level_light_colour) + 1)) = (s8) arg1;
+        (*(s8 *)((u8 *)(&g_level_light_colour) + 2)) = (s8) arg2;
         D_800DCD7C = 1;
-        D_800DD157 = (u8) temp_t6;
+        g_level_colour_priority = (u8) temp_t6;
     }
 }
 struct lnode_1515DA90 { struct lnode_1515DA90 *next; };
@@ -56,14 +56,14 @@ struct lnode_1515DA90 *light_list_append_new(void) {
     p = allocate_memory(0x34, 1, 2, 2);
     if (p != NULL) {
         bzero(p, 0x34);
-        if (D_800DCD78 != 0) {
-            cur = (struct lnode_1515DA90 *)D_800DCD78;
+        if (g_light_list_head != 0) {
+            cur = (struct lnode_1515DA90 *)g_light_list_head;
             while (cur->next != NULL) {
                 cur = cur->next;
             }
             cur->next = p;
         } else {
-            D_800DCD78 = (s32)p;
+            g_light_list_head = (s32)p;
         }
         p->next = NULL;
     }
@@ -104,7 +104,7 @@ s32 light_add_point(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
 
 /* was func_1515DC0C */
 void light_list_clear_frame_flags(void) {
-    u8 *var_v0 = (u8 *)D_800DCD78;
+    u8 *var_v0 = (u8 *)g_light_list_head;
     while (var_v0 != NULL) {
         var_v0[0xC] = 0;
         var_v0[0x30] = 0;
@@ -116,21 +116,21 @@ void light_list_clear_frame_flags(void) {
 void light_stub(void) {
 }
 
-extern s32 D_800DD140;
+extern s32 g_light_viewport_fixed; /* was D_800DD140 */
 
 /* Per-player view setup: no lights, lighting on, then light_viewport_to_fixed turns the player's current viewport
- * (D_800BE628 + player * 0x180 + 0x100 + frame * 0x40) into the s15.16 values D_800DD140[0..3], which are
+ * (g_player_cams + player * 0x180 + 0x100 + frame * 0x40) into the s15.16 values g_light_viewport_fixed[0..3], which are
  * loaded with the custom G_MOVEWORD index 0x10: integer halves at offsets 0x00..0x0C, fractions at 0x10..0x1C,
  * then 0x20..0x2C. */
 /* was func_1515DC40 */
 Gfx *light_setup_view(Gfx *gdl, s32 player) {
-    s32 *m = &D_800DD140;
+    s32 *m = &g_light_viewport_fixed;
 
     gdl->words.w0 = 0xDB020000; /* G_MOVEWORD G_MW_NUMLIGHT: 0 */
     gdl->words.w1 = 0;
     gdl++;
     gSPSetGeometryMode(gdl++, G_LIGHTING);
-    light_viewport_to_fixed((s16 *)(D_800BE628 + player * 0x180 + D_800BE9C0 * 0x40 + 0x100));
+    light_viewport_to_fixed((s16 *)(g_player_cams + player * 0x180 + g_dl_buf_index * 0x40 + 0x100));
 
     gdl->words.w0 = 0xDB100000;
     gdl->words.w1 = ((m[0] >> 16) << 16) | ((m[1] >> 16) & 0xFFFF);
@@ -171,8 +171,8 @@ Gfx *light_setup_view(Gfx *gdl, s32 player) {
     return gdl;
 }
 /* Per-object lighting: colours from light_get_zone_colour (fog/tint blend when flags & 2), then the (maxLights - 1) nearest
- * enabled point lights of the D_800DCD78 list (insertion sort by squared distance; flags & 1: from the player's camera
- * direction, flags & 4: no range cut-off), light structs (0x30 each) at base + (D_800BE9C0 * maxLights + i) * 0x30
+ * enabled point lights of the g_light_list_head list (insertion sort by squared distance; flags & 1: from the player's camera
+ * direction, flags & 4: no range cut-off), light structs (0x30 each) at base + (g_dl_buf_index * maxLights + i) * 0x30
  * (light_fill_point_light fills point lights), then gSPNumLights + one G_MOVEMEM per light, ambient and lookat (arg8).
  * The asm keeps the previous light's distance for directional lights (+4 != 0); the first one gets an uninitialised value. */
 /* was func_1515DE84 */
@@ -223,7 +223,7 @@ Gfx *light_apply_object_lights(Gfx *gdl, s16 player, s32 x, s32 y, s32 z, s32 ar
         py = y;
         pz = z;
     } else {
-        u8 *cam = (u8 *)D_800DBFF0 + player * 0x9A0;
+        u8 *cam = (u8 *)g_player_views + player * 0x9A0;
         f32 dx = *(f32 *)(cam + 0x2BC) - *(f32 *)(cam + 0x2F8);
         f32 dy = *(f32 *)(cam + 0x2C0) - *(f32 *)(cam + 0x2FC);
         f32 dz = *(f32 *)(cam + 0x2C4) - *(f32 *)(cam + 0x300);
@@ -242,7 +242,7 @@ Gfx *light_apply_object_lights(Gfx *gdl, s16 player, s32 x, s32 y, s32 z, s32 ar
     }
     count = 0;
     d = 0;
-    L = (u8 *)D_800DCD78;
+    L = (u8 *)g_light_list_head;
     if (L != NULL) {
         bit = 1 << player;
         do {
@@ -306,10 +306,10 @@ Gfx *light_apply_object_lights(Gfx *gdl, s16 player, s32 x, s32 y, s32 z, s32 ar
         g += 2;
     }
     if (maxLights != 0) {
-        amb = (u8 *)(((D_800BE9C0 * maxLights) + count) * 0x30 + base);
-        amb[8] = (&D_800DCD30)[player * 3 + 0];
-        amb[9] = (&D_800DCD30)[player * 3 + 1];
-        amb[10] = (&D_800DCD30)[player * 3 + 2];
+        amb = (u8 *)(((g_dl_buf_index * maxLights) + count) * 0x30 + base);
+        amb[8] = (&g_level_light_dirs)[player * 3 + 0];
+        amb[9] = (&g_level_light_dirs)[player * 3 + 1];
+        amb[10] = (&g_level_light_dirs)[player * 3 + 2];
         if (flags & 2) {
             amb[4] = amb[0] = col2[0];
             amb[5] = amb[1] = col2[1];
@@ -339,12 +339,12 @@ Gfx *light_apply_object_lights(Gfx *gdl, s16 player, s32 x, s32 y, s32 z, s32 ar
         }
         if (extra) {
             g[0] = ((((u32)(i * 0x30 + 0x60) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA;
-            g[1] = (u32)&D_800DCD40;
+            g[1] = (u32)&g_light_cmd_data;
             g += 2;
         }
         k = count + extra;
         g[0] = ((((u32)((k + 1) * 0x30 + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA;
-        g[1] = ((D_800BE9C0 * maxLights) + count) * 0x30 + base;
+        g[1] = ((g_dl_buf_index * maxLights) + count) * 0x30 + base;
         g += 2;
         g[0] = ((((u32)((k + 2) * 0x30 + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA;
         g[1] = (u32)arg8;
@@ -355,7 +355,7 @@ Gfx *light_apply_object_lights(Gfx *gdl, s16 player, s32 x, s32 y, s32 z, s32 ar
 u8 *light_zone_find_at(s32, s32, s32, s32, u8 **);
 
 /* Starting light colour of a position (P43): the colour zone of the g_light_colour_zones list that contains (x, y, z) (word +0x18,
- * bytes R, G, B from the low end), else the level colour D_800DCD20 scaled by (0x100 - ((arg5 >> 5) & 3) * 0x40) >> 8.
+ * bytes R, G, B from the low end), else the level colour g_level_light_colour scaled by (0x100 - ((arg5 >> 5) & 3) * 0x40) >> 8.
  * flags & 0x10: blend with the fog / tint zone of light_get_tint_zone: c' = (tintB * (c + ((0xFF - c) * fb >> 8))) >> 8,
  * plus 7/8 of (tintA * (c + ((0xFF - c) * fa >> 8))) >> 8, clamped to 0xFF. The asm returns no value. */
 /* was func_1515E7E8 */
@@ -375,7 +375,7 @@ void light_get_zone_colour(s32 x, s32 y, s32 z, s32 mask, u8 *col, s32 arg5, s32
     } else {
         u32 s = 0x100 - (((arg5 >> 5) & 3) << 6);
         for (i = 0; i < 3; i++) {
-            col[i] = (s32)(((u8 *)&D_800DCD20)[i] * s) >> 8;
+            col[i] = (s32)(((u8 *)&g_level_light_colour)[i] * s) >> 8;
         }
     }
     if (flags & 0x10) {
@@ -471,7 +471,7 @@ u8 *light_write_light_cmds(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4) {
                 (*(s32 *)((u8 *)temp_t3 + 0)) = (((var_t4 >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA;
                 var_a0 = (s32 *)((u8 *)var_a0 + (8));
                 var_t4 += 0x30;
-                temp_t9_2 = (D_800BE9C0 * arg2) + var_v1;
+                temp_t9_2 = (g_dl_buf_index * arg2) + var_v1;
                 var_v1 += 1;
                 (*(s32 *)((u8 *)temp_t3 + 4)) = (s32) ((temp_t9_2 * 0x30) + arg1);
             } while (temp_t9 != var_v1);
@@ -488,22 +488,22 @@ block_8:
             do {
                 (*(s32 *)((u8 *)var_a0 + 0)) = (((var_t4_2 >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA;
                 temp_a0_2 = ((s32 *)((u8 *)var_a0 + 8));
-                (*(s32 *)((u8 *)var_a0 + 4)) = (s32) ((((D_800BE9C0 * arg2) + var_v1) * 0x30) + arg1);
+                (*(s32 *)((u8 *)var_a0 + 4)) = (s32) ((((g_dl_buf_index * arg2) + var_v1) * 0x30) + arg1);
                 (*(s32 *)((u8 *)temp_a0_2 + 0)) = (s32) ((((var_t5 >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA);
                 temp_a0_3 = temp_a0_2 + 8;
                 var_t4_2 += 0xC0;
                 var_t5 += 0xC0;
                 temp_t9_3 = var_s1 >> 3;
                 var_s1 += 0xC0;
-                (*(s32 *)((u8 *)temp_a0_2 + 4)) = (s32) ((((D_800BE9C0 * arg2) + var_v1) * 0x30) + arg1 + 0x30);
+                (*(s32 *)((u8 *)temp_a0_2 + 4)) = (s32) ((((g_dl_buf_index * arg2) + var_v1) * 0x30) + arg1 + 0x30);
                 (*(s32 *)((u8 *)temp_a0_3 + 0)) = (s32) (((temp_t9_3 & 0xFF) << 8) | 0xDC280000 | 0xA);
                 temp_a0_4 = temp_a0_3 + 8;
                 temp_t8 = var_s2 >> 3;
                 var_s2 += 0xC0;
-                (*(s32 *)((u8 *)temp_a0_3 + 4)) = (s32) ((((D_800BE9C0 * arg2) + var_v1) * 0x30) + arg1 + 0x60);
+                (*(s32 *)((u8 *)temp_a0_3 + 4)) = (s32) ((((g_dl_buf_index * arg2) + var_v1) * 0x30) + arg1 + 0x60);
                 (*(s32 *)((u8 *)temp_a0_4 + 0)) = (s32) (((temp_t8 & 0xFF) << 8) | 0xDC280000 | 0xA);
                 var_a0 = temp_a0_4 + 8;
-                temp_t7 = (D_800BE9C0 * arg2) + var_v1;
+                temp_t7 = (g_dl_buf_index * arg2) + var_v1;
                 var_v1 += 4;
                 (*(s32 *)((u8 *)temp_a0_4 + 4)) = (s32) ((temp_t7 * 0x30) + arg1 + 0x90);
             } while (var_v1 != ((temp_t2 - var_t1) - 1));
@@ -513,18 +513,18 @@ block_8:
         temp_v0 = var_a0;
         var_a0 = (s32 *)((u8 *)var_a0 + (8));
         (*(s32 *)((u8 *)temp_v0 + 0)) = ((((u32) ((var_v1 * 0x30) + 0x60) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA;
-        (*(s32 **)((u8 *)temp_v0 + 4)) = &D_800DCD40;
+        (*(s32 **)((u8 *)temp_v0 + 4)) = &g_light_cmd_data;
     }
     temp_t3_3 = var_v1 + var_t1;
     temp_a0 = ((s32 *)((u8 *)var_a0 + 8));
     (*(s32 *)((u8 *)var_a0 + 0)) = ((((u32) (((temp_t3_3 + 1) * 0x30) + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA;
-    (*(s32 *)((u8 *)var_a0 + 4)) = (s32) ((((D_800BE9C0 * arg2) + var_v1) * 0x30) + arg1);
+    (*(s32 *)((u8 *)var_a0 + 4)) = (s32) ((((g_dl_buf_index * arg2) + var_v1) * 0x30) + arg1);
     (*(s32 *)((u8 *)temp_a0 + 0)) = (s32) (((((u32) (((temp_t3_3 + 2) * 0x30) + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA);
     (*(s32 *)((u8 *)temp_a0 + 4)) = arg4;
     return temp_a0 + 8;
 }
 void light_get_zone_colour(s32, s32, s32, s32, u8 *, s32, s32);
-extern u8 D_800DA241;
+extern u8 g_light_count; /* was D_800DA241 */
 extern u8 *D_800DA248;
 
 /* was func_1515EDF8 */
@@ -582,7 +582,7 @@ void light_compute_point_colour(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4
     }
     sp58 = var_f10;
     var_v1 = 0;
-    temp_a1 = (D_800DA241 & 0x7F) - 1;
+    temp_a1 = (g_light_count & 0x7F) - 1;
     if (temp_a1 > 0) {
         var_a0 = &D_800DA248;
         do {
@@ -671,7 +671,7 @@ u8 *light_zone_find_at(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 **arg4) {
     return NULL;
 }
 
-extern s32 D_800DA030;
+extern s32 g_view_mtxf; /* was D_800DA030 */
 
 /* was func_1515F1E8 */
 void light_fill_point_light(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
@@ -757,7 +757,7 @@ void light_fill_point_light(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, s3
         sp.u50 = (s32) (*(s16 *)((u8 *)temp_v0_2 + 0x18));
     } else {
         sp40 = temp_v1;
-        mtxf_transform_point(((s32 *)((u8 *)&D_800DA030 + (arg1 << 6))), (f32) sp.u48, (f32) sp.u4C, (f32) sp.u50, &sp.u70, &sp.u74, &sp.u78);
+        mtxf_transform_point(((s32 *)((u8 *)&g_view_mtxf + (arg1 << 6))), (f32) sp.u48, (f32) sp.u4C, (f32) sp.u50, &sp.u70, &sp.u74, &sp.u78);
         temp_f8_2 = (s32) sp.u70;
         temp_v0_3 = arg0 + (arg1 * 6);
         sp.u48 = temp_f8_2;
@@ -805,7 +805,7 @@ f32 mtx_fixed_get_element(s16 *arg0, s32 arg1) {
     return v * (1.0f / 65536.0f);
 }
 
-extern s32 D_800DD140;
+extern s32 g_light_viewport_fixed; /* was D_800DD140 */
 /* was func_1515F5B0 */
 void light_store_fixed(f32 arg0, s32 arg1) {
     if (arg0 >= 32767.0f) {
@@ -814,10 +814,10 @@ void light_store_fixed(f32 arg0, s32 arg1) {
         arg0 = -32768.0f;
     }
     arg0 *= 65536.0f;
-    *(s32 *)((u8 *)&D_800DD140 + (arg1 * 4)) = (s32) arg0;
+    *(s32 *)((u8 *)&g_light_viewport_fixed + (arg1 * 4)) = (s32) arg0;
 }
 
-extern s32 D_800DD140;
+extern s32 g_light_viewport_fixed; /* was D_800DD140 */
 /* was func_1515F61C */
 void light_store_int(f32 arg0, s32 arg1) {
     if (arg0 >= 32767.0f) {
@@ -825,13 +825,13 @@ void light_store_int(f32 arg0, s32 arg1) {
     } else if (arg0 < -32768.0f) {
         arg0 = -32768.0f;
     }
-    *(s32 *)((u8 *)&D_800DD140 + (arg1 * 4)) = (s32) arg0;
+    *(s32 *)((u8 *)&g_light_viewport_fixed + (arg1 * 4)) = (s32) arg0;
 }
 
 /* was func_1515F10C */
 void light_remove(s32 **arg0) {
     s32 **prev = NULL;
-    s32 **cur = (s32 **)D_800DCD78;
+    s32 **cur = (s32 **)g_light_list_head;
 
     while (cur != arg0) {
         prev = cur;
@@ -840,14 +840,14 @@ void light_remove(s32 **arg0) {
     if (prev != NULL) {
         *prev = *cur;
     } else {
-        D_800DCD78 = (s32)*cur;
+        g_light_list_head = (s32)*cur;
     }
     heap_free(cur);
 }
 
 /* was func_1515F170 */
 void light_group_set_disabled(s32 arg0, u8 arg1) {
-    u8 *var_v0 = (u8 *)D_800DCD78;
+    u8 *var_v0 = (u8 *)g_light_list_head;
     while (var_v0 != NULL) {
         if (arg0 == var_v0[0xB]) {
             var_v0[9] = arg1;
@@ -894,7 +894,7 @@ void spawn_region_list_push(s32 *arg0, s32 *arg1) {
 void obj_kind9_dispatch(void *arg0, u8 *arg1) {
     s32 idx = *(s32 *)(arg1 + 0x18);
     if ((idx >= 0) && (idx < 12)) {
-        void (*fp)(void *, void *) = D_8008B430[idx];
+        void (*fp)(void *, void *) = g_obj_kind9_fns[idx];
         if (fp != NULL) {
             fp(arg0, arg1);
         }
@@ -906,7 +906,7 @@ void obj_send_hit_6001d(u8 *arg0, s32 arg1) {
     obj_send_hit(arg0, 0x6001D, *(u16 *)(arg0 + 0x7A), -1);
 }
 
-extern void (*D_8008B460[])(u8 *, u8 *);
+extern void (*g_obj_kind_active_fns[])(u8 *, u8 *); /* was D_8008B460 */
 /* was func_1515F858 */
 void obj_kind_dispatch_active(u8 *arg0, u8 *arg1) {
     s32 v;
@@ -914,7 +914,7 @@ void obj_kind_dispatch_active(u8 *arg0, u8 *arg1) {
     if (arg0[0x3B] == 1) {
         v = *(s32 *)(arg1 + 0x1C);
         if ((v >= 0) && (v < 3)) {
-            D_8008B460[v](arg0, arg1);
+            g_obj_kind_active_fns[v](arg0, arg1);
         }
     }
 }
@@ -925,20 +925,20 @@ void light_ease_level_colour_grey(s32 arg0, s32 arg1) {
     u8 var_t1;
     u8 var_v1;
 
-    var_v1 = (*(u8 *)((u8 *)(&D_800DCD20) + 0));
-    var_t0 = (*(u8 *)((u8 *)(&D_800DCD20) + 1));
-    var_t1 = (*(u8 *)((u8 *)(&D_800DCD20) + 2));
-    if (D_800DCD94 != 97.0f) {
-        D_800DCD94 += (97.0f - D_800DCD94) * 0.5f;
-        var_v1 = D_800DCD94;
+    var_v1 = (*(u8 *)((u8 *)(&g_level_light_colour) + 0));
+    var_t0 = (*(u8 *)((u8 *)(&g_level_light_colour) + 1));
+    var_t1 = (*(u8 *)((u8 *)(&g_level_light_colour) + 2));
+    if (g_level_colour_ease_r != 97.0f) {
+        g_level_colour_ease_r += (97.0f - g_level_colour_ease_r) * 0.5f;
+        var_v1 = g_level_colour_ease_r;
     }
-    if (D_800DCD98 != 96.0f) {
-        D_800DCD98 += (96.0f - D_800DCD98) * 0.5f;
-        var_t0 = D_800DCD98;
+    if (g_level_colour_ease_g != 96.0f) {
+        g_level_colour_ease_g += (96.0f - g_level_colour_ease_g) * 0.5f;
+        var_t0 = g_level_colour_ease_g;
     }
-    if (D_800DCD9C != 98.0f) {
-        D_800DCD9C += (98.0f - D_800DCD9C) * 0.5f;
-        var_t1 = D_800DCD9C;
+    if (g_level_colour_ease_b != 98.0f) {
+        g_level_colour_ease_b += (98.0f - g_level_colour_ease_b) * 0.5f;
+        var_t1 = g_level_colour_ease_b;
     }
     light_set_level_colour(var_v1, var_t0, var_t1, 0);
 }
@@ -949,20 +949,20 @@ void light_ease_level_colour_warm(s32 arg0, s32 arg1) {
     u8 var_t1;
     u8 var_v1;
 
-    var_v1 = (*(u8 *)((u8 *)(&D_800DCD20) + 0));
-    var_t0 = (*(u8 *)((u8 *)(&D_800DCD20) + 1));
-    var_t1 = (*(u8 *)((u8 *)(&D_800DCD20) + 2));
-    if (D_800DCD94 != 229.0f) {
-        D_800DCD94 += (229.0f - D_800DCD94) * 0.5f;
-        var_v1 = D_800DCD94;
+    var_v1 = (*(u8 *)((u8 *)(&g_level_light_colour) + 0));
+    var_t0 = (*(u8 *)((u8 *)(&g_level_light_colour) + 1));
+    var_t1 = (*(u8 *)((u8 *)(&g_level_light_colour) + 2));
+    if (g_level_colour_ease_r != 229.0f) {
+        g_level_colour_ease_r += (229.0f - g_level_colour_ease_r) * 0.5f;
+        var_v1 = g_level_colour_ease_r;
     }
-    if (D_800DCD98 != 253.0f) {
-        D_800DCD98 += (253.0f - D_800DCD98) * 0.5f;
-        var_t0 = D_800DCD98;
+    if (g_level_colour_ease_g != 253.0f) {
+        g_level_colour_ease_g += (253.0f - g_level_colour_ease_g) * 0.5f;
+        var_t0 = g_level_colour_ease_g;
     }
-    if (D_800DCD9C != 160.0f) {
-        D_800DCD9C += (160.0f - D_800DCD9C) * 0.5f;
-        var_t1 = D_800DCD9C;
+    if (g_level_colour_ease_b != 160.0f) {
+        g_level_colour_ease_b += (160.0f - g_level_colour_ease_b) * 0.5f;
+        var_t1 = g_level_colour_ease_b;
     }
     light_set_level_colour(var_v1, var_t0, var_t1, 0);
 }

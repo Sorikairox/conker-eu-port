@@ -4,7 +4,7 @@ s/i < 25 \&\& owner == NULL/i < 25/ % f9first
 s/p->interaction_state != 0 \&\& // % f9dead
 s/(mask \& (1 << i))/(mask \& (2 << i))/ % f9
 s/if (mask != 0)/if (mask == 0)/ % f9 f9nomask
-s/D_800DC3C4\[(struct131 \*) obj - D_800DBEF4\]/D_800DC3C4[1]/ % f9idx2
+s/g_world_obj_rider_masks\[(struct131 \*) obj - g_world_objs\]/g_world_obj_rider_masks[1]/ % f9idx2
 s/parts = g_prop_owner_parts_a;/parts = g_prop_owner_parts_b;/ % f9
 s/parts = g_prop_owner_parts_b;/parts = g_prop_owner_parts_c;/ % f8
 s/parts = g_prop_owner_parts_c;/parts = g_prop_owner_parts_a;/ % f7

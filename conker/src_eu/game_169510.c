@@ -22,10 +22,10 @@ s32 light_alloc_light_buf(s32);
 extern s32 (*g_sprite_fx_update_fns[])(u8 *); /* was D_8008A010 */
 extern s32 (*g_sprite_fx_end_fns[])(u8 *); /* was D_8008A048 */
 /* Per-frame update of a sprite effect (struct210): +0x10 bit 0 active; +0x18 flags; +0x1C life (s16, counts down
- * by D_800BE9E4 when flags & 1); +0x80 / +0x81 update / end handler index (g_sprite_fx_update_fns / g_sprite_fx_end_fns, 0 = none);
+ * by g_frame_ticks when flags & 1); +0x80 / +0x81 update / end handler index (g_sprite_fx_update_fns / g_sprite_fx_end_fns, 0 = none);
  * +0x3A fade start, +0x3C fade rate: alpha +0x28 (flags & 0x8000) or +0x2D (flags & 0x10000) follows life * rate;
  * +0x20 frame position (16.16) advanced by speed +0x24, wrapped at the frame count of texture +0x1E
- * (D_80090F10 entry byte 4): flags 2 / 8 end at the top / bottom, 0x40 / 0x80 clamp, 4 ping-pong, else wrap.
+ * (g_sprite_textures entry byte 4): flags 2 / 8 end at the top / bottom, 0x40 / 0x80 clamp, 4 ping-pong, else wrap.
  * When the effect ends, the end handler may veto the removal (node_destroy). */
 /* was func_1513C060 */
 void sprite_fx_update(u8 *p) {
@@ -42,7 +42,7 @@ void sprite_fx_update(u8 *p) {
     }
     done = 0;
     if (*(s32 *)(p + 0x18) & 1) {
-        *(s16 *)(p + 0x1C) -= D_800BE9E4;
+        *(s16 *)(p + 0x1C) -= g_frame_ticks;
         if (*(s16 *)(p + 0x1C) < 0) {
             done = 1;
         }
@@ -71,7 +71,7 @@ void sprite_fx_update(u8 *p) {
         }
     }
     if (!done && ((speed = *(s32 *)(p + 0x24)) != 0)) {
-        pos = *(s32 *)(p + 0x20) + speed * D_800BE9E4;
+        pos = *(s32 *)(p + 0x20) + speed * g_frame_ticks;
         *(s32 *)(p + 0x20) = pos;
         top = (g_sprite_anim_table[p[0x1E]][0] << 16) - 1;
         if (top < pos) {
@@ -148,7 +148,7 @@ struct210 *sprite_fx_spawn(struct210 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4,
 
     temp_v0->unk9C = 0;
     if (arg5) {
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= g_last_player_index; i++) {
             temp_v0->unk8C[i] = light_alloc_light_buf(arg5);
         }
         temp_v0->unk9C = light_alloc_lookat_buf();
@@ -249,7 +249,7 @@ void sprite_fx_free(struct210 *arg0) {
 void sprite_fx_free_buffers(struct210 *arg0) {
     s32 i;
 
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= g_last_player_index; i++) {
         if (arg0->unk8C[i]) {
             heap_set_block_tag(arg0->unk8C[i], 4);
         }
@@ -306,7 +306,7 @@ void effect3d_free(struct210 *arg0) {
 void effect3d_free_buffers(struct210 *arg0) {
     s32 i;
 
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= g_last_player_index; i++) {
         if (arg0->unkA4[i]) {
             heap_set_block_tag(arg0->unkA4[i], 4);
         }
@@ -349,7 +349,7 @@ u8 *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 void fx_calc_color_mode_a(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
 void fx_calc_color_mode_b(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
 s32 model_part_emit_lights(u8 *, u8 *, s32, s32, s32, s32, u8 *, s32, s32);
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 /* was func_1513CBF0 */
 u8 *sprite_fx_draw(u8 *arg0, u8 *arg1, s16 arg2) {
@@ -435,13 +435,13 @@ u8 *sprite_fx_draw(u8 *arg0, u8 *arg1, s16 arg2) {
                 } else {
                     var_v0_5 = 3;
                 }
-                var_s1_2 = gfx_load_texture_cached(var_s1_2, &D_80090F10[temp_v1], (*(s32 *)((u8 *)arg1 + 0x20)), 2, 0, 0, (s32) temp_v1, 0, 0, &sp.u7B, var_v0_5);
+                var_s1_2 = gfx_load_texture_cached(var_s1_2, &g_sprite_textures[temp_v1], (*(s32 *)((u8 *)arg1 + 0x20)), 2, 0, 0, (s32) temp_v1, 0, 0, &sp.u7B, var_v0_5);
             }
             temp_a0 = gfx_set_combine_mode(gfx_prim_color_cached(gfx_env_color_cached(var_s1_2, sp.u66, sp.u64, sp.u62, (s32) sp.u60, &sp.u7B), 0, 0, sp.u6E, (s32) sp.u6C, (s32) sp.u6A, (s32) sp.u68, &sp.u7B), sp.u79, &sp.u7B);
             if ((*(u8 *)((u8 *)arg1 + 0x1E)) == 0xFF) {
                 var_v0_6 = 0;
             } else {
-                var_v0_6 = D_800D30BC;
+                var_v0_6 = g_gfx_tlut_mode;
             }
             temp_v1_2 = (sp.u7A * 8) + ((u8 *)&g_render_mode_pairs);
             temp_v0_2 = gfx_other_mode_cached(temp_a0, var_v0_6 | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1_2 + 4)) | (*(s32 *)((u8 *)temp_v1_2 + 0)), &sp.u7B);
@@ -470,7 +470,7 @@ extern s32 (*g_effect3d_update_fns[])(u8 *); /* was D_8008A058 */
 extern s32 (*g_effect3d_update2_fns[])(u8 *); /* was D_8008A100 */
 extern s32 (*g_effect3d_remove_fns[])(u8 *); /* was D_8008A1B0 */
 // effect3d_update: per-frame update of a 3D sprite effect (sibling of sprite_fx_update): +0x10 bit 0 active;
-// +0x58 flags; +0x1C life (s16, counts down by D_800BE9E4 when flags & 1); +0x70 / +0x71 update handlers
+// +0x58 flags; +0x1C life (s16, counts down by g_frame_ticks when flags & 1); +0x70 / +0x71 update handlers
 // (g_effect3d_update_fns / g_effect3d_update2_fns, 0 = none; returning 0 ends the effect); while alive, flags 0x08000000 / 0x10000000 fade
 // alpha +0x5C / +0x2B to life * rate +0x6E below life +0x6C (only ever lowering it, compared against +0x5C);
 // +0x20 frame position (16.16) advanced by speed +0x24 and wrapped at the frame count of texture +0x18
@@ -491,7 +491,7 @@ void effect3d_update(u8 *fx) {
     }
     done = 0;
     if (*(s32 *)(fx + 0x58) & 1) {
-        *(s16 *)(fx + 0x1C) -= D_800BE9E4;
+        *(s16 *)(fx + 0x1C) -= g_frame_ticks;
         if (*(s16 *)(fx + 0x1C) < 0) {
             done = 1;
         }
@@ -523,7 +523,7 @@ void effect3d_update(u8 *fx) {
         }
     }
     if (!done && ((speed = *(s32 *)(fx + 0x24)) != 0)) {
-        pos = *(s32 *)(fx + 0x20) + speed * D_800BE9E4;
+        pos = *(s32 *)(fx + 0x20) + speed * g_frame_ticks;
         *(s32 *)(fx + 0x20) = pos;
         top = (g_sprite_anim_table[fx[0x18]][0] << 16) - 1;
         if (top < pos) {
@@ -623,12 +623,12 @@ void * effect3d_spawn_full(void * arg0_p, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u
     if (arg7 != 0) {
         var_s1_2 = 0;
         var_s0_2 = temp_v0;
-        if (D_80082FA0 >= 0) {
+        if (g_last_player_index >= 0) {
             do {
                 (*(s32 *)((u8 *)var_s0_2 + 0xA4)) = light_alloc_light_buf(arg7);
                 var_s1_2 += 1;
                 var_s0_2 += 4;
-            } while (D_80082FA0 >= var_s1_2);
+            } while (g_last_player_index >= var_s1_2);
         }
         (*(s32 *)((u8 *)temp_v0 + 0xB4)) = light_alloc_lookat_buf();
     }
@@ -939,7 +939,7 @@ u8 *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 void fx_calc_color_mode_a(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
 void fx_calc_color_mode_b(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
 extern s32 g_effect3d_draw_fns; /* was D_8008A1BC */
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 /* was func_1513DB00 */
 u8 *effect3d_draw(u8 *arg0, u8 *arg1, s16 arg2) {
@@ -1066,7 +1066,7 @@ u8 *effect3d_draw(u8 *arg0, u8 *arg1, s16 arg2) {
                         } else {
                             var_v0_5 = 3;
                         }
-                        arg0 = gfx_load_texture_cached(var_a0, &D_80090F10[temp_t0], (*(s32 *)((u8 *)arg1 + 0x20)), var_a3, 0, 0, (s32) temp_t0, 0, 0, &sp.u8B, var_v0_5);
+                        arg0 = gfx_load_texture_cached(var_a0, &g_sprite_textures[temp_t0], (*(s32 *)((u8 *)arg1 + 0x20)), var_a3, 0, 0, (s32) temp_t0, 0, 0, &sp.u8B, var_v0_5);
                         var_a0 = arg0;
                     }
                     temp_a0 = gfx_set_combine_mode(gfx_prim_color_cached(gfx_env_color_cached(var_a0, sp.u80, sp.u7E, sp.u7C, (s32) sp.u7A, &sp.u8B), 0xF2, 0, sp.u88, (s32) sp.u86, (s32) sp.u84, (s32) sp.u82, &sp.u8B), sp78, &sp.u8B);
@@ -1078,7 +1078,7 @@ u8 *effect3d_draw(u8 *arg0, u8 *arg1, s16 arg2) {
                     if ((*(u8 *)((u8 *)arg1 + 0x18)) == 0xFF) {
                         var_v0_6 = 0;
                     } else {
-                        var_v0_6 = D_800D30BC;
+                        var_v0_6 = g_gfx_tlut_mode;
                     }
                     temp_v1_6 = (sp79 * 8) + ((u8 *)&g_render_mode_pairs);
                     temp_v0_6 = gfx_other_mode_cached(temp_a0, var_v0_6 | (var_t0 | 0x80000) | 0x2CA0, (*(s32 *)((u8 *)temp_v1_6 + 4)) | (*(s32 *)((u8 *)temp_v1_6 + 0)), &sp.u8B);
@@ -1337,22 +1337,22 @@ s32 effect3d_apply_velocity(struct_eu_1513E6E8 *arg0) {
     struct_eu_1513E6E8_vel *vel = &arg0->unk110;
 
     if (arg0->unk58 & 0x20) {
-        vel->unk8[1] += vel->unk2C * D_800BE9A4;
+        vel->unk8[1] += vel->unk2C * g_frame_step_f;
     }
     if (arg0->unk58 & 0x40) {
-        arg0->unk34[0] += vel->unk8[0] * D_800BE9A4;
-        arg0->unk34[1] += vel->unk8[1] * D_800BE9A4;
-        arg0->unk34[2] += vel->unk8[2] * D_800BE9A4;
+        arg0->unk34[0] += vel->unk8[0] * g_frame_step_f;
+        arg0->unk34[1] += vel->unk8[1] * g_frame_step_f;
+        arg0->unk34[2] += vel->unk8[2] * g_frame_step_f;
     }
     if (arg0->unk58 & 0x80) {
-        arg0->unk40[0] += vel->unk14[0] * D_800BE9A4;
-        arg0->unk40[1] += vel->unk14[1] * D_800BE9A4;
-        arg0->unk40[2] += vel->unk14[2] * D_800BE9A4;
+        arg0->unk40[0] += vel->unk14[0] * g_frame_step_f;
+        arg0->unk40[1] += vel->unk14[1] * g_frame_step_f;
+        arg0->unk40[2] += vel->unk14[2] * g_frame_step_f;
     }
     if (arg0->unk58 & 0x100) {
-        arg0->unk4C[0] += vel->unk20[0] * D_800BE9A4;
-        arg0->unk4C[1] += vel->unk20[1] * D_800BE9A4;
-        arg0->unk4C[2] += vel->unk20[2] * D_800BE9A4;
+        arg0->unk4C[0] += vel->unk20[0] * g_frame_step_f;
+        arg0->unk4C[1] += vel->unk20[1] * g_frame_step_f;
+        arg0->unk4C[2] += vel->unk20[2] * g_frame_step_f;
     }
     arg0->unk5D = 0xFF;
     return 1;
@@ -1416,8 +1416,8 @@ u8 *sprite_quad_build_scaled(u8 *fx, s16 slot) {
 }
 // ???
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
-extern s32 D_800DD608;
-extern s32 D_800DD618;
+extern s32 g_view_yaw_sin; /* was D_800DD608 */
+extern s32 g_view_yaw_cos; /* was D_800DD618 */
 
 /* was func_1513EAD8 */
 u8 *sprite_quad_build_screen(u8 *arg0, u8 arg1, s16 arg2) {
@@ -1471,9 +1471,9 @@ u8 *sprite_quad_build_screen(u8 *arg0, u8 arg1, s16 arg2) {
         temp_f0 = (*(f32 *)((u8 *)arg0 + 0x2C));
         temp_f12 = (*(f32 *)((u8 *)arg0 + 0x30));
         (*(s16 *)((u8 *)sp.u64 + 6)) = 0;
-        temp_f14 = *(f32 *) ((u8 *) &D_800DD608 + temp_t0) * temp_f0;  /* P270: was *(&D_800DD608 + temp_t0) (s32 * stride = arg2 * 16 bytes, int-to-float load; asm lwc1 at arg2 * 4) */
+        temp_f14 = *(f32 *) ((u8 *) &g_view_yaw_sin + temp_t0) * temp_f0;  /* P270: was *(&g_view_yaw_sin + temp_t0) (s32 * stride = arg2 * 16 bytes, int-to-float load; asm lwc1 at arg2 * 4) */
         (*(s16 *)((u8 *)sp.u64 + 0x16)) = 0;
-        temp_f16 = *(f32 *) ((u8 *) &D_800DD618 + temp_t0) * temp_f0;  /* P270: was *(&D_800DD618 + temp_t0) (s32 * stride = arg2 * 16 bytes, int-to-float load; asm lwc1 at arg2 * 4) */
+        temp_f16 = *(f32 *) ((u8 *) &g_view_yaw_cos + temp_t0) * temp_f0;  /* P270: was *(&g_view_yaw_cos + temp_t0) (s32 * stride = arg2 * 16 bytes, int-to-float load; asm lwc1 at arg2 * 4) */
         (*(s16 *)((u8 *)sp.u64 + 0x26)) = 0;
         temp_f2 = (*(f32 *)((u8 *)arg0 + 0x50)) * temp_f12;
         (*(s16 *)((u8 *)sp.u64 + 0x36)) = 0;
@@ -1589,8 +1589,8 @@ u8 *sprite_quad_build_rot(u8 *fx, s16 slot) {
     return start;
 }
 
-extern s32 D_800DD608;
-extern s32 D_800DD618;
+extern s32 g_view_yaw_sin; /* was D_800DD608 */
+extern s32 g_view_yaw_cos; /* was D_800DD618 */
 
 /* was func_1513F114 */
 u8 *sprite_quad_build_screen_rot(u8 *arg0, s16 arg1) {
@@ -1648,8 +1648,8 @@ u8 *sprite_quad_build_screen_rot(u8 *arg0, s16 arg1) {
         }
         temp_t0 = arg1 * 4;
         temp_f0 = (*(f32 *)((u8 *)arg0 + 0x30));
-        temp_f18 = *(&D_800DD608 + temp_t0);
-        temp_f20 = *(&D_800DD618 + temp_t0);
+        temp_f18 = *(&g_view_yaw_sin + temp_t0);
+        temp_f20 = *(&g_view_yaw_cos + temp_t0);
         temp_f16 = -((*(f32 *)((u8 *)arg0 + 0x50)) * temp_f0);
         sp.u78 = temp_f0 + temp_f16;
         var_f14 = -1.0f;
@@ -1746,8 +1746,8 @@ void sprite_fx_set_handlers(struct210 *arg0, u8 arg1, u8 arg2) {
 /* was func_1513F6E8 */
 s32 sprite_fx_grow(struct210 *arg0) {
     f32 temp_f0 = ((f32 *)arg0)[0x128 / 4];
-    arg0->unk2C += temp_f0 * D_800BE9A4;
-    arg0->unk30 += temp_f0 * D_800BE9A4;
+    arg0->unk2C += temp_f0 * g_frame_step_f;
+    arg0->unk30 += temp_f0 * g_frame_step_f;
     return 1;
 }
 
@@ -1773,7 +1773,7 @@ s32 effect3d_update_motion_drag(u8 *arg0) {
     (*(f32 *)((u8 *)(&sp.u20) + 0)) = (*(f32 *)((u8 *)temp_v1 + 0));
     (*(f32 *)((u8 *)(&sp.u20) + 4)) = (f32) (*(f32 *)((u8 *)temp_v1 + 4));
     (*(f32 *)((u8 *)(&sp.u20) + 8)) = (f32) (*(f32 *)((u8 *)temp_v1 + 8));
-    var_v0 = D_800BE9E4;
+    var_v0 = g_frame_ticks;
     if (var_v0 != 0) {
         temp_a2 = -(var_v0 & 3);
         temp_a1 = temp_a2 + var_v0;
@@ -1833,13 +1833,13 @@ block_5:
             (*(f32 *)((u8 *)temp_v1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 8)) * temp_f0_2);
         }
     }
-    (*(f32 *)((u8 *)temp_v1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 4)) + ((*(f32 *)((u8 *)temp_v1 + 0xC)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((sp.u20 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 0)) - sp.u20) * D_800BEDC8) * D_800BE9A4)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((sp.u24 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 4)) - sp.u24) * D_800BEDC8) * D_800BE9A4)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((sp.u28 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 8)) - sp.u28) * D_800BEDC8) * D_800BE9A4)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x40)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x40)) + ((*(f32 *)((u8 *)temp_v1 + 0x14)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x44)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x44)) + ((*(f32 *)((u8 *)temp_v1 + 0x18)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x48)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x48)) + ((*(f32 *)((u8 *)temp_v1 + 0x1C)) * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_v1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 4)) + ((*(f32 *)((u8 *)temp_v1 + 0xC)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + ((sp.u20 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 0)) - sp.u20) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((sp.u24 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 4)) - sp.u24) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((sp.u28 + (0.5f * (((*(f32 *)((u8 *)temp_v1 + 8)) - sp.u28) * D_800BEDC8) * g_frame_step_f)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x40)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x40)) + ((*(f32 *)((u8 *)temp_v1 + 0x14)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x44)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x44)) + ((*(f32 *)((u8 *)temp_v1 + 0x18)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x48)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x48)) + ((*(f32 *)((u8 *)temp_v1 + 0x1C)) * g_frame_step_f));
     return 1;
 }
 u8 *beam_quad_build_cam(u8 *fx, u8 flip, f32 *scale, s16 slot);
@@ -1975,7 +1975,7 @@ void sprite_quad_set_texcoords(Vtx *arg0, u8 arg1, u8 arg2) {
     u16 h;
 
     if (arg1 != 0xFF) {
-        entry = &D_80090F10[arg1];
+        entry = &g_sprite_textures[arg1];
         w = entry->unk6 - 1;
         h = entry->unk8 - 1;
         arg0[0].v.tc[0] = arg0[3].v.tc[0] = (arg2 & 1) ? w << 6 : 0;

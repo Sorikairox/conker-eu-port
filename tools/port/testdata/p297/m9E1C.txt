@@ -5,12 +5,12 @@ s/        TM_W(gdl, 0xFD180000, tex);  /        TM_W(gdl, 0xFD180000, tex + 1); 
 s/        TM_W(gdl, 0xF5181000, 0x00094250);/        TM_W(gdl, 0xF5181000, 0x00094251);/
 s/        gDPSetOtherMode(gdl++, 0x002C3F, 0x504244);/        gDPSetOtherMode(gdl++, 0x002C3E, 0x504244);/
 s/    pitch = 0x124;/    pitch = 0x120;/
-s/    if (D_800E0FE0 > 0) {/    if (D_800E0FE0 > 1) {/
-s/        pitch = 0x124 \/ D_800E0FE0;/        pitch = 0x120 \/ D_800E0FE0;/
+s/    if (g_mp_team_count > 0) {/    if (g_mp_team_count > 1) {/
+s/        pitch = 0x124 \/ g_mp_team_count;/        pitch = 0x120 \/ g_mp_team_count;/
 s/        out = 0xF;/        out = 0x7;/
-s/        for (i = 0; i < D_8008FD8C; i++) {/        for (i = 1; i < D_8008FD8C; i++) {/
+s/        for (i = 0; i < g_player_count; i++) {/        for (i = 1; i < g_player_count; i++) {/
 s/            if (player_stat_get((s16) i, 3) != 0) {/            if (player_stat_get((s16) i, 3) == 0) {/
-s/                out \&= ~(1 << D_800E1030\[i\]);/                out \&= ~(1 << i);/
+s/                out \&= ~(1 << g_mp_player_team\[i\]);/                out \&= ~(1 << i);/
 s/    x = pitch >> 1;/    x = pitch >> 2;/
 s/            score = player_stat_get((s16) i, 6);/            score = player_stat_get((s16) i, 5);/
 s/            D_800E0ED0\[i\] = score;/            ;/

@@ -27,6 +27,6 @@
 \#^        burst\.u28 = -1#s/-1/1/
 \#^        burst\.u29 = #s/0x12/0x13/
 \#^        burst\.u36 = #s/0x87/0x86/
-\#^        burst\.anim = #s/D_800908C4/D_800908C4 + 4/
+\#^        burst\.anim = #s/g_spark_burst_anim/g_spark_burst_anim + 4/
 \#^        burst\.u3D = #s/0xFF/0x7F/
 \#^        emit_sprite_nodes_by_angles(#s/flag, 1/flag, 0/

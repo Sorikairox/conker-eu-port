@@ -14,8 +14,8 @@
 49s/oz = ndy \* inv;/oz = dy * inv;/ % gen5
 51s/ox \*= 4\.0f;/ox *= 2.0f;/ % flat3
 53s/oz \*= 4\.0f;/oz *= 2.0f;/ % gen5
-54s/(D_800BE9C0 \* n + i) \* 4;/(D_800BE9C0 * n + i) * 3;/ % gen5
-54s/(D_800BE9C0 \* n + i) \* 4;/(D_800BE9C0 + i) * 4;/ % gen5 gen7b
+54s/(g_dl_buf_index \* n + i) \* 4;/(g_dl_buf_index * n + i) * 3;/ % gen5
+54s/(g_dl_buf_index \* n + i) \* 4;/(g_dl_buf_index + i) * 4;/ % gen5 gen7b
 56s/v\[0\]\.v\.ob\[1\] = (s32) (y + oy);/v[0].v.ob[1] = (s32) (y - oy);/ % gen5
 60s/v\[2\]\.v\.ob\[2\] = (s32) (z - oz);/v[2].v.ob[2] = (s32) (z + oz);/ % gen5
 61s/len = sqrtf(ndy \* ndy + dx \* dx);/len = sqrtf(ndy * ndy + dz * dz);/ % gen5
@@ -34,14 +34,14 @@
 86s/0, 0, 0, 0, 0, 0, 0x100, 0x100,/0, 0, 0, 0, 0, 0, 0x100, 0x80,/ % n0
 87s/0x3E);/0x3F);/ % n0
 89s/0xFF33FFFF;/0xFF33FFFE;/ % n0
-91s/D_800D30BC | 0x80000 | 0x2C0F,/D_800D30BC | 0x2C0F,/ % n0
+91s/g_gfx_tlut_mode | 0x80000 | 0x2C0F,/g_gfx_tlut_mode | 0x2C0F,/ % n0
 91s/0x552078);/0x552070);/ % n0
 92s/s = ((tw + 0x100) << 5) << 16;/s = ((tw + 0x100) << 4) << 16;/ % vert2
 93s/tTop = 0x100;/tTop = 0x101;/ % vert2
 94s/tBot = th + 0x100;/tBot = th + 0x101;/ % vert2
 95s/for (i = 1; i < n; i++) {/for (i = 1; i <= n; i++) {/ % vert2
-96s/(D_800BE9C0 \* n + (i - 1)) \* 4, 8, 0);/(D_800BE9C0 * n + i) * 4, 8, 0);/ % vert2
-96s/(D_800BE9C0 \* n + (i - 1)) \* 4, 8, 0);/(D_800BE9C0 * n + (i - 1)) * 4, 7, 0);/ % vert2
+96s/(g_dl_buf_index \* n + (i - 1)) \* 4, 8, 0);/(g_dl_buf_index * n + i) * 4, 8, 0);/ % vert2
+96s/(g_dl_buf_index \* n + (i - 1)) \* 4, 8, 0);/(g_dl_buf_index * n + (i - 1)) * 4, 7, 0);/ % vert2
 98s/gSP1Triangle(gfx++, 1, 5, 4, 0);/gSP1Triangle(gfx++, 1, 5, 3, 0);/ % vert2
 102s/gSP1Triangle(gfx++, 2, 7, 6, 0);/gSP1Triangle(gfx++, 2, 7, 5, 0);/ % vert2
 104s/gSPModifyVertex(gfx++, 4, G_MWO_POINT_ST,/gSPModifyVertex(gfx++, 5, G_MWO_POINT_ST,/ % vert2

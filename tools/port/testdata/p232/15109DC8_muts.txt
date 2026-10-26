@@ -1,5 +1,5 @@
-s/    scale = (random_float() \* D_800A2A04 + D_800A2A08) \* D_800A2A0C;/    scale = (random_float() * D_800A2A04 + D_800A2A08);/ % r00 r01
-s/    scale = (random_float() \* D_800A2A04 + D_800A2A08) \* D_800A2A0C;/    scale = (random_float() * D_800A2A08 + D_800A2A04) * D_800A2A0C;/ % r00 r01
+s/    scale = (random_float() \* g_point_spark_scale_range + g_point_spark_scale_base) \* g_point_spark_scale_mul;/    scale = (random_float() * g_point_spark_scale_range + g_point_spark_scale_base);/ % r00 r01
+s/    scale = (random_float() \* g_point_spark_scale_range + g_point_spark_scale_base) \* g_point_spark_scale_mul;/    scale = (random_float() * g_point_spark_scale_base + g_point_spark_scale_range) * g_point_spark_scale_mul;/ % r00 r01
 s/    t.kind = 0x2B;/    t.kind = 0x2A;/ % r00
 s/    t.flags = 0x4401;/    t.flags = 0x4400;/ % r00
 s/    t.u0 = 0x200005;/    t.u0 = 0x200004;/ % r00
@@ -32,8 +32,8 @@ s/    particle_spawn_basic(\&t, 1, 0, obj\[0xC\], obj\[1\]);/    particle_spawn_
 s/    e.u0 = 1;/    e.u0 = 2;/ % r00
 s/    e.u4 = 4;/    e.u4 = 3;/ % r00
 s/    e.pos\[1\] = pos\[1\];/    e.pos[1] = pos[0];/ % r00
-s/    e.u14\[1\] = D_800A2A14;/    e.u14[1] = D_800A2A18;/ % r00
-s/    e.u14\[3\] = D_800A2A1C;/    e.u14[3] = D_800A2A10;/ % r00
+s/    e.u14\[1\] = g_point_spark_k_2a14;/    e.u14[1] = g_point_spark_k_2a18;/ % r00
+s/    e.u14\[3\] = g_point_spark_k_2a1c;/    e.u14[3] = g_point_spark_k_2a10;/ % r00
 s/    e.u24 = 2.0f;/    e.u24 = 3.0f;/ % r00
 s/    e.u28 = 6.0f;/    e.u28 = 2.0f;/ % r00
 s/    e.u2E = 0xFF;/    e.u2E = 0xFE;/ % r00

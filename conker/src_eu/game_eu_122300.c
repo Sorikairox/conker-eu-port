@@ -173,22 +173,22 @@ u8 *lightning_bolt_update(u8 *arg0) {
     u8 *temp_v0;
 
     temp_v0 = arg0 + 0x170;
-    (*(f32 *)((u8 *)arg0 + 0x170)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x170)) - D_800BE9A4);
+    (*(f32 *)((u8 *)arg0 + 0x170)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x170)) - g_frame_step_f);
     if ((*(f32 *)((u8 *)arg0 + 0x170)) <= 0.0f) {
         return NULL;
     }
     sp18 = temp_v0;
     vec2_from_angle_rad((*(f32 *)((u8 *)temp_v0 + 0x10)), (*(f32 *)((u8 *)temp_v0 + 0x20)), &sp.u1C, &sp.u20);
-    (*(f32 *)((u8 *)sp18 + 0x10)) = (f32) ((*(f32 *)((u8 *)sp18 + 0x10)) + ((*(f32 *)((u8 *)sp18 + 0x14)) * D_800BE9A4));
-    (*(f32 *)((u8 *)sp18 + 4)) = (f32) ((*(f32 *)((u8 *)sp18 + 4)) + ((*(f32 *)((u8 *)arg0 + 0x44)) * D_800BE9A4));
-    (*(f32 *)((u8 *)sp18 + 8)) = (f32) ((*(f32 *)((u8 *)sp18 + 8)) + ((*(f32 *)((u8 *)arg0 + 0x48)) * D_800BE9A4));
-    (*(f32 *)((u8 *)sp18 + 0xC)) = (f32) ((*(f32 *)((u8 *)sp18 + 0xC)) + ((*(f32 *)((u8 *)arg0 + 0x4C)) * D_800BE9A4));
+    (*(f32 *)((u8 *)sp18 + 0x10)) = (f32) ((*(f32 *)((u8 *)sp18 + 0x10)) + ((*(f32 *)((u8 *)sp18 + 0x14)) * g_frame_step_f));
+    (*(f32 *)((u8 *)sp18 + 4)) = (f32) ((*(f32 *)((u8 *)sp18 + 4)) + ((*(f32 *)((u8 *)arg0 + 0x44)) * g_frame_step_f));
+    (*(f32 *)((u8 *)sp18 + 8)) = (f32) ((*(f32 *)((u8 *)sp18 + 8)) + ((*(f32 *)((u8 *)arg0 + 0x48)) * g_frame_step_f));
+    (*(f32 *)((u8 *)sp18 + 0xC)) = (f32) ((*(f32 *)((u8 *)sp18 + 0xC)) + ((*(f32 *)((u8 *)arg0 + 0x4C)) * g_frame_step_f));
     (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)sp18 + 4)) + (sp.u1C * (*(f32 *)((u8 *)sp18 + 0x18))));
     (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)sp18 + 8)) + sp.u20);
     (*(f32 *)((u8 *)arg0 + 0x40)) = (f32) ((*(f32 *)((u8 *)sp18 + 0xC)) - (sp.u1C * (*(f32 *)((u8 *)sp18 + 0x1C))));
-    (*(f32 *)((u8 *)arg0 + 0x20)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x20)) + ((*(f32 *)((u8 *)arg0 + 0x50)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x24)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x24)) + ((*(f32 *)((u8 *)arg0 + 0x54)) * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x28)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x28)) + ((*(f32 *)((u8 *)arg0 + 0x58)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x20)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x20)) + ((*(f32 *)((u8 *)arg0 + 0x50)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x24)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x24)) + ((*(f32 *)((u8 *)arg0 + 0x54)) * g_frame_step_f));
+    (*(f32 *)((u8 *)arg0 + 0x28)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x28)) + ((*(f32 *)((u8 *)arg0 + 0x58)) * g_frame_step_f));
     return sp18;
 }
 f32 vec3_length(f32 *);
@@ -277,16 +277,16 @@ typedef struct {
     u8 *pairs;  // 2 bytes per choice, byte 1 = the bolt's texture / style
     f32 *scales;
 } BoltSet536C;
-extern s32 (*D_80088ED8[])(u8 *);
-extern BoltSet536C D_80088EC0[];
+extern s32 (*g_lightning_cond_fns[])(u8 *); /* was D_80088ED8 */
+extern BoltSet536C g_lightning_bolt_sets[]; /* was D_80088EC0 */
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 
 // lightning_emitter_update: per-frame update of an emitter (record at +0x28: owner, accumulator, condition +0x30,
-// bolt set +0x31). If a condition function (D_80088ED8[+0x30], -1 = none) says no, nothing happens. Otherwise the
+// bolt set +0x31). If a condition function (g_lightning_cond_fns[+0x30], -1 = none) says no, nothing happens. Otherwise the
 // accumulator grows by (~0.051 + rand x ~0.153) x frame time and every whole unit spawns one bolt (lightning_bolt_spawn)
 // between two points around the owner's camera (camera_get_pos(owner[0x23D])): both at a random distance 254..635
 // along the camera heading (owner +0x380 degrees, to 256-unit angle) +-21, at height -133..79 relative to it, in
-// random order; style / scale picked at random from the D_80088EC0 set, width 5..15.
+// random order; style / scale picked at random from the g_lightning_bolt_sets set, width 5..15.
 /* was func_150F536C */
 void lightning_emitter_update(u8 *obj) {
     struct {
@@ -308,11 +308,11 @@ void lightning_emitter_update(u8 *obj) {
     f32 r;
 
     if ((s8) obj[0x30] != -1) {
-        if (D_80088ED8[(s8) obj[0x30]](obj) == 0) {
+        if (g_lightning_cond_fns[(s8) obj[0x30]](obj) == 0) {
             return;
         }
     }
-    em->acc += (0.0510000028f + random_float() * 0.153000012f) * D_800BE9A4;
+    em->acc += (0.0510000028f + random_float() * 0.153000012f) * g_frame_step_f;
     if (!(1.0f < em->acc)) {
         return;
     }
@@ -336,7 +336,7 @@ void lightning_emitter_update(u8 *obj) {
             a = b;
             b = tmp;
         }
-        set = &D_80088EC0[em->set];
+        set = &g_lightning_bolt_sets[em->set];
         k = (u32) random_int() % set->count;
         width = random_float() * 10.0f + 5.0f;
         r = random_float();

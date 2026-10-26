@@ -25,7 +25,7 @@ s32 text_pager_draw_caption(u8 *arg0) {
         temp_t0 = (temp_v1 * 0x1F) & 0xFF;
         var_s0 = temp_t0;
         var_a3 = (0xFF - temp_t0) & 0xFF;
-        *temp_v0 = temp_v1 - D_800BE9E4;
+        *temp_v0 = temp_v1 - g_frame_ticks;
     }
     if (var_a3 != 0) {
         text_set_color(0xCEU, 0xC4U, 0x61U, var_a3);
@@ -61,7 +61,7 @@ typedef struct {
 // console_text_type: P253. Handler (s32 (u8 *), function table at ELF file offset 0x248C44, between text_pager_draw_caption and
 // text_pager_draw_title) of a text box (+0x28 text block: +0x14 length, +0x15 index of the current string in the pointer
 // list at +0x18; +0x48 typing state). Types the string out: flag 1 of +0x30 restarts it; while not complete, the
-// fraction advances by 0.437 * D_800BE9A4 and each whole step shows one more character (at most the length). Draws
+// fraction advances by 0.437 * g_frame_step_f and each whole step shows one more character (at most the length). Draws
 // "C:> " + the shown characters + " " + 0xBB (cursor) in colour (0, 255, 0, 150) at (15, 190). Returns 1.
 /* was func_150D083C */
 s32 text_pager_draw_console(u8 *p) {
@@ -75,7 +75,7 @@ s32 text_pager_draw_console(u8 *p) {
         st->t = 0.0f;
     }
     if (st->t < (f32) txt[0x14]) {
-        st->t += 0.437f * D_800BE9A4;
+        st->t += 0.437f * g_frame_step_f;
         while (st->t > 1.0f) {
             st->n++;
             if (st->n > txt[0x14]) {
@@ -130,7 +130,7 @@ s32 text_pager_draw_title(u8 *arg0) {
         temp_t0 = (temp_v1 * 0xC) & 0xFF;
         var_s0 = temp_t0;
         var_a3 = (0xFF - temp_t0) & 0xFF;
-        *temp_v0 = temp_v1 - D_800BE9E4;
+        *temp_v0 = temp_v1 - g_frame_ticks;
     }
     if (var_a3 != 0) {
         text_set_color(0xFFU, 0xFFU, 0xFFU, var_a3);

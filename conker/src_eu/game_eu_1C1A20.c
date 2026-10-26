@@ -9,7 +9,7 @@ s32 hitinfo_from_obj_floor(s32 *, struct127 *);
 void hit_impact_effect(u8 *obj, u8 alt, u8 view, s32 group);
 
 
-// hit_impact_effect: P256: the impact effect at the last hit point D_800CC2C0/C4/C8 (written by the hit tests in
+// hit_impact_effect: P256: the impact effect at the last hit point g_hit_point_x/C4/C8 (written by the hit tests in
 // game_83300) for the struck object `obj`, chosen by its kind byte obj +0x04 (the material of the thing that was
 // hit). hitinfo_from_obj_floor gives the object's matrix (9 words) on the stack first. Fire-like kinds spawn embers
 // (fire_embers_spawn(pos, view, group)); the others pick a spark style (0 / 1 / 2 / 5 / 6) and spawn it with
@@ -26,9 +26,9 @@ void hit_impact_effect(u8 *obj, u8 alt, u8 view, s32 group) {
     u8 style;
 
     hitinfo_from_obj_floor(mtx, (struct127 *) obj);
-    pos[0] = D_800CC2C0;
-    pos[1] = D_800CC2C4;
-    pos[2] = D_800CC2C8;
+    pos[0] = g_hit_point_x;
+    pos[1] = g_hit_point_y;
+    pos[2] = g_hit_point_z;
     switch (obj[4]) {
     case 0x06: case 0x09: case 0x0C: case 0x0F: case 0x10: case 0x12: case 0x17: case 0x1B: case 0x1E: case 0x28:
     case 0x29: case 0x2A: case 0x2B: case 0x2C: case 0x2D: case 0x2E: case 0x30: case 0x34: case 0x38: case 0x3A:
@@ -164,12 +164,12 @@ void hit_react_attacker_fx_burst(struct127 *arg0, struct127 *arg1, s32 arg2) {
 }
 
 // hit_debris_burst: P256: the debris burst when `obj` is hit by `attacker`: unless obj's class (obj_get_hit_kind) is
-// 0x63 or its class mode D_800A43C6[class * 16] is 2, one emit_sparks_in_angle_range burst 270 above obj's position (heading
+// 0x63 or its class mode g_hit_kind_info_mode[class * 16] is 2, one emit_sparks_in_angle_range burst 270 above obj's position (heading
 // (attacker yaw +0x7A >> 8) - 0x80, single = mode == 1, obj's matrix from hitinfo_from_obj_floor), then hit_dust_trail_spawn(obj,
 // 0xFF, 1). The y offset is added in double as in the asm (D_800A8680 = 270.0).
 s32 obj_get_hit_kind(s32);
 u8 *hit_dust_trail_spawn(u8 *, u8, s32);
-extern u8 D_800A43C6[];
+extern u8 g_hit_kind_info_mode[]; /* was D_800A43C6 */
 /* was func_15194B3C */
 void hit_debris_burst(u8 *attacker, u8 *obj, s32 arg2) {
     s32 mtx[9];
@@ -188,7 +188,7 @@ void hit_debris_burst(u8 *attacker, u8 *obj, s32 arg2) {
     if (class == 0x63) {
         return;
     }
-    mode = D_800A43C6[class * 16];
+    mode = g_hit_kind_info_mode[class * 16];
     if (mode == 2) {
         return;
     }
@@ -300,7 +300,7 @@ void hit_react_none(s32 arg0, s32 arg1, s32 arg2) {
 
 /* was func_15194F64 */
 void hit_react_camera_cut(s32 arg0, u8 *arg1, s32 arg2) {
-    if ((D_80090130 == 1) && (arg1[0x127] == 0) && (D_800E9D00 & 8) && (*(u16 *)(*(u8 **)(arg1 + 0x31C) + 0x1A0) == 0)) {
+    if ((g_human_player_count == 1) && (arg1[0x127] == 0) && (g_cheat_flags & 8) && (*(u16 *)(*(u8 **)(arg1 + 0x31C) + 0x1A0) == 0)) {
         camera_cut_fade_spawn(arg0, (s32)arg1, arg2);
         *(s16 *)(*(u8 **)(arg1 + 0x31C) + 0x1A0) = 0x3E8;
     }

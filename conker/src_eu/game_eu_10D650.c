@@ -5,11 +5,11 @@
 
 typedef struct { u8 a[3]; } Tri3;
 typedef struct { u8 pad[0x14]; u8 u14; u8 pad2[0x1F]; } S34;
-extern Tri3 D_80088D24;
+extern Tri3 g_level_part_triggers; /* was D_80088D24 */
 
 /* was func_150DFE40 */
 s32 level_part_is_active(s32 arg0) {
-    Tri3 t = D_80088D24;
+    Tri3 t = g_level_part_triggers;
 
     if (((S34 *)D_800D34B8)[t.a[arg0]].u14 != 0) {
         return 1;
@@ -23,11 +23,11 @@ void trigger_set_position(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
 extern u8 g_level_part_fades[3]; /* was D_800D9D70 */
 
 // level_lights_and_scroll_update: per-frame level handler (table D_8008D0C0); does nothing unless arg0 is 0. Steps
-// the D_800DD835 counter (level_anim_frame_counter_tick(5, 4)), places light slots 3 / 4 at objects 6 / 7 (200 above them; a slot
+// the g_level_anim_frame counter (level_anim_frame_counter_tick(5, 4)), places light slots 3 / 4 at objects 6 / 7 (200 above them; a slot
 // whose object is missing is switched off with trigger_set_disabled(slot, 1)). Then for the three parts i (segment i + 2):
-// the fade g_level_part_fades[i] rises by D_800BE9E4 up to 0x60 while level_part_is_active(i) is on (else 0), and the first
+// the fade g_level_part_fades[i] rises by g_frame_ticks up to 0x60 while level_part_is_active(i) is on (else 0), and the first
 // G_SETTILESIZE after the part's G_SETTIMG of segment address (i + 2) << 24 in the level display list g_level_part_dls[0]
-// gets its low coordinate advanced by fade / 16 * D_800BE9E4 (on) or both coordinates set to 2 (off).
+// gets its low coordinate advanced by fade / 16 * g_frame_ticks (on) or both coordinates set to 2 (off).
 /* was func_150DFEA0 */
 void level_lights_and_scroll_update(s32 arg0) {
     u32 *dl;
@@ -65,7 +65,7 @@ void level_lights_and_scroll_update(s32 arg0) {
         on = level_part_is_active(i);
         if (on) {
             if (*fade < 0x60) {
-                *fade += D_800BE9E4;
+                *fade += g_frame_ticks;
                 if (*fade > 0x60) {
                     *fade = 0x60;
                 }
@@ -97,7 +97,7 @@ void level_lights_and_scroll_update(s32 arg0) {
         } while ((s8) (dl[j * 2] >> 24) != (s8) 0xF2);
         if (on) {
             hi = (dl[j * 2] >> 12) & 0xFFF;
-            lo = (dl[j * 2] & 0xFFF) + (*fade >> 4) * D_800BE9E4;
+            lo = (dl[j * 2] & 0xFFF) + (*fade >> 4) * g_frame_ticks;
         } else {
             lo = 2;
             hi = 2;
@@ -107,8 +107,8 @@ void level_lights_and_scroll_update(s32 arg0) {
 }
 
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
-extern s32 D_800906D4[];
-extern u8 D_800DD835;
+extern s32 g_sky_segment_tex_ids[]; /* was D_800906D4 */
+extern u8 g_level_anim_frame; /* was D_800DD835 */
 
 /* was func_150E0150 */
 Gfx *level_parts_set_segments(Gfx *gfx) {
@@ -119,10 +119,10 @@ Gfx *level_parts_set_segments(Gfx *gfx) {
 
     for (i = 0; i < 3; i++) {
         if (level_part_is_active(i)) {
-            k = D_800DD835;
-            a = D_800906D4[k + 9];
+            k = g_level_anim_frame;
+            a = g_sky_segment_tex_ids[k + 9];
         } else {
-            a = D_800906D4[8];
+            a = g_sky_segment_tex_ids[8];
         }
         a = texture_cache_lookup(a, sp48, 3, 0);
         gSPSegment(gfx++, i + 2, a);
@@ -146,7 +146,7 @@ void obj_bob_update(SE0228 *arg0) {
     f32 m;
 
     m = 0.55f;
-    d = arg0->u64 * D_800BE9E4;
+    d = arg0->u64 * g_frame_ticks;
     arg0->u4 += d;
     if (arg0->u4 < 11.0f) {
         t = m;
@@ -190,7 +190,7 @@ s32 mat_hit_flash_update(u8 *arg0, u8 *arg1) {
 
     if (*(s32 *)(arg1 + 0x2EC) != 0) {
         arg0[0x13] = 2;
-        *(f32 *)(arg1 + 0x2D8) -= D_800BE9A4;
+        *(f32 *)(arg1 + 0x2D8) -= g_frame_step_f;
         if (*(f32 *)(arg1 + 0x2D8) < 0.0f) {
             *(s32 *)(arg1 + 0x2EC) = 0;
             return 1;
@@ -253,7 +253,7 @@ void fx_flicker_lights_update(u8 *arg0) {
         (*(s16 *)((u8 *)arg0 + 0xE)) = -1;
         return;
     }
-    (*(s16 *)((u8 *)temp_v0 + 6)) = (s16) ((*(s16 *)((u8 *)temp_v0 + 6)) - D_800BE9E4);
+    (*(s16 *)((u8 *)temp_v0 + 6)) = (s16) ((*(s16 *)((u8 *)temp_v0 + 6)) - g_frame_ticks);
     sp78 = temp_v0;
     if ((*(s16 *)((u8 *)temp_v0 + 6)) < 0) {
         sp.u94 = (s32) (*(f32 *)((u8 *)sp.uA8 + 0x14));
@@ -267,7 +267,7 @@ void fx_flicker_lights_update(u8 *arg0) {
         light_create_with_ctrl((Header *) &sp.uA0, (Header2 *) &sp.u94, (random_int() % 121U) + 0x32, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
         (*(s16 *)((u8 *)sp78 + 6)) = (s16) ((random_int() % 81U) + 0x45);
     }
-    (*(s16 *)((u8 *)sp78 + 8)) = (s16) ((*(s16 *)((u8 *)sp78 + 8)) - D_800BE9E4);
+    (*(s16 *)((u8 *)sp78 + 8)) = (s16) ((*(s16 *)((u8 *)sp78 + 8)) - g_frame_ticks);
     if ((*(s16 *)((u8 *)sp78 + 8)) < 0) {
         var_s1 = (random_int() % 3U) + 2;
         do {
@@ -283,7 +283,7 @@ void fx_flicker_lights_update(u8 *arg0) {
         } while (var_s1 > 0);
         (*(s16 *)((u8 *)sp78 + 8)) = (s16) ((random_int() % 141U) + 0x19);
     }
-    (*(s16 *)((u8 *)sp78 + 0xA)) = (s16) ((*(s16 *)((u8 *)sp78 + 0xA)) - D_800BE9E4);
+    (*(s16 *)((u8 *)sp78 + 0xA)) = (s16) ((*(s16 *)((u8 *)sp78 + 0xA)) - g_frame_ticks);
     if ((*(s16 *)((u8 *)sp78 + 0xA)) < 0) {
         temp_s0_2 = random_int();
         obj_angle_point_effect(sp.uA8, (s16) (temp_s0_2 & 0xFF), (s16) ((random_int() & 0x7F) - 0x40), (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
@@ -297,10 +297,10 @@ void effect_attach_to_obj(u8 *arg0, s32 arg1, u8 arg2) {
 
 /* was func_150E0880 */
 void water_effect_start_once(void) {
-    if (D_80088D20 == 0) {
+    if (g_water_effect_started == 0) {
         light_group_set_disabled(6, 0);
         water_effect_spawn();
-        D_80088D20 = 1;
+        g_water_effect_started = 1;
     }
 }
 
@@ -332,7 +332,7 @@ void obj_emitter_trail_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u8 = arg0[0x3B];
     sp.uC = arg0;
     sp.u10 = 0;
-    sp.u14 = *(VecE08C8 *)D_800A5860;
+    sp.u14 = *(VecE08C8 *)g_vec3_zero;
     sp.u28 = 0x12C;
     sp.u2A = 0x1B;
     sp.u2B = 0xB;
@@ -373,9 +373,9 @@ void fade_by_camera_distance(u8 *arg0)
   f32 temp_f14;
   f32 temp_f2;
   s32 var_v0;
-  temp_f2 = D_800DBFF0->unk300 - ((f32) (*((s16 *) (((u8 *) arg0) + 0x14))));
-  temp_f12 = D_800DBFF0->unk2F8 - ((f32) (*((s16 *) (((u8 *) arg0) + 0x10))));
-  temp_f14 = D_800DBFF0->unk2FC - ((f32) (*((s16 *) (((u8 *) arg0) + 0x12))));
+  temp_f2 = g_player_views->unk300 - ((f32) (*((s16 *) (((u8 *) arg0) + 0x14))));
+  temp_f12 = g_player_views->unk2F8 - ((f32) (*((s16 *) (((u8 *) arg0) + 0x10))));
+  temp_f14 = g_player_views->unk2FC - ((f32) (*((s16 *) (((u8 *) arg0) + 0x12))));
   temp_f0 = sqrtf((temp_f2 * temp_f2) + ((temp_f12 * temp_f12) + (temp_f14 * temp_f14)));
   if (temp_f0 <= 2570.0f)
   {
@@ -397,10 +397,10 @@ void fade_by_camera_distance(u8 *arg0)
 /* P262: the C definition's exact types (game_eu_1306B0) */
 void *attached_particle_spawn(u8 *, u8, f32 *, f32 *, f32 *, s16, u8, f32, u8 *, u8, s32, s16, u8, s32);
 s32 mtx_transform_points(f32 **, s32 **, s32, s32);
-extern u8 D_80088D28;
-/* the rodata of level_lights_and_scroll_update.s (D_800A1340 / D_800A1358), gone from the NM build: local copies */
-static const f32 D_800A1340[2][3] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
-static const f32 D_800A1358[2][3] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
+extern u8 g_joint_spark_bone; /* was D_80088D28 */
+/* the rodata of level_lights_and_scroll_update.s (g_joint_spark_start_pts / g_joint_spark_end_pts), gone from the NM build: local copies */
+static const f32 g_joint_spark_start_pts[2][3] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } }; /* was D_800A1340 */
+static const f32 g_joint_spark_end_pts[2][3] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } }; /* was D_800A1358 */
 
 /* was func_150E0C58 */
 void obj_joint_spark_spray(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
@@ -412,10 +412,10 @@ void obj_joint_spark_spray(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     if (*(s32 *)(arg0 + 0x1D4) == 0) {
         return;
     }
-        sp54 = D_800A1340[arg1];
+        sp54 = g_joint_spark_start_pts[arg1];
         sp50 = sp64;
-        mtx_transform_points(&sp54, &sp50, *(s32 *)(arg0 + 0x1D4) + (D_80088D28 << 6), 1);
+        mtx_transform_points(&sp54, &sp50, *(s32 *)(arg0 + 0x1D4) + (g_joint_spark_bone << 6), 1);
         sp58[1] = (random_float() * 1) + 2.0f;
         sp58[0] = (random_float() * 14.0f) + 28.0f;
-        attached_particle_spawn(arg0, D_80088D28, (f32 *)((u8 *)D_800A1340 + arg1 * 12), (f32 *)((u8 *)D_800A1358 + arg1 * 12), sp58, (random_int() % 3U) + 4, (random_int() % 156U) + 0x64, (random_float() * 300.0f) + 400.0f, (u8 *)sp64, 0xFF, 0, -1, arg2, arg3);
+        attached_particle_spawn(arg0, g_joint_spark_bone, (f32 *)((u8 *)g_joint_spark_start_pts + arg1 * 12), (f32 *)((u8 *)g_joint_spark_end_pts + arg1 * 12), sp58, (random_int() % 3U) + 4, (random_int() % 156U) + 0x64, (random_float() * 300.0f) + 400.0f, (u8 *)sp64, 0xFF, 0, -1, arg2, arg3);
 }

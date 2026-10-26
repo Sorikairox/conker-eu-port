@@ -8,7 +8,7 @@ s32 tracer_check_hit_step(u8 *arg0, u8 *arg1, f32 arg2);
 void tracer_ease_values(s32 arg0, u8 *arg1, s32 arg2);
 s32 memcpy(s32, s32, s32);
 // hoisted forward declaration(s) for tracer_tick_life
-extern void (*D_8008FF70[])(s32);
+extern void (*g_tracer_expire_fns[])(s32); /* was D_8008FF70 */
 
 
 s32 sound_calc_pan_from_xz(f32, f32, u32);
@@ -30,7 +30,7 @@ void hit_spark_sound_play(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3, f32 arg4) {
 
     if (arg0 != NULL) {
         if ((D_800BE616 != 0) || (temp_v1 = (*(u8 **)((u8 *)arg0 + 0x318)), (temp_v1 == NULL))) {
-            temp_v0 = (*(s16 *)((u8 *)D_800B0DF0 + 0x2C));
+            temp_v0 = (*(s16 *)((u8 *)g_level_header + 0x2C));
             if ((temp_v0 == 0x24) || (temp_v0 == 0x13) || (temp_v0 == 0x4D) || (temp_v0 == 0x85) || (temp_v0 == 0x93)) {
                 sound_source_mix((s32) (*(f32 *)((u8 *)arg1 + 0)), (s32) (*(f32 *)((u8 *)arg1 + 4)), (s32) (*(f32 *)((u8 *)arg1 + 8)), 0x7FFF, 0x3E8, 0x64, &sp.u4C, &sp.u48, NULL);
                 if ((u32) sp.u48 >= 0x1001U) {
@@ -39,7 +39,7 @@ void hit_spark_sound_play(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3, f32 arg4) {
                 }
             }
         } else {
-            temp_v0_2 = (*(s16 *)((u8 *)D_800B0DF0 + 0x2C));
+            temp_v0_2 = (*(s16 *)((u8 *)g_level_header + 0x2C));
             if ((temp_v0_2 == 0x24) || (temp_v0_2 == 0x13)) {
                 temp_f0 = 255.0f - (arg4 * 0.1f);
                 if (temp_f0 > 16.0f) {
@@ -298,7 +298,7 @@ block_47:
     return sp.u19C;
 }
 s32 sound_calc_pan_volume(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32 *, s32 *, s32);
-extern s32 D_8008FF88;
+extern s32 g_tracer_whiz_table; /* was D_8008FF88 */
 
 /* was func_151C2CE4 */
 s8 tracer_update(u8 *arg0) {
@@ -334,12 +334,12 @@ s8 tracer_update(u8 *arg0) {
 
     temp_s0 = arg0 + 0x110;
     sp.uD7 = 1;
-    tracer_ease_values(arg0, temp_s0, D_800BE9E4);
-    if (tracer_check_hit_step(arg0, temp_s0, D_800BE9A4) == 0) {
+    tracer_ease_values(arg0, temp_s0, g_frame_ticks);
+    if (tracer_check_hit_step(arg0, temp_s0, g_frame_step_f) == 0) {
         sp.uD7 = 0;
     }
-    tracer_move(arg0, temp_s0, D_800BE9A4);
-    if (tracer_tick_life((s32) arg0, temp_s0, D_800BE9A4) == 0) {
+    tracer_move(arg0, temp_s0, g_frame_step_f);
+    if (tracer_tick_life((s32) arg0, temp_s0, g_frame_step_f) == 0) {
         sp.uD7 = 0;
     }
     if (((*(u8 *)((u8 *)(&arg0[0x110]) + 0xA0)) != 0) && (sp.uD7 == 1)) {
@@ -350,10 +350,10 @@ s8 tracer_update(u8 *arg0) {
             temp_v0 = random_int();
             var_t0 = sp.uCC;
             var_v1 = 0;
-            if (D_80082FA0 >= 0) {
-                temp_a3 = (u8 *) &D_8008FF88 + (temp_v0 & 7) * 4;
+            if (g_last_player_index >= 0) {
+                temp_a3 = (u8 *) &g_tracer_whiz_table + (temp_v0 & 7) * 4;
                 temp_a2 = (*(u16 *)((u8 *)temp_a3 + 2));
-                var_a0 = D_800DBFF0;
+                var_a0 = g_player_views;
                 temp_f18 = (*(f32 *)((u8 *)(&arg0[0x110]) + 0x98));
                 sp70 = (f32) temp_a2 * temp_f18;
 loop_9:
@@ -371,7 +371,7 @@ loop_9:
                 } else {
                     var_v1 += 1;
                     var_t0 = NULL;
-                    if (D_80082FA0 < var_v1) {
+                    if (g_last_player_index < var_v1) {
 
                     } else {
                         goto loop_9;
@@ -382,7 +382,7 @@ loop_9:
             sp.uCC = NULL;
             var_t0 = NULL;
             if (sound_voice_is_playing(temp_a0) != 0) {
-                var_t0 = &D_800DBFF0[(*(u8 *)((u8 *)(&arg0[0x110]) + 0xA1))];
+                var_t0 = &g_player_views[(*(u8 *)((u8 *)(&arg0[0x110]) + 0xA1))];
             } else {
                 (*(s8 *)((u8 *)(&arg0[0x110]) + 0xA0)) = 0;
             }
@@ -722,14 +722,14 @@ void tracer_impact_sparks(u8 *arg0) {
         emit_streaks_from_spec(&sp.u54, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
     }
 }
-extern f32 D_800AAE24[4]; /* the ember emitter's 4 float parameters (D_800AAE24..D_800AAE30) */
+extern f32 g_fire_ember_params[4]; /* the ember emitter's 4 float parameters (g_fire_ember_params..D_800AAE30); was D_800AAE24 */
 s32 emit_streaks_from_spec(s32 *, u8, s32);
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 s32 random_int(void);
 f32 random_float(void);
 
 // fire_embers_spawn: the ember burst of a fire at `pos` (room `room`, owner `owner`): an ember emitter
-// (emit_streaks_from_spec, type 5 / 7, 4 parameters from D_800AAE24, sizes 15 / 30, colour block, handlers 0x200005 /
+// (emit_streaks_from_spec, type 5 / 7, 4 parameters from g_fire_ember_params, sizes 15 / 30, colour block, handlers 0x200005 /
 // 0x60600), one glow sprite (particle_spawn_ex: texture 0x2B of set 0x4403, 6..12 frames, half size 106..302, fade from
 // 3 at rate 0x55, random flip flags 0x40 / 0x80) and a light flash (light_create_with_ctrl: 6..12 frames, type 5 or 6) at the
 // truncated position.
@@ -740,7 +740,7 @@ void fire_embers_spawn(void *arg0, u8 room, s32 owner) {
         s32 type;       /* +0x00: 5 */
         s32 subtype;    /* +0x04: 7 */
         f32 pos[3];     /* +0x08 */
-        f32 param[4];   /* +0x14: D_800AAE24..30 */
+        f32 param[4];   /* +0x14: g_fire_ember_params..30 */
         f32 sizeA;      /* +0x24: 15 */
         f32 sizeB;      /* +0x28: 30 */
         s16 u2C;
@@ -820,10 +820,10 @@ void fire_embers_spawn(void *arg0, u8 room, s32 owner) {
     emit.pos[0] = pos[0];
     emit.pos[1] = pos[1];
     emit.pos[2] = pos[2];
-    emit.param[0] = D_800AAE24[0];
-    emit.param[1] = D_800AAE24[1];
-    emit.param[2] = D_800AAE24[2];
-    emit.param[3] = D_800AAE24[3];
+    emit.param[0] = g_fire_ember_params[0];
+    emit.param[1] = g_fire_ember_params[1];
+    emit.param[2] = g_fire_ember_params[2];
+    emit.param[3] = g_fire_ember_params[3];
     emit.sizeA = 15.0f;
     emit.sizeB = 30.0f;
     emit.u2C = 0;
@@ -1144,17 +1144,17 @@ void fire_embers_spawn_b(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u50 = (s32) (*(f32 *)((u8 *)arg0 + 8));
     light_create_with_ctrl((Header *) &sp.u54, (Header2 *) &sp.u48, (random_int() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, (u8) (s32) arg1, arg2);
 }
-extern s32 D_800AADB0[6]; /* per-surface texture byte of the spark burst */
-extern s32 D_800AADC8[6]; /* per-surface texture byte of the smoke puff */
-extern u8 D_800AADE0[6][3]; /* per-surface debris colour A */
-extern u8 D_800AADF4[6][3]; /* per-surface debris colour B */
-extern u8 D_800AAE08[2][3]; /* the two flash colours */
-extern f32 D_800AAE44;
-extern f32 D_800AAE48;
-extern f32 D_800AAE4C;
-extern f32 D_800AAE50;
-extern f32 D_800AAE54;
-extern f32 D_800AAE58;
+extern s32 g_surface_spark_tex[6]; /* per-surface texture byte of the spark burst; was D_800AADB0 */
+extern s32 g_surface_smoke_tex[6]; /* per-surface texture byte of the smoke puff; was D_800AADC8 */
+extern u8 g_surface_debris_col_a[6][3]; /* per-surface debris colour A; was D_800AADE0 */
+extern u8 g_surface_debris_col_b[6][3]; /* per-surface debris colour B; was D_800AADF4 */
+extern u8 g_surface_flash_colours[2][3]; /* the two flash colours; was D_800AAE08 */
+extern f32 g_surface_smoke_k_34; /* was D_800AAE44 */
+extern f32 g_surface_smoke_k_3c; /* was D_800AAE48 */
+extern f32 g_surface_debris_k_2c; /* was D_800AAE4C */
+extern f32 g_surface_debris_k_54; /* was D_800AAE50 */
+extern f32 g_surface_debris_k_58; /* was D_800AAE54 */
+extern f32 g_surface_debris_k_68; /* was D_800AAE58 */
 void emit_particle_burst_req(u8 *req, s32 tag, s32 room, s32 owner);
 
 // impact_effects_spawn: the impact effects at object `obj`'s position (+0x140), chosen by level (g_level_id) and the
@@ -1279,7 +1279,7 @@ void surface_impact_effects(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debr
 
     if (random_float() < sparkChance) {
         s = random_float() * 15.0f + 15.0f;
-        spark.texture = D_800AADB0[type];
+        spark.texture = g_surface_spark_tex[type];
         spark.u07 = 0;
         spark.flags = (D_800BE616 ? 0x20000 : 0) | 0xBF01;
         spark.life = random_int() % 61U + 60;
@@ -1302,7 +1302,7 @@ void surface_impact_effects(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debr
     }
 
     if (random_float() < smokeChance) {
-        smoke.texture = D_800AADC8[type];
+        smoke.texture = g_surface_smoke_tex[type];
         smoke.u01 = 0;
         smoke.texSet = 0x3B03;
         smoke.life = random_int() % 6U + 13;
@@ -1320,9 +1320,9 @@ void surface_impact_effects(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debr
         smoke.vel[0] = pos[0] - prev[0];
         smoke.vel[1] = pos[1] - prev[1];
         smoke.vel[2] = pos[2] - prev[2];
-        smoke.u34 = D_800AAE44;
+        smoke.u34 = g_surface_smoke_k_34;
         smoke.u38 = 1.0f;
-        smoke.u3C = D_800AAE48;
+        smoke.u3C = g_surface_smoke_k_3c;
         smoke.flags = (D_800BE616 ? 0x40000000 : 0) | 0x08DC0009;
         smoke.alpha = random_int() % 76U + 180;
         smoke.u45 = 0xFF;
@@ -1346,20 +1346,20 @@ void surface_impact_effects(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debr
         debris.u12 = 0xF;
         debris.u14 = 0;
         debris.u18 = 0;
-        debris.colorA[0] = D_800AADE0[type][0];
-        debris.colorA[1] = D_800AADE0[type][1];
-        debris.colorA[2] = D_800AADE0[type][2];
+        debris.colorA[0] = g_surface_debris_col_a[type][0];
+        debris.colorA[1] = g_surface_debris_col_a[type][1];
+        debris.colorA[2] = g_surface_debris_col_a[type][2];
         debris.colorA[3] = 0xFF;
-        debris.colorB[0] = D_800AADF4[type][0];
-        debris.colorB[1] = D_800AADF4[type][1];
-        debris.colorB[2] = D_800AADF4[type][2];
+        debris.colorB[0] = g_surface_debris_col_b[type][0];
+        debris.colorB[1] = g_surface_debris_col_b[type][1];
+        debris.colorB[2] = g_surface_debris_col_b[type][2];
         debris.colorB[3] = 0xE6;
         debris.u24 = 0x14;
         debris.u25 = 0xFF;
         debris.u26 = 0x19;
         debris.u28 = 0xA;
         debris.u2A = 0x1E;
-        debris.u2C = D_800AAE4C;
+        debris.u2C = g_surface_debris_k_2c;
         debris.u30 = 60.0f;
         debris.u34 = 65.0f;
         debris.pos[0] = pos[0];
@@ -1371,15 +1371,15 @@ void surface_impact_effects(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debr
         debris.u4A = 0x28;
         debris.u4C = 9.0f;
         debris.u50 = 17.0f;
-        debris.u54 = D_800AAE50;
-        debris.u58 = D_800AAE54;
+        debris.u54 = g_surface_debris_k_54;
+        debris.u58 = g_surface_debris_k_58;
         debris.flags = (D_800BE616 ? 0x800000 : 0) | 0x40E07;
         debris.u60 = 0x10;
         debris.u61 = -1;
         debris.u62 = 8;
         debris.u63 = 6;
         debris.u64 = 1;
-        debris.u68 = D_800AAE58;
+        debris.u68 = g_surface_debris_k_68;
         emit_particle_burst_req((u8 *) &debris, debrisTag, obj[0xC], obj[1]);
     }
 
@@ -1392,7 +1392,7 @@ void surface_impact_effects(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debr
         at.unk4 = pos[1];
         at.unk8 = pos[2];
         i = random_int() & 1;
-        light_create_with_ctrl(&flash, &at, random_int() % 6U + 10, D_800AAE08[i][0], D_800AAE08[i][1], D_800AAE08[i][2],
+        light_create_with_ctrl(&flash, &at, random_int() % 6U + 10, g_surface_flash_colours[i][0], g_surface_flash_colours[i][1], g_surface_flash_colours[i][2],
                       0xFF, 0, 0, obj[0xC], obj[1]);
     }
 }
@@ -1469,16 +1469,16 @@ s32 tracer_tick_life(s32 arg0, u8 *arg1, f32 arg2) {
     var_v1 = 1;
     (*(f32 *)((u8 *)arg1 + 0x8C)) = (f32) ((*(f32 *)((u8 *)arg1 + 0x8C)) - arg2);
     if ((*(f32 *)((u8 *)arg1 + 0x8C)) <= 0.0f) {
-        if ((D_800E0940 != NULL) && ((*(u8 *)((u8 *)arg1 + 0)) & 1)) {
+        if ((g_world_obj_hit_cb != NULL) && ((*(u8 *)((u8 *)arg1 + 0)) & 1)) {
             temp_v1 = (*(s32 *)((u8 *)arg1 + 0x84));
             if (temp_v1 != 0) {
-                ((void (*)(u8 *, s32)) D_800E0940)(arg1 + 0x30, (temp_v1 - (s32) D_800DBEF4) / 160);
+                ((void (*)(u8 *, s32)) g_world_obj_hit_cb)(arg1 + 0x30, (temp_v1 - (s32) g_world_objs) / 160);
             }
         }
         if ((*(u8 *)((u8 *)arg1 + 0)) & 2) {
             temp_v0 = (*(s8 *)((u8 *)arg1 + 0x9C));
             if (temp_v0 != -1) {
-                D_8008FF70[temp_v0](arg0);
+                g_tracer_expire_fns[temp_v0](arg0);
             }
         }
         var_v1 = 0;
@@ -1502,7 +1502,7 @@ typedef struct {
     /* 0x2C */ f32 tail[3];
 } TimedEmitter;
 
-// timed_emitter_update: counts the emitter at obj+0x28 down by the frame time D_800BE9E4; when it runs out, spawns a
+// timed_emitter_update: counts the emitter at obj+0x28 down by the frame time g_frame_ticks; when it runs out, spawns a
 // random effect of type 0x2B (id effect_min + rand % (effect_range + 1)) with flags (1, 0), size 0x44, obj bytes
 // +0xC / +1, and copies a 17-float parameter block into it at +0x28 (random spreads, the emitter position as floats,
 // the three tail floats); then re-arms the timer to interval_min + rand % (interval_range + 1).
@@ -1512,7 +1512,7 @@ void timed_emitter_update(u8 *obj) {
     f32 p[17];
     u8 *fx;
 
-    e->timer -= D_800BE9E4;
+    e->timer -= g_frame_ticks;
     if (e->timer >= 0) {
         return;
     }
@@ -1566,17 +1566,17 @@ void orbit_sparks_emit(u8 *p) {
     f32 *s;
 
     s = (f32 *) (p + 0x28);
-    s[10] += s[9] * D_800BE9A4;
+    s[10] += s[9] * g_frame_step_f;
     if (!(1.0f < s[10])) {
         return;
     }
     inv = 1.0f / s[10];
-    t = s[8] + D_800BE9A4;
+    t = s[8] + g_frame_step_f;
     step = t * inv;
     a = s[4];
     b = s[5];
-    da = s[6] * D_800BE9A4 * inv;
-    db = s[7] * D_800BE9A4 * inv;
+    da = s[6] * g_frame_step_f * inv;
+    db = s[7] * g_frame_step_f * inv;
     do {
         sa = sinf(a);
         vec3_from_angles_rad(s[0] + sa * s[2], s[1] + sinf(b) * s[3], 5.0f, vec);
@@ -1624,7 +1624,7 @@ typedef struct {
     u8 surface[0x15];   /* +0x44 level surface (collision_ray_cast) */
     u8 kind;            /* +0x59 0 none, 1 level, 2 object bounds, 3 object model */
     u8 pad5A[2];
-    u8 *material;       /* +0x5C D_800DBEF4 entry (0xA0 bytes each) */
+    u8 *material;       /* +0x5C g_world_objs entry (0xA0 bytes each) */
     s32 extra;          /* +0x60 level hit extra */
 } RayHit;               /* 0x64 bytes, ray_cast_world's hit record */
 
@@ -1721,7 +1721,7 @@ s32 tracer_hit_update(s32 srcArg, s32 *hitArg, u8 *posArg, s32 *dirArg, s32 *out
     if (hit->material == NULL) {
         matIdx = -1;
     } else {
-        matIdx = (hit->material - (u8 *) D_800DBEF4) / 0xA0;
+        matIdx = (hit->material - (u8 *) g_world_objs) / 0xA0;
     }
     if (hit->kind == 0) {
         found = 0;
@@ -1774,7 +1774,7 @@ s32 tracer_hit_update(s32 srcArg, s32 *hitArg, u8 *posArg, s32 *dirArg, s32 *out
     if (matIdx == -1) {
         hit->material = NULL;
     } else {
-        hit->material = (u8 *) D_800DBEF4 + matIdx * 0xA0;
+        hit->material = (u8 *) g_world_objs + matIdx * 0xA0;
     }
     return 1;
 }

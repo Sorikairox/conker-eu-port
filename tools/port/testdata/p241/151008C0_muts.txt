@@ -1,11 +1,11 @@
 # P241 sky_segments_flicker (sky_segments_flicker) mutants: sed % setup names
 s/    if (arg0 != 0) {/    if (arg0 == 0) {/ % edges
-s/    D_800DD835++;/    D_800DD835 += 2;/ % edges
+s/    g_level_anim_frame++;/    g_level_anim_frame += 2;/ % edges
 s/    for (i = 0; i < 5; i++) {/    for (i = 0; i < 4; i++) {/ % edges
-s/        chance = (D_800BE500\[i\] != 0) ? 70 : 35;/        chance = (D_800BE500[i] != 0) ? 69 : 35;/ % edges
-s/        chance = (D_800BE500\[i\] != 0) ? 70 : 35;/        chance = (D_800BE500[i] != 0) ? 70 : 36;/ % edges
-s/        chance = (D_800BE500\[i\] != 0) ? 70 : 35;/        chance = (D_800BE500[i] == 0) ? 70 : 35;/ % edges
-s/            D_800BE500\[i\] ^= 1;/            D_800BE500[i] = 1;/ % edges
+s/        chance = (g_sky_segment_on\[i\] != 0) ? 70 : 35;/        chance = (g_sky_segment_on[i] != 0) ? 69 : 35;/ % edges
+s/        chance = (g_sky_segment_on\[i\] != 0) ? 70 : 35;/        chance = (g_sky_segment_on[i] != 0) ? 70 : 36;/ % edges
+s/        chance = (g_sky_segment_on\[i\] != 0) ? 70 : 35;/        chance = (g_sky_segment_on[i] == 0) ? 70 : 35;/ % edges
+s/            g_sky_segment_on\[i\] ^= 1;/            g_sky_segment_on[i] = 1;/ % edges
 s/                light_ctrl_broadcast(ids.id\[i\], 0x18, 0);/                light_ctrl_broadcast(ids.id[i], 0x19, 0);/ % edges
 s/                light_ctrl_broadcast(ids.id\[i\], 0x18, 0);/                light_ctrl_broadcast(ids.id[0], 0x18, 0);/ % edges
 s/                light_ctrl_broadcast(ids.id\[i\], 0x1C, 0);/                light_ctrl_broadcast(ids.id[i], 0x1C, 1);/ % edges

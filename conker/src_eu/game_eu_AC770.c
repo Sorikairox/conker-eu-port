@@ -466,7 +466,7 @@ void player_idle_animation(void) {
         return;
     }
     rec = g_cur_obj;
-    if (rec->unk5 == 4 || g_cur_obj_index >= D_8008FD8C) {
+    if (rec->unk5 == 4 || g_cur_obj_index >= g_player_count) {
         return;
     }
     ctl = rec->unk31C;
@@ -688,8 +688,8 @@ void player_idle_state_update(struct127 *arg0) {
         }
         if (((*(u8 *)((u8 *)temp_v0 + 0)) == 1) && (D_800C35EA != 1)) {
             temp_a1_2 = (*(u16 *)((u8 *)temp_v0 + 2));
-            if ((s32) temp_a1_2 < (0xFFFF - D_800BE9E4)) {
-                (*(u16 *)((u8 *)temp_v0 + 2)) = (u16) (temp_a1_2 + D_800BE9E4);
+            if ((s32) temp_a1_2 < (0xFFFF - g_frame_ticks)) {
+                (*(u16 *)((u8 *)temp_v0 + 2)) = (u16) (temp_a1_2 + g_frame_ticks);
             }
         } else {
             (*(u16 *)((u8 *)temp_v0 + 2)) = 0U;
@@ -701,8 +701,8 @@ void player_idle_state_update(struct127 *arg0) {
         temp_a1_3 = arg0->unk31C;
         temp_v0_2 = (s16) temp_a1_3->unk66;
         if (temp_v0_2 != 0) {
-            if (D_800BE9E4 < temp_v0_2) {
-                temp_a1_3->unk66 = temp_v0_2 - D_800BE9E4;
+            if (g_frame_ticks < temp_v0_2) {
+                temp_a1_3->unk66 = temp_v0_2 - g_frame_ticks;
             } else {
                 obj_broadcast_bored((u8 *) arg0);
                 arg0->unk31C->unk66 = 0;

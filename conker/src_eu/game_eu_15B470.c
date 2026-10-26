@@ -5,7 +5,7 @@
 
 /* was func_1512DC60 */
 void camera_shake_reset(u8 *arg0) {
-    u8 *temp_v0 = D_800DC6F0[arg0[0x23D]];
+    u8 *temp_v0 = g_camera_shake_states[arg0[0x23D]];
 
     *(s32 *)(temp_v0 + 0x50) = 5;
     *(f32 *)(temp_v0 + 0x54) = 0.0f;
@@ -16,7 +16,7 @@ void camera_shake_reset(u8 *arg0) {
     *(f32 *)(temp_v0 + 0x28) = -1.0f;
 }
 
-extern s32 D_80089970;
+extern s32 g_camera_shake_presets; /* was D_80089970 */
 
 /* was func_1512D748 */
 s32 camera_shake_start(struct108 *arg0, s32 arg1, s32 arg2) {
@@ -48,9 +48,9 @@ s32 camera_shake_start(struct108 *arg0, s32 arg1, s32 arg2) {
     u8 temp_t9;
     u8 *temp_v1;
 
-    temp_v0 = D_800DC6F0[arg0->unk23D];
+    temp_v0 = g_camera_shake_states[arg0->unk23D];
     if (arg0->unk3D4->unk120 == 0) {
-        temp_v1 = ((s32 *)((u8 *)&D_80089970 + (arg1 * 0xA)));
+        temp_v1 = ((s32 *)((u8 *)&g_camera_shake_presets + (arg1 * 0xA)));
         (*(f32 *)((u8 *)temp_v0 + 0)) = (f32) (*(u8 *)((u8 *)temp_v1 + 0));
         temp_t4 = (*(u8 *)((u8 *)temp_v1 + 1));
         var_f4 = (f32) temp_t4;
@@ -139,7 +139,7 @@ void camera_shake_update(u8 *arg0) {
     f32 var_f14;
     u8 *temp_s0;
 
-    temp_s0 = D_800DC6F0[(*(u8 *)((u8 *)arg0 + 0x23D))];
+    temp_s0 = g_camera_shake_states[(*(u8 *)((u8 *)arg0 + 0x23D))];
     if (random_int() & 1) {
         var_f14 = 1.0f;
     } else {
@@ -160,12 +160,12 @@ void camera_shake_update(u8 *arg0) {
                 if (((*(s32 *)((u8 *)temp_s0 + 0x50)) == 0) && ((*(s32 *)((u8 *)temp_s0 + 0x64)) != 0)) {
                     (*(s32 *)((u8 *)temp_s0 + 0x50)) = 1;
                 }
-                (*(f32 *)((u8 *)temp_s0 + 0x2C)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x2C)) + ((*(f32 *)((u8 *)temp_s0 + 0x40)) * D_800BE9A4));
+                (*(f32 *)((u8 *)temp_s0 + 0x2C)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x2C)) + ((*(f32 *)((u8 *)temp_s0 + 0x40)) * g_frame_step_f));
             } else if (temp_f2_2 <= (*(f32 *)((u8 *)temp_s0 + 0x34))) {
                 if (((*(s32 *)((u8 *)temp_s0 + 0x50)) == 1) && ((*(s32 *)((u8 *)temp_s0 + 0x64)) != 0)) {
                     (*(s32 *)((u8 *)temp_s0 + 0x50)) = 2;
                 }
-                (*(f32 *)((u8 *)temp_s0 + 0x2C)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x2C)) - ((*(f32 *)((u8 *)temp_s0 + 0x44)) * D_800BE9A4));
+                (*(f32 *)((u8 *)temp_s0 + 0x2C)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x2C)) - ((*(f32 *)((u8 *)temp_s0 + 0x44)) * g_frame_step_f));
             } else if (temp_f2_2 <= (*(f32 *)((u8 *)temp_s0 + 0x38))) {
                 if (((*(s32 *)((u8 *)temp_s0 + 0x50)) == 2) && ((*(s32 *)((u8 *)temp_s0 + 0x64)) != 0)) {
                     (*(s32 *)((u8 *)temp_s0 + 0x50)) = 3;
@@ -174,7 +174,7 @@ void camera_shake_update(u8 *arg0) {
                 if (((*(s32 *)((u8 *)temp_s0 + 0x50)) == 3) && ((*(s32 *)((u8 *)temp_s0 + 0x64)) != 0)) {
                     (*(s32 *)((u8 *)temp_s0 + 0x50)) = 4;
                 }
-                (*(f32 *)((u8 *)temp_s0 + 0x2C)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x2C)) - ((*(f32 *)((u8 *)temp_s0 + 0x4C)) * D_800BE9A4));
+                (*(f32 *)((u8 *)temp_s0 + 0x2C)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x2C)) - ((*(f32 *)((u8 *)temp_s0 + 0x4C)) * g_frame_step_f));
             } else {
                 camera_shake_reset(arg0);
             }

@@ -59,8 +59,8 @@ s32 scene_sfx_update(u8 *e, s32 *a1, u32 *vol, s32 *a3, s32 *a4, s32 *a5, u16 *s
     }
     left = r->left;
     if (left != 0xFFFF) {
-        if (D_800BE9E4 < left) {
-            r->left = left - D_800BE9E4;
+        if (g_frame_ticks < left) {
+            r->left = left - g_frame_ticks;
         } else {
             goto stop;
         }
@@ -77,7 +77,7 @@ s32 scene_sfx_update(u8 *e, s32 *a1, u32 *vol, s32 *a3, s32 *a4, s32 *a5, u16 *s
         return 0;
     }
     *vol = (u32) (*vol * D_800C40A9) / 25;
-    if (D_800BE9E4 < D_800C40A9) {
+    if (g_frame_ticks < D_800C40A9) {
         return 0;
     }
 stop:
@@ -525,16 +525,16 @@ extern u8 D_800844CC[3][3];        /* sub 0x37 colours (.data) */
 extern s32 *D_800C3A00[4];
 extern u8 D_800C3A18;
 extern s32 D_800905C4[];
-extern u8 D_800C3A78[], D_800C3A7A[], D_800C3A7C[], D_800C3A7E[], D_800C3A80[], D_800C3A82[], D_800C3A84[];
+extern u8 D_800C3A78[], D_800C3A7A[], g_cutscene_show_all[], D_800C3A7E[], D_800C3A80[], D_800C3A82[], D_800C3A84[]; /* was D_800C3A7C */
 extern u8 D_800C3A86;
 extern f32 D_800C3A70, D_800C3A74, D_800C3A94, D_800C3A98;
 extern s32 D_800C3A9C;
-extern f32 D_800D9F3C, D_800D9F40;
-extern s32 D_800BEE08;
+extern f32 g_cam_far_plane, g_cam_near_plane; /* was D_800D9F3C; was D_800D9F40 */
+extern s32 g_view_count_minus1; /* was D_800BEE08 */
 extern u8 D_800C40AB, D_800C40AD, D_800C3AA0, D_800DC2DC, D_800C40BD, g_slowmo_divisor; /* was D_800BEE2C */
 extern u8 D_800C39E2, D_800C39E3, D_800C3682, D_800C3683;
 extern s16 D_800C40BE;
-extern s32 D_800D2870;
+extern s32 g_hud_clock_frames; /* was D_800D2870 */
 extern u8 *D_800DE274, *D_800DE278, *D_800DE27C;
 extern char D_80096DE0[];          /* "Cutscene 1" */
 
@@ -694,7 +694,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         if (ev->id < D_800C3A5A[player] && D_800C3A10[player][ev->id].kind == 1 && ev->id != D_800C3A18) {
             D_800C3A18 = ev->id;
             g_camera_timers[0] = 4;
-            SA_S32(D_800DBFF0, 0x5F0) |= 4;
+            SA_S32(g_player_views, 0x5F0) |= 4;
         }
         return 1;
     case 9:
@@ -715,13 +715,13 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
 
     switch (ev->id) {
     case 0x3B:
-        D_800DDE18 = ev->b4 == 0 ? (s32) (SA_REC(player, track) + 0x28) : 0;
+        g_letterbox_track = ev->b4 == 0 ? (s32) (SA_REC(player, track) + 0x28) : 0;
         break;
     case 0x08:
         D_800C3A7A[player] = ev->b4 == 0;
         break;
     case 0x09:
-        D_800C3A7C[player] = ev->b4 == 0;
+        g_cutscene_show_all[player] = ev->b4 == 0;
         break;
     case 0x0D:
         D_800C3A78[player] = ev->b4 == 0;
@@ -876,10 +876,10 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             break;
         }
         case 10:
-            aim_hud_spawn_track_mode((u8 *) D_800DBFF0, 0, (s8) track, (u8) flag, 1);
+            aim_hud_spawn_track_mode((u8 *) g_player_views, 0, (s8) track, (u8) flag, 1);
             break;
         case 11:
-            aim_hud_clear((u8 *) D_800DBFF0);
+            aim_hud_clear((u8 *) g_player_views);
             break;
         case 12:
             water_effect_start_once();
@@ -998,11 +998,11 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         }
         break;
     case 0x25:
-        D_800C3A70 = ev->b4 != 0 ? (f32) ev->b4 : D_800D9F40;
+        D_800C3A70 = ev->b4 != 0 ? (f32) ev->b4 : g_cam_near_plane;
         camera_projection_set_viewport(0, D_800C3A70, D_800C3A74);
         break;
     case 0x58:
-        D_800C3A74 = ev->w6 != 0 ? (f32) (ev->w6 * 10) : D_800D9F3C;
+        D_800C3A74 = ev->w6 != 0 ? (f32) (ev->w6 * 10) : g_cam_far_plane;
         camera_projection_set_viewport(0, D_800C3A70, D_800C3A74);
         break;
     case 0x3C:
@@ -1074,7 +1074,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
     case 0x45:
         if (ev->b4 == 0) {
             screen_tint_create(0, scene_event_find_next(arg0, type, track, &next, 1, ev->id, 0, 0, 0, 0, player) - now, 0xFF, 0, 0,
-                          D_800BEE08, 0, 0);
+                          g_view_count_minus1, 0, 0);
         }
         break;
     case 0x49:
@@ -1136,7 +1136,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             v = ev->w6 != 0 ? ev->w6 : 0x7F;
             screen_tint_start(colours[ev->b5][0], colours[ev->b5][1], colours[ev->b5][2], (s16) v, span, 0);
         } else {
-            D_800DE240[0] = 0;
+            g_screen_tint_timer[0] = 0;
         }
         break;
     }
@@ -1145,7 +1145,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         if (ev->b4 == 0) {
             screen_pulse_start(ev->b5, span, ev->w6 != 0 ? ev->w6 : 4, 0x7F, 1);
         } else {
-            D_800DDE08 = 0;
+            g_screen_pulse_timer = 0;
         }
         break;
     case 0x5C: /* camera fade in / hold / out: span to the event's b4 = 1 / 2 / 3 companions */
@@ -1169,7 +1169,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         }
         break;
     case 0x62:
-        SA_U8(D_800B0DF0, 8) = 0;
+        SA_U8(g_level_header, 8) = 0;
         break;
     case 0x7C:
         D_800C3681 = ev->b4 == 0;
@@ -1297,7 +1297,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         break;
     case 0x81:
         hud_clock_set_enabled(ev->b4 ^ 1);
-        D_800D2870 = ev->w6 * 25;
+        g_hud_clock_frames = ev->w6 * 25;
         break;
     case 0x82:
         D_800C40BD = (u8) ev->b4 >= 101 ? 100 : ev->b4;
@@ -1479,9 +1479,9 @@ extern u8  *D_800C3D80[4][30];      /* per player and track: byte table written 
 extern s16 *D_eu_800C3C88[4][30];   /* per player and track: s16 x, y, z */
 extern s32 *D_800C3A00[4];          /* per player: word table indexed by w6 */
 extern s32 D_8008CDF0;
-extern u8 *D_8008AF88[];
+extern u8 *g_char_fx_states[]; /* was D_8008AF88 */
 /* gun_muzzle_smoke_spawn's .s rodata (game_eu_1F3040) is dropped in the NM link: local copy of its first muzzle point */
-static const f32 D_800AAE70[3] = { -113.828796f, -14.0823936f, 14.5422001f };
+static const f32 g_gun_smoke_start_pt[3] = { -113.828796f, -14.0823936f, 14.5422001f }; /* was D_800AAE70 */
 extern char D_80096DEC[];          /* "Cutscene 2" */
 
 extern u8 D_800844D8[3][6];         /* sub 0x11 colour sets (.data) */
@@ -1989,7 +1989,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
                 idx = 13;
             }
             for (node = O_PTR(obj, 0x2F4); node != NULL; node = O_PTR(node, 0x14)) {
-                if (idx == O_S16(node, 0x1C) || char_fx_slot_derives(O_S16(D_8008AF88[idx], 4), O_S16(node, 0x1C)) != 0) {
+                if (idx == O_S16(node, 0x1C) || char_fx_slot_derives(O_S16(g_char_fx_states[idx], 4), O_S16(node, 0x1C)) != 0) {
                     r = REC(player, track);
                     O_S32(O_PTR(node, 0x10), 0x30) =
                         (s32) seqfx_timer_create(span, (s32) O_PTR(node, 0x10), 0, (s32) (r + 0x30), (s32) (r + 0x20), flag, 0);
@@ -2056,7 +2056,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
                     u8 *att = attachment_find_by_slot((u8 *) obj, 0x46, 0);
                     if (att != NULL) {
                         u8 buf[16];
-                        f32 *src = D_800AAE70;
+                        f32 *src = g_gun_smoke_start_pt;
                         u8 *dst = buf;
                         if (model_node_points_to_world((u8 *) obj, att, 0, &src, &dst, 1) != 0) {
                             gun_muzzle_sparks_spawn((s32) obj, (s32) buf, 0x46, (u8) flag, 1);
@@ -2151,7 +2151,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             break;
         }
         case 13:
-            aim_hud_send_flash((s32) D_800DBFF0);
+            aim_hud_send_flash((s32) g_player_views);
             break;
         case 14: {
             f32 p[3];

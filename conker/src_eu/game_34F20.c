@@ -7,11 +7,11 @@
 /* was func_15007A70 */
 void level_start_game(s16 arg0, s16 arg1, s16 arg2) {
 
-    D_800BE9B4 = 2;
+    g_level_first_frame = 2;
     select_menu_reset();
     g_level_id = g_level_load_id = arg2;
 
-    warp_requests_reset(D_800DD2C0);
+    warp_requests_reset(g_warp_entry_ids);
     cutscene_clear_pending();
     obj_flagged_select_reset();
     level_lights_init(arg0, arg1);
@@ -22,7 +22,7 @@ void level_start_game(s16 arg0, s16 arg1, s16 arg2) {
     rail_state_clear();
     level_music_stop_all();
     D_800BE938 = 1;
-    D_800D18A8 = 0;
+    g_mp_respawning = 0;
     g_level_load_white_fill = 0;
 }
 
@@ -35,10 +35,10 @@ extern s32 D_8003E724;
 extern u8 g_frame_dt_history_idx; /* was D_800BEA39 */
 extern u8 g_frame_dt_history_count; /* was D_800BEA3A */
 extern u8 g_slowmo_divisor; /* was D_800BEE2C */
-extern s32 D_800BEE08;
+extern s32 g_view_count_minus1; /* was D_800BEE08 */
 extern s32 g_save_stat9; /* was D_800BE804 */
-extern u8 D_800E0FC9;
-extern u8 D_800E1001;
+extern u8 g_level_zoom_in_request; /* was D_800E0FC9 */
+extern u8 g_level_start_point_override; /* was D_800E1001 */
 extern s8 D_eu_800E0E30;
 void tlb_remap_game_segment(s32 arg0);
 void heap_free_tags_1_to_4(void);
@@ -138,8 +138,8 @@ void level_load(void) {
     s32 n;
     u8 *obj;
 
-    if (D_800BE9B4 == 0) {
-        D_800BE9B4 = 1;
+    if (g_level_first_frame == 0) {
+        g_level_first_frame = 1;
     }
     heap_free_tags_1_to_4();
     level_load_header((s32)g_level_load_id);
@@ -154,12 +154,12 @@ void level_load(void) {
         break;
     case 0x13:
         snd = 0xEB;
-        if (!(((u8 *)D_800D2E4C)[0x11] & 4)) {
-            snd = ((s8 *)D_800B0DF0)[0x11] + 0xEB;
+        if (!(((u8 *)g_save_progress_bits)[0x11] & 4)) {
+            snd = ((s8 *)g_level_header)[0x11] + 0xEB;
         }
         break;
     default:
-        snd = ((s8 *)D_800B0DF0)[0x11] + 0xEB;
+        snd = ((s8 *)g_level_header)[0x11] + 0xEB;
         break;
     }
     tlb_remap_game_segment(snd);
@@ -168,13 +168,13 @@ void level_load(void) {
     level_set_lod_shifts();
     debris_counts_reset();
     g_particle_emitter_count = 0;
-    D_800E0D50 = 0;
+    g_buddy_marker = 0;
     zap_bolt_table_clear();
     D_8003E724 = 1;
-    sp30 = D_800DD2C0;
+    sp30 = g_warp_entry_ids;
     sp2C = checkpoint_get_restart_index((s32)&sp30);
-    if (D_800E0B94 == 2) {
-        sp30 = D_800E1001;
+    if (g_game_mode == 2) {
+        sp30 = g_level_start_point_override;
     }
     D_800BE9F8 = g_level_id;
     g_level_id = (s32)g_level_load_id;
@@ -190,9 +190,9 @@ void level_load(void) {
     } else {
         framebuffer_fill_color(0, 0, 0);
     }
-    if (D_800BE616 == 0 && !(((u8 *)D_800D2E4C)[0x18] & 1)) {
-        D_800D2456 = 3;
-        D_800D2457 = 3;
+    if (D_800BE616 == 0 && !(((u8 *)g_save_progress_bits)[0x18] & 1)) {
+        g_hud_health_max_pieces = 3;
+        g_hud_health_shown_pieces = 3;
         player_stat_modify(0, 5, 3);
     }
     collision_set_step_size(g_level_id);
@@ -201,7 +201,7 @@ void level_load(void) {
     records_table_reset();
     zones_load(g_level_id);
     level_globals_reset();
-    viewports_init(D_800BEE08, 1);
+    viewports_init(g_view_count_minus1, 1);
     clear_dfc00_table();
     view_zoom_state_reset();
     texture_scroll_clear();
@@ -238,8 +238,8 @@ void level_load(void) {
     records_set_tint_180_60_60();
     level_setup_screen_projection(g_level_id);
     camera_set_screen_ortho(0);
-    for (i = 0; i <= D_80082FA0; i++) {
-        camera_raise_timer((struct108 *)((u8 *)D_800DBFF0 + i * 0x9A0), 1);
+    for (i = 0; i <= g_last_player_index; i++) {
+        camera_raise_timer((struct108 *)((u8 *)g_player_views + i * 0x9A0), 1);
     }
     level_hook_level_2b(g_level_id);
     level_load_ptr_table_3c(g_level_id);
@@ -254,7 +254,7 @@ void level_load(void) {
     player_morph_cache_clear();
     camera_update_dir_vector_thunk(0); /* the asm passes 0 */
     lipsync_reset();
-    D_800BE9E4 = 2;
+    g_frame_ticks = 2;
     glyph_count_reset();
     joint_chain_reset_mask_init();
     level_lights_stub(D_800D2340);
@@ -266,7 +266,7 @@ void level_load(void) {
         player_stat_modify(0, 9, g_save_stat9);
     }
     if (level_is_game_over_level() != 0) {
-        D_800BE800 = sp30;
+        g_save_restart_entry = sp30;
     }
     D_800D2E43 = 1;
     event_list_run_phase(4);
@@ -276,14 +276,14 @@ void level_load(void) {
         level_restart_at_start_point(sp30, sp2C - 1);
     }
     menu_clear_flag_ebc();
-    if (D_800E0FC9 != 0 || g_level_entry_zoom_mode == 2) {
+    if (g_level_zoom_in_request != 0 || g_level_entry_zoom_mode == 2) {
         if (D_800C35EA != 1 && g_level_entry_zoom_mode != 1) {
             n = mp_human_player_count();
             for (i = 0; i < n; i++) {
                 hud_lens_start_zoom_in(i);
             }
         }
-        D_800E0FC9 = 0;
+        g_level_zoom_in_request = 0;
     }
     camera_view_state_init();
     gfx_load_ucode();
@@ -294,8 +294,8 @@ void level_load(void) {
         }
         obj += 0x32C;
     } while (obj != (u8 *)&g_obj_scratch_rec);
-    if (D_800D18A8 != 0 && g_level_id != 0x22) {
-        D_800D18A8 = 0;
+    if (g_mp_respawning != 0 && g_level_id != 0x22) {
+        g_mp_respawning = 0;
         lives_popup_spawn(0xFF, 1);
     }
     game_over_apply_pending();
@@ -308,14 +308,14 @@ void level_reset_globals(void) {
 
     D_800D3668 = 0;
     D_800CBE00 = 0;
-    D_800DDD64 = 0;
+    g_flare_nodes = 0;
 
     for (i = 0; i < 2; i++)
     {
-        D_800DF7C8[i] = 0;
+        g_afterimage_lists[i] = 0;
     }
 
-    D_800D245C = 0;
+    g_hud_health_drop_list = 0;
     g_level_reset_2548 = 0;
 }
 

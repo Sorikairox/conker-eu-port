@@ -1334,7 +1334,7 @@ s32 emit_burst_from_spec_b(s32 *arg0, u8 arg1, s32 arg2) {
 
 void vec3_from_angles_byte(s16, s16, f32, void *);
 void spark_record_spawn(void *, u8, u8);
-extern void (*D_8008B000[])(u8 *);
+extern void (*g_coloured_point_fns[])(u8 *); /* was D_8008B000 */
 typedef struct { f32 v[3]; } V3_2de4;
 typedef struct {
     V3_2de4 v;
@@ -1370,7 +1370,7 @@ void emit_coloured_points(u8 *arg0, u8 arg1, s32 arg2) {
         sp.y = *(f32 *)(arg0 + 0x3C) + *(f32 *)(arg0 + 0x44) * random_float();
         i = *(s8 *)(arg0 + 0x30);
         if (i != 0xFFFFFFFF) { // unsigned compare: "!= -1" gives beq v0,fp (permuter found -1U)
-            D_8008B000[i](sp.c);
+            g_coloured_point_fns[i](sp.c);
         } else {
             sp.c[0] = 0xFF;
             sp.c[1] = 0xFF;
@@ -1382,12 +1382,12 @@ void emit_coloured_points(u8 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-extern u8 D_800A63C0[][3];
+extern u8 g_fire_colours[][3]; /* was D_800A63C0 */
 
 /* was func_1515302C */
 void colour_pick_random_fire(u8 *arg0) {
     u8 i = random_int() % 5U;
-    u8 *e = D_800A63C0[i];
+    u8 *e = g_fire_colours[i];
 
     arg0[3] = random_int() % 101U + 0x9B;
     arg0[0] = e[0];
@@ -2049,14 +2049,14 @@ s32 spark_shower_update(u8 *arg0) {
     if (!(*(u8 *)(arg0 + 0x184) & 1)) {
         *(f32 *)(arg0 + 0x1C) = s;
     }
-    do { t = p[0]; *(s8 *)(arg0 + 0x70) = (s8)(u32)(p[3] - p[4] * t * t); } while (0); // fakematch: same-line do-while(0) (permuter) keeps &D_800BE9A4 in v1 from the start
-    p[0] += D_800BE9A4;
+    do { t = p[0]; *(s8 *)(arg0 + 0x70) = (s8)(u32)(p[3] - p[4] * t * t); } while (0); // fakematch: same-line do-while(0) (permuter) keeps &g_frame_step_f in v1 from the start
+    p[0] += g_frame_step_f;
     if (p[1] < p[0]) {
         return 0;
     }
-    *(f32 *)(arg0 + 0x20) += *(f32 *)(arg0 + 0x50) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x24) += *(f32 *)(arg0 + 0x54) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x58) * D_800BE9A4;
+    *(f32 *)(arg0 + 0x20) += *(f32 *)(arg0 + 0x50) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x24) += *(f32 *)(arg0 + 0x54) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x58) * g_frame_step_f;
     return 1;
 }
 
@@ -2191,13 +2191,13 @@ s32 glow_pulse_update(u8 *arg0) {
     s = sinf(p[3]);
     *(f32 *)(arg0 + 0x18) = *(f32 *)(arg0 + 0x1C) = p[1] * s;
     *(s8 *)(arg0 + 0x70) = (s8)(u32)(((u32)p[2] & 0xFF) * s);
-    p[0] -= D_800BE9A4;
+    p[0] -= g_frame_step_f;
     if (p[0] <= 0.0f) {
         return 0;
     }
-    p[3] += p[4] * D_800BE9A4;
-    *(f32 *)(arg0 + 0x20) += *(f32 *)(arg0 + 0x50) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x24) += *(f32 *)(arg0 + 0x54) * D_800BE9A4;
-    *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x58) * D_800BE9A4;
+    p[3] += p[4] * g_frame_step_f;
+    *(f32 *)(arg0 + 0x20) += *(f32 *)(arg0 + 0x50) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x24) += *(f32 *)(arg0 + 0x54) * g_frame_step_f;
+    *(f32 *)(arg0 + 0x28) += *(f32 *)(arg0 + 0x58) * g_frame_step_f;
     return 1;
 }

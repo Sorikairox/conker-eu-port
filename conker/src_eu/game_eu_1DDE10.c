@@ -26,7 +26,7 @@ s32 spawn_emit_impact_spark(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s3
 /* P153 */
 void hitinfo_from_obj_floor(void *, u8 *);
 s32 obj_get_hit_kind(struct127 *);
-extern f32 D_800AA500[3]; /* (0, -12, 96): offset of the effect from the model node */
+extern f32 g_hit_flash_offset[3]; /* (0, -12, 96): offset of the effect from the model node; was D_800AA500 */
 
 // object_hit_flash_spawn: P153: spawns the hit flash (emit_sparks_in_angle_range parameter block) on obj's model node
 // (obj +0x1D4, +0x180) for the target's class: 4 without a target or for target types 0x53 / 0xA5, else
@@ -61,7 +61,7 @@ s32 object_hit_flash_spawn(u8 *obj, u8 *target) {
         return 0;
     }
     yaw = (*(u16 *) (obj + 0x7A) >> 8) + 0x40;
-    mtx_transform_point_or_origin(D_800AA500, &p.unk8, *(u8 **) (obj + 0x1D4) + 0x180);
+    mtx_transform_point_or_origin(g_hit_flash_offset, &p.unk8, *(u8 **) (obj + 0x1D4) + 0x180);
     p.unk0 = yaw - 0x68;
     p.unk14 = 7.22f;
     p.unk2C = 0xA;
@@ -264,10 +264,10 @@ block_9:
 /* P150 */
 s32 memcpy(s32, f32 *, s32);
 s32 obj_get_hit_kind(struct127 *);
-extern u8 D_800A43C6[];
+extern u8 g_hit_kind_info_mode[]; /* was D_800A43C6 */
 // object_link_effect_spawn: spawns a type 0x13 effect tied to obj (effect_node_create_nodraw, 0x98-byte state copied to +0x28)
 // for the target's class: 4 without a target or for target types 0x53 / 0xA5, else obj_get_hit_kind(target);
-// class 0x63 or a class mode (D_800A43C6[class * 16]) of 2 spawns nothing. The state is {obj, obj[0x3B], zeros,
+// class 0x63 or a class mode (g_hit_kind_info_mode[class * 16]) of 2 spawns nothing. The state is {obj, obj[0x3B], zeros,
 // 0.0f, mode == 1}. life = span, or 300 (not fixed) when span is -1. Returns the effect or 0. The type 0x13
 // effects of obj are first cleared through effect_nodes_broadcast({obj, obj[0x3B]}, 0x13).
 /* was func_151B09BC */
@@ -301,7 +301,7 @@ s32 object_link_effect_spawn(u8 *obj, u8 *target, s16 span, u8 arg3, s32 arg4) {
     if (class == 0x63) {
         return 0;
     }
-    mode = D_800A43C6[class * 16];
+    mode = g_hit_kind_info_mode[class * 16];
     if (mode == 2) {
         return 0;
     }
@@ -338,9 +338,9 @@ typedef struct {
     /* 0x01 */ u8 pad1[3];
     /* 0x04 */ f32 ofs[3];
 } BonePt1138;
-extern BonePt1138 D_800AA50C[]; /* 11 points */
-extern BonePt1138 D_800AA5BC[]; /* the same for character kind 0x36 */
-extern u8 D_800AB6F0[];
+extern BonePt1138 g_char_spark_bone_pts[]; /* 11 points; was D_800AA50C */
+extern BonePt1138 g_char36_spark_bone_pts[]; /* the same for character kind 0x36; was D_800AA5BC */
+extern u8 g_spark_kind_sprites[]; /* was D_800AB6F0 */
 
 typedef struct SparkSlot1138 {
     /* 0x00 */ u8 *rec;    /* the spark (effect3d_spawn_default record) */
@@ -397,12 +397,12 @@ typedef struct {
     /* 0x26 */ u8 pad26[2];
 } SparkMotion1138;
 
-// character_sparks_update: keeps up to 11 sparks attached to bone points (D_800AA50C, D_800AA5BC for character kind
+// character_sparks_update: keeps up to 11 sparks attached to bone points (g_char_spark_bone_pts, g_char36_spark_bone_pts for character kind
 // 0x36) of the target character. Each frame every attached spark is moved to its point (old position kept at
-// +0x40) and its timer counts down by D_800BE9E4; at < 0 it is let go (velocity (pos - old) * D_800BEDC8 in x / z,
-// effect3d_set_handlers(rec, 0x10, 0x1B, 0, 0x10), flag 1 at +0x58). New sparks (sprite D_800AB6F0[kind], life 52..102,
+// +0x40) and its timer counts down by g_frame_ticks; at < 0 it is let go (velocity (pos - old) * D_800BEDC8 in x / z,
+// effect3d_set_handlers(rec, 0x10, 0x1B, 0, 0x10), flag 1 at +0x58). New sparks (sprite g_spark_kind_sprites[kind], life 52..102,
 // timer 20..50) are spawned with effect3d_spawn_default at random free points while accum (+ random 0..0.307 *
-// D_800BE9A4 per frame) is above 1. Without a skeleton (+0x1D4) or with (+0x74 & 0xF) == 0xF all sparks are
+// g_frame_step_f per frame) is above 1. Without a skeleton (+0x1D4) or with (+0x74 & 0xF) == 0xF all sparks are
 // released (character_sparks_release); when the target is gone or changed the object is ended (+0xE = -1).
 /* was func_151B1138 */
 void character_sparks_update(u8 *obj) {
@@ -443,9 +443,9 @@ void character_sparks_update(u8 *obj) {
                     ((s32 *) (rec + 0x40))[1] = ((s32 *) (rec + 0x34))[1];
                     ((s32 *) (rec + 0x40))[2] = ((s32 *) (rec + 0x34))[2];
                     tgt = s->target;
-                    pt = (tgt[4] == 0x36) ? &D_800AA5BC[i] : &D_800AA50C[i];
+                    pt = (tgt[4] == 0x36) ? &g_char36_spark_bone_pts[i] : &g_char_spark_bone_pts[i];
                     mtx_transform_point_or_origin(pt->ofs, slot->rec + 0x34, (void *) (pt->bone * 64 + *(s32 *) (tgt + 0x1D4)));
-                    slot->timer -= D_800BE9E4;
+                    slot->timer -= g_frame_ticks;
                     if (slot->timer < 0) {
                         rec = slot->rec;
                         *(f32 *) (rec + 0x114) = 0.0f;
@@ -469,10 +469,10 @@ void character_sparks_update(u8 *obj) {
                 }
             }
             if (nfree != 0) {
-                s->accum = s->accum + random_float() * 307.0f * 0.001f * D_800BE9A4;
+                s->accum = s->accum + random_float() * 307.0f * 0.001f * g_frame_step_f;
                 if (1.0f < s->accum) {
                     last->next = free; /* the free list becomes a ring */
-                    t.sprite = D_800AB6F0[s->kind];
+                    t.sprite = g_spark_kind_sprites[s->kind];
                     t.flags = 0x1001;
                     t.life = (u32) random_int() % 51 + 52;
                     t.u8w = 0;
@@ -503,7 +503,7 @@ void character_sparks_update(u8 *obj) {
                             last = free;
                             free = free->next;
                         }
-                        pt = &D_800AA50C[free - s->slots];
+                        pt = &g_char_spark_bone_pts[free - s->slots];
                         t.u45 = (u32) random_int() % 101 + 100;
                         t.u44 = (u32) random_int() % 101 + 155;
                         m.u12 = (u32) random_int() % 5 + 4;
@@ -535,15 +535,15 @@ void character_sparks_update(u8 *obj) {
 }
 
 /* P143 */
-extern f32 D_800AA6D0;
-extern f32 D_800AA6D4;
-extern f32 D_800AA6D8;
+extern f32 g_debris_fall_lerp; /* was D_800AA6D0 */
+extern f32 g_debris_fall_debris_scale; /* was D_800AA6D4 */
+extern f32 g_debris_fall_ring_scale; /* was D_800AA6D8 */
 // debris_fall_update: update handler (g_effect3d_update_fns slot 16) of a falling debris sprite. Motion block at +0x110:
 // velocity x/y/z, gravity +0x11C; x / z speeds are multiplied by 0.25 * dt each frame, y gains gravity * dt; the
 // position +0x34 moves by the mean speed, the trail point +0x40 moves with it and then eases back towards the
-// position (factor D_800AA6D0). With floor check (+0x134) a floor probe (collision_floor_probe, from the previous height
+// position (factor g_debris_fall_lerp). With floor check (+0x134) a floor probe (collision_floor_probe, from the previous height
 // minus the half height +0x30) that hits ends the sprite (0) and spawns a splash at the floor + 5: either
-// impact_debris_spawn (scale D_800AA6D4) or the ring impact_splash_ring_spawn (scale D_800AA6D8), of type +0x135, sized by the mean
+// impact_debris_spawn (scale g_debris_fall_debris_scale) or the ring impact_splash_ring_spawn (scale g_debris_fall_ring_scale), of type +0x135, sized by the mean
 // of +0x124 + +0x12C / 2 and +0x128 + +0x130 / 2. Returns 1 while it keeps falling.
 /* was func_151B173C */
 s32 debris_fall_update(u8 *fx) {
@@ -560,13 +560,13 @@ s32 debris_fall_update(u8 *fx) {
     vx0 = mv[0];
     vz0 = mv[2];
     ret = 1;
-    mv[0] = vx0 * (0.25f * D_800BE9A4);
-    mv[2] = vz0 * (0.25f * D_800BE9A4);
-    dx = (mv[0] + vx0) * 0.5f * D_800BE9A4;
+    mv[0] = vx0 * (0.25f * g_frame_step_f);
+    mv[2] = vz0 * (0.25f * g_frame_step_f);
+    dx = (mv[0] + vx0) * 0.5f * g_frame_step_f;
     vy = mv[1];
-    dvy = mv[3] * D_800BE9A4;
-    dy = vy * D_800BE9A4 + dvy * D_800BE9A4 * 0.5f;
-    dz = (mv[2] + vz0) * 0.5f * D_800BE9A4;
+    dvy = mv[3] * g_frame_step_f;
+    dy = vy * g_frame_step_f + dvy * g_frame_step_f * 0.5f;
+    dz = (mv[2] + vz0) * 0.5f * g_frame_step_f;
     mv[1] = vy + dvy;
     *(f32 *)(fx + 0x38) = y0 + dy;
     *(f32 *)(fx + 0x34) += dx;
@@ -577,9 +577,9 @@ s32 debris_fall_update(u8 *fx) {
     x = *(f32 *)(fx + 0x34);
     y = *(f32 *)(fx + 0x38);
     z = *(f32 *)(fx + 0x3C);
-    *(f32 *)(fx + 0x40) = x + (*(f32 *)(fx + 0x40) - x) * D_800AA6D0;
-    *(f32 *)(fx + 0x44) = y + (*(f32 *)(fx + 0x44) - y) * D_800AA6D0;
-    *(f32 *)(fx + 0x48) = z + (*(f32 *)(fx + 0x48) - z) * D_800AA6D0;
+    *(f32 *)(fx + 0x40) = x + (*(f32 *)(fx + 0x40) - x) * g_debris_fall_lerp;
+    *(f32 *)(fx + 0x44) = y + (*(f32 *)(fx + 0x44) - y) * g_debris_fall_lerp;
+    *(f32 *)(fx + 0x48) = z + (*(f32 *)(fx + 0x48) - z) * g_debris_fall_lerp;
     if (fx[0x134] != 0) {
         probe[0] = x;
         probe[1] = y0 - *(f32 *)(fx + 0x30);
@@ -590,10 +590,10 @@ s32 debris_fall_update(u8 *fx) {
             hit[2] = probe[2];
             size = ((mv[5] + mv[7] * 0.5f) + (mv[6] + mv[8] * 0.5f)) * 0.5f;
             if (random_int() & 1) {
-                impact_debris_spawn(fx[0x135], size * D_800AA6D4, fx[0x5C], (s32)(fx + 0x7C), (struct17 *)hit, 100, 0, 1, 0,
+                impact_debris_spawn(fx[0x135], size * g_debris_fall_debris_scale, fx[0x5C], (s32)(fx + 0x7C), (struct17 *)hit, 100, 0, 1, 0,
                               fx[0xC], fx[1]);
             } else {
-                impact_splash_ring_spawn(fx[0x135], size * D_800AA6D8, fx[0x5C], hit, 1, fx[0xC], fx[1]);
+                impact_splash_ring_spawn(fx[0x135], size * g_debris_fall_ring_scale, fx[0x5C], hit, 1, fx[0xC], fx[1]);
             }
             ret = 0;
         }
@@ -617,8 +617,8 @@ s32 debris_fall_alpha_fade(u8 *arg0) {
 
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, f32 *, s32);
-extern s32 D_800DD608;
-extern s32 D_800DD618;
+extern s32 g_view_yaw_sin; /* was D_800DD608 */
+extern s32 g_view_yaw_cos; /* was D_800DD618 */
 
 /* was func_151B1A5C */
 u8 *debris_fall_draw(u8 *arg0, s16 arg1) {
@@ -666,8 +666,8 @@ u8 *debris_fall_draw(u8 *arg0, s16 arg1) {
             memcpy((*(s32 *)((u8 *)temp_v0 + 0x100)) + 0x40, temp_a1, 0x40);
         }
         temp_t0 = arg1 * 4;
-        temp_v1 = temp_t0 + &D_800DD618;
-        temp_a0 = temp_t0 + &D_800DD608;
+        temp_v1 = temp_t0 + &g_view_yaw_cos;
+        temp_a0 = temp_t0 + &g_view_yaw_sin;
         var_f16 = -1.0f;
         var_f14 = ((*temp_v1 * ((*(f32 *)((u8 *)arg0 + 0x40)) - (*(f32 *)((u8 *)arg0 + 0x34)))) - (*temp_a0 * ((*(f32 *)((u8 *)arg0 + 0x48)) - (*(f32 *)((u8 *)arg0 + 0x3C))))) * D_800BEDC8;
         if (var_f14 < 0.0f) {
@@ -720,8 +720,8 @@ s32 sprite_wobble_update(u8 *arg0) {
     f32 s;
     f32 c;
 
-    arg0[0x120] += (s8)arg0[0x122] * D_800BE9E4;
-    arg0[0x121] += (s8)arg0[0x123] * D_800BE9E4;
+    arg0[0x120] += (s8)arg0[0x122] * g_frame_ticks;
+    arg0[0x121] += (s8)arg0[0x123] * g_frame_ticks;
     p = arg0 + 0x110;
     s = angle_byte_cos((u8)(arg0[0x120] - 0x40));
     c = angle_byte_cos((u8)(p[0x11] - 0x40));
@@ -811,9 +811,9 @@ void bone_pair_drip_start(u8 *arg0) {
     }
 }
 
-extern f32 D_800BE9A4;
+extern f32 g_frame_step_f; /* was D_800BE9A4 */
 typedef struct { f32 x, y, z; } V3_20E4;
-extern V3_20E4 D_8008FE70, D_8008FE7C;
+extern V3_20E4 g_bone_drip_pt_a, g_bone_drip_pt_b; /* was D_8008FE70; was D_8008FE7C */
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 s32 particle_spawn_basic(void *, s32, s32, u8, s32);
 void vec3_from_angles_byte(s16, s16, f32, void *);
@@ -864,13 +864,13 @@ void bone_pair_drip_update(u8 *arg0) {
     V3_20E4 a;
 
     p = arg0 + 0x28;
-    *(f32 *)(p + 8) += (697.0f + random_float() * 342.0f) * 0.001f * D_800BE9A4;
+    *(f32 *)(p + 8) += (697.0f + random_float() * 342.0f) * 0.001f * g_frame_step_f;
     if (*(f32 *)(p + 8) > 1.0f) {
         if (*(s32 *)(*(u8 **)p + 0x1D4) != 0) {
-            V3_20E4 c = D_8008FE70;
+            V3_20E4 c = g_bone_drip_pt_a;
             mtx_transform_point_or_origin(&c, &b, *(s32 *)(*(u8 **)p + 0x1D4) + 0x800);
             {
-                V3_20E4 d = D_8008FE7C;
+                V3_20E4 d = g_bone_drip_pt_b;
                 mtx_transform_point_or_origin(&d, &a, *(s32 *)(*(u8 **)p + 0x1D4) + 0x640);
             }
             sp.u51 = 0x29;

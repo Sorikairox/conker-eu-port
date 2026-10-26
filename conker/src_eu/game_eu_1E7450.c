@@ -4,11 +4,11 @@
 
 
 void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
-extern u8 *D_8008CDEC[];
+extern u8 *g_sprite_tex_descs[]; /* was D_8008CDEC */
 f32 sinf(f32);
 f32 cosf(f32);
 
-// spark_sprite_launch: launches one spark sprite (node_spawn_sprite, texture D_8008CDEC[tex]) from (x, y + 1, z): the
+// spark_sprite_launch: launches one spark sprite (node_spawn_sprite, texture g_sprite_tex_descs[tex]) from (x, y + 1, z): the
 // direction is angle + 180 +- angSpread / 2 degrees, the start point is moved dist along it, the horizontal speed is
 // speed +- speedSpread / 2 (speedSpread 0 counts as 1) and the vertical speed rise +- riseSpread / 2 (gravity -160).
 // mode 2 tints it 68 38 10, other modes are white; random byte at +0x2B. `unused` (the caller's -80) is not read.
@@ -73,7 +73,7 @@ void spark_sprite_launch(s32 tex, s32 mode, s16 x, s16 y, s16 z, s32 unused, f32
         green = 0xFF;
         blue = 0xFF;
     }
-    rec.tex = D_8008CDEC[tex];
+    rec.tex = g_sprite_tex_descs[tex];
     rec.u4 = (hi << 16) | (y0 & 0xFFFF);
     rec.uE = 0x100;
     rec.pos[0] = x;
@@ -100,8 +100,8 @@ void spark_sprite_launch(s32 tex, s32 mode, s16 x, s16 y, s16 z, s32 unused, f32
     node_spawn_sprite(&rec, 0, 0, -1, room, owner);
 }
 
-extern f32 D_800AA964;
-extern f32 D_800AA968;
+extern f32 g_spark_sprite_shrink; /* was D_800AA964 */
+extern f32 g_spark_sprite_wobble_scale; /* was D_800AA968 */
 f32 math_cos_u8(u8);
 s32 decal_spawn_at(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -121,19 +121,19 @@ void spark_sprite_update(u8 *arg0) {
 
     temp_a2 = (*(s32 *)((u8 *)arg0 + 0x18));
     if (temp_a2 == 1) {
-        temp_t9 = ((*(u8 *)((u8 *)arg0 + 0x3B)) + (D_800BE9E4 * 4) + (D_800BE9E4 * 2)) & 0xFF;
+        temp_t9 = ((*(u8 *)((u8 *)arg0 + 0x3B)) + (g_frame_ticks * 4) + (g_frame_ticks * 2)) & 0xFF;
         (*(u8 *)((u8 *)arg0 + 0x3B)) = temp_t9;
-        (*(s16 *)((u8 *)arg0 + 0x2A)) = (s16) (s32) ((f32) (*(s16 *)((u8 *)arg0 + 0x2A)) * D_800AA964);
+        (*(s16 *)((u8 *)arg0 + 0x2A)) = (s16) (s32) ((f32) (*(s16 *)((u8 *)arg0 + 0x2A)) * g_spark_sprite_shrink);
         sp50 = temp_a2;
         sp4F = temp_t9;
         sp5C = (f32) (*(s16 *)((u8 *)arg0 + 0x2A));
-        (*(s16 *)((u8 *)arg0 + 0x34)) = (s16) (s32) ((math_sin_u8(temp_t9) + 3.0f) * sp5C * D_800AA968);
-        (*(s16 *)((u8 *)arg0 + 0x36)) = (s16) (s32) ((math_cos_u8(sp4F) + 3.0f) * sp5C * D_800AA968);
+        (*(s16 *)((u8 *)arg0 + 0x34)) = (s16) (s32) ((math_sin_u8(temp_t9) + 3.0f) * sp5C * g_spark_sprite_wobble_scale);
+        (*(s16 *)((u8 *)arg0 + 0x36)) = (s16) (s32) ((math_cos_u8(sp4F) + 3.0f) * sp5C * g_spark_sprite_wobble_scale);
     } else {
         temp_a1 = (*(s16 *)((u8 *)arg0 + 0x34));
         temp_a0 = (s32) (*(s32 *)((u8 *)arg0 + 0x14)) >> 0x10;
         if (temp_a0 != temp_a1) {
-            var_v0 = temp_a1 - (D_800BE9E4 * 4);
+            var_v0 = temp_a1 - (g_frame_ticks * 4);
             if (var_v0 < temp_a0) {
                 var_v0 = temp_a0;
             }
@@ -189,7 +189,7 @@ void spark_sprite_launch(s32, s32, s16, s16, s16, s32, f32, s16, s16, s16, s16, 
 // burst_emitter_finish: emits the object's burst at its anchor (the f32 position at obj+0x10 if any, else the s16
 // position at obj+0x16): obj+0x28 shots with the parameters at obj+0x1C..0x26, then 4 more with the first two
 // widened (x1.5 / x2), all through spark_sprite_launch (types obj+0x14 / 0x15, angle -80, spread 360, life 15). Then counts
-// obj+0x2A down by the frame step D_800BE9E4 and frees the object when it goes negative (node_destroy).
+// obj+0x2A down by the frame step g_frame_ticks and frees the object when it goes negative (node_destroy).
 /* was func_151BA260 */
 void spark_sprite_burst_update(u8 *obj) {
     f32 *anchor = *(f32 **) (obj + 0x10);
@@ -218,7 +218,7 @@ void spark_sprite_burst_update(u8 *obj) {
                       *(s16 *) (obj + 0x1E) * 2, *(s16 *) (obj + 0x20), *(s16 *) (obj + 0x22), 0xF,
                       *(s16 *) (obj + 0x24), *(s16 *) (obj + 0x26), obj[0xC], obj[1]);
     }
-    t = *(s16 *) (obj + 0x2A) - D_800BE9E4;
+    t = *(s16 *) (obj + 0x2A) - g_frame_ticks;
     if (t < 0) {
         node_destroy((struct102 *) obj);
     } else {

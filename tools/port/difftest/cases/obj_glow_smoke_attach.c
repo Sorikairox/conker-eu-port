@@ -18,8 +18,8 @@ typedef struct {
     u8 rgba[4];     /* 0x10 */
     f32 u14;        /* 0x14 */
     f32 u18;        /* 0x18 */
-    f32 pos[3];     /* 0x1C D_800A5860 */
-    f32 pos2[3];    /* 0x28 D_800A5860 */
+    f32 pos[3];     /* 0x1C g_vec3_zero */
+    f32 pos2[3];    /* 0x28 g_vec3_zero */
     f32 scale[3];   /* 0x34 */
     f32 u40;        /* 0x40 */
     u8 u44;         /* 0x44 */
@@ -131,8 +131,8 @@ void obj_glow_smoke_attach(u8 *obj, u8 arg1, s32 arg2) {
     g.rgba[1] = 0xFF;
     g.rgba[2] = 0xFF;
     g.rgba[3] = 0xFF;
-    *(Vec175C *) g.pos = *(Vec175C *) D_800A5860;
-    *(Vec175C *) g.pos2 = *(Vec175C *) D_800A5860;
+    *(Vec175C *) g.pos = *(Vec175C *) g_vec3_zero;
+    *(Vec175C *) g.pos2 = *(Vec175C *) g_vec3_zero;
     g.scale[0] = 1.0f;
     g.scale[1] = 1.0f;
     g.scale[2] = 1.0f;

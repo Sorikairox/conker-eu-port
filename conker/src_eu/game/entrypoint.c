@@ -18,7 +18,7 @@ extern u8 D_800BEECB;
 extern s16 g_gfx_tasks_pending; /* was D_800BEEC8 */
 extern s32 D_800BEE24;
 extern s32 D_800BEE20;
-extern s32 D_800BEE08;
+extern s32 g_view_count_minus1; /* was D_800BEE08 */
 void texture_build_size_table(void);
 void audio_system_init(void);
 void level_build_flag_bitmask(void);
@@ -36,7 +36,7 @@ void save_block_realloc_random(void);
 // game_main: the game thread's entry. Initialises the subsystems and the message queue, then loops forever: frame
 // states 1 / 5 run menu_init, then (from 2) the frame update, the 0x81280783 hook in mode 2 and level_start_game
 // with the low halves of D_800BEE24 / D_800BEE20 / g_level_load_id, then (from 3) level_load and the state goes back
-// to 0; every pass ends with sched_send_retrace_msg, D_800BEE08 = 0 and game_main_loop.
+// to 0; every pass ends with sched_send_retrace_msg, g_view_count_minus1 = 0 and game_main_loop.
 /* was func_15007830 */
 void game_thread_main(void) {
     game_bss_clear();
@@ -72,7 +72,7 @@ void game_thread_main(void) {
                 /* fallthrough */
             case 2:
                 level_lights_clear();
-                if (D_800E0B94 == 2) {
+                if (g_game_mode == 2) {
                     random_seed(0x81280783);
                 }
                 /* g_level_load_id is declared `u16 *` in variables.h; the code reads the low half of the word */
@@ -84,7 +84,7 @@ void game_thread_main(void) {
                 break;
         }
         sched_send_retrace_msg();
-        D_800BEE08 = 0;
+        g_view_count_minus1 = 0;
         game_main_loop();
     }
 }
@@ -122,7 +122,7 @@ void game_thread_main(void) {
 //                 func_151E50C8();
 //             case 1:
 //                 level_lights_clear();
-//                 if (2 == D_800E0B94) {
+//                 if (2 == g_game_mode) {
 //                     random_seed(0x81280783);
 //                 }
 //                 level_start_game(D_800BEA04[1], g_frame_phase_accum[1], g_level_load_id[1]);

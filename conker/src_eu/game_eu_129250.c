@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-/* One star of the D_800DC2B0 field (8000 of them): the position is three halves of f32s (the upper 16 bits). */
+/* One star of the g_sky_asset field (8000 of them): the position is three halves of f32s (the upper 16 bits). */
 typedef struct {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
@@ -14,7 +14,7 @@ typedef struct {
 
 #define STAR_COUNT 8000
 
-/* Camera record (D_800BE628, 0x180 bytes each) fields read here. */
+/* Camera record (g_player_cams, 0x180 bytes each) fields read here. */
 #define STAR_CAM_F(cam, off) (*(f32 *) ((u8 *) (cam) + (off)))
 #define STAR_CAM_WIDTH 0x04
 #define STAR_CAM_HEIGHT 0x08
@@ -63,9 +63,9 @@ static f32 star_half_to_f32(s16 h) {
 }
 
 /*
- * star_field_draw: draws the star field (Rare hand asm). Each of the STAR_COUNT points of D_800DC2B0 is transformed
+ * star_field_draw: draws the star field (Rare hand asm). Each of the STAR_COUNT points of g_sky_asset is transformed
  * by the view rotation mtx (no translation; w = the third column) and, when w > 203 and the projection lands
- * inside the current player's viewport (D_800BE628[g_cur_view_player]: scale +0xC / +0x10, origin +0x2C (+ scale x) /
+ * inside the current player's viewport (g_player_cams[g_cur_view_player]: scale +0xC / +0x10, origin +0x2C (+ scale x) /
  * +0x24 (+ scale y, y grows down), size +4 / +8), splatted as 4 one-pixel fill rectangles around the point with
  * bilinear weights: prim colour (tint | alpha * weight, rounded) then G_FILLRECT, 8 commands per star. The list is
  * padded to 16 bytes before and after with zero commands. Returns the new list end. Only caller camera_view_clear_draw.
@@ -81,9 +81,9 @@ Gfx *star_field_draw(Gfx *gdl, f32 (*mtx)[4]) {
     u32 tint;
     Gfx *g;
 
-    star = (StarPoint *) D_800DC2B0;
+    star = (StarPoint *) g_sky_asset;
     end = star + STAR_COUNT;
-    cam = (u8 *) D_800BE628 + g_cur_view_player * 0x180;
+    cam = (u8 *) g_player_cams + g_cur_view_player * 0x180;
     scaleX = STAR_CAM_F(cam, STAR_CAM_SCALE_X);
     scaleY = STAR_CAM_F(cam, STAR_CAM_SCALE_Y);
     width = STAR_CAM_F(cam, STAR_CAM_WIDTH);

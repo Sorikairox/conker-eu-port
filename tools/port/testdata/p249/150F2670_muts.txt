@@ -2,8 +2,8 @@
 s/x2 = obj->x_position \* obj->x_position;/x2 = obj->x_position * obj->y_position;/ % far
 s/z2 = obj->z_position \* obj->z_position;/z2 = obj->z_position;/ % farz
 s/if (\*timer != 0) {/if (*timer > 1) {/ % far coolend
-s/if (D_800BE9E4 < \*timer) {/if (D_800BE9E4 > *timer) {/ % coolend cool
-s/\*timer -= D_800BE9E4;/*timer -= 1;/ % cool
+s/if (g_frame_ticks < \*timer) {/if (g_frame_ticks > *timer) {/ % coolend cool
+s/\*timer -= g_frame_ticks;/*timer -= 1;/ % cool
 s/            \*timer = 0;/            *timer = 1;/ % coolend
 s/        return;/        ;/ % cool
 s/x2 \* x2 + z2 \* z2 > 6760000.0f/x2 * x2 + z2 * z2 > 6000000.0f/ % near

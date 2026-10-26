@@ -359,21 +359,21 @@ int __wrap_rzip_inflate(int src, int dst, unsigned work) {
     if ((unsigned)src < 0x10000000u || (unsigned)dst < 0x10000000u) { /* not game memory: report, don't decode */
         static int nbad;
         if (nbad++ < 4) {
-            extern signed char D_800BC860[]; extern unsigned D_800B1268[];
+            extern signed char g_texture_cache_ages[]; extern unsigned g_texture_cache_data[];
             unsigned k, nf = 0;
             port_log("[infcheck] bad pointers: src %08X dst %08X work %08X; texture cache entries with flag 0x40:\n",
                      (unsigned)src, (unsigned)dst, work);
             for (k = 0; k < 0x1E54; k++) {
-                int age = (signed char)vbe_ld8(&D_800BC860[k]);
+                int age = (signed char)vbe_ld8(&g_texture_cache_ages[k]);
                 if (age & 0x40 && nf++ < 12)
-                    port_log("[infcheck]   id 0x%X age %02X slot %08X\n", k, age & 0xFF, D_800B1268[k]);
+                    port_log("[infcheck]   id 0x%X age %02X slot %08X\n", k, age & 0xFF, g_texture_cache_data[k]);
             }
             port_log("[infcheck]   %u entries\n", nf);
-            { extern int D_800DA378, D_800DA37C; extern unsigned D_800B1268[];
-              port_log("[infcheck]   range D_800DA378 %d D_800DA37C %d; D_800BC860 at %p, D_800B1268 at %p\n", D_800DA378, D_800DA37C,
-                       (void *)D_800BC860, (void *)D_800B1268);
-              for (k = 0; k < 0x200000; k++) if (D_800B1268[k] == (unsigned)dst) {
-                  port_log("[infcheck]   slot index %u (age byte %02X)\n", k, vbe_ld8(&D_800BC860[k])); break; } }
+            { extern int g_texture_cache_dirty_lo, g_texture_cache_dirty_hi; extern unsigned g_texture_cache_data[];
+              port_log("[infcheck]   range D_800DA378 %d D_800DA37C %d; D_800BC860 at %p, D_800B1268 at %p\n", g_texture_cache_dirty_lo, g_texture_cache_dirty_hi,
+                       (void *)g_texture_cache_ages, (void *)g_texture_cache_data);
+              for (k = 0; k < 0x200000; k++) if (g_texture_cache_data[k] == (unsigned)dst) {
+                  port_log("[infcheck]   slot index %u (age byte %02X)\n", k, vbe_ld8(&g_texture_cache_ages[k])); break; } }
             port_js_stack(1, 6);
         }
         return __real_rzip_inflate(src, dst, work);
@@ -402,7 +402,7 @@ int __wrap_rzip_inflate(int src, int dst, unsigned work) {
 }
 
 /* P37 (diagnostic, ?infcheck=1): texture ids outside the cache (>= 0x1E54). texture_cache_lookup stores the id in the dirty
- * range D_800DA378 / D_800DA37C before its range check, and texture_cache_age_tick then walks past the end of its tables. */
+ * range g_texture_cache_dirty_lo / g_texture_cache_dirty_hi before its range check, and texture_cache_age_tick then walks past the end of its tables. */
 int __real_texture_cache_lookup(int id, int *outSize, int age, int addRef);
 int __wrap_texture_cache_lookup(int id, int *outSize, int age, int addRef) {
     static int on = -1, n;
@@ -423,8 +423,8 @@ void __wrap_level_load_models(int level) {
     if (on > 1) port_log("[infcheck] level loader level_load_models(0x%X) ends\n", level);
     if (on && level == 0x21) { /* texture 0xED0 through the game's own cache once the level is loaded (slots are -1 now);
                                 * the rzip_inflate wrapper checks the C inflater's output against the 768-byte header */
-        extern unsigned D_800B1268[];
-        int sz = 0, had = D_800B1268[0xED0] != 0xFFFFFFFFu, p = __wrap_texture_cache_lookup(0xED0, &sz, 3, 0);
+        extern unsigned g_texture_cache_data[];
+        int sz = 0, had = g_texture_cache_data[0xED0] != 0xFFFFFFFFu, p = __wrap_texture_cache_lookup(0xED0, &sz, 3, 0);
         port_log("[infcheck] texture 0xED0 via texture_cache_lookup: %s, data %08X size %d\n", had ? "already cached" : "loaded", p, sz);
     }
 }

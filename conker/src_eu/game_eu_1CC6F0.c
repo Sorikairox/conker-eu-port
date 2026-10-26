@@ -3,7 +3,7 @@
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
 void *memcpy(void *, const void *, s32);
-extern u8 D_800A5860[];
+extern u8 g_vec3_zero[]; /* was D_800A5860 */
 
 
 /* was func_1519EEE0 */
@@ -29,7 +29,7 @@ void seqfx_timer_update(struct102 *arg0) {
 
     if (*(s32 *)((u8 *)arg0 + 0x10) & 1) {
         var_v0 = 0;
-        *(s16 *)((u8 *)arg0 + 0x20) -= D_800BE9E4;
+        *(s16 *)((u8 *)arg0 + 0x20) -= g_frame_ticks;
         if (*(s16 *)((u8 *)arg0 + 0x20) < 0) {
             var_v0 = 1;
         }
@@ -62,11 +62,11 @@ typedef struct {
     f32 x34;
     f32 x38;
 } Sp_1519EFE8;
-extern f32 D_800A90A0;
-extern f32 D_800A90A4;
-extern f32 D_800A90A8;
-extern f32 D_800A90AC;
-extern f32 D_800A90B0;
+extern f32 g_seqfx_burst_k_90a0; /* was D_800A90A0 */
+extern f32 g_seqfx_burst_k_90a4; /* was D_800A90A4 */
+extern f32 g_seqfx_burst_k_90a8; /* was D_800A90A8 */
+extern f32 g_seqfx_burst_k_90ac; /* was D_800A90AC */
+extern f32 g_seqfx_burst_k_90b0; /* was D_800A90B0 */
 
 /* was func_1519EFE8 */
 void seqfx_burst_spawn(V3_1519EFE8 *arg0, u16 arg1, f32 arg2, u8 arg3, s32 arg4) {
@@ -86,11 +86,11 @@ void seqfx_burst_spawn(V3_1519EFE8 *arg0, u16 arg1, f32 arg2, u8 arg3, s32 arg4)
     s.x2C = 0x32;
     s.x2E = 0x14;
     f = arg2;
-    s.x24 = D_800A90A0;
-    s.x28 = D_800A90A4;
-    s.x30 = D_800A90A8;
-    s.x34 = D_800A90AC;
-    s.x38 = D_800A90B0;
+    s.x24 = g_seqfx_burst_k_90a0;
+    s.x28 = g_seqfx_burst_k_90a4;
+    s.x30 = g_seqfx_burst_k_90a8;
+    s.x34 = g_seqfx_burst_k_90ac;
+    s.x38 = g_seqfx_burst_k_90b0;
     i = arg1;
     emit_textured_burst(&s, &i, &f, 1, 0.0f, 0, arg3, arg4);
 }
@@ -148,7 +148,7 @@ void seqfx_track_effect_spawn(u8 *arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4) {
     s32 temp_v0_2;
     u8 *temp_v0;
 
-    temp_v0 = ((u8 *)&D_800A5860);
+    temp_v0 = ((u8 *)&g_vec3_zero);
     sp.u38 = arg0;
     sp.u3C = 1.0f;
     sp.u40 = 1.0f;

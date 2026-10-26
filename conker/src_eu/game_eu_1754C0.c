@@ -5,9 +5,9 @@
 void fxrec_free_lights(u8 *arg0);
 
 
-extern s32 (*D_8008A5A0[])(u8 *);
-extern s32 (*D_8008A5DC[])(u8 *);
-extern s32 (*D_8008A624[])(u8 *);
+extern s32 (*g_fxrec_step_fns[])(u8 *); /* was D_8008A5A0 */
+extern s32 (*g_fxrec_emit_fns[])(u8 *); /* was D_8008A5DC */
+extern s32 (*g_fxrec_update_fns[])(u8 *); /* was D_8008A624 */
 /* was func_15147CB0 */
 void fxrec_update(u8 *arg0) {
     s32 pad; // fakematch: moves the byte spill slot
@@ -15,7 +15,7 @@ void fxrec_update(u8 *arg0) {
     s8 w;
 
     if (*(u16 *)(arg0 + 0x1E) & 1) {
-        *(s16 *)(arg0 + 0x1C) -= D_800BE9E4;
+        *(s16 *)(arg0 + 0x1C) -= g_frame_ticks;
         if (*(s16 *)(arg0 + 0x1C) < 0) {
             done = 1;
         }
@@ -25,7 +25,7 @@ void fxrec_update(u8 *arg0) {
         return;
     }
     if (arg0[0x2F] != 0 && !done) {
-        if (!D_8008A5A0[arg0[0x2F]](arg0)) {
+        if (!g_fxrec_step_fns[arg0[0x2F]](arg0)) {
             done = 1;
         }
     }
@@ -34,7 +34,7 @@ void fxrec_update(u8 *arg0) {
         return;
     }
     if (arg0[0x30] != 0 && !done) {
-        if (!D_8008A5DC[arg0[0x30]](arg0)) {
+        if (!g_fxrec_emit_fns[arg0[0x30]](arg0)) {
             done = 1;
         }
     }
@@ -45,7 +45,7 @@ void fxrec_update(u8 *arg0) {
             return;
         }
         if (w != -1 && !done) {
-            if (!D_8008A624[w](arg0)) {
+            if (!g_fxrec_update_fns[w](arg0)) {
                 done = 1;
             }
         }
@@ -78,7 +78,7 @@ void fxrec_die_free(void *arg0) {
 void fxrec_free_lights(u8 *arg0) {
     s32 i;
 
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= g_last_player_index; i++) {
         if (((s32 *)(arg0 + 0x3C))[i]) {
             heap_set_block_tag(((s32 *)(arg0 + 0x3C))[i], 4);
         }
@@ -88,7 +88,7 @@ void fxrec_free_lights(u8 *arg0) {
     }
 }
 
-// record_free_dispatch: calls the record kind's (+0x20, 0..19, else 0) free handler D_8008A690 with the record.
+// record_free_dispatch: calls the record kind's (+0x20, 0..19, else 0) free handler g_fxrec_free_fns with the record.
 /* was func_15147F50 */
 void fxrec_dispatch_free(u8 *arg0) {
     s32 idx = *(s32 *)(arg0 + 0x20);
@@ -100,10 +100,10 @@ void fxrec_dispatch_free(u8 *arg0) {
     }
     /* P173: the handlers take the record (the asm keeps a0 = arg0 at the jalr; browser P171: fxrec_die_retire freed
      * garbage at rec + 0x84 when it got no argument) */
-    ((void (*)(u8 *)) D_8008A690[idx])(arg0);
+    ((void (*)(u8 *)) g_fxrec_free_fns[idx])(arg0);
 }
 
-// record_dispatch_b: calls the record kind's (+0x20, 0..19, else 0) D_8008A6E0 handler with the record.
+// record_dispatch_b: calls the record kind's (+0x20, 0..19, else 0) g_fxrec_kind_fns_b handler with the record.
 /* was func_15147FA0 */
 void fxrec_dispatch_b(u8 *arg0) {
     s32 idx = *(s32 *)(arg0 + 0x20);
@@ -115,7 +115,7 @@ void fxrec_dispatch_b(u8 *arg0) {
     }
     /* P173: the handlers take the record (the asm keeps a0 = arg0 at the jalr; browser P171: fxrec_die_retire freed
      * garbage at rec + 0x84 when it got no argument) */
-    ((void (*)(u8 *)) D_8008A6E0[idx])(arg0);
+    ((void (*)(u8 *)) g_fxrec_kind_fns_b[idx])(arg0);
 }
 
 void * light_alloc_lookat_buf(void);
@@ -170,12 +170,12 @@ void * fxrec_spawn(void * arg0_p, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 ar
     if (arg6 != 0) {
         var_s1_2 = 0;
         var_s0_2 = temp_v0;
-        if (D_80082FA0 >= 0) {
+        if (g_last_player_index >= 0) {
             do {
                 (*(s32 *)((u8 *)var_s0_2 + 0x3C)) = light_alloc_light_buf(arg6);
                 var_s1_2 += 1;
                 var_s0_2 += 4;
-            } while (D_80082FA0 >= var_s1_2);
+            } while (g_last_player_index >= var_s1_2);
         }
         (*(s32 *)((u8 *)temp_v0 + 0x4C)) = light_alloc_lookat_buf();
     }
@@ -185,7 +185,7 @@ void * fxrec_spawn(void * arg0_p, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 ar
     bzero(temp_v0 + 0x84, 0x10);
     return temp_v0;
 }
-extern s32 (*D_8008A644[])(u8 *, s32, s16);
+extern s32 (*g_fxrec_draw_fns[])(u8 *, s32, s16); /* was D_8008A644 */
 s32 model_part_emit_lights(s32, u8 *, s32, s32, s32, s16, u8 *, s32, s32);
 
 /* was func_151481BC */
@@ -197,14 +197,14 @@ s32 fxrec_draw(s32 arg0, u8 *arg1, s16 arg2) {
         return arg0;
     }
     if (arg1[0x31] != 0) {
-        return D_8008A644[arg1[0x31]](arg1, arg0, arg2);
+        return g_fxrec_draw_fns[arg1[0x31]](arg1, arg0, arg2);
     }
     return arg0;
 }
 
 /* was func_1514828C */
 void fxrec_handle_msg(u8 *arg0, s32 arg1, u8 arg2) {
-    void (*func)(void *, s32, u8) = D_8008A730[*(s32 *)(arg0 + 0x20)];
+    void (*func)(void *, s32, u8) = g_fxrec_msg_fns[*(s32 *)(arg0 + 0x20)];
 
     if (func != NULL) {
         func(arg0, arg1, arg2);
@@ -213,5 +213,5 @@ void fxrec_handle_msg(u8 *arg0, s32 arg1, u8 arg2) {
 
 /* was func_151482D4 */
 void fxrec_broadcast(s32 arg0, u8 arg1) {
-    node_broadcast_types(D_800A5B40, 2, arg0, arg1);
+    node_broadcast_types(g_fxrec_bcast_types, 2, arg0, arg1);
 }

@@ -10,22 +10,22 @@ s/if (n < 0x1D) {/if (n < 0x1C) {/
 s/idx \* 0x30 + 4\] = 0x9C;/idx * 0x30 + 5] = 0x9C;/
 s/\] = 0x9D;/] = 0x9E;/
 s/obj_remove(rec, 0);/obj_remove(rec, 1);/
-s/D_800D18A8 = 1;/D_800D18A8 = 2;/
+s/g_mp_respawning = 1;/g_mp_respawning = 2;/
 s/setup_entry_spawn((u8 \*) D_800D20FC + idx \* 0x30, idx, 0, 0, 0);/setup_entry_spawn((u8 *) D_800D20FC + idx * 0x30, idx, 0, 0, 1);/
 s/\[0x1B0\] = keep1B0;/[0x1B0] = keep1AF;/
 s/obj\[0x328\] = keep328;/obj[0x329] = keep328;/
-s/if (idx <= D_80082FA0) {/if (idx < D_80082FA0) {/
-s/idx \* 0x9A0), idx, D_800BEE12, team);/idx * 0x9A0), idx, D_800BEE12, 0);/
+s/if (idx <= g_last_player_index) {/if (idx < g_last_player_index) {/
+s/idx \* 0x9A0), idx, g_level_start_mode, team);/idx * 0x9A0), idx, g_level_start_mode, 0);/
 s/hud_lens_reset(idx);/hud_lens_reset(0);/
 s/screen_fade_start(0, 0, 0, 0, 1, idx);/screen_fade_start(0, 0, 0, 0, 0, idx);/
 s/screen_fade_start(0, 0, 0, 0x1E, 0, idx);/screen_fade_start(0, 0, 0, 0x1F, 0, idx);/
 s/obj_place_at_start(obj, team, 0);/obj_place_at_start(obj, 0, 0);/
-s/D_800D18A8 = 0;/D_800D18A8 = 1;/
+s/g_mp_respawning = 0;/g_mp_respawning = 1;/
 s/\[0x122\] = 0;/[0x123] = 0;/
 s/+ 0x124) = 0;/+ 0x126) = 0;/
 s/+ 0x1AA) = keep1AA;/+ 0x1AA) = 0;/
 s/|= 0x100;/|= 0x200;/
-s/obj\[0x1CA\] = D_8008726C;/obj[0x1CB] = D_8008726C;/
+s/obj\[0x1CA\] = g_player_start_health;/obj[0x1CB] = g_player_start_health;/
 s/\[0x75\] = 0;/[0x76] = 0;/
 s/obj\[0x210\] = 0xFF;/obj[0x210] = 0xFE;/
 s/obj\[0x232\] = 1;/obj[0x232] = 0;/

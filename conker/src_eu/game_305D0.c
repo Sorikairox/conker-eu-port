@@ -7,11 +7,11 @@ extern s32 *g_level_model_colour_groups; /* was D_800B1240 */
 extern u8 *g_level_model_colour_counts; /* was D_800B1244 */
 u8 *allocate_memory(s32, s32, s32, s32);
 extern u8 D_800B1248;
-extern s32 D_800B1214[];
+extern s32 g_level_dl_tinted_extra[]; /* was D_800B1214 */
 extern s32 g_level_part_vtx_base_1[]; /* was D_800B1224 */
 extern s32 g_level_part_vtx_count_1[]; /* was D_800B1254 */
 extern s32 g_level_model_entries; /* was D_800B1260 */
-extern s32 D_800B1220[];
+extern s32 g_level_part_vtx[]; /* was D_800B1220 */
 extern s32 D_800B1250[];
 extern s32 g_level_part_hdr8[]; /* was D_800B1230 */
 extern s32 *D_80082EB0[];
@@ -53,9 +53,9 @@ void level_model_relocate_table(s32 idx, s32 base, s32 table) {
 }
 /* Level model loader: asset (2, 4, level) is a list of count {model header, size} pairs. Each header's
  * offsets +0 (display list), +8, +0x10 are made absolute, its {ptr, ptr, x} table at +0x20 is relocated by
- * level_model_relocate_table (g_level_model_colour_groups / g_level_model_colour_counts). Parts 0..3 also set g_level_part_dls[i] (level DL), D_800B1220[i]
+ * level_model_relocate_table (g_level_model_colour_groups / g_level_model_colour_counts). Parts 0..3 also set g_level_part_dls[i] (level DL), g_level_part_vtx[i]
  * (vertex base = header + 0x28), D_800B1250[i] (vertex count = (DL - vertices) / 16), g_level_part_hdr8[i] (+8);
- * part 0 calls collision_set_tri_flags_table(+0x10). Then the level's texture preload list D_80082EB0[D_800B0DF0->0x4B]
+ * part 0 calls collision_set_tri_flags_table(+0x10). Then the level's texture preload list D_80082EB0[g_level_header->0x4B]
  * (age 0x3E). Allocations: count * 4 bytes (g_level_model_colour_groups) and count bytes (g_level_model_colour_counts), both
  * allocate_memory(n, 1, 0, 0); both are cleared with bzero(p, count) (count bytes, also for the word array). */
 /* was func_150031EC */
@@ -77,7 +77,7 @@ void level_load_models(s32 level) {
     }
     ent = (s32 *)asset_load_with_subfiles(&found, 0, &count, 2, 4, level);
     g_level_model_entries = (s32)ent;
-    p = D_800B1214;
+    p = g_level_dl_tinted_extra;
     q = g_level_part_vtx_base_1;
     r = g_level_part_vtx_count_1;
     do {
@@ -108,26 +108,26 @@ void level_load_models(s32 level) {
             }
             level_model_relocate_table(i, (s32)hdr, *(s32 *)(hdr + 0x20));
             if (i < 4) {
-                D_800B1220[i] = (s32)(hdr + 0x28);
+                g_level_part_vtx[i] = (s32)(hdr + 0x28);
                 g_level_part_dls[i] = *(s32 *)(hdr + 0x0);
                 D_800B1250[i] = (u32)(*(s32 *)(hdr + 0x0) - (s32)(hdr + 0x28)) >> 4;
                 g_level_part_hdr8[i] = *(s32 *)(hdr + 0x8);
                 if (i == 0) {
                     collision_set_tri_flags_table(*(s32 *)(hdr + 0x10));
                 }
-                gfx_dl_relocate_segments((Gfx *)g_level_part_dls[i], D_800B1220[i] + 0xFF000000, (s32)hdr);
+                gfx_dl_relocate_segments((Gfx *)g_level_part_dls[i], g_level_part_vtx[i] + 0xFF000000, (s32)hdr);
                 texture_resolve_dl_ids((Gfx *)g_level_part_dls[i], 0, 1, 0x3F, NULL);
             } else {
                 gfx_dl_relocate_segments((Gfx *)*(s32 *)(hdr + 0x0), 0, (s32)hdr);
             }
         }
     }
-    if (((u8 *)D_800B0DF0)[0x4B] != 0) {
-        id = D_80082EB0[((u8 *)D_800B0DF0)[0x4B]][0];
+    if (((u8 *)g_level_header)[0x4B] != 0) {
+        id = D_80082EB0[((u8 *)g_level_header)[0x4B]][0];
         off = 4;
         while (id != 0) {
             texture_cache_lookup(id, &size, 0x3E, 0);
-            id = *(s32 *)((u8 *)D_80082EB0[((u8 *)D_800B0DF0)[0x4B]] + off);
+            id = *(s32 *)((u8 *)D_80082EB0[((u8 *)g_level_header)[0x4B]] + off);
             off += 4;
         }
     }
@@ -154,7 +154,7 @@ s32 texture_table_reset(void) {
 u8 *allocate_memory(s32, s32, s32, s32);
 void heap_free(s32);
 extern u8 D_1A3B40[];
-extern u16 D_800920D0[];
+extern u16 g_texture_rom_sizes[]; /* was D_800920D0 */
 extern s16 D_800B8BB8[];
 
 /* build a table of 16-bit words read from ROM: for each entry, DMA 16 bytes at the (even-aligned) ROM
@@ -164,7 +164,7 @@ extern s16 D_800B8BB8[];
 void texture_build_size_table(void) {
     u8 *buf = allocate_memory(0x10, 1, 2, 0);
     u32 rom = (u32)D_1A3B40;
-    u16 *len = D_800920D0;
+    u16 *len = g_texture_rom_sizes;
     s16 *out = D_800B8BB8;
     s32 odd;
 
@@ -178,7 +178,7 @@ void texture_build_size_table(void) {
         rom_dma_read(rom, buf, 0x10, 1);
         *out++ = (buf[odd + 2] << 8) | buf[odd + 3];
         rom += *len++ + odd;
-    } while (out != (s16 *)D_800BC860);
+    } while (out != (s16 *)g_texture_cache_ages);
     heap_free((s32)buf);
 }
 // NON-MATCHING: something along these lines
@@ -252,7 +252,7 @@ void collision_build_level_tris(s32 arg0) {
     var_s0 = 0;
     if (g_world_obj_count > 0) {
         do {
-            temp_v0 = &D_800DBEF4->pad[var_s0];
+            temp_v0 = &g_world_objs->pad[var_s0];
             if (((*(u8 *)((u8 *)temp_v0 + 0x4F)) & 0x60) != 0x20) {
                 collision_count_dl_tris((*(s32 *)((u8 *)temp_v0 + 0x1C)));
             }
@@ -267,15 +267,15 @@ void collision_build_level_tris(s32 arg0) {
     var_s0_2 = 0;
     if (g_world_obj_count > 0) {
         do {
-            temp_v0_2 = &D_800DBEF4->pad[var_s0_2];
+            temp_v0_2 = &g_world_objs->pad[var_s0_2];
             if (((*(u8 *)((u8 *)temp_v0_2 + 0x4F)) & 0x60) != 0x20) {
                 temp_s3 = D_800DBE38;
                 (*(s16 *)((u8 *)temp_v0_2 + 0x58)) = (s16) temp_s3;
-                collision_scan_level_dl((*(s32 *)((u8 *)(&D_800DBEF4->pad[var_s0_2]) + 0x1C)));
-                (*(s16 *)((u8 *)(&D_800DBEF4->pad[var_s0_2]) + 0x56)) = (s16) (D_800DBE38 - temp_s3);
+                collision_scan_level_dl((*(s32 *)((u8 *)(&g_world_objs->pad[var_s0_2]) + 0x1C)));
+                (*(s16 *)((u8 *)(&g_world_objs->pad[var_s0_2]) + 0x56)) = (s16) (D_800DBE38 - temp_s3);
             } else {
                 (*(s16 *)((u8 *)temp_v0_2 + 0x58)) = 0;
-                (*(s16 *)((u8 *)(&D_800DBEF4->pad[var_s0_2]) + 0x56)) = 0;
+                (*(s16 *)((u8 *)(&g_world_objs->pad[var_s0_2]) + 0x56)) = 0;
             }
             var_s1 += 1;
             var_s0_2 += 0xA0;
@@ -315,7 +315,7 @@ void collision_build_level_tris(s32 arg0) {
 //
 //     if (D_800DBEF0 > 0) {
 //         for (i = 0; i < D_800DBEF0; i++) {
-//             temp_v0_2 = &D_800DBEF4[i];
+//             temp_v0_2 = &g_world_objs[i];
 //             if (((u8)temp_v0_2->unk4F & 0x60) != 32) {
 //                 collision_count_dl_tris(temp_v0_2->unk1C);
 //             }
@@ -327,7 +327,7 @@ void collision_build_level_tris(s32 arg0) {
 //     D_800D2C2C = 0;
 //
 //     for (i = 0; i < D_800DBEF0; i++) {
-//         temp_v0_2 = &D_800DBEF4[i];
+//         temp_v0_2 = &g_world_objs[i];
 //         if (((u8)temp_v0_2->unk4F & 0x60) != 32) {
 //             temp_v0_2->unk58 = D_800DBE38;
 //             temp_v0_2->unk56 = 0; //D_800DBE38 - D_800DBE38;

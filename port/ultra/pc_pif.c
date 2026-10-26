@@ -160,19 +160,19 @@ void port_pif_dma(int write, void *d) {
 /* ---------------- controllers ---------------- */
 
 /* P236: libultra's osContInit (init_eu_256E0.c) ends with osCreateMesgQueue(&__osEepromTimerQ, &__osEepromTimerMsg, 1)
- * (EU D_80042E08 / D_80042E20). This replacement skipped it, so the queue stayed zeroed (msgCount 0): the EEPROM
+ * (EU g_eep_timer_queue / g_eep_timer_msg). This replacement skipped it, so the queue stayed zeroed (msgCount 0): the EEPROM
  * long write's timer message (osEepromLongWrite eeprom_async_write_start -> osSetTimer) was dropped by osSendMesg, the per-frame
  * pump eeprom_async_write_step(0) never advanced, and the NEXT save blocked for good in eeprom_async_write_start's
  * `while (eeprom_async_write_step(1))` (osRecvMesg OS_MESG_BLOCK on a queue nobody can fill). Seen after P232 made
  * save_slot_write save_slot_pack C: first save at the level 6 entry (frame 17824), the game thread froze at the next one
  * (level 0x18 scene 2 request, frame 19116). Created once, as libultra does (guarded by __osContinitialized). */
-extern OSMesgQueue D_80042E08; /* __osEepromTimerQ */
-extern OSMesg D_80042E20;      /* __osEepromTimerMsg */
+extern OSMesgQueue g_eep_timer_queue; /* __osEepromTimerQ; was D_80042E08 */
+extern OSMesg g_eep_timer_msg;      /* __osEepromTimerMsg; was D_80042E20 */
 s32 osContInit(OSMesgQueue *mq, u8 *bits, OSContStatus *st) {
     (void)mq;
     u8 present = 0;
     static int eep_q_done;
-    if (!eep_q_done) { osCreateMesgQueue(&D_80042E08, &D_80042E20, 1); eep_q_done = 1; }
+    if (!eep_q_done) { osCreateMesgQueue(&g_eep_timer_queue, &g_eep_timer_msg, 1); eep_q_done = 1; }
     for (int i = 0; i < MAXCONTROLLERS; i++) {
         int on = port_pads[i][0] != 0;
         present |= on << i;
@@ -208,20 +208,20 @@ s32 osContStartReadData(OSMesgQueue *mq) {
 }
 
 /* P27: log what the game's per-frame read cont_read_frame gets (first changes of pad 0), and on the
- * next read what it made of it: D_800BED38[0] (dead-zoned pad) and D_800BED50[0] (new presses).
+ * next read what it made of it: g_cont_pads[0] (dead-zoned pad) and g_cont_pressed[0] (new presses).
  * Weak: the scheduler demo links this file without the game. ?padlog=N raises the limit (default 8). */
-extern OSContPad D_800BED38[4] __attribute__((weak));
-extern u16 D_800BED50[4] __attribute__((weak));
+extern OSContPad g_cont_pads[4] __attribute__((weak)); /* was D_800BED38 */
+extern u16 g_cont_pressed[4] __attribute__((weak)); /* was D_800BED50 */
 static unsigned pad_reads;
 static void pad_log(const OSContPad *pad) {
     static int lim = -1, n, game_n; static u32 last = 0xFFFFFFFFu, last_game = 0;
     if (lim < 0) { lim = port_flag("padlog"); if (!lim) lim = 8; }
-    if (D_800BED38 && game_n < lim) {
-        u32 g = vbe_ld16(&D_800BED38[0].button) << 16 | (u8)vbe_ld8(&D_800BED38[0].stick_x) << 8 | (u8)vbe_ld8(&D_800BED38[0].stick_y);
+    if (g_cont_pads && game_n < lim) {
+        u32 g = vbe_ld16(&g_cont_pads[0].button) << 16 | (u8)vbe_ld8(&g_cont_pads[0].stick_x) << 8 | (u8)vbe_ld8(&g_cont_pads[0].stick_y);
         if (g != last_game) {
             game_n++; last_game = g;
             port_log("[pad] game after read #%u: D_800BED38[0] buttons %04X stick %d,%d (dead-zoned), D_800BED50[0] new %04X\n",
-                     pad_reads - 1, g >> 16, (s8)(g >> 8), (s8)g, D_800BED50 ? vbe_ld16(&D_800BED50[0]) : 0);
+                     pad_reads - 1, g >> 16, (s8)(g >> 8), (s8)g, g_cont_pressed ? vbe_ld16(&g_cont_pressed[0]) : 0);
         }
     }
     u32 v = vbe_ld16(&pad[0].button) << 16 | (u8)vbe_ld8(&pad[0].stick_x) << 8 | (u8)vbe_ld8(&pad[0].stick_y);

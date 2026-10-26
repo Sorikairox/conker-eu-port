@@ -19,8 +19,8 @@
 \#^        event_dispatch_alt(3, 0x4003, 3, (s32) offset, (s32) -20.0f, (s32) (6728.0f \* t + -5530.0f));$#s/(s32) -20.0f/(s32) -21.0f/
 \#^        event_dispatch_alt(3, 0x4003, 3, (s32) offset, (s32) -20.0f, (s32) (6728.0f \* t + -5530.0f));$#s/6728.0f/6720.0f/
 \#^        event_dispatch_alt(3, 0x4003, 3, (s32) offset, (s32) -20.0f, (s32) (6728.0f \* t + -5530.0f));$#s/(s32) (6728.0f \* t + -5530.0f)/(s32) (6728.0f * t) + -5530/
-\#^        math_spring_approach_angle(&arg0->unk37C, vec3_heading_deg(&D_800D9E70) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,$#s/180.0f/90.0f/
-\#^        math_spring_approach_angle(&arg0->unk37C, vec3_heading_deg(&D_800D9E70) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,$#s/8.0f, 10.0f/10.0f, 8.0f/
+\#^        math_spring_approach_angle(&arg0->unk37C, vec3_heading_deg(&g_aim_vec_scratch) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,$#s/180.0f/90.0f/
+\#^        math_spring_approach_angle(&arg0->unk37C, vec3_heading_deg(&g_aim_vec_scratch) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,$#s/8.0f, 10.0f/10.0f, 8.0f/
 \#^                      arg0->unk7B4);$#s/unk7B4/unk7B8/
 \#^        arg0->unk39C = arg0->unk37C \* 0.017453292f;$#s/0.017453292f/0.0174533f/
 \#^        arg0->unk84 &= 0x3FFFEFFF;$#s/0x3FFFEFFF/0x3FFFFFFF/

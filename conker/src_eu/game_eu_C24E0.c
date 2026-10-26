@@ -138,7 +138,7 @@ void camera_build_view_proj(s32 arg0) {
     f32 a[4][4];
     f32 b[4][4];
 
-    guMtxL2F(a, &D_800DC6D0[D_800BE9C0][arg0]);
-    guMtxL2F(b, &((Mtx *)((u8 *)&((struct_eu_BE628 *)D_800BE628)[arg0] + 0x100))[D_800BE9C0]);
+    guMtxL2F(a, &D_800DC6D0[g_dl_buf_index][arg0]);
+    guMtxL2F(b, &((Mtx *)((u8 *)&((struct_eu_BE628 *)g_player_cams)[arg0] + 0x100))[g_dl_buf_index]);
     mtxf_mul(a, b, D_800D30C8[arg0]);
 }

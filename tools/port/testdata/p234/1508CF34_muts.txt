@@ -21,7 +21,7 @@ s/            dx = (CF34_F(rec, 0x14) - CF34_F(rec, 0x2C)) \* k;/            dx 
 s/            dz = (CF34_F(rec, 0x1C) - CF34_F(rec, 0x34)) \* k;/            dz = (CF34_F(rec, 0x18) - CF34_F(rec, 0x34)) * k;/ % k14_race k16_race special_18_race
 s/        dx = (f32) \*(s16 \*) (rec + 0x1A4) + dx - CF34_RAILF(0x17A8, i);/        dx = (f32) *(s16 *) (rec + 0x1A6) + dx - CF34_RAILF(0x17A8, i);/ % replan replan_veh
 s/        dz = (f32) \*(s16 \*) (rec + 0x1A8) + dz - CF34_RAILF(0x1828, i);/        dz = (f32) *(u16 *) (rec + 0x1A8) + dz - CF34_RAILF(0x1828, i);/ % replan replan_veh
-s/    rate = CF34_RAILF(0x1868, i) \* (f32) D_800BE9E4;/    rate = CF34_RAILF(0x1868, i);/ % ft3
+s/    rate = CF34_RAILF(0x1868, i) \* (f32) g_frame_ticks;/    rate = CF34_RAILF(0x1868, i);/ % ft3
 s/        oz = 0;$/        oz = 1;/ % k3_nov k3
 s/    if (1.0f < rate) {/    if (2.0f < rate) {/ % rate2
 s/    CF34_RAILF(0x1828, i) += dz \* rate;/    CF34_RAILF(0x1828, i) = dz * rate;/ % plain

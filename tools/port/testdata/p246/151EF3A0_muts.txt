@@ -1,5 +1,5 @@
 # P246 save_screen_frame_draw (save_screen_frame_draw) mutants: sed % setup names
-s/D_800E0EC4 | 0xFFFFFF00/D_800E0EC4 | 0xFFFF0000/ % load
+s/g_menu_alpha | 0xFFFFFF00/g_menu_alpha | 0xFFFF0000/ % load
 s/0x7FB, 0, 3, 0/0x7FC, 0, 3, 0/ % load
 s/0x887, 0, 3, 0/0x887, 0, 2, 0/ % load
 s/0xFD100000, tex/0xFD180000, tex/ % load

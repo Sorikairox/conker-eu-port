@@ -1,5 +1,5 @@
 \#^    obj_get_aim_vectors((struct127 \*) obj, #s/(s32) dir, (s32) side/(s32) side, (s32) dir/
-\#^    dir\[1\] \*= D_800AAE94\[0\];#s/D_800AAE94/D_800AAE98/
+\#^    dir\[1\] \*= g_gun_smoke_dir_scale\[0\];#s/g_gun_smoke_dir_scale/g_gun_smoke_tracer_k/
 \#^    if (\*(u8 \*\*) (obj + 0x1D4) != NULL) {#s/!=/==/
 \#^        out\[1\] = end;#s/end/start/
 \#^        att = attachment_find_by_slot(obj, 0x46, 0);#s/0x46/0x45/
@@ -16,7 +16,7 @@
 \#^        start\[1\] -= dir\[1\] \* -120\.0f;#s/-120/-82/
 \#^    tracer_spawn((u8 \*) start, NULL, #s/(u8 \*) end, (u8 \*) dir/(u8 *) dir, (u8 *) end/
 \#^    tracer_spawn((u8 \*) start, NULL, #s/300\.0f/200.0f/
-\#^    tracer_spawn((u8 \*) start, NULL, #s/D_800AAE98/D_800AAE94/
+\#^    tracer_spawn((u8 \*) start, NULL, #s/g_gun_smoke_tracer_k/g_gun_smoke_dir_scale/
 \#^    tracer_spawn((u8 \*) start, NULL, #s/a \* 10\.0f + 25\.0f/b * 10.0f + 25.0f/
 \#^                  b \* 150\.0f + 400\.0f#s/400/300/
 \#^                  b \* 150\.0f + 400\.0f#s/80\.0f/90.0f/

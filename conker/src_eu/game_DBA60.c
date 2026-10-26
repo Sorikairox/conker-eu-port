@@ -7,7 +7,7 @@ s32 event_dispatch(s32, s32, ...);
 
 /* was func_150AE5B0 */
 void camera_update_event_modes(struct108 *arg0) {
-    if ((D_800D2E4C->unk4 & 0x80) == 0) {
+    if ((g_save_progress_bits->unk4 & 0x80) == 0) {
         if (event_dispatch(0, 0x2000, 0xBB) != -1) {
             if (camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 8) != 0) {
                 arg0->unk84 |= 0x1000000;
@@ -18,7 +18,7 @@ void camera_update_event_modes(struct108 *arg0) {
         }
     }
     arg0->unk84 &= -0x4001;
-    if ((D_800D2E4C->unk1 & 4) == 0) {
+    if ((g_save_progress_bits->unk1 & 4) == 0) {
         if (event_dispatch(1, 0x2000, 0x95, event_dispatch(0, 0x2014, 0xB7) | 0x2000) != 0) {
             arg0->unk84 |= 0x1000000;
             if (((arg0->unk2C & 1) != 0) && (camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 0) != 0)) {
@@ -42,7 +42,7 @@ void camera_update_event_modes(struct108 *arg0) {
 void mtx_get_translation(void *, s32, void *);
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
-extern s32 D_8008CEB4;
+extern s32 g_owner_spark_sprite; /* was D_8008CEB4 */
 
 /* was func_150AE790 */
 void owner_child_spark_burst(u8 *arg0) {
@@ -201,7 +201,7 @@ void owner_child_spark_burst(u8 *arg0) {
                 sp.uB8 = (s32) (temp_f2_2 / temp_f20_2);
                 sp.uDF = 0;
                 sp.uBC = 0;
-                sp.uB4 = D_8008CEB4;
+                sp.uB4 = g_owner_spark_sprite;
                 sp.uC4 = (s16) (s32) sp.u148;
                 sp.uC6 = (s16) (s32) sp.u14C;
                 sp.uC8 = (s16) (s32) sp.u150;
@@ -211,9 +211,9 @@ void owner_child_spark_burst(u8 *arg0) {
     }
 }
 // some funky xor going on
-// spawns the objects of D_80088A80[0]; also checksums the code range
+// spawns the objects of g_owner_spawn_lists[0]; also checksums the code range
 // quadtree_alloc_node_pool..D_15001B08 and, if it was modified, clears object list 35 (anti-tamper)
-// owner_spawn_children: spawns the objects of spawn list D_80088A80[0] (effect_node_create_nodraw kind 0x27) for `owner`
+// owner_spawn_children: spawns the objects of spawn list g_owner_spawn_lists[0] (effect_node_create_nodraw kind 0x27) for `owner`
 // (P151): each new object gets the owner (+0x28), its sub-type (+0x2C = owner +0x3B) and the entry byte (+0x2D);
 // stops when a spawn fails. The N64 code also sums the code words quadtree_alloc_node_pool..D_15001B08 and on a mismatch
 // (anti-tamper) clears the object lists g_node_lists +0x8C / +0x22C; the port has no MIPS code there, so the
@@ -226,14 +226,14 @@ void owner_spawn_children(u8 *owner) {
     if (owner == NULL) {
         return;
     }
-    for (i = 0; i < D_80088A80[0].count; i++) {
-        obj = (u8 *)effect_node_create_nodraw(D_80088A80[0].entries[i].unk2, 0, -1, 1, 0x27, 8, 0xFF, 0);
+    for (i = 0; i < g_owner_spawn_lists[0].count; i++) {
+        obj = (u8 *)effect_node_create_nodraw(g_owner_spawn_lists[0].entries[i].unk2, 0, -1, 1, 0x27, 8, 0xFF, 0);
         if (obj == NULL) {
             return;
         }
         *(u8 **)(obj + 0x28) = owner;
         obj[0x2C] = owner[0x3B];
-        obj[0x2D] = D_80088A80[0].entries[i].unk0;
+        obj[0x2D] = g_owner_spawn_lists[0].entries[i].unk0;
     }
 }
 // NON-MATCHING: regalloc; checksums code quadtree_alloc_node_pool..D_15001B08 against 0x1B61AF60 (anti-tamper), clears object list 35 on mismatch
@@ -255,25 +255,25 @@ void owner_spawn_children(u8 *owner) {
 //         g_node_lists[0][35] = NULL;
 //         g_node_lists[1][35] = NULL;
 //     }
-//     for (i = 0; i < D_80088A80[0].count; i++) {
-//         obj = (u8 *)effect_node_create_nodraw(D_80088A80[0].entries[i].unk2, 0, -1, 1, 0x27, 8, 0xFF, 0);
+//     for (i = 0; i < g_owner_spawn_lists[0].count; i++) {
+//         obj = (u8 *)effect_node_create_nodraw(g_owner_spawn_lists[0].entries[i].unk2, 0, -1, 1, 0x27, 8, 0xFF, 0);
 //         if (obj == NULL) {
 //             return;
 //         }
 //         *(u8 **)(obj + 0x28) = arg0;
 //         obj[0x2C] = arg0[0x3B];
-//         obj[0x2D] = D_80088A80[0].entries[i].unk0;
+//         obj[0x2D] = g_owner_spawn_lists[0].entries[i].unk0;
 //     }
 // }
 
 /* was func_150AECCC */
 void particle_fall_step(struct42 *arg0) {
-    arg0->unk96 = arg0->unk96 + (arg0->unk94 * D_800BE9E4);
+    arg0->unk96 = arg0->unk96 + (arg0->unk94 * g_frame_ticks);
     if (arg0->unk96 >= 0x1401) {
         arg0->unk96 = 0x1400;
     }
     arg0->unk9E = arg0->unk9E - ((s32) arg0->unk96 >> 8);
-    arg0->unkA4 = arg0->unkA4 + D_800BE9E4;
+    arg0->unkA4 = arg0->unkA4 + g_frame_ticks;
     if (arg0->unkA4 >= 0x1A) {
         arg0->unkA4 = 0x19;
     }
@@ -281,7 +281,7 @@ void particle_fall_step(struct42 *arg0) {
 
 /* was func_150AED4C */
 void sprite_grow_step(struct114 *arg0) {
-    arg0->unk34 += arg0->unk14 * D_800BE9E4;
+    arg0->unk34 += arg0->unk14 * g_frame_ticks;
     if (arg0->unk2A < arg0->unk34) {
         arg0->unk3A = 70;
         arg0->unk34 = arg0->unk2A;

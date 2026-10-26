@@ -27,8 +27,8 @@
 \#^    blk.u1C = 0.0f;$#s/0.0f/1.0f/
 \#^    spec.x = 88.0f;$#s/88.0f/-88.0f/
 \#^    spec.y = 91.0f;$#s/91.0f/90.0f/
-\#^    blk.u18 = D_800AB164\[D_80082FA0 == 1\];$#s/== 1/!= 1/
-\#^    blk.u20 = D_800AB18C\[D_80082FA0 == 1\];$#s/D_800AB18C/D_800AB164/
+\#^    blk.u18 = g_aim_hud_bars_u18\[g_last_player_index == 1\];$#s/== 1/!= 1/
+\#^    blk.u20 = g_aim_hud_bars_u20\[g_last_player_index == 1\];$#s/g_aim_hud_bars_u20/g_aim_hud_bars_u18/
 \#^    spec.col\[3\] = 0;$#s/0;/1;/
 \#^    spec.kind = 0x7C;$#s/0x7C/0x7B/
 \#^    spec.flags &= ~2;$#s/~2/~4/

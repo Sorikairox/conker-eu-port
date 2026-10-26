@@ -12,7 +12,7 @@
  *  D_800BE950 / D_800BE970 / D_800BE984: RGB, DL command index and count of the G_SETENVCOLOR commands of
  *                 g_level_part_dls's display list (dl_env_colours_list) */
 extern u8 *D_800BE930[4];
-extern u8 *D_800B1220[4];  /* level geometry chunks: vertex arrays */
+extern u8 *g_level_part_vtx[4];  /* level geometry chunks: vertex arrays; was D_800B1220 */
 extern s32 D_800B1250[4];  /* level geometry chunks: vertex counts */
 extern u8 **g_level_model_colour_groups;    /* per colour group: entries {pad, u16 *vertex indices (+4), s32 count (+8)} (12 bytes); was D_800B1240 */
 extern u8 *g_level_model_colour_counts;     /* per colour group: entry count; was D_800B1244 */
@@ -21,8 +21,8 @@ extern u8 D_800BE984;
 #define COLOUR_GROUPS (*(u8 ****) D_800BE940)
 #define ROOM_COLOUR_BASE (*(u16 **) D_800BE944)
 #define COLOURS_STORED (*(u16 *) D_800BE948)
-#define LEVEL_FLAGS (((u8 *) D_800B0DF0)[0x21])
-#define ROOM_REC(i) ((u8 *) D_800DBEF4 + (i) * 0xA0) /* +0x16 u16 vertex count, +0x28 vertex array */
+#define LEVEL_FLAGS (((u8 *) g_level_header)[0x21])
+#define ROOM_REC(i) ((u8 *) g_world_objs + (i) * 0xA0) /* +0x16 u16 vertex count, +0x28 vertex array */
 void vertex_colours_store(u8 *vtx, s32 count);
 void dl_env_colours_list(u32 *dl);
 
@@ -61,10 +61,10 @@ void level_vertex_colours_backup(void) {
     D_800BE984 = 0;
     if (LEVEL_FLAGS & 1) {
         for (i = 0; i < 4; i++) {
-            if (D_800B1220[i] != NULL) {
+            if (g_level_part_vtx[i] != NULL) {
                 /* literal: based on D_800BE930[0], which is NULL here when chunk 0 has no vertices */
                 D_800BE930[i] = D_800BE930[0] + COLOURS_STORED * 3;
-                vertex_colours_store(D_800B1220[i], D_800B1250[i]);
+                vertex_colours_store(g_level_part_vtx[i], D_800B1250[i]);
             } else {
                 D_800BE930[i] = NULL;
             }
@@ -93,7 +93,7 @@ void level_vertex_colours_backup(void) {
             for (j = 0; j < g_level_model_colour_counts[i]; j++, ent += 0xC) {
                 COLOUR_GROUPS[i][j] = allocate_memory(*(s32 *) (ent + 8) * 3, 1, 0, 0);
                 /* groups 0..3 are the level chunks, the others room records 0.. */
-                vtx = (i < 4) ? D_800B1220[i] : *(u8 **) (ROOM_REC(i - 4) + 0x28);
+                vtx = (i < 4) ? g_level_part_vtx[i] : *(u8 **) (ROOM_REC(i - 4) + 0x28);
                 for (k = 0; k < *(s32 *) (ent + 8); k++) {
                     idx = *(u16 **) (ent + 4);
                     COLOUR_GROUPS[i][j][k * 3 + 0] = vtx[idx[k] * 16 + 0xC];
@@ -144,6 +144,6 @@ void clear_dfc00_table(void) {
     s32 i;
 
     for (i = 0; i < 0x1E3; i++) {
-        D_800DFC00[i] = 0;
+        g_shared_dl_refcounts[i] = 0;
     }
 }

@@ -91,7 +91,7 @@ void debris_spawn_linked(s32 arg0) {
     if (temp_v0 != NULL) {
         memcpy(temp_v0 + 0x170, &sp34, 4);
         for (i = 0; i < 2; i = (u8)(i + 1)) {
-            memcpy(temp_v0 + 0x90 + i * 0x40, D_80089810, 0x40);
+            memcpy(temp_v0 + 0x90 + i * 0x40, g_identity_mtx, 0x40);
         }
     }
 }

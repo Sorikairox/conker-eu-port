@@ -60,8 +60,8 @@ s32 fx_sine_sway_update(u8 *arg0) {
     temp_s0 = (f32 *)(arg0 + 0x170);
     *(f32 *)(arg0 + 0x20) = temp_s0[4] * sinf(*(f32 *)(arg0 + 0x170));
     *(f32 *)(arg0 + 0x28) = temp_s0[5] * sinf(temp_s0[1]);
-    temp_s0[0] = wrap_angle_rad((temp_s0[2] * D_800BE9A4) + temp_s0[0]);
-    temp_s0[1] = wrap_angle_rad((temp_s0[3] * D_800BE9A4) + temp_s0[1]);
+    temp_s0[0] = wrap_angle_rad((temp_s0[2] * g_frame_step_f) + temp_s0[0]);
+    temp_s0[1] = wrap_angle_rad((temp_s0[3] * g_frame_step_f) + temp_s0[1]);
     return 1;
 }
 
@@ -73,8 +73,8 @@ s32 fx_sine_swing_update(u8 *arg0) {
     p += 0xF8;
     *(f32 *)(p + 0x24) = *(f32 *)(p + 0x10) * sinf(*(f32 *)(p + 0));
     *(f32 *)(p + 0x28) = *(f32 *)(p + 0x14) * sinf(*(f32 *)(p + 4));
-    *(f32 *)(p + 0) = wrap_angle_rad(*(f32 *)(p + 8) * D_800BE9A4 + *(f32 *)(p + 0));
-    *(f32 *)(p + 4) = wrap_angle_rad(*(f32 *)(p + 0xC) * D_800BE9A4 + *(f32 *)(p + 4));
+    *(f32 *)(p + 0) = wrap_angle_rad(*(f32 *)(p + 8) * g_frame_step_f + *(f32 *)(p + 0));
+    *(f32 *)(p + 4) = wrap_angle_rad(*(f32 *)(p + 0xC) * g_frame_step_f + *(f32 *)(p + 4));
     return 1;
 }
 
@@ -92,7 +92,7 @@ s32 fx_swing_build_matrix(u8 *arg0, s32 arg1) {
     m[3][0] = *(f32 *)(v + 0x18);
     m[3][1] = *(f32 *)(v + 0x1C);
     m[3][2] = *(f32 *)(v + 0x20);
-    guMtxF2L(m, &((Mtx *)(arg0 + 0x78))[D_800BE9C0]);
+    guMtxF2L(m, &((Mtx *)(arg0 + 0x78))[g_dl_buf_index]);
     return 1;
 }
 
@@ -210,7 +210,7 @@ void camera_set_ride_event_flags(s32 arg0, s32 arg1)
   new_var = 0x405D; // fakematch: constant in a variable (permuter)
   event_dispatch_alt(0, new_var, arg1);
   event_dispatch_alt(0, 0x405F, arg1);
-  if (D_800D2E4C->pad15[0] & 8)
+  if (g_save_progress_bits->pad15[0] & 8)
   {
     event_dispatch_alt(0, 0x4063, arg1);
     event_dispatch_alt(0, 0x4064, arg1);

@@ -30,7 +30,7 @@ s/            ok = rail_param_step(rec, -step);/            ok = rail_param_step
 s/        if (tries >= 11) {/        if (tries >= 10) {/
 s/    text_set_flags(0x80);/    text_set_flags(0x81);/
 s/    r\[0x32\] = r\[0x33\];/    ;/
-s/    r\[0x33\] = D_800BE9E4;/    r[0x33] = 1;/
+s/    r\[0x33\] = g_frame_ticks;/    r[0x33] = 1;/
 s/(obj + 0x2C) \* dx + \*(f32 \*) (obj + 0x34) \* dz + c) - d) \* 4.0f/(obj + 0x14) * dx + *(f32 *) (obj + 0x34) * dz + c) - d) * 4.0f/
 s/(obj + 0x2C) \* dx + \*(f32 \*) (obj + 0x34) \* dz + c) - d) \* 4.0f/(obj + 0x2C) * dx + *(f32 *) (obj + 0x34) * dz + c) - d) * 2.0f/
 s/(obj + 0x2C) \* dx + \*(f32 \*) (obj + 0x34) \* dz + c) - d) \* 4.0f/(obj + 0x2C) * dx + *(f32 *) (obj + 0x34) * dz) - d) * 4.0f/
@@ -42,8 +42,8 @@ s/            if (mode == 0) {/            if (mode == 1) {/
 s/D_800D27BC = sinf(ang) \* 300.0f + \*(f32 \*) (obj + 0x14);/D_800D27BC = sinf(ang) * 300.0f;/
 s/                D_800D27C0 = \*(f32 \*) (obj + 0x18);/                ;/
 s/D_800D27C4 = cosf(ang) \* 300.0f + \*(f32 \*) (obj + 0x1C);/D_800D27C4 = cosf(ang) * 200.0f + *(f32 *) (obj + 0x1C);/
-s/D_800D2104\[obj\[0x13F\]\] + 0xA) = D_800D27C0;/D_800D2104[obj[0x13F]] + 0xA) = D_800D27C4;/
-s/D_800D2104\[obj\[0x13F\]\] + 8) = D_800D27BC;/D_800D2104[obj[0x13E]] + 8) = D_800D27BC;/
+s/g_path_points\[obj\[0x13F\]\] + 0xA) = D_800D27C0;/g_path_points[obj[0x13F]] + 0xA) = D_800D27C4;/
+s/g_path_points\[obj\[0x13F\]\] + 8) = D_800D27BC;/g_path_points[obj[0x13E]] + 8) = D_800D27BC;/
 s/            \*(f32 \*) (obj + 0x44) = mode;/            ;/
 s/\*(f32 \*) (obj + 0x20) = 75.0f;/*(f32 *) (obj + 0x20) = 70.0f;/
 s/} else if (D_800D27B0 == 2) {/} else if (D_800D27B0 == 4) {/
@@ -58,7 +58,7 @@ s/    r\[0x48\] = mode;/    r[0x48] = 1;/
 s/    D_800D27C9 = 1;/    D_800D27C9 = 2;/
 s/&& r\[0x48\] != 0 && !(D_800D18A0/\&\& !(D_800D18A0/
 s/&& !(D_800D18A0 & (1 << (s8) r\[0x31\]))) {/\&\& !(D_800D18A0 \& (1 << (s8) r[0x30]))) {/
-s/\*(s32 \*) (r + 0x1C) += D_800BE9E4;/*(s32 *) (r + 0x1C) += 1;/
+s/\*(s32 \*) (r + 0x1C) += g_frame_ticks;/*(s32 *) (r + 0x1C) += 1;/
 s/if ((s8) r\[0x30\] >= 2 &&/if ((s8) r[0x30] >= 1 \&\&/
 s/(obj + 0x31C)))\[0x84\] == 0) {/(obj + 0x31C)))[0x84] != 0) {/
 s/rail_record_start_script(rec, (struct127 \*) obj, 0xD);/rail_record_start_script(rec, (struct127 *) obj, 0xC);/

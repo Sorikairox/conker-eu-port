@@ -9,15 +9,15 @@ void shared_dl_release(s32);
 s32 debris_cloud_spawn(s32, s32, f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, s32);
 void particle_spark_ring_spawn(f32, f32, f32, f32, s32, f32, s32, s32, s32, s32);
 void particle_burst_random_spawn(s32, s32, s32, s32, f32, s32, s32);
-extern f32 D_800A7090; /* 0.4: wobble amplitude */
-extern f32 D_800A7094; /* 57.29578: radians -> degrees */
-extern f32 D_800A7098; /* 57.29578 */
-extern f32 D_800A709C; /* -0.4 */
-extern f32 D_800A70A0; /* 0.7 */
-extern f32 D_800A70A4; /* -0.7 */
+extern f32 g_debris_wobble_amp; /* 0.4: wobble amplitude; was D_800A7090 */
+extern f32 g_debris_rad_to_deg_a; /* 57.29578: radians -> degrees; was D_800A7094 */
+extern f32 g_debris_rad_to_deg_b; /* 57.29578; was D_800A7098 */
+extern f32 g_debris_k_709c; /* -0.4; was D_800A709C */
+extern f32 g_debris_k_70a0; /* 0.7; was D_800A70A0 */
+extern f32 g_debris_k_70a4; /* -0.7; was D_800A70A4 */
 
 // debris_update: moves a falling debris object (pos +0x90, velocity +0xA8, spin angles +0x9C..+0xA4 with rates
-// +0xB4..+0xBC, gravity 0.5 per tick, ticks D_800BE9E4). Flag +0xE8 bit 1 wobbles the scale +0xC4 (phase +0xE7),
+// +0xB4..+0xBC, gravity 0.5 per tick, ticks g_frame_ticks). Flag +0xE8 bit 1 wobbles the scale +0xC4 (phase +0xE7),
 // bit 2 turns the object along its velocity (+0xA0 yaw, +0x9C pitch, degrees). When it falls below the ground
 // (collision_level_nearest_height + radius +0xE9) it lands; by kind +0xEB: 1 = splash + two ripples, 4 = splash, 3 = splash + dust
 // burst (all three free the object), 6 = stops and rests 60 ticks, 8 = freed; other kinds bounce (velocity scaled by
@@ -30,7 +30,7 @@ void falling_debris_update(u8 *obj) {
     f32 ground;
     s32 left;
 
-    dt = D_800BE9E4;
+    dt = g_frame_ticks;
     *(f32 *) (obj + 0x90) += *(f32 *) (obj + 0xA8) * dt;
     *(f32 *) (obj + 0x98) += *(f32 *) (obj + 0xB0) * dt;
     *(f32 *) (obj + 0x9C) += *(f32 *) (obj + 0xB4) * dt;
@@ -40,15 +40,15 @@ void falling_debris_update(u8 *obj) {
     *(f32 *) (obj + 0x94) += *(f32 *) (obj + 0xAC) * dt;
 
     if (obj[0xE8] & 1) {
-        obj[0xE7] += D_800BE9E4 * 8;
-        *(f32 *) (obj + 0xC4) = (math_sin_u8(obj[0xE7]) * D_800A7090 + 1.0f) * *(f32 *) (obj + 0xD4);
+        obj[0xE7] += g_frame_ticks * 8;
+        *(f32 *) (obj + 0xC4) = (math_sin_u8(obj[0xE7]) * g_debris_wobble_amp + 1.0f) * *(f32 *) (obj + 0xD4);
     }
     if (obj[0xE8] & 2) {
-        *(f32 *) (obj + 0xA0) = math_atan2f(*(f32 *) (obj + 0xA8), *(f32 *) (obj + 0xB0)) * D_800A7094;
+        *(f32 *) (obj + 0xA0) = math_atan2f(*(f32 *) (obj + 0xA8), *(f32 *) (obj + 0xB0)) * g_debris_rad_to_deg_a;
         *(f32 *) (obj + 0x9C) =
             math_atan2f(-*(f32 *) (obj + 0xAC), sqrtf(*(f32 *) (obj + 0xA8) * *(f32 *) (obj + 0xA8) +
                                                         *(f32 *) (obj + 0xB0) * *(f32 *) (obj + 0xB0))) *
-            D_800A7098;
+            g_debris_rad_to_deg_b;
     }
 
     collision_select_area(0);
@@ -58,7 +58,7 @@ void falling_debris_update(u8 *obj) {
         switch (obj[0xEB]) {
             case 1:
                 debris_cloud_spawn(4, 0xB, *(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98),
-                              *(f32 *) (obj + 0xAC) * *(f32 *) (obj + 0xDC), 0.5f, 1.0f, 60.0f, 2, 0xFF, D_800A709C,
+                              *(f32 *) (obj + 0xAC) * *(f32 *) (obj + 0xDC), 0.5f, 1.0f, 60.0f, 2, 0xFF, g_debris_k_709c,
                               obj[0xC], obj[1]);
                 particle_spark_ring_spawn(*(f32 *) (obj + 0x90), (*(f32 *) (obj + 0x94) - obj[0xE9]) + 30.0f,
                               *(f32 *) (obj + 0x98), 50.0f, 0x28, 0.0030517578f, 0, 0x14, obj[0xC], obj[1]);
@@ -69,14 +69,14 @@ void falling_debris_update(u8 *obj) {
                 return;
             case 4:
                 debris_cloud_spawn(3, 0xB, *(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98),
-                              *(f32 *) (obj + 0xAC) * *(f32 *) (obj + 0xDC), 0.5f, D_800A70A0, 40.0f, 2, 0x3C, -0.5f,
+                              *(f32 *) (obj + 0xAC) * *(f32 *) (obj + 0xDC), 0.5f, g_debris_k_70a0, 40.0f, 2, 0x3C, -0.5f,
                               obj[0xC], obj[1]);
                 shared_dl_release(obj[0xEA]);
                 node_destroy((struct102 *) obj);
                 return;
             case 3:
                 debris_cloud_spawn(2, 0xCB, *(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), 6.0f,
-                              0.5f, 1.0f, 60.0f, 5, 0x3C, D_800A70A4, obj[0xC], obj[1]);
+                              0.5f, 1.0f, 60.0f, 5, 0x3C, g_debris_k_70a4, obj[0xC], obj[1]);
                 particle_burst_random_spawn(*(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94) + 10.0f, *(f32 *) (obj + 0x98), 4,
                               *(f32 *) (obj + 0xAC) * 200.0f, obj[0xC], obj[1]);
                 shared_dl_release(obj[0xEA]);
@@ -127,13 +127,13 @@ void falling_debris_update(u8 *obj) {
     }
 
     if (*(s32 *) (obj + 0xCC) != 0) {
-        left = *(s32 *) (obj + 0xCC) - D_800BE9E4;
+        left = *(s32 *) (obj + 0xCC) - g_frame_ticks;
         if (left > 0) {
             *(s32 *) (obj + 0xCC) = left;
             return;
         }
         obj[0xEC] = 2;
-        left = obj[0xE5] - D_800BE9E4 * 4;
+        left = obj[0xE5] - g_frame_ticks * 4;
         if (left > 0) {
             obj[0xE5] = left;
             *(s32 *) (obj + 0xCC) = 1;
@@ -144,8 +144,8 @@ void falling_debris_update(u8 *obj) {
     }
 }
 
-extern f32 D_800A70A8;
-extern s32 D_8008CE7C;
+extern f32 g_splash_vel_damp; /* was D_800A70A8 */
+extern s32 g_splash_spawn_word; /* was D_8008CE7C */
 
 /* was func_1516A964 */
 void particle_ground_splash_check(u8 *arg0) {
@@ -186,7 +186,7 @@ void particle_ground_splash_check(u8 *arg0) {
         if ((var_t0 - var_v1) < 0x32) {
             sp.u30 = 0;
             sp.u32 = 0x100;
-            sp.u2C = D_8008CE7C;
+            sp.u2C = g_splash_spawn_word;
             sp.u34 = (*(s16 *)((u8 *)arg0 + 0x20));
             sp.u36 = (*(s32 *)((u8 *)arg0 + 0x14)) + 0xA;
             sp.u38 = (*(s16 *)((u8 *)arg0 + 0x24));
@@ -200,8 +200,8 @@ void particle_ground_splash_check(u8 *arg0) {
             node_spawn_sprite_quad(&sp.u2C, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
         }
     } else {
-        (*(s16 *)((u8 *)arg0 + 0x26)) = (s16) (s32) ((f32) (*(s16 *)((u8 *)arg0 + 0x26)) * D_800A70A8);
-        (*(s16 *)((u8 *)arg0 + 0x28)) = (s16) (s32) ((f32) (*(s16 *)((u8 *)arg0 + 0x28)) * D_800A70A8);
+        (*(s16 *)((u8 *)arg0 + 0x26)) = (s16) (s32) ((f32) (*(s16 *)((u8 *)arg0 + 0x26)) * g_splash_vel_damp);
+        (*(s16 *)((u8 *)arg0 + 0x28)) = (s16) (s32) ((f32) (*(s16 *)((u8 *)arg0 + 0x28)) * g_splash_vel_damp);
     }
 }
 s32 decal_spawn_at(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
@@ -227,14 +227,14 @@ s32 particle_bounce_fall_step(u8 *arg0) {
     a = arg0[0x1F];
     if (arg0[0x24] != 0) {
         if (a != 0xFF) {
-            a += D_800BE9E4 * 16;
+            a += g_frame_ticks * 16;
             if (a >= 0x100) {
                 a = 0xFF;
             }
             arg0[0x1F] = a;
         }
     } else if (a != 0) {
-        a -= D_800BE9E4 * 4;
+        a -= g_frame_ticks * 4;
         if (a < 0) {
             a = 0;
         }

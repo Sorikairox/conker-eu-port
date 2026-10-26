@@ -7,23 +7,23 @@
 /* was func_15017790 */
 void level_state_clear(void) {
     save_block_realloc_random();
-    bzero(D_800D2E4C, 0x1B);
+    bzero(g_save_progress_bits, 0x1B);
     bzero(&g_level_state_blk_2e50, 0x10);
     bzero(&D_800D2E60, 9);
-    bzero(&D_800D2E70, 0xCC);
-    D_800D2E44 = (u8)0;
+    bzero(&g_event_states, 0xCC);
+    g_game_over_disabled = (u8)0;
 }
 
 /* was func_150177F8 */
 void level_state_init(void) {
     event_list_unload(1);
-    bzero(&D_800D2F48, 0xC);
+    bzero(&g_event_list, 0xC);
     event_timers_reset();
-    D_800D2DB0 = g_level_init_heading_f;
+    g_camera_event_heading = g_level_init_heading_f;
     g_level_state_u8_2e41 = 0xA;
     g_level_state_u8_2e42 = 6;
     D_800D3858 = 0;
-    D_800D2E44 = 0;
+    g_game_over_disabled = 0;
 }
 
 /* was func_15017868 */

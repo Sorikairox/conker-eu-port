@@ -1,7 +1,7 @@
 s/        if (e->live != 0) {/        if (e->live > 1) {/ % off_live1
 s/\* 0.01f;/* 0.02f;/
 s/if (e->time < 0) {/if (e->time <= 0) {/
-s/kill = D_8008D9C8\[e->onEnd\](arg0);/kill = D_8008D9C8[e->onEnd](arg0) != 0;/
+s/kill = g_char_effect_end_fns\[e->onEnd\](arg0);/kill = g_char_effect_end_fns[e->onEnd](arg0) != 0;/
 s/                e->mode |= 1;/                e->mode |= 2;/
 s/row = set->rows + owner\[0x1C8\] \* (n + 2);/row = set->rows + owner[0x1C8] * (n + 1);/
 s/                cfg = row\[n + 1\];/                cfg = row[n];/
@@ -11,7 +11,7 @@ s/|| e->attach != cfg->attach)) {/)) {/
 s/e->pos\[1\] = \*(f32 \*) (owner + 0x18) + cfg->yoff;/e->pos[1] = *(f32 *) (owner + 0x18);/
 s/cfg->local\[0\],/cfg->local[1],/
 s/e->pos\[1\] + slot->off\[1\];/e->pos[1] + slot->off[2];/
-s/slot->timer -= D_800BE9E4;/slot->timer -= 1;/
+s/slot->timer -= g_frame_ticks;/slot->timer -= 1;/
 s/if (10.0f < m->vel\[0\]) {/if (11.0f < m->vel[0]) {/
 s/m->vel\[1\] = 0.0f;/m->vel[1] = 1.0f;/
 s/(u32) (m->tpl->range + 1) + m->tpl->life;/(u32) (m->tpl->range + 2) + m->tpl->life;/
@@ -22,7 +22,7 @@ s/blk.size\[1\] = tpl->size\[1\] \* e->scale;/blk.size[1] = tpl->size[1];/
 s/blk.size2\[2\] = tpl->size\[4\] \* e->scale;/blk.size2[2] = tpl->size[3] * e->scale;/
 s/spawn.f40 = 2.0f;/spawn.f40 = 1.0f;/
 s/\&\& e->live < cfg->max) {/\&\& e->live <= cfg->max) {/
-s/D_8008D9C0\[tpl->init\]/D_8008D9C0[tpl->kind]/
+s/g_char_effect_spawn_init_fns\[tpl->init\]/g_char_effect_spawn_init_fns[tpl->kind]/
 s/memcpy(rec + 0x110, (u8 \*\*) \&blk, 0x58);/memcpy(rec + 0x110, (u8 **) \&blk, 0x54);/
 s/                                    case 1: \/\* sphere \*\//                                    case 3:/
 s/head->off\[0\] = r \* sb \* ca;/head->off[0] = r * sb * sa;/

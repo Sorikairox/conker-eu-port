@@ -64,7 +64,7 @@ void crumble_emitter_update(u8 *arg0) {
         return;
     }
     if ((*(s32 *)((u8 *)temp_s4 + 0x1D4)) != 0) {
-        (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((0.3143f + (random_float() * 0.58100003f)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((0.3143f + (random_float() * 0.58100003f)) * g_frame_step_f));
         if ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f) {
             sp.uD8 = ((*(f32 *)((u8 *)temp_s4 + 0x14C)) + (*(f32 *)((u8 *)temp_s4 + 0x150))) * 0.5f;
             temp_s5 = ((s32) (*(u16 *)((u8 *)temp_s4 + 0x76)) >> 8) - 0x40;
@@ -152,7 +152,7 @@ void obj_heavy_impact_fx(u8 *arg0, u8 arg1, s32 arg2) {
         rumble_all_players_at((struct17 *) &sp.u6C, 1307.0f, 2000.0f, 0.0005f, 0xC, 0xF, 0xFF, 0);
         fx_try_camera_shake(5, 0x4022);
         if (sp43 != 0) {
-            sp44 = (s32) (D_800DBFF0[g_cur_view_player].unk380 * 0.7111111f);
+            sp44 = (s32) (g_player_views[g_cur_view_player].unk380 * 0.7111111f);
             water_ring_spawn(-1, (s32) sp.u6C, (s32) (sp.u70 + 6.0f), (s32) sp.u74, 0x19, 0x12, 0, 0xFF, 1);
             sp38 = random_float();
             spawn_circle_random_emit(sp.u6C, sp.u70, sp.u74, (sp38 * 50.0f) + 40.0f, sp44 + 0x3C, sp44 - 0x3C, (random_int() % 11U) + 0x1E, 5, 0, 0.0f, 0, 0xFF);

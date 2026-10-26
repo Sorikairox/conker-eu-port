@@ -41,7 +41,7 @@ s32 camera_timed_record_update(s32 idx) {
     u8 *mk;
 
     if (rec[0] == 1) {
-        cam = (struct108 *) ((u8 *) D_800DBFF0 + rec[1] * 0x9A0);
+        cam = (struct108 *) ((u8 *) g_player_views + rec[1] * 0x9A0);
         D_800D31D8 = cam->unk2C0;
         D_800D2DB4 = 1;
         g_camera_timers[rec[1]] = 3;
@@ -66,7 +66,7 @@ s32 camera_timed_record_update(s32 idx) {
         return 1;
     }
     if (rec[0] == 2) {
-        cam = (struct108 *) ((u8 *) D_800DBFF0 + rec[1] * 0x9A0);
+        cam = (struct108 *) ((u8 *) g_player_views + rec[1] * 0x9A0);
         *(s16 *) (rec + 4) -= D_800BE9A0;
         if (*((u8 *) cam->unk3D0 + 0x1CA) == 0) {
             *(s16 *) (rec + 4) = 0;
@@ -123,7 +123,7 @@ extern s32 D_800D3C60;
 extern f32 D_800C3A20[];
 extern u8 D_800C3A80;
 extern s32 D_800DC740;
-extern s32 D_800898C0;
+extern s32 g_camera_restore_skip; /* was D_800898C0 */
 void camera_update_eye_base(struct108 *);
 void camera_queue_event(struct108 *, s32, void *);
 s32 obj_slot_by_spawn(s32);
@@ -135,19 +135,19 @@ extern s32 D_800DC450;
 #define CAM_B(c, off) (*(u8 *) ((u8 *) (c) + (off)))
 
 /* camera_script_set: the "set" half of the camera script commands (table EU 80088894, the "get" half is
- * event_query_camera at 80088858). `id` picks the camera record D_800DBFF0[id] (0x9A0 bytes), `op` the command and
+ * event_query_camera at 80088858). `id` picks the camera record g_player_views[id] (0x9A0 bytes), `op` the command and
  * `cmd` its words (arguments from cmd + 8). Covers the camera position / target vectors (+0x2A4, +0x2BC, +0x2F8),
  * the door camera (op 10 / 11: the D_800C3A20 path record from a D_800DC450 marker, camera_queue_event modes 5 / 7 / 6,
  * object 0's flag 0x200), timed camera records (op 12, D_800D31E0), fixed-point (/ 65536) speeds and the
- * remaining per-camera settings. Returns 1 for ops 4-9, 0 otherwise; 0 when id > D_80082FA0. */
+ * remaining per-camera settings. Returns 1 for ops 4-9, 0 otherwise; 0 when id > g_last_player_index. */
 /* was func_15097188 */
 s32 event_action_camera(s32 id, s32 op, u8 *cmd) {
-    struct108 *cam = (struct108 *) ((u8 *) D_800DBFF0 + id * 0x9A0);
+    struct108 *cam = (struct108 *) ((u8 *) g_player_views + id * 0x9A0);
     s32 *a = (s32 *) cmd;
     u8 *rec;
     u8 *mk;
 
-    if (D_80082FA0 < id) {
+    if (g_last_player_index < id) {
         return 0;
     }
     switch (op) {
@@ -303,13 +303,13 @@ s32 event_action_camera(s32 id, s32 op, u8 *cmd) {
         return 0;
     case 25:
         cam->pad3A4 = (f32) a[2] * (1.0f / 65536.0f);
-        D_800D2DB0 = cam->pad3A4;
+        g_camera_event_heading = cam->pad3A4;
         return 0;
     case 26:
         camera_init_controller(cam);
         return 0;
     case 27:
-        D_800898C0 = a[2] - 1;
+        g_camera_restore_skip = a[2] - 1;
         return 0;
     default:
         return 0;
@@ -340,8 +340,8 @@ s32 event_query_camera(s32 arg0, s32 arg1, u8 *arg2) {
     struct127 *temp_v0;
     u8 *temp_v1;
 
-    temp_a3 = &D_800DBFF0[arg0];
-    if (D_80082FA0 < arg0) {
+    temp_a3 = &g_player_views[arg0];
+    if (g_last_player_index < arg0) {
         goto block_13;
     }
     switch (arg1) {
@@ -387,7 +387,7 @@ extern s32 D_800D3250[];
  * the caller in game_14FF90 declares s32 and ignores it). */
 /* was func_15097BA8 */
 s32 camera_timed_push_back(s32 id) {
-    struct108 *r = &D_800DBFF0[id];
+    struct108 *r = &g_player_views[id];
     struct17 *a;
     struct17 *b;
     struct17 d;

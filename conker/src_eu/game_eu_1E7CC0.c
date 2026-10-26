@@ -31,7 +31,7 @@ typedef struct {
     u8 *p;
     u8 b;
 } Ba4b0;
-extern s8 D_800E0FFE[];
+extern s8 g_mp_pad_share_slot[]; /* was D_800E0FFE */
 u8 *mesh_effect_spawn(Sa4b0 *, s32, s32, u8, s32);
 /* was func_151BA4B0 */
 u8 *player_screen_uv_mesh_spawn(u8 *arg0, u8 arg1, s32 arg2)
@@ -57,14 +57,14 @@ u8 *player_screen_uv_mesh_spawn(u8 *arg0, u8 arg1, s32 arg2)
   goto dummy_label_283214; // fakematch: label barrier (permuter) puts sw a0 (b.p) before the arg0[0x3B] load
   dummy_label_283214:
   ;
-  if ((idx < 2) && (D_800E0FFE[idx] != 0))
+  if ((idx < 2) && (g_mp_pad_share_slot[idx] != 0))
   {
-    if (D_80090130 == 2)
+    if (g_human_player_count == 2)
     {
       s.u39 = 0xFD;
     }
     else
-      if (D_80090130 == 4)
+      if (g_human_player_count == 4)
     {
       if (idx == 0)
       {
@@ -94,7 +94,7 @@ u8 *player_screen_uv_mesh_spawn(u8 *arg0, u8 arg1, s32 arg2)
   return ret;
 }
 
-extern u8 D_800DA130[];
+extern u8 g_cam_view_proj_mtx[]; /* was D_800DA130 */
 extern u8 *g_obj0_camera; /* was D_800CCA08 */
 
 // object_screen_uv_project: g_mesh_effect_draw_fns kind-3 handler (s32 (u8 *, s32), called by mesh_effect_draw; same scheme as
@@ -103,8 +103,8 @@ extern u8 *g_obj0_camera; /* was D_800CCA08 */
 // drawn) when the object has no matrix, is hidden ((+0x74 & 0xF) == 0xF) or is the object this view looks from
 // (+0x318 / +0x31C rider check when D_800BE616, else g_obj0_camera / g_obj0_state). Otherwise copies the object's
 // matrix (+0x1D4 + 0x40, fixed point when D_800C42B0), with its fourth column set to (0, 0, 0, 1), into this frame's Mtx (rec +0x78 +
-// D_800BE9C0 * 0x40), and maps each vertex of the slot's copy to texture coordinates: its screen position (object
-// matrix, then view matrix D_800DA130[slot]) times 2.002, relative to the screen position of the object point
+// g_dl_buf_index * 0x40), and maps each vertex of the slot's copy to texture coordinates: its screen position (object
+// matrix, then view matrix g_cam_view_proj_mtx[slot]) times 2.002, relative to the screen position of the object point
 // (0, 67, 159) truncated to a multiple of 1024. Returns 1.
 /* was func_151BA634 */
 s32 object_screen_uv_project(u8 *rec, s32 slot) {
@@ -153,8 +153,8 @@ s32 object_screen_uv_project(u8 *rec, s32 slot) {
     m[1][3] = 0.0f;
     m[2][3] = 0.0f;
     m[3][3] = 1.0f;
-    guMtxF2L(m, (Mtx *) (rec + 0x78 + D_800BE9C0 * 0x40));
-    memcpy(view, D_800DA130 + slot * 0x40, 0x40);
+    guMtxF2L(m, (Mtx *) (rec + 0x78 + g_dl_buf_index * 0x40));
+    memcpy(view, g_cam_view_proj_mtx + slot * 0x40, 0x40);
     view[0][3] = 0.0f;
     view[1][3] = 0.0f;
     view[2][3] = 0.0f;
@@ -166,7 +166,7 @@ s32 object_screen_uv_project(u8 *rec, s32 slot) {
     baseX = (s32) (cx * (1.0f / 1024.0f)) * 1024.0f;
     baseY = (s32) (cy * (1.0f / 1024.0f)) * 1024.0f;
     for (i = 0; i < 20; i++) {
-        v = *(Vtx **) (rec + D_800BE9C0 * 0x10 + slot * 4 + 0x58) + i;
+        v = *(Vtx **) (rec + g_dl_buf_index * 0x10 + slot * 4 + 0x58) + i;
         mtxf_transform_point(m, v->v.ob[0], v->v.ob[1], v->v.ob[2], &wx, &wy, &wz);
         mtxf_transform_point(view, wx, wy, wz, &sx, &sy, &sz);
         sx *= 2.002f;
@@ -266,20 +266,20 @@ void hitinfo_from_obj_floor(void *, u8 *);
 void emit_random_sprites(u8 *, u8, s32);
 u8 *mdl_particle_spawn_ex(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extraSize, u8 arg5, s32 owner);
 /* model-space launch points (rodata of this function, read through the ROM image) */
-extern f32 D_800AA970[3];       /* piece 0x27: from / to */
-extern f32 D_800AA97C[3];
-extern f32 D_800AA988[3];       /* piece 0x28: from, to = one of two */
-extern f32 D_800AA994[2][3];
-extern f32 D_800AA9AC[4][3];    /* pieces 0x29: from / to / size */
-extern f32 D_800AA9DC[4][3];
-extern f32 D_800AAA0C[4];
-extern f32 D_800AAA1C[3];       /* pieces 0x2B: common from, to, position offset */
-extern f32 D_800AAA28[2][3];
-extern f32 D_800AAA40[2][3];
-extern f32 D_800AAA58[4][3];    /* pieces 0x2C: from / to / position offset / size */
-extern f32 D_800AAA88[4][3];
-extern f32 D_800AAAB8[4][3];
-extern f32 D_800AAAE8[4];
+extern f32 g_shatter27_from[3];       /* piece 0x27: from / to; was D_800AA970 */
+extern f32 g_shatter27_to[3]; /* was D_800AA97C */
+extern f32 g_shatter28_from[3];       /* piece 0x28: from, to = one of two; was D_800AA988 */
+extern f32 g_shatter28_to[2][3]; /* was D_800AA994 */
+extern f32 g_shatter29_from[4][3];    /* pieces 0x29: from / to / size; was D_800AA9AC */
+extern f32 g_shatter29_to[4][3]; /* was D_800AA9DC */
+extern f32 g_shatter29_size[4]; /* was D_800AAA0C */
+extern f32 g_shatter2b_from[3];       /* pieces 0x2B: common from, to, position offset; was D_800AAA1C */
+extern f32 g_shatter2b_to[2][3]; /* was D_800AAA28 */
+extern f32 g_shatter2b_pos_off[2][3]; /* was D_800AAA40 */
+extern f32 g_shatter2c_from[4][3];    /* pieces 0x2C: from / to / position offset / size; was D_800AAA58 */
+extern f32 g_shatter2c_to[4][3]; /* was D_800AAA88 */
+extern f32 g_shatter2c_pos_off[4][3]; /* was D_800AAAB8 */
+extern f32 g_shatter2c_size[4]; /* was D_800AAAE8 */
 
 /* random launch speed factor 0.083..0.283 and spin -14.4..14.4 */
 #define SHARD_SPEED() ((random_float() * 200.0f + 83.0f) * 0.001f)
@@ -307,7 +307,7 @@ void object_model_shatter(u8 *obj, u8 arg1, s32 arg2) {
     smoke.b = -0x3F;
     smoke.bRange = 0x34;
     smoke.count = 6;
-    smoke.countRange = 5 >> ((D_80082FA0 >= 2) ? 1 : 0);
+    smoke.countRange = 5 >> ((g_last_player_index >= 2) ? 1 : 0);
     smoke.pos[0] = *(f32 *)(obj + 0x14);
     smoke.pos[1] = *(f32 *)(obj + 0x18) + 25.0f;
     smoke.pos[2] = *(f32 *)(obj + 0x1C);
@@ -318,7 +318,7 @@ void object_model_shatter(u8 *obj, u8 arg1, s32 arg2) {
     smoke.v1Range = 68.0f;
     smoke.v2 = 609.0f;
     smoke.v2Range = 271.0f;
-    smoke.lifeRange = 3 >> ((D_80082FA0 >= 2 || D_8008FD8C >= 8) ? 1 : 0);
+    smoke.lifeRange = 3 >> ((g_last_player_index >= 2 || g_player_count >= 8) ? 1 : 0);
     smoke.s4C[0] = 0x19;
     smoke.s4C[1] = 0xF;
     smoke.s4C[2] = 0x64;
@@ -329,7 +329,7 @@ void object_model_shatter(u8 *obj, u8 arg1, s32 arg2) {
     smoke.f40 = 0.76900005f;
     smoke.f44 = -0.16900001f;
     smoke.f48 = 0.0f;
-    smoke.u58 = (D_80082FA0 >= 2 || D_8008FD8C >= 8) ? -1 : 0;
+    smoke.u58 = (g_last_player_index >= 2 || g_player_count >= 8) ? -1 : 0;
     emit_random_sprites((u8 *)&smoke, arg1, arg2);
 
     if (*(u8 **)(obj + 0x1D4) == NULL || (obj[0x74] & 0xF) == 0xF) {
@@ -371,8 +371,8 @@ void object_model_shatter(u8 *obj, u8 arg1, s32 arg2) {
     req.sizeX = 0.75f;
     random_float();
     req.gravity = -0.48800004f; /* -488 * 0.001 */
-    mtx_transform_point_or_origin(D_800AA970, req.from, mtx);
-    mtx_transform_point_or_origin(D_800AA97C, req.vel, mtx);
+    mtx_transform_point_or_origin(g_shatter27_from, req.from, mtx);
+    mtx_transform_point_or_origin(g_shatter27_to, req.vel, mtx);
     req.vel[0] = (req.vel[0] - req.from[0]) * speed;
     req.vel[1] = (req.vel[1] - req.from[1]) * speed;
     req.vel[2] = (req.vel[2] - req.from[2]) * speed;
@@ -392,8 +392,8 @@ void object_model_shatter(u8 *obj, u8 arg1, s32 arg2) {
     req.sizeX = 0.5f;
     random_float();
     req.gravity = -0.48800004f;
-    mtx_transform_point_or_origin(D_800AA988, req.from, mtx);
-    mtx_transform_point_or_origin(D_800AA994[random_int() & 1], req.vel, mtx);
+    mtx_transform_point_or_origin(g_shatter28_from, req.from, mtx);
+    mtx_transform_point_or_origin(g_shatter28_to[random_int() & 1], req.vel, mtx);
     req.vel[0] = (req.vel[0] - req.from[0]) * speed;
     req.vel[1] = (req.vel[1] - req.from[1]) * speed;
     req.vel[2] = (req.vel[2] - req.from[2]) * speed;
@@ -410,12 +410,12 @@ void object_model_shatter(u8 *obj, u8 arg1, s32 arg2) {
         if (random_int() & 1) {
             speed = SHARD_SPEED();
             req.life = (random_int() % 36U) + 30;
-            req.sizeX = D_800AAA0C[i];
-            req.sizeZ = D_800AAA0C[i];
+            req.sizeX = g_shatter29_size[i];
+            req.sizeZ = g_shatter29_size[i];
             random_float();
             req.gravity = -0.48800004f;
-            mtx_transform_point_or_origin(D_800AA9AC[i], req.from, mtx);
-            mtx_transform_point_or_origin(D_800AA9DC[i], req.vel, mtx);
+            mtx_transform_point_or_origin(g_shatter29_from[i], req.from, mtx);
+            mtx_transform_point_or_origin(g_shatter29_to[i], req.vel, mtx);
             req.vel[0] = (req.vel[0] - req.from[0]) * speed;
             req.vel[1] = (req.vel[1] - req.from[1]) * speed;
             req.vel[2] = (req.vel[2] - req.from[2]) * speed;
@@ -430,7 +430,7 @@ void object_model_shatter(u8 *obj, u8 arg1, s32 arg2) {
 
     /* pieces 0x2B: from one common point */
     req.model = 0x2B;
-    mtx_transform_point_or_origin(D_800AAA1C, req.from, mtx);
+    mtx_transform_point_or_origin(g_shatter2b_from, req.from, mtx);
     req.sizeX = 0.551f;
     req.sizeZ = 0.551f;
     for (i = 0; i < 2; i++) {
@@ -439,16 +439,16 @@ void object_model_shatter(u8 *obj, u8 arg1, s32 arg2) {
             req.life = (random_int() % 36U) + 30;
             random_float();
             req.gravity = -0.48800004f;
-            mtx_transform_point_or_origin(D_800AAA28[i], req.vel, mtx);
+            mtx_transform_point_or_origin(g_shatter2b_to[i], req.vel, mtx);
             req.vel[0] = (req.vel[0] - req.from[0]) * speed;
             req.vel[1] = (req.vel[1] - req.from[1]) * speed;
             req.vel[2] = (req.vel[2] - req.from[2]) * speed;
             req.pos[0] = origin[0];
             req.pos[1] = origin[1];
             req.pos[2] = origin[2];
-            req.pos[0] += D_800AAA40[i][0];
-            req.pos[1] += D_800AAA40[i][1];
-            req.pos[2] += D_800AAA40[i][2];
+            req.pos[0] += g_shatter2b_pos_off[i][0];
+            req.pos[1] += g_shatter2b_pos_off[i][1];
+            req.pos[2] += g_shatter2b_pos_off[i][2];
             req.spinX = SHARD_SPIN();
             req.spinZ = SHARD_SPIN();
             mdl_particle_spawn_ex((u8 *)&req, 3, 0xFF, bounds, 0, arg1, arg2);
@@ -461,21 +461,21 @@ void object_model_shatter(u8 *obj, u8 arg1, s32 arg2) {
         if (random_int() & 1) {
             speed = SHARD_SPEED();
             req.life = (random_int() % 36U) + 30;
-            req.sizeX = D_800AAAE8[i];
-            req.sizeZ = D_800AAAE8[i];
+            req.sizeX = g_shatter2c_size[i];
+            req.sizeZ = g_shatter2c_size[i];
             random_float();
             req.gravity = -0.48800004f;
-            mtx_transform_point_or_origin(D_800AAA58[i], req.from, mtx);
-            mtx_transform_point_or_origin(D_800AAA88[i], req.vel, mtx);
+            mtx_transform_point_or_origin(g_shatter2c_from[i], req.from, mtx);
+            mtx_transform_point_or_origin(g_shatter2c_to[i], req.vel, mtx);
             req.vel[0] = (req.vel[0] - req.from[0]) * speed;
             req.vel[1] = (req.vel[1] - req.from[1]) * speed;
             req.vel[2] = (req.vel[2] - req.from[2]) * speed;
             req.pos[0] = origin[0];
             req.pos[1] = origin[1];
             req.pos[2] = origin[2];
-            req.pos[0] += D_800AAAB8[i][0];
-            req.pos[1] += D_800AAAB8[i][1];
-            req.pos[2] += D_800AAAB8[i][2];
+            req.pos[0] += g_shatter2c_pos_off[i][0];
+            req.pos[1] += g_shatter2c_pos_off[i][1];
+            req.pos[2] += g_shatter2c_pos_off[i][2];
             req.spinX = SHARD_SPIN();
             req.spinZ = SHARD_SPIN();
             mdl_particle_spawn_ex((u8 *)&req, 3, 0xFF, bounds, 0, arg1, arg2);
@@ -504,7 +504,7 @@ s32 sound_pick_variant(s32, s32);
 // from idle (id 0x4A7) switches the voice to the run sound 0x4A8 (new voice at volume 0x2EE0, returns 1); stopping
 // while running (0x4A8) switches back to idle 0x4A7 (0x2000); while the wind-down 0x4A9 plays it waits (returns 1).
 // The run / wind-down voice fades its volume (*vol * level / 256) in (bit 7) or out by 8 a frame (returns 1 when
-// faded out); with a timer it counts down by D_800BE9E4 and, at the end while running, starts 0x4A9 and a new
+// faded out); with a timer it counts down by g_frame_ticks and, at the end while running, starts 0x4A9 and a new
 // random (random_int & 0x200) timer. Its pitch is |speed| * +0xB8 / 2. Repacks +0x1C; when *vol is 0 or the
 // voice was flagged (+0x10 & 0x80) it stops its sound (+0x24) and clears the id, the flag and *vol. Returns 0.
 /* was func_151BB690 */
@@ -587,7 +587,7 @@ s32 tank_engine_sound_update(u8 *voice, s32 arg1, s32 *vol, s32 arg3, s32 *pitch
                 }
             }
         } else {
-            timer -= D_800BE9E4;
+            timer -= g_frame_ticks;
             if (timer <= 0) {
                 timer = 0;
                 if (*id == 0x4A8) {
@@ -774,8 +774,8 @@ void impact_spark_flash_spawn(u8 *, u8, s32);
 void impact_rumble_spawn(s32, u8, s32);
 void impact_cam_shake_spawn(void *, u8, s32);
 void impact_debris_emitter_spawn(s32, u8, s32);
-extern s32 D_8008FF40;
-extern s32 D_8008FF4C;
+extern s32 g_explosion_fx_vec_a; /* was D_8008FF40 */
+extern s32 g_explosion_fx_vec_b; /* was D_8008FF4C */
 
 /* was func_151BC04C */
 void explosion_effects_at(s32 arg0, u8 *arg1, u8 *arg2, u8 arg3, s32 arg4) {
@@ -866,7 +866,7 @@ void explosion_effects_at(s32 arg0, u8 *arg1, u8 *arg2, u8 arg3, s32 arg4) {
         sp.uEC = -0x40;
         sp.uEE = 0x47;
         sp.uF0 = 6;
-        if (D_80082FA0 >= 2) {
+        if (g_last_player_index >= 2) {
             var_v0 = 1;
         } else {
             var_v0 = 0;
@@ -882,7 +882,7 @@ void explosion_effects_at(s32 arg0, u8 *arg1, u8 *arg2, u8 arg3, s32 arg4) {
         sp.u110 = 53.0f;
         sp.u114 = 203.0f;
         sp.u118 = 414.0f;
-        if ((D_80082FA0 >= 2) || (var_v0_2 = 0, ((D_8008FD8C < 8) == 0))) {
+        if ((g_last_player_index >= 2) || (var_v0_2 = 0, ((g_player_count < 8) == 0))) {
             var_v0_2 = 1;
         }
         sp.u120 = 3 >> var_v0_2;
@@ -896,7 +896,7 @@ void explosion_effects_at(s32 arg0, u8 *arg1, u8 *arg2, u8 arg3, s32 arg4) {
         sp.u128 = 0.87200004f;
         sp.u12C = -0.39800003f;
         sp.u130 = 0.36400002f;
-        if ((D_80082FA0 >= 2) || (D_8008FD8C >= 8)) {
+        if ((g_last_player_index >= 2) || (g_player_count >= 8)) {
             sp.u140 = -1;
         } else {
             sp.u140 = 0;
@@ -915,12 +915,12 @@ void explosion_effects_at(s32 arg0, u8 *arg1, u8 *arg2, u8 arg3, s32 arg4) {
                 impact_debris_emitter_spawn(&sp.uAC, arg3, arg4);
             }
         }
-        (*(s32 *)((u8 *)(&sp.u40) + 0)) = (s32) (*(s32 *)((u8 *)(&D_8008FF40) + 0));
-        (*(s32 *)((u8 *)(&sp.u40) + 4)) = (s32) (*(s32 *)((u8 *)(&D_8008FF40) + 4));
-        (*(s32 *)((u8 *)(&sp.u40) + 8)) = (s32) (*(s32 *)((u8 *)(&D_8008FF40) + 8));
-        (*(s32 *)((u8 *)(&sp.u34) + 0)) = (s32) (*(s32 *)((u8 *)(&D_8008FF4C) + 0));
-        (*(s32 *)((u8 *)(&sp.u34) + 4)) = (s32) (*(s32 *)((u8 *)(&D_8008FF4C) + 4));
-        (*(s32 *)((u8 *)(&sp.u34) + 8)) = (s32) (*(s32 *)((u8 *)(&D_8008FF4C) + 8));
+        (*(s32 *)((u8 *)(&sp.u40) + 0)) = (s32) (*(s32 *)((u8 *)(&g_explosion_fx_vec_a) + 0));
+        (*(s32 *)((u8 *)(&sp.u40) + 4)) = (s32) (*(s32 *)((u8 *)(&g_explosion_fx_vec_a) + 4));
+        (*(s32 *)((u8 *)(&sp.u40) + 8)) = (s32) (*(s32 *)((u8 *)(&g_explosion_fx_vec_a) + 8));
+        (*(s32 *)((u8 *)(&sp.u34) + 0)) = (s32) (*(s32 *)((u8 *)(&g_explosion_fx_vec_b) + 0));
+        (*(s32 *)((u8 *)(&sp.u34) + 4)) = (s32) (*(s32 *)((u8 *)(&g_explosion_fx_vec_b) + 4));
+        (*(s32 *)((u8 *)(&sp.u34) + 8)) = (s32) (*(s32 *)((u8 *)(&g_explosion_fx_vec_b) + 8));
         sp.u4C = 4;
         sp.u50 = 8;
         (*(f32 *)((u8 *)(&sp.u54) + 0)) = (f32) (*(f32 *)((u8 *)(&sp.u144) + 0));
@@ -971,13 +971,13 @@ void shot_scorch_decal_spawn(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
 }
 
 struct225 *light_create_obj_beam(struct127 *arg0, u8 arg1, struct17 *arg2, struct17 *arg3, f32 arg4, u8 arg5, s16 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, u8 argC, u8 argD, u8 argE, s32 argF);
-extern struct17 D_800AAB40;
-extern struct17 D_800AAB4C;
+extern struct17 g_obj_beam_light_from; /* was D_800AAB40 */
+extern struct17 g_obj_beam_light_to; /* was D_800AAB4C */
 
 /* was func_151BC624 */
 void obj_beam_light_attach(struct127 *arg0) {
     if (arg0 != NULL) {
-        light_create_obj_beam(arg0, 1, &D_800AAB40, &D_800AAB4C, 0.017699f, 2, 300, 255, 255, 255, 255, 1, 0, 0, 255, 1);
+        light_create_obj_beam(arg0, 1, &g_obj_beam_light_from, &g_obj_beam_light_to, 0.017699f, 2, 300, 255, 255, 255, 255, 1, 0, 0, 255, 1);
     }
 }
 
@@ -1035,7 +1035,7 @@ void obj_trail_smoke_light_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     s32 temp_v0_3;
     u8 *temp_v0_2;
 
-    if ((D_80082FA0 < 2) && (D_8008FD8C < 5)) {
+    if ((g_last_player_index < 2) && (g_player_count < 5)) {
         sp.uC0 = arg0 + 0x14;
         sp.uC4 = arg0 + 0x18;
         sp.uC8 = arg0 + 0x1C;
@@ -1168,7 +1168,7 @@ s32 trail_ring_life_fade_update(u8 *arg0) {
                 var_a1 = (*(u8 *)((u8 *)arg0 + 0x25)) - 1;
             }
             temp_v1 = (var_a1 * 0x14) + temp_v0;
-            (*(s16 *)((u8 *)temp_v1 + 0xC)) = (s16) ((*(s16 *)((u8 *)temp_v1 + 0xC)) - D_800BE9E4);
+            (*(s16 *)((u8 *)temp_v1 + 0xC)) = (s16) ((*(s16 *)((u8 *)temp_v1 + 0xC)) - g_frame_ticks);
             temp_a2 = (*(s16 *)((u8 *)temp_v1 + 0xC));
             if (temp_a2 < 0) {
                 if (var_a1 != (*(s8 *)((u8 *)arg0 + 0x2D))) {
@@ -1243,7 +1243,7 @@ s32 trail_follow_owner_update(u8 *arg0) {
     sp.u9C = temp_a2;
     sp.u90 = (*(f32 *)((u8 *)arg0 + 0x18)) - (*(f32 *)((u8 *)temp_a2 + 0x10));
     temp_f0 = vec3_length(&sp.u88);
-    (*(f32 *)((u8 *)sp.u9C + 0x14)) = (f32) ((*(f32 *)((u8 *)sp.u9C + 0x14)) + (temp_f0 * 0.048708f * D_800BE9A4));
+    (*(f32 *)((u8 *)sp.u9C + 0x14)) = (f32) ((*(f32 *)((u8 *)sp.u9C + 0x14)) + (temp_f0 * 0.048708f * g_frame_step_f));
     temp_f2 = (*(f32 *)((u8 *)sp.u9C + 0x14));
     (*(f32 *)((u8 *)sp.u9C + 0x1C)) = (f32) ((*(f32 *)((u8 *)sp.u9C + 0x1C)) + (temp_f0 * 9.708836f));
     sp4C = temp_f2;
@@ -1252,7 +1252,7 @@ s32 trail_follow_owner_update(u8 *arg0) {
         temp_f0_2 = 1.0f / sp4C;
         (*(f32 *)((u8 *)(&sp.u6C) + 0)) = (*(f32 *)((u8 *)temp_t3 + 0));
         (*(s32 *)((u8 *)(&sp.u6C) + 4)) = (s32) (*(s32 *)((u8 *)temp_t3 + 4));
-        var_f16 = (*(f32 *)((u8 *)sp.u9C + 0x18)) + D_800BE9A4;
+        var_f16 = (*(f32 *)((u8 *)sp.u9C + 0x18)) + g_frame_step_f;
         (*(s32 *)((u8 *)(&sp.u6C) + 8)) = (s32) (*(s32 *)((u8 *)temp_t3 + 8));
         temp_f2_2 = (*(f32 *)((u8 *)sp.u9C + 0x20));
         var_f14 = temp_f2_2;
@@ -1305,9 +1305,9 @@ Gfx *gfx_set_combine_mode(Gfx *arg0, u8 arg1, u8 *arg2);
 Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
 u8 *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 f32 sqrtf(f32);
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 extern s32 g_render_mode_pairs[]; /* was D_800A4EA8 */
-extern u8 D_80091084[];
+extern u8 g_ribbon_trail_texture[]; /* was D_80091084 */
 
 /* one ribbon vertex: the strip point +- the side offset, texture s from the point, t 0 / 0x7FF */
 #define RIBBON_VTX(v, x, y, z, s, t, a) \
@@ -1324,12 +1324,12 @@ extern u8 D_80091084[];
         (v)->flag = 0; \
     } while (0)
 
-// ribbon_strip_draw: D_8008A644 draw handler (kind 10) of a ribbon through the point ring obj +0x94 (0x14 bytes:
+// ribbon_strip_draw: g_fxrec_draw_fns draw handler (kind 10) of a ribbon through the point ring obj +0x94 (0x14 bytes:
 // x, y, z, alpha byte +0xE, f32 texture s +0x10; ring of obj[0x25], newest obj +0x2E - 1, oldest obj +0x2D, count
 // obj +0x2C). Each point gets two vertices 35 units either side along (point - previous point) x (point - camera);
 // each segment loads 4 vertices and draws two triangles. With obj +0x1E bit 2 the strip starts at the object's
-// position (+0x10, alpha 0x80, s 0) instead of the newest point. Texture D_80091084, white, render mode
-// D_800D30BC | 0x82CA0 with the g_render_mode_pairs entry 3; vertices from vtx_slot_buffer_get (obj[0x25] * 32 + 0xA0 bytes).
+// position (+0x10, alpha 0x80, s 0) instead of the newest point. Texture g_ribbon_trail_texture, white, render mode
+// g_gfx_tlut_mode | 0x82CA0 with the g_render_mode_pairs entry 3; vertices from vtx_slot_buffer_get (obj[0x25] * 32 + 0xA0 bytes).
 // Returns the display list end; draws nothing with fewer than 2 points or no vertex buffer.
 /* was func_151BD040 */
 s32 ribbon_strip_draw(u8 *obj, s32 gfx, s16 arg2) {
@@ -1364,11 +1364,11 @@ s32 ribbon_strip_draw(u8 *obj, s32 gfx, s16 arg2) {
     cam = camera_get_pos(arg2);
     pts = *(u8 **) (obj + 0x94);
     flag = 1;
-    g = gfx_load_texture_cached((Gfx *) gfx, (s32) D_80091084, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
+    g = gfx_load_texture_cached((Gfx *) gfx, (s32) g_ribbon_trail_texture, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
     g = gfx_env_color_cached(g, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     g = gfx_set_combine_mode(g, 0x4E, &flag);
     g = gfx_geometry_mode_cached(g, 0x200005, 0x1F0600);
-    g = (Gfx *) gfx_other_mode_cached(g, D_800D30BC | 0x80000 | 0x2CA0, g_render_mode_pairs[7] | g_render_mode_pairs[6], &flag);
+    g = (Gfx *) gfx_other_mode_cached(g, g_gfx_tlut_mode | 0x80000 | 0x2CA0, g_render_mode_pairs[7] | g_render_mode_pairs[6], &flag);
 
     if (*(u16 *) (obj + 0x1E) & 2) {
         j = *(s8 *) (obj + 0x2E) - 1;
@@ -1736,9 +1736,9 @@ void bone_emitter_particle_emit(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, f32 arg4
 /* was func_151BDD00 */
 f32 bone_emitter_timer_step(s16 *arg0) {
     s16 temp_v0 = arg0[0x40];
-    f32 ret = (f32)temp_v0 * 2 * D_800AAC40 + D_800AAC44;
+    f32 ret = (f32)temp_v0 * 2 * g_bone_emitter_timer_scale + g_bone_emitter_timer_base;
 
-    arg0[0x40] = temp_v0 + D_800BE9E4;
+    arg0[0x40] = temp_v0 + g_frame_ticks;
     return ret;
 }
 
@@ -1927,12 +1927,12 @@ s32 aura_burst_group_spawn(u8 *obj, u8 alpha, s32 owner) {
         fr.extra.u30 = 95.0f;
         fr.extra.u34 = 207.5f;
         fr.extra.group = group;
-        fr.spec.angle[0] = ((s32 *)D_800A5860)[0];
-        fr.spec.angle[1] = ((s32 *)D_800A5860)[1];
-        fr.spec.angle[2] = ((s32 *)D_800A5860)[2];
-        fr.spec.vel[0] = ((s32 *)D_800A5860)[0];
-        fr.spec.vel[1] = ((s32 *)D_800A5860)[1];
-        fr.spec.vel[2] = ((s32 *)D_800A5860)[2];
+        fr.spec.angle[0] = ((s32 *)g_vec3_zero)[0];
+        fr.spec.angle[1] = ((s32 *)g_vec3_zero)[1];
+        fr.spec.angle[2] = ((s32 *)g_vec3_zero)[2];
+        fr.spec.vel[0] = ((s32 *)g_vec3_zero)[0];
+        fr.spec.vel[1] = ((s32 *)g_vec3_zero)[1];
+        fr.spec.vel[2] = ((s32 *)g_vec3_zero)[2];
         fr.spec.scale[0] = 1.0f;
         fr.spec.scale[1] = 1.0f;
         fr.spec.scale[2] = 1.0f;
@@ -1997,12 +1997,12 @@ s32 aura_burst_group_spawn(u8 *obj, u8 alpha, s32 owner) {
         spawn.halfH = 100.0f;
         fr.emit.u1C = 0.7f;
         fr.emit.u20 = 1e-06f;
-        spawn.angle[0] = ((s32 *)D_800A5860)[0];
-        spawn.angle[1] = ((s32 *)D_800A5860)[1];
-        spawn.angle[2] = ((s32 *)D_800A5860)[2];
-        spawn.vel[0] = ((s32 *)D_800A5860)[0];
-        spawn.vel[1] = ((s32 *)D_800A5860)[1];
-        spawn.vel[2] = ((s32 *)D_800A5860)[2];
+        spawn.angle[0] = ((s32 *)g_vec3_zero)[0];
+        spawn.angle[1] = ((s32 *)g_vec3_zero)[1];
+        spawn.angle[2] = ((s32 *)g_vec3_zero)[2];
+        spawn.vel[0] = ((s32 *)g_vec3_zero)[0];
+        spawn.vel[1] = ((s32 *)g_vec3_zero)[1];
+        spawn.vel[2] = ((s32 *)g_vec3_zero)[2];
         spawn.scale[0] = 1.0f;
         spawn.scale[1] = 1.0f;
         spawn.scale[2] = 1.0f;
@@ -2025,13 +2025,13 @@ s32 aura_burst_group_spawn(u8 *obj, u8 alpha, s32 owner) {
 }
 
 void mtx_transform_points(f32 **, f32 **, void *, s32);
-extern f32 D_800AAB58[3]; /* the two emitter offsets (bone space) */
-extern f32 D_800AAB64[3];
-extern f32 D_800AAB70[3]; /* the two direction points */
-extern f32 D_800AAB7C[3];
+extern f32 g_aura_burst_emit_pt0[3]; /* the two emitter offsets (bone space); was D_800AAB58 */
+extern f32 g_aura_burst_emit_pt1[3]; /* was D_800AAB64 */
+extern f32 g_aura_burst_dir_pt0[3]; /* the two direction points; was D_800AAB70 */
+extern f32 g_aura_burst_dir_pt1[3]; /* was D_800AAB7C */
 // player_twin_emitters_follow: handler 2 of D_8008A980 (`void (u8 *)`; same shape as twin_emitters_follow_owner).
 // Ends the effect (+0xE = -1) when the owner (+0x28) is gone or its id +0x3B no longer matches +0x2C. While the
-// owner has bone matrices (+0x1D4) and its +0x74 low nibble is not 0xF, it transforms the four points D_800AAB58..7C
+// owner has bone matrices (+0x1D4) and its +0x74 low nibble is not 0xF, it transforms the four points g_aura_burst_emit_pt0..7C
 // by the first matrix (mtx_transform_points) and gives each of the two emitter pairs (+0x30 / +0x38 and +0x34 / +0x3C) its
 // position and direction: the first kind gets the flag 1 at +0x168, the second the flag 2 (and loses 4) at +0x58;
 // otherwise both flags are cleared. For the four players (owner index in g_objects below 4) the sizes follow the
@@ -2055,10 +2055,10 @@ void aura_burst_follow_owner(u8 *arg0) {
         return;
     }
     if (*(u8 **) (owner + 0x1D4) != NULL && (owner[0x74] & 0xF) != 0xF) {
-        src[0] = D_800AAB58;
-        src[1] = D_800AAB64;
-        src[2] = D_800AAB70;
-        src[3] = D_800AAB7C;
+        src[0] = g_aura_burst_emit_pt0;
+        src[1] = g_aura_burst_emit_pt1;
+        src[2] = g_aura_burst_dir_pt0;
+        src[3] = g_aura_burst_dir_pt1;
         dst[0] = pos[0];
         dst[1] = pos[1];
         dst[2] = dir[0];
@@ -2176,13 +2176,13 @@ void aura_burst_delete(struct260 * arg0) {
 s32 aura_particle_flicker_update(u8 *arg0) {
     f32 *s = (f32 *)(arg0 + 0x110);
 
-    s[9] -= D_800BE9A4;
+    s[9] -= g_frame_step_f;
     if (s[9] < 0.0f) {
         s[9] = random_float() * 4.0f;
         s[6] = s[2] + s[4] * random_float();
     }
     *(f32 *)(arg0 + 0x2C) += (s[6] - *(f32 *)(arg0 + 0x2C)) * 0.35f;
-    s[10] -= D_800BE9A4;
+    s[10] -= g_frame_step_f;
     if (s[10] < 0.0f) {
         s[10] = random_float() * 9.0f;
         if (random_int() & 1) {
@@ -2192,7 +2192,7 @@ s32 aura_particle_flicker_update(u8 *arg0) {
         }
     }
     *(f32 *)(arg0 + 0x30) += (s[7] - *(f32 *)(arg0 + 0x30)) * 0.4f;
-    s[14] -= D_800BE9A4;
+    s[14] -= g_frame_step_f;
     if (s[14] < 0.0f) {
         s[14] = random_float() * 10.0f;
         s[13] = s[11] + s[12] * random_float();
@@ -2279,14 +2279,14 @@ void aura_particle_free(struct210 * arg0) {
 }
 
 typedef struct { s32 a[4]; } V4_151BEC7C;
-extern V4_151BEC7C D_800AAB88;
+extern V4_151BEC7C g_aura_flicker_values; /* was D_800AAB88 */
 /* was func_151BEC7C */
 s32 aura_emitter_flicker_update(u8 *arg0) {
     u8 *v = arg0 + 0x110;
     V4_151BEC7C sp24;
     f32 f;
-    sp24 = D_800AAB88;
-    *(s16 *)(arg0 + 0x170) = *(s16 *)(arg0 + 0x170) - D_800BE9E4;
+    sp24 = g_aura_flicker_values;
+    *(s16 *)(arg0 + 0x170) = *(s16 *)(arg0 + 0x170) - g_frame_ticks;
     if (*(s16 *)(arg0 + 0x170) < 0) {
         *(s8 *)(arg0 + 0x18) = sp24.a[random_int() & 3];
         *(s16 *)(arg0 + 0x170) = (random_int() & 7) + 3;

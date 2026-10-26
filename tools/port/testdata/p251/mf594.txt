@@ -6,19 +6,19 @@
 \#^    s32 v = arg0\[0x1F\];$#s/0x1F/0x1E/
 \#^    if (arg0\[0x24\] != 0) {$#s/!=/==/
 \#^        if (v != maxAlpha\[kind\]) {$#s/!=/</
-\#^            v += D_800BE9E4 << 4;$#s/<< 4/<< 3/
+\#^            v += g_frame_ticks << 4;$#s/<< 4/<< 3/
 \#^            if (v > maxAlpha\[kind\]) {$#s/>/>=/
 \#^                v = maxAlpha\[kind\];$#s/maxAlpha/grow/
 \#^    } else if (v != 0) {$#s/v != 0/v > 1/
-\#^        v -= D_800BE9E4 \* fadeRate\[kind\];$#s/fadeRate/grow/
+\#^        v -= g_frame_ticks \* fadeRate\[kind\];$#s/fadeRate/grow/
 \#^        if (v < 0) {$#s/v < 0/v < 1/
 \#^            v = 0;$#s/0/1/
 \#^    if (arg0\[0x24\] == 0 && v == 0) {$#s/&&/||/
 \#^    if (arg0\[0x24\] == 0 && v == 0) {$#s/0x24/0x25/
 \#^    particle_move_xz(arg0);$#s/arg0/arg0 + 4/
-\#^    size = \*(s16 \*) (arg0 + 0x14) + D_800BE9E4 \* grow\[kind\];$#s/0x14/0x16/
-\#^    size = \*(s16 \*) (arg0 + 0x14) + D_800BE9E4 \* grow\[kind\];$#s/(s16 \*)/(u16 *)/
-\#^    size = \*(s16 \*) (arg0 + 0x14) + D_800BE9E4 \* grow\[kind\];$#s/grow\[kind\]/scale[kind]/
+\#^    size = \*(s16 \*) (arg0 + 0x14) + g_frame_ticks \* grow\[kind\];$#s/0x14/0x16/
+\#^    size = \*(s16 \*) (arg0 + 0x14) + g_frame_ticks \* grow\[kind\];$#s/(s16 \*)/(u16 *)/
+\#^    size = \*(s16 \*) (arg0 + 0x14) + g_frame_ticks \* grow\[kind\];$#s/grow\[kind\]/scale[kind]/
 \#^    \*(s16 \*) (arg0 + 0x16) = size;$#s/0x16/0x18/
 \#^    \*(s16 \*) (arg0 + 0x14) = size;$#s/size/size + 1/
 \#^    if (kind == 3) {$#s/3/2/

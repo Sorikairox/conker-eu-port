@@ -6,13 +6,13 @@
 \#^    vtx_slot_buffer_get((s32 \*) (arg0 + 0x84), slot, (arg0\[0x25\] << 5) + 0xA0, (s32 \*) &vtx, NULL);$#s/slot,/0,/
 \#^    if (vtx == NULL) {$#s/==/!=/
 \#^    flag = 1;$#s/1/2/
-\#^        gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached((u8 \*) dl, &D_80090F10\[0xBC\], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),$#s/0xBC\],/0xBB],/
-\#^        gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached((u8 \*) dl, &D_80090F10\[0xBC\], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),$#s/0, 0xBC, 0, 0/0, 0xBB, 0, 0/
-\#^        gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached((u8 \*) dl, &D_80090F10\[0xBC\], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),$#s/&flag, 3)/\&flag, 2)/
+\#^        gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached((u8 \*) dl, &g_sprite_textures\[0xBC\], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),$#s/0xBC\],/0xBB],/
+\#^        gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached((u8 \*) dl, &g_sprite_textures\[0xBC\], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),$#s/0, 0xBC, 0, 0/0, 0xBB, 0, 0/
+\#^        gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached((u8 \*) dl, &g_sprite_textures\[0xBC\], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),$#s/&flag, 3)/\&flag, 2)/
 \#^                                    0x220005, 0x1D0600),$#s/0x1D0600/0x1D0601/
 \#^                      0x4C, &flag),$#s/0x4C/0x4E/
-\#^        D_800D30BC | 0x80000 | 0x2CA0, \*(s32 \*) (g_render_mode_pairs + 0xC) | \*(s32 \*) (g_render_mode_pairs + 8), &flag);$#s/0x2CA0/0x2CA1/
-\#^        D_800D30BC | 0x80000 | 0x2CA0, \*(s32 \*) (g_render_mode_pairs + 0xC) | \*(s32 \*) (g_render_mode_pairs + 8), &flag);$#s/+ 0xC)/+ 0x4)/
+\#^        g_gfx_tlut_mode | 0x80000 | 0x2CA0, \*(s32 \*) (g_render_mode_pairs + 0xC) | \*(s32 \*) (g_render_mode_pairs + 8), &flag);$#s/0x2CA0/0x2CA1/
+\#^        g_gfx_tlut_mode | 0x80000 | 0x2CA0, \*(s32 \*) (g_render_mode_pairs + 0xC) | \*(s32 \*) (g_render_mode_pairs + 8), &flag);$#s/+ 0xC)/+ 0x4)/
 \#^    cur = \*(s8 \*) (arg0 + 0x2E) - 1;$#s/- 1/- 2/
 \#^    if (cur < 0) {$#s/< 0/<= 0/
 \#^    next = cur - 1;$#s/- 1/- 2/

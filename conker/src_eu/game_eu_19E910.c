@@ -28,18 +28,18 @@ typedef struct {
     /* 0x5D */ u8 u5D;
 } Debris71100;
 
-extern f32 D_800A7270[6][3]; /* piece offsets */
-extern u8 D_800A7360[6];     /* piece ids when flags & 2 */
+extern f32 g_crate_piece_offsets[6][3]; /* piece offsets; was D_800A7270 */
+extern u8 g_crate_piece_ids[6];     /* piece ids when flags & 2; was D_800A7360 */
 
 // crate_break_pieces: breaks the object into 6 node_spawn_model_fx debris pieces at the object position (+0x10 / +0x12 /
-// +0x14) plus the D_800A7270 offsets. Piece id: D_800A7360[i] if flags & 2, else id + i if flags & 1, else id;
+// +0x14) plus the g_crate_piece_offsets offsets. Piece id: g_crate_piece_ids[i] if flags & 2, else id + i if flags & 1, else id;
 // model shared_dl_acquire(id). Spin = offset * 0.08 (+7 on |y|) plus random (rand >> 16) / 16384, u24 / u28 / u2C random
 // (rand >> 16) * 1.25 / 16384, scale 1, life 60. Then a ring of 10 sparks (particle_spark_ring_spawn) 80 below the object, and
 // +0x6E = 1. kind / owner go to every spawn; arg2 is the template's +0x5B byte.
 /* was func_15171100 */
 void debris_crate_break_pieces(u8 *obj, s32 id, s32 arg2, s32 flags, s32 kind, s32 owner) {
     Debris71100 t;
-    f32 (*off)[3] = D_800A7270;
+    f32 (*off)[3] = g_crate_piece_offsets;
     f32 x, y, z;
     s32 piece;
     s32 i;
@@ -68,7 +68,7 @@ void debris_crate_break_pieces(u8 *obj, s32 id, s32 arg2, s32 flags, s32 kind, s
     t.u5D = 0;
     for (i = 0; i < 6; i++, off++) {
         if (flags & 2) {
-            piece = D_800A7360[i];
+            piece = g_crate_piece_ids[i];
         } else if (flags & 1) {
             piece = id + i;
         } else {
@@ -109,14 +109,14 @@ void debris_crate_break_by_level(s32 arg0, u8 arg1, s32 arg2) {
 s32 shared_dl_acquire(s32);
 void node_spawn_model_fx(u8 *arg0, u8 arg1, s32 arg2);
 
-/* D_800A72B8: the 6 pieces (model id, offset, velocity) */
+/* g_barrel_pieces: the 6 pieces (model id, offset, velocity) */
 typedef struct {
     u16 model;
     u8 pad2[2];
     f32 offset[3];
     f32 vel[3];
 } Piece714BC;
-extern Piece714BC D_800A72B8[6];
+extern Piece714BC g_barrel_pieces[6]; /* was D_800A72B8 */
 
 /* node_spawn_model_fx's debris template */
 typedef struct {
@@ -138,14 +138,14 @@ typedef struct {
     /* 0x5D */ u8 u5D;
 } Debris714BC;
 
-// barrel_break_pieces: breaks the object into the 6 pieces of D_800A72B8 (node_spawn_model_fx debris, model
+// barrel_break_pieces: breaks the object into the 6 pieces of g_barrel_pieces (node_spawn_model_fx debris, model
 // shared_dl_acquire(id)) at the object position (+0x10 / +0x12 / +0x14) plus each piece offset, with the piece velocity,
 // spin from the offset (x, |y|, z times 0.09 / 0.23 / 0.09), u24 = vel x * 0.1, random u28 -2..2 / u2C -5..5,
 // scale 2, life 60; then sets +0x6E to 1. kind / arg2 go to node_spawn_model_fx.
 /* was func_151714BC */
 void debris_barrel_break_pieces(u8 *obj, u8 kind, s32 arg2) {
     Debris714BC t;
-    Piece714BC *pc = D_800A72B8;
+    Piece714BC *pc = g_barrel_pieces;
     f32 x, y, z;
     s32 i;
 
@@ -284,20 +284,20 @@ void debris_cloud_spawn(s32 count, s32 id, f32 x, f32 y, f32 z, f32 spinY, f32 s
 }
 
 void debris_sparks_rect_spawn(s16 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, u8 argB, s32 argC);
-extern f32 D_800A73A0;
-extern f32 D_800A73A4;
+extern f32 g_debris_sparks_k_73a0; /* was D_800A73A0 */
+extern f32 g_debris_sparks_k_73a4; /* was D_800A73A4 */
 
 /* was func_15171B70 */
 void debris_sparks_rect_by_type(u8 *arg0, u8 arg1, s32 arg2) {
     switch (arg0[0x72]) {
     case 0xEB:
-        debris_sparks_rect_spawn((s16 *)arg0, 400.0f, 500.0f, 0.0f, D_800A73A0, 0.0f, 2, 5, 20, 20, 1.0f, arg1, arg2);
+        debris_sparks_rect_spawn((s16 *)arg0, 400.0f, 500.0f, 0.0f, g_debris_sparks_k_73a0, 0.0f, 2, 5, 20, 20, 1.0f, arg1, arg2);
         break;
     case 0xF6:
         debris_sparks_rect_spawn((s16 *)arg0, 200.0f, 400.0f, -1800.0f, -1000.0f, -1200.0f, 2, 5, 4, 10, 1.0f, arg1, arg2);
         break;
     case 0xF8:
-        debris_sparks_rect_spawn((s16 *)arg0, 100.0f, 160.0f, -2500.0f, D_800A73A4, 0.0f, 2, 5, 4, 4, 0.5f, arg1, arg2);
+        debris_sparks_rect_spawn((s16 *)arg0, 100.0f, 160.0f, -2500.0f, g_debris_sparks_k_73a4, 0.0f, 2, 5, 4, 4, 0.5f, arg1, arg2);
         break;
     case 0xF9:
         debris_sparks_rect_spawn((s16 *)arg0, 200.0f, 100.0f, 100.0f, -300.0f, 0.0f, 1, 5, 4, 4, 1.0f, arg1, arg2);
@@ -340,10 +340,10 @@ void particle_sprite_spawn(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 ar
 typedef struct {
     u8 rgb[3];
 } Colour71E60;
-extern Colour71E60 D_8008CFC0; /* {0x45, 0x53, 0x68} */
+extern Colour71E60 g_spark_ring_colour; /* {0x45, 0x53, 0x68}; was D_8008CFC0 */
 
 // spark_ring_spawn: spawns count type-0xD particles (particle_sprite_spawn) evenly around a circle of the given radius
-// around (x, z) at height y; each moves outwards (200 * sin / cos of its angle), colour D_8008CFC0 (the asm copies
+// around (x, z) at height y; each moves outwards (200 * sin / cos of its angle), colour g_spark_ring_colour (the asm copies
 // it into a one-entry stack table indexed by colour; every caller passes 0), speed rand16 * speedScale + speedBase,
 // life 10..25, spread 100 + rand16 / 65536.
 /* was func_15171E60 */
@@ -362,7 +362,7 @@ void particle_spark_ring_spawn(f32 x, f32 y, f32 z, f32 radius, s32 speedBase, f
     s32 vx, vz;
     s32 life;
 
-    colours[0] = D_8008CFC0;
+    colours[0] = g_spark_ring_colour;
     if (count <= 0) {
         return;
     }

@@ -1,8 +1,8 @@
 \#^    rec\.a\.mode = 5;$#s/5/6/
 \#^    rec\.a\.room = owner\[0x3B\];$#s/0x3B/0x3A/
-\#^    \*(Vec3f2C40 \*) rec\.a\.offset = \*(Vec3f2C40 \*) &D_800AA700;$#s/D_800AA700/D_800AA70C/
+\#^    \*(Vec3f2C40 \*) rec\.a\.offset = \*(Vec3f2C40 \*) &g_cord_rig_off_a_r;$#s/g_cord_rig_off_a_r/g_cord_rig_off_a_l/
 \#^    rec\.b\.mode = 2;$#s/2/3/
-\#^    \*(Vec3f2C40 \*) rec\.b\.offset = \*(Vec3f2C40 \*) D_800AA748;$#s/D_800AA748/D_800AA754/
+\#^    \*(Vec3f2C40 \*) rec\.b\.offset = \*(Vec3f2C40 \*) g_cord_rig_off_b_r;$#s/g_cord_rig_off_b_r/g_cord_rig_off_b_l/
 \#^    t\.u2 = 100;$#s/100/101/
 \#^    t\.pos\[1\] = \*(f32 \*) (owner + 0x18);$#s/0x18/0x1C/
 \#^    t\.pos2\[2\] = \*(f32 \*) (owner + 0x1C);$#s/0x1C/0x14/
@@ -14,10 +14,10 @@
 \#^    t\.u30 = 0\.713000059f;#s/0\.713000059f/0.7f/
 \#^    \*(u8 \*\*) (obj + 0x3C) = o;$#s/0x3C/0x40/
 \#^    \*(u8 \*\*) (obj + 0x38) = o;$#s/0x38/0x34/
-\#^    \*(Vec3f2C40 \*) rec\.b\.offset = \*(Vec3f2C40 \*) D_800AA754;$#s/D_800AA754/D_800AA748/
+\#^    \*(Vec3f2C40 \*) rec\.b\.offset = \*(Vec3f2C40 \*) g_cord_rig_off_b_l;$#s/g_cord_rig_off_b_l/g_cord_rig_off_b_r/
 \#^    beam\.mode = 2;$#s/2/5/
 \#^    beam\.room = owner\[0x3B\];$#s/owner\[0x3B\]/0/
-\#^    \*(Vec3f2C40 \*) beam\.right = \*(Vec3f2C40 \*) D_800AA754;$#s/D_800AA754/D_800AA70C/
+\#^    \*(Vec3f2C40 \*) beam\.right = \*(Vec3f2C40 \*) g_cord_rig_off_b_l;$#s/g_cord_rig_off_b_l/g_cord_rig_off_a_l/
 \#^    b = effect_node_create(0x12C, -1, -1, 0, 0, 0x13#s/0x13/0x14/
 \#^    b = effect_node_create(0x12C, -1, -1, 0, 0, 0x13#s/0xFF, 1/0xFF, 0/
 \#^    \*(struct260 \*\*) (obj + 0x44) = b;$#s/0x44/0x48/

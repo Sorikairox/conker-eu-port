@@ -3333,7 +3333,7 @@ typedef struct {
     s32 unk28;
     f32 unk2C;
 } struct_eu_sfx; // size 0x30
-// one entry of the D_800BE628 array (size 0x180)
+// one entry of the g_player_cams array (size 0x180)
 typedef struct {
     u8  pad0[0x24];
     f32 unk24;
@@ -3409,7 +3409,7 @@ typedef struct {
     u8  pad1E[0x24 - 0x1E];
     struct_eu_1FFF60_child *unk24; // first child
 } struct_eu_1FFF60;
-// 12-byte table entry, D_80090F10 (game_169510); unk6/unk8 look like texture width/height
+// 12-byte table entry, g_sprite_textures (game_169510); unk6/unk8 look like texture width/height
 typedef struct {
     u8  pad0[0x6];
     u16 unk6;
@@ -3608,7 +3608,7 @@ typedef struct struct_eu_1B6590 {
     /* 0x0C */ struct struct_eu_1B6590 *unkC;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
-} struct_eu_1B6590; // D_800DF7C8 list node
+} struct_eu_1B6590; // g_afterimage_lists list node
 typedef struct {
     /* 0x00 */ u8  pad0[6];
     /* 0x06 */ u8  unk6;

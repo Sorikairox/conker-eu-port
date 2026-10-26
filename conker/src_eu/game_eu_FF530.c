@@ -12,7 +12,7 @@ extern Vtx *g_sky_backdrop_vtx[][2]; /* was D_800DC2B8 */
 
 /* P64: texture descriptor passed to gfx_load_texture_tile (the texture load) */
 typedef struct {
-    s32 image;   /* D_800DC2B0 */
+    s32 image;   /* g_sky_asset */
     s16 fmt;     /* 4 */
     s16 width;   /* 0x100 */
     u8  b8;
@@ -22,12 +22,12 @@ typedef struct {
 
 /* P64: draws a scrolling textured quad over the view of player g_cur_view_player (word 0 = player index, half +2 = a
  * parameter of render_set_scissor): texture, pipe sync, other modes and combiner, render_set_scissor / render_set_color_image,
- * the texture load (gfx_load_texture_tile), then the player's view matrix (D_800BE628[p] +0xBC, 0x180-byte records)
- * multiplied by a Z rotation `angle` (matrix_rotate_ypr) into the frame's Mtx D_800DC2E0[p * 2 + D_800BE9C0],
- * D_80089810 as the projection, perspective normalisation D_800BE628[p] +0xB8 and the 4 vertices
- * g_sky_backdrop_vtx[p][D_800BE9C0] whose t coordinates are scrolled by `scroll` * 81 (top / bottom rows depend on the
+ * the texture load (gfx_load_texture_tile), then the player's view matrix (g_player_cams[p] +0xBC, 0x180-byte records)
+ * multiplied by a Z rotation `angle` (matrix_rotate_ypr) into the frame's Mtx D_800DC2E0[p * 2 + g_dl_buf_index],
+ * g_identity_mtx as the projection, perspective normalisation g_player_cams[p] +0xB8 and the 4 vertices
+ * g_sky_backdrop_vtx[p][g_dl_buf_index] whose t coordinates are scrolled by `scroll` * 81 (top / bottom rows depend on the
  * level g_level_id: 0x32 / 0x33 / 0x3F use -0x62 / 0x27, else -0x13 / 0x65), drawn as two triangles. */
-/* P243: D_80089578 camera callback: takes the dispatcher's 8 arguments (view_background_draw passes gdl, x, y, z, yaw, pitch,
+/* P243: g_view_bg_fns camera callback: takes the dispatcher's 8 arguments (view_background_draw passes gdl, x, y, z, yaw, pitch,
  * roll, handle); only yaw (= scroll) and roll (= angle) are used. Was 7 arguments with s32 x / y / z / pitch: same o32
  * slots, but a wasm signature mismatch through the table. */
 /* was func_150D1D20 */
@@ -54,7 +54,7 @@ Gfx *view_scroll_overlay_draw(Gfx *gdl, f32 x, f32 y, f32 z, f32 scroll, f32 pit
     tex.b8 = 0;
     tex.b9 = 3;
     tex.bA = 0;
-    tex.image = D_800DC2B0;
+    tex.image = g_sky_asset;
 
     gdl->words.w0 = 0xD7000002; gdl->words.w1 = 0xFFFFFFFF; gdl++;    /* gSPTexture(0xFFFF, 0xFFFF, 0, 0, G_ON) */
     gdl->words.w0 = 0xE7000000; gdl->words.w1 = 0; gdl++;             /* gDPPipeSync */
@@ -66,19 +66,19 @@ Gfx *view_scroll_overlay_draw(Gfx *gdl, f32 x, f32 y, f32 z, f32 scroll, f32 pit
 
     matrix_rotate_ypr(rot, 0.0f, 0.0f, angle);
     p = g_cur_view_player;
-    player = (u8 *)D_800BE628 + p * 0x180;
+    player = (u8 *)g_player_cams + p * 0x180;
     mtxf_mul(rot, (f32 (*)[4])(player + 0xBC), view);
-    mtx = (Mtx *)D_800DC2E0 + (g_cur_view_player * 2 + D_800BE9C0);
+    mtx = (Mtx *)D_800DC2E0 + (g_cur_view_player * 2 + g_dl_buf_index);
     guMtxF2L(view, mtx);
 
-    gdl->words.w0 = 0xDA380007; gdl->words.w1 = (u32)((Mtx *)D_800DC2E0 + (g_cur_view_player * 2 + D_800BE9C0)); gdl++;
-    gdl->words.w0 = 0xDA380003; gdl->words.w1 = (u32)D_80089810; gdl++;                 /* gSPMatrix (projection) */
+    gdl->words.w0 = 0xDA380007; gdl->words.w1 = (u32)((Mtx *)D_800DC2E0 + (g_cur_view_player * 2 + g_dl_buf_index)); gdl++;
+    gdl->words.w0 = 0xDA380003; gdl->words.w1 = (u32)g_identity_mtx; gdl++;                 /* gSPMatrix (projection) */
     gdl->words.w0 = 0xDB0E0000;                                                         /* gSPPerspNormalize */
-    gdl->words.w1 = *(u16 *)((u8 *)D_800BE628 + g_cur_view_player * 0x180 + 0xB8);
+    gdl->words.w1 = *(u16 *)((u8 *)g_player_cams + g_cur_view_player * 0x180 + 0xB8);
     gdl++;
 
     t = (s32)(scroll * 81.0f);
-    v = g_sky_backdrop_vtx[g_cur_view_player][D_800BE9C0];
+    v = g_sky_backdrop_vtx[g_cur_view_player][g_dl_buf_index];
     v[0].v.tc[1] = v[1].v.tc[1] = ((top + 0x100) << 5) + t;
     v[2].v.tc[1] = v[3].v.tc[1] = ((bottom + 0x1FF) << 5) + t;
     gdl->words.w0 = 0x01004008; gdl->words.w1 = (u32)v; gdl++;     /* gSPVertex(v, 4, 0) */

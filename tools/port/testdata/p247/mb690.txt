@@ -46,7 +46,7 @@
 \#^                    fading = 0;$#s/0/1/
 \#^                level -= 8;$#s/8/9/
 \#^                if (level <= 0) {$#s/<= 0/< 0/
-\#^            timer -= D_800BE9E4;$#s/-=/+=/
+\#^            timer -= g_frame_ticks;$#s/-=/+=/
 \#^            if (timer <= 0) {$#s/<= 0/< 0/
 \#^                timer = 0;$#s/0/1/
 \#^                if (\*id == 0x4A8) {$#s/0x4A8/0x4A9/

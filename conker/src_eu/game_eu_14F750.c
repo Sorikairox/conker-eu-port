@@ -3,8 +3,8 @@
 #include "variables.h"
 
 
-extern f32 D_800A37F0;
-extern f32 D_800A37F4;
+extern f32 g_camera_side_view_min_init; /* was D_800A37F0 */
+extern f32 g_camera_side_view_max_init; /* was D_800A37F4 */
 /* was func_15121F40 */
 void camera_group_side_view(u8 *arg0) {
     f32 temp_f20;
@@ -24,12 +24,12 @@ void camera_group_side_view(u8 *arg0) {
     struct127 *var_v0;
     struct127 *var_v0_2;
 
-    var_f12 = D_800A37F0;
-    var_f14 = D_800A37F4;
-    var_f2 = D_800A37F0;
-    var_f16 = D_800A37F4;
+    var_f12 = g_camera_side_view_min_init;
+    var_f14 = g_camera_side_view_max_init;
+    var_f2 = g_camera_side_view_min_init;
+    var_f16 = g_camera_side_view_max_init;
     var_f0 = 0.0f;
-    if (D_8008FD8C > 0) {
+    if (g_player_count > 0) {
         var_v0 = g_objects;
         do {
             temp_f20 = var_v0->x_position;
@@ -49,15 +49,15 @@ void camera_group_side_view(u8 *arg0) {
             if (var_f14 < temp_f20_2) {
                 var_f14 = temp_f20_2;
             }
-        } while ((u32) var_v0 < (u32) &g_objects[D_8008FD8C]);
+        } while ((u32) var_v0 < (u32) &g_objects[g_player_count]);
     }
     (*(f32 *)((u8 *)arg0 + 0x2BC)) = var_f16;
     var_f2_2 = 0.0f;
     var_v0_2 = g_objects;
     temp_f22 = (var_f12 + var_f14) * 0.5f;
     (*(f32 *)((u8 *)arg0 + 0x2C4)) = temp_f22;
-    (*(f32 *)((u8 *)arg0 + 0x2C0)) = (f32) ((var_f0 / (f32) D_8008FD8C) + 150.0f);
-    if (D_8008FD8C > 0) {
+    (*(f32 *)((u8 *)arg0 + 0x2C0)) = (f32) ((var_f0 / (f32) g_player_count) + 150.0f);
+    if (g_player_count > 0) {
         do {
             var_f0_2 = (var_v0_2->x_position - var_f16) * 0.5f;
             if (var_f0_2 < 0.0f) {
@@ -75,7 +75,7 @@ void camera_group_side_view(u8 *arg0) {
             if (var_f2_2 < var_f12_2) {
                 var_f2_2 = var_f12_2;
             }
-        } while ((u32) var_v0_2 < (u32) &g_objects[D_8008FD8C]);
+        } while ((u32) var_v0_2 < (u32) &g_objects[g_player_count]);
     }
     if (var_f2_2 < 300.0f) {
         var_f2_2 = 300.0f;

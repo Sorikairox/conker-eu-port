@@ -2,8 +2,8 @@ s/vtx_slot_buffer_get((s32) (p + 0x100), view, 0x40/vtx_slot_buffer_get((s32) (p
 s/    if (blk == NULL) {/    if (blk != NULL) {/
 s/    if (fresh) {/    if (!fresh) {/
 s/memcpy(\*(u8 \*\*) (p + 0x100 + view \* 4) + 0x40/memcpy(*(u8 **) (p + 0x100 + view * 4) + 0x20/
-s/    s = D_800DD608\[view\];/    s = D_800DD618[view];/
-s/    c = D_800DD618\[view\];/    c = D_800DD618[0];/
+s/    s = g_view_yaw_sin\[view\];/    s = g_view_yaw_cos[view];/
+s/    c = g_view_yaw_cos\[view\];/    c = g_view_yaw_cos[0];/
 s/(\*(f32 \*) (p + 0x40) - \*(f32 \*) (p + 0x34)) \* c/(*(f32 *) (p + 0x40) - *(f32 *) (p + 0x38)) * c/
 s/- s \* (\*(f32 \*) (p + 0x48)/+ s * (*(f32 *) (p + 0x48)/
 s/    if (t < 0.0f) {/    if (t <= 0.0f) {/

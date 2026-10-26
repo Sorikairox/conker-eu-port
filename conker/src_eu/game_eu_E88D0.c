@@ -56,7 +56,7 @@ void foot_splash_effect(u8 *obj, u8 kind, u8 alpha) {
     f32 hit[9];
     f32 probe[3];
     f32 pos[3];
-    u8 *cam = (u8 *) D_800DBFF0 + g_cur_view_player * 0x9A0;
+    u8 *cam = (u8 *) g_player_views + g_cur_view_player * 0x9A0;
     s32 heading = (s32) (*(f32 *) (cam + 0x380) * D_800A0240[0]);
     s16 left, right;
     f32 size;
@@ -225,7 +225,7 @@ s32 puff_particle_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s3
 s32 particle_shrink_update(u8 *arg0, s32 arg1) {
     s32 i;
     f32 *p = (f32 *)(arg0 + 0xA8);
-    for (i = D_800BE9E4; i != 0; i--) {
+    for (i = g_frame_ticks; i != 0; i--) {
         *(f32 *)(arg0 + 0x58) *= *p;
         *(f32 *)(arg0 + 0x60) *= *p;
     }

@@ -7,7 +7,7 @@
 // mesh_effect_spawn: spawns an animated mesh effect record (P195). The 0x3C-byte spawn block p (copied to rec + 0x10) names
 // a model by its +0x30 / +0x34 words (asset_load_with_subfiles, kind 2 lookup); the model header starts with its display list
 // pointer, followed at +0x28 by the vertex block (size = dl - header - 0x28). The record (kind 0x54 when arg1 != 0,
-// else 0x38; node_alloc with group arg4 and priority arg3) gets D_80082FA0 + 1 double-buffered vertex copies at
+// else 0x38; node_alloc with group arg4 and priority arg3) gets g_last_player_index + 1 double-buffered vertex copies at
 // +0xF8 (+0x58[i] / +0x68[i] point at the two halves), +0x4C = header, +0x50 = the copies' size, +0x54 = the display
 // list, which is registered with texture_resolve_dl_ids (age 0x3E). arg2 extra bytes follow the copies. Returns NULL when the
 // pool is full. Callers: level_obj_init_debris_table (ambient fires), swing_lamp_spawn, water_effect_spawn, game_eu_1E7CC0.
@@ -29,7 +29,7 @@ struct102 *mesh_effect_spawn(void *p, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
 
     hdr = (u8 *) asset_load_with_subfiles(&found, 0, &count, 2, *(s32 *) ((u8 *) p + 0x30), *(s32 *) ((u8 *) p + 0x34));
     size = *(s32 *) hdr - (s32) hdr - 0x28;
-    total = size * 2 * (D_80082FA0 + 1);
+    total = size * 2 * (g_last_player_index + 1);
     rec = node_alloc(arg1 ? 0x54 : 0x38, arg4, arg2 + total + 0xF8, 2, arg3, 1);
     if (rec == NULL) {
         return NULL;
@@ -37,7 +37,7 @@ struct102 *mesh_effect_spawn(void *p, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     memcpy(rec + 0x10, p, 0x3C);
     *(u8 **) (rec + 0x4C) = hdr;
     dst = rec + 0xF8;
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= g_last_player_index; i++) {
         ((u8 **) (rec + 0x58))[i] = dst;
         ((u8 **) (rec + 0x68))[i] = dst + size;
         memcpy(dst, hdr + 0x28, size);
@@ -55,7 +55,7 @@ void mesh_effect_update(u8 *arg0) {
     u8 ret = 0;
 
     if ((arg0[0x10] & 1) != 0) {
-        *(s16 *)(arg0 + 0x14) -= D_800BE9E4;
+        *(s16 *)(arg0 + 0x14) -= g_frame_ticks;
         if (*(s16 *)(arg0 + 0x14) < 0) {
             ret = 1;
         }
@@ -73,7 +73,7 @@ void mesh_effect_update(u8 *arg0) {
 //
 //     done = FALSE;
 //     if (arg0->unk10 & 1) {
-//         arg0->unk14 -= D_800BE9E4;
+//         arg0->unk14 -= g_frame_ticks;
 //         if (arg0->unk14 < 0) {
 //             done = TRUE;
 //         }
@@ -115,18 +115,18 @@ u8 *mesh_effect_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     }
     (*(s32 *)((u8 *)arg0 + 0)) = 0xDA380003;
     temp_a3_2 = arg0 + 8;
-    (*(u8 **)((u8 *)arg0 + 4)) = (u8 *) (arg1 + (D_800BE9C0 << 6) + 0x78);
+    (*(u8 **)((u8 *)arg0 + 4)) = (u8 *) (arg1 + (g_dl_buf_index << 6) + 0x78);
     (*(s32 *)((u8 *)temp_a3_2 + 0)) = 0xDB060004;
     temp_a3 = temp_a3_2 + 8;
-    (*(s32 *)((u8 *)temp_a3_2 + 4)) = (s32) (*(s32 *)((u8 *)((arg1 + (D_800BE9C0 * 0x10) + (var_a2 * 4))) + 0x58));
+    (*(s32 *)((u8 *)temp_a3_2 + 4)) = (s32) (*(s32 *)((u8 *)((arg1 + (g_dl_buf_index * 0x10) + (var_a2 * 4))) + 0x58));
     (*(s32 *)((u8 *)temp_a3 + 0)) = 0xDE000000;
     (*(s32 *)((u8 *)temp_a3 + 4)) = (s32) (*(s32 *)((u8 *)arg1 + 0x54));
     return temp_a3 + 8;
 }
 /* was func_1513B968 */
 s32 mesh_effect_load_identity(s32 arg0, s32 arg1) {
-    // FIXME: &arg0->unk_120[D_800BE9C0]
-    mtx_set_identity(arg0 + 120 + (D_800BE9C0 << 6));
+    // FIXME: &arg0->unk_120[g_dl_buf_index]
+    mtx_set_identity(arg0 + 120 + (g_dl_buf_index << 6));
     return 1;
 }
 
@@ -229,7 +229,7 @@ extern f32 g_water_t_scale_amp;          // 1.994f /* was D_800A4E5C */
 extern f32 g_water_t_scale_base;          // 8.328f /* was D_800A4E60 */
 
 // water_texcoords_update: object-type handler (table g_mesh_effect_draw_fns + 0x14). Calls mesh_effect_load_identity first, then rewrites the
-// texture coordinates of the nine vertex groups of the object's current vertex buffer (obj + 0x58 + D_800BE9C0 * 16
+// texture coordinates of the nine vertex groups of the object's current vertex buffer (obj + 0x58 + g_dl_buf_index * 16
 // + part * 4) so each group's texture faces the player camera point (camera_get_pos(part)) seen from its centre
 // g_water_proj_centres[k]: s = horizontal offset along the camera direction * (sin(rec + 0xC) * 1.21 + 2.854) - scroll u,
 // t = height * (sin(rec + 0x10) * 1.994 + 8.328) - scroll v, where rec = obj + obj[0x50] + 0xF8 holds the scroll
@@ -270,7 +270,7 @@ s32 water_texcoords_update(s32 obj, s16 part) {
             dirZ = -dx * inv;
         }
         for (n = g_water_proj_vtx_ranges[k][0]; n < g_water_proj_vtx_ranges[k][0] + g_water_proj_vtx_ranges[k][1]; n++) {
-            v = (Vtx_t *) (*(u8 **) (obj + 0x58 + D_800BE9C0 * 16 + part * 4) + n * 16);
+            v = (Vtx_t *) (*(u8 **) (obj + 0x58 + g_dl_buf_index * 16 + part * 4) + n * 16);
             v->tc[0] = (s32) ((((f32) v->ob[0] - g_water_proj_centres[k][0]) * dirX + ((f32) v->ob[2] - g_water_proj_centres[k][2]) * dirZ) *
                                   scaleS - scrollS);
             v->tc[1] = (s32) (((f32) v->ob[1] - g_water_proj_centres[k][1]) * scaleT - scrollT);
@@ -296,13 +296,13 @@ s32 water_wave_update(u8 *arg0) {
     f32 f;
     Wave1513BEB0 *w = (Wave1513BEB0 *)(arg0 + *(s32 *)(arg0 + 0x50) + (0, 0xF8)); // fakematch: comma keeps addu a0,t6 order
 
-    w->c += g_water_wave_rate_c * D_800BE9A4;
+    w->c += g_water_wave_rate_c * g_frame_step_f;
     f = wrap_angle_rad(w->c);
     w->c = f;
-    w->a += g_water_wave_rate_a * D_800BE9A4;
+    w->a += g_water_wave_rate_a * g_frame_step_f;
     w->b = sinf(f) * g_water_wave_amp_b;
-    w->d += g_water_wave_rate_d * D_800BE9A4;
-    w->e += g_water_wave_rate_e * D_800BE9A4;
+    w->d += g_water_wave_rate_d * g_frame_step_f;
+    w->e += g_water_wave_rate_e * g_frame_step_f;
     w->d = wrap_angle_rad(w->d);
     w->e = wrap_angle_rad(w->e);
     while (w->a > 4096.0f) {

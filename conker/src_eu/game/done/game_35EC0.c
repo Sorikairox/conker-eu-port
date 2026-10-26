@@ -17,19 +17,19 @@ void obj_holder_refs_init(void) {
 void view_zoom_state_reset(void) {
     if (0) {}
 
-    D_800DDE08 = 0;
+    g_screen_pulse_timer = 0;
 
     // unrolled loop?
     D_800DDE40 = 0;
-    D_800DDDAC = 0;
-    D_800DDE28 = 0;
-    D_800DDDB0 = 0;
-    D_800DDE1C = 0;
-    D_800DDE20 = 0;
-    D_800DDDC8 = 0.0f;
-    D_800DDDD8 = 0.0f;
+    g_screen_fade_dir = 0;
+    g_screen_fade_duration = 0;
+    g_screen_fade_timer = 0;
+    g_hud_lens_mode = 0;
+    g_hud_lens_scripted = 0;
+    g_hud_lens_zoom = 0.0f;
+    g_hud_lens_zoom_rate = 0.0f;
 
-    D_800DDE3C = 0;
+    g_hud_lens_state = 0;
     g_screen_fade_dir_p1 = 0;
     g_screen_fade_duration_p1 = 0;
     g_screen_fade_timer_p1 = 0;
@@ -57,6 +57,6 @@ void view_zoom_state_reset(void) {
     g_hud_lens_zoom_rate_p3 = 0.0f;
 
     g_hud_lens_state_p3 = 0;
-    D_800DDE18 = 0;
+    g_letterbox_track = 0;
     g_level_entry_zoom_mode = 0;
 }

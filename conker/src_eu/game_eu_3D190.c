@@ -99,14 +99,14 @@ void level_ropes_setup(void) {
     level_fx_spawn_box_b(-0x870, 0x36E, 0x4E1, -0x602, 2);
     level_fx_spawn_box_b(-0xBD5, 0x3F1, 0x659, -0x602, 2);
     level_fx_spawn_box_b(-0xE6B, -0x263, -0x427, -0x647, 1);
-    D_800DD1D4 = (f32) (*(u8 *)((u8 *)(&D_800DCD20) + 0));
-    var_f8 = (f32) (*(u8 *)((u8 *)(&D_800DCD20) + 1));
-    if ((s32) (*(u8 *)((u8 *)(&D_800DCD20) + 1)) < 0) {
+    D_800DD1D4 = (f32) (*(u8 *)((u8 *)(&g_level_light_colour) + 0));
+    var_f8 = (f32) (*(u8 *)((u8 *)(&g_level_light_colour) + 1));
+    if ((s32) (*(u8 *)((u8 *)(&g_level_light_colour) + 1)) < 0) {
         var_f8 += 4294967296.0f;
     }
     *D_800DD1D8 = var_f8;
-    var_f4 = (f32) (*(u8 *)((u8 *)(&D_800DCD20) + 2));
-    if ((s32) (*(u8 *)((u8 *)(&D_800DCD20) + 2)) < 0) {
+    var_f4 = (f32) (*(u8 *)((u8 *)(&g_level_light_colour) + 2));
+    if ((s32) (*(u8 *)((u8 *)(&g_level_light_colour) + 2)) < 0) {
         var_f4 += 4294967296.0f;
     }
     D_800DD1DC = var_f4;

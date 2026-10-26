@@ -61,7 +61,7 @@ void obj_path_bank_update(struct127 *arg0) {
 
     arg0->unk80 = 0xA;
     sp34 = arg0->unk76;
-    temp_f0 = (f32) (*(s16 *)((u8 *)(D_800D2104[arg0->unk13F]) + 2));
+    temp_f0 = (f32) (*(s16 *)((u8 *)(g_path_points[arg0->unk13F]) + 2));
     obj_set_gravity_band(arg0, temp_f0, 1.0f, temp_f0, D_8009FC8C, 12.0f, -16.0f);
     obj_walk_update(arg0);
     var_f2 = 6.0f;
@@ -92,7 +92,7 @@ void obj_lean_into_turn(struct127 *, s16);
 // obj_stun_update. Otherwise its resting height is 210 above the floor entry D_800D20FC[unk13F] (+8), the vertical
 // bounce speed unkB8 is -vy / 2 (0 in mode 3) unless unk22C bit 3; in mode 14 (unk223) it is pulled towards object
 // unk222 (no gravity, vy = (its height + unk224 - y) / (distance obj_dist_xz / speed)); otherwise (mode 1: 210 above
-// the player) the height comes from unk224 (10000: the D_800D2104 path point unk21E, else 8 x unk224, + unk180 for
+// the player) the height comes from unk224 (10000: the g_path_points path point unk21E, else 8 x unk224, + unk180 for
 // all but kinds 5 / 0x50 / 0xAD..0xAF) and, unless unk100 bit 6, the collision box (obj_set_gravity_band, 3 x 12 for kind
 // 0x44 at its path point height, else 5 x 35). Then the move (obj_walk_update), the facing unk40 from unk7A, the
 // animation (obj_physics_step), kinds 5 / 0xAD..0xAF / 0x44 turn from the old heading (obj_lean_into_turn), and the object
@@ -131,7 +131,7 @@ void held_object_update(struct127 *obj) {
             level = obj->unk224;
             if (level != 0) {
                 if (level == 10000) {
-                    height = *(s16 *) ((u8 *) D_800D2104[obj->unk13F] + obj->unk21E * 8 + 0xA);
+                    height = *(s16 *) ((u8 *) g_path_points[obj->unk13F] + obj->unk21E * 8 + 0xA);
                 } else if (obj->id == 0x50 || obj->id == 5 || obj->id == 0xAD || obj->id == 0xAE ||
                            obj->id == 0xAF) {
                     height = level * 8;
@@ -141,7 +141,7 @@ void held_object_update(struct127 *obj) {
             }
             if (!(obj->unk100 & 0x40)) {
                 if (obj->id == 0x44) {
-                    height = *(s16 *) ((u8 *) D_800D2104[obj->unk13F] + obj->unk21E * 8 + 0xA);
+                    height = *(s16 *) ((u8 *) g_path_points[obj->unk13F] + obj->unk21E * 8 + 0xA);
                     half = 3.0f;
                     depth = 12.0f;
                 } else {

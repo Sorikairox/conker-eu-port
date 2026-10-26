@@ -359,7 +359,7 @@ void obj_fx_point_impact_a4(u8 *arg0, int arg1, s32 arg2) {
 
 void fx_spawn_impact_particle(u8, s32 *, f32, s32, f32 *, u8);
 void fx_spawn_impact_burst(u8, f32 *, s32, f32, f32);
-extern u8 (*D_800900BC)(void);
+extern u8 (*g_fx_impact_id_fn_bc)(void); /* was D_800900BC */
 /* was func_151479E8 */
 void obj_fx_point_impact_bc(u8 *arg0, int arg1, s32 arg2)
 {
@@ -372,7 +372,7 @@ void obj_fx_point_impact_bc(u8 *arg0, int arg1, s32 arg2)
     }
     if (obj_fx_point_probe_floor(sp4C, arg0, (s32) sp28, arg1) != 0)
     {
-      fx_spawn_impact_particle(D_800900BC(), sp28, arg2 * 0.0076923077f, (u8) ((*((f32 *) (arg0 + 0x40))) * 0.7111111f), sp4C, arg1);
+      fx_spawn_impact_particle(g_fx_impact_id_fn_bc(), sp28, arg2 * 0.0076923077f, (u8) ((*((f32 *) (arg0 + 0x40))) * 0.7111111f), sp4C, arg1);
       if (arg2 >= 0x73)
       {
         fx_spawn_impact_burst(6, sp4C, sp28[6], 1.0f, 1.0f);
@@ -381,13 +381,13 @@ void obj_fx_point_impact_bc(u8 *arg0, int arg1, s32 arg2)
   }
 }
 
-extern u8 (*D_800900D0)(void);
-extern f32 D_800A5B2C;
-extern f32 D_800A5B30;
+extern u8 (*g_fx_impact_id_fn_d0)(void); /* was D_800900D0 */
+extern f32 g_fx_impact_level_scale; /* was D_800A5B2C */
+extern f32 g_fx_impact_size_scale; /* was D_800A5B30 */
 // impact_effect_c: P250. Effect table handler (u8 *obj, kind, level) like its table neighbour obj_fx_point_impact_bc (records
 // {handler, 0x82} at ELF file offset 0x24A4D4): when the object has a model (+0x1D4) and obj_fx_point_probe_floor finds the
-// effect point (pos + hit record), spawns the effect whose id D_800900D0() returns (fx_spawn_impact_particle: strength level *
-// D_800A5B2C, size +0x40 * D_800A5B30 as a byte) and, for level >= 0x73, effect 0xB (fx_spawn_impact_burst) with the hit
+// effect point (pos + hit record), spawns the effect whose id g_fx_impact_id_fn_d0() returns (fx_spawn_impact_particle: strength level *
+// g_fx_impact_level_scale, size +0x40 * g_fx_impact_size_scale as a byte) and, for level >= 0x73, effect 0xB (fx_spawn_impact_burst) with the hit
 // record's word 6.
 /* was func_15147B48 */
 void obj_fx_point_impact_d0(u8 *obj, s32 kind, s32 level) {
@@ -395,7 +395,7 @@ void obj_fx_point_impact_d0(u8 *obj, s32 kind, s32 level) {
     s32 hit[9];
 
     if (*(s32 *) (obj + 0x1D4) != 0 && obj_fx_point_probe_floor(pos, obj, (s32) hit, (u8) kind) != 0) {
-        fx_spawn_impact_particle(D_800900D0(), hit, (f32) level * D_800A5B2C, (u8) (u32) (*(f32 *) (obj + 0x40) * D_800A5B30),
+        fx_spawn_impact_particle(g_fx_impact_id_fn_d0(), hit, (f32) level * g_fx_impact_level_scale, (u8) (u32) (*(f32 *) (obj + 0x40) * g_fx_impact_size_scale),
                       pos, (u8) kind);
         if (level >= 0x73) {
             fx_spawn_impact_burst(0xB, pos, hit[6], 1.0f, 1.0f);

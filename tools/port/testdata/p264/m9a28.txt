@@ -36,10 +36,10 @@
 \#^        data = \*(Emitter2Record \*\*) (e + 0x98);$#s/0x98/0x94/
 \#^        memcpy(data, &rec, sizeof(Emitter2Record));$#s/sizeof(Emitter2Record)/0x150/
 \#^        if (rec\.soundFn != -1) {$#s/rec\.soundFn/rec.initFn/
-\#^            data->voice = D_8008FC58\[rec\.soundFn\]();$#s/data->voice/rec.voice/
+\#^            data->voice = g_emitter2_sound_start_fns\[rec\.soundFn\]();$#s/data->voice/rec.voice/
 \#^            data->voice = 0;$#s/0/1/
 \#^        if (rec\.initFn != -1) {$#s/!= -1/!= 0/
-\#^            D_8008FC44\[rec\.initFn\](e);$#s/(e)/((u8 *) data)/
+\#^            g_emitter2_init_fns\[rec\.initFn\](e);$#s/(e)/((u8 *) data)/
 \#^        if (spec\[0x54\] & 1) {$#s/& 1/\& 2/
 \#^            data->u148 = (s32) emitter2_light_create((s32) e, req\.pos, spec\[0x50\], spec\[0x51\], spec\[0x52\], spec\[0x53\], arg2, arg3);$#s/req\.pos/rec.pos2/
 \#^            data->u148 = (s32) emitter2_light_create((s32) e, req\.pos, spec\[0x50\], spec\[0x51\], spec\[0x52\], spec\[0x53\], arg2, arg3);$#s/spec\[0x50\], spec\[0x51\]/spec[0x51], spec[0x50]/

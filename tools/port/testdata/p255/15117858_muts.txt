@@ -3,10 +3,10 @@ s/(f32) ((params << 22) >> 22);/(f32) (params \& 0x3FF);/ % negrest restbits
 s/if (angle == rest \&\& speed == 0.0f) {/if (angle == rest) {/ % restmov
 s/kind = params >> 10;/kind = params >> 11;/ % start
 s/if (speed == 0.0f \&\& kind != 0/if (kind != 0/ % moving
-s/D_80089600\[kind\].move_sfx, 0x5DC0/D_80089600[kind].stop_sfx, 0x5DC0/ % start
+s/g_scenery_mover_sfx\[kind\].move_sfx, 0x5DC0/g_scenery_mover_sfx[kind].stop_sfx, 0x5DC0/ % start
 s/0x5DC0, 0xC8, 0x9C4, 0);/0x5DC0, 0xC8, 0x9C4, 4);/ % start
 s/0x5DC0, 0xC8, 0x9C4/0x5DC0, 0xC8, 0xFA0/ % start
-s/angle += speed \* (f32) D_800BE9E4;/angle += speed;/ % moving
+s/angle += speed \* (f32) g_frame_ticks;/angle += speed;/ % moving
 s/diff = math_angle_diff_deg(angle, rest);/diff = math_angle_diff_deg(rest, angle);/ % moving
 s/if (0.0f < diff) {/if (1.0f < diff) {/ % small
 s/speed += fabsf(diff) \* spring;/speed += diff;/ % moving

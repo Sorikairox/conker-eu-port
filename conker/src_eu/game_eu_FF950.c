@@ -2,14 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A5860[];
+extern u8 g_vec3_zero[]; /* was D_800A5860 */
 
 
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 extern f32 D_800A0CC0[6][3];  /* beam end points (beam space) */
 
 // beam_rays_update: obj + 0x28 is the source point, +0x34 the beam position (moved by its velocity +0x40 x
-// D_800BE9A4), +0x4C six ray parts. While obj + 0x6C bit 0 is set, each ray's end D_800A0CC0[i] is moved to the
+// g_frame_step_f), +0x4C six ray parts. While obj + 0x6C bit 0 is set, each ray's end D_800A0CC0[i] is moved to the
 // beam's position (mtxf_rotate_xyz_deg / mtxf_transform_point) and traced from the source (collision_ray_cast): on a hit the part's
 // sprite (+0x14) is shown at the hit point with alpha +0x64 x hit fraction, otherwise it is hidden. Without the bit
 // every ray sprite is hidden.
@@ -24,9 +24,9 @@ void beam_rays_update(u8 *obj) {
     s32 i;
 
     if (obj[0x6C] & 1) {
-        *(f32 *) (obj + 0x34) += *(f32 *) (obj + 0x40) * D_800BE9A4;
-        *(f32 *) (obj + 0x38) += *(f32 *) (obj + 0x44) * D_800BE9A4;
-        *(f32 *) (obj + 0x3C) += *(f32 *) (obj + 0x48) * D_800BE9A4;
+        *(f32 *) (obj + 0x34) += *(f32 *) (obj + 0x40) * g_frame_step_f;
+        *(f32 *) (obj + 0x38) += *(f32 *) (obj + 0x44) * g_frame_step_f;
+        *(f32 *) (obj + 0x3C) += *(f32 *) (obj + 0x48) * g_frame_step_f;
         mtxf_rotate_xyz_deg(mtx, *(f32 *) (obj + 0x34), *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x3C));
         for (i = 0; i < 6; i++) {
             part = ((u8 **) (obj + 0x4C))[i];
@@ -82,7 +82,7 @@ void beam_rays_handle_event(struct102 *arg0, u8 *arg1, s32 arg2) {
             (*(u8 *)((u8 *)temp_v0_2 + 0x44)) = (u8) ((*(u8 *)((u8 *)temp_v0_2 + 0x44)) & 0xFFFE);
         }
     } else {
-        temp_t4 = ((u8 *)&D_800A5860);
+        temp_t4 = ((u8 *)&g_vec3_zero);
         if (temp_t6 == 0x4E) {
             (*(s32 *)((u8 *)arg0 + 0x40)) = (s32) (*(s32 *)((u8 *)temp_t4 + 0));
             (*(s32 *)((u8 *)arg0 + 0x44)) = (s32) (*(s32 *)((u8 *)temp_t4 + 4));

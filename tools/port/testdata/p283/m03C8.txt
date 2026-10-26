@@ -36,4 +36,4 @@
 \#^        dl += 2;#s/2/1/
 \@^#define DL_TRAP() @s/0x0C00005B/0x0C00005A/
 \@^#define DL_STOP(c) @s/dl_dump_around((u8 \*) (c)), //
-\#^                    D_800BE9C0 = 1 - D_800BE9C0)#s/1 - D_800BE9C0/D_800BE9C0/
+\#^                    g_dl_buf_index = 1 - g_dl_buf_index)#s/1 - g_dl_buf_index/g_dl_buf_index/

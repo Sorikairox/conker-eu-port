@@ -6,14 +6,14 @@ s/i = p\[0x25\] - 1;/i = p[0x25];/ % wrap
 s/^            i--;$/            i -= 2;/ % loop
 s/i = \*(s8 \*) (p + 0x2E);/i = *(s8 *) (p + 0x2D);/ % loop wrap
 s/} while (i != \*(s8 \*) (p + 0x2D));/} while (i > *(s8 *) (p + 0x2D));/ % wrap
-s/(pts + i \* 0x24 + 0xC), D_800BE9A4)/(pts + i * 0x24 + 0x10), D_800BE9A4)/ % loop
-s/0xC), D_800BE9A4);/0xC), 0.0f);/ % loop
+s/(pts + i \* 0x24 + 0xC), g_frame_step_f)/(pts + i * 0x24 + 0x10), g_frame_step_f)/ % loop
+s/0xC), g_frame_step_f);/0xC), 0.0f);/ % loop
 s/if (\*(s8 \*) (p + 0x2C) > 0) {/if (*(s8 *) (p + 0x2C) > 1) {/ % st1
 s/\*(s32 \*) (p + 0x58) = pos\[1\];/*(s32 *) (p + 0x58) = pos[2];/ % loop
 s/\*(f32 \*) (p + 0x58) = 0.0f;/*(f32 *) (p + 0x58) = 1.0f;/ % st0
 s/(rec + 0x4D) >= 0x33)/(rec + 0x4D) > 0x33)/ % timer
 s/if (\*(s8 \*) (rec + 0x4D) >= 0x33)/if (*(u8 *) (rec + 0x4D) >= 0x33)/ % twrap
-s/(rec + 0x4D) += D_800BE9E4;/(rec + 0x4D) += 2;/ % timer tlow
+s/(rec + 0x4D) += g_frame_ticks;/(rec + 0x4D) += 2;/ % timer tlow
 s/(part + 0x1AA) += 1;/(part + 0x1AA) += 2;/ % timer
 s/(owner + 0x31C)) != NULL/(owner + 0x318)) != NULL/ % timer
 s/^        \*(s8 \*) (rec + 0x4D) = 0;$/        ;/ % timer nopart noowner

@@ -1,11 +1,11 @@
-\#^    s\[10\] += s\[9\] \* D_800BE9A4;$#s/s\[9\]/s[8]/
+\#^    s\[10\] += s\[9\] \* g_frame_step_f;$#s/s\[9\]/s[8]/
 \#^    if (!(1.0f < s\[10\])) {$#s/1.0f < s\[10\]/1.0f <= s[10]/
 \#^    inv = 1.0f / s\[10\];$#s/1.0f/2.0f/
-\#^    t = s\[8\] + D_800BE9A4;$#s/+ D_800BE9A4//
+\#^    t = s\[8\] + g_frame_step_f;$#s/+ g_frame_step_f//
 \#^    step = t \* inv;$#s/t \* inv/t/
 \#^    a = s\[4\];$#s/4/5/
-\#^    da = s\[6\] \* D_800BE9A4 \* inv;$#s/ \* inv//
-\#^    db = s\[7\] \* D_800BE9A4 \* inv;$#s/s\[7\]/s[6]/
+\#^    da = s\[6\] \* g_frame_step_f \* inv;$#s/ \* inv//
+\#^    db = s\[7\] \* g_frame_step_f \* inv;$#s/s\[7\]/s[6]/
 \#^        vec3_from_angles_rad(s\[0\] + sa \* s\[2\]#s/s\[0\] + sa/s[1] + sa/
 \#^        vec3_from_angles_rad(s\[0\] + sa \* s\[2\]#s/sinf(b) \* s\[3\]/sinf(b) * s[2]/
 \#^        vec3_from_angles_rad(s\[0\] + sa \* s\[2\]#s/5.0f/4.0f/

@@ -4,8 +4,8 @@
 \#^        \*(s16 \*) (self + 0xE) = -1;$#s/-1/0/
 \#^        \*(s16 \*) (self + 0xE) = -1;$#s/0xE/0xC/
 \#^    t->prev = t->cur;$#s/t->prev = t->cur/(void)0/
-\#^    if (D_8008FFD0\[t->point\](obj, &t->cur) == 0) {$#s/== 0/!= 0/
-\#^    if (D_8008FFD0\[t->point\](obj, &t->cur) == 0) {$#s/&t->cur/\&t->prev/
+\#^    if (g_obj_point_query_fns\[t->point\](obj, &t->cur) == 0) {$#s/== 0/!= 0/
+\#^    if (g_obj_point_query_fns\[t->point\](obj, &t->cur) == 0) {$#s/&t->cur/\&t->prev/
 \#^        t->cur = t->prev;$#s/t->cur = t->prev/(void)0/
 \#^    t->delta\.x = t->cur\.x - t->prev\.x;$#s/- t->prev\.x/- t->prev.y/
 \#^    t->delta\.y = t->cur\.y - t->prev\.y;$#s/t->cur\.y/t->cur.x/

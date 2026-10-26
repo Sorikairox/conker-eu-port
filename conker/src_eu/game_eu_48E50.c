@@ -6,7 +6,7 @@ extern u16 D_800C5BC0[];  /* vertex count of each model slot */
 extern u8 *D_800843D0[];  /* per colour group 1..5: RGB key colours (3 bytes each) */
 extern u8 D_80096CD0[];   /* per colour group 1..5: number of key colours (asm rodata_inject block; ROM) */
 // model_vertex_colours_blend: recolours the object's current vertex buffer (obj+0x28C, slot obj+0x1C8, buffer
-// D_800BE9C0). Each vertex's group ((u16 +6 >> 8) & 0x7F, 1..5; 0 = keep) picks a key colour ramp; the group's
+// g_dl_buf_index). Each vertex's group ((u16 +6 >> 8) & 0x7F, 1..5; 0 = keep) picks a key colour ramp; the group's
 // value t in 0..1 (vals[group - 1] when perGroup, else vals[0]) is linearly interpolated between the two key
 // colours around it and written to the vertex colour (+0xC..+0xE). Groups 6 and up are skipped.
 /* was func_eu_1501B640 */
@@ -27,7 +27,7 @@ void obj_vertex_colours_blend(struct127 *obj, f32 *vals, s32 perGroup) {
     u8 g;
     u8 b;
 
-    vtx = *(u8 **) (o + 0x28C + o[0x1C8] * 8 + D_800BE9C0 * 4);
+    vtx = *(u8 **) (o + 0x28C + o[0x1C8] * 8 + g_dl_buf_index * 4);
     if (vtx == NULL) {
         return;
     }

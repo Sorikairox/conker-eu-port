@@ -15,10 +15,10 @@ void trail_get_aim(s32 arg0, s32 arg1) {
     f32 sp34[3];
     f32 sp28[3];
 
-    obj_get_aim_vectors(arg0, (s32)sp34, (s32)sp28, arg1, D_800BE616 ? D_800A0F10 : D_800A0F14);
+    obj_get_aim_vectors(arg0, (s32)sp34, (s32)sp28, arg1, D_800BE616 ? g_trail_aim_scale_mp : g_trail_aim_scale_sp);
 }
 
-extern f32 D_800A0F18;
+extern f32 g_effect50_u3c; /* was D_800A0F18 */
 int game_gu_random(void);
 void music_play_song(s32 arg0, s32 arg1, s32 arg2);
 
@@ -75,7 +75,7 @@ void obj_spawn_effect50_with_sound(u8 *obj) {
     data.pos1[1] = spec.pos[1];
     data.pos1[2] = spec.pos[2];
     trail_get_aim((s32) obj, (s32) data.aim);
-    data.u3C = D_800A0F18;
+    data.u3C = g_effect50_u3c;
     if (g_level_id == 0x34) {
         data.sound = sound_play_at(0x1B6 + game_gu_random() % 2, 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 1500);
     } else {
@@ -102,16 +102,16 @@ void obj_spawn_effect50_with_sound(u8 *obj) {
     }
 }
 
-extern f32 D_800A0F1C;
-extern f32 D_800A0F20;
+extern f32 g_trail_gravity; /* was D_800A0F1C */
+extern f32 g_trail_half_gravity; /* was D_800A0F20 */
 
 /* was func_150D9304 */
 void trail_point_integrate(f32 *arg0, f32 *arg1, f32 arg2) {
     vertex sp4 = *(vertex *)arg1;
 
-    arg1[1] += D_800A0F1C * arg2;
+    arg1[1] += g_trail_gravity * arg2;
     arg0[0] += sp4.x * arg2;
-    arg0[1] += sp4.y * arg2 + D_800A0F20 * arg2 * arg2;
+    arg0[1] += sp4.y * arg2 + g_trail_half_gravity * arg2 * arg2;
     arg0[2] += sp4.z * arg2;
 }
 
@@ -128,8 +128,8 @@ void trail_stop_emitting(u8 *arg0) {
 // trail_emit_update) of an object that walks a ring of 0x24-byte points (+0x94; +0x25 = point count, +0x2E = last
 // processed point, +0x2D = current point, +0x2C = state). Returns 0 at once when the state is < 2 and flag 8 of +0x1E
 // is set. Otherwise every point from the last processed one back to the current one (walking backwards around the
-// ring) gets trail_point_integrate(point, point + 0xC, D_800BE9A4); +0x54..0x5C becomes the current point's position (zero
-// in state <= 0). The timer +0x4D of the record at +0x98 advances by D_800BE9E4; past 50 it restarts and the
+// ring) gets trail_point_integrate(point, point + 0xC, g_frame_step_f); +0x54..0x5C becomes the current point's position (zero
+// in state <= 0). The timer +0x4D of the record at +0x98 advances by g_frame_ticks; past 50 it restarts and the
 // record's owner (+0) part +0x31C gets its counter +0x1AA bumped. Returns 1.
 /* was func_150D93CC */
 s32 path_points_catch_up(u8 *p) {
@@ -147,7 +147,7 @@ s32 path_points_catch_up(u8 *p) {
             if (i < 0) {
                 i = p[0x25] - 1;
             }
-            trail_point_integrate((f32 *) (pts + i * 0x24), (f32 *) (pts + i * 0x24 + 0xC), D_800BE9A4);
+            trail_point_integrate((f32 *) (pts + i * 0x24), (f32 *) (pts + i * 0x24 + 0xC), g_frame_step_f);
         } while (i != *(s8 *) (p + 0x2D));
     }
     if (*(s8 *) (p + 0x2C) > 0) {
@@ -161,7 +161,7 @@ s32 path_points_catch_up(u8 *p) {
         *(f32 *) (p + 0x58) = 0.0f;
         *(f32 *) (p + 0x5C) = 0.0f;
     }
-    *(s8 *) (rec + 0x4D) += D_800BE9E4;
+    *(s8 *) (rec + 0x4D) += g_frame_ticks;
     if (*(s8 *) (rec + 0x4D) >= 0x33) {
         u8 *owner = *(u8 **) rec;
         u8 *part;
@@ -174,10 +174,10 @@ s32 path_points_catch_up(u8 *p) {
     return 1;
 }
 
-extern f32 D_800A0F24;
-extern f32 D_800A0F28;
-extern f32 D_800A0F2C;
-extern f32 D_800A0F34;
+extern f32 g_trail_3c_max; /* was D_800A0F24 */
+extern f32 g_trail_3c_step; /* was D_800A0F28 */
+extern f32 g_trail_3c_min; /* was D_800A0F2C */
+extern f32 g_trail_34_rate; /* was D_800A0F34 */
 /* was func_150D952C */
 s32 trail_emit_update(u8 *arg0) {
     struct {
@@ -246,26 +246,26 @@ s32 trail_emit_update(u8 *arg0) {
     (*(s32 *)((u8 *)arg0 + 0x18)) = (s32) (*(s32 *)((u8 *)(&sp.uF8) + 8));
     if ((*(u8 *)((u8 *)temp_s1 + 0x4C)) & 1) {
         if ((*(u16 *)((u8 *)((*(u8 **)((u8 *)temp_s2 + 0x31C))) + 0x8A)) & 0x2000) {
-            var_f0 = D_800A0F24;
-            (*(f32 *)((u8 *)temp_s1 + 0x3C)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x3C)) + (D_800A0F28 * D_800BE9A4));
-            if ((*(f32 *)((u8 *)temp_s1 + 0x3C)) > D_800A0F24) {
+            var_f0 = g_trail_3c_max;
+            (*(f32 *)((u8 *)temp_s1 + 0x3C)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x3C)) + (g_trail_3c_step * g_frame_step_f));
+            if ((*(f32 *)((u8 *)temp_s1 + 0x3C)) > g_trail_3c_max) {
                 goto block_11;
             }
         } else {
-            var_f0 = D_800A0F2C;
-            (*(f32 *)((u8 *)temp_s1 + 0x3C)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x3C)) - (D_800A0F28 * D_800BE9A4));
-            if ((*(f32 *)((u8 *)temp_s1 + 0x3C)) < D_800A0F2C) {
+            var_f0 = g_trail_3c_min;
+            (*(f32 *)((u8 *)temp_s1 + 0x3C)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x3C)) - (g_trail_3c_step * g_frame_step_f));
+            if ((*(f32 *)((u8 *)temp_s1 + 0x3C)) < g_trail_3c_min) {
 block_11:
                 (*(f32 *)((u8 *)temp_s1 + 0x3C)) = var_f0;
             }
         }
     }
     temp_v0 = temp_s1 + 0x14;
-    (*(f32 *)((u8 *)temp_s1 + 0x34)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x34)) + (D_800A0F34 * D_800BE9A4));
+    (*(f32 *)((u8 *)temp_s1 + 0x34)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0x34)) + (g_trail_34_rate * g_frame_step_f));
     temp_f2 = (*(f32 *)((u8 *)temp_s1 + 0x34));
     if (temp_f2 > 1.0f) {
         (*(f32 *)((u8 *)(&sp.uB8) + 0)) = (*(f32 *)((u8 *)temp_v0 + 0));
-        var_f20 = (*(f32 *)((u8 *)temp_s1 + 0x2C)) + D_800BE9A4;
+        var_f20 = (*(f32 *)((u8 *)temp_s1 + 0x2C)) + g_frame_step_f;
         (*(s32 *)((u8 *)(&sp.uB8) + 4)) = (s32) (*(s32 *)((u8 *)temp_v0 + 4));
         temp_f0 = 1.0f / temp_f2;
         (*(s32 *)((u8 *)(&sp.uB8) + 8)) = (s32) (*(s32 *)((u8 *)temp_v0 + 8));
@@ -360,7 +360,7 @@ void move_xz_towards(f32, f32, f32, f32 *, f32 *);
 f32 math_atan2f(f32, f32);
 s32 obj_send_hit(u8 *, s32, u16, s32);
 f32 wrap_float_range(f32, f32, f32);
-extern f32 D_800BE9A4;
+extern f32 g_frame_step_f; /* was D_800BE9A4 */
 static const f32 trail_max_len[1] = { 1195.0f };       /* D_800A0F38 */
 static const f32 trail_no_inv[1] = { -9999.0f };       /* D_800A0F3C, D_800A0F40 */
 static const f32 trail_push_k[1] = { 0.0010526315f };  /* D_800A0F44 */
@@ -527,7 +527,7 @@ s32 trail_stream_update(u8 *obj) {
 
     if (*(s8 *)(obj + 0x2C) >= 2) {
         /* texture scroll; each point's s = scroll + 29.03 per unit of length from the head */
-        *(f32 *)(data + 0x38) += trail_s_speed[0] * D_800BE9A4;
+        *(f32 *)(data + 0x38) += trail_s_speed[0] * g_frame_step_f;
         *(f32 *)(data + 0x38) = wrap_float_range(*(f32 *)(data + 0x38), trail_s_range[0], -16384.0f);
         sum = 0.0f;
         i = *(s8 *)(obj + 0x2E) - 1;
@@ -580,7 +580,7 @@ Gfx *gfx_set_combine_mode(Gfx *, u8, u8 *);
 Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 extern u8 D_800915E8[];
 extern s32 g_render_mode_pairs[]; /* was D_800A4EA8 */
-extern s32 D_800D30BC;
+extern s32 g_gfx_tlut_mode; /* was D_800D30BC */
 
 // trail_draw_ribbon: draws the object's point trail as a camera-facing textured ribbon. The trail is a ring of
 // 0x24-byte points at obj+0x94 (pos +0x00, alpha +0x1C, texture s +0x20; count obj+0x25, head obj+0x2E, tail
@@ -618,7 +618,7 @@ Gfx *trail_draw_ribbon(u8 *obj, Gfx *gfx, s16 id) {
     gfx = gfx_load_texture_cached(gfx, D_800915E8, 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
     gfx = gfx_geometry_mode_cached(gfx, 0x220005, 0x1D0600);
     gfx = gfx_set_combine_mode(gfx, 0x4E, &flag);
-    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, g_render_mode_pairs[7] | g_render_mode_pairs[6], &flag);
+    gfx = gfx_other_mode_cached(gfx, g_gfx_tlut_mode | 0x80000 | 0x2CA0, g_render_mode_pairs[7] | g_render_mode_pairs[6], &flag);
 
     if (*(u16 *)(obj + 0x1E) & 2) {
         i = *(s8 *)(obj + 0x2E) - 1;
@@ -917,7 +917,7 @@ void trail_hit_effects(u8 *obj, TrailHit *hit, f32 *dir) {
         return;
     }
     if (hit->count >= 2 && (*(u8 *)(hit->obj + 4) == 0x33 || *(u8 *)(hit->obj + 4) == 0x3A)) {
-        *(f32 *)(data + 0x48) += (hitfx_spark_rate[0] + random_float() * hitfx_spark_rand[0]) * D_800BE9A4;
+        *(f32 *)(data + 0x48) += (hitfx_spark_rate[0] + random_float() * hitfx_spark_rand[0]) * g_frame_step_f;
         if (1.0f < *(f32 *)(data + 0x48)) {
             spark.u08 = 0x5103;
             spark.u22 = 0x2E;
@@ -949,9 +949,9 @@ void trail_hit_effects(u8 *obj, TrailHit *hit, f32 *dir) {
             spark.pos[0] = hit->pos[0];
             spark.pos[1] = hit->pos[1];
             spark.pos[2] = hit->pos[2];
-            spark.acc[0] = ((f32 *)D_800A5860)[0];
-            spark.acc[1] = ((f32 *)D_800A5860)[1];
-            spark.acc[2] = ((f32 *)D_800A5860)[2];
+            spark.acc[0] = ((f32 *)g_vec3_zero)[0];
+            spark.acc[1] = ((f32 *)g_vec3_zero)[1];
+            spark.acc[2] = ((f32 *)g_vec3_zero)[2];
             do {
                 tail.b[0] = random_int();
                 tail.b[1] = random_int();
@@ -976,7 +976,7 @@ void trail_hit_effects(u8 *obj, TrailHit *hit, f32 *dir) {
         }
     } else {
         f = hitfx_dust_rate[0];
-        *(f32 *)(data + 0x44) += (f + random_float() * f) * D_800BE9A4;
+        *(f32 *)(data + 0x44) += (f + random_float() * f) * g_frame_step_f;
         if (1.0f < *(f32 *)(data + 0x44)) {
             hitinfo_from_record((f32 *)frame, hit);
             debris.pos[0] = hit->pos[0];
@@ -1006,9 +1006,9 @@ void trail_hit_effects(u8 *obj, TrailHit *hit, f32 *dir) {
                 objfx.back[0] = -dir[0];
                 objfx.back[1] = -dir[1];
                 objfx.back[2] = -dir[2];
-                v[0] = ((f32 *)D_800A5860)[0];
-                v[1] = ((f32 *)D_800A5860)[1];
-                v[2] = ((f32 *)D_800A5860)[2];
+                v[0] = ((f32 *)g_vec3_zero)[0];
+                v[1] = ((f32 *)g_vec3_zero)[1];
+                v[2] = ((f32 *)g_vec3_zero)[2];
                 objfx.v1[0] = v[0];
                 objfx.v1[1] = v[1];
                 objfx.v1[2] = v[2];
@@ -1035,7 +1035,7 @@ void trail_hit_effects(u8 *obj, TrailHit *hit, f32 *dir) {
     }
 
     if (hit->count == 1) {
-        *(f32 *)(data + 0x40) += (hitfx_smoke_rate[0] + random_float() * hitfx_smoke_rand[0]) * D_800BE9A4;
+        *(f32 *)(data + 0x40) += (hitfx_smoke_rate[0] + random_float() * hitfx_smoke_rand[0]) * g_frame_step_f;
         if (1.0f < *(f32 *)(data + 0x40)) {
             do {
                 f = random_float();

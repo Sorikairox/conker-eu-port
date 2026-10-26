@@ -1,8 +1,8 @@
 s/    found = 0;/    found = 1;/
 s/if (obj == NULL) {/if (obj != NULL) {/
 s/hitinfo_from_obj_floor(hit, obj);/hitinfo_from_obj_floor(hit + 1, obj);/
-s/D_800BEE08 \* 0x9A0), 7, 1)/D_800BEE08 * 0x9A0), 7, 0)/
-s/D_800BEE08 \* 0x9A0)/D_800BEE08 * 0x9A8)/
+s/g_view_count_minus1 \* 0x9A0), 7, 1)/g_view_count_minus1 * 0x9A0), 7, 0)/
+s/g_view_count_minus1 \* 0x9A0)/g_view_count_minus1 * 0x9A8)/
 s/(obj + 0x18) + 100.0f;/(obj + 0x18) + 10.0f;/
 s/pos\[2\] = \*(f32 \*) (obj + 0x1C);/pos[2] = *(f32 *) (obj + 0x14);/
 s/(obj + 0x18) - 300.0f/(obj + 0x18) + 300.0f/

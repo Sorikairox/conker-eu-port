@@ -32,7 +32,7 @@ void level_tex_scroll_create(void) {
 
 s32 memcpy(u8 *, f32 *, s32);
 extern s32 D_8009068C;
-extern s32 D_800B1214;
+extern s32 g_level_dl_tinted_extra; /* was D_800B1214 */
 
 /* was func_1500FF7C */
 void level_tex_scroll_fx_setup(void) {
@@ -46,7 +46,7 @@ void level_tex_scroll_fx_setup(void) {
     u8 *temp_v0_2;
 
     level_dl_add_texture_scroll(*g_level_part_dls, D_8009068C, 1, -1, 0, 0, 0, -4);
-    level_dl_add_texture_scroll(D_800B1214, D_8009068C, 1, -1, 0, 1, 0, -4);
+    level_dl_add_texture_scroll(g_level_dl_tinted_extra, D_8009068C, 1, -1, 0, 1, 0, -4);
     level_slots10_init();
     level_tex_scroll_create();
     sp.u44 = 0.0f;

@@ -28,13 +28,13 @@ s/                    fz = (s32) z;/                    fz = (s32) y;/
 s/                case 'X':/                case 'W':/
 s/(f32) ((q\[0\]\[1\] + q\[2\]\[1\]) >> 1)/(f32) ((q[0][1] + q[3][1]) >> 1)/
 s/(f32) (q\[0\]\[2\] + q\[2\]\[2\]) >> 1)/(f32) (q[0][2] + q[2][2]))/
-s/(f32) du, (f32) dv, D_800A32F0)/(f32) dv, (f32) du, D_800A32F0)/
-s/(f32) du, (f32) dv, D_800A32F0) == 0)/(f32) du, (f32) dv, 1000.0f) == 0)/
-s/            if (D_800DC2DB == 0 \&\& row >= dist) {/            if (D_800DC2DB == 0 \&\& row > dist) {/
-s/            if (D_800DC2DB != 0 \&\& row >= dist) {/            if (row > dist) {/
-s/            if (D_800DC2DB != 0 \&\& row >= dist) {/            if (0) {/
+s/(f32) du, (f32) dv, g_sky_tile_far)/(f32) dv, (f32) du, g_sky_tile_far)/
+s/(f32) du, (f32) dv, g_sky_tile_far) == 0)/(f32) du, (f32) dv, 1000.0f) == 0)/
+s/            if (g_sky_load_all_tiles == 0 \&\& row >= dist) {/            if (g_sky_load_all_tiles == 0 \&\& row > dist) {/
+s/            if (g_sky_load_all_tiles != 0 \&\& row >= dist) {/            if (row > dist) {/
+s/            if (g_sky_load_all_tiles != 0 \&\& row >= dist) {/            if (0) {/
 s/            id = tex + col \* rows + row;/            id = tex + row * rows + col;/
-s/((u8 \*) D_800B0DF0)\[9\] == 1/((u8 *) D_800B0DF0)[8] == 1/
+s/((u8 \*) g_level_header)\[9\] == 1/((u8 *) g_level_header)[8] == 1/
 s/face == 2 \&\& row >= 4/face == 1 \&\& row >= 4/
 s/row >= 4 \&\& row < 7/row >= 3 \&\& row < 7/
 s/row >= 4 \&\& row < 7/row >= 4 \&\& row < 6/

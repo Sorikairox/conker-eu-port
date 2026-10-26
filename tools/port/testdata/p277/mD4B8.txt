@@ -1,6 +1,6 @@
 \#^    blk.u1C = 0.0f;$#s/0.0f/1.0f/
-\#^    blk.u18 = D_800AB16C\[D_80082FA0 == 1\];$#s/== 1/== 0/
-\#^    blk.u20 = D_800AB194\[D_80082FA0 == 1\];$#s/D_800AB194/D_800AB16C/
+\#^    blk.u18 = g_aim_hud_rows_u18\[g_last_player_index == 1\];$#s/== 1/== 0/
+\#^    blk.u20 = g_aim_hud_rows_u20\[g_last_player_index == 1\];$#s/g_aim_hud_rows_u20/g_aim_hud_rows_u18/
 \#^    blk.owner = obj;$#d
 \#^    blk.alphaA = 0.0f;$#s/0.0f/130.0f/
 \#^    blk.alphaB = 130.0f;$#s/130.0f/131.0f/
@@ -18,7 +18,7 @@
 \#^    spec.scaleB = 16.0f;$#s/16.0f/18.0f/
 \#^    spec.player = obj\[0x23D\];$#s/obj\[0x23D\]/0/
 \#^    for (row = 0; row < 2; row++) {$#s/row < 2/row < 1/
-\#^        kinds.w = \*(s32 \*) D_8008FFC8;$#s/D_8008FFC8/(D_8008FFC8 + 1)/
+\#^        kinds.w = \*(s32 \*) g_aim_hud_slot_kinds;$#s/g_aim_hud_slot_kinds/(g_aim_hud_slot_kinds + 1)/
 \#^        spec.y = row ? 92.0f : -90.0f;$#s/92.0f : -90.0f/-90.0f : 92.0f/
 \#^        spec.flags |= row ? 4 : 0;$#s/4 : 0/2 : 0/
 \#^        blk.type = row ? 5 : 4;$#s/5 : 4/4 : 5/

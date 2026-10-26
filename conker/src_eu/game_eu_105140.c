@@ -87,16 +87,16 @@ void start_light_3_handle_msg(u8 *arg0, u8 *arg1, u8 arg2) {
 /* was func_150D7B40 */
 void anim_segments_clock_tick(s32 arg0) {
     if (arg0 == 0) {
-        D_800D9D30 += D_800BE9E4 << 6;
+        g_anim_segment_clock += g_frame_ticks << 6;
     }
 }
 
-extern s32 *D_80088CA0[2];
+extern s32 *g_anim_segment_tables[2]; /* was D_80088CA0 */
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 
 // anim_segments_set: points segments 2..7 at textures (texture_cache_lookup, mode 3) taken from the two 5-entry texture id
-// tables of D_80088CA0 (segments 2..5 from the first, 6 and 7 from the second): entry (D_800D9D30 >> 8) + 13 per
-// segment, mod 5, so the frames cycle with the D_800D9D30 clock (anim_segments_clock_tick). Returns the advanced display list.
+// tables of g_anim_segment_tables (segments 2..5 from the first, 6 and 7 from the second): entry (g_anim_segment_clock >> 8) + 13 per
+// segment, mod 5, so the frames cycle with the g_anim_segment_clock clock (anim_segments_clock_tick). Returns the advanced display list.
 /* was func_150D7B6C */
 Gfx *anim_segments_set(Gfx *gdl) {
     s32 *tabs[2];
@@ -106,10 +106,10 @@ Gfx *anim_segments_set(Gfx *gdl) {
     s32 seg;
     s32 tex;
 
-    tabs[0] = D_80088CA0[0];
-    tabs[1] = D_80088CA0[1];
+    tabs[0] = g_anim_segment_tables[0];
+    tabs[1] = g_anim_segment_tables[1];
     tab = 0;
-    frame = D_800D9D30 >> 8;
+    frame = g_anim_segment_clock >> 8;
     for (seg = 2; seg < 8; seg++, frame += 13) {
         if (seg >= 6) {
             tab = 1;

@@ -1,0 +1,299 @@
+old	new	confidence	description
+D_8008A420	g_occl_probe_fns	med	Occlusion probe handlers indexed by probe +0x34, called with the read-back colour channels (occlusion_probes_update)
+D_800DD730	g_occl_probe_depth	high	Per occlusion probe (3): projected depth of the probe point, compared with the z-buffer word read back
+D_800DD740	g_occl_probe_zbuf	high	Per occlusion probe: z-buffer word read back by the RDP (u16[4] each, 0xFFFF = pending)
+D_800DD758	g_occl_probe_colour	high	Per occlusion probe: colour-buffer word read back (RGBA5551, u16[4] each)
+D_800DD770	g_occl_probe_last_colour	med	Last colour-buffer word read back by occlusion_probes_update
+D_800DD778	g_occl_probes	high	The 3 occlusion probe records (state, screen x / y, handler, player) of occlusion_probe_request / _update
+D_80089810	g_identity_mtx	high	Fixed identity Mtx (0x40 bytes) loaded as modelview by many render passes and copied by debris_spawn_linked
+D_8008D0A4	g_level_update_fns	high	Per-level update handlers void(s32), indexed by level header byte (D_800B0DF0 padB[0]); level_update_frame
+D_8008D114	g_level_pre_layer_fns	high	Per-level DL hooks Gfx*(Gfx*, s32) run before the level layers, indexed by level header +0xC
+D_8008D11C	g_level_post_layer_fns	high	Per-level DL hooks Gfx*(Gfx*, s32) run after the level layers, indexed by level header +0xD
+D_800DD835	g_level_anim_frame	high	Level animation frame counter (sky / level part segments), advanced by level_anim_frame_counter_tick
+D_800DD836	g_level_anim_accum	high	Frame-time accumulator of level_anim_frame_counter_tick; the frame advances when it passes the period
+D_8008D450	g_anim_mesh_params	med	Per anim-mesh / flyer type 0x38-byte parameter rows (flyer limits, swing speed / angle / amplitude)
+D_800A7550	g_flyer_surface_tints	med	u8[4] colour per surface class ((type >> 5) & 3) stored at +0xEC by the leaf / flyer spawners
+D_800D3A04	g_cam_zoom_factors_1	med	Element [1] of the camera zoom factors D_800D3A00 (current / base fov ratio); passed to view_point_cull_test
+D_800DA030	g_view_mtxf	high	Per player 0x40-byte float view matrix (from the view Mtx; used by the culling / visibility tests)
+D_800DA070	g_view_mtxf_p1	high	Player 2's view float matrix (g_view_mtxf[1])
+D_800DDF5C	g_weather_slot_busy	high	u8[4] busy flags of the 4 weather / ambient effect slots (ambfx_effect_start); cleared by trigger zones
+D_800DE2B4	g_anim_mesh_slot_model_up	med	Field +4 (model while climbing) of the 0x14-byte anim mesh slots g_anim_mesh_slots; indexed with the slot stride
+D_800DE2B8	g_anim_mesh_slot_model_down	med	Field +8 (model / leaf model) of the 0x14-byte anim mesh slots; indexed with the slot stride
+D_800DE2BC	g_anim_mesh_slot_dl	med	Field +0xC (display list) of the 0x14-byte anim mesh slots, drawn by flyer_model_draw
+D_800DD410	g_vtx_anim_lights	high	List of vertex-animation light records created by vtx_anim_light_create (count g_vtx_anim_light_count)
+D_800DD418	g_vtx_anim_light_count	high	Number of entries in g_vtx_anim_lights
+D_8008CE04	g_swarm_member_tpl_word0	low	First word of the spawn template swarm_spawn fills for its members
+D_800DD368	g_node_list_swarms	med	Node list head g_node_lists[0][58]: the swarms (searched by id +0x34 in swarm_find_by_id)
+D_800DD36C	g_node_list_swarm_members	med	Node list head g_node_lists[0][59]: swarm member nodes (owner +0x14), destroyed with their swarm
+D_800DBFF0	g_player_views	high	Per-player 0x9A0-byte view / camera state records (camera position, +0x3D0 camera record, ...)
+D_800DD444	g_rain_state_timer	high	Rain state timer (s16, 600 frames) driven by rain_request / rain_update
+D_800DD860	g_rain_voice	high	Voice handle of the looping rain sound (sound 0x6F)
+D_800DD862	g_rain_gust_timer	high	Frames left until the next random rain gust
+D_800DD863	g_rain_gust_strength	high	Strength of the current rain gust (pushes the drops in rain_drop_update)
+D_800DD864	g_rain_level	med	Requested rain level (rain_request arg; 0 = stop, 4 = full)
+D_800DD866	g_rain_drop_count	high	Number of live rain drops in g_rain_drops (max 300)
+D_800DD868	g_rain_centre	high	Rain centre (s16 x +0, z +4) following the camera; drops respawn around it
+D_800DD870	g_rain_drops	high	Allocated table of 300 rain drop pointers
+D_800DD876	g_rain_state	high	Rain state machine (0 off, 1 starting, ...) of rain_update / rain_request
+D_8008D190	g_puff_sprite_dl	high	Display list drawn for each puff sprite (puff_sprite_draw)
+D_800909C4	g_puff_texture	med	Puff sprite texture loaded by puff_texture_set
+D_800DD5E0	g_tex_cache_last_addr	high	Address of the last texture loaded by gfx_load_texture_cached / trail / puff (-1 = none, reload)
+D_800DD880	g_puff_last_alpha	high	Last prim alpha set by puff_sprite_draw (-1 forces a reload)
+D_800A7610	g_player_morph_descs	med	Player morph descriptors (8 bytes: model type, count n, ...) used by player_morph_blend / setup_entry_spawn
+D_800C4730	g_model_part_counts	low	Per model id: word count of its asset section +0 (size / 4), set by model_load; sizes the morph caches
+D_800DD460	g_player_morph_caches	med	Per morph descriptor: allocated morph cache (pointer table) aged by player_morph_cache_age
+D_8008CEB0	g_ambient_flame_queue_count	high	Number of queued extra ambient flames (max 3) in g_ambient_flame_queue
+D_8008D254	g_ambient_sort_by_z	high	Ambient emitter sort key: 0 = sort by x, else by z
+D_8008D340	g_ambient_quad_setup_dl	high	Sprite render setup display list called before the ambient billboard quads
+D_80096091	g_ambient_sound_info_b1	med	Byte +1 of the 10-byte ambient sound info rows D_80096090 (flicker limit, << 8)
+D_800A7624	g_ambient_deg_to_rad_7624	high	Rodata f32: degrees to radians (ambient_emitters_update)
+D_800DD478	g_ambient_slots	high	15 positional ambient sound slots, 0x68 bytes each (word 0 = active)
+D_800DD8A0	g_ambient_flare_point	high	s16 x, y, z point that makes nearby ambient flames flare up (set by ambient_flare_point_set; x 0 = none)
+D_800DDA90	g_ambient_voices	high	15 ambient voice records (16 bytes: +8 voice handle, +0xC heard this frame)
+D_800DDD0C	g_ambient_quad_max	high	Maximum number of ambient billboard quads per frame (110)
+D_800DDD10	g_ambient_quad_bufs	high	Per frame buffer index: allocated vertex buffer of the ambient billboard quads
+D_800DDD1C	g_ambient_flame_phase	high	Extra flame animation phase (0..199, +5 per draw; >> 3 = frame)
+D_800DDD20	g_ambient_emitter_count	high	Number of ambient emitter records built by ambient_emitters_build
+D_800DDFB0	g_ambient_slot_tc	med	Per ambient slot: s16 pair used as quad texture coordinates s / t (from the sound rate / length)
+D_800DDFF0	g_ambient_slot_sound_ids	high	Per ambient slot: sound id (index of D_80096090)
+D_800DE070	g_ambient_slot_nearest	high	Per ambient slot: nearest emitter distance this frame (0x7FFF = none)
+D_800DE154	g_ambient_flame_tex	med	u16 texture of the extra flames (640 u16 per frame) passed to ambient_extra_flames_draw
+D_800DE158	g_ambient_flame_queue	high	Queue of up to 3 extra flames (16 bytes: s16 x, y, z, frame, s16 a, b, f32 size)
+D_800DE188	g_ambient_quad_count	high	Ambient billboard quads built this frame
+D_8008CFFC	g_flare_level_points	med	Per level (header +0x10): pointer to its lens flare point table
+D_8008D3A4	g_flare_ring_red	med	u8[2] red values of the lens flare rings (flare_nodes_draw)
+D_8008D3A8	g_flare_ring_green	med	u8[2] green values of the lens flare rings
+D_8008D3AC	g_flare_ring_blue	med	u8[2] blue values of the lens flare rings
+D_8009075C	g_flare_sprite	high	Lens flare sprite texture
+D_800A7630	g_flare_ring_sizes	high	Lens flare ring sizes, 7 per row
+D_800DCDD0	g_level_lights_mode	med	Level lights mode (level_set_lights_mode); lens flares are drawn only when non-zero
+D_800DDD64	g_flare_nodes	high	Linked list of lens flare nodes (0x34 bytes, next +0x24) of flare_node_add / _remove
+D_800DE190	g_flare_sprite_mode_set	high	Set once the flare sprite render mode was emitted this frame
+D_80082FA0	g_last_player_index	high	Number of split-screen players minus 1 (viewports_init arg); loops run i = 0..this
+D_8008D3B0	g_screen_pulse_colours	med	Screen pulse colours, two RGB triples per entry (indexed by g_screen_pulse_colour)
+D_8008D3B8	g_hud_scope_dl	med	Display list of the sniper scope overlay (hud_sniper_scope_draw)
+D_80090678	g_letterbox_tex_a	low	Texture id of the first letterbox bar texture (hud_letterbox_draw)
+D_8009067C	g_letterbox_tex_b	low	Texture id of the second letterbox bar texture (hud_letterbox_draw)
+D_800A766C	g_hud_scope_zoom_scale	med	Rodata f32: zoom scale of the sniper scope
+D_800A7670	g_hud_scope_radius_scale	med	Rodata f32: scope lens radius per zoom unit (r = this * zoom + 400)
+D_800A768C	g_hud_lens_mode_zoom	med	Rodata f32: lens zoom set when hud_lens_set_mode turns a mode on
+D_800A7690	g_hud_lens_scripted_rate	med	Rodata f32: zoom rate set by hud_lens_start_scripted
+D_800A7694	g_hud_lens_zoom_in_rate	med	Rodata f32: zoom rate set by hud_lens_start_zoom_in
+D_800DDDAC	g_screen_fade_dir	high	Per player: screen fade direction (0 = fade in); [1..3] are g_screen_fade_dir_p1..p3
+D_800DDDB0	g_screen_fade_timer	high	Per player: screen fade elapsed time (s32); [1..3] are g_screen_fade_timer_p1..p3
+D_800DDDC8	g_hud_lens_zoom	high	Per player: HUD lens zoom (f32, 1 = none); [1..3] are g_hud_lens_zoom_p1..p3
+D_800DDDD8	g_hud_lens_zoom_rate	high	Per player: lens zoom rate per frame step (f32); [1..3] are g_hud_lens_zoom_rate_p1..p3
+D_800DDE08	g_screen_pulse_timer	high	Frames left of the pulsing screen overlay (screen_pulse_start / _tick)
+D_800DDE18	g_letterbox_track	med	Pointer to the f32 letterbox amount (percent) of a scene track; 0 = no letterbox
+D_800DDE1C	g_hud_lens_mode	high	Per player: lens mode / cross hair (u8); [1..3] are g_hud_lens_mode_p1..p3
+D_800DDE20	g_hud_lens_scripted	high	Per player: scripted zoom active (u8); [1..3] are g_hud_lens_scripted_p1..p3
+D_800DDE28	g_screen_fade_duration	high	Per player: screen fade duration (s32); [1..3] are g_screen_fade_duration_p1..p3
+D_800DDE3C	g_hud_lens_state	high	Per player: lens state 1..4 (0 = off); [1..3] are g_hud_lens_state_p1..p3
+D_800DE1A0	g_hud_lens_wobble_timer	high	Per player: lens wobble timer (u8)
+D_800DE1A4	g_hud_lens_wobble_angle	high	Per player: lens wobble angle (u8)
+D_800DE1A8	g_hud_scope_range_frame	high	Per view: animated range finder frame (0..2) of the sniper scope
+D_800DE1B0	g_hud_lens_hold_timer	high	Per player: hold timer (u16) of lens state 3
+D_800DE1B8	g_screen_pulse_speed	high	Phase speed of the pulsing screen overlay
+D_800DE1B9	g_screen_pulse_phase	high	Phase (u8 angle) of the pulsing screen overlay
+D_800DE1BA	g_screen_pulse_colour	high	Colour index (g_screen_pulse_colours) of the pulsing screen overlay
+D_800DE1BB	g_screen_pulse_alpha	high	Alpha of the pulsing screen overlay
+D_800DE1C0	g_screen_tint_rgb	high	Per player: screen tint colour (RGB triple)
+D_800DE1CC	g_screen_tint_alpha	high	Per player: screen tint alpha (0 = off)
+D_800DE1D0	g_screen_fade_rgb	high	Per player: screen fade colour (RGB triple)
+D_800DE1F0	g_screen_fade_alpha_override	med	Per player: fixed screen fade alpha; non-zero replaces the timed fade
+D_800DE218	g_hud_lens_centre	high	Per player: lens / zoom centre offset from the viewport centre (f32 x, y)
+D_800DE240	g_screen_tint_timer	high	Per player: screen tint timer (u16), counted down by screen_tint_timers_tick
+D_8008D3F0	g_water_types	med	Water / wave area type records, 0x18 bytes each (wave params, box +0xC/+0xE, yaw +0x10, model +0x12, push +0x16)
+D_8008D3F8	g_water_types_slot_scale	med	Field +8 of g_water_types (f32, stride 0x18): z to wave slot scale (water_wave_slot_of_z)
+D_8008D400	g_water_types_yaw	med	Field +0x10 of g_water_types (s16 yaw degrees, +0x12 world object index; stride 0x18)
+D_8008D407	g_water_types_splash_timer	med	Field +0x17 of g_water_types (stride 0x18): splash sound cooldown timer
+D_800DE284	g_area_points_type	med	Per wave area slot (g_area_points): its water type index into g_water_types
+D_8008D760	g_anim_mesh_swing_rows	med	Per anim mesh slot: vertex row table swung by mesh_swing_update (anim_meshes_update)
+D_800A76B0	g_anim_mesh_ids	med	Anim mesh ids searched by anim_mesh_draw_by_id
+D_800DDE80	g_anim_mesh_slots	high	11 anim mesh slots of 0x14 bytes (+0 block / enabled, +4 / +8 models, +0xC display list)
+D_800DDF60	g_weather_slot_timers	med	s8[4] countdown timers of the weather / anim mesh slots (anim_meshes_update, flyer kind 0x13)
+D_800DDF68	g_anim_mesh_state	high	Per anim mesh slot state: 1 = just set up, then 0, -1, -2 = gone
+D_800DDF78	g_anim_mesh_dls	high	Per anim mesh slot: the relocated display list of its asset (0 = not loaded)
+D_800DE350	g_anim_mesh_slot8_block	med	Block (+0) of anim mesh slot 8 (g_anim_mesh_slots[8]), freed by anim_mesh_release(9)
+D_800DE399	g_anim_mesh_state_1	med	Alias of g_anim_mesh_state[1] (anim_mesh_load_with_next marks slot arg0 + 1)
+D_800DE3A0	g_anim_mesh_state_8	med	Alias of g_anim_mesh_state[8], tested by anim_mesh_release
+D_800DE3A1	g_anim_mesh_state_9	med	Alias of g_anim_mesh_state[9], tested by anim_mesh_release
+D_800DE3C8	g_anim_mesh_dl_8	med	Alias of g_anim_mesh_dls[8], cleared by anim_mesh_release
+D_8008D780	g_shadow_tri_budget	high	Current shadow triangle budget, adapted per frame between g_shadow_tri_budget_min and _max
+D_8008D788	g_shadow_viewport	high	Viewport (Vp) of the shadow texture render pass
+D_8008D798	g_shadow_box_corners	high	s8[8][3]: the 8 corners (+-1, +-1, +-1) of an object's shadow box
+D_8008D7B0	g_shadow_draw_setup_dl	med	Display list called before each shadow is drawn onto the scene (shadow_draw_all)
+D_8008D7E8	g_shadow_render_setup_dl	high	Static setup display list of the shadow texture render pass (shadow_render_caster)
+D_8008D838	g_shadow_clip_isect_fns	high	Per clip plane: edge intersection function of the shadow polygon clipper
+D_8008D860	g_shadow_clip_inside_fns	high	Per clip plane: inside test of the shadow polygon clipper
+D_8008D8D8	g_shard_quad_vtx	high	The 4-vertex quad drawn by shard_ring_draw
+D_8008D918	g_shard_k_d918	low	f32 scale applied to the three angles of shard_quad_rotation_matrix (likely degrees to radians)
+D_800D3AA0	g_shadow_proj_scale	high	f32[2] shadow projection x / y (u / v) scale
+D_800D3AA8	g_shadow_far_depth	high	Shadow far clip depth (w <= this: outcode 0x10)
+D_800D3AAC	g_shadow_near_depth	high	Shadow near clip depth (w >= this: outcode 0x20)
+D_800D3AB0	g_shadow_tri_table	high	Triangle table of the shadow vertex passes (3 vertex pointers / offsets per triangle)
+D_800DE440	g_shadow_light_dir	high	Default shadow light direction (reset to (100, 600, -200) when its y <= 0)
+D_800DE44C	g_shadow_tri_budget_max	high	Per level: maximum shadow triangle budget
+D_800DE450	g_shadow_tri_budget_grow	med	Per level: budget below which the far depth grows back toward the level value
+D_800DE454	g_shadow_tri_budget_min	high	Per level: minimum shadow triangle budget
+D_800DE458	g_shadow_far_base	high	Shadow far clip depth before the world scale (adapted by shadow_draw_all)
+D_800DE45C	g_shadow_alpha	high	Shadow alpha at the near depth (fades to 0 at the far depth)
+D_800DE460	g_shadow_vp_scale	med	Per level: scale (/1024) applied to the shadow viewport's +0xC value
+D_800DE464	g_shadow_no_point_lights	high	Non-zero: shadows use only the default light direction, no point lights
+D_800DE468	g_shadow_detail	med	Shadow detail level: >= 2 snaps the light positions; also caps detailed shadows per frame
+D_800DE46C	g_shadow_world_scale	high	World scale of the shadow distances
+D_800DE470	g_shadow_light_height_mode	high	Non-zero: minimum light height grows with the horizontal distance
+D_800DE471	g_shadow_flagged_tris_only	high	Non-zero: only level triangles whose D_800D3668 flag is 1 receive shadows
+D_800DE478	g_shadow_tex_buf	high	Shadow texture buffer (g_shadow_tex is its 64-byte aligned start)
+D_800DF4B8	g_shadow_tex	high	64-byte aligned shadow texture address (inside g_shadow_tex_buf)
+D_800DF4C0	g_shadow_viewports	med	Per view: 0x10-byte viewport copy (scaled by g_shadow_vp_scale) used by the shadow draw
+D_800DF500	g_shadow_persp_norm	high	Per shadow slot: perspNorm of the shadow projection (u16)
+D_800DF510	g_shadow_skip_players	med	Bit mask of players whose shadow is skipped (set by trigger zones, cleared each frame)
+D_800DF511	g_shadow_flat_players	med	Bit mask of players with flat shadows (y size / 4, half far depth), set by trigger zones
+D_800DF518	g_shadow_box_x_min	high	Shadow receiver box: x min
+D_800DF51C	g_shadow_box_x_max	high	Shadow receiver box: x max
+D_800DF520	g_shadow_box_z_min	high	Shadow receiver box: z min
+D_800DF524	g_shadow_box_z_max	high	Shadow receiver box: z max
+D_800DF528	g_shadow_light_mtxf	high	Per shadow slot: f32[4][4] light look-at view matrix
+D_800DF728	g_shadow_proj_mtx	high	Per shadow slot and frame: fixed-point projection Mtx (0x40 bytes)
+D_800DFB28	g_shadow_light_dist	high	Distance object -> light of the last shadow projection
+D_800A7770	g_light_fx_blink_off_times	high	u8[8] blink pattern: off times of the light effects
+D_800A7778	g_light_fx_two_pi_7778	high	Rodata f32: 2 pi (light effect phase wrap)
+D_800DFB30	g_light_fx	high	Light effect records (0x24 bytes, max 5) set up by light_fx_add
+D_800DFB3C	g_light_fx_blend	med	Field +0xC (blend, f32) of the g_light_fx records (stride 0x24)
+D_800DFBE4	g_light_fx_count	high	Number of light effects in g_light_fx
+D_8008D920	g_afterimage_update_fns	high	Afterimage node update handlers, by node type
+D_8008D928	g_afterimage_free_fns	high	Afterimage node release handlers (called before heap_free), by node type
+D_8008D930	g_afterimage_draw_fns	high	Afterimage node draw handlers, by node type
+D_800DF7C8	g_afterimage_lists	high	Afterimage node list heads ([0] objects, [1] world = g_afterimage_world_list)
+D_800DFBFC	g_afterimage_world_list	med	Afterimage list of the world (g_afterimage_lists[1]) used by afterimage_start_world
+D_800A7788	g_drift_dust_chance	med	Rodata f64: chance a drifting particle spawns dust when it hits the floor
+D_800A7790	g_drift_particle_k_7790	low	Rodata f32 stored at particle +0x48 when it hits the floor
+D_8008D940	g_bone_fx_visibility_fns	med	Visibility check handlers of bone-following effects (+0x18E index)
+D_800A77A0	g_bone_fx_scale_default	low	Rodata f32: bone effect scale (+0x128 / +0x12C) for the default model state
+D_800A77A4	g_bone_fx_scale_state1	low	Rodata f32: bone effect scale for model state 0x10
+D_800A77A8	g_bone_fx_scale_state2	low	Rodata f32: bone effect scale for model state 0x11
+D_8008D950	g_tumble_debris_kinds_a	low	s32 pair: random choice for spawn byte +0x6E of tumble_debris_spawn (arg9 == 0)
+D_8008D958	g_tumble_debris_kinds_b	low	s32 pair: random choice for spawn byte +0x6E of tumble_debris_spawn (arg9 != 0)
+D_8008D960	g_timed_queue_fns	med	Callbacks of the timed queue entries (index +0x1C), called with entry +0x10
+D_800DFC00	g_shared_dl_refcounts	high	Per shared display list id: reference count (saturates at 0xFF)
+D_800DFDE8	g_shared_dl_tex_lists	high	Per shared display list id: resolved texture id list
+D_800E0578	g_shared_dl_headers	high	Per shared display list id: loaded asset header / display list pointer
+D_8008D970	g_sprite_uv_scroll_fns	med	UV scroll handlers run by sprite_uv_scroll_update
+D_8008D980	g_char_effect_sets	high	Character effect sets (CharFxSet *), indexed by effect +0x22
+D_8008D9C0	g_char_effect_spawn_init_fns	high	Character effect particle spawn-record initialisers (template +0x3F)
+D_8008D9C8	g_char_effect_end_fns	high	Character effect end-of-time handlers (effect +0x21), result decides removal
+D_8008D9D0	g_bone_sparks_preset_tables	med	Bone spark preset tables (0x50-byte presets) per table index from bone_sparks_table_for_kind
+D_8008DA1C	g_bone_sparks_tick_fns	high	Bone-spark emitter tick handlers (bone_sparks_tick_hurt, bone_sparks_owner_release)
+D_8008DA24	g_bone_sparks_msg_fns	high	Bone-spark emitter message handlers (index self +0x8A)
+D_800A7840	g_char_effect_name_chain3	low	Name / tag data passed to character_effect_attach by character_effect_end_chain3 (effect 3)
+D_800A787C	g_char_effect_name_chain4	low	Name / tag data passed to character_effect_attach by character_effect_end_chain4 (effect 4)
+D_800A7EA8	g_bone_sparks_kind_00	low	Bone spark preset word for object kinds 0..4
+D_800A7EAC	g_bone_sparks_kind_49	low	Bone spark preset word for object kind 0x49
+D_800A7EB0	g_bone_sparks_kind_58	low	Bone spark preset word for object kind 0x58
+D_800A7EB4	g_bone_sparks_kind_50	low	Bone spark preset word for object kind 0x50
+D_800A7EB8	g_bone_sparks_kind_75	low	Bone spark preset word for object kind 0x75
+D_800A7EBC	g_bone_sparks_kind_80	low	Bone spark preset word for object kind 0x80
+D_800A7EC0	g_bone_sparks_kind_11	low	Bone spark preset word for object kinds 0x11, 0x14, 0x3B, 0x98, 0x99
+D_800A7EC4	g_bone_sparks_kind_16	low	Bone spark preset word for object kind 0x16
+D_800A7EC8	g_bone_sparks_kind_88	low	Bone spark preset word for object kinds 0x88, 0x90
+D_800A7ECC	g_bone_sparks_kind_9c	low	Bone spark preset word for object kind 0x9C
+D_800A7ED0	g_bone_sparks_kind_9d	low	Bone spark preset word for object kind 0x9D
+D_800A7ED4	g_bone_sparks_kind_9f	low	Bone spark preset word for object kind 0x9F
+D_800A7ED8	g_bone_sparks_kind_a0	low	Bone spark preset word for object kind 0xA0
+D_800A7EDC	g_bone_sparks_kind_87	low	Bone spark preset word for object kinds 0x87, 0xB0
+D_800A7EE0	g_bone_sparks_kind_b1	low	Bone spark preset word for object kind 0xB1
+D_800A7EE4	g_bone_sparks_kind_b4	low	Bone spark preset word for object kind 0xB4
+D_800A7EE8	g_bone_sparks_kind_70	low	Bone spark preset word for object kinds 0x70, 0xB2
+D_800A7EEC	g_bone_sparks_kind_53	low	Bone spark preset word for object kind 0x53
+D_800A7EF0	g_bone_sparks_kind_96	low	Bone spark preset word for object kind 0x96
+D_800E0968	g_attach_fx_point_counts	high	Per attach fx asset (g_attach_fx_assets): number of 16-byte attachment points
+D_8008FE10	g_model_drip_cfgs	med	Model drip configurations (DripCfg), indexed by drip +0x1A
+D_800A78B4	g_fx_bytes4_78b4	low	4-byte data block (struct_eu_bytes4b), only declared in game_eu_1BAAA0 / 1BE5C0, not used
+D_800A83F0	g_drip_node_type	low	Node type broadcast to by model_drip_broadcast (one-entry type list)
+D_800A83F4	g_drip_k_83f4	low	Rodata f32 stored at +0x10 and +0x1C of the drip spawn block
+D_800A83FC	g_drip_debris_scale	low	Rodata f32 scale of the impact debris a falling drop spawns
+D_800A8400	g_drip_splash_scale	low	Rodata f32 scale of the splash ring a falling drop spawns
+D_800AA120	g_drip_drop_ranges	med	Per drop type: 0x14-byte random ranges (life etc.) of the drip particles
+D_800A8410	g_dust_fx_offsets	high	Per dust effect type (4): f32[3] offset from the object
+D_800A8440	g_dust_fx_kinds	high	Per dust effect type: particle kind
+D_800A8444	g_dust_fx_rate_base	high	Per dust effect type: spawn rate base
+D_800A8454	g_dust_fx_rate_rand	high	Per dust effect type: spawn rate random part
+D_800A8464	g_dust_fx_size_base	high	Per dust effect type: particle size base
+D_800A8474	g_dust_fx_size_rand	high	Per dust effect type: particle size random part
+D_800A8484	g_dust_fx_life_base	high	Per dust effect type: particle life base (s16)
+D_800A848C	g_dust_fx_life_rand	high	Per dust effect type: particle life random range (s16)
+D_800A8494	g_dust_fx_scale_base	high	Per dust effect type: particle scale base
+D_800A84A4	g_dust_fx_scale_rand	high	Per dust effect type: particle scale random part
+D_800A84B4	g_dust_fx_ground_chance	high	Per dust effect type: chance the particle lands on the ground
+D_800A84C4	g_dust_fx_param_64	low	Per dust effect type: u8 parameter stored at data +0x64, passed on to dust_drop_particle_spawn
+D_800A84C8	g_dust_out_of_level_height	high	Rodata f32: dust height used when the point is outside the level
+D_800A84CC	g_dust_floor_search_depth	high	Rodata f32: floor search depth / default dust height
+D_800A84D0	g_dust_no_ground_height	high	Rodata f32: dust height used without a ground chance
+D_800A84D4	g_dust_drop_k_84d4	low	Rodata f32 added to a random 0..0.25 for spawn field +8 of dust_drop_particle_spawn
+D_800A84D8	g_dust_drop_k_84d8	low	Rodata f32 added to a random 0..0.25 for spawn field +0xC of dust_drop_particle_spawn
+D_800A84DC	g_water_splash_k_84dc	low	Rodata f32 scale of the impact debris of water_drop_splash_update
+D_800A84E0	g_water_splash_k_84e0	low	Rodata f32 angle scale of the splash spark direction (water_drop_splash_update)
+D_800A84E4	g_water_splash_k_84e4	low	Rodata f32: random range of the first splash spark angle
+D_800A84E8	g_water_splash_k_84e8	low	Rodata f32: base of the second splash spark angle
+D_800A84EC	g_water_splash_k_84ec	low	Rodata f32: random range of the third splash spark angle
+D_800A84F0	g_water_splash_k_84f0	low	Rodata f32: base of the third splash spark angle
+D_800A84F4	g_water_splash_k_84f4	low	Rodata f32: splash spark speed base / range
+D_800A84F8	g_water_splash_k_84f8	low	Rodata f32: splash spark size scale
+D_8008FC00	g_obj_surface_handlers	med	Per surface group: handler tables of obj_surface_handler_dispatch
+D_800A8590	g_ceiling_drip_k_8590	low	Rodata f32 compared with the drip's s16 +0x2E (sentinel for no height)
+D_800A85C4	g_bone_debris_k_85c4	low	Rodata f32 stored at spawn +0x34 by obj_bone_debris_emitter_attach
+D_800A85C8	g_bone_debris_k_85c8	low	Rodata f32 stored at +0x74 by bone_debris_emitter_init
+D_800CC2C0	g_hit_point_x	high	X of the last attack hit point (attack_hit_test), used by hit_impact_effect
+D_800CC2C4	g_hit_point_y	high	Y of the last attack hit point
+D_800CC2C8	g_hit_point_z	high	Z of the last attack hit point
+D_8008FC10	g_emitter_speed_fns	high	Emitter speed functions (kind +0x30)
+D_8008FC1C	g_emitter_init_fns	high	Emitter init handlers (kind +0x3C)
+D_8008FC20	g_emitter_path_check_fns	high	Emitter path handlers (record +0x61), result 0 stops the path update
+D_8008FC2C	g_emitter_retire_fns	med	Emitter retire handlers (owner +0x62), run when the emitter is retired / freed
+D_8008FC30	g_emitter_sound_start_fns	high	Emitter start-sound table (emitter_sound_start), returns the voice
+D_8008FC34	g_emitter_sound_update_fns	med	Emitter sound update handlers (record +0x64)
+D_8008FC38	g_emitter_sound_stop_fns	med	Emitter sound stop handlers (owner +0x65), run when retired / freed
+D_8008FC3C	g_emitter_extra_fns	low	Emitter extra per-frame handlers (record +0x68) of emitter_path_update
+D_8008FC40	g_emitter_hit_node_types	med	u8[3] node list types searched by path_hit_scene_nodes
+D_8008FC44	g_emitter2_init_fns	high	Spec emitter init handlers (record +0x34)
+D_8008FC48	g_emitter2_path_fx_fns	high	Spec emitter trail path fx handlers (state +0x35)
+D_8008FC54	g_emitter2_cleanup_fns	med	Spec emitter cleanup handlers (owner +0x36) of spec_emitter_cleanup
+D_8008FC58	g_emitter2_sound_start_fns	high	Spec emitter start-sound table (emitter2_sound_start)
+D_8008FC5C	g_emitter2_sound_update_fns	med	Spec emitter sound update handlers (owner +0x38)
+D_8008FC60	g_emitter2_release_fns	med	Spec emitter release handlers (owner +0x39, e.g. effect_node_release)
+D_8008FC64	g_emitter2_check_fns	high	Spec emitter check handlers (owner +0x48), result 0 stops
+D_800908C4	g_spark_burst_anim	med	Spark burst animation data (spark_effect_on_event, spray_particles_burst)
+D_80091414	g_emitter2_flame_tex	high	Texture descriptor of the spec emitter flames (emitter2_flame_draw)
+D_80091960	g_emitter_ribbon_texdef	high	Texture definition (id 0x918, 32 x 32) of the emitter ribbons
+D_800A8AF0	g_trail_smoke_kinds	high	Trail smoke kinds, 12 bytes each (owner +0x69)
+D_800A8B08	g_emitter_streak_kinds	med	Streak burst descriptors, 0x24 bytes each (index +0x74)
+D_800A8B50	g_spray_burst_descs	high	0x18-byte burst descriptors (radius, speed base / range, s16 base / range pairs)
+D_800A8B80	g_emitter_kinds	high	Emitter kind rows (0x60 bytes) of object_emitter_spawn
+D_800A8E7C	g_emitter_owner_ids	high	u8[6] owner setup ids matched against owner +0x3B by the emitter owner flag handlers
+D_800BE9A4	g_frame_step_f	high	Frame step as a float (frame delta * 0.5, slow-motion aware); scales per-frame motion
+D_800E0900	g_emitter_owner_records	med	6 registered records (record_register_e0900); +0x14 is the flag set / cleared by the emitters
+D_800E0D10	g_texscroll_link_tail	med	Tail (first inserted) of the 0x14-byte texture scroll link nodes (level_dl_add_texture_scroll)
+D_800E0D14	g_texscroll_link_head	med	Head (newest) of the 0x14-byte texture scroll link nodes
+D_800E0D18	g_texscroll_tail	high	Tail (first inserted) of the 0x3C-byte texture scroll entries walked by texscroll_update
+D_800E0D1C	g_texscroll_head	high	Head (newest) of the 0x3C-byte texture scroll entries
+D_800E0D20	g_texscroll_last_tex_id	low	Texture id of the last texture scroll search (-2 = none)
+D_800A8F60	g_spray_trail_descs	med	0x40-byte spray trail descriptors (spray_trail_spawn arg1)
+D_800E0D50	g_buddy_marker	high	The active buddy marker effect (0 = none)
+D_800A90A0	g_seqfx_burst_k_90a0	low	Rodata f32 stored at spawn +0x24 by seqfx_burst_spawn
+D_800A90A4	g_seqfx_burst_k_90a4	low	Rodata f32 stored at spawn +0x28 by seqfx_burst_spawn
+D_800A90A8	g_seqfx_burst_k_90a8	low	Rodata f32 stored at spawn +0x30 by seqfx_burst_spawn
+D_800A90AC	g_seqfx_burst_k_90ac	low	Rodata f32 stored at spawn +0x34 by seqfx_burst_spawn
+D_800A90B0	g_seqfx_burst_k_90b0	low	Rodata f32 stored at spawn +0x38 by seqfx_burst_spawn
+D_800911BC	g_foot_trail_tex	high	Texture descriptor of the foot trails (foot_trail_draw)
+D_800A90C0	g_foot_trail_k_90c0	low	Rodata f32 limit on the foot offset (foot_trail_get_foot_pos)
+D_800A90C4	g_foot_trail_k_90c4	low	Rodata f32 threshold of foot_trail_get_foot_pos
+D_800A90D0	g_foot_trail_k_90d0	low	Rodata f32 minimum move before a new foot trail point (foot_trail_update_points)
+D_8008FC70	g_ground_dust_greys	high	Grey level per colour index of the ground dust sprites
+D_8008FC80	g_particle_event_fns	high	Particle timed event handlers (+0xB6), called once at the trigger time
+D_8008FC88	g_particle_burst_colours	high	4 RGB colours of particle_burst_spawn
+D_800910E4	g_spark_burst_sprites	high	Sprite set of the spark bursts
+D_80091C2C	g_dust_sprite_set	med	Dust sprite set (colour index 1 / impact dust 0x11)
+D_8008FCA0	g_screen_tint_fx_draw_fns	med	Draw handlers of the screen tint effect objects (type +0x14)
+D_800A9138	g_ribbon_trail_epsilon	high	Rodata f32 1e-4: minimum move of a ribbon trail point
+D_8008FCA4	g_screen_tint_fx_msg_fns	med	Message handlers of the screen tint effect objects (type +0x19)
