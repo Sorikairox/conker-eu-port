@@ -18,7 +18,6 @@ void trail_get_aim(s32 arg0, s32 arg1) {
     obj_get_aim_vectors(arg0, (s32)sp34, (s32)sp28, arg1, D_800BE616 ? D_800A0F10 : D_800A0F14);
 }
 
-#ifdef NON_MATCHING
 extern f32 D_800A0F18;
 int game_gu_random(void);
 void music_play_song(s32 arg0, s32 arg1, s32 arg2);
@@ -102,9 +101,6 @@ void obj_spawn_effect50_with_sound(u8 *obj) {
         memcpy(*(u8 **) (rec + 0x98), &data, 0x50);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/obj_spawn_effect50_with_sound.s")
-#endif
 
 extern f32 D_800A0F1C;
 extern f32 D_800A0F20;
@@ -128,7 +124,6 @@ void trail_stop_emitting(u8 *arg0) {
     *(u16 *)(arg0 + 0x1C) = 0x28;
 }
 
-#ifdef NON_MATCHING
 // path_points_catch_up: P250. Handler (s32 (u8 *), function table at ELF file offset 0x24A5D8, next to
 // trail_emit_update) of an object that walks a ring of 0x24-byte points (+0x94; +0x25 = point count, +0x2E = last
 // processed point, +0x2D = current point, +0x2C = state). Returns 0 at once when the state is < 2 and flag 8 of +0x1E
@@ -178,11 +173,7 @@ s32 path_points_catch_up(u8 *p) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/path_points_catch_up.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_800A0F24;
 extern f32 D_800A0F28;
 extern f32 D_800A0F2C;
@@ -346,10 +337,6 @@ block_11:
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/trail_emit_update.s")
-#endif
-#ifdef NON_MATCHING
 typedef struct {
     u8 b[0x12];
 } TrailSurf;
@@ -584,11 +571,7 @@ s32 trail_stream_update(u8 *obj) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/trail_stream_update.s")
-#endif
 
-#ifdef NON_MATCHING
 f32 sqrtf(f32);
 void vtx_slot_buffer_get(void *, s16, s32, void *, u8 *);
 Gfx *gfx_load_texture_cached(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, u8 *, s32);
@@ -773,9 +756,6 @@ Gfx *trail_draw_ribbon(u8 *obj, Gfx *gfx, s16 id) {
     } while (prev != *(s8 *)(obj + 0x2D));
     return gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/trail_draw_ribbon.s")
-#endif
 
 /* was func_150DAA04 */
 void trail_stop_sound(u8 *arg0) {
@@ -838,11 +818,7 @@ void trail_send_aim_msg(u8 *arg0, f32 arg1) {
 }
 
 s32 particle_update_wobble_offset(s32, s32, u8 *, s32);
-#ifdef NON_MATCHING
 void vec_damp_xyz_per_tick(s32, f32, u8 *); /* P95: f32 (float bits were passed as an int) */
-#else
-void vec_damp_xyz_per_tick(s32, s32, u8 *);
-#endif
 
 /* was func_150DABA8 */
 s32 particle_move_step(s32 arg0, s32 arg1) {
@@ -852,15 +828,10 @@ s32 particle_move_step(s32 arg0, s32 arg1) {
     temp_a2 = arg0 + 0xA8;
     sp20 = temp_a2;
     particle_update_wobble_offset(arg0, arg0 + 0xAC, temp_a2, arg0 + 0xAA);
-#ifdef NON_MATCHING
     vec_damp_xyz_per_tick(arg0 + 0x58, (*(f32 *)((u8 *)temp_a2 + 0xC)), temp_a2); /* P95: f32 (float bits were passed as an int) */
-#else
-    vec_damp_xyz_per_tick(arg0 + 0x58, (*(s32 *)((u8 *)temp_a2 + 0xC)), temp_a2);
-#endif
     return 1;
 }
 
-#ifdef NON_MATCHING
 void hitinfo_from_record(f32 *, TrailHit *);
 void emit_sparks_on_disc(u8 *, s32, s32, u8, s32);
 void emit_sparks_on_surface_disc(u8 *, s32, s32, u8, s32);
@@ -1077,6 +1048,3 @@ void trail_hit_effects(u8 *obj, TrailHit *hit, f32 *dir) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/trail_hit_effects.s")
-#endif

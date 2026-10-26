@@ -64,7 +64,6 @@ void cord_update(Obj_151B3734 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, Vtx **, u8 *);
 s32 gfx_geometry_mode_cached(s32, s32, s32);
 s32 gfx_env_color_cached(s32, s32, s32, s32, s32, s8 *);
@@ -207,9 +206,6 @@ s32 cord_draw(s32 gfx, u8 *obj, s16 id) {
     }
     return gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_draw.s")
-#endif
 
 /* was func_151B3FE4 */
 void cord_handle_message(u8 *arg0, s32 arg1, u8 arg2) {
@@ -219,7 +215,6 @@ void cord_handle_message(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 // rope_nodes_reset: lays the 10 rope nodes (obj + 0x48, 0x18 bytes: pos, vel) evenly from the start point +0x14
 // towards the end point +0x20 (step = (end - start) / 9, D_800AA774 .. D_800AA77C), zeroes their velocities and
 // clears flag 2 at +0x10. Returns 1. (Table entry next to cord_shape_arc; also the fallback of cord_shape_ellipse /
@@ -254,10 +249,6 @@ s32 cord_nodes_reset_straight(u8 *obj) {
     obj[0x10] &= ~2;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_nodes_reset_straight.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_151B42A0 */
 s32 cord_shape_arc(u8 *arg0) {
     f32 sp80;
@@ -347,9 +338,6 @@ s32 cord_shape_arc(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_shape_arc.s")
-#endif
 extern f32 D_800AA78C;
 /* was func_151B44D8 */
 s32 cord_end_get_obj_pos(u8 *arg0, f32 *arg1, u8 arg2)
@@ -378,7 +366,6 @@ s32 cord_end_get_obj_pos(u8 *arg0, f32 *arg1, u8 arg2)
   return var_v1;
 }
 
-#ifdef NON_MATCHING
 s32 cord_nodes_reset_straight(u8 *);
 
 /* was func_151B458C */
@@ -503,11 +490,7 @@ s32 cord_shape_ellipse(u8 *arg0) {
 block_6:
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_shape_ellipse.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P292 */
 
 // rope_update_sag: entry 5 of the rope handler table at EU 0x8008FE90 (siblings cord_nodes_reset_straight / cord_shape_ellipse).
@@ -637,11 +620,7 @@ s32 cord_update_sag(u8 *obj) {
     obj[0x10] &= ~2;
     return ret;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_update_sag.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_151B4D88 */
 s32 cord_end_get_bone_pos(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3) {
     s32 var_a2;
@@ -679,10 +658,6 @@ s32 cord_end_get_bone_pos(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3) {
     mtx_transform_point_or_origin(var_a0, arg2, var_a2_2);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_end_get_bone_pos.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_151B4E8C */
 s32 cord_nodes_reset_x_line(u8 *arg0) {
     f32 temp_f0;
@@ -730,9 +705,6 @@ s32 cord_nodes_reset_x_line(u8 *arg0) {
     (*(u8 *)((u8 *)arg0 + 0x10)) = (u8) ((*(u8 *)((u8 *)arg0 + 0x10)) & 0xFFFD);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_nodes_reset_x_line.s")
-#endif
 /* was func_151B4F3C */
 s32 cord_style_default(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *argA, s32 *argB, s8 *argC, s8 *argD) {
     *arg1 = 0x220005;
@@ -787,7 +759,6 @@ u8 cord_style_owner_colour(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4,
     return ret;
 }
 
-#ifdef NON_MATCHING
 /* was func_151B5128 */
 s32 cord_nodes_reset_preset(u8 *arg0) {
     f32 temp_f0;
@@ -831,9 +802,6 @@ s32 cord_nodes_reset_preset(u8 *arg0) {
     (*(u8 *)((u8 *)arg0 + 0x10)) = (u8) ((*(u8 *)((u8 *)arg0 + 0x10)) & 0xFFFD);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_nodes_reset_preset.s")
-#endif
 void vtx_slot_buffers_free();
 
 /* was func_151B51CC */

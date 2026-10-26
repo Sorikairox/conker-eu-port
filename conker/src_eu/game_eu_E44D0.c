@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
 void camera_set_followed_obj(struct108 *, s32);
 extern s32 D_80088AB0;
@@ -92,6 +91,3 @@ void player_carry_state_update(u8 *p) {
         *(f32 *) (p + 0x190) = 0.0f;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E44D0/player_carry_state_update.s")
-#endif

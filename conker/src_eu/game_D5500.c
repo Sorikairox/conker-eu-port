@@ -3,7 +3,6 @@
 #include "variables.h"
 
 // is this handwritten??
-#ifdef NON_MATCHING
 extern f32 D_8009FA90; /* pi / 180 */
 /* Rotation matrix from three angles in degrees (D_8009FA90 = pi/180): with cX/sX the cos/sin of each,
  * row 0 = (cy cz, cy sz, -sy), row 1 = (sx sy cz - cx sz, sx sy sz + cx cz, sx cy),
@@ -41,6 +40,3 @@ void mtxf_rotate_xyz_deg(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3) {
     mtx[3][2] = 0.0f;
     mtx[3][3] = 1.0f;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_D5500/mtxf_rotate_xyz_deg.s")
-#endif

@@ -5,7 +5,6 @@
 
 
 // game entrypoint
-#ifdef NON_MATCHING
 /* P281: readable C for game_thread_main (game entry point, compiled C, 128 insns; replaces the commented US draft
    below). Verified with difftest up to the N-th frame (DIFFTEST_STOPCALL on game_main_loop): the loop never returns. */
 extern s32 D_800D3048;
@@ -89,9 +88,6 @@ void game_thread_main(void) {
         game_main_loop();
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game/entrypoint/game_thread_main.s")
-#endif
 // NON-MATCHING: need to better understand jump tables
 // void game_thread_main(void) {
 //     game_bss_clear();

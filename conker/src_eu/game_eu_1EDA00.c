@@ -1,18 +1,13 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void impact_debris_emitter_spawn(s32 arg0, u8 arg1, s32 arg2);
 void impact_scorch_decal_spawn(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
 void bullet_hit_mark_spawn(u8 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4);
 void explosion_ground_effects(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4);
-#endif
 // hoisted forward declaration(s) for impact_spark_flash_spawn
-#ifdef NON_MATCHING
 s32 spark_shower_spawn(u8 *, f32, f32, f32, f32, u8, s32); /* P95: f32 parameter */
-#else
-void spark_shower_spawn(u8 *, f32, s32, f32, f32, u8, s32);
-#endif
 // hoisted forward declaration(s) for impact_effects_basic
 void impact_flash_light_spawn(u8 *, u8, s32);
 void impact_rumble_spawn(s32, u8, s32);
@@ -22,7 +17,6 @@ void impact_spray_params_init(f32 *, f32 *);
 void impact_spark_flash_spawn(u8 *, u8, s32);
 
 
-#ifdef NON_MATCHING
 extern f32 D_800AAD5C;
 extern f32 D_800AAD60;
 extern f32 D_800AAD64;
@@ -69,9 +63,6 @@ void impact_spray_params_init(f32 *arg0, f32 *arg1) {
     }
     (*(s8 *)((u8 *)arg0 + 0x50)) = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/impact_spray_params_init.s")
-#endif
 typedef struct { s32 a[3]; } V3_151C0350;
 /* was func_151C0350 */
 void impact_effects_basic(u8 *arg0, f32 *arg1, u8 arg2, u8 arg3, s32 arg4) {
@@ -92,7 +83,6 @@ void impact_effects_basic(u8 *arg0, f32 *arg1, u8 arg2, u8 arg3, s32 arg4) {
     }
 }
 
-#ifdef NON_MATCHING
 /* P159 */
 s32 tri_calc_normal(u8 *, f32 *, f32 *, f32 *);
 void emit_spray_from_surface(void *, u8, s32);
@@ -163,11 +153,7 @@ void impact_effects_spawn(u8 *hit, f32 *pos, f32 *dir, u8 full, u8 arg4, s32 arg
         emit_spray_along_normal((f32 *)&b, arg4, arg5);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/impact_effects_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 collision_floor_probe(s32 *, s32, f32, f32 *);
 void hitinfo_from_obj_floor(void *, u8 *);
 void emit_random_sprites(u8 *, u8, s32);
@@ -264,9 +250,6 @@ void explosion_ground_effects(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/explosion_ground_effects.s")
-#endif
 /* was func_151C0894 */
 s32 obj_not_listed_check(u8 *arg0, u8 *arg1, s32 arg2, u8 **arg3) {
     u8 i;
@@ -287,11 +270,7 @@ s32 obj_not_listed_check(u8 *arg0, u8 *arg1, s32 arg2, u8 **arg3) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 void fx_scorch_decal_spawn(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
-#else
-s32 fx_scorch_decal_spawn(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
-#endif
 
 /* was func_151C0910 */
 void impact_scorch_decal_spawn(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
@@ -327,11 +306,7 @@ void impact_spark_flash_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     sp28 = random_float();
     temp_t7 = (random_int() % 56U) + 0xC8;
     temp_f12 = sp28 * 4.0f + 14.0f;
-#ifdef NON_MATCHING
     spark_shower_spawn(arg0, temp_f12, 1.1820899f, (f32) (u32) temp_t7, 0.0f, arg1, arg2); /* P95: float literal (asm passes the bits 0x3F974EB9) */
-#else
-    spark_shower_spawn(arg0, temp_f12, 0x3F974EB9, (f32) (u32) temp_t7, 0.0f, arg1, arg2);
-#endif
 }
 
 void cam_shake_all_players(s32 arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6);
@@ -353,7 +328,6 @@ void impact_debris_emitter_spawn(s32 arg0, u8 arg1, s32 arg2) {
     fx_debris_emitter_spawn(arg0, (s16) ((random_int() % 62U) + 0x78), arg1, arg2);
 }
 
-#ifdef NON_MATCHING
 /* P220: readable C for projectile_fire (game_eu_1EDA00, 669 words; analysis P213.md section 3). */
 void gun_muzzle_point_get(u8 *arg0, u8 *arg1);
 f32 camera_get_yaw_deg(s32 arg0);
@@ -619,9 +593,6 @@ s32 projectile_fire(struct127 *obj, struct127 *target, s32 *arg2, u8 arg3, u8 ar
 #undef SH
 #undef W
 #undef F
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/projectile_fire.s")
-#endif
 
 /* was func_151C16BC */
 s32 bullet_sound_pos_update(u8 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
@@ -638,7 +609,6 @@ s32 bullet_sound_pos_update(u8 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s
     return 0;
 }
 
-#ifdef NON_MATCHING
 void explosion_sfx_play(s32, f32, f32, f32, s32);
 s32 ray_cast_world(s32, f32, f32, f32, f32, f32, f32, s32 *, f32, s32, s32, s32, s32, u8 *, s32);
 void debris_burst_spawn(u8 *, u8 *, s32, u8, s32);
@@ -744,10 +714,6 @@ s32 bullet_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/bullet_update.s")
-#endif
-#ifdef NON_MATCHING
 void sfx_emitter_stop_by_callback(s32, s32, s32);
 
 /* was func_151C1B20 */
@@ -780,9 +746,6 @@ void bullet_free_attachments(void * arg0_p) {
     }
     sfx_emitter_stop_by_callback(bullet_sound_pos_update, arg0, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/bullet_free_attachments.s")
-#endif
 void bullet_free_attachments(void *arg0);
 void mdl_particle_die_retire(void *arg0);
 void mdl_particle_die_free(void *arg0);
@@ -875,7 +838,6 @@ void muzzle_flash_light_spawn(u8 *arg0, u8 arg1, s32 arg2) {
 
 s32 obj_not_listed_check();
 
-#ifdef NON_MATCHING
 /* P159 */
 // object_filter_not_listed: target filter 3 of D_80087030 (objects_hit_by_segment, ray_cast_world): returns obj_not_listed_check's
 // result (the N64 code leaves it in v0; the matching C is void, which breaks a call through the s32 table on wasm).
@@ -883,13 +845,7 @@ s32 obj_not_listed_check();
 s32 object_filter_not_listed(s32 arg0, s32 arg1, s32 *arg2) {
     return obj_not_listed_check(arg0, arg1, *arg2, arg2 + 1);
 }
-#else
-void object_filter_not_listed(s32 arg0, s32 arg1, s32 *arg2) {
-    obj_not_listed_check(arg0, arg1, *arg2, arg2 + 1);
-}
-#endif
 
-#ifdef NON_MATCHING
 s32 vec3_normalize_len(u8 *, u8 *, u8 *, s32);
 s32 ray_cast_through_passable(s32, u8 *, f32 *, u8 *, f32, s32, s32, s32, s8, u8 *, f32 *, f32 *, u8 *, s32);
 
@@ -995,10 +951,6 @@ block_15:
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/bullet_trace_path.s")
-#endif
-#ifdef NON_MATCHING
 /* P160 */
 s32 ray_cast_world(s32, f32, f32, f32, f32, f32, f32, s32 *, f32, s32, s32, s32, s32, u8 *, s32);
 extern f32 D_800AADA4;
@@ -1050,9 +1002,6 @@ s32 ray_cast_through_passable(s32 arg0, u8 *start, f32 *dir, u8 *hit, f32 arg4, 
     *(f32 *)(hit + 4) = dist;
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/ray_cast_through_passable.s")
-#endif
 
 /* was func_151C1FB8 */
 void obj_rider_cam_shake(u8 *arg0) {

@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
 extern f32 D_800DC434;
 
@@ -114,6 +113,3 @@ void camera_update_eye_height(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15BEC0/camera_update_eye_height.s")
-#endif

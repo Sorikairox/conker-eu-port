@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 // limb_trail_effect_spawn: spawns a type 0x17 effect record (effect3d_spawn_default) along the limb `idx` of obj's skeleton
 // (obj + 0x1D4, 0x40-byte matrices): the two limb points D_80088CB0[idx] / D_80088CBC[idx] are transformed by the
 // limb's matrix (mtx_transform_point_or_origin), their scaled difference gives the direction; nothing is spawned when its XZ length
@@ -108,11 +107,7 @@ void joint_beam_spawn(u8 *obj, s32 idx, u8 group, s32 arg3) {
         rec[0x138] = D_80088CE0[idx];
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/joint_beam_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_800A0FB4;
 extern f32 D_800A0FB8;
 /* was func_150DB694 */
@@ -162,10 +157,6 @@ s32 beam_motion_step(u8 *arg0) {
     (*(u8 *)((u8 *)arg0 + 0x5C)) = (u8) temp_v1;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/beam_motion_step.s")
-#endif
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
 
@@ -219,10 +210,6 @@ u8 *beam_build_quad_vtx_b(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/beam_build_quad_vtx_b.s")
-#endif
-#ifdef NON_MATCHING
 // anim_event_effect_spawn: animation event 0x32 (scene_event_run_b): when all five pointers are set and span != 0, spawns
 // a type 0x17 effect record (effect3d_spawn_default with flags 0x401, 0x243A, colour 0xC8 x4, lifetime span, group arg6 and
 // arg7) and links it to its sources: +0x110 = a0, +0x114 = a1, +0x118 = a2, +0x11C = a4, +0x120 = a3 (P195).
@@ -271,9 +258,6 @@ void beam_spawn_points(u8 *a0, u8 *a1, u8 *a2, u8 *a3, u8 *a4, s16 span, u8 arg6
         *(u8 **) (rec + 0x120) = a3;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/beam_spawn_points.s")
-#endif
 
 /* was func_150DBBB0 */
 s32 beam_alpha_from_value(u8 *arg0) {
@@ -288,7 +272,6 @@ s32 beam_alpha_from_value(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
 
@@ -351,6 +334,3 @@ u8 *beam_build_quad_vtx_c(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/beam_build_quad_vtx_c.s")
-#endif

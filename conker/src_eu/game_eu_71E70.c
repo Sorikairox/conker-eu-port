@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void collision_select_area(s32);
-#endif
 
 
 /* was func_15044660 */
@@ -11,7 +10,6 @@ void collision_reset_counter(void) {
     D_800CC1BC = 0;
 }
 
-#ifdef NON_MATCHING
 void collision_set_obj_body_heights(u8 *, f32, f32, s32);
 s32 collision_walls_slide(f32, f32, s32, u8 *, s32);
 s32 collision_ledge_probe(f32, f32, s32, u8 *, s32);
@@ -64,10 +62,6 @@ s32 collision_obj_walls(f32 arg0, f32 arg1, s32 arg2, u8 *arg3, s32 arg4, s32 ar
     D_800CC1F3 = (u8) sp5C;
     return var_s6;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/collision_obj_walls.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1504481C */
 void collision_tri_to_local(s32 *arg0, u8 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7) {
     f32 temp_f10;
@@ -110,14 +104,10 @@ void collision_tri_to_local(s32 *arg0, u8 *arg1, f32 arg2, f32 arg3, f32 arg4, f
     (*(f32 *)((u8 *)temp_a3 + -4)) = (f32) ((temp_f10_2 * arg3) - (temp_f6_2 * arg2));
     (*(f32 *)((u8 *)temp_a3 + -8)) = (f32) ((f32) (*(s16 *)((u8 *)var_v0 + 2)) - arg5);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/collision_tri_to_local.s")
-#endif
 /* was func_15044948 */
 void collision_nop(void) {
 }
 
-#ifdef NON_MATCHING
 /*
  * P53: collision cylinder of a record for the wall tests: D_800CC1F8 = height, D_800CC1FC = lift above the feet,
  * from obj_collision_cylinder's height (sp2E) and the record kind / state. arg2 is the y the record moves to.
@@ -182,9 +172,6 @@ void collision_set_obj_body_heights(u8 *arg0, f32 arg1, f32 arg2, s32 arg3) {
     D_800CC1F8 = (f32)h;
     D_800CC1FC = (f32)(h >> 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/collision_set_obj_body_heights.s")
-#endif
 
 u8 *timedfx_alloc(s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -239,7 +226,6 @@ u8 *timedfx_alloc(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 /* Timed effect list (entries made by timedfx_alloc, head D_800CBE00): per frame each entry with no start delay
  * (+0xE) runs its update hook D_80086220[+0xC](entry) and, when that returns non-zero, the hook D_8008622C[+0xD]
  * (called with no argument set: a0 is whatever the first hook left). The delay counts down by D_800BE9E4
@@ -295,11 +281,7 @@ void timedfx_update_all(void) {
         e = next;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/timedfx_update_all.s")
-#endif
 
-#ifdef NON_MATCHING
 f32 math_cos_u8(u8, u8 *);
 
 /* was func_15044E68 */
@@ -336,9 +318,6 @@ s32 timedfx_player_in_box(u8 *arg0) {
     }
     return var_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/timedfx_player_in_box.s")
-#endif
 /* was func_15044FD4 */
 void timedfx_track_and_test(u8 *arg0) {
     s16 *temp_v0 = *(s16 **)(arg0 + 0x18);
@@ -412,7 +391,6 @@ void timedfx_hit_player_1(void) {
     }
 }
 
-#ifdef NON_MATCHING
 extern f32 D_800990F0; // 99999.9f
 extern s32 D_800DC26C;
 s32 floor_collect_level_tris(s32, s32);
@@ -469,11 +447,7 @@ s32 collision_ceiling_static(f32 *pos, f32 maxY, Unk45674 *out) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/collision_ceiling_static.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_800990F4;
 extern f32 D_800DC298;
 extern f32 D_800DC29C;
@@ -544,9 +518,6 @@ s32 collision_floor_static(u8 *arg0, f32 maxY, u8 *arg2) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/collision_floor_static.s")
-#endif
 /* was func_150455FC */
 s32 collision_ceiling_static_probe(u8 *arg0, f32 arg1, u8 *arg2) {
     switch (collision_override_ceiling(arg0, arg1, arg2)) {
@@ -712,7 +683,6 @@ typedef struct {
     s32 unk20;
 } HitInfo;
 
-#ifdef NON_MATCHING
 extern f32 D_80099100;
 s32 floor_collect_world_obj_tris(s32, s32, s32, s32 *);
 s32 world_objects_transform_mesh(s32, s32 *, s32);
@@ -793,10 +763,6 @@ u8 collision_ceiling_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
     arg3->flags &= 0xFFFD;
     return 0U;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/collision_ceiling_dynamic_a.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_80099104;
 s32 floor_collect_world_obj_tris(s32, s32, s32, s32 *);
 s32 world_objects_transform_mesh(s32, s32 *, s32);
@@ -877,10 +843,6 @@ u8 collision_floor_dynamic_a(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
     arg3->flags &= 0xFFFD;
     return 0U;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/collision_floor_dynamic_a.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_80099108;
 s32 floor_collect_world_obj_tris(s32, s32, s32, s32 *);
 s32 world_objects_transform_mesh(s32, s32 *, s32);
@@ -963,10 +925,6 @@ u8 collision_ceiling_dynamic_b(u8 *arg0, f32 arg1, s32 *arg2, HitInfo *arg3) {
     arg3->flags &= 0xFFFD;
     return 0U;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/collision_ceiling_dynamic_b.s")
-#endif
-#ifdef NON_MATCHING
 s32 floor_collect_world_obj_tris(s32, s32, s32, s32 *);
 s32 world_objects_transform_mesh(s32, s32 *, s32);
 extern s32 D_800D3C50;
@@ -1048,9 +1006,6 @@ s32 collision_floor_dynamic_b(u8 *arg0, f32 arg1, s32 *arg2, u8 *arg3) {
     (*(u8 *)((u8 *)arg3 + 0x1C)) = (u8) ((*(u8 *)((u8 *)arg3 + 0x1C)) & 0xFFFD);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/collision_floor_dynamic_b.s")
-#endif
 u8 collision_ceiling_dynamic(u8 *, u16, f32, HitInfo *);
 
 u8 collision_ceiling_dynamic_a(u8 *, f32, s32 *, HitInfo *);
@@ -1464,7 +1419,6 @@ void mtx_look_at(Mtx *arg0, f32 arg1, f32 arg2, volatile f32 arg3, f32 arg4, f32
     guMtxF2L((f32 (*)[4]) sp30, arg0);
 }
 
-#ifdef NON_MATCHING
 /* Rare's guLookAtReflectF: view matrix mf (look-at, right-handed, w row = -eye . axis) and the LookAt light
  * directions l (+8.. right, +0x18.. up; bytes = min(v * 128, 127) truncated, no lower clamp; +0x11 / +0x15 = 0x80,
  * other colour bytes 0, +0xB / +0x1B left alone). Degenerate inputs: look = (0, 0, 1) when at == eye, right = (1, 0, 0)
@@ -1559,9 +1513,6 @@ void mtxf_look_at_reflect(f32 mf[4][4], LookAt *lp, f32 xEye, f32 yEye, f32 zEye
     mf[3][3] = 1.0f;
 }
 #pragma function sqrtf
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/mtxf_look_at_reflect.s")
-#endif
 void mtxf_look_at_reflect(f32 (*)[4], LookAt *, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 /* was func_15047E70 */
 void mtx_look_at_reflect(Mtx *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 argA) {

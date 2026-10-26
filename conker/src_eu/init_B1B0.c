@@ -2,13 +2,12 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void music_play_song(s32 arg0, s32 arg1, s32 arg2);
 void music_clear_link_refs(s32 *arg0);
 void music_queue_song(struct00 *arg0, struct151 *arg1);
 void music_player_apply_volume(s32 arg0);
 s32 music_song_can_start(u8 arg0, s32 *arg1);
-#endif
 
 
 /* was func_1000B1B0 */
@@ -306,7 +305,6 @@ s32 music_song_cb_sync_level(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
 }
 
 
-#ifdef NON_MATCHING
 /* P279: readable C for music_song_cb_level19_ambience (compiled C, 169 insns). */
 extern f32 D_8002C580; /* listener y of the source */
 extern f32 D_8002C584; /* squared distance beyond which the volume is the minimum */
@@ -360,10 +358,6 @@ s32 music_song_cb_level19_ambience(s32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 ar
     }
     return arg0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/music_song_cb_level19_ambience.s")
-#endif
-#ifdef NON_MATCHING
 /* P204 */
 // ambient_voice_update_3d: sound-voice handler (D_8002B5xx table, like music_song_cb_level1d_mode) for voice channel ch on
 // level 0x1D. state: bit 7 = started, bits 0..1 = mode, bits 2..6 = fade counter, bits 8..15 / 16..23 = the last
@@ -470,9 +464,6 @@ s32 music_song_cb_level1d_voices(s32 state, u8 ch, s32 arg2, s32 arg3) {
     }
     return state | last;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/music_song_cb_level1d_voices.s")
-#endif
 /* was func_1000C350 */
 s32 music_song_cb_level1d_mode(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
     if (!(arg0 & 0x80)) {
@@ -510,7 +501,6 @@ s32 music_song_cb_level1d_mode(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
     }
     return arg0;
 }
-#ifdef NON_MATCHING
 /*
  * channel_effect_update: P230. Per-frame update of a packed sound-channel effect state `state` for channel `ch`:
  * bits 0-1 effect mode, 2-7 hold timer, 8-15 parameter A, 16-23 parameter B (bit 7 = flag, bits 0-6 = level),
@@ -588,10 +578,6 @@ s32 music_song_cb_channel_effect(s32 state, u8 ch, f32 arg2, f32 arg3, f32 arg4)
     D_80041F08 = 0;
     return (timer << 2) | mode | (a << 8) | (b << 16) | fade;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/music_song_cb_channel_effect.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1000C7E8 */
 s32 music_song_cb_level31_distance(s32 arg0, s32 arg1, f32 arg2, s32 arg3, f32 arg4) {
     f32 temp_f12;
@@ -632,9 +618,6 @@ s32 music_song_cb_level31_distance(s32 arg0, s32 arg1, f32 arg2, s32 arg3, f32 a
     music_song_set_volume(0x3E, (s32) var_f2);
     return arg0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/music_song_cb_level31_distance.s")
-#endif
 /* was func_1000C934 */
 s32 music_song_cb_level37_song54(s32 arg0, u8 arg1, f32 arg2, f32 arg3) {
     s32 vol;
@@ -757,7 +740,6 @@ void music_players_set_volume_ramp(s32 arg0, s32 arg1, s32 arg2) {
     }
 }
 
-// #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/music_player_apply_volume.s")
 /* was func_1000CC54 */
 void music_player_apply_volume(s32 arg0) {
     s32 phi_a3;
@@ -824,7 +806,6 @@ s32 music_song_can_start(u8 arg0, s32 *arg1) {
     }
     return arg0 == 0;
 }
-#ifdef NON_MATCHING
 extern s32 D_80041C20[];
 extern s32 D_80041C30[];
 extern s32 D_80041C40[];
@@ -930,10 +911,6 @@ void music_player_process_messages(s32 arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/music_player_process_messages.s")
-#endif
-#ifdef NON_MATCHING
 extern s32 D_80041C20[];
 extern s32 D_80041C30[];
 extern s32 D_80041C40[];
@@ -1075,10 +1052,6 @@ void music_player_update_frame(s32 arg0, f32 arg1, f32 arg2, s32 arg3) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/music_player_update_frame.s")
-#endif
-#ifdef NON_MATCHING
 void music_players_set_volume_ramp(s32, s32, s32);
 void music_player_process_messages(s32);
 void music_player_update_frame(s32, f32, f32, s32);
@@ -1146,10 +1119,6 @@ done:
         music_player_update_frame(i, arg0, arg1, arg2);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/music_update_all.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1000D96C */
 void music_play_song(s32 arg0, s32 arg1, s32 arg2) {
     struct137 *sp2C;
@@ -1330,9 +1299,6 @@ block_56:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/music_play_song.s")
-#endif
 /* was func_1000DE1C */
 void music_stop_song(s32 arg0, s32 arg1) {
     s32 n;

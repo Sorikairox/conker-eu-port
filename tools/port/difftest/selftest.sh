@@ -242,7 +242,8 @@ TRIALS=32 chkce DIFFER effect_handle_message "" 's/D_8008A3CC\[rec\[0x168\]\](re
 TRIALS=32 chkce DIFFER effect_handle_message "" 's/(rec, msg, c);/(rec, msg, code);/'
 # P234: a callee declared only in a header the TU includes (random_int / random_float in functions.h) has a known
 # prototype: IDO's scratch f12 left right before `jal random_int` is not an argument (P232 point_spark_spawn first run
-# was a false DIFFER; the case is the P232 block without its local declarations). DIFFTEST_INCHDR_OLD=1 = old.
+# was a false DIFFER; the case is the P232 block without its local declarations; P329: since the NM blocks are gone the
+# case //DROPs the TU's local random_int / random_float declarations, which the old whole-block splice removed). DIFFTEST_INCHDR_OLD=1 = old.
 S9DC8="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=151308E4=0:92,151308E4=0+60:6,151530A8=0:89,151530A8=0+5C:15,151530A8=0+6C:8 DIFFTEST_RET=150ADF00=0;0;0 DIFFTEST_RETF=150ADF48=3F000000;3E800000"
 TRIALS=4 chkce EQUIV  point_spark_spawn "$S9DC8"
 TRIALS=4 chkce DIFFER point_spark_spawn "$S9DC8 DIFFTEST_INCHDR_OLD=1"

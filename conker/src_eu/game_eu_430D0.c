@@ -8,7 +8,6 @@ void glyph_count_reset(void) {
     D_800CC16C = 0;
 }
 
-#ifdef NON_MATCHING
 void heap_free(s32);
 void glyph_rle_to_texture(u8 *, s32, s32);
 extern u32 D_80083310[][2];
@@ -32,10 +31,6 @@ void glyph_set_load_rom(s16 idx) {
     }
     heap_free((s32)buf);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_430D0/glyph_set_load_rom.s")
-#endif
-#ifdef NON_MATCHING
 extern u8 *D_80085D20[];
 extern u8 *D_80085D24[];
 
@@ -92,6 +87,3 @@ void glyph_rle_to_texture(u8 *src, s32 idx, s32 set) {
 }
 #undef GLYPH
 #undef TEX
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_430D0/glyph_rle_to_texture.s")
-#endif

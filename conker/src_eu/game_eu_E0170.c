@@ -8,11 +8,7 @@ s32 emit_handler_ten(s32 arg0, s32 arg1) {
     return 10;
 }
 
-#ifdef NON_MATCHING
 void spawn_circle_random_emit(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
-#else
-s32 spawn_circle_random_emit(f32, f32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32);
-#endif
 s32 explosion_light_spawn(f32 *, s32, s32);
 
 /* was func_150B2974 */
@@ -22,16 +18,11 @@ void obj_blast_fx_spawn(u8 *arg0, s32 arg1, s32 arg2) {
     sp3C[0] = *(f32 *)(arg0 + 0x14);
     sp3C[1] = *(f32 *)(arg0 + 0x180);
     sp3C[2] = *(f32 *)(arg0 + 0x1C);
-#ifdef NON_MATCHING
     spawn_circle_random_emit(sp3C[0], sp3C[1], sp3C[2], 135.0f, 0, 0xFF, (random_int() % 15U) + 0x1B, 7, 0, 0.0f, 0, 0xFF);
-#else
-    spawn_circle_random_emit(sp3C[0], sp3C[1], *(s32 *)&sp3C[2], 0x43070000, 0, 0xFF, (random_int() % 15U) + 0x1B, 7, 0, 0.0f, 0, 0xFF);
-#endif
     rumble_all_players_at((struct17 *)sp3C, 1502.0f, 3000.0f, 0.00033333333f, 0xC, 0xF, 0xFF, 0);
     explosion_light_spawn(sp3C, 0xFF, 0);
 }
 
-#ifdef NON_MATCHING
 /* P243: readable C for emit_point_spark (game_eu_E0170, 116 insns). */
 // emit_point_spark: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a,
 // s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`): queues one line_fx_spawn particle (the S_3f24 record of
@@ -91,6 +82,3 @@ s32 emit_point_spark(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z
     line_fx_spawn(&sp, 1, 0, argB & 0xFF, 1);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0170/emit_point_spark.s")
-#endif

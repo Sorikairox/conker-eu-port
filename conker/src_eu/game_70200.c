@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 #include <stdarg.h>
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 Gfx *text_queue_draw(Gfx *arg0);
 void text_queue_vprintf(s32 fmtArg, s32 *args);
 u8 *allocate_memory(s32, s32, s32, s32);
@@ -17,7 +17,6 @@ extern char D_80086060[];
 extern char D_80086064[];
 extern char D_80098F40[];
 extern char D_80098F44[];
-#endif
 
 
 /* was func_15042D50 */
@@ -58,7 +57,6 @@ void text_printf(s32 arg0, ...) {
     }
     text_queue_vprintf(arg0, args);
 }
-#ifdef NON_MATCHING
 /* Text queue printf (used by text_printf_at / text_printf): one 0x5C node per line ('\n' splits) appended to the
  * D_800CBD64 list (tail D_800CC188), text at +0x1C. Conversions are copied to D_80086064 and handed to sprintf
  * (game_sprintf): d/x/X/s take an int word; f/F take a float pointer and use D_80086060 = "%s%s" + spec (two empty
@@ -177,9 +175,6 @@ void text_queue_vprintf(s32 fmtArg, s32 *args) {
     }
     D_800CBD78 = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/text_queue_vprintf.s")
-#endif
 /* was func_150432BC */
 void text_set_scale(f32 arg0) {
     D_800CBD80 = arg0;
@@ -207,7 +202,6 @@ void text_set_color(u8 arg0, u8 arg1, u8 arg2, u8 arg3) {
     D_800CBD63 = arg3;
 }
 
-#ifdef NON_MATCHING
 /* P13: difftest EQUIV on random inputs only (seeds 2, 3: 15 completed trials); runs with a poked single text/icon item
  * segfault Unicorn (exit 139), so the icon path is UNVERIFIED by difftest: runtime check in the browser.
  * On-screen text and icon queue flush (P13, hand C). Draws every queued item of D_800CBD64 (linked through
@@ -388,9 +382,6 @@ Gfx *text_queue_draw(Gfx *arg0) {
     D_800CBD78 = 0;
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/text_queue_draw.s")
-#endif
 /* was func_15043A00 */
 void ring_buffer_init(struct105 *arg0, s32 arg1, s32 arg2) {
     if (arg0 != 0) {
@@ -461,7 +452,6 @@ s32 ring_buffer_advance(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     }
     return arg2;
 }
-#ifdef NON_MATCHING
 // text_queue_put: appends a record (u32 length padded to 4, then the bytes) to the ring buffer q (D_800427A0:
 // +0 buffer, +4 size, +8 read, +C write); returns 1 when it does not fit, else 0 (also for no data). The padded
 // length is copied from src too (up to 3 bytes past len, as on N64).
@@ -489,11 +479,7 @@ s32 ring_buffer_put_record(struct105 *q, u8 *src, s32 len) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/ring_buffer_put_record.s")
-#endif
 
-#ifdef NON_MATCHING
 // text_queue_get: takes the next record from the ring buffer q (see ring_buffer_put_record) into dst (at most max - 1 bytes
 // plus a 0 when it is longer; the rest is skipped); returns the record's length, 0 when the queue is empty.
 /* was func_15043CA4 */
@@ -516,6 +502,3 @@ s32 ring_buffer_get_record(struct105 *q, u8 *dst, s32 max) {
     q->unk8 = pos;
     return len;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/ring_buffer_get_record.s")
-#endif

@@ -1,18 +1,16 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 tracer_tick_life(s32 arg0, u8 *arg1, f32 arg2);
 void tracer_move(u8 *arg0, u8 *arg1, f32 arg2);
 s32 tracer_check_hit_step(u8 *arg0, u8 *arg1, f32 arg2);
 void tracer_ease_values(s32 arg0, u8 *arg1, s32 arg2);
 s32 memcpy(s32, s32, s32);
-#endif
 // hoisted forward declaration(s) for tracer_tick_life
 extern void (*D_8008FF70[])(s32);
 
 
-#ifdef NON_MATCHING
 s32 sound_calc_pan_from_xz(f32, f32, u32);
 void music_post_event_request(u32, s32);
 s32 floor_flags_surface_type(s32);
@@ -53,10 +51,6 @@ void hit_spark_sound_play(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3, f32 arg4) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/hit_spark_sound_play.s")
-#endif
-#ifdef NON_MATCHING
 s32 vec3_normalize_len(u8 *, s32 *, s32, s32);
 s32 tracer_hit_update(s32, s32 *, u8 *, s32 *, s32 *, f32, s32, u8 *, s32 *, s8 *, s32, f32, u8 *, s32, s32, s32, s32, s32);
 s32 objects_hit_by_segment(u8 *, s32 *, u8 *, s8, s32);
@@ -303,10 +297,6 @@ block_27:
 block_47:
     return sp.u19C;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/tracer_spawn.s")
-#endif
-#ifdef NON_MATCHING
 s32 sound_calc_pan_volume(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32 *, s32 *, s32);
 extern s32 D_8008FF88;
 
@@ -413,10 +403,6 @@ loop_9:
     }
     return sp.uD7;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/tracer_update.s")
-#endif
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
 
@@ -550,9 +536,6 @@ s16 *tracer_draw(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/tracer_draw.s")
-#endif
 /* was func_151C33FC */
 s32 tracer_filter_not_self(u8 *arg0, u8 *arg1) {
     if (arg0 == arg1) {
@@ -589,7 +572,6 @@ void tracer_hit_callback(s32 arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, s32 a
     object_take_hit(arg0, arg1, arg3, arg4, arg5, *(s32 *)(arg2 + 0x1B4), arg2 + 0x170, arg2[0xC], arg2[1]);
 }
 
-#ifdef NON_MATCHING
 s32 cam_sprite_puff_spawn(f32, s32, u8 *, u8 *, s32, s32, s32, s32, s32, s32);
 s32 emit_streaks_from_spec(s32 *, u8, s32);
 extern u8 D_800DCE50;
@@ -740,10 +722,6 @@ void tracer_impact_sparks(u8 *arg0) {
         emit_streaks_from_spec(&sp.u54, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/tracer_impact_sparks.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_800AAE24[4]; /* the ember emitter's 4 float parameters (D_800AAE24..D_800AAE30) */
 s32 emit_streaks_from_spec(s32 *, u8, s32);
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
@@ -936,11 +914,7 @@ void fire_embers_spawn(void *arg0, u8 room, s32 owner) {
     at.unk8 = pos[2];
     light_create_with_ctrl(&flash, &at, (random_int() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, room, owner);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/fire_embers_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 /* was func_151C3C88 */
@@ -1170,10 +1144,6 @@ void fire_embers_spawn_b(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u50 = (s32) (*(f32 *)((u8 *)arg0 + 8));
     light_create_with_ctrl((Header *) &sp.u54, (Header2 *) &sp.u48, (random_int() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, (u8) (s32) arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/fire_embers_spawn_b.s")
-#endif
-#ifdef NON_MATCHING
 extern s32 D_800AADB0[6]; /* per-surface texture byte of the spark burst */
 extern s32 D_800AADC8[6]; /* per-surface texture byte of the smoke puff */
 extern u8 D_800AADE0[6][3]; /* per-surface debris colour A */
@@ -1426,11 +1396,7 @@ void surface_impact_effects(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debr
                       0xFF, 0, 0, obj[0xC], obj[1]);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/surface_impact_effects.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_151C491C */
 void tracer_ease_values(s32 arg0, u8 *arg1, s32 arg2) {
     f32 temp_f0;
@@ -1451,14 +1417,7 @@ void tracer_ease_values(s32 arg0, u8 *arg1, s32 arg2) {
         } while (var_a2 > 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/tracer_ease_values.s")
-#endif
-#ifdef NON_MATCHING
 s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
-#else
-s32 ray_cast_world(struct127 *, s32, s32, s32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
-#endif
 typedef struct { s32 w0; s32 w4; u8 b8[0x18]; u8 b20[0x39]; u8 x59; u8 pad5A[0x1A]; } Res_151C4990;
 /* was func_151C4990 */
 s32 tracer_check_hit_step(u8 *arg0, u8 *arg1, f32 arg2)
@@ -1481,11 +1440,7 @@ s32 tracer_check_hit_step(u8 *arg0, u8 *arg1, f32 arg2)
     }
     if (f != 0.0f)
     {
-#ifdef NON_MATCHING
       ray_cast_world(t, *((f32 *) (arg0 + 0x34)), *((f32 *) (arg0 + 0x38)), *((f32 *) (arg0 + 0x3C)), *((f32 *) (arg1 + 0x60)), *((f32 *) (arg1 + 0x64)), *((f32 *) (arg1 + 0x68)), (u8 *) (&r), f, 1, 0, !(arg1[0] & 8), *((s8 *) (arg1 + 0xA8)), 0, *((s32 *) (arg1 + 0xAC)));
-#else
-      ray_cast_world(t, *((s32 *) (arg0 + 0x34)), *((s32 *) (arg0 + 0x38)), *((s32 *) (arg0 + 0x3C)), *((f32 *) (arg1 + 0x60)), *((f32 *) (arg1 + 0x64)), *((f32 *) (arg1 + 0x68)), (u8 *) (&r), f, 1, 0, !(arg1[0] & 8), *((s8 *) (arg1 + 0xA8)), 0, *((s32 *) (arg1 + 0xAC)));
-#endif
       if (r.x59 >= 2)
       {
         tracer_hit_callback(r.w0, (s32) t, arg0, (s32) r.b8, (s32) r.b20, (s32) (&r));
@@ -1531,7 +1486,6 @@ s32 tracer_tick_life(s32 arg0, u8 *arg1, f32 arg2) {
     return var_v1;
 }
 
-#ifdef NON_MATCHING
 typedef struct {
     /* 0x00 */ s16 *pos;
     /* 0x04 */ s32 timer;
@@ -1586,11 +1540,7 @@ void timed_emitter_update(u8 *obj) {
     }
     e->timer = (u32)random_int() % (u32)(e->interval_range + 1) + e->interval_min;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/timed_emitter_update.s")
-#endif
 
-#ifdef NON_MATCHING
 f32 sinf(f32);
 void vec3_from_angles_rad(f32, f32, f32, f32 *);
 
@@ -1644,9 +1594,6 @@ void orbit_sparks_emit(u8 *p) {
     s[5] = wrap_angle_rad(b);
     s[8] = t;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/orbit_sparks_emit.s")
-#endif
 
 /* was func_151C5060 */
 void tracer_on_obj_replaced(u8 *arg0, s32 *arg1, u8 arg2) {
@@ -1664,7 +1611,6 @@ void tracer_on_obj_replaced(u8 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *, f32 *, s32 *, u8 *, f32);
 
 typedef struct {
@@ -1832,6 +1778,3 @@ s32 tracer_hit_update(s32 srcArg, s32 *hitArg, u8 *posArg, s32 *dirArg, s32 *out
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/tracer_hit_update.s")
-#endif

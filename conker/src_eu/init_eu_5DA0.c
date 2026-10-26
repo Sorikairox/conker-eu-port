@@ -4,9 +4,7 @@
 
 
 /* was func_10005DA0 */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/boot_map_init_segment.s")
 
-#ifdef NON_MATCHING
 /* P281: readable C for tlb_area_init (Rare hand asm, 55 insns, with the private entry func_10005E2C = the retry
    label). The two COP0 writes (Context = 0, Wired = 2: two wired TLB entries) have no C form; the port has no TLB
    and its platform layer does the boot setup (tools/port/platform_replaced.tsv). */
@@ -39,11 +37,7 @@ void tlb_area_init(s32 pages) {
     D_8003BE70 = allocate_memory((D_8003C218 + 7) >> 3, 0xFF, 0, 0);
     D_8003C21C = (u8 *) D_8003BE70 + ((D_8003C218 + 7) >> 3) - 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/tlb_area_init.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s16 D_8003C218;
 extern u8 *D_8003C21C;
 
@@ -61,16 +55,10 @@ void tlb_page_bitmap_reset(void) {
         *D_8003C21C = (2 << (n - 1)) - 1;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/tlb_page_bitmap_reset.s")
-#endif
 /* was func_10005F1C */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/tlb_miss_load_segment.s")
 
 /* was func_100061F8 */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/tlb_clear_entries.s")
 
-#ifdef NON_MATCHING
 /* thin wrapper: a0..a2 pass through untouched, v0 comes back from rzip_inflate_impl */
 s32 rzip_inflate_impl();
 
@@ -78,10 +66,6 @@ s32 rzip_inflate_impl();
 s32 rzip_inflate(s32 arg0, s32 arg1, u32 arg2) {
     return rzip_inflate_impl(arg0, arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/rzip_inflate.s")
-#endif
-#ifdef NON_MATCHING
 /* P36: Rare's inflater (init_eu_5DA0, hand-written asm 0x1000654C-0x100074B8), C for the whole set:
  * rzip_inflate_impl (entry), rzip_inflate_loop (block loop), rzip_inflate_block (block header), rzip_inflate_dynamic (dynamic block),
  * rzip_inflate_stored (stored block), rzip_inflate_fixed (fixed block), rzip_huft_build (huft_build), rzip_inflate_codes
@@ -587,71 +571,26 @@ void rzip_build_fixed_tables(void) {
     m = 5;
     inf_build(&st, l, 30, 0, D_8002C480, D_8002C4EE, &t, &m, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/rzip_inflate_impl.s")
-#endif
 
-#ifdef NON_MATCHING
 /* C: see rzip_inflate_impl above (P36) */
-#else
-/* was func_1000661C */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/rzip_inflate_loop.s")
-#endif
 
-#ifdef NON_MATCHING
 /* C: see rzip_inflate_impl above (P36) */
-#else
-/* was func_10006670 */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/rzip_inflate_block.s")
-#endif
 
-#ifdef NON_MATCHING
 /* C: see rzip_inflate_impl above (P36) */
-#else
-/* was func_10006714 */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/rzip_inflate_dynamic.s")
-#endif
 
-#ifdef NON_MATCHING
 /* C: see rzip_inflate_impl above (P36) */
-#else
-/* was func_10006B18 */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/rzip_inflate_stored.s")
-#endif
 
-#ifdef NON_MATCHING
 /* C: see rzip_inflate_impl above (P36) */
-#else
-/* was func_10006C1C */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/rzip_inflate_fixed.s")
-#endif
 
-#ifdef NON_MATCHING
 /* C: see rzip_inflate_impl above (P36) */
-#else
-/* was func_10006C5C */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/rzip_huft_build.s")
-#endif
 
-#ifdef NON_MATCHING
 /* C: see rzip_inflate_impl above (P36) */
-#else
-/* was func_100070F0 */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/rzip_inflate_codes.s")
-#endif
 
-#ifdef NON_MATCHING
 /* C: see rzip_inflate_impl above (P36) */
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/rzip_build_fixed_tables.s")
-#endif
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/__osExceptionPreamble.s")
 
 /* was func_10007AA8 */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/os_exc_send_mesg.s")
 
-#ifdef NON_MATCHING
 /* was func_10007CC8 */
 void os_enqueue_thread(s32 *arg0, s32 *arg1) {
     s32 *var_t8;
@@ -671,10 +610,6 @@ void os_enqueue_thread(s32 *arg0, s32 *arg1) {
     *var_t9 = arg1;
     (*(s32 **)((u8 *)arg1 + 8)) = arg0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/os_enqueue_thread.s")
-#endif
-#ifdef NON_MATCHING
 /* __osPopThread: unlink and return the head of a thread queue */
 /* was func_10007D14 */
 OSThread *os_pop_thread(OSThread **queue) {
@@ -683,25 +618,15 @@ OSThread *os_pop_thread(OSThread **queue) {
     *queue = t->next;
     return t;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/os_pop_thread.s")
-#endif
 /* was func_10007D28 */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/os_dispatch_thread.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/__osCleanupThread.s")
 
 /* was func_10007F64 */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/crash_print_hex32.s")
 
 /* was func_10007FB4 */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/crash_print_string.s")
 
 /* was func_10008018 */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/crash_draw_glyph.s")
 
 /* was func_10008090 */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/debug_syscall_trap.s")
 
 /* was func_1000809C */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/debugger_crash_entry.s")

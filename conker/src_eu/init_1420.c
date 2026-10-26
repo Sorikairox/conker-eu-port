@@ -23,7 +23,6 @@ typedef struct {
 } _Pft;
 
 
-#ifdef NON_MATCHING
 extern u32 D_80043ED0[];
 
 /* clear the 0xFE0-byte block at D_80043ED0 */
@@ -35,9 +34,6 @@ void boot_clear_low_block(void) {
         *p++ = 0;
     } while ((u32)p < (u32)D_80043ED0 + 0xFE0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_1420/boot_clear_low_block.s")
-#endif
 // NOT MATCHING: JUSTREG: uses v0 registers not a1 registers
 // void boot_clear_low_block(void) {
 //     s32 *tmp = &D_80043B40;
@@ -83,7 +79,6 @@ void tlb_remap_game_segment(s32 arg0) {
     __osRestoreInt(saveMask);
 }
 
-#ifdef NON_MATCHING
 /* P281: readable C for init_printf_ldtob (compiled C, 296 insns): libc _Ldtob. */
 #include "libc/stdlib.h"
 void *memcpy(void *, const void *, size_t);
@@ -202,9 +197,6 @@ void init_printf_ldtob(void *arg0, u8 code) {
     }
     init_printf_genld(px, code, p, nsig, xexp);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_1420/init_printf_ldtob.s")
-#endif
 
 /* was func_100019F0 */
 s16 init_printf_ldunscale(s16 *arg0, struct05 *arg1) {

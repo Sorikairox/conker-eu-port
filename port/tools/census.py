@@ -31,7 +31,7 @@ CEN = f'{OUT}/census'
 INC = ['-Iconker', '-Iconker/include', '-Iconker/include/2.0L', '-Iconker/include/2.0L/PR',
        '-Iconker/include/libc', '-Iconker/src/libultra/os', '-Iconker/src/libultra/audio',
        '-Iconker/src/libultra/io']
-DEFS = ['-DNON_MATCHING', '-DPORT', '-D_LANGUAGE_C', '-D_FINALROM', '-DF3DEX_GBI_2',
+DEFS = ['-DPORT', '-D_LANGUAGE_C', '-D_FINALROM', '-DF3DEX_GBI_2',
         '-D_MIPS_SZLONG=32', '-D_MIPS_SZINT=32']
 BASE = ['emcc', '-c', '-O1', '-g0', '-std=gnu89', '-nostdinc', '-fno-builtin', '-fno-strict-aliasing',
         '-fwrapv', '-fsigned-char',

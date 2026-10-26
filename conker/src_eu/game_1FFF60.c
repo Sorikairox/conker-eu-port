@@ -47,7 +47,6 @@ struct224 *attach_fx_spawn(void *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 ar
     return tmp;
 }
 
-#ifdef NON_MATCHING
 // effect_child_update: one effect child per frame. Freed (node_destroy) when its parent object is gone / hidden /
 // re-used (id +0x3B != child +0x14) or has no bone matrices. Otherwise its position is its offset +0x18 through the
 // parent's bone matrix (+0x1D4, bone +0x24); a timed child (+0x28 bit 0) counts +0x26 down by D_800BE9E4 and at
@@ -87,37 +86,6 @@ void attach_fx_update(struct_eu_1FFF60_child *arg0) {
     }
     arg0->unk34 = pos;
 }
-#else
-void attach_fx_update(struct_eu_1FFF60_child *arg0) {
-    struct_eu_1FFF60_parent *parent = arg0->unk10;
-    struct17 pos;
-
-    if (parent->unk0 == 0 || parent->unk4 == 0xFF || parent->unk3B != arg0->unk14 || parent->unk1D4 == NULL ||
-        (parent->unk74 & 0xF) == 0xF) {
-        node_destroy(arg0);
-        return;
-    }
-    mtx_transform_point_or_origin(&arg0->unk18, &pos, parent->unk1D4 + (arg0->unk24 << 6));
-    if (arg0->unk28 & 1) {
-        arg0->unk26 -= D_800BE9E4;
-        if (arg0->unk26 < 0) {
-            if (arg0->unk2A != -1) {
-                D_8008FFE8[arg0->unk2A](arg0, &pos);
-            }
-            arg0->unk2C = 0;
-            node_destroy(arg0);
-            return;
-        }
-    }
-    if (arg0->unk29 != -1) {
-        if (D_8008FFE0[arg0->unk29](arg0, &pos) == 0) {
-            node_destroy(arg0);
-            return;
-        }
-    }
-    arg0->unk34 = pos;
-}
-#endif
 
 /* was func_151D2DAC */
 void attach_fx_detach(struct102 *arg0) {
@@ -266,7 +234,6 @@ void attach_ctrl_update(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 // effect_node_release: runs the node's release hook D_8008FFFC[+0x1D] (if any), then for every child (list +0x24,
 // next +0x40) its end handler D_8008FFE8[+0x2A] (child, &child +0x34) and frees it (node_destroy), then releases
 // the node (char_fx_detach_effect with +0x10).
@@ -291,26 +258,6 @@ void attach_ctrl_cleanup(struct_eu_1FFF60 *arg0) {
     }
     char_fx_detach_effect(arg0, arg0->unk10);
 }
-#else
-void attach_ctrl_cleanup(struct_eu_1FFF60 *arg0) {
-    struct_eu_1FFF60_child *child;
-
-    if (D_8008FFFC[arg0->unk1D] != NULL) {
-        D_8008FFFC[arg0->unk1D](arg0);
-    }
-    child = arg0->unk24;
-    while (child != NULL) {
-        struct_eu_1FFF60_child *next = child->unk40;
-        if (child->unk2A != -1) {
-            D_8008FFE8[child->unk2A](child, &child->unk34);
-        }
-        child->unk2C = 0;
-        node_destroy(child);
-        child = next;
-    }
-    char_fx_detach_effect(arg0, arg0->unk10);
-}
-#endif
 
 /* was func_151D31F4 */
 void attach_ctrl_destroy(struct102 *arg0) {
@@ -392,7 +339,6 @@ void attach_fx_unlink_from_ctrl(struct224 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 // effect_node_children_free: effect-child handler (D_8008FFE0 [5] / D_8008FFE8 [3]): frees the node's children
 // (node_destroy on the first child +0x24 while the count +0x20 is above 0; each free unlinks it). The second
 // argument (the position the dispatchers pass) is unused; s32 return and the second parameter are the table's common
@@ -404,13 +350,6 @@ s32 attach_ctrl_destroy_children(struct224 *arg0, void *pos) {
     }
     return 0;
 }
-#else
-void attach_ctrl_destroy_children(struct224 *arg0) {
-    while (arg0->unk20 > 0) {
-        node_destroy(arg0->unk24);
-    };
-}
-#endif
 
 /* was func_151D33FC */
 void attach_ctrl_free_if_owner(struct224 *arg0, struct223 *arg1) {

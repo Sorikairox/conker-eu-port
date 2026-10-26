@@ -8,7 +8,6 @@ void area_points_reset(void) {
     D_800DDE50 = (u8)0;
 }
 
-#ifdef NON_MATCHING
 void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 extern u8 D_800DE284[];        /* level area id per slot */
 extern f32 (*D_800DE290[])[3]; /* 40 points per slot */
@@ -33,6 +32,3 @@ void area_points_alloc(s32 area) {
     rec[0x17] = 0;
     D_800DDE50++;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_362B0/area_points_alloc.s")
-#endif

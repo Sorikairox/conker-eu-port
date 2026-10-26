@@ -11,7 +11,6 @@ typedef struct {
 } struct_eu_158110;
 
 
-#ifdef NON_MATCHING
 s32 obj_collision_cylinder(struct127 *, s16 *, s16 *, s16 *);
 s32 floor_tri_height(f32, f32, s32, u8 *, f32 *);
 void collision_find_floor_no_fallback(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, s32 argC, s32 argD, s32 argE);
@@ -226,11 +225,7 @@ void camera_update_eye_base(struct108 *arg0) {
     }
 }
 #undef A390_F
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/camera_update_eye_base.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s16 D_80089930[4][4];      /* default viewport rects (x, y, w, h?) for slots 0..3 */
 extern s16 D_800DC630[4][4][4];   /* per player count: the viewport rects */
 extern u8 D_800DC4F0[];
@@ -261,10 +256,6 @@ void camera_viewport_tables_reset(void) {
     }
     bzero(D_800DC4F0, 0x130);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/camera_viewport_tables_reset.s")
-#endif
-#ifdef NON_MATCHING
 /* P96: freecam_auto_step */
 extern f32 D_800DC620;   /* screen x of the eye (camera_world_to_screen) */
 extern f32 D_800DC624;   /* screen y */
@@ -275,8 +266,6 @@ void freecam_scan_depth(u8 *, s32, s32, s32);
 s32 freecam_turn(u8 *, f32 *, f32 *);
 void camera_world_to_screen(s32 arg0, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz);
 void vec_rotate_xz_about_point(u8 *, u8 *, f32, u8 *);
-#endif
-#ifdef NON_MATCHING
 /* Free camera step of camera `arg0` (called by freecam_auto_update). Unless freecam_reset_countdown handles the frame, the eye
  * (+0x2BC / +0x2C0 / +0x2C4; the height kept 40 below the holder's ceiling +0x17C when it is above its floor
  * +0x180, unless +0x84 bit 0x10) is projected to the screen (camera_world_to_screen into D_800DC620 / 624 / 628). Off the
@@ -366,14 +355,7 @@ void freecam_auto_step(u8 *arg0) {
     }
     *(s32 *)(p + 0x698) = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/freecam_auto_step.s")
-#endif
-#ifdef NON_MATCHING
 void freecam_auto_step(u8 *arg0);
-#else
-s32 freecam_auto_step();
-#endif
 
 /* was func_1512B670 */
 void freecam_auto_update(u8 *arg0) {
@@ -388,11 +370,7 @@ void freecam_auto_update(u8 *arg0) {
             if ((temp_v0_2 & 8) && !(temp_v0_2 & 0x200) && ((*(u8 *)((u8 *)arg0 + 0x23C)) == 0)) {
                 temp_v0_3 = (*(s32 *)((u8 *)arg0 + 0x5F0));
                 if (!(temp_v0_3 & 0x80) && !(temp_v0_3 & 0x40)) {
-#ifdef NON_MATCHING
                     freecam_auto_step(arg0);   /* P77: the asm passes arg0 in a0 (the callee reads it) */
-#else
-                    freecam_auto_step();
-#endif
                     return;
                 }
             }
@@ -403,7 +381,6 @@ void freecam_auto_update(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 freecam_axis_threshold_test(u8 *cam, u8 *out, s32 lo, s32 hi, s32 value, s32 second);
 extern s16 D_800DC630[4][4][4];
 extern u8 D_800DC4F0[];
@@ -451,10 +428,6 @@ void freecam_scan_depth(u8 *cam, s32 x, s32 y, s32 depth) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/freecam_scan_depth.s")
-#endif
-#ifdef NON_MATCHING
 /* Free-camera reset countdown (called by freecam_auto_step): while +0x5FC (frames) is set, mark +0x5F8, fill the first
  * ceil(n) halfwords of the +0x8BC buffer with 0xFFFC (n = +4 of the camera's player entry in D_800BE628, 0x180
  * bytes each), clear +0x60C and count +0x5FC down; returns 1 then, else 0. */
@@ -473,9 +446,6 @@ s32 freecam_reset_countdown(u8 *cam) {
     *(s16 *)(cam + 0x5FC) -= 1;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/freecam_reset_countdown.s")
-#endif
 /* was func_1512BB6C */
 void freecam_axis_record_set(struct_eu_158110 *arg0, s32 arg1, s32 arg2) {
     arg0->unk2 = arg0->unk1;
@@ -488,7 +458,6 @@ void freecam_axis_record_set(struct_eu_158110 *arg0, s32 arg1, s32 arg2) {
     arg0->unk4 = arg1;
 }
 
-#ifdef NON_MATCHING
 void freecam_axis_record_set(struct_eu_158110 *arg0, s32 arg1, s32 arg2);
 extern s16 D_800DC634[];
 extern s16 D_800DC636[];
@@ -526,10 +495,6 @@ s32 freecam_axis_threshold_test(u8 *cam, u8 *out, s32 lo, s32 hi, s32 value, s32
     *(s32 *)(out + 8) = 0xFFFC;
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/freecam_axis_threshold_test.s")
-#endif
-#ifdef NON_MATCHING
 extern s16 D_800DC630[4][4][4];
 extern u8 D_800DC4F0[];
 
@@ -625,10 +590,6 @@ s32 freecam_turn(u8 *cam, f32 *turn, f32 *unused) {
     }
     return hit;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/freecam_turn.s")
-#endif
-#ifdef NON_MATCHING
 /* Camera eye collision. Unless collision is off (+0x84 flags 0x40000 / 0x80 / 0x200, the followed object
  * +0x3D4 has +0x95 set, or mode +0x2C == 0x40: then +0x3E8 = 1), the eye's collision ellipsoid size
  * (+0x94C width, +0x950 height) is picked from the situation and eased into +0x95C / +0x960 (math_spring_approach,
@@ -773,9 +734,6 @@ void camera_eye_collision(struct108 *arg0) {
     }
     camera_update_state_flags(arg0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/camera_eye_collision.s")
-#endif
 
 void camera_update_eye_orbit(u8 *);
 s32 camera_yaw_fade_in(u8 *);
@@ -809,7 +767,6 @@ void camera_too_close_swing(u8 *arg0) {
     camera_yaw_fade_in(arg0);
 }
 
-#ifdef NON_MATCHING
 /* P43: fade-in of +0x5CC (+0.006 per call, up to 1.0); at 1.0 clears flag 2 of +0x240 and sets +0x384 = 999.0,
  * else +0x384 += math_angle_diff_deg(+0x384, +0x37C) * +0x5CC. The asm returns no value (callers ignore it). */
 /* was func_1512C6C0 */
@@ -832,15 +789,11 @@ s32 camera_yaw_fade_in(u8 *arg0) {
     *(f32 *)(arg0 + 0x384) += f * *(f32 *)(arg0 + 0x5CC);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/camera_yaw_fade_in.s")
-#endif
 
 /* was func_1512C770 */
 void camera_step_noop(s32 arg0) {
 }
 
-#ifdef NON_MATCHING
 /* Camera collision with a cylinder (struct108 viewed as bytes, as the rest of this file does).
  * When the request flag +0x948 is set and the camera position (+0x2F8, a vec3) lies inside the circle of
  * radius +0x938 around (+0x93C, +0x944), the camera is pushed out onto the circle along the line from the
@@ -917,9 +870,6 @@ void camera_cylinder_push(u8 *arg0) {
     *camPos = pos;
     arg0[0x948] = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/camera_cylinder_push.s")
-#endif
 
 /* was func_1512C9EC */
 s32 camera_always_true(s32 arg0) {

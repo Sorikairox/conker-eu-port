@@ -15,7 +15,6 @@ void cont_arm_read_timer(void) {
     }
 }
 
-#ifdef NON_MATCHING
 extern u8 D_8002AE18;
 extern OSMesg D_800BEDB0;
 extern u8 D_800BEB60;
@@ -105,9 +104,6 @@ struct14 *cont_read_frame(void) {
     return &D_800BE730;
 }
 #undef DEADZONE
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_49310/cont_read_frame.s")
-#endif
 extern f32 D_80096D10;
 void rumble_start(u8, f32, f32);
 /* was func_1501BFF0 */
@@ -160,7 +156,6 @@ void rumble_stop(u8 arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800BEB80;
 extern s32 D_800BED60;
 extern s32 D_800BED68;
@@ -260,9 +255,6 @@ void rumble_update(void) {
     D_800BEEE3 = 0;
     D_eu_800E0E30 = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_49310/rumble_update.s")
-#endif
 /* was func_1501C51C */
 void rumble_stop_all(void) {
     u8 i;
@@ -272,7 +264,6 @@ void rumble_stop_all(void) {
     }
 }
 
-#ifdef NON_MATCHING
 void heap_free(s32);
 void save_slot_load(s8);
 void save_slot_write(s8);
@@ -327,6 +318,3 @@ void save_process_request(void) {
         D_800BE810 = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_49310/save_process_request.s")
-#endif

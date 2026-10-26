@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void fx_spawn_impact_particle(u8, s32 *, f32, s32, f32 *, u8);
-#endif
 
 
 s32 collision_floor_probe(f32 *, s32, f32, s32);
@@ -46,7 +45,6 @@ s32 footstep_surface_override(s32 arg0, s32 arg1) {
     return -1;
 }
 
-#ifdef NON_MATCHING
 extern f32 D_800A1840;
 extern f32 D_800A1844;
 
@@ -67,6 +65,3 @@ void footstep_dust_spawn(u8 *arg0, u8 arg1, s32 arg2) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_118CE0/footstep_dust_spawn.s")
-#endif

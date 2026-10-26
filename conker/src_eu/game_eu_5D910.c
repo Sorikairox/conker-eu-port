@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void attachment_apply_kind_effects(u8 *arg0, u8 *arg1);
 f32 *allocate_memory(s32, s32, s32, s32);
 s32 *asset_load_with_subfiles(s32, s32, s32, s32, s32, s32);
@@ -18,20 +18,14 @@ extern s32 *D_800E0578[];
 #define ATT_W(rec, off) (*(s32 *) ((rec) + (off)))
 s32 attachment_sound_cb();   /* P71: C under NON_MATCHING (else an extern s32 below, as the matching code uses it) */
 s32 sfx_emitter_stop_by_callback(s32 *, u8 *, u8 *);
-#endif
 
-#ifdef NON_MATCHING
 s32 animmodel_start_anim(u8 *, s32, s32, f32, f32, s32); /* P95: f32 parameter */
-#else
-s32 animmodel_start_anim(u8 *, s32, s32, s32, f32, s32);
-#endif
 
 void attachment_free(struct127 *, s32);
 
 s32 attachment_remove_by_slot_n(u8 *, s32, s32);
 
 
-#ifdef NON_MATCHING
 /*
  * P71: reference-counted load of asset (9, idx) with several display lists (the one-list variant is
  * shared_dl_acquire; shared_dl_release releases both). Header words: +0 the display-list offset table (+4 >> 2 entries),
@@ -78,11 +72,7 @@ s32 model_asset9_load_refcounted(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/model_asset9_load_refcounted.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 model_asset9_load_refcounted(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out8, s32 *outC);
 s32 animmodel_create(s32, s32, u8 *, u8 *, s32 *, u8 *, u8 *);
 
@@ -131,11 +121,7 @@ s32 attachment_load_model(struct127 *arg0, u8 *obj) {
     rec[9] = 1;
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_load_model.s")
-#endif
 
-#ifdef NON_MATCHING
 /*
  * P70: frees an attachment record of the list D_800C3EE0 (see attachment_update_all). now != 0 frees its buffers at
  * once (heap_free), else they are released deferred (heap_set_block_tag(buf, 4)) after attachment_undo_kind_effects.
@@ -204,16 +190,12 @@ void attachment_free(struct127 *arg0, s32 now) {
     }
     heap_free((s32) rec);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_free.s")
-#endif
 
 /* was func_150305E0 */
 void attachment_remove_by_slot(s32 arg0, s32 arg1) {
     attachment_remove_by_slot_n(arg0, arg1, 0xFF);
 }
 
-#ifdef NON_MATCHING
 /* was func_15030600 */
 s32 attachment_remove_by_slot_n(u8 *arg0, s32 arg1, s32 arg2) {
     s32 temp_s1;
@@ -252,9 +234,6 @@ block_10:
     }
     return var_s5;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_remove_by_slot_n.s")
-#endif
 /* was func_150306D4 */
 s32 attachment_remove_all_of_owner(u8 *arg0) {
     s32 temp_s0;
@@ -279,7 +258,6 @@ s32 attachment_remove_all_of_owner(u8 *arg0) {
     return var_s1;
 }
 
-#ifdef NON_MATCHING
 /* P65: the attachment records of the D_800C3EE0 list (offsets read from attachment_update_all's asm). */
 typedef struct Attach {
     /* 0x00 */ u8 model;            /* model id for obj_find_by_setup_id */
@@ -479,11 +457,7 @@ void attachment_update_all(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_update_all.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 attachment_load_model(struct127 *, u8 *);
 
 /* was func_15030DE4 */
@@ -587,10 +561,6 @@ block_9:
     attachment_apply_kind_effects(temp_v0, arg0);
     return temp_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_create.s")
-#endif
-#ifdef NON_MATCHING
 f32 *allocate_memory(s32, s32, s32, s32);
 
 /* was func_15031044 */
@@ -611,10 +581,6 @@ void attachment_set_local_transform(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_set_local_transform.s")
-#endif
-#ifdef NON_MATCHING
 s32 attachment_draw(s32, u8 *, struct127 *, s32, s32);
 
 /* was func_150310F8 */
@@ -664,13 +630,6 @@ block_19:
     }
     return var_s6;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_draw_all_for_player.s")
-#endif
-#ifdef NON_MATCHING
-#ifndef NON_MATCHING
-s32 attachment_draw(s32, u8 *, u8 *, s32, s32);
-#endif
 
 /* was func_15031284 */
 s32 attachment_draw_for_object(s32 arg0, u8 *arg1, s32 arg2, s32 arg3) {
@@ -697,37 +656,6 @@ s32 attachment_draw_for_object(s32 arg0, u8 *arg1, s32 arg2, s32 arg3) {
     }
     return var_s3;
 }
-#else
-#ifdef NON_MATCHING
-s32 attachment_draw_for_object(s32 arg0, u8 *arg1, s32 arg2, s32 arg3) {
-    s32 temp_s1;
-    s32 var_s0;
-    s32 var_s3;
-
-    var_s3 = arg0;
-    if ((arg1 == NULL) || ((*(s32 *)((u8 *)arg1 + 0x1D4)) == 0) || ((*(u8 *)((u8 *)arg1 + 0x3B)) == 0)) {
-
-    } else {
-        var_s0 = D_800C3EE0;
-        if (var_s0 != 0) {
-            do {
-                temp_s1 = (*(s32 *)((u8 *)var_s0 + 0x54));
-                if (((*(u8 *)((u8 *)arg1 + 0x3B)) != (*(u8 *)((u8 *)var_s0 + 0))) || ((*(u8 *)((u8 *)var_s0 + 3)) == 0)) {
-
-                } else {
-                    var_s3 = attachment_draw(var_s3, (u8 *) var_s0, arg1, arg2, arg3);
-                }
-                var_s0 = temp_s1;
-            } while (var_s0 != 0);
-        }
-    }
-    return var_s3;
-}
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_draw_for_object.s")
-#endif
-#endif
-#ifdef NON_MATCHING
 u8 * attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
 
 /* was func_15031360 */
@@ -775,10 +703,6 @@ block_13:
 block_14:
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_get_matrices.s")
-#endif
-#ifdef NON_MATCHING
 extern u8 D_80083350[];     /* segment 8: blended (alpha < 0xFF) material set */
 extern u8 D_800834D0[];     /* segment 8: opaque material set */
 extern u8 D_800DD714[];     /* fog colour r, g, b when the level fogs (header +0x3E) */
@@ -926,9 +850,6 @@ s32 attachment_draw(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special)
     }
     return (s32) gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_draw.s")
-#endif
 
 /* was func_15031C1C */
 void attachment_set_alpha_by_slot(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
@@ -938,7 +859,6 @@ void attachment_set_alpha_by_slot(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     }
 }
 
-#ifdef NON_MATCHING
 // attachment_find_nth: returns the arg2-th (0 = first) entry of the D_800C3EE0 list whose owner id (+0) is obj+0x3B
 // and whose sub id (+6) is arg1, or NULL.
 /* was func_15031C4C */
@@ -972,9 +892,6 @@ loop_3:
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_find_by_slot.s")
-#endif
 /* was func_15031CBC */
 u8 *attachment_find_by_slot_any(s32 arg0, u8 *arg1) {
     u8 *n;
@@ -1005,7 +922,6 @@ u8 *attachment_find_by_slot_any(s32 arg0, u8 *arg1) {
     return NULL;
 }
 
-#ifdef NON_MATCHING
 s32 object_fire_spawn(u8 *, s32, s32);
 void fire_smoke_trail_spawn(u8 *, u8, s32);
 void obj_timer_link_spawn(u8 *);
@@ -1076,10 +992,6 @@ void attachment_apply_kind_effects(u8 *arg0, u8 *arg1) {
         break;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_apply_kind_effects.s")
-#endif
-#ifdef NON_MATCHING
 struct127 *obj_find_by_setup_id(u8);
 void obj_timer_link_post_remove(u8 *);
 void light_ctrl_broadcast(u8, u8, s32);
@@ -1166,9 +1078,6 @@ void attachment_undo_kind_effects(u8 *rec) {
         obj_point_fx_broadcast_kill(obj);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_undo_kind_effects.s")
-#endif
 
 /* was func_1503211C */
 s32 attachment_cb_texture_pingpong(u8 *arg0, s32 arg1) {
@@ -1185,7 +1094,6 @@ s32 attachment_cb_texture_pingpong(u8 *arg0, s32 arg1) {
     return 0;
 }
 
-#ifdef NON_MATCHING
 extern f32 D_8009748C; /* 1 / 60 */
 
 /*
@@ -1237,11 +1145,7 @@ s32 attachment_cb_tile_by_height(u8 *arg0, struct127 *obj) {
     dl[i * 2] = 0xF2002000 | ((s32) (25.0f * t + 2.0f) & 0xFFF);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_cb_tile_by_height.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 D_80090680;      /* att+0x18 for kinds 0x5A / 0x74 / 0x7A when obj+0x2E8 == 0 */
 extern s32 D_80090684;      /* ... and when obj+0x2E8 != 0 */
 void anim_state_snapshot(u8 *);
@@ -1568,9 +1472,6 @@ s32 attachment_cb_sync_animation(u8 *att, u8 *obj) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_cb_sync_animation.s")
-#endif
 
 /* was func_150334A8 */
 s32 attachment_cb_anim_from_owner(u8 *arg0, u8 *arg1) {
@@ -1585,11 +1486,7 @@ s32 attachment_cb_anim_from_owner(u8 *arg0, u8 *arg1) {
     }
     t = *(s32 *)(arg1 + 0x2E4) & 0xFF;
     if (t != 0xFF) {
-#ifdef NON_MATCHING
         animmodel_start_anim(s, 0, t, 1.0f, 0.0f, 1); /* P95: float literal (asm passes the bits 0x3F800000) */
-#else
-        animmodel_start_anim(s, 0, t, 0x3F800000, 0.0f, 1);
-#endif
     }
     if (v != NULL) {
         *(f32 *)(*(u8 **)(arg0 + 0x48) + 8) = *(f32 *)(v + 8);
@@ -1612,11 +1509,7 @@ s32 attachment_cb_play_anim_once(u8 *arg0, s32 arg1) {
         return 0;
     }
     if ((*(u16 *)(var_s0 + 4) & 0x8000) != 0x8000) {
-#ifdef NON_MATCHING
         animmodel_start_anim(var_s0, 0, 0, 1.0f, 0.0f, 1); /* P95: float literal (asm passes the bits 0x3F800000) */
-#else
-        animmodel_start_anim(var_s0, 0, 0, 0x3F800000, 0.0f, 1);
-#endif
         var_s0 = *(u8 **)(arg0 + 0x48);
     }
     if ((*(f32 *)(var_s0 + 0x18) - 1.0f) <= *(f32 *)(var_s0 + 8)) {
@@ -1692,7 +1585,6 @@ s32 attachment_cb_spin_in_state5(u8 *arg0, u8 *arg1)
   return 0;
 }
 
-#ifdef NON_MATCHING
 /* was func_150337A8 */
 s32 attachment_tile_scroll_update(u8 *arg0, u8 *arg1) {
     s32 temp_a3;
@@ -1757,9 +1649,6 @@ s32 attachment_tile_scroll_update(u8 *arg0, u8 *arg1) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_tile_scroll_update.s")
-#endif
 void attachment_set_local_transform(s32, f32, f32, f32, f32, f32, f32);
 void mtxf_decompose(f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 void mtxf_mul(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
@@ -1837,7 +1726,6 @@ s32 attachment_cb_blink_texture(u8 *arg0, s32 arg1) {
     return 0;
 }
 
-#ifdef NON_MATCHING
 void obj_glow_post_remove_event(u8 *);
 s32 object_effect_start(u8 *, s32, s32, s32, s32, s32);
 
@@ -1881,12 +1769,6 @@ block_10:
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_cb_slot_anim_check.s")
-#endif
-#ifndef NON_MATCHING
-extern s32 attachment_sound_cb;
-#endif
 s32 sfx_emitter_stop_by_callback(s32 *, u8 *, u8 *);
 s32 attachment_tile_scroll_update(u8 *, u8 *);
 extern u8 D_800BEE2C;
@@ -1906,9 +1788,6 @@ s32 attachment_cb_loop_sound(u8 *arg0, u8 *arg1) {
     return 0;
 }
 
-#ifndef NON_MATCHING
-extern s32 attachment_sound_cb;
-#endif
 
 /* was func_15033DC8 */
 s32 attachment_cb_delayed_sound(u8 *arg0, u8 *arg1) {
@@ -1929,7 +1808,6 @@ s32 attachment_cb_delayed_sound(u8 *arg0, u8 *arg1) {
     return 0;
 }
 
-#ifdef NON_MATCHING
 s32 random_int(void);
 void sound_play_for_actor(s32, s32, s32, s32, s32, u8 *);
 
@@ -1986,9 +1864,6 @@ s32 attachment_sound_cb(u8 *voice, s32 arg1, s32 *playing, s32 arg3, s32 arg4, s
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_sound_cb.s")
-#endif
 
 /* was func_150340F0 */
 s32 attachment_cb_free_in_state3(s32 arg0, u8 *arg1) {

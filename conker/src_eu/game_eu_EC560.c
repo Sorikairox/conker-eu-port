@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 extern f32 D_800A0480;
 extern f32 D_800A0484;
 s32 event_dispatch(s32, s32, ...);
@@ -43,6 +42,3 @@ void player_seat_camera_update(struct108 *arg0) {
         event_dispatch_alt(0, 0x400E, 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EC560/player_seat_camera_update.s")
-#endif

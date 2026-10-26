@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 // framebuffer_green_to_gray: turns the RGBA5551 pixels in [start, end) gray by copying each pixel's green field
 // into its red and blue fields (alpha kept). Rare's asm (hand-written) does 8 pixels per step with 64-bit masks
 // D_8009FCA0 = 0x07C0 (green) / D_8009FCA8 = 0x07C1 (green + alpha) in every halfword; it always does at least one
@@ -22,15 +21,8 @@ void framebuffer_green_to_gray(u16 *start, u16 *end) {
         px += 8;
     } while (px < end);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/framebuffer_green_to_gray.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
-#else
-s32 event_dispatch(s32, s32, s32, s32);
-#endif
 
 /* was func_150B2300 */
 void camera_flags_from_events(u8 *arg0) {
@@ -64,7 +56,6 @@ void smoke_emitter_spawn(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 /* was func_150B2470 */
@@ -195,10 +186,6 @@ void smoke_emitter_update_large(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/smoke_emitter_update_large.s")
-#endif
-#ifdef NON_MATCHING
 /* P249: readable C for view_progress_setup (game_eu_DFAA0, 79 insns; compiled C, not hand asm: IDO prologue / delay slots). */
 // view_progress_setup: configures a view record (+0x84 flags, +0x190, +0x348 / +0x34C / +0x374, +0x5F0) from the game
 // progress queries event_dispatch (kind 0 = 3 arguments, kind 1 = 4). Query 0x5043 / 0x1A set: +0x84 |= 0x400000
@@ -232,6 +219,3 @@ void view_progress_setup(u8 *v) {
         *(s32 *) (v + 0x5F0) &= ~0x100;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/view_progress_setup.s")
-#endif

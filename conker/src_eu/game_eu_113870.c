@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P93: 28 arguments as the asm passes them (a0 = 0, a1..a3 = the first three floats in integer registers) */
 s32 beam_effect_spawn(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
 void impact_scatter_ahead(s32);
@@ -102,6 +101,3 @@ void weather_lightning_storm_update(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113870/weather_lightning_storm_update.s")
-#endif

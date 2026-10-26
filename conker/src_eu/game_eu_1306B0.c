@@ -1,12 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING
 void segment_closest_point(void *, void *, void *, void *, f32 *); /* P270 */
-#endif
 
 
-#ifdef NON_MATCHING
 s32 floor_flags_surface_type(s32);
 
 /* was func_15102EA0 */
@@ -101,10 +98,6 @@ block_7:
     sp50 = random_int();
     return sprite_fx_spawn_cam_at((s32) &sp.u64, 0U, 0U, arg2, (*(f32 *)((u8 *)arg3 + 0)), (*(f32 *)((u8 *)arg3 + 4)), (*(f32 *)((u8 *)arg3 + 8)), arg0, arg0, (u8) (sp4C & 0xFF), (u8) (((random_int() & 1) * 2) + (sp50 & 1)), sp60, sp5C, 0, (u8) (s32) arg8, arg9);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/cam_sprite_puff_spawn.s")
-#endif
-#ifdef NON_MATCHING
 void flip_sprite_particle_spawn(s16, u8, f32, u8 *, u8, u8, s32);
 s32 memcpy(s32, u8 *, s32); /* as declared further down in this file */
 /* the owner attachment block copied to the particle emitter at +0x110 (read by attached_points_update) */
@@ -203,16 +196,12 @@ void *attached_particle_spawn(u8 *owner, u8 matrix, f32 *pos, f32 *dir, f32 *ran
     flip_sprite_particle_spawn(count, alpha, speed, target, arg9, argC, argD);
     return emitter;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/attached_particle_spawn.s")
-#endif
 
 /* was func_151032D0 */
 void attached_particle_handle_event(s32 arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, arg0 + 0x110, arg0 + 0x114, arg0);
 }
 
-#ifdef NON_MATCHING
 u8 * attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
 void mtx_transform_points(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3);
 s32 model_node_points_to_world(u8 *, s32, s32, u8 **, u8 **, s32);
@@ -258,10 +247,6 @@ s32 attached_points_update(u8 *arg0) {
     att[0x14] |= 1;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/attached_points_update.s")
-#endif
-#ifdef NON_MATCHING
 s32 memcpy(s32, u8 *, s32);
 
 /* was func_15103438 */
@@ -391,10 +376,6 @@ s16 *attached_strip_draw(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/attached_strip_draw.s")
-#endif
-#ifdef NON_MATCHING
 s32 particle_spawn_basic(s32 *, s32, s32, u8, s32);
 extern s32 D_80088F70;
 
@@ -500,6 +481,3 @@ void flip_sprite_particle_spawn(s16 arg0, u8 arg1, f32 arg2, u8 *arg3, u8 arg4, 
     sp.u92 = arg4;
     particle_spawn_basic(&sp.u2C, 1, 0, arg5, arg6);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/flip_sprite_particle_spawn.s")
-#endif

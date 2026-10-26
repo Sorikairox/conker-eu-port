@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* obj_adjust_entries_face (P57): per-object adjustment entries for the face (eyelids / mouth), appended to buf as
  * {u16 offset, s16 value} pairs for anim_eval_joint_matrices; returns the end (obj_adjust_list_build writes the 0x1000 terminator).
  * obj = &D_800CC2D0[i] (bytes): +4 type, +0x1FE blink amount, +0x1FF blink state, +0x200 blink timer,
@@ -112,9 +111,6 @@ s16 *obj_adjust_entries_face(s16 *buf, u8 *obj, s32 a2, s32 a3) {
     }
     return buf;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/obj_adjust_entries_face.s")
-#endif
 
 extern s16 D_800C4310;
 
@@ -147,7 +143,6 @@ void reflect_queue_reset(void) {
     D_800C4320 = 0;
 }
 
-#ifdef NON_MATCHING
 void guMtxF2L2(float mf[4][4], Mtx *m);
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 s32 approx_dist2_int(s32 x0, s32 z0, s32 x1, s32 z1);
@@ -260,9 +255,6 @@ void reflect_build_joint_matrices(struct127 *obj, struct_eu_size0C *e, s32 mode,
         obj->unk1D4 = saved;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/reflect_build_joint_matrices.s")
-#endif
 
 /* was func_150359B8 */
 struct_eu_size0C *reflect_queue_alloc(void) {
@@ -273,7 +265,6 @@ struct_eu_size0C *reflect_queue_alloc(void) {
     return &D_800C4328[D_800C4320 - 1];
 }
 
-#ifdef NON_MATCHING
 s32 camera_view_test_sphere(s32, s32 *, f32, f32, f32, f32, f32, f32);
 extern s32 D_800DA030;
 extern f32 D_80098120;
@@ -294,10 +285,6 @@ s32 reflect_is_culled(s32 arg0, u8 *arg1, u8 *arg2, f32 arg3) {
     return camera_view_test_sphere(sp28, &D_800DA030, *(f32 *)(arg2 + 0x30), y, *(f32 *)(arg2 + 0x38),
                          w * *(f32 *)(arg1 + 0x14C), w * *(f32 *)(arg1 + 0x150), D_80098120) == 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/reflect_is_culled.s")
-#endif
-#ifdef NON_MATCHING
 void reflect_build_joint_matrices(struct127 *obj, struct_eu_size0C *e, s32 mode, s32 model, s32 mtx, s32 nmtx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 x, f32 y, f32 z, f32 g, f32 h, f32 alpha, s32 shadow, s32 sub);
 s32 model_joint_mtx_count(s32 id);
 void obj_ambient_colour(s32 id, u8 *col);
@@ -421,11 +408,7 @@ void reflect_queue_object(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, 
         e->unk0[4] = (s32) ((u32) e->unk0[4] * fade) >> 8;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/reflect_queue_object.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 D_80083350;
 extern s32 D_800834D0;
 
@@ -501,10 +484,6 @@ u8 *reflect_emit_entries_dl(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4) {
     }
     return var_a0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/reflect_emit_entries_dl.s")
-#endif
-#ifdef NON_MATCHING
 Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *color, s32 arg6, s32 arg7);
 
 /* Draw the D_800C4320 entries of D_800C4328 that have no unkB flag through obj_draw_model_dl, after a
@@ -538,10 +517,6 @@ Gfx *reflect_draw_queue(Gfx *gdl, s32 arg1) {
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/reflect_draw_queue.s")
-#endif
-#ifdef NON_MATCHING
 void reflect_queue_object(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
 s32 obj_collision_cylinder(struct127 *, s16 *, s32 *, s32 *);
 
@@ -576,6 +551,3 @@ void reflect_queue_objects_over_water(void) {
         } while (var_s1 != 0x19);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/reflect_queue_objects_over_water.s")
-#endif

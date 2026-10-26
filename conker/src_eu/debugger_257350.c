@@ -327,7 +327,6 @@ void debug_printf_put_arg(_Pft *x, va_list *args, char type, char *buff)
 
 #undef char
 // contains delay slot
-#ifdef NON_MATCHING
 /* P281: readable C for debug_printf_ldtob (compiled C, 296 insns): the debugger's _Ldtob; its rodata_inject tables are
    referenced by symbol (P129 practice), the late_rodata 1e8 is a literal (exact). */
 extern const f64 D_16004828[];   /* powers of ten 1e1, 1e2, 1e4, 1e8, ..., 1e256 */
@@ -443,9 +442,6 @@ void debug_printf_ldtob(_Pft *px, u8 code) {
     }
     debug_printf_genld(px, code, p, nsig, xexp);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger_257350/debug_printf_ldtob.s")
-#endif
 // _Ldunscale
 /* was func_16002D2C */
 s16 debug_printf_ldunscale(s16 *pex, f64 *px) {

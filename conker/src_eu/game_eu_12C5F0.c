@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* local copies of character_smoke_puff's rodata D_800A23D0 / DC / E8 / F4 (its .s carries it) */
 static const f32 sPuffPoint[3] = { 10.0f, -102.0f, 75.0f };
 static const f32 sSparkEnd[3] = { 10.0f, -151.0f, 105.0f };
@@ -17,9 +16,7 @@ s32 tracer_spawn(f32 *, f32 *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32,
 void weapon_count_shot(struct127 *);
 void muzzle_light_small_spawn(f32 *, u8, s32);
 void bone_streak_fx_start(f32 *, f32 *, s32, struct127 *, f32, u8, s32);
-#endif
 
-#ifdef NON_MATCHING
 // character_smoke_puff: smoke from a character obj (owner byte room / owner passed on). Takes its facing (obj_get_aim_vectors,
 // 0.811) and either, with a bone matrix table (obj+0x1D4, entry D_80088F40), the transformed local points
 // sPuffPoint (puff position), sSegStart / sSegEnd (a segment, stored as start + direction), or else a point 34 in
@@ -94,15 +91,6 @@ void character_smoke_puff(struct127 *obj, u8 room, s32 owner) {
     }
 }
 #define D_800A23D0 sPuffPoint[0] /* character_smoke_point_get's reference */
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12C5F0/character_smoke_puff.s")
-
-extern s32 D_800A23D0;
-#endif
-#ifndef NON_MATCHING
-s32 mtx_transform_points(s32 **, s32 *, s32, s32);
-extern u8 D_80088F40;
-#endif
 /* was func_150FF148 */
 void character_smoke_point_get(u8 *arg0, s32 arg1, s32 arg2) {
     s32 pad;
@@ -115,11 +103,8 @@ void character_smoke_point_get(u8 *arg0, s32 arg1, s32 arg2) {
     mtx_transform_points(&sp20, &sp1C, v, 1);
 }
 
-#ifdef NON_MATCHING /* P262: the C definition's exact types (game_eu_1306B0) */
+/* P262: the C definition's exact types (game_eu_1306B0) */
 void *attached_particle_spawn(u8 *, u8, f32 *, f32 *, f32 *, s16, u8, f32, u8 *, u8, s32, s16, u8, s32);
-#else
-s32 attached_particle_spawn(s32, u8, s32, s32, f32 *, s32, s32, f32, s32, s32, s32, s32, s32, s32);
-#endif
 
 /* was func_150FF1A8 */
 void bone_point_spark_spray(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {

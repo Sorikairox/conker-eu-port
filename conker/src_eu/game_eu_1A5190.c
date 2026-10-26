@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P188 */
 void *allocate_memory(s32, s32, s32, s32);
 u8 *world_record_find(u8 id);
@@ -132,11 +131,7 @@ void vtx_anim_light_create(u8 flags, u8 id, s16 x, s16 y, s16 z, f32 angle, u16 
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5190/vtx_anim_light_create.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P122 */
 u8 *world_record_find(u8 id);
 void world_record_build_matrix(f32 (*mf)[4], u8 *model);
@@ -239,6 +234,3 @@ void vtx_anims_update(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5190/vtx_anims_update.s")
-#endif

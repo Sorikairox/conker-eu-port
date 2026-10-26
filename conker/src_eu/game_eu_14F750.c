@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 extern f32 D_800A37F0;
 extern f32 D_800A37F4;
 /* was func_15121F40 */
@@ -86,6 +85,3 @@ void camera_group_side_view(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x300)) = (f32) (*(f32 *)((u8 *)arg0 + 0x2C4));
     (*(f32 *)((u8 *)arg0 + 0x2FC)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x2C0)) + (temp_f2 * 0.5f));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_14F750/camera_group_side_view.s")
-#endif

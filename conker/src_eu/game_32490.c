@@ -4,7 +4,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void *allocate_memory(s32, s32, s32, s32);
 void heap_free(void *);
 extern u8 *D_800C6A70;      /* look points, 0x14-byte records (LookPoint in game_eu_64770.c) */
@@ -43,9 +42,6 @@ s32 level_load_look_points(s32 arg0) {
     }
     return i;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_32490/level_load_look_points.s")
-#endif
 // NON-MATCHING: miles away
 // s32 level_load_look_points(s32 arg0) {
 //     struct161 **sp34;

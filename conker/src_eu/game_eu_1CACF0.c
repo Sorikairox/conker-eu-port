@@ -1,10 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 memcpy(s32, u8 **, s32);
 s32 spray_trail_bone_pos(u8 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5);
-#endif
 
 
 /* was func_1519D4E0 */
@@ -39,7 +38,6 @@ void spray_trail_free_alt(u8 *arg0) {
     fxrec_die_free(arg0);
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800A8F60;
 
 /* was func_1519D5A0 */
@@ -149,9 +147,6 @@ s32 spray_trail_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5
     }
     return (s32) var_v1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/spray_trail_spawn.s")
-#endif
 typedef struct { f32 x, y, z; } V3;
 typedef struct {
     V3 pos;
@@ -239,7 +234,6 @@ s32 spray_trail_update_points(TrailObj *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 s32 char_fx_find_effect(struct_eu_link *, u8 *, s32);
 s32 char_fx_attach(void *arg0, struct127 *arg1, s16 arg2);
 void spray_trail_stop_emit(u8 *arg0);
@@ -409,11 +403,7 @@ s32 spray_trail_record(u8 *obj) {
     *(f32 *) (st + 0x58) = *(f32 *) (tgt + 0x1C);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/spray_trail_record.s")
-#endif
 
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 Gfx *gfx_load_texture_cached(Gfx *gfx, s32 tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *flag, s32 argA);
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
@@ -613,9 +603,6 @@ s32 spray_trail_draw(u8 *obj, s32 gfx, s16 slot) {
     return (s32) g;
 }
 #undef SPRAY_VTX
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/spray_trail_draw.s")
-#endif
 
 /* was func_1519E764 */
 void spray_trail_handle_msg(u8 *arg0, u8 *arg1, u8 arg2)
@@ -693,7 +680,6 @@ void buddy_marker_spawn_trails(s32 arg0, s16 arg1, volatile u8 arg2, s32 arg3) {
     effect_node_create_nodraw(arg1, 6, -1, 1, 3, 0, arg2, arg3);
 }
 
-#ifdef NON_MATCHING
 s32 char_fx_find_effect(struct_eu_link *, u8 *, s32);
 
 /* was func_1519E9D4 */
@@ -737,9 +723,6 @@ void trail_marker_respawn_update(u8 *arg0) {
         (*(u8 *)((u8 *)arg0 + 0xD)) = (u8) ((*(u8 *)((u8 *)arg0 + 0xD)) | 1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/trail_marker_respawn_update.s")
-#endif
 /* was func_1519EAE0 */
 void trail_marker_handle_msg(u8 *arg0, s32 *arg1, u8 arg2) {
     u8 *v = arg0 + 0x28;
@@ -781,7 +764,6 @@ void buddy_marker_clear_all(void) {
     fxrec_broadcast(0, 9);
 }
 
-#ifdef NON_MATCHING
 s32 memcpy(s32, u8 **, s32);
 
 // buddy_marker_create: clears the old markers (buddy_marker_clear_all) and, if none is active (D_800E0D50), creates a
@@ -808,10 +790,6 @@ void buddy_marker_create(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/buddy_marker_create.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1519ECC4 */
 void buddy_marker_update(u8 *arg0) {
     u8 sp23;
@@ -847,9 +825,6 @@ void buddy_marker_update(u8 *arg0) {
         (*(u8 *)((u8 *)arg0 + 0xD)) = (u8) ((*(u8 *)((u8 *)arg0 + 0xD)) | 1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/buddy_marker_update.s")
-#endif
 /* was func_1519ED88 */
 void buddy_marker_handle_msg(u8 *arg0, s32 *arg1, u8 arg2)
 {

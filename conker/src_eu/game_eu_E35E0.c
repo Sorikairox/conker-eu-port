@@ -40,7 +40,6 @@ void zap_emitter_update(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 void zap_light_flash(u8 *arg0, u8 arg1, s32 arg2);
 s32 zap_particle_spawn(u8 *, u8, s32);
 s32 emit_streaks_from_spec(s32 *, u8, s32);
@@ -165,9 +164,6 @@ void zap_burst_spawn_small(f32 *pos, u8 arg1, s32 arg2) {
     zap_particle_spawn((u8 *)pos, arg1, arg2);
     zap_light_flash((u8 *)pos, arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/zap_burst_spawn_small.s")
-#endif
 
 typedef struct { s32 x, y, z; } V3i;
 void zap_light_flash(u8 *arg0, u8 arg1, s32 arg2);
@@ -292,7 +288,6 @@ void zap_burst_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     zap_light_flash(arg0, arg1, arg2);
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 /* was func_150B6314 */
@@ -395,9 +390,6 @@ s32 zap_particle_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u8D = 4;
     return particle_spawn_ex(&sp.u28, 1, 0, 0, (s32) arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/zap_particle_spawn.s")
-#endif
 /* was func_150B64E0 */
 void zap_light_flash(u8 *arg0, u8 arg1, s32 arg2) {
     s8 sp48[8];
@@ -415,16 +407,11 @@ void zap_light_flash(u8 *arg0, u8 arg1, s32 arg2) {
 
 /* was func_150B60E0 */
 void obj_get_skel_point_down205(u8 *arg0, u8 *arg1) {
-#ifdef NON_MATCHING
     /* D_800A0000 = {0, -205, 0} sits in cutscene_beam_spawn's GLOBAL_ASM rodata (default build only) */
     static const f32 D_800A0000_vec[3] = { 0.0f, -205.0f, 0.0f };
     mtx_transform_point_or_origin((void *) D_800A0000_vec, arg1, (*(s32 *)((u8 *)arg0 + 0x1D4)) + 0x140);
-#else
-    mtx_transform_point_or_origin(D_800A0000, arg1, (*(s32 *)((u8 *)arg0 + 0x1D4)) + 0x140);
-#endif
 }
 
-#ifdef NON_MATCHING
 s32 bolt_spawn(f32 *, f32 *, s32, f32 *, f32, s32, s32, s32);
 void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
 
@@ -514,9 +501,6 @@ void bolt_ring_update(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/bolt_ring_update.s")
-#endif
 /* was func_150B6930 */
 void bolt_ring_on_message(struct102 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 0x4A) {
@@ -524,7 +508,6 @@ void bolt_ring_on_message(struct102 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 /* cutscene_beam_spawn's ROM statics (D_800A000C ... D_800A005C, the default build keeps them in its GLOBAL_ASM rodata) */
 static const f32 D_800A000C_nm[3][3] = {
     { 0.0f, 0.0f, 0.0f }, { 2325.0f, 2915.0f, 904.0f }, { -1815.0f, 1412.0f, -3192.0f },
@@ -606,9 +589,6 @@ void cutscene_beam_spawn(u8 kind) {
     rec.u3C = 0.3f;
     water_jet_spawn(&rec, to, D_800A005C_nm[kind]);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/cutscene_beam_spawn.s")
-#endif
 
 /* was func_150B6BBC */
 s32 beam_set_mode_by_state(u8 *arg0) {

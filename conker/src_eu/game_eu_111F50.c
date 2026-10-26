@@ -38,7 +38,6 @@ void camera_calc_point_ahead(void) {
     p[1] = y;
 }
 
-#ifdef NON_MATCHING
 s32 impact_effect_spawn(f32, f32, f32, s32, s32, s32, s32);
 s32 floor_flags_surface_type(s32);
 s32 collision_level_nearest_height(s32, s32, s32, s32 *);
@@ -82,9 +81,6 @@ void impact_scatter_random(s32 arg0) {
         } while (var_s3 != arg0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_111F50/impact_scatter_random.s")
-#endif
 /* was func_150E4A94 */
 void impact_scatter_ahead(s32 arg0) {
     camera_calc_point_ahead();

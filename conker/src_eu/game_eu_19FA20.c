@@ -29,7 +29,6 @@ u8 *decal_alloc(s16 arg0, u16 arg1, u8 arg2, s32 arg3, s32 arg4, s32 arg5, u8 ar
     return t;
 }
 
-#ifdef NON_MATCHING
 extern s32 D_8008CDEC; /* sprite texture descriptors (u8 * per id): u16 width / height at +6 / +8 */
 s32 decal_place_on_floor(u8 *, f32, f32, f32, f32, s32, s32, s32);
 
@@ -80,9 +79,6 @@ void decal_spawn_at(f32 x, f32 y, f32 z, s16 kind, u16 arg4, u8 tex, f32 size, s
     *(s16 *) (v + 0x4A) = (*(u16 *) (t + 8) + 0x100) << 5;
     *(s16 *) (v + 0x3A) = (*(u16 *) (t + 8) + 0x100) << 5;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19FA20/decal_spawn_at.s")
-#endif
 
 s32 decal_fit_to_triangle(s32, s32, f32, f32, f32, f32, s32, s32);
 extern s32 D_8008CDEC;
@@ -138,7 +134,6 @@ void decal_tick(struct102 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800D30BC;
 extern u32 D_800DD5E4;
 extern s32 D_800DD5E8;
@@ -346,10 +341,6 @@ u8 *decal_draw(u8 *arg0, u8 *arg1, s32 arg2) {
     }
     return var_s0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19FA20/decal_draw.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_800A7524;
 extern f32 D_800A7530;
 s32 floor_triangle_slope(s32, s32, f32 *, f32 *);
@@ -504,10 +495,6 @@ s32 decal_fit_to_triangle(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
     (*(s16 *)((u8 *)arg0 + 0x34)) = (s16) (s32) ((f32) (*(s16 *)((u8 *)arg0 + 0x34)) + arg4);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19FA20/decal_fit_to_triangle.s")
-#endif
-#ifdef NON_MATCHING
 void collision_find_floor_default_range(s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, u16, s32);
 s32 decal_fit_to_triangle(s32, s32, f32, f32, f32, f32, s32, s32);
 // sprite_place_on_floor: moves (x, z) by `dist` along the angle `angle` - 90 degrees (x += dist sin, z += dist cos of
@@ -537,6 +524,3 @@ s32 decal_place_on_floor(u8 *spr, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 
     }
     return decal_fit_to_triangle((s32) spr, floor, x, floorY, z, angle, arg6, (u8) arg7);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19FA20/decal_place_on_floor.s")
-#endif

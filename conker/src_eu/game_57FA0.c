@@ -5,7 +5,7 @@
 #include <stdarg.h>
 
 #include "macros.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 typedef struct RomRecCacheEntry {
     /* 0x00 */ u32 key;      /* ROM address | 0x80000000 */
     /* 0x04 */ s32 stamp;    /* D_800C4180 at the last use */
@@ -13,7 +13,6 @@ typedef struct RomRecCacheEntry {
     /* 0x0C */ s32 word1;
 } RomRecCacheEntry;
 extern RomRecCacheEntry D_800C4188[16];
-#endif
 
 /* was func_1502AAF0 */
 void asset_system_stub_a(void) {
@@ -23,7 +22,6 @@ void asset_system_stub_a(void) {
 void asset_system_stub_b(s32 arg0) {
 }
 
-#ifdef NON_MATCHING
 /* ROM record MRU cache insert (P13, hand C): drops the n oldest of the 16 entries (bcopy down) and appends n
  * records from arg1 (two words each) at the end, keys arg3, arg3 + 8, ..., all stamped arg2. */
 
@@ -43,10 +41,6 @@ void asset_rec_cache_insert(s32 arg0, s32 *arg1, s32 arg2, u32 arg3) {
         arg3 += 8;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/asset_rec_cache_insert.s")
-#endif
-#ifdef NON_MATCHING
 /* P7: difftest EQUIV (128 trials, also with DIFFTEST_OUTPARAMS=1); only the cache-miss path ran (no random key hit) */
 /* reads the 8-byte ROM record at arg0 + arg1 * 8 through a 16-entry most-recently-used cache.
  * Returns the record's first word and stores its second in *arg2. */
@@ -86,10 +80,6 @@ s32 asset_rec_read_cached(u8 *arg0, s32 arg1, s32 *arg2) {
     asset_rec_cache_insert(2, rec, D_800C4180, key);   /* add it to the cache */
     return i;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/asset_rec_read_cached.s")
-#endif
-#ifdef NON_MATCHING
 /*
  * P65: the last step of asset_lookup_records (animation header lookup): DMA the n 8-byte records {offset, size} starting
  * at entry index of the ROM table at base into buf (16-byte aligned block that covers them, starting at the
@@ -109,9 +99,6 @@ s32 asset_rec_fetch_block(s32 base, s32 buf, s32 index, u32 n) {
     }
     return (s32) rec;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/asset_rec_fetch_block.s")
-#endif
 
 /* was func_1502B020 */
 u8 *asset_lookup_rom(s32 *arg0, s32 arg1, ...) {
@@ -166,11 +153,8 @@ s32 asset_lookup_records(u8 *arg0, s32 arg1, s32 arg2, u32 arg3, ...) {
     return ret;
 }
 s32 *allocate_memory(s32, s32, s32, s32);
-#ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
+// the definition is void (asm: v0 is not a result); one signature for wasm
 void heap_free(s32 *);
-#else
-s32 heap_free(s32 *);
-#endif
 s32 rzip_inflate(s32 *, s32, u32);
 s32 func_150ADC50();
 
@@ -211,7 +195,6 @@ s32 asset_dma_into(u8 *arg0, s32 arg1, s32 arg2, s32 arg3)
   return (s32) var_s1;
 
 }
-#ifdef NON_MATCHING
 /* Asset load: allocate, DMA the record; when (info & 0x70000000) == 0x10000000 the record is packed
  * (first word = unpacked size, rejected when 0 or >= 1000000): unpack it into a second buffer and free
  * the packed copy. *size_out gets the loaded size (0 on failure). */
@@ -246,10 +229,6 @@ s32 asset_load_alloc(u8 *rom, s32 info, s32 *size_out) {
     *size_out = got;
     return (s32) out;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/asset_load_alloc.s")
-#endif
-#ifdef NON_MATCHING
 /* Relocates a loaded asset's sub-file table of {s32 offset, u32 info} entries. With count == 0 the
  * table ends at the first entry whose info has bit 31 set. info &= 0x0FFFFFFF; offset becomes
  * base + offset, or 0 when offset == -1 or info == 0. Returns the entry count. */
@@ -270,9 +249,6 @@ s32 asset_relocate_subfiles(s32 base, s32 count) {
     }
     return count;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/asset_relocate_subfiles.s")
-#endif
 s32 asset_load_alloc(u8 *, s32, s32 *);
 
 /* was func_1502B5C8 */

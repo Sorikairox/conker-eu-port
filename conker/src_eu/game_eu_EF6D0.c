@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void mtx_get_translation(void *, s32, void *);
 
 /* was func_150C1EC0 */
@@ -23,15 +22,11 @@ s32 obj_fx_point_foot(s32 arg0, u8 *arg1, s32 arg2) {
     mtx_get_translation((*(s32 *)((u8 *)arg1 + 0x1D4)), sp1C, arg0);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF6D0/obj_fx_point_foot.s")
-#endif
 /* was func_150C1F2C */
 s32 foot_fx_effect_id(s32 arg0, s32 arg1) {
     return 7;
 }
 
-#ifdef NON_MATCHING
 s32 spawn_ring_emit(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
 
 /* was func_150C1F40 */
@@ -167,10 +162,6 @@ void foot_step_ring_effect(u8 *arg0, s32 arg1, s32 arg2) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF6D0/foot_step_ring_effect.s")
-#endif
-#ifdef NON_MATCHING
 /* P243: readable C for emit_point_puff (game_eu_EF6D0, 75 insns). */
 // emit_point_puff: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a,
 // s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`, emitters spawn_ring_emit / spawn_line_emit / spawn_circle_random_emit):
@@ -218,6 +209,3 @@ s32 emit_point_puff(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0
     puff_sprite_spawn(&s, 1);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF6D0/emit_point_puff.s")
-#endif

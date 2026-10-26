@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 extern s8 D_800DD6E0[];
 
 /* reset the two 16-byte tables, then keep arg0 in the first entry */
@@ -17,9 +16,6 @@ void warp_requests_reset(u8 arg0) {
     }
     D_800DD2C0 = arg0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A09D0/warp_requests_reset.s")
-#endif
 s32 screen_fade_start(s32, s32, s32, s32, s32, s32);
 extern s8 D_800DD6E0[];
 

@@ -24,7 +24,6 @@ f32 tank_yaw_offset_to_obj(u8 *arg0, u8 *arg1) {
     return angle_diff_signed_deg((f32) (math_atan2_u16((*(f32 *)((u8 *)arg1 + 0x14)) - (*(f32 *)((u8 *)arg0 + 0x14)), (*(f32 *)((u8 *)arg0 + 0x1C)) - (*(f32 *)((u8 *)arg1 + 0x1C)), 0) + 0x4000) * 0.005493164f, (*(f32 *)((u8 *)arg0 + 0x40)));
 }
 
-#ifdef NON_MATCHING
 /* P249: readable C for tank_shell_aim_error (game_eu_11AF60, 191 insns). */
 // tank_shell_aim_error: ballistic aim helper of the tank turret (tank_update). The shell leaves the muzzle at speed
 // 148.25 with gravity 2.5 per frame. Muzzle: with a skeleton (+0x1D4), the translation of its matrix (+0xC0) and the
@@ -92,9 +91,6 @@ f32 tank_shell_aim_error(u8 *obj, f32 pitch, f32 x, f32 y, f32 z, f32 radius) {
     }
     return result;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11AF60/tank_shell_aim_error.s")
-#endif
 
 /* was func_150EDAF8 */
 void tank_mark_driver_view(u8 *arg0) {
@@ -121,11 +117,7 @@ void tank_mark_driver_view(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 void obj_vtx_scroll_uv(u8 *, s32, s32, s32, s32, s32, s32, s32);
-#else
-s32 obj_vtx_scroll_uv(u8 *, s32, s32, s32, s32, s32, s32, s32);
-#endif
 /* was func_150EDBB8 */
 void tank_set_track_speeds(u8 *arg0, s32 arg1, s32 arg2) {
     s32 t;
@@ -144,7 +136,6 @@ void tank_set_track_speeds(u8 *arg0, s32 arg1, s32 arg2) {
     obj_vtx_scroll_uv(arg0, 1, var_s0, 0x800, 0x800, var_s0, -arg1 * 7, 0);
 }
 
-#ifdef NON_MATCHING
 /* P249: readable C for tank_update (game_eu_11AF60, 1407 insns). */
 // tank_update: per-frame update of a drivable tank (multiplayer Tank / PLAY barrel; ids 0x77 / 0x28 also drive the
 // track animation). The driver is player +0x124 (cleared here: player 0 in single player) or, in multiplayer
@@ -584,11 +575,7 @@ void tank_update(struct127 *o) {
 #undef TURRET_YAW
 #undef PAD
 #undef PAD_BUTTONS
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11AF60/tank_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P241: readable C for tank_dismount_enter (game_eu_11AF60, 73 insns). */
 // rider_dismount_enter: entry 2 of the state table D_80086440 (`void (u8 *)`, like its neighbour tank_parked_update):
 // puts the object in state 3 (+5; +0xE4 = 0, +0x125 = 0xFF, +0x328 = 0). When it carries a rider (+0x318), resets
@@ -623,14 +610,8 @@ void tank_dismount_enter(u8 *obj) {
         slot[0x10A] = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11AF60/tank_dismount_enter.s")
-#endif
 
 void stub_obj_set_param(u8 *, s32, f32);
-#ifndef NON_MATCHING
-s32 obj_state_common_update(struct127 *); /* P249: the definition is void; NM blocks above declare it so */
-#endif
 /* was func_150EF328 */
 void tank_parked_update(u8 *arg0) {
     if (arg0[5] != 3) {

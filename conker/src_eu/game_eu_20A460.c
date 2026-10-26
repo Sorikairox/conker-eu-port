@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void flip_sprite_particle_spawn(s16, u8, f32, u8 *, u8, u8, s32);
 s32 emit_dust_by_angles(s16 *, s32 *, s32, u8, s32);
 s32 screen_colour_fade_fx_start(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -74,9 +73,6 @@ void flash_burst_effects(u8 *arg0, u8 arg1, s32 arg2) {
     sp2C = random_int();
     screen_colour_fade_fx_start(0xFF, 0xFF, 0xFF, (((u32) sp2C % 51U) + 0x96) & 0xFF, (random_int() % 5U) + 8, 0, (s32) arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20A460/flash_burst_effects.s")
-#endif
 void flash_burst_effects(u8 *arg0, u8 arg1, s32 arg2);
 
 /* was func_151DCE6C */
@@ -103,7 +99,6 @@ void flash_smoke_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s3
     }
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 extern s32 D_800AB8E0;
 extern s32 D_800AB8EC;
@@ -263,6 +258,3 @@ void flash_smoke_emitter_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20A460/flash_smoke_emitter_update.s")
-#endif

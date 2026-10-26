@@ -1,24 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void aim_hud_spawn_track_mode(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void aim_hud_clear(u8 *arg0);
 void aim_hud_bar_spawn(u8 *obj, s32 kind, s32 wide, s32 arg3, s32 group);
 s32 sprite2d_spawn(void *, s32, s32, s32, s32, s32, s32);
-#endif
 void *memcpy(void *, const void *, unsigned int);
 
 void aim_hud_tint_spawn(u8 *arg0);
-#ifndef NON_MATCHING
-s32 aim_hud_spawn_track_mode(u8 *, s32, s32, s32, s32);
-#endif
-#ifndef NON_MATCHING
-s32 aim_hud_clear(u8 *);
-#endif
-#ifndef NON_MATCHING
-s32 aim_hud_bar_spawn(u8 *, s32, s32, s32, s32);
-#endif
 s32 aim_hud_quad_reticle_spawn(u8 *, s32);
 void aim_hud_crosshair_spawn(u8 *, u8);
 s32 aim_hud_lens_reticle_spawn(u8 *, u8);
@@ -99,7 +89,6 @@ void aim_hud_spawn_for_mode(u8 *arg0, s32 arg1)
 
 }
 
-#ifdef NON_MATCHING
 void sprite2d_emitter_spawn(s32, u8, s32);
 void aim_hud_slot_rows_spawn(u8 *, u8, s8, u8);
 
@@ -120,10 +109,6 @@ void aim_hud_spawn_track_mode(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) 
         D_8008D0A0 = 1;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/aim_hud_spawn_track_mode.s")
-#endif
-#ifdef NON_MATCHING
 void fb_fx_broadcast(s32, u8);
 void screen_tint_broadcast(s32, u8);
 
@@ -140,10 +125,6 @@ void aim_hud_clear(u8 *arg0) {
     effect_nodes_broadcast((s32) &sp.u24, 0x21U);
     D_8008D0A0 = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/aim_hud_clear.s")
-#endif
-#ifdef NON_MATCHING
 /* rodata of aim_hud_bar_spawn.s (D_800AB060..D_800AB268); D_800AB164 / 16C / 18C / 194 are also read by
    aim_hud_side_bars_spawn and the hud_slot_row spawner below, so they stay exported. */
 static const f32 sBarColourInit[4] = { 255.0f, 0.0f, 0.0f, 255.0f };            /* D_800AB060 */
@@ -301,11 +282,7 @@ void aim_hud_bar_spawn(u8 *obj, s32 kind, s32 wide, s32 arg3, s32 group) {
         memcpy(spr + 0x70, &blk, 0x58);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/aim_hud_bar_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_151CAC50 */
 s32 aim_hud_quad_reticle_spawn(u8 *arg0, s32 arg1) {
     struct {
@@ -487,9 +464,6 @@ s32 aim_hud_quad_reticle_spawn(u8 *arg0, s32 arg1) {
     } while (var_s0 != 0xC);
     return var_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/aim_hud_quad_reticle_spawn.s")
-#endif
 /* was func_151CB07C */
 void aim_hud_sprite_on_message(struct102 *arg0, u8 **arg1, u8 arg2) {
     void (*f)(void *, u8 **, u8);
@@ -622,7 +596,6 @@ void aim_hud_crosshair_spawn(u8 *arg0, u8 arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 fb_fx_spawn(s8 *, s32, s32, s32);
 
 /* was func_151CB2D8 */
@@ -796,10 +769,6 @@ s32 aim_hud_lens_reticle_spawn(u8 *arg0, u8 arg1) {
     }
     return var_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/aim_hud_lens_reticle_spawn.s")
-#endif
-#ifdef NON_MATCHING
 extern u8 D_800BEAC0;
 extern u8 D_800BEAC1;
 extern u8 D_800BEEE2;
@@ -871,9 +840,6 @@ void fb_lens_warp_draw(u8 *arg0, u16 *fb) {
         } while (x < 0.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/fb_lens_warp_draw.s")
-#endif
 
 /* was func_151CBA4C */
 void aim_fbfx_on_message(struct102 *arg0, u8 **arg1, u8 arg2) {
@@ -906,7 +872,6 @@ void aim_hud_fade_update(u8 *arg0) {
     arg0[0x2E] = *(f32 *)(p + 4);
 }
 
-#ifdef NON_MATCHING
 /* sprite2d_spawn's sprite spec (0x58 bytes). */
 typedef struct {
     /* 0x00 */ f32 x;
@@ -1037,9 +1002,6 @@ void aim_hud_side_bars_spawn(u8 *obj, u8 type, u8 wide, s8 arg3, u8 group) {
         memcpy(rec + 0x70, &blk, 0x58);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/aim_hud_side_bars_spawn.s")
-#endif
 /* was func_151CBEC8 */
 void aim_hud_side_bar_on_message(u8 *arg0, u8 *arg1, u8 arg2) {
     u8 *temp_v0 = arg0 + 0x70;
@@ -1129,7 +1091,6 @@ s32 aim_hud_dial_update(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* was func_151CC210 */
 s32 aim_hud_gauge_scale_update(u8 *arg0) {
     f32 temp_f0;
@@ -1168,10 +1129,6 @@ s32 aim_hud_gauge_scale_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/aim_hud_gauge_scale_update.s")
-#endif
-#ifdef NON_MATCHING
 /*
  * obj_height_in_range: P190. A height clamped to [obj +0x88, obj +0x8C]: with flag 4 of obj[0x7C] the point
  * D_800C3958[(s8)obj[0xC4]] +0x28 percent of the way from +0x88 to +0x8C, else the middle of +0x19C / +0x1A0 of
@@ -1199,9 +1156,6 @@ f32 aim_hud_gauge_value(u8 *arg0) {
     }
     return h;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/aim_hud_gauge_value.s")
-#endif
 
 /* was func_151CC840 */
 void aim_hud_send_flash(s32 arg0) {
@@ -1211,7 +1165,6 @@ void aim_hud_send_flash(s32 arg0) {
     sprite2d_broadcast((f32 *) &sp1C, 0x46);
 }
 
-#ifdef NON_MATCHING
 // glow_colour_on_message: message handler (same table row as aim_hud_side_bar_on_message). On message 0x46 whose key (*arg1)
 // matches the record's (+0x70): sets flag 2 at +0x7C, the fade value +0xC0 to 35, and copies the four colour floats
 // +0x9C .. +0xA8 (as u32 bytes) to the colour bytes +0x2B .. +0x2E.
@@ -1229,11 +1182,7 @@ void aim_hud_glow_on_message(u8 *arg0, u8 *arg1, u8 arg2) {
     arg0[0x2D] = (u32) *(f32 *) (rec + 0x34);
     arg0[0x2E] = (u32) *(f32 *) (rec + 0x38);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/aim_hud_glow_on_message.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_151CCAD4 */
 void aim_hud_gauge_spawn(u8 *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5) {
     struct {
@@ -1343,10 +1292,6 @@ void aim_hud_gauge_spawn(u8 *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5) 
         memcpy(temp_v0_2 + 0x70, &sp.u2C, 0x58U);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/aim_hud_gauge_spawn.s")
-#endif
-#ifdef NON_MATCHING
 void vec3_to_yaw_pitch_deg(void *, f32 *, f32 *);
 
 /* was func_151CCD2C */
@@ -1374,10 +1319,6 @@ s32 aim_hud_target_angle_update(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x64)) = (f32) (2.0f * (sp.u20 * 0.0027777778f * 2560.0f));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/aim_hud_target_angle_update.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_151CCDF0 */
 s32 aim_hud_gauge_marks_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     struct {
@@ -1538,9 +1479,6 @@ s32 aim_hud_gauge_marks_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, 
     }
     return var_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/aim_hud_gauge_marks_spawn.s")
-#endif
 /* was func_151CD2CC */
 void aim_hud_gauge_small_spawn(u8 *arg0, u8 arg1, u8 arg2, u8 arg3) {
     Spawn559A a;
@@ -1604,7 +1542,6 @@ void aim_hud_tint_spawn(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 extern u8 D_8008FFC8[4];
 extern const f32 D_800AB16C[2];
 extern const f32 D_800AB194[2];
@@ -1678,9 +1615,6 @@ void aim_hud_slot_rows_spawn(u8 *obj, u8 wide, s8 arg2, u8 group) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/aim_hud_slot_rows_spawn.s")
-#endif
 f32 aim_hud_gauge_value(u8 *);
 typedef struct { u8 pad0[0xD]; u8 unkD; u8 padE[0xA]; f32 unk18; f32 unk1C; f32 unk20; } SubCD;
 /* was func_151CD7D4 */

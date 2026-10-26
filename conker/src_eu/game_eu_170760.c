@@ -2,9 +2,8 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void clamp_range_to_bounds(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
-#endif
 
 void mtx_get_translation(Mtx *, s32, f32 *);
 
@@ -131,7 +130,6 @@ Gfx *gfx_other_mode_cached(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3) {
 s16 fx_layer_to_prim_depth(u8 arg0, s32 arg1) {
     return 0x7FFF - arg0;
 }
-#ifdef NON_MATCHING
 extern s32 D_80091914[];
 extern s32 D_800918C4;
 extern s32 D_80091960;
@@ -168,9 +166,6 @@ s32 fx_material_tex_addr(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
     }
     return v;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/fx_material_tex_addr.s")
-#endif
 /* was func_15143134 */
 void mtx_transform_point_or_origin(void *arg0, void *arg1, void *arg2) {
     D_800DCE30 = 1;
@@ -203,7 +198,6 @@ void mtx_transform_point_or_origin(void *arg0, void *arg1, void *arg2) {
     D_800DCE30 = 0;
 }
 
-#ifdef NON_MATCHING
 /* P139 */
 /*
  * spawn_region_random_point: random point inside the spawn region `rgn` (s16 centre x / y / z +0 / +2 / +4, s16
@@ -278,9 +272,6 @@ s32 spawn_region_random_point(u8 *rgn, f32 *x, f32 *z, f32 *top, f32 *bottom) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/spawn_region_random_point.s")
-#endif
 
 // void spawn_region_random_point(struct208 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4) {
 //     struct209 tmp;
@@ -385,7 +376,6 @@ void vec2_from_angle_byte(s16 arg0, f32 arg1, f32 *arg2, f32 *arg3) {
     *arg2 = arg1 * s;
     *arg3 = arg1 * sp1C;
 }
-#ifdef NON_MATCHING
 /* was func_151438D8 */
 u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
     u8 *sp58;
@@ -521,9 +511,6 @@ u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
     }
     return var_t0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/map_marker_find.s")
-#endif
 /* was func_15143D18 */
 void clamp_range_to_bounds(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3) {
     if (arg3 < arg2) {
@@ -630,7 +617,6 @@ u8 fx_try_camera_shake(s32 arg0, s32 arg1)
   }
   return ret;
 }
-#ifdef NON_MATCHING
 /* was func_1514401C */
 s32 sprite_anim_advance(s32 arg0, s32 *arg1, s32 *arg2, s32 arg3) {
     s32 temp_t0;
@@ -680,9 +666,6 @@ s32 sprite_anim_advance(s32 arg0, s32 *arg1, s32 *arg2, s32 arg3) {
     }
     return var_v1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/sprite_anim_advance.s")
-#endif
 // NON-MATCHING: regalloc only (flags copy in v0, limit in t0)
 // s32 sprite_anim_advance(u8 arg0, s32 *arg1, s32 *arg2, u8 arg3) {
 //     s32 max;
@@ -926,7 +909,6 @@ f32 spawn_region_volume(struct_eu_15144598 *arg0) {
     }
     return var_f2;
 }
-#ifdef NON_MATCHING
 /* was func_1514470C */
 void spawn_region_random_point_3d(u8 *arg0, u8 *arg1) {
     f32 sp94;
@@ -1020,9 +1002,6 @@ block_7:
         goto block_7;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/spawn_region_random_point_3d.s")
-#endif
 /* was func_15144A74 */
 f32 vec3_dot(struct17 *arg0, struct17 *arg1) {
     return (arg0->unk0 * arg1->unk0) + (arg0->unk4 * arg1->unk4) + (arg0->unk8 * arg1->unk8);
@@ -1101,7 +1080,6 @@ f32 angle_diff_rad(f32 arg0, f32 arg1) {
     return tmp;
 }
 
-#ifdef NON_MATCHING
 /* P136 */
 void mtxf_transform_point_w(u8 *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 extern u8 D_800DA130[]; /* per view: 4x4 f32 projection matrix (0x40 bytes) */
@@ -1142,10 +1120,6 @@ s32 world_to_screen(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view) {
     scr[1] = *(f32 *) (vp + 0x38) - *oinv * (scr[1] * (*(f32 *) (vp + 0x10) + 5.0f));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/world_to_screen.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_15144E80 */
 s32 tri_calc_normal(u8 *arg0, struct17 *arg1, u8 *arg2, struct17 *arg3) {
     struct {
@@ -1206,9 +1180,6 @@ s32 tri_calc_normal(u8 *arg0, struct17 *arg1, u8 *arg2, struct17 *arg3) {
     (*(s32 *)((u8 *)arg2 + 8)) = (s32) (*(s32 *)((u8 *)(&sp.u24) + 8));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/tri_calc_normal.s")
-#endif
 /* was func_151450B4 */
 void vec3_cross(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
     arg2->unk0 = arg0->unk4 * arg1->unk8 - arg0->unk8 * arg1->unk4;
@@ -1340,7 +1311,6 @@ void segment_closest_point(struct17 *arg0, struct17 *arg1, struct17 *arg2, struc
     }
 }
 
-#ifdef NON_MATCHING
 /* was func_1514563C */
 s32 line_closest_point(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4) {
     struct {
@@ -1372,9 +1342,6 @@ s32 line_closest_point(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 
     arg3->unk8 = (*arg4 * arg1->unk8) + arg0->unk8;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/line_closest_point.s")
-#endif
 // NON-MATCHING: t is also stored to an unused stack slot at sp+0 (frame 0x20); closest draft:
 // s32 line_closest_point(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4) {
 //     f32 sp10;
@@ -1399,7 +1366,6 @@ s32 line_closest_point(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 
 //     return 1;
 // }
 
-#ifdef NON_MATCHING
 /* was func_15145740 */
 void obj_get_aim_vectors(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     s16 sp3E;
@@ -1458,9 +1424,6 @@ void obj_get_aim_vectors(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/obj_get_aim_vectors.s")
-#endif
 // NON-MATCHING: 90% there
 // void obj_get_aim_vectors(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4) {
 //     struct194 tmp;
@@ -1532,7 +1495,6 @@ void obj_set_destroyed(struct127 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 void obj_get_fx_point_a(u8 *, f32 *, f32 *, f32 *);
 
 /* was func_15145AD8 */
@@ -1602,9 +1564,6 @@ s32 ray_obj_ellipsoid_hit(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3, s32 arg4, f32 
     (*(f32 *)((u8 *)arg4 + 4)) = (f32) ((*(f32 *)((u8 *)arg4 + 4)) * sp.u3C);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/ray_obj_ellipsoid_hit.s")
-#endif
 /* was func_15145C90 */
 u8 prop_is_flagged(s32 arg0) {
     if (arg0 < 0) {
@@ -1687,7 +1646,6 @@ void mtx_transform_points(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3) {
         }
     }
 }
-#ifdef NON_MATCHING
 /* P142 */
 // plane_axes_from_normal: builds two unit axes spanning the plane with normal n (a: in-plane axis, b = a x n,
 // then a = b x n). Returns 0 for a zero normal, else 1. An axis-aligned normal (two zero components) gets fixed
@@ -1772,10 +1730,6 @@ s32 vec3_make_basis(f32 *n, f32 *a, f32 *b) {
     vec3_normalize_len((struct17 *) b, (struct17 *) b, &len, &scale);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/vec3_make_basis.s")
-#endif
-#ifdef NON_MATCHING
 u8 *light_write_light_cmds(u8 *, s32, u8, u8, u8 *);
 u8 *light_apply_object_lights(u8 *, s16, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, s32, s32, s32);
 extern s32 D_800DA230[];
@@ -1819,9 +1773,6 @@ u8 *model_part_emit_lights(u8 *gfx, u8 *arg1, u8 arg2, u8 *arg3, u8 arg4, s16 ar
     return light_apply_object_lights(gfx, arg5, (s32)arg6[0], (s32)arg6[1], (s32)arg6[2], arg8, buf, *(s32 *)arg1, (u8 *)lookat,
                          arg1 + 4, *(s32 *)(arg1 + 0x1C), 0, flags, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/model_part_emit_lights.s")
-#endif
 /* was func_151464B8 */
 u8 player_mask_hides_all(s16 *arg0) {
     s32 i;
@@ -1844,7 +1795,6 @@ void obj_broadcast_replace(struct127 *arg0, struct127 *arg1) {
     node_broadcast_all(&tmp, 45, arg0, arg1);
 }
 
-#ifdef NON_MATCHING
 /* P136 */
 u8 *attachment_find_by_slot(u8 *, u16, s32);
 s32 attachment_get_matrices(u8 *, u8 *, Mtx **, s32 *);
@@ -1902,9 +1852,6 @@ s32 model_node_points_to_world(u8 *obj, u8 *node, s32 idx, f32 **in, f32 **out, 
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/model_node_points_to_world.s")
-#endif
 
 /* was func_1514672C */
 s32 pos_in_world_bounds(u8 *arg0) {

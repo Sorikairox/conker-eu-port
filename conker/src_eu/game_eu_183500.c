@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void light_remove(s32);
-#endif
 
 struct_eu_node *head_icon_find(s32 arg0);
 
@@ -48,7 +47,6 @@ void head_icon_show_timed(s32 arg0, s32 arg1, f32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 u8 *light_add_point(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* was func_15155E0C */
@@ -150,9 +148,6 @@ block_38:
         goto block_38;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183500/head_icon_update.s")
-#endif
 extern Gfx **D_800E0810;
 typedef struct {
     /* 0x00 */ u8 pad0[0x10];

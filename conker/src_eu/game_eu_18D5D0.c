@@ -41,15 +41,11 @@ void light_cycle_level_colour(s32 arg0, s32 arg1) {
     light_set_level_colour(c[0], c[1], c[2], 0U);
 }
 
-#ifdef NON_MATCHING
 // effect_noop_check: P237. Does nothing: the asm only loads obj +0x3B and arg1 +0x1C and tests them (an empty if,
 // probably a stripped debug check). No caller reads v0 (no jal callers; v0 is a load or garbage).
 /* was func_151600E0 */
 void obj_kind_check_stub(u8 *obj, u8 *arg1) {
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18D5D0/obj_kind_check_stub.s")
-#endif
 
 /* was func_15160104 */
 void obj_send_hit_6002d(u8 *arg0, s32 arg1) {

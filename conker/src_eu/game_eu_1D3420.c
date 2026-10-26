@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void bubble_emitter_spawn(u8 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5);
-#endif
 
 
-#ifdef NON_MATCHING
 s32 collision_floor_probe(f32 *, s32, f32, u8 *);
 s32 player_mask_hides_all(s32);
 s32 spark_spawn_from_desc(f32 *, s32, s32, s32, s32, s32);
@@ -195,9 +193,6 @@ void bubble_zone_update(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/bubble_zone_update.s")
-#endif
 void bubble_zone_sound_stop(u16);
 /* was func_151A625C */
 void bubble_zone_retire(struct260 *arg0)
@@ -231,7 +226,6 @@ void bubble_zone_sound_stop(u16 arg0) {
     sound_voice_stop(arg0);
 }
 
-#ifdef NON_MATCHING
 /* was func_151A6308 */
 struct210 *bubble_sprite_spawn(f32 arg0, u8 arg1, s32 arg2, u8 *arg3, s16 arg4, u8 arg5, u8 arg6, u8 arg7, s32 arg8) {
     struct {
@@ -323,10 +317,6 @@ struct210 *bubble_sprite_spawn(f32 arg0, u8 arg1, s32 arg2, u8 *arg3, s16 arg4, 
     }
     return sprite_fx_spawn_cam_at((s32) &sp.u5C, 0U, 0U, arg2, (*(f32 *)((u8 *)arg3 + 0)), (*(f32 *)((u8 *)arg3 + 4)), (*(f32 *)((u8 *)arg3 + 8)), arg0, arg0, (u8) (sp48 & 0xFF), (u8) (((temp_t0 & 1) * 2) + (sp4C & 1)), var_v1, var_v0, 0, (u8) (s32) arg7, arg8);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/bubble_sprite_spawn.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_151A6520 */
 void bubble_zone_handle_msg(u8 *arg0, u8 *arg1, s32 arg2) {
     u8 *sp2C;
@@ -368,9 +358,6 @@ loop_3:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/bubble_zone_handle_msg.s")
-#endif
 s32 light_create_flicker_preset(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void *memcpy(void *, const void *, s32);
 extern f32 D_800A9178;
@@ -483,7 +470,6 @@ void bubble_emitter_spawn(u8 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg
     }
 }
 
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 extern s32 D_800DD608;
 extern s32 D_800DD618;
@@ -567,10 +553,6 @@ u8 *bubble_emitter_draw(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/bubble_emitter_draw.s")
-#endif
-#ifdef NON_MATCHING
 /* P143 */
 f32 wrap_float_range(f32, f32, f32);
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
@@ -679,9 +661,6 @@ s32 bubble_emitter_update(u8 *fx) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/bubble_emitter_update.s")
-#endif
 
 void sfx_emitter_stop_by_callback(s32 (*)(struct57 *, struct57 *, s32 *, s32, s32, s32, u16 *), u8 *, s32, u8 *);
 
@@ -748,7 +727,6 @@ u8 *zone_node_find_by_key(s32 arg0) {
     return NULL;
 }
 
-#ifdef NON_MATCHING
 /* P153 */
 s32 debris_spray_spawn(void *spray, s32 arg1, u8 arg2, s32 arg3);
 void cam_shake_all_players(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6);
@@ -830,6 +808,3 @@ void object_explosion_effects(u8 *obj, u8 arg1, s32 arg2) {
     spark_shower_spawn((u8 *) f.pos, size, 1.6409999f, (f32) ((u32) random_int() % 56 + 200), 0.0f, arg1, arg2);
     rumble_all_players_at((struct17 *) f.pos, 1502.0f, 3000.0f, 0.00033333333f, 0xC, 0xF, 0xFF, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/object_explosion_effects.s")
-#endif

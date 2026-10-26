@@ -2,11 +2,10 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void snd_cache_flush_unused(void);
 void heap_free(s32);
 extern s32 D_8003E724;
-#endif
 
 typedef struct AMDMABuffer_s {
     ALLink node;
@@ -65,7 +64,6 @@ void snd_cache_update_dmas(void);
 Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen);
 
 
-#ifdef NON_MATCHING
 typedef struct {
     s32 maxVVoices;
     s32 maxPVoices;
@@ -208,9 +206,6 @@ void audio_mgr_init(AmSynConfig *c, OSPri pri, AmConfig *arg2) {
     D_8002AE40 = 1;
     osStartThread(&D_8003E3A0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/audio_mgr_init.s")
-#endif
 // NON-MATCHING: so much to do
 // void audio_mgr_init(struct15 *arg0, OSPri arg1, struct52 *arg2) {
 //     // ? sp160;
@@ -814,7 +809,6 @@ void snd_cache_entry_ref(struct54 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 func_150ADC50(struct147 *);
 
 /* was func_10009BE4 */
@@ -854,9 +848,6 @@ void snd_cache_entry_free(struct54 *arg0) {
     arg0->unk0 = NULL;
     arg0->unk4 = NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/snd_cache_entry_free.s")
-#endif
 // void snd_cache_entry_free(struct00 *arg0) {
 //     struct00 *temp_a1;
 //     struct00 *temp_v0;
@@ -896,7 +887,6 @@ void snd_cache_entry_free(struct54 *arg0) {
 //     // return temp_v0;
 // }
 
-#ifdef NON_MATCHING
 // Sound-bank on-demand loader (the n_alSynNew DMA callback set up by snd_cache_dma_new).
 // *slot holds either a packed ROM reference (bit 0 set: ROM offset in bits 8.., size byte in bits 0..7)
 // or, once loaded, a pointer to its cache entry. A ROM reference is replaced by a fresh cache entry
@@ -1030,9 +1020,6 @@ s32 snd_cache_load_on_demand(void *arg0, s32 arg1) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/snd_cache_load_on_demand.s")
-#endif
 /* was func_10009FFC */
 s32 snd_cache_dma_new(void) {
     if (D_800406A0.unk0 == 0) {
@@ -1045,7 +1032,6 @@ s32 snd_cache_dma_new(void) {
     return snd_cache_load_on_demand;
 }
 
-#ifdef NON_MATCHING
 /* Audio bank DMA bookkeeping: for each pending DMA (D_8002B1A0), poll D_80041A90; a finished message (+8 = bank
  * address) moves its node from the loading list (D_800406A0.unkC) to the loaded list (.unk4), relocating the bank's
  * pointer table once (unk16 == 1). Then nodes of the release list (.unk10) whose instruments are no longer in use
@@ -1158,9 +1144,6 @@ void snd_cache_update_dmas(void) {
         D_8003E724 = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/snd_cache_update_dmas.s")
-#endif
 typedef struct ACBuf_s {
     ALLink node;
     s32 unk8;

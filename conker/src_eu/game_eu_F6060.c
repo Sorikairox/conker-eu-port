@@ -6,7 +6,6 @@
 typedef struct { u8 u0; u8 pad1[3]; s16 u4; u8 pad6[4]; } E10;
 extern E10 *D_eu_800BE900;
 
-#ifdef NON_MATCHING
 // wobblers_update: the 10 records at D_eu_800BE900 (s8 dir +2, s16 pos +4, s16 speed +6, s16 target speed +8):
 // speed moves toward the target (sign follows the current speed) by at most D_800BE9E4 * 16, then pos advances by
 // speed * dir * D_800BE9A0 and bounces inside 0 .. 0x4FF (dir flips)
@@ -54,9 +53,6 @@ void wobblers_update(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/wobblers_update.s")
-#endif
 
 /* was func_150C89F4 */
 void wobblers_update_view0(s32 arg0) {
@@ -165,7 +161,6 @@ s32 obj_spawn_part_at_mtx(u8 *arg0, struct127 *arg1) {
     return 0;
 }
 
-#ifdef NON_MATCHING
 /* P197 */
 s32 memcpy(u8 *, u8 *, s32);
 f32 sinf(f32);
@@ -202,11 +197,7 @@ u8 *ring_effect_create(u8 *spec, s32 extra, s32 view, s32 arg3) {
     }
     return rec;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/ring_effect_create.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P220: readable C for ring_effect_update (game_eu_F6060, 212 words): update of the kind-0x31 ring effect (descriptor
  * at D_8008C238: update ring_effect_update, draw ring_effect_draw). */
 extern void (*D_80088BF8[])(u8 *, f32 *, u8, f32, f32); /* spawn handlers: ring_spawn_particle, ring_spawn_debris */
@@ -276,11 +267,7 @@ void ring_effect_update(u8 *node) {
         node_destroy((struct102 *)node);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/ring_effect_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P222: readable C for ring_effect_draw (game_eu_F6060, 767 words): draw callback of render layer 0x31 (the ring
  * effect; layer at D_8008B848 + 0x31 * 0x34: update ring_effect_update, draw ring_effect_draw). */
 typedef struct {
@@ -386,9 +373,6 @@ Gfx *ring_effect_draw(Gfx *gdl, u8 *node, s16 arg2) {
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/ring_effect_draw.s")
-#endif
 
 s32 particle_spawn_basic(void *, s32, s32, u8, s32);
 typedef struct {
@@ -488,7 +472,6 @@ void ring_spawn_particle(u8 *arg0, f32 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* 
     particle_spawn_basic(&sp, 1, 0, arg0[0xC], arg0[1]);
 }
 
-#ifdef NON_MATCHING
 // shockwave_hit_objects: P213: handler 1 of the effect node table D_80088C00 (dispatched by ring_effect_update with the
 /* node only; the node is freed when the result is 0). Every live object (state != 0) on the ground (unk28 < 20)
  * and not immune, that is a player (state 1) or type 0x53, is hit when the ring of radius node +0x44 has reached
@@ -538,11 +521,7 @@ s32 shockwave_hit_objects(u8 *node) {
     }
     return ret;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/shockwave_hit_objects.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_800A0950;
 extern f32 D_800A0954;
 extern f32 D_800A0958;
@@ -651,9 +630,6 @@ void ring_spawn_debris(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P22
     sp.uA8 = 7;
     mdl_particle_spawn(&sp.u34, 3, 0xFF, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/ring_spawn_debris.s")
-#endif
 /* was func_150CA57C */
 s32 particle_ballistic_update(u8 *arg0) {
     *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * D_800BE9A4;
@@ -666,7 +642,6 @@ s32 particle_ballistic_update(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 // landing_dust_burst: P201: the burst of effects under the character `obj` (the only caller, objfx_ca150, passes
 // D_800D154C) when it lands / stamps: position = obj x, y + 100, z; the ground below it (collision_floor_probe down to
 // y - 300, HitInfo started by hitinfo_from_obj_floor) gives y, else the floor height obj +0x180. Rumbles the current
@@ -823,26 +798,15 @@ s32 landing_dust_burst(u8 *obj) {
                   (s32) rgb, 0xFF);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/landing_dust_burst.s")
-#endif
 
-#ifdef NON_MATCHING
 void spawn_circle_random_emit(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
-#else
-s32 spawn_circle_random_emit(f32, f32, s32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
-#endif
 
 /* was func_150CAE30 */
 void landing_dust_spray(u8 *arg0) {
     s16 sp3E;
 
     sp3E = (random_int() % 21U) + 0xA;
-#ifdef NON_MATCHING
     spawn_circle_random_emit((*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(f32 *)((u8 *)arg0 + 8)), (random_float() * 59.0f) + 170.0f, 0, 0xFF, (s32) sp3E, 0x13, 0, 0.0f, 0, 0xFF);
-#else
-    spawn_circle_random_emit((*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(s32 *)((u8 *)arg0 + 8)), (random_float() * 59.0f) + 170.0f, 0, 0xFF, (s32) sp3E, 0x13, 0, 0.0f, 0, 0xFF);
-#endif
 }
 
 /* was func_150CAED0 */

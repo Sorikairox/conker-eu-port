@@ -111,7 +111,6 @@ void fx_light_sweep_emitter_update(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 collision_floor_probe(f32 *, s32, f32, s32 *);
 
 /* drifting_sprite_update: moves an effect over the ground: x +0x18 / z +0x1C advance by the velocities +0x20 / +0x24
@@ -141,6 +140,3 @@ s32 fx_drifting_sprite_update(u8 *o) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1188A0/fx_drifting_sprite_update.s")
-#endif

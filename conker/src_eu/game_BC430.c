@@ -4,7 +4,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* was func_1508EF80 */
 void vec_rotate_xz_about_point(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3) {
     f32 sp3C;
@@ -26,9 +25,6 @@ void vec_rotate_xz_about_point(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3) {
     (*(f32 *)((u8 *)arg3 + 0)) = sp28;
     (*(f32 *)((u8 *)arg3 + 8)) = (f32) (temp_f8_2 + (-sp24 * sp3C) + (*(f32 *)((u8 *)arg1 + 8)));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC430/vec_rotate_xz_about_point.s")
-#endif
 // NON-MATCHING: only the stack slots of x and the cosf() spill differ
 // extern f32 D_8009E050; // degrees to radians
 //

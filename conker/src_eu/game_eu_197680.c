@@ -14,7 +14,6 @@ u8 *image_fx_spawn(u8 *arg0, s32 arg1) {
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 // effect_spawn_template: spawns an effect record from a 0x3C-byte template (image_fx_spawn with priority 0xFF) and
 // returns it. P124: the matching body is `void` and leaves the record in v0 for its callers (game_eu_E48B0 stores
 // it); in the port a void function returns nothing, so the NM body returns the record.
@@ -22,11 +21,6 @@ u8 *image_fx_spawn(u8 *arg0, s32 arg1) {
 u8 *image_fx_spawn_template(void *arg0) {
     return image_fx_spawn(arg0, 0xFF);
 }
-#else
-void image_fx_spawn_template(s32 arg0) {
-    image_fx_spawn(arg0, 0xFF);
-}
-#endif
 
 /* was func_15169EF8 */
 void image_fx_update(u8 *arg0) {
@@ -57,7 +51,6 @@ void image_fx_update(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 /* P142 */
 Gfx *gfx_set_combine_mode(Gfx *gfx, u8 combineId, u8 *needSync);
 Gfx *gfx_other_mode_cached(Gfx *gfx, s32 modeL, s32 modeH, u8 *needSync);
@@ -129,6 +122,3 @@ Gfx *image_fx_draw(Gfx *gfx, u8 *fx, s32 arg2) {
                                  *(u16 *) (fx + 0x3C), *(u16 *) (fx + 0x3E), tileFlags, *(s16 *) (fx + 0x34),
                                  *(s16 *) (fx + 0x36), *(s16 *) (fx + 0x26) >> 8);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_197680/image_fx_draw.s")
-#endif

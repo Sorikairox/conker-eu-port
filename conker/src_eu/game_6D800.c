@@ -19,7 +19,6 @@ void dl_validate(void *arg0, u32 arg1) {
 }
 
 // contains jump relative
-#ifdef NON_MATCHING
 void func_150ADC50(void);
 void debug_syscall_trap(void);
 void dl_dump_around(u8 *arg0);
@@ -142,9 +141,6 @@ void dl_validate_list(void *list, u32 end, s32 parent) {
 }
 #undef DL_STOP
 #undef DL_TRAP
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6D800/dl_validate_list.s")
-#endif
 
 /* was func_1504072C */
 s32 dlcheck_addr_misaligned(s32 arg0) {
@@ -403,7 +399,6 @@ void dldump_movemem(s32 arg0) {
 void dldump_moveword(s32 arg0) {
 }
 
-#ifdef NON_MATCHING
 extern void (*D_80084840[])(u8 *);
 // dl_walk_call_handlers: P259: walks the display list from `dl` (8-byte F3DEX2 commands) while the command pointer
 // is <= `end` or a G_DL call is open, and passes every command from `from` up to `end` to its opcode handler
@@ -473,9 +468,6 @@ void dl_trace_segments(u8 *dl, u8 *from, u8 *end) {
         }
     } while (cmd <= end || depth > 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6D800/dl_trace_segments.s")
-#endif
 
 extern void (*D_80084840[])(u8 *);
 

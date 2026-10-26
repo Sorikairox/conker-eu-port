@@ -38,7 +38,6 @@ struct260 *fx_model_emitter_spawn(u8 arg0, u8 arg1, s32 arg2) {
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_basic(s32 *, s32, s32, u8, s32);
 void xform_points_ptrs(void *, void *, void *, s32);
 extern s32 D_800A13B4;
@@ -191,6 +190,3 @@ void fx_model_emitter_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10EDF0/fx_model_emitter_update.s")
-#endif

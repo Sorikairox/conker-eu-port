@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 Gfx *render_set_color_image(Gfx *);
 Gfx *gfx_load_texture_tile(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 void matrix_rotate_ypr(f32 (*)[4], f32, f32, f32);
@@ -86,6 +85,3 @@ Gfx *view_scroll_overlay_draw(Gfx *gdl, f32 x, f32 y, f32 z, f32 scroll, f32 pit
     gdl->words.w0 = 0x06000204; gdl->words.w1 = 0x406; gdl++;      /* gSP2Triangles(0,1,2, 0,2,3) */
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF530/view_scroll_overlay_draw.s")
-#endif

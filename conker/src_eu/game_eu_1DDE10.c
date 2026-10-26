@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
-#endif
 
 
 void vec3_from_angles_byte(s16, s16, f32, void *);
@@ -24,7 +23,6 @@ s32 spawn_emit_impact_spark(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s3
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* P153 */
 void hitinfo_from_obj_floor(void *, u8 *);
 s32 obj_get_hit_kind(struct127 *);
@@ -94,11 +92,7 @@ s32 object_hit_flash_spawn(u8 *obj, u8 *target) {
     emit_sparks_in_angle_range(&p, &p.unk8, (s32) basis, 0xFF, 1);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/object_hit_flash_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 collision_floor_all(f32 *, s32, f32, f32 *);
 s32 collision_floor_probe(f32 *, s32, f32, f32 *);
 void hitinfo_from_obj_floor(void *, u8 *);
@@ -267,10 +261,6 @@ block_9:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/ground_burst_spawn_b.s")
-#endif
-#ifdef NON_MATCHING
 /* P150 */
 s32 memcpy(s32, f32 *, s32);
 s32 obj_get_hit_kind(struct127 *);
@@ -338,11 +328,7 @@ s32 object_link_effect_spawn(u8 *obj, u8 *target, s16 span, u8 arg3, s32 arg4) {
     }
     return (s32)part;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/object_link_effect_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 void effect3d_set_handlers(u8 *, u8, u8, u8, u8);
 void character_sparks_release(u8 *arg0);
 
@@ -547,11 +533,7 @@ void character_sparks_update(u8 *obj) {
         *(s16 *) (obj + 0xE) = -1;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/character_sparks_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P143 */
 extern f32 D_800AA6D0;
 extern f32 D_800AA6D4;
@@ -618,9 +600,6 @@ s32 debris_fall_update(u8 *fx) {
     }
     return ret;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/debris_fall_update.s")
-#endif
 
 /* was func_151B1A28 */
 s32 debris_fall_alpha_fade(u8 *arg0) {
@@ -636,7 +615,6 @@ s32 debris_fall_alpha_fade(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, f32 *, s32);
 extern s32 D_800DD608;
@@ -735,9 +713,6 @@ u8 *debris_fall_draw(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/debris_fall_draw.s")
-#endif
 /* was func_151B1DD8 */
 s32 sprite_wobble_update(u8 *arg0) {
     s32 pad;
@@ -755,7 +730,6 @@ s32 sprite_wobble_update(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* was func_151B1EC8 */
 void character_sparks_release(u8 *arg0) {
     s32 var_s3;
@@ -779,9 +753,6 @@ void character_sparks_release(u8 *arg0) {
         var_s0 += 0xC;
     } while (var_s3 != 0x84);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/character_sparks_release.s")
-#endif
 /* was func_151B1F54 */
 void character_sparks_handle_msg(struct102 *arg0, u8 *arg1, u8 arg2) {
     s32 cur;

@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 typedef struct { f32 x, y, z; } V3_61A0;
 s32 mdl_particle_spawn(void *, s32, s32, s32, u8, s32);
 void *memcpy(void *, const void *, size_t);
@@ -119,11 +118,7 @@ s32 ripple_spawn_flat(V3_61A0 *pos, V3_61A0 *vel, f32 scale, V3_61A0 *dir, V3_61
     }
     return obj;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E39B0/ripple_spawn_flat.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 mdl_particle_fall_update(u8 *); /* P98: the asm reads a0 = the object */
 
 /* was func_151B6444 */
@@ -156,9 +151,6 @@ void ripple_flat_update(u8 *arg0) {
     }
     mdl_particle_fall_update(arg0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E39B0/ripple_flat_update.s")
-#endif
 /* was func_151B657C */
 void ripple_stop_sound(u8 *arg0) {
     s32 temp_v0 = *(s32 *)(arg0 + 0x88);

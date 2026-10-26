@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P153 */
 s32 trigger_point_in_kind3(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
 s32 collision_ray_cast(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 a6, s32 a7, s32 a8, s32 a9, s32 a10, s32 a11,
@@ -163,9 +162,6 @@ void water_splash_spawn(u8 *obj, f32 x, f32 z, u8 arg3, s32 arg4) {
     f.ring.u6C[1] = 1.0840001f; /* 0x3F8AC084 */
     emit_effect3d_from_surface((u8 *) &f.ring, arg3, arg4);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E7BC0/water_splash_spawn.s")
-#endif
 
 /* was func_150BA83C */
 s32 fx_fade_in_byte28_update(u8 *arg0) {
@@ -189,7 +185,6 @@ s32 fx_gravity_spin_update(f32 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* P143 */
 // effect_fade_by_height: update handler (D_8008A100 slot 2) of a sprite effect: alpha +0x5C = min(life +0x1C * 16,
 // height above +0x124 (y +0x38 minus floor) * 4, 255). Returns 0 (effect ends) once it is below the floor, else 1.
@@ -213,6 +208,3 @@ s32 effect_fade_by_height(u8 *fx) {
     fx[0x5C] = (byHeight < byLife) ? byHeight : byLife;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E7BC0/effect_fade_by_height.s")
-#endif

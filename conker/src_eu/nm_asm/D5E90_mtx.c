@@ -9,7 +9,6 @@
  * The file must not contain the word G-L-O-B-A-L_ASM (see the Makefile note on nm_asm files).
  * Float operations are written in the asm's order: each line rounds like one mul.s / add.s.
  */
-#ifdef NON_MATCHING
 #include <ultra64.h>
 
 #include "functions.h"
@@ -108,4 +107,3 @@ void mtx_f_to_l_batch(f32 *m, s32 n) {
         n--;
     } while (n != 0);
 }
-#endif

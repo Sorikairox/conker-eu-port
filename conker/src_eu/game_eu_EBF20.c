@@ -1,16 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A03E0[];
 extern u8 D_800A0430[];
-#endif
 
-#ifdef NON_MATCHING
 void scenery_platform_drift_update(u8 *, s32, s32, f32); /* P95: f32 parameter */
-#else
-void scenery_platform_drift_update(u8 *, s32, s32, s32);
-#endif
 
 /* was func_150BE710 */
 void scenery_spinner_update(u8 *arg0)
@@ -22,11 +17,7 @@ void scenery_spinner_update(u8 *arg0)
   new_var2 = arg0;
   if (((*((u8 *) (((u8 *) arg0) + 0x73))) & 3) != 3)
   {
-#ifdef NON_MATCHING
     scenery_platform_drift_update(arg0, 1, 0x62C, 500.0f); /* P95: float literal (asm passes the bits 0x43FA0000) */
-#else
-    scenery_platform_drift_update(arg0, 1, 0x62C, 0x43FA0000);
-#endif
     if ((*((u8 *) (((u8 *) arg0) + 0x4F))) & 4)
     {
       new_var3 = 0x64;
@@ -51,7 +42,6 @@ void scenery_spinner_update(u8 *arg0)
   }
 }
 
-#ifdef NON_MATCHING
 /* was func_150BE7E8 */
 void scenery_ease_pos_update(u8 *arg0) {
     f32 temp_f0;
@@ -76,9 +66,6 @@ void scenery_ease_pos_update(u8 *arg0) {
     (*(s16 *)((u8 *)arg0 + 0x3C)) = (s16) (s32) (temp_f20_2 * 16384.0f);
     (*(s16 *)((u8 *)arg0 + 0x3E)) = (s16) (s32) (var_f22 * 16384.0f);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EBF20/scenery_ease_pos_update.s")
-#endif
 /* was func_150BE938 */
 s16 *obj_adjust_entries_type21(s16 *arg0, s32 arg1) {
     u8 *p = (u8 *)&D_800CC2D0[arg1];
@@ -90,7 +77,6 @@ s16 *obj_adjust_entries_type21(s16 *arg0, s32 arg1) {
     return arg0 + 4;
 }
 
-#ifdef NON_MATCHING
 void hitinfo_from_obj_floor(void *, u8 *);
 s32 emit_debris_burst(s32 *, s32 *, s32 *, s32, s32, s32, s32, s32, s32, s32 *, f32, s32, s32, s32, s32);
 void obj_get_fx_point_b(u8 *, f32 *, f32 *, f32 *);
@@ -249,6 +235,3 @@ void obj_debris_dust_burst(u8 *arg0, s32 arg1, s32 arg2) {
         emit_sparks_in_angle_range((struct_eu_15154488 *) &sp.u58, &sp.u60, (s32) &sp.u124, temp_s1 & 0xFF, arg2);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EBF20/obj_debris_dust_burst.s")
-#endif

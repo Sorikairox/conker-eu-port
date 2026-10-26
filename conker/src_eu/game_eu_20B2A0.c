@@ -151,7 +151,6 @@ s32 game_eep_status(OSMesgQueue *mq, OSContStatus *data) {
     return data->errno;
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800E0EA0;
 extern s32 D_800E0EA4;
 extern s8 D_800E1002;
@@ -180,6 +179,3 @@ void demo_input_play_next(void) {
         D_800E0EA4 = 0x1F3;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B2A0/demo_input_play_next.s")
-#endif

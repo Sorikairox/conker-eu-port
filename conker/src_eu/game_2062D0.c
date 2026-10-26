@@ -2,13 +2,12 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 memcpy(s32, s32, s32);
 extern u8 D_800AB7C8[];
 void impact_splash_ring_spawn(u8, f32, u8, f32 *, u8, u8, s32);
 void impact_spawn_burst(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 u8 impact_dust_cloud_ground(u8 *arg0, u8 *arg1);
-#endif
 
 
 /* was func_151D8E20 */
@@ -105,7 +104,6 @@ u8 impact_puff_tex_kind11(void) {
 
 // big struct definition
 // void impact_dust_cloud_spawn(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, u8 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, u8 argC, u8 argD, u8 argE, s32 argF);
-#ifdef NON_MATCHING
 /* P170 */
 s32 random_int(void);
 f32 random_float(void);
@@ -252,9 +250,6 @@ s32 impact_dust_cloud_spawn(void *pos, f32 *vel, u8 kind, f32 arg3, s16 life, u8
     }
     return fx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_dust_cloud_spawn.s")
-#endif
 
 /* was func_151D93F4 */
 s32 impact_dust_cloud_update(void *arg0, void *arg1) {
@@ -285,7 +280,6 @@ s32 impact_dust_cloud_wobble(struct_eu_2062D0_d *arg0, s32 arg1) {
     arg0->unk3C = angle_byte_cos(sub->unk5 - 0x40) * sub->unkC + sub->unk0;
     return 1;
 }
-#ifdef NON_MATCHING
 s32 collision_floor_probe(f32 *, s32, f32, u8 *);
 s32 pos_in_world_bounds(f32 *);
 
@@ -349,9 +343,6 @@ u8 impact_dust_cloud_ground(u8 *arg0, u8 *arg1) {
 block_12:
     return sp.u5F;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_dust_cloud_ground.s")
-#endif
 /* was func_151D97A8 */
 u8 impact_debris_tex_kind0(void) {
     s32 tmp[7] = D_800AB350;
@@ -424,7 +415,6 @@ u8 impact_debris_tex_kind11(void) {
     return tmp[random_int() & 3];
 }
 
-#ifdef NON_MATCHING
 f32 vec3_dot(s32 *, s32 *);
 s32 tri_calc_normal(s32, s32 *, s32 *, s32 *);
 s32 vec3_normalize_len(s32 *, s32 *, s32, s32);
@@ -578,9 +568,6 @@ s32 impact_debris_spawn(u8 arg0, f32 arg1, u8 arg2, s32 arg3, struct17 *arg4, s1
     }
     return (s32) var_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_debris_spawn.s")
-#endif
 /* was func_151D9EB0 */
 void impact_cloud_emitter_update(struct_eu_2062D0_e *arg0) {
     struct_eu_2062D0_e_sub *sub = &arg0->unk28;
@@ -600,7 +587,6 @@ void impact_spawn_burst(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5,
     }
 }
 
-#ifdef NON_MATCHING
 /* P160 */
 extern f32 D_800AB850;
 extern f32 D_800AB854;
@@ -716,10 +702,6 @@ s32 impact_smoke_puff_spawn(u8 kind, f32 scale, f32 arg2, u8 arg3, s16 life, s32
     }
     return (s32)p;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_smoke_puff_spawn.s")
-#endif
-#ifdef NON_MATCHING
 s32 impact_tinted_particle_spawn(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s16 arg7, u8 arg8, s16 arg9, s16 argA, u8 argB, u8 argC, s32 argD);
 
 /* was func_151DA368 */
@@ -772,9 +754,6 @@ s32 impact_smoke_puff_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_smoke_puff_update.s")
-#endif
 // TODO when we know what arg0 is...
 /* was func_151DA6A8 */
 s32 impact_puff_scale_decay(struct_eu_2062D0 *arg0) {
@@ -790,7 +769,6 @@ s32 impact_puff_scale_decay(struct_eu_2062D0 *arg0) {
     }
     return 1;
 }
-#ifdef NON_MATCHING
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
                   s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 extern u8 D_800AB7D4[];
@@ -902,9 +880,6 @@ u8 *impact_spark_spawn(u8 *pos, u8 *vel, f32 scale, s16 sprite, u8 alpha, f32 sp
     }
     return p;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_spark_spawn.s")
-#endif
 typedef struct { f32 x, y, z; s32 a, b; } Node14;
 extern f32 D_800AB87C;
 void impact_splash_ring_spawn(u8, f32, u8, f32 *, u8, u8, s32);
@@ -948,7 +923,6 @@ s32 streak_on_land_burst(struct_eu_2062D0_c *arg0, s32 arg1, s32 arg2, s32 arg3,
     sub->unk20 = 4;
     return 1;
 }
-#ifdef NON_MATCHING
 /* P143 */
 extern u8 (*D_80090070[])(void);
 extern s32 D_800AB710;
@@ -1036,9 +1010,6 @@ void impact_splash_ring_spawn(u8 type, f32 size, u8 alpha, f32 *pos, u8 lit, u8 
         memcpy(fx + 0x110, &extra, 0xC);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_splash_ring_spawn.s")
-#endif
 /* was func_151DADA0 */
 s32 impact_splash_ring_update(struct_eu_2062D0_b *arg0) {
     struct_eu_2062D0_b_sub *sub = &arg0->unk110;
@@ -1050,7 +1021,6 @@ s32 impact_splash_ring_update(struct_eu_2062D0_b *arg0) {
     arg0->unk50 = D_800AB890 - sub->unk8 * f0;
     return 1;
 }
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
 extern s32 D_800DD608;
@@ -1120,9 +1090,6 @@ u8 *impact_splash_ring_verts(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_splash_ring_verts.s")
-#endif
 /* was func_151DB004 */
 void impact_tint_red(struct218 *arg0) {
     arg0->unk14 = (random_int() % 0x38U) + 80;
@@ -1239,7 +1206,6 @@ void impact_tint_bright(struct218 *arg0) {
     arg0->unk1A = (random_int() % 56U) + 200;
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 extern s32 D_800900D8;
 
@@ -1418,15 +1384,8 @@ s32 impact_tinted_particle_spawn(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4
     }
     return var_v1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_tinted_particle_spawn.s")
-#endif
 typedef struct { u8 fl; u8 pad1[3]; s32 unk4; u8 a[3]; u8 d[3]; u8 padE[2]; f32 s[3]; } S97C;
-#ifdef NON_MATCHING
 s32 vec_damp_xz_per_tick(u8 *, f32); /* P95: f32 (float bits were passed as an int) */
-#else
-s32 vec_damp_xz_per_tick(u8 *, s32);
-#endif
 /* was func_151DB97C */
 s32 impact_tinted_particle_update(u8 *arg0, s32 arg1) {
     S97C *p;
@@ -1435,11 +1394,7 @@ s32 impact_tinted_particle_update(u8 *arg0, s32 arg1) {
     f32 x;
     p = (S97C *)(arg0 + 0xA8);
     if (p->fl & 2) {
-#ifdef NON_MATCHING
         vec_damp_xz_per_tick(arg0 + 0x58, *(f32 *)(arg0 + 0xAC)); /* P95: f32 (float bits were passed as an int) */
-#else
-        vec_damp_xz_per_tick(arg0 + 0x58, *(s32 *)(arg0 + 0xAC));
-#endif
     }
     if (p->fl & 1) {
         p->a[0] += p->d[0] * D_800BE9E4;
@@ -1507,7 +1462,6 @@ void impact_spawn_debris_up(struct17 *arg0, s32 arg1, u8 *arg2, u8 arg3, s32 arg
     impact_debris_spawn(tmp2.unkF, (tmp2.unk0 * 25.0f) + 10.0f, ((tmp2.unk4 % 0x38U) + 200), arg1 + 4, &tmp, (random_int() % 0x97U) + 150, 0, 1, 0, arg3, arg4);
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800AB7F4;
 
 /* was func_151DBCBC */
@@ -1567,10 +1521,6 @@ void impact_dust_particle_spawn(u8 arg0, f32 arg1, s16 arg2, s32 arg3, void * ar
     }
     sprite_fx_spawn_quad((s32) &sp.u50, 0, 0U, 0U, (*(f32 *)((u8 *)arg4 + 0)), (*(f32 *)((u8 *)arg4 + 4)), (*(f32 *)((u8 *)arg4 + 8)), arg1, arg1, 0U, 0U, 0, (u8) (s32) arg5, arg6);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_dust_particle_spawn.s")
-#endif
-#ifdef NON_MATCHING
 extern s32 D_800AB7F4;
 
 /* was func_151DBE80 */
@@ -1655,10 +1605,6 @@ void impact_flat_fx_spawn(s32 arg0, f32 arg1, f32 arg2, s16 arg3, u8 *arg4, s32 
     sp50 = random_int();
     effect3d_spawn_oriented_simple((s32) &sp.u58, 0, 0xBU, 0x11U, 0U, (u8) ((sp50 & 1) + (sp4C & 1)), (s16) (random_int() & 0xFF), arg1, arg1, 0, arg5, 0U, 0, (u8) (s32) arg8, arg9);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_flat_fx_spawn.s")
-#endif
-#ifdef NON_MATCHING
 /* P153 */
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 extern u8 D_800AB700[]; /* sprite per glow type */
@@ -1751,9 +1697,6 @@ s32 impact_glow_spawn(f32 *pos, f32 size, u8 alpha, s16 life, u8 type, u8 arg5, 
     t.u6C = 1000.0f;
     return particle_spawn_ex((s32) &t, 1, 0, 0, arg5, arg6);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_glow_spawn.s")
-#endif
 extern f32 D_800AB8B0;
 extern f32 D_800AB8B4;
 extern f32 D_800AB8B8;
@@ -1846,7 +1789,6 @@ extern f32 D_800AB8C8;
 extern f32 D_800AB8CC;
 extern f32 D_800AB8D0;
 extern f32 D_800AB8D4;
-
 
 
 /* was func_151DC484 */

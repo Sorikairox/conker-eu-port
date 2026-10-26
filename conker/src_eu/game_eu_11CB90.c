@@ -66,7 +66,6 @@ void tether_stop(u8 *arg0, u8 arg1) {
     fx_lists_broadcast_a(&tmp, 0x43);
 }
 
-#ifdef NON_MATCHING
 /* P181 */
 void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 u8 *path_record_create(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
@@ -254,11 +253,7 @@ u8 *tether_effect_start(struct127 *arg0, u8 arg1, s32 arg2, s32 arg3) {
     *(u8 **)(e + 0x110 + 0x2C) = (u8 *)tether_light_spawn(70, 255, 130, 0, (s32)e, arg2, arg3);
     return e;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/tether_effect_start.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P146 */
 s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
 s32 vec3_normalize_len(f32 *, f32 *, f32 *, f32 *);
@@ -337,9 +332,6 @@ s32 tether_beam_update(u8 *fx) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/tether_beam_update.s")
-#endif
 
 /* was func_150EFD04 */
 s32 tether_filter_type28(u8 *arg0, s32 arg1, s32 arg2) {
@@ -456,7 +448,6 @@ void tether_effect_on_message(struct102 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 extern f32 D_800A19F0[][3];      /* bone-local points per kind (D_800A19C0 + 0x30) */
 
 /* rider_anchor_update: follows the mount ((+0x60)->+8): when its flag +0x128 bit 0 is set and its skeleton
@@ -492,11 +483,7 @@ s32 tether_flame_anchor_update(u8 *o) {
     o[0x1C] &= ~2;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/tether_flame_anchor_update.s")
-#endif
 
-#ifdef NON_MATCHING
 void vec3_from_angles_byte(s16, s16, f32, void *);
 s32 streak_spawn(s32 *, s32, f32 *, s32, s32, s32);
 
@@ -597,10 +584,6 @@ void tether_spark_emitter_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s0 + 4)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/tether_spark_emitter_update.s")
-#endif
-#ifdef NON_MATCHING
 /* P181 */
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
                   s32 arg9);
@@ -716,11 +699,7 @@ u8 *tether_smoke_emitter_spawn(u8 *obj, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s32 
     }
     return e;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/tether_smoke_emitter_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_150F066C */
 s32 tether_smoke_emitter_update(u8 *arg0) {
     s32 temp_t4;
@@ -744,9 +723,6 @@ s32 tether_smoke_emitter_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/tether_smoke_emitter_update.s")
-#endif
 /* was func_150F0718 */
 struct225 *tether_light_spawn(u8 arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6) {
     struct225 *r;
@@ -843,7 +819,6 @@ void tether_light_clear_slot(void *arg0) {
     *(s32 *)(temp_v0 + 0x13C) = 0;
 }
 
-#ifdef NON_MATCHING
 s32 attached_particle_spawn(u8 *, u8, u8 *, u8 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
 void mtx_transform_points(f32 **, f32 **, void *, s32);
 s32 tracer_spawn(f32 *, f32 *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, u8 *, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
@@ -928,9 +903,6 @@ s32 obj_arm_tracer_fire(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     attached_particle_spawn(arg0, *sp84, temp_v0_2 + (u8 *)&D_800A1A10, temp_v0_2 + (u8 *)&D_800A1A28, &sp.u98, ((u32) sp88 % 3U) + 8, 0xFF, (random_float() * 2000.0f) + 2000.0f, &sp.uD0, 0xFF, 0, -1, (s32) arg2, arg3);
     return sp.uDC;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/obj_arm_tracer_fire.s")
-#endif
 /* was func_150F0D64 */
 void tether_flame_on_message(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = *(u8 **)((u8 *)arg0 + 0x60);
@@ -983,11 +955,7 @@ void obj_attach_twin_lights(s32 arg0) {
 }
 
 typedef struct { s32 x, y, z; } V3i;
-#ifdef NON_MATCHING
 s32 emit_streaks_from_spec(s32 *, u8, s32); /* P164: 3 arguments (asm 151530A8 never reads a3) */
-#else
-s32 emit_streaks_from_spec(s32 *, s32, s32, u8 *);
-#endif
 
 /* was func_150F0FA4 */
 void fx_spark_burst_at(u8 *arg0) {
@@ -1101,14 +1069,9 @@ void fx_spark_burst_at(u8 *arg0) {
     sp.u8D = 0;
     sp.u8E = -1;
     sp.u8F = -1;
-#ifdef NON_MATCHING
     emit_streaks_from_spec(&sp.u1C, 0xFF, 1);
-#else
-    emit_streaks_from_spec(&sp.u1C, 0xFF, 1, arg0);
-#endif
 }
 
-#ifdef NON_MATCHING
 /* P159 */
 s32 random_int(void);
 f32 random_float(void);
@@ -1214,9 +1177,6 @@ void obj_glow_spawn(u8 *obj) {
         memcpy((u8 *)p + 0xA8, &sp.obj, 0x14);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/obj_glow_spawn.s")
-#endif
 
 /* was func_150F13C8 */
 s32 obj_glow_follow_pulse(u8 *arg0, s32 arg1)
@@ -1299,7 +1259,6 @@ void obj_trail_emitter_spawn(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 /* was func_150F16F0 */
@@ -1455,10 +1414,6 @@ void obj_trail_emitter_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/obj_trail_emitter_update.s")
-#endif
-#ifdef NON_MATCHING
 void effect_node_link_message(s32, u8, s32, s32, s32);
 // fx_hit_handler: P237. Hit handler of an effect (sibling of fx_target_light_on_message; record at +0x28 = target id, +0x2C =
 // target slot byte). Event 0x43: when the hitter `other` is the target (same id, or same byte +4 as +0x2C) the effect
@@ -1475,9 +1430,6 @@ void fx_target_effect_on_message(u8 *obj, s32 *other, u8 event) {
     }
     effect_node_link_message((s32) other, event, (s32) p, (s32) (p + 4), (s32) obj);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/fx_target_effect_on_message.s")
-#endif
 
 /* was func_150F1C04 */
 void fx_target_light_on_message(u8 *arg0, s32 *arg1, u8 arg2) {
@@ -1491,7 +1443,6 @@ void fx_target_light_on_message(u8 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 extern u8 D_800A1A5C[];    /* [2 variant][4 slot][2 side] f32[3] points */
 extern u8 D_800A1B1C[];    /* same layout, second point set */
 extern u8 D_800A1BDC[];    /* [2 variant][2 side] bone index */
@@ -1555,6 +1506,3 @@ void obj_limb_muzzle_burst(u8 *obj, u8 side, u8 slot, u8 flag, s32 arg4) {
                   D_800A1B1C + variant * 0x60 + slot * 0x18 + side * 0xC, speed, (u32)r % 6 + 8, 0xFF,
                   random_float() * 1877.0f + 2414.0f, world, 0xFF, 0, -1, flag, arg4);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/obj_limb_muzzle_burst.s")
-#endif

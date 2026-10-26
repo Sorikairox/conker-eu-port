@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void sprite_screen_rect(s32, f32, f32, f32, s32, s32 *);
-#endif
 
 /* was func_15095350 */
 Gfx *sprite_gfx_begin(Gfx *arg0) {
@@ -16,37 +15,23 @@ void sprite_tex_desc_set(s32, s32, s32);
 s32 gfx_load_texture_tile(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800D30B0;
 
-#ifdef NON_MATCHING
 /* NON_MATCHING: the matching void wrappers return the callee's v0 (the new display-list pointer), which callers use. */
 /* was func_15095380 */
 s32 sprite_load_texture(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
     sprite_tex_desc_set(arg1, arg2, arg3);
     return gfx_load_texture_tile(arg0, &D_800D30B0, arg4, arg5, 0, arg6, arg7, 0x100, 0x100, arg8);
 }
-#else
-void sprite_load_texture(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
-    sprite_tex_desc_set(arg1, arg2, arg3);
-    gfx_load_texture_tile(arg0, &D_800D30B0, arg4, arg5, 0, arg6, arg7, 0x100, 0x100, arg8);
-}
-#endif
 
 void sprite_tex_desc_set(s32, s32, s32);
 s32 gfx_load_texture_tile(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800D30B0;
 
-#ifdef NON_MATCHING
 /* NON_MATCHING: the matching void wrappers return the callee's v0 (the new display-list pointer), which callers use. */
 /* was func_150953F8 */
 s32 sprite_load_texture_at(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
     sprite_tex_desc_set(arg1, arg2, arg3);
     return gfx_load_texture_tile(arg0, &D_800D30B0, arg4, arg5, 0, arg6, arg7, arg8, arg9, argA);
 }
-#else
-void sprite_load_texture_at(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
-    sprite_tex_desc_set(arg1, arg2, arg3);
-    gfx_load_texture_tile(arg0, &D_800D30B0, arg4, arg5, 0, arg6, arg7, arg8, arg9, argA);
-}
-#endif
 
 /* was func_15095470 */
 void sprite_tex_desc_set(s32 arg0, s32 arg1, s32 arg2) {
@@ -67,7 +52,6 @@ void sprite_tex_desc_set(s32 arg0, s32 arg1, s32 arg2) {
     (*(u8 *)((u8 *)(&D_800D30B0) + 0xA)) = (u8) (*(u8 *)((u8 *)arg0 + 4));
 }
 
-#ifdef NON_MATCHING
 /* Texture loader behind sprite_load_texture / sprite_load_texture_at (the sky quad, sprites, ...): appends the display-list
  * commands that load the texture `tex` into TMEM at `tmem` and set up render tile `tile`, and returns the new
  * display-list end. `tex` is the descriptor sprite_tex_desc_set fills (D_800D30B0): +0 address, or an asset id below
@@ -167,16 +151,10 @@ s32 gfx_load_texture_tile(s32 gfxAddr, s32 *tex, s32 tmem, s32 tile, s32 frame, 
     }
     return (s32)gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/gfx_load_texture_tile.s")
-#endif
 
-#ifdef NON_MATCHING
 void mtxf_transform_point_w(u8 *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 extern u8 D_800D30C8[][0x40];   /* view matrices per player */
 extern f32 D_800D9F40;
-#endif
-#ifdef NON_MATCHING
 /* Projects the world point (x, y, z) with the current player's view matrix D_800D30C8[D_80082FA4]
  * (mtxf_transform_point_w -> *sx, *sy, *sz, *w). Behind / too far (w >= far) or too near (w <= D_800D9F40): returns 0.
  * Else *sx / *sy become screen coordinates of that player's viewport (D_800BE628 + player * 0x180: half
@@ -200,11 +178,7 @@ s32 sprite_project_point(f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz, f32 *w,
     *sy = *(f32 *)(vp + 0x38) - (*(f32 *)(vp + 0x10) + 5.0f) * py * inv;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/sprite_project_point.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 sprite_project_point(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
 
 /* was func_15095B70 */
@@ -229,10 +203,6 @@ u8 *sprite_draw_at_world_depth(u8 *arg0, u8 *arg1) {
     (*(s32 *)((u8 *)temp_a0 + 4)) = (s32) ((s32) (((f32) (*(s16 *)((u8 *)temp_t0 + 0x4C)) + ((sp.u3C / sp.u38) * (f32) (*(s16 *)((u8 *)temp_t0 + 0x44)))) * 32.0f) << 0x10);
     return sprite_draw_if_visible((s32) (temp_a0 + 8), (s32) arg1, sp.u44, sp.u40, sp.u38, 1, 0, 0, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/sprite_draw_at_world_depth.s")
-#endif
-#ifdef NON_MATCHING
 s32 sprite_project_point(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
 
 /* was func_15095CC0 */
@@ -262,21 +232,12 @@ u8 *sprite_prepare_at_world(u8 *arg0, u8 *arg1, s32 *arg2) {
     }
     return var_s0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/sprite_prepare_at_world.s")
-#endif
-#ifdef NON_MATCHING
 /* NON_MATCHING: the matching void wrappers return the callee's v0 (the new display-list pointer), which callers use. */
 s32 sprite_draw_if_visible(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 /* was func_15095E58 */
 s32 sprite_draw_at_screen(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
     return sprite_draw_if_visible(arg0, arg1, arg2, arg3, 4096.0f, 0, 0, 0, 0);
 }
-#else
-void sprite_draw_at_screen(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
-    sprite_draw_if_visible(arg0, arg1, arg2, arg3, 4096.0f, 0, 0, 0, 0);
-}
-#endif
 
 void sprite_screen_rect(s32, f32, f32, f32, s32, s32 *);
 s32 sprite_draw_rect(s32, s32, s32, s32, s32);
@@ -290,7 +251,6 @@ s32 sprite_draw_if_visible(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32
     return arg0;
 }
 
-#ifdef NON_MATCHING
 /* P139 */
 extern f32 D_80038400;     /* sprite size units -> screen x */
 extern f32 D_80038404;     /* sprite size units -> screen y */
@@ -356,23 +316,13 @@ void sprite_screen_rect(s32 sprArg, f32 sx, f32 sy, f32 w, s32 alt, s32 *visible
     D_800D30A8 = height;
     return;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/sprite_screen_rect.s")
-#endif
 
-#ifdef NON_MATCHING
 /* NON_MATCHING: the matching void wrappers return the callee's v0 (the new display-list pointer), which callers use. */
 /* was func_1509611C */
 s32 sprite_draw_rect_plain(s32 arg0, s32 arg1) {
     return sprite_draw_rect(arg0, arg1, 0, 0, 0);
 }
-#else
-void sprite_draw_rect_plain(s32 arg0, s32 arg1) {
-    sprite_draw_rect(arg0, arg1, 0, 0, 0);
-}
-#endif
 
-#ifdef NON_MATCHING
 /* P142 */
 extern u8 D_800D31C8;   /* sprite primitive colour r, g, b (alpha from the sprite) */
 extern u8 D_800D31C9;
@@ -522,11 +472,7 @@ s32 sprite_draw_rect(s32 gfxAddr, s32 sprAddr, s32 sOff, s32 tOff, s32 xAdd) {
     }
     return (s32) gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/sprite_draw_rect.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P142 */
 /* image_draw_tiled: draws the image described by img (the sprite_tex_desc_set descriptor: +0 address or asset id, +4
  * animated flag, +6 tile width, +8 tile height, +0xA format, +0xB texel size) as a grid of textured rectangles.
@@ -694,9 +640,6 @@ u32 *image_draw_tiled(u32 *gfx, ImageTileDesc *img, f32 scaleX, f32 scaleY, f32 
     }
     return gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/image_draw_tiled.s")
-#endif
 
 /* was func_15096D44 */
 Gfx *sprite_gfx_begin_alt(Gfx *arg0) {

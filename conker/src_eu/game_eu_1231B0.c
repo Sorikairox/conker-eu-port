@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void rain_update(s32);
 void screen_overlay_update_alpha(u8 *arg0);
 extern u8 D_800A1EE8[];
@@ -10,7 +10,6 @@ void mtx_transform_points(f32 **, f32 **, void *, s32);
 extern u8 D_800A1ED0[];
 extern u8 D_800A1EDC[];
 extern u8 D_800A5860[];
-#endif
 
 
 typedef struct {
@@ -111,7 +110,6 @@ void screen_overlay_update_scale(u8 *arg0) {
     screen_overlay_update_alpha(arg0);
 }
 
-#ifdef NON_MATCHING
 /* was func_150F5B48 */
 void screen_overlay_update_alpha(u8 *arg0) {
     s16 temp_t2;
@@ -137,15 +135,11 @@ void screen_overlay_update_alpha(u8 *arg0) {
     }
     (*(s8 *)((u8 *)arg0 + 0x45)) = (s8) ((s32) (temp_t2 * 0xFF) / (s32) (temp_v1 >> 0x10));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/screen_overlay_update_alpha.s")
-#endif
 /* was func_150F5C0C */
 void screen_overlay_on_end(s32 arg0) {
     rain_update(0);
 }
 
-#ifdef NON_MATCHING
 extern s32 D_80090624;
 
 /* was func_150F5C30 */
@@ -197,10 +191,6 @@ block_30:
     (*(s16 *)((u8 *)arg0 + 0x18)) = (s16) *(s32 *)((u8 *)&D_80090624 + (var_v1 * 4));
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/model_anim_texture_frame_cb.s")
-#endif
-#ifdef NON_MATCHING
 /* P204 */
 // model_tile_fade_cb: model-node callback (D_800845xx table, s32 (u8 *, u8 *)) for node n of the character pl:
 // does nothing while pl +0x2D0 is NULL. State n +0x38: 0 = start (becomes 1 once pl +0x84 is 5, else the tile is
@@ -260,9 +250,6 @@ s32 model_tile_fade_cb(u8 *n, u8 *pl) {
     dl[i].words.w0 = (G_SETTILESIZE << 24) | (2 << 12) | (t & 0xFFF);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/model_tile_fade_cb.s")
-#endif
 
 /* was func_150F6188 */
 void obj_bone_glow_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
@@ -282,7 +269,6 @@ void obj_bone_glow_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 *, s32, s32, s32, s32, s32);
 
 /* was func_150F6218 */
@@ -440,15 +426,11 @@ void obj_bone_glow_emitter_update(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/obj_bone_glow_emitter_update.s")
-#endif
 /* was func_150F66B8 */
 void obj_bone_glow_emitter_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     effect_node_link_message(arg1, arg2, (s32)(arg0 + 0x28), (s32)(arg0 + 0x2C), (s32)arg0);
 }
 
-#ifdef NON_MATCHING
 void mtx_transform_points(f32 **, f32 **, void *, s32);
 
 /* was func_150F66F8 */
@@ -526,9 +508,6 @@ void obj_bone_fx_pair_update(u8 *arg0) {
         (*(f32 *)((u8 *)temp_v0_4 + 0x4C)) = 8.0f;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/obj_bone_fx_pair_update.s")
-#endif
 /* was func_150F689C */
 void obj_bone_fx_pair_destroy_children(u8 *arg0) {
     struct102 *temp_a0;
@@ -712,7 +691,6 @@ void obj_bone_spark_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     bone_emitter_spawn(&sp, 0, arg0, arg1);
 }
 
-#ifdef NON_MATCHING
 void bone_emitter_spark_params(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5, f32 *arg6, f32 *arg7, f32 *arg8,
                    f32 *arg9, s16 *argA, u8 *argB, f32 *argC);
 void hitinfo_from_obj_floor(void *, u8 *);
@@ -765,6 +743,3 @@ void fx_bone_spark_dust_spawn(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 ar
     impact_dust_cloud_spawn(pos, dir, 1, speed, angle, alpha, size, hit, 1.8f, 1.8f, 1, (s32) &floor, 1, bounce, arg5[0xC],
                   arg5[1]);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/fx_bone_spark_dust_spawn.s")
-#endif

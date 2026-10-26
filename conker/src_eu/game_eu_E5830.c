@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-#ifdef NON_MATCHING
 void mtx_get_translation(Mtx *arg0, s32 arg1, struct17 *arg2);
 f32 angle_byte_cos(u8 arg0);
 void mtx_transform_point_or_origin(void *arg0, void *arg1, void *arg2);
@@ -270,11 +269,7 @@ void object_break_effects(u8 *obj, u8 owner, s32 arg2) {
         emit_sparks_by_angles((u8 *)&smoke, owner, arg2);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E5830/object_break_effects.s")
-#endif
 
-#ifdef NON_MATCHING
 void vec3_from_angles_byte(s16 yaw, s16 pitch, f32 dist, struct17 *out);
 s32 tumble_debris_spawn(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, u8 *arg4, f32 arg5, f32 arg6, u8 arg7, s16 arg8, u8 arg9, s32 argA, u8 argB, s32 argC);
 
@@ -317,9 +312,6 @@ void debris_tumble_burst_spawn(f32 *pos, f32 *unused, f32 *dist, f32 *yscale, u8
                       (drag * 633.0f + -1064.0f) * 0.001f, 0.94253397f, 1, r % 51 + 75, 0, 0, 0xFF, 1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E5830/debris_tumble_burst_spawn.s")
-#endif
 
 s32 particle_spawn_basic(void *, s32, s32, u8, s32);
 typedef struct {

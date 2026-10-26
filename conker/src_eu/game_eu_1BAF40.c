@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void bone_sparks_emit(s32);
-#endif
 
 typedef struct {
     /* 0x00 */ f32 x;
@@ -52,7 +51,6 @@ typedef struct {
     /* 0x40 */ struct_eu_1BAAA0_b *unk40;
 } struct_eu_1BAAA0;
 
-#ifdef NON_MATCHING
 /* P177 */
 u8 *character_effect_create(u8 **arg0, u8 arg1);
 // character_effect_attach: attaches effect `type` (1..18: fire, smoke, impacts, ...) to obj: a kind-0x21 effect record
@@ -119,11 +117,7 @@ u8 *character_effect_attach(u8 *obj, s16 type, s16 time, u8 clear, u8 view, s32 
     }
     return character_effect_create((u8 **)&e, view);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/character_effect_attach.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P197 */
 /* character_effect_update: P197: update handler of the kind-0x21 character effect records that character_effect_attach
  * (character_effect_attach) creates through character_effect_create (fire, smoke, impacts ... on a model). See below. */
@@ -519,9 +513,6 @@ void character_effect_update(u8 *arg0) {
         node_destroy((struct102 *) arg0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/character_effect_update.s")
-#endif
 
 /* was func_1518E808 */
 s32 effect_sound_follow_owner(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
@@ -676,7 +667,6 @@ s32 character_effect_end_chain4(u8 *arg0) {
     return 0;
 }
 
-#ifdef NON_MATCHING
 /* P203 */
 void vtx_slot_buffer_get(s32, s16, s32, u8 **, u8 *);
 f32 math_sin_u8(u8);
@@ -753,11 +743,7 @@ u8 *particle_quad_velocity_build(u8 *p, s16 view) {
     v[26] = *(f32 *) (p + 0x3C) - e * s;
     return blk;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/particle_quad_velocity_build.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P222: readable C for line_quad_build (game_eu_1BAF40, 273 words). */
 /* vtx_slot_buffer_get is declared above in game_eu_1BAF40.c: (s32, s16, s32, u8 **, u8 *) */
 
@@ -853,9 +839,6 @@ u8 *line_quad_build(u8 *fx, s16 slot) {
     *(s16 *) (vtx + 6) = 0;
     return start;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/line_quad_build.s")
-#endif
 
 /* was func_1518F4C4 */
 s32 line_particle_move_damped(u8 *arg0)
@@ -1100,7 +1083,6 @@ s32 bone_sparks_attach(s32 arg0, u8 *arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, 
     return (s32)temp_v0;
 }
 
-#ifdef NON_MATCHING
 void bone_sparks_emit(s32);
 // D_8008DA1C: the bone-spark emitter's tick handler table (0x8008DA1C: bone_sparks_tick_hurt, bone_sparks_owner_release). bone_sparks_tick
 // indexes it with self +0x88 and returns the handler's result; bone_sparks_release indexes D_8008DA20 (= D_8008DA1C + 1)
@@ -1125,11 +1107,7 @@ s32 bone_sparks_tick(u8 *self, void *pos) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/bone_sparks_tick.s")
-#endif
 
-#ifdef NON_MATCHING
 // bone_sparks_release: effect-child handler (D_8008FFE0 [6] / D_8008FFE8 [4]): runs the release handler
 // D_8008DA20[self +0x89] (= D_8008DA1C[self +0x89 + 1]; none: -1). The second argument is unused (table signature
 // s32 (node, pos)); returns the handler's result (0 without; the dispatchers that reach it ignore v0).
@@ -1142,23 +1120,8 @@ s32 bone_sparks_release(u8 *self, void *pos) {
     }
     return 0;
 }
-#else
-void bone_sparks_release(u8 *arg0)
-{
-  u8 *new_var;
-  new_var = ((u8 *) arg0) + 0x89;
-  if ((*((s8 *) new_var)) != (-1))
-  {
-    D_8008DA20[*((s8 *) new_var)](arg0);
-  }
-}
-#endif
 
-#ifndef NON_MATCHING
-s32 bone_sparks_emit(s32);
-#endif
 
-#ifdef NON_MATCHING
 // bone_sparks_burst: effect-child handler (D_8008FFE0 [4] / D_8008FFE8 [2]): sets the spark counter (self +0x30) to
 // base +0x3C + random f32 * spread +0x40 and emits them at once (bone_sparks_emit). The second argument is unused (table
 // signature s32 (node, pos)); returns 0 (the asm leaves bone_sparks_emit's v0; the dispatchers that reach it ignore it).
@@ -1170,21 +1133,7 @@ s32 bone_sparks_burst(u8 *self, void *pos) {
     bone_sparks_emit((s32)self);
     return 0;
 }
-#else
-void bone_sparks_burst(s32 arg0)
-{
-  u8 *new_var;
-  u8 *temp_v0;
-  f32 *new_var2;
-  temp_v0 = ((((((arg0 + 0x30) & 0xFFFFFFFF) & 0xFFFFFFFF) & 0xFFFFFFFF) & 0xFFFFFFFF) & 0xFFFFFFFF) & 0xFFFFFFFF;
-  new_var2 = (f32 *) (((u8 *) temp_v0) + 0);
-  new_var = temp_v0;
-  *new_var2 = (f32) ((*((f32 *) (((u8 *) new_var) + 0xC))) + ((*((f32 *) (((u8 *) temp_v0) + 0x10))) * random_float()));
-  bone_sparks_emit(arg0);
-}
-#endif
 
-#ifdef NON_MATCHING
 u8 *flame_spawn(u8 *arg0, u8 *arg1, s16 arg2, u8 arg3, u8 *arg4, f32 arg5, f32 arg6, f32 arg7, u8 arg8, u8 arg9,
                   u8 argA, s32 argB, u8 argC, s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11);
 void *attach_fx_spawn(void *arg0, void *arg1, s32 arg2, u8 arg3, s32 arg4);
@@ -1259,9 +1208,6 @@ void bone_sparks_emit(s32 arg0) {
         *count -= 1.0f;
     } while (1.0f < *count);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/bone_sparks_emit.s")
-#endif
 
 /* was func_15190174 */
 s32 bone_spark_follow_look(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *arg1) {
@@ -1281,7 +1227,6 @@ s32 bone_spark_follow_look_up(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *arg1) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 // effect_node_launch: P219. Entry 0 of the effect-node handler table D_8008FFE8, called by game_1FFF60's C
 // (node, &pos) and (child, &child->unk34). node +0x2C = the particle, node +0x30 = its config (NULL: the particle is freed
 // with node_destroy). Otherwise the particle gets velocity (target - node pos +0x34) * cfg +0x60 (+0x148..+0x150),
@@ -1318,9 +1263,6 @@ s32 bone_spark_release_toward(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *target) 
     *(s32 *)(p + 0x58) |= 0x08000001;
     return r;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/bone_spark_release_toward.s")
-#endif
 
 /* was func_15190334 */
 s32 bone_sparks_table_for_kind(s32 arg0, u8 *arg1, u8 arg2) {
@@ -1625,7 +1567,6 @@ struct225 *bone_sparks_light_create(s32 arg0, u8 *arg1, u8 arg2, s16 arg3, u8 ar
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 void light_flicker_intensity_step(u8 *arg0, u8 *arg1);
 s32 light_follow_obj_pos(u8 *arg0, u8 *arg1);
 
@@ -1636,12 +1577,6 @@ s32 bone_sparks_light_update(u8 *arg0) {
     light_flicker_intensity_step(arg0, arg0 + 0x20);
     return light_follow_obj_pos(arg0, arg0 + 0x18);
 }
-#else
-void bone_sparks_light_update(u8 *arg0) {
-    light_flicker_intensity_step(arg0, arg0 + 0x20);
-    light_follow_obj_pos(arg0, arg0 + 0x18);
-}
-#endif
 
 /* was func_15190970 */
 void bone_sparks_light_on_event(u8 *arg0, u8 *arg1, u8 arg2) {
@@ -1680,7 +1615,6 @@ void bone_sparks_light_free(void *arg0) {
     light_ctrl_free(arg0);
 }
 
-#ifdef NON_MATCHING
 // effect_node_release: P213: release handler of an effect node (entry of the D_8008FC60 handler table, void (u8 *),
 /* dispatched by spec_emitter_cleanup): frees the attached record +0x84 (node_destroy), then sfx_emitter_stop_by_callback(effect_sound_follow_owner,
  * node, word +0x10) (effect_sound_follow_owner is the node's sfx_emitter_start callback) and attach_fx_asset_release(word +0x78). */
@@ -1693,9 +1627,6 @@ void bone_sparks_node_release(u8 *node) {
     sfx_emitter_stop_by_callback((s32)effect_sound_follow_owner, (s32)node, *(s32 *)(node + 0x10));
     attach_fx_asset_release(*(s32 *)(node + 0x30 + 0x48));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/bone_sparks_node_release.s")
-#endif
 
 /* was func_15190A88 */
 void bone_sparks_detach_owner(u8 *arg0) {
@@ -1755,7 +1686,6 @@ s32 bone_sparks_tick_hurt(Obj0B2C *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 // bone_sparks_owner_release: D_8008DA1C [1] (bone_sparks_release's release handler, also reachable as a tick handler from
 // bone_sparks_tick): clears byte +0x1AC of the owner's (+0x10) attachment +0x31C, if any. Returns that pointer (the asm
 // leaves it in v0, and bone_sparks_tick returns a tick handler's v0), so the table has one signature s32 (u8 *).
@@ -1768,16 +1698,6 @@ s32 bone_sparks_owner_release(u8 *self) {
     }
     return (s32)att;
 }
-#else
-void bone_sparks_owner_release(u8 *arg0) {
-    u8 *temp_v0;
-
-    temp_v0 = (*(u8 **)((u8 *)((*(u8 **)((u8 *)arg0 + 0x10))) + 0x31C));
-    if (temp_v0 != NULL) {
-        (*(s8 *)((u8 *)temp_v0 + 0x1AC)) = 0;
-    }
-}
-#endif
 
 /* was func_15190C50 */
 void bone_sparks_on_model_swap(u8 *arg0, s32 *arg1, u8 arg2) {

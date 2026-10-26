@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /*
  * P54: floor_collect_level_tris / floor_collect_world_obj_tris / floor_collect_record_tris are hand-written asm (one shared register convention): each
  * walks a set of triangles and runs the per-triangle floor test func_150A408C (a label inside floor_collect_level_tris.s,
@@ -224,11 +223,7 @@ s32 floor_collect_record_tris(s32 x, s32 z) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/floor_collect_level_tris.s")
-#endif
 
-#ifdef NON_MATCHING
 /*
  * P53: floor_tri_height.s is hand-written: the height of a floor triangle under the point (x, z), in 24.8 fixed point.
  * The triangle is either 3 vertex pointers (tri, when packed == NULL) or 9 inline s16 (packed: x, y, z per vertex;
@@ -349,15 +344,8 @@ s32 floor_tri_height(f32 x, f32 z, s32 tri, u8 *packed, f32 *out) {
 }
 
 /* P54: func_150A44A4_tail.s no longer needed (floor_collect_level_tris / floor_collect_world_obj_tris are C) */
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/floor_tri_height.s")
-#endif
 
-#ifndef NON_MATCHING /* P54: C above */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/floor_collect_world_obj_tris.s")
-#endif
 
-#ifdef NON_MATCHING
 /*
  * world_objects_transform_mesh.s is hand-written asm with two entry points: world_objects_transform_mesh (transform the vertices of a
  * list of world objects into world space and refresh their per-triangle bounding boxes) and func_150A4ED4
@@ -576,11 +564,7 @@ void func_150A4ED4(s32 area) {
 }
 
 /* P54: func_150A49D0_tail.s no longer needed (floor_collect_level_tris / floor_collect_world_obj_tris are C) */
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/world_objects_transform_mesh.s")
-#endif
 
-#ifdef NON_MATCHING
 /*
  * obj_floor_mesh_update: P190 readable C for the hand-written obj_floor_mesh_update.s (saves $gp and every FPR, keeps
  * values in odd FPRs; inner labels func_150A53D4 / func_150A543C are its exit and release paths). Builds the
@@ -743,10 +727,4 @@ release:
         heap_free(p);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/obj_floor_mesh_update.s")
-#endif
 
-#ifndef NON_MATCHING /* P54: C above */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/floor_collect_record_tris.s")
-#endif

@@ -8,7 +8,6 @@ s32 allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     return heap_alloc_tagged(arg0, arg1, arg2, 0, arg3);
 }
 
-#ifdef NON_MATCHING
 /* P7: difftest EQUIV for valid inputs; DIFFER only when arg2 >= 5 (out-of-range alignment index: the asm reads its stack copy of the tables, this reads past the global). 24 seeds x 64 trials. Runtime check advised. */
 /* heap allocator. Blocks are address-ordered (next/prev) and the free ones are also on a free list
  * (freeNext/freePrev, which overlap the data of an allocated block).
@@ -199,10 +198,6 @@ s32 heap_alloc_tagged(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     osSetIntMask(mask);
     return (s32)newb + HEAP_HDR;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_3C40/heap_alloc_tagged.s")
-#endif
-#ifdef NON_MATCHING
 extern struct54 *D_8003841C;
 
 /* was func_10004074 */
@@ -313,9 +308,6 @@ loop_21:
         osSetIntMask(sp1C);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_3C40/heap_free.s")
-#endif
 /* was func_10004250 */
 void heap_age_tagged_blocks(void) {
     s32 temp_v0;

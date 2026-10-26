@@ -1,10 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void trail_point_apply_gravity(f32 *arg0, f32 *arg1, f32 arg2);
 extern u8 D_800A4EA8[];
-#endif
 
 void fx_carrier_release(u8 *);
 
@@ -37,7 +36,6 @@ struct260 *fx_carrier_spawn(s16 arg0, u8 arg1, u8 arg2, f32 arg3, u8 *arg4, u8 a
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 /* P204 (from the s163 draft 7814_b.c) */
 extern s32 (*D_80090040[])(u8 *);
 f32 vec3_length(struct17 *);
@@ -75,9 +73,6 @@ void effect_follow_update(u8 *obj) {
     }
     fx_carrier_release(obj);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/effect_follow_update.s")
-#endif
 
 extern void (*D_80090044[])(u8 *, s32, u8);
 /* was func_151D7958 */
@@ -143,7 +138,6 @@ void char_glow_trail_spawn(u8 *arg0, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
     }
 }
 
-#ifdef NON_MATCHING
 // linked_obj_event_3d: event handler of an object whose link record sits at +0x40 ({ s32 id, u8 key }): event 0x3D removes the
 // object (node_destroy) when the event's record matches by id or by key; any other event goes to the common
 // handler effect_node_link_message.
@@ -159,9 +153,6 @@ void char_glow_on_message(struct102 *obj, u8 *ev, u8 type) {
         effect_node_link_message((s32) ev, type, (s32) link, (s32) (link + 4), (s32) obj);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/char_glow_on_message.s")
-#endif
 
 extern u8 D_800AB660[];
 extern u8 D_800AB6B4[];
@@ -280,7 +271,6 @@ void fx_carrier_attach_trail(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 // trail_points_update: P232. Particle-object callback (s32 handler, returns 1 = keep / 0 = done) for a ring of
 // points: the ring holds +0x25 entries of 0x1C bytes at +0x94 (position at +0, velocity at +0xC), +0x2E is the
 // write cursor and +0x2D the oldest entry. Each frame every entry from the one before the cursor back to the oldest
@@ -317,11 +307,7 @@ s32 glow_trail_points_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/glow_trail_points_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_151D7FE8 */
 s32 glow_trail_emit_points(u8 *arg0) {
     struct {
@@ -412,10 +398,6 @@ s32 glow_trail_emit_points(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/glow_trail_emit_points.s")
-#endif
-#ifdef NON_MATCHING
 f32 wrap_float_range(f32, f32, f32);
 
 /* trail_ring_constrain: P238: handler of the trail object of glow_trail_points_update (ring of +0x25 entries of 0x1C bytes at
@@ -545,11 +527,7 @@ s32 glow_trail_limit_length(u8 *obj) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/glow_trail_limit_length.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 gfx_geometry_mode_cached(s32, s32, s32);
 s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
@@ -743,9 +721,6 @@ u8 *char_glow_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     }
     return var_s2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/char_glow_trail_draw.s")
-#endif
 /* was func_151D8CC8 */
 void trail_point_apply_gravity(f32 *arg0, f32 *arg1, f32 arg2) {
     f32 temp_f2 = *arg1;

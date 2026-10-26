@@ -4,7 +4,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 void area_drift_emitter_create(void *, u8);
 /* P18: D_80095B48/4C/50 are rodata f32 words (variables.h: u8[]); the body used to define them as u8[4] and read one byte */
@@ -69,9 +68,6 @@ s32 area_drift_emitter_spawn(u8 *arg0) {
     area_drift_emitter_create(&sp.u28, (*(u8 *)((u8 *)arg0 + 0x1B)));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_360A0/area_drift_emitter_spawn.s")
-#endif
 // NON-MATCHING: absolute mess
 // s32 area_drift_emitter_spawn(struct110 *arg0) {
 //     struct109 tmp;

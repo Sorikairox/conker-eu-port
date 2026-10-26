@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 debris_spray_spawn(s16 *, s32, s32, s32);
 
 /* was func_1506A9B0 */
@@ -66,9 +65,6 @@ void obj_effect_debris_spray(u8 *arg0, s32 arg1) {
     sp.u6C = 8.0f;
     debris_spray_spawn(&sp.u1C, 1, 0xFF, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/obj_effect_debris_spray.s")
-#endif
 /* was func_1506AABC */
 void obj_effect_emitter_trail(s32 arg0, s32 arg1) {
     obj_emitter_trail_spawn(arg0, 0xFF, 1);
@@ -178,12 +174,9 @@ void obj_effect_task_spawn(u8 *arg0, u8 *arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800CC680;   /* bit mask of the players to affect */
 void object_impact_effects(u8 *, f32 *, f32 *, f32 *, s32, s32);
-#endif
 
-#ifdef NON_MATCHING
 // players_effect_at_point: for every player whose bit is set in D_800CC680, object_impact_effects(player, D_800D1980,
 // D_eu_800D1990, NULL, 0xFF, 1) (the point / vector obj_effect_run_handler fills in).
 // P184: handler 10 of obj_effect_run_handler's D_800864B0 table, so it takes the dispatch arguments (unused).
@@ -200,9 +193,6 @@ void obj_effect_players_impact(u8 *obj, void *arg) {
         player += 0x32C;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/obj_effect_players_impact.s")
-#endif
 
 /* was func_1506AF3C */
 void obj_effect_ground_blast(struct127 *arg0, u8 *arg1) {
@@ -231,7 +221,6 @@ void obj_effect_misc_spawn(s32 arg0, s32 arg1) {
     obj_ribbon_spawn(arg0, 0, 1, 0xFF, 1);
 }
 
-#ifdef NON_MATCHING
 extern f32 D_800CC674[3];   /* vector copied to D_eu_800D1990 for the effect handlers */
 typedef void (*ObjEffectHandler)(u8 *obj, void *arg);
 extern ObjEffectHandler D_800864B0[15];   /* .data: obj_effect_debris_spray .. obj_effect_ground_blast_alt */
@@ -257,6 +246,3 @@ void obj_effect_run_handler(u8 *obj, s32 type, void *arg) {
         handler(obj, arg);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/obj_effect_run_handler.s")
-#endif

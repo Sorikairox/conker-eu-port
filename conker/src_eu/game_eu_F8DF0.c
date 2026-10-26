@@ -31,7 +31,6 @@ s32 water_entry_effect_id(s32 arg0, s32 arg1) {
     return 11;
 }
 
-#ifdef NON_MATCHING
 /* P296 */
 extern s32 D_800BEE08;
 extern u8 *D_800D9D00;
@@ -154,9 +153,6 @@ void object_water_entry_splash(u8 *obj, s32 arg1, s32 arg2) {
     rnd = random_float();
     spawn_circle_random_emit(pos[0], pos[1], pos[2], rnd * 59.0f + 70.0f, 0, 0xFF, ringLife, 0xF, 0, 0.0f, (s32) ringCol, 0xFF);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F8DF0/object_water_entry_splash.s")
-#endif
 
 /* was func_150CBCDC */
 s32 splash_fade_in_update(u8 *arg0) {

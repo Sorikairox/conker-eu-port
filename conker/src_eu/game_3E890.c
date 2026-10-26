@@ -81,7 +81,6 @@ f32 D_8009650C = 5.8676557540893555;
 //     s8 sp104;
 // } structaaa;
 
-#ifdef NON_MATCHING
 /* P127: the stack blocks of level_fire_emitters_create, one struct so the layout is the N64 one (sp38 / sp54 / spAC) */
 typedef struct {
     f32 tail[7];            /* 0x00 (sp38): copied to the emitter's +0x170 */
@@ -209,11 +208,7 @@ void level_fire_emitters_create(void) {
         memcpy(e + 0x170, b.tail, 0x1C);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3E890/level_fire_emitters_create.s")
-#endif
 
-#ifdef NON_MATCHING
 /* obj_glow_smoke_attach records (stack images; pad bytes stay unset like the asm's) */
 typedef struct {
     u8 *obj;        /* 0x00 */
@@ -374,9 +369,6 @@ void obj_glow_smoke_attach(u8 *obj, u8 arg1, s32 arg2) {
     h2.w[2] = 0;
     l->smoke = light_create_with_ctrl((Header *) &h, (Header2 *) &h2, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 1, 0, arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3E890/obj_glow_smoke_attach.s")
-#endif
 
 /* was func_15011A78 */
 void obj_spawn_effect_85(struct127 *arg0, u8 arg1, s32 arg2) {

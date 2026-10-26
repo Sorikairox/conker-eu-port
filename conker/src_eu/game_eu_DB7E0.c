@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /*
  * P106: the level event script VM, hand C.
  *
@@ -362,11 +361,7 @@ s32 event_native_timer_down(s32 *args) {
     }
     return next;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DB7E0/event_vm_run.s")
-#endif
 
-#ifdef NON_MATCHING
 /* event_vm_abort: abort the running event script (see the VM comment). */
 /* was func_150AE760 */
 void event_vm_abort(void) {
@@ -387,16 +382,12 @@ s32 object_sway_update(u8 *obj) {
     *(f32 *) (obj + 0x28) = sinf(phase[1]) * 5.9140005f;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DB7E0/event_vm_abort.s")
-#endif
 
 /* was func_150AE83C */
 s32 object_handler_true(s32 arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 void mtxf_rot_scale2_trans(s32, f32, f32, f32, f32, f32, f32, f32, f32);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
@@ -475,6 +466,3 @@ u8 *object_quad_vtx_build(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DB7E0/object_quad_vtx_build.s")
-#endif

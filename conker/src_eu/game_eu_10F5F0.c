@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 extern f32 D_80088D30[4];
 extern f32 D_80088D40[4];
 extern f32 D_80088D50[4];
@@ -42,6 +41,3 @@ void map_door_lights_update(u8 *obj) {
         *(u32 *) (obj + 0x84) |= 0x80000000;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F5F0/map_door_lights_update.s")
-#endif

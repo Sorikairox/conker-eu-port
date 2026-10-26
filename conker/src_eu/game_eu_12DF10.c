@@ -33,7 +33,6 @@ void obj_timer_link_spawn(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 // linked_obj_event_48: event handler of an object whose link record sits at +0x28 ({ s32 id, u8 key }): event 0x48 removes the
 // object (node_destroy) when the event's record matches by id or by key; any other event goes to the common
 // handler effect_node_link_message.
@@ -49,9 +48,6 @@ void obj_timer_link_handle_event(struct102 *obj, u8 *ev, u8 type) {
         effect_node_link_message((s32) ev, type, (s32) link, (s32) (link + 4), (s32) obj);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12DF10/obj_timer_link_handle_event.s")
-#endif
 
 /* was func_1510083C */
 void obj_timer_link_update(u8 *arg0)

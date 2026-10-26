@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 setup_entry_find_by_id(u8);
 struct127 *obj_find_by_setup_id(u8);
 s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
@@ -34,11 +33,7 @@ s32 script_entity_object_id(s32 entity, s32 unused) {
     }
     return idx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C5530/script_entity_object_id.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 obj_death_resolve(struct127 *);
 void obj_remove(struct127 *arg0, s32 arg1);
 extern u8 D_800D2520;
@@ -65,11 +60,7 @@ s32 script_object_remove(s32 id, s32 *args) {
     }
     return 999999;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C5530/script_object_remove.s")
-#endif
 
-#ifdef NON_MATCHING
 f32 sinf(f32);
 f32 cosf(f32);
 void obj_drop_carried(struct127 *);
@@ -896,10 +887,6 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C5530/event_action_object.s")
-#endif
-#ifdef NON_MATCHING
 /* Object query handler: entry 1 of event_dispatch's handler table D_80088838 (event ids 0x2xxx), called as
  * handler(id & 0xFFF, cmd, args) with args = D_800D3380 = {id, cmd, x1, x2, ...} (args[2] is the first extra
  * argument; D_800D3C60 = the number of words). `id` names an object (obj_find_by_spawn). 0xB7 asks setup_entry_find_by_id,
@@ -1431,6 +1418,3 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C5530/event_query_object.s")
-#endif

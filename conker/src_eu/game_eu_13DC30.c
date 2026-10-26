@@ -5,7 +5,6 @@
 s32 object_sound_position_cb();
 
 
-#ifdef NON_MATCHING
 Gfx *gfx_fill_rect_colour(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 r, u8 g, u8 b);
 u8 *view_frame_clear(u8 *);
 s32 sky_level_distance(f32 arg0, f32 arg1, f32 arg2, f32 arg3);
@@ -109,9 +108,6 @@ Gfx *view_background_draw(Gfx *gdl, s32 arg1) {
     gdl->words.w0 = 0xD9FFFFFF;
     return gdl + 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/view_background_draw.s")
-#endif
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 /* was func_1511084C */
 void matrix_rotate_ypr(f32 (*arg0)[4], f32 arg1, f32 arg2, f32 arg3) {
@@ -131,7 +127,6 @@ void camera_view_rotation_matrix(s32 arg0, f32 (*arg1)[4], f32 arg2, f32 arg3, f
     mtxf_mul(arg1, (f32 (*)[4])((u8 *)D_800BE628 + arg0 * 0x180 + 0xBC), arg1);
 }
 
-#ifdef NON_MATCHING
 Gfx *render_fill_rect_clamped(Gfx *gdl, s32 ulx, s32 uly, s32 lrx, s32 lry);
 extern u8 D_800DC2D8[];
 
@@ -162,9 +157,6 @@ Gfx *view_clear_level_colour(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, 
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/view_clear_level_colour.s")
-#endif
 /* was func_15110AC4 */
 Gfx *gfx_fill_rect_colour(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 r, u8 g, u8 b) {
     gDPPipeSync(gdl++);
@@ -175,7 +167,6 @@ Gfx *gfx_fill_rect_colour(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 r
 }
 
 extern u8 D_800DC2D8[];
-#ifdef NON_MATCHING
 // view_border_clear: camera callback D_80089578[3] (dispatcher view_background_draw passes 8 arguments; only gdl is used).
 // On levels 0x1B / 0x1E, and on 0x31 while D_800DBFF0's record +0x3D4 has byte +0x78 == 3, fills the rectangle
 // (2, 0)..(D_800BE620 - 2, D_800BE624) with the level colour D_800DC2D8 (gfx_fill_rect_colour); otherwise draws nothing.
@@ -188,16 +179,7 @@ Gfx *view_border_clear(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 ro
     }
     return gdl;
 }
-#else
-Gfx *view_border_clear(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    if ((D_800BE9F0 == 0x1B) || (D_800BE9F0 == 0x1E) || ((D_800BE9F0 == 0x31) && (*(u8 *)((u8 *)D_800DBFF0->unk3D4 + 0x78) == 3))) {
-        arg0 = gfx_fill_rect_colour(arg0, 2, 0, D_800BE620 - 2, D_800BE624, D_800DC2D8[0], D_800DC2D8[1], D_800DC2D8[2]);
-    }
-    return arg0;
-}
-#endif
 
-#ifdef NON_MATCHING
 extern u8 D_800BEEE2;
 
 /* was func_15110C28 */
@@ -255,10 +237,6 @@ u8 *view_frame_clear(u8 *arg0) {
     }
     return var_a0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/view_frame_clear.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_15110E44 */
 s32 sky_level_distance(f32 arg0, f32 arg1, f32 arg2, f32 arg3) {
     struct {
@@ -363,10 +341,6 @@ block_46:
     }
     return var_v1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/sky_level_distance.s")
-#endif
-#ifdef NON_MATCHING
 /* P188: one face of the sky box (D_800A3170, 16 bytes): texture size in texels and two opposite corners; the axis
  * the face is perpendicular to is the one whose coordinate the corners share */
 typedef struct {
@@ -384,8 +358,6 @@ extern s32 D_800DC2B8[];
 extern s32 D_800DC2E0;
 /* (one line: tools/port/protocheck.py reads single-line prototypes) */
 Gfx *sky_box_face_build(Gfx *gdl, s32 *vtx, s32 tex, s32 arg3, s32 arg4, u32 w, u32 h, u32 step_s, u32 step_t, f32 x, f32 y, f32 z, s32 axis, f32 (*view)[4], s32 dist, s32 *count, s32 *first, SkyLoad *loads, s32 *last_fmt, u8 *arg19, u8 *arg20, s16 *tlut_offset, u8 *tlut_count, u8 *tile, s32 face);
-#endif
-#ifdef NON_MATCHING
 /* P203 */
 s32 view_sphere_depth(f32 *m, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far);
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
@@ -578,11 +550,7 @@ Gfx *sky_box_face_build(Gfx *gdl, s32 *vtx, s32 tex, s32 arg3, s32 arg4, u32 w, 
     *vtx = vbuf;
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/sky_box_face_build.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P133 */
 void heap_free(s32);
 void texture_unref_age3(s32);
@@ -620,11 +588,7 @@ void overlay_mode_set(s32 mode) {
     D_800B0DF0->unk9 = mode;
     asset_load_ptr(&D_800DC2B0, 2, 0xD, D_800B0DF0->unk9);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/overlay_mode_set.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P136 */
 void *allocate_memory(s32, s32, s32, s32);
 s32 random_int(void); /* random */
@@ -676,11 +640,7 @@ void star_field_generate(void) {
         star[6] = (u32) random_int() % 5U;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/star_field_generate.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P188 */
 
 /*
@@ -908,11 +868,7 @@ Gfx *sky_box_draw(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/sky_box_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s16 D_800895D4;
 extern f32 D_800DC2F0;
 
@@ -1088,10 +1044,6 @@ void world_object_turn_to_player(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_object_turn_to_player.s")
-#endif
-#ifdef NON_MATCHING
 extern u8 D_800C3A7C;
 extern f32 D_800D9F3C;   /* default draw distance of the world records */
 extern u8 D_800DA030[];  /* per player: 0x40-byte view matrix for camera_view_test_sphere */
@@ -1211,11 +1163,7 @@ void world_records_build_visible(s32 view) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_records_build_visible.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_15113700 */
 void world_records_flag_active(void) {
     s32 var_v0;
@@ -1240,10 +1188,6 @@ void world_records_flag_active(void) {
         } while (var_v0 < D_800DC320);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_records_flag_active.s")
-#endif
-#ifdef NON_MATCHING
 void mtx_set_identity(Mtx *arg0);
 void world_record_build_matrix(f32 (*arg0)[4], u8 *arg1);
 extern s32 D_800895E0[];     /* per group: pointer to the group's entry list pointer (entries: u16 record id, u16) */
@@ -1315,11 +1259,7 @@ void world_records_update_matrices(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_records_update_matrices.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 fog_identity_stub(s32 arg0, s32 arg1);
 u8 *light_write_light_cmds(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4);
 s32 world_mesh_draw(s32, u8 *, s32, s16, s32, s32);
@@ -1369,10 +1309,6 @@ Gfx *world_meshes_draw_player(Gfx *arg0, s32 arg1, s16 arg2) {
     *(s32 *) (gdl + 0x10) = 0xD9FFFFFF;
     return (Gfx *) (gdl + 0x18);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_meshes_draw_player.s")
-#endif
-#ifdef NON_MATCHING
 /* P183 */
 Gfx *tint_emit_prim_env_colors(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3);
 u8 *segment_override_emit(u8 *arg0, s32 arg1);
@@ -1491,9 +1427,6 @@ s32 world_mesh_draw(s32 arg0, u8 *obj, s32 mtx, s16 player, s32 unused, s32 pass
     }
     return (s32) gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_mesh_draw.s")
-#endif
 
 extern u8 D_800C3A7C;
 s32 cutscene_room_has_actor(s32, s32);
@@ -1535,7 +1468,6 @@ void world_records_update_shadows(void) {
     }
 }
 
-#ifdef NON_MATCHING
 /* the D_800DBEF4 record fields world_records_run_callbacks uses (0xA0 bytes) */
 typedef struct {
     u8  pad0[0x38];
@@ -1611,9 +1543,6 @@ void world_records_run_callbacks(s32 arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_records_run_callbacks.s")
-#endif
 
 extern s32 *D_800DC3C4;
 
@@ -1653,7 +1582,6 @@ loop:
     return 0;
 }
 
-#ifdef NON_MATCHING
 void world_object_timer_update(struct127 *, s32);
 extern s32 *D_800DC3C4;
 typedef void (*fn15114708)(u8 *, struct127 *, u8 *, void *);
@@ -1696,10 +1624,6 @@ void world_records_dispatch_touches(void) {
         e[0x4F] &= 0x73;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_records_dispatch_touches.s")
-#endif
-#ifdef NON_MATCHING
 /* P136 */
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 
@@ -1762,11 +1686,7 @@ void world_object_rotate_point(s32 idx, f32 *px, f32 *py, f32 *pz) {
     *py += ry;
     *pz += rz;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_object_rotate_point.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P133 */
 void world_object_rotate_point(s32, f32 *, f32 *, f32 *);
 extern f32 D_800A3330;   /* world-object timer scale */
@@ -1795,9 +1715,6 @@ void world_object_timer_update(struct127 *arg0, s32 idx) {
         *(u16 *) (obj + 0x7A) = t;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_object_timer_update.s")
-#endif
 
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 /* was func_15114E28 */
@@ -1820,7 +1737,6 @@ void world_record_build_matrix(f32 (*arg0)[4], u8 *arg1) {
     mtxf_mul(sp20, arg0, arg0);
 }
 
-#ifdef NON_MATCHING
 // world_record_find: returns the world-object record (0xA0 bytes, D_800DBEF4[0 .. D_800DC320 - 1]) whose id byte
 // +0x72 equals id, or NULL; id 0 never matches. Scene tracks with ref kind 3 and scene event 5 / 3 look records up here.
 /* was func_151149AC */
@@ -1839,11 +1755,7 @@ u8 *world_record_find(u8 id) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_record_find.s")
-#endif
 
-#ifdef NON_MATCHING
 /* Per-frame release of the per-entry blocks D_800DC328[i] (P15, hand C from the asm). Entries are the
  * 0xA0-byte D_800DBEF4 records. A disabled entry (flag 0x70 & 1) drops its block pointer unless it is
  * kept (0x6F & 0x80). Otherwise a live block is freed at once, or, for kept / type-3 entries (0x4E),
@@ -1873,9 +1785,6 @@ void world_records_release_blocks(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_records_release_blocks.s")
-#endif
 extern s32 D_800DC3C8;
 
 /* was func_15115114 */
@@ -1928,7 +1837,6 @@ s32 object_sound_position_cb(u8 *arg0, s32 arg1, s32 *arg2, s32 arg3) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* P136 */
 
 /*
@@ -1976,9 +1884,6 @@ s32 world_object_sound_play(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 fla
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/world_object_sound_play.s")
-#endif
 
 /* was func_15115484 */
 void object_sound_set_volume_pitch(s32 arg0, s32 arg1, s32 arg2) {

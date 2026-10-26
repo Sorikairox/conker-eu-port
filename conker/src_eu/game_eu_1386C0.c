@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P124: the 0x3C-byte effect template image_fx_spawn_template copies into a new effect record (+0x10); same layout as S59A0
  * in game_eu_1231B0.c. m2c had split it into 20 separate stack locals, which clang lays out on its own. */
 typedef struct {
@@ -73,6 +72,3 @@ void effect_spawn_sum_counter(s32 arg0, s32 arg1, s32 arg2) {
     t.u20 = 252.59259f;
     image_fx_spawn_template(&t);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1386C0/effect_spawn_sum_counter.s")
-#endif

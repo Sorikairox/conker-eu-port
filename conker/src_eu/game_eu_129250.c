@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* One star of the D_800DC2B0 field (8000 of them): the position is three halves of f32s (the upper 16 bits). */
 typedef struct {
     /* 0x00 */ s16 x;
@@ -152,6 +151,3 @@ Gfx *star_field_draw(Gfx *gdl, f32 (*mtx)[4]) {
     }
     return STAR_CACHED(g);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129250/star_field_draw.s")
-#endif

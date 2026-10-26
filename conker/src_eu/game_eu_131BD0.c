@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void hitinfo_from_obj_floor(s32 *, struct127 *);
 s32 collision_floor_probe(f32 *, s32, f32, s32 *);
 f32 random_float(void);
@@ -77,6 +76,3 @@ void ground_explosion(struct127 *src, struct127 *obj, f32 *pos, u8 kind, s32 fla
     r = random_float();
     spark_shower_spawn(pos, r * 4.0f + 12.0f, 1.6409999f, (u32) random_int() % 56 + 200, 0.0f, arg5, arg6);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_131BD0/ground_explosion.s")
-#endif

@@ -69,7 +69,6 @@ void aiscript_move_setup(void) {
     aiscript_apply_move_flags();
 }
 
-#ifdef NON_MATCHING
 /* was func_15075650 */
 void aiscript_move_setup_path_point(void) {
     u8 sp1F;
@@ -142,9 +141,6 @@ block_14:
     }
     aiscript_apply_move_flags();
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_move_setup_path_point.s")
-#endif
 // NON-MATCHING: 95% there
 // void aiscript_move_setup_path_point(void) {
 //     u8 phi_a0;
@@ -194,7 +190,6 @@ block_14:
 //     aiscript_apply_move_flags();
 // }
 
-#ifdef NON_MATCHING
 /* was func_15075884 */
 void aiscript_move_timed_to_point(void) {
     f32 temp_f0;
@@ -214,9 +209,6 @@ void aiscript_move_timed_to_point(void) {
     }
     D_800D154C->unk44 = 2.0f * (temp_f0 / var_f2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_move_timed_to_point.s")
-#endif
 // NON-MATCHING: array index is wrong
 // void aiscript_move_timed_to_point(void) {
 //     f32 temp_f0;
@@ -233,7 +225,6 @@ void aiscript_move_timed_to_point(void) {
 //     D_800D154C->unk44 = 2.0f * (temp_f0 / D_800D1891);
 // }
 
-#ifdef NON_MATCHING
 /* was func_15075938 */
 void aiscript_if_path_offset(void) {
     s32 var_a0;
@@ -276,9 +267,6 @@ block_16:
         aiscript_branch((s32) D_800D1890);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_if_path_offset.s")
-#endif
 // NON-MATCHING: 2nd half ok, 1st is a mystery
 // void aiscript_if_path_offset(void) {
 //     u8 tmp;
@@ -491,7 +479,6 @@ void aiscript_set_jump(void) {
     D_800D154C->unk3A = D_800D1893;
 }
 
-#ifdef NON_MATCHING
 extern f32 D_8009A500; /* 1 / 12 */
 
 // path_jump_to_point: P210: script command: jump (ballistic) to point D_800D1891 of the object's path
@@ -518,9 +505,6 @@ void aiscript_jump_to_point(void) {
     D_800D154C->y_velocity = D_800D154C->gravity * t * 0.5f;
     D_800D154C->unk223 = 4;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_jump_to_point.s")
-#endif
 // NON-MATCHING: indexing is wrong
 // void aiscript_jump_to_point(void) {
 //     f32 temp_f12;
@@ -690,11 +674,7 @@ void aiscript_nop_b(void) {
 
 // ???
 void hitinfo_from_obj_floor(f32 *, struct127 *);
-#ifdef NON_MATCHING
 s32 lava_splash_effect(f32 *, f32 *, s32, s32); /* P183: s32 as its C definition (stale v0, unused) */
-#else
-void lava_splash_effect(f32 *, f32 *, s32, s32);
-#endif
 void emitter_stop_for_obj(struct127 *);
 
 /* was func_15076768 */
@@ -729,7 +709,6 @@ void aiscript_if_facing_target(void) {
     }
 }
 
-#ifdef NON_MATCHING
 int aiscript_find_by_kind(s32, s32);
 
 // find_visible_target: P210: script command: looks for the nearest object the current one can see: live (state,
@@ -782,9 +761,6 @@ void aiscript_find_visible_target(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_find_visible_target.s")
-#endif
 // NON-MATCHING: almost JUSTREG
 // void aiscript_find_visible_target(void) {
 //     u8 temp_s2;
@@ -886,7 +862,6 @@ void aiscript_set_xz_velocity(void) {
     D_800D154C->xz_velocity = D_800D1890;
 }
 
-#ifdef NON_MATCHING
 // object_set_scale: P210: script command: sets the current object's scale from the command bytes (two s16 in
 // hundredths: D_800D1890 / D_800D1891 = xz, D_800D1892 / D_800D1893 = y, low byte first; D_8009A504 = 0.01),
 // copies it to unk154 / unk158 and applies it with obj_set_scale.
@@ -901,9 +876,6 @@ void aiscript_set_scale(void) {
     D_800D154C->unk158 = D_800D154C->y_scale;
     obj_set_scale(D_800D154C, D_800D154C->xz_scale, D_800D154C->y_scale);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_set_scale.s")
-#endif
 // ???
 // void aiscript_set_scale(void) {
 //     s32 temp_a3;
@@ -1059,7 +1031,6 @@ void aiscript_set_field246(void) {
 }
 
 // ??
-#ifdef NON_MATCHING
 /* was func_15077404 */
 void aiscript_adjust_field246(void) {
     s16 var_v0;
@@ -1075,9 +1046,6 @@ void aiscript_adjust_field246(void) {
     }
     D_800D154C->unk246 = D_800D1890;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_adjust_field246.s")
-#endif
 /* was func_150774B4 */
 void aiscript_if_nav_arrived(void) {
     if ((D_800D154C->unk20F == D_800D154C->unk211) || (D_800D154C->unk211 == 0xFF)) {
@@ -1086,7 +1054,6 @@ void aiscript_if_nav_arrived(void) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 rail_point_pick(f32, f32, f32, s8, s8, u8 *, u8 *); /* P98: from the asm (f12, f14, a2 = z bits, a3, 3 stack words) */
 s32 rail_route_next(u8, s8, s8, u8 *, u8 *);
 s32 rail_node_position(s32, f32 *, f32 *, f32 *);
@@ -1233,9 +1200,6 @@ block_28:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_nav_next_node.s")
-#endif
 /* was func_150778F0 */
 void aiscript_path_advance(void) {
     u8 var_v0 = D_800D2528[D_800D154C->unk13F] - 1;
@@ -1393,7 +1357,6 @@ void aiscript_set_field24f(void) {
     D_800D154C->unk250 = D_800D1891;
 }
 
-#ifdef NON_MATCHING
 /* was func_15077F64 */
 void aiscript_turn_to_point_react(void) {
     u8 sp1E;
@@ -1419,9 +1382,6 @@ void aiscript_turn_to_point_react(void) {
         obj_start_hit_reaction(D_800D154C, var_a1, temp_t6 & 0xFF);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_turn_to_point_react.s")
-#endif
 // NON-MATCHING: what is D_800D2104 ???
 // void obj_start_hit_reaction(s32, s32, u8);
 // void aiscript_turn_to_point_react(void) {
@@ -1570,7 +1530,6 @@ void aiscript_jump(void) {
     aiscript_branch(D_800D1890);
 }
 
-#ifdef NON_MATCHING
 f32 math_cos_u8(u8);
 
 // path_point_from_object: P210: script command: sets point D_800D1890 & 0x3F of the current object's path
@@ -1619,9 +1578,6 @@ void aiscript_path_point_from_target(void) {
     pt = (s16 *)(D_800D2104[D_800D154C->unk13F] + D_800D1890 * 8 + 8);
     pt[2] = z;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_path_point_from_target.s")
-#endif
 /* was func_1507879C */
 void aiscript_if_target_2d0_x(void) {
     struct197 *temp_v0 = D_800CC2D0[D_800D154C->unk222].unk2D0;
@@ -1671,7 +1627,6 @@ void aiscript_copy_target_2d0_pos(void) {
 }
 
 // requires jump table
-#ifdef NON_MATCHING
 /* P183 */
 f32 math_atan2f(f32, f32);
 extern u8 D_800CC9D4[];
@@ -1780,9 +1735,6 @@ s32 aiscript_test_object_value(s32 idx) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_test_object_value.s")
-#endif
 
 /* was func_1507900C */
 void aiscript_if_value(void) {
@@ -1890,7 +1842,6 @@ void aiscript_send_event(void) {
     char_fx_send_event(D_800D154C, tmp0, tmp1, tmp2);
 }
 
-#ifdef NON_MATCHING
 /* was func_150793D8 */
 void aiscript_random_point_near_player(void) {
     struct {
@@ -1935,9 +1886,6 @@ void aiscript_random_point_near_player(void) {
     (*(s16 *)((u8 *)((D_800D2104[D_800D154C->unk13F] + (D_800D1890 * 8))) + 8)) = var_v1_2;
     (*(s16 *)((u8 *)((D_800D2104[D_800D154C->unk13F] + (D_800D1890 * 8))) + 0xC)) = var_t0_2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_random_point_near_player.s")
-#endif
 /* was func_15079570 */
 void aiscript_aim_jump_at_target(void) {
     f32 dist;
@@ -2059,7 +2007,6 @@ u16 aiscript_path_point_angle(s32 arg0) {
 }
 
 // requires jump table
-#ifdef NON_MATCHING
 /* obj_slot_by_setup_id (s32 (u8), game_eu_AF2A0) is used undeclared in this file, like its other callers here */
 int aiscript_find_by_kind(s32, s32);
 u16 aiscript_path_point_angle(s32 arg0);
@@ -2159,9 +2106,6 @@ void aiscript_object_var_cmd(void) {
             break;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_object_var_cmd.s")
-#endif
 
 /* was func_15079F24 */
 void aiscript_set_field48(void) {
@@ -2182,7 +2126,6 @@ void aiscript_set_field224(void) {
     D_800D154C->unk226 = D_800D1893;
 }
 
-#ifdef NON_MATCHING
 int aiscript_find_by_kind(s32, s32);
 extern f32 D_8009A5A4; /* 0.7 */
 
@@ -2216,9 +2159,6 @@ void aiscript_follow_player_speed(void) {
     aiscript_mode3();
     D_800D154C->unkF4 |= 0x40;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_follow_player_speed.s")
-#endif
 // NON-MATCHING: JUSTREG
 // void aiscript_follow_player_speed(void) {
 //     s16 phi_v1;
@@ -2482,7 +2422,6 @@ void aiscript_attach_to_id(void) {
 }
 
 // requires jump table
-#ifdef NON_MATCHING
 extern f32 D_8009A5CC; /* 65536 / (2 pi) */
 /* IDO's f32 -> u32 conversion (cvt.w.s, then 2^31 offset): -1 for NaN, values <= -1 and >= 2^32 */
 #define P210_F2U(v) (((v) > -1.0f && (v) < 4294967296.0f) ? (u32)(v) : 0xFFFFFFFF)
@@ -2533,9 +2472,6 @@ void aiscript_set_heading(void) {
             break;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_set_heading.s")
-#endif
 
 /* was func_1507ACB0 */
 void aiscript_set_path_range(void) {
@@ -2896,7 +2832,6 @@ void aiscript_nop_e(void) {
 }
 
 // scary loops
-#ifdef NON_MATCHING
 /* P102 draft (game_A28B0.c is not a port-b file): producer of the script pointer that event_action_object (cases 0x14,
  * 0x35, 0x60) and func_1507B... (game_A28B0.c line ~423) store in object +0x218. */
 extern u8 D_8009A4E0[];          /* empty script */
@@ -2934,9 +2869,6 @@ int aiscript_find_by_kind(s32 unused, s32 kind) {
     }
     return *(s32 *)(list + i * 8);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/aiscript_find_by_kind.s")
-#endif
 /* was func_1507BC14 */
 void aiscript_run(struct127 *arg0) {
 

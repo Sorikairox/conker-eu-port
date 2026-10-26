@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A1D20[];
-#endif
 
 
-#ifdef NON_MATCHING
 extern u8 D_800CC82C;
 extern u8 D_800CC8BA;
 extern s32 *D_800DC3C4;
@@ -51,9 +49,6 @@ void player_item_drop_check(s32 arg0) {
     texscroll_set_speed(((u8 **) D_800BE4F0)[2], off, 0);
     texscroll_set_speed(((u8 **) D_800BE4F0)[3], -off, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/player_item_drop_check.s")
-#endif
 
 /* was func_150F320C */
 void drip_emitter_spawn(u8 *arg0) {
@@ -77,7 +72,6 @@ void drip_emitter_spawn(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 void obj_tint_set_flash(u8 *, s32, s32, s32, s32, s32, s32);
 void mtx_transform_points(f32 **, f32 **, void *, s32);
 s32 vec3_make_basis(f32 *, s32 *, s32 *);
@@ -228,9 +222,6 @@ void drip_emitter_update(u8 *obj) {
         }
     } while (*(s8 *) (st + 0xC) > 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/drip_emitter_update.s")
-#endif
 
 /* was func_150F3714 */
 void drip_emitter_on_message(s32 arg0, s32 arg1, u8 arg2) {
@@ -242,7 +233,6 @@ void drip_sprite_on_message(s32 arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, arg0 + 0x110, arg0 + 0x114, arg0);
 }
 
-#ifdef NON_MATCHING
 /* was func_150F3794 */
 s32 drip_sprite_update(u8 *arg0) {
     u8 *sp18;
@@ -272,9 +262,6 @@ s32 drip_sprite_update(u8 *arg0) {
     }
     return var_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/drip_sprite_update.s")
-#endif
 s32 sprite_quad_build_axes();
 
 /* P224: draw table D_8008A1BC entry; the asm returns sprite_quad_build_axes's v0 and the dispatcher uses it. */
@@ -328,7 +315,6 @@ f32 player_swim_anim_speed(s32 arg0, f32 arg1) {
     return var_f2;
 }
 
-#ifdef NON_MATCHING
 extern u16 D_800BEB30[];
 extern u8 *D_800CC6A4; /* controller: +0 buttons (u16), +2 stick x, +3 stick y (s8) */
 extern s32 D_800CC6A0;
@@ -667,11 +653,7 @@ void player_swim_update(struct127 *self) {
     }
     obj_start_anim(self, anim, anim_speed, 9.0f, 0.0f, 0.0f, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/player_swim_update.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
 
 /* was func_150F4970 */
@@ -707,6 +689,3 @@ void camera_update_state3b_view(struct108 *arg0) {
     }
     arg0->unk84 &= 0x7FFFFFFF;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/camera_update_state3b_view.s")
-#endif

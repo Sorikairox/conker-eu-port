@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* was func_1510B460 */
 s32 view_point_cull_test(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 *arg8, f32 *arg9) {
     f32 sp0;
@@ -33,6 +32,3 @@ s32 view_point_cull_test(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 a
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138C70/view_point_cull_test.s")
-#endif

@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 Gfx *allocate_memory(s32, s32, s32, s32);
 extern s32 D_800BEFC4;
 
@@ -25,6 +24,3 @@ void gfx_alloc_dl_buffers(void) {
     bufs[1] = b;
     D_800BEFC4 = (((u8 *)b - (u8 *)bufs[0]) >> 3) - 400;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_43640/gfx_alloc_dl_buffers.s")
-#endif

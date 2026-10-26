@@ -56,7 +56,6 @@ typedef struct {
 } struct_eu_1BAAA0;
 
 
-#ifdef NON_MATCHING
 /* P292 */
 void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
 void xform_points_array(u8 *, f32 *, f32 *, s32);
@@ -195,6 +194,3 @@ void object_ring_burst_particles(u8 *obj, u8 owner, s32 ownerArg) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/object_ring_burst_particles.s")
-#endif

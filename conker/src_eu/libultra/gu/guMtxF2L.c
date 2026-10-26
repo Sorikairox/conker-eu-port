@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P279: readable C for libultra's hand-asm guMtxF2L (guMtxF2L.s: 16 unrolled cvt.w.s, round to nearest even in the
  * default FCSR mode, not the truncating C cast of mtxutil.c). */
 /* mtx_rint: cvt.w.s in the default mode (ties to even) for |f| < 2^31, as VTX_WAVE_RINT in game_eu_D4C90.c */
@@ -26,6 +25,3 @@ void guMtxF2L(float mf[4][4], Mtx *m) {
         h[k] = (u32) v >> 16;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/gu/guMtxF2L/guMtxF2L.s")
-#endif

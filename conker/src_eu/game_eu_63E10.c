@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void mtxf_look_at(f32 mtx[4][4], f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy, f32 upz);
 
 /* read from memory: the multiplications by 0 / 1 must not be folded (IDO folds literal operands, which changes the
@@ -62,6 +61,3 @@ void obj_joint_look_at_camera(s32 arg0, s32 index, s32 joint, s32 turn) {
         mtx[2][1] *= OBJ_F32(obj, 0x150);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_63E10/obj_joint_look_at_camera.s")
-#endif

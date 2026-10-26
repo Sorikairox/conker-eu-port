@@ -6,7 +6,6 @@ typedef struct { u32 active:1; u32 flag:1; u32 kind:4; u32 pad:26; u32 count; u3
 extern SlotEnt D_800D3430[];
 
 
-#ifdef NON_MATCHING
 // slots_reset: clears the 10 slots of D_800D3430 (inactive, count and timer 0); level start (level_state_init).
 /* was func_150A00F0 */
 void event_timers_reset(void) {
@@ -18,11 +17,7 @@ void event_timers_reset(void) {
         v->timer = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CDDE0/event_timers_reset.s")
-#endif
 
-#ifdef NON_MATCHING
 extern u16 D_800888B0[]; /* timer period per kind */
 extern u16 D_800888BC[]; /* count modulus per kind (0: none) */
 
@@ -47,9 +42,6 @@ void event_timers_update(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CDDE0/event_timers_update.s")
-#endif
 
 /* was func_150A0744 */
 s32 event_timer_start(s32 arg0, u8 *arg1)

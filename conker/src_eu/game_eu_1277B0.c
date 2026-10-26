@@ -3,11 +3,7 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
-#else
-s32 event_dispatch(s32, s32, s32, s32);
-#endif
 /* was func_150F9FA0 */
 void camera_hook_event_4025(u8 *arg0)
 {

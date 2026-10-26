@@ -1,13 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_8009FBE0[];
 extern u8 D_8009FBE8[];
-#endif
 
 
-#ifdef NON_MATCHING
 void hitinfo_from_obj_floor(void *, u8 *);
 s32 obj_get_local_yaw_byte(struct127 *);
 extern s32 D_8009FBE4;
@@ -168,6 +166,3 @@ void obj_hit_impact_fx_spawn(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg
     sp.u78 = 1;
     emit_sparks_in_angle_range((struct_eu_15154488 *) &sp.u3C, &sp.u44, (s32) &sp.u10C, temp_s1 & 0xFF, arg3);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DE3A0/obj_hit_impact_fx_spawn.s")
-#endif

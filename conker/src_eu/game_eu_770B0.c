@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* was func_150498A0 */
 void math_spring_approach(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5) {
     f32 sp4;
@@ -35,10 +34,6 @@ void math_spring_approach(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f3
     *arg0 = arg1;
     *arg2 = 0.0f;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_770B0/math_spring_approach.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_15049978 */
 void math_spring_approach_angle(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5) {
     f32 sp1C;
@@ -80,6 +75,3 @@ block_10:
     }
     math_wrap_deg_360(arg0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_770B0/math_spring_approach_angle.s")
-#endif

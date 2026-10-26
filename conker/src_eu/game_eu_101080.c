@@ -1,13 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void object_fire_cleanup(u8 *arg0);
 extern u8 D_800A4EA8[];
-#endif
 
 
-#ifdef NON_MATCHING
 /* fxrec_spawn spawn request (0x18 bytes) */
 typedef struct {
     /* 0x00 */ f32 pos[3];
@@ -287,11 +285,7 @@ s32 object_fire_spawn(struct127 *obj, u8 kind, s32 owner) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/object_fire_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 f32 vec3_length(s32);
 s32 motion_track_get_delta(s32, s32 *, u8 *);
 void smoke_puff_burst(f32 *pos, f32 *vel, f32 scale, u8 room, s32 owner);
@@ -474,11 +468,7 @@ s32 track_follow_record(u8 *obj) {
     *(f32 *) (st + 0x14) += (*(f32 *) (st + 0x18) - *(f32 *) (st + 0x14)) * D_800A0DDC_c[0];
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/track_follow_record.s")
-#endif
 
-#ifdef NON_MATCHING
 f32 vec3_length(s32);
 s32 motion_track_get_delta(s32, s32 *, u8 *);
 
@@ -597,10 +587,6 @@ s32 track_trail_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/track_trail_update.s")
-#endif
-#ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 gfx_geometry_mode_cached(s32, s32, s32);
 s32 gfx_env_color_cached(s32, s32, s32, s32, s32, s8 *);
@@ -860,10 +846,6 @@ u8 *track_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     }
     return var_s0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/track_trail_draw.s")
-#endif
-#ifdef NON_MATCHING
 u8 *attachment_find_by_slot(struct127 *, s32, s32);
 
 // object_fire_message: message handler of the object_fire_spawn effect object (D_8008A760 handler table). data = +0x98
@@ -896,11 +878,7 @@ void object_fire_message(u8 *obj, u8 *msg, u8 event) {
         *(u8 **) (data + 8) = attachment_find_by_slot(owner, (owner->id == 0x48) ? 0x7A : 0x79, 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/object_fire_message.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 model_node_points_to_world(struct127 *, s32, s32, void **, void **, s32);
 extern s32 D_800A0DA0;
 extern s32 D_800A0DAC;
@@ -932,9 +910,6 @@ s32 object_get_beam_ends(u8 *arg0, u8 *arg1, struct127 *arg2, s32 arg3) {
     *(f32 *)(arg1 + 8) = arg2->z_position;
     return 2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/object_get_beam_ends.s")
-#endif
 /* was func_150D50E4 */
 void object_fire_free(s32 arg0) {
     object_fire_cleanup(arg0);
@@ -947,7 +922,6 @@ void object_fire_free_alt(s32 arg0) {
     fxrec_die_free(arg0);
 }
 
-#ifdef NON_MATCHING
 void sfx_emitter_stop_by_callback(s32, s32, s32);
 s32 rocket_sound_update(u8 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *slot, u16 *sound);
 
@@ -974,9 +948,6 @@ void object_fire_cleanup(u8 *arg0) {
         node_destroy(temp_a0_2);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/object_fire_cleanup.s")
-#endif
 extern f32 D_800A0DE4;
 extern u8 D_800A0D90[];
 /* was func_150D51D4 */
@@ -993,7 +964,6 @@ s32 fire_emitter_flicker(u8 *arg0)
   return 1;
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 void vec3_from_angles_byte(s16, s16, f32, void *);
 extern f32 D_800A0DE8;
@@ -1100,10 +1070,6 @@ void smoke_puff_burst(f32 *pos, f32 *vel, f32 scale, u8 room, s32 owner) {
         n--;
     } while (n > 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/smoke_puff_burst.s")
-#endif
-#ifdef NON_MATCHING
 // rocket_sound_update: per-frame callback (sfx_emitter_start, same type as object_sound_follow_cam) of the three sounds
 // object_fire_spawn starts for its object (voice +0x18 = the object's Data3870, voice +0x1C = sound id). Target volume
 // and pitch per id: 0x5B3 follows the speed of data->obj (f32 +0x28): volume speed*25 (0 below 500, capped at 5000),
@@ -1223,6 +1189,3 @@ s32 rocket_sound_update(u8 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *sl
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/rocket_sound_update.s")
-#endif

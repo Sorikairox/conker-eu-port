@@ -21,7 +21,6 @@ typedef struct { u8 *str; s32 pad; } StrEnt_1516CDE8;
 extern StrEnt_1516CDE8 *D_800DD684;
 extern StrEnt_1516CDE8 *D_800DD688;
 
-#ifdef NON_MATCHING
 /* P155 */
 u8 *text_box_get_line(s32 *arg0, s32 arg1, s16 arg2);
 void text_measure_string(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3);
@@ -115,11 +114,7 @@ s32 text_box_open(s32 id, s32 player, s32 arg2, void (*callback)(s32, s32, s32),
     box[0xE] = 0;
     return (s32)box;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/text_box_open.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 mp3_stream_get_state(void);
 void text_box_place(u8 *box);
 extern u16 D_800BEB30[]; /* buttons pressed this frame, per player (0x8000 A, 0x4000 B) */
@@ -371,11 +366,7 @@ void text_box_update(u8 *box) {
     }
     text_box_place(box);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/text_box_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P170 */
 Gfx *sprite_load_texture(Gfx *gfx, u8 *header, s32 tmem, void *spr, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
 Gfx *sprite_draw_at_screen(Gfx *gfx, void *spr, f32 x, f32 y);
@@ -600,9 +591,6 @@ Gfx *text_box_draw(Gfx *gfx, u8 *box, s16 arg2) {
     }
     return text_box_draw_text(gfx, box, 0, 0, 0, (box[0x1A] * fade) >> 8);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/text_box_draw.s")
-#endif
 
 /* was func_1516CDE8 */
 u8 *text_box_get_line(s32 *arg0, s32 arg1, s16 arg2) {
@@ -631,7 +619,6 @@ u8 *text_box_get_line(s32 *arg0, s32 arg1, s16 arg2) {
     return p;
 }
 
-#ifdef NON_MATCHING
 /* P170 */
 Gfx *text_draw_string(Gfx *arg0, f32 arg1, f32 arg2, u8 *arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 argA);
 extern Gfx D_80085D30[]; /* text render state display list */
@@ -704,11 +691,7 @@ Gfx *text_box_draw_text(Gfx *gfx, u8 *box, u8 r, u8 g, u8 b, u8 a) {
     } while ((*(u8 **) (box + 0x24))[i++] != 0);
     return gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/text_box_draw_text.s")
-#endif
 
-#ifdef NON_MATCHING
 void camera_world_to_screen(s32 arg0, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz);
 void text_box_clamp_to_screen(u8 *, f32 *, f32 *, s32);
 extern u8 D_8009090C[]; /* box sprite header: u16 width +6, height +8 */
@@ -785,11 +768,7 @@ void text_box_place(u8 *box) {
         sinf(*(f32 *) (box + 0x58) + 3.14159274f) * (*(f32 *) (box + 0x3C) * 0.5f) * 1.04f + *(f32 *) (box + 0x60)
         - (f32) oy;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/text_box_place.s")
-#endif
 
-#ifdef NON_MATCHING
 extern u16 D_80090912;
 extern u16 D_80090932;
 
@@ -853,9 +832,6 @@ void text_box_clamp_to_screen(u8 *arg0, f32 *arg1, f32 *arg2, s32 arg3) {
         *arg2 = (f32) (s32) *arg2;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/text_box_clamp_to_screen.s")
-#endif
 /* was func_1516D850 */
 void text_box_close_now(u8 *arg0) {
     if ((arg0 != NULL) && (arg0[0] == 0x51)) {

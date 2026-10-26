@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void mp3_stream_stop(void);
 void mp3_stream_set_volume(s32, s32);
 extern s32 D_800D3C60;
@@ -35,9 +34,6 @@ s32 event_action_stream(s32 arg0, s32 arg1, u8 *arg2) {
         return 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC330/event_action_stream.s")
-#endif
 /* was func_1509EBD0 */
 s32 event_query_stream(s32 arg0, s32 arg1, s32 arg2) {
     s32 ret = 0;
@@ -48,7 +44,6 @@ s32 event_query_stream(s32 arg0, s32 arg1, s32 arg2) {
     return ret;
 }
 
-#ifdef NON_MATCHING
 void music_play_song(s32, s32, s32);
 void music_stop_song(s32, s32);
 extern s32 D_800D3C60;
@@ -93,9 +88,6 @@ s32 event_action_music(s32 arg0, u32 arg1, u8 *arg2) {
         return 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC330/event_action_music.s")
-#endif
 /* was func_1509ED80 */
 s32 event_query_music(s32 arg0, s32 arg1, s32 arg2) {
     switch (arg1) {

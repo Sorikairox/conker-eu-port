@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void mtx_transform_points(f32 **, f32 **, void *, s32);
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
@@ -107,9 +106,6 @@ u8 *gun_barrel_fire(u8 *obj, u8 side, u8 room, s32 owner) {
                   random_float() * D_800A1934 + 4000.0f, muzzle, 0xFF, 0, -1, room, owner);
     return tracer;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_119C50/gun_barrel_fire.s")
-#endif
 
 /* was func_150EC954 */
 s32 gun_tracer_can_hit(u8 *arg0, u8 *arg1) {

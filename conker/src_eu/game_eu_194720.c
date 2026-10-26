@@ -37,7 +37,6 @@ void flash_blades_spawn(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg
     }
 }
 
-#ifdef NON_MATCHING
 extern s32 D_8008CDEC;
 void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 
@@ -114,9 +113,6 @@ void flash_blades_update(u8 *obj) {
         node_destroy((struct102 *) obj);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_194720/flash_blades_update.s")
-#endif
 
 extern Vtx D_8008B780[];
 

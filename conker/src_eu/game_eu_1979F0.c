@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void collision_select_area(s32);
 s32 collision_level_nearest_height(s32, s32, s32, s32 *);
 void shared_dl_release(s32);
@@ -144,11 +143,7 @@ void falling_debris_update(u8 *obj) {
         node_destroy((struct102 *) obj);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1979F0/falling_debris_update.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_800A70A8;
 extern s32 D_8008CE7C;
 
@@ -209,9 +204,6 @@ void particle_ground_splash_check(u8 *arg0) {
         (*(s16 *)((u8 *)arg0 + 0x28)) = (s16) (s32) ((f32) (*(s16 *)((u8 *)arg0 + 0x28)) * D_800A70A8);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1979F0/particle_ground_splash_check.s")
-#endif
 s32 decal_spawn_at(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 /* was func_1516AAA8 */

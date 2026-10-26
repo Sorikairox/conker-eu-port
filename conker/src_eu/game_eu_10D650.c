@@ -17,7 +17,6 @@ s32 level_part_is_active(s32 arg0) {
     return 0;
 }
 
-#ifdef NON_MATCHING
 void level_anim_frame_counter_tick(s32 arg0, s32 arg1);
 void trigger_set_disabled(s32, s32);
 void trigger_set_position(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
@@ -106,9 +105,6 @@ void level_lights_and_scroll_update(s32 arg0) {
         dl[j * 2] = 0xF2000000 | ((hi & 0xFFF) << 12) | (lo & 0xFFF);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10D650/level_lights_and_scroll_update.s")
-#endif
 
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 extern s32 D_800906D4[];
@@ -220,7 +216,6 @@ s32 mat_hit_flash_update(u8 *arg0, u8 *arg1) {
     return 0;
 }
 
-#ifdef NON_MATCHING
 s32 object_arc_to_surface_spawn(u8 *, s16, s16, s16, s32, f32, f32, s32, s32, s8 *, s32, s32);
 void obj_angle_point_effect(u8 *, s16, s16, u8, s32);
 
@@ -295,9 +290,6 @@ void fx_flicker_lights_update(u8 *arg0) {
         (*(s16 *)((u8 *)sp78 + 0xA)) = (s16) ((random_int() % 26U) + 0xF);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10D650/fx_flicker_lights_update.s")
-#endif
 /* was func_150E0840 */
 void effect_attach_to_obj(u8 *arg0, s32 arg1, u8 arg2) {
     effect_node_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
@@ -352,11 +344,7 @@ void obj_emitter_trail_spawn(u8 *arg0, u8 arg1, s32 arg2) {
 }
 
 void vec3_from_angles_byte(s16, s16, f32, void *);
-#ifdef NON_MATCHING
 s32 particle_puff_spawn(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32); /* P95: f32 parameter */
-#else
-s32 particle_puff_spawn(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-#endif
 
 /* was func_150E0978 */
 void fx_debris_spray_vel(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
@@ -374,11 +362,7 @@ void fx_debris_spray_vel(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 a
     sp6C[3] += -arg3 * D_800BEDC8 * temp_f2;
     sp6C[4] += -arg4 * D_800BEDC8 * temp_f2;
     sp6C[5] += -arg5 * D_800BEDC8 * temp_f2;
-#ifdef NON_MATCHING
     particle_puff_spawn(&sp6C[6], sp6C, &sp6C[3], 0.986891f, (random_float() * 0.23f) + -0.337f, (random_float() * 200.0f) + 150.0f, ((u32) random_int() % 26U) + 0x28, (random_int() % 201U) + 0x37, 0x1E, 0x14, 0, -1, 0x34, 0x35, 0x34, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F7CA4E3) */
-#else
-    particle_puff_spawn(&sp6C[6], sp6C, &sp6C[3], 0x3F7CA4E3, (random_float() * 0.23f) + -0.337f, (random_float() * 200.0f) + 150.0f, ((u32) random_int() % 26U) + 0x28, (random_int() % 201U) + 0x37, 0x1E, 0x14, 0, -1, 0x34, 0x35, 0x34, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
-#endif
 }
 
 /* was func_150E0B78 */
@@ -410,21 +394,13 @@ void fade_by_camera_distance(u8 *arg0)
   *((s8 *) (((u8 *) arg0) + 0x8A)) = (s8) var_v0;
 }
 
-#ifdef NON_MATCHING /* P262: the C definition's exact types (game_eu_1306B0) */
+/* P262: the C definition's exact types (game_eu_1306B0) */
 void *attached_particle_spawn(u8 *, u8, f32 *, f32 *, f32 *, s16, u8, f32, u8 *, u8, s32, s16, u8, s32);
-#else
-s32 attached_particle_spawn(u8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, s32 *, s32, s32, s32, s32, s32);
-#endif
 s32 mtx_transform_points(f32 **, s32 **, s32, s32);
 extern u8 D_80088D28;
-#ifdef NON_MATCHING
 /* the rodata of level_lights_and_scroll_update.s (D_800A1340 / D_800A1358), gone from the NM build: local copies */
 static const f32 D_800A1340[2][3] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
 static const f32 D_800A1358[2][3] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
-#else
-extern f32 D_800A1340[][3];
-extern f32 D_800A1358[][3];
-#endif
 
 /* was func_150E0C58 */
 void obj_joint_spark_spray(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {

@@ -4,26 +4,12 @@
 
 
 s32 allocate_memory(s32, s32, s32, s32);
-#ifdef NON_MATCHING // the definition is void; one signature for wasm
+// the definition is void; one signature for wasm
 void heap_free(s32);
-#else
-s32 heap_free(s32);
-#endif
-#ifdef NON_MATCHING // P51: both definitions are void (NM C); one signature for wasm
+// P51: both definitions are void (NM C); one signature for wasm
 void anim_copy_keyframes(u8 *, s32, s32);
-#else
-s32 anim_copy_keyframes(u8 *, s32, s32);
-#endif
-#ifdef NON_MATCHING
 void anim_advance_frame(u8 *, f32, s32, s32); /* P59: void in the NM definition */
-#else
-s32 anim_advance_frame(u8 *, f32, s32, s32);
-#endif
-#ifdef NON_MATCHING
 void anim_eval_joint_matrices(s32 *, s32, u8 *, s32, s32, s16 *, s32, s32);
-#else
-s32 anim_eval_joint_matrices(s32 *, s32, u8 *, s32, s32, s16 *, s32, s32);
-#endif
 s32 mtx_f_to_l_batch(s32, u8);
 
 /* was func_1503F7A0 */
@@ -65,7 +51,6 @@ void animmodel_start_anim(u8 *arg0, s32 arg1, s32 arg2, f32 arg3, f32 arg4, s32 
     anim_start_entry(0, 0, arg0, 0, arg1, arg2, (s32) (*(u8 *)((u8 *)arg0 + 0x3F5)), arg3, arg4, 0.0f, 0.0f, arg5);
 }
 
-#ifdef NON_MATCHING
 s32 model_asset9_load_refcounted(s32, s32, s32, s32, s32, s32, s32 *);
 
 /* was func_1503F91C */
@@ -108,9 +93,6 @@ s32 animmodel_create(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
     animmodel_start_anim((u8 *) temp_s0, 1, 0, 1.0f, 0.0f, 0);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6CFB0/animmodel_create.s")
-#endif
 /* was func_1503FAA8 */
 void animmodel_free(u8 *arg0) {
     heap_set_block_tag(*(s32 **)(arg0 + 0x3E8), 4);

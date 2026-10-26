@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void face_eye_blink_update(u8 *);
 void face_anim_reset_default();
 s32 face_blink_allowed(u8 *);
@@ -9,10 +9,8 @@ s32 face_anim_entry_get(s32 arg0, s32 arg1);
 u32 face_anim_count(s32 arg0);
 s32 *face_anim_body_table(s32 arg0, s32 *arg1);
 void face_anim_start(struct127 *obj, u8 anim, u8 prio, u16 time, s32 arg4);
-#endif
 
 
-#ifdef NON_MATCHING
 /* P48: eye blink of object obj (+0x6A / +0x6B eyelid states, +0x6E countdown in frames of D_800BE9E4). Id 0x2B
  * and D_800C35EA == 1: nothing. A player-controlled object whose controller +0x120 is set keeps both eyes at 1.
  * When the countdown runs out (and +0x6C != 1) both states toggle; reopened eyes wait 10 + random % 140. */
@@ -48,11 +46,7 @@ void face_eye_blink_update(u8 *obj) {
         obj[0x6E] = 1;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/face_eye_blink_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* face_update_hide_mask (P57): for model types 0xF / 0x46 / 0x4C, the DL hide mask +0x94 from the selector bytes +0x6C / +0x6D:
  * bits 1..6 set, then one of 8 / 0x10 / 4 (first selector 0 / 1 / other) and 0x20 / 0x40 / 2 (second) cleared.
  * Selector: >= 10: (v - 10) == 5 -> 0, == 1 -> 1, else 2; below 2: v + 1; else v. */
@@ -85,11 +79,7 @@ void face_update_hide_mask(struct127 *arg0) {
     else if (s[1] == 1) *(u32 *)(o + 0x94) &= ~0x40;
     else *(u32 *)(o + 0x94) &= ~2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/face_update_hide_mask.s")
-#endif
 
-#ifdef NON_MATCHING
 void attachment_remove_by_slot(s32 arg0, s32 arg1);
 void face_anim_apply(struct127 *, s32);
 
@@ -121,11 +111,7 @@ void face_anim_set(u8 *arg0, s32 anim, s32 variant) {
         obj->unk135 = ((u8 *)face_anim_entry_get((s32)obj, anim))[3];
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/face_anim_set.s")
-#endif
 
-#ifdef NON_MATCHING
 void face_anim_play_body(s32, s32, s32);
 
 /* Apply the current animation (+0x6F) of `obj`: its entry (face_anim_entry_get) gives a model / frame pair for
@@ -162,9 +148,6 @@ void face_anim_apply(struct127 *obj, s32 variant) {
         obj->unk69 = ((u8 *) D_800D1C90[obj->id])[0x3C];
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/face_anim_apply.s")
-#endif
 
 s32 obj_current_part_model();
 
@@ -205,7 +188,6 @@ s32 face_blink_allowed(u8 *arg0)
 
 }
 
-#ifdef NON_MATCHING
 // P45: per-record animation / interaction timer step (after the state handler). +0x72 counts down by D_800BE9E4
 // (0xFFFE = frozen: return; 0xFFFF = forever); when face_blink_allowed says so, face_eye_blink_update; once +0x72 is 0 and
 // +0x70 != +0x6F, face_anim_reset_default. Records of type +5 == 2 are skipped.
@@ -238,10 +220,6 @@ void face_anim_timer_step(u8 *arg0) {
         face_anim_reset_default(arg0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/face_anim_timer_step.s")
-#endif
-#ifdef NON_MATCHING
 void attachment_remove_by_slot(s32 arg0, s32 arg1);
 void face_anim_apply(struct127 *, s32);
 
@@ -276,9 +254,6 @@ void face_anim_start(struct127 *obj, u8 anim, u8 prio, u16 time, s32 arg4) {
     obj->unk71 = prio;
     face_anim_apply(obj, arg4);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/face_anim_start.s")
-#endif
 /* was func_1507ECE8 */
 s32 face_anim_entry_get(s32 arg0, s32 arg1) {
     s32 *p;

@@ -180,7 +180,6 @@ void fire_handle_event(struct102 *arg0, u8 *arg1, u8 arg2)
   }
 }
 
-#ifdef NON_MATCHING
 u8 *cam_wobble_start_preset(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4);
 void vec2_from_angle_byte(s16 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 void vec3_from_angles_byte(s16 arg0, s16 arg1, f32 arg2, struct17 *arg3);
@@ -502,9 +501,6 @@ void fire_burn_update(u8 *arg0) {
         } while (1.0f < st->sparkAcc);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_126330/fire_burn_update.s")
-#endif
 
 extern u8 D_800A2010[][2];
 

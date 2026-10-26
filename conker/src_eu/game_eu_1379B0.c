@@ -134,7 +134,6 @@ struct260 *segment_effect_spawn(u8 *volatile arg0, s16 arg1, s8 arg2, s8 arg3, f
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 extern f32 D_800A28EC;          /* emission rate scale */
 extern f32 D_800A28D4[];        /* segment weights; [6] = total */
 extern f32 D_800A2938[];        /* segment start / end points (12-byte points, read as start = [i], end = [i + 1]) */
@@ -212,9 +211,6 @@ void segment_effect_update(u8 *fx) {
         ((void (*)(u8 *)) D_80089000[(s8) rec[0xC]])(fx);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1379B0/segment_effect_update.s")
-#endif
 
 /* was func_1510A8C4 */
 struct260 *vent_smoke_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
@@ -243,7 +239,6 @@ struct260 *vent_smoke_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 void mtx_transform_point_or_origin(void *arg0, void *arg1, void *arg2);
 s32 particle_spawn_basic(void *, u8, s32, u8, s32);
 
@@ -383,9 +378,6 @@ void vent_smoke_emitter_update(u8 *arg0) {
         rec->accum -= 1.0f;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1379B0/vent_smoke_emitter_update.s")
-#endif
 
 /* was func_1510ADF0 */
 void segment_effect_handle_event(u8 *arg0, struct212 *arg1, u8 arg2) {

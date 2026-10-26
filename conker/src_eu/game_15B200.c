@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* was func_1512DD50 */
 void camera_orbit_point_init(u8 *arg0) {
     struct {
@@ -61,9 +60,6 @@ void camera_orbit_point_init(u8 *arg0) {
     (*(f32 *)((u8 *)temp_v0 + 0x2C)) = 0.0f;
     (*(s8 *)((u8 *)temp_v0 + 0)) = (s8) (*(s32 *)((u8 *)temp_v1 + 0x1C));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15B200/camera_orbit_point_init.s")
-#endif
 // void camera_orbit_point_init(struct108 *arg0) {
 //     s32 pad;
 //     struct17 tmp;
@@ -105,7 +101,6 @@ void camera_orbit_point_init(u8 *arg0) {
 //     temp_v0->unk0 = (s8) temp_v1->unk1C;
 // }
 
-#ifdef NON_MATCHING
 void math_spring_approach(f32 *cur, f32 target, f32 *vel, f32 arg3, f32 arg4, f32 arg5);
 float sqrtf(float);
 
@@ -166,6 +161,3 @@ void camera_orbit_point_update(struct108 *arg0) {
         math_spring_approach((f32 *) (p + 0x300), c[16], (f32 *) (p + 0x3C8), c[10], c[11], *(f32 *) (p + 0x7B4));
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15B200/camera_orbit_point_update.s")
-#endif

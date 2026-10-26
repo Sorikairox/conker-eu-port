@@ -39,7 +39,6 @@ void cam_wobble_stop_at_half_cycle(u8 *arg0) {
     arg0[0x10] |= 2;
 }
 
-#ifdef NON_MATCHING
 extern s32 (*D_8008B730[])(u8 *);
 extern f32 (*D_8008B734[])(u8 *);
 extern f32 D_800A6F00; // 6 consecutive limits (all pi)
@@ -98,16 +97,12 @@ void cam_wobble_update(u8 *arg0) {
         node_destroy((struct102 *) arg0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/cam_wobble_update.s")
-#endif
 
 /* was func_15165454 */
 void cam_wobble_clear_offsets(void) {
     bzero(D_800DD210, 0x60);
 }
 
-#ifdef NON_MATCHING
 /* P177 */
 u8 *cam_wobble_spawn_params(u8 *arg0, s32 arg1, s8 arg2, s32 arg3, u8 arg4, s32 arg5);
 
@@ -268,11 +263,7 @@ u8 *cam_wobble_start_preset(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/cam_wobble_start_preset.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_15165B98 */
 u8 *cam_wobble_spawn_params(u8 *arg0, s32 arg1, s8 arg2, s32 arg3, u8 arg4, s32 arg5) {
     struct {
@@ -407,10 +398,6 @@ u8 *cam_wobble_spawn_params(u8 *arg0, s32 arg1, s8 arg2, s32 arg3, u8 arg4, s32 
     }
     return temp_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/cam_wobble_spawn_params.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_15165E4C */
 s32 cam_wobble_beh_envelope(u8 *arg0) {
     f32 temp_f0;
@@ -473,12 +460,8 @@ s32 cam_wobble_beh_envelope(u8 *arg0) {
     }
     return var_v1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/cam_wobble_beh_envelope.s")
-#endif
 f32 cam_wobble_fade_by_distance(void *arg0, void *arg1, s32 arg2, s32 arg3, f32 arg4);
 
-#ifdef NON_MATCHING
 /* P162: entry 1 of D_8008B734; cam_wobble_update (asm) stores the entry's f0 result, so this returns cam_wobble_fade_by_distance's
    f32 instead of void. */
 // object_distance_fade: fade factor of the object at obj + 0x108 (near / range / scale at +0x114 / +0x118 / +0x11C)
@@ -486,13 +469,7 @@ f32 cam_wobble_fade_by_distance(void *arg0, void *arg1, s32 arg2, s32 arg3, f32 
 f32 cam_wobble_distance_fade(u8 *arg0) {
     return cam_wobble_fade_by_distance(arg0, arg0 + 0x108, *(s32 *)(arg0 + 0x114), *(s32 *)(arg0 + 0x118), *(f32 *)(arg0 + 0x11C));
 }
-#else
-void cam_wobble_distance_fade(u8 *arg0) {
-    cam_wobble_fade_by_distance(arg0, arg0 + 0x108, *(s32 *)(arg0 + 0x114), *(s32 *)(arg0 + 0x118), *(f32 *)(arg0 + 0x11C));
-}
-#endif
 
-#ifdef NON_MATCHING
 f32 vec3_length(void *);
 
 /* was func_15166120 */
@@ -522,6 +499,3 @@ f32 cam_wobble_fade_by_distance(void * arg0_p, void * arg1_p, s32 arg2, s32 arg3
     }
     return var_f2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/cam_wobble_fade_by_distance.s")
-#endif

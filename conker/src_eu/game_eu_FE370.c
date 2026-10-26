@@ -3,11 +3,7 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
-#else
-s32 event_dispatch(s32, s32, s32);
-#endif
 void camera_set_followed_obj(struct108 *, s32);
 
 /* was func_150D0B60 */

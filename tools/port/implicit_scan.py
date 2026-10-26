@@ -15,6 +15,8 @@ Usage: tools/port/implicit_scan.py [--all] [--tsv OUT] [files...]
   a count of the rest; --all lists every implicit call site.
 Output TSV columns: file line callee nm_only float proto_hint
 A standing check: run after each conversion session; NM-relevant rows should be 0 (or listed).
+P329: the source has no NON_MATCHING / #else halves any more (matching build on branch exact-byte-decomp-wip), so
+every implicit call site is in the code the port compiles and counts as NM; the gate is 0 NM+float.
 """
 import os, re, subprocess, sys, glob
 from concurrent.futures import ThreadPoolExecutor
@@ -168,9 +170,8 @@ def main():
         nm = clang(f, True)
         if not nm:
             return f, []
-        base = clang(f, False)
-        nml = nm_lines(f)
-        return f, [(ln, fn, (ln in nml) or ((ln, fn) not in base)) for ln, fn in sorted(nm)]
+        # P329: the NON_MATCHING wrappers are gone, every line is port code: every implicit call counts as "NM"
+        return f, [(ln, fn, True) for ln, fn in sorted(nm)]
 
     with ThreadPoolExecutor(8) as ex:
         res = list(ex.map(one, files))

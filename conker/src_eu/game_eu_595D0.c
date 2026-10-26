@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 obj_get_player_alpha(struct127 *, s32);
 void obj_build_model_matrix(s32 arg0, s32 arg1);
 void obj_shadow_anim_step(s32 arg0);
@@ -17,7 +17,6 @@ void obj_tint_update(struct127 *arg0);
 void obj_floor_mesh_update(struct127 *arg0);
 s32 player_morph_blend(s32 arg0, s32 arg1, s32 arg2); /* P148: returns 0 / -1 (result unused) */
 extern u8 D_800C6A8F[];
-#endif
 
 typedef struct {
     /* 0x00 */ u8 pad0[0xA0];
@@ -29,7 +28,6 @@ typedef struct {
 } struct_eu_595D0;
 
 
-#ifdef NON_MATCHING
 u8 * obj_draw_ground_shadow(u8 *, s32, s16);
 u8 * obj_draw_part(u8 *, s32, s16, s32, s32);
 u8 * player_draw_slot8_strip(u8 *, s32, s16);
@@ -125,10 +123,6 @@ block_39:
     D_8003C8E0 = 0;
     return (Gfx *) (var_s2 + 8);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/objects_draw_pass.s")
-#endif
-#ifdef NON_MATCHING
 /* P41: per-object update of object arg1 (record arg0): clears +0x1D4 (the shadow / model pointer), type +5 == 5 →
  * obj_build_model_matrix(arg1, 1) only; type +4 == 0xFF or +5 == 3: nothing; +5 == 2: obj_shadow_anim_step. Otherwise the model setup
  * (obj_update_visibility, obj_build_model_matrix(arg1, 0) which sets +0x1D4, obj_bounds_from_skeleton), +0x1FC = 2 without a model, and the
@@ -180,10 +174,6 @@ void obj_update_one(struct127 *arg0, s32 arg1) {
         player_morph_blend(obj[0x134], obj[0x135], arg1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_update_one.s")
-#endif
-#ifdef NON_MATCHING
 void obj_select_next_flagged(void);
 void obj_update_one(struct127 *arg0, s32 arg1);
 void objects_update_carried(void);
@@ -256,11 +246,7 @@ void objects_update_all(void) {
     }
     D_800C4290 = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/objects_update_all.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 cutscene_obj_takes_part(struct127 *);
 s32 obj_get_player_alpha(struct127 *, s32);
 struct102 *blob_shadow_create(s32, struct127 *, s32, s32, s32);
@@ -311,9 +297,6 @@ void objects_update_blob_shadows(void) {
         var_s1 = (struct127 *)((u8 *)var_s1 + (0x32C));
     } while ((s32)var_s1 != (s32)&D_800D121C);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/objects_update_blob_shadows.s")
-#endif
 /* was func_1502C380 */
 void obj_mtx_buffer_reset(void) {
     D_800C42AC = D_800C42A8 = (&D_800C3E80)[D_800BE9C0];
@@ -330,7 +313,6 @@ s32 obj_shadow_kind(s32 arg0) {
     return temp_v1;
 }
 
-#ifdef NON_MATCHING
 u8 *sprite_load_texture(u8 *, u8 *, s32, void *, s32, s32, s32, s32, s32);
 u8 *sprite_draw_at_world_depth(u8 *arg0, u8 *arg1);
 extern u8 *D_8008CDEC[];
@@ -385,9 +367,6 @@ u8 *obj_draw_ground_shadow(u8 *gdl, s32 idx, s16 unused) {
     ((s32 *) gdl)[1] = (s32) D_800877A8;
     return gdl + 8;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_draw_ground_shadow.s")
-#endif
 
 extern u8 *D_8008CDEC[];
 
@@ -413,7 +392,6 @@ void obj_shadow_anim_step(s32 arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 void obj_set_type(s32, s32, s32);
 u8 obj_current_part_model(struct127 *);
 
@@ -481,11 +459,7 @@ void obj_select_lod(s32 i, s16 cam, s32 unused) {
         obj->unk1C8 = level;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_select_lod.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 cutscene_obj_takes_part(struct127 *);
 void obj_select_lod(s32, s16, s32);
 void obj_fog_alpha(u8 *, s32 *, s32);
@@ -557,9 +531,6 @@ u8 *obj_draw_part(u8 *gdl, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
     }
     return r;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_draw_part.s")
-#endif
 
 void obj_tint_get_colour(u8 *, s32 *, s32 *, s32 *, s32 *);
 
@@ -587,7 +558,6 @@ void obj_unpack_light_colours(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3, s32 *arg4,
     }
 }
 
-#ifdef NON_MATCHING
 u8 *obj_model_special_dl(u8 *arg0, s32 arg1);
 void model_keep_resident(u8 *arg0);
 u8 *obj_set_vertex_segments(u8 *, s32);
@@ -771,11 +741,7 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
     }
     return (Gfx *)g;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_draw_model_dl.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_1502D83C */
 void obj_ambient_colour(s32 arg0, u8 *arg1) {
     s32 temp_t1;
@@ -796,10 +762,6 @@ void obj_ambient_colour(s32 arg0, u8 *arg1) {
     (*(s32 *)((u8 *)arg1 + 4)) = 0xFF;
     (*(s32 *)((u8 *)arg1 + 0)) = 0xFF;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_ambient_colour.s")
-#endif
-#ifdef NON_MATCHING
 void mtxf_transform_point_w(f32 *mtx, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz, f32 *ow);
 extern f32 D_800D9F3C;
 extern f32 D_800D9F40;
@@ -842,11 +804,7 @@ void obj_fog_alpha(u8 *rec, s32 *col, s32 view) {
     }
     col[3] = (1.0f - t) * 255.0f;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_fog_alpha.s")
-#endif
 
-#ifdef NON_MATCHING
 void obj_anim_reset(struct127 *arg0);
 /* P51: per-frame key-frame copy for the skeleton evaluator anim_eval_joint_matrices. For the animation state a (arg0, or
  * object arg1's +0x2D0 after obj_anim_reset when its animation +0x84 is 0xFFFF) and each active slot k (2 with a
@@ -945,11 +903,7 @@ void anim_copy_keyframes(u8 *arg0, s32 arg1, s32 arg2) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/anim_copy_keyframes.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P48: joint-matrix count of model id: D_800C52F0[id], minus 4 for the ids of the asm's jump table
  * (jtbl_800971A8: 0x3B and 0x75 .. 0xB4 entries pointing at the "- 4" case). */
 /* was func_1502DE10 */
@@ -963,11 +917,7 @@ s32 model_joint_mtx_count(s32 id) {
             return D_800C52F0[id];
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/model_joint_mtx_count.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 model_load(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 s32 obj_anim_state_alloc(struct127 *, u16, s32, f32);
 s32 model_joint_mtx_count(s32);
@@ -1072,11 +1022,7 @@ void obj_build_model_instance(f32 (*m)[4], s32 arg1) {
     }
     D_800C429A += n;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_build_model_instance.s")
-#endif
 
-#ifdef NON_MATCHING
 void obj_build_model_instance(f32 (*mtx)[4], s32 arg1);
 extern s32 D_800C4294;
 /* P48: object arg0's model matrix. Skipped (nothing written) when the object is hidden for every player (+0x74 low
@@ -1191,9 +1137,6 @@ void obj_build_model_matrix(s32 arg0, s32 arg1) {
     }
     obj_build_model_instance(m, arg0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_build_model_matrix.s")
-#endif
 
 /* was func_1502E764 */
 void obj_mtx_buffer_flush(void) {
@@ -1203,7 +1146,6 @@ void obj_mtx_buffer_flush(void) {
     D_800C42B0 = 1;
 }
 
-#ifdef NON_MATCHING
 void obj_visibility_stub(s32 arg0, s32 arg1);
 s32 cutscene_obj_takes_part(struct127 *);
 s32 obj_zone_point_allowed(struct127 *, s32, s32);
@@ -1371,9 +1313,6 @@ block_37:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_update_visibility.s")
-#endif
 
 /* was func_1502ECEC */
 void obj_visibility_stub(s32 arg0, s32 arg1) {
@@ -1424,7 +1363,6 @@ void obj_tint_set_flash(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 ar
     (*(u8 *)((u8 *)arg0 + 0xA4)) = 6U;
 }
 
-#ifdef NON_MATCHING
 /* was func_1502EDEC */
 void obj_tint_update(struct127 *arg0) {
     s32 temp_lo;
@@ -1483,10 +1421,6 @@ void obj_tint_update(struct127 *arg0) {
         return;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_tint_update.s")
-#endif
-#ifdef NON_MATCHING
 /*
  * P71: colour (*r, *g, *b) and alpha *a of a model's tint block (+0xA4 kind, +0xA5..+0xA7 bytes, +0xA0 word).
  * 1: colour +0xA5..A7, alpha +0xA0 itself when < 0x100, else a pointer to a percentage (clamped 0..255) * 2.55.
@@ -1547,11 +1481,7 @@ void obj_tint_get_colour(u8 *rec, s32 *r, s32 *g, s32 *b, s32 *a) {
             break;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_tint_get_colour.s")
-#endif
 
-#ifdef NON_MATCHING
 /* obj_face_selector_target (P57): object arg0's mode byte +0x6A + arg1 folded to 0..2 (values 2 / 3 map to 0 / 1). */
 /* was func_1502F17C */
 s32 obj_face_selector_target(s32 arg0, s32 arg1) {
@@ -1562,11 +1492,7 @@ s32 obj_face_selector_target(s32 arg0, s32 arg1) {
     }
     return v;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_face_selector_target.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 obj_face_selector_target(s32, s32);
 void face_update_hide_mask(struct127 *);
 
@@ -1602,10 +1528,6 @@ void obj_face_selectors_step(s32 arg0) {
     } while (var_s1 != 2);
     face_update_hide_mask(&D_800CC2D0[arg0]);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_face_selectors_step.s")
-#endif
-#ifdef NON_MATCHING
 u8 *face_anim_entry_get(u8 *, s32);
 extern s32 D_800C5758;
 /* obj_set_vertex_segments (P57): segments 6 +0x18 / +0x1C / +0x28 / +0x2C of object arg1's model: vertex blocks
@@ -1656,11 +1578,7 @@ u8 *obj_set_vertex_segments(u8 *gdl, s32 arg1) {
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_set_vertex_segments.s")
-#endif
 
-#ifdef NON_MATCHING
 /* obj_follow_parent (P57): object arg0 attached to parent obj+0x65 (1-based): copy the parent's position
  * (its joint obj+0x5C translation when the parent has a skeleton +0x1D4), +0x180, z offset -4; unless
  * +0x101 & 0x20 the parent's +0x3C / +0x40 / angles; unless & 0x40 the bytes +7..+0xA, +0xF, +0xB.. */
@@ -1708,11 +1626,7 @@ void obj_follow_parent(s32 arg0) {
         o[0xB + i] = p[0xB + i];
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_follow_parent.s")
-#endif
 
-#ifdef NON_MATCHING
 void obj_carry_point(struct127 *arg0, f32 *x, f32 *y, f32 *z, s32 arg4);
 /* P48: objects attached to another one (+0x274 = its index + 1): y = +0x180, then obj_carry_point moves the position
  * (+0x14 / +0x18 / +0x1C) with the carrier (+0x19E passed along); y never goes below +0x180, which keeps the max. */
@@ -1734,11 +1648,7 @@ void objects_update_carried(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/objects_update_carried.s")
-#endif
 
-#ifdef NON_MATCHING
 extern u16 D_800C6318[];    /* per model: number of D_800C5C08 vertex ranges */
 
 /*
@@ -1842,9 +1752,6 @@ void obj_carry_point(struct127 *obj, f32 *x, f32 *y, f32 *z, s32 tri) {
     *y += ((w[1] + p[1][0][1]) - d[1]) - p[0][0][1];
     *z += ((w[2] + p[1][0][2]) - d[2]) - p[0][0][2];
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_carry_point.s")
-#endif
 
 u8 *allocate_memory(s32, s32, s32, s32);
 /* was func_1502FC38 */
@@ -1864,7 +1771,6 @@ void obj_save_prev_joint_mtx(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 void * obj_timer_scroll_tex_dl(void *, void *);
 extern s32 D_800C5758;
 
@@ -1915,10 +1821,6 @@ u8 *obj_model_special_dl(u8 *arg0, s32 arg1) {
     }
     return var_s0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_model_special_dl.s")
-#endif
-#ifdef NON_MATCHING
 #define OBJ_U8(obj, off) (*(u8 *) ((u8 *) (obj) + (off)))
 void obj_set_type(s32, s32, s32);
 void face_anim_reset_default(struct127 *);
@@ -1976,9 +1878,6 @@ void obj_apply_model_switch(struct127 *obj) {
     }
     face_anim_reset_default(obj);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/obj_apply_model_switch.s")
-#endif
 
 /* was func_15030060 */
 void model_keep_resident(u8 *arg0)

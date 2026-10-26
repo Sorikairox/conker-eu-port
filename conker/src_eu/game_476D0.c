@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 #include "libc/math.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void screen_clamp_rect(f32 *x0, f32 *y0, f32 *x1, f32 *y1);
 extern s32 D_800BEA58;
 extern s32 D_800BEA70;
@@ -17,10 +17,8 @@ extern u8 D_800BEA50[];
 s32 camera_rect_on_screen(s32);
 void camera_setup_perspective(s32, s32);
 void camera_projection_set_fov(s32, f32, f32, f32);
-#endif
 
 
-#ifdef NON_MATCHING
 s32 allocate_memory(s32, s32, s32, s32);
 s32 level_setup_screen_projection(s32);
 s32 camera_record_setup(s32, s32, s32, s32);
@@ -70,9 +68,6 @@ void viewports_init(s32 arg0, s32 arg1) {
     D_800BEA55 = 0;
     camera_set_screen_ortho(arg1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/viewports_init.s")
-#endif
 // NON-MATCHING: 80% there
 // void viewports_init(s32 arg0, s32 arg1) {
 //     s32 phi_s0;
@@ -146,7 +141,6 @@ void render_dl_buffers_init(void) {
 //     return tmp;
 // }
 
-#ifdef NON_MATCHING
 /* was func_1501A490 */
 s32 render_set_scissor(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     struct {
@@ -191,9 +185,6 @@ s32 render_set_scissor(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg
     }
     return (s32) var_s0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/render_set_scissor.s")
-#endif
 /* was func_1501A680 */
 Gfx *render_set_color_image(Gfx *arg0) {
     gDPSetColorImage(arg0++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_8002AAE8[D_800BE9C0]);
@@ -220,7 +211,6 @@ Gfx *render_fill_rect_clamped(Gfx *arg0, s32 a, s32 b, s32 c, s32 d) {
 }
 
 void func_150A7A00(f32 arg0, f32 arg1, s32 arg2, f32 arg3, f32 arg4, f32 arg5, f32* arg6, f32* arg7, f32* arg8, f32* arg9);
-#ifdef NON_MATCHING
 extern u8 D_800DA130[];
 void mtxf_transform_point_w(u8 *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 /* world_to_screen: projects (x, y, z) with view `view`'s matrix D_800DA130[view] (mtxf_transform_point_w) and maps it into
@@ -244,9 +234,6 @@ void camera_world_to_screen(s32 view, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32
     zv = (u8 *)D_800BE628 + (s16)view * 0x180 + D_800BE9C0 * 16;
     *sz = (*(s16 *)(zv + 0x4C) + pz * w * *(s16 *)(zv + 0x44)) * 32.0f;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/camera_world_to_screen.s")
-#endif
 // void camera_world_to_screen(s16 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6) {
 //     f32 sp34;
 //     f32 sp30;
@@ -266,7 +253,6 @@ void camera_world_to_screen(s32 view, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32
 //     *arg6 = (((f32) temp_v0_2->unk4C + (sp2C * sp28 * (f32) temp_v0_2->unk44)) * 32.0f);
 // }
 
-#ifdef NON_MATCHING
 /* Per-player camera record D_800BE628 + p * 0x180 for a screen split into n + 1 views: viewport w/h (+4/+8, from
  * D_800BEA58/D_800BEA70[n], minus 2 when split; the 2-player width also * D_800BEAD8), +0x64 aspect table
  * D_80083338[n], +0x68 = 2, base fov +0x6C (D_80096C98, 2 players: D_80096C94 * D_800BEAD8) / +0x70 = 50, current fov
@@ -366,9 +352,6 @@ s32 camera_record_setup(s32 p, s32 n, s32 zmax, s32 flag) {
     D_800BEA50[p] = p;
 }
 #undef CAMREC
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/camera_record_setup.s")
-#endif
 /* was func_1501AE94 */
 s32 camera_rect_on_screen(s32 arg0) {
     f32 w = (f32)D_800BE620 - 2.0f;
@@ -414,7 +397,6 @@ void screen_clamp_rect(f32 *x0, f32 *y0, f32 *x1, f32 *y1) {
     }
 }
 
-#ifdef NON_MATCHING
 extern f32 D_80096CA4;
 extern f32 D_80096CA8;
 void camera_projection_update(s32, f32, f32, f32, f32);
@@ -453,10 +435,6 @@ void camera_setup_perspective(s32 arg0, s32 arg1) {
     sp24 = temp_t4;
     camera_projection_update(arg0, sp34, (math_atan2f((*(f32 *)((u8 *)((D_800BE628 + sp28)) + 0x10)), sp38) * D_80096CA8) - (*(f32 *)((u8 *)((D_800BE628 + sp24)) + 0x70)), 1.0f, 0.0f);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/camera_setup_perspective.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1501B22C */
 void camera_compute_frustum_planes(s32 arg0) {
     f32 sp34;
@@ -495,9 +473,6 @@ void camera_compute_frustum_planes(s32 arg0) {
     (*(f32 *)((u8 *)temp_s0 + 0xA4)) = temp_f2_2;
     (*(f32 *)((u8 *)temp_s0 + 0xB0)) = (f32) -temp_f2_2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/camera_compute_frustum_planes.s")
-#endif
 // JUSTREG: I think?
 // void camera_compute_frustum_planes(s32 arg0) {
 //     f32 tmp0;

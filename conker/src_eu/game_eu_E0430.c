@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P197 */
 s32 debris_spray_spawn(void *spray, s32 mode, u8 view, s32 arg3);
 void spawn_arc_emit(f32 x, f32 y, f32 z, f32 r, s16 yaw, s16 a0, s16 a1, s16 count, u8 kind, s32 arg9, f32 argA,
@@ -252,11 +251,7 @@ s32 pipe_explode_effects(s32 pipe, s32 view) {
     sound_play_at(0x22, 0x7FFF, 0, 0, 0, (s32) p->pos[0], (s32) p->pos[1], (s32) p->pos[2], 1000, 3000);
     return 0; /* s32 for the caller game_eu_142E40.c (s32 (s32, s32)); nobody reads it (the asm leaves func_10010F88s v0) */
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0430/pipe_explode_effects.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P139 */
 /* P139: particle request passed to mdl_particle_spawn by the pipe-explode spawn handlers (0x7C bytes; same layout as
  * game_eu_103160.c's DebrisParticle). */
@@ -366,11 +361,7 @@ s32 pipe_explode_spawn_chunk(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 cx
     mdl_particle_spawn(&req, 3, 0xFF, 0, argB & 0xFF, 0);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0430/pipe_explode_spawn_chunk.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P139 */
 extern char D_8009FD38[];   /* "life" */
 extern char D_8009FD40[];   /* "../Effects/PipeExplode/pipeexplode.c" (one copy per tunable) */
@@ -494,11 +485,7 @@ s32 pipe_explode_spawn_debris(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 c
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0430/pipe_explode_spawn_debris.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P317: NM signature = D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 unused */
 /* was func_150B3B8C */
 s32 debris_ground_stop_update(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
@@ -537,9 +524,6 @@ s32 debris_ground_stop_update(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, 
     (*(f32 *)((u8 *)arg0 + 0x58)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x58)) * temp_f2);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0430/debris_ground_stop_update.s")
-#endif
 /* was func_150B3C6C */
 s32 trail_alpha_fade(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);
@@ -554,7 +538,6 @@ s32 trail_alpha_fade(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 struct210 *sprite_fx_spawn_cam(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, u8 argC, s32 argD);
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 extern s16 D_80088AA0[3];   /* splash colours (15, 16, 17) */
@@ -665,6 +648,3 @@ s32 trail_hit_splash(u8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
     trail_spawn((u8 *)&at, (s32)&shape, 0, 1, 7, 0, 0, 0, 0, 0, 0, (u8 *)&style, 0, obj[0xC], obj[1]);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0430/trail_hit_splash.s")
-#endif

@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-#ifdef NON_MATCHING
 /* Impact effect kinds read by impact_effect_spawn (its .s owns this rodata; the NM link drops it). */
 typedef struct {
     u16 sparkKind; /* +0 spark record kind for sprite_vtx_quads_init, 0 = none */
@@ -27,9 +26,7 @@ static const ImpactKind D_800A1440[20] = {
 static const u16 D_800A14E0[3][2] = { { 0x80, 0x60 }, { 0x100, 0x100 }, { 0x180, 0x180 } }; /* spark size per impact size */
 static const f32 D_800A14EC[3] = { 0.33f, 1.0f, 2.0f }; /* 0x3EA8F5C3, 0x3F800000, 0x40000000: debris count scale */
 static const f32 D_800A14F8[1] = { -10000.0f }; /* 0xC61C4000 (array: IDO puts scalar float statics in .data) */
-#endif
 
-#ifdef NON_MATCHING
 typedef struct {
     u8 pad0[0x84];
     u16 u84, u86;    /* size (D_800A14E0) */
@@ -120,11 +117,7 @@ s32 impact_effect_spawn(f32 x, f32 y, f32 z, s32 size, s32 kind, s32 *tri, s32 s
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1122E0/impact_effect_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 void collision_select_area(s32);
 s32 world_objects_transform_mesh(s32 count, s32 *idList, s32 force);
 s32 floor_collect_world_obj_tris(s32, s32, s32, s32 *);
@@ -217,9 +210,6 @@ s32 impact_effect_at_world_object(u8 *obj) {
     impact_effect_spawn(x, height, z, 1, floor_flags_surface_type(material), tri, 0);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1122E0/impact_effect_at_world_object.s")
-#endif
 
 typedef struct {
     u8 pad0[0x90];
@@ -253,7 +243,6 @@ void fx_ring_sprite_update(E523S *arg0) {
     arg0->u90 += D_800BE9E4;
 }
 
-#ifdef NON_MATCHING
 /* Dust particle record for node_spawn_sprite (0x38 bytes, cleared first). */
 typedef struct {
     u8 *tex;        /* +0x00 texture / animation */
@@ -424,9 +413,6 @@ void impact_dust_spawn(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 sl
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1122E0/impact_dust_spawn.s")
-#endif
 
 s32 mdl_particle_spawn(void *, s32, s32, s32, u8, s32);
 s32 game_gu_random(void);
@@ -533,7 +519,6 @@ void impact_dust_smoke_puff(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f3
     mdl_particle_spawn(&sp, 3, 0xFF, 0, 0xFF, 0);
 }
 
-#ifdef NON_MATCHING
 void tri_compute_plane(s32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
 f32 vec3f_dot(f32 *a, f32 *b);
 extern f32 D_800CC630, D_800CC634, D_800CC638; /* plane of the last tri_compute_plane triangle */
@@ -600,6 +585,3 @@ s32 debris_ground_bounce(u8 *p, f32 x, f32 y, f32 z, f32 ground, s16 *tri) {
     *(f32 *) (p + 0x58) *= fac;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1122E0/debris_ground_bounce.s")
-#endif

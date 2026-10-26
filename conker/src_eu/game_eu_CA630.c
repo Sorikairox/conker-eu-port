@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A6440[];
-#endif
 
 
 /* was func_1509CE20 */
@@ -68,7 +67,6 @@ s32 event_table_count(void) {
     return n;
 }
 
-#ifdef NON_MATCHING
 /* event_prereqs_met: D_800877D0[id] +0xC is a 0xFFFF-terminated list of event ids. The event may start when every
  * prerequisite has its save bit set (bit field at D_800D2E4C) and its own prerequisites hold. Empty list: 1. */
 /* was func_1509CBD4 */
@@ -89,9 +87,6 @@ s32 event_prereqs_met(s32 id) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/event_prereqs_met.s")
-#endif
 
 void event_unlock_chain_rec(s32 arg0);
 
@@ -100,11 +95,7 @@ void event_unlock_chain(s32 arg0) {
     event_unlock_chain_rec(arg0);
 }
 
-#ifdef NON_MATCHING
 void event_list_unlock(s32 listp, void (*cb)(s32), s32 arg2);
-#else
-s32 event_list_unlock(s32, void (*)(s32), s32);
-#endif
 extern s32 D_800877DC;
 
 /* was func_1509D0C4 */
@@ -140,7 +131,6 @@ s32 save_unlocks_apply(s32 arg0) {
     return cnt;
 }
 
-#ifdef NON_MATCHING
 // save_unlocks_propagate: unlocks arg0's list (save_unlocks_apply), then keeps expanding every entry of the state bytes
 // D_800D2E70 (0xCC of them) that is in state 3 until a whole pass unlocks nothing new. The asm returns no value.
 /* was func_1509D1EC */
@@ -158,11 +148,7 @@ void save_unlocks_propagate(s32 arg0) {
         }
     } while (added != 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/save_unlocks_propagate.s")
-#endif
 
-#ifdef NON_MATCHING
 // event_list_unlock: for each id of the 0xFFFF-terminated u16 list: calls cb(id) (event_unlock_chain_rec recurses into the
 // event's own list), sets its state byte D_800D2E70[id] to 3 and its save bit in D_800D2E4C. arg2 is unused; the
 // asm returns no value.
@@ -177,11 +163,7 @@ void event_list_unlock(s32 listp, void (*cb)(s32), s32 arg2) {
         list++;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/event_list_unlock.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P132: the save-route table asset_load_with_subfiles loads (asset 3, 8-byte records): record 0's info word gets the record
  * count - 1; record i >= 1 points at its own block, a list of (offset, flags) pairs ended by flag 0x80000000. */
 typedef struct SaveRouteRec {
@@ -227,15 +209,9 @@ s32 save_route_table_load(s32 arg0, s32 *count) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/save_route_table_load.s")
-#endif
 
-#ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
+// the definition is void (asm: v0 is not a result); one signature for wasm
 void heap_free(s32);
-#else
-s32 heap_free(s32);
-#endif
 /* was func_1509D464 */
 void save_route_table_free(void) {
     s32 r;
@@ -246,7 +222,6 @@ void save_route_table_free(void) {
     }
 }
 
-#ifdef NON_MATCHING
 // save_route_check: route arg1 of the table D_800D33D0 (record arg1 + 1, relocated by save_route_table_load): writes the
 // first id of its requirement list through outA and the id its word 0 points at through outB (0xBF / 0 when there
 // is no table or no route; NULL out-pointers are skipped) and returns 1 when every id of the list (word 2, count
@@ -290,11 +265,7 @@ s32 save_route_check(s8 arg0, u8 arg1, s32 *outA, s32 *outB) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/save_route_check.s")
-#endif
 
-#ifdef NON_MATCHING
 extern u8 D_8009F4A0;            /* the one-entry effect table of command 0x18 */
 extern s8 D_800D9D40;
 void light_ctrl_broadcast(u8, u8, s32);
@@ -505,11 +476,7 @@ s32 event_effect_command(s32 id, s32 *args, s32 *operand) {
     }
     return ret;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/event_effect_command.s")
-#endif
 
-#ifdef NON_MATCHING
 void water_jets_stop_all(void);
 void fx_slots_9cf0_clear(void);
 void char_fx_event15_stop(s32);
@@ -584,10 +551,6 @@ void event_effect_stop(s32 arg0, u8 *arg1) {
         break;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/event_effect_stop.s")
-#endif
-#ifdef NON_MATCHING
 extern s32 D_800A0D30;
 
 // P176: s32 like the D_80088874 handler table. The asm sets v0 only on the case 0x1C / 5 out-of-range path (1);
@@ -709,10 +672,6 @@ s32 event_action_effect(s32 arg0, s32 arg1, u8 *arg2) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/event_action_effect.s")
-#endif
-#ifdef NON_MATCHING
 void zap_bolt_get_pos(s32, s32 *, s32 *, s32 *);
 
 /* was func_1509DFCC */
@@ -777,6 +736,3 @@ loop_7:
     }
     return var_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/event_query_effect.s")
-#endif

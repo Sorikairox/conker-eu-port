@@ -105,7 +105,6 @@ s32 ripple_spawn_alt(V3 *arg0, V3 *arg1, f32 arg2, V3 *arg3, V3 *arg4, f32 arg5,
     return obj;
 }
 
-#ifdef NON_MATCHING
 s32 mdl_particle_fall_update(u8 *); /* P98: the asm reads a0 = the object */
 
 /* was func_151B6804 */
@@ -131,6 +130,3 @@ void ripple_alt_update(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x18)) = temp_f2;
     mdl_particle_fall_update(arg0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E3DD0/ripple_alt_update.s")
-#endif

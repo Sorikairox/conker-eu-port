@@ -13,7 +13,6 @@ s16 obj_yaw_to_linked_obj(u8 *arg0) {
     return math_atan2_u16(temp_v0->x_position - (*(f32 *)((u8 *)arg0 + 0x14)), (*(f32 *)((u8 *)arg0 + 0x1C)) - temp_v0->z_position, 0);
 }
 
-#ifdef NON_MATCHING
 /*
  * obj_knockdown_start: for object record rec (D_800CC2D0, 0x32C bytes): its state block (+0x31C) gets +0x78 = 9,
  * animations 0x1D then 0x1E at speed 1 (obj_setup_run), rec +0x8A = 20, +0x89 = +0x83 = 0, the block's +0x24 timer
@@ -38,9 +37,6 @@ void obj_knockdown_start(struct127 *rec) {
     state[0x11A] = 2;
     obj_start_anim(rec, 0x7F, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/obj_knockdown_start.s")
-#endif
 
 s32 obj_setup_undo(struct127 *, s32);
 /* was func_15063894 */
@@ -56,7 +52,6 @@ void obj_knockdown_clear(struct127 *arg0) {
     *((u8 *)arg0 + 0x83) = 0;
 }
 
-#ifdef NON_MATCHING
 /*
  * obj_hit_react_start: P190. For object record rec (D_800CC2D0, 0x32C bytes): its state block (+0x31C) gets
  * +0x78 = 0x3B and +0x11A = 2, animation 0x89 at speed 1 (obj_setup_run), rec +0x8A = 20, +0x89 = +0x83 = 0, and
@@ -77,24 +72,13 @@ void obj_hit_react_start(struct127 *rec) {
     ((u8 *)rec)[0x83] = 0;
     obj_start_anim(rec, 0x221, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/obj_hit_react_start.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
-#else
-s32 ray_cast_world(struct127 *, s32, s32, s32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
-#endif
 /* was func_150639D8 */
 void obj_ray_cast_from_ctl(u8 *arg0, f32 arg1) {
     u8 *temp_v0;
     temp_v0 = (*(u8 **)((u8 *)arg0 + 0x31C));
-#ifdef NON_MATCHING
     ray_cast_world(arg0, (*(f32 *)((u8 *)temp_v0 + 0x13C)), (*(f32 *)((u8 *)temp_v0 + 0x140)), (*(f32 *)((u8 *)temp_v0 + 0x144)), (*(f32 *)((u8 *)temp_v0 + 0x130)), (*(f32 *)((u8 *)temp_v0 + 0x134)), (*(f32 *)((u8 *)temp_v0 + 0x138)), temp_v0 + 0xB0, arg1, 0, 0, 0, -1, 0, 0);
-#else
-    ray_cast_world(arg0, (*(s32 *)((u8 *)temp_v0 + 0x13C)), (*(s32 *)((u8 *)temp_v0 + 0x140)), (*(s32 *)((u8 *)temp_v0 + 0x144)), (*(f32 *)((u8 *)temp_v0 + 0x130)), (*(f32 *)((u8 *)temp_v0 + 0x134)), (*(f32 *)((u8 *)temp_v0 + 0x138)), temp_v0 + 0xB0, arg1, 0, 0, 0, -1, 0, 0);
-#endif
     obj_notify_hit_target((struct127 *)arg0);
 }
 
@@ -112,7 +96,6 @@ void obj_notify_hit_target(struct127 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 /* P222: readable C for obj_run_pending_actions (game_eu_90F50, 179 words; jump table jtbl_80099A98 = EU 0x80099A98). */
 void obj_spawn_hit_shot(u8 *arg0, s32 arg1);
 void mouth_aim_ray(struct127 *obj, u8 which);
@@ -207,9 +190,6 @@ void obj_run_pending_actions(void) {
         (*(u8 **) ((u8 *) obj + 0x31C))[0x1B4] = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/obj_run_pending_actions.s")
-#endif
 
 extern s16 D_800CC6D2;
 
@@ -225,7 +205,6 @@ s16 player_aim_yaw_delta(u8 *arg0) {
     return D_800CC6D2;
 }
 
-#ifdef NON_MATCHING
 extern u8 *D_800CC6A4;
 extern f32 D_800CC6D4;
 
@@ -260,14 +239,7 @@ s32 player_aim_turn_update(u8 *arg0, s32 arg1, s32 arg2) {
     }
     return var_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/player_aim_turn_update.s")
-#endif
-#ifdef NON_MATCHING
 u8 * attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
-#else
-s32 attachment_find_by_slot(struct127 *, s32, s32);
-#endif
 void obj_effect_run_handler(struct127 *, s32, void *);
 
 /* was func_15063F14 */
@@ -304,7 +276,6 @@ void obj_detonate_attachment(struct127 *arg0, s32 arg1) {
     *(*(u8 **)((u8 *)arg0 + 0x31C) + 0x11A) = 0;
 }
 
-#ifdef NON_MATCHING
 // object_find_held: returns the first live object (word +0 != 0) of kind `kind` (+0x4) whose holder byte +0x65 is
 // owner's slot + 1, or NULL. Scans all 25 objects of D_800CC2D0 (the asm peels slot 0).
 /* was func_1506401C */
@@ -319,11 +290,7 @@ struct127 *obj_find_held(struct127 *owner, s32 kind) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/obj_find_held.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_15064240 */
 s32 player_try_begin_action(struct127 *arg0, s32 arg1, s32 arg2, s8 arg3, s32 arg4) {
     s32 temp_t6;
@@ -360,10 +327,6 @@ s32 player_try_begin_action(struct127 *arg0, s32 arg1, s32 arg2, s8 arg3, s32 ar
     }
     return 0x3E7;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/player_try_begin_action.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_80099B50;
 extern f32 D_80099B54;
 extern f32 D_80099B5C;
@@ -442,9 +405,6 @@ void obj_spawn_hit_shot(u8 *arg0, s32 arg1) {
     sp.u80 = temp_f0;
     camera_object_spawn(sp50, sp.u84, temp_f0, 0.0f, 0x64U, arg1, 0.0f, 0.5f, (s32) &sp.u6C, 1, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/obj_spawn_hit_shot.s")
-#endif
 s32 obj_find_visible_target(u8 *, u16 *, s32, s32, s32);
 
 /* was func_15064594 */
@@ -474,7 +434,6 @@ u16 obj_pick_attack_anim(u8 *arg0, u16 arg1, u16 arg2, u16 arg3) {
     return r;
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800CC6AC;               /* pad buttons pressed this frame */
 void objev_set_music_mode(void);
 void move_xz_towards(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
@@ -673,9 +632,6 @@ void player_context_action(struct127 *player, s32 buttons, f32 height, s32 arg3,
 #undef P_U8
 #undef P_F32
 #undef CTX
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/player_context_action.s")
-#endif
 
 /* was func_15064D5C */
 void obj_slot_sync_anim_frame(s32 arg0, s32 arg1) {
@@ -694,7 +650,6 @@ void obj_slot_sync_anim_frame(s32 arg0, s32 arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 /* was func_15064DD0 */
 void obj_play_carried_anim(struct127 *arg0) {
     s32 *temp_a1;
@@ -749,10 +704,6 @@ void obj_play_carried_anim(struct127 *arg0) {
     obj_start_anim(arg0, var_v1 & 0xFFFF, 1.0f, 6.0f, 0.0f, 0.0f, 0);
     obj_slot_sync_anim_frame(arg0->unk65 - 1, (s32) D_800C3E78);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/obj_play_carried_anim.s")
-#endif
-#ifdef NON_MATCHING
 extern u8 D_800B89C4[];              /* per-player record (stride 0x32C): character kind byte */
 
 #define P_U8(o) (((u8 *)player)[o])
@@ -1063,11 +1014,7 @@ s32 player_move_animation(struct127 *player, f32 vel, f32 stickMag, s32 moveAnim
 }
 #undef P_U8
 #undef P_F32
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/player_move_animation.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P216 / P219: readable C for player_item_action (game_eu_90F50, 4838 words, 0x42-case switch on `kind` via jtbl_80099C40).
  * P216 wrote the prologue, the tail and most cases; P219 fixed cases 3 / 9 / 0x15 / 0x37 / 0x38 / 0x39 / 0x3C (missing
  * calls) and wrote 0x24 0x3B 0x12 0x23 0x17 0x1A 0x2A 0x1B 0x26 0x3A 0x3E. Case numbers come from the jump table
@@ -2900,6 +2847,3 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
 #undef F
 #undef CTL
 #undef POSARGS
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/player_item_action.s")
-#endif

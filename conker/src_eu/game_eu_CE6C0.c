@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void trigger_sound_start(u8 *arg0);
 s32 trigger_test_object(struct127 *arg0, u8 *arg1, s32 arg2);
 s32 approx_dist3_int(s32, s32, s32);
@@ -27,12 +27,10 @@ extern s32 D_800D3694;
 extern s32 D_800D3698;
 extern u8 D_800DF510;
 extern u8 D_800DF511;
-#endif
 typedef struct { s16 x; s16 y; s16 z; s16 unk6; u8 pad8[8]; f32 unk10; u8 unk14; u8 unk15; u8 unk16; u8 unk17; s32 unk18; s32 unk1C; s32 unk20; f32 unk24; f32 unk28; f32 unk2C; f32 unk30; } Unk34B8; // 0x34 bytes, D_800D34B8[]
 extern u64 D_800D3510[][3];
 
 
-#ifdef NON_MATCHING
 void sfx_emitter_stop_at(u16, s16, s16, s16, u16);
 
 /* was func_150A09D0 */
@@ -137,9 +135,6 @@ block_36:
         } while (var_s6 < (u32) var_a1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/triggers_update.s")
-#endif
 extern f32 D_8009F970;
 extern f32 D_8009F974;
 /* was func_150A11F4 */
@@ -154,7 +149,6 @@ void trigger_cache_angles(u8 *arg0)
   *((f32 *) (((u8 *) arg0) + 0x30)) = fast_cosf(temp_f20);
 }
 
-#ifdef NON_MATCHING
 extern f32 D_8009F978;
 void reflect_queue_object(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
 
@@ -209,9 +203,6 @@ void trigger_reflect_queue_objects(void) {
         } while (var_s7 < (u32) D_800D3094);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/trigger_reflect_queue_objects.s")
-#endif
 /* was func_150A1520 */
 u8 *ptr_offset_0x400(u8 *arg0) {
     return arg0 + 0x400;
@@ -259,7 +250,6 @@ void trigger_camera_zones_apply(struct108 *arg0, u8 **arg1, s32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 // P45: trigger zones of a record, per frame, before its state handler (objects_run_state_handlers).
 // Zones: D_800D34BC, 0x28 bytes each: u64 mask[3] (which triggers the zone allows), u8 +0x18 priority, s16 box
 // +0x1A..+0x24 (x min/max, y min/max, z min/max, exclusive). w = the record's cached zone (D_800D34F0[player] - 1)
@@ -554,10 +544,6 @@ void trigger_zones_update_object(struct127 *arg0) {
         } while (next < (u32)D_800D3094);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/trigger_zones_update_object.s")
-#endif
-#ifdef NON_MATCHING
 s32 approx_dist3_int(s32, s32, s32);
 s32 approx_dist2_int(s16, s16, s32, s32);
 
@@ -727,9 +713,6 @@ block_35:
         return 1;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/trigger_test_object.s")
-#endif
 /* was func_150A28C4 */
 void trigger_sound_start(u8 *arg0)
 {
@@ -800,7 +783,6 @@ void trigger_ambfx_start(Unk34B8 *arg0, s32 arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 void arc_spark_spawn(struct127 *, s32, u8 *, u8);
 void spout_check_obj_hit(struct127 *, u8 *);
 extern u8 D_800D34B0;
@@ -868,9 +850,6 @@ void trigger_zone_event_fire(u8 *arg0, struct127 *arg1, s32 arg2, u64 arg4) { //
         break;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/trigger_zone_event_fire.s")
-#endif
 s32 trigger_test_object(struct127 *, u8 *, s32);
 s32 warp_request_start(struct127 *, u8, s32);
 
@@ -1026,7 +1005,6 @@ s32 trigger_test_camera(s32 arg0, u32 arg1) {
     return trigger_test_object(&sp, D_800D34B8 + arg1 * 0x34, 0);
 }
 
-#ifdef NON_MATCHING
 /* was func_150A332C */
 s32 trigger_plane_side(Unk34B8 *arg0, f32 arg1, f32 arg2, f32 arg3) {
     f32 temp_f14;
@@ -1038,9 +1016,6 @@ s32 trigger_plane_side(Unk34B8 *arg0, f32 arg1, f32 arg2, f32 arg3) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/trigger_plane_side.s")
-#endif
 s32 trigger_plane_side(Unk34B8 *, f32, f32, f32);
 /* was func_150A33C4 */
 s32 trigger_plane_side_object(s32 arg0, s32 arg1) {
@@ -1172,7 +1147,6 @@ s32 trigger_segment_hit(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     return 0;
 }
 
-#ifdef NON_MATCHING
 /* collision cylinder (0x34-byte entries of D_800D34B8, see trigger_set_position / trigger_cache_angles) */
 typedef struct {
     s16 x, y, z;    /* base centre */
@@ -1306,6 +1280,3 @@ s32 trigger_cylinder_segment_hit(u8 *arg0, f32 *p0, f32 *p1, f32 *out) {
     out[2] += cyl->z;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/trigger_cylinder_segment_hit.s")
-#endif

@@ -7,7 +7,6 @@
 void zone_stub(s32 arg0) {
 }
 
-#ifdef NON_MATCHING
 extern u8 D_80088CF0[8];
 extern u8 D_80088CF8[8];
 s32 trigger_contains_point(u8 *, s32, s32, s32);
@@ -36,11 +35,7 @@ s32 trigger_zones_check(s32 x, s32 y, s32 z) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/trigger_zones_check.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 void segment_override_add(s32, s32, s32, s32, s32);
 extern s32 D_800905B4;
@@ -107,10 +102,6 @@ void zone_debris_fall_update(u8 *arg0) {
         } while (var_s0 != 9);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/zone_debris_fall_update.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_150DEC58 */
 void obj_sine_wobble_update(u8 *arg0) {
     (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) (s32) ((math_sin_u8(((s32) (*(s32 *)((u8 *)arg0 + 0x7C)) >> 3) & 0xFF) * 10.2f) + 1130.0f);
@@ -120,10 +111,6 @@ void obj_sine_wobble_update(u8 *arg0) {
     (*(s32 *)((u8 *)arg0 + 0x80)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x80)) + (D_800BE9E4 * 0x10));
     (*(s32 *)((u8 *)arg0 + 0x84)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x84)) + (D_800BE9E4 * 0x18));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/obj_sine_wobble_update.s")
-#endif
-#ifdef NON_MATCHING
 void spawn_region_random_point_3d(u8 *, f32 *);
 s32 vec3_normalize_len(f32 *, f32 *, f32 *, f32 *);
 s32 memcpy(u8 *, void *, s32);
@@ -240,9 +227,6 @@ void beam_link_fire(u8 *p) {
     }
     *timer = (u32) random_int() % 201 + 200;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/beam_link_fire.s")
-#endif
 
 /* was func_150DF04C */
 s32 bolt_move_step(u8 *arg0) {

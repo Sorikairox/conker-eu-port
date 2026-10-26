@@ -1,13 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 texture_cache_lookup(s32 id, s32 *outSize, s32 age, s32 addRef);
 s32 texture_rom_offset(s32 arg0);
-#endif
 
 
-#ifdef NON_MATCHING
 extern u16 D_800DA290[]; /* [player * 3 + i]: wobble phase (12 bits, the sine angle is phase >> 4) */
 extern u8 D_800DA2A8[];  /* [player * 3 + i]: phase speed */
 extern u8 D_800DA2B8[];  /* [player * 3 + i]: wobble amplitude */
@@ -68,9 +66,6 @@ void tint_channels_update(s32 player) { /* s32: the asm uses a0 as it is (caller
     }
     D_800DA2D8[player * 3] = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/tint_channels_update.s")
-#endif
 
 /* was func_1510D338 */
 Gfx *tint_emit_prim_env_colors(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
@@ -79,7 +74,6 @@ Gfx *tint_emit_prim_env_colors(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
     return gdl;
 }
 
-#ifdef NON_MATCHING
 s32 allocate_memory(s32, s32, s32, s32);
 
 #define TEXCACHE_MISSING 0x80000000
@@ -171,10 +165,6 @@ s32 texture_resolve_dl_ids(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 *
 }
 #undef TEXCACHE_MISSING
 #undef TEXID_COUNT
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/texture_resolve_dl_ids.s")
-#endif
-#ifdef NON_MATCHING
 extern u16 D_800920D0[];
 extern u16 D_800B8BB8[];
 extern s32 D_800B1268[];
@@ -260,9 +250,6 @@ s32 texture_cache_lookup(s32 id, s32 *outSize, s32 age, s32 addRef) {
     return data;
 }
 #undef TEXCACHE_MISSING
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/texture_cache_lookup.s")
-#endif
 extern u16 D_800920D0[];
 extern s32 D_1A3B40;
 /* was func_1510D8F4 */
@@ -277,7 +264,6 @@ s32 texture_rom_offset(s32 arg0) {
     return sum;
 }
 
-#ifdef NON_MATCHING
 extern u8 D_800DC1DC;
 extern u8 D_800DA380;
 extern s32 D_800DC1E0;
@@ -346,9 +332,6 @@ void texture_cache_age_tick(void) {
     }
     D_800DC1E0 = -2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/texture_cache_age_tick.s")
-#endif
 /* was func_1510DB88 */
 void texture_cache_set_age(s32 arg0, s32 arg1) {
     s8 *p = &D_800BC860[arg0];
@@ -421,7 +404,6 @@ void texture_unref_age2(s32 arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 /* P130 */
 extern s32 D_800B1268[];  /* texture cache: expanded data per texture id */
 void heap_free(s16 *);  /* free (as the file's other callers) */
@@ -449,9 +431,6 @@ s32 texture_cache_release(s32 id, s32 unused1, u16 unused2) {
     D_800BC860[id] = 0;
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/texture_cache_release.s")
-#endif
 
 extern s8 D_800DA2F0;
 
@@ -478,7 +457,6 @@ void segment_override_add(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     }
 }
 
-#ifdef NON_MATCHING
 /* was func_1510DE40 */
 u8 *segment_override_emit(u8 *arg0, s32 arg1) {
     s32 var_v0;
@@ -510,6 +488,3 @@ u8 *segment_override_emit(u8 *arg0, s32 arg1) {
     }
     return var_a2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/segment_override_emit.s")
-#endif

@@ -1,13 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void sound_loop_at_object(u16 arg0, s32 arg1, s16 arg2, s32 arg3, s32 arg4);
 s32 world_record_find(u8);
-#endif
 
 
-#ifdef NON_MATCHING
 s32 rail_node_position(s32, f32 *, f32 *, f32 *);
 s32 rail_node_find_by_tag(s32);
 s32 impact_effect_at_world_object(s32);
@@ -198,10 +196,6 @@ block_62:
         goto block_62;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC5F0/event_action_world_object.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1509F254 */
 u8 event_query_world_object(s32 arg0, s32 arg1, u8 *arg2) {
     struct127 *sp24;
@@ -297,10 +291,6 @@ block_42:
         return ((*(u8 *)((u8 *)temp_v0 + 0x73)) & 4) != 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC5F0/event_query_world_object.s")
-#endif
-#ifdef NON_MATCHING
 u16 sound_play_plain(s32, s32, s32, s32);
 u32 sound_play_random_on_object(s32, s32, u32, u32, s32, s16, s32);
 void sound_play_random_world_object(s32, s32, s32, s32, s16, s32);
@@ -380,9 +370,6 @@ s32 event_sound_command(s32 id, s32 *args, s32 *operand) {
     }
     return h;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC5F0/event_sound_command.s")
-#endif
 
 /* was func_1509F728 */
 s32 event_sound_stop(s32 arg0, s32 *arg1) {
@@ -393,9 +380,6 @@ s32 event_sound_stop(s32 arg0, s32 *arg1) {
 }
 
 void sound_stop_on_object(s32, s32);
-#ifndef NON_MATCHING
-s32 sound_loop_at_object();
-#endif
 /* was func_1509F764 */
 s32 event_action_sound(s32 arg0, s32 arg1, s32 *arg2) {
     switch (arg1) {
@@ -457,7 +441,6 @@ void sound_play_random_world_object(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s16 
     world_object_sound_play(sp24, sound_pick_variant(arg0, ((arg1 - arg0) + 1) & 0xFF), arg2, arg4, arg5, 0);
 }
 
-#ifdef NON_MATCHING
 /* P226: the asm leaves sound_play_at's handle in v0 and event_sound_command returns it: NM returns it. */
 /* was func_1509F9C8 */
 u16 sound_play_random_at_trigger(s32 arg0, s32 arg1, u16 arg2, s32 arg3, u32 arg4) {
@@ -473,21 +456,6 @@ u16 sound_play_random_at_trigger(s32 arg0, s32 arg1, u16 arg2, s32 arg3, u32 arg
     sp34 = temp_v1;
     return sound_play_at(sound_pick_variant(arg0, ((arg1 - arg0) + 1) & 0xFF), arg2, 0, 0U, 0, (s16) (s32) (*(s16 *)temp_v1), (s16) (s32) (*(s16 *)((u8 *)temp_v1 + 2)), (s16) (s32) (*(s16 *)((u8 *)temp_v1 + 4)), (s16) arg4, (s16) (s32) temp_t0);
 }
-#else
-void sound_play_random_at_trigger(s32 arg0, s32 arg1, u16 arg2, s32 arg3, u32 arg4) {
-    u8 *temp_v1;
-    s32 temp_t0;
-    u8 *sp34;
-
-    temp_v1 = (arg3 * 0x34) + D_800D34B8;
-    temp_t0 = (*(s16 *)((u8 *)temp_v1 + 6));
-    if (arg4 >= (u32) temp_t0) {
-        arg4 = temp_t0 - 1;
-    }
-    sp34 = temp_v1;
-    sound_play_at(sound_pick_variant(arg0, ((arg1 - arg0) + 1) & 0xFF), arg2, 0, 0U, 0, (s16) (s32) (*(s16 *)temp_v1), (s16) (s32) (*(s16 *)((u8 *)temp_v1 + 2)), (s16) (s32) (*(s16 *)((u8 *)temp_v1 + 4)), (s16) arg4, (s16) (s32) temp_t0);
-}
-#endif
 
 /* was func_1509FA88 */
 u16 sound_play_random(s32 arg0, s32 arg1, s32 arg2) {
@@ -523,7 +491,6 @@ u16 sound_play_plain(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     return sound_play_2d(arg0, arg1, arg3, arg2, 0);
 }
 
-#ifdef NON_MATCHING
 /* was func_1509FBC8 */
 u16 sound_play_at_object(s32 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4) {
     struct127 *temp_v0;
@@ -534,10 +501,6 @@ u16 sound_play_at_object(s32 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4) {
     }
     return sound_play_at(arg0, arg2, 0, 0U, 0, (s16) (s32) temp_v0->x_position, (s16) (s32) temp_v0->y_position, (s16) (s32) temp_v0->z_position, (s16) arg3, (s16) arg4);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC5F0/sound_play_at_object.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1509FC5C */
 void sound_loop_at_object(u16 arg0, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
     struct127 *temp_v0;
@@ -545,9 +508,6 @@ void sound_loop_at_object(u16 arg0, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
     temp_v0 = obj_find_by_spawn(arg1);
     sound_voice_update_3d(arg0, 0x7FFFU, arg2, 0U, 0, (s16) (s32) temp_v0->x_position, (s16) (s32) temp_v0->y_position, (s16) (s32) temp_v0->z_position, (s16) arg3, (s16) arg4);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC5F0/sound_loop_at_object.s")
-#endif
 /* was func_1509FCE0 */
 s32 event_query_stub(s32 arg0, s32 arg1, s32 arg2) {
     return 0;

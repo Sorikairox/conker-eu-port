@@ -98,13 +98,9 @@ void fxrec_dispatch_free(u8 *arg0) {
     } else if (idx >= 20) {
         idx = 0;
     }
-#ifdef NON_MATCHING
     /* P173: the handlers take the record (the asm keeps a0 = arg0 at the jalr; browser P171: fxrec_die_retire freed
      * garbage at rec + 0x84 when it got no argument) */
     ((void (*)(u8 *)) D_8008A690[idx])(arg0);
-#else
-    D_8008A690[idx]();
-#endif
 }
 
 // record_dispatch_b: calls the record kind's (+0x20, 0..19, else 0) D_8008A6E0 handler with the record.
@@ -117,16 +113,11 @@ void fxrec_dispatch_b(u8 *arg0) {
     } else if (idx >= 20) {
         idx = 0;
     }
-#ifdef NON_MATCHING
     /* P173: the handlers take the record (the asm keeps a0 = arg0 at the jalr; browser P171: fxrec_die_retire freed
      * garbage at rec + 0x84 when it got no argument) */
     ((void (*)(u8 *)) D_8008A6E0[idx])(arg0);
-#else
-    D_8008A6E0[idx]();
-#endif
 }
 
-#ifdef NON_MATCHING
 void * light_alloc_lookat_buf(void);
 s32 light_alloc_light_buf(s32);
 s32 memcpy(u8 *, u8 *, s32);
@@ -194,9 +185,6 @@ void * fxrec_spawn(void * arg0_p, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 ar
     bzero(temp_v0 + 0x84, 0x10);
     return temp_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1754C0/fxrec_spawn.s")
-#endif
 extern s32 (*D_8008A644[])(u8 *, s32, s16);
 s32 model_part_emit_lights(s32, u8 *, s32, s32, s32, s16, u8 *, s32, s32);
 

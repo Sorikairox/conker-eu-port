@@ -2,11 +2,10 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void obj_get_held_point(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 void player_enter_dead_state(struct127 *arg0);
 void player_lose_life(s32);
-#endif
 
 
 /* was func_1507C8E0 */
@@ -16,7 +15,6 @@ void player_set_respawn_wait(struct127 *arg0, s32 arg1) {
 }
 
 // "goto" hell
-#ifdef NON_MATCHING
 void hud_lens_set_target(s32, f32, f32, f32, s32);
 extern u16 D_8009015C;
 extern s32 D_800BEB30;
@@ -133,9 +131,6 @@ block_54:
         D_8009015C &= 0xFF7F;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/player_update_life_states.s")
-#endif
 /* was func_1507CD0C */
 void player_enter_dead_state(struct127 *arg0) {
     s32 temp_lo = ((s32)arg0 - (s32)&D_800CC2D0) / (s32)sizeof(struct127);
@@ -147,7 +142,6 @@ void player_enter_dead_state(struct127 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 void node_broadcast_all(s32 arg0, u8 arg1);
 void obj_drop_carried(struct127 *);
 u8 *screen_lightning_curve_spawn(s16 count, f32 scale, u8 arg2, s32 arg3);
@@ -321,15 +315,11 @@ s32 player_hit_reaction(struct127 *obj, s32 kind) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/player_hit_reaction.s")
-#endif
 /* was func_1507D158 */
 void player_send_event(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 tmp = D_800CC82F[arg0 * 812];
     event_dispatch_alt(3, tmp | 0x2000, arg1, arg2, arg3, arg4);
 }
-#ifdef NON_MATCHING
 void player_stat_modify(s16, s16, s32);
 s32 player_stat_get(s16 arg0, s32 arg1);
 s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
@@ -421,11 +411,7 @@ void mp_player_respawn(struct127 *rec) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/mp_player_respawn.s")
-#endif
 
-#ifdef NON_MATCHING
 void player_stat_modify(s16, s16, s32);
 s32 player_stat_get(s16 arg0, s32 arg1);
 void mp_player_respawn(struct127 *);
@@ -494,9 +480,6 @@ void player_lose_life(s32 idx) {
     ctl[0x120] = 10;
     D_800BEA38--;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/player_lose_life.s")
-#endif
 // NON-MATCHING: pretty far away!
 // void player_lose_life(s16 arg0) { // struct126 *
 //     // ?32 sp24;
@@ -545,7 +528,6 @@ void player_lose_life(s32 idx) {
 //     //return temp_a0_2->unk31C;
 // }
 
-#ifdef NON_MATCHING
 extern u8 D_800BE616;
 extern s32 D_800BE9F0;
 extern u8 D_800C35EA;
@@ -683,9 +665,6 @@ s32 object_destroy_effects(struct127 *arg0) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/object_destroy_effects.s")
-#endif
 
 /* was func_1507DB44 */
 void object_set_all_flags(s32 arg0, s32 arg1) {
@@ -696,7 +675,6 @@ void object_set_all_flags(s32 arg0, s32 arg1) {
 void a9d90_stub(void) {
 }
 
-#ifdef NON_MATCHING
 s32 texture_cache_lookup(s32 *, s32, s32, s32);
 void hud_lens_reset(s32);
 extern s32 D_80086F20;
@@ -805,9 +783,6 @@ block_6:
     }
     return var_s0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/player_draw_out_overlay.s")
-#endif
 /* was func_1507DE4C */
 void obj_set_dying_flags(struct127 *arg0) {
 
@@ -863,7 +838,6 @@ void obj_set_hit_flags_by_kind(u8 *arg0, s32 arg1) {
         break;
     }
 }
-#ifdef NON_MATCHING
 void cutscene_scene_load(s32, s32, s32, s32, s32);
 void cutscene_set_focus_point(s16, s16, s16, f32);
 s32 level_start_point_get(s32, s32, s32, s16 *, s32 *, s32 *, u8 *, s32 *, s32 *, s32, s32 *);
@@ -907,9 +881,6 @@ block_5:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/level_restart_at_start_point.s")
-#endif
 /* was func_1507E114 */
 s32 checkpoint_get_restart_index(s32 arg0) {
     s32 sp5C;

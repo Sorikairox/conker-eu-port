@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 foot_trail_get_foot_pos(u8 *arg0, u8 arg1, u8 *arg2);
-#endif
 
 
-#ifdef NON_MATCHING
 extern f32 D_800A90C0;
 extern f32 D_800A90C4;
 /* was func_1519F500 */
@@ -65,9 +63,6 @@ s32 foot_trail_get_foot_pos(u8 *arg0, u8 arg1, u8 *arg2) {
     (*(f32 *)((u8 *)arg2 + 4)) = temp_f2_2;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/foot_trail_get_foot_pos.s")
-#endif
 /* was func_1519F678 */
 void foot_trail_free(u8 *arg0) {
     u8 **temp_v0 = *(u8 ***)(arg0 + 0x98);
@@ -102,7 +97,6 @@ void foot_trail_free_alt(u8 *arg0) {
     fxrec_die_free(arg0);
 }
 
-#ifdef NON_MATCHING
 u8 impact_current_kind(void);
 s32 memcpy(s32, u8 **, s32);
 extern s32 D_800AB7F4;
@@ -211,9 +205,6 @@ s32 foot_trail_spawn(u8 *arg0, u8 arg1) {
     }
     return (s32) var_v1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/foot_trail_spawn.s")
-#endif
 s32 foot_trail_spawn(u8 *, u8);
 /* was func_1519F928 */
 void foot_trails_start(u8 *arg0) {
@@ -247,7 +238,6 @@ void foot_trails_stop(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 /* was func_1519F9FC */
 void foot_trail_stop(u8 *arg0) {
     s32 temp_v1;
@@ -270,10 +260,6 @@ void foot_trail_stop(u8 *arg0) {
     (*(u16 *)((u8 *)arg0 + 0x1E)) = (u16) ((*(u16 *)((u8 *)arg0 + 0x1E)) & 0xFFFD);
     (*(u8 *)((u8 *)temp_v0 + 4)) = (u8) ((*(u8 *)((u8 *)temp_v0 + 4)) | 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/foot_trail_stop.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_800A90D0;
 s32 collision_floor_dynamic_b_full(f32 *, s32, f32, u8 *);
 
@@ -364,10 +350,6 @@ block_17:
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/foot_trail_update_points.s")
-#endif
-#ifdef NON_MATCHING
 /* P191 */
 s32 random_int(void); /* also in functions.h: declared again so difftest knows its arity (the asm leaves rec + 0x10 in a1) */
 /* footprint trail point (0x24 bytes, ring of t[0x25] points at t +0x94; head t +0x2E, tail +0x2D, count +0x2C) */
@@ -566,11 +548,7 @@ s32 foot_trail_update(u8 *t) {
     *(f32 *) (rec + 0x1C) = phase;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/foot_trail_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P204 */
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 gfx_load_texture_cached(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
@@ -865,11 +843,7 @@ s32 foot_trail_draw(u8 *t, s32 gfxArg, s16 slot) {
     }
     return (s32) gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/foot_trail_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_151A0DBC */
 void foot_trail_marker_update(u8 *arg0) {
     u8 *sp28;
@@ -913,9 +887,6 @@ void foot_trail_marker_update(u8 *arg0) {
         (*(u8 *)((u8 *)arg0 + 0xD)) = (u8) ((*(u8 *)((u8 *)arg0 + 0xD)) | 1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/foot_trail_marker_update.s")
-#endif
 /* was func_151A0E98 */
 void foot_trail_marker_clear(u8 *arg0) {
     u8 *p = *(u8 **)(arg0 + 0x28) + 0x58;

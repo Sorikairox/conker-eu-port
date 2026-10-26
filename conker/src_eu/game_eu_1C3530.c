@@ -1,9 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING
 void segment_closest_point(void *, void *, void *, void *, f32 *); /* P270 */
-#endif
 
 extern u8 D_800A8E7C;
 
@@ -43,7 +41,6 @@ void texscroll_reset(void) {
     D_800E0D20 = -2;
 }
 
-#ifdef NON_MATCHING
 // dl_find_scroll_texture: finds, in display list `dl`, the (skip+1)-th G_SETTIMG (0xFD) that loads texture `texId`
 // (w1 == D_800B1268[texId]; texId 0 = any texture). Returns the index of the first G_SETTILESIZE (0xF2) after it and
 // stores in *tileCount the number of G_SETTILESIZE commands of the run there (1, plus one per following
@@ -84,9 +81,6 @@ s32 dl_find_scroll_texture(Gfx *dl, s32 texId, s32 skip, s32 *tileCount) {
     } while (next == 0xF5 && next2 == 0xF2);
     return i;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/dl_find_scroll_texture.s")
-#endif
 
 typedef struct {
     DNode node;
@@ -145,7 +139,6 @@ s32 texscroll_id_identity(s16 arg0, s32 arg1, s32 arg2, s32 arg3) {
     return arg0;
 }
 
-#ifdef NON_MATCHING
 // level_dl_add_texture_scroll: registers texture scrolling for texture `texId` (0: any texture, with a new id
 // from D_800E0D20) in level display list `dl` (s32 address): for the `which`-th matching G_SETTIMG (-1: every one),
 // the G_SETTILESIZE index and its tile count go into the first free slot of the scroll entry's level-DL-0 list
@@ -220,9 +213,6 @@ void *level_dl_add_texture_scroll(s32 dl, s32 texId, s32 doubled, s32 which, s32
     }
     return e;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/level_dl_add_texture_scroll.s")
-#endif
 
 typedef struct Ent6270 {
     struct Ent6270 *dnext;
@@ -271,7 +261,6 @@ s32 texscroll_link_dl(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) // fakematch: non-
   n->next = 0;
 }
 
-#ifdef NON_MATCHING
 // dl_add_texture_scroll: as level_dl_add_texture_scroll for a model display list `dl` (s32 address): each matching G_SETTIMG
 // (`which`-th, -1: every one) is linked to the scroll entry with id texId (or, with `alwaysNew`, a new one for the
 // first match) through texscroll_link_dl (+0x18 chain: dl, G_SETTILESIZE index, tile count). New entries get speeds
@@ -335,9 +324,6 @@ s32 dl_add_texture_scroll(s32 dl, s32 texId, s32 doubled, s32 which, s32 alwaysN
     }
     return (s32) e;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/dl_add_texture_scroll.s")
-#endif
 
 // texture_anim_start_for: starts a texture animation on the model's texture set (arg0 +0x1C) and returns
 // dl_add_texture_scroll's handle (asm callers scenery_start_pending_anim / scenery_rippling_wall_update / door_lift_update store v0; P172).
@@ -346,7 +332,6 @@ s32 texture_anim_start_for(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32
     return dl_add_texture_scroll(*(s32 *)(arg0 + 0x1C), arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
-#ifdef NON_MATCHING
 /* P43: texture scrolling. For each entry of the D_800E0D18 list (next at +4): the scroll position (+0xE, +0x10, u16)
  * gives up to 8 (+0x14) G_SETTILESIZE words (0xF2000000 | s << 12 | t, s and t halved per mip level), written to the
  * level DLs arg0 (indices +0x1C[5], counts +0x30[5]) and arg1 (+0x26[5], +0x35[5]) and to the +0x18 chain of extra
@@ -430,9 +415,6 @@ s32 texscroll_update(s32 arg0, s32 arg1) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/texscroll_update.s")
-#endif
 
 /* was func_15196888 */
 void texscroll_set_speed(u8 *arg0, s32 arg1, s32 arg2) {
@@ -478,7 +460,6 @@ void emitter_unlink_free(u8 *arg0) {
     fxrec_die_free(arg0);
 }
 
-#ifdef NON_MATCHING
 typedef struct { f32 x, y, z; } EmitterVec;
 
 /* D_800A8B80: 0x60-byte emitter kind rows (rodata_inject of the GLOBAL_ASM; referenced by symbol, P129 practice). */
@@ -671,11 +652,7 @@ u8 *object_emitter_spawn(u8 *obj, s32 kind, u8 arg2, s32 arg3) {
     }
     return e;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/object_emitter_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 void trail_smoke_spawn(u8 *, s32, f32 *, u8 *);
 extern s32 D_8008FC20;
 extern s32 D_8008FC34;
@@ -823,10 +800,6 @@ loop_30:
     (*(s32 *)((u8 *)arg0 + 0x5C)) = 0;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/emitter_path_update.s")
-#endif
-#ifdef NON_MATCHING
 /* One point of an emitter's ring (emitter +0x94, emitter +0x25 entries; head +0x2E, tail +0x2D, count +0x2C). */
 typedef struct {
     /* 0x00 */ EmitterVec pos;
@@ -959,11 +932,7 @@ s32 emitter_update_points(u8 *e) {
     rec->u3C = time;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/emitter_update_points.s")
-#endif
 
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(void *, s16, s32, void *, u8 *);
 s32 gfx_load_texture_cached(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
 Gfx *gfx_geometry_mode_cached(Gfx *, s32, s32);
@@ -1165,9 +1134,6 @@ s32 emitter_ribbon_draw(u8 *e, s32 gfxArg, s16 slot) {
 }
 #undef RIBBON_NORMAL
 #undef RIBBON_PAIR
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/emitter_ribbon_draw.s")
-#endif
 
 /* was func_15197F68 */
 f32 emitter_speed_const_a(s32 arg0) {
@@ -1239,7 +1205,6 @@ s32 emitter_particle_shrink_fade(struct_1519812C *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(void *, s16, s32, void *, u8 *);
 f32 sqrtf(f32);
 // beam_quad_build: entry of the D_8008A1E0 draw table (`s16 *(u8 *, s16 slot)`, same family as spark_quad_build).
@@ -1339,9 +1304,6 @@ s16 *beam_quad_build(u8 *arg0, s16 arg1) {
     vtx[3] = 0;
     return ret;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/beam_quad_build.s")
-#endif
 void emitter_stop(u8 *arg0);
 /* was func_151985C4 */
 void emitter_on_message(struct102 *arg0, s32 *arg1, u8 arg2) {
@@ -1363,7 +1325,6 @@ void emitter_on_message(struct102 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 typedef struct {
     f32 size0;  // 0x00
     f32 size1;
@@ -1532,11 +1493,7 @@ void trail_smoke_spawn(u8 *obj, s32 idx, f32 *unused2, u8 *unused3) {
         *(f32 *) (owner + 0x70) -= 1.0f;
     } while (1.0f < *(f32 *) (owner + 0x70));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/trail_smoke_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 obj_send_hit(struct127 *obj, s32 flags, u16 val, s32 arg3);
 u8 *character_effect_attach(u8 *obj, s16 type, s16 time, u8 clear, u8 view, s32 arg5, char *name);
 // path_flame_touch_player: path handler 0 of D_8008FC20 (`s32 (*)(u8 *)`, result tested by the path updater).
@@ -1586,11 +1543,7 @@ s32 path_flame_touch_player(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/path_flame_touch_player.s")
-#endif
 
-#ifdef NON_MATCHING
 // path_pass_points_near_objects: path handler 2 of D_8008FC20 (`s32 (*)(u8 *)`, its result is tested by the path
 // updater). For every live object of D_800CC2D0 (+0x00 set, not held: +0x65 == 0) whose team byte +0x3B differs
 // from the path owner's (**(arg0 + 0x98))[0x3B], it walks back from the path's head point +0x2E to the current
@@ -1640,11 +1593,7 @@ s32 path_pass_points_near_objects(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/path_pass_points_near_objects.s")
-#endif
 
-#ifdef NON_MATCHING
 void anim_mesh_load(s32);
 s32 collision_level_nearest_height(s32, s32, s32, s32 *);
 extern u8 D_8008FC40[3];
@@ -1729,11 +1678,7 @@ s32 path_hit_scene_nodes(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/path_hit_scene_nodes.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P163: D_8008FC30 is the one-entry start-sound table (FC34 / FC38 / FC3C are separate update / stop / extra tables,
    each indexed by its own record byte, -1 = none); object_emitter_spawn (asm) stores the entry's v0 as the record's u16 voice handle (`sh $v0, 0xB2($sp) = record + 0x66`), so this returns sound_play_2d's handle. */
 // emitter_sound_start: starts sound 0x1AA at full volume and returns its voice handle
@@ -1741,11 +1686,6 @@ s32 path_hit_scene_nodes(u8 *arg0) {
 u16 emitter_sound_start(void) {
     return sound_play_2d(0x1AA, 0x7FFF, 0x40, 0, 0);
 }
-#else
-void emitter_sound_start(void) {
-    sound_play_2d(0x1AA, 0x7FFF, 0x40, 0, 0);
-}
-#endif
 
 /* was func_15199200 */
 void emitter_sound_update(u8 *arg0) {
@@ -1779,7 +1719,6 @@ void emitter_sound_stop(u8 *arg0) {
 void emitter_sound_noop(s32 arg0) {
 }
 
-#ifdef NON_MATCHING
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 extern s32 D_800A8B08;
 
@@ -1870,10 +1809,6 @@ void emitter_streak_burst(u8 *arg0, u8 *arg1) {
         (*(f32 *)((u8 *)temp_s4 + 0x7C)) = (f32) ((*(f32 *)((u8 *)temp_s4 + 0x7C)) - 1.0f);
     } while ((*(f32 *)((u8 *)temp_s4 + 0x7C)) > 1.0f);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/emitter_streak_burst.s")
-#endif
-#ifdef NON_MATCHING
 void *node_spawn_sprite(void *, s32, s32, s32, s32, s32);
 extern s32 D_800908C4;
 extern u8 D_800A8B50[]; /* 0x18-byte burst descriptors: f32 radius, speed base, speed range; s16 pairs (base, range) */
@@ -1972,9 +1907,6 @@ void spray_particles_burst(u8 *arg0, u8 *arg1) {
         *(f32 *)(data + 0x88) -= 1.0f;
     } while (*(f32 *)(data + 0x88) > 1.0f);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/spray_particles_burst.s")
-#endif
 /* was func_15199924 */
 void emitter_stop(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);
@@ -2029,7 +1961,6 @@ void emitter_owner_flag_set(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 struct225 *emitter2_light_create(s32 arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7);
 void mtx_transform_points(f32 **, f32 **, void *, s32);
 extern void (*D_8008FC44[])(u8 *); /* init: emitter2_owner_flag_clear, emitter2_path_fx_quarter, emitter2_path_fx_half, emitter2_path_fx_dense, emitter2_owner_flag_set */
@@ -2151,9 +2082,6 @@ u8 *spec_emitter_spawn(s32 arg0, u8 *spec, u8 arg2, s32 arg3) {
     }
     return e;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/spec_emitter_spawn.s")
-#endif
 
 /* was func_15199834 */
 void spec_emitter_stop_for_obj(u8 *arg0) {
@@ -2223,7 +2151,6 @@ void spec_emitter_cleanup(void *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 extern s32 (*D_8008FC64[])(u8 *); /* emitter2 check handlers (result 0 = stop) */
 extern void (*D_8008FC5C[])(u8 *); /* emitter2 sound update handlers */
 void point_integrate_gravity(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3);
@@ -2284,11 +2211,7 @@ s32 emitter2_path_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/emitter2_path_update.s")
-#endif
 
-#ifdef NON_MATCHING
 void obj_get_aim_vectors(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4);
 s32 vec3_make_basis(f32 *n, f32 *a, f32 *b);
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
@@ -2677,11 +2600,7 @@ s32 emitter2_flame_update(u8 *e) {
 }
 #undef E2F
 #undef EMIT2_F2U
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/emitter2_flame_update.s")
-#endif
 
-#ifdef NON_MATCHING
 void *memcpy(void *, const void *, s32);
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 f32 vec3_length(struct17 *);
@@ -3012,11 +2931,7 @@ s32 emitter2_trail_update(u8 *obj) {
     return 1;
 }
 #undef TRAIL_PREV
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/emitter2_trail_update.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 camera_view_test_sphere(s32 cam, s32 *mtx, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far);
 extern u8 D_800DA030[];   /* per view: 0x40-byte matrix for camera_view_test_sphere */
 extern u8 D_80091414[];   /* texture descriptor */
@@ -3227,9 +3142,6 @@ s32 emitter2_flame_draw(u8 *e, s32 gfxArg, s16 slot) {
 }
 #undef FLAME_NORMAL
 #undef FLAME_PAIR
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/emitter2_flame_draw.s")
-#endif
 
 /* was func_1519C38C */
 void point_integrate_gravity(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3) {
@@ -3285,7 +3197,6 @@ void emitter2_owner_flag_set(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 /* P163: D_8008FC58 is the one-entry start-sound table (FC5C / FC64 are separate tables used by emitter2_path_update);
    spec_emitter_spawn (asm) stores the entry's v0 as the record's u16 voice handle (`sh $v0, 0x130($t5) = record + 0x130`), so this returns sound_play_2d's handle. */
 // emitter2_sound_start: starts sound 0x1AA at full volume and returns its voice handle
@@ -3293,11 +3204,6 @@ void emitter2_owner_flag_set(u8 *arg0) {
 u16 emitter2_sound_start(void) {
     return sound_play_2d(0x1AA, 0x7FFF, 0x40, 0, 0);
 }
-#else
-void emitter2_sound_start(void) {
-    sound_play_2d(0x1AA, 0x7FFF, 0x40, 0, 0);
-}
-#endif
 
 /* was func_1519C52C */
 void emitter2_sound_update(u8 *arg0) {
@@ -3377,7 +3283,6 @@ void emitter2_light_unlink(u8 *arg0) {
     *(s32 *)(temp_v0 + 0x148) = 0;
 }
 
-#ifdef NON_MATCHING
 /* was func_1519C7DC */
 s32 line_particle_move_drag(u8 *arg0) {
     struct {
@@ -3434,9 +3339,6 @@ s32 line_particle_move_drag(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x48)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x48)) + ((sp.u44 * D_800BE9A4) + (0.5f * sp2C * temp_f0)));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/line_particle_move_drag.s")
-#endif
 /* was func_1519CA54 */
 s32 particle_shrink_fade_steps(u8 *arg0) {
     u8 *p;
@@ -3457,7 +3359,6 @@ s32 particle_shrink_fade_steps(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* was func_1519CADC */
 s16 *spark_quad_build(u8 *arg0, s16 arg1) {
     struct {
@@ -3582,9 +3483,6 @@ s16 *spark_quad_build(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/spark_quad_build.s")
-#endif
 /* was func_1519CE80 */
 s32 emitter2_check_owner_anim(u8 *arg0)
 {
@@ -3623,7 +3521,6 @@ s32 emitter2_path_fx_dense(s32 arg0) {
     return 0;
 }
 
-#ifdef NON_MATCHING
 /* The emitter spec spec_emitter_spawn reads (0x11C bytes; only the fields this caller fills are named). */
 typedef struct {
     /* 0x000 */ s32 u000;
@@ -3828,9 +3725,6 @@ void trail_emitter_spawn(u8 *arg0) {
         memcpy(*(u8 **) (e + 0x98) + 0x158, arg0 + 0x30, 8);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/trail_emitter_spawn.s")
-#endif
 
 /* was func_1519D2D4 */
 void trail_emitter_watch_owner(u8 *arg0) {
@@ -3842,7 +3736,6 @@ void trail_emitter_watch_owner(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 // path_trail_spawn_effects: spawns effect `kind` (attack_spawn_at_point) at even spacing along the path of `arg0` (needs a
 // count +0x2C >= 2): walks back from the head point +0x2E to the current point +0x2D (ring of +0x25 points of 0x28
 // bytes at +0x94, +0x1C = segment length), starting from the position at +0x10; whenever the walked length reaches
@@ -3888,6 +3781,3 @@ void path_trail_spawn_effects(s32 arg0, f32 step, s32 kind) {
         prev = pt;
     } while (i != *(s8 *) (self + 0x2D));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/path_trail_spawn_effects.s")
-#endif

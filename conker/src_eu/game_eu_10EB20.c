@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
 
 /* was func_150E1310 */
@@ -81,6 +80,3 @@ block_26:
         arg0->unk84 &= 0x7FFFFFFF;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10EB20/camera_update_level_events.s")
-#endif

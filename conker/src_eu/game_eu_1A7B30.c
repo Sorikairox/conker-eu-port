@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P125 */
 extern u8 D_8008D450[];
 
@@ -49,11 +48,7 @@ void flag_wave_update(u8 i) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/flag_wave_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P139 */
 /*
  * drift_object_spawn: creates an object of the given type (node_alloc(type, 0, 0xB8, 1, 0xFF, 1)) and sets it up:
@@ -96,11 +91,7 @@ void puff_drift_spawn(u8 colour, s16 x, s16 y, s16 z, s8 tilt, u16 arg5, u16 mod
     obj[0xB3] = 0xFF;
     *(s16 *) (obj + 0xAE) = arg9;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/puff_drift_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 // sprite_particle_update: update handler of the puff_drift_spawn sprite particles (tables next to puff_sprite_draw).
 // Moves the screen position +0x90 / +0x92 / +0x94 by the velocity +0xA0 / -+0xA2 / +0xA4 and the rotation
 // +0x96..+0x9A by the s8 spins +0x9C..+0x9E; mode 5 (+0xAC) adds gravity (+0xA2 += 1). While the life +0xA6 is
@@ -162,16 +153,12 @@ void puff_drift_update(u8 *obj) {
         node_destroy((struct102 *) obj);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/puff_drift_update.s")
-#endif
 
 /* was func_1517A904 */
 s32 puff_identity_stub(s32 arg0) {
     return arg0;
 }
 
-#ifdef NON_MATCHING
 s32 view_point_cull_test(u8 *, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
 u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 s32 puff_texture_set(s32 arg0, s32 arg1);
@@ -229,9 +216,6 @@ s32 puff_sprite_draw(s32 gfxArg, u8 *obj, s16 player) {
     gSPDisplayList(gfx++, D_8008D190);
     return (s32) gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/puff_sprite_draw.s")
-#endif
 
 s32 collision_find_floor_default_range(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
 

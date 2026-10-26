@@ -4,7 +4,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 level_load_look_points(s32);
 void ambient_sounds_load(void);
 void ambient_emitters_build(void);
@@ -63,9 +62,6 @@ void level_objects_init(s32 arg0) {
     level_clear_be570();
     level_set_lights_mode(((D_800D2E4C->unk4 & 0x80) == 0) & 0xFF);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3B920/level_objects_init.s")
-#endif
 // NON-MATCHING: damn nops, is this -g ?
 // void level_objects_init(s32 arg0) {
 //     u8 tmp;

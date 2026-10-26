@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void scene_event_queue_insert(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 /* one 8-byte entry of a player's D_800C3A10 table: what track arg1 refers to (scene chunk table, cutscene_scene_load) */
 typedef struct {
@@ -11,14 +11,12 @@ typedef struct {
 } struct_1502AB94_ref;
 
 extern struct_1502AB94_ref *D_800C3A10[];   /* per player */
-#endif
 
 
 /* was func_15023980 */
 void scene_stub_noop(void) {
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800C39D0;
 extern s32 D_eu_800C3A60;
 extern u8 D_800C40A9;
@@ -88,11 +86,7 @@ stop:
     heap_free(r);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_sfx_update.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 D_800C3AA8;
 extern s32 D_eu_800C3A60;
 
@@ -159,10 +153,6 @@ block_38:
     *arg3 = NULL;
     return *(s32 *)((u8 *)&D_eu_800C3A60 + (argA * 4));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_find_next.s")
-#endif
-#ifdef NON_MATCHING
 extern s32 D_800C3AA8;
 extern s32 D_eu_800C3A60;
 extern s32 D_800C39D0;
@@ -259,9 +249,6 @@ void scene_event_find_around(u8 **prev, u8 **next, s32 *prevTime, s32 *nextTime,
     }
 }
 #undef EV_MATCH
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_find_around.s")
-#endif
 
 s32 scene_event_run(s32, u8, u16, s32, s32);
 
@@ -285,7 +272,6 @@ void scene_event_queue_run(s32 arg0, s32 arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 extern u16 D_800C40BA;
 
 /* was func_15024438 */
@@ -341,10 +327,6 @@ loop_4:
     (*(s16 *)((u8 *)temp_v0 + 0xA)) = (s16) arg4;
     *arg1 += 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_queue_insert.s")
-#endif
-#ifdef NON_MATCHING
 void scene_event_queue_insert(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern s32 D_800C39D0;
 extern s32 D_800C39D8;
@@ -474,10 +456,6 @@ block_35:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_track_pass.s")
-#endif
-#ifdef NON_MATCHING
 /* --- P114: scene event handler A (scene_event_run_a); hand-written from the asm (map: docs/port/sessions/p114/scene_vm_map.md) --- */
 s16 *subtitle_slot_get(s32 track, s32 start);
 void subtitle_slot_close(s16 *arg0, s32 arg1);
@@ -1340,10 +1318,6 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
 #undef SA_F32
 #undef SA_PTR
 #undef SA_OBJ_INDEX
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_run_a.s")
-#endif
-#ifdef NON_MATCHING
 /* P90: hand-written from the asm (map: docs/port/sessions/p89/func_150268BC_map.md, tests: docs/port/sessions/p90) */
 /* --- callees: C definitions elsewhere (signatures copied) --- */
 void mp3_voice_play(s32 arg0, s32 arg1, s32 arg2);
@@ -2477,11 +2451,7 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_run_b.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 D_800C39D0;
 extern u8 D_800844A0[];  /* screen fade colours, 3 bytes (r, g, b) per entry */
 extern s8 D_800C40AA;
@@ -2785,11 +2755,7 @@ s32 scene_event_run_c(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
     return 1;
 }
 #undef NEXT
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_run_c.s")
-#endif
 
-#ifdef NON_MATCHING
 u8 *world_record_find(u8);
 s32 scene_event_run_a(s32, u8, u16, s32, s32, struct127 *, u8 *, u8 *, s32);
 s32 scene_event_run_b(s32, u8, u16, s32, s32, struct127 *, u8 *, u8 *, s32);
@@ -2845,6 +2811,3 @@ s32 scene_event_run(s32 arg0, u8 arg1, u16 arg2, s32 arg3, s32 player) {
     }
     return scene_event_run_c(arg0, arg1, arg2, arg3, player, obj, rec, data, flag, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_run.s")
-#endif

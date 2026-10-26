@@ -15,7 +15,6 @@ void look_record_alloc(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 void look_find_target(f32 *, s32, s32, s32, f32, s32, s32);
 void look_turn_joint(s32, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern u8 D_800C441A;
@@ -81,11 +80,7 @@ void look_frame_cb_current(void) {
     look_turn_joint(kind, 0, D_800C4408, D_800C3E78, first, 0, D_800C441A, 3, 0, 0, 0, later, 0);
     D_800C441A++;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_frame_cb_current.s")
-#endif
 
-#ifdef NON_MATCHING
 extern u8 D_800C441A;
 extern f32 D_800C4408[3];
 void look_find_target_simple(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA);
@@ -324,11 +319,7 @@ void look_head_body_by_kind(void) {
                   later, mode);
     D_800C441A++;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_head_body_by_kind.s")
-#endif
 
-#ifdef NON_MATCHING
 void look_angles_to_point(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5);
 
 /*
@@ -376,9 +367,6 @@ s32 look_point_in_joint_range(s32 id, s32 j1, s32 j2, f32 x, f32 y, f32 z, f32 *
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_point_in_joint_range.s")
-#endif
 extern s32 D_800C4414;
 
 /* was func_15037B70 */
@@ -415,7 +403,6 @@ s32 look_get_fixed_target(s32 arg0, u8 *arg1) {
     return 0;
 }
 
-#ifdef NON_MATCHING
 /* P76: look point table (D_800C6A70[D_800C6A74], 0x14-byte records; look_point_remove marks removed ones with unk6 = 2) */
 typedef struct {
     s16 x, y, z;    /* 0x00: the point (+50 is added to y for the joint range test) */
@@ -578,11 +565,7 @@ void look_find_target(f32 *out, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32
         face_anim_stub(self, D_800C6A70[bestPoint].anim - 1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_find_target.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 look_point_in_joint_range(s32 id, s32 j1, s32 j2, f32 x, f32 y, f32 z, f32 *out, f32 lim, s32 force, s32 mode);
 
 /*
@@ -669,11 +652,7 @@ s32 look_search_nearest_object(u8 *outp, s32 j1, s32 j2, s32 id, f32 lim, s32 pr
     out[0] = out[1] = out[2] = -99999.0f;
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_search_nearest_object.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_800989F8;
 /* was func_15038758 */
 void look_angles_to_point(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
@@ -713,10 +692,6 @@ block_9:
         *arg1 = temp_f0_2 - 360.0f;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_angles_to_point.s")
-#endif
-#ifdef NON_MATCHING
 /* P76: per-object look state (object +0x324, look_record_alloc: 0x48 bytes), three slots (D_800C441A) */
 typedef struct {
     f32 yaw[3];       /* 0x00: current angles (degrees), -99999 = unset */
@@ -1134,16 +1109,12 @@ void look_turn_joint(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s3
         lt->pitchOfs[slot] = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_turn_joint.s")
-#endif
 
 /* was func_15039D44 */
 void *look_get_limits(s32 arg0, s32 arg1) {
     return &D_80098418[arg1];
 }
 
-#ifdef NON_MATCHING
 /*
  * P71: limits of the look angles (*yaw, *pitch) of object id, set 0 of look_get_limits: f[0] / f[1] yaw max / min,
  * f[2] / f[3] pitch max / min, f[4] / f[5] yaw / pitch margins. Without a camera record (+0x318) or in camera
@@ -1195,11 +1166,7 @@ void look_clamp_default(f32 *yaw, f32 *pitch, f32 *outYaw, f32 *outPitch, f32 re
         *pitch = (lim[2] < *pitch) ? lim[2] : *pitch;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_clamp_default.s")
-#endif
 
-#ifdef NON_MATCHING
 extern u8 D_800BE9B4;
 extern u8 D_8009822C[];
 extern u8 D_80098400[];
@@ -1255,11 +1222,7 @@ void look_record_setup(struct127 *obj) {
         obj->unk2FB |= 4;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_record_setup.s")
-#endif
 
-#ifdef NON_MATCHING
 void look_clamp_default(f32 *, f32 *, f32 *, f32 *, f32, f32, s32);
 
 /* was func_1503A1C0 */
@@ -1322,10 +1285,6 @@ void look_clamp_angles(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32
         *arg2 = var_f2_2;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_clamp_angles.s")
-#endif
-#ifdef NON_MATCHING
 s32 model_header_load(s32 arg0, s32 arg1);
 s32 obj_collision_cylinder(struct127 *, s16 *, s16 *, s16 *); /* s32: P59 definition returns 0 */
 /* obj_bounds_from_skeleton (P57, from the m2c draft): object bounds from the skeleton. With a skeleton (+0x1D4) and a model
@@ -1506,9 +1465,6 @@ void obj_bounds_from_skeleton(struct127 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/obj_bounds_from_skeleton.s")
-#endif
 
 /* was func_1503A8FC */
 void obj_cb_pin_joint1_position(void) {
@@ -1519,7 +1475,6 @@ void obj_cb_pin_joint1_position(void) {
     *(f32 *)(p + 0x38) = *(f32 *)((u8 *)&D_800CC2D0[D_800C3E78] + 0x178);
 }
 
-#ifdef NON_MATCHING
 #define OBJ_U8(obj, off) (*(u8 *) ((u8 *) (obj) + (off)))
 extern u8 D_800C441A;
 extern u8 D_80084794[];
@@ -1573,9 +1528,6 @@ void obj22_cb_scale_joint(void) {
     m[3][2] = pos[2];
     D_800C441A++;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/obj22_cb_scale_joint.s")
-#endif
 
 void look_head_body_by_kind(void);
 void obj22_cb_scale_joint(void);
@@ -1592,7 +1544,6 @@ void look_joint_cb_combined(void) {
     obj22_cb_scale_joint();
 }
 
-#ifdef NON_MATCHING
 /* P65: head / eye aim state of an object (byte offsets; the struct127 field types there do not match the asm) */
 #define LOOK_MODE(o)      (*(u8 *) ((u8 *) (o) + 0x276))
 #define LOOK_PHASE(o)     (*(u16 *) ((u8 *) (o) + 0x278))
@@ -1939,9 +1890,6 @@ void look_aim_head_eyes(struct127 *obj) {
         LOOK_ANGLE(obj, 3) += LOOK_OFS(obj, 3);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_aim_head_eyes.s")
-#endif
 
 s32 look_search_nearest_object(u8 *, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800C43F0;

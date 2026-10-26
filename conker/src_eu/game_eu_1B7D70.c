@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 particle_emitter_spawn(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 memcpy(s32, s32, s32);
 
@@ -21,10 +20,6 @@ s32 bone_effect_spawn(s32 arg0, u8 *arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5, 
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B7D70/bone_effect_spawn.s")
-#endif
-#ifdef NON_MATCHING
 /* P143 */
 extern s32 (*D_8008D940[])(u8 *, u8 *, s32);
 // effect_follow_bone: update handler (D_8008A058 slot 2) that keeps an effect attached to a model bone. The
@@ -77,9 +72,6 @@ s32 effect_follow_bone(u8 *fx) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B7D70/effect_follow_bone.s")
-#endif
 
 extern f32 D_800A77A0;
 extern f32 D_800A77A4;

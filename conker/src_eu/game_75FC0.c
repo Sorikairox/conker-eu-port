@@ -2,10 +2,9 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800993D0[];
 extern u8 D_800993FC[];
-#endif
 
 #if 0
 f32 D_80099020[] = { 0.0, 3.619550943374634, -6.466859817504883, 3.5107080936431885, -0.5643919706344604, 0.005872000008821487 };
@@ -44,7 +43,6 @@ void obj_build_inverse_mtx(s32 arg0, s32 arg1) {
     mtxf_mul(&tmp.unk0,  &tmp.unk134, arg1);
 }
 
-#ifdef NON_MATCHING
 extern f32 D_80086370;
 extern f32 D_80086374;
 extern f32 D_80086378;
@@ -112,9 +110,6 @@ f32 math_asinf(f32 arg0) {
     }
     return 0.0f;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_75FC0/math_asinf.s")
-#endif
 // NON-MATCHING: regs and ordering needs fixing
 // f32 math_asinf(f32 arg0) {
 //     f32 temp_f0;

@@ -3,11 +3,7 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
-#else
-s32 event_dispatch(s32, s32, s32, s32);
-#endif
 
 /* was func_150F5830 */
 void camera_update_flag_401c(u8 *arg0) {

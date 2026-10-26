@@ -21,7 +21,6 @@ s32 camera_timed_records_any_active(s32 arg0)
   return 0;
 }
 
-#ifdef NON_MATCHING
 extern f32 D_800C3A20[];
 extern s32 D_800DC450;
 extern f32 D_800D31D8;
@@ -91,9 +90,6 @@ s32 camera_timed_record_update(s32 idx) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C4590/camera_timed_record_update.s")
-#endif
 
 s32 camera_timed_record_update(s32);
 
@@ -123,7 +119,6 @@ block_6:
     }
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800D3C60;
 extern f32 D_800C3A20[];
 extern u8 D_800C3A80;
@@ -322,11 +317,7 @@ s32 event_action_camera(s32 id, s32 op, u8 *cmd) {
 }
 #undef CAM_F
 #undef CAM_B
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C4590/event_action_camera.s")
-#endif
 
-#ifdef NON_MATCHING
 f32 vec3f_dot(f32 *, struct17 *);
 extern s32 D_800DC450;
 
@@ -389,10 +380,6 @@ block_13:
         return 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C4590/event_query_camera.s")
-#endif
-#ifdef NON_MATCHING
 extern s32 D_800D3250[];
 /* Pushes player `id` back along the direction between its two position vectors (+0x2A4 and +0x2F8): d =
  * normalised direction (vec3_diff / vec3_normalize); both vectors move by d * (-2.5, -2.0, -2.5) times the
@@ -419,6 +406,3 @@ s32 camera_timed_push_back(s32 id) {
     }
     return (s32) r;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C4590/camera_timed_push_back.s")
-#endif

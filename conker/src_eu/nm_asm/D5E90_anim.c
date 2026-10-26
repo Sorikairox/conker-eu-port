@@ -14,7 +14,6 @@
  * (D_80088918 = D_80088908 at the bottom, then D_80088914, then D_80088910, each 12 * count bytes), so the
  * globals that point at them are comparable across the tables but not with the asm's stack addresses.
  */
-#ifdef NON_MATCHING
 #include <ultra64.h>
 
 #include "functions.h"
@@ -736,4 +735,3 @@ compose:
         nmAnimLoad12(p, (f32 *)(D_800888E0 + (e[0] << 6)));
     }
 }
-#endif

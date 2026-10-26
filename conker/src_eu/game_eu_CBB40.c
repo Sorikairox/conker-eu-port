@@ -20,7 +20,6 @@ void rail_script_set_ease(s32 arg0, u8 *arg1) {
 void rail_script_nop(s32 arg0, s32 arg1) {
 }
 
-#ifdef NON_MATCHING
 s32 rail_state_init(void);
 s32 rail_rank_rivals(void);
 s32 rail_racers_update(void);
@@ -146,11 +145,7 @@ s32 event_action_rail(s32 arg0, u32 cmd, u8 *args) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CBB40/event_action_rail.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 rail_record_get_pos(s32);
 s32 rail_record_get_progress(s32);
 s32 rail_record_get_speed(s32);
@@ -256,6 +251,3 @@ block_45:
         return var_v1;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CBB40/event_query_rail.s")
-#endif

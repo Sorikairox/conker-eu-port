@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A0BC0[];
-#endif
 
 
-#ifdef NON_MATCHING
 s32 memcpy(s32, u8 **, s32);
 
 /* P80: arg3 goes on to fb_fx_spawn (its 2nd node_alloc argument); the only caller, scene_event_run_b, passes 0 */
@@ -50,10 +48,6 @@ s32 fb_zoom_fx_spawn(u8 *arg0, s16 arg1, s32 arg2, s32 arg3) {
     }
     return var_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FBE70/fb_zoom_fx_spawn.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_800A0BD0;
 s32 world_to_screen(s32 *, u8 *, s32 *, s32 *, f32 *, s32);
 
@@ -133,10 +127,6 @@ block_22:
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FBE70/fb_zoom_fx_update.s")
-#endif
-#ifdef NON_MATCHING
 /* the zoom effect state at arg0 + 0x18 */
 typedef struct {
     u8  pad0[0x10];
@@ -197,9 +187,6 @@ void fb_zoom_fx_apply(u8 *arg0, u16 *fb) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FBE70/fb_zoom_fx_apply.s")
-#endif
 
 /* was func_150CEBA4 */
 void fb_zoom_fx_handle_event(struct102 *arg0, u8 *arg1, u8 arg2) {

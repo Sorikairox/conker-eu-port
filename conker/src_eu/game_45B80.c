@@ -2,7 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 game_frame_step(void);
 void camera_player_update(s16 arg0);
 void game_frame_begin(void);
@@ -11,7 +11,6 @@ Gfx *render_overlay_pass(u8 *arg0);
 Gfx *render_player_hud(Gfx *gdl, s32 arg1);
 Gfx *render_final_overlay(Gfx *arg0);
 void game_update_frame_timing(void);
-#endif
 
 
 void* node_render_layers_draw(void *arg0, s32 arg1, s16 arg2, s32 arg3);
@@ -39,7 +38,6 @@ void game_main_loop(void) {
 }
 
 // something big and interesting
-#ifdef NON_MATCHING
 extern OSMesgQueue D_800BEE30;
 extern u8 D_8002AFA0;
 extern s16 D_8002AFA4;
@@ -223,9 +221,6 @@ s32 game_frame_step(void) {
     return 1;
 }
 #undef GDL
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/game_frame_step.s")
-#endif
 /* was func_15018DFC */
 void world_update_objects(void) {
     triggers_update(D_800BE9E4);
@@ -243,7 +238,6 @@ void world_update_objects(void) {
     player_update_life_states();
 }
 
-#ifdef NON_MATCHING
 /* P13: returns the DL pointer. The matching C is void, but the asm leaves render_level_pre_layer's result in v0 and
  * render_player_scene uses it as the new GDL. */
 /* was func_15018E88 */
@@ -255,16 +249,6 @@ void *render_scene_layers_pre(void *arg0, s16 arg1) {
     arg0 = node_render_layers_draw(arg0, 0, arg1, 1);
     return render_level_pre_layer(arg0, D_800BE9F0, arg1);
 }
-#else
-void render_scene_layers_pre(void *arg0, s16 arg1) {
-    if (D_800BE616 == 0) {
-        ambient_flames_draw(&arg0, 1);
-    }
-    arg0 = node_render_layers_draw(arg0, 0, arg1, 0);
-    arg0 = node_render_layers_draw(arg0, 0, arg1, 1);
-    render_level_pre_layer(arg0, D_800BE9F0, arg1);
-}
-#endif
 
 /* was func_15018F08 */
 void *render_scene_layers_post(void *arg0, s16 arg1) {
@@ -311,7 +295,6 @@ void game_frame_begin(void) {
 }
 
 // few loops
-#ifdef NON_MATCHING
 // Per-frame world update (P13 from the P12 convert.py EQUIV, prototypes cleaned): camera/objects/players/effects
 // steps, then ages the 0x20-byte records D_80043ED0..D_80044B20 (four counters each). Returns 1 (game_frame_step
 // builds the frame only when this is nonzero).
@@ -447,9 +430,6 @@ s32 world_update(void) {
     } while (p != &D_80044B20);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/world_update.s")
-#endif
 /* was func_15019414 */
 void game_frame_end_update(void) {
     if (D_800BEAC0 == 0) {
@@ -461,7 +441,6 @@ void game_frame_end_update(void) {
     }
 }
 
-#ifdef NON_MATCHING
 // Per-player frame setup: camera update, viewport, the player's view DL (render_set_scissor) and,
 // in normal play (not paused, no cutscene flag, player view active), the light words and player_view_dl_build.
 extern s16 D_80084810;
@@ -488,9 +467,6 @@ Gfx *render_player_frame_setup(Gfx *gdl, s16 player) {
     gdl = light_setup_view(gdl, player);
     return player_view_dl_build(gdl, player);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/render_player_frame_setup.s")
-#endif
 // NON-MATCHING: 70% of the way there... maybe.
 // s32 render_player_frame_setup(Gfx *arg0, s16 arg1) {
 //     s32 temp_s0;
@@ -516,7 +492,6 @@ Gfx *render_player_frame_setup(Gfx *gdl, s16 player) {
 //
 // }
 
-#ifdef NON_MATCHING
 /* Per-player scene pass (P13, hand C). Skipped (returns gdl) while paused (D_800BEAC0), during D_80084810, when
  * screen_fade_is_opaque(player) says so or the player's bit in D_800D18A0 is set. In split screen it first sets the
  * player's viewport/projection; then the layers in order: sky (world_meshes_draw_player 1), the D_800BE575 == 2 pass,
@@ -584,10 +559,6 @@ Gfx *render_player_scene(Gfx *arg0, s16 arg1) {
     gdl = node_render_layers_draw(gdl, 2, player, 1);
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/render_player_scene.s")
-#endif
-#ifdef NON_MATCHING
 u8 * hud_draw(u8 *);
 s32 screen_flash_overlay_draw(s32);
 s32 flare_nodes_draw(s32, s32);
@@ -650,15 +621,8 @@ Gfx *render_overlay_pass(u8 *arg0) {
     }
     return (Gfx *)sprite_gfx_begin_alt(node_render_layers_draw(node_render_layers_draw(var_s0_4, 3, 0, 0), 3, 0, 1));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/render_overlay_pass.s")
-#endif
 extern u16 D_800D1CC2;
-#ifdef NON_MATCHING
 void emit_sparks_by_angles(u8 *arg0, s32 arg1, s32 arg2);
-#else
-Gfx *emit_sparks_by_angles();
-#endif
 /* was func_15019BB8 */
 Gfx *render_player_hud(Gfx *gdl, s32 arg1) {
     gSPViewport(gdl++, (u8 *)D_800BE628 + arg1 * 0x180 + 0x40 + D_800BE9C0 * 0x10);
@@ -694,7 +658,6 @@ Gfx *render_player_hud(Gfx *gdl, s32 arg1) {
 //     node_render_layers_draw(temp_v0, 4, sp2A, 1);
 // }
 
-#ifdef NON_MATCHING
 /* Per-player 3D setup (P13, hand C): viewport and projection of camera record D_800BE628 + player * 0x180
  * (double-buffered by the DL buffer index D_800BE9C0), the fixed matrix D_80089810, level 0x1D's extra pass
  * (objects_draw_pass), the two model layers of group 5, then the view matrix and the player's model matrix from
@@ -726,9 +689,6 @@ Gfx *render_player_3d_setup(Gfx *arg0, s32 arg1) {
     gdl[1].words.w1 = D_800DC6D0[D_800BE9C0] + arg1 * 64;
     return gdl + 2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/render_player_3d_setup.s")
-#endif
 /* was func_15019E60 */
 Gfx *render_final_overlay(Gfx *arg0) {
     if (D_80082FA0 != 0) {
@@ -740,7 +700,6 @@ Gfx *render_final_overlay(Gfx *arg0) {
     return (Gfx *)text_queue_draw(hud_overlay_draw_screen(render_set_scissor(arg0, 0xFF, 0, 0, 0, 0)));
 }
 
-#ifdef NON_MATCHING
 void event_timers_update(void);
 extern u32 D_800BEA30;
 extern u8 D_800BEA39;
@@ -845,6 +804,3 @@ void game_update_frame_timing(void) {
     }
     event_timers_update();
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/game_update_frame_timing.s")
-#endif

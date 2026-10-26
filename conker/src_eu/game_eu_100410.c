@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 memcpy(s32, s32, s32);
-#endif
 
 
 s32 flake_particle_spawn(s32, u8 *, u8, u8);
@@ -23,7 +22,6 @@ void flake_spawner_update(u8 *arg0)
   }
 }
 
-#ifdef NON_MATCHING
 /* 0x60-byte particle state, copied to the particle's +0x28 */
 typedef struct {
     s32 kind;
@@ -70,11 +68,7 @@ s32 flake_particle_spawn(s32 kind, u8 *mtx, u8 arg2, u8 arg3) {
     }
     return memcpy((s32) ((u8 *) part + 0x28), (s32) &f, 0x60);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_100410/flake_particle_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
 
 /* was func_150D2E34 */
@@ -194,10 +188,6 @@ void fx_sprite_shower_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s0 + 0x14)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_100410/fx_sprite_shower_update.s")
-#endif
-#ifdef NON_MATCHING
 s32 memcpy(s32, s32, s32);
 
 /* was func_150D327C */
@@ -314,9 +304,6 @@ u8 *beam_build_quad_vtx(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_100410/beam_build_quad_vtx.s")
-#endif
 /* was func_150D368C */
 s32 beam_scroll_fade_step(u8 *arg0) {
     u8 *temp_s0;

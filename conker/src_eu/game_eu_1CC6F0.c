@@ -1,10 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void *memcpy(void *, const void *, s32);
 extern u8 D_800A5860[];
-#endif
 
 
 /* was func_1519EEE0 */
@@ -96,7 +95,6 @@ void seqfx_burst_spawn(V3_1519EFE8 *arg0, u16 arg1, f32 arg2, u8 arg3, s32 arg4)
     emit_textured_burst(&s, &i, &f, 1, 0.0f, 0, arg3, arg4);
 }
 
-#ifdef NON_MATCHING
 s32 mdl_particle_spawn_ex(f32 *, s32, s32, s32, s32, s32, s32);
 
 /* was func_1519F0FC */
@@ -197,9 +195,6 @@ void seqfx_track_effect_spawn(u8 *arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4) {
         memcpy(temp_v0_2 + 0x170, &sp.u38, 4);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CC6F0/seqfx_track_effect_spawn.s")
-#endif
 /* was func_1519F294 */
 s32 seqfx_track_effect_sync(u8 *arg0) {
     u8 *temp_v1;

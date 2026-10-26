@@ -3,11 +3,7 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
-#else
-s32 event_dispatch(s32, s32, s32, s32, s32, s32);
-#endif
 
 /* was func_150C7850 */
 void player_update_flags_btn4002(u8 *arg0) {

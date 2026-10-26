@@ -4,7 +4,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 extern s16 D_8002BF60[]; /* EU pan gain table (128 s16, US D_8002BC10): left = [pan], right = [127 - pan] */
 void mp3_stream_set_read_cb(s32 arg0);
 
@@ -40,9 +39,6 @@ void audio_fx_mixer_init(s32 heap) {
     m->unk16 = 0;
     mp3_stream_set_read_cb((s32) mp3_stream_rom_read);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_43620/audio_fx_mixer_init.s")
-#endif
 // looks straightforward.. but... isnt
 // void audio_fx_mixer_init(s32 arg0) {
 //     s32 idx;

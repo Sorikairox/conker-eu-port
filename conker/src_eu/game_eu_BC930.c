@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* was func_1508F120 */
 s32 link_group_find_partner(s32 arg0, s32 arg1, s32 arg2) {
     s32 var_t0;
@@ -63,9 +62,6 @@ block_13:
 block_14:
     return -1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_BC930/link_group_find_partner.s")
-#endif
 /* was func_1508F21C */
 void link_group_clear(u32 arg0) {
     if (arg0 < D_80087380) {
@@ -75,7 +71,6 @@ void link_group_clear(u32 arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 void look_point_remove(s32);
 void world_record_remove(u32);
 
@@ -148,6 +143,3 @@ block_15:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_BC930/link_group_remove_members.s")
-#endif

@@ -49,7 +49,6 @@ s32 os_epi_raw_start_dma(OSPiHandle *pihandle, s32 direction, u32 devAddr, void 
     return 0;
 }
 
-#ifdef NON_MATCHING
 /* P279: readable C for libultra's hand-asm bcopy (also replaced on PC by port/ultra/pc_libc.c vbe.bcopy). The asm
  * also returns dst in v0; the libultra prototype is void (v0use.py: only swarm_spawn passes it on as its own
  * return value, and nothing reads that). */
@@ -75,9 +74,5 @@ void bcopy(const void *src, void *dst, int n) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_23CC0/bcopy.s")
-#endif
 
 /* was func_10024190 */
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_23CC0/os_writeback_dcache.s")

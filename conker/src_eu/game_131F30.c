@@ -1,13 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void fx_sparks_emit(u8 *arg0);
 void sfx_emitter_stop_by_callback(s32, s32, s32);
-#endif
 
 
-#ifdef NON_MATCHING
 // prop_owner_effects_clear: P256: for the prop `obj` (a 0xA0-byte record of D_800DBEF4), finds its owner, the first
 // live object (interaction_state != 0) of D_800CC2D0[0..24] whose bit is set in the prop's mask D_800DC3C4[index],
 // or NULL, then clears effects keyed on it (effect_nodes_broadcast): kinds 0xF9 / 0xF8 / 0xF7 (obj +0x72) clear the type
@@ -68,11 +66,7 @@ void prop_owner_effects_clear(u8 *obj) {
         break;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/prop_owner_effects_clear.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 collision_floor_probe(f32 *, s32, f32, u8 *);
 s32 bolt_arc_spawn(s16 *, s32, u8, u8);
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
@@ -176,10 +170,6 @@ void fx_ground_arcs_update(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/fx_ground_arcs_update.s")
-#endif
-#ifdef NON_MATCHING
 void sfx_emitter_stop_by_callback(s32, s32, s32);
 
 /* was func_15104FF8 */
@@ -203,10 +193,6 @@ void fx_ground_arcs_on_msg(s32 arg0, s32 arg1, s32 arg2) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/fx_ground_arcs_on_msg.s")
-#endif
-#ifdef NON_MATCHING
 s32 bolt_spawn(f32 *, f32 *, s32, f32 *, f32, s32, s32, s32);
 s32 player_mask_hides_all(s32);
 
@@ -310,9 +296,6 @@ void fx_quad_bolts_update(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/fx_quad_bolts_update.s")
-#endif
 /* was func_1510550C */
 void fx_free_on_msg_4b(struct102 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 0x4B) {
@@ -329,7 +312,6 @@ void fx_quad_bolts_on_msg(struct207 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 typedef struct { s16 v[9]; } HitSurface558C; /* 0x12-byte surface record (collision_ray_cast) */
 void fire_embers_spawn(void *, u8, s32);
 void emit_impact_flash_spray(void *, s32 *, f32 *, s32, u8, s32);
@@ -408,9 +390,6 @@ void impact_debris_burst(u8 *p) {
         emit_impact_flash_spray(&flash, frames, scales, 1, p[0xC], p[1]);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/impact_debris_burst.s")
-#endif
 
 /* was func_15105848 */
 void fx_sparks_on_msg(struct207 *arg0, s32 arg1, u8 arg2) {
@@ -428,7 +407,6 @@ void fx_sparks_on_msg(struct207 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 spawn_region_random_point(u8 *, s32 *, s32 *, s32 *, s32 *);
 void vec3_from_angles_byte(s16, s16, f32, void *);
 s32 player_mask_hides_all(s32);
@@ -529,9 +507,6 @@ void fx_sparks_emit(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/fx_sparks_emit.s")
-#endif
 // void fx_sparks_emit(void *arg0) {
 //     s8 spE1;
 //     s8 spE0;

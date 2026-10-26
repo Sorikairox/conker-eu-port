@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P203 */
 /* P203: the 0x12-byte surface record a ray hit leaves (copied from the caller's hit when it has one) */
 typedef struct {
@@ -271,9 +270,6 @@ s32 bullet_impact_effects(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/bullet_impact_effects.s")
-#endif
 
 /* was func_151D4300 */
 s32 impact_puff_wobble_update(u8 *arg0) {
@@ -304,7 +300,6 @@ void obj_bone_point_or_pos(s32 arg0, s32 arg1, void *arg2, u8 arg3, f32 arg4) {
     (*(f32 *)((u8 *)arg1 + 8)) = (f32) (*(f32 *)((u8 *)arg0 + 0x1C));
 }
 
-#ifdef NON_MATCHING
 /* P159 */
 // object_sound_between: plays sound `sound` (attack_spawn_at_point) at the midpoint of a and b for object obj (its index
 // in D_800CC2D0); the facing is obj's u16 at +0x76, minus the s16 at +0x12 of its parent (+0x31C) when it has one.
@@ -322,9 +317,6 @@ void object_effect_between(struct127 *obj, f32 *a, f32 *b, s32 sound) {
     attack_spawn_at_point((a[0] + b[0]) * 0.5f, (a[1] + b[1]) * 0.5f, (a[2] + b[2]) * 0.5f, sound, obj - D_800CC2D0,
                   facing, 0, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/object_effect_between.s")
-#endif
 
 /* was func_151D44C4 */
 void muzzle_light_small_spawn(u8 *arg0, u8 arg1, s32 arg2) {
@@ -356,7 +348,6 @@ void explosion_light_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     light_create_with_ctrl(sp48, sp3C, (random_int() % 24U) + 0x22, 0xFF, 0xA1, 0xA2, 0xFFU, 0U, 0, arg1, arg2);
 }
 
-#ifdef NON_MATCHING
 /* P155 */
 s32 attack_spawn_at_point(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, u16 arg5, s32 arg6, s32 arg7);
 // object_sounds_at: plays the sounds `sound1` and `sound2` (attack_spawn_at_point) at pos for object obj (its index in
@@ -395,11 +386,7 @@ s32 object_effects_at(f32 *pos, f32 *dir, struct127 *obj, struct127 *model, s32 
     attack_spawn_at_point(pos[0], pos[1], pos[2], sound2, index, facing, flags, (s32)at);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/object_effects_at.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P155 */
 // object_sound_at: plays sound `sound` (attack_spawn_at_point) at pos for object obj (its index in D_800CC2D0), with the
 // direction of dir (x / z, binary angle - 0x4000, odd) or 0 without dir. arg3 is unused.
@@ -418,9 +405,6 @@ void object_effect_at(f32 *pos, f32 *dir, struct127 *obj, s32 arg3, s32 sound) {
     }
     attack_spawn_at_point(pos[0], pos[1], pos[2], sound, obj - D_800CC2D0, facing, 0, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/object_effect_at.s")
-#endif
 
 typedef struct { f32 x, y, z; } V3;
 
@@ -527,7 +511,6 @@ void obj_point_fx_broadcast_kill(u8 *arg0) {
     effect_nodes_broadcast(&tmp, 0x3C);
 }
 
-#ifdef NON_MATCHING
 /* P160 */
 void *memcpy(void *, const void *, s32);
 extern void (*D_80090010[])(u8 *obj, s32 sound, f32 *point);
@@ -569,11 +552,7 @@ s32 object_point_effect_spawn(u8 *obj, u8 kind, s16 arg2, u8 arg3, s32 arg4) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/object_point_effect_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P222: readable C for object_trail_smoke_update (game_eu_201240, 297 words). */
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 f32 vec3_length(struct17 *arg0);
@@ -704,9 +683,6 @@ void object_trail_smoke_update(u8 *ev) {
         rec->unkC -= 1.0f;
     } while (rec->unkC > 1.0f);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/object_trail_smoke_update.s")
-#endif
 
 /* was func_151D51E8 */
 void obj_point_fx_on_message(struct102 *arg0, u8 *arg1, u8 arg2)
@@ -726,7 +702,6 @@ void obj_point_fx_on_message(struct102 *arg0, u8 *arg1, u8 arg2)
   }
 }
 
-#ifdef NON_MATCHING
 // P231 (P230 implicit_scan): vec_damp_xyz_per_tick takes (f32 *, f32); the matching C below calls it without a prototype and
 // passes the f32's bit pattern as an int (lands in a1 either way on N64, wrong type on the port). Same fix as
 // particle_wobble_damp_update (game_eu_DCEF0, P230).
@@ -740,17 +715,7 @@ s32 trail_smoke_particle_update(u8 *arg0, s32 arg1) {
     vec_damp_xyz_per_tick((f32 *)(arg0 + 0x58), *(f32 *)(p + 0xC));
     return 1;
 }
-#else
-s32 trail_smoke_particle_update(u8 *arg0, s32 arg1) {
-    u8 *p = arg0 + 0xA8;
 
-    particle_update_wobble_offset(arg0, arg0 + 0xAC, p, arg0 + 0xAA);
-    vec_damp_xyz_per_tick(arg0 + 0x58, *(s32 *)(p + 0xC));
-    return 1;
-}
-#endif
-
-#ifdef NON_MATCHING
 /* P160: object_point_effect_spawn takes the object as a pointer */
 // object_bone_point_effects: spawns the point effects of bone points 0 and 1 of obj (object_point_effect_spawn kinds 0, 1)
 /* was func_151D5308 */
@@ -758,14 +723,7 @@ void object_bone_point_effects(s32 arg0) {
     object_point_effect_spawn((u8 *)arg0, 0, 0x50, 0xFF, 1);
     object_point_effect_spawn((u8 *)arg0, 1, 0x50, 0xFF, 1);
 }
-#else
-void object_bone_point_effects(s32 arg0) {
-    object_point_effect_spawn(arg0, 0, 0x50, 0xFF, 1);
-    object_point_effect_spawn(arg0, 1, 0x50, 0xFF, 1);
-}
-#endif
 
-#ifdef NON_MATCHING
 /* P179 */
 void hit_spark_sound_play(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3, f32 arg4);
 void object_impact_effects(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5);
@@ -820,9 +778,6 @@ void object_take_hit(u8 *obj, u8 *attacker, u8 *pos, f32 *pos2, u8 *rec, s32 fla
     obj_send_hit((struct127 *) obj, flags | 0x80000, (u16) ((angle - 0x4000) | 1),
                   (attacker != NULL) ? (struct127 *) attacker - D_800CC2D0 : -1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/object_take_hit.s")
-#endif
 
 /* was func_151D56F8 */
 void weapon_count_shot(u8 *arg0) {
@@ -832,7 +787,6 @@ void weapon_count_shot(u8 *arg0) {
     *(s16 *)(*(u8 **)(arg0 + 0x31C) + 0x1AA) += 1;
 }
 
-#ifdef NON_MATCHING
 /* was func_151D5724 */
 void weapon_find_aim_target(u8 *arg0, u8 *arg1, struct17 *arg2, struct17 *arg3, struct17 *arg4, u8 *arg5, u8 *arg6, u8 **arg7, u8 **arg8, u8 *arg9) {
     u8 *sp54;
@@ -880,10 +834,6 @@ void weapon_find_aim_target(u8 *arg0, u8 *arg1, struct17 *arg2, struct17 *arg3, 
     *arg7 = NULL;
     *arg8 = NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/weapon_find_aim_target.s")
-#endif
-#ifdef NON_MATCHING
 s32 cam_wobble_start_preset(s32, s32, s32 *, s32, s32);
 
 /* was func_151D58E4 */
@@ -911,9 +861,6 @@ void cam_shake_all_players(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 a
         } while (D_80082FA0 >= var_s0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/cam_shake_all_players.s")
-#endif
 typedef struct {
     struct17 pos;
     f32 unkC;
@@ -946,7 +893,6 @@ void rumble_all_players_at(struct17 *arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg
     }
 }
 
-#ifdef NON_MATCHING
 /* P155 */
 void emit_random_sprites(u8 *, u8, s32);
 // smoke_cloud_spawn: spawns a smoke cloud at pos (f32[3]) through emit_random_sprites with a fixed emitter block (0x5C
@@ -1014,15 +960,8 @@ s32 smoke_cloud_spawn(u8 *pos, u8 arg1, s32 arg2) {
     emit_random_sprites((u8 *)&sp, arg1, arg2);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/smoke_cloud_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 spark_shower_spawn(u8 *, f32, f32, f32, f32, u8, s32); /* P95: f32 parameter */
-#else
-void spark_shower_spawn(u8 *, f32, s32, f32, f32, u8, s32);
-#endif
 s32 smoke_cloud_spawn(u8 *, u8, s32);
 
 /* was func_151D5BF8 */
@@ -1030,14 +969,9 @@ void explosion_smoke_flash_spawn(u8 *arg0, u8 arg1, s32 arg2) {
 
     smoke_cloud_spawn(arg0, arg1, arg2);
     explosion_light_spawn(arg0, arg1, arg2);
-#ifdef NON_MATCHING
     spark_shower_spawn(arg0, (random_float() * 4.0f) + 12.0f, 1.6409999f, (random_int() % 56U) + 0xC8, 0.0f, arg1, arg2); /* P95: float literal (asm passes the bits 0x3FD20C49) */
-#else
-    spark_shower_spawn(arg0, (random_float() * 4.0f) + 12.0f, 0x3FD20C49, (random_int() % 56U) + 0xC8, 0.0f, arg1, arg2);
-#endif
 }
 
-#ifdef NON_MATCHING
 /* P155 */
 void mtx_transform_points(f32 **, f32 **, void *, s32);
 void bone_streak_fx_start(u8 *, u8 *, s32, u8 *, f32, u8, s32);
@@ -1066,11 +1000,7 @@ void bone_beam_spawn(struct127 *obj, f32 *a, f32 *b, u8 bone, f32 scale, u8 alph
     dir[2] -= at[2];
     bone_streak_fx_start((u8 *)at, (u8 *)dir, (s32)mtx, (u8 *)obj, scale, alpha, flags);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/bone_beam_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 *D_8009002C[]; /* P216: per-mouth point (2 entries) */
 extern u8 *D_80090034[];  /* P216: per-mouth bone index (2 entries) */
 s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
@@ -1121,11 +1051,7 @@ void mouth_aim_ray(struct127 *obj, u8 which) {
     }
     obj_notify_hit_target(obj);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/mouth_aim_ray.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P155 */
 void mtx_transform_points(f32 **, f32 **, void *, s32);
 // object_mouth_point: P155: obj_get_aim_vectors (obj, dir, arg3, arg4, 0.811), then out = `point` transformed by obj's
@@ -1158,11 +1084,7 @@ s32 object_mouth_point(struct127 *obj, f32 *out, f32 *dir, s32 arg3, s32 arg4, f
     out[2] = obj->z_position + 34.0f * sz;
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/object_mouth_point.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P159 */
 extern s32 (*D_80087030[])(u8 *, s32, s32);
 // objects_hit_by_segment: tests the segment start / dir (ray_sphere_intersect) against every live object of D_800CC2D0
@@ -1217,9 +1139,6 @@ s32 objects_hit_by_segment(u8 *start, s32 *dir, u8 *self, s8 filter, s32 filterA
     }
     return mask;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/objects_hit_by_segment.s")
-#endif
 
 s32 allocate_memory(s32, s32, s32, s32);
 

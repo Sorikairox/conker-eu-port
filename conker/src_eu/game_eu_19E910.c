@@ -5,7 +5,6 @@
 
 void particle_spark_ring_spawn(f32 x, f32 y, f32 z, f32 r, s32 base, f32 scale, s32 colour, s32 n, u8 kind, s32 owner);
 
-#ifdef NON_MATCHING
 s32 shared_dl_acquire(s32);
 void node_spawn_model_fx(u8 *arg0, u8 arg1, s32 arg2);
 
@@ -94,9 +93,6 @@ void debris_crate_break_pieces(u8 *obj, s32 id, s32 arg2, s32 flags, s32 kind, s
     particle_spark_ring_spawn(x, y - 80.0f, z, 70.0f, 500, 0.00457763671875f, 0, 10, kind, owner);
     obj[0x6E] = 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/debris_crate_break_pieces.s")
-#endif
 
 /* was func_15171434 */
 void debris_crate_break_by_level(s32 arg0, u8 arg1, s32 arg2) {
@@ -110,7 +106,6 @@ void debris_crate_break_by_level(s32 arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 shared_dl_acquire(s32);
 void node_spawn_model_fx(u8 *arg0, u8 arg1, s32 arg2);
 
@@ -195,9 +190,6 @@ void debris_barrel_break_pieces(u8 *obj, u8 kind, s32 arg2) {
     }
     obj[0x6E] = 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/debris_barrel_break_pieces.s")
-#endif
 
 /* was func_15171734 */
 void debris_obj_remove_explode(u8 *arg0) {
@@ -207,7 +199,6 @@ void debris_obj_remove_explode(u8 *arg0) {
     obj_remove(arg0, 1);
 }
 
-#ifdef NON_MATCHING
 s32 shared_dl_acquire(s32);
 void node_spawn_model_fx(u8 *arg0, u8 arg1, s32 arg2);
 
@@ -291,9 +282,6 @@ void debris_cloud_spawn(s32 count, s32 id, f32 x, f32 y, f32 z, f32 spinY, f32 s
         node_spawn_model_fx((u8 *) &t, kind, owner);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/debris_cloud_spawn.s")
-#endif
 
 void debris_sparks_rect_spawn(s16 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, u8 argB, s32 argC);
 extern f32 D_800A73A0;
@@ -343,7 +331,6 @@ void debris_sparks_rect_spawn(s16 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4,
     particle_quad_edge_sparks(pts[0], x, z, arg7, argA, arg6, arg8, arg9, argB, argC);
 }
 
-#ifdef NON_MATCHING
 f32 math_cos_u8(u8);
 void particle_sprite_spawn(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA,
                    u8 argB, u8 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, u8 arg13, u8 arg14,
@@ -396,20 +383,9 @@ void particle_spark_ring_spawn(f32 x, f32 y, f32 z, f32 radius, s32 speedBase, f
                       life, (s32) spread, 0, 0, kind, owner);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/particle_spark_ring_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 void obj_trail_burst_spawn(struct127 *, u8);
-#else
-s32 obj_trail_burst_spawn(struct127 *, u8);
-#endif
-#ifdef NON_MATCHING
 void obj_skel_line_emit_pair(struct127 *, u8, s32);
-#else
-s32 obj_skel_line_emit_pair(struct127 *, u8, s32);
-#endif
 s32 obj_spawn_ground_dust_rings(struct127 *, u8, s32);
 
 /* was func_15172164 */

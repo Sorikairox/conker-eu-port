@@ -22,11 +22,7 @@ extern void (*D_8008D0A4[])(s32);
 extern u16 D_800CC16E;
 s32 texscroll_update(s32, s32);
 s32 tex_scroll_update();
-#ifdef NON_MATCHING
 void ambient_slots_refresh(void);
-#else
-s32 ambient_slots_refresh();
-#endif
 s32 light_fx_update();
 
 /* was func_15174F68 */

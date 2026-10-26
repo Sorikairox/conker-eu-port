@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A4EA8[];
-#endif
 
 
-#ifdef NON_MATCHING
 /* P155 */
 s32 memcpy(void *, void *, s32);
 // path_record_create: allocates a path record (node_alloc kind 0x2D, 0x80 bytes + `extra` + 24 bytes per point
@@ -39,11 +37,7 @@ u8 *path_record_create(u8 *def, s32 extra, u8 arg2, s32 arg3) {
     *(s32 *)(rec + 0x7C) = *(s16 *)(rec + 0x12) * 64 + 0x140;
     return rec;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/path_record_create.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 (*D_8008FCE0[])(u8 *);
 extern s32 (*D_8008FCE8[])(u8 *);
 void bolt_subdivide(u8 *obj, s16 lo, s16 hi, f32 amp, s16 depth);
@@ -109,11 +103,7 @@ void bolt_path_update(u8 *obj) {
         node_destroy((struct102 *) obj);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/bolt_path_update.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 gfx_geometry_mode_cached(s32, s32, s32);
 s32 gfx_env_color_cached(s32, u8, u8, u8, s32, s8 *);
@@ -283,10 +273,6 @@ u8 *bolt_path_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     }
     return var_s0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/bolt_path_draw.s")
-#endif
-#ifdef NON_MATCHING
 #define BOLT_PT(obj, i) ((f32 *) (*(u8 **) ((u8 *) (obj) + 0x64) + (i) * 0x18))
 
 // bolt_subdivide: midpoint displacement of a lightning bolt's point list (obj+0x64, 0x18-byte points): the midpoint
@@ -317,9 +303,6 @@ void bolt_subdivide(u8 *obj, s16 lo, s16 hi, f32 amp, s16 depth) {
     }
 }
 #undef BOLT_PT
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/bolt_subdivide.s")
-#endif
 
 /* was func_151A8B10 */
 void bolt_path_release_buffers(u8 *arg0) {
@@ -473,7 +456,6 @@ u8 *bolt_attach_create(u8 *obj, V3BD4 *pos, u8 idx, s16 kind, f32 f4, f32 f8, C4
     return ret;
 }
 
-#ifdef NON_MATCHING
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, s32, u8 *, u8 *, u8 *, s32, s32 *, s32, f32);
 f32 vec3_length(f32 *);
 s32 prop_is_flagged(s32);
@@ -543,9 +525,6 @@ block_11:
 block_15:
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/bolt_follow_owner.s")
-#endif
 /* was func_151A8FD0 */
 void bolt_path_handle_msg(u8 *arg0, s32 arg1, u8 arg2) {
     s32 idx = arg0[0x5C];
@@ -784,7 +763,6 @@ s32 obj_effect_dispatch(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* P241: readable C for object_effect_kind2_start (game_eu_1D5710, 59 insns). */
 // object_effect_kind2_start: handler of D_8008FD24 entries 0..5 (`(u8 *, s32)`, dispatcher obj_effect_dispatch ignores the
 // result): spawns a kind-2 effect owned by obj through ground_emitter_spawn (1 byte of extra data) with the two values
@@ -817,9 +795,6 @@ void object_effect_kind2_start(u8 *obj, s32 idx) {
         memcpy((u8 *) p + 0x80, &extra, 1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/object_effect_kind2_start.s")
-#endif
 
 typedef struct {
     s32 u0;
@@ -881,7 +856,6 @@ void ground_emitter_toggle_msg(u8 *arg0, s32 arg1, u8 arg2)
   }
 }
 
-#ifdef NON_MATCHING
 /* P155 */
 s32 light_create_flicker_preset(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 typedef struct {
@@ -978,11 +952,7 @@ void kind_effect_spawn(u8 flags, u8 kind, void *owner, s32 pos, f32 arg4, f32 ar
         light_create_flicker_preset(&snd, at, k->b8, k->b9, k->bA, 0xFF, 0, 0, k->bC, 0xFF, 1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/kind_effect_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 flame_spawn(s32, f32 *, s16, s32, s32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* was func_151A9BE4 */
@@ -1031,9 +1001,6 @@ void ground_emitter_spawn_particle(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
         memcpy(temp_v0 + 0x160, &sp.u7C, 8);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/ground_emitter_spawn_particle.s")
-#endif
 void vec2_from_angle_rad(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 typedef void (*Fn9DE4)(f32 *, Obj9DE4 *, s32, u8, s32);
 extern Fn9DE4 D_8008FE00[];

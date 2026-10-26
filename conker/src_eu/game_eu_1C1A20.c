@@ -9,7 +9,6 @@ s32 hitinfo_from_obj_floor(s32 *, struct127 *);
 void hit_impact_effect(u8 *obj, u8 alt, u8 view, s32 group);
 
 
-#ifdef NON_MATCHING
 // hit_impact_effect: P256: the impact effect at the last hit point D_800CC2C0/C4/C8 (written by the hit tests in
 // game_83300) for the struck object `obj`, chosen by its kind byte obj +0x04 (the material of the thing that was
 // hit). hitinfo_from_obj_floor gives the object's matrix (9 words) on the stack first. Fire-like kinds spawn embers
@@ -71,9 +70,6 @@ void hit_impact_effect(u8 *obj, u8 alt, u8 view, s32 group) {
         impact_blast_spawn_large(pos, mtx, style, view, group);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/hit_impact_effect.s")
-#endif
 
 /* was func_151942B0 */
 void hit_react_impact_large(s32 arg0, s32 arg1, s32 arg2) {
@@ -167,7 +163,6 @@ void hit_react_attacker_fx_burst(struct127 *arg0, struct127 *arg1, s32 arg2) {
     hit_react_puff_burst(arg0, arg1);
 }
 
-#ifdef NON_MATCHING
 // hit_debris_burst: P256: the debris burst when `obj` is hit by `attacker`: unless obj's class (obj_get_hit_kind) is
 // 0x63 or its class mode D_800A43C6[class * 16] is 2, one emit_sparks_in_angle_range burst 270 above obj's position (heading
 // (attacker yaw +0x7A >> 8) - 0x80, single = mode == 1, obj's matrix from hitinfo_from_obj_floor), then hit_dust_trail_spawn(obj,
@@ -224,9 +219,6 @@ void hit_debris_burst(u8 *attacker, u8 *obj, s32 arg2) {
     emit_sparks_in_angle_range(&s, &s.unk8, (s32) mtx, 0xFF, 1);
     hit_dust_trail_spawn(obj, 0xFF, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/hit_debris_burst.s")
-#endif
 
 s32 obj_steam_puff_spawn(u8 *, u8, s32);
 s32 object_hit_flash_spawn(s32, u8 *);
@@ -369,7 +361,6 @@ void hit_react_default(s32 arg0, u8 *arg1, s32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 player_hit_reaction(struct127 *, s32);
 void obj_detonate_attachment(struct127 *, s32);
 
@@ -410,9 +401,6 @@ void obj_hit_retire(s32 arg0, u8 *obj, s8 *arg2) {
             break;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/obj_hit_retire.s")
-#endif
 
 /* was func_151952F0 */
 void hit_react_character(s32 arg0, s32 arg1, s32 arg2) {
@@ -449,11 +437,7 @@ void hit_react_kind3e_a6(s32 arg0, u8 *arg1, s32 arg2) {
 }
 
 s32 screen_colour_fade_fx_start(u8, u8, u8, u8, s16, u8, u8, s32);
-#ifdef NON_MATCHING
 void obj_hit_retire(s32, u8 *, s8 *); // P200: the asm returns no value; the only caller ignores it
-#else
-s32 obj_hit_retire(s32, u8 *, s8 *);
-#endif
 
 /* was func_15195418 */
 void hit_react_flash_retire(s32 arg0, u8 *arg1, s32 arg2) {
@@ -470,11 +454,7 @@ void hit_react_flash_retire(s32 arg0, u8 *arg1, s32 arg2) {
 }
 
 s32 player_hit_reaction(struct127 *, s32);
-#ifdef NON_MATCHING
 void explosion_ground_effects(f32 *, struct127 *, s32, s32, s32);
-#else
-s32 explosion_ground_effects(f32 *, struct127 *, s32, s32, s32);
-#endif
 /* was func_151954B8 */
 void hit_react_blast_retire(s32 arg0, struct127 *arg1, s32 arg2) {
     f32 sp34[3];
@@ -488,7 +468,6 @@ void hit_react_blast_retire(s32 arg0, struct127 *arg1, s32 arg2) {
     player_hit_reaction(arg1, 6);
 }
 
-#ifdef NON_MATCHING
 void bone_sparks_detach_owner(u8 *arg0);
 s32 bone_sparks_attach_preset(s32 arg0, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
 s32 memcpy(s32, s32, s32);
@@ -562,11 +541,7 @@ void character_hit_react(struct127 *obj, struct127 *target, u8 attached) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/character_hit_react.s")
-#endif
 
-#ifdef NON_MATCHING
 void * obj_alloc_slot(void);
 s32 obj_anim_state_alloc(struct127 *, u16, s32, f32);
 void bone_spark_emitter_spawn(u8 *, s32);
@@ -645,9 +620,6 @@ void obj_hit_split_halves(struct127 *arg0) {
     bone_spark_emitter_spawn(arg0, 0);
     bone_spark_emitter_spawn(temp_v0, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/obj_hit_split_halves.s")
-#endif
 void vec2_from_angle_rad(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 void object_impact_effects(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5);
 /* was func_15195A98 */

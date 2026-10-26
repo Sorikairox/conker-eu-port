@@ -191,16 +191,13 @@ s32 ribbon_trail_update_points(TrailObj18 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 void ribbon_trail_stop(u8 *);
 struct260 *effect_node_create_nodraw(s16 arg0, s8 arg1, s8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
 /* the .s's late_rodata D_800A9138 is dropped in the NM link */
 static const f32 D_800A9138[1] = { 9.99999975e-05f }; /* 0x38D1B717 (array: IDO puts scalar float statics in .data) */
-#endif
 
-#ifdef NON_MATCHING
 // trail_emitter_update: object update of a trail emitter made by ribbon_trail_spawn (state SB3AB4 at +0x98, ring of 0x18
 // byte trail points at +0x94, position +0x10). Ends (returns 0) when the owner record is gone or its id (+0x3B)
 // changed. The first time (flag 4 in +0x1E) it fetches the start position (ribbon_trail_bone_pos). When the source can no
@@ -298,11 +295,7 @@ s32 ribbon_trail_update(u8 *obj) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/ribbon_trail_update.s")
-#endif
 
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 gfx_load_texture_cached(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, u8 *, s32);
 s32 gfx_geometry_mode_cached(s32, s32, s32);
@@ -524,11 +517,7 @@ s32 ribbon_trail_draw(u8 *obj, s32 gfx, s16 player) {
     } while (prev != *(s8 *) (obj + 0x2D));
     return gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/ribbon_trail_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 struct102 *emitter_trail_spawn(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
 /* effect spec for emitter_trail_spawn (0x30 bytes) */
 typedef struct {
@@ -576,9 +565,6 @@ void obj_attached_effect_start(u8 *obj, u8 arg1) {
         emitter_trail_spawn((u8 *)&s, 0, arg1, 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/obj_attached_effect_start.s")
-#endif
 
 s32 particle_spawn_basic(void *, s32, s32, u8, s32);
 /* was func_151A4BE8 */
@@ -678,7 +664,6 @@ void spark_burst_particle_spawn(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4
     }
 }
 
-#ifdef NON_MATCHING
 /*
  * spark_burst_update: particle update handler 0 (D_80089B00, called by particle_sprite_update with the old position).
  * The 12-byte parameter block at +0xA8 (copied by the spawner above) gives three thresholds on the life timer
@@ -709,9 +694,6 @@ s32 spark_burst_update(u8 *arg0, f32 *oldPos) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/spark_burst_update.s")
-#endif
 
 /* was func_151A4EB0 */
 s32 spark_burst_update_tail(u8 *arg0, s32 arg1)
@@ -762,7 +744,6 @@ void owner_smoke_start(u8 *arg0, u8 arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 void emit_particle_burst_req(u8 *tmpl, s32 arg1, u8 room, u8 kind);
 
 /* emit_particle_burst_req's particle template (sp2C in the asm) */
@@ -895,9 +876,6 @@ void owner_smoke_update(u8 *obj) {
     t.u61 = -1;
     emit_particle_burst_req((u8 *) &t, 0xFF, obj[0xC], obj[1]);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/owner_smoke_update.s")
-#endif
 
 void ribbon_trail_stop(u8 *);
 /* was func_151A5290 */
@@ -993,11 +971,7 @@ void ribbon_trail_marker_update(u8 *arg0) {
     }
     if ((sp1B == 0) && (*(s32 *)(temp_v0 + 0x1D4) != 0) && ((temp_v0[0x74] & 0xF) != 0xF)) {
         sp1B = 1; // permuter: the flag is stored before and after the call
-#ifdef NON_MATCHING
         ribbon_trail_spawn(temp_a0, arg0[0xC]); /* the asm also loads a2 = arg0; the callee has 2 params */
-#else
-        ribbon_trail_spawn(temp_a0, arg0[0xC], arg0);
-#endif
         sp1B = 1;
     }
     if (sp1B) {

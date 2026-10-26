@@ -343,7 +343,6 @@ s32 sound_id_is_playing(u16 arg0) {
     }
     return 0;
 }
-#ifdef NON_MATCHING
 // sound_pick_variant: picks one of n variants of sound `base` at random and returns base + pick. For n < 8 the byte
 // D_80041F5C[base] remembers the variants already played (bit 7 = valid) so every variant plays once before one
 // repeats, and the last one played is never picked first in the next round; for n >= 8 it only stores pick + 1.
@@ -387,9 +386,6 @@ u16 sound_pick_variant(s32 base, u16 n) {
     }
     return base + pick;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/sound_pick_variant.s")
-#endif
 s32 sound_calc_pan_volume(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32 *, s32);
 
 /* was func_1000F6B8 */
@@ -503,7 +499,6 @@ void sound_voice_update_pan(u16 arg0, s16 arg1, s16 arg2, s16 arg3) {
     sound_voice_set_param(arg0, 256, tmp & 0x80);
 }
 
-#ifdef NON_MATCHING
 // sfx_start_positional: claims the next of the 32 positional sound slots (D_80041FE0[D_80042B00++]) for sound id
 // arg0 at (arg1, arg2, arg3) with volume arg4, ranges arg5 / arg6, update callback arg7 (+ its data arg8, arg9) and
 // flags argA (with a callback: flags | 0x12, else (flags & 0x108) | 2; flag 0x40: arg2 is a joint index resolved by
@@ -559,9 +554,6 @@ u16 sfx_emitter_start(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, u16 arg5
     e->unk10 |= 0x1000;
     return e->unk24;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/sfx_emitter_start.s")
-#endif
 /* was func_1000FC18 */
 void sfx_emitter_stop_at(u16 arg0, s16 arg1, s16 arg2, s16 arg3, u16 arg4) {
     s32 i;
@@ -613,7 +605,6 @@ s32 sfx_emitter_free_index(struct15 *arg0, s32 arg1, s32 *arg2) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* was func_1000FEF0 */
 s32 sfx_emitter_find_by_voice(s32 arg0, s32 arg1, s32 arg2) {
     s32 temp_t6;
@@ -641,9 +632,6 @@ loop_4:
 block_10:
     return -1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/sfx_emitter_find_by_voice.s")
-#endif
 // NON-MATCHING: needs a re-work
 // s32 sfx_emitter_find_by_voice(u16 arg0, struct127 *arg1, s32 arg2) {
 //     s32 i;
@@ -705,7 +693,6 @@ void sfx_emitter_replace_callback(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 ar
         }
     }
 }
-#ifdef NON_MATCHING
 // object_sound_play: plays sound sfx at object obj (volume vol, arg3 / arg4 = distance range) and keeps the handle in
 // obj+0x8E. Players (+0x318) play it as a 2D sound through sound_voice_play with the player's pan; other objects
 // get a 3D emitter that follows them (sfx_cb_follow_object, key unique_id | 0x10000). Dead objects (state 0 or 5) play nothing.
@@ -790,10 +777,6 @@ u16 actor_sound_play2(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4) {
     *(u16 *)(o + 0x8C) = handle;
     return handle;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/actor_sound_play.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/actor_sound_play2.s")
-#endif
 /* was func_10010558 */
 void actor_sound_play2_delayed(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5) {
     if (arg5 <= 0) {
@@ -803,7 +786,6 @@ void actor_sound_play2_delayed(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u1
     }
 }
 
-#ifdef NON_MATCHING
 /* was func_10010630 */
 void actor_sound_play_untracked(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4) {
     if (arg1->interaction_state != 0) {
@@ -814,9 +796,6 @@ void actor_sound_play_untracked(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u
         sfx_emitter_start(arg0, (s16) (s32) arg1->x_position, (s16) (s32) arg1->y_position, (s16) (s32) arg1->z_position, arg2, (u16) (s32) arg4, (s16) (s32) arg3, (s32) sfx_cb_follow_object, arg1, (s32) arg1->unique_id, 0, 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/actor_sound_play_untracked.s")
-#endif
 // void actor_sound_play_untracked(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4) {
 //     if (arg1->interaction_state != 0) {
 //         if (arg1->camera != 0) {
@@ -973,7 +952,6 @@ void actor_sounds_stop_loops(struct127 *arg0) {
     arg0->unk8E = 0;
 }
 
-#ifdef NON_MATCHING
 s32 n_sndp_play_sound(s32, s16, u16, u8, f32, s32, s32, struct31 **);
 extern s32 D_8003E708;
 extern u16 D_80042984;
@@ -1059,9 +1037,6 @@ loop_11:
 block_31:
     return var_t0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/sound_voice_play.s")
-#endif
 /* was func_10010E78 */
 u16 sound_voice_play_at(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA)
 {
@@ -1081,18 +1056,12 @@ u16 sound_play_2d(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4) {
     sound_voice_play(0, arg0, arg1, arg2, arg3, arg4, D_80041FD9);
 }
 
-#ifdef NON_MATCHING
 // sound_play_at: plays a sound with no owner (sound_voice_play_at with arg0 0). The asm passes sound_voice_play_at's v0
 // through, and the asm callers keep it as the sound handle, so the NM version returns it.
 /* was func_10010F88 */
 u16 sound_play_at(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
     return sound_voice_play_at(0, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 }
-#else
-void sound_play_at(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
-    sound_voice_play_at(0, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
-}
-#endif
 /* was func_10010FFC */
 u16 sound_play_for_actor(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, u8 *arg5)
 {
@@ -1246,7 +1215,6 @@ s32 sound_voice_get_id(u16 arg0) {
     return -1;
 }
 
-#ifdef NON_MATCHING
 // sound_source_mix: volume / pan / distance of a sound at (x, y, z) for the nearest listener (P151). With more than
 // one listener (D_80082FA0 = last index) it picks the one whose ear position (ex, ey, ez) is closest; then
 // sound_calc_pan_volume with the source relative to the ear, the listener's heading and the source relative to the listener
@@ -1281,10 +1249,6 @@ s32 sound_source_mix(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *o
     *outVol = (u32)(vol * gain) >> 15;
     return dist;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/sound_source_mix.s")
-#endif
-#ifdef NON_MATCHING
 /* SfxEnt.unk10 flags used by the update pass */
 #define SFX_PLAYING     0x0001 /* unk24 holds a live voice */
 #define SFX_REFRESH     0x0002 /* recompute even while playing */
@@ -1467,9 +1431,6 @@ void sfx_emitters_update(struct15 *arg0, s32 *count, s32 first, s32 end) {
         e->unk10 = flags;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/sfx_emitters_update.s")
-#endif
 /* was func_10011BB8 */
 void sound_update_frame(void) {
     s32 i;
@@ -1536,11 +1497,7 @@ void sound_set_pause_mute(s32 arg0) {
 }
 
 s32 floor_flags_surface_type(s32);
-#ifdef NON_MATCHING
 u16 sound_pick_variant(s32, u16); /* P157: two parameters (the asm reads a0 / a1 only, as every other caller declares) */
-#else
-u16 sound_pick_variant(s32, u16, s32, s32);
-#endif
 typedef struct { u16 a; u16 b; } SndPair;
 // rodata_inject: cdefined 0x2C5A0 0x2C758
 const SndPair D_8002C5A0[22][5] = {
@@ -1591,11 +1548,7 @@ u16 sound_surface_footstep(s32 arg0, s16 *arg1, s32 arg2)
     new_var = &arg2; // fakematch: permuter, base table reg t0 and arg2 reloads
     if (!D_8002C5A0 && !D_8002C5A0 && !D_8002C5A0) { // fakematch: permuter, always false
     }
-#ifdef NON_MATCHING
     v = sound_pick_variant(v, D_8002C5A0[arg0][*new_var].b);
-#else
-    v = sound_pick_variant(v, D_8002C5A0[arg0][*new_var].b, *new_var, arg0);
-#endif
   }
   return v;
 }

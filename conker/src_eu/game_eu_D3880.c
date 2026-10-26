@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P130: shadow triangle projection (hand asm shadow_level_triangles, shadow_object_triangles and their private vertex
  * transform shadow_project_vertex_entry) */
 extern f32 D_800D3AA0;  /* [2] f32: shadow u / v scale */
@@ -165,16 +164,7 @@ s32 shadow_object_triangles(u16 *ids, s32 out, f32 *m, s32 end) {
     } while (ids != last);
     return (s32) o;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/shadow_level_triangles.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/shadow_object_triangles.s")
-
-/* was func_150A661C */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/shadow_project_vertex_entry.s")
-#endif
-
-#ifdef NON_MATCHING
 /* P197 */
 extern f32 D_800D9F40; /* screen width (also the near-depth bound here) */
 extern f32 D_800D3A00[2];
@@ -223,19 +213,11 @@ s32 view_sphere_depth(f32 *m, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far) {
     }
     return VIEW66F0_RINT(depth);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/view_sphere_depth.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_150A6834 */
 void view_test_epilogue(void) {
 
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/view_test_epilogue.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_800D9F40; /* screen width (also the near-depth bound here) */
 s32 world_objects_in_box(s32, s32, s32 *, s32, s32, s32, s32, s32);
 
@@ -293,11 +275,7 @@ s32 func_150A69A8(s32 arg0, s32 arg1, s32 *arg2, s32 arg3) {
 }
 
 /* P54: func_150A6840_tail.s no longer needed (world_objects_in_box is C) */
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/camera_view_test_sphere.s")
-#endif
 
-#ifdef NON_MATCHING
 /*
  * P65: world_objects_in_box over the point box (x, z) .. (x, z) and y -10000 .. 20000 (all heights). Called by
  * collision_query_dynamic_cells with outCount = &count. The .s also holds a second, unreferenced entry at 0x150A6A18 (no caller,
@@ -307,11 +285,7 @@ s32 func_150A69A8(s32 arg0, s32 arg1, s32 *arg2, s32 arg3) {
 s32 world_objects_at_point(s32 x, s32 z, s32 *outCount, s32 n) {
     return world_objects_in_box(x, z, outCount, n, x, z, -10000, 20000);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/world_objects_at_point.s")
-#endif
 
-#ifdef NON_MATCHING
 /*
  * P54: world_objects_in_box (hand asm): the world objects (D_800DBEF4, D_800DC320 of them, 0xA0 bytes) whose box
  * (+0x10 / +0x12 / +0x14 centre, +0x50 x/z half size, +0x52 y half size) overlaps (x .. x2, z .. z2) and, unless
@@ -363,11 +337,7 @@ s32 world_objects_in_box(s32 x, s32 z, s32 *outCount, s32 n, s32 x2, s32 z2, s32
     *outCount = n1;
     return n0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/world_objects_in_box.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P128 */
 extern s32 D_eu_800BE9F4; /* PVS row index: per row {u16 byte index, s16 bit} (pvs_setup) */
 extern s32 D_eu_800BE9F8; /* Huffman tree: 6-byte nodes {s16 symbol (< 0: inner), s16 child 0, s16 child 1} */
@@ -433,6 +403,3 @@ void pvs_row_apply(s32 view) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/pvs_row_apply.s")
-#endif

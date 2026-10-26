@@ -1,14 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A4EA8[];
-#endif
 
 void anim_model_fx_free_lights(u8 *arg0);
 
 
-#ifdef NON_MATCHING
 /* was func_15156700 */
 s32 line_fx_spawn(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     struct {
@@ -76,9 +74,6 @@ s32 line_fx_spawn(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     bzero(temp_v0 + 0x88, 0x10);
     return (s32) sp.u44;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/line_fx_spawn.s")
-#endif
 s32 line_fx_spawn(s32, u8, s32, u8, s32);
 /* was func_151568F8 */
 void line_fx_spawn_default(s32 arg0, u8 arg1, s32 arg2) {
@@ -119,7 +114,6 @@ void line_fx_update(struct102 *arg0p) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, u8, s8 *);
 Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
@@ -250,9 +244,6 @@ u8 *line_fx_draw(s32 arg0, u8 *arg1, s16 arg2) {
     (*(s32 *)((u8 *)temp_s1 + 4)) = 0;
     return temp_s1 + 8;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/line_fx_draw.s")
-#endif
 s32 particle_spawn_basic(void *, s32, s32, u8, s32);
 typedef struct { f32 x, y, z; } V3_6E68;
 typedef struct { s32 a, b; } V2_6E68;
@@ -394,7 +385,6 @@ void line_spark_burst_at(u8 *arg0, u8 arg1) {
     particle_spawn_basic(&sp, arg0[0x88], 0, arg1, 0);
 }
 
-#ifdef NON_MATCHING
 // spark_point_flash_update: P256: counts the emitter `obj`'s timer (s16 +0x2C) down by the frame step D_800BE9E4;
 // when it runs out, picks a random point of the table D_800DCE60 (3 groups x 10 points of x, y, z, w); a point with
 // a zero coordinate spawns nothing, else line_spark_burst_random_flip(point, room obj[0xC]) and a light flash (light_create_with_ctrl:
@@ -430,9 +420,6 @@ void spark_point_flash_update(u8 *obj) {
     timer = (s16 *)(obj + 0x28);
     timer[2] = random_int() % (u32) (timer[1] + 1) + timer[0];
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/spark_point_flash_update.s")
-#endif
 
 /* was func_15157294 */
 void line_spark_burst_random_flip(u8 *arg0, u8 arg1)
@@ -582,20 +569,12 @@ void line_fx_free(struct102 *arg0) {
     node_unlink_free(arg0);
 }
 
-#ifdef NON_MATCHING
 s32 animmodel_start_anim(u8 *, s32, s32, f32, f32, s32); /* P95: f32 (float bits were passed as an int) */
-#else
-s32 animmodel_start_anim(u8 *, s32, s32, s32, f32, s32);
-#endif
 s32 animmodel_create(s32, s32, u8 *, u8 *, u8 *, u8 *, u8 *);
 s32 light_alloc_lookat_buf();
 s32 light_alloc_light_buf(s32);
-#ifdef NON_MATCHING
 /* was func_15157580 */
 u8 *anim_model_fx_spawn(u8 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7) { /* P95: f32 (float bits were passed as an int) */
-#else
-u8 *anim_model_fx_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7) {
-#endif
     u8 *obj;
     s32 type;
     s32 i;

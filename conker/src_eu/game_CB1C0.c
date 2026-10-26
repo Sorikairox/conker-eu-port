@@ -39,7 +39,6 @@ s32 obj_slot_by_spawn(s32);
 void func_15178C34(u8, s32, s32, s32, s32);
 void func_15178BE4(u8, f32*, s32);
 s32 swarm_distance_to_obj(u8 arg0, s32 arg1);
-#ifdef NON_MATCHING
 void swarm_set_target_ptr(u8, s32, s16);
 void swarm_set_target_pos(u8, s32, s32, s32, s16);
 
@@ -56,9 +55,6 @@ s32 fxevt_emitter_set_target(s32 arg0, s32 arg1, u8 *arg2) {
         return 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CB1C0/fxevt_emitter_set_target.s")
-#endif
 // NON-MATCHING: what is the logic here!?
 // s32 fxevt_emitter_set_target(s32 arg0, s32 arg1, struct215 *arg2) {
 //     // if (arg1 == 1) {

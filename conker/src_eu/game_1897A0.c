@@ -17,7 +17,6 @@ void *streak_spawn(s32 *arg0, s32 arg1, void *arg2, s32 arg3, u8 arg4, s32 arg5)
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 /* P175 */
 extern s32 (*D_8008B420[])(u8 *, u8 *); /* motion handlers; D_8008B424 = the same table shifted by one */
 
@@ -68,9 +67,6 @@ s32 streak_update_points(u8 *obj) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/streak_update_points.s")
-#endif
 extern s32 (*D_8008B424[])(u8 *, u8 *);
 
 /* was func_1515C534 */
@@ -106,7 +102,6 @@ s32 streak_update_fade(u8 *arg0) {
     }
     return 1;
 }
-#ifdef NON_MATCHING
 /* P175 */
 void vtx_slot_buffer_get(s32 *, s16, s32, Vtx **, u8 *);
 void fx_calc_color_mode_a(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
@@ -280,10 +275,6 @@ s32 streak_draw(u8 *obj, s32 gfx, s16 arg2) {
 }
 #undef STREAK_VTX
 #undef STREAK_NORMAL
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/streak_draw.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1515CF9C */
 s32 streak_push_point(u8 *arg0, u8 *arg1) {
     s32 temp_v1;
@@ -308,9 +299,6 @@ s32 streak_push_point(u8 *arg0, u8 *arg1) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/streak_push_point.s")
-#endif
 // s32 streak_push_point(void *arg0, void *arg1) {
 //     s32 temp_v1;
 //     s8 temp_v0;
@@ -374,7 +362,6 @@ struct260 *fx_source_emitter_spawn(s32 *arg0) {
 }
 
 // fat struct
-#ifdef NON_MATCHING
 void vec3_from_angles_byte(s16, s16, f32, void *);
 s32 emit_streaks_from_spec(s32 *, u8, s32);
 
@@ -504,6 +491,3 @@ void fx_source_emitter_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s1 + 4)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/fx_source_emitter_update.s")
-#endif

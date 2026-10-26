@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 typedef struct {
     u8 u0;          /* 0xC0 */
     s8 u1;
@@ -37,9 +37,7 @@ typedef struct {
     s16 u56;
 } LivesSprite;      /* 0x58 bytes, argument of anim_model_fx_spawn */
 s32 player_slot_is_active(u8 *arg0);
-#endif
 
-#ifdef NON_MATCHING
 /* P142 */
 void collision_select_area(s32);
 s32 zone_tree_find_leaf(s32 x, s32 z);
@@ -124,9 +122,6 @@ s32 life_pickup_spawn(f32 *pos, f32 angle, u8 kind, u8 flag, u8 size, s32 arg5, 
     }
     return life_pickup_ring_spawn(angle, (s32) pos, 3, 0xFF, size, flag, room, 0xFF, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/life_pickup_spawn.s")
-#endif
 
 /* was func_151BF0D0 */
 s32 life_pickup_spin_matrix(u8 *arg0) {
@@ -152,7 +147,6 @@ s32 gfx_passthrough_flag(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4) {
     return arg0;
 }
 
-#ifdef NON_MATCHING
 f32 vec3_length(f32 *);
 void obj_get_fx_point_a(u8 *, f32 *, f32 *, f32 *);
 s32 life_pickup_ring_spawn(f32, s32, s32, u8, s32, s32, s32, s32, s32);
@@ -218,9 +212,6 @@ s32 life_pickup_check_collect(u8 *arg0) {
     } while ((s32)var_s3 != (s32)&D_800D1968);
     return var_s5;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/life_pickup_check_collect.s")
-#endif
 /* was func_151BF444 */
 s32 player_slot_is_active(u8 *arg0) {
     if (arg0[0x127] == 0xFF) {
@@ -235,7 +226,6 @@ s32 player_slot_is_active(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* P139 */
 /* P139: particle request passed to mdl_particle_spawn (0x7C bytes; layout as game_eu_103160.c's DebrisParticle). */
 typedef struct {
@@ -332,11 +322,7 @@ s32 life_pickup_ring_spawn(f32 yaw, s32 posArg, s32 arg2, u8 arg3, s32 colour, s
     }
     return (s32) p;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/life_pickup_ring_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P142 */
 void emit_tumbling_pieces(u8 *req, u8, u8, s32);
 void emit_particle_burst_req(u8 *req, s32, s32, s32);
@@ -481,11 +467,7 @@ void pickup_burst_spawn(f32 *pos) {
     flash.u68 = 0.941177f;
     emit_particle_burst_req((u8 *) &flash, 0xFF, 0xFF, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/pickup_burst_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 /* Lives pop-up (called when a life pickup is collected, after sound 0x511): a HUD object (effect_node_create, type
  * 0x60, 0x18 bytes of state) holding a sprite (texture 0xA3) and the number of lives left, one or two digit
  * sprites from the glyph table D_800AAC94. Lives = player_stat_get(0, 3) minus the current one, at most 99.
@@ -669,11 +651,7 @@ void lives_popup_spawn(u8 arg0, s32 arg1) {
         popup->digit[i] = sprite2d_spawn(&dig, 0, 0, 0, 0, arg0, arg1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/lives_popup_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 screen_fade_alpha(s32, u8 *);
 s32 hud_lens_is_off(s32);
 
@@ -749,9 +727,6 @@ block_9:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/lives_popup_update.s")
-#endif
 /* was func_151C00DC */
 void lives_popup_free_sprites(u8 *arg0) {
     u8 *new_var; // fakematch: pointer temp keeps arg0 out of s-regs (permuter artifact)

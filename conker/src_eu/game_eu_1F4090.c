@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P188 */
 s32 obj_sub_counter_positive(u8 *);
 void weapon_count_shot(u8 *arg0);
@@ -160,11 +159,7 @@ void object_gun_fire(u8 *obj, u8 side, s32 aimed_, u8 *att, s32 kind, s32 flag, 
                                r2 * 150.0f + 400.0f, 50.0f, r % 156 + 100, obj, !aimed, !aimed, !aimed, 8, !aimed, 1,
                                0, 26, 0.0f, 255, -1, 0, flag, arg6);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4090/object_gun_fire.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P160: object_bone_point reads three arguments (the matching callers below leave a 4th in a3) */
 void object_bone_point(u8 *obj, f32 *out, u8 kind);
 
@@ -179,19 +174,7 @@ void object_bone_point_0(u8 *obj, s32 arg1, f32 *out) {
 void object_bone_point_1(u8 *obj, s32 arg1, f32 *out) {
     object_bone_point(obj, out, 1);
 }
-#else
-void object_bone_point();
 
-void object_bone_point_0(s32 arg0, s32 arg1, s32 arg2) {
-    object_bone_point(arg0, arg2, 0, arg2);
-}
-
-void object_bone_point_1(s32 arg0, s32 arg1, s32 arg2) {
-    object_bone_point(arg0, arg2, 1, arg2);
-}
-#endif
-
-#ifdef NON_MATCHING
 /* P160 */
 extern u32 D_800AAEE0[];
 extern u8 D_800AAEE8[];
@@ -202,11 +185,7 @@ extern u8 D_800AAEE8[];
 void object_bone_point(u8 *obj, f32 *out, u8 kind) {
     mtx_transform_point_or_origin(D_800AAEE8 + kind * 12, out, *(u8 **)(obj + 0x1D4) + D_800AAEE0[kind]);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4090/object_bone_point.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P163 */
 s32 obj_sub_counter_positive(u8 *);
 void weapon_count_shot(u8 *arg0);
@@ -299,15 +278,9 @@ s32 object_muzzle_fire(u8 *obj, u8 arg1, u8 arg2, s32 arg3) {
                   0, 0x1A, -1, 0, 1, arg2, arg3);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4090/object_muzzle_fire.s")
-#endif
 
-#ifdef NON_MATCHING /* P262: the C definition's exact types (game_eu_1306B0) */
+/* P262: the C definition's exact types (game_eu_1306B0) */
 void *attached_particle_spawn(u8 *, u8, f32 *, f32 *, f32 *, s16, u8, f32, u8 *, u8, s32, s16, u8, s32);
-#else
-s32 attached_particle_spawn(s32, u8, u8 *, u8 *, f32 *, s32, s32, f32, s32, s32, s32, s32, s32, s32);
-#endif
 extern u32 D_800AAEE0[];
 extern u8 D_800AAEE8[];
 extern u8 D_800AAF00[];
@@ -406,13 +379,9 @@ void obj_attached_model_fx_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 /* P163: obj_sub_counter_positive (game_eu_170760) takes only the object; the matching build passes a second argument the
    callee ignores, which would be a call signature mismatch on wasm. */
 s32 obj_sub_counter_positive(u8 *);
-#else
-s32 obj_sub_counter_positive(u8 *, u8 *);
-#endif
 
 /* was func_151C75E8 */
 s32 fx_alpha_from_parent_update(u8 *arg0) {
@@ -423,11 +392,7 @@ s32 fx_alpha_from_parent_update(u8 *arg0) {
     if (*(u16 *)(p + 0x84) != 0xE9) {
         return 0;
     }
-#ifdef NON_MATCHING
     if (obj_sub_counter_positive(p) != 0) {
-#else
-    if (obj_sub_counter_positive(p, arg0) != 0) {
-#endif
         *(s32 *)(arg0 + 0x60) |= 0x20000;
     } else {
         *(s32 *)(arg0 + 0x60) &= ~0x20000;

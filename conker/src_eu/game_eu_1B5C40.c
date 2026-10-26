@@ -61,7 +61,6 @@ void light_fx_set_blend(s32 arg0, f32 arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 /* P129: the light effects D_800DFB30[D_800DFBE4] (set up by light_fx_add), seen with their fields. */
 typedef struct {
     /* 0x00 */ u8 from[3];      /* colour at t = 0 */
@@ -181,6 +180,3 @@ s32 light_fx_update(void) {
     } while ((u32)++e < (u32)&D_800DFB30[D_800DFBE4]);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B5C40/light_fx_update.s")
-#endif

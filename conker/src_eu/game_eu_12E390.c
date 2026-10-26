@@ -1,16 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING
 void segment_closest_point(void *, void *, void *, void *, f32 *); /* P270 */
-#endif
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 memcpy(s32, s32, s32);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
-#endif
 
 
-#ifdef NON_MATCHING
 /* P153 */
 s32 particle_spawn_basic(s32 tmpl, u8 arg1, s32 size, u8 arg3, s32 arg4);
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
@@ -434,11 +430,7 @@ s32 obj_glow_effect_spawn(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, 
     }
     return (s32) rec;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/obj_glow_effect_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 /* obj_fx_kill_all: P238: handler in the kind table at D_8008A29C (default effect3d_retire): stops the object's sound
  * (u16 +0x1A0, sound_voice_stop) when set, ends each of its effects (+0x138, +0x13C, +0x134, +0x140, +0x144, in that
  * order; node_destroy) that is set, then runs the default effect3d_retire. The pointers are not cleared. */
@@ -467,11 +459,7 @@ void laser_sight_retire(struct210 *arg0) {
     }
     effect3d_retire(arg0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/laser_sight_retire.s")
-#endif
 
-#ifdef NON_MATCHING
 /* obj_fx_stop_all: P238: handler in the kind table at D_8008A2D0 (default effect3d_free): node_delete on each of
  * the object's effects (+0x138, +0x13C, +0x134, +0x140, +0x144, in that order) that is set, then the default
  * effect3d_free. No sound stop here (unlike obj_fx_kill_all). */
@@ -497,9 +485,6 @@ void laser_sight_free(struct210 *arg0) {
     }
     effect3d_free(arg0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/laser_sight_free.s")
-#endif
 
 /* was func_15101768 */
 void obj_glow_child_retire(struct210 *arg0) {
@@ -571,7 +556,6 @@ void obj_glow_halo_free(struct210 *arg0) {
     particle_die_free(arg0);
 }
 
-#ifdef NON_MATCHING
 /* P146 */
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 f32 vec3_length(f32 *);
@@ -741,11 +725,7 @@ s32 laser_sight_update(u8 *fx) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/laser_sight_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_15101F44 */
 u8 *laser_beam_draw(u8 *arg0, s16 arg1) {
     struct {
@@ -940,10 +920,6 @@ u8 *laser_beam_draw(u8 *arg0, s16 arg1) {
 block_23:
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/laser_beam_draw.s")
-#endif
-#ifdef NON_MATCHING
 s32 tri_calc_normal(u8 *, f32 *, f32 *, s32);
 s32 vec3_normalize_len(f32 *, f32 *, s32, s32);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
@@ -1016,10 +992,6 @@ u8 *laser_marker_draw(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/laser_marker_draw.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1510282C */
 s32 obj_glow_spin_flicker(u8 *arg0) {
     u8 *sp28;
@@ -1099,10 +1071,6 @@ s32 obj_glow_spin_flicker(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/obj_glow_spin_flicker.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_15102B74 */
 s32 obj_glow_halo_update(u8 *arg0, s32 arg1) {
     f32 sp24;
@@ -1120,10 +1088,6 @@ s32 obj_glow_halo_update(u8 *arg0, s32 arg1) {
     (*(f32 *)((u8 *)temp_s0 + 0x1C)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0 + 0x1C)));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/obj_glow_halo_update.s")
-#endif
-#ifdef NON_MATCHING
 /* P150 */
 s32 obj_glow_effect_spawn(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, u8 g, u8 b, f32 arg8, f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE);
 extern f32 D_800A2570[][3];
@@ -1169,9 +1133,6 @@ s32 object_effect_start(u8 *obj, s32 arg1, s32 kind, s32 arg3, s32 arg4, s32 arg
     return obj_glow_effect_spawn(obj, D_800A2570[kind & 0xFF], D_800A25C4[kind & 0xFF], D_800A2618[kind & 0xFF], (s16)arg1,
                          a, b, 0, 20.0f, 20.0f, 4.0f, 0.08f, arg3 & 0xFF, arg4 & 0xFF, arg5);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/object_effect_start.s")
-#endif
 
 /* was func_151027E8 */
 void obj_glow_post_remove_event(u8 *arg0) {

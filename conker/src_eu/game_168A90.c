@@ -4,7 +4,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 // mesh_effect_spawn: spawns an animated mesh effect record (P195). The 0x3C-byte spawn block p (copied to rec + 0x10) names
 // a model by its +0x30 / +0x34 words (asset_load_with_subfiles, kind 2 lookup); the model header starts with its display list
 // pointer, followed at +0x28 by the vertex block (size = dl - header - 0x28). The record (kind 0x54 when arg1 != 0,
@@ -50,9 +49,6 @@ struct102 *mesh_effect_spawn(void *p, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     texture_resolve_dl_ids(*(Gfx **) hdr, 0, 1, 0x3E, NULL);
     return (struct102 *) rec;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/mesh_effect_spawn.s")
-#endif
 /* was func_1513B798 */
 void mesh_effect_update(u8 *arg0) {
     s32 pad;
@@ -93,7 +89,6 @@ void mesh_effect_update(u8 *arg0) {
 //         node_destroy(arg0);
 //     }
 // }
-#ifdef NON_MATCHING
 extern s32 D_80089FC8;
 
 /* was func_1513B83C */
@@ -128,9 +123,6 @@ u8 *mesh_effect_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     (*(s32 *)((u8 *)temp_a3 + 4)) = (s32) (*(s32 *)((u8 *)arg1 + 0x54));
     return temp_a3 + 8;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/mesh_effect_draw.s")
-#endif
 /* was func_1513B968 */
 s32 mesh_effect_load_identity(s32 arg0, s32 arg1) {
     // FIXME: &arg0->unk_120[D_800BE9C0]
@@ -150,7 +142,6 @@ void mesh_effect_free(struct132 *arg0) {
     node_unlink_free(arg0);
 }
 
-#ifdef NON_MATCHING
 // object_mode_dispatch_a: runs the D_80089C44 handler picked by the object's +0x48 byte on the object. The asm leaves
 // the object in a0 at the jalr; every entry (mesh_effect_retire x4) is void (struct132 *), so no result is passed on.
 /* was func_1513BA10 */
@@ -163,15 +154,6 @@ void object_mode_dispatch_a(struct132 *arg0) {
 void object_mode_dispatch_b(struct132 *arg0) {
     ((void (*)(struct132 *)) D_80089C54[arg0->unk48])(arg0);
 }
-#else
-void object_mode_dispatch_a(struct132 *arg0) {
-    D_80089C44[arg0->unk48]();
-}
-
-void object_mode_dispatch_b(struct132 *arg0) {
-    D_80089C54[arg0->unk48]();
-}
-#endif
 
 /* was func_1513BA78 */
 void mesh_effect_on_msg(u8 *arg0, s32 arg1, u8 arg2) {
@@ -200,9 +182,6 @@ typedef struct {
     s32 w30; s32 w34;
     s8 b38; s8 pad39[3];
 } BAE8Params;
-#ifndef NON_MATCHING /* NM: defined above as (void *, u8, s32, u8, s32) */
-struct102 *mesh_effect_spawn(BAE8Params *, s32, s32, s32, s32);
-#endif
 void *memcpy(void *, const void *, s32);
 /* was func_1513BAE8 */
 struct102 *water_effect_spawn(void) {
@@ -241,7 +220,6 @@ struct102 *water_effect_spawn(void) {
     }
     return p;
 }
-#ifdef NON_MATCHING
 float sqrtf(float);
 extern f32 D_800A4DA0[9][3];    // the nine texture-projection centres
 extern s32 D_800A4E0C[9][2];    // their vertex ranges { first, count }
@@ -300,9 +278,6 @@ s32 water_texcoords_update(s32 obj, s16 part) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/water_texcoords_update.s")
-#endif
 extern f32 D_800A4E64; // 0.037f (file does not own .rodata)
 extern f32 D_800A4E68; // 1.9f
 extern f32 D_800A4E6C; // 77.3f

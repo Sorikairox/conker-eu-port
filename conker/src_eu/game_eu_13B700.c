@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* was func_1510DEF0 */
 u8 *blob_shadow_create(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 sp28;
@@ -61,10 +60,6 @@ u8 *blob_shadow_create(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     }
     return temp_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13B700/blob_shadow_create.s")
-#endif
-#ifdef NON_MATCHING
 /* P125 */
 f32 math_cos_u8(u8);
 f32 math_sin_u8(u8 arg0);
@@ -220,11 +215,7 @@ void blob_shadow_update(u8 *rec) {
     }
     rec[0x123] = 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13B700/blob_shadow_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P130 */
 extern s32 D_800DD5E4;     /* texture of the last drawn blob shadow */
 extern s32 D_80091B20[];   /* blob shadow texture ids */
@@ -304,11 +295,7 @@ Gfx *blob_shadow_draw(Gfx *g, u8 *rec, s16 idx) {
     g++;
     return g;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13B700/blob_shadow_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 /*
  * P65: floor slope of a triangle, given as 3 vertex pointers (tris) or, when verts != NULL, as 3
  * packed s16 x/y/z vertices (verts, stride 6). Tries the corners in turn: P1 = v[i], edges e1 = v[i+1] - P1 and
@@ -382,9 +369,6 @@ s32 floor_triangle_slope(s16 **tris, s16 *verts, f32 *outA, f32 *outB) {
     *outA = (e2y - *outB * e2z) / e2x;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13B700/floor_triangle_slope.s")
-#endif
 
 /* was func_1510EBB4 */
 Gfx *gfx_load_identity_modelview(Gfx *gdl, s32 arg1, s32 arg2) {

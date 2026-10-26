@@ -11,7 +11,6 @@ void ambient_sounds_reset(s32 arg0) {
     bzero(&D_800DD478, 1560);
 }
 
-#ifdef NON_MATCHING
 extern u16 D_800BE898[];  /* per ambient sound: loaded even when it is not id 0x3B */
 extern s16 D_800DDFB0[];  /* per ambient sound: 2 x s16 */
 extern u8 D_80096090[];   /* per sound id, 10 bytes: +2 u16 length, +8 u8 rate (asm rodata_inject block; ROM) */
@@ -62,11 +61,7 @@ void ambient_sounds_load(void) {
         timing[1] = (((length / rate) << 6) / 5) - 1;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_38360/ambient_sounds_load.s")
-#endif
 // GOTO hell
-#ifdef NON_MATCHING
 /* P180: level-load ambient sound emitters (ambient_emitters_build unit). Emitter records: D_800DE148, 14 bytes each. */
 typedef struct {
     s16 x, y, z;    /* +0 position */
@@ -108,9 +103,7 @@ void collision_select_area(s32 arg0);
 void tri_compute_plane(s32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
 void ambient_emitters_sort(s32 lo, s32 hi);
 s32 ambient_emitter_add(u32 index, s32 slot, s32 mode, s16 x, s16 y, s16 z, s32 spread, u8 kind, s32 phase);
-#endif
 
-#ifdef NON_MATCHING
 // ambient_slot_setup: sets up ambient sound slot `slot` for sound `id` (0xFF = empty) from its 10-byte sound info
 // (D_80096090): phase range D_800DE000 (+1; minus 1 and also D_800DE010 when info flag 0x10), D_800DE020 (2 when
 // flag 0x80), the two slot parameters D_800BE858 (+4 / +6), the id, the placement row (flags & 0x7F, bit 0x80 sets
@@ -158,11 +151,7 @@ void ambient_slot_setup(s32 slot, s32 id, s32 flags) {
     D_800DE050[slot * 2 + 0] = b;
     D_800DE050[slot * 2 + 1] = b;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_38360/ambient_slot_setup.s")
-#endif
 
-#ifdef NON_MATCHING
 // ambient_emitter_add: writes emitter `index` (D_800DE148, 14 bytes) of slot `slot` at (x, y, z) and returns
 // index + 1; when index is not below the level's emitter capacity - 1 (D_800B0DF0 +0x18) nothing is written and
 // the capacity - 1 is returned. Phase byte: 0x3C for slots with a range below 2, else slot * 4 + (phase & 1) for
@@ -208,11 +197,7 @@ s32 ambient_emitter_add(u32 index, s32 slot, s32 mode, s16 x, s16 y, s16 z, s32 
     }
     return index + 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_38360/ambient_emitter_add.s")
-#endif
 
-#ifdef NON_MATCHING
 // ambient_place_points: placer type 0: `count` emitters on the triangle at the (u, v) points D_80096014[i]
 // (p = v0 + (v1 - v0) u, then p + (v2 - p) v per axis), spread 0x80; returns the next emitter index.
 /* was func_1500B1F4 */
@@ -237,11 +222,7 @@ s32 ambient_place_points(s16 count, u8 kind, s32 slot, s32 mode, s32 index, s16 
     }
     return index;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_38360/ambient_place_points.s")
-#endif
 
-#ifdef NON_MATCHING
 // ambient_place_shape: placer type 4: emitters at the (x, z) offsets of point list D_80083110[shape] around the
 // triangle's centroid, y on the triangle's plane (tri_compute_plane; the centroid's y when the plane is vertical);
 // phase = D_800BE850 >> slot, then the slot's D_800BE850 bit flips. Returns the next emitter index.
@@ -281,11 +262,7 @@ s32 ambient_place_shape(s16 shape, u8 kind, s32 slot, s32 mode, s32 index, s16 *
     D_800BE850 ^= 1 << slot;
     return index;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_38360/ambient_place_shape.s")
-#endif
 
-#ifdef NON_MATCHING
 // ambient_place_centre_sfx: placer type 1: one emitter at the triangle's centroid (integer mean), and a positional
 // sound 0x4D there with volume `volume` (0x3E above 62.5).
 /* was func_1500B714 */
@@ -303,11 +280,7 @@ s32 ambient_place_centre_sfx(s16 volume, u8 kind, s32 slot, s32 mode, s32 index,
     sfx_emitter_start(0x4D, x, y, z, 0x8000, vol, vol >> 3, 0, NULL, 0, 0, 0);
     return index;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_38360/ambient_place_centre_sfx.s")
-#endif
 
-#ifdef NON_MATCHING
 // ambient_place_points_fixed_57: placer type 2: as type 0 with spread 0, then the slot's phase range = 0x57.
 // (count 0: the asm returns a stale v0; C returns index)
 /* was func_1500B8F4 */
@@ -330,11 +303,7 @@ s32 ambient_place_points_range57(s16 count, u8 kind, s32 slot, s32 mode, s32 ind
     D_800DE000[slot] = 0x57;
     return index;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_38360/ambient_place_points_range57.s")
-#endif
 
-#ifdef NON_MATCHING
 // ambient_place_points_fixed_8: placer type 3: as type 2 with phase range 8.
 /* was func_1500BAB8 */
 s32 ambient_place_points_range8(s16 count, u8 kind, s32 slot, s32 mode, s32 index, s16 **tri) {
@@ -356,11 +325,7 @@ s32 ambient_place_points_range8(s16 count, u8 kind, s32 slot, s32 mode, s32 inde
     D_800DE000[slot] = 8;
     return index;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_38360/ambient_place_points_range8.s")
-#endif
 
-#ifdef NON_MATCHING
 // ambient_place_points_fixed_21: placer type 5: as type 2 with phase range 0x21.
 /* was func_1500BC7C */
 s32 ambient_place_points_range21(s16 count, u8 kind, s32 slot, s32 mode, s32 index, s16 **tri) {
@@ -382,9 +347,6 @@ s32 ambient_place_points_range21(s16 count, u8 kind, s32 slot, s32 mode, s32 ind
     D_800DE000[slot] = 0x21;
     return index;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_38360/ambient_place_points_range21.s")
-#endif
 
 /* was func_1500BE40 */
 void ambient_timer_reset(s32 arg0) {
@@ -403,7 +365,6 @@ void ambient_state_reset(void) {
 }
 
 
-#ifdef NON_MATCHING
 // ambient_emitters_build: level start: sets up the 15 ambient sound slots (ids / flags at D_800BE4A0), allocates
 // the emitter records (capacity D_800B0DF0 +0x18, 14 bytes each) and, for every level triangle whose flag word
 // (D_800DBE5C) has a slot (bits 16-19, 1-based), runs the placer of the slot's row and the triangle's kind (bits
@@ -462,6 +423,3 @@ void ambient_emitters_build(void) {
         D_800DE040[q] = game_gu_random();
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_38360/ambient_emitters_build.s")
-#endif

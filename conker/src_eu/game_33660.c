@@ -15,7 +15,6 @@ void controller_init_si_queue(void) {
     controller_init_hook_noop();
 }
 
-#ifdef NON_MATCHING
 s32 os_motor_stop(u8 *);
 s32 os_motor_init(void *, void *, int);
 s32 os_pfs_init(void *, void *, int);
@@ -119,6 +118,3 @@ void controller_init_all(void) {
     } while (var_s0 != 4);
     D_8002AE14 = 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33660/controller_init_all.s")
-#endif

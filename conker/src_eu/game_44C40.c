@@ -42,7 +42,6 @@ void level_apply_flag_entries(void) {
     event_start_level_events(*(((s16*)&D_800BE9F0)+1), 1); // er?
 }
 
-#ifdef NON_MATCHING
 u8 **allocate_memory(s32, s32, s32, s32);
 void zones_build_overlap_masks(u8 *, u32);
 extern s32 D_800D34F0;
@@ -144,10 +143,6 @@ block_18:
     bzero(&D_800D3510, 0x180);
     bzero(&D_800D34F0, 0x20);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_44C40/zones_load.s")
-#endif
-#ifdef NON_MATCHING
 void trigger_cache_angles(u8 *);
 void zone_compute_bbox(u8 *, u8 *);
 extern u8 *D_800D34BC;
@@ -226,10 +221,6 @@ void zones_build_overlap_masks(u8 *arg0, u32 arg1) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_44C40/zones_build_overlap_masks.s")
-#endif
-#ifdef NON_MATCHING
 void mtxf_translate(f32 (*)[4], s32, s32, s32); /* axis as f32 bit patterns (game_D5250.c) */
 void mtxf_rotate_xyz_deg(f32 (*)[4], f32, f32, f32);
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
@@ -317,6 +308,3 @@ void zone_compute_bbox(u8 *zone, u8 *out) {
     *(s16 *)(out + 0x22) = *(s16 *)(zone + 4) + min_z;
     *(s16 *)(out + 0x24) = *(s16 *)(zone + 4) + max_z;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_44C40/zone_compute_bbox.s")
-#endif

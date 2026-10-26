@@ -2,9 +2,8 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void level_hotspot_setup(s32 arg0);
-#endif
 
 
 /* was func_150091D0 */
@@ -57,7 +56,6 @@ void level_hotspots_setup_all(void) {
 }
 
 // requires jumptable
-#ifdef NON_MATCHING
 u8 *allocate_memory(s32, s32, s32, s32);
 
 /* was func_15009334 */
@@ -143,9 +141,6 @@ void level_hotspot_setup(s32 arg0) {
         break;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_36680/level_hotspot_setup.s")
-#endif
 /* was func_150095D8 */
 void hotspot_fx_type01(s32 arg0, s32 arg1) {
     light_spawn_pulse_a(arg0, 0xFF, 1);

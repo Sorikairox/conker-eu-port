@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A2800[];
-#endif
 
 
-#ifdef NON_MATCHING
 void fx_debris_emitter_spawn(void *, s16, u8, s32);
 s32 object_hit_effects(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800A2804;
@@ -67,6 +65,3 @@ void obj_impact_burst(struct127 *arg0, u8 arg1, s32 arg2) {
     emit_textured_burst(&sp.u34, ((u8 *)&D_800A2800), &D_800A2804, 1, 40.0f, 0U, (u8) (s32) arg1, arg2);
     object_hit_effects(arg0, 1, 1, 1, 0, 0, (s32) arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_135EB0/obj_impact_burst.s")
-#endif

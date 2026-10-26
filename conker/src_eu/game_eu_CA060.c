@@ -1,14 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void cutscene_focus_on_object(s32 arg0, s32 arg1);
 void cutscene_set_focus_point2(s16, s16, s16, f32);
 void cutscene_set_focus_point(s16, s16, s16, f32);
-#endif
 
 
-#ifdef NON_MATCHING
 void cutscene_scene_load(s32, s32, s32, s32, s32);
 extern s8 D_800C39E2;
 extern s8 D_800C39E3;
@@ -108,10 +106,6 @@ s32 event_action_scene(s32 arg0, s32 arg1, u8 *arg2) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA060/event_action_scene.s")
-#endif
-#ifdef NON_MATCHING
 extern u8 D_800C3A92;
 extern u8 D_800C40B8;
 
@@ -156,10 +150,6 @@ s32 event_query_scene(s32 arg0, s32 arg1, s32 arg2) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA060/event_query_scene.s")
-#endif
-#ifdef NON_MATCHING
 void cutscene_set_focus_point(s16, s16, s16, f32);
 void cutscene_set_focus_point2(s16, s16, s16, f32);
 
@@ -182,6 +172,3 @@ void cutscene_focus_on_object(s32 arg0, s32 arg1) {
         cutscene_set_focus_point((s16) (s32) temp_v0->x_position, (s16) (s32) temp_v0->y_position, (s16) (s32) temp_v0->z_position, var_f0 + 180.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA060/cutscene_focus_on_object.s")
-#endif

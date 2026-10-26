@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void camera_look_mode_defaults(u8 *arg0);
-#endif
 
 
-#ifdef NON_MATCHING
 void aim_hud_spawn_for_mode(u8 *arg0, s32 arg1); // defined in game_eu_1F7960 (two arguments)
 
 /* was func_151201D0 */
@@ -132,10 +130,6 @@ block_43:
     (*(s32 *)((u8 *)arg0 + 0x84)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x84)) & ~0x280);
     (*(f32 *)((u8 *)arg0 + 0x374)) = (f32) (*(f32 *)((u8 *)var_v1 + 0x44));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_14D9E0/camera_look_enter.s")
-#endif
-#ifdef NON_MATCHING
 // Camera state block at player +0x740 (shared by camera_look_enter / camera_look_mode_defaults / camera_look_exit).
 typedef struct {
     f32 eye[3];    // 0x00: camera position (orbit point behind the player)
@@ -550,11 +544,7 @@ void camera_look_update(u8 *arg0) {
 #undef PU8
 #undef PPTR
 #undef CAM_MODE_RIDE
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_14D9E0/camera_look_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_15121A00 */
 void camera_ride_view_set(struct127 *arg0, u16 *arg1) {
     struct {
@@ -613,9 +603,6 @@ void camera_ride_view_set(struct127 *arg0, u16 *arg1) {
         (*(s32 *)((u8 *)temp_v1 + 0x138)) = (s32) (*(s32 *)((u8 *)(&sp.u28) + 8));
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_14D9E0/camera_ride_view_set.s")
-#endif
 /* was func_15121C68 */
 void camera_look_mode_defaults(u8 *arg0) {
     if (arg0[0x23E] != 0) {
@@ -671,11 +658,7 @@ void camera_look_mode_defaults(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x99C)) = 0.0f;
 }
 
-#ifdef NON_MATCHING
 void aim_hud_clear(u8 *arg0);
-#else
-s32 aim_hud_clear(u8 *);
-#endif
 
 /* was func_15121E34 */
 void camera_look_exit(u8 *arg0)

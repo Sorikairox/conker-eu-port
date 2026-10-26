@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* was func_150C5220 */
 void scenery_swing_angle_update(u8 *arg0) {
     f32 sp44;
@@ -49,10 +48,6 @@ void scenery_swing_angle_update(u8 *arg0) {
         (*(f32 *)((u8 *)arg0 + 0)) = (f32) (temp_f0 - 360.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F2A30/scenery_swing_angle_update.s")
-#endif
-#ifdef NON_MATCHING
 u8 *allocate_memory(s32, s32, s32, s32);
 s32 texture_cache_lookup(s32 *, s32 *, s32, s32);
 void segment_override_add(s32, s32, s32, s32, s32);
@@ -187,9 +182,6 @@ void scenery_vtx_scroll_update(u8 *arg0) {
     }
     segment_override_add(arg0, temp_v0_3, var_a2, 4, 5);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F2A30/scenery_vtx_scroll_update.s")
-#endif
 extern struct102 *D_800D9CF0[];
 /* was func_150C572C */
 void fx_slots_9cf0_clear(void) {

@@ -1,17 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING
 /* The vertices are written and handed to the RSP through KSEG1 (uncached); wasm has no such segment. */
 #ifdef PORT
 #define SPRITE_UNCACHED(p) ((u32) (p))
 #else
 #define SPRITE_UNCACHED(p) ((u32) (p) | 0xA0000000)
 #endif
-#endif
 
 
-#ifdef NON_MATCHING
 /* P133 */
 s32 sprite_load_texture(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 f32 math_sin_u8(u8);
@@ -208,6 +205,3 @@ Gfx *sprite_billboard_draw(Gfx *gfx, u8 *rec, s32 idx) {
     SPRITE_GFX(gfx, 0x05000604, 0);       /* gSP1Triangle(0, 3, 2) */
     return gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D4550/sprite_billboard_draw.s")
-#endif

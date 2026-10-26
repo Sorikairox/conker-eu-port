@@ -4,7 +4,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void fx_alloc_d88750(void);
 extern s32 D_800D9CF0;
 extern s8 D_800D9D40;
@@ -74,9 +73,6 @@ void level_objects_reset_state(void) {
     D_800BE4F0 = NULL;
     D_80088B40 = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3BA70/level_objects_reset_state.s")
-#endif
 /* was func_1500E70C */
 void level_hook_level_2b(s32 arg0) {
     if (arg0 == 0x2B) {
@@ -149,7 +145,6 @@ void level_obj_init_area_points(void) {
     area_points_alloc(1);
 }
 
-#ifdef NON_MATCHING
 void area_drift_emitter_create(void *arg0, u8 arg1);
 extern s32 D_800B1214;
 
@@ -217,9 +212,6 @@ void level_obj_init_drift_scene(void) {
     }
     sfx_emitter_start(0x61FU, var_v0, 0, 0, 0x2EE0, 0x3E8U, 0x190, (s32) sfx_cb_keep_until_silent, NULL, 0, 0x48, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3BA70/level_obj_init_drift_scene.s")
-#endif
 // NON-MATCHING: fair bit to figure out
 // void level_obj_init_drift_scene(void) {
 //     struct145 tmp;

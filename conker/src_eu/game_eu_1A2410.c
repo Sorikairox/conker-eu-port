@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
 extern s32 D_8008CDEC;
 
@@ -99,9 +98,6 @@ void fx_dust_puff_behind_obj(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s
         node_spawn_sprite(&sp.u40, 0, 0, -1, (s32) arg7, arg8);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2410/fx_dust_puff_behind_obj.s")
-#endif
 /* was func_15174E90 */
 void fx_puff_fade_grow_tick(u8 *arg0)
 {

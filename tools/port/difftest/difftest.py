@@ -312,6 +312,109 @@ def func_span(src, func):
         i += 1
     return None
 
+def _tl_items(src):
+    """P329: top-level items of C text as (start, end, kind, name): kind def / proto / typedef / var / tag / pp.
+    Comments and strings are skipped; a function definition ends at its closing brace, anything else at its ';'."""
+    out = []; i = 0; n = len(src)
+    def skip_ws(i):
+        while i < n:
+            if src[i].isspace(): i += 1
+            elif src.startswith('//', i): j = src.find('\n', i); i = n if j < 0 else j + 1
+            elif src.startswith('/*', i): j = src.find('*/', i + 2); i = n if j < 0 else j + 2
+            else: break
+        return i
+    while True:
+        i = skip_ws(i)
+        if i >= n: break
+        st = i
+        if src[i] == '#':
+            while True:
+                j = src.find('\n', i); j = n if j < 0 else j
+                if src[j - 1:j] == '\\' and j < n: i = j + 1; continue
+                break
+            out.append((st, j, 'pp', None)); i = j; continue
+        depth = 0; hdr_end = None; kind = None
+        while i < n:
+            c = src[i]
+            if src.startswith('//', i) or src.startswith('/*', i): i = skip_ws(i); continue
+            if c in '"\'':
+                q = c; i += 1
+                while i < n and src[i] != q: i += 2 if src[i] == '\\' else 1
+                i += 1; continue
+            if c in '({[':
+                if c == '{' and depth == 0 and hdr_end is None: hdr_end = i
+                depth += 1
+            elif c in ')}]':
+                depth -= 1
+                if c == '}' and depth == 0 and re.search(r'\)$|\)\w[^;(){}]*;$', re.sub(r'\s+', '', _nocom(src[st:hdr_end]))) \
+                        and not _nocom(src[st:hdr_end]).lstrip().startswith('typedef'):
+                    i += 1; kind = 'def'; break
+            elif c == ';' and depth == 0:
+                i += 1
+                if re.search(r'\w\s*\([\w\s,]*\)\s*[A-Za-z_][^;(){}]*;$', _nocom(src[st:i]).rstrip()) \
+                        and not _nocom(src[st:i]).lstrip().startswith(('typedef', 'extern')):
+                    continue   # K&R parameter declarations: the definition goes on
+                break
+            i += 1
+        txt = _nocom(src[st:i])
+        out.append((st, i, kind or _tl_kind(txt), _tl_name(txt, kind)))
+    return out
+
+def _nocom(t):
+    return re.sub(r'/\*.*?\*/|//[^\n]*', ' ', t, flags=re.S)
+
+def _tl_kind(t):
+    t = t.strip()
+    if t.startswith('typedef'): return 'typedef'
+    if re.match(r'(struct|union|enum)\s+\w+\s*\{', t): return 'tag'
+    if re.search(r'\)\s*;$', re.sub(r'\s+', ' ', t)) and '=' not in t and not re.search(r'\(\s*\*', t): return 'proto'
+    return 'var'
+
+def _tl_name(t, kind=None):
+    t = re.sub(r'\s+', ' ', t).strip()
+    if kind == 'def':
+        h = t[:t.index('{')].rstrip()
+    else:
+        m = re.match(r'(struct|union|enum) (\w+) ?\{', t)
+        if m and not t.startswith('typedef'): return m.group(1) + ' ' + m.group(2)
+        m = re.search(r'\( ?\* ?(\w+)', t)
+        if m: return m.group(1)
+        if t.startswith('typedef'):
+            m = re.search(r'(\w+) ?(\[[^\]]*\] ?)*;$', t); return m.group(1) if m else None
+        h = t.rstrip(';').strip()
+        k = h.find('=')
+        if k >= 0: h = h[:k].rstrip()
+        h = re.sub(r'( ?\[[^\]]*\])+$', '', h)
+        if not h.endswith(')'):
+            m = re.search(r'(\w+)$', h); return m.group(1) if m else None
+    d = 0
+    for j in range(len(h) - 1, -1, -1):
+        if h[j] == ')': d += 1
+        elif h[j] == '(':
+            d -= 1
+            if d == 0:
+                m = re.search(r'(\w+) ?$', h[:j]); return m.group(1) if m else None
+    return None
+
+def splice_items(src, func, code):
+    """P329: put candidate `code` in place of func's definition. Since the NON_MATCHING blocks were stripped, a candidate
+    that also carries the declarations of its old NM block (typedefs, prototypes, data, helper functions) replaces the
+    items of the same name and kind between the previous and the next function definition (and other function
+    definitions of the same name anywhere), like the old whole-block replacement did."""
+    items = _tl_items(src)
+    fi = [k for k, it in enumerate(items) if it[2] == 'def' and it[3] == func]
+    cand = {(it[2], it[3]) for it in _tl_items(code) if it[2] != 'pp' and it[3]}
+    if not fi:
+        return None
+    k = fi[-1]
+    lo = max([j for j in range(k) if items[j][2] == 'def'] or [-1]) + 1
+    hi = min([j for j in range(k + 1, len(items)) if items[j][2] == 'def'] or [len(items)])
+    drop = [it for j, it in enumerate(items) if j != k and (it[2], it[3]) in cand and (lo <= j < hi or it[2] == 'def')]
+    out = src
+    for st, en, kd, nm in sorted(drop + [items[k]], key=lambda x: -x[0]):
+        out = out[:st] + (code if (st, en) == items[k][:2] else '') + out[en:]
+    return out
+
 def build_tu(func, p, src, code):
     hoist = [l[8:] for l in code.split('\n') if l.startswith('//HOIST ')]
     dropl = [l[7:] for l in code.split('\n') if l.startswith('//DROP ')]
@@ -337,11 +440,13 @@ def build_tu(func, p, src, code):
         else:
             tu = src[:a] + '\n' + code + '\n' + src[b:]
     else:
-        sp = func_span(src, func)
-        if sp is None and (_GA or {}).get(func, ('', False))[1]:
-            sp = (len(src), len(src))   # P329: asm-only function (no C body in the stripped source): append the candidate
-        if sp is None: raise RuntimeError('no definition or pragma of %s in %s' % (func, p))
-        tu = src[:sp[0]] + code + src[sp[1]:]
+        tu = splice_items(src, func, code)
+        if tu is None:
+            sp = func_span(src, func)
+            if sp: tu = src[:sp[0]] + code + src[sp[1]:]
+        if tu is None and (_GA or {}).get(func, ('', False))[1]:
+            tu = src + '\n' + code + '\n'   # P329: asm-only function (no C body in the stripped source): append the candidate
+        if tu is None: raise RuntimeError('no definition or pragma of %s in %s' % (func, p))
     for l in dropl: tu = tu.replace(l + '\n', '', 1)
     if hoist:
         ms = list(re.finditer(r'^#include[^\n]*\n', tu, re.M)); k = ms[-1].end() if ms else 0

@@ -2,16 +2,14 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
 void camera_calc_relative_yaw(struct108 *arg0);
 void camera_queue_event(struct108 *arg0, s32 arg1, void *arg2);
 extern f32 D_80095DA0;
 extern f32 D_800C3A20[];
-#endif
 
 
-#ifdef NON_MATCHING
 s32 allocate_memory(s32, s32, s32, s32);
 s32 asset_load(s32 *arg0, s32 arg1, ...);
 void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3);
@@ -51,9 +49,6 @@ void camera_level_init(s32 arg0, s32 arg1) {
     D_800894B0 = 0;
     D_800DC440 = allocate_memory(D_80082FA0 * 0x9A0 + 0x9A0, 1, 2, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_32740/camera_level_init.s")
-#endif
 // NON-MATCHING: first half ok, second half needs work
 // void camera_level_init(s32 arg0, s32 arg1) {
 //     s32 pad0;
@@ -83,7 +78,6 @@ void camera_level_init(s32 arg0, s32 arg1) {
 //     D_800DC010 = allocate_memory((D_80082FA0 * 0x9A0) + 0x9A0, 1, 2, 0);
 // }
 
-#ifdef NON_MATCHING
 s32 camera_pop_mode(struct108 *arg0, s32 arg1);
 void camera_apply_zoom_level(struct108 *arg0);
 void camera_calc_view_dir(struct108 *arg0);
@@ -189,9 +183,6 @@ void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 #undef CAM_W
 #undef CAM_H
 #undef CAM_F
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_32740/camera_controller_init.s")
-#endif
 // NON-MATCHING: not a terrible start.
 // void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 //     f32 temp_f2;
@@ -290,7 +281,6 @@ void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 //     arg0->unk23C = (u8)1;
 // }
 
-#ifdef NON_MATCHING
 /* P41: initial camera eye. Controller arg0 (D_800DBFF0[player]) gets eye = arg2 (0x2F8, copied to 0x27C and 0x304),
  * at = the record arg1's position (0x2A4, copied to 0x2BC / 0x2B0 / 0x2E0), the horizontal distance 0x374, the
  * eye height state (collision_find_floor → 0x354..0x360, 0x348 / 0x34C), then the camera setup callees. Outside level
@@ -349,9 +339,6 @@ void camera_set_initial_eye(struct108 *arg0, u8 *arg1, f32 *arg2) {
         camera_queue_event(arg0, 6, NULL);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_32740/camera_set_initial_eye.s")
-#endif
 // void camera_set_initial_eye(struct108 *arg0, void *arg1, void *arg2) {
 //     void *sp48;
 //     f32 temp_f0;

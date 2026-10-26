@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 u8 *obj_muzzle_node_get(s32 arg0);
 void obj_muzzle_frame_get(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void beam_aim_compute(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, u8 *arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
@@ -71,9 +70,6 @@ void object_bolt_fire(struct127 *obj, u8 arg1, s32 arg2) {
                   arg2);
     beam_impact_sparks((u8 *) start14C, (s32) hit, arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12CAC0/object_bolt_fire.s")
-#endif
 
 extern s32 D_800A2420;
 /* was func_150FF550 */
@@ -99,7 +95,6 @@ void obj_joint_point_get(u8 *arg0, s16 arg1, u8 *arg2) {
     model_node_points_to_world(arg0, temp_v0, 0, &sp34, &sp30, 1);
 }
 
-#ifdef NON_MATCHING
 u8 *obj_muzzle_node_get(s32 arg0);
 void obj_muzzle_frame_get(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void beam_aim_compute(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, u8 *arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
@@ -162,9 +157,6 @@ void object_beam_fire(struct127 *obj, u8 arg1, s32 arg2) {
     bone_streak_fx_start((u8 *)posE8, (u8 *)dirDC, (s32)((u8 *)obj->unk1D4 + node[2] * 64), (u8 *)obj, 1.0f, arg1, arg2);
     beam_impact_sparks((u8 *)start124, (s32)hit, arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12CAC0/object_beam_fire.s")
-#endif
 
 /* was func_150FF808 */
 u8 *obj_muzzle_node_get(s32 arg0) {
@@ -176,7 +168,6 @@ void obj_muzzle_frame_get(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     obj_get_aim_vectors(arg0, arg1, arg2, arg3, 0.81100005f);
 }
 
-#ifdef NON_MATCHING
 s32 model_points_find(f32 *, f32 *, f32 *, f32 *, f32 *, u8 *, s32); /* P209: C, returns 1 / 0 */
 void weapon_find_aim_target(u8 *, u8 *, void *, void *, void *, u8 *, u8 *, u8 **, u8 **, u8 *);
 
@@ -216,9 +207,6 @@ void beam_aim_compute(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, u8 *arg5
     }
     weapon_find_aim_target(argD, arg2, arg5, arg6, arg7, arg8, arg9, argA, argB, argC);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12CAC0/beam_aim_compute.s")
-#endif
 typedef struct { s32 x, y, z; } V3i;
 /* was func_150FF9F4 */
 void beam_impact_sparks(u8 *arg0, s32 arg1, u8 arg2, s32 arg3) {
@@ -299,7 +287,6 @@ s32 beam_target_filter(u8 *arg0, s32 arg1, s32 arg2) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 extern char D_800A242C[]; /* joint names, 12 bytes each (D_800A2420 is declared s32 above) */
 extern char D_800A2438[];
 extern char D_800A2444[];
@@ -340,6 +327,3 @@ s32 model_points_find(f32 *points, f32 *a, f32 *ref, f32 *out, f32 *b, u8 *model
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12CAC0/model_points_find.s")
-#endif

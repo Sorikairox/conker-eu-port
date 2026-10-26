@@ -99,7 +99,6 @@ void rom_dma_read_chunked(u32 devAddr, u8 *dramAddr, u32 size) {
         } while (sent < size);
     }
 }
-#ifdef NON_MATCHING
 /* P62: hand-written from the asm. UNVERIFIED by difftest (busy-waits on the PI and reads the cartridge through
  * KSEG1, which neither harness maps); checked by reading against the asm, see docs/port/sessions/P62.md. */
 extern vu8 D_8003A8D2;       /* 1 while a direct cartridge read is in progress */
@@ -170,6 +169,3 @@ void rom_read_direct(s32 devAddr, void *dramAddr, u32 size) {
         osStartThread(&D_80035C70);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_4470/rom_read_direct.s")
-#endif

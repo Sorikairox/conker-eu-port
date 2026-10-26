@@ -1,14 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 breakable_slot_has_piece_flag(s32 arg0, s32 arg1);
 void breakable_release(s32 arg0);
 extern u8 D_80098CC4[];
-#endif
 
 
-#ifdef NON_MATCHING
 void breakable_request_flags(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 *D_800847FC[];
 
@@ -27,9 +25,6 @@ void breakable_request_flag_entry(struct127 *obj, s32 set, s32 entry) {
         breakable_request_flags(obj - D_800CC2D0, set, -1, -1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/breakable_request_flag_entry.s")
-#endif
 
 /* was func_1503E1FC */
 void breakable_request_flags(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
@@ -41,7 +36,6 @@ void breakable_request_flags(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     temp_v0->unkF = 2;
 }
 
-#ifdef NON_MATCHING
 extern s8 *D_800847E4[];
 extern u8 D_80098CC4[];
 extern void (*D_800847C0[])(s32, s32);  /* per kind: piece init (pc, slot) */
@@ -118,9 +112,6 @@ void breakable_update_slot(s32 i) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/breakable_update_slot.s")
-#endif
 
 extern s32 D_800C6A84;
 extern s32 D_800C6A88;
@@ -139,7 +130,6 @@ s32 breakable_slot_has_piece_flag(s32 arg0, s32 arg1)
   return 0;
 }
 
-#ifdef NON_MATCHING
 void heap_free(s32);
 extern s32 D_800847F0;
 
@@ -186,10 +176,6 @@ void breakable_release(s32 arg0) {
         temp_v0_3->unk74 &= 0xFF7F;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/breakable_release.s")
-#endif
-#ifdef NON_MATCHING
 extern s8 *D_800847E4[];
 void math_mtx_affine_inverse(f32 arg0[4][4], f32 arg1[4][4]);
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
@@ -245,11 +231,7 @@ void breakable_init_piece(s32 i, s32 piece, s32 jointOffset, u8 *pc, s32 detache
     *(f32 *) (pc + 0x4C) = dy * len;
     *(f32 *) (pc + 0x50) = dz * len;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/breakable_init_piece.s")
-#endif
 
-#ifdef NON_MATCHING
 f32 vec3f_magnitude(f32 *arg0);
 void vec3f_cross(u8 *, u8 *, u8 *);
 f32 vec3f_dot(f32 *a, f32 *b);
@@ -316,11 +298,7 @@ void mtxf_decompose(f32 *m, f32 *x, f32 *y, f32 *z, f32 *rx, f32 *ry, f32 *rz, f
     *ry = ay * 57.295776f;
     *rz = az * 57.295776f;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/mtxf_decompose.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s8 *D_800847E4[];
 extern u8 D_80098CC4[];
 void mtxf_translate(u8 *, s32, s32, s32);
@@ -378,11 +356,7 @@ void breakable_write_matrices(s32 i) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/breakable_write_matrices.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s8 *D_800847E4[];
 extern u8 D_80098CC4[];
 
@@ -414,11 +388,7 @@ void breakable_move_free_pieces(s32 i) {
         *(f32 *) (pc + 0x4C) += *(f32 *) (pc + 0x60) * dt;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/breakable_move_free_pieces.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_80098CD4;
 /* was func_1503EE68 */
 void breakable_scatter_pieces(s32 arg0, f32 arg1, f32 arg2, s32 arg3) {
@@ -467,10 +437,6 @@ void breakable_scatter_pieces(s32 arg0, f32 arg1, f32 arg2, s32 arg3) {
     } while (var_s2 != 3);
     *(f32 *)((u8 *)arg0 + 0x60) = D_80098CD4;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/breakable_scatter_pieces.s")
-#endif
-#ifdef NON_MATCHING
 extern s8 *D_800847E4[];
 extern u8 D_80098CC4[];
 void collision_select_area(s32);
@@ -524,9 +490,6 @@ void breakable_pieces_ground_collide(s32 i) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/breakable_pieces_ground_collide.s")
-#endif
 
 /* was func_1503F1A8 */
 void breakable_cb_nop(void) {
@@ -548,7 +511,6 @@ void breakable_cb_fall_then_remove(s32 arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 extern s32 *D_800847FC[];
 
 /*
@@ -568,9 +530,6 @@ s32 breakable_flag_entry_matches(s32 set, s32 entry, s32 i) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/breakable_flag_entry_matches.s")
-#endif
 
 extern u8 D_80098CC4[];
 
@@ -615,7 +574,6 @@ void breakable_cb_init_timer140(s32 arg0) {
     (*(f32 *)((u8 *)(temp_v0->unk0) + 0x1EC)) = 10.0f;
 }
 
-#ifdef NON_MATCHING
 s32 breakable_flag_entry_matches(s32, s32, s32);
 
 /*
@@ -638,13 +596,7 @@ void breakable_cb_init_flags(s32 i) {
         D_800CC2D0[i].unk94 &= ~0x400;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/breakable_cb_init_flags.s")
-#endif
 
-#ifndef NON_MATCHING
-s32 breakable_release(s32);
-#endif
 void breakable_pieces_ground_collide(s32);
 s32 breakable_flag_entry_matches(s32, s32, s32);
 

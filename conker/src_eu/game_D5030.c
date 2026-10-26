@@ -4,7 +4,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* mtx_set_identity: writes the fixed-point identity into the Mtx m (64 bytes: the 16 integer halves, then the 16
  * fraction halves, row-major as s16); only the diagonal integer halves (0, 5, 10, 15) are 1. Used for the matrix of
  * disabled world records (world_records_update_matrices) and by mesh_effect_load_identity (game_168A90.c). */
@@ -21,9 +20,6 @@ void mtx_set_identity(Mtx *m) {
     h[10] = 1;
     h[15] = 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_D5030/mtx_set_identity.s")
-#endif
 
 // struct WORD {
 //     s64 unk0;

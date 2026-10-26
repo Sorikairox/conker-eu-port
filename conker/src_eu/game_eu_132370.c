@@ -3,12 +3,8 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* was func_15104B60 */
 void stub_obj_set_param(s32 arg0, s32 arg1, f32 arg2) { /* P95: f32 (float bits were passed as an int) */
-#else
-void stub_obj_set_param(s32 arg0, s32 arg1, s32 arg2) {
-#endif
 }
 
 /* was func_15104B74 */
@@ -25,7 +21,6 @@ s32 stub_return_one_b(s32 arg0, s32 arg1) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 void collision_select_area(s32 arg0);
 s32 floor_collect_level_tris(s32, s32);
 /* floor triangles found by floor_collect_level_tris (16-byte records) */
@@ -91,6 +86,3 @@ s32 floor_height_below(f32 x, f32 z, f32 y, f32 *out) {
     *out = D_800D3720[best].h * 0.00390625f;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_132370/floor_height_below.s")
-#endif

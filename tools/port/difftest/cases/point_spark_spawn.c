@@ -1,3 +1,5 @@
+//DROP s32 random_int(void);
+//DROP f32 random_float(void);
 extern f32 D_800A2A04;
 extern f32 D_800A2A08;
 extern f32 D_800A2A0C;

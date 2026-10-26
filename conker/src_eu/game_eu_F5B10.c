@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
 void camera_set_followed_obj(struct108 *, s32);
 void camera_calc_relative_yaw(struct108 *arg0);
@@ -138,6 +137,3 @@ void player_flight_mode_update(u8 *obj) {
         *(f32 *) (obj + 0x190) = 0.0f;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F5B10/player_flight_mode_update.s")
-#endif

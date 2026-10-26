@@ -4,17 +4,11 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P98: D_800E1230 callback (mp3main_decode_next_frame calls it with (0, line, length)); a1 / a2 reach ring_buffer_put_record untouched */
 /* was func_10012560 */
 void mp3_id3_text_enqueue(s32 arg0, u8 *arg1, s32 arg2) {
     ring_buffer_put_record(&D_800427A0, arg1, arg2);
 }
-#else
-void mp3_id3_text_enqueue(s32 arg0) {
-    ring_buffer_put_record(&D_800427A0);
-}
-#endif
 
 /* was func_10012588 */
 void mp3_voice_init(s32 arg0) {

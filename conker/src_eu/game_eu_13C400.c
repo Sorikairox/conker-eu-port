@@ -1,14 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void collision_select_area(s32 arg0);
 extern u8 *D_800DC278;
 s32 zone_tree_leaf_index(u8 *arg0);
-#endif
 
 
-#ifdef NON_MATCHING
 void vec3f_cross(u8 *, u8 *, u8 *);
 extern s32 D_800D3720;
 
@@ -57,9 +55,6 @@ s32 collision_candidate_is_floor(s32 arg0) {
     }
     return var_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/collision_candidate_is_floor.s")
-#endif
 s32 collision_find_floor_ceiling(s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, u16, s32, f32, f32, s32);
 /* was func_1510ED24 */
 void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD) {
@@ -78,7 +73,6 @@ void collision_find_floor_no_fallback(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s3
     collision_find_floor_ceiling(arg0, arg1, 0, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, -10000.0f, 20000.0f, argE);
 }
 
-#ifdef NON_MATCHING
 /*
  * P53: floor / ceiling lookup under (x, z) = (arg7, arg9) over the 4 collision areas (D_800894C0[area] == 1):
  * 0 / 1 level tree (floor_collect_level_tris), 2 world objects (world_objects_in_box + world_objects_transform_mesh + floor_collect_world_obj_tris), 3 records
@@ -376,11 +370,7 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
     D_800DC288 = ceil;
     return argC;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/collision_find_floor_ceiling.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 floor_collect_world_obj_tris(s32, s32, s32, s32 *);
 s32 world_objects_transform_mesh(s32, s32 *, s32);
 s32 func_150A69A8(s32, s32, s32 *, s32);
@@ -412,10 +402,6 @@ f32 collision_object_floor_height(f32 arg0, f32 arg1, f32 arg2) {
     }
     return var_f2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/collision_object_floor_height.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1510FCA0 */
 s32 zone_tree_collect_near(s32 arg0, s32 arg1, s32 arg2, u8 **arg3) {
     s16 temp_a1_3;
@@ -472,9 +458,6 @@ block_10:
     }
     return var_v1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/zone_tree_collect_near.s")
-#endif
 /* was func_1510F800 */
 void collision_select_area(s32 arg0) {
     func_150A4ED4(arg0);
@@ -506,7 +489,6 @@ s32 floor_flags_surface_type(s32 arg0) {
     return arg0 & 0x1F;
 }
 
-#ifdef NON_MATCHING
 s32 floor_collect_level_tris(s32, s32);
 extern s32 D_800D3720;
 
@@ -580,10 +562,6 @@ block_13:
     }
     return (s32) ((f32) *(s32 *)((u8 *)&D_800D3720 + (var_a0 * 0x10)) * 0.00390625f);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/collision_level_nearest_height.s")
-#endif
-#ifdef NON_MATCHING
 void pvs_row_apply(s32);
 void camera_zone_flag_update(s32);
 extern s32 D_800DC1F0;
@@ -621,10 +599,6 @@ void player_zone_update(s32 arg0) {
         camera_zone_flag_update(arg0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/player_zone_update.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1510FD20 */
 s32 zone_tree_find_leaf(s32 arg0, s32 arg1) {
     s16 temp_v0;
@@ -710,9 +684,6 @@ block_22:
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/zone_tree_find_leaf.s")
-#endif
 extern u8 *D_800DC278;
 /* was func_151103B0 */
 s32 zone_tree_leaf_index(u8 *arg0) {

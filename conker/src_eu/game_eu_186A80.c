@@ -8,7 +8,6 @@ void move_watch_free(void **arg0) {
     node_unlink_free(arg0);
 }
 
-#ifdef NON_MATCHING
 /* P129: the state tables live in the ROM's game_data (EU addresses). The rule table D_800A65E0 and the five s8
  * handler lists D_8008B3CC points to (0x800A66C0 + 0x1C * kind) sit in the GLOBAL_ASM's rodata_inject block in the
  * matching build. They are referenced by symbol only, never defined here: the browser keeps every undefined N64
@@ -83,9 +82,6 @@ void move_watch_update(u8 *obj) {
 }
 #undef STATE_MASK
 #undef STATE_BIT
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/move_watch_update.s")
-#endif
 
 /* was func_15159514 */
 void move_watch_on_message(u8 *arg0, u8 *arg1, u8 arg2)
@@ -182,7 +178,6 @@ s32 move_watch_moving_state(u8 *arg0, u8 *arg1, u8 arg2) {
     return r;
 }
 
-#ifdef NON_MATCHING
 extern u16 D_8008B3E0;
 
 /* was func_15159828 */
@@ -227,9 +222,6 @@ loop_2:
     }
     return var_v1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/move_watch_anim_state.s")
-#endif
 /* was func_151598E0 */
 s32 move_watch_pick_kind(struct127 *arg0, u8 *arg1) {
     s32 ret = 0;
@@ -264,7 +256,6 @@ s32 move_watch_pick_kind(struct127 *arg0, u8 *arg1) {
     return ret;
 }
 
-#ifdef NON_MATCHING
 /* was func_1515999C */
 u8 move_watch_state_matches(u8 *arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5) {
     struct_eu_link *sp38;
@@ -315,14 +306,7 @@ u8 move_watch_state_matches(u8 *arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4, s1
     }
     return var_t2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/move_watch_state_matches.s")
-#endif
-#ifdef NON_MATCHING
 s32 collision_ceiling_probe(f32 *, s32, f32, u8 *); /* P95: f32 parameter */
-#else
-s32 collision_ceiling_probe(f32 *, s32, s32, u8 *);
-#endif
 s32 pos_in_world_bounds(f32 *);
 s32 smoke_wobble_step(u8 *, u8 *);
 s32 impact_current_kind();
@@ -344,11 +328,7 @@ u8 smoke_wobble_update_ground(u8 *arg0, u8 *arg1)
       {
         return 0;
       }
-#ifdef NON_MATCHING
       if (collision_ceiling_probe(v, 0, *((f32 *) (arg0 + 0x44)), arg0 + 0x80) != 0) /* P95: f32 field (prototype param is f32 in NM) */
-#else
-      if (collision_ceiling_probe(v, 0, *((s32 *) (arg0 + 0x44)), arg0 + 0x80) != 0)
-#endif
       {
         flag = 3; // fakematch: permuter, flag reused as the 3 constant (makes flag = 0 share the tail)
         v[1] = *((f32 *) (arg0 + 0x80));
@@ -367,7 +347,6 @@ u8 smoke_wobble_update_ground(u8 *arg0, u8 *arg1)
   return flag;
 }
 
-#ifdef NON_MATCHING
 /* P136 */
 /*
  * orbit_object_step: per-frame motion of an object on two oscillators (record at obj + 0xA8). Advances the byte
@@ -406,11 +385,7 @@ s32 smoke_wobble_step(u8 *obj, u8 *arg1) {
     }
     return ok;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/smoke_wobble_step.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 memcpy(s32, f32 *, s32);
 
 /* was func_15159E00 */
@@ -543,9 +518,6 @@ s32 smoke_wobble_spawn(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
     }
     return var_v1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/smoke_wobble_spawn.s")
-#endif
 /* was func_1515A120 */
 void smoke_wobble_spawn_at(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 *arg6) {
     f32 sp24[3];
@@ -560,7 +532,6 @@ void smoke_wobble_spawn_at(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32
     smoke_wobble_spawn(sp24, sp18, *(u8 *)(arg6 + 0xC), *(u8 *)(arg6 + 1));
 }
 
-#ifdef NON_MATCHING
 extern u8 D_800BEE0B;
 s32 camera_within_dist(u8 arg0, f32 arg1, struct17 *arg2);
 void mtxf_rotate_xyz_deg(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
@@ -716,9 +687,6 @@ void dust_disc_emitter_update(u8 *obj) {
         e->acc -= 1.0f;
     } while (1.0f < e->acc);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/dust_disc_emitter_update.s")
-#endif
 
 /* was func_1515A68C */
 s32 smoke_wobble_step_pulse(u8 *arg0, s32 arg1) {
@@ -745,7 +713,6 @@ s32 smoke_wobble_step_pulse(u8 *arg0, s32 arg1) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 extern f32 D_800A67C4;
 extern f32 D_800A67CC;
 extern f32 D_800A67D0;
@@ -921,9 +888,6 @@ s32 smoke_puff_spawn_grounded(f32 *arg0, u8 *arg1, f32 arg2, f32 arg3, u8 *arg4,
     }
     return var_v1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/smoke_puff_spawn_grounded.s")
-#endif
 typedef struct { f32 unk0; u8 unk4; u8 unk5; s8 unk6; s8 unk7; f32 unk8; f32 unkC; u8 unk10; u8 unk11; u8 unk12; u8 unk13; f32 unk14; f32 unk18; f32 unk1C; } SubAB7C;
 f32 angle_byte_cos(u8);
 /* was func_1515AB7C */
@@ -948,7 +912,6 @@ s32 smoke_sway_step(u8 *arg0, s32 arg1) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* was func_1515ACFC */
 u8 smoke_sway_step_ground(u8 *arg0, s32 arg1) {
     struct {
@@ -991,9 +954,6 @@ block_9:
     }
     return sp.u4B;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/smoke_sway_step_ground.s")
-#endif
 /* was func_1515AE90 */
 s32 move_watch_get_data(u8 *arg0, u8 **arg1) {
     struct_eu_link *sp1C;
@@ -1007,7 +967,6 @@ s32 move_watch_get_data(u8 *arg0, u8 **arg1) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* P133 */
 struct260 *ground_emitter_spawn(void *, s16, s32, u8, s32);
 typedef struct { u8 b[0x2C]; } Blk_AEE4;
@@ -1054,9 +1013,6 @@ void watch_attach_effect_start(u8 *obj, s32 arg1) {
         memcpy((u8 *) p + 0x80, &blk, 0x2C);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/watch_attach_effect_start.s")
-#endif
 
 typedef struct { f32 x, y, z; } V3_AFF4;
 typedef struct { s32 w[10]; } Blk_AFF4;
@@ -1078,7 +1034,6 @@ void watch_spawn_random_effect(u8 *arg0, V3_AFF4 *arg1, f32 arg2, s32 arg3) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 s32 memcpy(s32, f32 *, s32);
 
@@ -1224,6 +1179,3 @@ void smoke_emitter_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s0 + 0)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/smoke_emitter_update.s")
-#endif

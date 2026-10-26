@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-#ifdef NON_MATCHING
 /* P124: the 0x3C-byte effect template image_fx_spawn_template / image_fx_spawn copy into a new effect record (+0x10);
  * same layout as S59A0 in game_eu_1231B0.c. */
 typedef struct {
@@ -35,7 +34,6 @@ typedef struct {
     u8 u39;
     u8 pad3A[2];
 } EffectTemplateE48B0;
-#endif
 u8 *image_fx_spawn_template(void *);
 
 void cs_overlay_counter_box_open(s32, s32);
@@ -86,12 +84,9 @@ void cs_overlay_update(s32 arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800BEE08;
 void *screen_tint_create(s32, s32, s32, s32, s32, s32, u8, s32);
-#endif
 
-#ifdef NON_MATCHING
 // hud_box_reset: removes the old box object D_800D9CB4 (node_destroy), creates a new one (screen_tint_create(0, 0, 0xFF,
 // 0, 0, D_800BEE08, 0, 0)), sets state D_800D9CB0 = 3 and clears the 10 words D_800D9CB8.
 /* was func_150B7170 */
@@ -107,11 +102,7 @@ void cs_overlay_reset(void) {
         D_800D9CB8[i] = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/cs_overlay_reset.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 D_800D9CC4;
 
 /* was func_150B7214 */
@@ -130,9 +121,6 @@ s32 cs_overlay_mark_boxes_closing(void) {
     D_800D9CB0 = 3;
     return temp_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/cs_overlay_mark_boxes_closing.s")
-#endif
 /* was func_150B7258 */
 s32 cs_overlay_destroy_all(void) {
     struct102 **p;
@@ -159,7 +147,6 @@ void overlay_fx_scroll_update(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 extern s32 D_80091CC8;
 
 /* was func_150B731C */
@@ -242,10 +229,6 @@ block_6:
     }
     (*(u8 *)((u8 *)arg0 + 0x45)) = (u8) var_v1_3;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/overlay_fx_pulse_update.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_150B757C */
 void overlay_fx_slide_in_update(u8 *arg0) {
     s32 temp_v0;
@@ -268,9 +251,6 @@ void overlay_fx_slide_in_update(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x2C)) = (f32) (((s32) (var_v0 * -0x54) / 30) + 0xE6);
     (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) (((s32) (var_v0 * -0x32) / 30) + 0xAA);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/overlay_fx_slide_in_update.s")
-#endif
 /* was func_150B7688 */
 void overlay_fx_scale_grow_update(u8 *arg0) {
     if (*(s16 *)(arg0 + 0x38) != 0x1000) {
@@ -286,7 +266,6 @@ void overlay_fx_scale_grow_update(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 u8 *image_fx_spawn(void *, s32);
 extern s32 D_80091CD4;
 extern s32 D_800BEA58;
@@ -349,10 +328,6 @@ void cs_overlay_spawn_cross(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     t.u1C = v;
     image_fx_spawn(&t, arg3);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/cs_overlay_spawn_cross.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_150B78D0 */
 void overlay_fx_lerp_pos_update(u8 *arg0) {
     s16 temp_v0;
@@ -365,9 +340,6 @@ void overlay_fx_lerp_pos_update(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x2C)) = (f32) (((s32) (((*(s16 *)((u8 *)arg0 + 0x20)) - temp_v0) * temp_lo) >> 0x10) + temp_v0);
     (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) (((s32) (((*(s16 *)((u8 *)arg0 + 0x22)) - temp_v1) * temp_lo) >> 0x10) + temp_v1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/overlay_fx_lerp_pos_update.s")
-#endif
 extern s32 D_80091C8C;
 
 /* was func_150B7964 */
@@ -504,7 +476,6 @@ void cs_overlay_open_counter_right(void) {
     D_800D9CB0 = 3;
 }
 
-#ifdef NON_MATCHING
 extern s32 D_80091C98;
 
 // hud_counter_box_open: replaces HUD box slot `slot` of D_800D9CB8 (the old one is removed with node_destroy) by a
@@ -543,9 +514,6 @@ void cs_overlay_counter_box_open(s32 width, s32 slot) {
     }
     *box = (s32)image_fx_spawn_template(&sp);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/cs_overlay_counter_box_open.s")
-#endif
 
 extern s32 D_80091C98;
 extern s32 D_80091CA4;
@@ -628,7 +596,6 @@ void cs_overlay_open_boxes_4_8(void) {
     D_800D9CB0 = 3;
 }
 
-#ifdef NON_MATCHING
 u8 *image_fx_spawn_template(void *);
 extern s32 D_80091CBC;
 extern s32 D_80091C98;
@@ -711,6 +678,3 @@ s32 cs_overlay_create_bars(void) {
     D_800D9CB0 = 3;
     return D_800D9CB8[9];
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/cs_overlay_create_bars.s")
-#endif

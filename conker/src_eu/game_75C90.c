@@ -69,7 +69,6 @@ f32 math_asin_u8(f32 arg0) {
     return (arg0 < 0.0f) ? (255.0f - temp_f14) : temp_f14;
 }
 
-#ifdef NON_MATCHING
 /* was func_150488C8 */
 f32 math_asinf_table(f32 arg0) {
     f32 temp_f16;
@@ -104,9 +103,6 @@ f32 math_asinf_table(f32 arg0) {
     }
     return temp_f16;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_75C90/math_asinf_table.s")
-#endif
 // NON-MATCHING: needs more work
 // f32 math_asinf_table(f32 arg0) {
 //     f32 temp_f16;

@@ -9,7 +9,6 @@ s32 sound_calc_pan_volume(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32 *, s3
 
 
 void music_song_set_volume(s32, s32);
-#ifdef NON_MATCHING
 s32 approx_dist2_int(s32 x0, s32 z0, s32 x1, s32 z1);
 s32 approx_dist3_int(s32 arg0, s32 arg1, s32 arg2);
 
@@ -82,9 +81,6 @@ s32 sound_calc_pan_volume(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 o
     }
     return dist;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_A420/sound_calc_pan_volume.s")
-#endif
 // NON-MATCHING: mostly just regalloc
 // s32 func_150AD960(s32, s32, s32, s32);
 // s32 approx_dist3_int(s32, s32, s32);
@@ -155,7 +151,6 @@ s32 sound_calc_pan_volume(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 o
 // }
 
 
-#ifdef NON_MATCHING
 f32 vec3f_dot(f32 *a, f32 *b);
 f32 vec3f_magnitude(f32 *);
 void vec3_scale(struct17 *v, f32 len, struct17 *out);
@@ -267,9 +262,6 @@ s32 sound_path_calc_pan_volume(s32 path, s32 ex, s32 ey, s32 ez, f32 yaw, s32 x,
     return sound_calc_pan_volume(px - ex, py - ey, pz - ez, yaw, px - x, py - y, pz - z, near, far, outPan, (s32 *) outVol,
                          (s32 *) outDist);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_A420/sound_path_calc_pan_volume.s")
-#endif
 extern f32 D_8002C574;
 extern f64 D_8002C578;
 

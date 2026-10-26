@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 *asset_load_with_subfiles(s32, s32, s32, s32, s32, s32);
 s32 texture_resolve_dl_ids(s32, s32, s32, s32, s32 *);
 void gfx_dl_relocate(s32, s32 *);
@@ -34,9 +33,6 @@ s32 shared_dl_acquire(s32 arg0) {
     }
     return *p;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BA680/shared_dl_acquire.s")
-#endif
 
 extern u8 D_800DFC00[];
 extern s32 D_800DFDE8[];

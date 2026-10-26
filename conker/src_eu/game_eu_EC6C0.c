@@ -46,7 +46,6 @@ s32 impact_a_effect_id(s32 arg0, s32 arg1) {
     return -1;
 }
 
-#ifdef NON_MATCHING
 void fx_spawn_impact_particle(u8, s32 *, f32, s32, f32 *, u8);
 void fx_spawn_impact_burst(u8, f32 *, s32, f32, f32);
 extern f32 D_800A0490;
@@ -71,9 +70,6 @@ void impact_effect_a(u8 *obj, s32 kind, s32 level) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EC6C0/impact_effect_a.s")
-#endif
 
 
 /* was func_150BF130 */
@@ -115,7 +111,6 @@ s32 impact_b_effect_id(s32 arg0, s32 arg1) {
     return -1;
 }
 
-#ifdef NON_MATCHING
 extern f32 D_800A04A0;
 extern f32 D_800A04A4;
 extern f32 D_800A04A8;
@@ -134,15 +129,8 @@ void impact_effect_b(u8 *obj, s32 kind, s32 level) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EC6C0/impact_effect_b.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
-#else
-s32 event_dispatch(s32, s32, s32, s32);
-#endif
 
 /* was func_150BF3B0 */
 void player_update_btn_flags(u8 *arg0) {

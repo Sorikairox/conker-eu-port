@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 dl_fx_spawn(u8 *, s32, s32, s32, s32, s32, s32);
 s32 memcpy(s32, s16 *, s32);
 extern s32 D_8008D950;
@@ -115,10 +114,6 @@ s32 tumble_debris_spawn(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, u8 *arg4, f32 ar
     memcpy(sp.uAC + 0x100, &sp.u38, 0x30);
     return sp.uAC;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B8140/tumble_debris_spawn.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1518AB64 */
 s32 tumble_debris_update(u8 *arg0) {
     struct {
@@ -210,9 +205,6 @@ block_5:
     (*(f32 *)((u8 *)temp_v1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 8)) + ((*(f32 *)((u8 *)temp_v1 + 0x24)) * D_800BE9A4));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B8140/tumble_debris_update.s")
-#endif
 /* was func_1518AE84 */
 s32 tumble_debris_build_matrix(Mtx *arg0, u8 *arg1) {
     f32 *r;

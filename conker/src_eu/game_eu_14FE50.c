@@ -19,7 +19,6 @@ void camera_follow_keep_offset(u8 *arg0) {
     camera_follow_mode_update(arg0);
 }
 
-#ifdef NON_MATCHING
 void math_spring_approach_angle(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void camera_update_eye_base(struct108 *arg0);
 void camera_update_eye_orbit(u8 *);
@@ -98,6 +97,3 @@ void camera_follow_target_update(struct108 *arg0) {
         camera_update_eye_height(p);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_14FE50/camera_follow_target_update.s")
-#endif

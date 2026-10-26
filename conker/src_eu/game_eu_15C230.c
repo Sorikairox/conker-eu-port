@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* was func_1512EA20 */
 void camera_over_shoulder_place(u8 *arg0) {
     f32 sp18;
@@ -27,6 +26,3 @@ void camera_over_shoulder_place(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x2F8)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x2BC)) - temp_f8);
     (*(f32 *)((u8 *)arg0 + 0x300)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x2C4)) - (cosf(temp_f12) * 60.0f));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15C230/camera_over_shoulder_place.s")
-#endif

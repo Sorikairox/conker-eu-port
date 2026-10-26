@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* was func_151D6440 */
 u8 *fb_ghost_copy_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     u32 sp8C;
@@ -127,10 +126,6 @@ u8 *fb_ghost_copy_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     (*(s32 *)((u8 *)var_a0 + 4)) = 0x0F0A4000;
     return var_a0 + 8;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_203C50/fb_ghost_copy_draw.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_151D6760 */
 void fb_blur_average(u8 *arg0) {
     s16 temp_t7;
@@ -174,10 +169,6 @@ void fb_blur_average(u8 *arg0) {
         } while (var_a2 != D_800BE624);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_203C50/fb_blur_average.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_151D69C8 */
 u8 *fb_ghost_image_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     s32 sp34;
@@ -284,9 +275,6 @@ u8 *fb_ghost_image_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     }
     return var_a0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_203C50/fb_ghost_image_draw.s")
-#endif
 /* was func_151D6CA0 */
 void fb_ghost_set_mode(s32 arg0, s32 arg1) {
     if (D_800BE9F0 == 6 && D_80038080 == 0) {
@@ -307,7 +295,6 @@ void fb_ghost_set_mode(s32 arg0, s32 arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 allocate_memory(s32, s32, s32, s32);
 u8 *render_set_color_image(u8 *);
 u8 *fb_ghost_copy_draw(u8 *, s32, s32, s32);
@@ -352,6 +339,3 @@ block_10:
     }
     return var_s0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_203C50/fb_ghost_render.s")
-#endif

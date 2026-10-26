@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-#ifdef NON_MATCHING
 extern u16 D_800C5BC0[];  /* vertex count of each model slot */
 extern u8 *D_800843D0[];  /* per colour group 1..5: RGB key colours (3 bytes each) */
 extern u8 D_80096CD0[];   /* per colour group 1..5: number of key colours (asm rodata_inject block; ROM) */
@@ -59,6 +58,3 @@ void obj_vertex_colours_blend(struct127 *obj, f32 *vals, s32 perGroup) {
         vtx[0xE] = b;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_48E50/obj_vertex_colours_blend.s")
-#endif

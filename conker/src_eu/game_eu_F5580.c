@@ -38,7 +38,6 @@ void scenery_spin_z_level(u8 *arg0) {
     scenery_spin_z_update(arg0);
 }
 
-#ifdef NON_MATCHING
 void scenery_start_pending_anim(u8 *obj);
 // obj_shade_from_level: P237. Object callback (same family as scenery_spin_z_level_neg / scenery_spin_z_level): runs scenery_start_pending_anim(obj),
 // then, unless the object's +0x73 bit 2 is set, gives its model record (+0x7C, when there is one) the shade byte
@@ -55,11 +54,7 @@ void obj_shade_from_level(u8 *obj) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F5580/obj_shade_from_level.s")
-#endif
 
-#ifdef NON_MATCHING
 void music_play_song(s32, s32, s32);
 void music_stop_song(s32, s32);
 f32 math_cos_u8(s32);
@@ -109,10 +104,6 @@ void zone_ambience_update(s32 arg0) {
         puff_drift_spawn((s32) ((f32) ((random_int() & 0xFFFF) * 2) * 0.000015258789f) & 0xFF, (s16) (s32) (temp_f18 + -2418.0f), 0x62F, (s16) temp_s1_3, 7, 0x4B0, 0x25, 0xA, 0x1E, 3, 8);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F5580/zone_ambience_update.s")
-#endif
-#ifdef NON_MATCHING
 u8 *world_record_find(u8 id); /* P119: one argument (world_record_find reads only the id) */
 
 /* was func_150C8190 */
@@ -157,9 +148,6 @@ void scenery_dl_set_angle_coord(u8 *arg0) {
     *temp_a1_2 = temp_t0;
     *temp_a1_2 = temp_t0 | var_v1_2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F5580/scenery_dl_set_angle_coord.s")
-#endif
 /* was func_150C827C */
 void scenery_follow_obj_0c(u8 *arg0) {
     struct127 *temp_v0;

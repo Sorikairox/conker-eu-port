@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* was func_150D2960 */
 void ambient_sine_colour_update(u8 *arg0) {
     f32 sp24;
@@ -18,6 +17,3 @@ void ambient_sine_colour_update(u8 *arg0) {
     (*(f32 *)((u8 *)temp_s0 + 0x1C)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0 + 0x1C)) + ((*(f32 *)((u8 *)temp_s0 + 0x28)) * D_800BE9A4));
     (*(f32 *)((u8 *)temp_s0 + 0x20)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0 + 0x20)) + ((*(f32 *)((u8 *)temp_s0 + 0x2C)) * D_800BE9A4));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_100170/ambient_sine_colour_update.s")
-#endif

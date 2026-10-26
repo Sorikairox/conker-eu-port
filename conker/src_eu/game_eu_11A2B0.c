@@ -38,7 +38,6 @@ void fx_area_emitter_update(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 /* was func_150ECC30 */
@@ -169,9 +168,6 @@ void fx_point_particle_emitter_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11A2B0/fx_point_particle_emitter_update.s")
-#endif
 /* was func_150ECFE8 */
 void obj_tint_fx_spawn(u8 *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, u8 arg7, s32 arg8) {
     struct {
@@ -231,7 +227,6 @@ void obj_hit_green_tint(s32 arg0, u8 arg1, s32 arg2) {
     obj_tint_fx_spawn((u8 *)arg0, 0, 0xFF, 0, 0xFF, 4, -1, arg1, arg2);
 }
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
 void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
 extern f32 D_80088E70; /* current tint r, g, b */
@@ -322,6 +317,3 @@ void camera_update_map_tint(u8 *obj) {
     event_dispatch_alt(1, 0x30F4, 0x12, (u8) TINT_F2U(D_80088E74));
     event_dispatch_alt(1, 0x30F5, 0x12, (u8) TINT_F2U(D_80088E78));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11A2B0/camera_update_map_tint.s")
-#endif

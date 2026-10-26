@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
 void math_spring_approach(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 extern f32 D_80088C60; // tint red, green, blue (current)
@@ -59,11 +58,7 @@ void player_tint_update(u8 *obj) {
     event_dispatch_alt(1, 0x30F9, 0x12, (u32) D_80088C64 & 0xFF);
     event_dispatch_alt(1, 0x30F8, 0x12, (u32) D_80088C68 & 0xFF);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE5E0/player_tint_update.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 D_80088C30;
 extern s32 D_80088C34;
 extern s32 D_80088C38;
@@ -106,11 +101,7 @@ void level_item_flags_update(s32 arg0) {
         player_hit_reaction(D_800CC2D0, 6);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE5E0/level_item_flags_update.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 bone_emitter_spawn(u8 *, s32);
 
 /* was func_150D15F4 */
@@ -168,9 +159,6 @@ void bone_spark_emitter_spawn(u8 *arg0, s32 arg1) {
     sp.u50 = 0.35085f;
     bone_emitter_spawn(&sp.u1C, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE5E0/bone_spark_emitter_spawn.s")
-#endif
 extern f32 D_800A0C64;
 
 /* was func_150D16C4 */
@@ -179,11 +167,7 @@ s32 bone_spark_emitter_init(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 s32 impact_tinted_particle_spawn(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s16 arg7, u8 arg8, s16 arg9, s16 argA, u8 argB, u8 argC, s32 argD);
-#else
-s32 impact_tinted_particle_spawn(s32, f32 *, f32 *, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
-#endif
 
 extern f32 D_800A0C68, D_800A0C6C, D_800A0C70, D_800A0C74;
 /* was func_150D1714 */

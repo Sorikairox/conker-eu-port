@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void emit_sparks_by_angles(u8 *arg0, s32 arg1, s32 arg2);
 extern s32 D_80088AD4[2]; /* break sound ids */
 extern s32 D_80088ADC;    /* bounce sound id */
@@ -204,11 +203,7 @@ s32 projectile_bounce_update(u8 *obj, f32 x, f32 y, f32 z, f32 w, u8 *ext) {
                   1000, 4000);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/projectile_bounce_update.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 trigger_point_in_kind3(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
 s32 prop_is_flagged(s32);
@@ -406,11 +401,7 @@ s32 projectile_wall_hit(u8 *obj, u8 *hit, f32 x, f32 y, f32 z) {
                   *(f32 *) (obj + 0x40), 1000, 4000);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/projectile_wall_hit.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_150B9A40 */
 s32 fx_rise_grow_update(u8 *arg0) {
     f32 *temp_v0;
@@ -430,9 +421,6 @@ s32 fx_rise_grow_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/fx_rise_grow_update.s")
-#endif
 /* was func_150B9ADC */
 s32 fx_fade_in_alpha_update(u8 *arg0) {
     s16 temp_v0 = *(s16 *)(arg0 + 0x1C);
@@ -451,7 +439,6 @@ s32 fx_fade_in_28_update(struct102 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 s32 collision_floor_probe(f32 *, s32, f32, f32 *);
 void emit_sparks_by_angles(u8 *arg0, s32 arg1, s32 arg2);
 extern s32 D_80088AE0;    /* landing sound id */
@@ -690,22 +677,12 @@ s32 thrown_object_land_check(u8 *obj) {
     *(f32 *) (obj + 0x28) += D_800A01D0_c[0] * (tgt[2] - *(f32 *) (obj + 0x28));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/thrown_object_land_check.s")
-#endif
 
-#ifdef NON_MATCHING /* P209: void, the caller ignores v0 */
+/* P209: void, the caller ignores v0 */
 void mtx_look_along_scaled(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
-#else
-s32 mtx_look_along_scaled(s32, s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
-#endif
 /* was func_150BA1F4 */
 s32 fx_build_look_matrix(s32 arg0, u8 *arg1) {
-#ifdef NON_MATCHING
     mtx_look_along_scaled(arg0, *(f32 *)(arg1 + 0x18), *(f32 *)(arg1 + 0x1C), *(f32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28));
-#else
-    mtx_look_along_scaled(arg0, *(s32 *)(arg1 + 0x18), *(s32 *)(arg1 + 0x1C), *(s32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28));
-#endif
     return 1;
 }
 

@@ -30,7 +30,6 @@ typedef struct {
 } S2700;
 s32 emit_dust_by_angles(S2700 *, f32 *, s32, u8, s32);
 
-#ifdef NON_MATCHING
 void emit_sparks_by_angles(u8 *arg0, s32 arg1, s32 arg2);
 
 /* emit_sparks_by_angles's smoke spec (layout as smoke_column_spawn_far's) */
@@ -166,10 +165,6 @@ void smoke_columns_spawn(u8 flag) {
     t.u34 = 848.0f;
     emit_dust_by_angles(&t, &t.u8, 0, flag, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/smoke_columns_spawn.s")
-#endif
-#ifdef NON_MATCHING
 
 /* was func_150C2290 */
 void smoke_column_spawn_far(s32 arg0) {
@@ -269,9 +264,6 @@ void smoke_column_spawn_far(s32 arg0) {
     sp.u30 = 1.0f;
     emit_sparks_by_angles(&sp.u18, arg0 & 0xFF, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/smoke_column_spawn_far.s")
-#endif
 // TODO: figure out this struct!
 // void smoke_column_spawn_far(s32 arg0) {
 //     s16 sp9A;
@@ -389,7 +381,6 @@ s32 sprite_fade_in_alpha_b(struct_eu_sprite *arg0) {
     }
     return 1;
 }
-#ifdef NON_MATCHING
 /* P243: readable C for emit_point_smoke (game_EF410, 106 insns). */
 // emit_point_smoke: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a,
 // s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`): queues one emit_sparks_by_angles smoke puff (owner byte argB,
@@ -471,9 +462,6 @@ s32 emit_point_smoke(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z
     emit_sparks_by_angles((u8 *) &sm, argB & 0xFF, 1);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/emit_point_smoke.s")
-#endif
 
 /* was func_150C2700 */
 s32 fx_blast_spawn_preset(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
@@ -621,7 +609,6 @@ void fx_ring_particle_spawn(u8 *arg0)
   spark_spawn_from_desc(&sp.u3C, 0xA, 1, 0, arg0[0xC], arg0[1]);
   *((s16 *) (arg0 + 0xE)) = (random_int() % 51U) + 0x19;
 }
-#ifdef NON_MATCHING
 void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
 s32 memcpy(s32, f32 *, s32);
 
@@ -719,9 +706,6 @@ void fx_distant_burst_update(u8 *arg0) {
         } while (*temp_s0 > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/fx_distant_burst_update.s")
-#endif
 /* was func_150C2FCC */
 s32 smoke_puff_shrink_rise(struct_eu_EF410_b *arg0) {
     arg0->unk2C -= arg0->unk2C * arg0->unk150;
@@ -806,7 +790,6 @@ Gfx *obj_timer_scroll_tex_dl(Gfx *gfx, struct_eu_EF410_c *arg1) {
     gDPSetTileSize(gfx++, 4, v, t, 0x1FE, 0x3E);
     return gfx;
 }
-#ifdef NON_MATCHING
 void obj_update_ground_tilt(struct127 *);
 void obj_apply_gravity(struct127 *);
 void obj_sync_anim_frame(struct127 *, struct127 *);
@@ -900,10 +883,6 @@ void carried_object_update(struct127 *obj) {
     obj_effect_run_handler(obj, D_800BE616 ? 0xB : 0xE, &msg);
     obj_remove(obj, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/carried_object_update.s")
-#endif
-#ifdef NON_MATCHING
 void move_xz_towards(f32, f32, f32, f32 *, f32 *);
 f32 obj_approach_speed(f32, struct127 *, f32, f32, u8);
 u8 obj_turn_towards(struct127 *, u8, u16);
@@ -1016,10 +995,6 @@ void rolling_object_update(struct127 *obj) {
         actor_sound_stop(obj);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/rolling_object_update.s")
-#endif
-#ifdef NON_MATCHING
 void afterimage_start(struct127 *, s32, s32);
 s32 spawn_ring_kind2_small(f32, f32, f32, s32);
 void bomb_explode(struct127 *);
@@ -1078,9 +1053,6 @@ void bouncing_bomb_update(struct127 *obj) {
         obj_remove(obj, 1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/bouncing_bomb_update.s")
-#endif
 
 /* was func_150C3D48 */
 s32 checksum_key_offset(s32 arg0) {
@@ -1090,18 +1062,12 @@ s32 checksum_key_offset(s32 arg0) {
 s32 particle_emitter_node_spawn(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 particle_burst_random_spawn(s32, s32, s32, s32, f32, s32, s32);
 void debris_cloud_spawn(s32, s32, f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, s32);
-#ifdef NON_MATCHING // the definition is void (P284)
+// the definition is void (P284)
 void spark_sprite_burst_spawn(s32, s32, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-#else
-s32 spark_sprite_burst_spawn(s32, s32, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-#endif
 s32 checksum_key_offset(s32 arg0);
 s32 game_os_pi_read_io(u32, u32 *);
-#ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
+// the definition is void (asm: v0 is not a result); one signature for wasm
 void heap_free(s32);
-#else
-s32 heap_free(s32);
-#endif
 
 /* was func_150C3D5C */
 void bomb_explode(struct127 *arg0) {

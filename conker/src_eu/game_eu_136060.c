@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
 s32 memcpy(s32, f32 *, s32);
@@ -137,10 +136,6 @@ void area_sparkle_emitter_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s0 + 0)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_136060/area_sparkle_emitter_update.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_800A2830;
 extern f32 D_800A2834;
 /* was func_15108BD8 */
@@ -194,9 +189,6 @@ s32 area_sparkle_update(u8 *arg0, s32 arg1) {
 block_19:
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_136060/area_sparkle_update.s")
-#endif
 /* was func_15108D7C */
 void area_sparkle_emitter_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
     struct212 *temp_v0 = (struct212 *)(arg0 + 0x28);

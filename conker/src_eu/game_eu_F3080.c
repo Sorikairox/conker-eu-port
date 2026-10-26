@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 f32 vec3_length(f32 *);
 s32 memcpy(u8 *, s32, s32);
 
@@ -31,9 +30,6 @@ u8 *beam_spawn(s32 arg0, s32 arg1) {
     (*(s32 *)((u8 *)sp.u2C + 0x14)) = 0;
     return sp.u2C;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F3080/beam_spawn.s")
-#endif
 /* was func_150C5930 */
 void beam_retire(struct102 *arg0) {
     node_retire(arg0);
@@ -82,7 +78,6 @@ void beam_detach_free(struct102 *arg0) {
     beam_free(arg0);
 }
 
-#ifdef NON_MATCHING
 extern s32 (*D_80088B00[])(u8 *); /* motion handlers (beam_follow_obj_pos, beam_follow_obj_point) (index obj +0x30, -1 = none); 0 = remove the object */
 
 /* object_motion_step: for an active object (flag word +0x10 bit 0), runs its motion handler D_80088B00[+0x30] (if
@@ -119,11 +114,7 @@ void beam_motion_tick(struct102 *obj) {
         node_destroy(obj);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F3080/beam_motion_tick.s")
-#endif
 
-#ifdef NON_MATCHING
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 s32 gfx_prim_color_cached(s32, s32, s32, s16, s32, s32, s32, s8 *);
 s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
@@ -231,9 +222,6 @@ u8 *beam_quad_draw(u8 *gdl, u8 *obj, s16 view) {
     g[5] = 0;
     return gdl + 0x18;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F3080/beam_quad_draw.s")
-#endif
 
 /* was func_150C6088 */
 s32 beam_follow_obj_pos(u8 *arg0) {

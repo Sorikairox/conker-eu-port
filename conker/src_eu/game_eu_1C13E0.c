@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 emit_burst_from_spec_b(void *, u8, s32); /* P98: asm reads a0 = sp+0x20 block, a1 & 0xFF, a2 */
 
 /* was func_15193660 */
@@ -98,9 +97,6 @@ void obj_head_particle_burst(u8 *arg0, u8 arg1, s32 arg2) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C13E0/obj_head_particle_burst.s")
-#endif
 typedef struct {
     u8 u0;
     u8 *u4;
@@ -160,7 +156,6 @@ s32 bone_debris_emitter_init(struct102 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 s32 anim_model_fx_spawn_moving(s8 *, f32 *, s32, f32, s32, s32, s32, s32, s32);
 s32 motion_track_get_delta(u8 *, u8 **, u8 *);
 
@@ -296,6 +291,3 @@ void bone_debris_emit(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C13E0/bone_debris_emit.s")
-#endif

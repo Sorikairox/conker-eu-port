@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 screen_fade_alpha(s32);
 s32 hud_lens_is_off(s32);
 extern u8 D_800C35EA;
@@ -52,9 +51,6 @@ void fb_fx_apply_all(u16 *fb) {
         D_800DD5C0--;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18DB20/fb_fx_apply_all.s")
-#endif
 
 /* was func_151604E4 */
 u8 *fb_fx_spawn(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {

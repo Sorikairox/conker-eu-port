@@ -45,7 +45,6 @@ s32 rom_dma_read(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
 void n_csp_set_seq(N_ALCSPlayer *csp, ALCSeq *seq);
 
 // this one is a monster
-#ifdef NON_MATCHING
 // Audio init: audio heap, synth + audio manager (audio_mgr_init), the instrument bank, the sequence
 // table (sizes rounded up to even into D_8003CCB0), three sequence players and the sound player.
 typedef struct {
@@ -174,9 +173,6 @@ void audio_system_init(void) {
     audio_set_bus_mix_type(0, 2);
     audio_set_bus_mix_type(1, 2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8180/audio_system_init.s")
-#endif
 /* was func_100084D8 */
 void music_player_play(u8 idx) {
     if ((n_alCSPGetState(D_8003C900[idx]) == 0) || (n_alCSPGetState(D_8003C900[idx]) == 3)) {

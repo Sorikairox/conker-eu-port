@@ -30,7 +30,6 @@ void level_tex_scroll_create(void) {
     tex_scroll_create(D_80091B68, 0, 0xAD, 0x75);
 }
 
-#ifdef NON_MATCHING
 s32 memcpy(u8 *, f32 *, s32);
 extern s32 D_8009068C;
 extern s32 D_800B1214;
@@ -63,6 +62,3 @@ void level_tex_scroll_fx_setup(void) {
         memcpy(temp_v0_2 + 0x28, &sp.u38, 8);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3D5F0/level_tex_scroll_fx_setup.s")
-#endif

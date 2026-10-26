@@ -58,7 +58,6 @@ void scroll_banner_update(Obj2D0C *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 texture_cache_lookup(s32 *, s32, s32, s32);
 extern s32 D_A4A;
 
@@ -154,6 +153,3 @@ u8 *scroll_banner_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     }
     return var_s0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_200480/scroll_banner_draw.s")
-#endif

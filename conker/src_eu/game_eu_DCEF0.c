@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_8009FB60[];
-#endif
 
 u8 *world_record_find(u8);
 
@@ -33,7 +32,6 @@ void ground_fx_spawn_at_span(s32 arg0, s16 *arg1) {
     ground_fx_spawn_random(arg0, (f32)(arg1[4] + arg1[1]), (f32)arg1[1], arg1);
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 s32 memcpy(s32, s8 *, s32);
 
@@ -165,10 +163,6 @@ void smoke_emitter_update_small(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/smoke_emitter_update_small.s")
-#endif
-#ifdef NON_MATCHING
 // P230 (implicit_scan): vec_damp_xyz_per_tick takes (f32 *, f32); the matching C below calls it without a prototype and
 // passes the f32's bit pattern as an int (lands in a1 either way on N64, wrong type on the port).
 void particle_update_wobble_offset(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3);
@@ -181,15 +175,6 @@ s32 particle_wobble_damp_update(u8 *arg0, s32 arg1) {
     vec_damp_xyz_per_tick((f32 *)(arg0 + 0x58), *(f32 *)(p + 0xC));
     return 1;
 }
-#else
-s32 particle_wobble_damp_update(u8 *arg0, s32 arg1) {
-    u8 *p = arg0 + 0xA8;
-
-    particle_update_wobble_offset(arg0, arg0 + 0xAC, p, arg0 + 0xAA);
-    vec_damp_xyz_per_tick(arg0 + 0x58, *(s32 *)(p + 0xC));
-    return 1;
-}
-#endif
 
 u8 * fb_fx_spawn(void *arg0, s32 arg1, u8 arg2, s32 arg3);
 
@@ -218,7 +203,6 @@ void fb_fx_gray_callback(s32 arg0, s32 arg1) {
     framebuffer_green_to_gray((u16 *)arg1, (u16 *)(arg1 + 0x1ECC0));
 }
 
-#ifdef NON_MATCHING
 s32 sprite2d_spawn(f32 *, s32, s32, s32, s32, s32, s32);
 u8 impact_puff_tex_kind0(void);
 
@@ -407,9 +391,6 @@ void sprite_emitter_update(u8 *arg0) {
         (*(s16 *)((u8 *)sp34 + 2)) = (s16) ((random_int() % 11U) + 3);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/sprite_emitter_update.s")
-#endif
 /* was func_150B00D4 */
 s32 fx_bob_update(u8 *arg0) {
     u8 *v = arg0 + 0x70;
@@ -443,7 +424,6 @@ void nodes_destroy_for_player(void) {
     D_800DD5C0--;
 }
 
-#ifdef NON_MATCHING
 s32 beam_effect_spawn(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                   s32, f32, f32, f32, f32, f32, f32);
 void beam_effect_spawn_attached(s32 arg0, u8 arg1, s16 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9,
@@ -483,9 +463,6 @@ void player_joint_beam_spawn(s32 side) {
     beam_effect_spawn_attached((s32)D_800D154C, D_800D154C->unique_id, (s16)joint, -1, 0.0f, 0.0f, -39.0f, 0.0f, 0.0f, -150.0f, 3, 0xFF,
                   4, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/player_joint_beam_spawn.s")
-#endif
 
 /* was func_150B051C */
 void world_pair_hit_player_level(s32 arg0) {
@@ -497,7 +474,6 @@ void world_pair_hit_player_level(s32 arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 vec3_normalize_len(f32 *, f32 *, s32 *, s32 *);
 void vec3_to_yaw_pitch_deg(f32 *, f32 *, f32 *);
 u8 *mdl_particle_spawn_ex(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extraSize, u8 arg5, s32 owner);
@@ -611,9 +587,6 @@ void beam_trail_spawn(f32 *from, f32 *to, u8 alpha, s32 arg3) {
     src = trail;
     *(u8 **)(trail + 0x170) = obj_attached_glow_spawn(&src, 1, 8, alpha, arg3);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/beam_trail_spawn.s")
-#endif
 
 /* was func_150B07A0 */
 void beam_trail_free_extra(struct102 **arg0) {
@@ -634,7 +607,6 @@ void beam_trail_die_free(u8 *arg0) {
     mdl_particle_die_free(arg0);
 }
 
-#ifdef NON_MATCHING
 void emit_particle_burst_req(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 D_8009FB74;
 
@@ -776,9 +748,6 @@ void obj_impact_burst_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u64 = 9.687f;
     emit_textured_burst(&sp.u2C, ((u8 *)&D_8009FB60), &D_8009FB74, 5, 65.0f, 0U, (u8) (s32) arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/obj_impact_burst_spawn.s")
-#endif
 /* was func_150B0AEC */
 s32 world_record_anchor_init(u8 arg0, u8 *arg1) {
     u8 *temp_v0;

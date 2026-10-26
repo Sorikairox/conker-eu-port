@@ -4,7 +4,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void game_gu_ortho(void *, float, float, float, float, float, float, float);
 
 /* was func_15012370 */
@@ -27,9 +26,6 @@ void camera_init_player_projections(void) {
         } while (D_80082FA0 >= temp_t0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3F820/camera_init_player_projections.s")
-#endif
 // void camera_init_player_projections(void) {
 //     f32 temp_f0;
 //     f32 temp_f2;
@@ -50,7 +46,6 @@ void fx_alloc_d88750(void) {
     D_80088750 = timed_queue_create(4, 300, 0);
 }
 
-#ifdef NON_MATCHING
 void *memcpy(void *, const void *, unsigned int);
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 typedef struct {
@@ -118,6 +113,3 @@ void pipe_spray_points_init(void) {
         memcpy((u8 *) fx + 0x28, &params, 6);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3F820/pipe_spray_points_init.s")
-#endif

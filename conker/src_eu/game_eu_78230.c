@@ -2,17 +2,15 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 *D_800CC6A4;
 s32 obj_half_rate_tick(struct127 *);
 void walk_select_move_anim(struct127 *arg0, s32 arg1, f32 arg2);
-#endif
 
 
 f32 obj_carry_release(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 s32 obj_carry_pickup(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 
-#ifdef NON_MATCHING
 /* P38: per-frame object update (UNVERIFIED parts: see P38.md) */
 void obj_sync_collision_link(struct127 *, s32, s32);
 void objects_animate_textures(void);
@@ -228,9 +226,6 @@ block_64:
     D_800C3E78 = 0;
     D_800D39FC = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/objects_run_state_handlers.s")
-#endif
 // void objects_run_state_handlers(void) {
 //     u8 sp5C[6];
 //     f32 temp_f0;
@@ -442,7 +437,6 @@ block_64:
 //     D_800D35DC = (u8)0;
 // }
 
-#ifdef NON_MATCHING
 /* Per-frame pass over the 25 object records outside cutscenes (D_800C35EA != 1): sets the current object
  * (D_800C3E78 index, D_800D154C pointer), its controller (D_800CC6A4: pad i of D_800BE728 for the first four
  * players, a zeroed 6-byte pad otherwise; only for i < D_8008FD8C) and runs tank_mark_driver_view for objects 0x28 / 0x77.
@@ -476,9 +470,6 @@ void objects_update_tank_views(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/objects_update_tank_views.s")
-#endif
 // NON-MATCHING: whats up with sp48
 // void objects_update_tank_views(void) {
 //     struct127 *tmp;
@@ -517,7 +508,6 @@ s32 obj_coll_link_resolve_stub(s32 arg0, s32 arg1) {
 }
 
 // bleurgh
-#ifdef NON_MATCHING
 // P45: carried-object link of a record. +0x92 = (kind << 12) | index (bit 15 = only with arg1). Kind 0: resolve
 // through obj_coll_link_resolve_stub. Kind 3 (an entry of D_800DBEF4, 0xA0 bytes each): arg2 releases it (+0x4E = 0, link
 // cleared); else +0x4E = record index + 100 (arg1: 0 instead) and, without arg1, the entry follows the record
@@ -568,10 +558,6 @@ void obj_sync_collision_link(struct127 *rec, s32 arg1, s32 arg2) {
     *(s16 *)((u8 *)D_800DBEF4 + (u32)sp28 * 0xA0 + 0x12) = (s32)(*(f32 *)(arg0 + 0x18) + (f32)*(s16 *)(arg0 + 0x90));
     *(s16 *)((u8 *)D_800DBEF4 + (u32)sp28 * 0xA0 + 0x14) = (s32)*(f32 *)(arg0 + 0x1C);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/obj_sync_collision_link.s")
-#endif
-#ifdef NON_MATCHING
 /* P191 */
 void obj_sfx_play(s32, struct127 *);
 s32 player_hit_reaction(struct127 *, s32);
@@ -828,10 +814,6 @@ f32 swim_water_physics(struct127 *p, f32 dt) {
 #undef SWIM_AIR
 #undef SWIM_ANIM
 #undef SWIM_ST
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/swim_water_physics.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1504BA38 */
 void obj_calc_surface_lean(struct127 *arg0) {
     s8 temp_a1;
@@ -854,9 +836,6 @@ void obj_calc_surface_lean(struct127 *arg0) {
     }
     arg0->unkCE = (s16) (s32) ((f32) temp_v0 * 0.1f * ((f32) (*(s8 *)((u8 *)temp_v1 + 0)) - arg0->xz_velocity));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/obj_calc_surface_lean.s")
-#endif
 // NON-MATCHING: starts to fall apart towards the end
 // void obj_calc_surface_lean(struct127 *arg0) {
 //     s8 temp_a1;
@@ -993,7 +972,6 @@ void ctl_tick_timers(struct127 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 extern u8 *D_800CC6A4;
 extern u16 D_800CC6D2;
 extern f32 D_800CC6D4;
@@ -1061,9 +1039,6 @@ void walk_idle_variation(u8 *arg0, u16 *arg1, f32 *arg2, s8 *arg3) {
         (*(s8 *)((u8 *)arg0 + 0x276)) = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/walk_idle_variation.s")
-#endif
 /* was func_1504C078 */
 s32 walk_anim_cancel_special(void) {
     if (D_800D154C->unk31C->unk58 != 1) {
@@ -1081,7 +1056,6 @@ s32 walk_anim_land_id(void) {
     return 27;
 }
 
-#ifdef NON_MATCHING
 s32 player_move_animation(struct127 *, f32, f32, s32, f32);
 extern u8 D_800CC69C;
 extern u8 D_800CC6D1;
@@ -1250,9 +1224,6 @@ block_79:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/walk_select_move_anim.s")
-#endif
 /* was func_1504C854 */
 void ctl_decay_button_latches(struct127 *arg0) {
     D_800CC288 = arg0->unk31C->unk8C;
@@ -1358,7 +1329,6 @@ void obj_float_bob_setup(struct127 *arg0) {
     obj_set_gravity_band(arg0, var_f2, 3.8f, var_f2, -3.5f, 80.0f, -var_f12);
     arg0->unk80 = 1;
 }
-#ifdef NON_MATCHING
 u16 math_atan2_u16(f32, f32, s32);
 f32 fast_sinf(f32);
 void obj_stun_update(struct127 *); /* P209: the asm reads only a0 and returns nothing */
@@ -3156,10 +3126,6 @@ block_593:
     }
     arg0->unk31C->unk88 = (s16) sp190;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/obj_state_walk.s")
-#endif
-#ifdef NON_MATCHING
 /* P179 */
 void floor_slope_direction(s32 arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, f32 *arg5, f32 *arg6);
 void move_xz_towards(f32, f32, f32, f32 *, f32 *);
@@ -3249,10 +3215,6 @@ void obj_floor_push_turn(u8 *obj) {
     }
     move_xz_towards(-fx, -fz, strength, (f32 *) (obj + 0x164), (f32 *) (obj + 0x168));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/obj_floor_push_turn.s")
-#endif
-#ifdef NON_MATCHING
 s32 player_face_track_side(s32, struct127 *);
 void floor_slope_direction(s32 arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, f32 *arg5, f32 *arg6);
 extern f32 D_80099490[];
@@ -3501,10 +3463,6 @@ void walk_ground_slide_push(struct127 *rec, f32 x, f32 z, u16 angle) {
     }
     rec->unkC4 = rec->unkC4 + (dx - rec->unkC4) * rate;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/walk_ground_slide_push.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1505210C */
 f32 obj_slope_to_pitch_roll(u8 *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4) {
     f32 sp34;
@@ -3547,9 +3505,6 @@ f32 obj_slope_to_pitch_roll(u8 *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4) {
     *arg3 = var_f20;
     return var_f22;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/obj_slope_to_pitch_roll.s")
-#endif
 void obj_apply_gravity(struct127 *);
 
 /* was func_15052260 */
@@ -3658,14 +3613,9 @@ s32 obj_check_death(struct127 *arg0);
 void cutscene_actor_apply_track(struct127 *, s32, s32);
 s32 cutscene_obj_takes_part(struct127 *);
 void menu_object_update(struct127 *);
-#ifdef NON_MATCHING /* P209: both read only a0 and return nothing */
+/* P209: both read only a0 and return nothing */
 void obj_carried_update(struct127 *);
 void obj_stun_update(struct127 *);
-#else
-s32 obj_carried_update(struct127 *);
-void obj_walk_update(struct127 *);
-s32 obj_stun_update(struct127 *, s32);
-#endif
 s32 obj_find_carrier(struct127 *);
 s32 particle_emitter_preset_spawn(u8, s32, s32, s32, s32, s32);
 extern u8 D_800C3A78;
@@ -3688,11 +3638,7 @@ void obj_state_common_update(struct127 *arg0) {
         if (arg0->stunned == 0) {
             obj_walk_update(arg0);
         } else if (arg0->unk13D == 0) {
-#ifdef NON_MATCHING
             obj_stun_update(arg0);
-#else
-            obj_stun_update(arg0, 0x3D4CCCCD);
-#endif
         }
         arg0->unk40 = (f32) (s16) (arg0->unk7A + 0x4000) * 0.005493164f;
         obj_physics_step(arg0);
@@ -3712,7 +3658,6 @@ void obj_state_common_update(struct127 *arg0) {
         }
     }
 }
-#ifdef NON_MATCHING
 extern f32 D_80099700;
 extern f32 D_80099704;
 /* was func_15052760 */
@@ -3750,10 +3695,6 @@ void obj_lean_into_turn(struct127 *arg0, u16 arg1) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/obj_lean_into_turn.s")
-#endif
-#ifdef NON_MATCHING
 u16 math_atan2_u16(f32, f32, s32);
 void obj_set_gravity_band(struct127 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 void obj_physics_step(struct127 *arg0);
@@ -3908,9 +3849,6 @@ void obj_state_float_on_water(struct127 *arg0) {
 }
 #undef OBJ_F32
 #undef PLAYER
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/obj_state_float_on_water.s")
-#endif
 
 /* was func_15052EF0 */
 void obj_state_reset_idle(struct127 *arg0) {
@@ -3930,7 +3868,6 @@ struct127 *obj_reset_link_state(s32 arg0, s32 arg1) {
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 /* P128 */
 u8 *attachment_find_first_of_owner(u8 *arg0);
 
@@ -4022,9 +3959,6 @@ f32 obj_carry_release(struct127 *obj, f32 height, s32 anim, s32 flags, s32 reset
     }
     return 0.0f;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/obj_carry_release.s")
-#endif
 // NON-MATCHING: plenty still to do here
 // void obj_carry_release(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9) {
 //     s32 sp40;
@@ -4126,7 +4060,6 @@ f32 obj_carry_release(struct127 *obj, f32 height, s32 anim, s32 flags, s32 reset
 // }
 
 
-#ifdef NON_MATCHING
 /* P128 */
 // object_launch_player: launches the player record D_800CC2D0[obj->unk124] off object obj (a spring / bounce pad):
 // unless the player is already airborne-locked (disable_run) or stunned, or its state block forbids it (+0x6B), sets
@@ -4166,9 +4099,6 @@ s32 obj_carry_pickup(struct127 *obj, f32 vy, f32 gravity, s32 timer, s32 point) 
     D_800CC2D0[obj->unk124].unk31C->unk27 = 1;
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/obj_carry_pickup.s")
-#endif
 // NON-MATCHING: plenty still to do here
 // void obj_carry_pickup(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4) {
 //     // s32 sp44;
@@ -4203,12 +4133,7 @@ s32 obj_carry_pickup(struct127 *obj, f32 vy, f32 gravity, s32 timer, s32 point) 
 //     }
 // }
 
-#ifdef NON_MATCHING
 s32 obj_death_resolve(struct127 *);   /* P77: the asm reads a0 (the object) */
-#else
-s32 obj_death_resolve(void);
-#endif
-#ifdef NON_MATCHING
 /* P136 */
 s32 object_destroy_effects(struct127 *);
 void obj_set_timed_remove(struct127 *, s32);
@@ -4269,9 +4194,6 @@ s32 obj_death_resolve(struct127 *obj) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/obj_death_resolve.s")
-#endif
 
 /* was func_150535F4 */
 s32 obj_check_death(struct127 *arg0) {
@@ -4286,11 +4208,7 @@ s32 obj_check_death(struct127 *arg0) {
         if (((tmp & 0x10) != 0) ||
             (((tmp & 8) != 0) && (arg0->unk28 == 0.0f)) ||
             (arg0->unk10F == 0)) {
-#ifdef NON_MATCHING
             return obj_death_resolve(arg0);
-#else
-            return obj_death_resolve();
-#endif
         }
     }
     return 0;
@@ -4353,7 +4271,6 @@ void obj_state_wait_remove(struct127 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 rail_record_index_of();
 struct127 *rail_find_ahead(s32 player, s32 dir, f32 *t, s32 *alt);
 void rail_track_update(s32 player, s32 mode, f32 speed);
@@ -4760,9 +4677,6 @@ void obj_state_rail_follow(struct127 *obj) {
 #undef P38_U8
 #undef P38_U16
 #undef P38_OBJ
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/obj_state_rail_follow.s")
-#endif
 
 /* was func_150548D8 */
 void obj_state_nop2(s32 arg0) {
@@ -4810,7 +4724,6 @@ void obj_release_partner_remove(struct127 *arg0, struct127 *arg1) {
     obj_remove(arg0, 0);
 }
 
-#ifdef NON_MATCHING
 void afterimage_start(struct127 *, s32, s32);
 s32 obj_setup_undo(struct127 *, s32);
 void obj_sync_anim_frame(u8 *, u8 *);
@@ -4953,11 +4866,7 @@ void obj_state_partner_anim(struct127 *obj) {
         obj_glow_post_remove_event((u8 *) partner);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/obj_state_partner_anim.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P125 */
 f32 obj_carry_release(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 s32 obj_carry_pickup(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
@@ -5020,9 +4929,6 @@ void menu_object_update(struct127 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/menu_object_update.s")
-#endif
 // void menu_object_update(struct127 *arg0) {
 //     s16 phi_v1;
 //
@@ -5079,7 +4985,6 @@ void obj_attach_stuck_projectile(s32 arg0, s32 arg1, s32 arg2) {
     attachment_spawn_at_joint(arg0, arg1, 0x4D, arg2, 0, 0);
 }
 
-#ifdef NON_MATCHING
 /* P155 */
 s32 obj_find_reach_hit(s32 arg0, f32 arg1, f32 arg2, u8 **arg3, s32 arg4, s32 arg5);
 void spark_spawn_random(f32 *arg0, u8 arg1, s32 arg2);
@@ -5243,9 +5148,6 @@ void obj_state_projectile(struct127 *obj) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/obj_state_projectile.s")
-#endif
 // NON-MATCHING: 80% there
 // void obj_state_projectile(struct127 *arg0) {
 //     f32 sp84;

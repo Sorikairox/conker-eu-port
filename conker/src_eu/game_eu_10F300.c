@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void mtxf_look_at_f(f32 mf[4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
 // line_of_sight_hit_object: looks from (x0, y0, z0) towards (x1, y1, z1) and finds the live object (D_800CC2D0,
 // except index `skip`, dead or immune ones and `self`'s own slot unk124 - 1) that math_mtx_box_in_frustum rates lowest
@@ -52,6 +51,3 @@ s32 object_ray_hit_nearest(struct127 *self, f32 x0, f32 y0, f32 z0, f32 x1, f32 
     }
     return ret;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F300/object_ray_hit_nearest.s")
-#endif

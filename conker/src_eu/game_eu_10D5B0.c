@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* was func_150DFDA0 */
 void camera_update_water_mode(struct108 *arg0) {
     s32 temp_t1;
@@ -29,6 +28,3 @@ void camera_update_water_mode(struct108 *arg0) {
         camera_apply_zoom_level(arg0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10D5B0/camera_update_water_mode.s")
-#endif

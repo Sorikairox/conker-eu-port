@@ -2,14 +2,12 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void render_group_layer_range(s32 arg0, s32 *arg1, s32 *arg2);
-#endif
 typedef struct { u8 pad0[0xC]; void (*fn0C)(struct_eu_node *); u8 pad10[0xC]; void (*fn)(struct_eu_node *, s32, u8); u8 pad20[0x14]; } Tbl9070;
 extern Tbl9070 D_8008B848[];
 
 
-#ifdef NON_MATCHING
 /* P95: per-frame update hooks: calls the +0x18 function of each of the 101 D_8008B848 entries that has one
  * (no arguments are set up: a0 is the caller's, unused by the hooks as far as known). */
 /* was func_15167010 */
@@ -22,9 +20,6 @@ void node_types_run_frame_hooks(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/node_types_run_frame_hooks.s")
-#endif
 // NON-MATCHING: EU table has 101 entries (D_8008B4A8 = 0x8008B848 in EU); register/loop shape differs
 // void node_types_run_frame_hooks(void) {
 //     void (*func)(void);
@@ -127,7 +122,6 @@ dummy: ; // fakematch: label splits the block (permuter)
         }
     }
 }
-#ifdef NON_MATCHING
 /* The fields of a D_8008B848 render layer (0x34 bytes) that node_render_layers_draw uses. */
 typedef struct {
     u8 pad0[0x8];
@@ -302,9 +296,6 @@ void *node_render_layers_draw(void *arg0, s32 group, s16 arg2, s32 list) {
     return gdl;
 }
 #undef DL_FULL
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/node_render_layers_draw.s")
-#endif
 /* was func_15167A68 */
 void *node_alloc(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5) {
     struct_eu_node *node = (struct_eu_node *)heap_alloc_tagged(arg2, 1, arg3, 0, arg5);
@@ -370,7 +361,6 @@ void node_sprite_quad_update(struct_eu_15167B44 *arg0) {
         node_destroy((struct102 *)arg0);
     }
 }
-#ifdef NON_MATCHING
 Gfx *gfx_load_texture_cached(Gfx *gfx, s32 tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *flag, s32 argA);
 Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 Gfx *sprite_draw_at_world_depth(Gfx *gfx, u8 *quad);
@@ -410,9 +400,6 @@ s32 node_sprite_quad_draw(s32 gdl, u8 *obj, s16 player) {
     gfx = gfx_other_mode_cached(gfx, 0x2C00, (mode[1] | mode[0]) | 4, &flag);
     return (s32)sprite_draw_at_world_depth(gfx, (u8 *)&quad);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/node_sprite_quad_draw.s")
-#endif
 /* was func_15167D84 */
 void *node_spawn_sprite(void *arg0, s32 arg1, s32 arg2, s8 arg3, u8 arg4, s32 arg5) {
     u8 *temp_v0;
@@ -431,7 +418,6 @@ void *node_spawn_sprite(void *arg0, s32 arg1, s32 arg2, s8 arg3, u8 arg4, s32 ar
     temp_v0[0x48] = arg3;
     return temp_v0;
 }
-#ifdef NON_MATCHING
 extern void (*D_8008CD68[])(u8 *);  /* node behaviours, by s8 node +0x2F */
 /* D_8008CDC0 (variables.h: void (*[])(void)): node end handlers void (u8 *), by s8 node +0x48 */
 
@@ -531,10 +517,6 @@ void node_sprite_update(u8 *n) {
         node_destroy((struct102 *)n);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/node_sprite_update.s")
-#endif
-#ifdef NON_MATCHING
 /* P186 */
 Gfx *gfx_load_texture_cached(Gfx *gfx, s32 tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *flag, s32 argA);
 Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
@@ -657,10 +639,6 @@ s32 node_billboard_draw(s32 gdl, u8 *obj, s16 player) {
     gfx = gfx_env_color_cached(gfx, r, g, b, 0, &flag);
     return (s32) sprite_draw_at_world_depth(gfx, (u8 *) &quad);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/node_billboard_draw.s")
-#endif
-#ifdef NON_MATCHING
 /* P125 */
 extern u8 *D_8008CDEC[];
 
@@ -711,9 +689,6 @@ s32 sprite_vtx_quads_init(u8 *rec, s32 r, s32 g, s32 b, s32 a) {
     v[0].v.tc[1] = v[4].v.tc[1] = v[1].v.tc[1] = v[5].v.tc[1];
     return t0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/sprite_vtx_quads_init.s")
-#endif
 /* was func_15168800 */
 void *node_spawn_vtx_sprite(void *arg0, u8 arg1, s32 arg2) {
     u8 *temp_v0 = node_alloc(0xE, arg2, 0xB8, 1, arg1, 1);
@@ -810,7 +785,6 @@ void node_set_type(s32 arg0, s32 arg1) {
     node_list_insert(arg0, arg1);
 }
 
-#ifdef NON_MATCHING
 /* was func_15168B44 */
 void node_fade_delay_update(u8 *arg0) {
     s32 temp_t2;
@@ -837,9 +811,6 @@ void node_fade_delay_update(u8 *arg0) {
     }
     (*(s16 *)((u8 *)arg0 + 0x38)) = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/node_fade_delay_update.s")
-#endif
 /* was func_15168BAC */
 void node_run_end_callback(u8 *arg0) {
     u8 idx = arg0[0xE4];
@@ -902,7 +873,6 @@ void gfx_addr_add_offset(s32 *arg0, s32 arg1) {
         *arg0 = temp_v0 + arg1;
     }
 }
-#ifdef NON_MATCHING
 /* was func_15168E54 */
 void gfx_dl_relocate(s8 *arg0, s32 arg1) {
     s32 var_s0;
@@ -923,9 +893,6 @@ void gfx_dl_relocate(s8 *arg0, s32 arg1) {
         } while (var_v0 != -0x21);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/gfx_dl_relocate.s")
-#endif
 // NON-MATCHING: first cmd load is CSE'd in mine
 // void gfx_dl_relocate(struct_eu_gfxcmd *arg0, s32 arg1) {
 //     s32 i = 0;
@@ -1024,7 +991,6 @@ void node_broadcast_range(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
         }
     }
 }
-#ifdef NON_MATCHING
 /* P136 */
 /*
  * node_lists_update_types: for each of the n type ids in types[] (arg0), walks that type's node lists in both rows of
@@ -1064,9 +1030,6 @@ void node_broadcast_types(void *arg0, s32 n, s32 arg2, u8 arg3) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/node_broadcast_types.s")
-#endif
 void node_free_if_owner_msg(struct102 *arg0, u8 *arg1, u8 arg2);
 /* was func_1516944C */
 void node_broadcast_type(s32 j, s32 arg1, u8 arg2) {

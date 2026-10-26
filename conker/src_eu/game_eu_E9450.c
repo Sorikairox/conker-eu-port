@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 mdl_particle_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 /* was func_150BB760 */
@@ -154,10 +153,6 @@ void obj20_trail_chunk_spawn(u8 *arg0) {
         mdl_particle_spawn(&sp.u7C, 3, 0xFF, 0, 0xFF, 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/obj20_trail_chunk_spawn.s")
-#endif
-#ifdef NON_MATCHING
 /* mdl_particle_spawn particle request (0x7C bytes; same layout as game_eu_E5830's BreakChunk) */
 typedef struct {
     /* 0x00 */ f32 size;
@@ -425,11 +420,7 @@ void object_impact_debris(u8 *obj) {
     sound_play_at(0xAA, 0x6590, 0, 0, 0, *(f32 *) (obj + 0x14), *(f32 *) (obj + 0x18), *(f32 *) (obj + 0x1C), 200,
                   2000);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/object_impact_debris.s")
-#endif
 
-#ifdef NON_MATCHING
 /* object_impact_debris_hard: hard landing / crash effect of a type-0x20 object (object_destroy_effects when its y speed
  * (+0x20) is below -20): 6..9 debris chunks (sprite 1) thrown out within the object's height (+0xE4) around its
  * position, upward speed 0.05 * the y speed, stop at the first failed spawn; 2..5 sparks (impact_spark_spawn, sprites
@@ -617,11 +608,7 @@ void object_impact_debris_hard(u8 *obj) {
         mdl_particle_spawn((s32) &chunk, 3, 0xFF, 0, 0xFF, 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/object_impact_debris_hard.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_150BCBBC */
 void obj20_side_chunks_spawn(u8 *arg0) {
     struct {
@@ -766,9 +753,6 @@ loop_6:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/obj20_side_chunks_spawn.s")
-#endif
 /* P317: D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 are unused, the code is unchanged */
 /* was func_150BD498 */
 s32 debris_floor_settle_bounce(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
@@ -791,7 +775,6 @@ s32 debris_floor_settle_bounce(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4,
     return 1;
 }
 
-#ifdef NON_MATCHING
 s32 mdl_particle_spawn_ex(void *, s32, s32, s32, s32, s32, s32);
 s32 particle_spawn_ex(s32 *, s32, s32, s32, s32, s32);
 void spawn_region_random_point_3d(u8 *node, u8 *pos);
@@ -990,6 +973,3 @@ void blast_debris_and_smoke(u8 arg0, s32 owner) {
     at2[2] = ((s16 *) cyl[0])[2];
     rumble_all_players_at((struct17 *) at2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0, owner);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/blast_debris_and_smoke.s")
-#endif

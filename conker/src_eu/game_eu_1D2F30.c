@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-#ifdef NON_MATCHING
 u8 *gfx_other_mode_cached(u8 *, s32, s32, s8 *);
 
 /* was func_151A5720 */
@@ -142,9 +141,6 @@ block_7:
     (*(s32 *)((u8 *)var_a0 + 4)) = 0;
     gfx_other_mode_cached(var_a0 + 8, 0x2C00, 0x0F0A4004, &sp.uAB);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D2F30/screen_tint_draw_fill.s")
-#endif
 /* was func_151A5B84 */
 void screen_tint_handle_msg(u8 *arg0, s32 arg1, u8 arg2) {
     void (*f)(s32, void *, u8) = D_8008FCA4[arg0[0x19]];

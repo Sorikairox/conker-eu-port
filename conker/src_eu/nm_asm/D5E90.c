@@ -8,7 +8,6 @@
  * box in f0-f2, triangle in f23-f31, plane in f19-f22, outcode masks in v1/a0/t8); here they are static
  * functions with ordinary arguments.
  */
-#ifdef NON_MATCHING
 #include <ultra64.h>
 
 #include "functions.h"
@@ -1697,4 +1696,3 @@ s32 collision_ray_cast(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRe
     }
     return 1;
 }
-#endif

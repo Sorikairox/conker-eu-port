@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void vec3_diff(struct17 *arg0, struct17 *arg1, struct17 *arg2);
 f32 vec3_heading_deg(struct17 *arg0);
 f32 math_angle_diff_deg(f32 arg0, f32 arg1);
@@ -9,10 +9,8 @@ void math_spring_approach(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f3
 void camera_update_eye_orbit(u8 *);
 void camera_update_eye_base(u8 *);
 void camera_update_eye_height(u8 *);
-#endif
 
 
-#ifdef NON_MATCHING
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 f32 sinf(f32);
@@ -140,11 +138,7 @@ void camera_orbit_update(u8 *cam) {
     CAMF(0x370) = sqrtf(dx * dx + dz * dz);
 }
 #undef CAMF
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1501C0/camera_orbit_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P41: camera mode 1 (follow). Unless 0xDC == 4: turn yaw 0x37C by the angle between eye->0x2C8 and eye->at
  * (math_angle_diff_deg of the two headings) times the eased rate 0x8DC (toward 0x8D4: 0 when 0x298 is clear, 0.75 for
  * flag 0x100000 of 0x84 or 180 < 0x390 < 270, else 0.5); 0x39C = 0x37C in radians. Then the eye orbit
@@ -180,6 +174,3 @@ void camera_follow_mode_update(u8 *arg0) {
     camera_update_eye_height(arg0);
     camera_update_eye_base(arg0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1501C0/camera_follow_mode_update.s")
-#endif

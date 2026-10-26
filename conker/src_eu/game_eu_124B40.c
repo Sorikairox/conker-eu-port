@@ -15,7 +15,6 @@ void glow_pair_post_remove_event(u8 *arg0) {
     effect_nodes_broadcast((s32)&tmp, 0x3E);
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 void *memcpy(void *, const void *, s32);
 
@@ -57,9 +56,7 @@ typedef struct {
     u8 u74;           /* 0x74 */
     u8 pad75[3];
 } Rec7364;
-#endif
 
-#ifdef NON_MATCHING
 // object_twin_glow_spawn: creates a type-0x43 object (effect_node_create) for obj and copies a record {obj, obj +0x3B,
 // 0, 0, ..., +0x74 = 0} to its +0x28, then spawns two particle_spawn_ex glow particles (flags 0x4417, life 300, size
 // 1511, sprite 100, mode 0x64C000, the second one red instead of blue in colour[4..7]) and stores them at the
@@ -136,11 +133,7 @@ void *glow_pair_spawn(struct127 *obj) {
     r->fx[1] = particle_spawn_ex((s32) &t, 1, 0, 0, ((u8 *) o)[0xC], ((u8 *) o)[1]);
     return o;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_124B40/glow_pair_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_800A1F84;
 extern f32 D_800A1F88;
 void obj_tint_set_flash(u8 *, s32, s32, s32, s32, s32, s32);
@@ -225,10 +218,6 @@ block_16:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_124B40/glow_pair_update.s")
-#endif
-#ifdef NON_MATCHING
 // linked_obj_event_3e: event handler of an object whose link record sits at +0x28 ({ s32 id, u8 key }): event 0x3E removes the
 // object (node_destroy) when the event's record matches by id or by key; any other event goes to the common
 // handler effect_node_link_message.
@@ -244,9 +233,6 @@ void glow_pair_handle_event(struct102 *obj, u8 *ev, u8 type) {
         effect_node_link_message((s32) ev, type, (s32) link, (s32) (link + 4), (s32) obj);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_124B40/glow_pair_handle_event.s")
-#endif
 
 s32 char_fx_detach_effect(s32, s32);
 /* was func_150F791C */

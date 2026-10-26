@@ -32,7 +32,6 @@ void rail_nodes_load(s32 arg0) {
     rail_bands_build();
 }
 
-#ifdef NON_MATCHING
 extern u8 D_800D2780; /* number of used height bands in D_800D2770 */
 // point_bands_build: groups the D_800D2778 points by band (byte +6, 6 bands) and keeps each band's height range
 // (+2). The used bands go in D_800D2770 (count D_800D2780) and the split heights between consecutive used bands in
@@ -79,9 +78,6 @@ s32 rail_bands_build(void) {
     D_800D2788[i] = 100000.0f;
     return overlap;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_bands_build.s")
-#endif
 
 /* was func_15086218 */
 s32 rail_band_for_height(f32 arg0) {
@@ -93,7 +89,6 @@ s32 rail_band_for_height(f32 arg0) {
     return D_800D2770[i];
 }
 
-#ifdef NON_MATCHING
 extern u8 D_8008763C;            /* node remembered by the last caller (0xFF none), tried first */
 extern s32 D_800D277C;
 f32 rail_wall_hit(f32 x, f32 y, f32 z, f32 dx, f32 dz);
@@ -146,11 +141,7 @@ s32 rail_node_nearest(f32 x, f32 y, f32 z, s32 kind, s32 band) {
     D_800D277C = sqrtf(best);
     return res;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_node_nearest.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 rail_node_in_zone(s32);
 s32 rail_node_nearest(f32, f32, f32, s32, s32);
 s32 trigger_contains_point(u8 *, s32, s32, s32);
@@ -239,11 +230,7 @@ s32 rail_point_pick(f32 x, f32 y, f32 z, s32 count, s32 first, u8 *list, void *s
     }
     return near;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_point_pick.s")
-#endif
 
-#ifdef NON_MATCHING
 f32 rail_node_distance(s32, s32);
 extern u8 D_80087638;
 extern s32 D_800D277C;
@@ -463,11 +450,7 @@ s32 rail_route_next(s32 start, s32 nTargets, s32 nAvoid, u8 *targets, void *avoi
     D_800D277C = total;
     return next;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_route_next.s")
-#endif
 
-#ifdef NON_MATCHING
 // rail_node_distance: straight-line distance between track nodes `a` and `b` of D_800D2778 (0 when either is
 // 0xFF, no node).
 /* was func_15087040 */
@@ -488,9 +471,6 @@ f32 rail_node_distance(s32 a, s32 b) {
     dz = pa[2] - pb[2];
     return sqrtf(dx * dx + dy * dy + dz * dz);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_node_distance.s")
-#endif
 
 /* was func_150870E0 */
 s32 rail_node_in_zone(s32 arg0) {
@@ -522,7 +502,6 @@ s32 rail_node_find_by_tag(s32 arg0) {
     return 0xFF;
 }
 
-#ifdef NON_MATCHING
 // rail_wall_hit: where the move from (x, z) by (dx, dz) first crosses a wall: the type-1 nodes of D_800D2778 in the
 // height band of `y` (node +6 = rail_band_for_height(y)) and their links (+9..+0xD) to higher-numbered type-1 nodes form
 // segments; a segment counts when the move's start and end lie on different sides of its line and the crossing
@@ -599,11 +578,7 @@ f32 rail_wall_hit(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
     }
     return -1.0f;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_wall_hit.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s8 D_800D27C8;
 extern s8 D_800D27B9;
 extern s8 D_800D27BA;
@@ -702,11 +677,7 @@ void rail_records_init(s32 tag, s32 humans, s32 cpus) {
     }
     D_800D27BA = 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_records_init.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s8 D_800D27B0;
 extern f32 D_800D27BC;
 extern f32 D_800D27C0;
@@ -927,11 +898,7 @@ void rail_track_update(s32 player, s32 mode, f32 speed) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_track_update.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s8 D_800D27C9;
 void rail_camera_follow(u8 *rec, u8 *player);
 void rail_camera_spline(u8 *rec, u8 *player, s32 release);
@@ -965,9 +932,6 @@ void rail_cameras_update(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_cameras_update.s")
-#endif
 
 s32 rail_link_pick(u8, u8, s32);
 /* was func_1508823C */
@@ -987,7 +951,6 @@ void rail_record_set_alt(s32 arg0, s32 arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 // obj_yaw_clamp_to_track: keeps the object's yaw (+0x76) within 0x2400 of a quarter turn (+0x4000) past player
 // `player`'s track direction (record D_80087640 + player * 0x84, vector +0x10 / +0xC, math_atan2_u16). Nothing without
 // player records. Returns math_atan2_u16's raw result (the asm leaves v0 unset without records; the one caller
@@ -1015,11 +978,7 @@ s32 obj_yaw_clamp_to_track(u8 player, struct127 *obj) {
     }
     return r;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/obj_yaw_clamp_to_track.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s8 D_800D27C8;
 
 // player_face_track_side: turns the object (+0x76 yaw) a quarter turn (+0x3600 / +0x4A00) from the direction of
@@ -1050,9 +1009,6 @@ s32 player_face_track_side(s32 player, struct127 *obj) {
     }
     return dir;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/player_face_track_side.s")
-#endif
 
 /* was func_15088434 */
 void rail_record_set_player(s32 arg0, s32 arg1) {
@@ -1175,7 +1131,6 @@ s32 rail_record_get_lap(s32 arg0) {
     return temp_a0->unk27;
 }
 
-#ifdef NON_MATCHING
 // player_place_gap: finds the other player whose place (+0x29) is `player`'s place + `delta` and returns the absolute
 // track-progress gap to it (lap +0x24 * 16 + segment +8 * 16) << 8 | its index; 16 when there is none.
 /* was func_15088760 */
@@ -1202,11 +1157,7 @@ s32 player_place_gap(s32 player, s32 delta) {
     }
     return 16;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/player_place_gap.s")
-#endif
 
-#ifdef NON_MATCHING
 // rail_find_ahead: the nearest other racer in front of player `player`'s object along its rail record's track
 // direction (+0xC / +0x10, reversed when `dir` >= 0): among the D_800D27B8 records whose player (+0x31) is not the
 // object's own (obj[0x124] - 1) and, when the record's alt +0x2F is set, with the same alt, the one with the smallest
@@ -1266,9 +1217,6 @@ struct127 *rail_find_ahead(s32 player, s32 dir, f32 *t, s32 *alt) {
     }
     return found;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_find_ahead.s")
-#endif
 
 // K&R: cpu_player_slot_release calls this without the argument.
 s32 rail_record_index_of(arg0)
@@ -1319,7 +1267,6 @@ void rail_record_copy(s32 arg0, s32 arg1)
   }
 }
 
-#ifdef NON_MATCHING
 // cpu_player_slot_claim: takes the first free computer-player slot (bit i of D_800D27B4, i < D_800D27B9), resets
 // its record D_80087640[D_800D27B8 + i] (rail_record_reset), marks it used (+0x30 = 1) for the object record objp
 // (+0x31 = its D_800CC2D0 index) and returns the record index; -1 when none is free or there are no records.
@@ -1345,28 +1292,17 @@ s32 cpu_player_slot_claim(s32 objp, s32 arg1) {
     }
     return -1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/cpu_player_slot_claim.s")
-#endif
 
 s32 rail_record_index_of();
 
-#ifdef NON_MATCHING
 /* The asm never sets a0 before calling rail_record_index_of: the object pointer is this function's own a0,
  * passed through (UNVERIFIED: check the asm callers pass a struct127 *). */
 /* was func_15088BFC */
 void cpu_player_slot_release(struct127 *arg0) {
-#else
-void cpu_player_slot_release(void) {
-#endif
     s32 temp_v0;
 
     if (D_80087640 != NULL) {
-#ifdef NON_MATCHING
         temp_v0 = rail_record_index_of(arg0);
-#else
-        temp_v0 = rail_record_index_of();
-#endif
         D_80087640[temp_v0].unk31 = 0;
         D_800D27B4 &= ~(1 << (temp_v0 - D_800D27B8));
     }
@@ -1407,7 +1343,6 @@ void rail_record_reset(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x10)) = 1.0f;
 }
 
-#ifdef NON_MATCHING
 // rail_link_pick: the next track node after `node` coming from `prev`, among its type-0 links (+9..+0xD of the
 // D_800D2778 node, 0xFF / `prev` skipped): the last link whose band (+0xF) is not the wanted one (1 when `alt` is set,
 // else 2; a band-0 link only when none was found yet), otherwise the last link in the wanted band; 0xFF when none.
@@ -1446,11 +1381,7 @@ s32 rail_link_pick(u8 prev, u8 node, s32 alt) {
     }
     return other;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_link_pick.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s8 D_800D27B0;
 extern s8 D_800D27C8;
 s32 rail_link_pick(u8, u8, s32);
@@ -1555,9 +1486,6 @@ s32 rail_param_step(struct_eu_80087640 *rec, f32 dt) {
     }
     return dir;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_param_step.s")
-#endif
 
 f32 wrap_angle_deg(f32);
 f32 catmull_rom_eval(s32 *, s32, f32);
@@ -1633,7 +1561,6 @@ void rail_record_resync(u8 *arg0)
   }
 }
 
-#ifdef NON_MATCHING
 // rail_spline_points: the four spline control points of a rail record (nodes rec[0x2B..0x2E] of D_800D2778) as
 // separate x / y / z float arrays: each node's position moved by rec->unk0 toward its first type-4 link (x and z only;
 // the node itself when it has none); a missing node (0xFF) gives (i * 64, 0, 0). Returns 4 (the point count; the
@@ -1672,11 +1599,7 @@ s32 rail_spline_points(struct_eu_80087640 *rec, s32 *xs, s32 *ys, s32 *zs) {
     }
     return i;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_spline_points.s")
-#endif
 
-#ifdef NON_MATCHING
 // rail_node_next: the rail node after `node` coming from `prev` (D_800D2778, D_80087630 nodes of 16 bytes: s16 x / y / z,
 // links +9..+0xD (0xFF = none), type +0xE, band +0xF). Takes the links in order, skipping 0xFF and `prev`; a link of
 // type `type` (any type when `type` is 0xFF) and band `band` is returned at once, otherwise the last link of the right
@@ -1708,11 +1631,7 @@ u8 rail_node_next(u8 node, u8 type, u8 prev, u8 band) {
     }
     return last;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_node_next.s")
-#endif
 
-#ifdef NON_MATCHING
 extern u16 D_8009015C;
 void camera_queue_event(u8 *, s32, void *);
 u8 rail_node_next(u8 node, u8 type, u8 prev, u8 band);
@@ -1838,11 +1757,7 @@ void rail_camera_follow(u8 *rec, u8 *player) {
     *(f32 *) (cam + 0x1A0) = 30.0f;
     *(f32 *) (cam + 0x1A8) = 30.0f;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_camera_follow.s")
-#endif
 
-#ifdef NON_MATCHING
 void camera_queue_event(u8 *, s32, void *);
 u8 rail_node_next(u8 node, u8 type, u8 prev, u8 band);
 
@@ -1953,6 +1868,3 @@ void rail_camera_spline(u8 *rec, u8 *player, s32 release) {
     *(f32 *) (rec + 0x78) = 0.0f;
     camera_queue_event(*(u8 **) (player + 0x318), 7, rec + 0x4C);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/rail_camera_spline.s")
-#endif

@@ -17,7 +17,6 @@ void level_fx_spawn_box_b(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 rope_create(s8 *, s32);
 extern s32 D_800966D0;
 extern s32 D_800966E8;
@@ -137,6 +136,3 @@ void level_ropes_setup(void) {
     }
     D_800DD1F0 = var_f10_2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3D190/level_ropes_setup.s")
-#endif

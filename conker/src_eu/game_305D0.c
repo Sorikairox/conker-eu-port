@@ -2,7 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern s32 *D_800B1240;
 extern u8 *D_800B1244;
 u8 *allocate_memory(s32, s32, s32, s32);
@@ -19,11 +19,9 @@ s32 asset_load_with_subfiles(s32 *, s32, s32 *, s32, ...);
 void gfx_dl_relocate_segments(Gfx *, s32, s32);
 s32 texture_resolve_dl_ids(Gfx *, s32, s32, s32, s16 **);
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
-#endif
 
 
 // what is this loop doing?
-#ifdef NON_MATCHING
 /* Relocates a level model's {ptr, ptr, x} table (12-byte entries, ends at ptr0 == 0) by base: the table
  * pointer goes to D_800B1240[idx] (made absolute when non-zero) and its entry count to D_800B1244[idx]. */
 /* was func_15003120 */
@@ -53,10 +51,6 @@ void level_model_relocate_table(s32 idx, s32 base, s32 table) {
     }
     D_800B1244[idx] = n;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_305D0/level_model_relocate_table.s")
-#endif
-#ifdef NON_MATCHING
 /* Level model loader: asset (2, 4, level) is a list of count {model header, size} pairs. Each header's
  * offsets +0 (display list), +8, +0x10 are made absolute, its {ptr, ptr, x} table at +0x20 is relocated by
  * level_model_relocate_table (D_800B1240 / D_800B1244). Parts 0..3 also set D_800B0E00[i] (level DL), D_800B1220[i]
@@ -138,9 +132,6 @@ void level_load_models(s32 level) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_305D0/level_load_models.s")
-#endif
 /* was func_150034B4 */
 s32 texture_table_reset(void) {
       s32 i;
@@ -160,7 +151,6 @@ s32 texture_table_reset(void) {
       }
 }
 
-#ifdef NON_MATCHING
 u8 *allocate_memory(s32, s32, s32, s32);
 void heap_free(s32);
 extern u8 D_1A3B40[];
@@ -191,9 +181,6 @@ void texture_build_size_table(void) {
     } while (out != (s16 *)D_800BC860);
     heap_free((s32)buf);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_305D0/texture_build_size_table.s")
-#endif
 // NON-MATCHING: something along these lines
 // void texture_build_size_table(void) {
 //     s32 temp_s4;
@@ -227,7 +214,6 @@ void texture_build_size_table(void) {
 //     heap_free(temp_s4);
 // }
 
-#ifdef NON_MATCHING
 void collision_scan_level_dl(s32);
 void collision_alloc_area_arrays(void);
 s32 collision_max_area_tris(void);
@@ -305,9 +291,6 @@ void collision_build_level_tris(s32 arg0) {
     D_800D3A8C = D_8003809C + temp_t7;
     collision_select_area(2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_305D0/collision_build_level_tris.s")
-#endif
 // NON-MATCHING: 40% there
 // void collision_build_level_tris(s32 arg0) {
 //     struct131 *temp_v0_2;

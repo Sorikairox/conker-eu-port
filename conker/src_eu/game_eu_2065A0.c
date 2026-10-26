@@ -23,7 +23,6 @@ s32 rumble_mask_has_pak(u8 arg0) {
     return 0;
 }
 
-#ifdef NON_MATCHING
 s32 rumble_start_strength(s32, u8);
 s32 screen_fade_alpha(s32);
 s32 hud_lens_is_off(s32);
@@ -80,10 +79,6 @@ block_15:
     (*(u8 *)((u8 *)temp_v0 + 0x16)) = (u8) arg0->unk4;
     return (s32) temp_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2065A0/rumble_request.s")
-#endif
-#ifdef NON_MATCHING
 /* P241: readable C for rumble_record_update (game_eu_2065A0, 64 insns). */
 // rumble_effect_update: update of the kind-0x3F effect made by rumble_request (rumble for the players in the mask
 // +0x13, strength +0x12 0..8). With flag +0xE bit 0 the s16 life +0x10 counts down by D_800BE9E4 and the effect ends
@@ -119,9 +114,6 @@ void rumble_record_update(u8 *fx) {
         node_destroy((struct102 *) fx);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2065A0/rumble_record_update.s")
-#endif
 
 void rumble_stop(u8);
 /* was func_151D90D4 */

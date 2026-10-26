@@ -1,10 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void rain_drops_add(s32 arg0, s32 arg1);
 void rain_centre_follow_camera(void);
-#endif
 
 
 /* was func_15179420 */
@@ -19,11 +18,8 @@ void rain_init(void) {
 }
 
 extern u16 D_800DD860;
-#ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
+// the definition is void (asm: v0 is not a result); one signature for wasm
 void heap_free(s32 *);
-#else
-s32 heap_free(s32 *);
-#endif
 /* was func_1517946C */
 void rain_request(s32 arg0) {
     s32 i;
@@ -56,7 +52,6 @@ void rain_request(s32 arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 /* P125 */
 void rain_drops_add(s32 arg0, s32 arg1);
 int rain_drop_retire_one(void);
@@ -178,9 +173,6 @@ void rain_update(s32 arg0) {
         rain_spawn_splashes(D_800DD866 / 30);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/rain_update.s")
-#endif
 extern s32 D_800DD868[];
 /* was func_15179A38 */
 void rain_centre_follow_camera(void) {
@@ -288,7 +280,6 @@ void rain_drops_add(s32 arg0, s32 arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 f32 math_cos_u8(s32, struct102 *);
 
 /* was func_15179D20 */
@@ -369,9 +360,6 @@ block_18:
         (*(s8 *)((u8 *)arg0 + 0xB4)) = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/rain_drop_update.s")
-#endif
 /* was func_1517A028 */
 int rain_drop_retire_one(void)
 {
@@ -410,7 +398,6 @@ int rain_drop_retire_one(void)
   }
 }
 
-#ifdef NON_MATCHING
 /* P125 */
 s32 collision_level_nearest_height(s32 arg0, s32 arg1, s32 arg2, s32 *arg3);
 s32 random_int(void);
@@ -453,9 +440,6 @@ void rain_spawn_splashes(s32 count) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/rain_spawn_splashes.s")
-#endif
 
 /* was func_1517A220 */
 void rain_splash_fade_by_distance(u8 *arg0) {

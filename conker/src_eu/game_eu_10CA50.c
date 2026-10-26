@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 mdl_particle_spawn_ex(void *, s32, s32, s32, s32, u8, s32);
 void water_ring_spawn(s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void cam_shake_all_players(f32 *, f32, f32, f32, u8, u8, s32);
@@ -189,11 +188,7 @@ void big_explosion_spawn(f32 *pos, u8 room, s32 arg2) {
         memcpy(e + 0x28, &at, 0xC);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10CA50/big_explosion_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 collision_floor_all(f32 *, s32, f32, f32 *);
 void fx_debris_emitter_spawn(f32 *, s16, u8, s32);
 void ground_scatter_spawn(f32 *, f32, f32, void *, s32, u8, s32, u8, s32);
@@ -230,11 +225,7 @@ void ground_burst_effect(u8 *p) {
     top[1] += 500.0f;
     ground_scatter_spawn(top, top[1] - 1000.0f, 250.0f, hit, (random_int() % 3U) + 3, 1, 0, p[0xC], p[1]);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10CA50/ground_burst_effect.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 spark_spawn_from_desc(f32 *, s32, s32, s32, s32, s32);
 
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *); /* P95 */
@@ -331,6 +322,3 @@ void puff_cluster_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
         } while (var_s0 != 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10CA50/puff_cluster_spawn.s")
-#endif

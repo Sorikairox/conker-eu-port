@@ -18,7 +18,6 @@ void debris_counts_reset(void) {
 }
 
 
-#ifdef NON_MATCHING
 s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
 void collision_select_area(s32);
 s32 zone_tree_find_leaf(s32, s32);
@@ -140,10 +139,6 @@ void record_debris_spawn(struct_eu_15144598 *rec, f32 scale) {
     } while (1.0f < n);
 #undef RND
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/record_debris_spawn.s")
-#endif
-#ifdef NON_MATCHING
 s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
 void collision_select_area(s32);
 s32 particle_spawn_ex(s32 *, s32, s32, s32, s32, s32);
@@ -376,10 +371,6 @@ void record_particle_spawn_a(struct_eu_15144598 *arg0, f32 arg1) {
         } while (var_f26 > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/record_particle_spawn_a.s")
-#endif
-#ifdef NON_MATCHING
 s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
 void collision_select_area(s32);
 s32 memcpy(s32, f32 *, s32);
@@ -581,10 +572,6 @@ void record_scatter_spawn(struct_eu_15144598 *arg0, f32 arg1) {
         } while (var_f26 > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/record_scatter_spawn.s")
-#endif
-#ifdef NON_MATCHING
 s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
 void collision_select_area(s32);
 s32 mdl_particle_spawn(f32 *, s32, s32, s32, s32, s32);
@@ -793,9 +780,6 @@ void record_debris_spawn_c(struct_eu_15144598 *arg0, f32 arg1) {
         } while (var_f30 > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/record_debris_spawn_c.s")
-#endif
 // void record_debris_spawn_c(s32 arg0, f32 arg1) {
 //
 //     f32 temp_f0;
@@ -881,7 +865,6 @@ void record_debris_spawn_c(struct_eu_15144598 *arg0, f32 arg1) {
 //     }
 // }
 
-#ifdef NON_MATCHING
 s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
 void collision_select_area(s32);
 s32 zone_tree_find_leaf(s32, s32);
@@ -1000,11 +983,7 @@ void record_debris_spawn_b(struct_eu_15144598 *rec, f32 scale) {
     } while (1.0f < n);
 #undef RND
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/record_debris_spawn_b.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
 void collision_select_area(s32);
 s32 particle_spawn_ex(s32 *, s32, s32, s32, s32, s32);
@@ -1232,9 +1211,6 @@ void record_particle_spawn_b(struct_eu_15144598 *arg0, f32 arg1) {
         } while (var_f24 > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/record_particle_spawn_b.s")
-#endif
 // NON-MATCHING: not a bad start..
 // void record_particle_spawn_b(s32 arg0, f32 arg1) {
 //

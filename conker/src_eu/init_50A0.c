@@ -48,7 +48,6 @@ void prenmi_thread_start(void) {
 void prenmi_stub_noop(void) {
 }
 
-#ifdef NON_MATCHING
 /* P281: readable C for prenmi_thread_main (compiled C, 195 insns; replaces the US-era `#if 0` draft). */
 extern s32 D_8002C068;            /* set: do not wait for the PRE-NMI message */
 extern OSMesgQueue D_8003BD70;    /* PRE-NMI queue (osSetEventMesg(OS_EVENT_PRENMI) in prenmi_thread_start) */
@@ -117,6 +116,3 @@ void prenmi_thread_main(s32 arg0) {
     while (1) {
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_50A0/prenmi_thread_main.s")
-#endif

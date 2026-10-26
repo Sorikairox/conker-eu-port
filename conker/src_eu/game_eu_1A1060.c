@@ -45,7 +45,6 @@ s32 fog_identity_stub(s32 arg0, s32 arg1)
   }
 }
 
-#ifdef NON_MATCHING
 s8 fog_level_preset_get(s32 arg0);
 extern s32 D_800DD714;          /* current fog/colour state: c[4] at +0, then halfwords at +4..+0x10 */
 extern s16 D_800DD718, D_800DD71A, D_800DD71C, D_800DD71E, D_800DD720;
@@ -137,9 +136,6 @@ s32 fog_blend_presets(s32 from, s32 to, s32 arg2, s32 t, s32 dest) {
     *pb = ((s32)((b2 - a2) * t) / 4096) + a2;
     return a2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1060/fog_blend_presets.s")
-#endif
 s32 fog_blend_presets(s32, s32, s32, s32, s32);
 extern s32 D_800DC2D8;
 extern s32 D_800DD714;

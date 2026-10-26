@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A4EA8[];
-#endif
 
 void dl_fx_free_lights(u8 *arg0);
 
@@ -65,7 +64,6 @@ void dl_fx_update(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, u8, s8 *);
 Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
@@ -128,9 +126,6 @@ block_3:
     (*(s32 *)((u8 *)temp_s1 + 4)) = (s32) *(((s32 *)((u8 *)&D_8008B358 + ((*(u8 *)((u8 *)arg1 + 0x16)) * 4))));
     return temp_s1 + 8;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/dl_fx_draw.s")
-#endif
 /* was func_15158AFC */
 s32 dl_fx_mtx_rotate_scale(Mtx *arg0, u8 *arg1) {
     f32 *r;
@@ -154,7 +149,6 @@ s32 dl_fx_mtx_rotate_scale(Mtx *arg0, u8 *arg1) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* was func_15158BF4 */
 s32 dl_fx_beh_move(u8 *arg0) {
     struct {
@@ -245,9 +239,6 @@ block_5:
     (*(f32 *)((u8 *)temp_v1_3 + 8)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 8)) + ((*(f32 *)((u8 *)temp_v1_3 + 0x24)) * D_800BE9A4));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/dl_fx_beh_move.s")
-#endif
 typedef struct { f32 m[4][4]; } MtxF_s82;
 extern MtxF_s82 D_8008B1B8;
 

@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 struct127 *player_find_owned_object(struct127 *, struct127 *, s32);
 void mtx_transform_points(f32 **src, f32 **dst, u8 *bone, s32 n);
 s32 tracer_spawn(f32 *, f32 *, f32 *, f32 *, s32, s32, f32, f32, f32, f32, f32, s32, u8 *, s32, s32, s32, s32, s32,
@@ -236,11 +235,7 @@ void gun_shot_effects(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxow
     ev.camera = owner->camera;
     sprite2d_broadcast(&ev, 0x37);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/gun_shot_effects.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_150FC8E8 */
 void tracer_draw_masked(u8 *arg0) {
     s32 var_v0;
@@ -256,10 +251,6 @@ void tracer_draw_masked(u8 *arg0) {
     }
     surface_impact_effects((s32) arg0, 1.0f, 1.0f, 0.6f, 0.0f, 0xFFU, 0xFFU, (u8) var_v0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/tracer_draw_masked.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_800A2280, D_800A2284, D_800A2288, D_800A228C, D_800A2290, D_800A2294, D_800A2298, D_800A229C, D_800A22A0;
 u8 *cam_wobble_spawn(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
 
@@ -337,11 +328,7 @@ void gunfire_burst_spawn(struct127 *obj, struct127 *other, u8 a, u8 b) {
     fx.f[11] = D_800A22A0;
     *(u8 **) (rec + 0x28 + 0x10) = cam_wobble_spawn((u8 *) &fx, 0, 0xFF, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/gunfire_burst_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 void gun_shot_effects(u8 *, u8, f32, u8, s32, s32);
 
 /* was func_150FCB94 */
@@ -398,9 +385,6 @@ void gunfire_burst_update(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/gunfire_burst_update.s")
-#endif
 /* was func_150FCD98 */
 void gunfire_burst_handle_event(struct102 *arg0, u8 *arg1, u8 arg2) {
     s32 new_var; // fakematch: permuter temp

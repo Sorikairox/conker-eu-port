@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern s8 D_800E1013;
 extern f32 D_8009DD30;
 extern f32 D_8009DD34;
@@ -12,7 +12,6 @@ void obj_contact_pass(u8 *arg0, s32 arg1);
 f32 anim_events_run(struct127 *arg0, f32 arg1, s32 arg2);
 s32 obj_collision_cylinder(struct127 *, u16 *, u16 *, u16 *);
 void node_broadcast_all(s32 arg0, u8 arg1);
-#endif
 
 typedef struct {
     /* 0x000 */ u8 pad0[0x11B];
@@ -25,7 +24,6 @@ typedef struct {
 } struct_eu_B2980;
 
 
-#ifdef NON_MATCHING
 extern s32 D_800875E0;
 extern u8 D_8009DD24;
 
@@ -67,10 +65,6 @@ block_6:
     }
     goto loop_1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/obj_type_model_group.s")
-#endif
-#ifdef NON_MATCHING
 /* Level start point lookup. Entries of D_800D212C are 0x18 bytes: s16 x/y/z +0, u8 +6 / +7 (angle), f32 x3 +8,
  * u8 +0x14, s8 +0x15, s8 +0x16 (alias index). arg0 = player (0xFF: none), arg1 = start index (-1: the player's
  * saved one at rec+0x31C->+0x11B). Multiplayer (D_800BE616 && D_800D18A8) picks the start farthest from the
@@ -208,9 +202,6 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/level_start_point_get.s")
-#endif
 /* was func_15085880 */
 void player_start_index_set(struct_eu_B2980 *arg0, s32 arg1) {
     arg0->unk31C->unk11B = arg1;
@@ -221,7 +212,6 @@ u8 player_start_index_get(struct_eu_B2980 *arg0) {
     return arg0->unk31C->unk11B;
 }
 
-#ifdef NON_MATCHING
 /* Place object record arg0 (D_800CC2D0[i]) at level start arg1: level_start_point_get gives the start point, angle and
  * flags; anim_events_run runs with D_800D154C / D_800C3E78 temporarily set to this record; then position
  * (+0x14 / +0x2C / +0x180 / +0x1CC), yaw (+0x76..+0x7A, +0x40, +0xB8) and the camera controller's start eye
@@ -301,10 +291,6 @@ void obj_place_at_start(void *arg0, s32 arg1, s32 arg2) {
     msg.b = rec[0x3B];
     node_broadcast_all((s32)&msg, 4);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/obj_place_at_start.s")
-#endif
-#ifdef NON_MATCHING
 extern u16 D_8009015C;
 extern s32 D_800D255C;
 extern s32 D_800D2560;
@@ -371,10 +357,6 @@ void player_stat_modify(s16 arg0, s16 arg1, s32 arg2) {
             return;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/player_stat_modify.s")
-#endif
-#ifdef NON_MATCHING
 extern s32 D_800D255C;          /* per-player records, 0x1C bytes each (fields at +0, +4, +8, +9, +0xA, +0xC) */
 extern s32 D_800D2560;
 extern s32 D_800D2564;
@@ -408,9 +390,6 @@ s32 player_stat_get(s16 player, s32 field) {
     }
     return 0; /* the asm returns whatever v0 held */
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/player_stat_get.s")
-#endif
 /* was func_15085ABC */
 void player_stats_store_health(s16 arg0)
 {

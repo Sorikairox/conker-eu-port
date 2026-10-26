@@ -4,13 +4,12 @@
 #include "variables.h"
 
 #include "macros.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 quadtree_filter_box_tris(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in, u16 **out);
 s32 quadtree_tri_box_test(struct_eu_bytes24 arg0);
 void quadtree_write_leaf_list(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list);
 extern s32 D_800DC26C;   /* triangle table: 3 vertex pointers (s16 x, y, z) per entry */
 extern s32 D_800DC274;   /* grid table: s16 x, z per entry */
-#endif
 
 /* was func_15001970 */
 void collision_build_reset(void) {
@@ -29,7 +28,6 @@ void collision_build_reset(void) {
     D_800B0DC4 = D_800B0DC0;
 }
 
-#ifdef NON_MATCHING
 extern s32 D_80091EA0[];   /* node pool size per level (rodata) */
 extern s32 D_800B11EC;     /* node pool base */
 extern s16 D_800DC260;
@@ -64,9 +62,6 @@ void quadtree_alloc_node_pool(void) {
     D_800DC264 = 0;
     D_800DC266 = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/quadtree_alloc_node_pool.s")
-#endif
 // NON-MATCHING: JUSTREG (US draft)
 // void quadtree_alloc_node_pool(void) {
 //     s32 sp24;
@@ -249,7 +244,6 @@ u16 *quadtree_build_node(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
 }
 
 // 3 loops
-#ifdef NON_MATCHING
 /* Leaf list of a quadtree node, appended to the node pool after the node: the entries of the u16 index list
  * `list` (list[0] = count) whose triangle (relative to the box centre, (x0 + x1) / 2 and (z0 + z1) / 2) passes
  * the box test quadtree_tri_box_test (0 = inside). The first kept index is written as a big-endian halfword | 0x8000;
@@ -308,10 +302,6 @@ void quadtree_write_leaf_list(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list) {
     }
     quadtree_pool_put_byte(0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/quadtree_write_leaf_list.s")
-#endif
-#ifdef NON_MATCHING
 
 /* Quadtree build helper of quadtree_build_node: keeps the entries of the u16 index list `in` (in[0] = count)
  * whose triangle (relative to the box centre) passes the box test quadtree_tri_box_test (0 = inside), writes
@@ -385,9 +375,6 @@ s32 quadtree_filter_box_tris(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zma
     list[0] = cnt;
     return cnt;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/quadtree_filter_box_tris.s")
-#endif
 /* was func_15002560 */
 void quadtree_link_siblings(struct_eu_qnode *arg0, struct_eu_qnode *arg1) {
     struct_eu_qnode *s1;
@@ -514,7 +501,6 @@ s32 collision_max_area_tris(void) {
     return highest;
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800C48A8[];    /* per model: its display-list table (one list used here) */
 extern u16 D_800C5D38[];    /* per model: triangle count */
 extern u16 D_800C6318[];    /* per model: vertex-range count */
@@ -672,9 +658,6 @@ s32 model_build_collision_tables(s32 id) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/model_build_collision_tables.s")
-#endif
 
 /* was func_15002F40 */
 void collision_set_step_size(s32 arg0) {

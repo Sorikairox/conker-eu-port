@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 mdl_particle_spawn_ex(f32 *, s32, s32, s32, s32, s32, s32);
 s32 vec3_normalize_len(f32 *, f32 *, f32 *, s32 *);
 s32 memcpy(s32, f32 *, s32);
@@ -162,10 +161,6 @@ void lightning_bolt_spawn(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 a
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/lightning_bolt_spawn.s")
-#endif
-#ifdef NON_MATCHING
 void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
 
 /* was func_150F4E50 */
@@ -196,10 +191,6 @@ u8 *lightning_bolt_update(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x28)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x28)) + ((*(f32 *)((u8 *)arg0 + 0x58)) * D_800BE9A4));
     return sp18;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/lightning_bolt_update.s")
-#endif
-#ifdef NON_MATCHING
 f32 vec3_length(f32 *);
 
 // ambient_emitter_update: per-frame update of an ambient object with flags +0x194: the distance to the camera
@@ -245,9 +236,6 @@ s32 ambient_obj_update(u8 *obj) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/ambient_obj_update.s")
-#endif
 
 /* was func_150F527C */
 void ambient_obj_on_message(u8 *arg0, s32 arg1, u8 arg2) {
@@ -281,7 +269,6 @@ void lightning_emitter_spawn(u8 *arg0, s8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     }
 }
 
-#ifdef NON_MATCHING
 typedef struct {
     f32 v[3];
 } Vec3F536C;
@@ -358,6 +345,3 @@ void lightning_emitter_update(u8 *obj) {
         em->acc -= 1.0f;
     } while (1.0f < em->acc);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/lightning_emitter_update.s")
-#endif

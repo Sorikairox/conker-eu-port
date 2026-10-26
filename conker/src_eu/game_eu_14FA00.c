@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void math_spring_approach(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void math_spring_approach_angle(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void camera_update_eye_base(struct108 *arg0);
@@ -110,6 +109,3 @@ void camera_follow_yaw_update(struct108 *arg0, f32 arg1) {
     camera_update_eye_height(cam);
 }
 #undef CAM_F32
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_14FA00/camera_follow_yaw_update.s")
-#endif

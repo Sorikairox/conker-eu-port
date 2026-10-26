@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 extern u8 *D_8008CDEC[];
 f32 sinf(f32);
@@ -100,11 +99,7 @@ void spark_sprite_launch(s32 tex, s32 mode, s16 x, s16 y, s16 z, s32 unused, f32
     rec.colour[2] = blue;
     node_spawn_sprite(&rec, 0, 0, -1, room, owner);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7450/spark_sprite_launch.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_800AA964;
 extern f32 D_800AA968;
 f32 math_cos_u8(u8);
@@ -166,9 +161,6 @@ void spark_sprite_update(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7450/spark_sprite_update.s")
-#endif
 /* was func_151BA1A0 */
 void spark_sprite_burst_spawn(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA, s16 argB, s16 argC, s32 argD, u8 argE, s32 argF) {
     u8 *temp_v0;
@@ -192,7 +184,6 @@ void spark_sprite_burst_spawn(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s16 arg4, 
     }
 }
 
-#ifdef NON_MATCHING
 void spark_sprite_launch(s32, s32, s16, s16, s16, s32, f32, s16, s16, s16, s16, s16, s16, s16, s16, u8, s32);
 
 // burst_emitter_finish: emits the object's burst at its anchor (the f32 position at obj+0x10 if any, else the s16
@@ -234,6 +225,3 @@ void spark_sprite_burst_update(u8 *obj) {
         *(s16 *) (obj + 0x2A) = t;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7450/spark_sprite_burst_update.s")
-#endif

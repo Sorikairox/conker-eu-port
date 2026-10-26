@@ -48,4 +48,3 @@ void osViSwapBuffer(void *frameBufPtr) {
     __osRestoreInt(saveMask);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_251D0/osWritebackDCacheAll.s")

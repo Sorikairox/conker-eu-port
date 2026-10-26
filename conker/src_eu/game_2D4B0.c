@@ -24,7 +24,6 @@ void level_music_stop_all(void) {
     music_release_stopped_slots();
 }
 
-#ifdef NON_MATCHING
 void music_release_stopped_slots(void);
 void music_song_set_volume(s32 arg0, s32 arg1);
 void music_song_set_fade(s32 arg0, s32 arg1, s32 arg2);
@@ -237,11 +236,7 @@ void level_start_music(void) {
 
     audio_set_bus_mix_type(1, m.unkD);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2D4B0/level_start_music.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_800D9F3C;            /* screen height (D_800B0DF0->unk0) */
 extern f32 D_800D9F40;            /* screen width (D_800B0DF0->unk2) */
 extern f32 D_800D3A90;
@@ -307,9 +302,6 @@ s32 level_setup_screen_projection(s32 arg0) {
     D_800D9F38 = 0;
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2D4B0/level_setup_screen_projection.s")
-#endif
 // NON-MATCHING: almost only reg remaining
 // void level_setup_screen_projection(void) {
 //     s32 i;

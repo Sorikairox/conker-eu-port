@@ -19,7 +19,6 @@ void sprite2d_emitter_spawn(s32 arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 sprite2d_spawn(f32 *, s32, s32, s32, s32, s32, s32);
 
 /* was func_150BE40C */
@@ -123,9 +122,6 @@ void sprite2d_emitter_update(u8 *arg0) {
         (*(s16 *)((u8 *)sp34 + 4)) = (s16) ((random_int() % 151U) + 0x19);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EBBA0/sprite2d_emitter_update.s")
-#endif
 /* was func_150BE650 */
 void sprite2d_emitter_on_message(struct102 *arg0, u8 **arg1, u8 arg2) {
     if (arg2 == 0x21) {

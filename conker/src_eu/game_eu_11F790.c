@@ -1,10 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A1C90[];
 extern u8 D_800A1CA8[];
-#endif
 
 typedef struct {
     u8  pad0[0x8];
@@ -24,7 +23,6 @@ void tether_light_clear_slot(void *arg0);
 void light_ctrl_retire(void *arg0);
 void light_ctrl_free(void *arg0);
 
-#ifdef NON_MATCHING
 extern u16 D_80088EA0[3];
 
 /*
@@ -68,11 +66,7 @@ void obj7b_update_pulse_scale(struct127 *object) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/obj7b_update_pulse_scale.s")
-#endif
 
-#ifdef NON_MATCHING
 /*
  * P62: adjustment entries of object type 0x7B for obj_adjust_list_build (object i, buffer p): a shared angle (the s16 at
  * D_800CC298 + 0x12) swings down by D_800BE9E4 * 0x222 per call while object i's +0x84 is 0x21 (to at least
@@ -107,9 +101,6 @@ s16 *obj7b_joint_swing_entries(s16 *p, s32 i) {
     }
     return p + 12;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/obj7b_joint_swing_entries.s")
-#endif
 
 /* was func_eu_150F2230 */
 void obj7b_set_anim_ids(u8 *arg0) {
@@ -127,7 +118,6 @@ void obj7b_set_anim_ids(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 emit_debris_burst(s32 *, s32 *, s32 *, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32);
 s32 spark_shower_spawn(f32 *, f32, f32, f32, f32, s32, s32); /* P95: f32 (was the bit pattern as an int) */
 s32 smoke_cloud_spawn(f32 *, s32, s32);
@@ -245,10 +235,6 @@ void fx_big_explosion_at_obj(u8 *arg0, s32 arg1, s32 arg2) {
         emit_textured_burst(&sp.u60, ((u8 *)&D_800A1CA8), &D_800A1CB0, 2, 0.0f, 0U, (u8) temp_s1, arg2);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/fx_big_explosion_at_obj.s")
-#endif
-#ifdef NON_MATCHING
 /* P249: readable C for ambient_far_sound_update (game_eu_11F790, 80 insns). */
 // ambient_far_sound_update: random ambient sound while object `slot` is far out. A cooldown D_800D9D10 (u8) counts
 // down by D_800BE9E4 per frame (to 0); when it is 0 and x^4 + z^4 of D_800CC2D0[slot] exceeds 6760000, plays sound
@@ -280,15 +266,8 @@ void ambient_far_sound_update(s32 slot) {
         sound_play_2d((u32) random_int() % 3 + 0x6C, 0x5DC0, (u8) pan, 0, 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/ambient_far_sound_update.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 vec2_from_angle_byte(s16, f32, f32 *, f32 *); /* P95: f32 parameter */
-#else
-s32 vec2_from_angle_byte(s16, s32, f32 *, f32 *);
-#endif
 
 /* was func_150F2230 */
 void obj_bone_smoke_puff(u8 *arg0, u8 arg1, s32 arg2) {
@@ -299,11 +278,7 @@ void obj_bone_smoke_puff(u8 *arg0, u8 arg1, s32 arg2) {
         sp2C[0] = 0.0f;
         sp2C[1] = 0.0f;
         sp2C[2] = 0.0f;
-#ifdef NON_MATCHING
         vec2_from_angle_byte(random_int() & 0xFF, 100.0f, sp2C, &sp2C[2]); /* P95: float literal (asm passes the bits 0x42C80000) */
-#else
-        vec2_from_angle_byte(random_int() & 0xFF, 0x42C80000, sp2C, &sp2C[2]);
-#endif
         mtx_transform_point_or_origin(sp2C, sp20, *(s32 *)(arg0 + 0x1D4) + 0x4C0);
         fire_embers_spawn(sp20, arg1, arg2);
     }

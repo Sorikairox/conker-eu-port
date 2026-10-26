@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void hitinfo_from_obj_floor(s32 *, struct127 *);
 void *memcpy(void *, const void *, u32);
 /* dust effect data (0x68 bytes) copied to the effect object at +0x28 */
@@ -65,13 +64,9 @@ struct260 *obj_dust_effect_spawn(u8 *obj, f32 *offset, u8 kind, f32 a3, f32 arg4
     }
     return fx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BF960/obj_dust_effect_spawn.s")
-#endif
 
 typedef struct { f32 x, y, z; } V3_25AC;      /* P232: moved up for obj_dust_effect_update (used by dust_drop_particle_spawn) */
 typedef struct { s16 h[9]; } H12_25AC;
-#ifdef NON_MATCHING
 extern f32 D_800A84C8;          /* height used when the point is outside the level (pos_in_world_bounds == 0) */
 extern f32 D_800A84CC;          /* floor search depth / default height */
 extern f32 D_800A84D0;          /* height used without a ground chance (+0x60 <= 0) */
@@ -150,9 +145,6 @@ void obj_dust_effect_update(u8 *fx) {
         d->u18 -= 1.0f;
     } while (d->u18 > 1.0f);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BF960/obj_dust_effect_update.s")
-#endif
 
 u8 *particle_spawn_basic(void *, s32, s32, u8, s32);
 extern u8 (*D_80090070[])(void);
@@ -272,23 +264,14 @@ u8 *dust_drop_particle_spawn(V3_25AC *arg0, V3_25AC *arg1, f32 arg2, s16 arg3, u
     return ret;
 }
 
-#ifdef NON_MATCHING
 s32 particle_calc_wobble(u8 *, u8 *, f32, u8 *, u8 *, u8 *); /* P95: f32 (float bits were passed as an int) */
-#else
-s32 particle_calc_wobble(u8 *, u8 *, s32, u8 *, u8 *, u8 *);
-#endif
 
 /* was func_15192878 */
 s32 dust_drop_wobble(u8 *arg0, s32 arg1) {
-#ifdef NON_MATCHING
     particle_calc_wobble(arg0 + 0xAC, arg0 + 0xAE, (*(f32 *)((u8 *)arg0 + 0xA8)), arg0 + 0xB0, arg0 + 0x38, arg0 + 0x3C); /* P95: f32 (float bits were passed as an int) */
-#else
-    particle_calc_wobble(arg0 + 0xAC, arg0 + 0xAE, (*(s32 *)((u8 *)arg0 + 0xA8)), arg0 + 0xB0, arg0 + 0x38, arg0 + 0x3C);
-#endif
     return 1;
 }
 
-#ifdef NON_MATCHING
 extern f32 D_800A84DC;
 extern f32 D_800A84E0;
 extern f32 D_800A84E4;
@@ -339,9 +322,6 @@ s32 water_drop_splash_update(u8 *arg0, s32 arg1) {
     }
     return alive;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BF960/water_drop_splash_update.s")
-#endif
 
 s32 water_drop_splash_update(u8 *, s32);
 
@@ -358,7 +338,6 @@ s32 dust_drop_wobble_splash(u8 *arg0, s32 arg1) {
     return var_v1;
 }
 
-#ifdef NON_MATCHING
 struct260 *obj_dust_effect_spawn(u8 *obj, f32 *offset, u8 kind, f32 a3, f32 arg4, s16 life, f32 arg6, f32 arg7, s16 arg8, s16 arg9, u8 arg10, u8 arg11, f32 arg12, f32 arg13, f32 arg14, u8 arg15, u8 arg16, s32 arg17);
 /* per-dust-type parameters for obj_dust_effect_spawn (rodata), indexed by obj_dust_effect's type */
 extern f32 D_800A8410[4][3];
@@ -412,9 +391,6 @@ struct260 *obj_dust_effect(u8 *obj, s16 life, u8 arg2, s32 arg3) {
                          D_800A8464[type], D_800A8474[type], D_800A8484[type], D_800A848C[type], 100, 155,
                          D_800A8494[type], D_800A84A4[type], D_800A84B4[type], D_800A84C4[type], arg2, arg3);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BF960/obj_dust_effect.s")
-#endif
 
 /* was func_15192CEC */
 void obj_dust_effect_on_message(s32 arg0, s32 arg1, u8 arg2) {

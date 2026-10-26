@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void laser_switch_broadcast(s32 arg0, s32 arg1);
 void light_group_set_disabled(s32, s32);
 
@@ -19,6 +18,3 @@ void level_effects_reset(s32 arg0) {
     }
     light_group_set_disabled(9, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1230D0/level_effects_reset.s")
-#endif

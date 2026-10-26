@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 typedef struct {
     f32 height;     // ground height under the probe
     s16 tri[9];     // hit triangle (passed on to fx_scorch_decal_spawn)
@@ -76,11 +75,7 @@ void object_explode(u8 *obj, u8 owner, s32 arg2) {
     object_hit_effects(obj, 1, 1, 1, 1, 0, owner, arg2);
     object_effects_at(pos, NULL, (struct127 *) obj, (struct127 *) obj, 0, 0x16, 0x15, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10E600/object_explode.s")
-#endif
 
-#ifdef NON_MATCHING
 void cutscene_actor_apply_track(struct127 *, s32, s32);
 s32 obj_check_death(struct127 *);
 void obj_walk_update(struct127 *);
@@ -143,6 +138,3 @@ void enemy_update_alert_move(struct127 *arg0) {
         cutscene_actor_apply_track(arg0, 0, -1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10E600/enemy_update_alert_move.s")
-#endif

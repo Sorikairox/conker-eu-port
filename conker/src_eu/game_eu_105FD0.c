@@ -7,7 +7,6 @@
 void mat_handler_stub(s32 arg0) {
 }
 
-#ifdef NON_MATCHING
 extern s32 D_80090648;
 
 /* was func_150D87CC */
@@ -47,10 +46,6 @@ s32 mat_tile_slide_anim_d(u8 *arg0, u8 *arg1) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/mat_tile_slide_anim_d.s")
-#endif
-#ifdef NON_MATCHING
 extern s32 D_80090648;
 extern s32 D_800BE9E4;
 
@@ -113,9 +108,6 @@ s32 tile_slide_by_anim_update(u8 *mat, u8 *actor) {
     *(s32 *) (cmd + i * 8) = ((s32) (120.0f * t + 2.0f) & 0xFFF) | 0xF2002000;
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/tile_slide_by_anim_update.s")
-#endif
 
 /* was func_150D8AA0 */
 s16 *obj2b_write_msg(s16 *arg0, s32 arg1) {
@@ -124,7 +116,6 @@ s16 *obj2b_write_msg(s16 *arg0, s32 arg1) {
     return arg0 + 2;
 }
 
-#ifdef NON_MATCHING
 s32 collision_floor_probe(f32 *, s32, f32, f32 *);
 void hitinfo_from_obj_floor(void *, u8 *);
 void fx_scorch_decal_spawn(f32, s32, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -257,9 +248,6 @@ void explosion_ground_effect(struct127 *arg0) {
     sp.uB0 = 0.905482f;
     emit_particle_burst_req(&sp.u48, 0xFF, 0xFF, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/explosion_ground_effect.s")
-#endif
 /* was func_150D8DBC */
 s32 mat_toggle_by_flag(u8 *arg0) {
     if ((*(u8 **)(arg0 + 0x18))[0x6F] != 0) {
@@ -312,7 +300,6 @@ s32 handler_return_8(s32 arg0, s32 arg1) {
     return 8;
 }
 
-#ifdef NON_MATCHING
 void water_ring_spawn(s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void shard_ring_spawn(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
 
@@ -330,6 +317,3 @@ void obj_joint_dust_puff(u8 *arg0, u8 arg1, s32 arg2) {
         water_ring_spawn(-1, (s32) sp.u34, (s32) ((*(f32 *)((u8 *)arg0 + 0x180)) + 4.0f), (s32) sp.u3C, 4, 0x32, 0, 0xFF, 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/obj_joint_dust_puff.s")
-#endif

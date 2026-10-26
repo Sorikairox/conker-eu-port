@@ -36,7 +36,6 @@ void obj_surface_handler_dispatch(u8 *arg0, s32 arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 /* was func_15192E20 */
 s32 obj_surface_handler_class(u8 *arg0, s32 *arg1) {
     s32 var_v1;
@@ -60,6 +59,3 @@ s32 obj_surface_handler_class(u8 *arg0, s32 *arg1) {
     }
     return var_v1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C0580/obj_surface_handler_class.s")
-#endif

@@ -2,10 +2,9 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 u8 *debugger_draw_char(s16 *arg0, s32 arg1);
 void debugger_clear_screen(void);
-#endif
 
 s32 debugger_cell_to_fb(s32);
 void debugger_print_number(s32 arg0, s32 arg1, s32 arg2);
@@ -179,7 +178,6 @@ void debugger_draw_exception(struct118 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 /* was func_16000590 */
 void debugger_draw_fpu_regs(struct118 *arg0) {
     s32 temp_s2;
@@ -228,9 +226,6 @@ void debugger_draw_fpu_regs(struct118 *arg0) {
         var_s2_2 += 1;
     } while (var_s1_2 < 0x10);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/debugger_draw_fpu_regs.s")
-#endif
 typedef struct {
     u8 c[4];
 } struct_16003B48;
@@ -449,7 +444,6 @@ s32 debugger_stack_page_input(void) {
 }
 
 // called from func_10007DAC
-#ifdef NON_MATCHING
 s32 debug_cont_read(void);
 void debug_cont_get_read_data(void *);
 s32 debug_dump_tlb();
@@ -622,9 +616,6 @@ loop_47:
     }
     return var_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/debugger_main.s")
-#endif
 s32 debug_sprintf(u8 *, u8 *, u8 *, u8 *, f64);
 /* was func_16000F8C */
 void debugger_print_float(s32 arg0, f32 arg1)
@@ -670,7 +661,6 @@ void debugger_print_float(s32 arg0, f32 arg1)
 //     }
 // }
 
-#ifdef NON_MATCHING
 /* P281: readable C for debugger_print_number (compiled C, 155 insns). */
 extern s32 D_16003B50[10]; /* powers of ten 1 .. 1000000000 (the asm copies them to the stack first) */
 extern u8 D_160047E4[]; /* "NaN" */
@@ -735,9 +725,6 @@ void debugger_print_number(s32 cell, s32 kind, s32 value) {
             break;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/debugger_print_number.s")
-#endif
 
 /* was func_160012B0 */
 void debugger_print_string(s32 arg0, u8 *arg1) {
@@ -787,7 +774,6 @@ void debugger_fill_rect(s16 x0, s16 y0, s16 x1, s16 y1) {
         fb += D_160038A8 - x1;
     }
 }
-#ifdef NON_MATCHING
 extern s32 D_16003CE0;
 
 /* was func_160014F0 */
@@ -864,9 +850,6 @@ loop_4:
     } while (var_a3 != 8);
     return ((s16 *)((u8 *)arg0 + 0x10));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/debugger_draw_char.s")
-#endif
 // NON-MATCHING: only glyph/j registers swapped (t0/a1)
 // extern u8 D_16003CE0[];
 //

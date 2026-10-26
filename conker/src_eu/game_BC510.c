@@ -2,7 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void hud_health_drop_piece(void);
 void hud_health_update(void);
 void underwater_bubbles_update(void); /* P129 */
@@ -10,7 +10,6 @@ void underwater_air_meter_update(void); /* P129 */
 s32 shared_dl_acquire(s32);
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 extern s16 D_8009E060[];
-#endif
 
 
 // need to figure out D_800D2460
@@ -97,7 +96,6 @@ void hud_health_air_update(void) {
 #endif
 }
 
-#ifdef NON_MATCHING
 extern s16 D_8009E084;
 extern s16 D_8009E08A;
 extern u8 D_800CC8BA;
@@ -319,9 +317,6 @@ void hud_health_update(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_health_update.s")
-#endif
 /* was func_1508F7BC */
 void hud_health_drop_piece(void) {
     f32 sp48[4][4];
@@ -351,7 +346,6 @@ void hud_health_add_piece(void) {
     D_800D2410[D_800D2456++] = 0.0f;
 }
 
-#ifdef NON_MATCHING
 /* P129: the six 16-byte bubble records D_800D2880 .. D_800D28E0 (drawn by hud_bubbles_draw):
  *   +0 s16 x, +2 s16 y, +4 s16 x centre, +6 s16 size, +8 s16 sway amplitude, +A s16 timer,
  *   +C u8 rise speed, +D u8 state (0 free, 1 growing, 2 rising, 3 popped), +E u8 sway phase, +F u8 wobble phase.
@@ -459,10 +453,6 @@ void underwater_bubbles_update(void) {
     }
 }
 #undef BUB_S16
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/underwater_bubbles_update.s")
-#endif
-#ifdef NON_MATCHING
 s32 *hud_clock_draw(s32 *arg0);
 Gfx *sprite_gfx_begin(Gfx *arg0);
 Gfx *sprite_gfx_begin_alt(Gfx *arg0);
@@ -544,10 +534,6 @@ u8 *hud_draw(u8 *arg0) {
     }
     return (u8 *)gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_draw.s")
-#endif
-#ifdef NON_MATCHING
 /* Draws the D_800D29A8 display list once per world piece (D_8009E060 positions, D_800D2410 scales; matrices in
  * D_800D2590) and, in the level variant (arg1 == 0), once per D_800D245C object. arg1 != 0: front-end variant. */
 /* was func_150900F0 */
@@ -674,10 +660,6 @@ Gfx *hud_health_draw(Gfx *gdlArg, s32 arg1) {
     }
     return (Gfx *)var_s1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_health_draw.s")
-#endif
-#ifdef NON_MATCHING
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 u8 *sprite_load_texture(u8 *, s32 *, s32, s32 *, s32, s32, s32, s32, s32);
 u8 *sprite_draw_at_screen(u8 *, s32 *, f32, f32);
@@ -767,10 +749,6 @@ Gfx *hud_bubbles_draw(Gfx *gdlArg) {
     } while (var_s0_2 != (u8 *)&D_800D28E0);
     return (Gfx *)(var_s2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_bubbles_draw.s")
-#endif
-#ifdef NON_MATCHING
 /* P129: the air meter state at D_800D28E8 + 0x80 (drawn by func_15090AE8 with D_800D28E8's two 0x40 matrices). */
 typedef struct {
     /* 0x80 */ s32 dl;          /* first display list of model 0xB9 */
@@ -970,11 +948,7 @@ void underwater_air_meter_update(void) {
         am->drop_y += am->drop_vel;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/underwater_air_meter_update.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 extern s32 D_800837D0;
 extern s32 D_80083950;
@@ -1081,10 +1055,6 @@ Gfx *hud_air_meter_draw(Gfx *gdlArg) {
     }
     return (Gfx *)(var_s0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_air_meter_draw.s")
-#endif
-#ifdef NON_MATCHING
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 
 // hud_icon_sheet_load: P208: loads HUD icon sheet `sheet` (texture 0xD18 + sheet: CI4 64x64, its 16-colour RGBA16
@@ -1129,9 +1099,6 @@ Gfx *hud_icon_sheet_load(Gfx *gdl, s32 sheet, u8 *ready) {
     *ready = 1;
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_icon_sheet_load.s")
-#endif
 // NON-MATCHING: needs some love
 // Gfx* hud_icon_sheet_load(Gfx* arg0, struct257 *arg1, u8 *arg2) {
 //     u32 temp_v0;
@@ -1171,7 +1138,6 @@ Gfx *hud_icon_sheet_load(Gfx *gdl, s32 sheet, u8 *ready) {
 //     return arg0;
 // }
 
-#ifdef NON_MATCHING
 /* P153 */
 void text_printf_at(s32, s32, u8, s32, ...);
 extern char D_8009E090[]; /* "%d" */
@@ -1216,10 +1182,6 @@ void hud_time_draw(s32 x, s32 y, s32 ticks, u8 alpha) {
     text_printf_at(x, y, alpha, (s32) D_8009E0A8);
     text_printf_at(x + 0x10, y, alpha, (s32) D_8009E0B0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_time_draw.s")
-#endif
-#ifdef NON_MATCHING
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 Gfx *hud_icon_sheet_load(Gfx *gdl, s32 sheet, u8 *ready);
 Gfx *radar_draw(Gfx *, s32, s16 *, s32, s32);
@@ -1707,9 +1669,6 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/mp_hud_draw_views.s")
-#endif
 
 /* was func_15093818 */
 void hud_clock_set_enabled(s32 arg0) {
@@ -1729,7 +1688,6 @@ void hud_clock_load(void) {
     D_800D244C = allocate_memory(0x80, 1, 1, 0);
 }
 
-#ifdef NON_MATCHING
 void mtx_translate_fixed(s32, f32, f32, f32);
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 extern s32 D_11AF;
@@ -1773,10 +1731,6 @@ loop_1:
     }
     goto loop_1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_clock_draw.s")
-#endif
-#ifdef NON_MATCHING
 s32 rail_band_for_height(f32 y);
 extern f32 D_8009E24C; /* radar world -> screen scale, 2-4 players (0.0135) */
 extern f32 D_8009E250; /* radar zoom of the big radar (1.329) */
@@ -1967,6 +1921,3 @@ Gfx *radar_draw(Gfx *gdl, s32 size, s16 *table, s32 mode, s32 big) {
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/radar_draw.s")
-#endif

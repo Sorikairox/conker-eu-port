@@ -16,7 +16,6 @@ s32 obj_receive_hit(struct127 *arg0, struct127 *arg1, void *arg2, s32 arg3, s32 
 
 // EU: split from game_83300.c, EU pads to a file boundary before this.
 
-#ifdef NON_MATCHING
 void attachment_swap_owner_ids(s32, s32);
 // object_slots_swap: P259: swaps the objects `a` and `b` of D_800CC2D0 (after obj_broadcast_replace(a, b)), then fixes up
 // what is tied to the slot rather than the object: each object's index fields (+0x127 / +0x13F = index, unique_id =
@@ -84,9 +83,6 @@ void obj_slots_swap(struct127 *a, struct127 *b) {
     }
     obj_model_reset(b);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/obj_slots_swap.s")
-#endif
 
 /* was func_15062AC4 */
 void obj_update_inner_extent_ratios(struct127 *arg0) {
@@ -142,7 +138,6 @@ void obj_set_scale(struct127 *arg0, f32 arg1, f32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800C48A8;
 
 /* was func_15062D10 */
@@ -188,10 +183,6 @@ void gfx_tile_scroll_coords(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s3
         (*(s32 *)((u8 *)temp_a3 + 0)) = (s32) ((temp_a2_2 & 0xFF000000) | (var_v1 & 0xFFF) | ((var_v0 & 0xFFF) << 0xC));
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/gfx_tile_scroll_coords.s")
-#endif
-#ifdef NON_MATCHING
 extern u8 *D_800C5758[]; /* per object type: 12-byte texture entries, u16 size at +8 / +0xA */
 void uv_rotate(u8 *, s32 *, s32, f32, s32, s32);
 
@@ -230,10 +221,6 @@ void obj_type_tex_scroll_apply(s32 type, s32 dl, s32 arg2, s32 cmd, s32 amount, 
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/obj_type_tex_scroll_apply.s")
-#endif
-#ifdef NON_MATCHING
 extern s32 D_800C4440;
 
 /* was func_15062FC0 */
@@ -325,9 +312,6 @@ block_18:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/obj_vtx_scroll_uv.s")
-#endif
 /* was func_15063168 */
 void obj_hit_react_other_players(struct127 *arg0) {
     s32 i;
@@ -340,7 +324,6 @@ void obj_hit_react_other_players(struct127 *arg0) {
         }
     }
 }
-#ifdef NON_MATCHING
 void obj_remove(struct127 *obj, s32 mode);
 s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
 
@@ -392,6 +375,3 @@ void obj_model_swap_keep_pose(struct127 *obj, s32 a1, s32 a2, f32 scale) {
     *(f32 *) (o + 0xC4) = fC4;
     *(s32 *) (link + 0x3D4) = *(s32 *) (o + 0x31C);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/obj_model_swap_keep_pose.s")
-#endif

@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 mdl_particle_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 void fx_pick_random_color(u8, u8 *, u8 *, u8 *);
 void puff_sprite_spawn(u8 *, s32);
@@ -161,6 +160,3 @@ void rubble_burst_with_dust(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4) {
     sp.uC5 = 0;
     puff_sprite_spawn(&sp.u94, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9430/rubble_burst_with_dust.s")
-#endif

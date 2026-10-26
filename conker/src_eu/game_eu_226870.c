@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 // P251: readable C for the MP3 Huffman group (hand-written asm mp3_huff_decode_pair / mp3_huff_read_bits / mp3_huff_decode_big_values /
 // mp3_huff_decode_count1). The two leaf routines used a private register ABI (a0 = byte pointer, t0 = bit position, s1 = bit
 // count, s0 = tree, s5 = lookup base, a2 = table; results in v0 / t1) and were only called by 9184 / 933C, so they
@@ -58,15 +57,7 @@ static void huff_decode_pair(HuffReader *r, s32 table, s32 *x, s32 *y) {
     *x = (s8) node[2];
     *y = (s8) node[3];
 }
-#else
-/* was func_151F9060 */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/mp3_huff_decode_pair.s")
 
-/* was func_151F911C */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/mp3_huff_read_bits.s")
-#endif
-
-#ifdef NON_MATCHING
 /*
  * mp3util_get_bits: P190 readable C for the hand-written mp3_get_bits.s. Returns the next `numbits` bits of buffer
  * at bit *offset (MSB first; the asm reads the big-endian word at byte *offset >> 3 unaligned with lwl / lwr) and
@@ -82,11 +73,7 @@ s32 mp3_get_bits(u8 *buffer, s32 *offset, s32 numbits) {
     *offset = pos + numbits;
     return word >> ((32 - numbits) & 0x1F);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/mp3_get_bits.s")
-#endif
 
-#ifdef NON_MATCHING
 // huff_decode_big_values: P251 readable C for mp3_huff_decode_big_values (hand asm). Decodes (x, y) pairs with table `table`
 // from line i up to `end` (exclusive, two lines per pair; nothing when end <= i). A value 15 of a table with
 // linbits is extended by `linbits` raw bits (+ 15); each non-zero value is followed by its sign bit (x's sign is
@@ -123,11 +110,7 @@ s32 mp3_huff_decode_big_values(u8 *buf, s32 *bitpos, s32 table, s32 i, s32 linbi
     *signs = s;
     return i;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/mp3_huff_decode_big_values.s")
-#endif
 
-#ifdef NON_MATCHING
 // huff_decode_count1: P251 readable C for mp3_huff_decode_count1 (hand asm). Decodes quadruples (four one-bit values
 // v, w, x, y packed in the low nibble of table `table`'s result) from line i while i < 576 and the bit position
 // is before `endBit` (both tested before every quadruple). Reads 4 bits ahead for the signs, takes one per non-zero
@@ -170,11 +153,7 @@ s32 mp3_huff_decode_count1(u8 *buf, s32 *bitpos, s32 table, s32 i, s32 endBit, s
     *signs = s;
     return i;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/mp3_huff_decode_count1.s")
-#endif
 
-#ifdef NON_MATCHING
 // mp3_imdct36_hybrid: P251 readable C for mp3_imdct36_hybrid. Long-block (36-point) IMDCT of one subband for the MP3
 // hybrid synthesis, then windowing and overlap-add (the fast algorithm of maplay / JLayer's inv_mdct, 9-point DCTs
 // on the even and odd inputs). `in` holds the 18 dequantised spectral lines of subband `sb` and is used as scratch
@@ -297,6 +276,3 @@ void mp3_imdct36_hybrid(f32 *in, s32 sb, f32 *out, f32 *prev, f32 *win) {
         prev[i] = res[i - 9] * win[18 + i];
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/mp3_imdct36_hybrid.s")
-#endif

@@ -98,7 +98,6 @@ s32 ambient_placer_hop(s16 *arg0, s16 *arg1, s32 *arg2, s32 arg3) {
     return 0;
 }
 
-#ifdef NON_MATCHING
 typedef struct {
     s16 pos[3];     /* +0 x, y, z */
     u8 mode;        /* +6 mode << 5 | slot (low nibble: the slot / voice 0..14) */
@@ -111,9 +110,7 @@ typedef struct {
 } AmbientEmitterRec;  /* 14 bytes (ambient_emitter_add layout) */
 extern AmbientEmitterRec *D_800DE148;
 extern s32 D_8008D254;   /* sort key: 0 = x, else z */
-#endif
 
-#ifdef NON_MATCHING
 /* per-frame updater of a placer type: may move the quad base / phase / alpha; non-zero = drop the emitter */
 typedef s32 (*AmbientUpdater)(AmbientEmitterRec *e, Vtx *quad, s32 *phase, u8 *alpha);
 typedef struct {
@@ -146,9 +143,7 @@ void particle_spark_spawn(s32 x, s32 y, s32 z, s32 arg3, s32 arg4, s32 arg5, s32
 void heap_free(s32);
 void ambient_emitters_sort(s32 lo, s32 hi);
 s32 game_gu_random(void);
-#endif
 
-#ifdef NON_MATCHING
 // ambient_emitters_sort: quicksort of the emitter records D_800DE148[lo..hi] (14 bytes) by x, or by z when
 // D_8008D254 is set; pivot = the last record (Rare's partition loop, literal).
 /* was func_1517BE0C */
@@ -186,11 +181,7 @@ void ambient_emitters_sort(s32 lo, s32 hi) {
     ambient_emitters_sort(lo, i - 1);
     ambient_emitters_sort(i + 1, hi);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/ambient_emitters_sort.s")
-#endif
 
-#ifdef NON_MATCHING
 // ambient_emitters_update: per frame, the level's ambient emitters (fires, torches: the records sorted by
 // ambient_emitters_sort) within radius of (x, y, z) along the axis the camera angle (degrees) faces: nearest distance per
 // slot (D_800DE070), the slot's voice loaded (D_800DD478 slot words + D_800DDA90 voice) or marked "heard" (read by
@@ -488,15 +479,9 @@ void ambient_emitters_update(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px,
     }
     D_800DD8A0[0] = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/ambient_emitters_update.s")
-#endif
 
-#ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
+// the definition is void (asm: v0 is not a result); one signature for wasm
 void heap_free(s32);
-#else
-s32 heap_free(s32);
-#endif
 s32 rzip_inflate(s32, s32, u32);
 
 /* was func_1517D534 */
@@ -510,7 +495,6 @@ void ambient_slots_free_all(void)
  do { var_s0 = &D_800DDA90; var_s1 = 0; do { temp_a0 = *((s32 *) (((u8 *) var_s0) + 8)); if (temp_a0 != 0) { temp_a1 = (&D_800DD478)[var_s1 * 0x1A]; if (temp_a1 != 0) { rzip_inflate(temp_a0, temp_a1, D_8003809C); heap_free(*((s32 *) (((u8 *) var_s0) + 8))); } *((s32 *) (((u8 *) var_s0) + 8)) = 0; } var_s1 += 1; var_s0 += 4; } while (var_s1 != 0xF); } while (0);
 }
 
-#ifdef NON_MATCHING
 extern s32 D_8008D340;
 // sprite_billboard_quad_draw: appends one upright textured quad to the display list gfx and returns the new end.
 // The quad takes vertex slot D_800DE188 of this frame's quad buffer D_800DDD10[D_800BE9C0] (nothing is drawn once
@@ -604,9 +588,6 @@ s32 ambient_billboard_quad_draw(s32 gfx, s16 x, s16 y, s16 z, f32 angle, s32 rad
     D_800DE188++;
     return (s32) (g + 26);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/ambient_billboard_quad_draw.s")
-#endif
 
 extern u8 D_800DE158[];
 
@@ -658,7 +639,6 @@ s32 ambient_extra_flames_draw(s32 arg0, u16 *arg1) {
     return arg0;
 }
 
-#ifdef NON_MATCHING
 s32 tint_emit_prim_env_colors(s32, s32, s32, s32);
 extern s32 D_8008D340;
 extern u16 *D_800DE154;
@@ -876,10 +856,6 @@ loop_16:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/ambient_flames_draw.s")
-#endif
-#ifdef NON_MATCHING
 void ambient_emitters_update(s32, s32, s32, s32, f32, s32, s32, s32);
 
 /* Per-frame refresh of the 15 positional sound slots (records of 0x68 bytes at D_800DD478, word 0 = active) and
@@ -909,9 +885,6 @@ void ambient_slots_refresh(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/ambient_slots_refresh.s")
-#endif
 
 /* was func_1517E5CC */
 void ambient_flare_point_set(s32 arg0, s32 arg1, s32 arg2) {

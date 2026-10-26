@@ -1,10 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void rain_update(s32);
 s32 world_object_sound_play(u8 *, s32, s32, s16, s16, s32);
-#endif
 
 
 /* was func_1510AFA0 */
@@ -12,7 +11,6 @@ void clock_level_callback(s32 arg0) {
     rain_update(0);
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800BE804;
 
 /* was func_1510AFC4 */
@@ -92,9 +90,6 @@ void clock_hands_update(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0xA8)) = (f32) -temp_f2;
     (*(f32 *)((u8 *)arg0 + 8)) = (f32) -((f32) var_t0 * 6.0f);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1387B0/clock_hands_update.s")
-#endif
 s32 world_object_sound_play(u8 *, s32, s32, s16, s16, s32);
 
 /* was func_1510B34C */

@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 f32 sinf(f32);
 f32 cosf(f32);
 f32 sqrtf(f32);
@@ -161,9 +160,6 @@ void camera_freecam_update(u8 *cam) {
                   *(f32 *)(cam + 0x2F8), *(f32 *)(cam + 0x2FC), *(f32 *)(cam + 0x300), *(f32 *)(cam + 0x2FC), 0, 0,
                   freecam_far[0], *(f32 *)(cam + 0x2FC));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1579B0/camera_freecam_update.s")
-#endif
 
 /* was func_1512A8D0 */
 void camera_title_carousel_update(u8 *arg0) {

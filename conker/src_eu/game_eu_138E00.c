@@ -1,13 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 void camera_compute_frustum_planes(s32);
-#endif
 
 
-#ifdef NON_MATCHING
 extern f32 D_800D3A90;
 extern f32 D_800D9F3C;
 extern f32 D_800D9F40;
@@ -30,10 +28,6 @@ void camera_set_screen_ortho(s32 arg0) {
     w = ((f32 *)((u8 *)D_800BE628 + 0xC))[0];
     game_gu_ortho(&D_800D9F48, -w, w, -h, h, 1.0f, D_800A2FF0, 1.0f);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_set_screen_ortho.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_800C3A6C;            /* extra angle added to both fields of view */
 extern f32 D_800C3A70;            /* viewport width override (0: use arg4 or the screen width) */
 extern f32 D_800C3A74;            /* viewport height override (0: the screen height) */
@@ -80,12 +74,6 @@ void camera_projection_update(s32 player, f32 fovX, f32 fovY, f32 scale, f32 wid
     r = (u8 *)D_800BE628 + off;
     camera_perspective_build(player, (u16 *)(r + 0xB8), *(f32 *)(r + 0x78), *(f32 *)(r + 0x74), w, h, scale);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_projection_update.s")
-#endif
-#ifndef NON_MATCHING
-s32 camera_projection_update(s32, f32, f32, f32, f32);
-#endif
 struct V3 { f32 x, y, z; };
 extern struct V3 D_800D9EE0[];
 extern u8 D_800D9F10;
@@ -111,7 +99,6 @@ void camera_projection_apply_pending_fov(void)
     D_800D9F10 = 0;
 }
 
-#ifdef NON_MATCHING
 struct PendingF2 { f32 x; f32 y; };
 extern struct PendingF2 D_800D9F18[];
 extern u8 D_800D9F38;
@@ -137,10 +124,6 @@ void camera_projection_set_viewport(s32 player, f32 width, f32 height) {
     D_800D9F18[player].y = height;
     D_800D9F38 = 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_projection_set_viewport.s")
-#endif
-#ifdef NON_MATCHING
 // Apply the pending per-player requests queued in D_800D9F18 (x == -1.0f: none) through camera_perspective_build,
 // with the player's camera record (D_800BE628, 0x180 bytes each).
 extern struct PendingF2 D_800D9F18[];
@@ -162,10 +145,6 @@ void camera_projection_apply_pending_viewport(void) {
     }
     D_800D9F38 = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_projection_apply_pending_viewport.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1510BB78 */
 void camera_perspective_build(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6) {
     s32 sp2C;
@@ -178,10 +157,6 @@ void camera_perspective_build(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4,
     temp_v0 = D_800BE628 + temp_v1;
     guMtxF2L(temp_v0 + 0xBC, temp_v0 + (D_800BE9C0 << 6) + 0x100);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_perspective_build.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_800DA030[][4][4];   /* per player: view matrix (float) */
 extern f32 D_800DA130[][4][4];   /* per player: product */
 extern u8 *D_800DC6D0[];         /* per DL buffer: fixed-point view matrices, 0x40 per player */
@@ -201,10 +176,6 @@ void camera_matrices_refresh_all(void) {
         camera_compute_frustum_planes(i);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_matrices_refresh_all.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1510BD34 */
 u8 *view_dl_begin(u8 *arg0, s32 arg1) {
     u8 *temp_a0;
@@ -256,10 +227,6 @@ u8 *view_dl_begin(u8 *arg0, s32 arg1) {
     (*(s32 *)((u8 *)temp_a0 + 4)) = 0x552230;
     return temp_a0 + 8;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/view_dl_begin.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_800D3A00;
 
 /* was func_1510BED8 */
@@ -270,10 +237,6 @@ void camera_zoom_factors_calc(s32 arg0) {
     D_800D3A00 = ((((*(f32 *)((u8 *)temp_v0 + 0x74)) / (*(f32 *)((u8 *)temp_v0 + 0x6C))) - 1.0f) * -1.0f) + (*(f32 *)((u8 *)temp_v0 + 0x64));
     *(((f32 *)((u8 *)&D_800D3A00 + 4))) = ((((*(f32 *)((u8 *)temp_v0 + 0x78)) / (*(f32 *)((u8 *)temp_v0 + 0x70))) - 1.0f) * -1.0f) + (*(f32 *)((u8 *)temp_v0 + 0x68));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_zoom_factors_calc.s")
-#endif
-#ifdef NON_MATCHING
 Gfx *mesh_dl_cull_copy(s32, Gfx *, u8 *, s32, s32, s32);
 Gfx *level_dl_visibility_filter(s32, Gfx *, u8 *, s32, s32, s32);
 Gfx *wobblers_set_tex_segments(Gfx *);
@@ -416,10 +379,6 @@ Gfx *player_view_dl_build(Gfx *gdl, s16 player) {
     gDPPipeSync(gdl++);
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/player_view_dl_build.s")
-#endif
-#ifdef NON_MATCHING
 /* P181 */
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 extern s32 D_800B1268[]; /* per texture key: the texture address its G_SETTIMG loads */
@@ -570,11 +529,7 @@ s32 dl_find_texture_vertices(Gfx *dl, s32 key, Vtx **out, s32 skip) {
     }
     return (s32)(vbase + (max + 1) * 16 - (u32)*out) >> 4;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/dl_find_texture_vertices.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P181 */
 u8 *allocate_memory(s32, s32, s32, s32);
 s32 dl_find_texture_vertices(Gfx *dl, s32 key, Vtx **out, s32 skip);
@@ -634,11 +589,7 @@ u8 *tex_scroll_create(s32 key, s32 off, s32 speed, s32 radius) {
     }
     return r;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/tex_scroll_create.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P128 */
 f32 sinf(f32);
 f32 cosf(f32);
@@ -700,6 +651,3 @@ s32 tex_scroll_update(void) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/tex_scroll_update.s")
-#endif

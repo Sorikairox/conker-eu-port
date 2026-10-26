@@ -25,7 +25,6 @@ void obj_collision_sizes_update(void) {
     }
 }
 
-#ifdef NON_MATCHING
 extern u8 D_800B89C4[];
 extern f32 D_8009BA58;
 
@@ -161,6 +160,3 @@ out:
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_A9F60/obj_collision_cylinder.s")
-#endif

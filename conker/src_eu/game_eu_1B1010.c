@@ -1,13 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void texture_id_list_release(s16 *arg0);
 void heap_free(s32);
-#endif
 
 
-#ifdef NON_MATCHING
 /* P186 */
 void swarm_spawn(u8 kind, u8 *pos, s32, s32 x, s32 y, s32 z, s32, s32 span, s32 flag, s32, s32 w6);
 void flyer_field_spawn(s32, s32 slot, s32 x, s32 y, s32 z, s32, s32 player, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, s32);
@@ -105,9 +103,6 @@ s32 ambfx_effect_start(s32 x, s32 y, s32 z, s32 a, s32 kind, s32 unused, s32 pla
     }
     return slot;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1010/ambfx_effect_start.s")
-#endif
 
 u8 *asset_load_with_subfiles(s32, s32, s32, s32, s32, s32);
 void anim_mesh_load(s32);
@@ -174,7 +169,6 @@ void anim_mesh_load_dependent(s32 arg0, s32 arg1)
   }
 }
 
-#ifdef NON_MATCHING
 /* P133 */
 s32 texture_resolve_dl_ids(Gfx *, s32, s32, s32, s16 **);
 
@@ -204,9 +198,6 @@ void anim_mesh_load(s32 idx) {
     texture_resolve_dl_ids((Gfx *) asset[4], 0, 1, 0x3E, (s16 **) &slot[4]);
     D_800DDF68[idx] = 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1010/anim_mesh_load.s")
-#endif
 
 extern u8 D_800A76B0[];
 extern s32 D_800DDF78[];
@@ -230,7 +221,6 @@ Gfx *anim_mesh_draw_by_id(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
     return gdl;
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800DE350;
 extern s8 D_800DE3A0;
 extern s8 D_800DE3A1;
@@ -263,10 +253,6 @@ void anim_mesh_release(s32 arg0) {
         D_800DDF78[arg0] = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1010/anim_mesh_release.s")
-#endif
-#ifdef NON_MATCHING
 /* P125 */
 extern u8 D_8008D450[];
 extern u8 *D_8008D760[];
@@ -342,9 +328,6 @@ void anim_meshes_update(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1010/anim_meshes_update.s")
-#endif
 
 /* was func_15184688 */
 s32 ambfx_obj_record_flag57(u8 *arg0) {

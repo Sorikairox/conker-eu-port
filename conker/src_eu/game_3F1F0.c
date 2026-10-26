@@ -10,7 +10,6 @@ void level_hook_call_15103800(void) {
 }
 
 // doesnt look like fun
-#ifdef NON_MATCHING
 // marker_effect_spawn: P256: spawns a type 0x12C effect (effect_node_create, 0x4C-byte state copied to +0x28) for `obj`
 // and its slot byte (low byte of the word at obj +0x1C): the state holds obj, the slot, slot >= 4, a life of
 // 300 + rand % 121, eight handles world_record_find(D_800A1FD0[i * 8 + slot]) and the position of the slot's map marker
@@ -76,6 +75,3 @@ s32 marker_effect_spawn(u8 *obj) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3F1F0/marker_effect_spawn.s")
-#endif

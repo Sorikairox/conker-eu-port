@@ -1,12 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void light_viewport_to_fixed(s16 *arg0);
 void light_get_zone_colour(s32, s32, s32, s32, u8 *, s32, s32);
 void light_get_tint_zone(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7);
 void light_fill_point_light(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-#endif
 // hoisted forward declaration(s) for light_add_point
 s32 light_add_point(s32, s32, s32, s32, s32, s32, s32, s32, s32, u8);
 
@@ -35,7 +34,6 @@ u8 *light_alloc_light_buf(s32 arg0) {
     return p;
 }
 
-#ifdef NON_MATCHING
 /* was func_1515D4D4 */
 void light_set_level_colour(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
     s32 temp_t6;
@@ -49,9 +47,6 @@ void light_set_level_colour(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
         D_800DD157 = (u8) temp_t6;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/light_set_level_colour.s")
-#endif
 struct lnode_1515DA90 { struct lnode_1515DA90 *next; };
 /* was func_1515DA90 */
 struct lnode_1515DA90 *light_list_append_new(void) {
@@ -121,7 +116,6 @@ void light_list_clear_frame_flags(void) {
 void light_stub(void) {
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800DD140;
 
 /* Per-player view setup: no lights, lighting on, then light_viewport_to_fixed turns the player's current viewport
@@ -176,10 +170,6 @@ Gfx *light_setup_view(Gfx *gdl, s32 player) {
     gdl++;
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/light_setup_view.s")
-#endif
-#ifdef NON_MATCHING
 /* Per-object lighting: colours from light_get_zone_colour (fog/tint blend when flags & 2), then the (maxLights - 1) nearest
  * enabled point lights of the D_800DCD78 list (insertion sort by squared distance; flags & 1: from the player's camera
  * direction, flags & 4: no range cut-off), light structs (0x30 each) at base + (D_800BE9C0 * maxLights + i) * 0x30
@@ -362,12 +352,8 @@ Gfx *light_apply_object_lights(Gfx *gdl, s16 player, s32 x, s32 y, s32 z, s32 ar
     }
     return (Gfx *)g;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/light_apply_object_lights.s")
-#endif
 u8 *light_zone_find_at(s32, s32, s32, s32, u8 **);
 
-#ifdef NON_MATCHING
 /* Starting light colour of a position (P43): the colour zone of the D_800DCD80 list that contains (x, y, z) (word +0x18,
  * bytes R, G, B from the low end), else the level colour D_800DCD20 scaled by (0x100 - ((arg5 >> 5) & 3) * 0x40) >> 8.
  * flags & 0x10: blend with the fog / tint zone of light_get_tint_zone: c' = (tintB * (c + ((0xFF - c) * fb >> 8))) >> 8,
@@ -408,9 +394,6 @@ void light_get_zone_colour(s32 x, s32 y, s32 z, s32 mask, u8 *col, s32 arg5, s32
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/light_get_zone_colour.s")
-#endif
 
 /* was func_1515E9AC */
 void light_get_tint_zone(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7) {
@@ -438,7 +421,6 @@ void light_get_tint_zone(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *a
     }
 }
 
-#ifdef NON_MATCHING
 /* was func_1515EAB4 */
 u8 *light_write_light_cmds(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4) {
     s32 *temp_t3;
@@ -541,10 +523,6 @@ block_8:
     (*(s32 *)((u8 *)temp_a0 + 4)) = arg4;
     return temp_a0 + 8;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/light_write_light_cmds.s")
-#endif
-#ifdef NON_MATCHING
 void light_get_zone_colour(s32, s32, s32, s32, u8 *, s32, s32);
 extern u8 D_800DA241;
 extern u8 *D_800DA248;
@@ -665,9 +643,6 @@ void light_compute_point_colour(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4
     }
     (*(u8 *)((u8 *)arg5 + 2)) = (u8) var_v0_3;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/light_compute_point_colour.s")
-#endif
 /* was func_1515F0F4 */
 u8 *light_zone_find_at(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 **arg4) {
     struct127 sp;
@@ -696,7 +671,6 @@ u8 *light_zone_find_at(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 **arg4) {
     return NULL;
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800DA030;
 
 /* was func_1515F1E8 */
@@ -814,9 +788,6 @@ void light_fill_point_light(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, s3
     } while (var_v1 != &sp.u54);
     (*(u8 *)((u8 *)arg2 + 0xC)) = (u8) (*(u8 *)((u8 *)arg0 + 0x2F));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/light_fill_point_light.s")
-#endif
 void light_store_fixed(f32, s32);
 
 /* was func_1515F4E4 */

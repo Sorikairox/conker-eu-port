@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* damage_smoke_spawn records (stack images; pad bytes stay unset like the asm's) */
 typedef struct {
     u8 *obj;        /* 0x00 */
@@ -71,9 +70,7 @@ typedef struct {
 extern u32 D_800A0710[4];
 s32 memcpy(void *, void *, s32);
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-#endif
 
-#ifdef NON_MATCHING
 // object_glow_spawn: spawns a type `kind` object (0x12C when kind is -1; effect_node_create) linked to obj (record at +0x28:
 // obj, room, the glow at +0xC; field +0x14 = 0x54 / +0x16 = 1 for a type 0x34 owner, else -1 / 0), then a glow
 // (particle_spawn_ex type 1, radius 700, a random colour of D_800A0710, random flag bits 0x40 / 0x80) whose +0xA8 tail
@@ -159,11 +156,7 @@ void damage_smoke_spawn(u8 *obj, s16 kind, u8 flag, s32 arg3) {
         memcpy(e + 0xA8, &tail, 0x10);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F1E30/damage_smoke_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 void hitinfo_from_obj_floor(f32 *, u8 *);
 u8 *attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
 s32 model_node_points_to_world(u8 *, u8 *, s32, f32 **, f32 **, s32);
@@ -329,9 +322,6 @@ void damage_smoke_update(u8 *self) {
         rec->sparks -= 1.0f;
     } while (1.0f < rec->sparks);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F1E30/damage_smoke_update.s")
-#endif
 
 /* was func_150C4FD8 */
 void damage_smoke_destroy_glow(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0x34) != 0) { node_destroy(*(struct102 **)(p + 0x34)); } }

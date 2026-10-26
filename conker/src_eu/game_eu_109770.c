@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void emit_sparks_by_angles_b(u8 *arg0, s32 arg1);
 void emit_sprite_nodes_by_angles(u8 *arg0, s32 arg1, s32 arg2);
 u8 *object_emitter_spawn(u8 *, s32, u8, s32);
@@ -104,11 +103,7 @@ void spark_effect_on_event(u8 *obj, s32 mode, u8 flag) {
         object_emitter_spawn(obj, 2, flag, 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/spark_effect_on_event.s")
-#endif
 
-#ifdef NON_MATCHING
 void emit_sparks_by_angles_b(u8 *arg0, s32 arg1);
 
 /* was func_150DC1E0 */
@@ -177,10 +172,6 @@ void spark_burst_handler(u8 *arg0) {
     sp.u30 = 0.0f;
     emit_sparks_by_angles_b((u8 *) &sp.u18, (*(u8 *)((u8 *)arg0 + 0xC)));   /* the callee never reads a2 */
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/spark_burst_handler.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_800A1028, D_800A102C, D_800A1030, D_800A1034, D_800A1038, D_800A103C, D_800A1040, D_800A1044, D_800A1048,
     D_800A104C, D_800A1050, D_800A1054, D_800A1058, D_800A105C, D_800A1060, D_800A1064, D_800A1068, D_800A106C,
     D_800A1070, D_800A1074, D_800A1078, D_800A107C, D_800A1080, D_800A1084, D_800A1088, D_800A108C, D_800A1090,
@@ -445,11 +436,7 @@ u8 *item_effect_spawn(u8 kind, s32 arg1) {
     }
     return rec;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/item_effect_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 /* Shared by fountain_step / fountain_emit / fountain_draw (the fountain effect of item_effect_spawn). */
 /* The 0x11C-byte effect data of item_effect_spawn (obj +0x98); same layout as its local `d`. */
 typedef struct {
@@ -486,9 +473,7 @@ typedef struct {
     u8 pad36[2];
 } FountainDrop;
 void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
-#endif
 
-#ifdef NON_MATCHING
 /* Splash ring record for sprite_fx_spawn_quad (fields not set stay as they are). */
 typedef struct {
     s32 u00;                /* 0x00 1 */
@@ -703,11 +688,7 @@ s32 fountain_step(u8 *obj) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/fountain_step.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_800A10C4;
 void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 
@@ -859,11 +840,7 @@ s32 fountain_emit(u8 *obj) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/fountain_emit.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_800DD608[], D_800DD618[]; /* per view: camera yaw sine / cosine */
 extern s32 D_800D30BC;
 extern s32 D_800A4EA8[];
@@ -1017,9 +994,6 @@ s32 fountain_draw(u8 *obj, s32 gfx, s16 view) {
     return gfx;
 }
 #undef FOUNTAIN_VTX
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/fountain_draw.s")
-#endif
 
 /* was func_150DE450 */
 void fountain_spawn_by_marker(u8 *arg0) {

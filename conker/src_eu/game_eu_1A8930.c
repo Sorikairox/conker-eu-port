@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted: player_morph_cache_age calls it before player_morph_blend's block
+// hoisted: player_morph_cache_age calls it before player_morph_blend's block
 void heap_free(s32);
-#endif
 
 
 typedef struct {
@@ -41,7 +40,6 @@ void player_morph_cache_age(void) {
     }
 }
 
-#ifdef NON_MATCHING
 u8 obj_current_part_model(struct127 *);
 s32 asset_load(s32 *arg0, s32 arg1, ...);
 void os_writeback_dcache(void *, s32); /* osWritebackDCache */
@@ -219,6 +217,3 @@ s32 player_morph_blend(s32 target, s32 frames, s32 idx) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A8930/player_morph_blend.s")
-#endif

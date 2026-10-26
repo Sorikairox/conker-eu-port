@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 typedef struct {
     f32 f[4];        // 0x00
     s16 u10;         // 0x10
@@ -68,9 +67,6 @@ void drip_effect_attach(struct127 *obj, s32 arg1, s32 arg2) {
     spec.id = ((u8 *) obj)[0x3B];
     drip_effect_create((s32) &spec, arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/drip_effect_attach.s")
-#endif
 
 /* was func_1518C164 */
 void drip_effect_detach(u8 *arg0) {
@@ -112,7 +108,6 @@ u8 *drip_effect_create(s32 arg0, u8 arg1, s32 arg2) {
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 
 /* was func_1518C2D0 */
@@ -212,10 +207,6 @@ void drip_effect_update(u8 *arg0) {
         var_s3 = temp_t7;
     } while (temp_t7 < 2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/drip_effect_update.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1518C628 */
 s32 drip_stream_update(u8 *arg0) {
     struct {
@@ -354,9 +345,6 @@ s32 drip_stream_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/drip_stream_update.s")
-#endif
 /* was func_1518CAB0 */
 s32 drip_stream_fade(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);
@@ -420,7 +408,6 @@ s32 drip_stream_splash(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* was func_1518CC0C */
 s32 drip_stream_splash_dust(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     struct {
@@ -466,9 +453,6 @@ s32 drip_stream_splash_dust(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s3
     impact_dust_particle_spawn(sp.u47, (random_float() * 40.0f) + 100.0f, 0xFF, arg5, &sp.u38, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/drip_stream_splash_dust.s")
-#endif
 /* was func_1518CDC0 */
 void drip_effect_on_event(struct102 *arg0, u8 *arg1, u8 arg2) {
     s32 id;

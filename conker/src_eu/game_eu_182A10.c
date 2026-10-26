@@ -46,7 +46,6 @@ void sprite2d_update(u8 *arg0)
   }
 }
 
-#ifdef NON_MATCHING
 /* A 2D sprite drawn as one textured rectangle (HUD elements). Only the fields sprite2d_draw reads. */
 typedef struct {
     u8  pad0[0x10];
@@ -192,11 +191,7 @@ Gfx *sprite2d_draw(Gfx *gdl, Sprite2D *spr, s16 view) {
     gSPScisTextureRectangle(gdl++, xl, yl, xh, yh, G_TX_RENDERTILE, s, t, dsdx, dtdy);
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_182A10/sprite2d_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 sprite2d_find_overlap(u8 *, f32 *, s32, s32); /* P98: the asm reads a2 / a3 (the caller's arg2 / arg3, left in place) */
 s32 memcpy(u8 *, u8 *, s32);
 
@@ -232,9 +227,6 @@ u8 *sprite2d_spawn(u8 *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32
     (*(s8 *)((u8 *)sp.u34 + 0x68)) = (s8) (0 | arg1);
     return sp.u34;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_182A10/sprite2d_spawn.s")
-#endif
 /* was func_15155AD4 */
 void sprite2d_handle_message(u8 *arg0, s32 arg1, u8 arg2) {
     void (*fp)(void *, s32, u8) = D_8008B0A4[arg0[0x2A]];
@@ -243,7 +235,6 @@ void sprite2d_handle_message(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 // effect_overlap_find: whether a live effect of one of the `count` kinds in the s32 list `kinds` already overlaps the
 // box around `spec` (centre spec +0 / +4, half sizes ext[0] / ext[1]): walks the effect lists 0x5D and 0x57 of both
 // D_800DD280 banks; an effect (kind +0x2A, centre +0x10 / +0x14, half sizes +0x18 / +0x1C) overlaps when its centre
@@ -290,9 +281,6 @@ s32 sprite2d_find_overlap(u8 *spec, f32 *ext, s32 kinds, s32 count) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_182A10/sprite2d_find_overlap.s")
-#endif
 
 /* was func_15155C9C */
 void sprite2d_broadcast(void *arg0, u8 arg1) {

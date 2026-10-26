@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
 f32 vec3f_dot(struct17 *, struct17 *);
 void math_spring_approach_angle(f32 *, f32, s32 *, f32, f32, f32);
@@ -55,9 +54,6 @@ void camera_segment_track(struct108 *arg0) {
         arg0->unk84 &= 0x3FFFEFFF;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_123FB0/camera_segment_track.s")
-#endif
 // NON-MATCHING: 90% there
 // void camera_segment_track(struct108 *arg0) {
 //     struct190 tmp;

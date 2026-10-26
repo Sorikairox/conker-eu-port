@@ -6,9 +6,7 @@
 struct249 *event_find(s16 arg0);
 void save_block_realloc_random(void);
 void game_over_apply_pending(void);
-#ifdef NON_MATCHING
 struct249 *event_start(s32 id, s32 arg1);
-#endif
 
 
 /* was func_1509B4A0 */
@@ -44,7 +42,6 @@ u16 *event_get_vars(s32 arg0) {
     return NULL;
 }
 
-#ifdef NON_MATCHING
 struct249 *event_find(s16 arg0);
 struct249 *event_load(s16 arg0);
 void event_link_sorted(struct249 *arg0);
@@ -88,9 +85,6 @@ struct249 *event_start(s32 id, s32 arg1) {
     }
     return e;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/event_start.s")
-#endif
 
 /* was func_1509B704 */
 struct249 *event_find(s16 arg0) {
@@ -179,7 +173,6 @@ void event_link_sorted(struct249 *arg0) {
     D_800D2F48.length += 1;
 }
 
-#ifdef NON_MATCHING
 /* event_load: load event block `arg0` (asset 20) and relocate it; the caller event_start uses the result (the matching
  * void version leaves it in v0). */
 /* was func_1509B8FC */
@@ -192,19 +185,7 @@ struct249 *event_load(s16 arg0) {
     temp_v0->unk2 = D_800BE9F0;
     return (struct249 *) event_block_relocate((struct_eu_C8950_blk *) temp_v0);
 }
-#else
-void event_load(s16 arg0) {
-    struct248 *temp_v0;
-    s16 sp18[2];
 
-    temp_v0 = asset_load(&sp18, 2, 20, arg0);
-    temp_v0->unk0 |= arg0;
-    temp_v0->unk2 = D_800BE9F0;
-    event_block_relocate(temp_v0);
-}
-#endif
-
-#ifdef NON_MATCHING
 /* event_block_relocate: relocate a loaded event block: the variable area (unk6 bytes) goes after the script at an 8-aligned offset
  * (unkA), the block size is rounded up to 8, the block is copied to a new allocation with the variables cleared,
  * and the old block is freed. */
@@ -227,9 +208,6 @@ struct_eu_C8950_blk *event_block_relocate(struct_eu_C8950_blk *blk) {
     heap_free((s32) blk);
     return new;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/event_block_relocate.s")
-#endif
 // NON-MATCHING: register allocation of pad/pos swapped (v1/t0)
 // struct_eu_C8950_blk *event_block_relocate(struct_eu_C8950_blk *arg0) {
 //     u16 pos;
@@ -252,7 +230,6 @@ struct_eu_C8950_blk *event_block_relocate(struct_eu_C8950_blk *blk) {
 //     return new;
 // }
 
-#ifdef NON_MATCHING
 void event_vm_run(struct249 *, s32);
 void event_unlink_free(struct249 *);
 void event_send_cmd36(void);
@@ -299,10 +276,6 @@ void event_list_unload(s32 arg0) {
         e = next;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/event_list_unload.s")
-#endif
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
 void event_vm_run(struct249 *, s32);
 extern s16 D_800BEE12;
@@ -388,11 +361,7 @@ block_26:
         D_800D3858 = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/event_list_run_phase.s")
-#endif
 //
-#ifdef NON_MATCHING
 #include <stdarg.h>
 extern s32 D_800D3380[];
 extern s32 D_800D3C60;
@@ -423,11 +392,7 @@ s32 event_dispatch(s32 n, s32 id, ...) {
     D_800D3C60 = saved;
     return r;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/event_dispatch.s")
-#endif
 
-#ifdef NON_MATCHING
 extern void (*D_80088874[])(s32, s32, s32 *);
 
 /* Variadic event dispatch like event_dispatch, on the second handler table: event_dispatch_alt(n, id, arg, x1 .. xn) sets
@@ -451,9 +416,6 @@ void event_dispatch_alt(s32 n, s32 id, s32 arg, ...) {
     D_80088874[((id & 0xF000) >> 12) - 1](id & 0xFFF, arg, D_800D3380);
     D_800D3C60 = saved;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/event_dispatch_alt.s")
-#endif
 
 // need a bigger brain
 /* was func_1509C120 */

@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 extern f32 D_800A8590;
 s32 sprite_vtx_quads_init(s32 *, s32, s32, s32, s32);
 
@@ -56,9 +55,6 @@ void ceiling_drip_spawn(u8 *arg0) {
     node_spawn_vtx_sprite(&sp.u28, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
     (*(s16 *)((u8 *)arg0 + 0xE)) = (s16) ((random_int() & 0x7F) + 0x64);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1110/ceiling_drip_spawn.s")
-#endif
 /* was func_15193A24 */
 void ceiling_drip_fall_update(u8 *arg0) {
     s16 temp_v0;

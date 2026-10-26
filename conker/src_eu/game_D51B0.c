@@ -4,7 +4,6 @@
 
 
 // s16 / f32 matrix
-#ifdef NON_MATCHING
 /* guTranslate-style fixed-point Mtx: identity with the translation (x, y, z) in s15.16 */
 /* was func_150A7D00 */
 void mtx_translate_fixed(s16 *mtx, f32 x, f32 y, f32 z) {
@@ -29,6 +28,3 @@ void mtx_translate_fixed(s16 *mtx, f32 x, f32 y, f32 z) {
     mtx[29] = iy;
     mtx[30] = iz;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_D51B0/mtx_translate_fixed.s")
-#endif

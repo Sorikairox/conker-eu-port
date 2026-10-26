@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P179 */
 extern u8 *D_80087000[];
 extern u8 D_8009CF9C[];
@@ -88,9 +87,6 @@ s32 obj_reach_hit(s32 arg0, u8 *target, s32 kind, f32 reach, f32 grow, s32 arg5)
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE930/obj_reach_hit.s")
-#endif
 
 extern u16 D_8009C100;
 extern u16 D_8009C104;
@@ -117,7 +113,6 @@ s32 obj_hit_model_kind(u8 *arg0) {
     return -1;
 }
 
-#ifdef NON_MATCHING
 /* P150 */
 extern u8 *D_80087000[];
 extern u8 D_8009CF9C[];
@@ -229,11 +224,7 @@ s32 obj_ray_hit_model(u8 *obj, f32 *start, f32 *dir, f32 *point, f32 *exitPoint,
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE930/obj_ray_hit_model.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 obj_reach_hit(s32, u8 *, s32, f32, f32, s32);
 
 /* was func_15081974 */
@@ -261,6 +252,3 @@ loop_1:
     }
     goto loop_1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE930/obj_find_reach_hit.s")
-#endif

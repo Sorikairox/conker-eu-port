@@ -1,16 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern s32 D_800D3668;
 extern s32 D_800D3A8C;
 extern f32 D_800D3A00;
 extern f32 D_800D3A90;
 extern u8 *D_800DC278;
-#endif
 
 
-#ifdef NON_MATCHING
 /* P186 */
 extern u8 D_800D3A08[]; /* per-vertex cull flags, 4 bytes per vertex: x' < 0, inside the side planes, in front */
 
@@ -86,16 +84,8 @@ Gfx *mesh_dl_cull_copy(s32 dl, Gfx *gdl, u8 *mtx, s32 arg3, s32 arg4, s32 base) 
         src += 2;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/mesh_dl_cull_copy.s")
-#endif
 
-#ifndef NON_MATCHING /* P186: the loop of mesh_dl_cull_copy (folded into its C) */
-/* was func_150A563C */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/mesh_dl_cull_copy_loop.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P34: C for the hand-written asm blob level_dl_visibility_filter .. level_box_corner_outcode (game_eu_D2DB0, 0x150A5858-0x150A606C).
  * The inner glabels func_150A595C / func_150A5A9C / func_150A5AF0 / level_dl_filter_loop / func_150A5C70 / func_150A5C78 /
  * func_150A5C7C are loop labels, level_dl_state_flush (state flush) and level_box_corner_outcode (corner outcode, arguments in
@@ -479,20 +469,5 @@ walked:
 #undef W_NZ
 #undef W_EQ
 #undef W_EMIT
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/level_dl_visibility_filter.s")
-#endif
-#ifndef NON_MATCHING
-/* was func_150A5BE8 */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/level_dl_filter_loop.s")
-#endif
 
-#ifndef NON_MATCHING
-/* was func_150A5D08 */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/level_dl_state_flush.s")
-#endif
 
-#ifndef NON_MATCHING
-/* was func_150A5F98 */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/level_box_corner_outcode.s")
-#endif

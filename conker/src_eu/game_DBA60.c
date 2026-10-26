@@ -2,9 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
-#endif
 
 
 /* was func_150AE5B0 */
@@ -41,7 +39,6 @@ void camera_update_event_modes(struct108 *arg0) {
 }
 
 
-#ifdef NON_MATCHING
 void mtx_get_translation(void *, s32, void *);
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
@@ -213,13 +210,9 @@ void owner_child_spark_burst(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/owner_child_spark_burst.s")
-#endif
 // some funky xor going on
 // spawns the objects of D_80088A80[0]; also checksums the code range
 // quadtree_alloc_node_pool..D_15001B08 and, if it was modified, clears object list 35 (anti-tamper)
-#ifdef NON_MATCHING
 // owner_spawn_children: spawns the objects of spawn list D_80088A80[0] (effect_node_create_nodraw kind 0x27) for `owner`
 // (P151): each new object gets the owner (+0x28), its sub-type (+0x2C = owner +0x3B) and the entry byte (+0x2D);
 // stops when a spawn fails. The N64 code also sums the code words quadtree_alloc_node_pool..D_15001B08 and on a mismatch
@@ -243,9 +236,6 @@ void owner_spawn_children(u8 *owner) {
         obj[0x2D] = D_80088A80[0].entries[i].unk0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/owner_spawn_children.s")
-#endif
 // NON-MATCHING: regalloc; checksums code quadtree_alloc_node_pool..D_15001B08 against 0x1B61AF60 (anti-tamper), clears object list 35 on mismatch
 // void owner_spawn_children(u8 *arg0) {
 //     u32 *p;

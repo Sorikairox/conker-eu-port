@@ -22,7 +22,6 @@ void crumble_emitter_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 void vec3_from_angles_byte(s16, s16, f32, void *);
 void obj_get_fx_point_b(u8 *, f32 *, f32 *, f32 *);
 s32 tumble_debris_spawn(f32 *, f32 *, f32, f32 *, f32 *, f32, f32, s32, s32, s32, s32, s32, s32);
@@ -96,9 +95,6 @@ void crumble_emitter_update(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E81B0/crumble_emitter_update.s")
-#endif
 /* was func_150BADD0 */
 void crumble_emitter_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     effect_node_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
@@ -134,7 +130,6 @@ s32 crumble_return_9(s32 arg0, s32 arg1) {
     return 9;
 }
 
-#ifdef NON_MATCHING
 s32 fx_try_camera_shake(s32, s32);
 void spawn_circle_random_emit(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
 s32 water_ring_spawn(s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -164,6 +159,3 @@ void obj_heavy_impact_fx(u8 *arg0, u8 arg1, s32 arg2) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E81B0/obj_heavy_impact_fx.s")
-#endif

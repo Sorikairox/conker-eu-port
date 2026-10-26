@@ -13,7 +13,6 @@ void tail_record_alloc(u8 *arg0) {
     (*(s16 *)((u8 *)((*(u8 **)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x11C))) + 0x4C)) = (s16) (random_int() % 30U);
 }
 
-#ifdef NON_MATCHING
 extern u16 D_80098BE0[3];
 extern u16 D_80098B2C;
 extern u16 D_80098B2E;
@@ -54,9 +53,6 @@ void obj_set_kind_look_flags(struct127 *obj) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_692C0/obj_set_kind_look_flags.s")
-#endif
 
 extern u8 D_800CC9EB;
 /* was func_1503BC4C */
@@ -73,7 +69,6 @@ s32 tail_get_mode(s32 arg0, u8 *arg1) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 f32 sinf(f32);
 f32 cosf(f32);
 f32 math_angle_diff_deg(f32, f32);
@@ -463,11 +458,7 @@ void tail_update_conker(s32 arg0) {
     }
     tail_build_joint_matrices(arg0, mode, fade, (u8 *) rec);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_692C0/tail_update_conker.s")
-#endif
 
-#ifdef NON_MATCHING
 void mtx_rotate_scale_3x3(f32 mtx[4][4], f32, f32, f32, f32, f32, f32);
 void mtxf_look_at(f32 mtx[4][4], f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy, f32 upz);
 void mtxf_scale_set_trans(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 arg4, f32 arg5, f32 arg6);
@@ -541,6 +532,3 @@ void tail_build_joint_matrices(s32 idx, s32 mode, f32 fade, u8 *rec) {
         rec[0x4E] = 30;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_692C0/tail_build_joint_matrices.s")
-#endif

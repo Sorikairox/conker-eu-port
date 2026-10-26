@@ -36,7 +36,6 @@ void smoke_trail_destroy_puffs(void *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 void * memcpy(void *, const void *, s32);
 
 /* was func_150C0FC0 */
@@ -94,10 +93,6 @@ block_5:
     (*(s32 *)((u8 *)temp_v0 + 0x14)) = 0;
     return temp_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/smoke_trail_spawn.s")
-#endif
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 extern f32 D_800BE9A4;
 extern s32 D_800BE9E4;
@@ -291,11 +286,7 @@ void smoke_trail_update(Trail1138 *obj) {
         node_destroy((struct102 *) obj);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/smoke_trail_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /*
  * pool_slot_release: particle death handler 0 (D_80089BA0, called by particle_sprite_update before the free). The owner
  * at +0xA8 keeps 8-byte slots at +0x40 (object pointer, s16 next) in a used list (head +0x44) and a free list
@@ -335,6 +326,3 @@ void pool_slot_release(u8 *arg0) {
         *(s16 *)(pool + 0x46) = cur;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/pool_slot_release.s")
-#endif

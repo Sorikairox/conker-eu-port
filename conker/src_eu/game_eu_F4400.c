@@ -98,7 +98,6 @@ void ground_trail_b_keep_alive(u8 *arg0)
   *((s32 *) new_var) = ground_trail_b_spawn(temp_a2, new_var2, *((s32 *) (((u8 *) new_var2) + 0x18)));
 }
 
-#ifdef NON_MATCHING
 s32 collision_floor_dynamic_b_full(f32 *, s32, f32, u8 *);
 s32 emitter_trail_spawn(s32 *, s32, s32, s32);
 s32 memcpy(s32, u8 **, s32);
@@ -165,9 +164,6 @@ s32 ground_trail_b_spawn(s32 arg0, u8 *arg1, s32 arg2) {
     }
     return temp_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4400/ground_trail_b_spawn.s")
-#endif
 s32 particle_spawn_default(void *, s32, s32);
 /* was func_150C6F08 */
 void ground_trail_b_particle_spawn(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
@@ -305,7 +301,6 @@ s32 ground_trail_b_alive_check(u8 *arg0) {
     return ret;
 }
 
-#ifdef NON_MATCHING
 s32 object_list_move_1(u8 *);
 s32 object_list_free(u8 *);
 
@@ -324,21 +319,7 @@ s32 ground_trail_b_free(u8 *arg0) {
     *(s32 *)(temp_v0 + 0x18) = 0;
     return object_list_free(arg0);
 }
-#else
-void ground_trail_b_retire(u8 *arg0) {
-    u8 *temp_v0 = *(u8 **)(arg0 + 0x58) + 0x58;
-    *(s32 *)(temp_v0 + 0x18) = 0;
-    object_list_move_1(arg0);
-}
 
-void ground_trail_b_free(u8 *arg0) {
-    u8 *temp_v0 = *(u8 **)(arg0 + 0x58) + 0x58;
-    *(s32 *)(temp_v0 + 0x18) = 0;
-    object_list_free(arg0);
-}
-#endif
-
-#ifdef NON_MATCHING
 s32 collision_floor_dynamic_b_full(f32 *, s32, f32, u8 *);
 u8 impact_current_kind(void);
 extern s32 D_80088B80;
@@ -447,6 +428,3 @@ s32 ground_glow_b_spawn(u8 *arg0) {
     }
     return (s32) sp.uD4;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4400/ground_glow_b_spawn.s")
-#endif

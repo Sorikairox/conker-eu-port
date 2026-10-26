@@ -171,11 +171,7 @@ s32 fx_spark_burst_with_light(s32 *arg0, s32 *arg1, f32 arg2, u8 arg3, s32 arg4)
 
 void vec3_from_angles_byte(s16, s16, f32, void *);
 s32 fx_spark_burst_with_light(s32 *, s32 *, f32, u8, s32);
-#ifdef NON_MATCHING
 void spawn_region_random_point_3d(u8 *arg0, u8 *arg1);
-#else
-s32 spawn_region_random_point_3d(s32, s32 *);
-#endif
 
 /* was func_150EA3B4 */
 void fx_marker_spark_emitter_update(u8 *arg0)

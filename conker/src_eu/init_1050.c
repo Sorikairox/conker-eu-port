@@ -28,7 +28,6 @@ void boot_idle_thread_main(s32 arg0) {
     do {} while(1);
 }
 
-#ifdef NON_MATCHING
 /* P281: readable C for boot_game_thread_main (compiled C, 210 insns; EU version of the commented US draft below). It ends
    in game_thread_main, which never returns (difftest stubs it, so the whole body is compared). */
 extern OSMesgQueue D_8003B578;   /* VI retrace queue (reset path) */
@@ -116,9 +115,6 @@ void boot_game_thread_main(s32 arg0) {
     tlb_page_bitmap_reset();
     game_thread_main();
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_1050/boot_game_thread_main.s")
-#endif
 // NON-MATCHING: start/end mostly ok, middle, not-so-much.
 // s32 *allocate_memory(s32, s32, s32, s32);
 // void boot_game_thread_main(s32 arg0) {

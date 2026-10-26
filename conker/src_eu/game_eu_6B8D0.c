@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 extern s32 D_800C6A70;
 extern u32 D_800C6A74;
 
@@ -33,6 +32,3 @@ loop_4:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B8D0/look_point_remove.s")
-#endif

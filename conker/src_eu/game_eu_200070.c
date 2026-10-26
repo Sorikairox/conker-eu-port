@@ -1,11 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800AB490[];
-#endif
 
-#ifdef NON_MATCHING
 void hitinfo_from_obj_floor(void *, u8 *);
 s32 emit_debris_burst(s32 *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32 *, f32, s32, s32, s32, s32);
 void emit_sparks_by_angles(u8 *, s32, s32);
@@ -199,6 +197,3 @@ void destroy_burst_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
         emit_sparks_by_angles(&sp.u54, arg1, arg2);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_200070/destroy_burst_spawn.s")
-#endif

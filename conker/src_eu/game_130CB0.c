@@ -50,7 +50,6 @@ typedef struct {
     u16 pad2A;
     f32 unk2C;
 } SfxEnt_130CB0;
-#ifdef NON_MATCHING
 // object_sound_follow_cam: P253. sfx_emitter_start callback (s32 (SfxEnt *, s32 *pos, u32 *vol, s32 *pan, s32 *pitch,
 // s32 *slot, u16 *sound), called from the sound update in init_EB00.c; non-zero = free the slot) of the sounds
 // object_sound_play_cooldown starts for an object with a camera. The slot follows the object's position. With a timer (low half of
@@ -103,11 +102,7 @@ s32 object_sound_follow_cam(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 
     return 0;
 }
 
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_130CB0/object_sound_follow_cam.s")
-#endif
 
-#ifdef NON_MATCHING
 // object_sound_delayed: P253. sfx_emitter_start callback (same signature as object_sound_follow_cam) of the sounds object_sound_play_cooldown
 // starts for an object without a camera (state = flag 0x8000 from its arg4 | 0x10). The slot follows the object's
 // position. With a timer (state & 0x7FFF): a sound the update is about to start is queued (high half) and sound 0x5B0
@@ -156,10 +151,6 @@ s32 object_sound_delayed(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pi
     e->state = (state & ~0x7FFF) | timer;
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_130CB0/object_sound_delayed.s")
-#endif
-#ifdef NON_MATCHING
 
 /* was func_15103C14 */
 void object_sound_play_cooldown(s32 arg0, s32 arg1, u32 arg2, s32 arg3, s32 arg4) {
@@ -197,6 +188,3 @@ void object_sound_play_cooldown(s32 arg0, s32 arg1, u32 arg2, s32 arg3, s32 arg4
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_130CB0/object_sound_play_cooldown.s")
-#endif

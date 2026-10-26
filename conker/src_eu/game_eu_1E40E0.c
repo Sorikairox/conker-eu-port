@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A4EA8[];
-#endif
 
 
 typedef struct { f32 x, y, z; } V368D0;
@@ -38,7 +37,6 @@ void obj_ribbon_trail_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 // trail_ring_age_update: update handler (s32 (u8 *obj), the ribbon_trail_follow_update table) of the trail objects: the ring +0x94
 // holds 28-byte points {pos, life +0xC, alpha +0x10, distance +0x18}; write index +0x2E, read index +0x2D, count
 // +0x2C, capacity +0x25. Returns 0 (done) when fewer than 2 points are left and flag 8 of +0x1E is set. Walking back
@@ -111,11 +109,7 @@ s32 trail_ring_age_update(u8 *obj) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/trail_ring_age_update.s")
-#endif
 
-#ifdef NON_MATCHING
 f32 vec3_length(void *);
 
 /* was func_151B6B84 */
@@ -228,10 +222,6 @@ s32 ribbon_trail_follow_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/ribbon_trail_follow_update.s")
-#endif
-#ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 gfx_geometry_mode_cached(s32, s32, s32);
 s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
@@ -439,9 +429,6 @@ u8 *ribbon_trail_w10_draw(u8 *trail, u8 *gfx, s16 arg2) {
     } while (cur != *(s8 *) (trail + 0x2D));
     return gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/ribbon_trail_w10_draw.s")
-#endif
 
 /* was func_151B7664 */
 void ribbon_trail_handle_message(u8 *arg0, s32 *arg1, u8 arg2)
@@ -479,7 +466,6 @@ void ribbon_trail_handle_message(u8 *arg0, s32 *arg1, u8 arg2)
   }
 }
 
-#ifdef NON_MATCHING
 s32 random_int(void);
 f32 random_float(void);
 s32 particle_spawn_ex(void *spec, s32 count, s32 arg2, s32 arg3, s32 alpha, s32 arg5);
@@ -562,11 +548,7 @@ void obj_smoke_puff_spawn(u8 *obj, s32 alpha, s32 arg2) {
     p.accel[2] = 0.0f;
     particle_spawn_ex(&p, 1, 0, 0, alpha & 0xFF, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/obj_smoke_puff_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 (*D_8008FF30[])(u8 *, void *);   /* attach handlers: 0 glow_attach_follow_obj, 1 glow_attach_follow_model_point */
 extern s32 D_800AA840[4];                    /* glow particle variants (low byte used) */
 extern f32 D_800AA860;
@@ -689,9 +671,6 @@ u8 *obj_attached_glow_spawn(void *src, u8 type, s32 size, u8 alpha, s32 arg4) {
     }
     return obj;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/obj_attached_glow_spawn.s")
-#endif
 
 /* was func_151B7C28 */
 s32 glow_attach_follow_obj(u8 *arg0, u8 *arg1)
@@ -735,7 +714,6 @@ s32 glow_attach_follow_model_point(u8 *arg0, f32 *arg1) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 // obj_attached_glow_update: update handler of the obj_attached_glow_spawn helper objects. Each frame with a time step
 // (D_800BE9E4 > 0): the attach type's handler (D_8008FF30) moves the object (pos +0x10) - on failure returns 0 (the
 // caller frees it); the glow particle (data->glow, pos +0x40) follows. The move is logged in the trail ring +0x94
@@ -787,11 +765,7 @@ s32 obj_attached_glow_update(u8 *obj) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/obj_attached_glow_update.s")
-#endif
 
-#ifdef NON_MATCHING
 // trail_ring_trim_fade: update handler (s32 (u8 *obj), returns 1) of the trail objects whose ring +0x94 holds 20-byte
 // entries {pos, step length +0xC, alpha +0x10} (write index +0x2E, read index +0x2D, count +0x2C, size +0x25). With
 // 2+ points it walks back from the newest point summing the step lengths; once the sum passes 1198 the oldest kept
@@ -871,11 +845,7 @@ s32 trail_ring_trim_fade(u8 *obj) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/trail_ring_trim_fade.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 gfx_geometry_mode_cached(s32, s32, s32);
 s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
@@ -1087,9 +1057,6 @@ u8 *glow_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     }
     return var_s0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/glow_trail_draw.s")
-#endif
 /* was func_151B887C */
 void glow_handle_message(u8 *arg0, s32 arg1, u8 arg2) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);

@@ -39,7 +39,6 @@ struct260 *electric_bolt_spawn(s16 arg0, u8 arg1, s32 arg2) {
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 s32 gfx_load_texture_cached(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, u8 *, s32);
 s32 gfx_geometry_mode_cached(s32, s32, s32);
 s32 gfx_env_color_cached(s32, s32, s32, s32, s32, u8 *);
@@ -182,9 +181,6 @@ s32 electric_bolt_draw(s32 gfx, u8 *obj, s16 player) {
     }
     return gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E3000/electric_bolt_draw.s")
-#endif
 
 /* was func_151B604C */
 void electric_bolt_handle_message(u8 *arg0, u8 *arg1, u8 arg2)

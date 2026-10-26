@@ -4,7 +4,6 @@
 
 
 // need to figure out the structs
-#ifdef NON_MATCHING
 s32 rope_create(s8 *, s32);
 extern s32 D_80090648;
 extern s32 D_80096750;
@@ -46,6 +45,3 @@ void level_obj_init_ropes(void) {
         var_s1 += 6;   /* 0x18 bytes */
     } while (temp_s2 != 6);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3D5C0/level_obj_init_ropes.s")
-#endif

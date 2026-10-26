@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800AB930[];
-#endif
 
 
-#ifdef NON_MATCHING
 extern s32 D_800AB934;
 
 /* was func_151DD390 */
@@ -51,6 +49,3 @@ void bounce_dust_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u64 = 25.714f;
     emit_textured_burst(&sp.u2C, ((u8 *)&D_800AB930), &D_800AB934, 1, 26.0f, 0U, (u8) (s32) arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20ABA0/bounce_dust_spawn.s")
-#endif

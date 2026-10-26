@@ -1,14 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 Gfx *dbgfont_draw_char(Gfx *gdl, s32 x, s32 y, s32 idx);
 s32 dbgfont_char_index(u8 arg0);
 s32 text_char_to_glyph(s32 arg0);
-#endif
 
 
-#ifdef NON_MATCHING
 extern s32 D_80084CC0;
 
 /* was func_150415B0 */
@@ -62,10 +60,6 @@ u8 *dbgfont_setup_dl(u8 *arg0) {
     (*(s32 *)((u8 *)temp_a0 + 4)) = 0xFC1FC;
     return temp_a0 + 8;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/dbgfont_setup_dl.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_150416EC */
 Gfx *dbgfont_draw_string(Gfx *arg0, s32 arg1, s32 arg2, u8 *arg3) {
     Gfx *temp_v0;
@@ -91,9 +85,6 @@ Gfx *dbgfont_draw_string(Gfx *arg0, s32 arg1, s32 arg2, u8 *arg3) {
     }
     return var_s2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/dbgfont_draw_string.s")
-#endif
 extern u8 D_80084C60[];
 /* was func_15041770 */
 s32 dbgfont_char_index(u8 arg0) {
@@ -187,7 +178,6 @@ void text_icon_metrics(s32 arg0, s32 *arg1, s32 *arg2, f32 *arg3, s32 *arg4, f32
     }
 }
 
-#ifdef NON_MATCHING
 extern f32 D_80038400;         /* text scale x (screen units per glyph pixel) */
 extern f32 D_80038404;         /* text scale y */
 extern u8 *D_80085D20[];       /* [0] font texture (0xE0 bytes per glyph, I8) */
@@ -483,11 +473,7 @@ Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/text_draw_string.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_80038400;
 extern f32 D_80038404;
 extern u8 *D_80085D24[]; /* [0] glyph metrics (4 bytes per glyph) */
@@ -599,10 +585,6 @@ void text_measure_string(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
         *arg3 = (s32) ((f32) *arg3 * D_80038400);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/text_measure_string.s")
-#endif
-#ifdef NON_MATCHING
 extern u8 D_80085CC0;
 extern u8 D_80085CC1;
 extern u8 D_80085CC2;
@@ -655,6 +637,3 @@ loop_13:
     }
     goto loop_13;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/text_char_to_glyph.s")
-#endif

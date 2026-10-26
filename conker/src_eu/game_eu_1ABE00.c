@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 flare_node_depth_test(u8 *arg0, u32 *arg1);
-#endif
 
 
 u8 *allocate_memory(s32, s32, s32, s32);
@@ -45,7 +44,6 @@ u8 *flare_node_add(s32 arg0, s32 arg1) {
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 void heap_free(void *);
 
 // object_node_remove: unlinks node arg0 (an object's +0x154) from the list D_800DDD64 (next at +0x24, appended
@@ -70,9 +68,6 @@ void flare_node_remove(f32 *arg0, structEU_16DC80 *arg1) {
     }
     heap_free(node);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/flare_node_remove.s")
-#endif
 
 /* was func_1517E71C */
 void flare_nodes_read_zbuffer(void) {
@@ -95,7 +90,6 @@ void flare_nodes_read_zbuffer(void) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 flare_world_to_screen(f32 x, f32 y, f32 z, f32 *outX, f32 *outY);
 Gfx *flare_lens_draw(Gfx *gdl, u8 *node, s32 r, s32 g, s32 b, s32 alpha, u8 *flag);
 extern u8 D_8008D3A4[2];
@@ -160,10 +154,6 @@ Gfx *flare_nodes_draw(Gfx *gdl, s32 arg1) {
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/flare_nodes_draw.s")
-#endif
-#ifdef NON_MATCHING
 Gfx *flare_render_mode_set(Gfx *arg0);
 Gfx *gfx_load_texture_tile(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 Gfx *sprite_draw_at_screen(Gfx *gfx, void *spr, f32 x, f32 y);
@@ -287,9 +277,6 @@ Gfx *flare_lens_draw(Gfx *gdl, u8 *node, s32 row, s32 count, s32 falloff, s32 br
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/flare_lens_draw.s")
-#endif
 
 /* was func_1517EFBC */
 Gfx *flare_render_mode_set(Gfx *arg0) {
@@ -299,7 +286,6 @@ Gfx *flare_render_mode_set(Gfx *arg0) {
     return arg0;
 }
 
-#ifdef NON_MATCHING
 void camera_view_rotation_matrix(s32, f32 (*)[4], f32, f32, f32);
 void mtxf_transform_point_w(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 
@@ -338,11 +324,7 @@ s32 flare_world_to_screen(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     *outY = 0.0f;
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/flare_world_to_screen.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 sprite_project_point(f32, f32, f32, u8 *, u8 *, f32 *, f32 *, f32);
 extern s32 D_800899D0;
 
@@ -377,6 +359,3 @@ s32 flare_node_depth_test(u8 *arg0, u32 *arg1) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/flare_node_depth_test.s")
-#endif

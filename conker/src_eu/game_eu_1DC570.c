@@ -133,7 +133,6 @@ void smoke_trail_ember_spark(arg0, arg1, arg2)
   impact_spark_spawn(arg0, sp88, (sp5C * 0.40600002f) + 0.21000001f, (s16) ((((u32) sp60) % 41U) + 0x3C), (((u32) sp64) % 101U) + 0x9B, (sp68 * 4.0f) + 3.1000001f, (random_int() % 5U) + 3, (s32) arg1, 1.0f, 1.0f, 0, 0, 0, 0x10, 0xF, 0, (s32) arg2, 1);
 }
 
-#ifdef NON_MATCHING
 void hitinfo_from_obj_floor(void *, u8 *);
 void emit_sparks_in_angle_range(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4);
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
@@ -238,11 +237,7 @@ void ground_burst_spawn(u8 *obj, u8 room, s32 owner) {
     fx_splash_spawn((size * 30.0f + 90.0f) * 0.001f, (shade * 103.0f + 103.0f) * 1e-05f, a % 101 + 0x9B, b % 101 + 100,
                   c % 0x38 + 0x46, (s32) &floor[1], (struct17 *) base, 0, 1, room, owner);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DC570/ground_burst_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 // obj_steam_puff_spawn: plays sound 0x16 on the object (node_broadcast_obj_type) and spawns a 9.8 / 0.143 effect of type 1
 // attached to it (emitter_trail_spawn: life 0x140, flags 6 / 10 / -1 / 9) with arg1 / arg2 passed through; NULL object: 0.
 /* was func_151AF820 */
@@ -270,9 +265,6 @@ s32 obj_steam_puff_spawn(u8 *obj, u8 arg1, s32 arg2) {
     sp.u51 = 9;
     return emitter_trail_spawn(&sp, 0, arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DC570/obj_steam_puff_spawn.s")
-#endif
 
 s32 steam_puff_dust_spawn(void *, f32, f32, f32, u8);
 

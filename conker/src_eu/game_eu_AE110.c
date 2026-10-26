@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 // context_action_set: offers the context action `action` to the player obj (live, +0x127 != 0xFF) for slot 0 (B
 // button, player +0x31C byte +0x74) or slot != 0 (+0x75, with +0x7A = the D_800D34B8 hotspot index of target, 0x34-byte
 // entries); a slot whose bit 7 is set is locked. Actions 0x2B / 0x2C remember the hotspot in D_800D1DBC and show as
@@ -39,9 +38,6 @@ void context_action_set(struct127 *obj, u8 *target, s32 slot, s32 action, s32 ar
         (*(u8 **) ((u8 *) obj + 0x31C))[0x7A] = (target - D_800D34B8) / 0x34;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE110/context_action_set.s")
-#endif
 
 /* was func_15080A20 */
 void context_action_lock(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
@@ -112,7 +108,6 @@ void hint_text_event_cb(s32 arg0, s32 arg1, s32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 allocate_memory(s32, s32, s32, s32);
 s32 asset_load_with_subfiles(s32, s32, s32, s32, s32, s32, s32);
 s32 text_box_open(s32, s32, s32, void (*)(s32, s32, s32), s32 *, s32);
@@ -212,14 +207,8 @@ block_10:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE110/hint_box_open.s")
-#endif
-#ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
+// the definition is void (asm: v0 is not a result); one signature for wasm
 void heap_free(s32);
-#else
-s32 heap_free(s32);
-#endif
 void text_box_close_now(s32);
 void mp3_stream_set_volume(s32, s32);
 

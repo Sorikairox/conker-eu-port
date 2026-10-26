@@ -85,7 +85,6 @@ void os_create_vi_manager(OSPri pri) {
     }
 }
 
-#ifdef NON_MATCHING
 /* P281: readable C for os_vi_manager_main (libultra viMgrMain, compiled C, 110 insns). Verified with difftest up to the
    N-th osRecvMesg (DIFFTEST_STOPCALL): the loop never returns. */
 // vi_manager_main: the VI manager thread. Waits on the event queue: a retrace message swaps the VI context, counts
@@ -127,6 +126,3 @@ void os_vi_manager_main(void *arg) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_3570/os_vi_manager_main.s")
-#endif

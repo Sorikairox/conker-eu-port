@@ -91,7 +91,6 @@ void anim_segments_clock_tick(s32 arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 extern s32 *D_80088CA0[2];
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 
@@ -120,11 +119,7 @@ Gfx *anim_segments_set(Gfx *gdl) {
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105140/anim_segments_set.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 rail_record_index_of(struct127 *, s32);
 s32 rail_record_copy(s32, s32, s32);
 s32 cpu_player_slot_claim(s32, s32);
@@ -189,10 +184,6 @@ void obj_fire_weapon_kind(struct127 *arg0, s32 arg1) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105140/obj_fire_weapon_kind.s")
-#endif
-#ifdef NON_MATCHING
 u8 *attachment_find_first_of_owner(u8 *arg0);
 s32 attack_hit_test(struct127 *self, s32 skip);
 f32 obj_approach_speed(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
@@ -410,6 +401,3 @@ void liftable_object_update(struct127 *self) {
     }
     obj_check_death(self);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105140/liftable_object_update.s")
-#endif

@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* was func_151734E0 */
 u8 *screen_flash_overlay_draw(u8 *arg0) {
     u8 *temp_a0;
@@ -52,6 +51,3 @@ u8 *screen_flash_overlay_draw(u8 *arg0) {
     }
     return var_a0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A0CF0/screen_flash_overlay_draw.s")
-#endif

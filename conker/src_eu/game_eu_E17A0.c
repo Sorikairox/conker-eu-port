@@ -28,7 +28,6 @@ void obj_joint_blast_fx(struct127 *arg0, u8 arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 /* P243: readable C for emit_point_spark_ring (game_eu_E17A0, 113 insns). */
 // emit_point_spark_ring: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0,
 // s32 a, s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`), the sibling of emit_point_spark (game_eu_E0170):
@@ -88,6 +87,3 @@ s32 emit_point_spark_ring(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, 
     line_fx_spawn_default(&sp, 1, 0);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E17A0/emit_point_spark_ring.s")
-#endif

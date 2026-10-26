@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 extern s32 D_800D1CD0;
 
 /* was func_15016380 */
@@ -72,6 +71,3 @@ block_9:
         D_800D1CD0 = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_43B90/level_load_ptr_table_3c.s")
-#endif

@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-#ifdef NON_MATCHING
 void weapon_c_muzzle_frame_get(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void weapon_count_shot(u8 *arg0);
 void muzzle_light_small_spawn(u8 *arg0, u8 arg1, s32 arg2);
@@ -67,9 +66,6 @@ s32 weapon_c_fire(u8 *obj, u8 trail, u8 ray, u8 flag, s32 arg4) {
     weapon_c_rumble(obj);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12D5D0/weapon_c_fire.s")
-#endif
 
 /* was func_151000EC */
 void weapon_c_trail_attack_spawn(u8 *arg0, s32 arg1, struct127 *arg2, s32 arg3) {
@@ -125,7 +121,6 @@ void weapon_c_hit_callback(s32 arg0, u8 *arg1, s32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 /* P179 */
 extern u32 D_800A2530[4];
 void vec3_to_yaw_pitch_deg(f32 *, f32 *, f32 *);
@@ -242,6 +237,3 @@ void gun_shot_sparks(f32 *pos, f32 *dir, u8 flag, s32 arg3) {
         n--;
     } while (n > 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12D5D0/gun_shot_sparks.s")
-#endif

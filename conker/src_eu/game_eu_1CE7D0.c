@@ -45,11 +45,7 @@ void ground_dust_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-#ifdef NON_MATCHING
 void spawn_circle_random_emit(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
-#else
-s32 spawn_circle_random_emit(f32, f32, s32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
-#endif
 /* was func_151A10A8 */
 void ground_dust_update(u8 *arg0) {
     u8 *temp_s0;
@@ -58,17 +54,12 @@ void ground_dust_update(u8 *arg0) {
     if ((*(f32 *)((u8 *)arg0 + 0x38)) > 1.0f) {
         temp_s0 = arg0 + 0x28;
         do {
-#ifdef NON_MATCHING
             spawn_circle_random_emit((*(f32 *)temp_s0), (*(f32 *)((u8 *)temp_s0 + 4)), (*(f32 *)((u8 *)temp_s0 + 8)), (random_float() * 25.0f) + 15.0f, 0, 0xFF, 5, 4, (s32) (*(u8 *)((u8 *)temp_s0 + 0xC)), 0.0f, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)));
-#else
-            spawn_circle_random_emit((*(f32 *)temp_s0), (*(f32 *)((u8 *)temp_s0 + 4)), (*(s32 *)((u8 *)temp_s0 + 8)), (random_float() * 25.0f) + 15.0f, 0, 0xFF, 5, 4, (s32) (*(u8 *)((u8 *)temp_s0 + 0xC)), 0.0f, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)));
-#endif
             (*(f32 *)((u8 *)temp_s0 + 0x10)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x10)) - 1.0f);
         } while ((*(f32 *)((u8 *)temp_s0 + 0x10)) > 1.0f);
     }
 }
 
-#ifdef NON_MATCHING
 f32 angle_byte_cos(u8);
 s32 node_spawn_sprite(s32 **, s32, s32, s32, s32, s32);
 extern u8 D_8008FC70[];          /* grey level per colour index (arg8) */
@@ -158,9 +149,6 @@ s32 spawn_emit_sprite_blob(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0,
     node_spawn_sprite((s32 **) &rec, 0, 0, -1, argB & 0xFF, 1);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/spawn_emit_sprite_blob.s")
-#endif
 
 /* was func_151A13F0 */
 void fx_layers_preset_a(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
@@ -172,7 +160,6 @@ void fx_layers_preset_b(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
     fx_layers_spawn_stub(arg0, arg1, arg2, 163.0f, 2.019f, 0xA0, 0x4B, 0x41F, 0x4F6, 1, 2.019f, 0x87, 0x44, 0x41F, 0x4F6, 2, 1, 2.019f, 0x46, 0x42, 0x41F, 0x4F6, 7, 0x41, 4, 1, arg3, arg4);
 }
 
-#ifdef NON_MATCHING
 /* was func_151A15C0 */
 void fx_layers_scaled(f32 arg0, f32 arg1, f32 arg2, s16 arg3, f32 arg4, f32 arg5, u8 arg6, s32 arg7) {
     s16 temp_v0;
@@ -193,14 +180,10 @@ void fx_layers_scaled(f32 arg0, f32 arg1, f32 arg2, s16 arg3, f32 arg4, f32 arg5
     temp_f10 = (s32) (100.0f * arg4);
     fx_layers_spawn_stub(arg0, arg1, arg2, 250.0f * arg4, 1.0f, (s32) (s16) temp_f18, (s32) (s16) temp_f8, (s32) (s16) temp_f4, (s32) (s16) temp_f10, 0x12, 1.0f, (s32) (90.0f * arg5), (s32) (20.0f * arg5), (s32) (s16) temp_f4, (s32) (s16) temp_f10, (s32) var_t4, 0x10, 1.0f, (s32) (s16) temp_f18, (s32) (s16) temp_f8, (s32) (s16) temp_f4, (s32) (s16) temp_f10, (s32) (15.0f * arg4), (s32) (10.0f * arg4), 0x12, temp_v0 + 0x10, (u8) (s32) arg6, arg7);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/fx_layers_scaled.s")
-#endif
 /* was func_151A177C */
 void fx_layers_spawn_stub(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, s32 argB, s32 argC, s32 argD, s32 argE, s32 argF, s32 arg10, f32 arg11, s32 arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, u8 arg1A, s32 arg1B) {
 }
 
-#ifdef NON_MATCHING
 s32 node_spawn_sprite(s32 **, s32, s32, s32, s32, s32);
 extern s32 D_800910E4;
 
@@ -375,11 +358,7 @@ void spark_burst_emitter_update(u8 *obj) {
         e->accum -= 1.0f;
     } while (1.0f < e->accum);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/spark_burst_emitter_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_151A1D0C */
 void spark_sprite_fade_update(u8 *arg0) {
     s16 temp_lo;
@@ -422,9 +401,6 @@ void spark_sprite_fade_update(u8 *arg0) {
         (*(s16 *)((u8 *)arg0 + 0x34)) = temp_lo_2;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/spark_sprite_fade_update.s")
-#endif
 /* was func_151A1E8C */
 void spark_burst_a_start(u8 *arg0) {
     typedef struct { s32 w[3]; } Blk12;
@@ -454,7 +430,6 @@ void spark_burst_a_start(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 node_spawn_sprite(s32 **, s32, s32, s32, s32, s32);
 extern s32 D_800910E4;
 
@@ -593,9 +568,6 @@ void spark_burst_a_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s0 + 0x10)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/spark_burst_a_update.s")
-#endif
 /* was func_151A23E4 */
 void spark_sprite_a_fade_update(u8 *arg0)
 {
@@ -666,7 +638,6 @@ void spark_burst_b_start(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 node_spawn_sprite(s32 **, s32, s32, s32, s32, s32);
 extern s32 D_800910E4;
 
@@ -811,10 +782,6 @@ void spark_burst_b_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s0 + 0x10)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/spark_burst_b_update.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_151A2A58 */
 void spark_sprite_b_fade_update(u8 *arg0) {
     s16 temp_lo;
@@ -857,10 +824,6 @@ void spark_sprite_b_fade_update(u8 *arg0) {
         (*(s16 *)((u8 *)temp_v0_2 + 0x18)) = -0x270F;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/spark_sprite_b_fade_update.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_151A2B90 */
 void spark_sprite_c_fade_update(u8 *arg0) {
     s16 temp_lo;
@@ -898,10 +861,6 @@ void spark_sprite_c_fade_update(u8 *arg0) {
     (*(s8 *)((u8 *)arg0 + 0x41)) = temp_lo_3;
     (*(s8 *)((u8 *)arg0 + 0x40)) = temp_lo_3;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/spark_sprite_c_fade_update.s")
-#endif
-#ifdef NON_MATCHING
 /* P160 */
 s32 particle_spawn_basic(void *, s32, s32, u8, s32);
 s32 random_int(void);
@@ -1008,10 +967,6 @@ s32 particle_puff_spawn(f32 *pos, f32 *vel, f32 *acc, f32 arg3, f32 arg4, f32 sc
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/particle_puff_spawn.s")
-#endif
-#ifdef NON_MATCHING
 /* P146 */
 extern void (*D_8008FC80[])(u8 *, s32, s32, s32);
 s32 particle_upd_damp_vel(u8 *, s32);
@@ -1039,9 +994,6 @@ s32 particle_timed_event_update(u8 *part, s32 arg) {
     }
     return particle_upd_damp_vel(part, arg);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/particle_timed_event_update.s")
-#endif
 
 s32 particle_burst_spawn(s32, s32, s16, s16, f32, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32, u8);
 
@@ -1050,22 +1002,14 @@ s32 particle_burst_spawn_dir(s32 arg0, s16 arg1, s16 arg2, f32 arg3, f32 arg4, f
     return particle_burst_spawn(arg0, 0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, argE, argF, arg10, arg11, arg12, arg13, 1);
 }
 
-#ifdef NON_MATCHING
 /* was func_151A3084 */
 void particle_burst_spawn_vec(s32 arg0, s32 arg1, f32 arg2, f32 arg3, s32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, s16 arg9, s16 argA, s16 argB, s16 argC, s16 argD, s16 argE, s8 argF, u8 arg10, s32 arg11) {
     particle_burst_spawn(arg0, arg1, 0, 0, 0.0f, arg2, arg3, arg4, arg5, arg6, arg7, arg8, (s16) (s32) arg9, (s16) (s32) argA, (s16) (s32) argB, (s16) (s32) argC, (s16) (s32) argD, (s16) (s32) argE, (s8) (s32) argF, (u8) (s32) arg10, arg11, 0U);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/particle_burst_spawn_vec.s")
-#endif
-#ifdef NON_MATCHING
 /* P160: same signature as accel_from_angles (particle_burst_spawn calls either through one pointer; arg3 is the speed it ignores) */
 // accel_scaled_copy: out = base * (1 - t) (particle_burst_spawn's acceleration without a direction)
 /* was func_151A3134 */
 void accel_scaled_copy(f32 *arg0, s16 arg1, s16 arg2, f32 arg3, f32 arg4, f32 *arg5) {
-#else
-void accel_scaled_copy(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, f32 *arg5) {
-#endif
     f32 temp_f0 = 1.0f - arg4;
 
     arg5[0] = arg0[0] * temp_f0;
@@ -1079,7 +1023,6 @@ void accel_from_angles(s32 arg0, s16 arg1, s16 arg2, f32 arg3, f32 arg4, s32 arg
     vec3_from_angles_byte(arg1, arg2, (1.0f - arg4) * arg3, arg5);
 }
 
-#ifdef NON_MATCHING
 /* P160 */
 extern u8 D_8008FC88[]; /* 4 colours, 3 bytes each */
 typedef struct { u8 b[12]; } Blk12_151A31D4;
@@ -1136,11 +1079,7 @@ s32 particle_burst_spawn(s32 pos, s32 accel, s16 dirA, s16 dirB, f32 accelSpeed,
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/particle_burst_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 emit_streaks_from_spec(s32 *, u8, s32);
 
 /* was func_151A34BC */
@@ -1265,10 +1204,6 @@ void spark_burst_effect_a(u8 *arg0) {
     sp.u88 = 1.0f;
     emit_streaks_from_spec(&sp.u1C, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/spark_burst_effect_a.s")
-#endif
-#ifdef NON_MATCHING
 s32 emit_streaks_from_spec(s32 *, u8, s32);
 
 /* was func_151A3700 */
@@ -1393,6 +1328,3 @@ void spark_burst_effect_b(u8 *arg0) {
     sp.u88 = 1.0f;
     emit_streaks_from_spec(&sp.u1C, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/spark_burst_effect_b.s")
-#endif

@@ -10,7 +10,6 @@ void level_obj_init_vertex_lights(void) {
     vtx_anim_light_create(0, 255, 6628, 108, 0, 0.0f, 15000, 80.0f, 77, 15, 127, 127, 127, 127, 127, 127);
 }
 
-#ifdef NON_MATCHING
 s32 memcpy(s32, s16 *, s32);
 extern s32 *D_800E0D64;
 s32 trigger_zones_check(s32, s32, s32); // hit callback (C since P196; was declared as data)
@@ -38,9 +37,6 @@ void level_obj_init_d34b8_effect(void) {
         effect_node_create(5, 9, -1, -1, 1U, 0U, NULL, 0xFFU, 1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3DC30/level_obj_init_d34b8_effect.s")
-#endif
 // NON-MATCHING: ops in wrong order
 // void level_obj_init_d34b8_effect(void) {
 //     struct177 tmp;

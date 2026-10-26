@@ -1,7 +1,6 @@
 #include <ultra64.h>
 
 
-#ifdef NON_MATCHING
 /* was func_150A7CB0 */
 void mtxf_scale(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     (*(s32 *)((u8 *)arg0 + 0)) = arg1;
@@ -21,9 +20,6 @@ void mtxf_scale(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     (*(f32 *)((u8 *)arg0 + 0x3C)) = 1.0f;
     (*(s32 *)((u8 *)arg0 + 0x38)) = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_D5160/mtxf_scale.s")
-#endif
 // NON-MATCHING: sw/jr in wrong order
 // void mtxf_scale(f32 mtx[4][4], s32 x, s32 y, s32 z) {
 //     ((s32)mtx[0][0]) = x;

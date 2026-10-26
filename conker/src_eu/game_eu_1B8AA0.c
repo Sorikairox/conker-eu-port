@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* was func_1518B290 */
 s32 rubble_piece_hit_ground(u8 *arg0) {
     struct {
@@ -194,9 +193,6 @@ s32 rubble_piece_hit_ground(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B8AA0/rubble_piece_hit_ground.s")
-#endif
 /* was func_1518B71C */
 s32 rubble_piece_above_ground(f32 *arg0) {
     if (arg0[0x3C / 4] < arg0[0x170 / 4]) {
@@ -237,7 +233,6 @@ void rubble_scatter_spawn(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u8 arg4) {
     rubble_scatter_spawn_ex(arg0, arg1, arg2, arg3, 4, 0xFF, arg4);
 }
 
-#ifdef NON_MATCHING
 s32 collision_floor_probe(void *, u16, f32, void *); /* P95 */
 /* was func_1518B818 */
 void rubble_scatter_spawn_ex(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u8 arg6) {
@@ -393,6 +388,3 @@ void rubble_scatter_spawn_ex(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B8AA0/rubble_scatter_spawn_ex.s")
-#endif

@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-#ifdef NON_MATCHING
 void text_printf_at(s32, s32, u8, s32, ...);
 
 /* was func_150D06B0 */
@@ -40,9 +39,6 @@ s32 text_pager_draw_caption(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FDEC0/text_pager_draw_caption.s")
-#endif
 u8 *text_pager_spawn(u8, s32, s16, s32, s32, s32, u8, s32);
 s32 memcpy(s32, void *, s32);
 /* was func_150D07C4 */
@@ -58,7 +54,6 @@ void text_pager_spawn_console(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) { 
     }
 }
 
-#ifdef NON_MATCHING
 typedef struct {
     f32 t;  /* fraction of the next character */
     s16 n;  /* characters shown */
@@ -99,9 +94,6 @@ s32 text_pager_draw_console(u8 *p) {
     text_printf_at(0xF, 0xBE, 0x80, (s32) buf);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FDEC0/text_pager_draw_console.s")
-#endif
 
 u8 *text_pager_spawn(u8, s32, s16, s32, s32, s32, u8, s32);
 /* was func_150D09D4 */
@@ -115,7 +107,6 @@ void text_pager_spawn_title(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
     }
 }
 
-#ifdef NON_MATCHING
 void text_printf_at(s32, s32, u8, s32, ...);
 
 /* was func_150D0A44 */
@@ -153,6 +144,3 @@ s32 text_pager_draw_title(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FDEC0/text_pager_draw_title.s")
-#endif

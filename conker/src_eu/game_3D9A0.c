@@ -4,7 +4,6 @@
 
 
 // ???
-#ifdef NON_MATCHING
 u8 *world_record_find(s32);
 extern s32 D_800D9D70;
 
@@ -16,9 +15,6 @@ void level_obj_init_d9d70(void) {
     (*(f32 *)((u8 *)(world_record_find(0xF6)) + 0x7C)) = 2.0f;
     D_80088D20 = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3D9A0/level_obj_init_d9d70.s")
-#endif
 /* was func_15010538 */
 void obj_spawn_effect_80(struct127 *arg0) {
     struct175 tmp;

@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void emit_random_sprites(u8 *, u8, s32);
 void impact_spark_flash_spawn(u8 *, u8, s32);
 void impact_rumble_spawn(void *, u8, s32); /* P253: was s32 (a pointer in both callers) */
@@ -74,10 +73,6 @@ void impact_burst_effect(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u64 = 0.36400002f;
     emit_random_sprites(&sp.u1C, arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_104E40/impact_burst_effect.s")
-#endif
-#ifdef NON_MATCHING
 void impact_spray_params_init(f32 *, f32 *);
 void emit_spray_from_surface(u8 *, u8, s32);
 void emit_spray_along_normal(u8 *, u8, s32);
@@ -136,6 +131,3 @@ void bullet_impact_effect(ImpactTri_150D779C *tri, f32 *pos, f32 *dir, u8 kind, 
         emit_spray_along_normal((u8 *) &rec, kind, arg4);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_104E40/bullet_impact_effect.s")
-#endif

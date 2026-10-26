@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 memcpy(s32, void *, s32);
-#endif
 
 
-#ifdef NON_MATCHING
 void hitinfo_from_obj_floor(void *, u8 *);
 void vec3_from_angles_byte(s16, s16, f32, void *);
 void obj_get_fx_point_b(u8 *, f32 *, f32 *, f32 *);
@@ -65,9 +63,6 @@ void obj_dust_emitter_update(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/obj_dust_emitter_update.s")
-#endif
 /* was func_150CF994 */
 void obj_dust_emitter_handle_event(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = (u8 *)arg0 + 0x28;
@@ -87,19 +82,11 @@ void obj_dust_emitter_handle_event(struct102 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 void ground_fx_spawn_random(struct127 *, f32, f32); /* P95: f32 parameter */
-#else
-void ground_fx_spawn_random(struct127 *, f32, s32);
-#endif
 
 /* was func_150CFA40 */
 void ground_fx_spawn_above_player(s32 arg0) {
-#ifdef NON_MATCHING
     ground_fx_spawn_random(D_800CC2D0, D_800CC2D0->y_position + 300.0f, -10000.0f); /* P95: float literal (asm passes the bits 0xC61C4000) */
-#else
-    ground_fx_spawn_random(D_800CC2D0, D_800CC2D0->y_position + 300.0f, 0xC61C4000);
-#endif
 }
 
 extern s32 D_80088C30;
@@ -126,7 +113,6 @@ Gfx *tex_scroll_set_tile_sizes(Gfx *gdl) {
     return gdl;
 }
 
-#ifdef NON_MATCHING
 s32 sprite2d_spawn(s32 *, s32, s32, s32, s32, s32, s32);
 
 typedef struct {
@@ -214,11 +200,7 @@ void screen_bar_spawn(s16 span, u8 flag, s32 arg2) {
         memcpy(rec + 0x70, &extra, 0x10);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/screen_bar_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 s32 sprite2d_spawn(s32 *, s32, s32, s32, s32, s32, s32);
 extern s32 D_80090070;
@@ -354,9 +336,6 @@ s32 screen_bar_update_burst(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/screen_bar_update_burst.s")
-#endif
 /* was func_150D00FC */
 void bouncing_sprite_handle_drop(u8 *arg0, f32 *arg1, u8 arg2) {
     u8 *temp_v0 = arg0 + 0x70;
@@ -455,7 +434,6 @@ void text_pager_next_line(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 text_max_line_length(u8 *);
 void text_pager_copy_line(u8 *);
 typedef struct {
@@ -507,9 +485,6 @@ u8 *text_pager_spawn(u8 arg0, s32 arg1, s16 arg2, s32 arg3, s32 arg4, s32 arg5, 
     }
     return sp3C;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/text_pager_spawn.s")
-#endif
 extern s32 D_80088C40[];
 
 /* was func_150D0544 */

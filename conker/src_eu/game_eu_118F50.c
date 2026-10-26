@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
 s32 camera_pop_mode(struct108 *arg0, s32 arg1);
 void camera_set_followed_obj(struct108 *, s32);
@@ -69,6 +68,3 @@ void camera_update_event_lock(u8 *obj) {
         *(s32 *) (obj + 0x84) &= ~0x80;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_118F50/camera_update_event_lock.s")
-#endif

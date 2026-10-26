@@ -1,14 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void vec3_from_angles_rad(f32, f32, f32, f32 *);
-#endif
 
 s32 memcpy(s32, f32 *, s32);
 
 
-#ifdef NON_MATCHING
 extern f32 D_800A16C8;
 extern f32 D_800A16CC;
 extern f32 D_800A16D0;
@@ -119,10 +117,6 @@ void arc_spark_spawn(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/arc_spark_spawn.s")
-#endif
-#ifdef NON_MATCHING
 s32 beam_ray_spawn(u8 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32); /* P98: asm mtc1 a2 */
 f32 wrap_float_range(f32, f32, f32);
 
@@ -174,9 +168,6 @@ void arc_spark_update(u8 *arg0) {
         (*(f32 *)((u8 *)temp_s0 + 0x20)) = sp.uDC;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/arc_spark_update.s")
-#endif
 extern f32 *D_80088DDC;
 extern f32 *D_80088DE0;
 /* was func_150E73B4 */
@@ -314,7 +305,6 @@ void screen_lightning_random_flash(u8 arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 typedef struct {
     f32 x;      // 0x00
     f32 y;      // 0x04
@@ -386,9 +376,6 @@ s32 screen_sprite_spawn(f32 *pos, f32 scale, s16 life, u8 flags, u8 arg4, u8 arg
     spec.u41 = 0xA;
     return sprite2d_spawn(&spec, 0, arg8, arg9, 0, arg10, arg11);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/screen_sprite_spawn.s")
-#endif
 
 s32 random_int(void);
 f32 random_float(void);
@@ -496,7 +483,6 @@ void screen_sprite_spawn_edge(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16
     sprite2d_spawn(&sp, 0, arg7, arg8, 0, arg9, argA);
 }
 
-#ifdef NON_MATCHING
 f32 lagrange_cubic_w0(f32);
 f32 lagrange_cubic_w1(f32);
 f32 lagrange_cubic_w2(f32);
@@ -570,11 +556,7 @@ u8 *screen_lightning_curve_spawn(s16 count, f32 scale, u8 arg2, s32 arg3) {
     }
     return obj;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/screen_lightning_curve_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_150E821C */
 void screen_lightning_curve_update(u8 *arg0) {
     struct {
@@ -613,10 +595,6 @@ loop_3:
         (*(s16 *)((u8 *)arg0 + 0xE)) = -1;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/screen_lightning_curve_update.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_150E856C */
 void fx_scorch_decal_spawn(f32 arg0, u8 arg1, s32 arg2, u8 *arg3, s16 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB) {
     struct {
@@ -693,10 +671,6 @@ void fx_scorch_decal_spawn(f32 arg0, u8 arg1, s32 arg2, u8 *arg3, s16 arg4, u8 a
     sp4C = random_int();
     sprite_fx_spawn_cam_at((s32) &sp.u5C, 0U, 0U, arg2, (*(f32 *)((u8 *)arg3 + 0)), (*(f32 *)((u8 *)arg3 + 4)), (*(f32 *)((u8 *)arg3 + 8)), arg0, arg0, (u8) (sp48 & 0xFF), (u8) (((random_int() & 1) * 2) + (sp4C & 1)), sp58, sp54, 0, (u8) (s32) argA, argB);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/fx_scorch_decal_spawn.s")
-#endif
-#ifdef NON_MATCHING
 void emit_random_sprites(u8 *, u8, s32);
 void explosion_light_spawn(u8 *, u8, s32);
 extern s32 D_800A1660;
@@ -790,9 +764,6 @@ void fx_scripted_blast(s32 arg0, u8 arg1, s32 arg2) {
         rumble_request((structEU_151D8E18 *) &sp.u20, 0, 0xFFU, 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/fx_scripted_blast.s")
-#endif
 typedef struct { f32 x, y, z; } Vec3_150E892C;
 /* was func_150E892C */
 void fx_debris_emitter_spawn(Vec3_150E892C *arg0, s16 arg1, u8 arg2, s32 arg3) {
@@ -810,7 +781,6 @@ void fx_debris_emitter_spawn(Vec3_150E892C *arg0, s16 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 /* was func_150E89F0 */
@@ -939,9 +909,6 @@ void fx_debris_emitter_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/fx_debris_emitter_update.s")
-#endif
 /* was func_150E8DA4 */
 s32 fx_particle_anim_step(u8 *arg0, s32 arg1) {
     particle_update_wobble_offset(arg0, arg0 + 0xAC, arg0 + 0xA8, arg0 + 0xAA);
@@ -1256,7 +1223,6 @@ void storm_debris_emitter_update(u8 *arg0)
 
 }
 
-#ifdef NON_MATCHING
 extern u8 D_800A16C0;
 extern s32 D_800A16C4;
 
@@ -1372,9 +1338,6 @@ void storm_debris_burst_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s0 + 0x14)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/storm_debris_burst_update.s")
-#endif
 s32 mdl_particle_integrate(u8 *);
 
 typedef struct { s32 u0; s16 u4; u8 u6; u8 u7; s32 u8; s32 uC; u8 u10, u11, u12, u13, u14, u15, u16, u17; s32 u18; s32 u1C; s16 u20; s16 u22; s16 u24; s16 u26; } E9_S;

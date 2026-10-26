@@ -44,7 +44,6 @@ void obj_whirlpool_pull_update(struct127 *arg0) {
     obj_start_anim(arg0, 0U, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-#ifdef NON_MATCHING
 extern f32 D_8009FC8C;
 extern f32 D_8009FC90;
 void cutscene_actor_apply_track(struct127 *, s32, s32);
@@ -85,11 +84,7 @@ block_3:
         cutscene_actor_apply_track(arg0, 0, -1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/obj_path_bank_update.s")
-#endif
 
-#ifdef NON_MATCHING
 void obj_stun_update(struct127 *);
 void obj_lean_into_turn(struct127 *, s16);
 
@@ -169,11 +164,7 @@ void held_object_update(struct127 *obj) {
         cutscene_actor_apply_track(obj, 0, -1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/held_object_update.s")
-#endif
 
-#ifdef NON_MATCHING
 void obj_walk_update(struct127 *);
 void obj_apply_gravity(struct127 *);
 u8 *obj_find_by_state(s32, s32 *);
@@ -225,10 +216,6 @@ void obj_carrier_update(struct127 *arg0) {
     arg0->unk7A = temp_v0;
     arg0->unk40 = (f32) (s16) (temp_v0 + 0x4000) * 0.005493164f;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/obj_carrier_update.s")
-#endif
-#ifdef NON_MATCHING
 extern u8 D_800B8AC4[];
 extern s32 D_800CC670;
 extern s32 D_8008CE80;
@@ -346,6 +333,3 @@ void sinking_object_update(struct127 *obj) {
     rec.u34 = 0;
     node_spawn_sprite(&rec, 0, 0, -1, 0xFF, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/sinking_object_update.s")
-#endif

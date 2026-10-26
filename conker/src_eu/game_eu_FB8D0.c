@@ -5,11 +5,7 @@
 
 s32 collision_floor_probe(f32 *, s32, f32, f32 *);
 s32 hitinfo_from_obj_floor(f32 *, struct127 *);
-#ifdef NON_MATCHING
 void spawn_circle_random_emit(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
-#else
-s32 spawn_circle_random_emit(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
-#endif
 /* was func_150CE0C0 */
 void obj_spawn_ground_dust_rings(u8 *arg0, u8 arg1, s32 arg2)
 {

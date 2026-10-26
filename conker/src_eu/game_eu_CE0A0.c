@@ -30,7 +30,6 @@ s32 event_action_trigger(s32 arg0, u32 arg1, u8 *arg2) {
     return 0;
 }
 
-#ifdef NON_MATCHING
 /* Sequence-slot query handler: entry 3 of event_dispatch's handler table D_80088838, called as
  * handler(slot, cmd, args) like event_query_object (args[2] = first extra argument, D_800D3C60 = number of words).
  * `slot` indexes the 0x34-byte records at D_800D34B8 (the per-slot words +0x17 / +0x18 / +0x1C / +0x20 that
@@ -153,6 +152,3 @@ s32 event_query_trigger(s32 slot, s32 cmd, s32 *args) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE0A0/event_query_trigger.s")
-#endif

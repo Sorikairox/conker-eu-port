@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P249: readable C for rideable_vehicle_update (game_eu_EB860, 205 insns). */
 // rideable_vehicle_update: per-frame update of a rideable object (seen at the Colors start; id 0x23 uses the hit
 // states 0xA / 0xB / 0xC and kind 1, other ids 1 / 2 / 3 and kind 3). Clears +0x2E8 / +0x2FC, eases the turret value
@@ -92,6 +91,3 @@ void rideable_vehicle_update(u8 *o) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EB860/rideable_vehicle_update.s")
-#endif

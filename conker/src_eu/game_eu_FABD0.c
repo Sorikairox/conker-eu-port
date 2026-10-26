@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 struct210 *effect3d_spawn_default(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
 void *memcpy(void *, const void *, s32);
 
@@ -110,11 +109,7 @@ void spark_record_spawn(SparkIn_D3C0 *in, u8 room, u8 group) {
         memcpy(rec + 0x110, &x, sizeof(x));
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/spark_record_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 void vec3_from_angles_rad(f32, f32, f32, void *);
 
 /* was func_150CD68C */
@@ -270,10 +265,6 @@ block_14:
     (*(f32 *)((u8 *)arg0 + 0x48)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x48)) + (*(f32 *)((u8 *)temp_v1_3 + 0x1C)));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/spark_record_update_motion.s")
-#endif
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(void *, s16, s32, void *, u8 *);
 void *memcpy(void *, const void *, s32);
 
@@ -326,11 +317,7 @@ s16 *spark_record_quad_build(u8 *arg0, s16 arg1) {
     }
     return ret;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/spark_record_quad_build.s")
-#endif
 
-#ifdef NON_MATCHING
 void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
 void emit_coloured_points(u8 *arg0, u8 arg1, s32 arg2);
 extern f32 D_80088C14[5];   /* base angles (radians) of the five shooting-star lanes */
@@ -423,9 +410,6 @@ void shooting_star_sky_update(u8 *obj) {
         *(f32 *) (obj + 0x28) -= 1.0f;
     } while (1.0f < *(f32 *) (obj + 0x28));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/shooting_star_sky_update.s")
-#endif
 
 /* was func_150CE07C */
 void shooting_star_set_rate(s32 arg0) {

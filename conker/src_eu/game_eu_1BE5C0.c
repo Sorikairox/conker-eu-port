@@ -73,7 +73,6 @@ void model_drip_unlink_free(void *arg0) {
 typedef struct { s16 base; s16 range; u8 pad4[0x10]; } Rng14;
 extern Rng14 D_800AA120[];
 
-#ifdef NON_MATCHING
 /* P188 */
 /* P188: the 3-argument prototype (functions.h) again here, so that difftest takes its arity from it: the asm leaves
  * cfg->points in a3 at the call, mtx_transform_point_or_origin (matching C, 3 parameters) never reads a3 */
@@ -296,9 +295,6 @@ void model_drip_update(u8 *e) {
         node_destroy((struct102 *) e);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/model_drip_update.s")
-#endif
 
 /* was func_1519150C */
 s32 drop_wobble_update(u8 *arg0) {
@@ -317,7 +313,6 @@ s32 drop_wobble_update(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, f32 *, s32);
 extern s32 D_800DD608;
@@ -417,9 +412,6 @@ u8 *drop_quad_velocity_build(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/drop_quad_velocity_build.s")
-#endif
 void effect3d_set_handlers(u8 *, s32, s32, s32, s32);
 /* was func_15191970 */
 void model_drip_drop_all(u8 *arg0) {
@@ -446,7 +438,6 @@ void model_drip_drop_all(u8 *arg0) {
     bzero(*(u8 ***)(arg0 + 0x24), 0x2D0);
 }
 
-#ifdef NON_MATCHING
 /* P143 */
 s32 pos_in_world_bounds(u8 *);
 s32 collision_floor_probe(f32 *, s32, f32, f32 *);
@@ -516,9 +507,6 @@ s32 drop_fall_update(u8 *fx) {
     }
     return ret;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/drop_fall_update.s")
-#endif
 
 /* was func_15191DEC */
 s32 drop_fade(struct_eu_1BAAA0_e *arg0) {
@@ -534,7 +522,6 @@ s32 drop_fade(struct_eu_1BAAA0_e *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 u8 *model_drip_create(u8 **, s32, u8, s32);
 
 /* owner_effect_watch: P238: entry 13 of D_8008A4E8 (EU 0x8008A888, `void (u8 *)` handlers) for an effect e whose
@@ -565,11 +552,7 @@ void model_drip_wait_owner(u8 *e) {
         node_destroy((struct102 *) e);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/model_drip_wait_owner.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_15191EF0 */
 void model_drip_on_message(struct102 *arg0, u8 *arg1, u8 arg2) {
     if (arg2 == 0xD) {
@@ -589,10 +572,6 @@ void model_drip_on_message(struct102 *arg0, u8 *arg1, u8 arg2) {
         node_handle_link_message((s32) arg1, arg2, (s32) &arg0->unk10, (s32) &arg0->unk14, (s32) arg0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/model_drip_on_message.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_15191FF4 */
 void model_drip_wait_on_message(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *temp_a2;
@@ -621,9 +600,6 @@ void model_drip_wait_on_message(struct102 *arg0, u8 *arg1, u8 arg2) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/model_drip_wait_on_message.s")
-#endif
 extern s32 D_800A83F0;
 
 /* was func_151920FC */

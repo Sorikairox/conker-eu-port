@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 struct249 *event_find(s16 arg0);
 struct249 *event_start(s32 id, s32 arg1);
 void event_vm_abort(void);
@@ -174,11 +173,7 @@ s32 event_action_game_state(s32 id, s32 action, s32 *args) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CD540/event_action_game_state.s")
-#endif
 
-#ifdef NON_MATCHING
 struct249 *event_find(s16 arg0);
 f32 random_float(void);
 s32 mp_player_team(s32 arg0);
@@ -269,6 +264,3 @@ s32 event_query_game_state(s32 id, s32 query, s32 *args) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CD540/event_query_game_state.s")
-#endif

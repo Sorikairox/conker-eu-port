@@ -4,14 +4,12 @@
 typedef struct { s32 x0; s32 pad[4]; } Row20;
 extern Row20 D_800DE2B4[];
 extern Row20 D_800DE2B8[];
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A7550[4];
 void flyer_update(u8 *);
 s32 approx_dist2_int(s32, s32, s32, s32);
-#endif
 
 
-#ifdef NON_MATCHING
 s32 collision_level_nearest_height(s32 x, s32 y, s32 z, s32 *tri);
 extern s32 D_800DC26C; /* triangle table: 12 bytes per triangle */
 
@@ -95,11 +93,7 @@ void flyer_leaf_burst_spawn(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 player
         p[0xF1] = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/flyer_leaf_burst_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 void collision_select_area(s32 arg0);
 s32 floor_collect_level_tris(s32 x, s32 z);
 extern s32 D_800D3720; /* floor candidates (16 bytes: +0 height in 24.8) left by floor_collect_level_tris */
@@ -183,11 +177,7 @@ void flyer_leaf_drop_spawn(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 width, 
         p[0xF1] = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/flyer_leaf_drop_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 collision_level_nearest_height(s32 x, s32 y, s32 z, s32 *tri);
 s32 random_int(void);
 extern s32 D_800DC26C; /* triangle table: 12 bytes per triangle */
@@ -327,11 +317,7 @@ void flyer_field_spawn(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 rMax, s32 p
         p[0xF1] = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/flyer_field_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 /* ambient flyer object (the node_alloc particles of flyer_field_spawn / game_eu_1B1010) */
 typedef struct {
     u8 kind;            /* 0x00: 0x13 = chirping kind */
@@ -699,11 +685,7 @@ void flyer_update(u8 *arg0) {
         node_destroy((struct102 *)f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/flyer_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_15176DCC */
 void flyer_perched_update(u8 *arg0) {
     f32 temp_f0;
@@ -777,9 +759,6 @@ void flyer_perched_update(u8 *arg0) {
         node_destroy((struct102 *) arg0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/flyer_perched_update.s")
-#endif
 s32 approx_dist2_int(s32, s32, s32, s32);
 void flyer_update(u8 *);
 
@@ -839,7 +818,6 @@ void flyer_resting_update(u8 *arg0) {
     flyer_update(arg0);
 }
 
-#ifdef NON_MATCHING
 void mtxf_mul(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 Gfx *gfx_other_mode_cached(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 extern u8 D_800A7550[4];
@@ -903,15 +881,8 @@ Gfx *flyer_model_draw(Gfx *gdl, u8 *obj, s16 arg2) {
     gSPDisplayList(gdl++, D_800DE2BC[obj[0xED]].x0);
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/flyer_model_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 view_point_cull_test(u8 *, f32, f32, f32, f32, f32, f32, f32, s32, s32);
-#else
-s32 view_point_cull_test(u8 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
-#endif
 Gfx *flyer_model_draw(Gfx *, u8 *, s16);
 extern f32 D_800D3A00;
 extern f32 D_800D3A04;
@@ -923,11 +894,7 @@ Gfx *flyer_draw(Gfx *gdl, u8 *arg1, s16 arg2) {
     f32 mf[4][4];
     s32 pad[2];
 
-#ifdef NON_MATCHING
     if (view_point_cull_test(&D_800DA030[arg2 << 6], *(f32 *)(arg1 + 0x98), *(f32 *)(arg1 + 0x9C), *(f32 *)(arg1 + 0xA0), D_800D9F40, 4000.0f, D_800D3A00, D_800D3A04, 0, 0) == 0) {
-#else
-    if (view_point_cull_test(&D_800DA030[arg2 << 6], *(s32 *)(arg1 + 0x98), *(s32 *)(arg1 + 0x9C), *(s32 *)(arg1 + 0xA0), D_800D9F40, 4000.0f, D_800D3A00, D_800D3A04, 0, 0) == 0) {
-#endif
         switch (arg1[0x91]) {
         case 0:
             mtxf_rotate_xyz_deg(mf, *(f32 *)(arg1 + 0xA8), *(f32 *)(arg1 + 0xAC), *(f32 *)(arg1 + 0xB0));
@@ -950,7 +917,6 @@ Gfx *flyer_draw(Gfx *gdl, u8 *arg1, s16 arg2) {
     return gdl;
 }
 
-#ifdef NON_MATCHING
 extern s32 D_8008D450;
 
 /* was func_151777CC */
@@ -1008,6 +974,3 @@ void flyer_wing_flap_animate(u8 arg0) {
         (*(f32 *)((u8 *)temp_s0 + 0x24)) = (f32) (temp_f12 - 360.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/flyer_wing_flap_animate.s")
-#endif

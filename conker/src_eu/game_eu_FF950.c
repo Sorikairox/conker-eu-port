@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A5860[];
-#endif
 
 
-#ifdef NON_MATCHING
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 extern f32 D_800A0CC0[6][3];  /* beam end points (beam space) */
 
@@ -57,11 +55,7 @@ void beam_rays_update(u8 *obj) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF950/beam_rays_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_150D247C */
 void beam_rays_handle_event(struct102 *arg0, u8 *arg1, s32 arg2) {
     s32 temp_t6;
@@ -100,9 +94,6 @@ void beam_rays_handle_event(struct102 *arg0, u8 *arg1, s32 arg2) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF950/beam_rays_handle_event.s")
-#endif
 /* was func_150D2564 */
 void beam_rays_free_parts(u8 *arg0) {
     u8 *base = arg0 + 0x28;

@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A2720[];
-#endif
 
 
 /* was func_15103C10 */
@@ -11,7 +10,6 @@ void level_update_sfx_tick_b(s32 arg0) {
     sfx_cooldown_tick();
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800A2724;
 
 /* was func_15103C34 */
@@ -60,9 +58,6 @@ void pos_debris_burst_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u6C = 30.696001f;
     emit_textured_burst(&sp.u34, &sp.u30, &sp.u2C, 1, 0.0f, 1U, (u8) (s32) arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_131420/pos_debris_burst_spawn.s")
-#endif
 /* was func_15103D5C */
 s32 callback_return_zero(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     return 0;

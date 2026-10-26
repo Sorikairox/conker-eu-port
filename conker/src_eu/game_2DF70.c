@@ -11,7 +11,6 @@ void texture_scroll_clear(void) {
 }
 
 // jump table
-#ifdef NON_MATCHING
 extern u8 D_800DC2D8[];       /* camera / sky settings copied from the level header +5..+7 */
 extern u8 D_800DC2DB;         /* 1 on level 0x3C (mode 4) */
 extern u8 D_800DC2DC;         /* bit 0 of D_800D2E4C->unk14 */
@@ -168,11 +167,7 @@ void level_setup_sky_backdrop(s32 level) {
 
     D_800DC2DC = (D_800D2E4C->unk14 & 1) ? 1 : 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/level_setup_sky_backdrop.s")
-#endif
 // loops!
-#ifdef NON_MATCHING
 extern s32 D_800DC26C;    /* triangle table: 3 vertex pointers per triangle (12 bytes) */
 extern s32 D_800DC270;    /* per triangle: s16 x min, z min, x max, z max */
 extern s32 D_800DC274;    /* per triangle: s16 y min, y max */
@@ -300,6 +295,3 @@ void collision_scan_level_dl(s32 arg0) {
     }
     D_800DBE38 = count;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/collision_scan_level_dl.s")
-#endif

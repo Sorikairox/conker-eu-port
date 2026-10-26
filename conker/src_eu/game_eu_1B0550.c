@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800DE284[];
-#endif
 
 
-#ifdef NON_MATCHING
 s32 water_wave_push(struct127 *, s32, s32);
 extern s32 D_8008D3F0;
 extern s32 D_8008D407;
@@ -150,10 +148,6 @@ loop_17:
         } while (var_s7 < (s32) D_800DDE50);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B0550/water_waves_update.s")
-#endif
-#ifdef NON_MATCHING
 // water_mesh_wave_update: rebuilds a water object's world vertices for this frame's buffer (+0x20[D_800BE9C0]) from
 // its model vertices (+0x28, 16 bytes each): the vertex z picks a slot of the wave profile D_800DE290[+0x3C]
 // (water_wave_slot_of_z, 0..39, linear blend of neighbouring samples), whose height / 16 is added to the vertex y; the
@@ -198,9 +192,6 @@ void water_mesh_wave_update(u8 *obj) {
         out[2] = (s32)((f32)*(s16 *)(obj + 0x14) + oz);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B0550/water_mesh_wave_update.s")
-#endif
 
 extern u8 D_800DE284[];
 extern f32 D_8008D3F8[][6];
@@ -218,7 +209,6 @@ f32 water_wave_slot_of_z(s32 arg0, s32 arg1) {
     return x;
 }
 
-#ifdef NON_MATCHING
 /* P204 */
 extern u8 D_800DE284[];
 extern s32 D_8008D3F0;
@@ -273,6 +263,3 @@ s32 water_wave_push(struct127 *pl, s32 slot, s32 water) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B0550/water_wave_push.s")
-#endif

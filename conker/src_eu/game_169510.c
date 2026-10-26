@@ -2,11 +2,10 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 u8 *sprite_quad_build_axes(u8 *arg0, u8 *arg1, u8 *arg2, s16 arg3);
 Gfx *gfx_set_combine_mode(Gfx *arg0, u8 arg1, u8 *arg2);
 extern u8 D_800A4EA8[];
-#endif
 
 // copies the colours of 4 vertices
 typedef struct {
@@ -20,7 +19,6 @@ s32 light_alloc_lookat_buf(void);
 s32 light_alloc_light_buf(s32);
 
 
-#ifdef NON_MATCHING
 extern s32 (*D_8008A010[])(u8 *);
 extern s32 (*D_8008A048[])(u8 *);
 /* Per-frame update of a sprite effect (struct210): +0x10 bit 0 active; +0x18 flags; +0x1C life (s16, counts down
@@ -116,9 +114,6 @@ void sprite_fx_update(u8 *p) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/sprite_fx_update.s")
-#endif
 
 /* was func_1513C350 */
 struct210 *sprite_fx_spawn(struct210 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6, struct167 *arg7, s32 arg8, u8 arg9, s32 argA) {
@@ -346,7 +341,6 @@ void effect3d_dispatch_b(struct210 *arg0) {
     ((void (*)(struct210 *))D_80089F2C[idx])(arg0);
 }
 
-#ifdef NON_MATCHING
 Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 Gfx *gfx_prim_color_cached(s32, s32, s32, s16, s32, s32, s32, u8 *);
@@ -462,9 +456,6 @@ u8 *sprite_fx_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     }
     return var_s1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/sprite_fx_draw.s")
-#endif
 /* was func_1513CF9C */
 void sprite_fx_on_msg(s32 arg0, s32 arg1, u8 arg2) {
     D_80089F60[0](arg0, arg1, arg2);
@@ -474,7 +465,6 @@ void sprite_fx_on_msg(s32 arg0, s32 arg1, u8 arg2) {
 void sprite_fx_msg_stub(s32 arg0, s32 arg1, s32 arg2) {
 }
 
-#ifdef NON_MATCHING
 /* P143 draft, inserted P146 */
 extern s32 (*D_8008A058[])(u8 *);
 extern s32 (*D_8008A100[])(u8 *);
@@ -570,11 +560,7 @@ void effect3d_update(u8 *fx) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/effect3d_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_1513D2F0 */
 void * effect3d_spawn_full(void * arg0_p, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB) {
     u8 * arg0 = (u8 *) arg0_p;
@@ -648,23 +634,13 @@ void * effect3d_spawn_full(void * arg0_p, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u
     }
     return temp_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/effect3d_spawn_full.s")
-#endif
-#ifdef NON_MATCHING
 // record_spawn: effect3d_spawn_full without extra words; returns the new record (the asm leaves effect3d_spawn_full's v0 in
 // v0 and obj_glow_effect_spawn uses it). P153.
 /* was func_1513D4B8 */
 struct210 *effect3d_spawn(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
     return effect3d_spawn_full(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0, 0, arg7, arg8, arg9);
 }
-#else
-void effect3d_spawn(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
-    effect3d_spawn_full(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0, 0, arg7, arg8, arg9);
-}
-#endif
 
-#ifdef NON_MATCHING
 // record_spawn_default: effect3d_spawn_full with the default parameter block D_800A4AA0 and no extra words; returns the
 // new record (the asm leaves effect3d_spawn_full's v0 in v0; spark_spawn_from_desc copies into it). P128.
 // functions.h declares it with this return type under NON_MATCHING (P131 merge).
@@ -672,11 +648,6 @@ void effect3d_spawn(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
 struct210 *effect3d_spawn_default(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
     return effect3d_spawn_full(arg0, &D_800A4AA0, arg1, arg2, arg3, arg4, arg5, 0, 0, arg6, arg7, arg8);
 }
-#else
-void effect3d_spawn_default(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
-    effect3d_spawn_full(arg0, &D_800A4AA0, arg1, arg2, arg3, arg4, arg5, 0, 0, arg6, arg7, arg8);
-}
-#endif
 
 /* was func_1513D594 */
 s32 effect3d_spawn_oriented(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, u8 argD, s32 argE, u8 argF, s32 arg10) {
@@ -693,19 +664,12 @@ s32 effect3d_spawn_oriented(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 ar
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 /* P160: the N64 code leaves effect3d_spawn_oriented's record in v0 and impact_smoke_puff_spawn (game_2062D0) uses it */
 /* was func_1513D668 */
 struct210 *effect3d_spawn_oriented_simple(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE) {
     return (struct210 *)effect3d_spawn_oriented(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, 0, 0, argB, argC, argD, argE);
 }
-#else
-void effect3d_spawn_oriented_simple(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE) {
-    effect3d_spawn_oriented(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, 0, 0, argB, argC, argD, argE);
-}
-#endif
 
-#ifdef NON_MATCHING
 s32 floor_triangle_slope(s32, s32, f32 *, f32 *);
 s32 tri_calc_normal(s32, f32 *, f32 *, s32 *);
 s32 vec3_normalize_len(f32 *, f32 *, s32 *, s32 *);
@@ -840,9 +804,6 @@ s32 effect3d_build_axes(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4,
 block_23:
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/effect3d_build_axes.s")
-#endif
 // s32 effect3d_build_axes(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6) {
 //     f32 spBC;
 //     f32 spB8;
@@ -970,7 +931,6 @@ block_23:
 //     return 1;
 // }
 
-#ifdef NON_MATCHING
 Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 Gfx *gfx_prim_color_cached(s32, s32, s32, s16, s32, s32, s32, u8 *);
@@ -1133,9 +1093,6 @@ u8 *effect3d_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     }
     return arg0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/effect3d_draw.s")
-#endif
 // jump table
 extern s32 (*D_8008A304[])(u8 *, s32, u8);
 
@@ -1195,7 +1152,6 @@ void sprite_quad_stub_a(void) {
 }
 
 // positions a 4-vertex quad of half-size (arg4, arg5) at (arg1, arg2, arg3), rotated by angle arg6
-#ifdef NON_MATCHING
 /* was func_1513E13C */
 void sprite_quad_place(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6) {
     f32 sp48;
@@ -1239,9 +1195,6 @@ void sprite_quad_place(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, 
     arg0->unk64 = (s16) (s32) (temp_f10_2 - temp_f2);
     arg0->unk74 = (s16) (s32) (sp30 + temp_f2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/sprite_quad_place.s")
-#endif
 // NON-MATCHING: arg0 lives in a1 and stack layout differs (frame 0x50)
 // void sprite_quad_place(struct210 *arg0_, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6) {
 //     Vtx *arg0 = (Vtx *)&arg0_->unk40;
@@ -1267,7 +1220,6 @@ void sprite_quad_place(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, 
 void sprite_quad_stub_b(void) {
 }
 
-#ifdef NON_MATCHING
 s32 floor_triangle_slope(s32, s32, f32 *, f32 *);
 s32 tri_calc_normal(s32, f32 *, f32 *, s32 *);
 s32 vec3_normalize_len(f32 *, f32 *, s32 *, s32 *);
@@ -1359,9 +1311,6 @@ s32 sprite_quad_place_cam(s32 vtx, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/sprite_quad_place_cam.s")
-#endif
 
 typedef struct {
     u8  pad0[0x8];
@@ -1409,7 +1358,6 @@ s32 effect3d_apply_velocity(struct_eu_1513E6E8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* P143 */
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 // sprite_quad_build_scaled: builds the 4 corner vertices (+-half width +0x2C, +-half height +0x30, z 0) of a
@@ -1466,11 +1414,7 @@ u8 *sprite_quad_build_scaled(u8 *fx, s16 slot) {
     }
     return start;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/sprite_quad_build_scaled.s")
-#endif
 // ???
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 extern s32 D_800DD608;
 extern s32 D_800DD618;
@@ -1582,28 +1526,18 @@ u8 *sprite_quad_build_screen(u8 *arg0, u8 arg1, s16 arg2) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/sprite_quad_build_screen.s")
-#endif
-#ifdef NON_MATCHING
 /* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
    matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
 /* was func_1513EDB4 */
 s32 sprite_quad_build_screen_a(s32 arg0, s16 arg1) {
     return sprite_quad_build_screen(arg0, 0, arg1);
 }
-#else
-void sprite_quad_build_screen_a(s32 arg0, s16 arg1) {
-    sprite_quad_build_screen(arg0, 0, arg1);
-}
-#endif
 
 /* was func_1513EDE4 */
 s32 sprite_quad_build_screen_b(s32 arg0, s16 arg1) {
     return sprite_quad_build_screen(arg0, 1, arg1);
 }
 
-#ifdef NON_MATCHING
 /* P143 */
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 // sprite_quad_build: builds the 4 corner vertices (+-half width +0x2C, +-half height +0x30, z 0) of a sprite
@@ -1654,11 +1588,7 @@ u8 *sprite_quad_build_rot(u8 *fx, s16 slot) {
     }
     return start;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/sprite_quad_build_rot.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 D_800DD608;
 extern s32 D_800DD618;
 
@@ -1773,21 +1703,12 @@ u8 *sprite_quad_build_screen_rot(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/sprite_quad_build_screen_rot.s")
-#endif
-#ifdef NON_MATCHING
 /* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
    matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
 /* was func_1513F4B0 */
 u8 * sprite_quad_build_axes_entry(struct210 *arg0, s16 arg1) {
     return sprite_quad_build_axes(arg0, &arg0->unk110, &arg0->unk11C, arg1);
 }
-#else
-void sprite_quad_build_axes_entry(struct210 *arg0, s16 arg1) {
-    sprite_quad_build_axes(arg0, &arg0->unk110, &arg0->unk11C, arg1);
-}
-#endif
 
 // emits gDPSetCombineLERP for combine mode arg1 (table D_800A4F88), preceded by a pipe sync if *arg2 == 1
 /* was func_1513F4E4 */
@@ -1830,7 +1751,6 @@ s32 sprite_fx_grow(struct210 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* was func_1513F728 */
 s32 effect3d_update_motion_drag(u8 *arg0) {
     struct {
@@ -1922,12 +1842,8 @@ block_5:
     (*(f32 *)((u8 *)arg0 + 0x48)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x48)) + ((*(f32 *)((u8 *)temp_v1 + 0x1C)) * D_800BE9A4));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/effect3d_update_motion_drag.s")
-#endif
 u8 *beam_quad_build_cam(u8 *fx, u8 flip, f32 *scale, s16 slot);
 
-#ifdef NON_MATCHING
 /* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
    matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
 /* was func_1513FA2C */
@@ -1938,17 +1854,7 @@ u8 * beam_quad_build_a(s32 arg0, s16 arg1) {
     sp18[1] = 1.0f;
     return beam_quad_build_cam((u8 *) arg0, 0, sp18, arg1);
 }
-#else
-void beam_quad_build_a(s32 arg0, s16 arg1) {
-    f32 sp18[2];
 
-    sp18[0] = 1.0f;
-    sp18[1] = 1.0f;
-    beam_quad_build_cam((u8 *) arg0, 0, sp18, arg1);
-}
-#endif
-
-#ifdef NON_MATCHING
 /* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
    matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
 /* was func_1513FA70 */
@@ -1959,17 +1865,7 @@ u8 * beam_quad_build_b(s32 arg0, s16 arg1) {
     sp18[1] = 1.0f;
     return beam_quad_build_cam((u8 *) arg0, 1, sp18, arg1);
 }
-#else
-void beam_quad_build_b(s32 arg0, s16 arg1) {
-    f32 sp18[2];
 
-    sp18[0] = 1.0f;
-    sp18[1] = 1.0f;
-    beam_quad_build_cam((u8 *) arg0, 1, sp18, arg1);
-}
-#endif
-
-#ifdef NON_MATCHING
 /* P170 */
 
 // beam_quad_build: builds the 4 vertices of a camera-facing beam quad for display list slot `slot`: from the start
@@ -2070,9 +1966,6 @@ u8 *beam_quad_build_cam(u8 *fx, u8 flip, f32 *scale, s16 slot) {
     }
     return start;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/beam_quad_build_cam.s")
-#endif
 
 // sets the texture coordinates of a 4-vertex quad, flipping s/t according to arg2 bits 0/1
 /* was func_1513FFF4 */
@@ -2107,7 +2000,6 @@ void sprite_quad_set_colors(Vtx *arg0, struct_eu_vtxcol *arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 /* P143 */
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 // sprite_quad_build_flat: same result as sprite_quad_build_rot (corner quad +-0x2C / +-0x30 rotated by +0x40/+0x44/+0x48,
@@ -2158,9 +2050,6 @@ u8 *sprite_quad_build_flat(u8 *fx, s16 slot) {
     }
     return start;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/sprite_quad_build_flat.s")
-#endif
 
 /* was func_151403A8 */
 void fx_lists_broadcast_a(s32 arg0, u8 arg1) {
@@ -2172,7 +2061,6 @@ void fx_lists_broadcast_b(s32 arg0, u8 arg1) {
     node_broadcast_types(&D_800A5178, 3, arg0, arg1);
 }
 
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 
 /* was func_15140410 */
@@ -2235,10 +2123,6 @@ u8 *sprite_quad_build_axes(u8 *arg0, u8 *arg1, u8 *arg2, s16 arg3) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/sprite_quad_build_axes.s")
-#endif
-#ifdef NON_MATCHING
 #define L6AC_PREV(n) (*(u8 **)((n) + 4))
 #define L6AC_NEXT(n) (*(u8 **)((n) + 8))
 #define L6AC_KEY(n) (((n)[0x18] << 8) + (*(s32 *)((n) + 0x20) >> 16))
@@ -2298,6 +2182,3 @@ s32 scene_node_list_sort(s32 ret, s32 idx, s32 group, s16 skip) {
     L6AC_PREV(L6AC_NEXT(d)) = NULL;
     return ret;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/scene_node_list_sort.s")
-#endif

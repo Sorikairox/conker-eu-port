@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A4EA8[];
-#endif
 
 
 extern s32 (*D_8008B418[])(u8 *);
@@ -42,7 +41,6 @@ void quad_fx_update(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, u8, s8 *);
 Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
@@ -93,9 +91,6 @@ u8 *quad_fx_draw(s32 arg0, u8 *arg1, s32 arg2) {
     (*(s32 *)((u8 *)temp_v0 + 0x14)) = 0;
     return temp_v0 + 0x18;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_189860/quad_fx_draw.s")
-#endif
 s32 memcpy(u8 *, u8 **, s32);
 
 /* was func_1515C3C0 */

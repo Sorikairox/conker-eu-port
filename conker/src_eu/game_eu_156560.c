@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void math_spring_approach(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 extern s32 D_800D2DB4;
 extern f32 D_80089890[][5]; /* camera lean presets: {k0, k1, k2, k3, base} per +0x134 index */
@@ -100,6 +99,3 @@ void camera_lean_from_heading(struct108 *arg0, f32 *outB, f32 *outA) {
     }
     *(s32 *)(p + 0x134) = saved;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_156560/camera_lean_from_heading.s")
-#endif

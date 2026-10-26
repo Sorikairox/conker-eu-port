@@ -5,7 +5,6 @@
 
 
 // contains jr
-#ifdef NON_MATCHING
 /* P7: UNVERIFIED-difftest (infinite loop: UNSURE by construction; no difference over 10 trials with DIFFTEST_OUTPARAMS=1), needs runtime check */
 /* scheduler thread (sched.c-style): retrace / SP done / DP done / pre-NMI / controller messages */
 typedef struct SchedClient {
@@ -120,9 +119,6 @@ void sched_thread_main(s32 arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_49E0/sched_thread_main.s")
-#endif
 // void sched_thread_main(s32 arg0) {
 //     u32 sp64;
 //     s32 sp5C;
@@ -326,11 +322,9 @@ void sched_try_swap_buffer(void) {
 }
 
 extern u8 D_eu_8002AFA8;
-#ifdef NON_MATCHING
 // func_1515FDA0 is the US name of EU fb_fx_apply_all (undefined_syms alias); the port has only the EU symbol
 void fb_fx_apply_all(u16 *);
 #define func_1515FDA0 fb_fx_apply_all
-#endif
 extern s8 D_eu_8002AE24;
 
 /* was func_10005020 */

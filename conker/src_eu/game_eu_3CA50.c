@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 int game_gu_random(void);
 
 /* was func_1500F240 */
@@ -39,9 +38,6 @@ s32 mist_puff_spawn(f32 arg0, f32 arg1, f32 arg2) {
     sp.u60 = 0x30001;
     return sprite_fx_spawn_quad((s32) &sp.u48, 0, 0U, 0U, arg0, arg1, arg2, 110.0f, 110.0f, 0U, 0U, 0, 0xFFU, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3CA50/mist_puff_spawn.s")
-#endif
 /* was func_1500F328 */
 void level_fx_spawn_box_a(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     struct260 *temp_v0;
@@ -56,7 +52,6 @@ void level_fx_spawn_box_a(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     }
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800D9CF0[];
 void area_drift_emitter_create(void *arg0, u8 arg1);
 
@@ -138,6 +133,3 @@ void level_mist_setup(void) {
         area_drift_emitter_create(&spec, 1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3CA50/level_mist_setup.s")
-#endif

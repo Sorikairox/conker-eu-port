@@ -1,14 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void arc_control_points_thirds(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 void obj_attach_point_at_angles(u8 *arg0, s16 arg1, s16 arg2, u8 *arg3, u8 *arg4);
 void obj_bone_point_transform(u8 *arg0, u8 arg1, void *arg2, void *arg3);
-#endif
 
 
-#ifdef NON_MATCHING
 void bolt_arc_sample_curve(struct102 *);
 void bolt_arc_jitter_points(struct102 *);
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
@@ -123,9 +121,6 @@ u8 *bolt_arc_spawn(s16 *spec, s32 extra, u8 layer, s32 arg3) {
     }
     return obj;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/bolt_arc_spawn.s")
-#endif
 
 typedef struct { f32 x, y, z; } V3_133A70;
 void bolt_arc_sample_curve(struct102 *);
@@ -194,7 +189,6 @@ struct_eu_133A70_elem *bolt_arc_points_get(struct_eu_133A70 *arg0) {
     return &arg0->unk88[temp_v1];
 }
 
-#ifdef NON_MATCHING
 s32 vec3_make_basis(f32 *, f32 *, f32 *);
 f32 bezier_basis0(f32);
 f32 bezier_basis1(f32);
@@ -255,9 +249,6 @@ void bolt_arc_sample_curve(struct102 *arg0) {
         t += step;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/bolt_arc_sample_curve.s")
-#endif
 
 /* was func_15106A34 */
 f32 bezier_basis0(f32 arg0) {
@@ -334,7 +325,6 @@ void bolt_arc_jitter_points(struct102 *arg0)
 
 }
 
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, Vtx **, u8 *);
 s32 gfx_load_texture_cached(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
 s32 gfx_set_combine_mode(s32, u8, s8 *);
@@ -465,9 +455,6 @@ s32 bolt_arc_ribbon_draw(s32 gfx, u8 *obj, s16 id) {
     }
     return gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/bolt_arc_ribbon_draw.s")
-#endif
 
 extern void (*D_80088FB8[])(u8 *);
 /* was func_151073F8 */
@@ -511,7 +498,6 @@ void bolt_arc_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 typedef struct {
     s32 count;  // 0x00 points
     s32 u4;     // 0x04
@@ -557,11 +543,7 @@ s32 bolt_spawn(f32 *start, f32 *end, s32 depth, f32 *params, f32 jitter, u8 kind
     }
     return (s32) rec;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/bolt_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 f32 random_float(void);
 
 // bolt_subdivide: fills the points between `lo` and `hi` of a bolt record's point list (rec + 0x28 + 0xC, 12-byte
@@ -596,11 +578,7 @@ void bolt_points_subdivide(u8 *rec, s16 lo, s16 hi, f32 jitter) {
         lo = mid;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/bolt_points_subdivide.s")
-#endif
 
-#ifdef NON_MATCHING
 typedef struct {
     u8 *rec;      // 0x00 copied into the arc object (its +0x60 data) after the spawn
     s16 life;     // 0x04 <- passed to bolt_arc_spawn from here
@@ -698,9 +676,6 @@ void bolt_record_update(u8 *rec) {
     }
     *(s32 *) (spec + 4) += 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/bolt_record_update.s")
-#endif
 
 /* was func_15107B84 */
 void bolt_arc_unlink_from_bolt(s32 ***arg0) {
@@ -739,7 +714,6 @@ void bolt_record_handle_event(u8 *arg0, s32 arg1, u8 arg2)
   }
 }
 
-#ifdef NON_MATCHING
 s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
 
 /* The 0x50-byte arc spec bolt_arc_spawn copies into the arc object (+0x10). */
@@ -818,9 +792,6 @@ s32 object_arc_to_surface_spawn(u8 *obj, s16 angle0, s16 angle1, s16 life, s32 s
     }
     return (s32)arc;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/object_arc_to_surface_spawn.s")
-#endif
 
 /* was func_15107E64 */
 void obj_arc_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
@@ -829,7 +800,6 @@ void obj_arc_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, temp_a2, temp_a2 + 4, (s32)arg0);
 }
 
-#ifdef NON_MATCHING
 /* was func_15107EA4 */
 s32 obj_arc_follow_update(u8 *arg0, s8 *arg1) {
     struct {
@@ -861,14 +831,7 @@ s32 obj_arc_follow_update(u8 *arg0, s8 *arg1) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/obj_arc_follow_update.s")
-#endif
-#ifdef NON_MATCHING
 void vec3_from_angles_byte(s16, s16, f32, u8 *); /* P95: f32 (float bits were passed as an int) */
-#else
-s32 vec3_from_angles_byte(s16, s16, s32, u8 *);
-#endif
 s32 obj_get_fx_point_b(u8 *, f32 *, s32 *, s32 *);
 
 /* was func_15107FA0 */
@@ -878,11 +841,7 @@ void obj_attach_point_at_angles(u8 *arg0, s16 arg1, s16 arg2, u8 *arg3, u8 *arg4
     s32 sp24;
 
     obj_get_fx_point_b(arg0, sp2C, &sp28, &sp24);
-#ifdef NON_MATCHING
     vec3_from_angles_byte(arg1, arg2, *(f32 *)&sp28, arg3); /* P95: f32 (float bits were passed as an int) */
-#else
-    vec3_from_angles_byte(arg1, arg2, sp28, arg3);
-#endif
     *(f32 *)(arg3 + 4) *= *(f32 *)(arg0 + 0xF0);
     *(f32 *)(arg3 + 0) += sp2C[0];
     *(f32 *)(arg3 + 4) += sp2C[1];
@@ -915,11 +874,7 @@ void obj_angle_point_effect(u8 *arg0, s16 arg1, s16 arg2, u8 arg3, s32 arg4) {
 
     if (*(s32 *)(arg0 + 0x1D4) != 0) {
         obj_get_fx_point_b(arg0, sp20, &sp1C, &sp18);
-#ifdef NON_MATCHING
         vec3_from_angles_byte(arg1, arg2, *(f32 *)&sp1C, sp2C); /* P95: f32 (float bits were passed as an int) */
-#else
-        vec3_from_angles_byte(arg1, arg2, sp1C, sp2C);
-#endif
         sp2C[1] *= *(f32 *)(arg0 + 0xF0);
         sp2C[0] += sp20[0];
         sp2C[1] += sp20[1];
@@ -928,7 +883,6 @@ void obj_angle_point_effect(u8 *arg0, s16 arg1, s16 arg2, u8 arg3, s32 arg4) {
     }
 }
 
-#ifdef NON_MATCHING
 /* The 0x18-byte record the arc's data area (+0x60) gets: the object, a point and a kind byte. */
 typedef struct {
     u8 *obj;
@@ -992,11 +946,7 @@ s32 object_arc_from_point_spawn(u8 *obj, u8 kind, f32 *pos, s16 angle0, s16 angl
     }
     return (s32)arc;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/object_arc_from_point_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_151083C8 */
 s32 obj_point_arc_follow_update(u8 *arg0, s8 *arg1) {
     struct {
@@ -1030,9 +980,6 @@ s32 obj_point_arc_follow_update(u8 *arg0, s8 *arg1) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/obj_point_arc_follow_update.s")
-#endif
 /* was func_151084D4 */
 void obj_bone_point_transform(u8 *arg0, u8 arg1, void *arg2, void *arg3) {
     mtx_transform_point_or_origin(arg2, arg3, *(u8 **)(arg0 + 0x1D4) + (arg1 << 6));

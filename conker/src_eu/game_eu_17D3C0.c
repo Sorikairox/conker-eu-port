@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
-#endif
 
 
 f32 vec3_dot(u8 *, u8 *);
@@ -67,7 +66,6 @@ f32 *emit_disc_random_point(f32 *arg0, f32 arg1, f32 *arg2) {
     return arg2;
 }
 
-#ifdef NON_MATCHING
 /* P159 */
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 void particle_burst_spawn_vec(s32, s32, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
@@ -134,9 +132,6 @@ void emit_spray_particles(u8 *p, u8 *normal, s32 *axisA, s32 *axisB, f32 spread,
                       sp->u50, (u8)arg5, arg6);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_spray_particles.s")
-#endif
 
 s32 vec3_make_basis(u8 *, s32 *, s32 *);
 void emit_spray_particles(u8 *, u8 *, s32 *, s32 *, f32, s32, s32);
@@ -195,11 +190,7 @@ void emit_random_sprites(u8 *arg0, u8 arg1, s32 arg2) {
 }
 
 void emit_disc_from_surface();
-#ifdef NON_MATCHING
 s32 emit_dust_on_disc();
-#else
-void emit_dust_on_disc();
-#endif
 
 /* was func_1515046C */
 void emit_dust_on_surface_disc(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
@@ -208,7 +199,6 @@ void emit_dust_on_surface_disc(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) 
     emit_dust_on_disc(sp24, arg1, arg2, arg3, arg4);
 }
 
-#ifdef NON_MATCHING
 /* P153 */
 s32 emit_disc_prepare(u8 *arg0);
 f32 *emit_disc_random_point(f32 *arg0, f32 arg1, f32 *arg2);
@@ -251,11 +241,7 @@ s32 emit_dust_on_disc(f32 *path, u8 *def, s32 owner, s32 arg3, s32 arg4) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_dust_on_disc.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P155 */
 void vec3_from_angles_byte(s16, s16, f32, void *);
 typedef struct {
@@ -317,11 +303,7 @@ s32 emit_dust_by_angles(void *angles, void *def, s32 arg2, u8 arg3, s32 arg4) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_dust_by_angles.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P181 */
 void vec3_from_angles_byte(s16, s16, f32, void *);
 s32 mdl_particle_spawn_ex(void *, s32, s32, s32, s32, s32, s32);
@@ -436,11 +418,7 @@ s32 emit_spark_burst(s32 *arg0, s16 *ang, u8 arg2, s32 arg3) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_spark_burst.s")
-#endif
 
-#ifdef NON_MATCHING
 void vec3_from_angles_byte(s16, s16, f32, void *);
 s32 allocate_memory(s32, s32, s32, s32);
 s32 mdl_particle_spawn_ex(void *, s32, s32, s32, s32, s32, s32);
@@ -610,19 +588,11 @@ s32 emit_debris_burst(s32 *arg0, s32 *ids, s32 *scales, s32 n, s32 arg4, s32 arg
     return 0;
 }
 #undef RAND_SPREAD
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_debris_burst.s")
-#endif
 
 void vec3_from_angles_byte(s16, s16, f32, void *);
-#ifdef NON_MATCHING
 /* P59: arg 2 (z) is f32 in the definition (src_eu/nm_asm/D5E90.c); wasm needs the exact signature. */
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 #define RAY_Z0(p) (*(f32 *)(p))
-#else
-s32 collision_ray_cast(f32, f32, s32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
-#define RAY_Z0(p) (*(s32 *)(p))
-#endif
 s32 prop_is_flagged(s32);
 
 /* was func_1515128C */
@@ -687,7 +657,6 @@ void emit_tumbling_pieces(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 memcpy(s32, f32 *, s32);
 
 /* was func_1515176C */
@@ -829,10 +798,6 @@ void emit_effect3d_from_surface(u8 *arg0, s32 arg1, s32 arg2) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_effect3d_from_surface.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_15151BE0 */
 void emit_sparks_from_surface(u8 *arg0, s32 arg1, s32 arg2) {
     struct {
@@ -927,10 +892,6 @@ void emit_sparks_from_surface(u8 *arg0, s32 arg1, s32 arg2) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_sparks_from_surface.s")
-#endif
-#ifdef NON_MATCHING
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 
 /* was func_15151FA8 */
@@ -1003,10 +964,6 @@ void emit_sparks_by_angles(u8 *arg0, s32 arg1, s32 arg2) {
         } while (var_s3 != 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_sparks_by_angles.s")
-#endif
-#ifdef NON_MATCHING
 s32 vec3_normalize_len(u8 *, u8 *, void *, void *);
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 s32 mdl_particle_spawn(void *, s32, s32, s32, s32, s32);
@@ -1134,11 +1091,7 @@ void emit_impact_flash_spray(u8 *def, s32 *frames, f32 *scales, s32 n, u8 kind, 
         count--;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_impact_flash_spray.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P179 */
 s32 mdl_particle_spawn(void *, s32, s32, s32, s32, s32);
 void vec3_from_angles_byte(s16, s16, f32, void *);
@@ -1233,11 +1186,7 @@ void emit_textured_burst(void *arg0, void *arg1, void *arg2, s32 arg3, f32 arg4,
         n--;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_textured_burst.s")
-#endif
 
-#ifdef NON_MATCHING
 void vec3_from_angles_byte(s16, s16, f32, void *);
 s32 anim_model_fx_spawn_moving(s8 *, f32 *, s32, f32, s32, s32, s32, s32, s32);
 
@@ -1382,9 +1331,6 @@ s32 emit_burst_from_spec_b(s32 *arg0, u8 arg1, s32 arg2) {
     return 0;
 }
 #undef RAND_SPREAD
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_burst_from_spec_b.s")
-#endif
 
 void vec3_from_angles_byte(s16, s16, f32, void *);
 void spark_record_spawn(void *, u8, u8);
@@ -1449,7 +1395,6 @@ void colour_pick_random_fire(u8 *arg0) {
     arg0[2] = e[2];
 }
 
-#ifdef NON_MATCHING
 void vec3_from_angles_byte(s16, s16, f32, void *);
 void *streak_spawn(s32 *, s32, void *, s32, u8, s32);
 
@@ -1575,11 +1520,7 @@ s32 emit_streaks_from_spec(s32 *arg0, u8 arg1, s32 arg2) {
     return 0;
 }
 #undef RAND_SPREAD
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_streaks_from_spec.s")
-#endif
 
-#ifdef NON_MATCHING
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 
 /* was func_151534E0 */
@@ -1665,10 +1606,6 @@ void emit_sparks_by_angles_b(u8 *arg0, s32 arg1) {
         } while (var_s3 != 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_sparks_by_angles_b.s")
-#endif
-#ifdef NON_MATCHING
 s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
 
 /* was func_15153808 */
@@ -1757,10 +1694,6 @@ void emit_sprite_nodes_by_angles(u8 *arg0, s32 arg1, s32 arg2) {
         } while (var_s3 != 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_sprite_nodes_by_angles.s")
-#endif
-#ifdef NON_MATCHING
 /* P150 (hand C, replaces the batch m2c body) */
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 s32 memcpy(s32, f32 *, s32);
@@ -1872,9 +1805,6 @@ void emit_particle_burst_req(u8 *req, s32 tag, s32 owner, s32 ownerArg) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_particle_burst_req.s")
-#endif
 typedef struct { f32 v[3]; } V3_3f24;
 typedef struct {
     V3_3f24 pos;
@@ -1889,11 +1819,7 @@ typedef struct {
     s16 h;
     s16 i;
 } S_3f24;
-#ifdef NON_MATCHING
 s32 line_fx_spawn(S_3f24 *, u8, s32, u8, s32);
-#else
-void line_fx_spawn(S_3f24 *, u8, s32, u8, s32);
-#endif
 
 /* was func_15153F24 */
 void emit_line_sparks_by_angles(u8 *arg0, u8 arg1) {
@@ -2001,7 +1927,6 @@ void emit_sparks_in_angle_range(struct_eu_15154488 *arg0, struct17 *arg1, s32 ar
     }
 }
 
-#ifdef NON_MATCHING
 /* P159 */
 s32 mdl_particle_spawn(void *, s32, s32, s32, s32, s32);
 // spark_shower_spawn: spawns a spark particle (mdl_particle_spawn, 0x18 extra bytes at +0x170) at pos lasting `time`
@@ -2112,9 +2037,6 @@ s32 spark_shower_spawn(f32 *pos, f32 time, f32 size, f32 bright, f32 flat, u8 ar
     }
     return p;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/spark_shower_spawn.s")
-#endif
 
 /* was func_15154A9C */
 s32 spark_shower_update(u8 *arg0) {
@@ -2139,11 +2061,7 @@ s32 spark_shower_update(u8 *arg0) {
 }
 
 void vec3_from_angles_byte(s16, s16, f32, void *);
-#ifdef NON_MATCHING
 void debris_sprite_spawn(s32, void *, f32, f32, s32, s32, f32, s32, s32, u8, s32);
-#else
-void debris_sprite_spawn(s32, void *, f32, s32, s32, s32, f32, s32, s32, u8, s32);
-#endif
 /* was func_15154BF4 */
 void emit_rings_random_yaw(u8 *arg0, u8 arg1, s32 arg2) {
     s32 sp80[4];
@@ -2153,21 +2071,12 @@ void emit_rings_random_yaw(u8 *arg0, u8 arg1, s32 arg2) {
         do {
             vec3_from_angles_byte(random_int() & 0xFF, *(s16 *)(arg0 + 0xA) + (random_int() % (u32)(*(s16 *)(arg0 + 0xE) + 1)),
                 *(f32 *)(arg0 + 0x10) + *(f32 *)(arg0 + 0x14) * random_float(), sp80);
-#ifdef NON_MATCHING
             debris_sprite_spawn(*(s32 *)(arg0 + 4), sp80, *(f32 *)(arg0 + 0x18) + *(f32 *)(arg0 + 0x1C) * random_float(),
                 *(f32 *)(arg0 + 0x20),
                 *(u8 *)(arg0 + 0x24) + (random_int() % (u32)(*(u8 *)(arg0 + 0x25) + 1)),
                 *(s16 *)(arg0 + 0x26) + (random_int() % (u32)(*(s16 *)(arg0 + 0x28) + 1)),
                 *(f32 *)(arg0 + 0x2C) + *(f32 *)(arg0 + 0x30) * random_float(),
                 random_float() < *(f32 *)(arg0 + 0x34), *(s32 *)(arg0 + 0x38), arg1, arg2);
-#else
-            debris_sprite_spawn(*(s32 *)(arg0 + 4), sp80, *(f32 *)(arg0 + 0x18) + *(f32 *)(arg0 + 0x1C) * random_float(),
-                *(s32 *)(arg0 + 0x20),
-                *(u8 *)(arg0 + 0x24) + (random_int() % (u32)(*(u8 *)(arg0 + 0x25) + 1)),
-                *(s16 *)(arg0 + 0x26) + (random_int() % (u32)(*(s16 *)(arg0 + 0x28) + 1)),
-                *(f32 *)(arg0 + 0x2C) + *(f32 *)(arg0 + 0x30) * random_float(),
-                random_float() < *(f32 *)(arg0 + 0x34), *(s32 *)(arg0 + 0x38), arg1, arg2);
-#endif
             n--;
         } while (n > 0);
     }

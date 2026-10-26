@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 memcpy(s32, f32 *, s32);
 s32 collision_floor_all(f32 *, s32, f32, f32 *);
 
@@ -92,11 +91,7 @@ void dust_drop_spawn_near_char(s16 idx) {
         memcpy((s32) obj + 0x28, rec, 0x18);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/dust_drop_spawn_near_char.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 memcpy(s32, f32 *, s32);
 
 /* was func_1515B78C */
@@ -232,9 +227,6 @@ void dust_drop_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s0 + 0x10)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/dust_drop_update.s")
-#endif
 /* was func_1515BB64 */
 void screen_smoke_clear(s16 arg0) {
     s16 sp1C[2];
@@ -252,7 +244,6 @@ void screen_smoke_on_message(u8 *arg0, s16 *arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 u8 impact_current_kind(void);
 s32 sprite2d_spawn(void *, s32, s32, s32, s32, s32, s32);
 extern u8 (*D_800900A4[])(void);
@@ -352,11 +343,7 @@ void screen_smoke_burst(s16 id) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/screen_smoke_burst.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_1515BF04 */
 s32 screen_smoke_beh_rise(u8 *arg0) {
     f32 temp_f14;
@@ -369,9 +356,6 @@ s32 screen_smoke_beh_rise(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x1C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x7C)) + ((*(f32 *)((u8 *)arg0 + 0x80)) * ((*(f32 *)((u8 *)arg0 + 0x78)) + temp_f2) * 0.5f));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/screen_smoke_beh_rise.s")
-#endif
 /* was func_1515BF80 */
 void cam_zone_outside_tick(s32 arg0) {
 }

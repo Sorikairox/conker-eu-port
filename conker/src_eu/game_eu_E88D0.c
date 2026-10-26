@@ -18,7 +18,6 @@ typedef struct {
 void sprite_fx_set_handlers();
 
 
-#ifdef NON_MATCHING
 void mtx_get_translation(void *, s32, void *);
 s32 fx_try_camera_shake(s32, s32);
 void water_ring_spawn(s32, s32, s32, s32, s32, s32, s32, u8, s32);
@@ -119,14 +118,7 @@ void foot_splash_effect(u8 *obj, u8 kind, u8 alpha) {
     r1 = random_int();
     spawn_circle_random_emit(pos[0], pos[1], pos[2], size * 40.0f + 60.0f, right, left, (u32) r1 % 7 + 6, 6, 0, 0.0f, 0, alpha);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E88D0/foot_splash_effect.s")
-#endif
 
-#ifndef NON_MATCHING
-extern f32 D_800A0244;
-extern f32 D_800A0248;
-#endif
 s32 particle_spawn_basic(void *, s32, s32, u8, s32);
 /* was func_150BB4CC */
 s32 puff_particle_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {

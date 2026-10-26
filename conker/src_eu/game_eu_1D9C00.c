@@ -5,7 +5,6 @@
 s32 rope_rider_is_player(u8 *, u8 *);
 
 
-#ifdef NON_MATCHING
 /* P155 */
 u8 impact_current_kind(void);
 void spawn_circle_random_emit(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9,
@@ -68,11 +67,7 @@ void debris_burst_spawn(f32 *pos, u8 *src, s32 kind, u8 arg3, s32 arg4) {
         impact_flat_fx_spawn(light, fl->u0, fl->u8, fl->u4, (u8 *) pos, (s32) (src + 4), 0x96, 0, arg3, arg4);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/debris_burst_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P191 */
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 extern s8 D_800A9400[][5];
@@ -188,9 +183,6 @@ s32 debris_chunk_emit(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 
                   owner->arg);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/debris_chunk_emit.s")
-#endif
 
 /* was func_151AC97C */
 s32 debris_alpha_fade_by_life8(u8 *arg0) {
@@ -246,7 +238,6 @@ s32 debris_chunk_ground_dust(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* P191 */
 void vec3_from_angles_byte(s16, s16, f32, void *);
 extern s8 D_800A9400[][5];
@@ -309,9 +300,6 @@ s32 debris_dust_emit(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z
                   fAdd < def->additiveChance, 1.0f, 1.0f, 1, owner->src, 1, 0, argB & 0xFF, owner->arg);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/debris_dust_emit.s")
-#endif
 
 s32 vtx_slot_buffer_get(s32, s16, s32, u8 **, u8 *);
 extern f32 D_800DD608[];
@@ -412,11 +400,7 @@ s32 rope_rider_is_player(u8 *arg0, u8 *arg1) {
     return ret;
 }
 
-#ifdef NON_MATCHING
 void rope_ride_place(u8 *arg0);
-#else
-s32 rope_ride_place();
-#endif
 
 /* was func_151AD110 */
 void rope_rider_update(u8 *arg0) {
@@ -432,7 +416,6 @@ void rope_rider_handle_msg(u8 *arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, (s32)(arg0 + 0x1C), (s32)(arg0 + 0x20), (s32)arg0);
 }
 
-#ifdef NON_MATCHING
 /* P183 */
 void *allocate_memory(s32, s32, s32, s32);
 
@@ -545,11 +528,7 @@ s32 rope_create(s8 *arg0, s32 arg1) {
     *(f32 *) (e + 0x4C) = 0.0f;
     return (s32) e;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/rope_create.s")
-#endif
 
-#ifdef NON_MATCHING
 f32 math_cos_u8(u8);
 
 // rope_update: per-node update of the hanging rope (render layers 0x2F / 0x4E, built by rope_create): counts
@@ -686,11 +665,7 @@ void rope_update(u8 *e) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/rope_update.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 sprite_load_texture_at(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800D30BC;
 
@@ -807,9 +782,6 @@ Gfx *rope_draw(Gfx *gfx, u8 *e, s16 player) {
     }
     return gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/rope_draw.s")
-#endif
 
 void rope_release(u8 *);
 void rope_try_attach(u8 *, u8);
@@ -830,7 +802,6 @@ void rope_try_grab(u8 *arg0, u8 *arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 /* P150 */
 struct_eu_node *rope_find_by_id(s32);
 void rope_progress_from_height(f32 *, u8 *, s32, f32);
@@ -877,9 +848,6 @@ void rope_try_attach(u8 *obj, u8 id) {
     *(u8 **)(*(u8 **)(obj + 0x31C) + 0x9C) = path;
     *(u8 **)(path + 0x44) = obj;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/rope_try_attach.s")
-#endif
 
 /* was func_151AE814 */
 void rope_release(u8 *arg0) {
@@ -897,7 +865,6 @@ void rope_release(u8 *arg0) {
     (*(u8 **)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x9C)) = NULL;
 }
 
-#ifdef NON_MATCHING
 /* was func_151AE86C */
 void rope_progress_from_height(f32 *arg0, u8 *arg1, s32 arg2, f32 arg3) {
     f32 temp_f0;
@@ -941,10 +908,6 @@ loop_2:
     }
     *arg0 = ((f32) (var_v1 - 1) / (f32) (temp_v0 - 3)) + (var_f0 / (f32) temp_a2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/rope_progress_from_height.s")
-#endif
-#ifdef NON_MATCHING
 /* P153 */
 s32 obj_get_yaw_byte(struct127 *arg0);
 f32 angle_byte_cos(u8);
@@ -994,11 +957,7 @@ void rope_ride_place(u8 *arg0) {
     *(f32 *) (obj + 0x18) = (y - oldY) + oldY;
     *(f32 *) (obj + 0x1C) = (z - oldZ) + oldZ;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/rope_ride_place.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 D_800A9650;
 
 /* was func_151AEB40 */
@@ -1040,9 +999,6 @@ block_6:
     }
     goto loop_2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/rope_find_by_id.s")
-#endif
 /* was func_151AEBF0 */
 void rope_handle_msg(u8 *arg0, s32 *arg1, u8 arg2)
 {

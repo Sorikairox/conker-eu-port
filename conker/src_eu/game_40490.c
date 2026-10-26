@@ -19,7 +19,6 @@ typedef struct {
 
 extern void (*D_800831C0[])();
 
-#ifdef NON_MATCHING
 /* was func_15013000 */
 void hotspots_start_all(void) {
     s32 var_s0;
@@ -41,9 +40,6 @@ void hotspots_start_all(void) {
         } while (var_s1 < (u32) D_800D3094);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/hotspots_start_all.s")
-#endif
 // NON-MATCHING: global stores/loads scheduled differently, regalloc
 // void hotspots_start_all(void) {
 //     u32 i;
@@ -61,7 +57,6 @@ void hotspots_start_all(void) {
 //     }
 // }
 
-#ifdef NON_MATCHING
 extern s32 D_80096930[3];
 extern s32 D_8009693C[];
 extern s32 D_80096950[];
@@ -284,28 +279,17 @@ s32 record_particle_emitter_start(Rec150130B4 *rec) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/record_particle_emitter_start.s")
-#endif
 
 // record_start_dispatch: runs the record's start handler D_80082EA0[rec->unk17] (EU 0x80083230) on the record.
 /* was func_1501370C */
 s32 record_start_dispatch(struct16 *arg0) {
     u8 idx = arg0->unk17;
-#ifdef NON_MATCHING
     /* P164 (P161 null+0x14 writer): the handlers take the record (asm 150136BC keeps a0 = arg0 at the jalr) */
     void (*func)(struct16 *) = (void (*)(struct16 *)) D_80082EA0[idx];
 
     if (func != NULL) {
         func(arg0);
     }
-#else
-    void (*func)(void) = D_80082EA0[idx];
-
-    if (func != NULL) {
-        func();
-    }
-#endif
     return 1;
 }
 
@@ -316,7 +300,6 @@ s32 record_start_15d088(struct16 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 extern f32 D_800969F0;
 extern f32 D_800969F4;
 
@@ -371,9 +354,6 @@ s32 effect_spawn_record(s16 *rec) {
     sfx_emitter_start(0x67C, rec[0], rec[1] + r, rec[2], 0x2EE0, r * 2, r / 2, (s32) sfx_cb_keep_until_silent, NULL, 0, 8, 0);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/effect_spawn_record.s")
-#endif
 
 /* was func_1501396C */
 s32 record_dispatch_82ecc(struct16 *arg0) {
@@ -560,11 +540,7 @@ s32 record_emitter_start(struct134 *arg0) {
     pos[1] = (s16)arg0->unk2;
     pos[2] = arg0->unk4;
     temp_v0 = arg0->unk18;
-#ifdef NON_MATCHING
     life_pickup_spawn(pos, *(f32 *)&arg0->unk10, temp_v0 ? temp_v0 : 1, ((u8 *)arg0)[0x1F], 1, 255, 1);
-#else
-    life_pickup_spawn(pos, arg0->unk10, temp_v0 ? temp_v0 : 1, ((u8 *)arg0)[0x1F], 1, 255, 1);
-#endif
     return 1;
 }
 
@@ -807,7 +783,6 @@ s32 record_effect29_start(struct134 *arg0) {
     }
     return 1;
 }
-#ifdef NON_MATCHING
 void vec3_to_yaw_pitch_deg(void *, f32 *, f32 *);
 /* the 0x38-byte parameter block screen_effect_start copies to the effect at +0x28 */
 typedef struct {
@@ -872,10 +847,6 @@ s32 screen_effect_start(u8 *rec) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/screen_effect_start.s")
-#endif
-#ifdef NON_MATCHING
 /* the level record record_zone_box_start reads */
 typedef struct {
     s16 x, y, z;        /* 0x00 */
@@ -894,9 +865,7 @@ extern f32 D_80096A40;
 extern f32 D_80096A44;
 f32 sinf(f32);
 f32 cosf(f32);
-#endif
 
-#ifdef NON_MATCHING
 // record_zone_box_start: start handler (s32, returns 1) of a box-zone level record: marks it started (+0x16 |= 4),
 // rotates the rectangle (+-halfX, +-halfZ) by the record's yaw (sinf(angY * D_80096A40), cosf(angY * D_80096A44))
 // around (x, z) and hands a 0x40-byte block to a new effect_node_create object (type 0x12C, 0x2C; +0x28): two opposite
@@ -963,10 +932,6 @@ s32 record_zone_box_start(Rec1501474C *rec) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/record_zone_box_start.s")
-#endif
-#ifdef NON_MATCHING
 /* the level record record_light_ring_start reads */
 typedef struct {
     s16 x, y, z;        /* 0x00 */
@@ -984,9 +949,7 @@ extern f32 D_80096A58;
 extern f32 D_80096A5C;
 extern f32 D_80096A60;
 extern u8 D_800A0D08[]; /* 6 rgb triples */
-#endif
 
-#ifdef NON_MATCHING
 // record_light_ring_start: start handler (s32, returns 1) of a level record: marks it started (+0x16 |= 4) and
 // builds a 0x48-byte block for a new effect_node_create object (type 0x12C, 0x2E, kind 0x29; +0x28): the position, three
 // random angles ((u16) (random_int() * osGetCount()) scaled by D_80096A48 / 4C / 58 and 360), three sizes from the
@@ -1065,9 +1028,6 @@ s32 record_light_ring_start(Rec15014B60 *rec) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/record_light_ring_start.s")
-#endif
 /* was func_15014F6C */
 s32 record_effect49_start(struct134 *arg0) {
     struct {
@@ -1208,7 +1168,6 @@ s32 record_dispatch_82f70(struct134 *arg0) {
 }
 
 
-#ifdef NON_MATCHING
 /* the level record record_quad_zone_start reads (D_80082EA0 entry 0x34) */
 typedef struct {
     s16 x, y, z;        /* 0x00 */
@@ -1283,9 +1242,6 @@ void record_quad_zone_start(Rec15015354 *src) {
         memcpy(e + 0x28, &blk, 0x74);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/record_quad_zone_start.s")
-#endif
 /* was func_15015644 */
 s32 record_effect68_start(struct134 *arg0) {
     struct {
@@ -1309,7 +1265,6 @@ s32 record_effect68_start(struct134 *arg0) {
     }
     return 1;
 }
-#ifdef NON_MATCHING
 s32 rope_create(s8 *, s32);
 
 /*
@@ -1368,6 +1323,3 @@ s32 record_rope_zone_start(u8 *rec) {
     rope_create(&zone.kind, 0);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/record_rope_zone_start.s")
-#endif

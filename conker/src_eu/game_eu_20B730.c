@@ -19,7 +19,6 @@ void settings_reset_defaults(void) {
     }
 }
 
-#ifdef NON_MATCHING
 extern s8 D_80090210[];        /* settings minimum (0x1C bytes) */
 extern s8 D_8009022C[];        /* settings maximum */
 
@@ -38,9 +37,6 @@ void settings_clamp_to_range(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/settings_clamp_to_range.s")
-#endif
 
 /* was func_151DE074 */
 s32 pause_bit_invert(s32 arg0) {
@@ -64,7 +60,6 @@ void pause_quit_to_menu(void) {
     D_80090130 = 1;
 }
 
-#ifdef NON_MATCHING
 typedef struct MenuPad {
     u16 button;
     s8 stickX;
@@ -339,9 +334,6 @@ void game_pause_update(void) {
         sound_play_2d(sfx, 0x5DC0, 0x40, 0, 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/game_pause_update.s")
-#endif
 
 void screen_fade_update(void);
 #ifdef PORT
@@ -452,7 +444,6 @@ void menu_enter_title(void) {
 void game_mode_stub(void) {
 }
 
-#ifdef NON_MATCHING
 /* P117: the menu state record D_80090174 (points at D_800E0F20, set by menu_init). */
 typedef struct MenuState {
     f32 x0;
@@ -767,11 +758,7 @@ void menu_mode_update(void) {
         D_80090184 = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/menu_mode_update.s")
-#endif
 
-#ifdef NON_MATCHING
 extern u8 D_800ABBE4[]; /* "#": text id */
 extern u8 D_800ABBE8[];
 extern u8 D_800ABBEC[];
@@ -948,11 +935,7 @@ void title_press_start_page(void) {
         ((MenuState *) D_80090174)->input &= ~0x20;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/title_press_start_page.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s8 D_800ABC00[];         /* scenes per chapter (9 chapters) */
 extern u8 D_800ABC0C[];         /* "#": text id (chapter title) */
 extern u8 D_eu_800902B8[];      /* per-chapter text colour, 3 bytes (r, g, b) */
@@ -1275,11 +1258,7 @@ void title_chapter_select_page(void) {
         sound_play_2d(sfx, 0x4650, 0x40, 0, 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/title_chapter_select_page.s")
-#endif
 
-#ifdef NON_MATCHING
 extern u8 D_800ABC10[]; /* "%d" */
 extern u8 D_800ABC14[]; /* "%d:%02d:%02d" */
 extern u8 D_800ABC24[]; /* "#": text id */
@@ -1418,11 +1397,7 @@ void title_slot_page(void) {
         sound_play_2d(sfx, 0x4650, 0x40, 0, 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/title_slot_page.s")
-#endif
 
-#ifdef NON_MATCHING
 void settings_load_from_save(void);
 extern s8 D_80090164;
 extern s8 D_80090180;
@@ -1588,11 +1563,7 @@ void menu_mode_select_page(void) {
         ((MenuState *) D_80090174)->input &= ~0x20;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/menu_mode_select_page.s")
-#endif
 
-#ifdef NON_MATCHING
 void text_set_flags(u8);
 void settings_save(void);
 void settings_list_draw(s32, s32, s32, s32, s32);
@@ -1646,10 +1617,6 @@ void main_settings_page(void) {
     }
     rec->input &= ~0x20;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/main_settings_page.s")
-#endif
-#ifdef NON_MATCHING
 void obj_remove(struct127 *arg0, s32 arg1);
 void menu_spawn_character(s32 slot, s32 character);
 void text_printf_at(s32, s32, u8, s32, ...);
@@ -1870,11 +1837,7 @@ void menu_player_join_page(void) {
     }
     rec->input &= ~0x20;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/menu_player_join_page.s")
-#endif
 
-#ifdef NON_MATCHING
 void text_printf(s32, ...);
 void menu_game_start(void);
 void mp_start_intro_scene(void);
@@ -1990,10 +1953,6 @@ void main_players_page(void) {
     }
     ((MenuState *) D_80090174)->input &= ~0x20;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/main_players_page.s")
-#endif
-#ifdef NON_MATCHING
 extern s8 D_eu_800902E4[4];     /* initial column offsets of the 4 team columns */
 extern s8 D_800ABAF4[][12];     /* team layout per menu entry: count, min / max / per-team size (< 3 players),
                                  * same for 3+ players, team 1 size, team colours [4] */
@@ -2263,9 +2222,6 @@ void menu_team_select_page(void) {
         text_printf_at(0xAD, 0xB4, 0x81, (s32) D_800ABC94, 0x3C);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/menu_team_select_page.s")
-#endif
 
 void screen_fade_update(void);
 void menu_level_start_page(void);
@@ -2278,7 +2234,6 @@ void menu_run_level_start(void) {
     D_80090120 = 0;
 }
 
-#ifdef NON_MATCHING
 void settings_clamp_to_range(void); /* P85: takes no arguments (the asm reads none) */
 extern s32 D_80082F4C;
 extern s32 D_800ABA74;
@@ -2327,10 +2282,6 @@ void settings_load_from_save(void) {
     (*(u8 *)((u8 *)D_800E1010 + 6)) = (u8) (*(u8 *)((u8 *)temp_v0 + 9));
     settings_clamp_to_range();
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/settings_load_from_save.s")
-#endif
-#ifdef NON_MATCHING
 // settings_save: P127: the inverse of settings_load_from_save: copies the settings bytes D_800E1010 into the 10-byte save
 // record of the menu's settings set (D_800ABA74 row of the save slot x42; record D_80082F4C + set * 10): byte 0
 // cleared, 1..4 = settings 2, 3, 0x10, 0x11, the set-specific bytes 5 / 6 (set 0: 4; sets 1, 2: 0xD, 0xE; sets 5, 7:
@@ -2370,11 +2321,7 @@ void settings_save(void) {
     rec[9] = D_800E1010[6];
     save_request_config_write();
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/settings_save.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s8 D_800901E4;
 extern s32 D_800901E8;
 extern s32 D_800ABA78;
@@ -2561,10 +2508,6 @@ block_40:
 block_41:
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/mp_slot_query.s")
-#endif
-#ifdef NON_MATCHING
 extern s8 D_800ABA70[][10];     /* menu modes (rows of 10, by MenuState x42) */
 extern u16 D_80090160;
 extern s16 D_8009015C;
@@ -2813,9 +2756,6 @@ void menu_game_start(void) {
     D_8009011C = D_80087270[0];
     game_request_transition(6, level, 0, D_800902E7[D_80090128], mask);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/menu_game_start.s")
-#endif
 
 void menu_settings_apply_checked(void);
 extern s8 D_800E0FE1;
@@ -2937,7 +2877,6 @@ void port_warp_game_start(s32 level, s32 scene) {
 }
 #endif
 
-#ifdef NON_MATCHING
 f32 catmull_rom_eval(s32 points, s32 segment, f32 t);
 f32 sinf(f32);
 extern s8 D_800ABA2C[];         /* settings item table: per item label text, type, then (type >= 0) max + 1 choice texts */
@@ -3352,9 +3291,6 @@ void settings_list_draw(s32 mask, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/settings_list_draw.s")
-#endif
 s32 mp3_stream_get_state();
 void mp3_stream_set_volume(s32, s32);
 extern s32 *D_800E0EB8;
@@ -3404,7 +3340,6 @@ void mp_start_intro_scene(void) {
     menu_game_start();
 }
 
-#ifdef NON_MATCHING
 typedef struct {
     s16 level;
     s8 scene;     /* +2: scene to start */
@@ -3583,11 +3518,7 @@ void menu_level_start_page(void) {
     }
     ((MenuState *) D_80090174)->input &= ~0x20;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/menu_level_start_page.s")
-#endif
 
-#ifdef NON_MATCHING
 extern u8 D_800E0EB6;           /* set by mp_match_end: nonzero = the match was quit, not finished */
 // mp_match_end_continue: P232. Menu fade callback (D_800E0EB8, set by mp_match_end) run when a multiplayer match
 // has ended: closes the pause / menu state, keeps only some of the D_80090160 flags and picks what comes next from
@@ -3651,9 +3582,6 @@ void mp_match_end_continue(void) {
     D_8008FD8C = 1;
     D_80090130 = 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/mp_match_end_continue.s")
-#endif
 
 /* was func_151E5528 */
 void game_mode_set_10(void) {
@@ -3811,7 +3739,6 @@ void menu_init(void) {
     D_800E0FC5 = D_800E0B94;
 }
 
-#ifdef NON_MATCHING
 // Per-frame game-mode step: screen offset/scale from the D_800E1010 settings, input snapshot,
 // the mode's handler from the table D_8009018C[D_800E0B94], and the time-in-mode counter
 // D_800E0EC0 (reset and the previous mode kept in D_800E0FC5 when the mode changed; mode 7 keeps it).
@@ -3854,9 +3781,6 @@ void game_mode_frame_step(void) {
     }
     D_8003C8E0 = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/game_mode_frame_step.s")
-#endif
 /* was func_151E5AB8 */
 void screen_fade_update(void)
 {
@@ -3972,7 +3896,6 @@ s8 mp_is_free_for_all(void) {
     return D_80090168;
 }
 
-#ifdef NON_MATCHING
 extern s8 D_800E1016;            /* score limit of the scored game modes (0 = none) */
 /* mp_match_rules_update: once per frame in a multiplayer match. Decides whether the match is over (sets and returns
  * the match-over flag D_800E1050, 1 = over; 1 straight away when it is already set) and writes each player's / team's
@@ -4155,9 +4078,6 @@ s32 mp_match_check_over(void) {
     D_800E1050 = over;
     return over;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/mp_match_check_over.s")
-#endif
 
 /* was func_151E6710 */
 s32 mp_player_team(s32 arg0) {
@@ -4183,7 +4103,6 @@ s8 mp_human_player_count(void) {
     return D_80090130;
 }
 
-#ifdef NON_MATCHING
 extern s16 D_8009015C;
 extern u8 D_800E0FE8[];
 s32 random_int(void);
@@ -4408,11 +4327,7 @@ void mp_report_hit(struct127 *attacker, struct127 *victim, s32 kind) {
 }
 #undef MP_KILLS
 #undef MP_ROW
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/mp_report_hit.s")
-#endif
 
-#ifdef NON_MATCHING
 /* Load the text bank `bank` (1, 2, 4: picked per game mode by game_mode_frame_step) for the current language.
  * D_800E101A = language, D_800BEECB = language of the loaded banks, D_800E1003 = loaded bank (0 = none).
  * A bank is a block of NUL-terminated strings (runs of NULs between them), loaded with asset_load
@@ -4490,9 +4405,6 @@ void text_bank_load(s32 bank) {
         while (*p == 0) p++;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/text_bank_load.s")
-#endif
 
 /* was func_151E73A8 */
 void text_bank_reset(void) {
@@ -4501,7 +4413,6 @@ void text_bank_reset(void) {
     D_80090178 = 0;
 }
 
-#ifdef NON_MATCHING
 s32 rail_node_find_by_tag(s32 id);
 s32 rail_node_position(s32 point, f32 *x, f32 *y, f32 *z);
 f32 catmull_rom_eval(s32 points, s32 segment, f32 t);
@@ -4892,9 +4803,6 @@ void menu_camera_update(s32 arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/menu_camera_update.s")
-#endif
 extern f32 D_800ABE94;
 u8 *world_record_find(u8);
 extern u8 D_80090360[][6];
@@ -4937,7 +4845,6 @@ void settings_apply_sound_mode(void) {
     audio_set_output_mode(4U);
 }
 
-#ifdef NON_MATCHING
 // menu_settings_apply_checked: P127 (port): applies the sound mode (settings_apply_sound_mode). The N64 build then sums the code
 // words of game_pause_update..menu_reset_and_enter and, on a mismatch (anti-tamper), writes 0 over osSpTaskLoad; the port has
 // no MIPS code words there (the sum is 0) and the write lands in the null zone, so the NON_MATCHING build skips it.
@@ -4945,27 +4852,7 @@ void settings_apply_sound_mode(void) {
 void menu_settings_apply_checked(void) {
     settings_apply_sound_mode();
 }
-#else
-extern s32 game_pause_update;
-void menu_settings_apply_checked(void) {
-    void (*new_var)(OSTask *tp); // fakematch: permuter temp pinning osSpTaskLoad address
-    s32 var_v1;
-    s32 *var_v0;
-    settings_apply_sound_mode();
-    new_var = osSpTaskLoad; // fakematch
-    var_v1 = 0;
-    for (var_v0 = &game_pause_update; (u32) var_v0 < (u32) menu_reset_and_enter; var_v0++) {
-        var_v1 += *var_v0;
-        if (!new_var) { } // fakematch
-    }
-    if (var_v1 != 0xBB9FE01C) {
-        *((s32 *) new_var) = 0;
-        if (menu_reset_and_enter) { } // fakematch
-    }
-}
-#endif
 
-#ifdef NON_MATCHING
 void obj_remove(struct127 *arg0, s32 arg1);
 s32 setup_entry_find_by_id(u8);
 s32 setup_entry_spawn(u8 *, s32, s32, s32, s32);
@@ -5040,11 +4927,7 @@ void menu_spawn_character(s32 slot, s32 character) {
     obj_apply_setup_variant(obj, ch[6]);
     obj_start_anim(obj, 0xF, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/menu_spawn_character.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 D_800E0FD0;
 extern s32 D_800E0FD4;
 extern s32 D_800E0FD8;
@@ -5059,9 +4942,6 @@ void menu_char_slots_clear(void) {
     D_800E0FDC = 0;
     D_80090124 = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/menu_char_slots_clear.s")
-#endif
 s32 screen_fade_all_active();
 extern s16 D_800E0EB0;
 

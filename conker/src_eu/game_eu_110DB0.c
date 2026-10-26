@@ -5,7 +5,6 @@
 s32 zap_bolt_spawn(s32, s32, s32, s32, s32, s32, s32, f32, s32, f32, f32, f32, s32, s16);
 
 
-#ifdef NON_MATCHING
 extern f32 D_800A1400;
 /* was func_150E35A0 */
 s32 zap_bolt_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, f32 arg7, s32 arg8, f32 arg9, f32 argA, f32 argB, s32 argC, s16 argD) {
@@ -69,9 +68,6 @@ loop_3:
     }
     return (s32) temp_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/zap_bolt_spawn.s")
-#endif
 s32 approx_dist3_int(s32, s32, s32);
 
 /* was func_150E3788 */
@@ -109,7 +105,6 @@ void zap_bolt_spawn_path(u8 *arg0, u8 *arg1, s32 arg2, s16 arg3) {
     zap_bolt_spawn(temp_a0, temp_a1, temp_a2, temp_a0, temp_a1, temp_a2, 0x1A, 10.0f, 0, (*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(f32 *)((u8 *)arg0 + 8)), arg2, (s32) arg3);
 }
 
-#ifdef NON_MATCHING
 void music_post_event_request(u32, s32);
 /*
  * sound_handle_release_cb: P190. Callback that zap_bolt_spawn_with_sound passes to sfx_emitter_start: 1 while the handle *handle is
@@ -123,11 +118,6 @@ s32 zap_sound_release_cb(s32 arg0, s32 arg1, s32 *handle, s32 arg3) {
     music_post_event_request(2, *handle);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/zap_sound_release_cb.s")
-
-extern s32 zap_sound_release_cb;
-#endif
 
 /* was func_150E3994 */
 s32 zap_bolt_spawn_with_sound(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8) {
@@ -195,7 +185,6 @@ void zap_bolt_get_pos(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
     }
 }
 
-#ifdef NON_MATCHING
 extern f32 D_800A1404;
 extern f32 D_800A1408;
 extern f32 D_800A140C;
@@ -421,9 +410,6 @@ void zap_bolt_update(u8 *obj) {
         *(f32 *) (obj + 0x50) -= 1.0f;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/zap_bolt_update.s")
-#endif
 
 extern f32 D_800A1420;
 

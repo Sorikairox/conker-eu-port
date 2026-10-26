@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* D_800B1240[mesh]: per-mesh vertex colour groups */
 typedef struct {
     /* 0x0 */ u8 *rgb;   /* target colour, 3 bytes per listed vertex */
@@ -14,9 +13,7 @@ extern u8 *D_800B1244;               /* group count per mesh */
 extern VtxColourGroup **D_800B1240;
 extern u8 *D_800B1220;               /* mesh vertex buffer (16-byte vertices) */
 extern u8 *D_800BE930;               /* base vertex colours, 3 bytes per vertex */
-#endif
 
-#ifdef NON_MATCHING
 // vertex_colours_blend: blends the vertex colours of mesh's colour groups (all with group 0xFF, else only that one)
 // from their base colour towards the group's target colour by t / 256, writing the vertex rgb (+0xC..+0xE). Base
 // colour: per group / vertex table D_800BE940[mesh][g] when D_800B0DF0 +0x21 bit 2 is set, else D_800BE930 by
@@ -86,11 +83,6 @@ void vtx_colour_groups_blend(s32 mesh, s32 mode, s32 t, s32 group, s32 slot) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1730/vtx_colour_groups_blend.s")
-
-s32 vtx_colour_groups_blend();
-#endif
 
 /* was func_151741D0 */
 void vtx_colour_world_blend(s32 arg0, s32 arg1) {

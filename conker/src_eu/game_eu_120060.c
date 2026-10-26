@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void camera_set_ride_event_flags(s32 arg0, s32 arg1);
-#endif
 
 
 static const f32 D_800A1CF0_vec[3] = { 0.0f, -45.0f, 0.0f };
@@ -114,7 +113,6 @@ s32 fx_pendulum_sprite_update(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
 
 /* was func_150F2C20 */
@@ -194,9 +192,6 @@ void camera_update_ride_mode(struct108 *arg0) {
     }
     arg0->unk84 &= ~0x10;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_120060/camera_update_ride_mode.s")
-#endif
 /* was func_150F2F14 */
 void camera_set_ride_event_flags(s32 arg0, s32 arg1)
 {

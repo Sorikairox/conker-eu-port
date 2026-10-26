@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 typedef struct Node8D80 { u8 u0; u8 u1; u8 u2; u8 u3; u8 u4; s16 u6; void *u8_; struct Node8D80 *uC; struct127 *u10; s32 u14; } Node8D80;
 void *allocate_memory(s32, s32, s32, s32);
 void heap_free(u8 *);
@@ -54,18 +53,12 @@ void afterimage_start(struct127 *obj, s32 frames, s32 style) {
     bzero(buf, count * 0x180);
     afterimage_list_append(n, D_800DF7C8);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/afterimage_start.s")
-#endif
 
 typedef struct Node8EBC { u8 u0; u8 u1; u8 u2; u8 u3; u8 u4; s16 u6; void *u8_; struct Node8EBC *uC; s32 u10; } Node8EBC;
 extern Node8EBC *D_800DFBFC;
 void *allocate_memory(s32, s32, s32, s32);
-#ifdef NON_MATCHING // the definition is void; one signature for wasm
+// the definition is void; one signature for wasm
 void heap_free(u8 *);
-#else
-s32 heap_free(u8 *);
-#endif
 void afterimage_list_append();
 /* was func_15188EBC */
 void afterimage_start_world(s32 arg0, s32 arg1, s32 arg2) {
@@ -132,11 +125,8 @@ void afterimage_stop(s32 arg0) {
     }
 }
 
-#ifdef NON_MATCHING // the definition is void; one signature for wasm
+// the definition is void; one signature for wasm
 void heap_free(u8 *);
-#else
-s32 heap_free(u8 *);
-#endif
 
 /* was func_15189040 */
 void afterimage_remove_object(s32 arg0) {
@@ -167,11 +157,8 @@ void afterimage_remove_object(s32 arg0) {
 
 extern void (*D_8008D920[])(struct_eu_1B6590 *);
 extern void (*D_8008D928[])(struct_eu_1B6590 *);
-#ifdef NON_MATCHING // the definition is void; one signature for wasm
+// the definition is void; one signature for wasm
 void heap_free(u8 *);
-#else
-s32 heap_free(u8 *);
-#endif
 /* was func_151890E4 */
 void afterimage_list_update(s32 arg0) {
     struct_eu_1B6590 **head;
@@ -244,7 +231,6 @@ Gfx *afterimage_list_draw(Gfx *gfx, s32 arg1, s16 arg2) {
     return gfx;
 }
 
-#ifdef NON_MATCHING
 /* P249: readable C for afterimage_history_push (game_eu_1B6590, 79 insns). */
 // trail_matrix_history_push: advances an object's motion-trail matrix history. The record holds rec[1] steps of
 // `per` matrices (model_joint_mtx_count(object kind), 64 bytes each) in two halves of the buffer +8 (half D_800BE9C0 is
@@ -280,11 +266,7 @@ void afterimage_history_push(u8 *rec) {
         rec[2]++;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/afterimage_history_push.s")
-#endif
 
-#ifdef NON_MATCHING
 extern u16 **D_800895E0[];   /* per group: -> the group's entry list (4-byte entries, u16 record id first) */
 extern Mtx **D_800895F0[2];  /* per DL buffer: -> the world-object matrix array (one Mtx per record id) */
 extern u16 D_800DC318[];     /* per group: entry count */
@@ -327,11 +309,7 @@ void afterimage_history_push_world(u8 *rec) {
         rec[2]++;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/afterimage_history_push_world.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 model_joint_mtx_count(u8);
 
 /* was func_15189688 */
@@ -462,9 +440,6 @@ block_12:
         } while (var_s0 != 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/afterimage_clamp_spacing.s")
-#endif
 /* was func_15189B14 */
 void afterimage_free_history(u8 *arg0) {
     heap_set_block_tag((*(s32 **)((u8 *)arg0 + 8)), 2U);
@@ -475,7 +450,6 @@ void afterimage_world_free_history(u8 *arg0) {
     heap_set_block_tag((*(s32 **)((u8 *)arg0 + 8)), 2U);
 }
 
-#ifdef NON_MATCHING
 u8 obj_current_part_model_idx(struct127 *, s32 *);
 s32 model_make_ready(struct127 *, u8, s32, s32);
 u8 *obj_draw_part(u8 *, s32, s16, s32, s32);
@@ -522,11 +496,7 @@ u8 *afterimage_draw(u8 *gfx, u8 *rec, s16 arg2) {
     *(s32 *) (*(u8 **) (rec + 0x10) + 0x94) = saved;
     return gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/afterimage_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 world_mesh_draw(s32, u8 *, s32, s16, s32, s32);
 
 /* was func_15189D14 */
@@ -563,9 +533,6 @@ s32 afterimage_world_draw(s32 arg0, u8 *arg1, s16 arg2) {
     (*(s8 *)((u8 *)((*(u8 **)((u8 *)arg1 + 0x10))) + 0x8A)) = (s8) sp44;
     return var_s4;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/afterimage_world_draw.s")
-#endif
 /* was func_151898C0 */
 void afterimage_set_skin(s32 arg0, s32 arg1) {
     s32 var_v0;

@@ -10,7 +10,7 @@ ULTRA_CFLAGS := -O2 -g0 -std=gnu11 -I../conker/include/2.0L -D_LANGUAGE_C \
                 -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI_2 -DPORT -Wall -Wno-unused-parameter
 # same flags as port/tools/census.py (build mode) for TUs that include the game headers
 GAME_CFLAGS  := -O1 -g0 -std=gnu89 -nostdinc -fno-builtin -fno-strict-aliasing -fwrapv -fsigned-char \
-                -include ultra/port_prefix.h -DNON_MATCHING -DPORT -D_LANGUAGE_C -D_FINALROM -DF3DEX_GBI_2 \
+                -include ultra/port_prefix.h -DPORT -D_LANGUAGE_C -D_FINALROM -DF3DEX_GBI_2 \
                 -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -I../conker -I../conker/include -I../conker/include/2.0L \
                 -I../conker/include/2.0L/PR -I../conker/include/libc -Wno-unknown-pragmas \
                 -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-error=implicit-int \

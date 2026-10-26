@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 memcpy(u8 *, s32, s32);
 
 /* was func_15148310 */
@@ -38,10 +37,6 @@ u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 
     (*(s32 *)((u8 *)temp_a0 + 0x44)) = (s32) (*(s32 *)((u8 *)argB + 0x1C));
     return sp3C;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/trail_spawn.s")
-#endif
-#ifdef NON_MATCHING
 extern s32 (*D_8008A780[])(u8 *);
 extern s32 (*D_8008A798[])(u8 *);
 extern s32 (*D_8008A7CC[])(u8 *, s32, s32, s32, f32, s32); /* = D_8008A7D0 - 4: the hit handlers */
@@ -90,10 +85,6 @@ s32 trail_step(u8 *obj) {
     }
     return !done;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/trail_step.s")
-#endif
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 f32 *camera_get_pos(s32 arg0);
 s32 fx_material_tex_addr(s32, s32, s32, u8);
@@ -278,10 +269,6 @@ s32 trail_draw(u8 *obj, s32 gfx, s16 arg2) {
     return gfx;
 }
 #undef TRAIL_VTX
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/trail_draw.s")
-#endif
-#ifdef NON_MATCHING
 // trail_grow: motion handler 1 of a trail (D_8008A780): moves the points and adds one per frame until full.
 /* Points obj +0x94 (0x14 bytes: x, y, z, vy, u16 t at +0x10) in a ring of +0x25 from the oldest +0x2D to the head
  * +0x2E (exclusive), count +0x2C. Each point falls by gravity rec +0x10 (rec = obj +0x98) into its vy and moves by
@@ -347,9 +334,6 @@ s32 trail_grow(u8 *obj) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/trail_grow.s")
-#endif
 typedef struct { f32 x; f32 y; f32 z; f32 vy; s16 a; s16 pad12; } Part9064;
 /* was func_15149064 */
 s32 trail_move_points(u8 *arg0) {
@@ -374,7 +358,6 @@ s32 trail_move_points(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 s32 collision_floor_probe(f32 *, s32, f32, u8 *);
 s32 drip_stream_splash(u8 *, s32, s32, s32, f32);
 s32 drip_stream_splash_dust(u8 *, s32, s32, s32, f32, s32);
@@ -446,10 +429,6 @@ s32 trail_fall(u8 *obj) {
     }
     return D_8008A7D0[k](obj, old[0], old[1], old[2], *(f32 *)(obj + 0x60), (s32)(obj + 0x64)) != 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/trail_fall.s")
-#endif
-#ifdef NON_MATCHING
 // trail_shrink: motion handler 4 of a trail (D_8008A780): drops the newest point each frame and re-ramps the rest.
 /* Count obj +0x2C, ring of +0x25 points obj +0x94 (0x14 bytes, u16 texture t at +0x10) from the oldest +0x2D to the
  * head +0x2E. Returns 0 (the trail ends) when fewer than 3 points are left; else removes the head point and sets
@@ -491,9 +470,6 @@ s32 trail_shrink(u8 *obj) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/trail_shrink.s")
-#endif
 /* was func_15149468 */
 s32 trail_start_shrink(u8 **arg0, s32 arg1, s32 arg2, s32 arg3) {
     u8 *temp = arg0[0x98 / 4];
@@ -501,7 +477,6 @@ s32 trail_start_shrink(u8 **arg0, s32 arg1, s32 arg2, s32 arg3) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* P136 */
 /*
  * trail_spawn_directed: spawns one trail particle (trail_spawn, kind 0, handler pair 1 / 0) of type n at
@@ -583,9 +558,6 @@ void trail_spawn_directed(u8 n, f32 x, f32 y, f32 z, s32 tint, s32 yaw, s32 pitc
     rb.pad[0] = rb.pad[1] = 0;
     trail_spawn((u8 *) &sb, (s32) &mb, 0, 1, 0, 0, 0, 0, 0, 0, 0, (u8 *) &rb, 0, flag, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/trail_spawn_directed.s")
-#endif
 
 /* was func_15149638 */
 s32 trail_alpha_from_timer(u8 *arg0) {

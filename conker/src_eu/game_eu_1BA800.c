@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
 extern s32 D_8008CDEC;
 
@@ -89,9 +88,6 @@ void puff_sprite_spawn(u8 *arg0, s32 arg1) {
     sp.u5B = (*(u8 *)((u8 *)arg0 + 0x31));
     node_spawn_sprite(&sp.u30, 0, 0, -1, 0xFF, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BA800/puff_sprite_spawn.s")
-#endif
 extern void (*D_8008D970[])();
 
 /* was func_1518D218 */

@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 
 /* was func_150AEEB0 */
@@ -96,9 +95,6 @@ loop_2:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCBA0/obj_trail_burst_spawn.s")
-#endif
 /* was func_150AF6A0 */
 s32 trail_alpha_from_life(struct_eu_sprite *arg0) {
     struct_eu_sprite_sub *sub = arg0->unk98;

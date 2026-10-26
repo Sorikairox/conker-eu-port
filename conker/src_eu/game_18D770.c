@@ -36,25 +36,13 @@ void light_play_zap_sfx(u16 arg0, s16 arg1, u8 arg2, s32 arg3, f32 *arg4, s16 ar
 struct225 *light_create_scripted(s32 arg0, s16 arg1, u8 arg2, s32 arg3);
 s32  light_beh_scripted(struct225 *arg0);
 struct225 *light_create_obj_follow(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
-#ifdef NON_MATCHING
 s32 light_beh_follow_obj(struct225 *arg0);
-#else
-void light_beh_follow_obj(struct225 *arg0);
-#endif
 struct225 *light_spawn_flicker_b(s32 arg0, u8 arg1, s32 arg2);
 void ambient_pulse_spawn(s32 arg0);
 struct225 *light_spawn_flicker_preset(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
 struct225 *light_create_flicker_preset(Header *header, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 size, u8 arg8, u8 arg9, s32 argA);
-#ifdef NON_MATCHING
 void light_env_phase_on(struct239 *arg0, s32 phase);
-#else
-void light_env_phase_on(struct239 *arg0);
-#endif
-#ifdef NON_MATCHING
 void light_env_phase_off(struct239 *arg0, s32 phase);
-#else
-void light_env_phase_off(struct239 *arg0);
-#endif
 struct225 *light_spawn_burst_flash(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
 struct225 *light_create_track_ptrs(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 argC, u8 argD, s32 argE);
 struct225 *light_spawn_pulse_preset(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
@@ -107,7 +95,6 @@ struct225 *light_ctrl_alloc(Header *header, struct226 *arg1, s32 offset, u8 arg3
     return ret;
 }
 
-#ifdef NON_MATCHING
 // light_effect_update: P234 (port fix). Counts the effect's life down (+0x10, flag 1 of +0xE) and runs its handler
 // D_8008B0F0[+0xF] with the effect (the asm keeps a0 = the effect at the jalr; the matched C passed nothing, so the
 // port handlers got NULL: Total War null+0x24 writes); a 0 result or an expired life frees it (node_destroy).
@@ -129,25 +116,6 @@ void light_ctrl_update(struct225 *arg0) {
         node_destroy(arg0);
     }
 }
-#else
-void light_ctrl_update(struct225 *arg0) {
-    s32 pad;
-    u8 ret = 0;
-
-    if ((arg0->unkE & 1) != 0) {
-        arg0->unk10 -= D_800BE9E4;
-        if (arg0->unk10 < 0) {
-            ret = 1;
-        }
-    }
-    if ((ret == 0) && (arg0->unkF != -1) && (D_8008B0F0[arg0->unkF]() == 0)) {
-        ret = 1;
-    }
-    if (ret) {
-        node_destroy(arg0);
-    }
-}
-#endif
 
 // requires jump table
 extern s32 (*D_8008B4F0[])(struct225 *);
@@ -409,7 +377,6 @@ struct225 *light_create_obj_beam(struct127 *arg0, u8 arg1, struct17 *arg2, struc
 }
 
 // similar to light_beh_follow_joint
-#ifdef NON_MATCHING
 void mtx_transform_points(f32 **, f32 **, void *, s32);
 s32 vec3_normalize_len(f32 *, f32 *, f32 *, f32 *);
 s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
@@ -488,9 +455,6 @@ s32 light_beh_beam_raycast(struct225 *arg0) {
     arg0->unk14->unk9 = 1;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/light_beh_beam_raycast.s")
-#endif
 
 /* was func_15161238 */
 s32 obj_is_live_other(struct127 *arg0, struct127 *arg1) {
@@ -855,18 +819,12 @@ struct225 *light_create_obj_follow(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, 
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 // handler 10 of D_8008B0F0 (P234): the dispatcher light_ctrl_update tests the result, which is light_follow_obj_pos's v0 left in
 // place by the matched void C; s32 here, one signature for wasm
 /* was func_15161F2C */
 s32 light_beh_follow_obj(struct225 *arg0) {
     return light_follow_obj_pos(arg0, &arg0->unk18);
 }
-#else
-void light_beh_follow_obj(struct225 *arg0) {
-    light_follow_obj_pos(arg0, &arg0->unk18);
-}
-#endif
 
 extern void (*D_8008B6F8[])(u8 *, u8 *, u8);
 /* was func_15161F4C */
@@ -1083,7 +1041,6 @@ struct225 *light_create_flicker_preset(Header *header, s32 arg1, s32 arg2, s32 a
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 /* six 5-entry tables (rodata 0x800A6C60..0x800A6CD7), indexed by arg1 & 0xFF < 5 */
 static const f32 D_800A6C60[5] = { 0.0f, 50.0f, 50.0f, 50.0f, 50.0f };
 static const f32 D_800A6C74[5] = { 0.0f, 15.0f, 15.0f, 15.0f, 15.0f };
@@ -1174,9 +1131,6 @@ struct225 *light_spawn_envelope(struct226 *arg0, s32 arg1, u8 arg2, u8 arg3, s16
     }
     return var_v1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/light_spawn_envelope.s")
-#endif
 // s32 light_spawn_envelope(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, s8 arg6, s8 arg7, s8 arg8, s8 arg9, s32 argA, u8 argB, s32 argC) {
 //     struct225 *temp_v0;
 //     Header header;
@@ -1241,7 +1195,6 @@ struct225 *light_spawn_envelope(struct226 *arg0, s32 arg1, u8 arg2, u8 arg3, s16
 // }
 
 // a biggun'
-#ifdef NON_MATCHING
 extern void (*D_8008B704[])(u8 *, s32); // {light_env_phase_on, light_env_phase_off} (P289: 2 entries, D_8008B70C is the next table); a1 = the new phase
 
 // envelope_update: drives a byte (+0x14 -> +0x2F, e.g. an alpha) through a looping 4-phase envelope on the timer
@@ -1304,18 +1257,11 @@ s32 light_beh_envelope(u8 *obj) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/light_beh_envelope.s")
-#endif
 
 // P289: NM `phase` (unused) = the a1 the D_8008B704 dispatcher (light_beh_envelope) passes; it keeps the wasm call_indirect
 // signature void (u8 *, s32) of the table (the default build keeps the one-parameter text: IDO frames it differently).
-#ifdef NON_MATCHING
 /* was func_15162EF8 */
 void light_env_phase_on(struct239 *arg0, s32 phase) {
-#else
-void light_env_phase_on(struct239 *arg0) {
-#endif
     s8 sp1C[9]; // FIXME: what size should this be?
     struct240 *temp_v0;
 
@@ -1327,12 +1273,8 @@ void light_env_phase_on(struct239 *arg0) {
     fx_lists_broadcast_a(&sp1C, 36);
 }
 
-#ifdef NON_MATCHING
 /* was func_15162F50 */
 void light_env_phase_off(struct239 *arg0, s32 phase) {
-#else
-void light_env_phase_off(struct239 *arg0) {
-#endif
     s8 sp1C[9]; // FIXME: what size should this be?
     struct240 *temp_v0;
 
@@ -1381,7 +1323,6 @@ struct225 *light_spawn_burst_flash(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4
 }
 
 // big one
-#ifdef NON_MATCHING
 // lightning_flash_update: weather record handler (table entry at ROM 0x230744; returns 1 = keep). Drives the sky flash
 // of the area object +0x14 (skipped when its +0x9 is 1): its +0x2F gets the flash level +0x18, which decays by the
 // factor +0x1C once per tick (D_800BE9E4). While a burst is running (+0x2C flashes left) +0x38 counts down by
@@ -1425,9 +1366,6 @@ s32 light_beh_burst_flash(u8 *rec) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/light_beh_burst_flash.s")
-#endif
 
 /* was func_15163414 */
 struct225 *light_create_track_ptrs(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 argC, u8 argD, s32 argE) {

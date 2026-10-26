@@ -18,7 +18,6 @@ void camera_cut_fade_spawn(s32 arg0, s32 arg1, s32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 extern s8 D_800BEE2C;
 
 /* was func_15104764 */
@@ -105,14 +104,8 @@ block_11:
         break;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_131F00/camera_cut_fade_update.s")
-#endif
-#ifdef NON_MATCHING
 Gfx *screen_view_fill_colour(Gfx *gfx, s32 a, s32 r, s32 g, s32 b, s32 i);
-#endif
 
-#ifdef NON_MATCHING
 // obj_fog_alpha_gfx: with i == 0 and a non-zero alpha byte at obj +0x1B, appends screen_view_fill_colour's colour command
 // (alpha * 63 / 256, colour 0, 0, 0, index 0) to gfx; returns the new display list end (gfx unchanged otherwise).
 /* was func_15104A0C */
@@ -122,9 +115,6 @@ Gfx *obj_fog_alpha_gfx(Gfx *gfx, u8 *obj, s16 i) {
     }
     return gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_131F00/obj_fog_alpha_gfx.s")
-#endif
 
 /* was func_151044F4 */
 s32 held_obj_byte7d_get(void) {

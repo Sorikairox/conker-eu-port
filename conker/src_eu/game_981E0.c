@@ -2,15 +2,13 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING
 void player_lose_life(s32); /* P59: was implicitly int */
 void player_idle_animation(void); /* P60: idle animation, was implicitly int */
 s32 footstep_splash(struct127 *, s32); /* P192: C on port-b (returns 0), was implicit */
 s32 landing_dust_burst(u8 *); /* P204: C on port-b (P201, returns 0), was implicit */
 u8 *object_emitter_spawn(u8 *, s32, u8, s32); /* P230 (port-b P229): returns the emitter, was implicit */
 void ground_puff_spawn(struct127 *, u8, s32, u8); /* P295: hand C (void), was implicit */
-#endif
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 projectile_fire();   /* still asm; called by objfx_gun_fire */
 void face_anim_start(struct127 *, u8, u8, u16, s32);
 void objev_play_sound(void);  /* P68 hand C; called by objev_sound_if_above_water */
@@ -19,10 +17,8 @@ extern u8 D_eu_80099F30[];
 extern u8 D_80099F3C[];
 void aura_group_spawn(u8 *, u8, s32);        /* P238: port-b hand C (void); called by objfx_f9bb0 */
 void obj_point_burst_spawn(u8 *, u8, u8, s32);    /* P238: port-b hand C (void); called by objfx_fa520_0 / objfx_fa520_1 / objfx_fa520_2 */
-#endif
 
 
-#ifdef NON_MATCHING
 extern s32 D_8008679C;
 extern u8 D_80099DF0;
 extern u8 D_800C3A82;
@@ -101,9 +97,6 @@ loop_14:
     }
     return D_800D1878;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/anim_events_run.s")
-#endif
 /* was func_1506AF74 */
 void objev_anim_38(void) {
     if ((D_800D154C->unk100 & 8) != 0) {
@@ -201,7 +194,6 @@ void objev_player_lose_life(void) {
 void objev_nop_1506b3b0(void) {
 }
 
-#ifdef NON_MATCHING
 extern u8 D_80099DFE;
 extern u8 D_80099E03;
 
@@ -242,9 +234,6 @@ void objev_pick_turn_to_player(void) {
     D_800D154C->unk244 = (s16) (*D_80099DFC)[var_a0_2];
     D_800D154C->unk21C = 0x4E20;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_pick_turn_to_player.s")
-#endif
 // NON-MATCHING: 5% there...
 // void objev_pick_turn_to_player(void) {
 //     u8 sp19;
@@ -489,11 +478,7 @@ void objev_finish_and_idle(void) {
         temp_a0->unk78 = 0;
         D_800D2E60[D_800D1940 >> 3] |=  (1 << (D_800D1940 & 7));
     }
-#ifdef NON_MATCHING
     player_idle_animation(); /* takes no arguments (a0 is left over) */
-#else
-    player_idle_animation(temp_a0);
-#endif
 }
 
 /* was func_1506BA4C */
@@ -629,7 +614,6 @@ void objev_sound_if_above_water(void) {
     }
 }
 
-#ifdef NON_MATCHING
 /* Script command: play a sound for the current object D_800D154C. Command word D_800D1580:
  *   bits 0..10 sound id, 11..13 how to play it, 14..15 actor condition, 16 "defer", 24..31 actor type.
  * Condition 0x4000: only when the object's actor type (its id, or the alias D_8008704C[...] when
@@ -741,11 +725,7 @@ void objev_play_sound(void) {
     }
     actor_sound_play(sound, obj, volume, 500, 2500);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_play_sound.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 D_800D1C9C;
 s32 sound_pick_variant(s32, s32);
 /* objev_play_sound: void (P68 NM definition above; prototype at the top of the file) */
@@ -789,9 +769,6 @@ void objev_play_random_sound(void) {
         objev_play_sound();
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_play_random_sound.s")
-#endif
 
 /* was func_1506C418 */
 void objev_stop_sound_alt(void) {
@@ -804,7 +781,6 @@ void objev_stop_sound(void) {
 }
 
 // requires jump table
-#ifdef NON_MATCHING
 struct127 *obj_find_by_state(s32, s32 *);
 void *obj_alloc_slot(void);
 u8 *light_alloc_light_buf(s32 arg0);
@@ -1063,11 +1039,7 @@ s32 camera_object_spawn(f32 yaw, f32 dist, f32 rise, f32 height, u8 alpha, s32 m
     }
     return (s32) obj;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/camera_object_spawn.s")
-#endif
 // requires jump table
-#ifdef NON_MATCHING
 void vec3_to_yaw_pitch_deg(void *, f32 *, f32 *);
 // player_camera_view_update: P259: sets up the player camera for D_800D154C (the args the callers leave in a0 / a1
 // are not read) by event mode D_800D1580: yaw = facing angle +0x7A + 90 degrees, pitch 45, distance 323; in modes
@@ -1199,11 +1171,7 @@ void objev_player_camera_view(void) {
     off_y = -off_y;
     camera_object_spawn(yaw, off_h, off_y, height, 100, mode, 0.0f, smooth, (s32) target_ptr, flags54, snap);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_player_camera_view.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_8009A104;
 void obj_burning_fx_start(u8 *, u8);
 
@@ -1252,9 +1220,6 @@ void objev_throw_object(void) {
         temp_v0->gravity = D_8009A104;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_throw_object.s")
-#endif
 
 // mode_handler_noop: empty handler, entry 16 of the D_8008679C mode table (EU 0x1506D8AC; US 0x1506D4EC). It was
 // glued to the end of objev_throw_object (split in P263), so the port had no function at that table address.
@@ -1322,7 +1287,6 @@ void objev_clear_6e(void) {
     D_800D154C->unk6E = 0;
 }
 
-#ifdef NON_MATCHING
 /* Re-issue the current object's packed command D_800D1580 (bytes 3 and 2, low half = a duration in
  * frames scaled by the speed at unk2D0 + 0x10, 0xFFFF = none) through face_anim_start, unless the object
  * is in state 0x2A (P15, hand C). The asm returns junk (a %hi) on the early path, so this is void. */
@@ -1345,9 +1309,6 @@ void objev_start_anim_cmd(void) {
     }
     face_anim_start(obj, D_800D1580 >> 24, D_800D1580 >> 16, t, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_start_anim_cmd.s")
-#endif
 // ???
 /* was func_1506D6B4 */
 void objev_anim_in_water_by_health(void) {
@@ -1559,11 +1520,7 @@ s32 nodes_destroy_for_player();
 void player_joint_beam_spawn(s32 side);
 void particle_emitter_preset_obj_burst(s32, s32, u8, s32);
 s32 particle_emitter_preset_obj_pair(u8, s32, s32, s32, u8, s32);
-#ifdef NON_MATCHING
 void shard_ring_spawn(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
-#else
-s32 shard_ring_spawn(f32, f32, f32, s32, s32, s32, f32, f32);
-#endif
 
 /* was func_1506DE84 */
 void objev_effect_by_mode(void) {
@@ -1622,7 +1579,6 @@ void objev_effect_by_mode(void) {
     }
 }
 
-#ifdef NON_MATCHING
 void mtxf_transform_point(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
 void shard_ring_spawn(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
 void particle_quad_edge_sparks(f32 *quad, f32 x, f32 z, s32 arg3, f32 size, s32 arg5, s32 arg6, s32 arg7, s32 alpha, s32 arg9);
@@ -1666,10 +1622,6 @@ void objev_dust_square_large(void) {
     particle_quad_edge_sparks(&quad[0][0], *(f32 *) ((u8 *) D_800D154C + 0x14), *(f32 *) ((u8 *) D_800D154C + 0x1C), 4,
                   *(f32 *) ((u8 *) D_800D154C + 0x14C), 0, 4, 4, 0xFF, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_dust_square_large.s")
-#endif
-#ifdef NON_MATCHING
 void mtxf_transform_point(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
 void particle_quad_edge_sparks(f32 *quad, f32 x, f32 z, s32 arg3, f32 size, s32 arg5, s32 arg6, s32 arg7, s32 alpha, s32 arg9);
 
@@ -1711,10 +1663,6 @@ void objev_shadow_square_small(void) {
     particle_quad_edge_sparks(&quad[0][0], *(f32 *) ((u8 *) D_800D154C + 0x14), *(f32 *) ((u8 *) D_800D154C + 0x1C), 5,
                   *(f32 *) ((u8 *) D_800D154C + 0x14C) * 0.5f, 0, 4, 4, 0xFF, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_shadow_square_small.s")
-#endif
-#ifdef NON_MATCHING
 s32 actor_sound_is_playing(struct127 *arg0);
 s32 actor_sound2_is_playing(struct127 *arg0);
 s32 mp3_stream_get_state(void);
@@ -1772,9 +1720,6 @@ s32 sound_word_resolve(struct127 *rec, s32 *slot, s32 mode) {
     *slot = w;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/sound_word_resolve.s")
-#endif
 /* was func_1506E5FC */
 void objev_sound_300_1800(void) {
     if (sound_word_resolve(D_800D154C, &D_800D1580, 0) != 0) {
@@ -2068,7 +2013,6 @@ void objev_set_path_cmd(void) {
 }
 
 // TBD whats goins on here
-#ifdef NON_MATCHING
 /*
  * P80: script command: +0x282 = 0xFFFF, +0x276 = 5, and the byte pair +0x284 + 2 * i (i = bits 16..23 of the
  * command word D_800D1580) = bits 8..15, bits 0..7.
@@ -2083,9 +2027,6 @@ void objev_set_path_pair(void) {
     *((u8 *) D_800D154C + 0x284 + i) = w >> 8;
     *((u8 *) D_800D154C + 0x285 + i) = w;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_set_path_pair.s")
-#endif
 
 /* was func_1506EFB4 */
 void objev_clear_282(void) {
@@ -2144,7 +2085,6 @@ void objfx_aeeb0(s32 arg0) {
     obj_trail_burst_spawn(D_800D154C, 0xFF);
 }
 
-#ifdef NON_MATCHING
 /* the emitter spec spec_emitter_spawn reads (layout as game_eu_1C3530's Emitter2Spec) */
 typedef struct {
     /* 0x000 */ s32 u000;
@@ -2243,9 +2183,7 @@ typedef struct {
     /* 0x11A */ s16 u11A;
 } EmitterSpec981E0;
 u8 *spec_emitter_spawn(s32 arg0, u8 *spec, u8 arg2, s32 arg3);
-#endif
 
-#ifdef NON_MATCHING
 // player_emitter_spawn_c: player action handler (void (s32), argument unused): spawns the kind-0xC emitter on the
 // player D_800D154C (node byte its +0x3B) through spec_emitter_spawn (no extra data, layer 0xFF, owner 0) with a constant
 // spec (all fields set except padding, as the asm fills them).
@@ -2344,16 +2282,12 @@ void objfx_emitter_c(s32 arg0) {
     spec.u11A = 0xC;
     spec_emitter_spawn(0, (u8 *) &spec, 0xFF, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objfx_emitter_c.s")
-#endif
 
 /* was func_1506F524 */
 void objfx_197a7c(s32 arg0) {
     emitter_stop_for_obj(D_800D154C);
 }
 
-#ifdef NON_MATCHING
 // player_emitter_spawn_d: player action handler (void (s32), argument unused): as objfx_emitter_c with the kind-0xD
 // spec (trail colour 3C FF EB 52).
 /* was func_1506F54C */
@@ -2451,9 +2385,6 @@ void objfx_emitter_d(s32 arg0) {
     spec.u11A = 0x11;
     spec_emitter_spawn(0, (u8 *) &spec, 0xFF, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objfx_emitter_d.s")
-#endif
 
 /* was func_1506F8C0 */
 void objfx_19ef70(s32 arg0) {
@@ -2662,7 +2593,6 @@ void objfx_debris_burst(s32 arg0) {
     header2.unk8 = D_800D154C->z_position;
     light_create_with_ctrl(&header, &header2, (random_int() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
 }
-#ifdef NON_MATCHING
 void objev_player_camera_view(void); // P259: reads D_800D154C itself (the asm ignores a0 / a1)
 struct127 *player_find_owned_object(struct127 *, struct127 *, s32);
 void mtx_transform_points(f32 **, f32 **, void *, s32);
@@ -2787,9 +2717,6 @@ block_10:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objfx_gun_fire.s")
-#endif
 /* was func_15070690 */
 void objfx_eee00(s32 arg0) {
     tether_start_with_flash(D_800D154C, (arg0 - 0x3E) & 0xFF, arg0);
@@ -2840,7 +2767,6 @@ void objfx_fe49c(s32 arg0) {
     weapon_b_muzzle_effects(D_800D154C, 0xFF, 1, 0, 0);
 }
 
-#ifdef NON_MATCHING
 // player_emitter_spawn_9: player action handler (void (s32), argument unused): as objfx_emitter_c with the kind-9
 // spec (spec flags 0x11).
 /* was func_15070898 */
@@ -2938,9 +2864,6 @@ void objfx_emitter_9(s32 arg0) {
     spec.u11A = 0x19;
     spec_emitter_spawn(0, (u8 *) &spec, 0xFF, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objfx_emitter_9.s")
-#endif
 
 /* was func_15070C18 */
 void objfx_199834(s32 arg0) {
@@ -2990,9 +2913,6 @@ void objfx_hit_at_self_0(s32 arg0) {
     objfx_hit_at_self(0);
 }
 
-#ifndef NON_MATCHING /* P262: the NM build uses the exact prototype hoisted at the top */
-s32 attached_particle_spawn(struct127 *, u8, u8 *, s32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
-#endif
 extern struct17 D_80099F48;
 extern struct17 D_80099F54;
 
@@ -3432,7 +3352,6 @@ void objev_clear_10c_grounded(void) {
     }
 }
 
-#ifdef NON_MATCHING
 extern f32 D_8009A308;
 extern f32 D_800CC710;
 extern f32 D_800CC714;
@@ -3498,9 +3417,6 @@ block_13:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_player_react_anim.s")
-#endif
 /* was func_150721A4 */
 void objev_fade_cmd(void)
 {
@@ -3574,7 +3490,6 @@ void objev_remove_kind_owned(void) {
     }
 }
 
-#ifdef NON_MATCHING
 // event_respawn_record_object: P256: event-script command (request word D_800D1580): byte 0 = record id (looked up
 // with setup_entry_find_by_id, -1 = none), bits 8..14 = the new object's +0x5C, bit 15 = no +0x101 mode (else 4), bits
 // 16..23 = state (+0x232 gets the low 7 bits; bit 7 keeps the record's current object, otherwise that object is
@@ -3632,9 +3547,6 @@ void objev_respawn_record_object(void) {
         obj->unk94 |= 2;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_respawn_record_object.s")
-#endif
 /* was func_1507266C */
 void objev_adopt_remembered_obj(void)
 {
@@ -3749,7 +3661,6 @@ void objev_anim_next_blend6(void) {
     obj_start_anim(D_800D154C, D_800D154C->unk84.uh + 1, 1.0f, 6.0f, 0.0f, 0.0f, 0);
 }
 
-#ifdef NON_MATCHING
 // player_anim_follow_up: when the player's (D_800D154C) animation +0x84 ends, start the one that follows it (blend 4):
 // fixed pairs (0x35 / 0x3F -> 0x3A, 0x1CD / 0x1CF -> 0x1CE, the 0x26F..0x274 cycle, ...); for 0x10C, 0x156 and 0x167
 // the follow-up depends on the player's flag +0x31C->+0x197, without it the idle animation (player_idle_animation) starts;
@@ -3835,9 +3746,6 @@ void objev_anim_follow_up(void) {
         obj_start_anim(D_800D154C, next, 1.0f, 4.0f, 0.0f, 0.0f, 0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_anim_follow_up.s")
-#endif
 /* was func_15072DA0 */
 void objev_set_2f8_low3(void) {
     D_800D154C->unk2F8 &= 0xFFF8;
@@ -3943,7 +3851,6 @@ void objev_toggle_2f8_100(void) {
       }
 }
 
-#ifdef NON_MATCHING
 void *obj_alloc_slot(void);
 u8 *move_watch_spawn(u8 *arg0, u8 arg1, s32 arg2);
 u8 *light_alloc_light_buf(s32 arg0);
@@ -4024,10 +3931,6 @@ u8 *obj_spawn_child_at_joint(struct127 *parent, s32 joint, s32 kind, f32 x, f32 
     char_fx_attach(move_watch_spawn((u8 *) o, 1, 0), o, 0x13);
     return (u8 *) o;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/obj_spawn_child_at_joint.s")
-#endif
-#ifdef NON_MATCHING
 /* Script command: spawn a projectile / effect object from the current object D_800D154C through
  * obj_spawn_child_at_joint (owner, type, model, then offsets and speeds; 100 = lifetime). D_800D1580 picks the kind:
  *   0: type 0x17 model 0x1F, flagged 0x1000000 in unkF8. When the owner's camera (unk318) is within 30
@@ -4103,9 +4006,6 @@ void objev_spawn_shot_kind(void) {
         obj_spawn_child_at_joint(D_800D154C, 0xE, 0x88, 0.0f, 0.0f, 16.0f, JITTER(10.0f), x, y, 2.9f, 100);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_spawn_shot_kind.s")
-#endif
 
 /* was func_150738E8 */
 void objev_toss_carried(void) {
@@ -4146,7 +4046,6 @@ void objev_set_44(void) {
     D_800D154C->unk44 = (f32) D_800D1580;
 }
 
-#ifdef NON_MATCHING
 s32 obj_send_hit(struct127 *, s32, s32, u8);
 
 /* was func_15073A50 */
@@ -4172,9 +4071,6 @@ void objev_launch_owner_obj(void) {
         temp_a0->unk76 = D_800D154C->unk7A + temp_v0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_launch_owner_obj.s")
-#endif
 /* was func_15073B38 */
 void objev_set_31c_a8_ac_ad(void)
 {
@@ -4278,7 +4174,6 @@ void objev_clear_flags_10b(void) {
     D_800D154C->unk10B &= ~D_800D1580;
 }
 
-#ifdef NON_MATCHING
 extern u8 *D_800D252C;
 extern f32 D_800CC704;
 extern f32 D_800CC70C;
@@ -4449,9 +4344,6 @@ void objev_spawn_helper_object(void) {
 #undef CTL_F32
 #undef CTL_U16
 #undef OBJ_MODEL_S16
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_spawn_helper_object.s")
-#endif
 
 /* was func_15074644 */
 void objev_set_31c_11a(void) {
@@ -4497,7 +4389,6 @@ void objev_damage(void) {
     }
 }
 // ?
-#ifdef NON_MATCHING
 /* was func_150747E4 */
 void objev_set_owner_state(void) {
     struct127 *temp_a0;
@@ -4510,9 +4401,6 @@ void objev_set_owner_state(void) {
         temp_a0->unk232 = (u8) D_800D1580;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_set_owner_state.s")
-#endif
 /* was func_15074840 */
 void objev_add_31c_1aa(void) {
     if (D_800D154C->unk31C != 0) {
@@ -4526,7 +4414,6 @@ void objev_set_24f(void) {
 }
 
 // ??
-#ifdef NON_MATCHING
 /*
  * P80: script command: add bits 24..31 of the command word D_800D1580 to the object's byte +0x138 when the flag
  * test (word +0x2E4 + 4 * bits 16..23) & bits 8..15 matches bit 0 (bit 0 set: the flags are clear; clear: any set).
@@ -4544,9 +4431,6 @@ void objev_skip_if_flags(void) {
         o[0x138] += w >> 24;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_skip_if_flags.s")
-#endif
 
 /* was func_150748F4 */
 void objev_set_cc3d7(void) {
@@ -4596,7 +4480,6 @@ void objev_skip_if_not_carrying(void) {
     }
 }
 
-#ifdef NON_MATCHING
 /* was func_15074A94 */
 void objev_speed_by_player_dist(void) {
     f32 temp_f0;
@@ -4621,9 +4504,6 @@ void objev_speed_by_player_dist(void) {
     D_800D154C->unk154 = D_800D154C->unk158;
     D_800D154C->unk15C = 0.02f;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_speed_by_player_dist.s")
-#endif
 // NON-MATCHING: JUSTREG
 // void objev_speed_by_player_dist(void) {
 //     f32 phi_f2;
@@ -4692,12 +4572,8 @@ s32 hit_react_impact_small(u8 *, u8 *);
 // P214: entry of hit-handler table D_80086A34, whose other 36 entries are void (a, b, s32): the NM build takes the
 // third (unused) argument too, so the port's indirect call type matches. The extra parameter changes IDO's frame
 // (0x10 bytes), so the default build keeps the 2-parameter definition.
-#ifdef NON_MATCHING
 /* was func_15074C80 */
 void objhit_camera_object(u8 *arg0, u8 *arg1, s32 arg2) {
-#else
-void objhit_camera_object(u8 *arg0, u8 *arg1) {
-#endif
     s32 var_a2;
 
     if ((*(u16 *)((u8 *)arg0 + 0x278)) == 0x11) {
@@ -4816,7 +4692,6 @@ void objhit_kill_b(struct127 *arg0, struct127 *arg1, u8 *arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 // player_find_owned_object: the first live object (state != 0, id != 0xFF) of D_800CC2D0[0..25] whose owner byte
 // +0x65 is `owner`'s player number + 1, or NULL (P151). The other two arguments are not read.
 /* was func_1507515C */
@@ -4832,6 +4707,3 @@ struct127 *player_find_owned_object(struct127 *owner, struct127 *unused1, s32 un
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/player_find_owned_object.s")
-#endif

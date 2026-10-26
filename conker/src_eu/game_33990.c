@@ -18,7 +18,6 @@ void save_game_defaults(void) {
     D_800D2E45 = 1;
 }
 
-#ifdef NON_MATCHING
 s32 asset_load(s32 *arg0, s32 arg1, ...);
 void os_writeback_dcache(void *, s32); /* osWritebackDCache */
 extern u8 *D_800BE810;           /* bit widths of the 69 packed save fields (asset 1/7, +8) */
@@ -154,10 +153,6 @@ void save_slot_load(s8 arg0) {
         D_80082F50 = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_slot_load.s")
-#endif
-#ifdef NON_MATCHING
 s32 player_stat_get(s16, s32);
 
 /* save_slot_pack: P232. Writes save slot `slot` (record D_800BE818[slot]): bumps the slot's time stamp (+8, 31 bits)
@@ -263,10 +258,6 @@ void save_slot_write(s32 slot) { /* the asm uses the whole a0 (callers pass an s
         eeprom_async_write_start(&D_800BE900, area * 16 + 4, D_800BE778, 0x80);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_slot_write.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1500707C */
 void save_slot_erase(s32 arg0) {
     s32 temp_v0;
@@ -296,10 +287,6 @@ void save_slot_erase(s32 arg0) {
         } while (var_s0_2 != 4);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_slot_erase.s")
-#endif
-#ifdef NON_MATCHING
 extern u8 *D_80082F4C; /* -> D_800BE712: the ten 10-byte records of the save data */
 
 // save_data_reset: clears the save data D_800BE710 (0x68 bytes) and gives its ten records their defaults: bytes
@@ -342,10 +329,6 @@ void save_config_reset(void) {
         rec[9] = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_config_reset.s")
-#endif
-#ifdef NON_MATCHING
 
 /* was func_1500727C */
 void save_config_load(void) {
@@ -368,10 +351,6 @@ void save_config_load(void) {
         save_config_reset();
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_config_load.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_15007360 */
 void save_config_write(void) {
     s32 sp18;
@@ -394,10 +373,6 @@ void save_config_write(void) {
         sp18 = eeprom_async_write_start(&D_800BE900, 0x44U, &D_800BE710, 0x70);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_config_write.s")
-#endif
-#ifdef NON_MATCHING
 void settings_clamp_to_range(void); /* P85: takes no arguments (the asm reads none) */
 void menu_settings_apply_checked(void);
 extern u8 D_800BE77A;
@@ -461,10 +436,6 @@ void save_options_load(void) {
     menu_settings_apply_checked();
     D_800901D0 = 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_options_load.s")
-#endif
-#ifdef NON_MATCHING
 // save_options_write: copies the 0x1C option bytes D_800E1010..D_800E102C to D_800BE778 + 2, stores their checksum
 // (0xCC + sum of byte i << (i & 3) over bytes 2..29, 16 bits) in the first halfword and, unless EEPROM writes are
 // off (D_8002AC5C), writes the 0x20-byte block to EEPROM block 0 (eeprom_async_write_start = osEepromLongWrite).
@@ -487,9 +458,6 @@ void save_options_write(void) {
         eeprom_async_write_start(&D_800BE900, 0, D_800BE778, 0x20);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_options_write.s")
-#endif
 
 /* was func_15007644 */
 void controller_init_hook_noop(void) {
@@ -546,7 +514,6 @@ void save_request_slot_erase(s32 arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 // save_slots_reset: marks the three save-slot summaries D_800BE818 empty (+8 = -1, +0xE = -1), clears the current slot
 // D_800BE7FC / D_800BE7FE, sets D_80082F50, clears the 27 bytes at D_800D2E4C (pointer) and the 9 save bits
 // D_800D2E60, and sets the four bytes D_800BE7F8[0..3] to -1. Mode 3 (menu) calls it on its first frame.
@@ -574,9 +541,6 @@ void save_slots_reset(void) {
     D_800BE7F8[1] = -1;
     D_800BE7F8[0] = -1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_slots_reset.s")
-#endif
 // NON-MATCHING: should probably start over..
 // void save_slots_reset(void) {
 //     s32 phi_v0;

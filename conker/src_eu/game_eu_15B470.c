@@ -16,7 +16,6 @@ void camera_shake_reset(u8 *arg0) {
     *(f32 *)(temp_v0 + 0x28) = -1.0f;
 }
 
-#ifdef NON_MATCHING
 extern s32 D_80089970;
 
 /* was func_1512D748 */
@@ -129,10 +128,6 @@ s32 camera_shake_start(struct108 *arg0, s32 arg1, s32 arg2) {
     }
     return (s32) temp_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15B470/camera_shake_start.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_1512DEF0 */
 void camera_shake_update(u8 *arg0) {
     f32 sp20;
@@ -193,6 +188,3 @@ void camera_shake_update(u8 *arg0) {
         (*(s32 *)((u8 *)temp_s0 + 0x50)) = 5;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15B470/camera_shake_update.s")
-#endif

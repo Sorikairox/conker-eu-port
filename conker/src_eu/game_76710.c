@@ -5,17 +5,11 @@
 
 
 // wtf?
-#ifdef NON_MATCHING
 /* P20: the asm caller quadtree_filter_box_tris tests v0, which is collision_tri_box_test's return value passed through */
 /* was func_15049260 */
 s32 quadtree_tri_box_test(struct_eu_bytes24 arg0) {
     return collision_tri_box_test(arg0);
 }
-#else
-void quadtree_tri_box_test(struct_eu_bytes24 arg0) {
-    collision_tri_box_test(arg0);
-}
-#endif
 
 /* was func_150492CC */
 void quadtree_set_test_box(f32 arg0, f32 arg1, f32 arg2) {
@@ -33,7 +27,6 @@ void quadtree_set_test_box(f32 arg0, f32 arg1, f32 arg2) {
 }
 
 // too many temp vars
-#ifdef NON_MATCHING
 extern f32 D_800CC630;
 extern f32 D_800CC634;
 extern f32 D_800CC638;
@@ -71,6 +64,3 @@ void tri_compute_plane(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg
     D_800CC638 = sp8;
     D_800CC63C = (arg2 * sp8) + ((temp_f6 * (*(f32 *)&(arg0))) + (spC * sp4));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_76710/tri_compute_plane.s")
-#endif

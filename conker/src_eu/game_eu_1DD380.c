@@ -30,7 +30,6 @@ s32 obj_handler_stub(s32 arg0, s32 arg1) {
     return 0xC;
 }
 
-#ifdef NON_MATCHING
 /* P292 */
 void ground_colour_by_depth(f32, f32 *, f32 *, f32 *);
 void spawn_circle_random_emit(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9, s32 argA, u8 argB);
@@ -139,9 +138,6 @@ void object_ground_splash(u8 *obj, s32 arg1, s32 arg2) {
     ringLife = random_int() % 11U + 5;
     spawn_circle_random_emit(pos[0], pos[1], pos[2], random_float() * 17.0f + 29.0f, 0, 0xFF, ringLife, 0x10, 0, 0.0f, 0, 0xFF);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DD380/object_ground_splash.s")
-#endif
 
 /* was func_151B0184 */
 s32 splash_alpha_fade_by_life8(u8 *arg0) {

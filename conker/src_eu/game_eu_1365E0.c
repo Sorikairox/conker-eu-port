@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 u8 *mesh_effect_spawn(s8 *, s32, s32, s32, s32);
 s32 light_ctrl_alloc(s8 *, s32, s32, s32, s32);
 s32 memcpy(u8 *, u8 **, s32);
@@ -154,9 +153,6 @@ void swing_lamp_spawn(s32 arg0) {
         memcpy(temp_v0_3 + (*(s32 *)((u8 *)temp_v0_3 + 0x50)) + 0xF8, &sp.u28, 0x24);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/swing_lamp_spawn.s")
-#endif
 s32 swing_lamp_target_timer_tick(u8 *);
 s32 swing_lamp_height_update(u8 *);
 
@@ -184,7 +180,6 @@ s32 swing_lamp_update(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* was func_15109100 */
 s32 swing_lamp_target_timer_tick(u8 *arg0) {
     s32 temp_t0;
@@ -200,10 +195,6 @@ s32 swing_lamp_target_timer_tick(u8 *arg0) {
     }
     return (s32) (temp_v0 + 0xF8);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/swing_lamp_target_timer_tick.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_15109140 */
 s32 swing_lamp_height_update(u8 *arg0) {
     s32 temp_v1;
@@ -224,10 +215,6 @@ s32 swing_lamp_height_update(u8 *arg0) {
     (*(f32 *)((u8 *)(&temp_v0_2[0xF8]) + 0x10)) = 226.0f;
     return (s32) temp_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/swing_lamp_height_update.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_800A2850;
 extern f32 D_800A2854;
 extern f32 D_800A2858;
@@ -254,9 +241,6 @@ s32 swing_lamp_update_b(u8 *arg0) {
     (*(s8 *)((u8 *)arg0 + 0x12)) = 2;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/swing_lamp_update_b.s")
-#endif
 /* was func_151092A4 */
 s32 swing_lamp_matrix_build(u8 *arg0, s32 arg1) {
     f32 mf[4][4];
@@ -376,7 +360,6 @@ void swing_lamp_post_toggle(void) {
     node_broadcast_types(sp18, 2, 0, 0x1E);
 }
 
-#ifdef NON_MATCHING
 /* P204 */
 // sky_dome_project_uv: D_80089FC8 kind-4 handler (s32 (u8 *, s32), called by mesh_effect_draw) of a double-buffered
 // vertex record rec for player slot `slot`: builds this frame's matrix (rec +0x78 + D_800BE9C0 * 0x40) as a
@@ -428,6 +411,3 @@ s32 sky_dome_project_uv(u8 *rec, s32 slot) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/sky_dome_project_uv.s")
-#endif

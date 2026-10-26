@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P241: readable C for level_light2_orbit (game_eu_FCC80, 56 insns). */
 // level_light2_orbit: level update handler (D_8008D0A4 entry 6, `void (s32)`, argument unused): turns the point
 // (76, 241) around (-1, 44) by the angle (degrees) at +8 of world_record_find(4) and stores it, with z = -1805, as the
@@ -23,9 +22,6 @@ void level_light2_orbit(s32 arg0) {
     trigger_set_position(2, (s16) (dx * c - dy * s + -1.0f), (s16) (dx * s + dy * c + 44.0f), (s16) -1805.0f);
     level_anim_frame_counter_tick(5, 3);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCC80/level_light2_orbit.s")
-#endif
 
 /* was func_150CF550 */
 f32 math_angle_offset_scaled(s32 arg0, s32 arg1) {

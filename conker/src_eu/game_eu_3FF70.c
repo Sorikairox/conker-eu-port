@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* Level vertex colour backup (filled at level load, flags at level header byte +0x21):
  *  D_800BE930[4]  per level geometry chunk 0..3: its slice of the colour store (3 bytes per vertex); [0] is also
  *                 the store itself (vertex_colours_store writes through it)
@@ -106,11 +105,7 @@ void level_vertex_colours_backup(void) {
     }
     dl_env_colours_list((u32 *) D_800B0E00[0]);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3FF70/level_vertex_colours_backup.s")
-#endif
 
-#ifdef NON_MATCHING
 // vertex_colours_store: appends the colours (+0xC..+0xE) of `count` 16-byte vertices to the colour store
 // D_800BE930[0] at index D_800BE948.
 /* was func_15012C34 */
@@ -124,11 +119,7 @@ void vertex_colours_store(u8 *vtx, s32 count) {
         COLOURS_STORED++;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3FF70/vertex_colours_store.s")
-#endif
 
-#ifdef NON_MATCHING
 // dl_env_colours_list: walks a display list to its G_ENDDL and records each G_SETENVCOLOR command: its index
 // (D_800BE970) and RGB (D_800BE950, 3 bytes); D_800BE984 counts them.
 /* was func_15012E88 */
@@ -147,9 +138,6 @@ void dl_env_colours_list(u32 *dl) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3FF70/dl_env_colours_list.s")
-#endif
 
 /* was func_15012F40 */
 void clear_dfc00_table(void) {

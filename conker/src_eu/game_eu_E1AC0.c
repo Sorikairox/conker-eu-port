@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void water_jet_spray_spawn(u8 *arg0);
-#endif
 
 
 s32 fxrec_broadcast(s32, s32);
@@ -45,7 +44,6 @@ void water_jet_die_free(u8 *arg0) {
     fxrec_die_free(arg0);
 }
 
-#ifdef NON_MATCHING
 s32 memcpy(s32 *, s32 *, s32);
 
 /* was func_150B443C */
@@ -94,9 +92,6 @@ u8 *water_jet_spawn(s32 *arg0, u8 *arg1, s16 arg2) {
     }
     return sp40;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/water_jet_spawn.s")
-#endif
 typedef struct { f32 x, y, z; } V3s64;
 /* was func_150B45C8 */
 s32 water_jet_points_update(u8 *arg0) {
@@ -152,7 +147,6 @@ s32 water_jet_points_update(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* was func_150B4774 */
 s32 water_jet_emit_update(u8 *arg0) {
     struct {
@@ -263,10 +257,6 @@ s32 water_jet_emit_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/water_jet_emit_update.s")
-#endif
-#ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 gfx_geometry_mode_cached(s32, s32, s32);
 s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
@@ -523,9 +513,6 @@ u8 *water_jet_ribbon_draw(u8 *trail, u8 *gfx, s16 arg2) {
     } while (cur != *(s8 *) (trail + 0x2D));
     return gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/water_jet_ribbon_draw.s")
-#endif
 
 /* was func_150B5540 */
 void water_jet_stop(u8 *arg0) {
@@ -536,7 +523,6 @@ void water_jet_stop(u8 *arg0) {
     temp_v0[0x1C] |= 1;
 }
 
-#ifdef NON_MATCHING
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 extern s32 D_8009FFC0;
 
@@ -629,9 +615,6 @@ void water_jet_spray_spawn(u8 *arg0) {
         (*(f32 *)((u8 *)temp_s3 + 0x54)) = (f32) ((*(f32 *)((u8 *)temp_s3 + 0x54)) - 1.0f);
     } while ((*(f32 *)((u8 *)temp_s3 + 0x54)) > 1.0f);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/water_jet_spray_spawn.s")
-#endif
 /* was func_150B586C */
 void water_jet_message(u8 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 5) {

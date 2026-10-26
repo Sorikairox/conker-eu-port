@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 extern s16 D_80084814;
 
 /* was func_1503FCE0 */
@@ -61,9 +60,6 @@ void select_menu_read_stick(s16 arg0, s16 *arg1, s16 *arg2) {
     }
     *arg2 = var_v0_2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6D4F0/select_menu_read_stick.s")
-#endif
 /* was func_1503FB08 */
 void select_menu_reset(void) {
     D_80084818 = 0;
@@ -73,7 +69,6 @@ void select_menu_reset(void) {
     D_80084824 = 0;
 }
 
-#ifdef NON_MATCHING
 s32 event_table_count(void);
 s32 event_table_find_by_word4(s32);
 u8 *event_table_get_block(s32);
@@ -258,6 +253,3 @@ s32 select_menu_update_draw(Gfx **gfxp, u16 cancel, u16 select) {
     } while (i < visible);
     return -2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6D4F0/select_menu_update_draw.s")
-#endif

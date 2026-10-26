@@ -30,7 +30,6 @@ struct260 *obj_electrify_fx_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     return temp_v0;
 }
 
-#ifdef NON_MATCHING
 extern f32 D_8009FFF0;
 extern f32 D_8009FFF4;
 extern f32 D_8009FFF8;
@@ -84,9 +83,6 @@ void obj_electrify_fx_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E30C0/obj_electrify_fx_update.s")
-#endif
 /* was func_150B5CA4 */
 void obj_electrify_asset_release(void *arg0) {
     attach_fx_asset_release(6);

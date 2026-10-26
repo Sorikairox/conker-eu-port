@@ -12,8 +12,6 @@ void os_dispatch_thread(void);                    // __osDispatchThread
 void __osDequeueThread(OSThread **, OSThread *);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_22D70/__osSetFpcCsr.s")
-
 void osStartThread(OSThread *t) {
     register u32 saveMask = __osDisableInt();
 

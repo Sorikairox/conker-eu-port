@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s16 *obj_adjust_entries_player(s16 *arg0, s32 arg1);
 s16 *obj_adjust_entries_type98(s16 *arg0, s32 arg1);
 s16 *obj_adjust_entries_tilt(s16 *arg0, s32 arg1);
@@ -47,11 +46,7 @@ void obj_adjust_list_build(s16 *buf, s32 arg1) {
     j0 = model_get_face_joint(((u8 *)obj)[4], 0);
     *obj_adjust_entries_face(p, (u8 *)obj, j0, model_get_face_joint(((u8 *)obj)[4], 1)) = 0x1000;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_61AE0/obj_adjust_list_build.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_150344AC */
 s16 *obj_adjust_entries_player(s16 *arg0, s32 arg1) {
     s16 *var_a2;
@@ -97,9 +92,6 @@ s16 *obj_adjust_entries_player(s16 *arg0, s32 arg1) {
     }
     return var_a2;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_61AE0/obj_adjust_entries_player.s")
-#endif
 /* was func_15034630 */
 s16 *obj_adjust_entries_type98(s16 *arg0, s32 arg1)
 {
@@ -128,7 +120,6 @@ s16 *obj_adjust_entries_tilt(s16 *arg0, s32 arg1)
   return arg0;
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800CC9D4;
 
 /* was func_15034710 */
@@ -144,9 +135,6 @@ u8 *obj_adjust_entries_type8a(u8 *arg0, s32 arg1) {
     (*(s16 *)((u8 *)arg0 + 6)) = (s16) ((s16) temp_f16 - temp_t1);
     return arg0 + 8;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_61AE0/obj_adjust_entries_type8a.s")
-#endif
 extern f32 D_800980CC;
 /* was func_15034790 */
 s16 *obj_adjust_entries_type28(s16 *arg0, s32 arg1) {

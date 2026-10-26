@@ -9,7 +9,6 @@ void lipsync_reset(void)
   D_800D1D50 = (D_800D1D48 = (D_800D1D4C = 0));
 }
 
-#ifdef NON_MATCHING
 // text_queue_tempo_events: drains the text queue (text_queue_read into a 0x100-byte buffer); every 'L' record carries a
 // 28-bit big-endian 7-bit-packed value at bytes 4..7, divided by 441 (16 when that gives 0), which goes with the record's
 // byte 3 minus one to lipsync_apply_event for the current player's object D_800CC2D0[D_800D18D0].
@@ -33,11 +32,7 @@ void lipsync_poll_text_queue(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ADE10/lipsync_poll_text_queue.s")
-#endif
 
-#ifdef NON_MATCHING
 int game_gu_random(void);
 extern s32 D_80042B90;
 extern s32 D_8009C0E0;
@@ -69,14 +64,7 @@ void lipsync_update_mouth(u8 *arg0) {
         D_80042B90 = 0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ADE10/lipsync_update_mouth.s")
-#endif
-#ifdef NON_MATCHING
 void face_anim_set(u8 *arg0, s32 anim, s32 variant);
-#else
-s32 face_anim_set(u8 *, s32, s32);
-#endif
 s32 face_anim_count();
 
 /* was func_15080830 */

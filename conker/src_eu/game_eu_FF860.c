@@ -12,11 +12,7 @@ void ambient_red_flicker_bright_update(s32 arg0) {
     light_set_level_colour(*sp28, ((u8 *)&D_800DCD20)[1], ((u8 *)&D_800DCD20)[2], 0);
 }
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
-#else
-s32 event_dispatch(s32, s32, s32, s32);
-#endif
 
 /* was func_150D20E0 */
 void player_sync_flag10_event(u8 *arg0) {

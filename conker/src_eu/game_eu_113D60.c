@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32 *, s32 *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
 s32 prop_is_flagged(s32);
 f32 vec3_dot(void *, void *);
@@ -39,9 +38,7 @@ typedef struct {
     /* 0x28 */ f32 side;     /* -1 / 1: sign of vec3_dot(hit - from, hit point) */
     /* 0x2C */ s8 u2C;
 } Rec6550;
-#endif
 
-#ifdef NON_MATCHING
 // beam_ray_spawn: builds a type-0x41 effect3d_spawn_default request (from, to, a2 / a3 / arg4 floats, arg8 / arg9 bytes) and,
 // when `cast` is set, ray casts from -> to (collision_ray_cast): on a hit whose object passes prop_is_flagged the record
 // gets hit bit 0, the hit point and side = sign of vec3_dot(hit - from, hit). Spawns the object (effect3d_spawn_default
@@ -105,11 +102,7 @@ s32 beam_ray_spawn(u8 *from, f32 *to, f32 a2, f32 a3, f32 arg4, u8 room, s32 own
     }
     return (s32) o;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113D60/beam_ray_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 f32 vec3_dot(void *, void *);
 extern s32 D_80088DB0;
 
@@ -157,10 +150,6 @@ s8 beam_ray_update(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + ((*(f32 *)((u8 *)arg0 + 0x48)) * temp_f0 * D_800BE9A4));
     return var_a3;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113D60/beam_ray_update.s")
-#endif
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
 
@@ -282,9 +271,6 @@ s16 *beam_ray_build_verts(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113D60/beam_ray_build_verts.s")
-#endif
 /* was func_150E6D1C */
 s32 beam_ray_fade_out(u8 *arg0) {
     s16 temp_v0 = *(s16 *)(arg0 + 0x1C);
@@ -299,7 +285,6 @@ s32 beam_ray_fade_out(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* was func_150E6D50 */
 s32 beam_ray_hit_spark(u8 *arg0) {
     struct {
@@ -336,6 +321,3 @@ s32 beam_ray_hit_spark(u8 *arg0) {
     sprite_fx_spawn_cam((s32) &sp.u48, 0U, 0U, (s32) (temp_v1 + 0x14), (*(f32 *)((u8 *)temp_v1 + 4)), (*(f32 *)((u8 *)temp_v1 + 8)), (*(f32 *)((u8 *)temp_v1 + 0xC)), 50.0f, 50.0f, (u8) (random_int() & 0xFF), 0U, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113D60/beam_ray_hit_spark.s")
-#endif

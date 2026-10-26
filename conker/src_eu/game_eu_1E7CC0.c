@@ -1,10 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void shot_scorch_decal_spawn(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
 void fire_flash_light_spawn(u8 *arg0, u8 arg1, s32 arg2);
-#endif
 
 
 typedef struct {
@@ -95,7 +94,6 @@ u8 *player_screen_uv_mesh_spawn(u8 *arg0, u8 arg1, s32 arg2)
   return ret;
 }
 
-#ifdef NON_MATCHING
 extern u8 D_800DA130[];
 extern u8 *D_800CCA08;
 
@@ -178,9 +176,6 @@ s32 object_screen_uv_project(u8 *rec, s32 slot) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/object_screen_uv_project.s")
-#endif
 
 /* was func_151BAA18 */
 void screen_uv_mesh_handle_message(u8 *arg0, s32 arg1, u8 arg2)
@@ -219,7 +214,6 @@ void screen_uv_mesh_handle_message(u8 *arg0, s32 arg1, u8 arg2)
   }
 }
 
-#ifdef NON_MATCHING
 /* emit_random_sprites smoke burst request (0x5C bytes): each value is base + random(0..range) */
 typedef struct {
     /* 0x00 */ s16 a, aRange;
@@ -490,22 +484,14 @@ void object_model_shatter(u8 *obj, u8 arg1, s32 arg2) {
 }
 #undef SHARD_SPEED
 #undef SHARD_SPIN
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/object_model_shatter.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 tank_engine_sound_update(u8 *voice, s32 arg1, s32 *vol, s32 arg3, s32 *pitch, s32 arg5, u16 *id);
-#else
-extern s32 tank_engine_sound_update;
-#endif
 
 /* was func_151BB5F4 */
 void tank_engine_sound_start(u8 *arg0) {
     sfx_emitter_start(0x4A7U, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x18)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x1C)), 0x2000, 0x320U, 0xC8, (s32) &tank_engine_sound_update, arg0, 0, 8, 0);
 }
 
-#ifdef NON_MATCHING
 s32 sound_pick_variant(s32, s32);
 
 // tank_engine_sound_update: per-frame callback of the tank's engine voice (started by tank_engine_sound_start with id 0x4A7
@@ -626,11 +612,7 @@ s32 tank_engine_sound_update(u8 *voice, s32 arg1, s32 *vol, s32 arg3, s32 *pitch
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/tank_engine_sound_update.s")
-#endif
 
-#ifdef NON_MATCHING
 void explosion_sfx_play(s32, f32, f32, f32, s32);
 s32 tri_calc_normal(s32 *, s32 *, s32 *, s32 *);
 void impact_spark_flash_spawn(u8 *, u8, s32);
@@ -782,11 +764,7 @@ void shot_impact_effects(s32 obj, f32 *pos, f32 *target, u8 arg3, s32 arg4) {
     }
     emit_impact_flash_spray(&flash, frames, scales, 9, arg3, arg4);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/shot_impact_effects.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 collision_floor_probe(f32 *, s32, f32, f32 *);
 void hitinfo_from_obj_floor(void *, u8 *);
 void explosion_sfx_play(s32, f32, f32, f32, s32);
@@ -964,9 +942,6 @@ void explosion_effects_at(s32 arg0, u8 *arg1, u8 *arg2, u8 arg3, s32 arg4) {
         emit_textured_burst(&sp.u4C, &sp.u40, &sp.u34, 3, 0.0f, 1U, (u8) (s32) arg3, arg4);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/explosion_effects_at.s")
-#endif
 /* was func_151BC494 */
 void fire_flash_light_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     s8 sp48[8];
@@ -982,11 +957,7 @@ void fire_flash_light_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     light_create_with_ctrl(sp48, sp3C, (random_int() % 21U) + 0x1E, 0xFF, 0x61, 0x36, 0xFFU, 0U, 0, arg1, arg2);
 }
 
-#ifdef NON_MATCHING
 void fx_scorch_decal_spawn(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
-#else
-s32 fx_scorch_decal_spawn(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
-#endif
 
 /* was func_151BC56C */
 void shot_scorch_decal_spawn(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
@@ -1010,7 +981,6 @@ void obj_beam_light_attach(struct127 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 light_create_track_ptrs(s8 *, u8 *, u8 *, u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern f32 D_800DCE54;
 
@@ -1117,15 +1087,8 @@ void obj_trail_smoke_light_spawn(u8 *arg0, u8 arg1, s32 arg2) {
         memcpy(temp_v0_3 + 0x28, &sp.u6C, 8);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/obj_trail_smoke_light_spawn.s")
-#endif
 void vec3_from_angles_byte(s16, s16, f32, void *);
-#ifdef NON_MATCHING
 s32 particle_puff_spawn(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32); /* P95: f32 parameter */
-#else
-s32 particle_puff_spawn(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-#endif
 
 /* was func_151BC920 */
 void debris_spray_emit_b(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
@@ -1144,11 +1107,7 @@ void debris_spray_emit_b(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 a
     sp6C[3] += -arg3 * D_800BEDC8 * temp_f2;
     sp6C[4] += -arg4 * D_800BEDC8 * temp_f2;
     sp6C[5] += -arg5 * D_800BEDC8 * temp_f2;
-#ifdef NON_MATCHING
     particle_puff_spawn(&sp6C[6], sp6C, &sp6C[3], 1.0f, ((random_float() * 1049.0f) + -1022.0f) * 0.001f, (random_float() * 124.0f) + 202.0f, (random_int() & 0xF) + 0x14, (random_int() % 201U) + 0x37, 0xF, 0xF, 0, -1, 0xCB, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
-#else
-    particle_puff_spawn(&sp6C[6], sp6C, &sp6C[3], 0x3F800000, ((random_float() * 1049.0f) + -1022.0f) * 0.001f, (random_float() * 124.0f) + 202.0f, (random_int() & 0xF) + 0x14, (random_int() % 201U) + 0x37, 0xF, 0xF, 0, -1, 0xCB, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
-#endif
 }
 
 /* was func_151BCB30 */
@@ -1239,7 +1198,6 @@ s32 trail_ring_life_fade_update(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 f32 vec3_length(void *);
 
 /* was func_151BCD44 */
@@ -1340,10 +1298,6 @@ s32 trail_follow_owner_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/trail_follow_owner_update.s")
-#endif
-#ifdef NON_MATCHING
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 Gfx *gfx_load_texture_cached(Gfx *gfx, s32 tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *flag, s32 argA);
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
@@ -1528,9 +1482,6 @@ s32 ribbon_strip_draw(u8 *obj, s32 gfx, s16 arg2) {
     return (s32) g;
 }
 #undef RIBBON_VTX
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/ribbon_strip_draw.s")
-#endif
 
 /* was func_151BD7CC */
 void trail_follow_handle_message(u8 *arg0, s32 *arg1, u8 arg2)
@@ -1654,7 +1605,6 @@ s32 bone_emitter_timer_reset(s16 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_basic(s32 *, s32, s32, u8, s32);
 
 /* was func_151BD9EC */
@@ -1783,9 +1733,6 @@ void bone_emitter_particle_emit(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, f32 arg4
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/bone_emitter_particle_emit.s")
-#endif
 /* was func_151BDD00 */
 f32 bone_emitter_timer_step(s16 *arg0) {
     s16 temp_v0 = arg0[0x40];
@@ -1822,7 +1769,6 @@ void obj_aura_burst_stop(u8 *arg0) {
     effect_nodes_broadcast(&tmp, 0x3B);
 }
 
-#ifdef NON_MATCHING
 /* effect3d_spawn_full's particle spec and particle_emitter_spawn's spawn block (0x58 bytes). */
 typedef struct {
     /* 0x00 */ u8 texture;
@@ -2077,11 +2023,7 @@ s32 aura_burst_group_spawn(u8 *obj, u8 alpha, s32 owner) {
     /* the asm returns what v0 last held: 0 without a group, else the final emitter index (2) */
     return group != NULL ? 2 : 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/aura_burst_group_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 void mtx_transform_points(f32 **, f32 **, void *, s32);
 extern f32 D_800AAB58[3]; /* the two emitter offsets (bone space) */
 extern f32 D_800AAB64[3];
@@ -2179,9 +2121,6 @@ void aura_burst_follow_owner(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/aura_burst_follow_owner.s")
-#endif
 
 typedef struct {
     s32 a;

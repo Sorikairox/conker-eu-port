@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A4EA8[];
-#endif
 
 void anim_model_fx_build_mtx(u8 *, u8 *);
 
@@ -64,7 +63,6 @@ void anim_model_fx_update(u8 *arg0)
   }
 }
 
-#ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, u8, s8 *);
 Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
@@ -188,9 +186,6 @@ s32 *anim_model_fx_draw(s32 *arg0, u8 *arg1, s16 arg2) {
     }
     return var_s1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185050/anim_model_fx_draw.s")
-#endif
 /* was func_15157DD0 */
 s32 anim_model_fx_beh_identity(s32 arg0) {
     guMtxIdentF(&((f32 (*)[16])(arg0 + 0x7C))[D_800BE9C0]);

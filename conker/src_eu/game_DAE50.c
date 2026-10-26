@@ -6,7 +6,6 @@
 
 // some mips3/64bit stuff going on here
 
-#ifdef NON_MATCHING
 /* was func_150AD9A0 */
 s32 approx_dist3_int(s32 arg0, s32 arg1, s32 arg2) {
     s32 temp_a1;
@@ -42,9 +41,6 @@ s32 approx_dist3_int(s32 arg0, s32 arg1, s32 arg2) {
     }
     return ((u32) (var_a1 * 0xB) >> 5) + (((u32) var_a2 >> 2) + var_a0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DAE50/approx_dist3_int.s")
-#endif
 // NON-MATCHING: I am nothing without mip2c.
 // s32 approx_dist3_int(s32 arg0, s32 arg1, s32 arg2) {
 //     s32 v0;
@@ -129,7 +125,6 @@ s32 approx_dist3_int(s32 arg0, s32 arg1, s32 arg2) {
 // }
 
 // well this is a bastard
-#ifdef NON_MATCHING
 extern s64 D_80088950;
 
 /* random_int: (P106) one step of the 64-bit shift-register generator in D_80088950 (MIPS III ld / sd; the same step
@@ -145,9 +140,6 @@ s32 random_int(void) {
     D_80088950 = (s64) x;
     return (s32) x;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DAE50/random_int.s")
-#endif
 // s32 random_int() {
 //     // u32 tmp1;
 //     u64 tmp2;
@@ -190,7 +182,6 @@ s32 random_int(void) {
 //     // tmp0 = tmp0 >> 0 + 32;
 // }
 
-#ifdef NON_MATCHING
 extern s64 D_80088950;
 
 /* P95: random float in [0, 1]: one step of the 64-bit shift-register generator in D_80088950 (as random_int),
@@ -206,11 +197,7 @@ f32 random_float(void) {
     D_80088950 = (s64) x;
     return (f32) (s32) (x & 0xFFFF) * 1.5259022e-05f;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DAE50/random_float.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s64 D_80088950;
 
 /* MIPS III: a 64-bit add of the (sign-extended) argument */
@@ -218,9 +205,6 @@ extern s64 D_80088950;
 void random_seed(s32 arg0) {
     D_80088950 = (s64)arg0 + 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DAE50/random_seed.s")
-#endif
 // NON-MATCHING: hand-written function
 // void random_seed(s64 arg0) {
 //     D_800885B0 = arg0 + 1;

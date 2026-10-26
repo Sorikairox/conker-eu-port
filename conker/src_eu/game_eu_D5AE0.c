@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* Hand asm in the original: fixed-point rotation matrix from three angles in degrees (rx, ry, rz; 0.017453292 = pi/180):
  * row 0 = (cy cz, cy sz, -sy), row 1 = (sx sy cz - cx sz, sx sy sz + cx cz, sx cy),
  * row 2 = (cx sy cz + sx sz, cx sy sz - sx cz, cx cy), no translation. The asm keeps the angles in f20-f30 (saved). */
@@ -51,6 +50,3 @@ void mtx_rotate_xyz_deg_fixed(Mtx *m, f32 rx, f32 ry, f32 rz) {
     h[30] = 0;
     h[31] = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D5AE0/mtx_rotate_xyz_deg_fixed.s")
-#endif

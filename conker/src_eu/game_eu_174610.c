@@ -27,7 +27,6 @@ s32 obj_fx_point_probe_floor(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
     return collision_floor_probe(sp2C, 0, arg0[1] - 50.0f, arg2);
 }
 
-#ifdef NON_MATCHING
 s32 obj_query_table6(struct127 *);
 s32 trigger_first_touched(u32, s32, s32 *);
 
@@ -76,9 +75,6 @@ s32 interaction_hook_map_mode(s32 mode, struct127 *obj) {
             return -1;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/interaction_hook_map_mode.s")
-#endif
 
 typedef struct { f32 x, y, z; } V3_15147008;
 typedef struct {
@@ -168,7 +164,6 @@ int obj_fx_point_impact(arg0, arg1, arg2, arg3)
     }
 }
 
-#ifdef NON_MATCHING
 /* P243: readable C for obj_fx_point_effect10 (game_eu_174610, 73 insns). */
 // object_effect10_spawn: for an object with a model (+0x1D4), obj_fx_point_probe_floor finds the point `id` of obj (position into
 // pt, a record into rec); when found, spawns effect kind 10 through fx_spawn_impact_particle with size arg2 * (1 / 85) and the
@@ -190,11 +185,7 @@ void obj_fx_point_effect10(u8 *obj, u8 id, s32 arg2) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/obj_fx_point_effect10.s")
-#endif
 
-#ifdef NON_MATCHING
 u8 impact_current_kind(void);
 void fx_spawn_impact_burst(u8, f32 *, s32, f32, f32);
 void impact_splash_ring_spawn(u8, f32, u8, f32 *, u8, u8, s32);
@@ -239,16 +230,9 @@ void obj_fx_point_splash(u8 *obj, u8 id, s32 strength) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/obj_fx_point_splash.s")
-#endif
 
 s32 obj_fx_point_probe_floor(f32 *, u8 *, s32, u8);
-#ifdef NON_MATCHING
 void spawn_circle_random_emit(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
-#else
-s32 spawn_circle_random_emit(f32, f32, s32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
-#endif
 /* was func_151475B0 */
 void obj_fx_point_spawn_sparkle(u8 *arg0, volatile u8 arg1, s32 arg2) {
     f32 sp44[3];
@@ -258,11 +242,7 @@ void obj_fx_point_spawn_sparkle(u8 *arg0, volatile u8 arg1, s32 arg2) {
         do {} while (0); // fakematch: permuter
         obj_fx_point_probe_floor(sp44, *q, 0, arg1);
         sp42 = (random_int() % 11U) + 5;
-#ifdef NON_MATCHING
         spawn_circle_random_emit(sp44[0], sp44[1], sp44[2], random_float() * 11.0f, 0, 0xFF, sp42, 0x16, 0, 0.0f, 0, 0xFF);
-#else
-        spawn_circle_random_emit(sp44[0], sp44[1], *(s32 *)&sp44[2], random_float() * 11.0f, 0, 0xFF, sp42, 0x16, 0, 0.0f, 0, 0xFF);
-#endif
     }
 }
 
@@ -400,7 +380,6 @@ void obj_fx_point_impact_bc(u8 *arg0, int arg1, s32 arg2)
   }
 }
 
-#ifdef NON_MATCHING
 extern u8 (*D_800900D0)(void);
 extern f32 D_800A5B2C;
 extern f32 D_800A5B30;
@@ -422,6 +401,3 @@ void obj_fx_point_impact_d0(u8 *obj, s32 kind, s32 level) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/obj_fx_point_impact_d0.s")
-#endif

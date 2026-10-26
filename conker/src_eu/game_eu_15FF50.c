@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 *gfx_emit_sprite_tex_segment(u8 *arg0, u16 arg1, u8 arg2, s32 arg3);
-#endif
 // hoisted forward declaration(s) for mdl_particle_land_bounce_sfx_a, mdl_particle_land_bounce_sfx_b
 s32 mdl_particle_land_bounce_settle(u8 *, f32, f32, f32, f32, s32);
 
@@ -149,7 +148,6 @@ void mdl_particle_free_lights(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 /* one shared model per particle model id (D_800DC468 counts the users, D_800DC460 / D_800DC464 = list head / tail) */
 typedef struct ParticleModelRef {
     s32 *model;                      /* loaded model file (asset_load_with_subfiles) */
@@ -281,21 +279,12 @@ u8 *mdl_particle_spawn_ex(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extra
     *(s32 *)(p + 0x60) &= ~0x200000;
     return p;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/mdl_particle_spawn_ex.s")
-#endif
 
-#ifdef NON_MATCHING
 /* the asm passes mdl_particle_spawn_ex's v0 through, and obj20_side_chunks_spawn tests it */
 /* was func_15132FBC */
 s32 mdl_particle_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
     return (s32)mdl_particle_spawn_ex((u8 *)arg0, arg1, arg2, NULL, arg3, arg4, arg5);
 }
-#else
-void mdl_particle_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
-    mdl_particle_spawn_ex(arg0, arg1, arg2, 0, arg3, arg4, arg5);
-}
-#endif
 
 u8 player_mask_hides_all(s16 *arg0);
 typedef struct {
@@ -340,7 +329,6 @@ void mdl_particle_update_matrix(Unk15132FF8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 u8 *model_part_emit_lights(u8 *, u8 *, u8, s32, s32, s32, u8 *, s32, s32);
@@ -435,10 +423,6 @@ u8 *mdl_particle_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     (*(s32 *)((u8 *)temp_s1 + 4)) = (s32) **(*(s32 ***)((u8 *)arg1 + 0x8C));
     return temp_s1 + 8;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/mdl_particle_draw.s")
-#endif
-#ifdef NON_MATCHING
 typedef struct {
     s16 v[9];
 } Surf334C; /* floor / wall surface record (+0x114 of a particle) */
@@ -582,9 +566,6 @@ s32 mdl_particle_collide_update(u8 *p) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/mdl_particle_collide_update.s")
-#endif
 
 /* was func_1513384C */
 s32 mdl_particle_squash_update(u8 *arg0)
@@ -635,18 +616,10 @@ s32 mdl_particle_squash_update(u8 *arg0)
   return 1;
 }
 
-#ifdef NON_MATCHING
 s32 mtx_rot_scale_trans_l(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32); /* P95: f32 (float bits were passed as an int) */
-#else
-s32 mtx_rot_scale_trans_l(s32, s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
-#endif
 /* was func_15133A80 */
 s32 mdl_particle_mtx_rot_scale(s32 arg0, u8 *arg1) {
-#ifdef NON_MATCHING
     mtx_rot_scale_trans_l(arg0, *(f32 *)(arg1 + 0x18), *(f32 *)(arg1 + 0x1C), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40)); /* P95: f32 (float bits were passed as an int) */
-#else
-    mtx_rot_scale_trans_l(arg0, *(s32 *)(arg1 + 0x18), *(s32 *)(arg1 + 0x1C), *(s32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40));
-#endif
     return 1;
 }
 
@@ -679,7 +652,6 @@ void mdl_particle_handle_msg(u8 *arg0, u8 *arg1, u8 arg2)
   if (D_80089D98[idx] != NULL) { D_80089D98[idx](arg0, arg1, arg2); }
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800A3C60[];             /* model file per particle model id (ROM table) */
 s32 asset_load_with_subfiles(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, ...);
 s32 texture_resolve_dl_ids(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList);
@@ -700,22 +672,11 @@ s32 mdl_particle_model_load(s32 modelId, ParticleModelRef *ref, void *particle) 
     gfx_dl_relocate((s8 *)*ref->model, (s32)ref->model);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/mdl_particle_model_load.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 mtx_rot_scale2_trans_l(s32, f32, f32, f32, f32, f32, f32, f32, f32); /* P95: f32 (float bits were passed as an int) */
-#else
-s32 mtx_rot_scale2_trans_l(s32, s32, s32, s32, f32, f32, f32, f32, f32);
-#endif
 /* was func_15133CD0 */
 s32 mdl_particle_mtx_rot_scale3(s32 arg0, u8 *arg1) {
-#ifdef NON_MATCHING
     mtx_rot_scale2_trans_l(arg0, *(f32 *)(arg1 + 0x18), *(f32 *)(arg1 + 0x1C), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40)); /* P95: f32 (float bits were passed as an int) */
-#else
-    mtx_rot_scale2_trans_l(arg0, *(s32 *)(arg1 + 0x18), *(s32 *)(arg1 + 0x1C), *(s32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40));
-#endif
     return 1;
 }
 
@@ -731,7 +692,6 @@ s32 mdl_particle_integrate(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 s32 collision_floor_probe(f32 *, s32, f32, u8 *);
 /* landing handlers by +0x73 (entry 0 is NULL); they take (particle, old x, old y, old z, floor height, floor info),
    several are declared with s32 / fewer parameters (o32 passes them alike; the port's icall layer converts) */
@@ -771,9 +731,6 @@ s32 mdl_particle_fall_update(u8 *p) {
     }
     return keep;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/mdl_particle_fall_update.s")
-#endif
 
 /* P317: D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 are unused, the code is unchanged */
 /* was func_15133F44 */
@@ -803,7 +760,6 @@ s32 mdl_particle_land_stop(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* P241: readable C for mdl_particle_mtx_attach_bone (game_eu_15FF50, 65 insns). */
 // attached_bone_matrix: entry 5 of D_80089D2C (dispatcher mdl_particle_update_matrix: -1 ends the object, 0 hides it, 1 shows
 // it): copies bone obj[0x170] of the target object (+0x7C) into mtx. -1 when the target is gone (NULL, word +0 is 0,
@@ -838,9 +794,6 @@ s32 mdl_particle_mtx_attach_bone(Mtx *mtx, u8 *obj) {
     guMtxF2L(mf, mtx);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/mdl_particle_mtx_attach_bone.s")
-#endif
 
 /* was func_15134108 */
 s32 mdl_particle_land_bounce_settle(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5)
@@ -914,7 +867,6 @@ void mdl_particle_emit_tex_seg_b(s32 arg0, u8 *arg1, s32 arg2) {
     gfx_emit_sprite_tex_segment(arg0, *(u16 *)(arg1 + 0x174), arg1[0x176], *(s32 *)(arg1 + 0x178));
 }
 
-#ifdef NON_MATCHING
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 
 /* was func_1513445C */
@@ -953,9 +905,6 @@ s32 *gfx_emit_sprite_tex_segment(u8 *arg0, u16 arg1, u8 arg2, s32 arg3) {
     }
     return var_s0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/gfx_emit_sprite_tex_segment.s")
-#endif
 /* was func_15134548 */
 s32 mdl_particle_emit_tex_segs(s32 arg0, u8 *arg1, s32 arg2) {
     u8 *p = arg1 + 0x170;

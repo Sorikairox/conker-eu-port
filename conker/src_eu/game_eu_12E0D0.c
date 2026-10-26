@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P241: readable C for sky_segments_flicker (game_eu_12E0D0, 73 insns). */
 // sky_segments_flicker: level update handler (D_8008D0A4 entry 10, `void (s32)`; does nothing for a non-zero
 // argument): advances the sky animation frame D_800DD835 and toggles each of the 5 sky segment variants
@@ -39,11 +38,7 @@ void sky_segments_flicker(s32 arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E0D0/sky_segments_flicker.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 D_800906D4[]; /* asset ids: 3 animated frames, then the 5 segment textures' variants */
 extern u8 D_800DD835;
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
@@ -75,6 +70,3 @@ Gfx *sky_segments_set(Gfx *gdl) {
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E0D0/sky_segments_set.s")
-#endif

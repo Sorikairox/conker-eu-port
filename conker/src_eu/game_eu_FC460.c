@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-#ifdef NON_MATCHING
 void obj_state_common_update(struct127 *);
 f32 obj_carry_release(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 s32 obj_carry_pickup(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
@@ -185,6 +184,3 @@ void rider_ai_control(struct127 *self) {
     }
 }
 #undef P
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FC460/rider_ai_control.s")
-#endif

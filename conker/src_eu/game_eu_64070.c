@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void mtxf_transform_point(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern s16 D_800C43E4[][3];
 extern f32 D_80098130;
@@ -57,11 +56,7 @@ void player_strip_update_vertices(s32 idx, f32 mfA[4][4], f32 mfB[4][4]) {
     vtx[1] = (s32) y;
     vtx[2] = (s32) z;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64070/player_strip_update_vertices.s")
-#endif
 
-#ifdef NON_MATCHING
 u8 * attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
 void player_strip_update_vertices(s32 idx, f32 mfA[4][4], f32 mfB[4][4]);
 u8 * light_write_light_cmds(u8 *, s32, u8, u8, u8 *);
@@ -165,6 +160,3 @@ u8 *player_draw_slot8_strip(u8 *arg0, s32 arg1, s32 arg2) {
     (*(s32 *)((u8 *)temp_v0 + 0x2C)) = 0;
     return temp_v0 + 0x30;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64070/player_draw_slot8_strip.s")
-#endif

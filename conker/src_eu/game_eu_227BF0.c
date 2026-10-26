@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P281: readable C for mp3_imdct12_short (Rare hand asm, MP3 short-block IMDCT). */
 extern f32 D_800B116C, D_800B1170;              /* 3-point stage cosines */
 extern f32 D_800B1174, D_800B1178, D_800B117C;  /* odd-part twiddles */
@@ -104,6 +103,3 @@ void mp3_imdct12_short(f32 *in, s32 subband, f32 *out, f32 *prev) {
         prev[i] = acc[18 + i];
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_227BF0/mp3_imdct12_short.s")
-#endif

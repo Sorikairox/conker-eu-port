@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P279: the libultra cosf below (the commented copy) with the ROM's own constants: rpi / pihi / pilo / zero are
  * D_80086240..4C (.data), the polynomial P[0..4] is D_80099120 (.rodata), __libm_qnan_f is D_8002CC80. */
 // cosf: cos(x) by range reduction to [-pi/2, pi/2] around the nearest (n + 1/2) pi and an odd degree-9 polynomial
@@ -38,9 +37,6 @@ f32 cosf(f32 x) {
     }
     return D_8008624C;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/gu/cosf/cosf.s")
-#endif
 // NON-MATCHING: only dn/dx swap registers (f12/f2). To use it, split .data 0x22B4C0-0x22B4D0
 // and .rodata 0x23E3A0-0x23E3C0 out of the game_data blobs (tools/eu_port/rodata_split.py).
 // typedef union {

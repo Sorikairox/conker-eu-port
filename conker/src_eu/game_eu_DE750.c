@@ -67,7 +67,6 @@ void wake_spray_link_message(s32 arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
-#ifdef NON_MATCHING
 s32 motion_track_get_delta(u8 *arg0, u8 **arg1);
 void vec2_from_angle_rad(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 void vec3_from_angles_byte(s16, s16, f32, void *);
@@ -146,6 +145,3 @@ void wake_spray_update(u8 *fx) {
         *(f32 *) (fx + 0x30) -= 1.0f;
     } while (*(f32 *) (fx + 0x30) > 1.0f);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DE750/wake_spray_update.s")
-#endif

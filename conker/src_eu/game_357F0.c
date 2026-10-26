@@ -3,7 +3,6 @@
 #include "variables.h"
 
 // bit of a beast
-#ifdef NON_MATCHING
 /* spawn zone record (struct_eu_15144598 in game_39750 names only +0x6..+0x15) */
 typedef struct {
     /* 0x00 */ s16 x;
@@ -85,6 +84,3 @@ s32 spawn_zone_pick_point(struct_eu_15144598 *arg0, f32 *x, f32 *z, f32 *top, f3
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_357F0/spawn_zone_pick_point.s")
-#endif

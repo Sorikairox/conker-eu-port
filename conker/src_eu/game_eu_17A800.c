@@ -18,7 +18,6 @@ u8 *light_create_obj_joint(struct127 *, s32, s32 *, s32, s32, s32, s32, s32, s32
 void *bone_effect_spawn(void *, void *, void *, s32, s32, s32, s32);
 
 
-#ifdef NON_MATCHING
 // character_handler_indices: picks the handler-table indices for a character (P151). By the character type
 // (+0x4) it sets *outType (index into D_800A62B8, flag 4); by the game mode D_800BE9F0 it sets *outMode (index
 // into D_800A62A0, flag 2) and, when the character's sub-type (+0x3B) matches the mode, *outSub (column of
@@ -117,9 +116,6 @@ s32 char_fx_handler_indices(struct127 *arg0, s32 *outSub, s32 *outMode, s32 *out
     }
     return flags;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/char_fx_handler_indices.s")
-#endif
 
 s32 char_fx_handler_indices(struct127 *, s32 *, s32 *, s32 *);
 void head_icon_create(s32, s32);
@@ -203,7 +199,6 @@ s32 char_fx_clear_all(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 s32 char_fx_slot_derives();   /* K&R definition below (s16 state, s16 base) */
 extern s32 (*D_8008AF04[])(u8 *, s32, s32);   /* state event handlers: char_fx_evt_visibility .. char_fx_evt_accept (8) */
 // obj_state_event_dispatch: sends an event (arg2, arg3) to every state node of obj (list at +0x2F4, linked through
@@ -231,9 +226,6 @@ s32 char_fx_send_event(s32 obj, s16 state, s32 arg2, s32 arg3) {
     }
     return handled;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/char_fx_send_event.s")
-#endif
 
 s32 char_fx_slot_derives(arg0, arg1)
 s16 arg0;
@@ -254,7 +246,6 @@ s16 arg1;
     return 0;
 }
 
-#ifdef NON_MATCHING
 /* P241: readable C for char_fx_fixed_beam (game_eu_17A800, 58 insns). */
 // object_fixed_beam_spawn: entry 16 of D_8008AE10 (`void (struct127 *)`): spawns a beam effect (beam_spawn,
 // kind 0x46) from the fixed point (-477, -2015, 2244) to the object's position +0x14, width 0.32, gives it the
@@ -303,9 +294,6 @@ void char_fx_fixed_beam(struct127 *obj) {
         char_fx_attach(fx, obj, 0x15);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/char_fx_fixed_beam.s")
-#endif
 
 /* was func_1514DBBC */
 void char_fx_glow_light_j5(struct127 *arg0) {
@@ -477,17 +465,11 @@ void char_fx_rec32_attach(struct127 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 u8 *rope_rider_create(u8 *, f32, s32); /* P95 */
-#endif
 /* was func_1514DF64 */
 void char_fx_rec32_ad010_attach(struct127 *arg0) {
     char_fx_rec32_attach(arg0);
-#ifdef NON_MATCHING
     char_fx_attach(rope_rider_create(arg0, 20.0f, 0), arg0, 0x14); /* P95: float literal (asm passes the bits 0x41A00000) */
-#else
-    char_fx_attach(rope_rider_create(arg0, 0x41A00000, 0), arg0, 0x14);
-#endif
 }
 
 /* was func_1514DFA8 */
@@ -890,7 +872,6 @@ void char_fx_glow_attach_b(struct127 *arg0) {
     char_glow_trail_spawn(arg0, 5, -1, 0xFF, 1);
 }
 
-#ifdef NON_MATCHING
 // object_glow_attach: handler (table EU 8008AE1C) that builds a sprite effect (bone_effect_spawn with the same
 // three records as char_fx_glow_light_j5: render block a, size / fade block b, attachment c = {obj, its id, joint 0xC, mode
 // 2, offset (0, 100, 0) .. (0, 600, 0)}), attaches it to the object in slot 7 (char_fx_attach), then adds a light
@@ -1002,9 +983,6 @@ void char_fx_object_glow(struct127 *obj) {
     light[2] = 150.0f;
     light_create_obj_joint(obj, 0xC, (s32 *)light, 2, 0x12C, 0x28, 0xFF, 0xB5, 0, 0xFF, 0, 2, 0, 0, 0xFF, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/char_fx_object_glow.s")
-#endif
 
 u8 * light_add_point(s32, s32, s32, s32, s32, s32, s32, s32, s32, u8);
 u8 * character_effect_attach(struct127 *, s16, s32, u8, u8, s32, u8 *);
@@ -1352,7 +1330,6 @@ void char_fx_15c3c0_attach(u8 *arg0) {
     char_fx_attach(motion_track_spawn(&sp20, 0, 255, 1), arg0, 0x16);
 }
 
-#ifdef NON_MATCHING
 // character_fire_effect_start: handler (table EU 8008AE80): adds a light at (0, 90, 0) on joint 1 of the object
 // (light_create_obj_joint: 300, 2, 255, 0, 0, 255, 0, 3, 0, 0, 255, 1) attached in slot 0x19 (char_fx_attach), then a sprite
 // effect (bone_effect_spawn) with render block kind 0x69 / 3 / 0x4403, size 95 / 65, fade 0.15 / 0.7 / 0.4, attached to
@@ -1484,9 +1461,6 @@ void char_fx_fire_start(struct127 *obj) {
     c.mode = 3;
     bone_effect_spawn(&a, &b, &c, 2, 0, 0, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/char_fx_fire_start.s")
-#endif
 
 /* was func_1514F680 */
 void char_fx_bundle_attach_b(struct127 *arg0) {   /* P76: callback; a0 passes through */
@@ -1604,11 +1578,7 @@ typedef struct {
     /* 0x18 */ u8 u18;
 } BlkFB3C;
 
-#ifdef NON_MATCHING
 u8 *smoke_trail_spawn(BlkFB3C *arg0, s32 arg1, s32 arg2);
-#else
-void smoke_trail_spawn(BlkFB3C *arg0, s32 arg1, s32 arg2);
-#endif
 
 /* was func_1514FB3C */
 void char_fx_0c0fc0_attach(u8 *arg0) {

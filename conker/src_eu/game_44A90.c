@@ -13,7 +13,6 @@ void render_set_detail_level(void) {
     }
 }
 
-#ifdef NON_MATCHING
 extern s32 D_8009E084;
 extern Mtx D_800D27F0;
 extern s32 D_800D2848;
@@ -58,9 +57,6 @@ void camera_view_state_init(void) {
     bzero(&D_800D28E8, 0xC0);
     guPerspective(&D_800D27F0, &D_800D2874, 50.0f, 60.6f, 53.0f, 20000.0f, 1.0f);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_44A90/camera_view_state_init.s")
-#endif
 // void camera_view_state_init(void) {
 //     s32 i;
 //     D_800D2458 = 0;

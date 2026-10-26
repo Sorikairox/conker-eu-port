@@ -5,7 +5,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 // particle_emitter_spawn: spawns a particle record from the spawn block (type byte 1 = 3, flags 0x40400000 set
 // first) through effect3d_spawn_default, copies the emitter block (emitSize bytes) to rec + 0x110, clears its word +0x44,
 // stores arg7 at +0x59 and counts the record in D_800DCE20. Returns the record or NULL. level_fire_emitters_create passes
@@ -31,11 +30,7 @@ struct210 *particle_emitter_spawn(void *emit, s32 emitSize, u8 *spawn, u8 arg3, 
     }
     return rec;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/particle_emitter_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 world_to_screen(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 extern s32 (*D_8008A330[])(u8 *, s16);
@@ -208,9 +203,6 @@ u8 *effect_flare_update(u8 *obj, s16 player) {
     }
     return verts;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/effect_flare_update.s")
-#endif
 
 /* was func_151411A4 */
 void effect_free_buffers_retire(struct210 *arg0) {
@@ -240,7 +232,6 @@ void effect_destroy_delete(structEU_16DC80 *arg0) {
     D_8008A384[arg0->unk168](arg0);
 }
 
-#ifdef NON_MATCHING
 /* Per-frame grid-cell lookup for the scene nodes (P13, hand C). For the two node tables D_800DD280[2][104]
  * and the four list heads named by the index table D_800A5168[0..3], walk each list (next at 0x08). A node with
  * flag 0x2000 (word 0x58) clears its four per-player cell values (u16 at 0x15C); with flag 0x10 too, each
@@ -285,9 +276,6 @@ void effect_sample_zbuffer_cells(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/effect_sample_zbuffer_cells.s")
-#endif
 /* was func_1514143C */
 s32 effect_sync_link_pos(u8 *arg0)
 {
@@ -303,7 +291,6 @@ s32 effect_sync_link_pos(u8 *arg0)
   }
 }
 
-#ifdef NON_MATCHING
 /* was func_15141478 */
 s32 effect_flicker_update(u8 *arg0) {
     u8 *sp24;
@@ -335,9 +322,6 @@ s32 effect_flicker_update(u8 *arg0) {
     (*(f32 *)((u8 *)temp_a0 + 0x48)) = (f32) (temp_f0 + (((*(f32 *)((u8 *)temp_v1_2 + 0xC)) - temp_f0) * (*(f32 *)((u8 *)temp_v1_2 + 0x18))));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/effect_flicker_update.s")
-#endif
 /* was func_15141564 */
 s32 effect_pulse_sine_update(structEU_16DC80 *arg0) {
     struct { f32 unk0; f32 unk4; f32 unk8; f32 unkC; } *temp = &arg0->unk170.f;
@@ -390,7 +374,6 @@ s32 effect_pulse_envelope_update(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 extern void (*D_8008A3CC[])(u8 *, u8 *, s32);
 
 // effect_message_dispatch: message handler of an effect record (P151). Forwards (rec, msg, code) to the type's
@@ -413,9 +396,6 @@ void effect_handle_message(u8 *rec, u8 *msg, s32 code) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/effect_handle_message.s")
-#endif
 
 // ???
 /* was func_151417C4 */

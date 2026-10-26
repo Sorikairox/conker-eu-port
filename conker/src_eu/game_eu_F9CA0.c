@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 #include "libc/string.h"
 void hitinfo_from_obj_floor(void *, u8 *);
 s32 collision_floor_probe(u8 *, u16, f32, u8 *);
@@ -192,9 +191,6 @@ void ground_puff_spawn(struct127 *obj, u8 which, s32 arg2, u8 arg3) {
     spawn_circle_random_emit(pos[0], pos[1], pos[2], random_float() * 70.0f + 70.0f, 0, 0xFF, n, 0x12, 0, 0.0f, (s32) rgb, arg3);
     rumble_all_players_at((struct17 *) pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F9CA0/ground_puff_spawn.s")
-#endif
 
 /* was func_150CCB48 */
 s32 ground_puff_grow_fade_update(u8 *arg0)

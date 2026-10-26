@@ -39,7 +39,6 @@ void level_lights_clear(void) {
 }
 
 // double-loop
-#ifdef NON_MATCHING
 /* was func_150174C0 */
 void level_table_relocate(s32 arg0) {
     s32 var_a0;
@@ -78,9 +77,6 @@ void level_table_relocate(s32 arg0) {
         } while (var_v0 < (s32) D_80087380);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_447B0/level_table_relocate.s")
-#endif
 /* was func_15017578 */
 void level_table_load(s32 arg0) {
     u32 tmp = 0;

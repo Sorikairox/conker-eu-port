@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* gun_muzzle_smoke_spawn's .s owned this rodata (bone-space muzzle points); the NM link drops it, so NM gets copies.
    D_800AAE7C is the second point of D_800AAE70 (read by gun_muzzle_sparks_spawn); game_eu_51190 has its own copy. */
 static const f32 D_800AAE70[6] = { -113.828796f, -14.0823936f, 14.5422001f, -124.648605f, -14.0823936f, 14.5422001f };
@@ -20,12 +19,7 @@ void gun_muzzle_flash_light(u8 *arg0, u8 arg1, s32 arg2);
 u8 *tracer_spawn(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, u8 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9,
                   f32 argA, u8 argB, u8 *argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, s8 arg13,
                   s32 arg14, f32 arg15, u8 arg16, s8 arg17, s32 arg18, u8 arg19, s32 arg1A);
-#else
-extern f32 D_800AAE70[];
-extern f32 D_800AAE7C[];
-#endif
 
-#ifdef NON_MATCHING
 // gun_muzzle_smoke_spawn: smoke trail from object `obj`'s gun. Direction = the object's facing vector
 // (obj_get_aim_vectors) * 0.001. With a model (+0x1D4) the two muzzle points D_800AAE70 / D_800AAE88 are taken through
 // attachment 0x46 (attachment_find_by_slot / model_node_points_to_world; bail out when either fails), then sparks (gun_muzzle_flash_light) and, on a
@@ -85,9 +79,6 @@ void gun_muzzle_smoke_spawn(u8 *obj, u8 flag, s32 arg2) {
                   b * 150.0f + 400.0f, 80.0f, r % 56 + 200, obj, 1, 1, 0, *(u8 **) (obj + 0x1D4) != NULL ? 0xFF : 0x80,
                   0, 1, 0, 0x1A, 0.0f, 0xFF, D_800BE616 ? -1 : 2, 0, flag, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/gun_muzzle_smoke_spawn.s")
-#endif
 
 s32 attached_particle_spawn(s32, s32, f32 *, f32 *, f32 *, s32, s32, f32, s32, s32, s32, s32, s32, s32);
 
@@ -115,7 +106,6 @@ void gun_muzzle_flash_light(u8 *arg0, u8 arg1, s32 arg2) {
     light_create_with_ctrl(sp48, sp3C, (random_int() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFFU, 0U, 0, arg1, arg2);
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 *, s32, s32, s32, s32, s32);
 s32 impact_setup_segment(s32 *, s32 *, f32 *, f32 *, f32 *, s32, s32, s32);
 void vec3_from_angles_byte(s16, s16, f32, void *);
@@ -322,9 +312,6 @@ void impact_glow_sparks_spawn(s32 arg0, s32 arg1, s32 arg2, u8 arg3, u8 arg4, u8
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/impact_glow_sparks_spawn.s")
-#endif
 void bone_emitter_spark_params(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5, f32 *arg6, f32 *arg7, f32 *arg8, f32 *arg9, s16 *argA, u8 *argB, f32 *argC);
 /* was func_151C6424 */
 void bone_emitter_dust_emit(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5) {
@@ -340,7 +327,6 @@ void bone_emitter_dust_emit(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4
     impact_dust_cloud_spawn(sp6C, sp54, 1, sp50, sp4E, sp4D, sp48, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg5[0xC], arg5[1]);
 }
 
-#ifdef NON_MATCHING
 /* particle_spawn_ex's sprite particle template (same layout as SprTmpl5268 in game_eu_101080) */
 typedef struct {
     /* 0x00 */ s32 u0;
@@ -454,9 +440,6 @@ void debris_sprite_spawn(s32 pos, f32 *vel, f32 arg2, f32 spin, s32 alpha, s32 l
         memcpy(p + 0xB0, (f32 *) &f.extra, 8);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/debris_sprite_spawn.s")
-#endif
 
 typedef struct {
     s16 n0; s16 n1; s32 p; s16 c; s16 a; s16 d; s16 e;

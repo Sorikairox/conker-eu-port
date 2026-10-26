@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* s32 slots as in game_eu_EF6D0: the caller masks the tag itself (andi), IDO would skip the mask for a u8 parameter */
 s32 spawn_ring_emit(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
 
@@ -15,11 +14,7 @@ s32 spawn_ring_emit(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
 s32 spawn_ring_kind2_small(f32 x, f32 y, f32 z, s32 tag) {
     return spawn_ring_emit(x, y, z, 80.0f, 0, 3, 0x19, 2, 0, 0.0f, 0, tag & 0xFF);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF370/spawn_ring_kind2_small.s")
-#endif
 
-#ifdef NON_MATCHING
 f32 angle_byte_cos(u8);
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
                   s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
@@ -104,9 +99,6 @@ s32 emit_point_debris(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 
     } while (n != 0);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF370/emit_point_debris.s")
-#endif
 
 /* was func_150C1E78 */
 s32 trail_alpha_by_life_update(u8 *arg0)

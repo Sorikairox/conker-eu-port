@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void *allocate_memory(s32, s32, s32, s32);
 u32 asset_load_into(u8 *, s32, s32, s32, s32);
 s32 asset_get_size(s32, s32, s32);
@@ -15,10 +15,8 @@ extern u8 D_1A3B40[];
 extern s32 D_800D1968;
 extern u8 D_800D2521;
 extern u8 *D_800D252C;
-#endif
 
 
-#ifdef NON_MATCHING
 extern u8 D_800BE9B0;
 extern u16 D_800BE9B8;
 extern s32 D_800BE9C8;
@@ -76,10 +74,6 @@ loop_4:
         } while (var_s1 < var_v1);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_44010/setup_load_type_assets.s")
-#endif
-#ifdef NON_MATCHING
 /* P36: level setup load (level arg0). DMAs the fixed player-slot setup table (ROM D_1A3840..D_1A3B40 for the
  * multiplayer-style levels 0x1A / 0x24 / 0x2B / 0x2D / 0x30 / 0x33 / 0x34 / 0x3F, else D_1A3750..D_1A3840) into
  * D_800D20FC (allocated with room for the level's setup asset (2, 0xE, level) from asset_get_size), D_800D2521 =
@@ -266,10 +260,6 @@ void level_setup_load(s32 arg0) {
     warp_request_cancel(0);
     setup_entries_spawn_range(arg0, 1, 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_44010/level_setup_load.s")
-#endif
-#ifdef NON_MATCHING
 /* D_800D2520: setup entry count, D_800D2521: first entry of the level's own part; D_800D2104 (EU 0x800D2524, s32 *
  * in variables.h): per entry its data block; D_800D2528: per entry the block's kind byte; D_8008FD8C (EU
  * 0x8009012C): player slot count. */
@@ -307,6 +297,3 @@ void level_entry_data_load(s32 level) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_44010/level_entry_data_load.s")
-#endif

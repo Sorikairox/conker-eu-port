@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 spawn_ring_emit(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
 
 /* was func_150C1260 */
@@ -148,6 +147,3 @@ void foot_ring_debris_effect(u8 *arg0, s32 arg1) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EEF70/foot_ring_debris_effect.s")
-#endif

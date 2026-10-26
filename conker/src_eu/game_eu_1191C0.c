@@ -5,7 +5,6 @@
 s32 target_volume_hit_check(u8 *arg0, f32 *arg1, s32 arg2);
 
 
-
 /* was func_150EB430 */
 void target_volume_hit_check_offset(void *arg0, void *arg1, s32 arg2) {
     f32 sp1C[3];
@@ -56,7 +55,6 @@ s32 target_volume_hit_check(u8 *arg0, f32 *arg1, s32 arg2) {
     return 0;
 }
 
-#ifdef NON_MATCHING
 void scenery_pendulum_x_update(f32 *arg0);
 float sqrtf(float);
 
@@ -137,11 +135,7 @@ void world_obj_tilt_spring_update(u8 *obj) {
     *(f32 *) (obj + 0x84) = vel;
     *(f32 *) obj = angle;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1191C0/world_obj_tilt_spring_update.s")
-#endif
 
-#ifdef NON_MATCHING
 /* mdl_particle_spawn_ex spark template (fx_fireworks_burst); pad bytes stay unset like the asm's */
 typedef struct {
     f32 u0;         /* 0x00 9.0 */
@@ -185,9 +179,7 @@ extern f32 D_800A1860[];
 extern f32 D_800A186C[];
 extern VecBE44 D_800A1878[];
 extern u8 D_800A18A8[];
-#endif
 
-#ifdef NON_MATCHING
 void fx_debris_emitter_spawn(void *, s16, u8, s32);
 s32 spark_shower_spawn(f32 *, f32, f32, f32, f32, s32, s32);
 s32 cam_wobble_start_preset(s32, s32, s32, s32, s32);
@@ -258,11 +250,7 @@ s32 fx_fireworks_burst(s32 arg0) {
     }
     return ret;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1191C0/fx_fireworks_burst.s")
-#endif
 
-#ifdef NON_MATCHING
 void fx_debris_emitter_spawn(void *, s16, u8, s32);
 s32 spark_shower_spawn(f32 *, f32, f32, f32, f32, s32, s32);
 s32 cam_wobble_start_preset(s32, s32, s32, s32, s32);
@@ -324,6 +312,3 @@ s32 target_volume_explode(u8 *arg0, s32 arg1, s32 arg2) {
     } while (temp_at != 0);
     return temp_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1191C0/target_volume_explode.s")
-#endif

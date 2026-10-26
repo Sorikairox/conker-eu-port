@@ -2,9 +2,8 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 s32 interaction_mode_for_level(u32 arg0);
-#endif
 
 
 /* was func_15141970 */
@@ -22,7 +21,6 @@ void interact_fx_delete(void *arg0) {
     interact_fx_detach(arg0);
 }
 
-#ifdef NON_MATCHING
 /* was func_151419D0 */
 void interact_fx_handle_message(struct102 *arg0, u8 *arg1, s32 arg2) {
     s32 temp_a0;
@@ -54,9 +52,6 @@ void interact_fx_handle_message(struct102 *arg0, u8 *arg1, s32 arg2) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/interact_fx_handle_message.s")
-#endif
 // NON-MATCHING: one operand swap in the last compare (bnel a0,t2 vs t2,a0)
 // void interact_fx_handle_message(struct_eu_151419D0 *arg0, struct_eu_151419D0_msg *arg1, u8 arg2) {
 //     struct_eu_151419D0_sub *sub = &arg0->unk28;
@@ -80,7 +75,6 @@ void interact_fx_handle_message(struct102 *arg0, u8 *arg1, s32 arg2) {
 //         }
 //     }
 // }
-#ifdef NON_MATCHING
 u32 floor_flags_surface_type(s32);
 s32 obj_interaction_category(struct127 *);
 
@@ -124,11 +118,7 @@ void obj_interaction_update(struct127 *arg0, s32 arg1) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/obj_interaction_update.s")
-#endif
 // requires jump table
-#ifdef NON_MATCHING
 /* Category of object `obj` for the interaction tables D_8008A084 / D_8008A0B4 (obj_interaction_update), from its type id
  * (+0x04). Jump tables jtbl_800A55F8 (ids 121..165) and D_eu_800A56AC (ids 0..88); anything else is 11. */
 /* was func_15141C0C */
@@ -168,9 +158,6 @@ s32 obj_interaction_category(struct127 *obj) {
             return 11;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/obj_interaction_category.s")
-#endif
 /* was func_15141CC0 */
 s32 interaction_mode_for_level(u32 arg0) {
     if (D_800BE9F0 == 0x2F) {
@@ -225,7 +212,6 @@ void obj_interaction_start_timed(void *arg0, s32 arg1, s32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 memcpy(u8 *, s32 *, s32);
 
 /* was func_15141E38 */
@@ -263,9 +249,6 @@ void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/obj_interaction_attach_timed.s")
-#endif
 // NON-MATCHING: stack layout (sp40 should be at 0x40, list cursor at 0x58) and loop temp
 // void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
 //     struct_eu_link *sp58;
@@ -515,7 +498,6 @@ void mtx_rot_scale_trans_l(Mtx *m, f32 s1, f32 s2, f32 rx, f32 ry, f32 rz, f32 s
     mf[2][2] *= sz * s1;
     guMtxF2L(mf, m);
 }
-#ifdef NON_MATCHING
 // mtx_look_along_scaled: P208: builds in `m` (guMtxF2L) the matrix that puts a model at (x0, y0, z0) facing
 // (x1, y1, z1): row 2 is the unit direction, row 0 the horizontal side vector (dir.z, 0, -dir.x) normalised, row 1
 // the up vector dir x side normalised; every row is scaled per column by (sx, sy, sz), rows 0 / 2 also by `scale`
@@ -559,9 +541,6 @@ void mtx_look_along_scaled(Mtx *m, f32 scale, f32 up_scale, f32 sx, f32 sy, f32 
     mf[3][3] = 1.0f;
     guMtxF2L(mf, m);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/mtx_look_along_scaled.s")
-#endif
 /* was func_15142838 */
 void mtx_rot_scale2_trans_l(Mtx *m, f32 sx, f32 sy, f32 rx, f32 ry, f32 rz, f32 tx, f32 ty, f32 tz) {
     f32 mf[4][4];

@@ -101,11 +101,7 @@ void audio_mixer_request_mode(s32 *arg0);
 void audio_mixer_set_override_mode(s32 arg0);
 void audio_mixer_set_base_mode(s32 arg0);
 void audio_mixer_reset_modes(void);
-#ifdef NON_MATCHING
 void mp3_id3_text_enqueue(s32 arg0, u8 *arg1, s32 arg2);
-#else
-void mp3_id3_text_enqueue(s32 arg0);
-#endif
 void mp3_voice_init(s32 arg0);
 void mp3_voice_stop(s32 arg0);
 void mp3_voice_play(s32 arg0, s32 arg1, s32 arg2);
@@ -730,15 +726,10 @@ void fx_free_on_msg_4b(struct102 *arg0, s32 arg1, u8 arg2);
 void fx_quad_bolts_on_msg(struct207 *arg0, s32 *arg1, u8 arg2);
 void fx_sparks_on_msg(struct207 *arg0, s32 arg1, u8 arg2);
 void frame_hook_nop_1511fc20(s32 arg0);
-#ifdef NON_MATCHING
 /* P183: debug position hooks, the arguments their only caller (world_mesh_draw) passes: gdl in a0, three f32 in
  * a1..a3 (mfc1), then an f32 / s32 on the stack; both return gdl. Same o32 registers as the 4 x s32 form. */
 Gfx *debug_gdl_pos_value_nop(Gfx *gdl, f32 x, f32 y, f32 z, f32 w, s32 player);
 Gfx *debug_gdl_pos_nop(Gfx *gdl, f32 x, f32 y, f32 z, s32 player);
-#else
-s32  debug_gdl_pos_value_nop(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32  debug_gdl_pos_nop(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-#endif
 void camera_update_all(void);
 void camera_apply_zoom_level(struct108 *arg0);
 void camera_read_side_input(struct108 *arg0);
@@ -775,38 +766,19 @@ void effect3d_free(struct210 *arg0);
 void effect3d_free_buffers(struct210 *arg0);
 void effect3d_dispatch_a(struct210 *arg0);
 void effect3d_dispatch_b(struct210 *arg0);
-#ifdef NON_MATCHING
 struct210 *effect3d_spawn(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
-#else
-void effect3d_spawn(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
-#endif
-#ifdef NON_MATCHING
 /* P128/P131: the NM definition (game_169510.c) returns effect3d_spawn_full's record (the asm leaves it in v0) */
 struct210 *effect3d_spawn_default(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
-#else
-void effect3d_spawn_default(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
-#endif
 s32  effect3d_spawn_oriented(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, u8 argD, s32 argE, u8 argF, s32 arg10);
-#ifdef NON_MATCHING
 struct210 *effect3d_spawn_oriented_simple(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE);
-#else
-void effect3d_spawn_oriented_simple(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE);
-#endif
 void effect3d_msg_stub(s32 arg0, s32 arg1, s32 arg2);
 void effect3d_on_msg_owner(struct210 *arg0, struct212 *arg1, u8 arg2);
 void sprite_quad_stub_a(void);
 void sprite_quad_stub_b(void);
-#ifdef NON_MATCHING /* P224: D_8008A1BC entries return the callee's v0 */
+/* P224: D_8008A1BC entries return the callee's v0 */
 s32 sprite_quad_build_screen_a(s32 arg0, s16 arg1);
-#else
-void sprite_quad_build_screen_a(s32 arg0, s16 arg1);
-#endif
 s32 sprite_quad_build_screen_b(s32 arg0, s16 arg1);
-#ifdef NON_MATCHING
 u8 *sprite_quad_build_axes_entry(struct210 *arg0, s16 arg1);
-#else
-void sprite_quad_build_axes_entry(struct210 *arg0, s16 arg1);
-#endif
 void fx_lists_broadcast_a(s32 arg0, u8 arg1);
 void fx_lists_broadcast_b(s32 arg0, u8 arg1);
 void effect_free_buffers_retire(struct210 *arg0);
@@ -1011,11 +983,7 @@ void actor_sound_play_untracked(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u
 //actor_sound_set_volume
 u16  sound_voice_play(u16 arg0, s32 arg1, u16 arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6);
 //sound_voice_play_at
-#ifdef NON_MATCHING
 u16 sound_play_at(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
-#else
-void sound_play_at(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
-#endif
 //sound_play_for_actor
 //sound_stop_queue_process
 s32 sound_source_mix(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 *arg6, s32 *arg7, s32 *arg8);
@@ -1080,11 +1048,7 @@ s32  render_set_scissor(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, s32 ar
 s32  asset_load_ptr(s32 *, s32, ...);
 struct126 *func_1503195C(struct127 *, s32, s32);
 void dl_validate_list(void *arg0, u32 arg1, s32 arg2);
-#ifdef NON_MATCHING
 s32 ring_buffer_put_record(struct105 *arg0, u8 *arg1, s32 arg2); /* P98: the asm reads a1 / a2 (callback args left in place by mp3_id3_text_enqueue) */
-#else
-s32 ring_buffer_put_record(struct105*arg0);
-#endif
 f32  func_15047C00(f32 arg0);
 f32  func_15047D60(f32 arg0);
 f32  math_asinf_table(f32 arg0);
@@ -1098,11 +1062,7 @@ f32  obj_dist_3d(struct127 *arg0, struct127 *arg1);
 void obj_land_on_floor(struct127 *arg0, f32 arg1);
 void obj_start_anim(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6);
 u32  obj_find_reaction_row(s32, struct127*);
-#ifdef NON_MATCHING
 void obj_hit_reaction_advance(u8, struct127*); /* P209: the asm ignores a0 (home slot only) and returns nothing */
-#else
-f32 obj_hit_reaction_advance(u8, struct127*);
-#endif
 struct127* obj_find_by_id(s32);
 void obj_sfx_play_attached(s32 arg0, struct127 *arg1, u16 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 void obj_remove(struct127 *arg0, s32 arg1);
@@ -1149,11 +1109,7 @@ f32  angle_byte_cos(u8);
 f32  spawn_region_area(struct_eu_15144598 *arg0);
 f32  spawn_region_volume(struct_eu_15144598 *arg0);
 f32  wrap_angle_rad(f32 arg0);
-#ifdef NON_MATCHING
 s32 char_fx_send_event(s32, s16, s32, s32); /* P218: the asm passes the event values (a2 / a3) through unmasked */
-#else
-s32 char_fx_send_event(s32, s16, u8, u8);   /* the s32 version changes the C callers' default codegen */
-#endif
 s32  func_1515D6D0(s32 arg0, s32 arg1);
 void light_set_level_colour(s32, s32, s32, u8);
 void node_broadcast_types(void *, s32, s32, u8);
@@ -1186,11 +1142,7 @@ void flare_node_remove(f32 *arg0, structEU_16DC80 *arg1);
 void effect_set_orbit_pos(structEU_16DC80 *arg0, void *arg1, s32 arg2, s32 arg3, f32 arg4, f32 arg5);
 void swing_lamp_handle_event(u8 *arg0, s32 arg1, u8 arg2);
 void screen_uv_mesh_handle_message(u8 *arg0, s32 arg1, u8 arg2);
-#ifdef NON_MATCHING
 s32 collision_tri_box_test(struct_eu_bytes24 arg0);
-#else
-void collision_tri_box_test(struct_eu_bytes24 arg0);
-#endif
 void debugger_draw_gprs(struct118 *arg0);
 void debugger_draw_fpu_regs(struct118 *arg0);
 s32  asset_rec_read_cached(u8 *arg0, s32 arg1, s32 *arg2);
@@ -1199,11 +1151,7 @@ void node_list_unlink(struct_eu_node *arg0);
 s32  trigger_first_touched(); // 3 params (u32, s32, s32 *); the caller in game_16EE20 passes a 4th
 s32 dl_count_triangles(Gfx *arg0);
 u16  sound_voice_play_at(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA);
-#ifdef NON_MATCHING
 void objev_start_anim_cmd(void);
-#else
-s32 objev_start_anim_cmd(void);
-#endif
 void ground_explosion(struct127 *arg0, struct127 *arg1, f32 *arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6);
 void *node_alloc(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5);
 s32  ray_sphere_intersect(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, s32 arg4, s32 arg5, f32 *arg6, f32 *arg7);
@@ -1229,11 +1177,7 @@ s32 char_fx_attach(void *arg0, struct127 *arg1, s16 arg2);
 void obj_interaction_attach_timed(struct127 *arg0, s32 arg1);
 s32 impact_dust_cloud_spawn(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, u8 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, u8 argC, u8 argD, u8 argE, s32 argF);
 s32  sfx_cb_delayed_object_sound2(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6);
-#ifdef NON_MATCHING
 s32 life_pickup_spawn(f32 *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6); /* P98: asm reloads a1 with lwc1 */
-#else
-s32 life_pickup_spawn(f32 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6);
-#endif
 void kind_effect_spawn(u8 arg0, u8 arg1, void *arg2, s32 arg3, f32 arg4, f32 arg5, s16 arg6, u8 arg7, s32 arg8);
 void music_release_stopped_slots(void);
 s32  asset_dma_into(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -1264,9 +1208,7 @@ void rubble_scatter_spawn_ex(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s
 s32 attack_spawn_at_point(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, u16 arg5, s32 arg6, s32 arg7);
 void surface_impact_effects(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, u8 arg6, u8 arg7);
 void idle_recent_push_one(u8 arg0, u8 *arg1);
-#ifdef NON_MATCHING
 /* P221: NM only (game_981E0's objfx_fc438 called it undeclared: implicit int, a wasm signature mismatch) */
 void gunfire_burst_spawn(struct127 *arg0, struct127 *arg1, u8 arg2, u8 arg3);
-#endif
 /* EU: end new */
 #endif

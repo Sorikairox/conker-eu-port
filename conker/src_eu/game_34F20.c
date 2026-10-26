@@ -27,7 +27,6 @@ void level_start_game(s16 arg0, s16 arg1, s16 arg2) {
 }
 
 // requires jump table
-#ifdef NON_MATCHING
 // Level loader (hand C from the asm, P13). Runs once per level change: picks the music/ambience id for the
 // level (tlb_remap_game_segment), resets the per-level systems, allocates the two DL buffers (gfx_alloc_dl_buffers), arms the
 // controller-read timer (cont_arm_read_timer), initialises every player (camera_raise_timer), every live object
@@ -303,9 +302,6 @@ void level_load(void) {
     D_800BE9F4 = (u16 *)D_800BE9F0;
     rumble_records_clear_all();
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_34F20/level_load.s")
-#endif
 /* was func_150081E4 */
 void level_reset_globals(void) {
     s32 i;

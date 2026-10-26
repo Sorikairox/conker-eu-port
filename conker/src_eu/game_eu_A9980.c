@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 f32 anim_events_run(struct127 *arg0, f32 arg1, s32 arg2);
 extern u8 D_800BEE2C;
 extern u8 D_800C3A82[];
@@ -139,15 +138,8 @@ void anim_advance_frame(struct197 *anim, f32 step, struct127 *rec, s32 player) {
         rec->unkB4 = anim->unk8;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_A9980/anim_advance_frame.s")
-#endif
 s32 cutscene_obj_takes_part(struct127 *);
-#ifdef NON_MATCHING
 void anim_advance_frame(struct197 *, f32, struct127 *, s32); /* P59: void in the NM definition */
-#else
-s32 anim_advance_frame(struct197 *, f32, struct127 *, s32);
-#endif
 extern u8 D_800C3A78;
 
 /* was func_1507C608 */

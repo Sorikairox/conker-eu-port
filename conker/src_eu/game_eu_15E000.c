@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A5860[];
-#endif
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x58];
@@ -62,7 +61,6 @@ s32 particle_spawn_default(s32 arg0, u8 arg1, s32 arg2) {
     return particle_spawn_basic(arg0, arg1, arg2, 0xFF, 0);
 }
 
-#ifdef NON_MATCHING
 extern s32 (*D_80089B00[])(u8 *, f32 *);
 extern void (*D_80089BA0[])(u8 *);
 
@@ -182,11 +180,7 @@ void particle_sprite_update(u8 *arg0) {
         node_destroy((struct102 *)arg0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/particle_sprite_update.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 (*D_80089BA4[])(u8 *, s32);
 extern f32 D_800A3BDC;
 extern u8 D_800A4EA8[];
@@ -418,9 +412,6 @@ Gfx *particle_draw_sprite(Gfx *gfx, u8 *p, s16 view) {
     g[2].words.w1 = (dsdx << 16) | (dtdy & 0xFFFF);
     return g + 3;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/particle_draw_sprite.s")
-#endif
 
 typedef struct {
     u8 pad0[0x24];
@@ -635,16 +626,13 @@ void vec_damp_xyz_per_tick(f32 *arg0, f32 arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 particle_surface_hit_dispatch(); // callers pass s32 / pointers; the NM definition below takes (u8 *, u8 *, u8 *)
-#endif
 
 /* was func_15131F14 */
 void particle_check_surface_hit(s32 arg0, s32 arg1) {
     particle_surface_hit_dispatch(arg0, arg1, arg0 + 0xA8);
 }
 
-#ifdef NON_MATCHING
 extern s32 (*D_80089C14[])(u8 *, s32, u8 *, u8 *); // only entry 0: particle_hit_bounce (reads cfg as arg3)
 s32 pos_in_world_bounds(f32 *);
 s32 collision_floor_probe(f32 *, s32, f32, f32 *);
@@ -679,9 +667,6 @@ s32 particle_surface_hit_dispatch(u8 *obj, u8 *other, u8 *cfg) {
     q[2] = p[2];
     return D_80089C14[(s8) cfg[1]](obj, (s32) other, (u8 *) q, cfg) & 0xFF;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/particle_surface_hit_dispatch.s")
-#endif
 
 /* was func_1513206C */
 void particle_upd_damp_hit(struct_eu_15E000 *arg0, s32 arg1) {
@@ -769,7 +754,6 @@ s32 particle_upd_expand_fade(u8 *arg0, s32 arg1) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* was func_15132454 */
 s32 particle_spawn_smoke_puff(u8 *arg0, f32 arg1, u8 arg2, s32 arg3) {
     struct {
@@ -895,6 +879,3 @@ s32 particle_spawn_smoke_puff(u8 *arg0, f32 arg1, u8 arg2, s32 arg3) {
     }
     return var_v1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/particle_spawn_smoke_puff.s")
-#endif

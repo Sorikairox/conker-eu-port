@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 u8 *laser_create(f32 *, u8 *, f32 *, u8 *, u8 *, u8 *, u8, u8, u8, u8, s16, s16, s16, u8, u8, u8, u8, u8, u8, f32, f32, u8, u8, s32);
 
@@ -65,11 +64,7 @@ s32 laser_record_start(u8 *rec) {
                   (f32) (sc & 0xFF) * 0.024639944f, (f32) ((sc >> 8) & 0xFF) * 0.003079993f, (opt >> 31) == 0, 0xFF, 1);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_record_start.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P175 */
 void collision_select_area(s32);
 s32 light_create_flicker_preset(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -305,11 +300,7 @@ u8 *laser_create(f32 *hitA, u8 *triA, f32 *hitB, u8 *triB, u8 *owner, u8 *arg5, 
     }
     return rec;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_create.s")
-#endif
 
-#ifdef NON_MATCHING
 void segment_closest_point(void *, void *, void *, void *, f32 *);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, u8 *, s32);
@@ -438,10 +429,6 @@ u8 *laser_draw(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_draw.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_151C8880 */
 s32 laser_update(u8 *arg0) {
     s16 temp_v1;
@@ -535,9 +522,6 @@ s32 laser_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_update.s")
-#endif
 /* was func_151C8C24 */
 void laser_test_obj_broadcast(u8 *arg0, s32 arg1) {
     s32 sp18[2];
@@ -588,7 +572,6 @@ s32 laser_hum_sound_update(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32
     return 0;
 }
 
-#ifdef NON_MATCHING
 /* P177 */
 s32 obj_collision_cylinder(u8 *, s16 *, s16 *, s16 *);
 s32 segment_sphere_hit(f32 *, f32 *, f32 *, f32, f32, s32, s32, f32 *, f32 *);
@@ -648,11 +631,7 @@ s32 laser_hits_object(u8 *obj, u8 *rec) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_hits_object.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P177 */
 void fx_scorch_decal_spawn(f32, u8, s32 *, f32 *, s32, s32, s32, s32, s32, s32, u8, s32);
 void emit_spray_from_surface(u8 *arg0, u8 arg1, s32 arg2);
@@ -797,11 +776,7 @@ void laser_break_effects(u8 *obj, u8 *rec) {
                   (s32)sfx_cb_delayed_play_2d, (void *)5, 0, 0, random_int() % 500U);
     node_destroy((struct102 *)rec);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_break_effects.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P175 */
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
                   s32 arg9);
@@ -892,11 +867,7 @@ u8 *laser_glow_spawn(u8 *rec, f32 *from, f32 *to, u8 r, u8 g, u8 b, s32 ground, 
     }
     return glow;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_glow_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P175 */
 s32 mdl_particle_spawn(void *, s32, s32, s32, u8, s32);
 s32 mdl_particle_mtx_rot_scale3(s32, u8 *);
@@ -1022,9 +993,6 @@ void laser_end_pieces_spawn(u8 **out, f32 *pos, u8 *tri, f32 *dir, s32 ground, u
         memcpy((s32) (out[k] + 0x170), (u8 *) &anim, 0x14);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_end_pieces_spawn.s")
-#endif
 
 /* was func_151C9A84 */
 void laser_retire(struct210 *arg0) {
@@ -1127,7 +1095,6 @@ void laser_switch_broadcast(s32 arg0, s32 arg1) {
 }
 
 s32 hitinfo_from_obj_floor(s32 *, struct127 *);
-#ifdef NON_MATCHING
 /* P170 */
 s32 collision_floor_probe(f32 *, s32, f32, s32 *);
 f32 random_float(void);
@@ -1198,9 +1165,6 @@ void object_explode_big(struct127 *obj, u8 arg1, s32 arg2) {
         object_explode_air_burst(obj, arg1, arg2);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/object_explode_big.s")
-#endif
 
 void debris_burst_spawn(struct17 *, s32 *, s32, u8, s32);
 /* was func_151CA070 */

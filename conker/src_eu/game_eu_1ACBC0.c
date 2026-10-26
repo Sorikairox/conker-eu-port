@@ -61,15 +61,10 @@ s32 arg0;
     return r;
 }
 
-#ifdef NON_MATCHING
 /* screen_fade_alpha takes one argument; the matching code passes a1-a3 through unused */
 /* was func_1517F51C */
 s32 screen_fade_is_opaque(s32 arg0) {
     if (screen_fade_alpha(arg0) == 0xFF) {
-#else
-s32 screen_fade_is_opaque(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    if (screen_fade_alpha(arg0, arg1, arg2, arg3) == 0xFF) {
-#endif
         return 1;
     }
     return 0;
@@ -107,7 +102,6 @@ Gfx *screen_view_fill_colour(Gfx *gfx, s32 a, s32 r, s32 g, s32 b, s32 i) {
     return gfx;
 }
 
-#ifdef NON_MATCHING
 /* was func_1517F910 */
 Gfx *screen_fade_draw(Gfx *gdl, s32 arg1) {
     s32 r = screen_fade_alpha(arg1);
@@ -117,9 +111,6 @@ Gfx *screen_fade_draw(Gfx *gdl, s32 arg1) {
     }
     return screen_view_fill_colour(gdl, r, D_800DE1D0[arg1][0], D_800DE1D0[arg1][1], D_800DE1D0[arg1][2], arg1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/screen_fade_draw.s")
-#endif
 /* was func_1517F40C */
 s32 screen_fade_is_done(s32 arg0) {
     if ((&D_800DDDB0)[arg0] >= (&D_800DDE28)[arg0]) {
@@ -162,7 +153,6 @@ s32 screen_tint_draw(s32 arg0, s32 arg1) {
     return (s32)screen_view_fill_colour((u8 *)arg0, temp_a1, temp_v0[0], temp_v0[1], temp_v0[2], arg1);
 }
 
-#ifdef NON_MATCHING
 extern u8 D_8008D3B0[][6];
 
 /* Pulsing overlay: alpha D_800DE1BB (scaled by a 0..1 wave from math_sin_u8 when D_800DE1BC is set),
@@ -190,9 +180,6 @@ Gfx *screen_pulse_overlay_draw(Gfx *gdl) {
     return screen_view_fill_colour(gdl, a, (s32)((c[3] - c[0]) * t + c[0]), (s32)((c[4] - c[1]) * t + c[1]),
                          (s32)((c[5] - c[2]) * t + c[2]), 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/screen_pulse_overlay_draw.s")
-#endif
 /* was func_1517FC90 */
 void screen_pulse_start(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     D_800DDE08 = arg1;
@@ -203,7 +190,6 @@ void screen_pulse_start(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     D_800DE1BC = arg4;
 }
 
-#ifdef NON_MATCHING
 /* P95: per-frame countdown of the D_800DE240[0..D_80082FA0] timers by the frame time D_800BE9E4 (clamped at 0). */
 /* was func_1517FCCC */
 void screen_tint_timers_tick(void) {
@@ -225,9 +211,6 @@ void screen_tint_timers_tick(void) {
         p++;
     } while (p <= end);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/screen_tint_timers_tick.s")
-#endif
 
 /* was func_1517FD24 */
 void screen_pulse_tick(void)
@@ -248,7 +231,6 @@ void screen_pulse_tick(void)
   }
 }
 
-#ifdef NON_MATCHING
 extern u8 D_800DA130[];   /* per player: 0x40-byte HUD projection matrix */
 void mtxf_transform_point_w(u8 *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 
@@ -294,11 +276,7 @@ void hud_lens_set_target(s32 project, f32 x, f32 y, f32 z, s32 player) {
     D_800DE218[player][0] = sx - *(f32 *) (vp + 0xC);
     D_800DE218[player][1] = sy - *(f32 *) (vp + 0x10);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/hud_lens_set_target.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P130 */
 // view_fill_rect: appends a G_FILLRECT (F6) for the rectangle (x0, y0) - (x1, y1) (either corner order) clipped
 // to view's screen box (camera D_800BE628 + view * 0x180: f32 left +0x2C, top +0x24, right +0x30, bottom +0x28,
@@ -335,11 +313,7 @@ u8 *hud_view_fill_rect(u8 *dl, s32 x0, s32 y0, s32 x1, s32 y1, s32 view) {
     ((s32 *) dl)[0] = 0xF6000000 | ((x1 & 0x3FF) << 14) | ((y1 & 0x3FF) << 2);
     return dl + 8;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/hud_view_fill_rect.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P136 */
 /*
  * scope_lens_draw: draws the four quadrants of a round lens / range-finder texture (tex x tex texels, tile 0
@@ -378,11 +352,7 @@ Gfx *hud_scope_lens_draw(Gfx *gdl, s32 size, s32 tex, f32 dx, f32 dy, s32 view) 
                             0x1F - ((s32) ((x1 - r) * 32.0f) & 0x1F), ts + ((s32) (y0 * 32.0f) & 0x1F), k, -k);
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/hud_scope_lens_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 extern Gfx D_8008D3B8[];
 extern s32 D_80090648[];       /* scope textures: [1] lens I16, [2] rim IA16, [3..5] range finder frames RGBA16 */
 extern f32 D_800A766C;         /* zoom scale */
@@ -561,11 +531,7 @@ Gfx *hud_sniper_scope_draw(Gfx *gdl, s32 view) {
     gSPGeometryMode(gdl++, 0, 1);
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/hud_sniper_scope_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_800DDDC8;   /* [4] per player: HUD lens zoom (1 = none) */
 extern f32 D_800DDDD8;   /* [4] per player: zoom rate per frame step */
 extern u8 D_800DDE20;    /* [4] per player: scripted zoom (driven by the object's +0x31C state +0x120) */
@@ -727,9 +693,6 @@ void hud_lens_update(void) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/hud_lens_update.s")
-#endif
 
 /* was func_15182238 */
 s32 hud_lens_is_off(s32 arg0) {
@@ -804,7 +767,6 @@ void hud_lens_start_zoom_in(s32 arg0) {
     (&D_800DDDD8)[arg0] = D_800A7694;
 }
 
-#ifdef NON_MATCHING
 /* P38: m2c draft (ctx K&R header fixed), hud_view_fill_rect calls fixed by hand */
 s32 texture_cache_lookup(s32, s32, s32, s32);
 u8 *hud_view_fill_rect(u8 *, s32, s32, s32, s32, s32); /* P85: the callee compares full words (callers pass s16 values) */
@@ -1107,10 +1069,6 @@ u8 *hud_letterbox_draw(u8 *arg0) {
     }
     return var_s0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/hud_letterbox_draw.s")
-#endif
-#ifdef NON_MATCHING
 /* P133 */
 void *memcpy(void *, const void *, size_t);
 
@@ -1143,9 +1101,6 @@ s32 screen_colour_fade_fx_start(u8 r, u8 g, u8 b, u8 a, s16 frames, u8 mode, u8 
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/screen_colour_fade_fx_start.s")
-#endif
 
 /* was func_15182CB8 */
 void screen_colour_fade_fx_tick(struct_eu_1ACBC0 *arg0) {

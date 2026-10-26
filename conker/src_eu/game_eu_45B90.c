@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 extern s32 D_eu_800BE9F4;   /* PVS row index: per row {s16 byte index, s16 bit} */
 extern s32 D_eu_800BE9F8;   /* Huffman tree: 6-byte nodes {s16 symbol (-1: inner), s16 child 0, s16 child 1} */
 u8 *allocate_memory(s32, s32, s32, s32);
@@ -169,8 +168,3 @@ void pvs_build_huffman_tree(s32 *table) {
         e += 2;
     } while (sym++ != 0xFF);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_45B90/pvs_setup.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_45B90/pvs_build_huffman_tree.s")
-#endif

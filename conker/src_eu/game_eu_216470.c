@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 Gfx *sprite_gfx_begin_alt(Gfx *arg0);
 Gfx *hud_image_draw(Gfx *, void *, s32, s32, s32, s32, f32, s32);
 extern Gfx D_800903D8[];
@@ -13,16 +13,11 @@ extern u8 D_8009E28C[];
 extern u8 D_8009E280[];
 extern u8 D_8009E284[];
 extern u8 D_8009E288[];
-#endif
 
 
 Gfx *screen_fade_rect_draw(Gfx *gdl);
-#ifdef NON_MATCHING
 /* P120: the definition (game_70200) is varargs; a fixed-arg prototype gives a different wasm signature. */
 void text_printf_at(s32, s32, s32, void *, ...);
-#else
-void text_printf_at(s32, s32, s32, void *);
-#endif
 extern Gfx *(*D_800903A4[])(Gfx *);
 extern u8 D_800BEB60;
 
@@ -96,7 +91,6 @@ Gfx *hud_overlay_draw_screen(Gfx *arg0) {
     return arg0;
 }
 
-#ifdef NON_MATCHING
 extern f32 D_800901BC;
 extern f32 D_800901C0;
 
@@ -195,10 +189,6 @@ u8 *hud_tex_rect_scaled(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 ar
     (*(s32 *)((u8 *)temp_a0 + 4)) = (s32) ((arg8 << 0x10) | (arg9 & 0xFFFF));
     return temp_a0 + 8;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/hud_tex_rect_scaled.s")
-#endif
-#ifdef NON_MATCHING
 extern u16 D_8009015C;           /* HUD state: 0x10 = a player is near the target point */
 extern u16 D_80090160;           /* HUD elements: 1 / 8 team scores, 0x4000 / 0x8000 carried item, 0x6340 timer */
 extern s8 D_800E0FE0;            /* team count */
@@ -399,11 +389,7 @@ u8 *mp_hud_markers_draw(u8 *buf, s32 unused, s32 alpha) {
     return (u8 *) gdl;
 }
 #undef HUD_W
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/mp_hud_markers_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s8 D_80087608;            /* score marks per team */
 extern s16 D_800E0ED0[];         /* team score */
 u8 *hud_tex_rect_scaled(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -512,11 +498,7 @@ u8 *mp_team_marks_draw(u8 *buf, s32 y, s32 sel, s32 loadTex, s32 refresh) {
     gDPPipeSync(gdl++);
     return (u8 *) gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/mp_team_marks_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s16 D_800E0ED0[];         /* team score */
 extern char D_800ABEB0[], D_800ABEB4[];
 s32 texture_cache_lookup(s32, s32, s32, s32);
@@ -619,11 +601,7 @@ u8 *mp_team_score_draw(u8 *buf, s32 y, s32 update) {
     return (u8 *) gdl;
 }
 #undef TW_W
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/mp_team_score_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s8 D_800901E4[4];         /* player queue (controller numbers, -1 empty) */
 extern s8 D_800E0EF0[];          /* placing per team / player (1 = first) */
 extern s16 D_800E0ED0[];         /* team score */
@@ -825,11 +803,7 @@ u8 *mp_scoreboard_draw(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
 #undef BAR_W
 #undef BAR_MODE
 #undef BAR_ROW
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/mp_scoreboard_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 texture_cache_lookup(s32, s32, s32, s32);
 u8 *hud_tex_rect_scaled(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_80090424;
@@ -913,10 +887,6 @@ u8 *hud_counter_digits_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     } while ((u32) var_s1 >= (u32) &sp.u7C);
     return var_s0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/hud_counter_digits_draw.s")
-#endif
-#ifdef NON_MATCHING
 /* Table D_80090370 slot 0 (the in-game HUD pass): pause/fade overlay, and with D_800BEAC0 set the
  * money/lives counter screen (texture ids 0x7D3.. loaded through texture_cache_lookup, counters drawn by
  * hud_counter_digits_draw). */
@@ -1156,9 +1126,6 @@ u8 *hud_ingame_draw(u8 *arg0) {
     }
     return var_s0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/hud_ingame_draw.s")
-#endif
 /* was func_151EC0E0 */
 s32 mp_scoreboard_draw_fading(s32 arg0) {
     if (D_8009016C != 0) {
@@ -1167,7 +1134,6 @@ s32 mp_scoreboard_draw_fading(s32 arg0) {
     return arg0;
 }
 
-#ifdef NON_MATCHING
 extern s16 D_800E0EB0;
 
 /* Table D_80090370 slot 21: centred text screen. Lines D_800E1008[D_800E0EB0...] up to a "*" line;
@@ -1223,10 +1189,6 @@ Gfx *screen_centred_text_draw(Gfx *gdl) {
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/screen_centred_text_draw.s")
-#endif
-#ifdef NON_MATCHING
 extern s32 D_80091B9C;
 extern f32 D_800ABEF8;
 extern u8 D_85D[];
@@ -1347,10 +1309,6 @@ Gfx *screen_intro_credits_draw(Gfx *gdl) {
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/screen_intro_credits_draw.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_151EC928 */
 s32 screen_late_caption_draw(s32 arg0) {
     s32 temp_t6;
@@ -1367,10 +1325,6 @@ s32 screen_late_caption_draw(s32 arg0) {
     }
     return arg0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/screen_late_caption_draw.s")
-#endif
-#ifdef NON_MATCHING
 extern s32 D_80091BA8;
 extern s32 D_80091BB4;
 extern s32 D_80091BC0;
@@ -1425,10 +1379,6 @@ Gfx *screen_sprite_fade_draw(Gfx *gdl) {
     D_800E0FC6 = 0xFF - var_v1_2;
         return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/screen_sprite_fade_draw.s")
-#endif
-#ifdef NON_MATCHING
 Gfx *hud_image_draw(Gfx *, void *, s32, s32, s32, s32, f32, s32);
 Gfx *barrel_menu_draw(Gfx *);
 Gfx *cheat_entry_draw(Gfx *);
@@ -1514,10 +1464,6 @@ Gfx *frontend_menu_draw(Gfx *gdl) {
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/frontend_menu_draw.s")
-#endif
-#ifdef NON_MATCHING
 typedef struct {
     /* 0x00 */ f32 slide;        /* menu slide position (0.5 = centre) */
     /* 0x04 */ f32 x4;
@@ -1738,13 +1684,7 @@ Gfx *barrel_menu_draw(Gfx *gdl) {
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/barrel_menu_draw.s")
-#endif
 
-#ifndef NON_MATCHING
-void sprite_gfx_begin_alt(Gfx *);
-#endif
 Gfx *hud_image_draw(Gfx *, void *, s32, s32, s32, s32, f32, s32);
 extern Gfx D_800903D8[];
 extern u8 D_80091BCC[];
@@ -1752,12 +1692,8 @@ extern u8 D_80091BD8[];
 
 /* Table D_80090370 slot 17. The original is void in C but its v0 is sprite_gfx_begin_alt's return value, which
  * hud_overlay_draw_screen uses as the new display-list pointer: under NON_MATCHING it returns it explicitly. */
-#ifdef NON_MATCHING
 /* was func_151ED854 */
 Gfx *screen_logo_glow_draw(Gfx *gdl) {
-#else
-void screen_logo_glow_draw(Gfx *gdl) {
-#endif
     s32 a;
 
     gSPDisplayList(gdl++, D_800903D8);
@@ -1770,11 +1706,7 @@ void screen_logo_glow_draw(Gfx *gdl) {
     gDPPipeSync(gdl++);
     gDPSetCombine(gdl++, 0xFFD3FF, 0xFFA6FF7F);
     gDPSetEnvColor(gdl++, 0xFF, 0x80, 0x20, ((u8)D_800E0FC7 * (a + 1)) >> 8);
-#ifdef NON_MATCHING
     return sprite_gfx_begin_alt(hud_image_draw(gdl, D_80091BD8, 0x92, 0x6C, 8, 3, 1.0f, 0));
-#else
-    sprite_gfx_begin_alt(hud_image_draw(gdl, D_80091BD8, 0x92, 0x6C, 8, 3, 1.0f, 0));
-#endif
 }
 
 u8 *render_fill_rect_clamped(u8 *, s32, s32, s32, s32);
@@ -1790,7 +1722,6 @@ Gfx *screen_fade_rect_draw(Gfx *gdl) {
     return (Gfx *)render_fill_rect_clamped((u8 *)gdl, 0, 0, D_800BE620, D_800BE624);
 }
 
-#ifdef NON_MATCHING
 /* Tile setup for hud_image_draw: LoadBlock word count (*outBlock, from the D_8009E280/84 size tables), then
  * SetTile (load tile 7) / SetTile (render tile 0, line = w * D_8009E288[siz] bytes / 8, masks = ceil(log2(w/h)), wrap)
  * and SetTileSize. desc: +6 width, +8 height, +0xA format, +0xB size. */
@@ -1831,10 +1762,6 @@ Gfx *hud_image_tile_setup(Gfx *gdl, u8 *desc, s32 *outBlock) {
     g[7] = ((((*(u16 *)(desc + 6) - 1) * 4) & 0xFFF) << 12) | (((*(u16 *)(desc + 8) - 1) * 4) & 0xFFF);
     return (Gfx *)(g + 8);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/hud_image_tile_setup.s")
-#endif
-#ifdef NON_MATCHING
 /* HUD image drawn as cols x rows tiles: each tile's texture comes from the texture cache (texture_cache_lookup, id
  * desc+0 + idOffset, consecutive ids unless a block is larger than 0x1000 bytes and is split in halves), then
  * SetTImg / LoadBlock / scissored TextureRectangle (gSPScisTextureRectangle) at the scaled screen position.
@@ -1940,10 +1867,6 @@ Gfx *hud_image_draw(Gfx *gdl, void *descArg, s32 x, s32 y, s32 cols, s32 rows, f
     gdl++;
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/hud_image_draw.s")
-#endif
-#ifdef NON_MATCHING
 /* HUD model (0xA8 bytes; hud_anim_model_load builds it, hud_anim_model_draw draws it, hud_anim_model_free frees it). The pause /
  * counter screen keeps two: D_80090408 (file 0xA4, the blinking head) and D_8009040C (file 0xA2). */
 typedef struct {
@@ -2032,9 +1955,6 @@ s32 hud_anim_model_load(s32 file, s32 entry, s32 anim, f32 speed) {
     }
     return (s32) m;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/hud_anim_model_load.s")
-#endif
 
 /* was func_151EE310 */
 void hud_anim_model_free(u8 *arg0) {
@@ -2049,7 +1969,6 @@ void hud_anim_model_free(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 extern Gfx D_800904C0[];
 extern Gfx D_800904D8[];
 
@@ -2140,11 +2059,7 @@ u8 *hud_anim_model_draw(u8 *gdl, s32 model, f32 x, f32 y, f32 scale) {
     g++;
     return (u8 *) g;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/hud_anim_model_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 extern u8 *D_800904E8;   /* menu sprite entries (12 bytes each) */
 extern u8 *D_800E10AC;   /* menu sprite block (0x1A8 bytes) */
 extern s8 D_800E10B0;
@@ -2218,11 +2133,7 @@ void menu_sprites_load(void) {
     D_800E10AC[0x20] = 0;
     D_800E10B4 = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/menu_sprites_load.s")
-#endif
 
-#ifdef NON_MATCHING
 extern u8 D_800ABEE4[];          /* "-": the blinking text cursor */
 void mtx_translate_fixed(Mtx *, f32, f32, f32);
 s32 aiscript_find_by_kind(s32, s32);
@@ -2514,11 +2425,7 @@ Gfx *cheat_entry_draw(Gfx *gdl) {
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/cheat_entry_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 /* save_screen_frame_draw: draws the save / load screen frame (D_80090174 mode of frontend_menu_draw, padC[0] = selected
  * entry): environment alpha D_800E0EC4, two halves of texture 0x7FB (RGBA16, second half mirrored in S), two pieces of
  * texture 0x887 (RGBA32), then the caption string. The caption id comes from asset table 0x1D (u16 per entry), reloaded
@@ -2585,6 +2492,3 @@ Gfx *save_screen_frame_draw(Gfx *gdl, s32 entry) {
     return gdl;
 }
 #undef SAVE_W
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/save_screen_frame_draw.s")
-#endif

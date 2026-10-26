@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void mtx_translate_fixed(Mtx *mtx, f32 x, f32 y, f32 z);
 void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
 void mtx_look_at_reflect(Mtx *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 argA);
@@ -252,9 +251,6 @@ void camera_build_view_matrix(struct108 *arg0) {
 #undef CAM_OBJ
 #undef CAM_REC
 #undef CAM_MTX
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15A210/camera_build_view_matrix.s")
-#endif
 void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
 extern Mtx *D_800DC6D0[];
 

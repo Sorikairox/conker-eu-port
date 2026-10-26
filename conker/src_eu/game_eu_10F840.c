@@ -5,7 +5,6 @@
 s32 beam_effect_spawn(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, struct127 *, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
 
 
-#ifdef NON_MATCHING
 float sqrtf(float);
 f32 math_atan2f(f32, f32);
 extern u8 *D_8008CDEC[];
@@ -99,11 +98,7 @@ s32 beam_effect_spawn(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, 
     obj[0xDB] = 0;
     return (s32) (obj + 0x80);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/beam_effect_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 float sqrtf(float);
 f32 math_atan2f(f32, f32);
 extern s32 D_800DC26C;
@@ -352,11 +347,7 @@ void beam_effect_update(u8 *obj) {
         *(f32 *) (obj + 0xC0) = d;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/beam_effect_update.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 D_800D30BC;
 Gfx *sprite_load_texture(Gfx *gfx, u8 *header, s32 tmem, void *spr, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
 Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
@@ -441,9 +432,6 @@ Gfx *beam_effect_draw(Gfx *gfx, u8 *obj, s16 viewer) {
     obj[0xDB] = 1;
     return gfx + 3;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/beam_effect_draw.s")
-#endif
 
 /* was func_150E3324 */
 s32 beam_effect_stub(s32 arg0, s32 arg1) {

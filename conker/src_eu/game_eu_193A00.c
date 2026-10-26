@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P125 */
 f32 fast_cosf(f32);
 f32 fast_sinf(f32);
@@ -41,6 +40,3 @@ void mesh_swing_update(f32 *angle, s16 *vtx, f32 amp, f32 *speed, f32 max, f32 m
         *angle = min;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_193A00/mesh_swing_update.s")
-#endif

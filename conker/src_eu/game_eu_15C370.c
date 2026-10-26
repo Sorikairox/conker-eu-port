@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 Gfx *render_set_color_image(Gfx *arg0);
 extern s16 D_80083336;
 
@@ -79,6 +78,3 @@ Gfx *camera_read_depth_row(Gfx *gdl, struct108 *cam) {
     gdl++;
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15C370/camera_read_depth_row.s")
-#endif

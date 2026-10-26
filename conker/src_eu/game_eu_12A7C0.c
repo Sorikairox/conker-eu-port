@@ -1,19 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A5860[];
 extern u8 D_800A22BC[];
-#endif
 
 
 void view_sparkle_burst(u8);
 s32 cam_wobble_start_preset(s32, s32, s32, s32, s32);
-#ifdef NON_MATCHING
 s32 sfx_cb_delayed_play_2d(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c), not data */
-#else
-extern s32 sfx_cb_delayed_play_2d;
-#endif
 
 /* was func_150FCFB0 */
 void view_spots_flash_event(void) {
@@ -41,7 +36,6 @@ void view_spots_flash_event(void) {
     rumble_request((structEU_151D8E18 *) &sp, 0, 0xFFU, 0);
 }
 
-#ifdef NON_MATCHING
 /* P179 */
 extern s16 D_800A22B0[];
 s32 spark_shower_spawn(f32 *, f32, f32, f32, f32, s32, s32);
@@ -144,11 +138,7 @@ void view_sparkle_burst(u8 view) {
         n--;
     } while (n > 0);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/view_sparkle_burst.s")
-#endif
 
-#ifdef NON_MATCHING
 f32 cam_wobble_fade_by_distance(void *, void *, s32, s32, f32);
 
 /* view_spot_distance_fade: P238: entry 0 of D_8008B734 (cam_wobble_update, asm, passes the object in a0 and stores f0).
@@ -170,16 +160,12 @@ f32 view_spot_distance_fade(u8 *obj) {
     pos[2] = spot[2];
     return cam_wobble_fade_by_distance(obj, pos, *(s32 *) &nearDist, *(s32 *) &range, 0.00011104942f);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/view_spot_distance_fade.s")
-#endif
 
 /* was func_150FD530 */
 void level_update_sfx_tick_a(s32 arg0) {
     sfx_cooldown_tick();
 }
 
-#ifdef NON_MATCHING
 s32 collision_floor_probe(u8 *, u16, f32, u8 *);
 void hitinfo_from_obj_floor(void *, u8 *);
 s32 obj_send_hit(struct127 *, s32, u16, s32);
@@ -418,10 +404,6 @@ void bound_cloud_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/bound_cloud_spawn.s")
-#endif
-#ifdef NON_MATCHING
 /* P146 */
 extern f32 D_800A2310;
 extern f32 D_800A2314;
@@ -539,9 +521,6 @@ s32 bound_cloud_update(u8 *fx) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/bound_cloud_update.s")
-#endif
 
 /* was func_150FE08C */
 void bound_cloud_handle_event(u8 *arg0, u8 *arg1, u8 arg2)

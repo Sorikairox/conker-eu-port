@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 camera_event_queue_empty(u8 *arg0);
 s32 event_dispatch(s32, s32, ...);
 void camera_queue_event(u8 *, s32, void *);
@@ -337,9 +336,6 @@ void camera_process_events(struct108 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_156A30/camera_process_events.s")
-#endif
 
 extern s16 D_800898F0;
 extern u8 D_800DC458[];
@@ -356,7 +352,6 @@ void camera_pivot_slot_reset(u8 *arg0, s32 arg1)
   }
 }
 
-#ifdef NON_MATCHING
 /* P142 */
 void vec3_diff(struct17 *a, struct17 *b, struct17 *out);
 void vec3_normalize(struct17 *v, struct17 *out);
@@ -455,6 +450,3 @@ void camera_pivot_follow_update(struct108 *cam) {
     *(f32 *) (c + 0x980) = 2.0f;
     *(f32 *) (c + 0x970) = 2.0f;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_156A30/camera_pivot_follow_update.s")
-#endif

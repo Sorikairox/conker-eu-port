@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
 void camera_calc_relative_yaw(u8 *);
 
@@ -34,6 +33,3 @@ void camera_update_object_state9(struct108 *arg0) {
     }
     arg0->unk84 &= 0xFFFEFFFF;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_135D70/camera_update_object_state9.s")
-#endif

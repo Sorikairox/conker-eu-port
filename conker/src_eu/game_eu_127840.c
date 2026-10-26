@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void camera_view_rotation_matrix(s32 arg0, f32 (*arg1)[4], f32 arg2, f32 arg3, f32 arg4);
 Gfx *gfx_fill_rect_colour(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 r, u8 g, u8 b);
 Gfx *star_field_draw(Gfx *gdl, f32 (*mtx)[4]);
@@ -30,11 +29,7 @@ Gfx *camera_view_clear_draw(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f
     gdl[2].words.w1 = 0xFFFFFFFF;
     return star_field_draw(gdl + 3, mtx);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/camera_view_clear_draw.s")
-#endif
 
-#ifdef NON_MATCHING
 /* effect3d_spawn_full's particle spec and particle_emitter_spawn's spawn block (0x58 bytes). */
 typedef struct {
     /* 0x00 */ u8 texture;
@@ -313,11 +308,7 @@ void aura_group_spawn(u8 *obj, u8 alpha, s32 owner) {
     rumble_request(&shake, 0, alpha, owner);
     light_create_obj_joint(obj, 1, &D_800A2090, 3, 0x46, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, alpha, owner);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/aura_group_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 void mtx_transform_points(f32 **, f32 **, void *, s32);
 extern f32 D_800A209C[3]; /* the two emitter offsets (bone space) */
 extern f32 D_800A20A8[3];
@@ -410,9 +401,6 @@ void aura_group_follow_owner(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/aura_group_follow_owner.s")
-#endif
 
 /* was func_150FA9E8 */
 void screen_flash_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
@@ -438,7 +426,6 @@ void screen_flash_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 /* emit_dust_by_angles's spec (same layout as game_2062D0's S06E8). */
 typedef struct {
     /* 0x00 */ s16 u0[4];
@@ -656,9 +643,6 @@ void obj_point_burst_spawn(u8 *obj, u8 point, u8 alpha, s32 owner) {
     }
     fire_embers_spawn(&pos, alpha, owner);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/obj_point_burst_spawn.s")
-#endif
 
 extern u8 D_80088F00;
 
@@ -685,7 +669,6 @@ void arc_bolts_spawn_once(u8 arg0, s32 arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 void spawn_region_random_point_3d(u8 *node, u8 *pos);
 void lightning_bolt_spawn(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
 extern u8 D_80088ECC;   /* number of bolt styles */
@@ -716,9 +699,6 @@ void arc_bolts_emit(u8 *arg0) {
         ((f32 *) ends)[2] -= 1.0f;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/arc_bolts_emit.s")
-#endif
 
 /* was func_150FB264 */
 void arc_bolts_handle_event(struct102 *arg0, s32 arg1, u8 arg2) {
@@ -752,7 +732,6 @@ void effect_flag2_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 /* anim_model_fx_spawn's spec (0x58 bytes, the model effect it spawns). */
 typedef struct {
     /* 0x00 */ u8 u00;
@@ -896,11 +875,7 @@ void score_banner_spawn(s16 span, u8 flag, s32 owner) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/score_banner_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 void anim_model_fx_build_mtx(u8 *arg0, u8 *arg1);
 
 /* was func_150FB708 */
@@ -924,9 +899,6 @@ s32 score_banner_model_update(u8 *arg0) {
     anim_model_fx_build_mtx(arg0, &sp.u1C);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/score_banner_model_update.s")
-#endif
 s32 anim_model_fx_load_screen_mtx(s32, s32, s32, s32, s32);
 s32 banner_sprite_set_segment(s32, s32, s32, s32, s32);
 /* was func_150FB768 */
@@ -955,7 +927,6 @@ s32 banner_sprite_fade_update(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 void bone_point_spark_spray(s32, u8, s32, s32, s32, u8, s32);
 void mtx_transform_points(f32 **, f32 **, void *, s32);
 void bone_streak_fx_start(u8 *, u8 *, s32, u8 *, f32, u8, s32);
@@ -1021,6 +992,3 @@ void obj_bone14_spark_burst(u8 *arg0, u8 arg1, s32 arg2) {
         bone_streak_fx_start(&sp.u88, &sp.u7C, sp.u78, arg0, 1.0f, (s32) arg1, arg2);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/obj_bone14_spark_burst.s")
-#endif

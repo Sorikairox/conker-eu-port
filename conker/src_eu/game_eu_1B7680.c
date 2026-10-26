@@ -31,7 +31,6 @@ void area_drift_emitter_create(void *arg0, u8 arg1) {
 }
 #undef F
 
-#ifdef NON_MATCHING
 s32 player_mask_hides_all(s32);
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 extern u8 D_800BEA50[];
@@ -147,9 +146,6 @@ void area_drift_emitter_update(u8 *p) {
         *(f32 *)(p + 0x64) -= 1.0f;
     } while (1.0f < *(f32 *)(p + 0x64));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B7680/area_drift_emitter_update.s")
-#endif
 
 typedef struct { f32 x, y, z; s32 a, b; } Node14;
 u8 impact_current_kind(void);

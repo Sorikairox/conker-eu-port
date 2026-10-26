@@ -27,7 +27,6 @@ void mp_set_mode_for_level(s16 arg0, s32 arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800BEA58;
 extern s32 D_800BEA5C;
 extern s32 D_800BEA70;
@@ -124,9 +123,6 @@ void screen_setup_viewports(s32 arg0, s32 arg1) {
     (*(s16 *)((u8 *)(&D_800BEA88) + 0x4C)) = (s16) temp_v0;
     (*(s16 *)((u8 *)(&D_800BEA88) + 0x4E)) = (s16) temp_a1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_433F0/screen_setup_viewports.s")
-#endif
 // s32 screen_setup_viewports(s32 arg0, s32 arg1) {
 //     s16 temp_lo;
 //     s16 temp_lo_2;

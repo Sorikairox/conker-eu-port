@@ -1,20 +1,15 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A5860[];
 void obj_get_center_point(f32 *arg0, f32 *arg1);
 void debris_smoke_ring_spawn(s32 arg0, u8 arg1, s32 arg2);
 void debris_dust_cloud_spawn(s32 arg0, u8 arg1, s32 arg2);
 void debris_scorch_mark_spawn(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
 void debris_screen_flash(u8 arg0, u8 arg1, s32 arg2);
-#endif
 // hoisted forward declaration(s) for debris_smoke_ring_spawn
-#ifdef NON_MATCHING
 s32 spark_shower_spawn(s32, f32, f32, f32, f32, s32, s32); /* P95: f32 parameter */
-#else
-s32 spark_shower_spawn(s32, f32, s32, f32, f32, s32, s32);
-#endif
 
 
 /* was func_150D5950 */
@@ -35,7 +30,6 @@ void fire_smoke_trail_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
 s32 motion_track_get_delta(u8 *, u8 **);
@@ -203,9 +197,6 @@ void fire_smoke_trail_update(u8 *arg0) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/fire_smoke_trail_update.s")
-#endif
 /* was func_150D5E7C */
 void fire_smoke_trail_handle_msg(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = (u8 *)arg0 + 0x28;
@@ -235,7 +226,6 @@ void debris_particle_free_b(struct260 *arg0) {
     effect_node_free(arg0);
 }
 
-#ifdef NON_MATCHING
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, s16 *, f32 *, f32 *, f32 *, f32 *, s32, s32 *, f32);
 s32 mdl_particle_spawn(void *, s32, s32, s32, s32, s32);
 s32 obj_get_hit_kind(struct127 *);
@@ -454,9 +444,6 @@ void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
     debris_dust_cloud_spawn((s32)pos, id, arg2);
     debris_smoke_ring_spawn((s32)pos, id, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/debris_burst_destroyed_object.s")
-#endif
 /* was func_150D6898 */
 void debris_smoke_ring_spawn(s32 arg0, u8 arg1, s32 arg2) {
     f32 temp_f12;
@@ -469,11 +456,7 @@ void debris_smoke_ring_spawn(s32 arg0, u8 arg1, s32 arg2) {
     temp_f14 = sp28 * 4.0f;
     temp_f12 = temp_f14 + 15.0f;
     var_f18 = (f32) temp_t7;
-#ifdef NON_MATCHING
     spark_shower_spawn(arg0, temp_f12, 1.37457f, var_f18, 0.0f, arg1, arg2); /* P95: float literal (asm passes the bits 0x3FAFF1E9) */
-#else
-    spark_shower_spawn(arg0, temp_f12, 0x3FAFF1E9, var_f18, 0.0f, arg1, arg2);
-#endif
 }
 
 s32 glow_pulse_spawn(s32, f32, f32, f32, u8, s32);
@@ -491,7 +474,6 @@ void debris_dust_cloud_spawn(s32 arg0, u8 arg1, s32 arg2) {
     glow_pulse_spawn(arg0, (sp24 * 3.0f) + 8.0f, (sp28 * D_800A0E80) + D_800A0E84, (random_float() * 50.0f) + 100.0f, (s32) arg1, arg2);
 }
 
-#ifdef NON_MATCHING
 extern f32 D_800A0E88;
 extern f32 D_800A0E8C;
 extern f32 D_800A0E90;
@@ -527,9 +509,6 @@ void debris_spec_fill_preset(u8 *arg0, f32 *arg1) {
     }
     (*(s8 *)((u8 *)arg0 + 0x50)) = 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/debris_spec_fill_preset.s")
-#endif
 s32 bubble_sprite_spawn(f32, s32, s32, s32, s16, u8, u8, u8, s32);
 
 /* was func_150D6B00 */
@@ -554,7 +533,6 @@ void debris_screen_flash(u8 arg0, u8 arg1, s32 arg2) {
     screen_colour_fade_fx_start(0xFF, 0xFF, 0xFF, ((sp28 % 56U) + 0xC8) & 0xFF, (random_int() % 6U) + 0x19, (s32) arg0, (s32) arg1, arg2);
 }
 
-#ifdef NON_MATCHING
 void vec3_from_angles_byte(s16, s16, f32, void *);
 
 /* was func_150D6C40 */
@@ -798,9 +776,6 @@ void obj_sprite_burst_spawn(f32 *arg0, s32 arg1, s32 arg2) {
         memcpy(temp_v0_2 + 0xA8, &sp.u48, 0x1C);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/obj_sprite_burst_spawn.s")
-#endif
 /* was func_150D71A8 */
 void obj_get_center_point(f32 *arg0, f32 *arg1) {
     arg1[0] = arg0[5];
@@ -808,7 +783,6 @@ void obj_get_center_point(f32 *arg0, f32 *arg1) {
     arg1[2] = arg0[7];
 }
 
-#ifdef NON_MATCHING
 void vec_damp_xyz_per_tick(f32 *, f32);
 
 /* P67: update of a debris piece that follows its owner (obj +0xA8 = owner record, +0xAC = the owner's unique_id when
@@ -836,9 +810,6 @@ s32 debris_follow_owner_update(u8 *arg0, s32 arg1) {
     pos[2] += old[2] * D_800BE9A4 + (vel[2] - old[2]) * D_800BEDC8 * D_800BE9A4 * D_800BE9A4 * 0.5f;
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/debris_follow_owner_update.s")
-#endif
 /* was func_150D7370 */
 void debris_follow_handle_msg(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = (u8 *)arg0 + 0xA8;
@@ -866,7 +837,6 @@ end:        ;
     }
 }
 
-#ifdef NON_MATCHING
 /* was func_150D741C */
 s32 glow_follow_owner_update(u8 *arg0, s32 arg1) {
     u8 *sp18;
@@ -895,9 +865,6 @@ s32 glow_follow_owner_update(u8 *arg0, s32 arg1) {
     }
     return var_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/glow_follow_owner_update.s")
-#endif
 /* was func_150D7578 */
 void glow_follow_handle_msg(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = (u8 *)arg0 + 0xA8;

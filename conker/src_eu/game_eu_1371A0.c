@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 // event_object_effect_spawn: spawns a type-0x1A effect for an object (obj NULL: none) through effect_node_create:
 // lifetime `span` (negative: 300, untimed), sub-list arg5 + 0x14, arg6 / arg7 passed on. Its data (+0x28, 20 bytes):
 // the object, the object's byte +0x3B, 0.0f, arg4, arg2, arg3 (bytes +0x12 / +0x13 uninitialised, as in the asm).
@@ -46,11 +45,7 @@ struct260 *event_object_effect_spawn(u8 *obj, s16 span, s8 arg2, s8 arg3, f32 ar
     }
     return fx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1371A0/event_object_effect_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 extern s32 D_80089000;
 extern s32 D_80089004;
 extern s32 D_800A28D4;
@@ -152,10 +147,6 @@ void obj_point_effect_emitter_update(u8 *arg0) {
         (*(s32 (**)())((u8 *)&D_80089000 + (temp_v0_2 * 4)))(arg0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1371A0/obj_point_effect_emitter_update.s")
-#endif
-#ifdef NON_MATCHING
 extern f32 D_800A2A04;
 extern f32 D_800A2A08;
 extern f32 D_800A2A0C;
@@ -329,6 +320,3 @@ void point_spark_spawn(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     e.u70[3] = -1;
     emit_streaks_from_spec(&e, obj[0xC], obj[1]);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1371A0/point_spark_spawn.s")
-#endif

@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 void obj_broadcast_bored(u8 *arg0);
-#endif
 
 
 /* was func_1507EF60 */
@@ -30,7 +29,6 @@ void idle_list_add_group(s32 arg0, s32 *arg1, s32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 /* was func_1507F018 */
 s32 idle_list_filter_recent(u8 *arg0, s32 arg1, u8 *arg2, s32 *arg3, u8 *arg4) {
     struct {
@@ -174,9 +172,6 @@ loop_33:
     }
     return var_v1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/idle_list_filter_recent.s")
-#endif
 /* was func_1507F238 */
 void idle_recent_push(u8 arg0, u8 *arg1) {
     idle_recent_push_one(arg0, arg1);
@@ -234,7 +229,6 @@ void idle_recent_remove(s32 arg0, u8 *arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 idle_delay_random(s32);
 s32 obj_near_reachable_node(struct127 *);
 u8 move_watch_state_matches(u8 *, s16, s16, s16, s16, s16);
@@ -387,11 +381,6 @@ s32 idle_set_advance(void) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/idle_choose_next_set.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/idle_set_advance.s")
-#endif
 
 /* was func_1507F8A0 */
 s32 idle_delay_random(s32 arg0) {
@@ -450,7 +439,6 @@ void player_play_idle_base_anim(struct127 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 player_hit_reaction(struct127 *, s32);
 void idle_choose_next_set(void);
 s32 idle_set_advance(void);
@@ -613,11 +601,7 @@ void player_idle_animation(void) {
     ctl->unk58 = 1;
     ctl->unk59 = e[4];
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/player_idle_animation.s")
-#endif
 
-#ifdef NON_MATCHING
 void music_play_song(s32, s32, s32);
 void music_stop_song(s32, s32);
 void music_post_event_request(u32, s32);
@@ -684,10 +668,6 @@ void obj_surface_effects_update(struct127 *rec) {
     }
     ctl[6] = flags;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/obj_surface_effects_update.s")
-#endif
-#ifdef NON_MATCHING
 void obj_surface_effects_update(struct127 *);
 
 /* was func_150802A8 */
@@ -731,9 +711,6 @@ void player_idle_state_update(struct127 *arg0) {
         obj_surface_effects_update(arg0);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/player_idle_state_update.s")
-#endif
 /* was func_1508039C */
 void obj_broadcast_bored(u8 *arg0)
 {
@@ -751,7 +728,6 @@ void obj_broadcast_bored(u8 *arg0)
   effect_nodes_broadcast(0xFFFFFFFFFFFFFFFF & sp1C, 0xD);
 }
 
-#ifdef NON_MATCHING
 // obj_near_reachable_node: P256: 1 when `obj` stands in a zone of kind 5 or 0xB (trigger_find_at_point(4, kind, truncated
 // x, y, z)) and one of the nodes of the lists D_800DD280[0][0x15 / 0x16 / 0x17] (position at node +0x98) lies within
 // 1000 units (squared distance < D_8009C0DC = 1e6) and passes look_point_in_joint_range(obj index, joints 0 / 0, node position,
@@ -789,6 +765,3 @@ s32 obj_near_reachable_node(struct127 *obj) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/obj_near_reachable_node.s")
-#endif

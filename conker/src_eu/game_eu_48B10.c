@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* Smoothed view direction of camera `player` (D_800DBFF0 cameras, 0x9A0 bytes each), skipped while
  * D_800BEAC0 is set. The pitch (+0x388, folded into -180..180) and the heading (+0x380) are followed by
  * D_800BEAE0[player] / D_800BEAF0[player] at rate 0.1 (camera +0x698 set), 1.0 (D_800DBFF4 set) or 0.03;
@@ -88,10 +87,3 @@ void camera_update_dir_vector(s32 player) {
 void camera_update_dir_vector_thunk(s32 player) {
     camera_update_dir_vector(player);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_48B10/camera_update_dir_vector.s")
-
-void camera_update_dir_vector_thunk(void) {
-    camera_update_dir_vector();
-}
-#endif

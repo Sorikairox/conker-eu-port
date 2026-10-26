@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_8009684E[];
-#endif
 
 // fat struct to decipher
-#ifdef NON_MATCHING
 extern f32 D_80096850;
 extern f32 D_80096854;
 extern f32 D_80096858;
@@ -275,6 +273,3 @@ void level_obj_init_debris_table(void) {
         var_s1 = (s32 *)((u8 *)var_s1 + (0xC));
     } while (var_s2 != ((u8 *)&D_8009684E));
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3DF10/level_obj_init_debris_table.s")
-#endif

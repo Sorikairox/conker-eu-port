@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A5860[];
-#endif
 
 
 /* was func_151D6F20 */
@@ -102,7 +101,6 @@ void pickup_spin_sparkle_spawn(s16 *arg0, struct127 *arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 u8 *event_get_vars(s32);
 u8 *text_pager_spawn(s32, s32 *, s32, s32, s32, s32, s32, s32);
 s32 anim_model_fx_spawn(s8 *, s32, f32, s32, s32, s32, s32, s32); /* P95: f32 (float bits were passed as an int) */
@@ -227,9 +225,6 @@ block_7:
         memcpy((*(s32 *)((u8 *)temp_v0_2 + 0x48)), &sp.u3C, 0x10);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204730/money_collect_popup_spawn.s")
-#endif
 f32 camera_get_yaw_deg(s32);
 #define MTX_7410(a) (((f32 (*)[16])((a) + 0x7C))[D_800BE9C0])
 /* was func_151D7410 */
@@ -251,7 +246,6 @@ s32 money_popup_mtx_update(u8 *arg0) {
 }
 #undef MTX_7410
 
-#ifdef NON_MATCHING
 /* P241: readable C for money_popup_draw (game_eu_204730, 51 insns). */
 // money_popup_draw: entry 3 of the record table D_80088C40 (dispatcher text_pager_update ends the record, timer +0xE = -1,
 // when the result is 0). Returns 0 once the owner object (data +0) is gone or its id byte +0x3B no longer matches
@@ -285,9 +279,6 @@ s32 money_popup_draw(u8 *rec) {
     text_printf((s32) D_800AB634, *(s32 *) (data + 8));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204730/money_popup_draw.s")
-#endif
 
 /* was func_151D767C */
 void money_popup_on_message(u8 *arg0, s32 arg1, u8 arg2) {

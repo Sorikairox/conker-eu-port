@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 s32 rail_node_nearest(f32, f32, f32, s32, s32);
 f32 vec3f_dot(f32 *, f32 *);
 void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
@@ -511,10 +510,6 @@ void camera_apply_request(struct108 *arg0) {
 #undef ST_PUSH
 #undef ST_X
 #undef ST_Z
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15C660/camera_apply_request.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_15130370 */
 void camera_push_preset(struct108 *arg0, s32 arg1) {
     s32 temp_t0;
@@ -617,6 +612,3 @@ void camera_push_preset(struct108 *arg0, s32 arg1) {
         return;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15C660/camera_push_preset.s")
-#endif

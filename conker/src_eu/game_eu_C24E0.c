@@ -21,7 +21,6 @@ void skin_transform_points(s32 arg0, u8 *arg1) {
     }
 }
 
-#ifdef NON_MATCHING
 /* was func_15094DAC */
 s32 skin_point_table_build(s32 arg0, u8 **arg1) {
     s32 *temp_v0;
@@ -109,10 +108,6 @@ block_12:
     }
     return (s32) var_v0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C24E0/skin_point_table_build.s")
-#endif
-#ifdef NON_MATCHING
 // uv_rotate: writes `count` texture coordinates (s16 u, v pairs of `uv`) rotated by `angle` degrees about the
 // centre ((w / 2) * 32, (h / 2) * 32) to the vertices of `vtx` (stride 0x10, s, t at +8 / +0xA).
 /* was func_15094EC8 */
@@ -133,9 +128,6 @@ void uv_rotate(u8 *vtx, s32 *uv, s32 count, f32 angle, s32 w, s32 h) {
         *(s16 *) (vtx + i * 0x10 + 0xA) = ((f32) src[1] - cv) * c + ((f32) src[0] - cu) * s + cv;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C24E0/uv_rotate.s")
-#endif
 
 extern Mtx *D_800DC6D0[];
 extern f32 D_800D30C8[][4][4];

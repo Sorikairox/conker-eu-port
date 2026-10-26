@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 extern s16 D_80083336;
 
 /* was func_15174270 */
@@ -189,10 +188,6 @@ u8 *occlusion_probe_readback_emit(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 ar
     (*(s32 *)((u8 *)temp_v0 + 0)) = 0xE3000C00;
     return temp_v0 + 8;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1A80/occlusion_probe_readback_emit.s")
-#endif
-#ifdef NON_MATCHING
 typedef struct {
     f32 x, y, z;
     u8 state;
@@ -265,9 +260,6 @@ Gfx *occlusion_probes_update(Gfx *gdl, s16 player) {
     }
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1A80/occlusion_probes_update.s")
-#endif
 typedef struct {
     f32 x, y, z;
     u8 state;
@@ -276,9 +268,6 @@ typedef struct {
     s8 b34;
     s32 v38;
 } Ent_DD778; // size 0x3C
-#ifndef NON_MATCHING
-extern Ent_DD778 D_800DD778[];
-#endif
 
 /* was func_15174B60 */
 s32 occlusion_probe_request(f32 arg0, f32 arg1, f32 arg2, struct_eu_bytes24 *arg3, s8 arg4, s32 arg5) {

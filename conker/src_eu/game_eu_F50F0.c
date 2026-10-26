@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 extern f32 D_800A0880;
 extern f32 D_800A0884;
 void light_ctrl_broadcast(u8, u8, s32);
@@ -68,6 +67,3 @@ s32 light_flicker_update(u8 *arg0, u8 *arg1) {
     }
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F50F0/light_flicker_update.s")
-#endif

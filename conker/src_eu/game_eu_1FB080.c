@@ -1,11 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800AB364[];
 extern u8 D_800AB370[];
 extern u8 D_800A4EA8[];
-#endif
 
 void obj_point_trail_release(u8 *);
 
@@ -50,11 +49,7 @@ void spout_broadcast_stop(s32 arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 spout_effect_spawn(s32, u8, s32, u8, s32);
-#else
-s32 spout_effect_spawn(s32, u8, s32, u8, u8);
-#endif
 void path_fx_release(u8 *);
 /* was func_151CD97C */
 void spout_ctrl_on_message(u8 *arg0, s32 *arg1, u8 arg2) {
@@ -79,7 +74,6 @@ void spout_ctrl_on_message(u8 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 // splash_effect_spawn: spawns a 300-frame effect object (kind 0x34 / 11 / 7 / 0x23) at the s16 point src[0..2]
 // (y raised by src[4]) sized by src[3]; its 0x50-byte parameter block (sizes, rates, centre, owner arg2 / arg1)
 // is copied to the object's data (+0x98). Returns the object (0 if none).
@@ -156,9 +150,6 @@ s32 spout_effect_spawn(s32 src_p, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     }
     return (s32)obj;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/spout_effect_spawn.s")
-#endif
 
 typedef struct { f32 unk0; f32 unk4; f32 unk8; f32 unkC; u8 pad10[0xC]; } S1C;
 typedef struct { s32 x, y, z; } V3i;
@@ -198,7 +189,6 @@ s32 spout_update_fall(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 /* was func_151CDD6C */
 s32 spout_emit_swirl(u8 *arg0) {
     struct {
@@ -300,9 +290,6 @@ s32 spout_emit_swirl(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/spout_emit_swirl.s")
-#endif
 typedef struct {
     f32 unk0;
     f32 unk4;
@@ -360,7 +347,6 @@ s32 spout_smooth_points(u8 *arg0) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 gfx_geometry_mode_cached(s32, s32, s32);
 s32 gfx_load_texture_cached(u8 *, struct_eu_80090F10 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
@@ -546,9 +532,6 @@ u8 *spout_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     }
     return var_s3;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/spout_draw.s")
-#endif
 /* was func_151CEA2C */
 void path_fx_release(u8 *arg0) {
     arg0[0x30] = 0;
@@ -574,7 +557,6 @@ void spout_die_free(u8 *arg0) {
     fxrec_die_free(arg0);
 }
 
-#ifdef NON_MATCHING
 s32 obj_send_hit(s32, s32, s32, s32);
 void obj_get_fx_point_a(u8 *, f32 *, f32 *, f32 *);
 u8 *spout_find_by_id(s32);
@@ -610,10 +592,6 @@ void spout_check_obj_hit(s32 arg0, u8 *arg1) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/spout_check_obj_hit.s")
-#endif
-#ifdef NON_MATCHING
 // node_find_kind11_by_id: searches the node lists D_800DD280[0..1][list] for the two lists named in D_800A5B40
 // (s32 words 0x4D, 0x22) for a node of kind 11 (+0x20) whose sub-object (+0x98) has id (+0x48) == id; NULL if none
 /* was func_151CEBE4 */
@@ -633,11 +611,7 @@ u8 *spout_find_by_id(s32 id) {
     }
     return NULL;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/spout_find_by_id.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 collision_ceiling_static_probe(u8 *, f32, u8 *);
 s32 spawn_region_random_point(s32, s32 *, s32 *, s32 *, f32 *);
 
@@ -731,10 +705,6 @@ void drip_fx_update(u8 *arg0) {
         } while ((*(f32 *)((u8 *)temp_s0 + 8)) > 1.0f);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/drip_fx_update.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_151CEFD0 */
 s32 fx_rise_fade_update(u8 *arg0) {
     f32 temp_f12;
@@ -750,9 +720,6 @@ s32 fx_rise_fade_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/fx_rise_fade_update.s")
-#endif
 typedef struct {
     f32 x;
     f32 y;
@@ -836,7 +803,6 @@ s32 obj_ribbon_anchor_pos(struct_151CF1C0 *arg0, u8 *arg1, u8 *arg2) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 f32 vec3_length(f32 *);
 
 /* was func_151CF204 */
@@ -1023,10 +989,6 @@ s32 obj_ribbon_record(u8 *arg0) {
 block_35:
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/obj_ribbon_record.s")
-#endif
-#ifdef NON_MATCHING
 /* was func_151CF6D0 */
 s32 obj_ribbon_wave_update(u8 *arg0) {
     f32 temp_f0;
@@ -1110,10 +1072,6 @@ s32 obj_ribbon_wave_update(u8 *arg0) {
     (*(f32 *)((u8 *)temp_s4 + 0x24)) = (f32) ((*(f32 *)((u8 *)temp_s4 + 0x24)) + (-0.70900005f * D_800BE9A4));
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/obj_ribbon_wave_update.s")
-#endif
-#ifdef NON_MATCHING
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 
 // ribbon_trail_draw: draws a trail ribbon (same draw-handler shape as spout_draw). Needs at least 2 points
@@ -1227,9 +1185,6 @@ u8 *obj_ribbon_draw(u8 *rope, u8 *gdl, s16 slot) {
     } while (cur != (s8) rope[0x2D]);
     return gdl;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/obj_ribbon_draw.s")
-#endif
 
 /* was func_151CFDF4 */
 void obj_ribbon_on_message(u8 *arg0, s32 arg1, u8 arg2) {
@@ -1283,7 +1238,6 @@ void ground_fx_spawn_random(s32 arg0, f32 arg1, f32 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 /* P170 */
 void mtx_decompose(Mtx *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 void vec3_from_angles_byte(s16, s16, f32, void *);
@@ -1482,9 +1436,6 @@ void object_shatter_effects(u8 *obj, u8 arg1, s32 arg2) {
     debrisKind = 2;
     ground_scatter_spawn(pos, pos[1] - 2000.0f, 200.0f, ground, (random_int() & 3) + 7, 0, (s32) &debrisKind, arg1, arg2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/object_shatter_effects.s")
-#endif
 
 /* was func_151D0024 */
 void obj_fx_broadcast_kill(u8 *arg0) {
@@ -1532,7 +1483,6 @@ void limb_band_check_anim(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 /* file-scope prototypes above: gfx_load_texture_cached / gfx_set_combine_mode / gfx_geometry_mode_cached / gfx_other_mode_cached (s32 display lists),
    vtx_slot_buffer_get, vec3_length, D_800D30BC, D_800A4EA8 (u8[]) */
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
@@ -1693,9 +1643,6 @@ Gfx *limb_band_draw(Gfx *gfx, u8 *obj, s16 slot) {
     return gfx;
 }
 #undef BAND_VTX
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/limb_band_draw.s")
-#endif
 
 /* NEAR 2 from fire_smoke_trail_handle_msg: sib -li at,#; sib -beq a2,at,T */
 /* was func_151D0EA0 */
@@ -1717,7 +1664,6 @@ void limb_band_on_message(struct102 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-#ifdef NON_MATCHING
 void hitinfo_from_obj_floor(void *, u8 *);
 u8 *particle_spawn_ex(s32 *, s32, s32, s32, s32, s32);
 void mtx_transform_points(f32 **, f32 **, void *, s32);
@@ -1974,9 +1920,6 @@ void objfx_joint_flash_burst(u8 *arg0, s32 arg1, s32 arg2) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/objfx_joint_flash_burst.s")
-#endif
 /* was func_151D1488 */
 void fx_kill_linked_node(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0xA8) != 0) { node_destroy(*(struct102 **)(p + 0xA8)); } }
 
@@ -2035,7 +1978,6 @@ s32 object_point_above_pos(f32 *arg0, f32 *arg1) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 s32 object_offset_point(u8 *obj, f32 *out, u8 which);
 
 /* P162: D_8008FFD0 entries 1 / 2. obj_point_trail_update (asm) and obj_point_trail_spawn test the result ("point found"), so these
@@ -2051,17 +1993,7 @@ s32 object_offset_point_0(u8 *obj, f32 *out) {
 s32 object_offset_point_1(u8 *obj, f32 *out) {
     return object_offset_point(obj, out, 1);
 }
-#else
-void object_offset_point_0(s32 arg0, s32 arg1) {
-    object_offset_point(arg0, arg1, 0);
-}
 
-void object_offset_point_1(s32 arg0, s32 arg1) {
-    object_offset_point(arg0, arg1, 1);
-}
-#endif
-
-#ifdef NON_MATCHING
 extern f32 D_800AB37C[2][3];
 
 // object_offset_point: transforms the fixed offset D_800AB37C[which] by the object's matrix (obj + 0x1D4) into
@@ -2076,11 +2008,7 @@ s32 object_offset_point(u8 *obj, f32 *out, u8 which) {
     mtx_transform_point_or_origin(D_800AB37C[which], out, mtx);
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/object_offset_point.s")
-#endif
 
-#ifdef NON_MATCHING
 /* P247: the record obj_point_trail_spawn builds at self + 0x28 (same layout as its stack copy). */
 typedef struct {
     u8 *obj;                /* 0x00 followed object */
@@ -2133,9 +2061,6 @@ void obj_point_trail_update(u8 *self) {
         obj_point_trail_create(self);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/obj_point_trail_update.s")
-#endif
 
 /* was func_151D18D8 */
 void obj_point_trail_on_message(u8 *arg0, s32 arg1, u8 arg2) {
@@ -2176,7 +2101,6 @@ void obj_point_trail_release(u8 *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 /* was func_151D19F8 */
 void obj_point_trail_create(u8 *arg0) {
     struct {
@@ -2239,10 +2163,6 @@ void obj_point_trail_create(u8 *arg0) {
         (*(u8 **)((u8 *)sp44 + 8)) = temp_v0;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/obj_point_trail_create.s")
-#endif
-#ifdef NON_MATCHING
 f32 wrap_float_range(f32 value, f32 range, f32 base);
 // tank_track_record: entry 17 of D_8008A5DC (`s32 (*)(u8 *)`, result tested by the path updater). Once per frame
 // (D_800BE9E4 > 0) records the owner object's (**(arg0 + 0x98)) position (+0x40..+0x48) as the path's new head
@@ -2360,11 +2280,7 @@ s32 tank_track_record(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/tank_track_record.s")
-#endif
 
-#ifdef NON_MATCHING
 /* was func_151D1F2C */
 s32 obj_point_trail_fade(u8 *arg0) {
     f32 sp3C;
@@ -2463,10 +2379,6 @@ s32 obj_point_trail_fade(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/obj_point_trail_fade.s")
-#endif
-#ifdef NON_MATCHING
 // trail_ribbon_draw: entry 18 of D_8008A644 (`s32 (u8 *, s32 dl, s16 slot)`, dispatcher fxrec_draw: returns the
 // advanced display list). Draws a path as a textured ribbon: needs 2+ points (+0x2C); gets the slot's vertex buffer
 // (vtx_slot_buffer_get on +0x84, (+0x25 * 32 + 0xA0) bytes; returns `dl` unchanged without one), sets up texture 0xBC of
@@ -2606,9 +2518,6 @@ s32 tank_track_draw(u8 *arg0, s32 dl, s16 slot) {
     }
     return (s32) gfx;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/tank_track_draw.s")
-#endif
 /* was func_151D27EC */
 void path_owner_clear_link(u8 *arg0) {
     s32 **temp_v0 = *(s32 ***)(arg0 + 0x98);

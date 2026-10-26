@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-#ifdef NON_MATCHING
 /* P122: vertex wave animators (hand asm in the ROM), readable C; called by vtx_anims_update. */
 extern f32 D_8009A5E0[]; /* cos(i * 2pi / 256) for i = 0..64 (a quarter wave) */
 
@@ -24,9 +23,7 @@ extern f32 D_8009A5E0[]; /* cos(i * 2pi / 256) for i = 0..64 (a quarter wave) */
 #define VTXWAVE_AMP(st) (*(f32 *) ((st) + 4))
 #define VTXWAVE_PHASE(st) (*(u16 *) ((st) + 0x10))
 #define VTXWAVE_SPEED(st) (*(s8 *) ((st) + 0x12))
-#endif
 
-#ifdef NON_MATCHING
 /* vtx_wave_y_per_vertex: out[i].y = base[i].y + rint(cos(phase[i] - shift) * amp[i]) for the count vertices
  * (no offset where amp[i] <= 0); shift = state phase >> 4. Hand asm; count >= 1 (the asm loop wraps at 0). */
 /* was func_150A7480 */
@@ -48,11 +45,7 @@ void vtx_wave_y_per_vertex(Vtx *out, s32 count, u8 *state, u8 *phase, f32 *amp, 
     }
     VTXWAVE_PHASE(state) = (VTXWAVE_PHASE(state) + VTXWAVE_SPEED(state)) & 0xFFF;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D4C90/vtx_wave_y_per_vertex.s")
-#endif
 
-#ifdef NON_MATCHING
 /* vtx_wave_y: out[i].y = base[i].y + rint(cos(phase[i] - shift) * amplitude) with the state's amplitude for every
  * vertex; shift = state phase >> 4. Hand asm; count >= 1. */
 /* was func_150A75A0 */
@@ -70,11 +63,7 @@ void vtx_wave_y(Vtx *out, s32 count, u8 *state, u8 *phase, Vtx *base) {
     }
     VTXWAVE_PHASE(state) = (VTXWAVE_PHASE(state) + VTXWAVE_SPEED(state)) & 0xFFF;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D4C90/vtx_wave_y.s")
-#endif
 
-#ifdef NON_MATCHING
 /* vtx_wave_y_colour: as vtx_wave_y (state amplitude) and the vertex colour follows the wave:
  * channel c = colour[2c] + ((rint(cos * 1024) * colour[2c + 1]) >> 10) (base, swing bytes). Hand asm; count >= 1. */
 /* was func_150A76A8 */
@@ -104,11 +93,7 @@ void vtx_wave_y_colour(Vtx *out, s32 count, u8 *state, u8 *colour, u8 *phase, Vt
     }
     VTXWAVE_PHASE(state) = (VTXWAVE_PHASE(state) + VTXWAVE_SPEED(state)) & 0xFFF;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D4C90/vtx_wave_y_colour.s")
-#endif
 
-#ifdef NON_MATCHING
 /* vtx_wave_y_colour_per_vertex: as vtx_wave_y_colour with a per-vertex amplitude amp[i]; where amp <= 0 (from there on phase / amp stay on that element: Rare advances them only for amp > 0) the
  * vertex gets the base colour (colour[0], [2], [4]) and no offset. Hand asm; count >= 1. */
 /* was func_150A7840 */
@@ -146,11 +131,7 @@ void vtx_wave_y_colour_per_vertex(Vtx *out, s32 count, u8 *state, u8 *colour, u8
     }
     VTXWAVE_PHASE(state) = (VTXWAVE_PHASE(state) + VTXWAVE_SPEED(state)) & 0xFFF;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D4C90/vtx_wave_y_colour_per_vertex.s")
-#endif
 
-#ifdef NON_MATCHING
 /* vtx_wave_y_normal_colour: per-vertex amplitude wave (as vtx_wave_y_per_vertex) whose colour is a direction:
  * with a = phase[i] - shift, t = rint(cos(a - 64) * 64), e = cos(t - 64) * 127 and h = hue[i]:
  * colour = (rint(e * cos(h - 64)), rint(cos(t) * 127), rint(e * cos(h))); (0, 0x7F, 0) and no offset where
@@ -196,12 +177,5 @@ void vtx_wave_y_normal_colour(Vtx *out, s32 count, u8 *state, u8 *hue, u8 *phase
     }
     VTXWAVE_PHASE(state) = (VTXWAVE_PHASE(state) + VTXWAVE_SPEED(state)) & 0xFFF;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D4C90/vtx_wave_y_normal_colour.s")
-#endif
 
 /* P279: private entry of vtx_wave_y_normal_colour (sine lookup by quarter, t4/s6/s7 in, f8 out, returns via v0): folded into the VTX_WAVE_COS macro of vtx_wave_y_normal_colour's NM C */
-#ifndef NON_MATCHING
-/* was func_150A7BD0 */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D4C90/vtx_wave_cos_lookup.s")
-#endif

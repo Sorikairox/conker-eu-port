@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void vec_rotate_xz_about_point(u8 *, u8 *, f32, u8 *);
 
 /* Player sideways tilt: while button bit 0 or 1 of the pad word (*unk36C) is held (and flag 0x200000 of unk84 is
@@ -50,6 +49,3 @@ s32 camera_sideways_tilt(struct108 *p) {
     vec_rotate_xz_about_point((u8 *) &p->unk2F8, (u8 *) &p->unk2A4, *angle * D_800BE9A4 / 2.5f, (u8 *) &p->unk2F8);
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15B110/camera_sideways_tilt.s")
-#endif

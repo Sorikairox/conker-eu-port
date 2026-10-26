@@ -2,12 +2,10 @@
 
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A30A0[];
-#endif
 
 // loops...
-#ifdef NON_MATCHING
 extern s32 D_800A30B8;
 extern s32 D_800A30BC;
 extern s32 D_800A30D4;
@@ -86,6 +84,3 @@ loop_2:
         var_a2 = (s32 *)((u8 *)var_a2 + (3));
     } while (var_v0 != &D_800DA2E4);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2DDF0/level_init_color_tables.s")
-#endif

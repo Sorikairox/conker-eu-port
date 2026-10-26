@@ -18,7 +18,6 @@ void video_init_screen(void) {
     // EU: the VI mode is no longer set here
 }
 
-#ifdef NON_MATCHING
 /* was func_10003ACC */
 void framebuffer_fill_color(s32 arg0, s32 arg1, s32 arg2) {
     s16 *var_v1_2;
@@ -69,11 +68,7 @@ block_10:
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_39C0/framebuffer_fill_color.s")
-#endif
 // EU only
-#ifdef NON_MATCHING
 extern s32 D_8002AF20;
 
 /* was func_10003C10 */
@@ -108,6 +103,3 @@ void vi_mode_set_window(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
         (*(u32 *)((u8 *)(&D_8002AF20) + 0x40)) = temp_t2;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_39C0/vi_mode_set_window.s")
-#endif

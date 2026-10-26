@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void water_waves_update(void);
 s32 random_int(void);
 // level_ambient_cue_update: level update handler (D_8008D0A4[14]): runs water_waves_update, then counts the cue timer
@@ -46,6 +45,3 @@ void level_ambient_cue_update(s32 arg0) {
     pos = (s16 *) (D_800D34B8 + id * 0x34);
     sound_play_at((u32) random_int() % 3 + 0x6C, 0x5DC0, 0, 0, 0, pos[0], pos[1], pos[2], 0x320, 0x5DC);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE450/level_ambient_cue_update.s")
-#endif

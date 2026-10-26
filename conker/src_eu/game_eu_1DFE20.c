@@ -1,9 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A4EA8[];
-#endif
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x38];
@@ -143,7 +142,6 @@ s32 cord_rig_get_state(u8 *arg0) {
     return ret;
 }
 
-#ifdef NON_MATCHING
 extern s32 D_800AA700;
 extern s32 D_800AA70C;
 extern s32 D_800AA718;
@@ -288,10 +286,6 @@ void cord_rig_spawn_three_ropes(u8 *arg0) {
         memcpy(temp_v0_3 + 0x150, &sp.u34, 0x30);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/cord_rig_spawn_three_ropes.s")
-#endif
-#ifdef NON_MATCHING
 /* a light attachment: owner, its room byte, a mode and an offset from the owner */
 typedef struct {
     u8 *owner;
@@ -411,9 +405,6 @@ void cord_rig_spawn_twin_ropes(u8 *obj) {
         memcpy((u8 *) b + 0x28, &beam, 0x28);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/cord_rig_spawn_twin_ropes.s")
-#endif
 
 /* was func_151B2F00 */
 void cord_rig_rope_unlink(struct_eu_1DFE20_d *arg0) {
@@ -424,7 +415,6 @@ void cord_rig_rope_unlink(struct_eu_1DFE20_d *arg0) {
     }
 }
 
-#ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 gfx_geometry_mode_cached(u8 *, s32, s32);
 s32 gfx_env_color_cached(s32, s32, s32, s32, s32, s8 *);
@@ -570,9 +560,6 @@ block_11:
     }
     return var_s0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/cord_plank_draw.s")
-#endif
 /* was func_151B3474 */
 void cord_plank_handle_link_msg(s32 arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);

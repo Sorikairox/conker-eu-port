@@ -4,7 +4,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 s32 asset_load_with_subfiles(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, ...);
 s32 asset_load_ptr(s32 *arg0, s32 arg1, ...);
@@ -330,9 +329,6 @@ void world_objects_load(s32 arg0, s32 arg1) {
 #undef W32
 #undef WPTR
 #undef WF32
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/world_objects_load.s")
-#endif
 
 // FIXME: matches but something isnt right
 /* was func_15004574 */
@@ -347,7 +343,6 @@ void world_object_cache_selected(void) {
 void world_objects_noop(void) {
 }
 
-#ifdef NON_MATCHING
 void world_objects_clear_arrays(void);
 void world_record_build_matrix(f32 (*arg0)[4], u8 *arg1);
 void mtxf_transform_point(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
@@ -433,9 +428,6 @@ void world_objects_level_start(s32 arg0) {
         *(f32 *)(r + 0x84) = out1;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/world_objects_level_start.s")
-#endif
 /* was func_150049A4 */
 void gfx_dl_relocate_segments(Gfx *arg0, s32 arg1, s32 arg2) {
     s32 i;
@@ -466,7 +458,6 @@ void world_objects_clear_arrays(void) {
     }
 }
 
-#ifdef NON_MATCHING
 extern u16 D_800BE6C0;
 extern u16 D_800BE6C2;
 extern u16 D_800BE6C4;
@@ -521,9 +512,6 @@ void world_object_calc_radius(u8 *arg0, s32 arg1) {
         D_800BE6C4 += 1;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/world_object_calc_radius.s")
-#endif
 /* was func_15004BF0 */
 s32 world_object_alloc_id(s32 arg0) {
     s32 i;

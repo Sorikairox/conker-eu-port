@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A5860[];
-#endif
 
 
-#ifdef NON_MATCHING
 s32 vec3_normalize_len(f32 *, f32 *, f32 *, s32 *);
 s32 tracer_hit_update(s32, s32 *, u8 *, s32 *, s32 *, f32, s32, u8 *, s32 *, s8 *, s32, f32, u8 *, s32, s32, s32, s32, s32);
 s32 vec3_make_basis(f32 *, s32 *, s32 *);
@@ -162,11 +160,7 @@ void beam_light_effect_spawn(f32 *a0, void *a1, void *a2, void *a3, u8 arg4, u8 
         memcpy((s32) (e + 0x170), (s32 *) &lt, 0xB4);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/beam_light_effect_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
 void object_take_hit(u8 *obj, u8 *attacker, u8 *pos, f32 *pos2, u8 *rec, s32 flags, f32 *dir, u8 arg7, s32 arg8);
 void rocket_explode(u8 *arg0, u8 arg1, s32 arg2);
@@ -336,9 +330,6 @@ s32 rocket_update(u8 *obj) {
     }
     return alive;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/rocket_update.s")
-#endif
 
 extern f32 D_800A1FA8;
 /* was func_150F83A0 */
@@ -359,37 +350,22 @@ s32 pulse_sprite_update(u8 *arg0)
   return 1;
 }
 
-#ifdef NON_MATCHING
 /* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
    matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
 /* was func_150F84D8 */
 u8 * pulse_sprite_draw(u8 *arg0, s16 arg1) {
     return (u8 *) sprite_quad_build_axes(arg0, arg0 + 0x110, arg0 + 0x11C, arg1);
 }
-#else
-void pulse_sprite_draw(u8 *arg0, s16 arg1) {
-    sprite_quad_build_axes(arg0, arg0 + 0x110, arg0 + 0x11C, arg1);
-}
-#endif
 
-#ifdef NON_MATCHING
 s32 spark_shower_spawn(u8 *, f32, f32, f32, f32, u8, s32); /* P95: f32 parameter */
-#else
-void spark_shower_spawn(u8 *, f32, s32, f32, f32, u8, s32);
-#endif
 void muzzle_light_small_spawn(u8 *, u8, s32);
 
 /* was func_150F850C */
 void rocket_explode(u8 *arg0, u8 arg1, s32 arg2) {
-#ifdef NON_MATCHING
     spark_shower_spawn(arg0, 9.0f + random_float() * 3.0f, 0.511905f, 70.0f + random_float() * 70.0f, 0.0f, arg1, arg2); /* P95: float literal (asm passes the bits 0x3F030C35) */
-#else
-    spark_shower_spawn(arg0, 9.0f + random_float() * 3.0f, 0x3F030C35, 70.0f + random_float() * 70.0f, 0.0f, arg1, arg2);
-#endif
     muzzle_light_small_spawn(arg0, arg1, arg2);
 }
 
-#ifdef NON_MATCHING
 /* P159 */
 s32 mdl_particle_spawn_ex(void *, s32, s32, s32, s32, s32, s32);
 extern u8 D_800A5860[];
@@ -481,11 +457,7 @@ void trail_follower_spawn(f32 *rec, s16 life, u8 flag, s32 arg3) {
         memcpy(p + 0x170, (s32 *)&sp.rec, 0x14);
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/trail_follower_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 vec3_normalize_len(f32 *, f32 *, f32 *, s32 *);
 s32 vec3_make_basis(f32 *, s32 *, s32 *);
 s32 memcpy(s32, s32 *, s32);
@@ -622,6 +594,3 @@ s32 trail_follower_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/trail_follower_update.s")
-#endif

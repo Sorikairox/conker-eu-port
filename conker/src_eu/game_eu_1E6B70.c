@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-#ifdef NON_MATCHING
 /* P289: swinging_lamp_spawn's records (the N64 layouts: the callees copy / read them by offset) */
 typedef struct {            /* mdl_particle_spawn's particle spec (0x76 bytes; same layout as game_eu_201240's ImpactParticle) */
     f32 scale[4];           /* 0x00 */
@@ -185,11 +184,7 @@ void swinging_lamp_spawn(s32 arg0, u8 which, u8 arg2, u8 arg3) {
     spawn.u4C = 0xFF;
     ((DripLink *)(obj + 0x18))->emitter = particle_emitter_spawn(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, arg2, arg3);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E6B70/swinging_lamp_spawn.s")
-#endif
 
-#ifdef NON_MATCHING
 extern f32 D_800AA944;   /* ~0.0234f (rodata) */
 /* was func_151B97C4 */
 s32 swinging_lamp_swing_update(u8 *arg0) {
@@ -219,9 +214,6 @@ s32 swinging_lamp_swing_update(u8 *arg0) {
     }
     return 1;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E6B70/swinging_lamp_swing_update.s")
-#endif
 /* was func_151B98C0 */
 s32 swinging_lamp_get_matrix(Mtx *arg0, u8 *arg1) {
     f32 mf[4][4];
@@ -245,7 +237,6 @@ s32 swinging_lamp_get_matrix(Mtx *arg0, u8 *arg1) {
     return 1;
 }
 
-#ifdef NON_MATCHING
 void mtxf_transform_point(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 /* searchlight_light_update: P237. D_8008B0F0 handler of the swinging searchlight (object at effect +0x18, which
  * swinging_lamp_swing_update swings: angle +0x170, position +0x38, scale +0x18 / +0x1C). The lamp point (0, -150, 0) of the
@@ -296,9 +287,6 @@ s32 swinging_lamp_light_update(struct225 *arg0) {
     return 1;
 }
 #undef B9B8_BEAM
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E6B70/swinging_lamp_light_update.s")
-#endif
 
 /* was func_151B9C10 */
 void swinging_lamp_kick(f32 *arg0) {

@@ -1,16 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+// hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A04D0[];
-#endif
 
 
 /* was func_150BF470 */
 void stub_empty_bf470(s32 arg0) {
 }
 
-#ifdef NON_MATCHING
 void particle_emitter_node_spawn(s16, s16, s16, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, s16, s16, s16, s16, u16, u8, u8, u8, u8, s16, u16, u16, u8, u8, u8, u8, u8, s32, u8, u8, u8, s32);
 
 /* was func_150BF47C */
@@ -26,10 +24,6 @@ void twin_particle_emitters_spawn(s32 arg0) {
         var_s0 = -var_s0;
     } while (var_s1 != 2);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/twin_particle_emitters_spawn.s")
-#endif
-#ifdef NON_MATCHING
 /* fade_slide_update: per-frame update of a fading, sliding element (no direct caller; reached through a table, returns
  * a done flag). The level +0x1F rises by +0x27 per tick (D_800BE9E4) up to +0x26 while +0x24 is set, else falls by
  * +0x2F per tick down to 0; when it is 0 and +0x24 clear the element is done (1). Otherwise the s16 position +0x14 /
@@ -75,11 +69,7 @@ s32 fade_slide_update(u8 *e) {
     e[0x2C] = level;
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/fade_slide_update.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 world_object_sound_play(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags);
 void object_sound_set_volume_pitch(s32 arg0, s32 arg1, s32 arg2);
 void mtxf_translate(u8 *mtx, s32 x, s32 y, s32 z);
@@ -198,11 +188,7 @@ void lift_platform_update(u8 *p) {
         dst[i * 8 + 2] = z;
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/lift_platform_update.s")
-#endif
 
-#ifdef NON_MATCHING
 void scenery_door_swing_angle_update(u8 *);
 s32 texture_anim_start_for(u8 *, s32, s32, s32, s32, s32, s32);
 s32 setup_entry_try_spawn(s32, s32);
@@ -278,11 +264,7 @@ void door_lift_update(u8 *p) {
         }
     }
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/door_lift_update.s")
-#endif
 
-#ifdef NON_MATCHING
 void rubble_burst_with_dust(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 u8 *cam_wobble_start_preset(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4);
 void object_ring_burst_particles(u8 *obj, s32 arg1, s32 arg2);
@@ -414,11 +396,7 @@ void sinking_platform_update(u8 *p) {
     p[0x73] &= 0xFC;
     p[0x73] |= mode;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/sinking_platform_update.s")
-#endif
 
-#ifdef NON_MATCHING
 s32 object_hit_effects(u8 *, s32, s32, s32, s32, s32, s32, s32);
 void emit_particle_burst_req(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 
@@ -519,11 +497,7 @@ void object_land_puff(u8 *obj) {
     req.u68 = 0.877551f;
     emit_particle_burst_req((u8 *) &req, 0xFF, 0xFF, 1);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/object_land_puff.s")
-#endif
 
-#ifdef NON_MATCHING
 void emit_particle_burst_req(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 D_800A04D4;
 
@@ -671,10 +645,6 @@ s32 particle_land_shatter(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *
     emit_particle_burst_req(&sp.u34, 0xFF, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
     return 0;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/particle_land_shatter.s")
-#endif
-#ifdef NON_MATCHING
 s32 emit_spark_burst(s32 *, s16 *, u8, s32);
 extern s32 D_800A04D8;
 
@@ -759,10 +729,6 @@ void spark_burst_at(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
     sp.u32 = 0x23;
     emit_spark_burst(&sp.u34, &sp.u2C, arg4, arg5);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/spark_burst_at.s")
-#endif
-#ifdef NON_MATCHING
 s32 mdl_particle_land_bounce_settle(u8 *, f32, f32, f32, f32, s32); /* P95: f32 (float bits were passed as an int) */
 void emit_particle_burst_req(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 D_800A04DC;
@@ -947,6 +913,3 @@ s32 particle_land_maybe_shatter(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4
     }
     return mdl_particle_land_bounce_settle(arg0, arg1, arg2, arg3, arg4, arg5);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/particle_land_maybe_shatter.s")
-#endif

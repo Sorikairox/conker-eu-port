@@ -109,7 +109,6 @@ void water_ring_update(struct102 *arg0) {
     *(u8 *)((u8 *)arg0 + 0x92) = temp_v0;
 }
 
-#ifdef NON_MATCHING
 f32 math_cos_u8(u8);
 
 /* was func_151667D8 */
@@ -318,10 +317,6 @@ u8 *water_ring_draw(u8 *arg0, u8 *arg1, s32 arg2) {
     }
     return var_a3;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_193D00/water_ring_draw.s")
-#endif
-#ifdef NON_MATCHING
 extern s16 D_800DD270;
 extern s32 D_800DD650;
 extern s32 D_800DD654;
@@ -353,6 +348,3 @@ Gfx *layer_pre_scroll_texture(Gfx *gdl, s32 layer, s32 list, s16 arg3) {
     gdl = (Gfx *) sprite_load_texture((u8 *) gdl, (s32 *) D_800DD658, D_800DD650, (s32 *) D_800DD660, 0, 0, 0, 1, 3);
     return gfx_other_mode_cached(gdl, D_800D30BC | 0x82CA0, D_800A4EA8[7] | D_800A4EA8[6], &one);
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_193D00/layer_pre_scroll_texture.s")
-#endif
