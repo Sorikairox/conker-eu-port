@@ -44,3 +44,14 @@ default eu build stays byte-identical.
 - Some analysis tools only recognise `func_[0-9A-F]{8}` names (e.g. port/tools/n64mem.py, stubcalls.py,
   m2c_sanity.py call scans, port/tools/bootpath.py, difftest def_intfirst / function-size fallback). They take sizes
   and addresses from the ELF first, but renamed functions may drop out of their call lists until they learn names.
+
+## Port mode (P328; becomes the default in cleanup part 2)
+Since P328 the port tools take names and addresses from the frozen table `port/symbols/symbols.tsv` (see
+`port/symbols/freeze_symbols.py` for the columns), not from the byte-matching build. `tools/eu_port/rename.py --port`
+(and `--port --check`, `--port --verify`) renames in `conker/src_eu`, `conker/include`, `port/` and `tools/` only: the
+table row is renamed like any other use, so the table, not splat, carries the new name. It never touches
+`conker/symbol_addrs.eu.txt`, the undefined lists, `conker.eu.yaml` or `conker/Makefile`, and `--port --verify` runs
+`tools/eu_port/check.sh --port` (implicit_scan, romabs_check, difftest selftest on the ROM, census, web build) instead
+of verify_all + the NM link. `APPLY_PORT=1 tools/eu_port/apply_names.sh NN` does the whole proposals flow in port
+mode (inner entry points from the table). Cleanup part 2 deletes the matching build and makes port mode the default
+(the old mode stays on branch `exact-byte-decomp-wip`).

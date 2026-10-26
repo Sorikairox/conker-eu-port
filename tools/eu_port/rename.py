@@ -23,11 +23,19 @@ Left alone: conker/src (the US version), US/debug/ects symbol files, every *.md,
 difftest inputs), *.log, port_work/, historical logs (tools/eu_port/repair_log.tsv, tools/port/pilot/, baseline/),
 vendored tools (n64splat, asm-processor, asm-differ, mips_to_c, decomp-permuter), and text of the form `was <old>`.
 
+Port mode (P328, --port): for port-web after the split from the byte-matching build (branch exact-byte-decomp-wip).
+Renames in conker/src_eu, conker/include, port/ and tools/ only (no conker/symbol_addrs / undefined lists / yaml /
+Makefile); the frozen port symbol table port/symbols/symbols.tsv is in scope, so the name is renamed in the table
+(the table, not splat, is the source of truth for names and addresses). A name with no table row (NON_MATCHING-only
+function) gets no row, as before. --port --verify = old names left + tools/eu_port/check.sh --port (no verify_all,
+no NM link). Cleanup part 2 makes port mode the default and removes the matching-build mode.
+
 Usage (repo root, after eval "$(tools/eu_port/wt.sh env <name>)"):
   tools/eu_port/rename.py --check [OLD ...]   dry run: every file/line it would change
   tools/eu_port/rename.py [OLD ...]           apply (all rows, or only the listed old names)
   tools/eu_port/rename.py --verify            verify_all.sh (clean re-split, must stay byte-identical) + NM link +
                                               no in-scope use of any old name left
+  add --port to any of these for port mode (above)
 """
 import os, re, subprocess, sys
 
@@ -44,6 +52,11 @@ SKIP = ('tools/n64splat/', 'tools/asm-processor/', 'tools/asm-differ/', 'tools/m
 SKIP_EXT = ('.md', '.log', '.png', '.jpg', '.bin', '.z64', '.o', '.wasm', '.gz', '.zip')
 SYM_HDR = '// P322 rename.py: functions renamed through tools/eu_port/names.tsv (name = EU address)'
 IDENT = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$')
+PORT = '--port' in sys.argv[1:]
+PORT_TABLE = 'port/symbols/symbols.tsv'
+if PORT:    # P328 port mode: C + the frozen port symbol table only
+    SCOPE = ('conker/src_eu/', 'conker/include/', 'port/', 'tools/')
+    SKIP = SKIP + ('port/symbols/freeze_symbols.py', 'port/symbols/ido_cc.tsv')
 
 
 def word(name):
@@ -105,6 +118,12 @@ _MAP = None
 
 def map_addr(names):
     global _MAP
+    if _MAP is None and PORT:   # P328: addresses from the frozen port symbol table
+        _MAP = {}
+        for line in open(os.path.join(ROOT, PORT_TABLE)):
+            f = line.split('\t')
+            if not line.startswith('#') and len(f) > 1:
+                _MAP.setdefault(f[0], int(f[1], 16))
     if _MAP is None:    # parsed once: name -> address (re-reading the map per row made big tables take hours)
         _MAP = {}
         try:
@@ -192,6 +211,8 @@ def plan(rows, only):
             re.search(r'^%s\s*=' % re.escape(new), symtxt, re.M) and
             not re.search(r'^%s\s*=' % re.escape(old), symtxt, re.M)) or (
             map_addr([new]) is not None and map_addr([new]) == map_addr([old])) or (
+            # port mode: the table row was renamed already (new listed, old gone)
+            PORT and map_addr([new]) is not None and map_addr([old]) is None) or (
             # NON_MATCHING-only functions get no symbol entry: the `/* was old */` comment marks them as done
             any(('/* was %s */' % old) in texts[p] for p in inv.get(new, ()) if p.startswith('conker/src_eu/')))
         if not ours:
@@ -222,7 +243,10 @@ def plan(rows, only):
                 moves.append((p, np_)); report.append('git mv %s %s' % (p, np_))
         # symbol list: rename in place (old listed) or add new = EU address
         symnow = edits.get(SYMS, symtxt)
-        if not re.search(r'^' + re.escape(new) + r'\s*=', symnow, re.M):
+        if PORT:    # the table row (if any) was renamed with the other in-scope uses above
+            if map_addr([old, new]) is None:
+                report.append('NOTE: %s has no row in %s (NON_MATCHING-only): no table entry' % (old, PORT_TABLE))
+        elif not re.search(r'^' + re.escape(new) + r'\s*=', symnow, re.M):
             a = map_addr([old, new])
             if a is None and (hits or ours):
                 # NON_MATCHING-only function (code inside an asm routine split out as its own C function): the
@@ -282,6 +306,11 @@ def verify(rows):
             if word(old).search(tc):
                 left.append('%s still uses %s' % (p, old))
     print('old names left in scope: %d' % len(left)); print('\n'.join(left[:20])); ok &= not left
+    if PORT:    # P328: no matching build to re-split; the port checks instead
+        r = subprocess.run(['tools/eu_port/check.sh', '--port'], cwd=ROOT, env=env, capture_output=True, text=True)
+        print(r.stdout.strip()[-1500:]); print('check.sh --port rc %d' % r.returncode); ok &= r.returncode == 0
+        print('VERIFY OK' if ok else 'VERIFY FAILED')
+        return 0 if ok else 1
     r = subprocess.run(['tools/eu_port/verify_all.sh'], cwd=ROOT, env=env, capture_output=True, text=True)
     print(r.stdout.strip()[-600:]); print('verify_all rc %d' % r.returncode); ok &= r.returncode == 0
     ct = os.environ.get('CONKERDEV')
