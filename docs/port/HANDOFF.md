@@ -10,6 +10,18 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P319 (port-web) (session P319, 2026-10-26). Details: `docs/port/sessions/P319.md`
+- First browser test of the 100% build. Boot trapped in free() from func_100014C4 (K0_TO_PHYS / PHYS_TO_K0 pair on
+  D_8003BE74 / D_8003BE70 set by the now-C func_10005B04). Fixed port side: vbe.py K0_PHYS_SITES. Checks green.
+- Intro det=2: 0 traps / 0 stubs, same scene frames, milk glass + gloves OK, past "Em, this way". Race A plays (7447).
+  Routes pan8 / r5g: 0 traps, diverge slightly from retrace 7650 and fall at an earlier gap (re-tune needed).
+- play.sh refreshed (~/conker-play/build-20261026-093601, dad35035).
+## Next steps (from P319)
+1. Re-tune `p261/r5g.goto` / pan8 on this build (fall after waypoint 30, retrace 11822), then re-check lever / Frying Pan.
+2. Optional: find the first differing frame vs P265 around retrace 7586..7650 (river jump) with p205 position dumps, to
+   confirm it is a legit change (P265..P317 conversions) and not a new C bug.
+3. Other `| 0x80000000` / `& 0x0FFFFFFF` sites in game C may hide more PC pointer issues; the K0_* vbe tables are the fix.
+
 ## P318 (port-web) (session P318, 2026-10-26). Details: `docs/port/sessions/P318.md`
 - Merged port-b P317 (conversion complete). Checks green (verify_all, NM, protocheck 0, implicit 0, romabs 0 FAIL,
   selftest 152, census 722 0 FAIL). Stub census: no game stubs, only platform-replaced / trap ones.
