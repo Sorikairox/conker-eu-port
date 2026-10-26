@@ -2,7 +2,8 @@
 # Back up the work to the user's PRIVATE repo (origin = Sorikairox/conker-eu-port).
 # Never pushes to upstream (mkst/conker). Uses gh's credentials without changing global git config.
 # port-web is the integration branch and must hold the latest of everything (user rule, 2026-10-26):
-# eu is fast-forwarded to it, and any other local branch with commits port-web lacks is reported.
+# eu is fast-forwarded to it, and any other local branch with commits port-web lacks is reported
+# (except exact-byte-decomp-wip, the matching-build branch split off in P328).
 set -e
 cd "$(dirname "$0")/../.."
 url=$(git remote get-url origin)
@@ -17,9 +18,12 @@ else
 fi
 for b in $(git for-each-ref --format='%(refname:short)' refs/heads); do
   [ "$b" = master ] && continue
+  # exact-byte-decomp-wip keeps the byte-matching decomp build (IDO/splat/asm) frozen at the P328 split; it
+  # diverges from port-web on purpose, so it is pushed but never reported as unmerged.
+  [ "$b" = exact-byte-decomp-wip ] && continue
   n=$(git rev-list --count "port-web..$b")
   [ "$n" = 0 ] || echo "WARNING: $b has $n commits port-web lacks: merge it into port-web" >&2
 done
 git -c credential.helper= -c credential.helper='!gh auth git-credential' \
-  push --quiet origin eu port-web 2>&1 | tail -3
+  push --quiet origin eu port-web exact-byte-decomp-wip 2>&1 | tail -3
 echo "backup push done: $(date '+%F %T')"
