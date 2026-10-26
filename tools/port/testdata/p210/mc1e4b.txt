@@ -5,12 +5,12 @@ s/if (8.0f < obj->unk28) {/if (8.0f <= obj->unk28) {/
 s/if (obj->unk28 == 0.0f) {/if (obj->unk28 != 0.0f) {/
 s/self->unk2EC = 100;/self->unk2EC = 101;/
 s/                        self->unkD0 = 0;$/                        self->unkD0 = 1;/
-s/D_80086A34\[handler\](self, obj, scratch);/D_80086A34[handler](obj, obj, scratch);/
+s/g_hit_handlers\[handler\](self, obj, scratch);/g_hit_handlers[handler](obj, obj, scratch);/
 s/u8 handler = desc->handler;/u8 handler = desc->handler + 1;/
 s/if (obj->unkFC != 0) {/if (obj->unkFC == 0) {/
 s/if (sound_word_resolve(self, \&effect, 1) != 0) {/if (sound_word_resolve(self, \&effect, 0) != 0) {/
 s/obj_sfx_play_vol(effect, obj, 0x5DC0);/obj_sfx_play_vol(effect, self, 0x5DC0);/
-s/D_800D1580 = desc->sound;/D_800D1580 = desc->sound + 1;/
+s/g_cur_obj_cmd = desc->sound;/g_cur_obj_cmd = desc->sound + 1;/
 s/                    if (desc->sound != 0) {/                    if (desc->sound == 0) {/
 s/hits |= 1 << ((slot - 1) \& 0x1F);/hits |= 1 << (slot \& 0x1F);/
 s/                    continue; \/\* failed/                    break; \/* failed/

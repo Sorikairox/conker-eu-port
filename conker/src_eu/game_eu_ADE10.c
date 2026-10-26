@@ -11,7 +11,7 @@ void lipsync_reset(void)
 
 // text_queue_tempo_events: drains the text queue (text_queue_read into a 0x100-byte buffer); every 'L' record carries a
 // 28-bit big-endian 7-bit-packed value at bytes 4..7, divided by 441 (16 when that gives 0), which goes with the record's
-// byte 3 minus one to lipsync_apply_event for the current player's object D_800CC2D0[D_800D18D0].
+// byte 3 minus one to lipsync_apply_event for the current player's object g_objects[D_800D18D0].
 void lipsync_apply_event(u8 *arg0, s32 arg1, s32 arg2);
 /* was func_15080628 */
 void lipsync_poll_text_queue(void) {
@@ -28,7 +28,7 @@ void lipsync_poll_text_queue(void) {
             if (value == 0) {
                 value = 16;
             }
-            lipsync_apply_event((u8 *)&D_800CC2D0[D_800D18D0], buf[3] - 1, value);
+            lipsync_apply_event((u8 *)&g_objects[D_800D18D0], buf[3] - 1, value);
         }
     }
 }

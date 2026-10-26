@@ -7,16 +7,16 @@
 void fx_alloc_d88750(void);
 extern s32 D_800D9CF0;
 extern s8 D_800D9D40;
-extern s8 D_800D9D41;
-extern s8 D_800D9D48;
-extern s8 D_800D9D49;
-extern s32 D_800D9D4A;
-extern s8 D_800D9D58;
-extern s8 D_800D9D59;
-extern s32 D_800D9D5A;
-extern s32 D_800D9D66;
-extern s32 D_800D9D70;
-extern s32 D_800E0D94;
+extern s8 g_level_flag_9d41; /* was D_800D9D41 */
+extern s8 g_level_flag_9d48; /* was D_800D9D48 */
+extern s8 g_level_flag_9d49; /* was D_800D9D49 */
+extern s32 g_level_bytes_9d4a; /* was D_800D9D4A */
+extern s8 g_level_flag_9d58; /* was D_800D9D58 */
+extern s8 g_level_flag_9d59; /* was D_800D9D59 */
+extern s32 g_level_bytes_9d5a; /* was D_800D9D5A */
+extern s32 g_level_bytes_9d66_end; /* was D_800D9D66 */
+extern s32 g_level_part_fades; /* was D_800D9D70 */
+extern s32 g_level_reset_block_end; /* was D_800E0D94 */
 
 /* was func_1500E5C0 */
 void level_objects_reset_state(void) {
@@ -27,22 +27,22 @@ void level_objects_reset_state(void) {
     fx_alloc_d88750();
     obj_holder_refs_init();
     level_init_nop_15012770();
-    var_v0 = &D_800E0950;
+    var_v0 = &g_attach_fx_asset_refs;
     do {
         var_v0 += 4;
         (*(s8 *)((u8 *)var_v0 + -3)) = 0;
         (*(s8 *)((u8 *)var_v0 + -2)) = 0;
         (*(s8 *)((u8 *)var_v0 + -1)) = 0;
         (*(s8 *)((u8 *)var_v0 + -4)) = 0;
-    } while ((s32)var_v0 != (s32)&D_800E0D94);
-    D_800D9D41 = 0;
+    } while ((s32)var_v0 != (s32)&g_level_reset_block_end);
+    g_level_flag_9d41 = 0;
     D_800D9D40 = 0;
-    D_800D9D48 = 0;
-    D_800D9D58 = 0;
-    D_800D9D49 = 0;
-    var_v0_2 = &D_800D9D5A;
-    var_v1 = &D_800D9D4A;
-    D_800D9D59 = 0;
+    g_level_flag_9d48 = 0;
+    g_level_flag_9d58 = 0;
+    g_level_flag_9d49 = 0;
+    var_v0_2 = &g_level_bytes_9d5a;
+    var_v1 = &g_level_bytes_9d4a;
+    g_level_flag_9d59 = 0;
     do {
         var_v0_2 = (s32 *)((u8 *)var_v0_2 + (4));
         (*(s8 *)((u8 *)var_v1 + 1)) = 0;
@@ -54,7 +54,7 @@ void level_objects_reset_state(void) {
         var_v1 = (s32 *)((u8 *)var_v1 + (4));
         (*(s8 *)((u8 *)var_v1 + -4)) = 0;
         (*(s8 *)((u8 *)var_v0_2 + -4)) = 0;
-    } while (var_v0_2 != &D_800D9D66);
+    } while (var_v0_2 != &g_level_bytes_9d66_end);
     D_800D9CB0 = 0;
     D_800D9CB4 = 0;
     (*(s32 *)((u8 *)(&D_800D9CF0) + 0)) = 0;
@@ -63,13 +63,13 @@ void level_objects_reset_state(void) {
     (*(s32 *)((u8 *)(&D_800D9CF0) + 0xC)) = 0;
     D_80088C10 = NULL;
     bzero(D_800BE500, 5);
-    (*(s8 *)((u8 *)(&D_800D9D70) + 2)) = 0;
-    (*(s8 *)((u8 *)(&D_800D9D70) + 1)) = 0;
-    (*(s8 *)((u8 *)(&D_800D9D70) + 0)) = 0;
+    (*(s8 *)((u8 *)(&g_level_part_fades) + 2)) = 0;
+    (*(s8 *)((u8 *)(&g_level_part_fades) + 1)) = 0;
+    (*(s8 *)((u8 *)(&g_level_part_fades) + 0)) = 0;
     D_80088D20 = 0;
-    (*(struct134 **)((u8 *)D_800D9AA0 + 0)) = NULL;
-    (*(s32 *)((u8 *)D_800D9AA0 + 4)) = 0;
-    (*(s32 *)((u8 *)D_800D9AA0 + 8)) = 0;
+    (*(struct134 **)((u8 *)g_view_sparkle_spots + 0)) = NULL;
+    (*(s32 *)((u8 *)g_view_sparkle_spots + 4)) = 0;
+    (*(s32 *)((u8 *)g_view_sparkle_spots + 8)) = 0;
     g_level_scroll_handles = NULL;
     g_storm_thunder_flag = 0;
 }
@@ -80,44 +80,44 @@ void level_hook_level_2b(s32 arg0) {
     }
 }
 
-extern u8 D_800DCE50;
-extern f32 D_800DCE54;
-extern s8 D_800DCE58;
-extern f32 D_800DCE5C;
+extern u8 g_fx_lod_shift_players; /* was D_800DCE50 */
+extern f32 g_fx_lod_scale_players; /* was D_800DCE54 */
+extern s8 g_fx_lod_shift_chars; /* was D_800DCE58 */
+extern f32 g_fx_lod_scale_chars; /* was D_800DCE5C */
 
 /* was func_1500E738 */
 void level_set_lod_shifts(void) {
     switch (D_80082FA0) {
     case 0:
-        D_800DCE50 = 0;
-        D_800DCE54 = 1.0f;
+        g_fx_lod_shift_players = 0;
+        g_fx_lod_scale_players = 1.0f;
         break;
     case 1:
-        D_800DCE50 = 1;
-        D_800DCE54 = 0.5f;
+        g_fx_lod_shift_players = 1;
+        g_fx_lod_scale_players = 0.5f;
         break;
     case 2:
     case 3:
-        D_800DCE50 = 2;
-        D_800DCE54 = 0.25f;
+        g_fx_lod_shift_players = 2;
+        g_fx_lod_scale_players = 0.25f;
         break;
     }
     switch (D_8008FD8C) {
     case 2:
-        D_800DCE58 = 1;
-        D_800DCE5C = 0.5f;
+        g_fx_lod_shift_chars = 1;
+        g_fx_lod_scale_chars = 0.5f;
         return;
     case 3:
     case 4:
-        D_800DCE58 = 2;
-        D_800DCE5C = 0.25f;
+        g_fx_lod_shift_chars = 2;
+        g_fx_lod_scale_chars = 0.25f;
         return;
     case 5:
     case 6:
     case 7:
     case 8:
-        D_800DCE58 = 3;
-        D_800DCE5C = 0.125f;
+        g_fx_lod_shift_chars = 3;
+        g_fx_lod_scale_chars = 0.125f;
         return;
     case 9:
     case 10:
@@ -127,13 +127,13 @@ void level_set_lod_shifts(void) {
     case 14:
     case 15:
     case 16:
-        D_800DCE58 = 4;
-        D_800DCE5C = 0.0625f;
+        g_fx_lod_shift_chars = 4;
+        g_fx_lod_scale_chars = 0.0625f;
         return;
     case 1:
     default:
-        D_800DCE58 = 0;
-        D_800DCE5C = 1.0f;
+        g_fx_lod_shift_chars = 0;
+        g_fx_lod_scale_chars = 1.0f;
         return;
     }
 }
@@ -178,8 +178,8 @@ void level_obj_init_drift_scene(void) {
     } sp;
     s16 var_v0;
 
-    level_dl_add_texture_scroll(*D_800B0E00, D_800902E8, 0, -1, 0, 0, 0, -6);
-    level_dl_add_texture_scroll(D_800B1214, D_800902E8, 0, -1, 0, 1, 0, -6);
+    level_dl_add_texture_scroll(*g_level_part_dls, g_level_scroll_tex_a, 0, -1, 0, 0, 0, -6);
+    level_dl_add_texture_scroll(D_800B1214, g_level_scroll_tex_a, 0, -1, 0, 1, 0, -6);
     sp.u68 = 0.21428572f;
     sp.u70 = 5.0f;
     sp.u74 = 6.0f;
@@ -205,7 +205,7 @@ void level_obj_init_drift_scene(void) {
     sp.u48 = 800.0f;
     sp.u4C = -3000.0f;
     area_drift_emitter_create(&sp.u40, 1);
-    if (D_800BE9F0 == 6) {
+    if (g_level_id == 6) {
         var_v0 = 0x34;
     } else {
         var_v0 = 7;
@@ -217,8 +217,8 @@ void level_obj_init_drift_scene(void) {
 //     struct145 tmp;
 //     s32 phi_v0;
 //
-//     level_dl_add_texture_scroll(D_800B0E00[0], D_800902E8, 0, -1, 0, 0, 0, -6);
-//     level_dl_add_texture_scroll(D_800B0E00[1], D_800902E8, 0, -1, 0, 1, 0, -6);
+//     level_dl_add_texture_scroll(g_level_part_dls[0], g_level_scroll_tex_a, 0, -1, 0, 0, 0, -6);
+//     level_dl_add_texture_scroll(g_level_part_dls[1], g_level_scroll_tex_a, 0, -1, 0, 1, 0, -6);
 //     tmp.unk28 = D_80096210; // 0.2142857164144516
 //     tmp.unk30 = 5.0f;
 //     tmp.unk34 = 6.0f;
@@ -244,7 +244,7 @@ void level_obj_init_drift_scene(void) {
 //     tmp.unkC = D_8009621C;
 //     tmp.unk8 = 800.0f;
 //     func_15189900(&tmp, 1);
-//     if (D_800BE9F0 == 6) {
+//     if (g_level_id == 6) {
 //         phi_v0 = 52;
 //     } else {
 //         phi_v0 = 7;
@@ -254,6 +254,6 @@ void level_obj_init_drift_scene(void) {
 
 /* was func_1500EAA0 */
 void level_obj_init_tex_scroll(void) {
-    level_dl_add_texture_scroll(D_800B0E00[0], D_80090320, 0, -1, 0, 0, 0, -8);
-    level_dl_add_texture_scroll(D_800B0E00[1], D_80090320, 0, -1, 0, 1, 0, -8);
+    level_dl_add_texture_scroll(g_level_part_dls[0], g_level_scroll_tex_b, 0, -1, 0, 0, 0, -8);
+    level_dl_add_texture_scroll(g_level_part_dls[1], g_level_scroll_tex_b, 0, -1, 0, 1, 0, -8);
 }

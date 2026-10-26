@@ -574,8 +574,8 @@ void tracer_hit_callback(s32 arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, s32 a
 
 s32 cam_sprite_puff_spawn(f32, s32, u8 *, u8 *, s32, s32, s32, s32, s32, s32);
 s32 emit_streaks_from_spec(s32 *, u8, s32);
-extern u8 D_800DCE50;
-extern f32 D_800DCE54;
+extern u8 g_fx_lod_shift_players; /* was D_800DCE50 */
+extern f32 g_fx_lod_scale_players; /* was D_800DCE54 */
 
 /* was func_151C34F8 */
 void tracer_impact_sparks(u8 *arg0) {
@@ -655,7 +655,7 @@ void tracer_impact_sparks(u8 *arg0) {
     sp44 = temp_a3;
     sp48 = temp_v1;
     cam_sprite_puff_spawn((sp4C * 30.0f) + 8.0f, 0xFF, temp_v1 + 0x6C, temp_a3, (random_int() % 46U) + 0x19, 1, 1, (*(s32 *)((u8 *)temp_v1 + 0x88)), (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
-    if (random_float() < (0.25300002f * D_800DCE54)) {
+    if (random_float() < (0.25300002f * g_fx_lod_scale_players)) {
         sp.uD4 = 3;
         sp.uD5 = -1;
         sp48 = temp_v1;
@@ -665,8 +665,8 @@ void tracer_impact_sparks(u8 *arg0) {
         sp.uCC = (s32) (*(f32 *)((u8 *)temp_v1 + 0x34));
         sp.uD0 = (s32) (*(f32 *)((u8 *)temp_v1 + 0x38));
         light_create_with_ctrl((Header *) &sp.uD4, (Header2 *) &sp.uC8, (random_int() % 9U) + 0xC, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
-        sp.u54 = 5 >> D_800DCE50;
-        sp.u58 = 4 >> D_800DCE50;
+        sp.u54 = 5 >> g_fx_lod_shift_players;
+        sp.u58 = 4 >> g_fx_lod_shift_players;
         (*(s32 *)((u8 *)(&sp.u5C) + 0)) = (s32) (*(s32 *)((u8 *)sp44 + 0));
         (*(s32 *)((u8 *)(&sp.u5C) + 4)) = (s32) (*(s32 *)((u8 *)sp44 + 4));
         (*(s32 *)((u8 *)(&sp.u5C) + 8)) = (s32) (*(s32 *)((u8 *)sp44 + 8));
@@ -1157,7 +1157,7 @@ extern f32 D_800AAE54;
 extern f32 D_800AAE58;
 void emit_particle_burst_req(u8 *req, s32 tag, s32 room, s32 owner);
 
-// impact_effects_spawn: the impact effects at object `obj`'s position (+0x140), chosen by level (D_800BE9F0) and the
+// impact_effects_spawn: the impact effects at object `obj`'s position (+0x140), chosen by level (g_level_id) and the
 // object's surface bits (+0x198 & 0x1F) as one of 6 surface types: each of 4 effects is spawned when a random number
 // is below its chance: a spark burst (sprite_fx_spawn_cam_at, scale 15..30), a smoke puff (effect3d_spawn_full, moving along
 // +0x140 - +0x170), a debris spray (emit_particle_burst_req, two per-surface colours, `debrisTag`) and a light flash
@@ -1168,7 +1168,7 @@ void surface_impact_effects(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debr
     u8 *obj = (u8 *) arg0;
     f32 *pos = (f32 *) (obj + 0x140);
     f32 *prev = (f32 *) (obj + 0x170);
-    s32 level = D_800BE9F0;
+    s32 level = g_level_id;
     s32 surface = *(s32 *) (obj + 0x198) & 0x1F;
     s32 type;
     struct {

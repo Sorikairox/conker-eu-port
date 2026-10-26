@@ -65,8 +65,8 @@ Gfx *view_background_draw(Gfx *gdl, s32 arg1) {
         return gdl;
     }
 
-    view = D_800DD210 + D_80082FA4 * 0x18;
-    player = &D_800DBFF0[D_80082FA4];
+    view = D_800DD210 + g_cur_view_player * 0x18;
+    player = &D_800DBFF0[g_cur_view_player];
     /* wrap the three angles (degrees): yaw and roll into [-180, 180), pitch into [0, 360) */
     yaw = 360.0f - (*(f32 *)(view + 0xC) + player->unk388);
     while (yaw < -180.0f) {
@@ -94,7 +94,7 @@ Gfx *view_background_draw(Gfx *gdl, s32 arg1) {
     z = player->unk300;
 
     if (D_800C3682 != 0) {
-        u8 *cam = (u8 *)D_800BE628 + D_80082FA4 * 0x180;
+        u8 *cam = (u8 *)D_800BE628 + g_cur_view_player * 0x180;
         return gfx_fill_rect_colour(gdl, (s32)*(f32 *)(cam + 0x2C), (s32)*(f32 *)(cam + 0x24),
                              (s32)(*(f32 *)(cam + 0x30) - 1.0f), (s32)*(f32 *)(cam + 0x28), 0x16, 0x1C, 0x1B);
     }
@@ -131,17 +131,17 @@ Gfx *render_fill_rect_clamped(Gfx *gdl, s32 ulx, s32 uly, s32 lrx, s32 lry);
 extern u8 D_800DC2D8[];
 
 /* Default camera callback (D_80089578[0], called by view_background_draw): clear the current player's viewport
- * (D_800BE628[D_80082FA4] +0x24..0x30) to the level colour D_800DC2D8 via gfx_fill_rect_colour; in split screen, from
+ * (D_800BE628[g_cur_view_player] +0x24..0x30) to the level colour D_800DC2D8 via gfx_fill_rect_colour; in split screen, from
  * player 0 only, draw the black divider bars (horizontal across the middle; vertical too with 3-4 players). The
  * position / angle arguments are unused. */
 /* was func_15110948 */
 Gfx *view_clear_level_colour(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s32 handle) {
-    u8 *cam = (u8 *)D_800BE628 + D_80082FA4 * 0x180;
+    u8 *cam = (u8 *)D_800BE628 + g_cur_view_player * 0x180;
     s32 h;
 
     gdl = gfx_fill_rect_colour(gdl, (s32)*(f32 *)(cam + 0x2C), (s32)*(f32 *)(cam + 0x24), (s32)(*(f32 *)(cam + 0x30) - 1.0f),
                         (s32)*(f32 *)(cam + 0x28), D_800DC2D8[0], D_800DC2D8[1], D_800DC2D8[2]);
-    if (D_80082FA0 == 0 || D_80082FA4 != 0) {
+    if (D_80082FA0 == 0 || g_cur_view_player != 0) {
         return gdl;
     }
     gdl->words.w0 = 0xE7000000;
@@ -173,14 +173,14 @@ extern u8 D_800DC2D8[];
 // P244: NM signature = the dispatcher's type (it took 4 parameters: a wasm call_indirect signature mismatch).
 /* was func_15110B80 */
 Gfx *view_border_clear(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s32 handle) {
-    if (D_800BE9F0 == 0x1B || D_800BE9F0 == 0x1E
-        || (D_800BE9F0 == 0x31 && *(u8 *)((u8 *)D_800DBFF0->unk3D4 + 0x78) == 3)) {
+    if (g_level_id == 0x1B || g_level_id == 0x1E
+        || (g_level_id == 0x31 && *(u8 *)((u8 *)D_800DBFF0->unk3D4 + 0x78) == 3)) {
         gdl = gfx_fill_rect_colour(gdl, 2, 0, D_800BE620 - 2, D_800BE624, D_800DC2D8[0], D_800DC2D8[1], D_800DC2D8[2]);
     }
     return gdl;
 }
 
-extern u8 D_800BEEE2;
+extern u8 g_unpause_settle_frames; /* was D_800BEEE2 */
 
 /* was func_15110C28 */
 u8 *view_frame_clear(u8 *arg0) {
@@ -196,7 +196,7 @@ u8 *view_frame_clear(u8 *arg0) {
     u8 *var_a0;
 
     var_a0 = arg0;
-    if (D_80082FA4 == 0) {
+    if (g_cur_view_player == 0) {
         temp_a0 = var_a0 + 8;
         (*(s32 *)((u8 *)var_a0 + 0)) = 0xE7000000;
         (*(s32 *)((u8 *)var_a0 + 4)) = 0;
@@ -208,7 +208,7 @@ u8 *view_frame_clear(u8 *arg0) {
         temp_a0_3 = temp_a0_2 + 8;
         (*(s32 *)((u8 *)temp_a0_3 + 0)) = (s32) (((D_800BE620 - 1) & 0xFFF) | 0xFF100000);
         temp_a0_4 = temp_a0_3 + 8;
-        (*(s32 *)((u8 *)temp_a0_3 + 4)) = (s32) D_800BEDE4;
+        (*(s32 *)((u8 *)temp_a0_3 + 4)) = (s32) g_zbuffer;
         (*(s32 *)((u8 *)temp_a0_4 + 0)) = 0xF7000000;
         (*(s32 *)((u8 *)temp_a0_4 + 4)) = 0xFFFCFFFC;
         temp_v0 = render_set_scissor((s32) (temp_a0_4 + 8), 0xFF, 0, 0, 0, 0);
@@ -230,7 +230,7 @@ u8 *view_frame_clear(u8 *arg0) {
                 temp_t7 = (s32) D_800BE620 >> 1;
                 var_a0 = render_fill_rect_clamped(var_a0, temp_t7 - 1, 0, temp_t7 + 1, D_800BE624);
             }
-            if (D_800BEEE2 != 0) {
+            if (g_unpause_settle_frames != 0) {
                 var_a0 = render_fill_rect_clamped(var_a0, 0, 0, D_800BE620, D_800BE624);
             }
         }
@@ -246,7 +246,7 @@ s32 sky_level_distance(f32 arg0, f32 arg1, f32 arg2, f32 arg3) {
     s32 var_a2;
     s32 var_v1;
 
-    switch (D_800BE9F0) {
+    switch (g_level_id) {
     case 0x6:
     case 0x3B:
         var_v1 = (s32) (((arg1 * 40.0f) / 1800.0f) + 200.0f);
@@ -354,7 +354,7 @@ typedef struct {
     s32 fmt;  /* 0 = 8-bit CI (256 colours), 1 = 4-bit CI (16 colours) */
 } SkyLoad;
 extern SkyFace D_800A3170[];
-extern s32 D_800DC2B8[];
+extern s32 g_sky_backdrop_vtx[]; /* was D_800DC2B8 */
 extern s32 D_800DC2E0;
 /* (one line: tools/port/protocheck.py reads single-line prototypes) */
 Gfx *sky_box_face_build(Gfx *gdl, s32 *vtx, s32 tex, s32 arg3, s32 arg4, u32 w, u32 h, u32 step_s, u32 step_t, f32 x, f32 y, f32 z, s32 axis, f32 (*view)[4], s32 dist, s32 *count, s32 *first, SkyLoad *loads, s32 *last_fmt, u8 *arg19, u8 *arg20, s16 *tlut_offset, u8 *tlut_count, u8 *tile, s32 face);
@@ -645,7 +645,7 @@ void star_field_generate(void) {
 
 /*
  * sky_box_draw: camera callback (D_80089578[], same signature as view_clear_level_colour) that draws the textured sky box of
- * the current player D_80082FA4. The position arguments are unused. Steps:
+ * the current player g_cur_view_player. The position arguments are unused. Steps:
  *  - texture on, render_set_scissor (D_80083336) / render_set_color_image; on level 60 (and on level 19 in mode D_800C35EA == 1
  *    with D_800C3A08 == 1 or 2) the viewport is first cleared to black through gfx_fill_rect_colour (the camera record
  *    D_800BE628[p] +0x24..0x30, as view_clear_level_colour);
@@ -657,7 +657,7 @@ void star_field_generate(void) {
  *  - faces `first`..`last - 1` (0..4; 4..4 on level 25; 0..5 on level 12): faces 0..3 (the sides, every 90 degrees
  *    of pitch) only when the pitch is within the field of view (95 degrees in mode D_80082FA0 == 1, else 80) of the
  *    face, faces 4 / 5 (down / up) by the yaw, face 5 only from distance `dist` >= 300. sky_box_face_build builds each
- *    face's quads into the frame's vertex buffer D_800DC2B8[p * 2 + D_800BE9C0] and queues the texture loads (the
+ *    face's quads into the frame's vertex buffer g_sky_backdrop_vtx[p * 2 + D_800BE9C0] and queues the texture loads (the
  *    face's textures D_8008955C[sky +9][face, 0 for face 5]);
  *  - one G_VTX for all `count` vertices, then per quad (4 vertices): load its texture block and palette (tile
  *    changes only when the format does) and two triangles.
@@ -705,14 +705,14 @@ Gfx *sky_box_draw(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s
     } else {
         fov = 80.0f;
     }
-    if (D_800BE9F0 == 65) {
+    if (g_level_id == 65) {
         pitch -= 119.0f;
         if (pitch < 0.0f) {
             pitch += 360.0f;
         }
-    } else if (D_800BE9F0 == 60 ||
-               (D_800BE9F0 == 19 && D_800C35EA == 1 && (D_800C3A08 == 2 || D_800C3A08 == 1))) {
-        cam = (u8 *) D_800BE628 + D_80082FA4 * 0x180;
+    } else if (g_level_id == 60 ||
+               (g_level_id == 19 && D_800C35EA == 1 && (D_800C3A08 == 2 || D_800C3A08 == 1))) {
+        cam = (u8 *) D_800BE628 + g_cur_view_player * 0x180;
         gdl = gfx_fill_rect_colour(gdl, (s32) *(f32 *) (cam + 0x2C), (s32) *(f32 *) (cam + 0x24),
                             (s32) (*(f32 *) (cam + 0x30) - 1.0f), (s32) *(f32 *) (cam + 0x28), 0, 0, 0);
     }
@@ -757,27 +757,27 @@ Gfx *sky_box_draw(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s
     gdl->words.w1 = 0x06000000;
     gdl++;
     matrix_rotate_ypr(view, yaw, pitch, roll);
-    mtxf_mul(view, (f32 (*)[4]) ((u8 *) D_800BE628 + D_80082FA4 * 0x180 + 0xBC), m);
-    guMtxF2L(m, (Mtx *) D_800DC2E0 + (D_80082FA4 * 2 + D_800BE9C0));
+    mtxf_mul(view, (f32 (*)[4]) ((u8 *) D_800BE628 + g_cur_view_player * 0x180 + 0xBC), m);
+    guMtxF2L(m, (Mtx *) D_800DC2E0 + (g_cur_view_player * 2 + D_800BE9C0));
     gdl->words.w0 = 0xDA380007;
-    gdl->words.w1 = (u32) ((Mtx *) D_800DC2E0 + (D_80082FA4 * 2 + D_800BE9C0));
+    gdl->words.w1 = (u32) ((Mtx *) D_800DC2E0 + (g_cur_view_player * 2 + D_800BE9C0));
     gdl++;
     gdl->words.w0 = 0xDA380003;
     gdl->words.w1 = (u32) D_80089810;
     gdl++;
     gdl->words.w0 = 0xDB0E0000;
-    gdl->words.w1 = *(u16 *) ((u8 *) D_800BE628 + D_80082FA4 * 0x180 + 0xB8);
+    gdl->words.w1 = *(u16 *) ((u8 *) D_800BE628 + g_cur_view_player * 0x180 + 0xB8);
     gdl++;
     texs = D_8008955C[sky[9]];
     count = 0;
     first_vtx = 0;
     last_fmt = -1;
-    vtx = D_800DC2B8[D_80082FA4 * 2 + D_800BE9C0];
+    vtx = g_sky_backdrop_vtx[g_cur_view_player * 2 + D_800BE9C0];
     if (dist < 0) {
         dist = 0;
     }
-    last = (D_800BE9F0 == 12) ? 6 : 5;
-    i = (D_800BE9F0 == 25) ? 4 : 0;
+    last = (g_level_id == 12) ? 6 : 5;
+    i = (g_level_id == 25) ? 4 : 0;
     for (; i < last; i++) {
         switch (i) {
             case 0:
@@ -914,10 +914,10 @@ void world_object_turn_to_player(u8 *arg0) {
     u8 *temp_t0;
 
     temp_t0 = (*(u8 **)((u8 *)arg0 + 0x3C));
-    temp_f12 = D_800CC2D0->x_position - (f32) (*(s16 *)((u8 *)arg0 + 0x10));
+    temp_f12 = g_objects->x_position - (f32) (*(s16 *)((u8 *)arg0 + 0x10));
     temp_f2 = temp_f12 * temp_f12;
-    temp_f18 = (D_800CC2D0->y_position + 65.0f) - (f32) (*(s16 *)((u8 *)arg0 + 0x12));
-    temp_f14 = D_800CC2D0->z_position - (f32) (*(s16 *)((u8 *)arg0 + 0x14));
+    temp_f18 = (g_objects->y_position + 65.0f) - (f32) (*(s16 *)((u8 *)arg0 + 0x12));
+    temp_f14 = g_objects->z_position - (f32) (*(s16 *)((u8 *)arg0 + 0x14));
     temp_f16 = temp_f14 * temp_f14;
     temp_f6 = temp_f2 + (temp_f18 * temp_f18) + temp_f16;
     D_800DC2F0 = temp_f6;
@@ -1056,7 +1056,7 @@ s32 camera_view_test_sphere(s32 cam, s32 *mtx, f32 x, f32 y, f32 z, f32 r, f32 r
 
 /* world_records_build_visible: per frame (world_update path, view arg0), for every active player view
  * (player_stat_get(player, 0)) rebuilds the list of visible world-object records (0xA0 bytes, D_800DBEF4[0 ..
- * D_800DC320 - 1]). Records come in groups: a record's +0x70 >> 4 is the number of records following it in the group.
+ * g_world_obj_count - 1]). Records come in groups: a record's +0x70 >> 4 is the number of records following it in the group.
  * For each record the player's bit in +0x6F is cleared; a record takes part unless it is kind 1 (+0x6E), hidden
  * (+0x70 & 8), disabled (!(+0x4F & 1)) or has no model (+0x8A == 0). In mode D_800C35EA[view] == 1, cutscene_room_has_actor
  * decides (without D_800C3A7C[view] a refusal skips the record; an acceptance skips the occlusion test below), else
@@ -1091,7 +1091,7 @@ void world_records_build_visible(s32 view) {
         }
         D_800DC318[player] = 0;
         i = 0;
-        while (i < D_800DC320) {
+        while (i < g_world_obj_count) {
             visible = 0;
             first = i;
             last = i + (((u8 *) D_800DBEF4 + i * 0xA0)[0x70] >> 4);
@@ -1174,7 +1174,7 @@ void world_records_flag_active(void) {
 
     var_v0 = 0;
     var_v1 = 0;
-    if (D_800DC320 > 0) {
+    if (g_world_obj_count > 0) {
         do {
             temp_a0 = &D_800DBEF4->pad[var_v1];
             (*(u8 *)((u8 *)temp_a0 + 0x6F)) = (u8) ((*(u8 *)((u8 *)temp_a0 + 0x6F)) & ~0x40);
@@ -1185,7 +1185,7 @@ void world_records_flag_active(void) {
             }
             var_v0 += 1;
             var_v1 += 0xA0;
-        } while (var_v0 < D_800DC320);
+        } while (var_v0 < g_world_obj_count);
     }
 }
 void mtx_set_identity(Mtx *arg0);
@@ -1200,7 +1200,7 @@ extern f32 D_800DC338[][4][4]; /* per DL buffer: fallback matrix */
  * Mtx in the current DL buffer's array (D_800895F0[D_800BE9C0]):
  *  - disabled record (+0x70 & 1): mtx_set_identity;
  *  - kind +0x4E 3: left as it is; kind < 3: from world_record_build_matrix (record orientation / position);
- *  - kind 0x65..0x7C (follows object D_800CC2D0[kind - 100]): rotation from the record angles +0x2C / +0x30 /
+ *  - kind 0x65..0x7C (follows object g_objects[kind - 100]): rotation from the record angles +0x2C / +0x30 /
  *    +0x34 (mtxf_scale) at the object's position +0x14; with an attachment +0x1D4, at its +0x30 position,
  *    raised by the object's +0x90 (mtxf_translate_local), and that point is written back to the record (+0x10 / 12 / 14);
  *  - any other kind: the buffer's fallback matrix D_800DC338[D_800BE9C0]. */
@@ -1233,7 +1233,7 @@ void world_records_update_matrices(void) {
             if (kind < 3) {
                 world_record_build_matrix(mf, rec);
             } else if (kind >= 0x65 && kind < 0x7D) {
-                obj = (u8 *)D_800CC2D0 + (kind - 100) * 0x32C;
+                obj = (u8 *)g_objects + (kind - 100) * 0x32C;
                 if (*(u8 **)(obj + 0x1D4) == NULL) {
                     mtxf_scale(mf, *(s32 *)(rec + 0x2C), *(s32 *)(rec + 0x30), *(s32 *)(rec + 0x34));
                     mf[3][0] = *(f32 *)(obj + 0x14);
@@ -1265,7 +1265,7 @@ u8 *light_write_light_cmds(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4);
 s32 world_mesh_draw(s32, u8 *, s32, s16, s32, s32);
 extern s32 D_800895E0[];
 extern s32 D_800895F0[];
-extern u8 D_800D9FF0[];
+extern u8 g_player_ambient_lights[]; /* was D_800D9FF0 */
 extern s32 D_800DA230[];
 extern u8 D_800DA240;
 extern u8 D_800DA241;
@@ -1294,7 +1294,7 @@ Gfx *world_meshes_draw_player(Gfx *arg0, s32 arg1, s16 arg2) {
     *(s32 *) (gdl + 0xC) = 0x20000;
     *(s32 *) (gdl + 0x8) = 0xD9FFFFFF;
     gdl = light_write_light_cmds(gdl + 0x10, D_800DA230[arg2], D_800DA240, D_800DA241,
-                        (s32) (D_800D9FF0 + arg2 * 16 + D_800BE9C0 * 8));
+                        (s32) (g_player_ambient_lights + arg2 * 16 + D_800BE9C0 * 8));
     for (i = 0; i < D_800DC318[arg2]; i++) {
         entry = (u16 *) (*(u8 **) D_800895E0[arg2] + i * 4);
         idx = entry[0];
@@ -1440,7 +1440,7 @@ void world_records_update_shadows(void) {
     s32 ok;
     struct131 *e;
 
-    for (i = 0; i < D_800DC320; i++) {
+    for (i = 0; i < g_world_obj_count; i++) {
         e = &D_800DBEF4[i];
         found = 0;
         for (j = 0; j < D_80082FA0; j++) {
@@ -1493,7 +1493,7 @@ typedef struct {
 extern s32 D_800DC3C8;
 
 /* Runs the update callback of every pending record (flags & 0x40, not busy): first the first
- * D_800DC320 - D_800DC3C8 records, then the type-2 groups. In a group, the first record's position (0x5A..0x5E)
+ * g_world_obj_count - D_800DC3C8 records, then the type-2 groups. In a group, the first record's position (0x5A..0x5E)
  * and 0x80 value are copied to each following member before its update. arg0 is not used. */
 /* was func_151143D4 */
 void world_records_run_callbacks(s32 arg0) {
@@ -1506,7 +1506,7 @@ void world_records_run_callbacks(s32 arg0) {
 
     x = y = z = 0;
     extra = 0;
-    n = D_800DC320 - D_800DC3C8;
+    n = g_world_obj_count - D_800DC3C8;
     for (i = 0; i < n; i++) {
         rec = (Rec151143D4 *) D_800DBEF4 + i;
         if ((rec->flags & 0x40) == 0x40 && rec->busy == 0) {
@@ -1597,7 +1597,7 @@ void world_records_dispatch_touches(void) {
     struct127 *obj;
     u8 f;
 
-    for (i = 0; i < D_800DC320; i++) {
+    for (i = 0; i < g_world_obj_count; i++) {
         if (D_800DC3C4[i] == 0) {
             continue;
         }
@@ -1610,7 +1610,7 @@ void world_records_dispatch_touches(void) {
             base = (u8 *)D_800DBEF4;
             e = base + i * 0xA0;
             fn = *(fn15114708 *)(e + 0x78);
-            obj = (struct127 *)((u8 *)D_800CC2D0 + j * 0x32C);
+            obj = (struct127 *)((u8 *)g_objects + j * 0x32C);
             if (fn != NULL && (e[0x92] != 0 || ((u8 *)obj)[0x127] != 0xFF)) {
                 (*fn)(e, obj, base, (void *)fn);
                 e = (u8 *)D_800DBEF4 + i * 0xA0;
@@ -1693,10 +1693,10 @@ extern f32 D_800A3330;   /* world-object timer scale */
 extern u16 D_800CC1C0[]; /* per object: world-object index + 1 it follows */
 
 /*
- * world_object_timer_update: for a visible world-object record idx (< D_800DC320) and its object, refreshes the
+ * world_object_timer_update: for a visible world-object record idx (< g_world_obj_count) and its object, refreshes the
  * object's +0x14 / +0x18 / +0x1C (world_object_rotate_point) and advances its u16 timer +0x76 by the record's +0x64 speed
  * times D_800A3330 (float -> unsigned as IDO, stored as u16); when the object's +0x137 flag is set and its
- * D_800CC1C0 entry (index from the 0x32C-byte array D_800CC2D0) is idx + 1, +0x7A gets the same value.
+ * D_800CC1C0 entry (index from the 0x32C-byte array g_objects) is idx + 1, +0x7A gets the same value.
  */
 /* was func_15114CBC */
 void world_object_timer_update(struct127 *arg0, s32 idx) {
@@ -1704,14 +1704,14 @@ void world_object_timer_update(struct127 *arg0, s32 idx) {
     u8 *rec;
     u32 t;
 
-    if (obj == NULL || idx >= D_800DC320) {
+    if (obj == NULL || idx >= g_world_obj_count) {
         return;
     }
     world_object_rotate_point(idx, (f32 *) (obj + 0x14), (f32 *) (obj + 0x18), (f32 *) (obj + 0x1C));
     rec = (u8 *) D_800DBEF4 + idx * 0xA0;
     t = (f32) *(u16 *) (obj + 0x76) + *(f32 *) (rec + 0x64) * D_800A3330;
     *(u16 *) (obj + 0x76) = t;
-    if (obj[0x137] != 0 && D_800CC1C0[(obj - (u8 *) D_800CC2D0) / 0x32C] == idx + 1) {
+    if (obj[0x137] != 0 && D_800CC1C0[(obj - (u8 *) g_objects) / 0x32C] == idx + 1) {
         *(u16 *) (obj + 0x7A) = t;
     }
 }
@@ -1737,7 +1737,7 @@ void world_record_build_matrix(f32 (*arg0)[4], u8 *arg1) {
     mtxf_mul(sp20, arg0, arg0);
 }
 
-// world_record_find: returns the world-object record (0xA0 bytes, D_800DBEF4[0 .. D_800DC320 - 1]) whose id byte
+// world_record_find: returns the world-object record (0xA0 bytes, D_800DBEF4[0 .. g_world_obj_count - 1]) whose id byte
 // +0x72 equals id, or NULL; id 0 never matches. Scene tracks with ref kind 3 and scene event 5 / 3 look records up here.
 /* was func_151149AC */
 u8 *world_record_find(u8 id) {
@@ -1748,7 +1748,7 @@ u8 *world_record_find(u8 id) {
         return NULL;
     }
     rec = (u8 *) D_800DBEF4;
-    for (i = 0; i < D_800DC320; i++, rec += 0xA0) {
+    for (i = 0; i < g_world_obj_count; i++, rec += 0xA0) {
         if (rec[0x72] == id) {
             return rec;
         }
@@ -1765,7 +1765,7 @@ void heap_free(s32);
 void world_records_release_blocks(void) {
     s32 i;
 
-    for (i = 0; i < D_800DC320; i++) {
+    for (i = 0; i < g_world_obj_count; i++) {
         u8 *e = (u8 *)D_800DBEF4 + i * 0xA0;
 
         if ((e[0x70] & 1) == 1) {
@@ -1793,7 +1793,7 @@ void world_record_remove(u32 arg0) {
     u32 j;
 
     j = arg0 * 0xA0; // fakematch: j doubles as the row offset
-    if (arg0 < D_800DC320) {
+    if (arg0 < g_world_obj_count) {
         p = (struct131 *)((u8 *)D_800DBEF4 + j);
         if (*(struct102 **)((u8 *)p + 0x94) != NULL) {
             node_destroy(*(struct102 **)((u8 *)p + 0x94));
@@ -1803,9 +1803,9 @@ void world_record_remove(u32 arg0) {
         p->pad70[0] |= 8;
         D_800DBEF4[arg0].pad5A[0x14] = 1;
     }
-    arg0 = D_800DC320 - 1;
-    j = D_800DC320 - D_800DC3C8;
-    if (D_800DC320 != 0) {
+    arg0 = g_world_obj_count - 1;
+    j = g_world_obj_count - D_800DC3C8;
+    if (g_world_obj_count != 0) {
         p = (struct131 *)((u8 *)D_800DBEF4 + arg0 * 0xA0);
         if (p->pad70[0] & 8) {
             do {
@@ -1814,10 +1814,10 @@ void world_record_remove(u32 arg0) {
                 } else {
                     j--;
                 }
-                D_800DC320--;
+                g_world_obj_count--;
                 arg0--;
                 p--;
-            } while (D_800DC320 != 0 && (p->pad70[0] & 8));
+            } while (g_world_obj_count != 0 && (p->pad70[0] & 8));
         }
     }
 }
@@ -1900,7 +1900,7 @@ void level_tri_tables_check(s32 arg0, s32 arg1, s32 arg2)
 {
     s32 i;
     s32 j;
-    if (D_800BE9F0 == 0x12 || D_800BE9F0 == 0x36 || D_800BE9F0 == 0x13) {
+    if (g_level_id == 0x12 || g_level_id == 0x36 || g_level_id == 0x13) {
         for (i = 0; i < 2; i++) {
             u32 *base = (u32 *)D_800DC208[i];
             for (j = 0; j < D_800DBE18[i]; j++) {

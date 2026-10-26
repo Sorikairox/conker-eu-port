@@ -19,11 +19,11 @@
 \#^            attack_spawn_at_point(pt\[0\] + (prev\[0\] - pt\[0\]) \* t, pt\[1\] + (prev\[1\] - pt\[1\]) \* t, pt\[2\] + (prev\[2\] - pt\[2\]) \* t,$#s/(prev\[0\] - pt\[0\])/(prev[0] + pt[0])/
 \#^            attack_spawn_at_point(pt\[0\] + (prev\[0\] - pt\[0\]) \* t, pt\[1\] + (prev\[1\] - pt\[1\]) \* t, pt\[2\] + (prev\[2\] - pt\[2\]) \* t,$#s/pt\[1\] + (prev\[1\]/pt[1] - (prev[1]/
 \#^            attack_spawn_at_point(pt\[0\] + (prev\[0\] - pt\[0\]) \* t, pt\[1\] + (prev\[1\] - pt\[1\]) \* t, pt\[2\] + (prev\[2\] - pt\[2\]) \* t,$#s/(prev\[2\] - pt\[2\]) \* t/(prev[2] - pt[1]) * t/
-\#^                          kind, (s32) (obj - (u8 \*) D_800CC2D0) / 0x32C, \*(u16 \*) (obj + 0x76), 0, 0);$#s/kind,/kind | 1,/
-\#^                          kind, (s32) (obj - (u8 \*) D_800CC2D0) / 0x32C, \*(u16 \*) (obj + 0x76), 0, 0);$#s/\/ 0x32C/\/ 0x330/
-\#^                          kind, (s32) (obj - (u8 \*) D_800CC2D0) / 0x32C, \*(u16 \*) (obj + 0x76), 0, 0);$#s/\*(u16 \*) (obj + 0x76)/*(u16 *) (obj + 0x74)/
-\#^                          kind, (s32) (obj - (u8 \*) D_800CC2D0) / 0x32C, \*(u16 \*) (obj + 0x76), 0, 0);$#s/0, 0);/0, 1);/
-\#^                          kind, (s32) (obj - (u8 \*) D_800CC2D0) / 0x32C, \*(u16 \*) (obj + 0x76), 0, 0);$#s/, 0, 0);/, 1, 0);/
+\#^                          kind, (s32) (obj - (u8 \*) g_objects) / 0x32C, \*(u16 \*) (obj + 0x76), 0, 0);$#s/kind,/kind | 1,/
+\#^                          kind, (s32) (obj - (u8 \*) g_objects) / 0x32C, \*(u16 \*) (obj + 0x76), 0, 0);$#s/\/ 0x32C/\/ 0x330/
+\#^                          kind, (s32) (obj - (u8 \*) g_objects) / 0x32C, \*(u16 \*) (obj + 0x76), 0, 0);$#s/\*(u16 \*) (obj + 0x76)/*(u16 *) (obj + 0x74)/
+\#^                          kind, (s32) (obj - (u8 \*) g_objects) / 0x32C, \*(u16 \*) (obj + 0x76), 0, 0);$#s/0, 0);/0, 1);/
+\#^                          kind, (s32) (obj - (u8 \*) g_objects) / 0x32C, \*(u16 \*) (obj + 0x76), 0, 0);$#s/, 0, 0);/, 1, 0);/
 \#^            mark += spacing;$#s/+=/-=/
 \#^        prev = pt;$#s/pt;/prev;/
 \#^    } while (i != \*(s8 \*) (self + 0x2D));$#s/0x2D/0x2C/

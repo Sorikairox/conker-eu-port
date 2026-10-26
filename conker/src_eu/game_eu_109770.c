@@ -843,7 +843,7 @@ s32 fountain_emit(u8 *obj) {
 
 extern f32 D_800DD608[], D_800DD618[]; /* per view: camera yaw sine / cosine */
 extern s32 D_800D30BC;
-extern s32 D_800A4EA8[];
+extern s32 g_render_mode_pairs[]; /* was D_800A4EA8 */
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 gfx_load_texture_cached(s32, struct_eu_80090F10 *, s32, s32, s32, s32, s32, u8, s32, s8 *, s32);
 s32 gfx_geometry_mode_cached(s32, s32, s32);
@@ -914,7 +914,7 @@ s32 fountain_draw(u8 *obj, s32 gfx, s16 view) {
     gfx = gfx_env_color_cached(gfx, d->u28, d->u28, d->u28, 0xFF, &flag);
     gfx = gfx_set_combine_mode(gfx, comb, &flag);
     gfx = gfx_geometry_mode_cached(gfx, 1, 0x160600);
-    gfx = (s32) gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[mode * 2 + 1] | D_800A4EA8[mode * 2],
+    gfx = (s32) gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, g_render_mode_pairs[mode * 2 + 1] | g_render_mode_pairs[mode * 2],
                               &flag);
     if (*(u16 *) (obj + 0x1E) & 2) {
         /* still emitting: the strip starts at the object */

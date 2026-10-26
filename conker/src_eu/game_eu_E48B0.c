@@ -22,7 +22,7 @@ typedef struct {
     s16 u2A;
     s16 u2C;
     s16 u2E;
-    u8 u30; /* effect type: index into D_8008CDC0 (record +0x40) */
+    u8 u30; /* effect type: index into g_node_end_handlers (record +0x40) */
     u8 u31;
     u8 u32;
     u8 u33;
@@ -268,11 +268,11 @@ void overlay_fx_scale_grow_update(u8 *arg0) {
 
 u8 *image_fx_spawn(void *, s32);
 extern s32 D_80091CD4;
-extern s32 D_800BEA58;
+extern s32 g_screen_width; /* was D_800BEA58 */
 
 // effect_spawn_cross: spawns four type-7 effects (template D_80091CD4, priority arg3) around (arg0, arg1): above and
 // below (arg1 -/+ d, flag byte 0 / 8) and left and right (arg0 -/+ d, flag 4 / 0, u16 0x100), where d is the
-// distance of arg0 to the nearer screen edge (D_800BEA58 = screen width). arg2 goes to words 0xC and +0x14.
+// distance of arg0 to the nearer screen edge (g_screen_width = screen width). arg2 goes to words 0xC and +0x14.
 /* was func_150B7700 */
 void cs_overlay_spawn_cross(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     EffectTemplateE48B0 t;
@@ -298,8 +298,8 @@ void cs_overlay_spawn_cross(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     t.u35 = 0xFF;
     t.u36 = 7;
     t.u37 = 0x11;
-    if (arg0 < (D_800BEA58 >> 1)) {
-        d = D_800BEA58 - arg0;
+    if (arg0 < (g_screen_width >> 1)) {
+        d = g_screen_width - arg0;
     } else {
         d = arg0;
     }

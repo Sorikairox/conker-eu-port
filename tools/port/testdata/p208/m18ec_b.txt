@@ -23,7 +23,7 @@ s/                case 0x21: icon = 12; break;/                case 0x21: icon =
 s/                case 0x25: icon = 14; break;/                case 0x25: icon = 11; break;/
 s/                case 0x40: icon = 4; toff = -3; break;/                case 0x40: icon = 4; toff = 3; break;/
 s/                    if (obj->health != 0) {/                    if (obj->health == 0) {/
-s/                    if (D_800BE9F0 == 0x1A) {/                    if (D_800BE9F0 == 0x1B) {/
+s/                    if (g_level_id == 0x1A) {/                    if (g_level_id == 0x1B) {/
 s/                        toff = 4;/                        toff = 5;/
 s/                if (obj->unk13C) {/                if (0) {/
 s/                    ix = (right - table\[25\]) \* 4;/                    ix = (right - table[24]) * 4;/

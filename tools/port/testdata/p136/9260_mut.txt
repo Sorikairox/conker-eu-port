@@ -1,10 +1,10 @@
 s/for (k = 0; k < n; k++, types++) {/for (k = 1; k < n; k++, types++) {/
 s/for (i = 0; i < 2; i++) {/for (i = 0; i < 1; i++) {/
-s/if (D_8008B848\[\*types\].fn != NULL) {/if (D_8008B848[*types].fn0C != NULL) {/
-s/node = D_800DD280\[i\]\[\*types\];/node = D_800DD280[0][*types];/
-s/D_800DD5C0++;/D_800DD5C0 += 2;/
-s/D_800DD5C8\[D_800DD5C0\] = node->next;/D_800DD5C8[D_800DD5C0] = node->prev;/
+s/if (g_node_type_table\[\*types\].fn != NULL) {/if (g_node_type_table[*types].fn0C != NULL) {/
+s/node = g_node_lists\[i\]\[\*types\];/node = g_node_lists[0][*types];/
+s/g_node_iter_depth++;/g_node_iter_depth += 2;/
+s/g_node_iter_next\[g_node_iter_depth\] = node->next;/g_node_iter_next[g_node_iter_depth] = node->prev;/
 s/node_free_if_owner_msg((struct102 \*) node, (u8 \*) arg2, arg3);/node_free_if_owner_msg((struct102 *) node, (u8 *) arg2, 0);/
-s/D_8008B848\[\*types\].fn(node, arg2, arg3);/D_8008B848[*types].fn(node, 0, arg3);/
-s/node = D_800DD5C8\[D_800DD5C0\];/node = node->next;/
-s/D_800DD5C0--;/;/
+s/g_node_type_table\[\*types\].fn(node, arg2, arg3);/g_node_type_table[*types].fn(node, 0, arg3);/
+s/node = g_node_iter_next\[g_node_iter_depth\];/node = node->next;/
+s/g_node_iter_depth--;/;/

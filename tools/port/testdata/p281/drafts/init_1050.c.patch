@@ -64,8 +64,8 @@ index db850d72..13e38c37 100644
 +    mem_init_region_bounds();
 +    heap_init();
 +    rzip_build_fixed_tables();
-+    D_8002AAE8[0] = heap_alloc_tagged(0x1ECC0, 0xFF, 3, 1, 0);
-+    D_8002AAE8[1] = heap_alloc_tagged(0x1ECC0, 0xFF, 3, 1, 0);
++    g_framebuffers[0] = heap_alloc_tagged(0x1ECC0, 0xFF, 3, 1, 0);
++    g_framebuffers[1] = heap_alloc_tagged(0x1ECC0, 0xFF, 3, 1, 0);
 +    if (D_8000030C == 0) {
 +        osCreateMesgQueue(&D_8003B578, D_8003BC10, 8);
 +        os_create_vi_manager(OS_PRIORITY_VIMGR);

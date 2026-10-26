@@ -1,8 +1,8 @@
 25s/(arg0, \&pos)/(arg0, \&arg0->unk34)/
 25s/(arg0, \&pos)/(arg0, arg0)/
 25s/(arg0, \&pos)/(arg0->unk10, \&pos)/
-25s/D_8008FFE8\[arg0->unk2A\]/D_8008FFE0[arg0->unk2A]/
-25s/D_8008FFE8\[arg0->unk2A\]/D_8008FFE8[arg0->unk29]/
+25s/g_attach_child_end_fns\[arg0->unk2A\]/g_attach_child_update_fns[arg0->unk2A]/
+25s/g_attach_child_end_fns\[arg0->unk2A\]/g_attach_child_end_fns[arg0->unk29]/
 24s/!= -1/> 0/
 27s/= 0/= 1/
 22s/-=/+=/

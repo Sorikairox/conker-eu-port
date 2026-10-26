@@ -286,7 +286,7 @@ void damage_smoke_update(u8 *self) {
     }
 
     enabled = TRUE;
-    if (D_800BE9F0 == 2 && trigger_test_player(((u8 *) obj - (u8 *) D_800CC2D0) / 0x32C, 0x4065) == 0) {
+    if (g_level_id == 2 && trigger_test_player(((u8 *) obj - (u8 *) g_objects) / 0x32C, 0x4065) == 0) {
         enabled = FALSE;
     }
     if (enabled) {

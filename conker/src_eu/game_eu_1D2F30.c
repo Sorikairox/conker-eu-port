@@ -101,7 +101,7 @@ block_7:
                 temp_a0_5 = temp_a0_4 + 8;
                 (*(s32 *)((u8 *)temp_a0_4 + 0)) = (s32) (((D_800BE620 - 1) & 0xFFF) | 0xFD100000);
                 temp_a0_6 = temp_a0_5 + 8;
-                (*(s32 *)((u8 *)temp_a0_4 + 4)) = (s32) D_8002AAE8[D_800BE9C0];
+                (*(s32 *)((u8 *)temp_a0_4 + 4)) = (s32) g_framebuffers[D_800BE9C0];
                 (*(s32 *)((u8 *)temp_a0_5 + 0)) = temp_t4;
                 (*(s32 *)((u8 *)temp_a0_5 + 4)) = 0x07080200;
                 temp_t7 = (var_t1 * 4) & 0xFFF;

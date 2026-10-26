@@ -40,8 +40,8 @@ struct210 *cam_sprite_puff_spawn(f32 arg0, u8 arg1, s32 arg2, u8 *arg3, s16 arg4
     sp.u88 = 0x19;
     temp_v0 = floor_flags_surface_type(arg7);
     sp.u6A = 0x5C;
-    if (D_800BE9F0 != 0x26) {
-        if (D_800BE9F0 == 0x36) {
+    if (g_level_id != 0x26) {
+        if (g_level_id == 0x36) {
             if (temp_v0 == 9) {
                 return NULL;
             }
@@ -69,7 +69,7 @@ block_7:
     }
     sp.u6C = 0;
     sp.u70 = 0;
-    if (D_800BE9F0 == 0x36) {
+    if (g_level_id == 0x36) {
         sp.u74 = (u8) ((s32) arg1 >> 1);
     } else {
         sp.u74 = arg1;

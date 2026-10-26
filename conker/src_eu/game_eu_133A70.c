@@ -333,7 +333,7 @@ s32 gfx_env_color_cached(s32, s32, s32, s32, s32, s8 *);
 s32 gfx_other_mode_cached(s32, s32, s32, s8 *);
 extern s32 D_80091120[];  /* ribbon texture descriptor */
 extern s32 D_800D30BC;
-extern s32 D_800A4EA8[];  /* render mode pairs (2 words each) */
+extern s32 g_render_mode_pairs[];  /* render mode pairs (2 words each); was D_800A4EA8 */
 
 /* rodata D_800A27E8 / D_800A27EC (bit-exact copies: the NM link drops this file's .late_rodata) */
 static const f32 sRibbonMinLen2A[1] = { 0.0001f };  /* 0x38D1B717 */
@@ -354,7 +354,7 @@ static const f32 sRibbonMinLen2B[1] = { 0.0001f };  /* 0x38D1B717 */
 // the segment and the camera of view id, camera_get_pos), each segment one 6-vertex load and 4 triangles. Vertices
 // from vtx_slot_buffer_get (obj +0x74 pool, obj +0x84 count; nothing drawn without). Texture D_80091120 (combine 3), prim
 // colour obj +0x58..+0x5B, geometry 0x200005 / 0x1F0600, combine 0x44, render mode 0x80000 | 0x2CA0 | D_800D30BC
-// with the second D_800A4EA8 pair. Returns the display list end.
+// with the second g_render_mode_pairs pair. Returns the display list end.
 /* was func_15106D38 */
 s32 bolt_arc_ribbon_draw(s32 gfx, u8 *obj, s16 id) {
     Vtx *vtx;
@@ -382,7 +382,7 @@ s32 bolt_arc_ribbon_draw(s32 gfx, u8 *obj, s16 id) {
     gfx = gfx_env_color_cached(gfx, obj[0x58], obj[0x59], obj[0x5A], obj[0x5B], &flag);
     gfx = gfx_geometry_mode_cached(gfx, 0x200005, 0x1F0600);
     gfx = gfx_set_combine_mode(gfx, 0x44, &flag);
-    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[3] | D_800A4EA8[2], &flag);
+    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, g_render_mode_pairs[3] | g_render_mode_pairs[2], &flag);
 
     /* first point: side normal of the first segment */
     dx = pts[3] - pts[0];

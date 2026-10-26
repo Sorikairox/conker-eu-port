@@ -128,10 +128,10 @@
 231s/obj = obj_find_by_setup_id(9);/obj = obj_find_by_setup_id(8);/ % ch10
 232s/if (obj != NULL) {/if (obj == NULL) {/ % ch10 chnull
 233s/obj->unk232 = kind;/obj->unk232 = 0x10;/ % rep0
-234s/D_800D154C = obj;/D_800D154C = NULL;/ % ch10
-235s/D_800C3E78 = ((u8 \*) obj - (u8 \*) D_800CC2D0) \/ 0x32C;/D_800C3E78 = ((u8 *) obj - (u8 *) D_800CC2D0) \/ 0x300;/ % ch10
-235s/D_800C3E78 = ((u8 \*) obj - (u8 \*) D_800CC2D0) \/ 0x32C;/D_800C3E78 = ((u8 *) obj - ((u8 *) D_800CC2D0 + 4)) \/ 0x32C;/ % ch10
-235s/D_800C3E78 = ((u8 \*) obj - (u8 \*) D_800CC2D0) \/ 0x32C;/D_800C3E78 = ((u8 *) obj - (u8 *) D_800CC2D0 + 0x32C) \/ 0x32C;/ % ch10 chobj
+234s/g_cur_obj = obj;/g_cur_obj = NULL;/ % ch10
+235s/g_cur_obj_index = ((u8 \*) obj - (u8 \*) g_objects) \/ 0x32C;/g_cur_obj_index = ((u8 *) obj - (u8 *) g_objects) \/ 0x300;/ % ch10
+235s/g_cur_obj_index = ((u8 \*) obj - (u8 \*) g_objects) \/ 0x32C;/g_cur_obj_index = ((u8 *) obj - ((u8 *) g_objects + 4)) \/ 0x32C;/ % ch10
+235s/g_cur_obj_index = ((u8 \*) obj - (u8 \*) g_objects) \/ 0x32C;/g_cur_obj_index = ((u8 *) obj - (u8 *) g_objects + 0x32C) \/ 0x32C;/ % ch10 chobj
 236s/obj->unk218 = (struct216 \*) aiscript_find_by_kind(0, obj->unk232);/obj->unk218 = (struct216 *) aiscript_find_by_kind(1, obj->unk232);/ % ch10
 236s/obj->unk218 = (struct216 \*) aiscript_find_by_kind(0, obj->unk232);/obj->unk218 = (struct216 *) aiscript_find_by_kind(0, 0x10);/ % rep0
 236s/obj->unk218 = (struct216 \*) aiscript_find_by_kind(0, obj->unk232);/aiscript_find_by_kind(0, obj->unk232);/ % ch10

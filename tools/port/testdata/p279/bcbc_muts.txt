@@ -6,4 +6,4 @@ s/        } else if (D_8002C590 < arg3) {/        } else if (D_8002C590 > arg3) 
 s/                v = (u32) f + 0x20;/                v = (u32) f + 0x21;/
 s/        if (v != music_chan_get_volume(arg1, 2)) {/        if (v != music_chan_get_volume(arg1, 3)) {/
 s/        arg0 = 1;/        arg0 = 2;/
-s/    } else if (D_800BE9F0 == 0x13) {/    } else if (D_800BE9F0 != 0x14) {/
+s/    } else if (g_level_id == 0x13) {/    } else if (g_level_id != 0x14) {/

@@ -16,7 +16,7 @@ static const f32 sAxisY[3] = { 0.0f, 1.0f, 0.0f };
  * `turn` swaps the look direction a quarter turn about Y: (dx, dy, dz) -> (dz, dy, -dx). arg0 is unused. */
 /* was func_15036600 */
 void obj_joint_look_at_camera(s32 arg0, s32 index, s32 joint, s32 turn) {
-    struct127 *obj = &D_800CC2D0[index];
+    struct127 *obj = &g_objects[index];
     f32 (*mtx)[4];
     f32 pos[3];
     f32 d[3];

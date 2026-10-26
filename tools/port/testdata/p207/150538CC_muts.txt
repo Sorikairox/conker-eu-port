@@ -21,7 +21,7 @@ s/|| kind == 14)/|| kind == 13)/ % r14_near r13_near
 s/(D_800D27C0 + 100.0f)/(D_800D27C0 + 10.0f)/ % r13_owner
 s/\* 0.125f;/* 0.25f;/ % r13_owner r13_far
 s/\[0x2F\] = alt;/[0x2F] = 1;/ % r13_owner r13_far
-s/(u8 \*) D_800CC2D0) \/ 0x32C;/(u8 *) D_800CC2D0) \/ 0x32C + 1;/ % r13_near
+s/(u8 \*) g_objects) \/ 0x32C;/(u8 *) g_objects) \/ 0x32C + 1;/ % r13_near
 s/if (dist > 1.0f) {/if (dist > 0.0f) {/ % r13_same
 s/maxStep = dist;/maxStep = dist * 0.5f;/ % r13_near
 s/math_atan2_u16(-dx, dz, 0)/math_atan2_u16(dx, dz, 0)/ % r13_near r13_clamp
@@ -87,8 +87,8 @@ s/if (n < 25) {/if (n <= 25) {/ % d_k5_far
 s/P38_F32(0x20) = 35.0f;/P38_F32(0x20) = 36.0f;/ % d_k5
 s/P38_F32(0x24) = 6.0f;/P38_F32(0x24) = 7.0f;/ % d_k5
 s/obj_approach_speed(0.0f, obj, 1.0f, 1.0f, 0)/obj_approach_speed(0.0f, obj, 1.0f, 0.5f, 0)/ % k15_pitch
-s/(D_800CC268 >> 1) != 0/(D_800CC268 >> 2) != 0/ % m_k15_nobit
-s/D_800D1580 = 0xFF0100A7;/D_800D1580 = 0xFF0100A6;/ % m_k15_bit
+s/(g_obj_contact_mask >> 1) != 0/(g_obj_contact_mask >> 2) != 0/ % m_k15_nobit
+s/g_cur_obj_cmd = 0xFF0100A7;/g_cur_obj_cmd = 0xFF0100A6;/ % m_k15_bit
 s/P38_F32(0x3C) = 40.0f;/P38_F32(0x3C) = 41.0f;/ % m_k15_bit
 s/flags |= 2;/flags |= 0;/ % b_28_k17
 s/if (kind == 17) {/if (kind == 16) {/ % b_28_k17

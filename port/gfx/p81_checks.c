@@ -16,13 +16,13 @@
 int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
-extern unsigned char D_800CC2D0[];
+extern unsigned char g_objects[]; /* was D_800CC2D0 */
 extern unsigned char D_800C441A_[] __asm__("D_800C441A");
 extern unsigned char D_800C4408_[] __asm__("D_800C4408");
 extern unsigned char D_800C43F0_[] __asm__("D_800C43F0");
-extern unsigned char D_800C3E78_[] __asm__("D_800C3E78");
+extern unsigned char D_800C3E78_[] __asm__("g_cur_obj_index"); /* was D_800C3E78 */
 extern unsigned char D_800C3EE0_[] __asm__("D_800C3EE0");
-extern unsigned char D_800C6A70_[] __asm__("D_800C6A70");
+extern unsigned char D_800C6A70_[] __asm__("g_look_points"); /* was D_800C6A70 */
 extern unsigned char D_800C6A74_[] __asm__("D_800C6A74");
 extern unsigned char D_800C35EA_[] __asm__("D_800C35EA");
 
@@ -54,7 +54,7 @@ void p81_look_hook(int pre) {
          * obj_state_walk while in_water != 0): keep a swimming Conker at the water surface (+0x118 - 25) instead of
          * letting the buoyancy (gravity -3) accelerate him upward forever. */
         if (flag(&fsw, "p189swim") && !pre && id <= 64) {
-            unsigned char *q = D_800CC2D0 + id * REC;
+            unsigned char *q = g_objects + id * REC;
             float surf = F(q, 0x118);
             if (vbe_ld8(q + 0xAD) == 1 && surf != -10000.0f && F(q, 0x18) > surf - 25.0f) {
                 *(float *)(q + 0x18) = surf - 25.0f;
@@ -63,7 +63,7 @@ void p81_look_hook(int pre) {
             }
         }
         if (flag(&fy, "p189y") && !pre && id <= 64 && port_frame_count >= (unsigned)fy && ny++ < 240) {
-            const unsigned char *q = D_800CC2D0 + id * REC;
+            const unsigned char *q = g_objects + id * REC;
             port_log("[p189y] frame %u st %08x y %.2f vy %.3f g %.3f u28 %.3f floor %.2f water %d u31C %08x xzv %.2f old_y %.2f\n",
                      port_frame_count, W(q, 0), F(q, 0x18), F(q, 0x20), F(q, 0x24), F(q, 0x28), F(q, 0x118),
                      vbe_ld8(q + 0xAD), W(q, 0x31C), F(q, 0x3C), F(q, 0x30));
@@ -71,7 +71,7 @@ void p81_look_hook(int pre) {
     }
     if (!pre) { extern void p205_obj_hook(void); p205_obj_hook(); }
     if (!flag(&flook, "p81look") || id > 64) return;
-    r = D_800CC2D0 + id * REC;
+    r = g_objects + id * REC;
     if (pre) { slot0 = vbe_ld8(D_800C441A_); return; }
     lt = (const unsigned char *)(uintptr_t)W(r, 0x324);
     mtx = (const unsigned char *)(uintptr_t)W(r, 0x1D4);
@@ -145,7 +145,7 @@ int __wrap_attachment_draw_for_object(int gdl, unsigned char *obj, int a2, int a
     int out = flag(&fnoatt, "p81noatt") ? gdl : __real_attachment_draw_for_object(gdl, obj, a2, a3);
     n++;
     if (flag(&fatt, "p81att") && (n <= (unsigned)fatt || n % 256 == 0))
-        att_log("1284", n, (unsigned)gdl, (unsigned)out, obj ? (int)((obj - D_800CC2D0) / REC) : -1, a2);
+        att_log("1284", n, (unsigned)gdl, (unsigned)out, obj ? (int)((obj - g_objects) / REC) : -1, a2);
     return out;
 }
 

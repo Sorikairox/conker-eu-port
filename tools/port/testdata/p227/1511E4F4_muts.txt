@@ -4,7 +4,7 @@ s/s->scale = PK_F32(obj, 0x2C);/s->scale = PK_F32(obj, 0x30);/ % alloc
 s/        PK_F32(obj, 0x30) = 0.0f;/        PK_F32(obj, 0x30) = 1.0f;/ % alloc
 s/    case 0x5A:/    case 0x5B:/ % k5A
 s/        item = 0x17;/        item = 0x16;/ % k54_has
-s/if (D_800BE9F0 == 0x2D) {/if (D_800BE9F0 == 0x2C) {/ % k54_l2d_off
+s/if (g_level_id == 0x2D) {/if (g_level_id == 0x2C) {/ % k54_l2d_off
 s/o = event_get_vars(0xBA);/o = event_get_vars(0xBB);/ % k54_l2d_off
 s/\*(s32 \*) (o + 0x1FE4) <= 0/*(s32 *) (o + 0x1FE4) < 0/ % k54_l2d_off
 s/PK_F32(obj, 4) += (f32) D_800BE9E4 \* 1.52f;/PK_F32(obj, 4) += (f32) D_800BE9E4 * 1.5f;/ % base
@@ -50,4 +50,4 @@ s/PK_F32(obj, 0x34) -= 0.26f \* s->scale;/PK_F32(obj, 0x34) -= 0.2f * s->scale;/
 s/if (PK_F32(obj, 0x34) <= 0.0f) {/if (PK_F32(obj, 0x34) < -1.0f) {/ % st3_end
 s/PK_U8(obj, 0x6E) = 1;/PK_U8(obj, 0x6E) = 2;/ % st3_end
 s/            s->state = 0;/            s->state = 1;/ % st3_end
-s/for (p = D_800CC2D0; p < \&D_800CC2D0\[D_8008FD8C\]; p++)/for (p = D_800CC2D0; p < \&D_800CC2D0[D_8008FD8C - 1]; p++)/ % three take
+s/for (p = g_objects; p < \&g_objects\[D_8008FD8C\]; p++)/for (p = g_objects; p < \&g_objects[D_8008FD8C - 1]; p++)/ % three take

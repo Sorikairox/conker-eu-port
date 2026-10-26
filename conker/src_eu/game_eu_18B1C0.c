@@ -354,7 +354,7 @@ Gfx *light_apply_object_lights(Gfx *gdl, s16 player, s32 x, s32 y, s32 z, s32 ar
 }
 u8 *light_zone_find_at(s32, s32, s32, s32, u8 **);
 
-/* Starting light colour of a position (P43): the colour zone of the D_800DCD80 list that contains (x, y, z) (word +0x18,
+/* Starting light colour of a position (P43): the colour zone of the g_light_colour_zones list that contains (x, y, z) (word +0x18,
  * bytes R, G, B from the low end), else the level colour D_800DCD20 scaled by (0x100 - ((arg5 >> 5) & 3) * 0x40) >> 8.
  * flags & 0x10: blend with the fog / tint zone of light_get_tint_zone: c' = (tintB * (c + ((0xFF - c) * fb >> 8))) >> 8,
  * plus 7/8 of (tintA * (c + ((0xFF - c) * fa >> 8))) >> 8, clamped to 0xFF. The asm returns no value. */
@@ -367,7 +367,7 @@ void light_get_zone_colour(s32 x, s32 y, s32 z, s32 mask, u8 *col, s32 arg5, s32
     u8 *p;
     s32 i;
 
-    p = light_zone_find_at(x, y, z, mask, (u8 **)D_800DCD80);
+    p = light_zone_find_at(x, y, z, mask, (u8 **)g_light_colour_zones);
     if (p != NULL) {
         col[0] = *(u32 *)(p + 0x18);
         col[1] = *(u32 *)(p + 0x18) >> 8;
@@ -399,7 +399,7 @@ void light_get_zone_colour(s32 x, s32 y, s32 z, s32 mask, u8 *col, s32 arg5, s32
 void light_get_tint_zone(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7) {
     u8 *p;
 
-    p = light_zone_find_at(arg0, arg1, arg2, 0, (u8 **)D_800DCD84);
+    p = light_zone_find_at(arg0, arg1, arg2, 0, (u8 **)g_light_tint_zones);
     if (p != NULL) {
         arg4[0] = (*(u32 *)(p + 0x18)) & 0xFF;
         arg4[1] = (*(u32 *)(p + 0x18) >> 8) & 0xFF;
@@ -410,9 +410,9 @@ void light_get_tint_zone(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *a
         *arg6 = (*(u32 *)(p + 0x1C) >> 24) & 0xFF;
         *arg7 = (*(u32 *)(p + 0x18) >> 24) & 0xFF;
     } else {
-        arg4[0] = ((u8 *)D_800DCD24)[0];
-        arg4[1] = ((u8 *)D_800DCD24)[1];
-        arg4[2] = ((u8 *)D_800DCD24)[2];
+        arg4[0] = ((u8 *)g_level_light_dir)[0];
+        arg4[1] = ((u8 *)g_level_light_dir)[1];
+        arg4[2] = ((u8 *)g_level_light_dir)[2];
         arg5[0] = D_800DCD28[0];
         arg5[1] = D_800DCD28[1];
         arg5[2] = D_800DCD28[2];

@@ -15,14 +15,14 @@ extern u8 D_800DC2D8[];       /* camera / sky settings copied from the level hea
 extern u8 D_800DC2DB;         /* 1 on level 0x3C (mode 4) */
 extern u8 D_800DC2DC;         /* bit 0 of D_800D2E4C->unk14 */
 extern s32 D_800DC2E0;        /* per player: two Mtx (one per frame buffer) */
-extern Vtx *D_800DC2B8[][2];  /* per player: two vertex buffers (one per frame buffer) */
+extern Vtx *g_sky_backdrop_vtx[][2];  /* per player: two vertex buffers (one per frame buffer); was D_800DC2B8 */
 extern s32 *D_8008955C[];
 void *allocate_memory(s32, s32, s32, s32);
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 void star_field_generate(void);
 
 /* Sky gradient of mode 2: a start colour, then three segments (end colour, end row) blended linearly row by
- * row; the rows after the last segment keep its colour. Picked by level (D_800BE9F0). */
+ * row; the rows after the last segment keep its colour. Picked by level (g_level_id). */
 typedef struct {
     s32 rgb[3];
     s32 end;
@@ -45,13 +45,13 @@ static const SkyGradient sSkyGradients[] = {
 };
 
 /*
- * P74: per-level setup of the sky / backdrop buffers (called by level_load with D_800BE9F0; the argument is
+ * P74: per-level setup of the sky / backdrop buffers (called by level_load with g_level_id; the argument is
  * unused). D_800DC2D8[0..2] = level header +5..+7. Backdrop mode = header +8 (4 becomes 2 when D_800BE616 is set):
  *  - 4: per player (0..D_80082FA0) a vertex buffer of 2 x n vertices (n = 0x1C0 with D_80082FA0 == 1, else 0x130),
  *       D_800DC2B0 loaded as asset (0xD, header +9) by asset_load_ptr, 0x168 entries of D_8008955C[+9] requested
  *       when D_80038080 is set, two Mtx per player in D_800DC2E0, D_800DC2DB = (level == 0x3C).
  *  - 2: D_800DC2B0 = 256-row sky gradient texture (4 RGBA32 texels per row, sSkyGradients), two Mtx per player in
- *       D_800DC2E0, and per player two 4-vertex quads (+-0x6D6, z -1000, s 0x2000) in D_800DC2B8 (read by
+ *       D_800DC2E0, and per player two 4-vertex quads (+-0x6D6, z -1000, s 0x2000) in g_sky_backdrop_vtx (read by
  *       func_1510FD50 / game_eu_FF530.c).
  *  - 1: star_field_generate.
  * Always: D_800DC2DC = bit 0 of D_800D2E4C->unk14.
@@ -84,8 +84,8 @@ void level_setup_sky_backdrop(s32 level) {
         n = (D_80082FA0 == 1) ? 0x1C0 : 0x130;
         for (p = 0; p <= D_80082FA0; p++) {
             buf = allocate_memory(n * 2 * sizeof(Vtx), 1, 2, 0);
-            D_800DC2B8[p][0] = buf;
-            D_800DC2B8[p][1] = buf + n;
+            g_sky_backdrop_vtx[p][0] = buf;
+            g_sky_backdrop_vtx[p][1] = buf + n;
         }
         asset_load_ptr(&D_800DC2B0, 2, 0xD, D_800B0DF0->unk9);
         if (D_80038080 != 0) {
@@ -94,11 +94,11 @@ void level_setup_sky_backdrop(s32 level) {
             }
         }
         D_800DC2E0 = (s32) allocate_memory((D_80082FA0 + 1) * 2 * sizeof(Mtx), 1, 2, 0);
-        D_800DC2DB = (D_800BE9F0 == 0x3C) ? 1 : 0;
+        D_800DC2DB = (g_level_id == 0x3C) ? 1 : 0;
     } else if (D_800B0DF0->unk8 == 2) {
         tex = allocate_memory(0x100 * 4 * sizeof(u32), 1, 1, 0);
         D_800DC2B0 = (s32) tex;
-        switch (D_800BE9F0) {
+        switch (g_level_id) {
             case 0x24:
                 g = &sSkyGradients[0];
                 break;
@@ -148,10 +148,10 @@ void level_setup_sky_backdrop(s32 level) {
         D_800DC2E0 = (s32) allocate_memory((D_80082FA0 + 1) * 2 * sizeof(Mtx), 1, 1, 0);
         for (p = 0; p <= D_80082FA0; p++) {
             buf = allocate_memory(2 * 4 * sizeof(Vtx), 1, 1, 0);
-            D_800DC2B8[p][0] = buf;
-            D_800DC2B8[p][1] = buf + 4;
+            g_sky_backdrop_vtx[p][0] = buf;
+            g_sky_backdrop_vtx[p][1] = buf + 4;
             for (j = 0; j < 2; j++) {
-                v = D_800DC2B8[p][j];
+                v = g_sky_backdrop_vtx[p][j];
                 for (k = 0; k < 4; k++) {
                     v[k].v.ob[0] = (k == 0 || k == 3) ? -0x6D6 : 0x6D6;
                     v[k].v.ob[1] = (k < 2) ? 0x6D6 : -0x6D6;
@@ -172,7 +172,7 @@ extern s32 D_800DC26C;    /* triangle table: 3 vertex pointers per triangle (12 
 extern s32 D_800DC270;    /* per triangle: s16 x min, z min, x max, z max */
 extern s32 D_800DC274;    /* per triangle: s16 y min, y max */
 extern s32 D_800D3048[];  /* segment table */
-extern u8 D_800D3088;     /* 1 while object DLs are scanned: segment addresses lose 0x01000000 */
+extern u8 g_collision_scan_objects;     /* 1 while object DLs are scanned: segment addresses lose 0x01000000; was D_800D3088 */
 
 /* Collision triangle scan of a level DL (ends at G_ENDDL 0xDF): G_VTX (0x01) loads vertex pointers into a 32-entry
  * cache (the loop runs from the first vertex v0 = end - n to n - 1, as the asm does), G_TRI1 (0x05, index bytes
@@ -242,7 +242,7 @@ void collision_scan_level_dl(s32 arg0) {
         } else if (op == 1) {
             addr = cmd[1];
             if ((addr >> 24) & 0xF) {
-                addr = D_800D3048[(addr >> 24) & 0xF] + addr - (D_800D3088 << 24);
+                addr = D_800D3048[(addr >> 24) & 0xF] + addr - (g_collision_scan_objects << 24);
             }
             n = (s16) ((cmd[0] >> 12) & 0xFF);
             start = (s16) (((cmd[0] >> 1) & 0x7F) - n);

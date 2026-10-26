@@ -38,7 +38,7 @@ s/hdr = 1;/hdr = 0;/ % base
 s/D_800ABEA0\[team\]\[0\], D_800ABEA0\[team\]\[1\]/D_800ABEA0[team][1], D_800ABEA0[team][1]/ % base
 s/(base + 8) \* 4, (y - 2) \* 4, (base + 0x18) \* 4/(base + 8) * 4, (y - 2) * 4, (base + 0x10) * 4/ % base
 s/k = D_800901E4\[i\] \& 3;/k = D_800901E4[i] \& 1;/ % base
-s/v = D_800CC2D0\[i\].unk31C->unk1AA;/v = BAR_ROW(i, 0x6C);/ % hud
+s/v = g_objects\[i\].unk31C->unk1AA;/v = BAR_ROW(i, 0x6C);/ % hud
 s/v = BAR_ROW(i, 0x6C);/v = BAR_ROW(i, 0x6A);/ % base
 s/if (v > 0) {/if (v >= 0) {/ % base
 s/pct = (BAR_ROW(i, 0x66) \* 100) \/ v;/pct = (BAR_ROW(i, 0x66) * 10) \/ v;/ % base

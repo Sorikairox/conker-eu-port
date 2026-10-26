@@ -7,4 +7,4 @@
 /^Gfx \*view_border_clear(Gfx \*gdl,/,/^}/s/D_800BE620 - 2/D_800BE620 - 1/ % l1B
 /^Gfx \*view_border_clear(Gfx \*gdl,/,/^}/s/D_800DC2D8\[1\], D_800DC2D8\[2\]/D_800DC2D8[2], D_800DC2D8[1]/ % l1B
 /^Gfx \*view_border_clear(Gfx \*gdl,/,/^}/s/    return gdl;/    return 0;/ % l1B
-/^Gfx \*view_border_clear(Gfx \*gdl,/,/^}/s/|| D_800BE9F0 == 0x1E/\&\& D_800BE9F0 == 0x1E/ % l1B
+/^Gfx \*view_border_clear(Gfx \*gdl,/,/^}/s/|| g_level_id == 0x1E/\&\& g_level_id == 0x1E/ % l1B

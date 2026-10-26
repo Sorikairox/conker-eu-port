@@ -1,4 +1,4 @@
-/* P268 DIAGNOSTIC ?p268nodes=1: validates the render-node lists D_800DD280[2][104] (game_1944C0: u8 list index +0,
+/* P268 DIAGNOSTIC ?p268nodes=1: validates the render-node lists g_node_lists[2][104] (game_1944C0: u8 list index +0,
  * u8 group +1, prev +4, next +8) before and after the per-frame node update (node_lists_run_update) and before the node draw
  * (node_render_layers_draw). The first broken link is logged with the node bytes and the JS stack, once per phase. */
 #include <stdint.h>
@@ -9,7 +9,7 @@ extern unsigned port_frame_count;
 int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 void port_js_stack(int skip, int n);
-extern unsigned char D_800DD280_[] __asm__("D_800DD280");
+extern unsigned char D_800DD280_[] __asm__("g_node_lists"); /* was D_800DD280 */
 
 static int on = -1, logged;
 static unsigned W(const unsigned char *r, int o) { unsigned v; memcpy(&v, r + o, 4); return v; }
@@ -56,10 +56,10 @@ static int check(const char *where) {
 
 /* The update loop of node_lists_run_update (game_1944C0), re-done here with a list check after every handler call, so the
  * first handler that breaks a list is named (its type j and node). Same order and cursor protocol as the game C. */
-extern unsigned char D_8008B4A8_[] __asm__("D_8008B4A8");
-extern unsigned char D_800DD5C8_[] __asm__("D_800DD5C8");
-extern signed char D_800DD5C0_ __asm__("D_800DD5C0");
-#define D_800DD5C0 (*(signed char *)((uintptr_t)&D_800DD5C0_ ^ 3))   /* vbe: game bytes live at address ^ 3 */
+extern unsigned char D_8008B4A8_[] __asm__("g_node_type_update_fns"); /* was D_8008B4A8 */
+extern unsigned char D_800DD5C8_[] __asm__("g_node_iter_next"); /* was D_800DD5C8 */
+extern signed char D_800DD5C0_ __asm__("g_node_iter_depth"); /* was D_800DD5C0 */
+#define g_node_iter_depth (*(signed char *)((uintptr_t)&D_800DD5C0_ ^ 3))   /* vbe: game bytes live at address ^ 3 */
 void __real_node_lists_run_update(void);
 void __wrap_node_lists_run_update(void) {
     int i, j;
@@ -72,9 +72,9 @@ void __wrap_node_lists_run_update(void) {
             unsigned node;
             if (!fn) continue;
             node = W(D_800DD280_, (i * 104 + j) * 4);
-            D_800DD5C0++;
+            g_node_iter_depth++;
             while (node) {
-                unsigned *cur = (unsigned *)(D_800DD5C8_ + D_800DD5C0 * 4);
+                unsigned *cur = (unsigned *)(D_800DD5C8_ + g_node_iter_depth * 4);
                 *cur = W((const unsigned char *)(uintptr_t)node, 8);
                 if (on == 2 && j == 77) {   /* P269 ?p268nodes=2: cheap mode, only type-77 nodes, watch the 0x20 bytes past the block */
                     const unsigned char *q = (const unsigned char *)(uintptr_t)node;
@@ -92,18 +92,18 @@ void __wrap_node_lists_run_update(void) {
                                  sz + k * 4, before[k], W(q, sz + k * 4), *(unsigned short *)((uintptr_t)(q + 0x1E) ^ 2), (signed char)vbe_ld8(q + 0x24),
                                  vbe_ld8(q + 0x2F), vbe_ld8(q + 0x30), (signed char)vbe_ld8(q + 0x2C), (signed char)vbe_ld8(q + 0x2D), (signed char)vbe_ld8(q + 0x2E), vbe_ld8(q + 0x25));
                         dump("handled", node); dump("handled+80", node + 0x80); dump("handled+98", W(q, 0x98)); dump("handled+94", W(q, 0x94)); }
-                    node = *(unsigned *)(D_800DD5C8_ + D_800DD5C0 * 4);
+                    node = *(unsigned *)(D_800DD5C8_ + g_node_iter_depth * 4);
                     continue;
                 }
-                if (on == 2) { fn((void *)(uintptr_t)node); node = *(unsigned *)(D_800DD5C8_ + D_800DD5C0 * 4); continue; }
+                if (on == 2) { fn((void *)(uintptr_t)node); node = *(unsigned *)(D_800DD5C8_ + g_node_iter_depth * 4); continue; }
                 fn((void *)(uintptr_t)node);
                 if (!logged && check("after handler")) { const unsigned char *q = (const unsigned char *)(uintptr_t)node;
                     port_log("[p268]   handler of type %d (group %d) on node %08X: +1E %04X +24 %d +2F %d +30 %d +20 %08X\n", j, i, node,
                              *(unsigned short *)((uintptr_t)(q + 0x1E) ^ 2), (signed char)vbe_ld8(q + 0x24), vbe_ld8(q + 0x2F), vbe_ld8(q + 0x30), W(q, 0x20));
                     dump("handled", node); dump("handled+380", node + 0x380); }
-                node = *(unsigned *)(D_800DD5C8_ + D_800DD5C0 * 4);
+                node = *(unsigned *)(D_800DD5C8_ + g_node_iter_depth * 4);
             }
-            D_800DD5C0--;
+            g_node_iter_depth--;
         }
 }
 void *__real_node_render_layers_draw(void *gdl, int group, short a2, int list);

@@ -291,8 +291,8 @@ void fire_burn_update(u8 *arg0) {
 
     count = 0;
     for (i = 0; i < 25; i++) {
-        if (D_800CC2D0[i].id == 0x98 && *(u16 *)((u8 *)&D_800CC2D0[i] + 0x84) == 0x1EB &&
-            *((u8 *)&D_800CC2D0[i] + 0x222) == 0) {
+        if (g_objects[i].id == 0x98 && *(u16 *)((u8 *)&g_objects[i] + 0x84) == 0x1EB &&
+            *((u8 *)&g_objects[i] + 0x222) == 0) {
             count++;
         }
     }

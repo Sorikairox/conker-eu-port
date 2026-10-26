@@ -4,7 +4,7 @@ s/(req >> 15) \& 1/(req >> 14) \& 1/ % flag base
 s/(req >> 16) \& 0xFF/(req >> 16) \& 0x7F/ % keep
 s/setup_entry_find_by_id(req \& 0xFF)/setup_entry_find_by_id(req \& 0x7F)/ % rec5
 s/if (rec == -1)/if (rec == 0)/ % norec
-s/D_800D252C\[rec\] = 0;/D_800D252C[rec] = 1;/ % base
+s/g_setup_entry_flags\[rec\] = 0;/g_setup_entry_flags[rec] = 1;/ % base
 s/if (!(state \& 0x80))/if (state \& 0x80)/ % keep base
 s/old = obj_find_by_spawn(rec);/old = obj_find_by_spawn(0);/ % base
 s/if (old != NULL)/if (old == NULL)/ % noold base
@@ -13,14 +13,14 @@ s/obj_reset(old);/obj_reset(obj);/ % base
 s/rec \* 0x30)\[2\] = 0;/rec * 0x30)[3] = 0;/ % base
 s/rec \* 0x30, rec, 0, 0, 0)/rec * 0x30, rec, 1, 0, 0)/ % base
 s/if (n == 0)/if (n == 1)/ % nospawn rec5
-s/obj = \&D_800CC2D0\[n - 1\];/obj = \&D_800CC2D0[n];/ % base
-s/(D_800D154C - D_800CC2D0) + 1;/(D_800D154C - D_800CC2D0);/ % base
+s/obj = \&g_objects\[n - 1\];/obj = \&g_objects[n];/ % base
+s/(g_cur_obj - g_objects) + 1;/(g_cur_obj - g_objects);/ % base
 s/noMode ? 0 : 4;/noMode ? 0 : 3;/ % base
 s/state \& 0x7F;/state;/ % rec5
-s/D_800C3E78 + 1;/D_800C3E78;/ % base
-s/obj->y_position = D_800D154C->y_position;/obj->y_position = D_800D154C->z_position;/ % base
-s/D_800BE616 != 0 \&\& D_800D154C->id == 0x53/D_800BE616 != 0 \&\& D_800D154C->id == 0x52/ % k53 k52
+s/g_cur_obj_index + 1;/g_cur_obj_index;/ % base
+s/obj->y_position = g_cur_obj->y_position;/obj->y_position = g_cur_obj->z_position;/ % base
+s/D_800BE616 != 0 \&\& g_cur_obj->id == 0x53/D_800BE616 != 0 \&\& g_cur_obj->id == 0x52/ % k53 k52
 s/D_800BE616 != 0 \&\& //  % k53off
-s/D_800D154C->unk222 = obj - D_800CC2D0;/D_800D154C->unk222 = obj - D_800CC2D0 + 1;/ % k53
-s/D_800BE9F0 == 0x3F \&\& obj->id == 0x16/D_800BE9F0 == 0x3F \&\& obj->id == 0x17/ % lvl3F lvl3Fid17
+s/g_cur_obj->unk222 = obj - g_objects;/g_cur_obj->unk222 = obj - g_objects + 1;/ % k53
+s/g_level_id == 0x3F \&\& obj->id == 0x16/g_level_id == 0x3F \&\& obj->id == 0x17/ % lvl3F lvl3Fid17
 s/obj->unk94 |= 2;/obj->unk94 |= 4;/ % lvl3F

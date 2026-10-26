@@ -12,7 +12,7 @@
 \#^                anim = 0x27A;$#s/0x27A/0x27B/ % k3C_f k3C_n0 k3C_n1 k3C_r k3C_s k3C_u k3C_uk k3C_x k3C_zf k3C_zr k3C_zu k3C_zu0 k3C_zx
 \#^                obj_effect_run_handler(obj, 9, list);$#s/obj_effect_run_handler(obj, 9, list);/;/ % k15_f k15_fire k15_fire2 k15_fire3 k15_fire4 k15_fire5 k15_r k15_rel k15_s k15_u k15_uk k15_x k15_zf k15_zr k15_zu k15_zu0 k15_zx
 906s/0x2010/0x2000/ % k15_f k15_fire k15_fire2 k15_fire3 k15_fire4 k15_fire5 k15_r k15_rel k15_s k15_u k15_uk k15_x k15_zf k15_zr k15_zu k15_zu0 k15_zx
-\#^                D_800D1580 = 0x53;$#s/0x53/0x54/ % k39_f k39_fire k39_fire2 k39_fire3 k39_fire4 k39_fire5 k39_r k39_rel k39_s k39_u k39_uk k39_x k39_zf k39_zr k39_zu k39_zu0 k39_zx
+\#^                g_cur_obj_cmd = 0x53;$#s/0x53/0x54/ % k39_f k39_fire k39_fire2 k39_fire3 k39_fire4 k39_fire5 k39_r k39_rel k39_s k39_u k39_uk k39_x k39_zf k39_zr k39_zu k39_zu0 k39_zx
 679s/0x2010/0x2000/ % k39_f k39_fire k39_fire2 k39_fire3 k39_fire4 k39_fire5 k39_r k39_rel k39_s k39_u k39_uk k39_x k39_zf k39_zr k39_zu k39_zu0 k39_zx
 607s/0x2010/0x2000/ % k38_f k38_fire k38_fire2 k38_fire3 k38_fire4 k38_fire5 k38_r k38_rel k38_s k38_u k38_uk k38_x k38_zf k38_zr k38_zu k38_zu0 k38_zx
 731s/0x2010/0x2000/ % k37_f k37_r k37_s k37_u k37_uk k37_x k37_zf k37_zr k37_zu k37_zu0 k37_zx
@@ -23,7 +23,7 @@
 \#^        anim = 0x8E;$#s/0x8E/0x8F/ % k17_f k17_r k17_s k17_u k17_uk k17_x k17_zf k17_zr k17_zu k17_zu0 k17_zx
 \#^            H(obj, 0x76) = u - 0x4000;$#s/0x4000/0x3FFF/ % k17_f k17_r k17_s k17_u k17_uk k17_x k17_zf k17_zr k17_zu k17_zu0 k17_zx
 \#^            H(CTL, 0x19E) = 0x7D;$#s/0x7D/0x7E/ % k1B_f k1B_r k1B_s k1B_u k1B_uk k1B_x k1B_zf k1B_zr k1B_zu k1B_zu0 k1B_zx
-\#^                D_800D1580 = (snd & 0xFFFF) | 0x10000;$#s/0x10000/0x20000/ % k26_f k26_r k26_s k26_st1a k26_st1b k26_st1c k26_st2a k26_st2b k26_st2c k26_st3a k26_st3b k26_st3c k26_st4a k26_st4b k26_st4c k26_u k26_uk k26_x k26_zf k26_zr k26_zu k26_zu0 k26_zx
+\#^                g_cur_obj_cmd = (snd & 0xFFFF) | 0x10000;$#s/0x10000/0x20000/ % k26_f k26_r k26_s k26_st1a k26_st1b k26_st1c k26_st2a k26_st2b k26_st2c k26_st3a k26_st3b k26_st3c k26_st4a k26_st4b k26_st4c k26_u k26_uk k26_x k26_zf k26_zr k26_zu k26_zu0 k26_zx
 \#^                objev_spawn_helper_object();$#s/objev_spawn_helper_object();/;/ % k26_f k26_r k26_s k26_st1a k26_st1b k26_st1c k26_st2a k26_st2b k26_st2c k26_st3a k26_st3b k26_st3c k26_st4a k26_st4b k26_st4c k26_u k26_uk k26_x k26_zf k26_zr k26_zu k26_zu0 k26_zx
 \#^            obj_detonate_attachment(obj, 1);$#s/obj, 1)/obj, 0)/ % k26_f k26_r k26_s k26_st1a k26_st1b k26_st1c k26_st2a k26_st2b k26_st2c k26_st3a k26_st3b k26_st3c k26_st4a k26_st4b k26_st4c k26_u k26_uk k26_x k26_zf k26_zr k26_zu k26_zu0 k26_zx
 \#^            B(obj, 0xAA) = 0x4B;$#s/0x4B/0x4C/ % k3E_f k3E_r k3E_s k3E_u k3E_uk k3E_x k3E_zf k3E_zr k3E_zu k3E_zu0 k3E_zx

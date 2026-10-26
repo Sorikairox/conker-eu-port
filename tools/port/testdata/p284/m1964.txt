@@ -7,14 +7,14 @@
 \#^            if (obj->unk223 == 3) {$#s/3/2/
 \#^                obj->unkB8 = obj->y_velocity \* -0.5f;$#s/-0.5f/0.5f/
 \#^        if (obj->unk223 == 14) {$#s/14/13/
-\#^            target = &D_800CC2D0\[obj->unk222\];$#s/unk222\]/unk222 - 1]/
+\#^            target = &g_objects\[obj->unk222\];$#s/unk222\]/unk222 - 1]/
 \#^            obj->gravity = 0.0f;$#d
-\#^            obj->y_velocity = (D_800CC2D0\[obj->unk222\].y_position + (s16) obj->unk224 - obj->y_position) /$#s/(s16) obj->unk224/(u16) obj->unk224/
-\#^            obj->y_velocity = (D_800CC2D0\[obj->unk222\].y_position + (s16) obj->unk224 - obj->y_position) /$#s/- obj->y_position//
+\#^            obj->y_velocity = (g_objects\[obj->unk222\].y_position + (s16) obj->unk224 - obj->y_position) /$#s/(s16) obj->unk224/(u16) obj->unk224/
+\#^            obj->y_velocity = (g_objects\[obj->unk222\].y_position + (s16) obj->unk224 - obj->y_position) /$#s/- obj->y_position//
 \#^                              (dist / obj->xz_velocity);$#s/(dist \/ obj->xz_velocity)/(obj->xz_velocity \/ dist)/
 \#^                              (dist / obj->xz_velocity);$#s/dist \//210.0f \//
 \#^            dist = obj_dist_xz(target, obj);$#s/(target, obj)/(obj, target)/
-\#^                height = D_800CC2D0\[0\].y_position + 210.0f;$#s/\[0\]/[1]/
+\#^                height = g_objects\[0\].y_position + 210.0f;$#s/\[0\]/[1]/
 \#^                if (level == 10000) {$#s/10000/1000/
 \#^                    height = \*(s16 \*) ((u8 \*) D_800D2104\[obj->unk13F\] + obj->unk21E \* 8 + 0xA);$#s/0xA)/0x8)/
 \#^                } else if (obj->id == 0x50 || obj->id == 5 || obj->id == 0xAD || obj->id == 0xAE ||$#s/obj->id == 0x50 || //

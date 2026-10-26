@@ -6,7 +6,7 @@ s/if (D_800C35EA == 1) {/if (D_800C35EA != 0) {/
 s/music_song_set_fade(0x22, 0x14, 1);/music_song_set_fade(0x22, 0x14, 0);/
 s/        state = 0x80;/        state = 0x81;/
 s/started = TRUE;/started = 2;/
-s/D_800BE9F0 != 0x1D/D_800BE9F0 != 0x1C/
+s/g_level_id != 0x1D/g_level_id != 0x1C/
 s/        return state;/        return state | last;/
 s/sound_source_mix(-0x15F, 0, 0x197,/sound_source_mix(-0x15F, 0, 0x196,/
 s/sound_source_mix(-0x40, 0, 0x21F, 0x7FFF, 0xBB8, 0x12C/sound_source_mix(-0x40, 0, 0x21F, 0x7FFF, 0xBB8, 0x12D/

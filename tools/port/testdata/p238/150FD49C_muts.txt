@@ -8,6 +8,6 @@ s/f32 range = 9005\.0f;/f32 range = 9000.0f;/ % spot
 s/&range, 0\.00011104942f)/\&range, 0.0001f)/ % spot
 s/return cam_wobble_fade_by_distance(obj, pos,/return cam_wobble_fade_by_distance(pos, pos,/ % spot
 s/\*(s32 \*) &nearDist, \*(s32 \*) &range,/*(s32 *) \&range, *(s32 *) \&nearDist,/ % spot
-s/(s16 \*) D_800D9AA0\[0\];/(s16 *) D_800D9AA0[1];/ % spot
+s/(s16 \*) g_view_sparkle_spots\[0\];/(s16 *) g_view_sparkle_spots[1];/ % spot
 s/    if (spot == NULL) {/    if (spot != NULL) {/ % spot
 s/return cam_wobble_fade_by_distance(obj, pos, \*(s32 \*) &nearDist/return cam_wobble_fade_by_distance(obj, pos, (s32) nearDist/ % spot

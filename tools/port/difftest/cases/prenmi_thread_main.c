@@ -28,7 +28,7 @@ void prenmi_thread_main(s32 arg0) {
     if (D_8002C068 == 0) {
         osRecvMesg(&D_8003BD70, &mesg, OS_MESG_BLOCK);
     }
-    D_8002AC5C = 1;
+    g_eeprom_writes_disabled = 1;
     osStopThread(&D_80035C70);
     osStopThread(&D_80031AE0);
     audio_thread_stop();
@@ -42,11 +42,11 @@ void prenmi_thread_main(s32 arg0) {
             }
         }
         if (any == 1 && D_8002AE18 == 0) {
-            osRecvMesg(&D_800BE900, &D_800BEDB0, OS_MESG_BLOCK);
+            osRecvMesg(&g_si_mesg_queue, &D_800BEDB0, OS_MESG_BLOCK);
         }
         for (i = 0; i < 4; i++) {
             if (D_800BED64[i] != 0) {
-                os_motor_init(&D_800BE900, &D_800BEB80[i], i);
+                os_motor_init(&g_si_mesg_queue, &D_800BEB80[i], i);
                 os_motor_stop(&D_800BEB80[i]);
                 D_800BED68[i] = 0;
             }

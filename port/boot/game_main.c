@@ -57,7 +57,7 @@ void boot_game_thread_main(s32 arg0) {
      * in init_1050.c names it func_1000709C (the US name, a "missing" stub until now). Now that Rare's inflater is C
      * (init_eu_5DA0.c, port P36) a fixed block needs these tables: without them inf_codes read wild pointers. */
     { void rzip_build_fixed_tables(void); rzip_build_fixed_tables(); }
-    fb = D_8002AAE8;
+    fb = g_framebuffers;
     fb[0] = heap_alloc_tagged(126144, 0xFF, 3, 1, 0);
     fb[1] = heap_alloc_tagged(126144, 0xFF, 3, 1, 0);
     port_log("[boot] framebuffers %08X %08X\n", fb[0], fb[1]);

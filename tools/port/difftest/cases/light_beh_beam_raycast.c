@@ -12,7 +12,7 @@ typedef struct {
 /* data at +0x18 (light_create_obj_beam): object, its unique id, attach point, offset (+8), ray end (+0x14), scale (+0x20),
  * flags (+0x24: 1 = cast, 2 = poke kind 0x9E). */
 
-/* light_beam_update: P237. D_8008B0F0 handler for the beam lights of light_create_obj_beam. Ends the light (0) when its
+/* light_beam_update: P237. g_light_effect_update_fns handler for the beam lights of light_create_obj_beam. Ends the light (0) when its
  * object is gone or was reused (unique id). Without attach matrices (+0x1D4), without flag 1, or for a hidden
  * object (+0x74 & 0xF == 0xF), the light sits at the object position (light +0xE / +0x10 / +0x12) with brightness
  * +0x2F = 0 and +9 = 1. Else the offset and end points go through attach matrix `point` (mtx_transform_points), and when

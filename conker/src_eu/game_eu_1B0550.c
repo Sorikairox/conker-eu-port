@@ -8,7 +8,7 @@ extern u8 D_800DE284[];
 s32 water_wave_push(struct127 *, s32, s32);
 extern s32 D_8008D3F0;
 extern s32 D_8008D407;
-extern s32 D_800DE290;
+extern s32 g_area_points; /* was D_800DE290 */
 
 /* was func_15182D40 */
 void water_waves_update(void) {
@@ -47,8 +47,8 @@ void water_waves_update(void) {
     u8 *temp_v1_3;
 
     var_s7 = 0;
-    if ((s32) D_800DDE50 > 0) {
-        var_s3 = &D_800DE290;
+    if ((s32) g_area_points_count > 0) {
+        var_s3 = &g_area_points;
         sp90 = D_800DE284;
         do {
             var_s5 = 0;
@@ -60,7 +60,7 @@ void water_waves_update(void) {
             var_s2 = &sp.uA4;
 loop_3:
             *var_s2 = 0;
-            var_s0 = D_800CC2D0;
+            var_s0 = g_objects;
             var_s1 = 0;
 loop_4:
             if (var_s0->interaction_state != 0) {
@@ -123,7 +123,7 @@ loop_17:
                 *(s32 *)((u8 *)&D_8008D407 + (*sp90 * 0x18)) = 0;
             }
             if ((var_s6 != 0) && (*(s32 *)((u8 *)&D_8008D407 + (*sp90 * 0x18)) == 0)) {
-                temp_s0 = &D_800CC2D0[var_s5];
+                temp_s0 = &g_objects[var_s5];
                 temp_v1_2 = *sp90;
                 *(s32 *)((u8 *)&D_8008D407 + (temp_v1_2 * 0x18)) = (random_int() & 0x3F) + 0x96;
                 if ((temp_v1_2 == 2) || (temp_v1_2 == 3)) {
@@ -145,11 +145,11 @@ loop_17:
             var_s7 += 1;
             sp90 += 1;
             var_s3 = (s32 *)((u8 *)var_s3 + (4));
-        } while (var_s7 < (s32) D_800DDE50);
+        } while (var_s7 < (s32) g_area_points_count);
     }
 }
 // water_mesh_wave_update: rebuilds a water object's world vertices for this frame's buffer (+0x20[D_800BE9C0]) from
-// its model vertices (+0x28, 16 bytes each): the vertex z picks a slot of the wave profile D_800DE290[+0x3C]
+// its model vertices (+0x28, 16 bytes each): the vertex z picks a slot of the wave profile g_area_points[+0x3C]
 // (water_wave_slot_of_z, 0..39, linear blend of neighbouring samples), whose height / 16 is added to the vertex y; the
 // vertex goes through a translation by -D_8008D400 (the water type's depth) and is offset by the object position
 // +0x10. The vertex count comes from the type's model record (D_800DBEF4[D_8008D402].+0x16).
@@ -183,8 +183,8 @@ void water_mesh_wave_update(u8 *obj) {
             next = 39;
         }
         frac = pos - (f32)slot;
-        a = *(f32 *)(((u8 **)&D_800DE290)[water] + slot * 12 + 8) * (1.0f - frac);
-        b = *(f32 *)(((u8 **)&D_800DE290)[water] + next * 12 + 8) * frac;
+        a = *(f32 *)(((u8 **)&g_area_points)[water] + slot * 12 + 8) * (1.0f - frac);
+        b = *(f32 *)(((u8 **)&g_area_points)[water] + next * 12 + 8) * frac;
         v = (s16 *)(*(u8 **)(obj + 0x28) + off);
         mtxf_transform_point(mtx, (f32)v[0], (f32)(v[1] + ((s32)(b + a) >> 4)), (f32)v[2], &ox, &oy, &oz);
         out[0] = (s32)((f32)*(s16 *)(obj + 0x10) + ox);
@@ -212,12 +212,12 @@ f32 water_wave_slot_of_z(s32 arg0, s32 arg1) {
 /* P204 */
 extern u8 D_800DE284[];
 extern s32 D_8008D3F0;
-extern s32 D_800DE290;
+extern s32 g_area_points; /* was D_800DE290 */
 f32 water_wave_slot_of_z(s32, s32);
 
 // water_wave_push: how strongly wave slot `slot` (0..39) of water `water` pushes player pl: 0 when the player
 // rises faster than 3 (+0x28), is more than 300 above / below the slot's wave surface (model height +0x12 plus
-// the profile sample D_800DE290[water][slot] +8 / 16), or lies outside the water's box (the player's offset from the
+// the profile sample g_area_points[water][slot] +8 / 16), or lies outside the water's box (the player's offset from the
 // model origin, moved down by the type's depth +0x10: z in [+0xC, 0], x in [0, +0xE]). Otherwise the type's push
 // strength (s8 +0x16) when the player's own wave slot (water_wave_slot_of_z of z) is `slot`, 4 / 7 of it for a
 // neighbouring slot, else 0. Water types: D_8008D3F0 (0x18 bytes) indexed by D_800DE284[water].
@@ -241,7 +241,7 @@ s32 water_wave_push(struct127 *pl, s32 slot, s32 water) {
     }
     type = (u8 *) &D_8008D3F0 + *kind * 0x18;
     model = (u8 *) D_800DBEF4 + *(s16 *) (type + 0x12) * 0xA0;
-    surface = *(f32 *) (((u8 **) &D_800DE290)[water] + slot * 12 + 8) * 0.0625f + (f32) *(s16 *) (model + 0x12);
+    surface = *(f32 *) (((u8 **) &g_area_points)[water] + slot * 12 + 8) * 0.0625f + (f32) *(s16 *) (model + 0x12);
     if (pl->y_position < surface - 300.0f || surface + 300.0f < pl->y_position) {
         return 0;
     }

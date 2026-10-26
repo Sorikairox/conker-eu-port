@@ -51,7 +51,7 @@ void fx_dust_puff_behind_obj(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s
     s32 temp_v0_3;
     struct127 *temp_v0;
 
-    temp_v0 = &D_800CC2D0[arg0];
+    temp_v0 = &g_objects[arg0];
     if ((temp_v0->in_water == 0) && (temp_v0->unk118 == -10000.0f)) {
         temp_f20 = temp_v0->x_position;
         temp_f12 = temp_v0->unk40 * 0.017453292f;

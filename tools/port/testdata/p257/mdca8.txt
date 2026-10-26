@@ -1,4 +1,4 @@
-\#^    D_800D31CB = 0;$#s/= 0/= 1/
+\#^    g_sprite_keep_prim_colour = 0;$#s/= 0/= 1/
 \#^    tex = (s32 \*) D_8008CDEC\[obj\[0x1A\]\];$#s/0x1A/0x1B/
 \#^    gfx = (u8 \*) gfx_load_texture_cached((s32) gfx, (s32) tex, obj\[0x1B\] << 8, 2, 0x100, 0x100, 0, 6, (s32) &quad,$#s/<< 8/<< 7/
 \#^    gfx = (u8 \*) gfx_load_texture_cached((s32) gfx, (s32) tex, obj\[0x1B\] << 8, 2, 0x100, 0x100, 0, 6, (s32) &quad,$#s/0x100, 0x100/0x100, 0x101/
@@ -24,12 +24,12 @@
 \#^    D_800D31C9 = obj\[0x1D\];$#s/0x1D/0x1C/
 \#^    D_800D31CA = obj\[0x1E\];$#s/0x1E/0x1F/
 \#^    g = obj\[0x21\];$#s/0x21/0x22/
-\#^    if (r != D_800DD5F8 || g != D_800DD5FA || b != D_800DD5FC) {$#s/|| b != D_800DD5FC//
-\#^    if (r != D_800DD5F8 || g != D_800DD5FA || b != D_800DD5FC) {$#s/r != D_800DD5F8 ||//
-\#^        D_800DD5FA = g;$#s/= g/= r/
-\#^        D_800DD5FC = b;$#s/D_800DD5FC = b/D_800DD5FE = b/
+\#^    if (r != D_800DD5F8 || g != g_gfx_env_g_cached || b != g_gfx_env_b_cached) {$#s/|| b != g_gfx_env_b_cached//
+\#^    if (r != D_800DD5F8 || g != g_gfx_env_g_cached || b != g_gfx_env_b_cached) {$#s/r != D_800DD5F8 ||//
+\#^        g_gfx_env_g_cached = g;$#s/= g/= r/
+\#^        g_gfx_env_b_cached = b;$#s/g_gfx_env_b_cached = b/g_gfx_env_a_cached = b/
 \#^        ((s32 \*) gfx)\[1\] = (r << 24) | (g << 16) | (b << 8);$#s/(b << 8)/(b << 8) | 0xFF/
 \#^        ((s32 \*) gfx)\[1\] = (r << 24) | (g << 16) | (b << 8);$#s/(g << 16)/(g << 15)/
 \#^    return sprite_draw_at_world_depth(gfx, (u8 \*) &quad);$#s/gfx,/gfx + 8,/
 1,/if (synced == 0) {/s/if (synced == 0) {/if (synced != 0) {/
-/D_800DD5FC = b;/,/if (synced == 0) {/s/if (synced == 0) {/if (synced != 0) {/
+/g_gfx_env_b_cached = b;/,/if (synced == 0) {/s/if (synced == 0) {/if (synced != 0) {/

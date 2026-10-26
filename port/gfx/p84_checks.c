@@ -83,9 +83,9 @@ static void lang_hook(const char *name) { lang_watch("stub"); l_last = name; }
 extern unsigned char p88_D_800C35EA[] __asm__("D_800C35EA");
 extern unsigned char p88_D_800C39D0[] __asm__("D_800C39D0");
 extern unsigned char p88_D_eu_800C3A60[] __asm__("D_eu_800C3A60");
-/* P88 ?p88pos=N: every N frames from frame 940 to 1300, player record 0 (D_800CC2D0, 0x32C bytes) state / position and
+/* P88 ?p88pos=N: every N frames from frame 940 to 1300, player record 0 (g_objects, 0x32C bytes) state / position and
  * the slot 0 scene state / counter. */
-extern unsigned char p88_D_800CC2D0[] __asm__("D_800CC2D0");
+extern unsigned char p88_D_800CC2D0[] __asm__("g_objects"); /* was D_800CC2D0 */
 static void p88_pos(void) {
     static int f = -1, from = -1, to = -1; /* P154: ?p88from=F / ?p88to=F (default 940 / 3000) */
     static unsigned last;

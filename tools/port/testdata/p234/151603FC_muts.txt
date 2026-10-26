@@ -1,2 +1,2 @@
 # P234 light_ctrl_update mutant
-s/D_8008B0F0\[arg0->unkF\](arg0)/D_8008B0F0[arg0->unkF](NULL)/ % 
+s/g_light_effect_update_fns\[arg0->unkF\](arg0)/g_light_effect_update_fns[arg0->unkF](NULL)/ % 

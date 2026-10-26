@@ -11,7 +11,7 @@ void clock_level_callback(s32 arg0) {
     rain_update(0);
 }
 
-extern s32 D_800BE804;
+extern s32 g_save_stat9; /* was D_800BE804 */
 
 /* was func_1510AFC4 */
 void clock_hands_update(u8 *arg0) {
@@ -33,9 +33,9 @@ void clock_hands_update(u8 *arg0) {
 
     var_v0 = (*(s32 *)((u8 *)arg0 + 0x3C));
     var_v1 = (s32) (var_v0 / 3000) % 60;
-    if (((*(s32 *)((u8 *)arg0 + 0x84)) == 0) && (D_800BE804 != 0)) {
+    if (((*(s32 *)((u8 *)arg0 + 0x84)) == 0) && (g_save_stat9 != 0)) {
         (*(s32 *)((u8 *)arg0 + 0x84)) = 1;
-        temp_hi = (u32) (D_800BE804 * 0xB4) % 43200U;
+        temp_hi = (u32) (g_save_stat9 * 0xB4) % 43200U;
         temp_t6 = temp_hi * 0x32;
         var_v0 = temp_t6;
         (*(s32 *)((u8 *)arg0 + 0x3C)) = (s32) temp_hi;

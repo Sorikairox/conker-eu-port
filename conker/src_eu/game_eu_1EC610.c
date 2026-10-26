@@ -87,7 +87,7 @@ s32 life_pickup_spawn(f32 *pos, f32 angle, u8 kind, u8 flag, u8 size, s32 arg5, 
         sp.spr.u38 = sizes[size];
         sp.spr.u0 = (flag ? 0x10 : 0) | 0xE;
         sp.spr.u1 = 1;
-        if (D_800BE9F0 == 7) {
+        if (g_level_id == 7) {
             sp.spr.u2 = 6;
         } else {
             sp.spr.u2 = 2;
@@ -152,7 +152,7 @@ void obj_get_fx_point_a(u8 *, f32 *, f32 *, f32 *);
 s32 life_pickup_ring_spawn(f32, s32, s32, u8, s32, s32, s32, s32, s32);
 void pickup_burst_spawn(f32 *);
 void lives_popup_spawn(u8, s32);
-extern s32 D_800D1968;
+extern s32 g_obj_update_counter; /* was D_800D1968 */
 
 /* was func_151BF268 */
 s32 life_pickup_check_collect(u8 *arg0) {
@@ -173,7 +173,7 @@ s32 life_pickup_check_collect(u8 *arg0) {
     u8 *temp_s1;
 
     var_s5 = 1;
-    var_s3 = D_800CC2D0;
+    var_s3 = g_objects;
     do {
         if (player_slot_is_active((u8 *) var_s3) != 0) {
             temp_s1 = arg0 + 0x120;
@@ -209,7 +209,7 @@ s32 life_pickup_check_collect(u8 *arg0) {
             }
         }
         var_s3 = (struct127 *)((u8 *)var_s3 + (0x32C));
-    } while ((s32)var_s3 != (s32)&D_800D1968);
+    } while ((s32)var_s3 != (s32)&g_obj_update_counter);
     return var_s5;
 }
 /* was func_151BF444 */
@@ -262,7 +262,7 @@ s32 mdl_particle_mtx_rot_scale3(s32 arg0, u8 *arg1);
  * ring_particle_spawn: spawns one ring particle (sprite 0x26, life 300, scale (1, 1, 0.923, 0.923; 0x3F6C49BB), rotated by
  * yaw about y, no motion) at the 3 words at pos (copied as they are), colour D_8008FF60[colour] (only colours 0..2;
  * else nothing and 0), flags 0xC1D00 | 0x4000 when flag (u8) is set, +0x5C = arg6, +0x61 = 0x18 in game mode 7
- * (D_800BE9F0). Request (arg2, (u8) arg3, 0, (u8) arg7, arg8). On success mdl_particle_mtx_rot_scale3(p + 0x90 + 0x40 * k, p)
+ * (g_level_id). Request (arg2, (u8) arg3, 0, (u8) arg7, arg8). On success mdl_particle_mtx_rot_scale3(p + 0x90 + 0x40 * k, p)
  * for k = 0, 1. Returns the particle (0 on failure).
  */
 /* was func_151BF490 */
@@ -301,7 +301,7 @@ s32 life_pickup_ring_spawn(f32 yaw, s32 posArg, s32 arg2, u8 arg3, s32 colour, s
     req.alpha = 0xFF;
     req.colour = D_8008FF60[(u8) colour];
     req.u5C = arg6;
-    req.u61 = (D_800BE9F0 == 7) ? 0x18 : 0;
+    req.u61 = (g_level_id == 7) ? 0x18 : 0;
     req.u62[0] = 0;
     req.u62[1] = 0;
     req.u62[2] = 0;
@@ -665,7 +665,7 @@ void lives_popup_update(u8 *arg0) {
     u8 *temp_v0_3;
     u8 *var_v1;
 
-    if ((D_800BEAC1 != 0) || (var_v1 = arg0 + 0x28, (D_800BEAC0 != 0))) {
+    if ((D_800BEAC1 != 0) || (var_v1 = arg0 + 0x28, (g_game_paused != 0))) {
         (*(s16 *)((u8 *)arg0 + 0xE)) = -1;
         (*(u8 *)((u8 *)arg0 + 0xD)) = (u8) ((*(u8 *)((u8 *)arg0 + 0xD)) | 1);
         return;

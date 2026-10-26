@@ -56,7 +56,7 @@ typedef struct {
 } Blend1A8930;
 
 /*
- * player_morph_blend: blends player `idx`'s (D_800CC2D0) morph target from the previous shape to shape `target`
+ * player_morph_blend: blends player `idx`'s (g_objects) morph target from the previous shape to shape `target`
  * over `frames` ticks. The shape set D_800A7610[i] is picked by the player's type (obj_current_part_model); a player with
  * +0x1C8 set and no vertex buffer (+0x28C[D_800BE9C0]) or no D_800D19A0 entry only advances the blend factor. On
  * a new target the old one becomes `prev` and t restarts at 0. Shape vertex sets (one per part j, loaded on demand
@@ -66,7 +66,7 @@ typedef struct {
  */
 /* was func_1517B270 */
 s32 player_morph_blend(s32 target, s32 frames, s32 idx) {
-    u8 *ply = (u8 *)D_800CC2D0 + idx * 0x32C;
+    u8 *ply = (u8 *)g_objects + idx * 0x32C;
     DescABB0 *desc;
     Blend1A8930 *b;
     EntABB0 ***cache;
@@ -102,7 +102,7 @@ s32 player_morph_blend(s32 target, s32 frames, s32 idx) {
         if (*(s32 *)(ply + 0x28C + D_800BE9C0 * 4) == 0 || (&D_800D19A0)[found] == 0) {
             /* nothing to draw into: only advance the blend */
             if (target == b->cur) {
-                if (!D_800BEAC0) {
+                if (!g_game_paused) {
                     b->t += b->rate * D_800BE9E4;
                 }
                 if (1.0f < b->t) {
@@ -171,7 +171,7 @@ s32 player_morph_blend(s32 target, s32 frames, s32 idx) {
         }
     }
 
-    if (!D_800BEAC0) {
+    if (!g_game_paused) {
         b->t += b->rate * D_800BE9E4;
     }
     if (1.0f < b->t) {

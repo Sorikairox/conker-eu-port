@@ -9,7 +9,7 @@ void camera_update_eye_base(struct108 *arg0);
 void camera_update_eye_orbit(struct108 *arg0);
 void camera_update_eye_height(u8 *arg0);
 extern u8 D_800BE616;
-extern u8 D_800BEE2C;
+extern u8 g_slowmo_divisor; /* was D_800BEE2C */
 extern f32 D_800A3810;
 extern f32 D_800A3814;
 extern f32 D_800A3818;
@@ -27,7 +27,7 @@ extern f32 D_800A3824;
 // facing + turn (+0x7C) - 180 - arg1, minus the locked-camera tilt (+0x2E4 >> 16) and the ctl +0x12 offset for the
 // riding modes (9, 0x37..0x39, 0x3B, 0x12), wrapped by math_wrap_deg_360; +0x23C snaps the yaw to ctl +0x18C (taking its
 // saved position +0x160 into +0x2F8 / +0x304 once) or the target, else it eases with mode-dependent gains (unless
-// D_800BEE2C). +0x39C = yaw * D_800A3810 / D_800A3824.
+// g_slowmo_divisor). +0x39C = yaw * D_800A3810 / D_800A3824.
 /* was func_151221F0 */
 void camera_follow_yaw_update(struct108 *arg0, f32 arg1) {
     u8 *cam = (u8 *) arg0;
@@ -98,7 +98,7 @@ void camera_follow_yaw_update(struct108 *arg0, f32 arg1) {
                 gain = 0.75f;
                 rate = D_800A3820;
             }
-            if (D_800BEE2C == 0) {
+            if (g_slowmo_divisor == 0) {
                 math_spring_approach_angle((f32 *) (cam + 0x37C), yaw, (f32 *) (cam + 0x7C8), gain, rate, CAM_F32(0x7B4));
             }
         }

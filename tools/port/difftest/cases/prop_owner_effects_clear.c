@@ -1,6 +1,6 @@
 #ifdef NON_MATCHING
 // prop_owner_effects_clear: P256: for the prop `obj` (a 0xA0-byte record of D_800DBEF4), finds its owner, the first
-// live object (interaction_state != 0) of D_800CC2D0[0..24] whose bit is set in the prop's mask D_800DC3C4[index],
+// live object (interaction_state != 0) of g_objects[0..24] whose bit is set in the prop's mask D_800DC3C4[index],
 // or NULL, then clears effects keyed on it (effect_nodes_broadcast): kinds 0xF9 / 0xF8 / 0xF7 (obj +0x72) clear the type
 // 0x35 effects of {9, part list, owner} with the 9-entry part lists g_prop_owner_parts_a / g_prop_owner_parts_b / g_prop_owner_parts_c (copied to
 // the stack), kind 0xF6 the type 0x38 effects of {owner}; other kinds do nothing.
@@ -29,7 +29,7 @@ void prop_owner_effects_clear(u8 *obj) {
     owner = NULL;
     mask = D_800DC3C4[(struct131 *) obj - D_800DBEF4];
     if (mask != 0) {
-        p = D_800CC2D0;
+        p = g_objects;
         for (i = 0; i < 25 && owner == NULL; i++, p++) {
             if (p->interaction_state != 0 && (mask & (1 << i))) {
                 owner = p;

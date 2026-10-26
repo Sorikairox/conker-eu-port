@@ -36,7 +36,7 @@ void sched_thread_main(s32 arg0) {
         osRecvMesg(&D_8003B218, &msg, OS_MESG_BLOCK);
         /* an if chain, not a switch: difftest mis-ran IDO's jump table here; see P7.md */
         if ((u32)msg == 0) { /* retrace */
-            if (D_8002AC5C != 0) {
+            if (g_eeprom_writes_disabled != 0) {
                 D_8002AF20.comRegs.hStart = 0x8C02D5;
                 D_8002AF20.comRegs.xScale = 0x200;
                 D_8002AF20.fldRegs[0].yScale = 0x400;
@@ -113,8 +113,8 @@ void sched_thread_main(s32 arg0) {
                 D_8003A581 = 1;
             }
         } else if ((u32)msg == 6) { /* controller read */
-            if (D_8002AC5C == 0) {
-                osContStartReadData(&D_800BE900);
+            if (g_eeprom_writes_disabled == 0) {
+                osContStartReadData(&g_si_mesg_queue);
             }
         }
     }
@@ -231,10 +231,10 @@ void sched_thread_main(s32 arg0) {
 //             D_8003A581 = (u8)1U;
 //             goto loop_1;
 //         case 6:
-//             if (D_8002AC5C != 0) {
+//             if (g_eeprom_writes_disabled != 0) {
 //                 goto loop_1;
 //             }
-//             osContStartReadData(&D_800BE900);
+//             osContStartReadData(&g_si_mesg_queue);
 //         }
 //     }
 //     goto loop_1;
@@ -294,7 +294,7 @@ void sched_try_start_gfx_task(void) {
 
 /* was func_10004F00 */
 void sched_start_gfx_task(void) {
-    if (D_8002AC5C == 0) {
+    if (g_eeprom_writes_disabled == 0) {
         osSpTaskLoad(&D_8002AC50->list);
         osSpTaskStartGo(&D_8002AC50->list);
         D_8003A580 = 0;
@@ -333,7 +333,7 @@ void sched_swap_framebuffer(void) {
 
     D_8003A582 = 0;
     fb = D_8002AC50->framebuffer;
-    if ((D_8002AC50->flags & OS_SC_SWAPBUFFER) && (D_8002AC5C == 0)) {
+    if ((D_8002AC50->flags & OS_SC_SWAPBUFFER) && (g_eeprom_writes_disabled == 0)) {
         func_1515FDA0(fb);
         // EU: blank the VI once before the first swap
         if (D_eu_8002AFA8 == 0) {

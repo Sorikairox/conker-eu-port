@@ -5,15 +5,15 @@
 #include "libc/math.h"
 // hoisted declarations of the NON_MATCHING bodies
 void screen_clamp_rect(f32 *x0, f32 *y0, f32 *x1, f32 *y1);
-extern s32 D_800BEA58;
-extern s32 D_800BEA70;
-extern f32 D_80083338[];
-extern f32 D_80096C94;
-extern f32 D_80096C98;
-extern f32 D_80096C9C;
-extern f32 D_80096CA0;
-extern s16 D_800BEA88[];
-extern u8 D_800BEA50[];
+extern s32 g_screen_width; /* was D_800BEA58 */
+extern s32 g_screen_height; /* was D_800BEA70 */
+extern f32 g_view_aspect_table[]; /* was D_80083338 */
+extern f32 g_view_fov_2p; /* was D_80096C94 */
+extern f32 g_view_fov_default; /* was D_80096C98 */
+extern f32 g_cam_fov_x_deg_to_rad; /* was D_80096C9C */
+extern f32 g_cam_fov_y_deg_to_rad; /* was D_80096CA0 */
+extern s16 g_view_split_offsets[]; /* was D_800BEA88 */
+extern u8 g_view_player_order[]; /* was D_800BEA50 */
 s32 camera_rect_on_screen(s32);
 void camera_setup_perspective(s32, s32);
 void camera_projection_set_fov(s32, f32, f32, f32);
@@ -23,12 +23,12 @@ s32 allocate_memory(s32, s32, s32, s32);
 s32 level_setup_screen_projection(s32);
 s32 camera_record_setup(s32, s32, s32, s32);
 void camera_set_screen_ortho(s32);
-extern s8 D_800BEA34;
+extern s8 g_dl_buffers_reinit_req; /* was D_800BEA34 */
 extern s8 D_800BEA37;
-extern s32 D_800BEA4C;
+extern s32 g_viewports; /* was D_800BEA4C */
 extern s8 D_800BEA55;
-extern s32 D_800BEA5C;
-extern f32 D_800BEAD8;
+extern s32 g_view_widths; /* was D_800BEA5C */
+extern f32 g_split_width_scale; /* was D_800BEAD8 */
 
 /* was func_1501A220 */
 void viewports_init(s32 arg0, s32 arg1) {
@@ -45,13 +45,13 @@ void viewports_init(s32 arg0, s32 arg1) {
         var_s0 = arg0 + 2;
     }
     D_800BE628 = allocate_memory(var_s0 * 0x180, 1, 1, 0);
-    D_800BEA4C = allocate_memory(var_s0 * 0x10, 1, 1, 0);
+    g_viewports = allocate_memory(var_s0 * 0x10, 1, 1, 0);
     if (D_80082FA0 == 1) {
-        temp_f0 = (f32) D_800BEA5C - 2.0f;
+        temp_f0 = (f32) g_view_widths - 2.0f;
         temp_f16 = (s32) (temp_f0 * 0.8f);
-        D_800BEAD8 = (f32) (temp_f16 - (temp_f16 % 4)) / temp_f0;
+        g_split_width_scale = (f32) (temp_f16 - (temp_f16 % 4)) / temp_f0;
     }
-    level_setup_screen_projection(D_800BE9F0);
+    level_setup_screen_projection(g_level_id);
     temp_s1 = D_80082FA0;
     var_s0_2 = 0;
     if (temp_s1 >= 0) {
@@ -64,7 +64,7 @@ void viewports_init(s32 arg0, s32 arg1) {
         camera_record_setup(var_s0_2, 0, 0x3FF, 0);
     }
     D_800BEA37 = 1;
-    D_800BEA34 = 1;
+    g_dl_buffers_reinit_req = 1;
     D_800BEA55 = 0;
     camera_set_screen_ortho(arg1);
 }
@@ -95,7 +95,7 @@ void viewports_init(s32 arg0, s32 arg1) {
 //         D_800BE6B8 = (temp_f16 - phi_s0) / temp_f0;
 //     }
 //
-//     level_setup_screen_projection(D_800BE9F0);
+//     level_setup_screen_projection(g_level_id);
 //
 //     for(i = 0; i <= D_80082FA0; i++) {
 //         camera_record_setup(i, D_80082FA0, 1023, 0);
@@ -119,8 +119,8 @@ void render_dl_buffers_init(void) {
         gfx = D_800BEDE8[i];
         gSPSegment(gfx++, 0, 0);
         gSPSegment(gfx++, 0, 0);
-        gSPDisplayList(gfx++, D_8002CC90);
-        gDPSetDepthImage(gfx++, D_800BEDE4);
+        gSPDisplayList(gfx++, g_dl_frame_init);
+        gDPSetDepthImage(gfx++, g_zbuffer);
         gSPViewport(gfx++, &((struct_eu_BE628 *)D_800BE628)->unk40[i]);
         D_800BE9D8[i] = (s32)gfx;
     }
@@ -187,7 +187,7 @@ s32 render_set_scissor(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg
 }
 /* was func_1501A680 */
 Gfx *render_set_color_image(Gfx *arg0) {
-    gDPSetColorImage(arg0++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_8002AAE8[D_800BE9C0]);
+    gDPSetColorImage(arg0++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, g_framebuffers[D_800BE9C0]);
     return arg0;
 }
 
@@ -254,11 +254,11 @@ void camera_world_to_screen(s32 view, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32
 // }
 
 /* Per-player camera record D_800BE628 + p * 0x180 for a screen split into n + 1 views: viewport w/h (+4/+8, from
- * D_800BEA58/D_800BEA70[n], minus 2 when split; the 2-player width also * D_800BEAD8), +0x64 aspect table
- * D_80083338[n], +0x68 = 2, base fov +0x6C (D_80096C98, 2 players: D_80096C94 * D_800BEAD8) / +0x70 = 50, current fov
- * +0x74/+0x78, +0x60 w/h, half size +0xC/+0x10, centre +0x34/+0x38 (D_800BEA88 table: 20 bytes per n, 4 per player),
+ * g_screen_width/g_screen_height[n], minus 2 when split; the 2-player width also * g_split_width_scale), +0x64 aspect table
+ * g_view_aspect_table[n], +0x68 = 2, base fov +0x6C (g_view_fov_default, 2 players: g_view_fov_2p * g_split_width_scale) / +0x70 = 50, current fov
+ * +0x74/+0x78, +0x60 w/h, half size +0xC/+0x10, centre +0x34/+0x38 (g_view_split_offsets table: 20 bytes per n, 4 per player),
  * clip rect +0x2C/+0x24/+0x30/+0x28, scale +0x14/+0x18 (camera_setup_perspective when flag), tan factors +0x7C/+0x80, the Vp
- * at D_800BEA4C + p * 16 (scale (w + 10) * 2, depth zmax >> 1, translate centre * 4) copied into both frame
+ * at g_viewports + p * 16 (scale (w + 10) * 2, depth zmax >> 1, translate centre * 4) copied into both frame
  * buffers' Vp at +0x40, +0x84 = 1.0, +1 = camera_rect_on_screen(p); clip rect via screen_clamp_rect, camera_projection_set_fov(p, 0, 0, 1). */
 #define CAMREC(o) (*(f32 *)((u8 *)D_800BE628 + p * 0x180 + (o)))
 /* was func_1501A8C0 */
@@ -275,20 +275,20 @@ s32 camera_record_setup(s32 p, s32 n, s32 zmax, s32 flag) {
     s32 *dst;
     u8 *rec;
 
-    CAMREC(4) = (&D_800BEA58)[n];
-    CAMREC(8) = (&D_800BEA70)[n];
+    CAMREC(4) = (&g_screen_width)[n];
+    CAMREC(8) = (&g_screen_height)[n];
     if (n != 0) {
         CAMREC(4) = CAMREC(4) - 2.0f;
         CAMREC(8) = CAMREC(8) - 2.0f;
     }
-    CAMREC(0x64) = D_80083338[n];
+    CAMREC(0x64) = g_view_aspect_table[n];
     CAMREC(0x68) = 2.0f;
     if (n == 1) {
-        CAMREC(4) = CAMREC(4) * D_800BEAD8;
-        CAMREC(0x6C) = D_80096C94 * D_800BEAD8;
+        CAMREC(4) = CAMREC(4) * g_split_width_scale;
+        CAMREC(0x6C) = g_view_fov_2p * g_split_width_scale;
         CAMREC(0x70) = 50.0f;
     } else {
-        CAMREC(0x6C) = D_80096C98;
+        CAMREC(0x6C) = g_view_fov_default;
         CAMREC(0x70) = 50.0f;
     }
     CAMREC(0x74) = CAMREC(0x6C);
@@ -296,7 +296,7 @@ s32 camera_record_setup(s32 p, s32 n, s32 zmax, s32 flag) {
     CAMREC(0x60) = CAMREC(4) / CAMREC(8);
     CAMREC(0xC) = CAMREC(4) * 0.5f;
     CAMREC(0x10) = CAMREC(8) * 0.5f;
-    ctr = (s16 *)((u8 *)D_800BEA88 + n * 20 + p * 4);
+    ctr = (s16 *)((u8 *)g_view_split_offsets + n * 20 + p * 4);
     CAMREC(0x34) = ctr[0];
     CAMREC(0x38) = ctr[1];
     CAMREC(0x2C) = CAMREC(0x34) - CAMREC(0xC);
@@ -306,32 +306,32 @@ s32 camera_record_setup(s32 p, s32 n, s32 zmax, s32 flag) {
     if ((s16)flag != 0) {
         camera_setup_perspective(p, n);
     } else {
-        sw = (&D_800BEA58)[0];
-        sh = (&D_800BEA70)[0];
+        sw = (&g_screen_width)[0];
+        sh = (&g_screen_height)[0];
         w = CAMREC(4);
         h = CAMREC(8);
         CAMREC(0x14) = (w / sw) * ((sw / sh) / (w / h));
-        CAMREC(0x18) = CAMREC(8) / (f32)(&D_800BEA70)[0];
+        CAMREC(0x18) = CAMREC(8) / (f32)(&g_screen_height)[0];
     }
-    a = CAMREC(0x6C) * 0.5f * D_80096C9C;
+    a = CAMREC(0x6C) * 0.5f * g_cam_fov_x_deg_to_rad;
     s = sinf(a);
     CAMREC(0x7C) = s / (CAMREC(0xC) * cosf(a));
-    a = CAMREC(0x70) * 0.5f * D_80096CA0;
+    a = CAMREC(0x70) * 0.5f * g_cam_fov_y_deg_to_rad;
     s = sinf(a);
     CAMREC(0x80) = s / (CAMREC(0x10) * cosf(a));
-    vp = (s16 *)(D_800BEA4C + p * 16);
+    vp = (s16 *)(g_viewports + p * 16);
     w = CAMREC(4) + 10.0f;
     vp[0] = w + w;
-    vp = (s16 *)(D_800BEA4C + p * 16);
+    vp = (s16 *)(g_viewports + p * 16);
     h = CAMREC(8) + 10.0f;
     vp[1] = h + h;
-    ((s16 *)(D_800BEA4C + p * 16))[2] = zmax >> 1;
-    ((s16 *)(D_800BEA4C + p * 16))[3] = 0;
-    ((s16 *)(D_800BEA4C + p * 16))[4] = CAMREC(0x34) * 4.0f;
-    ((s16 *)(D_800BEA4C + p * 16))[5] = CAMREC(0x38) * 4.0f;
-    ((s16 *)(D_800BEA4C + p * 16))[6] = zmax >> 1;
-    ((s16 *)(D_800BEA4C + p * 16))[7] = 0;
-    src = (s32 *)(D_800BEA4C + p * 16);
+    ((s16 *)(g_viewports + p * 16))[2] = zmax >> 1;
+    ((s16 *)(g_viewports + p * 16))[3] = 0;
+    ((s16 *)(g_viewports + p * 16))[4] = CAMREC(0x34) * 4.0f;
+    ((s16 *)(g_viewports + p * 16))[5] = CAMREC(0x38) * 4.0f;
+    ((s16 *)(g_viewports + p * 16))[6] = zmax >> 1;
+    ((s16 *)(g_viewports + p * 16))[7] = 0;
+    src = (s32 *)(g_viewports + p * 16);
     dst = (s32 *)((u8 *)D_800BE628 + p * 0x180 + D_800BE9C0 * 16 + 0x40);
     dst[0] = src[0];
     dst[1] = src[1];
@@ -349,7 +349,7 @@ s32 camera_record_setup(s32 p, s32 n, s32 zmax, s32 flag) {
     rec = (u8 *)D_800BE628 + p * 0x180;
     screen_clamp_rect((f32 *)(rec + 0x2C), (f32 *)(rec + 0x24), (f32 *)(rec + 0x30), (f32 *)(rec + 0x28));
     camera_projection_set_fov(p, 0.0f, 0.0f, CAMREC(0x84));
-    D_800BEA50[p] = p;
+    g_view_player_order[p] = p;
 }
 #undef CAMREC
 /* was func_1501AE94 */
@@ -397,11 +397,11 @@ void screen_clamp_rect(f32 *x0, f32 *y0, f32 *x1, f32 *y1) {
     }
 }
 
-extern f32 D_80096CA4;
-extern f32 D_80096CA8;
+extern f32 g_cam_persp_deg_to_rad; /* was D_80096CA4 */
+extern f32 g_cam_persp_rad_to_deg; /* was D_80096CA8 */
 void camera_projection_update(s32, f32, f32, f32, f32);
-extern s32 D_800BEA58;
-extern s32 D_800BEA70;
+extern s32 g_screen_width; /* was D_800BEA58 */
+extern s32 g_screen_height; /* was D_800BEA70 */
 
 /* was func_1501B0A0 */
 void camera_setup_perspective(s32 arg0, s32 arg1) {
@@ -422,18 +422,18 @@ void camera_setup_perspective(s32 arg0, s32 arg1) {
     temp_t6 = arg0 * 0x180;
     temp_v0 = D_800BE628 + temp_t6;
     sp28 = temp_t6;
-    temp_f12 = (*(f32 *)((u8 *)temp_v0 + 0x6C)) * D_80096CA4;
+    temp_f12 = (*(f32 *)((u8 *)temp_v0 + 0x6C)) * g_cam_persp_deg_to_rad;
     sp4C = temp_f12;
-    sp48 = (*(f32 *)((u8 *)temp_v0 + 0x70)) * D_80096CA4;
+    sp48 = (*(f32 *)((u8 *)temp_v0 + 0x70)) * g_cam_persp_deg_to_rad;
     sp2C = sinf(temp_f12);
     sp44 = sp2C / cosf(sp4C);
     sp2C = sinf(sp48);
     temp_t8 = arg1 * 4;
-    sp38 = (f32) *(((s32 *)((u8 *)&D_800BEA70 + temp_t8))) / (2.0f * (sp2C / cosf(sp48)));
+    sp38 = (f32) *(((s32 *)((u8 *)&g_screen_height + temp_t8))) / (2.0f * (sp2C / cosf(sp48)));
     temp_t4 = arg1 * 0x180;
-    sp34 = (math_atan2f((*(f32 *)((u8 *)((D_800BE628 + sp28)) + 0xC)), (f32) *(((s32 *)((u8 *)&D_800BEA58 + temp_t8))) / (2.0f * sp44)) * D_80096CA8) - (*(f32 *)((u8 *)((D_800BE628 + temp_t4)) + 0x6C));
+    sp34 = (math_atan2f((*(f32 *)((u8 *)((D_800BE628 + sp28)) + 0xC)), (f32) *(((s32 *)((u8 *)&g_screen_width + temp_t8))) / (2.0f * sp44)) * g_cam_persp_rad_to_deg) - (*(f32 *)((u8 *)((D_800BE628 + temp_t4)) + 0x6C));
     sp24 = temp_t4;
-    camera_projection_update(arg0, sp34, (math_atan2f((*(f32 *)((u8 *)((D_800BE628 + sp28)) + 0x10)), sp38) * D_80096CA8) - (*(f32 *)((u8 *)((D_800BE628 + sp24)) + 0x70)), 1.0f, 0.0f);
+    camera_projection_update(arg0, sp34, (math_atan2f((*(f32 *)((u8 *)((D_800BE628 + sp28)) + 0x10)), sp38) * g_cam_persp_rad_to_deg) - (*(f32 *)((u8 *)((D_800BE628 + sp24)) + 0x70)), 1.0f, 0.0f);
 }
 /* was func_1501B22C */
 void camera_compute_frustum_planes(s32 arg0) {
@@ -490,7 +490,7 @@ void camera_compute_frustum_planes(s32 arg0) {
 //     tmp0 = temp_s0->unk74 * 0.5f;
 //     tmp7 = -tmp0;
 //     tmp5 = temp_s0->unk78 * 0.5f;
-//     tmp7 *= D_80096900;
+//     tmp7 *= g_debris_linked_zone_pos;
 //     tmp3 = cosf(tmp7);
 //     tmp7 = sinf(tmp7);
 //     temp_s0->unk9C = tmp7;

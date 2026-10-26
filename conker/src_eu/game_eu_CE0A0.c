@@ -34,7 +34,7 @@ s32 event_action_trigger(s32 arg0, u32 arg1, u8 *arg2) {
  * handler(slot, cmd, args) like event_query_object (args[2] = first extra argument, D_800D3C60 = number of words).
  * `slot` indexes the 0x34-byte records at D_800D34B8 (the per-slot words +0x17 / +0x18 / +0x1C / +0x20 that
  * trigger_get_fields / trigger_set_fields_masked read and write). Object ids passed as arguments drop bits 12..15; their kind is
- * bits 12..15: 0x2000 = an object (obj_find_by_spawn, index in D_800CC2D0), 0x9000 = a player / character id. */
+ * bits 12..15: 0x2000 = an object (obj_find_by_spawn, index in g_objects), 0x9000 = a player / character id. */
 s32 trigger_find_touching_player(s32);
 s32 trigger_test_camera(s32, u32);
 s32 trigger_plane_side_object(s32, s32);
@@ -43,8 +43,8 @@ void trigger_get_fields(s32, s32 *, s32 *, s32 *, s32 *);
 extern s32 D_800D3C60;
 
 #define B9B8_SLOT(i) (D_800D34B8 + (i) * 0x34)
-#define B9B8_OBJ(i) ((u8 *)D_800CC2D0 + (i) * 0x32C)   /* object i of D_800CC2D0 (0x32C each) */
-#define B9B8_INDEX(p) (((u8 *)(p) - (u8 *)D_800CC2D0) / 0x32C)
+#define B9B8_OBJ(i) ((u8 *)g_objects + (i) * 0x32C)   /* object i of g_objects (0x32C each) */
+#define B9B8_INDEX(p) (((u8 *)(p) - (u8 *)g_objects) / 0x32C)
 
 /* was func_150A09B8 */
 s32 event_query_trigger(s32 slot, s32 cmd, s32 *args) {
@@ -88,7 +88,7 @@ s32 event_query_trigger(s32 slot, s32 cmd, s32 *args) {
         slotp = B9B8_SLOT(slot);
         return (*(s16 *)(slotp + 0) << 16) | (u16)*(s16 *)(slotp + 4);
     case 0xB:
-    case 0xC: /* first object of D_800CC2D0 with id args[2] that is attached to this slot */
+    case 0xC: /* first object of g_objects with id args[2] that is attached to this slot */
         for (i = 0; i < 25; i++) {
             obj = B9B8_OBJ(i);
             if (*(s32 *)obj == args[2] && trigger_test_player(i, slot) == 0) {

@@ -322,7 +322,7 @@ void beam_effect_update(u8 *obj) {
         target = *(u8 **) (obj + 0xDC);
         object_ray_hit_nearest((struct127 *) target, *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), *(f32 *) (obj + 0x9C),
                       *(f32 *) (obj + 0x94) + vx, *(f32 *) (obj + 0x98) + vy, *(f32 *) (obj + 0x9C) + vz,
-                      target != NULL ? (target - (u8 *) D_800CC2D0) / 0x32C : 0, 0);
+                      target != NULL ? (target - (u8 *) g_objects) / 0x32C : 0, 0);
     }
     *(f32 *) (obj + 0x94) += vx;
     *(f32 *) (obj + 0x98) += vy;

@@ -99,7 +99,7 @@ s32 bullet_glow_draw(s32 arg0, s16 arg1) {
     return beam_quad_build_b(arg0, arg1);
 }
 
-extern f32 D_800DCE54;
+extern f32 g_fx_lod_scale_players; /* was D_800DCE54 */
 /* was func_151B8C18 */
 s32 bullet_smoke_emitter_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     u8 *p;
@@ -111,7 +111,7 @@ s32 bullet_smoke_emitter_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     sp18.unk4 = (s32) (p + 0x3C);
     sp18.unk8 = (s32) (p + 0x40);
     sp18.unkC = 10.0f;
-    sp18.unk10 = 0.2075f * D_800DCE54;
+    sp18.unk10 = 0.2075f * g_fx_lod_scale_players;
     sp18.unk14 = 300;
     sp18.unk16 = 0;
     sp18.unk17 = 3;

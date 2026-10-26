@@ -386,7 +386,7 @@ void ambient_emitters_build(void) {
     if (*(u16 *) ((u8 *) D_800B0DF0 + 0x18) == 0) {
         return;
     }
-    if ((D_800BE9F0 == 6 && D_80038080 == 0) || D_800BE9F0 == 0x1D) {
+    if ((g_level_id == 6 && D_80038080 == 0) || g_level_id == 0x1D) {
         return;
     }
     slots = (u16 *) &D_800BE4A0;

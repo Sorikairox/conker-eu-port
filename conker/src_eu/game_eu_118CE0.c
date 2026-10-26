@@ -33,7 +33,7 @@ s32 obj_query_table6(s32);
 /* was func_150EB5B0 */
 s32 footstep_surface_override(s32 arg0, s32 arg1) {
     if (arg0 == 1) {
-        if (D_800BE9F0 == 4) {
+        if (g_level_id == 4) {
             if (obj_query_table6(arg1) != 0) {
                 return 6;
             }

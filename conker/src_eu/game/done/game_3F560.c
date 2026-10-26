@@ -28,7 +28,7 @@ void ambient_fx_spawn_type4(s32 arg0) {
 void obj_drip_attach(struct127 *arg0) {
     struct185 tmp;
 
-    if (D_800BE9F0 != 24) {
+    if (g_level_id != 24) {
         tmp.unk0 = arg0;
         tmp.unk4 = arg0->unique_id;
         tmp.unk6 = 300;

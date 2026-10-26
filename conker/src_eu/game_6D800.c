@@ -8,13 +8,13 @@
 void dl_validate(void *arg0, u32 arg1) {
     s32 i;
 
-    D_800C68A0 = D_800848B0 = 0;
-    D_800C68A1 = 0;
+    g_dl_check_drawn_flag = g_dl_check_last_timg = 0;
+    g_dl_check_depth = 0;
 
     for (i = 0; i < 16; i++) {
-        D_800C6860[i] = -1;
+        g_dl_check_segments[i] = -1;
     }
-    D_800C6860[0] = 0;
+    g_dl_check_segments[0] = 0;
     dl_validate_list(arg0, arg1, 0);
 }
 
@@ -31,9 +31,9 @@ s32 dlcheck_vtx_invalid(struct148 *arg0);
                     D_800BE9C0 = 1 - D_800BE9C0)
 
 // dl_validate: debug walk over a display list of 8-byte commands until `end` (or, with end 0, until G_ENDDL 0xDF),
-// following G_DL (0xDE) branches through the segment table D_800C6860 (at most 20 deep, target must be a cached
-// 8-aligned KSEG0 address) and tracking G_MOVEWORD segment writes (index 6) and G_SETTIMG (D_800848B0). Primitives
-// (0xE4 / 0xE5 / 0xF6, 1, 5, 6, 7, 0x10-0x1F) mark D_800C68A0 "drawn since pipe sync", G_RDPPIPESYNC clears it; an
+// following G_DL (0xDE) branches through the segment table g_dl_check_segments (at most 20 deep, target must be a cached
+// 8-aligned KSEG0 address) and tracking G_MOVEWORD segment writes (index 6) and G_SETTIMG (g_dl_check_last_timg). Primitives
+// (0xE4 / 0xE5 / 0xF6, 1, 5, 6, 7, 0x10-0x1F) mark g_dl_check_drawn_flag "drawn since pipe sync", G_RDPPIPESYNC clears it; an
 // RDP state command (0xE2 / 0xE3 / 0xEA-0xEE / 0xF7-0xF9 / 0xFB-0xFF) while it is set, a failed command check
 // (dlcheck_dl_invalid / dlcheck_tri_invalid / dlcheck_vtx_invalid) or a bad branch stops in the debugger; unknown opcodes trap.
 /* was func_150403C8 */
@@ -50,8 +50,8 @@ void dl_validate_list(void *list, u32 end, s32 parent) {
             case 0xDE:
                 w1 = dl[1];
                 bad = dlcheck_dl_invalid((struct148 *) dl);
-                addr = ((w1 & 0xFFFFFF) + D_800C6860[(w1 >> 24) & 0xF]) | 0x80000000;
-                if (++D_800C68A1 == 20) {
+                addr = ((w1 & 0xFFFFFF) + g_dl_check_segments[(w1 >> 24) & 0xF]) | 0x80000000;
+                if (++g_dl_check_depth == 20) {
                     dl_dump_around((u8 *) dl);
                     DL_TRAP();
                 }
@@ -60,8 +60,8 @@ void dl_validate_list(void *list, u32 end, s32 parent) {
                 } else {
                     DL_STOP(dl);
                 }
-                if (D_800C68A1 != 0) {
-                    D_800C68A1--;
+                if (g_dl_check_depth != 0) {
+                    g_dl_check_depth--;
                 } else {
                     DL_TRAP();
                     D_800BE9C0 = 1 - D_800BE9C0;
@@ -70,7 +70,7 @@ void dl_validate_list(void *list, u32 end, s32 parent) {
                 }
                 break;
             case 0xE7:
-                D_800C68A0 = 0;
+                g_dl_check_drawn_flag = 0;
                 break;
             case 0xE4:
             case 0xE5:
@@ -79,17 +79,17 @@ void dl_validate_list(void *list, u32 end, s32 parent) {
             case 7:
             case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 23:
             case 24: case 25: case 26: case 27: case 28: case 29: case 30: case 31:
-                D_800C68A0 = 1;
+                g_dl_check_drawn_flag = 1;
                 break;
             case 5:
                 bad = dlcheck_tri_invalid(dl);
-                D_800C68A0 = 1;
+                g_dl_check_drawn_flag = 1;
                 break;
             case 1:
                 bad = dlcheck_vtx_invalid((struct148 *) dl);
                 break;
             case 0xFD:
-                D_800848B0 = dl[1];
+                g_dl_check_last_timg = dl[1];
                 break;
             case 0xFF:
             case 0xE2:
@@ -109,7 +109,7 @@ void dl_validate_list(void *list, u32 end, s32 parent) {
                 break;
             case 0xDB:
                 if (((dl[0] >> 16) & 0xFF) == 6) {
-                    D_800C6860[(s32) (dl[0] & 0xFFFF) / 4] = dl[1];
+                    g_dl_check_segments[(s32) (dl[0] & 0xFFFF) / 4] = dl[1];
                 }
                 break;
             case 0xD3: case 0xD4: case 0xD5: case 0xD6:
@@ -124,9 +124,9 @@ void dl_validate_list(void *list, u32 end, s32 parent) {
                 DL_TRAP();
                 break;
         }
-        if (needSync && D_800C68A0) {
+        if (needSync && g_dl_check_drawn_flag) {
             dl_dump_around((u8 *) dl);
-            D_800C68A0 = 0;
+            g_dl_check_drawn_flag = 0;
             DL_TRAP();
             D_800BE9C0 = 1 - D_800BE9C0;
             debug_syscall_trap();
@@ -399,10 +399,10 @@ void dldump_movemem(s32 arg0) {
 void dldump_moveword(s32 arg0) {
 }
 
-extern void (*D_80084840[])(u8 *);
+extern void (*g_dl_trace_op_handlers[])(u8 *); /* was D_80084840 */
 // dl_walk_call_handlers: P259: walks the display list from `dl` (8-byte F3DEX2 commands) while the command pointer
 // is <= `end` or a G_DL call is open, and passes every command from `from` up to `end` to its opcode handler
-// D_80084840[op]. It resets the segment table D_800C6860 (all -1, segment 0 = 0), records G_MOVEWORD segment
+// g_dl_trace_op_handlers[op]. It resets the segment table g_dl_check_segments (all -1, segment 0 = 0), records G_MOVEWORD segment
 // writes (G_MW_SEGMENT), follows G_DL (0xDE) calls into known segments (unknown segment: skipped) and returns on
 // G_ENDDL (0xDF) to the saved command; G_VTX (1) only steps (the asm counts its vertices in an empty loop).
 // No callers in the ROM (only the symbol table names it).
@@ -419,9 +419,9 @@ void dl_trace_segments(u8 *dl, u8 *from, u8 *end) {
     u8 op;
 
     for (i = 0; i < 16; i++) {
-        D_800C6860[i] = -1;
+        g_dl_check_segments[i] = -1;
     }
-    D_800C6860[0] = 0;
+    g_dl_check_segments[0] = 0;
     depth = 0;
     active = FALSE;
     cmd = dl;
@@ -434,7 +434,7 @@ void dl_trace_segments(u8 *dl, u8 *from, u8 *end) {
         }
         op = cmd[0];
         if (active) {
-            D_80084840[op](cmd);
+            g_dl_trace_op_handlers[op](cmd);
         }
         if (cmd == end) {
             active = FALSE;
@@ -445,10 +445,10 @@ void dl_trace_segments(u8 *dl, u8 *from, u8 *end) {
             w1 = ((u32 *) cmd)[1];
             seg = (w1 >> 24) & 0xF;
             cmd += 8;
-            if (D_800C6860[seg] == -1) {
+            if (g_dl_check_segments[seg] == -1) {
                 depth--;
             } else {
-                cmd = (u8 *) (((w1 & 0xFFFFFF) + D_800C6860[seg]) | 0x80000000);
+                cmd = (u8 *) (((w1 & 0xFFFFFF) + g_dl_check_segments[seg]) | 0x80000000);
             }
             break;
         case 0xDF: // G_ENDDL
@@ -458,7 +458,7 @@ void dl_trace_segments(u8 *dl, u8 *from, u8 *end) {
             w0 = ((u32 *) cmd)[0];
             w1 = ((u32 *) cmd)[1];
             if (((w0 >> 16) & 0xFF) == 6) { // G_MW_SEGMENT
-                D_800C6860[(s32) (w0 & 0xFFFF) >> 2] = w1;
+                g_dl_check_segments[(s32) (w0 & 0xFFFF) >> 2] = w1;
             }
             cmd += 8;
             break;
@@ -469,7 +469,7 @@ void dl_trace_segments(u8 *dl, u8 *from, u8 *end) {
     } while (cmd <= end || depth > 0);
 }
 
-extern void (*D_80084840[])(u8 *);
+extern void (*g_dl_trace_op_handlers[])(u8 *); /* was D_80084840 */
 
 /* was func_15040CC8 */
 void dl_dump_around(u8 *arg0)
@@ -487,12 +487,12 @@ void dl_dump_around(u8 *arg0)
       i += 1;
     }
     while (0);
- } while (i < 0x10); i = -0x14; do { new_var2 = (new_var = arg0 + (i * 8)); p = new_var2; D_80084840[*p](p); new_var3 = 1; i += new_var3;
+ } while (i < 0x10); i = -0x14; do { new_var2 = (new_var = arg0 + (i * 8)); p = new_var2; g_dl_trace_op_handlers[*p](p); new_var3 = 1; i += new_var3;
   }
   while (i < 0xA);
-  if (D_800848B0 != 0)
+  if (g_dl_check_last_timg != 0)
   {
-    texture_table_find(D_800848B0);
+    texture_table_find(g_dl_check_last_timg);
   }
 }
 // NON-MATCHING: todo
@@ -518,7 +518,7 @@ void dl_dump_around(u8 *arg0)
 //     if (temp_s0_2 < 0xA) {
 //         goto loop_3;
 //     }
-//     temp_a0_2 = D_800848B0;
+//     temp_a0_2 = g_dl_check_last_timg;
 //     if (temp_a0_2 != 0) {
 //         texture_table_find(temp_a0_2);
 //     }

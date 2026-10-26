@@ -771,10 +771,10 @@ s32 attachment_draw(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special)
     if (attachment_get_matrices(att, obj, &mtx, &unused110) == 0) {
         return (s32) gfx;
     }
-    i = (obj - (u8 *) D_800CC2D0) / (s32) sizeof(struct127);
+    i = (obj - (u8 *) g_objects) / (s32) sizeof(struct127);
     obj_ambient_colour(i, (u8 *) col);
     if (*(s16 *) ((u8 *) D_800B0DF0 + 0x3E) != 0) {
-        obj_fog_alpha((u8 *) &D_800CC2D0[i], col, player);
+        obj_fog_alpha((u8 *) &g_objects[i], col, player);
     } else {
         col[3] = 0xFF;
     }
@@ -1771,12 +1771,12 @@ block_10:
 }
 s32 sfx_emitter_stop_by_callback(s32 *, u8 *, u8 *);
 s32 attachment_tile_scroll_update(u8 *, u8 *);
-extern u8 D_800BEE2C;
+extern u8 g_slowmo_divisor; /* was D_800BEE2C */
 /* was func_15033CB8 */
 s32 attachment_cb_loop_sound(u8 *arg0, u8 *arg1) {
     attachment_tile_scroll_update(arg0, arg1);
     if (D_800C35EA != 1) {
-        if (D_800BEE2C != 0) {
+        if (g_slowmo_divisor != 0) {
             if (*(s32 *)(arg0 + 0x3C) != 0) {
                 sfx_emitter_stop_by_callback(&attachment_sound_cb, arg0, arg1);
             }

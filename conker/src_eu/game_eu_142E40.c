@@ -153,8 +153,8 @@ void scenery_crumble_platform_update(u8 *arg0) {
                 }
             }
         } else {
-            temp_f0_2 = D_800CC2D0->x_position - (f32) (*(s16 *)((u8 *)arg0 + 0x10));
-            temp_f2_2 = D_800CC2D0->z_position - (f32) (*(s16 *)((u8 *)arg0 + 0x14));
+            temp_f0_2 = g_objects->x_position - (f32) (*(s16 *)((u8 *)arg0 + 0x10));
+            temp_f2_2 = g_objects->z_position - (f32) (*(s16 *)((u8 *)arg0 + 0x14));
             if (((temp_f0_2 * temp_f0_2) + (temp_f2_2 * temp_f2_2)) > 250000.0f) {
                 temp_t1 = (*(s32 *)((u8 *)arg0 + 0x7C));
                 (*(s32 *)((u8 *)arg0 + 0x7C)) = 0;
@@ -609,7 +609,7 @@ void scenery_platform_drift_update(u8 *obj, s32 flags, s32 sound, f32 dist) {
     if (!(obj[0x4F] & 4)) {
         push = 0;
     } else {
-        push = scenery_push_strength(*(s16 *) (obj + 0x10), *(s16 *) (obj + 0x14), (s32) (obj + 0x7C), (u8 *) D_800CC2D0) >> 3;
+        push = scenery_push_strength(*(s16 *) (obj + 0x10), *(s16 *) (obj + 0x14), (s32) (obj + 0x7C), (u8 *) g_objects) >> 3;
     }
     if ((flags & 1) && push < 0) {
         push = 0;
@@ -1108,15 +1108,15 @@ void scenery_press_button_update(u8 *arg0) {
     var_a2 = 0;
     var_t0 = NULL;
     var_a3 = temp_v0 & 3;
-    if ((temp_v1 == 0x800B) && (D_800BE9F0 == 0xC)) {
+    if ((temp_v1 == 0x800B) && (g_level_id == 0xC)) {
         var_a1 = 0x22;
-    } else if (D_800BE9F0 == 0x31) {
+    } else if (g_level_id == 0x31) {
         var_a1 = 0x14;
         var_a2 = 1;
-    } else if (D_800BE9F0 == 0xA) {
+    } else if (g_level_id == 0xA) {
         var_a1 = 0x14;
         var_a2 = 1;
-    } else if (D_800BE9F0 == 0x34) {
+    } else if (g_level_id == 0x34) {
         var_a1 = 0xA;
         var_a2 = 1;
         var_t1 = 6;
@@ -1318,7 +1318,7 @@ void scenery_local_to_world(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 *arg4) {
 
     var_f14 = arg2;
     var_s0 = arg0;
-    if (((*(u16 *)((u8 *)var_s0 + 0x54)) == 0x8006) && (D_800BE9F0 == 0x35)) {
+    if (((*(u16 *)((u8 *)var_s0 + 0x54)) == 0x8006) && (g_level_id == 0x35)) {
         temp_v0 = world_record_find(0xFDU);
         var_s0 = temp_v0;
         scenery_attach_to_record(temp_v0);
@@ -1348,7 +1348,7 @@ void scenery_local_to_world(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 *arg4) {
 // gate_swing_update: world mesh record (D_800DBEF4, 0xA0 bytes) handler at D_800893D8 for the per-level push gate / door
 // (levels 1 / 0x29, 0xB, 0x17, 0x28, 0x2F, 0x35, 0x3C, 0x40, 0x41; other levels do nothing). The level case gives the
 // open angle, the handle point (scaled by +0x2C..+0x34), the squared reach (scaled by +0x34 squared) and the creak
-// sound; bit 3 of +0x73 marks gates that only close when told to (state 1). A player (D_800CC2D0, D_8008FD8C of them)
+// sound; bit 3 of +0x73 marks gates that only close when told to (state 1). A player (g_objects, D_8008FD8C of them)
 // near the handle and not busy (+0x31C byte +0x6B < 4) pushes it: state 2 (opening) waits 50 ticks (+0x7C bits 8..15)
 // then swings +0x0 up to the open angle with speed +0x84 / acceleration +0x80, plays sound 0x14 and sets state 3
 // (open). With bit 2 of +0x73 the gate is pushed from the other side and only drives the player's +0x6B state (3 -> 4).
@@ -1382,7 +1382,7 @@ void scenery_gate_swing_update(u8 *rec) {
     u8 *p;
     u8 *q;
 
-    switch (D_800BE9F0) {
+    switch (g_level_id) {
         case 0x1:
         case 0x29:
             x = -13.0f;
@@ -1471,7 +1471,7 @@ void scenery_gate_swing_update(u8 *rec) {
     player = NULL;
     if (state != 3 && state != 1) {
         n = D_8008FD8C;
-        for (p = (u8 *) D_800CC2D0; p < (u8 *) D_800CC2D0 + n * 0x32C; p += 0x32C) {
+        for (p = (u8 *) g_objects; p < (u8 *) g_objects + n * 0x32C; p += 0x32C) {
             if (p[0x65] != 0 || p[0x104] != 0) {
                 continue;
             }
@@ -1492,7 +1492,7 @@ void scenery_gate_swing_update(u8 *rec) {
     }
     if (player == NULL && state == 2) {
         n = D_8008FD8C;
-        p = (u8 *) D_800CC2D0;
+        p = (u8 *) g_objects;
         for (i = 0; i < n; i++, p += 0x32C) {
             if ((*(u8 **) (p + 0x31C))[0x6B] != 0) {
                 player = p;
@@ -1729,7 +1729,7 @@ void scenery_mover_swing_step(s32 arg0, s32 arg1) {
         *(f32 *) (rec + 4) = yaw;
     }
     slot = (u8) (*(s32 *) (rec + 0x3C) >> 24);
-    if (D_800BE9F0 == 2) {
+    if (g_level_id == 2) {
         music_set_b070_mode((s32) (255.0f - fabsf((yaw - open) * 255.0f / open)));
         return;
     }
@@ -1740,7 +1740,7 @@ void scenery_mover_swing_step(s32 arg0, s32 arg1) {
     light_fx_set_blend(slot - 1, frac);
     level = (s32) (frac * 255.0f);
     vtx_colour_world_blend(level, slot - 1);
-    if (D_800BE9F0 == 1 && slot - 1 == 0) {
+    if (g_level_id == 1 && slot - 1 == 0) {
         vtx_colour_record_blend(level, 0, 0xF8);
     }
 }
@@ -2173,7 +2173,7 @@ void scenery_mesh_cluster_flap_update(u8 *obj) {
 // pickup_spin_update: world mesh record (D_800DBEF4, 0xA0 bytes) handler for a spinning, bobbing pickup (P195). The phase
 // +0x7C advances by 5 degrees * D_800BE9A4 (wrapping at 6 pi) and drives the tilt +0x0 / +0x8 (15 * sin / cos), the
 // spin +0x4 (phase * 60 / pi) and the bob of y +0x12 around the base +0x80 (latched from y). While +0x84 (respawn
-// timer, in ticks) is 0, the first live player (D_800CC2D0, D_8008FD8C of them; +0x3C >= 0) within 80 units on the
+// timer, in ticks) is 0, the first live player (g_objects, D_8008FD8C of them; +0x3C >= 0) within 80 units on the
 // ground plane and in its height band fades it in by distance; touching it with +0x1CA set gives the item
 // (obj_add_health): respawning pickups (+0x3C high half = respawn time / 50) start their timer and set +0x70 bit 2,
 // others are marked taken (+0x6E) and saved through link_group_remove_members(2, index); then sound 0x1CF and the effect
@@ -2215,7 +2215,7 @@ void scenery_pickup_spin_update(u8 *rec) {
             rec[0x4F] = 0x31;
             rec[0x8A] = (0x20 - *(s32 *) (rec + 0x84)) << 3;
         } else {
-            for (p = (u8 *) D_800CC2D0; p < (u8 *) D_800CC2D0 + D_8008FD8C * 0x32C; p += 0x32C) {
+            for (p = (u8 *) g_objects; p < (u8 *) g_objects + D_8008FD8C * 0x32C; p += 0x32C) {
                 if (*(s32 *) p == 0 || p[0x127] == 0xFF || *(s32 *) (rec + 0x3C) < 0) {
                     continue;
                 }
@@ -2294,7 +2294,7 @@ loop_2:
     return sp.uC;
 }
 // obj_texture_anim_step: steps the animated texture of a scenery object. The first D_800896C4 entry that applies
-// (level filter -1 or the current level D_800BE9F0; id 0xFF = any, else the object's +0x54 type, with 0x8000 set for
+// (level filter -1 or the current level g_level_id; id 0xFF = any, else the object's +0x54 type, with 0x8000 set for
 // level-filtered entries) gives the frame table, frame count, ticks per frame and ping-pong flag. *slots holds the
 // object's texture slot (looked up once from its +0x1C texture list by scenery_dl_find_tex_slots: index << 16 | slot) and
 // *state the playing direction (high half) and the tick counter (low half). The frame texture is loaded
@@ -2327,7 +2327,7 @@ void scenery_texture_anim_step(u8 *obj, s32 *slots, s32 *state) {
     for (e = D_800896C4; e != D_800896C4 + 24; e++) {
         id = e->id;
         if (e->level != -1) {
-            if (D_800BE9F0 != e->level) {
+            if (g_level_id != e->level) {
                 continue;
             }
             if (id != 0xFF) {
@@ -2366,7 +2366,7 @@ void scenery_texture_anim_step(u8 *obj, s32 *slots, s32 *state) {
         dir = 1;
     }
     tex = texture_cache_lookup(found->frames[tick / found->ticks], &size,
-                        (D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) ? 3 : 0x3E, 0);
+                        (g_level_id == 6 || g_level_id == 0x3B) ? 3 : 0x3E, 0);
     end = 0;
     if (second != 0) {
         end = size + tex - 0x20;
@@ -3109,7 +3109,7 @@ void scenery_ride_lift_update(u8 *arg0) {
     var_t2 = temp_v0 & 3;
     temp_t4 = temp_v0 & 4;
     sp38 = (*(f32 *)((u8 *)arg0 + 0x84));
-    if (D_800BE9F0 == 0xA) {
+    if (g_level_id == 0xA) {
         temp_f0 = (*(f32 *)((u8 *)arg0 + 0x34)) * 100.0f;
         sp44 = temp_f0 * temp_f0;
         if ((*(s32 *)((u8 *)arg0 + 0x7C)) == 0) {
@@ -3153,7 +3153,7 @@ block_16:
             }
         }
         if ((var_s1 == NULL) && ((var_t2 == 2) || (var_t2 == 1))) {
-            var_v1 = D_800CC2D0;
+            var_v1 = g_objects;
             var_v0_2 = 0;
             if (D_8008FD8C > 0) {
 loop_21:
@@ -3352,7 +3352,7 @@ void scenery_smash_reveal_update(u8 *arg0) {
     u8 *temp_v0;
 
     sp.u64 = (*(u8 *)((u8 *)arg0 + 0x73)) & 3;
-    if (D_800BE9F0 == 4) {
+    if (g_level_id == 4) {
         sp.u5C = arg0 + 0x140;
     } else {
         sp.u5C = NULL;
@@ -3489,7 +3489,7 @@ typedef struct {
     s16 *uv;        /* 0x18 texture coordinates - 0x2000 (2 per vertex) */
 } RippleD0CC;
 
-// rippling_wall_update: per-frame update of a rippling vertical surface (levels D_800BE9F0 4 and 0x13 only; vertex
+// rippling_wall_update: per-frame update of a rippling vertical surface (levels g_level_id 4 and 0x13 only; vertex
 // records 0x10 bytes, template +0x28, output +0x20 + D_800BE9C0 * 4). The top is 22000 (scenery_ripple_top_height) above +0x14.
 // First call: the +0x7C state; level 4: speed 0x1DA, height 100, phase = (top - z) * 0.1; level 0x13: speed 0x259,
 // height 36, phase = top - z, a sound (texture_anim_start_for D_80090688), and for the +0x72 == 0xFE variant a texture that
@@ -3521,9 +3521,9 @@ void scenery_rippling_wall_update(u8 *obj) {
     s16 *dst;
 
     spin = 0.0f;
-    if (D_800BE9F0 == 4) {
+    if (g_level_id == 4) {
         lvl13 = FALSE;
-    } else if (D_800BE9F0 == 0x13) {
+    } else if (g_level_id == 0x13) {
         lvl13 = TRUE;
         if (obj[0x72] == 0xFE) {
             spin = D_800A35C8_c[0];
@@ -3576,7 +3576,7 @@ void scenery_rippling_wall_update(u8 *obj) {
         }
         st->glow = 0;
         st->glowTimer = 0;
-        if (D_800BE9F0 == 4 && obj[0x72] != 0xF2) {
+        if (g_level_id == 4 && obj[0x72] != 0xF2) {
             st->glowPhase = (obj[0x72] == 0xF1) ? 0 : 0x80;
             st->glow = 1;
         }
@@ -4043,7 +4043,7 @@ void pickup_update(u8 *obj) {
         break;
     case 0x54:
         item = 0x17;
-        if (D_800BE9F0 == 0x2D) {
+        if (g_level_id == 0x2D) {
             o = event_get_vars(0xBA);
             if (o != NULL && *(s32 *) (o + 0x1FE4) <= 0) {
                 off = 1;
@@ -4059,7 +4059,7 @@ void pickup_update(u8 *obj) {
         break;
     }
     if ((s32) s->state < 3 && !off) {
-        for (p = D_800CC2D0; p < &D_800CC2D0[D_8008FD8C]; p++) {
+        for (p = g_objects; p < &g_objects[D_8008FD8C]; p++) {
             if (*(s32 *) p == 0 || PK_U8(p, 0x1CA) == 0 || PK_U8(p, 0x127) == 0xFF || PK_U8(p, 0x300) == 0) {
                 continue;
             }
@@ -4393,7 +4393,7 @@ void scenery_carry_player_arc_update(u8 *arg0) {
     temp_v0_4 = (*(s32 *)((u8 *)arg0 + 0x80));
     var_a0 = sp34;
     if (temp_v0_4 == 1) {
-        temp_v1 = &D_800CC2D0[(*(s32 *)((u8 *)arg0 + 0x84))];
+        temp_v1 = &g_objects[(*(s32 *)((u8 *)arg0 + 0x84))];
         (*(s16 *)((u8 *)arg0 + 0x10)) = (s16) (s32) temp_v1->x_position;
         (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) ((s32) temp_v1->y_position + 0x64);
         (*(s16 *)((u8 *)arg0 + 0x14)) = (s16) (s32) temp_v1->z_position;
@@ -4460,7 +4460,7 @@ void scenery_attach_to_record(u8 *arg0) {
     f32 sp3C;
     u8 *temp_v0;
     u16 t = *(u16 *)(arg0 + 0x3E);
-    if ((*(u16 *)(arg0 + 0x54) == 0x8005) && (D_800BE9F0 == 0x35)) {
+    if ((*(u16 *)(arg0 + 0x54) == 0x8005) && (g_level_id == 0x35)) {
         temp_v0 = world_record_find(t);
         if (temp_v0 != 0) {
             world_record_build_matrix(sp48, temp_v0);
@@ -4696,7 +4696,7 @@ loop_2:
 block_7:
         if ((s8) temp_t7 >= 0) {
             if (var_a3 != 0) {
-                if ((s8) temp_t7 == (*(u8 *)((u8 *)D_800CCA0C + 0x11B))) {
+                if ((s8) temp_t7 == (*(u8 *)((u8 *)g_obj0_state + 0x11B))) {
                     if (arg1 == 0) {
                         if ((var_v0 != 0) && (var_v0 != 1)) {
                             var_v0 = 1;

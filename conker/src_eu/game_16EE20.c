@@ -160,16 +160,16 @@ s32 obj_interaction_category(struct127 *obj) {
 }
 /* was func_15141CC0 */
 s32 interaction_mode_for_level(u32 arg0) {
-    if (D_800BE9F0 == 0x2F) {
+    if (g_level_id == 0x2F) {
         return 6;
     }
-    if (D_800BE9F0 == 0x42) {
+    if (g_level_id == 0x42) {
         return 7;
     }
-    if (D_800BE9F0 == 0x27) {
+    if (g_level_id == 0x27) {
         return 8;
     }
-    if (D_800BE9F0 == 0x19) {
+    if (g_level_id == 0x19) {
         return 5;
     }
     switch (arg0) {
@@ -184,12 +184,12 @@ s32 interaction_mode_for_level(u32 arg0) {
     case 2:
     case 8:
     case 12:
-        if (D_800BE9F0 == 2) {
+        if (g_level_id == 2) {
             return 7;
         }
         return 4;
     case 5:
-        if (D_800BE9F0 == 0x14) {
+        if (g_level_id == 0x14) {
             return 5;
         }
         return 9;
@@ -372,7 +372,7 @@ void fx_spawn_impact_particle(u8 arg0, u8 *arg1, f32 arg2, u8 arg3, u8 *arg4, u8
 s32 obj_query_table6(struct127 *arg0) {
     struct_eu_words6 sp18 = g_trigger_query_words6;
 
-    if (trigger_first_touched(arg0 - D_800CC2D0, 6, &sp18, arg0) == -1) {
+    if (trigger_first_touched(arg0 - g_objects, 6, &sp18, arg0) == -1) {
         return 0;
     }
     return 1;

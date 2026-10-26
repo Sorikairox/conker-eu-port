@@ -1,4 +1,4 @@
-# P221 obj_spawn_effect50_with_sound (EU 150D9098, game_eu_106830) obj_spawn_effect50_with_sound. ARG 0 obj. D_800BE9F0 = EU 800BEE10 (level).
+# P221 obj_spawn_effect50_with_sound (EU 150D9098, game_eu_106830) obj_spawn_effect50_with_sound. ARG 0 obj. g_level_id = EU 800BEE10 (level).
 # keys: music_play_song 1000DC5C, trail_get_emit_point / trail_get_aim (C, OUTA the pos / aim), game_gu_random (RET rand),
 # sound_play_at 10011278 (RET sound), fxrec_spawn (RET rec; ARGMEM spec 0x1C), memcpy 10023360 (ARGMEM 0x50).
 # knobs: DIFFTEST_STKFILL=5A5A5A5A DIFFTEST_ROMDATA=1 DIFFTEST_ARGMEM=10023360=1:80,15147FF0=0:28

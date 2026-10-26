@@ -531,7 +531,7 @@ extern f32 D_800C3A70, D_800C3A74, D_800C3A94, D_800C3A98;
 extern s32 D_800C3A9C;
 extern f32 D_800D9F3C, D_800D9F40;
 extern s32 D_800BEE08;
-extern u8 D_800C40AB, D_800C40AD, D_800C3AA0, D_800DC2DC, D_800C40BD, D_800BEE2C;
+extern u8 D_800C40AB, D_800C40AD, D_800C3AA0, D_800DC2DC, D_800C40BD, g_slowmo_divisor; /* was D_800BEE2C */
 extern u8 D_800C39E2, D_800C39E3, D_800C3682, D_800C3683;
 extern s16 D_800C40BE;
 extern s32 D_800D2870;
@@ -558,7 +558,7 @@ typedef struct {
 #define SA_S32(p, o) (*(s32 *) ((u8 *) (p) + (o)))
 #define SA_F32(p, o) (*(f32 *) ((u8 *) (p) + (o)))
 #define SA_PTR(p, o) (*(u8 **) ((u8 *) (p) + (o)))
-#define SA_OBJ_INDEX(o) (((u8 *) (o) - (u8 *) D_800CC2D0) / 0x32C)
+#define SA_OBJ_INDEX(o) (((u8 *) (o) - (u8 *) g_objects) / 0x32C)
 
 // scene_event_run_a: first handler of a scene event (scene_event_run tries this one, then scene_event_run_b, then
 // scene_event_run_c). ev is the 8-byte event, track / player its track, now the track time, obj / wrec the track's object
@@ -802,7 +802,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         break;
     case 0x1E:
         D_800C39E2 = ev->b4 + 1;
-        D_800C39E3 = D_800BE9F0;
+        D_800C39E3 = g_level_id;
         break;
     case 0x03: {
         u8 *r = world_record_find(ev->w6);
@@ -1100,7 +1100,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         D_800C40AB = 1;
         break;
     case 0x5A:
-        D_800C3E78 = SA_OBJ_INDEX(obj);
+        g_cur_obj_index = SA_OBJ_INDEX(obj);
         switch (SA_U8(o, 4)) {
         case 0x53:
             SA_U8(o, 0x124) = 0;
@@ -1117,11 +1117,11 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         }
         break;
     case 0x71: /* release the player object (slot 0) */
-        SA_S16(D_800CC2D0, 0xCC) = 0;
-        SA_U8(SA_PTR(D_800CC2D0, 0x31C), 0x4E) = 0;
-        SA_U8(D_800CC2D0, 0x65) = 0;
-        SA_U8(SA_PTR(D_800CC2D0, 0x31C), 0x27) = 0;
-        SA_S32(D_800CC2D0, 0xF8) &= ~0x01000000;
+        SA_S16(g_objects, 0xCC) = 0;
+        SA_U8(SA_PTR(g_objects, 0x31C), 0x4E) = 0;
+        SA_U8(g_objects, 0x65) = 0;
+        SA_U8(SA_PTR(g_objects, 0x31C), 0x27) = 0;
+        SA_S32(g_objects, 0xF8) &= ~0x01000000;
         if (obj != NULL) {
             SA_U8(o, 0x13C) = 0;
         }
@@ -1161,9 +1161,9 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             if (next == NULL) {
                 out = 0;
             }
-            if (D_800BE9F0 == 0x18) {
+            if (g_level_id == 0x18) {
                 screen_overlay_show_timed(in, end - now - out - in, out, ev->b5);
-            } else if (D_800BE9F0 == 0x21) {
+            } else if (g_level_id == 0x21) {
                 effect_spawn_sum_counter(in, end - now - out - in, out);
             }
         }
@@ -1216,20 +1216,20 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
                 SA_U8(o, 0xA9) = 0;
                 break;
             case 3:
-                D_800C3E78 = SA_OBJ_INDEX(obj);
-                SA_U8(D_800CC2D0, 0x13C) = D_800C3E78 + 100;
-                SA_F32(D_800CC2D0, 0x3C) = 0.0f;
-                SA_S16(SA_PTR(D_800CC2D0, 0x31C), 0x18) = 0;
+                g_cur_obj_index = SA_OBJ_INDEX(obj);
+                SA_U8(g_objects, 0x13C) = g_cur_obj_index + 100;
+                SA_F32(g_objects, 0x3C) = 0.0f;
+                SA_S16(SA_PTR(g_objects, 0x31C), 0x18) = 0;
                 obj_attach_to_carrier(obj, 0);
                 SA_S32(o, 0x5C) = 9;
                 SA_U8(o, 0x65) = 1;
                 SA_U8(o, 0x101) |= 4;
                 break;
             case 4:
-                SA_U8(SA_PTR(D_800CC2D0, 0x31C), 0x17) = 1;
+                SA_U8(SA_PTR(g_objects, 0x31C), 0x17) = 1;
                 break;
             case 5:
-                D_800D154C = obj;
+                g_cur_obj = obj;
                 objev_set_timer_3c_2000();
                 break;
             case 6:
@@ -1249,7 +1249,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         D_800C3A86 = ev->b4 == 0;
         break;
     case 0x74:
-        D_800BEE2C = ev->b5;
+        g_slowmo_divisor = ev->b5;
         break;
     case 0x6F:
         if (obj != NULL) {
@@ -1275,7 +1275,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         }
         break;
     case 0x7B:
-        if (D_800BE9F0 == 0x1D) {
+        if (g_level_id == 0x1D) {
             D_800C3AA0 = 1;
         }
         break;
@@ -1293,7 +1293,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         D_800DC2DC = 1;
         break;
     case 0x80:
-        D_800BE9ED = ev->b4;
+        g_level_load_white_fill = ev->b4;
         break;
     case 0x81:
         hud_clock_set_enabled(ev->b4 ^ 1);
@@ -1512,7 +1512,7 @@ static const u8 sBones5F19[8] = { 7, 8, 9, 10, 13, 14, 15, 16 };                
 /* frames until the next event of this type and id on the track: the effect's duration */
 #define SPAN(ev, out) (scene_event_find_next((u32) (ev), (ev)->type, track, (out), 1, (ev)->id, 0, 0, 0, 0, player) - now)
 #define REC(player, track) ((u8 *) &(&D_800C3958)[player][track])
-#define OBJ_INDEX(obj) ((s32) ((u8 *) (obj) - (u8 *) D_800CC2D0) / 812)
+#define OBJ_INDEX(obj) ((s32) ((u8 *) (obj) - (u8 *) g_objects) / 812)
 
 /* Script event interpreter (middle handler of scene_event_run). `arg0` is one 8-byte ScriptEvent of track `track` of
  * player `player`; `now` = the current frame, `value` = the byte type 0x11 stores, `obj` / `rec` = the object or the
@@ -2747,7 +2747,7 @@ s32 scene_event_run_c(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             if ((s8) ev[4] == 0) {
                 head_icon_show_timed(0, scene_event_find_next((u32) ev, type, track, &next, 1, 0x57, 0, 0, 0, 0, player) - now, 0.0f);
             } else if (replay != 0) {
-                D_800C3E78 = 0;
+                g_cur_obj_index = 0;
                 head_icon_set_bobbing();
             }
             return 1;

@@ -18,13 +18,13 @@ void *streak_spawn(s32 *arg0, s32 arg1, void *arg2, s32 arg3, u8 arg4, s32 arg5)
 }
 
 /* P175 */
-extern s32 (*D_8008B420[])(u8 *, u8 *); /* motion handlers; D_8008B424 = the same table shifted by one */
+extern s32 (*g_streak_motion_handlers[])(u8 *, u8 *); /* motion handlers; g_streak_motion_handlers_from1 = the same table shifted by one; was D_8008B420; was D_8008B424 */
 
 // particle_streak_step: per-frame step of a streak particle (kind 8 of D_8008A5A0, created by streak_spawn).
 /* The points (obj +0x94, 0x10 bytes: x, y, z, vy) form a ring of +0x25 entries from the oldest +0x2D to the head
  * +0x2E (exclusive), count +0x2C. Each live point moves by the record's velocity (rec = obj +0x98: vx +4, vz +0xC)
  * and falls by the gravity rec +0x10 into its vy, all scaled by the frame time D_800BE9A4. Then the motion handler
- * rec +0x38 (D_8008B420, -1 = none) runs with (obj, rec); the oldest point is stored in obj +0x54 (0 when the ring
+ * rec +0x38 (g_streak_motion_handlers, -1 = none) runs with (obj, rec); the oldest point is stored in obj +0x54 (0 when the ring
  * is empty). Returns 0 when the handler ends the particle, else 1. */
 /* was func_1515C388 */
 s32 streak_update_points(u8 *obj) {
@@ -50,7 +50,7 @@ s32 streak_update_points(u8 *obj) {
         }
     }
     if (*(s8 *) (rec + 0x38) != -1) {
-        done = D_8008B420[*(s8 *) (rec + 0x38)](obj, rec) == 0;
+        done = g_streak_motion_handlers[*(s8 *) (rec + 0x38)](obj, rec) == 0;
     }
     if (*(s8 *) (obj + 0x2C) > 0) {
         p = (f32 *) (pts + *(s8 *) (obj + 0x2D) * 0x10);
@@ -67,7 +67,7 @@ s32 streak_update_points(u8 *obj) {
     }
     return 1;
 }
-extern s32 (*D_8008B424[])(u8 *, u8 *);
+extern s32 (*g_streak_motion_handlers_from1[])(u8 *, u8 *); /* was D_8008B424 */
 
 /* was func_1515C534 */
 s32 streak_update_fade(u8 *arg0) {
@@ -79,7 +79,7 @@ s32 streak_update_fade(u8 *arg0) {
     b = *(u8 **)(arg0 + 0x98);
     done = 0;
     if (((s8 *)b)[0x39] != -1) {
-        done = D_8008B424[((s8 *)b)[0x39]](arg0, b) == 0;
+        done = g_streak_motion_handlers_from1[((s8 *)b)[0x39]](arg0, b) == 0;
     }
     if (!done) {
         if (b[0x14] & 4) {
@@ -113,9 +113,9 @@ s32 gfx_prim_color_cached(s32, s32, s32, s16, s32, s32, s32, s8 *);
 s32 gfx_env_color_cached(s32, s32, s32, s32, s32, s8 *);
 s32 gfx_other_mode_cached(s32, s32, s32, s8 *);
 f32 sqrtf(f32);
-extern s32 D_80091228[];  /* streak texture descriptor */
+extern s32 g_streak_texture[];  /* streak texture descriptor; was D_80091228 */
 extern s32 D_800D30BC;
-extern s32 D_800A4EA8[];  /* render mode pairs (2 words each) */
+extern s32 g_render_mode_pairs[];  /* render mode pairs (2 words each); was D_800A4EA8 */
 
 /* One streak vertex: position, flag 0, texture (s, t), colour white with alpha a. */
 #define STREAK_VTX(v, px, py, pz, s, t, a) \
@@ -160,10 +160,10 @@ extern s32 D_800A4EA8[];  /* render mode pairs (2 words each) */
  * of +0x25 entries, count +0x2C. Each point gets two vertices offset by +-n (STREAK_NORMAL; camera of view arg2 at
  * D_800DBFF0 + arg2 * 0x9A0 + 0x2F8): texture s runs 0..0x800 along the ribbon, t = 0x3FF / 0 across it, and the
  * alpha fades from 0 at the head to rec +0x1A at the tail. Each segment emits one 4-vertex load and two triangles.
- * Vertices come from vtx_slot_buffer_get (2 per point + 10 spare). Sets the texture D_80091228 (combine 0x3E), combine
+ * Vertices come from vtx_slot_buffer_get (2 per point + 10 spare). Sets the texture g_streak_texture (combine 0x3E), combine
  * rec +0x21, geometry mode rec +0x24 / +0x28, the env / prim colours from rec +0x15..+0x1F (fx_calc_color_mode_a /
  * fx_calc_color_mode_b), render mode 0x80000 | 0x2CA0 | D_800D30BC (| 0x100000 with rec +0x14 flag 1) with the
- * D_800A4EA8 entry rec +0x20. Returns the display list end; draws nothing with fewer than 2 points. */
+ * g_render_mode_pairs entry rec +0x20. Returns the display list end; draws nothing with fewer than 2 points. */
 /* was func_1515C6F4 */
 s32 streak_draw(u8 *obj, s32 gfx, s16 arg2) {
     u8 *rec;
@@ -204,13 +204,13 @@ s32 streak_draw(u8 *obj, s32 gfx, s16 arg2) {
                   rec[0x1A], rec[0x1F], rec[0x15]);
     fx_calc_color_mode_b(&r1, &g1, &b1, &a1, rec[0x1B], rec[0x1C], rec[0x1D], rec[0x1E], rec[0x17], rec[0x18], rec[0x19],
                   rec[0x1A], rec[0x1F], rec[0x16]);
-    gfx = gfx_load_texture_cached(gfx, D_80091228, 0, 0, 0, 0, 0x42, 0, 0, &flag, 0x3E);
+    gfx = gfx_load_texture_cached(gfx, g_streak_texture, 0, 0, 0, 0, 0x42, 0, 0, &flag, 0x3E);
     gfx = gfx_set_combine_mode(gfx, rec[0x21], &flag);
     gfx = gfx_geometry_mode_cached(gfx, *(s32 *) (rec + 0x24), *(s32 *) (rec + 0x28));
     gfx = gfx_prim_color_cached(gfx, 0, 0, r0, g0, b0, a0, &flag);
     gfx = gfx_env_color_cached(gfx, r1, g1, b1, a1, &flag);
     gfx = gfx_other_mode_cached(gfx, ((rec[0x14] & 1) ? 0x100000 : 0) | 0x80000 | D_800D30BC | 0x2CA0,
-                        D_800A4EA8[rec[0x20] * 2 + 1] | D_800A4EA8[rec[0x20] * 2], &flag);
+                        g_render_mode_pairs[rec[0x20] * 2 + 1] | g_render_mode_pairs[rec[0x20] * 2], &flag);
 
     i = *(s8 *) (obj + 0x2E) - 1;
     if (i < 0) {
@@ -427,7 +427,7 @@ void fx_source_emitter_update(u8 *arg0) {
     u8 *temp_s0;
     u8 *temp_s1;
 
-    temp_s0 = ((*(u8 *)((u8 *)arg0 + 0x30)) << 6) + ((u8 *)&D_800A6880);
+    temp_s0 = ((*(u8 *)((u8 *)arg0 + 0x30)) << 6) + ((u8 *)&g_fx_source_emitter_presets);
     temp_s1 = arg0 + 0x28;
     (*(f32 *)((u8 *)temp_s1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 4)) + ((*(f32 *)((u8 *)temp_s0 + 0)) + (random_float() * (*(f32 *)((u8 *)temp_s0 + 4)))));
     if ((*(f32 *)((u8 *)temp_s1 + 4)) > 1.0f) {

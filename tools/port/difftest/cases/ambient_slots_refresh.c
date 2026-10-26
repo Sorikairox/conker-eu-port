@@ -17,7 +17,7 @@ void ambient_slots_refresh(void) {
     for (i = 0; i < 15; i++) {
         voices[i * 0x10 + 0xC] = 0;
     }
-    ambient_emitters_update((s32) D_800CC2D0[0].x_position, (s32) D_800CC2D0[0].y_position, (s32) D_800CC2D0[0].z_position,
+    ambient_emitters_update((s32) g_objects[0].x_position, (s32) g_objects[0].y_position, (s32) g_objects[0].z_position,
                   1500, D_800DBFF0->unk380, (s32) D_800DBFF0->unk2F8, (s32) D_800DBFF0->unk2FC,
                   (s32) D_800DBFF0->unk300);
     for (i = 0; i < 15; i++) {

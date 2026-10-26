@@ -6,10 +6,10 @@
 \#^    if (att\[0x58\] != 1) {$#s/!= 1/!= 0/
 \#^        \*(u16 \*) (owner + 0x2F8) &= 0xFEFF;$#s/0xFEFF/0xFFFE/
 \#^    for (k = 0; k < 3; k++) {$#s/k < 3/k < 2/
-\#^        node = D_800DD280\[0\]\[types\[k\]\];$#s/types\[k\]/types[k] + 1/
+\#^        node = g_node_lists\[0\]\[types\[k\]\];$#s/types\[k\]/types[k] + 1/
 \#^        i = \*(s8 \*) (arg0 + 0x2E);$#s/0x2E/0x2D/
-\#^        D_800DD5C0++;$#s/++/+= 2/
-\#^            D_800DD5C8\[D_800DD5C0\] = node->next;$#s/node->next/node->prev/
+\#^        g_node_iter_depth++;$#s/++/+= 2/
+\#^            g_node_iter_next\[g_node_iter_depth\] = node->next;$#s/node->next/node->prev/
 \#^            nx = \*(f32 \*) (n + 0x98);$#s/0x98/0x9C/
 \#^            nz = \*(f32 \*) (n + 0xA0);$#s/0xA0/0x9C/
 \#^            while (i != \*(s8 \*) (arg0 + 0x2D)) {$#s/0x2D/0x2C/
@@ -30,6 +30,6 @@
 \#^                    v = collision_level_nearest_height((s32) \*(f32 \*) (n + 0x98), (s32) \*(f32 \*) (n + 0x9C), (s32) \*(f32 \*) (n + 0xA0),$#s/0x9C)/0xA0)/
 \#^                    n\[0x91\] = 4;$#s/4/3/
 \#^                    \*(f32 \*) (n + 0xC8) = v;$#s/= v/= v + 1/
-\#^            node = D_800DD5C8\[D_800DD5C0\];$#s/D_800DD5C8\[D_800DD5C0\]/node->next/
-\#^        D_800DD5C0--;$#s/--/++/
+\#^            node = g_node_iter_next\[g_node_iter_depth\];$#s/g_node_iter_next\[g_node_iter_depth\]/node->next/
+\#^        g_node_iter_depth--;$#s/--/++/
 \#^    return 1;$#s/1/2/

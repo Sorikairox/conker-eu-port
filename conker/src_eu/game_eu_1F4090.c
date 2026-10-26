@@ -22,7 +22,7 @@ extern u8 D_800AAF48[];  /* [2 side] f32[3] shot start point */
 extern f32 D_800AAFD8;   /* obj_get_aim_vectors parameter */
 extern f32 D_800AAFDC;   /* smallest direction component for a side offset */
 extern f32 D_800AAFE0;   /* shot parameter (1 / 300) */
-extern u8 D_800DCE50;
+extern u8 g_fx_lod_shift_players; /* was D_800DCE50 */
 
 /*
  * object_gun_fire: P188: fires side `side` (0 / 1) of obj's gun (not while obj_sub_counter_positive says it is busy).
@@ -35,7 +35,7 @@ extern u8 D_800DCE50;
  * when the object has one (+0x318: rumble_request with a random 11..21 pitch value and voice 1 << +0x23D), and with
  * matrices and a model that is not hidden (+0x74 & 0xF != 15): the muzzle puff (muzzle_light_small_spawn), the tracer
  * (bone_streak_fx_start) and the shot (gun_side_spark_spray), each always when aimed, otherwise only by chance (puff / tracer: 1
- * in 2 and single-player-ish modes D_80082FA0 < 2; shot: random & the D_800DCE50 mask is 0), and the projectile
+ * in 2 and single-player-ish modes D_80082FA0 < 2; shot: random & the g_fx_lod_shift_players mask is 0), and the projectile
  * (tracer_spawn: speed 300, random life / size, kind 26). The asm returns tracer_spawn's result (0 on the early
  * exits) but no caller reads it and game_eu_51190 declares it void, so it is void here (one wasm signature).
  */
@@ -145,7 +145,7 @@ void object_gun_fire(u8 *obj, u8 side, s32 aimed_, u8 *att, s32 kind, s32 flag, 
             }
         }
         mask = 1;
-        for (n = D_800DCE50; n != 0; n--) {
+        for (n = g_fx_lod_shift_players; n != 0; n--) {
             mask |= 1 << n;
         }
         if (aimed || !(random_int() & mask)) {

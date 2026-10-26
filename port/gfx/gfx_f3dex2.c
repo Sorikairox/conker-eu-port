@@ -1869,7 +1869,7 @@ uint32_t *__wrap_level_dl_visibility_filter(int dl, uint32_t *gdl, unsigned char
 }
 
 /* P39: ?camwatch=N: write watch on the camera chain, checked at every asm-stub entry (port_stub_hit) and around
- * every camera_build_view_matrix call (-Wl,--wrap). Watched: the camera target D_800DBFF0[0]+0x3D4 (= D_800CC2D0[0]+0x31C)
+ * every camera_build_view_matrix call (-Wl,--wrap). Watched: the camera target D_800DBFF0[0]+0x3D4 (= g_objects[0]+0x31C)
  * +0x130..+0x154 (dir / eye / at), the controller's smoothed target 0x2A4..0x2AC, at 0x2BC..0x2C4, eye
  * 0x2F8..0x300, orbit 0x18C..0x198 and yaw 0x3A0, and the followed record (+0x3D0) position +0x14..+0x1C.
  * The first N changes are logged with the stub (or wrapper point) that saw them and a JS stack; camera_build_view_matrix
@@ -1974,7 +1974,7 @@ void __wrap_camera_build_view_matrix(void *arg0) {
                      CWF(0x5CC), CWF(0x384));
 #undef CWF
         }
-        if ((cw_calls & 63) == 0 && v[28]) { /* P39: the object array D_800CC2D0[] (EU 0x800CC6F0, 0x32C each): pos, +0x31C */
+        if ((cw_calls & 63) == 0 && v[28]) { /* P39: the object array g_objects[] (EU 0x800CC6F0, 0x32C each): pos, +0x31C */
             int k;
             for (k = 0; k < 8; k++) {
                 const unsigned char *r = (const unsigned char *)v[28] + k * 0x32C;
@@ -2012,11 +2012,11 @@ int __wrap_char_fx_init(void *arg0) {
     int r = __real_char_fx_init(arg0);
     unsigned after = *(volatile unsigned *)(uintptr_t)0x14;
     if ((before != after || logged < 6) && logged < 40) {
-        extern unsigned char D_800A62B8[], D_800A62A0[], D_800CC2D0[]; extern unsigned D_8008AE10[]; extern unsigned char D_8008AF30[];
+        extern unsigned char D_800A62B8[], D_800A62A0[], g_objects[]; extern unsigned D_8008AE10[]; extern unsigned char D_8008AF30[];
         int vt = (fl & 4) ? vbe_ld8(D_800A62B8 + type) : -1, vm = (fl & 2) ? vbe_ld8(D_800A62A0 + mode) : -1;
         logged++;
         port_log("[p158null] frame %u obj %d ret %d flags %d sub %d mode %d type %d -> handler idx type %d (%08X) mode %d (%08X) | null+0x14 %08X -> %08X\n",
-                 port_frame_count, (int)(((unsigned char *)arg0 - D_800CC2D0) / 0x32C), r, fl, sub, mode, type,
+                 port_frame_count, (int)(((unsigned char *)arg0 - g_objects) / 0x32C), r, fl, sub, mode, type,
                  vt, vt >= 0 ? D_8008AE10[vt] : 0, vm, vm >= 0 ? D_8008AE10[vm] : 0, before, after);
         (void)D_8008AF30;
     }
@@ -2033,8 +2033,8 @@ float __wrap_shadow_light_projection(int obj, int slot, float sx, float sy, floa
     static int from = -1; if (from < 0) from = port_flag("p158f");
     if (n > 0 && port_frame_count >= (unsigned)from && calls++ % (unsigned)n == 0 && logged < 400) {
         extern float D_800DE3E0[][3], D_800DE440[3], D_800D3AA0[2], D_800D3AA8, D_800D3AAC, D_800DE46C; extern int D_800DE464;
-        extern unsigned char D_800CC2D0[];
-        const float *o = (const float *)(D_800CC2D0 + obj * 0x32C + 0x14);
+        extern unsigned char g_objects[];
+        const float *o = (const float *)(g_objects + obj * 0x32C + 0x14);
         logged++;
         port_log("[p158light] frame %u obj %d slot %d box %.1f %.1f %.1f prev %.1f -> dist %.1f | light %.1f %.1f %.1f obj %.1f %.1f %.1f "
                  "| default %.1f %.1f %.1f nolights %d scale %.3f | proj %.3f %.3f far %.1f near %.1f\n",
@@ -2066,10 +2066,10 @@ uint8_t *__wrap_shadow_draw_all(uint8_t *gdl, int arg1) {
         }
         if (slots && sl < 140) sl += snprintf(seq + sl, sizeof seq - sl, "%u", slots);
         if (calls % 128 == 0) { /* why objects are skipped: the filter fields of objects 0..1 (vbe bytes: address ^ 3) */
-            extern unsigned char D_800CC2D0[]; extern unsigned D_800DF510;
+            extern unsigned char g_objects[]; extern unsigned D_800DF510;
             int k;
             for (k = 0; k < 2; k++) {
-                const unsigned char *o = D_800CC2D0 + k * 0x32C;
+                const unsigned char *o = g_objects + k * 0x32C;
                 #define VB(off) (*(const unsigned char *)((uintptr_t)(o + (off)) ^ 3))
                 unsigned t31c = *(const unsigned *)(o + 0x31C);
                 port_log("[shadow] obj[%d]: state %d 1D4 %08X 74 %02X 5 %02X 66 %02X 84 %04X 65 %02X id %02X 31C %08X (95 %02X 98 %02X) mask DF510 %08X\n",
@@ -2150,7 +2150,7 @@ int __wrap_camera_view_test_sphere(int cam, int *mtx, float x, float y, float z,
  *  - objects_draw_pass (object list draw; calls the now-C obj_draw_part per object part): commands it appends per mode.
  *  - texscroll_update (texture scrolling): the D_800E0D18 list, scroll position (+0xE / +0x10) and speed (+0x12 / +0x13). */
 static int p46_flag = -1;
-extern unsigned char D_800CC2D0[], D_800C3638, D_800C3A7A;
+extern unsigned char g_objects[], D_800C3638, D_800C3A7A; /* was D_800CC2D0 */
 int obj_get_player_alpha(void *rec, int part);
 static unsigned p46_bdc0_calls, p46_bdc0_cmds[4], p46_bdc0_n[4], p46_6560_calls;
 void *__real_objects_draw_pass(void *gdl, int mode, short player);
@@ -2162,7 +2162,7 @@ void *__wrap_objects_draw_pass(void *gdl, int mode, short player) {
         unsigned d = (unsigned)((char *)r - (char *)gdl) / 8, k = (unsigned)mode & 3;
         p46_bdc0_cmds[k] += d; p46_bdc0_n[k]++;
         if (p46_bdc0_calls < (unsigned)p46_flag || (p46_bdc0_calls & 255) == 0) {
-            const unsigned char *r0 = D_800CC2D0;
+            const unsigned char *r0 = g_objects;
             port_log("[p46] objects_draw_pass #%u frame %u mode %d player %d: %u commands appended | rec0 state %u id %02X "
                      "unk5 %02X +74 %02X +1D4 %08X +1C8 %02X alpha(obj_get_player_alpha) %d | D_800C3638 %u D_800C3A7A %u\n",
                      p46_bdc0_calls, port_frame_count, mode, player, d, *(const unsigned *)r0, vbe_ld8(r0 + 4),

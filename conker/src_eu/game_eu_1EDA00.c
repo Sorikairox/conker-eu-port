@@ -433,7 +433,7 @@ s32 projectile_fire(struct127 *obj, struct127 *target, s32 *arg2, u8 arg3, u8 ar
         aiming = 0;
     }
 
-    if (D_800BE9F0 == 0x24) {
+    if (g_level_id == 0x24) {
         trace = 0;
     } else {
         trace = objects_hit_by_segment(aiming ? (u8 *)aim : (u8 *)pos, aiming ? (s32 *)aimDir : (s32 *)dir, (u8 *)obj, 3,

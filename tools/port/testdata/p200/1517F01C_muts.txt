@@ -1,9 +1,9 @@
-s/    cam = (u8 \*) D_800DBFF0 + D_80082FA4 \* 0x9A0;/    cam = (u8 *) D_800DBFF0;/
-s/    camera_view_rotation_matrix(D_80082FA4, mtx,/    camera_view_rotation_matrix(0, mtx,/
+s/    cam = (u8 \*) D_800DBFF0 + g_cur_view_player \* 0x9A0;/    cam = (u8 *) D_800DBFF0;/
+s/    camera_view_rotation_matrix(g_cur_view_player, mtx,/    camera_view_rotation_matrix(0, mtx,/
 s/-\*(f32 \*) (cam + 0x388), -\*(f32 \*) (cam + 0x380)/-*(f32 *) (cam + 0x380), -*(f32 *) (cam + 0x388)/
 s/-\*(f32 \*) (cam + 0x388), -\*(f32 \*) (cam + 0x380)/*(f32 *) (cam + 0x388), -*(f32 *) (cam + 0x380)/
 s/, \*(f32 \*) (cam + 0x5EC));/, 0.0f);/
-s/    vp = (u8 \*) D_800BE628 + D_80082FA4 \* 0x180;/    vp = (u8 *) D_800BE628;/
+s/    vp = (u8 \*) D_800BE628 + g_cur_view_player \* 0x180;/    vp = (u8 *) D_800BE628;/
 s/    hw = \*(f32 \*) (vp + 0xC);/    hw = *(f32 *) (vp + 0x10);/
 s/    mtxf_transform_point_w(mtx, x, y, z, \&sx, \&sy, \&sz, \&w);/    mtxf_transform_point_w(mtx, x, z, y, \&sx, \&sy, \&sz, \&w);/
 s/    if (10.0f < w) {/    if (10.0f <= w) {/

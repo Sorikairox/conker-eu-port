@@ -45,17 +45,17 @@ void context_action_lock(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
         arg2 |= 0x80;
     }
     if (arg1 == 0) {
-        (*(u8 **)((u8 *)&D_800CCA0C + arg0 * 0x32C))[0x74] = arg2;
+        (*(u8 **)((u8 *)&g_obj0_state + arg0 * 0x32C))[0x74] = arg2;
         return;
     }
-    (*(u8 **)((u8 *)&D_800CCA0C + arg0 * 0x32C))[0x75] = arg2;
+    (*(u8 **)((u8 *)&g_obj0_state + arg0 * 0x32C))[0x75] = arg2;
 }
 
 /* was func_15080AA8 */
 void context_action_clear(s32 arg0) {
     struct127 *p;
     u8 b;
-    p = &D_800CC2D0[arg0];
+    p = &g_objects[arg0];
     if ((p->unk31C->pad6C[8] != 0) && (!(p->unk31C->pad6C[8] & 0x80))) {
         p->unk31C->pad6C[8] = 0;
     }
@@ -234,7 +234,7 @@ extern u8 *D_800D1DBC;
 void hint_box_update(void) {
     if ((D_800D1941 != 0) && ((*(u8 *)((u8 *)D_800D1950 + 0x15)) == 0)) {
         hint_box_close();
-        if ((D_800BE9F0 != 0x29) && (D_800BE9F0 != 0x2E)) {
+        if ((g_level_id != 0x29) && (g_level_id != 0x2E)) {
             (*(u8 *)((u8 *)D_800D2E60 + 8)) = (u8) ((*(u8 *)((u8 *)D_800D2E60 + 8)) | 0x10);
         }
         if (D_800D1DBC != NULL) {

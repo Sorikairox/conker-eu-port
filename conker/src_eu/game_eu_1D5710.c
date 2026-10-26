@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A4EA8[];
+extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 
 /* P155 */
@@ -173,7 +173,7 @@ u8 *bolt_path_draw(u8 *arg0, u8 *arg1, s16 arg2) {
             sp.u84 = (*(s16 *)((u8 *)arg1 + 0x12)) - 1;
             var_s2 = 0;
             var_s1 = 1;
-            temp_v1 = ((u8 *)&D_800A4EA8);
+            temp_v1 = ((u8 *)&g_render_mode_pairs);
             temp_t0 = (*(u8 **)((u8 *)arg1 + 0x64));
             temp_lo = sp.u84 * 0x18;
             var_s0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_env_color_cached(gfx_geometry_mode_cached(gfx_load_texture_cached(var_s0, &D_80091120, 0, 0, 0, 0, 0x2C, 0, 0, &sp.u87, 3), 0x200005, 0x1F0600), (*(u8 *)((u8 *)arg1 + 0x24)), (*(u8 *)((u8 *)arg1 + 0x25)), (*(u8 *)((u8 *)arg1 + 0x26)), (s32) (*(u8 *)((u8 *)arg1 + 0x27)), &sp.u87), 0x19, &sp.u87), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.u87);

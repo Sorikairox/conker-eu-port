@@ -12,7 +12,7 @@
 // (+0x170, above 180 minus 360) * 10, +0x2E8 = 1 and +0x66 bit 0x20 is set. It does not read a controller.
 // Then the physics (obj_state_common_update) and the hit states: +0x232 == state 2 -> obj_carry_release(o, 100, kind, 4, 0,
 // state 3, 0, 0, 0, 0); +0x232 == state 1 -> unless obj_find_child_nth(o, 0) finds something, the first player slot
-// (< 25) of D_800CC268 & ~D_800D18A0 that has a pad (+0x127 != 0xFF), +0x65 == 0, +0x13C == 0 and a part with
+// (< 25) of g_obj_contact_mask & ~D_800D18A0 that has a pad (+0x127 != 0xFF), +0x65 == 0, +0x13C == 0 and a part with
 // +0x19B / +0x197 / +0x1AC == 0 and s16 +0x46 <= 0 becomes +0x124, gets obj_carry_pickup(o, 44, 3.2, state 2, kind),
 // part +0x24 = 500 and part +0x19E = 0.
 void obj_state_common_update(struct127 *);
@@ -44,7 +44,7 @@ void rideable_vehicle_update(u8 *o) {
         o[0x66] &= ~0x20;
     }
     if (o[0x13C] != 0) {
-        slot = (u8 *) &D_800CC2D0[o[0x13C] - 100];
+        slot = (u8 *) &g_objects[o[0x13C] - 100];
         view = *(u8 **) (slot + 0x318);
         if (view != NULL) {
             o[0x2FC] = 1 << view[0x23D];
@@ -68,18 +68,18 @@ void rideable_vehicle_update(u8 *o) {
         obj_carry_release((struct127 *) o, 100.0f, kind, 4, 0, state3, 0, 0, 0, 0);
         return;
     }
-    if (o[0x232] != state1 || !(~D_800D18A0 & D_800CC268)) {
+    if (o[0x232] != state1 || !(~D_800D18A0 & g_obj_contact_mask)) {
         return;
     }
     if (obj_find_child_nth((struct127 *) o, 0) != NULL) {
         return;
     }
-    mask = ~D_800D18A0 & D_800CC268;
+    mask = ~D_800D18A0 & g_obj_contact_mask;
     for (i = 0; i < 0x19; i++) {
         if (!(mask & (1 << i))) {
             continue;
         }
-        slot = (u8 *) &D_800CC2D0[i];
+        slot = (u8 *) &g_objects[i];
         part = *(u8 **) (slot + 0x31C);
         if (slot[0x127] != 0xFF && slot[0x65] == 0 && part[0x19B] == 0 && part[0x197] == 0 && slot[0x13C] == 0
             && part[0x1AC] == 0 && *(s16 *) (part + 0x46) <= 0) {

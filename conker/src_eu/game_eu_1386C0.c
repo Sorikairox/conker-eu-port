@@ -23,7 +23,7 @@ typedef struct {
     s16 u2A;
     s16 u2C;
     s16 u2E;
-    u8 u30; /* effect type: index into D_8008CDC0 (record +0x40) */
+    u8 u30; /* effect type: index into g_node_end_handlers (record +0x40) */
     u8 u31;
     u8 u32;
     u8 u33;

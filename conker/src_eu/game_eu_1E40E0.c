@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A4EA8[];
+extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 
 typedef struct { f32 x, y, z; } V368D0;
@@ -246,7 +246,7 @@ typedef struct {
 // value, t 0 / 0x7FF, white with the point's alpha; one G_VTX of 4 + two triangles per segment. With +0x1E bit 1
 // the ribbon starts at the trail's own position (+0x10, alpha 0x80, s 0). Vertices come from vtx_slot_buffer_get (the
 // trail's +0x84 buffer, (count << 5) + 0xA0 bytes; none -> gfx unchanged); render state: texture D_80091084,
-// combine 0x4E, geometry 0x200005 / 0x1F0600, othermode D_800D30BC | 0x82CA0 / D_800A4EA8 words 6 | 7.
+// combine 0x4E, geometry 0x200005 / 0x1F0600, othermode D_800D30BC | 0x82CA0 / g_render_mode_pairs words 6 | 7.
 /* was func_151B6ED8 */
 u8 *ribbon_trail_w10_draw(u8 *trail, u8 *gfx, s16 arg2) {
     RibbonPoint *pts;
@@ -283,7 +283,7 @@ u8 *ribbon_trail_w10_draw(u8 *trail, u8 *gfx, s16 arg2) {
     gfx = gfx_env_color_cached(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gfx = (u8 *) gfx_set_combine_mode((s32) gfx, 0x4E, &flag);
     gfx = (u8 *) gfx_geometry_mode_cached((s32) gfx, 0x200005, 0x1F0600);
-    gfx = gfx_other_mode_cached((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, ((s32 *) D_800A4EA8)[7] | ((s32 *) D_800A4EA8)[6],
+    gfx = gfx_other_mode_cached((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, ((s32 *) g_render_mode_pairs)[7] | ((s32 *) g_render_mode_pairs)[6],
                         &flag);
 
     if (*(u16 *) (trail + 0x1E) & 2) {
@@ -930,7 +930,7 @@ u8 *glow_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
             temp_v0 = camera_get_pos((s32) arg2);
             sp.u97 = 1;
             sp.uC4 = temp_v0;
-            temp_v1 = ((u8 *)&D_800A4EA8);
+            temp_v1 = ((u8 *)&g_render_mode_pairs);
             var_a0 = (*(s8 *)((u8 *)arg0 + 0x2E)) - 1;
             var_s0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached(var_s0, &D_800914B0, 0, 0, 0, 0, 0x78, 0, 0, &sp.u97, 3), 0x200005, 0x1F0600), 0x56, &sp.u97), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.u97);
             if (var_a0 < 0) {

@@ -58,5 +58,5 @@ void view_zoom_state_reset(void) {
 
     g_hud_lens_state_p3 = 0;
     D_800DDE18 = 0;
-    D_800DDE38 = 0;
+    g_level_entry_zoom_mode = 0;
 }

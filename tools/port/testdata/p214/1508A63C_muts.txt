@@ -5,8 +5,8 @@ s/row = me \* 16;/row = me * 15;/
 s/if (!(mask \& (1 << me))) {/if (!(mask \& (2 << me))) {/
 s/if (active\[k\] <= 0 || team\[k\] == myTeam) {/if (active[k] < 0 || team[k] == myTeam) {/
 s/|| team\[k\] == myTeam) {/) {/
-s/dx = D_800CC2D0\[me\].x_position - obj->x_position;/dx = D_800CC2D0[me].x_position - obj->z_position;/
-s/dz = D_800CC2D0\[me\].z_position - obj->z_position;/dz = D_800CC2D0[me].y_position - obj->z_position;/
+s/dx = g_objects\[me\].x_position - obj->x_position;/dx = g_objects[me].x_position - obj->z_position;/
+s/dz = g_objects\[me\].z_position - obj->z_position;/dz = g_objects[me].y_position - obj->z_position;/
 s/            d = 0x7D00;/            d = 0x7D01;/
 s/            d += 500;/            d += 501;/
 s/if (node\[me\] != node\[k\]) {/if (node[me] == node[k]) {/

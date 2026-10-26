@@ -18,12 +18,12 @@ void cutscene_scene_load(s32, s32, s32, s32, s32);
 void os_pi_get_access(void);
 void os_pi_rel_access(void);
 s32 osPiRawReadIo(u32, u32 *);
-extern u8 *D_800D34BC;
-extern u64 D_800D34C0[3];
-extern u64 D_800D34D8[3];
+extern u8 *g_trigger_zones; /* was D_800D34BC */
+extern u64 g_zone_always_mask[3]; /* was D_800D34C0 */
+extern u64 g_zone_overlap_mask[3]; /* was D_800D34D8 */
 extern u16 D_800D34F0[16];
-extern u8 **D_800D3690;
-extern s32 D_800D3694;
+extern u8 **g_camera_zone_list; /* was D_800D3690 */
+extern s32 g_camera_zone_count; /* was D_800D3694 */
 extern s32 D_800D3698;
 extern u8 D_800DF510;
 extern u8 D_800DF511;
@@ -69,7 +69,7 @@ void triggers_update(s32 arg0) {
                     sfx_emitter_stop_at(((u32) (*(u32 *)((u8 *)var_v0 + 0x1C)) >> 0x10) & 0xFFFF, (*(s16 *)((u8 *)var_v0 + 0)), (*(s16 *)((u8 *)var_v0 + 2)), (*(s16 *)((u8 *)var_v0 + 4)), (*(s32 *)((u8 *)var_v0 + 0x18)));
                     (*(s32 *)((u8 *)(&D_800D34B8[var_s0]) + 0x20)) = 0;
                 }
-                if ((D_800C35EA == 1) && (trigger_test_object(D_800CC2D0, &D_800D34B8[var_s0], 0) == 0)) {
+                if ((D_800C35EA == 1) && (trigger_test_object(g_objects, &D_800D34B8[var_s0], 0) == 0)) {
                     trigger_sound_start(&D_800D34B8[var_s0]);
                 }
 block_36:
@@ -172,7 +172,7 @@ void trigger_reflect_queue_objects(void) {
         do {
             temp_s0 = &D_800D34B8[var_s4];
             if ((*(u8 *)((u8 *)temp_s0 + 0x14)) == 0) {
-                var_s1 = D_800CC2D0;
+                var_s1 = g_objects;
                 var_s2 = 0;
                 if (((s32) (*(u8 *)((u8 *)temp_s0 + 0x15)) >> 2) == 6) {
                     do {
@@ -251,10 +251,10 @@ void trigger_camera_zones_apply(struct108 *arg0, u8 **arg1, s32 arg2) {
 }
 
 // P45: trigger zones of a record, per frame, before its state handler (objects_run_state_handlers).
-// Zones: D_800D34BC, 0x28 bytes each: u64 mask[3] (which triggers the zone allows), u8 +0x18 priority, s16 box
+// Zones: g_trigger_zones, 0x28 bytes each: u64 mask[3] (which triggers the zone allows), u8 +0x18 priority, s16 box
 // +0x1A..+0x24 (x min/max, y min/max, z min/max, exclusive). w = the record's cached zone (D_800D34F0[player] - 1)
-// if it still contains the position, else D_800D34D8; then every zone set in w that contains the position ANDs its
-// mask in (the lowest priority one is cached for players), a zone that does not is cleared. w |= D_800D34C0 (always
+// if it still contains the position, else g_zone_overlap_mask; then every zone set in w that contains the position ANDs its
+// mask in (the lowest priority one is cached for players), a zone that does not is cleared. w |= g_zone_always_mask (always
 // on). Then each trigger set in w (D_800D34B8, 0x34 bytes) that trigger_test_object says the record touches fires by
 // kind (+0x15 >> 2) and is recorded in D_800D3510[player] (the bits of the previous frame are `prev`).
 /* was func_150A16A4 */
@@ -288,8 +288,8 @@ void trigger_zones_update_object(struct127 *arg0) {
     spB8 = arg0->camera;
     if (spB8 == NULL) {
         spC8 = 0xFF;
-    } else if (D_800D3694 != 0) {
-        trigger_camera_zones_apply(spB8, D_800D3690, D_800D3694);
+    } else if (g_camera_zone_count != 0) {
+        trigger_camera_zones_apply(spB8, g_camera_zone_list, g_camera_zone_count);
     }
     x = (s32)arg0->x_position;
     y = (s32)arg0->y_position;
@@ -300,11 +300,11 @@ void trigger_zones_update_object(struct127 *arg0) {
     obj_set_spawn_flags(arg0);
     *(s16 *)((u8 *)arg0 + 0x120) = -10000;
     D_800D3698 = 0;
-    player = arg0 - D_800CC2D0;
+    player = arg0 - g_objects;
     found = 0;
     if (player < 16) {
         if (D_800D34F0[player] > 0) {
-            zone = D_800D34BC + D_800D34F0[player] * 0x28 - 0x28;
+            zone = g_trigger_zones + D_800D34F0[player] * 0x28 - 0x28;
             if (*(s16 *)(zone + 0x1A) < x && x < *(s16 *)(zone + 0x1C) && *(s16 *)(zone + 0x1E) < y &&
                 y < *(s16 *)(zone + 0x20) && *(s16 *)(zone + 0x22) < z && z < *(s16 *)(zone + 0x24)) {
                 for (k = 0; k < 3; k++) {
@@ -318,7 +318,7 @@ void trigger_zones_update_object(struct127 *arg0) {
     ws = w;
     if (found == 0) {
         for (k = 0; k < 3; k++) {
-            w[k] = D_800D34D8[k];
+            w[k] = g_zone_overlap_mask[k];
         }
     }
     i = 0;
@@ -337,7 +337,7 @@ void trigger_zones_update_object(struct127 *arg0) {
                 ws++;
             }
             if ((u32)mask & 1) {
-                zone = D_800D34BC + i * 0x28;
+                zone = g_trigger_zones + i * 0x28;
                 if (*(s16 *)(zone + 0x1A) < x && x < *(s16 *)(zone + 0x1C) && *(s16 *)(zone + 0x1E) < y &&
                     y < *(s16 *)(zone + 0x20) && *(s16 *)(zone + 0x22) < z && z < *(s16 *)(zone + 0x24)) {
                     for (k = 0; k < 3; k++) {
@@ -360,7 +360,7 @@ void trigger_zones_update_object(struct127 *arg0) {
         base = 0;
     }
     for (k = 0; k < 3; k++) {
-        w[k] |= D_800D34C0[k];
+        w[k] |= g_zone_always_mask[k];
     }
     if (player < 16) {
         ps = D_800D3510[player];
@@ -421,7 +421,7 @@ void trigger_zones_update_object(struct127 *arg0) {
                             case 5:
                                 o = (u8 *)arg0->unk31C;
                                 if (o[0x95] == 0 && *((u8 *)arg0 + 0x104) == 0 && *((u8 *)arg0 + 0x1CA) != 0 &&
-                                    *((u8 *)arg0 + 0x89) == 0 && (o[0x11A] == 0 || D_800BE9F0 == 6) &&
+                                    *((u8 *)arg0 + 0x89) == 0 && (o[0x11A] == 0 || g_level_id == 6) &&
                                     8.0f < *(f32 *)((u8 *)arg0 + 0x44)) {
                                     flip = 0;
                                     ang = ((u32)(*(f32 *)(e + 0x10) * 182.04445f) - *(u16 *)(o + 0x4C)) & 0xFFFF;
@@ -492,7 +492,7 @@ void trigger_zones_update_object(struct127 *arg0) {
                             *((u8 *)arg0 + 0x1CA) != 0) {
                             e = D_800D34B8 + off;
                             warp_request_start(arg0, e[0x17], *(s32 *)(e + 0x18));
-                            if (D_800BE9F0 != (D_800D34B8 + off)[0x17]) {
+                            if (g_level_id != (D_800D34B8 + off)[0x17]) {
                                 *((u8 *)arg0 + 0x125) = 0xFF;
                                 *(f32 *)((u8 *)arg0 + 0x1CC) = arg0->y_position;
                             }
@@ -511,7 +511,7 @@ void trigger_zones_update_object(struct127 *arg0) {
                                 e[0x14] = 1;
                                 e = D_800D34B8 + off;
                             }
-                            cutscene_scene_load(D_800BE9F0, *(s32 *)(e + 0x18), 0, 0, 0);
+                            cutscene_scene_load(g_level_id, *(s32 *)(e + 0x18), 0, 0, 0);
                             e = D_800D34B8 + off;
                             *(s32 *)(e + 0x1C) += 1;
                         }
@@ -935,7 +935,7 @@ s32 trigger_test_player(s32 arg0, s32 arg1) {
         }
         return 1;
     }
-    return trigger_test_object(&D_800CC2D0[arg0], D_800D34B8 + arg1 * 0x34, 1);
+    return trigger_test_object(&g_objects[arg0], D_800D34B8 + arg1 * 0x34, 1);
 }
 
 /* was func_150A2FCC */
@@ -956,7 +956,7 @@ s32 trigger_first_touched(u32 arg0, s32 arg1, s32 *arg2) {
     for (i = 0; i < arg1; i++) {
         v = arg2[i] & 0xFFF;
         if (v < (u32)D_800D3094) {
-            if (trigger_test_object(&D_800CC2D0[arg0], D_800D34B8 + v * 0x34, 1) == 0) {
+            if (trigger_test_object(&g_objects[arg0], D_800D34B8 + v * 0x34, 1) == 0) {
                 return v;
             }
         }
@@ -974,7 +974,7 @@ s32 trigger_find_touching_player(s32 arg0) {
         return -1;
     }
     for (i = 0; i < 16; i++) {
-        if (*(u16 *)((u8 *)&D_800D2138 + 0x208) & (1 << i)) {
+        if (*(u16 *)((u8 *)&g_session_game_mode + 0x208) & (1 << i)) {
             if ((D_800D3510[i][(u32)arg0 >> 6] >> ((u32)arg0 & 0x3F)) & 1) {
                 return i;
             }
@@ -1024,7 +1024,7 @@ s32 trigger_plane_side_object(s32 arg0, s32 arg1) {
         return 1;
     }
     if ((((Unk34B8 *) D_800D34B8)[arg1].unk15 & 3) == 3) {
-        return trigger_plane_side(arg1 + (Unk34B8 *) D_800D34B8, D_800CC2D0[arg0].x_position, D_800CC2D0[arg0].y_position, D_800CC2D0[arg0].z_position);
+        return trigger_plane_side(arg1 + (Unk34B8 *) D_800D34B8, g_objects[arg0].x_position, g_objects[arg0].y_position, g_objects[arg0].z_position);
     }
     return 0;
 }

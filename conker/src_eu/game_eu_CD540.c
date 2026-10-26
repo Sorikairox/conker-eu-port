@@ -88,7 +88,7 @@ s32 event_action_game_state(s32 id, s32 action, s32 *args) {
             return 0;
         case 8:
             if (D_800D3C60 == 4) {
-                warp_request_start(D_800CC2D0, args[2] & 0xFFF, args[3] & 0xFFF);
+                warp_request_start(g_objects, args[2] & 0xFFF, args[3] & 0xFFF);
             }
             return 0;
         case 9: /* set / clear a bit of D_800D2E60 */
@@ -126,7 +126,7 @@ s32 event_action_game_state(s32 id, s32 action, s32 *args) {
             }
             return 0;
         case 13:
-            D_800DDE38 = 1;
+            g_level_entry_zoom_mode = 1;
             return 0;
         case 14:
             D_800E9D00 |= args[2];
@@ -154,9 +154,9 @@ s32 event_action_game_state(s32 id, s32 action, s32 *args) {
             }
             return 0;
         case 19:
-            D_800BE3DF = args[2];
+            g_save_resume_level = args[2];
             D_800BE800 = args[3];
-            *(s32 *) &D_800BE9F4 = (s8) D_800BE3DF;
+            *(s32 *) &g_level_load_id = (s8) g_save_resume_level;
             return 0;
         case 20: /* attract idle check (-> mode 8) */
             credits_start();
@@ -201,7 +201,7 @@ s32 event_query_game_state(s32 id, s32 query, s32 *args) {
         case 0x1B: /* the event's state word (no NULL check in the asm) */
             return ((u16 *) event_find(id))[1];
         case 0x1C:
-            return D_800BE9F0;
+            return g_level_id;
         case 0x1D: /* bit mask of the D_8008FD8C slots whose D_80087270 byte is not 10, minus the D_800D18A0 bits */
             mask = 0;
             for (i = 0; i < D_8008FD8C; i++) {
@@ -215,7 +215,7 @@ s32 event_query_game_state(s32 id, s32 query, s32 *args) {
         case 0x1F:
             return D_800BE9F8;
         case 0x20:
-            return (s8) D_800BE3DF;
+            return (s8) g_save_resume_level;
         case 0x21:
             return D_800BE800;
         case 0x22: /* weighted random pick: args[2] weights follow in args[3..] */

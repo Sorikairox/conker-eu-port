@@ -95,8 +95,8 @@
 /        \*(f32 \*) (obj + 0xC0) = dist0;/d % mv_near mv_step
 /        vy \*= dist0;/s/dist0/step/ % mv_near mv_step
 /    if (obj\[0xFE\] == 1) {/s/== 1/!= 0/ % m0 ff_fe
-/                      target != NULL ? (target - (u8 \*) D_800CC2D0) \/ 0x32C : 0, 0);/s/: 0, 0)/: 1, 0)/ % mv_fe1n
-/                      target != NULL ? (target - (u8 \*) D_800CC2D0) \/ 0x32C : 0, 0);/s/0x32C :/0x328 :/ % mv_fe1 mv_fe1_2
+/                      target != NULL ? (target - (u8 \*) g_objects) \/ 0x32C : 0, 0);/s/: 0, 0)/: 1, 0)/ % mv_fe1n
+/                      target != NULL ? (target - (u8 \*) g_objects) \/ 0x32C : 0, 0);/s/0x32C :/0x328 :/ % mv_fe1 mv_fe1_2
 /                      \*(f32 \*) (obj + 0x94) + vx, \*(f32 \*) (obj + 0x98) + vy, \*(f32 \*) (obj + 0x9C) + vz,/s/+ vy,/+ vx,/ % mv_fe1
 /    \*(f32 \*) (obj + 0x98) += vy;/s/vy/vz/ % m0
 /    if (limit == 0.0f) {/s/== 0.0f/!= 0.0f/ % m0 mv_lim

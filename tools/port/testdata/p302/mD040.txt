@@ -6,7 +6,7 @@ s#    g = gfx_env_color_cached(g, 0xFF, 0xFF, 0xFF, 0xFF, \&flag);#    g = gfx_e
 s#    g = gfx_set_combine_mode(g, 0x4E, \&flag);#    g = gfx_set_combine_mode(g, 0x4F, \&flag);# % base
 s#    g = gfx_geometry_mode_cached(g, 0x200005, 0x1F0600);#    g = gfx_geometry_mode_cached(g, 0x200005, 0x1F0601);# % base
 s#D_800D30BC | 0x80000 | 0x2CA0,#D_800D30BC | 0x2CA0,# % base
-s#D_800A4EA8\[7\] | D_800A4EA8\[6\],#D_800A4EA8[7] | D_800A4EA8[5],# % base
+s#g_render_mode_pairs\[7\] | g_render_mode_pairs\[6\],#g_render_mode_pairs[7] | g_render_mode_pairs[5],# % base
 s#    if (\*(u16 \*) (obj + 0x1E) \& 2) {#    if (*(u16 *) (obj + 0x1E) \& 1) {# % base flag2
 s#        cur\[1\] = \*(f32 \*) (obj + 0x14);#        cur[1] = *(f32 *) (obj + 0x18);# % flag2
 s#        curA = 0x80;#        curA = 0x81;# % flag2

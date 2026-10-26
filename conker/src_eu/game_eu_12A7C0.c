@@ -42,7 +42,7 @@ s32 spark_shower_spawn(f32 *, f32, f32, f32, f32, s32, s32);
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 void emit_random_sprites(u8 *, u8, s32);
 
-// view_sparkle_burst: P179: one flash plus 3..4 spark sprays at view `view`'s spot (D_800D9AA0[view], 0..2: s16 x, y,
+// view_sparkle_burst: P179: one flash plus 3..4 spark sprays at view `view`'s spot (g_view_sparkle_spots[view], 0..2: s16 x, y,
 /* z, radius +6, height +8; nothing when the slot is NULL). The flash (spark_shower_spawn) sits at the middle of the
  * height: size random * 4 + 12, brightness 200..255. Each spray (emit_random_sprites block, layout of emit_random_sprites in
  * game_eu_17D3C0) starts on the circle of the spot's radius at angle base + random [0, range] (D_800A22B0[view]:
@@ -88,7 +88,7 @@ void view_sparkle_burst(u8 view) {
     if (view >= 3) {
         return;
     }
-    spot = (s16 *) D_800D9AA0[view];
+    spot = (s16 *) g_view_sparkle_spots[view];
     if (spot == NULL) {
         return;
     }
@@ -142,7 +142,7 @@ void view_sparkle_burst(u8 view) {
 f32 cam_wobble_fade_by_distance(void *, void *, s32, s32, f32);
 
 /* view_spot_distance_fade: P238: entry 0 of D_8008B734 (cam_wobble_update, asm, passes the object in a0 and stores f0).
- * Fade factor of `obj` against view 0's spot (D_800D9AA0[0], s16 x / y / z as floats): cam_wobble_fade_by_distance with near
+ * Fade factor of `obj` against view 0's spot (g_view_sparkle_spots[0], s16 x / y / z as floats): cam_wobble_fade_by_distance with near
  * distance 2007, range 9005 and scale 1 / 9005 (D_800A22FC, 0x38E8E334). 1.0 when there is no spot. The near /
  * range parameters are f32 bit patterns in cam_wobble_fade_by_distance's s32 slots (it reads them as floats). */
 /* was func_150FD49C */
@@ -150,7 +150,7 @@ f32 view_spot_distance_fade(u8 *obj) {
     f32 pos[3];
     f32 nearDist = 2007.0f;
     f32 range = 9005.0f;
-    s16 *spot = (s16 *) D_800D9AA0[0];
+    s16 *spot = (s16 *) g_view_sparkle_spots[0];
 
     if (spot == NULL) {
         return 1.0f;

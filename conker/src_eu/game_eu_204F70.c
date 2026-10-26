@@ -3,7 +3,7 @@
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
 void trail_point_apply_gravity(f32 *arg0, f32 *arg1, f32 arg2);
-extern u8 D_800A4EA8[];
+extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 void fx_carrier_release(u8 *);
 
@@ -591,7 +591,7 @@ u8 *char_glow_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
 
         } else {
             sp.uA7 = 1;
-            temp_v1 = ((u8 *)&D_800A4EA8);
+            temp_v1 = ((u8 *)&g_render_mode_pairs);
             var_t0 = sp.uA8;
             var_s2 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached(var_s2, &D_80091084, 0, 0, 0, 0, 0x1F, 0, 0, &sp.uA7, 0x3E), 0x200005, 0x1F0600), 0x4C, &sp.uA7), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0xC)) | (*(s32 *)((u8 *)temp_v1 + 8)), &sp.uA7);
             if ((*(u16 *)((u8 *)arg0 + 0x1E)) & 2) {

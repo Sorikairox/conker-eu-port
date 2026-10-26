@@ -686,7 +686,7 @@ s32 fx_alpha_fade_by_life16(u8 *arg0) {
     return 1;
 }
 
-extern s32 D_800AB7F4;
+extern s32 g_impact_kind_colours; /* was D_800AB7F4 */
 
 /* was func_151AB3A8 */
 void char_ground_glow_refresh(u8 *arg0) {
@@ -755,7 +755,7 @@ void char_ground_glow_refresh(u8 *arg0) {
         sp5C = temp_f6 + 50.0f;
         sp.u76 = 0xA;
         sp.u78 = 0xA;
-        temp_v0_2 = (u8 *) &D_800AB7F4 + sp5B * 3;
+        temp_v0_2 = (u8 *) &g_impact_kind_colours + sp5B * 3;
         sp.u86 = 0x38;
         sp.u84 = 0x12C;
         sp.u8C = (s32) ((32768.0f * 0.5f) + 26214.4f);

@@ -1,0 +1,292 @@
+old	new	confidence	description
+D_8008B420	g_streak_motion_handlers	high	Streak motion handler table, indexed by s8 rec +0x38; called with (obj, rec), 0 = finished
+D_8008B424	g_streak_motion_handlers_from1	med	D_8008B420 shifted by one entry: streak fade handlers indexed by s8 rec +0x39 (index -1 = none)
+D_80091228	g_streak_texture	high	Texture descriptor used by streak_draw (gfx_load_texture_cached)
+D_800A6880	g_fx_source_emitter_presets	med	f32/s32 presets (64 bytes each, indexed by emitter +0x30) of fx_source_emitter_update: emit rate, rand rate, spawn params
+D_80088A90	g_level_lights_on_colour	med	RGB copied to D_800DCD20 when level lights mode is switched on (level 6 / 0x39)
+D_80088A94	g_level_lights_on_tint	med	RGB copied to level header +5..+7 when level lights mode is switched on (level 6 / 0x39)
+D_80088A98	g_level_lights_off_colour	med	RGB copied to D_800DCD20 when level lights mode is switched off
+D_8008B0F0	g_light_effect_update_fns	high	Light effect update handlers, indexed by light ctrl +0xF; return 0 ends the light
+D_8008B208	g_light_destroy_fns	high	Light controller destroy handlers, indexed by +0x12 (light_ctrl_destroy)
+D_8008B2B0	g_light_delete_fns	high	Light controller delete handlers, indexed by +0x12 (light_ctrl_delete)
+D_8008B4F0	g_light_message_fns	high	Light controller message handlers, indexed by +0x12 (NULL = none)
+D_8008B598	g_light_joint_follow_fns	med	Behaviour handlers of joint-following lights, indexed by s8 +0x14 (light_beh_follow_joint)
+D_8008B6F8	g_light_follow_message_fns	med	Message handlers of following lights, indexed by +0x1D (light_follow_handle_message)
+D_8008B704	g_light_env_phase_fns	high	Envelope light phase-change handlers {light_env_phase_on, light_env_phase_off}, called with (obj, phase)
+D_8008B70C	g_light_track_ptr_fns	med	Handlers of light_beh_track_ptrs, indexed by s8 +0x24 (US D_8008B36C)
+D_8008B710	g_light_track_message_fns	med	Message handlers of tracking lights (light_track_handle_message), US D_8008B370
+D_8008B714	g_light_obj_message_fns_a	med	Message handlers of object lights, indexed by +0x2D (light_obj_handle_message_a)
+D_8008B71C	g_light_obj_message_fns_b	med	Message handlers of object lights, indexed by +0x3D (light_obj_handle_message_b)
+D_800A6690	g_str_light_scale	high	String "scale": debug tweak label of light_beh_tweak_intensity
+D_800A6698	g_str_light_c_path	high	String "../Effects/Light/light.c": source file name for debug_tweak_int
+D_800A66C0	g_light_lightning_peaks	med	Peak flash levels of the 9 lightning light presets (light_spawn_lightning)
+D_800A6760	g_light_flicker_low_levels	med	Low intensity of the 24 flicker light presets (record +0x1C)
+D_800A67C0	g_light_flicker_mid_levels	med	Normal intensity of the 24 flicker light presets (record +0x18)
+D_800A6820	g_light_flicker_high_levels	med	High intensity of the 24 flicker light presets (record +0x20)
+D_800A68F8	g_light_storm_flash_decay	med	Flash decay factor of the 3 storm (burst flash) light presets (record +0x1C)
+D_800A6904	g_light_storm_pause_min	med	Minimum pause between bursts of the 3 storm light presets (record +0x24)
+D_800A6910	g_light_storm_pause_range	med	Random pause range between bursts of the 3 storm light presets (record +0x28)
+D_800A691C	g_light_storm_burst_min	med	Minimum flashes per burst of the 3 storm light presets (s32, record +0x30)
+D_800A6928	g_light_storm_burst_range	med	Random extra flashes per burst of the 3 storm light presets (s32, record +0x34)
+D_800A6934	g_light_storm_gap_min	med	Minimum gap between flashes of the 3 storm light presets (record +0x3C)
+D_800A6940	g_light_storm_gap_range	med	Random gap range between flashes of the 3 storm light presets (record +0x40)
+D_800A694C	g_light_storm_level_min	med	Minimum flash level of the 3 storm light presets (record +0x44)
+D_800A6958	g_light_storm_level_range	med	Random flash level range of the 3 storm light presets (record +0x48)
+D_800A6964	g_light_pulse_base_levels	high	Base intensity of the 14 sine pulse light presets
+D_800A699C	g_light_pulse_amplitudes	high	Intensity amplitude of the 14 sine pulse light presets
+D_800A69D4	g_light_pulse_speeds	high	Phase speed (radians per tick) of the 14 sine pulse light presets
+D_800A6A0C	g_light_joint_pulse_joints	low	Joint id list passed to light_create_obj_joint by light_create_joint_pulse
+D_800A6A94	g_light_rotated_offset	med	Local offset vector transformed by the rotation matrix in light_beh_rotated_offset
+D_800A6AC4	g_light_zap_sound_ids	high	The 10 sound ids light_play_zap_sfx picks from at random
+D_800A6B34	g_light_colour_pulse_speeds	med	Speed of the 3 colour pulse light presets (record +0x1C, light_spawn_colour_pulse)
+D_800A6C60	g_light_env_peak_levels	med	Peak level of the 5 envelope light presets (light_spawn_envelope)
+D_800A6C74	g_light_env_base_levels	med	Base level of the 5 envelope light presets
+D_800A6C88	g_light_env_start_times	med	Start time offset of the 5 envelope light presets (0, 0, 15.5, 31, 46.5)
+D_800A6C9C	g_light_env_rise_times	med	Rise time of the 5 envelope light presets
+D_800A6CB0	g_light_env_hold_times	med	Hold time of the 5 envelope light presets
+D_800A6CC4	g_light_env_fall_times	med	Fall time of the 5 envelope light presets
+D_8008B4A8	g_node_type_update_fns	high	Per node type handler records (struct115): update / update2 functions run over the node lists
+D_8008B4D0	g_node_type_destroy_fns	high	Per node type destroy handlers (struct115 view at +0x28), indexed by node +0 (node_destroy)
+D_8008B4D4	g_node_type_delete_fns	high	Per node type delete handlers (struct115 view at +0x2C), indexed by node +0 (node_delete)
+D_8008B848	g_node_type_table	high	The 101 node type / render layer records (0x34 bytes): update, draw, broadcast and frame hooks
+D_8008CD68	g_node_sprite_behaviours	high	Sprite node behaviour functions, indexed by s8 node +0x2F
+D_8008CDC0	g_node_end_handlers	high	Node end handlers void (u8 *), indexed by s8 node +0x48 (or effect +0x40)
+D_8008CF04	g_node_global_hooks	high	The 3 global per-frame node hooks (NULL = none) run by node_run_global_hooks
+D_800908EC	g_tex_billboard_white_env	med	Texture whose billboards get a white environment colour (node_billboard_draw)
+D_80090BAC	g_tex_billboard_blue_env	med	Texture whose billboards get a (128, 128, 255) environment colour (node_billboard_draw)
+D_800A4EA8	g_render_mode_pairs	high	Render mode table, 2 words (cycle 1 / cycle 2 othermode) per entry, used by many effect draw functions
+D_800D31CB	g_sprite_keep_prim_colour	med	1 = sprite draws keep the current primitive colour (set by text_draw_string and render layer pre hook)
+D_800DD280	g_node_lists	high	Doubly linked node list heads [2][104]: group x node type
+D_800DD5C0	g_node_iter_depth	high	Nesting depth of the safe node list iteration (index into D_800DD5C8)
+D_800DD5C8	g_node_iter_next	high	Stack of next-node pointers for safe node list iteration, indexed by D_800DD5C0
+D_800DD5F0	g_gfx_prim_r_cached	high	Cached primitive colour red (gfx_prim_color_cached), reset per frame
+D_800DD5F2	g_gfx_prim_g_cached	high	Cached primitive colour green
+D_800DD5F4	g_gfx_prim_b_cached	high	Cached primitive colour blue
+D_800DD5F6	g_gfx_prim_a_cached	high	Cached primitive colour alpha (-1 = unknown)
+D_800DD5FA	g_gfx_env_g_cached	high	Cached environment colour green (gfx_env_color_cached)
+D_800DD5FC	g_gfx_env_b_cached	high	Cached environment colour blue
+D_800DD5FE	g_gfx_env_a_cached	high	Cached environment colour alpha (-1 = unknown)
+D_800DD628	g_gfx_cached_state_628	low	s16 render state cache cleared at the start of node_render_layers_draw (with D_800DD62C / D_800DD630)
+D_8008FFE0	g_attach_child_update_fns	high	Effect-child update handlers, indexed by child +0x29; return 0 frees the child
+D_8008FFE8	g_attach_child_end_fns	high	Effect-child end handlers, indexed by child +0x2A (same table as D_8008FFE0 from entry 2)
+D_8008FFEC	g_attach_ctrl_update_fns	med	Attach controller update handlers, indexed by s8 +0x19; return 0 destroys the node
+D_8008FFF0	g_attach_ctrl_show_fns	med	Attach controller handlers run when the owner becomes visible, indexed by s8 +0x1A
+D_8008FFF4	g_attach_ctrl_hide_fns	med	Attach controller handlers run when the owner becomes hidden, indexed by s8 +0x1B
+D_8008FFF8	g_attach_ctrl_expire_fns	med	Attach controller handlers run when its timer +0x16 expires, indexed by s8 +0x1C
+D_8008FFFC	g_attach_ctrl_release_fns	high	Attach controller release hooks, indexed by +0x1D (attach_ctrl_cleanup)
+D_80090004	g_attach_ctrl_message_fns	med	Attach controller message handlers, indexed by +0x1D (attach_ctrl_handle_message)
+D_800AB140	g_attach_fx_asset_ids	high	Asset ids (asset 2/9/id) of the attachment effect kinds
+D_800E0950	g_attach_fx_asset_refs	high	Reference counts (bytes) of the loaded attachment effect assets
+D_800E0990	g_attach_fx_assets	high	Loaded attachment effect assets (attachment point sets, 16 bytes per point), by kind
+D_80090070	g_impact_dust_tex_fns	med	Per particle kind functions returning the dust / ring texture byte (impact_dust_cloud_spawn, ring spawn)
+D_800900A4	g_impact_debris_tex_fns	med	Per particle kind functions returning a random debris / smoke texture byte (impact_debris_tex_kindN)
+D_800900D8	g_impact_tint_fns	low	Per particle kind functions filling the tint of impact_tinted_particle_spawn
+D_800AB340	g_impact_puff_tex_kind0	high	Puff texture ids of particle kind 0 (88, 64, 62)
+D_800AB344	g_impact_puff_tex_kind5	high	Puff texture ids of particle kind 5 (46, 48, 45, 51, 52)
+D_800AB34C	g_impact_puff_tex_kind11	high	Puff texture ids of particle kind 11 (96..99)
+D_800AB350	g_impact_debris_tex_kind0	high	Debris texture ids of particle kind 0 (0, 1, 2, 58..61)
+D_800AB36C	g_impact_debris_tex_kind1	high	Debris texture ids of particle kind 1 (15..17)
+D_800AB378	g_impact_debris_tex_kind2	high	Debris texture ids of particle kind 2 (143..145)
+D_800AB384	g_impact_debris_tex_kind3	high	Debris texture ids of particle kind 3 (28, 29)
+D_800AB38C	g_impact_debris_tex_kind4	high	Debris texture ids of particle kind 4 (8, 9)
+D_800AB394	g_impact_debris_tex_kind5	high	Debris texture ids of particle kind 5 (49..51, 13, 14)
+D_800AB3A8	g_impact_debris_tex_kind6	high	Debris texture ids of particle kind 6 (150..152)
+D_800AB3B4	g_impact_debris_tex_kind7	high	Debris texture ids of particle kind 7 (27, 28)
+D_800AB3BC	g_impact_debris_tex_kind8	high	Debris texture ids of particle kind 8 (160..162)
+D_800AB3C8	g_impact_debris_tex_kind9	high	Debris texture id of particle kind 9 (179)
+D_800AB3CC	g_impact_debris_tex_kind10	high	Debris texture ids of particle kind 10 (185..187)
+D_800AB3D8	g_impact_debris_tex_kind11	high	Debris texture ids of particle kind 11 (96..99)
+D_800AB46C	g_impact_puff_size_factor	med	Size factor (0.0003) of the smoke puff spawned by impact_spawn_burst
+D_800AB700	g_impact_glow_sprites	high	Sprite per glow type (impact_glow_spawn)
+D_800AB710	g_impact_kind_flags	med	Per particle kind byte: nonzero adds the 0x800000 / 0x40000000 flag to its spawned particles
+D_800AB7C8	g_impact_ref_normal	low	Reference vector (3 words) compared with the hit surface normal in impact_debris_spawn (dot < -0.5)
+D_800AB7F4	g_impact_kind_colours	high	Per particle kind RGB tint (3 bytes each) of dust and ground glow effects
+D_800AB844	g_impact_cloud_size_range	med	Random size range of the dust clouds of impact_cloud_emitter_update
+D_800AB848	g_impact_cloud_size_min	med	Minimum size of the dust clouds of impact_cloud_emitter_update
+D_800AB850	g_impact_puff_p4_range	low	Random range of smoke puff record +4 (times scale) in impact_smoke_puff_spawn
+D_800AB854	g_impact_puff_p4_min	low	Minimum of smoke puff record +4 (times scale) in impact_smoke_puff_spawn
+D_800AB858	g_impact_puff_p8_range	low	Random range of smoke puff record +8 (times scale) in impact_smoke_puff_spawn
+D_800AB85C	g_impact_puff_p8_min	low	Minimum of smoke puff record +8 (times scale) in impact_smoke_puff_spawn
+D_800AB87C	g_impact_land_ring_scale	low	Size factor of the splash ring spawned by streak_on_land_debris
+D_800AB880	g_impact_ring_grow_a_range	med	Random range of the splash ring growth speed A (impact_splash_ring_spawn)
+D_800AB884	g_impact_ring_grow_a_min	med	Minimum splash ring growth speed A
+D_800AB888	g_impact_ring_grow_b_range	med	Random range of the splash ring growth speed B
+D_800AB88C	g_impact_ring_grow_b_min	med	Minimum splash ring growth speed B
+D_800AB890	g_impact_ring_height_base	low	Base value of splash ring +0x50 (minus growth B times the cosine) in impact_splash_ring_update
+D_800AB8A0	g_impact_debris_speed_range	med	Spark random speed range of impact_spawn_debris_burst (spec +0x18)
+D_800AB8A4	g_impact_debris_scale_min	med	Spark minimum scale of impact_spawn_debris_burst (spec +0x1C)
+D_800AB8A8	g_impact_debris_scale_range	med	Spark random scale range of impact_spawn_debris_burst (spec +0x20)
+D_800AB8AC	g_impact_debris_launch_range	med	Spark random launch speed range of impact_spawn_debris_burst (spec +0x28)
+D_800AB8B0	g_impact_blast_l_scale_min	med	Spark minimum scale of impact_blast_spawn_large
+D_800AB8B4	g_impact_blast_l_scale_range	med	Spark random scale range of impact_blast_spawn_large
+D_800AB8B8	g_impact_blast_l_dust_size_min	med	Dust minimum size of impact_blast_spawn_large (emit_dust_by_angles)
+D_800AB8BC	g_impact_blast_l_dust_size_rng	med	Dust random size range of impact_blast_spawn_large
+D_800AB8C0	g_impact_blast_l_dust_chance	low	Dust flag chance (def +0x34) of impact_blast_spawn_large
+D_800AB8C4	g_impact_blast_s_scale_min	med	Spark minimum scale of impact_blast_spawn_small
+D_800AB8C8	g_impact_blast_s_scale_range	med	Spark random scale range of impact_blast_spawn_small
+D_800AB8CC	g_impact_blast_s_dust_size_min	med	Dust minimum size of impact_blast_spawn_small
+D_800AB8D0	g_impact_blast_s_dust_size_rng	med	Dust random size range of impact_blast_spawn_small
+D_800AB8D4	g_impact_blast_s_dust_chance	low	Dust flag chance (def +0x34) of impact_blast_spawn_small
+D_800E1230	g_mp3_log_callback	med	Optional callback (0, line, length) given each text line by mp3main_decode_next_frame
+D_800E1268	g_mp3_win_normal	high	MP3 IMDCT window for normal blocks (36 sines)
+D_800E12F8	g_mp3_win_start	high	MP3 IMDCT window for start blocks (long to short)
+D_800E1418	g_mp3_win_stop	high	MP3 IMDCT window for stop blocks (short to long)
+D_800E14A8	g_mp3_pow43_table	high	Pointer to the MP3 x^(4/3) dequantisation table
+D_800E14B0	g_mp3_gain_pow2	med	MP3 global gain power-of-two table (dequantisation)
+D_800E18B0	g_mp3_scalefac_pow2	med	MP3 scale factor power-of-two table (dequantisation)
+D_800E1CB0	g_mp3_main_state	med	MP3 player main state block (mp3main_init)
+D_80041EA0	g_game_mesg_bufs	med	Message buffers (8 messages each) of the 3 game message queues
+D_800D9FA4	g_screen_tint_extra_a	low	3 bytes cleared at level setup next to the screen tint up/down tables
+D_800D9FA8	g_screen_tint_extra_b	low	3 bytes cleared at level setup next to the screen tint up/down tables
+D_800D9FAB	g_screen_tint_extra_ab	low	Byte set to 0xFF at level setup (level_setup_screen_projection)
+D_800D9FAC	g_screen_tint_extra_ac	low	Byte set to 0xFF at level setup (level_setup_screen_projection)
+D_800D9FF0	g_player_ambient_lights	med	Per player, per frame buffer 8-byte ambient light (colour, copy) sent with the view lights
+D_800A30A0	g_level_colour_set_indices	med	Per level colour set (header +0x29): 3 indices into the colour tables A / B / C
+D_800A30B8	g_level_colour_table_a	low	RGB colour table A read by level_init_color_tables
+D_800A30BC	g_level_colour_table_b	low	RGB colour table B read by level_init_color_tables
+D_800A30D4	g_level_colour_table_c	low	RGB colour table C read by level_init_color_tables
+D_800DA2D7	g_level_colour_dst_inner_end	low	End address of the inner copy loop of level_init_color_tables
+D_800DA2E4	g_level_colour_dst_end	low	End address of the destination colour arrays of level_init_color_tables
+D_800DC2B8	g_sky_backdrop_vtx	high	Per player two sky backdrop vertex buffers (one per frame buffer)
+D_800B0E00	g_level_part_dls	high	Display lists of the level model parts (0..3)
+D_800B0E58	g_texture_table_ids	med	Texture table ids (-1 = free), searched by texture_table_find
+D_800B1224	g_level_part_vtx_base_1	low	D_800B1220 + 1: vertex base of level parts 1..3 (cleared by level_load_models)
+D_800B1230	g_level_part_hdr8	low	Per level part pointer from model header +8 (relocated)
+D_800B1240	g_level_model_colour_groups	med	Per level model vertex colour group tables (made absolute)
+D_800B1244	g_level_model_colour_counts	med	Per level model count of vertex colour groups
+D_800B1254	g_level_part_vtx_count_1	low	D_800B1250 + 1: vertex counts of level parts 1..3 (cleared by level_load_models)
+D_800B1260	g_level_model_entries	med	Level model asset entries (8 bytes each: model header, size)
+D_800BC448	g_texture_table_flags	low	Per texture table entry byte cleared by texture_table_reset
+D_800D304C	g_collision_scan_count	low	Counter cleared before the world objects are scanned in collision_build_level_tris
+D_800D3088	g_collision_scan_objects	high	1 while object display lists are scanned: segment addresses lose 0x01000000
+D_800D9F58	g_texture_last_id_a	low	Texture state set to 0xFFFF by texture_table_reset
+D_800D9F5C	g_texture_last_id_b	low	Texture state set to -1 by texture_table_reset
+D_800D9F60	g_texture_level_mode	low	Set by texture_table_reset: 1 in levels 1 and 50, else 0
+D_800A2A90	g_world_obj_model_records	med	Per model id 12-byte display records (multiplayer objects) of world_objects_load
+D_800BE6C0	g_world_obj_radius_small_cnt	low	Counter of world objects whose stored radius is smaller than the computed one
+D_800BE6C2	g_world_obj_radius_set_cnt	low	Counter of world objects that got their radius set (world_object_calc_radius)
+D_800BE6C4	g_world_obj_radius_ok_cnt	low	Counter of world objects whose stored radius was big enough
+D_800DBF00	g_world_obj_level_count	med	Number of world objects from the level placement list (first list)
+D_800DBF88	g_world_obj_selected	med	Index of the selected world object (0xFF = none)
+D_800DBF8C	g_world_obj_selected_1c	low	Copy of field +0x1C of the selected world object
+D_800DBF90	g_world_obj_selected_28	low	Copy of field +0x28 of the selected world object
+D_800DC300	g_world_obj_view_words	low	4 per-object word arrays allocated by world_objects_load
+D_800DC310	g_world_obj_mtx_a	med	Per world object 64-byte matrices (first array)
+D_800DC314	g_world_obj_mtx_b	med	Per world object 64-byte matrices (second array)
+D_800DC320	g_world_obj_count	high	Number of world objects (0xA0-byte records at D_800DBEF4)
+D_800DC378	g_world_obj_identity_mtx	med	Float matrix set to identity at world object level start
+D_800DC3B8	g_world_obj_state_3b8	low	World object byte set to 0xFF by world_objects_load
+D_80084300	g_vertex_anchor_template	med	0x50-byte vertex anchor block copied into each player's block
+D_800C3FC0	g_vertex_anchor_blocks	med	Per player vertex anchor blocks (0x50 bytes; slot 0 is the template)
+D_800C6A70	g_look_points	high	Look point table (0x14-byte LookPoint records)
+D_800894B0	g_camera_frame_count	high	Frame counter incremented by camera_update_all, cleared at camera level init
+D_80095DA0	g_camera_initial_eye_k	low	f32 constant passed by camera_set_initial_eye
+D_800BE6D0	g_camera_grid_bufs	low	Per player buffers of grid width (D_800BE620) s16 entries, stored at camera +0x8BC
+D_800BE2D0	g_si_mesg_buf	high	Message buffer (8) of the SI message queue
+D_800BE6E0	g_cont_status	high	OSContStatus array filled by osContInit
+D_800BE730	g_cont_pad_ptrs	high	Pointers to the 4 controller pad records (returned by cont_read_frame)
+D_800BE74E	g_cont_pad1	med	Controller pad 2 data record (6 bytes)
+D_800BE754	g_cont_pad2	med	Controller pad 3 data record (6 bytes)
+D_800BE75A	g_cont_pad3	med	Controller pad 4 data record (6 bytes)
+D_800BE9E0	g_si_event_mesg	high	Message posted on the SI event queue
+D_800BEB4C	g_cont_count	high	Number of connected controllers counted by controller_init_all
+D_8002AC5C	g_eeprom_writes_disabled	high	Nonzero disables EEPROM save writes (debug)
+D_80082BB4	g_save_request_kind	high	Pending save request (1/2 slot load/write, 4/5 config, 6/7 options)
+D_80082F50	g_save_slot_refresh	med	While set, slot loads refresh the slot summaries (cleared after slot 3)
+D_800BE3DF	g_save_resume_level	low	Saved byte (default 24) stored in the slot summary +0xC; likely the level to resume
+D_800BE3E8	g_save_play_time	high	Play time counter saved with the slot
+D_800BE3EC	g_save_request_slot	high	Slot of the pending save request (0 for config / options)
+D_800BE710	g_save_config	high	EEPROM config block (0x70 bytes, u16 checksum + data)
+D_800BE712	g_save_config_data0	low	First data byte of the config block (checksummed with weight 4)
+D_800BE713	g_save_config_data1	low	Second data byte of the config block (checksummed with weight 8)
+D_800BE714	g_save_config_data_rest	low	Rest of the config block data from +4, summed into the checksum
+D_800BE778	g_save_slot_buf	high	0x80-byte EEPROM save slot buffer
+D_800BE77A	g_save_slot_buf_body	med	Save slot buffer + 2 (after the checksum)
+D_800BE7F8	g_save_slot_kinds	med	Kind of each of the 4 save slots (-1 = empty)
+D_800BE7FC	g_save_best_slot_score	med	Best set-bit count among loaded slots (-1 = none)
+D_800BE804	g_save_stat9	low	Saved value of player stat 9 (restored with player_stat_modify(0, 9, .))
+D_800BE810	g_save_field_widths	high	Bit widths of the 69 packed save fields (asset 1/7 + 8)
+D_800BE818	g_save_slot_summaries	high	The 3 save slot summaries (0x10 bytes each)
+D_800BE900	g_si_mesg_queue	high	SI message queue (controllers, EEPROM, rumble pak)
+D_800C3A60	g_save_level_bits	med	The 69 packed save fields (u64 each), e.g. per level seen-cutscene bits
+D_800D2E45	g_save_default_flag_2e45	low	Byte set to 1 by save_game_defaults
+D_800E102C	g_save_options_end	med	End of the 0x1C option bytes D_800E1010.. saved in the options block
+D_80087280	g_mp_level_mode_ids	med	Per multiplayer level index (D_800D2138) mode passed to mp_set_mode_for_level
+D_800BE9ED	g_level_load_white_fill	high	Set by scene event 0x80: next level load clears the framebuffer white instead of black
+D_800BE9F0	g_level_id	high	Current level id
+D_800BE9F4	g_level_load_id	high	Level id to load (committed into D_800BE9F0)
+D_800C35C4	g_cutscene_pending	high	Pending cutscene (id + 1, 0 = none) started by cutscene_start_pending
+D_800D2548	g_level_reset_2548	low	Word cleared by level_reset_globals
+D_800DDE38	g_level_entry_zoom_mode	med	Level entry lens zoom mode: 1 = no zoom-in, 2 = force zoom-in
+D_80082F60	g_effect_init_hooks_a	med	Effect init hooks run by effect_run_init_hooks(1)
+D_80082F64	g_effect_init_hooks_b	med	Effect init hooks run by effect_run_init_hooks(2)
+D_800DDE50	g_area_points_count	high	Number of used area point slots (next slot of area_points_alloc)
+D_800DE290	g_area_points	high	Per slot 40 points (f32 x, y, z) of a level area (also water wave profiles)
+D_80082BFC	g_hotspot_fx_fns	high	Hotspot effect functions, indexed by hotspot type (hotspot_fx_dispatch)
+D_80082D60	g_ambient_fx_fns	high	Ambient effect functions (ambient_fx_dispatch)
+D_80095B27	g_hotspot_light_levels	low	Per hotspot type light byte (header +4) of hotspot_fx_type69_72 (indexed by type)
+D_80095B48	g_area_drift_speed_k	low	f32 0.00219: speed factor of area_drift_emitter_spawn
+D_80095B4C	g_area_drift_param_48	low	f32 20.1: parameter +0x48 of area_drift_emitter_spawn
+D_80095B50	g_area_drift_param_64	low	f32 0.4: parameter +0x64 of area_drift_emitter_spawn
+D_80095B70	g_hotspot_swing_lamp_presets	med	Swinging lamp presets of hotspot types 0x33..0x36
+D_80095B74	g_hotspot_flash_presets	med	Light flash presets of hotspot types 0x38..0x39
+D_800DCD24	g_level_light_dir	med	Level light direction (s8 x, y, z)
+D_800DCD31	g_level_light_dirs_0y	low	Level light direction 0, y (D_800DCD30 table, reset to (127, 0, 0))
+D_800DCD32	g_level_light_dirs_0z	low	Level light direction 0, z
+D_800DCD33	g_level_light_dirs_1x	low	Level light direction 1, x
+D_800DCD34	g_level_light_dirs_1y	low	Level light direction 1, y
+D_800DCD35	g_level_light_dirs_1z	low	Level light direction 1, z
+D_800DCD36	g_level_light_dirs_2x	low	Level light direction 2, x
+D_800DCD37	g_level_light_dirs_2y	low	Level light direction 2, y
+D_800DCD38	g_level_light_dirs_2z	low	Level light direction 2, z
+D_800DCD39	g_level_light_dirs_3x	low	Level light direction 3, x
+D_800DCD3A	g_level_light_dirs_3y	low	Level light direction 3, y
+D_800DCD3B	g_level_light_dirs_3z	low	Level light direction 3, z
+D_800DCD80	g_light_colour_zones	high	Linked list of level light colour zones (light_get_zone_colour)
+D_800DCD84	g_light_tint_zones	high	Linked list of level light tint zones (light_get_tint_zone)
+D_800964A0	g_debris_a_sound_ids	high	The 9 sound ids of record_debris_spawn pieces
+D_800964B4	g_debris_b_sound_ids	high	The 14 sound ids of record_debris_spawn_b pieces
+D_800964D0	g_debris_a_density	high	Pieces per unit of record volume x scale (record_debris_spawn)
+D_800964D4	g_debris_a_rand_scale	high	1 / 65535: random scale of record_debris_spawn
+D_800964D8	g_debris_a_pi	high	Pi (random angle of record_debris_spawn)
+D_800964DC	g_debris_a_p3c_range	low	Random range of piece field +0x3C (record_debris_spawn)
+D_800964E0	g_debris_a_p3c_min	low	Minimum of piece field +0x3C (record_debris_spawn)
+D_800964E4	g_debris_a_p40_range	low	Random range of piece field +0x40 (record_debris_spawn)
+D_800964E8	g_debris_a_p48_range	low	Random range of piece field +0x48 (record_debris_spawn)
+D_80096538	g_debris_b_density	high	Pieces per unit of record volume x scale (record_debris_spawn_b)
+D_8009653C	g_debris_b_rand_scale	high	1 / 65535: random scale of record_debris_spawn_b
+D_80096544	g_debris_b_p3c_range	low	Random range of piece field +0x3C (record_debris_spawn_b)
+D_80096548	g_debris_b_p3c_min	low	Minimum of piece field +0x3C (record_debris_spawn_b)
+D_8009654C	g_debris_b_p40_range	low	Random range of piece field +0x40 (record_debris_spawn_b)
+D_80096550	g_debris_b_p48_range	low	Random range of piece field +0x48 (record_debris_spawn_b)
+D_80096554	g_debris_b_size_scale	med	Size factor of the pieces of sound 0x39 (record_debris_spawn_b)
+D_80083120	g_level_obj_init_fns	high	Level object init functions, by level object type (level_objects_init)
+D_800DD834	g_level_obj_state_d834	low	Byte set to 0xFF by level_objects_init
+D_800E0A10	g_level_proj_mode	med	Level projection mode (level_get_proj_mode), also the current impact particle kind
+D_800902E8	g_level_scroll_tex_a	low	Texture scrolled in the level display lists by the drift scene / fx59 inits
+D_80090320	g_level_scroll_tex_b	low	Texture scrolled in the level display lists by level_obj_init_tex_scroll
+D_800D9AA0	g_view_sparkle_spots	med	Per view (3) sparkle spot pointers (view_sparkle_burst)
+D_800D9D66	g_level_bytes_9d66_end	low	End of the byte arrays cleared by level_objects_reset_state
+D_800DCE50	g_fx_lod_shift_players	high	Particle count shift by player count (0, 1, 2)
+D_800DCE54	g_fx_lod_scale_players	high	Particle chance scale by player count (1, 0.5, 0.25)
+D_800DCE58	g_fx_lod_shift_chars	med	Effect detail shift by character count D_8008FD8C (0..4)
+D_800DCE5C	g_fx_lod_scale_chars	med	Effect detail scale by character count D_8008FD8C (1 .. 0.0625)
+D_800E0D94	g_level_reset_block_end	low	End of the block from D_800E0950 cleared by level_objects_reset_state
+D_80096750	g_level_rope_list	low	Rope definitions spawned by level_obj_init_ropes
+D_800D9D41	g_level_flag_9d41	low	Level byte cleared at level reset (level_clear_d9d40_flags)
+D_800D9D48	g_level_flag_9d48	low	Level byte cleared at level reset (level_clear_d9d40_flags)
+D_800D9D49	g_level_flag_9d49	low	Level byte cleared at level reset (level_clear_d9d40_flags)
+D_800D9D4A	g_level_bytes_9d4a	low	Level byte array cleared at level reset (level_clear_d9d40_flags)
+D_800D9D58	g_level_flag_9d58	low	Level byte cleared at level reset (level_clear_d9d40_flags)
+D_800D9D59	g_level_flag_9d59	low	Level byte cleared at level reset (level_clear_d9d40_flags)
+D_800D9D5A	g_level_bytes_9d5a	low	Level byte array cleared at level reset (level_clear_d9d40_flags)
+D_800D9D70	g_level_part_fades	med	Fade levels of the 3 level parts (rise up to 0x60 while the part is active)
+D_80096430	g_level_rope_def	low	Rope definition (struct180) used by level_obj_init_rope
+D_80096800	g_level_debris_defs	low	Debris spawn records read by level_obj_init_debris_table
+D_80096848	g_level_debris_kinds	low	Byte table walked by level_obj_init_debris_table
+D_8009684E	g_level_debris_kinds_end	low	End of the D_80096848 byte table
+D_80096850	g_level_debris_k_add	low	Constant added in level_obj_init_debris_table
+D_80096854	g_level_debris_k_mul_a	low	Scale factor A of level_obj_init_debris_table
+D_80096858	g_level_debris_k_mul_b	low	Scale factor B of level_obj_init_debris_table
+D_8009685C	g_level_debris_k_mul_c	low	Scale factor C of level_obj_init_debris_table
+D_80096860	g_level_debris_k_scale	low	Common scale of level_obj_init_debris_table

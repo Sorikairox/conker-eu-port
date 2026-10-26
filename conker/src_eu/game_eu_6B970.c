@@ -20,9 +20,9 @@ void breakable_request_flag_entry(struct127 *obj, s32 set, s32 entry) {
 
     if (entry != -1) {
         e = &D_800847FC[set][entry * 2];
-        breakable_request_flags(obj - D_800CC2D0, set, e[0], e[1]);
+        breakable_request_flags(obj - g_objects, set, e[0], e[1]);
     } else {
-        breakable_request_flags(obj - D_800CC2D0, set, -1, -1);
+        breakable_request_flags(obj - g_objects, set, -1, -1);
     }
 }
 
@@ -68,7 +68,7 @@ void breakable_update_slot(s32 i) {
     u8 *buf;
 
     if (state == 2) {
-        obj = &D_800CC2D0[i];
+        obj = &g_objects[i];
         *((u8 *) obj + 0x74) |= 0x80;
         if (obj->unk1D4 == NULL) {
             return;
@@ -157,7 +157,7 @@ void breakable_release(s32 arg0) {
             if ((s32) temp_s6 > 0) {
                 do {
                     if ((*var_s1 != 0xFF) && (breakable_slot_has_piece_flag(var_s0, arg0) != 0)) {
-                        temp_v0_2 = &D_800CC2D0[arg0];
+                        temp_v0_2 = &g_objects[arg0];
                         temp_v0_2->unk94 |= 1 << *var_s1;
                     }
                     var_s0 += 1;
@@ -167,7 +167,7 @@ void breakable_release(s32 arg0) {
         }
         temp_v1_2 = temp_s7->unk0;
         temp_s7->unkF = 0;
-        temp_v0_3 = &D_800CC2D0[arg0];
+        temp_v0_3 = &g_objects[arg0];
         if (temp_v1_2 != 0) {
             sp3C = temp_v0_3;
             heap_free(temp_v1_2);
@@ -190,7 +190,7 @@ void mtxf_decompose(f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 
  */
 /* was func_1503E6B4 */
 void breakable_init_piece(s32 i, s32 piece, s32 jointOffset, u8 *pc, s32 detached) {
-    struct127 *obj = &D_800CC2D0[i];
+    struct127 *obj = &g_objects[i];
     f32 mat[4][4];
     f32 inv[4][4];
     s32 parent;
@@ -313,7 +313,7 @@ void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
  */
 /* was func_1503EB1C */
 void breakable_write_matrices(s32 i) {
-    struct127 *obj = &D_800CC2D0[i];
+    struct127 *obj = &g_objects[i];
     struct106 *rec;
     s8 *att;
     s32 n;
@@ -507,7 +507,7 @@ void breakable_cb_fall_then_remove(s32 arg0) {
     temp_v0 = temp_v0 - D_800BE9E4; // fakematch: split load/subtract (permuter) gives the ref register order
     (*(s16 *)((u8 *)temp_v1 + 0xC)) = temp_v0;
     if (temp_v0 <= 0) {
-        obj_remove(&D_800CC2D0[arg0], 1);
+        obj_remove(&g_objects[arg0], 1);
     }
 }
 
@@ -579,21 +579,21 @@ s32 breakable_flag_entry_matches(s32, s32, s32);
 /*
  * P74: slot i's record timer (+0xC) = 300; then for the flag-set 2 entries satisfied by the slot
  * (breakable_flag_entry_matches): entry 0 sets object flag 0x40 and clears 0x200, entry 1 sets 0x80 and clears 0x100,
- * entry 2 clears 0x400 (D_800CC2D0[i].unk94).
+ * entry 2 clears 0x400 (g_objects[i].unk94).
  */
 /* was func_1503F45C */
 void breakable_cb_init_flags(s32 i) {
     *(s16 *) ((u8 *) &D_800C6660[i] + 0xC) = 300;
     if (breakable_flag_entry_matches(2, 0, i) != 0) {
-        D_800CC2D0[i].unk94 |= 0x40;
-        D_800CC2D0[i].unk94 &= ~0x200;
+        g_objects[i].unk94 |= 0x40;
+        g_objects[i].unk94 &= ~0x200;
     }
     if (breakable_flag_entry_matches(2, 1, i) != 0) {
-        D_800CC2D0[i].unk94 |= 0x80;
-        D_800CC2D0[i].unk94 &= ~0x100;
+        g_objects[i].unk94 |= 0x80;
+        g_objects[i].unk94 &= ~0x100;
     }
     if (breakable_flag_entry_matches(2, 2, i) != 0) {
-        D_800CC2D0[i].unk94 &= ~0x400;
+        g_objects[i].unk94 &= ~0x400;
     }
 }
 
@@ -613,15 +613,15 @@ void breakable_cb_settle(s32 arg0) {
     if ((*(s16 *)((u8 *)temp_v0 + 0xC)) <= 0) {
         breakable_release(arg0);
         if (breakable_flag_entry_matches(2, 0, arg0) != 0) {
-            temp_v0_2 = &D_800CC2D0[arg0];
+            temp_v0_2 = &g_objects[arg0];
             temp_v0_2->unk94 |= 8;
         }
         if (breakable_flag_entry_matches(2, 1, arg0) != 0) {
-            temp_v0_3 = &D_800CC2D0[arg0];
+            temp_v0_3 = &g_objects[arg0];
             temp_v0_3->unk94 |= 4;
         }
         if (breakable_flag_entry_matches(2, 2, arg0) != 0) {
-            temp_v0_4 = &D_800CC2D0[arg0];
+            temp_v0_4 = &g_objects[arg0];
             temp_v0_4->unk94 |= 2;
         }
     }

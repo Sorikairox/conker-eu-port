@@ -16,7 +16,7 @@ void aim_hud_side_bars_spawn(u8 *, u8, u8, s8, u8);
 void aim_hud_gauge_spawn(u8 *, u8, u8, u8, u8, u8);
 s32 aim_hud_gauge_marks_spawn(u8 *, s32, s32, s32, s32, s32);
 void aim_hud_gauge_small_spawn(u8 *, u8, u8, u8);
-extern u8 D_800CC3C8[];
+extern u8 g_obj_id_by_slot1[]; /* was D_800CC3C8 */
 
 /* was func_151CA150 */
 void aim_hud_spawn_for_mode(u8 *arg0, s32 arg1)
@@ -24,7 +24,7 @@ void aim_hud_spawn_for_mode(u8 *arg0, s32 arg1)
   s32 v; s32 t;
   aim_hud_clear(arg0);
   v = *((u8 *) (((u8 *) (*((u8 **) (((u8 *) arg0) + 0x3D0)))) + 0x65));
-  if (v != 0) { t = D_800CC3C8[v * 0x32C]; if ((t == 0x23) || (t == 0x8A)) arg1 = 0x1B; }
+  if (v != 0) { t = g_obj_id_by_slot1[v * 0x32C]; if ((t == 0x23) || (t == 0x8A)) arg1 = 0x1B; }
   switch (arg1)
   {
     case 0x23:
@@ -47,7 +47,7 @@ void aim_hud_spawn_for_mode(u8 *arg0, s32 arg1)
       return;
 
     case 0x1B:
-      if (D_800BE9F0 == 0x27)
+      if (g_level_id == 0x27)
     {
       aim_hud_spawn_track_mode(arg0, 1, -1, 0xFF, 1);
       return;
@@ -105,7 +105,7 @@ void aim_hud_spawn_track_mode(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) 
     aim_hud_slot_rows_spawn(arg0, temp_s2 & 0xFF, (s8) arg2, temp_s1 & 0xFF);
     sprite2d_emitter_spawn(arg0, temp_s1 & 0xFF, arg4);
     aim_hud_side_bars_spawn(arg0, 2U, temp_s2 & 0xFF, (s8) arg2, (u8) temp_s1);
-    if (D_800BE9F0 == 0x27) {
+    if (g_level_id == 0x27) {
         D_8008D0A0 = 1;
     }
 }
@@ -769,9 +769,9 @@ s32 aim_hud_lens_reticle_spawn(u8 *arg0, u8 arg1) {
     }
     return var_v0;
 }
-extern u8 D_800BEAC0;
+extern u8 g_game_paused; /* was D_800BEAC0 */
 extern u8 D_800BEAC1;
-extern u8 D_800BEEE2;
+extern u8 g_unpause_settle_frames; /* was D_800BEEE2 */
 extern s32 D_800BE620;
 f32 curve_table_lookup(f32, f32, f32);
 
@@ -781,7 +781,7 @@ f32 curve_table_lookup(f32, f32, f32);
  * effect+0x24 + effect+0x28 into the effect's buffer (effect+0x20), then writes it back mirrored in the four
  * quadrants around the target's screen point (target = effect+0x1C, x / y floats at +0x34 / +0x38) with a
  * radial lens falloff from curve_table_lookup, sampling the saved block at 12 + offset * scale.
- * Skipped while D_800BEAC0 / D_800BEAC1 / D_800BEEE2 are set.
+ * Skipped while g_game_paused / D_800BEAC1 / g_unpause_settle_frames are set.
  */
 /* was func_151CB6C0 */
 void fb_lens_warp_draw(u8 *arg0, u16 *fb) {
@@ -796,7 +796,7 @@ void fb_lens_warp_draw(u8 *arg0, u16 *fb) {
     s32 rowA, rowB, colA, colB;
     s32 u0, u1, v0, v1;
 
-    if (D_800BEAC0 != 0 || D_800BEAC1 != 0 || D_800BEEE2 != 0) {
+    if (g_game_paused != 0 || D_800BEAC1 != 0 || g_unpause_settle_frames != 0) {
         return;
     }
     target = *(u8 **)(arg0 + 0x1C);

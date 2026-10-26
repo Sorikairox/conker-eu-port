@@ -113,7 +113,7 @@ typedef struct {
         f32 pos[3];           /* 0x08 */
         f32 dir[3];           /* 0x14 */
         u8 kind;              /* 0x20 */
-        s8 objIndex;          /* 0x21: slot in D_800CC2D0 */
+        s8 objIndex;          /* 0x21: slot in g_objects */
         u8 owner23D;          /* 0x22: obj +0x318 byte 0x23D, 0xFF without */
         u8 mode;              /* 0x23: 2 or 0 */
         u8 pad24[0x14];
@@ -147,7 +147,7 @@ s32 obj_glow_effect_spawn(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, 
     }
 
     /* main record state */
-    f.main.objIndex = (s32) (obj - (u8 *) D_800CC2D0) / 812;
+    f.main.objIndex = (s32) (obj - (u8 *) g_objects) / 812;
     if (*(u8 **) (obj + 0x318) != NULL) {
         f.main.owner23D = (*(u8 **) (obj + 0x318))[0x23D];
     } else {

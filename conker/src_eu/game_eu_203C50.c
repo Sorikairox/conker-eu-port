@@ -277,7 +277,7 @@ u8 *fb_ghost_image_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
 }
 /* was func_151D6CA0 */
 void fb_ghost_set_mode(s32 arg0, s32 arg1) {
-    if (D_800BE9F0 == 6 && D_80038080 == 0) {
+    if (g_level_id == 6 && D_80038080 == 0) {
         return;
     }
     if (arg1 == 0) {
@@ -308,7 +308,7 @@ u8 *fb_ghost_render(u8 *arg0) {
     u8 *var_s0;
 
     var_s0 = arg0;
-    if (((D_800BE574 == 0) && (D_800BE9F0 != 0x32) && (D_800BE9F0 != 0x33)) || (D_800BEAC0 != 0)) {
+    if (((D_800BE574 == 0) && (g_level_id != 0x32) && (g_level_id != 0x33)) || (g_game_paused != 0)) {
 
     } else if (D_800BE574 != 0) {
         (*(s32 *)((u8 *)var_s0 + 0)) = 0xE7000000;
@@ -329,7 +329,7 @@ block_10:
             (*(s32 *)((u8 *)var_s0 + 4)) = (s32) D_800BE570;
             (*(s32 *)((u8 *)temp_s0 + 0)) = 0xED000000;
             (*(s32 *)((u8 *)temp_s0 + 4)) = (s32) ((((s32) ((f32) D_800BE620 * 4.0f) & 0xFFF) << 0xC) | ((s32) ((f32) D_800BE624 * 4.0f) & 0xFFF));
-            temp_v0_2 = fb_ghost_copy_draw(temp_s0 + 8, D_8002AAE8[D_800BE9C0], 0, 4);
+            temp_v0_2 = fb_ghost_copy_draw(temp_s0 + 8, g_framebuffers[D_800BE9C0], 0, 4);
             (*(s32 *)((u8 *)temp_v0_2 + 0)) = 0xEF082C3F;
             (*(s32 *)((u8 *)temp_v0_2 + 4)) = 0x552230;
             (*(s32 *)((u8 *)temp_v0_2 + 8)) = 0xD9FFFFFF;

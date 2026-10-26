@@ -16,7 +16,7 @@ s32 weapon_a_fire(s32 arg0, u8 arg1, s32 arg2) {
     }
     obj_get_aim_vectors(arg0, (s32) sp98, (s32) spB0, 0, 0.0f);
     weapon_a_muzzle_effects(arg0, arg1, arg2, spA4, sp8C);
-    return tracer_spawn(sp8C, 0, sp8C, sp98, 0, 0, 300.0f, 0.0033333334f, (random_float() * 10.0f) + 25.0f, (random_float() * 201.0f) + 601.0f, 50.0f, (random_int() % 56U) + 0xC8, arg0, 1, 1, 0, 0xFF, 1, 1, 0, (D_800BE9F0 == 0x2B) ? 0x27 : 0x1A, 0.0f, 0xFF, -1, 0, (s32) arg1, arg2);
+    return tracer_spawn(sp8C, 0, sp8C, sp98, 0, 0, 300.0f, 0.0033333334f, (random_float() * 10.0f) + 25.0f, (random_float() * 201.0f) + 601.0f, 50.0f, (random_int() % 56U) + 0xC8, arg0, 1, 1, 0, 0xFF, 1, 1, 0, (g_level_id == 0x2B) ? 0x27 : 0x1A, 0.0f, 0xFF, -1, 0, (s32) arg1, arg2);
 }
 
 const u32 rodata_12BB30_FDF38[] = { 0x40E00000, 0xC3080000, 0x42340000, 0x40E00000, 0xC3290000, 0x424C0000, 0x40E00000, 0x42200000, 0x41500000 }; // D_800A2340 = [0], D_800A234C = [3], D_800A2358 = [6]
@@ -47,7 +47,7 @@ s32 weapon_a_muzzle_effects(struct127 *arg0, u8 arg1, s32 arg2, s32 *arg3, s32 *
             pos.unk8 = *(f32 *)((u8 *)arg0 + 0x1C);
             pos2 = pos;
         }
-        object_effect_between(arg0, &pos, &pos2, (D_800BE9F0 == 0x2B) ? 0x28 : 0x1E);
+        object_effect_between(arg0, &pos, &pos2, (g_level_id == 0x2B) ? 0x28 : 0x1E);
         muzzle_light_small_spawn(&pos, arg1, arg2);
         weapon_a_shell_sparks(arg0, (s32) &pos, arg1, arg2);
         weapon_a_rumble((u8 *) arg0);

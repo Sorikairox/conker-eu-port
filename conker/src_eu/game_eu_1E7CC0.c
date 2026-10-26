@@ -53,7 +53,7 @@ u8 *player_screen_uv_mesh_spawn(u8 *arg0, u8 arg1, s32 arg2)
   s.u30 = 9;
   s.u34 = 0x1AD;
   s.u39 = 0xFF;
-  idx = (arg0 - ((u8 *) D_800CC2D0)) / 812;
+  idx = (arg0 - ((u8 *) g_objects)) / 812;
   goto dummy_label_283214; // fakematch: label barrier (permuter) puts sw a0 (b.p) before the arg0[0x3B] load
   dummy_label_283214:
   ;
@@ -95,13 +95,13 @@ u8 *player_screen_uv_mesh_spawn(u8 *arg0, u8 arg1, s32 arg2)
 }
 
 extern u8 D_800DA130[];
-extern u8 *D_800CCA08;
+extern u8 *g_obj0_camera; /* was D_800CCA08 */
 
 // object_screen_uv_project: g_mesh_effect_draw_fns kind-3 handler (s32 (u8 *, s32), called by mesh_effect_draw; same scheme as
 // sky_dome_project_uv) of a 20-vertex record rec attached to an object (rec + +0x50 + 0xF8 = {obj, obj id}) for
 // player view `slot`: releases the record (node_destroy) when the object is gone or replaced; returns 0 (not
 // drawn) when the object has no matrix, is hidden ((+0x74 & 0xF) == 0xF) or is the object this view looks from
-// (+0x318 / +0x31C rider check when D_800BE616, else D_800CCA08 / D_800CCA0C). Otherwise copies the object's
+// (+0x318 / +0x31C rider check when D_800BE616, else g_obj0_camera / g_obj0_state). Otherwise copies the object's
 // matrix (+0x1D4 + 0x40, fixed point when D_800C42B0), with its fourth column set to (0, 0, 0, 1), into this frame's Mtx (rec +0x78 +
 // D_800BE9C0 * 0x40), and maps each vertex of the slot's copy to texture coordinates: its screen position (object
 // matrix, then view matrix D_800DA130[slot]) times 2.002, relative to the screen position of the object point
@@ -141,7 +141,7 @@ s32 object_screen_uv_project(u8 *rec, s32 slot) {
             && rider[0x23D] == slot) {
             return 0;
         }
-    } else if (D_800CCA08 != NULL && D_800CCA0C != NULL && D_800CCA0C[0x197] != 0 && D_800CCA08[0x23D] == slot) {
+    } else if (g_obj0_camera != NULL && g_obj0_state != NULL && g_obj0_state[0x197] != 0 && g_obj0_camera[0x23D] == slot) {
         return 0;
     }
     if (D_800C42B0) {
@@ -982,7 +982,7 @@ void obj_beam_light_attach(struct127 *arg0) {
 }
 
 s32 light_create_track_ptrs(s8 *, u8 *, u8 *, u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern f32 D_800DCE54;
+extern f32 g_fx_lod_scale_players; /* was D_800DCE54 */
 
 /* was func_151BC6B4 */
 void obj_trail_smoke_light_spawn(u8 *arg0, u8 arg1, s32 arg2) {
@@ -1040,7 +1040,7 @@ void obj_trail_smoke_light_spawn(u8 *arg0, u8 arg1, s32 arg2) {
         sp.uC4 = arg0 + 0x18;
         sp.uC8 = arg0 + 0x1C;
         sp.uD4 = 0x12C;
-        sp.uD0 = 0.30339998f * D_800DCE54;
+        sp.uD0 = 0.30339998f * g_fx_lod_scale_players;
         sp.uD6 = 4;
         sp.uD7 = 4;
         sp.uD8 = 1;
@@ -1306,7 +1306,7 @@ Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
 u8 *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 f32 sqrtf(f32);
 extern s32 D_800D30BC;
-extern s32 D_800A4EA8[];
+extern s32 g_render_mode_pairs[]; /* was D_800A4EA8 */
 extern u8 D_80091084[];
 
 /* one ribbon vertex: the strip point +- the side offset, texture s from the point, t 0 / 0x7FF */
@@ -1329,7 +1329,7 @@ extern u8 D_80091084[];
 // obj +0x2C). Each point gets two vertices 35 units either side along (point - previous point) x (point - camera);
 // each segment loads 4 vertices and draws two triangles. With obj +0x1E bit 2 the strip starts at the object's
 // position (+0x10, alpha 0x80, s 0) instead of the newest point. Texture D_80091084, white, render mode
-// D_800D30BC | 0x82CA0 with the D_800A4EA8 entry 3; vertices from vtx_slot_buffer_get (obj[0x25] * 32 + 0xA0 bytes).
+// D_800D30BC | 0x82CA0 with the g_render_mode_pairs entry 3; vertices from vtx_slot_buffer_get (obj[0x25] * 32 + 0xA0 bytes).
 // Returns the display list end; draws nothing with fewer than 2 points or no vertex buffer.
 /* was func_151BD040 */
 s32 ribbon_strip_draw(u8 *obj, s32 gfx, s16 arg2) {
@@ -1368,7 +1368,7 @@ s32 ribbon_strip_draw(u8 *obj, s32 gfx, s16 arg2) {
     g = gfx_env_color_cached(g, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     g = gfx_set_combine_mode(g, 0x4E, &flag);
     g = gfx_geometry_mode_cached(g, 0x200005, 0x1F0600);
-    g = (Gfx *) gfx_other_mode_cached(g, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[7] | D_800A4EA8[6], &flag);
+    g = (Gfx *) gfx_other_mode_cached(g, D_800D30BC | 0x80000 | 0x2CA0, g_render_mode_pairs[7] | g_render_mode_pairs[6], &flag);
 
     if (*(u16 *) (obj + 0x1E) & 2) {
         j = *(s8 *) (obj + 0x2E) - 1;
@@ -2034,7 +2034,7 @@ extern f32 D_800AAB7C[3];
 // owner has bone matrices (+0x1D4) and its +0x74 low nibble is not 0xF, it transforms the four points D_800AAB58..7C
 // by the first matrix (mtx_transform_points) and gives each of the two emitter pairs (+0x30 / +0x38 and +0x34 / +0x3C) its
 // position and direction: the first kind gets the flag 1 at +0x168, the second the flag 2 (and loses 4) at +0x58;
-// otherwise both flags are cleared. For the four players (owner index in D_800CC2D0 below 4) the sizes follow the
+// otherwise both flags are cleared. For the four players (owner index in g_objects below 4) the sizes follow the
 // player's state word (D_800BE728[0][player], bit 0x8000): first kind +0x158 / +0x15C = 6 / 21, else 3 / 8; second
 // kind +0x174 = 1.5, else 1.
 /* was func_151BE33C */
@@ -2097,7 +2097,7 @@ void aura_burst_follow_owner(u8 *arg0) {
             }
         }
     }
-    player = (owner - (u8 *) D_800CC2D0) / 0x32C;
+    player = (owner - (u8 *) g_objects) / 0x32C;
     if (player < 4) {
         for (i = 0; i < 2; i++) {
             p = a[i];

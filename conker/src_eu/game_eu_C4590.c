@@ -206,12 +206,12 @@ s32 event_action_camera(s32 id, s32 op, u8 *cmd) {
         D_800C3A80 = 0;
         camera_queue_event(cam, 5, NULL);
         camera_queue_event(cam, 7, D_800C3A20);
-        *(s32 *) ((u8 *) D_800CC2D0 + 0x25C) |= 0x200;
+        *(s32 *) ((u8 *) g_objects + 0x25C) |= 0x200;
         return 0;
     case 11: /* door camera off */
         camera_queue_event(cam, 6, NULL);
         D_800D2DB4 = 0;
-        *(s32 *) ((u8 *) D_800CC2D0 + 0x25C) &= ~0x200;
+        *(s32 *) ((u8 *) g_objects + 0x25C) &= ~0x200;
         return 0;
     case 12: /* timed camera record a[2] */
         rec = D_800D31E0 + a[2] * 0x24;

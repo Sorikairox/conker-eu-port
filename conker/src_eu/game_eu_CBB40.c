@@ -230,7 +230,7 @@ block_45:
     case 20:
         var_v1 = 0;
         var_v0 = &D_800CCA1C;
-        if ((D_800CC2D0->interaction_state != 0) && (*D_800CC2D4 == (*(s32 *)((u8 *)arg2 + 8)))) {
+        if ((g_objects->interaction_state != 0) && (*D_800CC2D4 == (*(s32 *)((u8 *)arg2 + 8)))) {
             var_v1 = 1;
         }
         do {
@@ -247,7 +247,7 @@ block_45:
                 var_v1 += 1;
             }
             var_v0 = (s32 *) ((u8 *) var_v0 + 0xCB0);
-        } while (var_v0 != &D_800D121C);
+        } while (var_v0 != &g_obj_scratch_rec);
         return var_v1;
     }
 }

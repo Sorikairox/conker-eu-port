@@ -14,7 +14,7 @@ typedef struct {
 } ObjEffect1FSpec;   // 0x1C bytes, copied by drip_effect_create
 u8 *drip_effect_create(s32, u8, s32);
 
-// obj_effect1F_attach: the type-0x1F effect node (lists D_800DD280[0..1][0x1F]) that belongs to `obj` (+0x24) or has
+// obj_effect1F_attach: the type-0x1F effect node (lists g_node_lists[0..1][0x1F]) that belongs to `obj` (+0x24) or has
 // its id (+0x28 == obj[0x3B]); if there is none, spawns one with drip_effect_create (`arg1`, `arg2` passed on) whose
 // parameters depend on the object's kind obj[4]: 0..4 -> 10.0 x4 / 5 / 0, 7 -> (2.76, 5.96, 3.21, 5.0) / 4 / 0x37.
 // Nothing for a NULL object or another kind. void: the asm returns the node, but the only caller (game_eu_C5530,
@@ -29,7 +29,7 @@ void drip_effect_attach(struct127 *obj, s32 arg1, s32 arg2) {
         return;
     }
     for (i = 0; i < 2; i++) {
-        for (node = D_800DD280[i][0x1F]; node != NULL; node = node->next) {
+        for (node = g_node_lists[i][0x1F]; node != NULL; node = node->next) {
             if (*(struct127 **) ((u8 *) node + 0x24) == obj || ((u8 *) obj)[0x3B] == *((u8 *) node + 0x28)) {
                 return;
             }
@@ -76,18 +76,18 @@ void drip_effect_detach(u8 *arg0) {
     if (arg0 != NULL) {
         for (i = 0; i < 2; i++) {
             u8 *new_var; // fakematch: permuter temp, turns the loop tail into bnel
-            node = D_800DD280[i][0x1F];
-            D_800DD5C0++;
+            node = g_node_lists[i][0x1F];
+            g_node_iter_depth++;
             while (node != NULL) {
-                D_800DD5C8[D_800DD5C0] = node->next;
+                g_node_iter_next[g_node_iter_depth] = node->next;
                 new_var = (u8 *)node;
                 *(u8 **)(new_var + 0x24) = arg0;
                 if ((arg0 != NULL) || (arg0[0x3B] == *((u8 *)node + 0x28))) {
                     node_destroy((struct102 *)node);
                 }
-                node = D_800DD5C8[D_800DD5C0];
+                node = g_node_iter_next[g_node_iter_depth];
             }
-            D_800DD5C0--;
+            g_node_iter_depth--;
         }
     }
 }

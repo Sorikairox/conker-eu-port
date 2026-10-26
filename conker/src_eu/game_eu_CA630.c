@@ -353,7 +353,7 @@ s32 event_effect_command(s32 id, s32 *args, s32 *operand) {
         }
         break;
     case 0x06:
-        ret = zap_bolt_spawn_with_sound(args[1], args[2], args[3], args[4], args[5], args[6], (s32) D_800CC2D0, args[7],
+        ret = zap_bolt_spawn_with_sound(args[1], args[2], args[3], args[4], args[5], args[6], (s32) g_objects, args[7],
                             (f32) args[8]);
         if (ret != 0) {
             ret = (ret << 6) | 0xE004;
@@ -700,7 +700,7 @@ s32 event_query_effect(s32 arg0, s32 arg1, s32 arg2) {
 loop_6:
                 var_a1 = 0;
 loop_7:
-                var_v0_2 = D_800DD280[var_t0][*(s32 *)((u8 *)&D_800A6440 + var_a1 * 4)];
+                var_v0_2 = g_node_lists[var_t0][*(s32 *)((u8 *)&D_800A6440 + var_a1 * 4)];
                 var_a1 += 1;
                 /* P176 (browser P174): test +0x48 of every node, then move to next (the m2c body advanced first:
                  * it skipped each list's first node and read NULL + 0x48 at the end) */

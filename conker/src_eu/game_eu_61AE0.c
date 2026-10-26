@@ -21,7 +21,7 @@ s16 *obj_adjust_entries_face(s16 *buf, u8 *obj, s32 a2, s32 a3);
  * entries of obj_adjust_entries_face for the model's two face joints (model_get_face_joint(type, 0 / 1)). */
 /* was func_150342D0 */
 void obj_adjust_list_build(s16 *buf, s32 arg1) {
-    struct127 *obj = &D_800CC2D0[arg1];
+    struct127 *obj = &g_objects[arg1];
     s16 *p = buf;
     s32 j0;
 
@@ -58,7 +58,7 @@ s16 *obj_adjust_entries_player(s16 *arg0, s32 arg1) {
     u16 temp_a1;
 
     var_a2 = arg0;
-    temp_v0 = &D_800CC2D0[arg1];
+    temp_v0 = &g_objects[arg1];
     temp_v1 = temp_v0->unk31C;
     if ((temp_v1 != NULL) && !(temp_v0->unk2F8 & 0x80)) {
         temp_a1 = temp_v0->unk84.uh;
@@ -84,11 +84,11 @@ s16 *obj_adjust_entries_player(s16 *arg0, s32 arg1) {
         var_a2 = (s16 *)((u8 *)var_a2 + (4));
         (*(s16 *)((u8 *)var_a2 + -2)) = (s16) (temp_v0->unk1D1 * 0xC8);
     }
-    temp_v0_2 = D_800CC2D0[D_800C3E78].unk31C;
+    temp_v0_2 = g_objects[g_cur_obj_index].unk31C;
     if ((temp_v0_2 != NULL) && (temp_v0_2->unk12 != 0)) {
         *var_a2 = 8;
         var_a2 = (s16 *)((u8 *)var_a2 + (4));
-        (*(s16 *)((u8 *)var_a2 + -2)) = (s16) -D_800CC2D0[D_800C3E78].unk31C->unk12;
+        (*(s16 *)((u8 *)var_a2 + -2)) = (s16) -g_objects[g_cur_obj_index].unk31C->unk12;
     }
     return var_a2;
 }
@@ -96,7 +96,7 @@ s16 *obj_adjust_entries_player(s16 *arg0, s32 arg1) {
 s16 *obj_adjust_entries_type98(s16 *arg0, s32 arg1)
 {
   struct127 *temp_v0;
-  temp_v0 = &D_800CC2D0[arg1];
+  temp_v0 = &g_objects[arg1];
   if (temp_v0->unk1D1 != 0)
   {
     *arg0 = 6;
@@ -110,7 +110,7 @@ s16 *obj_adjust_entries_type98(s16 *arg0, s32 arg1)
 s16 *obj_adjust_entries_tilt(s16 *arg0, s32 arg1)
 {
   struct127 *temp_v0;
-  temp_v0 = &D_800CC2D0[arg1];
+  temp_v0 = &g_objects[arg1];
   if (temp_v0->unk1D1 != 0)
   {
     *arg0 = 6;
@@ -147,7 +147,7 @@ s16 *obj_adjust_entries_type28(s16 *arg0, s32 arg1) {
         s32 blk_t; // fakematch: block boundary keeps the k load first
 
         arg0[0] = 0x12;
-        p = &D_800CC2D0[arg1];
+        p = &g_objects[arg1];
         v = *(s16 *)((u8 *)p + 0x2E6);
         arg0[1] = v * k;
         arg0[2] = 0xE;
@@ -182,14 +182,14 @@ void obj7b_update_pulse_scale(struct127 *);
 /* was func_150348D4 */
 void obj_postprocess_joints(s32 arg0) {
 
-    if (D_800CC2D0[arg0].unk1D4 != NULL) {
-        if ((D_800CC2D0[arg0].interaction_state == 1) || (D_800CC2D0[arg0].unk5 == 7)) {
+    if (g_objects[arg0].unk1D4 != NULL) {
+        if ((g_objects[arg0].interaction_state == 1) || (g_objects[arg0].unk5 == 7)) {
             obj_update_tail_for_conker(arg0);
         }
-        if (D_800CC2D0[arg0].interaction_state == 0x22) {
+        if (g_objects[arg0].interaction_state == 0x22) {
             obj_update_tail_for_conker(arg0);
         }
-        switch (D_800CC2D0[arg0].id) {                          /* irregular */
+        switch (g_objects[arg0].id) {                          /* irregular */
         case 0x4:
             if (D_800BE616 == 0) {
                 obj_joint_look_at_camera(0, arg0, 9, 0);
@@ -198,13 +198,13 @@ void obj_postprocess_joints(s32 arg0) {
             }
             break;
         case 0x70:
-            obj_lower_joints_by_face(&D_800CC2D0[arg0], 0xA, 0xB);
+            obj_lower_joints_by_face(&g_objects[arg0], 0xA, 0xB);
             return;
         case 0x7B:
-            obj7b_update_pulse_scale(&D_800CC2D0[arg0]);
+            obj7b_update_pulse_scale(&g_objects[arg0]);
             return;
         case 0x60:
-            obj_pin_root_height(&D_800CC2D0[arg0]);
+            obj_pin_root_height(&g_objects[arg0]);
             break;
         }
     }
@@ -247,13 +247,13 @@ void obj_hide_masked_joints(S34A18 *arg0) {
 /* was func_15034AD8 */
 void obj_hide_masked_joints_all(void) {
     struct127 *var_s0;
-    var_s0 = D_800CC2D0;
-    if (D_800BEAC0 == 0) {
+    var_s0 = g_objects;
+    if (g_game_paused == 0) {
         do {
             if ((var_s0->interaction_state != 0) && (var_s0->unk9C != 0)) {
                 obj_hide_masked_joints(var_s0);
             }
             var_s0++;
-        } while (var_s0 != (struct127 *)&D_800D121C);
+        } while (var_s0 != (struct127 *)&g_obj_scratch_rec);
     }
 }

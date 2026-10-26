@@ -3,16 +3,16 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u16 D_80098E00[256];
-extern f32 D_80099000;
-extern f32 D_80099004;
-extern f32 D_80099008;
-extern f32 D_8009900C;
-extern f32 D_80099010;
-extern f32 D_80099014;
+extern u16 g_asin_table[256]; /* was D_80098E00 */
+extern f32 g_asin_tbl_index_scale; /* was D_80099000 */
+extern f32 g_asin_tbl_half_pi; /* was D_80099004 */
+extern f32 g_asin_u8_index_scale; /* was D_80099008 */
+extern f32 g_asin_interp_index_scale; /* was D_8009900C */
+extern f32 g_asin_tbl_last_value; /* was D_80099010 */
+extern f32 g_text_anchor_proj_param; /* was D_80099014 */
 
 #if 0
-extern u16 D_80098E00[256] = {
+extern u16 g_asin_table[256] = { /* was D_80098E00 */
     0x0000, 0x00A2, 0x0145, 0x01E8, 0x028B, 0x032E, 0x03D1, 0x0474,
     0x0518, 0x05BB, 0x065E, 0x0701, 0x07A4, 0x0847, 0x08EA, 0x098E,
     0x0A31, 0x0AD4, 0x0B77, 0x0C1B, 0x0CBE, 0x0D62, 0x0E05, 0x0EA9,
@@ -47,24 +47,24 @@ extern u16 D_80098E00[256] = {
     0xD726, 0xD9CC, 0xDCA5, 0xDFBC, 0xE326, 0xE706, 0xEB9D, 0xF197
 };
 
-f32 D_80099000 = 255.99998474121094;
-f32 D_80099004 = 1.5707963705062866;
-f32 D_80099008 = 255.99998474121094;
-f32 D_8009900C = 255.99998474121094;
-f32 D_80099010 = 65535.0;
-f32 D_80099014 = 1.5707963705062866;
+f32 g_asin_tbl_index_scale = 255.99998474121094; /* was D_80099000 */
+f32 g_asin_tbl_half_pi = 1.5707963705062866; /* was D_80099004 */
+f32 g_asin_u8_index_scale = 255.99998474121094; /* was D_80099008 */
+f32 g_asin_interp_index_scale = 255.99998474121094; /* was D_8009900C */
+f32 g_asin_tbl_last_value = 65535.0; /* was D_80099010 */
+f32 g_text_anchor_proj_param = 1.5707963705062866; /* was D_80099014 */
 #endif
 
 /* was func_150487E0 */
 f32 math_asin_scaled(f32 arg0) {
-    f32 temp_f14 = (D_80098E00[(s32)(fabsf(arg0) * D_80099000)] * D_80099004) / 65536.0f;
+    f32 temp_f14 = (g_asin_table[(s32)(fabsf(arg0) * g_asin_tbl_index_scale)] * g_asin_tbl_half_pi) / 65536.0f;
 
     return (arg0 < 0.0f) ? -temp_f14 : temp_f14;
 }
 
 /* was func_15048864 */
 f32 math_asin_u8(f32 arg0) {
-    f32 temp_f14 = (s32)(D_80098E00[(s32)(fabsf(arg0) * D_80099008)]) >> 0xA;
+    f32 temp_f14 = (s32)(g_asin_table[(s32)(fabsf(arg0) * g_asin_u8_index_scale)]) >> 0xA;
 
     return (arg0 < 0.0f) ? (255.0f - temp_f14) : temp_f14;
 }
@@ -82,7 +82,7 @@ f32 math_asinf_table(f32 arg0) {
 
     temp_f2 = fabsf(arg0) * 255.99998f;
     temp_f6 = (s32) temp_f2;
-    temp_v1 = &((u16 *)&D_80098E00)[temp_f6];   /* P18: u16 table (sll 1) */
+    temp_v1 = &((u16 *)&g_asin_table)[temp_f6];   /* P18: u16 table (sll 1) */
     temp_t9 = (*(u16 *)((u8 *)temp_v1 + 0));
     var_f16 = (f32) temp_t9;
     if ((s32) temp_t9 < 0) {
@@ -112,12 +112,12 @@ f32 math_asinf_table(f32 arg0) {
 //     f32 phi_f16;
 //
 //
-//     index = temp_f2 = fabsf(arg0) * D_8009900C;
-//     phi_f16 = D_80098E00[index];
+//     index = temp_f2 = fabsf(arg0) * g_asin_interp_index_scale;
+//     phi_f16 = g_asin_table[index];
 //
-//     phi_f0 = (index < 255) ? D_80098E00[index+1] : D_80099010;
+//     phi_f0 = (index < 255) ? g_asin_table[index+1] : g_asin_tbl_last_value;
 //
-//     temp_f16 = ((((phi_f0 - phi_f16) * (temp_f2 - (f32)index)) + phi_f16) * D_80099014) / 65536.0f;
+//     temp_f16 = ((((phi_f0 - phi_f16) * (temp_f2 - (f32)index)) + phi_f16) * g_text_anchor_proj_param) / 65536.0f;
 //     if (arg0 < 0.0f) {
 //         return -temp_f16;
 //     }

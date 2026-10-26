@@ -27,7 +27,7 @@ void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
 extern void (*port_stub_trace_hook)(const char *name);
 extern unsigned D_800D19A0[], D_800C5000[], D_800D1C90[];
-extern unsigned char D_800CC2D0[];
+extern unsigned char g_objects[]; /* was D_800CC2D0 */
 extern unsigned D_800C42A8;
 extern int D_8008891C;
 void look_frame_cb_current(void);
@@ -37,7 +37,7 @@ int obj22_cb_scale_joint(void);
 void look_joint_cb_combined(void);
 void gfx_pose_overlay_set(const float (*J)[16], int n, const float *root, const unsigned char *skel);
 
-#define REC 0x32C  /* sizeof(struct127), D_800CC2D0[] */
+#define REC 0x32C  /* sizeof(struct127), g_objects[] */
 static int fl_model = -1, fl_dump, fl_pose, fl_anim, fl_speed;
 static void p58_flags(void) {
     if (fl_model >= 0) return;
@@ -168,7 +168,7 @@ void __wrap_anim_eval_joint_matrices(int *arena, float (*m)[4], int anim, int sk
     if (rec == 0) rec0calls++;
     log = fl_model && (calls <= (unsigned)fl_model || calls % 256 == 0);
     if (log && calls == 1) { void p58_check_cbtable(void); p58_check_cbtable(); }
-    if (fl_anim && rec == 0 && anim) p58_anim_setup((unsigned char *)(uintptr_t)anim, D_800CC2D0);
+    if (fl_anim && rec == 0 && anim) p58_anim_setup((unsigned char *)(uintptr_t)anim, g_objects);
     memcpy(root, m, 64);
     /* the adjustment scan exactly as the evaluator does it (u16 pairs until 0x1000), bounded */
     if (buf) {
@@ -259,7 +259,7 @@ void __wrap_anim_eval_joint_matrices(int *arena, float (*m)[4], int anim, int sk
                               anim ? *(float *)(uintptr_t)(anim + 8) : 0);
         }
         if (log) {
-            const unsigned char *ob = rec >= 0 ? D_800CC2D0 + REC * rec : 0;
+            const unsigned char *ob = rec >= 0 ? g_objects + REC * rec : 0;
             char rb[200]; int k = 0;
             if (remap) for (i = 0; i < nn && k < 180; i++) if (vbe_ld8(remap + i))
                 k += snprintf(rb + k, sizeof rb - k, " slot%d->%u", i, vbe_ld8(remap + i));

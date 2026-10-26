@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A4EA8[];
+extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 
 extern s32 (*D_8008B418[])(u8 *);
@@ -81,7 +81,7 @@ u8 *quad_fx_draw(s32 arg0, u8 *arg1, s32 arg2) {
     } else {
         var_v1 = 0;
     }
-    temp_v0_2 = ((*(u8 *)((u8 *)arg1 + 0x2B)) * 8) + ((u8 *)&D_800A4EA8);
+    temp_v0_2 = ((*(u8 *)((u8 *)arg1 + 0x2B)) * 8) + ((u8 *)&g_render_mode_pairs);
     temp_v0 = gfx_other_mode_cached(temp_a0, var_v1 | 0x80000 | D_800D30BC | 0x2CA0, (*(s32 *)((u8 *)temp_v0_2 + 4)) | (*(s32 *)((u8 *)temp_v0_2 + 0)), &sp.u73);
     (*(u8 **)((u8 *)temp_v0 + 4)) = (u8 *) (arg1 + 0x50);
     (*(s32 *)((u8 *)temp_v0 + 0)) = 0x01004008;
@@ -213,7 +213,7 @@ void motion_track_reset_all(void) {
     struct_eu_node *node;
 
     for (i = 0; i < 2; i++) {
-        for (node = D_800DD280[i][50]; node != NULL; node = node->next) {
+        for (node = g_node_lists[i][50]; node != NULL; node = node->next) {
             *(s32 *)((u8 *)node + 0x44) = 0;
             *(s32 *)((u8 *)node + 0x48) = -1;
         }

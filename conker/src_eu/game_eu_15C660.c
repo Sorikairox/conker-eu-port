@@ -278,7 +278,7 @@ void camera_apply_request(struct108 *arg0) {
             }
             if (camera_push_mode(arg0, 0x400, 0, ES32(0x134), 2) != 0) {
                 if (RQ_MODE == 0xE) {
-                    camera_set_followed_obj(arg0, (obj - (u8 *)D_800CC2D0) / 0x32C);
+                    camera_set_followed_obj(arg0, (obj - (u8 *)g_objects) / 0x32C);
                 }
                 ES32(0x84) &= ~8;
                 ES32(0x628) = 0;
@@ -295,7 +295,7 @@ void camera_apply_request(struct108 *arg0) {
                 EF(0x384) = EF(0x37C);
             }
             if (RQ_MODE == 0xE) {
-                rec = (u8 *)D_800CC2D0 + p[0x23D] * 0x32C;
+                rec = (u8 *)g_objects + p[0x23D] * 0x32C;
                 EF(0x618) = *(f32 *)(rec + 0x14);
                 EF(0x61C) = *(f32 *)(rec + 0x18);
                 EF(0x620) = *(f32 *)(rec + 0x1C);

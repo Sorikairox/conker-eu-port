@@ -36,7 +36,7 @@ extern s32 D_800D30BC;    /* TLUT bit of the last loaded texture (gfx_load_textu
  * from the address of D_800DBFF0, not from the pointer it holds), 0x200 / 0x4000 quad above / below the origin,
  * 0x8 / 0x10 / 0x400 / 0x1000 / 0x2000 combine modes, 0x800 prim alpha, 0x20 / 0x2000 other modes.
  * Loads the texture (sprite_load_texture) when the texture or frame changed; the combine / other mode / alpha commands
- * only when they differ from the last sprite's (D_800DD5EE, D_800DD5EC, D_800DD5F6); a pipe sync precedes the
+ * only when they differ from the last sprite's (D_800DD5EE, D_800DD5EC, g_gfx_prim_a_cached); a pipe sync precedes the
  * first mode change when no texture load did. Then the 4 vertices (camera yaw D_800DD600, optional roll and
  * pitch rotations, rounded, plus the position) and the triangles (0, 2, 1), (0, 3, 2).
  */
@@ -173,8 +173,8 @@ Gfx *sprite_billboard_draw(Gfx *gfx, u8 *rec, s32 idx) {
     }
 
     /* prim alpha */
-    if ((flags & 0x800) && D_800DD5F6 != spr[0xA4]) {
-        D_800DD5F6 = spr[0xA4];
+    if ((flags & 0x800) && g_gfx_prim_a_cached != spr[0xA4]) {
+        g_gfx_prim_a_cached = spr[0xA4];
         SPRITE_GFX(gfx, 0xFA000000, spr[0xA4]); /* gDPSetPrimColor(0, 0, 0, 0, 0, alpha) */
     }
 

@@ -391,7 +391,7 @@ void ambient_emitters_update(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px,
 
     // Phase animation per slot: ping-pong (D_800DDC04 bit; D_800DDC08 bit: slower, with random direction flips)
     // or wrap-around.
-    if (D_800BEAC0 == 0) {
+    if (g_game_paused == 0) {
         for (i = 0; i < 15; i++) {
             period = (D_800DE000[i] << 8) - 1;
             if (period < 0x101) {
@@ -875,7 +875,7 @@ void ambient_slots_refresh(void) {
     for (i = 0; i < 15; i++) {
         voices[i * 0x10 + 0xC] = 0;
     }
-    ambient_emitters_update((s32) D_800CC2D0[0].x_position, (s32) D_800CC2D0[0].y_position, (s32) D_800CC2D0[0].z_position,
+    ambient_emitters_update((s32) g_objects[0].x_position, (s32) g_objects[0].y_position, (s32) g_objects[0].z_position,
                   1500, D_800DBFF0->unk380, (s32) D_800DBFF0->unk2F8, (s32) D_800DBFF0->unk2FC,
                   (s32) D_800DBFF0->unk300);
     for (i = 0; i < 15; i++) {

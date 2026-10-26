@@ -4,7 +4,7 @@
 // hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800AB364[];
 extern u8 D_800AB370[];
-extern u8 D_800A4EA8[];
+extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 void obj_point_trail_release(u8 *);
 
@@ -405,7 +405,7 @@ u8 *spout_draw(u8 *arg0, u8 *arg1, s16 arg2) {
             temp_s6 = (*(s32 *)((u8 *)arg0 + 0x94));
             sp.uB3 = 1;
             temp_v0 = *(s32 *) ((u8 *) &D_800AB2C0 + (*(u8 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x98))) + 0x4C)) * 4);
-            temp_v1 = ((u8 *)&D_800A4EA8);
+            temp_v1 = ((u8 *)&g_render_mode_pairs);
             var_s3 = gfx_other_mode_cached(gfx_geometry_mode_cached(gfx_set_combine_mode(gfx_load_texture_cached(var_s3, &D_80090F10[temp_v0], 0, 0, 0, 0, temp_v0, 0, 0, &sp.uB3, 3), 0x4E, &sp.uB3), 0x200005, 0x1F0600), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.uB3);
             if ((*(u16 *)((u8 *)arg0 + 0x1E)) & 2) {
                 var_s2 = (*(s8 *)((u8 *)arg0 + 0x2E)) - 1;
@@ -592,7 +592,7 @@ void spout_check_obj_hit(s32 arg0, u8 *arg1) {
         }
     }
 }
-// node_find_kind11_by_id: searches the node lists D_800DD280[0..1][list] for the two lists named in D_800A5B40
+// node_find_kind11_by_id: searches the node lists g_node_lists[0..1][list] for the two lists named in D_800A5B40
 // (s32 words 0x4D, 0x22) for a node of kind 11 (+0x20) whose sub-object (+0x98) has id (+0x48) == id; NULL if none
 /* was func_151CEBE4 */
 u8 *spout_find_by_id(s32 id) {
@@ -602,7 +602,7 @@ u8 *spout_find_by_id(s32 id) {
 
     for (i = 0; i < 2; i++) {
         for (group = 0; group < 2; group++) {
-            for (node = (u8 *)D_800DD280[group][((s32 *)D_800A5B40)[i]]; node != NULL; node = *(u8 **)(node + 8)) {
+            for (node = (u8 *)g_node_lists[group][((s32 *)D_800A5B40)[i]]; node != NULL; node = *(u8 **)(node + 8)) {
                 if (*(s32 *)(node + 0x20) == 11 && *(s32 *)(*(u8 **)(node + 0x98) + 0x48) == id) {
                     return node;
                 }
@@ -1077,7 +1077,7 @@ Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 // ribbon_trail_draw: draws a trail ribbon (same draw-handler shape as spout_draw). Needs at least 2 points
 // (+0x2C) and, when the owner record (*+0x98) exists, its +0x1D4 drawable. Vertices come from vtx_slot_buffer_get (slot
 // `slot`, 0x20 bytes per point + 0xA0). The render state is flat colour (0xED, 0xD2, 0x85, 200) with
-// D_800A4EA8 combine words. The points (+0x94, 0x28 bytes: position at +0, side offset x / z at +0x18 / +0x1C,
+// g_render_mode_pairs combine words. The points (+0x94, 0x28 bytes: position at +0, side offset x / z at +0x18 / +0x1C,
 // scale +0x14, centre offset x / z at +0x20 / +0x24) form a ring buffer of +0x25 entries walked backwards from the
 // head (+0x2E - 1) to the tail (+0x2D); each point gives two vertices (position +- side offset + scaled centre
 // offset) and each segment one quad (gSPVertex of the last 4 vertices + two triangles).
@@ -1115,7 +1115,7 @@ u8 *obj_ribbon_draw(u8 *rope, u8 *gdl, s16 slot) {
     gdl = (u8 *) gfx_geometry_mode_cached((s32) gdl, 0x200005, 0x1F0600);
     gdl = (u8 *) gfx_set_combine_mode((s32) gdl, 0x54, (s8 *) &flag);
     gdl = gfx_other_mode_cached((s32) gdl, D_800D30BC | 0x80000 | 0x2CA0,
-                        *(s32 *) (D_800A4EA8 + 0xC) | *(s32 *) (D_800A4EA8 + 0x8), (s8 *) &flag);
+                        *(s32 *) (g_render_mode_pairs + 0xC) | *(s32 *) (g_render_mode_pairs + 0x8), (s8 *) &flag);
     cur = (s8) rope[0x2E] - 1;
     if (cur < 0) {
         cur = rope[0x25] - 1;
@@ -1484,7 +1484,7 @@ void limb_band_check_anim(u8 *arg0) {
 }
 
 /* file-scope prototypes above: gfx_load_texture_cached / gfx_set_combine_mode / gfx_geometry_mode_cached / gfx_other_mode_cached (s32 display lists),
-   vtx_slot_buffer_get, vec3_length, D_800D30BC, D_800A4EA8 (u8[]) */
+   vtx_slot_buffer_get, vec3_length, D_800D30BC, g_render_mode_pairs (u8[]) */
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 f32 sqrtf(f32);
 f32 sinf(f32);
@@ -1567,7 +1567,7 @@ Gfx *limb_band_draw(Gfx *gfx, u8 *obj, s16 slot) {
     gfx = (Gfx *) gfx_load_texture_cached((u8 *) gfx, (struct_eu_80090F10 *) D_80091504, 0, 0, 0, 0, 0x7F, 0, 0, (s8 *) &flag, 3);
     gfx = (Gfx *) gfx_set_combine_mode((s32) gfx, 0x3B, (s8 *) &flag);
     gfx = gfx_env_color_cached(gfx, 0xFF, 0xFF, 0xFF, obj[0x34], &flag);
-    gfx = (Gfx *) gfx_other_mode_cached((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, ((s32 *) D_800A4EA8)[7] | ((s32 *) D_800A4EA8)[6],
+    gfx = (Gfx *) gfx_other_mode_cached((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, ((s32 *) g_render_mode_pairs)[7] | ((s32 *) g_render_mode_pairs)[6],
                                 (s8 *) &flag);
 
     dir[0] = b[0] - a[0];
@@ -2423,7 +2423,7 @@ s32 tank_track_draw(u8 *arg0, s32 dl, s16 slot) {
         gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached((u8 *) dl, &D_80090F10[0xBC], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),
                                     0x220005, 0x1D0600),
                       0x4C, &flag),
-        D_800D30BC | 0x80000 | 0x2CA0, *(s32 *) (D_800A4EA8 + 0xC) | *(s32 *) (D_800A4EA8 + 8), &flag);
+        D_800D30BC | 0x80000 | 0x2CA0, *(s32 *) (g_render_mode_pairs + 0xC) | *(s32 *) (g_render_mode_pairs + 8), &flag);
 
     cur = *(s8 *) (arg0 + 0x2E) - 1;
     if (cur < 0) {

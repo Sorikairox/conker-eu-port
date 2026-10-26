@@ -16,20 +16,20 @@ void attach_fx_link_to_ctrl(struct224 *arg0);
 void attach_fx_asset_acquire(s32 arg0) {
     u32 tmp;
 
-    (&D_800E0950)[arg0] = (&D_800E0950)[arg0] + 1;
+    (&g_attach_fx_asset_refs)[arg0] = (&g_attach_fx_asset_refs)[arg0] + 1;
 
-    if ((&D_800E0950)[arg0] < 2) {
-        D_800E0990[arg0] = asset_load(&tmp, 2, 9, D_800AB140[arg0]);
+    if ((&g_attach_fx_asset_refs)[arg0] < 2) {
+        g_attach_fx_assets[arg0] = asset_load(&tmp, 2, 9, g_attach_fx_asset_ids[arg0]);
         D_800E0968[arg0] = tmp >> 4;
     }
 }
 
 /* was func_151D2B4C */
 void attach_fx_asset_release(s32 arg0) {
-    if ((&D_800E0950)[arg0] != 0) {
-        (&D_800E0950)[arg0] = (&D_800E0950)[arg0] - 1;
-        if ((&D_800E0950)[arg0] == 0) {
-            heap_set_block_tag(D_800E0990[arg0], 4);
+    if ((&g_attach_fx_asset_refs)[arg0] != 0) {
+        (&g_attach_fx_asset_refs)[arg0] = (&g_attach_fx_asset_refs)[arg0] - 1;
+        if ((&g_attach_fx_asset_refs)[arg0] == 0) {
+            heap_set_block_tag(g_attach_fx_assets[arg0], 4);
         }
     }
 }
@@ -50,10 +50,10 @@ struct224 *attach_fx_spawn(void *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 ar
 // effect_child_update: one effect child per frame. Freed (node_destroy) when its parent object is gone / hidden /
 // re-used (id +0x3B != child +0x14) or has no bone matrices. Otherwise its position is its offset +0x18 through the
 // parent's bone matrix (+0x1D4, bone +0x24); a timed child (+0x28 bit 0) counts +0x26 down by D_800BE9E4 and at
-// expiry runs its end handler D_8008FFE8[+0x2A] (node, &pos) and is freed; the update handler D_8008FFE0[+0x29]
+// expiry runs its end handler g_attach_child_end_fns[+0x2A] (node, &pos) and is freed; the update handler g_attach_child_update_fns[+0x29]
 // (node, &pos) returning 0 frees it; else the position is stored at +0x34.
-// NON_MATCHING copy: the handler table at 0x8008FFE0 (D_8008FFE0 [0..6], D_8008FFE8 = [2..6]) is called through one
-// signature, s32 (child *, void *) (wasm call_indirect); variables.h declares D_8008FFE8 void-returning, so the
+// NON_MATCHING copy: the handler table at 0x8008FFE0 (g_attach_child_update_fns [0..6], g_attach_child_end_fns = [2..6]) is called through one
+// signature, s32 (child *, void *) (wasm call_indirect); variables.h declares g_attach_child_end_fns void-returning, so the
 // end-handler call casts. The one-argument entries take and ignore the position (bone_sparks_tick, bone_sparks_burst,
 // attach_ctrl_destroy_children, bone_sparks_release).
 /* was func_151D2C40 */
@@ -71,7 +71,7 @@ void attach_fx_update(struct_eu_1FFF60_child *arg0) {
         arg0->unk26 -= D_800BE9E4;
         if (arg0->unk26 < 0) {
             if (arg0->unk2A != -1) {
-                ((s32 (*)(struct_eu_1FFF60_child *, void *))D_8008FFE8[arg0->unk2A])(arg0, &pos);
+                ((s32 (*)(struct_eu_1FFF60_child *, void *))g_attach_child_end_fns[arg0->unk2A])(arg0, &pos);
             }
             arg0->unk2C = 0;
             node_destroy(arg0);
@@ -79,7 +79,7 @@ void attach_fx_update(struct_eu_1FFF60_child *arg0) {
         }
     }
     if (arg0->unk29 != -1) {
-        if (D_8008FFE0[arg0->unk29](arg0, &pos) == 0) {
+        if (g_attach_child_update_fns[arg0->unk29](arg0, &pos) == 0) {
             node_destroy(arg0);
             return;
         }
@@ -188,10 +188,10 @@ void *attach_ctrl_spawn(void *arg0, s32 arg1, u8 arg2, s32 arg3) {
     return temp_v0;
 }
 
-extern s32 (*D_8008FFEC[])(u8 *);
-extern void (*D_8008FFF0[])(u8 *);
-extern void (*D_8008FFF4[])(u8 *);
-extern void (*D_8008FFF8[])(u8 *);
+extern s32 (*g_attach_ctrl_update_fns[])(u8 *); /* was D_8008FFEC */
+extern void (*g_attach_ctrl_show_fns[])(u8 *); /* was D_8008FFF0 */
+extern void (*g_attach_ctrl_hide_fns[])(u8 *); /* was D_8008FFF4 */
+extern void (*g_attach_ctrl_expire_fns[])(u8 *); /* was D_8008FFF8 */
 
 /* was func_151D2F90 */
 void attach_ctrl_update(u8 *arg0) {
@@ -214,7 +214,7 @@ void attach_ctrl_update(u8 *arg0) {
         if (*(s16 *)(arg0 + 0x16) < 0) {
             w = arg0[0x1C];
             if (w != -1) {
-                D_8008FFF8[w](arg0);
+                g_attach_ctrl_expire_fns[w](arg0);
             }
             node_destroy((struct102 *)arg0);
             return;
@@ -223,19 +223,19 @@ void attach_ctrl_update(u8 *arg0) {
     cur = arg0[0x18] & 2;
     if (old != cur) {
         if (cur) {
-            D_8008FFF0[(s8)arg0[0x1A]](arg0);
+            g_attach_ctrl_show_fns[(s8)arg0[0x1A]](arg0);
         } else {
-            D_8008FFF4[(s8)arg0[0x1B]](arg0);
+            g_attach_ctrl_hide_fns[(s8)arg0[0x1B]](arg0);
         }
     }
     w = arg0[0x19];
-    if (w != -1 && !D_8008FFEC[w](arg0)) {
+    if (w != -1 && !g_attach_ctrl_update_fns[w](arg0)) {
         node_destroy((struct102 *)arg0);
     }
 }
 
-// effect_node_release: runs the node's release hook D_8008FFFC[+0x1D] (if any), then for every child (list +0x24,
-// next +0x40) its end handler D_8008FFE8[+0x2A] (child, &child +0x34) and frees it (node_destroy), then releases
+// effect_node_release: runs the node's release hook g_attach_ctrl_release_fns[+0x1D] (if any), then for every child (list +0x24,
+// next +0x40) its end handler g_attach_child_end_fns[+0x2A] (child, &child +0x34) and frees it (node_destroy), then releases
 // the node (char_fx_detach_effect with +0x10).
 // NON_MATCHING copy: the end handler is called through the table's common signature s32 (child *, void *) (see
 // attach_fx_update).
@@ -243,14 +243,14 @@ void attach_ctrl_update(u8 *arg0) {
 void attach_ctrl_cleanup(struct_eu_1FFF60 *arg0) {
     struct_eu_1FFF60_child *child;
 
-    if (D_8008FFFC[arg0->unk1D] != NULL) {
-        D_8008FFFC[arg0->unk1D](arg0);
+    if (g_attach_ctrl_release_fns[arg0->unk1D] != NULL) {
+        g_attach_ctrl_release_fns[arg0->unk1D](arg0);
     }
     child = arg0->unk24;
     while (child != NULL) {
         struct_eu_1FFF60_child *next = child->unk40;
         if (child->unk2A != -1) {
-            ((s32 (*)(struct_eu_1FFF60_child *, void *))D_8008FFE8[child->unk2A])(child, &child->unk34);
+            ((s32 (*)(struct_eu_1FFF60_child *, void *))g_attach_child_end_fns[child->unk2A])(child, &child->unk34);
         }
         child->unk2C = 0;
         node_destroy(child);
@@ -271,7 +271,7 @@ void attach_ctrl_delete(struct102 *arg0) {
     node_unlink_free(arg0);
 }
 
-extern s32 D_80090004[];
+extern s32 g_attach_ctrl_message_fns[]; /* was D_80090004 */
 void attach_ctrl_free_if_owner(struct224 *, struct223 *);
 /* was func_151D324C */
 void attach_ctrl_handle_message(struct224 *arg0, struct223 *arg1, u8 arg2) {
@@ -288,7 +288,7 @@ void attach_ctrl_handle_message(struct224 *arg0, struct223 *arg1, u8 arg2) {
             arg0->unk14 = arg1->unk8;
         }
     }
-    temp_v0_2 = (void *)D_80090004[arg0->pad15[8]];
+    temp_v0_2 = (void *)g_attach_ctrl_message_fns[arg0->pad15[8]];
     if (temp_v0_2 != NULL) {
         temp_v0_2(arg0, arg1, arg2);
     }
@@ -339,7 +339,7 @@ void attach_fx_unlink_from_ctrl(struct224 *arg0) {
     }
 }
 
-// effect_node_children_free: effect-child handler (D_8008FFE0 [5] / D_8008FFE8 [3]): frees the node's children
+// effect_node_children_free: effect-child handler (g_attach_child_update_fns [5] / g_attach_child_end_fns [3]): frees the node's children
 // (node_destroy on the first child +0x24 while the count +0x20 is above 0; each free unlinks it). The second
 // argument (the position the dispatchers pass) is unused; s32 return and the second parameter are the table's common
 // signature s32 (node, pos) (wasm call_indirect). Returns 0 (the dispatchers that reach it ignore v0).

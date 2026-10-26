@@ -1,4 +1,4 @@
-s/        return NULL;/        return (struct127 *) D_800CC2D0;/
+s/        return NULL;/        return (struct127 *) g_objects;/
 s/    if (dir >= 0) {/    if (dir > 0) {/
 s/        sign = -1.0f;/        sign = 1.0f;/
 s/        sign = 1.0f;/        sign = -1.0f;/
@@ -19,6 +19,6 @@ s/        if (0.0f < d \&\& d < best) {/        if (d < best) {/
 s/            best = d;//
 s/            \*t = other->unk0;/            *t = other->unk8;/
 s/            \*alt = (s8) ((u8 \*) other)\[0x2F\];/            *alt = ((u8 *) other)[0x2F];/
-s/            found = \&D_800CC2D0\[(s8) other->unk31\];/            found = \&D_800CC2D0[i];/
+s/            found = \&g_objects\[(s8) other->unk31\];/            found = \&g_objects[i];/
 s/        d = nx \* \*(f32 \*) ((u8 \*) obj + 0x14) + nz \* \*(f32 \*) ((u8 \*) obj + 0x1C) + c;/        d = nx * *(f32 *) ((u8 *) obj + 0x14) + nz * *(f32 *) ((u8 *) obj + 0x18) + c;/
 s/        id = other->unk31;/        id = i;/

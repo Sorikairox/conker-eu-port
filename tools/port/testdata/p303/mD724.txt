@@ -42,8 +42,8 @@
 103s/vel\[k\] += bend \* 1\.24;/vel[k] += bend * 1.25;/ % n20
 103s/vel\[k\] += bend \* 1\.24;/vel[k] += bend * 1.24f;/ % n20 kick obj5 lvl39
 105s/cur\[k\] += vel\[k\];/cur[k] -= vel[k];/ % n2
-106s/if (D_800BE9F0 == 0x39 \&\& cur\[0\] > 1150\.0f) {/if (cur[0] > 1150.0f) {/ % lvl39 lvl39b
-106s/if (D_800BE9F0 == 0x39 \&\& cur\[0\] > 1150\.0f) {/if (D_800BE9F0 == 0x39 \&\& cur[0] > 1149.0f) {/ % lvl39
+106s/if (g_level_id == 0x39 \&\& cur\[0\] > 1150\.0f) {/if (cur[0] > 1150.0f) {/ % lvl39 lvl39b
+106s/if (g_level_id == 0x39 \&\& cur\[0\] > 1150\.0f) {/if (g_level_id == 0x39 \&\& cur[0] > 1149.0f) {/ % lvl39
 107s/cur\[0\] = 1150\.0f;/cur[0] = 1149.0f;/ % lvl39
 111s/dz = cur\[2\] - p\[8\];/dz = cur[2] - p[2];/ % n2
 114s/total += fabsf(vel\[0\]);/total += vel[0];/ % snd0 slow

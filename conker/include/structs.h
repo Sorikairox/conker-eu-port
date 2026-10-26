@@ -3027,7 +3027,7 @@ typedef struct {
 } struct260; // size at least 0x24
 
 /* EU: new decompilation */
-// doubly linked list node; lists live in D_800DD280[unk1][unk0] (game_1944C0)
+// doubly linked list node; lists live in g_node_lists[unk1][unk0] (game_1944C0)
 typedef struct struct_eu_node {
     u8  unk0; // list index
     u8  unk1; // list group
@@ -3124,7 +3124,7 @@ typedef struct {
 } struct_eu_1897A0_b;
 // animation state hanging off struct127.unk2D0 (game_83300); two 0x1D0 blocks
 typedef struct {
-    s32 unk0;   // end-of-animation callback (D_800866AC[entry +2])
+    s32 unk0;   // end-of-animation callback (g_anim_file_bases[entry +2])
     u16 unk4;
     u16 unk6;
     f32 unk8;

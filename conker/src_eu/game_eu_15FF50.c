@@ -214,8 +214,8 @@ u8 *mdl_particle_spawn_ex(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extra
         D_800DC460 = (s32)ref;
         ref->prev = NULL;
         ref->modelId = *(u16 *)(req + 0x56);
-        if ((*(s32 *)(req + 0x50) & 0x100000) && D_800BE9F0 != 0x3B && D_800BE9F0 != 6 && D_800BE9F0 != 0x13 &&
-            D_800BE616 == 0 && D_800BE9F0 != 2) {
+        if ((*(s32 *)(req + 0x50) & 0x100000) && g_level_id != 0x3B && g_level_id != 6 && g_level_id != 0x13 &&
+            D_800BE616 == 0 && g_level_id != 2) {
             ref->keep = 1;
         } else {
             ref->keep = 0;

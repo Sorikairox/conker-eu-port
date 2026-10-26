@@ -1,10 +1,10 @@
 # P259 scenery_press_button_update (lift_y_step) mutants: sed % setup names
 s/var_a1 = 0x22;/var_a1 = 0x28;/ % s3lvC
-s/(temp_v1 == 0x800B) \&\& (D_800BE9F0 == 0xC)/(D_800BE9F0 == 0xC)/ % lvCkind4
-/D_800BE9F0 == 0x31/,/var_a2 = 1;/s/var_a2 = 1;/var_a2 = 0;/ % s3lv31
-/D_800BE9F0 == 0xA)/,/var_a2 = 1;/s/var_a1 = 0x14;/var_a1 = 0x15;/ % s3lvA s2def
-/D_800BE9F0 == 0x34/,/var_t1 = 6;/s/var_t1 = 6;/var_t1 = 3;/ % s2lv34hit s2lv34edge s2lv34past
-/D_800BE9F0 == 0x34/,/var_t1 = 6;/s/var_a1 = 0xA;/var_a1 = 0xB;/ % s2lv34hit s2lv34edge s2lv34past
+s/(temp_v1 == 0x800B) \&\& (g_level_id == 0xC)/(g_level_id == 0xC)/ % lvCkind4
+/g_level_id == 0x31/,/var_a2 = 1;/s/var_a2 = 1;/var_a2 = 0;/ % s3lv31
+/g_level_id == 0xA)/,/var_a2 = 1;/s/var_a1 = 0x14;/var_a1 = 0x15;/ % s3lvA s2def
+/g_level_id == 0x34/,/var_t1 = 6;/s/var_t1 = 6;/var_t1 = 3;/ % s2lv34hit s2lv34edge s2lv34past
+/g_level_id == 0x34/,/var_t1 = 6;/s/var_a1 = 0xA;/var_a1 = 0xB;/ % s2lv34hit s2lv34edge s2lv34past
 s/var_t0 = prop_owner_effects_clear;/var_t0 = NULL;/ % s2lv34hit
 s/var_t0(arg0);/var_t0(NULL);/ % s2lv34hit
 s/var_a1 = 0xF;/var_a1 = 0xE;/ % s2kind4 s2kind4miss lvCkind4

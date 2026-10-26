@@ -1,4 +1,4 @@
-# P259 scenery_press_button_update (lift_y_step, level-dependent rise / fall of obj+0x12): obj 80410000; words: +0x10 (s16 y at +0x12), +0x4C (byte +0x4F), +0x54 (u16 kind), +0x70 (byte +0x73 = state bits), +0x7C (home y | 0x80000000). D_800BE9F0 (level) EU 800BEE10. EU jalr target prop_owner_effects_clear = 15105000
+# P259 scenery_press_button_update (lift_y_step, level-dependent rise / fall of obj+0x12): obj 80410000; words: +0x10 (s16 y at +0x12), +0x4C (byte +0x4F), +0x54 (u16 kind), +0x70 (byte +0x73 = state bits), +0x7C (home y | 0x80000000). g_level_id (level) EU 800BEE10. EU jalr target prop_owner_effects_clear = 15105000
 s3lvC ! 0=80410000 ! 800BEE10=0000000C,80410054=800B0000,80410070=00000003,8041007C=80000150,80410010=00000100,8041004C=00000000 ! ! ! ! !
 s3lvCsame ! 0=80410000 ! 800BEE10=0000000C,80410054=800B0000,80410070=00000003,8041007C=80000150,80410010=0000012E,8041004C=00000000 ! ! ! ! !
 lvCkind4 ! 0=80410000 ! 800BEE10=0000000C,80410054=00040000,80410070=00000003,8041007C=80000150,80410010=00000100,8041004C=00000000 ! ! ! ! !

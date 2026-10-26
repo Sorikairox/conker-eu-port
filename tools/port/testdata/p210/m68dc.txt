@@ -1,24 +1,24 @@
-s/D_800D154C->unkA8 = 0;/;/
+s/g_cur_obj->unkA8 = 0;/;/
 s/f32 best = D_800D1890 \* 8;/f32 best = D_800D1890 * 4;/
 s/for (i = 0; i < 25; i++, o++) {/for (i = 0; i < 24; i++, o++) {/
 s/if (o->interaction_state == 0 || o->health == 0/if (o->health == 0/
 s/|| o->health == 0 || !/|| !/
 s/!(o->unkF8 \& 0x20)/!(o->unkF8 \& 0x10)/
 s/ || i == self) {/) {/
-s/if (D_800D1891 == 0 \&\& D_800D154C->id == o->id) {/if (D_800D154C->id == o->id) {/
+s/if (D_800D1891 == 0 \&\& g_cur_obj->id == o->id) {/if (g_cur_obj->id == o->id) {/
 s/if (50.0f < fabsf(/if (55.0f < fabsf(/
 s/if (!(d < best)) {/if (!(d <= best)) {/
-s/fov = D_800D1C90\[D_800D154C->id\]->unk17;/fov = 0x40;/
-s/o->x_position - D_800D154C->x_position, D_800D154C->z_position - o->z_position/D_800D154C->x_position - o->x_position, D_800D154C->z_position - o->z_position/
-s/(D_800D154C->unk76 >> 8) + D_800D154C->unk2CA)/(D_800D154C->unk76 >> 8))/
+s/fov = D_800D1C90\[g_cur_obj->id\]->unk17;/fov = 0x40;/
+s/o->x_position - g_cur_obj->x_position, g_cur_obj->z_position - o->z_position/g_cur_obj->x_position - o->x_position, g_cur_obj->z_position - o->z_position/
+s/(g_cur_obj->unk76 >> 8) + g_cur_obj->unk2CA)/(g_cur_obj->unk76 >> 8))/
 s/ + fov \/ 2) \& 0xFF) < fov/ + fov \/ 4) \& 0xFF) < fov/
 s/\& 0xFF) < fov) {/\& 0xFF) <= fov) {/
-s/D_800D154C->unkA8 = i + 0x80;/D_800D154C->unkA8 = i + 0x81;/
+s/g_cur_obj->unkA8 = i + 0x80;/g_cur_obj->unkA8 = i + 0x81;/
 s/            best = d;/            ;/
 s/aiscript_find_by_kind(0, D_800D1893)/aiscript_find_by_kind(0, D_800D1892)/
-s/        D_800D154C->unk218--;/        ;/
+s/        g_cur_obj->unk218--;/        ;/
 s/if (D_800D1892 != 0) {/if (D_800D1892 == 0) {/
-s/t = \&D_800CC2D0\[D_800D154C->unkA8 \& 0x7F\];/t = \&D_800CC2D0[D_800D154C->unkA8 \& 0x3F];/
+s/t = \&g_objects\[g_cur_obj->unkA8 \& 0x7F\];/t = \&g_objects[g_cur_obj->unkA8 \& 0x3F];/
 s/t->unk218 = NULL;/;/
 s/t->unk232 = D_800D1892;/t->unk232 = D_800D1893;/
 s/t->unk222 = self;/t->unk222 = self + 1;/

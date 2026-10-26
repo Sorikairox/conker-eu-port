@@ -96,7 +96,7 @@ void debris_crate_break_pieces(u8 *obj, s32 id, s32 arg2, s32 flags, s32 kind, s
 
 /* was func_15171434 */
 void debris_crate_break_by_level(s32 arg0, u8 arg1, s32 arg2) {
-    switch (D_800BE9F0) {
+    switch (g_level_id) {
     case 2:
         debris_crate_break_pieces((u8 *) arg0, 1, 1, 1, arg1, arg2);
         break;

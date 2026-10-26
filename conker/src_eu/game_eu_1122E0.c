@@ -130,7 +130,7 @@ extern struct {
 extern s32 D_800DC26C;
 
 // object_impact_effect: impact effect for the world object `obj` (0xA0-byte records at D_800DBEF4, count
-// D_800DC320). Probes the object's floor (floor_collect_world_obj_tris, only this object's id in the list) at its x / z (+0x10 /
+// g_world_obj_count). Probes the object's floor (floor_collect_world_obj_tris, only this object's id in the list) at its x / z (+0x10 /
 // +0x14) jittered by up to +-(+0x50) units, at most 5 tries. Takes the highest hit: its height (/ 256) becomes the
 // effect y, and its triangle, moved into world space with the object's matrix (world_record_build_matrix; vertex offsets +
 // the object's vertex base for the current frame buffer D_800BE9C0), carries the debris. The effect kind comes from
@@ -152,7 +152,7 @@ s32 impact_effect_at_world_object(u8 *obj) {
     s16 verts[3][8];
     s32 world[3];
 
-    if (idx >= D_800DC320 || idx < 0) {
+    if (idx >= g_world_obj_count || idx < 0) {
         return 0;
     }
     id = idx;

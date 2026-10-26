@@ -64,6 +64,6 @@ s/mp_team_score_draw((u8 \*) gdl, y, 1)/mp_team_score_draw((u8 *) gdl, y, 0)/ % 
 s/if (sel != -1) {$/if (sel == -1) {/ % near_sel
 s/if (near) {$/if (!near) {/ % near
 1,/if (D_80090160 \& 1) {/s/if (D_80090160 \& 1) {/if (D_80090160 \& 2) {/ % f1only
-s/p = \&D_800CC2D0\[i\];/p = \&D_800CC2D0[i + 1];/ % act_team1
+s/p = \&g_objects\[i\];/p = \&g_objects[i + 1];/ % act_team1
 s/for (i = 0; i < D_8008FD8C; i++)/for (i = 1; i < D_8008FD8C; i++)/ % arrow_t0
 s/for (team = 0; team < D_800E0FE0; team++)/for (team = 1; team < D_800E0FE0; team++)/ % base

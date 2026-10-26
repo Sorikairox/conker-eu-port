@@ -40,9 +40,9 @@ typedef struct struct_eu_221290 {
     /* 0x8478 */ s32 (*unk8478)(struct struct_eu_221290 *);
 } struct_eu_221290;
 
-extern struct_eu_221290 D_800E1CB0;
+extern struct_eu_221290 g_mp3_main_state; /* was D_800E1CB0 */
 extern s32 D_800E0E04;
-extern void (*D_800E1230)(s32, u8 *, s32);
+extern void (*g_mp3_log_callback)(s32, u8 *, s32); /* was D_800E1230 */
 
 /* Perfect Dark src/lib/mp3/mp3.h layout (same offsets) */
 struct asistream_scalefac {
@@ -167,7 +167,7 @@ struct mp3decthing {
 extern f32 sine_block[4][36];
 extern struct mp3decfourbytes *var8009c640;
 extern f32 *var8009c644;
-extern f32 *D_800E14A8; /* var8009c648 */
+extern f32 *g_mp3_pow43_table; /* var8009c648; was D_800E14A8 */
 
 /* Perfect Dark src/lib/mp3/decoder.c tables: byte-identical to ROM 0x2511B0-0x256150 (this file's .rodata) */
 // rodata_inject: cdefined 0x2511B0 0x256144
@@ -2186,8 +2186,8 @@ const u32 var70059acc[] = {0x3ff746ed};
 const u32 var70059ad0[] = {0x3fff069a};
 
 extern struct mp3decfourbytes *var8009c650[];
-extern f32 D_800E14B0[]; /* var8009c6d8 (an array here) */
-extern f32 D_800E18B0[]; /* var8009c6dc */
+extern f32 g_mp3_gain_pow2[]; /* var8009c6d8 (an array here); was D_800E14B0 */
+extern f32 g_mp3_scalefac_pow2[]; /* var8009c6dc; was D_800E18B0 */
 
 s32 mp3_get_bits(u8 *buffer, s32 *offset, s32 numbits); /* mp3util_get_bits */
 
@@ -2195,9 +2195,9 @@ s32 mp3_get_bits(u8 *buffer, s32 *offset, s32 numbits); /* mp3util_get_bits */
 
 
 
-extern f32 D_800E1268[36];
-extern f32 D_800E12F8[36];
-extern f32 D_800E1418[36];
+extern f32 g_mp3_win_normal[36]; /* was D_800E1268 */
+extern f32 g_mp3_win_start[36]; /* was D_800E12F8 */
+extern f32 g_mp3_win_stop[36]; /* was D_800E1418 */
 extern struct mp3decfourbytes **D_800E0E20;
 extern s32 D_800E0E28;
 extern f32 *D_800E0E30;
@@ -2214,41 +2214,41 @@ s32 mp3dec_init(void) {
     f32 b;
 
     for (i = 0; i < 36; i++) {
-        D_800E1268[i] = sinf((i + 0.5f) * 0.08726646f);
+        g_mp3_win_normal[i] = sinf((i + 0.5f) * 0.08726646f);
     }
     for (i = 0; i < 18; i++) {
-        D_800E12F8[i] = sinf((i + 0.5f) * 0.08726646f);
+        g_mp3_win_start[i] = sinf((i + 0.5f) * 0.08726646f);
     }
     for (i = 18; i < 24; i++) {
-        D_800E12F8[i] = 1.0f;
+        g_mp3_win_start[i] = 1.0f;
     }
     for (i = 24; i < 30; i++) {
-        D_800E12F8[i] = sinf((i + 0.5f - 18.0f) * 0.2617994f);
+        g_mp3_win_start[i] = sinf((i + 0.5f - 18.0f) * 0.2617994f);
     }
     for (i = 30; i < 36; i++) {
-        D_800E12F8[i] = 0.0f;
+        g_mp3_win_start[i] = 0.0f;
     }
     for (i = 0; i < 6; i++) {
-        D_800E1418[i] = 0.0f;
+        g_mp3_win_stop[i] = 0.0f;
     }
     for (i = 6; i < 12; i++) {
-        D_800E1418[i] = sinf((i + 0.5f - 6.0f) * 0.2617994f);
+        g_mp3_win_stop[i] = sinf((i + 0.5f - 6.0f) * 0.2617994f);
     }
     for (i = 12; i < 18; i++) {
-        D_800E1418[i] = 1.0f;
+        g_mp3_win_stop[i] = 1.0f;
     }
     for (i = 18; i < 36; i++) {
-        D_800E1418[i] = sinf((i + 0.5f) * 0.08726646f);
+        g_mp3_win_stop[i] = sinf((i + 0.5f) * 0.08726646f);
     }
     for (i = 1; i < 34; i++) {
         ((u8 **)D_800E0E20)[i] += D_800E0E28;
     }
-    D_800E14A8 = D_800E0E30;
-    if (D_800E14A8 == NULL) {
+    g_mp3_pow43_table = D_800E0E30;
+    if (g_mp3_pow43_table == NULL) {
         return 0;
     }
     x = 1.0f;
-    D_800E14A8[0] = 0.0f;
+    g_mp3_pow43_table[0] = 0.0f;
     for (i = 1; i < 0x2000; i++) {
         n = i;
         n *= n;
@@ -2259,15 +2259,15 @@ s32 mp3dec_init(void) {
             d = (x2 * x - n) / (2.0f * x2);
             x -= d;
         } while (d > eps || d < -eps);
-        D_800E14A8[i] = x;
+        g_mp3_pow43_table[i] = x;
     }
     a = 0.70710677f;
     b = 0.25f;
-    D_800E14B0[0] = 1.0f;
-    D_800E18B0[0] = 1.0f;
+    g_mp3_gain_pow2[0] = 1.0f;
+    g_mp3_scalefac_pow2[0] = 1.0f;
     for (i = 1; i < 256; i++) {
-        D_800E14B0[i] = a;
-        D_800E18B0[i] = b;
+        g_mp3_gain_pow2[i] = a;
+        g_mp3_scalefac_pow2[i] = b;
         b *= 0.25f;
         a *= 0.70710677f;
     }
@@ -2325,14 +2325,14 @@ s32 mp3dec_dequantize(struct asistream *stream, u32 gr, u32 ch)
 
 	for (sfb = 0; sfb < 22; sfb++) {
 		sp4c = (stream->scalefac[gr][ch].l[sfb] + stream->preflag[gr][ch] * sp158[sfb]) * (scale + 1);
-		sp100[sfb] = D_800E14B0[sp4c] * sp60;
+		sp100[sfb] = g_mp3_gain_pow2[sp4c] * sp60;
 	}
 
 	for (sp58 = 0; sp58 < 3; sp58++) {
 		for (sfb = 0; sfb < 13; sfb++) {
 			sp50 = stream->subblock_gain[gr][ch][sp58];
 			sp4c = stream->scalefac[gr][ch].s[sp58][sfb] * (scale + 1);
-			sp64[sp58][sfb] = sp60 * D_800E18B0[sp50] * D_800E14B0[sp4c];
+			sp64[sp58][sfb] = sp60 * g_mp3_scalefac_pow2[sp50] * g_mp3_gain_pow2[sp4c];
 		}
 	}
 
@@ -2368,15 +2368,15 @@ s32 mp3dec_dequantize(struct asistream *stream, u32 gr, u32 ch)
 				sp24 = sp64[sp58];
 
 				if (*sp38++) {
-					*sp40++ = -(D_800E14A8[*sp3c++] * sp24[sfb]);
+					*sp40++ = -(g_mp3_pow43_table[*sp3c++] * sp24[sfb]);
 				} else {
-					*sp40++ = D_800E14A8[*sp3c++] * sp24[sfb];
+					*sp40++ = g_mp3_pow43_table[*sp3c++] * sp24[sfb];
 				}
 			} else {
 				if (*sp38++) {
-					*sp40++ = -(D_800E14A8[*sp3c++] * sp100[sfb]);
+					*sp40++ = -(g_mp3_pow43_table[*sp3c++] * sp100[sfb]);
 				} else {
-					*sp40++ = D_800E14A8[*sp3c++] * sp100[sfb];
+					*sp40++ = g_mp3_pow43_table[*sp3c++] * sp100[sfb];
 				}
 			}
 
@@ -3233,7 +3233,7 @@ s32 mp3main_read_frame(struct asistream *stream, s32 arg1)
 struct_eu_221290 *mp3main_init(s32 arg0, s32 (*arg1)(s32, u8 *, s32, s32), s32 arg2) {
     struct_eu_221290 *sp1C;
 
-    sp1C = &D_800E1CB0;
+    sp1C = &g_mp3_main_state;
     if (sp1C == NULL) {
         return NULL;
     }
@@ -3282,8 +3282,8 @@ s32 mp3main_decode_next_frame(struct_eu_221290 *arg0, u8 **arg1, s32 *arg2) {
                     break;
                 }
             } while (sp28[sp24++]);
-            if (D_800E1230 != NULL) {
-                D_800E1230(0, sp28, strlen(sp28) + 1);
+            if (g_mp3_log_callback != NULL) {
+                g_mp3_log_callback(0, sp28, strlen(sp28) + 1);
             }
         }
     }

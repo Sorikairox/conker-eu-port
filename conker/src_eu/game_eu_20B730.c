@@ -103,7 +103,7 @@ void text_set_color(u8 arg0, u8 arg1, u8 arg2, u8 arg3);
 void menu_game_start(void);
 void os_writeback_dcache(void *, s32); /* osWritebackDCache (hand-written cache loop) */
 
-// game_pause_update: P127: menu handler of mode 0 (story game, D_8009018C[0]): counts the play time (D_800BE3E8
+// game_pause_update: P127: menu handler of mode 0 (story game, D_8009018C[0]): counts the play time (g_save_play_time
 // seconds), shows the time limit (multiplayer, settings byte 3 >= 3), and runs the pause menu: START (0x1000) on a
 // controller that is not disabled (D_800D18A0) opens it (D_800BEAC1) unless blocked (screen_fade_all_active, scene states);
 // the stick moves the cursor D_800901CC over the 2 (story) / 3 (multiplayer) items with sfx 0x62D; past the last item
@@ -132,10 +132,10 @@ void game_pause_update(void) {
     sfx = 0;
     blocked = 0;
     simple = D_80090158;
-    if (D_800BE9F0 == 0x22) {
+    if (g_level_id == 0x22) {
         simple = 1;
     }
-    if (D_800C35EA != 1 || D_800BE9F0 != 0x18 || D_800C3A08 != 1) {
+    if (D_800C35EA != 1 || g_level_id != 0x18 || D_800C3A08 != 1) {
         if (screen_fade_all_active() != 0) {
             blocked = 1;
         }
@@ -148,7 +148,7 @@ void game_pause_update(void) {
     }
 
     /* START opens the pause menu */
-    if (D_800BEAC0 == 0 && D_800BEAC1 == 0 && !blocked && D_80090298 == 0) {
+    if (g_game_paused == 0 && D_800BEAC1 == 0 && !blocked && D_80090298 == 0) {
         nPads = D_80082FA0;
         for (i = 0; i <= nPads && D_800BEAC1 == 0; i++) {
             if (((&D_800BED50)[i] & 0x1000) && !(D_800D18A0 & (1 << i))) {
@@ -163,11 +163,11 @@ void game_pause_update(void) {
     }
 
     /* play time */
-    if (D_800BEAC0 == 0 && D_800D3268 != 0xC7) {
+    if (g_game_paused == 0 && D_800D3268 != 0xC7) {
         D_800E0EC9 += D_800BE9E4;
         if (D_800E0EC9 >= 50) {
             D_800E0EC9 -= 50;
-            D_800BE3E8++;
+            g_save_play_time++;
         }
     }
 
@@ -194,7 +194,7 @@ void game_pause_update(void) {
         }
         return;
     }
-    if (D_800BEAC0 == 0) {
+    if (g_game_paused == 0) {
         return;
     }
 
@@ -347,8 +347,8 @@ void port_warp_game_start(s32 level, s32 scene);
 /* was func_151DEBB4 */
 void intro_mode_update(void) {
     screen_fade_update();
-    *(s32 *)((u8 *)D_800CC2D0 + 0x25C) |= 0x200;
-    D_800CC2D0[0].y_position = 1000.0f;
+    *(s32 *)((u8 *)g_objects + 0x25C) |= 0x200;
+    g_objects[0].y_position = 1000.0f;
     if (D_80000300 != 0) {
         D_800E0EC0 = 0;
     }
@@ -419,7 +419,7 @@ void menu_fade_load_options(void) {
      * frame stops the game, like the level request on the boot screen's first frame (P324 tests). Saves are unaffected: the options load above
      * is requested as before, and the menu (menu_mode_update) requests the slot, config and options loads itself on
      * its first frames. Only once per boot, so the attract loop (back to level 0x21) behaves as on the N64. */
-    if (port_option(PORT_OPT_SKIP_INTRO) && !port_intro_skipped && D_800BE9F0 == 0x21 && D_800E0EC0 >= 32) {
+    if (port_option(PORT_OPT_SKIP_INTRO) && !port_intro_skipped && g_level_id == 0x21 && D_800E0EC0 >= 32) {
         port_intro_skipped = 1;
         menu_reset_and_enter();
     }
@@ -556,7 +556,7 @@ void menu_mode_update(void) {
 
     if ((u8) D_80090120 != 0) {
         *(s32 *) ((u8 *) D_800DBFF0 + 0x2C) = 0x80000;
-        cutscene_scene_load(D_800BE9F0, 1, 0, 0, 0);
+        cutscene_scene_load(g_level_id, 1, 0, 0, 0);
         D_80090120 = 0;
         return;
     }
@@ -814,8 +814,8 @@ void title_press_start_page(void) {
                 }
                 if (obj != NULL) {
                     obj->unk232 = voice;
-                    D_800D154C = obj;
-                    D_800C3E78 = (s32) ((u8 *) obj - (u8 *) D_800CC2D0) / (s32) sizeof(struct127);
+                    g_cur_obj = obj;
+                    g_cur_obj_index = (s32) ((u8 *) obj - (u8 *) g_objects) / (s32) sizeof(struct127);
                     obj->unk218 = aiscript_find_by_kind(0, obj->unk232);
                     obj->unk21C = 0;
                     obj->unk201 = 0x14;
@@ -1268,7 +1268,7 @@ extern u8 D_800ABC30[];
 extern u8 D_800ABC34[];
 extern u8 D_800ABC38[];
 extern u8 D_800ABC3C[];
-extern s32 D_800BE804;
+extern s32 g_save_stat9; /* was D_800BE804 */
 extern s32 *D_800E0EB8;
 void slot_game_start(void);
 void text_printf(s32, ...);
@@ -1307,7 +1307,7 @@ void title_slot_page(void) {
         sfx = 0x62D;
     }
     text_set_pos(0x94, 0x46);
-    save = &D_800BE818[slot];
+    save = &g_save_slot_summaries[slot];
     if (save->unk8 == -1) {
         D_800901CC = 0;
     }
@@ -1357,8 +1357,8 @@ void title_slot_page(void) {
                 D_800E0EB8 = (s32 *) slot_game_start;
                 D_80090114 = 3;
                 D_8008FDA8 = slot;
-                D_800BE7FC = -1;
-                D_80082F50 = 0;
+                g_save_best_slot_score = -1;
+                g_save_slot_refresh = 0;
                 save_request_slot_load(save->unkE);
                 sfx = 0x500;
             }
@@ -1375,9 +1375,9 @@ void title_slot_page(void) {
             if ((s8) D_800901CC == 3) {
                 D_800901CC = 0;
                 save_request_slot_erase(slot);
-                D_800BE3DF = 0x29;
+                g_save_resume_level = 0x29;
                 D_800BE800 = 0;
-                D_800BE804 = 0;
+                g_save_stat9 = 0;
                 level_state_clear();
                 save->padC[0] = 0x18;
                 ((u32 *) save)[1] = 0;
@@ -2519,7 +2519,7 @@ extern s8 D_800BEA38;
 extern u8 D_800D3260;
 extern s8 D_80090110;
 extern s8 D_800901E4;           /* first of the 16-byte player queue */
-extern s32 D_800BE804;
+extern s32 g_save_stat9; /* was D_800BE804 */
 s8 mp_slot_query(s32);
 void menu_settings_apply_checked(void);
 void game_request_transition(s32, s32, s32, s32, s32);
@@ -2584,12 +2584,12 @@ void menu_game_start(void) {
     D_8009013C = 0;
     D_80090110 = 0;
     level_state_clear();
-    D_800BE804 = 0;
+    g_save_stat9 = 0;
     bzero(D_80090174 + 0x66, 0x30);
     bzero(D_80090174 + 0x46, 0x20);
     bzero(D_800E0F00, 0x20);
     D_800BEAC1 = 0;
-    D_800BEAC0 = 0;
+    g_game_paused = 0;
     D_800E0B94 = 0;
     D_8008FDA8 = -1;
     D_800843F0[1] = 0xFF;
@@ -2772,7 +2772,7 @@ extern s16 D_8009014C;
 extern u8 D_80090154;
 extern s8 D_800902B0;
 extern u8 D_800902B4;
-extern s32 D_800BE804;
+extern s32 g_save_stat9; /* was D_800BE804 */
 extern u8 D_800E1001;
 
 /* was func_151E3864 */
@@ -2791,9 +2791,9 @@ void chapter_scene_start(void) {
     level_state_clear();
     event_unlock_chain(sp24[1]);
     save_unlocks_propagate(sp24[1]);
-    D_800BE9F4 = event_table_get_u16_8(sp24[1]);
+    g_level_load_id = event_table_get_u16_8(sp24[1]);
     player_stat_modify(0, 9, sp24[0]);
-    D_800BE804 = sp24[0];
+    g_save_stat9 = sp24[0];
     D_800DD2C0 = event_table_get_id_field(sp24[1]);
     if (D_80090154 == 2) {
         D_800DD2C0 = D_800E1001;
@@ -2817,7 +2817,7 @@ void chapter_scene_start(void) {
     D_800E0FE1 = 1;
     menu_settings_apply_checked();
     D_800D3260 = 1;
-    game_request_transition(6, (s32) D_800BE9F4, event_table_get_id_field(sp24[1]), 0, 1);
+    game_request_transition(6, (s32) g_level_load_id, event_table_get_id_field(sp24[1]), 0, 1);
 }
 
 void menu_settings_apply_checked(void);
@@ -2843,7 +2843,7 @@ void slot_game_start(void) {
     D_800D27C8 = 0;
     D_800E0B94 = 0;
     D_800D3260 = 0;
-    game_request_transition(6, (s32) (s8) D_800BE3DF, (s32) D_800BE800, 0, 1);
+    game_request_transition(6, (s32) (s8) g_save_resume_level, (s32) D_800BE800, 0, 1);
     D_800E0FC9 = 1;
     D_800E0FE1 = 1;
     menu_settings_apply_checked();
@@ -2855,8 +2855,8 @@ void slot_game_start(void) {
  * without the save slot load: D_8008FDA8 = -1 = no slot, so the fresh save is left alone). Game mode 0. */
 void port_warp_game_start(s32 level, s32 scene) {
     D_8008FDA8 = -1;
-    D_800BE7FC = -1;
-    D_80082F50 = 0;
+    g_save_best_slot_score = -1;
+    g_save_slot_refresh = 0;
     D_80087260 = 3;
     if (D_800E9D00 & 0x200) {
         D_80087260 = 0x33;
@@ -3837,7 +3837,7 @@ void mp_match_end(s32 arg0) {
             D_800E0EB8 = (s32 *)&pause_quit_to_menu;
         }
         for (i = 0; i < D_80090130; i++) {
-            *(s16 *)(D_80090174 + i * 12 + 0x6C) = *(s16 *)(*(u8 **)((u8 *)&D_800CC2D0[i] + 0x31C) + 0x1AA);
+            *(s16 *)(D_80090174 + i * 12 + 0x6C) = *(s16 *)(*(u8 **)((u8 *)&g_objects[i] + 0x31C) + 0x1AA);
         }
         D_80090160 &= 0xE35F;
         D_800E0EB6 = arg0;
@@ -3978,9 +3978,9 @@ s32 mp_match_check_over(void) {
                     if (a < b) {
                         (*out)++;
                     } else if (a == b) {
-                        if (D_800CC2D0[j].unk31C->unk1AA < D_800CC2D0[i].unk31C->unk1AA) {
+                        if (g_objects[j].unk31C->unk1AA < g_objects[i].unk31C->unk1AA) {
                             (*out)++;
-                        } else if (D_800CC2D0[i].unk31C->unk1AA == D_800CC2D0[j].unk31C->unk1AA && j < i &&
+                        } else if (g_objects[i].unk31C->unk1AA == g_objects[j].unk31C->unk1AA && j < i &&
                                    D_80082FA0 < j) {
                             (*out)++;
                         }
@@ -3996,12 +3996,12 @@ s32 mp_match_check_over(void) {
         tm[i] = 0;
     }
     for (i = 0; i < D_8008FD8C; i++) {
-        team = D_800CC2D0[i].unk128;
+        team = g_objects[i].unk128;
         tm[team] += *(s16 *) (D_80090174 + 0x46 + i * 2);
         kills = player_stat_get(i, 4);
         tm[4 + team] += player_stat_get(i, 3) * 6 + kills;
         tm[8 + team] = player_stat_get(team, 6);
-        tm[12 + team] += D_800CC2D0[i].unk31C->unk1AA;
+        tm[12 + team] += g_objects[i].unk31C->unk1AA;
     }
     col = 8;
     limit = -1;
@@ -4056,7 +4056,7 @@ s32 mp_match_check_over(void) {
     n = D_8008FD8C;
     for (i = 0; i < n; i++) {
         if (D_80087270[i] != 10 && !(D_800D18A0 & (1 << i))) {
-            mask |= 1 << D_800CC2D0[i].unk128;
+            mask |= 1 << g_objects[i].unk128;
         }
     }
     live = 0;
@@ -4115,7 +4115,7 @@ void actor_sound_play2_delayed(u16, struct127 *, s32, s32, s32, s32);
 #define MP_ROW(p, off) (*(s16 *)(D_80090174 + (p) * 0xC + (off)))
 
 // mp_report_hit: multiplayer hit report. `attacker` hit `victim` with damage kind `kind`. The scoring player is the
-// attacker's slot in D_800CC2D0 or, for a non-player attacker, its owner (unk124 = slot + 1); no player -> nothing.
+// attacker's slot in g_objects or, for a non-player attacker, its owner (unk124 = slot + 1); no player -> nothing.
 // Marks the victim's last hitter (D_800E0FE8[victim] = player | 0x80); for human players (< D_80090130) counts hits
 // on other teams (D_800E1030 = team; row +0x66, +0x6A for kind 0x2E) and team kills (row +0x70, not kind 0x2D); a
 // kill of another team's player raises the kill score (+0x46, capped at 9999; player_stat_modify when flag 0x200 of
@@ -4125,7 +4125,7 @@ void actor_sound_play2_delayed(u16, struct127 *, s32, s32, s32, s32);
 /* was func_151E67A0 */
 void mp_report_hit(struct127 *attacker, struct127 *victim, s32 kind) {
     struct127 *src = attacker;
-    s32 player = (s32)((u8 *)attacker - (u8 *)D_800CC2D0) / 0x32C;
+    s32 player = (s32)((u8 *)attacker - (u8 *)g_objects) / 0x32C;
     s32 vi;
     s32 sound;
     s32 n;
@@ -4136,13 +4136,13 @@ void mp_report_hit(struct127 *attacker, struct127 *victim, s32 kind) {
     if (player >= D_8008FD8C) {
         player = attacker->unk124 - 1;
         if (player >= 0) {
-            src = &D_800CC2D0[player];
+            src = &g_objects[player];
         }
     }
     if (player < 0 || player >= D_8008FD8C) {
         return;
     }
-    vi = (s32)((u8 *)victim - (u8 *)D_800CC2D0) / 0x32C;
+    vi = (s32)((u8 *)victim - (u8 *)g_objects) / 0x32C;
     D_800E0FE8[vi] = player | 0x80;
     if (player < D_80090130) {
         if (D_800E1030[player] != D_800E1030[vi]) {
@@ -4909,7 +4909,7 @@ void menu_spawn_character(s32 slot, s32 character) {
     if (index == 0) {
         return;
     }
-    obj = &D_800CC2D0[index - 1];
+    obj = &g_objects[index - 1];
     *slotObj = obj;
     *(u16 *) ((u8 *) obj + 0x2F8) |= 3;
     *((u8 *) obj + 5) = 7;
@@ -4920,7 +4920,7 @@ void menu_spawn_character(s32 slot, s32 character) {
         *(void **) ((u8 *) obj + 0x31C) = work;
         bzero(work, 0x1C0);
     }
-    obj = &D_800CC2D0[index - 1];
+    obj = &g_objects[index - 1];
     if (type == 0x3B) {
         *((u8 *) obj + 0x68) = slot + 1;
     }

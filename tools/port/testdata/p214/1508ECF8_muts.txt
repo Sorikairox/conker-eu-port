@@ -16,11 +16,11 @@ s/RAIL_WORDS(0xEB0)\[i\] = RAIL_WORDS(0xEB0)\[j\];/;/
 s/if (k >= 0) {/if (k > 0) {/
 s/RAIL_WORDS(0xF70)\[k\] = i;/RAIL_WORDS(0xF70)[k] = j;/
 s/RAIL_WORDS(0x16C0)\[i\] = RAIL_WORDS(0x16C0)\[j\];/RAIL_WORDS(0x16C0)[i] = RAIL_WORDS(0x16C0)[i + 1];/
-s/obj_slots_swap(\&D_800CC2D0\[j\], obj);/obj_slots_swap(obj, \&D_800CC2D0[j]);/
-s/D_800BE9F0 == 0x3F/D_800BE9F0 == 0x3E/
+s/obj_slots_swap(\&g_objects\[j\], obj);/obj_slots_swap(obj, \&g_objects[j]);/
+s/g_level_id == 0x3F/g_level_id == 0x3E/
 s/obj->unk13C >= 100/obj->unk13C > 100/
 s/(u8) (obj->unk13C - 100)/(u8) (obj->unk13C - 99)/
-s/slot = obj - D_800CC2D0;/slot = i;/
+s/slot = obj - g_objects;/slot = i;/
 s/(carrier->unique_id - 0x14) \* 4/(carrier->unique_id - 0x13) * 4/
 s/= slot | 0x2000;/= slot | 0x1000;/
 s/(entry + 0x24DC) = slot;/(entry + 0x24DC) = 0;/
@@ -28,5 +28,5 @@ s/obj->unk31C->unk84 = 0;/;/
 s/obj->immune = 0x5A;/obj->immune = 0x5B;/
 s/obj->unk31C->unk1AA = saved1AA;/;/
 s/+ 0x1AF) = 0x40;/+ 0x1AF) = 0x41;/
-s/camera_snap_to_object(obj->camera, obj);/camera_snap_to_object(obj->camera, \&D_800CC2D0[j]);/
+s/camera_snap_to_object(obj->camera, obj);/camera_snap_to_object(obj->camera, \&g_objects[j]);/
 s/    D_80090134++;/    ;/

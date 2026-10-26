@@ -17,7 +17,7 @@ typedef struct {
     u8 pad16[0x1E];
 } struct_eu_40490_obj; // size 0x34
 
-extern void (*D_800831C0[])();
+extern void (*g_hotspot_start_handlers[])(); /* was D_800831C0 */
 
 /* was func_15013000 */
 void hotspots_start_all(void) {
@@ -31,7 +31,7 @@ void hotspots_start_all(void) {
     var_s0 = 0;
     if (D_800D3094 != 0) {
         do {
-            temp_a1 = D_800831C0[((s32) (*(u8 *)((u8 *)(&D_800D34B8[var_s0]) + 0x15)) >> 2) & 0xFF];
+            temp_a1 = g_hotspot_start_handlers[((s32) (*(u8 *)((u8 *)(&D_800D34B8[var_s0]) + 0x15)) >> 2) & 0xFF];
             if (temp_a1 != NULL) {
                 temp_a1(&D_800D34B8[var_s0], temp_a1);
             }
@@ -50,31 +50,31 @@ void hotspots_start_all(void) {
 //     D_800DCD90 = 0.0f;
 //     for (i = 0; i < D_800D3094; i++) {
 //         obj = &((struct_eu_40490_obj *)D_800D34B8)[i];
-//         func = D_800831C0[(u8)(obj->unk15 >> 2)];
+//         func = g_hotspot_start_handlers[(u8)(obj->unk15 >> 2)];
 //         if (func != NULL) {
 //             func(obj, func);
 //         }
 //     }
 // }
 
-extern s32 D_80096930[3];
-extern s32 D_8009693C[];
-extern s32 D_80096950[];
-extern s32 D_80096960[];
-extern f32 D_80096984;
-extern f32 D_80096988;
-extern f32 D_8009698C;
-extern f32 D_80096990;
-extern f32 D_800969E0;
-extern f32 D_800969E4;
-extern f32 D_800969E8;
-extern u8 D_80083228[6];
+extern s32 g_emitter_param_types5_7[3]; /* was D_80096930 */
+extern s32 g_emitter_spawn_kinds[]; /* was D_8009693C */
+extern s32 g_emitter_spawn_flags[]; /* was D_80096950 */
+extern s32 g_emitter_param_by_type[]; /* was D_80096960 */
+extern f32 g_emitter_spread_scale; /* was D_80096984 */
+extern f32 g_emitter_const_u10; /* was D_80096988 */
+extern f32 g_emitter_const_u14; /* was D_8009698C */
+extern f32 g_emitter_const_u20; /* was D_80096990 */
+extern f32 g_emitter_t8_const_0; /* was D_800969E0 */
+extern f32 g_emitter_t8_const_1; /* was D_800969E4 */
+extern f32 g_emitter_t8_const_3; /* was D_800969E8 */
+extern u8 g_emitter_target_record_ids[6]; /* was D_80083228 */
 void collision_select_area(s32);
 u8 *world_record_find(u8);
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
                   s32 arg9);
 
-/* the record record_particle_emitter_start reads (D_80082EA0 start handlers get the level record) */
+/* the record record_particle_emitter_start reads (g_record_start_handlers start handlers get the level record) */
 typedef struct {
     s16 x, y, z;        /* 0x00 */
     s16 rangeX;         /* 0x06 */
@@ -129,11 +129,11 @@ typedef struct {
 /*
  * record_particle_emitter_start: P230: start handler of a particle-emitter record. Marks the record started
  * (+0x16 |= 4) and fills a spawn block: position from the record, the "to" point = position + (0, 0, -500)
- * rotated by the record's angles (mtxf_rotate_xyz_deg / mtxf_transform_point), kind D_8009693C[colour >> 24], flags
- * D_80096950[colour >> 24] + 3, life 300, colour from +0x18, scale 1, and an optional sound
+ * rotated by the record's angles (mtxf_rotate_xyz_deg / mtxf_transform_point), kind g_emitter_spawn_kinds[colour >> 24], flags
+ * g_emitter_spawn_flags[colour >> 24] + 3, life 300, colour from +0x18, scale 1, and an optional sound
  * (opts top byte: collision_select_area(0); zone_tree_find_leaf(x, z)). The emitter block gets the ranges +6 / +8, the spreads
  * (opts bytes 1 / 0) / 255 and a per-type sub kind (+0x58); type 8 and 13..18 emitters also get a tail at +0x170
- * (types 13..18: the target object world_record_find(D_80083228[type - 13]) and its position; none -> no emitter).
+ * (types 13..18: the target object world_record_find(g_emitter_target_record_ids[type - 13]) and its position; none -> no emitter).
  */
 /* was func_150130B4 */
 s32 record_particle_emitter_start(Rec150130B4 *rec) {
@@ -170,11 +170,11 @@ s32 record_particle_emitter_start(Rec150130B4 *rec) {
     b.emit.range[0] = b.emit.range[1];
     b.emit.range[3] = rec->rangeY;
     b.emit.range[2] = b.emit.range[3];
-    b.emit.spreadX = ((rec->opts >> 8) & 0xFF) * D_80096984;
-    b.emit.spreadY = (rec->opts & 0xFF) * D_80096984;
-    b.emit.u10 = D_80096988;
-    b.emit.u14 = D_8009698C;
-    b.emit.u20 = D_80096990;
+    b.emit.spreadX = ((rec->opts >> 8) & 0xFF) * g_emitter_spread_scale;
+    b.emit.spreadY = (rec->opts & 0xFF) * g_emitter_spread_scale;
+    b.emit.u10 = g_emitter_const_u10;
+    b.emit.u14 = g_emitter_const_u14;
+    b.emit.u20 = g_emitter_const_u20;
     b.emit.u48 = 1.0f;
     b.emit.u54[0] = 0;
     b.emit.u54[1] = 0;
@@ -182,9 +182,9 @@ s32 record_particle_emitter_start(Rec150130B4 *rec) {
     b.emit.u54[3] = 0;
 
     idx = rec->colour >> 24;
-    b.spawn.kind = D_8009693C[idx];
+    b.spawn.kind = g_emitter_spawn_kinds[idx];
     b.spawn.u1 = 3;
-    b.spawn.flags = D_80096950[idx] + 3;
+    b.spawn.flags = g_emitter_spawn_flags[idx] + 3;
     b.spawn.life = 300;
     b.spawn.u8_ = 0;
     b.spawn.uC = 0;
@@ -221,20 +221,20 @@ s32 record_particle_emitter_start(Rec150130B4 *rec) {
         case 2:
         case 3:
         case 4:
-            b.emit.u54[4] = D_80096960[type];
+            b.emit.u54[4] = g_emitter_param_by_type[type];
             particle_emitter_spawn(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
             break;
         case 5:
         case 6:
         case 7:
-            b.emit.u54[4] = D_80096930[type - 5]; /* the asm indexes a stack copy of the table */
+            b.emit.u54[4] = g_emitter_param_types5_7[type - 5]; /* the asm indexes a stack copy of the table */
             particle_emitter_spawn(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
             break;
         case 8:
-            tail.t8[0] = D_800969E0;
-            tail.t8[1] = D_800969E4;
+            tail.t8[0] = g_emitter_t8_const_0;
+            tail.t8[1] = g_emitter_t8_const_1;
             tail.t8[2] = 0.0f;
-            tail.t8[3] = D_800969E8;
+            tail.t8[3] = g_emitter_t8_const_3;
             e = particle_emitter_spawn(&b.emit, 0x70, &b.spawn, 0, 0x29, 0, 0, -1, 0xFF, 1);
             if (e != NULL) {
                 memcpy(e + 0x170, tail.t8, 0x10);
@@ -244,7 +244,7 @@ s32 record_particle_emitter_start(Rec150130B4 *rec) {
         case 10:
         case 11:
         case 12:
-            b.emit.u54[4] = D_80096950[type];
+            b.emit.u54[4] = g_emitter_spawn_flags[type];
             particle_emitter_spawn(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
             break;
         case 13:
@@ -253,7 +253,7 @@ s32 record_particle_emitter_start(Rec150130B4 *rec) {
         case 16:
         case 17:
         case 18:
-            tail.t13.obj = world_record_find(D_80083228[type - 13]); /* the asm indexes a stack copy */
+            tail.t13.obj = world_record_find(g_emitter_target_record_ids[type - 13]); /* the asm indexes a stack copy */
             if (tail.t13.obj == NULL) {
                 break;
             }
@@ -280,12 +280,12 @@ s32 record_particle_emitter_start(Rec150130B4 *rec) {
     return 1;
 }
 
-// record_start_dispatch: runs the record's start handler D_80082EA0[rec->unk17] (EU 0x80083230) on the record.
+// record_start_dispatch: runs the record's start handler g_record_start_handlers[rec->unk17] (EU 0x80083230) on the record.
 /* was func_1501370C */
 s32 record_start_dispatch(struct16 *arg0) {
     u8 idx = arg0->unk17;
     /* P164 (P161 null+0x14 writer): the handlers take the record (asm 150136BC keeps a0 = arg0 at the jalr) */
-    void (*func)(struct16 *) = (void (*)(struct16 *)) D_80082EA0[idx];
+    void (*func)(struct16 *) = (void (*)(struct16 *)) g_record_start_handlers[idx];
 
     if (func != NULL) {
         func(arg0);
@@ -300,14 +300,14 @@ s32 record_start_15d088(struct16 *arg0) {
     return 1;
 }
 
-extern f32 D_800969F0;
-extern f32 D_800969F4;
+extern f32 g_rec_effect_k1; /* was D_800969F0 */
+extern f32 g_rec_effect_k2; /* was D_800969F4 */
 
 /*
  * P80: effect spawn from a record (s16 x, y, z at +0 / +2 / +4, s16 +6, s16 radius +8, f32 angles +0xC / +0x10):
  * nothing for radius 0. Else an effect (effect_node_create type 0x19) gets a 0x34-byte block: position, the unit
  * direction (0, 2r, 0) rotated by the angles (mtxf_rotate_xyz_deg / mtxf_transform_point) times 1 / 2r, 2r, (f32) +6, the two
- * angles, 0 and D_800969F0 / D_800969F4; then a sound / particle (sfx_emitter_start 0x67C) at (x, y + r, z).
+ * angles, 0 and g_rec_effect_k1 / g_rec_effect_k2; then a sound / particle (sfx_emitter_start 0x67C) at (x, y + r, z).
  */
 /* was func_15013778 */
 s32 effect_spawn_record(s16 *rec) {
@@ -336,8 +336,8 @@ s32 effect_spawn_record(s16 *rec) {
     blk.angX = *(f32 *) (rec + 6);
     blk.angY = *(f32 *) (rec + 8);
     blk.zero = 0.0f;
-    blk.k1 = D_800969F0;
-    blk.k2 = D_800969F4;
+    blk.k1 = g_rec_effect_k1;
+    blk.k2 = g_rec_effect_k2;
     blk.pos[0] = rec[0];
     blk.pos[1] = rec[1];
     blk.pos[2] = rec[2];
@@ -359,7 +359,7 @@ s32 effect_spawn_record(s16 *rec) {
 s32 record_dispatch_82ecc(struct16 *arg0) {
     u8 idx = arg0->unk17;
     /* P76: the handlers take the record (a0 still holds arg0 at the jalr; record_emitter_start writes arg0->unk16) */
-    void (*func)(struct16 *) = (void (*)(struct16 *)) D_80082ECC[idx];
+    void (*func)(struct16 *) = (void (*)(struct16 *)) g_record_dispatch_82ecc_tbl[idx];
 
     if (func != NULL) {
         func(arg0);
@@ -389,7 +389,7 @@ typedef struct {
     u8 unk34;
     u8 pad35[3];
 } Ent150139AC;
-extern Ent150139AC D_80096350[];
+extern Ent150139AC g_ambient_effect_presets[]; /* was D_80096350 */
 typedef struct {
     s16 unk0;
     s16 unk2;
@@ -405,8 +405,8 @@ typedef struct {
     u8 unk17;
     s32 unk18;
 } Obj150139AC;
-extern f32 D_800969F8;
-extern f32 D_800969FC;
+extern f32 g_ambient_effect_size_scale; /* was D_800969F8 */
+extern f32 g_ambient_effect_const_48; /* was D_800969FC */
 
 /* was func_150139AC */
 s32 record_ambient_effect_start(Obj150139AC *arg0) {
@@ -457,7 +457,7 @@ s32 record_ambient_effect_start(Obj150139AC *arg0) {
         break;
     case 0:
     case 1:
-        tmp.unk4 = arg0->unk6 * arg0->unk6 * D_800969F8;
+        tmp.unk4 = arg0->unk6 * arg0->unk6 * g_ambient_effect_size_scale;
         tmp.unk10 = arg0->unk2 + arg0->unk8;
         break;
     default:
@@ -465,7 +465,7 @@ s32 record_ambient_effect_start(Obj150139AC *arg0) {
         tmp.unk10 = 1000.0f;
         break;
     }
-    e = &D_80096350[idx];
+    e = &g_ambient_effect_presets[idx];
     tmp.unk14 = e->unk4;
     tmp.unk18 = e->unk8;
     tmp.unk1C = e->unkC;
@@ -482,7 +482,7 @@ s32 record_ambient_effect_start(Obj150139AC *arg0) {
     tmp.unk40 = e->unk30;
     tmp.unk41 = e->unk31;
     tmp.unk42 = e->unk32;
-    tmp.unk48 = D_800969FC;
+    tmp.unk48 = g_ambient_effect_const_48;
     tmp.unk60 = 0;
     tmp.unk64 = 0;
     tmp.unk65 = 0;
@@ -505,7 +505,7 @@ s32 record_ambient_effect_start(Obj150139AC *arg0) {
     return 1;
 }
 
-extern void (*D_800832B8[])(struct134 *, f32);
+extern void (*g_record_scripted_handlers[])(struct134 *, f32); /* was D_800832B8 */
 
 /* was func_15013C38 */
 s32 record_scripted_dispatch(struct134 *arg0) {
@@ -513,7 +513,7 @@ s32 record_scripted_dispatch(struct134 *arg0) {
     void (*func)(struct134 *, f32);
 
     arg0->unk16 |= 4;
-    if ((((u8 *)D_800D2E4C)[0x11] & 4) && (D_800BE9F0 == 19)) {
+    if ((((u8 *)D_800D2E4C)[0x11] & 4) && (g_level_id == 19)) {
         return 1;
     }
     if ((D_800C35EA == 1) && ((D_800C3A08 == 15) || (D_800C3A08 == 16) || (D_800C3A08 == 17))) {
@@ -522,9 +522,9 @@ s32 record_scripted_dispatch(struct134 *arg0) {
     if (idx >= 6) {
         return 1;
     }
-    func = D_800832B8[idx];
+    func = g_record_scripted_handlers[idx];
     if (func != NULL) {
-        f32 val = (u32)arg0->unk1C * D_80096A00;
+        f32 val = (u32)arg0->unk1C * g_rec_scripted_param_scale;
         func(arg0, val);
     }
     return 1;
@@ -545,16 +545,16 @@ s32 record_emitter_start(struct134 *arg0) {
 }
 
 s32 spark_spawn_from_desc(f32 *, s32, s32, s32, s32, s32);
-extern f32 D_80096A04;
-extern f32 D_80096A08;
-extern f32 D_80096A0C;
-extern f32 D_80096A10;
-extern f32 D_80096A14;
-extern f32 D_80096A18;
-extern f32 D_80096A1C;
-extern f32 D_80096A20;
-extern f32 D_80096A24;
-extern f32 D_80096A28;
+extern f32 g_burst_size_scale_b; /* was D_80096A04 */
+extern f32 g_burst_size_scale_c; /* was D_80096A08 */
+extern f32 g_burst_const_6c; /* was D_80096A0C */
+extern f32 g_burst_const_70; /* was D_80096A10 */
+extern f32 g_burst_const_74; /* was D_80096A14 */
+extern f32 g_burst_mul_3c; /* was D_80096A18 */
+extern f32 g_burst_mul_44; /* was D_80096A1C */
+extern f32 g_burst_mul_40; /* was D_80096A20 */
+extern f32 g_burst_mul_48; /* was D_80096A24 */
+extern f32 g_burst_mul_4c; /* was D_80096A28 */
 
 /* was func_15013DE8 */
 s32 record_particle_burst_start(u8 *arg0) {
@@ -591,8 +591,8 @@ s32 record_particle_burst_start(u8 *arg0) {
     f32 c;
 
     arg0[0x16] |= 4;
-    b = *(s16 *)(arg0 + 6) * D_80096A04;
-    c = *(s16 *)(arg0 + 8) * D_80096A08;
+    b = *(s16 *)(arg0 + 6) * g_burst_size_scale_b;
+    c = *(s16 *)(arg0 + 8) * g_burst_size_scale_c;
     sp.u50 = 0x6231; sp.u52 = 0x1A4D;
     sp.u56 = 0;
     sp.u57 = 0;
@@ -604,18 +604,18 @@ s32 record_particle_burst_start(u8 *arg0) {
     sp.u5E = 0;
     sp.u5F = 0;
     sp.u64 = 0;
-    sp.u6C = D_80096A0C;
+    sp.u6C = g_burst_const_6c;
     sp.u30 = *(s16 *)(arg0 + 0);
     sp.u34 = *(s16 *)(arg0 + 2);
     sp.u38 = *(s16 *)(arg0 + 4);
     sp.u54 = 0x12C;
     sp.u68 = 0.0f;
-    sp.u70 = D_80096A10;
-    sp.u74 = D_80096A14;
+    sp.u70 = g_burst_const_70;
+    sp.u74 = g_burst_const_74;
     sp.u5C = (random_int() % 56U) + 0xC8;
-    sp.u3C = D_80096A18 * b;
-    sp.u44 = D_80096A1C * b;
-    sp.u40 = D_80096A20 * c; sp.u48 = D_80096A24 * c; sp.u4C = D_80096A28 * c;
+    sp.u3C = g_burst_mul_3c * b;
+    sp.u44 = g_burst_mul_44 * b;
+    sp.u40 = g_burst_mul_40 * c; sp.u48 = g_burst_mul_48 * c; sp.u4C = g_burst_mul_4c * c;
 
     spark_spawn_from_desc(&sp.u30, 0xA, 1, (u8)((*(s32 *)(arg0 + 0x18) != 0) ? 2 : 1), 0xFF, 1);
     return 1;
@@ -631,7 +631,7 @@ s32 record_start_1cd2c0(s32 arg0) {
 /* was func_15013FC4 */
 s32 record_dispatch_82f40(struct133 *arg0) {
     s32 idx = ((u8 *)arg0)[0x1B];
-    void (*func)(void) = D_80082F40[idx];
+    void (*func)(void) = g_record_dispatch_82f40_tbl[idx];
 
     if (func != NULL) {
         func();
@@ -659,14 +659,14 @@ s32 record_register_d9a20(struct134 *arg0) {
     if (temp_v0 == 0) {
         D_800D9A20 = arg0;
     } else if (temp_v0 == 1) {
-        D_800D9A24 = arg0;
+        g_spawn_region_record_1 = arg0;
     }
     return 1;
 }
 
 /* was func_1501407C */
 s32 record_clear_d987c(s32 arg0) {
-    D_800D987C = (u8)0;
+    g_record_flag_d987c = (u8)0;
     return 1;
 }
 
@@ -705,7 +705,7 @@ s32 record_kind_effect_start(struct134 *arg0) {
     s32 f1 = (flags & 1) ? 1 : 0;
     s32 f10 = (flags & 0x10) ? 0x10 : 0;
 
-    kind_effect_spawn(f10 | f1 | f2 | f4 | f8, ((u8 *)arg0)[0x1F], arg0, 0, D_80096A2C, 100.0f, -1, 255, 1);
+    kind_effect_spawn(f10 | f1 | f2 | f4 | f8, ((u8 *)arg0)[0x1F], arg0, 0, g_rec_kind_effect_param, 100.0f, -1, 255, 1);
     return 1;
 }
 
@@ -735,12 +735,12 @@ s32 record_register_d9aa0(struct134 *arg0) {
     if (idx < 0 || idx >= 3) {
         return 1;
     }
-    D_800D9AA0[idx] = arg0;
+    g_view_sparkle_spots[idx] = arg0;
     return 1;
 }
 
-extern f32 D_80096A30;
-extern f32 D_80096A34;
+extern f32 g_effect29_size_scale; /* was D_80096A30 */
+extern f32 g_effect29_radius_scale; /* was D_80096A34 */
 
 /* was func_150142EC */
 s32 record_effect29_start(struct134 *arg0) {
@@ -763,17 +763,17 @@ s32 record_effect29_start(struct134 *arg0) {
     if (D_80082FA0 >= 2) {
         return 1;
     }
-    if ((((u8 *)D_800D2E4C)[0x11] & 4) && (D_800BE9F0 == 19)) {
+    if ((((u8 *)D_800D2E4C)[0x11] & 4) && (g_level_id == 19)) {
         return 1;
     }
-    a = ((u32)arg0->unk1C & 0xFFFF) * D_80096A30;
-    b = (((u32)arg0->unk1C >> 16) & 0xFFFF) * D_80096A30;
-    c = ((u32)arg0->unk20 & 0xFFFF) * D_80096A30;
-    d = (((u32)arg0->unk20 >> 16) & 0xFFFF) * D_80096A30;
+    a = ((u32)arg0->unk1C & 0xFFFF) * g_effect29_size_scale;
+    b = (((u32)arg0->unk1C >> 16) & 0xFFFF) * g_effect29_size_scale;
+    c = ((u32)arg0->unk20 & 0xFFFF) * g_effect29_size_scale;
+    d = (((u32)arg0->unk20 >> 16) & 0xFFFF) * g_effect29_size_scale;
     r = spawn_region_volume((struct_eu_15144598 *)arg0);
     tmp.unk0 = arg0;
-    tmp.unk4 = a * r * D_80096A34;
-    tmp.unk8 = b * r * D_80096A34;
+    tmp.unk4 = a * r * g_effect29_radius_scale;
+    tmp.unk8 = b * r * g_effect29_radius_scale;
     tmp.unkC = c;
     tmp.unk10 = d;
     tmp.unk14 = 0.0f;
@@ -861,13 +861,13 @@ typedef struct {
     u32 colour;         /* 0x18: bytes 0..3 copied little end first */
     u32 params;         /* 0x1C: four 0..255 parameters, low byte first */
 } Rec1501474C;
-extern f32 D_80096A40;
-extern f32 D_80096A44;
+extern f32 g_zone_box_deg_to_rad_sin; /* was D_80096A40 */
+extern f32 g_zone_box_deg_to_rad_cos; /* was D_80096A44 */
 f32 sinf(f32);
 f32 cosf(f32);
 
 // record_zone_box_start: start handler (s32, returns 1) of a box-zone level record: marks it started (+0x16 |= 4),
-// rotates the rectangle (+-halfX, +-halfZ) by the record's yaw (sinf(angY * D_80096A40), cosf(angY * D_80096A44))
+// rotates the rectangle (+-halfX, +-halfZ) by the record's yaw (sinf(angY * g_zone_box_deg_to_rad_sin), cosf(angY * g_zone_box_deg_to_rad_cos))
 // around (x, z) and hands a 0x40-byte block to a new effect_node_create object (type 0x12C, 0x2C; +0x28): two opposite
 // corners, the two edge vectors from them, the top (y + height) and bottom y, parameters 0 / 1 as (p / 256) * 0.5,
 // 0, parameters 2 / 3 as (p / 256) * 250, and the colour bytes in reverse order.
@@ -897,8 +897,8 @@ s32 record_zone_box_start(Rec1501474C *rec) {
     rec->flags16 |= 4;
     cx = rec->x;
     cz = rec->z;
-    sn = sinf(rec->angY * D_80096A40);
-    cs = cosf(rec->angY * D_80096A44);
+    sn = sinf(rec->angY * g_zone_box_deg_to_rad_sin);
+    cs = cosf(rec->angY * g_zone_box_deg_to_rad_cos);
     c[0][0] = rec->halfX * cs + cx + rec->halfZ * sn;
     c[0][1] = rec->halfZ * cs + cz - rec->halfX * sn;
     c[1][0] = rec->halfX * cs + cx + (f32) -rec->halfZ * sn;
@@ -941,20 +941,20 @@ typedef struct {
     u32 sizeXY;         /* 0x18: two u16 sizes, low half first */
     u32 sizeZW;         /* 0x1C: two more u16 values */
 } Rec15014B60;
-extern f32 D_80096A48;
-extern f32 D_80096A4C;
-extern f32 D_80096A50;
-extern f32 D_80096A54;
-extern f32 D_80096A58;
-extern f32 D_80096A5C;
-extern f32 D_80096A60;
-extern u8 D_800A0D08[]; /* 6 rgb triples */
+extern f32 g_light_ring_angle_scale_0; /* was D_80096A48 */
+extern f32 g_light_ring_angle_scale_1; /* was D_80096A4C */
+extern f32 g_light_ring_size_scale_a; /* was D_80096A50 */
+extern f32 g_light_ring_size_scale_b; /* was D_80096A54 */
+extern f32 g_light_ring_angle_scale_2; /* was D_80096A58 */
+extern f32 g_light_ring_u3c_scale_a; /* was D_80096A5C */
+extern f32 g_light_ring_u3c_scale_b; /* was D_80096A60 */
+extern u8 g_light_ring_colours[]; /* 6 rgb triples; was D_800A0D08 */
 
 // record_light_ring_start: start handler (s32, returns 1) of a level record: marks it started (+0x16 |= 4) and
 // builds a 0x48-byte block for a new effect_node_create object (type 0x12C, 0x2E, kind 0x29; +0x28): the position, three
-// random angles ((u16) (random_int() * osGetCount()) scaled by D_80096A48 / 4C / 58 and 360), three sizes from the
-// record's u16 halves (* D_80096A50 * D_80096A54), six lights (light_create_with_ctrl at the record position, colour
-// D_800A0D08[i], red in level 0x40), a fourth value (* D_80096A5C * D_80096A60), the record and a 1 byte. When
+// random angles ((u16) (random_int() * osGetCount()) scaled by g_light_ring_angle_scale_0 / 4C / 58 and 360), three sizes from the
+// record's u16 halves (* g_light_ring_size_scale_a * g_light_ring_size_scale_b), six lights (light_create_with_ctrl at the record position, colour
+// g_light_ring_colours[i], red in level 0x40), a fourth value (* g_light_ring_u3c_scale_a * g_light_ring_u3c_scale_b), the record and a 1 byte. When
 // no object is free the lights are freed again (node_destroy).
 /* was func_15014B60 */
 s32 record_light_ring_start(Rec15014B60 *rec) {
@@ -988,15 +988,15 @@ s32 record_light_ring_start(Rec15014B60 *rec) {
     blk.pos[1] = rec->y;
     blk.pos[2] = rec->z;
     t = osGetCount();
-    blk.ang[0] = (u16) (random_int() * t) * D_80096A48 * 360.0f;
+    blk.ang[0] = (u16) (random_int() * t) * g_light_ring_angle_scale_0 * 360.0f;
     t = osGetCount();
-    blk.ang[1] = (u16) (random_int() * t) * D_80096A4C * 360.0f;
+    blk.ang[1] = (u16) (random_int() * t) * g_light_ring_angle_scale_1 * 360.0f;
     t = osGetCount();
-    blk.ang[2] = (u16) (random_int() * t) * D_80096A58 * 360.0f;
-    blk.size[0] = (rec->sizeXY & 0xFFFF) * D_80096A50 * D_80096A54;
-    blk.size[1] = ((rec->sizeXY >> 16) & 0xFFFF) * D_80096A50 * D_80096A54;
-    blk.size[2] = (rec->sizeZW & 0xFFFF) * D_80096A50 * D_80096A54;
-    blk.u3C = ((rec->sizeZW >> 16) & 0xFFFF) * D_80096A5C * D_80096A60;
+    blk.ang[2] = (u16) (random_int() * t) * g_light_ring_angle_scale_2 * 360.0f;
+    blk.size[0] = (rec->sizeXY & 0xFFFF) * g_light_ring_size_scale_a * g_light_ring_size_scale_b;
+    blk.size[1] = ((rec->sizeXY >> 16) & 0xFFFF) * g_light_ring_size_scale_a * g_light_ring_size_scale_b;
+    blk.size[2] = (rec->sizeZW & 0xFFFF) * g_light_ring_size_scale_a * g_light_ring_size_scale_b;
+    blk.u3C = ((rec->sizeZW >> 16) & 0xFFFF) * g_light_ring_u3c_scale_a * g_light_ring_u3c_scale_b;
     ipos[0] = rec->x;
     ipos[1] = rec->y;
     ipos[2] = rec->z;
@@ -1005,14 +1005,14 @@ s32 record_light_ring_start(Rec15014B60 *rec) {
         req.u1 = -1;
         req.life = 300;
         req.u4 = 0;
-        if (D_800BE9F0 == 0x40) {
+        if (g_level_id == 0x40) {
             r = 0xFF;
             g = 0;
             b = 0;
         } else {
-            r = D_800A0D08[i * 3];
-            g = D_800A0D08[i * 3 + 1];
-            b = D_800A0D08[i * 3 + 2];
+            r = g_light_ring_colours[i * 3];
+            g = g_light_ring_colours[i * 3 + 1];
+            b = g_light_ring_colours[i * 3 + 2];
         }
         blk.light[i] = light_create_with_ctrl((Header *) &req, (Header2 *) ipos, 5, r, g, b, 0xFF, 0, 0, 0xFF, 0);
     }
@@ -1140,7 +1140,7 @@ s32 record_effect60_start(struct134 *arg0) {
     tmp.unk3D = 0;
     tmp.unk3C = 0;
     tmp.unk38 = 0;
-    tmp.unk20 = D_80096A64;
+    tmp.unk20 = g_effect60_const_20;
     collision_select_area(0);
     tmp.unk44 = zone_tree_find_leaf(arg0->unk0, arg0->unk4);
     temp_v0 = effect_node_create(300, -1, 60, -1, 0, 45, 72, 255, 0);
@@ -1159,7 +1159,7 @@ s32 record_dispatch_82f70(struct134 *arg0) {
         return 1;
     }
 
-    func = D_80082F70[idx];
+    func = g_record_dispatch_82f70_tbl[idx];
     if (func != NULL) {
         func();
     }
@@ -1168,7 +1168,7 @@ s32 record_dispatch_82f70(struct134 *arg0) {
 }
 
 
-/* the level record record_quad_zone_start reads (D_80082EA0 entry 0x34) */
+/* the level record record_quad_zone_start reads (g_record_start_handlers entry 0x34) */
 typedef struct {
     s16 x, y, z;        /* 0x00 */
     s16 halfX;          /* 0x06 */
@@ -1179,7 +1179,7 @@ typedef struct {
     u8 started;         /* 0x14 */
 } Rec15015354;
 
-// record_quad_zone_start: start handler (void, D_80082EA0 entry 0x34) of a rectangular zone record: marks it started
+// record_quad_zone_start: start handler (void, g_record_start_handlers entry 0x34) of a rectangular zone record: marks it started
 // (+0x14 = 1), turns the rectangle (+-halfX, 0, +-halfZ) around the record's position by its angles (mtxf_rotate_xyz_deg /
 // mtxf_transform_point) into 4 world corners, stores the 4 edge vectors (next corner - corner) and the sound id of the spot
 // (collision_select_area(0); zone_tree_find_leaf(x, z)), and hands that 0x74-byte block to a new effect_node_create object (+0x28).
@@ -1288,15 +1288,15 @@ s32 record_rope_zone_start(u8 *rec) {
     } zone;
     s32 i;
 
-    if (D_800BE9F0 == 0xB) {
+    if (g_level_id == 0xB) {
         if (*(u32 *) (rec + 0x18) < 6) {
             return 1;
         }
-    } else if (D_800BE9F0 == 0x2C) {
+    } else if (g_level_id == 0x2C) {
         if (*(u32 *) (rec + 0x18) < 7) {
             return 1;
         }
-    } else if (D_800BE9F0 == 0x26) {
+    } else if (g_level_id == 0x26) {
         if (*(u32 *) (rec + 0x18) < 2) {
             return 1;
         }

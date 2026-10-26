@@ -197,7 +197,7 @@ void idle_mode_update(void)
 {
   u8 *p;
   s32 type;
-  p = (u8 *)D_800D154C->unk31C;
+  p = (u8 *)g_cur_obj->unk31C;
   type = p[0x64];
   p += 0x58;
   if (type == 0) {
@@ -253,13 +253,13 @@ typedef struct {
  * request (3), the "bored" set 0xB / 0xC (ctl +0x66 with no character idle, 0xC after 100 frames, which also
  * resets the mode and calls obj_broadcast_bored), 0 when hurt (health < 2), held (move_watch_state_matches) or the timer is
  * still below idle_delay_random(mode). Otherwise idle_mode_update updates the mode and a group is chosen: by state /
- * character / level (D_800BE9F0) / D_800D18C0 & 1, else by the mode (0, 1, plus 3 in mode 2 after 4 sets
+ * character / level (g_level_id) / D_800D18C0 & 1, else by the mode (0, 1, plus 3 in mode 2 after 4 sets
  * when obj_near_reachable_node). idle_list_filter_recent filters the list against the recent sets; a random survivor becomes
  * ctl +0x5C (entry 0) and is pushed onto recent[] (idle_recent_push; idle_recent_remove first drops it when
  * idle_list_filter_recent says it was already there). */
 /* was func_1507F3B0 */
 void idle_choose_next_set(void) {
-    struct127 *rec = D_800D154C;
+    struct127 *rec = g_cur_obj;
     IdleState *st = (IdleState *)((u8 *)rec->unk31C + 0x58);
     struct126 *ctl;
     u8 list[40];
@@ -289,20 +289,20 @@ void idle_choose_next_set(void) {
             id = 0xC;
             st->timer = 0;
             st->mode = 0;
-            obj_broadcast_bored((u8 *)D_800D154C);
+            obj_broadcast_bored((u8 *)g_cur_obj);
         }
         idle_list_add(list, &n, id);
         goto choose;
     }
     if (rec->health < 2
-        || move_watch_state_matches((u8 *)&D_800CC2D0[D_800C3E78], 0, 0, -1, -1, -1) != 0
+        || move_watch_state_matches((u8 *)&g_objects[g_cur_obj_index], 0, 0, -1, -1, -1) != 0
         || st->timer < idle_delay_random(st->mode)) {
         idle_list_add(list, &n, 0);
         goto choose;
     }
 
     idle_mode_update();
-    rec = D_800D154C;
+    rec = g_cur_obj;
     group = -1;
     if (rec->unk2F8 & 0x200) {
         group = 2;
@@ -314,12 +314,12 @@ void idle_choose_next_set(void) {
         group = 0xA;
     } else if (attachment_find_by_slot((u8 *)rec, 0x17, 0) != NULL) {
         group = 6;
-    } else if (D_800BE9F0 == 0x31) {
+    } else if (g_level_id == 0x31) {
         group = (D_800D18C0 & 4) ? 8 : 7;
-    } else if (D_800D154C->id == 0x96) {
+    } else if (g_cur_obj->id == 0x96) {
         group = 2;
     } else {
-        switch (D_800BE9F0) {
+        switch (g_level_id) {
             case 0x0E: case 0x10: case 0x1B: case 0x1C: case 0x1E: case 0x23:
             case 0x26: case 0x28: case 0x2F: case 0x36: case 0x3A:
                 group = 2;
@@ -340,7 +340,7 @@ void idle_choose_next_set(void) {
         idle_list_add_group((s32)list, &n, 0);
     } else {
         idle_list_add_group((s32)list, &n, 1);
-        if (st->mode == 2 && st->count >= 4 && obj_near_reachable_node(D_800D154C) != 0) {
+        if (st->mode == 2 && st->count >= 4 && obj_near_reachable_node(g_cur_obj) != 0) {
             idle_list_add_group((s32)list, &n, 3);
         }
     }
@@ -368,7 +368,7 @@ choose:
  * (no set, or the set's list ends with 0: then set and entry are cleared), else 0. */
 /* was func_1507F834 */
 s32 idle_set_advance(void) {
-    IdleState *st = (IdleState *)((u8 *)D_800D154C->unk31C + 0x58);
+    IdleState *st = (IdleState *)((u8 *)g_cur_obj->unk31C + 0x58);
 
     if (st->set == 0) {
         return 1;
@@ -393,7 +393,7 @@ s32 idle_delay_random(s32 arg0) {
         var_a0 = 0x32;
         goto block_7;
     }
-    if (D_800BE9F0 == 0x31) {
+    if (g_level_id == 0x31) {
         return 0;
     }
     var_v1 = 0;
@@ -445,7 +445,7 @@ s32 idle_set_advance(void);
 extern u8 *D_80086F40[];
 extern u8 D_8009BC80[][8];
 
-/* P60: idle animation of the current player record D_800D154C (D_800C3E78 = its index, players only; not when
+/* P60: idle animation of the current player record g_cur_obj (g_cur_obj_index = its index, players only; not when
  * D_800C35EA == 1 or the record's +5 is 4). Marks the controller's idle state (ctl +0x58 = 1); while the idle
  * delay ctl +0x59 runs it counts down. Out of health: player_hit_reaction(rec, 0). Else the run / jump locks and the
  * turn are reset and an idle animation is chosen: ctl +0x17 (random 0x4F / 0x4D), a per-character idle
@@ -465,13 +465,13 @@ void player_idle_animation(void) {
     if (D_800C35EA == 1) {
         return;
     }
-    rec = D_800D154C;
-    if (rec->unk5 == 4 || D_800C3E78 >= D_8008FD8C) {
+    rec = g_cur_obj;
+    if (rec->unk5 == 4 || g_cur_obj_index >= D_8008FD8C) {
         return;
     }
     ctl = rec->unk31C;
     ctl->unk58 = 1;
-    if ((D_800D154C->unk2F8 & 0x20) || D_800D154C->unk31C->unk120 != 0) {
+    if ((g_cur_obj->unk2F8 & 0x20) || g_cur_obj->unk31C->unk120 != 0) {
         return;
     }
     if (ctl->unk59 > 0) {
@@ -479,28 +479,28 @@ void player_idle_animation(void) {
         ctl->unk5A = 0;
         return;
     }
-    rec = D_800D154C;
+    rec = g_cur_obj;
     if (rec->health == 0) {
         player_hit_reaction(rec, 0);
         return;
     }
     if (rec->disable_run >= 0xFA) {
-        D_800D154C->disable_run = 0;
+        g_cur_obj->disable_run = 0;
     }
-    if (D_800D154C->disable_jump == 0xFF) {
-        D_800D154C->disable_jump = 0;
+    if (g_cur_obj->disable_jump == 0xFF) {
+        g_cur_obj->disable_jump = 0;
     }
-    D_800D154C->unk83 = 0;
-    D_800D154C->unkAA = 0;
-    D_800D154C->unk76 = D_800D154C->unk7A;
-    D_800D154C->unk100 &= ~1;
-    D_800D154C->unk2F8 &= ~7;
+    g_cur_obj->unk83 = 0;
+    g_cur_obj->unkAA = 0;
+    g_cur_obj->unk76 = g_cur_obj->unk7A;
+    g_cur_obj->unk100 &= ~1;
+    g_cur_obj->unk2F8 &= ~7;
 
-    rec = D_800D154C;
+    rec = g_cur_obj;
     ctl = rec->unk31C;
     if (ctl->pad17[0] != 0) {
         anim = (random_int() & 3) ? 0x4D : 0x4F;
-        obj_start_anim(D_800D154C, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
+        obj_start_anim(g_cur_obj, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
         return;
     }
     ch = ctl->unk78;
@@ -561,7 +561,7 @@ void player_idle_animation(void) {
     }
 
     if (idle_set_advance() != 0) {
-        rec = D_800D154C;
+        rec = g_cur_obj;
         if (rec->unk31C->unk198 != 0 && ctl->unk5C == 0) {
             switch (rec->unk31C->unk78) {
                 case 0x03: anim = 0x2C; break;
@@ -580,7 +580,7 @@ void player_idle_animation(void) {
 
     e = D_8009BC80[D_80086F40[ctl->unk5C][ctl->unk5D]];
     if (D_80086F40[ctl->unk5C][ctl->unk5D] == 0) {
-        rec = D_800D154C;
+        rec = g_cur_obj;
         switch (rec->unk31C->unk78) {
             case 0x09: anim = 0x3A; break;
             case 0x23: anim = 0x42; break;
@@ -597,7 +597,7 @@ void player_idle_animation(void) {
             e = D_8009BC80[anim];
         }
     }
-    obj_start_anim(D_800D154C, *(u16 *) e, e[2] * 0.01f, e[3] * 0.1f, 0.0f, 0.0f, 0);
+    obj_start_anim(g_cur_obj, *(u16 *) e, e[2] * 0.01f, e[3] * 0.1f, 0.0f, 0.0f, 0);
     ctl->unk58 = 1;
     ctl->unk59 = e[4];
 }
@@ -729,7 +729,7 @@ void obj_broadcast_bored(u8 *arg0)
 }
 
 // obj_near_reachable_node: P256: 1 when `obj` stands in a zone of kind 5 or 0xB (trigger_find_at_point(4, kind, truncated
-// x, y, z)) and one of the nodes of the lists D_800DD280[0][0x15 / 0x16 / 0x17] (position at node +0x98) lies within
+// x, y, z)) and one of the nodes of the lists g_node_lists[0][0x15 / 0x16 / 0x17] (position at node +0x98) lies within
 // 1000 units (squared distance < D_8009C0DC = 1e6) and passes look_point_in_joint_range(obj index, joints 0 / 0, node position,
 // out, 90.0f, 0, 0); else 0. The list ids come from D_80086FF0 {0x15, 0x16, 0x17} (struct copy to the stack).
 s32 trigger_find_at_point(s32, s32, s32 x, s32 y, s32 z);
@@ -752,13 +752,13 @@ s32 obj_near_reachable_node(struct127 *obj) {
         return 0;
     }
     for (k = 0; k < 3; k++) {
-        for (node = D_800DD280[0][lists.id[k]]; node != NULL; node = node->next) {
+        for (node = g_node_lists[0][lists.id[k]]; node != NULL; node = node->next) {
             pos = (f32 *) ((u8 *) node + 0x98);
             dx = pos[0] - obj->x_position;
             dy = pos[1] - obj->y_position;
             dz = pos[2] - obj->z_position;
             if (dx * dx + dy * dy + dz * dz < 1000000.0f &&
-                look_point_in_joint_range(obj - D_800CC2D0, 0, 0, pos[0], pos[1], pos[2], out, 90.0f, 0, 0) != 0) {
+                look_point_in_joint_range(obj - g_objects, 0, 0, pos[0], pos[1], pos[2], out, 90.0f, 0, 0) != 0) {
                 return 1;
             }
         }

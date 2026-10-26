@@ -1,12 +1,12 @@
 s/if (D_8002C068 == 0) {/if (D_8002C068 != 0) {/
-s/D_8002AC5C = 1;/D_8002AC5C = 2;/
+s/g_eeprom_writes_disabled = 1;/g_eeprom_writes_disabled = 2;/
 s/osStopThread(&D_80035C70);/osStopThread(\&D_80031AE0);/
 s/osSetThreadPri(NULL, 11);/osSetThreadPri(NULL, 12);/
 s/if (D_8002AE14 != 0) {/if (D_8002AE14 == 0) {/
 s/any = 1;/any = 2;/
 s/if (any == 1 \&\& D_8002AE18 == 0) {/if (any == 1 || D_8002AE18 == 0) {/
-s/osRecvMesg(&D_800BE900, &D_800BEDB0, OS_MESG_BLOCK);/osRecvMesg(\&D_800BE900, \&D_800BEDB0, OS_MESG_NOBLOCK);/
-s/os_motor_init(&D_800BE900, &D_800BEB80\[i\], i);/os_motor_init(\&D_800BE900, \&D_800BEB80[i], 0);/
+s/osRecvMesg(&g_si_mesg_queue, &D_800BEDB0, OS_MESG_BLOCK);/osRecvMesg(\&g_si_mesg_queue, \&D_800BEDB0, OS_MESG_NOBLOCK);/
+s/os_motor_init(&g_si_mesg_queue, &D_800BEB80\[i\], i);/os_motor_init(\&g_si_mesg_queue, \&D_800BEB80[i], 0);/
 s/os_motor_stop(&D_800BEB80\[i\]);/os_motor_stop(\&D_800BEB80[0]);/
 s/D_800BED68\[i\] = 0;/D_800BED64[i] = 0;/
 s/D_8003BFC0 + 0x22ADD7/D_8003BFC0 + 0x22ADD8/

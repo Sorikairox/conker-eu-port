@@ -106,7 +106,7 @@ void tank_mark_driver_view(u8 *arg0) {
             var_v0 = arg0[0x124];
         }
         if (((u16 **)D_800BE728[0])[var_v0][0] & 0x10) {
-            temp_v1 = &D_800CC2D0[var_v0];
+            temp_v1 = &g_objects[var_v0];
             if (*((u8 *)temp_v1->unk31C + 0x197) != 0) {
                 cam = temp_v1->camera;
                 if (cam != NULL) {
@@ -140,7 +140,7 @@ void tank_set_track_speeds(u8 *arg0, s32 arg1, s32 arg2) {
 // tank_update: per-frame update of a drivable tank (multiplayer Tank / PLAY barrel; ids 0x77 / 0x28 also drive the
 // track animation). The driver is player +0x124 (cleared here: player 0 in single player) or, in multiplayer
 // (D_800BE616), player +0x127 (0xFF = none); `pad` = D_800BE748 entry (6 bytes: u16 flags, s8 stick x at +2, s8 stick
-// y at +3), buttons = D_800BE728[0][player][0], the driver's part = D_800CC2D0[player] +0x31C.
+// y at +3), buttons = D_800BE728[0][player][0], the driver's part = g_objects[player] +0x31C.
 //  - Driven when the driver's part +0x84 is 0 (multiplayer) or the tank has +0x13C (single player, which also sets the
 //    skid state +0xD0 = 1 / 2 with +0x114 = 2.0 above |speed| 5). Boost: part +0x128 bit 0 + button 0x8000 with the
 //    boost timer (part +0x12C, u16, minus D_800BE9E4 per frame; rail_pickup_slot_release(player, 0) when it runs out) doubles
@@ -149,7 +149,7 @@ void tank_set_track_speeds(u8 *arg0, s32 arg1, s32 arg2) {
 //    -4..4 when centred), heading +0x78 = +0x7A - steer * rate (rate from the speed, at least 10). Button 0x10
 //    (brake; single player, or part +0x128 bit 2) stops the tank and sets part +0x75 / +0x78 to 0x1F.
 //    Throttle +0x44 = stick y * gain (0 while +0x89 counts down). D_800BEB30 bit 0x2000 fires (aiscript_find_by_kind).
-//  - Not driven: ctl_decay_button_latches (AI) while D_800C3E78 < D_8008FD8C.
+//  - Not driven: ctl_decay_button_latches (AI) while g_cur_obj_index < D_8008FD8C.
 //  - Then obj_state_common_update (physics; skipped in multiplayer while part +0x120 is set), the hit reactions (+0x232 = 0xD,
 //    single-player squash / bounce on player +0x124), the track speeds (tank_set_track_speeds), the turret: auto-aim at
 //    object part +0x129 (with +0x12A lead) when the driver's part +0x84 is set, else (driven) D-pad yaw (flags
@@ -224,10 +224,10 @@ void tank_update(struct127 *o) {
     } else {
         player = ob[0x127];
         if (player != 0xFF) {
-            if (((u8 *) D_800CC2D0[player].unk31C)[0x84] == 0) {
+            if (((u8 *) g_objects[player].unk31C)[0x84] == 0) {
                 driven = 1;
             }
-            drv = &D_800CC2D0[player];
+            drv = &g_objects[player];
             if (drv->health != 0) {
                 part = TANK_PART(drv);
                 if (part[0x128] & 0x80) {
@@ -250,7 +250,7 @@ void tank_update(struct127 *o) {
     }
 
     if (driven) {
-        drv = &D_800CC2D0[player];
+        drv = &g_objects[player];
         gain = 0.0f;
         brake = 0;
         alive = drv->health;
@@ -310,7 +310,7 @@ void tank_update(struct127 *o) {
         *(f32 *) (ob + 0x44) = (f32) (s8) PAD(player)[3] * gain;
         TANK_PART(drv)[0x75] = brake;
         TANK_PART(drv)[0x78] = brake;
-    } else if (D_800C3E78 < D_8008FD8C) {
+    } else if (g_cur_obj_index < D_8008FD8C) {
         btn = player;
         ctl_decay_button_latches(o);
         if (btn < 4 && (PAD_BUTTONS(player) & 0x2000)) {
@@ -322,7 +322,7 @@ void tank_update(struct127 *o) {
     }
     ob[0x247] = 0x32;
     ob[0x248] = 0x32;
-    if (D_800BE616 == 0 || D_800C3E78 >= D_8008FD8C || TANK_PART(o)[0x120] == 0) {
+    if (D_800BE616 == 0 || g_cur_obj_index >= D_8008FD8C || TANK_PART(o)[0x120] == 0) {
         obj_state_common_update(o);
     }
     if (*(s32 *) ob == 0) {
@@ -332,8 +332,8 @@ void tank_update(struct127 *o) {
     // hit reactions
     if (ob[0x232] == 0xD) {
         obj_carry_release(o, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);
-    } else if (D_800BE616 == 0 && (D_800CC268 & 1)) {
-        tgt = &D_800CC2D0[ob[0x124]];
+    } else if (D_800BE616 == 0 && (g_obj_contact_mask & 1)) {
+        tgt = &g_objects[ob[0x124]];
         if (((u8 *) tgt)[0x65] == 0 && TANK_PART(tgt)[0x78] == 0 && (*(u32 *) (ob + 0x25C) & 0x400)) {
             if (*(f32 *) ((u8 *) tgt + 0x44) > 15.0f && tgt->y_velocity > 10.0f) {
                 obj_carry_pickup(o, 68.0f, 4.0f, 0xD, 5);
@@ -366,13 +366,13 @@ void tank_update(struct127 *o) {
     }
 
     // turret
-    if (((u8 *) D_800CC2D0[aimer].unk31C)[0x84] != 0) {
+    if (((u8 *) g_objects[aimer].unk31C)[0x84] != 0) {
         s8 k = (s8) TANK_PART(o)[0x129];
 
         if (k >= 0) {
             f32 lead, rad, sx, sz, ang, ry, cp, h, lv, sy;
 
-            tgt = &D_800CC2D0[k];
+            tgt = &g_objects[k];
             {
                 f32 dx = tgt->x_position - o->x_position;
                 f32 dz = tgt->z_position - o->z_position;
@@ -418,7 +418,7 @@ void tank_update(struct127 *o) {
                 TURRET_YAW(o) -= step;
             }
         }
-        if (TANK_PART(&D_800CC2D0[player])[0x197] != 0) {
+        if (TANK_PART(&g_objects[player])[0x197] != 0) {
             view = aimer + 1;
         }
         if (D_800BE616 == 0) {
@@ -432,7 +432,7 @@ void tank_update(struct127 *o) {
                 if (i == aimer) {
                     continue;
                 }
-                tgt = &D_800CC2D0[i];
+                tgt = &g_objects[i];
                 if (D_800BE616 == 0 && !(*(u32 *) ((u8 *) tgt + 0xF8) & 0x40)) {
                     continue;
                 }
@@ -463,7 +463,7 @@ void tank_update(struct127 *o) {
             if (pick != -1) {
                 f32 ty, adj, lim;
 
-                tgt = &D_800CC2D0[pick];
+                tgt = &g_objects[pick];
                 if (D_800BE616 != 0) {
                     ty = tgt->y_position + 40.0f;
                 } else {
@@ -525,7 +525,7 @@ void tank_update(struct127 *o) {
                 if (res != 0) {
                     res = 1;
                 }
-                obj = D_800CC2D0;
+                obj = g_objects;
                 for (i = 0; i < D_8008FD8C; i++, obj++) {
                     if (ob[0x128] != ((u8 *) obj)[0x128]) {
                         hit[0] = obj->x_position - *(f32 *) (vw + 0x2F8);
@@ -581,7 +581,7 @@ void tank_update(struct127 *o) {
 // puts the object in state 3 (+5; +0xE4 = 0, +0x125 = 0xFF, +0x328 = 0). When it carries a rider (+0x318), resets
 // the rider onto object slot k (camera_set_followed_obj; k = 1 for player 3, else 0), sets byte +0x78 of the object's part
 // +0x31C to 0x29, clears bit 0x10 of D_800BE748 entry k (6-byte entries), marks the rider's player bit in
-// D_800CC2D0[k] +0x2FC and, if D_800CC2D0[k] +0x10A was set, calls screen_tint_start(0xFF, 0, 0, 180, 20, player)
+// g_objects[k] +0x2FC and, if g_objects[k] +0x10A was set, calls screen_tint_start(0xFF, 0, 0, 180, 20, player)
 // and clears it.
 void camera_set_followed_obj(struct108 *, s32);
 void screen_tint_start(s32, s32, s32, s32, s32, s32);
@@ -603,7 +603,7 @@ void tank_dismount_enter(u8 *obj) {
     camera_set_followed_obj((struct108 *) rider, k);
     (*(u8 **) (obj + 0x31C))[0x78] = 0x29;
     D_800BE748[k * 3] &= ~0x10;
-    slot = (u8 *) &D_800CC2D0[k];
+    slot = (u8 *) &g_objects[k];
     slot[0x2FC] |= 1 << rider[0x23D];
     if (slot[0x10A] != 0) {
         screen_tint_start(0xFF, 0, 0, 180, 20, rider[0x23D]);

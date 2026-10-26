@@ -13,7 +13,7 @@ s/            \/\* fallthrough \*\//            break;/
 s/        case 0x16:/        case 0x15:/
 s/        case 0x7C:/        case 0x7D:/
 s/            if (obj\[0x65\] != 0) {/            if (1) {/
-s/                p = (u8 \*) \&D_800CC2D0\[obj\[0x65\] - 1\];/                p = (u8 *) \&D_800CC2D0[obj[0x65]];/
+s/                p = (u8 \*) \&g_objects\[obj\[0x65\] - 1\];/                p = (u8 *) \&g_objects[obj[0x65]];/
 s/                p\[0x232\] = 10;/                p[0x232] = 11;/
 s/                \*(s32 \*) (p + 0x218) = 0;//
 s/                obj\[0x65\] = 0;//

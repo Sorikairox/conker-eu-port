@@ -9,9 +9,9 @@ void vertex_anchor_alloc_players(void) {
     s32 i; //s0
     struct222** s1;
 
-    D_800C3FC0 = (struct222*) &D_80084300;
+    g_vertex_anchor_blocks = (struct222*) &g_vertex_anchor_template;
     for( i = 1;  i <= D_80082FA0; i++){
-        (&D_800C3FC0)[i] = (struct222 *) allocate_memory(0x50, 1, 2, 0); //allocate_memory
-        bcopy(D_800C3FC0, (&D_800C3FC0)[i], 0x50); //bcopy
+        (&g_vertex_anchor_blocks)[i] = (struct222 *) allocate_memory(0x50, 1, 2, 0); //allocate_memory
+        bcopy(g_vertex_anchor_blocks, (&g_vertex_anchor_blocks)[i], 0x50); //bcopy
     }
 }

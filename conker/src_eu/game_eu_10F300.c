@@ -4,7 +4,7 @@
 
 
 void mtxf_look_at_f(f32 mf[4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
-// line_of_sight_hit_object: looks from (x0, y0, z0) towards (x1, y1, z1) and finds the live object (D_800CC2D0,
+// line_of_sight_hit_object: looks from (x0, y0, z0) towards (x1, y1, z1) and finds the live object (g_objects,
 // except index `skip`, dead or immune ones and `self`'s own slot unk124 - 1) that math_mtx_box_in_frustum rates lowest
 // (non-zero) in that view within the eye-target distance; spawns effect `kind` (attack_spawn_at_point) at that object,
 // copies self's heading unk76 to it and returns attack_spawn_at_point's result (0 when nothing was hit).
@@ -29,7 +29,7 @@ s32 object_ray_hit_nearest(struct127 *self, f32 x0, f32 y0, f32 z0, f32 x1, f32 
     if (self != NULL) {
         own = self->unk124 - 1;
     }
-    for (i = 0, obj = D_800CC2D0; i < 25; i++, obj++) {
+    for (i = 0, obj = g_objects; i < 25; i++, obj++) {
         if (obj->interaction_state == 0 || i == skip || obj->health == 0 || obj->immune != 0 || i == own) {
             continue;
         }
@@ -44,8 +44,8 @@ s32 object_ray_hit_nearest(struct127 *self, f32 x0, f32 y0, f32 z0, f32 x1, f32 
         }
     }
     if (best != -1) {
-        obj = &D_800CC2D0[best];
-        ret = attack_spawn_at_point(obj->x_position, obj->y_position + (f32)obj->unkD6, obj->z_position, kind, D_800C3E78, 0,
+        obj = &g_objects[best];
+        ret = attack_spawn_at_point(obj->x_position, obj->y_position + (f32)obj->unkD6, obj->z_position, kind, g_cur_obj_index, 0,
                             0, 0);
         obj->unk76 = self->unk76;
     }

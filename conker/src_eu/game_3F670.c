@@ -72,7 +72,7 @@ void debris_spawn_linked(s32 arg0) {
     sp34 = arg0;
     sp.u80 = 0;
     collision_select_area(0);
-    sp.u84 = zone_tree_find_leaf((s32) (&D_80096900)[0], (s32) (&D_80096900)[2]);
+    sp.u84 = zone_tree_find_leaf((s32) (&g_debris_linked_zone_pos)[0], (s32) (&g_debris_linked_zone_pos)[2]);
     sp.u88 = 0xFF;
     sp.u89 = 0;
     sp.u8A = 6;

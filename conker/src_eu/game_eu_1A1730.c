@@ -3,14 +3,14 @@
 #include "variables.h"
 
 
-/* D_800B1240[mesh]: per-mesh vertex colour groups */
+/* g_level_model_colour_groups[mesh]: per-mesh vertex colour groups */
 typedef struct {
     /* 0x0 */ u8 *rgb;   /* target colour, 3 bytes per listed vertex */
     /* 0x4 */ u16 *vtx;  /* vertex indices */
     /* 0x8 */ s32 count;
 } VtxColourGroup;
-extern u8 *D_800B1244;               /* group count per mesh */
-extern VtxColourGroup **D_800B1240;
+extern u8 *g_level_model_colour_counts;               /* group count per mesh; was D_800B1244 */
+extern VtxColourGroup **g_level_model_colour_groups; /* was D_800B1240 */
 extern u8 *D_800B1220;               /* mesh vertex buffer (16-byte vertices) */
 extern u8 *D_800BE930;               /* base vertex colours, 3 bytes per vertex */
 
@@ -34,7 +34,7 @@ void vtx_colour_groups_blend(s32 mesh, s32 mode, s32 t, s32 group, s32 slot) {
     s32 j;
     s32 n;
 
-    if (D_800B1244[mesh] == 0) {
+    if (g_level_model_colour_counts[mesh] == 0) {
         return;
     }
     flags = ((u8 *) D_800B0DF0)[0x21];
@@ -51,9 +51,9 @@ void vtx_colour_groups_blend(s32 mesh, s32 mode, s32 t, s32 group, s32 slot) {
     }
     if (group == 0xFF) {
         first = 0;
-        end = D_800B1244[mesh];
+        end = g_level_model_colour_counts[mesh];
     } else {
-        if (group >= D_800B1244[mesh]) {
+        if (group >= g_level_model_colour_counts[mesh]) {
             return;
         }
         first = group;
@@ -64,7 +64,7 @@ void vtx_colour_groups_blend(s32 mesh, s32 mode, s32 t, s32 group, s32 slot) {
     } else {
         vtxBuf = *(u8 **) ((u8 *) D_800DBEF4 + slot * 0xA0 + 0x20 + D_800BE9C0 * 4);
     }
-    grp = &D_800B1240[mesh][first];
+    grp = &g_level_model_colour_groups[mesh][first];
     for (g = first; g < end; g++, grp++) {
         to = grp->rgb;
         for (j = 0; j < grp->count; j++, to += 3) {

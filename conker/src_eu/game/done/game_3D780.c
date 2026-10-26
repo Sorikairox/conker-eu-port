@@ -6,10 +6,10 @@
 
 /* was func_150102D0 */
 void level_obj_init_scroll_fx59(void) {
-    level_dl_add_texture_scroll(D_800B0E00[0], D_800902E8, 0, -1, 0, 0, 0, -6);
-    level_dl_add_texture_scroll(D_800B0E00[1], D_800902E8, 0, -1, 0, 1, 0, -6);
-    level_dl_add_texture_scroll(D_800B0E00[0], g_tex_scroll_id_02ec, 0, -1, 0, 0, 0, -3);
-    level_dl_add_texture_scroll(D_800B0E00[1], g_tex_scroll_id_02ec, 0, -1, 0, 1, 0, -3);
+    level_dl_add_texture_scroll(g_level_part_dls[0], g_level_scroll_tex_a, 0, -1, 0, 0, 0, -6);
+    level_dl_add_texture_scroll(g_level_part_dls[1], g_level_scroll_tex_a, 0, -1, 0, 1, 0, -6);
+    level_dl_add_texture_scroll(g_level_part_dls[0], g_tex_scroll_id_02ec, 0, -1, 0, 0, 0, -3);
+    level_dl_add_texture_scroll(g_level_part_dls[1], g_tex_scroll_id_02ec, 0, -1, 0, 1, 0, -3);
     effect_node_create(300, -1, 59, -1, 0, 0, 0, 255, 1);
 }
 

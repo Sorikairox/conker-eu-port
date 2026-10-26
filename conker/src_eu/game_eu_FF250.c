@@ -40,7 +40,7 @@ void camera_update_ride_chase(struct108 *arg0) {
             arg0->unk374 = (-194.0f * temp_f2_2) + 280.0f;
             arg0->unk348 = temp_f0;
             arg0->unk34C = temp_f0;
-            if (D_800BE9F0 == 0x32) {
+            if (g_level_id == 0x32) {
                 sp34 = temp_f2_2;
                 var_v0 = event_dispatch(4, arg0->unk23D | 0x2000, 0xAC, 0x4027, 0x4035, 0x4036, 0x4037, 0);
             } else {
@@ -69,7 +69,7 @@ void camera_update_ride_chase(struct108 *arg0) {
             arg0->unk1A4 = 0.0f;
             arg0->unk190 = 0.0f;
         }
-        if (D_800BE9F0 == 0x32) {
+        if (g_level_id == 0x32) {
             if (event_dispatch(1, 0x4039, 6, 0x9000, 0, 0, 0, 0) != 0) {
                 arg0->unk84 |= 0x1000;
                 return;

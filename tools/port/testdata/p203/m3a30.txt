@@ -23,9 +23,9 @@ s/                snd = 0x106;/                snd = 0x107;/
 s/            snd = 0xB0;/            snd = 0xB1;/
 s/sound_voice_play_at(0, snd, 0x6590/sound_voice_play_at(0, snd, 0x6591/
 s/(s32) pos\[2\], 500, 800);/(s32) pos[2], 500, 801);/
-s/    if (random_float() < D_800DCE54) {/    if (random_float() <= D_800DCE54) {/
-s/        sparks.count = 5 >> D_800DCE50;/        sparks.count = 5 >> (D_800DCE50 + 1);/
-s/        sparks.count2 = 4 >> D_800DCE50;/        sparks.count2 = 5 >> D_800DCE50;/
+s/    if (random_float() < g_fx_lod_scale_players) {/    if (random_float() <= g_fx_lod_scale_players) {/
+s/        sparks.count = 5 >> g_fx_lod_shift_players;/        sparks.count = 5 >> (g_fx_lod_shift_players + 1);/
+s/        sparks.count2 = 4 >> g_fx_lod_shift_players;/        sparks.count2 = 5 >> g_fx_lod_shift_players;/
 s/        sparks.pos\[2\] = pos\[2\];/        sparks.pos[2] = pos[1];/
 s/        sparks.speed = 8.25f;/        sparks.speed = 8.5f;/
 s/        sparks.f20 = 0.0f;/        sparks.f20 = 1.0f;/

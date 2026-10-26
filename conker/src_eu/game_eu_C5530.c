@@ -110,7 +110,7 @@ void screen_fade_start(s32, s32, s32, s32, s8, s32);
 void obj_remove(struct127 *, s32);
 void *aiscript_find_by_kind(s32, s32);
 extern s32 D_800D3C60;
-extern s32 D_800BE804;
+extern s32 g_save_stat9; /* was D_800BE804 */
 extern u16 D_800BEB30[];
 extern s16 D_800C4414[];
 extern u16 D_8009015C;
@@ -122,7 +122,7 @@ extern u16 D_8009015C;
 #define E9C_S32(p, o) (*(s32 *)((u8 *)(p) + (o)))
 #define E9C_F32(p, o) (*(f32 *)((u8 *)(p) + (o)))
 #define E9C_REC(p) (*(u8 **)((u8 *)(p) + 0x31C))
-#define E9C_INDEX(p) (((u8 *)(p) - (u8 *)D_800CC2D0) / 0x32C)   /* index in D_800CC2D0 (0x32C each) */
+#define E9C_INDEX(p) (((u8 *)(p) - (u8 *)g_objects) / 0x32C)   /* index in g_objects (0x32C each) */
 #define E9C_FIX(v) ((f32)(v) * (1.0f / 65536.0f))                 /* 16.16 fixed point argument */
 #define E9C_PATH(p, n) ((s16 *)((s32 **)D_800D2104)[E9C_U8(p, 0x13F)] + (n) * 4)  /* point n of path +0x13F */
 /* f32 -> u32 as IDO converts it (truncation; negative or NaN give 0xFFFFFFFF) */
@@ -181,7 +181,7 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         E9C_S32(o, 0x25C) &= ~1;
         return 1;
     case 0x07:
-        D_800D154C = obj;
+        g_cur_obj = obj;
         obj_drop_carried(obj);
         return 1;
     case 0x08: /* position; 0x7FFFFFFF keeps a coordinate */
@@ -237,8 +237,8 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         return 1;
     case 0x14: /* +0x232 = args[2], restart its script (aiscript_find_by_kind) */
         E9C_U8(o, 0x232) = args[2];
-        D_800D154C = obj;
-        D_800C3E78 = E9C_INDEX(o);
+        g_cur_obj = obj;
+        g_cur_obj_index = E9C_INDEX(o);
         E9C_S32(o, 0x218) = (s32)aiscript_find_by_kind(0, E9C_U8(o, 0x232));
         E9C_U16(o, 0x21C) = 0;
         return 1;
@@ -431,8 +431,8 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         obj->y_position = (f32)args[6] + py;
         return 1;
     case 0x35:
-        D_800D154C = obj;
-        D_800C3E78 = E9C_INDEX(o);
+        g_cur_obj = obj;
+        g_cur_obj_index = E9C_INDEX(o);
         E9C_S32(o, 0x218) = (s32)aiscript_find_by_kind(0, args[2]);
         E9C_U16(o, 0x21C) = 0;
         return 1;
@@ -616,8 +616,8 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         E9C_U8(o, 0x20F) = 0xFF;
         E9C_S32(o, 0x25C) &= ~0x800;
         E9C_U8(o, 0x232) = args[3];
-        D_800D154C = obj;
-        D_800C3E78 = E9C_INDEX(o);
+        g_cur_obj = obj;
+        g_cur_obj_index = E9C_INDEX(o);
         E9C_S32(o, 0x218) = (s32)aiscript_find_by_kind(0, E9C_U8(o, 0x232));
         E9C_U16(o, 0x21C) = 0;
         return 1;
@@ -636,19 +636,19 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
             E9C_U8(E9C_REC(o), 0x8E) = 2;
         }
         return 1;
-    case 0x62: /* the first D_8008FD8C objects: player_stat_modify(index, 10, args[2]); D_800BE804 = player_stat_get */
+    case 0x62: /* the first D_8008FD8C objects: player_stat_modify(index, 10, args[2]); g_save_stat9 = player_stat_get */
         n = E9C_INDEX(o);
         if (n >= 0 && n < D_8008FD8C) {
             player_stat_modify(E9C_INDEX(o), 10, args[2]);
         }
-        D_800BE804 = player_stat_get(E9C_INDEX(o), 6);
+        g_save_stat9 = player_stat_get(E9C_INDEX(o), 6);
         return 1;
     case 0x63:
         n = E9C_INDEX(o);
         if (n >= 0 && n < D_8008FD8C) {
             player_stat_modify(E9C_INDEX(o), 9, args[2]);
         }
-        D_800BE804 = player_stat_get(E9C_INDEX(o), 6);
+        g_save_stat9 = player_stat_get(E9C_INDEX(o), 6);
         return 1;
     case 0x64:
         i = args[2];
@@ -875,7 +875,7 @@ s32 event_action_object(s32 id, s32 cmd, s32 *args) {
         return 1;
     case 0x8D: /* remove the live objects of kind 5 that belong to this one (+0x124 = its number + 1) */
         for (i = 0; i < 25; i++) {
-            p = (u8 *)D_800CC2D0 + i * 0x32C;
+            p = (u8 *)g_objects + i * 0x32C;
             if (E9C_S32(p, 0) != 0 && E9C_U8(p, 0x124) == E9C_INDEX(o) + 1 && E9C_U8(p, 5) == 5) {
                 obj_remove((struct127 *)p, 0);
             }
@@ -925,7 +925,7 @@ extern f32 D_8009E80C;
 #define A024_F32(p, o) (*(f32 *)((u8 *)(p) + (o)))
 #define A024_REC(p) (*(u8 **)((u8 *)(p) + 0x31C))
 #define A024_OBJ(arg) obj_find_by_spawn((arg) & 0xFFFF0FFF)
-#define A024_INDEX(p) (((u8 *)(p) - (u8 *)D_800CC2D0) / 0x32C)   /* index in D_800CC2D0 (0x32C each) */
+#define A024_INDEX(p) (((u8 *)(p) - (u8 *)g_objects) / 0x32C)   /* index in g_objects (0x32C each) */
 #define A024_POINT(i) (((u8 *)D_800D2778 + (i) * 0x10)[7])
 #define A024_DEG (360.0f / 65536.0f)
 
@@ -1074,7 +1074,7 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
     case 0xB5: /* the object +0x10A refers to (bit 7 set), its +0 */
         n = A024_U8(obj, 0x10A);
         if (n & 0x80) {
-            return A024_S32(&D_800CC2D0[n & 0x7F], 0);
+            return A024_S32(&g_objects[n & 0x7F], 0);
         }
         return 0xFFFF;
     case 0xB6: /* read and clear bit 7 of D_800E0FE8[index] */
@@ -1094,7 +1094,7 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
         if (A024_U8(obj, 0x65) == 0) {
             return -1;
         }
-        return A024_U8(&D_800CC2D0[A024_U8(obj, 0x65) - 1], 0x13F);
+        return A024_U8(&g_objects[A024_U8(obj, 0x65) - 1], 0x13F);
     case 0xBC:
         return A024_U8(obj, 0x13C);
     case 0xBD: /* xz distance to object args[2] */
@@ -1344,7 +1344,7 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
             return 0;
         }
         A024_U8(obj, 0x275) = 0;
-        return (A024_U8(&D_800CC2D0[n - 1], 4) == args[2]) ? 1 : 0;
+        return (A024_U8(&g_objects[n - 1], 4) == args[2]) ? 1 : 0;
     case 0xE7: /* nearest point of path +0x13F to object args[2], squared xz distance in (args[3]^2, args[4]^2) */
         n = A024_U8(obj, 0x13F);
         list = (s16 *)D_800D2104[n];
@@ -1412,7 +1412,7 @@ s32 event_query_object(s32 id, s32 cmd, s32 *args) {
         if (A024_U8(obj, 0x13C) == 0) {
             return 0;
         }
-        return A024_U8(&D_800CC2D0[A024_U8(obj, 0x13C)], 0x13F) | 0x2000;
+        return A024_U8(&g_objects[A024_U8(obj, 0x13C)], 0x13F) | 0x2000;
     case 0xF3:
         return (A024_U8(obj, 0xA9) == 2) ? 1 : 0;
     }

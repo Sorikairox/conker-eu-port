@@ -17,7 +17,7 @@
  *   adds to the caller's $v1 (0 here; level data starts each leaf with an absolute index).
  * - floor_collect_world_obj_tris: area 2, the world objects in the u16 list ids[0 .. count - 1] (D_800DBEF4 + id * 0xA0: +0x56
  *   triangle count, +0x58 first triangle; vertex base D_800DC328[id], skipped when 0), tag = id.
- * - floor_collect_record_tris: area 3, the 25 records D_800CC2D0 except D_800D39FC - 1, with +0 != 0, +0xF8 & 0x4000,
+ * - floor_collect_record_tris: area 3, the 25 records g_objects except D_800D39FC - 1, with +0 != 0, +0xF8 & 0x4000,
  *   +0x264 (vertex base) and +0x268 (bounds) set; byte +4 = model: D_800C5D38[m] triangles, offsets D_800C6070[m].
  */
 extern u8 D_800DBE62;
@@ -196,7 +196,7 @@ s32 floor_collect_world_obj_tris(s32 x, s32 z, s32 count, s32 *idList) {
 
 /* was func_150A5480 */
 s32 floor_collect_record_tris(s32 x, s32 z) {
-    u8 *rec = (u8 *)D_800CC2D0;
+    u8 *rec = (u8 *)g_objects;
     u8 *end = rec + 0x4F4C;
     s32 skip = D_800D39FC - 1;
     s32 n = 0;
@@ -568,7 +568,7 @@ void func_150A4ED4(s32 area) {
 /*
  * obj_floor_mesh_update: P190 readable C for the hand-written obj_floor_mesh_update.s (saves $gp and every FPR, keeps
  * values in odd FPRs; inner labels func_150A53D4 / func_150A543C are its exit and release paths). Builds the
- * world-space floor mesh of an object record (D_800CC2D0, 0x32C bytes each) that floor_collect_record_tris tests (area 3):
+ * world-space floor mesh of an object record (g_objects, 0x32C bytes each) that floor_collect_record_tris tests (area 3):
  * - only while the record is live (+0, +0x1D4 matrices, +0xF8 & 0x4000), its model m = byte +4 has a group list
  *   D_800C5C08[m] and another live record is within the radius +0x270 on x / z; otherwise the three buffers
  *   +0x264 / +0x268 / +0x26C are freed and cleared.
@@ -602,7 +602,7 @@ static s32 objmesh_rint(f32 f) {
 void obj_floor_mesh_update(struct127 *arg0) {
     u8 *obj = (u8 *)arg0;
     u8 *rec;
-    u8 *recEnd = (u8 *)D_800CC2D0 + 25 * 0x32C;
+    u8 *recEnd = (u8 *)g_objects + 25 * 0x32C;
     s32 m, p;
     s32 *group;
     u32 groups, n;
@@ -623,7 +623,7 @@ void obj_floor_mesh_update(struct127 *arg0) {
     }
     /* another live record within the radius (x / z) */
     r2 = OBJMESH_F(obj, 0x270) * OBJMESH_F(obj, 0x270);
-    for (rec = (u8 *)D_800CC2D0; rec != recEnd; rec += 0x32C) {
+    for (rec = (u8 *)g_objects; rec != recEnd; rec += 0x32C) {
         if (rec == obj || OBJMESH_W(rec, 0) == 0) {
             continue;
         }

@@ -14,7 +14,7 @@ extern u8 D_8009CF9C[];
  * `kind` (D_80087000[kind], D_8009CF9C[kind] entries of 10 bytes, same layout as obj_ray_hit_model: +0 bone, +2 radius,
  * +4 centre in bone space, bone matrices at +0x1D4) with each radius x +0x14C plus `grow` (x attacker scale). The
  * first sphere containing the point wins; unless the target's +0x125 is set the hit is reported to it with
- * attack_spawn_at_point(target position, `arg5`, the attacker's index in D_800CC2D0, 0, 0, 0). */
+ * attack_spawn_at_point(target position, `arg5`, the attacker's index in g_objects, 0, 0, 0). */
 /* was func_15081120 */
 s32 obj_reach_hit(s32 arg0, u8 *target, s32 kind, f32 reach, f32 grow, s32 arg5) {
     u8 *att = (u8 *) arg0;
@@ -80,7 +80,7 @@ s32 obj_reach_hit(s32 arg0, u8 *target, s32 kind, f32 reach, f32 grow, s32 arg5)
         if (!(radius * radius < dx * dx + dy * dy + dz * dz)) {
             if (target[0x125] == 0) {
                 attack_spawn_at_point(*(f32 *)(target + 0x14), *(f32 *)(target + 0x18), *(f32 *)(target + 0x1C), arg5,
-                              (struct127 *) att - D_800CC2D0, 0, 0, 0);
+                              (struct127 *) att - g_objects, 0, 0, 0);
             }
             return rec[0] + 1;
         }
@@ -234,7 +234,7 @@ s32 obj_find_reach_hit(s32 arg0, f32 arg1, f32 arg2, u8 **arg3, s32 arg4, s32 ar
     struct127 *var_s0;
 
     *arg3 = NULL;
-    var_s0 = D_800CC2D0;
+    var_s0 = g_objects;
 loop_1:
     if ((var_s0->interaction_state != 0) && (var_s0->unk1D4 != NULL) && (arg5 == var_s0->id)) {
         temp_v0_2 = obj_hit_model_kind((u8 *) var_s0);
@@ -247,7 +247,7 @@ loop_1:
         }
     }
     var_s0 = (struct127 *)((u8 *)var_s0 + (0x32C));
-    if ((s32)var_s0 == (s32)&D_800D121C) {
+    if ((s32)var_s0 == (s32)&g_obj_scratch_rec) {
         return 0;
     }
     goto loop_1;

@@ -264,7 +264,7 @@ s32 texscroll_link_dl(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) // fakematch: non-
 // dl_add_texture_scroll: as level_dl_add_texture_scroll for a model display list `dl` (s32 address): each matching G_SETTIMG
 // (`which`-th, -1: every one) is linked to the scroll entry with id texId (or, with `alwaysNew`, a new one for the
 // first match) through texscroll_link_dl (+0x18 chain: dl, G_SETTILESIZE index, tile count). New entries get speeds
-// speedS / speedT. Does nothing while D_800BEAC0 is set. Returns the last entry used as s32 (0: none).
+// speedS / speedT. Does nothing while g_game_paused is set. Returns the last entry used as s32 (0: none).
 // The asm returns an uninitialised stack word when the very first search finds nothing (C: 0).
 /* was func_15196344 */
 s32 dl_add_texture_scroll(s32 dl, s32 texId, s32 doubled, s32 which, s32 alwaysNew, s32 speedS, s32 speedT) {
@@ -280,7 +280,7 @@ s32 dl_add_texture_scroll(s32 dl, s32 texId, s32 doubled, s32 which, s32 alwaysN
     if (gdl == NULL) {
         return 0;
     }
-    if (D_800BEAC0 != 0) {
+    if (g_game_paused != 0) {
         return 0;
     }
     skip = which;
@@ -336,7 +336,7 @@ s32 texture_anim_start_for(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32
  * gives up to 8 (+0x14) G_SETTILESIZE words (0xF2000000 | s << 12 | t, s and t halved per mip level), written to the
  * level DLs arg0 (indices +0x1C[5], counts +0x30[5]) and arg1 (+0x26[5], +0x35[5]) and to the +0x18 chain of extra
  * DLs (+8 base, +0xC index, +0xE count, next at +0x10); then the position moves by speed (+0x12, +0x13, s8) times
- * D_800BE9E4 unless D_800BEAC0, wrapping once at the texture size (+0xA, +0xC) * 8. A count above the number of
+ * D_800BE9E4 unless g_game_paused, wrapping once at the texture size (+0xA, +0xC) * 8. A count above the number of
  * words built reads stale stack in the asm (C: uninitialised tbl[]). The asm returns no value. */
 /* was func_15196560 */
 s32 texscroll_update(s32 arg0, s32 arg1) {
@@ -371,7 +371,7 @@ s32 texscroll_update(s32 arg0, s32 arg1) {
         }
         w *= 8;
         h *= 8;
-        if (D_800BEAC0 == 0) {
+        if (g_game_paused == 0) {
             u += *(s8 *)(e + 0x12) * D_800BE9E4;
             v += *(s8 *)(e + 0x13) * D_800BE9E4;
         }
@@ -1498,7 +1498,7 @@ s32 obj_send_hit(struct127 *obj, s32 flags, u16 val, s32 arg3);
 u8 *character_effect_attach(u8 *obj, s16 type, s16 time, u8 clear, u8 view, s32 arg5, char *name);
 // path_flame_touch_player: path handler 0 of D_8008FC20 (`s32 (*)(u8 *)`, result tested by the path updater).
 // Walks back from the path's head point +0x2E to the current point +0x2D (ring of +0x25 points of 0x24 bytes at
-// +0x94); when player 0 (D_800CC2D0[0]: x +0x14, y +0x18 + s16 +0xE8, z +0x1C) is within its radius s16 +0xE4 of a
+// +0x94); when player 0 (g_objects[0]: x +0x14, y +0x18 + s16 +0xE8, z +0x1C) is within its radius s16 +0xE4 of a
 // point (the height difference scaled by (1 + r / +0xE6) / 2), it is hurt (obj_send_hit flags 0x60006 with its u16
 // +0x7A, by the owner object **(arg0 + 0x98)), gets the flame-thrower effect (character_effect_attach type 0xB with the
 // emitter's +0x0C / +0x01), and the current point advances to that point (count +0x2C drops by one per step).
@@ -1507,7 +1507,7 @@ u8 *character_effect_attach(u8 *obj, s16 type, s16 time, u8 clear, u8 view, s32 
 s32 path_flame_touch_player(u8 *arg0) {
     u8 *points = *(u8 **) (arg0 + 0x94);
     u8 *owner = *(u8 **) (arg0 + 0x98);
-    u8 *player = (u8 *) D_800CC2D0;
+    u8 *player = (u8 *) g_objects;
     f32 *pt;
     f32 radius;
     f32 height;
@@ -1529,8 +1529,8 @@ s32 path_flame_touch_player(u8 *arg0) {
         dz = pt[2] - *(f32 *) (player + 0x1C);
         dy = (pt[1] - (*(f32 *) (player + 0x18) + *(s16 *) (player + 0xE8))) * ((1.0f + radius / height) * 0.5f);
         if (dx * dx + dy * dy + dz * dz < radius * radius) {
-            obj_send_hit(D_800CC2D0, 0x60006, *(u16 *) (player + 0x7A),
-                          (s32) (*(u8 **) owner - (u8 *) D_800CC2D0) / 0x32C);
+            obj_send_hit(g_objects, 0x60006, *(u16 *) (player + 0x7A),
+                          (s32) (*(u8 **) owner - (u8 *) g_objects) / 0x32C);
             character_effect_attach(player, 0xB, 0, 1, arg0[0xC], arg0[1], "Characterflamethrower");
             while (i != *(s8 *) (arg0 + 0x2D)) {
                 (*(s8 *) (arg0 + 0x2D))++;
@@ -1545,7 +1545,7 @@ s32 path_flame_touch_player(u8 *arg0) {
 }
 
 // path_pass_points_near_objects: path handler 2 of D_8008FC20 (`s32 (*)(u8 *)`, its result is tested by the path
-// updater). For every live object of D_800CC2D0 (+0x00 set, not held: +0x65 == 0) whose team byte +0x3B differs
+// updater). For every live object of g_objects (+0x00 set, not held: +0x65 == 0) whose team byte +0x3B differs
 // from the path owner's (**(arg0 + 0x98))[0x3B], it walks back from the path's head point +0x2E to the current
 // point +0x2D (ring of +0x25 points of 0x24 bytes at +0x94). When the object (x +0x14, y +0x18 + s16 +0xE8,
 // z +0x1C) is within (radius +0xE4)^2 + 2500 of a point (the height difference scaled by (1 + r / +0xE6) / 2),
@@ -1564,7 +1564,7 @@ s32 path_pass_points_near_objects(u8 *arg0) {
     f32 dz;
     s32 i;
 
-    for (obj = (u8 *) D_800CC2D0; obj != (u8 *) &D_800D121C; obj += 0x32C) {
+    for (obj = (u8 *) g_objects; obj != (u8 *) &g_obj_scratch_rec; obj += 0x32C) {
         if (*(s32 *) obj == 0 || obj[0x65] != 0 || obj[0x3B] == (*(u8 **) owner)[0x3B]) {
             continue;
         }
@@ -1599,8 +1599,8 @@ s32 collision_level_nearest_height(s32, s32, s32, s32 *);
 extern u8 D_8008FC40[3];
 // path_hit_scene_nodes: path handler 1 of D_8008FC20 (`s32 (*)(u8 *)`, result tested by the path updater). Returns 0
 // when the owner's (**(arg0 + 0x98)) attachment +0x31C is missing, or (clearing bit 0x100 of the owner's u16
-// +0x2F8) when that attachment's +0x58 is not 1. Otherwise, for the three scene-node lists D_800DD280[0][t] with
-// t from D_8008FC40, it walks each list (safe iteration through D_800DD5C8[++D_800DD5C0]) and, from the path's head
+// +0x2F8) when that attachment's +0x58 is not 1. Otherwise, for the three scene-node lists g_node_lists[0][t] with
+// t from D_8008FC40, it walks each list (safe iteration through g_node_iter_next[++g_node_iter_depth]) and, from the path's head
 // point +0x2E back to the current point +0x2D (ring of +0x25 points of 0x24 bytes at +0x94, radius f32 +0x18), hits
 // the node when its position (+0x98 / +0x9C / +0xA0) is within radius^2 + 900 of a point: sound anim_mesh_load(5),
 // node_set_type(node, 0x18), state +0xED = 5, +0x94 = D_800DDE80[27], s16 +0x92 = 9, +0xB8 = +0xA8 = 40, +0xB4 = 0,
@@ -1633,15 +1633,15 @@ s32 path_hit_scene_nodes(u8 *arg0) {
         return 0;
     }
     for (k = 0; k < 3; k++) {
-        node = D_800DD280[0][types[k]];
+        node = g_node_lists[0][types[k]];
         if (node == NULL) {
             continue;
         }
         i = *(s8 *) (arg0 + 0x2E);
-        D_800DD5C0++;
+        g_node_iter_depth++;
         while (node != NULL) {
             n = (u8 *) node;
-            D_800DD5C8[D_800DD5C0] = node->next;
+            g_node_iter_next[g_node_iter_depth] = node->next;
             nx = *(f32 *) (n + 0x98);
             ny = *(f32 *) (n + 0x9C);
             nz = *(f32 *) (n + 0xA0);
@@ -1672,9 +1672,9 @@ s32 path_hit_scene_nodes(u8 *arg0) {
                     *(f32 *) (n + 0xC8) = v;
                 }
             }
-            node = D_800DD5C8[D_800DD5C0];
+            node = g_node_iter_next[g_node_iter_depth];
         }
-        D_800DD5C0--;
+        g_node_iter_depth--;
     }
     return 1;
 }
@@ -2935,7 +2935,7 @@ s32 emitter2_trail_update(u8 *obj) {
 s32 camera_view_test_sphere(s32 cam, s32 *mtx, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far);
 extern u8 D_800DA030[];   /* per view: 0x40-byte matrix for camera_view_test_sphere */
 extern u8 D_80091414[];   /* texture descriptor */
-extern s32 D_800A4EA8[];  /* render mode word pairs */
+extern s32 g_render_mode_pairs[];  /* render mode word pairs; was D_800A4EA8 */
 static const f32 sEmit2CullFar[1] = { 20000.0f }; /* D_800A8ED4 */
 
 /* n = (a - b) x (p - cam), scaled to length `width` (0 when degenerate) */
@@ -2994,7 +2994,7 @@ static const f32 sEmit2CullFar[1] = { 20000.0f }; /* D_800A8ED4 */
 // radius = their horizontal distance, half height |dy| + 2 * rec +0x2C) is outside view `slot` (camera_view_test_sphere with
 // D_800BE628 + slot * 0x180, D_800DA030 + slot * 0x40, far 20000), or without a vertex buffer (vtx_slot_buffer_get, 0x20
 // bytes per point + 0xA0). Sets texture D_80091414 (0x6B), geometry 0x200005 / 0x1F0600, combine 0x4C and render
-// mode D_800D30BC | 0x80000 | 0x2CA0 / D_800A4EA8[6] | [7], then draws a camera-facing strip (camera
+// mode D_800D30BC | 0x80000 | 0x2CA0 / g_render_mode_pairs[6] | [7], then draws a camera-facing strip (camera
 // camera_get_pos(slot)) from the newest point (or, with e +0x1E bit 2, from e +0x10 with rec +0x2C / +0x144 / +0x3A)
 // back to the tail: two vertices per point at +-n (n = segment x (point - camera), length = the point's size),
 // texture s = the point's +0x24, alpha its +0x20. When s drops along the strip (older s < newer s), the older pair
@@ -3061,7 +3061,7 @@ s32 emitter2_flame_draw(u8 *e, s32 gfxArg, s16 slot) {
     gfx = (Gfx *) gfx_load_texture_cached((s32) gfx, (s32) D_80091414, 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
     gfx = gfx_geometry_mode_cached(gfx, 0x200005, 0x1F0600);
     gfx = gfx_set_combine_mode(gfx, 0x4C, &flag);
-    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[7] | D_800A4EA8[6], &flag);
+    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, g_render_mode_pairs[7] | g_render_mode_pairs[6], &flag);
 
     if (*(u16 *) (e + 0x1E) & 2) {
         /* from the live position to the newest point */
@@ -3740,7 +3740,7 @@ void trail_emitter_watch_owner(u8 *arg0) {
 // count +0x2C >= 2): walks back from the head point +0x2E to the current point +0x2D (ring of +0x25 points of 0x28
 // bytes at +0x94, +0x1C = segment length), starting from the position at +0x10; whenever the walked length reaches
 // the next mark (0, then every owner +0x14C * step), one effect is spawned on that segment, interpolated back towards
-// the previous point, for the owner's object (**(arg0 + 0x98): its D_800CC2D0 index and u16 +0x76).
+// the previous point, for the owner's object (**(arg0 + 0x98): its g_objects index and u16 +0x76).
 /* was func_1519D320 */
 void path_trail_spawn_effects(s32 arg0, f32 step, s32 kind) {
     u8 *self = (u8 *) arg0;
@@ -3775,7 +3775,7 @@ void path_trail_spawn_effects(s32 arg0, f32 step, s32 kind) {
             obj = *(u8 **) owner;
             t = (walked - mark) / len;
             attack_spawn_at_point(pt[0] + (prev[0] - pt[0]) * t, pt[1] + (prev[1] - pt[1]) * t, pt[2] + (prev[2] - pt[2]) * t,
-                          kind, (s32) (obj - (u8 *) D_800CC2D0) / 0x32C, *(u16 *) (obj + 0x76), 0, 0);
+                          kind, (s32) (obj - (u8 *) g_objects) / 0x32C, *(u16 *) (obj + 0x76), 0, 0);
             mark += spacing;
         }
         prev = pt;

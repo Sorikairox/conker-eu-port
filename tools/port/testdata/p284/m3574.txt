@@ -20,9 +20,9 @@
 \#^    if ((d + 4.0f) + (d + 4.0f) < obj->xz_velocity) {$#s/4.0f) + (d + 4.0f)/4.0f) + (d + 5.0f)/
 \#^        obj->xz_velocity = d + d;$#s/d + d/d/
 \#^    if (flags == 4) {$#s/4/5/
-\#^        D_800D1580 = 0xFF020133;$#s/0xFF020133/0xFF020134/
-\#^        D_800D154C = D_800CC2D0;$#s/D_800CC2D0/obj/
-\#^        D_800D154C = obj;$#s/obj/D_800CC2D0/
+\#^        g_cur_obj_cmd = 0xFF020133;$#s/0xFF020133/0xFF020134/
+\#^        g_cur_obj = g_objects;$#s/g_objects/obj/
+\#^        g_cur_obj = obj;$#s/obj/g_objects/
 \#^        obj->unk164 = obj->unkBC;$#s/unkBC/unk148/
 \#^        obj->unk168 = obj->unk148;$#s/unk148/unkBC/
 \#^        obj->xz_velocity = 0.0f;$#s/0.0f/1.0f/
@@ -41,9 +41,9 @@
 \#^    obj_roll_pitch_step(obj, obj->unk78, obj->unk44, (2.0f - obj->xz_scale) \* scale);$#s/obj->unk78/obj->unk7A/
 \#^    if (obj->unk44 < 0.2f) {$#s/0.2f/0.3f/
 \#^    } else if (actor_sound_is_playing(obj) == 0) {$#s/==/!=/
-\#^            D_800D1580 = 0x630;$#s/0x630/0x631/
-\#^            D_800D1580 = 0x67A;$#s/0x67A/0x67B/
-\#^            D_800D1580 = 0x62A;$#s/0x62A/0x62B/
+\#^            g_cur_obj_cmd = 0x630;$#s/0x630/0x631/
+\#^            g_cur_obj_cmd = 0x67A;$#s/0x67A/0x67B/
+\#^            g_cur_obj_cmd = 0x62A;$#s/0x62A/0x62B/
 \#^        pitch = (s32) (obj->unk44 \* 2500.0f);$#s/2500.0f/2400.0f/
 \#^        if (pitch > 28000) {$#s/28000/27000/
 \#^            pitch = 28000;$#s/28000/27999/

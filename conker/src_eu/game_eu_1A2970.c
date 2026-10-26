@@ -435,7 +435,7 @@ void flyer_update(u8 *arg0) {
         return;
     }
     alpha = f->alpha;
-    if ((f->type == 8 || f->type == 9) && D_800BE9F0 == 6 && D_800C35EA != 0 && D_800C3A08 == 0xF) {
+    if ((f->type == 8 || f->type == 9) && g_level_id == 6 && D_800C35EA != 0 && D_800C3A08 == 0xF) {
         f->flags &= 0xFFF7;
         if (D_800C35EA == 0 || D_800C3A08 != 0xF) {
             node_destroy((struct102 *)f);
@@ -679,7 +679,7 @@ void flyer_update(u8 *arg0) {
     }
     if ((f->flags & 2)
         && view_point_cull_test(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0
-        && (D_800D2138 != 1
+        && (g_session_game_mode != 1
             || view_point_cull_test(D_800DA070, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0)
                    != 0)) {
         node_destroy((struct102 *)f);
@@ -699,7 +699,7 @@ void flyer_perched_update(u8 *arg0) {
         temp_v0 = (*(u8 *)((u8 *)arg0 + 0x91));
         switch (temp_v0) {                          /* irregular */
         case 0:
-            if (approx_dist2_int((s32) D_800CC2D0->x_position, (s32) D_800CC2D0->z_position, (s32) (*(f32 *)((u8 *)arg0 + 0x98)), (s32) (*(f32 *)((u8 *)arg0 + 0xA0))) < 0x190) {
+            if (approx_dist2_int((s32) g_objects->x_position, (s32) g_objects->z_position, (s32) (*(f32 *)((u8 *)arg0 + 0x98)), (s32) (*(f32 *)((u8 *)arg0 + 0xA0))) < 0x190) {
                 (*(u8 *)((u8 *)arg0 + 0x91)) = 1U;
                 temp_f10 = (f32) (-1 - (random_int() & 3));
                 (*(f32 *)((u8 *)arg0 + 0xA8)) = -8.0f;
@@ -795,7 +795,7 @@ void flyer_resting_update(u8 *arg0) {
     D_800DDF68[arg0[0xED]] = 1;
     switch (arg0[0x91]) {
         case 0:
-            if (approx_dist2_int(*(f32 *)((u8 *)D_800CC2D0 + 0x14), *(f32 *)((u8 *)D_800CC2D0 + 0x1C),
+            if (approx_dist2_int(*(f32 *)((u8 *)g_objects + 0x14), *(f32 *)((u8 *)g_objects + 0x1C),
                               *(f32 *)(arg0 + 0x98), *(f32 *)(arg0 + 0xA0)) < 200) {
                 arg0[0x91] = 2;
                 *(f32 *)(arg0 + 0xE4) = (f32)((u32)random_int() % *(s16 *)(arg0 + 0xDA));

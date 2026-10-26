@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A4EA8[];
+extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x38];
@@ -136,7 +136,7 @@ s32 cord_rig_get_state(u8 *arg0) {
     s32 ret = 2;
     u8 *temp_v1 = *(u8 **)(arg0 + 0x30);
 
-    if (((temp_v0 - D_800CC2D0) + 1 == temp_v1[0x65]) && (*(s32 *)(temp_v1 + 0x5C) == 1)) {
+    if (((temp_v0 - g_objects) + 1 == temp_v1[0x65]) && (*(s32 *)(temp_v1 + 0x5C) == 1)) {
         return 1;
     }
     return ret;
@@ -490,7 +490,7 @@ u8 *cord_plank_draw(u8 *arg0, u8 *arg1, s16 arg2) {
         mtx_transform_point_or_origin(temp_s1_2 + 0x14, &sp.u74, sp64);
         sp.uB2 = 1;
         sp.uA8 = &D_800DBFF0[arg2].unk2F8;
-        temp_v1 = ((u8 *)&D_800A4EA8);
+        temp_v1 = ((u8 *)&g_render_mode_pairs);
         temp_v0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_prim_color_cached(gfx_env_color_cached(gfx_load_texture_cached(gfx_geometry_mode_cached(var_s0, 0x200005, 0x60600), &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &sp.uB2, 3), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0x2B, &sp.uB2), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x2C)) | (*(s32 *)((u8 *)temp_v1 + 0x28)), &sp.uB2);
         temp_f0 = sp.u74 - sp.u80;
         temp_f14 = ((temp_f0 * 0.5f) + sp.u80) - (*(f32 *)((u8 *)sp.uA8 + 0));

@@ -19,7 +19,7 @@ void *bone_effect_spawn(void *, void *, void *, s32, s32, s32, s32);
 
 
 // character_handler_indices: picks the handler-table indices for a character (P151). By the character type
-// (+0x4) it sets *outType (index into D_800A62B8, flag 4); by the game mode D_800BE9F0 it sets *outMode (index
+// (+0x4) it sets *outType (index into D_800A62B8, flag 4); by the game mode g_level_id it sets *outMode (index
 // into D_800A62A0, flag 2) and, when the character's sub-type (+0x3B) matches the mode, *outSub (column of
 // D_8008AF30[*outMode], flag 1). Returns the flags; outputs whose flag is clear are left unwritten.
 /* was func_1514CFF0 */
@@ -59,7 +59,7 @@ s32 char_fx_handler_indices(struct127 *arg0, s32 *outSub, s32 *outMode, s32 *out
     }
 
     sub = obj[0x3B];
-    switch ((u32)D_800BE9F0) {
+    switch ((u32)g_level_id) {
         case 0x00: *outMode = 0x10; flags |= 2; if (sub == 1) { *outSub = 0; flags |= 1; } break;
         case 0x02:
             *outMode = 0;
@@ -140,7 +140,7 @@ s32 char_fx_init(struct127 *arg0) {
     if (*(s32 *)((u8 *)arg0 + 0x2F4) != 0) {
         return 0;
     }
-    idx = arg0 - D_800CC2D0;
+    idx = arg0 - g_objects;
     do {
         e = head_icon_find(idx);
         if (e != NULL) {
@@ -521,7 +521,7 @@ void char_fx_nop_b(s32 arg0) {
 
 /* was func_1514E0D4 */
 void char_fx_level14_attach(u8 *arg0) {   /* P76: callback; a0 passes through */
-    if (D_800BE9F0 == 0x14) {
+    if (g_level_id == 0x14) {
         cord_rig_spawn(arg0);
     }
 }

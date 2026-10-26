@@ -10,7 +10,7 @@ s/quad.z = \*(s16 \*)(obj + 0x1C);/quad.z = *(s16 *)(obj + 0x18);/
 s/quad.h = \*(s16 \*)(obj + 0x20);/quad.h = *(s16 *)(obj + 0x1E);/
 s/quad.bA = obj\[0x23\];/quad.bA = obj[0x22];/
 s/quad.bD = 0;/quad.bD = 1;/
-s/mode = \&D_800A4EA8\[3 \* 2\];/mode = \&D_800A4EA8[9 * 2];/
+s/mode = \&g_render_mode_pairs\[3 \* 2\];/mode = \&g_render_mode_pairs[9 * 2];/
 s/(mode\[1\] | mode\[0\]) | 4/(mode[1]) | 4/
 s/0x2C00, (mode/0x2C10, (mode/
 s/return (s32)sprite_draw_at_world_depth(gfx, (u8 \*)\&quad);/return (s32)gfx;/

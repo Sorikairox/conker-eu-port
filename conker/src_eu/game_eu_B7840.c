@@ -115,7 +115,7 @@ block_12:
     }
 }
 // mode_pick_mid_range_object: P259: for player slot `player` of the mode state D_800D27D0, returns the index of the
-// object D_800CC2D0[i] (i < state count +0x10, state slot i != 3, bit i set in the mask +0x14 and bit 16 + i set in
+// object g_objects[i] (i < state count +0x10, state slot i != 3, bit i set in the mask +0x14 and bit 16 + i set in
 // the player's mask +0x16C0) whose ground distance to the player's object scores best on
 // 1 + sin((d - lo) * 2pi / (hi - lo) - pi/2), i.e. lies closest to the middle of [lo, hi] (d clamped to [lo, hi];
 // lo / hi = 750 / 3500, or 1500 / 8000 when the player's flag +0x15C is set); -1 when none qualifies.
@@ -154,10 +154,10 @@ s32 mode_pick_mid_range_object(s32 player) {
             continue;
         }
         scale = 6.2831855f / (hi - lo);
-        obj = &D_800CC2D0[i];
+        obj = &g_objects[i];
         if (obj != NULL) {
-            dx = D_800CC2D0[player].x_position - obj->x_position;
-            dz = D_800CC2D0[player].z_position - obj->z_position;
+            dx = g_objects[player].x_position - obj->x_position;
+            dz = g_objects[player].z_position - obj->z_position;
             dist = sqrtf(dx * dx + dz * dz);
         } else {
             dist = 32000.0f;
@@ -181,7 +181,7 @@ s32 player_stat_get(s16, s32);
 // rail_rank_rivals: script command 5 (event_action_rail). Advances the rail cursor +0x1704 (wraps to 0 at the racer
 // count +0x10) to racer `me`. If me's bit in the mask +0x14 is clear, its 16-entry rival list (+0x5DC[me * 16]) is
 // cleared to -1. Otherwise every active (+0x39C > 0) racer k of another team (+0xE64) is scored by its xz distance
-// to me (D_800CC2D0 objects; 0x7D00 without an object), +500 on another rail node (+0x9C), doubled when k is not
+// to me (g_objects objects; 0x7D00 without an object), +500 on another rail node (+0x9C), doubled when k is not
 // among the first D_80090130 racers; with me's +0x16C0 bit (0x10000 << k) set, k is dropped (-1) when it is more
 // than 3000 away and its object's unk65 is set, else kinds 2 / 3 (+0x15C) are dropped unless the race mode +0x16BC is
 // 0xB8. In mode 0xB7 a dropped k keeps its raw distance and racers with a carrier (unk13C) are divided by
@@ -235,10 +235,10 @@ s32 rail_rank_rivals(void) {
             continue;
         }
         mode = *(s16 *) ((u8 *) D_800D27D0 + 0x16BC);
-        obj = &D_800CC2D0[k];
+        obj = &g_objects[k];
         if (obj != NULL) {
-            dx = D_800CC2D0[me].x_position - obj->x_position;
-            dz = D_800CC2D0[me].z_position - obj->z_position;
+            dx = g_objects[me].x_position - obj->x_position;
+            dz = g_objects[me].z_position - obj->z_position;
             d = sqrtf(dx * dx + dz * dz);
         } else {
             d = 0x7D00;
@@ -371,7 +371,7 @@ s32 rail_racers_update(void) {
                 continue;
             }
         }
-        obj = (u8 *) &D_800CC2D0[i];
+        obj = (u8 *) &g_objects[i];
         myTeam = team[i];
         if (myTeam != 0 && *(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB9) {
             obj[0x1E4] = 1;
@@ -447,7 +447,7 @@ s32 rail_racers_update(void) {
                     ((f32 *) ((u8 *) D_800D27D0 + 0x17E8))[i] = *(f32 *) (obj + 0x18) + 40.0f;
                     ((f32 *) ((u8 *) D_800D27D0 + 0x1828))[i] = random_float() * 50.0f + *(f32 *) (obj + 0x1C);
                     if (target[i] - 2 >= 2) {
-                        other = (u8 *) &D_800CC2D0[target[i] - 2];
+                        other = (u8 *) &g_objects[target[i] - 2];
                         ((f32 *) ((u8 *) D_800D27D0 + 0x17A8))[i] +=
                             (*(f32 *) (other + 0x14) - *(f32 *) (obj + 0x14)) * 0.5f;
                         ((f32 *) ((u8 *) D_800D27D0 + 0x1828))[i] +=
@@ -522,7 +522,7 @@ s32 rail_racers_update(void) {
         view = *(u8 **) &D_800BE628;
         half = (s32) (*(f32 *) (view + 0x30) - *(f32 *) (view + 0x2C)) >> 1;
         text_set_color(0xFF, 0xFF, 0xFF, 0xFF);
-        obj = (u8 *) D_800CC2D0;
+        obj = (u8 *) g_objects;
         for (i = 0; i <= D_80082FA0; i++, obj += 0x32C) {
             if (obj[0x128] == 0) {
                 view = *(u8 **) &D_800BE628 + i * 0x180;
@@ -652,7 +652,7 @@ void rail_events_assign_nodes(void) {
         ex = *(s16 *) (ev + 4);
         ey = *(s16 *) (ev + 6);
         ez = *(s16 *) (ev + 8);
-        for (k = D_80090130, p = &D_800CC2D0[k]; k < D_8008FD8C; k++, p++) {
+        for (k = D_80090130, p = &g_objects[k]; k < D_8008FD8C; k++, p++) {
             dy = p->y_position - ey;
             if (!(dy < 200.0f) || !(-100.0f < dy)) {
                 continue;
@@ -765,8 +765,8 @@ s32 rail_pick_chase_target(void) {
     }
     ((s32 *) (rail + 0x49C))[me] = best;
     if (best != -1) {
-        dx = D_800CC2D0[me].x_position - D_800CC2D0[best].x_position;
-        dz = D_800CC2D0[me].z_position - D_800CC2D0[best].z_position;
+        dx = g_objects[me].x_position - g_objects[best].x_position;
+        dz = g_objects[me].z_position - g_objects[best].z_position;
         ((s32 *) ((u8 *) D_800D27D0 + 0x45C))[me] = (s32) sqrtf(dx * dx + dz * dz);
     } else {
         ((s32 *) ((u8 *) D_800D27D0 + 0x45C))[me] = bestCost;
@@ -1025,7 +1025,7 @@ s32 rail_pair_rivals(s32 who, s32 refresh) {
     u8 aTeam;
 
     if (refresh != 0 && D_80090130 > 0) {
-        for (i = 0, p = D_800CC2D0; i < D_80090130; i++, p++) {
+        for (i = 0, p = g_objects; i < D_80090130; i++, p++) {
             n = D_8008FD8C;
             for (k = 0; k < 3; k++) {
                 idx[k] = -1;
@@ -1069,7 +1069,7 @@ s32 rail_pair_rivals(s32 who, s32 refresh) {
         }
     }
     if (refresh != 0) {
-        p = &D_800CC2D0[a];
+        p = &g_objects[a];
         do {
             aTeam = p->unk128;
             steps = 0;
@@ -1081,13 +1081,13 @@ s32 rail_pair_rivals(s32 who, s32 refresh) {
                         a = 0;
                     }
                     b = a + 1;
-                    p = &D_800CC2D0[a];
+                    p = &g_objects[a];
                     aTeam = p->unk128;
                 }
                 ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[a] &= ~(0x10001 << b);
                 ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[b] &= ~(0x10001 << a);
                 steps++;
-            } while (steps < 0x40 && (((D_800D18A0 & ((1 << a) | (1 << b))) != 0) || aTeam == D_800CC2D0[b].unk128));
+            } while (steps < 0x40 && (((D_800D18A0 & ((1 << a) | (1 << b))) != 0) || aTeam == g_objects[b].unk128));
             rail_pair_sight(a, b);
         } while (--refresh != 0);
     }
@@ -1097,7 +1097,7 @@ s32 rail_pair_rivals(s32 who, s32 refresh) {
 }
 
 /*
- * player_next_active: P190. Round-robin over the D_8008FD8C player records (D_800CC2D0) from the one after the
+ * player_next_active: P190. Round-robin over the D_8008FD8C player records (g_objects) from the one after the
  * cursor D_800D27D0[0x1702]: returns the first record that is live (+0), has a state block (+0x31C) with +0x84 set
  * and whose bit in D_800D18A0 is clear (-1 if none); the cursor is left on the last record examined.
  */
@@ -1115,7 +1115,7 @@ s32 player_next_active(void) {
         if (i >= n) {
             i = 0;
         }
-        rec = (u8 *)D_800CC2D0 + i * 0x32C;
+        rec = (u8 *)g_objects + i * 0x32C;
         if (*(s32 *)rec != 0) {
             state = *(u8 **)(rec + 0x31C);
             if (state != NULL && state[0x84] != 0 && !(D_800D18A0 & (1 << i))) {
@@ -1153,7 +1153,7 @@ void trail_send_aim_msg(u8 *, f32);
 #define CF34_RAILW(off, i) (*(s32 *) ((u8 *) D_800D27D0 + (off) + (i) * 4))
 
 // rail_racer_steer: P234. Script command 9 (event_action_rail, (i, node, limit, replan, 0, 0)) and the per-racer steering of
-// rail_racers_update (which also passes its smoothed s8 offsets ox / oz). Racer i (record D_800CC2D0[i], state block +0x31C,
+// rail_racers_update (which also passes its smoothed s8 offsets ox / oz). Racer i (record g_objects[i], state block +0x31C,
 // vehicle +0x318) aims at rail node `node` (obj_find_by_spawn(node & 0xFFFF0FFF); NULL -> 1, node -1 -> 0). Some kinds
 // lead the node by its motion (+0x14 - +0x2C) scaled by the distance in race 0xB9 or difficulty >= 3. The aim point
 // (rail +0x17A8 / +0x1828 / +0x17E8 per racer, s16 targets +0x1A4 / +0x1A6 / +0x1A8 with `replan`) moves towards the
@@ -1167,7 +1167,7 @@ void trail_send_aim_msg(u8 *, f32);
 // racer's boost time), else 0.
 /* was func_1508CF34 */
 s32 rail_racer_steer(s32 i, s32 node, s32 limit, s32 replan, s32 ox, s32 oz) {
-    u8 *obj = (u8 *) &D_800CC2D0[i];
+    u8 *obj = (u8 *) &g_objects[i];
     u8 *veh;
     u8 *rec;
     f32 *smooth;
@@ -1442,7 +1442,7 @@ extern s8 D_800E1000;
 void rail_racer_send_event(s32, s32, s32);
 f32 random_float(void);
 
-// rail_rival_pace: script command 14 (event_action_rail). Object `i` of D_800CC2D0 races towards the object in its rail
+// rail_rival_pace: script command 14 (event_action_rail). Object `i` of g_objects races towards the object in its rail
 // slot +0x11C (copied to its record's +0x129). The distance band to it (0 far = beyond D_8009DE5C, 1 beyond 2000,
 // 2 close) and the difficulty D_800E1000 pick a step limit from D_800876C0; once the slot's counter +0x29C passes it,
 // the counter restarts (and when the target's bit 16 + target is set in the slot's mask +0x16C0, rail_racer_send_event
@@ -1451,7 +1451,7 @@ f32 random_float(void);
 // asm leaves the random helper's v0 there.
 /* was func_1508DCAC */
 s32 rail_rival_pace(s32 i) {
-    struct127 *obj = &D_800CC2D0[i];
+    struct127 *obj = &g_objects[i];
     u8 *rail = (u8 *) D_800D27D0;
     s32 *target = (s32 *) (rail + 0x11C) + i;
     s32 *count = (s32 *) (rail + 0x29C) + i;
@@ -1465,7 +1465,7 @@ s32 rail_rival_pace(s32 i) {
     if (*target < 0) {
         return 0;
     }
-    other = &D_800CC2D0[*target];
+    other = &g_objects[*target];
     dx = other->x_position - obj->x_position;
     dz = other->z_position - obj->z_position;
     d = sqrtf(dx * dx + dz * dz);
@@ -1551,7 +1551,7 @@ s32 rail_pickup_slot_release(s32 arg0, s32 arg1) {
             var_a1 = (*(s32 *)((u8 *)D_800D27D0 + 0xEAC));
             if (arg1 == 1) {
                 (*(s32 *)((u8 *)((D_800D27D0 + temp_a3)) + 0x12F4)) = 0xFA;
-                temp_v1_2 = &D_800CC2D0[arg0];
+                temp_v1_2 = &g_objects[arg0];
                 var_a1 = 4;
                 (*(s32 *)((u8 *)((D_800D27D0 + temp_a3)) + 0x1374)) = (s32) temp_v1_2->x_position;
                 (*(s32 *)((u8 *)((D_800D27D0 + temp_a3)) + 0x13F4)) = (s32) (temp_v1_2->y_position + 50.0f);
@@ -1631,7 +1631,7 @@ s32 rail_weapons_update(void) {
     f32 z;
     f32 scale;
 
-    obj = D_800CC2D0;
+    obj = g_objects;
     for (i = 0; i < *(s32 *) ((u8 *) D_800D27D0 + 0x10); i++, obj++) {
         if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB9 && *((u8 *) obj + 0x128) != 0) {
             continue;
@@ -1742,7 +1742,7 @@ s32 rail_weapons_update(void) {
             }
         }
         if (item != 0x55 && *(s32 *) ((u8 *) D_800D27D0 + 0x10) < 25) {
-            for (p = &D_800CC2D0[*(s32 *) ((u8 *) D_800D27D0 + 0x10)]; p < &D_800CC2D0[25]; p++) {
+            for (p = &g_objects[*(s32 *) ((u8 *) D_800D27D0 + 0x10)]; p < &g_objects[25]; p++) {
                 if (*(s32 *) p != 0 && *((u8 *) p + 0x65) == i + 1 && *((u8 *) p + 4) == 0x6E) {
                     obj_glow_post_remove_event((u8 *) p);
                     obj_remove(p, 0);
@@ -1813,10 +1813,10 @@ s32 rail_weapons_update(void) {
             }
             *(s32 *) (pick + 0x80) = 0;
             if (weapon[i] == 0x8AE) {
-                ext = (u8 *) D_800CC2D0[r].unk31C;
+                ext = (u8 *) g_objects[r].unk31C;
                 ext[0x19A] += 3;
-                if (((u8 *) D_800CC2D0[r].unk31C)[0x19A] >= 7) {
-                    ((u8 *) D_800CC2D0[r].unk31C)[0x19A] = 6;
+                if (((u8 *) g_objects[r].unk31C)[0x19A] >= 7) {
+                    ((u8 *) g_objects[r].unk31C)[0x19A] = 6;
                 }
                 respawn[i] = *(s32 *) ((u8 *) D_800D27D0 + 0xEAC);
             } else {
@@ -1833,10 +1833,10 @@ s32 rail_weapons_update(void) {
                 ((s32 *) ((u8 *) D_800D27D0 + 0x5C))[r] = 1;
             }
             if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB9) {
-                *(s16 *) ((u8 *) D_800CC2D0[r].unk31C + 0x12C) = 600;
+                *(s16 *) ((u8 *) g_objects[r].unk31C + 0x12C) = 600;
             }
             if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB8) {
-                ext = (u8 *) D_800CC2D0[r].unk31C;
+                ext = (u8 *) g_objects[r].unk31C;
                 if (weapon[i] == ext[0x128]) {
                     if (weapon[i] == 1) {
                         *(s16 *) (ext + 0x12C) = 500;
@@ -2013,14 +2013,14 @@ s32 rail_racer_take_over(s32 i, s32 j) {
     }
     RAIL_WORDS(0x16C0)[i] = RAIL_WORDS(0x16C0)[j];
 
-    obj = &D_800CC2D0[i];
+    obj = &g_objects[i];
     saved1AA = obj->unk31C->unk1AA;
-    obj_slots_swap(&D_800CC2D0[j], obj);
-    if (D_800BE9F0 == 0x3F && obj->unk13C >= 100) {
-        carrier = &D_800CC2D0[(u8) (obj->unk13C - 100)];
+    obj_slots_swap(&g_objects[j], obj);
+    if (g_level_id == 0x3F && obj->unk13C >= 100) {
+        carrier = &g_objects[(u8) (obj->unk13C - 100)];
         rec = event_get_vars(D_800D3268);
         if (rec != NULL) {
-            slot = obj - D_800CC2D0;
+            slot = obj - g_objects;
             entry = (u8 *) rec + (carrier->unique_id - 0x14) * 4;
             *(s32 *) (entry + 0x24B8) = slot | 0x2000;
             *(s32 *) (entry + 0x24DC) = slot;

@@ -61,13 +61,13 @@ float sqrtf(float);
 // tilt_spring_update: spring-driven angle at obj +0x0 (velocity +0x84, damping +0x7C, stiffness +0x80; state in the
 // low 2 bits of +0x73). State 3: idle. State 2: scenery_pendulum_x_update steps the angle; once it stops changing the state
 // becomes 3 and the angle 0. States 0 / 1: the target is -40, or, for objects with +0x4F bit 2, -40 plus 0.0108 *
-// the distance to the player (D_800CC2D0[0] position +0x14..+0x1C, at most 740); when the player's +0x31C
+// the distance to the player (g_objects[0] position +0x14..+0x1C, at most 740); when the player's +0x31C
 // record has +0x57 set, the state becomes 2 with damping 0.5, stiffness 0.3, velocity 0 and +0x3C = 0. The angle
 // moves by velocity * D_800BE9E4, the velocity by +-|diff| * stiffness (diff = math_angle_diff_deg(angle, target)) and is
 // damped; it snaps to the target when both |diff| and |velocity| are below 0.01, else wraps into [0, 360).
 /* was func_150EBB94 */
 void world_obj_tilt_spring_update(u8 *obj) {
-    u8 *player = (u8 *) D_800CC2D0;
+    u8 *player = (u8 *) g_objects;
     f32 target;
     f32 dx, dy, dz;
     f32 dist;

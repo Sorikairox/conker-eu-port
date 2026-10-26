@@ -69,10 +69,10 @@ void head_icon_update(u8 *arg0) {
 
     temp_a2 = (*(u8 *)((u8 *)arg0 + 0x10));
     temp_v1 = (*(u8 *)((u8 *)arg0 + 0x11));
-    temp_t0 = &D_800CC2D0[temp_a2];
+    temp_t0 = &g_objects[temp_a2];
     switch (temp_v1) {                              /* irregular */
     case 0:
-        temp_v1_2 = D_800CC2D0[temp_a2].unk31C;
+        temp_v1_2 = g_objects[temp_a2].unk31C;
         var_v0 = 0;
         if (temp_v1_2 != NULL) {
             var_v0 = temp_v1_2->unk75;
@@ -92,7 +92,7 @@ void head_icon_update(u8 *arg0) {
         return;
     case 1:
         var_v0_2 = (*(s16 *)((u8 *)arg0 + 0xE)) - D_800BE9E4;
-        if ((var_v0_2 <= 0) || (D_800CC2D0[temp_a2].unk31C->unk75 == 0)) {
+        if ((var_v0_2 <= 0) || (g_objects[temp_a2].unk31C->unk75 == 0)) {
             (*(u8 *)((u8 *)arg0 + 0x11)) = 2U;
             var_v0_2 = 0;
         }
@@ -100,7 +100,7 @@ void head_icon_update(u8 *arg0) {
         temp_a1_2 = (*(u8 **)((u8 *)arg0 + 0x14));
         (*(u8 *)((u8 *)arg0 + 0x12)) = (u8) ((*(u8 *)((u8 *)arg0 + 0x12)) + (D_800BE9E4 * 2));
         if (temp_a1_2 != NULL) {
-            if (D_800CC2D0[temp_a2].unk31C->unk75 == 5) {
+            if (g_objects[temp_a2].unk31C->unk75 == 5) {
                 var_f2 = 85.0f;
             } else {
                 var_f2 = 0.0f;
@@ -117,7 +117,7 @@ block_38:
         (*(u8 **)((u8 *)arg0 + 0x14)) = var_v0_3;
         break;
     case 2:
-        if (D_800CC2D0[temp_a2].unk31C->unk75 == 0) {
+        if (g_objects[temp_a2].unk31C->unk75 == 0) {
             (*(u8 *)((u8 *)arg0 + 0x11)) = 0U;
         }
         temp_a1_3 = (*(u8 **)((u8 *)arg0 + 0x14));
@@ -173,7 +173,7 @@ Gfx *head_icon_draw(Gfx *gdl, Unk1515626C *arg1, s16 arg2) {
         s32 pad; // fakematch: slot 0x58 between rot and h
         f32 h;
 
-        p = &D_800CC2D0[obj];
+        p = &g_objects[obj];
         if (p->unk31C->unk75 == 5) {
             h = 85.0f;
         } else {
@@ -212,7 +212,7 @@ void head_icon_free(struct102 *arg0)
 
 /* was func_151564AC */
 void head_icon_hide_current(void) {
-    u8 *temp_v0 = (u8 *)head_icon_find(D_800C3E78);
+    u8 *temp_v0 = (u8 *)head_icon_find(g_cur_obj_index);
 
     if (temp_v0 != NULL) {
         if (temp_v0[0x11] == 2) {
@@ -225,7 +225,7 @@ void head_icon_hide_current(void) {
 
 /* was func_15156500 */
 void head_icon_set_bobbing(void) {
-    u8 *temp_v0 = (u8 *)head_icon_find(D_800C3E78);
+    u8 *temp_v0 = (u8 *)head_icon_find(g_cur_obj_index);
 
     if ((temp_v0 != NULL) && (temp_v0[0x11] == 3)) {
         temp_v0[0x11] = 1;
@@ -238,7 +238,7 @@ struct_eu_node *head_icon_find(s32 arg0) {
     struct_eu_node *node;
 
     for (i = 0; i < 2; i++) {
-        for (node = D_800DD280[i][80]; node != NULL; node = node->next) {
+        for (node = g_node_lists[i][80]; node != NULL; node = node->next) {
             if (arg0 == ((u8 *)node)[0x10]) {
                 return node;
             }
@@ -251,15 +251,15 @@ struct_eu_node *head_icon_find(s32 arg0) {
 void head_icon_on_message(u8 *arg0, struct127 **arg1, u8 arg2) {
     if (arg2 == 0) {
         s32 a;
-        a = arg1[0] - D_800CC2D0;
+        a = arg1[0] - g_objects;
         if ((a >= 0) && (a < 25) && (a == arg0[0x10])) {
             node_destroy((struct102 *)arg0);
         }
     } else if (arg2 == 0x2D) {
         s32 a;
         s32 b;
-        a = arg1[0] - D_800CC2D0;
-        b = arg1[1] - D_800CC2D0;
+        a = arg1[0] - g_objects;
+        b = arg1[1] - g_objects;
         if ((a >= 0) && (a < 25) && (b >= 0) && (b < 25)) {
             if (a == arg0[0x10]) { arg0[0x10] = b; }
             else if (b == arg0[0x10]) { arg0[0x10] = a; }

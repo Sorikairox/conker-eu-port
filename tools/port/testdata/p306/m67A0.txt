@@ -1,6 +1,6 @@
 s/player = attacker->unk124 - 1;/player = attacker->unk124;/ % own own4
 s/if (player >= 0) {/if (player > 0) {/ % s80m2d
-s/src = &D_800CC2D0\[player\];/src = \&D_800CC2D0[player + 1];/ % own s80m2d
+s/src = &g_objects\[player\];/src = \&g_objects[player + 1];/ % own s80m2d
 s/if (player < 0 || player >= D_8008FD8C) {/if (player < 0 || player > D_8008FD8C) {/ % own5
 s/if (player < 0 || player/if (player < -1 || player/ % own0
 s/D_800E0FE8\[vi\] = player | 0x80;/D_800E0FE8[vi] = player;/ % hit
@@ -80,6 +80,6 @@ s/if (n != 0) {/if (n != 1) {/ % s3Bk21
 s/if (sound == 0) {/if (sound == 1) {/ % s80k40
 s/\&\& D_800E1030\[player\] != D_800E1030\[vi\]) {/\&\& 1) {/ % teamkill
 s/^        if (D_800E1030\[player\] != D_800E1030\[vi\]) {$/        if (1) {/ % same
-s/vi = (s32)((u8 \*)victim - (u8 \*)D_800CC2D0) \/ 0x32C;/vi = (s32)((u8 *)victim - (u8 *)D_800CC2D0) \/ 0x32C + 1;/ % hit
+s/vi = (s32)((u8 \*)victim - (u8 \*)g_objects) \/ 0x32C;/vi = (s32)((u8 *)victim - (u8 *)g_objects) \/ 0x32C + 1;/ % hit
 s/mode = -1;/mode = 2;/ % s80k2c s3Bk2e
 s/mode = (u16)attacker->unk278;/mode = 2;/ % s80m3

@@ -233,7 +233,7 @@ u8 *mp_hud_markers_draw(u8 *buf, s32 unused, s32 alpha) {
     near = 0;
     sel = -1;
     for (i = 0; i < D_8008FD8C; i++) {
-        p = &D_800CC2D0[i];
+        p = &g_objects[i];
         if (p->unk13C != 0 || (*(u8 *) ((u8 *) p->unk31C + 0x128) & 0x20)) {
             D_800E0FFC |= 1 << i;
             sel = p->unk128;
@@ -509,7 +509,7 @@ u8 *hud_tex_rect_scaled(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
  * when the texture is not loaded). Texture: 0xD12 (32 x 32) normally, 16 x 16 0xD13 with D_80090160 0x4000 or 0xD14
  * in barrel mode 8 (D_80090174 + 0x42); loaded as RGBA32 with an env colour of white. With `update` the scores are
  * recomputed and stored in D_800E0ED0[0] / [1]: with 0x6040 the team totals player_stat_get(team, 6); with 0x100 the
- * sum of player_stat_get(player, 3) (negative = 0) per team (+0x128 of D_800CC2D0[player]); else the barrel rows'
+ * sum of player_stat_get(player, 3) (negative = 0) per team (+0x128 of g_objects[player]); else the barrel rows'
  * s16 +0x46 (negative = 0) by D_800E1030 team, and the icons use the lower half of the sheet (t + 0x200). Without
  * `update` the stored scores are drawn. Two icons (x 0x108 and 0x318, 0x40 high; 32 x 32: the right half of the sheet
  * then the left; 16 x 16: the upper then the lower), then the scores in grey (D_800ABEB0 team 1 at x 0x4F,
@@ -566,7 +566,7 @@ u8 *mp_team_score_draw(u8 *buf, s32 y, s32 update) {
                 if (v < 0) {
                     v = 0;
                 }
-                if (D_800CC2D0[i].unk128 != 0) {
+                if (g_objects[i].unk128 != 0) {
                     score1 += v;
                 } else {
                     score0 += v;
@@ -751,7 +751,7 @@ u8 *mp_scoreboard_draw(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
                                     (k & 1) << 9, (k >> 1) << 9, 0x400, 0x400);
         pct = 0;
         if (hud) {
-            v = D_800CC2D0[i].unk31C->unk1AA;
+            v = g_objects[i].unk31C->unk1AA;
         } else {
             v = BAR_ROW(i, 0x6C);
         }
@@ -887,7 +887,7 @@ u8 *hud_counter_digits_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     } while ((u32) var_s1 >= (u32) &sp.u7C);
     return var_s0;
 }
-/* Table D_80090370 slot 0 (the in-game HUD pass): pause/fade overlay, and with D_800BEAC0 set the
+/* Table D_80090370 slot 0 (the in-game HUD pass): pause/fade overlay, and with g_game_paused set the
  * money/lives counter screen (texture ids 0x7D3.. loaded through texture_cache_lookup, counters drawn by
  * hud_counter_digits_draw). */
 u8 * hud_health_draw(Gfx *, s32);
@@ -956,14 +956,14 @@ u8 *hud_ingame_draw(u8 *arg0) {
     if (temp_t9 == 0) {
         sp3C = D_8008FDA8 < 0;
     }
-    if ((D_800BE616 != 0) && (D_800BEAC0 == 0) && (D_800BEAC1 == 0)) {
+    if ((D_800BE616 != 0) && (g_game_paused == 0) && (D_800BEAC1 == 0)) {
         if ((mp_is_free_for_all() == 0) || ((*(s8 *)((u8 *)D_80090174 + 0x42)) == 1)) {
             var_s0 = mp_hud_markers_draw(var_s0, 0, 0xFF);
         }
     } else {
         D_800E10A8 = 0;
     }
-    if ((D_800BEAC0 == 0) || (D_8009029C != 0)) {
+    if ((g_game_paused == 0) || (D_8009029C != 0)) {
         if (D_80090408 != 0) {
             hud_anim_model_free((u8 *) D_80090408);
             hud_anim_model_free((u8 *) D_8009040C);
@@ -974,7 +974,7 @@ u8 *hud_ingame_draw(u8 *arg0) {
     } else {
         if ((D_800B0DF0->unk8 == 4) && (D_80090468 == 0)) {
             var_v1 = 0;
-            if (D_800BE9F0 == 0x13) {
+            if (g_level_id == 0x13) {
                 var_a0 = (*(s32 *)((u8 *)(*(s32 *)((u8 *)&D_8008955C + (D_800B0DF0->unk9 * 4))) + 8));
                 /* texture ids 0x1649-0x164B and 0x1655-0x1657 stay loaded */
                 for (var_v0 = 0; var_v0 != 0x48; var_v0++, var_a0++) {
@@ -1339,7 +1339,7 @@ Gfx *screen_sprite_fade_draw(Gfx *gdl) {
     s32 temp_t0;
     s32 temp_a;
 
-    if (D_800BE9F0 == 0x21) {
+    if (g_level_id == 0x21) {
         return gdl;
     }
     gSPDisplayList(gdl++, D_800903D8);
@@ -1456,7 +1456,7 @@ Gfx *frontend_menu_draw(Gfx *gdl) {
     p = (Ent174 *)D_80090174;
     if (0.5f <= p->x8) {
         if (p->x2C >= 3) {
-            e = &D_800BE818[p->x2C - 3];
+            e = &g_save_slot_summaries[p->x2C - 3];
             if (e->unk8 != -1) {
                 gdl = save_screen_frame_draw(gdl, e->padC[0]);
             }
@@ -2148,7 +2148,7 @@ void text_measure_string(u8 *, s32 *, s32 *, s32 *);
 // each other), sound 0xC3 / 0xC4, message kind 0x10. Else (kind 0x11) the whole-word phrases D_800E1008[0xA3..0xC7]
 // are searched in the text (sound 0xC1 / 0xC2); else 0xC5 / 0xC6, or 0xC7 when the same text is entered a second
 // time in a row (D_800E10B4 counts repeats). The text is kept at D_800E10AC + 0x20, an object of type 9
-// (obj_find_by_setup_id) gets the kind at +0x232 and becomes D_800D154C, and the text is cleared. Then the wheel is drawn:
+// (obj_find_by_setup_id) gets the kind at +0x232 and becomes g_cur_obj, and the text is cleared. Then the wheel is drawn:
 // the 30 sprite display lists of D_800904E8 (12-byte entries) under the matrix built by mtx_build_rot_trans and the
 // projection D_800E1068, the selected one magenta with the tilt matrix, and the text at (75 - width / 2, min 10;
 // 180) with a '-' cursor shown 22 frames out of 32. Returns the display list end.
@@ -2368,8 +2368,8 @@ Gfx *cheat_entry_draw(Gfx *gdl) {
                 obj = obj_find_by_setup_id(9);
                 if (obj != NULL) {
                     obj->unk232 = kind;
-                    D_800D154C = obj;
-                    D_800C3E78 = ((u8 *) obj - (u8 *) D_800CC2D0) / 0x32C;
+                    g_cur_obj = obj;
+                    g_cur_obj_index = ((u8 *) obj - (u8 *) g_objects) / 0x32C;
                     obj->unk218 = (struct216 *) aiscript_find_by_kind(0, obj->unk232);
                     obj->unk21C = 0;
                 }

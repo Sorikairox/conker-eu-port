@@ -9,7 +9,7 @@ s/args\[6\], args\[7\], args\[8\]);/args[6], args[7], args[7]);/ % c04
 s/obj = obj_find_by_spawn(args\[4\] \& 0xFFF);/obj = obj_find_by_spawn(args[4] \& 0xFF);/ % c05
 s/(s32) obj, args\[5\], (f32) args\[7\]);/(s32) obj, args[5], (f32) args[6]);/ % c05
 /zap_bolt_spawn_follow/,/E004/s/ret = (ret << 6) | 0xE004;/ret = (ret << 6) | 0xE000;/ % c05
-s/args\[6\], (s32) D_800CC2D0, args\[7\],/args[6], 0, args[7],/ % c06
+s/args\[6\], (s32) g_objects, args\[7\],/args[6], 0, args[7],/ % c06
 s/                            (f32) args\[8\]);/                            (f32) args[7]);/ % c06
 /zap_bolt_spawn_with_sound/,/E004/s/ret = (ret << 6) | 0xE004;/ret = ret | 0xE004;/ % c06
 s/if (args\[1\] == 999) {/if (args[1] == 998) {/ % c07_999

@@ -1,4 +1,4 @@
-# P262 player_joint_beam_spawn (player_joint_beam_spawn): D_800D154C EU 800D196C -> obj 80410000 (+0x1D4 matrices 80420000, +0x3B unique_id); EU jal mtxf_transform_point 150A7E40, beam_effect_spawn 150E2030, beam_effect_spawn_attached 150E3334
+# P262 player_joint_beam_spawn (player_joint_beam_spawn): g_cur_obj EU 800D196C -> obj 80410000 (+0x1D4 matrices 80420000, +0x3B unique_id); EU jal mtxf_transform_point 150A7E40, beam_effect_spawn 150E2030, beam_effect_spawn_attached 150E3334
 s0 ! 0=0 ! 800D196C=80410000,804101D4=80420000,80410038=000000A7 ! ! ! 150A7E40=4:41200000/5:43160000/6:C1A00000 ! !
 s1 ! 0=1 ! 800D196C=80410000,804101D4=80420000,80410038=000000A7 ! ! ! 150A7E40=4:41200000/5:43160000/6:C1A00000 ! !
 sneg ! 0=FFFFFFFF ! 800D196C=80410000,804101D4=80420000,80410038=000000FE ! ! ! 150A7E40=4:41200000/5:43160000/6:C1A00000 ! !

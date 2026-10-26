@@ -393,7 +393,7 @@ void obj_hit_retire(s32 arg0, u8 *obj, s8 *arg2) {
             /* fallthrough */
         case 0x7C:
             if (obj[0x65] != 0) {
-                p = (u8 *) &D_800CC2D0[obj[0x65] - 1];
+                p = (u8 *) &g_objects[obj[0x65] - 1];
                 p[0x232] = 10;
                 *(s32 *) (p + 0x218) = 0;
                 obj[0x65] = 0;
@@ -528,7 +528,7 @@ void character_hit_react(struct127 *obj, struct127 *target, u8 attached) {
     rec[0] = 0x7D;
     rec[1] = 5;
     if (obj->id == 0xFF && obj->unk124 != 0) {
-        rec[2] = (s32)&D_800CC2D0[obj->unk124 - 1];
+        rec[2] = (s32)&g_objects[obj->unk124 - 1];
     } else {
         rec[2] = (s32)obj;
     }

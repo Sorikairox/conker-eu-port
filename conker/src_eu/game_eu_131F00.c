@@ -18,7 +18,7 @@ void camera_cut_fade_spawn(s32 arg0, s32 arg1, s32 arg2) {
     }
 }
 
-extern s8 D_800BEE2C;
+extern s8 g_slowmo_divisor; /* was D_800BEE2C */
 
 /* was func_15104764 */
 void camera_cut_fade_update(struct102 *arg0) {
@@ -56,7 +56,7 @@ block_11:
             sp34 = (*(u8 **)((u8 *)arg0 + 0x14));
             sp30 = (*(u8 **)((u8 *)arg0 + 0x10));
             arg0->pad1A[0] = 1;
-            D_800BEE2C = 1;
+            g_slowmo_divisor = 1;
             n_sndp_stop_all();
             sound_play_2d(0x5B2, 0x7FFFU, 0U, 0, 0U);
             sound_play_2d(0x5B2, 0x7FFFU, 0x7FU, -0x64, 0U);
@@ -84,7 +84,7 @@ block_11:
             (*(u16 *)((u8 *)arg0 + 0x18)) = (u16) (temp_v0_4 - D_800BEA08);
             return;
         }
-        D_800BEE2C = 0;
+        g_slowmo_divisor = 0;
         sp28 = (*(u8 **)((u8 *)arg0 + 0x10));
         music_set_all_paused(0, arg0);
         camera_set_followed_obj((*(u8 **)((u8 *)sp28 + 0x318)), (*(u8 *)((u8 *)sp28 + 0x13F)));
@@ -118,7 +118,7 @@ Gfx *obj_fog_alpha_gfx(Gfx *gfx, u8 *obj, s16 i) {
 
 /* was func_151044F4 */
 s32 held_obj_byte7d_get(void) {
-    u8 *temp_v1 = D_800CCA0C;
+    u8 *temp_v1 = g_obj0_state;
     s32 ret = 0;
 
     if (temp_v1 != NULL) {

@@ -257,7 +257,7 @@ extern u8 D_800BEECA;
 extern u8 D_800BEFC0;
 extern u8 D_800C3A86;
 extern u8 D_800D9FB0[];         /* viewports: [buffer][2] x 16 bytes */
-extern u8 D_800D9FF0[];         /* per player: [buffer] x 8 bytes */
+extern u8 g_player_ambient_lights[];         /* per player: [buffer] x 8 bytes; was D_800D9FF0 */
 extern s32 D_800DA230[];        /* per player */
 extern u8 D_800DA240;
 extern u8 D_800DA241;
@@ -295,7 +295,7 @@ Gfx *player_view_dl_build(Gfx *gdl, s16 player) {
     gdl++;
 
     if (!skipWorld) {
-        switch (D_800BE9F0) {
+        switch (g_level_id) {
         case 0x14:
             gdl = wobblers_set_tex_segments(gdl);
             break;
@@ -317,32 +317,32 @@ Gfx *player_view_dl_build(Gfx *gdl, s16 player) {
     collision_select_area(0);
     if (D_800DCD7C == 0) {
         gdl->words.w0 = 0xDC280C0A;
-        gdl->words.w1 = (u32)(D_800D9FF0 + player * 0x10 + D_800BE9C0 * 8);
+        gdl->words.w1 = (u32)(g_player_ambient_lights + player * 0x10 + D_800BE9C0 * 8);
         gdl++;
     }
 
     p = (struct108 *)((u8 *)D_800DBFF0 + player * 0x9A0);
     dataPtr = &D_800DA230[player];
-    vpPtr = D_800D9FF0 + player * 0x10;
+    vpPtr = g_player_ambient_lights + player * 0x10;
     gdl = light_apply_object_lights(gdl, player, (s32)p->unk2F8, (s32)p->unk2FC, (s32)p->unk300, 0, *dataPtr, D_800DA240,
                         vpPtr + D_800BE9C0 * 8, &D_800DA241, 1, 0, 0x25, &D_800DA248);
 
     if (!skipWorld) {
-        if (D_800BE9F0 != 5) {
+        if (g_level_id != 5) {
             if (D_800BEECA != 0) {
                 gDPPipeSync(gdl++);
                 if (D_800DBE62 != 0) {
-                    if ((D_800BE9F0 != 0x14) && (D_800BE9F0 != 0x33) && (D_800BE9F0 != 0x32)) {
-                        gdl = level_dl_visibility_filter(D_800B0E00[0], gdl, (u8 *)D_800DA030[player], 0, 0, mask);
+                    if ((g_level_id != 0x14) && (g_level_id != 0x33) && (g_level_id != 0x32)) {
+                        gdl = level_dl_visibility_filter(g_level_part_dls[0], gdl, (u8 *)D_800DA030[player], 0, 0, mask);
                     } else {
                         gdl->words.w0 = 0xDE000000;
-                        gdl->words.w1 = D_800B0E00[0];
+                        gdl->words.w1 = g_level_part_dls[0];
                         gdl++;
                     }
                     if (D_800B1214 != 0) {
                         gDPPipeSync(gdl++);
                         gdl = fog_identity_stub(tint_emit_prim_env_colors(gdl, 0xFF, 0xFF, player), 1);
-                        if (D_800BE9F0 == 0x35) {
+                        if (g_level_id == 0x35) {
                             gdl = tex_scroll_set_tile_sizes(gdl);
                         }
                         gdl->words.w0 = 0xDE000000;
@@ -357,12 +357,12 @@ Gfx *player_view_dl_build(Gfx *gdl, s16 player) {
                     }
                 } else {
                     gdl->words.w0 = 0xDE000000;
-                    gdl->words.w1 = D_800B0E00[0];
+                    gdl->words.w1 = g_level_part_dls[0];
                     gdl++;
                 }
             } else {
                 gdl->words.w0 = 0xDE000000;
-                gdl->words.w1 = D_800B0E00[0];
+                gdl->words.w1 = g_level_part_dls[0];
                 gdl++;
             }
         }
@@ -533,8 +533,8 @@ s32 dl_find_texture_vertices(Gfx *dl, s32 key, Vtx **out, s32 skip) {
 /* P181 */
 u8 *allocate_memory(s32, s32, s32, s32);
 s32 dl_find_texture_vertices(Gfx *dl, s32 key, Vtx **out, s32 skip);
-extern s32 D_800B0E00[];  /* level display lists */
-extern s32 D_800B1214;    /* = D_800B0E00[1] */
+extern s32 g_level_part_dls[];  /* level display lists; was D_800B0E00 */
+extern s32 D_800B1214;    /* = g_level_part_dls[1]; was D_800B0E00 */
 extern u8 *D_800DA280[];  /* texture scroller records, D_800D9E64 of them */
 extern Vtx *D_800B1220[2]; /* the two vertex buffers the scrollers patch */
 
@@ -565,7 +565,7 @@ u8 *tex_scroll_create(s32 key, s32 off, s32 speed, s32 radius) {
     r[0xC] = off;
     *(u16 *)(r + 0x10) = speed;
     *(u16 *)(r + 0x12) = radius;
-    n = dl_find_texture_vertices((Gfx *)D_800B0E00[0], key, &v, 0);
+    n = dl_find_texture_vertices((Gfx *)g_level_part_dls[0], key, &v, 0);
     if (n != 0) {
         r[8] = n;
         r[0xA] = ((u8 *)v - (u8 *)D_800B1220[0]) >> 4;

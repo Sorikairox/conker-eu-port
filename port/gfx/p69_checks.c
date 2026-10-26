@@ -20,12 +20,12 @@ int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 const char *port_fsig_of(void *fp);
 extern unsigned port_frame_count;
-extern unsigned char D_800CC2D0[];
+extern unsigned char g_objects[]; /* was D_800CC2D0 */
 extern unsigned char D_80084550_[] __asm__("D_80084550");
 extern unsigned char D_800C3EE0_[] __asm__("D_800C3EE0");
 extern unsigned char D_800C4408_[] __asm__("D_800C4408");
 extern unsigned char D_800C441A_[] __asm__("D_800C441A");
-extern unsigned char D_800DD280_[] __asm__("D_800DD280");
+extern unsigned char D_800DD280_[] __asm__("g_node_lists"); /* was D_800DD280 */
 static unsigned w_n;
 /* ?p69stub=MASK DIAGNOSTIC (bisecting the respawn hang): skip the game C like the old asm stubs did: 1 face_anim_start,
  * 2 attachment_update_all, 4 model_build_collision_tables (returns 0), 8 look_aim_head_eyes, 16 collision_floor_all (returns 0), 32 look_frame_cb_current. */
@@ -35,7 +35,7 @@ static int stubbed(int b) { if (fstub < 0) fstub = port_flag("p69stub"); return 
 #define REC 0x32C
 static float F(const unsigned char *r, int o) { return *(const float *)(r + o); }
 static unsigned W(const unsigned char *r, int o) { return *(const unsigned *)(r + o); }
-static int recno(const void *r) { return (int)(((const unsigned char *)r - D_800CC2D0) / REC); }
+static int recno(const void *r) { return (int)(((const unsigned char *)r - g_objects) / REC); } /* was D_800CC2D0 */
 static int flag(int *f, const char *n) { if (*f < 0) *f = port_flag(n); return *f; }
 
 static const unsigned cb_rom[25] = {0, 0x150D87CC, 0x1503211C, 0x1503216C, 0x150F5C30, 0x150322B8, 0x1503356C,
@@ -77,7 +77,7 @@ void __wrap_attachment_update_all(void) {
     if (port_frame_count >= 900 && (port_frame_count / 2) % 300 == 0) {   /* object census, every ~600 frames */
         int i;
         for (i = 0; i < 25; i++) {
-            const unsigned char *r = D_800CC2D0 + i * REC;
+            const unsigned char *r = g_objects + i * REC;
             if (vbe_ld8(r + 4) || vbe_ld8(r + 5))
                 port_log("[p69] census frame %u: record %d id %02X state %d health %d pos %.0f %.0f %.0f anim %04X "
                          "+D0 %d\n", port_frame_count, i, vbe_ld8(r + 4), vbe_ld8(r + 5), vbe_ld8(r + 0x1CA), F(r, 0x14),
@@ -125,7 +125,7 @@ int __wrap_model_build_collision_tables(int id) {
 
 static void healths(unsigned char *h) {
     int i;
-    for (i = 0; i < 25; i++) h[i] = vbe_ld8(D_800CC2D0 + i * REC + 0x1CA);
+    for (i = 0; i < 25; i++) h[i] = vbe_ld8(g_objects + i * REC + 0x1CA);
 }
 
 int __real_attack_hit_test(void *self, int skip);
@@ -145,7 +145,7 @@ int __wrap_attack_hit_test(void *self, int skip) {
                  port_frame_count, recno(r), vbe_ld8(r + 4), skip, d0, vbe_ld8(r + 0xD0), vbe_ld16(r + 0x84), v);
         for (i = 0; i < 25; i++)
             if (h0[i] != h1[i])
-                port_log("[p69]   hit: record %d id %02X health %d -> %d\n", i, vbe_ld8(D_800CC2D0 + i * REC + 4),
+                port_log("[p69]   hit: record %d id %02X health %d -> %d\n", i, vbe_ld8(g_objects + i * REC + 4),
                          h0[i], h1[i]);
     }
     return v;
@@ -229,7 +229,7 @@ void __wrap_heap_free(int p) {
     __real_heap_free(p);
 }
 
-/* ?p69free also scans the object lists D_800DD280[2][104] once per frame (from the attachment_update_all wrap): the first
+/* ?p69free also scans the object lists g_node_lists[2][104] once per frame (from the attachment_update_all wrap): the first
  * node pointer outside wasm memory >= 0x10000000 is logged with its list and the node that links to it. */
 static void p69_scan_lists(void) {
     static int done;
@@ -267,7 +267,7 @@ static void p69_scan_lists(void) {
         }
 }
 
-/* ?p69watch=N: poll the word D_800DD280[1][0] (list group 1, type 0; P69's garbage 0x243C head) at every asm-stub hit
+/* ?p69watch=N: poll the word g_node_lists[1][0] (list group 1, type 0; P69's garbage 0x243C head) at every asm-stub hit
  * (port_stub_trace_hook), free and per frame; log the first N changes with the JS stack and the last stub seen. */
 extern void (*port_stub_trace_hook)(const char *name);
 static const char *w_last = "-";

@@ -20,7 +20,7 @@ s/        if (D_80090160 \& 0x6040) {/        if (D_80090160 \& 0x6000) {/ % tea
 s/            score1 = player_stat_get(1, 6);/            score1 = player_stat_get(1, 3);/ % team2000
 s/        } else if (D_80090160 \& 0x100) {/        } else if (D_80090160 \& 0x80) {/ % pl100
 s/                v = player_stat_get((s16) i, 3);/                v = player_stat_get((s16) i, 6);/ % pl100
-s/                if (D_800CC2D0\[i\].unk128 != 0) {/                if (D_800CC2D0[i].unk128 == 1) {/ % pl100_t2
+s/                if (g_objects\[i\].unk128 != 0) {/                if (g_objects[i].unk128 == 1) {/ % pl100_t2
 s/            row = 0x200;/            row = 0x100;/ % big_rows
 s/                v = \*(s16 \*) (D_80090174 + 0x46 + i \* 2);/                v = *(u16 *) (D_80090174 + 0x46 + i * 2);/ % big_rows
 s/                if (D_800E1030\[i\] != 0) {/                if (D_800E1030[i] == 0) {/ % big_rows

@@ -48,17 +48,17 @@ s32 screen_fade_is_done(s32);
 /* was func_15172D80 */
 void warp_request_update(s32 arg0) {
     if (D_800DD6E0[arg0] != -1) {
-        if (D_800CC2D0[arg0].health == 0) {
+        if (g_objects[arg0].health == 0) {
             D_800DD6E0[arg0] = -1;
             screen_fade_start(0, 0, 0, 0x32, 0, arg0);
         }
         if (screen_fade_is_done(arg0) != 0) {
-            if (D_800BE9F0 != D_800DD6E0[arg0]) {
+            if (g_level_id != D_800DD6E0[arg0]) {
                 game_request_transition(1, D_800DD6E0[arg0], 0, 0, 0);
                 return;
             }
             warp_request_cancel(arg0);
-            warp_player_to_entry((u8 *)&D_800CC2D0[arg0], (&D_800DD2C0)[arg0]);
+            warp_player_to_entry((u8 *)&g_objects[arg0], (&D_800DD2C0)[arg0]);
         }
     }
 }
@@ -76,7 +76,7 @@ void warp_request_start(struct127 *arg0, s32 arg1, s32 arg2) {
                 D_800DD6E0[temp_v1] = (s8) arg1;
                 (&D_800DD2C0)[temp_v1] = (u8) arg2;
             }
-        } else if (arg1 == D_800BE9F0) {
+        } else if (arg1 == g_level_id) {
             warp_player_to_entry((u8 *) arg0, arg2);
         }
     }

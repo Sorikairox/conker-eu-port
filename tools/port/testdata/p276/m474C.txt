@@ -1,6 +1,6 @@
 \#^    rec->flags16 |= 4;$#s/4/8/
-\#^    sn = sinf(rec->angY \* D_80096A40);$#s/angY/angX/
-\#^    cs = cosf(rec->angY \* D_80096A44);$#s/D_80096A44/D_80096A40/
+\#^    sn = sinf(rec->angY \* g_zone_box_deg_to_rad_sin);$#s/angY/angX/
+\#^    cs = cosf(rec->angY \* g_zone_box_deg_to_rad_cos);$#s/g_zone_box_deg_to_rad_cos/g_zone_box_deg_to_rad_sin/
 \#^    c\[0\]\[0\] = rec->halfX \* cs + cx + rec->halfZ \* sn;$#s/+ rec->halfZ/- rec->halfZ/
 \#^    c\[0\]\[1\] = rec->halfZ \* cs + cz - rec->halfX \* sn;$#s/+ cz/+ cx/
 \#^    c\[1\]\[0\] = rec->halfX \* cs + cx + (f32) -rec->halfZ \* sn;$#s/(f32) -rec/(f32) rec/

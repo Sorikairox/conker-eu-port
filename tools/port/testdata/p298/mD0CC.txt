@@ -1,4 +1,4 @@
-s#    if (D_800BE9F0 == 4) {#    if (D_800BE9F0 == 5) {# % other l4run
+s#    if (g_level_id == 4) {#    if (g_level_id == 5) {# % other l4run
 s#            spin = D_800A35C8_c\[0\];#            spin = D_800A35CC_c[0];# % l13spin
 s#            uh = 0x20;#            uh = 0x21;# % l13spin
 s#    top -= \*(s16 \*) (obj + 0x14);#    top -= *(s16 *) (obj + 0x12);# % l4init
@@ -17,7 +17,7 @@ s#            st->phase\[i\] = (u32) ((top - (\*(s16 \*\*) (obj + 0x28))\[i \* 8
 s#            dst\[0\] = src\[0\] + \*(s16 \*) (obj + 0x10);#            dst[0] = src[0] + *(s16 *) (obj + 0x12);# % l4init
 s#            dst\[2\] = src\[2\] + \*(s16 \*) (obj + 0x14);#            dst[2] = src[2] - *(s16 *) (obj + 0x14);# % l13init
 s#        st->glowTimer = 0;#        st->glowTimer = 1;# % l4init
-s#        if (D_800BE9F0 == 4 \&\& obj\[0x72\] != 0xF2) {#        if (D_800BE9F0 == 4 \&\& obj[0x72] != 0xF3) {# % l4initf2
+s#        if (g_level_id == 4 \&\& obj\[0x72\] != 0xF2) {#        if (g_level_id == 4 \&\& obj[0x72] != 0xF3) {# % l4initf2
 s#            st->glowPhase = (obj\[0x72\] == 0xF1) ? 0 : 0x80;#            st->glowPhase = (obj[0x72] == 0xF0) ? 0 : 0x80;# % l4initf1
 s#            st->sound = texture_anim_start_for(obj, D_80090688, 0, 0, 0, 0, 8);#            st->sound = texture_anim_start_for(obj, D_80090688, 0, 0, 0, 0, 9);# % l13init
 s#    t = (st->time >> 8) \& 0xFF;#    t = (st->time >> 7) \& 0xFF;# % l4run

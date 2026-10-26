@@ -72,7 +72,7 @@ void weapon_c_trail_attack_spawn(u8 *arg0, s32 arg1, struct127 *arg2, s32 arg3) 
     u16 w;
     s32 idx;
     w = *(u16 *)((u8 *)arg2 + 0x7A);
-    idx = arg2 - D_800CC2D0;
+    idx = arg2 - g_objects;
     attack_spawn_at_point(*(f32 *)arg0, *(f32 *)(arg0 + 4), *(f32 *)(arg0 + 8), arg3 | 0x60000, idx, w, 0, arg1);
 }
 

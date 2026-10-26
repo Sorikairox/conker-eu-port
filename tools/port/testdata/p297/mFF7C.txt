@@ -15,8 +15,8 @@ s/        if (top - \*(s16 \*) (p + 0x12) != \*(s32 \*) (p + 0x80)) {/        if
 s/            \*(s16 \*) (p + 0x12) = top + \*(s32 \*) (p + 0x80);/            *(s16 *) (p + 0x12) = top - *(s32 *) (p + 0x80);/
 s/    if ((p\[0x4F\] \& 4) \&\& /    if ((p[0x4F] \& 8) \&\& /
 s/ + 0x31C))\[0x57\] == 1) {/ + 0x31C))[0x57] != 0) {/
-s/        rubble_burst_with_dust(\*(f32 \*) ((u8 \*) D_800CC2D0 + 0x14), \*(f32 \*) ((u8 \*) D_800CC2D0 + 0x18),/        rubble_burst_with_dust(*(f32 *) ((u8 *) D_800CC2D0 + 0x18), *(f32 *) ((u8 *) D_800CC2D0 + 0x18),/
-s/                      \*(f32 \*) ((u8 \*) D_800CC2D0 + 0x1C), 0xFF, 0);/                      *(f32 *) ((u8 *) D_800CC2D0 + 0x1C), 0xFE, 0);/
+s/        rubble_burst_with_dust(\*(f32 \*) ((u8 \*) g_objects + 0x14), \*(f32 \*) ((u8 \*) g_objects + 0x18),/        rubble_burst_with_dust(*(f32 *) ((u8 *) g_objects + 0x18), *(f32 *) ((u8 *) g_objects + 0x18),/
+s/                      \*(f32 \*) ((u8 \*) g_objects + 0x1C), 0xFF, 0);/                      *(f32 *) ((u8 *) g_objects + 0x1C), 0xFE, 0);/
 s/        if (mode == 0) {/        if (mode != 3) {/
 s/            cam_wobble_start_preset(3, D_800BEE0B, NULL, 0xFF, 0);/            cam_wobble_start_preset(2, D_800BEE0B, NULL, 0xFF, 0);/
 s/            rumble.unk2 = 0x3C;/            rumble.unk2 = 0x28;/

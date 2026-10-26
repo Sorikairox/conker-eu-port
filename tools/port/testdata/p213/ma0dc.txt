@@ -1,5 +1,5 @@
 s/    s32 ret = 0;/    s32 ret = 1;/
-s/o != \&D_800CC2D0\[25\]/o != \&D_800CC2D0[24]/
+s/o != \&g_objects\[25\]/o != \&g_objects[24]/
 s/        ret = o->interaction_state;/        ret = 0;/
 s/if (ret == 0 || /if (/
 s/!(o->unk28 < 20.0f)/!(o->unk28 <= 20.0f)/
@@ -18,7 +18,7 @@ s/        if (o->id == 0x53) {/        if (o->id == 0x54) {/
 s/o->disable_run = 10;/o->disable_run = 11;/
 s/o->unk218 = NULL;/;/
 s/o->unk232 = 0x13;/o->unk232 = 0x12;/
-s/D_800CC2D0\[o->unk124\].unk65 != 0/o->unk65 != 0/
+s/g_objects\[o->unk124\].unk65 != 0/o->unk65 != 0/
 s/o->unk232 = 0x14;/o->unk232 = 0x15;/
 s/ret = obj_send_hit(o, 0x6000E, o->unk7A, -1);/obj_send_hit(o, 0x6000E, o->unk7A, -1);/
 s/obj_send_hit(o, 0x6000E, o->unk7A, -1);/obj_send_hit(o, 0x6000F, o->unk7A, -1);/

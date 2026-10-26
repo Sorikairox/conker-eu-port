@@ -10,8 +10,8 @@ void level_lights_init(s16 arg0, s16 arg1) {
     s16 tmp;
 
     tmp = arg0;
-    bzero(&D_800D2138, 524);
-    D_800D2138 = tmp;
+    bzero(&g_session_game_mode, 524);
+    g_session_game_mode = tmp;
 
     for (i = 0; i < 16; i++) {
         if ((1 << i) & arg1) {
@@ -35,7 +35,7 @@ void level_lights_stub(s16 arg0) {
 
 /* was func_15017498 */
 void level_lights_clear(void) {
-    bzero(&D_800D2138, 524);
+    bzero(&g_session_game_mode, 524);
 }
 
 // double-loop
@@ -82,5 +82,5 @@ void level_table_load(s32 arg0) {
     u32 tmp = 0;
     D_800D23C0 = asset_load(&tmp, 3, 12, arg0, 4);
     D_80087380 = tmp / 24;
-    level_table_relocate(D_800DBF00);
+    level_table_relocate(g_world_obj_level_count);
 }

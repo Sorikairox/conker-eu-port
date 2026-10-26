@@ -96,7 +96,7 @@ struct225 *light_ctrl_alloc(Header *header, struct226 *arg1, s32 offset, u8 arg3
 }
 
 // light_effect_update: P234 (port fix). Counts the effect's life down (+0x10, flag 1 of +0xE) and runs its handler
-// D_8008B0F0[+0xF] with the effect (the asm keeps a0 = the effect at the jalr; the matched C passed nothing, so the
+// g_light_effect_update_fns[+0xF] with the effect (the asm keeps a0 = the effect at the jalr; the matched C passed nothing, so the
 // port handlers got NULL: Total War null+0x24 writes); a 0 result or an expired life frees it (node_destroy).
 /* was func_151603FC */
 void light_ctrl_update(struct225 *arg0) {
@@ -109,7 +109,7 @@ void light_ctrl_update(struct225 *arg0) {
             ret = 1;
         }
     }
-    if ((ret == 0) && (arg0->unkF != -1) && (D_8008B0F0[arg0->unkF](arg0) == 0)) {
+    if ((ret == 0) && (arg0->unkF != -1) && (g_light_effect_update_fns[arg0->unkF](arg0) == 0)) {
         ret = 1;
     }
     if (ret) {
@@ -118,7 +118,7 @@ void light_ctrl_update(struct225 *arg0) {
 }
 
 // requires jump table
-extern s32 (*D_8008B4F0[])(struct225 *);
+extern s32 (*g_light_message_fns[])(struct225 *); /* was D_8008B4F0 */
 
 /* was func_151604A0 */
 void light_ctrl_handle_message(struct225 *arg0, u8 *arg1, u8 arg2) {
@@ -158,8 +158,8 @@ void light_ctrl_handle_message(struct225 *arg0, u8 *arg1, u8 arg2) {
         }
         break;
     default:
-        if (D_8008B4F0[arg0->unk12] != NULL) {
-            D_8008B4F0[arg0->unk12](arg0);
+        if (g_light_message_fns[arg0->unk12] != NULL) {
+            g_light_message_fns[arg0->unk12](arg0);
         }
         break;
     }
@@ -167,7 +167,7 @@ void light_ctrl_handle_message(struct225 *arg0, u8 *arg1, u8 arg2) {
 
 /* was func_15160600 */
 s32 light_beh_tweak_intensity(struct225 *arg0) {
-    arg0->unk14->unk2F = debug_tweak_int(0, &D_800A6690, 0, 0xFF, 0xFF, &D_800A6698, 575);
+    arg0->unk14->unk2F = debug_tweak_int(0, &g_str_light_scale, 0, 0xFF, 0xFF, &g_str_light_c_path, 575);
     return 1;
 }
 
@@ -196,7 +196,7 @@ s32 light_beh_rotated_offset(struct225 *arg0) {
     mtx[3][0] = ((s16 *)*pp)[8];
     mtx[3][1] = ((s16 *)*pp)[9];
     mtx[3][2] = ((s16 *)*pp)[10];
-    mtxf_transform_point(mtx, D_800A6A94.unk0, D_800A6A94.unk4, D_800A6A94.unk8, &x, &y, &z);
+    mtxf_transform_point(mtx, g_light_rotated_offset.unk0, g_light_rotated_offset.unk4, g_light_rotated_offset.unk8, &x, &y, &z);
     arg0->unk14->unkE = x;
     arg0->unk14->unk10 = y;
     arg0->unk14->unk12 = z;
@@ -293,7 +293,7 @@ typedef struct {
     u8  unk15;
 } struct_eu_15160B74;
 
-extern u8 (*D_8008B598[])(struct225 *);
+extern u8 (*g_light_joint_follow_fns[])(struct225 *); /* was D_8008B598 */
 
 typedef struct { f32 x, y, z; } V3_60B74;
 
@@ -325,7 +325,7 @@ u8 light_beh_follow_joint(struct225 *arg0) {
         arg0->unk14->unk12 = *(f32 *)(obj + 0x1C);
     }
     if ((s8)s[0x14] != -1) {
-        ret = D_8008B598[(s8)s[0x14]](arg0);
+        ret = g_light_joint_follow_fns[(s8)s[0x14]](arg0);
     }
     return ret;
 }
@@ -391,7 +391,7 @@ typedef struct {
 /* data at +0x18 (light_create_obj_beam): object, its unique id, attach point, offset (+8), ray end (+0x14), scale (+0x20),
  * flags (+0x24: 1 = cast, 2 = poke kind 0x9E). */
 
-/* light_beam_update: P237. D_8008B0F0 handler for the beam lights of light_create_obj_beam. Ends the light (0) when its
+/* light_beam_update: P237. g_light_effect_update_fns handler for the beam lights of light_create_obj_beam. Ends the light (0) when its
  * object is gone or was reused (unique id). Without attach matrices (+0x1D4), without flag 1, or for a hidden
  * object (+0x74 & 0xF == 0xF), the light sits at the object position (light +0xE / +0x10 / +0x12) with brightness
  * +0x2F = 0 and +9 = 1. Else the offset and end points go through attach matrix `point` (mtx_transform_points), and when
@@ -603,7 +603,7 @@ struct225 *light_spawn_lightning(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s
         return 0;
     }
 
-    tmp = D_800A66C0[arg2];
+    tmp = g_light_lightning_peaks[arg2];
     tmp1.unk4 = tmp;
     tmp1.unk8 = 0.0f;
     tmp1.unkC = 0.0f;
@@ -672,7 +672,7 @@ void light_ctrl_destroy(struct225 *arg0) {
     if ((arg0->unkE & 2) != 0) {
         light_remove(arg0->unk14, arg0);
     }
-    D_8008B208[arg0->unk12](arg0);
+    g_light_destroy_fns[arg0->unk12](arg0);
 }
 
 /* was func_15161860 */
@@ -680,18 +680,18 @@ void light_ctrl_delete(struct225 *arg0) {
     if ((arg0->unkE & 2) != 0) {
         light_remove(arg0->unk14, arg0);
     }
-    D_8008B2B0[arg0->unk12](arg0);
+    g_light_delete_fns[arg0->unk12](arg0);
 }
 
 typedef struct {
     s32 unk0[10];
 } struct_eu_151618BC;
 
-extern struct_eu_151618BC D_800A6AC4;
+extern struct_eu_151618BC g_light_zap_sound_ids; /* was D_800A6AC4 */
 
 /* was func_151618BC */
 void light_play_zap_sfx(u16 arg0, s16 arg1, u8 arg2, s32 arg3, f32 *arg4, s16 arg5, s16 arg6) {
-    struct_eu_151618BC tbl = D_800A6AC4;
+    struct_eu_151618BC tbl = g_light_zap_sound_ids;
 
     sound_play_at(tbl.unk0[(u32)random_int() % 10], arg0, arg1, arg2, arg3, arg4[0], arg4[1], arg4[2], arg5, arg6);
 }
@@ -819,14 +819,14 @@ struct225 *light_create_obj_follow(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, 
     return temp_v0;
 }
 
-// handler 10 of D_8008B0F0 (P234): the dispatcher light_ctrl_update tests the result, which is light_follow_obj_pos's v0 left in
+// handler 10 of g_light_effect_update_fns (P234): the dispatcher light_ctrl_update tests the result, which is light_follow_obj_pos's v0 left in
 // place by the matched void C; s32 here, one signature for wasm
 /* was func_15161F2C */
 s32 light_beh_follow_obj(struct225 *arg0) {
     return light_follow_obj_pos(arg0, &arg0->unk18);
 }
 
-extern void (*D_8008B6F8[])(u8 *, u8 *, u8);
+extern void (*g_light_follow_message_fns[])(u8 *, u8 *, u8); /* was D_8008B6F8 */
 /* was func_15161F4C */
 void light_follow_handle_message(u8 *arg0, u8 *arg1, u8 arg2)
 {
@@ -841,7 +841,7 @@ void light_follow_handle_message(u8 *arg0, u8 *arg1, u8 arg2)
     if (*(s32 *)arg1 == *(s32 *)v) { *(s32 *)v = *(s32 *)(arg1 + 4); v[4] = arg1[9]; }
     else if (*(s32 *)(arg1 + 4) == *(s32 *)v) { *(s32 *)v = *(s32 *)arg1; v[4] = arg1[8]; }
   }
-  if (D_8008B6F8[arg0[0x1D]] != NULL) { D_8008B6F8[arg0[0x1D]](arg0, arg1, arg2); }
+  if (g_light_follow_message_fns[arg0[0x1D]] != NULL) { g_light_follow_message_fns[arg0[0x1D]](arg0, arg1, arg2); }
 }
 
 /* was func_15162034 */
@@ -945,7 +945,7 @@ struct225 *light_spawn_colour_pulse(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s8 arg4
     data.unk0 = D_eu_800A6AEC[arg1];
     data.unkC = D_eu_800A6B10[arg1];
     data.unk18 = 0.0f;
-    data.unk1C = D_800A6B34[arg1];
+    data.unk1C = g_light_colour_pulse_speeds[arg1];
     header.unk0 = arg3;
     header.unk1 = arg4;
     header.unk2 = arg5;
@@ -996,9 +996,9 @@ struct225 *light_spawn_flicker_preset(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 a
         return 0;
     }
 
-    src[0] = D_800A67C0[arg1];
-    src[1] = D_800A6760[arg1];
-    src[2] = D_800A6820[arg1];
+    src[0] = g_light_flicker_mid_levels[arg1];
+    src[1] = g_light_flicker_low_levels[arg1];
+    src[2] = g_light_flicker_high_levels[arg1];
     src[3] = 1.0f;
     src[4] = 0.0f;
     src[5] = 10.0f;
@@ -1026,9 +1026,9 @@ struct225 *light_create_flicker_preset(Header *header, s32 arg1, s32 arg2, s32 a
         return 0;
     }
 
-    src[0] = D_800A67C0[arg8];
-    src[1] = D_800A6760[arg8];
-    src[2] = D_800A6820[arg8];
+    src[0] = g_light_flicker_mid_levels[arg8];
+    src[1] = g_light_flicker_low_levels[arg8];
+    src[2] = g_light_flicker_high_levels[arg8];
     src[3] = 1.0f;
     src[4] = 0.0f;
     src[5] = 10.0f;
@@ -1042,12 +1042,12 @@ struct225 *light_create_flicker_preset(Header *header, s32 arg1, s32 arg2, s32 a
 }
 
 /* six 5-entry tables (rodata 0x800A6C60..0x800A6CD7), indexed by arg1 & 0xFF < 5 */
-static const f32 D_800A6C60[5] = { 0.0f, 50.0f, 50.0f, 50.0f, 50.0f };
-static const f32 D_800A6C74[5] = { 0.0f, 15.0f, 15.0f, 15.0f, 15.0f };
-static const f32 D_800A6C88[5] = { 0.0f, 0.0f, 15.5f, 31.0f, 46.5f };
-static const f32 D_800A6C9C[5] = { 10.0f, 12.0f, 12.0f, 12.0f, 12.0f };
-static const f32 D_800A6CB0[5] = { 10.0f, 25.0f, 25.0f, 25.0f, 25.0f };
-static const f32 D_800A6CC4[5] = { 10.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+static const f32 g_light_env_peak_levels[5] = { 0.0f, 50.0f, 50.0f, 50.0f, 50.0f }; /* was D_800A6C60 */
+static const f32 g_light_env_base_levels[5] = { 0.0f, 15.0f, 15.0f, 15.0f, 15.0f }; /* was D_800A6C74 */
+static const f32 g_light_env_start_times[5] = { 0.0f, 0.0f, 15.5f, 31.0f, 46.5f }; /* was D_800A6C88 */
+static const f32 g_light_env_rise_times[5] = { 10.0f, 12.0f, 12.0f, 12.0f, 12.0f }; /* was D_800A6C9C */
+static const f32 g_light_env_hold_times[5] = { 10.0f, 25.0f, 25.0f, 25.0f, 25.0f }; /* was D_800A6CB0 */
+static const f32 g_light_env_fall_times[5] = { 10.0f, 0.0f, 0.0f, 0.0f, 0.0f }; /* was D_800A6CC4 */
 
 /* was func_1516295C */
 struct225 *light_spawn_envelope(struct226 *arg0, s32 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, s8 arg6, s8 arg7, s8 arg8, s8 arg9, s32 argA, u8 argB, s32 argC) {
@@ -1088,14 +1088,14 @@ struct225 *light_spawn_envelope(struct226 *arg0, s32 arg1, u8 arg2, u8 arg3, s16
     if (temp_t6 >= 5) {
         return NULL;
     }
-    temp_f2 = D_800A6C60[temp_t6];
-    temp_f12 = D_800A6C74[temp_t6];
-    temp_f0 = D_800A6C9C[temp_t6];
-    temp_f18 = D_800A6CB0[temp_t6];
+    temp_f2 = g_light_env_peak_levels[temp_t6];
+    temp_f12 = g_light_env_base_levels[temp_t6];
+    temp_f0 = g_light_env_rise_times[temp_t6];
+    temp_f18 = g_light_env_hold_times[temp_t6];
     temp_f14 = temp_f18 + temp_f0;
     sp.u38 = temp_f2 - temp_f12;
-    sp.u3C = D_800A6C88[temp_t6];
-    temp_f16 = D_800A6CC4[temp_t6] + temp_f14;
+    sp.u3C = g_light_env_start_times[temp_t6];
+    temp_f16 = g_light_env_fall_times[temp_t6] + temp_f14;
     sp.u55 = arg6;
     sp.u44 = temp_f14;
     sp.u48 = temp_f16;
@@ -1147,7 +1147,7 @@ struct225 *light_spawn_envelope(struct226 *arg0, s32 arg1, u8 arg2, u8 arg3, s16
 //         return 0;
 //     }
 //
-//     temp_f2 = D_800A6880[arg1];
+//     temp_f2 = g_fx_source_emitter_presets[arg1];
 //     temp_f12 = D_800A6894[arg1];
 //     temp_f8 = D_800A68A8[arg1];
 //     temp_f0 = D_800A68BC[arg1];
@@ -1195,12 +1195,12 @@ struct225 *light_spawn_envelope(struct226 *arg0, s32 arg1, u8 arg2, u8 arg3, s16
 // }
 
 // a biggun'
-extern void (*D_8008B704[])(u8 *, s32); // {light_env_phase_on, light_env_phase_off} (P289: 2 entries, D_8008B70C is the next table); a1 = the new phase
+extern void (*g_light_env_phase_fns[])(u8 *, s32); // {light_env_phase_on, light_env_phase_off} (P289: 2 entries, g_light_track_ptr_fns is the next table); a1 = the new phase /* was D_8008B704; was D_8008B70C */
 
 // envelope_update: drives a byte (+0x14 -> +0x2F, e.g. an alpha) through a looping 4-phase envelope on the timer
 // +0x24: before +0x28 the base +0x1C (phase 0); rising to base + range (+0x20) until +0x2C (phase 1, slope +0x38);
 // the hold value +0x18 until +0x30 (phase 2); then falling back (phase 3). On a phase change the phase's handler id
-// (+0x3D..+0x40, -1 = none) is run from D_8008B704 with (obj, phase). The timer advances by the frame time and wraps at +0x34.
+// (+0x3D..+0x40, -1 = none) is run from g_light_env_phase_fns with (obj, phase). The timer advances by the frame time and wraps at +0x34.
 // Returns 1.
 /* was func_15162B28 */
 s32 light_beh_envelope(u8 *obj) {
@@ -1248,7 +1248,7 @@ s32 light_beh_envelope(u8 *obj) {
                 break;
         }
         if (id != -1) {
-            D_8008B704[id](obj, obj[0x3C]);
+            g_light_env_phase_fns[id](obj, obj[0x3C]);
         }
     }
     *(f32 *) (obj + 0x24) += D_800BE9A4;
@@ -1258,7 +1258,7 @@ s32 light_beh_envelope(u8 *obj) {
     return 1;
 }
 
-// P289: NM `phase` (unused) = the a1 the D_8008B704 dispatcher (light_beh_envelope) passes; it keeps the wasm call_indirect
+// P289: NM `phase` (unused) = the a1 the g_light_env_phase_fns dispatcher (light_beh_envelope) passes; it keeps the wasm call_indirect
 // signature void (u8 *, s32) of the table (the default build keeps the one-parameter text: IDO frames it differently).
 /* was func_15162EF8 */
 void light_env_phase_on(struct239 *arg0, s32 phase) {
@@ -1297,18 +1297,18 @@ struct225 *light_spawn_burst_flash(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4
     }
 
     src.unk0 = 0.0f;
-    src.unk4 = D_800A68F8[arg1];
+    src.unk4 = g_light_storm_flash_decay[arg1];
     src.unk8 = 0.0f;
     src.unk14 = 0;
     src.unk20 = 0.0f;
-    src.unkC = D_800A6904[arg1];
-    src.unk10 = D_800A6910[arg1];
-    src.unk24 = D_800A6934[arg1];
-    src.unk28 = D_800A6940[arg1];
-    src.unk2C = D_800A694C[arg1];
-    src.unk18 = D_800A691C[arg1];
-    src.unk1C = D_800A6928[arg1];
-    src.unk30 = D_800A6958[arg1];
+    src.unkC = g_light_storm_pause_min[arg1];
+    src.unk10 = g_light_storm_pause_range[arg1];
+    src.unk24 = g_light_storm_gap_min[arg1];
+    src.unk28 = g_light_storm_gap_range[arg1];
+    src.unk2C = g_light_storm_level_min[arg1];
+    src.unk18 = g_light_storm_burst_min[arg1];
+    src.unk1C = g_light_storm_burst_range[arg1];
+    src.unk30 = g_light_storm_level_range[arg1];
 
     header.unk0 = arg3;
     header.unk1 = arg5;
@@ -1396,7 +1396,7 @@ s32 light_beh_track_ptrs(u8 *arg0) {
     *(s16 *)(*(u8 **)(arg0 + 0x14) + 0x10) = (s32)**(f32 **)(arg0 + 0x1C);
     *(s16 *)(*(u8 **)(arg0 + 0x14) + 0x12) = (s32)**(f32 **)(arg0 + 0x20);
     if (*(s8 *)(arg0 + 0x24) != -1) {
-        return D_8008B70C[*(volatile s8 *)(arg0 + 0x24)](); // fakematch: volatile forces the second lb
+        return g_light_track_ptr_fns[*(volatile s8 *)(arg0 + 0x24)](); // fakematch: volatile forces the second lb
     }
     return 1;
 }
@@ -1418,9 +1418,9 @@ void light_track_handle_message(u8 *arg0, s32 arg1, u8 arg2)
 {
   int new_var;
   new_var = 0x25; // fakematch: constant index in a variable stops the CSE of the table index load
-  if (D_8008B710[arg0[new_var]] != 0)
+  if (g_light_track_message_fns[arg0[new_var]] != 0)
   {
-    D_8008B710[arg0[new_var]](arg0, arg1, arg2);
+    g_light_track_message_fns[arg0[new_var]](arg0, arg1, arg2);
   }
 }
 // NON-MATCHING: similar issue to light_beh_track_ptrs
@@ -1444,10 +1444,10 @@ struct225 *light_spawn_pulse_preset(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg
         return 0;
     }
 
-    src[0] = D_800A6964[arg1];
-    src[1] = D_800A699C[arg1];
+    src[0] = g_light_pulse_base_levels[arg1];
+    src[1] = g_light_pulse_amplitudes[arg1];
     src[2] = random_float() * 6.2831855f;
-    src[3] = D_800A69D4[arg1];
+    src[3] = g_light_pulse_speeds[arg1];
 
     header.unk0 = arg4;
     header.unk1 = 1;
@@ -1549,10 +1549,10 @@ struct225 *light_create_obj_pulse(u8 arg0, u8 arg1, s32 arg2) {
     if (temp_v0 == 0) {
         return 0;
     }
-    tmp1[0] = D_800A6964[6]; // D_800A697C
-    tmp1[1] = D_800A699C[6]; // D_800A69B4
+    tmp1[0] = g_light_pulse_base_levels[6]; // D_800A697C
+    tmp1[1] = g_light_pulse_amplitudes[6]; // D_800A69B4
     tmp1[2] = random_float() * 6.2831855f;
-    tmp1[3] = D_800A69D4[6]; // D_800A69EC;
+    tmp1[3] = g_light_pulse_speeds[6]; // D_800A69EC;
 
     header2.unk0 = temp_v0->unk10;
     header2.unk4 = temp_v0->unk12;
@@ -1563,7 +1563,7 @@ struct225 *light_create_obj_pulse(u8 arg0, u8 arg1, s32 arg2) {
     header.unk2 = 300;
     header.unk4 = 5;
 
-    temp_v0_2 = light_create_with_ctrl(&header, &header2, D_800A6964[6], 0, 0xFF, 0, 0xFF, 0, 20, arg1, arg2);
+    temp_v0_2 = light_create_with_ctrl(&header, &header2, g_light_pulse_base_levels[6], 0, 0xFF, 0, 0xFF, 0, 20, arg1, arg2);
     if (temp_v0_2 != 0) {
         memcpy(&temp_v0_2->unk18, &tmp1, 16);
         memcpy(&temp_v0_2->unk28, &temp_v0, 4);
@@ -1591,12 +1591,12 @@ struct225 *light_create_joint_pulse(s32 arg0, u8 arg1, s32 arg2) {
     struct225 *temp_v0;
     f32 src[4];
 
-    src[0] = D_800A6964[6];
-    src[1] = D_800A699C[6];
+    src[0] = g_light_pulse_base_levels[6];
+    src[1] = g_light_pulse_amplitudes[6];
     src[2] = random_float() * 6.2831855f;
-    src[3] = D_800A69D4[6];
+    src[3] = g_light_pulse_speeds[6];
 
-    temp_v0 = light_create_obj_joint(arg0, 1, &D_800A6A0C, 2, 300, 100, 0, 0xFF, 0, 0xFF, 0, 0, sizeof(src), 1, arg1, arg2);
+    temp_v0 = light_create_obj_joint(arg0, 1, &g_light_joint_pulse_joints, 2, 300, 100, 0, 0xFF, 0, 0xFF, 0, 0, sizeof(src), 1, arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk30, &src, sizeof(src));
     }
@@ -1689,7 +1689,7 @@ void light_obj_handle_message_a(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 
         }
         goto dummy_label; dummy_label: ; // fakematch: forces the `b` + target-copied delay slot
     } else {
-        func = D_8008B714[arg0->unk2D];
+        func = g_light_obj_message_fns_a[arg0->unk2D];
         if (func != NULL) {
             func(arg0, arg1, arg2);
         }
@@ -1718,7 +1718,7 @@ void light_obj_handle_message_a(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 
 //             pl->unk4 = arg1->unk8;
 //         }
 //     } else {
-//         func = D_8008B714[arg0->unk2D];
+//         func = g_light_obj_message_fns_a[arg0->unk2D];
 //         if (func != NULL) {
 //             func(arg0, arg1, arg2);
 //         }
@@ -1796,7 +1796,7 @@ void light_obj_handle_message_b(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 
         }
         goto dummy_label; dummy_label: ; // fakematch: forces the `b` + target-copied delay slot
     } else {
-        func = D_8008B71C[((u8 *)arg0)[0x3D]];
+        func = g_light_obj_message_fns_b[((u8 *)arg0)[0x3D]];
         if (func != NULL) {
             func(arg0, arg1, arg2);
         }
@@ -1932,9 +1932,9 @@ void light_set_orbit_pos(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f3
 // }
 
 // loop
-extern u8 D_80088A90[];
-extern u8 D_80088A94[];
-extern u8 D_80088A98[];
+extern u8 g_level_lights_on_colour[]; /* was D_80088A90 */
+extern u8 g_level_lights_on_tint[]; /* was D_80088A94 */
+extern u8 g_level_lights_off_colour[]; /* was D_80088A98 */
 void overlay_mode_set(s32);
 void light_group_set_disabled(s32, s32);
 
@@ -1942,7 +1942,7 @@ void light_group_set_disabled(s32, s32);
 void level_set_lights_mode(u8 arg0) {
     D_800DCDD0 = arg0;
     if (arg0) {
-        switch (D_800BE9F0) {
+        switch (g_level_id) {
         case 0xB:
             overlay_mode_set(4);
             break;
@@ -1950,28 +1950,28 @@ void level_set_lights_mode(u8 arg0) {
             light_group_set_disabled(0xA, 1);
             overlay_mode_set(4);
         case 0x39:
-            ((u8 *)&D_800DCD20)[0] = D_80088A90[0];
-            ((u8 *)&D_800DCD20)[1] = D_80088A90[1];
-            ((u8 *)&D_800DCD20)[2] = D_80088A90[2];
-            D_800B0DF0->unk5 = D_80088A94[0];
-            D_800B0DF0->unk6 = D_80088A94[1];
-            D_800B0DF0->unk7 = D_80088A94[2];
+            ((u8 *)&D_800DCD20)[0] = g_level_lights_on_colour[0];
+            ((u8 *)&D_800DCD20)[1] = g_level_lights_on_colour[1];
+            ((u8 *)&D_800DCD20)[2] = g_level_lights_on_colour[2];
+            D_800B0DF0->unk5 = g_level_lights_on_tint[0];
+            D_800B0DF0->unk6 = g_level_lights_on_tint[1];
+            D_800B0DF0->unk7 = g_level_lights_on_tint[2];
             break;
         case 0x7:
         case 0xC:
             break;
         }
     } else {
-        switch (D_800BE9F0) {
+        switch (g_level_id) {
         case 0x6:
             light_group_set_disabled(0xA, 0);
         case 0x7:
         case 0xC:
         case 0x39:
             overlay_mode_set(6);
-            ((u8 *)&D_800DCD20)[0] = D_80088A98[0];
-            ((u8 *)&D_800DCD20)[1] = D_80088A98[1];
-            ((u8 *)&D_800DCD20)[2] = D_80088A98[2];
+            ((u8 *)&D_800DCD20)[0] = g_level_lights_off_colour[0];
+            ((u8 *)&D_800DCD20)[1] = g_level_lights_off_colour[1];
+            ((u8 *)&D_800DCD20)[2] = g_level_lights_off_colour[2];
             D_800B0DF0->unk5 = 0xFF;
             D_800B0DF0->unk6 = 0xFF;
             D_800B0DF0->unk7 = 0xFF;

@@ -20,13 +20,13 @@ s32 level_part_is_active(s32 arg0) {
 void level_anim_frame_counter_tick(s32 arg0, s32 arg1);
 void trigger_set_disabled(s32, s32);
 void trigger_set_position(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
-extern u8 D_800D9D70[3];
+extern u8 g_level_part_fades[3]; /* was D_800D9D70 */
 
 // level_lights_and_scroll_update: per-frame level handler (table D_8008D0C0); does nothing unless arg0 is 0. Steps
 // the D_800DD835 counter (level_anim_frame_counter_tick(5, 4)), places light slots 3 / 4 at objects 6 / 7 (200 above them; a slot
 // whose object is missing is switched off with trigger_set_disabled(slot, 1)). Then for the three parts i (segment i + 2):
-// the fade D_800D9D70[i] rises by D_800BE9E4 up to 0x60 while level_part_is_active(i) is on (else 0), and the first
-// G_SETTILESIZE after the part's G_SETTIMG of segment address (i + 2) << 24 in the level display list D_800B0E00[0]
+// the fade g_level_part_fades[i] rises by D_800BE9E4 up to 0x60 while level_part_is_active(i) is on (else 0), and the first
+// G_SETTILESIZE after the part's G_SETTIMG of segment address (i + 2) << 24 in the level display list g_level_part_dls[0]
 // gets its low coordinate advanced by fade / 16 * D_800BE9E4 (on) or both coordinates set to 2 (off).
 /* was func_150DFEA0 */
 void level_lights_and_scroll_update(s32 arg0) {
@@ -59,8 +59,8 @@ void level_lights_and_scroll_update(s32 arg0) {
         }
         slot = 4;
     }
-    dl = (u32 *) D_800B0E00[0];
-    fade = D_800D9D70;
+    dl = (u32 *) g_level_part_dls[0];
+    fade = g_level_part_fades;
     for (i = 0; i < 3; i++, fade++) {
         on = level_part_is_active(i);
         if (on) {

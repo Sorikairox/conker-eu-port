@@ -483,13 +483,13 @@ s32 debugger_main(OSThread *arg0) {
 
     var_s3 = 0;
     sp40 = 1;
-    if (D_8002AC5C != 0) {
+    if (g_eeprom_writes_disabled != 0) {
         return 0;
     }
     g_dbg_fb_index = 0;
-    if (((*(s32 *)((u8 *)D_8002AAE8 + 0)) == 0) || (D_8002AAE8[1] == 0)) {
-        (*(s32 *)((u8 *)D_8002AAE8 + 0)) = 0x80350000;
-        D_8002AAE8[1] = 0x80350000;
+    if (((*(s32 *)((u8 *)g_framebuffers + 0)) == 0) || (g_framebuffers[1] == 0)) {
+        (*(s32 *)((u8 *)g_framebuffers + 0)) = 0x80350000;
+        g_framebuffers[1] = 0x80350000;
         return 0;
     }
     debug_dump_tlb();
@@ -556,7 +556,7 @@ s32 debugger_main(OSThread *arg0) {
     if ((((u32) D_8003C8E0 >> 0x18) & 0xFF) == 0xC) {
         arg0 = &D_80031AE0;
     }
-    if ((*(s32 *)((u8 *)D_8002C130 + 4)) == D_8002AAE8[1]) {
+    if ((*(s32 *)((u8 *)D_8002C130 + 4)) == g_framebuffers[1]) {
         g_dbg_fb_index = 1;
     }
     g_dbg_fault_thread = (struct118 *) arg0;
@@ -901,13 +901,13 @@ s32 debugger_cell_to_fb(s32 arg0) {
     v1 += (arg0 & 0x1F) * 16;
     v1 += g_dbg_fb_width * 4;
     v1 += 0x10;
-    return D_8002AAE8[g_dbg_fb_index] + v1;
+    return g_framebuffers[g_dbg_fb_index] + v1;
 }
 
 // clear the framebuffer
 /* was func_16001678 */
 void debugger_clear_screen(void) {
-    u32 *fb = D_8002AAE8[g_dbg_fb_index];
+    u32 *fb = g_framebuffers[g_dbg_fb_index];
     s32 h;
     u32 *end;
 

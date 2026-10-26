@@ -457,9 +457,9 @@ extern u8 *D_800DFBF0; /* matrix list obj_draw_part draws the object with */
 extern u8 D_800DFBF4;  /* alpha obj_draw_part draws the object with */
 // trail_draw: P253. Draw handler (u8 *(u8 *gfx, u8 *rec, s16 arg2), same table as afterimage_history_push) of an object's
 // motion trail: with filled steps (rec[2] != 0) it prepares the object +0x10 (obj_current_part_model_idx / model_make_ready), swaps
-// the object's +0x94 for the record's +0x14 and draws the object (obj_draw_part, D_800CC2D0 slot index, mode 4) once
+// the object's +0x94 for the record's +0x14 and draws the object (obj_draw_part, g_objects slot index, mode 4) once
 // per filled step, each time with that step's matrices from the history buffer +8 (this half, D_800BE9C0) and alpha
-// rec[3] * (3 + step) * 32 / 256, then restores +0x94. Objects outside the 25 first D_800CC2D0 slots are skipped.
+// rec[3] * (3 + step) * 32 / 256, then restores +0x94. Objects outside the 25 first g_objects slots are skipped.
 /* was func_15189B64 */
 u8 *afterimage_draw(u8 *gfx, u8 *rec, s16 arg2) {
     struct127 *obj = *(struct127 **) (rec + 0x10);
@@ -479,7 +479,7 @@ u8 *afterimage_draw(u8 *gfx, u8 *rec, s16 arg2) {
     obj = *(struct127 **) (rec + 0x10);
     m = D_800BE9C0 * per * n;
     count = rec[2];
-    slot = ((u8 *) obj - (u8 *) D_800CC2D0) / 0x32C;
+    slot = ((u8 *) obj - (u8 *) g_objects) / 0x32C;
     if (slot < 0 || slot >= 25) {
         return gfx;
     }

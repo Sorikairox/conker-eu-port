@@ -81,7 +81,7 @@ u8 *occlusion_probe_readback_emit(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 ar
     temp_a0_9 = temp_a0_8 + 8;
     temp_a0_10 = temp_a0_9 + 8;
     temp_a0_11 = temp_a0_10 + 8;
-    (*(s32 *)((u8 *)temp_a0_8 + 4)) = (s32) ((arg2 * D_800BE620 * 2) + D_800BEDE4);
+    (*(s32 *)((u8 *)temp_a0_8 + 4)) = (s32) ((arg2 * D_800BE620 * 2) + g_zbuffer);
     (*(s32 *)((u8 *)temp_a0_9 + 0)) = 0xF5100000;
     (*(s32 *)((u8 *)temp_a0_9 + 4)) = 0x07000000;
     (*(s32 *)((u8 *)temp_a0_10 + 0)) = 0xE6000000;
@@ -137,7 +137,7 @@ u8 *occlusion_probe_readback_emit(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 ar
     temp_a0_21 = temp_a0_20 + 8;
     temp_a0_22 = temp_a0_21 + 8;
     temp_a0_23 = temp_a0_22 + 8;
-    (*(s32 *)((u8 *)temp_a0_20 + 4)) = (s32) (D_8002AAE8[D_800BE9C0] + (arg2 * D_800BE620 * 2));
+    (*(s32 *)((u8 *)temp_a0_20 + 4)) = (s32) (g_framebuffers[D_800BE9C0] + (arg2 * D_800BE620 * 2));
     (*(s32 *)((u8 *)temp_a0_21 + 0)) = 0xF5100000;
     (*(s32 *)((u8 *)temp_a0_21 + 4)) = 0x07000000;
     (*(s32 *)((u8 *)temp_a0_22 + 0)) = 0xE6000000;

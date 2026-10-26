@@ -28,7 +28,7 @@ void framebuffer_fill_color(s32 arg0, s32 arg1, s32 arg2) {
     s32 var_v1;
     u8 *var_v1_3;
 
-    var_v1 = (*(s32 *)((u8 *)D_8002AAE8 + 0));
+    var_v1 = (*(s32 *)((u8 *)g_framebuffers + 0));
     var_t2 = 0;
     temp_t0 = (s32) (D_800BE620 * D_800BE624 * 2) >> 1;
     if (var_v1 != 0) {
@@ -44,7 +44,7 @@ void framebuffer_fill_color(s32 arg0, s32 arg1, s32 arg2) {
             temp_t8 = ((arg0 << 8) & 0xF800) | ((arg1 * 8) & 0x7C0) | ((arg2 >> 2) & 0x3E) | 1;
             temp_a1 = temp_t0 & 3;
             if (temp_a1 != 0) {
-                var_v1_2 = D_8002AAE8[1] + (0 * 2);
+                var_v1_2 = g_framebuffers[1] + (0 * 2);
                 do {
                     var_t2 += 1;
                     *var_v1_2 = temp_t8;
@@ -55,7 +55,7 @@ void framebuffer_fill_color(s32 arg0, s32 arg1, s32 arg2) {
                 }
             } else {
 block_10:
-                var_v1_3 = D_8002AAE8[1] + (var_t2 * 2);
+                var_v1_3 = g_framebuffers[1] + (var_t2 * 2);
                 do {
                     var_t2 += 4;
                     (*(s16 *)((u8 *)var_v1_3 + 2)) = temp_t8;
@@ -81,7 +81,7 @@ void vi_mode_set_window(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
     s32 var_v1;
     u32 temp_t2;
 
-    if (D_8002AC5C == 0) {
+    if (g_eeprom_writes_disabled == 0) {
         temp_v0 = arg1 + 0x3F;
         temp_a2 = arg0 + 0x8C;
         temp_f8 = (s32) (517.0f * arg3);

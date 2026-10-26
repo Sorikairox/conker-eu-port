@@ -103,7 +103,7 @@ void obj_glow_smoke_attach(u8 *obj, u8 arg1, s32 arg2) {
     tail.uC = 0.396174014f;   /* D_800968C4 */
     tail.u10 = 5.86765575f;   /* D_800968BC */
     tail.u14 = 0.104256302f;  /* D_800968C8 */
-    tail.u18 = 12.1114445f;   /* D_800968C0 */
+    tail.u18 = 12.1114445f;   /* g_level_init_heading_f */
     tail.room = obj[0x3B];
     tail.u1C = 0.344045877f;  /* D_800968D0 */
     tail.u20 = 0.519737124f;  /* D_800968CC */

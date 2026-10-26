@@ -2,21 +2,21 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_8009684E[];
+extern u8 g_level_debris_kinds_end[]; /* was D_8009684E */
 
 // fat struct to decipher
-extern f32 D_80096850;
-extern f32 D_80096854;
-extern f32 D_80096858;
-extern f32 D_8009685C;
-extern f32 D_80096860;
+extern f32 g_level_debris_k_add; /* was D_80096850 */
+extern f32 g_level_debris_k_mul_a; /* was D_80096854 */
+extern f32 g_level_debris_k_mul_b; /* was D_80096858 */
+extern f32 g_level_debris_k_mul_c; /* was D_8009685C */
+extern f32 g_level_debris_k_scale; /* was D_80096860 */
 void storm_controller_spawn(void);
 void collision_select_area(s32);
 s32 mdl_particle_spawn(f32 *, s32, s32, s32, s32, s32);
 u8 *mesh_effect_spawn(s8 *, s32, s32, s32, s32);
 s32 memcpy(u8 *, f32 *, s32);
-extern s32 D_80096800;
-extern u8 D_80096848;
+extern s32 g_level_debris_defs; /* was D_80096800 */
+extern u8 g_level_debris_kinds; /* was D_80096848 */
 
 /* was func_15010A60 */
 void level_obj_init_debris_table(void) {
@@ -159,8 +159,8 @@ void level_obj_init_debris_table(void) {
     sp.u1C4 = 0;
     sp.u1C6 = 1;
     sp.u1C8 = 0xFF;
-    var_s2 = &D_80096848;
-    var_s1 = &D_80096800;
+    var_s2 = &g_level_debris_kinds;
+    var_s1 = &g_level_debris_defs;
     sp.u164 = 0.0f;
     sp.u168 = 0.0f;
     sp.u16C = 0.0f;
@@ -199,7 +199,7 @@ void level_obj_init_debris_table(void) {
         if (temp_t2_2 < 0) {
             var_f18 += 4294967296.0f;
         }
-        temp_f2 = 2.0f * (var_f18 * D_80096860) * D_8009685C;
+        temp_f2 = 2.0f * (var_f18 * g_level_debris_k_scale) * g_level_debris_k_mul_c;
         sp.uE8 = temp_f2;
         sp.uD0 = temp_f2;
         temp_s0_2 = osGetCount();
@@ -208,7 +208,7 @@ void level_obj_init_debris_table(void) {
         if (temp_t3 < 0) {
             var_f10 += 4294967296.0f;
         }
-        temp_f2_2 = 2.0f * (var_f10 * D_80096860) * D_8009685C;
+        temp_f2_2 = 2.0f * (var_f10 * g_level_debris_k_scale) * g_level_debris_k_mul_c;
         sp.uEC = temp_f2_2;
         sp.uD4 = temp_f2_2;
         temp_s0_3 = osGetCount();
@@ -217,7 +217,7 @@ void level_obj_init_debris_table(void) {
         if (temp_t7 < 0) {
             var_f6 += 4294967296.0f;
         }
-        temp_f0 = (var_f6 * D_80096860 * D_80096858) + 2.0f;
+        temp_f0 = (var_f6 * g_level_debris_k_scale * g_level_debris_k_mul_b) + 2.0f;
         sp.uF8 = temp_f0;
         sp.uE0 = temp_f0;
         temp_s0_4 = osGetCount();
@@ -226,7 +226,7 @@ void level_obj_init_debris_table(void) {
         if (temp_t8 < 0) {
             var_f18_2 += 4294967296.0f;
         }
-        temp_f0_2 = (var_f18_2 * D_80096860 * D_80096858) + 2.0f;
+        temp_f0_2 = (var_f18_2 * g_level_debris_k_scale * g_level_debris_k_mul_b) + 2.0f;
         sp.uFC = temp_f0_2;
         sp.uE4 = temp_f0_2;
         temp_s0_5 = osGetCount();
@@ -235,7 +235,7 @@ void level_obj_init_debris_table(void) {
         if (temp_t1 < 0) {
             var_f4 += 4294967296.0f;
         }
-        temp_f0_3 = (var_f4 * D_80096860 * D_80096854) + D_80096850;
+        temp_f0_3 = (var_f4 * g_level_debris_k_scale * g_level_debris_k_mul_a) + g_level_debris_k_add;
         sp.uF0 = temp_f0_3;
         sp.uD8 = temp_f0_3;
         temp_s0_6 = osGetCount();
@@ -244,7 +244,7 @@ void level_obj_init_debris_table(void) {
         if (temp_t2_3 < 0) {
             var_f10_2 += 4294967296.0f;
         }
-        temp_f0_4 = (var_f10_2 * D_80096860 * D_80096854) + D_80096850;
+        temp_f0_4 = (var_f10_2 * g_level_debris_k_scale * g_level_debris_k_mul_a) + g_level_debris_k_add;
         sp.uF4 = temp_f0_4;
         sp.uDC = temp_f0_4;
         temp_v0 = mdl_particle_spawn(&sp.u154, 3, 0xFF, 0x18, 0xFF, 1);
@@ -271,5 +271,5 @@ void level_obj_init_debris_table(void) {
         }
         var_s2 += 1;
         var_s1 = (s32 *)((u8 *)var_s1 + (0xC));
-    } while (var_s2 != ((u8 *)&D_8009684E));
+    } while (var_s2 != ((u8 *)&g_level_debris_kinds_end));
 }

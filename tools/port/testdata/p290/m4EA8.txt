@@ -1,8 +1,8 @@
 s/D_800DBEF4) \/ 0xA0;/D_800DBEF4) \/ 0x50;/
 s/s32 tries = 5;/s32 tries = 4;/
 s/f32 height = D_800A14F8\[0\];/f32 height = 0.0f;/
-s/if (idx >= D_800DC320 || idx < 0)/if (idx > D_800DC320 || idx < 0)/
-s/if (idx >= D_800DC320 || idx < 0)/if (idx >= D_800DC320 || idx < -1)/
+s/if (idx >= g_world_obj_count || idx < 0)/if (idx > g_world_obj_count || idx < 0)/
+s/if (idx >= g_world_obj_count || idx < 0)/if (idx >= g_world_obj_count || idx < -1)/
 s/collision_select_area(2);/collision_select_area(1);/
 s/world_objects_transform_mesh(1, (s32 \*) &id, 0);/world_objects_transform_mesh(1, (s32 *) \&id, 1);/
 s/id = idx;/id = idx + 1;/

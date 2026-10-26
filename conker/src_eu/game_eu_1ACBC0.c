@@ -580,7 +580,7 @@ void hud_lens_update(void) {
         rate = &(&D_800DDDD8)[p];
         lens = &(&D_800DDE3C)[p];
         if ((&D_800DDE20)[p] != 0) {
-            obj = &D_800CC2D0[p];
+            obj = &g_objects[p];
             *zoom += *rate * (f32) D_800BE9E4;
             rec = (u8 *) obj->unk31C;
             if (rec == NULL) {
@@ -620,7 +620,7 @@ void hud_lens_update(void) {
                 }
             }
         } else if (*lens != 0) {
-            obj = &D_800CC2D0[p];
+            obj = &g_objects[p];
             *zoom += *rate * (f32) D_800BE9E4;
             if (obj->unk1D4 != NULL) {
                 mtx = (u8 *) obj->unk1D4;

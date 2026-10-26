@@ -1,6 +1,6 @@
 s/team = ctl\[0x11B\];/team = ctl[0x11A];/
 s/team = -1;/team = 0;/
-s/if (D_800BE9F0 == 0x2B) {/if (D_800BE9F0 == 0x2C) {/
+s/if (g_level_id == 0x2B) {/if (g_level_id == 0x2C) {/
 s/n = player_stat_get((s16) idx, 1);/n = player_stat_get((s16) idx, 3);/
 s/if (n >= 0x11 \&\& n < 0x21) {/if (n >= 0x11 \&\& n < 0x20) {/
 s/if (n >= 0x11 \&\& n < 0x21) {/if (n > 0x11 \&\& n < 0x21) {/
@@ -33,7 +33,7 @@ s/(obj + 0x218) = 0;/(obj + 0x21C) = 0;/
 s/\[0x11B\] = team;/[0x11B] = 0;/
 s/obj\[0x125\] = 0x96;/obj[0x125] = 0x95;/
 s/\[0x1B1\] = 0x96;/[0x1B0] = 0x96;/
-s/if (D_800BE9F0 == 0x33) {/if (D_800BE9F0 == 0x34) {/
+s/if (g_level_id == 0x33) {/if (g_level_id == 0x34) {/
 s/player_send_event(idx, 0x78, 0, 0, 0);/player_send_event(idx, 0x77, 0, 0, 0);/
 s/rail_record_resync(obj);/rail_record_resync(0);/
 s/s8 keep1B0 = ctl\[0x1B0\];/s8 keep1B0 = ctl[0x1B1];/

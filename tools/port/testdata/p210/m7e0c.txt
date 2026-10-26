@@ -5,7 +5,7 @@ s/    if (fade > 0) {/    if (fade >= 0) {/
 s/if (fade < n\[0x3F\]) {/if (fade <= n[0x3F]) {/
 s/n\[0x3F\] -= fade;/n[0x3F] -= fade + 1;/
 s/if ((s8)n\[0x2F\] != -1 \&\& /if (/
-s/D_8008CD68\[(s8)n\[0x2F\]\](n);/D_8008CD68[(s8)n[0x2F] + 1](n);/
+s/g_node_sprite_behaviours\[(s8)n\[0x2F\]\](n);/g_node_sprite_behaviours[(s8)n[0x2F] + 1](n);/
 s/\*(s16 \*)(n + 0x30) += \*(s16 \*)(n + 0x32);/;/
 s/((\*(s16 \*)(n + 0x22) << 8) | n\[0x2E\]) + \*(s16 \*)(n + 0x30)/((*(s16 *)(n + 0x22) << 8) | n[0x2E]) + *(s16 *)(n + 0x32)/
 s/\*(s16 \*)(n + 0x22) = v >> 8;/*(s16 *)(n + 0x22) = v >> 9;/

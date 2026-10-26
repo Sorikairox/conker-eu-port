@@ -30,7 +30,7 @@ void camera_group_side_view(u8 *arg0) {
     var_f16 = D_800A37F4;
     var_f0 = 0.0f;
     if (D_8008FD8C > 0) {
-        var_v0 = D_800CC2D0;
+        var_v0 = g_objects;
         do {
             temp_f20 = var_v0->x_position;
             if (temp_f20 < var_f2) {
@@ -49,11 +49,11 @@ void camera_group_side_view(u8 *arg0) {
             if (var_f14 < temp_f20_2) {
                 var_f14 = temp_f20_2;
             }
-        } while ((u32) var_v0 < (u32) &D_800CC2D0[D_8008FD8C]);
+        } while ((u32) var_v0 < (u32) &g_objects[D_8008FD8C]);
     }
     (*(f32 *)((u8 *)arg0 + 0x2BC)) = var_f16;
     var_f2_2 = 0.0f;
-    var_v0_2 = D_800CC2D0;
+    var_v0_2 = g_objects;
     temp_f22 = (var_f12 + var_f14) * 0.5f;
     (*(f32 *)((u8 *)arg0 + 0x2C4)) = temp_f22;
     (*(f32 *)((u8 *)arg0 + 0x2C0)) = (f32) ((var_f0 / (f32) D_8008FD8C) + 150.0f);
@@ -75,7 +75,7 @@ void camera_group_side_view(u8 *arg0) {
             if (var_f2_2 < var_f12_2) {
                 var_f2_2 = var_f12_2;
             }
-        } while ((u32) var_v0_2 < (u32) &D_800CC2D0[D_8008FD8C]);
+        } while ((u32) var_v0_2 < (u32) &g_objects[D_8008FD8C]);
     }
     if (var_f2_2 < 300.0f) {
         var_f2_2 = 300.0f;

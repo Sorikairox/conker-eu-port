@@ -124,7 +124,7 @@ u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 extern s32 D_80091198[];
 float sqrtf(float);
 extern s32 D_800D30BC;
-extern u8 D_800A4EA8[];
+extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 // beam_quad_draw: draws a camera-facing beam quad from +0x18 (start) to +0x24 (end) for player view `view` when
 // flag 1 of +0x10 is set. The quad's half-width vector is (end - start) x (end - camera) normalised to 8.4
@@ -171,7 +171,7 @@ u8 *beam_quad_draw(u8 *gdl, u8 *obj, s16 view) {
         gdl = (u8 *) gfx_set_combine_mode((s32) gdl, 0x13, (s8 *) &flag);
     }
     gdl = gfx_other_mode_cached((s32) gdl, D_800D30BC | 0x80000 | 0x2CA0,
-                        *(s32 *) (D_800A4EA8 + 0xC) | *(s32 *) (D_800A4EA8 + 0x8), (s8 *) &flag);
+                        *(s32 *) (g_render_mode_pairs + 0xC) | *(s32 *) (g_render_mode_pairs + 0x8), (s8 *) &flag);
     dx = *(f32 *) (obj + 0x24) - *(f32 *) (obj + 0x18);
     dy = *(f32 *) (obj + 0x28) - *(f32 *) (obj + 0x1C);
     dz = *(f32 *) (obj + 0x2C) - *(f32 *) (obj + 0x20);

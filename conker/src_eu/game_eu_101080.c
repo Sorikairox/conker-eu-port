@@ -3,7 +3,7 @@
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
 void object_fire_cleanup(u8 *arg0);
-extern u8 D_800A4EA8[];
+extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 
 /* fxrec_spawn spawn request (0x18 bytes) */
@@ -427,7 +427,7 @@ s32 track_follow_record(u8 *obj) {
                     st[5] = 2;
                 }
             } else {
-                slot = (tgt - (u8 *) D_800CC2D0) / 0x32C;
+                slot = (tgt - (u8 *) g_objects) / 0x32C;
                 if (slot >= 4) {
                     st[5] = 1;
                 } else {
@@ -711,7 +711,7 @@ u8 *track_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
             temp_v0 = camera_get_pos((s32) arg2);
             sp.uEB = 1;
             sp.u118 = temp_v0;
-            temp_v1_2 = ((u8 *)&D_800A4EA8);
+            temp_v1_2 = ((u8 *)&g_render_mode_pairs);
             var_s0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_env_color_cached(gfx_load_texture_cached(var_s0, &D_800914B0, 0, 0, 0, 0, 0x78, 0, 0, &sp.uEB, 0x3E), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uEB), 0x200005, 0x1F0600), 0x55, &sp.uEB), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1_2 + 0x1C)) | (*(s32 *)((u8 *)temp_v1_2 + 0x18)), &sp.uEB);
             var_a0 = (*(s8 *)((u8 *)arg0 + 0x2E)) - 1;
             if (var_a0 < 0) {

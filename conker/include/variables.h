@@ -92,7 +92,7 @@ extern s32  D_8000031C[16]; // 64 bytes
 
 extern u8   D_8002AAE0;
 extern u8   D_8002AAE4;
-extern s32  D_8002AAE8[2]; // pointer to framebuffer
+extern s32  g_framebuffers[2]; // pointer to framebuffer /* was D_8002AAE8 */
 extern u8   D_8002AB40;
 extern OSViMode D_8002AB90;
 extern OSViMode D_8002ABE0;
@@ -100,9 +100,9 @@ extern s32  D_8002AC30;
 extern OSScTask *D_8002AC50;
 extern OSScTask *D_8002AC54;
 extern OSScTask *D_8002AC58;
-extern u8   D_8002AC5C;
-extern u8   D_8002AC60;
-extern u16  D_8002AC64;
+extern u8   g_eeprom_writes_disabled; /* was D_8002AC5C */
+extern u8   g_loop_exit_flag_ac60; /* was D_8002AC60 */
+extern u16  g_loop_exit_value_ac64; /* was D_8002AC64 */
 extern s8   D_8002AC6C;
 extern u8   D_8002AE40;
 extern u32  D_8002AE44;
@@ -317,7 +317,7 @@ extern s32 D_800418B0[];
 extern u8 D_800419A0;
 extern struct137 D_800419A8[12]; // 1200 bytes
 extern OSMesgQueue D_80041E58[3];
-extern struct117 D_80041EA0[3];
+extern struct117 g_game_mesg_bufs[3]; /* was D_80041EA0 */
 
 extern s32  D_80042760;
 extern s32  D_80042770;
@@ -357,24 +357,24 @@ extern s32  D_80044B20; // 253952 bytes, bunch of structs?
 /* 80080000 */
 extern s32  D_80082B20;
 extern void (*g_camera_level_hook_fns[])(struct108 *); /* was D_80082B40 */
-extern u8   D_80082BB4;
+extern u8   g_save_request_kind; /* was D_80082BB4 */
 extern u8   D_80082BC0;
 extern u8   D_80082BE0[4];
 extern u8   D_80082BE4[5];
-extern void (*D_80082BFC[])(s32 arg0);
-extern void (*D_80082D60[])(void);
+extern void (*g_hotspot_fx_fns[])(s32 arg0); /* was D_80082BFC */
+extern void (*g_ambient_fx_fns[])(void); /* was D_80082D60 */
 extern void (*D_80082D90[])(void);
-extern void (*D_80082EA0[])(void);
-extern void (*D_80082ECC[])(void);
-extern void (*D_80082F40[])(void);
-extern void (*D_80082F70[])(void);
+extern void (*g_record_start_handlers[])(void); /* was D_80082EA0 */
+extern void (*g_record_dispatch_82ecc_tbl[])(void); /* was D_80082ECC */
+extern void (*g_record_dispatch_82f40_tbl[])(void); /* was D_80082F40 */
+extern void (*g_record_dispatch_82f70_tbl[])(void); /* was D_80082F70 */
 extern s32  D_80082FA0;
-extern s32  D_80082FA4;
+extern s32  g_cur_view_player; /* was D_80082FA4 */
 extern u8   D_80084064;
-extern s32  D_80084300;
+extern s32  g_vertex_anchor_template; /* was D_80084300 */
 extern s16  D_80084480;
 extern void (*D_800844B0[])(s32 arg0);
-extern s32  D_800848B0;
+extern s32  g_dl_check_last_timg; /* was D_800848B0 */
 
 extern f32 D_80085FD0;
 extern f32 D_80085FD4;
@@ -396,16 +396,16 @@ extern s32 g_obj_table_reset_word; /* was D_80086000 */
 extern void (*D_80086004[])(s32);
 extern void (*D_8008600C[])(s32);
 extern void (*D_80086014[])(s32);
-extern s16 D_800860C0[];
-extern f32 D_800860CC[];
-extern u16 D_800860E4[];
+extern s16 g_carry_anim_ids[]; /* was D_800860C0 */
+extern f32 g_carry_anim_speeds[]; /* was D_800860CC */
+extern u16 g_carry_reaction_rows[]; /* was D_800860E4 */
 extern void (*D_80086150[])(s32);
 extern void (*D_80086730[])(void);
 extern s8  D_80087260;
 extern s8  D_80087264;
 extern s8  D_8008726C;
 extern s8  D_80087270[];
-extern u8  D_80087280[];
+extern u8  g_mp_level_mode_ids[]; /* was D_80087280 */
 extern u32 D_80087380;
 
 extern u64 D_800885B0;
@@ -416,9 +416,9 @@ extern vertex g_holder_target_pos; /* was D_80088724 */
 extern u8  D_80088980;
 extern u8  g_storm_thunder_flag; /* was D_80088B40 */
 extern void (*D_80088B60[2])(void);
-extern u8  D_80088B90;
+extern u8  g_bone_beam_style_b; /* was D_80088B90 */
 extern u8  D_80088BB0;
-extern s32 D_800894B0;
+extern s32 g_camera_frame_count; /* was D_800894B0 */
 extern s32 D_80089520;
 extern s32 D_80089524[]; // struct arrays?
 extern s32 D_80089534[];
@@ -443,17 +443,17 @@ extern void (*g_effect_node_msg_fns[74])(struct260*, s32, u8); /* was D_8008A8D8
 extern s32 (*g_effect_node_draw_fns[])(s32, struct260*, s16); /* was D_8008A670 */
 /* P234: EU D_8008B490; every handler takes the struct225 (the asm keeps a0 = the object at the jalr) and the
    dispatcher light_ctrl_update tests the result (0 = destroy) */
-extern s32  (*D_8008B0F0[])(struct225 *);
+extern s32  (*g_light_effect_update_fns[])(struct225 *); /* was D_8008B0F0 */
 extern u8   (*D_8008B1F8[])(struct225*);
-extern void (*D_8008B208[])(struct225*);
-extern void (*D_8008B2B0[])(struct225*);
+extern void (*g_light_destroy_fns[])(struct225*); /* was D_8008B208 */
+extern void (*g_light_delete_fns[])(struct225*); /* was D_8008B2B0 */
 extern s32 (*D_8008B36C[])(void);
 extern s32 (*D_8008B370[])(s32);
 extern void (*D_8008B374[])(s32);
 
-extern struct115 D_8008B4A8[];
-extern struct115 D_8008B4D0[];
-extern struct115 D_8008B4D4[];
+extern struct115 g_node_type_update_fns[]; /* was D_8008B4A8 */
+extern struct115 g_node_type_destroy_fns[]; /* was D_8008B4D0 */
+extern struct115 g_node_type_delete_fns[]; /* was D_8008B4D4 */
 
 
 extern u8   D_8008CEB0;
@@ -469,13 +469,13 @@ extern u16  D_8008FDBC;
 /* 8009 */
 extern s32 g_tex_scroll_id_02b8; /* was D_800902B8 */
 extern s32 g_tex_scroll_id_02e4; /* was D_800902E4 */
-extern s32 D_800902E8;
+extern s32 g_level_scroll_tex_a; /* was D_800902E8 */
 extern s32 g_tex_scroll_id_02ec; /* was D_800902EC */
 extern s32 g_tex_scroll_id_0310; /* was D_80090310 */
 extern s32 g_tex_scroll_id_0314; /* was D_80090314 */
 extern s32 g_tex_scroll_id_0318; /* was D_80090318 */
 extern s32 g_tex_scroll_id_031c; /* was D_8009031C */
-extern s32 D_80090320;
+extern s32 g_level_scroll_tex_b; /* was D_80090320 */
 
 extern s32 jtbl_80091A30[];
 
@@ -493,20 +493,20 @@ extern f32 D_80095B18;
 extern f32 D_80095B1C;
 extern f32 D_80095B20;
 extern f32 D_80095B24;
-extern u8  D_80095B27[];
+extern u8  g_hotspot_light_levels[]; /* was D_80095B27 */
 extern f32 D_80095B28;
 extern f32 D_80095B2C;
 extern f32 D_80095B30;
 extern f32 D_80095B40;
 extern f32 D_80095B44;
 // hotspot_fx_type24_27 suggests they are u8, but they look like floats!
-extern u8 D_80095B48[]; // 0.002188183832913637
-extern u8 D_80095B4C[]; // 20.100000381469727
-extern u8 D_80095B50[]; // 0.4000000059604645
+extern u8 g_area_drift_speed_k[]; // 0.002188183832913637 /* was D_80095B48 */
+extern u8 g_area_drift_param_48[]; // 20.100000381469727 /* was D_80095B4C */
+extern u8 g_area_drift_param_64[]; // 0.4000000059604645 /* was D_80095B50 */
 
 extern f32 D_80095B54;
-extern u8  D_80095B70[4];
-extern u8  D_80095B74[2];
+extern u8  g_hotspot_swing_lamp_presets[4]; /* was D_80095B70 */
+extern u8  g_hotspot_flash_presets[2]; /* was D_80095B74 */
 extern f32 D_80095BB8;
 extern f32 D_80095BBC;
 extern f32 D_80095BC0;
@@ -549,7 +549,7 @@ extern f32 g_scroll_fx_pt3_y; /* was D_80096240 */
 extern f32 g_scroll_fx_pt3_z; /* was D_80096244 */
 
 extern f32 *D_800963A0;
-extern struct180 *D_80096430; // 6 x s32?
+extern struct180 *g_level_rope_def; // 6 x s32? /* was D_80096430 */
 
 extern f32 g_ground_emitter7_param_8; /* was D_80096530 */
 extern f32 g_ground_emitter7_param_c; /* was D_80096534 */
@@ -560,9 +560,9 @@ extern f32 D_80096560;
 extern f32 D_80096570;
 extern u32 D_8009667C;
 extern f32 D_800968B0;
-extern f32 D_800968C0;
+extern f32 g_level_init_heading_f; /* was D_800968C0 */
 extern s32 D_800968E0;
-extern f32 D_80096900;
+extern f32 g_debris_linked_zone_pos; /* was D_80096900 */
 extern f32 D_80096904;
 
 extern f32 D_80098D90[];
@@ -578,7 +578,7 @@ extern f32 D_800991AC;
 extern f32 D_800991B0;
 extern f32 D_800991D4; // 0.10000000149011612f
 extern f32 D_80099408;
-extern f32 D_8009940C;
+extern f32 g_asinf_near1_q; /* was D_8009940C */
 extern f32 D_80099410;
 extern f32 D_80099414;
 extern f32 D_80099418;
@@ -615,7 +615,7 @@ extern u8  D_80099A43;
 extern s16 D_80099AB4[];
 extern s16 D_80099ABC[];
 
-extern f32 D_80099C1C;
+extern f32 g_screen_flash_b_effect; /* was D_80099C1C */
 extern f32 D_80099C34;
 extern f32 D_80099C38;
 extern f32 D_80099C3C;
@@ -652,8 +652,8 @@ extern f32 D_8009A1E4;
 extern f32 D_8009A220[];
 extern f32 D_8009A420[];
 extern f32 D_8009A620[];
-extern struct253 D_8009A6D8[];
-extern struct252 D_8009A9F8;
+extern struct253 g_hit_desc_table[]; /* was D_8009A6D8 */
+extern struct252 g_hit_sender_default; /* was D_8009A9F8 */
 
 extern s16 D_8009DCB4[];
 extern s32 D_8009DCC0;
@@ -677,10 +677,10 @@ extern f32 D_800A1B8C;
 extern f32 D_800A1B98;
 extern f32 D_800A1B9C;
 extern f32 D_800A1BA0;
-extern f32 D_800A1FB0;
-extern f32 D_800A1FBC;
-extern f32 D_800A2148;
-extern f32 D_800A2154;
+extern f32 g_bone_beam_b_start; /* was D_800A1FB0 */
+extern f32 g_bone_beam_b_end; /* was D_800A1FBC */
+extern f32 g_bone_beam_a_start; /* was D_800A2148 */
+extern f32 g_bone_beam_a_end; /* was D_800A2154 */
 // extern struct201 D_800A2CD0[];
 extern u8  D_800A2CD0[][3];
 
@@ -702,12 +702,12 @@ extern f32 D_800A56C8;
 extern s32 D_800A5770;
 
 // in game_18D770.c
-extern u8  D_800A6690[5];  // "scale"
-extern u8  D_800A6698[24]; // "../Effects/Light/light.c"
+extern u8  g_str_light_scale[5];  // "scale" /* was D_800A6690 */
+extern u8  g_str_light_c_path[24]; // "../Effects/Light/light.c" /* was D_800A6698 */
 extern f32 D_800A66B4[3];  // { 0.0f, -415.0f, 0.0f }
-extern f32 D_800A66C0[9];  // { 70.0f, 38.0f, 70.0f, 55.0f, 50.0f, 80.0f, 140.0f, 70.0f, 34.0f };
+extern f32 g_light_lightning_peaks[9];  // { 70.0f, 38.0f, 70.0f, 55.0f, 50.0f, 80.0f, 140.0f, 70.0f, 34.0f }; /* was D_800A66C0 */
 extern s32 D_800A66E4[10]; // { 1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108 }
-extern s32 D_800A6A0C;
+extern s32 g_light_joint_pulse_joints; /* was D_800A6A0C */
 extern f32 D_800A6AD4;     // 0.005000000353902578f
 extern f32 D_800A6AD8;     // 6.2831854820251465f
 extern f32 D_800A6ADC;     // 0.10209999978542328f
@@ -722,27 +722,27 @@ extern f32 D_800A6AFC;
 extern s32 D_800A670C[][3]; // { {128.0f, 59.5f, 59.5f}, {187.0f, 59.5f, 59.5f}, {128.0f, 17.5f, 0.0f} }
 extern s32 D_800A6730[][3];
 extern f32 D_800A6754[];
-extern f32 D_800A6760[24];
-extern f32 D_800A67C0[24];
-extern f32 D_800A6820[24];
-extern f32 D_800A6880[];
+extern f32 g_light_flicker_low_levels[24]; /* was D_800A6760 */
+extern f32 g_light_flicker_mid_levels[24]; /* was D_800A67C0 */
+extern f32 g_light_flicker_high_levels[24]; /* was D_800A6820 */
+extern f32 g_fx_source_emitter_presets[]; /* was D_800A6880 */
 extern f32 D_800A6894[];
 extern f32 D_800A68A8[];
 extern f32 D_800A68BC[];
 extern f32 D_800A68D0[];
 extern f32 D_800A68E4[];
-extern f32 D_800A68F8[3];
-extern f32 D_800A6904[3];
-extern f32 D_800A6910[3];
-extern s32 D_800A691C[3];
-extern s32 D_800A6928[3];
-extern f32 D_800A6934[3];
-extern f32 D_800A6940[3];
-extern f32 D_800A694C[3];
-extern f32 D_800A6958[3];
-extern f32 D_800A6964[14];
-extern f32 D_800A699C[14];
-extern f32 D_800A69D4[14];
+extern f32 g_light_storm_flash_decay[3]; /* was D_800A68F8 */
+extern f32 g_light_storm_pause_min[3]; /* was D_800A6904 */
+extern f32 g_light_storm_pause_range[3]; /* was D_800A6910 */
+extern s32 g_light_storm_burst_min[3]; /* was D_800A691C */
+extern s32 g_light_storm_burst_range[3]; /* was D_800A6928 */
+extern f32 g_light_storm_gap_min[3]; /* was D_800A6934 */
+extern f32 g_light_storm_gap_range[3]; /* was D_800A6940 */
+extern f32 g_light_storm_level_min[3]; /* was D_800A694C */
+extern f32 g_light_storm_level_range[3]; /* was D_800A6958 */
+extern f32 g_light_pulse_base_levels[14]; /* was D_800A6964 */
+extern f32 g_light_pulse_amplitudes[14]; /* was D_800A699C */
+extern f32 g_light_pulse_speeds[14]; /* was D_800A69D4 */
 
 extern f32 D_800A6B00; // 6.2831854820251465f
 extern f32 D_800A6B04; // 3.1415927410125732f
@@ -750,30 +750,30 @@ extern f32 D_800A6B08;
 extern f32 D_800A6B0C;
 extern f32 D_800A6B10;
 
-extern u16 D_800AB140[];
+extern u16 g_attach_fx_asset_ids[]; /* was D_800AB140 */
 extern s32 D_800AB168[1];
 // game_2062D0.c
-extern u8  D_800AB340[3]; // 88, 64, 62
-extern u8  D_800AB344[5]; // 46, 48, 45, 51, 52
-extern u8  D_800AB34C[4]; // 96, 97, 98, 99
-extern s32 D_800AB350[7]; // 0, 1, 2, 58, 59, 60, 61
-extern s32 D_800AB36C[3]; // 15, 16, 17
-extern s32 D_800AB384[2]; // 28, 29
-extern s32 D_800AB378[3]; // 143, 144, 145
-extern s32 D_800AB38C[2]; // 8, 9
-extern s32 D_800AB394[5]; // 49, 50, 51, 13, 14
-extern s32 D_800AB3A8[3]; // 150, 151, 152
-extern s32 D_800AB3B4[2]; // 27, 28
-extern s32 D_800AB3BC[3]; // 160, 161, 162
-extern s32 D_800AB3C8[1]; // 179
-extern s32 D_800AB3CC[3]; // 185, 186, 187
-extern s32 D_800AB3D8[4]; // 96, 97, 98, 99
+extern u8  g_impact_puff_tex_kind0[3]; // 88, 64, 62 /* was D_800AB340 */
+extern u8  g_impact_puff_tex_kind5[5]; // 46, 48, 45, 51, 52 /* was D_800AB344 */
+extern u8  g_impact_puff_tex_kind11[4]; // 96, 97, 98, 99 /* was D_800AB34C */
+extern s32 g_impact_debris_tex_kind0[7]; // 0, 1, 2, 58, 59, 60, 61 /* was D_800AB350 */
+extern s32 g_impact_debris_tex_kind1[3]; // 15, 16, 17 /* was D_800AB36C */
+extern s32 g_impact_debris_tex_kind3[2]; // 28, 29 /* was D_800AB384 */
+extern s32 g_impact_debris_tex_kind2[3]; // 143, 144, 145 /* was D_800AB378 */
+extern s32 g_impact_debris_tex_kind4[2]; // 8, 9 /* was D_800AB38C */
+extern s32 g_impact_debris_tex_kind5[5]; // 49, 50, 51, 13, 14 /* was D_800AB394 */
+extern s32 g_impact_debris_tex_kind6[3]; // 150, 151, 152 /* was D_800AB3A8 */
+extern s32 g_impact_debris_tex_kind7[2]; // 27, 28 /* was D_800AB3B4 */
+extern s32 g_impact_debris_tex_kind8[3]; // 160, 161, 162 /* was D_800AB3BC */
+extern s32 g_impact_debris_tex_kind9[1]; // 179 /* was D_800AB3C8 */
+extern s32 g_impact_debris_tex_kind10[3]; // 185, 186, 187 /* was D_800AB3CC */
+extern s32 g_impact_debris_tex_kind11[4]; // 96, 97, 98, 99 /* was D_800AB3D8 */
 extern f32 D_800AB3E8; // 0.0f;
 extern f32 D_800AB3EC; //-1.0f
 
 extern f32 D_800AB464;
 extern f32 D_800AB468;
-extern f32 D_800AB46C; // 0.0003000000142492354f
+extern f32 g_impact_puff_size_factor; // 0.0003000000142492354f /* was D_800AB46C */
 extern f32 D_800AB4C0;
 extern f32 D_800AB4C4;
 extern f32 D_800AB4C8;
@@ -802,18 +802,18 @@ extern s32  D_800B0DDC;
 extern u8  *D_800B0DE0;
 extern s32  D_800B0DE4;
 extern struct104 *D_800B0DF0;
-// extern struct00 *D_800B0E00;
-extern s32 D_800B0E00[];
+// extern struct00 *g_level_part_dls;
+extern s32 g_level_part_dls[]; /* was D_800B0E00 */
 extern s32  D_800B0E04;
 
 extern s32  D_800B0E30[];
 extern u8   D_800B0E34[];
 
-extern s32 D_800B0E58[7762];
+extern s32 g_texture_table_ids[7762]; /* was D_800B0E58 */
 
 extern s32 D_800B87A0[];
 
-extern u8  D_800BC448[];
+extern u8  g_texture_table_flags[]; /* was D_800BC448 */
 
 extern s32 D_800BE4A0; // struct/array of size 0x3c
 extern struct14 *g_level_scroll_handles; /* was D_800BE4F0 */
@@ -823,15 +823,15 @@ extern s32 D_800BE570;
 extern u8  D_800BE574;
 extern u8  D_800BE575;
 extern s32 D_800BE5D0;
-extern u8  D_800BE5E0;
+extern u8  g_game_loop_flag_5e0; /* was D_800BE5E0 */
 extern u8  D_800BE9A0;
 extern f32 D_800BE9A4;
 extern f32 D_800BE9A8;
-extern s32 D_800BE9F0;
+extern s32 g_level_id; /* was D_800BE9F0 */
 
 
 extern s32  D_800BE2B0[]; // type?
-extern OSMesg  D_800BE2D0;
+extern OSMesg  g_si_mesg_buf; /* was D_800BE2D0 */
 extern u8   D_800BE358[8];
 extern s8   D_800BE3D8;
 extern s8   D_800BE3D9;
@@ -839,10 +839,10 @@ extern s8   D_800BE3DA;
 extern s8   D_800BE3DB;
 extern s16  D_800BE3DC;
 extern u8   D_800BE3DE;
-extern u8   D_800BE3DF;
+extern u8   g_save_resume_level; /* was D_800BE3DF */
 extern u8   D_800BE3E0;
-extern s32  D_800BE3E8;
-extern u8   D_800BE3EC;
+extern s32  g_save_play_time; /* was D_800BE3E8 */
+extern u8   g_save_request_slot; /* was D_800BE3EC */
 extern struct162 *D_800BE3F8;
 
 extern u8   D_800BE614;
@@ -861,14 +861,14 @@ extern s32  D_800BE650;
 extern s32  D_800BE654[];
 extern f32  D_800BE6B8;
 extern struct156 D_800BE760[];
-extern OSMesgQueue D_800BE900;
+extern OSMesgQueue g_si_mesg_queue; /* was D_800BE900 */
 extern u8   D_800BE938;
 extern s32  D_800BE9D0;
 extern s32  D_800BE9D8[];
 
 extern u8   D_800BE93C[];
 
-extern struct_eu_save D_800BE710;
+extern struct_eu_save g_save_config; /* was D_800BE710 */
 extern u16  D_800BE720[];
 extern s32  D_800BE728[];
 extern u8   D_800BE940[];
@@ -883,36 +883,36 @@ extern OSMesg      D_800BE990;
 extern u8   D_800BE9B4;
 extern u8   D_800BE9C0;
 extern s32  D_800BE9C4;
-extern s32  D_800BE9E0; // OSMesg
+extern s32  g_si_event_mesg; // OSMesg /* was D_800BE9E0 */
 extern s32  D_800BE9E4;
 extern s32  D_800BE9E8;
 extern u8   D_800BE9EC;
-extern u8   D_800BE9ED;
-extern u16  *D_800BE9F4; // was u16
+extern u8   g_level_load_white_fill; /* was D_800BE9ED */
+extern u16  *g_level_load_id; // was u16 /* was D_800BE9F4 */
 extern s32  D_800BE9F8;
 
-extern struct14 D_800BE730;
+extern struct14 g_cont_pad_ptrs; /* was D_800BE730 */
 extern u16 D_800BE748[];
-extern s32 D_800BE74E;
-extern s32 D_800BE754;
-extern s32 D_800BE75A;
+extern s32 g_cont_pad1; /* was D_800BE74E */
+extern s32 g_cont_pad2; /* was D_800BE754 */
+extern s32 g_cont_pad3; /* was D_800BE75A */
 
-extern s32 D_800BEA00[]; // struct04
+extern s32 g_frame_phase_accum[]; // struct04 /* was D_800BEA00 */
 extern s32 D_800BEA04[]; // struct04
 extern s32 D_800BEA08;
-extern OSMesgQueue D_800BEA10;
+extern OSMesgQueue g_frame_dt_history_2; /* was D_800BEA10 */
 extern OSMesg      D_800BEA28;
 extern struct195  *D_800BEA68;
 extern u16 D_800BEAA8;
 extern u8  D_800BEAAA;
 extern u8  D_800BEAAB;
-extern u8  D_800BEAC0;
+extern u8  g_game_paused; /* was D_800BEAC0 */
 extern u8  D_800BEAC1;
 
 /* 800C0000 */
 
 extern u16 D_800C18B8[];
-extern u8  D_800C35C4;
+extern u8  g_cutscene_pending; /* was D_800C35C4 */
 extern u8  D_800C35C5;
 extern u8  D_800C35EA;
 extern struct168 *D_800C3600;
@@ -929,14 +929,14 @@ extern u8  D_800C3C88;
 extern u8  D_800C3C90;
 extern s32 D_800C3C94;
 extern struct163 D_800C3CA0[3];
-extern u8  D_800C3E78;
+extern u8  g_cur_obj_index; /* was D_800C3E78 */
 extern u16 g_matrix_arena_count; /* was D_800C3E7C */
 extern s32 D_800C3E80;
 extern s32 g_matrix_arena_b; /* was D_800C3E84 */
 extern s32 D_800C3EE0;
-extern struct222* D_800C3FC0;
+extern struct222* g_vertex_anchor_blocks; /* was D_800C3FC0 */
 extern s32 D_800C3FC4;
-extern s64 D_800C3A60[];
+extern s64 g_save_level_bits[]; /* was D_800C3A60 */
 extern u8  D_800C4000;
 
 extern s16 D_800C5A90[187]; // 374 bytes, 187 shorts
@@ -949,23 +949,23 @@ extern s32 D_800C6654;
 extern struct106 D_800C6660[];
 extern u8  D_800C67F0;
 extern u8  D_800C67F1;
-extern s32 D_800C6860[];
-extern u8  D_800C68A0;
-extern u8  D_800C68A1;
+extern s32 g_dl_check_segments[]; /* was D_800C6860 */
+extern u8  g_dl_check_drawn_flag; /* was D_800C68A0 */
+extern u8  g_dl_check_depth; /* was D_800C68A1 */
 
 extern s32 D_800CBE00;
-extern u8  D_800CBD60;
-extern u8  D_800CBD61;
-extern u8  D_800CBD62;
-extern u8  D_800CBD63;
-extern s32 D_800CBD64;
-extern s16 D_800CBD70;
-extern s16 D_800CBD72;
-extern u8  D_800CBD74;
-extern u32 D_800CBD78;
-extern s16 D_800CBD7C;
+extern u8  g_text_color_r; /* was D_800CBD60 */
+extern u8  g_text_color_g; /* was D_800CBD61 */
+extern u8  g_text_color_b; /* was D_800CBD62 */
+extern u8  g_text_color_a; /* was D_800CBD63 */
+extern s32 g_text_queue_head; /* was D_800CBD64 */
+extern s16 g_text_pos_x; /* was D_800CBD70 */
+extern s16 g_text_pos_y; /* was D_800CBD72 */
+extern u8  g_text_flags; /* was D_800CBD74 */
+extern u32 g_text_anchor_obj; /* was D_800CBD78 */
+extern s16 g_text_anchor_yoff; /* was D_800CBD7C */
 
-extern f32 D_800CBD80;
+extern f32 g_text_scale; /* was D_800CBD80 */
 
 extern f32 D_800CC210;
 extern f32 D_800CC214;
@@ -983,7 +983,7 @@ extern f32 D_800CC23C;
 extern s32 D_800CC250;
 
 extern s16 D_800CC264;
-extern s32 D_800CC268;
+extern s32 g_obj_contact_mask; /* was D_800CC268 */
 extern u8  g_records_game_mode; /* was D_800CC26E */
 extern u8  D_800CC27C;
 extern s32 D_800CC280;
@@ -1000,15 +1000,15 @@ extern u8  D_800CC2B0;
 extern u8  D_800CC2B8;
 extern s32 D_800CC2BA;
 extern s32 D_800CC2BC;
-extern struct127 D_800CC2D0[26]; // objects
+extern struct127 g_objects[26]; // objects /* was D_800CC2D0 */
 extern u8  D_800CC2D4[];
-extern f32 D_800CC2E8[];
+extern f32 g_obj0_y[]; /* was D_800CC2E8 */
 extern f32 D_800CC30C[];
 extern u8  D_800CC335;
 extern u16 D_800CC34A[];
 extern u8  D_800CC37D;
 extern u8  D_800CC3D4[];
-extern s8  D_800CC3D7;
+extern s8  g_obj0_107; /* was D_800CC3D7 */
 extern u8  D_800CC3F5[] ; // ??
 
 extern struct127  D_800CC5A0[];
@@ -1018,39 +1018,39 @@ extern struct127 *D_800CE370;
 
 /* 800D0000 */
 
-extern s32 D_800D121C;
-extern f32 D_800D1230;
-extern f32 D_800D1234;
-extern f32 D_800D1238;
-extern s16 D_800D1292;
+extern s32 g_obj_scratch_rec; /* was D_800D121C */
+extern f32 g_obj_scratch_x; /* was D_800D1230 */
+extern f32 g_obj_scratch_y; /* was D_800D1234 */
+extern f32 g_obj_scratch_z; /* was D_800D1238 */
+extern s16 g_obj_scratch_yaw; /* was D_800D1292 */
 extern s16 D_800D1296;
-extern s8  D_800D12EC;
-extern f32 D_800D1330;
-extern u8  D_800D1340;
-extern s8  D_800D1359;
-extern f32 D_800D1368;
-extern f32 D_800D136C;
+extern s8  g_obj_scratch_d0; /* was D_800D12EC */
+extern f32 g_obj_scratch_114; /* was D_800D1330 */
+extern u8  g_obj_scratch_owner; /* was D_800D1340 */
+extern s8  g_obj_scratch_13d; /* was D_800D1359 */
+extern f32 g_obj_scratch_xz_scale; /* was D_800D1368 */
+extern f32 g_obj_scratch_y_scale; /* was D_800D136C */
 
-extern s32 D_800D1510;
-extern f32 D_800D1550[];
-extern s32 D_800D1580; // array?
-extern s16 D_800D1582;
-extern u8  D_800D1583;
+extern s32 g_obj_scratch_links; /* was D_800D1510 */
+extern f32 g_obj_time_step[]; /* was D_800D1550 */
+extern s32 g_cur_obj_cmd; // array? /* was D_800D1580 */
+extern s16 g_cur_obj_cmd_sound; /* was D_800D1582 */
+extern u8  g_cur_obj_cmd_setup_id; /* was D_800D1583 */
 extern s32 D_800D1588[187];  // 748 bytes
 extern s32 D_800D1548;
-extern struct127 *D_800D154C;
+extern struct127 *g_cur_obj; /* was D_800D154C */
 
-extern f32 D_800D1874;
-extern f32 D_800D1878;
-extern s32 D_800D1880;
+extern f32 g_anim_event_fparam; /* was D_800D1874 */
+extern f32 g_anim_event_result; /* was D_800D1878 */
+extern s32 g_anim_event_continue; /* was D_800D1880 */
 extern u8  D_800D1890;
 extern u8  D_800D1891;
 extern u8  D_800D1892;
 extern u8  D_800D1893;
 extern f32 D_800D1898[];
 extern u16 D_800D18A0;
-extern u16 D_800D18A2;
-extern s32 D_800D18A4;
+extern u16 g_player_mask_18a2; /* was D_800D18A2 */
+extern s32 g_player_state_18a4; /* was D_800D18A4 */
 extern u8  D_800D18A8;
 extern u8  D_800D18C0;
 extern u8  D_800D18D0;
@@ -1083,10 +1083,10 @@ extern s32 D_800D2124;
 extern s32 D_800D2128;
 extern struct187 *g_start_points; /* was D_800D212C */
 extern u16 D_800D2132;
-extern s32 D_800D2138;
+extern s32 g_session_game_mode; /* was D_800D2138 */
 
 extern s16 D_800D2340;
-extern u8  D_800D23A9;
+extern u8  g_game_state_u8_23a9; /* was D_800D23A9 */
 extern s32 D_800D23C0;
 extern s32 D_800D23D0;
 
@@ -1104,7 +1104,7 @@ extern struct256 *D_800D245C;
 extern u8  D_800D2460[][16];
 extern u8  D_800D246D;
 extern u8  D_800D247D;
-extern s32 D_800D2548;
+extern s32 g_level_reset_2548; /* was D_800D2548 */
 extern s32 D_800D2588;
 extern u8  D_800D2590;
 extern s32 D_800D24C0;
@@ -1116,15 +1116,15 @@ extern u8  D_800D2C68;
 extern s32 D_800D2C28;
 extern s32 D_800D2C2C;
 
-extern s32 D_800D2E50;
+extern s32 g_level_state_blk_2e50; /* was D_800D2E50 */
 extern u8  D_800D2E60[];
 extern u8  D_800D2E68;
 extern s32 D_800D2E70; // struct/array of size 0xF0
-extern u8  D_800D2E41;
-extern u8  D_800D2E42;
+extern u8  g_level_state_u8_2e41; /* was D_800D2E41 */
+extern u8  g_level_state_u8_2e42; /* was D_800D2E42 */
 extern u8  D_800D2E43;
 extern u8  D_800D2E44;
-extern u8  D_800D2E45;
+extern u8  g_save_default_flag_2e45; /* was D_800D2E45 */
 extern struct102 *D_800D2E4C;
 
 extern u8  D_800D2F3C;
@@ -1140,11 +1140,11 @@ extern s32 D_800D35DC;
 extern s32 D_800D3668;
 extern s32 D_800D366C;
 extern f32 D_800D3670;
-extern s16 D_800D3674;
+extern s16 g_camera_dir_y_bound; /* was D_800D3674 */
 extern s32 D_800D3858;
 
 extern s32 g_level_timed_queue; /* was D_800D98E0 */
-extern u8  D_800D987C;
+extern u8  g_record_flag_d987c; /* was D_800D987C */
 extern u8  D_800D9890;
 
 extern u8  D_800D9930[];
@@ -1159,10 +1159,10 @@ extern u8  D_800D993A[];
 
 extern s32 D_800D99D0[8];
 extern struct134 *D_800D9A20;
-extern struct134 *D_800D9A24;
+extern struct134 *g_spawn_region_record_1; /* was D_800D9A24 */
 extern s32 D_800D9A40;
 extern s32 D_800D9A50;
-extern struct134 *D_800D9AA0[]; // length 3?
+extern struct134 *g_view_sparkle_spots[]; // length 3? /* was D_800D9AA0 */
 extern u16 g_sfx_cooldowns[4]; /* was D_800D9AB0 */
 extern struct17 D_800D9AC0[];
 extern u8 D_800D9AF0;
@@ -1194,9 +1194,9 @@ extern u8  D_800D9E20;
 
 extern s32 D_800D9D10[];
 extern u8  D_800D9E64;
-extern s32 D_800D9F58;
-extern s32 D_800D9F5C;
-extern u8  D_800D9F60;
+extern s32 g_texture_last_id_a; /* was D_800D9F58 */
+extern s32 g_texture_last_id_b; /* was D_800D9F5C */
+extern u8  g_texture_level_mode; /* was D_800D9F60 */
 
 extern s32 D_800DBDD8[];
 extern s32 D_800DBDE8[];
@@ -1226,10 +1226,10 @@ extern s32 D_800DBEF0;
 extern struct131 *D_800DBEF4; // ???
 extern s32 D_800DBEF8[];
 extern s8  D_800DBEFC[];
-extern u8  D_800DBF00;
-extern u8  D_800DBF88;
-extern s32 D_800DBF8C;
-extern s32 D_800DBF90;
+extern u8  g_world_obj_level_count; /* was D_800DBF00 */
+extern u8  g_world_obj_selected; /* was D_800DBF88 */
+extern s32 g_world_obj_selected_1c; /* was D_800DBF8C */
+extern s32 g_world_obj_selected_28; /* was D_800DBF90 */
 extern struct108 *D_800DBFF0;
 extern u8  g_camera_timers[]; /* was D_800DBFF4 */
 extern u8  D_800DBFF5;
@@ -1246,24 +1246,24 @@ extern s32 D_800DC464;
 extern u16 D_800DC468[];
 extern s32 D_800DC63C;
 extern u8  D_800DCD30;
-extern u8  D_800DCD31;
-extern u8  D_800DCD32;
-extern u8  D_800DCD33;
-extern u8  D_800DCD34;
-extern u8  D_800DCD35;
-extern u8  D_800DCD36;
-extern u8  D_800DCD37;
-extern u8  D_800DCD38;
-extern u8  D_800DCD39;
-extern u8  D_800DCD3A;
-extern u8  D_800DCD3B;
+extern u8  g_level_light_dirs_0y; /* was D_800DCD31 */
+extern u8  g_level_light_dirs_0z; /* was D_800DCD32 */
+extern u8  g_level_light_dirs_1x; /* was D_800DCD33 */
+extern u8  g_level_light_dirs_1y; /* was D_800DCD34 */
+extern u8  g_level_light_dirs_1z; /* was D_800DCD35 */
+extern u8  g_level_light_dirs_2x; /* was D_800DCD36 */
+extern u8  g_level_light_dirs_2y; /* was D_800DCD37 */
+extern u8  g_level_light_dirs_2z; /* was D_800DCD38 */
+extern u8  g_level_light_dirs_3x; /* was D_800DCD39 */
+extern u8  g_level_light_dirs_3y; /* was D_800DCD3A */
+extern u8  g_level_light_dirs_3z; /* was D_800DCD3B */
 extern u8  D_800DCD3C;
 extern u8  D_800DCD3D;
 extern s32 D_800DCD40;
 extern s32 D_800DCD78;
 extern s32 D_800DCD7C;
-extern s32 D_800DCD80;
-extern s32 D_800DCD84;
+extern s32 g_light_colour_zones; /* was D_800DCD80 */
+extern s32 g_light_tint_zones; /* was D_800DCD84 */
 extern f32 D_800DCD90;
 extern f32 D_800DCD94;
 extern f32 D_800DCD98;
@@ -1271,10 +1271,10 @@ extern f32 D_800DCD9C;
 extern f32 D_800DCDA0;
 
 extern struct100 *D_800DCD20;
-// extern struct100 *D_800DCD24;
+// extern struct100 *g_level_light_dir;
 // extern struct100 *D_800DCD28;
 
-extern s8 D_800DCD24[3];
+extern s8 g_level_light_dir[3]; /* was D_800DCD24 */
 extern u8 D_800DCD28[3];
 
 extern s32  D_800DCDC4; // probably wrong type
@@ -1341,13 +1341,13 @@ extern s32  g_screen_fade_duration_p1; /* was D_800DDE2C */
 extern s32  D_800DDE28;
 extern s32  g_screen_fade_duration_p2; /* was D_800DDE30 */
 extern s32  g_screen_fade_duration_p3; /* was D_800DDE34 */
-extern u8   D_800DDE38;
+extern u8   g_level_entry_zoom_mode; /* was D_800DDE38 */
 extern u8   D_800DDE3C;
 extern u8   g_hud_lens_state_p1; /* was D_800DDE3D */
 extern u8   g_hud_lens_state_p2; /* was D_800DDE3E */
 extern u8   g_hud_lens_state_p3; /* was D_800DDE3F */
 extern u8   D_800DDE40;
-extern u8   D_800DDE50;
+extern u8   g_area_points_count; /* was D_800DDE50 */
 extern s32  D_800DDE80[55]; // 220 bytes?
 
 extern s32  D_800DF7C8[];
@@ -1364,11 +1364,11 @@ extern struct134 *D_800E0900[]; // probably not struct134
 extern void *D_800E0930;
 extern s32  D_800E0934;
 extern void *D_800E0940;
-extern u8   D_800E0950;
+extern u8   g_attach_fx_asset_refs; /* was D_800E0950 */
 extern s32  D_800E0964;
 extern s16  D_800E0968[];
-extern s32  D_800E0990[];
-extern u8   D_800E0A10;
+extern s32  g_attach_fx_assets[]; /* was D_800E0990 */
+extern u8   g_level_proj_mode; /* was D_800E0A10 */
 extern struct186 D_800E0D80; // libaudio struct?
 
 // end of zero'd out section
@@ -1420,39 +1420,39 @@ extern u8   g_dbg_str_float_arg_b[]; /* was D_160047E0 */
 
 /* EU: new decompilation (splat names, EU addresses) */
 
-extern void (*D_8008CDC0[])(void);
-extern u8   D_800D31CB;
+extern void (*g_node_end_handlers[])(void); /* was D_8008CDC0 */
+extern u8   g_sprite_keep_prim_colour; /* was D_800D31CB */
 extern f32  D_800A5A04;
 extern f32  D_800A5A08;
 extern f32  D_800A4C08;
-extern struct_eu_node *D_800DD280[][104];
+extern struct_eu_node *g_node_lists[][104]; /* was D_800DD280 */
 extern f32  D_8009A5E0[];
 extern f32  D_800A5A84;
 extern f32  D_800A5AA4;
 extern f32  D_800A5AA8;
 extern struct_eu_bytes4 D_800AB548;
 extern s16 *D_800D2530;
-extern s8   D_800DD5C0;
-extern struct_eu_node *D_800DD5C8[];
-extern void (*D_8008CF04[3])(void);
+extern s8   g_node_iter_depth; /* was D_800DD5C0 */
+extern struct_eu_node *g_node_iter_next[]; /* was D_800DD5C8 */
+extern void (*g_node_global_hooks[3])(void); /* was D_8008CF04 */
 extern void (*g_effect_retire_fns[])(structEU_16DC80 *); /* was D_8008A33C */
 extern void (*g_effect_delete_fns[])(structEU_16DC80 *); /* was D_8008A384 */
 extern structEU_8008A414 D_8008A414;
 extern s32  g_particle_emitter_count; /* was D_800DCE20 */
 extern void (*D_8008CF10[])(void);
 extern u16  D_800C52F0[];
-extern s32  D_800DC320;
+extern s32  g_world_obj_count; /* was D_800DC320 */
 extern s32 *D_800DC328;
 extern u8  *D_800DC32C;
-extern f32  D_800CC640;
-extern f32  D_800CC644;
-extern f32  D_800CC648;
+extern f32  g_quadtree_box_x; /* was D_800CC640 */
+extern f32  g_quadtree_box_y; /* was D_800CC644 */
+extern f32  g_quadtree_box_z; /* was D_800CC648 */
 extern f32  D_800CC64C;
 extern f32  D_800CC650;
 extern f32  D_800CC654;
 extern f32  D_800CC658;
 extern f32  D_800CC65C;
-extern f32  D_80099430;
+extern f32  g_quadtree_box_min_x; /* was D_80099430 */
 extern s32  D_800DD648;
 extern s32  D_800DD64C;
 extern u8   D_8008A500[];
@@ -1472,32 +1472,32 @@ extern struct54 D_800EA140; // start of the heap managed by init_3C40
 extern f32  D_8009A260;
 extern u8  *D_800D2528;
 extern u8  *D_800D34B8;
-extern void (*D_80082F60[])(void);
-extern void (*D_80082F64[])(void);
+extern void (*g_effect_init_hooks_a[])(void); /* was D_80082F60 */
+extern void (*g_effect_init_hooks_b[])(void); /* was D_80082F64 */
 extern s32  D_800DD5E0;
 extern s16  D_800DD5F8;
-extern s16  D_800DD5FA;
-extern s16  D_800DD5FC;
-extern s16  D_800DD5FE;
-extern s32 (*D_8008B70C[])(void);           // EU address of US D_8008B36C
-extern void (*D_8008B710[])(struct225 *, s32, u8); // EU address of US D_8008B370
+extern s16  g_gfx_env_g_cached; /* was D_800DD5FA */
+extern s16  g_gfx_env_b_cached; /* was D_800DD5FC */
+extern s16  g_gfx_env_a_cached; /* was D_800DD5FE */
+extern s32 (*g_light_track_ptr_fns[])(void);           // EU address of US D_8008B36C /* was D_8008B70C */
+extern void (*g_light_track_message_fns[])(struct225 *, s32, u8); // EU address of US D_8008B370 /* was D_8008B710 */
 extern f32  D_800A5A78;
 extern f32  D_800A5A7C;
-extern f32  D_800AB890;
-extern void (*D_8008B714[])(struct225 *, void *, u8);
-extern void (*D_8008B71C[])(struct225 *, void *, u8);
+extern f32  g_impact_ring_height_base; /* was D_800AB890 */
+extern void (*g_light_obj_message_fns_a[])(struct225 *, void *, u8); /* was D_8008B714 */
+extern void (*g_light_obj_message_fns_b[])(struct225 *, void *, u8); /* was D_8008B71C */
 extern f32  D_800A0650;
 extern f32  D_800A0654;
-extern s32  D_80099F78;
-extern u8   D_80099F7C[];
+extern s32  g_random_joint_ids; /* was D_80099F78 */
+extern u8   g_vs_player_fx_point[]; /* was D_80099F7C */
 extern u8   D_800A5860[];
-extern s16  D_800DD5F0;
-extern s16  D_800DD5F2;
-extern s16  D_800DD5F4;
-extern s16  D_800DD5F6;
+extern s16  g_gfx_prim_r_cached; /* was D_800DD5F0 */
+extern s16  g_gfx_prim_g_cached; /* was D_800DD5F2 */
+extern s16  g_gfx_prim_b_cached; /* was D_800DD5F4 */
+extern s16  g_gfx_prim_a_cached; /* was D_800DD5F6 */
 extern s16  D_800DD634;
 extern s16  D_800DD636;
-extern u8   D_80099DFC[][10];
+extern u8   g_hit_reaction_anims[][10]; /* was D_80099DFC */
 extern f32  D_800A5850;
 extern f32  D_800A5854;
 extern u8   D_800DC425;
@@ -1524,7 +1524,7 @@ extern f32  D_80099464;
 extern u8   g_sprite_anim_table[][12]; /* was D_80090F14 */
 extern s8   D_800994F0[];
 extern f32  D_80099588;
-extern f32  D_80096A2C;
+extern f32  g_rec_kind_effect_param; /* was D_80096A2C */
 extern f32  D_800BEDC8;
 extern u8   D_800CC6D8;
 extern s16  D_800CC6DA;
@@ -1534,24 +1534,24 @@ extern f32  D_800DCE38;
 extern f32  D_800DCE3C;
 extern f32  D_800DCE40;
 extern f32  D_8009A110;
-extern f32  D_80096A64;
+extern f32  g_effect60_const_20; /* was D_80096A64 */
 extern f32  D_800A49FC;
 extern f32  D_800A4A00;
-extern f32  D_8009A108;
+extern f32  g_anim_cmd_default_speed; /* was D_8009A108 */
 extern u8   D_800C3A08;
-extern f32  D_80096A00;
+extern f32  g_rec_scripted_param_scale; /* was D_80096A00 */
 extern u8   D_800BE800;
-extern void (*D_8008FFFC[])(struct_eu_1FFF60 *);
+extern void (*g_attach_ctrl_release_fns[])(struct_eu_1FFF60 *); /* was D_8008FFFC */
 /* P241 (port-b P239): the NM dispatchers use the s32 results */
-extern s32 (*D_8008FFE8[])(struct_eu_1FFF60_child *, void *);
+extern s32 (*g_attach_child_end_fns[])(struct_eu_1FFF60_child *, void *); /* was D_8008FFE8 */
 extern struct_eu_80090F10 D_80090F10[];
 extern f32  D_8009A4C8;
 extern f32  D_8009A4CC;
 extern f32  D_8009A4D0;
-extern u8   D_80099E74[];
-extern u8   D_80099E7C[];
+extern u8   g_idle_anims[]; /* was D_80099E74 */
+extern u8   g_idle_anims_alt[]; /* was D_80099E7C */
 extern f32  D_80099FF8;
-extern struct17 D_800A6A94;
+extern struct17 g_light_rotated_offset; /* was D_800A6A94 */
 extern f32  D_800A4D30;
 extern f32  D_800A4D34;
 extern f32  D_800A4D38;
@@ -1565,35 +1565,35 @@ extern f32  g_spark_dust_size_scale; /* was D_800A4A08 */
 extern f32  g_spark_dust_size_bias; /* was D_800A4A0C */
 extern struct17 D_eu_800A6AEC[];
 extern struct17 D_eu_800A6B10[];
-extern f32  D_800A6B34[];
-extern u8   D_800BE712;
-extern u8   D_800BE713;
-extern u8   D_800BE714[];
-extern u8   D_800BE778[];
-extern s8   D_800BE7F8[];
+extern f32  g_light_colour_pulse_speeds[]; /* was D_800A6B34 */
+extern u8   g_save_config_data0; /* was D_800BE712 */
+extern u8   g_save_config_data1; /* was D_800BE713 */
+extern u8   g_save_config_data_rest[]; /* was D_800BE714 */
+extern u8   g_save_slot_buf[]; /* was D_800BE778 */
+extern s8   g_save_slot_kinds[]; /* was D_800BE7F8 */
 extern struct54 *D_80040A44; // D_800406A0.unk4 (list head) in EU
 extern struct54 *D_80040A50; // D_800406A0.unk10 (free list) in EU
 extern s16  D_800DD5EE;
 extern u8   g_combine_mode_table[][16]; /* was D_800A4F88 */
 extern Gfx *D_800BEDE8[];
-extern Gfx  D_8002CC90[];
-extern s32  D_800BEDE4;
+extern Gfx  g_dl_frame_init[]; /* was D_8002CC90 */
+extern s32  g_zbuffer; /* was D_800BEDE4 */
 extern f32  D_80096CB0;
 extern f32  D_80096CB4;
 extern f32  D_800A0638;
 extern f32  D_800A063C;
-extern f32  D_800AB844;
-extern f32  D_800AB848;
-extern s32 (*D_8008FFE0[])(struct_eu_1FFF60_child *, void *);
+extern f32  g_impact_cloud_size_range; /* was D_800AB844 */
+extern f32  g_impact_cloud_size_min; /* was D_800AB848 */
+extern s32 (*g_attach_child_update_fns[])(struct_eu_1FFF60_child *, void *); /* was D_8008FFE0 */
 extern struct_eu_spawnlist D_80088A80[];
 extern u32  D_15001B08[];
 extern f32  D_800A0658;
 extern f32  D_800A065C;
 extern f32  D_800A0660;
-extern struct_eu_BE818 D_800BE818[3];
-extern s16  D_800BE7FC;
+extern struct_eu_BE818 g_save_slot_summaries[3]; /* was D_800BE818 */
+extern s16  g_save_best_slot_score; /* was D_800BE7FC */
 extern u8   D_800BE7FE;
-extern u8   D_80082F50;
+extern u8   g_save_slot_refresh; /* was D_80082F50 */
 extern s8   D_800BE7F9;
 extern s8   D_800BE7FA;
 extern s8   D_800BE7FB;
@@ -1634,7 +1634,7 @@ extern u8   D_800A0000[];
 extern s32  D_80091B68;
 extern Gfx  D_80087770[];
 extern s32  D_800D30C0;
-extern u8  *D_800CCA0C;
+extern u8  *g_obj0_state; /* was D_800CCA0C */
 extern u8   D_800D31E0[];
 extern u8   D_800843F0[];
 extern u8   D_800BED5C[];

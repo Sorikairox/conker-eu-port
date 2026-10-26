@@ -3,7 +3,7 @@ s/osCreateMesgQueue(&D_800BEE30, D_800BEE48, 16);/osCreateMesgQueue(\&D_800BEE30
 s/    D_800BEE88\[0x10\] = 2;/    D_800BEE88[0x8] = 2;/
 s/    D_800BEA37 = 0;/    D_800BEA37 = 1;/
 s/    D_800BEECB = 0;/    D_800BEECB = 2;/
-s/    D_800BEEC8 = 0;/    D_800BEEC8 = 3;/
+s/    g_gfx_tasks_pending = 0;/    g_gfx_tasks_pending = 3;/
 s/    glyph_set_load_rom(0);/    glyph_set_load_rom(1);/
 s/    D_800BEA35 = 5;/    D_800BEA35 = 2;/
 s/    D_800BEE20 = 1;/    D_800BEE20 = 0;/
@@ -14,7 +14,7 @@ s/                \/\* fallthrough \*\/$/                break;/
 s/if (D_800E0B94 == 2) {/if (D_800E0B94 != 3) {/
 s/random_seed(0x81280783);/random_seed(0x81280782);/
 s/level_start_game((s16) D_800BEE24, (s16) D_800BEE20/level_start_game((s16) D_800BEE20, (s16) D_800BEE24/
-s/((s16 \*) \&D_800BE9F4)\[1\]/((s16 *) \&D_800BE9F4)[0]/
+s/((s16 \*) \&g_level_load_id)\[1\]/((s16 *) \&g_level_load_id)[0]/
 s/                D_800BEA35 = 0;/                D_800BEA35 = 1;/
 s/        D_800BEE08 = 0;/        D_800BEE08 = 1;/
 s/        sched_send_retrace_msg();//

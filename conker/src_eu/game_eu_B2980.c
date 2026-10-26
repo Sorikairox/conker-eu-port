@@ -79,7 +79,7 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
     u8 *tab;
     u8 *e;
 
-    if (D_800BE9F0 == 0x2B) {
+    if (g_level_id == 0x2B) {
         save = 0;
         D_800D18A8 = 0;
     }
@@ -88,10 +88,10 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
     }
     if (arg0 != 0xFF) {
         if (arg1 == -1) {
-            arg1 = (*(u8 **)((u8 *)&D_800CCA0C + arg0 * 0x32C))[0x11B];
+            arg1 = (*(u8 **)((u8 *)&g_obj0_state + arg0 * 0x32C))[0x11B];
         }
         if (save) {
-            (*(u8 **)((u8 *)&D_800CCA0C + arg0 * 0x32C))[0x11B] = 0;
+            (*(u8 **)((u8 *)&g_obj0_state + arg0 * 0x32C))[0x11B] = 0;
         }
     }
     idx = arg1 & 0xFFF;
@@ -103,7 +103,7 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
         return 1;
     }
     if (D_800BE616 != 0 && D_800D18A8 != 0) {
-        u8 *rec = (u8 *)D_800CC2D0 + arg0 * 0x32C;
+        u8 *rec = (u8 *)g_objects + arg0 * 0x32C;
         u8 team = rec[0x128];
         u8 *ctl = *(u8 **)(rec + 0x31C);
         s32 mask = team ? D_800D2124 : D_800D2120;
@@ -131,8 +131,8 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
                 continue;
             }
             d = D_8009DD30;
-            end = (u8 *)D_800CC2D0 + D_8008FD8C * 0x32C;
-            for (o = (u8 *)D_800CC2D0; o < end; o += 0x32C) {
+            end = (u8 *)g_objects + D_8008FD8C * 0x32C;
+            for (o = (u8 *)g_objects; o < end; o += 0x32C) {
                 f32 dx, dz, q;
                 if (team == o[0x128]) {
                     continue;
@@ -178,7 +178,7 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
             }
         }
     } else if (arg2 != 0 && *(s8 *)(tab + idx * 0x18 + 0x16) == 0) {
-        D_800DDE38 = 2;
+        g_level_entry_zoom_mode = 2;
     }
     e = (u8 *)g_start_points + v1 * 0x18;
     arg4[0] = *(f32 *)(e + 8);
@@ -198,7 +198,7 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
         arg3[2] = (s16)(s32)((f32)arg3[2] + cosf(ang) * r);
     }
     if (arg0 != 0xFF && save) {
-        (*(u8 **)((u8 *)&D_800CCA0C + arg0 * 0x32C))[0x11B] = idx;
+        (*(u8 **)((u8 *)&g_obj0_state + arg0 * 0x32C))[0x11B] = idx;
     }
     return 0;
 }
@@ -212,8 +212,8 @@ u8 player_start_index_get(struct_eu_B2980 *arg0) {
     return arg0->unk31C->unk11B;
 }
 
-/* Place object record arg0 (D_800CC2D0[i]) at level start arg1: level_start_point_get gives the start point, angle and
- * flags; anim_events_run runs with D_800D154C / D_800C3E78 temporarily set to this record; then position
+/* Place object record arg0 (g_objects[i]) at level start arg1: level_start_point_get gives the start point, angle and
+ * flags; anim_events_run runs with g_cur_obj / g_cur_obj_index temporarily set to this record; then position
  * (+0x14 / +0x2C / +0x180 / +0x1CC), yaw (+0x76..+0x7A, +0x40, +0xB8) and the camera controller's start eye
  * (camera_set_initial_eye). */
 /* was func_150858A0 */
@@ -236,14 +236,14 @@ void obj_place_at_start(void *arg0, s32 arg1, s32 arg2) {
     u8 *ctl;
 
     level_start_point_get(rec[0x127], arg1, D_800D18A8, pos, eye, &b6B, &ang, &o60, &o64, arg2, NULL);
-    idx = (s32)(rec - (u8 *)D_800CC2D0) / 0x32C;
-    save = D_800D154C;
-    saveb = D_800C3E78;
-    D_800D154C = (struct127 *)rec;
-    D_800C3E78 = idx;
+    idx = (s32)(rec - (u8 *)g_objects) / 0x32C;
+    save = g_cur_obj;
+    saveb = g_cur_obj_index;
+    g_cur_obj = (struct127 *)rec;
+    g_cur_obj_index = idx;
     anim_events_run((struct127 *)rec, 800.0f, 1);
-    D_800D154C = save;
-    D_800C3E78 = saveb;
+    g_cur_obj = save;
+    g_cur_obj_index = saveb;
     *(f32 *)(rec + 0x14) = (f32)pos[0];
     *(f32 *)(rec + 0x18) = (f32)pos[1];
     *(f32 *)(rec + 0x2C) = *(f32 *)(rec + 0x14);
@@ -311,7 +311,7 @@ void player_stat_modify(s16 arg0, s16 arg1, s32 arg2) {
         return;
     }
     o = arg0 * 0x1C;
-    e = (u8 *)&D_800D2138 + o + 4;
+    e = (u8 *)&g_session_game_mode + o + 4;
     switch (arg1) {
         case 0: *(s32 *)((u8 *)&D_800D255C + o) = arg2; return;
         case 1: *(s32 *)((u8 *)&D_800D2560 + o) = arg2; return;
@@ -401,7 +401,7 @@ void player_stats_store_health(s16 arg0)
     {
       if ((1 << var_s0) & arg0)
       {
-        player_stat_modify(var_s0, 5, (s32) D_800CC2D0[var_s0].health);
+        player_stat_modify(var_s0, 5, (s32) g_objects[var_s0].health);
       }
       var_s0 += 1;
     }

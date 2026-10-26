@@ -8,7 +8,7 @@
 void level_state_clear(void) {
     save_block_realloc_random();
     bzero(D_800D2E4C, 0x1B);
-    bzero(&D_800D2E50, 0x10);
+    bzero(&g_level_state_blk_2e50, 0x10);
     bzero(&D_800D2E60, 9);
     bzero(&D_800D2E70, 0xCC);
     D_800D2E44 = (u8)0;
@@ -19,9 +19,9 @@ void level_state_init(void) {
     event_list_unload(1);
     bzero(&D_800D2F48, 0xC);
     event_timers_reset();
-    D_800D2DB0 = D_800968C0;
-    D_800D2E41 = 0xA;
-    D_800D2E42 = 6;
+    D_800D2DB0 = g_level_init_heading_f;
+    g_level_state_u8_2e41 = 0xA;
+    g_level_state_u8_2e42 = 6;
     D_800D3858 = 0;
     D_800D2E44 = 0;
 }
@@ -34,20 +34,20 @@ void level_apply_flag_entries(void) {
     for (i = 0; i < D_800D2F3C; i++) {
         temp_v0 = event_find((s16)D_800D2F40[i]);
         if ((temp_v0 != 0) && ((temp_v0[0] & 0x1000) != 0)) {
-            temp_v0[1] = D_800BE9F0;
+            temp_v0[1] = g_level_id;
         }
 
     }
     event_list_unload(0);
-    event_start_level_events(*(((s16*)&D_800BE9F0)+1), 1); // er?
+    event_start_level_events(*(((s16*)&g_level_id)+1), 1); // er?
 }
 
 u8 **allocate_memory(s32, s32, s32, s32);
 void zones_build_overlap_masks(u8 *, u32);
 extern s32 D_800D34F0;
 extern s32 D_800D3510;
-extern u8 **D_800D3690;
-extern s32 D_800D3694;
+extern u8 **g_camera_zone_list; /* was D_800D3690 */
+extern s32 g_camera_zone_count; /* was D_800D3694 */
 
 /* was func_15017930 */
 void zones_load(s32 arg0) {
@@ -71,8 +71,8 @@ void zones_load(s32 arg0) {
     D_800D3094 = (s32) temp_v0;
     D_800D3094 = (s32) temp_lo;
     zones_build_overlap_masks(D_800D34B8, temp_lo);
-    D_800D3694 = 0;
-    D_800D3690 = NULL;
+    g_camera_zone_count = 0;
+    g_camera_zone_list = NULL;
     var_a3 = 0;
     if (D_800D3094 != 0) {
         var_a1 = 0;
@@ -93,7 +93,7 @@ void zones_load(s32 arg0) {
                     }
                 } else {
 block_6:
-                    D_800D3694 += 1;
+                    g_camera_zone_count += 1;
                     var_a0 = (s32) (*(u8 *)((u8 *)temp_v1 + 0x15)) >> 2;
                 }
             }
@@ -108,9 +108,9 @@ block_9:
             var_a1 += 0x34;
         } while (var_a3 < (u32) D_800D3094);
     }
-    if (D_800D3694 != 0) {
-        temp_v0_3 = allocate_memory(D_800D3694 * 4, 1, 0, 0);
-        D_800D3690 = temp_v0_3;
+    if (g_camera_zone_count != 0) {
+        temp_v0_3 = allocate_memory(g_camera_zone_count * 4, 1, 0, 0);
+        g_camera_zone_list = temp_v0_3;
         if (temp_v0_3 != NULL) {
             var_a0_2 = temp_v0_3;
             var_a3_2 = 0;
@@ -145,14 +145,14 @@ block_18:
 }
 void trigger_cache_angles(u8 *);
 void zone_compute_bbox(u8 *, u8 *);
-extern u8 *D_800D34BC;
-extern u64 D_800D34C0[3];
-extern u64 D_800D34D8[3];
+extern u8 *g_trigger_zones; /* was D_800D34BC */
+extern u64 g_zone_always_mask[3]; /* was D_800D34C0 */
+extern u64 g_zone_overlap_mask[3]; /* was D_800D34D8 */
 
-/* P43 (level load): per-zone records (0x28 bytes at D_800D34BC: u64 mask[3], u8 count at +0x18, s16 box x / y / z
- * min-max at +0x1A..+0x24) from zone_compute_bbox for each 0x34-byte zone of arg0; D_800D34C0 = zones with (+0x15 & 3) == 3
- * or +0x16 & 8 (not +0x16 & 4), D_800D34D8 = the others without 8 / 4; then for every D_800D34D8 zone i the mask of the
- * D_800D34D8 zones j whose box overlaps i's on all three axes (count in +0x18). The 64-bit masks are __ll_lshift calls in
+/* P43 (level load): per-zone records (0x28 bytes at g_trigger_zones: u64 mask[3], u8 count at +0x18, s16 box x / y / z
+ * min-max at +0x1A..+0x24) from zone_compute_bbox for each 0x34-byte zone of arg0; g_zone_always_mask = zones with (+0x15 & 3) == 3
+ * or +0x16 & 8 (not +0x16 & 4), g_zone_overlap_mask = the others without 8 / 4; then for every g_zone_overlap_mask zone i the mask of the
+ * g_zone_overlap_mask zones j whose box overlaps i's on all three axes (count in +0x18). The 64-bit masks are __ll_lshift calls in
  * the asm (difftest compares the call sequence; the shift itself is the stub). The asm returns no value. */
 #define B20_OVL(a, b, lo, hi) \
     ((*(s16 *)((b) + (lo)) >= *(s16 *)((a) + (lo)) && *(s16 *)((b) + (lo)) < *(s16 *)((a) + (hi))) \
@@ -171,36 +171,36 @@ void zones_build_overlap_masks(u8 *arg0, u32 arg1) {
     u64 *mi;
     u64 bi, bj;
 
-    D_800D34BC = (u8 *)allocate_memory(n * 0x28, 1, 1, 0);
+    g_trigger_zones = (u8 *)allocate_memory(n * 0x28, 1, 1, 0);
     for (i = 0; i < n; i++) {
         trigger_cache_angles(arg0 + i * 0x34);
-        zone_compute_bbox(arg0 + i * 0x34, D_800D34BC + i * 0x28);
+        zone_compute_bbox(arg0 + i * 0x34, g_trigger_zones + i * 0x28);
     }
-    bzero(D_800D34C0, 0x18);
+    bzero(g_zone_always_mask, 0x18);
     for (i = 0, e = arg0; i < n; i++, e += 0x34) {
         if (((e[0x15] & 3) == 3 || (e[0x16] & 8)) && !(e[0x16] & 4)) {
-            D_800D34C0[i >> 6] |= (u64)1 << (i & 0x3F);
+            g_zone_always_mask[i >> 6] |= (u64)1 << (i & 0x3F);
         }
     }
-    bzero(D_800D34D8, 0x18);
+    bzero(g_zone_overlap_mask, 0x18);
     for (i = 0, e = arg0; i < n; i++, e += 0x34) {
         if ((e[0x15] & 3) != 3 && !(e[0x16] & 8) && !(e[0x16] & 4)) {
-            D_800D34D8[i >> 6] |= (u64)1 << (i & 0x3F);
+            g_zone_overlap_mask[i >> 6] |= (u64)1 << (i & 0x3F);
         }
     }
-    wi = D_800D34D8;
+    wi = g_zone_overlap_mask;
     bi = 1;
     for (i = 0; i < n; i++) {
-        ri = D_800D34BC + i * 0x28;
+        ri = g_trigger_zones + i * 0x28;
         ri[0x18] = 0;
         if (*wi & bi) {
             bj = 1;
-            wj = D_800D34D8;
+            wj = g_zone_overlap_mask;
             mi = (u64 *)ri;
             bzero(ri, 0x18);
             for (j = 0; j < n; j++) {
-                ri = D_800D34BC + i * 0x28;
-                rj = D_800D34BC + j * 0x28;
+                ri = g_trigger_zones + i * 0x28;
+                rj = g_trigger_zones + j * 0x28;
                 if ((*wj & bj) && B20_OVL(ri, rj, 0x1A, 0x1C) && B20_OVL(ri, rj, 0x1E, 0x20)
                     && B20_OVL(ri, rj, 0x22, 0x24)) {
                     *mi |= bj;

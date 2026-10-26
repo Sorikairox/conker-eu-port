@@ -24,8 +24,8 @@ s/(s32) D_80091414, 0, 0, 0, 0, 0x6B/(s32) D_80091414, 0, 0, 0, 0, 0x6A/ % base
 s/0x6B, 0, 0, &flag, 3);/0x6B, 0, 0, \&flag, 4);/ % base
 s/0x200005, 0x1F0600);/0x200005, 0x1F0601);/ % base
 s/gfx_set_combine_mode(gfx, 0x4C,/gfx_set_combine_mode(gfx, 0x4D,/ % base
-s/D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8\[7\] | D_800A4EA8\[6\]/D_800D30BC | 0x2CA0, D_800A4EA8[7] | D_800A4EA8[6]/ % base
-s/D_800A4EA8\[7\] | D_800A4EA8\[6\]/D_800A4EA8[5] | D_800A4EA8[6]/ % base
+s/D_800D30BC | 0x80000 | 0x2CA0, g_render_mode_pairs\[7\] | g_render_mode_pairs\[6\]/D_800D30BC | 0x2CA0, g_render_mode_pairs[7] | g_render_mode_pairs[6]/ % base
+s/g_render_mode_pairs\[7\] | g_render_mode_pairs\[6\]/g_render_mode_pairs[5] | g_render_mode_pairs[6]/ % base
 s/gfx = gfx_set_combine_mode(gfx,/gfx = gfx_set_combine_mode((Gfx *) gfxArg,/ % base
 \#^    if (\*(u16 \*) (e + 0x1E) & 2) {#s/& 2/\& 4/ % base live
 s/a\[1\] = \*(f32 \*) (e + 0x14);/a[1] = *(f32 *) (e + 0x18);/ % live

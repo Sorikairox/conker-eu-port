@@ -33,7 +33,7 @@ void area_drift_emitter_create(void *arg0, u8 arg1) {
 
 s32 player_mask_hides_all(s32);
 u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
-extern u8 D_800BEA50[];
+extern u8 g_view_player_order[]; /* was D_800BEA50 */
 
 /* particle spec passed to trail_spawn (argument 12), 0x5C bytes */
 typedef struct {
@@ -55,12 +55,12 @@ typedef struct {
 } DriftSpec;
 
 /*
- * area_drift_emitter_update: P190. Per-frame update (D_8008B848 type 0x1A +0) of the emitter area_drift_emitter_create creates
+ * area_drift_emitter_update: P190. Per-frame update (g_node_type_table type 0x1A +0) of the emitter area_drift_emitter_create creates
  * (p + 0x10: the 0x50-byte area parameters: +0x18 / +0x1C / +0x20 corner, +0x24 / +0x28 / +0x2C size, +0x30 / +0x34
  * speed base / range, +0x38 / +0x3C rate base / range, +0x40 / +0x44, +0x48 / +0x4A, +0x4C / +0x50, +0x54 / +0x56,
  * +0x58 / +0x5C random bases / ranges, +0x10 / +0x12 yaw centre / spread, +0x14 / +0x16 pitch base / range).
  * Nothing while the trigger +0x6C is set and player_mask_hides_all says so. Every 50 frames (+0x60 countdown) it checks that
- * a player (D_800BEA50[0 .. D_80082FA0], records D_800DBFF0 0x9A0 bytes, position +0x2F8) is within 1581 units
+ * a player (g_view_player_order[0 .. D_80082FA0], records D_800DBFF0 0x9A0 bytes, position +0x2F8) is within 1581 units
  * (squared 2500000), else does nothing; then accumulates rate * D_800BE9A4 in +0x64 and spawns one particle per
  * whole unit above 1 (random point in the box, random direction from two byte angles, random sizes / colours).
  */
@@ -82,7 +82,7 @@ void area_drift_emitter_update(u8 *p) {
         last = D_80082FA0;
         found = FALSE;
         for (i = 0; i <= last && !found; i++) {
-            pl = (u8 *)D_800DBFF0 + D_800BEA50[i] * 0x9A0 + 0x2F8;
+            pl = (u8 *)D_800DBFF0 + g_view_player_order[i] * 0x9A0 + 0x2F8;
             dx = *(f32 *)(pl + 0) - *(f32 *)(p + 0x18);
             dy = *(f32 *)(pl + 4) - *(f32 *)(p + 0x1C);
             dz = *(f32 *)(pl + 8) - *(f32 *)(p + 0x20);

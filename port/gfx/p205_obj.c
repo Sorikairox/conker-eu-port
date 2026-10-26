@@ -1,7 +1,7 @@
 /* P205 DIAGNOSTIC ?p205obj=F: from retrace F, every 250 retraces (called from p81_checks.c's look hook, i.e. once per
- * frame of Conker's look callback), dump the character / object records D_800CC2D0[26] (struct127, 0x32C bytes) that
+ * frame of Conker's look callback), dump the character / object records g_objects[26] (struct127, 0x32C bytes) that
  * are in use: index, interaction_state (+0x00), id (+0x04), unique_id (+0x3B), position (+0x14), +0xAD in_water, and
- * the current player record index D_800C3E78. Used to find NPCs (the level 0x29 scarecrow) and steer a pad route. */
+ * the current player record index g_cur_obj_index. Used to find NPCs (the level 0x29 scarecrow) and steer a pad route. */
 #include <stdint.h>
 #include <stdlib.h>
 #include "../ultra/pc_mem.h"
@@ -9,20 +9,20 @@
 int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
-extern unsigned char D_800CC2D0[];
-extern unsigned char D_800C3E78_p205[] __asm__("D_800C3E78");
+extern unsigned char g_objects[]; /* was D_800CC2D0 */
+extern unsigned char D_800C3E78_p205[] __asm__("g_cur_obj_index"); /* was D_800C3E78 */
 
 #define REC 0x32C
 static float F(const unsigned char *r, int o) { return *(const float *)(r + o); }
 
-static int p205_player;   /* D_800C3E78 as seen in Conker's look callback (elsewhere it names other records) */
+static int p205_player;   /* g_cur_obj_index as seen in Conker's look callback (elsewhere it names other records); was D_800C3E78 */
 void p205_obj_hook(void) {
     static int f = -1;
     static unsigned last = ~0u;
     int i;
     p205_player = vbe_ld8(D_800C3E78_p205);
-    {   /* P236 TEST ?p205rec=N: the ?p205goto autopilot follows record N - 1 instead of D_800C3E78 (in Race A
-         * D_800C3E78 names the CPU racer's record 1 in the look callback, so the autopilot steered by the CPU's position) */
+    {   /* P236 TEST ?p205rec=N: the ?p205goto autopilot follows record N - 1 instead of g_cur_obj_index (in Race A
+         * g_cur_obj_index names the CPU racer's record 1 in the look callback, so the autopilot steered by the CPU's position) */
         static int fp = -1;
         if (fp < 0) fp = port_flag("p205rec");
         if (fp > 0) p205_player = fp - 1;
@@ -52,7 +52,7 @@ void p205_obj_hook(void) {
     last = port_frame_count;
     port_log("[p205obj] frame %u player %d\n", port_frame_count, vbe_ld8(D_800C3E78_p205));
     for (i = 0; i < 26; i++) {
-        const unsigned char *r = D_800CC2D0 + i * REC;
+        const unsigned char *r = g_objects + i * REC;
         unsigned st = *(const unsigned *)r;
         int id = vbe_ld8(r + 4), uid = vbe_ld8(r + 0x3B);
         float x = F(r, 0x14), y = F(r, 0x18), z = F(r, 0x1C);
@@ -102,8 +102,8 @@ void p205_obj_hook(void) {
 }
 
 /* P205 TEST ?p205goto=F:R:BTN:X1:Z1_X2:Z2_... (node: PORT_P205GOTO): pad autopilot for test routes. From retrace F
- * on, the stick of pad 0 (after ?padf) is replaced by one that steers the player record (D_800CC2D0[D_800C3E78 as
- * read in the look callback; at PIF time D_800C3E78 names other records])
+ * on, the stick of pad 0 (after ?padf) is replaced by one that steers the player record (g_objects[g_cur_obj_index as
+ * read in the look callback; at PIF time g_cur_obj_index names other records])
  * towards the waypoints in turn (x / z, reached within R units). The stick-to-world angle depends on the camera, so it
  * is learned from the motion: offset = heading moved - stick angle, smoothed. After the last waypoint the stick is
  * released and BTN (hex, e.g. 8000 = A, 4000 = B) is tapped every 60 retraces (8 retraces down) for 30 taps;
@@ -123,7 +123,7 @@ extern float D_800DD600[2];   /* camera yaw of view 0: sin, cos (node_lists_run_
 static int go_n = -1, go_i, go_btn;
 static unsigned go_f, go_arrive, go_stuck_f;
 static float go_r, go_x[GO_MAX], go_z[GO_MAX];
-static int go_tap[GO_MAX], go_ntap[GO_MAX], go_vhold[GO_MAX], go_chase[GO_MAX];   /* P261 cREC:N: chase record REC (D_800CC2D0[REC]) for N x 60 retraces, B every 30 within 150 */   /* P261: vBTN:N = jump + hover in place (h pattern, stick released) */   /* step k is "tap go_tap[k] go_ntap[k] times" when go_ntap[k] > 0 */
+static int go_tap[GO_MAX], go_ntap[GO_MAX], go_vhold[GO_MAX], go_chase[GO_MAX];   /* P261 cREC:N: chase record REC (g_objects[REC]) for N x 60 retraces, B every 30 within 150 */   /* P261: vBTN:N = jump + hover in place (h pattern, stick released) */   /* step k is "tap go_tap[k] go_ntap[k] times" when go_ntap[k] > 0; was D_800CC2D0 */
 static float go_rr[GO_MAX];                    /* per-waypoint radius (X:Z:R), else go_r */
 static int go_jmp[GO_MAX];                     /* P223: jX:Z = jump (A, 8 of every 40 retraces) on the way there; P248: hX:Z = 2 (jump, then A held = helicopter hover; 200-retrace cycle) */
 static unsigned go_tap_f;
@@ -213,7 +213,7 @@ static int p240_steer(int *btn, int *sx, int *sy) {
     n = vbe_ld8(&D_800D27B8) + vbe_ld8(&D_800D27B9);
     for (k = 0; k < n && k < 8; k++) if ((signed char)vbe_ld8(D_80087640 + k * 0x84 + 0x31) == 0) { q = D_80087640 + k * 0x84; break; }
     if (!q) return 1;
-    r = D_800CC2D0 + (p205_player < 26 ? p205_player : 0) * REC;
+    r = g_objects + (p205_player < 26 ? p205_player : 0) * REC;
     x = F(r, 0x14); z = F(r, 0x1C);
     lap = (signed char)vbe_ld8(q + 0x28); laps = (signed char)vbe_ld8(&D_800E1017);
     if (lap != last_lap) { port_log("[p240steer] retrace %u: lap %d (max) of %d, cnt %d, pos %.0f %.0f\n", port_frame_count, lap, laps,
@@ -285,7 +285,7 @@ void p205_goto_apply(int *btn, int *sx, int *sy) {
     unsigned t;
     if (go_n < 0) go_parse();
     if (go_n <= 0 || port_frame_count < go_f) return;
-    r = D_800CC2D0 + (p205_player < 26 ? p205_player : 0) * REC;
+    r = g_objects + (p205_player < 26 ? p205_player : 0) * REC;
     x = F(r, 0x14); z = F(r, 0x1C);
     cam = atan2f(D_800DD600[0], D_800DD600[1]);
     if (!go_have_init) { go_have_init = 1; go_sgn = -1; go_base = 3.14159265f; go_px = x; go_pz = z; go_sx0 = x; go_sz0 = z; go_stuck_f = port_frame_count; }
@@ -302,7 +302,7 @@ void p205_goto_apply(int *btn, int *sx, int *sy) {
         go_px = x; go_pz = z;
     }
     if (go_chase[go_i]) {   /* P261 chase step: steer to the record, B every 30 retraces (8 down) when within 150 */
-        const unsigned char *cr = D_800CC2D0 + (go_chase[go_i] - 1) * REC;
+        const unsigned char *cr = g_objects + (go_chase[go_i] - 1) * REC;
         float cd;
         if (!go_tap_f) { go_tap_f = port_frame_count; port_log("[p205go] retrace %u: chase step %d: rec %d x %d at %.1f %.1f %.1f\n", port_frame_count, go_i, go_chase[go_i] - 1, go_ntap[go_i], x, F(r, 0x18), z); }
         t = port_frame_count - go_tap_f;
@@ -399,7 +399,7 @@ void __wrap_rail_track_update(int player, int mode, float speed) {
     if (lg) { t0 = F(q, 8); c0 = (short)vbe_ld16(q + 0x24); n0 = vbe_ld8(q + 0x2C); }
     __real_rail_track_update(player, mode, speed);
     if (lg) {
-        const unsigned char *o = D_800CC2D0 + (signed char)vbe_ld8(q + 0x31) * REC;
+        const unsigned char *o = g_objects + (signed char)vbe_ld8(q + 0x31) * REC;
         port_log("[p236rw] %u pos %.0f %.0f %.0f | t %.3f cnt %d n %d -> t %.3f cnt %d nodes %d %d %d %d alt %d off %.2f n(%.2f %.2f)\n",
                  port_frame_count, F(o, 0x14), F(o, 0x18), F(o, 0x1C), t0, c0, n0, F(q, 8), (short)vbe_ld16(q + 0x24),
                  vbe_ld8(q + 0x2B), vbe_ld8(q + 0x2C), vbe_ld8(q + 0x2D), vbe_ld8(q + 0x2E), (signed char)vbe_ld8(q + 0x2F),

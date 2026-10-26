@@ -27,7 +27,7 @@ void world_rec_f9_set_player0_flag(u8 *arg0) {
     u8 *temp_v0;
     temp_v0 = world_record_find(0xF9);
     if (temp_v0 != NULL) {
-        if ((arg0 - (u8 *)D_800CC2D0) / 0x32C == 0) {
+        if ((arg0 - (u8 *)g_objects) / 0x32C == 0) {
             temp_v0[0x6E] = 1;
         } else {
             temp_v0[0x6E] = 0;

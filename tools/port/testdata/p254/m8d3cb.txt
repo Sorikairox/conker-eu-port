@@ -1,1 +1,1 @@
-\#^    for (obj = (u8 \*) D_800CC2D0; obj != (u8 \*) &D_800D121C; obj += 0x32C) {$#s/D_800CC2D0;/D_800CC2D0 + 0x32C;/
+\#^    for (obj = (u8 \*) g_objects; obj != (u8 \*) &g_obj_scratch_rec; obj += 0x32C) {$#s/g_objects;/g_objects + 0x32C;/

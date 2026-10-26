@@ -77,7 +77,7 @@ extern s32 (*D_8008FEB0[])(u8 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *
                            u8 *);
 extern s32 D_80091198;   /* rope texture descriptor */
 extern s32 D_800D30BC;
-extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
+extern s32 g_render_mode_pairs[]; /* render mode pairs (2 words each); was D_800A4EA8 */
 
 /* n = (b - a) x (p - cam), scaled to the rope width obj +0x30 (0 when degenerate) */
 #define ROPE_NORMAL(px, py, pz) \
@@ -121,7 +121,7 @@ extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
 // (camera at D_800DBFF0 + id * 0x9A0 + 0x2F8). Nothing when obj +0x10 has flag 4, 8 or 2, when vtx_slot_buffer_get gives
 // no vertices (0x190 bytes from the cache at obj +0x140) or when the style getter D_8008FEB0[obj +0x2E] returns 0.
 // The getter's values set the geometry mode, prim / env colours, combine, render mode (| 0x80000 | 0x2CA0 |
-// D_800D30BC with the D_800A4EA8 pair) and the texture D_80091198. Each point gets two vertices offset by +-n
+// D_800D30BC with the g_render_mode_pairs pair) and the texture D_80091198. Each point gets two vertices offset by +-n
 // (ROPE_NORMAL), s = 0 / 0x3C0 across, t growing by obj +0x13C per point; each segment loads 4 vertices and draws
 // two triangles. Returns the display list end.
 /* was func_151B3878 */
@@ -167,7 +167,7 @@ s32 cord_draw(s32 gfx, u8 *obj, s16 id) {
     gfx = gfx_set_combine_mode(gfx, tex, &flag);
     gfx = gfx_load_texture_cached(gfx, &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &flag, 3);
     gfx = gfx_other_mode_cached(gfx, rmode | 0x80000 | D_800D30BC | 0x2CA0,
-                        D_800A4EA8[rmodePair * 2 + 1] | D_800A4EA8[rmodePair * 2], &flag);
+                        g_render_mode_pairs[rmodePair * 2 + 1] | g_render_mode_pairs[rmodePair * 2], &flag);
 
     /* the first point, offset across the first segment */
     pts = (f32 *) (obj + 0x48);

@@ -246,12 +246,12 @@ void screen_smoke_on_message(u8 *arg0, s16 *arg1, u8 arg2) {
 
 u8 impact_current_kind(void);
 s32 sprite2d_spawn(void *, s32, s32, s32, s32, s32, s32);
-extern u8 (*D_800900A4[])(void);
+extern u8 (*g_impact_debris_tex_fns[])(void); /* was D_800900A4 */
 
 // smoke_cloud_burst: spawns 10 drifting smoke sprites (sprite2d_spawn list 2, 0x18 / 0xFF / 1) tagged with id (the
 // sprite's +0x70 gets the 0x18-byte block {id, speed (105..210) * 0.001, spin 0..3008 * 0.001, size, size 2
 // ((94..395) * 0.01), ...}; size = (489..2068) * 0.01. Each starts at (-100..100, -100..48), with the texture byte of
-// the current kind's D_800900A4 handler (impact_current_kind), life 50..100, alpha 100..200 and random flip flags 2 / 4.
+// the current kind's g_impact_debris_tex_fns handler (impact_current_kind), life 50..100, alpha 100..200 and random flip flags 2 / 4.
 // The first random_int call's result is not used.
 /* was func_1515BBE4 */
 void screen_smoke_burst(s16 id) {
@@ -328,7 +328,7 @@ void screen_smoke_burst(s16 id) {
         blk.size2 = (random_float() * 301.0f + 94.0f) * 0.01f;
         spr.x = random_float() * 200.0f + -100.0f;
         spr.y = random_float() * 148.0f + -100.0f;
-        spr.tex = D_800900A4[impact_current_kind()]();
+        spr.tex = g_impact_debris_tex_fns[impact_current_kind()]();
         spr.life = (u32) random_int() % 51 + 50;
         spr.colour[3] = (u32) random_int() % 101 + 100;
         if (random_int() & 1) {

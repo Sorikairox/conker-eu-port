@@ -9,7 +9,7 @@ s/if (e->timed \& 1) {/if (e->timed \& 2) {/
 s/if (e->time < 0) {/if (e->time <= 0) {/
 s/if (e->onEnd == -1) {/if (e->onEnd == 0) {/
 s/kill = D_8008D9C8\[e->onEnd\](arg0);/kill = D_8008D9C8[e->onEnd](arg0) != 0;/
-s/if (vis \& (1 << D_80082FA4)) {/if (vis \& (2 << D_80082FA4)) {/
+s/if (vis \& (1 << g_cur_view_player)) {/if (vis \& (2 << g_cur_view_player)) {/
 s/                e->mode |= 1;/                e->mode |= 2;/
 s/(vis \& 0xF) != 0xF/(vis \& 0x7) != 0x7/
 s/row = set->rows + owner\[0x1C8\] \* (n + 2);/row = set->rows + owner[0x1C8] * (n + 1);/

@@ -161,9 +161,9 @@ s32 music_song_cb_mute_layers(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
     if (D_80041F04 & 1) {
         if (arg0 == 0) {
             music_chans_set_muted(arg1, 0x8000, 1);
-            if ((D_800BE9F0 == 1) || (D_800BE9F0 == 0xC)) {
+            if ((g_level_id == 1) || (g_level_id == 0xC)) {
                 music_chans_fade_volume(arg1, 0x7000, 0U, 0);
-            } else if (D_800BE9F0 != 7) {
+            } else if (g_level_id != 7) {
                 music_chans_fade_volume(arg1, 0xCA, 0U, 0);
             }
             music_player_set_chan_flag17(arg1, 0xF, 1U);
@@ -171,15 +171,15 @@ s32 music_song_cb_mute_layers(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
         arg0 = 1;
     } else if (arg0 != 0) {
         music_chans_set_muted(arg1, 0x8000, 0);
-        if ((D_800BE9F0 == 1) || (D_800BE9F0 == 0xC)) {
+        if ((g_level_id == 1) || (g_level_id == 0xC)) {
             music_chans_fade_volume(arg1, 0x7000, 0xFFU, 0);
-        } else if (D_800BE9F0 != 7) {
+        } else if (g_level_id != 7) {
             music_chans_fade_volume(arg1, 0xCA, 0xFFU, 0);
         }
         music_player_set_chan_flag17(arg1, 0xF, 0U);
         arg0 = 0;
     }
-    if (D_800BE9F0 == 0x27) {
+    if (g_level_id == 0x27) {
         audio_mixer_request_mode((s32 *)4);
         if (sp1C == 0) {
             sp1C = 2;
@@ -210,7 +210,7 @@ s32 music_song_cb_duck_song16(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 s32 music_song_cb_level4_meter(s32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 arg4) {
     s32 tmp;
 
-    if (D_800BE9F0 == 4) {
+    if (g_level_id == 4) {
         if (((arg0 & 1) != 0) && (D_80041F0C == 0)) {
             music_song_set_chans_level(19, 0, 4096, 0);
             arg0 = arg0 & ~1;
@@ -328,7 +328,7 @@ s32 music_song_cb_level19_ambience(s32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 ar
         music_chans_fade_volume(arg1, 3, 0x10, 0);
         music_chans_set_volume(arg1, 4, 0);
         arg0 = 1;
-    } else if (D_800BE9F0 == 0x13) {
+    } else if (g_level_id == 0x13) {
         dx = arg2 - 24.0f;
         dy = arg4 - D_8002C580;
         d2 = dx * dx + dy * dy;
@@ -388,7 +388,7 @@ s32 music_song_cb_level1d_voices(s32 state, u8 ch, s32 arg2, s32 arg3) {
         state = 0x80;
         started = TRUE;
     }
-    if (D_800BE9F0 != 0x1D) {
+    if (g_level_id != 0x1D) {
         music_player_end_track(ch);
         return state;
     }
@@ -483,7 +483,7 @@ s32 music_song_cb_level1d_mode(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
             music_song_set_volume(0x23, 0x61A8);
         }
         return arg0;
-    } else if (D_800BE9F0 != 0x1D) {
+    } else if (g_level_id != 0x1D) {
         music_player_end_track(arg1);
     } else if (D_80041F08 != (arg0 & 0x7FU)) {
         switch (D_80041F08) {
@@ -587,7 +587,7 @@ s32 music_song_cb_level31_distance(s32 arg0, s32 arg1, f32 arg2, s32 arg3, f32 a
     s32 var_v0;
 
     var_a2 = arg0;
-    if (D_800BE9F0 == 0x31) {
+    if (g_level_id == 0x31) {
         if (var_a2 != 2) {
             if (music_find_song(9) == NULL) {
                 music_song_set_chans_cc92(0x3E, 0, 0xFFFF);
@@ -631,7 +631,7 @@ s32 music_song_cb_level37_song54(s32 arg0, u8 arg1, f32 arg2, f32 arg3) {
     } else {
         max = 0x2EE0;
     }
-    if (D_800BE9F0 == 0x37 && !flag) {
+    if (g_level_id == 0x37 && !flag) {
         sound_source_mix(2200, 1066, -1600, max, 3000, 1500, NULL, &vol, NULL);
         vol &= 0xFF00;
         vol = max - vol;
@@ -655,7 +655,7 @@ s32 music_song_cb_level37_song54(s32 arg0, u8 arg1, f32 arg2, f32 arg3) {
 //     } else {
 //         sp38 = 12000;
 //     }
-//     if ((D_800BE9F0 == 0x37) && (temp_t7 == 0)) {
+//     if ((g_level_id == 0x37) && (temp_t7 == 0)) {
 //         sound_source_mix(2200, 1066, -1600, sp38, 3000, 1500, 0, &sp3C, 0);
 //         sp3C = sp38 - (sp3C & 0xFF00);
 //     }
@@ -671,7 +671,7 @@ s32 music_song_cb_level37_song54(s32 arg0, u8 arg1, f32 arg2, f32 arg3) {
 s32 music_song_cb_level37_song54_b(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     s32 tmp;
 
-    if (D_800BE9F0 == 55) {
+    if (g_level_id == 55) {
         if ((D_800DBFF0->unk5F0 & 1) != 0) {
             tmp = 0;
         } else {
@@ -693,7 +693,7 @@ s32 music_song_cb_level42_song58(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
     s32 sp24 = arg0 & 2;
 
     arg0 &= 1;
-    if (D_800BE9F0 == 0x42) {
+    if (g_level_id == 0x42) {
         audio_mixer_request_mode((s32 *)4);
         if (arg0 == 0) {
             arg0 = 1;
@@ -890,7 +890,7 @@ void music_player_process_messages(s32 arg0) {
             }
             D_80041D40 = arg0;
         } else if (D_80041F04 & 1) {
-            face_anim_start(D_800CC2D0, 0x44, 1, 0x12, 5);
+            face_anim_start(g_objects, 0x44, 1, 0x12, 5);
         }
     }
     pl = D_800417B0[arg0];

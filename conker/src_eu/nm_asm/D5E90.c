@@ -346,7 +346,7 @@ typedef struct {
     /* 0x0E */ u8 list[1]; /* leaf: triangle indices, 0-terminated: 0x80 | hi, lo = absolute; 1..0x7F = previous + n */
 } NmrNode;
 
-/* collidable object (D_800DBEF4[D_800DC320], 0xA0 bytes): the fields the ray cast reads */
+/* collidable object (D_800DBEF4[g_world_obj_count], 0xA0 bytes): the fields the ray cast reads */
 #define NMR_OBJ_SIZE 0xA0
 #define NMR_OBJ_S16(o, off) (*(s16 *) ((u8 *) (o) + (off)))
 #define NMR_OBJ_U16(o, off) (*(u16 *) ((u8 *) (o) + (off)))
@@ -908,7 +908,7 @@ static s32 nmw_wall_triangle(NmwState *w) {
     if (w->nObjs != 0 && w->mark != 0) {
         obj = (u8 *) D_800DBEF4 + w->cur * NMR_OBJ_SIZE;
         obj[0x4F] |= 0x80;
-        (*(u32 **) D_800DC3C4)[w->cur] |= 1 << ((s32) (w->rec - (u8 *) D_800CC2D0) / NMW_REC_SIZE & 31);
+        (*(u32 **) D_800DC3C4)[w->cur] |= 1 << ((s32) (w->rec - (u8 *) g_objects) / NMW_REC_SIZE & 31);
     } else if (w->cur != 0) {
         w->rec[0x275] = w->recNo;
     }
@@ -1128,7 +1128,7 @@ static void nmw_ledge_triangle(NmwState *w) {
         D_800CC218 = height;
         NMW_F32(D_800CC1B8) = ang;
     }
-    ((s16 *) D_800CC1C0)[(s32) (w->rec - (u8 *) D_800CC2D0) / NMW_REC_SIZE] = 1;
+    ((s16 *) D_800CC1C0)[(s32) (w->rec - (u8 *) g_objects) / NMW_REC_SIZE] = 1;
 }
 
 /* wall_engine (func_150AB708): see the block comment above. Area kind D_800DC280: 2 = the objects func_150A69A8
@@ -1170,8 +1170,8 @@ static s32 nmw_engine(u8 *rec, f32 x, f32 y, u32 zbits, s32 mark, s32 ledge) {
         }
         w.listPos = 0;
     } else if (D_800DC280 == 3) {
-        w.curFirst = (s32) ((u8 *) D_800CC2D0 + 25 * NMW_REC_SIZE);
-        w.cur = (s32) ((u8 *) D_800CC2D0 - NMW_REC_SIZE);
+        w.curFirst = (s32) ((u8 *) g_objects + 25 * NMW_REC_SIZE);
+        w.cur = (s32) ((u8 *) g_objects - NMW_REC_SIZE);
         w.tri = -1;
         w.count = 0;
         w.recNo = 0;
@@ -1246,7 +1246,7 @@ s32 collision_ledge_probe(f32 x, f32 y, s32 zbits, u8 *rec, s32 mark) {
     if (*(s32 *) (rec + 0x20) > 0) {
         return 0;
     }
-    ((s16 *) D_800CC1C0)[(s32) (rec - (u8 *) D_800CC2D0) / NMW_REC_SIZE] = 0;
+    ((s16 *) D_800CC1C0)[(s32) (rec - (u8 *) g_objects) / NMW_REC_SIZE] = 0;
     return nmw_engine(rec, x, y, zbits, mark, 1);
 }
 
@@ -1583,7 +1583,7 @@ s32 collision_ray_cast(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRe
     /* objects */
     collision_select_area(2);
     obj = (u8 *) D_800DBEF4;
-    objEnd = obj + D_800DC320 * NMR_OBJ_SIZE;
+    objEnd = obj + g_world_obj_count * NMR_OBJ_SIZE;
     if (obj != objEnd) {
         dd = (ray.dir[0] * ray.dir[0] + ray.dir[1] * ray.dir[1] + ray.dir[2] * ray.dir[2]) * 4.0f;
         tx = 2.0f * ray.dir[0];

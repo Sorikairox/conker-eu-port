@@ -86,7 +86,7 @@ void object_ground_splash(u8 *obj, s32 arg1, s32 arg2) {
     if (obj_bone_ground_probe(pos, obj, (s32) ground, (u8) arg1) == 0) {
         return;
     }
-    if (D_800BE9F0 == 0x14) {
+    if (g_level_id == 0x14) {
         ground_colour_by_depth(pos[2], &r, &g, &b);
         cr = SPLASH_F2U(r) & 0xFF;
         cg = SPLASH_F2U(g) & 0xFF;

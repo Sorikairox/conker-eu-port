@@ -6,7 +6,7 @@
 void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
 void camera_calc_relative_yaw(struct108 *arg0);
 void camera_queue_event(struct108 *arg0, s32 arg1, void *arg2);
-extern f32 D_80095DA0;
+extern f32 g_camera_initial_eye_k; /* was D_80095DA0 */
 extern f32 D_800C3A20[];
 
 
@@ -19,7 +19,7 @@ extern s32 D_800DC450;
 extern s16 D_800898F0;
 extern s32 D_800DC6E0;
 extern Mtx *D_800DC6D0[];       /* per DL buffer: view matrices, 0x40 per player */
-extern s32 D_800BE6D0[];
+extern s32 g_camera_grid_bufs[]; /* was D_800BE6D0 */
 extern s32 D_800DC440;
 
 /* Level init: load the 0x18-byte records (D_800DC450), allocate the per-player camera controllers (D_800DBFF0,
@@ -39,14 +39,14 @@ void camera_level_init(s32 arg0, s32 arg1) {
     D_800DC6D0[1] = (Mtx *)allocate_memory(n << 6, 1, 1, 0);
     i = 0;
     do {
-        D_800BE6D0[i] = allocate_memory(D_800BE620 * 2, 1, 2, 0);
+        g_camera_grid_bufs[i] = allocate_memory(D_800BE620 * 2, 1, 2, 0);
         camera_controller_init((struct108 *)((u8 *)D_800DBFF0 + i * 0x9A0), i, (s16)arg0, arg1);
         g_camera_timers[i] = 0;
         i++;
     } while (i <= (u32)D_80082FA0);
     camera_viewport_tables_reset();
     camera_shake_tracks_load();
-    D_800894B0 = 0;
+    g_camera_frame_count = 0;
     D_800DC440 = allocate_memory(D_80082FA0 * 0x9A0 + 0x9A0, 1, 2, 0);
 }
 // NON-MATCHING: first half ok, second half needs work
@@ -74,7 +74,7 @@ void camera_level_init(s32 arg0, s32 arg1) {
 //
 //     func_1512ABF8();
 //     func_1512D238();
-//     D_800894B0 = 0;
+//     g_camera_frame_count = 0;
 //     D_800DC010 = allocate_memory((D_80082FA0 * 0x9A0) + 0x9A0, 1, 2, 0);
 // }
 
@@ -97,7 +97,7 @@ extern s32 D_800898D4[];
 #define CAM_F(o) (*(f32 *)(p + (o)))
 
 /* Initialise one per-player camera controller (0x9A0 bytes, D_800DBFF0[player]): clear it, reset the 21 camera
- * slots (camera_pop_mode, 999 timers), link it with the player's object record D_800CC2D0[player] (0x32C each,
+ * slots (camera_pop_mode, 999 timers), link it with the player's object record g_objects[player] (0x32C each,
  * record +0x318 = controller, controller +0x3D0 = record, +0x3D4 = record +0x31C), mode arg2 (camera_pivot_slot_reset /
  * camera_level_hook_dispatch), then the default distances / limits. */
 /* was func_150054C4 */
@@ -114,7 +114,7 @@ void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
         CAM_H(0x1B6 + i * 2) = 999;
     }
     CAM_F(0x5D4) = ((f32)D_800BE624 * 60.0f) / 216.0f;
-    rec = (u8 *)D_800CC2D0 + p[0x23D] * 0x32C;
+    rec = (u8 *)g_objects + p[0x23D] * 0x32C;
     CAM_W(0x2C) = 1;
     CAM_W(0xDC) = 0;
     *(u8 **)(p + 0x3D0) = rec;
@@ -148,7 +148,7 @@ void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
     CAM_W(0x238) = -1;
     CAM_H(0x3CC) = p[0x23D];
     CAM_H(0x368) = p[0x23D];
-    rec = (u8 *)D_800CC2D0 + p[0x23D] * 0x32C;
+    rec = (u8 *)g_objects + p[0x23D] * 0x32C;
     *(u8 **)(p + 0x3D0) = rec;
     CAM_W(0x3D4) = *(s32 *)(rec + 0x31C);
     camera_pivot_slot_reset(arg0, arg2);
@@ -172,7 +172,7 @@ void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
     CAM_F(0x364) = -10000.0f; /* D_80095D98 */
     CAM_F(0x7E8) = 50.0f;
     CAM_F(0x86C) = 999.0f; /* D_80095D9C */
-    CAM_W(0x8BC) = D_800BE6D0[p[0x23D]];
+    CAM_W(0x8BC) = g_camera_grid_bufs[p[0x23D]];
     D_800898C0 = 0;
     D_800C3671 = 0;
     D_800898C4[p[0x23D]] = 0;
@@ -205,7 +205,7 @@ void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 //         arg0->unk1B6[phi_s0] = 999;
 //     }
 //     temp_v0 = arg0->unk23D;
-//     temp_a2 = &D_800CC2D0[temp_v0]; // * 0x32C);
+//     temp_a2 = &g_objects[temp_v0]; // * 0x32C);
 //     arg0->unk5D4 = (f32) (((f32) D_800BE624 * 60.0f) / 216.0f);
 //     arg0->unk2C = 1;
 //     arg0->unkDC = 0;
@@ -247,7 +247,7 @@ void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 //     arg0->unk238 = -1;
 //     arg0->unk3CC = (s16) temp_v0;
 //     arg0->unk368 = (s16) temp_v0;
-//     temp_a2 = &D_800CC2D0[temp_v0]; // * 0x32C);
+//     temp_a2 = &g_objects[temp_v0]; // * 0x32C);
 //     arg0->unk3D0 = temp_a2;
 //     arg0->unk3D4 = temp_a2->unk31C;
 //     func_151298C0(arg0, arg2, temp_a2);
@@ -303,7 +303,7 @@ void camera_set_initial_eye(struct108 *arg0, u8 *arg1, f32 *arg2) {
     *(s32 *)(p + 0x308) = *(s32 *)(p + 0x2FC);
     *(s32 *)(p + 0x30C) = *(s32 *)(p + 0x300);
     collision_find_floor((s32)(p + 0x644), (s32)(p + 0x648), (s32)(p + 0x354), (s32)(p + 0x360), (s32)(p + 0x640), 0,
-                  *(f32 *)(p + 0x2F8), *(f32 *)(p + 0x2FC), *(f32 *)(p + 0x300), *(f32 *)(p + 0x2FC), 0, 0, D_80095DA0, *(f32 *)(p + 0x2FC));
+                  *(f32 *)(p + 0x2F8), *(f32 *)(p + 0x2FC), *(f32 *)(p + 0x300), *(f32 *)(p + 0x2FC), 0, 0, g_camera_initial_eye_k, *(f32 *)(p + 0x2FC));
     *(f32 *)(p + 0x358) = *(f32 *)(p + 0x354);
     *(f32 *)(p + 0x35C) = *(f32 *)(p + 0x354);
     *(f32 *)(p + 0x2A4) = *(f32 *)(arg1 + 0x14);
@@ -332,7 +332,7 @@ void camera_set_initial_eye(struct108 *arg0, u8 *arg1, f32 *arg2) {
     camera_calc_pitch(arg0);
     camera_calc_relative_yaw(arg0);
     *(s32 *)(p + 0x5F0) |= 4;
-    if (D_800BE9F0 != 0x21 && D_800C35EA != 1) {
+    if (g_level_id != 0x21 && D_800C35EA != 1) {
         camera_queue_event(arg0, 5, NULL);
         D_800C3A20[3] = *(f32 *)(p + 0x37C);
         camera_queue_event(arg0, 8, D_800C3A20);
@@ -395,7 +395,7 @@ void camera_set_initial_eye(struct108 *arg0, u8 *arg1, f32 *arg2) {
 //     camera_calc_pitch(arg0);
 //     camera_calc_relative_yaw(arg0);
 //     arg0->unk5F0 = (s32) (arg0->unk5F0 | 4);
-//     if ((D_800BE9F0 != 0x21) && (D_800C35EA != 1)) {
+//     if ((g_level_id != 0x21) && (D_800C35EA != 1)) {
 //         func_1512D560(arg0, 5, 0);
 //         D_800C3600->unkC = (f32) arg0->unk37C;
 //         func_1512D560(arg0, 8, D_800C3600);

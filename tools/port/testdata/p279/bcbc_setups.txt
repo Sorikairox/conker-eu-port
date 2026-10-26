@@ -1,4 +1,4 @@
-# P279 music_song_cb_level19_ambience: args (state, channel, x, z, y); level D_800BE9F0 = EU 800BEE10; RET 150A2EA8 = trigger_test_player, 10008D3C = music_chan_get_volume
+# P279 music_song_cb_level19_ambience: args (state, channel, x, z, y); level g_level_id = EU 800BEE10; RET 150A2EA8 = trigger_test_player, 10008D3C = music_chan_get_volume
 init ! 0=0,1=7,2=42C80000,3=42C80000,4=42C80000 ! 800BEE10=13 ! 150A2EA8=0,10008D3C=20 ! ! ! !
 lvl4 ! 0=5,1=7,2=42C80000,3=42C80000,4=42C80000 ! 800BEE10=4 ! 150A2EA8=0,10008D3C=20 ! ! ! !
 far ! 0=9,1=7,2=45DB8000,3=44FA0000,4=453C7000 ! 800BEE10=13 ! 150A2EA8=0,10008D3C=20 ! ! ! !

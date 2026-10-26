@@ -691,7 +691,7 @@ s32 rail_record_start_script(struct_eu_80087640 *, struct127 *, s32);
 void text_set_flags(u8);
 
 // rail_track_update: moves `player`'s rail record (D_80087640 + player * 0x84) along its spline to the point nearest
-// the player object (D_800CC2D0 + rec[0x31]): the step +0 (start 0.5 when +0x30 is 0, else eased toward +4 by 1/8,
+// the player object (g_objects + rec[0x31]): the step +0 (start 0.5 when +0x30 is 0, else eased toward +4 by 1/8,
 // clamped to +-0.06) is used, then up to 11 times the player's distance from the plane through the spline point
 // (normal = the tangent, stored at +0xC / +0x10) is turned into a parameter step for rail_param_step (halved when it
 // grows). +0x14 gets the speed along the track ((previous - current distance) * 4 / frames). With +0x30 set it
@@ -742,7 +742,7 @@ void rail_track_update(s32 player, s32 mode, f32 speed) {
     }
     rec = &D_80087640[player];
     r = (u8 *) rec;
-    obj = (u8 *) &D_800CC2D0[(s8) r[0x31]];
+    obj = (u8 *) &g_objects[(s8) r[0x31]];
     px = *(f32 *) (obj + 0x14);
     pz = *(f32 *) (obj + 0x1C);
     D_800D27B0 = 0;
@@ -816,8 +816,8 @@ void rail_track_update(s32 player, s32 mode, f32 speed) {
         D_800D27C4 = catmull_rom_eval((s32 *) zs, 0, ((struct_eu_80087640 *) copy)->unk8);
         if (player < D_800D27B8) {
             if (mode == 0) {
-                // player 0's yaw (D_800CC2D0[0] +0x40) in degrees (Rare's 0.01745 for pi / 180)
-                f32 ang = *(f32 *) ((u8 *) D_800CC2D0 + 0x40) * 0.01745;
+                // player 0's yaw (g_objects[0] +0x40) in degrees (Rare's 0.01745 for pi / 180)
+                f32 ang = *(f32 *) ((u8 *) g_objects + 0x40) * 0.01745;
 
                 D_800D27BC = sinf(ang) * 300.0f + *(f32 *) (obj + 0x14);
                 D_800D27C0 = *(f32 *) (obj + 0x18);
@@ -904,7 +904,7 @@ void rail_camera_follow(u8 *rec, u8 *player);
 void rail_camera_spline(u8 *rec, u8 *player, s32 release);
 
 // rail_cameras_update: clears D_800D27C9 and runs the rail camera of each of the D_800D27B8 player records
-// (D_80087640, 0x84 bytes) whose player (D_800CC2D0 + rec[0x31]) has a camera (+0x318): records in state 2 or more
+// (D_80087640, 0x84 bytes) whose player (g_objects + rec[0x31]) has a camera (+0x318): records in state 2 or more
 // (rec[0x30]) follow the rail (rail_camera_follow), the others with rec[0x48] == 0 run the spline camera
 // (rail_camera_spline), and the rest release the spline camera once while rec[0x49] is set.
 /* was func_15088130 */
@@ -919,7 +919,7 @@ void rail_cameras_update(void) {
     }
     for (i = 0; i < D_800D27B8; i++) {
         rec = (u8 *) D_80087640 + i * 0x84;
-        player = (u8 *) &D_800CC2D0[(s8) rec[0x31]];
+        player = (u8 *) &g_objects[(s8) rec[0x31]];
         if (*(s32 *) (player + 0x318) == 0) {
             continue;
         }
@@ -1040,14 +1040,14 @@ s32 rail_record_start_script(struct_eu_80087640 *arg0, struct127 *arg1, s32 arg2
     if (temp_v0->unk120 != 0) {
         return 1;
     }
-    if (D_800D18A0 & (1 << (arg1 - D_800CC2D0))) {
+    if (D_800D18A0 & (1 << (arg1 - g_objects))) {
         return 1;
     }
     temp_v0->unk84 = 1;
     arg1->interaction_state = 0xC;
     arg1->unk232 = arg2;
-    D_800D154C = arg1;
-    D_800C3E78 = *(s8 *)&arg0->unk31;
+    g_cur_obj = arg1;
+    g_cur_obj_index = *(s8 *)&arg0->unk31;
     arg1->unk218 = aiscript_find_by_kind(0, arg2);
     arg1->unk21C = 0;
     arg1->immune = 0xFF;
@@ -1072,7 +1072,7 @@ s32 rail_record_start(s32 arg0, s32 arg1) {
     }
     temp_a0 = &D_80087640[arg0];
     temp_v1 = (s8) temp_a0->pad28[8];
-    temp_a1 = &D_800CC2D0[(s8) temp_a0->unk31];
+    temp_a1 = &g_objects[(s8) temp_a0->unk31];
     if (temp_v1 == 0) {
         sp1C = temp_a0;
         var_a2 = rail_record_start_script(temp_a0, temp_a1, arg1);
@@ -1162,7 +1162,7 @@ s32 player_place_gap(s32 player, s32 delta) {
 // direction (+0xC / +0x10, reversed when `dir` >= 0): among the D_800D27B8 records whose player (+0x31) is not the
 // object's own (obj[0x124] - 1) and, when the record's alt +0x2F is set, with the same alt, the one with the smallest
 // positive distance (< 10000) from the plane through the player's position. Stores that record's +0 in `*t` and its
-// alt in `*alt` and returns its object (D_800CC2D0 + +0x31); NULL when there is none or no records.
+// alt in `*alt` and returns its object (g_objects + +0x31); NULL when there is none or no records.
 /* was func_1508882C */
 struct127 *rail_find_ahead(s32 player, s32 dir, f32 *t, s32 *alt) {
     struct_eu_80087640 *rec;
@@ -1191,7 +1191,7 @@ struct127 *rail_find_ahead(s32 player, s32 dir, f32 *t, s32 *alt) {
     }
     nx = *(f32 *) ((u8 *) rec + 0xC) * sign;
     nz = *(f32 *) ((u8 *) rec + 0x10) * sign;
-    obj = &D_800CC2D0[(s8) rec->unk31];
+    obj = &g_objects[(s8) rec->unk31];
     want = ((u8 *) rec)[0x2F];
     self = ((u8 *) obj)[0x124] - 1;
     found = NULL;
@@ -1206,13 +1206,13 @@ struct127 *rail_find_ahead(s32 player, s32 dir, f32 *t, s32 *alt) {
         if (want != 0 && want != (s8) ((u8 *) other)[0x2F]) {
             continue;
         }
-        obj = &D_800CC2D0[id];
+        obj = &g_objects[id];
         d = nx * *(f32 *) ((u8 *) obj + 0x14) + nz * *(f32 *) ((u8 *) obj + 0x1C) + c;
         if (0.0f < d && d < best) {
             best = d;
             *t = other->unk0;
             *alt = (s8) ((u8 *) other)[0x2F];
-            found = &D_800CC2D0[(s8) other->unk31];
+            found = &g_objects[(s8) other->unk31];
         }
     }
     return found;
@@ -1228,7 +1228,7 @@ s32 rail_record_index_of(arg0)
     s32 n;
     struct_eu_80087640 *p;
 
-    idx = arg0 - D_800CC2D0;
+    idx = arg0 - g_objects;
     if (D_80087640 == NULL) {
         return -1;
     }
@@ -1270,7 +1270,7 @@ void rail_record_copy(s32 arg0, s32 arg1)
 
 // cpu_player_slot_claim: takes the first free computer-player slot (bit i of D_800D27B4, i < D_800D27B9), resets
 // its record D_80087640[D_800D27B8 + i] (rail_record_reset), marks it used (+0x30 = 1) for the object record objp
-// (+0x31 = its D_800CC2D0 index) and returns the record index; -1 when none is free or there are no records.
+// (+0x31 = its g_objects index) and returns the record index; -1 when none is free or there are no records.
 // arg1 is unused (the caller passes the object twice).
 /* was func_15088B08 */
 s32 cpu_player_slot_claim(s32 objp, s32 arg1) {
@@ -1287,7 +1287,7 @@ s32 cpu_player_slot_claim(s32 objp, s32 arg1) {
             i += D_800D27B8;
             rail_record_reset((u8 *)&D_80087640[i]);
             *((u8 *)&D_80087640[i] + 0x30) = 1;
-            D_80087640[i].unk31 = ((u8 *)objp - (u8 *)D_800CC2D0) / 0x32C;
+            D_80087640[i].unk31 = ((u8 *)objp - (u8 *)g_objects) / 0x32C;
             return i;
         }
     }
@@ -1637,7 +1637,7 @@ extern u16 D_8009015C;
 void camera_queue_event(u8 *, s32, void *);
 u8 rail_node_next(u8 node, u8 type, u8 prev, u8 band);
 
-// rail_camera_follow: rail camera of one player record (D_80087640 + i * 0x84, player = D_800CC2D0 + rec[0x31],
+// rail_camera_follow: rail camera of one player record (D_80087640 + i * 0x84, player = g_objects + rec[0x31],
 // camera = player + 0x318) on the rail nodes of D_800D2778 (band 1 when D_8009015C bit 6 is set, else 0). State 2
 // (rec[0x30]) sets it up: the first type-5 band-2 node starts the segment rec[0x4A] -> rec[0x4B] (rec[0x4B] = its
 // band-3 link, or its non-band-3 link when D_800D27C8 is set), then the whole rail loop is walked from there and the

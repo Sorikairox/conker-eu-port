@@ -83,22 +83,22 @@ void level_item_flags_update(s32 arg0) {
     D_80088C34 += -step * 66;
     D_80088C38 += -step * 8;
     D_80088C3C += step * 92;
-    if ((*(u8 **) ((u8 *) D_800CC2D0 + 0x31C))[0x120] != 0) {
+    if ((*(u8 **) ((u8 *) g_objects + 0x31C))[0x120] != 0) {
         return;
     }
     for (i = 0; i < 3; i++) {
         item = world_record_find(0xFA - i);
         if (D_800DC3C4[(item - (s32) D_800DBEF4) / 160] & 1) {
-            obj_hit_split_halves(D_800CC2D0);
-            actor_sound_play(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);
+            obj_hit_split_halves(g_objects);
+            actor_sound_play(0x627, g_objects, 0x7FFF, 0xC8, 0x2BC);
         }
     }
     item = world_record_find(0xFB);
     if (D_800DC3C4[(item - (s32) D_800DBEF4) / 160] & 1) {
-        actor_sound_play(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);
-        object_hit_effects(D_800CC2D0, 1, 1, 1, 1, 0, 0xFF, 1);
-        obj_set_destroyed(D_800CC2D0);
-        player_hit_reaction(D_800CC2D0, 6);
+        actor_sound_play(0x627, g_objects, 0x7FFF, 0xC8, 0x2BC);
+        object_hit_effects(g_objects, 1, 1, 1, 1, 0, 0xFF, 1);
+        obj_set_destroyed(g_objects);
+        player_hit_reaction(g_objects, 6);
     }
 }
 

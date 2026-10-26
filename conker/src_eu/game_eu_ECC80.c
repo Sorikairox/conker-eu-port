@@ -277,7 +277,7 @@ extern u8 D_800BEE0B;
 // start sound; 1 just follows the rest height + the offset +0x80; 2 drops 0x622 at 48 and, landed, marks itself and
 // the next 0xA0-byte placement (+0x6E / +0x10E = 1, link_group_remove_members(2, index)); 4 plays a sound when landed. The rest
 // height (s16 +0x12 the first time) is kept in +0x7C with bit 31 set; the platform rests 0x50 below it. Mode
-// (+0x73 & 3): 0 at rest (height = rest), stepping on it (+0x4F bit 4 with player D_800CC2D0's +0x31C->0x57 == 1)
+// (+0x73 & 3): 0 at rest (height = rest), stepping on it (+0x4F bit 4 with player g_objects's +0x31C->0x57 == 1)
 // shakes the camera and rumbles (only in mode 0); 2 shakes (+0 / +8 random offsets) for the -(+0x80) ticks of
 // D_800BE9E4, then sinks (offsets random / 12 for 40 ticks) to the bottom, where the rest height and +0x11C move
 // down by the drop, mode 3; 3 sits at the low height until it is no longer stood on (+0x4F / +0x73 bit 4), then
@@ -313,9 +313,9 @@ void sinking_platform_update(u8 *p) {
         }
         return;
     }
-    if ((p[0x4F] & 4) && (*(u8 **) ((u8 *) D_800CC2D0 + 0x31C))[0x57] == 1) {
-        rubble_burst_with_dust(*(f32 *) ((u8 *) D_800CC2D0 + 0x14), *(f32 *) ((u8 *) D_800CC2D0 + 0x18),
-                      *(f32 *) ((u8 *) D_800CC2D0 + 0x1C), 0xFF, 0);
+    if ((p[0x4F] & 4) && (*(u8 **) ((u8 *) g_objects + 0x31C))[0x57] == 1) {
+        rubble_burst_with_dust(*(f32 *) ((u8 *) g_objects + 0x14), *(f32 *) ((u8 *) g_objects + 0x18),
+                      *(f32 *) ((u8 *) g_objects + 0x1C), 0xFF, 0);
         if (mode == 0) {
             cam_wobble_start_preset(3, D_800BEE0B, NULL, 0xFF, 0);
             rumble.unk0 = 1;

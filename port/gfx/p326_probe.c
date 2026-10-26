@@ -1,5 +1,5 @@
 /* P326 TEST ?p326=1 (called from p205_obj_hook, i.e. once per frame of Conker's look callback): measures the two
- * gameplay options "Longer breath" and "Longer tail spin" on player record 0 (Conker, D_800CC2D0[0], struct127):
+ * gameplay options "Longer breath" and "Longer tail spin" on player record 0 (Conker, g_objects[0], struct127):
  *   - air: logs the water entry / exit (+0xAD in_water), the air counter +0xB2 every 100 ticks and every health
  *     change (+0x1CA) while under water, with the frame step D_800BE9E4 the counter grows by;
  *   - tail spin: logs every change of the helicopter counter ctl +0x31 (ctl = +0x31C): 1 = jumped, 3 = spin started,
@@ -14,7 +14,7 @@
 int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
-extern unsigned char D_800CC2D0[];
+extern unsigned char g_objects[]; /* was D_800CC2D0 */
 extern int D_800BE9E4;
 
 static float F(const unsigned char *r, int o) { return *(const float *)(r + o); }
@@ -24,7 +24,7 @@ void p326_probe(void) {
     static unsigned lastlog, lastlog2;
     static float hx, hz;
     static int water = -1, health = -1, glide = -1, lastair = -1;
-    unsigned char *r = D_800CC2D0;
+    unsigned char *r = g_objects;
     const unsigned char *ctl;
     int w, h, air, g;
     if (f < 0) f = port_flag("p326");

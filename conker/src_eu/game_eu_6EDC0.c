@@ -182,10 +182,10 @@ extern f32 D_80038400;         /* text scale x (screen units per glyph pixel) */
 extern f32 D_80038404;         /* text scale y */
 extern u8 *D_80085D20[];       /* [0] font texture (0xE0 bytes per glyph, I8) */
 extern u8 *D_80085D24[];       /* [0] glyph metrics: width, height, x offset, y offset (4 bytes per glyph) */
-extern Gfx D_80085D30[];
+extern Gfx g_text_render_dl[]; /* was D_80085D30 */
 extern Gfx D_80087770[];
 extern Gfx D_800877A8[];
-extern u8 D_800A4EA8[];        /* render mode pairs (8 bytes each) */
+extern u8 g_render_mode_pairs[];        /* render mode pairs (8 bytes each); was D_800A4EA8 */
 extern s32 D_800BEFC4;         /* display list capacity (commands) */
 extern u16 D_800CC16E;         /* controller layout bits: picks the icon of the B1 / B2-B5 / BB codes */
 extern u8 D_800CC170;          /* current control code (0xFF: none) */
@@ -204,7 +204,7 @@ Gfx *sprite_load_texture(Gfx *, s32 *, s32, void *, s32, s32, s32, s32, s32);
 Gfx *sprite_draw_at_screen(Gfx *, void *, f32, f32);
 
 /* the view of the current player (0x180-byte records): +0x14 / +0x18 scale, +0x24..+0x30 clip top / bottom / left / right */
-#define TEXT_VIEW() ((u8 *) D_800BE628 + D_80082FA4 * 0x180)
+#define TEXT_VIEW() ((u8 *) D_800BE628 + g_cur_view_player * 0x180)
 #define VIEW_F(v, off) (*(f32 *) ((v) + (off)))
 
 /*
@@ -409,8 +409,8 @@ Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f
                 icon.flags = 0;
                 icon.alpha = primA;
                 gSPDisplayList(gdl++, D_80087770);
-                D_800D31CB = 1;
-                gDPSetOtherMode(gdl++, 0x2C3F, ((u32 *) D_800A4EA8)[0x32] | ((u32 *) D_800A4EA8)[0x33] | 4);
+                g_sprite_keep_prim_colour = 1;
+                gDPSetOtherMode(gdl++, 0x2C3F, ((u32 *) g_render_mode_pairs)[0x32] | ((u32 *) g_render_mode_pairs)[0x33] | 4);
                 if (iconFlip == 0) {
                     gDPSetCombine(gdl++, 0xFFB3FF, 0xFF65FEFF);
                 }
@@ -419,8 +419,8 @@ Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f
                     gdl = sprite_draw_at_screen(gdl, &icon, x, y - iconDy);
                 }
                 gSPDisplayList(gdl++, D_800877A8);
-                gSPDisplayList(gdl++, D_80085D30);
-                D_800D31CB = 0;
+                gSPDisplayList(gdl++, g_text_render_dl);
+                g_sprite_keep_prim_colour = 0;
                 y -= halfH;
                 x += halfW * 0.5f;
             }

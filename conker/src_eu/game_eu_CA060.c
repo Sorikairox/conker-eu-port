@@ -31,7 +31,7 @@ s32 event_action_scene(s32 arg0, s32 arg1, u8 *arg2) {
     switch (arg1) {
     case 1:
         if (D_800C35EA == 0) {
-            sp3C = D_800BE9F0;
+            sp3C = g_level_id;
             if (D_800D3C60 == 6) {
                 cutscene_set_focus_point((*(s16 *)((u8 *)arg2 + 0xA)), (*(s16 *)((u8 *)arg2 + 0xE)), (*(s16 *)((u8 *)arg2 + 0x12)), (f32) (*(s32 *)((u8 *)arg2 + 0x14)) * 0.000015258789f);
             } else if (D_800D3C60 == 3) {
@@ -51,10 +51,10 @@ s32 event_action_scene(s32 arg0, s32 arg1, u8 *arg2) {
             if (D_800D3C60 == 6) {
                 cutscene_set_focus_point((*(s16 *)((u8 *)arg2 + 0xA)), (*(s16 *)((u8 *)arg2 + 0xE)), (*(s16 *)((u8 *)arg2 + 0x12)), (f32) (*(s32 *)((u8 *)arg2 + 0x14)) * 0.000015258789f);
             }
-            temp_s0 = D_800BE9F0;
-            D_800BE9F0 = 0x25;
+            temp_s0 = g_level_id;
+            g_level_id = 0x25;
             cutscene_scene_load(0x25, arg0, 0, 0, 0);
-            D_800BE9F0 = temp_s0;
+            g_level_id = temp_s0;
             return 1;
         }
         return 0;
@@ -62,7 +62,7 @@ s32 event_action_scene(s32 arg0, s32 arg1, u8 *arg2) {
         if (D_800C35EA == 0) {
             sp30 = (*(s32 *)((u8 *)arg2 + 8));
             temp_v1 = (*(s32 *)((u8 *)arg2 + 0xC));
-            sp34 = D_800BE9F0;
+            sp34 = g_level_id;
             if (D_800D3C60 == 8) {
                 sp2C = temp_v1;
                 cutscene_set_focus_point((*(s16 *)((u8 *)arg2 + 0x12)), (*(s16 *)((u8 *)arg2 + 0x16)), (*(s16 *)((u8 *)arg2 + 0x1A)), (f32) (*(s32 *)((u8 *)arg2 + 0x1C)) * 0.000015258789f);
@@ -75,7 +75,7 @@ s32 event_action_scene(s32 arg0, s32 arg1, u8 *arg2) {
         return 0;
     case 2:
         D_800C39E2 = arg0 + 1;
-        D_800C39E3 = (s8) D_800BE9F0;
+        D_800C39E3 = (s8) g_level_id;
         D_800C40B9 = 1;
         if (D_800D3C60 == 6) {
             cutscene_set_focus_point2((*(s16 *)((u8 *)arg2 + 0xA)), (*(s16 *)((u8 *)arg2 + 0xE)), (*(s16 *)((u8 *)arg2 + 0x12)), (f32) (*(s32 *)((u8 *)arg2 + 0x14)) * 0.000015258789f);
@@ -111,14 +111,14 @@ extern u8 D_800C40B8;
 
 // event_query_scene: event-script scene queries (ids 0x1xxx; arg0 = scene, arg1 = query). P176 (browser P174):
 // returns the asm's per-case answer (jtbl_8009E828); the m2c body was void and the s32 handler table read 0.
-// 1: scene arg0 no longer playing (0 while D_800C35C4 is set), 2: scene arg0 playing (D_800C40B8), 3 / 6: cutscene
+// 1: scene arg0 no longer playing (0 while g_cutscene_pending is set), 2: scene arg0 playing (D_800C40B8), 3 / 6: cutscene
 // arg0 playing (D_800C3A08), 4: no scene playing, 5: D_800C3A92 (debug skip). Other queries: the asm leaves v0
 // unchanged (0 here).
 /* was func_1509CBD8 */
 s32 event_query_scene(s32 arg0, s32 arg1, s32 arg2) {
     switch (arg1) {
     case 1:
-        if (D_800C35C4 != 0) {
+        if (g_cutscene_pending != 0) {
             return 0;
         }
         if (D_800C35EA == 0) {

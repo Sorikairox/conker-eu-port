@@ -12,13 +12,13 @@ void level_hook_call_15103800(void) {
 // doesnt look like fun
 // marker_effect_spawn: P256: spawns a type 0x12C effect (effect_node_create, 0x4C-byte state copied to +0x28) for `obj`
 // and its slot byte (low byte of the word at obj +0x1C): the state holds obj, the slot, slot >= 4, a life of
-// 300 + rand % 121, eight handles world_record_find(D_800A1FD0[i * 8 + slot]) and the position of the slot's map marker
+// 300 + rand % 121, eight handles world_record_find(g_marker_effect_record_ids[i * 8 + slot]) and the position of the slot's map marker
 // (map_marker_find over D_800D3094 with a key of type 3 / 0x15 / slot, flags 0x11A0: its s16 x, y, z at +0 / +4 / +6),
 // or (0, 0, 10) without one. Always returns 1.
 s32 world_record_find(u8);
 u8 *map_marker_find(s32, s32, u16, u8 *);
 void *memcpy(void *, const void *, unsigned int);
-extern u8 D_800A1FD0[];
+extern u8 g_marker_effect_record_ids[]; /* was D_800A1FD0 */
 /* was func_15011D60 */
 s32 marker_effect_spawn(u8 *obj) {
     struct {
@@ -51,7 +51,7 @@ s32 marker_effect_spawn(u8 *obj) {
     state.slot = *(s32 *)(obj + 0x1C);
     state.high = (state.slot < 4) ? 0 : 1;
     for (i = 0; i < 8; i++) {
-        state.handle[i] = world_record_find(D_800A1FD0[i * 8 + state.slot]);
+        state.handle[i] = world_record_find(g_marker_effect_record_ids[i * 8 + state.slot]);
     }
     state.h3C = 0;
     state.f2C[0] = 0.0f;

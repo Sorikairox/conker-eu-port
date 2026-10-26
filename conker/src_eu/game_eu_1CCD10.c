@@ -99,7 +99,7 @@ void foot_trail_free_alt(u8 *arg0) {
 
 u8 impact_current_kind(void);
 s32 memcpy(s32, u8 **, s32);
-extern s32 D_800AB7F4;
+extern s32 g_impact_kind_colours; /* was D_800AB7F4 */
 
 /* was func_1519F738 */
 s32 foot_trail_spawn(u8 *arg0, u8 arg1) {
@@ -192,7 +192,7 @@ s32 foot_trail_spawn(u8 *arg0, u8 arg1) {
         (*(s32 *)((u8 *)(&sp.u58) + 8)) = (s32) (*(s32 *)((u8 *)(&sp.u98) + 8));
         sp.uA6 |= 4;
     }
-    temp_v0_2 = (u8 *) &D_800AB7F4 + sp43 * 3;
+    temp_v0_2 = (u8 *) &g_impact_kind_colours + sp43 * 3;
     sp.u72 = (*(u8 *)((u8 *)temp_v0_2 + 0));
     sp.u73 = (*(u8 *)((u8 *)temp_v0_2 + 1));
     sp.u74 = (*(u8 *)((u8 *)temp_v0_2 + 2));

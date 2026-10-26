@@ -8,26 +8,26 @@ Gfx *text_queue_draw(Gfx *arg0);
 void text_queue_vprintf(s32 fmtArg, s32 *args);
 u8 *allocate_memory(s32, s32, s32, s32);
 int game_sprintf(char *s, const char *fmt, ...);
-extern u8 D_800CC18C;
-extern u8 D_800CC18D;
-extern u8 D_800CC18E;
-extern u8 D_800CC18F;
-extern s32 D_800CC188;
-extern char D_80086060[];
-extern char D_80086064[];
-extern char D_80098F40[];
-extern char D_80098F44[];
+extern u8 g_text_bg_r; /* was D_800CC18C */
+extern u8 g_text_bg_g; /* was D_800CC18D */
+extern u8 g_text_bg_b; /* was D_800CC18E */
+extern u8 g_text_bg_a; /* was D_800CC18F */
+extern s32 g_text_queue_tail; /* was D_800CC188 */
+extern char g_text_fmt_float[]; /* was D_80086060 */
+extern char g_text_fmt_spec_buf[]; /* was D_80086064 */
+extern char g_text_str_empty_a[]; /* was D_80098F40 */
+extern char g_text_str_empty_b[]; /* was D_80098F44 */
 
 
 /* was func_15042D50 */
 void text_queue_reset(void) {
-    D_800CBD64 = 0;
+    g_text_queue_head = 0;
     text_queue_draw(0);
 }
 
 /* was func_15042D78 */
 void text_set_flags(u8 arg0) {
-    D_800CBD74 = arg0;
+    g_text_flags = arg0;
 }
 
 /* was func_15042D94 */
@@ -36,9 +36,9 @@ void text_printf_at(s32 arg0, s32 arg1, u8 arg2, s32 arg3, ...) {
     s32 args[16];
     s32 i;
 
-    D_800CBD74 = arg2;
-    D_800CBD70 = arg0;
-    D_800CBD72 = arg1;
+    g_text_flags = arg2;
+    g_text_pos_x = arg0;
+    g_text_pos_y = arg1;
     va_start(ap, arg3);
     for (i = 0; i < 16; i++) {
         args[i] = va_arg(ap, s32);
@@ -58,8 +58,8 @@ void text_printf(s32 arg0, ...) {
     text_queue_vprintf(arg0, args);
 }
 /* Text queue printf (used by text_printf_at / text_printf): one 0x5C node per line ('\n' splits) appended to the
- * D_800CBD64 list (tail D_800CC188), text at +0x1C. Conversions are copied to D_80086064 and handed to sprintf
- * (game_sprintf): d/x/X/s take an int word; f/F take a float pointer and use D_80086060 = "%s%s" + spec (two empty
+ * g_text_queue_head list (tail g_text_queue_tail), text at +0x1C. Conversions are copied to g_text_fmt_spec_buf and handed to sprintf
+ * (game_sprintf): d/x/X/s take an int word; f/F take a float pointer and use g_text_fmt_float = "%s%s" + spec (two empty
  * strings). "#c" puts the next argument in +0xD (icon). Position/scale/colour come from the D_800CBD6x/7x state. */
 /* was func_15042ECC */
 void text_queue_vprintf(s32 fmtArg, s32 *args) {
@@ -80,22 +80,22 @@ void text_queue_vprintf(s32 fmtArg, s32 *args) {
             *(s32 *)(node + 0x18) = 0;
             done = 0;
             out = (char *)node + 0x1C;
-            if (D_800CC188 == 0) {
-                D_800CBD64 = (s32)node;
+            if (g_text_queue_tail == 0) {
+                g_text_queue_head = (s32)node;
             } else {
-                *(u8 **)(D_800CC188 + 0x18) = node;
+                *(u8 **)(g_text_queue_tail + 0x18) = node;
             }
             node[0xD] = 0;
             do {
                 c = *fmt;
                 if (c == '%') {
-                    D_80086064[0] = '%';
+                    g_text_fmt_spec_buf[0] = '%';
                     fmt++;
                     n = 1;
                     do {
                         c = *fmt;
-                        D_80086064[n + 1] = 0;
-                        D_80086064[n] = c;
+                        g_text_fmt_spec_buf[n + 1] = 0;
+                        g_text_fmt_spec_buf[n] = c;
                         switch (c) {
                             case '%':
                                 *out++ = *fmt;
@@ -106,7 +106,7 @@ void text_queue_vprintf(s32 fmtArg, s32 *args) {
                             case 'd':
                             case 'x':
                             case 's':
-                                game_sprintf(out, D_80086064, args[argi++]);
+                                game_sprintf(out, g_text_fmt_spec_buf, args[argi++]);
                                 while (*out != 0) {
                                     out++;
                                 }
@@ -114,7 +114,7 @@ void text_queue_vprintf(s32 fmtArg, s32 *args) {
                                 break;
                             case 'F':
                             case 'f':
-                                game_sprintf(out, D_80086060, D_80098F40, D_80098F44, (f64) *(f32 *)args[argi++]);
+                                game_sprintf(out, g_text_fmt_float, g_text_str_empty_a, g_text_str_empty_b, (f64) *(f32 *)args[argi++]);
                                 while (*out != 0) {
                                     out++;
                                 }
@@ -140,90 +140,90 @@ void text_queue_vprintf(s32 fmtArg, s32 *args) {
                     fmt++;
                 }
             } while (!done);
-            node[0xC] = D_800CBD74;
-            *(u32 *)node = D_800CBD78;
-            if (D_800CBD78 != 0) {
-                node[0xC] = D_800CBD74 | 1;
-                *(s16 *)(node + 0xA) = D_800CBD7C;
+            node[0xC] = g_text_flags;
+            *(u32 *)node = g_text_anchor_obj;
+            if (g_text_anchor_obj != 0) {
+                node[0xC] = g_text_flags | 1;
+                *(s16 *)(node + 0xA) = g_text_anchor_yoff;
                 if (D_80090130 >= 2) {
-                    *(f32 *)(node + 4) = D_800CBD80 + D_800CBD80;
+                    *(f32 *)(node + 4) = g_text_scale + g_text_scale;
                 } else {
-                    *(f32 *)(node + 4) = D_800CBD80;
+                    *(f32 *)(node + 4) = g_text_scale;
                 }
             } else {
-                *(s16 *)(node + 8) = D_800CBD70;
-                *(s16 *)(node + 0xA) = D_800CBD72;
-                *(f32 *)(node + 4) = D_800CBD80;
+                *(s16 *)(node + 8) = g_text_pos_x;
+                *(s16 *)(node + 0xA) = g_text_pos_y;
+                *(f32 *)(node + 4) = g_text_scale;
             }
-            node[0xE] = D_800CBD60;
-            node[0xF] = D_800CBD61;
-            node[0x10] = D_800CBD62;
-            node[0x11] = D_800CBD63;
-            node[0x12] = D_800CC18C;
-            node[0x13] = D_800CC18D;
-            node[0x14] = D_800CC18E;
-            node[0x15] = D_800CC18F;
-            D_800CC188 = (s32)node;
+            node[0xE] = g_text_color_r;
+            node[0xF] = g_text_color_g;
+            node[0x10] = g_text_color_b;
+            node[0x11] = g_text_color_a;
+            node[0x12] = g_text_bg_r;
+            node[0x13] = g_text_bg_g;
+            node[0x14] = g_text_bg_b;
+            node[0x15] = g_text_bg_a;
+            g_text_queue_tail = (s32)node;
             if (node[0xD] != 0) {
                 node[0xE] = 0xFF;
                 node[0xF] = 0xFF;
                 node[0x10] = 0xFF;
             } else {
-                D_800CBD72 += 0xB;
+                g_text_pos_y += 0xB;
             }
         } while (*fmt != 0);
     }
-    D_800CBD78 = 0;
+    g_text_anchor_obj = 0;
 }
 /* was func_150432BC */
 void text_set_scale(f32 arg0) {
-    D_800CBD80 = arg0;
+    g_text_scale = arg0;
 }
 
 /* was func_150432CC */
 void text_set_box(s32 arg0, s32 arg1) {
-    D_800CBD74 = D_800CBD74 | 1;
-    D_800CBD74 = D_800CBD74;
-    D_800CBD7C = arg1;
-    D_800CBD78 = arg0;
+    g_text_flags = g_text_flags | 1;
+    g_text_flags = g_text_flags;
+    g_text_anchor_yoff = arg1;
+    g_text_anchor_obj = arg0;
 }
 
 /* was func_150432FC */
 void text_set_pos(s16 arg0, s16 arg1) {
-    D_800CBD70 = arg0;
-    D_800CBD72 = arg1;
+    g_text_pos_x = arg0;
+    g_text_pos_y = arg1;
 }
 
 /* was func_1504332C */
 void text_set_color(u8 arg0, u8 arg1, u8 arg2, u8 arg3) {
-    D_800CBD60 = arg0;
-    D_800CBD61 = arg1;
-    D_800CBD62 = arg2;
-    D_800CBD63 = arg3;
+    g_text_color_r = arg0;
+    g_text_color_g = arg1;
+    g_text_color_b = arg2;
+    g_text_color_a = arg3;
 }
 
 /* P13: difftest EQUIV on random inputs only (seeds 2, 3: 15 completed trials); runs with a poked single text/icon item
  * segfault Unicorn (exit 139), so the icon path is UNVERIFIED by difftest: runtime check in the browser.
- * On-screen text and icon queue flush (P13, hand C). Draws every queued item of D_800CBD64 (linked through
+ * On-screen text and icon queue flush (P13, hand C). Draws every queued item of g_text_queue_head (linked through
  * 0x18, freed with heap_free after drawing) and resets the queue state. Item: 0x00 world anchor (projected
  * with sprite_project_point), 0x04 f32 scale, 0x08/0x0A s16 x/y, 0x0C flags (0x40: x/y already in screen units,
  * 0x80: drop shadow, == 1: centred), 0x0D icon (0 = text), 0x0E..0x11 RGBA, 0x15 measure, 0x1C the string.
- * Icons come from the 8-byte table D_80085D70 (w, h, scale/128, flags, texture) and go through the sprite
- * descriptor D_80090410 and hud_image_draw; D_80085E38's texture animates with the frame counter D_80086070. */
-extern s32 D_80086070;
-extern u8 D_80085D30[];
-extern u8 D_80085D70[];
-extern u8 D_80085E38[];
+ * Icons come from the 8-byte table g_text_icon_table (w, h, scale/128, flags, texture) and go through the sprite
+ * descriptor D_80090410 and hud_image_draw; g_text_icon_animated's texture animates with the frame counter g_text_icon_anim_frame. */
+extern s32 g_text_icon_anim_frame; /* was D_80086070 */
+extern u8 g_text_render_dl[]; /* was D_80085D30 */
+extern u8 g_text_icon_table[]; /* was D_80085D70 */
+extern u8 g_text_icon_animated[]; /* was D_80085E38 */
 extern u8 D_80090410[];
 extern f32 D_800901BC;
 extern f32 D_800901C0;
-extern f32 D_80099014;
+extern f32 g_text_anchor_proj_param; /* was D_80099014 */
 extern s32 D_800BEDCC;
-extern u8 D_800CC18C;
-extern u8 D_800CC18D;
-extern u8 D_800CC18E;
-extern u8 D_800CC18F;
-extern s32 D_800CC188;
+extern u8 g_text_bg_r; /* was D_800CC18C */
+extern u8 g_text_bg_g; /* was D_800CC18D */
+extern u8 g_text_bg_b; /* was D_800CC18E */
+extern u8 g_text_bg_a; /* was D_800CC18F */
+extern s32 g_text_queue_tail; /* was D_800CC188 */
 s32 sprite_project_point(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 arg7);
 void text_measure_string(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3);
 Gfx *text_draw_string(Gfx *arg0, f32 arg1, f32 arg2, u8 *arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 argA);
@@ -244,11 +244,11 @@ Gfx *text_queue_draw(Gfx *arg0) {
     f32 sx, sy, sz, sw;
     f32 scale;
 
-    D_80086070++;
-    item = (u8 *)D_800CBD64;
+    g_text_icon_anim_frame++;
+    item = (u8 *)g_text_queue_head;
     if (item != NULL) {
         gdl->words.w0 = 0xDE000000;
-        gdl->words.w1 = (u32)D_80085D30;
+        gdl->words.w1 = (u32)g_text_render_dl;
         gdl++;
         gdl->words.w0 = 0xEF002C3F;
         gdl->words.w1 = 0x504240;
@@ -269,10 +269,10 @@ Gfx *text_queue_draw(Gfx *arg0) {
                 }
                 anchor = *(u8 **)item;
                 if (anchor != NULL) {
-                    D_80082FA4 = 0;
+                    g_cur_view_player = 0;
                     visible = sprite_project_point(*(f32 *)(anchor + 0x14),
                                             *(f32 *)(anchor + 0x18) + (f32) * (s16 *)(item + 0xA),
-                                            *(f32 *)(anchor + 0x1C), &sx, &sy, &sz, &sw, D_80099014);
+                                            *(f32 *)(anchor + 0x1C), &sx, &sy, &sz, &sw, g_text_anchor_proj_param);
                     if (visible != 0) {
                         *(s16 *)(item + 0x8) = (s32)sx;
                         *(s16 *)(item + 0xA) = (s32)sy;
@@ -301,7 +301,7 @@ Gfx *text_queue_draw(Gfx *arg0) {
                 gdl++;
                 next = *(u8 **)(item + 0x18);
             } else {
-                icon = D_80085D70 + (item[0xD] - 1) * 8;
+                icon = g_text_icon_table + (item[0xD] - 1) * 8;
                 gdl->words.w0 = 0xFC12D225;
                 gdl->words.w1 = 0xFFA7FFFF;
                 gdl++;
@@ -337,8 +337,8 @@ Gfx *text_queue_draw(Gfx *arg0) {
                 gdl->words.w1 = (item[0xE] << 24) | (item[0xF] << 16) | (item[0x10] << 8) | item[0x11];
                 gdl++;
                 *(s32 *)D_80090410 = *(s32 *)(icon + 4);
-                if (icon == D_80085E38) {
-                    v = (D_80086070 >> 1) % 10;
+                if (icon == g_text_icon_animated) {
+                    v = (g_text_icon_anim_frame >> 1) % 10;
                     if (v >= 6) {
                         v = 10 - v;
                     }
@@ -347,7 +347,7 @@ Gfx *text_queue_draw(Gfx *arg0) {
                 gdl = hud_image_draw(gdl, D_80090410, *(s16 *)(item + 0x8), *(s16 *)(item + 0xA), icon[0], icon[1],
                                     scale, 0);
                 gdl->words.w0 = 0xDE000000;
-                gdl->words.w1 = (u32)D_80085D30;
+                gdl->words.w1 = (u32)g_text_render_dl;
                 gdl++;
                 gdl->words.w0 = 0xEF002C3F;
                 gdl->words.w1 = 0x504240;
@@ -365,21 +365,21 @@ Gfx *text_queue_draw(Gfx *arg0) {
         gdl->words.w1 = 0;
         gdl++;
     }
-    D_800CBD60 = 0xFF;
-    D_800CBD61 = 0xFF;
-    D_800CBD62 = 0xFF;
-    D_800CBD63 = 0xFF;
-    D_800CC18C = 0;
-    D_800CC18D = 0;
-    D_800CC18E = 0;
-    D_800CC18F = 0x80;
-    D_800CBD70 = 10;
-    D_800CBD72 = 10;
-    D_800CBD80 = 1.0f;
-    D_800CBD74 = 0;
-    D_800CBD64 = 0;
-    D_800CC188 = 0;
-    D_800CBD78 = 0;
+    g_text_color_r = 0xFF;
+    g_text_color_g = 0xFF;
+    g_text_color_b = 0xFF;
+    g_text_color_a = 0xFF;
+    g_text_bg_r = 0;
+    g_text_bg_g = 0;
+    g_text_bg_b = 0;
+    g_text_bg_a = 0x80;
+    g_text_pos_x = 10;
+    g_text_pos_y = 10;
+    g_text_scale = 1.0f;
+    g_text_flags = 0;
+    g_text_queue_head = 0;
+    g_text_queue_tail = 0;
+    g_text_anchor_obj = 0;
     return gdl;
 }
 /* was func_15043A00 */

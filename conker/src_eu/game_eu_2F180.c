@@ -21,7 +21,7 @@ void collision_build_reset(void) {
     *D_800DBE18 = 0;
     *D_800DBE1C = 0;
     D_800DBE20 = 0;
-    tmp = D_80091C04[D_800BE9F0];
+    tmp = D_80091C04[g_level_id];
     D_800DBE24 = 0;
     D_800B0DC0 = allocate_memory(tmp, 1, 0, 0);
     D_800B0DC8 = tmp + D_800B0DC0;
@@ -44,7 +44,7 @@ void quadtree_alloc_node_pool(void) {
     s32 size;
     s32 word;
 
-    size = D_80091EA0[D_800BE9F0];
+    size = D_80091EA0[g_level_id];
     os_pi_get_access();
     while (IO_READ(PI_STATUS_REG) & 3) {
     }
@@ -68,7 +68,7 @@ void quadtree_alloc_node_pool(void) {
 //     s32 tmp;
 //     s32 sp1C;
 //
-//     tmp = D_800BE9F0;
+//     tmp = g_level_id;
 //     sp24 = D_80091AF0[tmp];
 //
 //     __osPiGetAccess();
@@ -417,8 +417,8 @@ void collision_load_level_grid(void) {
     tmp1 = D_800DBE2C;
 
     D_800DBE28 = (((tmp0 + 7) / 8) + 0xF) & 0xFFF0;
-    tmp2 = asset_load(0, 2, 5, D_800BE9F0 << 1);
-    tmp3 = asset_load(0, 2, 5, (D_800BE9F0 << 1) + 1);
+    tmp2 = asset_load(0, 2, 5, g_level_id << 1);
+    tmp3 = asset_load(0, 2, 5, (g_level_id << 1) + 1);
     if (tmp2 == 0) {
         D_800BE5D0 = 0;
     } else {

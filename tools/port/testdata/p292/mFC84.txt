@@ -1,7 +1,7 @@
 \#^    if (obj == NULL || \*(void \*\*) (obj + 0x1D4) == NULL)#s/0x1D4/0x1D0/
 \#^    if (obj_bone_ground_probe(pos, obj, (s32) ground, (u8) arg1) == 0)#s/(u8) arg1/1/
 \#^    if (obj_bone_ground_probe(pos, obj, (s32) ground, (u8) arg1) == 0)#s/== 0/!= 0/
-\#^    if (D_800BE9F0 == 0x14)#s/0x14/0x13/
+\#^    if (g_level_id == 0x14)#s/0x14/0x13/
 \#^        ground_colour_by_depth(pos\[2\], #s/pos\[2\]/pos[0]/
 \#^        cr = SPLASH_F2U(r)#s/SPLASH_F2U(r)/(s32) r/
 \#^        cg = SPLASH_F2U(g)#s/(g)/(b)/

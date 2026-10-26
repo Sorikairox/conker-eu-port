@@ -10,8 +10,8 @@ typedef struct {
 } ImpactSurface;
 /* P203: spark burst spec for emit_streaks_from_spec (0x74 bytes; bytes 0x59..0x5B and 0x6B are never set) */
 typedef struct {
-    s32 count;        /* 0x00 5 >> D_800DCE50 */
-    s32 count2;       /* 0x04 4 >> D_800DCE50 */
+    s32 count;        /* 0x00 5 >> g_fx_lod_shift_players */
+    s32 count2;       /* 0x04 4 >> g_fx_lod_shift_players */
     f32 pos[3];       /* 0x08 */
     f32 speed;        /* 0x14 8.25 */
     f32 spread;       /* 0x18 5.86 */
@@ -70,16 +70,16 @@ u8 *mdl_particle_spawn(ImpactParticle *spec, s32 arg1, s32 arg2, s32 arg3, u8 ar
 void *cam_sprite_puff_spawn(f32 size, u8 arg1, ImpactSurface *surf, f32 *pos, s16 life, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
 s32 sfx_cb_delayed_play_2d(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c), passed by address */
 void *memcpy(void *, const void *, s32);
-extern u8 D_800DCE50;  /* spark count shift (0 = full) */
-extern f32 D_800DCE54; /* spark chance */
+extern u8 g_fx_lod_shift_players;  /* spark count shift (0 = full); was D_800DCE50 */
+extern f32 g_fx_lod_scale_players; /* spark chance; was D_800DCE54 */
 
 // impact_effect_spawn: P203: effects where a shot or blow hits `pos` coming along `dir`. The surface: the caller's
 // hit record (`hit`, 0x12 bytes) at pos, else a ray from pos - dir along dir (collision_ray_cast) gives the hit point,
 // surface and material id (-1 when nothing is hit). kind (0..5, others do nothing) picks the particle type (0x34,
 // 0x4D, 0x57, 0x58, 0x0C, none). `big` = a random odd number or a surface without material (prop_is_flagged == 0).
 // Kind 1 (bullet) plays a ricochet: a random 0x459..0x45B one-shot (sfx_emitter_start, only in one-player mode, then
-// the follow-up sound 0x106) when big, else 0xB0, through sound_voice_play_at at the position. With chance D_800DCE54 a
-// spark burst (emit_streaks_from_spec, 5 >> D_800DCE50 sparks). In one- and two-player modes the particle of the kind: when
+// the follow-up sound 0x106) when big, else 0xB0, through sound_voice_play_at at the position. With chance g_fx_lod_scale_players a
+// spark burst (emit_streaks_from_spec, 5 >> g_fx_lod_shift_players sparks). In one- and two-player modes the particle of the kind: when
 // big a fast debris piece thrown back along the surface normal (vec3_normalize_len) with random spin, else a slow puff
 // with a trail block (+0x170) along the direction's angles. A material surface that was hit also gets a decal
 // (cam_sprite_puff_spawn, size 15..35, life 300). arg4 / arg5 are passed to every spawner (view / owner).
@@ -160,9 +160,9 @@ s32 bullet_impact_effects(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 
         sound_voice_play_at(0, snd, 0x6590, (u32) random_int() % 500 - 250, 0, 0, (s32) pos[0], (s32) pos[1],
                       (s32) pos[2], 500, 800);
     }
-    if (random_float() < D_800DCE54) {
-        sparks.count = 5 >> D_800DCE50;
-        sparks.count2 = 4 >> D_800DCE50;
+    if (random_float() < g_fx_lod_scale_players) {
+        sparks.count = 5 >> g_fx_lod_shift_players;
+        sparks.count2 = 4 >> g_fx_lod_shift_players;
         sparks.pos[0] = pos[0];
         sparks.pos[1] = pos[1];
         sparks.pos[2] = pos[2];
@@ -302,7 +302,7 @@ void obj_bone_point_or_pos(s32 arg0, s32 arg1, void *arg2, u8 arg3, f32 arg4) {
 
 /* P159 */
 // object_sound_between: plays sound `sound` (attack_spawn_at_point) at the midpoint of a and b for object obj (its index
-// in D_800CC2D0); the facing is obj's u16 at +0x76, minus the s16 at +0x12 of its parent (+0x31C) when it has one.
+// in g_objects); the facing is obj's u16 at +0x76, minus the s16 at +0x12 of its parent (+0x31C) when it has one.
 /* was func_151D441C */
 void object_effect_between(struct127 *obj, f32 *a, f32 *b, s32 sound) {
     u8 *parent;
@@ -314,7 +314,7 @@ void object_effect_between(struct127 *obj, f32 *a, f32 *b, s32 sound) {
     } else {
         facing = *(u16 *)((u8 *)obj + 0x76);
     }
-    attack_spawn_at_point((a[0] + b[0]) * 0.5f, (a[1] + b[1]) * 0.5f, (a[2] + b[2]) * 0.5f, sound, obj - D_800CC2D0,
+    attack_spawn_at_point((a[0] + b[0]) * 0.5f, (a[1] + b[1]) * 0.5f, (a[2] + b[2]) * 0.5f, sound, obj - g_objects,
                   facing, 0, 0);
 }
 
@@ -351,7 +351,7 @@ void explosion_light_spawn(u8 *arg0, u8 arg1, s32 arg2) {
 /* P155 */
 s32 attack_spawn_at_point(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, u16 arg5, s32 arg6, s32 arg7);
 // object_sounds_at: plays the sounds `sound1` and `sound2` (attack_spawn_at_point) at pos for object obj (its index in
-// D_800CC2D0) with `flags` and a source point: with dir, pos - 90 * dir and dir's binary angle - 0x4000 (odd) as
+// g_objects) with `flags` and a source point: with dir, pos - 90 * dir and dir's binary angle - 0x4000 (odd) as
 // facing; without, pos raised by half the height of `model` (obj_collision_cylinder, when given) and facing 0. arg4 is
 // unused. Returns 0 (the asm leaves v0 unset; the caller ignores it).
 /* was func_151D4684 */
@@ -381,14 +381,14 @@ s32 object_effects_at(f32 *pos, f32 *dir, struct127 *obj, struct127 *model, s32 
         }
         facing = 0;
     }
-    index = obj - D_800CC2D0;
+    index = obj - g_objects;
     attack_spawn_at_point(pos[0], pos[1], pos[2], sound1, index, facing, flags, (s32)at);
     attack_spawn_at_point(pos[0], pos[1], pos[2], sound2, index, facing, flags, (s32)at);
     return 0;
 }
 
 /* P155 */
-// object_sound_at: plays sound `sound` (attack_spawn_at_point) at pos for object obj (its index in D_800CC2D0), with the
+// object_sound_at: plays sound `sound` (attack_spawn_at_point) at pos for object obj (its index in g_objects), with the
 // direction of dir (x / z, binary angle - 0x4000, odd) or 0 without dir. arg3 is unused.
 /* was func_151D4898 */
 void object_effect_at(f32 *pos, f32 *dir, struct127 *obj, s32 arg3, s32 sound) {
@@ -403,7 +403,7 @@ void object_effect_at(f32 *pos, f32 *dir, struct127 *obj, s32 arg3, s32 sound) {
         angle = (a <= -1.0f) ? 0xFFFFFFFF : (u32)a;
         facing = ((angle - 0x4000) | 1) & 0xFFFF;
     }
-    attack_spawn_at_point(pos[0], pos[1], pos[2], sound, obj - D_800CC2D0, facing, 0, 0);
+    attack_spawn_at_point(pos[0], pos[1], pos[2], sound, obj - g_objects, facing, 0, 0);
 }
 
 typedef struct { f32 x, y, z; } V3;
@@ -776,7 +776,7 @@ void object_take_hit(u8 *obj, u8 *attacker, u8 *pos, f32 *pos2, u8 *rec, s32 fla
     w = (s32) (math_atan2f(dir[0], dir[2]) * 10430.378f);
     angle = (w < 0) ? 0xFFFF : w;
     obj_send_hit((struct127 *) obj, flags | 0x80000, (u16) ((angle - 0x4000) | 1),
-                  (attacker != NULL) ? (struct127 *) attacker - D_800CC2D0 : -1);
+                  (attacker != NULL) ? (struct127 *) attacker - g_objects : -1);
 }
 
 /* was func_151D56F8 */
@@ -1087,7 +1087,7 @@ s32 object_mouth_point(struct127 *obj, f32 *out, f32 *dir, s32 arg3, s32 arg4, f
 
 /* P159 */
 extern s32 (*D_80087030[])(u8 *, s32, s32);
-// objects_hit_by_segment: tests the segment start / dir (ray_sphere_intersect) against every live object of D_800CC2D0
+// objects_hit_by_segment: tests the segment start / dir (ray_sphere_intersect) against every live object of g_objects
 // (not self, kind byte +4 not 0xFF unless level 0x23, state +5 not 3, flag 0x40 at +0xF8, passing filter
 // D_80087030[filter](obj, self, filterArg) unless filter is -1) as a sphere at its position raised by +0xD6 with
 // diameter 2 * max(+0xD2, +0xD4). Returns a mask with bit i cleared for each hit object i (all other bits set).
@@ -1105,14 +1105,14 @@ s32 objects_hit_by_segment(u8 *start, s32 *dir, u8 *self, s8 filter, s32 filterA
 
     mask = -1;
     for (i = 0; i < 25; i++) {
-        obj = (u8 *)&D_800CC2D0[i];
+        obj = (u8 *)&g_objects[i];
         if (*(s32 *)(obj + 0) == 0) {
             continue;
         }
         if (obj[5] == 3) {
             continue;
         }
-        if (D_800BE9F0 != 0x23 && obj[4] == 0xFF) {
+        if (g_level_id != 0x23 && obj[4] == 0xFF) {
             continue;
         }
         if (obj == self) {

@@ -156,7 +156,7 @@ void gun_shot_effects(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxow
     } else {
         mask = 0xFF;
     }
-    kind = (D_800BE9F0 == 0x34 || D_800BE9F0 == 0x26) ? 5 : 4;
+    kind = (g_level_id == 0x34 || g_level_id == 0x26) ? 5 : 4;
     r1 = random_float();
     r2 = random_float();
     r3 = random_int();

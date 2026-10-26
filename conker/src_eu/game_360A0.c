@@ -6,7 +6,7 @@
 
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 void area_drift_emitter_create(void *, u8);
-/* P18: D_80095B48/4C/50 are rodata f32 words (variables.h: u8[]); the body used to define them as u8[4] and read one byte */
+/* P18: g_area_drift_speed_k/4C/50 are rodata f32 words (variables.h: u8[]); the body used to define them as u8[4] and read one byte */
 
 /* was func_15008BF0 */
 s32 area_drift_emitter_spawn(u8 *arg0) {
@@ -41,7 +41,7 @@ s32 area_drift_emitter_spawn(u8 *arg0) {
 
     (*(u8 *)((u8 *)arg0 + 0x16)) = (u8) ((*(u8 *)((u8 *)arg0 + 0x16)) | 4);
     sp.u54 = 0.0f;
-    sp.u50 = (f32) (*(s16 *)((u8 *)arg0 + 6)) * 0.19600001f * *(f32 *)D_80095B48;
+    sp.u50 = (f32) (*(s16 *)((u8 *)arg0 + 6)) * 0.19600001f * *(f32 *)g_area_drift_speed_k;
     sp.u70 = 4;
     sp.u74 = 2;
     sp.u60 = 0x64;
@@ -50,9 +50,9 @@ s32 area_drift_emitter_spawn(u8 *arg0) {
     sp.u6E = 0x14;
     sp.u58 = 7.0f;
     sp.u5C = 6.0f;
-    sp.u48 = *(f32 *)D_80095B4C;
+    sp.u48 = *(f32 *)g_area_drift_param_48;
     sp.u4C = 7.5f;
-    sp.u64 = *(f32 *)D_80095B50;
+    sp.u64 = *(f32 *)g_area_drift_param_64;
     sp.u68 = 0.60700005f;
     sp.u2A = 0x14;
     sp.u28 = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x10)) * 0.7111111f);
@@ -75,7 +75,7 @@ s32 area_drift_emitter_spawn(u8 *arg0) {
 //     f32 bar = D_80095B40;
 //
 //     arg0->unk16 |= 4;
-//     foo = arg0->unk6 * D_80095B44 * D_80095B48;
+//     foo = arg0->unk6 * D_80095B44 * g_area_drift_speed_k;
 //
 //     tmp.unk54 = 0.0f;
 //     tmp.unk50 = foo;
@@ -89,9 +89,9 @@ s32 area_drift_emitter_spawn(u8 *arg0) {
 //     //
 //     tmp.unk58 = 7.0f;
 //     tmp.unk5C = 6.0f;
-//     tmp.unk48 = D_80095B4C;
+//     tmp.unk48 = g_area_drift_param_48;
 //     tmp.unk4C = 7.5f;
-//     tmp.unk64 = D_80095B50;
+//     tmp.unk64 = g_area_drift_param_64;
 //     tmp.unk68 = D_80095B54;
 //     tmp.unk2A = 20;
 //     tmp.unk28 = arg0->unk10 * bar;

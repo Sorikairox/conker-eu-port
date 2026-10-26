@@ -315,11 +315,11 @@ u8 *decal_draw(u8 *arg0, u8 *arg1, s32 arg2) {
         } else {
             var_a0_2 = temp_v1_2 * 0xA;
         }
-        if ((temp_t5 != D_800DD5F0) || (temp_t6 != D_800DD5F2) || (temp_t8 != D_800DD5F4) || (var_a0_2 != D_800DD5F6)) {
-            D_800DD5F0 = temp_t5;
-            D_800DD5F2 = temp_t6;
-            D_800DD5F4 = temp_t8;
-            D_800DD5F6 = var_a0_2;
+        if ((temp_t5 != g_gfx_prim_r_cached) || (temp_t6 != g_gfx_prim_g_cached) || (temp_t8 != g_gfx_prim_b_cached) || (var_a0_2 != g_gfx_prim_a_cached)) {
+            g_gfx_prim_r_cached = temp_t5;
+            g_gfx_prim_g_cached = temp_t6;
+            g_gfx_prim_b_cached = temp_t8;
+            g_gfx_prim_a_cached = var_a0_2;
             if (sp.u8C != 0) {
                 (*(s32 *)((u8 *)var_s0_2 + 0)) = 0xE7000000;
                 (*(s32 *)((u8 *)var_s0_2 + 4)) = 0;

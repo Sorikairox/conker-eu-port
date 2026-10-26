@@ -239,7 +239,7 @@ void ring_effect_update(u8 *node) {
         if ((s8)node[0x3C] != -1) {
             *(f32 *)(node + 0x50) += *(f32 *)(node + 0x38) * D_800BE9A4 * (D_800A08FC * *(f32 *)(node + 0x44));
             while (1.0f < *(f32 *)(node + 0x50)) {
-                s32 view = (s32)(*(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x380) * D_800A0904);
+                s32 view = (s32)(*(f32 *)((u8 *)D_800DBFF0 + g_cur_view_player * 0x9A0 + 0x380) * D_800A0904);
                 s32 a = (u32)random_int() % 81 + view - 0x28;
                 f32 s = angle_byte_cos((u8)(a - 0x40));
                 f32 c = angle_byte_cos((u8)a);
@@ -269,14 +269,14 @@ void ring_effect_update(u8 *node) {
 }
 
 /* P222: readable C for ring_effect_draw (game_eu_F6060, 767 words): draw callback of render layer 0x31 (the ring
- * effect; layer at D_8008B848 + 0x31 * 0x34: update ring_effect_update, draw ring_effect_draw). */
+ * effect; layer at g_node_type_table + 0x31 * 0x34: update ring_effect_update, draw ring_effect_draw). */
 typedef struct {
     s32 n;          /* 5 */
     f32 (*pt)[2];   /* D_800A08D0: (radial offset, height) */
 } RingProfile;
 extern RingProfile D_80088BC0;
 extern s32 *D_80091234;  /* the ring texture's id */
-extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
+extern s32 g_render_mode_pairs[]; /* render mode pairs (2 words each); was D_800A4EA8 */
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
@@ -288,7 +288,7 @@ void ground_colour_by_depth(f32, f32 *, f32 *, f32 *);
 #define RING_DL(a, b) (gdl->words.w0 = (a), gdl->words.w1 = (b), gdl++)
 
 // ring_effect_draw: draws a ring effect node: render state (geometry mode, colours, combiner 0x21, render mode
-// D_800A4EA8 entry 14), the ring texture (texture_cache_lookup(*D_80091234): CI4 with 6 mip levels in tiles 0..5, its TLUT is
+// g_render_mode_pairs entry 14), the ring texture (texture_cache_lookup(*D_80091234): CI4 with 6 mip levels in tiles 0..5, its TLUT is
 // the last 0x20 bytes) and a surface of revolution: the cross-section D_80088BC0 (radial offset, height, scaled by
 // +0x40) swept around the centre +0x10 / +0x14 / +0x18 at radius +0x44, one vertex column per direction (+0x360:
 // cos / sin pairs, +0x24 of them, the last column repeats the first). Columns farther than 3300.6 from the world
@@ -312,7 +312,7 @@ Gfx *ring_effect_draw(Gfx *gdl, u8 *node, s16 arg2) {
     gdl = gfx_env_color_cached(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gdl = gfx_prim_color_cached(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gdl = gfx_set_combine_mode(gdl, 0x21, &flag);
-    gdl = gfx_other_mode_cached(gdl, 0x1DACA0, D_800A4EA8[29] | D_800A4EA8[28], &flag);
+    gdl = gfx_other_mode_cached(gdl, 0x1DACA0, g_render_mode_pairs[29] | g_render_mode_pairs[28], &flag);
     tex = texture_cache_lookup(*D_80091234, &size, 3, 0);
     gSPTexture(gdl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     RING_DL(0xFD500000, tex);        /* texture image: CI, 16-bit words (block load) */
@@ -477,7 +477,7 @@ void ring_spawn_particle(u8 *arg0, f32 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* 
  * and not immune, that is a player (state 1) or type 0x53, is hit when the ring of radius node +0x44 has reached
  * it: ring - (horizontal distance to the node centre +0x10 / +0x18 - 100, 150 more for an unlifted type 0x53)
  * in [0, 250). Type 0x53 gets disable_run = 10, its script restarted (unk218 NULL) at command 0x13 (0x14 when its
- * holder D_800CC2D0[unk124] holds something, unk65); others the hit obj_send_hit(obj, 0x6000E, facing, -1).
+ * holder g_objects[unk124] holds something, unk65); others the hit obj_send_hit(obj, 0x6000E, facing, -1).
  * The asm returns its leftover v0: the state of the last object, or obj_send_hit's result when that one was hit;
  * the C keeps that value. */
 s32 obj_send_hit(struct127 *obj, s32 flags, u16 val, s32 arg3);
@@ -490,7 +490,7 @@ s32 shockwave_hit_objects(u8 *node) {
     f32 dist;
     f32 reach;
 
-    for (o = D_800CC2D0; o != &D_800CC2D0[25]; o++) {
+    for (o = g_objects; o != &g_objects[25]; o++) {
         ret = o->interaction_state;
         if (ret == 0 || !(o->unk28 < 20.0f) || o->immune != 0) {
             continue;
@@ -512,7 +512,7 @@ s32 shockwave_hit_objects(u8 *node) {
             o->disable_run = 10;
             o->unk218 = NULL;
             o->unk232 = 0x13;
-            if (D_800CC2D0[o->unk124].unk65 != 0) {
+            if (g_objects[o->unk124].unk65 != 0) {
                 o->unk232 = 0x14;
             }
         } else {
@@ -643,7 +643,7 @@ s32 particle_ballistic_update(u8 *arg0) {
 }
 
 // landing_dust_burst: P201: the burst of effects under the character `obj` (the only caller, objfx_ca150, passes
-// D_800D154C) when it lands / stamps: position = obj x, y + 100, z; the ground below it (collision_floor_probe down to
+// g_cur_obj) when it lands / stamps: position = obj x, y + 100, z; the ground below it (collision_floor_probe down to
 // y - 300, HitInfo started by hitinfo_from_obj_floor) gives y, else the floor height obj +0x180. Rumbles the current
 // player's pad (camera_shake_start(view, 7, 1)), takes the ground colour at the position (ground_colour_by_depth, three floats
 // -> bytes), shakes the camera (rumble_all_players_at) and creates a 13-point dust ring (ring_effect_create, view 0xFF, group 1).

@@ -13,7 +13,7 @@ void camera_update_level_events(struct108 *arg0) {
     s32 var_v1;
 
     if (arg0->unk23E == 9) {
-        if (D_800BE9F0 == 0x1E) {
+        if (g_level_id == 0x1E) {
             event_dispatch_alt(0, 0x4044, 1);
         }
         if ((arg0->unk2C != 0x100) && (arg0->unk6C8 == 0)) {
@@ -39,11 +39,11 @@ void camera_update_level_events(struct108 *arg0) {
         arg0->unk348 = 110.0f;
         arg0->unk374 = 300.0f;
     }
-    var_v1 = D_800BE9F0;
+    var_v1 = g_level_id;
     if (var_v1 == 0x1E) {
         event_dispatch_alt(0, 0x4044, 0);
 block_16:
-        var_v1 = D_800BE9F0;
+        var_v1 = g_level_id;
     }
     if (var_v1 == 0x2F) {
         arg0->unk84 &= 0x7FFFFFFF;
@@ -65,7 +65,7 @@ block_16:
             arg0->unk84 = temp_t9 | 8;
         }
 block_26:
-        var_v1 = D_800BE9F0;
+        var_v1 = g_level_id;
     }
     if (var_v1 == 0x1B) {
         if (event_dispatch(1, 0x406E, 6, 0x9000) != 0) {

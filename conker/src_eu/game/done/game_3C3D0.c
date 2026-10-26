@@ -9,8 +9,8 @@ void level_setup_scroll_fx_points(void) {
     struct102 *temp_v0;
     struct174 tmp;
 
-    level_dl_add_texture_scroll(D_800B0E00[0], g_tex_scroll_id_02b8, 1, -1, 0, 0, 0, -8);
-    level_dl_add_texture_scroll(D_800B0E00[1], g_tex_scroll_id_02b8, 1, -1, 0, 1, 0, -8);
+    level_dl_add_texture_scroll(g_level_part_dls[0], g_tex_scroll_id_02b8, 1, -1, 0, 0, 0, -8);
+    level_dl_add_texture_scroll(g_level_part_dls[1], g_tex_scroll_id_02b8, 1, -1, 0, 1, 0, -8);
 
     tmp.unk0 = g_scroll_fx_pt0_x;
     tmp.unk4 = g_scroll_fx_pt0_y;

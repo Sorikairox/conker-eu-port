@@ -12,7 +12,7 @@ extern void (*D_8008B478[])(u8 *, u16 *);
  * framebuffer_effects_apply: runs the framebuffer handlers (D_8008B478, index effect+0x10, -1 = none) of the
  * type-0x34 effects of both list groups on the frame about to be swapped (called by sched_swap_framebuffer).
  * Flag bits at effect+0xE: 4 = skip this frame once (cleared here), 2 = not while D_800C35EA == 1,
- * 8 = only while hud_lens_is_off(0) is set and screen_fade_alpha(0) is 0. Walks with the D_800DD5C8 safe-next
+ * 8 = only while hud_lens_is_off(0) is set and screen_fade_alpha(0) is 0. Walks with the g_node_iter_next safe-next
  * stack so a handler may free its effect.
  */
 /* was func_15160310 */
@@ -23,10 +23,10 @@ void fb_fx_apply_all(u16 *fb) {
     s32 run;
 
     for (i = 0; i < 2; i++) {
-        node = (u8 *)D_800DD280[i][0x34];
-        D_800DD5C0++;
+        node = (u8 *)g_node_lists[i][0x34];
+        g_node_iter_depth++;
         while (node != NULL) {
-            D_800DD5C8[D_800DD5C0] = ((struct_eu_node *)node)->next;
+            g_node_iter_next[g_node_iter_depth] = ((struct_eu_node *)node)->next;
             flags = node[0xE];
             if (flags & 4) {
                 node[0xE] = flags & ~4;
@@ -46,9 +46,9 @@ void fb_fx_apply_all(u16 *fb) {
                     D_8008B478[*(s8 *)(node + 0x10)](node, fb);
                 }
             }
-            node = (u8 *)D_800DD5C8[D_800DD5C0];
+            node = (u8 *)g_node_iter_next[g_node_iter_depth];
         }
-        D_800DD5C0--;
+        g_node_iter_depth--;
     }
 }
 

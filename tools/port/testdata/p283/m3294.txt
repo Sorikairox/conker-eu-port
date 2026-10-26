@@ -7,8 +7,8 @@
 \#^        st\[0xC\] = 3;#s/3/2/
 \#^        \*(f32 \*) (st + 8) = 0\.0f;#s/0\.0f/1.0f/
 \#^    st\[5\] = owner\[0x222\];#s/st\[5\]/st[6]/
-\#^        obj_tint_set_flash((u8 \*) D_800CC2D0 #s/0x32C/0x328/
-\#^        obj_tint_set_flash((u8 \*) D_800CC2D0 #s/0x50, 0, 0xF/0x50, 0, 0xE/
+\#^        obj_tint_set_flash((u8 \*) g_objects #s/0x32C/0x328/
+\#^        obj_tint_set_flash((u8 \*) g_objects #s/0x50, 0, 0xF/0x50, 0, 0xE/
 \#^    if (\*(u8 \*\*) (owner + 0x1D4) == NULL) {#s/==/!=/
 \#^    if (\*(s8 \*) (st + 0xC) <= 0) {#s/<= 0/< 0/
 \#^    \*(f32 \*) (st + 8) += #s/D_800A1D38 \* D_800BE9A4/D_800A1D38/

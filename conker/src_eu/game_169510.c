@@ -5,7 +5,7 @@
 // hoisted declarations of the NON_MATCHING bodies
 u8 *sprite_quad_build_axes(u8 *arg0, u8 *arg1, u8 *arg2, s16 arg3);
 Gfx *gfx_set_combine_mode(Gfx *arg0, u8 arg1, u8 *arg2);
-extern u8 D_800A4EA8[];
+extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 // copies the colours of 4 vertices
 typedef struct {
@@ -443,7 +443,7 @@ u8 *sprite_fx_draw(u8 *arg0, u8 *arg1, s16 arg2) {
             } else {
                 var_v0_6 = D_800D30BC;
             }
-            temp_v1_2 = (sp.u7A * 8) + ((u8 *)&D_800A4EA8);
+            temp_v1_2 = (sp.u7A * 8) + ((u8 *)&g_render_mode_pairs);
             temp_v0_2 = gfx_other_mode_cached(temp_a0, var_v0_6 | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1_2 + 4)) | (*(s32 *)((u8 *)temp_v1_2 + 0)), &sp.u7B);
             (*(u8 **)((u8 *)temp_v0_2 + 4)) = (u8 *) (arg1 + 0x40);
             (*(s32 *)((u8 *)temp_v0_2 + 0)) = 0x01004008;
@@ -1080,7 +1080,7 @@ u8 *effect3d_draw(u8 *arg0, u8 *arg1, s16 arg2) {
                     } else {
                         var_v0_6 = D_800D30BC;
                     }
-                    temp_v1_6 = (sp79 * 8) + ((u8 *)&D_800A4EA8);
+                    temp_v1_6 = (sp79 * 8) + ((u8 *)&g_render_mode_pairs);
                     temp_v0_6 = gfx_other_mode_cached(temp_a0, var_v0_6 | (var_t0 | 0x80000) | 0x2CA0, (*(s32 *)((u8 *)temp_v1_6 + 4)) | (*(s32 *)((u8 *)temp_v1_6 + 0)), &sp.u8B);
                     (*(s32 *)((u8 *)temp_v0_6 + 0)) = 0x01004008;
                     (*(s32 *)((u8 *)temp_v0_6 + 4)) = sp6C;
@@ -2127,7 +2127,7 @@ u8 *sprite_quad_build_axes(u8 *arg0, u8 *arg1, u8 *arg2, s16 arg3) {
 #define L6AC_NEXT(n) (*(u8 **)((n) + 8))
 #define L6AC_KEY(n) (((n)[0x18] << 8) + (*(s32 *)((n) + 0x20) >> 16))
 
-/* Insertion sort of scene-node list D_800DD280[group][idx] by key (+0x18 << 8) + (+0x20 >> 16), ascending, stable;
+/* Insertion sort of scene-node list g_node_lists[group][idx] by key (+0x18 << 8) + (+0x20 >> 16), ascending, stable;
  * a node moves behind the last earlier node whose key is not greater. A stack node stands in for the list head
  * (key 0, no prev); as in the asm the head's prev is set before the NULL test and the first node's prev is cleared
  * at the end, so an empty list writes word 4. `skip` != 0: nothing. Returns `ret` (a0) unchanged. */
@@ -2146,7 +2146,7 @@ s32 scene_node_list_sort(s32 ret, s32 idx, s32 group, s16 skip) {
     if (skip != 0) {
         return ret;
     }
-    slot = (u8 **)((u8 *)D_800DD280 + group * 0x1A0 + idx * 4);   /* D_800DD280[2][104] list heads */
+    slot = (u8 **)((u8 *)g_node_lists + group * 0x1A0 + idx * 4);   /* g_node_lists[2][104] list heads */
     head = *slot;
     d[0x18] = 0;
     dummy[8] = 0;

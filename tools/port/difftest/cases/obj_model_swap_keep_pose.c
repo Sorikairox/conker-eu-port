@@ -32,7 +32,7 @@ void obj_model_swap_keep_pose(struct127 *obj, s32 a1, s32 a2, f32 scale) {
     fC4 = *(f32 *) (o + 0xC4);
     yaw = *(u16 *) (o + 0x76);
     obj_remove(obj, 0);
-    setup_entry_spawn(e, slot, 0, 0, (obj - D_800CC2D0) + 1);
+    setup_entry_spawn(e, slot, 0, 0, (obj - g_objects) + 1);
     *(f32 *) (o + 0x14) = x;
     *(f32 *) (o + 0x18) = y;
     *(u8 **) (o + 0x318) = link;

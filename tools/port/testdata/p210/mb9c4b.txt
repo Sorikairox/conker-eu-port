@@ -3,7 +3,7 @@ s/obj->unk109 = cur->unk20;/obj->unk109 = base->unk20;/
 s/obj->gravity = cur->gravity;/obj->gravity = base->gravity;/
 s/obj->unk239 = 0;/;/
 s/ev.uid = self->unique_id;/ev.uid = obj->unique_id;/
-s/D_800D1580 = base->sound;/D_800D1580 = cur->sound;/
+s/g_cur_obj_cmd = base->sound;/g_cur_obj_cmd = cur->sound;/
 s/if (base->flags \& 0x100) {/if (cur->flags \& 0x100) {/
 s/obj->unk105 = 0;/;/
 s/obj->immune = base->immune \& 0x3F;/obj->immune = base->immune \& 0x7F;/

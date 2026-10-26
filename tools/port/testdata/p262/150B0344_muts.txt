@@ -12,10 +12,10 @@ s/40.0f, 0.0f, 2.0f, 120.0f, 0x3C, 0x23/40.0f, 0.0f, 2.0f, 12.0f, 0x3C, 0x23/ % 
 s/120.0f, 0x3C, 0x23, 0, 0,/120.0f, 0x3C, 0x22, 0, 0,/ % s0
 s/0, 0, 0, 0, 0, 0, 0,$/0, 0, 0, 0, 0, 0, 1,/ % s0
 s/^                  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);/                  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);/ % s0
-s/D_800D154C->unique_id, (s16)joint/D_800D154C->unique_id, (s16)side/ % s0
-s/D_800D154C->unique_id, (s16)joint/0, (s16)joint/ % s0
+s/g_cur_obj->unique_id, (s16)joint/g_cur_obj->unique_id, (s16)side/ % s0
+s/g_cur_obj->unique_id, (s16)joint/0, (s16)joint/ % s0
 s/(s16)joint, -1, 0.0f/(s16)joint, 1, 0.0f/ % s0
 s/-39.0f, 0.0f, 0.0f, -150.0f, 3, 0xFF,/-39.0f, 0.0f, 0.0f, -150.0f, 3, 0x7F,/ % s0
 s/-39.0f, 0.0f, 0.0f, -150.0f/-39.0f, 0.0f, 0.0f, -15.0f/ % s0
 s/^                  4, 0);/                  5, 0);/ % s0
-s/beam_effect_spawn_attached((s32)D_800D154C,/beam_effect_spawn_attached((s32)mtx,/ % s0
+s/beam_effect_spawn_attached((s32)g_cur_obj,/beam_effect_spawn_attached((s32)mtx,/ % s0

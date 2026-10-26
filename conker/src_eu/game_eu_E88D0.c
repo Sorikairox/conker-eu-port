@@ -56,7 +56,7 @@ void foot_splash_effect(u8 *obj, u8 kind, u8 alpha) {
     f32 hit[9];
     f32 probe[3];
     f32 pos[3];
-    u8 *cam = (u8 *) D_800DBFF0 + D_80082FA4 * 0x9A0;
+    u8 *cam = (u8 *) D_800DBFF0 + g_cur_view_player * 0x9A0;
     s32 heading = (s32) (*(f32 *) (cam + 0x380) * D_800A0240[0]);
     s16 left, right;
     f32 size;

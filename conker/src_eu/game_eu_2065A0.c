@@ -27,7 +27,7 @@ s32 rumble_start_strength(s32, u8);
 s32 screen_fade_alpha(s32);
 s32 hud_lens_is_off(s32);
 s32 memcpy(u8 *, structEU_151D8E18 *, s32);
-extern u8 D_800BEEE2;
+extern u8 g_unpause_settle_frames; /* was D_800BEEE2 */
 extern u8 D_800BEEE3;
 
 /* was func_151D8E18 */
@@ -44,7 +44,7 @@ s32 rumble_request(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3) {
     if (rumble_mask_has_pak(arg0->unk5) == 0) {
         return 0;
     }
-    if ((D_800BEAC0 != 0) || (D_800BEAC1 != 0) || (D_800BEEE2 != 0) || (D_800BEEE3 != 0)) {
+    if ((g_game_paused != 0) || (D_800BEAC1 != 0) || (g_unpause_settle_frames != 0) || (D_800BEEE3 != 0)) {
         return 0;
     }
     var_s1 = 0;

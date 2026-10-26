@@ -68,7 +68,7 @@ void scenery_ease_pos_update(u8 *arg0) {
 }
 /* was func_150BE938 */
 s16 *obj_adjust_entries_type21(s16 *arg0, s32 arg1) {
-    u8 *p = (u8 *)&D_800CC2D0[arg1];
+    u8 *p = (u8 *)&g_objects[arg1];
 
     arg0[0] = 0x68;
     arg0[1] = *(s32 *)(p + 0x2E8);

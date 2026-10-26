@@ -13,7 +13,7 @@
 int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
-extern unsigned char D_800CC2D0[];
+extern unsigned char g_objects[]; /* was D_800CC2D0 */
 extern int D_800D1CE4;
 
 #define REC 0x32C
@@ -21,14 +21,14 @@ static int fl = -1;
 static int on(void) { if (fl < 0) fl = port_flag("p61check"); return fl; }
 static int want(unsigned n) { return on() && (n <= (unsigned)fl || n % 256 == 0); }
 static float F(const unsigned char *r, int o) { return *(const float *)(r + o); }
-static int recno(const void *r) { return (int)(((const unsigned char *)r - D_800CC2D0) / REC); }
+static int recno(const void *r) { return (int)(((const unsigned char *)r - g_objects) / REC); } /* was D_800CC2D0 */
 
 /* ---- player_lose_life (life lost) and game_request_transition */
 static int in_d4f8;
 void __real_player_lose_life(int idx);
 void __wrap_player_lose_life(int idx) {
     static unsigned n;
-    const unsigned char *r = D_800CC2D0 + idx * REC;
+    const unsigned char *r = g_objects + idx * REC;
     float x = F(r, 0x14), y = F(r, 0x18), z = F(r, 0x1C);
     int st = *(const int *)r;
     n++;
@@ -126,7 +126,7 @@ static void p63_anim_log(const unsigned char *a, float step, int rec, unsigned i
                  (short)vbe_ld16(a + 0x3C), vbe_ld8(a + 0x43), vbe_ld8(a + 0x45), vbe_ld8(a + 0x47), cb,
                  f1 < f0 ? " LOOP" : "", crossed ? " END-CB" : "", changed ? " NEW" : "", loops, cbs);
     if (n <= (unsigned)fl63 || n % 64 == 0 || id != lastid || changed) {
-        const unsigned char *r0 = D_800CC2D0;
+        const unsigned char *r0 = g_objects;
         port_log("[p63]   rec 0: pos %.1f %.1f %.1f +28 %.2f xzv %.2f +44 %.2f | floor +184 %08X (slide class %u, kind %u) "
                  "+188 %08X +110 %d +162 %d D_800CC69C %d +83 %d +84 %04X | ctl +4E %02X +11A %02X\n",
                  F(r0, 0x14), F(r0, 0x18), F(r0, 0x1C), F(r0, 0x28), F(r0, 0x3C), F(r0, 0x44),
@@ -186,7 +186,7 @@ static int p63cb_arm(void *anim, unsigned cb) {
     static int fl = -1;
     const unsigned char *a = anim;
     if (fl < 0) fl = port_flag("p63cb");
-    if (!fl || p63cb_hits >= (unsigned)fl || anim != (void *)(*(unsigned char **)(D_800CC2D0 + 0x2D0))) return 0;
+    if (!fl || p63cb_hits >= (unsigned)fl || anim != (void *)(*(unsigned char **)(g_objects + 0x2D0))) return 0;
     if (!(F(a, 0x10) >= 0 && F(a, 8) + F(a, 0x10) * 2.5f >= F(a, 0x18) - 1.0f)) return 0;  /* near the end only */
     p63cb_armed = cb;
     p63cb_anim = anim;

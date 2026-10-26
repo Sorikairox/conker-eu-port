@@ -6,7 +6,7 @@
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 u8 *laser_create(f32 *, u8 *, f32 *, u8 *, u8 *, u8 *, u8, u8, u8, u8, s16, s16, s16, u8, u8, u8, u8, u8, u8, f32, f32, u8, u8, s32);
 
-// record_beam_start: D_80082EA0 entry 8 (level-start record). Unless rec +0x14 is 1: the segment from the record's
+// record_beam_start: g_record_start_handlers entry 8 (level-start record). Unless rec +0x14 is 1: the segment from the record's
 // point (s16 x, y, z) along the length +8 rotated by the angles +0xC / +0x10; two ray casts (collision_ray_cast) from its
 // middle towards both ends give the end points (geometry hits); when both hit, laser_create builds the beam between
 // them with the colour +0x1C (r, g, b bytes) and the option bits / bytes of +0x18 and +0x20. Always returns 1.
@@ -255,7 +255,7 @@ u8 *laser_create(f32 *hitA, u8 *triA, f32 *hitB, u8 *triB, u8 *owner, u8 *arg5, 
     spawn.to[0] = hitB[0];
     spawn.to[1] = hitB[1];
     spawn.to[2] = hitB[2];
-    spawn.u40 = ((D_800BE9F0 == 0x36) ? 0 : 0x2000000) | 0x6C0000 | 0x40000000;
+    spawn.u40 = ((g_level_id == 0x36) ? 0 : 0x2000000) | 0x6C0000 | 0x40000000;
     spawn.u44[0] = 0xFF;
     spawn.u44[1] = 0xFF;
     spawn.u44[2] = 0;

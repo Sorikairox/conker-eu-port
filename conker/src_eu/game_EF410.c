@@ -657,7 +657,7 @@ void fx_distant_burst_update(u8 *arg0) {
     temp_s0 = arg0 + 0x28;
     *temp_s0 += random_float() * 20.0f * 1e-9f * D_800BE9A4 * 3.6447764e7f;
     if (*temp_s0 > 1.0f) {
-        temp_v0 = camera_get_pos(D_80082FA4);
+        temp_v0 = camera_get_pos(g_cur_view_player);
         temp_f0 = (*(f32 *)((u8 *)temp_v0 + 0));
         temp_f2 = (*(f32 *)((u8 *)temp_v0 + 8));
         if (((temp_f0 * temp_f0) + (temp_f2 * temp_f2)) > 2500000.0f) {
@@ -724,7 +724,7 @@ s32 fx_wake_near_camera(struct_eu_EF410_d *arg0) {
     f32 d;
 
     if (arg0->unk1C >= 6) {
-        v = (struct17 *)camera_get_pos(D_80082FA4);
+        v = (struct17 *)camera_get_pos(g_cur_view_player);
         d = v->unk0 * v->unk0 + v->unk8 * v->unk8;
         if (d < 2500000.0f) {
             flag = TRUE;
@@ -748,7 +748,7 @@ s32 fx_wake_near_camera(struct_eu_EF410_d *arg0) {
 //     phi_a1 = (u8)0U;
 //     if ((s32) arg0->unk1C >= 6) {
 //         sp1F = 0;
-//         temp_v0 = camera_get_pos(D_80082FA4, (u8)0U);
+//         temp_v0 = camera_get_pos(g_cur_view_player, (u8)0U);
 //         temp_f0 = temp_v0->unk0;
 //         temp_f2 = temp_v0->unk8;
 //         temp_a1 = sp1F;
@@ -795,7 +795,7 @@ void obj_apply_gravity(struct127 *);
 void obj_sync_anim_frame(struct127 *, struct127 *);
 void obj_effect_run_handler(struct127 *, s32, void *);
 
-// carried_object_update: update of an object that another one (unk65, 1-based D_800CC2D0 slot) can carry: always
+// carried_object_update: update of an object that another one (unk65, 1-based g_objects slot) can carry: always
 // flag 0x4000000 in unkF8; when a carrier was set (unk222) and none is now, it restarts from its owner's position
 // (unk124); then the usual movement steps (obj_update_ground_tilt / obj_apply_gravity / obj_update_floor / obj_land_on_floor), half the
 // speed when unk28 is 0, the animation (obj_start_anim mode 0, or 2 / 3 / 1 by the carrier's unk84 0x1F9 / 0x1FB /
@@ -817,7 +817,7 @@ void carried_object_update(struct127 *obj) {
 
     obj->unkF8 |= 0x4000000;
     if (obj->unk222 != 0 && obj->unk65 == 0) {
-        owner = &D_800CC2D0[obj->unk124 - 1];
+        owner = &g_objects[obj->unk124 - 1];
         obj->old_x_position = owner->x_position;
         obj->old_y_position = owner->y_position;
         obj->old_z_position = owner->z_position;
@@ -832,7 +832,7 @@ void carried_object_update(struct127 *obj) {
     }
     if (obj->unk65 != 0) {
         obj->unk222 = obj->unk65;
-        id = D_800CC2D0[obj->unk65 - 1].unk84.uh;
+        id = g_objects[obj->unk65 - 1].unk84.uh;
         if (id == 0x1F9) {
             mode = 2;
         } else if (id == 0x1FB) {
@@ -845,14 +845,14 @@ void carried_object_update(struct127 *obj) {
     }
     obj_start_anim(obj, mode, 0.0f, 0.0f, 0.0f, 0.0f, 0);
     if (obj->unk65 != 0) {
-        obj_sync_anim_frame(obj, &D_800CC2D0[obj->unk65 - 1]);
+        obj_sync_anim_frame(obj, &g_objects[obj->unk65 - 1]);
     }
     if (obj->unk2E4 == 0) {
         return;
     }
     carrier = NULL;
     if (obj->unk65 != 0) {
-        carrier = &D_800CC2D0[obj->unk65 - 1];
+        carrier = &g_objects[obj->unk65 - 1];
         if (carrier->interaction_state == 5) {
             obj->unk65 = 0;
             obj->unk2E4 = 0;
@@ -871,7 +871,7 @@ void carried_object_update(struct127 *obj) {
     msg.pos[0] = obj->x_position;
     msg.pos[1] = obj->y_position;
     msg.pos[2] = obj->z_position;
-    msg.owner = &D_800CC2D0[obj->unk124 - 1];
+    msg.owner = &g_objects[obj->unk124 - 1];
     msg.carrier = obj->unk65;
     if (carrier != NULL) {
         carrier->stunned = 0;
@@ -942,10 +942,10 @@ void rolling_object_update(struct127 *obj) {
     }
     flags = obj->unk87;
     if (flags == 4) {
-        D_800D1580 = 0xFF020133;
-        D_800D154C = D_800CC2D0;
+        g_cur_obj_cmd = 0xFF020133;
+        g_cur_obj = g_objects;
         objev_sound_alt_300_1800();
-        D_800D154C = obj;
+        g_cur_obj = obj;
         obj->unk164 = obj->unkBC;
         obj->unk168 = obj->unk148;
         obj->xz_velocity = 0.0f;
@@ -974,11 +974,11 @@ void rolling_object_update(struct127 *obj) {
         actor_sound_stop(obj);
     } else if (actor_sound_is_playing(obj) == 0) {
         if (obj->id == 0xAC) {
-            D_800D1580 = 0x630;
+            g_cur_obj_cmd = 0x630;
         } else if (obj->id == 0x25) {
-            D_800D1580 = 0x67A;
+            g_cur_obj_cmd = 0x67A;
         } else {
-            D_800D1580 = 0x62A;
+            g_cur_obj_cmd = 0x62A;
         }
         objev_sound_300_1800();
     } else {

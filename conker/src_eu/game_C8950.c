@@ -182,7 +182,7 @@ struct249 *event_load(s16 arg0) {
 
     temp_v0 = asset_load(&sp18, 2, 20, arg0);
     temp_v0->unk0 |= arg0;
-    temp_v0->unk2 = D_800BE9F0;
+    temp_v0->unk2 = g_level_id;
     return (struct249 *) event_block_relocate((struct_eu_C8950_blk *) temp_v0);
 }
 
@@ -262,7 +262,7 @@ void event_list_unload(s32 arg0) {
             event_unlink_free(e);
             state[id] = 3;
         } else if (arg0 != 0 || (flags & 0x8000) ||
-                   ((flags & 0x1000) && D_800BE9F0 != *(u16 *)((u8 *)e + 2))) {
+                   ((flags & 0x1000) && g_level_id != *(u16 *)((u8 *)e + 2))) {
             D_8003C8E0 = 0x06000001;
             event_vm_run(e, 3);
             D_8003C8E0 = 0;
@@ -294,7 +294,7 @@ void event_list_run_phase(s32 arg0) {
 
     var_s0 = D_800D2F48.unk4;
     camera_timed_records_update();
-    if ((D_800BE616 != 0) || (D_800BE9F0 == 0x32) || (event_dispatch(0, 0x2000, 0x93) != 0) || (arg0 != 2)) {
+    if ((D_800BE616 != 0) || (g_level_id == 0x32) || (event_dispatch(0, 0x2000, 0x93) != 0) || (arg0 != 2)) {
         event_send_cmd36();
         temp_a2 = D_800D2F48.length;
         var_s5 = 0;
@@ -331,7 +331,7 @@ void event_list_run_phase(s32 arg0) {
                     if (var_a1 != 0) {
                         var_s0 = var_s0->next;
                     } else {
-                        if (!(var_v1 & 0x2000) || (D_800BE9F0 == (*(u16 *)((u8 *)var_s0 + 2)))) {
+                        if (!(var_v1 & 0x2000) || (g_level_id == (*(u16 *)((u8 *)var_s0 + 2)))) {
                             if ((arg0 == 2) || ((arg0 == 1) && !(var_v1 & 0x400))) {
                                 D_8003C8E0 = 0x06000004;
                                 event_vm_run(var_s0, arg0);
@@ -454,7 +454,7 @@ void event_send_cmd36(void) {
 
 /* was func_1509C2A4 */
 s32 level_is_game_over_level(void) {
-    s32 temp_v0 = D_800BE9F0;
+    s32 temp_v0 = g_level_id;
     if ((temp_v0 == 3) ||
         (temp_v0 == 5) ||
         (temp_v0 == 9) ||
@@ -491,8 +491,8 @@ s32 level_is_game_over_level(void) {
 /* was func_1509C3A0 */
 void game_over_apply_pending(void) {
     if ((D_800D2E43 != 0) && (D_800D2E44 == 0) && (level_is_game_over_level() != 0)) {
-        D_800BE3DF = (s8) D_800BE9F4;
-        if (D_800C35C4 == 0) {
+        g_save_resume_level = (s8) g_level_load_id;
+        if (g_cutscene_pending == 0) {
             save_request_slot_write(D_8008FDA8);
         }
         D_800D2E43 = 0;

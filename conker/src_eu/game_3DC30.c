@@ -63,8 +63,8 @@ void level_obj_init_rope(void) {
     struct179 tmp;
 
     tmp.unk20 = 0;  
-    //D_80096430 listed as (struct180*), but used as (struct180) here;
-    tmp.unk4 = *((struct180*) &D_80096430); 
+    //g_level_rope_def listed as (struct180*), but used as (struct180) here;
+    tmp.unk4 = *((struct180*) &g_level_rope_def); 
 
     tmp.unk0 = 1;
     tmp.unk1C = fabsf(tmp.unk4.unk4 - tmp.unk4.unk10); 

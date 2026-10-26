@@ -13,7 +13,7 @@ s/        tex = texture_cache_lookup(0xD15, NULL, 3, 0);/        tex = texture_c
 s/            if (k != 0x26 && k != 0x3A) {/            if (k != 0x26) {/ % fire1 fire1h fire2 fire2h fire3 fire3h fire4 fire4h fire_neg fire_skip all
 s/            ix = ((s32)view->unk30 - 15) \* 4;/            ix = ((s32)view->unk30 - 14) * 4;/ % fire1 fire1h fire2 fire2h fire3 fire3h fire4 fire4h fire_neg fire_skip all
 s/            iy = ((s32)view->unk24 + 5) \* 4;/            iy = ((s32)view->unk24 + 4) * 4;/ % fire1 fire1h fire2 fire2h fire3 fire3h fire4 fire4h fire_neg fire_skip all
-s/            if (D_800BE9F0 == 0x1A || D_800BE9F0 == 0x3F) {/            if (D_800BE9F0 == 0x1A) {/ % fire1 fire1h fire2 fire2h fire3 fire3h fire4 fire4h fire_neg fire_skip all
+s/            if (g_level_id == 0x1A || g_level_id == 0x3F) {/            if (g_level_id == 0x1A) {/ % fire1 fire1h fire2 fire2h fire3 fire3h fire4 fire4h fire_neg fire_skip all
 s/            } else if (obj->id == 0x75 || obj->id == 0xB1) {/            } else if (obj->id == 0x75) {/ % fire1 fire1h fire2 fire2h fire3 fire3h fire4 fire4h fire_neg fire_skip all
 s/                wi = 5, hi = 20, s = 0xC0, t = 0x100;/                wi = 5, hi = 21, s = 0xC0, t = 0x100;/ % fire1 fire1h fire2 fire2h fire3 fire3h fire4 fire4h fire_neg fire_skip all
 s/            } else if (obj->id == 0x3B) {/            } else if (obj->id == 0x3C) {/ % fire1 fire1h fire2 fire2h fire3 fire3h fire4 fire4h fire_neg fire_skip all

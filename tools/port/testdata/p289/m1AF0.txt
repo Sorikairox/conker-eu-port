@@ -25,10 +25,10 @@
 \#^            bestScore = score;$#s/score;/i;/
 \#^    if (best != -1) {$#s/-1/0/
 \#^        ret = attack_spawn_at_point(obj->x_position#s/ + (f32)obj->unkD6//
-\#^        ret = attack_spawn_at_point(obj->x_position#s/kind, D_800C3E78, 0,/kind, best, 0,/
-\#^        ret = attack_spawn_at_point(obj->x_position#s/D_800C3E78, 0,/D_800C3E78, 1,/
+\#^        ret = attack_spawn_at_point(obj->x_position#s/kind, g_cur_obj_index, 0,/kind, best, 0,/
+\#^        ret = attack_spawn_at_point(obj->x_position#s/g_cur_obj_index, 0,/g_cur_obj_index, 1,/
 \#^        ret = attack_spawn_at_point(obj->x_position#s/ret = //
 \#^        obj->unk76 = self->unk76;$#s/self->unk76/obj->unk76 + 1/
 \#^        obj->unk76 = self->unk76;$#s/^.*$//
-\#^        obj = &D_800CC2D0\[best\];$#s/best/best + 1/
+\#^        obj = &g_objects\[best\];$#s/best/best + 1/
 \#^    return ret;$#s/ret;/best;/

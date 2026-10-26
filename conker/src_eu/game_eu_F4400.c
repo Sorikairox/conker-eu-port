@@ -323,7 +323,7 @@ s32 ground_trail_b_free(u8 *arg0) {
 s32 collision_floor_dynamic_b_full(f32 *, s32, f32, u8 *);
 u8 impact_current_kind(void);
 extern s32 D_80088B80;
-extern s32 D_800AB7F4;
+extern s32 g_impact_kind_colours; /* was D_800AB7F4 */
 
 /* was func_150C7290 */
 s32 ground_glow_b_spawn(u8 *arg0) {
@@ -397,7 +397,7 @@ s32 ground_glow_b_spawn(u8 *arg0) {
         sp60 = temp_f10 + 200.0f;
         sp.u7A = 0xA;
         sp.u7C = 0xA;
-        temp_v0_2 = (u8 *) &D_800AB7F4 + sp5F * 3;
+        temp_v0_2 = (u8 *) &g_impact_kind_colours + sp5F * 3;
         sp.u8A = 0x38;
         sp.u88 = 0x12C;
         sp.u90 = (s32) ((32768.0f * 0.5f) + 26214.4f);

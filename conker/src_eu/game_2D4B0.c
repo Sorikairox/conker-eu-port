@@ -11,7 +11,7 @@ void game_init_message_queues(void) {
     for (i = 0; i < 3; i++)
     {
         msgQueue = &D_80041E58[i];
-        osCreateMesgQueue(msgQueue, &D_80041EA0[i], 8);
+        osCreateMesgQueue(msgQueue, &g_game_mesg_bufs[i], 8);
         music_player_set_msg_queue(i, msgQueue);
     }
 
@@ -240,13 +240,13 @@ void level_start_music(void) {
 extern f32 D_800D9F3C;            /* screen height (D_800B0DF0->unk0) */
 extern f32 D_800D9F40;            /* screen width (D_800B0DF0->unk2) */
 extern f32 D_800D3A90;
-extern u8 D_800D9FA4[3];
-extern u8 D_800D9FA8[3];
-extern u8 D_800D9FAB;
-extern u8 D_800D9FAC;
+extern u8 g_screen_tint_extra_a[3]; /* was D_800D9FA4 */
+extern u8 g_screen_tint_extra_b[3]; /* was D_800D9FA8 */
+extern u8 g_screen_tint_extra_ab; /* was D_800D9FAB */
+extern u8 g_screen_tint_extra_ac; /* was D_800D9FAC */
 extern u8 D_800DA240;
 extern s32 D_800DA230[];
-extern u8 D_800D9FF0[][2][8];
+extern u8 g_player_ambient_lights[][2][8]; /* was D_800D9FF0 */
 extern f32 D_800D9EE0[][3];       /* per player, 0xC each: first float = -1 (no request) */
 extern u8 D_800D9F10;
 extern f32 D_800D9F18[][2];       /* per player projection request: first float = -1 (none) */
@@ -256,8 +256,8 @@ s32 light_alloc_light_buf(s32 arg0);
 
 /* Per-level setup of the screen / projection-request state: screen size floats, level_init_color_tables, clear the
  * D_800D9F88 / D_800D9F98 4x3 tables and the small flags, then per player (0..D_80082FA0): D_800DA230 handle,
- * D_800D9FF0 colour slots = 0xFF, D_800D9EE0 / D_800D9F18 requests = -1, and the request counters to 0.
- * arg0 (the level, D_800BE9F0) is passed through to level_init_color_tables in a0. The asm returns a stale v0 (callers ignore it). */
+ * g_player_ambient_lights colour slots = 0xFF, D_800D9EE0 / D_800D9F18 requests = -1, and the request counters to 0.
+ * arg0 (the level, g_level_id) is passed through to level_init_color_tables in a0. The asm returns a stale v0 (callers ignore it). */
 /* was func_150006E0 */
 s32 level_setup_screen_projection(s32 arg0) {
     s32 i, j;
@@ -273,23 +273,23 @@ s32 level_setup_screen_projection(s32 arg0) {
         }
     }
     for (i = 0; i < 3; i++) {
-        D_800D9FA4[i] = 0;
-        D_800D9FA8[i] = 0;
+        g_screen_tint_extra_a[i] = 0;
+        g_screen_tint_extra_b[i] = 0;
     }
-    D_800D9FAB = 0xFF;
-    D_800D9FAC = 0xFF;
+    g_screen_tint_extra_ab = 0xFF;
+    g_screen_tint_extra_ac = 0xFF;
     D_800DA240 = 0xB;
     for (i = 0; i <= D_80082FA0; i++) {
         D_800DA230[i] = light_alloc_light_buf(D_800DA240);
     }
     for (i = 0; i <= D_80082FA0; i++) {
         for (j = 0; j < 2; j++) {
-            D_800D9FF0[i][j][4] = 0xFF;
-            D_800D9FF0[i][j][0] = 0xFF;
-            D_800D9FF0[i][j][5] = 0xFF;
-            D_800D9FF0[i][j][1] = 0xFF;
-            D_800D9FF0[i][j][6] = 0xFF;
-            D_800D9FF0[i][j][2] = 0xFF;
+            g_player_ambient_lights[i][j][4] = 0xFF;
+            g_player_ambient_lights[i][j][0] = 0xFF;
+            g_player_ambient_lights[i][j][5] = 0xFF;
+            g_player_ambient_lights[i][j][1] = 0xFF;
+            g_player_ambient_lights[i][j][6] = 0xFF;
+            g_player_ambient_lights[i][j][2] = 0xFF;
         }
     }
     for (i = 0; i <= D_80082FA0; i++) {

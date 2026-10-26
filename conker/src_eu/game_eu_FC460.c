@@ -54,7 +54,7 @@ void rider_ai_control(struct127 *self) {
             if ((*(u8 **) (obj + 0x31C))[0x84] != 0) {
                 ctl_decay_button_latches(self);
             } else {
-                D_800CC288 = D_800BEB30[D_800C3E78];
+                D_800CC288 = D_800BEB30[g_cur_obj_index];
             }
         } else {
             D_800CC288 = ((u16 *) &D_800BEA68)[obj[0x13C]];
@@ -90,11 +90,11 @@ void rider_ai_control(struct127 *self) {
         obj[0x124] = 0;
         if (obj[0x89] == 0 && !(D_800BE616 != 0 && (*(u8 **) (obj + 0x31C))[0x84] != 0)) {
             if (D_800BE616 != 0) {
-                D_800CC6A0 = (s32) (*(f32 *) ((u8 *) D_800DBFF0 + D_800C3E78 * 0x9A0 + 0x37C) * D_800A0BF0_c[0]);
+                D_800CC6A0 = (s32) (*(f32 *) ((u8 *) D_800DBFF0 + g_cur_obj_index * 0x9A0 + 0x37C) * D_800A0BF0_c[0]);
                 yaw = math_atan2_u16((s8) D_800CC6A4[2], (s8) D_800CC6A4[3], 0) + D_800CC6A0;
                 P(0x44, f32) = pad_stick_speed((struct49 *) D_800CC6A4);
             } else {
-                pl = (u8 *) D_800CC2D0 + obj[0x124] * 0x32C;
+                pl = (u8 *) g_objects + obj[0x124] * 0x32C;
                 P(0x44, f32) = *(f32 *) (pl + 0x44) * 1.75f;
                 yaw = *(u16 *) (*(u8 **) (pl + 0x31C) + 0x4C);
             }
@@ -136,23 +136,23 @@ void rider_ai_control(struct127 *self) {
         }
     }
 
-    if (D_800BE616 == 0 || D_800C3E78 >= D_8008FD8C || (*(u8 **) (obj + 0x31C))[0x120] == 0) {
+    if (D_800BE616 == 0 || g_cur_obj_index >= D_8008FD8C || (*(u8 **) (obj + 0x31C))[0x120] == 0) {
         obj_state_common_update(self);
     }
-    pl = *(u8 **) ((u8 *) D_800CC2D0 + 0x31C);
+    pl = *(u8 **) ((u8 *) g_objects + 0x31C);
     if (pl[0x27] != 0 && (obj[0x232] != D_800A0BE8_c[twin] || obj[0x104] != 0)) {
         /* the attack was interrupted: player 0 drops its hold */
         pl[0x27] = 0;
-        ((u8 *) D_800CC2D0)[0x89] = 0;
-        ((u8 *) D_800CC2D0)[0x83] = 0;
-        ((u8 *) D_800CC2D0)[0x125] = 0;
+        ((u8 *) g_objects)[0x89] = 0;
+        ((u8 *) g_objects)[0x83] = 0;
+        ((u8 *) g_objects)[0x125] = 0;
         obj[0x232] = 0x11;
     }
     atk = &D_800A0BE8_c[twin];
     if (D_800BE616 == 0) {
         if (obj[0x232] == atk[0]) {
             obj_carry_release(self, 156.0f, atk[4], 4, 0, atk[2], 0xFF, 0, 0, 0);
-        } else if ((D_800CC268 & 1) && ((u8 *) D_800CC2D0 + obj[0x124] * 0x32C)[0x65] == 0
+        } else if ((g_obj_contact_mask & 1) && ((u8 *) g_objects + obj[0x124] * 0x32C)[0x65] == 0
                    && (P(0x25C, s32) & 0x400)) {
             obj[0x124] = 0;
             obj_carry_pickup(self, 50.0f, 3.0f, atk[0], atk[4]);
@@ -179,7 +179,7 @@ void rider_ai_control(struct127 *self) {
         P(0x2E4, s32) = P(0x2E4, s32) + (sway - (s16) P(0x2E4, s32)) / 8;
         P(0x2E8, s32) = P(0x2E8, s32) + (-err - P(0x2E8, s32)) / 8;
     }
-    if (D_800BE616 != 0 && D_800CC268 != 0 && *(u8 **) (obj + 0x31C) != NULL && (*(u8 **) (obj + 0x31C))[0x1AC] != 0) {
+    if (D_800BE616 != 0 && g_obj_contact_mask != 0 && *(u8 **) (obj + 0x31C) != NULL && (*(u8 **) (obj + 0x31C))[0x1AC] != 0) {
         obj_hit_react_other_players(self);
     }
 }

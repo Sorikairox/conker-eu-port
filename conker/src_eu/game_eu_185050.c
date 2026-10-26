@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A4EA8[];
+extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 void anim_model_fx_build_mtx(u8 *, u8 *);
 
@@ -127,7 +127,7 @@ s32 *anim_model_fx_draw(s32 *arg0, u8 *arg1, s16 arg2) {
         temp_s1 = gfx_geometry_mode_cached(var_s1, (*(s32 *)((u8 *)arg1 + 0x24)), (*(s32 *)((u8 *)arg1 + 0x28)));
         fx_calc_color_mode_a(&sp.u80, &sp.u7E, &sp.u7C, &sp.u7A, (s32) (*(u8 *)((u8 *)arg1 + 0x40)), (s32) (*(u8 *)((u8 *)arg1 + 0x41)), (s32) (*(u8 *)((u8 *)arg1 + 0x42)), (s32) (*(u8 *)((u8 *)arg1 + 0x43)), (s32) (*(u8 *)((u8 *)arg1 + 0x44)), (s32) (*(u8 *)((u8 *)arg1 + 0x45)), (s32) (*(u8 *)((u8 *)arg1 + 0x46)), (s32) (*(u8 *)((u8 *)arg1 + 0x47)), 0xFF, (s32) (*(s8 *)((u8 *)arg1 + 0x3C)));
         fx_calc_color_mode_b(&sp.u78, &sp.u76, &sp.u74, &sp.u72, (s32) (*(u8 *)((u8 *)arg1 + 0x40)), (s32) (*(u8 *)((u8 *)arg1 + 0x41)), (s32) (*(u8 *)((u8 *)arg1 + 0x42)), (s32) (*(u8 *)((u8 *)arg1 + 0x43)), (s32) (*(u8 *)((u8 *)arg1 + 0x44)), (s32) (*(u8 *)((u8 *)arg1 + 0x45)), (s32) (*(u8 *)((u8 *)arg1 + 0x46)), (s32) (*(u8 *)((u8 *)arg1 + 0x47)), 0xFF, (s32) (*(s8 *)((u8 *)arg1 + 0x3D)));
-        temp_v1 = ((*(s32 *)((u8 *)arg1 + 0x2C)) * 8) + ((u8 *)&D_800A4EA8);
+        temp_v1 = ((*(s32 *)((u8 *)arg1 + 0x2C)) * 8) + ((u8 *)&g_render_mode_pairs);
         var_v0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_prim_color_cached(gfx_env_color_cached(temp_s1, sp.u78, sp.u76, sp.u74, (s32) sp.u72, &sp.u83), 0, 0, sp.u80, (s32) sp.u7E, (s32) sp.u7C, (s32) sp.u7A, &sp.u83), (*(u8 *)((u8 *)arg1 + 0x33)), &sp.u83), (*(s32 *)((u8 *)arg1 + 0x20)) | 0x80000 | 0x2C00 | (*(s32 *)((u8 *)arg1 + 0x34)) | (*(s32 *)((u8 *)arg1 + 0x38)), (*(s32 *)((u8 *)temp_v1 + 4)) | (*(s32 *)((u8 *)temp_v1 + 0)), &sp.u83);
         temp_v1_2 = (*(u8 *)((u8 *)arg1 + 0x10));
         if (temp_v1_2 & 2) {

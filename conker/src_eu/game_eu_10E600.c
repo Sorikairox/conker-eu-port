@@ -81,7 +81,7 @@ s32 obj_check_death(struct127 *);
 void obj_walk_update(struct127 *);
 void obj_stun_update(struct127 *); /* P209: the asm reads only a0 and returns nothing */
 s32 obj_turn_towards(struct127 *, s32, u16);
-extern u16 D_800CC766;
+extern u16 g_obj0_yaw; /* was D_800CC766 */
 
 /* was func_150E1160 */
 void enemy_update_alert_move(struct127 *arg0) {
@@ -103,7 +103,7 @@ void enemy_update_alert_move(struct127 *arg0) {
             if (temp_v0 != 3) {
                 arg0->unk218 = NULL;
                 arg0->unk232 = 4;
-                arg0->unk78 = D_800CC766;
+                arg0->unk78 = g_obj0_yaw;
                 if (temp_v0 == 2) {
                     arg0->unk232 = 2;
                 }
@@ -111,10 +111,10 @@ void enemy_update_alert_move(struct127 *arg0) {
         }
     } else {
         if ((s32) arg0->unk83 >= 0x3D) {
-            D_800D1580 = -0xFDFECD;
-            D_800D154C = D_800CC2D0;
+            g_cur_obj_cmd = -0xFDFECD;
+            g_cur_obj = g_objects;
             objev_sound_alt_300_1800();
-            D_800D154C = arg0;
+            g_cur_obj = arg0;
         }
         arg0->unk83 = 0;
     }

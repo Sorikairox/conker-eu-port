@@ -46,7 +46,7 @@ void swarm_set_target_pos(u8, s32, s32, s32, s16);
 s32 fxevt_emitter_set_target(s32 arg0, s32 arg1, u8 *arg2) {
     switch (arg1) {                                 /* irregular */
     case 0:
-        swarm_set_target_ptr(arg0 & 0xFF, &D_800CC2D0[obj_slot_by_spawn((*(s32 *)((u8 *)arg2 + 8)) & ~0x2000)].x_position, (*(s16 *)((u8 *)arg2 + 0xE)));
+        swarm_set_target_ptr(arg0 & 0xFF, &g_objects[obj_slot_by_spawn((*(s32 *)((u8 *)arg2 + 8)) & ~0x2000)].x_position, (*(s16 *)((u8 *)arg2 + 0xE)));
         return 1;
     case 1:
         swarm_set_target_pos(arg0 & 0xFF, (*(s32 *)((u8 *)arg2 + 8)), (*(s32 *)((u8 *)arg2 + 0xC)), (*(s32 *)((u8 *)arg2 + 0x10)), (*(s32 *)((u8 *)arg2 + 0x14)));
@@ -61,7 +61,7 @@ s32 fxevt_emitter_set_target(s32 arg0, s32 arg1, u8 *arg2) {
 //     //     return 0;
 //     // }
 //     // if (arg1 == 0) {
-//     //     func_15178BE4(arg0 & 0xFF, &D_800CC2D0[obj_slot_by_spawn(arg2->unk8 & ~0x2000)].unk14, arg2->unkC.s.unk2);
+//     //     func_15178BE4(arg0 & 0xFF, &g_objects[obj_slot_by_spawn(arg2->unk8 & ~0x2000)].unk14, arg2->unkC.s.unk2);
 //     //     return 1;
 //     // }
 //     // if (arg1 != 1) {
@@ -73,7 +73,7 @@ s32 fxevt_emitter_set_target(s32 arg0, s32 arg1, u8 *arg2) {
 //         case 1:
 //             return 0;
 //         case 0:
-//             func_15178BE4(arg0 & 0xFF, &D_800CC2D0[obj_slot_by_spawn(arg2->unk8 & ~0x2000)].unk14, arg2->unkC.s.unk2);
+//             func_15178BE4(arg0 & 0xFF, &g_objects[obj_slot_by_spawn(arg2->unk8 & ~0x2000)].unk14, arg2->unkC.s.unk2);
 //             return 1;
 //         default:
 //             func_15178C34(arg0 & 0xFF, arg2->unk8, arg2->unkC.i.unk0, arg2->unk10, arg2->unk14);

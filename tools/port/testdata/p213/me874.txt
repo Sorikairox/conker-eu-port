@@ -41,13 +41,13 @@ s/                    end = 4;/                    end = 5;/
 s/m = obj->unk184 \& 0x1F;/m = obj->unk184 \& 0xFF;/
 s/(m == 14 || m == 19)/(m == 14)/
 s/(m == 14 || m == 19)/(m == 19)/
-s/D_800BE9F0 != 0x34/D_800BE9F0 != 0x35/
+s/g_level_id != 0x34/g_level_id != 0x35/
 s/                        end = 13;/                        end = 12;/
 s/                            case 15:/                            case 18:/
 s/                                end = 16;/                                end = 17;/
 s/((u8 \*)obj->unk31C)\[0x1AC\] = 1;/((u8 *)obj->unk31C)[0x1AC] = 2;/
-s/D_800D1580 = (s32)0xFF010434;/D_800D1580 = (s32)0xFF010435;/
-s/D_800D1580 = (s32)0xFF070169;/;/
+s/g_cur_obj_cmd = (s32)0xFF010434;/g_cur_obj_cmd = (s32)0xFF010435;/
+s/g_cur_obj_cmd = (s32)0xFF070169;/;/
 s/                                objev_sound_alt_300_1800();/                                ;/
 s/                                objev_sound_300_1800();/                                ;/
 s/                            case 33:/                            case 34:/

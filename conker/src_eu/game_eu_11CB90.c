@@ -322,7 +322,7 @@ s32 tether_beam_update(u8 *fx) {
                       0, 1, 4, 0, 0);
         if (((u8 *)hit)[0x59] >= 2) {
             obj_tint_set_flash(*(u8 **)hit, 0xFF, 0, 0, 0x90, 0, 1);
-            obj_send_hit(*(struct127 **)hit, 0xA0038, 0, (s32)(src - (u8 *)D_800CC2D0) / 0x32C);
+            obj_send_hit(*(struct127 **)hit, 0xA0038, 0, (s32)(src - (u8 *)g_objects) / 0x32C);
         }
     } else {
         p = *(u8 **)(st + 0x2C);

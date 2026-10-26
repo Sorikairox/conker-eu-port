@@ -48,7 +48,7 @@ Gfx *objects_draw_pass(Gfx *gdl, s32 arg1, s16 arg2) {
     (*(s32 *)((u8 *)arg0 + 0)) = 0xDE000000;
     (*(s32 **)((u8 *)arg0 + 4)) = &D_800844F0;
     var_s2 = arg0 + 8;
-    var_s0 = D_800CC2D0;
+    var_s0 = g_objects;
     var_s1 = 0;
     do {
         D_8003C8E0 = (var_s1 & 0xFFFFFF) | 0x01000000;
@@ -197,14 +197,14 @@ void objects_update_all(void) {
     D_800C4294 = 0;
     maxd = 0;
     for (i = 0; i < 25; i++) {
-        u8 v = ((u8 *)&D_800CC2D0[i])[0x274];
+        u8 v = ((u8 *)&g_objects[i])[0x274];
         if (v != 0) {
             D_800C4294 |= 1 << ((v + 0x1F) & 0x1F);
         }
     }
     bzero(depth, 25);
     for (i = 0; i < 25; i++) {
-        rec = (u8 *)&D_800CC2D0[i];
+        rec = (u8 *)&g_objects[i];
         if (*(s32 *)rec == 0) {
             continue;
         }
@@ -215,7 +215,7 @@ void objects_update_all(void) {
         depth[i] = 0;
         do {
             depth[i]++;
-            rec = (u8 *)&D_800CC2D0[rec[0x65] - 1];
+            rec = (u8 *)&g_objects[rec[0x65] - 1];
         } while (rec[0x65] != 0);
         if (maxd < depth[i]) {
             maxd = depth[i];
@@ -231,17 +231,17 @@ void objects_update_all(void) {
             }
         }
         for (i = 0; i < n; i++) {
-            obj_update_one(&D_800CC2D0[order[i]], order[i]);
+            obj_update_one(&g_objects[order[i]], order[i]);
         }
     }
     objects_update_carried();
     for (i = 0; i < 25; i++) {
-        if (*(s32 *)&D_800CC2D0[i] != 0) {
-            obj_save_prev_joint_mtx((u8 *)&D_800CC2D0[i]);
+        if (*(s32 *)&g_objects[i] != 0) {
+            obj_save_prev_joint_mtx((u8 *)&g_objects[i]);
         }
     }
     attachment_update_all();
-    if (D_800BEAC0 == 0) {
+    if (g_game_paused == 0) {
         obj_anims_advance_all(0);
     }
     D_800C4290 = 0;
@@ -261,7 +261,7 @@ void objects_update_blob_shadows(void) {
     struct127 *var_s1;
     u8 *temp_a0;
 
-    var_s1 = D_800CC2D0;
+    var_s1 = g_objects;
     do {
         if (var_s1->interaction_state != 0) {
             var_s2 = 0;
@@ -295,7 +295,7 @@ void objects_update_blob_shadows(void) {
             }
         }
         var_s1 = (struct127 *)((u8 *)var_s1 + (0x32C));
-    } while ((s32)var_s1 != (s32)&D_800D121C);
+    } while ((s32)var_s1 != (s32)&g_obj_scratch_rec);
 }
 /* was func_1502C380 */
 void obj_mtx_buffer_reset(void) {
@@ -318,7 +318,7 @@ u8 *sprite_draw_at_world_depth(u8 *arg0, u8 *arg1);
 extern u8 *D_8008CDEC[];
 
 /*
- * P71: ground shadow of object idx (none while D_800BEAC0 is set or when the alpha +7 is 0). Shadow quad: position
+ * P71: ground shadow of object idx (none while g_game_paused is set or when the alpha +7 is 0). Shadow quad: position
  * (x, y + half the size +0x122, z), extent 19 * size (15 * size for state +0 == 3), alpha +7; texture
  * D_8008CDEC[obj_shadow_kind(idx)] with +0x60 (sprite_load_texture, which also fills the quad), drawn by sprite_draw_at_world_depth
  * between the D_80087770 / D_800877A8 display lists.
@@ -337,10 +337,10 @@ u8 *obj_draw_ground_shadow(u8 *gdl, s32 idx, s16 unused) {
     s32 ext;
     s32 tex;
 
-    if (D_800BEAC0 != 0) {
+    if (g_game_paused != 0) {
         return gdl;
     }
-    obj = (u8 *) &D_800CC2D0[idx];
+    obj = (u8 *) &g_objects[idx];
     size = obj[0x122];
     if (obj[7] == 0) {
         return gdl;
@@ -376,10 +376,10 @@ void obj_shadow_anim_step(s32 arg0) {
     s16 a;
     s16 b;
 
-    if (D_800BEAC0 == 0) {
-        a = *(s16 *)((u8 *)&D_800CC2D0[arg0] + 0x60);
-        b = *(s16 *)((u8 *)&D_800CC2D0[arg0] + 0x62);
-        if (D_800CC2D0[arg0].unk7 != 0) {
+    if (g_game_paused == 0) {
+        a = *(s16 *)((u8 *)&g_objects[arg0] + 0x60);
+        b = *(s16 *)((u8 *)&g_objects[arg0] + 0x62);
+        if (g_objects[arg0].unk7 != 0) {
             lim = D_8008CDEC[obj_shadow_kind(arg0)][4] << 8;
             a = a + b;
             if (a >= lim) {
@@ -387,7 +387,7 @@ void obj_shadow_anim_step(s32 arg0) {
             } else if (a < 0) {
                 a = a + lim;
             }
-            *(s16 *)((u8 *)&D_800CC2D0[arg0] + 0x60) = a;
+            *(s16 *)((u8 *)&g_objects[arg0] + 0x60) = a;
         }
     }
 }
@@ -404,7 +404,7 @@ u8 obj_current_part_model(struct127 *);
  */
 /* was func_1502C9D8 */
 void obj_select_lod(s32 i, s16 cam, s32 unused) {
-    struct127 *obj = &D_800CC2D0[i];
+    struct127 *obj = &g_objects[i];
     struct108 *view = &D_800DBFF0[cam];
     f32 near0 = 500.0f;
     f32 near1 = 730.0f;
@@ -487,10 +487,10 @@ u8 *obj_draw_part(u8 *gdl, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
     s32 alpha;
     u8 *r;
 
-    if (D_800C3638 != 0 && D_800C3A7A == 0 && cutscene_obj_takes_part(&D_800CC2D0[arg1]) == 0) {
+    if (D_800C3638 != 0 && D_800C3A7A == 0 && cutscene_obj_takes_part(&g_objects[arg1]) == 0) {
         return gdl;
     }
-    rec = (u8 *)&D_800CC2D0[arg1];
+    rec = (u8 *)&g_objects[arg1];
     if ((rec[0x74] & (1 << arg2)) == (1 << arg2)) {
         return gdl;
     }
@@ -589,7 +589,7 @@ extern u8 D_800DD714[];
 /* was func_1502CFEC */
 Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *color, s32 arg6, s32 arg7) {
     u32 *g = (u32 *)gdl;
-    u8 *o = (u8 *)&D_800CC2D0[arg1];
+    u8 *o = (u8 *)&g_objects[arg1];
     s32 model;    /* sp140 */
     s32 var;      /* sp144 */
     s32 fog;      /* sp130 */
@@ -747,7 +747,7 @@ void obj_ambient_colour(s32 arg0, u8 *arg1) {
     s32 temp_t1;
     struct127 *temp_v0;
 
-    temp_v0 = &D_800CC2D0[arg0];
+    temp_v0 = &g_objects[arg0];
     if ((temp_v0->unk66 & 0xC) == 4) {
         (*(s32 *)((u8 *)arg1 + 0)) = (s32) ((s32) (temp_v0->unk1DD + temp_v0->unk1E0) / 2);
         (*(s32 *)((u8 *)arg1 + 4)) = (s32) ((s32) (temp_v0->unk1DE + temp_v0->unk1E1) / 2);
@@ -943,7 +943,7 @@ void obj_build_model_instance(f32 (*m)[4], s32 arg1) {
     u8 remap[0x44];
     u8 dbuf[0x324];
     u8 sbuf[0x54];
-    u8 *obj = (u8 *)&D_800CC2D0[arg1];
+    u8 *obj = (u8 *)&g_objects[arg1];
     s32 id = obj[4];
     s32 *slot = &((s32 *)&D_800D19A0)[id];
     u8 *map = NULL;
@@ -1036,7 +1036,7 @@ extern s32 D_800C4294;
 /* was func_1502E228 */
 void obj_build_model_matrix(s32 arg0, s32 arg1) {
     f32 m[4][4];
-    u8 *obj = (u8 *)&D_800CC2D0[arg0];
+    u8 *obj = (u8 *)&g_objects[arg0];
     u8 *src;
     u8 *ref;
     s32 force = 1;
@@ -1071,7 +1071,7 @@ void obj_build_model_matrix(s32 arg0, s32 arg1) {
             return;
         }
         best = 0;
-        for (i = 0; i <= D_80082FA4; i++) {
+        for (i = 0; i <= g_cur_view_player; i++) {
             a = obj_get_player_alpha((struct127 *)obj, i);
             if (best < a) {
                 best = a;
@@ -1081,9 +1081,9 @@ void obj_build_model_matrix(s32 arg0, s32 arg1) {
             return;
         }
     }
-    D_800C3E78 = arg0;
+    g_cur_obj_index = arg0;
     if (obj[0x65] != 0 && !(obj[0x101] & 0x10)) {
-        src = *(u8 **)((u8 *)&D_800CC2D0[obj[0x65] - 1] + 0x1D4);
+        src = *(u8 **)((u8 *)&g_objects[obj[0x65] - 1] + 0x1D4);
         if (src == NULL) {
             return;
         }
@@ -1106,7 +1106,7 @@ void obj_build_model_matrix(s32 arg0, s32 arg1) {
                       *(f32 *)(obj + 0x14C), *(f32 *)(obj + 0x150), *(f32 *)(obj + 0x14C));
         if (obj[0x101] & 0x10) {
             /* the parent (index +0x65 - 1; the asm does not check +0x65 != 0 here) */
-            ref = (u8 *)&D_800CC2D0[obj[0x65]] - 0x32C;
+            ref = (u8 *)&g_objects[obj[0x65]] - 0x32C;
             src = *(u8 **)(ref + 0x1D4);
             if (src == NULL) {
                 m[3][0] = 0.0f;
@@ -1196,7 +1196,7 @@ void obj_update_visibility(s32 arg0) {
     u8 temp_v0_8;
 
     var_s7 = 1;
-    temp_s1 = &D_800CC2D0[arg0];
+    temp_s1 = &g_objects[arg0];
     temp_s0 = temp_s1->id;
     if (temp_s1->unk5 == 7) {
         temp_s1->unk74 &= 0xFFF0;
@@ -1208,7 +1208,7 @@ void obj_update_visibility(s32 arg0) {
     if (((D_800C3638 == 0) || (D_800C3A7A != 0) || (cutscene_obj_takes_part(temp_s1) != 0)) && ((temp_v0_2 = temp_s1->unk127, (temp_v0_2 == 0xFF)) || ((u16) D_800D2340 & (1 << (temp_v0_2 & 0x1F)))) && ((temp_s1->unk101 & 1) != 1) && (temp_s1->unk7 != 0)) {
         temp_v0_3 = temp_s1->unk65;
         if (temp_v0_3 != 0) {
-            temp_s1->unk74 = ((u8 *)&D_800CC2D0[temp_v0_3 - 1])[0x74] /* the parent's mask */;
+            temp_s1->unk74 = ((u8 *)&g_objects[temp_v0_3 - 1])[0x74] /* the parent's mask */;
             return;
         }
         temp_v1 = &D_800D1C90[temp_s0];
@@ -1485,7 +1485,7 @@ void obj_tint_get_colour(u8 *rec, s32 *r, s32 *g, s32 *b, s32 *a) {
 /* obj_face_selector_target (P57): object arg0's mode byte +0x6A + arg1 folded to 0..2 (values 2 / 3 map to 0 / 1). */
 /* was func_1502F17C */
 s32 obj_face_selector_target(s32 arg0, s32 arg1) {
-    s32 v = ((u8 *)&D_800CC2D0[arg0])[0x6A + arg1];
+    s32 v = ((u8 *)&g_objects[arg0])[0x6A + arg1];
     if (v >= 2) {
         if (v < 4) v -= 2;
         else v = 2;
@@ -1504,7 +1504,7 @@ void obj_face_selectors_step(s32 arg0) {
     u8 temp_v0;
     u8 temp_v0_2;
 
-    var_s0 = &D_800CC2D0[arg0];
+    var_s0 = &g_objects[arg0];
     var_s1 = 0;
     do {
         if ((s32) (*(u8 *)((u8 *)var_s0 + 0x6C)) < 0xA) {
@@ -1526,7 +1526,7 @@ void obj_face_selectors_step(s32 arg0) {
         var_s1 += 1;
         var_s0 = (struct127 *)((u8 *)var_s0 + (1));
     } while (var_s1 != 2);
-    face_update_hide_mask(&D_800CC2D0[arg0]);
+    face_update_hide_mask(&g_objects[arg0]);
 }
 u8 *face_anim_entry_get(u8 *, s32);
 extern s32 D_800C5758;
@@ -1536,7 +1536,7 @@ extern s32 D_800C5758;
  * pair when that matches the table's +0xA entry or the byte is 0) and the bytes +0x68 / +0x69. */
 /* was func_1502F30C */
 u8 *obj_set_vertex_segments(u8 *gdl, s32 arg1) {
-    u8 *o = (u8 *)&D_800CC2D0[arg1];
+    u8 *o = (u8 *)&g_objects[arg1];
     s32 type = o[4];
     u8 *ov = NULL;
     u8 sel[2];
@@ -1584,7 +1584,7 @@ u8 *obj_set_vertex_segments(u8 *gdl, s32 arg1) {
  * +0x101 & 0x20 the parent's +0x3C / +0x40 / angles; unless & 0x40 the bytes +7..+0xA, +0xF, +0xB.. */
 /* was func_1502F554 */
 void obj_follow_parent(s32 arg0) {
-    u8 *o = (u8 *)&D_800CC2D0[arg0];
+    u8 *o = (u8 *)&g_objects[arg0];
     u8 *p;
     u8 *m;
     s32 i;
@@ -1592,7 +1592,7 @@ void obj_follow_parent(s32 arg0) {
 
     if (o[0x65] == 0) return;
     if ((o[0x101] & 2) == 2) return;
-    p = (u8 *)&D_800CC2D0[o[0x65]] - 0x32C;
+    p = (u8 *)&g_objects[o[0x65]] - 0x32C;
     m = *(u8 **)(p + 0x1D4);
     if (m == NULL) {
         *(f32 *)(o + 0x14) = *(f32 *)(p + 0x14);
@@ -1634,12 +1634,12 @@ void obj_carry_point(struct127 *arg0, f32 *x, f32 *y, f32 *z, s32 arg4);
 void objects_update_carried(void) {
     u8 *obj;
 
-    for (obj = (u8 *)D_800CC2D0; obj != (u8 *)&D_800CC2D0[25]; obj += 0x32C) {
+    for (obj = (u8 *)g_objects; obj != (u8 *)&g_objects[25]; obj += 0x32C) {
         if (*(s32 *)obj == 0 || obj[0x274] == 0) {
             continue;
         }
         *(f32 *)(obj + 0x18) = *(f32 *)(obj + 0x180);
-        obj_carry_point(&D_800CC2D0[obj[0x274] - 1], (f32 *)(obj + 0x14), (f32 *)(obj + 0x18), (f32 *)(obj + 0x1C),
+        obj_carry_point(&g_objects[obj[0x274] - 1], (f32 *)(obj + 0x14), (f32 *)(obj + 0x18), (f32 *)(obj + 0x1C),
                       *(u16 *)(obj + 0x19E));
         if (*(f32 *)(obj + 0x18) < *(f32 *)(obj + 0x180)) {
             *(f32 *)(obj + 0x18) = *(f32 *)(obj + 0x180);
@@ -1786,7 +1786,7 @@ u8 *obj_model_special_dl(u8 *arg0, s32 arg1) {
     u8 *var_s0;
 
     var_s0 = arg0;
-    temp_a2 = &D_800CC2D0[arg1];
+    temp_a2 = &g_objects[arg1];
     temp_v0 = temp_a2->id;
     if ((temp_v0 == 0x89) || (temp_v0 == 0xBA)) {
         return obj_timer_scroll_tex_dl(var_s0, temp_a2);
@@ -1809,7 +1809,7 @@ u8 *obj_model_special_dl(u8 *arg0, s32 arg1) {
     temp_t4 = ((s32 *)((u8 *)&D_800C5758 + (temp_v0 * 4)));
     var_a0 = 0;
     if (*temp_t4 != 0) {
-        var_a1 = &D_800CC2D0[arg1];
+        var_a1 = &g_objects[arg1];
         do {
             temp_v0_2 = *temp_t4 + (var_v1 * 0xC);
             (*(s32 *)((u8 *)var_s0 + 0)) = (s32) ((((var_a1->unk27A + 2) & 0xFFFF & 0xFFF) << 0xC) | 0xF2000000 | ((var_a1->unk27E + 2) & 0xFFFF & 0xFFF));
@@ -1858,7 +1858,7 @@ void obj_apply_model_switch(struct127 *obj) {
         }
     }
     model = (*(u8 **) ((u8 *) obj + 0x2C4))[entry];
-    obj_set_type(((u8 *) obj - (u8 *) D_800CC2D0) / 0x32C, model, 0);
+    obj_set_type(((u8 *) obj - (u8 *) g_objects) / 0x32C, model, 0);
     OBJ_U8(obj, 0x1C8) = entry;
     if (D_800C35EA == 1) {
         D_800C3638 = 0;
@@ -1887,7 +1887,7 @@ void model_keep_resident(u8 *arg0)
   u8 *s;
   u8 a2;
   s32 v;
-  if ((D_80038080 == 0) && (D_800BE9F0 == 0x1D))
+  if ((D_80038080 == 0) && (g_level_id == 0x1D))
   {
     ((u8 *) D_800D2040)[idx] = 2;
     return;

@@ -33,7 +33,7 @@ extern u8 D_8003A948[];           /* yield buffer */
 extern OSMesgQueue D_800BEE30;    /* main-loop queue */
 extern u8 D_800BEE88[];           /* done messages, 0x20 each */
 extern OSMesgQueue D_8003B548;    /* scheduler gfx queue */
-extern s16 D_800BEEC8;
+extern s16 g_gfx_tasks_pending; /* was D_800BEEC8 */
 extern s32 D_800BEFD0;            /* ucode text / data pairs */
 extern s32 D_800C1480;
 extern u8 *D_800BEFBC;
@@ -100,13 +100,13 @@ void gfx_task_submit(s32 arg0, s32 arg1) {
     }
     D_800BEEF4[0x58 / 4] = (s32)&D_800BEE30;
     D_800BEEF4[0x5C / 4] = (s32)(D_800BEE88 + D_800BE9C0 * 0x20);
-    D_800BEEF4[0x10 / 4] = D_8002AAE8[D_800BE9C0];
+    D_800BEEF4[0x10 / 4] = g_framebuffers[D_800BE9C0];
     osWritebackDCacheAll();
     osSendMesg(&D_8003B548, (OSMesg)D_800BEEF4, OS_MESG_BLOCK);
     if (arg1 != 0) {
         D_800BE9C0 ^= 1;
     }
-    D_800BEEC8++;
+    g_gfx_tasks_pending++;
 }
 extern s32 D_2D810;
 extern s8 D_80084400;
@@ -372,11 +372,11 @@ s32 cutscene_load_scene_asset(s32 arg0, s32 arg1, s32 arg2) {
 /* was func_1501D2C4 */
 void cutscene_mark_seen(s32 arg0, s32 arg1) {
     if (D_800C3670 == 0) {
-        D_800C3A60[arg0] |= 1ULL << arg1;
+        g_save_level_bits[arg0] |= 1ULL << arg1;
     }
 }
 
-/* cutscene_was_seen: has scene arg1 of level arg0 been seen (bit in the saved D_800C3A60[level]), or is D_800C3670 set?
+/* cutscene_was_seen: has scene arg1 of level arg0 been seen (bit in the saved g_save_level_bits[level]), or is D_800C3670 set?
  * Only the cutscene-skip test cutscene_can_skip asks this. */
 /* was func_1501D330 */
 s32 cutscene_was_seen(s32 arg0, s32 arg1) {
@@ -394,16 +394,16 @@ s32 cutscene_was_seen(s32 arg0, s32 arg1) {
     if (D_800C3670 != 0) {
         return 1;
     }
-    if ((D_800C3A60[arg0] & (1ULL << arg1)) != 0) {
+    if ((g_save_level_bits[arg0] & (1ULL << arg1)) != 0) {
         return 1;
     }
     return 0;
 }
 
 /* Load scene `scene` (asset group 3, type 6, found by cutscene_load_scene_asset) of level `level` into sequence slot `slot`.
- * Skipped while the slot is already loaded (D_800C35EA[slot] == 1) or a level change is pending (D_800C35C4).
- * For another level than the current one (D_800BE9F0) the level change is requested instead (game_request_transition;
- * D_800C35C4 = scene + 1, D_800C35C5 = "the slot was empty").
+ * Skipped while the slot is already loaded (D_800C35EA[slot] == 1) or a level change is pending (g_cutscene_pending).
+ * For another level than the current one (g_level_id) the level change is requested instead (game_request_transition;
+ * g_cutscene_pending = scene + 1, D_800C35C5 = "the slot was empty").
  * The asset is a header {u16 nActors, nCameras, nSounds, nWords} followed by 8-byte records {s32 value, u32 bits}
  * (record 0 is the header pointer itself): nActors actor records, one record for D_800C3A10[slot], nActors
  * more (not read here), nCameras, nSounds, then nWords plain words. The per-slot tables (u16 arrays of
@@ -469,13 +469,13 @@ void cutscene_scene_load(s32 level, s32 scene, s32 slot, s32 callback, s32 callb
 
     loaded = &D_800C35EA + slot;
     state = *loaded;
-    if (state == 1 || D_800C35C4 != 0) {
+    if (state == 1 || g_cutscene_pending != 0) {
         return;
     }
     D_800C3C90 = callback;
     D_800C3C94 = callbackArg;
-    if (level != D_800BE9F0) {
-        D_800C35C4 = scene + 1;
+    if (level != g_level_id) {
+        g_cutscene_pending = scene + 1;
         game_request_transition(1, level, 0, 0, 0);
         if (*loaded != 0) {
             D_800C35C5 = 0;
@@ -487,7 +487,7 @@ void cutscene_scene_load(s32 level, s32 scene, s32 slot, s32 callback, s32 callb
 
     (&D_800C3A08)[slot] = scene;
     if (state != 2) {
-        D_800C39C8 = D_800BE9F0;
+        D_800C39C8 = g_level_id;
         D_800C40B8 = scene;
     }
     cutscene_slot_reset(slot);
@@ -647,7 +647,7 @@ void cutscene_scan_start_events(s32 slot) {
 
 /* Starts cutscene slot `slot`: script position D_800C39D0[slot] = start D_eu_800C3A60[slot] + D_800BEA08, runs the
  * camera / actor tracks once (cutscene_camera_track_pass, cutscene_apply_cameras, with scene_event_track_pass around them), then gives every
- * live object that takes part (cutscene_obj_takes_part, current object index in D_800C3E78) its first actor frame
+ * live object that takes part (cutscene_obj_takes_part, current object index in g_cur_obj_index) its first actor frame
  * (cutscene_actor_apply_track(obj, slot, -1)) and ends with cutscene_end(1, slot). */
 /* was func_1501DE84 */
 void cutscene_start(s32 slot) {
@@ -659,9 +659,9 @@ void cutscene_start(s32 slot) {
     cutscene_camera_track_pass(0);
     scene_event_track_pass(0, 0);
     cutscene_apply_cameras(0);
-    for (i = 0, obj = D_800CC2D0; i < 25; i++, obj++) {
+    for (i = 0, obj = g_objects; i < 25; i++, obj++) {
         if (*(s32 *)obj != 0) {
-            D_800C3E78 = i;
+            g_cur_obj_index = i;
             if (cutscene_obj_takes_part((s32 *)obj) != 0) {
                 cutscene_actor_apply_track(obj, slot, -1);
             }
@@ -680,9 +680,9 @@ void music_restart_type13_songs(void);
 
 /* End of cutscene slot `slot` (called by cutscene_update_skip with the slot left in a0): mp3_stream_stop when
  * mp3_voice_is_playing, remove object 0's attachment 0 (obj_find_child_nth / obj_remove), run cutscene_start(slot) once and
- * again while D_800C40B9 was set before the call and no level change is pending (D_800C35C4); screen colour
+ * again while D_800C40B9 was set before the call and no level change is pending (g_cutscene_pending); screen colour
  * screen_fade_start(0, 0, 0, 0x19, 0, 0) unless D_800C39C9, D_800C40AA == 1 or D_800C40AD; clear +0xA4 of every live
- * object (D_800CC2D0, 25), D_800C3663 = 0, music_restart_type13_songs, g_camera_timers[0] = 4, D_800C3A92 = 1. */
+ * object (g_objects, 25), D_800C3663 = 0, music_restart_type13_songs, g_camera_timers[0] = 4, D_800C3A92 = 1. */
 /* was func_1501DF70 */
 void cutscene_end_skip(s32 slot) {
     struct127 *p;
@@ -692,20 +692,20 @@ void cutscene_end_skip(s32 slot) {
     if (mp3_voice_is_playing() != 0) {
         mp3_stream_stop();
     }
-    p = obj_find_child_nth(D_800CC2D0, 0);
+    p = obj_find_child_nth(g_objects, 0);
     if (p != NULL) {
         obj_remove(p, 0);
     }
     do {
         flag = D_800C40B9;
         cutscene_start(slot);
-    } while (flag != 0 && D_800C35C4 == 0);
+    } while (flag != 0 && g_cutscene_pending == 0);
     if (D_800C39C9 == 0 && (s8)D_800C40AA != 1 && D_800C40AD == 0) {
         screen_fade_start(0, 0, 0, 0x19, 0, 0);
     }
     for (i = 0; i < 25; i++) {
-        if (D_800CC2D0[i].interaction_state != 0) {
-            *((u8 *)&D_800CC2D0[i] + 0xA4) = 0;
+        if (g_objects[i].interaction_state != 0) {
+            *((u8 *)&g_objects[i] + 0xA4) = 0;
         }
     }
     D_800C3663 = 0;
@@ -717,7 +717,7 @@ void cutscene_end_skip(s32 slot) {
 extern u16 D_800BEB30;  /* buttons held */
 extern u8 D_800D3260;
 extern u8 D_800C3A08;
-extern s32 D_800BE9F0;
+extern s32 g_level_id; /* was D_800BE9F0 */
 /* May cutscene slot `slot` be skipped (called by cutscene_update_skip for a playing slot)? Level 0x1D: once after a
  * pending request (D_80090124, cleared here), else only when slot 0's scene is 5 (then as below). Level 0x21:
  * button 0x1000 held (D_800BEB30) with D_8000030C == 1 and slot 0 past frame 250. Other levels: button 0x20,
@@ -741,7 +741,7 @@ s32 port_skip_hold(void);
 #endif
 /* was func_1501E0C8 */
 s32 cutscene_can_skip(s32 slot, u8 *unused) {
-    s32 level = D_800BE9F0;
+    s32 level = g_level_id;
 
     if (level == 0x1D) {
         if (D_80090124 != 0) {
@@ -865,7 +865,7 @@ extern u8 D_eu_800C3E78;
 
 /* Per-player counter step (P15, hand C from the asm): remembers the previous value D_800C39D8[i] of
  * D_800C39D0[i], and for an active player (D_800C35EA[i] == 1) advances it by D_800BEA08 (player 0
- * only when D_800BEAC0 == 0), clamped to D_eu_800C3A60[i]. */
+ * only when g_game_paused == 0), clamped to D_eu_800C3A60[i]. */
 /* was func_1501E46C */
 void cutscene_advance_position(s32 i) {
     s32 *cur = &(&D_800C39D0)[i];
@@ -879,7 +879,7 @@ void cutscene_advance_position(s32 i) {
         return;
     }
     cutscene_update_skip(i);
-    if (i != 0 || D_800BEAC0 == 0) {
+    if (i != 0 || g_game_paused == 0) {
         *cur += D_800BEA08;
     }
     if (D_800C39E0[i] == 0 && D_800C40AE == D_800C39D8[i] && D_800C40AE != *cur) {
@@ -1014,7 +1014,7 @@ void cutscene_end(s32 skipped, s32 slot) {
     node_broadcast_all((s32)&scene, skipped ? 0xF : 0x10);
     D_800C39D8[slot] = -100;
     (&D_800C39D0)[slot] = D_800C40AE;
-    cutscene_mark_seen(D_800BE9F0, (&D_800C3A08)[slot]);
+    cutscene_mark_seen(g_level_id, (&D_800C3A08)[slot]);
     *loaded = 0;
     D_800C3638 = 0;
     cutscene_actors_reset_anim(slot);
@@ -1032,13 +1032,13 @@ void cutscene_end(s32 skipped, s32 slot) {
         *loaded = 2;
         level = D_800C39E3;
         if (level == 0x25) {
-            savedLevel = D_800BE9F0;
-            D_800BE9F0 = 0x25;
+            savedLevel = g_level_id;
+            g_level_id = 0x25;
         }
         D_800C3671 = 0;
         cutscene_scene_load(level, D_800C39E2 - 1, slot, D_800C3C90, D_800C3C94);
         if (D_800C39E3 == 0x25) {
-            D_800BE9F0 = savedLevel;
+            g_level_id = savedLevel;
         }
     } else {
         if (D_800C40AB != 0) {
@@ -1055,7 +1055,7 @@ void camera_queue_event(struct108 *, s32, void *);
 void cutscene_restore_records(s32);
 void cutscene_release_listed_objs(s32);
 extern s32 D_800C3A20;   /* camera event block */
-extern s32 D_800D121C;   /* end of the object table D_800CC2D0 */
+extern s32 g_obj_scratch_rec;   /* end of the object table g_objects; was D_800D121C; was D_800CC2D0 */
 extern f32 D_80096D74;   /* unset D_800C3A94 */
 extern f32 D_80096D78;   /* unset D_800C3A98 */
 
@@ -1107,7 +1107,7 @@ void cutscene_end_camera_objs(s32 slot) {
         cutscene_release_listed_objs(slot);
     }
     cutscene_restore_records(slot);
-    for (obj = (u8 *)D_800CC2D0; obj != (u8 *)&D_800D121C; obj += 0x32C) {
+    for (obj = (u8 *)g_objects; obj != (u8 *)&g_obj_scratch_rec; obj += 0x32C) {
         if (*(s32 *)obj != 0 && cutscene_obj_takes_part((s32 *)obj) != 0) {
             obj[0xA4] = 0;
             *(f32 *)(obj + 0xB8) = 0.0f;
@@ -2117,7 +2117,7 @@ void cutscene_actor_apply_track(struct127 *arg0, s32 arg1, s32 arg2) {
         }
         A834_F(0x54) = 0.0f;
         *(s16 *)((u8 *)obj + 0xCC) = 0;
-        D_800D39FC = (arg0 - D_800CC2D0) + 1;
+        D_800D39FC = (arg0 - g_objects) + 1;
         collision_find_floor((s32)obj + 0x188, (s32)obj + 0x18C, (s32)&floorY, (s32)obj + 0x118, (s32)obj + 0x184,
                       (s32)obj + 0x1A2, A834_F(0x14), A834_F(0x18), A834_F(0x1C), A834_F(0x18), 0, (s32)obj,
                       D_80096DB4, *(f32 *)((u8 *)arg0 + 0x18));
@@ -2200,7 +2200,7 @@ s32 cutscene_player_look_target(f32 *outA, f32 *outB, f32 *outC, f32 *pos, s32 p
         if (*(u16 *)e != 2) {
             continue;
         }
-        if (*((u8 *)D_800CC2D0 + player * 0x32C + 0x3B) != e[2]) {
+        if (*((u8 *)g_objects + player * 0x32C + 0x3B) != e[2]) {
             continue;
         }
         step = (u8 *)D_800C3D80[slot][i];
@@ -2259,7 +2259,7 @@ s32 cutscene_player_look_limits(f32 *a, f32 *b, s32 player, s32 slot) {
         if (*(u16 *)e != 2) {
             continue;
         }
-        if (*((u8 *)D_800CC2D0 + player * 0x32C + 0x3B) != e[2]) {
+        if (*((u8 *)g_objects + player * 0x32C + 0x3B) != e[2]) {
             continue;
         }
         a[1] = 0.0f;
@@ -2404,7 +2404,7 @@ s32 cutscene_actor_spawn_obj(s32 arg0, s32 arg1) {
                     if (var_v0 != 0) {
                         sp3C = (struct127 *) var_v0;
                         obj_start_anim((struct127 *) var_v0, 0U, 0.0f, 0.0f, 0.0f, 0.0f, 1);
-                        var_v0 = cutscene_obj_list_add(((u8 *) sp3C - (u8 *) D_800CC2D0) / 812, arg1);
+                        var_v0 = cutscene_obj_list_add(((u8 *) sp3C - (u8 *) g_objects) / 812, arg1);
                     }
                 }
                 /* Duplicate return node #13. Try simplifying control flow for better match */
@@ -2545,7 +2545,7 @@ void cutscene_release_listed_objs(s32 arg0)
   u8 *p;
   struct127 *e;
  i = 0; n = *cnt; if (n > 0) { p = D_800C3938[arg0]; do {
-      e = &D_800CC2D0[*p];
+      e = &g_objects[*p];
       if (e->interaction_state)
       {
         new_var = &(*cnt);
@@ -2570,9 +2570,9 @@ void cutscene_event_dispatch(s32 *arg0) {
     }
 }
 
-extern u8 D_800CC3FF;   /* D_800CC2D0[0] + 0x12F: actor id of an object (0x32C-byte objects) */
+extern u8 D_800CC3FF;   /* g_objects[0] + 0x12F: actor id of an object (0x32C-byte objects); was D_800CC2D0 */
 /* Does object `obj` take part in the loaded cutscene? Slot 1 for object kind 4 (byte +5), else slot 0; its id
- * is the actor id of its owner D_800CC2D0[obj[0x65]] (byte at +0x12F) when it has one, else its own byte +0x3B.
+ * is the actor id of its owner g_objects[obj[0x65]] (byte at +0x12F) when it has one, else its own byte +0x3B.
  * Returns 2 (owned) / 1 when an active actor of that slot has entry type 2 (object) with that id (entry byte
  * +2), else 0 (also for no object, a free slot obj[0] == 0, or no scene loaded in slot 0). */
 /* was func_15022A8C */
@@ -2910,17 +2910,17 @@ void hud_bubbles_reset(void);
 void player_idle_animation(void);
 extern f32 D_80096DCC;   /* no water level (-10000) */
 /* Scene teardown, player (cutscene_end): clears flag 0x200 of object 0 (+0x25C) and, unless D_800C39CA, resets
- * the player object obj_find_by_setup_id(1) (D_800C3E78 = its index): speeds / timers cleared; in water (water level
+ * the player object obj_find_by_setup_id(1) (g_cur_obj_index = its index): speeds / timers cleared; in water (water level
  * +0x118 set, D_80096DCC = none, and above the feet +0x18): swimming (+0xAD = 1, hud_bubbles_reset when the water
  * is deeper than 50 above the floor +0x1A6 or the model flag +0x31C->+0x20 bit 0 is set), else standing on the
  * floor +0x180 (+0x20 = -4, +0x24 = 5). Then the height above the floor (+0x28), cleared input / state bytes,
- * D_800D154C = the player and the idle animation (player_idle_animation). `slot` is not read. */
+ * g_cur_obj = the player and the idle animation (player_idle_animation). `slot` is not read. */
 /* was func_15023684 */
 void cutscene_teardown_player(s32 slot) {
     u8 *p;
     f32 water;
 
-    *(u32 *)((u8 *)D_800CC2D0 + 0x25C) &= ~0x200;
+    *(u32 *)((u8 *)g_objects + 0x25C) &= ~0x200;
     if (D_800C39CA != 0) {
         return;
     }
@@ -2928,7 +2928,7 @@ void cutscene_teardown_player(s32 slot) {
     if (p == NULL) {
         return;
     }
-    D_800C3E78 = (p - (u8 *)D_800CC2D0) / 0x32C;
+    g_cur_obj_index = (p - (u8 *)g_objects) / 0x32C;
     *(f32 *)(p + 0x3C) = 0.0f;
     if (*(f32 **)(p + 0x31C) != NULL) {
         **(f32 **)(p + 0x31C) = 0.0f;
@@ -2959,7 +2959,7 @@ void cutscene_teardown_player(s32 slot) {
     p[0x8A] = 0;
     p[0x104] = 0;
     *(f32 *)(p + 0x28) = *(f32 *)(p + 0x18) - *(f32 *)(p + 0x180);
-    D_800D154C = (struct127 *)p;
+    g_cur_obj = (struct127 *)p;
     player_idle_animation();
     (*(u8 **)(p + 0x31C))[0x23] = 0;
     p[0x276] = 0;
@@ -2983,7 +2983,7 @@ void cutscene_update_objects(void) {
     struct127 *var_s0;
     u8 var_s1;
 
-    var_s0 = D_800CC2D0;
+    var_s0 = g_objects;
     var_s1 = 0;
     if (D_800C3A78 != 0) {
         objects_run_state_handlers();
@@ -2991,7 +2991,7 @@ void cutscene_update_objects(void) {
     }
     do {
         if (var_s0->interaction_state != 0) {
-            D_800C3E78 = var_s1;
+            g_cur_obj_index = var_s1;
             cutscene_event_dispatch(&var_s0->interaction_state);
             face_anim_timer_step(&var_s0->interaction_state);
             if (cutscene_obj_takes_part(&var_s0->interaction_state) != 0) {

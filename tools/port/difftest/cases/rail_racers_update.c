@@ -71,7 +71,7 @@ s32 rail_racers_update(void) {
                 continue;
             }
         }
-        obj = (u8 *) &D_800CC2D0[i];
+        obj = (u8 *) &g_objects[i];
         myTeam = team[i];
         if (myTeam != 0 && *(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB9) {
             obj[0x1E4] = 1;
@@ -147,7 +147,7 @@ s32 rail_racers_update(void) {
                     ((f32 *) ((u8 *) D_800D27D0 + 0x17E8))[i] = *(f32 *) (obj + 0x18) + 40.0f;
                     ((f32 *) ((u8 *) D_800D27D0 + 0x1828))[i] = random_float() * 50.0f + *(f32 *) (obj + 0x1C);
                     if (target[i] - 2 >= 2) {
-                        other = (u8 *) &D_800CC2D0[target[i] - 2];
+                        other = (u8 *) &g_objects[target[i] - 2];
                         ((f32 *) ((u8 *) D_800D27D0 + 0x17A8))[i] +=
                             (*(f32 *) (other + 0x14) - *(f32 *) (obj + 0x14)) * 0.5f;
                         ((f32 *) ((u8 *) D_800D27D0 + 0x1828))[i] +=
@@ -222,7 +222,7 @@ s32 rail_racers_update(void) {
         view = *(u8 **) &D_800BE628;
         half = (s32) (*(f32 *) (view + 0x30) - *(f32 *) (view + 0x2C)) >> 1;
         text_set_color(0xFF, 0xFF, 0xFF, 0xFF);
-        obj = (u8 *) D_800CC2D0;
+        obj = (u8 *) g_objects;
         for (i = 0; i <= D_80082FA0; i++, obj += 0x32C) {
             if (obj[0x128] == 0) {
                 view = *(u8 **) &D_800BE628 + i * 0x180;

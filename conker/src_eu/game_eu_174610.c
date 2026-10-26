@@ -31,7 +31,7 @@ s32 obj_query_table6(struct127 *);
 s32 trigger_first_touched(u32, s32, s32 *);
 
 /* Interaction hook (g_interaction_hook_fns table, called by obj_interaction_update with the mode from interaction_mode_for_level and the object):
- * maps mode 0..8 to an entry of g_interaction_handlers, -1 = none. Mode 1 in level 4 (D_800BE9F0) asks obj_query_table6; mode 6
+ * maps mode 0..8 to an entry of g_interaction_handlers, -1 = none. Mode 1 in level 4 (g_level_id) asks obj_query_table6; mode 6
  * looks the object up with the five ids 0x401D..0x4021 (D_800A5AB0) through trigger_first_touched. */
 /* was func_15146EE0 */
 s32 interaction_hook_map_mode(s32 mode, struct127 *obj) {
@@ -41,7 +41,7 @@ s32 interaction_hook_map_mode(s32 mode, struct127 *obj) {
         case 0:
             return 0;
         case 1:
-            if (D_800BE9F0 == 4) {
+            if (g_level_id == 4) {
                 if (obj_query_table6(obj) != 0) {
                     return 6;
                 }
@@ -63,7 +63,7 @@ s32 interaction_hook_map_mode(s32 mode, struct127 *obj) {
             ids[2] = 0x401F;
             ids[3] = 0x4020;
             ids[4] = 0x4021;
-            if (trigger_first_touched(obj - D_800CC2D0, 5, ids) == -1) {
+            if (trigger_first_touched(obj - g_objects, 5, ids) == -1) {
                 return -1;
             }
             return 6;
@@ -336,7 +336,7 @@ s32 fx_spawn_dust_puff(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg
     return 1;
 }
 
-extern u8 (*D_800900A4)(void);
+extern u8 (*g_impact_debris_tex_fns)(void); /* was D_800900A4 */
 void fx_spawn_impact_particle(u8, s32 *, f32, s32, f32 *, u8);
 void fx_spawn_impact_burst(u8, f32 *, s32, f32, f32);
 /* was func_15147888 */
@@ -352,7 +352,7 @@ void obj_fx_point_impact_a4(u8 *arg0, int arg1, s32 arg2) {
             if (arg2 >= 0x73) {
                 fx_spawn_impact_burst(0, sp4C, sp28[6], 1.0f, 1.0f);
             }
-            fx_spawn_impact_particle(D_800900A4(), sp28, arg2 * 0.0076923077f, (u8)(*(f32 *)(arg0 + 0x40) * 0.7111111f), sp4C, arg1);
+            fx_spawn_impact_particle(g_impact_debris_tex_fns(), sp28, arg2 * 0.0076923077f, (u8)(*(f32 *)(arg0 + 0x40) * 0.7111111f), sp4C, arg1);
         }
     }
 }

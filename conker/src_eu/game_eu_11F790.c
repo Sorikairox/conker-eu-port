@@ -80,7 +80,7 @@ s16 *obj7b_joint_swing_entries(s16 *p, s32 i) {
     s32 v;
     s32 k;
 
-    if (*(u16 *)((u8 *)&D_800CC2D0[i] + 0x84) == 0x21) {
+    if (*(u16 *)((u8 *)&g_objects[i] + 0x84) == 0x21) {
         v = *angle - step;
         if ((f32)v > -6553.6f) {
             *angle = v;
@@ -237,14 +237,14 @@ void fx_big_explosion_at_obj(u8 *arg0, s32 arg1, s32 arg2) {
 }
 /* P249: readable C for ambient_far_sound_update (game_eu_11F790, 80 insns). */
 // ambient_far_sound_update: random ambient sound while object `slot` is far out. A cooldown D_800D9D10 (u8) counts
-// down by D_800BE9E4 per frame (to 0); when it is 0 and x^4 + z^4 of D_800CC2D0[slot] exceeds 6760000, plays sound
+// down by D_800BE9E4 per frame (to 0); when it is 0 and x^4 + z^4 of g_objects[slot] exceeds 6760000, plays sound
 // 0x6C..0x6E (random_int() % 3) at volume 0x5DC0 with the pan of sound_source_mix(0, y, 0, 0x7FFF, 20000, 19000)
 // (+0x80, low byte) and restarts the cooldown at 0x80..0xFF frames.
 s32 sound_source_mix(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *outPan, s32 *outVol, s32 *outDist);
 s32 random_int(void);
 /* was func_150F2670 */
 void ambient_far_sound_update(s32 slot) {
-    struct127 *obj = &D_800CC2D0[slot];
+    struct127 *obj = &g_objects[slot];
     u8 *timer = (u8 *) D_800D9D10;
     f32 x2, z2;
     s32 pan, vol, dist;

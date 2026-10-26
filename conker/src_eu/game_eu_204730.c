@@ -7,7 +7,7 @@ extern u8 D_800A5860[];
 
 /* was func_151D6F20 */
 void pickup_burst_in_mp_level(s32 arg0, s32 arg1) {
-    if ((D_800BE9F0 == 50) || (D_800BE9F0 == 51)) {
+    if ((g_level_id == 50) || (g_level_id == 51)) {
         obj_sprite_burst_spawn(arg0, 0xFF, 1);
     }
 }

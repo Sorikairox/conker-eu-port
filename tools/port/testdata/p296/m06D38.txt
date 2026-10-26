@@ -10,7 +10,7 @@
 \#^    gfx = gfx_geometry_mode_cached(gfx, 0x200005, 0x1F0600);#s/0x1F0600/0x1F0601/
 \#^    gfx = gfx_set_combine_mode(gfx, 0x44, &flag);#s/0x44/0x45/
 \#^    gfx = gfx_other_mode_cached(gfx#s/0x2CA0/0x2CA1/
-\#^    gfx = gfx_other_mode_cached(gfx#s/D_800A4EA8\[3\]/D_800A4EA8[1]/
+\#^    gfx = gfx_other_mode_cached(gfx#s/g_render_mode_pairs\[3\]/g_render_mode_pairs[1]/
 \#^    dx = pts\[3\] - pts\[0\];#s/pts\[3\]/pts[4]/
 \#^    dz = pts\[5\] - pts\[2\];#s/pts\[2\]/pts[1]/
 \#^    ey = pts\[1\] - cam\[1\];#s/cam\[1\]/cam[0]/

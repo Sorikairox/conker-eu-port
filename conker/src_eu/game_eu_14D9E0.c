@@ -611,7 +611,7 @@ void camera_look_mode_defaults(u8 *arg0) {
             (*(f32 *)((u8 *)arg0 + 0x784)) = 350.0f;
             return;
         }
-        if ((arg0[0x23E] == 0x3B) && ((D_800BE9F0 == 0x41) || (D_800BE9F0 == 0x3C))) {
+        if ((arg0[0x23E] == 0x3B) && ((g_level_id == 0x41) || (g_level_id == 0x3C))) {
             (*(f32 *)((u8 *)arg0 + 0x190)) = -12.0f;
             (*(f32 *)((u8 *)arg0 + 0x99C)) = -28.0f;
             (*(f32 *)((u8 *)arg0 + 0x784)) = 106.0f;
@@ -624,7 +624,7 @@ void camera_look_mode_defaults(u8 *arg0) {
             (*(s32 *)((u8 *)arg0 + 0x84)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x84)) | 0x80);
             return;
         }
-        if ((arg0[0x23E] == 0x12) && (D_800BE9F0 == 0x3C)) {
+        if ((arg0[0x23E] == 0x12) && (g_level_id == 0x3C)) {
             (*(f32 *)((u8 *)arg0 + 0x190)) = 10.0f;
             (*(f32 *)((u8 *)arg0 + 0x784)) = 180.0f;
             (*(f32 *)((u8 *)arg0 + 0x99C)) = 0.0f;

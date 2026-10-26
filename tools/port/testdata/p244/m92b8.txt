@@ -4,8 +4,8 @@
 \#^    gdl = gfx_prim_color_cached(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);$#s/0xF2, 0,/0xF2, 1,/ %
 \#^    gdl = gfx_prim_color_cached(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);$#s/0xFF, 0xFF, \&flag/0xFF, 0, \&flag/ %
 \#^    gdl = gfx_set_combine_mode(gdl, 0x21, &flag);$#s/0x21/0x20/ %
-\#^    gdl = gfx_other_mode_cached(gdl, 0x1DACA0, D_800A4EA8\[29\] | D_800A4EA8\[28\], &flag);$#s/\[29\] | /[27] | / %
-\#^    gdl = gfx_other_mode_cached(gdl, 0x1DACA0, D_800A4EA8\[29\] | D_800A4EA8\[28\], &flag);$#s/0x1DACA0/0x1DACA1/ %
+\#^    gdl = gfx_other_mode_cached(gdl, 0x1DACA0, g_render_mode_pairs\[29\] | g_render_mode_pairs\[28\], &flag);$#s/\[29\] | /[27] | / %
+\#^    gdl = gfx_other_mode_cached(gdl, 0x1DACA0, g_render_mode_pairs\[29\] | g_render_mode_pairs\[28\], &flag);$#s/0x1DACA0/0x1DACA1/ %
 \#^    tex = texture_cache_lookup(\*D_80091234, &size, 3, 0);$#s/, 3, 0)/, 2, 0)/ %
 \#^    tex = texture_cache_lookup(\*D_80091234, &size, 3, 0);$#s/, 3, 0)/, 3, 1)/ %
 \#^    RING_DL(0xFD500000, tex);        /\* texture image: CI, 16-bit words (block load) \*/$#s/tex)/tex + 1)/ %

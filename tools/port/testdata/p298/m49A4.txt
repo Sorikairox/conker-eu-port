@@ -18,7 +18,7 @@ s#        off\[2\] = D_800A0720\[i\]\[2\] \* f;#        off[2] = D_800A0720[i][1
 s#        mtx_transform_point_or_origin(off, pos, \*(u8 \*\*) (obj + 0x1D4) + (D_800A0744\[i\] << 6));#        mtx_transform_point_or_origin(off, pos, *(u8 **) (obj + 0x1D4) + (D_800A0744[i] << 5));# % m0t1 m0t2
 s#        glow\[0x74\] = 0xFF;#        glow[0x74] = 0xFE;# % m0t1
 s#        \*(Vec49A4 \*) (rec->glow + 0x40) = \*(Vec49A4 \*) pos;#        *(Vec49A4 *) (rec->glow + 0x44) = *(Vec49A4 *) pos;# % m0t1
-s#    if (D_800BE9F0 == 2 \&\& trigger_test_player(((u8 \*) obj - (u8 \*) D_800CC2D0) \/ 0x32C, 0x4065) == 0) {#    if (D_800BE9F0 == 2 \&\& trigger_test_player(((u8 *) obj - (u8 *) D_800CC2D0) \/ 0x32C, 0x4066) == 0) {# % gm2no gm2yes
+s#    if (g_level_id == 2 \&\& trigger_test_player(((u8 \*) obj - (u8 \*) g_objects) \/ 0x32C, 0x4065) == 0) {#    if (g_level_id == 2 \&\& trigger_test_player(((u8 *) obj - (u8 *) g_objects) \/ 0x32C, 0x4066) == 0) {# % gm2no gm2yes
 s#        enabled = FALSE;#        enabled = TRUE;# % gm2no
 s#        rec->smoke += (D_800A078C_c\[0\] + random_float() \* D_800A0790_c\[0\]) \* D_800BE9A4;#        rec->smoke += (D_800A078C_c[0] + random_float() * D_800A0794_c[0]) * D_800BE9A4;# % one many
 s#        while (1\.0f < rec->smoke) {#        while (1.0f <= rec->smoke) {# % exact

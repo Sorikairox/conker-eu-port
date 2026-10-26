@@ -82,7 +82,7 @@ void flare_nodes_read_zbuffer(void) {
             if ((temp_f0 >= 0.0f) && (temp_f0 < (f32) D_800BE620)) {
                 temp_f2 = *(f32 *)(var_v0 + 0x10);
                 if ((temp_f2 >= 0.0f) && (temp_f2 < (f32) D_800BE624)) {
-                    *(u16 *)(var_v0 + 0x2A) = *(u16 *)(*(u8 **)&D_800BEDE4 + ((s32) temp_f0 * 2) + ((u32) (s32) temp_f2 * (u32) D_800BE620 * 2));
+                    *(u16 *)(var_v0 + 0x2A) = *(u16 *)(*(u8 **)&g_zbuffer + ((s32) temp_f0 * 2) + ((u32) (s32) temp_f2 * (u32) D_800BE620 * 2));
                 }
             }
             var_v0 = *(s32 *)(var_v0 + 0x24);
@@ -268,7 +268,7 @@ Gfx *flare_lens_draw(Gfx *gdl, u8 *node, s32 row, s32 count, s32 falloff, s32 br
         f = j;
         spr.alpha = alpha;
         size = sizes[i] << 12;
-        D_800D31CB = 0;
+        g_sprite_keep_prim_colour = 0;
         spr.scaleX = size * D_80038400 / 255.0f;
         spr.scaleY = size * D_80038404 / 255.0f;
         gdl = sprite_draw_at_screen(gdl, &spr, *(f32 *) (node + 0xC) - dx * f / 5.0f,
@@ -289,7 +289,7 @@ Gfx *flare_render_mode_set(Gfx *arg0) {
 void camera_view_rotation_matrix(s32, f32 (*)[4], f32, f32, f32);
 void mtxf_transform_point_w(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 
-// world_to_screen: projects (x, y, z) with the current player's camera (D_800DBFF0[D_80082FA4]: view matrix from
+// world_to_screen: projects (x, y, z) with the current player's camera (D_800DBFF0[g_cur_view_player]: view matrix from
 // camera_view_rotation_matrix with -pitch +0x388, -yaw +0x380 and +0x5EC) into its viewport (D_800BE628 + player * 0x180: half
 // width +0xC, half height +0x10). In front (w > 10): *outX / *outY = viewport centre + projected x / - projected y,
 // returns 1; else both 0 and returns 0.
@@ -306,9 +306,9 @@ s32 flare_world_to_screen(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     f32 sz;
     f32 w;
 
-    cam = (u8 *) D_800DBFF0 + D_80082FA4 * 0x9A0;
-    camera_view_rotation_matrix(D_80082FA4, mtx, -*(f32 *) (cam + 0x388), -*(f32 *) (cam + 0x380), *(f32 *) (cam + 0x5EC));
-    vp = (u8 *) D_800BE628 + D_80082FA4 * 0x180;
+    cam = (u8 *) D_800DBFF0 + g_cur_view_player * 0x9A0;
+    camera_view_rotation_matrix(g_cur_view_player, mtx, -*(f32 *) (cam + 0x388), -*(f32 *) (cam + 0x380), *(f32 *) (cam + 0x5EC));
+    vp = (u8 *) D_800BE628 + g_cur_view_player * 0x180;
     hw = *(f32 *) (vp + 0xC);
     hh = *(f32 *) (vp + 0x10);
     mtxf_transform_point_w(mtx, x, y, z, &sx, &sy, &sz, &w);

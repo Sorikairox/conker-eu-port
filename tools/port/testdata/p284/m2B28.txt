@@ -17,9 +17,9 @@
 \#^                id = obj\[0x3F\];$#s/0x3F/0x40/
 \#^                id = obj\[0x40\];$#s/0x40/0x3F/
 \#^        if (id != -1) {$#s/-1/0/
-\#^            D_8008B704\[id\](obj, obj\[0x3C\]);$#s/\[id\]/[id + 1]/
+\#^            g_light_env_phase_fns\[id\](obj, obj\[0x3C\]);$#s/\[id\]/[id + 1]/
 \#^    \*(f32 \*) (obj + 0x24) += D_800BE9A4;$#s/+=/-=/
 \#^    while (\*(f32 \*) (obj + 0x34) < \*(f32 \*) (obj + 0x24)) {$#s/</<=/
 \#^        \*(f32 \*) (obj + 0x24) -= \*(f32 \*) (obj + 0x34);$#s/0x34/0x30/
 \#^    return 1;$#s/1;/0;/
-\#^            D_8008B704\[id\](obj, obj\[0x3C\]);$#s/obj\[0x3C\])/old)/
+\#^            g_light_env_phase_fns\[id\](obj, obj\[0x3C\]);$#s/obj\[0x3C\])/old)/

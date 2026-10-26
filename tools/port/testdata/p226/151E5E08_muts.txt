@@ -20,14 +20,14 @@ s/if (j == i || D_800E0EE0\[j\] != -1 || D_80087270\[j\] == 10) {/if (j == i || 
 s/if (j == i || D_800E0EE0\[j\] != -1 || D_80087270\[j\] == 10) {/if (j == i || D_800E0EE0[j] != -1) {/ % ffa_spect
 s/                    b -= ((s16 \*) D_800E0F00)\[j\];/                    b -= 0;/ % ffa_hcap
 s/                    if (b >= lim) {/                    if (b > lim) {/ % ffa_limit
-s/                        if (D_800CC2D0\[j\].unk31C->unk1AA < D_800CC2D0\[i\].unk31C->unk1AA) {/                        if (D_800CC2D0[j].unk31C->unk1AA > D_800CC2D0[i].unk31C->unk1AA) {/ % ffa_tb
+s/                        if (g_objects\[j\].unk31C->unk1AA < g_objects\[i\].unk31C->unk1AA) {/                        if (g_objects[j].unk31C->unk1AA > g_objects[i].unk31C->unk1AA) {/ % ffa_tb
 s/\&\& j < i \&\&/\&\& j > i \&\&/ % ffa_tieidx ffa_tieidx0
 s/                                   D_80082FA0 < j) {/                                   D_80082FA0 <= j) {/ % ffa_tieidx ffa_tieidx0
 s/        tm\[team\] += \*(s16 \*) (D_80090174 + 0x46 + i \* 2);/        tm[team] = *(s16 *) (D_80090174 + 0x46 + i * 2);/ % team_sum
 s/        kills = player_stat_get(i, 4);/        kills = player_stat_get(i, 5);/ % team_m9a
 s/        tm\[4 + team\] += player_stat_get(i, 3) \* 6 + kills;/        tm[4 + team] += player_stat_get(i, 3) * 5 + kills;/ % team_kd
 s/        tm\[8 + team\] = player_stat_get(team, 6);/        tm[8 + team] = player_stat_get(i, 6);/ % team_m0
-s/        tm\[12 + team\] += D_800CC2D0\[i\].unk31C->unk1AA;/        tm[12 + team] = D_800CC2D0[i].unk31C->unk1AA;/ % team_tie team_tie2 team_tie3
+s/        tm\[12 + team\] += g_objects\[i\].unk31C->unk1AA;/        tm[12 + team] = g_objects[i].unk31C->unk1AA;/ % team_tie team_tie2 team_tie3
 s/            limit = D_800E1010\[4\];/            limit = D_800E1010[5];/ % team_m0_hit
 s/            limit = D_800E1010\[0x12\];/            limit = D_800E1010[0x13];/ % team_m2 team_m8 team_m10
 s/        case 8:/        case 7:/ % team_m8

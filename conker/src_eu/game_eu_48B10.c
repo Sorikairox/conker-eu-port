@@ -4,7 +4,7 @@
 
 
 /* Smoothed view direction of camera `player` (D_800DBFF0 cameras, 0x9A0 bytes each), skipped while
- * D_800BEAC0 is set. The pitch (+0x388, folded into -180..180) and the heading (+0x380) are followed by
+ * g_game_paused is set. The pitch (+0x388, folded into -180..180) and the heading (+0x380) are followed by
  * D_800BEAE0[player] / D_800BEAF0[player] at rate 0.1 (camera +0x698 set), 1.0 (g_camera_timers set) or 0.03;
  * the smoothed heading stays within 90 degrees of the real one. The direction vector, scaled to 127, is
  * stored as three s8 in D_800DCD30[player * 3]. */
@@ -28,7 +28,7 @@ void camera_update_dir_vector(s32 player) {
     f32 z;
     s8 *out;
 
-    if (D_800BEAC0 != 0) {
+    if (g_game_paused != 0) {
         return;
     }
     cam = (u8 *)D_800DBFF0 + player * 0x9A0;

@@ -102,7 +102,7 @@ void wake_spray_update(u8 *fx) {
         *(s16 *) (fx + 0xE) = -1;
         return;
     }
-    owner = (u8 *) &D_800CC2D0[obj[0x124]];
+    owner = (u8 *) &g_objects[obj[0x124]];
     fast = FALSE;
     if ((*(u8 **) (owner + 0x31C))[0x4F] == 2) {
         boost = *(f32 *) (owner + 0x44) * 1.35f;

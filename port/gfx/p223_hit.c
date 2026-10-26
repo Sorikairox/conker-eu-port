@@ -1,6 +1,6 @@
 /* P223 DIAGNOSTIC ?p223hit=N: knock-back check. Wraps obj_receive_hit (object_receive_hit, game_83300.c; its callers are
  * in game_8FCB0.c, so --wrap sees them): logs the first N calls (then every 32nd) with the attacker / target records
- * (index into D_800CC2D0, id, uid), the target's reaction type (+0x239), the hit descriptor (kind, handler, damage,
+ * (index into g_objects, id, uid), the target's reaction type (+0x239), the hit descriptor (kind, handler, damage,
  * push, xz / y speed), the result bits, and the target's speeds / angle / health / stun before and after. After a
  * landed hit the target is followed for 60 frames (position + speeds every 6 frames) from p205_obj_hook. */
 #include <stdint.h>
@@ -9,12 +9,12 @@
 int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
-extern unsigned char D_800CC2D0[];
+extern unsigned char g_objects[]; /* was D_800CC2D0 */
 #define REC 0x32C
 static float F(const unsigned char *r, int o) { return *(const float *)(r + o); }
 static int on(void) { static int f = -1; if (f < 0) f = port_flag("p223hit"); return f; }
 static int recno(const unsigned char *r) {
-    long d = r - D_800CC2D0;
+    long d = r - g_objects;
     return d >= 0 && d < 26 * REC && d % REC == 0 ? (int)(d / REC) : -1;
 }
 static const unsigned char *fol; static unsigned fol_f;

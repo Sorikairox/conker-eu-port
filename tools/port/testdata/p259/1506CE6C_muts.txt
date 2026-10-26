@@ -39,9 +39,9 @@ s/    case 18:/    case 19:/ % m18 m19
 s/pitch = pitch \* 2.2f + 7.0f;/pitch = pitch * 2.2f + 6.0f;/ % m15
 s/        height = 3.3f;/        height = 3.0f;/ % m15
 s/        height = 2.4f;/        height = 2.0f;/ % m1
-s/vec3_to_yaw_pitch_deg(D_800CCA0C + 0xE8, \&yaw, \&pitch);/vec3_to_yaw_pitch_deg(D_800CCA0C + 0xE4, \&yaw, \&pitch);/ % m3
-s/target\[0\] = \*(f32 \*) (D_800CCA0C + 0xDC);/target[0] = 0.0f;/ % m3
-s/target\[1\] = \*(f32 \*) (D_800CCA0C + 0xE0);/target[1] = *(f32 *) (D_800CCA0C + 0xE4);/ % m3
+s/vec3_to_yaw_pitch_deg(g_obj0_state + 0xE8, \&yaw, \&pitch);/vec3_to_yaw_pitch_deg(g_obj0_state + 0xE4, \&yaw, \&pitch);/ % m3
+s/target\[0\] = \*(f32 \*) (g_obj0_state + 0xDC);/target[0] = 0.0f;/ % m3
+s/target\[1\] = \*(f32 \*) (g_obj0_state + 0xE0);/target[1] = *(f32 *) (g_obj0_state + 0xE4);/ % m3
 s/        pitch = -pitch;/        ;/ % m3
 s/        target_ptr = target;/        ;/ % m3
 s/        flags54 = 0x30;/        flags54 = 0x20;/ % m17

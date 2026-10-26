@@ -17,7 +17,7 @@ s32 obj_receive_hit(struct127 *arg0, struct127 *arg1, void *arg2, s32 arg3, s32 
 // EU: split from game_83300.c, EU pads to a file boundary before this.
 
 void attachment_swap_owner_ids(s32, s32);
-// object_slots_swap: P259: swaps the objects `a` and `b` of D_800CC2D0 (after obj_broadcast_replace(a, b)), then fixes up
+// object_slots_swap: P259: swaps the objects `a` and `b` of g_objects (after obj_broadcast_replace(a, b)), then fixes up
 // what is tied to the slot rather than the object: each object's index fields (+0x127 / +0x13F = index, unique_id =
 // index + 1) and its +0x144 pointer (kept in the slot); `b` gets the camera record D_800DBFF0[index of b] (whose
 // +0x3D4 takes b's +0x31C, and that record's byte +0x197 is cleared), `a` none; attachment_swap_owner_ids swaps the unique ids;
@@ -38,8 +38,8 @@ void obj_slots_swap(struct127 *a, struct127 *b) {
     bcopy(b, &tmp, sizeof(struct127));
     bcopy(a, b, sizeof(struct127));
     bcopy(&tmp, a, sizeof(struct127));
-    ib = b - D_800CC2D0;
-    ia = a - D_800CC2D0;
+    ib = b - g_objects;
+    ia = a - g_objects;
     b->unk127 = ib;
     b->unique_id = ib + 1;
     b->unk13F = ib;
@@ -67,7 +67,7 @@ void obj_slots_swap(struct127 *a, struct127 *b) {
         if (i == ib || i == ia) {
             continue;
         }
-        obj = &D_800CC2D0[i];
+        obj = &g_objects[i];
         if (obj->interaction_state == 0 || obj->unk65 == 0) {
             continue;
         }
@@ -79,7 +79,7 @@ void obj_slots_swap(struct127 *a, struct127 *b) {
         }
     }
     if (b->unk13C >= 100) {
-        D_800CC2D0[(u8) (b->unk13C - 100)].unk13D = ib + 100;
+        g_objects[(u8) (b->unk13C - 100)].unk13D = ib + 100;
     }
     obj_model_reset(b);
 }
@@ -203,7 +203,7 @@ void obj_type_tex_scroll_apply(s32 type, s32 dl, s32 arg2, s32 cmd, s32 amount, 
     if (D_800C6360[type] == 0) {
         return;
     }
-    for (i = 0, o = D_800CC2D0; i < 25; i++, o++) {
+    for (i = 0, o = g_objects; i < 25; i++, o++) {
         if (*(s32 *) o == 0 || type != *((u8 *) o + 4) || o->unk2FA == 0) {
             continue;
         }
@@ -214,7 +214,7 @@ void obj_type_tex_scroll_apply(s32 type, s32 dl, s32 arg2, s32 cmd, s32 amount, 
             w *= 2;
             h *= 2;
         }
-        list = ((u8 **) &D_800CC2D0[i].unk28C)[D_800BE9C0];
+        list = ((u8 **) &g_objects[i].unk28C)[D_800BE9C0];
         if (list != NULL) {
             table = (s32 *) D_800C6360[type];
             uv_rotate(list + dl * 16, &table[cmd], arg2, (f32) amount, h, w);
@@ -317,9 +317,9 @@ void obj_hit_react_other_players(struct127 *arg0) {
     s32 i;
 
     for (i = 0; i < D_8008FD8C; i++) {
-        if ((i != (arg0 - D_800CC2D0)) && ((1 << i) & D_800CC268)) {
-            if ((D_800CC2D0[i].unk31C != NULL) && (((u8 *)D_800CC2D0[i].unk31C)[0x1AC] == 0)) {
-                character_hit_react(arg0, &D_800CC2D0[i], 1);
+        if ((i != (arg0 - g_objects)) && ((1 << i) & g_obj_contact_mask)) {
+            if ((g_objects[i].unk31C != NULL) && (((u8 *)g_objects[i].unk31C)[0x1AC] == 0)) {
+                character_hit_react(arg0, &g_objects[i], 1);
             }
         }
     }
@@ -359,7 +359,7 @@ void obj_model_swap_keep_pose(struct127 *obj, s32 a1, s32 a2, f32 scale) {
     fC4 = *(f32 *) (o + 0xC4);
     yaw = *(u16 *) (o + 0x76);
     obj_remove(obj, 0);
-    setup_entry_spawn(e, slot, 0, 0, (obj - D_800CC2D0) + 1);
+    setup_entry_spawn(e, slot, 0, 0, (obj - g_objects) + 1);
     *(f32 *) (o + 0x14) = x;
     *(f32 *) (o + 0x18) = y;
     *(u8 **) (o + 0x318) = link;

@@ -226,7 +226,7 @@ s32 obj_get_player_alpha(struct127 *, s32);
 // blob_shadow_draw: emits the display list of a blob shadow record rec (set up by blob_shadow_update this frame, which
 // sets rec[0x123] when it is visible): its translation Mtx (this frame's +0x10 slot) to the floor point (+0x114 x,
 // +0x11C floor y, +0x118 z), the texture D_80091B20[rec[0x121]] when it changed (D_800DD5E4), geometry mode off,
-// the prim alpha rec[0x122] * owner alpha / 256 when it changed (D_800DD5F6) - owner alpha from obj_get_player_alpha for
+// the prim alpha rec[0x122] * owner alpha / 256 when it changed (g_gfx_prim_a_cached) - owner alpha from obj_get_player_alpha for
 // an object owner (rec[0x120] 0), else owner u8 +0x8A * u8 +0x8B[idx] / 256 - and the 4 vertices (+0x90 slot) as
 // two triangles. Other owner kinds never get rec[0x123] (blob_shadow_update returns first). Returns the DL end.
 /* was func_1510E6A0 */
@@ -272,8 +272,8 @@ Gfx *blob_shadow_draw(Gfx *g, u8 *rec, s16 idx) {
         alpha = 0; /* not reached (the asm reads a stale stack word) */
     }
     alpha = (rec[0x122] * alpha + 0xFF) >> 8;
-    if (alpha != D_800DD5F6) {
-        D_800DD5F6 = alpha;
+    if (alpha != g_gfx_prim_a_cached) {
+        g_gfx_prim_a_cached = alpha;
         g->words.w0 = 0xE7000000;
         g->words.w1 = 0;
         g++;

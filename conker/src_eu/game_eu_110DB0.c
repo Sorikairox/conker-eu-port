@@ -158,16 +158,16 @@ void zap_bolt_free_slot(s32 arg0) {
     s32 i;
     arg0 = arg0 - 1;
     for (i = 0; i < 2; i++) {
-        struct_eu_node *node = D_800DD280[i][0x27];
-        D_800DD5C0++;
+        struct_eu_node *node = g_node_lists[i][0x27];
+        g_node_iter_depth++;
         while (node != NULL) {
-            D_800DD5C8[D_800DD5C0] = node->next;
+            g_node_iter_next[g_node_iter_depth] = node->next;
             if (arg0 == -1 || arg0 == ((u8 *)node)[0x48]) {
                 zap_bolt_free(node);
             }
-            node = D_800DD5C8[D_800DD5C0];
+            node = g_node_iter_next[g_node_iter_depth];
         }
-        D_800DD5C0--;
+        g_node_iter_depth--;
     }
 }
 

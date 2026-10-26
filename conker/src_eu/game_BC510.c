@@ -58,8 +58,8 @@ static void hud_cash_always_draw(void) {
     u8 flags;
     u32 anchor;
 
-    if (!port_option(PORT_OPT_CASH_ALWAYS) || D_800C35EA == 1 || D_800BEAC0 != 0 || D_800BEAC1 != 0 ||
-        D_800BE9F0 == 0x1D) {
+    if (!port_option(PORT_OPT_CASH_ALWAYS) || D_800C35EA == 1 || g_game_paused != 0 || D_800BEAC1 != 0 ||
+        g_level_id == 0x1D) {
         return;
     }
     cash = player_stat_get(0, 6);
@@ -75,13 +75,13 @@ static void hud_cash_always_draw(void) {
             cash = cash * n / 3;
         }
     }
-    color[0] = D_800CBD60; color[1] = D_800CBD61; color[2] = D_800CBD62; color[3] = D_800CBD63;
-    x = D_800CBD70; y = D_800CBD72; flags = D_800CBD74; anchor = D_800CBD78;
-    D_800CBD78 = 0;                           /* screen position, not anchored to an object */
+    color[0] = g_text_color_r; color[1] = g_text_color_g; color[2] = g_text_color_b; color[3] = g_text_color_a;
+    x = g_text_pos_x; y = g_text_pos_y; flags = g_text_flags; anchor = g_text_anchor_obj;
+    g_text_anchor_obj = 0;                           /* screen position, not anchored to an object */
     text_set_color(0x32, 0x7D, 0x1C, 0xFF);   /* the pop-up's green */
     text_printf_at(0x10E, 0x14, 0x81, (s32) D_800AB634, cash); /* 0x81: centred, with shadow */
-    D_800CBD60 = color[0]; D_800CBD61 = color[1]; D_800CBD62 = color[2]; D_800CBD63 = color[3];
-    D_800CBD70 = x; D_800CBD72 = y; D_800CBD74 = flags; D_800CBD78 = anchor;
+    g_text_color_r = color[0]; g_text_color_g = color[1]; g_text_color_b = color[2]; g_text_color_a = color[3];
+    g_text_pos_x = x; g_text_pos_y = y; g_text_flags = flags; g_text_anchor_obj = anchor;
 }
 #endif
 
@@ -371,7 +371,7 @@ void underwater_bubbles_update(void) {
             D_800D28E0 = 0;
         }
     }
-    value = D_800CC2D0[0].in_water ? D_800CC2D0[0].unkB2 : 0;
+    value = g_objects[0].in_water ? g_objects[0].unkB2 : 0;
     /* The asm never sets the spawn flag (sp+0x44) to non-zero: it only clears it (value < 0x5B, or delay 0) and
      * otherwise reads whatever the stack slot holds. On the N64 that slot is always the s1 that player_morph_cache_age
      * saved there just before (game_frame_end_update -> player_morph_cache_age, then -> hud_health_air_update -> hud_health_update, which
@@ -480,7 +480,7 @@ u8 *hud_draw(u8 *arg0) {
     s32 i;
     f32 f;
 
-    if (D_800BE9F0 == 0x1D) {
+    if (g_level_id == 0x1D) {
         return (u8 *)gdl;
     }
     gdl->words.w0 = 0xDB0E0000;
@@ -803,7 +803,7 @@ void underwater_air_meter_update(void) {
     s32 dark;
     s32 tint_r, tint_g;
 
-    used = D_800CC2D0[0].in_water ? D_800CC2D0[0].unkB2 : 0;
+    used = g_objects[0].in_water ? g_objects[0].unkB2 : 0;
     if (used < 0x5B) {
         am->active = 0;
         return;
@@ -818,7 +818,7 @@ void underwater_air_meter_update(void) {
         am->drop_vel = D_8009E0FC;
         am->wobble_timer = (random_int() & 0x3F) + 0x3C;
     }
-    am->level = (f32)D_800CC2D0[0].unkB2 / 720.0f;
+    am->level = (f32)g_objects[0].unkB2 / 720.0f;
     if (am->level > 1.0f) {
         am->level = 1.0f;
     }
@@ -1337,7 +1337,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
             right = view->unk30 - f;
             y = f + view->unk24;
             if (D_80090160 & 4) {
-                obj = &D_800CC2D0[p];
+                obj = &g_objects[p];
                 st = (u8 *)obj->unk31C;
                 count = 1;
                 k = st[0x75] & 0x7F;
@@ -1367,7 +1367,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
                 case 0x38: icon = -1; break;
                 default:
                     icon = -1;
-                    if (D_800BE9F0 == 0x1A) {
+                    if (g_level_id == 0x1A) {
                         icon = 4;
                         toff = 4;
                     }
@@ -1434,7 +1434,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
             view = (struct_eu_BE628 *)D_800BE628 + p;
             right = view->unk30 - 5.0f;
             y = view->unk24 + 5.0f;
-            obj = &D_800CC2D0[p];
+            obj = &g_objects[p];
             count = 1;
             icon = -1;
             trow = 0;
@@ -1543,7 +1543,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
         gdl->words.w1 = 0x00504244;
         gdl++;
         for (p = 0; p <= D_80082FA0; p++) {
-            obj = &D_800CC2D0[p];
+            obj = &g_objects[p];
             k = ((u8 *)obj->unk31C)[0x75] & 0x7F;
             if (k != 0x26 && k != 0x3A) {
                 continue;
@@ -1551,7 +1551,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
             view = (struct_eu_BE628 *)D_800BE628 + p;
             ix = ((s32)view->unk30 - 15) * 4;
             iy = ((s32)view->unk24 + 5) * 4;
-            if (D_800BE9F0 == 0x1A || D_800BE9F0 == 0x3F) {
+            if (g_level_id == 0x1A || g_level_id == 0x3F) {
                 wi = 11, hi = 14, s = 0x200, t = 0x1E0;
             } else if (obj->id == 0x75 || obj->id == 0xB1) {
                 wi = 5, hi = 20, s = 0xC0, t = 0x100;
@@ -1642,7 +1642,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
             gdl->words.w1 = 0xFFFFFBFD;
             gdl++;
             for (i = 0; i < 25; i++) {
-                obj = &D_800CC2D0[i];
+                obj = &g_objects[i];
                 if (i != p && !(i < D_8008FD8C && player_stat_get((s16)i, 3) > 0) && obj->unk328 == 0) {
                     continue;
                 }
@@ -1816,7 +1816,7 @@ Gfx *radar_draw(Gfx *gdl, s32 size, s16 *table, s32 mode, s32 big) {
         view = (struct_eu_BE628 *)D_800BE628 + p;
         x0 = ((s32)view->unk30 - table[7] - half) * 4;
         y0 = (table[21] + (s32)view->unk24 + half) * 4;
-        me = &D_800CC2D0[p];
+        me = &g_objects[p];
         if ((u8)big) {
             x0 -= 0x1C6;
             y0 -= 0x46;
@@ -1860,7 +1860,7 @@ Gfx *radar_draw(Gfx *gdl, s32 size, s16 *table, s32 mode, s32 big) {
             if (me->camera != NULL && me->camera->unk23D == 3) {
                 self = 1;
             }
-            ref = &D_800CC2D0[self];
+            ref = &g_objects[self];
         }
         rx = ref->x_position;
         rz = ref->z_position;
@@ -1870,7 +1870,7 @@ Gfx *radar_draw(Gfx *gdl, s32 size, s16 *table, s32 mode, s32 big) {
             if (i == p || i == self) {
                 continue;
             }
-            obj = &D_800CC2D0[i];
+            obj = &g_objects[i];
             if (obj->interaction_state == 0 || obj->unk328 == 0) {
                 continue;
             }

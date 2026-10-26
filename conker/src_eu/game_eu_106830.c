@@ -60,7 +60,7 @@ void obj_spawn_effect50_with_sound(u8 *obj) {
     if (*(u8 **) (obj + 0x31C) == NULL) {
         return;
     }
-    if (D_800BE9F0 == 10) {
+    if (g_level_id == 10) {
         music_play_song(10, 0x37, 0);
     }
     trail_get_emit_point((f32 *) obj, spec.pos);
@@ -76,7 +76,7 @@ void obj_spawn_effect50_with_sound(u8 *obj) {
     data.pos1[2] = spec.pos[2];
     trail_get_aim((s32) obj, (s32) data.aim);
     data.u3C = D_800A0F18;
-    if (D_800BE9F0 == 0x34) {
+    if (g_level_id == 0x34) {
         data.sound = sound_play_at(0x1B6 + game_gu_random() % 2, 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 1500);
     } else {
         data.sound = sound_play_at(0x1B6 + game_gu_random() % 2, 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 5000);
@@ -495,7 +495,7 @@ s32 trail_stream_update(u8 *obj) {
                             *(u8 *)(hobj + 0x232) = 0x2C;
                             *(s32 *)(hobj + 0x218) = 0;
                         } else {
-                            s32 slot = (owner - (u8 *)D_800CC2D0) / 0x32C;
+                            s32 slot = (owner - (u8 *)g_objects) / 0x32C;
                             u32 ang = math_atan2f(unit[0], unit[2]) * trail_ang_k[0];
 
                             obj_send_hit(hobj, 0xE0036, (u16)((ang - 0x4000) | 1), slot);
@@ -579,7 +579,7 @@ Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
 Gfx *gfx_set_combine_mode(Gfx *, u8, u8 *);
 Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 extern u8 D_800915E8[];
-extern s32 D_800A4EA8[];
+extern s32 g_render_mode_pairs[]; /* was D_800A4EA8 */
 extern s32 D_800D30BC;
 
 // trail_draw_ribbon: draws the object's point trail as a camera-facing textured ribbon. The trail is a ring of
@@ -618,7 +618,7 @@ Gfx *trail_draw_ribbon(u8 *obj, Gfx *gfx, s16 id) {
     gfx = gfx_load_texture_cached(gfx, D_800915E8, 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
     gfx = gfx_geometry_mode_cached(gfx, 0x220005, 0x1D0600);
     gfx = gfx_set_combine_mode(gfx, 0x4E, &flag);
-    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[7] | D_800A4EA8[6], &flag);
+    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, g_render_mode_pairs[7] | g_render_mode_pairs[6], &flag);
 
     if (*(u16 *)(obj + 0x1E) & 2) {
         i = *(s8 *)(obj + 0x2E) - 1;

@@ -380,7 +380,7 @@ void shooting_star_sky_update(u8 *obj) {
         lanes[4] = D_80088C14[4];
         k = (u32) random_int() % 5;
         ang = random_float() * D_800A0B40 + lanes[k];
-        h = *(f32 *) ((u8 *) D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x380) - 180.0f;
+        h = *(f32 *) ((u8 *) D_800DBFF0 + g_cur_view_player * 0x9A0 + 0x380) - 180.0f;
         while (360.0f < h) {
             h -= 360.0f;
         }

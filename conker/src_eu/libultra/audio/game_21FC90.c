@@ -153,7 +153,7 @@ void mp3_stream_set_fx(s32 arg0, s32 arg1) {
 }
 
 extern s32 D_8002C05E;
-extern s32 D_800BE9F0;
+extern s32 g_level_id; /* was D_800BE9F0 */
 extern s32 D_800E11B4;
 extern s32 *D_800E11B8;
 extern s16 D_800E11BC;
@@ -330,7 +330,7 @@ s32 mp3_stream_synth_pull(s32 count, Acmd **cmdp) {
                 D_800E11D5 = 0;
             }
         }
-    } else if ((D_800E0E04 == 3) && (D_800BE9F0 != 0x35)) {
+    } else if ((D_800E0E04 == 3) && (g_level_id != 0x35)) {
         if (D_800E0E2C != 0) {
             heap_free(D_800E0E20);
             heap_free(D_800E0E24);

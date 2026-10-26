@@ -324,15 +324,15 @@ extern s32 D_800DD658;
 extern u8 D_800DD660[];
 extern u8 D_800907A4[];
 extern s32 D_800D30BC;
-extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
+extern s32 g_render_mode_pairs[]; /* render mode pairs (2 words each); was D_800A4EA8 */
 u8 *sprite_load_texture(u8 *, s32 *, s32, s32 *, s32, s32, s32, s32, s32);
 Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 
-/* layer_pre_scroll_texture: P238: `pre` callback of render layer 4 (D_8008B848 + 0xE4, RenderLayer +0x14; called as
+/* layer_pre_scroll_texture: P238: `pre` callback of render layer 4 (g_node_type_table + 0xE4, RenderLayer +0x14; called as
  * pre(gdl, layer, list, arg2) by node_render_layers_draw, the other arguments are unused). Advances the s16 scroll D_800DD270 by
  * 0x80 (back to 0 once it reaches 0x500), records texture D_800907A4 / the old scroll / 1 in D_800DD658 / 650 / 654,
  * emits the texture through sprite_load_texture(gdl, D_800DD658, D_800DD650, D_800DD660, 0, 0, 0, 1, 3) and returns the
- * render mode set by gfx_other_mode_cached(gdl, D_800D30BC | 0x82CA0, render modes 3 (D_800A4EA8 words 7 | 6), &1). */
+ * render mode set by gfx_other_mode_cached(gdl, D_800D30BC | 0x82CA0, render modes 3 (g_render_mode_pairs words 7 | 6), &1). */
 /* was func_15166E28 */
 Gfx *layer_pre_scroll_texture(Gfx *gdl, s32 layer, s32 list, s16 arg3) {
     u8 one = 1;
@@ -346,5 +346,5 @@ Gfx *layer_pre_scroll_texture(Gfx *gdl, s32 layer, s32 list, s16 arg3) {
     }
     D_800DD654 = 1;
     gdl = (Gfx *) sprite_load_texture((u8 *) gdl, (s32 *) D_800DD658, D_800DD650, (s32 *) D_800DD660, 0, 0, 0, 1, 3);
-    return gfx_other_mode_cached(gdl, D_800D30BC | 0x82CA0, D_800A4EA8[7] | D_800A4EA8[6], &one);
+    return gfx_other_mode_cached(gdl, D_800D30BC | 0x82CA0, g_render_mode_pairs[7] | g_render_mode_pairs[6], &one);
 }

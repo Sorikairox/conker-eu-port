@@ -14,11 +14,11 @@
 int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
-extern unsigned char D_800CC2D0[];
+extern unsigned char g_objects[]; /* was D_800CC2D0 */
 
 #define REC 0x32C
 static float F(const unsigned char *r, int o) { return *(const float *)(r + o); }
-static int recno(const void *r) { return (int)(((const unsigned char *)r - D_800CC2D0) / REC); }
+static int recno(const void *r) { return (int)(((const unsigned char *)r - g_objects) / REC); } /* was D_800CC2D0 */
 
 static int fj = -1, fh = -1, flg = -1;
 extern unsigned char D_800CC69C_[] __asm__("D_800CC69C");

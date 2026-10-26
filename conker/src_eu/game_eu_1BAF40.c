@@ -56,7 +56,7 @@ u8 *character_effect_create(u8 **arg0, u8 arg1);
 // character_effect_attach: attaches effect `type` (1..18: fire, smoke, impacts, ...) to obj: a kind-0x21 effect record
 /* (character_effect_create, for view `view`) holding obj, obj's id byte +0x3B, a duration, a flag byte, a direction byte and the
  * effect number. With `clear`, first frees (node_destroy) every kind-0x21 record of both groups that belongs to obj
- * or to obj's id (the list walk keeps the next pointer in D_800DD5C8[depth] like the other list walks).
+ * or to obj's id (the list walk keeps the next pointer in g_node_iter_next[depth] like the other list walks).
  * Types 13, 14, 15, 16 and 18 take `time` as the duration (13, 15, 16: flag 0 for time 999 = endless); types 10..12
  * set the flag from obj +0x1CA. Returns the record, NULL for no obj, an unknown type or no record.
  * `arg5` and `name` (the effect's debug name) are not used. */
@@ -80,16 +80,16 @@ u8 *character_effect_attach(u8 *obj, s16 type, s16 time, u8 clear, u8 view, s32 
     }
     if (clear) {
         for (i = 0; i < 2; i++) {
-            D_800DD5C0++;
-            node = D_800DD280[i][0x21];
+            g_node_iter_depth++;
+            node = g_node_lists[i][0x21];
             while (node != NULL) {
-                D_800DD5C8[D_800DD5C0] = node->next;
+                g_node_iter_next[g_node_iter_depth] = node->next;
                 if (*(u8 **)((u8 *)node + 0x18) == obj || obj[0x3B] == ((u8 *)node)[0x1C]) {
                     node_destroy((struct102 *)node);
                 }
-                node = D_800DD5C8[D_800DD5C0];
+                node = g_node_iter_next[g_node_iter_depth];
             }
-            D_800DD5C0--;
+            g_node_iter_depth--;
         }
     }
     e.owner = obj;
@@ -238,7 +238,7 @@ extern s32 (*D_8008D9C8[])(u8 *);
  * (character_effect_attach / character_effect_create), a particle emitter tied to the owner model e->owner. When e is not running it only
  * frees its particles (character_effect_free_particles, mode 1). It removes itself (node_destroy) when the owner is gone or has
  * another id, or when its time (e +0x1E, bit 0 of e +0x20) runs out (then the D_8008D9C8[onEnd] handler decides).
- * When the owner is hidden for this view (owner +0x74 bit D_80082FA4) the particles are freed. Otherwise the row of
+ * When the owner is hidden for this view (owner +0x74 bit g_cur_view_player) the particles are freed. Otherwise the row of
  * D_8008D980[effect] for the owner's variant (+0x1C8) is picked: with matrices (+0x1D4) and a visible model
  * (+0x74 & 0xF != 0xF) the row whose id list holds owner +0x84 (else the default row), mode 4; without, the hidden
  * row (mode 2) at the owner position + yoff. A row / mode change restarts the effect (accumulator = max).
@@ -291,7 +291,7 @@ void character_effect_update(u8 *arg0) {
         }
         owner = e->owner;
         vis = owner[0x74];
-        if (vis & (1 << D_80082FA4)) {
+        if (vis & (1 << g_cur_view_player)) {
             /* hidden in this view */
             if (!(e->mode & 1)) {
                 character_effect_free_particles(arg0);
@@ -1089,7 +1089,7 @@ void bone_sparks_emit(s32);
 // with self +0x89. One signature for both views (wasm call_indirect): s32 (u8 *).
 extern s32 (*D_8008DA1C[])(u8 *);
 
-// bone_sparks_tick: effect-child handler (D_8008FFE0 [3] / D_8008FFE8 [1]). Advances the emitter's spark counter
+// bone_sparks_tick: effect-child handler (g_attach_child_update_fns [3] / g_attach_child_end_fns [1]). Advances the emitter's spark counter
 // (self +0x30) by (rate +0x34 + random f32 * spread +0x38) * D_800BE9A4 (frame time), emits the sparks
 // (bone_sparks_emit), then runs the tick handler D_8008DA1C[self +0x88] (none: -1) and returns its result (1 without).
 // The second argument (the position the effect-node dispatchers pass) is not used; it is there for the table's
@@ -1108,7 +1108,7 @@ s32 bone_sparks_tick(u8 *self, void *pos) {
     return 1;
 }
 
-// bone_sparks_release: effect-child handler (D_8008FFE0 [6] / D_8008FFE8 [4]): runs the release handler
+// bone_sparks_release: effect-child handler (g_attach_child_update_fns [6] / g_attach_child_end_fns [4]): runs the release handler
 // D_8008DA20[self +0x89] (= D_8008DA1C[self +0x89 + 1]; none: -1). The second argument is unused (table signature
 // s32 (node, pos)); returns the handler's result (0 without; the dispatchers that reach it ignore v0).
 /* was func_1518FDC8 */
@@ -1122,7 +1122,7 @@ s32 bone_sparks_release(u8 *self, void *pos) {
 }
 
 
-// bone_sparks_burst: effect-child handler (D_8008FFE0 [4] / D_8008FFE8 [2]): sets the spark counter (self +0x30) to
+// bone_sparks_burst: effect-child handler (g_attach_child_update_fns [4] / g_attach_child_end_fns [2]): sets the spark counter (self +0x30) to
 // base +0x3C + random f32 * spread +0x40 and emits them at once (bone_sparks_emit). The second argument is unused (table
 // signature s32 (node, pos)); returns 0 (the asm leaves bone_sparks_emit's v0; the dispatchers that reach it ignore it).
 /* was func_1518FE0C */
@@ -1139,7 +1139,7 @@ u8 *flame_spawn(u8 *arg0, u8 *arg1, s16 arg2, u8 arg3, u8 *arg4, f32 arg5, f32 a
 void *attach_fx_spawn(void *arg0, void *arg1, s32 arg2, u8 arg3, s32 arg4);
 
 // bone_sparks_emit: while the emitter's counter (self + 0x30) is above 1, emits one spark per unit (if the live
-// count +0x20 is below the limit +0x5C): a random attachment point of set +0x78 (D_800E0990 / D_800E0968: 16-byte
+// count +0x20 is below the limit +0x5C): a random attachment point of set +0x78 (g_attach_fx_assets / D_800E0968: 16-byte
 // entries, bone index + offset) is transformed by the owner's (+0x10) bone matrix, a particle (kind 0x13 / 0x14) is
 // spawned there and a follower (attach_fx_spawn) ties it to the bone. Owners without matrices or hidden (nibble 0xF)
 // only drain the counter.
@@ -1180,7 +1180,7 @@ void bone_sparks_emit(s32 arg0) {
     do {
         if (*(s16 *)(self + 0x20) < *(s32 *)(self + 0x5C)) {
             set = *(s32 *)(self + 0x78);
-            point = (u8 *)D_800E0990[set] + ((u32)random_int() % (u16)D_800E0968[set]) * 16;
+            point = (u8 *)g_attach_fx_assets[set] + ((u32)random_int() % (u16)D_800E0968[set]) * 16;
             speed[0] = random_float() * *(f32 *)(self + 0x4C) + *(f32 *)(self + 0x44);
             speed[1] = random_float() * *(f32 *)(self + 0x50) + *(f32 *)(self + 0x48);
             mtx_transform_point_or_origin(point + 4, at, *(u8 **)(owner + 0x1D4) + (point[0] << 6));
@@ -1227,7 +1227,7 @@ s32 bone_spark_follow_look_up(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *arg1) {
     return 1;
 }
 
-// effect_node_launch: P219. Entry 0 of the effect-node handler table D_8008FFE8, called by game_1FFF60's C
+// effect_node_launch: P219. Entry 0 of the effect-node handler table g_attach_child_end_fns, called by game_1FFF60's C
 // (node, &pos) and (child, &child->unk34). node +0x2C = the particle, node +0x30 = its config (NULL: the particle is freed
 // with node_destroy). Otherwise the particle gets velocity (target - node pos +0x34) * cfg +0x60 (+0x148..+0x150),
 // +0x154 = random f32 * cfg +0x68 + cfg +0x64, +0x158 = cfg +0x6C, +0x6C / +0x6E = cfg s16 +0x70 / +0x72,
@@ -1537,9 +1537,9 @@ struct225 *bone_sparks_light_create(s32 arg0, u8 *arg1, u8 arg2, s16 arg3, u8 ar
         return NULL;
     }
     tmp = arg0;
-    f[0] = D_800A67C0[arg2];
-    f[1] = D_800A6760[arg2];
-    f[2] = D_800A6820[arg2];
+    f[0] = g_light_flicker_mid_levels[arg2];
+    f[1] = g_light_flicker_low_levels[arg2];
+    f[2] = g_light_flicker_high_levels[arg2];
     f[3] = 1.0f;
     f[5] = 5.0f;
     f[4] = 0.0f;
@@ -1676,7 +1676,7 @@ s32 bone_sparks_tick_hurt(Obj0B2C *arg0) {
 
     arg0->t.acc += D_800BE9E4;
     while (t->acc >= t->step) {
-        obj_send_hit(arg0->unk10, 0x60021, 0, t->obj - D_800CC2D0);
+        obj_send_hit(arg0->unk10, 0x60021, 0, t->obj - g_objects);
         t->acc -= t->step;
     }
     v = *(u8 **)((u8 *)arg0->unk10 + 0x31C);

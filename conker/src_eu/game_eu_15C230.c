@@ -15,7 +15,7 @@ void camera_over_shoulder_place(u8 *arg0) {
     if ((*(u8 *)((u8 *)arg0 + 0x23D)) == 3) {
         var_a1 = 1;
     }
-    temp_v0 = &D_800CC2D0[var_a1];
+    temp_v0 = &g_objects[var_a1];
     (*(f32 *)((u8 *)arg0 + 0x2BC)) = (f32) temp_v0->x_position;
     (*(f32 *)((u8 *)arg0 + 0x2C0)) = (f32) (temp_v0->y_position + 150.0f);
     (*(f32 *)((u8 *)arg0 + 0x2C4)) = (f32) temp_v0->z_position;

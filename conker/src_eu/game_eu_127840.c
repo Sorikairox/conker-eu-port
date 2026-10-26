@@ -9,7 +9,7 @@ Gfx *star_field_draw(Gfx *gdl, f32 (*mtx)[4]);
 
 // camera_view_clear_draw: camera callback (D_80089578[1], called by view_background_draw with the D_80089578 signature):
 // builds the current player's view matrix from yaw / pitch / roll (camera_view_rotation_matrix), clears the player's viewport
-// (D_800BE628[D_80082FA4] +0x24..0x30) to black (gfx_fill_rect_colour), sets pipe sync, other modes 0xEF002C0F / 0x0F0A4004
+// (D_800BE628[g_cur_view_player] +0x24..0x30) to black (gfx_fill_rect_colour), sets pipe sync, other modes 0xEF002C0F / 0x0F0A4004
 // and combiner 0xFC357E6A / 0xFFFFFFFF, and draws with the matrix (star_field_draw, which returns the new list end).
 // The position and handle arguments are unused.
 /* was func_150FA030 */
@@ -17,8 +17,8 @@ Gfx *camera_view_clear_draw(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f
     f32 mtx[4][4];
     u8 *cam;
 
-    camera_view_rotation_matrix(D_80082FA4, mtx, yaw, pitch, roll);
-    cam = (u8 *) D_800BE628 + D_80082FA4 * 0x180;
+    camera_view_rotation_matrix(g_cur_view_player, mtx, yaw, pitch, roll);
+    cam = (u8 *) D_800BE628 + g_cur_view_player * 0x180;
     gdl = gfx_fill_rect_colour(gdl, (s32) *(f32 *) (cam + 0x2C), (s32) *(f32 *) (cam + 0x24),
                         (s32) (*(f32 *) (cam + 0x30) - 1.0f), (s32) *(f32 *) (cam + 0x28), 0, 0, 0);
     gdl[0].words.w0 = 0xE7000000;

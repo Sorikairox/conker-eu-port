@@ -7,15 +7,15 @@ void mtxf_transform_point(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *out
 extern s16 D_800C43E4[][3];
 extern f32 D_80098130;
 
-// vertex_anchor_follow: places the first vertex (s16 x, y, z at +0) of object `idx`'s vertex block D_800C3FC0[idx].
+// vertex_anchor_follow: places the first vertex (s16 x, y, z at +0) of object `idx`'s vertex block g_vertex_anchor_blocks[idx].
 // Types 0x3E / 0x41, type 0x138 with its +0x2D0 record's +8 >= 36 and types 0x3D / 0xD9 with it > 21 put it at
 // (-7, -17, -7) through matrix mfA (mtxf_transform_point) and store that in D_800C43E4[idx]. Otherwise the midpoint of the
 // block's vertices 2 and 3 (+0x20 / +0x30) goes through matrix mfB and D_800C43E4[idx] moves towards it by a rate:
 // 1.0 for types 0x138 / 0x139 and for 0x3D / 0xD9 with +8 > 7, else D_80098130 (0.7); the vertex takes that result.
 /* was func_15036860 */
 void player_strip_update_vertices(s32 idx, f32 mfA[4][4], f32 mfB[4][4]) {
-    u8 *obj = (u8 *) D_800CC2D0 + idx * 0x32C;
-    s16 *vtx = ((s16 **) &D_800C3FC0)[idx];
+    u8 *obj = (u8 *) g_objects + idx * 0x32C;
+    s16 *vtx = ((s16 **) &g_vertex_anchor_blocks)[idx];
     u16 type = *(u16 *) (obj + 0x84);
     f32 h = *(f32 *) (*(u8 **) (obj + 0x2D0) + 8);
     s16 *cur;
@@ -82,7 +82,7 @@ u8 *player_draw_slot8_strip(u8 *arg0, s32 arg1, s32 arg2) {
     u8 *temp_v1_2;
     u8 *var_s1;
 
-    temp_s0 = &D_800CC2D0[arg1];
+    temp_s0 = &g_objects[arg1];
     temp_v0_2 = temp_s0->unk31C->unk75;
     if ((temp_v0_2 != 2) && (temp_v0_2 != 0x13)) {
         return arg0;
@@ -96,7 +96,7 @@ u8 *player_draw_slot8_strip(u8 *arg0, s32 arg1, s32 arg2) {
         return arg0;
     }
     temp_v1 = (*(u8 **)((u8 *)((temp_v0_3 + (D_800BE9C0 * 4))) + 0x28));
-    temp_t0 = &(&D_800C3FC0)[arg1];
+    temp_t0 = &(&g_vertex_anchor_blocks)[arg1];
     temp_v0_4 = 1 * 0x10;
     (*(u8 *)((u8 *)(*temp_t0) + 0xC)) = (u8) (*(u8 *)((u8 *)temp_v1 + 0x30C));
     temp_v1_2 = temp_v1 + 0x300;

@@ -400,7 +400,7 @@ s32 swarm_distance_to_obj(s32 arg0, s32 arg1) {
 
     temp_v0 = swarm_find_by_id(arg0 & 0xFF);
     if (temp_v0 != NULL) {
-        temp_a2 = &D_800CC2D0[arg1];
+        temp_a2 = &g_objects[arg1];
         temp_f16 = (s32) (temp_a2->x_position - (f32) (*(s32 *)((u8 *)temp_v0 + 0x18)));
         temp_f10 = (s32) (temp_a2->y_position - (f32) (*(s32 *)((u8 *)temp_v0 + 0x1C)));
         temp_f8 = (s32) (temp_a2->z_position - (f32) (*(s32 *)((u8 *)temp_v0 + 0x20)));

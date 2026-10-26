@@ -14,7 +14,7 @@
 117s/alpha = f->alpha;/alpha = f->fading;/ % fadein fadeout
 118s/(f->type == 8 || f->type == 9)/(f->type == 8 || f->type == 10)/ % ev9go ev7
 118s/(f->type == 8 || f->type == 9)/(f->type == 7 || f->type == 9)/ % ev8go ev7 ev8wait
-118s/D_800BE9F0 == 6/D_800BE9F0 >= 5/ % ev8lvl5
+118s/g_level_id == 6/g_level_id >= 5/ % ev8lvl5
 118s/D_800C35EA != 0 \&\& D_800C3A08 == 0xF) {/D_800C35EA != 0 \&\& D_800C3A08 >= 0xE) {/ % ev8evE
 118s/D_800C35EA != 0 \&\& D_800C3A08 == 0xF) {/D_800C3A08 == 0xF) {/ % ev8ev35
 119s/f->flags \&= 0xFFF7;/f->flags \&= 0xFFFF;/ % ev8wait
@@ -171,5 +171,5 @@
 361s/view_point_cull_test(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0/view_point_cull_test(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A00, 0, 0) != 0/ % cull1
 361s/view_point_cull_test(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0/view_point_cull_test(D_800DA030, f->x, f->y, f->z, D_800D9F3C, D_800D9F40, D_800D3A00, D_800D3A04, 0, 0) != 0/ % cull1
 361s/view_point_cull_test(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0/view_point_cull_test(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) == 0/ % cull0 cull1
-362s/(D_800D2138 != 1/(D_800D2138 != 2/ % cull2a cull2c
+362s/(g_session_game_mode != 1/(g_session_game_mode != 2/ % cull2a cull2c
 363s/|| view_point_cull_test(D_800DA070, f->x, f->y, f->z/|| view_point_cull_test(D_800DA030, f->x, f->y, f->z/ % cull2b

@@ -183,7 +183,7 @@ void object_impact_effects(u8 *, f32 *, f32 *, f32 *, s32, s32);
 /* was func_1506AEA0 */
 void obj_effect_players_impact(u8 *obj, void *arg) {
     s32 mask = D_800CC680;
-    u8 *player = (u8 *) D_800CC2D0;
+    u8 *player = (u8 *) g_objects;
 
     while (mask != 0) {
         if (mask & 1) {

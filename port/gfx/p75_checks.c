@@ -1,11 +1,11 @@
 /* P75 runtime checks of port P70 / P74 C (link-time wraps; only cross-TU calls are seen).
  *  ?p75sky=1     level_setup_sky_backdrop (game_2DF70.c, sky / backdrop buffers; called by level_load per level): level,
- *                header +5..+8 (mode), D_80082FA0, the buffers D_800DC2E0 / D_800DC2B8[p][0..1] / D_800DC2B0, and in
+ *                header +5..+8 (mode), D_80082FA0, the buffers D_800DC2E0 / g_sky_backdrop_vtx[p][0..1] / D_800DC2B0, and in
  *                mode 2 the gradient texture (rows 0 / 32 / ... / 255) and the first quad's vertices. Also, every
  *                256 frames (from the tail wrap), the quad vertex t coordinates and the first Mtx word that view_scroll_overlay_draw writes (it is
  *                no longer wrapped: P72's TEMPORARY NULL guard is gone).
  *  ?p75tail=N    tail_update_conker (P70 tail chain, called by obj_update_tail_for_conker in game_eu_61AE0.c): arg0, calls per frame,
- *                tail record of D_800CC2D0[arg0] (points p[0..4], phase, sway, timer, fade): first N calls, then
+ *                tail record of g_objects[arg0] (points p[0..4], phase, sway, timer, fade): first N calls, then
  *                every 64th.
  *  ?p75brk=N     breakable_update_slot (P74 breakable state machine, called per object in game_eu_595D0.c when D_800C6A8F[slot * 16] != 0):
  *                slot, kind, state before -> after, piece buffer, first piece; first N calls + every state change.
@@ -20,9 +20,9 @@
 int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
-extern unsigned char D_800CC2D0[];
+extern unsigned char g_objects[]; /* was D_800CC2D0 */
 extern unsigned char D_800DC2E0_[] __asm__("D_800DC2E0");
-extern unsigned char D_800DC2B8_[] __asm__("D_800DC2B8");
+extern unsigned char D_800DC2B8_[] __asm__("g_sky_backdrop_vtx"); /* was D_800DC2B8 */
 extern unsigned char D_800DC2B0_[] __asm__("D_800DC2B0");
 extern unsigned char D_800DC2D8_[] __asm__("D_800DC2D8");
 extern unsigned char D_80082FA0_[] __asm__("D_80082FA0");
@@ -80,7 +80,7 @@ void __wrap_level_setup_sky_backdrop(int level) {
 static unsigned tail_calls, tail_frame, tail_inframe, tail_maxinframe, tail_nonzero;
 void __real_tail_update_conker(int arg0);
 void __wrap_tail_update_conker(int arg0) {
-    const unsigned char *obj = D_800CC2D0 + arg0 * REC;
+    const unsigned char *obj = g_objects + arg0 * REC;
     if (port_frame_count != tail_frame) {
         if (tail_inframe > tail_maxinframe) tail_maxinframe = tail_inframe;
         tail_frame = port_frame_count; tail_inframe = 0;
@@ -90,8 +90,8 @@ void __wrap_tail_update_conker(int arg0) {
            * D_800C3682 (viewport-clear path instead), mode = header +8 (index into D_80089578: 2 = view_scroll_overlay_draw),
            * and sky_level_distance's level-0 case: handle 0 (no backdrop call) when player y < 1600 and yaw > 26 */
             static int f78 = -1; static unsigned n78;
-            extern unsigned char D_800C3682_[] __asm__("D_800C3682"), D_800BE9F0_[] __asm__("D_800BE9F0"),
-                D_800DBFF0_[] __asm__("D_800DBFF0"), D_800DD210_[] __asm__("D_800DD210"), D_80082FA4_[] __asm__("D_80082FA4");
+            extern unsigned char D_800C3682_[] __asm__("D_800C3682"), D_800BE9F0_[] __asm__("g_level_id"),
+                D_800DBFF0_[] __asm__("D_800DBFF0"), D_800DD210_[] __asm__("D_800DD210"), D_80082FA4_[] __asm__("g_cur_view_player");
             if (flag(&f78, "p78sky") && port_frame_count >= n78) {
                 n78 = port_frame_count + (unsigned)f78;
                 const unsigned char *h = (const unsigned char *)(uintptr_t)W(D_800B0DF0_, 0);
@@ -156,7 +156,7 @@ static void brk_req(void) {
     done = 1;
     {
         void breakable_request_flags(int, int, int, int);
-        const unsigned char *obj = D_800CC2D0 + slot * REC;
+        const unsigned char *obj = g_objects + slot * REC;
         port_log("[p75] DIAGNOSTIC break request frame %u: slot %u (id %02X joints %08X) kind %u\n", port_frame_count,
                  slot, vbe_ld8(obj + 4), W(obj, 0x1D4), kind);
         breakable_request_flags((int)slot, (int)kind, -1, -1);

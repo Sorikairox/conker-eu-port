@@ -37,8 +37,8 @@ s/tip\[1\] -= pos\[1\];/tip[1] -= pos[2];/ % noaim
 1,/kind = /s/mask = ~(1 << \*((u8 \*)owner->camera + 0x23D));/mask = ~(2 << *((u8 *)owner->camera + 0x23D));/ % aim0
 1,/kind = /s/if (aimed \&\& owner->camera != NULL) {/if (aimed) {/ % aimnocam
 1,/kind = /s/mask = 0xFF;/mask = 0x7F;/ % noaim
-s/kind = (D_800BE9F0 == 0x34 || D_800BE9F0 == 0x26) ? 5 : 4;/kind = (D_800BE9F0 == 0x34) ? 5 : 4;/ % lvl26
-s/kind = (D_800BE9F0 == 0x34 || D_800BE9F0 == 0x26) ? 5 : 4;/kind = (D_800BE9F0 == 0x26) ? 5 : 4;/ % lvl34
+s/kind = (g_level_id == 0x34 || g_level_id == 0x26) ? 5 : 4;/kind = (g_level_id == 0x34) ? 5 : 4;/ % lvl26
+s/kind = (g_level_id == 0x34 || g_level_id == 0x26) ? 5 : 4;/kind = (g_level_id == 0x26) ? 5 : 4;/ % lvl34
 s/tracer_spawn(pos, aimed ? NULL : tip,/tracer_spawn(pos, tip,/ % aim0
 s/aimed ? hit : NULL, aimed ? dir : NULL, aimed ? 1 : 0, 0, 252.0f,/aimed ? hit : NULL, aimed ? dir : NULL, 1, 0, 252.0f,/ % noaim
 s/aimed ? 1 : 0, 0, 252.0f,/aimed ? 1 : 0, 0, 250.0f,/ % aim0

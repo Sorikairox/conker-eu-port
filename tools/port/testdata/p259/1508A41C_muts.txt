@@ -12,8 +12,8 @@ s/!(mask \& bit)/0/ % maskoff
 s/(bit << 16)/(bit << 15)/ % pmaskoff pmasklow
 s/D_800D27D0 + player \* 4 + 0x16C0/D_800D27D0 + 0x16C0/ % p1
 s/scale = 6.2831855f/scale = 6.28318f/ % p1 mid
-s/D_800CC2D0\[player\].x_position - obj->x_position/D_800CC2D0[player].x_position + obj->x_position/ % midoff
-s/dz = D_800CC2D0\[player\].z_position/dz = D_800CC2D0[0].z_position/ % midoff
+s/g_objects\[player\].x_position - obj->x_position/g_objects[player].x_position + obj->x_position/ % midoff
+s/dz = g_objects\[player\].z_position/dz = g_objects[0].z_position/ % midoff
 s/dx \* dx + dz \* dz/dx * dx + dx * dz/ % p1
 s/if (hi < dist) {/if (hi > dist) {/ % p1
 s/if (dist < lo) {/if (dist > lo) {/ % p1

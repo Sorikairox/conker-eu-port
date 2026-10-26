@@ -2888,7 +2888,7 @@ void object_debris_spawn(f32 *pos, s32 *ids, s32 *scales, s32 n, f32 scale, u8 k
         spec.u24 = -1.2620001f;
         spec.u28 = 0.49f;
         spec.u38 = 12.911f;
-    } else if (kind == 0x13 && D_800BE9F0 == 0x3C) {
+    } else if (kind == 0x13 && g_level_id == 0x3C) {
         spec.solidChance = 0.0f;
     }
     emit_debris_burst((s32 *)&spec, ids, scales, n, (s32)&extra, 0xC, 6, 1, mode, (s32)bounds, 5.0f, 1,

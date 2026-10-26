@@ -78,7 +78,7 @@ Gfx *text_draw_string(Gfx *, f32, f32, u8 *, s32, s32, s32, s32, f32, f32, s32);
 s32 strlen(const char *);
 extern u16 D_800BEB30;     /* buttons pressed this frame */
 extern u8 D_80084828;      /* selected entry */
-extern u8 D_80085D30[];    /* text display list */
+extern u8 g_text_render_dl[];    /* text display list; was D_80085D30 */
 extern u8 D_80098CE0[];    /* text shown while the menu is locked */
 extern u8 D_80098CF4[];    /* marker line drawn above some entries */
 extern u8 D_80098CF8[];    /* blink text of the selected entry */
@@ -126,8 +126,8 @@ s32 select_menu_update_draw(Gfx **gfxp, u16 cancel, u16 select) {
     count = event_table_count();
     g = *gfxp;
     *gfxp = g + 1;
-    ((s32 *) g)[0] = 0xDE000000; /* gSPDisplayList(D_80085D30) */
-    ((s32 *) g)[1] = (s32) D_80085D30;
+    ((s32 *) g)[0] = 0xDE000000; /* gSPDisplayList(g_text_render_dl) */
+    ((s32 *) g)[1] = (s32) g_text_render_dl;
     visible = (count < 19) ? count : 19;
     y = 1;
 

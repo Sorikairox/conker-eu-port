@@ -1,6 +1,6 @@
 s/    if (obj == NULL) {/    if (obj == (struct127 *) 1) {/
 s/    for (i = 0; i < 2; i++) {/    for (i = 0; i < 1; i++) {/
-s/D_800DD280\[i\]\[0x1F\]/D_800DD280[i][0x1E]/
+s/g_node_lists\[i\]\[0x1F\]/g_node_lists[i][0x1E]/
 s/(u8 \*) node + 0x24) == obj ||/(u8 *) node + 0x20) == obj ||/
 s/((u8 \*) obj)\[0x3B\] == \*((u8 \*) node + 0x28)) {/((u8 *) obj)[0x3B] == *((u8 *) node + 0x29)) {/
 s/((u8 \*) obj)\[0x3B\] == \*((u8 \*) node + 0x28)) {/((u8 *) obj)[0x3A] == *((u8 *) node + 0x28)) {/

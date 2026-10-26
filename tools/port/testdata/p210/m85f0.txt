@@ -24,7 +24,7 @@ s/if (obj->unk28 < 0.2f \&\& /if (obj->unk28 < 0.25f \&\& /
 s/    if (obj->unk10C <= 0) {/    if (obj->unk10C < 0) {/
 s/((u8 \*)obj->unk31C)\[0x7D\] = 0;/((u8 *)obj->unk31C)[0x7C] = 0;/
 s/        obj->unk10C = 0;$/        ;/
-s/obj_hit_reaction_advance(D_800C3E78, obj);/obj_hit_reaction_advance(D_800C3E78, NULL);/
+s/obj_hit_reaction_advance(g_cur_obj_index, obj);/obj_hit_reaction_advance(g_cur_obj_index, NULL);/
 s/    if (obj->stunned == 0) {/    if (stun == 1) {/
 s/obj->xz_velocity = 0.0f;/;/
 s/        obj->unk81 = 0;/        ;/

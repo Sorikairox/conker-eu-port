@@ -13,7 +13,7 @@ s/rec\[0\] = 0x7D;/rec[0] = 0x7C;/ % attach
 s/rec\[1\] = 5;/;/ % attach
 s/if (obj->id == 0xFF \&\& obj->unk124 != 0) {/if (obj->id == 0xFF) {/ % player0
 s/if (obj->id == 0xFF \&\& obj->unk124 != 0) {/if (obj->id >= 0xFE \&\& obj->unk124 != 0) {/ % pl1
-s/D_800CC2D0\[obj->unk124 - 1\]/D_800CC2D0[obj->unk124]/ % player
+s/g_objects\[obj->unk124 - 1\]/g_objects[obj->unk124]/ % player
 s/rec\[2\] = (s32)obj;/rec[2] = (s32)target;/ % attach
 s/0xFA, attached ? 0 : -1, attached ? 0 : -1, 8,/0xFA, attached ? 0 : -1, attached ? 0 : -1, 9,/ % attach
 s/0xFA, attached ? 0 : -1,/0xFA, attached ? 1 : -1,/ % attach

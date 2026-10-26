@@ -18,7 +18,7 @@ struct124 *shadow_obj_box_extents(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     s32 var_v0;
     struct127 *temp_t0;
 
-    temp_t0 = &D_800CC2D0[arg0];
+    temp_t0 = &g_objects[arg0];
     sp3C = (s32) temp_t0->id;
     *arg3 = 0.0f;
     *arg2 = 0.0f;
@@ -145,7 +145,7 @@ f32 shadow_light_projection(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_
     s32 done;
     s32 i;
 
-    rec = &D_800CC2D0[obj];
+    rec = &g_objects[obj];
     done = 0;
     best = 5000.0f;
     pos[0] = rec->x_position;
@@ -337,7 +337,7 @@ s32 approx_dist3_int(s32, s32, s32);
  * cleared and 0 is returned; else d. */
 /* was func_15185360 */
 s32 shadow_obj_light_distance(s32 obj, s32 player, f32 *x, f32 *y, f32 *z) {
-    struct127 *o = &D_800CC2D0[obj];
+    struct127 *o = &g_objects[obj];
     struct108 *p = &D_800DBFF0[player];
     s32 d;
 
@@ -387,7 +387,7 @@ u8 *view_dl_begin(u8 *, s32);
 // restore the frame state. Marks the object (unk123 = 1). Returns the display list end.
 /* was func_15185514 */
 u8 *shadow_render_caster(u8 *dl, s32 obj, s32 slot, s32 arg3) {
-    struct127 *o = &D_800CC2D0[obj];
+    struct127 *o = &g_objects[obj];
     Gfx *g = (Gfx *) dl;
     s32 col[4];
     s32 level;
@@ -938,10 +938,10 @@ u8 *shadow_draw_all(u8 *arg0, s32 arg1) {
         goto block_88;
     }
     temp_s1 = (u8 *) &D_800DF4C0 + arg1 * 0x10;
-    memcpy(temp_s1, D_800BE628 + (D_80082FA4 * 0x180) + (D_800BE9C0 * 0x10) + 0x40, 0x10);
+    memcpy(temp_s1, D_800BE628 + (g_cur_view_player * 0x180) + (D_800BE9C0 * 0x10) + 0x40, 0x10);
     spE8 = var_s0;
     var_s7 = 0;
-    sp74 = D_800CC2D0;
+    sp74 = g_objects;
     spF8 = 0;
     (*(s16 *)((u8 *)temp_s1 + 0xC)) = (s16) ((s32) ((*(s16 *)((u8 *)temp_s1 + 0xC)) * D_800DE460) >> 0xA);
     do {
@@ -986,7 +986,7 @@ loop_42:
                                 if ((sp74->unk127 != 0xFF) && ((s32) sp74->unk1C8 < 2)) {
                                     sp120 = 1;
                                 } else {
-                                    temp_v1_2 = &D_800CC2D0[sp74->unk124];
+                                    temp_v1_2 = &g_objects[sp74->unk124];
                                     if (((spF8 + 1) == temp_v1_2->unk65) && (temp_v1_2->unk127 != 0xFF) && (sp74->id == 0x53)) {
                                         sp120 = 1;
                                     } else {
@@ -1119,7 +1119,7 @@ loop_54:
     if (spF4 != 0) {
         temp_v0_11 = view_dl_begin(var_s0, arg1);
         (*(s32 *)((u8 *)temp_v0_11 + 0)) = 0xDC080008;
-        (*(s32 *)((u8 *)temp_v0_11 + 4)) = (s32) (D_800BE628 + (D_80082FA4 * 0x180) + (D_800BE9C0 * 0x10) + 0x40);
+        (*(s32 *)((u8 *)temp_v0_11 + 4)) = (s32) (D_800BE628 + (g_cur_view_player * 0x180) + (D_800BE9C0 * 0x10) + 0x40);
         var_s0 = temp_v0_11 + 8;
     } else {
         var_s0 = spE8;
@@ -1205,7 +1205,7 @@ s32 world_objects_transform_mesh(s32 count, s32 *idList, s32 force);
 s32 shadow_object_triangles(u16 *, s32, f32 *, s32);
 
 // shadow_object_vertices: adds the world objects' triangles under a shadow (box x / z +- r) after the count level
-// shadow vertices at buf. Takes the D_800DC320 world objects (0xA0-byte records at D_800DBEF4) that are shown
+// shadow vertices at buf. Takes the g_world_obj_count world objects (0xA0-byte records at D_800DBEF4) that are shown
 // (+0x6E == 0, no 0x60 flag at +0x4F) and whose x / z (s16 +0x10 / +0x14) +- their size (max of u16 +0x50, +0x52)
 // meet the box, refreshes their triangles (world_objects_transform_mesh) and projects them (shadow_object_triangles).
 // Returns count plus the number of vertices added.
@@ -1215,7 +1215,7 @@ u32 shadow_object_vertices(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end, s32
     s32 size;
     s32 i, n;
 
-    if (D_800DC320 == 0) {
+    if (g_world_obj_count == 0) {
         return count;
     }
     collision_select_area(2);
@@ -1226,7 +1226,7 @@ u32 shadow_object_vertices(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end, s32
     D_800DF524 = z + r;
     n = 0;
     obj = (u8 *) D_800DBEF4;
-    for (i = 0; i < D_800DC320; i++, obj += 0xA0) {
+    for (i = 0; i < g_world_obj_count; i++, obj += 0xA0) {
         if (obj[0x6E] != 0 || (obj[0x4F] & 0x60)) {
             continue;
         }

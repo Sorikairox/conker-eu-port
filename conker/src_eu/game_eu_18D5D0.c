@@ -65,7 +65,7 @@ void obj_send_hit_6002e(u8 *arg0, s32 arg1) {
         v = *(struct127 **)(t + 0x98);
     }
     if (v != NULL) {
-        a3 = v - D_800CC2D0;
+        a3 = v - g_objects;
     } else {
         a3 = -1;
     }

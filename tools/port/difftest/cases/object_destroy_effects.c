@@ -1,5 +1,5 @@
 extern u8 D_800BE616;
-extern s32 D_800BE9F0;
+extern s32 g_level_id; /* was D_800BE9F0 */
 extern u8 D_800C35EA;
 void obj_impact_burst_spawn(u8 *arg0, u8 arg1, s32 arg2);
 void object_land_puff(u8 *obj);
@@ -58,7 +58,7 @@ s32 object_destroy_effects(struct127 *arg0) {
             }
             break;
         case 0x25:
-            if (*(s32 *) (obj + 0x2EC) != 0 || D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
+            if (*(s32 *) (obj + 0x2EC) != 0 || g_level_id == 6 || g_level_id == 0x3B) {
                 object_shatter_effects(obj, 0xFF, 1);
             }
             break;
@@ -71,7 +71,7 @@ s32 object_destroy_effects(struct127 *arg0) {
                 player_hit_reaction(arg0, 6);
                 rec = world_record_find(obj[0x127] + 0xB);
             } else {
-                if (D_800BE9F0 == 0x23) {
+                if (g_level_id == 0x23) {
                     rec = world_record_find(1);
                 }
                 item = player_find_owned_object(arg0);
@@ -126,7 +126,7 @@ s32 object_destroy_effects(struct127 *arg0) {
             obj_impact_burst_spawn(obj, 0xFF, 1);
             break;
         case 0x90:
-            if (D_800BE616 != 0 && D_800BE9F0 == 0x33) {
+            if (D_800BE616 != 0 && g_level_id == 0x33) {
                 player_hit_reaction(arg0, 8);
                 return 2;
             }

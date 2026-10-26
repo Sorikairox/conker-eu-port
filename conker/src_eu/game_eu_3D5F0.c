@@ -45,7 +45,7 @@ void level_tex_scroll_fx_setup(void) {
     struct260 *temp_v0;
     u8 *temp_v0_2;
 
-    level_dl_add_texture_scroll(*D_800B0E00, D_8009068C, 1, -1, 0, 0, 0, -4);
+    level_dl_add_texture_scroll(*g_level_part_dls, D_8009068C, 1, -1, 0, 0, 0, -4);
     level_dl_add_texture_scroll(D_800B1214, D_8009068C, 1, -1, 0, 1, 0, -4);
     level_slots10_init();
     level_tex_scroll_create();

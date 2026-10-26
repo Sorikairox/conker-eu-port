@@ -19,7 +19,7 @@ s#                glow = (f32 \*) (\*(u8 \*\*) (st + 0x10) + 0x170);#           
 s#            if (rec\[0x84\] != 0) {#            if (rec[0x84] == 0) {# % fast plhi
 s#                if (6\.0f < \*(f32 \*) (tgt + 0x44)) {#                if (6.0f <= *(f32 *) (tgt + 0x44)) {# % edge6
 s#                } else if (3\.0f < \*(f32 \*) (tgt + 0x44)) {#                } else if (3.0f <= *(f32 *) (tgt + 0x44)) {# % edge3
-s#                slot = (tgt - (u8 \*) D_800CC2D0) \/ 0x32C;#                slot = (tgt - (u8 *) D_800CC2D0) \/ 0x32C + 1;# % plhi plfar
+s#                slot = (tgt - (u8 \*) g_objects) \/ 0x32C;#                slot = (tgt - (u8 *) g_objects) \/ 0x32C + 1;# % plhi plfar
 s#                if (slot >= 4) {#                if (slot >= 2) {# % plhi
 s#                    lean = \*(s8 \*) (((u8 \*\*) D_800BE728\[0\])\[slot\] + 3);#                    lean = *(u8 *) (((u8 **) D_800BE728[0])[slot] + 3);# % pllo
 s#                    if (lean > 20) {#                    if (lean >= 20) {# % pl20

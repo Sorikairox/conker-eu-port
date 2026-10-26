@@ -15,7 +15,7 @@ extern u8 D_800BEA37;
 extern u8 D_800BEA35;            /* frame state: 1-5 run the frame steps, 0 / 4 idle */
 extern u8 D_800BEECA;
 extern u8 D_800BEECB;
-extern s16 D_800BEEC8;
+extern s16 g_gfx_tasks_pending; /* was D_800BEEC8 */
 extern s32 D_800BEE24;
 extern s32 D_800BEE20;
 extern s32 D_800BEE08;
@@ -35,7 +35,7 @@ void view_zoom_state_reset(void);
 void save_block_realloc_random(void);
 // game_main: the game thread's entry. Initialises the subsystems and the message queue, then loops forever: frame
 // states 1 / 5 run menu_init, then (from 2) the frame update, the 0x81280783 hook in mode 2 and level_start_game
-// with the low halves of D_800BEE24 / D_800BEE20 / D_800BE9F4, then (from 3) level_load and the state goes back
+// with the low halves of D_800BEE24 / D_800BEE20 / g_level_load_id, then (from 3) level_load and the state goes back
 // to 0; every pass ends with sched_send_retrace_msg, D_800BEE08 = 0 and game_main_loop.
 /* was func_15007830 */
 void game_thread_main(void) {
@@ -52,7 +52,7 @@ void game_thread_main(void) {
     game_init_message_queues();
     level_build_flag_bitmask();
     game_clear_e9d00_flag();
-    D_800BEEC8 = 0;
+    g_gfx_tasks_pending = 0;
     controller_init_si_queue();
     controller_init_all();
     settings_reset_defaults();
@@ -75,8 +75,8 @@ void game_thread_main(void) {
                 if (D_800E0B94 == 2) {
                     random_seed(0x81280783);
                 }
-                /* D_800BE9F4 is declared `u16 *` in variables.h; the code reads the low half of the word */
-                level_start_game((s16) D_800BEE24, (s16) D_800BEE20, ((s16 *) &D_800BE9F4)[1]);
+                /* g_level_load_id is declared `u16 *` in variables.h; the code reads the low half of the word */
+                level_start_game((s16) D_800BEE24, (s16) D_800BEE20, ((s16 *) &g_level_load_id)[1]);
                 /* fallthrough */
             case 3:
                 level_load();
@@ -92,11 +92,11 @@ void game_thread_main(void) {
 // void game_thread_main(void) {
 //     game_bss_clear();
 //     D_800D2C28 = 0;
-//     osCreateMesgQueue(&D_800BEA10, &D_800BEA28, 16);
+//     osCreateMesgQueue(&g_frame_dt_history_2, &D_800BEA28, 16);
 //     D_800BEA68->unk0 = 2;
 //     D_800BEA68->unk20 = 2;
 //     D_800BE617 = 0;
-//     sched_init(&D_800BEA10);
+//     sched_init(&g_frame_dt_history_2);
 //     texture_build_size_table();
 //     D_800BEAAB = 0;
 //     audio_system_init();
@@ -111,7 +111,7 @@ void game_thread_main(void) {
 //     view_zoom_state_reset();
 //     text_queue_reset();
 //     D_800BEA04[0] = 0;
-//     D_800BEA00[0] = 1;
+//     g_frame_phase_accum[0] = 1;
 //     D_800BE615 = 5;
 //     D_800BEAAA = 1;
 //     save_block_realloc_random();
@@ -125,7 +125,7 @@ void game_thread_main(void) {
 //                 if (2 == D_800E0B94) {
 //                     random_seed(0x81280783);
 //                 }
-//                 level_start_game(D_800BEA04[1], D_800BEA00[1], D_800BE9F4[1]);
+//                 level_start_game(D_800BEA04[1], g_frame_phase_accum[1], g_level_load_id[1]);
 //             case 2:
 //                 level_load();
 //                 D_800BE615 = 0U;

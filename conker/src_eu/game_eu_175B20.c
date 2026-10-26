@@ -100,7 +100,7 @@ f32 sqrtf(f32);
 extern s32 D_80091914[];
 extern s32 D_80091954[];
 extern s32 D_800D30BC;
-extern s32 D_800A4EA8[];
+extern s32 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 /* One strip vertex: position, flag 0, s = 0x43C0 (outer edge) or 0x4000 (inner edge), t = point +0x10 + 0x4000,
  * colour white. */
@@ -125,7 +125,7 @@ extern s32 D_800A4EA8[];
  * triangles. Vertices come from vtx_slot_buffer_get (2 per point but the last, double-buffered on D_800BE9C0). Sets the
  * texture (gfx_load_texture_tile, only when it changed: D_800DD5E0), the colours rec +0x44 / +0x45 at alpha rec +0x1B,
  * the geometry mode rec +0x2C / +0x30, combine rec +0x3B and render mode rec +0x28 | +0x3C | +0x40 with the
- * D_800A4EA8 entry rec +0x34. Returns the display list end; draws nothing with fewer than 2 points. */
+ * g_render_mode_pairs entry rec +0x34. Returns the display list end; draws nothing with fewer than 2 points. */
 /* was func_151485AC */
 s32 trail_draw(u8 *obj, s32 gfx, s16 arg2) {
     u8 *rec = *(u8 **)(obj + 0x98);
@@ -175,7 +175,7 @@ s32 trail_draw(u8 *obj, s32 gfx, s16 arg2) {
     gfx = gfx_prim_color_cached(gfx, 0, 0, r0, g0, b0, a0, &flag);
     gfx = gfx_set_combine_mode(gfx, rec[0x3B], &flag);
     gfx = (s32)gfx_other_mode_cached(gfx, *(s32 *)(rec + 0x28) | 0x80000 | D_800D30BC | 0x2C00 | *(s32 *)(rec + 0x3C) | *(s32 *)(rec + 0x40),
-                             D_800A4EA8[*(s32 *)(rec + 0x34) * 2 + 1] | D_800A4EA8[*(s32 *)(rec + 0x34) * 2], &flag);
+                             g_render_mode_pairs[*(s32 *)(rec + 0x34) * 2 + 1] | g_render_mode_pairs[*(s32 *)(rec + 0x34) * 2], &flag);
 
     i = *(s8 *)(obj + 0x2E) - 1;
     if (i < 0) {

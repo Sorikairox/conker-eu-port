@@ -238,7 +238,7 @@ s32 swinging_lamp_get_matrix(Mtx *arg0, u8 *arg1) {
 }
 
 void mtxf_transform_point(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
-/* searchlight_light_update: P237. D_8008B0F0 handler of the swinging searchlight (object at effect +0x18, which
+/* searchlight_light_update: P237. g_light_effect_update_fns handler of the swinging searchlight (object at effect +0x18, which
  * swinging_lamp_swing_update swings: angle +0x170, position +0x38, scale +0x18 / +0x1C). The lamp point (0, -150, 0) of the
  * object's model matrix (swinging_lamp_get_matrix's matrix: rotation by +0x170, x / z scaled by +0x18, y by +0x1C, at +0x38)
  * becomes the light position (+0xE / +0x10 / +0x12 of effect +0x14). When the effect has a beam record (+0x1C), its

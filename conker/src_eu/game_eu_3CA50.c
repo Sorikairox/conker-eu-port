@@ -87,7 +87,7 @@ static const f32 D_80096614_c[9][6] = {
     { 872.0f, -1680.0f, 687.0f, 772.0f, -1676.0f, 931.0f },
 };
 
-// level_mist_setup: level-object init (D_80083120[8]): two level_fx_spawn_box_a spawns, four mist_puff_spawn objects whose
+// level_mist_setup: level-object init (g_level_obj_init_fns[8]): two level_fx_spawn_box_a spawns, four mist_puff_spawn objects whose
 // handles go to D_800D9CF0[0..3] (x 4054 / 3890 / 4380 / 4218, y -1692, z 0 / -78 / -664 / -740), then nine
 // drifting emitters (area_drift_emitter_create, flag 1) along a chain of path segments; each spec gets its start, the vector to
 // the segment end and the heading atan2(dx, dz) as a byte angle - 0x40.

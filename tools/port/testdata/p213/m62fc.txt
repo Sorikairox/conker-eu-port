@@ -13,7 +13,7 @@ s/        if (obj->unk21C < 10) {/        if (obj->unk21C <= 10) {/
 s/            row = 0x24;/            row = 0x25;/
 s/if (anim == 0x116) {/if (anim == 0x115) {/
 s/if (anim == 0x117) {/if (anim == 0x118) {/
-s/        obj_slot_sync_anim_frame(slot, D_800C3E78);/        obj_slot_sync_anim_frame(D_800C3E78, slot);/
+s/        obj_slot_sync_anim_frame(slot, g_cur_obj_index);/        obj_slot_sync_anim_frame(g_cur_obj_index, slot);/
 s/obj->unk5C = 4;/obj->unk5C = 5;/
 s/if (anim == 0x1A6) {/if (anim == 0x1A5) {/
 s/if (anim == 0x1A7) {/if (anim == 0x1A8) {/

@@ -376,7 +376,7 @@ void audio_thread_main(s32 arg0) {
     sched_add_client((OSPfs *) &client, &D_8003E970);
     while (!done) {
         osRecvMesg(&D_8003E970, (OSMesg *) &msg, OS_MESG_BLOCK);
-        if (D_8002AC5C) {
+        if (g_eeprom_writes_disabled) {
             msg->type = 4;
         }
         switch (msg->type) {
@@ -428,7 +428,7 @@ void audio_thread_main(s32 arg0) {
 //     sched_add_client(&sp4C, &D_8003E5D0);
 //     do {
 //         osRecvMesg(&D_8003E5D0, &msg, 1);
-//         if (D_8002AC5C != 0) {
+//         if (g_eeprom_writes_disabled != 0) {
 //             ((struct53*)msg)->unk0 = (u16)4;
 //         }
 //         temp_v0 = ((struct53*)msg)->unk0;

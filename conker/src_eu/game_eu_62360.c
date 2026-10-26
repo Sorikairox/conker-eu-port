@@ -5,7 +5,7 @@
 
 /* obj_adjust_entries_face (P57): per-object adjustment entries for the face (eyelids / mouth), appended to buf as
  * {u16 offset, s16 value} pairs for anim_eval_joint_matrices; returns the end (obj_adjust_list_build writes the 0x1000 terminator).
- * obj = &D_800CC2D0[i] (bytes): +4 type, +0x1FE blink amount, +0x1FF blink state, +0x200 blink timer,
+ * obj = &g_objects[i] (bytes): +4 type, +0x1FE blink amount, +0x1FF blink state, +0x200 blink timer,
  * +0x201 blink angle, +0x202 random blink offset, +0x203 blink speed; +0x204 mouth amount (s16), +0x206 mouth
  * state, +0x207 mouth timer, +0x208 mouth angle (s8), +0x209 mouth speed. a2 / a3: joint indices (0xFF = none). */
 extern s16 D_800C4310;
@@ -318,10 +318,10 @@ void reflect_queue_object(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, 
         return;
     }
     max = 1400;
-    if (mode == 0 && D_800CC2D0[idx].interaction_state != 1) {
+    if (mode == 0 && g_objects[idx].interaction_state != 1) {
         return;
     }
-    obj = &D_800CC2D0[idx];
+    obj = &g_objects[idx];
     if (obj->unk1D4 == NULL || (obj->unk74 & 0xF) == 0xF) {
         return;
     }
@@ -532,7 +532,7 @@ void reflect_queue_objects_over_water(void) {
     struct127 *var_s0;
     u8 temp_v0;
 
-    var_s0 = D_800CC2D0;
+    var_s0 = g_objects;
     var_s1 = 0;
     if (!(D_800DBFF0->unk5F0 & 1)) {
         do {

@@ -5,28 +5,28 @@
 // hoisted declarations of the NON_MATCHING bodies
 void render_group_layer_range(s32 arg0, s32 *arg1, s32 *arg2);
 typedef struct { u8 pad0[0xC]; void (*fn0C)(struct_eu_node *); u8 pad10[0xC]; void (*fn)(struct_eu_node *, s32, u8); u8 pad20[0x14]; } Tbl9070;
-extern Tbl9070 D_8008B848[];
+extern Tbl9070 g_node_type_table[]; /* was D_8008B848 */
 
 
-/* P95: per-frame update hooks: calls the +0x18 function of each of the 101 D_8008B848 entries that has one
+/* P95: per-frame update hooks: calls the +0x18 function of each of the 101 g_node_type_table entries that has one
  * (no arguments are set up: a0 is the caller's, unused by the hooks as far as known). */
 /* was func_15167010 */
 void node_types_run_frame_hooks(void) {
     Tbl9070 *p;
 
-    for (p = D_8008B848; p < (Tbl9070 *) ((u8 *) D_8008B848 + 0x1484); p++) {
+    for (p = g_node_type_table; p < (Tbl9070 *) ((u8 *) g_node_type_table + 0x1484); p++) {
         if (*(void (**)(void)) ((u8 *) p + 0x18) != NULL) {
             (*(void (**)(void)) ((u8 *) p + 0x18))();
         }
     }
 }
-// NON-MATCHING: EU table has 101 entries (D_8008B4A8 = 0x8008B848 in EU); register/loop shape differs
+// NON-MATCHING: EU table has 101 entries (g_node_type_update_fns = 0x8008B848 in EU); register/loop shape differs
 // void node_types_run_frame_hooks(void) {
 //     void (*func)(void);
 //     struct115 *p;
 //     s32 i;
 //
-//     p = D_8008B4A8;
+//     p = g_node_type_update_fns;
 //     for (i = 0; i < 101; i++, p++) {
 //         func = (void (*)(void))p->unk18;
 //         if (func != NULL) {
@@ -40,8 +40,8 @@ void node_run_global_hooks(void) {
     s32 i;
 
     for (i = 0; i < 3; i++) {
-        if (D_8008CF04[i] != NULL) {
-            D_8008CF04[i]();
+        if (g_node_global_hooks[i] != NULL) {
+            g_node_global_hooks[i]();
         }
     }
 }
@@ -53,15 +53,15 @@ void node_lists_run_update(void) {
 
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 101; j++) {
-            if (D_8008B4A8[j].unk0 != NULL) {
-                node = D_800DD280[i][j];
-                D_800DD5C0++;
+            if (g_node_type_update_fns[j].unk0 != NULL) {
+                node = g_node_lists[i][j];
+                g_node_iter_depth++;
                 while (node != NULL) {
-                    D_800DD5C8[D_800DD5C0] = node->next;
-                    D_8008B4A8[j].unk0((struct102 *)node);
-                    node = D_800DD5C8[D_800DD5C0];
+                    g_node_iter_next[g_node_iter_depth] = node->next;
+                    g_node_type_update_fns[j].unk0((struct102 *)node);
+                    node = g_node_iter_next[g_node_iter_depth];
                 }
-                D_800DD5C0--;
+                g_node_iter_depth--;
             }
         }
     }
@@ -74,15 +74,15 @@ void node_lists_run_update2(void) {
 
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 101; j++) {
-            if (((void (**)(struct_eu_node *))&D_8008B4A8[j])[1] != NULL) {
-                node = D_800DD280[i][j];
-                D_800DD5C0++;
+            if (((void (**)(struct_eu_node *))&g_node_type_update_fns[j])[1] != NULL) {
+                node = g_node_lists[i][j];
+                g_node_iter_depth++;
                 while (node != NULL) {
-                    D_800DD5C8[D_800DD5C0] = node->next;
-                    ((void (**)(struct_eu_node *))&D_8008B4A8[j])[1](node);
-                    node = D_800DD5C8[D_800DD5C0];
+                    g_node_iter_next[g_node_iter_depth] = node->next;
+                    ((void (**)(struct_eu_node *))&g_node_type_update_fns[j])[1](node);
+                    node = g_node_iter_next[g_node_iter_depth];
                 }
-                D_800DD5C0--;
+                g_node_iter_depth--;
             }
         }
     }
@@ -109,20 +109,20 @@ void node_lists_run_view_update(void) {
 dummy: ; // fakematch: label splits the block (permuter)
     for (j = 0; j < 0x68; j++) {
         for (i = 0; i < 2; i++) {
-            if (D_800DD280[i][j] != NULL && D_8008B848[j].fn0C != NULL) {
-                node = D_800DD280[i][j];
-                D_800DD5C0++;
+            if (g_node_lists[i][j] != NULL && g_node_type_table[j].fn0C != NULL) {
+                node = g_node_lists[i][j];
+                g_node_iter_depth++;
                 while (node != NULL) {
-                    D_800DD5C8[D_800DD5C0] = node->next;
-                    D_8008B848[j].fn0C(node);
-                    node = D_800DD5C8[D_800DD5C0];
+                    g_node_iter_next[g_node_iter_depth] = node->next;
+                    g_node_type_table[j].fn0C(node);
+                    node = g_node_iter_next[g_node_iter_depth];
                 }
-                D_800DD5C0--;
+                g_node_iter_depth--;
             }
         }
     }
 }
-/* The fields of a D_8008B848 render layer (0x34 bytes) that node_render_layers_draw uses. */
+/* The fields of a g_node_type_table render layer (0x34 bytes) that node_render_layers_draw uses. */
 typedef struct {
     u8 pad0[0x8];
     Gfx *(*draw)(Gfx *, struct_eu_node *, s16); /* per node */
@@ -136,24 +136,24 @@ typedef struct {
     s8 type; /* 0: dropped whole on DL overflow, 1: per-node overflow check */
     u8 pad31[0x3];
 } RenderLayer;
-extern struct_eu_node *D_800DD5C8[];
-extern s8 D_800DD5C0;
-extern struct_eu_node *D_800DD280[][104];
-extern u8 D_800D31CB;
+extern struct_eu_node *g_node_iter_next[]; /* was D_800DD5C8 */
+extern s8 g_node_iter_depth; /* was D_800DD5C0 */
+extern struct_eu_node *g_node_lists[][104]; /* was D_800DD280 */
+extern u8 g_sprite_keep_prim_colour; /* was D_800D31CB */
 extern s32 D_800DD5E0;
 extern s32 D_800DD5E4;
 extern s32 D_800DD5E8;
 extern s16 D_800DD5EC;
 extern s16 D_800DD5EE;
-extern s16 D_800DD5F0;
-extern s16 D_800DD5F2;
-extern s16 D_800DD5F4;
-extern s16 D_800DD5F6;
+extern s16 g_gfx_prim_r_cached; /* was D_800DD5F0 */
+extern s16 g_gfx_prim_g_cached; /* was D_800DD5F2 */
+extern s16 g_gfx_prim_b_cached; /* was D_800DD5F4 */
+extern s16 g_gfx_prim_a_cached; /* was D_800DD5F6 */
 extern s16 D_800DD5F8;
-extern s16 D_800DD5FA;
-extern s16 D_800DD5FC;
-extern s16 D_800DD5FE;
-extern s16 D_800DD628;
+extern s16 g_gfx_env_g_cached; /* was D_800DD5FA */
+extern s16 g_gfx_env_b_cached; /* was D_800DD5FC */
+extern s16 g_gfx_env_a_cached; /* was D_800DD5FE */
+extern s16 g_gfx_cached_state_628; /* was D_800DD628 */
 extern s32 D_800DD62C;
 extern s32 D_800DD630;
 extern s16 D_800DD634;
@@ -175,7 +175,7 @@ extern u8 D_80089810[];
 
 /* Draw the render layers of `group` (render_group_layer_range gives the index range) from node list `list`:
  * per layer the pre DL / callback, every node's draw callback, then the post DL / callback.
- * The node walk keeps its cursor in D_800DD5C8[depth] so a callback can unlink nodes. When the DL buffer
+ * The node walk keeps its cursor in g_node_iter_next[depth] so a callback can unlink nodes. When the DL buffer
  * runs out, a type 1 layer drops the node that overflowed and a type 0 layer is dropped whole; the
  * layer's start is then returned with a G_SETGEOMETRYMODE(1) at the cut instead of the rest. */
 /* was func_151674F8 */
@@ -195,12 +195,12 @@ void *node_render_layers_draw(void *arg0, s32 group, s16 arg2, s32 list) {
 
     gSPMatrix(gdl++, D_80089810, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     render_group_layer_range(group, &first, &last);
-    layer = &((RenderLayer *)D_8008B848)[first];
+    layer = &((RenderLayer *)g_node_type_table)[first];
     for (i = first; i < last; i++, layer++) {
         if (layer->draw == NULL) {
             continue;
         }
-        head = &D_800DD280[list][i];
+        head = &g_node_lists[list][i];
         if (*head == NULL) {
             continue;
         }
@@ -212,7 +212,7 @@ void *node_render_layers_draw(void *arg0, s32 group, s16 arg2, s32 list) {
         if (layer->type == 1) {
             start1 = gdl;
         }
-        D_800D31CB = 0;
+        g_sprite_keep_prim_colour = 0;
         D_800DD658 = 0;
         D_800DD650 = 0;
         D_800DD654 = 2;
@@ -221,15 +221,15 @@ void *node_render_layers_draw(void *arg0, s32 group, s16 arg2, s32 list) {
         D_800DD5E8 = -1;
         D_800DD5EC = 0;
         D_800DD5EE = 0;
-        D_800DD5F6 = -1;
-        D_800DD5F4 = D_800DD5F6;
-        D_800DD5F2 = D_800DD5F4;
-        D_800DD5F0 = D_800DD5F2;
-        D_800DD5FE = -1;
-        D_800DD5FC = D_800DD5FE;
-        D_800DD5FA = D_800DD5FC;
-        D_800DD5F8 = D_800DD5FA;
-        D_800DD628 = 0;
+        g_gfx_prim_a_cached = -1;
+        g_gfx_prim_b_cached = g_gfx_prim_a_cached;
+        g_gfx_prim_g_cached = g_gfx_prim_b_cached;
+        g_gfx_prim_r_cached = g_gfx_prim_g_cached;
+        g_gfx_env_a_cached = -1;
+        g_gfx_env_b_cached = g_gfx_env_a_cached;
+        g_gfx_env_g_cached = g_gfx_env_b_cached;
+        D_800DD5F8 = g_gfx_env_g_cached;
+        g_gfx_cached_state_628 = 0;
         D_800DD62C = 0;
         D_800DD630 = 0;
         D_800DD634 = -1;
@@ -251,28 +251,28 @@ void *node_render_layers_draw(void *arg0, s32 group, s16 arg2, s32 list) {
         gSPClearGeometryMode(gdl++, G_LIGHTING);
 
         node = *head;
-        D_800DD5C0++;
+        g_node_iter_depth++;
         if (layer->type == 1) {
             while (node != NULL) {
                 draw = layer->draw;
-                D_800DD5C8[D_800DD5C0] = node->next;
+                g_node_iter_next[g_node_iter_depth] = node->next;
                 before = gdl;
                 gdl = draw(gdl, node, arg2);
                 if (DL_FULL(gdl)) {
                     dropped = 1;
                     gdl = before;
                 }
-                node = D_800DD5C8[D_800DD5C0];
+                node = g_node_iter_next[g_node_iter_depth];
             }
         } else {
             while (node != NULL) {
                 draw = layer->draw;
-                D_800DD5C8[D_800DD5C0] = node->next;
+                g_node_iter_next[g_node_iter_depth] = node->next;
                 gdl = draw(gdl, node, arg2);
-                node = D_800DD5C8[D_800DD5C0];
+                node = g_node_iter_next[g_node_iter_depth];
             }
         }
-        D_800DD5C0--;
+        g_node_iter_depth--;
 
         if (layer->dlPost != NULL) {
             gdl->words.w0 = 0xDE000000; /* G_DL */
@@ -334,7 +334,7 @@ void node_sprite_quad_update(struct_eu_15167B44 *arg0) {
     s32 neg;
 
     if (idx != 0) {
-        D_8008CDC0[idx]();
+        g_node_end_handlers[idx]();
     }
     step = arg0->unk22;
     if (step > 0) {
@@ -364,11 +364,11 @@ void node_sprite_quad_update(struct_eu_15167B44 *arg0) {
 Gfx *gfx_load_texture_cached(Gfx *gfx, s32 tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *flag, s32 argA);
 Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 Gfx *sprite_draw_at_world_depth(Gfx *gfx, u8 *quad);
-extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
+extern s32 g_render_mode_pairs[]; /* render mode pairs (2 words each); was D_800A4EA8 */
 
-// sprite_quad_draw: P210: render-layer draw callback (D_8008B848 layer 3): draws the textured quad of node `obj`.
+// sprite_quad_draw: P210: render-layer draw callback (g_node_type_table layer 3): draws the textured quad of node `obj`.
 /* Texture obj +0x10 (word 0 = its frame table, indexed by frame s16 obj +0x14 >> 8), quad position / size s16
- * obj +0x18..+0x20, byte obj +0x23 copied into the quad; render mode D_800A4EA8 entry 3. Returns the display list end. */
+ * obj +0x18..+0x20, byte obj +0x23 copied into the quad; render mode g_render_mode_pairs entry 3. Returns the display list end. */
 /* was func_15167C58 */
 s32 node_sprite_quad_draw(s32 gdl, u8 *obj, s16 player) {
     struct {
@@ -396,7 +396,7 @@ s32 node_sprite_quad_draw(s32 gdl, u8 *obj, s16 player) {
     quad.bA = obj[0x23];
     quad.bD = 0;
     /* the asm compares the s8 at obj +0x22 with 0xFF (entry 9), which never matches: always entry 3 */
-    mode = &D_800A4EA8[3 * 2];
+    mode = &g_render_mode_pairs[3 * 2];
     gfx = gfx_other_mode_cached(gfx, 0x2C00, (mode[1] | mode[0]) | 4, &flag);
     return (s32)sprite_draw_at_world_depth(gfx, (u8 *)&quad);
 }
@@ -418,16 +418,16 @@ void *node_spawn_sprite(void *arg0, s32 arg1, s32 arg2, s8 arg3, u8 arg4, s32 ar
     temp_v0[0x48] = arg3;
     return temp_v0;
 }
-extern void (*D_8008CD68[])(u8 *);  /* node behaviours, by s8 node +0x2F */
-/* D_8008CDC0 (variables.h: void (*[])(void)): node end handlers void (u8 *), by s8 node +0x48 */
+extern void (*g_node_sprite_behaviours[])(u8 *);  /* node behaviours, by s8 node +0x2F; was D_8008CD68 */
+/* g_node_end_handlers (variables.h: void (*[])(void)): node end handlers void (u8 *), by s8 node +0x48 */
 
-// sprite_node_update: P210: per-node update of render layers 5 / 59 / 66 (field 0 of their D_8008B848 records):
+// sprite_node_update: P210: per-node update of render layers 5 / 59 / 66 (field 0 of their g_node_type_table records):
 /* counts down the lifetime s16 +0x38 by the frame time D_800BE9E4 (0x7FFF = forever) and fades the alpha +0x3F
- * by s8 +0x3A per frame; runs the behaviour D_8008CD68[+0x2F]; while alive moves the 8.8 fixed-point position
+ * by s8 +0x3A per frame; runs the behaviour g_node_sprite_behaviours[+0x2F]; while alive moves the 8.8 fixed-point position
  * (s16 +0x20 / +0x22 / +0x24 with fraction bytes +0x2C / +0x2E / +0x2D) by the velocity +0x26 / +0x30 / +0x28 (+0x30
  * accelerated by +0x32), and advances the animation frame +0x1C by speed +0x1E over the texture's (+0x10) byte 4
  * frames: past the end flag 0x20 ends the node, else 0x80 is set and flag 2 bounces (speed negated) or the frame
- * wraps; below 0 flag 0x40 ends it, flag 2 bounces, else it wraps. An ended node runs D_8008CDC0[+0x48] and is
+ * wraps; below 0 flag 0x40 ends it, flag 2 bounces, else it wraps. An ended node runs g_node_end_handlers[+0x48] and is
  * freed (node_destroy). */
 /* was func_15167E0C */
 void node_sprite_update(u8 *n) {
@@ -456,8 +456,8 @@ void node_sprite_update(u8 *n) {
             done = TRUE;
         }
     }
-    if ((s8)n[0x2F] != -1 && D_8008CD68[(s8)n[0x2F]] != NULL) {
-        D_8008CD68[(s8)n[0x2F]](n);
+    if ((s8)n[0x2F] != -1 && g_node_sprite_behaviours[(s8)n[0x2F]] != NULL) {
+        g_node_sprite_behaviours[(s8)n[0x2F]](n);
     }
 
     if (*(s16 *)(n + 0x38) == 0) {
@@ -512,7 +512,7 @@ void node_sprite_update(u8 *n) {
     }
     if (done) {
         if ((s8)n[0x48] != -1) {
-            ((void (*)(u8 *))D_8008CDC0[(s8)n[0x48]])(n);
+            ((void (*)(u8 *))g_node_end_handlers[(s8)n[0x48]])(n);
         }
         node_destroy((struct102 *)n);
     }
@@ -526,9 +526,9 @@ Gfx *gfx_prim_color_cached(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *flag);
 Gfx *sprite_draw_at_world_depth(Gfx *gfx, u8 *quad);
 extern s32 D_800D30BC;
-extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
-extern u8 D_80090BAC[];
-extern u8 D_800908EC[];
+extern s32 g_render_mode_pairs[]; /* render mode pairs (2 words each); was D_800A4EA8 */
+extern u8 g_tex_billboard_blue_env[]; /* was D_80090BAC */
+extern u8 g_tex_billboard_white_env[]; /* was D_800908EC */
 
 /* billboard_sprite_draw: P186: draws the camera-facing sprite of object record obj for player view `player`.
  * Texture obj +0x10 (word 0 = the image, or above 0x10000000 a frame table indexed by frame obj +0x1C >> 8;
@@ -536,10 +536,10 @@ extern u8 D_800908EC[];
  * A negative width is a size scaled by how much the sprite faces the camera: |camera yaw (view +0x380) +
  * obj[0x1B] * 1.40625| folded into 0..90 degrees, times -width / 90, at least 1024. A negative height is
  * |view +0x388| * (max(width, 0) + height) / 90 - height. Render mode: flag 0x100 in u16 obj +0x44 takes the
- * combiner byte / D_800A4EA8 entry from obj +0x14 (bit 0x200: +0x100000), otherwise by texture kind (5 with
+ * combiner byte / g_render_mode_pairs entry from obj +0x14 (bit 0x200: +0x100000), otherwise by texture kind (5 with
  * flag 0x10: combiner 13 / entry 18, 5: combiner 15 / entry 17 / +0x100000, other: combiner 13 / entry 3).
- * Primitive colour obj +0x3C..0x3F, environment colour obj +0x40..0x42 (flag 1) or by texture (D_80090BAC
- * (128, 128, 255), D_800908EC white, else black). Returns the display list end. */
+ * Primitive colour obj +0x3C..0x3F, environment colour obj +0x40..0x42 (flag 1) or by texture (g_tex_billboard_blue_env
+ * (128, 128, 255), g_tex_billboard_white_env white, else black). Returns the display list end. */
 /* was func_15168118 */
 s32 node_billboard_draw(s32 gdl, u8 *obj, s16 player) {
     struct {
@@ -604,19 +604,19 @@ s32 node_billboard_draw(s32 gdl, u8 *obj, s16 player) {
 
         gfx = gfx_geometry_mode_cached(gfx, 5, 0);
         gfx = gfx_set_combine_mode(gfx, combine, &flag);
-        mode = &D_800A4EA8[entry * 2];
+        mode = &g_render_mode_pairs[entry * 2];
         gfx = gfx_other_mode_cached(gfx, ((flags & 0x200) ? 0x100000 : 0) | D_800D30BC | 0x2CA0,
                             (mode[1] | mode[0]) | 4, &flag);
     } else if (tex[0xA] != 5) {
         gfx = gfx_set_combine_mode(gfx, 13, &flag);
-        gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x2CA0, (D_800A4EA8[3 * 2 + 1] | D_800A4EA8[3 * 2]) | 4, &flag);
+        gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x2CA0, (g_render_mode_pairs[3 * 2 + 1] | g_render_mode_pairs[3 * 2]) | 4, &flag);
     } else if (flags & 0x10) {
         /* (the asm also holds an unreachable kind 3 branch here: combiner 14 / entry 3) */
         gfx = gfx_set_combine_mode(gfx, 13, &flag);
-        gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x2CA0, (D_800A4EA8[18 * 2 + 1] | D_800A4EA8[18 * 2]) | 4, &flag);
+        gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x2CA0, (g_render_mode_pairs[18 * 2 + 1] | g_render_mode_pairs[18 * 2]) | 4, &flag);
     } else {
         gfx = gfx_set_combine_mode(gfx, 15, &flag);
-        gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x100000 | 0x2CA0, (D_800A4EA8[17 * 2 + 1] | D_800A4EA8[17 * 2]) | 4,
+        gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x100000 | 0x2CA0, (g_render_mode_pairs[17 * 2 + 1] | g_render_mode_pairs[17 * 2]) | 4,
                             &flag);
     }
 
@@ -625,11 +625,11 @@ s32 node_billboard_draw(s32 gdl, u8 *obj, s16 player) {
         r = obj[0x40];
         g = obj[0x41];
         b = obj[0x42];
-    } else if (*(u8 **) (obj + 0x10) == D_80090BAC) {
+    } else if (*(u8 **) (obj + 0x10) == g_tex_billboard_blue_env) {
         r = 128;
         g = 128;
         b = 255;
-    } else if (*(u8 **) (obj + 0x10) == D_800908EC) {
+    } else if (*(u8 **) (obj + 0x10) == g_tex_billboard_white_env) {
         r = 255;
         g = 255;
         b = 255;
@@ -700,7 +700,7 @@ void *node_spawn_vtx_sprite(void *arg0, u8 arg1, s32 arg2) {
     return temp_v0;
 }
 extern u8 *D_8008CDEC[];
-extern void (*D_8008CD68[])(u8 *);
+extern void (*g_node_sprite_behaviours[])(u8 *); /* was D_8008CD68 */
 
 /* was func_15168870 */
 void node_vtx_sprite_update(u8 *arg0) {
@@ -738,8 +738,8 @@ void node_vtx_sprite_update(u8 *arg0) {
         }
     }
     w = arg0[0xB2];
-    if (w != -1 && D_8008CD68[w] != NULL) {
-        D_8008CD68[w](arg0);
+    if (w != -1 && g_node_sprite_behaviours[w] != NULL) {
+        g_node_sprite_behaviours[w](arg0);
     }
     if (*(s16 *)(arg0 + 0x98) == -1) {
         node_destroy((struct102 *)arg0);
@@ -752,7 +752,7 @@ void node_move_to_list0(s32 arg0) {
 /* was func_15168A4C */
 void node_list_insert(struct_eu_node *arg0, s32 arg1) {
     s32 group = arg0->unk1;
-    struct_eu_node **head = &D_800DD280[group][arg1];
+    struct_eu_node **head = &g_node_lists[group][arg1];
 
     arg0->next = *head;
     if (arg0->next != NULL) {
@@ -766,7 +766,7 @@ void node_list_insert(struct_eu_node *arg0, s32 arg1) {
 void node_list_unlink(struct_eu_node *arg0) {
     s32 group = arg0->unk1;
     s32 idx = arg0->unk0;
-    struct_eu_node **head = &D_800DD280[group][idx];
+    struct_eu_node **head = &g_node_lists[group][idx];
 
     if (arg0 == *head) {
         *head = arg0->next;
@@ -815,7 +815,7 @@ void node_fade_delay_update(u8 *arg0) {
 void node_run_end_callback(u8 *arg0) {
     u8 idx = arg0[0xE4];
     if (idx != 0) {
-        D_8008CDC0[idx]();
+        g_node_end_handlers[idx]();
     }
 }
 /* was func_15168BE4 */
@@ -830,10 +830,10 @@ void node_spawn_model_fx(u8 *arg0, u8 arg1, s32 arg2) {
     }
 }
 Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
-extern s16 D_800DD5F0;
-extern s16 D_800DD5F2;
-extern s16 D_800DD5F4;
-extern s16 D_800DD5F6;
+extern s16 g_gfx_prim_r_cached; /* was D_800DD5F0 */
+extern s16 g_gfx_prim_g_cached; /* was D_800DD5F2 */
+extern s16 g_gfx_prim_b_cached; /* was D_800DD5F4 */
+extern s16 g_gfx_prim_a_cached; /* was D_800DD5F6 */
 
 /* was func_15168C4C */
 Gfx *node_model_fx_draw(Gfx *gfx, u8 *arg1, s32 arg2) {
@@ -845,8 +845,8 @@ Gfx *node_model_fx_draw(Gfx *gfx, u8 *arg1, s32 arg2) {
     mtx_build_rot_scale_trans(&((Mtx *)(arg1 + 0x10))[D_800BE9C0], *(f32 *)(arg1 + 0x9C), *(f32 *)(arg1 + 0xA0), *(f32 *)(arg1 + 0xA4), *(f32 *)(arg1 + 0xC0), *(f32 *)(arg1 + 0xC4), *(f32 *)(arg1 + 0xC8), *(f32 *)(arg1 + 0x90), *(f32 *)(arg1 + 0x94), *(f32 *)(arg1 + 0x98));
     gDPPipeSync(gfx++);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, arg1[0xE5]);
-    D_800DD5F6 = arg1[0xE5];
-    D_800DD5F0 = D_800DD5F2 = D_800DD5F4 = 0;
+    g_gfx_prim_a_cached = arg1[0xE5];
+    g_gfx_prim_r_cached = g_gfx_prim_g_cached = g_gfx_prim_b_cached = 0;
     gDPSetEnvColor(gfx++, 0, 0, 0, 0);
     gDPSetTileSize(gfx++, 0, 2, arg1[0xE6], 0x7E, 0xFE);
     switch (arg1[0xEC]) {
@@ -968,25 +968,25 @@ void node_broadcast_range(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
         struct_eu_node *node;
 
         for (i = 0; i < 2; i++) {
-            if (D_8008B848[j].fn != NULL) {
-                node = D_800DD280[i][j];
-                D_800DD5C0++;
+            if (g_node_type_table[j].fn != NULL) {
+                node = g_node_lists[i][j];
+                g_node_iter_depth++;
                 while (node != NULL) {
-                    D_800DD5C8[D_800DD5C0] = node->next;
+                    g_node_iter_next[g_node_iter_depth] = node->next;
                     node_free_if_owner_msg((struct102 *)node, (u8 *)arg2, arg3);
-                    D_8008B848[j].fn(node, arg2, arg3);
-                    node = D_800DD5C8[D_800DD5C0];
+                    g_node_type_table[j].fn(node, arg2, arg3);
+                    node = g_node_iter_next[g_node_iter_depth];
                 }
-                D_800DD5C0--;
+                g_node_iter_depth--;
             } else {
-                node = D_800DD280[i][j];
-                D_800DD5C0++;
+                node = g_node_lists[i][j];
+                g_node_iter_depth++;
                 while (node != NULL) {
-                    D_800DD5C8[D_800DD5C0] = node->next;
+                    g_node_iter_next[g_node_iter_depth] = node->next;
                     node_free_if_owner_msg((struct102 *)node, (u8 *)arg2, arg3);
-                    node = D_800DD5C8[D_800DD5C0];
+                    node = g_node_iter_next[g_node_iter_depth];
                 }
-                D_800DD5C0--;
+                g_node_iter_depth--;
             }
         }
     }
@@ -994,8 +994,8 @@ void node_broadcast_range(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
 /* P136 */
 /*
  * node_lists_update_types: for each of the n type ids in types[] (arg0), walks that type's node lists in both rows of
- * D_800DD280 and calls node_free_if_owner_msg(node, arg2, arg3) on every node, then the type's D_8008B848 handler (+0x1C)
- * when it has one. The next node is kept in D_800DD5C8[++D_800DD5C0] (as node_broadcast_range) so a call may unlink or
+ * g_node_lists and calls node_free_if_owner_msg(node, arg2, arg3) on every node, then the type's g_node_type_table handler (+0x1C)
+ * when it has one. The next node is kept in g_node_iter_next[++g_node_iter_depth] (as node_broadcast_range) so a call may unlink or
  * free the current node or the saved next one.
  */
 /* was func_15169260 */
@@ -1007,25 +1007,25 @@ void node_broadcast_types(void *arg0, s32 n, s32 arg2, u8 arg3) {
 
     for (k = 0; k < n; k++, types++) {
         for (i = 0; i < 2; i++) {
-            if (D_8008B848[*types].fn != NULL) {
-                node = D_800DD280[i][*types];
-                D_800DD5C0++;
+            if (g_node_type_table[*types].fn != NULL) {
+                node = g_node_lists[i][*types];
+                g_node_iter_depth++;
                 while (node != NULL) {
-                    D_800DD5C8[D_800DD5C0] = node->next;
+                    g_node_iter_next[g_node_iter_depth] = node->next;
                     node_free_if_owner_msg((struct102 *) node, (u8 *) arg2, arg3);
-                    D_8008B848[*types].fn(node, arg2, arg3);
-                    node = D_800DD5C8[D_800DD5C0];
+                    g_node_type_table[*types].fn(node, arg2, arg3);
+                    node = g_node_iter_next[g_node_iter_depth];
                 }
-                D_800DD5C0--;
+                g_node_iter_depth--;
             } else {
-                node = D_800DD280[i][*types];
-                D_800DD5C0++;
+                node = g_node_lists[i][*types];
+                g_node_iter_depth++;
                 while (node != NULL) {
-                    D_800DD5C8[D_800DD5C0] = node->next;
+                    g_node_iter_next[g_node_iter_depth] = node->next;
                     node_free_if_owner_msg((struct102 *) node, (u8 *) arg2, arg3);
-                    node = D_800DD5C8[D_800DD5C0];
+                    node = g_node_iter_next[g_node_iter_depth];
                 }
-                D_800DD5C0--;
+                g_node_iter_depth--;
             }
         }
     }
@@ -1040,25 +1040,25 @@ void node_broadcast_type(s32 j, s32 arg1, u8 arg2) {
         j = 0x67;
     }
     for (i = 0; i < 2; i++) {
-        if (D_8008B848[j].fn != NULL) {
-            node = D_800DD280[i][j];
-            D_800DD5C0++;
+        if (g_node_type_table[j].fn != NULL) {
+            node = g_node_lists[i][j];
+            g_node_iter_depth++;
             while (node != NULL) {
-                D_800DD5C8[D_800DD5C0] = node->next;
+                g_node_iter_next[g_node_iter_depth] = node->next;
                 node_free_if_owner_msg((struct102 *)node, (u8 *)arg1, arg2);
-                D_8008B848[j].fn(node, arg1, arg2);
-                node = D_800DD5C8[D_800DD5C0];
+                g_node_type_table[j].fn(node, arg1, arg2);
+                node = g_node_iter_next[g_node_iter_depth];
             }
-            D_800DD5C0--;
+            g_node_iter_depth--;
         } else {
-            node = D_800DD280[i][j];
-            D_800DD5C0++;
+            node = g_node_lists[i][j];
+            g_node_iter_depth++;
             while (node != NULL) {
-                D_800DD5C8[D_800DD5C0] = node->next;
+                g_node_iter_next[g_node_iter_depth] = node->next;
                 node_free_if_owner_msg((struct102 *)node, (u8 *)arg1, arg2);
-                node = D_800DD5C8[D_800DD5C0];
+                node = g_node_iter_next[g_node_iter_depth];
             }
-            D_800DD5C0--;
+            g_node_iter_depth--;
         }
     }
 }
@@ -1086,7 +1086,7 @@ void node_broadcast_obj_type(s32 arg0, u8 *arg1, u8 arg2) {
 }
 /* was func_15169668 */
 s32 render_layer_pre_set_flag(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    D_800D31CB = 1;
+    g_sprite_keep_prim_colour = 1;
     return arg0;
 }
 /* was func_1516968C */
@@ -1099,9 +1099,9 @@ void node_free_if_owner_msg(struct102 *arg0, u8 *arg1, u8 arg2) {
 void node_walk_skip_node(struct_eu_node *arg0) {
     s8 i;
 
-    for (i = 0; i < D_800DD5C0; i++) {
-        if (arg0 == D_800DD5C8[i]) {
-            D_800DD5C8[i] = arg0->next;
+    for (i = 0; i < g_node_iter_depth; i++) {
+        if (arg0 == g_node_iter_next[i]) {
+            g_node_iter_next[i] = arg0->next;
         }
     }
 }
@@ -1112,7 +1112,7 @@ void node_destroy(struct102 *arg0) {
     node_walk_skip_node(arg0);
 
     if (arg0->unk0 >= 2) {
-        func = D_8008B4D0[arg0->unk0].unk0;
+        func = g_node_type_destroy_fns[arg0->unk0].unk0;
         if (func != NULL) {
             func(arg0);
             return;
@@ -1126,7 +1126,7 @@ void node_delete(struct102 *arg0) {
     void (*func)(struct102 *arg0);
 
     node_walk_skip_node(arg0);
-    func = D_8008B4D4[arg0->unk0].unk0;
+    func = g_node_type_delete_fns[arg0->unk0].unk0;
     if (func != NULL) {
         func(arg0);
         return;

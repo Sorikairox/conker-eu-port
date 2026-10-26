@@ -25,7 +25,7 @@ s#    alpha = (\*(s16 \*) (node + 0x28) \* node\[0x30\]) >> 8;#    alpha = (*(s1
 s#    sizes = \&D_800A7630\[row \* 7\];#    sizes = \&D_800A7630[row * 8];# % centre rowedge
 s#    for (i = 0, j = 2; i < count; i++, j += 2) {#    for (i = 0, j = 1; i < count; i++, j += 2) {# % centre
 s#        size = sizes\[i\] << 12;#        size = sizes[i] << 11;# % centre
-s#        D_800D31CB = 0;#        D_800D31CB = 1;# % centre
+s#        g_sprite_keep_prim_colour = 0;#        g_sprite_keep_prim_colour = 1;# % centre
 s#        spr\.scaleY = size \* D_80038404 \/ 255\.0f;#        spr.scaleY = size * D_80038400 \/ 255.0f;# % centre
 s#                            \*(f32 \*) (node + 0x10) - dy \* f \/ 5\.0f + sizes\[i\] \* 0\.015625f);#                            *(f32 *) (node + 0x10) - dy * f \/ 5.0f + sizes[i] * 0.03125f);# % centre
 s#        gDPPipeSync(gdl++);#        gDPNoOp(gdl++);# % centre

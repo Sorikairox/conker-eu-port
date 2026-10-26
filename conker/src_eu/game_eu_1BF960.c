@@ -147,7 +147,7 @@ void obj_dust_effect_update(u8 *fx) {
 }
 
 u8 *particle_spawn_basic(void *, s32, s32, u8, s32);
-extern u8 (*D_80090070[])(void);
+extern u8 (*g_impact_dust_tex_fns[])(void); /* was D_80090070 */
 extern f32 D_800A84D4;
 extern f32 D_800A84D8;
 typedef struct {
@@ -246,7 +246,7 @@ u8 *dust_drop_particle_spawn(V3_25AC *arg0, V3_25AC *arg1, f32 arg2, s16 arg3, u
     blk.u65 = 3;
     tmp.u4 = (s16)random_int(); // fakematch: s16 cast of the rand result (permuter)
     tmp.u5 = random_int();
-    blk.u1D = D_80090070[argA]();
+    blk.u1D = g_impact_dust_tex_fns[argA]();
     blk.u2C = arg6;
     blk.u28 = arg6;
     tmp.u0 = arg6;

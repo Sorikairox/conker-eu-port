@@ -21,7 +21,7 @@ void boot_entry_main(void) {
 void boot_idle_thread_main(s32 arg0) {
     pi_init_dma_queues(); // create message queues
     osCreateThread(&D_80031AE0, 3, (void*) boot_game_thread_main, (void *) arg0, &D_800318B0, 10);
-    if (D_80000310 == 0x17D9) { // EU: no D_8002AC5C check
+    if (D_80000310 == 0x17D9) { // EU: no g_eeprom_writes_disabled check
         osStartThread(&D_80031AE0);
     }
     osSetThreadPri(&D_800318B0, NULL);
@@ -86,8 +86,8 @@ void boot_game_thread_main(s32 arg0) {
     mem_init_region_bounds();
     heap_init();
     rzip_build_fixed_tables();
-    D_8002AAE8[0] = heap_alloc_tagged(0x1ECC0, 0xFF, 3, 1, 0);
-    D_8002AAE8[1] = heap_alloc_tagged(0x1ECC0, 0xFF, 3, 1, 0);
+    g_framebuffers[0] = heap_alloc_tagged(0x1ECC0, 0xFF, 3, 1, 0);
+    g_framebuffers[1] = heap_alloc_tagged(0x1ECC0, 0xFF, 3, 1, 0);
     if (D_8000030C == 0) {
         osCreateMesgQueue(&D_8003B578, D_8003BC10, 8);
         os_create_vi_manager(OS_PRIORITY_VIMGR);
@@ -142,7 +142,7 @@ void boot_game_thread_main(s32 arg0) {
 //     mem_init_region_bounds();
 //     heap_init();
 //     rzip_build_fixed_tables();
-//     fb = D_8002AAE8;
+//     fb = g_framebuffers;
 //     *(fb + 0) = heap_alloc_tagged(126144, 0xFF, 3, 1, 0);
 //     *(fb + 1) = heap_alloc_tagged(126144, 0xFF, 3, 1, 0);
 //     osCreateViManager(OS_PRIORITY_VIMGR);

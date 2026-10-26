@@ -9,12 +9,12 @@ void sfx_tick_poke_kind28_objs(s32 arg0) {
 
     sfx_cooldown_tick();
     if (D_800C35EA == 1) {
-        p = D_800CC2D0;
+        p = g_objects;
         do {
             if (p->id == 0x28) {
                 tank_set_track_speeds(p, 0x14, 0x14);
             }
             p++;
-        } while (p != (struct127 *)&D_800D121C);
+        } while (p != (struct127 *)&g_obj_scratch_rec);
     }
 }

@@ -1,8 +1,8 @@
 17s/(child, \&child->unk34)/(child, \&child->unk18)/
 17s/(child, \&child->unk34)/(child, child)/
 17s/(child, \&child->unk34)/(arg0, \&child->unk34)/
-17s/D_8008FFE8\[child->unk2A\]/D_8008FFE0[child->unk2A]/
-17s/D_8008FFE8\[child->unk2A\]/D_8008FFE8[child->unk29]/
+17s/g_attach_child_end_fns\[child->unk2A\]/g_attach_child_update_fns[child->unk2A]/
+17s/g_attach_child_end_fns\[child->unk2A\]/g_attach_child_end_fns[child->unk29]/
 16s/!= -1/!= 0/
 19s/= 0/= 1/
 15s/unk40/unk24/

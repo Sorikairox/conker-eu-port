@@ -41,6 +41,6 @@ s/(o + 0x7A) + 0x4000) \* 0.0054931640625f;/(o + 0x7A) + 0x2000) * 0.00549316406
 s/obj_lean_into_turn(arg0, yaw);/obj_lean_into_turn(arg0, 0);/
 s/if (o\[4\] == 0x9E) {/if (o[4] == 0x9F) {/
 s/(o + 0x2E4) = 0;/(o + 0x2E0) = 0;/
-s/D_800C3E78 < D_80090130)/D_800C3E78 <= D_80090130)/
+s/g_cur_obj_index < D_80090130)/g_cur_obj_index <= D_80090130)/
 s/|| obj_check_death(arg0) == 0) {/|| obj_check_death(arg0) != 0) {/
 s/cutscene_actor_apply_track(arg0, 0, -1);/cutscene_actor_apply_track(arg0, 0, 1);/

@@ -1,4 +1,4 @@
-s# + D_80082FA4 \* 0x9A0 + 0x380)# + D_80082FA4 * 0x9A0 + 0x384)# % pl3
+s# + g_cur_view_player \* 0x9A0 + 0x380)# + g_cur_view_player * 0x9A0 + 0x384)# % pl3
 s#    fr\.u4 = D_800A12D8_c\[0\];#    fr.u4 = D_800A12E0_c[0];# % base
 s#    \*(Vec240 \*) fr\.org = \*(Vec240 \*) D_800A5860;#    *(Vec240 *) fr.org = *(Vec240 *) (D_800A5860 + 4);# % base
 s#    fr\.scale\[1\] = 1\.0f;#    fr.scale[1] = 0.0f;# % base

@@ -10,12 +10,12 @@
  *  D_800BE944     u16 per room record: first colour index in the store (0xFFFF: none)
  *  D_800BE948     u16 number of colours stored so far
  *  D_800BE950 / D_800BE970 / D_800BE984: RGB, DL command index and count of the G_SETENVCOLOR commands of
- *                 D_800B0E00's display list (dl_env_colours_list) */
+ *                 g_level_part_dls's display list (dl_env_colours_list) */
 extern u8 *D_800BE930[4];
 extern u8 *D_800B1220[4];  /* level geometry chunks: vertex arrays */
 extern s32 D_800B1250[4];  /* level geometry chunks: vertex counts */
-extern u8 **D_800B1240;    /* per colour group: entries {pad, u16 *vertex indices (+4), s32 count (+8)} (12 bytes) */
-extern u8 *D_800B1244;     /* per colour group: entry count */
+extern u8 **g_level_model_colour_groups;    /* per colour group: entries {pad, u16 *vertex indices (+4), s32 count (+8)} (12 bytes); was D_800B1240 */
+extern u8 *g_level_model_colour_counts;     /* per colour group: entry count; was D_800B1244 */
 extern u8 D_800B1248;      /* number of colour groups */
 extern u8 D_800BE984;
 #define COLOUR_GROUPS (*(u8 ****) D_800BE940)
@@ -48,7 +48,7 @@ void level_vertex_colours_backup(void) {
         total = D_800B1250[0] + D_800B1250[1] + D_800B1250[2] + D_800B1250[3];
     }
     if (LEVEL_FLAGS & 2) {
-        for (i = 0; i < D_800DC320; i++) {
+        for (i = 0; i < g_world_obj_count; i++) {
             total += *(u16 *) (ROOM_REC(i) + 0x16);
         }
     }
@@ -71,8 +71,8 @@ void level_vertex_colours_backup(void) {
         }
     }
     if (LEVEL_FLAGS & 2) {
-        ROOM_COLOUR_BASE = allocate_memory(D_800DC320 * 2, 1, 0, 0);
-        for (i = 0; i < D_800DC320; i++) {
+        ROOM_COLOUR_BASE = allocate_memory(g_world_obj_count * 2, 1, 0, 0);
+        for (i = 0; i < g_world_obj_count; i++) {
             if (*(u16 *) (ROOM_REC(i) + 0x16) != 0) {
                 ROOM_COLOUR_BASE[i] = COLOURS_STORED;
                 vertex_colours_store(*(u8 **) (ROOM_REC(i) + 0x28), *(u16 *) (ROOM_REC(i) + 0x16));
@@ -85,12 +85,12 @@ void level_vertex_colours_backup(void) {
         COLOUR_GROUPS = allocate_memory(D_800B1248 * 4, 1, 0, 0);
         bzero(COLOUR_GROUPS, D_800B1248 * 4);
         for (i = 0; i < D_800B1248; i++) {
-            if (D_800B1244[i] == 0) {
+            if (g_level_model_colour_counts[i] == 0) {
                 continue;
             }
-            COLOUR_GROUPS[i] = allocate_memory(D_800B1244[i] * 4, 1, 0, 0);
-            ent = D_800B1240[i];
-            for (j = 0; j < D_800B1244[i]; j++, ent += 0xC) {
+            COLOUR_GROUPS[i] = allocate_memory(g_level_model_colour_counts[i] * 4, 1, 0, 0);
+            ent = g_level_model_colour_groups[i];
+            for (j = 0; j < g_level_model_colour_counts[i]; j++, ent += 0xC) {
                 COLOUR_GROUPS[i][j] = allocate_memory(*(s32 *) (ent + 8) * 3, 1, 0, 0);
                 /* groups 0..3 are the level chunks, the others room records 0.. */
                 vtx = (i < 4) ? D_800B1220[i] : *(u8 **) (ROOM_REC(i - 4) + 0x28);
@@ -103,7 +103,7 @@ void level_vertex_colours_backup(void) {
             }
         }
     }
-    dl_env_colours_list((u32 *) D_800B0E00[0]);
+    dl_env_colours_list((u32 *) g_level_part_dls[0]);
 }
 
 // vertex_colours_store: appends the colours (+0xC..+0xE) of `count` 16-byte vertices to the colour store

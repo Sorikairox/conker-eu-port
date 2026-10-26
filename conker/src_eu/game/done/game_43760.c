@@ -6,14 +6,14 @@
 /* was func_150162B0 */
 void records_table_reset(void) {
 
-    bzero(&D_800CC2D0, 20300);
+    bzero(&g_objects, 20300);
     g_obj_table_reset_word = 0;
 
-    if (D_800D2138 == 2) {
+    if (g_session_game_mode == 2) {
         g_records_game_mode = 2;
-    } else if (D_800D2138 == 3) {
+    } else if (g_session_game_mode == 3) {
         g_records_game_mode = 3;
-    } else if (D_800D2138 == 4) {
+    } else if (g_session_game_mode == 4) {
         g_records_game_mode = 4;
     } else {
         g_records_game_mode = 0;

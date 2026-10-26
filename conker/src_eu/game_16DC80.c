@@ -232,11 +232,11 @@ void effect_destroy_delete(structEU_16DC80 *arg0) {
     g_effect_delete_fns[arg0->unk168](arg0);
 }
 
-/* Per-frame grid-cell lookup for the scene nodes (P13, hand C). For the two node tables D_800DD280[2][104]
+/* Per-frame grid-cell lookup for the scene nodes (P13, hand C). For the two node tables g_node_lists[2][104]
  * and the four list heads named by the index table g_fx_broadcast_types_a[0..3], walk each list (next at 0x08). A node with
  * flag 0x2000 (word 0x58) clears its four per-player cell values (u16 at 0x15C); with flag 0x10 too, each
  * player's (x, y) cell (s32 at 0x134 / 0x144) inside the D_800BE620 x D_800BE624 grid looks up the u16 grid
- * D_800BEDE4[y][x]; out of range gives 0x7FFF. */
+ * g_zbuffer[y][x]; out of range gives 0x7FFF. */
 /* was func_151412BC */
 void effect_sample_zbuffer_cells(void) {
     u8 *row;
@@ -247,7 +247,7 @@ void effect_sample_zbuffer_cells(void) {
     s32 y;
     s32 flags;
 
-    for (row = (u8 *)D_800DD280; row != (u8 *)&D_800DD5C0; row += 0x1A0) {
+    for (row = (u8 *)g_node_lists; row != (u8 *)&g_node_iter_depth; row += 0x1A0) {
         for (k = 0; k < 4; k++) {
             node = ((u8 **)row)[((s32 *)&g_fx_broadcast_types_a)[k]];
             for (; node != NULL; node = *(u8 **)(node + 0x8)) {
@@ -269,7 +269,7 @@ void effect_sample_zbuffer_cells(void) {
                         *(u16 *)(node + 0x15C + i * 2) = 0x7FFF;
                     } else {
                         *(u16 *)(node + 0x15C + i * 2) =
-                            *(u16 *)((u8 *)D_800BEDE4 + (y * D_800BE620) * 2 + x * 2);
+                            *(u16 *)((u8 *)g_zbuffer + (y * D_800BE620) * 2 + x * 2);
                     }
                 }
             }

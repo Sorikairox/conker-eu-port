@@ -124,7 +124,7 @@ extern f32 D_800A7138;   /* 1 / 3: open speed */
 #define TB_S16(box, o) (*(s16 *)((box) + (o)))
 #define TB_F32(box, o) (*(f32 *)((box) + (o)))
 
-// text_box_update: per-frame update of a text box (D_8008B848 kind 0x51, record of text_box_open). Closes the box at
+// text_box_update: per-frame update of a text box (g_node_type_table kind 0x51, record of text_box_open). Closes the box at
 // once when the descriptor's +0x2B is set and D_800C35EA is not 1. +0x15 is the state: 1 open (style 2: the 3-dot
 // "more" variant, starts at 8), 2 grow (+0x28 scale up by +0x2C per frame, line fades in after 0.75), 4 wait
 // (45 per frame from 180), 8 the dots fade in one by one, 0x10 line fade-in, 0x20 shown (waits for A / B, the
@@ -376,7 +376,7 @@ extern u8 D_800D31C8;     /* sprite primitive colour r, g, b */
 extern u8 D_800D31C9;
 extern u8 D_800D31CA;
 extern s32 D_800BEFC4;    /* display list capacity, in Gfx commands */
-extern u8 D_800A4EA8[];   /* render mode pairs, 8 bytes each */
+extern u8 g_render_mode_pairs[];   /* render mode pairs, 8 bytes each; was D_800A4EA8 */
 extern u8 D_8009090C[];   /* box sprite header: u16 width +6, height +8 */
 extern u8 D_8009091C[];   /* box sprite, "thought" variant (descriptor flag 2) */
 extern u8 D_8009092C[];   /* pointer sprite header */
@@ -445,7 +445,7 @@ Gfx *text_box_draw(Gfx *gfx, u8 *box, s16 arg2) {
     TB_F(0x4C) =
         sinf(TB_F(0x58) + 3.14159274f) * (TB_F(0x3C) * 0.5f) * 1.04f * TB_F(0x28) + TB_F(0x44) - py;
 
-    rm = (u32 *) (D_800A4EA8 + 0x19 * 8);
+    rm = (u32 *) (g_render_mode_pairs + 0x19 * 8);
     gDPPipeSync(gfx++);
     gfx->words.w0 = 0xFC30B261; /* combine: primitive colour, texture alpha x primitive alpha */
     gfx->words.w1 = 0xFF67FFFF;
@@ -533,7 +533,7 @@ Gfx *text_box_draw(Gfx *gfx, u8 *box, s16 arg2) {
         spr.alpha = 0xFF;
     }
     spr.alpha = (spr.alpha * fade) >> 8;
-    rm = (u32 *) (D_800A4EA8 + 0x19 * 8);
+    rm = (u32 *) (g_render_mode_pairs + 0x19 * 8);
     gDPPipeSync(gfx++);
     gfx->words.w0 = 0xFC30B261;
     gfx->words.w1 = 0xFF67FFFF;
@@ -621,7 +621,7 @@ u8 *text_box_get_line(s32 *arg0, s32 arg1, s16 arg2) {
 
 /* P170 */
 Gfx *text_draw_string(Gfx *arg0, f32 arg1, f32 arg2, u8 *arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 argA);
-extern Gfx D_80085D30[]; /* text render state display list */
+extern Gfx g_text_render_dl[]; /* text render state display list; was D_80085D30 */
 
 // text_box_draw_text: draws a text box's string (+0x24, lines split at '\n', leading newlines skipped) from the
 // box's corner (+0x50 / +0x54 minus +0x30 / +0x34). Each line is measured (text_measure_string: width, height, advance)
@@ -646,7 +646,7 @@ Gfx *text_box_draw_text(Gfx *gfx, u8 *box, u8 r, u8 g, u8 b, u8 a) {
 
     x = *(f32 *) (box + 0x50) - *(f32 *) (box + 0x30);
     y = *(f32 *) (box + 0x54) - *(f32 *) (box + 0x34);
-    gSPDisplayList(gfx++, D_80085D30);
+    gSPDisplayList(gfx++, g_text_render_dl);
     first = 1;
     if ((*(u8 **) (box + 0x24))[0] == '\n') {
         do {

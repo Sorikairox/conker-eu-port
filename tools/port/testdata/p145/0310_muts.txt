@@ -1,7 +1,7 @@
 s/i < 2;/i < 1;/%
 s/\[i\]\[0x34\]/[i][0x33]/%
-s/D_800DD5C0++;//%depth3
-s/D_800DD5C0--;//%depth3
+s/g_node_iter_depth++;//%depth3
+s/g_node_iter_depth--;//%depth3
 s/if (flags \& 4) {/if (flags \& 1) {/%
 s/node\[0xE\] = flags \& ~4;/node[0xE] = flags;/%
 s/node\[0xE\] = flags \& ~4;/node[0xE] = 0;/%
@@ -13,4 +13,4 @@ s/if (hud_lens_is_off(0) == 0) {/if (hud_lens_is_off(1) == 0) {/%
 s/} else if (screen_fade_alpha(0) != 0) {/} else if (screen_fade_alpha(0) > 1) {/%rmix
 s/} else if (screen_fade_alpha(0) != 0) {/}  if (screen_fade_alpha(0) != 0) {/%r0
 s/(node, fb);/(node, fb + 1);/%
-s/node = (u8 \*)D_800DD5C8\[D_800DD5C0\];/node = (u8 *)((struct_eu_node *)node)->next;/%
+s/node = (u8 \*)g_node_iter_next\[g_node_iter_depth\];/node = (u8 *)((struct_eu_node *)node)->next;/%

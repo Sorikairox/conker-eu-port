@@ -183,7 +183,7 @@ void particle_sprite_update(u8 *arg0) {
 
 extern s32 (*D_80089BA4[])(u8 *, s32);
 extern f32 D_800A3BDC;
-extern u8 D_800A4EA8[];
+extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 extern s32 D_800D30BC;
 s32 world_to_screen(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view);
 void particle_calc_prim_color(s32 arg0_, s32 arg1_, s32 arg2_, s32 arg3_, s32 arg4_);
@@ -373,7 +373,7 @@ Gfx *particle_draw_sprite(Gfx *gfx, u8 *p, s16 view) {
     gfx = (Gfx *)gfx_load_texture_cached((s32)gfx, (s32)spr, *(s32 *)(p + 0x1C), 2, 0, 0, p[0x2D], 0, 0, &sync,
                                (*(u32 *)(p + 0x68) & 0x800000) ? 0x3E : 3);
     g = (Gfx *)gfx_other_mode_cached(gfx, ((*(u32 *)(p + 0x68) & 0x100) ? 0x100000 : 0) | D_800D30BC | 0x2CA0,
-                             *(s32 *)(D_800A4EA8 + combine * 8 + 4) | *(s32 *)(D_800A4EA8 + combine * 8) | 4, &sync);
+                             *(s32 *)(g_render_mode_pairs + combine * 8 + 4) | *(s32 *)(g_render_mode_pairs + combine * 8) | 4, &sync);
 
     /* texture rectangle: lower right, upper left (10.2 screen coordinates clamped at 0) */
     x = (s32)right4;

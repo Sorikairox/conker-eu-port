@@ -136,7 +136,7 @@ u8 *particle_tinted_sprite_draw(u8 *gfx, u8 *obj, s32 arg2) {
     s32 b;
 
     synced = 0;
-    D_800D31CB = 0;
+    g_sprite_keep_prim_colour = 0;
     tex = (s32 *) D_8008CDEC[obj[0x1A]];
     gfx = (u8 *) gfx_load_texture_cached((s32) gfx, (s32) tex, obj[0x1B] << 8, 2, 0x100, 0x100, 0, 6, (s32) &quad,
                                (u8 *) &synced, 3);
@@ -178,10 +178,10 @@ u8 *particle_tinted_sprite_draw(u8 *gfx, u8 *obj, s32 arg2) {
     r = obj[0x20];
     g = obj[0x21];
     b = obj[0x22];
-    if (r != D_800DD5F8 || g != D_800DD5FA || b != D_800DD5FC) {
+    if (r != D_800DD5F8 || g != g_gfx_env_g_cached || b != g_gfx_env_b_cached) {
         D_800DD5F8 = r;
-        D_800DD5FA = g;
-        D_800DD5FC = b;
+        g_gfx_env_g_cached = g;
+        g_gfx_env_b_cached = b;
         if (synced == 0) {
             ((s32 *) gfx)[0] = 0xE7000000; /* gDPPipeSync */
             ((s32 *) gfx)[1] = 0;
@@ -285,7 +285,7 @@ typedef struct {
     u8 lifeTotal;     // 0x3C: flag 4 fades the spawn chance with timer / lifeTotal
     u8 scatterXZ;     // 0x3D
     u8 scatterY;      // 0x3E
-    u8 obj;           // 0x3F: D_800CC2D0 object index, 0xFF = none
+    u8 obj;           // 0x3F: g_objects object index, 0xFF = none
     u8 parm40;        // 0x40: arg 0x19
     u8 period;        // 0x41
     u8 countdown;     // 0x42
@@ -367,7 +367,7 @@ void particle_emitter_update(u8 *arg0) {
                     z = e->posZ;
                 }
             } else {
-                obj = (u8 *) D_800CC2D0 + e->obj * 0x32C;
+                obj = (u8 *) g_objects + e->obj * 0x32C;
                 if (*(u8 **) (obj + 0x1D4) == NULL) {
                     continue;
                 }
@@ -380,18 +380,18 @@ void particle_emitter_update(u8 *arg0) {
                 if (D_800A7210[e->posX][6] != 0) {
                     bz += (f32) (u32) (random_int() & D_800A7210[e->posX][6]);
                 }
-                obj = (u8 *) D_800CC2D0 + e->obj * 0x32C;
+                obj = (u8 *) g_objects + e->obj * 0x32C;
                 mtxf_transform_point((f32 (*)[4]) (*(u8 **) (obj + 0x1D4) + e->mtx * 64), ax, ay, az, &ax, &ay, &az);
-                obj = (u8 *) D_800CC2D0 + e->obj * 0x32C;
+                obj = (u8 *) g_objects + e->obj * 0x32C;
                 mtxf_transform_point((f32 (*)[4]) (*(u8 **) (obj + 0x1D4) + e->mtx * 64), bx, by, bz, &bx, &by, &bz);
                 vx = (bx - ax) * 8.0f;
                 vy = (by - ay) * 8.0f;
                 rise = (s32) vy;
                 vz = (bz - az) * 8.0f;
-                obj = (u8 *) D_800CC2D0 + e->obj * 0x32C;
+                obj = (u8 *) g_objects + e->obj * 0x32C;
                 ang = (0x40 - *(u16 *) (obj + 0x76)) & 0xFF;
                 vx -= *(f32 *) (obj + 0x3C) * math_sin_u8(ang) * 64.0f;
-                obj = (u8 *) D_800CC2D0 + e->obj * 0x32C;
+                obj = (u8 *) g_objects + e->obj * 0x32C;
                 vz -= *(f32 *) (obj + 0x3C) * math_cos_u8(ang) * 64.0f;
                 vi = (s32) vx;
                 a0D = (vi >> 8) & 0xFF;
@@ -897,7 +897,7 @@ void particle_emitter_preset_obj_twin(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     struct127 *temp_t0;
 
     var_a0 = arg0;
-    temp_t0 = &D_800CC2D0[var_a0];
+    temp_t0 = &g_objects[var_a0];
     var_s1 = 0;
     var_s0 = 0;
     if (temp_t0->interaction_state == 1) {

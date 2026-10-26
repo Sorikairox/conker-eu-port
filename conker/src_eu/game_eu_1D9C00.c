@@ -382,7 +382,7 @@ u8 *rope_rider_create(u8 *arg0, f32 arg1, s32 arg2) {
     }
     *(u8 **)(temp_v0 + 0x1C) = arg0;
     temp_v0[0x20] = arg0[0x3B];
-    *(s32 *)(temp_v0 + 0x24) = (struct127 *)arg0 - D_800CC2D0;
+    *(s32 *)(temp_v0 + 0x24) = (struct127 *)arg0 - g_objects;
     *(f32 *)(temp_v0 + 0x28) = arg1;
     *(s32 *)(temp_v0 + 0x10) = 1;
     *(s32 *)(temp_v0 + 0x14) = 0;
@@ -439,7 +439,7 @@ s32 rope_create(s8 *arg0, s32 arg1) {
     u8 r, g, b;
     struct_eu_80090F10 *tex;
 
-    e = node_alloc((D_800BE9F0 == 0x2C) ? 0x4E : 0x2F, 0, arg1 + 0x58, 1, 0xFF, 1);
+    e = node_alloc((g_level_id == 0x2C) ? 0x4E : 0x2F, 0, arg1 + 0x58, 1, 0xFF, 1);
     if (e == NULL) {
         return 0;
     }
@@ -466,14 +466,14 @@ s32 rope_create(s8 *arg0, s32 arg1) {
     *(f32 *) (e + 0x3C) = (f32) (top - bottom) / 19.0f;
     *(Vtx **) (e + 0x48) = allocate_memory(0xA00, 1, 2, 0);
 
-    if (D_800BE9F0 == 0xB) {
+    if (g_level_id == 0xB) {
         *(u16 *) (e + 0x40) = 0x37;
         shift = 4;
     } else {
         *(u16 *) (e + 0x40) = 0x36;
         shift = 5;
     }
-    if (D_800BE9F0 == 0x39) {
+    if (g_level_id == 0x39) {
         r = 0x58;
         g = 0x4B;
         b = 0x2C;
@@ -635,7 +635,7 @@ void rope_update(u8 *e) {
                 vel[k] += bend * 1.24;
             }
             cur[k] += vel[k];
-            if (D_800BE9F0 == 0x39 && cur[0] > 1150.0f) {
+            if (g_level_id == 0x39 && cur[0] > 1150.0f) {
                 cur[0] = 1150.0f;
             }
         }
@@ -973,7 +973,7 @@ struct_eu_node *rope_find_by_id(s32 arg0) {
 loop_1:
     var_v1 = 0;
 loop_2:
-    var_a0 = D_800DD280[var_v1][*(s32 *)((u8 *)&D_800A9650 + (var_v0 * 4))];
+    var_a0 = g_node_lists[var_v1][*(s32 *)((u8 *)&D_800A9650 + (var_v0 * 4))];
     temp_t4 = (var_v1 + 1) & 0xFF;
     if (var_a0 != NULL) {
 loop_3:

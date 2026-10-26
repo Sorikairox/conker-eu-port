@@ -1,6 +1,6 @@
 s/u8 kind = desc->kind \& 0x7F;/u8 kind = desc->kind;/
 s/u8 type = obj->unk239 \& 0x7F;/u8 type = obj->unk239;/
-s/if (type != 0 \&\& (count = D_8009AA60\[type\]) > 0) {/if (type != 0 \&\& (count = D_8009AA60[type]) > 1) {/
+s/if (type != 0 \&\& (count = g_hit_rule_counts\[type\]) > 0) {/if (type != 0 \&\& (count = g_hit_rule_counts[type]) > 1) {/
 s/for (n = 0; n < count; n++, rule++) {/for (n = 1; n < count; n++, rule++) {/
 s/            if (rule->action \& 0x80) {/            if (rule->action \& 0x40) {/
 s/                if (rule->kind == kind) {/                if (rule->kind != kind) {/
@@ -16,7 +16,7 @@ s/(((s32)ang - obj->unk7A + 0x4000) >> 15)/(((s32)ang - self->unk7A + 0x4000) >>
 s/(((s32)ang - obj->unk7A + 0x4000) >> 15) \& 0xFFFF/(((s32)ang - obj->unk7A + 0x4000) >> 15) \& 1/
 s/(((s32)ang - obj->unk7A + 0x4000) >> 15)/(((s32)ang - obj->unk7A) >> 15)/
 s/                    if (rule->param != 0xFF) {/                    if (rule->param != 0xFE) {/
-s/tbl = (HitDesc \*)D_8009A6D8 + rule->param - idx;/tbl = (HitDesc *)D_8009A6D8 + rule->param;/
+s/tbl = (HitDesc \*)g_hit_desc_table + rule->param - idx;/tbl = (HitDesc *)g_hit_desc_table + rule->param;/
 s/if ((desc->damage \& mask) < obj->health) {/if ((desc->damage \& mask) <= obj->health) {/
 s/if ((desc->damage \& mask) < obj->health) {/if ((desc->damage) < obj->health) {/
 s/                    obj->health = 0;/                    ;/
@@ -37,7 +37,7 @@ s/obj->gravity = 2.0f;/obj->gravity = 1.0f;/
 s/if (obj->unk84.uh == 0x283) {/if (obj->unk84.uh != 0x283) {/
 s/obj->unk76 = self->unk7A;/obj->unk76 = obj->unk7A;/
 s/obj->xz_velocity = 25.0f;/obj->xz_velocity = 24.0f;/
-s/D_800D1580 = 0xFF0102E2;/D_800D1580 = 0xFF0102E3;/
+s/g_cur_obj_cmd = 0xFF0102E2;/g_cur_obj_cmd = 0xFF0102E3;/
 s/                        self->unkD0 = 0;/                        ;/
 s/self->unk232 = 0xD;/self->unk232 = 0xC;/
 s/                        self->unk218 = NULL;/                        ;/
@@ -45,12 +45,12 @@ s/if (8.0f < obj->unk28) {/if (8.0f <= obj->unk28) {/
 s/if (obj->unk28 == 0.0f) {/if (obj->unk28 != 0.0f) {/
 s/self->unk2EC = 100;/self->unk2EC = 101;/
 s/                        self->unkD0 = 0;$/                        self->unkD0 = 1;/
-s/D_80086A34\[handler\](self, obj, scratch);/D_80086A34[handler](obj, obj, scratch);/
+s/g_hit_handlers\[handler\](self, obj, scratch);/g_hit_handlers[handler](obj, obj, scratch);/
 s/u8 handler = desc->handler;/u8 handler = desc->handler + 1;/
 s/if (obj->unkFC != 0) {/if (obj->unkFC == 0) {/
 s/if (sound_word_resolve(self, \&effect, 1) != 0) {/if (sound_word_resolve(self, \&effect, 0) != 0) {/
 s/obj_sfx_play_vol(effect, obj, 0x5DC0);/obj_sfx_play_vol(effect, self, 0x5DC0);/
-s/D_800D1580 = desc->sound;/D_800D1580 = desc->sound + 1;/
+s/g_cur_obj_cmd = desc->sound;/g_cur_obj_cmd = desc->sound + 1;/
 s/                    if (desc->sound != 0) {/                    if (desc->sound == 0) {/
 s/hits |= 1 << ((slot - 1) \& 0x1F);/hits |= 1 << (slot \& 0x1F);/
 s/                    continue; \/\* failed/                    break; \/* failed/

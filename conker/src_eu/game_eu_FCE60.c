@@ -86,7 +86,7 @@ void ground_fx_spawn_random(struct127 *, f32, f32); /* P95: f32 parameter */
 
 /* was func_150CFA40 */
 void ground_fx_spawn_above_player(s32 arg0) {
-    ground_fx_spawn_random(D_800CC2D0, D_800CC2D0->y_position + 300.0f, -10000.0f); /* P95: float literal (asm passes the bits 0xC61C4000) */
+    ground_fx_spawn_random(g_objects, g_objects->y_position + 300.0f, -10000.0f); /* P95: float literal (asm passes the bits 0xC61C4000) */
 }
 
 extern s32 D_80088C30;
@@ -203,7 +203,7 @@ void screen_bar_spawn(s16 span, u8 flag, s32 arg2) {
 
 void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 s32 sprite2d_spawn(s32 *, s32, s32, s32, s32, s32, s32);
-extern s32 D_80090070;
+extern s32 g_impact_dust_tex_fns; /* was D_80090070 */
 
 /* was func_150CFD10 */
 s32 screen_bar_update_burst(u8 *arg0) {
@@ -303,7 +303,7 @@ s32 screen_bar_update_burst(u8 *arg0) {
             if (temp_v1 > 0) {
                 do {
                     sp.uCA = (random_int() % 101U) + 0x9B;
-                    sp.uBC = (*(s8 (**)())((u8 *)(&D_80090070) + 8))();
+                    sp.uBC = (*(s8 (**)())((u8 *)(&g_impact_dust_tex_fns) + 8))();
                     temp_s0 = random_int();
                     vec2_from_angle_byte((s16) (((u32) temp_s0 % 65U) - 0xA0), (random_float() * 2.0f) + 2.5f, &sp.u9C, &sp.uA0);
                     sp.uA4 = (random_float() * 0.333f) + 0.404f;

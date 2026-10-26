@@ -10,8 +10,8 @@
 \#^    obj->unk80 = 1;$#s/1/2/
 \#^    if (obj->unk25C & 0x40) {$#s/0x40/0x20/
 \#^        obj->unk25C &= ~0x40;$#s/~0x40/~0x41/
-\#^        obj->old_x_position = D_800CC2D0\[0\].x_position;$#s/x_position;/y_position;/
-\#^        obj->old_z_position = D_800CC2D0\[0\].z_position;$#s/old_z/old_y/
+\#^        obj->old_x_position = g_objects\[0\].x_position;$#s/x_position;/y_position;/
+\#^        obj->old_z_position = g_objects\[0\].z_position;$#s/old_z/old_y/
 \#^        obj_carried_update(obj);$#s/obj_carried_update(obj);//
 \#^        if ((D_800B8AC4\[obj->unk13D \* 0x32C\] == 0 || (D_800CC670 & 4)) && obj->unk21C >= 9) {$#s/0x32C/0x328/
 \#^        if ((D_800B8AC4\[obj->unk13D \* 0x32C\] == 0 || (D_800CC670 & 4)) && obj->unk21C >= 9) {$#s/& 4/\& 2/
@@ -33,8 +33,8 @@
 \#^    rec.pos\[2\] = (s32) (obj->z_position + c \* dist);$#s/+ c/- c/
 \#^    collision_select_area(0);$#s/0/1/
 \#^    rec.u04 = collision_level_nearest_height(rec.pos\[0\], rec.pos\[1\], rec.pos\[2\], NULL);$#s/rec.pos\[1\], rec.pos\[2\]/rec.pos[2], rec.pos[1]/
-\#^    speed = D_800CC2D0\[0\].xz_velocity \* 64.0f;$#s/64.0f/32.0f/
-\#^    a = D_800CC2D0\[0\].unk76 >> 8;$#s/>> 8/\& 0xFF/
+\#^    speed = g_objects\[0\].xz_velocity \* 64.0f;$#s/64.0f/32.0f/
+\#^    a = g_objects\[0\].unk76 >> 8;$#s/>> 8/\& 0xFF/
 \#^    rec.u18 = (s32) (math_sin_u8(a) \* -speed);$#s/-speed/speed/
 \#^    rec.u1A = -30;$#s/-30/-31/
 \#^    rec.u1F = 7;$#s/7/6/

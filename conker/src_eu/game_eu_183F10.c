@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A4EA8[];
+extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 void anim_model_fx_free_lights(u8 *arg0);
 
@@ -194,7 +194,7 @@ u8 *line_fx_draw(s32 arg0, u8 *arg1, s16 arg2) {
     if (temp_t3 & 4) {
         var_v1 |= 0x400;
     }
-    temp_v1_2 = (sp.u5B * 8) + ((u8 *)&D_800A4EA8);
+    temp_v1_2 = (sp.u5B * 8) + ((u8 *)&g_render_mode_pairs);
     temp_f12 = (*(f32 *)((u8 *)arg1 + 0x14));
     temp_f2 = (*(f32 *)((u8 *)arg1 + 0x10));
     temp_f14 = (*(f32 *)((u8 *)arg1 + 0x28));

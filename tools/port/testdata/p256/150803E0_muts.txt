@@ -11,8 +11,8 @@ s/dy = pos\[1\] - obj->y_position;/dy = pos[1] - obj->x_position;/ % zone5 faron
 s/dz = pos\[2\] - obj->z_position;/dz = pos[2] + obj->z_position;/ % zsign
 s/< 1000000.0f/<= 1000000.0f/ % edgeexact
 s/< 1000000.0f/< 999000.0f/ % justin
-s/look_point_in_joint_range(obj - D_800CC2D0, 0, 0,/look_point_in_joint_range(obj - D_800CC2D0, 0, 1,/ % zone5
-s/look_point_in_joint_range(obj - D_800CC2D0,/look_point_in_joint_range(obj - D_800CC2D0 + 1,/ % zone5
+s/look_point_in_joint_range(obj - g_objects, 0, 0,/look_point_in_joint_range(obj - g_objects, 0, 1,/ % zone5
+s/look_point_in_joint_range(obj - g_objects,/look_point_in_joint_range(obj - g_objects + 1,/ % zone5
 s/pos\[1\], pos\[2\], out, 90.0f/pos[2], pos[1], out, 90.0f/ % zone5
 s/out, 90.0f, 0, 0)/out, 9.0f, 0, 0)/ % zone5
 s/out, 90.0f, 0, 0) != 0/out, 90.0f, 0, 0) == 0/ % reject rejectall

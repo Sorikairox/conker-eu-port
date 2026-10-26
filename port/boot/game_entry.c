@@ -14,12 +14,12 @@ void port_glog(const char *fmt, ...);
 const char *port_gstr(const char *gamestr);
 
 /* data (EU addresses; all live in the n64_rdram mirror) */
-extern s32 D_800D3048, D_800BEE24, D_800BEE20, D_800BE9F4, D_800BEE08;
+extern s32 D_800D3048, D_800BEE24, D_800BEE20, g_level_load_id, D_800BEE08; /* was D_800BE9F4 */
 extern OSMesgQueue D_800BEE30;
 extern OSMesg D_800BEE48[16];
 extern s16 D_800BEE88[];
 extern u8 D_800BEA37, D_800BEECB, D_800BEA35, D_800BEECA, D_800E0B94;
-extern s16 D_800BEEC8;
+extern s16 g_gfx_tasks_pending; /* was D_800BEEC8 */
 
 /* callees: prototypes must match the wasm signature of the definition (C body or stub) */
 void game_bss_clear(void);
@@ -68,7 +68,7 @@ void game_thread_main(void) {
     game_init_message_queues();
     level_build_flag_bitmask();
     game_clear_e9d00_flag();
-    D_800BEEC8 = 0;
+    g_gfx_tasks_pending = 0;
     controller_init_si_queue();
     controller_init_all();
     settings_reset_defaults();
@@ -99,7 +99,7 @@ void game_thread_main(void) {
                 level_lights_clear();
                 if (D_800E0B94 == 2) random_seed(0x81280783);
                 /* lh 0x2(...): the low halves of three s32 globals (mixed-width access) */
-                level_start_game(((s16 *)&D_800BEE24)[1], ((s16 *)&D_800BEE20)[1], ((s16 *)&D_800BE9F4)[1]);
+                level_start_game(((s16 *)&D_800BEE24)[1], ((s16 *)&D_800BEE20)[1], ((s16 *)&g_level_load_id)[1]);
                 /* fallthrough */
             case 0x15007970:
                 level_load();

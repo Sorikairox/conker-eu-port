@@ -203,7 +203,7 @@ void camera_process_events(struct108 *arg0) {
                 ((f32 *)(p + 0x304))[i] = ((f32 *)(p + 0x2F8))[i];
             }
             triggers_update(D_800BE9E4);
-            trigger_zones_update_object((struct127 *)((u8 *)D_800CC2D0 + p[0x23D] * 0x32C));
+            trigger_zones_update_object((struct127 *)((u8 *)g_objects + p[0x23D] * 0x32C));
             camera_apply_request(arg0);
             camera_lean_from_heading(arg0, NULL, NULL);
             camera_dispatch_mode(arg0);
@@ -307,7 +307,7 @@ void camera_process_events(struct108 *arg0) {
             if (g_camera_timers[0] != 0) {
                 camera_update_dir_vector(0);
             }
-            if (D_800BEAC0 == 0) {
+            if (g_game_paused == 0) {
                 collision_find_floor((s32)(p + 0x644), (s32)(p + 0x648), (s32)&probe, (s32)(p + 0x360), (s32)(p + 0x640), 0,
                               *(f32 *)(p + 0x2F8), *(f32 *)(p + 0x2FC), *(f32 *)(p + 0x300), *(f32 *)(p + 0x2FC), 0, 0,
                               -10000.0f, *(f32 *)(p + 0x2FC));

@@ -1,7 +1,7 @@
 #ifdef NON_MATCHING
 // P239 TEST VARIANT (void, one argument: the shipped s32 (u8 *, void *) is one word longer and its jal to the
 // adjacent bone_sparks_emit lands inside the candidate range, which difftest cannot stub).
-// bone_sparks_burst: effect-child handler (D_8008FFE0 [4] / D_8008FFE8 [2]): sets the spark counter (self +0x30) to
+// bone_sparks_burst: effect-child handler (g_attach_child_update_fns [4] / g_attach_child_end_fns [2]): sets the spark counter (self +0x30) to
 // base +0x3C + random f32 * spread +0x40 and emits them at once (bone_sparks_emit). The second argument is unused (table
 // signature s32 (node, pos)); returns 0 (the asm leaves bone_sparks_emit's v0; the dispatchers that reach it ignore it).
 void bone_sparks_burst(u8 *self) {

@@ -53,7 +53,7 @@ extern u8 D_8008FF20;     /* matrix index of object A */
 extern u8 D_8008FF24;     /* matrix index of object B */
 extern s32 D_80091318;
 extern s32 D_800D30BC;
-extern s32 D_800A4EA8[];
+extern s32 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 /* One bolt vertex: position, s, t, colour red. */
 #define BOLT_VTX(v, px, py, pz, s, t) \
@@ -111,7 +111,7 @@ s32 electric_bolt_draw(s32 gfx, u8 *obj, s16 player) {
         gfx = gfx_env_color_cached(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
         gfx = gfx_prim_color_cached(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
         gfx = gfx_set_combine_mode(gfx, 0x2E, &flag);
-        gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[5 * 2 + 1] | D_800A4EA8[5 * 2], &flag);
+        gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, g_render_mode_pairs[5 * 2 + 1] | g_render_mode_pairs[5 * 2], &flag);
         dir[0] = pb[0] - pa[0];
         dir[1] = pb[1] - pa[1];
         dir[2] = pb[2] - pa[2];

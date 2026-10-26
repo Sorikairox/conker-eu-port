@@ -45,7 +45,7 @@ struct14 *cont_read_frame(void) {
     for (i = 0; i < 4; i++) {
         D_800BEB38[i] = player[i].button;
     }
-    osRecvMesg(&D_800BE900, &D_800BEDB0, OS_MESG_BLOCK);
+    osRecvMesg(&g_si_mesg_queue, &D_800BEDB0, OS_MESG_BLOCK);
     osContGetReadData(pads);
     save_process_request();
     D_8002AE18 = 1;
@@ -61,7 +61,7 @@ struct14 *cont_read_frame(void) {
     }
 
     nplayers = 4;
-    if (D_800BE9F0 != 0x1D) {
+    if (g_level_id != 0x1D) {
         nplayers = D_80090130;
     }
     for (i = 0; i < 4; i++) {
@@ -101,7 +101,7 @@ struct14 *cont_read_frame(void) {
             player[i].stick_y = DEADZONE(player[i].stick_y);
         }
     }
-    return &D_800BE730;
+    return &g_cont_pad_ptrs;
 }
 #undef DEADZONE
 extern f32 D_80096D10;
@@ -159,7 +159,7 @@ void rumble_stop(u8 arg0) {
 extern s32 D_800BEB80;
 extern s32 D_800BED60;
 extern s32 D_800BED68;
-extern u8 D_800BEEE2;
+extern u8 g_unpause_settle_frames; /* was D_800BEEE2 */
 extern u8 D_800BEEE3;
 extern u8 D_eu_800E0E30;
 
@@ -183,7 +183,7 @@ void rumble_update(void) {
     do {
         if (D_800BE938 != 0) {
             temp_s0 = ((u8 *)&D_800BEB80 + (var_s1 * 0x68));
-            if (os_motor_init(&D_800BE900, temp_s0, var_s1) == 0) {
+            if (os_motor_init(&g_si_mesg_queue, temp_s0, var_s1) == 0) {
                 if (*var_s3 == 0) {
                     *var_s3 = 1;
                     D_800BED5C[var_s1] = 0;
@@ -204,18 +204,18 @@ void rumble_update(void) {
             temp_s7 = ((u8 *)&D_800BED60 + var_s1);
             if ((D_800BEEE3 != 0) || (D_eu_800E0E30 != 0)) {
                 temp_s0_2 = ((u8 *)&D_800BEB80 + (var_s1 * 0x68));
-                os_motor_init(&D_800BE900, temp_s0_2, var_s1);
+                os_motor_init(&g_si_mesg_queue, temp_s0_2, var_s1);
                 os_motor_stop(temp_s0_2);
                 ((u8 *)&D_800BED68)[var_s1] = 0;
                 *temp_s4 = 0;
             }
-            if ((D_800BEAC1 == 0) && (D_800BEAC0 == 0) && (D_800BEEE2 == 0) && (D_800BEEE3 == 0) && (D_eu_800E0E30 == 0)) {
+            if ((D_800BEAC1 == 0) && (g_game_paused == 0) && (g_unpause_settle_frames == 0) && (D_800BEEE3 == 0) && (D_eu_800E0E30 == 0)) {
                 temp_v0 = *temp_s4;
                 switch (temp_v0) {                  /* irregular */
                 case 0:
                     if (*temp_s7 == 1) {
                         temp_s0_3 = ((u8 *)&D_800BEB80 + (var_s1 * 0x68));
-                        os_motor_init(&D_800BE900, temp_s0_3, var_s1);
+                        os_motor_init(&g_si_mesg_queue, temp_s0_3, var_s1);
                         os_motor_stop(temp_s0_3);
                         ((u8 *)&D_800BED68)[var_s1] = 0;
                     }
@@ -276,7 +276,7 @@ void save_options_write(void);
 s32 eeprom_async_write_step(s32);
 s32 game_eeprom_probe(OSMesgQueue *);
 extern u8 D_800843F4;
-extern s32 D_800BE810;
+extern s32 g_save_field_widths; /* was D_800BE810 */
 
 /* was func_1501C55C */
 void save_process_request(void) {
@@ -284,15 +284,15 @@ void save_process_request(void) {
     u8 state;
 
     eeprom_async_write_step(0);
-    mode = (s8)D_80082BB4;
+    mode = (s8)g_save_request_kind;
     if (mode == 0) {
         return;
     }
     state = D_800843F4;
     if (state != 2) {
-        D_800843F4 = game_eeprom_probe(&D_800BE900);
+        D_800843F4 = game_eeprom_probe(&g_si_mesg_queue);
         state = D_800843F4;
-        mode = (s8)D_80082BB4;
+        mode = (s8)g_save_request_kind;
     }
     if (state != 2) {
         if (mode == 1) {
@@ -300,21 +300,21 @@ void save_process_request(void) {
         } else if (mode == 4) {
             save_config_reset();
         }
-        D_80082BB4 = 0;
+        g_save_request_kind = 0;
         return;
     }
     switch (mode) {
-        case 1: save_slot_load((s8)D_800BE3EC); break;
-        case 2: save_slot_write((s8)D_800BE3EC); break;
-        case 3: save_slot_erase((s8)D_800BE3EC); break;
+        case 1: save_slot_load((s8)g_save_request_slot); break;
+        case 2: save_slot_write((s8)g_save_request_slot); break;
+        case 3: save_slot_erase((s8)g_save_request_slot); break;
         case 4: save_config_load(); break;
         case 5: save_config_write(); break;
         case 6: save_options_load(); break;
         case 7: save_options_write(); break;
     }
-    D_80082BB4 = 0;
-    if (D_800BE810 != 0) {
-        heap_free(D_800BE810 - 8);
-        D_800BE810 = 0;
+    g_save_request_kind = 0;
+    if (g_save_field_widths != 0) {
+        heap_free(g_save_field_widths - 8);
+        g_save_field_widths = 0;
     }
 }

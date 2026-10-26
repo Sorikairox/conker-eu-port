@@ -16,7 +16,7 @@ void obj_surface_handler_dispatch(u8 *arg0, s32 arg1) {
     if ((arg0 != NULL) && (obj_surface_handler_class(arg0, &sp2C) != 0)) {
         switch (floor_flags_surface_type(*(s32 *)(arg0 + 0x184))) {
         case 5:
-            if (D_800BE9F0 == 0x14) {
+            if (g_level_id == 0x14) {
                 idx = 2;
             } else {
                 idx = 1;

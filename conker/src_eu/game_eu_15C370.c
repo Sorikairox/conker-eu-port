@@ -7,7 +7,7 @@ Gfx *render_set_color_image(Gfx *arg0);
 extern s16 D_80083336;
 
 /* camera_read_depth_row: display list that copies one z-buffer row into the camera's depth-row buffer. With
- * w = D_800BE620 (screen width): it loads row +0x8BA (u16) of the z-buffer D_800BEDE4 as a 16-bit texture
+ * w = D_800BE620 (screen width): it loads row +0x8BA (u16) of the z-buffer g_zbuffer as a 16-bit texture
  * (w texels, line (w * 2 + 7) / 8, dxt (0x7FF + n) / n with n = max(1, w * 2 / 8)), sets the colour image to
  * the camera's buffer +0x8BC (w wide), scissor w x 1, and draws a w x 1 copy-mode rectangle. Then it restores
  * the frame state (render_set_color_image, render_set_scissor with player D_80083336) and the other modes. free_camera_scan_depth
@@ -25,7 +25,7 @@ Gfx *camera_read_depth_row(Gfx *gdl, struct108 *cam) {
     gdl->words.w1 = 0;
     gdl++;
     gdl->words.w0 = 0xFD100000; /* texture image: 16-bit, z-buffer row */
-    gdl->words.w1 = D_800BEDE4 + (*(u16 *)(p + 0x8BA) * D_800BE620) * 2;
+    gdl->words.w1 = g_zbuffer + (*(u16 *)(p + 0x8BA) * D_800BE620) * 2;
     gdl++;
     gdl->words.w0 = 0xF5100000; /* tile 7 */
     gdl->words.w1 = 0x07000000;

@@ -77,13 +77,13 @@ int port_romsym_test(void) {
  * the port branch converted them in P20 (game_57FA0.c, game_eu_2F180.c). */
 
 /* P23: ?dlstat=N probe of the frame builder's state (logged with the gfx frame statistics). */
-extern unsigned char D_800BEA35, D_800BEAC0, D_800E0B94;
+extern unsigned char D_800BEA35, g_game_paused, D_800E0B94; /* was D_800BEAC0 */
 extern unsigned D_800BE9D0, D_800BE9D8[2], D_800BEDE8[2];
 extern unsigned char D_800BE9C0; /* u8 (P31: was short, read the wrong byte) */
 void port_cam_probe(unsigned task);
 void port_frame_probe(unsigned task) {
     port_glog("[probe] task %u: BEA35 %u BEAC0 %u E0B94 %u GDL %08X BE9D8 %08X %08X BEDE8 %08X %08X BE9C0 %d\n", task,
-              D_800BEA35, D_800BEAC0, D_800E0B94, D_800BE9D0, D_800BE9D8[0], D_800BE9D8[1],
+              D_800BEA35, g_game_paused, D_800E0B94, D_800BE9D0, D_800BE9D8[0], D_800BE9D8[1],
               D_800BEDE8[0], D_800BEDE8[1], (int)D_800BE9C0); /* vbe TU: plain accesses are game memory */
     port_cam_probe(task);
 }
@@ -101,7 +101,7 @@ extern int D_800BE628, D_80082FA0, D_800D2DB4, D_80041C30[3];
 extern unsigned D_800417B0[3];
 extern unsigned char D_800DE1BB, D_800DE1BC, D_800C35EA;
 extern struct PendingF2_ D_800D9F18[];
-extern int D_800BE9F0; extern unsigned D_800CC2D0[];
+extern int g_level_id; extern unsigned g_objects[]; /* was D_800BE9F0; was D_800CC2D0 */
 extern float D_800D9F40, D_800D9F3C, D_800C3A70, D_800C3A74, D_800C3A6C;
 void port_cam_probe(unsigned task) {
     int buf = D_800BE9C0 & 1;
@@ -110,7 +110,7 @@ void port_cam_probe(unsigned task) {
     port_glog("[cam] task %u: players %d VIEW %08X %08X CAM %08X CAMREC %08X proj w0,w2,w5,w13 %08X %08X %08X %08X "
               "view w0,w2 %08X %08X req0 %08X BEAC0 %u C35EA %u D2DB4 %d\n", task, D_80082FA0, D_800DC6D0[0], D_800DC6D0[1],
               D_800DBFF0, D_800BE628, proj ? proj[0] : 0, proj ? proj[2] : 0, proj ? proj[5] : 0, proj ? proj[5 + 8] : 0,
-              view ? view[0] : 0, view ? view[2] : 0, *(unsigned *)&D_800D9F18[0].x, D_800BEAC0, D_800C35EA, D_800D2DB4);
+              view ? view[0] : 0, view ? view[2] : 0, *(unsigned *)&D_800D9F18[0].x, g_game_paused, D_800C35EA, D_800D2DB4);
     port_glog("[chk] task %u: music players %08X %08X %08X beat C30 %d %d %d | FAD4 DE1BB %u DE1BC %u | E7FC DDD64 %08X\n",
               task, D_800417B0[0], D_800417B0[1], D_800417B0[2], D_80041C30[0], D_80041C30[1], D_80041C30[2],
               D_800DE1BB, D_800DE1BC, D_800DDD64);
@@ -133,18 +133,18 @@ void port_cam_probe(unsigned task) {
                       vw ? vw[0] : 0, vw ? vw[1] : 0, vw ? vw[2] : 0, vw ? vw[3] : 0, vw ? vw[8] : 0, vw ? vw[9] : 0,
                       vw ? vw[10] : 0, vw ? vw[11] : 0);
         }
-        port_glog("[camlvl] level D_800BE9F0 %d D_800CC2D0 %08X %08X\n", D_800BE9F0, D_800CC2D0[0], D_800CC2D0[1]);
+        port_glog("[camlvl] level D_800BE9F0 %d D_800CC2D0 %08X %08X\n", g_level_id, g_objects[0], g_objects[1]);
         { /* P37: camera target = the character record at player object 0 + 0x31C (setup_entry_spawn sets it for character
            * slots), the enabled-player mask D_800D2340, the character player_stat_get(0, 1), the slot count D_8008FD8C,
-           * the setup entry count D_800D2520 and the spawned flag of entry 0 (D_800D252C[0]). */
-            extern s16 D_800D2340; extern s8 D_8008FD8C; extern u8 D_800D2520; extern u8 *D_800D252C;
+           * the setup entry count D_800D2520 and the spawned flag of entry 0 (g_setup_entry_flags[0]). */
+            extern s16 D_800D2340; extern s8 D_8008FD8C; extern u8 D_800D2520; extern u8 *g_setup_entry_flags;
             extern u8 *D_800D20FC;
             s32 player_stat_get(s16, s32);
             u8 *e = D_800D20FC;
             port_glog("[camtgt] level %d: D_800CC2D0[0]+0x31C = %08X, mask D_800D2340 %04X, slots %d, char(0) %d, setup entries %d, "
-                      "entry0 type %02X placeholder %d spawned %d\n", D_800BE9F0, *(unsigned *)((u8 *)D_800CC2D0 + 0x31C),
+                      "entry0 type %02X placeholder %d spawned %d\n", g_level_id, *(unsigned *)((u8 *)g_objects + 0x31C),
                       (u16)D_800D2340, D_8008FD8C, player_stat_get(0, 1), D_800D2520, e ? e[4] : 0, e ? e[2] : 0,
-                      D_800D252C ? D_800D252C[0] : -1);
+                      g_setup_entry_flags ? g_setup_entry_flags[0] : -1);
         }
         port_glog("[camrec] screen D_800D9F40 %g D_800D9F3C %g C3A70 %g C3A74 %g C3A6C %g\n", D_800D9F40, D_800D9F3C,
                   D_800C3A70, D_800C3A74, D_800C3A6C);

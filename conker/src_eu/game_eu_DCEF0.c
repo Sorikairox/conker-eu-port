@@ -17,12 +17,12 @@ void world_pair_hit_player(s32 arg0, u8 arg1) {
     if (D_800CC3D4[0] == 0) {
         i = (struct131 *)world_record_find(arg0) - D_800DBEF4;
         if (D_800DC3C4[i] & 1) {
-            obj_send_hit(D_800CC2D0, 0x3F, 0x6E00, -1);
+            obj_send_hit(g_objects, 0x3F, 0x6E00, -1);
             return;
         }
         i = (struct131 *)world_record_find(arg1) - D_800DBEF4;
         if (D_800DC3C4[i] & 1) {
-            obj_send_hit(D_800CC2D0, 0x3F, 0xEE00, -1);
+            obj_send_hit(g_objects, 0x3F, 0xEE00, -1);
         }
     }
 }
@@ -413,15 +413,15 @@ void nodes_destroy_for_player(void) {
     struct_eu_node *node;
 
     node = D_800DD2C4;
-    D_800DD5C0++;
+    g_node_iter_depth++;
     while (node != NULL) {
-        D_800DD5C8[D_800DD5C0] = node->next;
-        if (D_800C3E78 == ((u8 *)node)[0x3F]) {
+        g_node_iter_next[g_node_iter_depth] = node->next;
+        if (g_cur_obj_index == ((u8 *)node)[0x3F]) {
             node_destroy((struct102 *)node);
         }
-        node = D_800DD5C8[D_800DD5C0];
+        node = g_node_iter_next[g_node_iter_depth];
     }
-    D_800DD5C0--;
+    g_node_iter_depth--;
 }
 
 s32 beam_effect_spawn(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
@@ -429,13 +429,13 @@ s32 beam_effect_spawn(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32
 void beam_effect_spawn_attached(s32 arg0, u8 arg1, s16 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9,
                    s16 argA, s16 argB, u16 argC, u8 argD);
 
-// player_joint_beam_spawn: event-mode helper (D_800D1580 modes 9 / 10). Uses joint matrix 3 (side 0) or 2 (side 1)
-// of the player's (D_800D154C) matrix block at +0x1D4 (64 bytes per matrix; nothing when it is NULL); transforms the
+// player_joint_beam_spawn: event-mode helper (g_cur_obj_cmd modes 9 / 10). Uses joint matrix 3 (side 0) or 2 (side 1)
+// of the player's (g_cur_obj) matrix block at +0x1D4 (64 bytes per matrix; nothing when it is NULL); transforms the
 // local points (0, 0, -20) and (0, 0, -150) to world space, spawns the line effect beam_effect_spawn between them
 // (40, 0, 2, 120, 60, 35) and attaches effect beam_effect_spawn_attached to that joint ((0, 0, -39) .. (0, 0, -150), 3, 255, 4).
 /* was func_150B0344 */
 void player_joint_beam_spawn(s32 side) {
-    u8 *mtx = (u8 *)D_800D154C->unk1D4;
+    u8 *mtx = (u8 *)g_cur_obj->unk1D4;
     f32 x0, y0, z0;
     f32 x1, y1, z1;
     f32 (*m)[4];
@@ -460,13 +460,13 @@ void player_joint_beam_spawn(s32 side) {
     mtxf_transform_point(m, x1, y1, z1, &x1, &y1, &z1);
     beam_effect_spawn(0, x0, y0, z0, x1, y1, z1, 40.0f, 0.0f, 2.0f, 120.0f, 0x3C, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                   0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-    beam_effect_spawn_attached((s32)D_800D154C, D_800D154C->unique_id, (s16)joint, -1, 0.0f, 0.0f, -39.0f, 0.0f, 0.0f, -150.0f, 3, 0xFF,
+    beam_effect_spawn_attached((s32)g_cur_obj, g_cur_obj->unique_id, (s16)joint, -1, 0.0f, 0.0f, -39.0f, 0.0f, 0.0f, -150.0f, 3, 0xFF,
                   4, 0);
 }
 
 /* was func_150B051C */
 void world_pair_hit_player_level(s32 arg0) {
-    if (D_800BE9F0 == 6) {
+    if (g_level_id == 6) {
         rain_update(0);
         world_pair_hit_player(0xE2, 0xE1);
     } else {

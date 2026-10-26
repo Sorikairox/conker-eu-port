@@ -8,11 +8,11 @@
 // hoisted declarations of the NON_MATCHING bodies
 typedef struct RomRecCacheEntry {
     /* 0x00 */ u32 key;      /* ROM address | 0x80000000 */
-    /* 0x04 */ s32 stamp;    /* D_800C4180 at the last use */
+    /* 0x04 */ s32 stamp;    /* g_rom_rec_cache_clock at the last use */
     /* 0x08 */ s32 word0;
     /* 0x0C */ s32 word1;
 } RomRecCacheEntry;
-extern RomRecCacheEntry D_800C4188[16];
+extern RomRecCacheEntry g_rom_rec_cache[16]; /* was D_800C4188 */
 
 /* was func_1502AAF0 */
 void asset_system_stub_a(void) {
@@ -30,13 +30,13 @@ void asset_rec_cache_insert(s32 arg0, s32 *arg1, s32 arg2, u32 arg3) {
     u32 i;
 
     if (arg0 != 0) {
-        bcopy(&D_800C4188[arg0], &D_800C4188[0], 0x100 - arg0 * 16);
+        bcopy(&g_rom_rec_cache[arg0], &g_rom_rec_cache[0], 0x100 - arg0 * 16);
     }
     for (i = 16 - arg0; i < 16; i++) {
-        D_800C4188[i].word0 = arg1[0];
-        D_800C4188[i].word1 = arg1[1];
-        D_800C4188[i].key = arg3;
-        D_800C4188[i].stamp = arg2;
+        g_rom_rec_cache[i].word0 = arg1[0];
+        g_rom_rec_cache[i].word1 = arg1[1];
+        g_rom_rec_cache[i].key = arg3;
+        g_rom_rec_cache[i].stamp = arg2;
         arg1 += 2;
         arg3 += 8;
     }
@@ -44,8 +44,8 @@ void asset_rec_cache_insert(s32 arg0, s32 *arg1, s32 arg2, u32 arg3) {
 /* P7: difftest EQUIV (128 trials, also with DIFFTEST_OUTPARAMS=1); only the cache-miss path ran (no random key hit) */
 /* reads the 8-byte ROM record at arg0 + arg1 * 8 through a 16-entry most-recently-used cache.
  * Returns the record's first word and stores its second in *arg2. */
-/* RomRecCacheEntry / D_800C4188: hoisted above (P13) */
-extern s32 D_800C4180;   /* use counter */
+/* RomRecCacheEntry / g_rom_rec_cache: hoisted above (P13) */
+extern s32 g_rom_rec_cache_clock;   /* use counter; was D_800C4180 */
 void asset_rec_cache_insert(s32 arg0, s32 *arg1, s32 arg2, u32 arg3);
 
 /* was func_1502AC88 */
@@ -59,25 +59,25 @@ s32 asset_rec_read_cached(u8 *arg0, s32 arg1, s32 *arg2) {
     s32 j;
 
     for (i = 0; i < 16; i++) {
-        if (D_800C4188[i].key == key) {
+        if (g_rom_rec_cache[i].key == key) {
             /* move the hit to the end: most recent */
-            hit = D_800C4188[i];
+            hit = g_rom_rec_cache[i];
             for (j = i; j < 15; j++) {
-                D_800C4188[j] = D_800C4188[j + 1];
+                g_rom_rec_cache[j] = g_rom_rec_cache[j + 1];
             }
-            D_800C4188[15] = hit;
-            D_800C4188[15].stamp = D_800C4180;
-            *arg2 = D_800C4188[15].word1;
-            return D_800C4188[15].word0;
+            g_rom_rec_cache[15] = hit;
+            g_rom_rec_cache[15].stamp = g_rom_rec_cache_clock;
+            *arg2 = g_rom_rec_cache[15].word1;
+            return g_rom_rec_cache[15].word0;
         }
     }
-    D_800C4180++;
+    g_rom_rec_cache_clock++;
     buf = (u8 *)(((u32)raw + 15) & ~15);
     rom_dma_read(key & 0x7FFFFFF0, buf, ((key & 0xE) + 0x1F) & ~0xF, 1);
     rec = (s32 *)(buf + (key & 0xF));
     i = rec[0];
     *arg2 = rec[1];
-    asset_rec_cache_insert(2, rec, D_800C4180, key);   /* add it to the cache */
+    asset_rec_cache_insert(2, rec, g_rom_rec_cache_clock, key);   /* add it to the cache */
     return i;
 }
 /*

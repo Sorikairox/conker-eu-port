@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A4EA8[];
+extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 
 void dl_fx_free_lights(u8 *arg0);
 
@@ -108,7 +108,7 @@ block_3:
     temp_s1_2 = gfx_geometry_mode_cached(arg0, (*(s32 *)((u8 *)arg1 + 0x1C)), (*(s32 *)((u8 *)arg1 + 0x20)));
     fx_calc_color_mode_a(&sp.u6A, &sp.u68, &sp.u66, &sp.u64, (s32) (*(u8 *)((u8 *)arg1 + 0x3C)), (s32) (*(u8 *)((u8 *)arg1 + 0x3D)), (s32) (*(u8 *)((u8 *)arg1 + 0x3E)), (s32) (*(u8 *)((u8 *)arg1 + 0x3F)), (s32) (*(u8 *)((u8 *)arg1 + 0x38)), (s32) (*(u8 *)((u8 *)arg1 + 0x39)), (s32) (*(u8 *)((u8 *)arg1 + 0x3A)), (s32) (*(u8 *)((u8 *)arg1 + 0x3B)), 0xFF, (s32) (*(s8 *)((u8 *)arg1 + 0x34)));
     fx_calc_color_mode_b(&sp.u62, &sp.u60, &sp.u5E, &sp.u5C, (s32) (*(u8 *)((u8 *)arg1 + 0x3C)), (s32) (*(u8 *)((u8 *)arg1 + 0x3D)), (s32) (*(u8 *)((u8 *)arg1 + 0x3E)), (s32) (*(u8 *)((u8 *)arg1 + 0x3F)), (s32) (*(u8 *)((u8 *)arg1 + 0x38)), (s32) (*(u8 *)((u8 *)arg1 + 0x39)), (s32) (*(u8 *)((u8 *)arg1 + 0x3A)), (s32) (*(u8 *)((u8 *)arg1 + 0x3B)), 0xFF, (s32) (*(s8 *)((u8 *)arg1 + 0x35)));
-    temp_v1 = ((*(s32 *)((u8 *)arg1 + 0x24)) * 8) + ((u8 *)&D_800A4EA8);
+    temp_v1 = ((*(s32 *)((u8 *)arg1 + 0x24)) * 8) + ((u8 *)&g_render_mode_pairs);
     temp_v1_2 = (*(u8 *)((u8 *)arg1 + 0x10));
     var_s1 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_prim_color_cached(gfx_env_color_cached(temp_s1_2, sp.u62, sp.u60, sp.u5E, (s32) sp.u5C, &sp.u5B), 0, 0, sp.u6A, (s32) sp.u68, (s32) sp.u66, (s32) sp.u64, &sp.u5B), (*(u8 *)((u8 *)arg1 + 0x2B)), &sp.u5B), (*(s32 *)((u8 *)arg1 + 0x18)) | 0x80000 | 0x2C00 | (*(s32 *)((u8 *)arg1 + 0x2C)) | (*(s32 *)((u8 *)arg1 + 0x30)), (*(s32 *)((u8 *)temp_v1 + 4)) | (*(s32 *)((u8 *)temp_v1 + 0)), &sp.u5B);
     if (temp_v1_2 & 2) {

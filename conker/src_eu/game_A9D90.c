@@ -39,9 +39,9 @@ void player_update_life_states(void) {
     struct127 *var_s1;
     u8 var_v0;
 
-    if (D_800BEAC0 == 0) {
+    if (g_game_paused == 0) {
         var_v1 = D_8008FD8C;
-        var_s1 = D_800CC2D0;
+        var_s1 = g_objects;
         var_s2 = 0;
         if (var_v1 > 0) {
             do {
@@ -133,7 +133,7 @@ block_54:
 }
 /* was func_1507CD0C */
 void player_enter_dead_state(struct127 *arg0) {
-    s32 temp_lo = ((s32)arg0 - (s32)&D_800CC2D0) / (s32)sizeof(struct127);
+    s32 temp_lo = ((s32)arg0 - (s32)&g_objects) / (s32)sizeof(struct127);
 
     arg0->unk31C->unk120 = 3;
 
@@ -149,7 +149,7 @@ extern u16 D_8009015C;
 extern s16 D_800E0F00[];
 extern u8 D_800D1CC9;
 
-// player_hit_reaction: puts player object `obj` (D_800CC2D0 index below D_8008FD8C) into hit / death reaction
+// player_hit_reaction: puts player object `obj` (g_objects index below D_8008FD8C) into hit / death reaction
 // `kind` (0..16; stored in its controller +0x121) unless it is already reacting (only kind 9 can override a
 // different running reaction). In multiplayer it counts the hit (D_800E0F00[idx]) and may play sound 10; it
 // sends message 3, picks the reaction animation (D_800D1CC9 = camera / blend mode), resets the object's motion
@@ -175,7 +175,7 @@ s32 player_hit_reaction(struct127 *obj, s32 kind) {
     if (ctl == NULL) {
         return 0;
     }
-    idx = ((s32)obj - (s32)D_800CC2D0) / 0x32C;
+    idx = ((s32)obj - (s32)g_objects) / 0x32C;
     if (idx >= D_8008FD8C) {
         return 0;
     }
@@ -291,10 +291,10 @@ s32 player_hit_reaction(struct127 *obj, s32 kind) {
     *(f32 *)((u8 *)obj + 0x3C) = 0.0f;
     *(s16 *)((u8 *)obj->unk31C + 0x46) = 0;
     if (obj->unk13C != 0) {
-        saved = D_800D154C;
-        D_800D154C = obj;
+        saved = g_cur_obj;
+        g_cur_obj = obj;
         obj_drop_carried(obj);
-        D_800D154C = saved;
+        g_cur_obj = saved;
     }
 
     if (next == 0 || next == 3) {
@@ -308,7 +308,7 @@ s32 player_hit_reaction(struct127 *obj, s32 kind) {
         player_lose_life(idx);
     }
 
-    if (idx == 0 && D_800BE9F0 == 4) {
+    if (idx == 0 && g_level_id == 4) {
         r = random_int();
         f = random_float();
         screen_lightning_curve_spawn(r % 3 + 4, f * 0.1f + 0.3f, 0xFF, 0);
@@ -328,13 +328,13 @@ void obj_place_at_start(void *arg0, s32 arg1, s32 arg2);
 void hud_lens_reset(s32);
 void rail_record_resync(u8 *arg0);
 extern u8 D_800BE616;
-extern s32 D_800BE9F0;
+extern s32 g_level_id; /* was D_800BE9F0 */
 extern s8 D_8008726C;
 extern u8 D_800D18A8;
 extern s16 D_800BEE12;
-extern struct127 D_800CC2D0[];
+extern struct127 g_objects[]; /* was D_800CC2D0 */
 
-// mp_player_respawn: multiplayer respawn of a player object (D_800CC2D0[idx], 0x32C bytes) after a lost life.
+// mp_player_respawn: multiplayer respawn of a player object (g_objects[idx], 0x32C bytes) after a lost life.
 // Keeps the character record's (+0x31C) +0x1AA / +0x1AF / +0x1B0 and the object's +0x328 across the reset; the team /
 // colour byte is ctl +0x11B in multiplayer (D_800BE616), else -1. In level 0x2B a player whose stat 1 is 17..32 gets a
 // random 17..32 back (player_stat_modify(idx, 0, n)) and its D_800D20FC entry +4 becomes 0x9C (n < 29) or 0x9D. Then the
@@ -360,8 +360,8 @@ void mp_player_respawn(struct127 *rec) {
     } else {
         team = -1;
     }
-    if (D_800BE9F0 == 0x2B) {
-        idx = (s32) (obj - (u8 *) D_800CC2D0) / 0x32C;
+    if (g_level_id == 0x2B) {
+        idx = (s32) (obj - (u8 *) g_objects) / 0x32C;
         n = player_stat_get((s16) idx, 1);
         if (n >= 0x11 && n < 0x21) {
             n = (random_int() & 0xF) + 0x11;
@@ -373,7 +373,7 @@ void mp_player_respawn(struct127 *rec) {
             }
         }
     }
-    idx = (s32) (obj - (u8 *) D_800CC2D0) / 0x32C;
+    idx = (s32) (obj - (u8 *) g_objects) / 0x32C;
     obj_remove(rec, 0);
     D_800D18A8 = 1;
     setup_entry_spawn((u8 *) D_800D20FC + idx * 0x30, idx, 0, 0, 0);
@@ -405,7 +405,7 @@ void mp_player_respawn(struct127 *rec) {
     if (D_800BE616 != 0) {
         obj[0x125] = 0x96;
         (*(u8 **) (obj + 0x31C))[0x1B1] = 0x96;
-        if (D_800BE9F0 == 0x33) {
+        if (g_level_id == 0x33) {
             player_send_event(idx, 0x78, 0, 0, 0);
             rail_record_resync(obj);
         }
@@ -429,7 +429,7 @@ extern u8 D_800D2E43;
 extern u8 D_800D18A8;
 extern s8 D_80090134;
 extern s8 D_800BEA38;
-extern struct127 D_800CC2D0[];
+extern struct127 g_objects[]; /* was D_800CC2D0 */
 
 /* A player record (index idx) has lost a life. With lives left (player_stat_get(idx, 3)) the life counter (5) is
  * reset and the record respawns: in multiplayer (D_800BE616) via mp_player_respawn or a 10-frame timer, else a
@@ -445,7 +445,7 @@ void player_lose_life(s32 idx) {
     }
     if (player_stat_get(idx, 3) != 0) {
         player_stat_modify(idx, 5, D_8008726C);
-        rec = &D_800CC2D0[idx];
+        rec = &g_objects[idx];
         *(s16 *)((u8 *)rec + 0xB2) = 0;
         if (D_800BE616 != 0) {
             if (D_800E1050 == 0) {
@@ -459,7 +459,7 @@ void player_lose_life(s32 idx) {
         if (!(D_800D2E4C->unk19 & 4) && D_8008FDA8 >= 0) {
             game_request_transition(1, 0x22, 0, 0, 0);
         } else {
-            game_request_transition(2, (s8)D_800BE3DF, D_800BE800, 0, 0);
+            game_request_transition(2, (s8)g_save_resume_level, D_800BE800, 0, 0);
         }
         return;
     }
@@ -473,7 +473,7 @@ void player_lose_life(s32 idx) {
     } else {
         D_800D18A0 |= 1 << idx;
     }
-    ctl = (u8 *)D_800CC2D0[idx].unk31C;
+    ctl = (u8 *)g_objects[idx].unk31C;
     if (ctl[0x84] == 0) {
         D_80090134--;
     }
@@ -491,12 +491,12 @@ void player_lose_life(s32 idx) {
 //     // sp24 = (?32) arg0;
 //     if (player_stat_get(arg0, 3) != 0) {
 //         player_stat_modify(arg0, 5, D_8008726C); //temp_ret =
-//         temp_a0 = &D_800CC2D0[arg0];
+//         temp_a0 = &g_objects[arg0];
 //         temp_a0->unkB2 = (u16)0;
 //         if (D_800BE616 == 0) {
 //             D_800D18A8 = (u8)1;
 //             if (((D_800D2E4C->unk19 & 4) != 0) || (D_8008FDA8 < 0)) {
-//                 func_1501C730(2, D_800BE3DF, D_800BE3E0, 0, 0);
+//                 func_1501C730(2, g_save_resume_level, D_800BE3E0, 0, 0);
 //                 return;
 //             }
 //             func_1501C730(1, 0x22, 0, 0, 0);
@@ -519,7 +519,7 @@ void player_lose_life(s32 idx) {
 //     } else {
 //         D_800D18A0 = (u16) (D_800D18A0 | (1 << (s32) arg0));
 //     }
-//     // temp_a0 = &D_800CC2D0[arg0];
+//     // temp_a0 = &g_objects[arg0];
 //     if (temp_a0->unk31C->unk84 == 0) {
 //         D_8008FD94 -= 1; //(s8) (D_8008FD94 - 1);
 //     }
@@ -529,7 +529,7 @@ void player_lose_life(s32 idx) {
 // }
 
 extern u8 D_800BE616;
-extern s32 D_800BE9F0;
+extern s32 g_level_id; /* was D_800BE9F0 */
 extern u8 D_800C35EA;
 void obj_impact_burst_spawn(u8 *arg0, u8 arg1, s32 arg2);
 void object_land_puff(u8 *obj);
@@ -589,7 +589,7 @@ s32 object_destroy_effects(struct127 *arg0) {
             }
             break;
         case 0x25:
-            if (*(s32 *) (obj + 0x2EC) != 0 || D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
+            if (*(s32 *) (obj + 0x2EC) != 0 || g_level_id == 6 || g_level_id == 0x3B) {
                 object_shatter_effects(obj, 0xFF, 1);
             }
             break;
@@ -602,7 +602,7 @@ s32 object_destroy_effects(struct127 *arg0) {
                 player_hit_reaction(arg0, 6);
                 rec = world_record_find(obj[0x127] + 0xB);
             } else {
-                if (D_800BE9F0 == 0x23) {
+                if (g_level_id == 0x23) {
                     rec = world_record_find(1);
                 }
                 item = player_find_owned_object(arg0, NULL, 0);
@@ -657,7 +657,7 @@ s32 object_destroy_effects(struct127 *arg0) {
             obj_impact_burst_spawn(obj, 0xFF, 1);
             break;
         case 0x90:
-            if (D_800BE616 != 0 && D_800BE9F0 == 0x33) {
+            if (D_800BE616 != 0 && g_level_id == 0x33) {
                 player_hit_reaction(arg0, 8);
                 return 2;
             }
@@ -871,13 +871,13 @@ void level_restart_at_start_point(s32 arg0, s32 arg1) {
             sp.u3C = 3;
 block_5:
             cutscene_set_focus_point(sp.u5C, sp.u5E, (*(s32 *)((u8 *)&sp + 0x28)), ((f32) (sp.u4E - 0x40) * 1.40625f) + 180.0f);
-            temp_t8 = D_800BE9F0;
-            D_800BE9F0 = 0x25;
+            temp_t8 = g_level_id;
+            g_level_id = 0x25;
             D_800C3671 = 1;
             sp.u64 = temp_t8;
             cutscene_scene_load(0x25, sp.u3C, 0, 0, 0);
             D_800C3670 = 1;
-            D_800BE9F0 = sp.u64;
+            g_level_id = sp.u64;
         }
     }
 }
@@ -894,10 +894,10 @@ s32 checkpoint_get_restart_index(s32 arg0) {
     if (D_800D18A8 == 0) {
         return 0;
     }
-    if ((s32)D_800BE9F4 == 0x22 || (s32)D_800BE9F4 == 0x18) {
+    if ((s32)g_level_load_id == 0x22 || (s32)g_level_load_id == 0x18) {
         return 0;
     }
-    D_800BE9F4 = (u16 *)(s32)(s8)D_800BE3DF;
+    g_level_load_id = (u16 *)(s32)(s8)g_save_resume_level;
     level_start_point_get(0, D_800BE800, 1, sp54, sp48, &sp43, &sp42, &sp44, &sp3C, 1, &sp5C);
     return sp5C + 1;
 }

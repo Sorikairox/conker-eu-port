@@ -1,6 +1,6 @@
 s/if (e->timed \& 1) {/if (e->timed \& 2) {/
 s/if (e->onEnd == -1) {/if (e->onEnd == 0) {/
-s/if (vis \& (1 << D_80082FA4)) {/if (vis \& (2 << D_80082FA4)) {/
+s/if (vis \& (1 << g_cur_view_player)) {/if (vis \& (2 << g_cur_view_player)) {/
 s/(vis \& 0xF) != 0xF/(vis \& 0x7) != 0x7/
 s/                cfg = row\[n\];/                cfg = row[0];/
 s/                            cfg = row\[i\];/                            cfg = row[i + 1];/

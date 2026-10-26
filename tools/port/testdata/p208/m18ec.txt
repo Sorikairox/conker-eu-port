@@ -42,7 +42,7 @@ s/                case 0x21: icon = 12; break;/                case 0x21: icon =
 s/                case 0x25: icon = 14; break;/                case 0x25: icon = 11; break;/
 s/                case 0x40: icon = 4; toff = -3; break;/                case 0x40: icon = 4; toff = 3; break;/
 s/                    if (obj->health != 0) {/                    if (obj->health == 0) {/
-s/                    if (D_800BE9F0 == 0x1A) {/                    if (D_800BE9F0 == 0x1B) {/
+s/                    if (g_level_id == 0x1A) {/                    if (g_level_id == 0x1B) {/
 s/                        toff = 4;/                        toff = 5;/
 s/                if (obj->unk13C) {/                if (0) {/
 s/                    ix = (right - table\[25\]) \* 4;/                    ix = (right - table[24]) * 4;/
@@ -90,7 +90,7 @@ s/        tex = texture_cache_lookup(0xD15, NULL, 3, 0);/        tex = texture_c
 s/            if (k != 0x26 && k != 0x3A) {/            if (k != 0x26) {/
 s/            ix = ((s32)view->unk30 - 15) \* 4;/            ix = ((s32)view->unk30 - 14) * 4;/
 s/            iy = ((s32)view->unk24 + 5) \* 4;/            iy = ((s32)view->unk24 + 4) * 4;/
-s/            if (D_800BE9F0 == 0x1A || D_800BE9F0 == 0x3F) {/            if (D_800BE9F0 == 0x1A) {/
+s/            if (g_level_id == 0x1A || g_level_id == 0x3F) {/            if (g_level_id == 0x1A) {/
 s/            } else if (obj->id == 0x75 || obj->id == 0xB1) {/            } else if (obj->id == 0x75) {/
 s/                wi = 5, hi = 20, s = 0xC0, t = 0x100;/                wi = 5, hi = 21, s = 0xC0, t = 0x100;/
 s/            } else if (obj->id == 0x3B) {/            } else if (obj->id == 0x3C) {/

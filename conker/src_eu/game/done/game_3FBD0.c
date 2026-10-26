@@ -6,7 +6,7 @@
 
 /* was func_15012720 */
 u8 level_get_proj_mode(void) {
-    switch(D_800BE9F0)
+    switch(g_level_id)
     {
         case 0:
         case 44:

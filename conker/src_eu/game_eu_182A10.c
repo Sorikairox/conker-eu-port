@@ -63,7 +63,7 @@ typedef struct {
     s32 otherMode;      /* 0x34 */
     s32 geomSet;        /* 0x38 */
     s32 geomClear;      /* 0x3C */
-    s32 renderMode;     /* 0x40 D_800A4EA8 pair index */
+    s32 renderMode;     /* 0x40 g_render_mode_pairs pair index */
     u8  pad44[3];
     u8  combine;        /* 0x47 */
     s32 otherMode2;     /* 0x48 */
@@ -92,7 +92,7 @@ typedef struct {
 #define SPRITE_VIEW_F(v, off) (*(f32 *) ((v) + (off)))
 
 extern struct_eu_80090F10 D_80090F10[];
-extern u8 D_800A4EA8[];
+extern u8 g_render_mode_pairs[]; /* was D_800A4EA8 */
 extern s32 D_800D30BC;
 s32 hud_lens_is_off(s32);
 s32 screen_fade_alpha(s32);
@@ -121,7 +121,7 @@ Gfx *sprite2d_draw(Gfx *gdl, Sprite2D *spr, s16 view) {
     s32 xh, yh, xl, yl;
 
     ok = 1;
-    rec = (u8 *) D_800BE628 + D_80082FA4 * 0x180;
+    rec = (u8 *) D_800BE628 + g_cur_view_player * 0x180;
     if ((spr->flags & SPRITE2D_ONE_PLAYER) && spr->player != view) {
         return gdl;
     }
@@ -145,7 +145,7 @@ Gfx *sprite2d_draw(Gfx *gdl, Sprite2D *spr, s16 view) {
     gdl = gfx_env_color_cached(gdl, primR, primG, primB, primA, &ok);
     gdl = gfx_prim_color_cached(gdl, 0, 0, envR, envG, envB, envA, &ok);
     gdl = gfx_set_combine_mode(gdl, spr->combine, &ok);
-    mode = (u32 *) (D_800A4EA8 + spr->renderMode * 8);
+    mode = (u32 *) (g_render_mode_pairs + spr->renderMode * 8);
     gdl = gfx_other_mode_cached(gdl, spr->otherMode | D_800D30BC | 0x2C00 | spr->otherMode2 | spr->otherMode3,
                         mode[1] | mode[0], &ok);
 
@@ -237,7 +237,7 @@ void sprite2d_handle_message(u8 *arg0, s32 arg1, u8 arg2) {
 
 // effect_overlap_find: whether a live effect of one of the `count` kinds in the s32 list `kinds` already overlaps the
 // box around `spec` (centre spec +0 / +4, half sizes ext[0] / ext[1]): walks the effect lists 0x5D and 0x57 of both
-// D_800DD280 banks; an effect (kind +0x2A, centre +0x10 / +0x14, half sizes +0x18 / +0x1C) overlaps when its centre
+// g_node_lists banks; an effect (kind +0x2A, centre +0x10 / +0x14, half sizes +0x18 / +0x1C) overlaps when its centre
 // lies within the summed half sizes on both axes (edges included). Returns 1 on the first overlap, else 0.
 /* was func_15155B1C */
 s32 sprite2d_find_overlap(u8 *spec, f32 *ext, s32 kinds, s32 count) {
@@ -254,7 +254,7 @@ s32 sprite2d_find_overlap(u8 *spec, f32 *ext, s32 kinds, s32 count) {
 
     for (bank = 0; bank < 2; bank++) {
         for (j = 0; j < 2; j++) {
-            node = (u8 *) D_800DD280[bank][j == 0 ? 0x5D : 0x57]; // the asm copies {0x5D, 0x57} from .rodata
+            node = (u8 *) g_node_lists[bank][j == 0 ? 0x5D : 0x57]; // the asm copies {0x5D, 0x57} from .rodata
             while (node != NULL) {
                 next = *(u8 **) (node + 8);
                 found = 0;

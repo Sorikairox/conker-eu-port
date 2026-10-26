@@ -14,14 +14,14 @@ typedef int32_t s32; typedef uint8_t u8; typedef uint16_t u16;
 int port_flag(const char *name);
 void port_log(const char *fmt, ...);
 extern unsigned port_frame_count;
-extern u8 D_800C35C4, D_800C35EA, D_800C40B8, D_800C3A08, D_800C3A92;
-extern u8 *D_800DD280[][104];
+extern u8 g_cutscene_pending, D_800C35EA, D_800C40B8, D_800C3A08, D_800C3A92; /* was D_800C35C4 */
+extern u8 *g_node_lists[][104]; /* was D_800DD280 */
 extern u8 D_800A6440[];
-extern s32 D_800BE9F0;
+extern s32 g_level_id; /* was D_800BE9F0 */
 static int on(void) { static int f = -1; if (f < 0) f = port_flag("p174ev"); return f; }
 
 static s32 asm_CBD8(s32 a0, s32 a1) {
-    unsigned c4 = vbe_ld8(&D_800C35C4), ea = vbe_ld8(&D_800C35EA), sc = vbe_ld8(&D_800C40B8), s2 = vbe_ld8(&D_800C3A08);
+    unsigned c4 = vbe_ld8(&g_cutscene_pending), ea = vbe_ld8(&D_800C35EA), sc = vbe_ld8(&D_800C40B8), s2 = vbe_ld8(&D_800C3A08);
     switch (a1) {
     case 1: if (c4) return 0; if (!ea) return 1; return (unsigned)a0 == sc ? 0 : 1;
     case 2: return ea == 1 && (unsigned)a0 == sc;
@@ -40,7 +40,7 @@ static s32 asm_DFCC19(void) {
     for (int g = 0; g < 2; g++)
         for (int i = 0; i < 3; i++) {
             unsigned li = *(unsigned *)(D_800A6440 + 4 * i);
-            u8 *n = D_800DD280[g][li];
+            u8 *n = g_node_lists[g][li];
             int cnt = 0;
             while (n && cnt < 32) {
                 unsigned st = vbe_ld8(n + 0x48);
@@ -97,7 +97,7 @@ s32 __wrap_event_native_query(s32 *args) {
         if (j < 64 && (kr[j] != r || kra[j] != ra) && nlog++ < 600) {
             port_log("[p174ev] frame %u ev %X q5 id %04X arg %d -> C %d asm %d%s (EA %u C4 %u scene 40B8 %u 3A08 %u 3A92 %u)\n",
                      port_frame_count, cur_ev, id & 0xFFFF, arg, r, ra, fixed ? " FIXED" : "", vbe_ld8(&D_800C35EA),
-                     vbe_ld8(&D_800C35C4), vbe_ld8(&D_800C40B8), vbe_ld8(&D_800C3A08), vbe_ld8(&D_800C3A92));
+                     vbe_ld8(&g_cutscene_pending), vbe_ld8(&D_800C40B8), vbe_ld8(&D_800C3A08), vbe_ld8(&D_800C3A92));
             kr[j] = r; kra[j] = ra;
         }
     }
@@ -135,7 +135,7 @@ s32 __wrap_event_native_action(s32 *args) {
  * pointers obj_check_visible dereferences (obj +0x144, D_800D2104[obj +0x13F] if D_800D2528[obj +0x13F], D_800D1C90[id]),
  * logged when outside the wasm memory (raw N64 addresses / garbage) - the trap at 10732 with ?p174fix (scene 3 of
  * level 0x18). Up to 40 lines. */
-extern u8 D_800CC2D0[];
+extern u8 g_objects[]; /* was D_800CC2D0 */
 extern s32 *D_800D2104;
 extern u8 *D_800D2528;
 extern u8 *D_800D1C90[];
@@ -147,12 +147,12 @@ void __wrap_objects_update_visibility(void) {
         static unsigned nlog, nfr;
         if (port_frame_count >= 10731 && nfr < 16) {
             char b[1600]; int k = 0;
-            for (int i = 0; i < 0x19; i++) { u8 *o = D_800CC2D0 + 0x32C * i; if (*(s32 *)o) k += snprintf(b + k, sizeof b - k, " %d:id%u/74=%x/13F=%u/on%u/p%08x", i, vbe_ld8(o + 4), vbe_ld8(o + 0x74), vbe_ld8(o + 0x13F), D_800D2528 ? vbe_ld8(D_800D2528 + vbe_ld8(o + 0x13F)) : 99, D_800D2104 ? (unsigned)D_800D2104[vbe_ld8(o + 0x13F)] : 0); }
+            for (int i = 0; i < 0x19; i++) { u8 *o = g_objects + 0x32C * i; if (*(s32 *)o) k += snprintf(b + k, sizeof b - k, " %d:id%u/74=%x/13F=%u/on%u/p%08x", i, vbe_ld8(o + 4), vbe_ld8(o + 0x74), vbe_ld8(o + 0x13F), D_800D2528 ? vbe_ld8(D_800D2528 + vbe_ld8(o + 0x13F)) : 99, D_800D2104 ? (unsigned)D_800D2104[vbe_ld8(o + 0x13F)] : 0); }
             k += snprintf(b + k, sizeof b - k, " | D2528 %08x D2104 %08x", (unsigned)(uintptr_t)D_800D2528, (unsigned)(uintptr_t)D_800D2104);
             nfr++; port_log("[p174ptr] frame %u D_80082FA0 %d objs%s\n", port_frame_count, D_80082FA0, b);
         }
         for (int i = 0; i < 0x19 && nlog < 40; i++) {
-            u8 *o = D_800CC2D0 + 0x32C * i;
+            u8 *o = g_objects + 0x32C * i;
             if (*(s32 *)o == 0) continue;
             unsigned id = vbe_ld8(o + 4), k = vbe_ld8(o + 0x13F), p144 = *(unsigned *)(o + 0x144);
             unsigned on2528 = D_800D2528 ? vbe_ld8(D_800D2528 + k) : 0xFFFF, p2104 = D_800D2104 ? (unsigned)D_800D2104[k] : 0;

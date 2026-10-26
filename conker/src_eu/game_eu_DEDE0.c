@@ -19,26 +19,26 @@ void obj_whirlpool_pull_update(struct127 *arg0) {
     arg0->unk178 = arg0->z_position;
     arg0->immune = 0x64;
     arg0->unk40 = (f32) (s16) (arg0->unk7A + 0x4000) * 0.005493164f;
-    if (obj_dist_xz(D_800CC2D0, arg0) < 1100.0f) {
-        temp_f0 = obj_dist_xz(arg0, D_800CC2D0);
+    if (obj_dist_xz(g_objects, arg0) < 1100.0f) {
+        temp_f0 = obj_dist_xz(arg0, g_objects);
         temp_f16 = temp_f0;
-        temp_f2 = arg0->y_position - D_800CC2D0->y_position;
+        temp_f2 = arg0->y_position - g_objects->y_position;
         if (temp_f2 < 0.0f) {
             temp_f2 = 1000.0f;
         } else {
             temp_f2 = 1050.0f - (temp_f2 * 0.7f);
         }
-        if ((temp_f0 < temp_f2) && (D_800CC2D0->in_water == 1)) {
+        if ((temp_f0 < temp_f2) && (g_objects->in_water == 1)) {
             
             temp_f0_2 = 1100.0f - temp_f16;
-            temp_v1 = math_atan2_u16(arg0->unk174 - D_800CC2D0->x_position, D_800CC2D0->z_position - arg0->unk178, 0);
+            temp_v1 = math_atan2_u16(arg0->unk174 - g_objects->x_position, g_objects->z_position - arg0->unk178, 0);
             if (temp_f0_2 > 850.0f) {
                 temp_f2 = (temp_f0_2 - 820.0f) * 0.09f;
-                *D_800CC2E8 = D_800CC2D0->y_position - *D_800D1550 * (0, temp_f2);
+                *g_obj0_y = g_objects->y_position - *g_obj_time_step * (0, temp_f2);
             }
             vec_from_yaw_pitch(temp_v1 - 0x3000, (temp_f0_2 * 0.045f) + 5.0f, 0.0f, &sp50, &sp4C, &sp48);
-            D_800CC2D0->unk164 = sp50;
-            D_800CC2D0->unk168 = sp4C;
+            g_objects->unk164 = sp50;
+            g_objects->unk168 = sp4C;
         }
     }
     obj_start_anim(arg0, 0U, 1.0f, 0.0f, 0.0f, 0.0f, 0);
@@ -119,14 +119,14 @@ void held_object_update(struct127 *obj) {
             }
         }
         if (obj->unk223 == 14) {
-            target = &D_800CC2D0[obj->unk222];
+            target = &g_objects[obj->unk222];
             dist = obj_dist_xz(target, obj);
             obj->gravity = 0.0f;
-            obj->y_velocity = (D_800CC2D0[obj->unk222].y_position + (s16) obj->unk224 - obj->y_position) /
+            obj->y_velocity = (g_objects[obj->unk222].y_position + (s16) obj->unk224 - obj->y_position) /
                               (dist / obj->xz_velocity);
         } else {
             if (obj->unk223 == 1) {
-                height = D_800CC2D0[0].y_position + 210.0f;
+                height = g_objects[0].y_position + 210.0f;
             }
             level = obj->unk224;
             if (level != 0) {
@@ -201,7 +201,7 @@ void obj_carrier_update(struct127 *arg0) {
         (*(f32 *)((u8 *)temp_s0 + 0xB8)) = (f32) (fast_sinf(var_f12 * 0.2f) * 6.0f);
         obj_apply_gravity(arg0);
         (*(f32 *)((u8 *)temp_s0 + 0x18)) = (f32) (arg0->y_position - 170.0f);
-        (*(s8 *)((u8 *)temp_s0 + 0x13C)) = (s8) (D_800C3E78 + 0x64);
+        (*(s8 *)((u8 *)temp_s0 + 0x13C)) = (s8) (g_cur_obj_index + 0x64);
         vec_from_yaw_pitch((*(u16 *)((u8 *)temp_s0 + 0x7A)), (*(f32 *)((u8 *)temp_s0 + 0xB8)) * -7.0f, 0.0f, &sp.u34, &sp.u30, &sp.u2C);
         (*(f32 *)((u8 *)temp_s0 + 0x14)) = (f32) (arg0->x_position + sp.u34);
         (*(f32 *)((u8 *)temp_s0 + 0x1C)) = (f32) (arg0->z_position + sp.u30);
@@ -212,7 +212,7 @@ void obj_carrier_update(struct127 *arg0) {
         (*(f32 *)((u8 *)temp_s0 + 0x16C)) = 0.0f;
         (*(f32 *)((u8 *)temp_s0 + 0x170)) = 0.0f;
     }
-    temp_v0 = math_atan2_u16(D_800CC2D0->x_position - arg0->x_position, arg0->z_position - D_800CC2D0->z_position, 0);
+    temp_v0 = math_atan2_u16(g_objects->x_position - arg0->x_position, arg0->z_position - g_objects->z_position, 0);
     arg0->unk7A = temp_v0;
     arg0->unk40 = (f32) (s16) (temp_v0 + 0x4000) * 0.005493164f;
 }
@@ -281,8 +281,8 @@ void sinking_object_update(struct127 *obj) {
     obj->unk80 = 1;
     if (obj->unk25C & 0x40) {
         obj->unk25C &= ~0x40;
-        obj->old_x_position = D_800CC2D0[0].x_position;
-        obj->old_z_position = D_800CC2D0[0].z_position;
+        obj->old_x_position = g_objects[0].x_position;
+        obj->old_z_position = g_objects[0].z_position;
     }
     target = 0.0f;
     if (obj->unk13D != 0) {
@@ -312,8 +312,8 @@ void sinking_object_update(struct127 *obj) {
     rec.pos[2] = (s32) (obj->z_position + c * dist);
     collision_select_area(0);
     rec.u04 = collision_level_nearest_height(rec.pos[0], rec.pos[1], rec.pos[2], NULL);
-    speed = D_800CC2D0[0].xz_velocity * 64.0f;
-    a = D_800CC2D0[0].unk76 >> 8;
+    speed = g_objects[0].xz_velocity * 64.0f;
+    a = g_objects[0].unk76 >> 8;
     rec.u16 = (s32) (math_cos_u8(a) * speed);
     rec.u18 = (s32) (math_sin_u8(a) * -speed);
     rec.u1A = -30;

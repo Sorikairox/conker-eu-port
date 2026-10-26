@@ -53,22 +53,22 @@ Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear) {
 }
 /* was func_15142C10 */
 Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5) {
-    if ((r != D_800DD5F8) || (g != D_800DD5FA) || (b != D_800DD5FC) || (a != D_800DD5FE)) {
+    if ((r != D_800DD5F8) || (g != g_gfx_env_g_cached) || (b != g_gfx_env_b_cached) || (a != g_gfx_env_a_cached)) {
         if (*arg5 == 1) {
             gDPPipeSync(gfx++);
             *arg5 = 0;
         }
         gDPSetEnvColor(gfx++, r, g, b, a);
         D_800DD5F8 = r;
-        D_800DD5FA = g;
-        D_800DD5FC = b;
-        D_800DD5FE = a;
+        g_gfx_env_g_cached = g;
+        g_gfx_env_b_cached = b;
+        g_gfx_env_a_cached = a;
     }
     return gfx;
 }
 /* was func_15142CF0 */
 Gfx *gfx_prim_color_cached(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *arg7) {
-    if ((m != D_800DD634) || (l != D_800DD636) || (r != D_800DD5F0) || (g != D_800DD5F2) || (b != D_800DD5F4) || (a != D_800DD5F6)) {
+    if ((m != D_800DD634) || (l != D_800DD636) || (r != g_gfx_prim_r_cached) || (g != g_gfx_prim_g_cached) || (b != g_gfx_prim_b_cached) || (a != g_gfx_prim_a_cached)) {
         if (*arg7 == 1) {
             gDPPipeSync(gfx++);
             *arg7 = 0;
@@ -76,10 +76,10 @@ Gfx *gfx_prim_color_cached(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u
         gDPSetPrimColor(gfx++, m, l, r, g, b, a);
         D_800DD634 = m;
         D_800DD636 = l;
-        D_800DD5F0 = r;
-        D_800DD5F2 = g;
-        D_800DD5F4 = b;
-        D_800DD5F6 = a;
+        g_gfx_prim_r_cached = r;
+        g_gfx_prim_g_cached = g;
+        g_gfx_prim_b_cached = b;
+        g_gfx_prim_a_cached = a;
     }
     return gfx;
 }
@@ -100,7 +100,7 @@ s32 gfx_load_texture_cached(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s3
         if (*arg9 == 1) {
             *arg9 = 0;
         }
-        if ((D_800BE9F0 == 0x18) || (D_800BE9F0 == 0x13) || (D_800BE9F0 == 6) || (D_800BE9F0 == 0x3B) || (D_800BE9F0 == 2) || (D_800BE616 != 0)) {
+        if ((g_level_id == 0x18) || (g_level_id == 0x13) || (g_level_id == 6) || (g_level_id == 0x3B) || (g_level_id == 2) || (D_800BE616 != 0)) {
             argA = 3;
         }
         temp_v0_2 = sprite_load_texture_at(arg0, arg1, arg2 >> 8, arg8, 0, 0, 0, arg3, arg4, arg5, argA);
@@ -577,7 +577,7 @@ u8 fx_try_camera_shake(s32 arg0, s32 arg1)
   found = 0;
   while ((!found) && (i < n))
   {
-    if (D_800CC2D0[i].health != 0)
+    if (g_objects[i].health != 0)
     {
       found = 1;
     }
@@ -1483,7 +1483,7 @@ f32 curve_table_lookup(f32 arg0, f32 arg1, f32 arg2) {
 /* was func_15145A50 */
 void obj_set_destroyed(struct127 *arg0) {
     arg0->unk5 = 3;
-    if (D_800BE9F0 != 51) {
+    if (g_level_id != 51) {
         if ((D_800BE616 != 0) || (arg0->interaction_state == 5) || (arg0->interaction_state == 1) || (arg0->interaction_state == 21)) {
             arg0->interaction_state = 5;
             if (arg0->unk31C != NULL) {
@@ -1735,7 +1735,7 @@ u8 *light_apply_object_lights(u8 *, s16, s32, s32, s32, s32, s32, s32, u8 *, u8 
 extern s32 D_800DA230[];
 extern u8 D_800DA240;
 extern u8 D_800DA241;
-extern u8 D_800D9FF0[];
+extern u8 g_player_ambient_lights[]; /* was D_800D9FF0 */
 /* Lights of a model part (arg1: +0x00 count, +0x04 out list, +0x08 per-player light buffers, +0x18 lookat,
  * +0x1C mask). kind (arg2) 1: the object's own light set (arg3 +0x301 / +0x302 / +0x304 / +0x314) when it is
  * alive and in room arg4, else (2) the level's default lights; other kinds: the nearest point lights at arg6. */
@@ -1767,7 +1767,7 @@ u8 *model_part_emit_lights(u8 *gfx, u8 *arg1, u8 arg2, u8 *arg3, u8 arg4, s16 ar
         return light_write_light_cmds(gfx, *(s32 *)(arg3 + 0x304 + arg5 * 4), arg3[0x301], arg3[0x302], *(u8 **)(arg3 + 0x314));
     }
     if (kind == 2) {
-        return light_write_light_cmds(gfx, D_800DA230[arg5], D_800DA240, D_800DA241, D_800D9FF0 + arg5 * 16 + D_800BE9C0 * 8);
+        return light_write_light_cmds(gfx, D_800DA230[arg5], D_800DA240, D_800DA241, g_player_ambient_lights + arg5 * 16 + D_800BE9C0 * 8);
     }
     flags = ((arg7 & 2) ? 0x10 : 0) | 8 | ((arg7 & 1) ? 2 : 0);
     return light_apply_object_lights(gfx, arg5, (s32)arg6[0], (s32)arg6[1], (s32)arg6[2], arg8, buf, *(s32 *)arg1, (u8 *)lookat,

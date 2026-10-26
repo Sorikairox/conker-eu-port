@@ -11,7 +11,7 @@ void obj_collision_sizes_update(void) {
     struct127 *p;
     struct126 *t;
 
-    p = D_800CC2D0;
+    p = g_objects;
     i = 0;
     if (D_8008FD8C > 0) {
         do {
@@ -138,7 +138,7 @@ s32 obj_collision_cylinder(struct127 *rec, u16 *height, u16 *width, u16 *radius)
         break;
     }
     holder = rec->unk13C;
-    /* D_800B89C4[n * 0x32C] is D_800CC2D0[n - 100].id */
+    /* D_800B89C4[n * 0x32C] is g_objects[n - 100].id */
     if (holder > 100 && D_800B89C4[holder * 0x32C] == 0x13) {
         r += 120.0f * *(f32 *)((u8 *)rec + 0x14C);
         h += 100.0f * *(f32 *)((u8 *)rec + 0x150);

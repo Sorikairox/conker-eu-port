@@ -18,7 +18,7 @@ s32 level_list_index_of(s32);
 s32 char_fx_init(struct127 *);
 void obj_randomize_anim_frame(u8 *);
 extern s8 D_8008FD8C;
-extern u8 *D_800D252C;
+extern u8 *g_setup_entry_flags; /* was D_800D252C */
 extern s8 D_800901E4[];
 extern s8 D_800D2550;
 extern u16 D_800D2132;
@@ -47,7 +47,7 @@ s32 obj_ray_hit_model(u8 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32
 s32 ray_hit_object_bounds(f32 *, f32 *, u8 *, f32 *, f32 *, f32 *, f32 *);
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *, f32 *, s32 *, u8 *, f32);
 // ray_cast_world: casts the ray (x, y, z) + t * (dx, dy, dz) against the level (unless noLevel) and the 25 objects
-// of D_800CC2D0 (unless noObjects) and keeps the nearest hit closer than maxDist (0 = 9999999) in hit:
+// of g_objects (unless noObjects) and keeps the nearest hit closer than maxDist (0 = 9999999) in hit:
 // +0 object, +4 distance (-1 = none), +0x8 point, +0x14 normal (model hits), +0x20 exit point, +0x2C start,
 // +0x38 direction, +0x44 level surface, +0x56 / +0x58 / +0x5A model hit data, +0x59 kind (0 none, 1 level,
 // 2 object bounds, 3 object model), +0x5C level material (D_800DBEF4 entry), +0x60 level hit extra. Objects are
@@ -110,7 +110,7 @@ s32 ray_cast_world(struct127 *caster, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 d
     }
     bzero(link, sizeof(link));
     for (i = 0; i < 25; i++) {
-        obj = (u8 *)&D_800CC2D0[0] + i * 0x32C;
+        obj = (u8 *)&g_objects[0] + i * 0x32C;
         if (*(s32 *)obj != 0 && obj[0x65] != 0) {
             link[obj[0x65] - 1] = i + 1;
         }
@@ -145,7 +145,7 @@ s32 ray_cast_world(struct127 *caster, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 d
         if (own == i) {
             continue;
         }
-        obj = (u8 *)&D_800CC2D0[0] + i * 0x32C;
+        obj = (u8 *)&g_objects[0] + i * 0x32C;
         if (*(s32 *)obj == 0 || obj[0x5] == 3 || obj == (u8 *)caster || !(*(s32 *)(obj + 0xF8) & 0x40)) {
             continue;
         }
@@ -348,7 +348,7 @@ s32 shot_hit_apply(u8 *obj, u8 *hit, s32 kind) {
                 bullet_impact_effect(h->normal, h->pos, h->dir, 0xFF, 1);
                 break;
             case 5:
-                if (D_800BE9F0 == 0xE) {
+                if (g_level_id == 0xE) {
                     a[0] = h->pos[0] + h->dir[0] * 5.0f;
                     a[1] = h->pos[1] + h->dir[1] * 5.0f;
                     a[2] = h->pos[2] + h->dir[2] * 5.0f;
@@ -383,7 +383,7 @@ s32 shot_hit_apply(u8 *obj, u8 *hit, s32 kind) {
         return 2;
     }
     effect = D_80099E84[kind];
-    if (kind == 7 && D_800BE9F0 == 0x2B) {
+    if (kind == 7 && g_level_id == 0x2B) {
         effect = 0x27;
     }
     vec3_to_yaw_pitch_deg(h->dir, &yaw, &pitch);
@@ -463,7 +463,7 @@ s32 shot_hit_apply(u8 *obj, u8 *hit, s32 kind) {
             angle = 0xFFFFFFFF;
         }
         obj_send_hit((struct127 *) target, effect | 0x80000, angle & 0xFFFF,
-                      (obj - (u8 *) D_800CC2D0) / 0x32C);
+                      (obj - (u8 *) g_objects) / 0x32C);
     }
     return 2;
 }
@@ -473,10 +473,10 @@ s32 camera_view_test_sphere(s32, s32 *, f32, f32, f32, f32, f32, f32);
 extern s32 D_800DA030[];
 
 /* P36: level-setup entry idx (0x30 bytes at D_800D20FC): spawn it with setup_entry_spawn(e, idx, 0, 0, 0) and return
- * that, or return 0 when: already spawned (D_800D252C[idx] != 0); a placeholder (e[2] == 1); no position
+ * that, or return 0 when: already spawned (g_setup_entry_flags[idx] != 0); a placeholder (e[2] == 1); no position
  * (x == 0x7FFF); its respawn timer D_800D2530[idx] is running (lowered by D_800BE9A0 this frame); idx >= 5 with a
- * range class e[1] & 6 (2: 650, 4: 1300, else 2750 units) and no player object D_800CC2D0[0 .. D_8008FD8C)
- * (+0 != 0, +0x127 != 0xFF and enabled in the u16 mask at D_800D2138 + 0x208) within that XZ distance; or
+ * range class e[1] & 6 (2: 650, 4: 1300, else 2750 units) and no player object g_objects[0 .. D_8008FD8C)
+ * (+0 != 0, +0x127 != 0xFF and enabled in the u16 mask at g_session_game_mode + 0x208) within that XZ distance; or
  * e[1] & 8 and the spot (x, y + 150, z), radius 150, is in view of one of the cameras 0 .. D_80082FA0
  * (camera_view_test_sphere on D_800BE628 + i * 0x180, D_800DA030 + i * 0x10). Player slots (idx < 5) skip the range test.
  * arg1 is unused. */
@@ -489,7 +489,7 @@ s32 setup_entry_try_spawn(s32 idx, s32 arg1) {
     s32 x, flags, cls, n, ok, i, b;
     f32 r2, dx, dz;
 
-    if (D_800D252C[idx] != 0) {
+    if (g_setup_entry_flags[idx] != 0) {
         return 0;
     }
     e = (u8 *) D_800D20FC + idx * 0x30;
@@ -521,12 +521,12 @@ s32 setup_entry_try_spawn(s32 idx, s32 arg1) {
         n = D_8008FD8C;
         ok = 1;
         if (n > 0) {
-            obj = (u8 *) D_800CC2D0;
-            end = (u8 *) D_800CC2D0 + n * 0x32C;
+            obj = (u8 *) g_objects;
+            end = (u8 *) g_objects + n * 0x32C;
             do {
                 if (*(s32 *) obj != 0) {
                     b = obj[0x127];
-                    if (b != 0xFF && ((1 << b) & *(u16 *) ((u8 *) &D_800D2138 + 0x208))) {
+                    if (b != 0xFF && ((1 << b) & *(u16 *) ((u8 *) &g_session_game_mode + 0x208))) {
                         dx = *(f32 *) (obj + 0x14) - (f32) x;
                         dz = *(f32 *) (obj + 0x1C) - (f32) *(s16 *) (e + 0xA);
                         if (dx * dx + dz * dz <= r2) {
@@ -590,7 +590,7 @@ void obj_set_spawn_flags(u8 *arg0) {
     temp_v0 = *(u8 **)(arg0 + 0x31C);
     *(s32 *)(arg0 + 0xF8) |= 4;
     if ((temp_v0 != NULL) && (temp_v0[0x56] == 0)) {
-        switch (D_800BE9F0) {
+        switch (g_level_id) {
         case 0x0:
         case 0xA:
         case 0xE:
@@ -612,9 +612,9 @@ void obj_set_spawn_flags(u8 *arg0) {
     }
 }
 
-/* Spawns the level-setup object e (0x30-byte entry of D_800D20FC) into an object slot of D_800CC2D0 (0x32C each):
+/* Spawns the level-setup object e (0x30-byte entry of D_800D20FC) into an object slot of g_objects (0x32C each):
  * slot = reuse+reset (obj_reset) of slot reuse - 1 when reuse != 0, of slot idx when idx < D_8008FD8C (the
- * player / character slots), else a new one (obj_alloc_slot). Returns slot + 1, or 0 when D_800D252C[idx] & 0x7F
+ * player / character slots), else a new one (obj_alloc_slot). Returns slot + 1, or 0 when g_setup_entry_flags[idx] & 0x7F
  * (already spawned) or no slot is free (25). Fills position (+0x14.., from e+6/8/A), angle (e+0xC << 8), the setup
  * flags e+0x18 (+0xF8), model / type (e+4) via obj_copy_type_params / obj_set_type / obj_anim_state_alloc, the player record
  * (+0x31C, 0x1C0 bytes) for character slots and types 0x98 / 0x28, and the other per-type defaults. */
@@ -638,28 +638,28 @@ s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
     void obj_alloc_light_bufs();
     u8 obj_current_part_model(struct_eu_AF2A0 *);
 
-    if (D_800D252C[idx] & ~0x80) {
+    if (g_setup_entry_flags[idx] & ~0x80) {
         return 0;
     }
     type = e[4];
     if (reuse != 0) {
-        obj = (u8 *)D_800CC2D0 + reuse * 0x32C - 0x32C;
+        obj = (u8 *)g_objects + reuse * 0x32C - 0x32C;
         obj_reset((struct127 *)obj);
     } else if (idx != -1 && idx < D_8008FD8C) {
-        obj = (u8 *)D_800CC2D0 + idx * 0x32C;
+        obj = (u8 *)g_objects + idx * 0x32C;
         obj_reset((struct127 *)obj);
     } else {
         obj = (u8 *)obj_alloc_slot();
     }
-    slot = (s32)(obj - (u8 *)D_800CC2D0) / 0x32C;
+    slot = (s32)(obj - (u8 *)g_objects) / 0x32C;
     if (slot == 0x19) {
         return 0;
     }
     if (idx != -1) {
         if (*(u16 *)e & 0x21) {
-            D_800D252C[idx] = slot + 1;
+            g_setup_entry_flags[idx] = slot + 1;
         } else {
-            D_800D252C[idx] = slot + 0x81;
+            g_setup_entry_flags[idx] = slot + 0x81;
         }
         O8(0x13F) = idx;
         if (idx < D_8008FD8C) {
@@ -783,7 +783,7 @@ s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
             O8(0x68) = v + 0x10;
         }
     }
-    if (D_80038080 == 0 && D_800BE9F0 != 0x1D && e[0x2E] == 0xFF) {
+    if (D_80038080 == 0 && g_level_id != 0x1D && e[0x2E] == 0xFF) {
         n = O8(0x2C9);
         if (n == 0) {
             n = 1;
@@ -792,7 +792,7 @@ s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
             ((u8 *)D_800D2040)[(*(u8 **)(obj + 0x2C4))[i]] = 0xFF;
         }
     }
-    if (D_800BE9F0 == 0x1D) {
+    if (g_level_id == 0x1D) {
         O8(0x66) &= 0xDF;
     }
     char_fx_init((struct127 *)obj);
@@ -1007,11 +1007,11 @@ s32 obj_setup_undo(struct127 *obj, s32 n) {
             continue;
         }
         o = (u8 *) obj_find_by_id(cmd[0]);
-        if (o == NULL || o[0x65] != ((u8 *) obj - (u8 *) D_800CC2D0) / 0x32C + 1) {
+        if (o == NULL || o[0x65] != ((u8 *) obj - (u8 *) g_objects) / 0x32C + 1) {
             continue;
         }
         if (o[4] == 0x1D || o[4] == 0x6E || o[4] == 0x2F) {
-            obj_release_partner_remove((struct127 *) o, (struct127 *) ((u8 *) D_800CC2D0 + o[0x65] * 0x32C - 0x32C));
+            obj_release_partner_remove((struct127 *) o, (struct127 *) ((u8 *) g_objects + o[0x65] * 0x32C - 0x32C));
         } else {
             obj_remove((struct127 *) o, 0);
         }
@@ -1023,7 +1023,7 @@ s32 obj_setup_undo(struct127 *obj, s32 n) {
  * Then +6 = obj_type_model_group(obj) (model id); +0x58 = asset_lookup_rom(0, 2, 2, id) when D_800C5A90[id] != 0. arg2 unused. */
 /* was func_15083C3C */
 void obj_set_type(s32 slot, s32 type, s32 arg2) {
-    u8 *obj = (u8 *) D_800CC2D0 + slot * 0x32C;
+    u8 *obj = (u8 *) g_objects + slot * 0x32C;
     u8 *rec;
     u8 id;
 
@@ -1092,7 +1092,7 @@ void obj_copy_type_params(u8 *arg0, u16 type, u8 *arg2) {
         } else {
             *(u16 *)(arg0 + 0x10) = v;
         }
-        if (D_800BE9F0 == 0x1D) {
+        if (g_level_id == 0x1D) {
             *(u16 *)(arg0 + 0x10) = 1000;
         }
     } else {
@@ -1143,14 +1143,14 @@ s32 obj_spawn_attached(struct127 *owner, u8 mode, u8 kind, s32 arg3, s32 arg4, s
     model_header_load(kind, 0);
     anim_bank_load(kind, 0);
     o = (u8 *) obj_alloc_slot();
-    o[0x3B] = 0xFF - (o - (u8 *) D_800CC2D0) / 0x32C;
+    o[0x3B] = 0xFF - (o - (u8 *) g_objects) / 0x32C;
     o[0xAB] = arg3;
     *(s32 *) o = arg4;
     obj_fade_reset((struct127 *) o);
     o[0x232] = 1;
     o[0x1CA] = 1;
     o[0x125] = 0xFF;
-    o[0x65] = (ow - (u8 *) D_800CC2D0) / 0x32C + 1;
+    o[0x65] = (ow - (u8 *) g_objects) / 0x32C + 1;
     *(s32 *) (o + 0x5C) = mode;
     o[0x123] = 1;
     o[4] = kind;
@@ -1193,7 +1193,7 @@ s32 obj_spawn_attached(struct127 *owner, u8 mode, u8 kind, s32 arg3, s32 arg4, s
         D_800C3638 = 0;
     }
     obj_copy_type_params(o, kind, NULL);
-    obj_set_type((o - (u8 *) D_800CC2D0) / 0x32C, kind, 1);
+    obj_set_type((o - (u8 *) g_objects) / 0x32C, kind, 1);
     obj_anim_state_alloc((struct127 *) o, arg7, flag2, arg8);
     if (single) {
         D_800C3638 = 1;
@@ -1239,7 +1239,7 @@ s32 setup_entry_find_by_id(u8 id) {
 }
 
 /* P222: readable C for obj_find_by_setup_id (game_eu_AF2A0, 72 words); replaces the m2c-style NM body (goto loop). */
-// object_find_by_id: returns the live object (word +0 != 0) of D_800CC2D0 whose id byte +0x3B is `id`, scanning all
+// object_find_by_id: returns the live object (word +0 != 0) of g_objects whose id byte +0x3B is `id`, scanning all
 // 26 slots (the asm peels slots 0 and 1 and unrolls the rest by 4); NULL for id 0 or when none matches.
 /* was func_15083E90 */
 struct127 *obj_find_by_setup_id(u8 id) {
@@ -1249,7 +1249,7 @@ struct127 *obj_find_by_setup_id(u8 id) {
     if (id == 0) {
         return NULL;
     }
-    for (i = 0, o = D_800CC2D0; i < 26; i++, o++) {
+    for (i = 0, o = g_objects; i < 26; i++, o++) {
         if (o->interaction_state != 0 && id == o->unique_id) {
             return o;
         }
@@ -1261,7 +1261,7 @@ s32 obj_slot_by_setup_id(u8 arg0) {
     struct127 *p = obj_find_by_setup_id(arg0);
 
     if (p != NULL) {
-        return p - D_800CC2D0;
+        return p - g_objects;
     }
     return -1;
 }
@@ -1272,7 +1272,7 @@ s32 obj_slot_by_spawn(s32 arg0) {
     struct127 *temp_v0 = obj_find_by_spawn(arg0);
 
     if (temp_v0 != NULL) {
-        return temp_v0 - D_800CC2D0;
+        return temp_v0 - g_objects;
     }
     return -1;
 }
@@ -1309,7 +1309,7 @@ s32 obj_model_vertex_blocks_get(struct127 *o, s32 var) {
     s32 w;
 
     if (obj[0x65] != 0) {
-        rec = *(u8 **)((u8 *)&D_800CC2D0[obj[0x65] - 1] + 0x144);
+        rec = *(u8 **)((u8 *)&g_objects[obj[0x65] - 1] + 0x144);
     } else {
         rec = *(u8 **)(obj + 0x144);
     }
@@ -1509,7 +1509,7 @@ void obj_release_models(struct127 *obj) {
     nparts = o[0x2C9];
     parts = *(u8 **) (o + 0x2C4);
     obj_model_refs_release_all(o);
-    self = obj - D_800CC2D0;
+    self = obj - g_objects;
     lastUser = 1;
     for (j = 0; j < nparts; j++) {
         freeModel = 1;
@@ -1518,7 +1518,7 @@ void obj_release_models(struct127 *obj) {
             if (k == self) {
                 continue;
             }
-            other = (u8 *) &D_800CC2D0[k];
+            other = (u8 *) &g_objects[k];
             if (*(s32 *) other == 0 || other[4] == 0xFF || other[5] == 2) {
                 continue;
             }
@@ -1620,7 +1620,7 @@ void model_slots_age_release(void) {
             u8 *rec;
             s32 j;
 
-            for (obj = D_800CC2D0; (u32)obj < (u32)&D_800D121C; obj++) {
+            for (obj = g_objects; (u32)obj < (u32)&g_obj_scratch_rec; obj++) {
                 if (obj->interaction_state == 0) {
                     continue;
                 }

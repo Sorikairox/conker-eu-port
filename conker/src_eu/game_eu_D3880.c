@@ -287,7 +287,7 @@ s32 world_objects_at_point(s32 x, s32 z, s32 *outCount, s32 n) {
 }
 
 /*
- * P54: world_objects_in_box (hand asm): the world objects (D_800DBEF4, D_800DC320 of them, 0xA0 bytes) whose box
+ * P54: world_objects_in_box (hand asm): the world objects (D_800DBEF4, g_world_obj_count of them, 0xA0 bytes) whose box
  * (+0x10 / +0x12 / +0x14 centre, +0x50 x/z half size, +0x52 y half size) overlaps (x .. x2, z .. z2) and, unless
  * +0x4F & 0x40, (y .. y2), all bounds strict; skipped: +0x6E != 0, +0x4F & 0x60 == 0x20, index n - 1.
  * Indices with +0x4F & 0x60 == 0 go to the u16 list D_800D3C00 (the count is returned), the others (0x40 / 0x60)
@@ -305,9 +305,9 @@ s32 world_objects_in_box(s32 x, s32 z, s32 *outCount, s32 n, s32 x2, s32 z2, s32
     s32 k, r, c;
 
     *outCount = 0;
-    if (D_800DC320 == 0) return 0;
+    if (g_world_obj_count == 0) return 0;
     obj = (u8 *)D_800DBEF4;
-    end = obj + (s32)((u32)D_800DC320 * 0xA0u);
+    end = obj + (s32)((u32)g_world_obj_count * 0xA0u);
     do {
         if (obj[0x6E] != 0) goto next;
         k = obj[0x4F] & 0x60;

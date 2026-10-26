@@ -4,7 +4,7 @@ s/121U + 300/121 + 300/ % s5big
 s/(state.slot < 4) ? 0 : 1/(state.slot < 5) ? 0 : 1/ % s4
 s/(state.slot < 4) ? 0 : 1/(state.slot < 3) ? 0 : 1/ % s3
 s/for (i = 0; i < 8; i++)/for (i = 0; i < 7; i++)/ % s0
-s/D_800A1FD0\[i \* 8 + state.slot\]/D_800A1FD0[i * 8 + 1]/ % s3 s7
+s/g_marker_effect_record_ids\[i \* 8 + state.slot\]/g_marker_effect_record_ids[i * 8 + 1]/ % s3 s7
 s/state.f2C\[3\] = 0.0f;/state.f2C[3] = 1.0f;/ % s0
 s/state.h3C = 0;/state.h3C = 1;/ % s0
 s/key.type = 3;/key.type = 4;/ % s0

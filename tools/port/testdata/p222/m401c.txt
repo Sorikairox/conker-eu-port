@@ -8,7 +8,7 @@
 9s/0x65)/0x64)/ %
 9s/\*(s32 \*) o != 0 \&\& //  %
 9s/ \&\& kind == \*((u8 \*) o + 4)// %
-9s/ \&\& (owner - D_800CC2D0) + 1 == \*((u8 \*) o + 0x65)// %
+9s/ \&\& (owner - g_objects) + 1 == \*((u8 \*) o + 0x65)// %
 10s/return o;/return o + 1;/ %
-13s/NULL/D_800CC2D0/ %
+13s/NULL/g_objects/ %
 8s/o++)/o += 2)/ %

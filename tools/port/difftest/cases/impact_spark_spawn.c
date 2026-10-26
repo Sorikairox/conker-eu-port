@@ -7,7 +7,7 @@ extern u8 D_800AB7E4[];
 /* Spawn one particle of kind `kind` (0x10 = spark / debris sprite) through trail_spawn:
  * - spawn block (0x1C bytes): position `pos`, sprite `sprite` + 0x10, model 0x35, count 1, -1, `tint`, `owner`;
  * - motion block (0x20 bytes): speed, velocity `vel`, scale, floor -10000, flags (8 | 0x40, 0x20 / 0x80 from the
- *   per-type tables D_800AB7E4 / D_800AB710, 3 when `fade`), D_800AB7D4[type], 0xFF, alpha, two s16 timers;
+ *   per-type tables D_800AB7E4 / g_impact_kind_flags, 3 when `fade`), D_800AB7D4[type], 0xFF, alpha, two s16 timers;
  * - fixed render block (0x1E bytes, constants).
  * On success the object's extra data (+0x98) gets (sx, sy, type) at +0x48. Returns the particle or NULL. */
 u8 *impact_spark_spawn(u8 *pos, u8 *vel, f32 scale, s16 sprite, u8 alpha, f32 speed, s32 tint, u8 fade, f32 sx, f32 sy,
@@ -67,7 +67,7 @@ u8 *impact_spark_spawn(u8 *pos, u8 *vel, f32 scale, s16 sprite, u8 alpha, f32 sp
     if (D_800AB7E4[type] != 0) {
         f |= 0x20;
     }
-    if (((u8 *) &D_800AB710)[type] != 0) {
+    if (((u8 *) &g_impact_kind_flags)[type] != 0) {
         f |= 0x80;
     }
     mb.full = 0xFF;

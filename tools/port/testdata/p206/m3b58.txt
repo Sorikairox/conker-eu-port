@@ -33,7 +33,7 @@ s/        if (me->interaction_state != 0x25) {/        if (me->interaction_state
 s/            self = -1;/            self = 2;/
 s/            self = 0;/            self = 2;/
 s/            if (me->camera != NULL \&\& me->camera->unk23D == 3) {/            if (me->camera != NULL \&\& me->camera->unk23D == 2) {/
-s/            ref = \&D_800CC2D0\[self\];/            ref = me;/
+s/            ref = \&g_objects\[self\];/            ref = me;/
 s/        rz = ref->z_position;/        rz = ref->y_position;/
 s/        my_level = rail_band_for_height(ref->y_position);/        my_level = rail_band_for_height(me->y_position);/
 s/        for (i = 0; i < 25; i++) {/        for (i = 0; i < 24; i++) {/

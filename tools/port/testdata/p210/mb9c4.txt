@@ -22,19 +22,19 @@ s/obj->gravity = cur->gravity;/obj->gravity = base->gravity;/
 s/if (dmg < obj->health) {/if (dmg <= obj->health) {/
 s/obj->health -= dmg;/obj->health -= dmg + 1;/
 s/if (obj->interaction_state == 1) {/if (obj->interaction_state == 2) {/
-s/        D_800D154C = obj;/        ;/
-s/        D_800C3E78 = num;/        D_800C3E78 = num + 1;/
+s/        g_cur_obj = obj;/        ;/
+s/        g_cur_obj_index = num;/        g_cur_obj_index = num + 1;/
 s/if (ctl->unk4E != 2) {/if (ctl->unk4E == 2) {/
 s/anim_events_run(obj, 800.0f, 1);/anim_events_run(obj, 400.0f, 1);/
-s/        D_800D154C = saved;/        ;/
-s/        D_800C3E78 = savedNum;/        ;/
+s/        g_cur_obj = saved;/        ;/
+s/        g_cur_obj_index = savedNum;/        ;/
 s/obj->unkF8 \&= ~0x01008000;/obj->unkF8 \&= ~0x01000000;/
 s/obj->unk31C->unk95 = 0;/;/
 s/obj->unk31C->unk6B = 0;/;/
 s/if (obj->unk31C->pad98\[0\] != 0) {/if (obj->unk31C->pad98[0] == 0) {/
 s/obj->unk31C->unk54 = 0;/;/
 s/        obj->unk137 = 0;/        ;/
-s/\&D_800CC2D0\[(u8)(obj->unk65 - 1)\]/\&D_800CC2D0[(u8)(obj->unk65)]/
+s/\&g_objects\[(u8)(obj->unk65 - 1)\]/\&g_objects[(u8)(obj->unk65)]/
 s/(id != 0x8A \&\& id != 0x23)/(id != 0x8A)/
 s/|| obj->health == 0 ||/||/
 s/|| (base->flags \& 2)$/|| (base->flags \& 4)/
@@ -51,15 +51,15 @@ s/obj->unk239 = 0;/;/
 s/                obj->unk65 = 0;/                ;/
 s/    if (handler == 0) {/    if (handler == 1) {/
 s/handler = base->handler;/handler = cur->handler + 1;/
-s/D_80086A34\[handler\](self, obj, \&kind);/D_80086A34[handler](obj, self, \&kind);/
+s/g_hit_handlers\[handler\](self, obj, \&kind);/g_hit_handlers[handler](obj, self, \&kind);/
 s/    if (kind != 0x27) {$/    if (kind != 0x26) {/
-s/\&D_800CC2D0\[self->unk124 - 1\] : self, obj, kind/\&D_800CC2D0[self->unk124] : self, obj, kind/
+s/\&g_objects\[self->unk124 - 1\] : self, obj, kind/\&g_objects[self->unk124] : self, obj, kind/
 s/: self, obj, kind);/: obj, obj, kind);/
 s/ev.uid = self->unique_id;/ev.uid = obj->unique_id;/
 s/node_broadcast_range(0, 0x68, (s32)\&ev, 2);/node_broadcast_range(0, 0x69, (s32)\&ev, 2);/
 s/    if (base->sound != 0) {/    if (cur->sound != 0) {/
-s/D_800D1580 = base->sound;/D_800D1580 = cur->sound;/
-s/actor_sound_play_untracked(D_800D1582, obj, 0x6D60, 0x12C, 0x708);/actor_sound_play_untracked(D_800D1582, obj, 0x6D60, 0x12C, 0x700);/
+s/g_cur_obj_cmd = base->sound;/g_cur_obj_cmd = cur->sound;/
+s/actor_sound_play_untracked(g_cur_obj_cmd_sound, obj, 0x6D60, 0x12C, 0x708);/actor_sound_play_untracked(g_cur_obj_cmd_sound, obj, 0x6D60, 0x12C, 0x700);/
 s/    } else if (cur->sound != 0) {/    } else if (base->sound != 0) {/
 s/self->unk107 = 0x3C;/self->unk107 = 0x3D;/
 s/if (D_800BE616 == 0 || obj->interaction_state != 1) {/if (D_800BE616 == 0 \&\& obj->interaction_state != 1) {/
@@ -68,10 +68,10 @@ s/if (base->flags \& 0x100) {/if (cur->flags \& 0x100) {/
 s/            obj->unk218 = NULL;/            ;/
 s/    obj->unkD0 = 0;/    ;/
 s/obj->unk10A = self->unk124 + 0x7F;/obj->unk10A = self->unk124 + 0x80;/
-s/obj->unk10A = D_800C3E78 | 0x80;/obj->unk10A = D_800C3E78;/
+s/obj->unk10A = g_cur_obj_index | 0x80;/obj->unk10A = g_cur_obj_index;/
 s/self->unk108 = (slot - 1) | 0x80;/self->unk108 = slot | 0x80;/
 s/if ((base->flags \& 0x40) \&\& obj->interaction_state == 1) {/if ((base->flags \& 0x40) || obj->interaction_state == 1) {/
-s/D_800CC2D0\[slot - 1\].unk31C + 0x46) = 8000;/D_800CC2D0[slot - 1].unk31C + 0x44) = 8000;/
+s/g_objects\[slot - 1\].unk31C + 0x46) = 8000;/g_objects[slot - 1].unk31C + 0x44) = 8000;/
 s/if (obj->unk23B != 0) {/if (obj->unk23B == 0) {/
 s/obj->stunned = 0xFE;/obj->stunned = 0xFF;/
 s/obj->unk105 = 0;/;/

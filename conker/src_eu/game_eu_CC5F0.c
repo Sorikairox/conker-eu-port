@@ -214,7 +214,7 @@ u8 event_query_world_object(s32 arg0, s32 arg1, u8 *arg2) {
     case 19:
     case 20:
     case 21:
-        var_v1 = D_800CC2D0;
+        var_v1 = g_objects;
         var_s0 = 0;
 loop_7:
         if (var_v1->interaction_state == (*(s32 *)((u8 *)arg2 + 8))) {

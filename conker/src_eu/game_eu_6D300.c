@@ -80,7 +80,7 @@ void obj_select_next_flagged(void)
     }
     while (i != start)
     {
-      if (D_800CC2D0[i].unkF8 & 0x800000)
+      if (g_objects[i].unkF8 & 0x800000)
       {
         D_800C67F1 = i;
         return;

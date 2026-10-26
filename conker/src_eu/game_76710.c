@@ -13,14 +13,14 @@ s32 quadtree_tri_box_test(struct_eu_bytes24 arg0) {
 
 /* was func_150492CC */
 void quadtree_set_test_box(f32 arg0, f32 arg1, f32 arg2) {
-    D_800CC640 = arg0;
-    D_800CC644 = arg1;
-    D_800CC648 = arg2;
+    g_quadtree_box_x = arg0;
+    g_quadtree_box_y = arg1;
+    g_quadtree_box_z = arg2;
     D_800CC64C = arg0 / 2;
     D_800CC650 = arg1 / 2;
     D_800CC654 = arg2 / 2;
     if (arg0 == 0.0f) {
-        arg0 = D_80099430;
+        arg0 = g_quadtree_box_min_x;
     }
     D_800CC658 = arg1 / arg0;
     D_800CC65C = arg2 / arg0;

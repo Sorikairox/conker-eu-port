@@ -88,13 +88,13 @@ void __wrap_obj_state_walk(void *arg0) {
 
 /* P52: with ?p49walk set, also
  *  - wrap obj_apply_gravity (P50 C gravity; the call from the walk handler): y / y_velocity / +0x28 before and after,
- *    gravity +0x24 and the frame time D_800D1550[0] (an f32 array, P50), first p49walk calls then every p49every;
+ *    gravity +0x24 and the frame time g_obj_time_step[0] (an f32 array, P50), first p49walk calls then every p49every;
  *  - wrap objects_update_all (P48 C object update loop, called from game_45B80.c): record 0's model fields after it
  *    (+0x1D4 model instance, +0x2D0 animation state, id +4, D_800D19A0[id] loaded model, D_800C52F0[id]). */
-extern float D_800D1550[];
+extern float g_obj_time_step[]; /* was D_800D1550 */
 extern unsigned D_800D19A0[];
 extern unsigned short D_800C52F0[];
-extern unsigned char D_800CC2D0[];
+extern unsigned char g_objects[]; /* was D_800CC2D0 */
 void __real_obj_apply_gravity(void *rec);
 void __wrap_obj_apply_gravity(void *rec) {
     static int flag = -1, every = -1;
@@ -106,8 +106,8 @@ void __wrap_obj_apply_gravity(void *rec) {
     calls++;
     if (flag && (calls <= (unsigned)flag || calls % (unsigned)every == 0))
         port_log("[p52] gravity call %u frame %u: dt D_800D1550[0] %g (bits %08X) grav %g | y %g -> %g yv %g -> %g "
-                 "+28 %g -> %g | +180 %g floor118 %g\n", calls, port_frame_count, D_800D1550[0],
-                 *(const unsigned *)D_800D1550, F(0x24), y0, F(0x18), v0, F(0x20), h0, F(0x28), F(0x180), F(0x118));
+                 "+28 %g -> %g | +180 %g floor118 %g\n", calls, port_frame_count, g_obj_time_step[0],
+                 *(const unsigned *)g_obj_time_step, F(0x24), y0, F(0x18), v0, F(0x20), h0, F(0x28), F(0x180), F(0x118));
 }
 void __real_objects_update_all(void);
 /* P116: objects_update_all follows each record's +0x65 parent chain (1-based slot) with no bound; a cycle hangs the game
@@ -117,19 +117,19 @@ static int p116_cycle(void) {
     static unsigned logged;
     int i, k, bad = -1;
     for (i = 0; i < 25 && bad < 0; i++) {
-        const unsigned char *q = (const unsigned char *)D_800CC2D0 + i * 0x32C;
+        const unsigned char *q = (const unsigned char *)g_objects + i * 0x32C;
         if (*(const int *)q == 0 || vbe_ld8(q + 0x65) == 0) continue;
         for (k = 0; k < 26 && vbe_ld8(q + 0x65) != 0; k++) {
             unsigned p = vbe_ld8(q + 0x65);
             if (p > 25) { k = 26; break; }
-            q = (const unsigned char *)D_800CC2D0 + (p - 1) * 0x32C;
+            q = (const unsigned char *)g_objects + (p - 1) * 0x32C;
         }
         if (k >= 26) bad = i;
     }
     if (bad >= 0 && logged++ < 4) {
         port_log("[p116] +0x65 parent cycle from slot %d, frame %u; records:\n", bad, port_frame_count);
         for (i = 0; i < 25; i++) {
-            const unsigned char *q = (const unsigned char *)D_800CC2D0 + i * 0x32C;
+            const unsigned char *q = (const unsigned char *)g_objects + i * 0x32C;
             if (*(const int *)q == 0 && vbe_ld8(q + 0x65) == 0) continue;
             port_log("[p116]   slot %2d %08X state %d kind %02X +65 %02X +3B %02X +5C %d +123 %d +1D4 %08X\n", i,
                      (unsigned)(uintptr_t)q, *(const int *)q, vbe_ld8(q + 4), vbe_ld8(q + 0x65), vbe_ld8(q + 0x3B),
@@ -141,7 +141,7 @@ static int p116_cycle(void) {
 void __wrap_objects_update_all(void) {
     static int flag = -1;
     static unsigned calls;
-    const unsigned char *r = D_800CC2D0;
+    const unsigned char *r = g_objects;
     if (p116_cycle()) return;
     __real_objects_update_all();
     if (flag < 0) { flag = port_flag("p49walk"); }
@@ -157,7 +157,7 @@ void __wrap_objects_update_all(void) {
 
 /* P52 diagnostic ?p52void=1 (P55: now off by default and only a diagnostic; the floor query is real C since P53/P54):
  * forces "no floor" (-10000) into arg 3 (spC4) and arg 4 (+0x118) after the real query.
- * P55 ?p49walk: for record 0 (argB == D_800CC2D0) logs the query's inputs / outputs and an independent float floor
+ * P55 ?p49walk: for record 0 (argB == g_objects) logs the query's inputs / outputs and an independent float floor
  * height: every level triangle (D_800DC26C, D_800DBE4C of them, vertices s16 at the offsets) whose x/z projection
  * holds (x, z), with the plane y there; the highest such y that is <= y + 15 (step), and the count of hits. */
 extern unsigned D_800DC26C, D_800DBE4C;
@@ -336,9 +336,9 @@ static void p55_synth(void) {
 }
 /* P101 DIAGNOSTIC ?p101col=N: on the first N floor -> void changes of record 0's floor query: the 4 collision areas
  * (enable D_800894C0, triangle count D_800DBE18, x / y / z extent of the table D_800DC208), the level DLs
- * D_800B0E00[0..3], and the world objects (D_800DC320 records of 0xA0 at D_800DBEF4: DL +0x1C, flags +0x4F, first tri
+ * g_level_part_dls[0..3], and the world objects (g_world_obj_count records of 0xA0 at D_800DBEF4: DL +0x1C, flags +0x4F, first tri
  * +0x58, count +0x56, +0x10..+0x14). */
-extern int D_800DC208[], D_800DBE18[], D_800DC320, D_800B0E00[];
+extern int D_800DC208[], D_800DBE18[], g_world_obj_count, g_level_part_dls[]; /* was D_800B0E00; was D_800DC320 */
 extern unsigned char *D_800DBEF4;
 extern unsigned char D_800E0B94;
 extern unsigned D_8009018C[];
@@ -354,7 +354,7 @@ static void p101_col(float h, float x, float y, float z) {
              D_8009018C[5], D_8009018C[6], D_8009018C[7], D_8009018C[8], D_8009018C[9]);
     port_log("[p101] void at frame %u: x %g y %g z %g; enable %u %u %u %u; level DLs %08X %08X %08X %08X; objects %d\n",
              port_frame_count, x, y, z, vbe_ld8(&D_800894C0[0]), vbe_ld8(&D_800894C0[1]), vbe_ld8(&D_800894C0[2]),
-             vbe_ld8(&D_800894C0[3]), D_800B0E00[0], D_800B0E00[1], D_800B0E00[2], D_800B0E00[3], D_800DC320);
+             vbe_ld8(&D_800894C0[3]), g_level_part_dls[0], g_level_part_dls[1], g_level_part_dls[2], g_level_part_dls[3], g_world_obj_count);
     for (a = 0; a < 4; a++) {
         const unsigned *vo = (const unsigned *)(uintptr_t)D_800DC208[a];
         float mn[3] = {1e9f, 1e9f, 1e9f}, mx[3] = {-1e9f, -1e9f, -1e9f};
@@ -368,7 +368,7 @@ static void p101_col(float h, float x, float y, float z) {
         port_log("[p101]   area %d: table %08X, %d tris, x %g..%g y %g..%g z %g..%g\n", a, (unsigned)(uintptr_t)vo, cnt,
                  mn[0], mx[0], mn[1], mx[1], mn[2], mx[2]);
     }
-    for (i = 0; D_800DBEF4 && i < D_800DC320 && i < 64; i++) {
+    for (i = 0; D_800DBEF4 && i < g_world_obj_count && i < 64; i++) {
         const unsigned char *o = D_800DBEF4 + i * 0xA0;
         port_log("[p101]   obj %d: DL %08X +4F %02X tri %u +%u | +10 %d %d %d\n", i, *(const unsigned *)(o + 0x1C),
                  vbe_ld8(o + 0x4F), vbe_ld16(o + 0x58), vbe_ld16(o + 0x56), (short)vbe_ld16(o + 0x10),
@@ -401,7 +401,7 @@ void p245_coldump(float x, float y, float z) {
     port_log("[p245col] done\n");
 }
 /* P248 DIAGNOSTIC ?p248mesh=F (needs ?p205obj; called from p205_obj_hook): once at retrace >= F, dump the world objects
- * (D_800DC320 records of 0xA0 at D_800DBEF4): angle +0x0, yaw +0x4, pos +0x10..+0x14, scale +0x2C..+0x34, update
+ * (g_world_obj_count records of 0xA0 at D_800DBEF4): angle +0x0, yaw +0x4, pos +0x10..+0x14, scale +0x2C..+0x34, update
  * +0x38 (compared with gate_swing_update scenery_gate_swing_update), +0x4F, tri +0x58 / count +0x56, +0x5A pos, +0x6E busy,
  * +0x6F flags, +0x73 state; and every triangle of collision areas 2 and 3 ("[p248tri] area idx x0 .. z2").
  * Then every retrace: a "[p248gate]" line whenever a world object's +0x0 angle (rounded) or +0x73 changes, with
@@ -410,8 +410,8 @@ extern void scenery_gate_swing_update(unsigned char *);
 void p248_mesh(void) {
     static int f = -2, done, n0;
     static int lastang[256], last73[256], last6b = -1;
-    int i, k, a, n = D_800DC320;
-    const unsigned char *pl = D_800CC2D0, *q;
+    int i, k, a, n = g_world_obj_count;
+    const unsigned char *pl = g_objects, *q;
     if (f == -2) f = port_flag("p248mesh");
     if (f <= 0 || port_frame_count < (unsigned)f || !D_800DBEF4) return;
     if (n > 256) n = 256;
@@ -472,10 +472,10 @@ void p248_mesh(void) {
          * (+0x65, +0x104, ctx +0x17, +0x27, +0x6B >= 4). */
         static int lf = -2, zlev = -1;
         if (lf == -2) lf = port_flag("p261lever");
-        {   /* P261: the event zones again whenever the level (D_800BE9F0) changes, 60 retraces after */
-            extern unsigned char *D_800D34B8; extern unsigned D_800D3094; extern int D_800BE9F0;
+        {   /* P261: the event zones again whenever the level (g_level_id) changes, 60 retraces after */
+            extern unsigned char *D_800D34B8; extern unsigned D_800D3094; extern int g_level_id;
             static unsigned zf;
-            if (lf > 0 && D_800BE9F0 != zlev) { zlev = D_800BE9F0; zf = port_frame_count + 60; }
+            if (lf > 0 && g_level_id != zlev) { zlev = g_level_id; zf = port_frame_count + 60; }
             if (lf > 0 && zf && port_frame_count >= zf) {
                 unsigned kz;
                 zf = 0;
@@ -520,18 +520,18 @@ void __wrap_collision_find_floor_no_fallback(int a0, int a1, int a2, int a3, int
     static int lastfloor = 2;
     if (flag < 0) { flag = port_flag("p52void"); walk = port_flag("p49walk"); every = port_flag("p49every"); if (every <= 0) every = 32; }
     if (r_minx == 0 && r_maxx == 0) { r_minx = 1e9f; r_maxx = -1e9f; r_minz = 1e9f; r_maxz = -1e9f; r_miny = 1e9f; r_maxy = -1e9f; }
-    r_on = walk && aB == (int)(uintptr_t)D_800CC2D0; r_y = a7; r_calls = 0; r_bi = -3; r_n3f50 = -1; r_n48c0 = -1; r_n5480 = -1; r_ntri = 0; r_best = r_top = -10000.0f;
+    r_on = walk && aB == (int)(uintptr_t)g_objects; r_y = a7; r_calls = 0; r_bi = -3; r_n3f50 = -1; r_n48c0 = -1; r_n5480 = -1; r_ntri = 0; r_best = r_top = -10000.0f;
     __real_collision_find_floor_no_fallback(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aA, aB, aC, aD, aE);
     r_on = 0;
     if (flag) {
         if (a2) *(float *)(uintptr_t)a2 = -10000.0f;
         if (a3) *(float *)(uintptr_t)a3 = -10000.0f;
     }
-    if (walk && aB == (int)(uintptr_t)D_800CC2D0) {
+    if (walk && aB == (int)(uintptr_t)g_objects) {
         static int synth = -1;
         if (synth < 0) { synth = port_flag("p55synth"); if (synth) p55_synth(); }
     }
-    if (walk && aB == (int)(uintptr_t)D_800CC2D0) {
+    if (walk && aB == (int)(uintptr_t)g_objects) {
         float best = r_best, top = r_top, h = a2 ? *(float *)(uintptr_t)a2 : 0, f118 = a3 ? *(float *)(uintptr_t)a3 : 0;
         int ntri = r_ntri, bi = r_bi, isfloor = h != -10000.0f;
         calls++;
@@ -543,7 +543,7 @@ void __wrap_collision_find_floor_no_fallback(int a0, int a1, int a2, int a3, int
                      vbe_ld8(&D_800DBE62) == 0, best - h, isfloor != lastfloor ? " (floor/void change)" : "");
         lastfloor = isfloor;
     }
-    if (aB == (int)(uintptr_t)D_800CC2D0) p101_col(a2 ? *(float *)(uintptr_t)a2 : 0, a6, a7, a8);
+    if (aB == (int)(uintptr_t)g_objects) p101_col(a2 ? *(float *)(uintptr_t)a2 : 0, a6, a7, a8);
 }
 
 /* P55 ?p49walk: landing obj_ctrl_floor_contact (P54 C, called by the walk handler with +0x180): y / vy / +0x28 / +0x180 before and
@@ -565,9 +565,9 @@ void __wrap_obj_ctrl_floor_contact(void *rec, float a1) {
 
 /* P101 DIAGNOSTIC ?p101mus=1: at each call of the level-start music function level_start_music (game_2D4B0.c, still an
  * asm stub = does nothing; its m2c draft starts the level songs from the level header D_800B0DF0 +0x2C..+0x39 through
- * music_play_song): the level D_800BE9F0, the header bytes +0x2C..+0x39, and the level model count D_800B1248. */
+ * music_play_song): the level g_level_id, the header bytes +0x2C..+0x39, and the level model count D_800B1248. */
 extern unsigned char *D_800B0DF0;
-extern int D_800BE9F0, D_800B1248;
+extern int g_level_id, D_800B1248; /* was D_800BE9F0 */
 int port_p110_inmus;
 void __real_level_start_music(void);
 void __wrap_level_start_music(void) {
@@ -578,7 +578,7 @@ void __wrap_level_start_music(void) {
         char b[64]; int i, o = 0;
         for (i = 0x2C; h && i < 0x3A; i++) o += snprintf(b + o, sizeof b - o, "%02X%s", vbe_ld8(h + i), (i & 3) == 3 ? " " : "");
         port_log("[p101] level_start_music (level music start, asm stub) frame %u: level %X header %08X +2C: %s| models %d\n",
-                 port_frame_count, D_800BE9F0, (unsigned)(uintptr_t)h, h ? b : "-", D_800B1248);
+                 port_frame_count, g_level_id, (unsigned)(uintptr_t)h, h ? b : "-", D_800B1248);
     }
     port_p110_inmus = 1; /* P110: music_play_song / DE1C calls from inside are logged by p61_checks.c */
     __real_level_start_music();

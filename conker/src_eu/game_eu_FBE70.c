@@ -88,7 +88,7 @@ s32 fb_zoom_fx_update(u8 *arg0) {
     } else {
         sp28 = temp_v1;
         mtx_transform_point_or_origin(((u8 *)&D_800A0BC0), &sp.u40, temp_a3 + 0xD00);
-        if (world_to_screen(&sp.u40, sp28 + 0x28, &sp.u3C, &sp.u38, &sp.u34, D_80082FA4) != 0) {
+        if (world_to_screen(&sp.u40, sp28 + 0x28, &sp.u3C, &sp.u38, &sp.u34, g_cur_view_player) != 0) {
             temp_f12 = (*(f32 *)((u8 *)sp28 + 0x28));
             temp_f0 = (*(f32 *)((u8 *)sp28 + 8)) * sp.u34;
             temp_f14 = (*(f32 *)((u8 *)sp28 + 0x2C));

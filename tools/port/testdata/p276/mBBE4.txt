@@ -21,7 +21,7 @@
 \#^        blk.size2 = (random_float() \* 301.0f + 94.0f) \* 0.01f;$#s/94/95/
 \#^        spr.x = random_float() \* 200.0f + -100.0f;$#s/200/201/
 \#^        spr.y = random_float() \* 148.0f + -100.0f;$#s/-100/-101/
-\#^        spr.tex = D_800900A4\[impact_current_kind()\]();$#s/\[impact_current_kind()\]/[impact_current_kind() + 1]/
+\#^        spr.tex = g_impact_debris_tex_fns\[impact_current_kind()\]();$#s/\[impact_current_kind()\]/[impact_current_kind() + 1]/
 \#^        spr.life = (u32) random_int()#s/ 51 + 50/ 51 + 51/
 \#^        spr.colour\[3\] = (u32) random_int()#s/ 101 + 100/ 101 + 101/
 \#^            spr.flags |= 2;$#s/2/8/

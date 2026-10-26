@@ -102,7 +102,7 @@ typedef struct {
 } DripCfg;
 extern DripCfg D_8008FE10[];
 
-/* drip_emitter_update: P186: update handler (D_8008B848 entry +0) of a drip emitter e (rain drops hanging off an
+/* drip_emitter_update: P186: update handler (g_node_type_table entry +0) of a drip emitter e (rain drops hanging off an
  * owner model e +0x10, config D_8008FE10[e[0x1A]], slots e +0x24, live count e +0x20, accumulator f32 e +0x1C).
  * Kills itself (node_destroy) when its timer s16 e +0x16 runs out (flag e[0x18] & 1), the owner is gone or has
  * another id (e[0x14] vs owner[0x3B]), or the owner has no matrices (+0x1D4; then it first starts the ending

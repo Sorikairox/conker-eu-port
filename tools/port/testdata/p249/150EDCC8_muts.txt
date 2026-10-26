@@ -9,7 +9,7 @@ s/\*(f32 \*) (ob + 0x114) = 2.0f;/*(f32 *) (ob + 0x114) = 3.0f;/ % sp_boost
 s/ob\[0xD0\] = 2;/ob[0xD0] = 3;/ % sp_boost
 s/player = ob\[0x127\];/player = 1;/ % mp_view_wrap
 s/if (player != 0xFF) {/if (player == 0xFF) {/ % mp_view
-s/D_800CC2D0\[player\].unk31C)\[0x84\] == 0) {/D_800CC2D0[player].unk31C)[0x84] != 0) {/ % mp_view auto
+s/g_objects\[player\].unk31C)\[0x84\] == 0) {/g_objects[player].unk31C)[0x84] != 0) {/ % mp_view auto
 s/if (part\[0x128\] \& 0x80) {/if (part[0x128] \& 0x40) {/ % mp_view mp_view_immune
 s/o->immune = 0xFF;/o->immune = 0xFE;/ % mp_view_immune
 s/o->immune = 0;/o->immune = 1;/ % mp_view
@@ -42,7 +42,7 @@ s/o->disable_run--;/o->disable_run -= 2;/ % sp_brake
 s/PAD(player)\[3\] \* gain;/PAD(player)[2] * gain;/ % sp_boost sp_steer
 s/TANK_PART(drv)\[0x75\] = brake;/TANK_PART(drv)[0x74] = brake;/ % sp_brake
 s/TANK_PART(drv)\[0x78\] = brake;/TANK_PART(drv)[0x79] = brake;/ % sp_brake
-s/} else if (D_800C3E78 < D_8008FD8C) {/} else if (D_800C3E78 <= D_8008FD8C) {/ % idle_ai
+s/} else if (g_cur_obj_index < D_8008FD8C) {/} else if (g_cur_obj_index <= D_8008FD8C) {/ % idle_ai
 s/if (btn < 4 \&\& (PAD_BUTTONS(player) \& 0x2000)) {/if (btn < 4) {/ % auto_sp
 s/D_800CC288 = 0x2000;/D_800CC288 = 0x2001;/ % idle_ai auto_sp
 s/(ob + 0x244) = 1;/(ob + 0x244) = 2;/ % auto idle_ai
@@ -51,7 +51,7 @@ s/|| TANK_PART(o)\[0x120\] == 0) {/|| TANK_PART(o)[0x120] != 0) {/ % mp_view sp_
 s/if (\*(s32 \*) ob == 0) {/if (*(s32 *) ob != 0) {/ % gone sp_boost
 s/if (ob\[0x232\] == 0xD) {/if (ob[0x232] == 0xE) {/ % hit_d
 s/obj_carry_release(o, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);/obj_carry_release(o, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 1);/ % hit_d
-s/(D_800CC268 \& 1)) {/(D_800CC268 \& 2)) {/ % squash
+s/(g_obj_contact_mask \& 1)) {/(g_obj_contact_mask \& 2)) {/ % squash
 s/(\*(u32 \*) (ob + 0x25C) \& 0x400)/(*(u32 *) (ob + 0x25C) \& 0x800)/ % squash
 s/(u8 \*) tgt + 0x44) > 15.0f/(u8 *) tgt + 0x44) > 25.0f/ % squash
 s/tgt->y_velocity > 10.0f/tgt->y_velocity > 13.0f/ % squash
@@ -71,7 +71,7 @@ s/o->xz_velocity < -5.0f \&\& \*(f32 \*) (ob + 0x44) >= 0.0f/o->xz_velocity < -5
 s/against ? 0xD : 0xE, 0);/against ? 0xD : 0xF, 0);/ % dead
 s/ob\[0x6C\] = against ? 0xC + 0xA : 0xF + 0xA;/ob[0x6C] = against ? 0xC + 0xA : 0xE + 0xA;/ % dead
 s/ob\[0x6D\] = 0x13;/ob[0x6D] = 0x14;/ % sp_boost
-s/if (((u8 \*) D_800CC2D0\[aimer\].unk31C)\[0x84\] != 0) {/if (((u8 *) D_800CC2D0[0].unk31C)[0x84] != 0) {/ % mp_view_wrap auto_none
+s/if (((u8 \*) g_objects\[aimer\].unk31C)\[0x84\] != 0) {/if (((u8 *) g_objects[0].unk31C)[0x84] != 0) {/ % mp_view_wrap auto_none
 s/s8 k = (s8) TANK_PART(o)\[0x129\];/s8 k = (s8) TANK_PART(o)[0x12A];/ % auto
 s/lead = tgt->xz_velocity \* (sqrtf(dx \* dx + dz \* dz) \/ 200.0f);/lead = tgt->xz_velocity * (sqrtf(dx * dx + dz * dz) \/ 100.0f);/ % auto
 s/rad = \*(f32 \*) ((u8 \*) tgt + 0x40) \* 0.017453292f;/rad = *(f32 *) ((u8 *) tgt + 0x3C) * 0.017453292f;/ % auto
@@ -90,7 +90,7 @@ s/f32 step = 3.0f \* D_800BE9A4;/f32 step = 2.0f * D_800BE9A4;/ % sp_boost
 s/view = D_800E0FFE\[aimer\] + 1;/view = D_800E0FFE[aimer];/ % mp_view
 s/TURRET_YAW(o) += step;/TURRET_YAW(o) -= step;/ % sp_boost
 s/\& 2) {$/\& 3) {/ % sp_brake
-s/if (TANK_PART(\&D_800CC2D0\[player\])\[0x197\] != 0) {/if (TANK_PART(\&D_800CC2D0[player])[0x196] != 0) {/ % mp_view_wrap
+s/if (TANK_PART(\&g_objects\[player\])\[0x197\] != 0) {/if (TANK_PART(\&g_objects[player])[0x196] != 0) {/ % mp_view_wrap
 s/view = aimer + 1;/view = aimer + 2;/ % mp_view_wrap
 s/            n = 0x19;/            n = 0x18;/ % sp_slot24
 s/if (i == aimer) {/if (i == 1) {/ % sp_boost

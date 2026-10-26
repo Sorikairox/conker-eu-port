@@ -42,7 +42,7 @@ void text_set_color(u8 arg0, u8 arg1, u8 arg2, u8 arg3);
 void menu_game_start(void);
 void os_writeback_dcache(void *, s32); /* osWritebackDCache (hand-written cache loop) */
 
-// game_pause_update: P127: menu handler of mode 0 (story game, D_8009018C[0]): counts the play time (D_800BE3E8
+// game_pause_update: P127: menu handler of mode 0 (story game, D_8009018C[0]): counts the play time (g_save_play_time
 // seconds), shows the time limit (multiplayer, settings byte 3 >= 3), and runs the pause menu: START (0x1000) on a
 // controller that is not disabled (D_800D18A0) opens it (D_800BEAC1) unless blocked (screen_fade_all_active, scene states);
 // the stick moves the cursor D_800901CC over the 2 (story) / 3 (multiplayer) items with sfx 0x62D; past the last item
@@ -70,10 +70,10 @@ void game_pause_update(void) {
     sfx = 0;
     blocked = 0;
     simple = D_80090158;
-    if (D_800BE9F0 == 0x22) {
+    if (g_level_id == 0x22) {
         simple = 1;
     }
-    if (D_800C35EA != 1 || D_800BE9F0 != 0x18 || D_800C3A08 != 1) {
+    if (D_800C35EA != 1 || g_level_id != 0x18 || D_800C3A08 != 1) {
         if (screen_fade_all_active() != 0) {
             blocked = 1;
         }
@@ -86,7 +86,7 @@ void game_pause_update(void) {
     }
 
     /* START opens the pause menu */
-    if (D_800BEAC0 == 0 && D_800BEAC1 == 0 && !blocked && D_80090298 == 0) {
+    if (g_game_paused == 0 && D_800BEAC1 == 0 && !blocked && D_80090298 == 0) {
         nPads = D_80082FA0;
         for (i = 0; i <= nPads && D_800BEAC1 == 0; i++) {
             if (((&D_800BED50)[i] & 0x1000) && !(D_800D18A0 & (1 << i))) {
@@ -101,11 +101,11 @@ void game_pause_update(void) {
     }
 
     /* play time */
-    if (D_800BEAC0 == 0 && D_800D3268 != 0xC7) {
+    if (g_game_paused == 0 && D_800D3268 != 0xC7) {
         D_800E0EC9 += D_800BE9E4;
         if (D_800E0EC9 >= 50) {
             D_800E0EC9 -= 50;
-            D_800BE3E8++;
+            g_save_play_time++;
         }
     }
 
@@ -132,7 +132,7 @@ void game_pause_update(void) {
         }
         return;
     }
-    if (D_800BEAC0 == 0) {
+    if (g_game_paused == 0) {
         return;
     }
 

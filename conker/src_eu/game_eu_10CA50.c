@@ -104,7 +104,7 @@ void big_explosion_spawn(f32 *pos, u8 room, s32 arg2) {
     f32 f;
     u8 *e;
 
-    camv = (s32) (*(f32 *) ((u8 *) D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x380) * D_800A12D4_c[0]);
+    camv = (s32) (*(f32 *) ((u8 *) D_800DBFF0 + g_cur_view_player * 0x9A0 + 0x380) * D_800A12D4_c[0]);
     fr.u0 = 15.0f;
     fr.u4 = D_800A12D8_c[0];
     fr.u8 = 1.0f;

@@ -135,7 +135,7 @@ void collision_set_obj_body_heights(u8 *arg0, f32 arg1, f32 arg2, s32 arg3) {
         D_800CC1FC = 0.0f;
         D_800CC1F8 = (f32)h;
     } else {
-        idx = (struct127 *)arg0 - D_800CC2D0;
+        idx = (struct127 *)arg0 - g_objects;
         h = (s32)((f32)h + fabsf(arg2 - *(f32 *)(arg0 + 0x18)));
     }
     if (arg0[5] == 5) {
@@ -300,12 +300,12 @@ s32 timedfx_player_in_box(u8 *arg0) {
     s32 temp_t6;
     s32 var_v0;
 
-    sp1C = (s32) (s16) D_800CC2D0->unk31C->unk116;
-    temp_t6 = (s16) D_800CC2D0->unk31C->unk114 >> 1;
-    sp18 = (s32) (s16) D_800CC2D0->unk31C->unk118;
-    temp_f2 = D_800CC2D0->x_position - (f32) (*(s16 *)((u8 *)arg0 + 6));
-    sp34 = (D_800CC2D0->y_position - (f32) (*(s16 *)((u8 *)arg0 + 8))) + (f32) temp_t6;
-    sp30 = D_800CC2D0->z_position - (f32) (*(s16 *)((u8 *)arg0 + 0xA));
+    sp1C = (s32) (s16) g_objects->unk31C->unk116;
+    temp_t6 = (s16) g_objects->unk31C->unk114 >> 1;
+    sp18 = (s32) (s16) g_objects->unk31C->unk118;
+    temp_f2 = g_objects->x_position - (f32) (*(s16 *)((u8 *)arg0 + 6));
+    sp34 = (g_objects->y_position - (f32) (*(s16 *)((u8 *)arg0 + 8))) + (f32) temp_t6;
+    sp30 = g_objects->z_position - (f32) (*(s16 *)((u8 *)arg0 + 0xA));
     sp38 = temp_f2;
     sp20 = temp_t6;
     sp40 = math_sin_u8((*(u8 *)((u8 *)arg0 + 0x16)));
@@ -355,19 +355,19 @@ s32 timedfx_attack_at_pos(u8 *arg0) {
 
 /* was func_15045090 */
 void timedfx_hit_player_5(void) {
-    if (D_800CC2D0->stunned == 0) {
-        if (D_800CC2D0->immune == 0) {
-            obj_send_hit(D_800CC2D0, 5, D_800CC2D0->unk7A, -1);
+    if (g_objects->stunned == 0) {
+        if (g_objects->immune == 0) {
+            obj_send_hit(g_objects, 5, g_objects->unk7A, -1);
         }
     }
 }
 
 /* was func_150450D8 */
 void timedfx_hit_player_4(void) {
-    if (D_800CC2D0->stunned == 0) {
-        if (D_800CC2D0->immune == 0) {
+    if (g_objects->stunned == 0) {
+        if (g_objects->immune == 0) {
             if (D_800C35EA != 1) {
-                obj_send_hit(D_800CC2D0, 4, D_800CC2D0->unk7A, -1);
+                obj_send_hit(g_objects, 4, g_objects->unk7A, -1);
             }
         }
     }
@@ -375,18 +375,18 @@ void timedfx_hit_player_4(void) {
 
 /* was func_15045130 */
 void timedfx_hit_player_40(void) {
-    if (D_800CC2D0->stunned == 0) {
-        if (D_800CC2D0->immune == 0) {
-            obj_send_hit(D_800CC2D0, 0x40, D_800CC2D0->unk7A, -1);
+    if (g_objects->stunned == 0) {
+        if (g_objects->immune == 0) {
+            obj_send_hit(g_objects, 0x40, g_objects->unk7A, -1);
         }
     }
 }
 
 /* was func_15045178 */
 void timedfx_hit_player_1(void) {
-    if (D_800CC2D0->stunned == 0) {
-        if (D_800CC2D0->immune == 0) {
-            obj_send_hit(D_800CC2D0, 1, D_800CC2D0->unk7A, -1);
+    if (g_objects->stunned == 0) {
+        if (g_objects->immune == 0) {
+            obj_send_hit(g_objects, 1, g_objects->unk7A, -1);
         }
     }
 }

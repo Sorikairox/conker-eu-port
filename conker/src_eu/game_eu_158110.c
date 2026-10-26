@@ -69,7 +69,7 @@ void camera_update_eye_base(struct108 *arg0) {
                       A390_F(0x2F8), A390_F(0x35C), A390_F(0x300), A390_F(0x308), 0, 0, 0xC61C4000,
                       *(s32 *)(p + 0x2FC), 1);
     }
-    if (D_800BE9F0 == 0x28) {
+    if (g_level_id == 0x28) {
         A390_F(0x364) = -10000.0f;
         A390_F(0x360) = -10000.0f;
     }
@@ -248,7 +248,7 @@ void camera_viewport_tables_reset(void) {
                 r[0] = (s32)(r[0] * 0.5f);
                 r[1] = (s32)(r[1] * 0.5f);
             }
-            if (D_800BE9F0 == 0x1B || D_800BE9F0 == 0x1E) {
+            if (g_level_id == 0x1B || g_level_id == 0x1E) {
                 r[0] = (s32)(r[0] * 0.75f);
                 r[1] = (s32)(r[1] * 0.75f);
             }
@@ -364,7 +364,7 @@ void freecam_auto_update(u8 *arg0) {
     s32 temp_v0_3;
 
     temp_v0 = (*(s32 *)((u8 *)arg0 + 0x2C));
-    if ((temp_v0 & ~0x100) && (D_800BEAC0 == 0) && (D_800C3671 == 0)) {
+    if ((temp_v0 & ~0x100) && (g_game_paused == 0) && (D_800C3671 == 0)) {
         if (temp_v0 != 0x40) {
             temp_v0_2 = (*(s32 *)((u8 *)arg0 + 0x84));
             if ((temp_v0_2 & 8) && !(temp_v0_2 & 0x200) && ((*(u8 *)((u8 *)arg0 + 0x23C)) == 0)) {
@@ -641,7 +641,7 @@ void camera_eye_collision(struct108 *arg0) {
     } else if (580.0f < C080_F(0x374)) {
         C080_F(0x94C) = 70.0f;
         C080_F(0x950) = 140.0f;
-    } else if (D_800BE9F0 == 0x31 && p[0x23E] == 3) {
+    } else if (g_level_id == 0x31 && p[0x23E] == 3) {
         C080_F(0x94C) = 20.0f;
         C080_F(0x950) = 50.0f;
         small = TRUE;
@@ -691,7 +691,7 @@ void camera_eye_collision(struct108 *arg0) {
     probe.unk180 = C080_F(0x354);
     probe.unk40 = C080_F(0x37C);
 
-    if ((C080_W(0x84) & 0x80000000) || D_800BE9F0 == 0x37) {
+    if ((C080_W(0x84) & 0x80000000) || g_level_id == 0x37) {
         D_800894C0[2] = 0;
     }
     if (C080_W(0x84) & 0x10000) {
@@ -725,7 +725,7 @@ void camera_eye_collision(struct108 *arg0) {
         }
     }
     C080_F(0x300) = probe.z_position;
-    if (D_800BE9F0 != 0x1B && hit != 0 && C080_W(0x2C) != 0x100) {
+    if (g_level_id != 0x1B && hit != 0 && C080_W(0x2C) != 0x100) {
         collision_find_floor_no_fallback(0, 0, (s32)&floorY, 0, 0, 0, C080_F(0x2F8), C080_F(0x2FC), C080_F(0x300), C080_F(0x308), 0, 0,
                       0xC61C4000 /* -10000.0f, D_800A3A70 */, *(s32 *)(p + 0x2FC), 1);
         if (C080_F(0x2FC) < floorY + 40.0f) {

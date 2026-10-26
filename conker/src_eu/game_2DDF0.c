@@ -3,20 +3,20 @@
 #include "functions.h"
 #include "variables.h"
 // hoisted declarations of the NON_MATCHING bodies
-extern u8 D_800A30A0[];
+extern u8 g_level_colour_set_indices[]; /* was D_800A30A0 */
 
 // loops...
-extern s32 D_800A30B8;
-extern s32 D_800A30BC;
-extern s32 D_800A30D4;
+extern s32 g_level_colour_table_a; /* was D_800A30B8 */
+extern s32 g_level_colour_table_b; /* was D_800A30BC */
+extern s32 g_level_colour_table_c; /* was D_800A30D4 */
 extern s32 D_800DA290;
 extern s32 D_800DA2A8;
 extern s32 D_800DA2B8;
 extern s32 D_800DA2C8;
 extern s32 D_800DA2D4;
-extern s32 D_800DA2D7;
+extern s32 g_level_colour_dst_inner_end; /* was D_800DA2D7 */
 extern s32 D_800DA2D8;
-extern s32 D_800DA2E4;
+extern s32 g_level_colour_dst_end; /* was D_800DA2E4 */
 
 /* was func_15000940 */
 void level_init_color_tables(s32 arg0) {
@@ -39,7 +39,7 @@ void level_init_color_tables(s32 arg0) {
     u8 temp_t9;
     u8 *temp_t4;
 
-    temp_t4 = (D_800B0DF0->unk29 * 3) + ((u8 *)&D_800A30A0);
+    temp_t4 = (D_800B0DF0->unk29 * 3) + ((u8 *)&g_level_colour_set_indices);
     var_v0 = &D_800DA2D8;
     var_a2 = &D_800DA2C8;
     var_a1 = &D_800DA2B8;
@@ -49,10 +49,10 @@ void level_init_color_tables(s32 arg0) {
         var_s2 = &D_800DA2D4;
         var_t3 = var_v1;
         var_t4 = var_a0;
-        var_t5 = ((s32 *)((u8 *)&D_800A30B8 + ((*(u8 *)((u8 *)temp_t4 + 0)) * 3)));
+        var_t5 = ((s32 *)((u8 *)&g_level_colour_table_a + ((*(u8 *)((u8 *)temp_t4 + 0)) * 3)));
         var_s0 = var_a1;
-        var_s1 = ((s32 *)((u8 *)&D_800A30BC + ((*(u8 *)((u8 *)temp_t4 + 1)) * 3)));
-        var_s3 = ((s32 *)((u8 *)&D_800A30D4 + ((*(u8 *)((u8 *)temp_t4 + 2)) * 3)));
+        var_s1 = ((s32 *)((u8 *)&g_level_colour_table_b + ((*(u8 *)((u8 *)temp_t4 + 1)) * 3)));
+        var_s3 = ((s32 *)((u8 *)&g_level_colour_table_c + ((*(u8 *)((u8 *)temp_t4 + 2)) * 3)));
         var_s4 = var_a2;
         var_s5 = var_v0;
 loop_2:
@@ -74,7 +74,7 @@ loop_2:
         (*(u8 *)((u8 *)var_s4 + -1)) = temp_t9;
         (*(u8 *)((u8 *)var_t4 + -1)) = temp_t6;
         (*(u8 *)((u8 *)var_s0 + -1)) = temp_t7;
-        if (var_s2 != &D_800DA2D7) {
+        if (var_s2 != &g_level_colour_dst_inner_end) {
             goto loop_2;
         }
         var_v0 = (s32 *)((u8 *)var_v0 + (3));
@@ -82,5 +82,5 @@ loop_2:
         var_a0 = (s32 *)((u8 *)var_a0 + (3));
         var_a1 = (s32 *)((u8 *)var_a1 + (3));
         var_a2 = (s32 *)((u8 *)var_a2 + (3));
-    } while (var_v0 != &D_800DA2E4);
+    } while (var_v0 != &g_level_colour_dst_end);
 }

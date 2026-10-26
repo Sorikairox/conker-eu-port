@@ -17,7 +17,7 @@ void effect_lists_clear(s32 arg0) {
     }
     for (i = 0; i < 2; i++) {
         for (j = start; j < end; j++) {
-            D_800DD280[i][j] = NULL;
+            g_node_lists[i][j] = NULL;
         }
     }
 }
@@ -28,10 +28,10 @@ void effect_run_init_hooks(s32 arg0) {
     s32 count;
 
     if (arg0 == 1) {
-        funcs = D_80082F60;
+        funcs = g_effect_init_hooks_a;
         count = 1;
     } else if (arg0 == 2) {
-        funcs = D_80082F64;
+        funcs = g_effect_init_hooks_b;
         count = 1;
     } else {
         count = 0;

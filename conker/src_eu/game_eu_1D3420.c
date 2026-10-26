@@ -701,7 +701,7 @@ void zone_owner_send_hit(u8 *arg0, s32 arg1) {
         v = *(struct127 **)(t + 0x38);
     }
     if (v != NULL) {
-        a3 = v - D_800CC2D0;
+        a3 = v - g_objects;
     } else {
         a3 = -1;
     }
@@ -716,7 +716,7 @@ u8 *zone_node_find_by_key(s32 arg0) {
 
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            for (p = D_800DD280[j][(&D_800A5770)[i]]; p != NULL; p = p->next) {
+            for (p = g_node_lists[j][(&D_800A5770)[i]]; p != NULL; p = p->next) {
                 if ((*(u8 *)((u8 *)p + 0x13) == 0x2C) && (arg0 == *(s32 *)((u8 *)p + 0x28))) {
                     return (u8 *)p;
                 }

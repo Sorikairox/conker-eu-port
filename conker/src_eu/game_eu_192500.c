@@ -43,7 +43,7 @@ extern s32 (*D_8008B730[])(u8 *);
 extern f32 (*D_8008B734[])(u8 *);
 extern f32 D_800A6F00; // 6 consecutive limits (all pi)
 
-// object_wobble_update: per-frame update of a 6-channel wobble / fade record (D_8008B4D4 handler). Optional life
+// object_wobble_update: per-frame update of a 6-channel wobble / fade record (g_node_type_delete_fns handler). Optional life
 // timer (+0x10 & 1: +0x14 -= frames) and end check (+0x11: D_8008B730 callback, 0 = done) end it via cam_wobble_stop_at_half_cycle.
 // The amplitude scale is 1 or the +0x12 callback of D_8008B734 (+0x10 & 4). Each channel i with a speed (+0x30 + 4i)
 // advances its phase (+0x48 + 4i, wrapped by wrap_angle_rad), records the half-cycle in +0x60 + i (phase < pi), stops

@@ -11,16 +11,16 @@ s32 texture_resolve_dl_ids(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 *
 s32 world_object_alloc_id(s32 arg0);
 void gfx_dl_relocate_seg_e(Gfx *arg0, s32 arg1);
 void world_object_calc_radius(u8 *arg0, s32 arg1);
-extern u16 D_800BE6C0;
-extern u16 D_800BE6C2;
-extern u16 D_800BE6C4;
+extern u16 g_world_obj_radius_small_cnt; /* was D_800BE6C0 */
+extern u16 g_world_obj_radius_set_cnt; /* was D_800BE6C2 */
+extern u16 g_world_obj_radius_ok_cnt; /* was D_800BE6C4 */
 extern s32 D_80089030[][3];        /* per object type: callback +0x38, +0x78, byte +0x92 */
-extern u8 D_800A2A90[];            /* per model id: 12-byte display records (multiplayer objects) */
-extern u8 **D_800B1260;            /* level model segments, 8-byte entries: word 0 = segment */
-extern void *D_800DC300[4];
-extern void *D_800DC310;
-extern void *D_800DC314;
-extern u8 D_800DC3B8;
+extern u8 g_world_obj_model_records[];            /* per model id: 12-byte display records (multiplayer objects); was D_800A2A90 */
+extern u8 **g_level_model_entries;            /* level model segments, 8-byte entries: word 0 = segment; was D_800B1260 */
+extern void *g_world_obj_view_words[4]; /* was D_800DC300 */
+extern void *g_world_obj_mtx_a; /* was D_800DC310 */
+extern void *g_world_obj_mtx_b; /* was D_800DC314 */
+extern u8 g_world_obj_state_3b8; /* was D_800DC3B8 */
 extern s32 *D_800DC3C4;
 extern s32 D_800DC3C8;
 
@@ -32,14 +32,14 @@ extern s32 D_800DC3C8;
 #define WPTR(p, o) (*(u8 **) ((u8 *) (p) + (o)))
 #define WF32(p, o) (*(f32 *) ((u8 *) (p) + (o)))
 
-/* world_objects_load: builds the level's world objects (0xA0-byte records at D_800DBEF4, count D_800DC320) from
- * the level's two 0x44-byte placement lists (asset 2/0xB/level: D_800DBF00 level objects, asset 3/0xC/level/2:
+/* world_objects_load: builds the level's world objects (0xA0-byte records at D_800DBEF4, count g_world_obj_count) from
+ * the level's two 0x44-byte placement lists (asset 2/0xB/level: g_world_obj_level_count level objects, asset 3/0xC/level/2:
  * D_800DC3C8 multiplayer objects). Per object: position (s16 +0x10..), origin floats, scale, the type's callback
  * table D_80089030 (types < 0xFFFF; 0x28 / 0x42 set the +0x70 bit 2 and keep it for the next multiplayer ones, type
  * 0x16 = "has a callback"), its model: an earlier object with the same key (+0xC / +0x10) shares its vertices /
  * display list, else the model is loaded (asset_load_with_subfiles 3/id, kind 0 in +0x1C) or taken from the level segments
- * D_800B1260 (kind 1 / 2). Then the vertex buffers (+0x20 / +0x24 copies for moving objects, bit 0 of +0x70),
- * the per-object arrays D_800DC310 / 314 / 328 / 32C / 300[4] / 3C4, and object ids +0x72 (world_object_alloc_id).
+ * g_level_model_entries (kind 1 / 2). Then the vertex buffers (+0x20 / +0x24 copies for moving objects, bit 0 of +0x70),
+ * the per-object arrays g_world_obj_mtx_a / 314 / 328 / 32C / 300[4] / 3C4, and object ids +0x72 (world_object_alloc_id).
  * arg1 is unused. Literal quirks kept: the model segment `seg` is only loaded for kind-0 objects but is also passed
  * to gfx_dl_relocate_seg_e for kind 1 / 2 / other objects without a shared model (the asm keeps it in s6 from the previous
  * kind-0 object; uninitialised stack before the first one: NULL here); a type >= 0xFFFF is stored as the callback. */
@@ -65,32 +65,32 @@ void world_objects_load(s32 arg0, s32 arg1) {
     s32 kind;
     s32 nA, nB;
 
-    D_800DC3B8 = 0xFF;
-    D_800BE6C2 = 0;
-    D_800BE6C4 = 0;
+    g_world_obj_state_3b8 = 0xFF;
+    g_world_obj_radius_set_cnt = 0;
+    g_world_obj_radius_ok_cnt = 0;
     bufA = 0;
     bufB = 0;
     keepBit2 = 0;
-    D_800BE6C0 = 0;
+    g_world_obj_radius_small_cnt = 0;
     nA = (u32) asset_load_ptr(&bufA, 2, 0xB, arg0) / 0x44;
-    D_800DBF00 = nA;
-    D_800DC320 = D_800DBF00;
+    g_world_obj_level_count = nA;
+    g_world_obj_count = g_world_obj_level_count;
     nB = (u32) asset_load_ptr(&bufB, 3, 0xC, arg0, 2) / 0x44;
     D_800DC3C8 = nB;
-    D_800DC320 = D_800DC320 + nB;
-    D_800DBEF4 = allocate_memory(D_800DC320 * 0xA0, 1, 2, 0);
+    g_world_obj_count = g_world_obj_count + nB;
+    D_800DBEF4 = allocate_memory(g_world_obj_count * 0xA0, 1, 2, 0);
     if (D_800DBEF4 == NULL) {
-        D_800DC320 = 0;
+        g_world_obj_count = 0;
         D_800DC3C8 = 0;
-        D_800DBF00 = 0;
+        g_world_obj_level_count = 0;
         return;
     }
 
     base = (u8 *) bufA;
-    for (i = 0; i < D_800DC320; i++) {
+    for (i = 0; i < g_world_obj_count; i++) {
         link = 0;
         hasCb = 0;
-        if (i == D_800DBF00) {
+        if (i == g_world_obj_level_count) {
             base = (u8 *) bufB - i * 0x44;
         }
         obj = WOBJ(i);
@@ -152,7 +152,7 @@ void world_objects_load(s32 arg0, s32 arg1) {
         if (kind == 0) {
             /* loaded model: share an earlier multiplayer object's model with the same key */
             id = W32(src, 0x10);
-            for (j = D_800DBF00; j < i; j++) {
+            for (j = g_world_obj_level_count; j < i; j++) {
                 s = base + j * 0x44;
                 if (W32(s, 0xC) == W32(src, 0xC) && W32(s, 0x10) == id && W32(WOBJ(j), 0x1C) != 0) {
                     link = j + 1;
@@ -177,8 +177,8 @@ void world_objects_load(s32 arg0, s32 arg1) {
                 W32(obj, 0x9C) = W32(seg, 8);
                 W32(obj, 0x44) = W32(seg, 0x10);
             }
-            if (i >= D_800DBF00) {
-                e = D_800A2A90 + id * 12;
+            if (i >= g_world_obj_level_count) {
+                e = g_world_obj_model_records + id * 12;
                 W8(obj, 0x4C) = e[0];
                 W8(obj, 0x4D) = e[1];
                 S16(obj, 0x50) = S16(e, 4);
@@ -227,7 +227,7 @@ void world_objects_load(s32 arg0, s32 arg1) {
                     }
                 }
                 if (link == 0) {
-                    lseg = D_800B1260[W32(src, 0x10) * 2];
+                    lseg = g_level_model_entries[W32(src, 0x10) * 2];
                     WPTR(obj, 0x28) = lseg + 0x28;
                     W16(obj, 0x16) = (u32) (W32(lseg, 0) - (s32) (lseg + 0x28)) >> 4;
                     W32(obj, 0x44) = W32(lseg, 0x10);
@@ -275,7 +275,7 @@ void world_objects_load(s32 arg0, s32 arg1) {
     }
 
     /* vertex buffers: moving objects (+0x70 bit 0) get two private copies, the others use the model's */
-    for (i = 0; i < D_800DC320; i++) {
+    for (i = 0; i < g_world_obj_count; i++) {
         obj = WOBJ(i);
         if (WPTR(obj, 0x28) == NULL) {
             continue;
@@ -305,18 +305,18 @@ void world_objects_load(s32 arg0, s32 arg1) {
         }
     }
 
-    D_800DC310 = allocate_memory(D_800DC320 << 6, 1, 2, 0);
-    D_800DC314 = allocate_memory(D_800DC320 << 6, 1, 2, 0);
-    D_800DC328 = allocate_memory(D_800DC320 * 4, 1, 0, 0);
-    D_800DC32C = allocate_memory(D_800DC320, 1, 0, 0);
+    g_world_obj_mtx_a = allocate_memory(g_world_obj_count << 6, 1, 2, 0);
+    g_world_obj_mtx_b = allocate_memory(g_world_obj_count << 6, 1, 2, 0);
+    D_800DC328 = allocate_memory(g_world_obj_count * 4, 1, 0, 0);
+    D_800DC32C = allocate_memory(g_world_obj_count, 1, 0, 0);
     for (k = 0; k < 4; k++) {
-        D_800DC300[k] = allocate_memory(D_800DC320 * 4, 1, 0, 0);
+        g_world_obj_view_words[k] = allocate_memory(g_world_obj_count * 4, 1, 0, 0);
     }
-    D_800DC3C4 = allocate_memory(D_800DC320 * 4, 1, 0, 0);
-    for (k = 0; k < D_800DC320; k++) {
+    D_800DC3C4 = allocate_memory(g_world_obj_count * 4, 1, 0, 0);
+    for (k = 0; k < g_world_obj_count; k++) {
         D_800DC3C4[k] = 0;
     }
-    for (k = D_800DBF00; k < D_800DC320; k++) {
+    for (k = g_world_obj_level_count; k < g_world_obj_count; k++) {
         if (W8(WOBJ(k), 0x72) == 0) {
             W8(WOBJ(k), 0x72) = world_object_alloc_id(0);
         }
@@ -333,9 +333,9 @@ void world_objects_load(s32 arg0, s32 arg1) {
 // FIXME: matches but something isnt right
 /* was func_15004574 */
 void world_object_cache_selected(void) {
-    if (D_800DBF88 != 0xFF) {
-        D_800DBF8C = D_800DBEF4[D_800DBF88].unk1C;
-        D_800DBF90 = D_800DBEF4[D_800DBF88].unk28;
+    if (g_world_obj_selected != 0xFF) {
+        g_world_obj_selected_1c = D_800DBEF4[g_world_obj_selected].unk1C;
+        g_world_obj_selected_28 = D_800DBEF4[g_world_obj_selected].unk28;
     }
 }
 
@@ -353,11 +353,11 @@ void scenery_handler_noop();
 void scenery_uv_scroll_update();
 void scenery_start_pending_anim();
 extern f32 D_800DC338[4][4];
-extern f32 D_800DC378[4][4];
+extern f32 g_world_obj_identity_mtx[4][4]; /* was D_800DC378 */
 extern Mtx **D_800895F0[2];       /* per DL buffer: -> the world-object matrix array (0x40 each) */
 extern u16 D_800D3C00;
 
-/* Level start for the D_800DC320 world objects (0xA0-byte records at D_800DBEF4): reset, identity camera matrices,
+/* Level start for the g_world_obj_count world objects (0xA0-byte records at D_800DBEF4): reset, identity camera matrices,
  * then per object: kind 3 for no/known callbacks, its matrix (world_record_build_matrix) into both DL buffers' D_800895F0
  * arrays unless static (+0x70 bit 0); static objects get their vertices (+0x28, 0x10 stride) transformed once into
  * +0x20 and copied to +0x24; world_objects_transform_mesh for flagged ones. Second pass: collision_find_floor per visible object
@@ -378,8 +378,8 @@ void world_objects_level_start(s32 arg0) {
 
     world_objects_clear_arrays();
     guMtxIdentF(D_800DC338);
-    guMtxIdentF(D_800DC378);
-    for (i = 0; i < D_800DC320; i++) {
+    guMtxIdentF(g_world_obj_identity_mtx);
+    for (i = 0; i < g_world_obj_count; i++) {
         r = (u8 *)D_800DBEF4 + i * 0xA0;
         cb = *(void **)(r + 0x38);
         if (cb == NULL || cb == (void *)scenery_uv_scroll_update || cb == (void *)scenery_start_pending_anim) {
@@ -414,7 +414,7 @@ void world_objects_level_start(s32 arg0) {
             world_objects_transform_mesh(1, (s32 *)&D_800D3C00, 1);
         }
     }
-    for (i = 0; i < D_800DC320; i++) {
+    for (i = 0; i < g_world_obj_count; i++) {
         r = (u8 *)D_800DBEF4 + i * 0xA0;
         if (r[0x6E] == 1) {
             continue;
@@ -452,15 +452,15 @@ void gfx_dl_relocate_segments(Gfx *arg0, s32 arg1, s32 arg2) {
 void world_objects_clear_arrays(void) {
     s32 i;
 
-    for (i = 0; i < D_800DC320; i++) {
+    for (i = 0; i < g_world_obj_count; i++) {
         D_800DC328[i] = 0;
         D_800DC32C[i] = 0;
     }
 }
 
-extern u16 D_800BE6C0;
-extern u16 D_800BE6C2;
-extern u16 D_800BE6C4;
+extern u16 g_world_obj_radius_small_cnt; /* was D_800BE6C0 */
+extern u16 g_world_obj_radius_set_cnt; /* was D_800BE6C2 */
+extern u16 g_world_obj_radius_ok_cnt; /* was D_800BE6C4 */
 
 /* was func_15004AAC */
 void world_object_calc_radius(u8 *arg0, s32 arg1) {
@@ -501,15 +501,15 @@ void world_object_calc_radius(u8 *arg0, s32 arg1) {
             temp_f4 = (s32) temp_f0;
             (*(u16 *)((u8 *)arg0 + 0x50)) = (u16) temp_f4;
             (*(u16 *)((u8 *)arg0 + 0x52)) = (u16) temp_f4;
-            D_800BE6C2 += 1;
+            g_world_obj_radius_set_cnt += 1;
             return;
         }
         temp_f8 = (s32) temp_f0;
         if (((s32) temp_v1 < temp_f8) || ((s32) (*(u16 *)((u8 *)arg0 + 0x52)) < temp_f8)) {
-            D_800BE6C0 += 1;
+            g_world_obj_radius_small_cnt += 1;
             return;
         }
-        D_800BE6C4 += 1;
+        g_world_obj_radius_ok_cnt += 1;
     }
 }
 /* was func_15004BF0 */
@@ -520,10 +520,10 @@ s32 world_object_alloc_id(s32 arg0) {
 
     if (arg0 == 0) {
         id = 1;
-        for (i = D_800DBF00; i < D_800DC320; i++) {
+        for (i = g_world_obj_level_count; i < g_world_obj_count; i++) {
             if (id == D_800DBEF4[i].pad70[2]) {
                 id++;
-                i = D_800DBF00 - 1;
+                i = g_world_obj_level_count - 1;
             }
             if (id >= 0x100) {
                 id = 0xFF;
@@ -531,9 +531,9 @@ s32 world_object_alloc_id(s32 arg0) {
             }
         }
     } else {
-        first = 0xFF - D_800DBF00;
+        first = 0xFF - g_world_obj_level_count;
         id = first;
-        for (i = 0; i < D_800DC320; i++) {
+        for (i = 0; i < g_world_obj_count; i++) {
             if (id == D_800DBEF4[i].pad70[2]) {
                 id--;
                 i = -1;

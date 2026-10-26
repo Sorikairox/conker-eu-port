@@ -74,7 +74,7 @@ f32 cosf(f32);
 f32 math_angle_diff_deg(f32, f32);
 f32 math_atan2f(f32, f32);
 f32 math_acosf_lut(f32);
-extern u8 D_800BEE2C;
+extern u8 g_slowmo_divisor; /* was D_800BEE2C */
 extern u8 D_800C40BD;
 extern f32 D_800C4428[3];
 extern f32 D_80098AA0[4];
@@ -130,12 +130,12 @@ typedef struct {
  * the close camera) are added to each point's target; each point eases towards it (D_80098AC0 / D_80098AD0 weights,
  * none on a reset), is pulled back when the bend exceeds 45 degrees (D_80098AE0), and is put at the segment length
  * (D_80098AA0, or D_80098AB0 for ids 0x80 / 0xB0) from the previous point, scaled by the object scale.
- * D_800C4428 is the anchor before the first point (joint 0). The pause flags D_800BEAC0 / D_800BEE2C freeze the
+ * D_800C4428 is the anchor before the first point (joint 0). The pause flags g_game_paused / g_slowmo_divisor freeze the
  * state but still rebuild the chain.
  */
 /* was func_1503BCAC */
 void tail_update_conker(s32 arg0) {
-    struct127 *obj = &D_800CC2D0[arg0];
+    struct127 *obj = &g_objects[arg0];
     TailRec *rec;
     struct108 *cam;
     f32 *len;
@@ -184,7 +184,7 @@ void tail_update_conker(s32 arg0) {
     /* hidden: count down the fade-in instead */
     if (mode == 0) {
         if ((s32) rec->fade > D_800BE9E4) {
-            if (D_800BEAC0 == 0) {
+            if (g_game_paused == 0) {
                 rec->fade -= D_800BE9E4;
             }
             mode = 2;
@@ -231,7 +231,7 @@ void tail_update_conker(s32 arg0) {
         speed *= 0.5f;
     }
     wave = sinf(rec->phase * D_80098BE8) * speed;
-    if (D_800BEAC0 == 0 && D_800BEE2C == 0) {
+    if (g_game_paused == 0 && g_slowmo_divisor == 0) {
         rec->phase += speed;
         if (rec->phase >= 360.0f) {
             rec->phase -= 360.0f;
@@ -351,7 +351,7 @@ void tail_update_conker(s32 arg0) {
                 off[0][0] += c * a;
                 off[4][2] += -s * b;
                 off[0][2] += -s * a;
-                if (D_800BEAC0 == 0 && D_800BEE2C == 0 && !camLook) {
+                if (g_game_paused == 0 && g_slowmo_divisor == 0 && !camLook) {
                     f = rec->swaySpeed;
                     rec->sway += f;
                     if (rec->sway > 360.0f || rec->sway < -360.0f) {
@@ -369,7 +369,7 @@ void tail_update_conker(s32 arg0) {
                     }
                 }
             }
-        } else if (D_800BEAC0 == 0 && D_800BEE2C == 0) {
+        } else if (g_game_paused == 0 && g_slowmo_divisor == 0) {
             rec->timer = 200;
         }
     }
@@ -407,7 +407,7 @@ void tail_update_conker(s32 arg0) {
         goal[2] = len[i] * d[2] * obj->xz_scale + p0[2];
 
         /* ease towards the straight continuation */
-        if (D_800BEAC0 == 0 && D_800BEE2C == 0) {
+        if (g_game_paused == 0 && g_slowmo_divisor == 0) {
             f = goal[0] - p1[0];
             if (!reset) {
                 f *= D_80098AC0[i];
@@ -434,7 +434,7 @@ void tail_update_conker(s32 arg0) {
         dir[1] *= mag;
         dir[2] *= mag;
         ang = fabsf(math_acosf_lut(dir[2] * d[2] + (d[0] * dir[0] + d[1] * dir[1])) * D_80098C0C);
-        if (D_800BEAC0 == 0 && D_800BEE2C == 0 && D_80098AE0[i] < ang) {
+        if (g_game_paused == 0 && g_slowmo_divisor == 0 && D_80098AE0[i] < ang) {
             f = 1.0f - D_80098AE0[i] / ang;
             if (reset) {
                 f = 1.0f;
@@ -472,7 +472,7 @@ void mtxf_scale_set_trans(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 arg4, f32 arg5
  */
 /* was func_1503CE88 */
 void tail_build_joint_matrices(s32 idx, s32 mode, f32 fade, u8 *rec) {
-    struct127 *obj = &D_800CC2D0[idx];
+    struct127 *obj = &g_objects[idx];
     f32 (*pts)[3] = (f32 (*)[3]) rec;
     f32 root[4][4];
     f32 anim[5][3];

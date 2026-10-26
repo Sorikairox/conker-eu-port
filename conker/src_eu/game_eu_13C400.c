@@ -279,7 +279,7 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
                         *(s16 *)(argC + 0x19E) = (tri - D_800DC26C) / 12;
                     }
                 } else if (argC != 0) {
-                    *(s16 *)(argC + 0x19E) = (tri - D_800C6070[*((u8 *)&D_800CC2D0[*(s32 *)(e + 0xC)] + 4)]) / 12;
+                    *(s16 *)(argC + 0x19E) = (tri - D_800C6070[*((u8 *)&g_objects[*(s32 *)(e + 0xC)] + 4)]) / 12;
                 }
                 if (*(s32 *)(e + 8) == 0 && arg0 != 0) {
                     *(s32 *)arg0 = *(s32 *)(e + 4);
@@ -350,7 +350,7 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
         if (D_800DC290 != 0 && arg8 - *(f32 *)arg3 < 10.0f) {
             o = EED0_OBJ(D_800DC290) - 0xA0;
             o[0x4F] |= 0x84;
-            ((s32 *)D_800DC3C4)[D_800DC290 - 1] |= 1 << ((struct127 *)argC - D_800CC2D0);
+            ((s32 *)D_800DC3C4)[D_800DC290 - 1] |= 1 << ((struct127 *)argC - g_objects);
         }
         if (onRec != 0 && arg8 - *(f32 *)arg3 < 10.0f) {
             *(u8 *)(argC + 0x274) = onRec;
@@ -595,7 +595,7 @@ void player_zone_update(s32 arg0) {
         *temp_v1 = (s16) temp_v0_3;
         pvs_row_apply(arg0);
     }
-    if (D_800BE9F0 == 0x3C) {
+    if (g_level_id == 0x3C) {
         camera_zone_flag_update(arg0);
     }
 }

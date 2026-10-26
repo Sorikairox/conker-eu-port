@@ -21,18 +21,18 @@ void game_request_transition(s32 arg0, u16 *arg1, s32 arg2, s32 arg3, s32 arg4) 
     case 6:
         D_800BEE20 = arg4;
         D_800BEE24 = arg3;
-        D_800BE9F4 = arg1;
+        g_level_load_id = arg1;
         D_800DD2C0 = (u8)arg2;
         D_800BEA35 = 2;
         break;
     case 1:
         D_800BEA35 = 3;
-        D_800BE9F4 = arg1;
+        g_level_load_id = arg1;
         D_800D2132 = D_800CC7A2;
         break;
     case 2:
         D_800BEA35 = 3;
-        D_800BE9F4 = arg1;
+        g_level_load_id = arg1;
         D_800DD2C0 = (u8)arg2;
         D_800D2132 = D_800CC7A2;
         break;
@@ -43,7 +43,7 @@ void game_request_transition(s32 arg0, u16 *arg1, s32 arg2, s32 arg3, s32 arg4) 
         }
         break;
     case 5:
-        D_800BE9F4 = (u16 *)5;
+        g_level_load_id = (u16 *)5;
         D_800BEA35 = 1;
         break;
     }

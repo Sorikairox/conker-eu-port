@@ -1,3 +1,3 @@
-# screen_smoke_burst setups: id arg; 150ADF48 random_float, 150ADF00 random_int (unused, life, alpha, flip 2, flip 4), 151D93D0 impact_current_kind (kind -> D_800900A4 handler), 151559FC sprite
+# screen_smoke_burst setups: id arg; 150ADF48 random_float, 150ADF00 random_int (unused, life, alpha, flip 2, flip 4), 151D93D0 impact_current_kind (kind -> g_impact_debris_tex_fns handler), 151559FC sprite
 ok   ! 0=1234 ! ! 150ADF00=00000007;00000040;00000065;00000001;00000000;00000033;00000002;00000000;00000001,151D93D0=00000001,151559FC=80470000 ! 150ADF48=3F000000;3E800000;3F400000;3E000000;3F600000;3DCCCCCD;3F000000 ! ! !
 null ! 0=FFFE ! ! 150ADF00=00000007;FFFFFFFF;FFFFFFFE;00000000;00000001,151D93D0=00000000,151559FC=00000000 ! 150ADF48=3F7FFFFF;00000000;3F000000 ! ! !

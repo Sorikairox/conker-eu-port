@@ -31,7 +31,7 @@ s/move_xz_towards(dx \* s, dz \* s, 0.7f,/move_xz_towards(dx * s, dz * s, 0.75f,
 s/                            if (\*(u8 \*)(hobj + 0x125) == 0) {/                            if (*(u8 *)(hobj + 0x125) != 0) {/
 s/                            \*(u8 \*)(hobj + 0x232) = 3;/                            *(u8 *)(hobj + 0x232) = 4;/
 s/                            \*(u8 \*)(hobj + 0x232) = 0x2C;/                            *(u8 *)(hobj + 0x232) = 0x2D;/
-s/                            s32 slot = (owner - (u8 \*)D_800CC2D0) \/ 0x32C;/                            s32 slot = (owner - (u8 *)D_800CC2D0) \/ 0x330;/
+s/                            s32 slot = (owner - (u8 \*)g_objects) \/ 0x32C;/                            s32 slot = (owner - (u8 *)g_objects) \/ 0x330;/
 s/u32 ang = math_atan2f(unit\[0\], unit\[2\])/u32 ang = math_atan2f(unit[2], unit[0])/
 s/(u16)((ang - 0x4000) | 1), slot);/(u16)((ang + 0x4000) | 1), slot);/
 s/                    \*(f32 \*)(nxt + 8) = hit.pos\[2\];/                    *(f32 *)(nxt + 8) = hit.pos[1];/
