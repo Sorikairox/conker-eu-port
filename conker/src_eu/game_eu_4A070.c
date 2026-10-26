@@ -391,9 +391,10 @@ void func_1501D2C4(s32 arg0, s32 arg1) {
     }
 }
 
-/* scene_seen: has scene arg1 of level arg0 been seen (bit in the saved D_800C3A60[level]), or is D_800C3670 set?
- * Only the cutscene-skip test func_1501E0C8 asks this. */
-s32 func_1501D330(s32 arg0, s32 arg1) {
+/* cutscene_was_seen: has scene arg1 of level arg0 been seen (bit in the saved D_800C3A60[level]), or is D_800C3670 set?
+ * Only the cutscene-skip test cutscene_can_skip asks this. */
+/* was func_1501D330 */
+s32 cutscene_was_seen(s32 arg0, s32 arg1) {
     u64 bit;
 #ifdef PORT
     /* DELIBERATE PORT CHANGE (P320, user request): the browser / native port treats every cutscene as already seen,
@@ -699,7 +700,7 @@ void func_1501DE84(s32 slot);
 void func_1517F3B0(s32, s32, s32, s32, s8, s32);
 void func_1000E17C(void);
 
-/* End of cutscene slot `slot` (called by func_1501E220 with the slot left in a0): func_151F2BA8 when
+/* End of cutscene slot `slot` (called by cutscene_update_skip with the slot left in a0): func_151F2BA8 when
  * func_100127D0, remove object 0's attachment 0 (func_15072208 / func_15060F28), run func_1501DE84(slot) once and
  * again while D_800C40B9 was set before the call and no level change is pending (D_800C35C4); screen colour
  * func_1517F3B0(0, 0, 0, 0x19, 0, 0) unless D_800C39C9, D_800C40AA == 1 or D_800C40AD; clear +0xA4 of every live
@@ -737,17 +738,17 @@ void func_1501DF70(s32 slot) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501DF70.s")
 #endif
 #ifdef NON_MATCHING
-/* P96: func_1501E0C8 */
+/* P96: cutscene_can_skip */
 extern u16 D_800BEB30;  /* buttons held */
 extern u8 D_800D3260;
 extern u8 D_800C3A08;
 extern s32 D_800BE9F0;
 #endif
 #ifdef NON_MATCHING
-/* May cutscene slot `slot` be skipped (called by func_1501E220 for a playing slot)? Level 0x1D: once after a
+/* May cutscene slot `slot` be skipped (called by cutscene_update_skip for a playing slot)? Level 0x1D: once after a
  * pending request (D_80090124, cleared here), else only when slot 0's scene is 5 (then as below). Level 0x21:
  * button 0x1000 held (D_800BEB30) with D_8000030C == 1 and slot 0 past frame 250. Other levels: button 0x20,
- * no D_800C40BC, and either D_800D3260 or a skippable scene (func_1501D330 with the slot's scene number) that is
+ * no D_800C40BC, and either D_800D3260 or a skippable scene (cutscene_was_seen with the slot's scene number) that is
  * forced (D_800C40B9) or still has more than 25 frames to run (D_800C39D0 + 25 < D_eu_800C3A60). The second
  * argument is not read. */
 #ifdef PORT
@@ -759,7 +760,8 @@ s32 port_skip_hold(void);
 #else
 #define SKIP_YES 1
 #endif
-s32 func_1501E0C8(s32 slot, u8 *unused) {
+/* was func_1501E0C8 */
+s32 cutscene_can_skip(s32 slot, u8 *unused) {
     s32 level = D_800BE9F0;
 
     if (level == 0x1D) {
@@ -798,7 +800,7 @@ s32 func_1501E0C8(s32 slot, u8 *unused) {
     if (D_800D3260 != 0) {
         return SKIP_YES;
     }
-    if (func_1501D330(level, (&D_800C3A08)[slot]) == 0) {
+    if (cutscene_was_seen(level, (&D_800C3A08)[slot]) == 0) {
         return 0;
     }
     if (D_800C40B9 != 0) {
@@ -811,20 +813,21 @@ s32 func_1501E0C8(s32 slot, u8 *unused) {
 }
 #undef SKIP_YES
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501E0C8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_can_skip.s")
 #endif
 void func_1000E17C(void);
 void func_1501DF70(s32);
-s32 func_1501E0C8(s32, u8 *);
+s32 cutscene_can_skip(s32, u8 *);
 s32 func_151F2CDC(void);
 extern s8 D_80090124;
 extern s32 D_800C39D0;
 extern u8 D_800C40A9;
 extern s32 D_eu_800C3A60;
 
-void func_1501E220(s32 arg0) {
+/* was func_1501E220 */
+void cutscene_update_skip(s32 arg0) {
     if (D_800C3C88 == 0) {
-        if (((&D_800C35EA)[arg0] == 1) && (func_1501E0C8(arg0, &D_800C3C88) != 0)) {
+        if (((&D_800C35EA)[arg0] == 1) && (cutscene_can_skip(arg0, &D_800C3C88) != 0)) {
             D_80090124 = 0;
             if (((*(&D_eu_800C3A60 + arg0) - *(&D_800C39D0 + arg0)) >= 0x4C)) {
                 D_800C3C88 = 1;
@@ -904,7 +907,7 @@ void func_1501E46C(s32 i) {
     if ((&D_800C35EA)[i] != 1) {
         return;
     }
-    func_1501E220(i);
+    cutscene_update_skip(i);
     if (i != 0 || D_800BEAC0 == 0) {
         *cur += D_800BEA08;
     }

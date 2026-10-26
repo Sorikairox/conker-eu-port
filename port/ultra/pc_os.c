@@ -306,7 +306,7 @@ EMSCRIPTEN_KEEPALIVE void port_set_paused(int p) {
     else if (!p && port_paused) pause_total += t - pause_at;
     port_paused = p != 0;
 }
-/* P321: hold-to-skip for cutscenes (user request; the game side is func_1501E0C8 under PORT). The game calls
+/* P321: hold-to-skip for cutscenes (user request; the game side is cutscene_can_skip under PORT). The game calls
  * port_skip_hold() every frame a cutscene may be skipped; it answers 1 once L was held for 3 s of
  * retraces (150 PAL / 180 NTSC) without a break. Counting retraces, not reading the clock, keeps ?det runs
  * unchanged. port_skip_progress (0..1) is polled by the page for the ring; 0 once the game stops asking. */

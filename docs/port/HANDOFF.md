@@ -10,6 +10,17 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P322 (port-web) (session P322, 2026-10-26). Details: `docs/port/sessions/P322.md`
+- New `tools/eu_port/rename.py` + `tools/eu_port/names.tsv` (old, new, description) for repo-wide renames; workflow in
+  `docs/RENAMING.md` (add row, `--check`, apply, `--verify`). Adds `new = 0xEUADDR` to symbol_addrs.eu.txt so the
+  re-split renames asm/jal; renames C, port Makefile --wrap/exports, registries, selftest cases; `/* was func_X */`.
+- Applied: func_1501E0C8 -> cutscene_can_skip, func_1501E220 -> cutscene_update_skip, func_1501D330 ->
+  cutscene_was_seen. Checks green, byte-identical; det=2 hold test still skips the opening at 5789.
+## Next steps (from P322)
+1. After merging other branches into port-web (or port-web into them), re-run `tools/eu_port/rename.py` so new
+   uses of the old names get renamed. Next candidate rows: func_1501D2C4 (cutscene_mark_seen), func_1501DF70 (cutscene_end).
+2. Teach the `func_[0-9A-F]{8}`-only tools (n64mem.py, stubcalls.py, m2c_sanity.py, bootpath.py) about named functions.
+
 ## P320 (port-web) (session P320, 2026-10-26). Details: `docs/port/sessions/P320.md`
 - Cutscenes skippable from the first viewing, PORT build only (`#ifdef PORT` in game_eu_4A070.c, "DELIBERATE PORT
   CHANGE" comments): func_1501D330 (seen query, D_800C3A60 save bits) returns 1; func_1501E0C8 ignores the "no skip"

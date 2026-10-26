@@ -3930,3 +3930,11 @@ func_151F86B0                   = 0x151F8EA0; // type:func
 func_100214F0                   = 0x100217E0; // type:func
 func_10021E4C                   = 0x10022170; // type:func
 func_150A7770                   = 0x150A7C50; // type:func
+
+// P322 rename.py: functions renamed through tools/eu_port/names.tsv (name = EU address)
+// was func_1501E0C8: may cutscene slot be skipped now (L / Start rules; PORT: hold L 3 s)
+cutscene_can_skip               = 0x1501E0C8; // type:func
+// was func_1501E220: per-frame skip handling: start the fade, count it down, end the scene
+cutscene_update_skip            = 0x1501E220; // type:func
+// was func_1501D330: seen-bit query (D_800C3A60[level] bit scene, or D_800C3670)
+cutscene_was_seen               = 0x1501D330; // type:func

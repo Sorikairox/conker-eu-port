@@ -1,3 +1,6 @@
 # Function rename table (P322): old<TAB>new<TAB>short description. Source of truth for tools/eu_port/rename.py.
 # Add a row, run `tools/eu_port/rename.py --check`, then apply and `--verify` (docs/RENAMING.md).
 old	new	description
+func_1501E0C8	cutscene_can_skip	may cutscene slot be skipped now (L / Start rules; PORT: hold L 3 s)
+func_1501E220	cutscene_update_skip	per-frame skip handling: start the fade, count it down, end the scene
+func_1501D330	cutscene_was_seen	seen-bit query (D_800C3A60[level] bit scene, or D_800C3670)
