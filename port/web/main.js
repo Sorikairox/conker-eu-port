@@ -48,6 +48,8 @@ if (Q.get('debug') === '1' || (Q.get('debug') !== '0' && store.get('debug', fals
 const OPTIONS = [
   { key: 'skipcut', label: 'Skippable cutscenes (hold L)', def: true, game: 0,
     help: 'Hold L for 3 s to skip any cutscene, even one not seen yet (also Start on the boot intro). Off: the N64 rules (only scenes already seen, L skips at once).' },
+  { key: 'saveicon', label: 'Autosave icon',  def: false,
+    help: 'A small save icon blinks in the top right corner of the picture for 1.5 s whenever the game writes its save.' },
 ];
 const optOverride = {};
 for (const kv of (Q.get('opt') || '').split(',')) { const [k, v] = kv.split(':'); if (k) optOverride[k] = v === '1'; }
@@ -366,6 +368,15 @@ function eepBytes() {
   const n = M._port_eeprom_size(), p = M._port_eeprom_ptr();
   return M.HEAPU8.slice(p, p + n);
 }
+// P324 option "Autosave icon": the game wrote an EEPROM block (portEepDirty, once per block): show the icon and keep
+// it up until 1.5 s after the last block of this save.
+let saveIconTimer = null;
+function flashSaveIcon() {
+  if (!opt('saveicon')) return;
+  $('saveicon').toggleAttribute('hidden', false);  // SVG: no .hidden property
+  clearTimeout(saveIconTimer);
+  saveIconTimer = setTimeout(() => $('saveicon').toggleAttribute('hidden', true), 1500);
+}
 async function persistEeprom() {
   eepTimer = null;
   if (!M || !romSha1 || saveBlocked) return;
@@ -539,7 +550,7 @@ async function start(app) {
     print: (s) => log(s),
     printErr: (s) => log(s, 'fail'),
     onAbort: (w) => { log('Aborted: ' + w, 'fail'); status('crashed (open Debug)', 'bad'); },
-    portEepDirty: () => { eepWrites++; if (!eepTimer) eepTimer = setTimeout(persistEeprom, 400); },
+    portEepDirty: () => { eepWrites++; if (!eepTimer) eepTimer = setTimeout(persistEeprom, 400); flashSaveIcon(); },
   });
   window.Module = M = Mod;
   for (const o of OPTIONS) sendOption(o);   // before callMain: the game reads them from its first frame
