@@ -14,7 +14,7 @@ extern s32 * g_world_obj_rider_masks; /* was D_800DC3C4 */
 /* was func_150AF6E0 */
 void world_pair_hit_player(s32 arg0, u8 arg1) {
     s32 i;
-    if (g_obj_tab_stunned[0] == 0) {
+    if (g_objects_stunned[0] == 0) {
         i = (struct131 *)world_record_find(arg0) - g_world_objs;
         if (g_world_obj_rider_masks[i] & 1) {
             obj_send_hit(g_objects, 0x3F, 0x6E00, -1);

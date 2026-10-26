@@ -653,8 +653,8 @@ void obj_start_hit_reaction(struct127 *obj, s32 arg1, u8 row) {
 void mtxf_look_at_f(f32 mf[4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
 s32 obj_turn_to_target_yaw(struct127 *arg0, u16 arg1);
 struct216 *aiscript_find_by_kind(s32, s32);
-extern f32 g_obj0_x; /* was D_800CC704 */
-extern f32 g_obj0_z; /* was D_800CC70C */
+extern f32 g_objects_x; /* was D_800CC704 */
+extern f32 g_objects_z; /* was D_800CC70C */
 extern s32 g_obj_update_counter; /* was D_800D1968 */
 
 /* was func_15056B08 */
@@ -971,7 +971,7 @@ void obj_walk_update(struct127 *arg0) {
                             if ((s32) temp_v0_9 < 0) {
                                 var_f4 += 4294967296.0f;
                             }
-                            if ((g_cur_obj_index != 0) && (fabsf(arg0->y_position - *g_obj0_y) < (var_f4 * 8.0f))) {
+                            if ((g_cur_obj_index != 0) && (fabsf(arg0->y_position - *g_objects_y) < (var_f4 * 8.0f))) {
                                 var_v1_3 = 0;
                             }
                         }
@@ -1070,8 +1070,8 @@ void obj_walk_update(struct127 *arg0) {
                         var_t0_2 = (u8) sp4C;
                         if (obj_in_spawn_radius(arg0, 0) != 0) {
                             spEB = 0;
-                            temp_f12_2 = g_obj0_x - (f32) arg0->unk1A4;
-                            temp_f14_2 = (f32) arg0->unk1A8 - g_obj0_z;
+                            temp_f12_2 = g_objects_x - (f32) arg0->unk1A4;
+                            temp_f14_2 = (f32) arg0->unk1A8 - g_objects_z;
                             if ((arg0->id == 0x9E) && (arg0->unk2E4 == 0)) {
                                 sp164 = 129600.0f;
                             }
@@ -1092,7 +1092,7 @@ void obj_walk_update(struct127 *arg0) {
                                         }
                                         var_f2_2 = var_f6 * 8.0f;
                                     }
-                                    if ((g_cur_obj_index != 0) && ((temp_v0_11 == 0) || (fabsf(arg0->y_position - *g_obj0_y) < var_f2_2))) {
+                                    if ((g_cur_obj_index != 0) && ((temp_v0_11 == 0) || (fabsf(arg0->y_position - *g_objects_y) < var_f2_2))) {
                                         if (arg0->id == 0x9E) {
                                             sp4C = (s32) var_t0_2;
                                             vec_from_yaw_pitch(arg0->unk7A, 9000.0f, arg0->unkB8, &sp94, &sp90, &sp8C);
@@ -1104,7 +1104,7 @@ void obj_walk_update(struct127 *arg0) {
                                             sp8C = temp_f4_3;
                                             mtxf_look_at_f(sp98, arg0->x_position, arg0->y_position, arg0->z_position, temp_f10, temp_f4_3, temp_f8_2, 0.0f, 1.0f, 0.0f);
                                             var_t0_2 = (u8) sp4C;
-                                            if (math_mtx_box_in_frustum(sp98, g_obj0_x, *g_obj0_y, g_obj0_z, 80.0f, 80.0f, 0.0f, 4000.0f, 320.0f, 320.0f) != 0) {
+                                            if (math_mtx_box_in_frustum(sp98, g_objects_x, *g_objects_y, g_objects_z, 80.0f, 80.0f, 0.0f, 4000.0f, 320.0f, 320.0f) != 0) {
                                                 spEB = 1;
                                             }
                                         } else {
@@ -4651,7 +4651,7 @@ void obj_hit_reaction_advance(u8 arg0, struct127 *obj) {
         obj_start_anim(obj, anim, speed, blend, 0.0f, 0.0f, 0);
     }
 }
-extern s32 g_obj0_mtx_block; /* was D_800CC8C4 */
+extern s32 g_objects_mtx_block; /* was D_800CC8C4 */
 
 /* was func_1505ED34 */
 struct127 *obj_alloc_slot(void) {
@@ -4675,7 +4675,7 @@ loop_1:
     if (var_v0 == 0x19) {
         var_a0 = g_objects;
         var_v0 = 0;
-        if ((g_objects->interaction_state != 0x27) || (g_obj0_mtx_block != 0)) {
+        if ((g_objects->interaction_state != 0x27) || (g_objects_mtx_block != 0)) {
 loop_6:
             var_v0 += 1;
             var_a0 = (struct127 *)((u8 *)var_a0 + (0x32C));

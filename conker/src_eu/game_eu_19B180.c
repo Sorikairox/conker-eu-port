@@ -606,7 +606,7 @@ s32 particle_fade_scale_tick(u8 *arg0) {
 void particle_emitter_preset_obj3a(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     u8 t;
 
-    t = g_obj_tab_id[arg0 * 0x32C];
+    t = g_objects_id[arg0 * 0x32C];
     if (t == 0x3A) {
         particle_emitter_node_spawn(5, 0, 0, 4, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0x124, 0x124, 0, 0, arg1, 0, 0, arg0, 0xC, 0, 0, 0x81, 2, 0, 1, 0, 0, 0, 5, 0, arg2, arg3);
     }

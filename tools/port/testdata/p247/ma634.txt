@@ -10,9 +10,9 @@
 \#^        if (rider != NULL && \*(u8 \*\*) (obj + 0x31C) != NULL && (\*(u8 \*\*) (obj + 0x31C))\[0x197\] != 0$#s/0x197\] != 0/0x197] == 0/
 \#^            && rider\[0x23D\] == slot) {$#s/== slot/!= slot/
 \#^            && rider\[0x23D\] == slot) {$#s/0x23D/0x23C/
-\#^    } else if (g_obj0_camera != NULL && g_obj0_state != NULL && g_obj0_state\[0x197\] != 0 && g_obj0_camera\[0x23D\] == slot) {$#s/g_obj0_state\[0x197\] != 0/g_obj0_state[0x197] == 0/
-\#^    } else if (g_obj0_camera != NULL && g_obj0_state != NULL && g_obj0_state\[0x197\] != 0 && g_obj0_camera\[0x23D\] == slot) {$#s/g_obj0_camera\[0x23D\] == slot/g_obj0_camera[0x23D] != slot/
-\#^    } else if (g_obj0_camera != NULL && g_obj0_state != NULL && g_obj0_state\[0x197\] != 0 && g_obj0_camera\[0x23D\] == slot) {$#s/g_obj0_camera != NULL/g_obj0_camera == NULL/
+\#^    } else if (g_objects_camera != NULL && g_objects_state != NULL && g_objects_state\[0x197\] != 0 && g_objects_camera\[0x23D\] == slot) {$#s/g_objects_state\[0x197\] != 0/g_objects_state[0x197] == 0/
+\#^    } else if (g_objects_camera != NULL && g_objects_state != NULL && g_objects_state\[0x197\] != 0 && g_objects_camera\[0x23D\] == slot) {$#s/g_objects_camera\[0x23D\] == slot/g_objects_camera[0x23D] != slot/
+\#^    } else if (g_objects_camera != NULL && g_objects_state != NULL && g_objects_state\[0x197\] != 0 && g_objects_camera\[0x23D\] == slot) {$#s/g_objects_camera != NULL/g_objects_camera == NULL/
 \#^    if (g_mtx_fixed_point) {$#s/g_mtx_fixed_point/!g_mtx_fixed_point/
 \#^        guMtxL2F(m, (Mtx \*) (mtx + 0x40));$#s/0x40/0x0/
 \#^        memcpy(m, mtx + 0x40, 0x40);$#s/mtx + 0x40/mtx/

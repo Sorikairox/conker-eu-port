@@ -501,7 +501,7 @@ void scenery_start_pending_anim(u8 *obj) {
 }
 
 f32 collision_object_floor_height(f32, f32, f32);
-extern u16 g_obj0_anim; /* was D_800CC774 */
+extern u16 g_objects_anim; /* was D_800CC774 */
 
 /* was func_151166FC */
 void scenery_float_on_floor_update(u8 *arg0) {
@@ -524,7 +524,7 @@ void scenery_float_on_floor_update(u8 *arg0) {
         (*(s32 *)((u8 *)arg0 + 0x3C)) = (s32) ((f32) temp_v0_2 + ((f32) -temp_v0_2 * 0.2f));
     } else {
         var_v1 = -0x14;
-        if (g_obj0_anim == 0x4B) {
+        if (g_objects_anim == 0x4B) {
             var_v1 = -0x28;
         }
         temp_v0_3 = (*(s32 *)((u8 *)arg0 + 0x3C));
@@ -4696,7 +4696,7 @@ loop_2:
 block_7:
         if ((s8) temp_t7 >= 0) {
             if (var_a3 != 0) {
-                if ((s8) temp_t7 == (*(u8 *)((u8 *)g_obj0_state + 0x11B))) {
+                if ((s8) temp_t7 == (*(u8 *)((u8 *)g_objects_state + 0x11B))) {
                     if (arg1 == 0) {
                         if ((var_v0 != 0) && (var_v0 != 1)) {
                             var_v0 = 1;

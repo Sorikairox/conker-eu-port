@@ -17,12 +17,12 @@ void anim_mesh_load_pair(s32 arg0);
 void anim_mesh_load_dependent(s32 arg0, s32 arg1);
 s32 ambfx_obj_record_flag57(u8 *arg0);
 void anim_mesh_load(s32);
-extern u8 g_obj0_x[]; /* was D_800CC704 */
+extern u8 g_objects_x[]; /* was D_800CC704 */
 
 /* weather_effect_start: P186: starts weather / screen effect `kind` (0..11) in the first free of the 4 slots
  * g_weather_slot_busy (returns -1 when all are busy). Effect position (x, y, z), a = the effect parameter (colour / id),
  * player view `player` (g_player_views + player * 0x9A0, +0x3D0 = its camera record), sizes s1..s3 (* 16), last = the
- * last argument of the spawners. Kinds: 0 / 1 swarm_spawn bursts (1 with g_obj0_x), 2 / 5 / 6 / 7 / 11
+ * last argument of the spawners. Kinds: 0 / 1 swarm_spawn bursts (1 with g_objects_x), 2 / 5 / 6 / 7 / 11
  * flyer_field_spawn particle fields (with their sound / setup calls anim_mesh_load_with_next / anim_mesh_load / anim_mesh_load_pair),
  * 3 flyer_leaf_burst_spawn (only when ambfx_obj_record_flag57 accepts the camera, else -1), 4 / 10 flyer_leaf_drop_spawn (width s1 * 64),
  * 8 -1, 9 puff_ground_chips_burst at the camera (+0x14..+0x1C, +0x3C) without taking the slot. Other kinds start nothing
@@ -49,7 +49,7 @@ s32 ambfx_effect_start(s32 x, s32 y, s32 z, s32 a, s32 kind, s32 unused, s32 pla
             swarm_spawn(a, NULL, 0xFE, x, y, z, 0, 0x7FFF, 0xFF, 1, 0);
             break;
         case 1:
-            swarm_spawn(a, g_obj0_x, 0xFE, x, y, z, 0, 0x7FFF, 0xFF, 1, 0);
+            swarm_spawn(a, g_objects_x, 0xFE, x, y, z, 0, 0x7FFF, 0xFF, 1, 0);
             break;
         case 2:
             anim_mesh_load_with_next(0);

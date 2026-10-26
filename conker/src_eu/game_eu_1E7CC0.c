@@ -95,13 +95,13 @@ u8 *player_screen_uv_mesh_spawn(u8 *arg0, u8 arg1, s32 arg2)
 }
 
 extern u8 g_cam_view_proj_mtx[]; /* was D_800DA130 */
-extern u8 *g_obj0_camera; /* was D_800CCA08 */
+extern u8 *g_objects_camera; /* was D_800CCA08 */
 
 // object_screen_uv_project: g_mesh_effect_draw_fns kind-3 handler (s32 (u8 *, s32), called by mesh_effect_draw; same scheme as
 // sky_dome_project_uv) of a 20-vertex record rec attached to an object (rec + +0x50 + 0xF8 = {obj, obj id}) for
 // player view `slot`: releases the record (node_destroy) when the object is gone or replaced; returns 0 (not
 // drawn) when the object has no matrix, is hidden ((+0x74 & 0xF) == 0xF) or is the object this view looks from
-// (+0x318 / +0x31C rider check when g_mp_mode_active, else g_obj0_camera / g_obj0_state). Otherwise copies the object's
+// (+0x318 / +0x31C rider check when g_mp_mode_active, else g_objects_camera / g_objects_state). Otherwise copies the object's
 // matrix (+0x1D4 + 0x40, fixed point when g_mtx_fixed_point), with its fourth column set to (0, 0, 0, 1), into this frame's Mtx (rec +0x78 +
 // g_dl_buf_index * 0x40), and maps each vertex of the slot's copy to texture coordinates: its screen position (object
 // matrix, then view matrix g_cam_view_proj_mtx[slot]) times 2.002, relative to the screen position of the object point
@@ -141,7 +141,7 @@ s32 object_screen_uv_project(u8 *rec, s32 slot) {
             && rider[0x23D] == slot) {
             return 0;
         }
-    } else if (g_obj0_camera != NULL && g_obj0_state != NULL && g_obj0_state[0x197] != 0 && g_obj0_camera[0x23D] == slot) {
+    } else if (g_objects_camera != NULL && g_objects_state != NULL && g_objects_state[0x197] != 0 && g_objects_camera[0x23D] == slot) {
         return 0;
     }
     if (g_mtx_fixed_point) {

@@ -6499,7 +6499,7 @@ D_800B30F0	g_obj_table_minus128	(med) Object table D_800CC2D0 based 128 records 
 D_800C3E78	g_cur_obj_index	Index of the current object in the object table (pairs with D_800D154C); 25 = the scratch record
 D_800CC268	g_obj_contact_mask	Bit mask of the objects the current one touched in the contact pass (obj_contact_resolve / obj_physics_step)
 D_800CC3C8	g_obj_id_by_slot1	(med) Byte base so that [n * 0x32C] is the id (+4) of object n - 1 (1-based slot lookups)
-D_800CC8C4	g_obj0_mtx_block	(med) Matrix block pointer (+0x1D4) of object 0, tested by obj_alloc_slot
+D_800CC8C4	g_objects_mtx_block	(med) Matrix block pointer (+0x1D4) of object 0, tested by obj_alloc_slot
 D_800D121C	g_obj_scratch_rec	Scratch object record after the 25-entry object table (attack_spawn_at_point, obj_send_hit); end of the table
 D_800D1230	g_obj_scratch_x	x position (+0x14) of the scratch object record (attack_spawn_at_point)
 D_800D1234	g_obj_scratch_y	y position (+0x18) of the scratch object record (attack_spawn_at_point)
@@ -6536,24 +6536,24 @@ D_80099FAC	g_joint7_burst_params_a	(low) First parameter table of emit_textured_
 D_80099FC4	g_joint7_burst_params_b	(low) Second parameter table of emit_textured_burst in objfx_joint7_burst
 D_8009A104	g_thrown_obj_gravity	(med) f32 gravity given to the thrown object by objev_throw_object
 D_8009A108	g_anim_cmd_default_speed	(med) f32 default animation speed when the part speed is 0 (objev_start_anim_cmd)
-D_8009A308	g_obj0_fall_start_reset	(low) f32 value stored as object 0 fall start height in objev_player_react_anim
+D_8009A308	g_objects_fall_start_reset	(low) f32 value stored as object 0 fall start height in objev_player_react_anim
 D_800A1FB0	g_bone_beam_b_start	(low) Start point / offset passed to bone_beam_spawn by objfx_1d5714_b
 D_800A1FBC	g_bone_beam_b_end	(low) End point / offset passed to bone_beam_spawn by objfx_1d5714_b
 D_800A2148	g_bone_beam_a_start	(low) Start point / offset passed to bone_beam_spawn by objfx_1d5714_a
 D_800A2154	g_bone_beam_a_end	(low) End point / offset passed to bone_beam_spawn by objfx_1d5714_a
 D_800CC2D0	g_objects	Object table: 25 struct127 records of 0x32C bytes (players first), followed by the scratch record D_800D121C
-D_800CC2E8	g_obj0_y	y position (+0x18) of object 0 (the player)
-D_800CC3D7	g_obj0_107	(low) Byte +0x107 of object 0, set from the command word by objev_set_cc3d7
-D_800CC704	g_obj0_x	x position (+0x14) of object 0 (the player)
-D_800CC70C	g_obj0_z	z position (+0x1C) of object 0 (the player)
-D_800CC710	g_obj0_y_velocity	y_velocity (+0x20) of object 0, copied from the current object in objev_player_react_anim
-D_800CC714	g_obj0_gravity	gravity (+0x24) of object 0, copied from the current object in objev_player_react_anim
-D_800CC766	g_obj0_yaw	(med) u16 +0x76 (facing) of object 0, set from the current object's in objev_player_react_anim
-D_800CC771	g_obj0_81	(low) Byte +0x81 (movement flags) of object 0, set to 1 in objev_player_react_anim
-D_800CC8BC	g_obj0_fall_start_y	(med) f32 +0x1CC (height where the fall started) of object 0 (objev_player_react_anim)
-D_800CC964	g_obj0_274	(low) Byte +0x274 of object 0, compared with the slot + 1 of the object riding the current one
-D_800CCA08	g_obj0_camera	Camera pointer (+0x318) of object 0 (player camera; objev_player_react_anim sets a flag in it)
-D_800CCA0C	g_obj0_state	(med) State block pointer (+0x31C) of object 0, read by event scripts and the player camera view
+D_800CC2E8	g_objects_y	y position (+0x18) of object 0 (the player)
+D_800CC3D7	g_objects_107	(low) Byte +0x107 of object 0, set from the command word by objev_set_cc3d7
+D_800CC704	g_objects_x	x position (+0x14) of object 0 (the player)
+D_800CC70C	g_objects_z	z position (+0x1C) of object 0 (the player)
+D_800CC710	g_objects_y_velocity	y_velocity (+0x20) of object 0, copied from the current object in objev_player_react_anim
+D_800CC714	g_objects_gravity	gravity (+0x24) of object 0, copied from the current object in objev_player_react_anim
+D_800CC766	g_objects_yaw	(med) u16 +0x76 (facing) of object 0, set from the current object's in objev_player_react_anim
+D_800CC771	g_objects_81	(low) Byte +0x81 (movement flags) of object 0, set to 1 in objev_player_react_anim
+D_800CC8BC	g_objects_fall_start_y	(med) f32 +0x1CC (height where the fall started) of object 0 (objev_player_react_anim)
+D_800CC964	g_objects_274	(low) Byte +0x274 of object 0, compared with the slot + 1 of the object riding the current one
+D_800CCA08	g_objects_camera	Camera pointer (+0x318) of object 0 (player camera; objev_player_react_anim sets a flag in it)
+D_800CCA0C	g_objects_state	(med) State block pointer (+0x31C) of object 0, read by event scripts and the player camera view
 D_800D154C	g_cur_obj	Current object (struct127 *) whose script / update runs; index in D_800C3E78
 D_800D1580	g_cur_obj_cmd	Command / event word of the current object's script (sound, anim, mode argument)
 D_800D1582	g_cur_obj_cmd_sound	Halfword of the command word D_800D1580: sound id for objev_sound_* and obj_apply_hit
@@ -6574,12 +6574,12 @@ D_8009A500	g_aiscript_one_twelfth	1 / 12: scales the jump speed by the time in a
 D_8009A504	g_aiscript_hundredth	0.01: converts the hundredths scale arguments of aiscript_set_scale
 D_8009A5A4	g_aiscript_follow_speed_scale	0.7: factor applied to the player's speed by aiscript_follow_player_speed
 D_8009A5CC	g_aiscript_rad_to_binang	65536 / (2 pi): radians to 16-bit angle units (aiscript_set_heading)
-D_800CC2D4	g_obj_tab_id	Byte view of the object table at D_800CC2D0 + 4: [n * 0x32C] is the type id of object n
-D_800CC30C	g_obj_tab_xz_velocity	f32 view of the object table at D_800CC2D0 + 0x3C: [0] is the player's xz velocity, per object at n * 0x32C bytes
-D_800CC3D4	g_obj_tab_stunned	Byte view of the object table at D_800CC2D0 + 0x104 (stunned), [n * 0x32C] for object n
-D_800CC3F5	g_obj_tab_immune	Byte view of the object table at D_800CC2D0 + 0x125 (immune), set by aiscript_set_immune
-D_800CC521	g_obj_tab_counter_251	(low) Byte view of the object table at D_800CC2D0 + 0x251, compared by aiscript_if_target_counter251
-D_800CC5A0	g_obj_tab_2d0	(low) Object table view at D_800CC2D0 + 0x2D0 (the unk2D0 pointer word), read by aiscript_copy_target_2d0_pos
+D_800CC2D4	g_objects_id	Byte view of the object table at D_800CC2D0 + 4: [n * 0x32C] is the type id of object n
+D_800CC30C	g_objects_xz_velocity	f32 view of the object table at D_800CC2D0 + 0x3C: [0] is the player's xz velocity, per object at n * 0x32C bytes
+D_800CC3D4	g_objects_stunned	Byte view of the object table at D_800CC2D0 + 0x104 (stunned), [n * 0x32C] for object n
+D_800CC3F5	g_objects_immune	Byte view of the object table at D_800CC2D0 + 0x125 (immune), set by aiscript_set_immune
+D_800CC521	g_objects_counter_251	(low) Byte view of the object table at D_800CC2D0 + 0x251, compared by aiscript_if_target_counter251
+D_800CC5A0	g_objects_2d0	(low) Object table view at D_800CC2D0 + 0x2D0 (the unk2D0 pointer word), read by aiscript_copy_target_2d0_pos
 D_800CC718	g_obj1_unk11c	(low) Object table view at D_800CC2D0 + 0x448 (object 1 +0x11C); script test value 10 reads an f32 at [idx * 0x32C]
 D_800CC734	g_obj1_unk138	(low) Object table view at D_800CC2D0 + 0x464 (object 1 +0x138); script test value 5 reads an f32 at [idx * 0x32C]
 D_800CC779	g_obj1_unk17d	(low) Object table view at D_800CC2D0 + 0x4A9 (object 1 +0x17D); script test value 18 reads a byte at [idx * 0x32C]
@@ -7172,7 +7172,7 @@ D_800A35A4	g_scenery_texproj_k_35a4	(low) f32 offset constant of the projected t
 D_800A35A8	g_scenery_texproj_k_35a8	(low) f32 scale constant of the projected texture coordinates in scenery_tex_project_follow
 D_800BE9B4	g_level_first_frame	(med) Level start flag: 2 on game start, 1 on level load, cleared by game_frame_step; makes eased things snap
 D_800BE9E4	g_frame_ticks	Frame ticks (retraces) elapsed this frame, divided under slow motion (game_update_frame_timing)
-D_800CC774	g_obj0_anim	(med) u16 animation id (+0x84) of object 0 (the player); 0x4B tested by scenery_float_on_floor_update
+D_800CC774	g_objects_anim	(med) u16 animation id (+0x84) of object 0 (the player); 0x4B tested by scenery_float_on_floor_update
 D_800DC3F0	g_scenery_door_group_count	(med) Number of entries used in the door group table D_800DC3F8 (scenery_door_group_sync)
 D_800DC3F8	g_scenery_door_groups	(med) Door group table, 8 bytes per group (scenery_door_group_sync, reset by scenery_door_groups_reset)
 D_800A37F0	g_camera_side_view_min_init	(low) f32 initial minimum of the player x range in camera_group_side_view

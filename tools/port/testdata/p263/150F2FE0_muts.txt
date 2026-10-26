@@ -1,6 +1,6 @@
 # P263 player_item_drop_check (player_item_drop_check) mutants: sed % setup names
-s/if (g_obj0_state == NULL || g_obj0_state\[0x120\] != 0) {/if (g_obj0_state == NULL) {/ % busy
-s/if (g_obj0_state == NULL || g_obj0_state\[0x120\] != 0) {/if (g_obj0_state[0x120] != 0) {/ % nullp
+s/if (g_objects_state == NULL || g_objects_state\[0x120\] != 0) {/if (g_objects_state == NULL) {/ % busy
+s/if (g_objects_state == NULL || g_objects_state\[0x120\] != 0) {/if (g_objects_state[0x120] != 0) {/ % nullp
 s/for (i = 0; i < 2; i++) {/for (i = 0; i < 1; i++) {/ % hit1
 s/item = world_record_find(0xFA - i);/item = world_record_find(0xFA + i);/ % hit1
 s/(item - (s32) g_world_objs) \/ 160\]/(item - (s32) g_world_objs) \/ 128]/ % hit0

@@ -81,7 +81,7 @@ s32 obj_check_death(struct127 *);
 void obj_walk_update(struct127 *);
 void obj_stun_update(struct127 *); /* P209: the asm reads only a0 and returns nothing */
 s32 obj_turn_towards(struct127 *, s32, u16);
-extern u16 g_obj0_yaw; /* was D_800CC766 */
+extern u16 g_objects_yaw; /* was D_800CC766 */
 
 /* was func_150E1160 */
 void enemy_update_alert_move(struct127 *arg0) {
@@ -103,7 +103,7 @@ void enemy_update_alert_move(struct127 *arg0) {
             if (temp_v0 != 3) {
                 arg0->unk218 = NULL;
                 arg0->unk232 = 4;
-                arg0->unk78 = g_obj0_yaw;
+                arg0->unk78 = g_objects_yaw;
                 if (temp_v0 == 2) {
                     arg0->unk232 = 2;
                 }

@@ -230,7 +230,7 @@ block_45:
     case 20:
         var_v1 = 0;
         var_v0 = &g_obj1_interaction_state;
-        if ((g_objects->interaction_state != 0) && (*g_obj_tab_id == (*(s32 *)((u8 *)arg2 + 8)))) {
+        if ((g_objects->interaction_state != 0) && (*g_objects_id == (*(s32 *)((u8 *)arg2 + 8)))) {
             var_v1 = 1;
         }
         do {

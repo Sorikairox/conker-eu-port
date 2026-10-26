@@ -624,7 +624,7 @@ void aiscript_set_field22e(void) {
 /* was func_1507652C */
 void aiscript_set_immune(void) {
     if (g_aiscript_arg1 != 0) {
-        g_obj_tab_immune[g_cur_obj->unk124 * 0x32C] = g_aiscript_arg0;
+        g_objects_immune[g_cur_obj->unk124 * 0x32C] = g_aiscript_arg0;
     } else {
         g_cur_obj->immune = g_aiscript_arg0;
     }
@@ -1489,7 +1489,7 @@ void aiscript_if_target_dist(void) {
     } else if (g_aiscript_arg2 == 1) {
         var_f0 = obj_dist_3d(g_cur_obj, &g_objects[g_cur_obj->unk222]);
     } else {
-        var_f0 = fabsf(g_cur_obj->y_position - *(f32 *)((u8 *)g_obj0_y + g_cur_obj->unk222 * 0x32C));
+        var_f0 = fabsf(g_cur_obj->y_position - *(f32 *)((u8 *)g_objects_y + g_cur_obj->unk222 * 0x32C));
     }
     var_f2 = (f32) (g_aiscript_arg3 * 8);
     if (g_aiscript_arg3 == 0xFF) {
@@ -1608,8 +1608,8 @@ void aiscript_if_target_counter251(void) {
             aiscript_branch(g_aiscript_arg0);
         }
     } else {
-        if (((g_aiscript_arg2 == 0) && (g_aiscript_arg1 == g_obj_tab_counter_251[g_cur_obj->unk222 * 0x32C])) ||
-            ((g_aiscript_arg2 == 1) && (g_aiscript_arg1 != g_obj_tab_counter_251[g_cur_obj->unk222 * 0x32C]))) {
+        if (((g_aiscript_arg2 == 0) && (g_aiscript_arg1 == g_objects_counter_251[g_cur_obj->unk222 * 0x32C])) ||
+            ((g_aiscript_arg2 == 1) && (g_aiscript_arg1 != g_objects_counter_251[g_cur_obj->unk222 * 0x32C]))) {
             aiscript_branch(g_aiscript_arg0);
         }
     }
@@ -1621,7 +1621,7 @@ void aiscript_copy_target_2d0_pos(void) {
     struct197 *temp_v0;
 
     temp_v0 = g_cur_obj->unk2D0;
-    temp_a0 = g_obj_tab_2d0[g_cur_obj->unk222].interaction_state; // wtf
+    temp_a0 = g_objects_2d0[g_cur_obj->unk222].interaction_state; // wtf
     temp_v0->unk8 = (f32) temp_a0->unk8;
     temp_v0->unkC = (f32) temp_a0->unkC;
 }
@@ -1642,7 +1642,7 @@ extern u8 g_obj1_unk326[]; /* was D_800CC922 */
 extern u8 g_obj1_unk17d[]; /* was D_800CC779 */
 
 // script_test_object_value: P183: script condition: reads value g_aiscript_arg2 (0..18) of object `idx` (0x32C-byte
-// records of g_objects; some values come from the global object g_obj0_state or the player's +0x222 object) and
+// records of g_objects; some values come from the global object g_objects_state or the player's +0x222 object) and
 // compares it with g_aiscript_arg3 by operator g_aiscript_arg1 (0 ==, 1 !=, 2 <, 3 >, 4 <=, 5 >=). Value 6 is the angle
 // difference 0..128 (256 per turn) between the object's heading (+0x7A >> 8, - 0x40) and its direction to the
 // player g_cur_obj; value 9 is 2 when the object's +0xCA0C record has +0x8 and +0x16 set. Returns 1 when true.
@@ -1658,7 +1658,7 @@ s32 aiscript_test_object_value(s32 idx) {
 
     switch (g_aiscript_arg2) {
         case 0:
-            v = *(f32 *) ((u8 *) g_obj_tab_xz_velocity + off);
+            v = *(f32 *) ((u8 *) g_objects_xz_velocity + off);
             break;
         case 1:
             v = *(s32 *) (g_objects_unk2e4 + off);
@@ -1670,7 +1670,7 @@ s32 aiscript_test_object_value(s32 idx) {
             v = *(s32 *) (g_obj2_unkb4 + off);
             break;
         case 4:
-            v = *(f32 *) ((u8 *) g_obj0_y + off);
+            v = *(f32 *) ((u8 *) g_objects_y + off);
             break;
         case 5:
             v = *(f32 *) (g_obj1_unk138 + off);
@@ -1691,10 +1691,10 @@ s32 aiscript_test_object_value(s32 idx) {
             v = g_held_item_obj_id[off];
             break;
         case 8:
-            v = g_obj_tab_stunned[off];
+            v = g_objects_stunned[off];
             break;
         case 9:
-            rec = *(u8 **) ((u8 *) &g_obj0_state + off);
+            rec = *(u8 **) ((u8 *) &g_objects_state + off);
             v = 0;
             if (*(s16 *) (rec + 0x8) != 0 && rec[0x16] != 0) {
                 v = 2;
@@ -1704,10 +1704,10 @@ s32 aiscript_test_object_value(s32 idx) {
             v = *(f32 *) (g_obj1_unk11c + off);
             break;
         case 11:
-            v = g_obj0_state[0x78];
+            v = g_objects_state[0x78];
             break;
         case 12:
-            v = g_obj0_state[0x7D];
+            v = g_objects_state[0x7D];
             break;
         case 13:
             v = g_obj1_unk1f6;
@@ -1716,7 +1716,7 @@ s32 aiscript_test_object_value(s32 idx) {
             v = g_aiscript_cheat_value;
             break;
         case 15:
-            v = g_obj_tab_id[((u8 *) g_cur_obj)[0x222] * 0x32C];
+            v = g_objects_id[((u8 *) g_cur_obj)[0x222] * 0x32C];
             break;
         case 16:
             v = g_player_health[off];
@@ -1917,9 +1917,9 @@ void aiscript_uid_immune_or_if_stunned(void) {
     s32 idx = obj_slot_by_setup_id(g_aiscript_arg0);
     if (g_aiscript_arg2 != 0) {
         if (idx != -1) {
-            g_obj_tab_immune[idx * sizeof(struct127)] = g_aiscript_arg1;
+            g_objects_immune[idx * sizeof(struct127)] = g_aiscript_arg1;
         }
-    } else if ((idx != -1) && (g_obj_tab_stunned[idx * sizeof(struct127)] != 0)) {
+    } else if ((idx != -1) && (g_objects_stunned[idx * sizeof(struct127)] != 0)) {
         aiscript_branch(g_aiscript_arg1);
     }
 }
@@ -1942,7 +1942,7 @@ void aiscript_respawn_near_path(void) {
 
 /* was func_15079880 */
 void aiscript_move_at_player_speed(void) {
-    s32 tmp = g_obj_tab_xz_velocity[0] + (s8)g_aiscript_arg2;
+    s32 tmp = g_objects_xz_velocity[0] + (s8)g_aiscript_arg2;
 
     if (tmp < g_aiscript_arg1) {
         tmp = g_aiscript_arg1;
@@ -2196,7 +2196,7 @@ void aiscript_set_path_point_coord(void) {
 
 /* was func_1507A164 */
 s32 aiscript_speed_from_player(void) {
-    s32 tmp = g_obj_tab_xz_velocity[0] + (s8)g_aiscript_arg2;
+    s32 tmp = g_objects_xz_velocity[0] + (s8)g_aiscript_arg2;
 
     if (tmp < g_aiscript_arg1) {
         tmp = g_aiscript_arg1;
@@ -2392,7 +2392,7 @@ void aiscript_if_mp_or_cc335(void) {
 
 /* was func_1507A8EC */
 void aiscript_if_target_id(void) {
-    if (g_aiscript_arg1 == g_obj_tab_id[g_cur_obj->unk222 * sizeof(struct127)]) {
+    if (g_aiscript_arg1 == g_objects_id[g_cur_obj->unk222 * sizeof(struct127)]) {
         g_aiscript_arg2 ^= 1;
     }
     if (g_aiscript_arg2 != 0) {

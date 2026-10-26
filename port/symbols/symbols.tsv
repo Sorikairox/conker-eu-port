@@ -1309,7 +1309,7 @@ g_zone_tree	800DC278	0	data	global	abs	game_data	7372
 rumble_mask_has_pak	151D8D90	88	func	global	.game	game	13629
 rail_state_init	1508A040	3DC	func	global	.game	game	14257
 D_800AEF8C	800AEF8C	0	none	global	abs	game_data	6429
-g_obj_tab_counter_251	800CC941	0	data	global	abs	game_data	7017
+g_objects_counter_251	800CC941	0	data	global	abs	game_data	7017
 .L151393F0	151393F0	0	func	global	.game	game	-
 objev_anim_54	1506B5E8	40	func	global	.game	game	9849
 D_800AACE4	800AACE4	0	none	global	abs	game_data	5878
@@ -2033,7 +2033,7 @@ D_800AA768	800AA768	0	none	global	abs	game_data	5706
 g_ribbon_trail_epsilon	800A9138	0	none	global	abs	game_data	5528
 D_800A77CC	800A77CC	0	none	global	abs	game_data	5296
 g_cur_pad	800CC6A4	0	none	global	abs	game_data	6953
-g_obj_tab_id	800CC6F4	0	data	global	abs	game_data	6970
+g_objects_id	800CC6F4	0	data	global	abs	game_data	6970
 D_800A6F0C	800A6F0C	0	none	global	abs	game_data	5040
 g_point_spark_scale_mul	800A2A0C	0	none	global	abs	game_data	4179
 g_tex_anim_id_ripple_wall	80090688	0	none	global	abs	game_data	1302
@@ -2180,7 +2180,7 @@ g_hud_lens_zoom_p1	800DE1FC	0	data	global	abs	game_data	7641
 screen_fade_update	151E5AB8	DC	func	global	.game	game	13681
 D_800A7004	800A7004	0	none	global	abs	game_data	5095
 g_os_shutdown_alias	8002C068	0	none	global	abs	init_data	212
-g_obj0_fall_start_reset	8009A308	0	none	global	abs	game_data	2362
+g_objects_fall_start_reset	8009A308	0	none	global	abs	game_data	2362
 ground_burst_spawn_b	151B0968	604	func	global	.game	game	11236
 g_level_light_dirs_2y	800DD167	0	data	global	abs	game_data	7471
 player_update_flags_btn4002	150C7850	8C	func	global	.game	game	14627
@@ -4364,7 +4364,7 @@ tumble_debris_update	1518AB64	320	func	global	.game	game	12856
 fountain_step	150DCAD8	948	func	global	.game	game	11573
 D_eu_800D136C	800D136C	0	none	global	abs	game_data	8608
 audio_do_frame	10009890	22C	func	global	.init	init	8977
-g_obj0_z	800CC70C	0	none	global	abs	game_data	6973
+g_objects_z	800CC70C	0	none	global	abs	game_data	6973
 objev_sound_hi_word_alt	1506BFE4	7C	func	global	.game	game	9882
 D_8002CAF0	8002CAF0	0	none	global	abs	init_data	297
 attachment_load_model	150302C8	180	func	global	.game	game	13897
@@ -5256,7 +5256,7 @@ D_8009FC54	8009FC54	0	none	global	abs	game_data	2674
 D_800A7018	800A7018	0	none	global	abs	game_data	5100
 D_800A0BCC	800A0BCC	0	none	global	abs	game_data	3275
 D_800993BC	800993BC	0	none	global	abs	game_data	1887
-g_obj_tab_xz_velocity	800CC72C	0	data	global	abs	game_data	6978
+g_objects_xz_velocity	800CC72C	0	data	global	abs	game_data	6978
 func_10006708	10006708	0	func	global	abs	init	7960
 D_8009A2D8	8009A2D8	0	none	global	abs	game_data	2351
 obj_water_buoyancy	150592A4	21C	func	global	.game	game	10897
@@ -5742,7 +5742,7 @@ mdl_particle_model_load	15133C18	B8	func	global	.game	game	12264
 D_eu_8003A584	8003A584	0	none	global	abs	init_data	8244
 g_player_health	800CC8BA	0	none	global	abs	game_data	7010
 hotspot_fx_type02	150095B0	28	func	global	.game	game	9409
-g_obj0_state	800CCA0C	0	data	global	abs	game_data	7025
+g_objects_state	800CCA0C	0	data	global	abs	game_data	7025
 actor_sound_play2	10010634	214	func	global	.init	init	9070
 D_eu_800D2E41	800D2E41	0	none	global	abs	game_data	8664
 D_800DFC03	800DFC03	0	none	global	abs	game_data	7737
@@ -5760,7 +5760,7 @@ g_collision_scan_count	800D304C	0	none	global	abs	game_data	7156
 trail_emitter_watch_owner	1519D2D4	4C	func	global	.game	game	13043
 g_quadtree_stat_1	800DC262	0	none	global	abs	game_data	7365
 D_eu_800CC521	800CC521	0	none	global	abs	game_data	8596
-g_obj0_x	800CC704	0	none	global	abs	game_data	6971
+g_objects_x	800CC704	0	none	global	abs	game_data	6971
 particle_scale_vel_xyz	1516FEF4	40	func	global	.game	game	12654
 bolt_subdivide	151A88F0	220	func	global	.game	game	13160
 aim_hud_fade_update	151CBAC0	EC	func	global	.game	game	13492
@@ -6600,7 +6600,7 @@ D_80097178	80097178	0	none	global	abs	game_data	1732
 aiscript_speed_from_player	1507A524	AC	func	global	.game	game	11046
 g_os_pi_thread	80035C70	0	data	global	abs	init_data	330
 hud_scope_lens_draw	1518010C	9E4	func	global	.game	game	12770
-g_obj0_gravity	800CC714	0	none	global	abs	game_data	6975
+g_objects_gravity	800CC714	0	none	global	abs	game_data	6975
 D_eu_800406A0	800406A0	0	none	global	abs	init_data	8256
 g_part_at_mtx_k_08c4	800A08C4	0	data	global	abs	game_data	3142
 D_800A04F4	800A04F4	0	none	global	abs	game_data	2964
@@ -6924,9 +6924,9 @@ g_prenmi_time	8003BFC0	0	none	global	abs	init_data	405
 texscroll_link_dl	15196270	D4	func	global	.game	game	13045
 spark_shrink_fade	1514AA08	54	func	global	.game	game	12325
 D_800A16E4	800A16E4	0	none	global	abs	game_data	3611
-g_obj0_y_velocity	800CC710	0	none	global	abs	game_data	6974
+g_objects_y_velocity	800CC710	0	none	global	abs	game_data	6974
 D_800A1F14	800A1F14	0	none	global	abs	game_data	3876
-g_obj0_mtx_block	800CC8C4	0	none	global	abs	game_data	7012
+g_objects_mtx_block	800CC8C4	0	none	global	abs	game_data	7012
 g_os_vi_curr	8002C130	0	data	global	abs	init_data	220
 trigger_zones_update_object	150A16A4	BDC	func	global	.game	game	14353
 spark_sprite_burst_spawn	151BA1A0	C0	func	global	.game	game	13350
@@ -7306,7 +7306,7 @@ ambient_obj_update	150F4FB8	2C4	func	global	.game	game	11775
 fx_fade_in_28_update	150B9AFC	20	func	global	.game	game	14512
 D_800A177C	800A177C	0	none	global	abs	game_data	3649
 g_spark_rand_k_5bac	800A5BAC	0	data	global	abs	game_data	4835
-g_obj0_anim	800CC774	0	none	global	abs	game_data	6986
+g_objects_anim	800CC774	0	none	global	abs	game_data	6986
 D_800A90B8	800A90B8	0	none	global	abs	game_data	5503
 D_800AA6C8	800AA6C8	0	none	global	abs	game_data	5683
 __n_seqpStopOsc	1001C184	1C8	func	global	.init	init	9222
@@ -8446,7 +8446,7 @@ g_camera_k_3510	800A3510	0	none	global	abs	game_data	4305
 g_joint_flash_params_b	800AB370	0	none	global	abs	game_data	6038
 floor_slope_direction	1510FDA0	AC	func	global	.game	game	12044
 ambient_place_points_range8	1500BA68	1C4	func	global	.game	game	9482
-g_obj0_107	800CC7F7	0	data	global	abs	game_data	7002
+g_objects_107	800CC7F7	0	data	global	abs	game_data	7002
 camera_event_queue_clear	1512DBDC	44	func	global	.game	game	12208
 g_obj_point_query_fns	8008FFD0	0	data	global	abs	game_data	1164
 D_800A7024	800A7024	0	none	global	abs	game_data	5103
@@ -10243,7 +10243,7 @@ g_explosion_frag_spin_x	800A1220	0	none	global	abs	game_data	3513
 g_tint_prim_rgb_p2_g	800D9F8F	0	none	global	abs	game_data	7300
 D_eu_800A2154	800A2154	0	none	global	abs	game_data	3958
 impact_debris_tex_kind9	151DA070	1C	func	global	.game	game	10759
-g_obj0_274	800CC964	0	none	global	abs	game_data	7018
+g_objects_274	800CC964	0	none	global	abs	game_data	7018
 light_fx_clear_all	15188500	30	func	global	.game	game	12826
 D_800AACC4	800AACC4	0	none	global	abs	game_data	5870
 g_fx_model_emitter_pts_a	800A13B4	0	none	global	abs	game_data	3555
@@ -10564,7 +10564,7 @@ D_800A6418	800A6418	0	none	global	abs	game_data	4948
 jtbl_80091E68_game	80091E68	0	none	global	abs	game_data	1399
 .L150324E4_game_data	150324E4	0	func	global	.game	game	-
 footstep_splash	151AB174	1F8	func	global	.game	game	11230
-g_obj_tab_immune	800CC815	0	data	global	abs	game_data	7003
+g_objects_immune	800CC815	0	data	global	abs	game_data	7003
 D_800CC7E8	800CC7E8	0	none	global	abs	game_data	6998
 object_debris_spawn	1513A7BC	240	func	global	.game	game	10385
 obj_blend_push_velocity	15059744	80	func	global	.game	game	10899
@@ -11066,7 +11066,7 @@ anim_mesh_load_dependent	15183F60	DC	func	global	.game	game	12788
 g_char_fx_event_fns	8008AF04	0	none	global	abs	game_data	998
 g_pad_states	800BEB68	0	data	global	abs	game_data	6661
 .L15032D78_game_data	15032D78	0	func	global	.game	game	-
-g_obj0_81	800CC771	0	none	global	abs	game_data	6985
+g_objects_81	800CC771	0	none	global	abs	game_data	6985
 menu_init	151E582C	FC	func	global	.game	game	13679
 func_150A98E0	150A98E0	0	func	global	abs	game	8036
 effect3d_retire	1513CFDC	34	func	global	.game	game	10419
@@ -11610,7 +11610,7 @@ smoke_trail_free	150C0F1C	2C	func	global	.game	game	14566
 rail_record_resync	150891D4	1D8	func	global	.game	game	14252
 objev_anim_af	1506BD44	28	func	global	.game	game	9875
 g_wall_ledge_grab_z	800CC1B0	0	none	global	abs	game_data	6906
-g_obj_tab_2d0	800CC9C0	0	data	global	abs	game_data	7019
+g_objects_2d0	800CC9C0	0	data	global	abs	game_data	7019
 bound_cloud_retire	150FE22C	2C	func	global	.game	game	11863
 D_800A0C4C	800A0C4C	0	none	global	abs	game_data	3298
 gunfire_burst_free	150FCEF4	30	func	global	.game	game	11851
@@ -12744,7 +12744,7 @@ D_800B10D0	800B10D0	0	none	global	abs	game_data	6472
 D_eu_80041F5C	80041F5C	0	none	global	abs	init_data	8273
 ambient_fx_dispatch	1500AB0C	44	func	global	.game	game	9473
 world_object_calc_radius	15004A5C	144	func	global	.game	game	9321
-g_obj0_camera	800CCA08	0	none	global	abs	game_data	7024
+g_objects_camera	800CCA08	0	none	global	abs	game_data	7024
 g_level_flag_9d59	800D9D59	0	data	global	abs	game_data	7266
 var700599d4	800B0DC4	4	data	global	.game_data	game_data	-
 spark_shower_update	15154A9C	158	func	global	.game	game	12458
@@ -12859,7 +12859,7 @@ effect3d_dispatch_a	1513D0C8	4C	func	global	.game	game	10422
 g_hud_health_piece_scale1	800D2834	0	none	global	abs	game_data	7132
 dldump_moveword	15040D5C	C	func	global	.game	game	9712
 spawn_region_random_point_3d	15144C7C	368	func	global	.game	game	10537
-g_obj_tab_stunned	800CC7F4	0	data	global	abs	game_data	7001
+g_objects_stunned	800CC7F4	0	data	global	abs	game_data	7001
 g_anim_decode_mode	800888F0	0	none	global	abs	game_data	736
 g_point_spark_k_2a1c	800A2A1C	0	none	global	abs	game_data	4183
 D_800A7738	800A7738	0	none	global	abs	game_data	5269
@@ -13917,7 +13917,7 @@ g_audio_mixer_default_vol	8002BD60	0	data	global	abs	init_data	199
 record_register_e0900	15013FB4	3C	func	global	.game	game	9567
 fx_fade_in_byte28_update	150BA83C	20	func	global	.game	game	14517
 vec3_normalize	1504946C	70	func	global	.game	game	9774
-g_obj0_fall_start_y	800CC8BC	0	none	global	abs	game_data	7011
+g_objects_fall_start_y	800CC8BC	0	none	global	abs	game_data	7011
 g_aiscript_hundredth	8009A504	0	none	global	abs	game_data	2400
 g_face_lower_amount	800C4310	0	data	global	abs	game_data	6833
 objfx_cbf80_2	150703A0	34	func	global	.game	game	10008
@@ -15379,7 +15379,7 @@ glow_trail_limit_length	151D8280	3F4	func	global	.game	game	13623
 music_player_process_messages	1000D19C	44C	func	global	.init	init	9018
 aiscript_nav_next_node	150778C8	3E8	func	global	.game	game	11392
 g_cutscene_in_progress	800C3A58	0	data	global	abs	game_data	6762
-g_obj0_y	800CC708	0	data	global	abs	game_data	6972
+g_objects_y	800CC708	0	data	global	abs	game_data	6972
 impact_dust_cloud_update	151D99A4	5C	func	global	.game	game	10747
 g_mesh_effect_tick_fns	80089FB8	0	data	global	abs	game_data	951
 D_800B1084	800B1084	0	none	global	abs	game_data	6453
@@ -16079,7 +16079,7 @@ D_800A773C	800A773C	0	none	global	abs	game_data	5270
 D_800A736C	800A736C	0	none	global	abs	game_data	5168
 g_mp_map_scale	8009E23C	0	none	global	abs	game_data	2535
 tether_effect_on_message	150EFE90	13C	func	global	.game	game	11720
-g_obj0_yaw	800CC766	0	none	global	abs	game_data	6983
+g_objects_yaw	800CC766	0	none	global	abs	game_data	6983
 D_800A1950	800A1950	0	none	global	abs	game_data	3724
 fade_mode_update	151E564C	14C	func	global	.game	game	13677
 face_anim_set	1507E8E0	C8	func	global	.game	game	14120

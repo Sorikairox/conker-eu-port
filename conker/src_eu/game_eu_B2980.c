@@ -88,10 +88,10 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
     }
     if (arg0 != 0xFF) {
         if (arg1 == -1) {
-            arg1 = (*(u8 **)((u8 *)&g_obj0_state + arg0 * 0x32C))[0x11B];
+            arg1 = (*(u8 **)((u8 *)&g_objects_state + arg0 * 0x32C))[0x11B];
         }
         if (save) {
-            (*(u8 **)((u8 *)&g_obj0_state + arg0 * 0x32C))[0x11B] = 0;
+            (*(u8 **)((u8 *)&g_objects_state + arg0 * 0x32C))[0x11B] = 0;
         }
     }
     idx = arg1 & 0xFFF;
@@ -198,7 +198,7 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
         arg3[2] = (s16)(s32)((f32)arg3[2] + cosf(ang) * r);
     }
     if (arg0 != 0xFF && save) {
-        (*(u8 **)((u8 *)&g_obj0_state + arg0 * 0x32C))[0x11B] = idx;
+        (*(u8 **)((u8 *)&g_objects_state + arg0 * 0x32C))[0x11B] = idx;
     }
     return 0;
 }

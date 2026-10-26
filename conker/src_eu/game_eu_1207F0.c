@@ -13,7 +13,7 @@ s32 object_hit_effects(void *, s32, s32, s32, s32, s32, s32, s32);
 s32 player_hit_reaction(struct127 *, s32);
 void texscroll_set_speed(u8 *, s32, s32);
 
-// player_item_drop_check: unless the player's held object (g_obj0_state, byte 0x120) is busy, checks items 0xFA and
+// player_item_drop_check: unless the player's held object (g_objects_state, byte 0x120) is busy, checks items 0xFA and
 // 0xF9 (world_record_find; entry index = (item - g_world_objs) / 160 into the flag words at g_world_obj_rider_masks). The first one
 // with bit 0 set: releases the player's current carried object (obj_remove), clears g_player_health and resets the
 // player (object_hit_effects, sound 0x627 via actor_sound_play_untracked, obj_set_destroyed, mode 6 via player_hit_reaction). Then the four
@@ -25,7 +25,7 @@ void player_item_drop_check(s32 arg0) {
     s32 i;
     s32 item;
 
-    if (g_obj0_state == NULL || g_obj0_state[0x120] != 0) {
+    if (g_objects_state == NULL || g_objects_state[0x120] != 0) {
         return;
     }
     for (i = 0; i < 2; i++) {

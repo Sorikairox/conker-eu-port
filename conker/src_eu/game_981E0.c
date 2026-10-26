@@ -789,8 +789,8 @@ s32 obj_find_visible_target(u8 *, u16 *, s32, s32, s32);
 void *allocate_memory(s32, s32, s32, s32);
 u8 *move_watch_spawn(u8 *arg0, u8 arg1, s32 arg2);
 void obj_effect_run_handler(u8 *, s32, void *);
-extern f32 g_obj0_x; /* was D_800CC704 */
-extern f32 g_obj0_z; /* was D_800CC70C */
+extern f32 g_objects_x; /* was D_800CC704 */
+extern f32 g_objects_z; /* was D_800CC70C */
 extern u8 g_weapon_hit_effects[]; /* was D_80099E84 */
 extern s16 D_eu_80099E98[][4];
 // P310: copies of the asm's injected rodata (D_8009A050 / D_8009A054); 1-element arrays so IDO keeps them in .rodata (P283)
@@ -952,11 +952,11 @@ s32 camera_object_spawn(f32 yaw, f32 dist, f32 rise, f32 height, u8 alpha, s32 m
         }
     }
     if (flags & 2) {
-        angle = math_atan2_u16(g_obj0_x - *(f32 *) (obj + 0x14), *(f32 *) (obj + 0x1C) - g_obj0_z, 0);
+        angle = math_atan2_u16(g_objects_x - *(f32 *) (obj + 0x14), *(f32 *) (obj + 0x1C) - g_objects_z, 0);
     }
     if (flags & 4) {
         d = obj_dist_xz((struct127 *) obj, g_objects);
-        rise = ((g_obj0_y[0] + 60.0f) - *(f32 *) (obj + 0x18)) / (d / dist);
+        rise = ((g_objects_y[0] + 60.0f) - *(f32 *) (obj + 0x18)) / (d / dist);
     }
     if (flags & 8) {
         angle = angle + (u32) random_int() % 0x1200 - 0x900;
@@ -1045,7 +1045,7 @@ void vec3_to_yaw_pitch_deg(void *, f32 *, f32 *);
 // are not read) by event mode g_cur_obj_cmd: yaw = facing angle +0x7A + 90 degrees, pitch 45, distance 323; in modes
 // 5 / 9 / 10 yaw / pitch come from the direction of matrix 3 of the player's +0x1D4 matrices (degrees, folded to
 // -180..180); otherwise the pitch follows the camera record's +0x780 (when its +0x2C is 0x100) or the player's tilt
-// +0x1D1. Per mode: distance / height / smoothing (mode 3: aim at the g_obj0_state target, distance 500), then
+// +0x1D1. Per mode: distance / height / smoothing (mode 3: aim at the g_objects_state target, distance 500), then
 // vec_from_yaw_pitch turns pitch / distance into the offset and camera_object_spawn applies it (flag t1 = snap).
 /* was func_1506CE6C */
 void objev_player_camera_view(void) {
@@ -1137,13 +1137,13 @@ void objev_player_camera_view(void) {
         break;
     case 3:
         dist = 500.0f;
-        vec3_to_yaw_pitch_deg(g_obj0_state + 0xE8, &yaw, &pitch);
-        target[0] = *(f32 *) (g_obj0_state + 0xDC);
-        target[1] = *(f32 *) (g_obj0_state + 0xE0);
+        vec3_to_yaw_pitch_deg(g_objects_state + 0xE8, &yaw, &pitch);
+        target[0] = *(f32 *) (g_objects_state + 0xDC);
+        target[1] = *(f32 *) (g_objects_state + 0xE0);
         pitch = -pitch;
         snap = TRUE;
         target_ptr = target;
-        target[2] = *(f32 *) (g_obj0_state + 0xE4);
+        target[2] = *(f32 *) (g_objects_state + 0xE4);
         break;
     case 6:
         snap = TRUE;
@@ -1901,7 +1901,7 @@ void objev_drop_carried(void) {
 /* was func_1506EC50 */
 void objev_hold_frame_airborne(void) {
     if (0.2f < g_cur_obj->unk28) {
-        if (((g_cur_obj_cmd & 0x8000) == 0) || (g_obj0_y[0] < g_cur_obj->y_position)) {
+        if (((g_cur_obj_cmd & 0x8000) == 0) || (g_objects_y[0] < g_cur_obj->y_position)) {
             g_anim_event_result = g_cur_obj_cmd & 0xFF;
             g_anim_event_continue = 0;
             g_cur_obj->unk138 -= 1;
@@ -3352,14 +3352,14 @@ void objev_clear_10c_grounded(void) {
     }
 }
 
-extern f32 g_obj0_fall_start_reset; /* was D_8009A308 */
-extern f32 g_obj0_y_velocity; /* was D_800CC710 */
-extern f32 g_obj0_gravity; /* was D_800CC714 */
-extern u16 g_obj0_yaw; /* was D_800CC766 */
-extern s8 g_obj0_81; /* was D_800CC771 */
-extern f32 g_obj0_fall_start_y; /* was D_800CC8BC */
-extern u8 g_obj0_274; /* was D_800CC964 */
-extern u8 *g_obj0_camera; /* was D_800CCA08 */
+extern f32 g_objects_fall_start_reset; /* was D_8009A308 */
+extern f32 g_objects_y_velocity; /* was D_800CC710 */
+extern f32 g_objects_gravity; /* was D_800CC714 */
+extern u16 g_objects_yaw; /* was D_800CC766 */
+extern s8 g_objects_81; /* was D_800CC771 */
+extern f32 g_objects_fall_start_y; /* was D_800CC8BC */
+extern u8 g_objects_274; /* was D_800CC964 */
+extern u8 *g_objects_camera; /* was D_800CCA08 */
 
 /* was func_15071FDC */
 void objev_player_react_anim(void) {
@@ -3386,9 +3386,9 @@ loop_2:
                 goto loop_2;
             }
         }
-        if ((var_a2 + 1) == g_obj0_274) {
-            g_obj0_yaw = g_cur_obj->unk76 + 0x8000;
-            g_obj0_fall_start_y = g_obj0_fall_start_reset;
+        if ((var_a2 + 1) == g_objects_274) {
+            g_objects_yaw = g_cur_obj->unk76 + 0x8000;
+            g_objects_fall_start_y = g_objects_fall_start_reset;
             goto block_13;
         }
     } else {
@@ -3397,23 +3397,23 @@ loop_2:
             (*(f32 *)((u8 *)g_cur_obj + 0x2E0)) = 0.0f;
         } else {
             var_t0 = 0x32;
-            g_obj0_yaw = g_cur_obj->unk76;
+            g_objects_yaw = g_cur_obj->unk76;
             var_t1 = 0;
             if (g_cur_obj->unk251 != 0) {
-                g_obj0_fall_start_y = *g_obj0_y + 800.0f;
+                g_objects_fall_start_y = *g_objects_y + 800.0f;
             }
         }
         g_cur_obj->unk2E4 = 0x32;
 block_13:
-        g_obj0_y_velocity = (*(f32 *)((u8 *)g_cur_obj + 0x2D8));
-        g_obj0_gravity = (*(f32 *)((u8 *)g_cur_obj + 0x2DC));
+        g_objects_y_velocity = (*(f32 *)((u8 *)g_cur_obj + 0x2D8));
+        g_objects_gravity = (*(f32 *)((u8 *)g_cur_obj + 0x2DC));
         sp2C = var_t1;
-        *g_obj_tab_xz_velocity = (*(f32 *)((u8 *)g_cur_obj + 0x2E0));
-        g_obj0_81 = 1;
+        *g_objects_xz_velocity = (*(f32 *)((u8 *)g_cur_obj + 0x2E0));
+        g_objects_81 = 1;
         obj_start_anim(g_objects, var_t0 & 0xFFFF, 1.0f, 2.0f, 6.0f, 0.0f, 0);
-        (*(s8 *)((u8 *)g_obj0_state + 0x31)) = (s8) sp2C;
-        if (g_obj0_camera != NULL) {
-            (*(s32 *)((u8 *)g_obj0_camera + 0x5F0)) = (s32) ((*(s32 *)((u8 *)g_obj0_camera + 0x5F0)) | 0x400);
+        (*(s8 *)((u8 *)g_objects_state + 0x31)) = (s8) sp2C;
+        if (g_objects_camera != NULL) {
+            (*(s32 *)((u8 *)g_objects_camera + 0x5F0)) = (s32) ((*(s32 *)((u8 *)g_objects_camera + 0x5F0)) | 0x400);
         }
     }
 }
@@ -4175,8 +4175,8 @@ void objev_clear_flags_10b(void) {
 }
 
 extern u8 *g_setup_entry_flags; /* was D_800D252C */
-extern f32 g_obj0_x; /* was D_800CC704 */
-extern f32 g_obj0_z; /* was D_800CC70C */
+extern f32 g_objects_x; /* was D_800CC704 */
+extern f32 g_objects_z; /* was D_800CC70C */
 u8 *attachment_find_by_slot(u8 *, s32, s32);
 s32 setup_entry_spawn(u8 *, s32, s32, s32, s32);
 void sfx_emitter_replace_callback(s32, s32, s32, s32, s32, s32);
@@ -4299,15 +4299,15 @@ void objev_spawn_helper_object(void) {
         state = 5;
         obj->xz_velocity = 0.0f;
         obj_burning_fx_start((u8 *) obj, 0xFF);
-        OBJ_MODEL_S16(obj, 8) = (s16) (s32) g_obj0_x;
-        OBJ_MODEL_S16(obj, 0xC) = (s16) (s32) g_obj0_z;
+        OBJ_MODEL_S16(obj, 8) = (s16) (s32) g_objects_x;
+        OBJ_MODEL_S16(obj, 0xC) = (s16) (s32) g_objects_z;
         break;
     case 0x7B:
         if (arg == 0x10) {
             state = 7;
-            OBJ_MODEL_S16(obj, 8) = (s16) (s32) g_obj0_x;
+            OBJ_MODEL_S16(obj, 8) = (s16) (s32) g_objects_x;
             OBJ_MODEL_S16(obj, 0xA) = 0x3D4;
-            OBJ_MODEL_S16(obj, 0xC) = (s16) (s32) g_obj0_z;
+            OBJ_MODEL_S16(obj, 0xC) = (s16) (s32) g_objects_z;
             obj->unique_id = 0xFF - (n - 1);
             obj_effect_run_handler((u8 *) obj, 0xC, NULL);
             r1 = random_int();
@@ -4434,7 +4434,7 @@ void objev_skip_if_flags(void) {
 
 /* was func_150748F4 */
 void objev_set_cc3d7(void) {
-    g_obj0_107 = (s8) g_cur_obj_cmd;
+    g_objects_107 = (s8) g_cur_obj_cmd;
 }
 
 /* was func_1507490C */

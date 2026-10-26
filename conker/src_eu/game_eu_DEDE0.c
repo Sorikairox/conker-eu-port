@@ -34,7 +34,7 @@ void obj_whirlpool_pull_update(struct127 *arg0) {
             temp_v1 = math_atan2_u16(arg0->unk174 - g_objects->x_position, g_objects->z_position - arg0->unk178, 0);
             if (temp_f0_2 > 850.0f) {
                 temp_f2 = (temp_f0_2 - 820.0f) * 0.09f;
-                *g_obj0_y = g_objects->y_position - *g_obj_time_step * (0, temp_f2);
+                *g_objects_y = g_objects->y_position - *g_obj_time_step * (0, temp_f2);
             }
             vec_from_yaw_pitch(temp_v1 - 0x3000, (temp_f0_2 * 0.045f) + 5.0f, 0.0f, &sp50, &sp4C, &sp48);
             g_objects->unk164 = sp50;

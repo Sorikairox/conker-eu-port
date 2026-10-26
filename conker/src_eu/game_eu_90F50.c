@@ -1037,7 +1037,7 @@ extern u8 g_obj_pending_actions; /* was D_800CC2B0 */
 extern u8 g_frame_delta; /* was D_800BE9A0 */
 extern s32 g_level_id;       /* level; was D_800BE9F0 */
 extern u8 g_mp_mode_active; /* was D_800BE616 */
-extern u8 *g_obj0_state; /* was D_800CCA0C */
+extern u8 *g_objects_state; /* was D_800CCA0C */
 extern u8 g_hints_seen_b8; /* was D_800D2E68 */
 extern u8 *g_level_zones; /* was D_800D34B8 */
 extern s32 g_cur_obj_cmd; /* was D_800D1580 */
@@ -1348,7 +1348,7 @@ s32 player_item_action(struct127 *obj, s32 buttons, s32 held, f32 height, s32 re
         break;
 
     case 1: case 0x35: /* 150668EC */
-        if (!(held & 0x4000) || (!(height <= 0.0f) && kind != 0x35) || g_obj0_state[0x4E] == 1 ||
+        if (!(held & 0x4000) || (!(height <= 0.0f) && kind != 0x35) || g_objects_state[0x4E] == 1 ||
             B(obj, 0x13C) >= 100 || B(obj, 0xA9) != 0) {
             break;
         }

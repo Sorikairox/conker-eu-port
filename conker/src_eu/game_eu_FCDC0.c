@@ -9,7 +9,7 @@ s32 scenery_pendulum_z_update();
 void scenery_pendulum_trigger_update(u8 *arg0) {
     u8 *p;
     if ((arg0[0x73] & 3) != 2) {
-        if ((arg0[0x4F] & 4) && ((u8 *)g_obj0_state)[0x57] != 0) {
+        if ((arg0[0x4F] & 4) && ((u8 *)g_objects_state)[0x57] != 0) {
             p = world_record_find(0xFE);
             p[0x73] &= 0xFFFC;
             p[0x73] |= 2;

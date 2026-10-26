@@ -45,10 +45,10 @@ void context_action_lock(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
         arg2 |= 0x80;
     }
     if (arg1 == 0) {
-        (*(u8 **)((u8 *)&g_obj0_state + arg0 * 0x32C))[0x74] = arg2;
+        (*(u8 **)((u8 *)&g_objects_state + arg0 * 0x32C))[0x74] = arg2;
         return;
     }
-    (*(u8 **)((u8 *)&g_obj0_state + arg0 * 0x32C))[0x75] = arg2;
+    (*(u8 **)((u8 *)&g_objects_state + arg0 * 0x32C))[0x75] = arg2;
 }
 
 /* was func_15080AA8 */

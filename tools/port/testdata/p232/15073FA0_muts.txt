@@ -46,7 +46,7 @@ s/    obj->xz_velocity = speed;/    obj->xz_velocity = speed + 1.0f;/ % k75_tbl
 s/    obj->unk1CC = obj->y_position;/    obj->unk1CC = obj->x_position;/ % k75_tbl
 s/    case 0x4A:/    case 0x4B:/ % k4A
 s/        obj_burning_fx_start((u8 \*) obj, 0xFF);/        obj_burning_fx_start((u8 *) obj, 0xFE);/ % k4A
-s/        OBJ_MODEL_S16(obj, 0xC) = (s16) (s32) g_obj0_z;/        OBJ_MODEL_S16(obj, 0xE) = (s16) (s32) g_obj0_z;/ % k4A k7B_10_tbl
+s/        OBJ_MODEL_S16(obj, 0xC) = (s16) (s32) g_objects_z;/        OBJ_MODEL_S16(obj, 0xE) = (s16) (s32) g_objects_z;/ % k4A k7B_10_tbl
 s/            state = 7;/            state = 8;/ % k7B_10_tbl
 s/            OBJ_MODEL_S16(obj, 0xA) = 0x3D4;/            OBJ_MODEL_S16(obj, 0xA) = 0x3D5;/ % k7B_10_tbl
 s/            obj->unique_id = 0xFF - (n - 1);/            obj->unique_id = 0xFF - n;/ % k7B_10_tbl

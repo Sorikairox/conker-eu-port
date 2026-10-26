@@ -118,7 +118,7 @@ Gfx *obj_fog_alpha_gfx(Gfx *gfx, u8 *obj, s16 i) {
 
 /* was func_151044F4 */
 s32 held_obj_byte7d_get(void) {
-    u8 *temp_v1 = g_obj0_state;
+    u8 *temp_v1 = g_objects_state;
     s32 ret = 0;
 
     if (temp_v1 != NULL) {

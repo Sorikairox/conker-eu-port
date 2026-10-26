@@ -1001,18 +1001,18 @@ extern u8  D_800CC2B8;
 extern s32 D_800CC2BA;
 extern s32 D_800CC2BC;
 extern struct127 g_objects[26]; // objects /* was D_800CC2D0 */
-extern u8  g_obj_tab_id[]; /* was D_800CC2D4 */
-extern f32 g_obj0_y[]; /* was D_800CC2E8 */
-extern f32 g_obj_tab_xz_velocity[]; /* was D_800CC30C */
+extern u8  g_objects_id[]; /* was D_800CC2D4 */
+extern f32 g_objects_y[]; /* was D_800CC2E8 */
+extern f32 g_objects_xz_velocity[]; /* was D_800CC30C */
 extern u8  g_objects_parent_slot; /* was D_800CC335 */
 extern u16 D_800CC34A[];
 extern u8  g_objects_in_water; /* was D_800CC37D */
-extern u8  g_obj_tab_stunned[]; /* was D_800CC3D4 */
-extern s8  g_obj0_107; /* was D_800CC3D7 */
-extern u8  g_obj_tab_immune[] ; /* was D_800CC3F5 */ // ??
+extern u8  g_objects_stunned[]; /* was D_800CC3D4 */
+extern s8  g_objects_107; /* was D_800CC3D7 */
+extern u8  g_objects_immune[] ; /* was D_800CC3F5 */ // ??
 
-extern struct127  g_obj_tab_2d0[]; /* was D_800CC5A0 */
-extern u8  g_obj_tab_counter_251[]; /* was D_800CC521 */ // ??
+extern struct127  g_objects_2d0[]; /* was D_800CC5A0 */
+extern u8  g_objects_counter_251[]; /* was D_800CC521 */ // ??
 
 extern struct127 *D_800CE370;
 
@@ -1634,7 +1634,7 @@ extern u8   D_800A0000[];
 extern s32  g_level_vtx_scroll_tex_key; /* was D_80091B68 */
 extern Gfx  g_sprite_setup_dl[]; /* was D_80087770 */
 extern s32  g_gfx_cur_tex_addr; /* was D_800D30C0 */
-extern u8  *g_obj0_state; /* was D_800CCA0C */
+extern u8  *g_objects_state; /* was D_800CCA0C */
 extern u8   g_camera_timed_records[]; /* was D_800D31E0 */
 extern u8   g_player_pad_map[]; /* was D_800843F0 */
 extern u8   g_rumble_active[]; /* was D_800BED5C */
