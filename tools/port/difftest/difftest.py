@@ -47,7 +47,6 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '..', '..', '..', 'port', 'symbols'))
 import symbols as portsyms, romimage
 ROMFILE = os.environ.get('DIFFTEST_ROM') or os.path.join(HERE, '..', '..', '..', 'baserom.eu.z64')
-REF_S_OLD = os.environ.get('DIFFTEST_REF_S_OLD') == '1'   # P328: 1 = reference of GLOBAL_ASM functions from asm/nonmatchings .s
 PRAG = re.compile(r'#pragma GLOBAL_ASM\("([^"]*)/(\w+)\.s"\)')
 WORD_RE = re.compile(r"/\*\s+([0-9A-F]+)\s+([0-9A-F]+)\s+([0-9A-F]{8})\s+\*/\s*(.*)")
 PAGE = 0x1000
@@ -235,11 +234,18 @@ def matched_size(vram, func):
     nx = [a for n, a in symtab().items() if n.startswith('func_') and a > vram]
     return (min(nx) - vram) if nx else None
 
+_GA = None
 def find_file(func):
+    """-> (path, ref, src). ref = 'rom' for a function that had a GLOBAL_ASM pragma (reference = ROM bytes at its table
+    address and size, ref_from_rom), None for other C functions (reference length = matched size). P329: the pragma
+    set and its file come from the frozen port/symbols/global_asm.tsv (the pragmas were stripped from src_eu)."""
+    global _GA
+    if _GA is None: _GA = portsyms.global_asm()
+    if func in _GA:
+        p = 'src_eu/' + _GA[func][0]
+        return p, 'rom', open(p).read()
     for p in glob.glob('src_eu/**/*.c', recursive=True):
         src = open(p).read()
-        for m in PRAG.finditer(src):
-            if m.group(2) == func: return p, m.group(1) + '/' + func + '.s', src
         if re.search(r'^[A-Za-z_][^\n;#/]*\b%s\s*\([^;]*?\)\s*\{' % func, src, re.M):
             return p, None, src
     return None, None, None
@@ -332,6 +338,8 @@ def build_tu(func, p, src, code):
             tu = src[:a] + '\n' + code + '\n' + src[b:]
     else:
         sp = func_span(src, func)
+        if sp is None and (_GA or {}).get(func, ('', False))[1]:
+            sp = (len(src), len(src))   # P329: asm-only function (no C body in the stripped source): append the candidate
         if sp is None: raise RuntimeError('no definition or pragma of %s in %s' % (func, p))
         tu = src[:sp[0]] + code + src[sp[1]:]
     for l in dropl: tu = tu.replace(l + '\n', '', 1)
@@ -1762,7 +1770,7 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         return dict(func=func, result='ERROR', line='ERROR %s: not found in src_eu' % func)
     try:
         if spath:
-            vram, rwords = ref_from_s(spath) if REF_S_OLD else ref_from_rom(func)
+            vram, rwords = ref_from_rom(func)
         else:
             vram = symaddr(func)
             if vram is None: raise RuntimeError('no EU address for ' + func)

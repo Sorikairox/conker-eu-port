@@ -63,3 +63,15 @@ def segments():
         f = line.rstrip('\n').split('\t')
         out.append((f[0], int(f[1], 16), int(f[2], 16), int(f[3], 16), None if f[4] == '-' else int(f[4], 16)))
     return out
+
+
+def global_asm():
+    """P329: name -> (file under conker/src_eu, asm_only) for every function that had a `#pragma GLOBAL_ASM` line before
+    the pragmas were stripped (global_asm.tsv). asm_only = no C body (platform-replaced code)."""
+    out = {}
+    for l in open(os.path.join(HERE, 'global_asm.tsv')):
+        if l.startswith('#') or '\t' not in l:
+            continue
+        n, f, a = l.rstrip('\n').split('\t')
+        out[n] = (f, a == '1')
+    return out

@@ -21,23 +21,10 @@ SRC = 'conker/src_eu'
 
 
 def asm_only():
-    """name -> file for every GLOBAL_ASM function that has no C body in NON_MATCHING mode."""
-    res = {}
-    for path in glob.glob(f'{SRC}/**/*.c', recursive=True):
-        stack = []  # for #ifdef NON_MATCHING ... #else tracking
-        for line in open(path, errors='replace'):
-            s = line.strip()
-            if s.startswith('#if'):
-                stack.append('nm' if re.match(r'#ifdef\s+NON_MATCHING\b', s) else
-                             'nnm' if re.match(r'#ifndef\s+NON_MATCHING\b', s) else 'other')
-            elif s.startswith('#else') and stack:
-                stack[-1] = {'nm': 'nm_else', 'nnm': 'nnm_else'}.get(stack[-1], stack[-1])
-            elif s.startswith('#endif') and stack:
-                stack.pop()
-            m = re.match(r'#pragma\s+GLOBAL_ASM\("([^"]+)"\)', s)
-            if m and not any(x in ('nm_else', 'nnm') for x in stack):
-                res[os.path.splitext(os.path.basename(m[1]))[0]] = os.path.relpath(path, SRC)
-    return res
+    """name -> file (under conker/src_eu) for every function with no C body (platform-replaced asm). P329: from the frozen
+    port/symbols/global_asm.tsv (asm_only = 1); before, from the `#pragma GLOBAL_ASM` lines outside the NON_MATCHING
+    #else halves, which the cleanup stripped (same names and files)."""
+    return {n: f for n, (f, ao) in n64mem.portsyms.global_asm().items() if ao}
 
 
 def addresses():

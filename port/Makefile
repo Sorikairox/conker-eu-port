@@ -101,7 +101,7 @@ $(B)/stubs/n64mem_labels.o: $(GEN)/n64mem_labels.s
 	@mkdir -p $(@D)
 	emcc -c $< -o $@
 
-$(GEN)/asm_stubs.c $(GEN)/data_stubs.c $(GEN)/n64mem_tab.c $(GEN)/n64mem_labels.s &: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) tools/gen_stubs.py tools/n64mem.py symbols/symbols.tsv
+$(GEN)/asm_stubs.c $(GEN)/data_stubs.c $(GEN)/n64mem_tab.c $(GEN)/n64mem_labels.s &: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) tools/gen_stubs.py tools/n64mem.py symbols/symbols.tsv symbols/global_asm.tsv
 	cd .. && python3 port/tools/gen_stubs.py port/$(GEN) $(LIBDIR) $(addprefix port/,$(GAME_OBJS) $(BOOT_OBJS) $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ))
 
 # indirect calls: signature table of the non-vbe objects + mismatch dispatcher (tools/icall.py)
