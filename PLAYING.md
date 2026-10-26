@@ -62,7 +62,7 @@ The game saves to its virtual EEPROM, which the page stores in the browser for t
 
 A save is tied to the browser profile. Clearing site data, or using a private window, gives you a fresh game.
 
-## What should work (as of 2026-10-25)
+## What should work (as of 2026-10-26)
 
 - **Single player:** title, new game, the opening and intro scenes, the first room, then level 0x29 (the first gameplay level after the intro):
   - Birdy and his dialogue;
@@ -75,12 +75,13 @@ A save is tied to the browser profile. Clearing site data, or using a private wi
 - **Also working:**
   - music and sound, with the music decoder now converted to C;
   - saving and loading.
+- **All of the game's code is now C** (100% converted, 2026-10-26). The build you get from `play.sh` runs only converted game code; the intro and Race A were re-tested on it.
 
 ## Known problems
 
 - **The gargoyle:** beating it (climb back up after the Frying Pan training and hit it with B) hasn't been reached in testing yet.
-- **Test routes:** the automated test route now misses the last jump across the gaps before the lever, so the lever / Frying Pan part was not re-checked on the latest build. It worked in testing on the previous build.
-- **Unconverted functions:** about 4% of the game's functions still run as placeholders. A part of the game that uses one may draw or behave wrongly.
+- **Test routes:** on the latest build the automated level 0x29 test route falls at one of the gaps before the lever, so the lever / Frying Pan part was not re-checked. It worked in testing on earlier builds. Playing it by hand should work.
+- **Newly converted code:** the last functions were converted just now and have only had a short browser test (intro, Race A). Parts of the game that weren't tested may draw or behave wrongly; please report them.
 - **Speed:** heavy scenes may run slower than full speed.
 
 ## Reporting what you find
