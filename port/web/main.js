@@ -33,11 +33,44 @@ function toggle(name, on) {
   const b = $('t-' + name), p = $('p-' + name);
   on = on === undefined ? p.hidden : on;
   p.hidden = !on; b.setAttribute('aria-pressed', String(on));
-  $('side').hidden = ['controls', 'saves', 'debug'].every((n) => $('p-' + n).hidden);
+  $('side').hidden = ['controls', 'saves', 'options', 'debug'].every((n) => $('p-' + n).hidden);
   if (name === 'debug') { store.set('debug', on); if (on) out.scrollTop = out.scrollHeight; }
 }
-for (const n of ['controls', 'saves', 'debug']) $('t-' + n).onclick = () => toggle(n);
+for (const n of ['controls', 'saves', 'options', 'debug']) $('t-' + n).onclick = () => toggle(n);
 if (Q.get('debug') === '1' || (Q.get('debug') !== '0' && store.get('debug', false))) toggle('debug', true);
+
+// ---------------------------------------------------------------- options (P324)
+// Every port-only feature is optional. One row per option: key (localStorage 'opt.KEY'), label, default, help text,
+// and `game`: the PORT_OPT_* id (port/ultra/port_options.h) when game C reads the option through port_option(id);
+// those are pushed to the game with port_set_option before it starts and on every change. Defaults off = the
+// original game, except where the user asked otherwise.
+// Test aid: ?opt=KEY:1,KEY:0 overrides options for this page load (not saved).
+const OPTIONS = [
+  { key: 'skipcut', label: 'Skippable cutscenes (hold L)', def: true, game: 0,
+    help: 'Hold L for 3 s to skip any cutscene, even one not seen yet (also Start on the boot intro). Off: the N64 rules (only scenes already seen, L skips at once).' },
+];
+const optOverride = {};
+for (const kv of (Q.get('opt') || '').split(',')) { const [k, v] = kv.split(':'); if (k) optOverride[k] = v === '1'; }
+const opt = (key) => {
+  const o = OPTIONS.find((x) => x.key === key);
+  return key in optOverride ? optOverride[key] : store.get('opt.' + key, o.def);
+};
+function sendOption(o) { if (o.game !== undefined && M && M._port_set_option) M._port_set_option(o.game, opt(o.key) ? 1 : 0); }
+const optionChanged = {};   // key -> callback for page-side options that need to react at once
+(function renderOptions() {
+  for (const o of OPTIONS) {
+    const l = document.createElement('label'), c = document.createElement('input'), t = document.createElement('span');
+    c.type = 'checkbox'; c.checked = opt(o.key); c.id = 'opt-' + o.key;
+    c.onchange = () => {
+      delete optOverride[o.key]; store.set('opt.' + o.key, c.checked);
+      sendOption(o); if (optionChanged[o.key]) optionChanged[o.key](c.checked);
+      log(`[options] ${o.key} ${c.checked ? 'on' : 'off'}`);
+    };
+    t.textContent = o.label;
+    const h = document.createElement('small'); h.textContent = o.help; t.appendChild(h);
+    l.append(c, t); $('options').appendChild(l);
+  }
+})();
 
 // ---------------------------------------------------------------- IndexedDB (ROM cache, saves)
 let dbp = null;
@@ -509,6 +542,8 @@ async function start(app) {
     portEepDirty: () => { eepWrites++; if (!eepTimer) eepTimer = setTimeout(persistEeprom, 400); },
   });
   window.Module = M = Mod;
+  for (const o of OPTIONS) sendOption(o);   // before callMain: the game reads them from its first frame
+  log('[options] ' + OPTIONS.map((o) => `${o.key}=${opt(o.key) ? 1 : 0}`).join(' '));
   if (app === 'game' && romBytes) {
     const p = M._malloc(romBytes.length);
     M.HEAPU8.set(romBytes, p);

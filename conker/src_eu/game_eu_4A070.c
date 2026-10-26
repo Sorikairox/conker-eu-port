@@ -408,8 +408,11 @@ s32 cutscene_was_seen(s32 arg0, s32 arg1) {
     /* DELIBERATE PORT CHANGE (P320, user request): the browser / native port treats every cutscene as already seen,
      * so any cutscene can be skipped on the first viewing (the original only allows it after it was watched once).
      * Nothing is written: the seen bits (cutscene_mark_seen, saved to the EEPROM) are still recorded as on the N64.
-     * Not in the default eu or the plain NON_MATCHING build (no PORT define there). */
-    return 1;
+     * Since P324 only with the page option "Skippable cutscenes (hold L)" on (PORT_OPT_CUTSCENE_SKIP, default on);
+     * off = the N64 rule below. Not in the default eu or the plain NON_MATCHING build (no PORT define there). */
+    if (port_option(PORT_OPT_CUTSCENE_SKIP)) {
+        return 1;
+    }
 #endif
     if (D_800C3670 != 0) {
         return 1;
@@ -763,13 +766,19 @@ extern s32 D_800BE9F0;
  * no D_800C40BC, and either D_800D3260 or a skippable scene (cutscene_was_seen with the slot's scene number) that is
  * forced (D_800C40B9) or still has more than 25 frames to run (D_800C39D0 + 25 < D_eu_800C3A60). The second
  * argument is not read. */
-#ifdef PORT
 /* DELIBERATE PORT CHANGE (P321, user request): L skips a cutscene only after it is held for 3 s straight.
  * The L test moves to the end: once the scene may be skipped, port_skip_hold (port/ultra/pc_os.c) times how
- * long L is held (D_800BEB30 only flags the press) and the page draws a ring around an L badge from port_skip_progress. */
+ * long L is held (D_800BEB30 only flags the press) and the page draws a ring around an L badge from port_skip_progress.
+ * P324: all the port changes in this function (P320 + P321) apply only while the page option "Skippable cutscenes
+ * (hold L)" is on (PORT_SKIP_RULES = port_option(PORT_OPT_CUTSCENE_SKIP)). Off, every test is the N64 one: Start
+ * skips the boot intro only after a reset, L skips at once, and the "no skip" marker D_800C40BC is obeyed.
+ * Without PORT, PORT_SKIP_RULES is 0 and SKIP_YES is 1, so the NON_MATCHING code is the original. */
+#ifdef PORT
 s32 port_skip_hold(void);
-#define SKIP_YES port_skip_hold()
+#define PORT_SKIP_RULES port_option(PORT_OPT_CUTSCENE_SKIP)
+#define SKIP_YES (PORT_SKIP_RULES ? port_skip_hold() : 1)
 #else
+#define PORT_SKIP_RULES 0
 #define SKIP_YES 1
 #endif
 /* was func_1501E0C8 */
@@ -786,29 +795,26 @@ s32 cutscene_can_skip(s32 slot, u8 *unused) {
         }
     }
     if (level == 0x21) {
-#ifdef PORT
-        /* DELIBERATE PORT CHANGE (P320): the boot intro (level 0x21) can be skipped with Start from the first
-         * power-on; the N64 allows it only after a reset (osResetType D_8000030C == 1, i.e. it was seen once). */
-        if ((D_800BEB30 & 0x1000) && D_800C39D0 >= 0xFB) {
-#else
-        if ((D_800BEB30 & 0x1000) && D_8000030C == 1 && D_800C39D0 >= 0xFB) {
-#endif
+        /* DELIBERATE PORT CHANGE (P320): with the option on, the boot intro (level 0x21) can be skipped with Start
+         * from the first power-on; the N64 allows it only after a reset (osResetType D_8000030C == 1, seen once). */
+        if ((D_800BEB30 & 0x1000) && (D_8000030C == 1 || PORT_SKIP_RULES) && D_800C39D0 >= 0xFB) {
             return 1;
         }
         return 0;
     }
-#ifndef PORT
-    if (!(D_800BEB30 & 0x20)) {
-        return 0;
+    if (!PORT_SKIP_RULES) {
+        if (!(D_800BEB30 & 0x20)) {
+            return 0;
+        }
+        /* D_800C40BC: the scene script carries the "no skip" event 0xE (cutscene_scan_start_events), or an event
+         * set it (event_action_scene case 6).
+         * DELIBERATE PORT CHANGE (P320): with the option on, the port ignores it so every cutscene can be skipped
+         * with L, the opening (level 0x18 scene 1) included; that one carries the marker, so it can never be skipped
+         * on the N64. (The L test itself then happens in SKIP_YES, held for 3 s.) */
+        if (D_800C40BC != 0) {
+            return 0;
+        }
     }
-    /* D_800C40BC: the scene script carries the "no skip" event 0xE (cutscene_scan_start_events), or an event set it
-     * (event_action_scene case 6).
-     * DELIBERATE PORT CHANGE (P320): the port ignores it so every cutscene can be skipped with L, the opening
-     * (level 0x18 scene 1) included; that one carries the marker, so it can never be skipped on the N64. */
-    if (D_800C40BC != 0) {
-        return 0;
-    }
-#endif
     if (D_800D3260 != 0) {
         return SKIP_YES;
     }
@@ -824,6 +830,7 @@ s32 cutscene_can_skip(s32 slot, u8 *unused) {
     return 0;
 }
 #undef SKIP_YES
+#undef PORT_SKIP_RULES
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_can_skip.s")
 #endif

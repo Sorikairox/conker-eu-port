@@ -9,6 +9,7 @@
 #include "pc_ultra.h"
 #include "../gfx/gfx.h"
 #include "pc_mem.h"
+#include "port_options.h"
 #include "../audio/aud.h"
 #include <PR/os_exception.h>
 #include <PR/os_convert.h>
@@ -306,6 +307,18 @@ EMSCRIPTEN_KEEPALIVE void port_set_paused(int p) {
     else if (!p && port_paused) pause_total += t - pause_at;
     port_paused = p != 0;
 }
+/* P324: page options (the Options panel in port/web). The page calls port_set_option(id, value) before the game
+ * starts and again whenever a toggle changes; game C asks port_option(id) inside its `#ifdef PORT` changes. The ids
+ * are the PORT_OPT_* list in port_options.h (force-included into every game TU) and the `game:` ids in main.js.
+ * The defaults here are the page defaults, so runs without the page (node) behave like a fresh browser. */
+static int port_options[PORT_OPT_COUNT] = {
+    [PORT_OPT_CUTSCENE_SKIP] = 1,   /* "Skippable cutscenes (hold L)": on by default (user request) */
+};
+EMSCRIPTEN_KEEPALIVE void port_set_option(int id, int value) {
+    if (id >= 0 && id < PORT_OPT_COUNT) port_options[id] = value;
+}
+int port_option(int id) { return id >= 0 && id < PORT_OPT_COUNT ? port_options[id] : 0; }
+
 /* P321: hold-to-skip for cutscenes (user request; the game side is cutscene_can_skip under PORT). The game calls
  * port_skip_hold() every frame a cutscene may be skipped; it answers 1 once L was held for 3 s of
  * retraces (150 PAL / 180 NTSC) without a break. Counting retraces, not reading the clock, keeps ?det runs

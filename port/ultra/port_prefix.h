@@ -74,4 +74,7 @@
 #pragma weak osContStartReadData
 #pragma weak osContGetReadData
 
+/* P324: page options (PORT_OPT_* ids, port_option) for the `#ifdef PORT` changes in game C */
+#include "port_options.h"
+
 #endif
