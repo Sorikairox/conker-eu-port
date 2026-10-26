@@ -1,6 +1,0 @@
-KILLED by random [s/i < 0x1C/i < 0x1B/]
-KILLED by random [s/D_800E1010\[i\] < D_80090210\[i\]/D_800E1010[i] <= D_80090210[i]/]
-KILLED by random [s/D_8009022C\[i\] < D_800E1010\[i\]/D_8009022C[i] <= D_800E1010[i]/]
-KILLED by random [s/D_800E1010\[i\] = D_800901F4\[i\];/D_800E1010[i] = D_80090210[i];/]
-KILLED by random [s/ || / \&\& /]
-KILLED by random [s/D_800E1010\[i\] < D_80090210\[i\]/D_800E1010[i] < D_8009022C[i]/]

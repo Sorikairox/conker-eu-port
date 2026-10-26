@@ -1,5 +1,0 @@
-KILLED by flash_hi2 [s/(D_800CC178\[2\] - 127)/(D_800CC178[2] - 128)/]
-KILLED by space_sc [s/x += 4.0f \* D_80038400;/x += 4.0f * D_80038404;/]
-KILLED by iB1 [s/(D_800CC16E >> 8) . 10;/(D_800CC16E >> 8) \& 7;/]
-KILLED by cA3 [s/curG = 0xFF;$/curG = 0xFE;/]
-SURVIVED [s/icon.alpha = primA;/icon.alpha = a;/]

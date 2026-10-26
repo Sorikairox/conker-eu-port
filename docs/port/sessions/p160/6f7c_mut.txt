@@ -1,6 +1,0 @@
-s/kind \* 12/kind * 4/
-s/D_800AAEE0\[kind\]/D_800AAEE0[0]/
-s/D_800AAEE8 + kind/D_800AAEE8 + 1 + kind/
-s/u8 kind)/s32 kind)/
-s/(obj + 0x1D4)/(obj + 0x1D0)/
-s/, out, /, out + 1, /

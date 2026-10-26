@@ -1,4 +1,0 @@
-func_10005B04 (P285, init_eu_5DA0) knobs: DIFFTEST_RET=10003EBC=0;0;80234000
-  random: EQUIV func_10005B04 (100 trials ok, 0 inconclusive, 400 calls, ret=void, ref 55 words, cand 56 words)
-  setups 5B04_setups.txt: 5 EQUIV / 5
-  muts 5B04_muts.txt: 14 killed / 14; not applied: 0

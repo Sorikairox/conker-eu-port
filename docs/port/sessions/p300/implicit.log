@@ -1,3 +1,0 @@
-clang errors (scan may be incomplete): conker/src_eu/game_eu_106830.c (2)
-clang errors (scan may be incomplete): conker/src_eu/game_eu_1579B0.c (2)
-implicit_scan: 2 TUs, 0 implicit call sites (0 in NM code, 0 float-related, 0 NM+float)

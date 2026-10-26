@@ -1,9 +1,0 @@
-s/if (\*(s8 \*)(obj + 0x2C) < 3) {/if (*(s8 *)(obj + 0x2C) < 2) {/ %
-s/obj\[0x2C\] = \*(s8 \*)(obj + 0x2C) - 1;/obj[0x2C] = *(s8 *)(obj + 0x2C) - 2;/ %
-s/step = 0x1000 \/ \*(s8 \*)(obj + 0x2C);/step = 0x1000 \/ *(s8 *)(obj + 0x2D);/ %
-s/t = (rec\[0x18\] \& 0x20) ? 0x1000 : 0;/t = (rec[0x18] \& 0x10) ? 0x1000 : 0;/ %
-s/obj\[0x2E\] = \*(s8 \*)(obj + 0x2E) - 1;/obj[0x2E] = *(s8 *)(obj + 0x2E);/ %
-s/        obj\[0x2E\] = obj\[0x25\] - 1;/        obj[0x2E] = obj[0x25];/ %
-s/                t -= step;/                t += step;/ %
-s/            if (i == obj\[0x25\]) {/            if (i == obj[0x25] - 1) {/ %
-s/    return 1;/    return 2;/ %

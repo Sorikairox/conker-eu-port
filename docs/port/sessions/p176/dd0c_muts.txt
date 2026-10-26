@@ -1,2 +1,0 @@
-s/(temp_v0 >= 3)) {/(temp_v0 >= 4)) {/ % big
-s/(temp_v0 < 0) ||/(temp_v0 < -1) ||/ % neg

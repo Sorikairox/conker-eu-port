@@ -1,9 +1,0 @@
-KILLED 1: s/        v = (s16 \*) (tri\[i\] + base);/        v = (s16 *) (tri[0] + base);/
-KILLED 2: s/        dx = (f32) v\[0\] - cx;/        dx = (f32) v[0] - cz;/
-KILLED 3: s/        dy = (f32) v\[1\] - cy;/        dy = (f32) v[1];/
-KILLED 4: s/        dz = (f32) v\[2\] - cz;/        dz = (f32) v[1] - cz;/
-KILLED 5: s/        out\[3 \* i + 0\] = dx \* co + dz \* si;/        out[3 * i + 0] = dx * co - dz * si;/
-KILLED 6: s/        out\[3 \* i + 1\] = dy;/        out[3 * i + 1] = dx;/
-KILLED 7: s/        out\[3 \* i + 2\] = dz \* co - dx \* si;/        out[3 * i + 2] = dz * si - dx * co;/
-KILLED 8: s/f32 cz, f32 si, f32 co, f32 \*out) {/f32 cz, f32 co, f32 si, f32 *out) {/
-done: killed 8 survived 0 other 0

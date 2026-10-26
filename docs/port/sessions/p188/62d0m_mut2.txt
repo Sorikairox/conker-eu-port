@@ -1,6 +1,0 @@
-s/src\[1\] = (f32 \*) (D_800AAF18/src[1] = (f32 *) (D_800AAF30/ % m1 matt1
-s/src\[4\] = (f32 \*) (D_800AAF00 + side \* 12)/src[4] = (f32 *) (D_800AAF00 + side * 8)/ % maim1
-s/(obj\[0x74\] \& 0xF) != 15)/(obj[0x74] \& 0x7) != 7)/ % mhid7
-s/if (aimed || D_80082FA0 < 2) {/if (aimed || D_80082FA0 < 1) {/ % mmode1
-s/mask = 1;/mask = 0;/ % m1
-s/func_151C7320((s32) obj, side,/func_151C7320((s32) obj, 0,/ % maim1

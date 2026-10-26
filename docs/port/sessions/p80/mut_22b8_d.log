@@ -1,9 +1,0 @@
-m1 KILLED by k407_kB5_m9F_i35: s/idx == cur \&\&/idx != cur \&\&/
-m2 KILLED by k388_k8B_m9F_i35: s/== 0x3FF/== 0x3FE/
-m3 KILLED by k407_kB5_m9F_i35: s/anim\[0x215\] == 0/anim[0x215] != 0/
-m4 KILLED by k388_k8B_m9F_i35: s/- 1.0f;/- 2.0f;/
-m5 LIVE: s/if (last <= /if (last < /
-m6 KILLED by k008_k58_m9B_i9B: s/\& ~0x8000/\& ~0x4000/
-m7 KILLED by k388_k8B_m9F_i35: s/0, idx, 0, 0.0f, 1)/0, idx, 1, 0.0f, 1)/
-m8 KILLED by k388_k8B_m9F_i35: s/\*(s16 \*) (anim + 0x3A) = \*(s16 \*) (src + 0x3A)/*(s16 *) (anim + 0x3A) = *(s16 *) (src + 0x38)/
-m9 KILLED by k407_kB5_m9F_i35: s/(\*(s8 \*) (anim + 0x39) != 0 ||/(*(s8 *) (anim + 0x39) == 0 ||/

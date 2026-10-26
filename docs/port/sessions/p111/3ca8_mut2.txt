@@ -1,2 +1,0 @@
-s/colours\[(u32)func_150ADA20()/colours[(u32)func_150ADA20() + 1 -1 + (func_150ADA20() \& 0)/
-s/splash.colour = colours\[(u32)func_150ADA20()/splash.colour = colours[(s32)func_150ADA20()/

@@ -1,6 +1,0 @@
-s/if (st->set == 0) {/if (st->set == 1) {/ % s0e0 s1e0
-s/st->entry++;/;/ % s1e0 s2e0 s3e0
-s/st->set = 0;/;/ % s1e0 s1e1 s1e2 s1e3 s1e5 s1e8 s2e1 s2e2 s2e3 s2e5 s2e8 s3e1 s3e3 s3e5 s3e8
-s/st->entry = 0;/;/ % s1e0 s1e1 s1e2 s1e3 s1e5 s1e8 s2e1 s2e2 s2e3 s2e5 s2e8 s3e1 s3e3 s3e5 s3e8
-s/== 0) {\n        st->set/!= 0) {/ % s1e0
-s/return 0;/return 2;/ % s1e0 s2e0 s3e0 s4e0

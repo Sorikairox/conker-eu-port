@@ -1,2 +1,0 @@
-s/if (vol == 0) {/if (vol < 2) {/ % vol1
-s/^            voice = e->unk24;$/            voice = 0;/ % cb0

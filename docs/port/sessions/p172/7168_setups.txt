@@ -1,2 +1,0 @@
-# func_15007168 save_data_reset (DIFFTEST_ROMDATA=1: D_80082F4C -> 800BE712)
-rom ! ! ! ! ! ! !

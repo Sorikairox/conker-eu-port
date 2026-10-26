@@ -1,3 +1,0 @@
-s/\[0xF\] != 3) {/[0xF] != 2) {/ % init_c8_order
-s/            break;/            ;/ % init_two
-s/if (1000.0f < dist) {/if (900.0f < dist) {/ % dist950

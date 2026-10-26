@@ -1,5 +1,5 @@
 /* ROM asset viewer: draws real Conker display lists straight from the ROM through the F3DEX2
- * interpreter, before the game's own frame builders are C (docs/port/sessions/P6.md).
+ * interpreter, before the game's own frame builders are C (docs/port/design/P6.md).
  *
  * Page: ?app=game&gfxdemo=1  (default asset list) or gfxdemo=ROMOFF:DLOFF,ROMOFF:DLOFF,... (hex).
  * Each asset is one rzip file of the ROM's asset area (u32 BE size + raw DEFLATE), a Rare model
@@ -32,7 +32,7 @@ static int nA, inited;
 static unsigned *work;            /* viewer DL + matrices + viewport (vbe game-memory layout) */
 static unsigned char *bones, *enddl;
 
-/* defaults: rzip asset files found by a scan of the ROM (docs/port/sessions/P6.md) */
+/* defaults: rzip asset files found by a scan of the ROM (docs/port/design/P6.md) */
 static const unsigned DEF[][2] = {
     {0x122C7A0, 0x528},  /* Conker TRI4 (0x1x) triangles, vertex colours, CI textures by id */
     {0xBA0708, 0x400},   /* skinned (segment-3 bone matrices), 5 textures */
@@ -90,7 +90,7 @@ static int load(Asset *a) {
     return a->buf ? 0 : -1;
 }
 
-/* ---- texture ids (P8; docs/port/sessions/P8.md "Texture ids")
+/* ---- texture ids (P8; docs/port/design/P8.md "Texture ids")
  * The texture bank: texture id i (0 <= i < 0x1E54) is an rzip file at ROM
  *   D_1A3B40 (0x1A3B40) + sum of D_800920D0[0..i)       (u16 compressed sizes, game_data)
  * which is texture_rom_offset (C) + texture_cache_lookup (asm: cache D_800B1268[id], DMA, inflate). */

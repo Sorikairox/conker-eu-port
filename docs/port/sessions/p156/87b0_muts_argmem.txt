@@ -1,8 +1,0 @@
-s/p\[1\] \*= \*yscale/p[1] *= *dist/
-s/p\[0\] += pos\[0\]/p[0] += pos[1]/
-s/p\[2\] += pos\[2\]/p[2] -= pos[2]/
-s/rot\[1\] = func_150ADA68() \* 360.0f/rot[1] = func_150ADA68() * 180.0f/
-s/spin\[1\] = 0.0f/spin[1] = 1.0f/
-s/spin\[0\] = (func_150ADA68() \* 3140.0f/spin[0] = (func_150ADA68() * 3141.0f/
-s/(u8 \*)vel, (u8 \*)spin/(u8 *)spin, (u8 *)vel/
-s/1, r/2, r/

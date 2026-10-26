@@ -1,8 +1,0 @@
-s|(\&D_eu_800C3A60)\[slot\] + D_800BEA08;|(\&D_eu_800C3A60)[slot];| %
-s|    func_1502457C(1, 0);|    func_1502457C(0, 0);| %
-s|    func_1501ECA4(0);|    func_1501ECA4(1);| %
-s|i < 25;|i < 24;| %
-s|            D_800C3E78 = i;|            D_800C3E78 = i + 1;| %
-s|        if (\*(s32 \*)obj != 0) {|        if (1) {| %
-s|                func_15021834(obj, slot, -1);|                func_15021834(obj, slot, 0);| %
-s|    func_1501E888(1, slot);|    func_1501E888(0, slot);| %

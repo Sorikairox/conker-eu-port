@@ -1,8 +1,0 @@
-s/slot\[0\] = type;/slot[0] = 0;/ %
-s/\*(void \*\*) (slot + 1) = data;/*(void **) (slot + 1) = 0;/ %
-s/q->unkAC \* 8)/q->unkAC * 4)/ %
-s/q->unkAC == 20/q->unkAC == 19/ %
-s/q->unkAC = 0;/q->unkAC = 1;/ %
-s/q->unkAC++;/q->unkAC += 2;/ %
-s/cam\[0x23D\]/cam[0x23C]/ %
-s/slot + 1)/slot + 2)/ %

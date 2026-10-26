@@ -1,5 +1,0 @@
-# func_150B7B9C: ARG width, slot; D_800D9CB8 (EU 800D9CB8); func_1516972C jal 15169C9C, func_15169ED8 jal 15169ED8 (RET; run with
-# DIFFTEST_ARGMEM 15169ED8 0:4, 0+14:6, 0+1C:30 - the template's unset words are stack garbage)
-old ! 0=3C,1=1 ! 800D9CBC=80461234 ! 15169ED8=80475678 ! ! ! !
-empty ! 0=E6,1=2 ! 800D9CC0=0 ! 15169ED8=80475678 ! ! ! !
-neg ! 0=FFFFFF00,1=0 ! 800D9CB8=80460000 ! 15169ED8=0 ! ! ! !

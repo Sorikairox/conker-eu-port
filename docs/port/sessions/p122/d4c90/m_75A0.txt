@@ -1,3 +1,0 @@
-s/f32 amp = VTXWAVE_AMP(state);/f32 amp = 1.0f;/ %
-s/b = (phase\[i\] - shift) \& 0xFF;/b = (phase[0] - shift) \& 0xFF;/ %
-s/out\[i\].v.ob\[1\] = base\[i\].v.ob\[1\] + VTX/out[i].v.ob[2] = base[i].v.ob[1] + VTX/ %

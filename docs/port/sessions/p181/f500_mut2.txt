@@ -1,4 +1,0 @@
-s/    pay.angA = func_150ADA68() \* 6.2831855f;/    pay.angA = func_150ADA68() * 6.0f;/
-s/    pay.kind = 18;/    pay.kind = 19;/
-s/    pay.side = arg1;/    pay.side = 0;/
-s/    pay.u18 = 0;/    pay.u18 = 1;/

@@ -696,7 +696,7 @@ $('start').onclick = () => start('game');
     if (cached) await setRom(new Uint8Array(cached), 'cached in this browser');
   } catch (e) { /* no IndexedDB: fine */ }
   // dev/test aid: &romurl=PATH fetches the ROM from the (local) server instead of the picker; it is
-  // not cached. Used by the headless browser tests with a read-only mount (docs/port/sessions/P4.md).
+  // not cached. Used by the headless browser tests with a read-only mount (docs/port/design/P4.md).
   if (Q.get('romurl')) {
     try { await setRom(new Uint8Array(await (await fetch(Q.get('romurl'))).arrayBuffer()), 'dev romurl'); }
     catch (e) { log('romurl: ' + e.message, 'fail'); }

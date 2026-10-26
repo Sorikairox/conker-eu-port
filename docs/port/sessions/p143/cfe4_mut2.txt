@@ -1,7 +1,0 @@
-s/                fx\[0x2B\] = a;/                fx[0x2A] = a;/
-s/(flags & 0x10000000) && !done/(flags \& 0x10000000)/
-s/                } while (top < pos);/                } while (top <= pos);/
-s/        } else if (pos < 0) {/        } else if (pos <= 0) {/
-s/                } while (pos < 0);/                } while (pos < -1);/
-s/= top - pos /= top + pos /
-s/= -pos /= pos /

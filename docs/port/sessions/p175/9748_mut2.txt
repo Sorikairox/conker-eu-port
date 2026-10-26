@@ -1,2 +1,0 @@
-s/func_15145974(az, \&blk.spin\[1\], \&blk.spin\[0\]);/func_15145974(ay, \&blk.spin[1], \&blk.spin[0]);/
-s/    blk.spin\[0\] += 90.0f;/    blk.spin[0] += 91.0f;/

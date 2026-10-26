@@ -1,7 +1,0 @@
-code build: OK
-check_files: OK
-full ROM: OK
-init      funcs   456/  538 (84.8%)  bytes  127348/ 164864 (77.2%)
-game      funcs  3503/ 5335 (65.7%)  bytes  522344/2074912 (25.2%)
-debugger  funcs    36/   43 (83.7%)  bytes   10356/  14080 (73.6%)
-total     funcs  3995/ 5916 (67.5%)  bytes  660048/2253856 (29.3%)

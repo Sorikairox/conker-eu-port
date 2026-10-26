@@ -1,2 +1,0 @@
-s/u32 last = packed \& 0xFFFFFF;/u32 last = packed \& 0x7FFFFF;/
-s/: 0xFFFFFFFF;/: 0;/

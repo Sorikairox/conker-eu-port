@@ -4,7 +4,7 @@
 cd "$(dirname "$0")/../.." || exit 1
 export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 eval "$(tools/eu_port/wt.sh env web)"
-D=${1:-$PWD/docs/port/sessions/p66}; J=${2:-28000}; mkdir -p "$D"
+D=${1:-$PWD/port_work/p66}; J=${2:-28000}; mkdir -p "$D"
 S="$((J-600)):shot:$D/jump_00_$((J-600))ms.png; $J:keydown:Space; $((J+400)):keyup:Space"
 for k in 01 02 03 04 05 06 07 08 09 10 11 12 13 14; do t=$((J + 100 * 10#$k)); S="$S; $t:shot:$D/jump_${k}_${t}ms.png"; done
 S="$S; $((J+2500)):shot:$D/jump_15_$((J+2500))ms.png"

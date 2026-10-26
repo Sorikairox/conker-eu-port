@@ -1,9 +1,0 @@
-s/type == 3 || //  %
-s/type == 0x96) {/type == 0x97) {/ %
-s/            t.uA = 3;/            t.uA = 2;/ %
-s/        t.u6 = 300;/        t.u6 = 301;/ %
-s/        t.u4 = chr\[0x3B\];/        t.u4 = chr[0x3A];/ %
-s/        if (chr\[0x127\] != 0xFF) {/        if (chr[0x127] == 0xFF) {/ %
-s/0x66) = 500;/0x64) = 500;/ %
-s/arg0\[0xC\], arg0\[1\]);/arg0[0xC], arg0[0]);/ %
-s/        s16 u6;/        s16 u6; s8 x;/ %

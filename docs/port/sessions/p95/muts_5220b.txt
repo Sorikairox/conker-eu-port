@@ -1,2 +1,0 @@
-s/if (h < dist)/if (h <= dist + 1.0f)/ % m1_hedge
-s/} else if (dist < g) {/} else if (dist < g + 10.0f) {/ % m1_gedge

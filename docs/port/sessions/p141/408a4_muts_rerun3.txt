@@ -1,5 +1,0 @@
-s/scr\[0\] < view\[0x2C \/ 4\]/scr[0] <= view[0x2C \/ 4]/
-s/fabsf(r2) > 0.0001f/fabsf(r2) > 0.01f/
-s/if (!(fade > 0.0f)) {/if (!(fade > 0.2f)) {/
-s/D_800BE9C0 \* 0x10)/D_800BE9C0 * 0x20)/
-s/>= 0x1F) {/>= 0x20) {/

@@ -1,2 +1,0 @@
-# P134 func_150F1F80: flags at obj+0x2E4 (arg 0 points at a heap object via learned pointers; poke the flag word through OUTA not needed: random trials cover it)
-base ! ! ! ! ! ! !

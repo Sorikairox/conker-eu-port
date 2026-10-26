@@ -1,7 +1,0 @@
-s/while (\*list != 0xFFFF) {/while (*list != 0xFFFF \&\& *list != 0x12) {/
-s/cb(\*list);/cb(*list + 1);/
-s/\[\*list\] = 3;/[*list] = 2;/
-s/\[\*list >> 3\] |= 1 << (\*list \& 7);/[*list >> 3] |= 1 << (*list \& 3);/
-s/\[\*list >> 3\] |= 1 << (\*list \& 7);/[*list >> 2] |= 1 << (*list \& 7);/
-s/\[\*list >> 3\] |= 1 << (\*list \& 7);/[*list >> 3] = 1 << (*list \& 7);/
-s/        list++;/        list += 2;/

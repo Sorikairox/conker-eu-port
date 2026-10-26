@@ -1,8 +1,0 @@
-s|        return 0;|        return 1;| %
-s|if (id < D_800D2520)|if (id <= D_800D2520)| %
-s|\[2\] = 1;|[2] = 0;| %
-s|D_800D3C60 == 2 \&\& args\[1\] != 0|args[1] != 0| %
-s|D_800D3C60 == 2 \&\& args\[1\] != 0|D_800D3C60 == 2| %
-s|func_15053430(obj);|func_15060F28(obj, 0);| %
-s|func_15060F28(obj, 0);|func_15060F28(obj, 1);| %
-s|return 999999;|return 99999;| %

@@ -1,7 +1,0 @@
-s|    while (i < count) {|    while (i <= count) {| %
-s|list\[i - 1\] == id|list[i] == id| %
-s|^            return i;|            return i - 1;| %
-s|list\[count\] = id;|list[count + 1] = id;| %
-s|D_800C396A\[slot\] = count + 1;|D_800C396A[slot] = count;| %
-s|\&D_800C3970\[slot \* 30\]|\&D_800C3970[slot * 32]| %
-s|^    return i;|    return count + 1;| %

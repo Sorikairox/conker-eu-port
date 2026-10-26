@@ -1,6 +1,0 @@
-func_15109DC8 best=180 try=DIFF137
-func_1516FDD4 best=105 try=DIFF16
-func_15183EE4 best=26 try=DIFF15
-func_1514563C best=213 try=DIFF29
-func_151831CC best=3340 try=SIZE+2
-func_15188008 best=2368 try=SIZE-2

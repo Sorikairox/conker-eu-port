@@ -1,9 +1,0 @@
-s/            j++;/            ;/ %
-s/            b = (b - 0x40) \& 0xFF;/            b = (b + 0x40) \& 0xFF;/ %
-s/            f = VTX_WAVE_COS(b) \* 64.0f;/            f = VTX_WAVE_COS(b) * 32.0f;/ %
-s/            g = VTX_WAVE_COS(t) \* 127.0f;/            g = VTX_WAVE_COS(t) * 128.0f;/ %
-s/            b = (t - 0x40) \& 0xFF;/            b = t;/ %
-s/            b = (hue\[i\] - 0x40) \& 0xFF;/            b = (hue[j] - 0x40) \& 0xFF;/ %
-s/            b = hue\[i\];/            b = hue[0];/ %
-s/            out\[i\].v.cn\[1\] = 0x7F;/            out[i].v.cn[1] = 0x80;/ %
-s/            out\[i\].v.cn\[0\] = VTX_WAVE_RINT(f);/            out[i].v.cn[0] = (s32) f;/ %

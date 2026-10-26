@@ -1,1 +1,0 @@
-s/if (obj->unk28 < 0.2f \&\& /if (obj->unk28 < 0.25f \&\& /

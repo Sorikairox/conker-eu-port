@@ -6,7 +6,7 @@
  *   -> one sound record from the ROM's sound bank -> n_alSynAllocVoice + n_alSynStartVoiceParams
  *   -> n_alAudioFrame (C command-list builder) -> aud_run_alist -> PCM -> WAV / SDL.
  *
- * Sound bank (asset table at ROM 0xAB2240, docs/port/sessions/P9.md): asset (0x17,0) is the ctl
+ * Sound bank (asset table at ROM 0xAB2240, docs/port/design/P9.md): asset (0x17,0) is the ctl
  * (rzip), (0x17,1) the sound records Rare loads on demand, (0x17,2) the sample table. A record is
  * ALSound(+0) / ALEnvelope(+0x10) / ALKeyMap(+0x20) / ALWaveTable(+0x28) / ALADPCMBook with
  * record-relative pointers; the wavetable base is relative to the sample table. The game's loader

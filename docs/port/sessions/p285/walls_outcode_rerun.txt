@@ -1,2 +1,0 @@
-s/    if (z > hz) code |= 0x10;/    if (!(z <= hz)) code |= 0x10;/
-s/    if (d > e) code |= 8;/    if (d >= e) code |= 8;/

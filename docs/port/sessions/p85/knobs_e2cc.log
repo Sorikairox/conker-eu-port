@@ -1,5 +1,0 @@
-base/s1: EQUIV func_1506E2CC (12 trials ok, 0 inconclusive, 60 calls, ret=void, ref 104 words, cand 99 words)
-nomtx/s1: EQUIV func_1506E2CC (12 trials ok, 0 inconclusive, 0 calls, ret=void, ref 104 words, cand 99 words)
-h0/s1: EQUIV func_1506E2CC (12 trials ok, 0 inconclusive, 60 calls, ret=void, ref 104 words, cand 99 words)
-odd/s1: EQUIV func_1506E2CC (12 trials ok, 0 inconclusive, 60 calls, ret=void, ref 104 words, cand 99 words)
-same/s1: EQUIV func_1506E2CC (12 trials ok, 0 inconclusive, 60 calls, ret=void, ref 104 words, cand 99 words)

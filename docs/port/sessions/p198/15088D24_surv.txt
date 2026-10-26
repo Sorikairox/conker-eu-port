@@ -1,3 +1,0 @@
-s/    if ((s8) alt != 0) {/    if (alt != 0) {/
-s/        want = 2;/        want = 3;/
-s/        if (link == 0xFF || link == prev) {/        if (link == prev) {/

@@ -1,5 +1,0 @@
-s/i < count;/i < count - 1;/ %
-s/vtx\[i \* 16 + 0xC\]/vtx[i * 16 + 0xB]/ %
-s/COLOURS_STORED \* 3 + 2\]/COLOURS_STORED * 3 + 3]/ %
-s/COLOURS_STORED++;// %
-s/vtx\[i \* 16 + 0xE\]/vtx[i * 12 + 0xE]/ %

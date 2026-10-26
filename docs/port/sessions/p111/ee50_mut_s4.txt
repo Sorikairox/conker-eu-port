@@ -1,2 +1,0 @@
-s/\*(f32 \*)(st + 0x2C) = (u32)RQ_ARG;/*(f32 *)(st + 0x2C) = RQ_ARG;/
-s/if (dist < EF(0x374)) {/if (dist <= EF(0x374) + 1.0f) {/

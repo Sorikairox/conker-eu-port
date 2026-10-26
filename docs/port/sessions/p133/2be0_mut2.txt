@@ -1,3 +1,0 @@
-s/fade.step = a \/ frames;/fade.step = r \/ frames;/
-s/fade.a = a;/fade.a = b;/
-s/fade.mode = mode;/fade.mode = arg6;/

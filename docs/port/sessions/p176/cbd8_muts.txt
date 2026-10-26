@@ -1,8 +1,0 @@
-s/        if (D_800C35C4 != 0) {/        if (D_800C35C4 == 0) {/ % c1e
-s/        if (D_800C35EA == 0) {/        if (D_800C35EA == 1) {/ % c1b
-s/    case 2:/    case 7:/ % c2a
-s/        if (D_800C35EA == 1 \&\& arg0 == D_800C40B8) {/        if (D_800C35EA == 1 || arg0 == D_800C40B8) {/ % c2c
-s/        return D_800C35EA != 1;/        return D_800C35EA != 2;/ % c4a
-s/        return D_800C3A92;/        return D_800C40B8;/ % c5
-s/    case 6:/    case 7:/ % c6a
-s/    case 3:/    case 8:/ % c3a

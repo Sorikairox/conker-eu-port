@@ -1,2 +1,0 @@
-s/} while (x < 0.0f);/} while (x <= 0.0f);/%onestep
-s/if (!(x < 0.0f))/if (!(x <= 0.0f))/%onestep

@@ -1,4 +1,0 @@
-func_15007830 (P285, entrypoint) knobs: DIFFTEST_STOPCALL=15018680=8 DIFFTEST_OUTW=15018680=@800BEA34:00010000;00020000;00030000;00040000;00050000;00000000;00060000;00010000
-  random: EQUIV func_15007830 (100 trials ok, 0 inconclusive, 4704 calls, ret=void, ref 123 words, cand 124 words)
-  setups 7830_setups.txt: 3 EQUIV / 3
-  muts 7830_muts.txt: 20 killed / 20; not applied: 0

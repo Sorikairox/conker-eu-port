@@ -1,2 +1,0 @@
-KILLED by base [s/gdl = func_15142C10(gdl, primR, primG, primB, primA, \&ok);/gdl = func_15142C10(gdl, primR, primG, primB, primB, \&ok);/]
-KILLED by ybig [s/yl = (s32) top;/yl = (s16) top;/]

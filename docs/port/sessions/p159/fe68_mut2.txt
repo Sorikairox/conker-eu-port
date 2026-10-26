@@ -1,5 +1,0 @@
-s/(u32)(sp->countExtra + 1) + sp->countBase/(u32)(sp->countExtra + 2) + sp->countBase/
-s/(u32)(sp->countExtra + 1) + sp->countBase/(u32)(sp->countExtra + 1)/
-s/(u32)(sp->lifeExtra + 1) + sp->lifeBase/(s32)(sp->lifeExtra + 1) + sp->lifeBase/
-s/(u32)(sp->lifeExtra + 1) + sp->lifeBase/(u32)(sp->lifeExtra + 1) + sp->lifeExtra/
-s/life = (u32)func_150ADA20()/life = (s32)func_150ADA20()/

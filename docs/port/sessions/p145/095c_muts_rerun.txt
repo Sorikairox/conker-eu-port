@@ -1,7 +1,0 @@
-s/old\[1\] = \*(f32 \*)(arg0 + 0x44);/old[1] = *(f32 *)(arg0 + 0x40);/%add
-s/if ((flags \& 0x400) \&\& \*(s16 \*)(arg0 + 0x1A) < \*(s16 \*)(arg0 + 0x32)) {/if ((flags \& 0x400) \&\& *(s16 *)(arg0 + 0x1A) < *(s16 *)(arg0 + 0x2E)) {/%t32_only t2e_only
-s/} while (len < fr);/} while (len <= fr);/%end_eq
-s/} else if (fr < 0) {/} else if (fr <= 0) {/%st_zero
-s/} while (fr < 0);/} while (fr < -1);/%st_m1
-s/= len - fr/= fr - len + len - len + len - fr - fr + fr + 1 - 1 + 0 * fr + len - len + len - len + 2 * 0 + len - len + 0 + len - fr - len + fr - fr + fr - 1 + 1 + 0 + 0 + len - len + len - len - len + len + len - len + 0 - 1 + 1 - len + len + fr - fr + 0 - 0 + 1 - 1 - 0 + 0 - len + len + 0 + 1 - 1 + fr - fr - 0 + 0 + 2 - 2 + 1/%end_bnc end_bnc_big
-s/= -fr/= fr/%st_bnc st_bnc_big

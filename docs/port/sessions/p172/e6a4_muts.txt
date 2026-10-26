@@ -1,8 +1,0 @@
-s/if (node == (u8 \*) D_800DDD64) {/if (node == (u8 *) D_800DDD64 + 4) {/ %
-s/D_800DDD64 = \*(s32 \*) (node + 0x24);/D_800DDD64 = *(s32 *) (node + 0x20);/ %
-s/prev = (u8 \*) D_800DDD64;/prev = *(u8 **) ((u8 *) D_800DDD64 + 0x24);/ %
-s/prev != NULL \&\&/1 \&\&/ %
-s/!= node) {/!= node + 4) {/ %
-s/            return;/            ;/ %
-s/\*(s32 \*) (prev + 0x24) = \*(s32 \*) (node + 0x24);/*(s32 *) (prev + 0x24) = (s32) node;/ %
-s/    func_10004074(node);/    func_10004074(prev);/ %

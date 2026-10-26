@@ -1,4 +1,0 @@
-s/arg2 \* 4 + 0x304/arg2 * 8 + 0x304/
-s/arg2 \* 4 + 0x304/arg2 * 4 + 0x300/
-s/= (struct222 \*) ((u8 \*) \*temp_t0 + 0x10);/= (struct222 *) ((u8 *) *temp_t0 + 0x20);/
-s/temp_v0_4 = 1 \* 0x10;/temp_v0_4 = 0x20;/

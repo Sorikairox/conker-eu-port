@@ -1,8 +1,0 @@
-s/if (frames > 0) {/if (frames >= 0) {/
-s/fade.step = a \/ frames;/fade.step = r \/ frames;/
-s/fade.a = a;/fade.a = b;/
-s/fade.mode = mode;/fade.mode = arg6;/
-s/-1, 0x39, 3, 1, 0,/-1, 0x39, 3, 1, 1,/
-s/(struct37 \*) 8, arg6, arg7/(struct37 *) 8, mode, arg7/
-s/(u8 \*) e + 0x28/(u8 *) e + 0x24/
-s/&fade, 8);/\&fade, 6);/

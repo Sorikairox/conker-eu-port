@@ -1,3 +1,0 @@
-s/    a = da;/    a = 0;/
-s/    s = ds;/    s = 0;/
-s/if (len2 == 0.0f) {/if (len2 <= 1.0f) {/

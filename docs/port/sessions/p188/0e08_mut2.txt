@@ -1,2 +1,0 @@
-s/(e + 0x16) < 0) {/(e + 0x16) < 1) {/ % ktimer0 ktimer timerok
-s/- \*(f32 \*) &blk.rng\[3\]/- *(f32 *) \&blk.rng[2]/ % hmid high spawn

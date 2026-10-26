@@ -1,2 +1,0 @@
-s|(u16)\*(s16 \*)(slotp + 4)|*(s16 *)(slotp + 4)| % cAz_0 cAz_1 cAz_2
-s|for (i = 0; i < 25; i++)|for (i = 0; i < 24; i++)| % cBlast cBlast2 cClast cClast2

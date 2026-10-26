@@ -1,5 +1,5 @@
 /* PC replacements for game functions that cannot be C in the decomp (session P8; list from
- * docs/port/sessions/P5.md, "PC-replacement needed"). They stay GLOBAL_ASM in conker/src_eu; the
+ * docs/port/design/P5.md, "PC-replacement needed"). They stay GLOBAL_ASM in conker/src_eu; the
  * port's definitions here replace the weak asm stubs (port/tools/gen_stubs.py). This TU goes through
  * the vbe IR pass like the game TUs (port/Makefile BOOT_SRC), so game memory is accessed with N64
  * semantics: D_80088950 below is a big-endian u64 in virtual big-endian memory.
@@ -28,7 +28,7 @@ extern u64 D_80088950;
 s32 random_int(void);
 
 /* self-test: three guRandom steps from a known seed (expected values from the u64 formula in
- * Python, docs/port/sessions/P8.md); checks the vbe 64-bit load/store of the seed too */
+ * Python, docs/port/design/P8.md); checks the vbe 64-bit load/store of the seed too */
 void port_glog(const char *fmt, ...);
 #define port_log port_glog /* format strings live in vbe game memory */
 int port_overrides_test(void) {

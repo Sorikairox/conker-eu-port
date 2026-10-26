@@ -1,1 +1,0 @@
-walls trials 300 diffs 0 {'ray far': 101, 'ray hit': 124, 'ray next leaf': 101, 'ray obj hit': 18, 'ray obj listed': 103, 'ray ref fault': 3, 'ray xy': 80, 'ray yz': 53, 'ray zx': 88, 'ray:0': 112, 'ray:0 far': 61, 'ray:1': 84, 'ray:1 far': 40}

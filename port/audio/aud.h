@@ -1,5 +1,5 @@
 /* Conker audio HLE (session P9): CPU interpreter for the Rare n_audio ABI ("naudio", Conker variant)
- * and the PC audio output. See port/audio/LICENSES.md and docs/port/sessions/P9.md. */
+ * and the PC audio output. See port/audio/LICENSES.md and docs/port/design/P9.md. */
 #ifndef PORT_AUD_H
 #define PORT_AUD_H
 #include <stdint.h>

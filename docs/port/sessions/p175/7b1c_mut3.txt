@@ -1,3 +1,0 @@
-s/    e.phase\[1\] = func_150ADA68() \* 6.2831855f;/    e.phase[1] = func_150ADA68() * 6.283185f;/
-s/e.pieceB\[1\] == NULL || e.pieceB\[2\] == NULL) {/e.pieceB[1] == NULL) {/
-s/                func_1516972C((struct102 \*) e.pieceB\[i\]);/                func_1516972C((struct102 *) e.pieceA[i]);/

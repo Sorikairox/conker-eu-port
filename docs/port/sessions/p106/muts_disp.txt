@@ -1,6 +1,0 @@
-s/(id \& 0xF000) >> 12/(id \& 0x7000) >> 12/ % idhi4 idhi
-s/if (n == 0) {/if (n == 1) {/ %
-s/id \& 0xFFFF0FFF/id \& 0x0FFF/ % idhi idhi4
-s/\[n - 1\](/[n](/ %
-s/, args, operand);/, args, args);/ %
-s/args\[1\], args);/args[0], args);/ %

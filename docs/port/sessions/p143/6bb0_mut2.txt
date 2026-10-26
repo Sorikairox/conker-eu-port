@@ -1,3 +1,0 @@
-s/func_15143874(r0 & 0xFF, func_150ADA68() \* src\[3\]/func_15143874(r0 \& 0x7F, func_150ADA68() * src[3]/
-s/(func_150ADA20() & 0xF) + 0x19/(func_150ADA20() \& 0x7) + 0x19/
-s/func_15143794(r0 & 0xFF, ((u32)r1/func_15143794(r1 \& 0xFF, ((u32)r0/

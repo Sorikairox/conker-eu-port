@@ -1,8 +1,0 @@
-s/if (owner == NULL) {/if (owner == (u8 *)1) {/% null
-s/i < D_80088A80\[0\].count;/i <= D_80088A80[0].count;/% c1 c0
-s/entries\[i\].unk2, 0, -1, 1, 0x27, 8, 0xFF, 0)/entries[i].unk2, 0, -1, 1, 0x28, 8, 0xFF, 0)/% c1
-s/entries\[i\].unk2, 0, -1/entries[i].unk0, 0, -1/% c1
-s/            return;$/            continue;/% c3fail
-s/\*(u8 \*\*)(obj + 0x28) = owner;/*(u8 **)(obj + 0x24) = owner;/% c1
-s/obj\[0x2C\] = owner\[0x3B\];/obj[0x2C] = owner[0x3A];/% c1
-s/obj\[0x2D\] = D_80088A80\[0\].entries\[i\].unk0;/obj[0x2D] = D_80088A80[0].entries[0].unk0;/% c3

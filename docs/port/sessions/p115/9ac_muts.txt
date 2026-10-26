@@ -1,4 +1,0 @@
-s/if (id == 0) {/if (id == 1) {/ %
-s/rec\[0x72\] == id/rec[0x73] == id/ %
-s/rec += 0xA0/rec += 0x90/ %
-s/i < D_800DC320/i <= D_800DC320/ %

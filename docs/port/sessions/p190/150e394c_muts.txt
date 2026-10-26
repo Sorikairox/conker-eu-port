@@ -1,5 +1,0 @@
-s/if (\*handle == 0) {/if (*handle != 0) {/
-s/        return 1;/        return 2;/
-s/func_1000E7A0(2, \*handle);/func_1000E7A0(3, *handle);/
-s/func_1000E7A0(2, \*handle);/func_1000E7A0(2, (s32)handle);/
-s/    return 0;/    return 1;/

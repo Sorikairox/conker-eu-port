@@ -1,5 +1,5 @@
 /* F3DEX2 display-list interpreter for the browser build (WebGL2). Written for this port
- * (docs/port/sessions/P6.md); no third-party code (port/gfx/LICENSES.md).
+ * (docs/port/design/P6.md); no third-party code (port/gfx/LICENSES.md).
  *
  * Entry points
  *   gfx_run_task()  the RSP gfx task path: osSpTaskStartGo(M_GFXTASK) -> here (pc_os.c), so real

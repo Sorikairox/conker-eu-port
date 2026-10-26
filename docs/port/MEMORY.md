@@ -1,7 +1,7 @@
 # Memory model of the wasm32 build
 
 Status: chosen and prototyped in session P4 (branch `port-web`). Code: `port/tools/{n64mem,vbe,vbe_build,sigs}.py`,
-`port/ultra/pc_mem.{c,h}`. Session notes and numbers: `docs/port/sessions/P4.md`.
+`port/ultra/pc_mem.{c,h}`. Session notes and numbers: `docs/port/design/P4.md`.
 
 ## The problem
 

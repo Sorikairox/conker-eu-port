@@ -1,3 +1,0 @@
-s/e\[1\] < bestPriority) {/e[1] <= bestPriority) {/
-s/exitPoint\[2\] = bestOut\[2\];/exitPoint[2] = bestOut[1];/
-s/bestOut\[2\] = hitOut\[2\];/bestOut[2] = hitOut[1];/

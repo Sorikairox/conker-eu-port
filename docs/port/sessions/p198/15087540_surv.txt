@@ -1,2 +1,0 @@
-s/    best = D_800D27C8 \* 0xFF;/    best = D_800D27C8;/
-s/        if (q\[0xE\] != 0) {/        if (q[0xE] == 1) {/

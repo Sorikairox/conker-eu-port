@@ -1,2 +1,0 @@
-s/dir = flags \& 0x10;/dir = flags \& 0x18;/ % f8
-s/angle \* 0.7111111f/angle * 0.7f/ % angbig rsm16

@@ -143,7 +143,7 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
     A header every TU includes (port_prefix.h, port_options.h, functions.h): ~45 s, everything. Output proven equal
     to a `make clean` build (conker.wasm md5). Still not tracked: the conker ELF/map that n64mem.py reads (P323
     bisect gotcha) and edits to port/exclude.txt only take effect through the census list.
-  - **Gameplay tests**: `docs/port/sessions/p327/warp.sh NAME SECS LEVEL [EXTRA_QUERY]` (env PADF, SCENE, POS, SHOTS)
+  - **Gameplay tests**: `tools/port/scripts/warp.sh NAME SECS LEVEL [EXTRA_QUERY]` (env PADF, SCENE, POS, SHOTS)
     = `?warp=<level hex>[&warpscene=N]`: boots straight into gameplay (level 0x29 at retrace 38, Conker controllable,
     fresh save, det=2, muted). A walk test is a 30 s run (33 s wall) instead of the new-game route (title + opening,
     0x29 at ~5795, 155-260 s runs). Test-only URL flag: without ?warp nothing changes. Use the p320 new-game route

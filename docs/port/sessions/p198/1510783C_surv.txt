@@ -1,7 +1,0 @@
-1,/func_15143794((u8) r1, r2/s/func_15143794((u8) r1, r2/func_15143794((u8) r2, r1/
-1,/- (spread >> 1) - 0x40,/s/- (spread >> 1) - 0x40,/- (spread >> 1),/
-1,/- (spread >> 1) - 0x40,/s/- (spread >> 1) - 0x40,/- spread - 0x40,/
-1,/(u32) (spread + 1)/s/(u32) (spread + 1)/(u32) spread/
-1,/\* \*(f32 \*) (p + 0x10) + \*(f32 \*) (p + 0xC)/s/\* \*(f32 \*) (p + 0x10) + \*(f32 \*) (p + 0xC)/* *(f32 *) (p + 0xC) + *(f32 *) (p + 0x10)/
-s/- (spread >> 1) - 0x40,/- (spread >> 1) - 0x3F,/
-s/    s.c2\[0\] = s.b\[0\] + off\[0\];/    s.c2[0] = s.b[0] - off[0];/

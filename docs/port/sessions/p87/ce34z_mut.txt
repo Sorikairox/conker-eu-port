@@ -1,1 +1,0 @@
-s|            if (\*len < v) {|            if (*len <= v) {| %

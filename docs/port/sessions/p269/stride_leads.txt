@@ -1,6 +1,0 @@
-P269 leads: NM C adds a hex byte offset to a typed (s16 */f32 *) pointer, so the C stride is 2x/4x the asm's.
-func_151D7FE8  game_eu_204F70 (port)    f32 *temp_a0 + 0xC  -> asm addiu a1,a0,0xC  CONFIRMED (crash P268/P269), difftest DIFFER old / EQUIV fixed
-func_150D4810  game_eu_101080 (port-b)  s16 *sp.uD8 + 0x10   asm addiu 0x10 x6, 0x20 x0  (vertex pointer: C steps 0x20 bytes) UNVERIFIED
-func_151C3080  game_eu_1EFE10 (port)    s16 *sp.u5C + 0x10   asm 0x10 x3                                       UNVERIFIED
-func_1519CADC  game_eu_1C3530 (port-b)  s16 *sp.u8C + 0x10   asm 0x10 x3                                       UNVERIFIED
-func_151CE3D0  game_eu_1FB080 (port-b)  s16 *sp.uBC + 0x10   asm 0x10 x6, 0x20 x1                              UNVERIFIED

@@ -1,6 +1,0 @@
-s/    tile.tex += frame \* cols \* rows;/    tile.tex += frame * cols;/
-s/    tile.animated = 1;/    tile.animated = 0;/
-s/                tile.width = (u16) colW + 2;/                tile.width = (u16) colW + 1;/
-s/            tile.height = topH + 2;/            tile.height = topH;/
-s/                tile.tex++;/                tile.tex += 2;/
-s/                    tile.height = img->height;/                    tile.height = tileH;/

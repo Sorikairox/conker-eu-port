@@ -1,7 +1,0 @@
-s/if (kind == 2 || kind == 18 || kind == 11 || kind == 12) {/if (kind == 2 || kind == 18 || kind == 11) {/
-s/h->u5A == 0 \&\& /       /
-s/effect = 0x3D;/effect = 0x3E;/
-s/if (kind != 11 \&\& kind != 12 \&\& target\[0x1CA\] != 0) {/if (kind != 11 \&\& target[0x1CA] != 0) {/
-s/case 11: reaction = 0x6D;/case 11: reaction = 0x6B;/
-s/if (reaction != 0 \&\& target\[0x1CA\] < 2) {/if (reaction != 0 \&\& target[0x1CA] < 3) {/
-s/angle = (f >= 2147483648.0f) ? 0xFFFFFFFF : ((u32) (s32) f | 0x80000000);/angle = (s32) f;/

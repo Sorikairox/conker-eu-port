@@ -1,5 +1,0 @@
-s/+ 0x48)) == 2) {/+ 0x48)) == 3) {/ % first
-s/+ 0x48)) == 2) {/+ 0x48)) != 1) {/ % three
-s/for (; var_v0_2 != NULL; var_v0_2 = temp_v1) {/for (; var_v0_2 != NULL; var_v0_2 = NULL) {/ % second
-s/if (var_a1 >= 3) {/if (var_a1 >= 2) {/ % g1last
-s/if (temp_t8 >= 2) {/if (temp_t8 >= 1) {/ % g1first

@@ -1,4 +1,0 @@
-func_15141A7C base: DIFFER func_15141A7C: trial 12: call #7: ref calls 0x00010000, cand calls 0x00040000
-func_15141A7C cur: DIFFER func_15141A7C: trial 12: call #7: ref calls 0x00010000, cand calls 0x00040000
-func_1510E004 base: DIFFER func_1510E004: trial 2: call count ref=1 cand=0 (0x1510E908)
-func_1510E004 cur: DIFFER func_1510E004: trial 2: call count ref=1 cand=0 (0x1510E908)

@@ -1,5 +1,0 @@
-s/(D_8009092C + 8) \* 0.5f/(D_8009092C + 6) * 0.5f/
-s/        spr.alpha = 0x55;/        spr.alpha = 0x56;/
-s/(D_8009090C + 6) \* 2355.2f/(D_8009090C + 8) * 2355.2f/
-s/^            return start;/            return gfx;/
-s/^        return start;/        return gfx;/

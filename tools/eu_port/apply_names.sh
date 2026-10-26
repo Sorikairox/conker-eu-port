@@ -68,7 +68,7 @@ echo "checks OK"
 echo "web build OK"
 D=$L/hold; rm -rf $D
 PADF='3386:1000:0:0,3401:0:0:0,4458:1000:0:0,4473:0:0:0,5600:20:0:0,5800:0:0:0' SHOTS="150000" \
-  docs/port/sessions/p320/run.sh $D 200 > $D.out 2>&1 || true
+  tools/port/scripts/newgame.sh $D 200 > $D.out 2>&1 || true
 grep -q "^\[p88\] scene frame 5789:" $D/chrome.log || { echo "browser hold test changed (see $D/chrome.log)"; exit 1; }
 ! grep -q "Aborted\|RuntimeError" $D/chrome.log || { echo "browser trap"; exit 1; }
 echo "browser OK"

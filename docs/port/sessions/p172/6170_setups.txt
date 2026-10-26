@@ -1,2 +1,0 @@
-# func_15016170 audio_mixer_init (DIFFTEST_ROMDATA=1 for the pan table). arg heap
-heap ! 0=80470000 ! ! 10012B34=80440000;80440100;80440200 ! ! ! !

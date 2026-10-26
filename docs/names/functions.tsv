@@ -24,7 +24,7 @@ address	current_name	file	proposed_name	name_source	description	source	conflicts
 10003BD0	func_10003BD0	init_3BD0.c	heap_init	candidate	heap init: one free block spanning D_800EA140 .. D_80038098	port:init_3BD0.c:9	
 10003C10	func_10003C10	init_39C0.c		none			
 10003C6C	func_10003C6C	init_3C40.c		none			
-10004074	func_10004074	init_3C40.c	heap_free	candidate	heap free (P2 draft)	doc:port:docs/port/sessions/P5.md:60	
+10004074	func_10004074	init_3C40.c	heap_free	candidate	heap free (P2 draft)	doc:port:docs/port/design/P5.md:60	
 10004250	func_10004250	init_3C40.c		none			
 10004308	func_10004308	init_3C40.c		none			
 100043B4	func_100043B4	init_3C40.c		none			
@@ -992,7 +992,7 @@ address	current_name	file	proposed_name	name_source	description	source	conflicts
 1504129C	func_1504129C	game_6E240.c		none			
 150415B0	func_150415B0	game_eu_6EDC0.c		none			
 150416EC	func_150416EC	game_eu_6EDC0.c		none			
-15041770	func_15041770	game_eu_6EDC0.c	linear_search_table	candidate	linear search of the u8 table D_80084C60	doc:web:docs/port/sessions/P4.md:87	
+15041770	func_15041770	game_eu_6EDC0.c	linear_search_table	candidate	linear search of the u8 table D_80084C60	doc:web:docs/port/design/P4.md:87	
 150417F8	func_150417F8	game_eu_6EDC0.c		none			
 150418D0	func_150418D0	game_eu_6EDC0.c		none			
 15041A9C	func_15041A9C	game_eu_6EDC0.c	draw_len_characters_str	candidate	draw len characters of str at (x, y) in colour r, g, b, a with scales scaleX / scaleY (4096 = 1). Characters go through func_15042F30 (glyph index). Glyphs are I8 texture rectangles from font 0 (D_...	port:game_eu_6EDC0.c:215	doc_differs;missing_in:portb
@@ -1959,9 +1959,9 @@ address	current_name	file	proposed_name	name_source	description	source	conflicts
 1509CBD4	func_1509CBD4	game_eu_CA630.c	event_prerequisites	candidate	Event prerequisites: D_800877D0[id] +0xC is a 0xFFFF-terminated list of event ids. The event may start when every prerequisite has its save bit set (bit field at D_800D2E4C) and its own prerequisit...	port:game_eu_CA630.c:66	missing_in:portb,web
 1509CBD8	func_1509CBD8	game_eu_CA060.c		none			
 1509CD0C	func_1509CD0C	game_eu_CA060.c		none			
-1509CE20	func_1509CE20	game_eu_CA630.c	unk_holds_pointer	candidate	.unk0, an s32 that holds a pointer	doc:web:docs/port/sessions/P4.md:86	
-1509CE40	func_1509CE40	game_eu_CA630.c	unk_byte_struct_game	candidate	D_800877D0[i].unk8, a u16 in a 0x14-byte struct in game_data	doc:web:docs/port/sessions/P4.md:83	
-1509CE60	func_1509CE60	game_eu_CA630.c	xa_xfff	candidate	*(u16 *)(&D_800877D0[i] + 0xA) & 0xFFF	doc:web:docs/port/sessions/P4.md:84	
+1509CE20	func_1509CE20	game_eu_CA630.c	unk_holds_pointer	candidate	.unk0, an s32 that holds a pointer	doc:web:docs/port/design/P4.md:86	
+1509CE40	func_1509CE40	game_eu_CA630.c	unk_byte_struct_game	candidate	D_800877D0[i].unk8, a u16 in a 0x14-byte struct in game_data	doc:web:docs/port/design/P4.md:83	
+1509CE60	func_1509CE60	game_eu_CA630.c	xa_xfff	candidate	*(u16 *)(&D_800877D0[i] + 0xA) & 0xFFF	doc:web:docs/port/design/P4.md:84	
 1509CE88	func_1509CE88	game_eu_CA630.c		none			
 1509CEA8	func_1509CEA8	game_eu_CA630.c		none			
 1509CF78	func_1509CF78	game_eu_CA630.c		none			
@@ -2016,7 +2016,7 @@ address	current_name	file	proposed_name	name_source	description	source	conflicts
 150A1520	func_150A1520	game_eu_CE6C0.c		none			
 150A152C	func_150A152C	game_eu_CE6C0.c		none			
 150A16A4	func_150A16A4	game_eu_CE6C0.c	trigger_zones_record	candidate	trigger zones of a record, per frame, before its state handler (func_1504A730). Zones: D_800D34BC, 0x28 bytes each: u64 mask[3] (which triggers the zone allows), u8 +0x18 priority, s16 box +0x1A..+...	port:game_eu_CE6C0.c:258	
-150A2280	func_150A2280	game_eu_CE6C0.c	existing_body	candidate	existing body: dropped the bogus 4th argument of func_150AD9A0, re-verified EQUIV	doc:port:docs/port/sessions/P5.md:70	
+150A2280	func_150A2280	game_eu_CE6C0.c	existing_body	candidate	existing body: dropped the bogus 4th argument of func_150AD9A0, re-verified EQUIV	doc:port:docs/port/design/P5.md:70	
 150A28C4	func_150A28C4	game_eu_CE6C0.c		none			
 150A29A0	func_150A29A0	game_eu_CE6C0.c		none			
 150A29C8	func_150A29C8	game_eu_CE6C0.c		none			
@@ -4693,7 +4693,7 @@ address	current_name	file	proposed_name	name_source	description	source	conflicts
 151E8620	func_151E8620	game_eu_216470.c		none			
 151E8648	func_151E8648	game_eu_20B730.c		none			
 151E86A4	func_151E86A4	game_eu_20B730.c		none			
-151E8998	func_151E8998	game_eu_20B730.c	clears_words_byte	candidate	clears 4 words + a byte	doc:port:docs/port/sessions/P5.md:62	
+151E8998	func_151E8998	game_eu_20B730.c	clears_words_byte	candidate	clears 4 words + a byte	doc:port:docs/port/design/P5.md:62	
 151E89C0	func_151E89C0	game_eu_20B730.c		none			
 151E8A64	func_151E8A64	game_eu_20B730.c		none			
 151E8B94	func_151E8B94	game_eu_20B730.c		none			

@@ -1,9 +1,0 @@
-s/if (D_800D2DB4 != 0) {/if (D_800D2DB4 == 0) {/ % p1 p0
-s/a->unk0 += d.unk0 \* -2.5f/a->unk0 += d.unk0 * -2.0f/ % p1 p0
-s/a->unk4 += d.unk4 \* -2.0f/a->unk4 += d.unk4 * -2.5f/ % p1 p0
-s/b->unk8 += d.unk8 \* -2.5f/b->unk8 += d.unk8 * 2.5f/ % p1 p0
-s/func_15048F90(a, b, &d);/func_15048F90(b, a, \&d);/ % p1 p0
-s/b->unk4 += d.unk4/b->unk4 += d.unk0/ % p1 p0
-s/a->unk8 += d.unk8 \* -2.5f \* (f32) D_800D3250\[id\];/a->unk8 += d.unk8 * -2.5f * (f32) D_800D3250[id + 1];/ % p1 p0
-s/return (s32) r;/return (s32) a;/ % p1 p0
-s/func_1504917C(&d, &d);/func_1504917C(\&d, (struct17 *) b);/ % p1 p0

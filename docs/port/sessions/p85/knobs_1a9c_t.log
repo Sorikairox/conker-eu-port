@@ -1,3 +1,0 @@
-space_sc/s1: EQUIV func_15041A9C (12 trials ok, 0 inconclusive, 60 calls, ret=int, ref 1098 words, cand 1070 words)
-flash_hi/s1: EQUIV func_15041A9C (12 trials ok, 0 inconclusive, 36 calls, ret=int, ref 1098 words, cand 1070 words)
-flash_hi2/s1: EQUIV func_15041A9C (12 trials ok, 0 inconclusive, 60 calls, ret=int, ref 1098 words, cand 1070 words)

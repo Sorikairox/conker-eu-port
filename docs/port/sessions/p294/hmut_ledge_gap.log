@@ -1,5 +1,0 @@
-SURVIVED 1: s|        if (!(NM_FABS(dx) >= 4.0f) \&\& !(NM_FABS(z1 - z0) >= 4.0f) \&\& (first == 0 \|\| i < 2)) {|        if (!(NM_FABS(dx) >= 4.0f) \&\& (first == 0 \|\| i < 2)) {|
-SURVIVED 2: s|\&\& (first == 0 \|\| i < 2)) {|\&\& (first == 0)) {|
-SURVIVED 3: s|    if (!(disc > 0.0f)) {|    if (!(disc > 1.0f)) {|
-SURVIVED 4: s|        func_150492CC((f32) w.margin \* 2.0f, NMW_F32(D_800CC1F8) + 0.0f, (f32) w.radius \* 2.0f);|        func_150492CC((f32) w.margin * 2.0f, NMW_F32(D_800CC1F8) + 0.0f, (f32) w.margin * 2.0f);|
-done: killed 0 survived 4 other 0

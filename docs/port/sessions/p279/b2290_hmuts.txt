@@ -1,5 +1,0 @@
-# P279 func_150B2290 (game_eu_DFAA0.c) harness mutants
-s/            p\[i\] = (p\[i\] \& 0x07C1) | (g << 5) | (g >> 5);/            p[i] = (p[i] \& 0x07C0) | (g << 5) | (g >> 5);/
-s/            p\[i\] = (p\[i\] \& 0x07C1) | (g << 5) | (g >> 5);/            p[i] = (p[i] \& 0x07C1) | (g << 5) | (g >> 6);/
-s/    } while ((s32) p < (s32) end);/    } while ((s32) p <= (s32) end);/
-s/        for (i = 0; i < 8; i++) {/        for (i = 0; i < 7; i++) {/

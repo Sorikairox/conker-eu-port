@@ -1,2 +1,0 @@
-s/        if (v >= 0x100) {/        if (v > 0x100) {/ % cap100
-s/    if (textAlpha != 0xFF) {/    if (textAlpha < 0xFE) {/ % alphaFE

@@ -1,6 +1,0 @@
-s/(val\[1\] < val\[2\]); break; *$/(val[1] <= val[2]); break;/ % op12_imm op12_var op12_res op12_frm op12_dat op12_neg op12_big op12_eq
-s/case 0x14: \*addr\[0\] = !(val\[2\] < val\[1\])/case 0x14: *addr[0] = !(val[2] <= val[1])/ % op14_imm op14_var op14_frm op14_res op14_dat op14_neg op14_big op14_eq
-s/if (sp >= top) {/if (sp > top) {/ % call_ret_imm0 romC9_e0 call_noenter
-s/\*addr\[0\] = 0;/*addr[0] = 1;/ % op05_m1 op05_m1b
-s/\*addr\[0\] = -(u32) val\[1\];$/*addr[0] = val[1];/ % op04_m1 op04_m1b
-s/(val\[1\] == val\[2\])/(val[1] == val[2] + 1)/ % op16_imm op16_var op16_res op16_frm op16_dat op16_big op16_neg op16_eq

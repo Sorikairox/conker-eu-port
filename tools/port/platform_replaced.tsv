@@ -25,7 +25,7 @@ tlb_clear_entries	init_eu_5DA0	18	tlb	port/boot/game_main.c calls it; the port's
 debug_dump_tlb	debugger_258ED0	40	debugger	not reached on PC (debugger TLB dump)	none	tlbr of 32 entries into 4 tables
 boot_entrypoint	init_eu_1000	20	boot	port/boot/game_main.c (PC boot: entrypoint -> boot_entry_main path)	none	N64 entrypoint: clears BSS, sets sp, jumps to boot_map_init_segment
 boot_map_init_segment	init_eu_5DA0	21	boot	port/boot/game_main.c	none	boot COP0 init (Context, EntryHi) then main
-tlb_area_init	init_eu_5DA0	55	boot	port/boot/game_main.c calls it (0xEB); asm stub on PC	todo	mtc0 Context + allocate_memory + heap_alloc_tagged: the allocation part is game logic, check the stub hit (P281: NM C draft in docs/port/sessions/p281/drafts, random-EQUIV, mutants pending)
+tlb_area_init	init_eu_5DA0	55	boot	port/boot/game_main.c calls it (0xEB); asm stub on PC	todo	mtc0 Context + allocate_memory + heap_alloc_tagged: the allocation part is game logic, check the stub hit (P281: NM C draft in tools/port/testdata/p281/drafts, random-EQUIV, mutants pending)
 tlb_miss_load_segment	init_eu_5DA0	371	tlb	not reached on PC (segments are loaded by port_mem_load, no TLB)	none	TLB-miss refill / rzip decompress of game segments (cop0 heavy)
 __osExceptionPreamble	init_eu_5DA0	378	exception	port/ultra/pc_sched.c (fibers; interrupts are delivered as messages)	none	libultra exceptasm: __osException
 os_exc_send_mesg	init_eu_5DA0	136	exception	port/ultra/pc_sched.c	none	exceptasm: __osEnqueueAndYield (context save)
@@ -41,6 +41,6 @@ func_100229D0	229D0	16	pad	not code: 16 nops without jr (alignment padding in a 
 debug_cont_pad_buf	debugger_eu_259B40	4	pad	not code: 4 nops (vbe.py FUNC_AS_DATA: only its address is used)	none	-
 bzero	init_eu_22A10	40	libc	port/ultra/pc_libc.c vbe.bzero	todo	hand asm libultra bzero
 bcopy	init_eu_23CC0	196	libc	port/ultra/pc_libc.c vbe.bcopy (memmove)	todo	hand asm libultra bcopy
-os_vi_manager_main	init_eu_3570	102	libultra-c	port/ultra/pc_os.c osCreateViManager (no-op: the VI manager thread never runs)	todo	libultra viMgrMain (compiled C) (P281: NM C draft in docs/port/sessions/p281/drafts, random-EQUIV, mutants pending)
-game_thread_main	entrypoint	124	boot	port/boot/game_entry.c (PC translation of the main loop)	todo	game entrypoint / main loop (compiled C) (P281: NM C draft in docs/port/sessions/p281/drafts, random-EQUIV, mutants pending)
-boot_game_thread_main	init_1050	203	boot	port/boot/game_main.c boot_game_thread_main (PC main thread)	todo	main thread (compiled C) (P281: NM C draft in docs/port/sessions/p281/drafts, random-EQUIV, mutants pending)
+os_vi_manager_main	init_eu_3570	102	libultra-c	port/ultra/pc_os.c osCreateViManager (no-op: the VI manager thread never runs)	todo	libultra viMgrMain (compiled C) (P281: NM C draft in tools/port/testdata/p281/drafts, random-EQUIV, mutants pending)
+game_thread_main	entrypoint	124	boot	port/boot/game_entry.c (PC translation of the main loop)	todo	game entrypoint / main loop (compiled C) (P281: NM C draft in tools/port/testdata/p281/drafts, random-EQUIV, mutants pending)
+boot_game_thread_main	init_1050	203	boot	port/boot/game_main.c boot_game_thread_main (PC main thread)	todo	main thread (compiled C) (P281: NM C draft in tools/port/testdata/p281/drafts, random-EQUIV, mutants pending)

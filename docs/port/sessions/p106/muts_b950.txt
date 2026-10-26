@@ -1,7 +1,0 @@
-s/(8 - ((/(4 - ((/ %
-s/blk->unk4 = pos + blk->unk6;/blk->unk4 = pos;/ %
-s/blk->unkA = pos;/blk->unkA = pos + 8;/ %
-s/\& 7) + 8;/\& 7) + 4;/ %
-s/allocate_memory(blk->unk4, 0xFF, 2, 0)/allocate_memory(blk->unk4, 0xFF, 1, 0)/ %
-s/bzero((u8 \*) new + new->unkA, new->unk6)/bzero((u8 *) new + new->unkA, new->unk4)/ %
-s/func_10004074((s32) blk)/func_10004074((s32) new)/ %

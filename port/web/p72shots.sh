@@ -8,7 +8,7 @@
 cd "$(dirname "$0")/../.." || exit 1
 export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 eval "$(tools/eu_port/wt.sh env web)"
-D=${1:-$PWD/docs/port/sessions/p72}; W=${2:-29000}; H=${3:-8000}; X=${4:-}; mkdir -p "$D"
+D=${1:-$PWD/port_work/p72}; W=${2:-29000}; H=${3:-8000}; X=${4:-}; mkdir -p "$D"
 if [ -n "${WALLCLOCK:-}" ]; then S="$W:keydown:KeyW; $((W + H)):keyup:KeyW"; Q=""
 else set -- ${WALKF:-$((W * 50 / 1000 - 70)) $((W * 50 / 1000 - 70 + H * 50 / 1000))}; S=""; Q="&padf=$1:0:0:80,$2:0:0:0"; fi
 for k in $(seq 1 16); do t=$((W + 1000 * k)); S="$S${S:+; }$t:shot:$D/walk_${t}ms.png"; done

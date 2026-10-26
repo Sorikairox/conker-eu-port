@@ -1,7 +1,0 @@
-s/            radius = ((u8 \*) node)\[8\];/            radius = ((u8 *) node)[9];/
-s/            r2 = (f32) radius + (f32) radius;/            r2 = (f32) radius;/
-s/            if (1e8f < r2 \* r2) {/            if (1e8f <= r2 * r2) {/
-s/            if (1e8f < r2 \* r2) {/            if (1e6f < r2 * r2) {/
-s/                res = func_150867D4(near, (s8) count, (s8) first, list, sel);/                res = func_150867D4(near, count, (s8) first, list, sel);/
-s/                for (k = 0; k < 5; k++) {/                for (k = 0; k < 4; k++) {/
-s/                        if (dist < best) {/                        if (dist <= best) {/

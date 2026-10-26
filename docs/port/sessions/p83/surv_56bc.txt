@@ -1,1 +1,0 @@
-s|while (6.2831855f < CAM_F(0x29C)) {|while (6.2831855f <= CAM_F(0x29C)) {| % ph2pi
