@@ -100,7 +100,8 @@ async function takeFile(f) {
 $('rom').addEventListener('change', (e) => takeFile(e.target.files[0]));
 // iOS greys out files whose extension has no known type (.z64 / .n64 / .eep), so no filter there;
 // the ROM is checked by SHA-1 anyway
-if (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+if (IOS) {
   for (const id of ['rom', 'eep-import']) $(id).removeAttribute('accept');
 }
 {
@@ -427,16 +428,44 @@ $('volume').addEventListener('input', (e) => {
 // Browsers start an AudioContext only after a user gesture. The game opens its context at the first
 // audio buffer (port/audio/aud_out.c); the first click / key press resumes it, and a context opened
 // after that gesture starts at once (sticky activation).
+// iOS (every iOS browser is WebKit) keeps a context created outside a gesture suspended for good, and
+// mutes Web Audio when the ring switch is on silent. So on iOS: mark the page as media playback, create
+// the context inside the first tap, unlock it with a silent buffer, and hand that context to the game
+// when it asks for one (port/audio/aud_out.c resamples if the rate differs).
+let preCtx = null;
+if (IOS) {
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* older iOS */ }
+  for (const k of ['AudioContext', 'webkitAudioContext']) {
+    const Orig = window[k];
+    if (!Orig) continue;
+    window[k] = function (opts) { if (preCtx) { const c = preCtx; preCtx = null; return c; } return new Orig(opts); };
+    window[k].prototype = Orig.prototype;
+  }
+}
+function unlockIosAudio() {
+  if (!IOS || window.portAudio) return;
+  if (preCtx) { if (preCtx.state !== 'running') preCtx.resume().catch(() => {}); return; }
+  const C = (window.AudioContext || window.webkitAudioContext).prototype.constructor;
+  try {
+    const c = new C();
+    const b = c.createBuffer(1, 1, 22050), src = c.createBufferSource();
+    src.buffer = b; src.connect(c.destination); src.start(0);
+    c.resume().catch(() => {});
+    preCtx = c;
+    log('[audio] iOS: context unlocked by tap: ' + c.state);
+  } catch (e) { log('[audio] iOS unlock failed: ' + e, 'fail'); }
+}
 let gestured = false;
 function onGesture() {
   gestured = true;
+  unlockIosAudio();
   const a = window.portAudio;
   if (a && a.ctx && a.ctx.state !== 'running' && !(userPaused || hiddenPaused)) {
     a.ctx.resume().then(() => log('[audio] context resumed by user gesture: ' + a.ctx.state)).catch(() => {});
   }
   updateSoundHint();
 }
-for (const ev of ['pointerdown', 'keydown', 'touchend']) window.addEventListener(ev, onGesture, true);
+for (const ev of ['pointerdown', 'pointerup', 'keydown', 'touchend', 'click']) window.addEventListener(ev, onGesture, true);
 function updateSoundHint() {
   const a = window.portAudio;
   $('soundhint').hidden = !(a && a.ctx && a.ctx.state !== 'running' && !(userPaused || hiddenPaused));
