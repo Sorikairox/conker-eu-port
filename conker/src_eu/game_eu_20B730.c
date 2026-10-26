@@ -344,6 +344,12 @@ void game_pause_update(void) {
 #endif
 
 void screen_fade_update(void);
+#ifdef PORT
+static s32 port_intro_skipped; /* P324 "Skip intro": done once per boot (the attract loop also returns to level 0x21) */
+#endif
+/* intro_mode_update: game mode 11 (set by menu_init at power-on), the boot screen on level 0x25: the age / legal /
+ * logo pages run on the timer D_800E0EC0 (A skips ahead), then at 0x2C7 mode 1 and level 0x21, the logo-screen
+ * intro whose script finally enters the title menu (menu_reset_and_enter). */
 /* was func_151DEBB4 */
 void intro_mode_update(void) {
     screen_fade_update();
@@ -360,6 +366,16 @@ void intro_mode_update(void) {
             D_800E0EC0 = 0x258;
         }
     }
+#ifdef PORT
+    /* DELIBERATE PORT CHANGE (P324, user request): page option "Skip intro" (PORT_OPT_SKIP_INTRO, default off).
+     * Step 1 of 2: the boot screen ends early (its timer jumps to the end), so the logo-screen level 0x21 starts
+     * next; step 2 is in menu_fade_load_options. It waits until the boot screen has run 25 frames: a level request
+     * on its very first frame, while the power-on load of level 0x25 is still settling, stops the game (P324 test).
+     * Off = the N64 path. */
+    if (port_option(PORT_OPT_SKIP_INTRO) && !port_intro_skipped && D_800E0EC0 >= 25) {
+        D_800E0EC0 = 0x2C7;
+    }
+#endif
     if (D_800E0EC0 >= 0x2C7) {
         D_800901C8 = 2;
         D_800E0B94 = 1;
@@ -381,6 +397,9 @@ void menu_reset_and_enter(void) {
     menu_enter_title();
 }
 
+/* menu_fade_load_options: game mode 1 (the logo-screen intro on level 0x21), once per frame: fade speed 4, no fade
+ * overlay, and the save's options block is requested until it has loaded (D_800901D0). The intro's scene script
+ * leaves for the title menu itself (scene opcode 0x67 -> menu_reset_and_enter). */
 /* was func_151DECFC */
 void menu_fade_load_options(void) {
     D_80090114 = 4;
@@ -388,6 +407,18 @@ void menu_fade_load_options(void) {
     if (D_800901D0 == 0) {
         save_request_options_load();
     }
+#ifdef PORT
+    /* DELIBERATE PORT CHANGE (P324): "Skip intro" step 2. Once level 0x21 is running, enter the title menu with the
+     * call its intro script ends with, so the intro never plays. It waits until mode 1 has run 32 frames (D_800E0EC0
+     * restarts at 0 on the mode change; level 0x21 is up about 7 frames in): a menu request on the level's first
+     * frame stops the game, like the level request on the boot screen's first frame (P324 tests). Saves are unaffected: the options load above
+     * is requested as before, and the menu (menu_mode_update) requests the slot, config and options loads itself on
+     * its first frames. Only once per boot, so the attract loop (back to level 0x21) behaves as on the N64. */
+    if (port_option(PORT_OPT_SKIP_INTRO) && !port_intro_skipped && D_800BE9F0 == 0x21 && D_800E0EC0 >= 32) {
+        port_intro_skipped = 1;
+        menu_reset_and_enter();
+    }
+#endif
 }
 
 

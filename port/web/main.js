@@ -56,6 +56,8 @@ const OPTIONS = [
     help: 'R latches the same way: one press turns R-Look on, the next press turns it off.' },
   { key: 'togglewalk', label: 'Toggle walk (half tilt)', def: false,
     help: 'The half-tilt key latches: one press walks (half stick), the next press runs again. Applies to every stick input of pad 1.' },
+  { key: 'skipintro', label: 'Skip intro', def: false, game: 1,
+    help: 'Start straight at the title menu: no boot logos, legal pages or intro. Takes effect at the next start.' },
 ];
 const optOverride = {};
 for (const kv of (Q.get('opt') || '').split(',')) { const [k, v] = kv.split(':'); if (k) optOverride[k] = v === '1'; }
