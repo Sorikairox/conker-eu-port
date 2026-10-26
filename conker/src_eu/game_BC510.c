@@ -36,11 +36,65 @@ void hud_bubbles_reset(void)
   D_800D28E0 = 0;
 }
 
+#ifdef PORT
+s32 event_dispatch(s32, s32, ...);
+u8 *event_get_vars(s32);
+void text_printf_at(s32, s32, u8, s32, ...);
+extern u8 D_800AB634[]; /* "$ %d", the format of the cash pop-up (money_popup_draw) */
+
+/* hud_cash_always_draw: P325 option "Always show cash" (off by default). The original shows the cash total only
+ * in a short green "$ N" pop-up above Conker when a script hands him cash (money_collect_popup_spawn) and on the
+ * pause screen (hud_ingame_draw). With the option on this queues the same "$ N" text, same colour, every frame
+ * in the top right corner of the screen: not during cutscenes (D_800C35EA), pauses, the title level 0x1D or the
+ * HUD-less frames (D_800BEAC1), the cases where hud_draw hides the health HUD. The amount is computed as on the
+ * pause screen: stat 6, 0x7D00 means 1000000, and while event 0x5082 runs without 0x5083 it is scaled by
+ * event 0x83's count (+0x64) / 3. The text state is saved and restored so that other text in the same frame
+ * (pop-ups anchored to an object, default white) is unchanged. */
+static void hud_cash_always_draw(void) {
+    s32 cash;
+    s32 n;
+    u8 *vars;
+    u8 color[4];
+    s16 x, y;
+    u8 flags;
+    u32 anchor;
+
+    if (!port_option(PORT_OPT_CASH_ALWAYS) || D_800C35EA == 1 || D_800BEAC0 != 0 || D_800BEAC1 != 0 ||
+        D_800BE9F0 == 0x1D) {
+        return;
+    }
+    cash = player_stat_get(0, 6);
+    if (cash == 0x7D00) {
+        cash = 1000000;
+    }
+    if (event_dispatch(0, 0x5082, 0x1A) != 0 && event_dispatch(0, 0x5083, 0x1A) == 0) {
+        vars = event_get_vars(0x83);
+        n = vars != NULL ? *(s32 *) (vars + 0x64) : 0;
+        if (n == 0) {
+            cash = 0;
+        } else if (n < 3) {
+            cash = cash * n / 3;
+        }
+    }
+    color[0] = D_800CBD60; color[1] = D_800CBD61; color[2] = D_800CBD62; color[3] = D_800CBD63;
+    x = D_800CBD70; y = D_800CBD72; flags = D_800CBD74; anchor = D_800CBD78;
+    D_800CBD78 = 0;                           /* screen position, not anchored to an object */
+    text_set_color(0x32, 0x7D, 0x1C, 0xFF);   /* the pop-up's green */
+    text_printf_at(0x10E, 0x14, 0x81, (s32) D_800AB634, cash); /* 0x81: centred, with shadow */
+    D_800CBD60 = color[0]; D_800CBD61 = color[1]; D_800CBD62 = color[2]; D_800CBD63 = color[3];
+    D_800CBD70 = x; D_800CBD72 = y; D_800CBD74 = flags; D_800CBD78 = anchor;
+}
+#endif
+
+/* hud_health_air_update: per frame single-player HUD update: health pieces, air bubbles, air meter. */
 /* was func_1508F0A4 */
 void hud_health_air_update(void) {
     hud_health_update();
     underwater_bubbles_update();
     underwater_air_meter_update();
+#ifdef PORT
+    hud_cash_always_draw();
+#endif
 }
 
 #ifdef NON_MATCHING

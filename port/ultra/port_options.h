@@ -9,6 +9,7 @@ enum {
     PORT_OPT_CUTSCENE_SKIP = 0, /* cutscenes skippable from the first viewing by holding L for 3 s (P320/P321) */
     PORT_OPT_SKIP_INTRO = 1,    /* boot straight into the title menu (intro_mode_update, P324) */
     PORT_OPT_HEALTH_ALWAYS = 2, /* HUD health pieces stay on screen (hud_health_update, P325) */
+    PORT_OPT_CASH_ALWAYS = 3,   /* cash total always on screen (hud_cash_always_draw, P325) */
     PORT_OPT_COUNT = 16
 };
 int port_option(int id);

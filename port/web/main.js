@@ -60,6 +60,8 @@ const OPTIONS = [
     help: 'Start straight at the title menu: no boot logos, legal pages or intro. Takes effect at the next start.' },
   { key: 'healthhud', label: 'Health always visible', def: false, game: 2,
     help: 'The chocolate (health) pieces stay on screen during play. Off: as on the N64, they slide in only when your health changes.' },
+  { key: 'cashhud', label: 'Always show cash', def: false, game: 3,
+    help: 'Your cash total ($) stays in the top right corner during play. Off: as on the N64, it only pops up above Conker when he gets cash (and on the pause screen).' },
 ];
 const optOverride = {};
 for (const kv of (Q.get('opt') || '').split(',')) { const [k, v] = kv.split(':'); if (k) optOverride[k] = v === '1'; }
