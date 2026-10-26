@@ -570,8 +570,23 @@ def k0_add_sites(text, st):
             st['k0_add'] += n
             if n != want:
                 sys.stderr.write(f'vbe.py: k0_add_sites {m[1]}: {n} adds rewritten, expected {want}\n')
+        phys = K0_PHYS_SITES.get(m[1]) if m else None
+        if phys:
+            op, c, want = phys
+            blk, n = re.subn(rf'= {op} i32 (%[\w.$-]+), {c}$', rf'= {op} i32 \1, {K0_PHYS_IDENT[op]}', blk, flags=re.M)
+            st['k0_phys'] += n
+            if n != want:
+                sys.stderr.write(f'vbe.py: k0_phys_sites {m[1]}: {n} {op}s rewritten, expected {want}\n')
         out.append(blk)
     return ''.join(out)
+
+
+# P319: K0_TO_PHYS / PHYS_TO_K0 pair on the TLB code area. func_10005B04 (tlb_area_init, game C since P285) keeps
+# `area & 0x0FFFFFFF` (physical) in D_8003BE74; func_100014C4 (level code reload) frees `D_8003BE74 | 0x80000000` and
+# `D_8003BE70 | 0x80000000`. On the PC both are wasm pointers (0x10xxxxxx): the mask dropped the 0x10000000 bit and the
+# or made 0x9xxxxxxx -> free() trapped out of bounds at the first level load (boot). Both become identity ops.
+K0_PHYS_SITES = {'func_10005B04': ('and', '268435455', 1), 'func_100014C4': ('or', '-2147483648', 2)}
+K0_PHYS_IDENT = {'and': '-1', 'or': '0'}
 
 # P19: RCP / PI / SI register accesses through a constant KSEG1 address (rcp.h IO_READ / IO_WRITE in
 # matched game C, e.g. `IO_READ(AI_LEN_REG)` in func_100095A0) are not memory on the PC. Constant
