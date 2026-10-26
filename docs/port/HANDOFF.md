@@ -73,5 +73,7 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   holdl.sh: opening ends at 5789, 0x29 at 5795, 0 traps to retrace 9965; warp.sh 29: 0x29 at 38, 0 traps. Deployed.
 - Size: tracked files 8450 -> 2103, tracked bytes 325.9 MB -> 21.2 MB; worktree on disk 3.7 GB -> 2.4 GB (of which
   2.1 GB is the gitignored port_work scratch).
-- Not done / follow-ups: ~/conker/orchestrator.md (branch eu, main checkout) still has the old section 2: copy this
-  branch's section 2 over at the next merge point. Rebuild analysis tools on port/symbols if needed (Open items).
+- backup_push.sh fast-forwarded `eu` (main checkout ~/conker) to port-web, so ~/conker now has this layout too:
+  root HANDOFF.md is gone there (the eu decomp hand-off is in history / on exact-byte-decomp-wip) and the old
+  untracked dirs (tools/asm-differ, asm-processor, mips_to_c, n64splat, tools/eu_port/m2c) are left on disk there.
+- Follow-ups: rebuild analysis tools on port/symbols if needed (Open items).
