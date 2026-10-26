@@ -54,6 +54,12 @@
               animation: saveblink .5s steps(2, jump-none) infinite alternate; }
   #saveicon[hidden] { display: none; }
   @keyframes saveblink { from { opacity: 1; } to { opacity: .35; } }
+  /* P324 toggle options: labels of the latched inputs, top left of the game picture */
+  #latches { position: absolute; left: 2%; top: 3%; display: flex; gap: 4px; pointer-events: none; }
+  #latches[hidden] { display: none; }
+  #latches span { background: rgba(20, 22, 27, .75); color: var(--accent); border: 1px solid var(--accent); border-radius: 10px;
+                  padding: 1px 8px; font: 600 12px system-ui, sans-serif; }
+  #touch .tb.latched { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(224, 166, 58, .45); }
   #soundhint { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, .7); color: var(--muted);
                padding: 4px 10px; border-radius: 12px; font-size: 12px; pointer-events: none; }
   #soundhint[hidden] { display: none; }
@@ -148,6 +154,7 @@
         <circle cx="32" cy="32" r="20" class="badge"/><text x="32" y="38.5" text-anchor="middle">L</text></svg>
       <svg id="saveicon" viewBox="0 0 24 24" hidden><path d="M3 3h14l4 4v14H3z" fill="rgba(30,32,38,.85)" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
         <rect x="7" y="3.8" width="9" height="5" fill="var(--accent)"/><rect x="6.5" y="13" width="11" height="7" rx="1" fill="#fff"/></svg>
+      <div id="latches" hidden></div>
       <div id="soundhint" hidden>click or press a key to enable sound</div>
     </div>
     <div class="hint" id="keyhint">Keys: WASD stick · Space A · F B · Q Z · E R · R L · Enter Start · IJKL C-buttons · arrows D-pad · Ctrl half-tilt. Gamepads work too.</div>

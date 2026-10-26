@@ -50,12 +50,20 @@ const OPTIONS = [
     help: 'Hold L for 3 s to skip any cutscene, even one not seen yet (also Start on the boot intro). Off: the N64 rules (only scenes already seen, L skips at once).' },
   { key: 'saveicon', label: 'Autosave icon',  def: false,
     help: 'A small save icon blinks in the top right corner of the picture for 1.5 s whenever the game writes its save.' },
+  { key: 'togglecrouch', label: 'Toggle crouch', def: false,
+    help: 'Z (key, pad button or touch button) latches: one press crouches and keeps crouching, the next press stands up.' },
+  { key: 'togglerlook', label: 'Toggle R-Look', def: false,
+    help: 'R latches the same way: one press turns R-Look on, the next press turns it off.' },
+  { key: 'togglewalk', label: 'Toggle walk (half tilt)', def: false,
+    help: 'The half-tilt key latches: one press walks (half stick), the next press runs again. Applies to every stick input of pad 1.' },
 ];
 const optOverride = {};
 for (const kv of (Q.get('opt') || '').split(',')) { const [k, v] = kv.split(':'); if (k) optOverride[k] = v === '1'; }
+const optCache = {};   // opt() is read every animation frame by the input code: cache, refreshed on change
 const opt = (key) => {
+  if (key in optCache) return optCache[key];
   const o = OPTIONS.find((x) => x.key === key);
-  return key in optOverride ? optOverride[key] : store.get('opt.' + key, o.def);
+  return (optCache[key] = key in optOverride ? optOverride[key] : store.get('opt.' + key, o.def));
 };
 function sendOption(o) { if (o.game !== undefined && M && M._port_set_option) M._port_set_option(o.game, opt(o.key) ? 1 : 0); }
 const optionChanged = {};   // key -> callback for page-side options that need to react at once
@@ -64,7 +72,7 @@ const optionChanged = {};   // key -> callback for page-side options that need t
     const l = document.createElement('label'), c = document.createElement('input'), t = document.createElement('span');
     c.type = 'checkbox'; c.checked = opt(o.key); c.id = 'opt-' + o.key;
     c.onchange = () => {
-      delete optOverride[o.key]; store.set('opt.' + o.key, c.checked);
+      delete optOverride[o.key]; store.set('opt.' + o.key, c.checked); optCache[o.key] = c.checked;
       sendOption(o); if (optionChanged[o.key]) optionChanged[o.key](c.checked);
       log(`[options] ${o.key} ${c.checked ? 'on' : 'off'}`);
     };
@@ -188,8 +196,8 @@ function keyboardPad() {
   x = (on('RIGHT') ? 1 : 0) - (on('LEFT') ? 1 : 0);
   y = (on('UP') ? 1 : 0) - (on('DOWN') ? 1 : 0);
   let [sx, sy] = octagon(x, y);
-  if (on('HALF')) { sx = Math.round(sx / 2); sy = Math.round(sy / 2); }
-  return { present: true, b, x: sx, y: sy };
+  if (on('HALF') && !opt('togglewalk')) { sx = Math.round(sx / 2); sy = Math.round(sy / 2); }  // latched: see applyLatches
+  return { present: true, b, x: sx, y: sy, half: !!on('HALF') };
 }
 function gamepadPad(gp) {
   let b = 0;
@@ -261,6 +269,38 @@ const capture = (el, e) => { try { el.setPointerCapture(e.pointerId); } catch (_
   rest();
 })();
 
+// ---------------------------------------------------------------- P324 toggle options (crouch / R-Look / walk)
+// With a toggle option on, the bound input of pad 1 (keyboard, first gamepad and touch merged) latches: each new
+// press (raw input goes from up to down) flips the latch, and the game sees the button held / the stick at half
+// tilt for as long as the latch is on, whatever the raw input does in between. Off: the raw input passes through
+// unchanged and any latch is dropped. Small labels in #latches show which latches are on.
+const LATCHES = [
+  { key: 'togglecrouch', bit: N64.Z, name: 'Crouch' },
+  { key: 'togglerlook', bit: N64.R, name: 'R-Look' },
+  { key: 'togglewalk', bit: 0, name: 'Walk' },   // bit 0 = the half-tilt pseudo-button (stick at half)
+];
+const latch = {}, latchPrev = {};
+let latchText = '';
+function applyLatches(p, halfHeld) {
+  for (const l of LATCHES) {
+    const raw = l.bit ? (p.b & l.bit) !== 0 : halfHeld;
+    if (!opt(l.key)) latch[l.key] = false;
+    else if (raw && !latchPrev[l.key]) latch[l.key] = !latch[l.key];
+    latchPrev[l.key] = raw;
+    if (!opt(l.key)) continue;
+    if (l.bit) p.b = latch[l.key] ? p.b | l.bit : p.b & ~l.bit;
+    else if (latch[l.key]) { p.x = Math.round(p.x / 2); p.y = Math.round(p.y / 2); }
+  }
+  const txt = LATCHES.filter((l) => latch[l.key]).map((l) => l.name).join(' ');
+  if (txt !== latchText) {
+    latchText = txt; $('latches').textContent = '';
+    for (const n of txt ? txt.split(' ') : []) { const e = document.createElement('span'); e.textContent = n; $('latches').appendChild(e); }
+    $('latches').hidden = !txt;
+    for (const l of LATCHES) if (l.bit) { const tb = $('tk-' + (l.bit === N64.Z ? 'Z' : 'R')); tb.classList.toggle('latched', !!latch[l.key]); }
+  }
+  return p;
+}
+
 const SKIP_ARC = 2 * Math.PI * 27;
 $('skiparc').style.strokeDasharray = String(SKIP_ARC);
 let lastPadText = '';
@@ -271,12 +311,14 @@ function pollInput() {
   }
   // pad 0 = keyboard merged with the first gamepad; pads 1-3 = further gamepads
   const pads = [keyboardPad(), null, null, null];
+  const halfHeld = pads[0].half;   // the half-tilt key (P324 walk toggle)
   if (touch.b || touch.x || touch.y) { const k = pads[0]; pads[0] = { present: true, b: k.b | touch.b, x: k.x || touch.x, y: k.y || touch.y }; }
   gps.forEach((gp, i) => {
     const g = gamepadPad(gp);
     if (i === 0) { const k = pads[0]; pads[0] = { present: true, b: k.b | g.b, x: k.x || g.x, y: k.y || g.y }; }
     else if (i < 4) pads[i] = g;
   });
+  applyLatches(pads[0], halfHeld);
   const txt = gps.length ? gps.map((g, i) => `pad ${i + 1}: ${g.id.slice(0, 40)}${g.mapping === 'standard' ? '' : ' (non-standard mapping)'}`).join('\n') : 'no gamepad (press a button on it to connect)';
   if (txt !== lastPadText) { $('pads').textContent = txt; lastPadText = txt; }
   if (M && M._port_skip_progress) {  // P321: ring while L is held over a skippable cutscene
