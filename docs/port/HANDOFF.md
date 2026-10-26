@@ -10,6 +10,12 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P326 (port-web) (session P326, 2026-10-27). Details: `docs/port/sessions/P326.md`
+- Gameplay options (both default off): "Longer breath" (PORT_OPT_LONG_BREATH = 4, swim_water_physics: the air
+  counter +0xB2 grows at half speed below the warning point 0x5A1) and "Longer tail spin" (PORT_OPT_LONG_TAILSPIN = 5,
+  obj_jump_swim_glide_update: A-held spin limit 0x3E -> 0x79). Probe `?p326=1` (port/gfx/p326_probe.c),
+  `?p326sink=N`, `?p326hcycle=N`. The 0x29 river is "float" water (no air use): a real dive test needs a later level.
+
 ## P325 (port-web) (session P325, 2026-10-26). Details: `docs/port/sessions/P325.md`
 - HUD options (both default off): "Health always visible" (PORT_OPT_HEALTH_ALWAYS = 2, hud_health_update keeps its
   show timer D_800D2864 >= 1) and "Always show cash" (PORT_OPT_CASH_ALWAYS = 3, hud_cash_always_draw in
