@@ -98,6 +98,11 @@ async function takeFile(f) {
   } catch (err) { status('ROM: ' + err.message, 'bad'); log('ROM: ' + err.message, 'fail'); }
 }
 $('rom').addEventListener('change', (e) => takeFile(e.target.files[0]));
+// iOS greys out files whose extension has no known type (.z64 / .n64 / .eep), so no filter there;
+// the ROM is checked by SHA-1 anyway
+if (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+  for (const id of ['rom', 'eep-import']) $(id).removeAttribute('accept');
+}
 {
   const dz = $('drop');
   const over = (on) => (e) => { e.preventDefault(); dz.classList.toggle('over', on); };
