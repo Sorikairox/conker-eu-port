@@ -94,7 +94,7 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 - `tools/eu_port/merge_wt.sh` for `eu-wt-a`→`eu` (it verifies, unions append-only docs, logs history).
 - For port branches: `git merge --no-edit`, resolve `docs/*` conflicts with `tools/eu_port/merge_union.py <file>` (pass each path explicitly — zsh doesn't word-split), stop on code conflicts; after a code-bearing merge run `verify_all.sh` + `port_work/p28h/nmcheck.sh`.
 - `port-web` must clear `port/build/census/files.tsv` and `port/build/vbe.stamp` and rebuild clean after any merge.
-- **Any** game-C change in port-web (bisects, local fixes) needs `port/build/vbe.stamp` deleted before building: the stamp does not depend on sources, so make says "Nothing to be done" and you test the old build (P97 bisect was invalid because of this; P99).
+- **Any** game-C change in port-web (bisects, local fixes) needs `port/build/vbe.stamp` deleted before building: the stamp does not depend on sources, so make says "Nothing to be done" and you test the old build (P97 bisect was invalid because of this; P99). (Obsolete since P327: the build is incremental by content; a clean rebuild after merges is still fine.)
 
 ### Mechanical asm→C translation (user decision 2026-10-23)
 - `tools/port/asm2c_hand.py` (P56) writes register-level C, one statement per instruction. It is allowed **only for code Rare hand-wrote in assembly** (e.g. the D5E90.s engines). That is a stopgap; each such file is listed for a later readable rewrite.
@@ -133,7 +133,26 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
   symbol as a function instead changed the boot path, so keep the old set plus renamed-from-func_ names.
 - Bisect gotcha (P323): n64mem reads conker/build/conker.eu.elf + map; after resetting sources, rebuild the matching
   ELF (verify_all) before a web build, or the port is generated from stale symbols.
-- Build gotcha (P321): port-web game TUs are recompiled only after `port/web/run.sh census` (vbe.stamp depends on census/files.tsv, not on src_eu files). A bare `run.sh build` after editing game C silently keeps the old object.
+- Build gotcha (P321, FIXED in P327): game TUs used to be recompiled only after `port/web/run.sh census`, and header
+  edits were missed. Since P327 `port/web/run.sh build` is incremental and correct (see the workflow below); deleting
+  vbe.stamp or running the census by hand is no longer needed (the P97/P99 stale-stamp trap is gone too).
+- Port-web session workflow (P327; measured on the 10-core Mac mini with the other slots idle):
+  - **Build**: `port/web/run.sh build` rebuilds exactly the TUs whose source or included headers changed (content
+    keys from clang depfiles, port/tools/depkey.py; census --incremental + vbe_build.py run inside make). One-file
+    game-C edit: 6 s (before: census 19 s + build 17 s, and a bare build silently kept the old object). No-op: 2 s.
+    A header every TU includes (port_prefix.h, port_options.h, functions.h): ~45 s, everything. Output proven equal
+    to a `make clean` build (conker.wasm md5). Still not tracked: the conker ELF/map that n64mem.py reads (P323
+    bisect gotcha) and edits to port/exclude.txt only take effect through the census list.
+  - **Gameplay tests**: `docs/port/sessions/p327/warp.sh NAME SECS LEVEL [EXTRA_QUERY]` (env PADF, SCENE, POS, SHOTS)
+    = `?warp=<level hex>[&warpscene=N]`: boots straight into gameplay (level 0x29 at retrace 38, Conker controllable,
+    fresh save, det=2, muted). A walk test is a 30 s run (33 s wall) instead of the new-game route (title + opening,
+    0x29 at ~5795, 155-260 s runs). Test-only URL flag: without ?warp nothing changes. Use the p320 new-game route
+    only for things that need the real route (intro, title, opening, saves, the hold-L regression).
+  - **Checks**: `tools/eu_port/check.sh --fast` (101 s: verify_all + NM + protocheck + implicit_scan + build) is
+    allowed before a commit when the change ONLY touches `#ifdef PORT` blocks, port/ or the page (port/web).
+    `--full` (270 s: + romabs + arity + selftest + full census) is required for anything else (NM C, headers, harness,
+    tools/port, merges) and is run ONCE by every session on its final state before the last commit and the deploy.
+    Both print one line per step and GREEN/RED; never commit on RED.
 
 ### Lesson: test the harness itself (P71, P73)
 - Twice a difftest bug made results meaningless while looking fine: callee arity taken from call statements (P71), and the candidate silently dropped when one NM block holds two functions (P73) — every mutant "survived" because the old copy was tested. A surviving mutant that should obviously die is a harness bug until proven otherwise; add a selftest case for every harness fix.

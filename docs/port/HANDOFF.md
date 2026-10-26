@@ -10,6 +10,14 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P327 (port-web) (session P327, 2026-10-27). Details: `docs/port/sessions/P327.md`
+- Session speed-up tools (no game change unless ?warp): `?warp=<level hex>[&warpscene=N]` boots straight into
+  gameplay (docs/port/sessions/p327/warp.sh: level 0x29 at retrace 38, 30 s walk tests); `port/web/run.sh build` is
+  incremental by content (one-file edit 6 s, no-op 2 s, header edits tracked; md5 = clean build); 
+  `tools/eu_port/check.sh --fast` (101 s) / `--full` (270 s). Rules in orchestrator.md section 2 (port-web workflow).
+- Next: use warp.sh for gameplay tests; untested levels other than 0x29 (warp to a level whose setup needs event
+  state may behave differently from the real route).
+
 ## P326 (port-web) (session P326, 2026-10-27). Details: `docs/port/sessions/P326.md`
 - Gameplay options (both default off): "Longer breath" (PORT_OPT_LONG_BREATH = 4, swim_water_physics: the air
   counter +0xB2 grows at half speed below the warning point 0x5A1) and "Longer tail spin" (PORT_OPT_LONG_TAILSPIN = 5,
