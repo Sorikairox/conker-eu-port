@@ -224,7 +224,7 @@ def plan(rows, only):
         symnow = edits.get(SYMS, symtxt)
         if not re.search(r'^' + re.escape(new) + r'\s*=', symnow, re.M):
             a = map_addr([old, new])
-            if a is None and hits:
+            if a is None and (hits or ours):
                 # NON_MATCHING-only function (code inside an asm routine split out as its own C function): the
                 # matching build has no such symbol, so there is nothing to list; the source rename is enough
                 report.append('NOTE: %s has no address in %s (NON_MATCHING-only): no symbol entry' % (old, MAP))
