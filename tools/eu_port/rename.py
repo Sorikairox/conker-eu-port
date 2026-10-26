@@ -159,6 +159,10 @@ def plan(rows, only):
         # collision: the new name is already used for something else (fine when it is our own earlier rename,
         # i.e. the symbol list already maps new to old's address, e.g. a merge brought new uses of the old name)
         ours = re.search(r'^// was %s:' % re.escape(old), symtxt, re.M) or (
+            # renamed in place (the old name was already listed, possibly a US name at another EU address):
+            # the symbol list now has the new name and no longer the old one
+            re.search(r'^%s\s*=' % re.escape(new), symtxt, re.M) and
+            not re.search(r'^%s\s*=' % re.escape(old), symtxt, re.M)) or (
             map_addr([new]) is not None and map_addr([new]) == map_addr([old]))
         if not ours:
             # only code counts: comments (naming proposals, notes that mention the same function) and '#' note lines

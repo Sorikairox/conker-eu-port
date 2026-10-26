@@ -27,7 +27,7 @@ for c in sys.argv[1:]:
         if len(f) < 4: sys.exit(f'chunk{c}: bad row {f}')
         o, n, conf, d = f[:4]
         n = n.lower()   # names that embed an address use lowercase hex
-        if not re.fullmatch(r'func_[0-9A-F]{8}', o) or not re.fullmatch(r'[a-z][a-z0-9_]{2,47}', n): sys.exit(f'chunk{c}: bad name {o} {n}')
+        if not re.fullmatch(r'func_(eu_)?[0-9A-F]{8}', o) or not re.fullmatch(r'[a-z][a-z0-9_]{2,47}', n): sys.exit(f'chunk{c}: bad name {o} {n}')
         if o in have: print(f'skip {o}: already in names.tsv'); continue
         rows.append((o, n, conf, d.replace('\t', ' ')))
 dn = [n for n, k in collections.Counter(r[1] for r in rows).items() if k > 1] + [r[1] for r in rows if r[1] in used]
