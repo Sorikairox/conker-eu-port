@@ -70,6 +70,8 @@ The **Options** button in the page header opens a panel of extras that are not i
 | Toggle R-Look | off | R works as a switch in the same way: press once for R-Look, press again to end it. |
 | Toggle walk (half tilt) | off | The half-tilt key (Ctrl) works as a switch: press once to walk, press again to run. While it is on, the stick of every input (keys, gamepad, touch) is at half tilt. |
 | Skip intro | off | The game starts straight at the title menu, without the boot logos, legal pages and intro. Saves load as usual. Takes effect the next time you press Start. |
+| Health always visible | off | The chocolate (health) pieces stay at the top left during play. Original: they slide in only when your health changes and leave after about 5 s. Cutscenes still hide them. |
+| Always show cash | off | Your cash total ("$ N", in the same green as the game's own cash pop-up) stays at the top right during play. Original: the total only pops up above Conker when he gets cash, and on the pause screen. Hidden in cutscenes and while paused. |
 
 While a toggle is latched, a small label (Crouch, R-Look, Walk) shows at the top left of the picture, and the touch Z or R button gets a ring.
 

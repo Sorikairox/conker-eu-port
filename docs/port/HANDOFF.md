@@ -10,6 +10,12 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P325 (port-web) (session P325, 2026-10-26). Details: `docs/port/sessions/P325.md`
+- HUD options (both default off): "Health always visible" (PORT_OPT_HEALTH_ALWAYS = 2, hud_health_update keeps its
+  show timer D_800D2864 >= 1) and "Always show cash" (PORT_OPT_CASH_ALWAYS = 3, hud_cash_always_draw in
+  game_BC510.c queues the original "$ %d" text top right). The original shows cash only as a pop-up over Conker
+  on pickup and on the pause screen. Possible follow-up: digit-texture counter like the pause screen instead of text.
+
 ## P324 (port-web) (session P324, 2026-10-26). Details: `docs/port/sessions/P324.md`
 - Options panel in the page (main.js `OPTIONS`, localStorage `opt.KEY`, `?opt=KEY:1,...` test override). Game-side
   options: `port_option(PORT_OPT_*)` (port/ultra/port_options.h, force-included via port_prefix.h), set by the page
