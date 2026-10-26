@@ -68,3 +68,10 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   `tools/port/scripts/` (newgame.sh, newgame_summary.sh, warp.sh, new holdl.sh); docs/port/sessions, docs/sessions,
   root HANDOFF.md and matching-only docs deleted; P4..P9 design docs kept in docs/port/design.
 - conker.wasm md5 f73eb4a25467dc5aa21b8a12cab69699 at every step (same as before P328).
+- Step 5: orchestrator.md section 2 rewritten for the port-only layout (matching-build / verify_all / convert rules
+  removed, port rules kept), README "how to build" + layout, PLAN.md marked historical. Final: check.sh GREEN;
+  holdl.sh: opening ends at 5789, 0x29 at 5795, 0 traps to retrace 9965; warp.sh 29: 0x29 at 38, 0 traps. Deployed.
+- Size: tracked files 8450 -> 2103, tracked bytes 325.9 MB -> 21.2 MB; worktree on disk 3.7 GB -> 2.4 GB (of which
+  2.1 GB is the gitignored port_work scratch).
+- Not done / follow-ups: ~/conker/orchestrator.md (branch eu, main checkout) still has the old section 2: copy this
+  branch's section 2 over at the next merge point. Rebuild analysis tools on port/symbols if needed (Open items).

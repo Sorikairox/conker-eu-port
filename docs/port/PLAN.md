@@ -28,11 +28,13 @@ byte-identical ROM. 3992 of 5913 functions are C; about 1890 are still `#pragma 
 
 ## Phase 1: every function in C (non-matching allowed), with an equivalence gate
 
-Status: the infrastructure is done (this session). See `docs/port/HANDOFF.md`.
+Status: DONE (P317: every function is C or platform-replaced). P329 removed the matching-build convention below
+(GLOBAL_ASM / NON_MATCHING wrappers, the byte-identical gate and convert.py) from port-web; it is kept on branch
+`exact-byte-decomp-wip`. The text below describes how the conversion phase worked.
 
 - **Convention.** A converted function goes in its source file as
-  `#ifdef NON_MATCHING <C> #else #pragma GLOBAL_ASM(...) #endif`. The default build stays byte-identical
-  (`verify_all.sh`). `make VERSION=eu NON_MATCHING=1` compiles the C into `conker/build_nm/`.
+  `#ifdef NON_MATCHING <C> #else #pragma GLOBAL_ASM(...) #endif`; the default (matching) build stayed
+  byte-identical, `NON_MATCHING=1` compiled the C.
 - **Gate.** `tools/port/difftest.sh FUNC draft.c` must print `EQUIV`. It is a Unicorn MIPS
   differential test: original bytes against the IDO-compiled C, with random inputs, a lazily
   randomised memory model and stubbed callees. It compares the call trace (with arguments), the
@@ -42,7 +44,7 @@ Status: the infrastructure is done (this session). See `docs/port/HANDOFF.md`.
   contexts, narrow and argfix variants) → autofix → IDO compile → difftest → insert.
 - **Fan-out.** Sessions take disjoint file ranges, as the decomp worktrees do. Each session runs
   convert.py over its range, hand-fixes the `DIFFER`/`CERR` leftovers using the difftest reason, and
-  commits after `verify_all.sh`. Order: small functions first. Hardware and libultra functions
+  commits after the byte-identical check. Order: small functions first. Hardware and libultra functions
   (`mtc0`, `cache`, TLB) are left in asm or replaced by the PC layer in Phase 3; they need no C
   equivalent.
 - **Data.** For each converted function, also write down its rodata (the literals and jump tables
