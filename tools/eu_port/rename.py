@@ -222,14 +222,19 @@ def plan(rows, only):
         symnow = edits.get(SYMS, symtxt)
         if not re.search(r'^' + re.escape(new) + r'\s*=', symnow, re.M):
             a = map_addr([old, new])
-            if a is None:
+            if a is None and hits:
+                # NON_MATCHING-only function (code inside an asm routine split out as its own C function): the
+                # matching build has no such symbol, so there is nothing to list; the source rename is enough
+                report.append('NOTE: %s has no address in %s (NON_MATCHING-only): no symbol entry' % (old, MAP))
+            elif a is None:
                 sys.exit('%s: no address for %s in %s (build first: tools/eu_port/verify_all.sh)' % (old, old, MAP))
-            if re.search(r'^\s*\S+\s*=\s*0x%08X\s*;' % a, symnow, re.M | re.I):
-                sys.exit('%s: address 0x%08X already has another name in %s' % (old, a, SYMS))
-            d = _TOK.sub(lambda m: ren.get(m.group(0), m.group(0)), desc)
-            sym_add.append('// was %s: %s\n%-31s = 0x%08X; // type:func' % (old, d, new, a))
-            report.append('%s: add %s = 0x%08X' % (SYMS, new, a))
-            hits += 1
+            else:
+                if re.search(r'^\s*\S+\s*=\s*0x%08X\s*;' % a, symnow, re.M | re.I):
+                    sys.exit('%s: address 0x%08X already has another name in %s' % (old, a, SYMS))
+                d = _TOK.sub(lambda m: ren.get(m.group(0), m.group(0)), desc)
+                sym_add.append('// was %s: %s\n%-31s = 0x%08X; // type:func' % (old, d, new, a))
+                report.append('%s: add %s = 0x%08X' % (SYMS, new, a))
+                hits += 1
         if hits == 0:
             report.append('%s -> %s: already applied' % (old, new))
         if sym_add:
