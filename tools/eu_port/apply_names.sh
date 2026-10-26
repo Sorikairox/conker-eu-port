@@ -57,7 +57,7 @@ grep -q "^\[p88\] scene frame 5789:" $D/chrome.log || { echo "browser hold test 
 ! grep -q "Aborted\|RuntimeError" $D/chrome.log || { echo "browser trap"; exit 1; }
 echo "browser OK"
 n=$(git diff --stat | tail -1)
-git add -A conker/src_eu conker/include conker port tools
+git add -A conker/src_eu conker/include conker port tools && git add -u   # -u: difftest inputs under docs/ too
 for c in "$@"; do git add docs/names/proposals/chunk$c.tsv; done
 git commit -q -m "rename: chunks $* of docs/names/chunks.tsv named via tools/eu_port/names.tsv
 
