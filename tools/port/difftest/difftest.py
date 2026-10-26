@@ -169,7 +169,7 @@ def addr2name(a):
     if _ADDR2NAME is None:
         _ADDR2NAME = {}
         for n, v in symtab().items():
-            if n.startswith('func_') or not n.startswith(('D_', 'jtbl_')):
+            if n.startswith('func_') or not (n.startswith(('D_', 'jtbl_')) or (renamed_from(n) or '').startswith('D_')):
                 _ADDR2NAME.setdefault(v, n)
     return _ADDR2NAME.get(a)
 
@@ -181,7 +181,7 @@ def addr_names(a):
     if _ADDRNAMES is None:
         _ADDRNAMES = {}
         for n, v in symtab().items():
-            if not n.startswith(('D_', 'jtbl_')): _ADDRNAMES.setdefault(v & 0xFFFFFFFF, []).append(n)
+            if not (n.startswith(('D_', 'jtbl_')) or (renamed_from(n) or '').startswith('D_')): _ADDRNAMES.setdefault(v & 0xFFFFFFFF, []).append(n)
         for nm, val, size, typ, bind, shndx, sec in portsyms.elf_symbols():
             if typ == 2 and nm:
                 l = _ADDRNAMES.setdefault(val, [])

@@ -73,7 +73,9 @@ def main():
     # JS-library imports (WebGL, emscripten html5) and the PC icall runtime are not game functions
     js = ('gl', 'emscripten_', '__port_')
     funcs = sorted(n for n in undef_f if n not in defined and n not in libs and not n.startswith(js))
-    datas = sorted(n for n in undef_d if n not in defined and n not in libs and not n.startswith('n64_'))  # mirrors: n64mem_labels.s
+    # sorted by the original D_ name, so renaming a global does not reorder the zeroed stubs (same wasm layout)
+    datas = sorted((n for n in undef_d if n not in defined and n not in libs and not n.startswith('n64_')),
+                   key=lambda n: n64mem.RENAMED_FROM.get(n, n))  # mirrors: n64mem_labels.s
 
     # ---- N64 memory model: mirror labels, relocations, function table (port/tools/n64mem.py)
     stub_sig = {n: undef_f[n].most_common(1)[0][0] for n in funcs}
@@ -175,7 +177,7 @@ def main():
     for n in datas:
         a = addr.get(n)
         if a is None:
-            m = re.match(r'D_([0-9A-F]{8})$', n)
+            m = re.match(r'D_([0-9A-F]{8})$', n64mem.RENAMED_FROM.get(n, n))   # a renamed D_ global keeps its address
             a = int(m[1], 16) if m else None
         size = 0x100
         if a is not None and a >= 0x80000000:

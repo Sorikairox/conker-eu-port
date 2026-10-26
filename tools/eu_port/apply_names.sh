@@ -1,6 +1,7 @@
 #!/bin/bash
 # Apply naming proposals (docs/names/PROPOSING.md) in one step, on port-web:
 #   tools/eu_port/apply_names.sh 03 04 05      chunks docs/names/proposals/chunkNN.tsv
+#   tools/eu_port/apply_names.sh g01 g02       global-variable chunks docs/names/proposals/globalsNN.tsv
 # validate (format, duplicates against each other and names.tsv) -> append to tools/eu_port/names.tsv (non-high
 # confidence kept as "(med)"/"(low)" in the description) -> rename.py --check, apply, --verify -> full checks ->
 # census + web build -> browser hold-L test (opening must end at retrace 5789) -> commit -> backup_push.
@@ -14,6 +15,9 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 [ $# -gt 0 ] || { sed -n '2,7p' "$0"; exit 2; }
 L=port_work/apply_names_$(echo "$@" | tr ' ' _); mkdir -p "$L"
 [ -z "$(git status --porcelain --untracked-files=no)" ] || { echo "tree not clean"; exit 1; }
+# global-variable renames change no code: the wasm before and after must be the same file (checked below)
+(port/web/run.sh census && port/web/run.sh build) > $L/build0.txt 2>&1 || { tail -5 $L/build0.txt; echo "web build (before) failed"; exit 1; }
+W0=$(md5 -q port/build/web/conker.wasm); S0=$(tools/eu_port/wasm_sig.py)
 
 python3 -I - "$@" <<'EOF'
 import re, sys, collections
@@ -35,15 +39,19 @@ for r in rws:
     a = int(r[1], 16); i = bisect.bisect_left(fs, (a, 0))
     if r[0].startswith('func_') and any(pa < a < pa + pz for pa, pz in fs[max(0, i - 40):i]):
         inner.add(r[0])
+def path(c):
+    return f'docs/names/proposals/globals{c[1:]}.tsv' if c.startswith('g') else f'docs/names/proposals/chunk{c}.tsv'
 for c in sys.argv[1:]:
-    for line in open(f'docs/names/proposals/chunk{c}.tsv'):
+    for line in open(path(c)):
         if line.startswith('#') or line.startswith('old\t') or not line.strip(): continue
         f = line.rstrip('\n').split('\t')
         if len(f) < 4: sys.exit(f'chunk{c}: bad row {f}')
         o, n, conf, d = f[:4]
         n = re.sub(r'_([0-9A-F]{8})$', lambda m: '_' + m.group(1).lower(), n)   # embedded address: lowercase hex
         # (other case is kept: real SDK names such as n_alBnkfNew / _bnkfPatchBank)
-        if not re.fullmatch(r'func_(eu_)?[0-9A-F]{8}', o) or not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]{2,47}', n): sys.exit(f'chunk{c}: bad name {o} {n}')
+        if re.fullmatch(r'D_[0-9A-F]{8}', o) and int(o[2:], 16) < 0x10000000:
+            print(f'skip {o}: ROM offset / number, not a variable (vbe.py ROM_ABS, romabs_check)'); continue
+        if not re.fullmatch(r'(func_(eu_)?|D_)[0-9A-F]{8}', o) or not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]{2,47}', n): sys.exit(f'chunk{c}: bad name {o} {n}')
         if o in have: print(f'skip {o}: already in names.tsv'); continue
         if o in inner: print(f'skip {o}: secondary entry point inside another function (asm glabel), keeps its name'); continue
         rows.append((o, n, conf, d.replace('\t', ' ')))
@@ -66,18 +74,22 @@ tools/eu_port/check.sh > $L/checks.txt 2>&1 || { tail -12 $L/checks.txt; echo "c
 echo "checks OK"
 (port/web/run.sh census && port/web/run.sh build) > $L/build.txt 2>&1 || { tail -5 $L/build.txt; echo "web build failed"; exit 1; }
 echo "web build OK"
+W1=$(md5 -q port/build/web/conker.wasm); S1=$(tools/eu_port/wasm_sig.py)
+if [[ " $* " != *" "[0-9]* ]] && [ "$S0" != "$S1" ]; then echo "globals-only rename changed the wasm ($S0 -> $S1)"; exit 1; fi
+if [ "$W0" = "$W1" ]; then echo "conker.wasm unchanged ($W1): same program, browser test not needed"; else
 D=$L/hold; rm -rf $D
 PADF='3386:1000:0:0,3401:0:0:0,4458:1000:0:0,4473:0:0:0,5600:20:0:0,5800:0:0:0' SHOTS="150000" \
   tools/port/scripts/newgame.sh $D 200 > $D.out 2>&1 || true
 grep -q "^\[p88\] scene frame 5789:" $D/chrome.log || { echo "browser hold test changed (see $D/chrome.log)"; exit 1; }
 ! grep -q "Aborted\|RuntimeError" $D/chrome.log || { echo "browser trap"; exit 1; }
 echo "browser OK"
+fi
 n=$(git diff --stat | tail -1)
 git add -A conker/src_eu conker/include conker port tools && git add -u   # -u: difftest inputs under docs/ too
-for c in "$@"; do git add docs/names/proposals/chunk$c.tsv; done
-git commit -q -m "rename: chunks $* of docs/names/chunks.tsv named via tools/eu_port/names.tsv
+for c in "$@"; do case $c in g*) git add docs/names/proposals/globals${c#g}.tsv;; *) git add docs/names/proposals/chunk$c.tsv;; esac; done
+git commit -q -m "rename: chunks $* (docs/names/proposals) named via tools/eu_port/names.tsv
 
-$n. check.sh green (implicit_scan, romabs, selftest 152/152, census + web build), browser hold-L skip unchanged (opening ends at 5789). Applied with tools/eu_port/apply_names.sh.
+$n. check.sh green (implicit_scan, romabs, selftest, census + web build); conker.wasm $([ "$W0" = "$W1" ] && echo "unchanged ($W1)" || echo "changed, browser hold-L skip unchanged (opening ends at 5789)"). Applied with tools/eu_port/apply_names.sh.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_014MU6B4SSHUBUyCXqLySTxn"

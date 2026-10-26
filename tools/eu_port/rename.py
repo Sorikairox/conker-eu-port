@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""P322: repo-wide function rename driven by tools/eu_port/names.tsv (see docs/RENAMING.md).
+"""P322: repo-wide function and global (D_ data symbol) rename driven by tools/eu_port/names.tsv (see docs/RENAMING.md).
 
 names.tsv (tab separated, '#' comments): old<TAB>new<TAB>short description. It is the source of truth: add a row,
 run `--check`, then apply (no flag), then `--verify`. Rows that are already applied are skipped, so the whole table
@@ -11,6 +11,8 @@ conker/include, port/ (Makefile --wrap and EXPORTED_FUNCTIONS lists, port/tools 
 symbol table port/symbols/symbols.tsv, so later builds and difftest see the new name at the same address) and tools/
 (registries such as tools/port/verify_registry.tsv, platform_replaced.tsv, nm_folded.tsv, difftest selftest cases and
 scripts, test inputs under tools/port/testdata), and the `/* was <old> */` comment above the definition.
+  * a global (old name D_<ADDR>) has no C definition: `/* was <old> */` is appended to its file-scope declaration
+    lines instead; the build tools find its address through names.tsv (n64mem.RENAMED_FROM).
   * tracked files whose path contains the old name (e.g. tools/port/difftest/cases/func_X.c) are `git mv`ed.
   * a function with no table row (a C-only helper split out of an asm routine) gets no row.
 Not touched: docs/ (history), *.log, port_work/, and text of the form `was <old>`.
@@ -224,6 +226,27 @@ def plan(rows, only):
             report.append('NOTE: %s has no row in %s (NON_MATCHING-only): no table entry' % (old, PORT_TABLE))
         if hits == 0:
             report.append('%s -> %s: already applied' % (old, new))
+        if old.startswith('D_'):
+            # a global (data symbol): no single definition (the data comes from the ROM), so `/* was old */` goes at
+            # the end of each file-scope declaration line (column 0: `extern u16 pad_held[];`, definitions)
+            for p in sorted(inv.get(new, ())):
+                if p not in edits or not p.endswith(('.c', '.h')):
+                    continue
+                out, n = [], 0
+                for line in edits[p].split('\n'):
+                    if (line[:1].isalpha() or line[:1] == '_') and line.rstrip()[-1:] != '\\' \
+                            and word(new).search(line) and ('was ' + old) not in line:
+                        s = line.rstrip()
+                        if s.endswith('*/') and '/*' in s and '*/' not in s[s.rindex('/*'):-2]:
+                            line = s[:-2].rstrip() + '; was %s */' % old   # into the line's own trailing comment
+                        else:
+                            line += ' /* was %s */' % old
+                        n += 1
+                    out.append(line)
+                if n:
+                    edits[p] = '\n'.join(out)
+                    report.append('%s: /* was %s */ on %d declaration line(s)' % (p, old, n))
+            continue
         # `/* was old */` above the definition
         merged = dict(texts); merged.update(edits)
         site = comment_site(merged, old, new, inv.get(new, set()))

@@ -91,16 +91,27 @@ def ll_refs():
     return refs
 
 
+def renamed_from():
+    """new name -> old D_/func_ name (tools/eu_port/names.tsv): renamed globals still count as KSEG0 data"""
+    out = {}
+    for line in open('tools/eu_port/names.tsv'):
+        f = line.rstrip('\n').split('\t')
+        if len(f) >= 2 and not line.startswith('#'):
+            out[f[1]] = f[0]
+    return out
+
+
 def main():
     addr = addresses()
-    ram_data = {v: k for k, v in addr.items() if re.match(r'D_8[0-9A-F]{7}$', k)}
+    old = renamed_from()
+    ram_data = {v: k for k, v in addr.items() if re.match(r'D_8[0-9A-F]{7}$', old.get(k, k))}
     s_refs, l_refs = src_refs(), ll_refs()
     names = set(s_refs) | set(l_refs)
     rows, fails, info = [], [], []
     for n in sorted(names):
         v = addr.get(n)
         if v is None:
-            m = re.match(r'D_([0-9A-Fa-f]{8})$', n)
+            m = re.match(r'D_([0-9A-Fa-f]{8})$', old.get(n, n))
             v = int(m[1], 16) if m else None
         if v is None or v >= LOW_LIMIT:
             continue

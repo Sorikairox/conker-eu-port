@@ -40,7 +40,7 @@ def _renamed_from():
     return out
 
 
-RENAMED_FROM = _renamed_from()   # new name -> old name (P322 renames)
+RENAMED_FROM = _renamed_from()   # new name -> old name (P322 function renames, global D_ renames)
 
 
 def native_addr(nm):
@@ -141,7 +141,7 @@ def generate(outdir, defined_f, defined_d, stubbed, undef_data, addr):
     for n in undef_data:
         a = addr.get(n)
         if a is None:
-            m = re.match(r'D_([0-9A-F]{8})$', n)
+            m = re.match(r'D_([0-9A-F]{8})$', RENAMED_FROM.get(n, n))   # a renamed D_ global keeps its address
             a = int(m[1], 16) if m else None
         if a is None:
             continue
