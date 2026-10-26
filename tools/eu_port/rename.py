@@ -154,7 +154,7 @@ def comment_site(texts, old, new, cand=None):
     return None
 
 
-_CMT = re.compile(r'/\*.*?\*/|//[^\n]*', re.S)
+_CMT = re.compile(r'/\*.*?\*/|//[^\n]*|"(?:[^"\\\n]|\\.)*"', re.S)   # comments and string literals
 
 
 def code_only(path, text):
