@@ -191,7 +191,9 @@ def plan(rows, only):
             # the symbol list now has the new name and no longer the old one
             re.search(r'^%s\s*=' % re.escape(new), symtxt, re.M) and
             not re.search(r'^%s\s*=' % re.escape(old), symtxt, re.M)) or (
-            map_addr([new]) is not None and map_addr([new]) == map_addr([old]))
+            map_addr([new]) is not None and map_addr([new]) == map_addr([old])) or (
+            # NON_MATCHING-only functions get no symbol entry: the `/* was old */` comment marks them as done
+            any(('/* was %s */' % old) in texts[p] for p in inv.get(new, ()) if p.startswith('conker/src_eu/')))
         if not ours:
             # only code counts: comments (naming proposals, notes that mention the same function) and '#' note lines
             # are not a use of the name
